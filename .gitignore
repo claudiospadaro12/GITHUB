@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Segreti / ambiente locale
+.env
+
+# Output generati
+report_output.html

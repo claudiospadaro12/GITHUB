@@ -1,0 +1,43 @@
+name: Report di Mercato Giornaliero
+
+on:
+  schedule:
+    # Cron in UTC. Eseguiamo a 05:00 e 06:00 UTC nei giorni feriali:
+    #   - ora legale (CEST, UTC+2): 05:00 UTC = 07:00 Roma  → invia
+    #   - ora solare (CET,  UTC+1): 06:00 UTC = 07:00 Roma  → invia
+    # Lo script salta l'esecuzione che non corrisponde alle 07:00 locali,
+    # così arriva esattamente un report al giorno alle 7:00 italiane.
+    - cron: "0 5 * * 1-5"
+    - cron: "0 6 * * 1-5"
+  workflow_dispatch:        # esecuzione manuale (forza l'invio, ignora il gate orario)
+
+concurrency:
+  group: daily-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Genera e invia il report
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          # Su esecuzione manuale forziamo l'invio ignorando il gate orario.
+          FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+        run: python run_report.py
