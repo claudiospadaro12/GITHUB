@@ -36,6 +36,18 @@ class Instrument:
     s2: float | None = None
     recent_high: float | None = None  # massimo a 20 sedute
     recent_low: float | None = None   # minimo a 20 sedute
+    # Fibonacci (ritracciamenti sull'ultimo swing significativo)
+    fib_direction: str | None = None  # "rialzista" | "ribassista"
+    fib_swing_low: float | None = None
+    fib_swing_high: float | None = None
+    fib_236: float | None = None
+    fib_382: float | None = None
+    fib_50: float | None = None
+    fib_618: float | None = None
+    fib_786: float | None = None
+    golden_low: float | None = None   # confine inferiore golden zone (50–61,8%)
+    golden_high: float | None = None  # confine superiore golden zone
+    fib_zone: str | None = None       # posizione del prezzo rispetto alla golden zone
     error: str | None = None
 
 
@@ -65,6 +77,56 @@ def _pivot_levels(high: float, low: float, close: float) -> dict[str, float]:
         "s1": _r(2 * pivot - high),
         "r2": _r(pivot + rng),
         "s2": _r(pivot - rng),
+    }
+
+
+def _fibonacci(
+    highs: pd.Series, lows: pd.Series, last: float, lookback: int = 60
+) -> dict | None:
+    """Ritracciamenti di Fibonacci sull'ultimo swing significativo.
+
+    Individua swing high/low nelle ultime `lookback` sedute, deduce la
+    direzione dello swing dalla posizione relativa dei due estremi e calcola i
+    livelli di ritracciamento. La golden zone è la fascia 50%–61,8%.
+    """
+    h = highs.tail(lookback).reset_index(drop=True)
+    l = lows.tail(lookback).reset_index(drop=True)
+    if len(h) < 5 or len(l) < 5:
+        return None
+
+    swing_high = float(h.max())
+    swing_low = float(l.min())
+    rng = swing_high - swing_low
+    if rng <= 0:
+        return None
+
+    # Lo swing è rialzista se il minimo precede il massimo (movimento dal basso
+    # verso l'alto): il ritracciamento atteso è verso il basso, dentro la zona.
+    up = int(l.idxmin()) < int(h.idxmax())
+
+    ratios = {"236": 0.236, "382": 0.382, "50": 0.5, "618": 0.618, "786": 0.786}
+    levels = {
+        k: _r(swing_high - r * rng) if up else _r(swing_low + r * rng)
+        for k, r in ratios.items()
+    }
+
+    g_low = min(levels["50"], levels["618"])
+    g_high = max(levels["50"], levels["618"])
+    if last < g_low:
+        zone = "Sotto la golden zone"
+    elif last > g_high:
+        zone = "Sopra la golden zone"
+    else:
+        zone = "Dentro la golden zone (50–61,8%)"
+
+    return {
+        "direction": "rialzista" if up else "ribassista",
+        "swing_low": _r(swing_low),
+        "swing_high": _r(swing_high),
+        "levels": levels,
+        "golden_low": g_low,
+        "golden_high": g_high,
+        "zone": zone,
     }
 
 
@@ -108,8 +170,10 @@ def _analyze_frame(name: str, ticker: str, df: pd.DataFrame) -> Instrument:
         score -= 1
 
     # Supporti/resistenze: pivot dall'ultima seduta + estremi recenti (20 sedute).
+    # Fibonacci: ritracciamenti sull'ultimo swing (~60 sedute) con golden zone.
     levels: dict[str, float] = {}
     recent_high = recent_low = None
+    fib: dict | None = None
     if "High" in df.columns and "Low" in df.columns:
         highs = df["High"].dropna()
         lows = df["Low"].dropna()
@@ -117,7 +181,9 @@ def _analyze_frame(name: str, ticker: str, df: pd.DataFrame) -> Instrument:
             levels = _pivot_levels(float(highs.iloc[-1]), float(lows.iloc[-1]), last)
             recent_high = _r(float(highs.tail(20).max()))
             recent_low = _r(float(lows.tail(20).min()))
+            fib = _fibonacci(highs, lows, last)
 
+    fl = (fib or {}).get("levels", {})
     return Instrument(
         name=name,
         ticker=ticker,
@@ -136,6 +202,17 @@ def _analyze_frame(name: str, ticker: str, df: pd.DataFrame) -> Instrument:
         s2=levels.get("s2"),
         recent_high=recent_high,
         recent_low=recent_low,
+        fib_direction=(fib or {}).get("direction"),
+        fib_swing_low=(fib or {}).get("swing_low"),
+        fib_swing_high=(fib or {}).get("swing_high"),
+        fib_236=fl.get("236"),
+        fib_382=fl.get("382"),
+        fib_50=fl.get("50"),
+        fib_618=fl.get("618"),
+        fib_786=fl.get("786"),
+        golden_low=(fib or {}).get("golden_low"),
+        golden_high=(fib or {}).get("golden_high"),
+        fib_zone=(fib or {}).get("zone"),
     )
 
 

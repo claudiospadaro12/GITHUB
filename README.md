@@ -7,6 +7,8 @@ report di mercato:
   (EUR/USD, GBP/USD, USD/JPY, DXY, …)
 - per ogni indice e per l'oro: **direzione attesa del trend** del giorno
 - **supporti e resistenze** (pivot point classici + massimi/minimi a 20 sedute)
+- **ritracciamenti di Fibonacci** con evidenziata la **golden zone** (50%–61,8%), dove
+  un ritracciamento sano tende a fermarsi prima che il trend riprenda
 - le **notizie macroeconomiche** più importanti della giornata
 - i **cross forex da evitare** (es. quelli esposti a news ad alto impatto)
 

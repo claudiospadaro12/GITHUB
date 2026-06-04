@@ -111,6 +111,58 @@ def _levels_table(groups: dict[str, list[Instrument]]) -> str:
     )
 
 
+def _fib_rows(items: list[Instrument]) -> str:
+    rows = []
+    for it in items:
+        if it.error or it.fib_50 is None:
+            continue
+        dir_label = "▲ rialz." if it.fib_direction == "rialzista" else "▼ ribass."
+        dir_color = "#0a7d32" if it.fib_direction == "rialzista" else "#b3261e"
+        if it.fib_zone and it.fib_zone.startswith("Dentro"):
+            zone_cell = '<span style="color:#a86a00;font-weight:700;">● Dentro</span>'
+        elif it.fib_zone and it.fib_zone.startswith("Sopra"):
+            zone_cell = '<span style="color:#3a9d5d;">Sopra</span>'
+        else:
+            zone_cell = '<span style="color:#c45b4d;">Sotto</span>'
+        golden = f"{_fmt(it.golden_low)} – {_fmt(it.golden_high)}"
+        rows.append(
+            "<tr>"
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;">{it.name}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:{dir_color};">{dir_label}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">{_fmt(it.fib_382)}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">{_fmt(it.fib_50)}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">{_fmt(it.fib_618)}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;'
+            f'background:#fffbe6;font-weight:600;">{golden}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;">{zone_cell}</td>'
+            "</tr>"
+        )
+    return "".join(rows)
+
+
+def _fib_table(groups: dict[str, list[Instrument]]) -> str:
+    items = groups["Indici"] + groups["Materie prime"] + groups["Forex"]
+    body = _fib_rows(items)
+    if not body:
+        return '<p style="color:#999;">Livelli di Fibonacci non disponibili.</p>'
+    headers = ["Strumento", "Swing", "38,2%", "50%", "61,8%", "Golden zone", "Prezzo"]
+    ths = "".join(
+        f'<th style="padding:6px 10px;text-align:{"left" if i in (0, 1, 6) else "right"};'
+        f'border-bottom:2px solid #ddd;font-size:12px;color:#666;">{h}</th>'
+        for i, h in enumerate(headers)
+    )
+    return (
+        '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+        f"<thead><tr>{ths}</tr></thead>"
+        f"<tbody>{body}</tbody></table>"
+        '<p style="font-size:11px;color:#aaa;margin-top:6px;">'
+        "La <strong>golden zone</strong> (50%–61,8% del ritracciamento sull'ultimo swing) è "
+        "l'area in cui un ritracciamento sano tende a fermarsi prima che il trend riprenda. "
+        "&quot;Prezzo&quot; indica dove si trova la quotazione rispetto a questa zona."
+        "</p>"
+    )
+
+
 def _calendar_table(events: list[MacroEvent]) -> str:
     if not events:
         return '<p style="color:#999;">Nessun evento macro nel feed di oggi.</p>'
@@ -175,6 +227,9 @@ def build_html(
 
     <h2 style="margin-top:26px;">Supporti e resistenze</h2>
     {_levels_table(groups)}
+
+    <h2 style="margin-top:26px;">Fibonacci &amp; golden zone</h2>
+    {_fib_table(groups)}
 
     <h2 style="margin-top:26px;">Calendario macro di oggi</h2>
     {_calendar_table(events)}

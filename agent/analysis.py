@@ -46,6 +46,15 @@ e il supporto più vicino sotto, scegliendoli tra i livelli forniti (pivot R1/R2
 e massimi/minimi a 20 sedute). Una riga ciascuno, con i valori numerici esatti.</li>
 </ul>
 
+<h2>Zona di Fibonacci (golden zone)</h2>
+<ul>
+  <li>Per OGNI indice e per l'oro: indica la <strong>golden zone</strong> (fascia 50%–61,8% \
+del ritracciamento, con i due valori numerici) e dove si trova il prezzo rispetto ad essa \
+(sopra / dentro / sotto, usando il campo fib_zone). Spiega in una riga dove il prezzo \
+potrebbe fermarsi/reagire: in un ritracciamento sano è proprio nella golden zone che il \
+trend tende a riprendere. Tieni conto della direzione dello swing (fib_dir).</li>
+</ul>
+
 <h2>Notizie macroeconomiche più importanti</h2>
 <ul>
   <li>Gli eventi ad alto impatto di oggi (orario, valuta, evento) e perché contano. \
@@ -88,6 +97,13 @@ def _format_instruments(label: str, items: list[Instrument]) -> str:
             f"S2={it.s2}",
             f"max20={it.recent_high}",
             f"min20={it.recent_low}",
+            f"fib_dir={it.fib_direction}",
+            f"fib_swing={it.fib_swing_low}-{it.fib_swing_high}",
+            f"fib38.2={it.fib_382}",
+            f"fib50={it.fib_50}",
+            f"fib61.8={it.fib_618}",
+            f"golden_zone={it.golden_low}-{it.golden_high}",
+            f"fib_zone={it.fib_zone}",
         ]
         lines.append(f"- {it.name} [{it.ticker}]: " + ", ".join(str(p) for p in parts))
     return "\n".join(lines)
