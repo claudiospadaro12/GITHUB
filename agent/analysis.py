@@ -39,6 +39,13 @@ principali eventi macro di oggi.</p>
 le medie, RSI, eventi macro).</li>
 </ul>
 
+<h2>Livelli chiave (supporti e resistenze)</h2>
+<ul>
+  <li>Per OGNI indice e per l'oro: indica la resistenza più vicina sopra il prezzo \
+e il supporto più vicino sotto, scegliendoli tra i livelli forniti (pivot R1/R2/S1/S2 \
+e massimi/minimi a 20 sedute). Una riga ciascuno, con i valori numerici esatti.</li>
+</ul>
+
 <h2>Notizie macroeconomiche più importanti</h2>
 <ul>
   <li>Gli eventi ad alto impatto di oggi (orario, valuta, evento) e perché contano. \
@@ -74,6 +81,13 @@ def _format_instruments(label: str, items: list[Instrument]) -> str:
             f"SMA200={it.sma200}",
             f"RSI14={it.rsi14}",
             f"bias={it.bias}",
+            f"pivot={it.pivot}",
+            f"R1={it.r1}",
+            f"R2={it.r2}",
+            f"S1={it.s1}",
+            f"S2={it.s2}",
+            f"max20={it.recent_high}",
+            f"min20={it.recent_low}",
         ]
         lines.append(f"- {it.name} [{it.ticker}]: " + ", ".join(str(p) for p in parts))
     return "\n".join(lines)

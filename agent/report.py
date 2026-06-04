@@ -67,6 +67,50 @@ def _data_table(label: str, items: list[Instrument]) -> str:
     )
 
 
+def _levels_rows(items: list[Instrument]) -> str:
+    rows = []
+    for it in items:
+        if it.error or it.pivot is None:
+            continue
+        cells = [
+            (it.name, "left", "#1a1a1a"),
+            (_fmt(it.s2), "right", "#b3261e"),
+            (_fmt(it.s1), "right", "#c45b4d"),
+            (_fmt(it.pivot), "right", "#444"),
+            (_fmt(it.r1), "right", "#3a9d5d"),
+            (_fmt(it.r2), "right", "#0a7d32"),
+            (_fmt(it.recent_low), "right", "#888"),
+            (_fmt(it.recent_high), "right", "#888"),
+        ]
+        tds = "".join(
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:{a};color:{c};">{v}</td>'
+            for v, a, c in cells
+        )
+        rows.append(f"<tr>{tds}</tr>")
+    return "".join(rows)
+
+
+def _levels_table(groups: dict[str, list[Instrument]]) -> str:
+    items = groups["Indici"] + groups["Materie prime"] + groups["Forex"]
+    body = _levels_rows(items)
+    if not body:
+        return '<p style="color:#999;">Livelli non disponibili.</p>'
+    headers = ["Strumento", "S2", "S1", "Pivot", "R1", "R2", "Min 20g", "Max 20g"]
+    ths = "".join(
+        f'<th style="padding:6px 10px;text-align:{"left" if i == 0 else "right"};'
+        f'border-bottom:2px solid #ddd;font-size:12px;color:#666;">{h}</th>'
+        for i, h in enumerate(headers)
+    )
+    return (
+        '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+        f"<thead><tr>{ths}</tr></thead>"
+        f"<tbody>{body}</tbody></table>"
+        '<p style="font-size:11px;color:#aaa;margin-top:6px;">'
+        "S/R = pivot point classici dall'ultima seduta; Min/Max 20g = estremi delle ultime 20 sedute."
+        "</p>"
+    )
+
+
 def _calendar_table(events: list[MacroEvent]) -> str:
     if not events:
         return '<p style="color:#999;">Nessun evento macro nel feed di oggi.</p>'
@@ -128,6 +172,9 @@ def build_html(
     {_data_table("Indici", groups["Indici"])}
     {_data_table("Materie prime", groups["Materie prime"])}
     {_data_table("Forex", groups["Forex"])}
+
+    <h2 style="margin-top:26px;">Supporti e resistenze</h2>
+    {_levels_table(groups)}
 
     <h2 style="margin-top:26px;">Calendario macro di oggi</h2>
     {_calendar_table(events)}

@@ -28,6 +28,14 @@ class Instrument:
     rsi14: float | None = None
     bias: str = "Dati non disponibili"
     score: int = 0
+    # Supporti e resistenze
+    pivot: float | None = None
+    r1: float | None = None
+    r2: float | None = None
+    s1: float | None = None
+    s2: float | None = None
+    recent_high: float | None = None  # massimo a 20 sedute
+    recent_low: float | None = None   # minimo a 20 sedute
     error: str | None = None
 
 
@@ -40,6 +48,24 @@ def _rsi(close: pd.Series, period: int = 14) -> pd.Series:
     avg_loss = loss.ewm(alpha=1 / period, min_periods=period).mean()
     rs = avg_gain / avg_loss
     return 100 - 100 / (1 + rs)
+
+
+def _r(value: float) -> float:
+    """Arrotonda con precisione adatta alla scala del prezzo."""
+    return round(value, 2) if abs(value) >= 100 else round(value, 4)
+
+
+def _pivot_levels(high: float, low: float, close: float) -> dict[str, float]:
+    """Pivot point classici dall'ultima seduta completata."""
+    pivot = (high + low + close) / 3
+    rng = high - low
+    return {
+        "pivot": _r(pivot),
+        "r1": _r(2 * pivot - low),
+        "s1": _r(2 * pivot - high),
+        "r2": _r(pivot + rng),
+        "s2": _r(pivot - rng),
+    }
 
 
 def _bias_from_score(score: int) -> str:
@@ -81,17 +107,35 @@ def _analyze_frame(name: str, ticker: str, df: pd.DataFrame) -> Instrument:
     elif rsi < 45:
         score -= 1
 
+    # Supporti/resistenze: pivot dall'ultima seduta + estremi recenti (20 sedute).
+    levels: dict[str, float] = {}
+    recent_high = recent_low = None
+    if "High" in df.columns and "Low" in df.columns:
+        highs = df["High"].dropna()
+        lows = df["Low"].dropna()
+        if len(highs) and len(lows):
+            levels = _pivot_levels(float(highs.iloc[-1]), float(lows.iloc[-1]), last)
+            recent_high = _r(float(highs.tail(20).max()))
+            recent_low = _r(float(lows.tail(20).min()))
+
     return Instrument(
         name=name,
         ticker=ticker,
-        last_close=round(last, 4),
+        last_close=_r(last),
         change_pct=round(change_pct, 2) if change_pct is not None else None,
-        sma20=round(sma20, 4),
-        sma50=round(sma50, 4) if sma50 is not None else None,
-        sma200=round(sma200, 4) if sma200 is not None else None,
+        sma20=_r(sma20),
+        sma50=_r(sma50) if sma50 is not None else None,
+        sma200=_r(sma200) if sma200 is not None else None,
         rsi14=round(rsi, 1),
         bias=_bias_from_score(score),
         score=score,
+        pivot=levels.get("pivot"),
+        r1=levels.get("r1"),
+        r2=levels.get("r2"),
+        s1=levels.get("s1"),
+        s2=levels.get("s2"),
+        recent_high=recent_high,
+        recent_low=recent_low,
     )
 
 

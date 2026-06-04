@@ -6,6 +6,7 @@ report di mercato:
 - **Indici** (DAX, S&P 500, Nasdaq 100, Nikkei 225, FTSE MIB), **oro** e **forex**
   (EUR/USD, GBP/USD, USD/JPY, DXY, …)
 - per ogni indice e per l'oro: **direzione attesa del trend** del giorno
+- **supporti e resistenze** (pivot point classici + massimi/minimi a 20 sedute)
 - le **notizie macroeconomiche** più importanti della giornata
 - i **cross forex da evitare** (es. quelli esposti a news ad alto impatto)
 
