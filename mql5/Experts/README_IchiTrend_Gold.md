@@ -7,9 +7,8 @@ aggiungere parzializzazione, breakeven avanzato e piramidazione.
 
 | Componente | Logica |
 |---|---|
-| **Ingresso** | Incrocio Tenkan-sen (blu) / Kijun-sen (rossa) dell'Ichimoku |
-| **Filtro trend** | Prezzo sopra la nuvola (Kumo) → solo long; sotto → solo short |
-| **Filtro laterale** | Opera **solo se ADX > soglia** (default 23): evita i falsi incroci nel range |
+| **Direzione (Ichimoku)** | Rialzista se Tenkan>Kijun **e** prezzo sopra la nuvola (Kumo); ribassista nel caso opposto |
+| **Innesco (Bollinger)** | Entro sulla **rottura della banda** nella direzione del trend (chiusura oltre la banda esterna). Bande compresse = nessuna rottura = nessun trade |
 | **Stop loss** | Dinamico = `InpATR_SL` × ATR (si adatta alla volatilità) |
 | **Trailing** | Dinamico = `InpATR_Trail` × ATR; mette al sicuro i profitti |
 | **Rischio** | Lotto calcolato su `InpRiskPercent`% del capitale per trade |
@@ -30,7 +29,8 @@ aggiungere parzializzazione, breakeven avanzato e piramidazione.
 
 | Parametro | Default | Significato |
 |---|---|---|
-| `InpADXMin` | 23.0 | Più alto = più selettivo (meno trade, più "puliti") |
+| `InpBBPeriod` | 20 | Periodo delle Bollinger |
+| `InpBBDev` | 2.0 | Deviazioni standard: più alto = bande più larghe, rotture più rare/forti |
 | `InpATR_SL` | 1.5 | Stop più largo se aumenti; più stretto se diminuisci |
 | `InpATR_Trail` | 2.0 | Distanza del trailing dal prezzo |
 | `InpRiskPercent` | 0.5 | % di capitale rischiata per trade (tienila bassa!) |
@@ -45,7 +45,7 @@ aggiungere parzializzazione, breakeven avanzato e piramidazione.
 
 ## Prossimi passi (roadmap)
 
-- [x] **v1** — Ingresso Ichimoku + filtro ADX + SL/trailing su ATR
+- [x] **v1.1** — Direzione Ichimoku + innesco rottura Bollinger + SL/trailing su ATR
 - [ ] **v2** — Parzializzazione dopo X×ATR + stop a breakeven
 - [ ] **v3** — Piramidazione controllata (solo con prima posizione a breakeven)
 - [ ] **v4** — Filtro orari news ad alto impatto

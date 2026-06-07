@@ -3,11 +3,12 @@
 //|                                                                  |
 //|  EA BASE per XAUUSD (oro) su timeframe M5.                       |
 //|                                                                  |
-//|  LOGICA (versione 1 - solo le fondamenta):                      |
-//|   - INGRESSO: incrocio Tenkan-sen (blu) / Kijun-sen (rossa)     |
-//|     dell'Ichimoku                                                |
-//|   - FILTRO TREND: prezzo sopra/sotto la nuvola (Kumo)           |
-//|   - FILTRO LATERALE: ADX > soglia (evita i falsi incroci)       |
+//|  LOGICA (versione 1.1 - solo le fondamenta):                    |
+//|   - DIREZIONE (Ichimoku): rialzista se Tenkan>Kijun e prezzo    |
+//|     sopra la nuvola (Kumo); ribassista nel caso opposto          |
+//|   - INNESCO (Bollinger): entro sulla ROTTURA della banda nella  |
+//|     direzione del trend (chiusura oltre la banda esterna).      |
+//|     Bande compresse = niente rottura = niente trade             |
 //|   - STOP e TRAILING dinamici basati su ATR (volatilita')        |
 //|   - UNA sola posizione per volta (NIENTE piramidazione qui)     |
 //|                                                                  |
@@ -33,10 +34,10 @@ input int    InpTenkan      = 9;     // Tenkan-sen (periodo linea blu)
 input int    InpKijun       = 26;    // Kijun-sen (periodo linea rossa)
 input int    InpSenkouB     = 52;    // Senkou Span B
 
-//--- Filtro trend (ADX)
-input group "=== Filtro ADX (anti-laterale) ==="
-input int    InpADXPeriod   = 14;    // Periodo ADX
-input double InpADXMin       = 23.0;  // ADX minimo per operare (sotto = laterale, non opero)
+//--- Filtro volatilita' (Bollinger Bands)
+input group "=== Bollinger (compressione/espansione) ==="
+input int    InpBBPeriod    = 20;    // Periodo Bollinger
+input double InpBBDev        = 2.0;   // Deviazioni standard delle bande
 
 //--- Gestione del rischio (ATR)
 input group "=== Rischio e gestione (ATR) ==="
@@ -54,7 +55,7 @@ input int    InpMaxSpread    = 50;    // Spread massimo consentito (in punti); 0
 //  HANDLE DEGLI INDICATORI (creati una volta sola in OnInit)
 //==================================================================
 int hIchimoku = INVALID_HANDLE;
-int hADX      = INVALID_HANDLE;
+int hBands    = INVALID_HANDLE;
 int hATR      = INVALID_HANDLE;
 
 datetime lastBarTime = 0;   // per operare solo all'apertura di una nuova candela
@@ -66,10 +67,10 @@ int OnInit()
   {
    //--- creo gli handle degli indicatori sul simbolo/timeframe correnti
    hIchimoku = iIchimoku(_Symbol, _Period, InpTenkan, InpKijun, InpSenkouB);
-   hADX      = iADX(_Symbol, _Period, InpADXPeriod);
+   hBands    = iBands(_Symbol, _Period, InpBBPeriod, 0, InpBBDev, PRICE_CLOSE);
    hATR      = iATR(_Symbol, _Period, InpATRPeriod);
 
-   if(hIchimoku == INVALID_HANDLE || hADX == INVALID_HANDLE || hATR == INVALID_HANDLE)
+   if(hIchimoku == INVALID_HANDLE || hBands == INVALID_HANDLE || hATR == INVALID_HANDLE)
      {
       Print("ERRORE: impossibile creare gli handle degli indicatori.");
       return(INIT_FAILED);
@@ -89,7 +90,7 @@ int OnInit()
 void OnDeinit(const int reason)
   {
    if(hIchimoku != INVALID_HANDLE) IndicatorRelease(hIchimoku);
-   if(hADX      != INVALID_HANDLE) IndicatorRelease(hADX);
+   if(hBands    != INVALID_HANDLE) IndicatorRelease(hBands);
    if(hATR      != INVALID_HANDLE) IndicatorRelease(hATR);
   }
 
@@ -142,49 +143,50 @@ bool IsNewBar()
 //+------------------------------------------------------------------+
 int GetSignal()
   {
-   double tenkan[2], kijun[2];
+   double tenkan[1], kijun[1];
    double spanA[1], spanB[1];
-   double adx[1];
+   double upper[2], lower[2];
 
-   //--- leggo Tenkan e Kijun sulle ultime 2 candele CHIUSE (indici 1 e 2)
-   //    cosi' rilevo l'incrocio appena avvenuto, senza repaint
-   if(CopyBuffer(hIchimoku, 0, 1, 2, tenkan) < 2) return(0); // 0 = TENKANSEN
-   if(CopyBuffer(hIchimoku, 1, 1, 2, kijun)  < 2) return(0); // 1 = KIJUNSEN
+   //--- ICHIMOKU: leggo lo stato sull'ultima candela CHIUSA (indice 1)
+   if(CopyBuffer(hIchimoku, 0, 1, 1, tenkan) < 1) return(0); // 0 = TENKANSEN (blu)
+   if(CopyBuffer(hIchimoku, 1, 1, 1, kijun)  < 1) return(0); // 1 = KIJUNSEN (rossa)
    if(CopyBuffer(hIchimoku, 2, 1, 1, spanA)  < 1) return(0); // 2 = SENKOU SPAN A
    if(CopyBuffer(hIchimoku, 3, 1, 1, spanB)  < 1) return(0); // 3 = SENKOU SPAN B
-   if(CopyBuffer(hADX,      0, 1, 1, adx)    < 1) return(0); // 0 = ADX main
 
-   //--- ATTENZIONE all'ordine: CopyBuffer con as_series di default mette
-   //    indice 0 = candela piu' recente tra quelle copiate.
-   //    tenkan[0]/kijun[0] = candela 1 (ultima chiusa)
-   //    tenkan[1]/kijun[1] = candela 2 (quella prima)
-   double tenkanNow  = tenkan[0];
-   double tenkanPrev = tenkan[1];
-   double kijunNow   = kijun[0];
-   double kijunPrev  = kijun[1];
+   //--- BOLLINGER: bande sulle ultime 2 candele chiuse (per vedere la rottura "fresca")
+   if(CopyBuffer(hBands, 1, 1, 2, upper) < 2) return(0); // 1 = UPPER_BAND
+   if(CopyBuffer(hBands, 2, 1, 2, lower) < 2) return(0); // 2 = LOWER_BAND
 
-   //--- FILTRO 1: c'e' davvero un trend? (ADX sopra la soglia)
-   if(adx[0] < InpADXMin)
-      return(0);
+   //--- chiusure: candela 1 (ultima chiusa) e candela 2 (quella prima)
+   double closeNow  = iClose(_Symbol, _Period, 1);
+   double closePrev = iClose(_Symbol, _Period, 2);
 
-   //--- prezzo di riferimento (chiusura ultima candela)
-   double price = iClose(_Symbol, _Period, 1);
+   //--- indice 0 = candela piu' recente tra quelle copiate (candela 1)
+   double upperNow  = upper[0];
+   double upperPrev = upper[1];
+   double lowerNow  = lower[0];
+   double lowerPrev = lower[1];
 
-   //--- bordi della nuvola
+   //--- bordi della nuvola Ichimoku
    double kumoTop = MathMax(spanA[0], spanB[0]);
    double kumoBot = MathMin(spanA[0], spanB[0]);
 
-   //--- INCROCIO RIALZISTA: blu passa sopra rossa
-   bool crossUp   = (tenkanPrev <= kijunPrev) && (tenkanNow > kijunNow);
-   //--- INCROCIO RIBASSISTA: blu passa sotto rossa
-   bool crossDown = (tenkanPrev >= kijunPrev) && (tenkanNow < kijunNow);
+   //--- DIREZIONE del trend secondo l'Ichimoku
+   bool trendUp   = (tenkan[0] > kijun[0]) && (closeNow > kumoTop);
+   bool trendDown = (tenkan[0] < kijun[0]) && (closeNow < kumoBot);
 
-   //--- LONG: incrocio su + prezzo sopra la nuvola
-   if(crossUp && price > kumoTop)
+   //--- INNESCO: rottura "fresca" della banda
+   //    long: prima la candela era dentro/sotto la banda sup, ora chiude sopra
+   bool breakoutUp   = (closePrev <= upperPrev) && (closeNow > upperNow);
+   //    short: prima dentro/sopra la banda inf, ora chiude sotto
+   bool breakoutDown = (closePrev >= lowerPrev) && (closeNow < lowerNow);
+
+   //--- LONG: trend rialzista Ichimoku + rottura della banda superiore
+   if(trendUp && breakoutUp)
       return(+1);
 
-   //--- SHORT: incrocio giu + prezzo sotto la nuvola
-   if(crossDown && price < kumoBot)
+   //--- SHORT: trend ribassista Ichimoku + rottura della banda inferiore
+   if(trendDown && breakoutDown)
       return(-1);
 
    return(0);
