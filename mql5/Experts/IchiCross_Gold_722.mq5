@@ -3,24 +3,30 @@
 //|                                                                  |
 //|  EA per XAUUSD (oro) su M5 — metodo manuale Ichimoku 7/22/44.    |
 //|                                                                  |
-//|  LOGICA (v1.0):                                                  |
+//|  LOGICA (v1.1):                                                  |
 //|   - INGRESSO: incrocio Tenkan/Kijun sull'ultima candela chiusa  |
 //|       (verso l'alto = long, verso il basso = short).            |
-//|   - FILTRO: solo se le bande di Bollinger sono in ESPANSIONE     |
-//|       (ampiezza in aumento). In compressione: nessun trade.     |
+//|   - FILTRO: bande di Bollinger in ESPANSIONE + (default ON)     |
+//|       nuvola Kumo e concordanza H1. In compressione/controtrend |
+//|       niente trade.                                             |
 //|   - STOP LOSS iniziale = InpATR_SL x ATR.                       |
-//|   - PARZIALE dopo +InpATR_PartialAt x ATR di profitto, poi SL   |
-//|       a pareggio (breakeven).                                   |
-//|   - TRAILING dinamico in ATR (mette al sicuro i profitti).      |
+//|   - PARZIALE/BREAKEVEN disponibili ma DISATTIVI di default      |
+//|       (parziale 0%): si lascia correre il trade.               |
+//|   - TRAILING dinamico in ATR (gestione principale del profitto).|
 //|   - USCITA anticipata sull'incrocio Tenkan/Kijun opposto.       |
 //|   - Lotto da rischio % (InpRiskPercent). UNA posizione per volta.|
-//|   - Filtri opzionali (default OFF): nuvola Kumo, time frame sup. |
 //|                                                                  |
-//|  NOTA: base da testare SU DEMO nello Strategy Tester. I valori  |
-//|        ATR/percentuali vanno tarati sui risultati del backtest. |
+//|  CONFIG VALIDATA (XAUUSD M5, ticks reali):                      |
+//|   - Ottimizzata su 2024, validata OUT-OF-SAMPLE su 2025.        |
+//|   - 2025: +860 EUR, Profit Factor 1.28, Drawdown 3.9%,         |
+//|     win rate 58.7%, 223 trade. 2024+2025: PF 1.10.            |
+//|   - CAVEAT: 2024-2025 anni fortemente di trend su oro; la      |
+//|     strategia e' trend-following. Va ancora stress-testata su  |
+//|     anni laterali e in forward demo con costi reali prima di   |
+//|     denaro vero. PF 1.10-1.28 = margine sottile.              |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -43,10 +49,10 @@ input int    InpBBPeriod        = 20;  // Periodo Bollinger
 input double InpBBDev           = 2.0; // Deviazioni standard
 input int    InpBBExpandLookback= 3;   // Bande in espansione se larghezza ora > larghezza N candele fa
 
-//--- Filtri opzionali d'ingresso
-input group "=== Filtri opzionali (default OFF) ==="
-input bool         InpUseKumoFilter = false;       // Long solo sopra la nuvola, short sotto
-input bool         InpUseHTFFilter  = false;       // Concordanza con un time frame superiore
+//--- Filtri d'ingresso (config validata: entrambi ON)
+input group "=== Filtri trend (default ON) ==="
+input bool         InpUseKumoFilter = true;        // Long solo sopra la nuvola, short sotto
+input bool         InpUseHTFFilter  = true;        // Concordanza con un time frame superiore
 input ENUM_TIMEFRAMES InpHTF        = PERIOD_H1;    // Time frame del filtro superiore
 
 //--- Uscita
@@ -56,12 +62,12 @@ input bool   InpExitOnOppositeCross = true;  // Esci sull'incrocio Tenkan/Kijun 
 //--- Rischio e gestione (tutto in ATR)
 input group "=== Rischio e gestione (ATR) ==="
 input int    InpATRPeriod      = 14;   // Periodo ATR
-input double InpATR_SL         = 1.5;  // Stop Loss iniziale = X x ATR
+input double InpATR_SL         = 2.75; // Stop Loss iniziale = X x ATR
 input double InpATR_PartialAt  = 1.0;  // Parzializza dopo +X x ATR di profitto
-input double InpPartialPercent = 50.0; // % della posizione da chiudere alla parziale
-input bool   InpBreakevenAtPartial = true; // Alla parziale, sposta lo SL a pareggio
+input double InpPartialPercent = 0;    // % da chiudere alla parziale (0 = parziale disattivata)
+input bool   InpBreakevenAtPartial = false; // Alla parziale, sposta lo SL a pareggio
 input double InpATR_TrailStart = 1.0;  // Il trailing parte dopo +X x ATR di profitto
-input double InpATR_Trail      = 2.0;  // Distanza del trailing = X x ATR
+input double InpATR_Trail      = 4.0;  // Distanza del trailing = X x ATR
 input double InpRiskPercent    = 0.50; // Rischio per trade (% del capitale)
 
 //--- Generali
