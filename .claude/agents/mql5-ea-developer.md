@@ -27,24 +27,49 @@ arriva dal backtest dell'utente. Se ti mancano i risultati di un backtest di
 riferimento, chiedili prima di promettere miglioramenti di performance — puoi
 comunque fare review statica del codice.
 
-## Architettura dell'EA esistente (conoscila prima di toccarla)
+## La strategia REALE dell'utente — EA principale
 
-`IchiTrend_Gold_Base.mq5` — XAUUSD, M5, una posizione per volta:
+`mql5/Experts/IchiCross_Gold_722.mq5` — questo è il metodo che l'utente
+trada davvero (prima a mano). XAUUSD, M5, una posizione per volta:
 
-- **Direzione (Ichimoku):** long se `Tenkan > Kijun` e prezzo sopra la nuvola
-  (Kumo); short nel caso opposto.
-- **Innesco (Bollinger):** ingresso sulla *rottura fresca* della banda nella
-  direzione del trend (chiusura che supera la banda esterna, mentre la candela
-  precedente era dentro/oltre).
-- **Rischio (ATR):** Stop Loss = `InpATR_SL × ATR`; trailing = `InpATR_Trail ×
-  ATR`; lotto calcolato da `InpRiskPercent` % del capitale. Nessun take profit:
-  si esce col trailing.
-- **Gestione:** segnali valutati solo all'apertura di una nuova candela
-  (`IsNewBar`); trailing aggiornato a ogni tick; filtro spread (`SpreadOK`);
-  numero magico per identificare i propri trade.
+- **Ichimoku 7/22/44** (Tenkan 7, Kijun 22, Senkou Span B 44; 44 è custom, lo
+  standard è 52 — parametrizzato così l'utente confronta).
+- **Ingresso:** *incrocio* Tenkan/Kijun sull'ultima candela chiusa (verso l'alto
+  = long, verso il basso = short). NON è l'EA-scheletro (quello entrava sulla
+  rottura di Bollinger): qui Bollinger è solo un filtro.
+- **Filtro bande in espansione:** entra solo se la larghezza delle bande di
+  Bollinger è in aumento (`BandsExpanding`). In compressione: nessun trade.
+- **SL iniziale = `InpATR_SL × ATR`.**
+- **Parziale + breakeven:** dopo `+InpATR_PartialAt × ATR` chiude
+  `InpPartialPercent`% e porta lo SL a pareggio (una sola volta per posizione,
+  stato in `g_partialDone` legato al ticket).
+- **Trailing dinamico in ATR** (`InpATR_Trail`), parte dopo
+  `+InpATR_TrailStart × ATR`; muove lo SL solo a favore.
+- **Uscita anticipata:** incrocio Tenkan/Kijun opposto
+  (`InpExitOnOppositeCross`).
+- **Filtri opzionali (default OFF):** nuvola Kumo (`InpUseKumoFilter`), time
+  frame superiore (`InpUseHTFFilter` / `InpHTF`). Tenuti spenti perché la v1
+  replichi *esattamente* la regola dell'utente.
+- **Rischio:** `InpRiskPercent` (0,50% di default).
 
-Funzioni chiave: `OnInit`, `OnTick`, `GetSignal`, `OpenTrade`,
-`CalcLotByRisk`, `ManageTrailing`, `HasOpenPosition`, `SpreadOK`.
+Funzioni chiave: `GetCross` (incrocio grezzo, usato sia per ingresso sia per
+uscita opposta), `BandsExpanding`, `KumoOk`/`HtfOk` (filtri opz.),
+`GetEntrySignal`, `OpenTrade`, `CalcLotByRisk`, `ManageOpenPosition` (parziale +
+breakeven + trailing), `CloseCurrent`, `HasOpenPosition`, `SpreadOK`.
+
+### Punti aperti / da tarare nei backtest
+- I multipli ATR (SL, parziale, trailing) e `InpPartialPercent` sono valori di
+  partenza: si tarano sui risultati del tester, non a tavolino.
+- Filtro Kumo: i buffer Senkou A/B sono letti allo shift 1 (nuvola "disegnata"
+  su quella candela), approssimazione accettabile finché il filtro è opzionale.
+- Possibili estensioni quando l'utente le chiede: parziali multiple (più
+  tranche), filtro orario/sessioni, filtro news, conferma rottura.
+
+## Scheletro di riferimento (non è la strategia dell'utente)
+
+`mql5/Experts/IchiTrend_Gold_Base.mq5` — base generica preesistente: Ichimoku
+standard 9/26/52 + ingresso sulla *rottura* di Bollinger. Usalo solo come
+riferimento di stile/struttura, NON come metodo dell'utente.
 
 ## Principi di lavoro
 

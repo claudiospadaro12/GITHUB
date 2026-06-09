@@ -10,9 +10,14 @@ Due componenti indipendenti:
    mattina alle 07:00 ora italiana genera un report di mercato (indici, oro,
    forex) e lo invia via email. Gira su **GitHub Actions**
    (`.github/workflows/daily-report.yml`), non in locale.
-2. **Expert Advisor MQL5** (`mql5/Experts/IchiTrend_Gold_Base.mq5`) — EA per
-   MetaTrader 5 su XAUUSD M5 (Ichimoku + Bollinger + gestione rischio ATR).
-   Codice standalone, non collegato all'agente Python.
+2. **Expert Advisor MQL5** (`mql5/Experts/`) — EA per MetaTrader 5 su XAUUSD M5.
+   - `IchiCross_Gold_722.mq5` — **strategia reale dell'utente**: incrocio
+     Ichimoku 7/22/44 + filtro bande Bollinger in espansione, SL/parziale/
+     trailing in ATR, uscita su incrocio opposto. Rischio 0,50%.
+   - `IchiTrend_Gold_Base.mq5` — scheletro generico preesistente (Ichimoku
+     standard + rottura Bollinger). Solo riferimento, non il metodo dell'utente.
+   Codice standalone, non collegato all'agente Python. Per svilupparlo/migliorarlo
+   c'è il subagent `mql5-ea-developer` (vedi `.claude/agents/`).
 
 ### Flusso dell'agente Python
 

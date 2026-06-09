@@ -1,0 +1,443 @@
+//+------------------------------------------------------------------+
+//|                                        IchiCross_Gold_722.mq5     |
+//|                                                                  |
+//|  EA per XAUUSD (oro) su M5 — metodo manuale Ichimoku 7/22/44.    |
+//|                                                                  |
+//|  LOGICA (v1.0):                                                  |
+//|   - INGRESSO: incrocio Tenkan/Kijun sull'ultima candela chiusa  |
+//|       (verso l'alto = long, verso il basso = short).            |
+//|   - FILTRO: solo se le bande di Bollinger sono in ESPANSIONE     |
+//|       (ampiezza in aumento). In compressione: nessun trade.     |
+//|   - STOP LOSS iniziale = InpATR_SL x ATR.                       |
+//|   - PARZIALE dopo +InpATR_PartialAt x ATR di profitto, poi SL   |
+//|       a pareggio (breakeven).                                   |
+//|   - TRAILING dinamico in ATR (mette al sicuro i profitti).      |
+//|   - USCITA anticipata sull'incrocio Tenkan/Kijun opposto.       |
+//|   - Lotto da rischio % (InpRiskPercent). UNA posizione per volta.|
+//|   - Filtri opzionali (default OFF): nuvola Kumo, time frame sup. |
+//|                                                                  |
+//|  NOTA: base da testare SU DEMO nello Strategy Tester. I valori  |
+//|        ATR/percentuali vanno tarati sui risultati del backtest. |
+//+------------------------------------------------------------------+
+#property copyright "Progetto EA Oro"
+#property version   "1.00"
+#property strict
+
+#include <Trade/Trade.mqh>
+
+CTrade trade;
+
+//==================================================================
+//  PARAMETRI DI INPUT
+//==================================================================
+
+//--- Ichimoku (impostazione manuale 7/22/44)
+input group "=== Ichimoku ==="
+input int    InpTenkan       = 7;     // Tenkan-sen
+input int    InpKijun        = 22;    // Kijun-sen
+input int    InpSenkouB      = 44;    // Senkou Span B (standard 52; 44 = custom)
+
+//--- Filtro anti-compressione (Bollinger Bands)
+input group "=== Filtro bande in espansione ==="
+input int    InpBBPeriod        = 20;  // Periodo Bollinger
+input double InpBBDev           = 2.0; // Deviazioni standard
+input int    InpBBExpandLookback= 3;   // Bande in espansione se larghezza ora > larghezza N candele fa
+
+//--- Filtri opzionali d'ingresso
+input group "=== Filtri opzionali (default OFF) ==="
+input bool         InpUseKumoFilter = false;       // Long solo sopra la nuvola, short sotto
+input bool         InpUseHTFFilter  = false;       // Concordanza con un time frame superiore
+input ENUM_TIMEFRAMES InpHTF        = PERIOD_H1;    // Time frame del filtro superiore
+
+//--- Uscita
+input group "=== Uscita ==="
+input bool   InpExitOnOppositeCross = true;  // Esci sull'incrocio Tenkan/Kijun opposto
+
+//--- Rischio e gestione (tutto in ATR)
+input group "=== Rischio e gestione (ATR) ==="
+input int    InpATRPeriod      = 14;   // Periodo ATR
+input double InpATR_SL         = 1.5;  // Stop Loss iniziale = X x ATR
+input double InpATR_PartialAt  = 1.0;  // Parzializza dopo +X x ATR di profitto
+input double InpPartialPercent = 50.0; // % della posizione da chiudere alla parziale
+input bool   InpBreakevenAtPartial = true; // Alla parziale, sposta lo SL a pareggio
+input double InpATR_TrailStart = 1.0;  // Il trailing parte dopo +X x ATR di profitto
+input double InpATR_Trail      = 2.0;  // Distanza del trailing = X x ATR
+input double InpRiskPercent    = 0.50; // Rischio per trade (% del capitale)
+
+//--- Generali
+input group "=== Generali ==="
+input long   InpMagic     = 250604;    // Numero magico
+input int    InpMaxSpread = 50;        // Spread massimo (punti); 0 = nessun limite
+
+//==================================================================
+//  HANDLE E STATO
+//==================================================================
+int hIchimoku    = INVALID_HANDLE;
+int hIchimokuHTF = INVALID_HANDLE;
+int hBands       = INVALID_HANDLE;
+int hATR         = INVALID_HANDLE;
+
+datetime lastBarTime  = 0;
+long     g_ticket     = 0;       // ticket della posizione in gestione
+bool     g_partialDone= false;   // parziale gia' eseguita su questa posizione
+
+//+------------------------------------------------------------------+
+//| Inizializzazione                                                 |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   hIchimoku    = iIchimoku(_Symbol, _Period, InpTenkan, InpKijun, InpSenkouB);
+   hIchimokuHTF = iIchimoku(_Symbol, InpHTF,  InpTenkan, InpKijun, InpSenkouB);
+   hBands       = iBands(_Symbol, _Period, InpBBPeriod, 0, InpBBDev, PRICE_CLOSE);
+   hATR         = iATR(_Symbol, _Period, InpATRPeriod);
+
+   if(hIchimoku == INVALID_HANDLE || hIchimokuHTF == INVALID_HANDLE ||
+      hBands == INVALID_HANDLE || hATR == INVALID_HANDLE)
+     {
+      Print("ERRORE: impossibile creare gli handle degli indicatori.");
+      return(INIT_FAILED);
+     }
+
+   trade.SetExpertMagicNumber(InpMagic);
+   trade.SetTypeFillingBySymbol(_Symbol);
+
+   Print("IchiCross_Gold_722 avviato su ", _Symbol, " ",
+         EnumToString((ENUM_TIMEFRAMES)_Period));
+   return(INIT_SUCCEEDED);
+  }
+
+//+------------------------------------------------------------------+
+//| Deinizializzazione                                               |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+   if(hIchimoku    != INVALID_HANDLE) IndicatorRelease(hIchimoku);
+   if(hIchimokuHTF != INVALID_HANDLE) IndicatorRelease(hIchimokuHTF);
+   if(hBands       != INVALID_HANDLE) IndicatorRelease(hBands);
+   if(hATR         != INVALID_HANDLE) IndicatorRelease(hATR);
+  }
+
+//+------------------------------------------------------------------+
+//| Ad ogni tick                                                     |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+   //--- la gestione della posizione (parziale + breakeven + trailing)
+   //    va aggiornata a ogni tick
+   ManageOpenPosition();
+
+   //--- ingressi e uscite su incrocio: solo all'apertura di una nuova candela
+   if(!IsNewBar())
+      return;
+
+   //--- se ho una posizione aperta: valuto solo l'uscita su incrocio opposto
+   if(HasOpenPosition())
+     {
+      if(InpExitOnOppositeCross)
+        {
+         int    cross = GetCross();
+         long   type  = PositionGetInteger(POSITION_TYPE);
+         if(type == POSITION_TYPE_BUY  && cross < 0) CloseCurrent();
+         else if(type == POSITION_TYPE_SELL && cross > 0) CloseCurrent();
+        }
+      return;
+     }
+
+   //--- nessuna posizione: valuto un nuovo ingresso
+   if(!SpreadOK())
+      return;
+
+   int signal = GetEntrySignal();   // +1 long, -1 short, 0 niente
+   if(signal > 0)
+      OpenTrade(ORDER_TYPE_BUY);
+   else if(signal < 0)
+      OpenTrade(ORDER_TYPE_SELL);
+  }
+
+//+------------------------------------------------------------------+
+//| True una sola volta per ogni nuova candela                       |
+//+------------------------------------------------------------------+
+bool IsNewBar()
+  {
+   datetime t = (datetime)SeriesInfoInteger(_Symbol, _Period, SERIES_LASTBAR_DATE);
+   if(t != lastBarTime)
+     {
+      lastBarTime = t;
+      return(true);
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Incrocio Tenkan/Kijun sull'ultima candela chiusa                 |
+//|  +1 = incrocio verso l'alto, -1 = verso il basso, 0 = nessuno    |
+//+------------------------------------------------------------------+
+int GetCross()
+  {
+   double tenkan[2], kijun[2];
+   ArraySetAsSeries(tenkan, true);
+   ArraySetAsSeries(kijun,  true);
+
+   //--- copio le ultime 2 candele chiuse: [0] = candela 1, [1] = candela 2
+   if(CopyBuffer(hIchimoku, 0, 1, 2, tenkan) < 2) return(0);
+   if(CopyBuffer(hIchimoku, 1, 1, 2, kijun)  < 2) return(0);
+
+   bool crossUp   = (tenkan[1] <= kijun[1]) && (tenkan[0] > kijun[0]);
+   bool crossDown = (tenkan[1] >= kijun[1]) && (tenkan[0] < kijun[0]);
+
+   if(crossUp)   return(+1);
+   if(crossDown) return(-1);
+   return(0);
+  }
+
+//+------------------------------------------------------------------+
+//| Le bande di Bollinger sono in espansione?                        |
+//|  (larghezza candela 1 > larghezza di InpBBExpandLookback fa)     |
+//+------------------------------------------------------------------+
+bool BandsExpanding()
+  {
+   int count = InpBBExpandLookback + 1;          // serve l'indice [lookback]
+   if(count < 2) count = 2;
+
+   double upper[], lower[];
+   ArraySetAsSeries(upper, true);
+   ArraySetAsSeries(lower, true);
+
+   if(CopyBuffer(hBands, 1, 1, count, upper) < count) return(false); // 1 = UPPER
+   if(CopyBuffer(hBands, 2, 1, count, lower) < count) return(false); // 2 = LOWER
+
+   double widthNow  = upper[0] - lower[0];
+   double widthPast = upper[InpBBExpandLookback] - lower[InpBBExpandLookback];
+
+   return(widthNow > widthPast);
+  }
+
+//+------------------------------------------------------------------+
+//| Filtro nuvola Kumo (opzionale): prezzo dalla parte giusta        |
+//+------------------------------------------------------------------+
+bool KumoOk(int dir)
+  {
+   double spanA[1], spanB[1];
+   if(CopyBuffer(hIchimoku, 2, 1, 1, spanA) < 1) return(false); // SENKOU SPAN A
+   if(CopyBuffer(hIchimoku, 3, 1, 1, spanB) < 1) return(false); // SENKOU SPAN B
+
+   double kumoTop = MathMax(spanA[0], spanB[0]);
+   double kumoBot = MathMin(spanA[0], spanB[0]);
+   double close1  = iClose(_Symbol, _Period, 1);
+
+   if(dir > 0) return(close1 > kumoTop);
+   if(dir < 0) return(close1 < kumoBot);
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Filtro time frame superiore (opzionale)                          |
+//+------------------------------------------------------------------+
+bool HtfOk(int dir)
+  {
+   double tenkan[1], kijun[1];
+   if(CopyBuffer(hIchimokuHTF, 0, 1, 1, tenkan) < 1) return(false);
+   if(CopyBuffer(hIchimokuHTF, 1, 1, 1, kijun)  < 1) return(false);
+
+   if(dir > 0) return(tenkan[0] > kijun[0]);
+   if(dir < 0) return(tenkan[0] < kijun[0]);
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Segnale d'ingresso completo (incrocio + filtri)                  |
+//+------------------------------------------------------------------+
+int GetEntrySignal()
+  {
+   int cross = GetCross();
+   if(cross == 0)            return(0);
+   if(!BandsExpanding())     return(0);     // niente trade in compressione
+   if(InpUseKumoFilter && !KumoOk(cross)) return(0);
+   if(InpUseHTFFilter  && !HtfOk(cross))  return(0);
+   return(cross);
+  }
+
+//+------------------------------------------------------------------+
+//| Valore ATR sull'ultima candela chiusa                            |
+//+------------------------------------------------------------------+
+double ATRvalue()
+  {
+   double atr[1];
+   if(CopyBuffer(hATR, 0, 1, 1, atr) < 1) return(0);
+   return(atr[0]);
+  }
+
+//+------------------------------------------------------------------+
+//| Apre una posizione con SL su ATR e lotto da rischio %            |
+//+------------------------------------------------------------------+
+void OpenTrade(ENUM_ORDER_TYPE type)
+  {
+   double atr = ATRvalue();
+   if(atr <= 0) return;
+
+   double slDistance = InpATR_SL * atr;
+
+   double price = (type == ORDER_TYPE_BUY)
+                  ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
+                  : SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+   double sl = (type == ORDER_TYPE_BUY) ? price - slDistance : price + slDistance;
+
+   int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   sl    = NormalizeDouble(sl, digits);
+   price = NormalizeDouble(price, digits);
+
+   double lot = CalcLotByRisk(slDistance);
+   if(lot <= 0) return;
+
+   //--- nessun take profit: usciamo con trailing / parziale / incrocio opposto
+   bool ok;
+   if(type == ORDER_TYPE_BUY)
+      ok = trade.Buy(lot, _Symbol, price, sl, 0, "IchiCross long");
+   else
+      ok = trade.Sell(lot, _Symbol, price, sl, 0, "IchiCross short");
+
+   if(!ok)
+      Print("Apertura ordine FALLITA. Retcode=", trade.ResultRetcode(),
+            " - ", trade.ResultRetcodeDescription());
+  }
+
+//+------------------------------------------------------------------+
+//| Lotto tale che la perdita allo SL sia ~ InpRiskPercent %         |
+//+------------------------------------------------------------------+
+double CalcLotByRisk(double slDistancePrice)
+  {
+   double balance   = AccountInfoDouble(ACCOUNT_BALANCE);
+   double riskMoney = balance * InpRiskPercent / 100.0;
+
+   double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+   double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   if(tickSize <= 0 || tickValue <= 0) return(0);
+
+   double ticks      = slDistancePrice / tickSize;
+   double lossPerLot = ticks * tickValue;
+   if(lossPerLot <= 0) return(0);
+
+   double lot = riskMoney / lossPerLot;
+
+   double minLot  = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   double maxLot  = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
+   double lotStep = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+
+   lot = MathFloor(lot / lotStep) * lotStep;
+   lot = MathMax(minLot, MathMin(maxLot, lot));
+   return(lot);
+  }
+
+//+------------------------------------------------------------------+
+//| Gestione posizione aperta: parziale + breakeven + trailing       |
+//+------------------------------------------------------------------+
+void ManageOpenPosition()
+  {
+   if(!PositionSelect(_Symbol))
+      return;
+   if(PositionGetInteger(POSITION_MAGIC) != InpMagic)
+      return;
+
+   //--- nuova posizione? azzero lo stato della parziale
+   long ticket = PositionGetInteger(POSITION_TICKET);
+   if(ticket != g_ticket)
+     {
+      g_ticket      = ticket;
+      g_partialDone = false;
+     }
+
+   double atr = ATRvalue();
+   if(atr <= 0) return;
+
+   int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   long   type   = PositionGetInteger(POSITION_TYPE);
+   double openP  = PositionGetDouble(POSITION_PRICE_OPEN);
+   double volume = PositionGetDouble(POSITION_VOLUME);
+   double bid    = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   double ask    = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+
+   //--- profitto corrente in prezzo (a favore)
+   double profitPrice = (type == POSITION_TYPE_BUY) ? (bid - openP) : (openP - ask);
+
+   //--- 1) PARZIALE + BREAKEVEN (una sola volta)
+   if(!g_partialDone && profitPrice >= InpATR_PartialAt * atr)
+     {
+      double minLot  = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+      double lotStep = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+
+      double closeVol = volume * InpPartialPercent / 100.0;
+      closeVol = MathFloor(closeVol / lotStep) * lotStep;
+
+      //--- parzializzo solo se il residuo resta >= lotto minimo
+      if(closeVol >= minLot && (volume - closeVol) >= minLot)
+         trade.PositionClosePartial(_Symbol, closeVol);
+
+      //--- breakeven: SL a pareggio
+      if(InpBreakevenAtPartial && PositionSelect(_Symbol))
+        {
+         double be    = NormalizeDouble(openP, digits);
+         double curSL = PositionGetDouble(POSITION_SL);
+         bool   improve = (type == POSITION_TYPE_BUY) ? (be > curSL)
+                                                      : (curSL == 0 || be < curSL);
+         if(improve)
+            trade.PositionModify(_Symbol, be, PositionGetDouble(POSITION_TP));
+        }
+
+      g_partialDone = true;
+     }
+
+   //--- 2) TRAILING dinamico in ATR
+   if(profitPrice >= InpATR_TrailStart * atr && PositionSelect(_Symbol))
+     {
+      double trailDist = InpATR_Trail * atr;
+      double curSL     = PositionGetDouble(POSITION_SL);
+
+      if(type == POSITION_TYPE_BUY)
+        {
+         double newSL = NormalizeDouble(bid - trailDist, digits);
+         if(newSL > curSL)
+            trade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
+        }
+      else
+        {
+         double newSL = NormalizeDouble(ask + trailDist, digits);
+         if(curSL == 0 || newSL < curSL)
+            trade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
+        }
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Chiude la posizione corrente di questo EA                        |
+//+------------------------------------------------------------------+
+void CloseCurrent()
+  {
+   if(trade.PositionClose(_Symbol))
+     {
+      g_ticket      = 0;
+      g_partialDone = false;
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| C'e' una posizione aperta di QUESTO EA?                          |
+//+------------------------------------------------------------------+
+bool HasOpenPosition()
+  {
+   if(!PositionSelect(_Symbol))
+      return(false);
+   return(PositionGetInteger(POSITION_MAGIC) == InpMagic);
+  }
+
+//+------------------------------------------------------------------+
+//| Spread accettabile?                                              |
+//+------------------------------------------------------------------+
+bool SpreadOK()
+  {
+   if(InpMaxSpread <= 0)
+      return(true);
+   long spread = SymbolInfoInteger(_Symbol, SYMBOL_SPREAD);
+   return(spread <= InpMaxSpread);
+  }
+//+------------------------------------------------------------------+
