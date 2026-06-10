@@ -26,7 +26,7 @@
 //|     denaro vero. PF 1.10-1.28 = margine sottile.              |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.10"
+#property version   "1.20"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -54,6 +54,9 @@ input group "=== Filtri trend (default ON) ==="
 input bool         InpUseKumoFilter = true;        // Long solo sopra la nuvola, short sotto
 input bool         InpUseHTFFilter  = true;        // Concordanza con un time frame superiore
 input ENUM_TIMEFRAMES InpHTF        = PERIOD_H1;    // Time frame del filtro superiore
+input bool         InpUseADXFilter  = true;        // Filtro forza del trend (no mercato laterale)
+input int          InpADXPeriod     = 14;          // Periodo ADX
+input double       InpADXThreshold  = 25.0;        // Soglia ADX (sotto = laterale, niente trade)
 
 //--- Uscita
 input group "=== Uscita ==="
@@ -82,6 +85,7 @@ int hIchimoku    = INVALID_HANDLE;
 int hIchimokuHTF = INVALID_HANDLE;
 int hBands       = INVALID_HANDLE;
 int hATR         = INVALID_HANDLE;
+int hADX         = INVALID_HANDLE;
 
 datetime lastBarTime  = 0;
 long     g_ticket     = 0;       // ticket della posizione in gestione
@@ -96,9 +100,10 @@ int OnInit()
    hIchimokuHTF = iIchimoku(_Symbol, InpHTF,  InpTenkan, InpKijun, InpSenkouB);
    hBands       = iBands(_Symbol, _Period, InpBBPeriod, 0, InpBBDev, PRICE_CLOSE);
    hATR         = iATR(_Symbol, _Period, InpATRPeriod);
+   hADX         = iADX(_Symbol, _Period, InpADXPeriod);
 
    if(hIchimoku == INVALID_HANDLE || hIchimokuHTF == INVALID_HANDLE ||
-      hBands == INVALID_HANDLE || hATR == INVALID_HANDLE)
+      hBands == INVALID_HANDLE || hATR == INVALID_HANDLE || hADX == INVALID_HANDLE)
      {
       Print("ERRORE: impossibile creare gli handle degli indicatori.");
       return(INIT_FAILED);
@@ -121,6 +126,7 @@ void OnDeinit(const int reason)
    if(hIchimokuHTF != INVALID_HANDLE) IndicatorRelease(hIchimokuHTF);
    if(hBands       != INVALID_HANDLE) IndicatorRelease(hBands);
    if(hATR         != INVALID_HANDLE) IndicatorRelease(hATR);
+   if(hADX         != INVALID_HANDLE) IndicatorRelease(hADX);
   }
 
 //+------------------------------------------------------------------+
@@ -251,6 +257,16 @@ bool HtfOk(int dir)
   }
 
 //+------------------------------------------------------------------+
+//| Filtro forza del trend: ADX sopra la soglia (no laterale)        |
+//+------------------------------------------------------------------+
+bool AdxOk()
+  {
+   double adx[1];
+   if(CopyBuffer(hADX, 0, 1, 1, adx) < 1) return(false); // buffer 0 = linea ADX
+   return(adx[0] >= InpADXThreshold);
+  }
+
+//+------------------------------------------------------------------+
 //| Segnale d'ingresso completo (incrocio + filtri)                  |
 //+------------------------------------------------------------------+
 int GetEntrySignal()
@@ -258,6 +274,7 @@ int GetEntrySignal()
    int cross = GetCross();
    if(cross == 0)            return(0);
    if(!BandsExpanding())     return(0);     // niente trade in compressione
+   if(InpUseADXFilter  && !AdxOk())       return(0);  // niente trade nel laterale
    if(InpUseKumoFilter && !KumoOk(cross)) return(0);
    if(InpUseHTFFilter  && !HtfOk(cross))  return(0);
    return(cross);
