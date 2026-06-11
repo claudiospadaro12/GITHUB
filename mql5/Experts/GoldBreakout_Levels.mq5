@@ -17,7 +17,7 @@
 //|  forward demo prima del reale.                                  |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.20"
+#property version   "1.30"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -27,6 +27,10 @@ CTrade trade;
 input group "=== Consolidamento ==="
 input int    InpConsolBars   = 5;    // Candele del consolidamento (box)
 input double InpConsolMaxATR  = 1.2; // Range del box <= X x ATR (piu' basso = piu' stretto)
+
+//--- Ingresso
+input group "=== Ingresso ==="
+input bool   InpConfirmCloseBreak = false; // Conferma: entra su candela CHIUSA oltre il box (invece che al tocco)
 
 //--- Livelli chiave (confluenza)
 input group "=== Livelli chiave ==="
@@ -106,8 +110,8 @@ void OnTick()
    //--- trailing a ogni tick
    ManageTrailing();
 
-   //--- ingresso "al tocco": controllato a ogni tick mentre il setup e' armato
-   if(g_armed && !HasOpenPosition() && SpreadOK())
+   //--- ingresso "al tocco" (solo se NON usiamo la conferma su chiusura)
+   if(!InpConfirmCloseBreak && g_armed && !HasOpenPosition() && SpreadOK())
      {
       double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
       double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -122,7 +126,38 @@ void OnTick()
    if(HasOpenPosition())
      { g_armed = false; return; }
 
-   EvaluateSetup();
+   if(InpConfirmCloseBreak)
+      TryConfirmedEntry();   // ingresso su candela CHIUSA oltre il box
+   else
+      EvaluateSetup();       // arma il box per l'ingresso al tocco
+  }
+
+//+------------------------------------------------------------------+
+//| Ingresso con conferma: la candela appena chiusa supera il box    |
+//+------------------------------------------------------------------+
+void TryConfirmedEntry()
+  {
+   double atr = ATRvalue();
+   if(atr <= 0) return;
+
+   //--- box = consolidamento PRIMA della candela di rottura (shift 2..N+1)
+   double boxHigh = -DBL_MAX, boxLow = DBL_MAX;
+   for(int i = 2; i <= InpConsolBars + 1; i++)
+     {
+      double hi = iHigh(_Symbol, _Period, i);
+      double lo = iLow(_Symbol, _Period, i);
+      if(hi > boxHigh) boxHigh = hi;
+      if(lo < boxLow)  boxLow  = lo;
+     }
+   double range = boxHigh - boxLow;
+   if(range <= 0 || range > InpConsolMaxATR * atr) return;
+   if(InpRequireLevel && !NearLevel(boxLow, boxHigh, atr)) return;
+
+   double c1 = iClose(_Symbol, _Period, 1);   // ultima candela chiusa
+   if(c1 > boxHigh && TrendOk(+1))
+     { g_boxHigh = boxHigh; g_boxLow = boxLow; OpenTrade(ORDER_TYPE_BUY); }
+   else if(c1 < boxLow && TrendOk(-1))
+     { g_boxHigh = boxHigh; g_boxLow = boxLow; OpenTrade(ORDER_TYPE_SELL); }
   }
 
 //+------------------------------------------------------------------+
