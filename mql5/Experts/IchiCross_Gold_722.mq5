@@ -16,7 +16,7 @@
 //|   costi M5. Serve forward demo con costi reali prima del vero. |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.20"
+#property version   "1.30"
 #property strict
 
 #include <Trade/Trade.mqh>
