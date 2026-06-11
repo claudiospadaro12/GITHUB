@@ -17,7 +17,7 @@
 //|  forward demo prima del reale.                                  |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -38,6 +38,12 @@ input bool   InpUsePivot      = true;// Pivot di giornata (PP, R1/2, S1/2)
 input bool   InpUseRound      = true;// Numeri tondi
 input double InpRoundStep      = 25.0;// Passo numeri tondi ($)
 
+//--- Filtro di trend (timeframe superiore)
+input group "=== Filtro di trend ==="
+input bool         InpUseTrendFilter = true;      // Breakout solo nella direzione del trend
+input ENUM_TIMEFRAMES InpTrendTF     = PERIOD_H4; // Time frame del trend
+input int          InpTrendMAPeriod  = 50;        // Periodo EMA del trend
+
 //--- Rischio e gestione
 input group "=== Rischio e gestione (ATR) ==="
 input int    InpATRPeriod      = 14;  // Periodo ATR
@@ -52,6 +58,7 @@ input long   InpMagic     = 250611;   // Numero magico (diverso dall'EA oro)
 input int    InpMaxSpread = 50;       // Spread massimo (punti); 0 = nessun limite
 
 int      hATR        = INVALID_HANDLE;
+int      hTrend      = INVALID_HANDLE;
 datetime lastBarTime = 0;
 bool     g_armed     = false;   // setup pronto, in attesa della rottura
 double   g_boxHigh   = 0;
@@ -60,9 +67,10 @@ double   g_boxLow    = 0;
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   hATR = iATR(_Symbol, _Period, InpATRPeriod);
-   if(hATR == INVALID_HANDLE)
-     { Print("ERRORE: handle ATR non creato."); return(INIT_FAILED); }
+   hATR   = iATR(_Symbol, _Period, InpATRPeriod);
+   hTrend = iMA(_Symbol, InpTrendTF, InpTrendMAPeriod, 0, MODE_EMA, PRICE_CLOSE);
+   if(hATR == INVALID_HANDLE || hTrend == INVALID_HANDLE)
+     { Print("ERRORE: handle indicatori non creati."); return(INIT_FAILED); }
 
    trade.SetExpertMagicNumber(InpMagic);
    trade.SetTypeFillingBySymbol(_Symbol);
@@ -74,7 +82,22 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-   if(hATR != INVALID_HANDLE) IndicatorRelease(hATR);
+   if(hATR   != INVALID_HANDLE) IndicatorRelease(hATR);
+   if(hTrend != INVALID_HANDLE) IndicatorRelease(hTrend);
+  }
+
+//+------------------------------------------------------------------+
+//| Filtro trend: il prezzo e' dalla parte giusta dell'EMA superiore |
+//+------------------------------------------------------------------+
+bool TrendOk(int dir)
+  {
+   if(!InpUseTrendFilter) return(true);
+   double ema[1];
+   if(CopyBuffer(hTrend, 0, 0, 1, ema) < 1) return(false);
+   double px = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   if(dir > 0) return(px > ema[0]);
+   if(dir < 0) return(px < ema[0]);
+   return(false);
   }
 
 //+------------------------------------------------------------------+
@@ -88,8 +111,8 @@ void OnTick()
      {
       double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
       double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-      if(ask >= g_boxHigh)      { OpenTrade(ORDER_TYPE_BUY);  g_armed = false; }
-      else if(bid <= g_boxLow)  { OpenTrade(ORDER_TYPE_SELL); g_armed = false; }
+      if(ask >= g_boxHigh && TrendOk(+1))     { OpenTrade(ORDER_TYPE_BUY);  g_armed = false; }
+      else if(bid <= g_boxLow && TrendOk(-1)) { OpenTrade(ORDER_TYPE_SELL); g_armed = false; }
      }
 
    //--- rivalutazione del setup: solo a nuova candela
