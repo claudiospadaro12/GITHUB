@@ -17,7 +17,7 @@
 //|  forward demo prima del reale.                                  |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.10"
+#property version   "1.20"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -111,8 +111,8 @@ void OnTick()
      {
       double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
       double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-      if(ask >= g_boxHigh && TrendOk(+1))     { OpenTrade(ORDER_TYPE_BUY);  g_armed = false; }
-      else if(bid <= g_boxLow && TrendOk(-1)) { OpenTrade(ORDER_TYPE_SELL); g_armed = false; }
+      if(ask >= g_boxHigh && TrendOk(+1))     { if(OpenTrade(ORDER_TYPE_BUY))  g_armed = false; }
+      else if(bid <= g_boxLow && TrendOk(-1)) { if(OpenTrade(ORDER_TYPE_SELL)) g_armed = false; }
      }
 
    //--- rivalutazione del setup: solo a nuova candela
@@ -229,11 +229,12 @@ bool NearLevel(double boxLow, double boxHigh, double atr)
 
 //+------------------------------------------------------------------+
 //| Apre la posizione di breakout con SL oltre il box                |
+//|  Ritorna true se l'ordine e' andato a buon fine.                 |
 //+------------------------------------------------------------------+
-void OpenTrade(ENUM_ORDER_TYPE type)
+bool OpenTrade(ENUM_ORDER_TYPE type)
   {
    double atr = ATRvalue();
-   if(atr <= 0) return;
+   if(atr <= 0) return(false);
 
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -244,14 +245,23 @@ void OpenTrade(ENUM_ORDER_TYPE type)
                : g_boxHigh + InpSL_BufferATR * atr;
 
    int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
-   sl    = NormalizeDouble(sl, digits);
    price = NormalizeDouble(price, digits);
+   sl    = NormalizeDouble(sl, digits);
+
+   //--- rispetta la distanza minima dello stop imposta dal broker
+   double minDist = MathMax((double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL),
+                            (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_FREEZE_LEVEL)) * _Point;
+   if(MathAbs(price - sl) < minDist)
+     {
+      sl = (type == ORDER_TYPE_BUY) ? price - minDist : price + minDist;
+      sl = NormalizeDouble(sl, digits);
+     }
 
    double slDist = MathAbs(price - sl);
-   if(slDist <= 0) return;
+   if(slDist <= 0) return(false);
 
    double lot = CalcLotByRisk(slDist);
-   if(lot <= 0) return;
+   if(lot <= 0) return(false);
 
    bool ok;
    if(type == ORDER_TYPE_BUY)
@@ -262,6 +272,7 @@ void OpenTrade(ENUM_ORDER_TYPE type)
    if(!ok)
       Print("Apertura ordine FALLITA. Retcode=", trade.ResultRetcode(),
             " - ", trade.ResultRetcodeDescription());
+   return(ok);
   }
 
 //+------------------------------------------------------------------+
@@ -310,16 +321,18 @@ void ManageTrailing()
    if(profitPrice < InpATR_TrailStart * atr) return;
 
    double trailDist = InpATR_Trail * atr;
+   double minDist   = MathMax((double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL),
+                              (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_FREEZE_LEVEL)) * _Point;
    if(type == POSITION_TYPE_BUY)
      {
       double newSL = NormalizeDouble(bid - trailDist, digits);
-      if(newSL > curSL)
+      if(newSL > curSL && (bid - newSL) >= minDist)
          trade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
      }
    else
      {
       double newSL = NormalizeDouble(ask + trailDist, digits);
-      if(curSL == 0 || newSL < curSL)
+      if((curSL == 0 || newSL < curSL) && (newSL - ask) >= minDist)
          trade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
      }
   }
