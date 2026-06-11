@@ -3,18 +3,18 @@
 //|  EA per XAUUSD (oro) su M5 — Ichimoku 7/22/44 + filtri trend.    |
 //|                                                                  |
 //|  FILTRI INGRESSO (default ON): bande Bollinger in espansione,   |
-//|   ADX>=25 (no laterale), nuvola Kumo, concordanza H1.           |
+//|   ADX>=30 (no laterale), nuvola Kumo, concordanza H1.           |
 //|  GESTIONE: SL 2.75xATR, trailing 4xATR, uscita su incrocio      |
 //|   opposto, rischio 0.5%. Niente parziale/breakeven di default.  |
 //|                                                                  |
-//|  BACKTEST 5 ANNI (XAUUSD M5, ticks reali, con filtro ADX):      |
-//|    2021 +540 (PF1.23) | 2022 -662 (PF0.77) | 2023 -260 (PF0.89) |
-//|    2024 +479 (PF1.25) | 2025 +678 (PF1.43) | TOT ~+775 EUR.    |
-//|    Senza ADX il totale era ~-636 EUR: il filtro ribalta in      |
-//|    positivo migliorando 4 anni su 5. DD max ~9%.               |
-//|  CAVEAT: positiva ma modesta; ancora negativa negli anni        |
-//|   laterali (2022-2023). Demo, 1 broker, costi M5. Serve         |
-//|   forward demo con costi reali prima di denaro vero.           |
+//|  BACKTEST (XAUUSD M5, ticks reali, filtro ADX soglia 30):       |
+//|    2021 +486 (PF1.38) | 2022 -143 (PF0.88) | 2023 +80 (PF1.06) |
+//|    2025 +395 (PF1.64) | 2024 da completare. Sub-tot 4 anni     |
+//|    +818 EUR. Vs soglia 25 (+296 su stessi 4 anni): la 30       |
+//|    sistema gli anni laterali, varianza molto piu' bassa        |
+//|    (worst year -143 invece di -662). DD max ~4%.              |
+//|  CAVEAT: positiva e piu' costante, ma sempre demo / 1 broker / |
+//|   costi M5. Serve forward demo con costi reali prima del vero. |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
 #property version   "1.20"
@@ -47,7 +47,7 @@ input bool         InpUseHTFFilter  = true;        // Concordanza con un time fr
 input ENUM_TIMEFRAMES InpHTF        = PERIOD_H1;    // Time frame del filtro superiore
 input bool         InpUseADXFilter  = true;        // Filtro forza del trend (no mercato laterale)
 input int          InpADXPeriod     = 14;          // Periodo ADX
-input double       InpADXThreshold  = 25.0;        // Soglia ADX (sotto = laterale, niente trade)
+input double       InpADXThreshold  = 30.0;       // Soglia ADX (sotto = laterale, niente trade)
 
 //--- Uscita
 input group "=== Uscita ==="
