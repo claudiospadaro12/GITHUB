@@ -1,29 +1,20 @@
 //+------------------------------------------------------------------+
 //|                                        IchiCross_Gold_722.mq5     |
+//|  EA per XAUUSD (oro) su M5 — Ichimoku 7/22/44 + filtri trend.    |
 //|                                                                  |
-//|  EA per XAUUSD (oro) su M5 — metodo manuale Ichimoku 7/22/44.    |
+//|  FILTRI INGRESSO (default ON): bande Bollinger in espansione,   |
+//|   ADX>=25 (no laterale), nuvola Kumo, concordanza H1.           |
+//|  GESTIONE: SL 2.75xATR, trailing 4xATR, uscita su incrocio      |
+//|   opposto, rischio 0.5%. Niente parziale/breakeven di default.  |
 //|                                                                  |
-//|  LOGICA (v1.1):                                                  |
-//|   - INGRESSO: incrocio Tenkan/Kijun sull'ultima candela chiusa  |
-//|       (verso l'alto = long, verso il basso = short).            |
-//|   - FILTRO: bande di Bollinger in ESPANSIONE + (default ON)     |
-//|       nuvola Kumo e concordanza H1. In compressione/controtrend |
-//|       niente trade.                                             |
-//|   - STOP LOSS iniziale = InpATR_SL x ATR.                       |
-//|   - PARZIALE/BREAKEVEN disponibili ma DISATTIVI di default      |
-//|       (parziale 0%): si lascia correre il trade.               |
-//|   - TRAILING dinamico in ATR (gestione principale del profitto).|
-//|   - USCITA anticipata sull'incrocio Tenkan/Kijun opposto.       |
-//|   - Lotto da rischio % (InpRiskPercent). UNA posizione per volta.|
-//|                                                                  |
-//|  CONFIG VALIDATA (XAUUSD M5, ticks reali):                      |
-//|   - Ottimizzata su 2024, validata OUT-OF-SAMPLE su 2025.        |
-//|   - 2025: +860 EUR, Profit Factor 1.28, Drawdown 3.9%,         |
-//|     win rate 58.7%, 223 trade. 2024+2025: PF 1.10.            |
-//|   - CAVEAT: 2024-2025 anni fortemente di trend su oro; la      |
-//|     strategia e' trend-following. Va ancora stress-testata su  |
-//|     anni laterali e in forward demo con costi reali prima di   |
-//|     denaro vero. PF 1.10-1.28 = margine sottile.              |
+//|  BACKTEST 5 ANNI (XAUUSD M5, ticks reali, con filtro ADX):      |
+//|    2021 +540 (PF1.23) | 2022 -662 (PF0.77) | 2023 -260 (PF0.89) |
+//|    2024 +479 (PF1.25) | 2025 +678 (PF1.43) | TOT ~+775 EUR.    |
+//|    Senza ADX il totale era ~-636 EUR: il filtro ribalta in      |
+//|    positivo migliorando 4 anni su 5. DD max ~9%.               |
+//|  CAVEAT: positiva ma modesta; ancora negativa negli anni        |
+//|   laterali (2022-2023). Demo, 1 broker, costi M5. Serve         |
+//|   forward demo con costi reali prima di denaro vero.           |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
 #property version   "1.20"
