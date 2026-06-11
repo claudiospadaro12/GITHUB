@@ -7,13 +7,12 @@
 //|  GESTIONE: SL 2.75xATR, trailing 4xATR, uscita su incrocio      |
 //|   opposto, rischio 0.5%. Niente parziale/breakeven di default.  |
 //|                                                                  |
-//|  BACKTEST (XAUUSD M5, ticks reali, filtro ADX soglia 30):       |
+//|  BACKTEST 5 ANNI (XAUUSD M5, ticks reali, filtro ADX soglia 30):|
 //|    2021 +486 (PF1.38) | 2022 -143 (PF0.88) | 2023 +80 (PF1.06) |
-//|    2025 +395 (PF1.64) | 2024 da completare. Sub-tot 4 anni     |
-//|    +818 EUR. Vs soglia 25 (+296 su stessi 4 anni): la 30       |
-//|    sistema gli anni laterali, varianza molto piu' bassa        |
-//|    (worst year -143 invece di -662). DD max ~4%.              |
-//|  CAVEAT: positiva e piu' costante, ma sempre demo / 1 broker / |
+//|    2024 +686 (PF1.99) | 2025 +395 (PF1.64) | TOT ~+1504 EUR.   |
+//|    Vs senza ADX (-636) e vs soglia 25 (+775): la 30 e' la      |
+//|    migliore. 4 anni su 5 positivi, worst -143, DD max ~4.3%.   |
+//|  CAVEAT: positiva e costante, ma sempre demo / 1 broker /      |
 //|   costi M5. Serve forward demo con costi reali prima del vero. |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
