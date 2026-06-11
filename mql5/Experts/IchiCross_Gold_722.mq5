@@ -3,20 +3,23 @@
 //|  EA per XAUUSD (oro) su M5 — Ichimoku 7/22/44 + filtri trend.    |
 //|                                                                  |
 //|  FILTRI INGRESSO (default ON): bande Bollinger in espansione,   |
-//|   ADX>=30 (no laterale), nuvola Kumo, concordanza H1.           |
+//|   ADX>=30 (no laterale), nuvola Kumo, concordanza H1, e filtro  |
+//|   orario sessioni 8-22 (ora server).                           |
 //|  GESTIONE: SL 2.75xATR, trailing 4xATR, uscita su incrocio      |
 //|   opposto, rischio 0.5%. Niente parziale/breakeven di default.  |
 //|                                                                  |
-//|  BACKTEST 5 ANNI (XAUUSD M5, ticks reali, filtro ADX soglia 30):|
-//|    2021 +486 (PF1.38) | 2022 -143 (PF0.88) | 2023 +80 (PF1.06) |
-//|    2024 +686 (PF1.99) | 2025 +395 (PF1.64) | TOT ~+1504 EUR.   |
-//|    Vs senza ADX (-636) e vs soglia 25 (+775): la 30 e' la      |
-//|    migliore. 4 anni su 5 positivi, worst -143, DD max ~4.3%.   |
-//|  CAVEAT: positiva e costante, ma sempre demo / 1 broker /      |
-//|   costi M5. Serve forward demo con costi reali prima del vero. |
+//|  BACKTEST 5 ANNI (XAUUSD M5, ticks reali, ADX30 + orario 8-22): |
+//|    Totale ~+1421 EUR, PF 1.50, DD ~4.9%, 198 trade, TUTTI e 5   |
+//|    gli anni positivi. Il filtro orario raddrizza il 2022 (da    |
+//|    -143 a +214) e migliora la qualita' (PF 2024 1.99->3.15).   |
+//|    Vs senza orario +1504 ma con 1 anno negativo e PF piu' basso:|
+//|    -5% di profitto in cambio di molta piu' costanza.          |
+//|  NOTA: orario in ora del SERVER del broker; se cambi broker     |
+//|   ritara InpStartHour/InpEndHour.                              |
+//|  CAVEAT: sempre demo / 1 broker / costi M5. Serve forward demo. |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.50"
+#property version   "1.60"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -70,9 +73,9 @@ input double InpATR_TrailStart = 1.0;  // Il trailing parte dopo +X x ATR di pro
 input double InpATR_Trail      = 4.0;  // Distanza del trailing = X x ATR
 input double InpRiskPercent    = 0.50; // Rischio per trade (% del capitale)
 
-//--- Filtro orario (sessioni)
+//--- Filtro orario (sessioni) — VALIDATO ON: migliora la costanza
 input group "=== Filtro orario (sessioni) ==="
-input bool   InpUseSessionFilter = false; // Opera solo in una fascia oraria (ora del server)
+input bool   InpUseSessionFilter = true;  // Opera solo in una fascia oraria (ora del server)
 input int    InpStartHour        = 8;     // Ora di inizio (server)
 input int    InpEndHour          = 22;    // Ora di fine (server, esclusa)
 
