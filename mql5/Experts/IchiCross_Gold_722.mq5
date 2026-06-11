@@ -16,7 +16,7 @@
 //|   costi M5. Serve forward demo con costi reali prima del vero. |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.30"
+#property version   "1.40"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -47,6 +47,11 @@ input ENUM_TIMEFRAMES InpHTF        = PERIOD_H1;    // Time frame del filtro sup
 input bool         InpUseADXFilter  = true;        // Filtro forza del trend (no mercato laterale)
 input int          InpADXPeriod     = 14;          // Periodo ADX
 input double       InpADXThreshold  = 30.0;       // Soglia ADX (sotto = laterale, niente trade)
+
+//--- Conferma Heikin Ashi (opzionale)
+input group "=== Conferma Heikin Ashi ==="
+input bool   InpUseHAFilter   = false; // Entra solo se le candele Heikin Ashi confermano la direzione
+input int    InpHAConfirmBars = 1;     // Quante candele HA consecutive devono confermare
 
 //--- Uscita
 input group "=== Uscita ==="
@@ -267,6 +272,45 @@ bool AdxOk()
   }
 
 //+------------------------------------------------------------------+
+//| Filtro Heikin Ashi: le ultime candele HA confermano la direzione |
+//|  (long = HA rialziste, short = HA ribassiste)                    |
+//+------------------------------------------------------------------+
+bool HaOk(int dir)
+  {
+   int need = (InpHAConfirmBars < 1) ? 1 : InpHAConfirmBars;
+   int n    = need + 60;          // candele extra per stabilizzare la ricorsione HA
+
+   double o[], h[], l[], c[];
+   ArraySetAsSeries(o,true); ArraySetAsSeries(h,true);
+   ArraySetAsSeries(l,true); ArraySetAsSeries(c,true);
+   if(CopyOpen (_Symbol,_Period,1,n,o) < n) return(false);
+   if(CopyHigh (_Symbol,_Period,1,n,h) < n) return(false);
+   if(CopyLow  (_Symbol,_Period,1,n,l) < n) return(false);
+   if(CopyClose(_Symbol,_Period,1,n,c) < n) return(false);
+
+   //--- calcolo HA dal piu' vecchio (n-1) al piu' recente (0)
+   double haOpen[], haClose[];
+   ArrayResize(haOpen,n); ArrayResize(haClose,n);
+   int old = n - 1;
+   haClose[old] = (o[old]+h[old]+l[old]+c[old]) / 4.0;
+   haOpen[old]  = (o[old]+c[old]) / 2.0;
+   for(int i = old-1; i >= 0; i--)
+     {
+      haClose[i] = (o[i]+h[i]+l[i]+c[i]) / 4.0;
+      haOpen[i]  = (haOpen[i+1] + haClose[i+1]) / 2.0;
+     }
+
+   //--- le ultime 'need' candele HA (index 0..need-1) devono concordare
+   for(int k = 0; k < need; k++)
+     {
+      bool bull = haClose[k] > haOpen[k];
+      if(dir > 0 && !bull) return(false);
+      if(dir < 0 &&  bull) return(false);
+     }
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
 //| Segnale d'ingresso completo (incrocio + filtri)                  |
 //+------------------------------------------------------------------+
 int GetEntrySignal()
@@ -277,6 +321,7 @@ int GetEntrySignal()
    if(InpUseADXFilter  && !AdxOk())       return(0);  // niente trade nel laterale
    if(InpUseKumoFilter && !KumoOk(cross)) return(0);
    if(InpUseHTFFilter  && !HtfOk(cross))  return(0);
+   if(InpUseHAFilter   && !HaOk(cross))   return(0);  // conferma Heikin Ashi
    return(cross);
   }
 
