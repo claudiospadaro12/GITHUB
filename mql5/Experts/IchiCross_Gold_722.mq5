@@ -51,6 +51,8 @@ input double       InpADXThreshold  = 30.0;       // Soglia ADX (sotto = lateral
 //--- Uscita
 input group "=== Uscita ==="
 input bool   InpExitOnOppositeCross = true;  // Esci sull'incrocio Tenkan/Kijun opposto
+input bool   InpUseTimeExit = false;         // Uscita a tempo: chiudi dopo N candele
+input int    InpBarsInTrade  = 3;            // Numero di candele prima di chiudere (uscita a tempo)
 
 //--- Rischio e gestione (tutto in ATR)
 input group "=== Rischio e gestione (ATR) ==="
@@ -80,6 +82,7 @@ int hADX         = INVALID_HANDLE;
 datetime lastBarTime  = 0;
 long     g_ticket     = 0;       // ticket della posizione in gestione
 bool     g_partialDone= false;   // parziale gia' eseguita su questa posizione
+int      g_barsHeld   = 0;       // candele trascorse dall'ingresso (uscita a tempo)
 
 //+------------------------------------------------------------------+
 //| Inizializzazione                                                 |
@@ -132,9 +135,16 @@ void OnTick()
    if(!IsNewBar())
       return;
 
-   //--- se ho una posizione aperta: valuto solo l'uscita su incrocio opposto
+   //--- se ho una posizione aperta: valuto le uscite (tempo / incrocio opposto)
    if(HasOpenPosition())
      {
+      //--- uscita a tempo: chiudi dopo N candele dall'ingresso
+      if(InpUseTimeExit)
+        {
+         g_barsHeld++;
+         if(g_barsHeld >= InpBarsInTrade)
+           { CloseCurrent(); return; }
+        }
       if(InpExitOnOppositeCross)
         {
          int    cross = GetCross();
@@ -358,6 +368,7 @@ void ManageOpenPosition()
      {
       g_ticket      = ticket;
       g_partialDone = false;
+      g_barsHeld    = 0;          // nuova posizione: azzero il contatore candele
      }
 
    double atr = ATRvalue();
@@ -430,6 +441,7 @@ void CloseCurrent()
      {
       g_ticket      = 0;
       g_partialDone = false;
+      g_barsHeld    = 0;
      }
   }
 
