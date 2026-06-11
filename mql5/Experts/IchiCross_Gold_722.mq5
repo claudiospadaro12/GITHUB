@@ -16,7 +16,7 @@
 //|   costi M5. Serve forward demo con costi reali prima del vero. |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro"
-#property version   "1.40"
+#property version   "1.50"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -69,6 +69,12 @@ input bool   InpBreakevenAtPartial = false; // Alla parziale, sposta lo SL a par
 input double InpATR_TrailStart = 1.0;  // Il trailing parte dopo +X x ATR di profitto
 input double InpATR_Trail      = 4.0;  // Distanza del trailing = X x ATR
 input double InpRiskPercent    = 0.50; // Rischio per trade (% del capitale)
+
+//--- Filtro orario (sessioni)
+input group "=== Filtro orario (sessioni) ==="
+input bool   InpUseSessionFilter = false; // Opera solo in una fascia oraria (ora del server)
+input int    InpStartHour        = 8;     // Ora di inizio (server)
+input int    InpEndHour          = 22;    // Ora di fine (server, esclusa)
 
 //--- Generali
 input group "=== Generali ==="
@@ -162,6 +168,8 @@ void OnTick()
 
    //--- nessuna posizione: valuto un nuovo ingresso
    if(!SpreadOK())
+      return;
+   if(!SessionOk())          // fuori dalla fascia oraria: niente nuovi ingressi
       return;
 
    int signal = GetEntrySignal();   // +1 long, -1 short, 0 niente
@@ -509,5 +517,21 @@ bool SpreadOK()
       return(true);
    long spread = SymbolInfoInteger(_Symbol, SYMBOL_SPREAD);
    return(spread <= InpMaxSpread);
+  }
+
+//+------------------------------------------------------------------+
+//| Siamo nella fascia oraria operativa? (ora del server)            |
+//+------------------------------------------------------------------+
+bool SessionOk()
+  {
+   if(!InpUseSessionFilter)
+      return(true);
+   MqlDateTime t;
+   TimeToStruct(TimeCurrent(), t);
+   int h = t.hour;
+   if(InpStartHour <= InpEndHour)
+      return(h >= InpStartHour && h < InpEndHour);
+   //--- fascia che attraversa la mezzanotte
+   return(h >= InpStartHour || h < InpEndHour);
   }
 //+------------------------------------------------------------------+
