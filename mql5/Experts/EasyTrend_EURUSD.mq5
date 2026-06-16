@@ -61,6 +61,9 @@
 
 #include <Trade/Trade.mqh>
 
+//=== ENUM: direzione operazioni consentite ========================
+enum ENUM_TRADE_DIR { DIR_BOTH, DIR_LONG_ONLY, DIR_SHORT_ONLY };
+
 //=== INPUT INDICATORE: Linear Regression Candle ===================
 input int    LinRegLength      = 11;     // Lunghezza regressione lineare (candele) [DA VALIDARE su TV]
 input int    SignalLength      = 11;     // Lunghezza segnale/plot = SMA della linreg-close [DA VALIDARE su TV]
@@ -78,6 +81,7 @@ input int    SessionEnd        = 18;     // Ora fine sessione (inclusa)   - ora 
 input int    SessionTZShiftHours = 0;    // Offset ore da applicare per allineare a TradingView [DA VALIDARE]
 input double StopBufferPips     = 3.0;   // Buffer di stop oltre l'estremo (pip)
 input int    SignalSearchBars   = 30;    // Quante barre dopo la divergenza cercare la candela di segnale
+input ENUM_TRADE_DIR TradeDirection = DIR_BOTH; // Direzione consentita (Entrambi / Solo Long / Solo Short)
 
 //=== INPUT RISK MANAGEMENT ========================================
 input double RiskPercent        = 2.0;   // Rischio % per operazione
@@ -143,7 +147,8 @@ int OnInit()
    pendingExpiry  = 0;
 
    Print("[EASYTREND] v1.0 inizializzato | ", Symbol(), " | Risk:", RiskPercent,
-         "% | RR 1:", RewardRatio, " | Magic:", MagicNumber);
+         "% | RR 1:", RewardRatio, " | Dir:", EnumToString(TradeDirection),
+         " | Magic:", MagicNumber);
    return INIT_SUCCEEDED;
 }
 
@@ -345,7 +350,8 @@ void DetectNewDivergence()
    int newPivShift = PivotRight + 1;
 
    //--- DIVERGENZA RIALZISTA: pivot LOW su CCI ---
-   if(IsCCIPivotLow(newPivShift))
+   // Gate direzionale: in SHORT_ONLY i segnali long vengono scartati prima dell'esecuzione.
+   if(TradeDirection != DIR_SHORT_ONLY && IsCCIPivotLow(newPivShift))
    {
       // cerco il precedente pivot low entro la finestra
       for(int back = DivMinBars; back <= DivMaxBars; back++)
@@ -370,7 +376,8 @@ void DetectNewDivergence()
    }
 
    //--- DIVERGENZA RIBASSISTA: pivot HIGH su CCI ---
-   if(IsCCIPivotHigh(newPivShift))
+   // Gate direzionale: in LONG_ONLY i segnali short vengono scartati prima dell'esecuzione.
+   if(TradeDirection != DIR_LONG_ONLY && IsCCIPivotHigh(newPivShift))
    {
       for(int back = DivMinBars; back <= DivMaxBars; back++)
       {
