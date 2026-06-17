@@ -71,6 +71,23 @@ Una strategia passa a "validata" **solo se** supera tutti questi punti:
 
 > 📌 Regola d'oro: **se non passa, si scarta.** Niente affezione "perché ci abbiamo lavorato".
 
+### 📐 Soglie di accettabilità (demo vs live)
+
+| Metrica | ❌ Scarta | 🟡 Demo (promettente) | ✅ Candidato live |
+|---|---|---|---|
+| **Profit Factor** | < 1,3 | 1,3 – 1,5 | 1,5 – 2,0 *(>3 = sospetto overfit)* |
+| **Max Drawdown** | > 35% | 20 – 35% | < 20% (ottimo < 15%) |
+| **Recovery Factor** (netto/maxDD) | < 2 | 2 – 5 | > 5 |
+| **Sharpe** | < 0,5 | 0,5 – 1,0 | > 1,0 (ottimo > 2) |
+| **N° trade** | < 100 | 100 – 300 | > 300 (ideale 500+ su 5 anni) |
+| **Expectancy/trade** | ≤ 0 | > 0 | > 0 stabile su OOS |
+
+**Requisiti NON negoziabili (oltre ai numeri):** costi inclusi · tenuta **out-of-sample/walk-forward** · multi-anno/multi-regime · niente overfitting.
+
+**"Haircut" del live (lascia margine):** dal vivo è sempre peggio del backtest → PF cala ~0,2–0,3 · DD cresce ~1,5× · Sharpe cala ~0,5–1,0. Quindi un PF 1,5 in backtest ≈ ~1,2–1,3 reale.
+
+**Processo:** backtest passa le soglie → **forward test in demo 1–3 mesi** → se demo ≈ backtest → **live con size piccola** → si scala solo dopo storico reale.
+
 ---
 
 ## 🚦 Roadmap (in ordine)
