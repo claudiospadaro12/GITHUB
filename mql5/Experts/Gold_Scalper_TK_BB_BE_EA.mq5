@@ -29,18 +29,27 @@
 //|   Ingresso = (MODO A valido) OPPURE (MODO B valido).            |
 //|   Una sola posizione per volta (no piramidazione in v1).        |
 //|                                                                  |
-//|  GESTIONE (dedotta dai trade reali - tutti INPUT):             |
+//|  GESTIONE v2 (dedotta dai trade reali - tutti INPUT):          |
 //|   - Stop iniziale fisso in $ (default 4.0) o ATR (opzionale).   |
-//|   - Break-even rapido quando profitto >= InpBreakEvenDollars.   |
-//|   - Chiusura parziale 50% quando profitto >= InpPartialDollars. |
-//|   - Trailing sul residuo (fisso in $ o ATR) per far correre.    |
+//|   - Break-even che RISPETTA la distanza minima del broker       |
+//|     (SYMBOL_TRADE_STOPS_LEVEL): va a pari appena la piattaforma |
+//|     lo consente (entry +/- stopsLevel + buffer).                |
+//|   - Chiusura parziale 50% quando il PROFITTO FLOATING in valuta |
+//|     conto (POSITION_PROFIT) supera InpPartialProfitMoney (€).   |
+//|   - Trailing ATR-adattivo di DEFAULT (si allarga nei trend),    |
+//|     con opzione trailing fisso in $. Monotono.                  |
+//|   - Momentum-fade: quando la forza del prezzo rallenta (ATR o   |
+//|     larghezza Bollinger in contrazione) ed e' in profitto,      |
+//|     stringe il trailing o chiude il residuo.                    |
+//|   - Tutte le modifiche di SL rispettano SYMBOL_TRADE_STOPS_LEVEL|
+//|     tramite un helper di "clamp" (no rifiuti del broker).       |
 //|   - Nessun TP fisso sul residuo (lascia correre col trailing).  |
 //|                                                                  |
 //|  Stile di codice (CTrade, filling adattivo, gestione handle,   |
 //|  lotto normalizzato) ripreso da Gold_Ichimoku_TK_ATR_EA.mq5.   |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro - Claudio"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -55,6 +64,20 @@ enum ENUM_SCALP_DIRECTION
    SDIR_BOTH       = 0,   // Entrambe (Long + Short)
    SDIR_LONG_ONLY  = 1,   // Solo LONG
    SDIR_SHORT_ONLY = 2    // Solo SHORT
+  };
+
+//--- NUOVO v2: proxy per rilevare il rallentamento del momentum ----
+enum ENUM_FADE_MODE
+  {
+   FADE_ATR     = 0,   // ATR in calo per N barre consecutive
+   FADE_BBWIDTH = 1    // Larghezza bande Bollinger in contrazione per N barre
+  };
+
+//--- NUOVO v2: cosa fare quando il momentum rallenta ---------------
+enum ENUM_FADE_ACTION
+  {
+   FADE_TIGHTEN = 0,   // Stringe il trailing (dimezza la distanza)
+   FADE_CLOSE   = 1    // Chiude il residuo a mercato
   };
 
 //==================================================================
@@ -93,13 +116,24 @@ input double InpAtrMultSL     = 1.5;  // ATR x Stop Loss (se ATR usato)
 
 //--- Break-even / Parziale / Trailing (cuore dello stile) --------
 input group "=== Gestione: Break-even / Parziale / Trailing ==="
-input double InpBreakEvenDollars = 0.3; // [DEDOTTO] profitto in $ che porta SL a pareggio
-input double InpPartialDollars   = 0.5; // [DEDOTTO] profitto in $ che attiva la parziale
-input double InpPartialPercent   = 50.0;// [DEDOTTO] % di volume chiusa alla parziale
+// Break-even: scatta appena la piattaforma lo consente (distanza minima broker).
+input double InpBreakEvenDollars = 0.0; // [DEDOTTO/regolabile] soglia BE alternativa in $ (0 = usa solo distanza minima broker)
+input int    InpBeBufferPoints   = 2;   // [DEDOTTO/regolabile] buffer in POINT oltre la distanza minima broker per il BE
+// Parziale 50% in valuta conto (€): usa POSITION_PROFIT (P&L floating gia' in valuta conto).
+input double InpPartialProfitMoney = 20.0; // [DEDOTTO/regolabile] profitto floating in valuta conto (€) che attiva la parziale
+input double InpPartialPercent   = 50.0;// [DEDOTTO/regolabile] % di volume chiusa alla parziale
+// Trailing: ATR-adattivo di DEFAULT (si allarga nei trend forti).
 input double InpTrailDollars      = 1.0;// [DEDOTTO] trailing fisso in $ sul residuo (se non ATR)
-input bool   InpUseAtrTrail       = false; // true: trailing = ATR x mult ; false: trailing fisso $
-input double InpAtrMultTrail      = 1.5;   // ATR x Trailing (se ATR usato)
+input bool   InpUseAtrTrail       = true;  // [DEDOTTO/regolabile] true: trailing = ATR x mult (DEFAULT) ; false: trailing fisso $
+input double InpAtrMultTrail      = 2.0;   // [DEDOTTO/regolabile] ATR x Trailing (un po' piu' largo: "stare largo")
 input bool   InpTrailOnlyAfterPartial = true; // trailing solo dopo la parziale (lascia correre il residuo)
+
+//--- NUOVO v2: Momentum-fade (uscita/stringitura su forza in calo) -
+input group "=== Momentum-fade (forza del prezzo in calo) ==="
+input bool            InpUseMomentumFade = true;        // Attiva il rilevamento del rallentamento del momentum
+input ENUM_FADE_MODE  InpFadeMode        = FADE_BBWIDTH;// Proxy: ATR in calo o larghezza Bollinger in contrazione
+input ENUM_FADE_ACTION InpFadeAction     = FADE_TIGHTEN;// Azione: stringi il trailing o chiudi il residuo
+input int             InpFadeBars        = 3;           // Barre consecutive di contrazione richieste
 
 //--- Money management --------------------------------------------
 input group "=== Money management ==="
@@ -126,9 +160,13 @@ input int    InpMaxSpreadPoints = 0;     // Spread massimo (in POINT); 0 = disat
 //==================================================================
 //  STATO GLOBALE
 //==================================================================
-int hAtrM5 = INVALID_HANDLE; // ATR su M5 (per SL/trailing se ATR usato)
+int hAtrM5      = INVALID_HANDLE; // ATR su M5 (per SL/trailing se ATR usato)
+int hAtrFade    = INVALID_HANDLE; // NUOVO v2: ATR sul TF corrente (proxy momentum FADE_ATR)
+int hBBFade     = INVALID_HANDLE; // NUOVO v2: Bollinger sul TF corrente (proxy momentum FADE_BBWIDTH)
 
 datetime g_lastBarTime = 0;  // per rilevare la nuova barra M5
+
+datetime g_lastFadeBarTime = 0; // NUOVO v2: ultima barra (TF corrente) su cui ho valutato il fade
 
 // Stato del trade corrente (tra i tick: BE / parziale / trailing)
 double g_entryPrice    = 0.0;  // prezzo di ingresso reale
@@ -137,6 +175,7 @@ bool   g_beDone        = false;// break-even gia' applicato?
 bool   g_partialDone   = false;// chiusura parziale gia' eseguita?
 double g_trailStop     = 0.0;  // valore corrente dello stop trailing (monotono)
 double g_initVolume    = 0.0;  // volume iniziale della posizione (per la parziale)
+bool   g_fadeTighten   = false;// NUOVO v2: il momentum-fade ha chiesto di stringere il trailing?
 
 // Contatori di sicurezza giornalieri
 int      g_dayTrades   = 0;     // numero trade aperti oggi
@@ -159,6 +198,31 @@ int OnInit()
         }
      }
 
+   // NUOVO v2: handle per il rilevamento del momentum-fade (sul TF corrente).
+   // Creo solo il proxy selezionato per non sprecare handle.
+   if(InpUseMomentumFade)
+     {
+      if(InpFadeMode == FADE_ATR)
+        {
+         hAtrFade = iATR(_Symbol, _Period, InpAtrLen);
+         if(hAtrFade == INVALID_HANDLE)
+           {
+            Print("ERRORE: impossibile creare l'handle ATR (fade) sul TF corrente.");
+            return(INIT_FAILED);
+           }
+        }
+      else // FADE_BBWIDTH
+        {
+         // Bollinger 20, deviazioni InpBBMult, su close del TF corrente.
+         hBBFade = iBands(_Symbol, _Period, InpBBLen, 0, InpBBMult, PRICE_CLOSE);
+         if(hBBFade == INVALID_HANDLE)
+           {
+            Print("ERRORE: impossibile creare l'handle Bollinger (fade) sul TF corrente.");
+            return(INIT_FAILED);
+           }
+        }
+     }
+
    trade.SetExpertMagicNumber(InpMagic);
    ConfigureFilling();
 
@@ -175,12 +239,17 @@ int OnInit()
    // Se all'avvio esiste gia' una posizione di questo EA, ricostruisco lo stato
    AdoptExistingPosition();
 
-   Print("Gold_Scalper_TK_BB_BE_EA avviato su ", _Symbol, " ",
+   Print("Gold_Scalper_TK_BB_BE_EA v1.10 avviato su ", _Symbol, " ",
          EnumToString((ENUM_TIMEFRAMES)_Period),
          " | ModoA=", (InpUseModeA?"ON":"OFF"),
          " | ModoB=", (InpUseModeB?"ON":"OFF"),
          " | ConfirmTF=", EnumToString(InpConfirmTF),
-         " | Dir=", EnumToString(InpTradeDirection));
+         " | Dir=", EnumToString(InpTradeDirection),
+         " | Parziale@", DoubleToString(InpPartialProfitMoney, 2), AccountInfoString(ACCOUNT_CURRENCY),
+         " | Trail=", (InpUseAtrTrail?("ATRx"+DoubleToString(InpAtrMultTrail,2)):("$"+DoubleToString(InpTrailDollars,2))),
+         " | Fade=", (InpUseMomentumFade?EnumToString(InpFadeMode):"OFF"),
+         "/", EnumToString(InpFadeAction),
+         " | BeBuf=", IntegerToString(InpBeBufferPoints), "pt");
    return(INIT_SUCCEEDED);
   }
 
@@ -189,7 +258,9 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-   if(hAtrM5 != INVALID_HANDLE) IndicatorRelease(hAtrM5);
+   if(hAtrM5   != INVALID_HANDLE) IndicatorRelease(hAtrM5);
+   if(hAtrFade != INVALID_HANDLE) IndicatorRelease(hAtrFade); // NUOVO v2
+   if(hBBFade  != INVALID_HANDLE) IndicatorRelease(hBBFade);  // NUOVO v2
   }
 
 //+------------------------------------------------------------------+
@@ -467,6 +538,7 @@ void OpenTrade(ENUM_ORDER_TYPE type)
    g_beDone      = false;
    g_partialDone = false;
    g_trailStop   = 0.0;
+   g_fadeTighten = false;        // NUOVO v2
    g_initVolume  = lot;
    g_posTicket   = 0;            // verra' adottato a tick (PositionSelect)
 
@@ -558,6 +630,7 @@ void ManagePosition()
       g_beDone      = false;
       g_partialDone = false;
       g_trailStop   = 0.0;
+      g_fadeTighten = false; // NUOVO v2
       return;
      }
 
@@ -580,28 +653,47 @@ void ManagePosition()
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    double profitDollars = isLong ? (bid - entry) : (entry - ask);  // in $ oro per unita' di prezzo
 
-   //--- 1) BREAK-EVEN rapido: appena il profitto raggiunge la soglia, SL a entry.
-   if(!g_beDone && profitDollars >= InpBreakEvenDollars)
+   // NUOVO v2: profitto FLOATING in valuta del conto (gia' al netto del volume).
+   double profitMoney = PositionGetDouble(POSITION_PROFIT);
+
+   //--- 1) BREAK-EVEN che RISPETTA la distanza minima del broker.
+   //    Il trader va a pari "appena la piattaforma lo consente": cioe' appena il
+   //    prezzo supera l'ingresso di almeno la distanza minima (StopsLevel) + buffer.
+   //    La soglia effettiva di attivazione e' il MAX tra:
+   //      - distanza minima broker + buffer (in prezzo)
+   //      - InpBreakEvenDollars (soglia alternativa in prezzo; 0 = ignorata)
+   if(!g_beDone)
      {
-      double newSL = NormalizeDouble(entry, digits);
-      // Sposto solo se migliora (long: su; short: giu') rispetto allo SL attuale.
-      bool improve = isLong ? (newSL > curSL + _Point/2.0)
-                            : (curSL == 0.0 || newSL < curSL - _Point/2.0);
-      if(improve)
+      double stopsLevelPrice = StopsLevelPrice();                 // distanza minima broker (in prezzo)
+      double bufferPrice     = InpBeBufferPoints * _Point;        // buffer aggiuntivo
+      double beTrigger       = MathMax(stopsLevelPrice + bufferPrice, InpBreakEvenDollars);
+
+      if(profitDollars >= beTrigger)
         {
-         if(ModifyStop(newSL, curTP))
-            g_beDone = true;
+         // SL a pareggio (entry), poi clampato alla distanza minima consentita.
+         double newSL = ClampStopToStopsLevel(NormalizeDouble(entry, digits), isLong, bid, ask);
+         newSL = NormalizeDouble(newSL, digits);
+
+         // Sposto solo se migliora (long: su; short: giu') rispetto allo SL attuale.
+         bool improve = isLong ? (newSL > curSL + _Point/2.0)
+                               : (curSL == 0.0 || newSL < curSL - _Point/2.0);
+         if(improve)
+           {
+            if(ModifyStop(newSL, curTP))
+               g_beDone = true;
+           }
+         else
+           {
+            g_beDone = true;  // SL gia' a pareggio o migliore: marco come fatto.
+           }
+         // Rileggo lo SL dopo l'eventuale modifica.
+         curSL = PositionGetDouble(POSITION_SL);
         }
-      else
-        {
-         g_beDone = true;  // SL gia' a pareggio o migliore: marco come fatto.
-        }
-      // Rileggo lo SL dopo l'eventuale modifica.
-      curSL = PositionGetDouble(POSITION_SL);
      }
 
-   //--- 2) CHIUSURA PARZIALE 50%: una sola volta, alla soglia di profitto.
-   if(!g_partialDone && profitDollars >= InpPartialDollars && InpPartialPercent > 0.0)
+   //--- 2) CHIUSURA PARZIALE 50%: una sola volta, sul PROFITTO IN VALUTA CONTO (€).
+   //    Trigger = POSITION_PROFIT (P&L floating della posizione, gia' in valuta conto).
+   if(!g_partialDone && profitMoney >= InpPartialProfitMoney && InpPartialPercent > 0.0)
      {
       double curVol = PositionGetDouble(POSITION_VOLUME);
       double closeVol = NormalizeLot(curVol * InpPartialPercent / 100.0);
@@ -630,12 +722,56 @@ void ManagePosition()
         }
      }
 
-   //--- 3) TRAILING sul residuo (fisso in $ o ATR), monotono.
+   //--- 2-bis) NUOVO v2: MOMENTUM-FADE.
+   //    Valuto il rallentamento della forza SOLO a barra chiusa (no repaint) e
+   //    SOLO se la posizione e' gia' in profitto. Se rilevato, secondo InpFadeAction:
+   //      FADE_TIGHTEN -> dimezzo la distanza di trailing (fattore applicato sotto);
+   //      FADE_CLOSE   -> chiudo il residuo a mercato (ed esco subito).
+   double trailFactor = 1.0;  // moltiplicatore della distanza di trailing (1.0 = nessuna stretta)
+   if(InpUseMomentumFade && profitMoney > 0.0 && IsNewFadeBar())
+     {
+      // Valutazione del fade UNA SOLA VOLTA per barra chiusa del TF corrente.
+      bool fading = MomentumIsFading();
+      if(fading)
+        {
+         if(InpFadeAction == FADE_CLOSE)
+           {
+            if(trade.PositionClose(_Symbol))
+              {
+               Print("MOMENTUM-FADE: residuo chiuso a mercato (forza in calo, in profitto).");
+               // Stato azzerato al prossimo ManagePosition (HasOpenPosition()==false).
+               return;
+              }
+            else
+              {
+               Print("MOMENTUM-FADE: PositionClose FALLITA. Retcode=", trade.ResultRetcode(),
+                     " - ", trade.ResultRetcodeDescription());
+              }
+           }
+         else // FADE_TIGHTEN
+           {
+            g_fadeTighten = true; // attiva la stretta del trailing
+           }
+        }
+      else
+        {
+         // La forza e' tornata a espandersi: rilascio la stretta.
+         g_fadeTighten = false;
+        }
+     }
+   // FADE_TIGHTEN: applico la stretta del trailing in modo persistente finche'
+   // il fade resta attivo sull'ultima barra valutata (g_fadeTighten).
+   if(InpUseMomentumFade && InpFadeAction == FADE_TIGHTEN && g_fadeTighten)
+      trailFactor = 0.5; // dimezza la distanza di trailing
+
+   //--- 3) TRAILING sul residuo (ATR-adattivo di default o fisso in $), monotono.
    //    Se InpTrailOnlyAfterPartial e' true, parte solo dopo la parziale (lascia correre).
+   //    La distanza puo' essere ristretta dal momentum-fade (trailFactor).
+   //    Lo SL e' SEMPRE clampato alla distanza minima del broker (StopsLevel).
    bool trailActive = (!InpTrailOnlyAfterPartial) || g_partialDone;
    if(trailActive)
      {
-      double trailDist = TrailDistance();
+      double trailDist = TrailDistance() * trailFactor;
       if(trailDist > 0.0)
         {
          // Rileggo SL aggiornato.
@@ -648,7 +784,9 @@ void ManagePosition()
             if(candidate > g_trailStop)        // trailing monotono (solo su)
                g_trailStop = candidate;
 
-            double newSL = NormalizeDouble(g_trailStop, digits);
+            // Clamp alla distanza minima del broker prima di inviare la modifica.
+            double newSL = ClampStopToStopsLevel(NormalizeDouble(g_trailStop, digits), true, bid, ask);
+            newSL = NormalizeDouble(newSL, digits);
             if(newSL > curSL + _Point/2.0)     // sposto solo IN SU
                ModifyStop(newSL, curTP);
            }
@@ -658,12 +796,62 @@ void ManagePosition()
             if(g_trailStop == 0.0 || candidate < g_trailStop)  // monotono (solo giu')
                g_trailStop = candidate;
 
-            double newSL = NormalizeDouble(g_trailStop, digits);
+            double newSL = ClampStopToStopsLevel(NormalizeDouble(g_trailStop, digits), false, bid, ask);
+            newSL = NormalizeDouble(newSL, digits);
             if(curSL == 0.0 || newSL < curSL - _Point/2.0)     // sposto solo IN GIU
                ModifyStop(newSL, curTP);
            }
         }
      }
+  }
+
+//==================================================================
+//  NUOVO v2: DISTANZA MINIMA DEL BROKER (StopsLevel / FreezeLevel)
+//==================================================================
+
+//+------------------------------------------------------------------+
+//| Distanza minima consentita per gli stop, in PREZZO.              |
+//|  Considera sia SYMBOL_TRADE_STOPS_LEVEL sia SYMBOL_TRADE_FREEZE_ |
+//|  LEVEL (prendo il max, piu' prudente). Se il broker ritorna 0,   |
+//|  resta 0 (nessun vincolo dichiarato).                            |
+//+------------------------------------------------------------------+
+double StopsLevelPrice()
+  {
+   long stopsLevel  = SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   long freezeLevel = SymbolInfoInteger(_Symbol, SYMBOL_TRADE_FREEZE_LEVEL);
+   long lvl = (stopsLevel > freezeLevel) ? stopsLevel : freezeLevel;
+   if(lvl < 0) lvl = 0;
+   return((double)lvl * _Point);
+  }
+
+//+------------------------------------------------------------------+
+//| Clampa uno SL proposto in modo che NON sia mai piu' vicino al    |
+//| prezzo della distanza minima del broker (StopsLevel/FreezeLevel).|
+//|  LONG  -> SL deve stare almeno (bid - minDist) o piu' in basso;  |
+//|           se proposto troppo alto, lo abbasso a (bid - minDist). |
+//|  SHORT -> SL deve stare almeno (ask + minDist) o piu' in alto;   |
+//|           se proposto troppo basso, lo alzo a (ask + minDist).   |
+//|  Cosi' la PositionModify non viene rifiutata dal broker.         |
+//+------------------------------------------------------------------+
+double ClampStopToStopsLevel(double proposedSL, bool isLong, double bid, double ask)
+  {
+   double minDist = StopsLevelPrice();
+   if(minDist <= 0.0)
+      return(proposedSL); // nessun vincolo dichiarato dal broker
+
+   if(isLong)
+     {
+      double maxAllowedSL = bid - minDist;   // lo SL long non puo' superare questo livello
+      if(proposedSL > maxAllowedSL)
+         return(maxAllowedSL);
+     }
+   else
+     {
+      double minAllowedSL = ask + minDist;   // lo SL short non puo' scendere sotto questo livello
+      if(proposedSL < minAllowedSL)
+         return(minAllowedSL);
+     }
+   return(proposedSL);
   }
 
 //==================================================================
@@ -679,6 +867,79 @@ double TrailDistance()
       return(InpAtrMultTrail * atrVal);
      }
    return(InpTrailDollars);
+  }
+
+//==================================================================
+//  NUOVO v2: MOMENTUM-FADE (rilevamento del rallentamento)
+//==================================================================
+
+//+------------------------------------------------------------------+
+//| Ritorna true una sola volta per ogni nuova barra CHIUSA del TF   |
+//| corrente: cosi' il fade si valuta a barra chiusa (no repaint).   |
+//+------------------------------------------------------------------+
+bool IsNewFadeBar()
+  {
+   datetime t = (datetime)SeriesInfoInteger(_Symbol, _Period, SERIES_LASTBAR_DATE);
+   if(t != g_lastFadeBarTime)
+     {
+      g_lastFadeBarTime = t;
+      return(true);
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Il momentum sta rallentando? (valutato su barre CHIUSE)          |
+//|  FADE_ATR:     ATR(InpAtrLen) in calo per InpFadeBars barre.     |
+//|  FADE_BBWIDTH: larghezza bande (upper-lower) in contrazione      |
+//|                per InpFadeBars barre.                            |
+//|  Richiede una sequenza STRETTAMENTE monotona decrescente di      |
+//|  InpFadeBars valori consecutivi (barra chiusa piu' recente=sh.1).|
+//+------------------------------------------------------------------+
+bool MomentumIsFading()
+  {
+   if(InpFadeBars < 1)
+      return(false);
+
+   // Mi servono InpFadeBars confronti consecutivi -> InpFadeBars+1 valori.
+   int need = InpFadeBars + 1;
+
+   if(InpFadeMode == FADE_ATR)
+     {
+      if(hAtrFade == INVALID_HANDLE)
+         return(false);
+      double atr[];
+      // shift 1 = ultima barra chiusa; copio need valori a partire da shift 1.
+      if(CopyBuffer(hAtrFade, 0, 1, need, atr) < need)
+         return(false);
+      // atr[0] = barra chiusa piu' recente, atr[need-1] = la piu' vecchia.
+      for(int i = 0; i < InpFadeBars; i++)
+        {
+         if(!(atr[i] < atr[i + 1])) // deve essere strettamente decrescente nel tempo
+            return(false);
+        }
+      return(true);
+     }
+   else // FADE_BBWIDTH
+     {
+      if(hBBFade == INVALID_HANDLE)
+         return(false);
+      double up[], lo[];
+      // buffer 1 = upper band, buffer 2 = lower band (iBands).
+      if(CopyBuffer(hBBFade, 1, 1, need, up) < need)
+         return(false);
+      if(CopyBuffer(hBBFade, 2, 1, need, lo) < need)
+         return(false);
+      // Larghezza = upper - lower. Deve contrarsi per InpFadeBars barre.
+      for(int i = 0; i < InpFadeBars; i++)
+        {
+         double wNew = up[i]     - lo[i];     // barra piu' recente
+         double wOld = up[i + 1] - lo[i + 1]; // barra precedente
+         if(!(wNew < wOld))                   // deve essere in contrazione nel tempo
+            return(false);
+        }
+      return(true);
+     }
   }
 
 //+------------------------------------------------------------------+
@@ -799,6 +1060,7 @@ void AdoptExistingPosition()
       g_beDone      = false;
       g_partialDone = false;
       g_trailStop   = 0.0;
+      g_fadeTighten = false; // NUOVO v2
      }
   }
 //+------------------------------------------------------------------+
