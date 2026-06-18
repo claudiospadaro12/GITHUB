@@ -39,6 +39,7 @@ Legenda: ✅ validata · 🟡 in corso · 🔜 in programma · ❌ scartata · �
 - **Caveat onesto:** edge **regime-dipendente** (vive sui trend dell'oro; perde poco nei laterali 2012/18/22). È una scommessa long strutturale sull'oro.
 - **File:** `pine/Gold_Ichimoku_ATR_Strategy_v3.pine` (+ indicator), `mql5/Experts/Gold_Ichimoku_TK_ATR_EA.mq5`
 - **Prossimo passo:** 🟡 backtest MT5 di verifica → **ottimizzazione walk-forward** (pochi parametri: Tenkan/Kijun/atrMultSL).
+- **Verifica MT5 (XAUUSD H1, 2024-01→2026-06, tick reali 78%, Solo Long, EXIT_CROSS, 0,3%):** PF **1,31** · netto +1.227 € (+12,3%) · **max DD 4,38%** · Sharpe **1,78** · recovery 1,73 · 217 trade · win 33,6% · payoff 2,6. → Conferma il Pine (differenze attese per spread reale ed esecuzione MT5). DD e Sharpe ottimi; PF al confine demo → obiettivo walk-forward alzarlo.
 
 ### ❌ Breakout JPY — SCARTATA
 - **Asset/TF:** 7 cross JPY (USDJPY, EURJPY, GBPJPY, CHFJPY, CADJPY, NZDJPY, AUDJPY), M15 · **Stile:** breakout di inversione (fade)
