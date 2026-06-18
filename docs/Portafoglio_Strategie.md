@@ -21,7 +21,7 @@ Legenda: ✅ validata · 🟡 in corso · 🔜 in programma · ❌ scartata · �
 
 | Asset | Trend-following | Espansione/Breakout | Range/Mean-rev | Apertura (ORB) |
 |---|---|---|---|---|
-| **Oro (XAUUSD)** | ✅ Ichimoku TK+ATR | 🔜 prossimo | ⬜ (difficile, costi) | ⬜ |
+| **Oro (XAUUSD)** | 🟡 Ichimoku TK+ATR *(edge da riconfermare sul reale)* | 🔜 prossimo | ⬜ (difficile, costi) | ⬜ |
 | **Indici** (DAX, US500, NAS100) | ⬜ | ⬜ | ⬜ | ⬜ (buono per indici) |
 | **Materie prime** (WTI, argento, gas) | ⬜ | ⬜ | ⬜ | ⬜ |
 | **Forex** (storico) | — | ❌ Breakout JPY | — | — |
@@ -30,7 +30,10 @@ Legenda: ✅ validata · 🟡 in corso · 🔜 in programma · ❌ scartata · �
 
 ## 📒 Registro dettagliato delle strategie testate
 
-### ✅ Gold Ichimoku TK + ATR — VALIDATA
+### 🟡 Gold Ichimoku TK + ATR — SOTTO VERIFICA (edge non confermato sul broker reale)
+
+> ⚠️ **Aggiornamento 2026-06-18:** ottimizzazione MT5 su **11 anni (2015-2026, broker BCM, 1-min OHLC, 990 combinazioni)**: **nessun set supera PF 1,23** (default 7/22/1.5 → PF **1,01**, +152 €, DD 28%). Il bel risultato del Pine (PF 1,42 su OANDA) **non si trasferisce** sul broker reale: probabili cause = **spread reale dell'oro su BCM** + **fragilità ai dati** (OANDA vs BCM). Il PF 1,31 visto su 2024-2026 era il toro recente. **Decisione: test su broker a spread basso** per isolare se la colpa è lo spread.
+
 - **Asset/TF:** XAUUSD, H1 · **Stile:** trend-following
 - **Logica:** Ichimoku Donchian (Tenkan 7 / Kijun 22 / SenkouB 44), entrata su cross TK + filtro Kumo, SL su ATR (×1,5), uscita su cross opposto. **Solo Long.**
 - **Backtest 2006–2026 (rischio 0,3%):** PF **1,42** · netto **+390%** · max DD **12,3%** · 1.885 trade · win 42% · payoff 1,94 · **17 anni positivi su 21**.
