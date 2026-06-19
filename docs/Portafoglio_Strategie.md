@@ -98,6 +98,22 @@ Una strategia passa a "validata" **solo se** supera tutti questi punti:
 
 ---
 
+## 🏦 Idoneità Prop Trading
+
+Criteri tipici (FTMO 2-step): target **+10%**, **max DD ~10%**, **perdita giornaliera ~5%**. Conta più il **DD basso + MAR (rendimento/DD)** che il rendimento alto.
+
+| Strategia | DD max | Edge | Idoneità prop | Note |
+|---|---|---|---|---|
+| **Gold Ichimoku** (Tickmill) | 5-8% | PF 1,4-1,5 | 🟡 **candidato** | DD ottimo per prop; ma "lento" vs target +10% (MAR ~0,6-0,9). Validare su dati puliti. Preferire prop a target basso / 1-step. |
+| **Scalper M5** | 55% (BCM) | payoff <1 | ❌ no | sfonda il limite giornaliero 5%; da riprovare su spread stretto |
+| **Easy Trend** EUR/USD | 16% | nessun edge | ❌ no | non raggiunge +10% |
+| **Breakout JPY** | 55-83% | nessun edge | ❌ no | DD da blow-up |
+| **Operatività MANUALE (piano oro)** | basso (per regole) | win rate alto | 🟡 **promettente** | rischio 1%/trade, stop giorn. **−3% < 5%** FTMO ✅; serve track record disciplinato |
+
+**Principi per la prop:** ottimizzare **MAR e DD basso**, non il rendimento assoluto · tarare il rischio per arrivare a +target prima di −DD · preferire firm con **1-step / target più bassi / DD più generosi** · validare su dati puliti + forward test **prima** di pagare la fee.
+
+---
+
 ## 🚦 Roadmap (in ordine)
 
 1. 🟡 **Oro trend** — finire backtest MT5 → ottimizzazione walk-forward.
