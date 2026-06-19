@@ -75,7 +75,39 @@
 //|  (every-tick / real-ticks) prima di qualsiasi uso in demo/live.  |
 //|  Nessun risultato di backtest e' qui dichiarato come acquisito.   |
 //|                                                                  |
+//|  ============= MIGLIORIE ROBUSTEZZA v3.20 (post-backtest) ====    |
+//|  Basate su un backtest IN-SAMPLE 2023-2024 girato con 0% tick     |
+//|  reali (dati modellati, NON affidabili). Tutte le migliorie sono  |
+//|  STRUTTURALI e TOGGLEABLE; il default preserva il comportamento    |
+//|  attuale, TRANNE il bugfix del contatore SL (sicurezza). Ogni      |
+//|  miglioria va VALIDATA su tick reali (Dukascopy) + out-of-sample   |
+//|  prima di qualsiasi uso. Dettagli: docs/Analisi_Backtest_DAX_v1.md |
+//|                                                                  |
+//|  1) TP a R-MULTIPLO dello SL effettivo (anti payoff<1):           |
+//|     InpUseRMultipleTP (def OFF). Il backtest mostra avg loss >    |
+//|     avg win perche' il TP e' fisso in punti mentre lo SL e'       |
+//|     tecnico/variabile -> R:R incoerente. Con R-mode il parziale   |
+//|     (InpPartial_R_Multiple) e il TP finale (InpTP_R_Multiple)     |
+//|     sono multipli della distanza SL reale -> R:R coerente.        |
+//|  2) BE/TRAILING legati a R: InpUseRBasedActivation (def OFF).     |
+//|     Attivazione di BE e trailing proporzionale al rischio reale   |
+//|     (InpBreakEven_R, InpTrailingActivation_R) invece che a punti  |
+//|     fissi. Protegge i profitti in proporzione, senza tagliare     |
+//|     troppo presto sui trade ampi.                                 |
+//|  3) BUGFIX CONTATORE SL CONSECUTIVI (sicurezza, InpSLCounterMode):|
+//|     prima un parziale in profitto azzerava la streak anche se la  |
+//|     posizione poi chiudeva in PERDITA NETTA -> il contatore       |
+//|     sottostimava (es. 5 SL col limite 3). Ora il default          |
+//|     (NET_LOSS_PER_POSITION) valuta la perdita netta dell'intera   |
+//|     posizione solo a chiusura totale. Modalita' legacy e          |
+//|     SL_REASON_ONLY restano selezionabili. NB: per streak che      |
+//|     attraversano piu' giorni usare scope CROSSDAY.                |
+//|  4) DIRECTION MODE: InpDirectionMode {BOTH(def)/LONG_ONLY/        |
+//|     SHORT_ONLY} per A/B test dell'asimmetria L/S senza            |
+//|     hardcodare short-only (eviterebbe overfit al regime).         |
+//|                                                                  |
 //|  ===================== CHANGELOG STORICO ====================     |
+//|  v3.20: migliorie robustezza post-backtest (vedi sopra)          |
 //|  v2.0 : clean rebuild da v1.9 (Heiken Ashi)                       |
 //|  v1.9 : filtro Heiken Ashi + bugfix GetATRD1Ratio                 |
 //|  v1.8.2: ottimizzazione genetica (ADX 24, MA dist 35)            |
@@ -91,8 +123,8 @@
 //+------------------------------------------------------------------+
 #property copyright "Private project"
 #property link      ""
-#property version   "3.10"
-#property description "DAX_MASTER_PROP - consolidato FTMO low-DD da DAXMasterEA v2.0"
+#property version   "3.20"
+#property description "DAX_MASTER_PROP - consolidato FTMO low-DD + migliorie robustezza v3.20 (R-multiple TP, fix contatore SL, direction mode)"
 #property strict
 
 #include <Trade\Trade.mqh>
@@ -144,6 +176,22 @@ enum EConsecutiveSLScope
    SCOPE_CROSSDAY   // halt finche' non arriva un trade vincente (stile Emiliano)
 };
 
+// v3.20 - criterio per il contatore SL consecutivi (bugfix di sicurezza)
+enum ESLCounterMode
+{
+   SL_MODE_NET_LOSS_PER_POSITION, // DEFAULT: conta la perdita NETTA per posizione (somma di tutti i deal di uscita). Un parziale positivo seguito da uno stop in perdita netta = 1 perdita (NON azzera la streak).
+   SL_MODE_ANY_NEGATIVE_DEAL,     // legacy: ogni singolo deal di uscita con profit<0 incrementa, ogni deal>0 azzera (comportamento pre-3.20, sottostima la streak)
+   SL_MODE_SL_REASON_ONLY         // conta solo i deal chiusi dal broker per Stop Loss (DEAL_REASON_SL)
+};
+
+// v3.20 - gate direzionale globale per A/B test dell'asimmetria Long/Short
+enum EDirectionMode
+{
+   DIR_BOTH,        // DEFAULT: opera sia LONG sia SHORT (comportamento attuale)
+   DIR_LONG_ONLY,   // solo LONG (per A/B test)
+   DIR_SHORT_ONLY   // solo SHORT (per A/B test)
+};
+
 //+------------------------------------------------------------------+
 //| INPUT PARAMETERS                                                 |
 //+------------------------------------------------------------------+
@@ -164,6 +212,10 @@ input double   InpMaxTotalDDPercent   = 6.0;     // PROP: DD massimo totale % (m
 input group "=== PROP - Stop su SL consecutivi (Protezione 3) ==="
 input int                  InpMaxConsecutiveSL    = 3;            // PROP: stop consecutivi prima dell'halt
 input EConsecutiveSLScope  InpConsecutiveSLScope  = SCOPE_DAILY;  // PROP: DAILY (fino a fine giorno) / CROSSDAY (fino a vincita)
+// v3.20 BUGFIX SICUREZZA: il default conta la perdita NETTA per POSIZIONE.
+// Prima un parziale in profitto azzerava la streak anche se la posizione poi
+// chiudeva in perdita netta -> il contatore sottostimava le streak (es. 5 SL col limite 3).
+input ESLCounterMode       InpSLCounterMode       = SL_MODE_NET_LOSS_PER_POSITION; // v3.20: criterio contatore SL (default = perdita netta/posizione)
 
 input group "=== Session Timing (server time) ==="
 input int      InpMorningStartHour    = 9;       // Apertura DAX
@@ -245,6 +297,28 @@ input int      InpPartialPercent= 50;             // Parzializza 50% del volume
 input double   InpBreakEven     = 20;             // Sposta SL a BE a +N price units
 input double   InpBE_Offset     = 5;              // Offset BE (+N price units sicurezza)
 input double   InpFinalTP       = 50;             // Target finale in price units
+
+input group "=== v3.20 - TP a R-multiplo dello SL effettivo (anti payoff<1) ==="
+// RAZIONALE: il TP fisso in punti vs SL tecnico variabile crea un R:R incoerente
+// (backtest: avg loss > avg win). Con questa opzione il parziale e il TP finale
+// diventano multipli della distanza SL EFFETTIVA del trade -> R:R coerente.
+// DEFAULT OFF = comportamento attuale (TP fisso in punti) preservato per A/B test.
+input bool     InpUseRMultipleTP    = false;      // v3.20: TP/parziale come R-multiplo dello SL reale (OFF = punti fissi attuali)
+input double   InpPartial_R_Multiple = 0.9;       // v3.20: soglia parziale = R x distanza SL (se R-mode ON)
+input double   InpTP_R_Multiple      = 1.8;       // v3.20: TP finale = R x distanza SL (se R-mode ON). >1 per payoff>=1
+
+input group "=== v3.20 - BE/Trailing legati a R (toggleable) ==="
+// RAZIONALE: attivazione di BE e trailing proporzionale al rischio reale, non a
+// punti fissi. DEFAULT OFF = soglie in punti fisse attuali preservate.
+input bool     InpUseRBasedActivation = false;    // v3.20: BE/trailing attivati a multipli di R dello SL reale (OFF = punti fissi)
+input double   InpBreakEven_R          = 0.5;     // v3.20: BE attivato a R x distanza SL (se R-mode ON)
+input double   InpTrailingActivation_R = 0.8;     // v3.20: trailing attivato a R x distanza SL (se R-mode ON)
+
+input group "=== v3.20 - Direction Mode (A/B test asimmetria L/S) ==="
+// RAZIONALE: il backtest mostra LONG debole / SHORT forte, ma forzare short-only
+// sarebbe overfit al regime. Questo gate permette di testare le 3 varianti in A/B.
+// DEFAULT BOTH = comportamento attuale (entrambe le direzioni).
+input EDirectionMode InpDirectionMode = DIR_BOTH; // v3.20: BOTH (default) / LONG_ONLY / SHORT_ONLY
 
 input group "=== Hedging Module (HOOKS - DISABLED) ==="
 input bool     InpHedgingEnabled      = false;           // v1 = solo single-order
@@ -353,6 +427,11 @@ ESignalDirection g_activeDir           = SIG_NONE;
 double           g_activeMaxFavorable  = 0;
 double           g_activeTrailingSL    = 0;
 
+// v3.20 - distanza SL EFFETTIVA del trade corrente (price units), per TP/BE/trailing a R
+double           g_activeSLDistance    = 0;
+// v3.20 - id della posizione attiva (per accumulare la perdita netta della posizione)
+long             g_activePositionId    = 0;
+
 // Magic number
 const long MAGIC_DAX_EA = 20260422;
 
@@ -444,6 +523,15 @@ int OnInit()
    Print("  Afternoon session: ", (InpTradeAfternoon ? "ON" : "OFF"),
          " | Heiken Ashi: ", (InpHAFilterEnabled ? "ON" : "OFF"));
    Print("  Hedging: ", InpHedgingEnabled ? "ENABLED" : "disabled (v1 single-order)");
+   // v3.20 - migliorie robustezza
+   Print("  [v3.20] SL counter mode: ", EnumToString(InpSLCounterMode));
+   Print("  [v3.20] Direction mode: ", EnumToString(InpDirectionMode));
+   Print("  [v3.20] R-multiple TP: ", (InpUseRMultipleTP ? "ON" : "OFF"),
+         (InpUseRMultipleTP ? StringFormat(" (partial %.2fR / final %.2fR)",
+                                           InpPartial_R_Multiple, InpTP_R_Multiple) : ""));
+   Print("  [v3.20] R-based BE/trailing: ", (InpUseRBasedActivation ? "ON" : "OFF"),
+         (InpUseRBasedActivation ? StringFormat(" (BE %.2fR / trail %.2fR)",
+                                                InpBreakEven_R, InpTrailingActivation_R) : ""));
 
    return INIT_SUCCEEDED;
 }
@@ -570,25 +658,60 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
 //+------------------------------------------------------------------+
 //| PROP - Protezione 3: aggiorna contatore SL consecutivi           |
-//| Conta come "perdita" un deal di uscita con profit netto < 0      |
-//| oppure chiuso dal broker per stop loss (DEAL_REASON_SL).         |
-//| Un deal di uscita con profit netto > 0 azzera il contatore.      |
+//| v3.20 BUGFIX SICUREZZA: tre modalita' (InpSLCounterMode).         |
+//|                                                                  |
+//| SL_MODE_NET_LOSS_PER_POSITION (default): valuta la PERDITA NETTA  |
+//|   dell'INTERA posizione (somma di TUTTI i deal di uscita) solo    |
+//|   quando la posizione e' completamente chiusa. Cosi' un parziale  |
+//|   in profitto seguito da uno stop in perdita netta conta come 1   |
+//|   perdita e NON azzera la streak (bug pre-3.20).                  |
+//| SL_MODE_ANY_NEGATIVE_DEAL: comportamento legacy pre-3.20 (ogni    |
+//|   deal di uscita con profit<0 incrementa, ogni >0 azzera).        |
+//| SL_MODE_SL_REASON_ONLY: conta solo i deal con DEAL_REASON_SL.     |
 //+------------------------------------------------------------------+
 void UpdateConsecutiveSLCounter(ulong dealTicket)
 {
-   double profit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT)
-                 + HistoryDealGetDouble(dealTicket, DEAL_SWAP)
-                 + HistoryDealGetDouble(dealTicket, DEAL_COMMISSION);
+   double dealProfit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT)
+                     + HistoryDealGetDouble(dealTicket, DEAL_SWAP)
+                     + HistoryDealGetDouble(dealTicket, DEAL_COMMISSION);
    long dealReason = HistoryDealGetInteger(dealTicket, DEAL_REASON);
 
-   bool isLoss = (profit < 0) || (dealReason == DEAL_REASON_SL);
+   bool isLoss;
+   bool isWin;
+   double evalProfit = dealProfit;   // valore mostrato nei log
+
+   if(InpSLCounterMode == SL_MODE_NET_LOSS_PER_POSITION)
+   {
+      // BUGFIX: decidi SOLO quando la posizione e' interamente chiusa,
+      // sulla perdita NETTA aggregata di tutti i suoi deal di uscita.
+      long posId = HistoryDealGetInteger(dealTicket, DEAL_POSITION_ID);
+      if(PositionStillOpenById(posId))
+         return;   // parziale: aspetta la chiusura totale per decidere
+
+      double netProfit = GetPositionNetProfit(posId);
+      evalProfit = netProfit;
+      isLoss = (netProfit < 0);
+      isWin  = (netProfit > 0);
+   }
+   else if(InpSLCounterMode == SL_MODE_SL_REASON_ONLY)
+   {
+      isLoss = (dealReason == DEAL_REASON_SL);
+      // un'uscita NON-SL in profitto azzera; un'uscita NON-SL in perdita e' neutra
+      isWin  = (dealReason != DEAL_REASON_SL && dealProfit > 0);
+   }
+   else // SL_MODE_ANY_NEGATIVE_DEAL (legacy pre-3.20)
+   {
+      isLoss = (dealProfit < 0) || (dealReason == DEAL_REASON_SL);
+      isWin  = (dealProfit > 0) && (dealReason != DEAL_REASON_SL);
+   }
 
    if(isLoss)
    {
       g_consecutiveSL++;
       Print("[PROP][SL-STREAK] Trade chiuso in perdita. Consecutivi: ",
             g_consecutiveSL, "/", InpMaxConsecutiveSL,
-            " (profit=", DoubleToString(profit, 2), ")");
+            " (netProfit=", DoubleToString(evalProfit, 2),
+            ", mode=", EnumToString(InpSLCounterMode), ")");
 
       if(g_consecutiveSL >= InpMaxConsecutiveSL)
       {
@@ -606,7 +729,7 @@ void UpdateConsecutiveSLCounter(ulong dealTicket)
          }
       }
    }
-   else if(profit > 0)
+   else if(isWin)
    {
       if(g_consecutiveSL > 0)
          Print("[PROP][SL-STREAK] Trade vincente: azzero contatore (era ", g_consecutiveSL, ")");
@@ -614,6 +737,47 @@ void UpdateConsecutiveSLCounter(ulong dealTicket)
       // un trade vincente riapre l'operativita' cross-day
       g_crossdayHalt = false;
    }
+   // breakeven esatto (netProfit==0): neutro, non tocca la streak
+}
+
+//+------------------------------------------------------------------+
+//| v3.20 - true se la posizione (per id) e' ancora aperta           |
+//| (cioe' restano deal/volume da chiudere -> il deal corrente e' un |
+//| parziale, non la chiusura totale).                               |
+//+------------------------------------------------------------------+
+bool PositionStillOpenById(long posId)
+{
+   for(int i = 0; i < PositionsTotal(); i++)
+   {
+      if(!g_position.SelectByIndex(i)) continue;
+      if(g_position.Magic() != MAGIC_DAX_EA) continue;
+      if((long)g_position.Identifier() == posId) return true;
+   }
+   return false;
+}
+
+//+------------------------------------------------------------------+
+//| v3.20 - somma il profit NETTO di TUTTI i deal di uscita di una    |
+//| posizione (per id). Usato dal contatore SL in modalita' NET.     |
+//+------------------------------------------------------------------+
+double GetPositionNetProfit(long posId)
+{
+   if(!HistorySelectByPosition(posId))
+      return 0;
+
+   double net = 0;
+   int total = HistoryDealsTotal();
+   for(int i = 0; i < total; i++)
+   {
+      ulong d = HistoryDealGetTicket(i);
+      if(d == 0) continue;
+      long entry = HistoryDealGetInteger(d, DEAL_ENTRY);
+      if(entry == DEAL_ENTRY_IN) continue;   // solo i deal di uscita
+      net += HistoryDealGetDouble(d, DEAL_PROFIT)
+           + HistoryDealGetDouble(d, DEAL_SWAP)
+           + HistoryDealGetDouble(d, DEAL_COMMISSION);
+   }
+   return net;
 }
 
 //+------------------------------------------------------------------+
@@ -734,6 +898,15 @@ void HandleWaitTrigger()
 
    ESignalDirection sig = GenerateSignal();
    if(sig == SIG_NONE) return;
+
+   // v3.20: gate direzionale globale (A/B test asimmetria L/S)
+   if(!DirectionModePass(sig))
+   {
+      if(InpVerboseMode)
+         Print("[SIGNAL][BLOCKED] ", EnumToString(sig),
+               " filtrato da InpDirectionMode=", EnumToString(InpDirectionMode));
+      return;
+   }
 
    // v1.2: Daily Bias filter
    if(!DailyBiasFilterPass(sig))
@@ -1722,6 +1895,18 @@ bool DirectionalFiltersPass(ESignalDirection dir)
 }
 
 //+------------------------------------------------------------------+
+//| v3.20 - DirectionModePass: gate direzionale globale per A/B test  |
+//| dell'asimmetria Long/Short. DEFAULT DIR_BOTH = nessun filtro.     |
+//+------------------------------------------------------------------+
+bool DirectionModePass(ESignalDirection dir)
+{
+   if(InpDirectionMode == DIR_BOTH) return true;
+   if(InpDirectionMode == DIR_LONG_ONLY)  return (dir == SIG_LONG);
+   if(InpDirectionMode == DIR_SHORT_ONLY) return (dir == SIG_SHORT);
+   return true;
+}
+
+//+------------------------------------------------------------------+
 //| SRProximityFilterPass (STUB - default OFF)                       |
 //| Funzione non implementata. Se attivata, blocca conservativamente |
 //| invece di passare silenziosamente come "filtro attivo" finto.    |
@@ -1790,11 +1975,17 @@ bool OpenPosition(ESignalDirection dir)
       return false;
    }
 
+   // v3.20: TP finale fisso in punti (default) oppure a R-multiplo dello SL reale.
+   // R-mode rende il R:R coerente con il rischio effettivo del trade (anti payoff<1).
+   double finalTPdist = InpFinalTP;
+   if(InpUseRMultipleTP)
+      finalTPdist = InpTP_R_Multiple * slDistance;
+
    double tpPrice = 0;
    if(dir == SIG_LONG)
-      tpPrice = entryPrice + InpFinalTP;
+      tpPrice = entryPrice + finalTPdist;
    else
-      tpPrice = entryPrice - InpFinalTP;
+      tpPrice = entryPrice - finalTPdist;
 
    double lots = CalculateLotSize(slDistance);
    if(lots <= 0)
@@ -1829,6 +2020,10 @@ bool OpenPosition(ESignalDirection dir)
    g_activeDir           = dir;
    g_activeMaxFavorable  = 0;
    g_activeTrailingSL    = 0;
+   g_activeSLDistance    = slDistance;   // v3.20: distanza SL reale per TP/BE/trailing a R
+   g_activePositionId    = 0;
+   if(g_position.SelectByTicket(g_activeTicket))
+      g_activePositionId = (long)g_position.Identifier();
 
    Print("[OPEN][OK] ", EnumToString(dir),
          " ticket=", g_activeTicket,
@@ -1946,7 +2141,12 @@ void ManagePartial()
    else
       moveUnits = g_activeEntryPrice - currentPrice;
 
-   if(moveUnits < InpFirstTP) return;
+   // v3.20: soglia parziale fissa (default) o a R-multiplo dello SL reale
+   double partialThreshold = InpFirstTP;
+   if(InpUseRMultipleTP && g_activeSLDistance > 0)
+      partialThreshold = InpPartial_R_Multiple * g_activeSLDistance;
+
+   if(moveUnits < partialThreshold) return;
 
    double volumeToClose = g_activeInitialVolume * InpPartialPercent / 100.0;
    double lotStep = g_symbol.LotsStep();
@@ -1987,7 +2187,12 @@ void ManageBreakeven()
    else
       moveUnits = g_activeEntryPrice - currentPrice;
 
-   if(moveUnits < InpBreakEven) return;
+   // v3.20: attivazione BE fissa (default) o a R-multiplo dello SL reale
+   double beThreshold = InpBreakEven;
+   if(InpUseRBasedActivation && g_activeSLDistance > 0)
+      beThreshold = InpBreakEven_R * g_activeSLDistance;
+
+   if(moveUnits < beThreshold) return;
 
    double newSL = 0;
    if(g_activeDir == SIG_LONG)
@@ -2060,7 +2265,12 @@ void ManageTrailing()
    else
       moveUnits = g_activeEntryPrice - currentPrice;
 
-   if(moveUnits < InpTrailingActivationProfit) return;
+   // v3.20: attivazione trailing fissa (default) o a R-multiplo dello SL reale
+   double trailActivation = InpTrailingActivationProfit;
+   if(InpUseRBasedActivation && g_activeSLDistance > 0)
+      trailActivation = InpTrailingActivation_R * g_activeSLDistance;
+
+   if(moveUnits < trailActivation) return;
 
    if(moveUnits <= g_activeMaxFavorable) return;
    g_activeMaxFavorable = moveUnits;
@@ -2117,6 +2327,8 @@ void ResetActivePositionTracking()
    g_activeDir           = SIG_NONE;
    g_activeMaxFavorable  = 0;
    g_activeTrailingSL    = 0;
+   g_activeSLDistance    = 0;   // v3.20
+   g_activePositionId    = 0;   // v3.20
 }
 
 int CountMyPositions()
