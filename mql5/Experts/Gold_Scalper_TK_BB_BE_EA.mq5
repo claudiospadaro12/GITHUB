@@ -47,9 +47,33 @@
 //|                                                                  |
 //|  Stile di codice (CTrade, filling adattivo, gestione handle,   |
 //|  lotto normalizzato) ripreso da Gold_Ichimoku_TK_ATR_EA.mq5.   |
+//|                                                                  |
+//|  ----------------------------------------------------------------|
+//|  v1.20 (v3) - SELETTIVITA' e regole di SESSIONE.                |
+//|  In backtest la v1.10 apriva troppi trade (1174/anno) e perdeva |
+//|  su broker a spread largo. La v1.20 rende l'EA SELETTIVO: poche  |
+//|  operazioni di qualita', tenute poco, con tetto di profitto      |
+//|  giornaliero. Modifiche mirate (resto della logica invariato):   |
+//|                                                                  |
+//|   1) FILTRO DI VOLATILITA' (InpUseVolFilter, InpVolMode):       |
+//|      - VOL_ATR: entra solo se ATR(InpAtrLen) su M5 >=           |
+//|        InpMinAtrDollars (si opera solo a mercato in movimento). |
+//|      - VOL_ADR: entra solo se il range del giorno corrente      |
+//|        finora e' < InpAdrUsedMaxPct% dell'ADR (media range      |
+//|        High-Low giorn. su InpAdrDays): evita gli ingressi a     |
+//|        fine corsa. SOGLIE DA TARARE col backtest.               |
+//|   2) USCITA A TEMPO (InpMaxBarsInTrade): "due candele e poi     |
+//|      chiudiamo". Trailing/partial restano attivi DENTRO quelle  |
+//|      barre. Trade-off: limita i winner lunghi.                  |
+//|   3) MAX TRADE/GIORNO (InpMaxTradesPerDay): tetto agli ingressi.|
+//|   4) STOP SESSIONE su P&L giorn. REALIZZATO (InpDailyProfit-    |
+//|      Target / InpDailyLossLimit): raggiunto il target/limite,   |
+//|      chiude l'eventuale posizione e non riapre fino al giorno   |
+//|      successivo.                                                 |
+//|  +500/giorno e' un TETTO, non un'aspettativa realistica.       |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Oro - Claudio"
-#property version   "1.10"
+#property version   "1.20"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -78,6 +102,13 @@ enum ENUM_FADE_ACTION
   {
    FADE_TIGHTEN = 0,   // Stringe il trailing (dimezza la distanza)
    FADE_CLOSE   = 1    // Chiude il residuo a mercato
+  };
+
+//--- NUOVO v3 (v1.20): modalita' del filtro di volatilita' ---------
+enum ENUM_VOL_MODE
+  {
+   VOL_ATR = 0,   // ATR M5 >= soglia in $ (entra solo se il mercato si muove)
+   VOL_ADR = 1    // range del giorno finora < % dell'ADR (spazio residuo)
   };
 
 //==================================================================
@@ -141,10 +172,27 @@ input bool   InpUseRiskSize  = false; // true: rischio % ; false: lotto fisso
 input double InpFixedLots     = 0.5;  // [DEDOTTO] lotto fisso (come il trader)
 input double InpRiskPercent   = 0.5;  // Rischio per trade (% del balance) se InpUseRiskSize
 
+//--- NUOVO v3 (v1.20): Filtro di volatilita' ---------------------
+input group "=== v1.20 - Filtro di volatilita' (SELETTIVITA') ==="
+input bool         InpUseVolFilter   = true;     // Attiva il filtro di volatilita' (non entrare su ogni candela)
+input ENUM_VOL_MODE InpVolMode       = VOL_ATR;  // VOL_ATR (ATR M5 minimo) oppure VOL_ADR (spazio residuo nel giorno)
+input double       InpMinAtrDollars  = 1.0;      // [VOL_ATR][DA TARARE] ATR(InpAtrLen) M5 minimo in $ per entrare
+input int          InpAdrDays        = 14;       // [VOL_ADR] giorni per la media dell'Average Daily Range
+input double       InpAdrUsedMaxPct  = 80.0;     // [VOL_ADR][DA TARARE] entra solo se range giorno finora < % dell'ADR
+
+//--- NUOVO v3 (v1.20): Uscita a tempo ----------------------------
+input group "=== v1.20 - Uscita a tempo (due candele e chiudiamo) ==="
+input int    InpMaxBarsInTrade      = 2;  // Chiudi dopo N barre M5 chiuse dall'ingresso (0 = off). Limita i winner lunghi.
+
+//--- NUOVO v3 (v1.20): Stop sessione su P&L giornaliero ----------
+input group "=== v1.20 - Stop sessione su P&L giornaliero ==="
+input double InpDailyProfitTarget   = 500.0; // Profitto REALIZZATO giorn. (valuta conto) che ferma la giornata (0 = off). TETTO, non aspettativa.
+input double InpDailyLossLimit       = 300.0; // Perdita REALIZZATA giorn. (valuta conto) che ferma la giornata (0 = off).
+
 //--- Sicurezza ---------------------------------------------------
 input group "=== Sicurezza ==="
-input int    InpMaxTradesPerDay     = 0; // 0 = nessun limite
-input double InpMaxDailyLossDollars  = 0;// 0 = off (stop operativita' oltre questa perdita giorn.)
+input int    InpMaxTradesPerDay     = 6; // [v1.20] max ingressi/giorno (0 = illimitato)
+input double InpMaxDailyLossDollars  = 0;// 0 = off (stop operativita' oltre questa perdita giorn. su EQUITY floating)
 
 //--- Filtri ------------------------------------------------------
 input group "=== Filtri ==="
@@ -163,6 +211,7 @@ input int    InpMaxSpreadPoints = 0;     // Spread massimo (in POINT); 0 = disat
 int hAtrM5      = INVALID_HANDLE; // ATR su M5 (per SL/trailing se ATR usato)
 int hAtrFade    = INVALID_HANDLE; // NUOVO v2: ATR sul TF corrente (proxy momentum FADE_ATR)
 int hBBFade     = INVALID_HANDLE; // NUOVO v2: Bollinger sul TF corrente (proxy momentum FADE_BBWIDTH)
+int hAtrVol     = INVALID_HANDLE; // NUOVO v3: ATR M5 per il filtro di volatilita' (VOL_ATR)
 
 datetime g_lastBarTime = 0;  // per rilevare la nuova barra M5
 
@@ -176,11 +225,13 @@ bool   g_partialDone   = false;// chiusura parziale gia' eseguita?
 double g_trailStop     = 0.0;  // valore corrente dello stop trailing (monotono)
 double g_initVolume    = 0.0;  // volume iniziale della posizione (per la parziale)
 bool   g_fadeTighten   = false;// NUOVO v2: il momentum-fade ha chiesto di stringere il trailing?
+datetime g_entryBarTime = 0;   // NUOVO v3: ora (M5) della barra in cui e' stata aperta la posizione
 
 // Contatori di sicurezza giornalieri
 int      g_dayTrades   = 0;     // numero trade aperti oggi
 double   g_dayStartEquity = 0.0;// equity a inizio giornata (per perdita giorn.)
 datetime g_currentDay  = 0;     // giorno corrente (per reset contatori)
+bool     g_dayStopped  = false; // NUOVO v3: giornata fermata (target/limite P&L realizzato raggiunto)
 
 //+------------------------------------------------------------------+
 //| Inizializzazione                                                 |
@@ -223,6 +274,18 @@ int OnInit()
         }
      }
 
+   // NUOVO v3 (v1.20): handle ATR M5 per il filtro di volatilita' (solo VOL_ATR).
+   // Lo creo separato da hAtrM5 perche' quest'ultimo esiste solo se SL/trailing usano l'ATR.
+   if(InpUseVolFilter && InpVolMode == VOL_ATR)
+     {
+      hAtrVol = iATR(_Symbol, PERIOD_M5, InpAtrLen);
+      if(hAtrVol == INVALID_HANDLE)
+        {
+         Print("ERRORE: impossibile creare l'handle ATR M5 (filtro volatilita').");
+         return(INIT_FAILED);
+        }
+     }
+
    trade.SetExpertMagicNumber(InpMagic);
    ConfigureFilling();
 
@@ -239,7 +302,15 @@ int OnInit()
    // Se all'avvio esiste gia' una posizione di questo EA, ricostruisco lo stato
    AdoptExistingPosition();
 
-   Print("Gold_Scalper_TK_BB_BE_EA v1.10 avviato su ", _Symbol, " ",
+   string volStr;
+   if(!InpUseVolFilter)
+      volStr = "OFF";
+   else if(InpVolMode == VOL_ATR)
+      volStr = "ATR>=$" + DoubleToString(InpMinAtrDollars, 2);
+   else
+      volStr = "ADR<" + DoubleToString(InpAdrUsedMaxPct, 1) + "%(" + IntegerToString(InpAdrDays) + "g)";
+
+   Print("Gold_Scalper_TK_BB_BE_EA v1.20 avviato su ", _Symbol, " ",
          EnumToString((ENUM_TIMEFRAMES)_Period),
          " | ModoA=", (InpUseModeA?"ON":"OFF"),
          " | ModoB=", (InpUseModeB?"ON":"OFF"),
@@ -250,6 +321,13 @@ int OnInit()
          " | Fade=", (InpUseMomentumFade?EnumToString(InpFadeMode):"OFF"),
          "/", EnumToString(InpFadeAction),
          " | BeBuf=", IntegerToString(InpBeBufferPoints), "pt");
+   Print("v1.20 SELETTIVITA' | VolFilter=", volStr,
+         " | MaxBarsInTrade=", IntegerToString(InpMaxBarsInTrade),
+         " | MaxTrades/gg=", IntegerToString(InpMaxTradesPerDay),
+         " | TargetGG=", DoubleToString(InpDailyProfitTarget, 2),
+         " | LossLimitGG=", DoubleToString(InpDailyLossLimit, 2),
+         " ", AccountInfoString(ACCOUNT_CURRENCY),
+         " (target = TETTO, non aspettativa; soglie DA TARARE)");
    return(INIT_SUCCEEDED);
   }
 
@@ -261,6 +339,7 @@ void OnDeinit(const int reason)
    if(hAtrM5   != INVALID_HANDLE) IndicatorRelease(hAtrM5);
    if(hAtrFade != INVALID_HANDLE) IndicatorRelease(hAtrFade); // NUOVO v2
    if(hBBFade  != INVALID_HANDLE) IndicatorRelease(hBBFade);  // NUOVO v2
+   if(hAtrVol  != INVALID_HANDLE) IndicatorRelease(hAtrVol);  // NUOVO v3
   }
 
 //+------------------------------------------------------------------+
@@ -285,7 +364,14 @@ void OnTick()
    // Reset contatori giornalieri se e' cambiato il giorno
    ResetDailyCountersIfNewDay(false);
 
-   // 1) Gestione della posizione aperta (BE / parziale / trailing) -> OGNI tick.
+   // NUOVO v3 (v1.20): stop sessione su P&L REALIZZATO giornaliero.
+   // Se il target di profitto e' raggiunto (o la perdita ha sfondato il limite),
+   // chiudo l'eventuale posizione e marco la giornata come ferma. La gestione di
+   // una posizione gia' aperta (sotto) resta attiva finche' non e' chiusa, ma non
+   // si apre piu' nulla fino al giorno successivo.
+   CheckDailyPnLStop();
+
+   // 1) Gestione della posizione aperta (BE / parziale / trailing / uscita a tempo) -> OGNI tick.
    ManagePosition();
 
    // 2) Segnali ed entrate SOLO a nuova barra M5 chiusa (no repaint).
@@ -420,10 +506,18 @@ void OnNewBarM5()
    if(!InpUseModeA && !InpUseModeB)
       return;
 
+   // NUOVO v3 (v1.20): giornata fermata da target/limite P&L realizzato.
+   if(g_dayStopped)
+      return;
+
    // Filtri di sicurezza / sessione
    if(!SessionOK())
       return;
    if(!DailyLimitsOK())
+      return;
+
+   // NUOVO v3 (v1.20): filtro di volatilita' (non entrare su ogni candela).
+   if(!VolatilityOK())
       return;
 
    // --- MODO A: cross TK su M5 (barre chiuse) + conferma multi-TF ---
@@ -541,6 +635,8 @@ void OpenTrade(ENUM_ORDER_TYPE type)
    g_fadeTighten = false;        // NUOVO v2
    g_initVolume  = lot;
    g_posTicket   = 0;            // verra' adottato a tick (PositionSelect)
+   // NUOVO v3: memorizzo la barra M5 d'ingresso per l'uscita a tempo.
+   g_entryBarTime = (datetime)SeriesInfoInteger(_Symbol, PERIOD_M5, SERIES_LASTBAR_DATE);
 
    g_dayTrades++;
 
@@ -639,6 +735,15 @@ void ManagePosition()
       AdoptExistingPosition();
    if(g_posTicket == 0)
       return;
+
+   // NUOVO v3 (v1.20): USCITA A TEMPO ("due candele e poi chiudiamo").
+   // Chiudo la posizione (residuo compreso) dopo InpMaxBarsInTrade barre M5
+   // CHIUSE dall'ingresso, se ancora aperta. Conto le barre M5 trascorse dalla
+   // barra d'ingresso a quella corrente (no look-ahead: uso la barra corrente).
+   // Trailing/partial restano attivi DENTRO quelle barre; questo cap limita i
+   // winner lunghi (trade-off voluto per la selettivita').
+   if(CheckTimeExit())
+      return; // posizione chiusa: lo stato si azzera al prossimo ManagePosition.
 
    long   ptype   = PositionGetInteger(POSITION_TYPE);
    bool   isLong  = (ptype == POSITION_TYPE_BUY);
@@ -1031,6 +1136,211 @@ void ResetDailyCountersIfNewDay(bool force)
       g_currentDay      = today;
       g_dayTrades       = 0;
       g_dayStartEquity  = AccountInfoDouble(ACCOUNT_EQUITY);
+      g_dayStopped      = false;   // NUOVO v3: la giornata riparte "operativa"
+     }
+  }
+
+//==================================================================
+//  NUOVO v3 (v1.20): FILTRO DI VOLATILITA'
+//==================================================================
+
+//+------------------------------------------------------------------+
+//| Filtro di volatilita': decide se il mercato e' "operabile".      |
+//|  VOL_ATR: ATR(InpAtrLen) M5 (ultima barra chiusa) >= soglia $.   |
+//|  VOL_ADR: range del giorno corrente finora < % dell'ADR (media   |
+//|           del range High-Low giornaliero su InpAdrDays).         |
+//|  Valutato a barra M5 chiusa (nessun look-ahead: la barra d'oggi  |
+//|  "finora" usa High/Low correnti del giorno in corso).            |
+//+------------------------------------------------------------------+
+bool VolatilityOK()
+  {
+   if(!InpUseVolFilter)
+      return(true);
+
+   if(InpVolMode == VOL_ATR)
+     {
+      if(hAtrVol == INVALID_HANDLE)
+         return(true); // handle non disponibile: non blocco (fail-open)
+      double buf[1];
+      if(CopyBuffer(hAtrVol, 0, 1, 1, buf) < 1) // shift 1 = ultima barra chiusa
+         return(false);
+      double atrVal = buf[0];
+      // ATR su XAUUSD e' gia' espresso in $ (1.0 di prezzo = 1$ per unita').
+      return(atrVal >= InpMinAtrDollars);
+     }
+
+   // VOL_ADR: confronto il range del giorno corrente finora con l'ADR.
+   double adr = AverageDailyRange(InpAdrDays);
+   if(adr <= 0.0)
+      return(true); // dati insufficienti: non blocco
+
+   double todayRange = TodayRangeSoFar();
+   if(todayRange < 0.0)
+      return(true); // dati insufficienti: non blocco
+
+   // Entra solo se c'e' ancora "spazio": range usato finora < % dell'ADR.
+   double usedPct = (todayRange / adr) * 100.0;
+   return(usedPct < InpAdrUsedMaxPct);
+  }
+
+//+------------------------------------------------------------------+
+//| Average Daily Range: media del range High-Low giornaliero        |
+//| sugli ultimi 'days' giorni CHIUSI (shift 1..days, no giorno      |
+//| corrente per evitare di mischiare un range incompleto).          |
+//+------------------------------------------------------------------+
+double AverageDailyRange(int days)
+  {
+   if(days < 1)
+      return(0.0);
+   double hi[], lo[];
+   // shift 1 = ultimo giorno chiuso; copio 'days' giorni chiusi.
+   if(CopyHigh(_Symbol, PERIOD_D1, 1, days, hi) < days)
+      return(0.0);
+   if(CopyLow(_Symbol, PERIOD_D1, 1, days, lo) < days)
+      return(0.0);
+   double sum = 0.0;
+   for(int i = 0; i < days; i++)
+      sum += (hi[i] - lo[i]);
+   return(sum / days);
+  }
+
+//+------------------------------------------------------------------+
+//| Range del GIORNO CORRENTE finora (High-Low della barra D1 a      |
+//| shift 0, cioe' il giorno in corso). Nessun look-ahead: usa solo  |
+//| i massimi/minimi gia' formati fino a ora.                        |
+//+------------------------------------------------------------------+
+double TodayRangeSoFar()
+  {
+   double hi[], lo[];
+   if(CopyHigh(_Symbol, PERIOD_D1, 0, 1, hi) < 1)
+      return(-1.0);
+   if(CopyLow(_Symbol, PERIOD_D1, 0, 1, lo) < 1)
+      return(-1.0);
+   return(hi[0] - lo[0]);
+  }
+
+//==================================================================
+//  NUOVO v3 (v1.20): USCITA A TEMPO
+//==================================================================
+
+//+------------------------------------------------------------------+
+//| Uscita a tempo: chiude la posizione dopo InpMaxBarsInTrade barre |
+//| M5 CHIUSE dall'ingresso. Ritorna true se ha chiuso (cosi' il     |
+//| chiamante puo' uscire subito dalla gestione).                    |
+//|  Conteggio: numero di barre M5 la cui ora di apertura e'         |
+//|  strettamente > g_entryBarTime (ovvero barre nate DOPO quella    |
+//|  d'ingresso). Quando raggiunge InpMaxBarsInTrade, chiudo.        |
+//+------------------------------------------------------------------+
+bool CheckTimeExit()
+  {
+   if(InpMaxBarsInTrade <= 0)
+      return(false);
+   if(g_entryBarTime == 0)
+      return(false);
+
+   int barsSince = iBarShift(_Symbol, PERIOD_M5, g_entryBarTime, false);
+   // iBarShift(entryBarTime) = quante barre M5 fa e' stata aperta la posizione,
+   // cioe' il numero di barre M5 CHIUSE trascorse dall'ingresso (barra corrente
+   // = shift 0). Esempio: ingresso su barra X; alla 2a barra chiusa dopo X,
+   // barsSince == 2 -> chiudo.
+   if(barsSince < 0)
+      return(false);
+
+   if(barsSince >= InpMaxBarsInTrade)
+     {
+      if(trade.PositionClose(_Symbol))
+        {
+         Print("USCITA A TEMPO: posizione chiusa dopo ", barsSince,
+               " barre M5 dall'ingresso (cap=", InpMaxBarsInTrade, ").");
+         return(true);
+        }
+      else
+        {
+         Print("USCITA A TEMPO: PositionClose FALLITA. Retcode=", trade.ResultRetcode(),
+               " - ", trade.ResultRetcodeDescription());
+        }
+     }
+   return(false);
+  }
+
+//==================================================================
+//  NUOVO v3 (v1.20): STOP SESSIONE SU P&L REALIZZATO GIORNALIERO
+//==================================================================
+
+//+------------------------------------------------------------------+
+//| P&L REALIZZATO del giorno corrente (valuta conto): somma di      |
+//| profit + commission + swap dei DEAL chiusi oggi su questo        |
+//| simbolo e questo magic. Si basa sullo storico dei deal del       |
+//| giorno (dal mezzanotte server a ora).                            |
+//+------------------------------------------------------------------+
+double RealizedPnLToday()
+  {
+   datetime from = g_currentDay;                 // mezzanotte server del giorno corrente
+   datetime to   = TimeCurrent() + 1;            // fino ad ora (inclusiva)
+   if(!HistorySelect(from, to))
+      return(0.0);
+
+   double pnl = 0.0;
+   int total = HistoryDealsTotal();
+   for(int i = 0; i < total; i++)
+     {
+      ulong ticket = HistoryDealGetTicket(i);
+      if(ticket == 0)
+         continue;
+      // Solo deal di QUESTO EA e simbolo.
+      if(HistoryDealGetInteger(ticket, DEAL_MAGIC) != InpMagic)
+         continue;
+      if(HistoryDealGetString(ticket, DEAL_SYMBOL) != _Symbol)
+         continue;
+      // Considero solo i deal che incidono sul P&L (uscite / parziali / chiusure).
+      long entry = HistoryDealGetInteger(ticket, DEAL_ENTRY);
+      if(entry == DEAL_ENTRY_IN)
+         continue; // l'apertura non realizza P&L
+      pnl += HistoryDealGetDouble(ticket, DEAL_PROFIT)
+           + HistoryDealGetDouble(ticket, DEAL_COMMISSION)
+           + HistoryDealGetDouble(ticket, DEAL_SWAP);
+     }
+   return(pnl);
+  }
+
+//+------------------------------------------------------------------+
+//| Stop sessione: se il P&L realizzato del giorno raggiunge il      |
+//| target di profitto o sfonda il limite di perdita, chiude         |
+//| l'eventuale posizione e ferma la giornata (niente nuove entrate  |
+//| fino al giorno successivo).                                       |
+//+------------------------------------------------------------------+
+void CheckDailyPnLStop()
+  {
+   if(g_dayStopped)
+      return;
+   if(InpDailyProfitTarget <= 0.0 && InpDailyLossLimit <= 0.0)
+      return;
+
+   double realized = RealizedPnLToday();
+
+   bool hitTarget = (InpDailyProfitTarget > 0.0 && realized >= InpDailyProfitTarget);
+   bool hitLoss   = (InpDailyLossLimit   > 0.0 && realized <= -InpDailyLossLimit);
+
+   if(hitTarget || hitLoss)
+     {
+      g_dayStopped = true;
+      // Chiudo l'eventuale posizione aperta di questo EA.
+      if(HasOpenPosition())
+        {
+         if(trade.PositionClose(_Symbol))
+            Print("STOP GIORNATA: posizione chiusa. P&L realizzato oggi=",
+                  DoubleToString(realized, 2), " ", AccountInfoString(ACCOUNT_CURRENCY),
+                  hitTarget ? " (TARGET raggiunto)" : " (LIMITE perdita raggiunto)");
+         else
+            Print("STOP GIORNATA: PositionClose FALLITA. Retcode=", trade.ResultRetcode(),
+                  " - ", trade.ResultRetcodeDescription());
+        }
+      else
+        {
+         Print("STOP GIORNATA: niente nuove entrate fino a domani. P&L realizzato oggi=",
+               DoubleToString(realized, 2), " ", AccountInfoString(ACCOUNT_CURRENCY),
+               hitTarget ? " (TARGET raggiunto)" : " (LIMITE perdita raggiunto)");
+        }
      }
   }
 
@@ -1061,6 +1371,15 @@ void AdoptExistingPosition()
       g_partialDone = false;
       g_trailStop   = 0.0;
       g_fadeTighten = false; // NUOVO v2
+      // NUOVO v3: per l'uscita a tempo dopo un restart uso l'ora di apertura
+      // della posizione mappata sulla barra M5 corrispondente (conservativo:
+      // la posizione potrebbe gia' aver superato il cap e verra' chiusa subito).
+      datetime posOpen = (datetime)PositionGetInteger(POSITION_TIME);
+      int sh = iBarShift(_Symbol, PERIOD_M5, posOpen, false);
+      if(sh >= 0)
+         g_entryBarTime = (datetime)iTime(_Symbol, PERIOD_M5, sh);
+      else
+         g_entryBarTime = posOpen;
      }
   }
 //+------------------------------------------------------------------+
