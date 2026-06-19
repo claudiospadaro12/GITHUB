@@ -54,7 +54,8 @@ La strategia sull'oro è uno **scalping/intraday momentum**: si opera **in direz
 - **Break-even:** stop a pari **appena il broker lo consente**.
 
 ### e) Take profit / gestione
-- **Parziale 50%** al raggiungimento di **+€20**.
+- **Parziale 50%** al raggiungimento di **almeno +€10** (incasso subito qualcosa).
+- **Subito dopo il parziale:** sposto lo stop a **break-even** e poi **oltre il pari** (trailing che blinda un profitto crescente sul residuo).
 - **Sul residuo:** **trailing ATR-adattivo** (più largo nei trend forti).
 - **Uscita a tempo:** se dopo **~2 candele** non funziona → chiudo.
 - **Uscita anticipata:** se la **forza rallenta** (bande in contrazione / ATR in calo) → stringo o chiudo.
