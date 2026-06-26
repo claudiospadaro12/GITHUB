@@ -42,9 +42,19 @@ closeEOD = input.bool(true, "Chiudi a fine sessione (intraday)", group="Sessione
 // ----------------- INPUT: Periodo (in-sample / out-of-sample) -------
 useDates = input.bool(false, "Limita periodo", group="Periodo",
      tooltip="Accendi per testare un sotto-periodo: in-sample vs out-of-sample.")
-startD   = input.time(timestamp("2026-01-05T00:00"), "Inizio", group="Periodo")
-endD     = input.time(timestamp("2026-03-31T23:59"), "Fine",   group="Periodo")
-inRange  = not useDates or (time >= startD and time <= endD)
+sY = input.int(2026, "Inizio: anno",   group="Periodo")
+sM = input.int(1,    "Inizio: mese",   minval=1, maxval=12, group="Periodo")
+sD = input.int(5,    "Inizio: giorno", minval=1, maxval=31, group="Periodo")
+eY = input.int(2026, "Fine: anno",     group="Periodo")
+eM = input.int(3,    "Fine: mese",     minval=1, maxval=12, group="Periodo")
+eD = input.int(31,   "Fine: giorno",   minval=1, maxval=31, group="Periodo")
+startD  = timestamp(syminfo.timezone, sY, sM, sD, 0, 0)
+endD    = timestamp(syminfo.timezone, eY, eM, eD, 23, 59)
+inRange = not useDates or (time >= startD and time <= endD)
+// barre nel periodo selezionato (diagnostica)
+var int barsInRange = 0
+if useDates and time >= startD and time <= endD
+    barsInRange += 1
 
 // ----------------- INPUT: Uscite / rischio --------------------------
 exitMode = input.string("Supertrend opposto + RR", "Uscita",
@@ -127,3 +137,12 @@ if closeEOD and not inSess and inSess[1]
 plot(stVal, "Supertrend", color = stDir < 0 ? color.new(color.green, 0) : color.new(color.red, 0), style=plot.style_linebr)
 plot(useEMA ? ema : na, "EMA200", color=color.new(color.orange, 0))
 bgcolor(biasHTF == 1 ? color.new(color.green, 92) : biasHTF == -1 ? color.new(color.red, 92) : na, title="Bias H4")
+bgcolor(useDates and inRange ? color.new(color.blue, 90) : na, title="Periodo selezionato")
+
+// etichetta diagnostica (in alto a destra): quante barre nel periodo
+if barstate.islast and useDates
+    var label lab = na
+    label.delete(lab)
+    lab := label.new(bar_index, high, "Periodo ON\nBarre nel range: " + str.tostring(barsInRange) +
+         "\nTrade: " + str.tostring(strategy.closedtrades),
+         style=label.style_label_down, color=color.navy, textcolor=color.white)
