@@ -1,0 +1,126 @@
+//@version=5
+// =====================================================================
+//  HARSI Strategy — BACKTEST (Claudio)
+//  Replica la strategia "Heikin Ashi RSI Oscillator" (JayRogers) come
+//  STRATEGIA backtestabile, con le 4 condizioni del video di Ippolito.
+//
+//  SCOPO: misurare se l'edge esiste DAVVERO (win rate, profit factor,
+//  rapporto medio vincita/perdita, R:R reale) — NON per fare trading
+//  reale da qui. Il trading automatico reale lo fa l'EA MT5.
+//
+//  ONESTA': la strategia originale e' contro-trend / scalping e
+//  l'autore tiene a pagamento SL/TP esatti, timeframe e asset migliori.
+//  Le distanze SL/TP qui sono NOSTRE: vanno validate IN/OUT-of-sample.
+// =====================================================================
+strategy("HARSI Backtest - Claudio", overlay=false,
+     initial_capital=12817,
+     default_qty_type=strategy.fixed, default_qty_value=1,
+     pyramiding=0,
+     process_orders_on_close=true,
+     commission_type=strategy.commission.percent, commission_value=0.0,
+     calc_on_every_tick=false)
+
+// ----------------- INPUT: HARSI -------------------------------------
+rsiLen    = input.int(14, "RSI Length", minval=1, group="HARSI")
+rsiSmooth = input.int(1,  "RSI Smoothing (linea)", minval=1, group="HARSI")
+upExt     = input.float(30, "Banda estrema sup (+30 ~ RSI80)", group="HARSI")
+upMild    = input.float(20, "Banda lieve sup (+20)",           group="HARSI")
+loMild    = input.float(-20,"Banda lieve inf (-20)",           group="HARSI")
+loExt     = input.float(-30,"Banda estrema inf (-30 ~ RSI20)", group="HARSI")
+
+// ----------------- INPUT: Gestione trade ----------------------------
+useRisk   = input.bool(true, "Sizing a rischio % (off = qty fissa)", group="Trade")
+riskPct   = input.float(1.0, "Rischio % per trade", step=0.25, group="Trade")
+rr        = input.float(2.0, "Reward:Risk (TP)", step=0.5, group="Trade",
+     tooltip="ATTENZIONE: su uno scalp mean-reversion un RR>=2 abbassa il win-rate. Prova anche 1.0-1.5.")
+swingLook = input.int(10, "Swing lookback (SL)", minval=1, group="Trade")
+bufTicks  = input.int(50, "Buffer SL (in mintick)", minval=0, group="Trade")
+
+// ----------------- INPUT: Filtri sessione (opz.) --------------------
+useHours  = input.bool(false, "Filtro orario", group="Sessione")
+sessTxt   = input.session("0700-2000", "Sessione (ora exchange)", group="Sessione")
+inSess    = not useHours or not na(time(timeframe.period, sessTxt))
+
+// ----------------- HEIKIN-ASHI di PREZZO ----------------------------
+haClose = (open + high + low + close) / 4.0
+var float haOpen = na
+haOpen := na(haOpen[1]) ? (open + close) / 2.0 : (haOpen[1] + haClose[1]) / 2.0
+haHigh = math.max(high, math.max(haOpen, haClose))
+haLow  = math.min(low,  math.min(haOpen, haClose))
+
+// ----------------- RSI su ogni serie HA, ri-centrato ----------------
+rO = ta.rsi(haOpen,  rsiLen) - 50.0
+rH = ta.rsi(haHigh,  rsiLen) - 50.0
+rL = ta.rsi(haLow,   rsiLen) - 50.0
+rC = ta.rsi(haClose, rsiLen) - 50.0
+
+// ----------------- Candele HA-RSI -----------------------------------
+hrClose = (rO + rH + rL + rC) / 4.0
+var float hrOpen = na
+hrOpen := na(hrOpen[1]) ? (rO + rC) / 2.0 : (hrOpen[1] + hrClose[1]) / 2.0
+hrHigh = math.max(rH, math.max(hrOpen, hrClose))
+hrLow  = math.min(rL, math.min(hrOpen, hrClose))
+hrBull = hrClose >= hrOpen
+
+// ----------------- Linea RSI overlay (ri-centrata + smoothing) ------
+rsiRaw  = ta.rsi(close, rsiLen) - 50.0
+rsiLine = rsiSmooth > 1 ? ta.ema(rsiRaw, rsiSmooth) : rsiRaw
+
+// ----------------- LE 4 CONDIZIONI ----------------------------------
+// SHORT (da overbought):
+//  1) candela HA-RSI chiude nella fascia rossa (>= +20)
+//  2) RSI line >= estremo (+30 ~ RSI80)
+//  3) flip colore: candela prec. bull, candela attuale bear
+//  4) RSI gira giu'
+shCond1 = hrClose >= upMild
+shCond2 = rsiLine >= upExt
+shCond3 = hrBull[1] and not hrBull
+shCond4 = rsiLine < rsiLine[1]
+shortSig = shCond1 and shCond2 and shCond3 and shCond4 and inSess
+
+// LONG (da oversold): specchiato
+loCond1 = hrClose <= loMild
+loCond2 = rsiLine <= loExt
+loCond3 = (not hrBull[1]) and hrBull
+loCond4 = rsiLine > rsiLine[1]
+longSig = loCond1 and loCond2 and loCond3 and loCond4 and inSess
+
+// ----------------- SL / TP / SIZING ---------------------------------
+buf      = bufTicks * syminfo.mintick
+swLow    = ta.lowest(low,  swingLook)
+swHigh   = ta.highest(high, swingLook)
+
+f_qty(stopDist) =>
+    q = 1.0
+    if useRisk and stopDist > 0 and syminfo.pointvalue > 0
+        riskMoney = strategy.equity * riskPct / 100.0
+        q := riskMoney / (stopDist * syminfo.pointvalue)
+    q
+
+// entra solo a chiusura candela (process_orders_on_close=true)
+if longSig and strategy.position_size == 0
+    slL = swLow - buf
+    sd  = close - slL
+    if sd > 0
+        tpL = close + rr * sd
+        strategy.entry("L", strategy.long, qty=f_qty(sd))
+        strategy.exit("Lx", "L", stop=slL, limit=tpL)
+
+if shortSig and strategy.position_size == 0
+    slS = swHigh + buf
+    sd  = slS - close
+    if sd > 0
+        tpS = close - rr * sd
+        strategy.entry("S", strategy.short, qty=f_qty(sd))
+        strategy.exit("Sx", "S", stop=slS, limit=tpS)
+
+// ----------------- VISUAL (candele HA-RSI + bande) ------------------
+plotcandle(hrOpen, hrHigh, hrLow, hrClose, "HARSI",
+     color = hrBull ? color.new(color.lime, 0) : color.new(color.red, 0),
+     wickcolor = color.gray, bordercolor = na)
+plot(rsiLine, "RSI", color=color.new(color.aqua, 0))
+hline(upExt,  "+30", color=color.new(color.red, 60),   linestyle=hline.style_dotted)
+hline(upMild, "+20", color=color.new(color.red, 80),   linestyle=hline.style_dotted)
+hline(0,      "0",   color=color.new(color.gray, 50),  linestyle=hline.style_dotted)
+hline(loMild, "-20", color=color.new(color.green, 80), linestyle=hline.style_dotted)
+hline(loExt,  "-30", color=color.new(color.green, 60), linestyle=hline.style_dotted)
