@@ -19,7 +19,11 @@ strategy("DAX M3 Supertrend - Claudio", overlay=true,
      initial_capital=12817,
      default_qty_type=strategy.fixed, default_qty_value=1,
      pyramiding=0, process_orders_on_close=true, calc_on_every_tick=false,
-     commission_type=strategy.commission.percent, commission_value=0.0)
+     commission_type=strategy.commission.cash_per_contract, commission_value=1.0,
+     slippage=2)
+// Costo modellato DI DEFAULT: 1.0 valuta per contratto per fill = ~2 punti
+// DAX a giro (entrata+uscita) = spread realistico/pessimista. NON usare
+// commissione "Percentuale" nel pannello: su un indice a 24.000 sarebbe enorme.
 
 // ----------------- INPUT: Supertrend / bias -------------------------
 stFactor = input.float(3.5, "Supertrend Factor", step=0.1, group="Supertrend")
@@ -34,6 +38,13 @@ useADX   = input.bool(true, "Filtro ADX su H4", group="Filtri")
 // ----------------- INPUT: Sessione ----------------------------------
 sess     = input.session("0930-1730", "Sessione operativa (CET)", group="Sessione")
 closeEOD = input.bool(true, "Chiudi a fine sessione (intraday)", group="Sessione")
+
+// ----------------- INPUT: Periodo (in-sample / out-of-sample) -------
+useDates = input.bool(false, "Limita periodo", group="Periodo",
+     tooltip="Accendi per testare un sotto-periodo: in-sample vs out-of-sample.")
+startD   = input.time(timestamp("2026-01-05T00:00"), "Inizio", group="Periodo")
+endD     = input.time(timestamp("2026-03-31T23:59"), "Fine",   group="Periodo")
+inRange  = not useDates or (time >= startD and time <= endD)
 
 // ----------------- INPUT: Uscite / rischio --------------------------
 exitMode = input.string("Supertrend opposto + RR", "Uscita",
@@ -67,8 +78,8 @@ emaOkL    = not useEMA or close > ema
 emaOkS    = not useEMA or close < ema
 inSess    = not na(time(timeframe.period, sess))
 
-longSig  = biasHTF ==  1 and flipLong  and emaOkL and inSess
-shortSig = biasHTF == -1 and flipShort and emaOkS and inSess
+longSig  = biasHTF ==  1 and flipLong  and emaOkL and inSess and inRange
+shortSig = biasHTF == -1 and flipShort and emaOkS and inSess and inRange
 
 // ----------------- SIZING (1% del capitale) -------------------------
 f_qty(stopDist) =>
