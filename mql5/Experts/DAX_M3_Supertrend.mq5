@@ -42,7 +42,7 @@ enum ENUM_EXIT_MODE
 input group "=== Supertrend ==="
 input double Factor        = 3.5;   // Supertrend Factor (x ATR)
 input int    AtrPeriod     = 10;    // Supertrend ATR period
-input int    ST_Lookback   = 400;   // Barre per stabilizzare la ricorsione
+input int    ST_Lookback   = 150;   // Barre per stabilizzare la ricorsione (basta ~40-100)
 
 input group "=== Bias H4 ==="
 input bool   UseEMA        = true;  // Filtro EMA200 (H4 e TF corrente)
