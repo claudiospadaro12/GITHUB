@@ -27,6 +27,8 @@ upExt     = input.float(30, "Banda estrema sup (+30 ~ RSI80)", group="HARSI")
 upMild    = input.float(20, "Banda lieve sup (+20)",           group="HARSI")
 loMild    = input.float(-20,"Banda lieve inf (-20)",           group="HARSI")
 loExt     = input.float(-30,"Banda estrema inf (-30 ~ RSI20)", group="HARSI")
+extLook   = input.int(3, "Barre entro cui l'RSI ha toccato l'estremo", minval=1, group="HARSI",
+     tooltip="L'RSI deve aver raggiunto l'estremo (80/20) nelle ultime N candele, non per forza su quella del flip.")
 
 // ----------------- INPUT: Gestione trade ----------------------------
 useRisk   = input.bool(true, "Sizing a rischio % (off = qty fissa)", group="Trade")
@@ -73,14 +75,14 @@ rsiLine = rsiSmooth > 1 ? ta.ema(rsiRaw, rsiSmooth) : rsiRaw
 //  3) flip colore: candela prec. bull, candela attuale bear
 //  4) RSI gira giu'
 shCond1 = hrClose >= upMild
-shCond2 = rsiLine >= upExt
+shCond2 = ta.highest(rsiLine, extLook) >= upExt
 shCond3 = hrBull[1] and not hrBull
 shCond4 = rsiLine < rsiLine[1]
 shortSig = shCond1 and shCond2 and shCond3 and shCond4 and inSess
 
 // LONG (da oversold): specchiato
 loCond1 = hrClose <= loMild
-loCond2 = rsiLine <= loExt
+loCond2 = ta.lowest(rsiLine, extLook) <= loExt
 loCond3 = (not hrBull[1]) and hrBull
 loCond4 = rsiLine > rsiLine[1]
 longSig = loCond1 and loCond2 and loCond3 and loCond4 and inSess

@@ -17,6 +17,7 @@ upExt     = input.float(30, "Banda estrema sup (+30 ~ RSI80)", group="HARSI")
 upMild    = input.float(20, "Banda lieve sup (+20)",           group="HARSI")
 loMild    = input.float(-20,"Banda lieve inf (-20)",           group="HARSI")
 loExt     = input.float(-30,"Banda estrema inf (-30 ~ RSI20)", group="HARSI")
+extLook   = input.int(3, "Barre entro cui l'RSI ha toccato l'estremo", minval=1, group="HARSI")
 useHours  = input.bool(false, "Filtro orario", group="Sessione")
 sessTxt   = input.session("0700-2000", "Sessione", group="Sessione")
 inSess    = not useHours or not na(time(timeframe.period, sessTxt))
@@ -44,8 +45,8 @@ rsiRaw  = ta.rsi(close, rsiLen) - 50.0
 rsiLine = rsiSmooth > 1 ? ta.ema(rsiRaw, rsiSmooth) : rsiRaw
 
 // ----------------- 4 CONDIZIONI -------------------------------------
-shortSig = (hrClose >= upMild) and (rsiLine >= upExt) and (hrBull[1] and not hrBull) and (rsiLine < rsiLine[1]) and inSess
-longSig  = (hrClose <= loMild) and (rsiLine <= loExt) and ((not hrBull[1]) and hrBull) and (rsiLine > rsiLine[1]) and inSess
+shortSig = (hrClose >= upMild) and (ta.highest(rsiLine, extLook) >= upExt) and (hrBull[1] and not hrBull) and (rsiLine < rsiLine[1]) and inSess
+longSig  = (hrClose <= loMild) and (ta.lowest(rsiLine, extLook) <= loExt) and ((not hrBull[1]) and hrBull) and (rsiLine > rsiLine[1]) and inSess
 
 // ----------------- VISUAL -------------------------------------------
 plotcandle(hrOpen, hrHigh, hrLow, hrClose, "HARSI",
