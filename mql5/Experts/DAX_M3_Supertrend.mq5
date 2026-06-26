@@ -136,6 +136,32 @@ double RoundDownToStep(double lot)
 }
 
 //------------------------------------------------------------------
+// Arrotonda un prezzo al tick size del simbolo (evita "invalid
+// stops" da prezzi non allineati al tick del broker).
+//------------------------------------------------------------------
+double RoundToTick(double price)
+{
+   double tick = SymbolInfoDouble(g_sym, SYMBOL_TRADE_TICK_SIZE);
+   if(tick <= 0.0) return(NormalizeDouble(price, g_digits));
+   double r = MathRound(price / tick) * tick;
+   return(NormalizeDouble(r, g_digits));
+}
+
+//------------------------------------------------------------------
+// Distanza minima richiesta dal broker per SL/TP dal prezzo
+// corrente (stops level / freeze level) + 1 tick di margine.
+//------------------------------------------------------------------
+double MinStopDistance()
+{
+   long stopsLvl  = SymbolInfoInteger(g_sym, SYMBOL_TRADE_STOPS_LEVEL);
+   long freezeLvl = SymbolInfoInteger(g_sym, SYMBOL_TRADE_FREEZE_LEVEL);
+   double tick = SymbolInfoDouble(g_sym, SYMBOL_TRADE_TICK_SIZE);
+   if(tick <= 0.0) tick = g_point;
+   double minPts = (double)MathMax(stopsLvl, freezeLvl);
+   return(minPts * g_point + tick);
+}
+
+//------------------------------------------------------------------
 // Calcola il lotto a rischio. Ritorna 0 (e Print) se nemmeno il
 // lotto minimo rispetta il budget di rischio.
 //------------------------------------------------------------------
@@ -240,6 +266,30 @@ int CountEAPositions(int dir)
       n++;
    }
    return(n);
+}
+
+//------------------------------------------------------------------
+// Ticket della posizione EA piu' recente di una direzione (per il
+// fallback "apri senza stop poi modifica").
+//------------------------------------------------------------------
+ulong NewestEAPositionTicket(int dir)
+{
+   ulong    best = 0;
+   datetime bestTime = 0;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket == 0) continue;
+      if(!PositionSelectByTicket(ticket)) continue;
+      if(PositionGetString(POSITION_SYMBOL) != g_sym) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != MagicNumber) continue;
+      long ptype = PositionGetInteger(POSITION_TYPE);
+      if(dir > 0 && ptype != POSITION_TYPE_BUY)  continue;
+      if(dir < 0 && ptype != POSITION_TYPE_SELL) continue;
+      datetime t = (datetime)PositionGetInteger(POSITION_TIME);
+      if(t >= bestTime) { bestTime = t; best = ticket; }
+   }
+   return(best);
 }
 
 //==================================================================
@@ -616,6 +666,17 @@ void OpenTrade(bool isBuy, double stLine)
       return;
    }
 
+   //--- rispetta la distanza minima del broker: allarga SL se troppo vicino
+   double minDist = MinStopDistance();
+   if(isBuy)
+   {
+      if(entry - sl < minDist) sl = entry - minDist;
+   }
+   else
+   {
+      if(sl - entry < minDist) sl = entry + minDist;
+   }
+
    double stopDistance = MathAbs(entry - sl);
    if(stopDistance <= 0.0)
    {
@@ -640,21 +701,45 @@ void OpenTrade(bool isBuy, double stLine)
       return;
    }
 
-   // TP solo se la modalita' usa RR
+   // TP solo se la modalita' usa RR (con distanza minima garantita)
    bool useRR = (ExitMode == EXIT_ST_OPPOSITE_PLUS_RR || ExitMode == EXIT_RR_ONLY);
    double tp = 0.0;
    if(useRR)
+   {
       tp = isBuy ? entry + RR * stopDistance
                  : entry - RR * stopDistance;
+      if(isBuy  && (tp - entry) < minDist) tp = entry + minDist;
+      if(!isBuy && (entry - tp) < minDist) tp = entry - minDist;
+   }
 
-   sl = NormalizeDouble(sl, g_digits);
-   tp = (tp > 0.0) ? NormalizeDouble(tp, g_digits) : 0.0;
+   sl = RoundToTick(sl);
+   tp = (tp > 0.0) ? RoundToTick(tp) : 0.0;
 
    bool ok;
    if(isBuy)
       ok = trade.Buy(lot, g_sym, 0.0, sl, tp, "DAX_ST BUY");
    else
       ok = trade.Sell(lot, g_sym, 0.0, sl, tp, "DAX_ST SELL");
+
+   //--- fallback: se "invalid stops" (10016), apri senza stop e poi modifica
+   if(!ok && trade.ResultRetcode() == 10016)
+   {
+      Print("DAX_ST: invalid stops (entry=", DoubleToString(entry,g_digits),
+            " SL=", DoubleToString(sl,g_digits), " TP=", DoubleToString(tp,g_digits),
+            " minDist=", DoubleToString(minDist,g_digits),
+            ") -> riprovo senza stop + PositionModify.");
+      bool ok2 = isBuy ? trade.Buy(lot, g_sym, 0.0, 0.0, 0.0, "DAX_ST BUY")
+                       : trade.Sell(lot, g_sym, 0.0, 0.0, 0.0, "DAX_ST SELL");
+      if(ok2)
+      {
+         ulong tk = NewestEAPositionTicket(isBuy ? 1 : -1);
+         if(tk != 0 && trade.PositionModify(tk, sl, tp))
+            ok = true;
+         else
+            Print("DAX_ST: PositionModify post-apertura fallita. retcode=",
+                  trade.ResultRetcode(), " ", trade.ResultRetcodeDescription());
+      }
+   }
 
    if(!ok)
       Print("DAX_ST: apertura ", (isBuy ? "BUY" : "SELL"),
@@ -768,6 +853,18 @@ int OnInit()
    }
 
    g_lastBar = (datetime)SeriesInfoInteger(g_sym, _Period, SERIES_LASTBAR_DATE);
+
+   //--- DIAGNOSTICA vincoli broker (per capire eventuali "invalid stops")
+   Print("DAX_ST VINCOLI ", g_sym,
+         " | digits=", g_digits,
+         " point=", DoubleToString(g_point, g_digits),
+         " tickSize=", DoubleToString(SymbolInfoDouble(g_sym, SYMBOL_TRADE_TICK_SIZE), 5),
+         " tickValue=", DoubleToString(SymbolInfoDouble(g_sym, SYMBOL_TRADE_TICK_VALUE), 5),
+         " stopsLevel=", (long)SymbolInfoInteger(g_sym, SYMBOL_TRADE_STOPS_LEVEL),
+         " freezeLevel=", (long)SymbolInfoInteger(g_sym, SYMBOL_TRADE_FREEZE_LEVEL),
+         " volMin=", DoubleToString(SymbolInfoDouble(g_sym, SYMBOL_VOLUME_MIN), 2),
+         " volStep=", DoubleToString(SymbolInfoDouble(g_sym, SYMBOL_VOLUME_STEP), 2),
+         " minStopDist=", DoubleToString(MinStopDistance(), g_digits));
 
    Print("DAX_ST avviato su ", g_sym,
          " TF=", EnumToString((ENUM_TIMEFRAMES)_Period),
