@@ -1,0 +1,56 @@
+; Preset NASDAQ - Apertura Americana (breakout + numeri tondi + filtro news)
+; Carica in: Strategy Tester -> tab Input -> Load
+; ATTENZIONE: InpSessionHour e' in ORA SERVER. Qui ipotizzo broker GMT+2/+3
+; (Nasdaq cash apre alle 14:30 sul server). Verifica sul TUO grafico e correggi!
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=21
+InpCloseMin=45
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpEntryMode=0
+InpRangeMode=0
+InpPrevWindowMin=60
+InpBufferPoints=20
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=true
+InpUseGapFill=false
+InpGapMinPoints=150
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseRoundLevels=true
+InpRoundStep=100.0
+InpRoundMinDistPts=100
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpMagic=770201
+InpMaxSpread=0
+InpVerbose=true

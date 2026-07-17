@@ -97,10 +97,67 @@ con **TP sulla chiusura di ieri**.
 | Rischio | `InpSLMode` | Stop su estremo opposto (`RANGE`) o su ATR |
 | Rischio | `InpTP1_R` / `InpTP1_ClosePct` | 1° obiettivo (in R) e % da chiudere |
 | Rischio | `InpUseTrailing` / `InpTrailAtrMult` | Trailing stop su ATR |
+| Numeri tondi | `InpUseRoundLevels` | Usa il numero tondo come 1° obiettivo |
+| Numeri tondi | `InpRoundStep` | Passo della griglia (in **PREZZO**, es. 100) |
+| Numeri tondi | `InpRoundMinDistPts` | Distanza minima dall'ingresso (in **punti**) |
+| News | `InpUseNewsFilter` + `InpNewsFile` | Blocca il trading intorno alle news da file CSV |
+| News | `InpNewsMinImpact` | Impatto minimo (3=High "3 tori") |
+| News | `InpNewsBeforeMin/AfterMin` | Minuti di stop prima/dopo la news |
+| News | `InpNewsFlatten` | Chiudi tutto prima della news |
 
-> ⚠️ `InpBufferPoints` e `InpGapMinPoints` sono in **punti**, che dipendono dallo strumento.
-> Sugli indici un "punto indice" può valere 1, 10 o 100 punti a seconda del broker: tara
-> questi valori sul tuo simbolo.
+> ⚠️ Unità: `InpRoundStep` è in **PREZZO**; `InpBufferPoints`, `InpGapMinPoints` e
+> `InpRoundMinDistPts` sono in **punti**. Sugli indici un "punto" può valere 1, 10 o 100 a
+> seconda del broker: **tara questi valori sul tuo simbolo**.
+
+---
+
+## 🎯 Numeri tondi come obiettivo (approssima il %Custom/Multipivot)
+
+Il piano Nasdaq usa i **numeri tondi** (17000, 38000, …) come livelli-obiettivo. Attivando
+`InpUseRoundLevels = true`, la **parziale** viene presa al **primo numero tondo** nella
+direzione del trade (multiplo di `InpRoundStep`), ad almeno `InpRoundMinDistPts` di distanza.
+È attivo di default nel preset Nasdaq (`InpRoundStep = 100`).
+
+---
+
+## 📰 Filtro news (file CSV — "prima di un dato a 3 tori tolgo tutto")
+
+L'EA **non** si collega a internet: legge le news da un file CSV in `MQL5/Files/`.
+
+1. Copia `mql5/Files/abtg_news.csv` in `MQL5/Files/`.
+2. Attiva `InpUseNewsFilter = true` (già attivo nei preset Nasdaq).
+3. Nella finestra `[news − InpNewsBeforeMin, news + InpNewsAfterMin]` l'EA **non apre**
+   nuovi ordini e, se `InpNewsFlatten = true`, **cancella i pendenti e chiude** le posizioni.
+
+**Formato del file** (separatore `;`, una riga per evento):
+```
+YYYY.MM.DD HH:MM ; Impatto ; Valuta ; Titolo
+2026.01.09 14:30 ; High ; USD ; Non-Farm Payrolls
+```
+- **Impatto**: `High`/`Medium`/`Low` oppure `3`/`2`/`1`. Con `InpNewsMinImpact = 3` filtri solo i "3 tori".
+- La **prima riga di intestazione** viene ignorata automaticamente.
+- **Orari**: devono essere in **ora SERVER**. Se esporti da ForexFactory in un altro fuso,
+  usa `InpNewsShiftMinutes` per allinearli (es. `-60` o `+60`).
+- **Valute**: con `InpNewsCurrencies = "USD"` filtri solo gli eventi USD (vuoto = tutti).
+
+> Devi tenere aggiornato il CSV (es. incollando le news della settimana da ForexFactory).
+> Il file di esempio contiene alcuni eventi 2026 come modello.
+
+---
+
+## 📂 File preset `.set` pronti (cartella `mql5/Presets/`)
+
+| File | EA | Uso |
+|------|----|----|
+| `ABTG_DAX_Apertura_EU.set` | DAX | Breakout apertura europea |
+| `ABTG_Nasdaq_Apertura_US.set` | Nasdaq | Breakout + numeri tondi + news |
+| `ABTG_Nasdaq_GapFill.set` | Nasdaq | Modalità Gap Fill |
+
+Caricali nello **Strategy Tester ▸ scheda Input ▸ Load** (oppure nella finestra parametri
+dell'EA sul grafico, pulsante *Load*).
+
+> ⚠️ I `.set` ipotizzano un broker **GMT+2/+3** (DAX apre 08:00, Nasdaq 14:30 sul server).
+> **Correggi `InpSessionHour`** se il tuo broker ha un fuso diverso (vedi tabella orari sopra).
 
 ---
 
@@ -133,9 +190,8 @@ con **TP sulla chiusura di ieri**.
 - Serve **storia M1** per calcolare il range: usa dati/tick reali nel tester.
 - Su conti **hedging** un whipsaw molto rapido potrebbe far scattare entrambi i pendenti
   prima dell'OCO (raro). Su conti **netting** si compensano.
-- Il calendario news (ForexFactory) **non** è integrato: evita manualmente le fasce dei
-  dati ad alto impatto, oppure usa `InpCloseHour` per non restare esposto.
+- Il calendario news va **mantenuto a mano** nel CSV (nessuna connessione a internet).
 - Il **Multipivot / %Custom** proprietario è approssimato con R-multipli e numeri tondi.
 
-Se vuoi, posso aggiungere: filtro news via file, livelli a numero tondo come TP,
-o versioni separate "solo breakout" / "solo gap fill".
+Possibili aggiunte future: import automatico del calendario news, livelli di Fibonacci
+come obiettivi, versioni separate "solo breakout" / "solo gap fill".

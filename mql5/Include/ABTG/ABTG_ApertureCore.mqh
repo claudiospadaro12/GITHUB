@@ -127,6 +127,21 @@ input bool   InpBreakevenAtTP1  = true;               // Sposta stop in pari dop
 input bool   InpUseTrailing     = true;               // Attiva trailing stop
 input double InpTrailAtrMult    = 2.0;                // Trailing = X * ATR
 
+input group "=== Obiettivi a numeri tondi (approx. Multipivot/%Custom) ==="
+input bool   InpUseRoundLevels  = false;              // Usa i numeri tondi come 1o obiettivo
+input double InpRoundStep       = 100.0;              // Passo della griglia di numeri tondi (in PREZZO)
+input double InpRoundMinDistPts = 50;                 // Distanza minima dall'ingresso (punti) per validare il livello
+
+input group "=== Filtro notizie (file CSV in MQL5/Files) ==="
+input bool   InpUseNewsFilter   = false;              // Blocca il trading intorno alle news importanti
+input string InpNewsFile        = "abtg_news.csv";    // File CSV con le notizie (in MQL5/Files)
+input int    InpNewsMinImpact   = 3;                  // Impatto minimo da filtrare (3=High "3 tori")
+input int    InpNewsBeforeMin   = 30;                 // Minuti di stop PRIMA della news
+input int    InpNewsAfterMin    = 30;                 // Minuti di stop DOPO la news
+input int    InpNewsShiftMinutes= 0;                  // Sposta gli orari del file per allinearli al SERVER
+input string InpNewsCurrencies  = "";                 // Valute da filtrare, es. "USD,EUR" (vuoto = tutte)
+input bool   InpNewsFlatten     = true;               // Chiudi posizioni e cancella pendenti prima della news
+
 input group "=== Generali ==="
 input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
 input int    InpMaxSpread      = 0;                   // Spread massimo in punti (0 = nessun limite)
@@ -152,6 +167,12 @@ double   gRangeLow  = 0;
 ulong    gBuyTicket = 0;           // ticket ordine pendente buy
 ulong    gSellTicket= 0;           // ticket ordine pendente sell
 bool     gPartialDone = false;     // parziale gia' eseguita?
+
+// calendario news caricato da file CSV
+datetime gNewsTime[];              // orario evento (server, gia' shiftato)
+int      gNewsImpact[];            // impatto: 3=High, 2=Medium, 1=Low
+string   gNewsCcy[];               // valuta dell'evento
+int      gNewsCount = 0;
 
 //+------------------------------------------------------------------+
 //| Log helper                                                       |
@@ -189,11 +210,97 @@ int ABTG_OnInit()
         }
      }
 
+   if(InpUseNewsFilter)
+      LoadNews();
+
    ABTGLog(StringFormat("avviato su %s. Apertura server %02d:%02d, range %d min, flat %02d:%02d.",
                         _Symbol, InpSessionHour, InpSessionMin, InpRangeMinutes,
                         InpCloseHour, InpCloseMin));
    ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
    return(INIT_SUCCEEDED);
+  }
+
+//+------------------------------------------------------------------+
+//| Carica le news da un file CSV in MQL5/Files.                     |
+//|  Formato per riga (separatore ';'):                              |
+//|    YYYY.MM.DD HH:MM ; Impatto ; Valuta ; Titolo                  |
+//|  Impatto: High/Medium/Low oppure 3/2/1. Righe non valide (es.    |
+//|  intestazione) vengono ignorate.                                 |
+//+------------------------------------------------------------------+
+void LoadNews()
+  {
+   gNewsCount = 0;
+   ArrayResize(gNewsTime, 0);
+   ArrayResize(gNewsImpact, 0);
+   ArrayResize(gNewsCcy, 0);
+
+   int h = FileOpen(InpNewsFile, FILE_READ|FILE_CSV|FILE_ANSI, ';');
+   if(h == INVALID_HANDLE)
+     {
+      ABTGLog("ATTENZIONE: file news '"+InpNewsFile+"' non trovato in MQL5/Files. Filtro news disattivato di fatto.");
+      return;
+     }
+
+   while(!FileIsEnding(h))
+     {
+      string sTime = FileReadString(h);
+      if(FileIsLineEnding(h) && StringLen(sTime) == 0) continue;
+      string sImp  = FileIsLineEnding(h) ? "" : FileReadString(h);
+      string sCcy  = FileIsLineEnding(h) ? "" : FileReadString(h);
+      // consumo eventuali colonne extra (es. titolo) fino a fine riga
+      while(!FileIsLineEnding(h) && !FileIsEnding(h)) FileReadString(h);
+
+      datetime t = StringToTime(sTime);
+      if(t <= 0) continue;                    // riga non valida (intestazione ecc.)
+      t += InpNewsShiftMinutes * 60;          // allineo all'orario del server
+
+      int imp = ImpactToInt(sImp);
+
+      int n = gNewsCount;
+      ArrayResize(gNewsTime,   n+1);
+      ArrayResize(gNewsImpact, n+1);
+      ArrayResize(gNewsCcy,    n+1);
+      gNewsTime[n]   = t;
+      gNewsImpact[n] = imp;
+      gNewsCcy[n]    = sCcy;
+      gNewsCount     = n+1;
+     }
+   FileClose(h);
+   ABTGLog(StringFormat("news caricate: %d eventi dal file '%s'.", gNewsCount, InpNewsFile));
+  }
+
+//+------------------------------------------------------------------+
+//| Converte l'impatto testuale/numerico in intero (3/2/1/0)        |
+//+------------------------------------------------------------------+
+int ImpactToInt(string s)
+  {
+   string u = s;
+   StringToUpper(u);
+   StringTrimLeft(u); StringTrimRight(u);
+   if(StringFind(u,"HIGH")>=0 || u=="3") return(3);
+   if(StringFind(u,"MED") >=0 || u=="2") return(2);
+   if(StringFind(u,"LOW") >=0 || u=="1") return(1);
+   return(0);
+  }
+
+//+------------------------------------------------------------------+
+//| Siamo nella finestra di blackout di una news importante?         |
+//+------------------------------------------------------------------+
+bool InNewsBlackout(datetime now)
+  {
+   if(!InpUseNewsFilter || gNewsCount == 0) return(false);
+   bool filterCcy = (StringLen(InpNewsCurrencies) > 0);
+
+   for(int i = 0; i < gNewsCount; i++)
+     {
+      if(gNewsImpact[i] < InpNewsMinImpact) continue;
+      if(filterCcy && StringFind(InpNewsCurrencies, gNewsCcy[i]) < 0) continue;
+
+      datetime from = gNewsTime[i] - InpNewsBeforeMin*60;
+      datetime to   = gNewsTime[i] + InpNewsAfterMin*60;
+      if(now >= from && now <= to) return(true);
+     }
+   return(false);
   }
 
 //+------------------------------------------------------------------+
@@ -224,6 +331,15 @@ void ABTG_OnTick()
       ResetDay();
      }
 
+   //--- FILTRO NEWS: se siamo vicino a un dato importante, "tolgo tutto"
+   //    (come dice il piano: prima di un dato a 3 tori si azzera l'esposizione)
+   bool newsBlk = InNewsBlackout(TimeCurrent());
+   if(newsBlk && InpNewsFlatten)
+     {
+      CancelMyPendings();
+      if(SelectMyPosition()) gTrade.PositionClose(_Symbol);
+     }
+
    //--- a fine sessione: cancella i pendenti ed (eventualmente) chiudi
    if(TimeInMinutes(now) >= InpCloseHour*60 + InpCloseMin)
      {
@@ -244,6 +360,8 @@ void ABTG_OnTick()
          break;
 
       case PH_BUILDING:
+         // durante il blackout news non piazzo nulla: aspetto che passi
+         if(newsBlk) break;
          // costruisco il range e poi piazzo gli ordini.
          // avanzo a PH_PLACED SOLO se la decisione e' stata presa (orari/dati ok):
          // se i dati M1 non sono ancora pronti riprovo al tick successivo.
@@ -591,12 +709,10 @@ double CalcLotByRisk(double slDistancePrice)
   }
 
 //+------------------------------------------------------------------+
-//| OCO: se una posizione dell'EA e' aperta, cancella i pendenti     |
+//| Cancella tutti gli ordini pendenti di QUESTO EA sul simbolo      |
 //+------------------------------------------------------------------+
-void HandleOCO()
+void CancelMyPendings()
   {
-   if(!HasOpenPosition()) return;
-
    for(int i = OrdersTotal() - 1; i >= 0; i--)
      {
       ulong ticket = OrderGetTicket(i);
@@ -607,6 +723,15 @@ void HandleOCO()
      }
    gBuyTicket  = 0;
    gSellTicket = 0;
+  }
+
+//+------------------------------------------------------------------+
+//| OCO: se una posizione dell'EA e' aperta, cancella i pendenti     |
+//+------------------------------------------------------------------+
+void HandleOCO()
+  {
+   if(!HasOpenPosition()) return;
+   CancelMyPendings();
   }
 
 //+------------------------------------------------------------------+
@@ -631,12 +756,20 @@ void ManagePosition()
    double riskDist = (type == POSITION_TYPE_BUY) ? (openP - InitialSL(openP, sl, type)) : (InitialSL(openP, sl, type) - openP);
    if(riskDist <= 0) riskDist = AtrValue()*InpAtrSlMult;
 
-   //--- 1) PARZIALE al primo obiettivo (1R * InpTP1_R)
-   if(!gPartialDone && InpTP1_R > 0 && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+   //--- 1) PARZIALE al primo obiettivo
+   if(!gPartialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
      {
-      double target = (type == POSITION_TYPE_BUY) ? openP + riskDist*InpTP1_R
-                                                   : openP - riskDist*InpTP1_R;
-      bool reached = (type == POSITION_TYPE_BUY) ? (bid >= target) : (ask <= target);
+      int dirSign = (type == POSITION_TYPE_BUY) ? +1 : -1;
+
+      // obiettivo: numero tondo (se attivo) oppure R-multiplo
+      double target;
+      if(InpUseRoundLevels && InpRoundStep > 0)
+         target = NextRoundLevel(openP, dirSign, InpRoundStep, InpRoundMinDistPts*_Point);
+      else
+         target = openP + dirSign*riskDist*InpTP1_R;
+
+      bool reached = (target > 0) &&
+                     ((type == POSITION_TYPE_BUY) ? (bid >= target) : (ask <= target));
       if(reached)
         {
          double closeVol = NormalizeVolume(vol * InpTP1_ClosePct/100.0);
@@ -645,7 +778,7 @@ void ManagePosition()
             if(gTrade.PositionClosePartial(ticket, closeVol))
               {
                gPartialDone = true;
-               ABTGLog(StringFormat("1o obiettivo (%.1fR): chiusa parziale %.2f lotti.", InpTP1_R, closeVol));
+               ABTGLog(StringFormat("1o obiettivo @ %.5f: chiusa parziale %.2f lotti.", target, closeVol));
                //--- 2) BREAKEVEN sul residuo
                if(InpBreakevenAtTP1)
                  {
@@ -692,6 +825,27 @@ double InitialSL(double openP, double curSL, long type)
   }
 
 //+------------------------------------------------------------------+
+//| Primo NUMERO TONDO nella direzione del trade, ad almeno         |
+//| minDistPrice dal prezzo (approssima i livelli %Custom/Multipivot)|
+//+------------------------------------------------------------------+
+double NextRoundLevel(double price, int dir, double stepPrice, double minDistPrice)
+  {
+   if(stepPrice <= 0) return(0);
+   double lvl;
+   if(dir > 0)
+     {
+      lvl = MathCeil(price/stepPrice)*stepPrice;
+      while(lvl - price < minDistPrice) lvl += stepPrice;
+     }
+   else
+     {
+      lvl = MathFloor(price/stepPrice)*stepPrice;
+      while(price - lvl < minDistPrice) lvl -= stepPrice;
+     }
+   return(lvl);
+  }
+
+//+------------------------------------------------------------------+
 //| Normalizza un volume ai vincoli del simbolo                     |
 //+------------------------------------------------------------------+
 double NormalizeVolume(double v)
@@ -710,14 +864,7 @@ double NormalizeVolume(double v)
 void EndOfSession()
   {
    // cancella eventuali ordini pendenti dell'EA
-   for(int i = OrdersTotal() - 1; i >= 0; i--)
-     {
-      ulong ticket = OrderGetTicket(i);
-      if(ticket == 0) continue;
-      if(OrderGetString(ORDER_SYMBOL) != _Symbol) continue;
-      if(OrderGetInteger(ORDER_MAGIC) != InpMagic) continue;
-      gTrade.OrderDelete(ticket);
-     }
+   CancelMyPendings();
    // chiudi la posizione se richiesto
    if(InpCloseAtEnd && SelectMyPosition())
      {
