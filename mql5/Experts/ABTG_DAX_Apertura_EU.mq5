@@ -25,10 +25,13 @@
 #define ABTG_DEF_MAGIC        770101
 #define ABTG_DEF_SESSION_HOUR 9      // apertura DAX (server) - ADATTA AL TUO BROKER!
 #define ABTG_DEF_SESSION_MIN  0
-#define ABTG_DEF_RANGE_MIN    15     // range dei primi 15 minuti
+#define ABTG_DEF_RANGE_MIN    15     // range dei primi 15 minuti (PDF: "primi 15 minuti")
+#define ABTG_DEF_RANGE_MODE   0      // 0=range di apertura (breakout classico dell'apertura EU)
 #define ABTG_DEF_CLOSE_HOUR   17     // flat a fine mattinata/pomeriggio (server)
 #define ABTG_DEF_CLOSE_MIN    30
 #define ABTG_DEF_USE_GAPFILL  false  // sul DAX di default breakout, non gap fill
+#define ABTG_DEF_RISK         2.0    // rischio max 2% (money management del piano)
+#define ABTG_DEF_TRAIL_MODE   2      // 2=punti fissi (piano DAX: trailing ~410 punti sugli indici)
 
 #include <ABTG/ABTG_ApertureCore.mqh>
 

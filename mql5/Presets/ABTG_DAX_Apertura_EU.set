@@ -1,4 +1,4 @@
-; Preset DAX - Apertura Europea (breakout)
+; Preset DAX - Apertura Europea (breakout del range di apertura)
 ; Carica in: Strategy Tester -> tab Input -> Load
 ; ATTENZIONE: InpSessionHour e' in ORA SERVER. Qui ipotizzo broker GMT+2/+3
 ; (DAX apre alle 08:00 sul server). Verifica sul TUO grafico e correggi!
@@ -11,6 +11,7 @@ InpCloseAtEnd=true
 InpOneTradePerDay=true
 InpEntryMode=0
 InpRangeMode=0
+InpLevelTF=16385
 InpPrevWindowMin=60
 InpBufferPoints=20
 InpPendingExpiryMin=120
@@ -18,6 +19,7 @@ InpAllowLong=true
 InpAllowShort=true
 InpUseGapFill=false
 InpGapMinPoints=150
+InpGapMinRR=1.5
 InpUseEmaFilter=false
 InpEmaFast=14
 InpEmaSlow=200
@@ -31,7 +33,7 @@ InpCorrSymbol=SPXUSD
 InpCorrTF=16385
 InpCorrEmaFast=14
 InpCorrEmaSlow=100
-InpRiskPercent=1.0
+InpRiskPercent=2.0
 InpSLMode=0
 InpAtrSlMult=1.5
 InpAtrPeriodMgmt=14
@@ -39,7 +41,10 @@ InpTP1_R=1.0
 InpTP1_ClosePct=50.0
 InpBreakevenAtTP1=true
 InpUseTrailing=true
+InpTrailMode=2
+InpTrailTF=1
 InpTrailAtrMult=2.0
+InpTrailFixedPts=410
 InpUseRoundLevels=false
 InpRoundStep=50.0
 InpRoundMinDistPts=50

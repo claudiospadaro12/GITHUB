@@ -43,6 +43,18 @@
 #ifndef ABTG_DEF_RANGE_MIN
    #define ABTG_DEF_RANGE_MIN    15    // minuti del range di apertura
 #endif
+#ifndef ABTG_DEF_RANGE_MODE
+   #define ABTG_DEF_RANGE_MODE   0     // 0=range apertura, 1=finestra prec., 2=candela prec.
+#endif
+#ifndef ABTG_DEF_LEVEL_TF
+   #define ABTG_DEF_LEVEL_TF     PERIOD_H1  // TF dei "massimi/minimi precedenti" (piano Nasdaq: H1)
+#endif
+#ifndef ABTG_DEF_RISK
+   #define ABTG_DEF_RISK         2.0   // rischio % per trade (piano: massimo 2%)
+#endif
+#ifndef ABTG_DEF_TRAIL_MODE
+   #define ABTG_DEF_TRAIL_MODE   1     // 0=ATR, 1=base candela prec., 2=punti fissi
+#endif
 #ifndef ABTG_DEF_CLOSE_HOUR
    #define ABTG_DEF_CLOSE_HOUR   17    // ora (SERVER) di chiusura/flat della giornata
 #endif
@@ -64,14 +76,23 @@ enum ENUM_ABTG_ENTRY
 
 enum ENUM_ABTG_RANGE
   {
-   ABTG_RANGE_OPENING = 0,  // range = primi N minuti DOPO l'apertura
-   ABTG_RANGE_PREV    = 1   // range = massimo/minimo dei N minuti PRIMA dell'apertura
+   ABTG_RANGE_OPENING = 0,  // range = primi N minuti DOPO l'apertura (PDF: primi 15 min)
+   ABTG_RANGE_PREV    = 1,  // range = massimo/minimo dei N minuti PRIMA dell'apertura
+   ABTG_RANGE_PREVBAR = 2   // range = massimo/minimo della CANDELA PRECEDENTE su InpLevelTF
+                            //          (piano Nasdaq: "massimi/minimi precedenti" su H1)
   };
 
 enum ENUM_ABTG_SL
   {
-   ABTG_SL_RANGE = 0,   // stop sull'estremo opposto del range
+   ABTG_SL_RANGE = 0,   // stop sull'estremo opposto del range (piano: "stop sui massimi prec.")
    ABTG_SL_ATR   = 1    // stop a X volte l'ATR
+  };
+
+enum ENUM_ABTG_TRAIL
+  {
+   ABTG_TRAIL_ATR     = 0,  // trailing a X volte l'ATR
+   ABTG_TRAIL_PREVBAR = 1,  // trailing alla BASE della candela precedente (piano: su M1)
+   ABTG_TRAIL_FIXED   = 2   // trailing a distanza fissa in punti (piano DAX: es. 410 punti)
   };
 
 //==================================================================
@@ -88,7 +109,8 @@ input bool   InpOneTradePerDay = true;                // Un solo ciclo operativo
 
 input group "=== Ingresso ==="
 input ENUM_ABTG_ENTRY InpEntryMode = ABTG_BREAKOUT;   // Modalita' d'ingresso
-input ENUM_ABTG_RANGE InpRangeMode = ABTG_RANGE_OPENING; // Da dove prendo massimo/minimo
+input ENUM_ABTG_RANGE InpRangeMode = (ENUM_ABTG_RANGE)ABTG_DEF_RANGE_MODE; // Da dove prendo max/min
+input ENUM_TIMEFRAMES InpLevelTF   = ABTG_DEF_LEVEL_TF; // (RANGE_PREVBAR) TF dei massimi/minimi prec. (Nasdaq: H1)
 input int    InpPrevWindowMin = 60;                   // (solo RANGE_PREV) finestra precedente in minuti
 input double InpBufferPoints  = 20;                   // Buffer oltre il range, in punti (0=nessuno)
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
@@ -98,6 +120,7 @@ input bool   InpAllowShort    = true;                 // Consenti operazioni sho
 input group "=== Gap Fill (opzionale, tipico USA) ==="
 input bool   InpUseGapFill    = ABTG_DEF_USE_GAPFILL; // Attiva modalita' gap fill se InpEntryMode=GAPFILL
 input double InpGapMinPoints  = 150;                  // Gap minimo (in punti) per operare
+input double InpGapMinRR      = 1.5;                  // Rapporto rischio/rendimento minimo (PDF: 1:1.5)
 
 input group "=== Filtro di trend (opzionale) ==="
 input bool   InpUseEmaFilter  = false;                // Filtro EMA: opera solo a favore di trend
@@ -117,15 +140,18 @@ input int    InpCorrEmaFast    = 14;                  // EMA veloce indice guida
 input int    InpCorrEmaSlow    = 100;                 // EMA lenta indice guida
 
 input group "=== Rischio e gestione ==="
-input double InpRiskPercent    = 1.0;                 // Rischio per trade in % del capitale
+input double InpRiskPercent    = ABTG_DEF_RISK;       // Rischio per trade in % (piano: max 2%)
 input ENUM_ABTG_SL InpSLMode   = ABTG_SL_RANGE;       // Come calcolo lo stop loss
 input double InpAtrSlMult       = 1.5;                // (SL_ATR) stop = X * ATR
 input int    InpAtrPeriodMgmt   = 14;                 // Periodo ATR per gestione
-input double InpTP1_R           = 1.0;                // 1o obiettivo in R (0 = nessuna parziale)
-input double InpTP1_ClosePct    = 50;                 // % di posizione chiusa al 1o obiettivo
+input double InpTP1_R           = 1.0;                // 1o obiettivo in R (se non uso i numeri tondi)
+input double InpTP1_ClosePct    = 50;                 // % di posizione chiusa al 1o obiettivo (piano: "dimezzo")
 input bool   InpBreakevenAtTP1  = true;               // Sposta stop in pari dopo la parziale
 input bool   InpUseTrailing     = true;               // Attiva trailing stop
-input double InpTrailAtrMult    = 2.0;                // Trailing = X * ATR
+input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Tipo di trailing
+input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
+input double InpTrailAtrMult    = 2.0;                // (TRAIL_ATR) trailing = X * ATR
+input double InpTrailFixedPts   = 410;                // (TRAIL_FIXED) trailing in punti (piano DAX: 410 punti)
 
 input group "=== Obiettivi a numeri tondi (approx. Multipivot/%Custom) ==="
 input bool   InpUseRoundLevels  = false;              // Usa i numeri tondi come 1o obiettivo
@@ -407,10 +433,36 @@ int TimeInMinutes(const MqlDateTime &t)
   }
 
 //+------------------------------------------------------------------+
+//| Calcola i livelli max/min secondo InpRangeMode                   |
+//|  - OPENING: primi N minuti dopo l'apertura                       |
+//|  - PREV:    finestra di N minuti prima dell'apertura             |
+//|  - PREVBAR: candela precedente su InpLevelTF (piano Nasdaq: H1)  |
+//+------------------------------------------------------------------+
+bool ComputeLevels(double &hi, double &lo)
+  {
+   if(InpRangeMode == ABTG_RANGE_PREVBAR)
+     {
+      // "massimi/minimi precedenti": massimo e minimo dell'ULTIMA candela chiusa su InpLevelTF
+      hi = iHigh(_Symbol, InpLevelTF, 1);
+      lo = iLow (_Symbol, InpLevelTF, 1);
+      return(hi > 0 && lo > 0 && hi > lo);
+     }
+
+   int openMin = InpSessionHour*60 + InpSessionMin;
+   int fromMin, toMin;
+   if(InpRangeMode == ABTG_RANGE_OPENING)
+     { fromMin = openMin; toMin = openMin + InpRangeMinutes; }
+   else // ABTG_RANGE_PREV
+     { fromMin = openMin - InpPrevWindowMin; toMin = openMin; }
+
+   return(ComputeRangeWindow(fromMin, toMin, hi, lo));
+  }
+
+//+------------------------------------------------------------------+
 //| Calcola il range (massimo/minimo) su una finestra in minuti     |
 //|  fromMin/toMin sono minuti dall'inizio giornata (server)         |
 //+------------------------------------------------------------------+
-bool ComputeRange(int fromMin, int toMin, double &hi, double &lo)
+bool ComputeRangeWindow(int fromMin, int toMin, double &hi, double &lo)
   {
    //--- costruisco i datetime di inizio/fine finestra per OGGI
    MqlDateTime d;
@@ -444,15 +496,8 @@ bool ComputeRange(int fromMin, int toMin, double &hi, double &lo)
 //+------------------------------------------------------------------+
 bool TryPlaceBreakout()
   {
-   int openMin = InpSessionHour*60 + InpSessionMin;
-   int fromMin, toMin;
-   if(InpRangeMode == ABTG_RANGE_OPENING)
-     { fromMin = openMin; toMin = openMin + InpRangeMinutes; }
-   else
-     { fromMin = openMin - InpPrevWindowMin; toMin = openMin; }
-
-   if(!ComputeRange(fromMin, toMin, gRangeHigh, gRangeLow))
-     { ABTGLog("range non ancora calcolabile (dati M1): riprovo."); return(false); }
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("livelli non ancora calcolabili (dati non pronti): riprovo."); return(false); }
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
 
@@ -519,10 +564,16 @@ bool TryPlaceGapFill()
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: salto il gap fill."); return(true); }
 
+   //--- livelli della prima finestra di apertura (la "conferma" del PDF, es. prime candele)
+   int openMin = InpSessionHour*60 + InpSessionMin;
+   double hi, lo;
+   if(!ComputeRangeWindow(openMin, openMin + InpRangeMinutes, hi, lo))
+     { ABTGLog("gap fill: livelli di apertura non pronti, riprovo."); return(false); }
+
    int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
    double buffer = InpBufferPoints * _Point;
-   double ask    = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
-   double bid    = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   double tp     = NormalizeDouble(prevClose, digits);   // obiettivo = chiusura precedente (fill completo)
+   datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
 
    int  bias    = TrendBias();
    bool longOK  = (bias == 0 || bias == +1);
@@ -530,23 +581,33 @@ bool TryPlaceGapFill()
 
    if(gap > 0 && InpAllowShort && shortOK)
      {
-      // gap UP -> mi aspetto discesa verso prevClose: SELL a mercato, TP = chiusura di ieri
-      double sl   = NormalizeDouble(todayOpen + buffer + AtrValue()*0.5, digits); // sopra il massimo di apertura
-      double tp   = NormalizeDouble(prevClose, digits);
-      double dist = sl - bid;
-      double lot  = CalcLotByRisk(dist);
-      if(lot > 0 && dist > 0 && gTrade.Sell(lot, _Symbol, bid, sl, tp, ABTG_DEF_NAME+" GAPFILL SELL"))
-         ABTGLog(StringFormat("GAP UP %.0f pt -> SELL, TP %.5f (fill), SL %.5f", gap, tp, sl));
+      // GAP UP -> mi aspetto il ritorno giu': SELL STOP al break sotto il minimo iniziale,
+      // SL sopra il massimo iniziale, TP = chiusura precedente (come esempio Nasdaq del PDF)
+      double entry = NormalizeDouble(lo - buffer, digits);
+      double sl    = NormalizeDouble(hi + buffer, digits);
+      double risk  = sl - entry;
+      double reward= entry - tp;
+      if(risk <= 0 || reward <= 0) { ABTGLog("gap fill up: geometria non valida."); return(true); }
+      if(reward/risk < InpGapMinRR)
+        { ABTGLog(StringFormat("gap fill up: RR %.2f < %.2f, salto.", reward/risk, InpGapMinRR)); return(true); }
+      double lot = CalcLotByRisk(risk);
+      if(lot > 0 && gTrade.SellStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" GAPFILL SELL"))
+         ABTGLog(StringFormat("GAP UP %.0f pt -> SELL STOP @ %.5f  SL %.5f  TP %.5f (RR %.2f)", gap, entry, sl, tp, reward/risk));
      }
    else if(gap < 0 && InpAllowLong && longOK)
      {
-      // gap DOWN -> mi aspetto risalita verso prevClose: BUY a mercato, TP = chiusura di ieri
-      double sl   = NormalizeDouble(todayOpen - buffer - AtrValue()*0.5, digits);
-      double tp   = NormalizeDouble(prevClose, digits);
-      double dist = ask - sl;
-      double lot  = CalcLotByRisk(dist);
-      if(lot > 0 && dist > 0 && gTrade.Buy(lot, _Symbol, ask, sl, tp, ABTG_DEF_NAME+" GAPFILL BUY"))
-         ABTGLog(StringFormat("GAP DOWN %.0f pt -> BUY, TP %.5f (fill), SL %.5f", gap, tp, sl));
+      // GAP DOWN -> mi aspetto la risalita: BUY STOP al break sopra il massimo iniziale,
+      // SL sotto il minimo iniziale, TP = chiusura precedente
+      double entry = NormalizeDouble(hi + buffer, digits);
+      double sl    = NormalizeDouble(lo - buffer, digits);
+      double risk  = entry - sl;
+      double reward= tp - entry;
+      if(risk <= 0 || reward <= 0) { ABTGLog("gap fill down: geometria non valida."); return(true); }
+      if(reward/risk < InpGapMinRR)
+        { ABTGLog(StringFormat("gap fill down: RR %.2f < %.2f, salto.", reward/risk, InpGapMinRR)); return(true); }
+      double lot = CalcLotByRisk(risk);
+      if(lot > 0 && gTrade.BuyStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" GAPFILL BUY"))
+         ABTGLog(StringFormat("GAP DOWN %.0f pt -> BUY STOP @ %.5f  SL %.5f  TP %.5f (RR %.2f)", gap, entry, sl, tp, reward/risk));
      }
    return(true);
   }
@@ -790,26 +851,48 @@ void ManagePosition()
         }
      }
 
-   //--- 3) TRAILING STOP su ATR (protegge i profitti)
+   //--- 3) TRAILING STOP (protegge i profitti)
    if(InpUseTrailing)
      {
-      double trail = AtrValue()*InpTrailAtrMult;
-      if(trail > 0)
+      if(type == POSITION_TYPE_BUY)
         {
-         if(type == POSITION_TYPE_BUY)
-           {
-            double newSL = NormalizeDouble(bid - trail, digits);
-            if(newSL > sl && newSL > openP)
-               gTrade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
-           }
-         else if(type == POSITION_TYPE_SELL)
-           {
-            double newSL = NormalizeDouble(ask + trail, digits);
-            if((newSL < sl || sl == 0) && newSL < openP)
-               gTrade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
-           }
+         double newSL = TrailStopBuy(bid);
+         if(newSL > 0 && newSL > sl && newSL > openP)
+            gTrade.PositionModify(_Symbol, NormalizeDouble(newSL, digits), PositionGetDouble(POSITION_TP));
+        }
+      else if(type == POSITION_TYPE_SELL)
+        {
+         double newSL = TrailStopSell(ask);
+         if(newSL > 0 && (newSL < sl || sl == 0) && newSL < openP)
+            gTrade.PositionModify(_Symbol, NormalizeDouble(newSL, digits), PositionGetDouble(POSITION_TP));
         }
      }
+  }
+
+//+------------------------------------------------------------------+
+//| Nuovo stop di trailing per un LONG secondo InpTrailMode          |
+//+------------------------------------------------------------------+
+double TrailStopBuy(double bid)
+  {
+   if(InpTrailMode == ABTG_TRAIL_PREVBAR)
+      return(iLow(_Symbol, InpTrailTF, 1));                 // base (minimo) candela prec.
+   if(InpTrailMode == ABTG_TRAIL_FIXED)
+      return(bid - InpTrailFixedPts * _Point);
+   double atr = AtrValue();                                 // ABTG_TRAIL_ATR
+   return(atr > 0 ? bid - atr*InpTrailAtrMult : 0);
+  }
+
+//+------------------------------------------------------------------+
+//| Nuovo stop di trailing per uno SHORT secondo InpTrailMode        |
+//+------------------------------------------------------------------+
+double TrailStopSell(double ask)
+  {
+   if(InpTrailMode == ABTG_TRAIL_PREVBAR)
+      return(iHigh(_Symbol, InpTrailTF, 1));                // base (massimo) candela prec.
+   if(InpTrailMode == ABTG_TRAIL_FIXED)
+      return(ask + InpTrailFixedPts * _Point);
+   double atr = AtrValue();                                 // ABTG_TRAIL_ATR
+   return(atr > 0 ? ask + atr*InpTrailAtrMult : 0);
   }
 
 //+------------------------------------------------------------------+

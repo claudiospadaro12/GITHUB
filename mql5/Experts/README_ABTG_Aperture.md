@@ -4,10 +4,10 @@ Due Expert Advisor per **MetaTrader 5** che automatizzano la parte **meccanica**
 piani di trading sulle **aperture** (Europa 09:00 e USA 15:30), tratti dai materiali
 "Piano di Trading Apertura Europea/Americana" e "La Magia delle Aperture".
 
-| File | Mercato | Logica |
+| File | Mercato | Logica (come da piano) |
 |------|---------|--------|
-| `ABTG_DAX_Apertura_EU.mq5` | DAX / D30EUR (apertura EU) | Breakout del range di apertura |
-| `ABTG_Nasdaq_Apertura_US.mq5` | Nasdaq / NASUSD (apertura USA) | Breakout + Gap Fill opzionale |
+| `ABTG_DAX_Apertura_EU.mq5` | DAX / D30EUR (apertura EU) | Breakout del **range di apertura** (primi 15 min) |
+| `ABTG_Nasdaq_Apertura_US.mq5` | Nasdaq / NASUSD (apertura USA) | Rottura **massimi/minimi candela H1 precedente** + Gap Fill |
 | `Include/ABTG/ABTG_ApertureCore.mqh` | — | Motore condiviso (non si avvia da solo) |
 
 I due EA sono **gusci sottili** sopra lo stesso motore: stessa logica, default diversi.
@@ -19,10 +19,27 @@ Funzionano anche su **oro, forex e altri indici/metalli** cambiando simbolo e or
 
 - **Nessun EA garantisce profitti.** Questi automatizzano regole d'ingresso/gestione,
   ma il risultato dipende da mercato, broker, spread, slippage e parametri.
-- I piani originali contengono **parti discrezionali** (lettura correlazioni "a occhio",
-  indicatore proprietario **Qqin Multipivot** non pubblico). Qui sono **approssimate**
-  con logica equivalente (range, ATR, R-multipli, EMA/Supertrend). Non è una copia 1:1.
+- Solo l'indicatore proprietario **Qqin Multipivot / %Custom** non è pubblico: i suoi
+  livelli-obiettivo sono resi con i **numeri tondi** (come indica lo stesso piano Nasdaq).
+  Tutto il resto segue **alla lettera** le regole scritte (vedi sezione sotto).
 - **Testa SEMPRE su conto DEMO** e nello **Strategy Tester** prima di usare denaro vero.
+
+---
+
+## ✅ Fedeltà ai piani (cosa è stato tradotto ESATTAMENTE)
+
+| Regola scritta nei file | Dove | Come è implementata |
+|---|---|---|
+| "Ordini nel time frame **H1**: SELL STOP sotto i **minimi precedenti**, BUY STOP sopra i **massimi precedenti**" | Nasdaq, sl. 10 | `InpRangeMode = Candela precedente`, `InpLevelTF = H1` |
+| "Cancello l'ordine non eseguito" | Nasdaq, sl. 11 | OCO automatico |
+| "Porto lo stop sui massimi precedenti" | Nasdaq, sl. 11 | SL su estremo opposto (`InpSLMode = RANGE`) |
+| "TP in divenire **dimezzando** sui livelli" + "Primo obiettivo = **numero tondo**" | Nasdaq, sl. 11-12 | Parziale 50% al numero tondo (`InpUseRoundLevels`) |
+| "Lo stop lo porto **in pari**" | Nasdaq, sl. 11 | Breakeven dopo la parziale |
+| "Scendo in **M1**, seguo lo stop alla **base della candela precedente**" | America, sl. 11 | `InpTrailMode = Base candela prec.`, `InpTrailTF = M1` |
+| "% di perdita **massimo del 2%**" | Nasdaq, sl. 14 | `InpRiskPercent = 2.0` |
+| Gap up → SELL al **break** sotto il minimo, SL sopra, **TP = chiusura prec.**, **RR ≥ 1:1.5** | PDF p.24-25 | Modalità Gap Fill con `InpGapMinRR = 1.5` |
+| DAX: breakout **primi 15 minuti**; trailing indici ~**410 punti** | PDF p.8/14, DAX sl. 20 | `InpRangeMode = Apertura` (15 min), `InpTrailMode = Punti fissi (410)` |
+| "Prima di un dato a **3 tori** tolgo tutto" | Nasdaq/America, Routine | Filtro news: chiude/cancella tutto nel blackout |
 
 ---
 
@@ -66,17 +83,20 @@ Esempi comuni (indicativi — **verifica sul tuo grafico**):
 ## ⚙️ Come funziona (passo passo)
 
 1. **Attesa apertura** → all'ora impostata parte la fase operativa.
-2. **Range di apertura** → registra massimo/minimo dei primi `InpRangeMinutes` (default 15).
+2. **Livelli** (`InpRangeMode`) → massimo/minimo dei primi `InpRangeMinutes` (DAX) **oppure**
+   della **candela H1 precedente** (Nasdaq, come da piano).
 3. **Ordini pendenti** → `BUY STOP` sopra il massimo + buffer, `SELL STOP` sotto il minimo − buffer.
 4. **OCO** → quando uno parte, l'altro viene cancellato.
-5. **Gestione** → al 1° obiettivo (`InpTP1_R`, default 1R) chiude una **parziale**
-   (`InpTP1_ClosePct`, default 50%), porta lo **stop in pari** e attiva il **trailing** ATR.
+5. **Gestione** → al 1° obiettivo (numero tondo o R) chiude una **parziale** (default **50%**),
+   porta lo **stop in pari** e attiva il **trailing** (base candela M1 su Nasdaq, punti fissi su DAX).
 6. **Fine sessione** (`InpCloseHour`) → cancella i pendenti e (se `InpCloseAtEnd`) chiude.
 
 **Modalità Gap Fill** (solo `ABTG_Nasdaq_Apertura_US`, opzionale): imposta
 `InpEntryMode = GAPFILL` e `InpUseGapFill = true`. Se il mercato apre in gap ≥
-`InpGapMinPoints`, opera **verso la chiusura precedente** (gap up → short, gap down → long),
-con **TP sulla chiusura di ieri**.
+`InpGapMinPoints`, l'EA — come nell'esempio del PDF — **aspetta la prima finestra** di
+apertura e poi mette uno **stop order al break dell'estremo iniziale verso la chiusura
+precedente** (gap up → SELL sotto il minimo; gap down → BUY sopra il massimo), con
+**SL oltre l'estremo opposto**, **TP = chiusura di ieri**, ed entra **solo se RR ≥ `InpGapMinRR`** (1:1.5).
 
 ---
 
@@ -88,15 +108,18 @@ con **TP sulla chiusura di ieri**.
 | Sessione | `InpRangeMinutes` | Durata del range di apertura (min) |
 | Sessione | `InpCloseHour/Min` | Ora di flat / stop nuovi ingressi |
 | Ingresso | `InpEntryMode` | `BREAKOUT` o `GAPFILL` |
-| Ingresso | `InpRangeMode` | Range = apertura (`OPENING`) o finestra precedente (`PREV`) |
-| Ingresso | `InpBufferPoints` | Buffer oltre il range (in punti) |
+| Ingresso | `InpRangeMode` | `Apertura` (primi N min), `Finestra prec.`, o **`Candela prec.`** (Nasdaq: H1) |
+| Ingresso | `InpLevelTF` | TF dei massimi/minimi precedenti (Nasdaq: **H1**) |
+| Ingresso | `InpBufferPoints` | Buffer oltre il livello (in punti) |
+| Gap Fill | `InpGapMinPoints` / `InpGapMinRR` | Gap minimo e RR minimo (PDF: 1:1.5) |
 | Filtri | `InpUseEmaFilter` | Opera solo a favore delle EMA (14/200) |
 | Filtri | `InpUseSupertrend` | Filtro Supertrend (mult. 2.5 come da piano) |
 | Filtri | `InpUseCorrelation` + `InpCorrSymbol` | Opera solo se l'indice guida (es. `SPXUSD`) concorda |
-| Rischio | `InpRiskPercent` | Rischio per trade in % (default 1%) |
+| Rischio | `InpRiskPercent` | Rischio per trade in % (**default 2%**, come da piano) |
 | Rischio | `InpSLMode` | Stop su estremo opposto (`RANGE`) o su ATR |
-| Rischio | `InpTP1_R` / `InpTP1_ClosePct` | 1° obiettivo (in R) e % da chiudere |
-| Rischio | `InpUseTrailing` / `InpTrailAtrMult` | Trailing stop su ATR |
+| Rischio | `InpTP1_R` / `InpTP1_ClosePct` | 1° obiettivo (in R) e % da chiudere (dimezzo=50%) |
+| Rischio | `InpUseTrailing` / `InpTrailMode` | Trailing: **ATR**, **Base candela prec.** (M1), o **Punti fissi** (410) |
+| Rischio | `InpTrailTF` / `InpTrailFixedPts` | TF candela (per base candela) / distanza fissa in punti |
 | Numeri tondi | `InpUseRoundLevels` | Usa il numero tondo come 1° obiettivo |
 | Numeri tondi | `InpRoundStep` | Passo della griglia (in **PREZZO**, es. 100) |
 | Numeri tondi | `InpRoundMinDistPts` | Distanza minima dall'ingresso (in **punti**) |

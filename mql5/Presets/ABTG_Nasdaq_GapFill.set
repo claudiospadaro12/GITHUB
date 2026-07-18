@@ -1,5 +1,6 @@
-; Preset NASDAQ - Apertura Americana (modalita' GAP FILL)
-; Se apre in gap >= InpGapMinPoints, opera verso la chiusura precedente.
+; Preset NASDAQ - Apertura Americana (modalita' GAP FILL, fedele all'esempio del PDF)
+; Se apre in gap: entra al BREAK dell'estremo iniziale verso la chiusura precedente,
+; SL oltre l'estremo opposto, TP = chiusura di ieri, solo se RR >= 1:1.5.
 ; Carica in: Strategy Tester -> tab Input -> Load (EA: ABTG_Nasdaq_Apertura_US)
 ; ATTENZIONE: InpSessionHour e' in ORA SERVER (qui 14:30 = broker GMT+2/+3). Verifica!
 InpSessionHour=14
@@ -11,6 +12,7 @@ InpCloseAtEnd=true
 InpOneTradePerDay=true
 InpEntryMode=1
 InpRangeMode=0
+InpLevelTF=16385
 InpPrevWindowMin=60
 InpBufferPoints=20
 InpPendingExpiryMin=120
@@ -18,6 +20,7 @@ InpAllowLong=true
 InpAllowShort=true
 InpUseGapFill=true
 InpGapMinPoints=150
+InpGapMinRR=1.5
 InpUseEmaFilter=false
 InpEmaFast=14
 InpEmaSlow=200
@@ -31,7 +34,7 @@ InpCorrSymbol=SPXUSD
 InpCorrTF=16385
 InpCorrEmaFast=14
 InpCorrEmaSlow=100
-InpRiskPercent=1.0
+InpRiskPercent=2.0
 InpSLMode=1
 InpAtrSlMult=1.5
 InpAtrPeriodMgmt=14
@@ -39,7 +42,10 @@ InpTP1_R=1.0
 InpTP1_ClosePct=50.0
 InpBreakevenAtTP1=true
 InpUseTrailing=true
+InpTrailMode=1
+InpTrailTF=1
 InpTrailAtrMult=2.0
+InpTrailFixedPts=410
 InpUseRoundLevels=false
 InpRoundStep=100.0
 InpRoundMinDistPts=100

@@ -1,7 +1,8 @@
-; Preset NASDAQ - Apertura Americana (breakout + numeri tondi + filtro news)
+; Preset NASDAQ - Apertura Americana (rottura massimi/minimi candela H1 precedente)
+; Fedele al piano: ordini su H1, BUY STOP sopra i massimi prec. / SELL STOP sotto i minimi prec.,
+; TP dimezzando sui numeri tondi, stop in pari, trailing sulla base della candela M1, filtro news.
 ; Carica in: Strategy Tester -> tab Input -> Load
-; ATTENZIONE: InpSessionHour e' in ORA SERVER. Qui ipotizzo broker GMT+2/+3
-; (Nasdaq cash apre alle 14:30 sul server). Verifica sul TUO grafico e correggi!
+; ATTENZIONE: InpSessionHour e' in ORA SERVER (qui 14:30 = broker GMT+2/+3). Verifica sul grafico!
 InpSessionHour=14
 InpSessionMin=30
 InpRangeMinutes=15
@@ -10,7 +11,8 @@ InpCloseMin=45
 InpCloseAtEnd=true
 InpOneTradePerDay=true
 InpEntryMode=0
-InpRangeMode=0
+InpRangeMode=2
+InpLevelTF=16385
 InpPrevWindowMin=60
 InpBufferPoints=20
 InpPendingExpiryMin=120
@@ -18,6 +20,7 @@ InpAllowLong=true
 InpAllowShort=true
 InpUseGapFill=false
 InpGapMinPoints=150
+InpGapMinRR=1.5
 InpUseEmaFilter=false
 InpEmaFast=14
 InpEmaSlow=200
@@ -31,7 +34,7 @@ InpCorrSymbol=SPXUSD
 InpCorrTF=16385
 InpCorrEmaFast=14
 InpCorrEmaSlow=100
-InpRiskPercent=1.0
+InpRiskPercent=2.0
 InpSLMode=0
 InpAtrSlMult=1.5
 InpAtrPeriodMgmt=14
@@ -39,7 +42,10 @@ InpTP1_R=1.0
 InpTP1_ClosePct=50.0
 InpBreakevenAtTP1=true
 InpUseTrailing=true
+InpTrailMode=1
+InpTrailTF=1
 InpTrailAtrMult=2.0
+InpTrailFixedPts=410
 InpUseRoundLevels=true
 InpRoundStep=100.0
 InpRoundMinDistPts=100

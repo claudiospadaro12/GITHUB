@@ -27,10 +27,14 @@
 #define ABTG_DEF_MAGIC        770201
 #define ABTG_DEF_SESSION_HOUR 15     // apertura Nasdaq cash (server) - ADATTA AL TUO BROKER!
 #define ABTG_DEF_SESSION_MIN  30
-#define ABTG_DEF_RANGE_MIN    15     // range dei primi 15 minuti (alta volatilita')
+#define ABTG_DEF_RANGE_MIN    15     // (usato in gap fill o se passi a range di apertura)
+#define ABTG_DEF_RANGE_MODE   2      // 2=massimi/minimi della CANDELA PRECEDENTE (piano: su H1)
+#define ABTG_DEF_LEVEL_TF     PERIOD_H1  // piano Nasdaq: "ordini nel time frame H1"
 #define ABTG_DEF_CLOSE_HOUR   21     // flat prima della chiusura serale (server)
 #define ABTG_DEF_CLOSE_MIN    45
 #define ABTG_DEF_USE_GAPFILL  false  // metti true + InpEntryMode=GAPFILL per il gap fill
+#define ABTG_DEF_RISK         2.0    // rischio max 2% (money management del piano)
+#define ABTG_DEF_TRAIL_MODE   1      // 1=base candela precedente su M1 (piano: "seguo su M1")
 
 #include <ABTG/ABTG_ApertureCore.mqh>
 
