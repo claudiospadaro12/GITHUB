@@ -112,7 +112,7 @@ input ENUM_ABTG_ENTRY InpEntryMode = ABTG_BREAKOUT;   // Modalita' d'ingresso
 input ENUM_ABTG_RANGE InpRangeMode = (ENUM_ABTG_RANGE)ABTG_DEF_RANGE_MODE; // Da dove prendo max/min
 input ENUM_TIMEFRAMES InpLevelTF   = ABTG_DEF_LEVEL_TF; // (RANGE_PREVBAR) TF dei massimi/minimi prec. (Nasdaq: H1)
 input int    InpPrevWindowMin = 60;                   // (solo RANGE_PREV) finestra precedente in minuti
-input double InpBufferPoints  = 20;                   // Buffer oltre il range, in punti (0=nessuno)
+input double InpBufferPoints  = 200;                  // Buffer oltre il range, in punti (indici: ~2 punti indice)
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
 input bool   InpAllowLong     = true;                 // Consenti operazioni long
 input bool   InpAllowShort    = true;                 // Consenti operazioni short
@@ -501,10 +501,9 @@ bool TryPlaceBreakout()
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
 
-   double buffer  = InpBufferPoints * _Point;
-   int    digits  = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
-   double buyPx   = NormalizeDouble(gRangeHigh + buffer, digits);
-   double sellPx  = NormalizeDouble(gRangeLow  - buffer, digits);
+   double buffer  = EffectiveBuffer();
+   double buyPx   = NormalizePrice(gRangeHigh + buffer);
+   double sellPx  = NormalizePrice(gRangeLow  - buffer);
 
    int  bias    = TrendBias();                 // 0 entrambi, +1 solo long, -1 solo short, 2 conflitto (nessuno)
    bool longOK  = (bias == 0 || bias == +1);
@@ -516,10 +515,10 @@ bool TryPlaceBreakout()
    if(InpAllowLong && longOK)
      {
       double sl = (InpSLMode == ABTG_SL_RANGE) ? sellPx : buyPx - AtrValue()*InpAtrSlMult;
-      sl = NormalizeDouble(sl, digits);
+      sl = NormalizePrice(sl);
       double dist = buyPx - sl;
       double lot  = CalcLotByRisk(dist);
-      double tp   = (InpTP1_R > 0) ? NormalizeDouble(buyPx + dist*TpTotalR(), digits) : 0.0;
+      double tp   = (InpTP1_R > 0) ? NormalizePrice(buyPx + dist*TpTotalR()) : 0.0;
       if(lot > 0 && dist > 0)
         {
          if(gTrade.BuyStop(lot, buyPx, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" BUY"))
@@ -533,10 +532,10 @@ bool TryPlaceBreakout()
    if(InpAllowShort && shortOK)
      {
       double sl = (InpSLMode == ABTG_SL_RANGE) ? buyPx : sellPx + AtrValue()*InpAtrSlMult;
-      sl = NormalizeDouble(sl, digits);
+      sl = NormalizePrice(sl);
       double dist = sl - sellPx;
       double lot  = CalcLotByRisk(dist);
-      double tp   = (InpTP1_R > 0) ? NormalizeDouble(sellPx - dist*TpTotalR(), digits) : 0.0;
+      double tp   = (InpTP1_R > 0) ? NormalizePrice(sellPx - dist*TpTotalR()) : 0.0;
       if(lot > 0 && dist > 0)
         {
          if(gTrade.SellStop(lot, sellPx, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" SELL"))
@@ -570,9 +569,8 @@ bool TryPlaceGapFill()
    if(!ComputeRangeWindow(openMin, openMin + InpRangeMinutes, hi, lo))
      { ABTGLog("gap fill: livelli di apertura non pronti, riprovo."); return(false); }
 
-   int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
-   double buffer = InpBufferPoints * _Point;
-   double tp     = NormalizeDouble(prevClose, digits);   // obiettivo = chiusura precedente (fill completo)
+   double buffer = EffectiveBuffer();
+   double tp     = NormalizePrice(prevClose);   // obiettivo = chiusura precedente (fill completo)
    datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
 
    int  bias    = TrendBias();
@@ -583,8 +581,8 @@ bool TryPlaceGapFill()
      {
       // GAP UP -> mi aspetto il ritorno giu': SELL STOP al break sotto il minimo iniziale,
       // SL sopra il massimo iniziale, TP = chiusura precedente (come esempio Nasdaq del PDF)
-      double entry = NormalizeDouble(lo - buffer, digits);
-      double sl    = NormalizeDouble(hi + buffer, digits);
+      double entry = NormalizePrice(lo - buffer);
+      double sl    = NormalizePrice(hi + buffer);
       double risk  = sl - entry;
       double reward= entry - tp;
       if(risk <= 0 || reward <= 0) { ABTGLog("gap fill up: geometria non valida."); return(true); }
@@ -598,8 +596,8 @@ bool TryPlaceGapFill()
      {
       // GAP DOWN -> mi aspetto la risalita: BUY STOP al break sopra il massimo iniziale,
       // SL sotto il minimo iniziale, TP = chiusura precedente
-      double entry = NormalizeDouble(hi + buffer, digits);
-      double sl    = NormalizeDouble(lo - buffer, digits);
+      double entry = NormalizePrice(hi + buffer);
+      double sl    = NormalizePrice(lo - buffer);
       double risk  = entry - sl;
       double reward= tp - entry;
       if(risk <= 0 || reward <= 0) { ABTGLog("gap fill down: geometria non valida."); return(true); }
@@ -808,7 +806,6 @@ void ManagePosition()
    double tp     = PositionGetDouble(POSITION_TP);
    double vol    = PositionGetDouble(POSITION_VOLUME);
    ulong  ticket = PositionGetInteger(POSITION_TICKET);
-   int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
 
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
@@ -843,7 +840,7 @@ void ManagePosition()
                //--- 2) BREAKEVEN sul residuo
                if(InpBreakevenAtTP1)
                  {
-                  double be = NormalizeDouble(openP, digits);
+                  double be = NormalizePrice(openP);
                   gTrade.PositionModify(_Symbol, be, tp);
                  }
               }
@@ -858,13 +855,13 @@ void ManagePosition()
         {
          double newSL = TrailStopBuy(bid);
          if(newSL > 0 && newSL > sl && newSL > openP)
-            gTrade.PositionModify(_Symbol, NormalizeDouble(newSL, digits), PositionGetDouble(POSITION_TP));
+            gTrade.PositionModify(_Symbol, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
         }
       else if(type == POSITION_TYPE_SELL)
         {
          double newSL = TrailStopSell(ask);
          if(newSL > 0 && (newSL < sl || sl == 0) && newSL < openP)
-            gTrade.PositionModify(_Symbol, NormalizeDouble(newSL, digits), PositionGetDouble(POSITION_TP));
+            gTrade.PositionModify(_Symbol, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
         }
      }
   }
@@ -926,6 +923,31 @@ double NextRoundLevel(double price, int dir, double stepPrice, double minDistPri
       while(price - lvl < minDistPrice) lvl -= stepPrice;
      }
    return(lvl);
+  }
+
+//+------------------------------------------------------------------+
+//| Arrotonda un prezzo al TICK del simbolo (non solo ai decimali).  |
+//| Necessario sui simboli con tick size > point (es. indici a       |
+//| step 0.10 con 2 cifre), altrimenti il broker rifiuta l'ordine.   |
+//+------------------------------------------------------------------+
+double NormalizePrice(double price)
+  {
+   double ts = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   int    dg = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   if(ts <= 0) return(NormalizeDouble(price, dg));
+   return(NormalizeDouble(MathRound(price/ts)*ts, dg));
+  }
+
+//+------------------------------------------------------------------+
+//| Buffer effettivo in prezzo: almeno il "livello degli stop" del   |
+//| broker, cosi' gli ordini non vengono rifiutati perche' troppo    |
+//| vicini (es. NASUSD ha stops level = 100 punti).                  |
+//+------------------------------------------------------------------+
+double EffectiveBuffer()
+  {
+   double stopsLvl = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   double bufPts   = MathMax(InpBufferPoints, stopsLvl);
+   return(bufPts * _Point);
   }
 
 //+------------------------------------------------------------------+

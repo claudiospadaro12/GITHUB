@@ -131,6 +131,11 @@ precedente** (gap up → SELL sotto il minimo; gap down → BUY sopra il massimo
 > ⚠️ Unità: `InpRoundStep` è in **PREZZO**; `InpBufferPoints`, `InpGapMinPoints` e
 > `InpRoundMinDistPts` sono in **punti**. Sugli indici un "punto" può valere 1, 10 o 100 a
 > seconda del broker: **tara questi valori sul tuo simbolo**.
+>
+> **Esempio (broker BCM Markets, D30EUR/NASUSD):** Cifre=2, tick=0.10 → **1 punto indice = 100 punti**.
+> Quindi buffer 300 = 3 punti indice; gap 3000 = 30 punti indice. Il Nasdaq ha inoltre
+> **livello stop = 100 punti**: l'EA alza da solo il buffer sopra questa soglia per non farsi
+> rifiutare gli ordini, e arrotonda tutti i prezzi al tick (0.10).
 
 ---
 
