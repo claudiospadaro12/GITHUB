@@ -8,7 +8,13 @@ piani di trading sulle **aperture** (Europa 09:00 e USA 15:30), tratti dai mater
 |------|---------|--------|
 | `ABTG_DAX_Apertura_EU.mq5` | DAX / D30EUR (apertura EU) | Breakout del **range di apertura** (primi 15 min) |
 | `ABTG_Nasdaq_Apertura_US.mq5` | Nasdaq / NASUSD (apertura USA) | Rottura **massimi/minimi candela H1 precedente** + Gap Fill |
+| `ABTG_Nasdaq_Live5m.mq5` | Nasdaq / NASUSD | **Variante "live":** candela **5 min pre-apertura**, 7 punti, filtro 17-40 |
+| `ABTG_DAX_Live5m.mq5` | DAX / D30EUR | **Variante "live":** candela **5 min pre-apertura**, 7 punti |
 | `Include/ABTG/ABTG_ApertureCore.mqh` | — | Motore condiviso (non si avvia da solo) |
+
+> 🔬 **Le versioni "Live5m"** servono per il **confronto A/B**: falle girare su grafici
+> SEPARATI dagli EA base (hanno magic number diversi, i trade non si mescolano) e dopo
+> qualche settimana confronta i risultati. Vedi la sezione *"Confronto A/B"* in fondo.
 
 I due EA sono **gusci sottili** sopra lo stesso motore: stessa logica, default diversi.
 Funzionano anche su **oro, forex e altri indici/metalli** cambiando simbolo e orari.
@@ -210,6 +216,35 @@ dell'EA sul grafico, pulsante *Load*).
 4. Periodo: almeno alcuni mesi. Deposito: coerente col conto reale.
 5. Controlla nel log i messaggi `[DAX Apertura EU] ...` / `[Nasdaq Apertura US] ...`.
 6. Ottimizza pochi parametri per volta (buffer, RangeMinutes, TP1_R, filtri).
+
+---
+
+## 🔬 Confronto A/B: versioni base vs "Live5m"
+
+Due modi diversi di leggere l'apertura, da confrontare sul campo:
+
+| | EA base (`_Apertura_`) | EA live (`_Live5m`) |
+|---|---|---|
+| Candela di riferimento | Range primi 15 min (DAX) / candela H1 prec. (Nasdaq) | **Candela 5 min PRIMA** dell'apertura |
+| Buffer ordini | 3 punti indice (300) | **7 punti indice** (700) |
+| Filtro ampiezza | no | **sì (Nasdaq: 17-40 punti)** |
+| Origine | PowerPoint / PDF del corso | Live del 17/07/26 |
+
+**Come si confrontano:**
+1. Metti i 4 EA su **4 grafici separati** (2 DAX + 2 Nasdaq), ognuno col suo preset.
+2. Hanno **magic number diversi** (770101 / 770103 / 770201 / 770203): i trade restano distinti.
+3. Dopo qualche settimana di DEMO, apri **Cronologia conto** e filtra per commento/magic,
+   oppure guarda i risultati nello **Strategy Tester** con lo stesso periodo per entrambi.
+4. Confronta: numero operazioni, % vincenti, profitto netto, drawdown massimo.
+
+**Nuovi parametri del filtro ampiezza** (`ABTG_ApertureCore`):
+- `InpMinRangePts` — ampiezza minima candela/range in punti (0 = disattivato).
+- `InpMaxRangePts` — ampiezza massima (0 = disattivato).
+- Sul broker BCM: 17 punti indice = **1700**, 40 punti indice = **4000**.
+
+> ⚠️ La live include anche un **hedging "Piano B/C"** (aggiungere size in perdita per
+> recuperare). **NON è automatizzato** di proposito: è la parte che genera i grossi
+> drawdown mostrati nella live stessa. Gli EA fanno OCO pulito e non mediano mai.
 
 ---
 

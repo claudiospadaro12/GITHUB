@@ -64,6 +64,18 @@
 #ifndef ABTG_DEF_USE_GAPFILL
    #define ABTG_DEF_USE_GAPFILL  false
 #endif
+#ifndef ABTG_DEF_BUFFER
+   #define ABTG_DEF_BUFFER       200   // buffer oltre il range, in punti
+#endif
+#ifndef ABTG_DEF_PREVWIN
+   #define ABTG_DEF_PREVWIN      60    // (RANGE_PREV) finestra precedente in minuti
+#endif
+#ifndef ABTG_DEF_MINRANGE
+   #define ABTG_DEF_MINRANGE     0     // ampiezza minima del range/candela (punti; 0=off)
+#endif
+#ifndef ABTG_DEF_MAXRANGE
+   #define ABTG_DEF_MAXRANGE     0     // ampiezza massima del range/candela (punti; 0=off)
+#endif
 
 //==================================================================
 //  ENUM di supporto
@@ -111,11 +123,13 @@ input group "=== Ingresso ==="
 input ENUM_ABTG_ENTRY InpEntryMode = ABTG_BREAKOUT;   // Modalita' d'ingresso
 input ENUM_ABTG_RANGE InpRangeMode = (ENUM_ABTG_RANGE)ABTG_DEF_RANGE_MODE; // Da dove prendo max/min
 input ENUM_TIMEFRAMES InpLevelTF   = ABTG_DEF_LEVEL_TF; // (RANGE_PREVBAR) TF dei massimi/minimi prec. (Nasdaq: H1)
-input int    InpPrevWindowMin = 60;                   // (solo RANGE_PREV) finestra precedente in minuti
-input double InpBufferPoints  = 200;                  // Buffer oltre il range, in punti (indici: ~2 punti indice)
+input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra prec. in minuti (live: 5 = candela pre-apertura)
+input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
 input bool   InpAllowLong     = true;                 // Consenti operazioni long
 input bool   InpAllowShort    = true;                 // Consenti operazioni short
+input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/range in punti (live: 1700=17 punti; 0=off)
+input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
 
 input group "=== Gap Fill (opzionale, tipico USA) ==="
 input bool   InpUseGapFill    = ABTG_DEF_USE_GAPFILL; // Attiva modalita' gap fill se InpEntryMode=GAPFILL
@@ -498,6 +512,13 @@ bool TryPlaceBreakout()
   {
    if(!ComputeLevels(gRangeHigh, gRangeLow))
      { ABTGLog("livelli non ancora calcolabili (dati non pronti): riprovo."); return(false); }
+
+   //--- FILTRO AMPIEZZA (strategia live: candela deve stare tra 17 e 40 punti indice)
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("candela %.0f pt < min %.0f: niente trade (whipsaw).", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
 
