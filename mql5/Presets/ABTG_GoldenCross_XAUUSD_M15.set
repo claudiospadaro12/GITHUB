@@ -1,0 +1,51 @@
+; Preset GOLDEN CROSS HA - XAUUSD su M15 (15 min - piu' trade, piu' rumore)
+; Ingresso a mercato sulla conferma (3 Heiken Ashi); stop swing; TP 2R;
+; parziale 50% a 1R + stop in pari + trailing su EMA21.
+; Carica in: finestra EA -> Dati in Ingresso -> Carica (EA: ABTG_GoldenCross)
+InpTimeframe=15
+InpEmaFast=9
+InpEmaMid=21
+InpEmaSlow=50
+InpEmaSlopeBars=3
+InpRequireAlignment=true
+InpCrossLookback=8
+InpHACount=3
+InpHAWickRatio=0.30
+InpHABodyFactor=0.60
+InpAdxPeriod=14
+InpAdxMin=20.0
+InpAdxRising=true
+InpRequireDI=true
+InpMaxDistATR=1.5
+InpMinRR=1.0
+InpEntryMode=0
+InpPullbackRef=0
+InpPendingExpiryBars=3
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=0
+InpSwingLookback=10
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLBufferPts=0
+InpTP_R=2.0
+InpPartialR=1.0
+InpPartialPct=50
+InpBreakeven=true
+InpTrailMode=0
+InpTrailAtrMult=2.0
+InpExitOnCross=true
+InpExitOnHAflip=false
+InpRiskPercent=1.0
+InpMaxTradesPerDay=2
+InpStopAfterLosses=2
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpMagic=770311
+InpMaxSpread=0
+InpVerbose=true
