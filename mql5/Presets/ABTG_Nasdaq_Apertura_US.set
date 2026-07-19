@@ -2,7 +2,7 @@
 ; Fedele al piano: ordini su H1, BUY STOP sopra i massimi prec. / SELL STOP sotto i minimi prec.,
 ; TP dimezzando sui numeri tondi, stop in pari, trailing sulla base della candela M1, filtro news.
 ; Carica in: Strategy Tester -> tab Input -> Load
-; ATTENZIONE: InpSessionHour e' in ORA SERVER (qui 14:30 = broker GMT+2/+3). Verifica sul grafico!
+; BCM CONFERMATO: server = ora italiana - 1. Nasdaq apre 15:30 IT = 14:30 server.
 InpSessionHour=14
 InpSessionMin=30
 InpRangeMinutes=15

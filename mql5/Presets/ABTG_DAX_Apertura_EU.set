@@ -1,7 +1,6 @@
 ; Preset DAX - Apertura Europea (breakout del range di apertura)
 ; Carica in: Strategy Tester -> tab Input -> Load
-; ATTENZIONE: InpSessionHour e' in ORA SERVER. Qui ipotizzo broker GMT+2/+3
-; (DAX apre alle 08:00 sul server). Verifica sul TUO grafico e correggi!
+; BCM CONFERMATO: server = ora italiana - 1. DAX apre 09:00 IT = 08:00 server.
 InpSessionHour=8
 InpSessionMin=0
 InpRangeMinutes=15

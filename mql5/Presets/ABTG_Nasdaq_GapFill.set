@@ -2,7 +2,7 @@
 ; Se apre in gap: entra al BREAK dell'estremo iniziale verso la chiusura precedente,
 ; SL oltre l'estremo opposto, TP = chiusura di ieri, solo se RR >= 1:1.5.
 ; Carica in: Strategy Tester -> tab Input -> Load (EA: ABTG_Nasdaq_Apertura_US)
-; ATTENZIONE: InpSessionHour e' in ORA SERVER (qui 14:30 = broker GMT+2/+3). Verifica!
+; BCM CONFERMATO: server = ora italiana - 1. Nasdaq apre 15:30 IT = 14:30 server.
 InpSessionHour=14
 InpSessionMin=30
 InpRangeMinutes=15

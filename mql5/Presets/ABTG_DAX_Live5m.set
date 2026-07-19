@@ -2,7 +2,7 @@
 ; Candela 08:55-09:00 (IT) = 07:55-08:00 server; ordini a 7 punti.
 ; Filtro ampiezza candela OFF di default (taralo sul DAX dopo averlo osservato).
 ; Carica in: Strategy Tester -> tab Input -> Load (EA: ABTG_DAX_Live5m)
-; ATTENZIONE: InpSessionHour e' in ORA SERVER (08:00 = broker come BCM). Verifica!
+; BCM CONFERMATO: server = ora italiana - 1. DAX apre 09:00 IT = 08:00 server.
 InpSessionHour=8
 InpSessionMin=0
 InpRangeMinutes=15

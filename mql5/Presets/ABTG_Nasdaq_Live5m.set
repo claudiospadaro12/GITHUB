@@ -1,7 +1,7 @@
 ; Preset NASDAQ LIVE 5m - strategia della live (candela 5 min pre-apertura)
 ; Candela 15:25-15:30 (IT) = 14:25-14:30 server; ordini a 7 punti; candela 17-40 punti.
 ; Carica in: Strategy Tester -> tab Input -> Load (EA: ABTG_Nasdaq_Live5m)
-; ATTENZIONE: InpSessionHour e' in ORA SERVER (14:30 = broker GMT+... come BCM). Verifica!
+; BCM CONFERMATO: server = ora italiana - 1. Nasdaq apre 15:30 IT = 14:30 server.
 InpSessionHour=14
 InpSessionMin=30
 InpRangeMinutes=15
