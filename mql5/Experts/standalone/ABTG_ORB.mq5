@@ -1,0 +1,405 @@
+//+------------------------------------------------------------------+
+//|                                                  ABTG_ORB.mq5     |
+//|                                                                  |
+//|  EA "ORB semplice" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO        |
+//|  (metti in MQL5\Experts e compila con F7: niente cartelle)      |
+//|                                                                  |
+//|  Replica la logica dell'ORB_Indicator_V15:                      |
+//|   - RANGE = candela 14:25-14:30 (server) = 15:25-15:30 IT       |
+//|     (i 5 minuti prima dell'apertura USA)                        |
+//|   - Ingresso a EntryPoints x K oltre max/min del range:         |
+//|     BUY STOP sopra, SELL STOP sotto (OCO)                       |
+//|   - K = coefficiente per strumento (indici/oro=1.0, 225JPY=10,  |
+//|     cross JPY=0.01, altri forex=0.0001, oil=0.01)               |
+//|   - SL sull'estremo opposto (o ATR/fisso); TP a R multiplo      |
+//|     (webinar: min 1:2) + parziale + breakeven                  |
+//|   - Runner: trailing / uscita su EMA9 (M5), come da webinar     |
+//|   - Cancella/chiude a 22:59 server; 1 trade a sessione          |
+//|                                                                  |
+//|  ⚠️ Orari in ORA SERVER. Nessun EA garantisce profitti. DEMO.   |
+//+------------------------------------------------------------------+
+#property copyright "Progetto EA Aperture Mercati"
+#property version   "1.00"
+#property strict
+
+#include <Trade/Trade.mqh>
+CTrade gTrade;
+
+enum ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1, ORB_SL_FIXED=2 };
+
+//==================================================================
+//  INPUT
+//==================================================================
+input group "=== Range ORB (ORARI SERVER, come l'indicatore) ==="
+input int    InpRangeStartHour = 14;  // Inizio range (server). BCM: 14:25 = 15:25 IT
+input int    InpRangeStartMin  = 25;
+input int    InpRangeEndHour   = 14;  // Fine range (server). BCM: 14:30 = 15:30 IT
+input int    InpRangeEndMin    = 30;
+input int    InpEndHour        = 22;  // Fine giornata: cancella/chiude (server). Indicatore: 22:59
+input int    InpEndMin         = 59;
+input bool   InpCloseAtEnd     = true;
+input bool   InpOneTradePerDay = true;
+input int    InpPendingExpiryMin = 600;
+
+input group "=== Ingresso (EntryPoints x K, come l'indicatore) ==="
+input double InpEntryPoints = 10.0;   // Distanza ingresso oltre max/min (in unita' K)
+input double InpK           = 1.0;    // Coefficiente: indici/oro=1.0; 225JPY=10; JPY=0.01; forex=0.0001; oil=0.01
+input bool   InpAllowLong   = true;
+input bool   InpAllowShort  = true;
+
+input group "=== Stop, target, gestione ==="
+input ENUM_ORB_SL InpSLMode = ORB_SL_OPPRANGE; // Estremo opposto range / ATR / punti fissi
+input ENUM_TIMEFRAMES InpExecTF = PERIOD_M5;   // TF di esecuzione (ATR, EMA, trailing)
+input int    InpAtrPeriod  = 14;
+input double InpAtrSLmult   = 1.5;
+input double InpSLFixedPts   = 1000;   // (FIXED) stop in punti
+input double InpTP_R         = 2.0;    // Take profit in R (webinar: min 1:2)
+input double InpTP1Pct       = 50;     // % chiusa al target
+input bool   InpBreakeven    = true;   // Stop in pari dopo la parziale
+input bool   InpUseTrailEMA  = true;   // Trailing dello stop sull'EMA veloce
+input int    InpEmaFast      = 9;
+input int    InpEmaSlow      = 21;
+input bool   InpExitOnEmaClose = true; // Esci se una candela chiude oltre l'EMA9 opposta
+
+input group "=== Rischio ==="
+input double InpRiskPercent  = 1.0;    // Rischio per trade in %
+
+input group "=== Filtro notizie (CSV in MQL5/Files) ==="
+input bool   InpUseNewsFilter = false;
+input string InpNewsFile      = "abtg_news.csv";
+input int    InpNewsMinImpact = 3;
+input int    InpNewsBeforeMin = 30;
+input int    InpNewsAfterMin  = 30;
+input int    InpNewsShiftMinutes = 0;
+input string InpNewsCurrencies= "USD";
+input bool   InpNewsFlatten   = true;
+
+input group "=== Generali ==="
+input long   InpMagic     = 770601;
+input int    InpMaxSpread = 0;
+input bool   InpVerbose   = true;
+
+//==================================================================
+//  STATO
+//==================================================================
+int      hAtr=INVALID_HANDLE, hEmaF=INVALID_HANDLE, hEmaS=INVALID_HANDLE;
+enum ENUM_ORBPHASE { ORB_WAIT, ORB_PLACED, ORB_DONE };
+ENUM_ORBPHASE gPhase=ORB_WAIT;
+int      gDay=-1;
+double   gRangeHigh=0, gRangeLow=0;
+bool     gPart1=false;
+datetime gLastExec=0;
+
+datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
+
+void Log(string m){ if(InpVerbose) Print("[ORB] ", m); }
+
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   gTrade.SetExpertMagicNumber(InpMagic);
+   gTrade.SetTypeFillingBySymbol(_Symbol);
+   gTrade.SetDeviationInPoints(30);
+   hAtr =iATR(_Symbol,InpExecTF,InpAtrPeriod);
+   hEmaF=iMA(_Symbol,InpExecTF,InpEmaFast,0,MODE_EMA,PRICE_CLOSE);
+   hEmaS=iMA(_Symbol,InpExecTF,InpEmaSlow,0,MODE_EMA,PRICE_CLOSE);
+   if(hAtr==INVALID_HANDLE||hEmaF==INVALID_HANDLE||hEmaS==INVALID_HANDLE)
+     { Print("ERRORE: handle indicatori."); return(INIT_FAILED); }
+   if(InpUseNewsFilter) LoadNews();
+   Log(StringFormat("avviato su %s. Range server %02d:%02d-%02d:%02d, ingresso %.1f x K(%.4f), fine %02d:%02d.",
+       _Symbol,InpRangeStartHour,InpRangeStartMin,InpRangeEndHour,InpRangeEndMin,InpEntryPoints,InpK,InpEndHour,InpEndMin));
+   return(INIT_SUCCEEDED);
+  }
+
+void OnDeinit(const int reason)
+  {
+   if(hAtr !=INVALID_HANDLE) IndicatorRelease(hAtr);
+   if(hEmaF!=INVALID_HANDLE) IndicatorRelease(hEmaF);
+   if(hEmaS!=INVALID_HANDLE) IndicatorRelease(hEmaS);
+  }
+
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+   ManageTP1();
+   HandleOCO();
+
+   MqlDateTime now; TimeToStruct(TimeCurrent(),now);
+   if(now.day_of_year!=gDay){ gDay=now.day_of_year; ResetDay(); }
+
+   bool newsBlk=InNewsBlackout(TimeCurrent());
+   if(newsBlk && InpNewsFlatten){ CancelPendings(); if(SelPos()) gTrade.PositionClose(_Symbol); }
+
+   int nowMin=now.hour*60+now.min;
+   if(nowMin>=InpEndHour*60+InpEndMin){ EndOfDay(); return; }
+
+   //--- gestione runner (EMA) a nuova barra M5
+   datetime t=iTime(_Symbol,InpExecTF,0);
+   if(t!=gLastExec){ gLastExec=t; ManageRunner(); }
+
+   //--- piazzamento ordini alla fine del range
+   if(gPhase==ORB_WAIT && nowMin>=InpRangeEndHour*60+InpRangeEndMin)
+     {
+      if(newsBlk) return;
+      if(TryPlace()) gPhase=ORB_PLACED;
+     }
+  }
+
+void ResetDay(){ gPhase=ORB_WAIT; gRangeHigh=0; gRangeLow=0; gPart1=false; Log("nuovo giorno."); }
+
+//+------------------------------------------------------------------+
+//| Calcola max/min del range (finestra server, anche a cavallo mezzanotte)|
+//+------------------------------------------------------------------+
+bool ComputeRange(double &hi,double &lo)
+  {
+   MqlDateTime t; TimeToStruct(TimeCurrent(),t); t.sec=0;
+   t.hour=InpRangeEndHour;   t.min=InpRangeEndMin;   datetime tEnd=StructToTime(t);
+   t.hour=InpRangeStartHour; t.min=InpRangeStartMin; datetime tStart=StructToTime(t);
+   if(tStart>=tEnd) tStart-=86400;
+   int iS=iBarShift(_Symbol,PERIOD_M1,tStart,false);
+   int iE=iBarShift(_Symbol,PERIOD_M1,tEnd,false);
+   if(iS<0||iE<0) return(false);
+   int start=MathMin(iS,iE);
+   int count=MathAbs(iS-iE)+1;
+   if(count<1) return(false);
+   int hIdx=iHighest(_Symbol,PERIOD_M1,MODE_HIGH,count,start);
+   int lIdx=iLowest (_Symbol,PERIOD_M1,MODE_LOW, count,start);
+   if(hIdx<0||lIdx<0) return(false);
+   hi=iHigh(_Symbol,PERIOD_M1,hIdx);
+   lo=iLow (_Symbol,PERIOD_M1,lIdx);
+   return(hi>0 && lo>0 && hi>lo);
+  }
+
+//+------------------------------------------------------------------+
+//| Piazza gli ordini pendenti oltre il range (EntryPoints x K)      |
+//+------------------------------------------------------------------+
+bool TryPlace()
+  {
+   if(!ComputeRange(gRangeHigh,gRangeLow))
+     { Log("range non ancora calcolabile (dati M1): riprovo."); return(false); }
+   if(!SpreadOK()){ Log("spread alto: niente ordini."); return(true); }
+
+   double entryDist=EntryDistance();
+   double buyPx =NormalizePrice(gRangeHigh+entryDist);
+   double sellPx=NormalizePrice(gRangeLow -entryDist);
+   double atr=AtrVal();
+   datetime exp=TimeCurrent()+InpPendingExpiryMin*60;
+
+   if(InpAllowLong)
+     {
+      double sl=SLforLong(buyPx,sellPx,atr);
+      double dist=buyPx-sl;
+      if(dist>0)
+        {
+         double tp=NormalizePrice(buyPx+dist*InpTP_R);
+         double lot=LotByRisk(dist);
+         if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"ORB BUY"))
+            Log(StringFormat("BUY STOP @ %.5f SL %.5f TP %.5f lot %.2f",buyPx,sl,tp,lot));
+        }
+     }
+   if(InpAllowShort)
+     {
+      double sl=SLforShort(sellPx,buyPx,atr);
+      double dist=sl-sellPx;
+      if(dist>0)
+        {
+         double tp=NormalizePrice(sellPx-dist*InpTP_R);
+         double lot=LotByRisk(dist);
+         if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"ORB SELL"))
+            Log(StringFormat("SELL STOP @ %.5f SL %.5f TP %.5f lot %.2f",sellPx,sl,tp,lot));
+        }
+     }
+   return(true);
+  }
+
+double EntryDistance()
+  {
+   double d=InpEntryPoints*InpK;                      // distanza in PREZZO
+   double minD=(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
+   return(MathMax(d,minD));
+  }
+
+double SLforLong(double entry,double oppEntry,double atr)
+  {
+   double sl;
+   if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeLow;
+   else if(InpSLMode==ORB_SL_FIXED) sl=entry-InpSLFixedPts*_Point;
+   else sl=entry-atr*InpAtrSLmult;
+   return(NormalizePrice(sl));
+  }
+double SLforShort(double entry,double oppEntry,double atr)
+  {
+   double sl;
+   if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeHigh;
+   else if(InpSLMode==ORB_SL_FIXED) sl=entry+InpSLFixedPts*_Point;
+   else sl=entry+atr*InpAtrSLmult;
+   return(NormalizePrice(sl));
+  }
+
+//+------------------------------------------------------------------+
+//| Parziale al target + stop in pari (ad ogni tick)                 |
+//+------------------------------------------------------------------+
+void ManageTP1()
+  {
+   if(!SelPos()) return;
+   if(gPart1 || InpTP1Pct<=0 || InpTP1Pct>=100) return;
+   long type=PositionGetInteger(POSITION_TYPE);
+   bool isLong=(type==POSITION_TYPE_BUY);
+   double openP=PositionGetDouble(POSITION_PRICE_OPEN);
+   double sl=PositionGetDouble(POSITION_SL);
+   double vol=PositionGetDouble(POSITION_VOLUME);
+   ulong ticket=PositionGetInteger(POSITION_TICKET);
+   double bid=SymbolInfoDouble(_Symbol,SYMBOL_BID), ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+   double risk=isLong?(openP-sl):(sl-openP);
+   if(risk<=0) return;
+   double tgt=isLong?openP+risk*InpTP_R:openP-risk*InpTP_R;
+   bool hit=isLong?(bid>=tgt):(ask<=tgt);
+   if(!hit) return;
+   double cv=NormVol(vol*InpTP1Pct/100.0);
+   if(cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv))
+     { gPart1=true; if(InpBreakeven) gTrade.PositionModify(_Symbol,NormalizePrice(openP),PositionGetDouble(POSITION_TP));
+       Log("target: parziale + stop in pari."); }
+  }
+
+//+------------------------------------------------------------------+
+//| Runner: trailing su EMA9 + uscita se chiude oltre EMA9 opposta   |
+//+------------------------------------------------------------------+
+void ManageRunner()
+  {
+   if(!SelPos()) return;
+   if(!InpUseTrailEMA && !InpExitOnEmaClose) return;
+   double ef[1]; if(CopyBuffer(hEmaF,0,1,1,ef)!=1) return;
+   long type=PositionGetInteger(POSITION_TYPE);
+   bool isLong=(type==POSITION_TYPE_BUY);
+   double close1=iClose(_Symbol,InpExecTF,1);
+
+   if(InpExitOnEmaClose)
+     {
+      if(isLong && close1<ef[0]) { gTrade.PositionClose(_Symbol); Log("chiusura M5 sotto EMA9: uscita."); return; }
+      if(!isLong && close1>ef[0]){ gTrade.PositionClose(_Symbol); Log("chiusura M5 sopra EMA9: uscita."); return; }
+     }
+   if(InpUseTrailEMA)
+     {
+      double sl=PositionGetDouble(POSITION_SL);
+      double openP=PositionGetDouble(POSITION_PRICE_OPEN);
+      double newSL=NormalizePrice(ef[0]);
+      if(isLong && newSL>sl && newSL<SymbolInfoDouble(_Symbol,SYMBOL_BID))
+         gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
+      if(!isLong && (newSL<sl||sl==0) && newSL>SymbolInfoDouble(_Symbol,SYMBOL_ASK))
+         gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
+     }
+  }
+
+//+------------------------------------------------------------------+
+void HandleOCO(){ if(SelPos()) CancelPendings(); }
+
+void CancelPendings()
+  {
+   for(int i=OrdersTotal()-1;i>=0;i--)
+     {
+      ulong t=OrderGetTicket(i);
+      if(t==0) continue;
+      if(OrderGetString(ORDER_SYMBOL)!=_Symbol) continue;
+      if(OrderGetInteger(ORDER_MAGIC)!=InpMagic) continue;
+      gTrade.OrderDelete(t);
+     }
+  }
+
+void EndOfDay()
+  {
+   CancelPendings();
+   if(InpCloseAtEnd && SelPos()){ gTrade.PositionClose(_Symbol); Log("fine giornata: posizione chiusa."); }
+   gPhase=ORB_DONE;
+  }
+
+//==================================================================
+//  UTILITY
+//==================================================================
+double AtrVal(){ double a[1]; if(CopyBuffer(hAtr,0,1,1,a)<1) return(0); return(a[0]); }
+
+double NormalizePrice(double price)
+  {
+   double ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+   int dg=(int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
+   if(ts<=0) return(NormalizeDouble(price,dg));
+   return(NormalizeDouble(MathRound(price/ts)*ts,dg));
+  }
+
+double LotByRisk(double slDist)
+  {
+   if(slDist<=0) return(0);
+   double risk=AccountInfoDouble(ACCOUNT_BALANCE)*InpRiskPercent/100.0;
+   double tv=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE);
+   double tsz=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+   if(tv<=0||tsz<=0) return(0);
+   double lossPerLot=(slDist/tsz)*tv;
+   if(lossPerLot<=0) return(0);
+   double lot=risk/lossPerLot;
+   double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+   double mx=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);
+   double st=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP); if(st<=0) st=0.01;
+   lot=MathFloor(lot/st)*st;
+   return(MathMax(mn,MathMin(mx,lot)));
+  }
+
+double NormVol(double v)
+  {
+   double st=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP);
+   double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+   if(st<=0) st=0.01;
+   v=MathFloor(v/st)*st;
+   return(v<mn?0:v);
+  }
+
+bool SpreadOK(){ if(InpMaxSpread<=0) return(true); return(SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)<=InpMaxSpread); }
+bool SelPos(){ if(!PositionSelect(_Symbol)) return(false); return(PositionGetInteger(POSITION_MAGIC)==InpMagic); }
+
+//==================================================================
+//  FILTRO NOTIZIE (CSV in MQL5/Files)
+//==================================================================
+void LoadNews()
+  {
+   gNewsCount=0; ArrayResize(gNewsTime,0); ArrayResize(gNewsImpact,0); ArrayResize(gNewsCcy,0);
+   int h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI,';');
+   if(h==INVALID_HANDLE){ Log("file news non trovato: filtro spento."); return; }
+   while(!FileIsEnding(h))
+     {
+      string sTime=FileReadString(h);
+      if(FileIsLineEnding(h)&&StringLen(sTime)==0) continue;
+      string sImp=FileIsLineEnding(h)?"":FileReadString(h);
+      string sCcy=FileIsLineEnding(h)?"":FileReadString(h);
+      while(!FileIsLineEnding(h)&&!FileIsEnding(h)) FileReadString(h);
+      datetime t=StringToTime(sTime);
+      if(t<=0) continue;
+      t+=InpNewsShiftMinutes*60;
+      int imp=ImpactToInt(sImp);
+      int n=gNewsCount;
+      ArrayResize(gNewsTime,n+1); ArrayResize(gNewsImpact,n+1); ArrayResize(gNewsCcy,n+1);
+      gNewsTime[n]=t; gNewsImpact[n]=imp; gNewsCcy[n]=sCcy; gNewsCount=n+1;
+     }
+   FileClose(h);
+   Log(StringFormat("news caricate: %d.",gNewsCount));
+  }
+
+int ImpactToInt(string s)
+  {
+   string u=s; StringToUpper(u); StringTrimLeft(u); StringTrimRight(u);
+   if(StringFind(u,"HIGH")>=0||u=="3") return(3);
+   if(StringFind(u,"MED") >=0||u=="2") return(2);
+   if(StringFind(u,"LOW") >=0||u=="1") return(1);
+   return(0);
+  }
+
+bool InNewsBlackout(datetime now)
+  {
+   if(!InpUseNewsFilter||gNewsCount==0) return(false);
+   bool filt=(StringLen(InpNewsCurrencies)>0);
+   for(int i=0;i<gNewsCount;i++)
+     {
+      if(gNewsImpact[i]<InpNewsMinImpact) continue;
+      if(filt && StringFind(InpNewsCurrencies,gNewsCcy[i])<0) continue;
+      if(now>=gNewsTime[i]-InpNewsBeforeMin*60 && now<=gNewsTime[i]+InpNewsAfterMin*60) return(true);
+     }
+   return(false);
+  }
+//+------------------------------------------------------------------+
