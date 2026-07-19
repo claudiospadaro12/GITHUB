@@ -25,7 +25,8 @@
 #include <Trade/Trade.mqh>
 CTrade gTrade;
 
-enum ENUM_M3_SL { M3SL_SUPERTREND=0, M3SL_ATR=1, M3SL_FIXED=2 };
+enum ENUM_M3_SL    { M3SL_SUPERTREND=0, M3SL_ATR=1, M3SL_FIXED=2 };
+enum ENUM_M3_ENTRY { M3E_ROTTURA=0, M3E_CONTINUAZIONE=1, M3E_ENTRAMBE=2 };
 
 //==================================================================
 //  INPUT
@@ -54,6 +55,11 @@ input bool   InpCloseAtEnd = true;               // Chiudi posizioni residue a f
 input int    InpMaxTradesPerDay = 0;             // Max trade al giorno (0 = illimitato)
 
 input group "=== Ingresso ==="
+input ENUM_M3_ENTRY InpEntryMode = M3E_ENTRAMBE;  // Rottura, Continuazione (ritracciamento) o entrambe
+input int    InpContEmaPeriod = 50;               // (continuazione) EMA M3 del ritracciamento
+input bool   InpUseEmaCross = false;              // Filtro robustezza: EMA veloce vs lenta allineate al bias
+input int    InpEmaFastP   = 14;                  // EMA veloce (filtro cross)
+input int    InpEmaSlowP   = 50;                  // EMA lenta (filtro cross)
 input bool   InpAllowLong  = true;
 input bool   InpAllowShort = true;
 
@@ -64,6 +70,8 @@ input double InpAtrSLmult   = 1.5;               // (ATR) stop = X * ATR M3
 input double InpSLFixedPts   = 1500;             // (FIXED) stop in punti (DAX BCM: 1500 = 15 punti indice)
 input double InpTPPoints     = 2000;             // 1o target in punti (DAX BCM: 2000 = 20 punti indice; 0=off)
 input double InpTP1Pct       = 50;               // % chiusa al 1o target
+input double InpTP2Points    = 0;                // 2o target in punti (trend: es. 20000 = 200 punti; 0=off)
+input double InpTP2Pct       = 50;               // % (del residuo) chiusa al 2o target
 input bool   InpBreakeven    = true;             // Stop in pari dopo la parziale
 input bool   InpTrailOnST    = true;             // Trailing dello stop sulla linea Supertrend M3
 input bool   InpExitOnFlip   = true;             // Esci se il Supertrend M3 gira contro
@@ -89,9 +97,10 @@ input bool   InpVerbose   = true;
 //  STATO
 //==================================================================
 int      hAtrBias=INVALID_HANDLE, hAtrTrig=INVALID_HANDLE, hEmaBias=INVALID_HANDLE, hAdxBias=INVALID_HANDLE;
+int      hEmaCont=INVALID_HANDLE, hEmaFast=INVALID_HANDLE, hEmaSlow=INVALID_HANDLE;
 datetime gLastM3=0;
 int      gDay=-1, gTradesToday=0;
-bool     gPart1=false;
+bool     gPart1=false, gPart2=false;
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 
@@ -107,7 +116,11 @@ int OnInit()
    hAtrTrig=iATR(_Symbol,InpTriggerTF,InpStAtrPeriod);
    hEmaBias=iMA(_Symbol,InpBiasTF,InpEmaPeriod,0,MODE_EMA,PRICE_CLOSE);
    hAdxBias=iADX(_Symbol,InpBiasTF,InpAdxPeriod);
-   if(hAtrBias==INVALID_HANDLE||hAtrTrig==INVALID_HANDLE||hEmaBias==INVALID_HANDLE||hAdxBias==INVALID_HANDLE)
+   hEmaCont=iMA(_Symbol,InpTriggerTF,InpContEmaPeriod,0,MODE_EMA,PRICE_CLOSE);
+   hEmaFast=iMA(_Symbol,InpTriggerTF,InpEmaFastP,0,MODE_EMA,PRICE_CLOSE);
+   hEmaSlow=iMA(_Symbol,InpTriggerTF,InpEmaSlowP,0,MODE_EMA,PRICE_CLOSE);
+   if(hAtrBias==INVALID_HANDLE||hAtrTrig==INVALID_HANDLE||hEmaBias==INVALID_HANDLE||hAdxBias==INVALID_HANDLE||
+      hEmaCont==INVALID_HANDLE||hEmaFast==INVALID_HANDLE||hEmaSlow==INVALID_HANDLE)
      { Print("ERRORE: handle indicatori."); return(INIT_FAILED); }
    if(InpUseNewsFilter) LoadNews();
    Log(StringFormat("avviato su %s. Bias %s, trigger %s, ST mult %.1f. Ingressi dopo %02d:%02d (server).",
@@ -121,6 +134,9 @@ void OnDeinit(const int reason)
    if(hAtrTrig!=INVALID_HANDLE) IndicatorRelease(hAtrTrig);
    if(hEmaBias!=INVALID_HANDLE) IndicatorRelease(hEmaBias);
    if(hAdxBias!=INVALID_HANDLE) IndicatorRelease(hAdxBias);
+   if(hEmaCont!=INVALID_HANDLE) IndicatorRelease(hEmaCont);
+   if(hEmaFast!=INVALID_HANDLE) IndicatorRelease(hEmaFast);
+   if(hEmaSlow!=INVALID_HANDLE) IndicatorRelease(hEmaSlow);
   }
 
 //+------------------------------------------------------------------+
@@ -172,14 +188,49 @@ void OnNewM3Bar(int nowMin)
 
    int bias=Bias();
    if(bias==0) return;
+   if(InpUseEmaCross && !EmaCrossOK(bias)) return;
 
-   //--- ROTTURA confermata: il Supertrend M3 e' appena girato nella direzione del bias
    int dir1=(int)d3[1], dir2=(int)d3[2];
-   bool flipLong  = (bias>0 && dir1>0 && dir2<0);
-   bool flipShort = (bias<0 && dir1<0 && dir2>0);
+   bool doRottura = (InpEntryMode==M3E_ROTTURA || InpEntryMode==M3E_ENTRAMBE);
+   bool doContin  = (InpEntryMode==M3E_CONTINUAZIONE || InpEntryMode==M3E_ENTRAMBE);
 
-   if(flipLong  && InpAllowLong)  Enter(true,  l3[1]);
-   if(flipShort && InpAllowShort) Enter(false, l3[1]);
+   //--- ROTTURA: il Supertrend M3 e' appena girato nella direzione del bias
+   if(doRottura)
+     {
+      if(bias>0 && dir1>0 && dir2<0 && InpAllowLong) { Enter(true,  l3[1]); return; }
+      if(bias<0 && dir1<0 && dir2>0 && InpAllowShort){ Enter(false, l3[1]); return; }
+     }
+
+   //--- CONTINUAZIONE: Supertrend gia' allineato + ritracciamento sull'EMA e ripartenza
+   if(doContin && dir1==bias && ContPullback(bias))
+     {
+      if(bias>0 && InpAllowLong)  Enter(true,  l3[1]);
+      if(bias<0 && InpAllowShort) Enter(false, l3[1]);
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Continuazione: la candela M3 ha ritracciato sull'EMA e riparte   |
+//+------------------------------------------------------------------+
+bool ContPullback(int bias)
+  {
+   double e[1];
+   if(CopyBuffer(hEmaCont,0,1,1,e)!=1) return(false);
+   double o=iOpen(_Symbol,InpTriggerTF,1), c=iClose(_Symbol,InpTriggerTF,1);
+   double h=iHigh(_Symbol,InpTriggerTF,1), l=iLow(_Symbol,InpTriggerTF,1);
+   if(bias>0) return(l<=e[0] && c>e[0] && c>o);   // ha toccato l'EMA dal basso e richiude sopra
+   return(h>=e[0] && c<e[0] && c<o);              // ha toccato l'EMA dall'alto e richiude sotto
+  }
+
+//+------------------------------------------------------------------+
+//| Filtro robustezza: EMA veloce vs lenta allineate al bias         |
+//+------------------------------------------------------------------+
+bool EmaCrossOK(int bias)
+  {
+   double f[1],s[1];
+   if(CopyBuffer(hEmaFast,0,1,1,f)!=1 || CopyBuffer(hEmaSlow,0,1,1,s)!=1) return(true);
+   if(bias>0) return(f[0]>s[0]);
+   return(f[0]<s[0]);
   }
 
 //+------------------------------------------------------------------+
@@ -228,7 +279,7 @@ void Enter(bool isLong,double stLine)
    double lot=LotByRisk(risk);
    if(lot<=0){ Log("lotto nullo."); return; }
 
-   gPart1=false;
+   gPart1=false; gPart2=false;
    bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,0,"DAX M3 L")
                  :gTrade.Sell(lot,_Symbol,bid,sl,0,"DAX M3 S");
    if(ok){ gTradesToday++; Log(StringFormat("%s @ %.2f SL %.2f lot %.2f (rottura M3)",isLong?"LONG":"SHORT",entry,sl,lot)); }
@@ -241,20 +292,37 @@ void Enter(bool isLong,double stLine)
 void ManageTP1()
   {
    if(!SelPos()) return;
-   if(gPart1 || InpTPPoints<=0 || InpTP1Pct<=0 || InpTP1Pct>=100) return;
    long type=PositionGetInteger(POSITION_TYPE);
    bool isLong=(type==POSITION_TYPE_BUY);
    double openP=PositionGetDouble(POSITION_PRICE_OPEN);
    double vol=PositionGetDouble(POSITION_VOLUME);
    ulong ticket=PositionGetInteger(POSITION_TICKET);
    double bid=SymbolInfoDouble(_Symbol,SYMBOL_BID), ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
-   double tgt=isLong?openP+InpTPPoints*_Point:openP-InpTPPoints*_Point;
-   bool hit=isLong?(bid>=tgt):(ask<=tgt);
-   if(!hit) return;
-   double cv=NormVol(vol*InpTP1Pct/100.0);
-   if(cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv))
-     { gPart1=true; if(InpBreakeven) gTrade.PositionModify(_Symbol,NormalizePrice(openP),PositionGetDouble(POSITION_TP));
-       Log("1o target: parziale + stop in pari."); }
+
+   //--- 1o target
+   if(!gPart1 && InpTPPoints>0 && InpTP1Pct>0 && InpTP1Pct<100)
+     {
+      double tgt=isLong?openP+InpTPPoints*_Point:openP-InpTPPoints*_Point;
+      bool hit=isLong?(bid>=tgt):(ask<=tgt);
+      if(hit)
+        {
+         double cv=NormVol(vol*InpTP1Pct/100.0);
+         if(cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv))
+           { gPart1=true; if(InpBreakeven) gTrade.PositionModify(_Symbol,NormalizePrice(openP),PositionGetDouble(POSITION_TP));
+             Log("1o target: parziale + stop in pari."); }
+        }
+     }
+   //--- 2o target (trend, es. ~200 punti)
+   else if(gPart1 && !gPart2 && InpTP2Points>0 && InpTP2Pct>0 && InpTP2Pct<100)
+     {
+      double tgt=isLong?openP+InpTP2Points*_Point:openP-InpTP2Points*_Point;
+      bool hit=isLong?(bid>=tgt):(ask<=tgt);
+      if(hit)
+        {
+         double cv=NormVol(vol*InpTP2Pct/100.0);
+         if(cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv)){ gPart2=true; Log("2o target: seconda parziale."); }
+        }
+     }
   }
 
 //+------------------------------------------------------------------+
