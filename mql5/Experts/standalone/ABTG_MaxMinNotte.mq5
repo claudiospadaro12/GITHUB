@@ -44,11 +44,13 @@ input double InpMaxBoxPts    = 0;    // Ampiezza MAX del box in punti (0=off)
 input group "=== Piazzamento e chiusura (ORA SERVER) ==="
 input int    InpPlaceHour    = 7;    // Ora piazzamento ordini (server). BCM: 7:59 = 08:59 CET
 input int    InpPlaceMin     = 59;
+input int    InpEntryCutoffHour = 8; // CUTOFF ingressi (server): dopo, cancella i pendenti non scattati
+input int    InpEntryCutoffMin  = 30;// BCM: 8:30 = 09:30 CET (solo la rottura "fresca" dell'apertura)
 input int    InpCloseHour    = 17;   // Ora cancellazione/flat (server). BCM: 17:30 = 18:30 CET
 input int    InpCloseMin     = 30;
 input bool   InpCloseAtEnd   = true; // Chiudi posizioni residue a fine finestra
 input bool   InpOneTradePerDay = true;
-input int    InpPendingExpiryMin = 600; // Cancella il pendente non eseguito dopo N minuti
+input int    InpPendingExpiryMin = 90; // Cancella il pendente non eseguito dopo N minuti
 
 input group "=== Ingresso ==="
 input double InpBufferPoints = 1000; // Buffer oltre max/min notte, in punti (DAX BCM: 1000 = 10 punti indice)
@@ -149,6 +151,16 @@ void OnTick()
 
    int nowMin = now.hour*60+now.min;
    if(nowMin >= InpCloseHour*60+InpCloseMin){ EndOfDay(); return; }
+
+   //--- CUTOFF: se i pendenti non sono scattati entro l'orario, cancellali
+   //    (evita di inseguire una rottura "vecchia" a corsa gia' avvenuta -> esaurimento)
+   if(gPhase==MMP_PLACED && !SelPos() && nowMin >= InpEntryCutoffHour*60+InpEntryCutoffMin)
+     {
+      CancelPendings();
+      gPhase=MMP_DONE;
+      Log("cutoff ingressi superato: pendenti non eseguiti cancellati (niente rincorsa).");
+      return;
+     }
 
    if(gPhase==MMP_WAIT && nowMin >= InpPlaceHour*60+InpPlaceMin)
      {
