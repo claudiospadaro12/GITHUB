@@ -1,0 +1,51 @@
+; Preset DAX M3 T-TREND - DAX (D30EUR)
+; Bias Supertrend(3.5) H4 + EMA200 + ADX; trigger rottura Supertrend M3 dopo le 09:30.
+; Orari SERVER (BCM = ora italiana - 1): ingressi dopo 08:30 = 09:30 CET; flat 17:30 = 18:30 CET.
+; SL su Supertrend M3; TP 2000 pt = 20 punti indice + trailing su Supertrend; uscita al flip.
+; Carica in: finestra EA -> Dati in Ingresso -> Carica (EA: ABTG_DAX_M3)
+InpBiasTF=16388
+InpTriggerTF=3
+InpStMult=3.5
+InpStAtrPeriod=10
+InpUseEMA200=true
+InpEmaPeriod=200
+InpUseADX=true
+InpAdxPeriod=14
+InpAdxMin=25.0
+InpStartHour=8
+InpStartMin=30
+InpEndHour=17
+InpEndMin=0
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpMaxTradesPerDay=0
+InpEntryMode=2
+InpContEmaPeriod=50
+InpUseEmaCross=false
+InpEmaFastP=14
+InpEmaSlowP=50
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=0
+InpSLBufferPts=0
+InpAtrSLmult=1.5
+InpSLFixedPts=1500
+InpTPPoints=2000
+InpTP1Pct=50
+InpTP2Points=0
+InpTP2Pct=50
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=EUR,USD
+InpMagic=770501
+InpMaxSpread=0
+InpVerbose=true

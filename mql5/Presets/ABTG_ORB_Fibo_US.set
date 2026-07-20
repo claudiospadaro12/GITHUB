@@ -1,0 +1,44 @@
+; Preset ORB + FIBONACCI (webinar) - indici USA / oro
+; Opening Range 14:30-15:00 server = 15:30-16:00 CET (apertura USA, 30 min).
+; Breakout confermato -> ingresso su Golden Zone 50-61.8% -> SL 78.6%, TP estensione.
+; Carica in: finestra EA -> Dati in Ingresso -> Carica (EA: ABTG_ORB_Fibo)
+InpORStartHour=14
+InpORStartMin=30
+InpORMinutes=30
+InpBreakCutoffMin=120
+InpEndHour=22
+InpEndMin=59
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpExecTF=5
+InpUseVolume=true
+InpVolMult=1.5
+InpVolAvgBars=20
+InpBodyMinRatio=0.5
+InpFibGZ1=0.5
+InpFibGZ2=0.618
+InpFibSL=0.786
+InpUseEMAFilter=true
+InpEmaFast=9
+InpEmaSlow=21
+InpUseMACD=false
+InpAllowLong=true
+InpAllowShort=true
+InpRiskPercent=1.0
+InpMinRR=0.0
+InpSLBufferPts=0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailEMA=true
+InpExitOnEmaClose=true
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpMagic=770602
+InpMaxSpread=0
+InpVerbose=true

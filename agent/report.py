@@ -7,6 +7,7 @@ nei client di posta (incluso Gmail).
 
 from __future__ import annotations
 
+from .correlation import RefCorr, verdict as corr_verdict
 from .macro_calendar import MacroEvent
 from .market_data import Instrument
 
@@ -194,11 +195,94 @@ def _calendar_table(events: list[MacroEvent]) -> str:
     )
 
 
+def _correlation_table(refs: list[RefCorr] | None) -> str:
+    if not refs:
+        return "<p style='color:#888;'>Correlazione non disponibile.</p>"
+    head = (
+        "<tr style='background:#f3f4f6;text-align:left;'>"
+        "<th style='padding:6px 10px;'>DAX vs</th><th style='padding:6px 10px;'>TF</th>"
+        "<th style='padding:6px 10px;'>Correlazione</th>"
+        "<th style='padding:6px 10px;'>Direzioni (DAX / rif.)</th>"
+        "<th style='padding:6px 10px;'>Esito</th></tr>"
+    )
+    rows = ""
+    for rc in refs:
+        for i, tf in enumerate(rc.per_tf):
+            first = (
+                f"<td rowspan='{len(rc.per_tf)}' style='padding:6px 10px;font-weight:600;"
+                f"border-top:1px solid #eee;'>{rc.name}</td>" if i == 0 else ""
+            )
+            if tf.note:
+                corr_s, dirs, esito, color = "n/d", "—", tf.note, "#8a8a8a"
+            else:
+                corr_s = f"{tf.corr:.2f}" if tf.corr is not None else "n/d"
+                dirs = f"{tf.dax_dir or '—'} / {tf.ref_dir or '—'}"
+                esito = "✓ allineati" if tf.aligned else "⚠ divergenza"
+                color = "#0a7d32" if tf.aligned else "#b3261e"
+            rows += (
+                f"<tr style='border-top:1px solid #eee;'>{first}"
+                f"<td style='padding:6px 10px;'>{tf.timeframe}</td>"
+                f"<td style='padding:6px 10px;'>{corr_s}</td>"
+                f"<td style='padding:6px 10px;'>{dirs}</td>"
+                f"<td style='padding:6px 10px;color:{color};font-weight:600;'>{esito}</td></tr>"
+            )
+    v = corr_verdict(refs)
+    return (
+        f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{rows}</table>"
+        f"<div style='margin-top:8px;padding:8px 12px;background:#eef2ff;border-radius:6px;"
+        f"font-size:13px;'><strong>Sintesi bias DAX:</strong> {v}</div>"
+    )
+
+
+def _keylevels_table(groups: dict[str, list[Instrument]]) -> str:
+    """Livelli chiave del giorno + zone suggerite per gli ordini pendenti."""
+    items = groups["Indici"] + groups["Materie prime"]
+    head = (
+        "<tr style='background:#f3f4f6;text-align:left;'>"
+        "<th style='padding:6px 10px;'>Strumento</th>"
+        "<th style='padding:6px 10px;'>Prezzo</th>"
+        "<th style='padding:6px 10px;'>Max/Min Giorno Prec.</th>"
+        "<th style='padding:6px 10px;'>Max/Min Sett. Prec.</th>"
+        "<th style='padding:6px 10px;'>Pivot</th>"
+        "<th style='padding:6px 10px;'>Ordini pendenti (idea)</th></tr>"
+    )
+    rows = ""
+    for it in items:
+        if it.error:
+            continue
+        pd_hl = f"{_fmt(it.prev_day_high)} / {_fmt(it.prev_day_low)}"
+        pw_hl = f"{_fmt(it.prev_week_high)} / {_fmt(it.prev_week_low)}"
+        # idea ordini pendenti: BUY STOP sopra la resistenza vicina, SELL STOP sotto il supporto vicino
+        res = it.prev_day_high
+        sup = it.prev_day_low
+        pend = (
+            f"BUY STOP &gt; {_fmt(res)} · SELL STOP &lt; {_fmt(sup)}"
+            if res is not None and sup is not None else "—"
+        )
+        rows += (
+            "<tr style='border-top:1px solid #eee;'>"
+            f"<td style='padding:6px 10px;font-weight:600;'>{it.name}</td>"
+            f"<td style='padding:6px 10px;'>{_fmt(it.last_close)}</td>"
+            f"<td style='padding:6px 10px;'>{pd_hl}</td>"
+            f"<td style='padding:6px 10px;'>{pw_hl}</td>"
+            f"<td style='padding:6px 10px;'>{_fmt(it.pivot)}</td>"
+            f"<td style='padding:6px 10px;font-size:12px;'>{pend}</td></tr>"
+        )
+    note = (
+        "<div style='margin-top:6px;font-size:11px;color:#888;'>"
+        "Metti il BUY STOP qualche punto <em>sopra</em> la resistenza e il SELL STOP qualche "
+        "punto <em>sotto</em> il supporto (buffer ~10 punti indice). Il <strong>box notturno</strong> "
+        "(00:00–05:59) leggilo dall'indicatore sul grafico: i dati overnight non sono disponibili qui.</div>"
+    )
+    return f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{rows}</table>{note}"
+
+
 def build_html(
     date_str: str,
     commentary_html: str,
     groups: dict[str, list[Instrument]],
     events: list[MacroEvent],
+    correlation: list[RefCorr] | None = None,
 ) -> str:
     """Assembla il corpo HTML completo dell'email."""
     return f"""\
@@ -220,10 +304,16 @@ def build_html(
 
     {commentary_html}
 
+    <h2 style="margin-top:26px;">Correlazione DAX ↔ S&amp;P / Nikkei (multi-timeframe)</h2>
+    {_correlation_table(correlation)}
+
     <h2 style="margin-top:26px;">Dati tecnici di riferimento</h2>
     {_data_table("Indici", groups["Indici"])}
     {_data_table("Materie prime", groups["Materie prime"])}
     {_data_table("Forex", groups["Forex"])}
+
+    <h2 style="margin-top:26px;">Livelli chiave del giorno &amp; ordini pendenti</h2>
+    {_keylevels_table(groups)}
 
     <h2 style="margin-top:26px;">Supporti e resistenze</h2>
     {_levels_table(groups)}

@@ -32,6 +32,14 @@ codice markdown). Usa questa struttura, con questi titoli esatti:
 <p>2-4 frasi sul tono del mercato (risk-on / risk-off), basate sui bias e sui \
 principali eventi macro di oggi.</p>
 
+<h2>Bias DAX e correlazione (S&amp;P / Nikkei)</h2>
+<p>Usando ESCLUSIVAMENTE i dati della sezione CORRELAZIONE DAX forniti: indica il \
+bias del DAX e se è CONFERMATO o meno dall'allineamento con S&amp;P 500 e Nikkei 225 \
+sui vari timeframe (D1/H1/M15). Regola ABTG: se sono allineati il bias è più \
+affidabile; se divergono (correlazione bassa o direzione opposta) segnala il rischio \
+di <strong>falso breakout</strong> e invita a prudenza. Se un timeframe è "non \
+verificabile", dillo, non inventare.</p>
+
 <h2>Direzione attesa del trend (oggi)</h2>
 <ul>
   <li>Per OGNI indice e per l'oro: nome, direzione attesa (Rialzista / Ribassista \
@@ -42,8 +50,11 @@ le medie, RSI, eventi macro).</li>
 <h2>Livelli chiave (supporti e resistenze)</h2>
 <ul>
   <li>Per OGNI indice e per l'oro: indica la resistenza più vicina sopra il prezzo \
-e il supporto più vicino sotto, scegliendoli tra i livelli forniti (pivot R1/R2/S1/S2 \
-e massimi/minimi a 20 sedute). Una riga ciascuno, con i valori numerici esatti.</li>
+e il supporto più vicino sotto, scegliendoli tra i livelli forniti (pivot R1/R2/S1/S2, \
+max/min del giorno precedente e della settimana precedente, massimi/minimi a 20 sedute). \
+Una riga ciascuno, con i valori numerici esatti. Indica anche la <strong>zona per un \
+eventuale ordine pendente</strong>: BUY STOP appena sopra la resistenza chiave, SELL STOP \
+appena sotto il supporto chiave. Ricorda che è un'indicazione di zona, non un segnale.</li>
 </ul>
 
 <h2>Zona di Fibonacci (golden zone)</h2>
@@ -97,6 +108,10 @@ def _format_instruments(label: str, items: list[Instrument]) -> str:
             f"S2={it.s2}",
             f"max20={it.recent_high}",
             f"min20={it.recent_low}",
+            f"maxGiornoPrec={it.prev_day_high}",
+            f"minGiornoPrec={it.prev_day_low}",
+            f"maxSettPrec={it.prev_week_high}",
+            f"minSettPrec={it.prev_week_low}",
             f"fib_dir={it.fib_direction}",
             f"fib_swing={it.fib_swing_low}-{it.fib_swing_high}",
             f"fib38.2={it.fib_382}",
@@ -125,6 +140,7 @@ def build_user_content(
     groups: dict[str, list[Instrument]],
     events: list[MacroEvent],
     date_str: str,
+    correlation_text: str = "",
 ) -> str:
     hi_ccy = high_impact_currencies(events)
     sections = [
@@ -134,6 +150,8 @@ def build_user_content(
         _format_instruments("Indici", groups["Indici"]),
         _format_instruments("Materie prime", groups["Materie prime"]),
         _format_instruments("Forex", groups["Forex"]),
+        "",
+        (correlation_text or "CORRELAZIONE DAX: non disponibile."),
         "",
         "CALENDARIO MACRO DI OGGI:",
         _format_events(events),
@@ -151,10 +169,11 @@ def generate_commentary(
     groups: dict[str, list[Instrument]],
     events: list[MacroEvent],
     date_str: str,
+    correlation_text: str = "",
 ) -> str:
     """Chiama Claude e restituisce il commento analitico in HTML."""
     client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
-    user_content = build_user_content(groups, events, date_str)
+    user_content = build_user_content(groups, events, date_str, correlation_text)
 
     # Streaming + get_final_message: protegge dai timeout su output lunghi.
     # Prompt caching sul system prompt (stabile) per ridurre i costi nel tempo.
