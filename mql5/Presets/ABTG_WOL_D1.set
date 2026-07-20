@@ -1,0 +1,43 @@
+; Preset WEEKLY OPEN LINE (WOL) - D1 - multi-asset (forex/indici/materie prime volatili)
+; Doji in prossimita' della WOL (apertura settimanale) + candela di conferma -> inversione.
+; Distanze in ATR (scala-indipendente). SL su estremo Doji, TP RR 1:2, parziale EMA14 + pari, trailing.
+; Commento ordini: "WOL". Magic 771401. Attacca su grafico D1 del simbolo scelto.
+InpTF=16408
+InpWolProximityAtr=0.5
+InpAllowLong=true
+InpAllowShort=true
+InpDojiBodyMaxPct=12.0
+InpUseHeikinAshi=true
+InpMaxDojiAtr=2.0
+InpRequireConfirmClose=true
+InpUseChannels=false
+InpTmaSlow=56
+InpAtrSlow=100
+InpMultSlow=2.0
+InpUseEmaTrend=false
+InpEma200Period=200
+InpEma14Period=14
+InpAvoidLateral=true
+InpMinDojiAtr=0.3
+InpAtrExitPeriod=14
+InpSLbufferPips=8.0
+InpMinRR=1.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP_RR=2.0
+InpUseTrailing=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=WOL
+InpMagic=771401
+InpMaxSpread=0
+InpVerbose=true
