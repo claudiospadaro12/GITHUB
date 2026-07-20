@@ -45,7 +45,9 @@ def main() -> int:
               "Imposta FORCE_RUN=1 per forzare.")
         return 0
 
-    settings.require_anthropic()
+    # La chiave Claude è OPZIONALE: se manca o è invalida usiamo l'analisi
+    # deterministica (fallback), così il report parte sempre. L'email invece
+    # serve davvero per recapitarlo.
     if not settings.dry_run:
         settings.require_email()
 
@@ -70,9 +72,18 @@ def main() -> int:
         print(f"[warn] Correlazione non calcolata: {exc}")
         corr, corr_text = None, ""
 
-    # 4. Sintesi con Claude
-    print("[info] Sintesi del commento con Claude...")
-    commentary = analysis.generate_commentary(settings, groups, events, date_str, corr_text)
+    # 4. Sintesi con Claude (opzionale): se la chiave manca o l'API fallisce,
+    #    ripieghiamo sull'analisi deterministica senza bloccare l'invio.
+    if settings.anthropic_api_key:
+        try:
+            print("[info] Sintesi del commento con Claude...")
+            commentary = analysis.generate_commentary(settings, groups, events, date_str, corr_text)
+        except Exception as exc:
+            print(f"[warn] Commento AI non disponibile ({exc}); uso l'analisi automatica.")
+            commentary = analysis.build_fallback_commentary(groups, events, corr)
+    else:
+        print("[info] Nessuna chiave Claude: uso l'analisi automatica (deterministica).")
+        commentary = analysis.build_fallback_commentary(groups, events, corr)
 
     # 5. Composizione e invio
     html = report.build_html(date_str, commentary, groups, events, corr)
