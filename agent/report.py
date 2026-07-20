@@ -7,6 +7,7 @@ nei client di posta (incluso Gmail).
 
 from __future__ import annotations
 
+from .correlation import RefCorr, verdict as corr_verdict
 from .macro_calendar import MacroEvent
 from .market_data import Instrument
 
@@ -194,11 +195,51 @@ def _calendar_table(events: list[MacroEvent]) -> str:
     )
 
 
+def _correlation_table(refs: list[RefCorr] | None) -> str:
+    if not refs:
+        return "<p style='color:#888;'>Correlazione non disponibile.</p>"
+    head = (
+        "<tr style='background:#f3f4f6;text-align:left;'>"
+        "<th style='padding:6px 10px;'>DAX vs</th><th style='padding:6px 10px;'>TF</th>"
+        "<th style='padding:6px 10px;'>Correlazione</th>"
+        "<th style='padding:6px 10px;'>Direzioni (DAX / rif.)</th>"
+        "<th style='padding:6px 10px;'>Esito</th></tr>"
+    )
+    rows = ""
+    for rc in refs:
+        for i, tf in enumerate(rc.per_tf):
+            first = (
+                f"<td rowspan='{len(rc.per_tf)}' style='padding:6px 10px;font-weight:600;"
+                f"border-top:1px solid #eee;'>{rc.name}</td>" if i == 0 else ""
+            )
+            if tf.note:
+                corr_s, dirs, esito, color = "n/d", "—", tf.note, "#8a8a8a"
+            else:
+                corr_s = f"{tf.corr:.2f}" if tf.corr is not None else "n/d"
+                dirs = f"{tf.dax_dir or '—'} / {tf.ref_dir or '—'}"
+                esito = "✓ allineati" if tf.aligned else "⚠ divergenza"
+                color = "#0a7d32" if tf.aligned else "#b3261e"
+            rows += (
+                f"<tr style='border-top:1px solid #eee;'>{first}"
+                f"<td style='padding:6px 10px;'>{tf.timeframe}</td>"
+                f"<td style='padding:6px 10px;'>{corr_s}</td>"
+                f"<td style='padding:6px 10px;'>{dirs}</td>"
+                f"<td style='padding:6px 10px;color:{color};font-weight:600;'>{esito}</td></tr>"
+            )
+    v = corr_verdict(refs)
+    return (
+        f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{rows}</table>"
+        f"<div style='margin-top:8px;padding:8px 12px;background:#eef2ff;border-radius:6px;"
+        f"font-size:13px;'><strong>Sintesi bias DAX:</strong> {v}</div>"
+    )
+
+
 def build_html(
     date_str: str,
     commentary_html: str,
     groups: dict[str, list[Instrument]],
     events: list[MacroEvent],
+    correlation: list[RefCorr] | None = None,
 ) -> str:
     """Assembla il corpo HTML completo dell'email."""
     return f"""\
@@ -219,6 +260,9 @@ def build_html(
     </div>
 
     {commentary_html}
+
+    <h2 style="margin-top:26px;">Correlazione DAX ↔ S&amp;P / Nikkei (multi-timeframe)</h2>
+    {_correlation_table(correlation)}
 
     <h2 style="margin-top:26px;">Dati tecnici di riferimento</h2>
     {_data_table("Indici", groups["Indici"])}

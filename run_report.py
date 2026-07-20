@@ -20,7 +20,7 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from agent import analysis, config, market_data, notify, report
+from agent import analysis, config, correlation, market_data, notify, report
 from agent.macro_calendar import fetch_today_events
 
 # Mesi in italiano per l'intestazione.
@@ -61,12 +61,21 @@ def main() -> int:
     events = fetch_today_events(tz=config.TIMEZONE)
     print(f"[info] {len(events)} eventi macro oggi.")
 
+    # 3-bis. Correlazione DAX vs S&P/Nikkei (regola ABTG), multi-timeframe
+    print("[info] Calcolo correlazione DAX vs S&P/Nikkei...")
+    try:
+        corr = correlation.compute()
+        corr_text = correlation.format_for_prompt(corr)
+    except Exception as exc:  # non bloccare il report se la correlazione fallisce
+        print(f"[warn] Correlazione non calcolata: {exc}")
+        corr, corr_text = None, ""
+
     # 4. Sintesi con Claude
     print("[info] Sintesi del commento con Claude...")
-    commentary = analysis.generate_commentary(settings, groups, events, date_str)
+    commentary = analysis.generate_commentary(settings, groups, events, date_str, corr_text)
 
     # 5. Composizione e invio
-    html = report.build_html(date_str, commentary, groups, events)
+    html = report.build_html(date_str, commentary, groups, events, corr)
     subject = f"📊 Report di Mercato — {now.day} {_MESI[now.month - 1]} {now.year}"
 
     if settings.dry_run:
