@@ -235,6 +235,7 @@ def build_fallback_commentary(
     groups: dict[str, list[Instrument]],
     events: list[MacroEvent],
     correlation_obj=None,
+    gold_dxy_obj=None,
 ) -> str:
     """Analisi deterministica (senza AI) con la stessa struttura del report.
 
@@ -246,6 +247,7 @@ def build_fallback_commentary(
 
     hi_ccy = sorted(high_impact_currencies(events))
     corr_verdict = corr_mod.verdict(correlation_obj) if correlation_obj else "Correlazione non disponibile."
+    gold_verdict = corr_mod.gold_dxy_verdict(gold_dxy_obj)
 
     all_items = groups["Indici"] + groups["Materie prime"]
     forex = groups["Forex"]
@@ -281,6 +283,9 @@ def build_fallback_commentary(
 
 <h2>Bias DAX e correlazione (S&amp;P / Nikkei)</h2>
 <p>{corr_verdict}</p>
+
+<h2>Bias oro e dollaro (relazione inversa)</h2>
+<p>{gold_verdict}</p>
 
 <h2>Direzione attesa del trend (oggi)</h2>
 <ul>

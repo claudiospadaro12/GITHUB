@@ -72,6 +72,14 @@ def main() -> int:
         print(f"[warn] Correlazione non calcolata: {exc}")
         corr, corr_text = None, ""
 
+    # 3-ter. Correlazione oro vs dollaro (DXY), relazione inversa
+    print("[info] Calcolo correlazione Oro vs Dollaro (DXY)...")
+    try:
+        gold_dxy = correlation.compute_gold_dxy()
+    except Exception as exc:
+        print(f"[warn] Correlazione oro/dollaro non calcolata: {exc}")
+        gold_dxy = None
+
     # 4. Sintesi con Claude (opzionale): se la chiave manca o l'API fallisce,
     #    ripieghiamo sull'analisi deterministica senza bloccare l'invio.
     if settings.anthropic_api_key:
@@ -80,13 +88,13 @@ def main() -> int:
             commentary = analysis.generate_commentary(settings, groups, events, date_str, corr_text)
         except Exception as exc:
             print(f"[warn] Commento AI non disponibile ({exc}); uso l'analisi automatica.")
-            commentary = analysis.build_fallback_commentary(groups, events, corr)
+            commentary = analysis.build_fallback_commentary(groups, events, corr, gold_dxy)
     else:
         print("[info] Nessuna chiave Claude: uso l'analisi automatica (deterministica).")
-        commentary = analysis.build_fallback_commentary(groups, events, corr)
+        commentary = analysis.build_fallback_commentary(groups, events, corr, gold_dxy)
 
     # 5. Composizione e invio
-    html = report.build_html(date_str, commentary, groups, events, corr)
+    html = report.build_html(date_str, commentary, groups, events, corr, gold_dxy)
     subject = f"📊 Report di Mercato — {now.day} {_MESI[now.month - 1]} {now.year}"
 
     if settings.dry_run:
