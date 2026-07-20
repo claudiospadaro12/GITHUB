@@ -1,0 +1,53 @@
+; Preset PTE (Pro Trading Experience) - H4 - default EURUSD
+; Mean-reversion: DOJI col corpo FUORI dal canale veloce (TMA) + conferma Heikin Ashi -> rientro.
+; SL = ATR + 5 pip; TP1 = EMA14 (parziale 50% + pari); TP2 = 2*ATR; trailing su EMA14.
+; Commento ordini: "PTE". Magic 771301. Attacca su grafico H4 del simbolo scelto.
+;
+; PARAMETRI TMA PER COPPIA (da Setting_canali_PTE) -- LENTO (TmaSlow/AtrSlow) | VELOCE (TmaFast/AtrFast), mult sempre 2:
+;   --- H4 ---   EURUSD 200/110 | 30/50   AUDCAD 56/100 | 20/35   GBPUSD 150/130 | 40/50
+;               NZDUSD 290/170 | 30/50   USDCAD 120/170 | 60/75   USDCHF 150/130 | 50/65   USDJPY 200/110 | 30/50
+;   --- DAILY -- EURUSD 220/140 | 50/70   AUDCAD 150/110 | 30/70   GBPUSD 100/200 | 50/90
+;               NZDUSD 100/200 | 50/70   USDJPY 200/110 | 30/50   AUDUSD 150/110 | 30/70
+; Imposta InpTmaSlow/InpAtrSlow e InpTmaFast/InpAtrFast secondo la coppia e il TF.
+InpTF=16388
+InpTmaSlow=200
+InpAtrSlow=110
+InpMultSlow=2.0
+InpTmaFast=30
+InpAtrFast=50
+InpMultFast=2.0
+InpDojiBodyMaxPct=10.0
+InpUseHeikinAshi=true
+InpRequireOutSlow=false
+InpRequireColorFlip=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseEma200Bias=false
+InpEma200Period=200
+InpEma14Period=14
+InpUseWPR=false
+InpWprPeriod=14
+InpWprOB=-20.0
+InpWprOS=-80.0
+InpAtrExitPeriod=14
+InpSLbufferPips=5.0
+InpSLfromDoji=false
+InpTP1_ATRmult=0.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_ATRmult=2.0
+InpUseTrailing=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=PTE
+InpMagic=771301
+InpMaxSpread=0
+InpVerbose=true
