@@ -10,6 +10,18 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
+
+def _clean_key(raw: str) -> str:
+    """Ripulisce la chiave API da caratteri spurii.
+
+    Le chiavi Anthropic sono composte solo da caratteri ASCII senza spazi
+    (`sk-ant-...`). Capita che, copiando da editor o app di note, si insinuino
+    spazi, a-capo o simboli non-ASCII (es. una freccia '→' usata come
+    indicatore di riga). Questi caratteri non fanno parte della chiave e la
+    rendono inutilizzabile: qui li rimuoviamo per recuperare il valore vero.
+    """
+    return "".join(ch for ch in raw if ch.isascii() and not ch.isspace())
+
 # Fuso orario di riferimento per l'orario di invio del report.
 TIMEZONE = "Europe/Rome"
 SEND_HOUR = 7  # 07:00 ora italiana
@@ -48,7 +60,7 @@ class Settings:
     """Impostazioni risolte dall'ambiente al momento dell'esecuzione."""
 
     anthropic_api_key: str = field(
-        default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", "").strip()
+        default_factory=lambda: _clean_key(os.getenv("ANTHROPIC_API_KEY", ""))
     )
 
     # Email (SMTP)
