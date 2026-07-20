@@ -164,6 +164,152 @@ def build_user_content(
     return "\n".join(sections)
 
 
+def _dir_from_bias(bias: str) -> str:
+    b = (bias or "").lower()
+    if "rialz" in b:
+        return "Rialzista"
+    if "ribass" in b:
+        return "Ribassista"
+    return "Laterale"
+
+
+def _nearest_levels(it: Instrument) -> tuple[float | None, float | None]:
+    """Resistenza piu' vicina sopra il prezzo e supporto piu' vicino sotto."""
+    last = it.last_close
+    if last is None:
+        return None, None
+    above = [v for v in (it.r1, it.r2, it.prev_day_high, it.prev_week_high, it.recent_high) if v is not None and v > last]
+    below = [v for v in (it.s1, it.s2, it.prev_day_low, it.prev_week_low, it.recent_low) if v is not None and v < last]
+    res = min(above) if above else None
+    sup = max(below) if below else None
+    return res, sup
+
+
+def _fallback_instrument_rows(items: list[Instrument]) -> str:
+    rows = []
+    for it in items:
+        if it.error:
+            rows.append(f"<li><strong>{it.name}</strong>: dato non disponibile ({it.error}).</li>")
+            continue
+        direction = _dir_from_bias(it.bias)
+        motivo = []
+        if it.sma20 is not None and it.last_close is not None:
+            motivo.append("sopra SMA20" if it.last_close > it.sma20 else "sotto SMA20")
+        if it.sma200 is not None and it.last_close is not None:
+            motivo.append("sopra SMA200" if it.last_close > it.sma200 else "sotto SMA200")
+        if it.rsi14 is not None:
+            motivo.append(f"RSI {it.rsi14}")
+        m = ", ".join(motivo) if motivo else "quadro tecnico"
+        rows.append(
+            f"<li><strong>{it.name}</strong> — {direction} "
+            f"(prezzo {it.last_close}, {m}; bias {it.bias}).</li>"
+        )
+    return "\n".join(rows)
+
+
+def _fallback_levels_rows(items: list[Instrument]) -> str:
+    rows = []
+    for it in items:
+        if it.error or it.last_close is None:
+            continue
+        res, sup = _nearest_levels(it)
+        res_txt = f"resistenza {res} (zona BUY STOP appena sopra)" if res is not None else "resistenza n/d"
+        sup_txt = f"supporto {sup} (zona SELL STOP appena sotto)" if sup is not None else "supporto n/d"
+        rows.append(f"<li><strong>{it.name}</strong> (prezzo {it.last_close}): {res_txt}; {sup_txt}.</li>")
+    return "\n".join(rows)
+
+
+def _fallback_fib_rows(items: list[Instrument]) -> str:
+    rows = []
+    for it in items:
+        if it.error or it.golden_low is None or it.golden_high is None:
+            continue
+        rows.append(
+            f"<li><strong>{it.name}</strong>: golden zone {it.golden_low}–{it.golden_high} "
+            f"(swing {it.fib_direction}). Prezzo: {it.fib_zone or 'n/d'}.</li>"
+        )
+    return "\n".join(rows)
+
+
+def build_fallback_commentary(
+    groups: dict[str, list[Instrument]],
+    events: list[MacroEvent],
+    correlation_obj=None,
+) -> str:
+    """Analisi deterministica (senza AI) con la stessa struttura del report.
+
+    Usata quando la chiave Claude non e' disponibile o l'API non risponde: il
+    report parte comunque, completo di bias, direzione, correlazione, livelli,
+    Fibonacci, news e cross da evitare, tutto calcolato dai dati.
+    """
+    from . import correlation as corr_mod
+
+    hi_ccy = sorted(high_impact_currencies(events))
+    corr_verdict = corr_mod.verdict(correlation_obj) if correlation_obj else "Correlazione non disponibile."
+
+    all_items = groups["Indici"] + groups["Materie prime"]
+    forex = groups["Forex"]
+
+    # Direzione sintetica del quadro: quanti indici/oro rialzisti vs ribassisti
+    up = sum(1 for it in all_items if _dir_from_bias(it.bias) == "Rialzista")
+    down = sum(1 for it in all_items if _dir_from_bias(it.bias) == "Ribassista")
+    if up > down:
+        tono = "prevalentemente costruttivo (piu' strumenti sopra le medie)"
+    elif down > up:
+        tono = "prevalentemente debole (piu' strumenti sotto le medie)"
+    else:
+        tono = "misto/laterale (segnali contrastanti)"
+
+    news_rows = "\n".join(
+        f"<li>{e.time} — {e.currency} — {e.title} (prev {e.previous or 'n/d'}, forecast {e.forecast or 'n/d'}).</li>"
+        for e in events if e.impact.lower() == "high"
+    ) or "<li>Nessun evento ad alto impatto in calendario oggi.</li>"
+
+    if hi_ccy:
+        forex_rows = "\n".join(
+            f"<li><strong>{it.name}</strong>: coinvolge una valuta con news ad alto impatto oggi "
+            f"({', '.join(c for c in hi_ccy if c in it.name.replace('/', ''))}) → prudenza/volatilita'.</li>"
+            for it in forex
+            if any(c in it.name.replace('/', '') for c in hi_ccy)
+        ) or "<li>Nessun cross direttamente esposto a news ad alto impatto oggi.</li>"
+    else:
+        forex_rows = "<li>Oggi nessuna valuta con eventi ad alto impatto: nessun cross da evitare per news.</li>"
+
+    return f"""\
+<h2>Quadro generale</h2>
+<p>Scenario atteso {tono}. {corr_verdict} Le indicazioni sotto sono di contesto, non segnali operativi.</p>
+
+<h2>Bias DAX e correlazione (S&amp;P / Nikkei)</h2>
+<p>{corr_verdict}</p>
+
+<h2>Direzione attesa del trend (oggi)</h2>
+<ul>
+{_fallback_instrument_rows(all_items)}
+</ul>
+
+<h2>Livelli chiave (supporti e resistenze)</h2>
+<ul>
+{_fallback_levels_rows(all_items)}
+</ul>
+
+<h2>Zona di Fibonacci (golden zone)</h2>
+<ul>
+{_fallback_fib_rows(all_items) or "<li>Golden zone non calcolabile con lo storico disponibile.</li>"}
+</ul>
+
+<h2>Notizie macroeconomiche più importanti</h2>
+<ul>
+{news_rows}
+</ul>
+
+<h2>Cross forex da evitare oggi</h2>
+<ul>
+{forex_rows}
+</ul>
+<p style="color:#666;font-size:0.9em"><em>Analisi generata in modalità automatica (senza commento AI): i numeri sono
+calcolati dai dati di mercato. Per il commento discorsivo più raffinato serve la chiave Claude.</em></p>"""
+
+
 def generate_commentary(
     settings: config.Settings,
     groups: dict[str, list[Instrument]],
