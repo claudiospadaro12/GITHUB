@@ -1,0 +1,32 @@
+; Preset POST-NEWS -- ECB Press Conference -- EUR/JPY -- M5
+; Notizia 14:45 IT (giovedi, 8 volte/anno). Azione 15:00 IT = 14:00 server. Scadenza 18:15 IT = 17:15 server.
+; Range = le DUE candele dopo quella della notizia. BUY STOP max+3, SELL STOP min-2, TP50/SL25. Trailing +25->SL15 ON.
+; Attacca su grafico EUR/JPY M5 e carica questo preset. Magic 771201.
+; NB: per operare servono le DATE ECB nel file abtg_news.csv (valuta EUR). Vedi abtg_news_postnews_esempio.csv.
+InpActionHour=14
+InpActionMin=0
+InpExpiryHour=17
+InpExpiryMin=15
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsCurrencies=EUR
+InpNewsTitleMatch=ECB
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=2.0
+InpTPpips=50.0
+InpSLpips=25.0
+InpUseTrail25=true
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpRiskPercent=3.0
+InpRiskRefSLpips=50.0
+InpComment=ECB PostNews
+InpMagic=771201
+InpMaxSpread=0
+InpVerbose=true
