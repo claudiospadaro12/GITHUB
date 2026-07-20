@@ -48,7 +48,7 @@ class Settings:
     """Impostazioni risolte dall'ambiente al momento dell'esecuzione."""
 
     anthropic_api_key: str = field(
-        default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", "")
+        default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", "").strip()
     )
 
     # Email (SMTP)
@@ -69,6 +69,21 @@ class Settings:
             raise RuntimeError(
                 "ANTHROPIC_API_KEY non impostata. Configurala come variabile "
                 "d'ambiente o GitHub Secret."
+            )
+        # Le chiavi API sono solo ASCII: un carattere non-ASCII (spesso incollato
+        # per errore, es. una freccia) manda in crash l'header HTTP con un
+        # UnicodeEncodeError poco chiaro. Meglio segnalarlo subito.
+        try:
+            self.anthropic_api_key.encode("ascii")
+        except UnicodeEncodeError:
+            bad = next(
+                (ch for ch in self.anthropic_api_key if ord(ch) > 127), "?"
+            )
+            raise RuntimeError(
+                "ANTHROPIC_API_KEY contiene un carattere non valido "
+                f"(non-ASCII: '{bad}'). Il Secret è stato probabilmente incollato "
+                "con del testo extra o corrotto: ricrea la chiave e reincolla solo "
+                "il valore 'sk-ant-...' senza spazi o simboli."
             )
 
     def require_email(self) -> None:
