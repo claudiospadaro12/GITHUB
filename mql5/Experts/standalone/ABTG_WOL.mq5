@@ -60,7 +60,7 @@ input double InpMinDojiAtr      = 0.3; // range Doji >= N*ATR (anti-lateralita')
 
 input group "=== Stop / target ==="
 input int    InpAtrExitPeriod = 14;
-input double InpSLbufferPips   = 8.0;  // SL = estremo Doji +/- questo (guida: 5/10 pip)
+input double InpSLbufferAtr    = 0.15; // SL = estremo Doji +/- N*ATR (scala-indipendente: forex/oro/indici)
 input double InpMinRR          = 1.0;  // salta se RR (verso il TP finale) < questo (guida: >=1:1)
 input double InpTP1_ATRmult    = 0.0;  // 0 = TP1 su EMA14; altrimenti N*ATR
 input double InpTP1Pct         = 50;
@@ -100,12 +100,6 @@ datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 void Log(string m){ if(InpVerbose) Print("[WOL] ", m); }
 
 //+------------------------------------------------------------------+
-double PipSize()
-  {
-   int d=(int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
-   return (d==3 || d==5) ? _Point*10.0 : _Point;
-  }
-
 int OnInit()
   {
    gTrade.SetExpertMagicNumber(InpMagic);
@@ -249,10 +243,10 @@ bool InChannels(double bodyHi,double bodyLo)
 //+------------------------------------------------------------------+
 void Enter(bool isLong,double dojiHigh,double dojiLow,double atr)
   {
-   double pip=PipSize();
    double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
    double entry=isLong?ask:bid;
-   double sl = isLong ? NormalizePrice(dojiLow-InpSLbufferPips*pip) : NormalizePrice(dojiHigh+InpSLbufferPips*pip);
+   double buf=InpSLbufferAtr*atr;
+   double sl = isLong ? NormalizePrice(dojiLow-buf) : NormalizePrice(dojiHigh+buf);
 
    double risk=isLong?(entry-sl):(sl-entry);
    double minDist=(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
