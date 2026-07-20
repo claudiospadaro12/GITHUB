@@ -36,6 +36,11 @@ class Instrument:
     s2: float | None = None
     recent_high: float | None = None  # massimo a 20 sedute
     recent_low: float | None = None   # minimo a 20 sedute
+    # Livelli chiave del giorno (per ordini pendenti, stile ABTG)
+    prev_day_high: float | None = None
+    prev_day_low: float | None = None
+    prev_week_high: float | None = None
+    prev_week_low: float | None = None
     # Fibonacci (ritracciamenti sull'ultimo swing significativo)
     fib_direction: str | None = None  # "rialzista" | "ribassista"
     fib_swing_low: float | None = None
@@ -173,6 +178,7 @@ def _analyze_frame(name: str, ticker: str, df: pd.DataFrame) -> Instrument:
     # Fibonacci: ritracciamenti sull'ultimo swing (~60 sedute) con golden zone.
     levels: dict[str, float] = {}
     recent_high = recent_low = None
+    prev_day_high = prev_day_low = prev_week_high = prev_week_low = None
     fib: dict | None = None
     if "High" in df.columns and "Low" in df.columns:
         highs = df["High"].dropna()
@@ -181,7 +187,19 @@ def _analyze_frame(name: str, ticker: str, df: pd.DataFrame) -> Instrument:
             levels = _pivot_levels(float(highs.iloc[-1]), float(lows.iloc[-1]), last)
             recent_high = _r(float(highs.tail(20).max()))
             recent_low = _r(float(lows.tail(20).min()))
+            # Max/min del giorno precedente = ultima seduta chiusa
+            prev_day_high = _r(float(highs.iloc[-1]))
+            prev_day_low = _r(float(lows.iloc[-1]))
             fib = _fibonacci(highs, lows, last)
+            # Max/min della settimana precedente (resample settimanale)
+            try:
+                wk_h = df["High"].resample("W").max().dropna()
+                wk_l = df["Low"].resample("W").min().dropna()
+                if len(wk_h) >= 2 and len(wk_l) >= 2:
+                    prev_week_high = _r(float(wk_h.iloc[-2]))
+                    prev_week_low = _r(float(wk_l.iloc[-2]))
+            except Exception:
+                pass
 
     fl = (fib or {}).get("levels", {})
     return Instrument(
@@ -202,6 +220,10 @@ def _analyze_frame(name: str, ticker: str, df: pd.DataFrame) -> Instrument:
         s2=levels.get("s2"),
         recent_high=recent_high,
         recent_low=recent_low,
+        prev_day_high=prev_day_high,
+        prev_day_low=prev_day_low,
+        prev_week_high=prev_week_high,
+        prev_week_low=prev_week_low,
         fib_direction=(fib or {}).get("direction"),
         fib_swing_low=(fib or {}).get("swing_low"),
         fib_swing_high=(fib or {}).get("swing_high"),

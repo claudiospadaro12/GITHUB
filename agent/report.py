@@ -234,6 +234,49 @@ def _correlation_table(refs: list[RefCorr] | None) -> str:
     )
 
 
+def _keylevels_table(groups: dict[str, list[Instrument]]) -> str:
+    """Livelli chiave del giorno + zone suggerite per gli ordini pendenti."""
+    items = groups["Indici"] + groups["Materie prime"]
+    head = (
+        "<tr style='background:#f3f4f6;text-align:left;'>"
+        "<th style='padding:6px 10px;'>Strumento</th>"
+        "<th style='padding:6px 10px;'>Prezzo</th>"
+        "<th style='padding:6px 10px;'>Max/Min Giorno Prec.</th>"
+        "<th style='padding:6px 10px;'>Max/Min Sett. Prec.</th>"
+        "<th style='padding:6px 10px;'>Pivot</th>"
+        "<th style='padding:6px 10px;'>Ordini pendenti (idea)</th></tr>"
+    )
+    rows = ""
+    for it in items:
+        if it.error:
+            continue
+        pd_hl = f"{_fmt(it.prev_day_high)} / {_fmt(it.prev_day_low)}"
+        pw_hl = f"{_fmt(it.prev_week_high)} / {_fmt(it.prev_week_low)}"
+        # idea ordini pendenti: BUY STOP sopra la resistenza vicina, SELL STOP sotto il supporto vicino
+        res = it.prev_day_high
+        sup = it.prev_day_low
+        pend = (
+            f"BUY STOP &gt; {_fmt(res)} · SELL STOP &lt; {_fmt(sup)}"
+            if res is not None and sup is not None else "—"
+        )
+        rows += (
+            "<tr style='border-top:1px solid #eee;'>"
+            f"<td style='padding:6px 10px;font-weight:600;'>{it.name}</td>"
+            f"<td style='padding:6px 10px;'>{_fmt(it.last_close)}</td>"
+            f"<td style='padding:6px 10px;'>{pd_hl}</td>"
+            f"<td style='padding:6px 10px;'>{pw_hl}</td>"
+            f"<td style='padding:6px 10px;'>{_fmt(it.pivot)}</td>"
+            f"<td style='padding:6px 10px;font-size:12px;'>{pend}</td></tr>"
+        )
+    note = (
+        "<div style='margin-top:6px;font-size:11px;color:#888;'>"
+        "Metti il BUY STOP qualche punto <em>sopra</em> la resistenza e il SELL STOP qualche "
+        "punto <em>sotto</em> il supporto (buffer ~10 punti indice). Il <strong>box notturno</strong> "
+        "(00:00–05:59) leggilo dall'indicatore sul grafico: i dati overnight non sono disponibili qui.</div>"
+    )
+    return f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{rows}</table>{note}"
+
+
 def build_html(
     date_str: str,
     commentary_html: str,
@@ -268,6 +311,9 @@ def build_html(
     {_data_table("Indici", groups["Indici"])}
     {_data_table("Materie prime", groups["Materie prime"])}
     {_data_table("Forex", groups["Forex"])}
+
+    <h2 style="margin-top:26px;">Livelli chiave del giorno &amp; ordini pendenti</h2>
+    {_keylevels_table(groups)}
 
     <h2 style="margin-top:26px;">Supporti e resistenze</h2>
     {_levels_table(groups)}

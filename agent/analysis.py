@@ -50,8 +50,11 @@ le medie, RSI, eventi macro).</li>
 <h2>Livelli chiave (supporti e resistenze)</h2>
 <ul>
   <li>Per OGNI indice e per l'oro: indica la resistenza più vicina sopra il prezzo \
-e il supporto più vicino sotto, scegliendoli tra i livelli forniti (pivot R1/R2/S1/S2 \
-e massimi/minimi a 20 sedute). Una riga ciascuno, con i valori numerici esatti.</li>
+e il supporto più vicino sotto, scegliendoli tra i livelli forniti (pivot R1/R2/S1/S2, \
+max/min del giorno precedente e della settimana precedente, massimi/minimi a 20 sedute). \
+Una riga ciascuno, con i valori numerici esatti. Indica anche la <strong>zona per un \
+eventuale ordine pendente</strong>: BUY STOP appena sopra la resistenza chiave, SELL STOP \
+appena sotto il supporto chiave. Ricorda che è un'indicazione di zona, non un segnale.</li>
 </ul>
 
 <h2>Zona di Fibonacci (golden zone)</h2>
@@ -105,6 +108,10 @@ def _format_instruments(label: str, items: list[Instrument]) -> str:
             f"S2={it.s2}",
             f"max20={it.recent_high}",
             f"min20={it.recent_low}",
+            f"maxGiornoPrec={it.prev_day_high}",
+            f"minGiornoPrec={it.prev_day_low}",
+            f"maxSettPrec={it.prev_week_high}",
+            f"minSettPrec={it.prev_week_low}",
             f"fib_dir={it.fib_direction}",
             f"fib_swing={it.fib_swing_low}-{it.fib_swing_high}",
             f"fib38.2={it.fib_382}",
