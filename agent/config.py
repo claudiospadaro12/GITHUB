@@ -41,6 +41,10 @@ INDICES: dict[str, str] = {
 
 COMMODITIES: dict[str, str] = {
     "Oro (XAU/USD)": "GC=F",
+    "Argento (XAG/USD)": "SI=F",
+    "Rame": "HG=F",
+    "Platino": "PL=F",
+    "Petrolio (WTI)": "CL=F",
 }
 
 FOREX: dict[str, str] = {

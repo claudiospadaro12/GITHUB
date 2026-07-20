@@ -7,7 +7,7 @@ nei client di posta (incluso Gmail).
 
 from __future__ import annotations
 
-from .correlation import RefCorr, verdict as corr_verdict
+from .correlation import RefCorr, verdict as corr_verdict, gold_dxy_verdict
 from .macro_calendar import MacroEvent
 from .market_data import Instrument
 
@@ -277,12 +277,51 @@ def _keylevels_table(groups: dict[str, list[Instrument]]) -> str:
     return f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{rows}</table>{note}"
 
 
+def _gold_dxy_table(rc: RefCorr | None) -> str:
+    """Correlazione oro↔dollaro (relazione inversa): tabella + sintesi."""
+    if not rc:
+        return "<p style='color:#888;'>Correlazione oro/dollaro non disponibile.</p>"
+    head = (
+        "<tr style='background:#f3f4f6;text-align:left;'>"
+        "<th style='padding:6px 10px;'>TF</th>"
+        "<th style='padding:6px 10px;'>Correlazione</th>"
+        "<th style='padding:6px 10px;'>Direzioni (Oro / Dollaro)</th>"
+        "<th style='padding:6px 10px;'>Esito (relazione inversa)</th></tr>"
+    )
+    rows = ""
+    for tf in rc.per_tf:
+        if tf.note:
+            corr_s, dirs, esito, color = "n/d", "—", tf.note, "#8a8a8a"
+        else:
+            corr_s = f"{tf.corr:.2f}" if tf.corr is not None else "n/d"
+            dirs = f"{tf.dax_dir or '—'} / {tf.ref_dir or '—'}"
+            esito = "✓ inversa sana" if tf.aligned else "⚠ non inversa"
+            color = "#0a7d32" if tf.aligned else "#b3261e"
+        rows += (
+            "<tr style='border-top:1px solid #eee;'>"
+            f"<td style='padding:6px 10px;'>{tf.timeframe}</td>"
+            f"<td style='padding:6px 10px;'>{corr_s}</td>"
+            f"<td style='padding:6px 10px;'>{dirs}</td>"
+            f"<td style='padding:6px 10px;color:{color};font-weight:600;'>{esito}</td></tr>"
+        )
+    v = gold_dxy_verdict(rc)
+    return (
+        f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{rows}</table>"
+        f"<div style='margin-top:8px;padding:8px 12px;background:#fffbe6;border-radius:6px;"
+        f"font-size:13px;'><strong>Sintesi bias oro:</strong> {v}</div>"
+        "<p style='font-size:11px;color:#aaa;margin-top:6px;'>"
+        "Oro e dollaro si muovono di norma in <strong>direzione opposta</strong>: dollaro debole "
+        "→ oro sostenuto. Correlazione negativa = relazione inversa in atto.</p>"
+    )
+
+
 def build_html(
     date_str: str,
     commentary_html: str,
     groups: dict[str, list[Instrument]],
     events: list[MacroEvent],
     correlation: list[RefCorr] | None = None,
+    gold_dxy: RefCorr | None = None,
 ) -> str:
     """Assembla il corpo HTML completo dell'email."""
     return f"""\
@@ -306,6 +345,9 @@ def build_html(
 
     <h2 style="margin-top:26px;">Correlazione DAX ↔ S&amp;P / Nikkei (multi-timeframe)</h2>
     {_correlation_table(correlation)}
+
+    <h2 style="margin-top:26px;">Oro ↔ Dollaro (DXY) — relazione inversa</h2>
+    {_gold_dxy_table(gold_dxy)}
 
     <h2 style="margin-top:26px;">Dati tecnici di riferimento</h2>
     {_data_table("Indici", groups["Indici"])}

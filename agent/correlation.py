@@ -119,6 +119,70 @@ def _one(label: str, period: str, interval: str, minbars: int,
     return TFCorr(label, corr=corr, dax_dir=dd, ref_dir=rd, aligned=aligned)
 
 
+GOLD_TICKER = "GC=F"
+DXY_TICKER = "DX-Y.NYB"
+
+
+def _pair_corr(label: str, period: str, interval: str, minbars: int,
+               a_ticker: str, b_ticker: str, inverse: bool) -> TFCorr:
+    """Correlazione generica tra due strumenti su un timeframe.
+
+    Con `inverse=True` l'allineamento "sano" e' quando i due si muovono in
+    direzioni OPPOSTE (caso oro vs dollaro: quando il dollaro scende, l'oro sale).
+    """
+    a = _download_close(a_ticker, period, interval)
+    b = _download_close(b_ticker, period, interval)
+    if a is None or b is None:
+        return TFCorr(label, note="dati non disponibili")
+    joined = pd.concat([a.rename("a"), b.rename("b")], axis=1, join="inner").dropna()
+    if len(joined) < minbars:
+        return TFCorr(label, note="storico/sovrapposizione insufficiente")
+    ret = joined.pct_change().dropna()
+    try:
+        corr = float(ret["a"].corr(ret["b"]))
+    except Exception:
+        corr = None
+    ad = _direction(joined["a"])
+    bd = _direction(joined["b"])
+    if inverse:
+        aligned = (ad is not None and bd is not None
+                   and ad != "laterale" and bd != "laterale" and ad != bd)
+    else:
+        aligned = (ad is not None and bd is not None and ad == bd and ad != "laterale")
+    return TFCorr(label, corr=corr, dax_dir=ad, ref_dir=bd, aligned=aligned)
+
+
+def compute_gold_dxy() -> RefCorr:
+    """Correlazione ORO vs Dollaro (DXY) su D1/H1/M15 — relazione inversa."""
+    rc = RefCorr(name="Oro vs Dollaro (DXY)", ticker=DXY_TICKER)
+    for label, period, interval, minbars in TIMEFRAMES:
+        rc.per_tf.append(
+            _pair_corr(label, period, interval, minbars, GOLD_TICKER, DXY_TICKER, inverse=True)
+        )
+    return rc
+
+
+def gold_dxy_verdict(rc: RefCorr | None) -> str:
+    """Sintesi del bias oro secondo la relazione inversa col dollaro."""
+    if rc is None:
+        return "Correlazione oro/dollaro non disponibile."
+    d1 = next((tf for tf in rc.per_tf if tf.timeframe == "D1"), None)
+    if d1 is None or d1.note or d1.dax_dir is None or d1.ref_dir is None:
+        return "Correlazione oro/dollaro non verificabile (dati insufficienti)."
+    gold, dxy = d1.dax_dir, d1.ref_dir  # dax_dir=oro, ref_dir=dollaro
+    corr_s = f" (correlazione {d1.corr:.2f})" if d1.corr is not None else ""
+    if gold == "rialzista" and dxy == "ribassista":
+        return ("Oro sostenuto dal dollaro DEBOLE: relazione inversa sana, bias oro "
+                f"rialzista confermato{corr_s}.")
+    if gold == "ribassista" and dxy == "rialzista":
+        return ("Oro frenato dal dollaro FORTE: relazione inversa sana, bias oro "
+                f"ribassista{corr_s}.")
+    if gold != "laterale" and gold == dxy:
+        return (f"⚠️ Oro e dollaro nella STESSA direzione ({gold}): relazione inversa "
+                f"rotta, cautela{corr_s}.")
+    return f"Quadro oro/dollaro poco direzionale (oro {gold}, dollaro {dxy}){corr_s}."
+
+
 def compute() -> list[RefCorr]:
     """Calcola la correlazione DAX vs S&P e DAX vs Nikkei su D1/H1/M15."""
     out: list[RefCorr] = []
