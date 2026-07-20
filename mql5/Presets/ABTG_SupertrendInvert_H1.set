@@ -1,0 +1,48 @@
+; Preset SUPERTREND INVERT - H1 (generico, usabile su indici/forex/oro)
+; Segnale: inversione Supertrend H1 (ATR 10 / Mult 3.5), solo config STRONG.
+; SL cuspide Supertrend, TP1 1xATR parziale 50% + pari, trailing/uscita su segnale opposto.
+; Attacca su grafico H1 del simbolo scelto e carica questo preset.
+InpTF=16385
+InpStMult=3.5
+InpStAtrPeriod=10
+InpRequireStrong=true
+InpEma50Period=50
+InpEma200Period=200
+InpAllowLong=true
+InpAllowShort=true
+InpUseADX=true
+InpAdxPeriod=14
+InpAdxMin=20.0
+InpAdxRising=true
+InpUseStoch=true
+InpStochK=14
+InpStochD=3
+InpStochSlow=3
+InpStochLongMin=40.0
+InpStochShortMax=60.0
+InpUseStochH4=false
+InpStochH4K=21
+InpUseExtensionFilter=true
+InpMaxExtAtr=2.0
+InpSLBufferPts=0
+InpTP1_ATRmult=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpExitOnOpposite=true
+InpTrailOnST=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseTimeWindow=false
+InpStartHour=7
+InpEndHour=20
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpMagic=770801
+InpMaxSpread=0
+InpVerbose=true
