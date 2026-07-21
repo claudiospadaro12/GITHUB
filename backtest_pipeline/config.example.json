@@ -1,0 +1,60 @@
+{
+  "_commento": "Configurazione della pipeline di ottimizzazione MT5. Copia in config.json e adatta.",
+
+  "mt5": {
+    "terminal_path": "C:\\Program Files\\MetaTrader 5\\terminal64.exe",
+    "_terminal_path_nota": "Percorso del terminale sul VPS Windows. Su Linux+Wine sara' diverso.",
+    "data_path": "C:\\Users\\Utente\\AppData\\Roaming\\MetaQuotes\\Terminal\\<HASH>",
+    "_data_path_nota": "Cartella dati del terminale (File > Apri cartella dati). Serve per leggere i report."
+  },
+
+  "backtest": {
+    "symbol": "XAUUSD",
+    "period": "M5",
+    "deposit": 10000,
+    "currency": "USD",
+    "leverage": 100,
+    "modeling": "real_ticks",
+    "_modeling_nota": "real_ticks = ' Every tick based on real ticks' (il piu' accurato per l'oro)."
+  },
+
+  "walk_forward": {
+    "_commento": "Divide lo storico in finestre: ottimizza su IS (in-sample), valida su OOS (out-of-sample).",
+    "start": "2024.01.01",
+    "end": "2025.06.01",
+    "in_sample_months": 6,
+    "out_of_sample_months": 2,
+    "step_months": 2,
+    "_esempio": "IS gen-giu -> OOS lug-ago; poi IS mar-ago -> OOS set-ott; ecc."
+  },
+
+  "selezione": {
+    "metrica": "recovery_factor",
+    "_metrica_opzioni": "balance | profit_factor | expected_payoff | drawdown_min | recovery_factor | sharpe | custom",
+    "min_trade": 100,
+    "_min_trade_nota": "Scarta i set con troppi pochi trade (statisticamente inaffidabili).",
+    "preferisci_plateau": true,
+    "_plateau_nota": "Sceglie parametri circondati da altri buoni (robusti), non il picco isolato (overfit)."
+  },
+
+  "experts": [
+    {
+      "nome": "IchiTrend_Gold_Base",
+      "file_ex5": "IchiTrend_Gold_Base.ex5",
+      "parametri": [
+        { "input": "InpBBDev",     "start": 1.6, "step": 0.2, "stop": 2.6, "ottimizza": true },
+        { "input": "InpATR_SL",    "start": 1.0, "step": 0.5, "stop": 3.0, "ottimizza": true },
+        { "input": "InpATR_Trail", "start": 1.0, "step": 0.5, "stop": 3.0, "ottimizza": true },
+        { "input": "InpRiskPercent", "valore": 0.5, "ottimizza": false }
+      ]
+    },
+    {
+      "nome": "Esempio_EA_2",
+      "file_ex5": "Esempio_EA_2.ex5",
+      "parametri": [
+        { "input": "FastMA", "start": 5, "step": 1, "stop": 20, "ottimizza": true },
+        { "input": "SlowMA", "start": 20, "step": 5, "stop": 100, "ottimizza": true }
+      ]
+    }
+  ]
+}
