@@ -1,0 +1,221 @@
+//@version=5
+indicator("Ichimoku TK Cross + Bollinger - Claudio v2", overlay=true)
+
+// ============================================================
+// === PARAMETRI ICHIMOKU =====================================
+// ============================================================
+tenkanLen    = input.int(7,  "Tenkan-sen (Rossa)", minval=1, group="🎯 Ichimoku")
+kijunLen     = input.int(22, "Kijun-sen (Blu)",    minval=1, group="🎯 Ichimoku")
+senkouBLen   = input.int(44, "Senkou Span B",      minval=1, group="🎯 Ichimoku")
+displacement = input.int(26, "Displacement",       minval=1, group="🎯 Ichimoku")
+
+// ============================================================
+// === BOLLINGER BANDS ========================================
+// ============================================================
+showBollinger = input.bool(true, "Mostra Bollinger Bands", group="📊 Bollinger")
+bbLength      = input.int(20, "Periodi BB", minval=1, group="📊 Bollinger")
+bbStdDev      = input.float(2.0, "Deviazione Standard", minval=0.1, step=0.1, group="📊 Bollinger")
+
+// ============================================================
+// === ALERT SQUEEZE ==========================================
+// ============================================================
+useSqueezeAlert = input.bool(true, "Avvisa quando bande in squeeze", group="🔔 Squeeze Alert",
+     tooltip="Mostra sfondo arancione quando le bande sono compresse")
+
+squeezeLookback = input.int(50, "Periodi confronto larghezza", minval=10, group="🔔 Squeeze Alert",
+     tooltip="Confronta larghezza attuale con la media degli ultimi N periodi")
+
+squeezeThreshold = input.float(0.8, "Soglia squeeze (× media)", minval=0.1, maxval=2, step=0.05, group="🔔 Squeeze Alert",
+     tooltip="0.8 = squeeze quando la larghezza è < 80% della media")
+
+// ============================================================
+// === FILTRI QUALITA' SEGNALE (la "manopola" di frequenza) ===
+//   Spegni filtri  -> PIU' segnali (verso il cross puro)
+//   Accendi filtri -> MENO segnali ma piu' probabili
+// ============================================================
+filterKumo = input.bool(true,  "Filtro: prezzo dalla parte della Kumo", group="🎚️ Filtri qualità",
+     tooltip="LONG solo sopra la nuvola, SHORT solo sotto")
+filterExp  = input.bool(true,  "Filtro: solo bande ESPANSE (no squeeze)", group="🎚️ Filtri qualità",
+     tooltip="La tua tesi: niente segnali in compressione")
+filterADX  = input.bool(false, "Filtro: ADX trend forte", group="🎚️ Filtri qualità",
+     tooltip="Default OFF per non ridurre troppo i segnali. Accendilo per filtrare i trend deboli")
+adxLen     = input.int(14,   "ADX Length",  minval=1, group="🎚️ Filtri qualità")
+adxMin     = input.float(20, "ADX soglia",  minval=1, step=1, group="🎚️ Filtri qualità")
+cooldown   = input.int(1, "Min candele tra segnali forti", minval=1, group="🎚️ Filtri qualità",
+     tooltip="1 = nessun blocco. Alza per diradare i segnali forti")
+
+// ============================================================
+// === COLORI =================================================
+// ============================================================
+colTenkan   = input.color(color.red,   "Tenkan", group="🎨 Colori")
+colKijun    = input.color(color.blue,  "Kijun",  group="🎨 Colori")
+colChikou   = input.color(color.lime,  "Chikou", group="🎨 Colori")
+colUpKumo   = input.color(color.new(color.orange, 70), "Up Kumo",   group="🎨 Colori")
+colDownKumo = input.color(color.new(color.purple, 70), "Down Kumo", group="🎨 Colori")
+colBB       = input.color(color.new(color.yellow, 0),  "Bollinger", group="🎨 Colori")
+
+// ============================================================
+// === MOSTRA / NASCONDI ======================================
+// ============================================================
+showCloud    = input.bool(true, "Mostra Kumo")
+showChikou   = input.bool(true, "Mostra Chikou Span")
+showSignals  = input.bool(true, "Mostra segnali LONG/SHORT")
+showWeak     = input.bool(true, "Mostra cross deboli (frecce piccole)",
+     tooltip="Mostra anche i cross che NON passano i filtri, come frecce piccole")
+alertOnCross = input.bool(true, "Attiva alert")
+
+// ============================================================
+// === CALCOLO ICHIMOKU =======================================
+// ============================================================
+donchian(len) => math.avg(ta.highest(len), ta.lowest(len))
+
+tenkan  = donchian(tenkanLen)
+kijun   = donchian(kijunLen)
+senkouA = math.avg(tenkan, kijun)
+senkouB = donchian(senkouBLen)
+chikou  = close
+
+// Posizione nuvola sotto il prezzo corrente (calcolata displacement barre fa)
+spanA = senkouA[displacement]
+spanB = senkouB[displacement]
+cloudTop = math.max(spanA, spanB)
+cloudBot = math.min(spanA, spanB)
+aboveCloud = close > cloudTop
+belowCloud = close < cloudBot
+
+// ============================================================
+// === CALCOLO BOLLINGER ======================================
+// ============================================================
+bbBasis = ta.sma(close, bbLength)
+bbDev   = bbStdDev * ta.stdev(close, bbLength)
+bbUpper = bbBasis + bbDev
+bbLower = bbBasis - bbDev
+
+// === SQUEEZE DETECTION ===
+bbWidth     = bbUpper - bbLower
+bbWidthAvg  = ta.sma(bbWidth, squeezeLookback)
+inSqueeze   = bbWidth < bbWidthAvg * squeezeThreshold
+
+// === ADX ===
+[diPlus, diMinus, adx] = ta.dmi(adxLen, adxLen)
+strongTrend = adx > adxMin
+
+// ============================================================
+// === PLOT LINEE ICHIMOKU ====================================
+// ============================================================
+plot(tenkan, "Tenkan-sen", color=colTenkan, linewidth=2)
+plot(kijun,  "Kijun-sen",  color=colKijun,  linewidth=2)
+plot(showChikou ? chikou : na, "Chikou Span", color=colChikou, offset=-displacement)
+
+// === KUMO ===
+p1 = plot(showCloud ? senkouA : na, "Senkou A", color=color.new(color.green, 80), offset=displacement)
+p2 = plot(showCloud ? senkouB : na, "Senkou B", color=color.new(color.red,   80), offset=displacement)
+fill(p1, p2, color = senkouA > senkouB ? colUpKumo : colDownKumo, title="Kumo Fill")
+
+// ============================================================
+// === PLOT BOLLINGER =========================================
+// ============================================================
+bbU = plot(showBollinger ? bbUpper : na, "BB Upper", color=colBB, linewidth=1)
+bbB = plot(showBollinger ? bbBasis : na, "BB Basis", color=color.new(color.yellow, 50), linewidth=1)
+bbL = plot(showBollinger ? bbLower : na, "BB Lower", color=colBB, linewidth=1)
+fill(bbU, bbL, color=color.new(color.yellow, 95), title="BB Fill")
+
+// === SFONDO SQUEEZE ===
+bgcolor(useSqueezeAlert and inSqueeze ? color.new(color.orange, 88) : na, title="Squeeze Background")
+
+// ============================================================
+// === SEGNALI TK CROSS (raw) =================================
+// ============================================================
+rawLong  = ta.crossover(tenkan,  kijun)
+rawShort = ta.crossunder(tenkan, kijun)
+
+// === Condizioni filtro (un filtro spento = sempre vero) ===
+longOk  = (not filterKumo or aboveCloud) and (not filterExp or not inSqueeze) and (not filterADX or strongTrend)
+shortOk = (not filterKumo or belowCloud) and (not filterExp or not inSqueeze) and (not filterADX or strongTrend)
+
+// === Cooldown sui segnali forti ===
+var int lastSig = na
+barsSince = na(lastSig) ? cooldown : bar_index - lastSig
+canFire   = barsSince >= cooldown
+
+strongLong  = rawLong  and longOk  and canFire
+strongShort = rawShort and shortOk and canFire
+if strongLong or strongShort
+    lastSig := bar_index
+
+// === Cross che NON passano i filtri (deboli) ===
+weakLong  = rawLong  and not strongLong
+weakShort = rawShort and not strongShort
+
+// ============================================================
+// === LABEL FORTI + FRECCE DEBOLI ============================
+// ============================================================
+// --- Segnali FORTI: label grandi ---
+plotshape(showSignals and strongLong,
+     title="LONG", text="LONG",
+     style=shape.labelup, location=location.belowbar,
+     color=color.new(color.green, 0), textcolor=color.white, size=size.small)
+
+plotshape(showSignals and strongShort,
+     title="SHORT", text="SHORT",
+     style=shape.labeldown, location=location.abovebar,
+     color=color.new(color.red, 0), textcolor=color.white, size=size.small)
+
+// --- Cross DEBOLI: frecce piccole semitrasparenti ---
+plotshape(showSignals and showWeak and weakLong,
+     title="Cross debole LONG", style=shape.triangleup,
+     location=location.belowbar, color=color.new(color.green, 60), size=size.tiny)
+
+plotshape(showSignals and showWeak and weakShort,
+     title="Cross debole SHORT", style=shape.triangledown,
+     location=location.abovebar, color=color.new(color.red, 60), size=size.tiny)
+
+// ============================================================
+// === MINI TABELLA STATO =====================================
+// ============================================================
+showTable = input.bool(true, "Mostra tabella stato", group="👁️ Visualizzazione")
+
+if showTable and barstate.islast
+    var table t = table.new(position.top_right, 2, 6, bgcolor=color.new(color.black, 70), border_width=1)
+
+    squeezeStr = inSqueeze ? "⚠️ SQUEEZE" : "✅ ESPANSIONE"
+    squeezeCol = inSqueeze ? color.orange : color.green
+    bbWidthPct = bbWidthAvg > 0 ? (bbWidth / bbWidthAvg) * 100 : 0
+
+    trendStr = close > cloudTop ? "▲ SOPRA Kumo" : close < cloudBot ? "▼ SOTTO Kumo" : "≈ DENTRO Kumo"
+    trendCol = close > cloudTop ? color.green : close < cloudBot ? color.red : color.gray
+    adxCol   = strongTrend ? color.green : color.gray
+
+    table.cell(t, 0, 0, "ICHIMOKU+BB", text_color=color.white, bgcolor=color.new(color.blue, 50))
+    table.cell(t, 1, 0, syminfo.ticker + " " + timeframe.period, text_color=color.white, bgcolor=color.new(color.blue, 50))
+
+    table.cell(t, 0, 1, "Bande", text_color=color.white)
+    table.cell(t, 1, 1, squeezeStr, text_color=squeezeCol)
+
+    table.cell(t, 0, 2, "Larghezza", text_color=color.white)
+    table.cell(t, 1, 2, str.tostring(bbWidthPct, "#.#") + "% media", text_color=squeezeCol)
+
+    table.cell(t, 0, 3, "Trend (Kumo)", text_color=color.white)
+    table.cell(t, 1, 3, trendStr, text_color=trendCol)
+
+    table.cell(t, 0, 4, "ADX", text_color=color.white)
+    table.cell(t, 1, 4, str.tostring(adx, "#.#") + (strongTrend ? " forte" : " debole"), text_color=adxCol)
+
+    table.cell(t, 0, 5, "Soglia squeeze", text_color=color.white)
+    table.cell(t, 1, 5, str.tostring(squeezeThreshold * 100, "#") + "%", text_color=color.yellow)
+
+// ============================================================
+// === ALERTS =================================================
+// ============================================================
+// Cross puri (tutti)
+alertcondition(rawLong,  title="LONG TK Cross",  message="ICHIMOKU LONG su {{ticker}} {{interval}} a {{close}}")
+alertcondition(rawShort, title="SHORT TK Cross", message="ICHIMOKU SHORT su {{ticker}} {{interval}} a {{close}}")
+
+// Solo segnali FORTI (passano i filtri) -> i piu' utili per entrare
+alertcondition(strongLong,  title="LONG FORTE (filtri OK)",  message="ICHIMOKU LONG FORTE su {{ticker}} {{interval}} a {{close}}")
+alertcondition(strongShort, title="SHORT FORTE (filtri OK)", message="ICHIMOKU SHORT FORTE su {{ticker}} {{interval}} a {{close}}")
+
+if alertOnCross and strongLong
+    alert("ICHIMOKU LONG FORTE su " + syminfo.ticker + " " + timeframe.period, alert.freq_once_per_bar_close)
+if alertOnCross and strongShort
+    alert("ICHIMOKU SHORT FORTE su " + syminfo.ticker + " " + timeframe.period, alert.freq_once_per_bar_close)
