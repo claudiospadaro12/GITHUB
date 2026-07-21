@@ -1,0 +1,38 @@
+; Preset NIGHTLY (fade box notturno) - forex con mercati "dormienti" di notte
+; Box sessione asiatica 22:00-04:59 server (BCM = ora italiana - 1). Ordini LIMITE ai bordi (fade):
+; SELL LIMIT sul MAX notte, BUY LIMIT sul MIN notte. SL oltre il box (ATR), TP verso il centro. Cutoff 07:00.
+; Escludi JPY/AUD/NZD (mercati attivi di notte). Commento "NIGHTLY". Magic 771701.
+; Attacca al grafico del cross (M1 disponibile per il box). Coppie tipo EURUSD, EURGBP, GBPUSD, EURCHF.
+InpBoxStartHour=22
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpPlaceHour=5
+InpPlaceMin=0
+InpCutoffHour=7
+InpCutoffMin=0
+InpCloseAtCutoff=false
+InpAllowLong=true
+InpAllowShort=true
+InpEdgeOffsetPips=0
+InpOneShotPerNight=true
+InpSLpips=0
+InpAtrPeriod=14
+InpSLatrMult=1.0
+InpTPfrac=0.5
+InpMaxNightVolPips=45
+InpMinRangePips=0
+InpMaxRangePips=0
+InpBlockNightActive=true
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=60
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=NIGHTLY
+InpMagic=771701
+InpMaxSpread=0
+InpVerbose=true
