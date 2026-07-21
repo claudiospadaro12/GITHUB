@@ -58,6 +58,21 @@ _HIGHER_BETTER = {"result", "profit", "profit_factor", "expected_payoff", "recov
 _LOWER_BETTER = {"drawdown"}
 
 
+def _coerce_numeric(df: pd.DataFrame) -> pd.DataFrame:
+    """Converte in numerico le colonne dove possibile, lasciando intatte le altre.
+
+    Sostituisce il vecchio df.apply(pd.to_numeric, errors='ignore'), rimosso
+    nelle versioni recenti di pandas (che ora alza 'invalid error value').
+    """
+    out = df.copy()
+    for col in out.columns:
+        conv = pd.to_numeric(out[col], errors="coerce")
+        # tiene la conversione solo se non introduce NaN nuovi (colonna davvero numerica)
+        if conv.notna().sum() == out[col].replace("", pd.NA).notna().sum():
+            out[col] = conv
+    return out
+
+
 def _norm(h: str) -> str:
     return str(h).strip().lower().replace("\xa0", " ")
 
@@ -90,7 +105,7 @@ def _load_mt5_xml(path: str) -> pd.DataFrame:
     width = len(header)
     body = [r + [""] * (width - len(r)) for r in rows_out[1:] if any(c != "" for c in r)]
     df = pd.DataFrame(body, columns=header)
-    return df.apply(pd.to_numeric, errors="ignore")
+    return _coerce_numeric(df)
 
 
 def load_optimization(path: str) -> pd.DataFrame:
