@@ -1,0 +1,43 @@
+; Preset FIBO H4 - H4 - coppie consigliate GBP/USD e USD/JPY
+; Engulfing a fine trend -> ordini LIMITE nelle Entry Zone Fibo (ratio proprietari 1.88 e 2.88),
+; target = 100 (estremo swing), SL oltre il 4.236. Distanza min 50 pip, 1/3 + 2/3, cancella a fine giornata.
+; Commento ordini "FIBOH4". Magic 771601. Grafico H4. Coppie forex (per oro/indici adatta i pip e i ratio).
+InpTF=16388
+InpEngulfLookback=12
+InpAllowTwoCandle=true
+InpMinEngulfBodyPct=25.0
+InpAllowLong=true
+InpAllowShort=true
+InpEZ1ratio=1.88
+InpEZ2ratio=2.88
+InpSLratio=4.236
+InpUseEZ2=true
+InpMinDistPips=50.0
+InpAtrPeriod=14
+InpMaxEngulfAtr=3.0
+InpPendingExpiryBars=6
+InpSLbufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpRiskPercent=1.0
+InpFirstFraction=0.3333
+InpUseCutoff=true
+InpCutoffHour=17
+InpCutoffMin=45
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=FIBOH4
+InpMagic=771601
+InpMaxSpread=0
+InpVerbose=true
