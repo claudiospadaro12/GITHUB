@@ -38,11 +38,15 @@ def main() -> int:
     settings = config.Settings()
     now = datetime.now(ZoneInfo(config.TIMEZONE))
 
-    # 1. Gate orario: in CI giriamo a 05:00 e 06:00 UTC; solo l'esecuzione che
-    #    corrisponde alle 07:00 italiane procede (così l'ora legale è gestita).
-    if not settings.force_run and now.hour != config.SEND_HOUR:
-        print(f"[skip] Ora locale {now:%H:%M} ≠ {config.SEND_HOUR:02d}:00 {config.TIMEZONE}. "
-              "Imposta FORCE_RUN=1 per forzare.")
+    # 1. Gate orario TOLLERANTE: c'è un solo cron (05:00 UTC = 06:00/07:00 Roma),
+    #    ma GitHub Actions spesso ritarda i cron di 30-90 min. Quindi invece di
+    #    pretendere l'ora esatta, accettiamo qualsiasi firing nella FINESTRA del
+    #    mattino: così il report parte comunque, anche se GitHub lo esegue tardi.
+    #    (Un solo cron feriale => una sola esecuzione al giorno => un solo invio.)
+    morning_lo, morning_hi = config.SEND_HOUR - 1, config.SEND_HOUR + 5  # es. 06:00–12:00
+    if not settings.force_run and not (morning_lo <= now.hour < morning_hi):
+        print(f"[skip] Ora locale {now:%H:%M} fuori dalla finestra mattutina "
+              f"{morning_lo:02d}:00–{morning_hi:02d}:00 {config.TIMEZONE}. FORCE_RUN=1 per forzare.")
         return 0
 
     # La chiave Claude è OPZIONALE: se manca o è invalida usiamo l'analisi
