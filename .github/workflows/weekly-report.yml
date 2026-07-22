@@ -1,0 +1,34 @@
+name: Report Settimanale di Trading
+
+on:
+  # Lanciato dal VPS (Task Scheduler) il sabato alle 09:00 via workflow_dispatch.
+  workflow_dispatch:
+
+concurrency:
+  group: weekly-report
+  cancel-in-progress: false
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Genera e invia il report settimanale
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          DAYS: "7"
+        run: python run_weekly_report.py
