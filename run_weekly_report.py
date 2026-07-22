@@ -35,13 +35,13 @@ def _eur(x: float) -> str:
     return f"{x:+,.2f}".replace(",", "§").replace(".", ",").replace("§", ".")
 
 
-def _trade_section(path: str) -> str:
+def _trade_section(path: str, since: str) -> str:
     if not statement or not path or not os.path.exists(path):
         return ("<p style='color:#666'>Nessuno statement fornito questa settimana "
                 "(imposta <code>STATEMENT_FILE</code> o carica l'export dello storico). "
                 "L'analisi dei trade comparirà qui.</p>")
     try:
-        st = statement.parse(path)
+        st = statement.parse(path, since=since)
     except Exception as exc:
         return f"<p style='color:#b02418'>Statement non leggibile: {exc}</p>"
     if not st.trades:
@@ -103,9 +103,9 @@ def _bias_section(snaps: list[dict]) -> str:
     """
 
 
-def build_html(now: datetime, snaps: list[dict], statement_path: str) -> str:
-    start = (now - timedelta(days=int(os.getenv("DAYS", "7")))).strftime("%d/%m")
-    period = f"{start} – {now.strftime('%d/%m/%Y')}"
+def build_html(now: datetime, snaps: list[dict], statement_path: str, week_start: datetime) -> str:
+    since = week_start.strftime("%Y.%m.%d")
+    period = f"{week_start.strftime('%d/%m')} (lun) – {now.strftime('%d/%m/%Y')}"
     return f"""<!doctype html><html><head><meta charset='utf-8'>
 <style>
  body{{font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;max-width:720px;margin:auto;padding:12px}}
@@ -118,7 +118,7 @@ def build_html(now: datetime, snaps: list[dict], statement_path: str) -> str:
  <h1>📊 Report Settimanale — {period}</h1>
  <p style='color:#666'>Analisi dei trade e verifica del bias di mercato.</p>
  <h2>1. Andamento dei trade</h2>
- {_trade_section(statement_path)}
+ {_trade_section(statement_path, since)}
  <h2>2. Il bias era corretto?</h2>
  {_bias_section(snaps)}
  <hr style='margin-top:28px'>
@@ -130,8 +130,9 @@ def build_html(now: datetime, snaps: list[dict], statement_path: str) -> str:
 def main() -> int:
     settings = config.Settings()
     now = datetime.now(ZoneInfo(config.TIMEZONE))
-    days = int(os.getenv("DAYS", "7"))
-    snaps = snapshot.load_range(now - timedelta(days=days), now)
+    # Inizio settimana = LUNEDI' della settimana in corso (00:00).
+    week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    snaps = snapshot.load_range(week_start, now)
 
     # statement: da env, oppure il file .xlsx piu' recente in data/statements/
     statement_path = os.getenv("STATEMENT_FILE", "")
@@ -141,8 +142,9 @@ def main() -> int:
         files = sorted(sdir.glob("*.xlsx"), key=lambda p: p.stat().st_mtime, reverse=True) if sdir.exists() else []
         statement_path = str(files[0]) if files else ""
 
-    print(f"[info] Report settimanale: {len(snaps)} snapshot, statement={'sì' if statement_path else 'no'}")
-    html = build_html(now, snaps, statement_path)
+    print(f"[info] Report settimanale (da lun {week_start:%d/%m}): {len(snaps)} snapshot, "
+          f"statement={'sì' if statement_path else 'no'}")
+    html = build_html(now, snaps, statement_path, week_start)
     subject = f"📊 Report Settimanale — settimana del {now.day} {_MESI[now.month-1]}"
 
     if settings.dry_run:

@@ -99,7 +99,9 @@ def _order_comments(ws) -> dict:
     return comments
 
 
-def parse(path: str) -> Stats:
+def parse(path: str, since: str | None = None) -> Stats:
+    """Legge lo statement. Se `since` (formato 'AAAA.MM.GG') e' dato, considera
+    solo i trade aperti da quella data in poi (per limitarsi alla settimana)."""
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     ws = wb[wb.sheetnames[0]]
     rows = list(ws.iter_rows(values_only=True))
@@ -133,6 +135,9 @@ def parse(path: str) -> Stats:
                 net=0.0, strategy=comments.get(pid, ""),
             )
         except (IndexError, ValueError):
+            continue
+        # filtro settimana: salta i trade aperti prima di `since`
+        if since and t.open_time[:10] < since:
             continue
         t.net = t.profit + t.commission + t.swap
         st.trades.append(t)
