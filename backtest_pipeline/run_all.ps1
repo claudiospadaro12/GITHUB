@@ -17,32 +17,57 @@
 #  (i file OptResults_*.csv): li analizzo io e creo gli EA _Ottimizzato.
 # =====================================================================
 
-# --- 1) PERCORSI (terminale di SCORTA -V3, per non disturbare il live) -
-# Usiamo "BCM Markets MT5 Terminal -V3": il terminale H24 con gli EA live
-# (215D85D7 = "BCM Markets MT5 Terminal") resta INTATTO.
-# Cartella dati del terminale -V3:
-$DataFolder   = "C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104"
-# Eseguibili del terminale -V3:
-$Terminal     = "C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe"
-$MetaEditor   = "C:\Program Files\BCM Markets MT5 Terminal -V3\metaeditor64.exe"
-# Cartella del repo (dove c'e' questo script). Di norma lasciala com'e':
-$RepoRoot     = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Python       = "python"    # o percorso completo di python.exe
+# --- 1) PERCORSI: RILEVAMENTO AUTOMATICO -----------------------------
+# Lo script trova DA SOLO il terminale BCM e la sua cartella dati, su
+# QUALSIASI macchina (VPS o PC fisso). Lancialo sul PC dove vuoi fare i
+# test (quello con MT5 BCM aperto almeno una volta e loggato al demo).
+#
+# Se vuoi forzare percorsi specifici, scrivili qui (altrimenti lasciali
+# vuoti "" = rilevamento automatico):
+$Terminal     = ""   # es. "C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe"
+$MetaEditor   = ""   # es. "C:\Program Files\BCM Markets MT5 Terminal\metaeditor64.exe"
+$DataFolder   = ""   # es. "C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\<hash>"
+$Python       = "python"
 # ---------------------------------------------------------------------
 
 $ErrorActionPreference = "Stop"
+$RepoRoot   = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+Write-Host "=== OTTIMIZZAZIONE AUTOMATICA EA ===" -ForegroundColor Cyan
+
+# --- rileva il terminale BCM (preferisce quello NON -V3) -------------
+if (-not $Terminal) {
+    $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
+    $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+    if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+    if ($cand) { $Terminal = $cand.FullName; $MetaEditor = Join-Path $cand.DirectoryName "metaeditor64.exe" }
+}
+# --- rileva la cartella dati abbinata (via origin.txt) ---------------
+if ($Terminal -and -not $DataFolder) {
+    $instDir  = Split-Path -Parent $Terminal
+    $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+    if (Test-Path $termRoot) {
+        $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
+            $o = Join-Path $_.FullName "origin.txt"
+            (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir)
+        } | Select-Object -First 1 -ExpandProperty FullName
+    }
+}
+
+Write-Host ("Terminale : {0}" -f $Terminal)
+Write-Host ("MetaEditor: {0}" -f $MetaEditor)
+Write-Host ("Cartella dati: {0}" -f $DataFolder)
+
+# controlli preliminari
+if (-not $Terminal -or -not (Test-Path $Terminal)) { Write-Host "Terminale BCM non trovato. Scrivi il percorso a mano in cima ($Terminal)." -ForegroundColor Red; exit 1 }
+if (-not $MetaEditor -or -not (Test-Path $MetaEditor)) { Write-Host "metaeditor64.exe non trovato accanto al terminale." -ForegroundColor Red; exit 1 }
+if (-not $DataFolder -or -not (Test-Path $DataFolder)) { Write-Host "Cartella dati non trovata. Scrivila a mano in cima ($DataFolder)." -ForegroundColor Red; exit 1 }
+
 $ExpertsSrc = Join-Path $RepoRoot "..\mql5\Experts"
 $IniDir     = Join-Path $RepoRoot "ini"
 $MqlExperts = Join-Path $DataFolder "MQL5\Experts"
 $MqlFiles   = Join-Path $DataFolder "MQL5\Files"
 $Results    = Join-Path $RepoRoot "risultati_ottimizzazione"
-
-Write-Host "=== OTTIMIZZAZIONE AUTOMATICA EA ===" -ForegroundColor Cyan
-
-# controlli preliminari
-foreach ($p in @($Terminal, $MetaEditor, $DataFolder)) {
-    if (-not (Test-Path $p)) { Write-Host "PERCORSO NON TROVATO: $p" -ForegroundColor Red; Write-Host "Correggi i percorsi in cima allo script."; exit 1 }
-}
 New-Item -ItemType Directory -Force -Path $MqlExperts | Out-Null
 New-Item -ItemType Directory -Force -Path $Results    | Out-Null
 
