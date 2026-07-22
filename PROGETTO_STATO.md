@@ -31,9 +31,31 @@ perde, per EA/simbolo, pattern, azioni concrete).
 - [x] Soluzione pronta: `report_scheduler/` → Task Scheduler del VPS chiama GitHub alle 07:00
 - [ ] **Da fare (utente):** creare token GitHub + salvarlo sul VPS + lanciare setup_task.ps1
 
-## 4. (?) Terzo punto
-Il messaggio si era interrotto su "...backtest ed ottimizzazione con agente e ___".
-Da completare: cos'era il terzo filone?
+## 4. 🔁 Pagella giornaliera — chiusura del loop
+**Obiettivo:** ogni giorno l'agente verifica DUE cose e manda una "pagella".
+
+- **A) Coerenza del bias:** confronta il bias del mattino (report) con il
+  movimento reale del giorno → costruisce lo storico di quanto il bias ci prende.
+  - [ ] Salvare il bias del mattino (una riga per strumento) nel report esistente
+  - [ ] A EOD: scaricare il movimento reale + confronto direzione/magnitudine
+- **B) Compliance dei trade:** confronta i trade eseguiti (statement) con le
+  regole del Piano di Trading.
+  - Automatici: rischio ≤2%, stop giornaliero, size coerenti, simbolo/sessione, no oro discrezionale/post-news
+  - Soggettivi (solo se i trade sono taggati): grado setup, revenge → altrimenti segnalati
+  - [ ] Codificare le regole del piano (già scritte in piano_trading/)
+  - [ ] Generare la "pagella": X/Y bias coerenti + X/Y trade a regola
+- **Limiti:** controlli oggettivi automatici; soggettivi richiedono tag; sui CFD i
+  decimali del broker differiscono (direzione ok).
+
+## 5. 📋 Piano di Trading (FATTO — base)
+- [x] Documento Word creato (piano_trading/Piano_di_Trading_Claudio.docx)
+      seguendo la guida del coach: Obiettivi/Disciplina, Money Management
+      (size + rischio), Strategie (auto + discrezionale), Controllo
+- [ ] Personalizzare con il coach: capitale reale, obiettivo annuo, importi € dei limiti
+
+## (?) Punto rimasto in sospeso
+Un messaggio si era interrotto su "...ottimizzazione con agente e ___".
+Se c'era un altro filone, da completare.
 
 ---
 
