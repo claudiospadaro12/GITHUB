@@ -17,12 +17,14 @@
 #  (i file OptResults_*.csv): li analizzo io e creo gli EA _Ottimizzato.
 # =====================================================================
 
-# --- 1) PERCORSI DA CONTROLLARE (VPS) --------------------------------
-# Cartella dati del terminale MT5 dove girano gli EA (quella del VPS):
-$DataFolder   = "C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D7767A1C39E22D242C8114BF9F5"
-# Eseguibili MT5 (correggi se installato altrove):
-$Terminal     = "C:\Program Files\MetaTrader 5\terminal64.exe"
-$MetaEditor   = "C:\Program Files\MetaTrader 5\metaeditor64.exe"
+# --- 1) PERCORSI (terminale di SCORTA -V3, per non disturbare il live) -
+# Usiamo "BCM Markets MT5 Terminal -V3": il terminale H24 con gli EA live
+# (215D85D7 = "BCM Markets MT5 Terminal") resta INTATTO.
+# Cartella dati del terminale -V3:
+$DataFolder   = "C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104"
+# Eseguibili del terminale -V3:
+$Terminal     = "C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe"
+$MetaEditor   = "C:\Program Files\BCM Markets MT5 Terminal -V3\metaeditor64.exe"
 # Cartella del repo (dove c'e' questo script). Di norma lasciala com'e':
 $RepoRoot     = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Python       = "python"    # o percorso completo di python.exe
