@@ -16,6 +16,19 @@ from dataclasses import dataclass, field
 
 import openpyxl
 
+# Codici valuta ISO per riconoscere le coppie forex.
+_CURRENCIES = {"USD", "EUR", "GBP", "JPY", "CHF", "AUD", "CAD", "NZD"}
+
+
+def classify_asset(symbol: str) -> str:
+    """Classifica un simbolo in: Metalli / Valute / Cross / Indici."""
+    s = (symbol or "").upper()
+    if any(m in s for m in ("XAU", "XAG", "XPT", "XPD")):
+        return "Metalli"
+    if len(s) == 6 and s[:3] in _CURRENCIES and s[3:] in _CURRENCIES:
+        return "Valute" if "USD" in s else "Cross"
+    return "Indici"
+
 
 @dataclass
 class Trade:
@@ -45,6 +58,7 @@ class Stats:
     by_symbol: dict = field(default_factory=dict)
     by_day: dict = field(default_factory=dict)
     by_strategy: dict = field(default_factory=dict)
+    by_class: dict = field(default_factory=dict)   # Indici/Valute/Cross/Metalli
 
     @property
     def win_rate(self) -> float:
@@ -151,7 +165,8 @@ def parse(path: str, since: str | None = None) -> Stats:
             st.gross_loss += t.net; st.losses += 1
         day = t.open_time[:10]
         for key, bucket in ((t.symbol, st.by_symbol), (day, st.by_day),
-                            (t.strategy or "(manuale/senza commento)", st.by_strategy)):
+                            (t.strategy or "(manuale/senza commento)", st.by_strategy),
+                            (classify_asset(t.symbol), st.by_class)):
             b = bucket.setdefault(key, {"n": 0, "wins": 0, "net": 0.0})
             b["n"] += 1; b["wins"] += 1 if t.net > 0 else 0; b["net"] += t.net
 

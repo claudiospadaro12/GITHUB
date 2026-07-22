@@ -55,15 +55,31 @@ def _trade_section(path: str, since: str) -> str:
                     f"<td style='text-align:right;color:{col}'>{_eur(b['net'])}</td></tr>")
         return out
 
+    def top(d):
+        if not d:
+            return ("—", 0.0)
+        k = max(d, key=lambda x: d[x]["net"])
+        return (k, d[k]["net"])
+
+    tc, tcv = top(st.by_class)
+    ts, tsv = top(st.by_symbol)
+    te, tev = top(st.by_strategy)
+
     col = "#1f7a3d" if st.net_total >= 0 else "#b02418"
     return f"""
     <p><b>Netto settimana:</b> <span style='color:{col};font-size:18px'>{_eur(st.net_total)} EUR</span>
        &nbsp;·&nbsp; {len(st.trades)} trade &nbsp;·&nbsp; win rate {st.win_rate*100:.0f}%
        &nbsp;·&nbsp; profit factor {st.profit_factor:.2f}
        &nbsp;·&nbsp; aspettativa {_eur(st.expectancy)}/trade</p>
+    <div style='background:#eef6ee;border-left:4px solid #1f7a3d;padding:8px 12px;margin:10px 0'>
+      <b>🏆 Più profittevoli:</b> &nbsp; categoria <b>{tc}</b> ({_eur(tcv)}) &nbsp;·&nbsp;
+      simbolo <b>{ts}</b> ({_eur(tsv)}) &nbsp;·&nbsp; EA <b>{te}</b> ({_eur(tev)})
+    </div>
+    <h3>Per categoria (Indici / Valute / Cross / Metalli)</h3>
+    <table>{rows(st.by_class,'')}</table>
     <h3>Per simbolo</h3>
     <table>{rows(st.by_symbol,'')}</table>
-    <h3>Per strategia / EA</h3>
+    <h3>Per strategia / EA (i tuoi EA)</h3>
     <table>{rows(st.by_strategy,'')}</table>
     """
 
