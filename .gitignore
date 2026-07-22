@@ -10,3 +10,6 @@ env/
 
 # Output generati
 report_output.html
+
+# token sveglia report (mai committare)
+.gh_report_token.txt
