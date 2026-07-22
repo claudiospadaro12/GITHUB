@@ -60,9 +60,18 @@ foreach ($f in $eaFiles) {
     else { Write-Host "   ERRORE compilazione $($f.Name) (salto)" -ForegroundColor Red }
 }
 
-# --- 4) genera gli .ini ----------------------------------------------
+# --- 4) genera gli .ini (opzionale: gli .ini sono gia' nel repo) ------
 Write-Host "`n[3/5] Genero i file .ini di ottimizzazione..." -ForegroundColor Yellow
-& $Python (Join-Path $RepoRoot "gen_ini.py")
+$py = Get-Command $Python -ErrorAction SilentlyContinue
+if ($py -and (Test-Path (Join-Path $RepoRoot "gen_ini.py"))) {
+    try { & $Python (Join-Path $RepoRoot "gen_ini.py") }
+    catch { Write-Host "   gen_ini.py non eseguito: uso gli .ini gia' presenti in ini\." -ForegroundColor Yellow }
+} else {
+    Write-Host "   Python non trovato: uso gli .ini gia' presenti in ini\ (nessun problema)." -ForegroundColor Yellow
+}
+if (-not (Test-Path $IniDir) -or @(Get-ChildItem -Path $IniDir -Filter "*.ini" -ErrorAction SilentlyContinue).Count -eq 0) {
+    Write-Host "NESSUN file .ini trovato in $IniDir. Impossibile procedere." -ForegroundColor Red; exit 1
+}
 
 # --- 5) lancia l'ottimizzazione per ogni EA --------------------------
 Write-Host "`n[4/5] Avvio le ottimizzazioni (una alla volta)..." -ForegroundColor Yellow
