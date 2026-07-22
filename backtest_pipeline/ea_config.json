@@ -12,7 +12,7 @@
   },
   "experts": [
     {
-      "file": "ABTG_DAX_Apertura_EU", "symbol": "DAXEUR", "period": "M5",
+      "file": "ABTG_DAX_Apertura_EU", "symbol": "D30EUR", "period": "M5",
       "params": {
         "InpRangeMinutes":  {"start": 5,   "step": 5,   "stop": 60},
         "InpBufferPoints":  {"start": 100, "step": 100, "stop": 1500},
@@ -20,7 +20,7 @@
       }
     },
     {
-      "file": "ABTG_DAX_Live5m", "symbol": "DAXEUR", "period": "M5",
+      "file": "ABTG_DAX_Live5m", "symbol": "D30EUR", "period": "M5",
       "params": {
         "InpRangeMinutes":  {"start": 5,   "step": 5,   "stop": 60},
         "InpBufferPoints":  {"start": 100, "step": 100, "stop": 1500},
@@ -67,7 +67,7 @@
       }
     },
     {
-      "file": "ABTG_MaxMinNotte", "symbol": "DAXEUR", "period": "M15",
+      "file": "ABTG_MaxMinNotte", "symbol": "D30EUR", "period": "M15",
       "params": {
         "InpBufferPoints": {"start": 200, "step": 200, "stop": 2000},
         "InpAtrSLmult":    {"start": 1.0, "step": 0.5, "stop": 3.0},
@@ -115,7 +115,7 @@
       }
     },
     {
-      "file": "ABTG_DAX_M3", "symbol": "DAXEUR", "period": "M3",
+      "file": "ABTG_DAX_M3", "symbol": "D30EUR", "period": "M3",
       "params": {
         "InpStMult":     {"start": 1.5,  "step": 0.5, "stop": 4.5},
         "InpSLFixedPts": {"start": 800,  "step": 300, "stop": 2500},

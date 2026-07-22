@@ -77,6 +77,17 @@ $eaFiles = Get-ChildItem -Path $ExpertsSrc -Filter "ABTG_*.mq5"
 foreach ($f in $eaFiles) { Copy-Item $f.FullName -Destination $MqlExperts -Force }
 Write-Host "   copiati $($eaFiles.Count) EA."
 
+# copia anche lo script scarica-storico in MQL5\Scripts (se presente)
+$ScriptsSrc = Join-Path $RepoRoot "..\mql5\Scripts"
+$MqlScripts = Join-Path $DataFolder "MQL5\Scripts"
+$scriptFiles = @()
+if (Test-Path $ScriptsSrc) {
+    New-Item -ItemType Directory -Force -Path $MqlScripts | Out-Null
+    $scriptFiles = Get-ChildItem -Path $ScriptsSrc -Filter "ABTG_*.mq5"
+    foreach ($f in $scriptFiles) { Copy-Item $f.FullName -Destination $MqlScripts -Force }
+    if ($scriptFiles.Count) { Write-Host "   copiati $($scriptFiles.Count) script (incl. scarica-storico)." }
+}
+
 # --- 3) compila ------------------------------------------------------
 Write-Host "`n[2/5] Compilo gli EA..." -ForegroundColor Yellow
 foreach ($f in $eaFiles) {
@@ -85,6 +96,13 @@ foreach ($f in $eaFiles) {
     $ex5 = [System.IO.Path]::ChangeExtension($src, ".ex5")
     if (Test-Path $ex5) { Write-Host "   OK  $($f.Name)" -ForegroundColor Green }
     else { Write-Host "   ERRORE compilazione $($f.Name) (salto)" -ForegroundColor Red }
+}
+foreach ($f in $scriptFiles) {
+    $src = Join-Path $MqlScripts $f.Name
+    & $MetaEditor "/compile:$src" "/log" | Out-Null
+    $ex5 = [System.IO.Path]::ChangeExtension($src, ".ex5")
+    if (Test-Path $ex5) { Write-Host "   OK  (script) $($f.Name)" -ForegroundColor Green }
+    else { Write-Host "   ERRORE compilazione script $($f.Name)" -ForegroundColor Red }
 }
 
 # --- 4) genera gli .ini (opzionale: gli .ini sono gia' nel repo) ------
