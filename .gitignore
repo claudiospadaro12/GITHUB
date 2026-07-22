@@ -17,3 +17,8 @@ report_output.html
 piano_trading/node_modules/
 piano_trading/*.pdf
 piano_trading/package*.json
+
+# output generati dai report (dry-run/test)
+weekly_output.html
+report_output.html
+data/snapshots/*.json
