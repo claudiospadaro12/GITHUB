@@ -25,11 +25,14 @@ perde, per EA/simbolo, pattern, azioni concrete).
 - [ ] Walk-forward (validazione out-of-sample) per non illudersi coi backtest
 - [ ] `backtest_pipeline/` → rifinire l'orchestratore per lanciare tutti gli EA
 
-## 3. 📧 Report di mercato giornaliero (email 07:00)
+## 3. 📧 Report di mercato giornaliero (email 07:00) — ✅ ATTIVO
 - [x] Sistema funzionante su GitHub Actions
 - [x] Capito il problema: GitHub ritarda i cron di ore
-- [x] Soluzione pronta: `report_scheduler/` → Task Scheduler del VPS chiama GitHub alle 07:00
-- [ ] **Da fare (utente):** creare token GitHub + salvarlo sul VPS + lanciare setup_task.ps1
+- [x] Task Scheduler del VPS ("ReportMercatoGiornaliero") chiama GitHub alle 07:00 feriali
+- [x] Token GitHub creato e salvato sul VPS (C:\Users\Administrator\.gh_report_token.txt)
+- [x] Testato: run #67 (workflow_dispatch dal VPS) OK, email ricevuta
+- [x] Rimosso il cron di GitHub per evitare email doppie
+- Nota: se il VPS e' spento non parte -> riattivare il cron fallback nel workflow
 
 ## 4. 🔁 Pagella giornaliera — chiusura del loop
 **Obiettivo:** ogni giorno l'agente verifica DUE cose e manda una "pagella".
