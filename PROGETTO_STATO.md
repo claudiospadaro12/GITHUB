@@ -2,7 +2,9 @@
 
 Riepilogo per riprendere in fretta. Aggiornato: 22 luglio 2026.
 
-## 1. 📊 Report analisi trading — SETTIMANALE (sabato 09:00)
+## 1. 📊 Report analisi trading — SETTIMANALE (sabato 09:00) — ✅ ATTIVO E TESTATO
+   (trade + categorie Indici/Valute/Cross/Metalli + più profittevoli + per EA +
+    verifica bias; testato end-to-end su GitHub, statement letto, email ok)
 **Obiettivo:** report del sabato che unisce analisi trade + verifica di
 bias/livelli/correlazioni della settimana (cosa avevo previsto vs realta').
 **Deciso:** settimanale, sabato 09:00; dati catturati ogni giorno in automatico.
