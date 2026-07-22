@@ -20,7 +20,7 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from agent import analysis, config, correlation, market_data, notify, report
+from agent import analysis, config, correlation, market_data, notify, report, snapshot
 from agent.macro_calendar import fetch_today_events
 
 # Mesi in italiano per l'intestazione.
@@ -83,6 +83,14 @@ def main() -> int:
     except Exception as exc:
         print(f"[warn] Correlazione oro/dollaro non calcolata: {exc}")
         gold_dxy = None
+
+    # 3-quater. Salva lo SNAPSHOT del giorno (bias/livelli/correlazioni) per la
+    #           verifica nel report settimanale del sabato. Non blocca l'invio.
+    try:
+        snap_path = snapshot.save_snapshot(groups, corr, gold_dxy, when=now)
+        print(f"[info] Snapshot del giorno salvato: {snap_path}")
+    except Exception as exc:
+        print(f"[warn] Snapshot non salvato: {exc}")
 
     # 4. Sintesi con Claude (opzionale): se la chiave manca o l'API fallisce,
     #    ripieghiamo sull'analisi deterministica senza bloccare l'invio.

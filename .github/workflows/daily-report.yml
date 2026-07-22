@@ -11,6 +11,9 @@ concurrency:
   group: daily-report
   cancel-in-progress: false
 
+permissions:
+  contents: write        # per committare lo snapshot giornaliero nel repo
+
 jobs:
   report:
     runs-on: ubuntu-latest
@@ -37,3 +40,15 @@ jobs:
           # Su esecuzione manuale forziamo l'invio ignorando il gate orario.
           FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: python run_report.py
+
+      - name: Salva lo snapshot del giorno nel repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/snapshots/ || true
+          if git diff --staged --quiet; then
+            echo "Nessuno snapshot nuovo da committare."
+          else
+            git commit -m "snapshot: dati di mercato del giorno [skip ci]"
+            git push
+          fi
