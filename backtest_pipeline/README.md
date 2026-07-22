@@ -1,70 +1,57 @@
-# Pipeline di ottimizzazione MT5 (walk-forward)
+# Ottimizzazione automatica degli EA sul VPS
 
-Automatizza l'ottimizzazione di **più Expert Advisor** in serie sullo Strategy
-Tester di MT5, con **protezione anti-overfitting** (walk-forward).
+Pipeline per ottimizzare **tutti gli Expert Advisor** in automatico dentro MT5,
+sul VPS, e trovare i parametri migliori. Tu lanci **un solo script**; io analizzo
+i risultati e creo gli EA `_Ottimizzato` con i parametri già dentro.
 
-Pensata per chi ha **molti EA** (15+) dove l'ottimizzazione manuale uno-a-uno
-diventa insostenibile.
+## Come funziona (5 fasi)
 
-## ⚠️ Leggi prima: cosa fa e cosa NON fa
+| Fase | Chi | Cosa |
+|------|-----|------|
+| 1. Preparazione | **io (fatto)** | Ho reso ogni EA *self-contained* (blocco OptFrame incluso dentro: NON serve più `OptFrame.mqh` nella cartella Include) e ho scelto i 2–3 parametri da ottimizzare per ciascuno, con i range sensati. |
+| 2. Config | **io (fatto)** | `ea_config.json` + generatore `.ini` + launcher `run_all.ps1`. |
+| 3. Esecuzione | **tu** | Lanci `run_all.ps1` sul VPS. Compila tutto, ottimizza ogni EA uno alla volta, salva i CSV. |
+| 4. Analisi | **io** | Mi mandi la cartella `risultati_ottimizzazione`; con `optimizer/batch_analyze.py` scelgo il set robusto (no picco/overfit). |
+| 5. Consegna | **io** | Creo `ABTG_*_Ottimizzato.mq5` con i parametri migliori già nelle impostazioni di default. |
 
-- ✅ Lancia l'ottimizzatore **nativo** di MT5 (non lo reinventa) su tanti EA in fila.
-- ✅ Divide lo storico in **In-Sample** (dove ottimizza) e **Out-of-Sample**
-  (dove valida su dati mai visti) → tiene solo i parametri **robusti**.
-- ❌ Non "trova i parametri migliori" nel senso di massimizzare il profitto passato:
-  quello è **overfitting** e fa perdere soldi in reale. L'obiettivo è la **stabilità**.
-- ❌ Non gira in cloud/qui: **gira sul TUO VPS** dove c'è MT5. Questi script sono la
-  macchina; il VPS è l'officina.
+## Cosa devi fare tu (una volta)
 
-## Dove sta ancora da completare (onesto)
+1. Apri `run_all.ps1` e controlla i **3 percorsi** in cima:
+   - `$DataFolder` = cartella dati del terminale MT5 del VPS (quella con hash `215D85D7...`).
+   - `$Terminal` / `$MetaEditor` = dove è installato MT5 (`terminal64.exe`, `metaeditor64.exe`).
+2. Controlla in `ea_config.json` che i **simboli** (`DAXEUR`, `NASUSD`, `XAUUSD`, `EURUSD`, `GBPUSD`) combacino con i nomi nella tua **Market Watch BCM**. Se un nome è diverso, correggilo lì.
+3. Lancia:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File run_all.ps1
+   ```
+4. A fine corsa, comprimi la cartella `risultati_ottimizzazione` (i file `OptResults_*.csv`) e mandamela.
 
-| Componente | Stato |
-|---|---|
-| Logica walk-forward, finestre IS/OOS | ✅ solido |
-| Generazione `.set` (range di ottimizzazione) | ✅ solido |
-| Generazione `.ini` (avvio Tester) | ⚠️ i codici numerici MT5 (`Model`, `OptimizationCriterion`) vanno **verificati** sulla tua versione |
-| Avvio MT5 + walk-forward loop | ✅ solido (Windows nativo o Linux+Wine) |
-| **Lettura risultati** (`parse_report.py`) | ⛔ **da completare con un tuo report reale** — non invento il formato |
+> ⚠️ Fallo sul terminale di **test**, non su quello che opera in live. L'ottimizzazione
+> apre e chiude il terminale più volte: non deve disturbare gli EA che girano H24.
 
-## Cosa mi serve da te per finalizzarla
+## Dettagli tecnici
 
-1. **VPS Windows** (MT5 nativo) o **Linux + Wine**?
-2. Un **`.ini` di ottimizzazione salvato dal tuo MT5** (così allineo i codici esatti).
-3. Un **report di ottimizzazione esportato** (o un `.xml` da `Tester/cache/`),
-   così scrivo il parser sui campi veri.
-4. La **metrica** che vuoi massimizzare (di default: recovery factor, buon compromesso
-   rischio/rendimento).
-
-## Come funziona (una volta completa)
-
-```
-1. config.json         → elenchi i tuoi 15 EA + i range di parametri
-2. python run_pipeline.py
-      per ogni EA:
-        per ogni finestra walk-forward:
-          - ottimizza sull'IN-SAMPLE (ottimizzatore genetico MT5)
-          - prende i migliori set
-          - li RI-TESTA sull'OUT-OF-SAMPLE (dati mai visti)
-          - tiene solo quelli che reggono anche lì
-3. risultati_walk_forward.json → i parametri robusti per ogni EA
-```
+- **Criterio di ottimizzazione**: Recovery Factor (robusto), calcolato in `OnTester`.
+- **Modello prezzi**: *1 minute OHLC* (`Model=1`) — buon compromesso velocità/fedeltà.
+- **Export**: ogni EA scrive `MQL5\Files\OptResults_<EA>_<Symbol>.csv` (colonne uguali
+  all'export XML del tester) grazie al blocco OptFrame inlinato — leggibile da
+  `optimizer/batch_analyze.py`.
+- **Anti-overfit**: non prendo il singolo "picco". Scelgo il set su un *plateau* stabile
+  e lo confermo in avanti (il tuo demo in forward è la vera validazione, visto che lo
+  storico dati su alcuni indici è corto).
+- **Il rischio % NON si ottimizza**: resta al valore del piano (money management).
+  Ottimizzo solo i parametri che generano l'edge (range, buffer, stop/target, filtri).
 
 ## File
 
-- `config.example.json` — copia in `config.json` e adatta
-- `generate_config.py` — genera `.ini`/`.set` per MT5
-- `run_pipeline.py` — orchestratore walk-forward
-- `parse_report.py` — lettura risultati (da completare col tuo formato)
-
-## Dipendenze (sul VPS)
-
-```
-pip install python-dateutil
-```
+- `ea_config.json` — quali parametri e range per ogni EA (modificabile).
+- `gen_ini.py` — genera gli `.ini` del tester in `ini/`.
+- `run_all.ps1` — il launcher unico da eseguire sul VPS.
+- `ini/` — configurazioni tester generate (una per EA).
+- `risultati_ottimizzazione/` — dove finiscono i CSV dopo la corsa (da mandarmi).
 
 ## Il concetto anti-overfitting in una frase
 
 > Non cerchiamo i parametri che hanno guadagnato di più **ieri** (li trova sempre,
-> ed è un'illusione). Cerchiamo quelli che hanno funzionato in modo **stabile** su
-> periodi diversi, **compreso uno che l'ottimizzatore non ha mai visto**. Se reggono
-> lì, hanno una possibilità di reggere in reale.
+> ed è un'illusione). Cerchiamo quelli che hanno funzionato in modo **stabile** e
+> reggono anche **in avanti**, sul demo. Se reggono lì, hanno una possibilità in reale.

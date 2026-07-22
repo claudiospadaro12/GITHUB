@@ -24,19 +24,24 @@ bias/livelli/correlazioni della settimana (cosa avevo previsto vs realta').
 - [ ] Prossima versione: verifica anche LIVELLI (S/R, golden zone) e CORRELAZIONI
 - Nota: la verifica bias avra' dati veri dopo qualche giorno di snapshot (da 23/07).
 
-## 2. 🤖 Backtest + ottimizzazione EA in automatico
-**Obiettivo:** ottimizzare i ~15 EA in serie, con selezione parametri ROBUSTI
-(anti-overfitting), il piu' automatico possibile.
+## 2. 🤖 Backtest + ottimizzazione EA in automatico — ⏳ PRONTO DA LANCIARE
+**Obiettivo:** ottimizzare tutti i ~19 EA in serie, con selezione parametri ROBUSTI
+(anti-overfitting), con UN SOLO script sul VPS.
 
 - [x] `OptFrame.mqh` → scrive il CSV dei risultati da solo (testato, compila)
 - [x] `optimizer/batch_analyze.py` → sceglie i set robusti (testato su dati reali)
-- [x] Catena provata end-to-end su ABTG_Nightly
-- [ ] **Nodo aperto:** compilare/ottimizzare SOLO sul terminale MT5 sano
-      (uno dei due ha la libreria standard rotta → dà errori su Object.mqh/Trade.mqh).
-      Test: aprire un EA e fare F7 in ciascun MT5; usare quello con 0 errori.
-- [ ] Aggiungere `#include <OptFrame.mqh>` agli altri 14 EA (uno alla volta)
-- [ ] Walk-forward (validazione out-of-sample) per non illudersi coi backtest
-- [ ] `backtest_pipeline/` → rifinire l'orchestratore per lanciare tutti gli EA
+- [x] Catena provata end-to-end su ABTG_Nightly + ABTG_DAX_Apertura_EU
+- [x] **Tutti i 18 EA resi self-contained** (blocco OptFrame inlinato dentro ogni
+      .mq5 → NIENTE piu' include esterno, niente errori "file non trovato").
+      Rimossa la dipendenza da OptFrame.mqh; a ABTG_Nightly tolto il vecchio include.
+- [x] `backtest_pipeline/ea_config.json` → per ogni EA: simbolo, TF, 2-3 parametri
+      da ottimizzare con range sensati (il rischio % NON si ottimizza).
+- [x] `backtest_pipeline/gen_ini.py` → genera i .ini del Tester (19 file, testato).
+- [x] `backtest_pipeline/run_all.ps1` → LAUNCHER UNICO: copia+compila+ottimizza tutto
+      e raccoglie i CSV. Il VPS fa tutto da solo.
+- [ ] **TU:** controlla i 3 percorsi e i simboli, poi lancia run_all.ps1 sul VPS di TEST.
+- [ ] Mi mandi `risultati_ottimizzazione/` → io analizzo e creo gli `_Ottimizzato`.
+- Nota storico dati corto su alcuni indici → il forward su demo resta la vera validazione.
 
 ## 3. 📧 Report di mercato giornaliero (email 07:00) — ✅ ATTIVO
 - [x] Sistema funzionante su GitHub Actions
