@@ -12,10 +12,15 @@ bias/livelli/correlazioni della settimana (cosa avevo previsto vs realta').
 - [x] **Cattura giornaliera** (prerequisito): il report salva ogni giorno
       data/snapshots/AAAA-MM-GG.json con bias/livelli/correlazioni e lo committa nel repo.
       → parte da domani; la verifica avra' dati dopo ~1 settimana.
-- [ ] Generatore report settimanale: rilegge snapshot + scarica movimenti reali +
-      verifica bias/livelli/correlazioni + analisi trade dallo statement
-- [ ] Secondo task sul VPS: trigger sabato 09:00 (come il report giornaliero)
-- [ ] Statement trade: auto-export (consigliato) o fornito a mano — DA DECIDERE
+- [x] Parser statement (agent/statement.py): trade + strategia da EA + statistiche
+- [x] Verifica bias (agent/verify.py): bias previsto vs movimento reale (yfinance)
+- [x] Orchestratore (run_weekly_report.py): analisi trade + verifica bias -> HTML/email
+- [x] Workflow GitHub (weekly-report.yml) + sveglia VPS sabato 09:00 (trigger_weekly.ps1)
+- [ ] **Da fare (utente):** registrare il task del sabato sul VPS (setup_weekly_task.ps1)
+- [ ] Statement: per ora si mette in data/statements/ (il piu' recente).
+      Auto-export da MT5 = prossimo miglioramento.
+- [ ] Prossima versione: verifica anche LIVELLI (S/R, golden zone) e CORRELAZIONI
+- Nota: la verifica bias avra' dati veri dopo qualche giorno di snapshot (da 23/07).
 
 ## 2. 🤖 Backtest + ottimizzazione EA in automatico
 **Obiettivo:** ottimizzare i ~15 EA in serie, con selezione parametri ROBUSTI
