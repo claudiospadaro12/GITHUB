@@ -2,14 +2,20 @@
 
 Riepilogo per riprendere in fretta. Aggiornato: 22 luglio 2026.
 
-## 1. 📊 Report analisi trading (settimanale/giornaliero)
-**Obiettivo:** dallo statement MT5 → relazione automatica (cosa funziona, cosa
-perde, per EA/simbolo, pattern, azioni concrete).
+## 1. 📊 Report analisi trading — SETTIMANALE (sabato 09:00)
+**Obiettivo:** report del sabato che unisce analisi trade + verifica di
+bias/livelli/correlazioni della settimana (cosa avevo previsto vs realta').
+**Deciso:** settimanale, sabato 09:00; dati catturati ogni giorno in automatico.
 
 - [x] Relazione di prova fatta a mano sui dati reali (20-22 lug): +453,60 EUR,
       edge su DAX/Nasdaq apertura, oro discrezionale in perdita, GBPUSD 07:00 da rivedere
-- [ ] Automatizzare: export storico + generazione relazione (giornaliera o settimanale)
-- [ ] Decidere: giornaliera o settimanale?
+- [x] **Cattura giornaliera** (prerequisito): il report salva ogni giorno
+      data/snapshots/AAAA-MM-GG.json con bias/livelli/correlazioni e lo committa nel repo.
+      → parte da domani; la verifica avra' dati dopo ~1 settimana.
+- [ ] Generatore report settimanale: rilegge snapshot + scarica movimenti reali +
+      verifica bias/livelli/correlazioni + analisi trade dallo statement
+- [ ] Secondo task sul VPS: trigger sabato 09:00 (come il report giornaliero)
+- [ ] Statement trade: auto-export (consigliato) o fornito a mano — DA DECIDERE
 
 ## 2. 🤖 Backtest + ottimizzazione EA in automatico
 **Obiettivo:** ottimizzare i ~15 EA in serie, con selezione parametri ROBUSTI
