@@ -1,15 +1,11 @@
 name: Report di Mercato Giornaliero
 
 on:
-  schedule:
-    # UN SOLO cron giornaliero (feriali), 05:00 UTC:
-    #   - ora legale (CEST, UTC+2): 05:00 UTC = 07:00 Roma
-    #   - ora solare (CET,  UTC+1): 05:00 UTC = 06:00 Roma
-    # NB: GitHub Actions spesso RITARDA i cron di 30-90 minuti sotto carico.
-    # Per questo un solo cron + finestra oraria tollerante nello script:
-    # il report parte comunque, anche se GitHub lo esegue in ritardo.
-    - cron: "0 5 * * 1-5"
-  workflow_dispatch:        # esecuzione manuale (forza sempre l'invio)
+  # La sveglia ora e' il VPS: Task Scheduler -> workflow_dispatch alle 07:00
+  # (puntuale, niente ritardo). Il cron 'schedule' di GitHub e' stato RIMOSSO
+  # perche' partiva in ritardo (anche +2h) e avrebbe inviato una SECONDA email.
+  # Per riattivare un fallback, rimettere qui: schedule: - cron: "0 5 * * 1-5"
+  workflow_dispatch:        # lanciato dal VPS (e a mano). Forza sempre l'invio.
 
 concurrency:
   group: daily-report
