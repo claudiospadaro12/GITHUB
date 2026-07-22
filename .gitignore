@@ -13,3 +13,7 @@ report_output.html
 
 # token sveglia report (mai committare)
 .gh_report_token.txt
+
+piano_trading/node_modules/
+piano_trading/*.pdf
+piano_trading/package*.json
