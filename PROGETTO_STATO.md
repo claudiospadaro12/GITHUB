@@ -74,6 +74,20 @@ bias/livelli/correlazioni della settimana (cosa avevo previsto vs realta').
       (size + rischio), Strategie (auto + discrezionale), Controllo
 - [ ] Personalizzare con il coach: capitale reale, obiettivo annuo, importi € dei limiti
 
+## 6. 🛡️ Protezioni "live" (dopo i backtest) — DA FARE
+Emerse dalla giornata -535 EUR (23/07: tutti gli EA long sul DAX in un DAX
+ribassista) e dal confronto con l'amico che crea EA.
+
+- [ ] **Guardiano di portafoglio**: stop giornaliero (es. -3/4% conto -> blocca
+      nuovi trade fino a domani) + limite di esposizione stesso strumento/direzione
+      (no 4 EA long DAX insieme). Priorità alta.
+- [ ] **Rivedere DAX M3**: il 23/07 ha aperto 5 long a scendere (-220). Manca un
+      filtro di trend robusto.
+- [ ] **Spia slippage + floor minimo SL** (idea amico, rifinita):
+      1) registrare prezzo richiesto vs eseguito su ogni ordine -> CSV (distribuzione, non solo media);
+      2) floor SL = spread + 95° percentile slippage + cuscinetto ATR; se SL calcolato < floor -> allarga+riduci size (reversal) o salta (breakout).
+      NB: il backtest NON misura lo slippage reale -> questi dati si prendono in demo/live.
+
 ## (?) Punto rimasto in sospeso
 Un messaggio si era interrotto su "...ottimizzazione con agente e ___".
 Se c'era un altro filone, da completare.
