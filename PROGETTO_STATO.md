@@ -43,6 +43,14 @@ bias/livelli/correlazioni della settimana (cosa avevo previsto vs realta').
 - [ ] Mi mandi `risultati_ottimizzazione/` → io analizzo e creo gli `_Ottimizzato`.
 - Nota storico dati corto su alcuni indici → il forward su demo resta la vera validazione.
 
+**REGOLA FISSA per gli EA ottimizzati (richiesta di Claudio):**
+- Suffisso **`_Ottimizzato`** nel nome (es. ABTG_DAX_Apertura_EU_Ottimizzato).
+- Girano **IN PARALLELO** agli originali, **NON li sostituiscono**.
+- **Magic number DIVERSO** dall'originale (es. 770101 -> 770102) per non interferire.
+- Claudio tiene entrambi in demo -> dopo vari giorni di FORWARD si confronta
+  originale vs ottimizzato e si tiene solo il migliore.
+- Backtest a TICK REALI (Model=4). Simboli: D30EUR(DAX), NASUSD, XAUUSD, EURUSD, GBPUSD.
+
 ## 3. 📧 Report di mercato giornaliero (email 07:00) — ✅ ATTIVO
 - [x] Sistema funzionante su GitHub Actions
 - [x] Capito il problema: GitHub ritarda i cron di ore
