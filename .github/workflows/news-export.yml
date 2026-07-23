@@ -1,0 +1,33 @@
+name: Genera abtg_news.csv (calendario EA)
+
+# Genera SOLO il file news per gli EA (Forex Factory -> abtg_news.csv) e lo
+# committa. Utile per rigenerarlo su richiesta senza inviare il report.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Installa dipendenze
+        run: pip install requests
+      - name: Genera abtg_news.csv
+        run: python -m agent.news_export data/abtg_news.csv
+      - name: Committa il file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/abtg_news.csv || true
+          if git diff --staged --quiet; then
+            echo "Nessuna modifica al file news."
+          else
+            git commit -m "news EA: aggiorna abtg_news.csv [skip ci]"
+            git push
+          fi

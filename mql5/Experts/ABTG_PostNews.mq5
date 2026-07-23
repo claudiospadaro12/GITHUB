@@ -72,6 +72,7 @@ input bool   InpVerbose   = true;
 //==================================================================
 datetime gLastBar=0;
 int      gPlacedDay=-1;
+int      gNewsLoadedDay=-1;   // giorno in cui ho letto il file news l'ultima volta
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; string gNewsTitle[]; int gNewsCount=0;
 
@@ -89,6 +90,7 @@ int OnInit()
    gTrade.SetExpertMagicNumber(InpMagic);
    gTrade.SetTypeFillingBySymbol(_Symbol);
    gTrade.SetDeviationInPoints(30);
+   MqlDateTime _di; TimeToStruct(TimeCurrent(),_di); gNewsLoadedDay=_di.day_of_year;
    if(InpUseNewsFilter) LoadNews();
    Log(StringFormat("avviato su %s. Azione %02d:%02d server, scadenza %02d:%02d server. 1 pip=%.5f",
        _Symbol,InpActionHour,InpActionMin,InpExpiryHour,InpExpiryMin,PipSize()));
@@ -100,6 +102,12 @@ void OnDeinit(const int reason){}
 //+------------------------------------------------------------------+
 void OnTick()
   {
+   // Ricarica il file news una volta al giorno: l'agente lo aggiorna ogni
+   // mattina, cosi' l'EA vede sempre gli eventi nuovi senza riavviarlo.
+   MqlDateTime _tc; TimeToStruct(TimeCurrent(),_tc);
+   if(InpUseNewsFilter && _tc.day_of_year!=gNewsLoadedDay)
+     { LoadNews(); gNewsLoadedDay=_tc.day_of_year; }
+
    ManageTrailing();
    FridayCloseCheck();
 
