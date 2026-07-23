@@ -92,6 +92,18 @@ def main() -> int:
     except Exception as exc:
         print(f"[warn] Snapshot non salvato: {exc}")
 
+    # 3-quinquies. Genera il file news per gli EA (abtg_news.csv): calendario
+    #              Forex Factory con ECB/FOMC riconosciuti. Serve al PostNews
+    #              (e ai filtri news degli altri EA). Non blocca l'invio.
+    try:
+        from agent import news_export
+        rows = news_export.collect_news()
+        n = news_export.write_abtg_news("data/abtg_news.csv")
+        s = news_export.summarize(rows)
+        print(f"[info] abtg_news.csv generato: {n} eventi (ECB={s['ECB']}, FOMC={s['FOMC']}).")
+    except Exception as exc:
+        print(f"[warn] abtg_news.csv non generato: {exc}")
+
     # 4. Sintesi con Claude (opzionale): se la chiave manca o l'API fallisce,
     #    ripieghiamo sull'analisi deterministica senza bloccare l'invio.
     if settings.anthropic_api_key:
