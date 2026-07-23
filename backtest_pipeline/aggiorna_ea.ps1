@@ -4,9 +4,15 @@
 #  Copia i sorgenti .mq5 aggiornati del repo nel terminale BCM e li
 #  ricompila. Gli EA gia' attaccati ai grafici si ricaricano da soli
 #  (MT5 ricarica l'.ex5 dopo la ricompilazione). NON lancia backtest.
-#  Usalo quando ti do una nuova versione di un EA (es. PostNews con la
-#  ricarica news giornaliera).
+#
+#  USO:
+#    .\aggiorna_ea.ps1              -> aggiorna TUTTI gli EA
+#    .\aggiorna_ea.ps1 PostNews     -> aggiorna SOLO gli EA il cui nome
+#                                       contiene "PostNews" (consigliato
+#                                       sul VPS a mercato aperto: tocca
+#                                       solo quello, non disturba gli altri)
 # =====================================================================
+param([string]$Only = "")
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -31,6 +37,8 @@ $MqlExperts = Join-Path $DataFolder "MQL5\Experts"
 New-Item -ItemType Directory -Force -Path $MqlExperts | Out-Null
 
 $eaFiles = Get-ChildItem -Path $ExpertsSrc -Filter "ABTG_*.mq5"
+if ($Only) { $eaFiles = $eaFiles | Where-Object { $_.Name -like "*$Only*" } }
+if (-not $eaFiles) { Write-Host "Nessun EA corrisponde a '$Only'." -ForegroundColor Red; exit 1 }
 foreach ($f in $eaFiles) { Copy-Item $f.FullName -Destination $MqlExperts -Force }
 Write-Host "Copiati $($eaFiles.Count) EA. Compilo..." -ForegroundColor Yellow
 foreach ($f in $eaFiles) {
