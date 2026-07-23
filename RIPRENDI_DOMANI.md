@@ -19,18 +19,22 @@ powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1
 ```
 Deve dire "OK! Script installato e compilato".
 
-**3. Scarica lo storico dentro MT5:**
+**3. Scarica lo storico + TICK REALI dentro MT5:**
 - Apri MT5 (fisso) → Navigatore → Script → trascina `ABTG_HistoryDownloader` su un grafico.
 - In `InpSimboli` incolla: `D30EUR,NASUSD,XAUUSD,EURUSD,GBPUSD,USDJPY`
+- `InpScaricaTick = true` (scarica anche i tick reali → ci mette un po', e' normale).
 - `InpListaSoloNomi = false` → OK. Aspetta "=== FINITO ===" (scheda "Esperti").
-- Se compare "NESSUN DATO (timeout)" accanto a un simbolo → dillo a Claude.
+- Guarda le righe "TICK": ti dicono da che data BCM ha i tick reali (la profondita').
+  Se "nessun tick reale disponibile" per un simbolo → dillo a Claude.
 
-**4. Ottimizzazione pulita:**
+**4. Ottimizzazione a TICK REALI (scelta "B"):**
 - CHIUDI MT5.
 - PowerShell in `backtest_pipeline`:
 ```
 powershell -ExecutionPolicy Bypass -File .\run_all.ps1
 ```
+- ATTENZIONE: a tick reali e' MOLTO piu' lento → lascialo girare a lungo
+  (anche una notte intera). E' voluto: backtest realistici.
 - Alla fine:
 ```
 (Get-ChildItem .\risultati_ottimizzazione\OptResults_*.csv).Count

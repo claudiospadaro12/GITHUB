@@ -4,7 +4,7 @@
     "deposit": 10000,
     "currency": "EUR",
     "leverage": 100,
-    "model": 1,
+    "model": 4,
     "optimization": 2,
     "optimization_criterion": 6,
     "from_date": "2024.01.01",

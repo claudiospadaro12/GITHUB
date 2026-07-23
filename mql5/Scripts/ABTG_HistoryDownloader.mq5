@@ -20,6 +20,35 @@ input string InpDataInizio    = "2015.01.01"; // scarica dalla piu' vecchia poss
 input bool   InpListaSoloNomi = false;     // true = stampa solo l'elenco dei simboli del broker ed esce
 input bool   InpTuttiBroker   = false;     // true = usa TUTTI i simboli del broker (non solo Market Watch)
 input int    InpTimeoutSec    = 60;        // secondi max di attesa download per simbolo/TF
+input bool   InpScaricaTick   = true;      // scarica anche i TICK REALI (per backtest a tick reali)
+
+//+------------------------------------------------------------------+
+//| Scarica i tick reali a blocchi di 30 giorni (evita array enormi) |
+//| Ritorna il totale tick e imposta 'first' alla prima data trovata |
+//+------------------------------------------------------------------+
+long DownloadTicks(string sym, datetime from, datetime &first)
+  {
+   datetime now = TimeCurrent();
+   long total = 0;
+   first = 0;
+   datetime a = from;
+   while(a < now && !IsStopped())
+     {
+      datetime b = a + 30*24*3600; if(b > now) b = now;
+      MqlTick tk[];
+      int got = -1, tries = 0;
+      while(!IsStopped() && tries < InpTimeoutSec*4)
+        {
+         got = CopyTicksRange(sym, tk, COPY_TICKS_ALL, (ulong)a*1000, (ulong)b*1000);
+         if(got > 0) break;
+         if(got == 0 && tries > 8) break; // finestra davvero senza tick (o non disponibili)
+         Sleep(250); tries++;
+        }
+      if(got > 0){ total += got; if(first==0) first = tk[0].time; }
+      a = b;
+     }
+   return total;
+  }
 
 //+------------------------------------------------------------------+
 ENUM_TIMEFRAMES TFfromString(string s)
@@ -134,6 +163,20 @@ void OnStart()
 
          if(fh!=INVALID_HANDLE)
             FileWrite(fh, sym, tfn, (string)got, (got>0?TimeToString(first, TIME_DATE):"-"));
+        }
+
+      // --- TICK REALI (per i backtest a tick reali) ------------------
+      if(InpScaricaTick && !IsStopped())
+        {
+         datetime tfirst = 0;
+         PrintFormat("[%d/%d] %-12s TICK : scarico... (puo' richiedere tempo)", s+1, nsym, sym);
+         long nticks = DownloadTicks(sym, from, tfirst);
+         if(nticks > 0)
+            PrintFormat("[%d/%d] %-12s TICK : %I64d tick (dal %s)", s+1, nsym, sym, nticks, TimeToString(tfirst, TIME_DATE));
+         else
+            PrintFormat("[%d/%d] %-12s TICK : nessun tick reale disponibile", s+1, nsym, sym);
+         if(fh!=INVALID_HANDLE)
+            FileWrite(fh, sym, "TICK", (string)nticks, (nticks>0?TimeToString(tfirst, TIME_DATE):"-"));
         }
      }
 
