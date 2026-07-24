@@ -15,7 +15,13 @@
 #
 #  Alla fine, comprimi e mandami la cartella .\risultati_ottimizzazione\
 #  (i file OptResults_*.csv): li analizzo io e creo gli EA _Ottimizzato.
+#
+#  RIPRESA: se un giro e' stato interrotto, rilancialo con -Riprendi:
+#      powershell -ExecutionPolicy Bypass -File run_all.ps1 -Riprendi
+#  Salta gli EA che hanno GIA' il loro OptResults in MQL5\Files e fa
+#  solo i mancanti (poi raccoglie tutto).
 # =====================================================================
+param([switch]$Riprendi)
 
 # --- 1) PERCORSI: RILEVAMENTO AUTOMATICO -----------------------------
 # Lo script trova DA SOLO il terminale BCM e la sua cartella dati, su
@@ -127,6 +133,11 @@ foreach ($ini in $inis) {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($ini.Name)
     $ex5  = Join-Path $MqlExperts "$name.ex5"
     if (-not (Test-Path $ex5)) { Write-Host "   [$i/$($inis.Count)] $name : .ex5 mancante, salto" -ForegroundColor Red; continue }
+    # RIPRESA: se ha gia' il suo OptResults, saltalo
+    if ($Riprendi) {
+        $gia = Get-ChildItem -Path $MqlFiles -Filter ("OptResults_" + $name + "_*.csv") -ErrorAction SilentlyContinue
+        if ($gia) { Write-Host "   [$i/$($inis.Count)] $name : gia' fatto, salto (ripresa)" -ForegroundColor DarkGray; continue }
+    }
     Write-Host "   [$i/$($inis.Count)] Ottimizzo $name ..." -ForegroundColor Cyan
     $proc = Start-Process -FilePath $Terminal -ArgumentList "/config:`"$($ini.FullName)`"" -PassThru
     $proc.WaitForExit()   # ShutdownTerminal=1 -> il terminale si chiude da solo
