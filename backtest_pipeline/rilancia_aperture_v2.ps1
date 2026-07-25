@@ -50,11 +50,12 @@ Write-Host ("Cartella di lavoro: {0}" -f $Work)
 # --- 1) scarico i file freschi da GitHub -----------------------------
 Write-Host "`n[1/7] Scarico gli EA v2 + config freschi da GitHub..." -ForegroundColor Yellow
 New-Item -ItemType Directory -Force -Path (Join-Path $Work "src_v2") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $Work "ini") | Out-Null
 $dl = @(
-    @{ url = "$RawBase/mql5/Experts/ABTG_DAX_Apertura_EU.mq5";    out = "src_v2\ABTG_DAX_Apertura_EU.mq5" },
-    @{ url = "$RawBase/mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5"; out = "src_v2\ABTG_Nasdaq_Apertura_US.mq5" },
-    @{ url = "$RawBase/backtest_pipeline/ea_config.json";         out = "ea_config.json" },
-    @{ url = "$RawBase/backtest_pipeline/gen_ini.py";             out = "gen_ini.py" }
+    @{ url = "$RawBase/mql5/Experts/ABTG_DAX_Apertura_EU.mq5";        out = "src_v2\ABTG_DAX_Apertura_EU.mq5" },
+    @{ url = "$RawBase/mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5";     out = "src_v2\ABTG_Nasdaq_Apertura_US.mq5" },
+    @{ url = "$RawBase/backtest_pipeline/ini/ABTG_DAX_Apertura_EU.ini";    out = "ini\ABTG_DAX_Apertura_EU.ini" },
+    @{ url = "$RawBase/backtest_pipeline/ini/ABTG_Nasdaq_Apertura_US.ini"; out = "ini\ABTG_Nasdaq_Apertura_US.ini" }
 )
 foreach ($d in $dl) {
     $dest = Join-Path $Work $d.out
@@ -114,13 +115,12 @@ foreach ($t in $Targets) {
     else { Write-Host ("   ERRORE compilazione {0} (mi fermo)" -f $t.file) -ForegroundColor Red; exit 1 }
 }
 
-# --- 4) genero gli .ini v2 (dal config fresco) -----------------------
-Write-Host "`n[4/7] Genero gli .ini v2..." -ForegroundColor Yellow
-$py = Get-Command $Python -ErrorAction SilentlyContinue
-if ($py) {
-    & $Python (Join-Path $Work "gen_ini.py") --config (Join-Path $Work "ea_config.json") --out $IniDir
-} else {
-    Write-Host "   Python non trovato. Installa Python o passami gli .ini a mano." -ForegroundColor Red; exit 1
+# --- 4) verifico gli .ini v2 (gia' scaricati pronti, NIENTE Python) --
+Write-Host "`n[4/7] Verifico gli .ini v2 (gia' pronti, niente Python)..." -ForegroundColor Yellow
+foreach ($t in $Targets) {
+    $ini = Join-Path $IniDir ("{0}.ini" -f $t.file)
+    if (Test-Path $ini) { Write-Host ("   OK  {0}.ini" -f $t.file) -ForegroundColor Green }
+    else { Write-Host ("   ERRORE: manca {0}.ini (download fallito?)" -f $t.file) -ForegroundColor Red; exit 1 }
 }
 
 # --- 5) cancello i vecchi OptResults delle due aperture --------------
