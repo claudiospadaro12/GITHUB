@@ -17,7 +17,9 @@ param(
     [int]$DaxOpenHour = 9,   [int]$DaxOpenMin = 0,
     [int]$NasOpenHour = 15,  [int]$NasOpenMin = 30,
     [double]$BufferPts = 200, [double]$SlippagePts = 100, [double]$TP_R = 2.0,
-    [string]$FromDate = "2024.01.01", [string]$ToDate = "2026.07.01"
+    [string]$FromDate = "2024.01.01", [string]$ToDate = "2026.07.01",
+    [switch]$UseSpare,            # usa il terminale di scorta -V3 (per girare in parallelo alle ottimizzazioni)
+    [string]$TerminalPath = ""    # oppure percorso esplicito a terminal64.exe
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,10 +30,20 @@ Write-Host "=== STUDIO APERTURA (LONG vs SHORT, con slippage) ===" -ForegroundCo
 
 # --- rileva terminale BCM + cartella dati (come run_all) -------------
 $Terminal=""; $MetaEditor=""; $DataFolder=""
-$allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-$cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-if ($cand) { $Terminal=$cand.FullName; $MetaEditor=Join-Path $cand.DirectoryName "metaeditor64.exe" }
+if ($TerminalPath -and (Test-Path $TerminalPath)) {
+    $Terminal=$TerminalPath; $MetaEditor=Join-Path (Split-Path -Parent $TerminalPath) "metaeditor64.exe"
+} else {
+    $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
+    if ($UseSpare) {
+        # scorta: preferisci il -V3 (non occupato dalle ottimizzazioni)
+        $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*" } | Select-Object -First 1
+        if (-not $cand) { Write-Host "Terminale -V3 (scorta) non trovato: passa -TerminalPath col percorso giusto." -ForegroundColor Red; exit 1 }
+    } else {
+        $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+        if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+    }
+    if ($cand) { $Terminal=$cand.FullName; $MetaEditor=Join-Path $cand.DirectoryName "metaeditor64.exe" }
+}
 if ($Terminal) {
     $instDir=Split-Path -Parent $Terminal
     $termRoot=Join-Path $env:APPDATA "MetaQuotes\Terminal"
@@ -46,20 +58,21 @@ Write-Host ("Cartella dati: {0}" -f $DataFolder)
 if (-not $Terminal -or -not (Test-Path $Terminal)) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
 if (-not $DataFolder -or -not (Test-Path $DataFolder)) { Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1 }
 
-# --- MT5 deve essere CHIUSO: se e' aperto, /config non esegue il test ---
-$running = @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)
+# --- QUESTO terminale deve essere CHIUSO (altri MT5 possono restare aperti) ---
+# Se stai ottimizzando sul terminale principale, lancia lo studio col -UseSpare:
+# usa il -V3, e qui blocchiamo solo se il -V3 stesso e' in esecuzione.
+$running = @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -ieq $Terminal })
 if ($running.Count -gt 0) {
-    Write-Host "`n!!! MT5 e' APERTO su questo PC. Con MT5 aperto il test NON parte" -ForegroundColor Red
-    Write-Host "    (il comando passa all'istanza aperta ed esce subito -> 0 trade)." -ForegroundColor Red
-    Write-Host "    CHIUDI del tutto MetaTrader 5 (anche dalla barra in basso a destra)" -ForegroundColor Yellow
-    Write-Host "    e rilancia. Sul PC fisso puoi chiuderlo; NON farlo sul VPS live." -ForegroundColor Yellow
-    $r = Read-Host "`n    Vuoi che lo chiuda io adesso? (S/N)"
+    Write-Host "`n!!! Questo terminale ($Terminal) e' APERTO: il test non partirebbe." -ForegroundColor Red
+    Write-Host "    Se qui sopra stanno girando le OTTIMIZZAZIONI, NON chiuderlo:" -ForegroundColor Yellow
+    Write-Host "    rilancia lo studio col terminale di scorta -> aggiungi  -UseSpare" -ForegroundColor Yellow
+    $r = Read-Host "`n    Altrimenti vuoi che chiuda QUESTO terminale adesso? (S/N)"
     if ($r -match '^[SsYy]') {
         $running | Stop-Process -Force
         Start-Sleep -Seconds 3
-        Write-Host "    MT5 chiuso. Proseguo." -ForegroundColor Green
+        Write-Host "    Terminale chiuso. Proseguo." -ForegroundColor Green
     } else {
-        Write-Host "    Ok, chiudilo a mano e rilancia lo script." -ForegroundColor Yellow
+        Write-Host "    Ok. Usa -UseSpare per girare in parallelo, oppure aspetta la fine e rilancia." -ForegroundColor Yellow
         exit 1
     }
 }
