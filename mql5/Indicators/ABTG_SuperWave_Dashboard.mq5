@@ -780,12 +780,17 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
          ObjectSetInteger(0,P+"sb_"+(string)s,OBJPROP_TIMEFRAMES,tf);
          ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_TIMEFRAMES,tf);
          for(int c=0;c<NTF;c++)
+           {
             ObjectSetInteger(0,P+"bg_"+(string)s+"_"+(string)c,OBJPROP_TIMEFRAMES,tf);
+            // i NUMERI: se nascondo -> via; se mostro -> ci pensa UpdateAll (solo celle attive)
+            if(gHidden) ObjectSetInteger(0,P+"cx_"+(string)s+"_"+(string)c,OBJPROP_TIMEFRAMES,OBJ_NO_PERIODS);
+           }
         }
       ObjectSetInteger(0,P+"panel",OBJPROP_TIMEFRAMES,tf);
       for(int c=0;c<NTF;c++) ObjectSetInteger(0,P+"h_"+(string)c,OBJPROP_TIMEFRAMES,tf);
       ObjectSetInteger(0,P+"h_sym",OBJPROP_TIMEFRAMES,tf);
-      if(!gHidden) UpdateAll(); else ChartRedraw();
+      if(!gHidden){ gUpdIdx=0; UpdateAll(); BlinkConfluence(); }  // ricolora subito celle + confluenze
+      else ChartRedraw();
       return;
      }
 
