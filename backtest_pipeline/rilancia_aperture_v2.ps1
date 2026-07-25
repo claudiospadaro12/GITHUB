@@ -26,7 +26,8 @@ param(
     [string]$Terminal   = "",
     [string]$MetaEditor = "",
     [string]$DataFolder = "",
-    [string]$Python     = "python"
+    [string]$Python     = "python",
+    [switch]$Force       # prosegui anche se MT5 sembra gia' aperto
 )
 
 $ErrorActionPreference = "Stop"
@@ -102,6 +103,22 @@ $MqlFiles   = Join-Path $DataFolder "MQL5\Files"
 $IniDir     = Join-Path $Work "ini"
 $Results    = Join-Path $Work "risultati_aperture_v2"
 New-Item -ItemType Directory -Force -Path $MqlExperts,$Results | Out-Null
+
+# --- CONTROLLO DI SICUREZZA: MT5 non deve essere gia' aperto ---------
+# MetaTrader NON puo' far girare due Strategy Tester insieme sullo stesso
+# terminale: se e' gia' aperto (es. un'altra ottimizzazione tipo run_all.ps1
+# o il terminale live), i lanci /config vengono IGNORATI e otterresti 0 CSV.
+$running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
+if ($running) {
+    Write-Host "`n!!! MetaTrader (terminal64.exe) e' GIA' APERTO." -ForegroundColor Red
+    Write-Host "    Non posso lanciare le ottimizzazioni: MT5 non fa girare due tester insieme," -ForegroundColor Red
+    Write-Host "    quindi i lanci verrebbero ignorati (0 CSV, come e' successo prima)." -ForegroundColor Red
+    Write-Host "    -> Ferma l'altra ottimizzazione (Ctrl+C su run_all.ps1) e CHIUDI MetaTrader," -ForegroundColor Yellow
+    Write-Host "       poi rilancia questo script." -ForegroundColor Yellow
+    Write-Host "    (Se sei sicuro che nessun tester stia girando, puoi forzare con -Force.)" -ForegroundColor DarkGray
+    if (-not $Force) { exit 1 }
+    Write-Host "    -Force attivo: proseguo comunque (a tuo rischio)." -ForegroundColor DarkGray
+}
 
 # --- 3) copio + compilo SOLO i due EA aperture -----------------------
 Write-Host "`n[3/7] Copio e compilo i due EA aperture..." -ForegroundColor Yellow
