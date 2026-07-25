@@ -18,8 +18,8 @@
 #property copyright "Progetto EA Aperture Mercati"
 #property version   "4.00"
 #property indicator_chart_window
-#property indicator_buffers 14
-#property indicator_plots   7
+#property indicator_buffers 15
+#property indicator_plots   8
 #property indicator_label1  "HeikinAshi"
 #property indicator_type1   DRAW_COLOR_CANDLES
 #property indicator_color1  clrLimeGreen, clrRed
@@ -39,13 +39,16 @@
 #property indicator_label5  "MA 14"
 #property indicator_type5   DRAW_LINE
 #property indicator_color5  clrAqua
-#property indicator_label6  "MA 100"
+#property indicator_label6  "MA 50"
 #property indicator_type6   DRAW_LINE
-#property indicator_color6  clrOrange
-#property indicator_label7  "MA 200"
+#property indicator_color6  clrGold
+#property indicator_label7  "MA 100"
 #property indicator_type7   DRAW_LINE
-#property indicator_color7  clrTomato
-#property indicator_width7  2
+#property indicator_color7  clrOrange
+#property indicator_label8  "MA 200"
+#property indicator_type8   DRAW_LINE
+#property indicator_color8  clrTomato
+#property indicator_width8  2
 
 input string InpSymbols   = "D30EUR,NASUSD,SPXUSD,XAUUSD,EURUSD,EURGBP,EURJPY,EURCHF,EURAUD,EURCAD,EURNZD,GBPUSD,GBPAUD,GBPCAD,GBPCHF,GBPJPY,GBPNZD,CHFJPY,CADCHF,CADJPY,USDJPY,USDCHF,USDCAD,AUDCAD,AUDCHF,AUDJPY,AUDNZD,AUDUSD,BTCUSD"; // Simboli (adatta ai TUOI BCM!)
 input int    InpAtrPeriod = 10;    // Periodo ATR del Supertrend
@@ -55,8 +58,9 @@ input double InpMult3     = 2.5;   // Supertrend 3
 input bool   InpShowST2   = true;  // mostra ST 3.0
 input bool   InpShowST3   = true;  // mostra ST 2.5
 input int    InpMA1       = 14;    // Media veloce (riferimento pullback)
-input int    InpMA2       = 50;    // Media media (per l'INCROCIO - Giorgio Bo: 50)
-input int    InpMA3       = 200;   // Media lenta
+input int    InpMA2       = 50;    // Media 50 (per l'INCROCIO - Giorgio Bo)
+input int    InpMA3       = 100;   // Media media
+input int    InpMA4       = 200;   // Media lenta
 input ENUM_MA_METHOD InpMAmethod = MODE_SMA; // tipo medie
 input bool   InpShowCross = true;  // segna l'INCROCIO media50 x media200 a favore del Supertrend
 input int    InpCrossWindow = 20;  // quanto indietro cercare l'incrocio (barre)
@@ -116,9 +120,9 @@ string   P = "SWD_";
 
 double haO[], haH[], haL[], haC[], haCol[];
 double st1[], c1[], st2[], c2[], st3[], c3[];
-double ma1[], ma2[], ma3[];
+double ma1[], ma2[], ma3[], ma4[];
 double up1[],dn1[],up2[],dn2[],up3[],dn3[];
-int    hAtr, hMa1, hMa2, hMa3;
+int    hAtr, hMa1, hMa2, hMa3, hMa4;
 
 int gHeaderY, gRow0Y;
 
@@ -136,13 +140,15 @@ int OnInit()
    SetIndexBuffer(11,ma1,  INDICATOR_DATA);
    SetIndexBuffer(12,ma2,  INDICATOR_DATA);
    SetIndexBuffer(13,ma3,  INDICATOR_DATA);
+   SetIndexBuffer(14,ma4,  INDICATOR_DATA);
    PlotIndexSetDouble(0, PLOT_EMPTY_VALUE, 0.0);
-   for(int p=1;p<7;p++) PlotIndexSetDouble(p, PLOT_EMPTY_VALUE, EMPTY_VALUE);
+   for(int p=1;p<8;p++) PlotIndexSetDouble(p, PLOT_EMPTY_VALUE, EMPTY_VALUE);
 
    hAtr = iATR(_Symbol,_Period,InpAtrPeriod);
    hMa1 = iMA(_Symbol,_Period,InpMA1,0,InpMAmethod,PRICE_CLOSE);
    hMa2 = iMA(_Symbol,_Period,InpMA2,0,InpMAmethod,PRICE_CLOSE);
    hMa3 = iMA(_Symbol,_Period,InpMA3,0,InpMAmethod,PRICE_CLOSE);
+   hMa4 = iMA(_Symbol,_Period,InpMA4,0,InpMAmethod,PRICE_CLOSE);
    if(hAtr==INVALID_HANDLE) return(INIT_FAILED);
    IndicatorSetString(INDICATOR_SHORTNAME,"SuperWave");
 
@@ -258,9 +264,10 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
       if(CopyBuffer(hMa1,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma1[i]=m[i];
       if(CopyBuffer(hMa2,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma2[i]=m[i];
       if(CopyBuffer(hMa3,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma3[i]=m[i];
+      if(CopyBuffer(hMa4,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma4[i]=m[i];
      }
    else
-     { for(int i=0;i<rates_total;i++){ st1[i]=EMPTY_VALUE; ma1[i]=EMPTY_VALUE; ma2[i]=EMPTY_VALUE; ma3[i]=EMPTY_VALUE; } }
+     { for(int i=0;i<rates_total;i++){ st1[i]=EMPTY_VALUE; ma1[i]=EMPTY_VALUE; ma2[i]=EMPTY_VALUE; ma3[i]=EMPTY_VALUE; ma4[i]=EMPTY_VALUE; } }
 
    DrawCross(rates_total,time);
    DrawTrade(rates_total,time,close);
@@ -279,9 +286,9 @@ void DrawCross(int rt,const datetime &time[])
    int w=MathMin(InpCrossWindow, rt-3);
    for(int i=rt-2; i>=rt-2-w && i>1; i--)
      {
-      if(ma2[i]==EMPTY_VALUE || ma3[i]==EMPTY_VALUE || ma2[i-1]==EMPTY_VALUE || ma3[i-1]==EMPTY_VALUE) continue;
-      bool up = (ma2[i-1]<=ma3[i-1] && ma2[i]>ma3[i]);
-      bool dn = (ma2[i-1]>=ma3[i-1] && ma2[i]<ma3[i]);
+      if(ma2[i]==EMPTY_VALUE || ma4[i]==EMPTY_VALUE || ma2[i-1]==EMPTY_VALUE || ma4[i-1]==EMPTY_VALUE) continue;
+      bool up = (ma2[i-1]<=ma4[i-1] && ma2[i]>ma4[i]);   // 50 incrocia 200 al rialzo
+      bool dn = (ma2[i-1]>=ma4[i-1] && ma2[i]<ma4[i]);   // 50 incrocia 200 al ribasso
       if(!up && !dn) continue;
       int cdir  = up?1:-1;
       int stdir = (c1[i]==0)?1:-1;          // direzione Supertrend a quella barra
