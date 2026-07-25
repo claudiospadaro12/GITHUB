@@ -381,7 +381,7 @@ void DrawTrade(int rt,const datetime &time[],const double &close[])
 void DrawTradePanel(bool ok,int dir,double entry,double stop)
   {
    string q=P+"q_";
-   int RM=8, BW=178, LH=15, y=20;
+   int RM=8, BW=210, LH=15, y=20;
    string ids[12]={"bg","t","dir","in","sl","h","tp1","tp2","tp3","risklbl","riskedit","note"};
    if(!ok)
      { for(int i=0;i<12;i++) ObjectDelete(0,q+ids[i]); return; }
@@ -409,10 +409,11 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop)
    LblR(q+"dir", RM+6, y+LH,     (dir>0?"BUY":"SELL"),             ecol,       InpFont+1);
    LblR(q+"in",  RM+6, y+2*LH,   "Ingresso  "+DoubleToString(entry,dg), InpTextCol, InpFont);
    LblR(q+"sl",  RM+6, y+3*LH,   "Stop  "+DoubleToString(stop,dg)+"  ("+DoubleToString(slPts,0)+" pt)", InpStopCol, InpFont);
-   LblR(q+"h",   RM+6, y+4*LH,   "TARGET           prezzo      lotti", InpHeadCol, InpFont-1);
-   LblR(q+"tp1", RM+6, y+5*LH,   "TP1 ("+DoubleToString(InpTP1_R,1)+"R)  "+DoubleToString(tp1,dg)+"   "+DoubleToString(L1,2), InpTargetCol, InpFont);
-   LblR(q+"tp2", RM+6, y+6*LH,   "TP2 ("+DoubleToString(InpTP2_R,1)+"R)  "+DoubleToString(tp2,dg)+"   "+DoubleToString(L2,2), InpTargetCol, InpFont);
-   LblR(q+"tp3", RM+6, y+7*LH,   "TP3 ("+DoubleToString(InpTP3_R,1)+"R)  "+DoubleToString(tp3,dg)+"   "+DoubleToString(L3,2), InpTargetCol, InpFont);
+   double d1=MathAbs(tp1-entry)/_Point, d2=MathAbs(tp2-entry)/_Point, d3=MathAbs(tp3-entry)/_Point;
+   LblR(q+"h",   RM+6, y+4*LH,   "TARGET      prezzo     dist    lotti", InpHeadCol, InpFont-1);
+   LblR(q+"tp1", RM+6, y+5*LH,   "TP1 "+DoubleToString(InpTP1_R,1)+"R  "+DoubleToString(tp1,dg)+"  "+DoubleToString(d1,0)+"pt  "+DoubleToString(L1,2), InpTargetCol, InpFont);
+   LblR(q+"tp2", RM+6, y+6*LH,   "TP2 "+DoubleToString(InpTP2_R,1)+"R  "+DoubleToString(tp2,dg)+"  "+DoubleToString(d2,0)+"pt  "+DoubleToString(L2,2), InpTargetCol, InpFont);
+   LblR(q+"tp3", RM+6, y+7*LH,   "TP3 "+DoubleToString(InpTP3_R,1)+"R  "+DoubleToString(tp3,dg)+"  "+DoubleToString(d3,0)+"pt  "+DoubleToString(L3,2), InpTargetCol, InpFont);
    // riga RISCHIO: etichetta + casella modificabile (clicca e scrivi il %)
    LblR (q+"risklbl", RM+56, y+8*LH, "Rischio % (clicca):  "+DoubleToString(riskMoney,2)+" =", InpTextCol, InpFont);
    EditR(q+"riskedit",RM+6,  y+8*LH-1, 46, 15, DoubleToString(gRiskPct,2));
