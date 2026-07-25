@@ -736,6 +736,9 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
       else ObjectSetString(0,sparam,OBJPROP_TEXT,DoubleToString(gRiskPct,2)); // valore assurdo -> ripristino
       return;
      }
+   // una casella-valore (prezzo/lotti) toccata per sbaglio -> ridisegna e ripristina il valore
+   if(id==CHARTEVENT_OBJECT_ENDEDIT && StringFind(sparam,P+"q_")==0)
+     { ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT); return; }
    if(id!=CHARTEVENT_OBJECT_CLICK) return;
 
    if(sparam==P+"btnHA")
@@ -847,8 +850,8 @@ void EditVal(string name,int x,int y,int w,int h,string text,color col)
    ObjectSetInteger(0,name,OBJPROP_COLOR,col);
    ObjectSetInteger(0,name,OBJPROP_FONTSIZE,InpFont);
    ObjectSetInteger(0,name,OBJPROP_ALIGN,ALIGN_LEFT);
-   ObjectSetInteger(0,name,OBJPROP_READONLY,true);   // sola lettura: si copia ma non si modifica
-   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+   ObjectSetInteger(0,name,OBJPROP_READONLY,false);  // scrivibile SOLO per poter selezionare+copiare
+   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false); // (se lo tocchi, si auto-ripristina: vedi OnChartEvent)
    // aggiorna il testo SOLO se e' cambiato, per non perdere la selezione mentre copi
    if(created || ObjectGetString(0,name,OBJPROP_TEXT)!=text)
       ObjectSetString(0,name,OBJPROP_TEXT,text);
