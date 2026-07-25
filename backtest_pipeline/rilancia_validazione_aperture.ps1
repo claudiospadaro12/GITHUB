@@ -27,7 +27,8 @@ $RawBase = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 $Targets = @(
     @{ ea = "ABTG_DAX_Apertura_EU";    ini = "valid_DAX_Apertura";    sym = "D30EUR" },
     @{ ea = "ABTG_Nasdaq_Apertura_US"; ini = "valid_Nasdaq_Apertura"; sym = "NASUSD" },
-    @{ ea = "ABTG_ORB";                ini = "valid_ORB";             sym = "NASUSD" }
+    @{ ea = "ABTG_ORB";                ini = "valid_ORB";             sym = "NASUSD" },
+    @{ ea = "ABTG_DAX_Live5m_v2";      ini = "valid_DAX_Live5m_v2";   sym = "D30EUR" }
 )
 
 $Work = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
