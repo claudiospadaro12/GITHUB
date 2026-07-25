@@ -463,10 +463,8 @@ void DrawTrade(int rt,const datetime &time[],const double &high[],const double &
 void DrawTradePanel(bool ok,int dir,double entry,double stop,double tp1,double tp2,double tp3)
   {
    string q=P+"q_";
-   int RM=8, BW=210, LH=15, y=20;
-   string ids[12]={"bg","t","dir","in","sl","h","tp1","tp2","tp3","risklbl","riskedit","note"};
-   if(!ok)
-     { for(int i=0;i<12;i++) ObjectDelete(0,q+ids[i]); return; }
+   int RM=8, BW=210, LH=16, y=20;
+   if(!ok){ ObjectsDeleteAll(0,q); return; }
 
    double risk=MathAbs(entry-stop);
    int dg=_Digits;
@@ -480,26 +478,43 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop,double tp1,double t
    double L2=NormLots(totLots*InpSize2/100.0);
    double L3=NormLots(totLots*InpSize3/100.0);
    double slPts=risk/_Point;
+   double d1=MathAbs(tp1-entry)/_Point, d2=MathAbs(tp2-entry)/_Point, d3=MathAbs(tp3-entry)/_Point;
    color ecol=(dir>0)?InpBuyCol:InpSellCol;
 
-   int BH=LH*10+8;
+   //--- colonne (ancorate a destra: la casella si estende verso destra) ---
+   int wPrice=66, wLots=42;
+   int xLots  = wLots + 12;          // casella lotti
+   int xPrice = wPrice + xLots + 4;  // casella prezzo (a sinistra dei lotti)
+   int xName  = xPrice + 4;          // etichetta nome (a sinistra del prezzo)
+
+   int BH=LH*10+10;
    RectR(q+"bg", RM, y-4, BW, BH, InpPanelCol, InpGridCol);
-   LblR(q+"t",   RM+6, y,        "OPERAZIONE  "+_Symbol,           InpHeadCol, InpFont+1);
-   LblR(q+"dir", RM+6, y+LH,     (dir>0?"BUY":"SELL"),             ecol,       InpFont+1);
-   LblR(q+"in",  RM+6, y+2*LH,   "Ingresso  "+DoubleToString(entry,dg), InpTextCol, InpFont);
-   LblR(q+"sl",  RM+6, y+3*LH,   "Stop  "+DoubleToString(stop,dg)+"  ("+DoubleToString(slPts,0)+" pt)", InpStopCol, InpFont);
-   double d1=MathAbs(tp1-entry)/_Point, d2=MathAbs(tp2-entry)/_Point, d3=MathAbs(tp3-entry)/_Point;
-   double r1=(risk>0)?MathAbs(tp1-entry)/risk:0, r2=(risk>0)?MathAbs(tp2-entry)/risk:0, r3=(risk>0)?MathAbs(tp3-entry)/risk:0;
-   LblR(q+"h",   RM+6, y+4*LH,   "TARGET   prezzo     dist    R     lotti", InpHeadCol, InpFont-1);
-   LblR(q+"tp1", RM+6, y+5*LH,   "TP1  "+DoubleToString(tp1,dg)+"  "+DoubleToString(d1,0)+"pt  "+DoubleToString(r1,1)+"R  "+DoubleToString(L1,2), InpTargetCol, InpFont);
-   LblR(q+"tp2", RM+6, y+6*LH,   "TP2  "+DoubleToString(tp2,dg)+"  "+DoubleToString(d2,0)+"pt  "+DoubleToString(r2,1)+"R  "+DoubleToString(L2,2), InpTargetCol, InpFont);
-   LblR(q+"tp3", RM+6, y+7*LH,   "TP3  "+DoubleToString(tp3,dg)+"  "+DoubleToString(d3,0)+"pt  "+DoubleToString(r3,1)+"R  "+DoubleToString(L3,2), InpTargetCol, InpFont);
-   // riga RISCHIO: etichetta + casella modificabile (clicca e scrivi il %)
-   LblR (q+"risklbl", RM+56, y+8*LH, "Rischio % (clicca):  "+DoubleToString(riskMoney,2)+" =", InpTextCol, InpFont);
-   EditR(q+"riskedit",RM+48, y+8*LH-1, 44, 15, DoubleToString(gRiskPct,2));  // X>larghezza: resta dentro
+   LblR(q+"t",   RM+6, y,      "OPERAZIONE  "+_Symbol, InpHeadCol, InpFont+1);
+   LblR(q+"dir", RM+6, y+LH,   (dir>0?"BUY":"SELL"),   ecol,       InpFont+1);
+
+   LblR   (q+"in_l", xName,  y+2*LH,   "Ingresso", InpTextCol, InpFont);
+   EditVal(q+"in_e", xPrice, y+2*LH-1, wPrice, LH-2, DoubleToString(entry,dg), InpTextCol);
+   LblR   (q+"sl_l", xName,  y+3*LH,   "Stop "+DoubleToString(slPts,0)+"pt", InpStopCol, InpFont);
+   EditVal(q+"sl_e", xPrice, y+3*LH-1, wPrice, LH-2, DoubleToString(stop,dg), InpStopCol);
+
+   LblR(q+"h", RM+6, y+4*LH, "clic sul valore -> Ctrl+C     prezzo      lotti", C'150,154,160', InpFont-1);
+
+   LblR   (q+"tp1_l", xName,  y+5*LH,   "TP1 "+DoubleToString(d1,0)+"pt", InpTargetCol, InpFont);
+   EditVal(q+"tp1_e", xPrice, y+5*LH-1, wPrice, LH-2, DoubleToString(tp1,dg), InpTargetCol);
+   EditVal(q+"tp1_L", xLots,  y+5*LH-1, wLots,  LH-2, DoubleToString(L1,2),    InpTextCol);
+   LblR   (q+"tp2_l", xName,  y+6*LH,   "TP2 "+DoubleToString(d2,0)+"pt", InpTargetCol, InpFont);
+   EditVal(q+"tp2_e", xPrice, y+6*LH-1, wPrice, LH-2, DoubleToString(tp2,dg), InpTargetCol);
+   EditVal(q+"tp2_L", xLots,  y+6*LH-1, wLots,  LH-2, DoubleToString(L2,2),    InpTextCol);
+   LblR   (q+"tp3_l", xName,  y+7*LH,   "TP3 "+DoubleToString(d3,0)+"pt", InpTargetCol, InpFont);
+   EditVal(q+"tp3_e", xPrice, y+7*LH-1, wPrice, LH-2, DoubleToString(tp3,dg), InpTargetCol);
+   EditVal(q+"tp3_L", xLots,  y+7*LH-1, wLots,  LH-2, DoubleToString(L3,2),    InpTextCol);
+
+   // rischio %: etichetta (col denaro) + casella EDITABILE (clicca e scrivi)
+   LblR (q+"risklbl", xName,  y+8*LH,   "Risk% ="+DoubleToString(riskMoney,2), InpTextCol, InpFont);
+   EditR(q+"riskedit",xPrice, y+8*LH-1, wPrice, LH-2, DoubleToString(gRiskPct,2));
    string crossN = gCrossOK ? "  ·  INCROCIO OTTIMO" : "";
    color  noteC  = gCrossOK ? InpTargetCol : C'140,144,150';
-   LblR (q+"note",    RM+6,  y+9*LH,   "size "+DoubleToString(InpSize1,0)+"/"+DoubleToString(InpSize2,0)+"/"+DoubleToString(InpSize3,0)+"%  ·  tot "+DoubleToString(NormLots(totLots),2)+" lot"+crossN, noteC, InpFont-1);
+   LblR (q+"note", RM+6, y+9*LH, "size "+DoubleToString(InpSize1,0)+"/"+DoubleToString(InpSize2,0)+"/"+DoubleToString(InpSize3,0)+"%  ·  tot "+DoubleToString(NormLots(totLots),2)+" lot"+crossN, noteC, InpFont-1);
   }
 //+------------------------------------------------------------------+
 double NormLots(double v)
@@ -816,6 +831,27 @@ void EditR(string name,int x,int y,int w,int h,string text)
    ObjectSetInteger(0,name,OBJPROP_READONLY,false);
    ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
    if(created) ObjectSetString(0,name,OBJPROP_TEXT,text);  // NON sovrascrivo mentre l'utente digita
+  }
+//--- casella VALORE (sola lettura ma SELEZIONABILE/COPIABILE); aggiorna solo se cambia
+void EditVal(string name,int x,int y,int w,int h,string text,color col)
+  {
+   bool created=false;
+   if(ObjectFind(0,name)<0){ ObjectCreate(0,name,OBJ_EDIT,0,0,0); created=true; }
+   ObjectSetInteger(0,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,x);
+   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,y);
+   ObjectSetInteger(0,name,OBJPROP_XSIZE,w);
+   ObjectSetInteger(0,name,OBJPROP_YSIZE,h);
+   ObjectSetInteger(0,name,OBJPROP_BGCOLOR,C'28,30,36');
+   ObjectSetInteger(0,name,OBJPROP_BORDER_COLOR,C'70,74,82');
+   ObjectSetInteger(0,name,OBJPROP_COLOR,col);
+   ObjectSetInteger(0,name,OBJPROP_FONTSIZE,InpFont);
+   ObjectSetInteger(0,name,OBJPROP_ALIGN,ALIGN_LEFT);
+   ObjectSetInteger(0,name,OBJPROP_READONLY,true);   // sola lettura: si copia ma non si modifica
+   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+   // aggiorna il testo SOLO se e' cambiato, per non perdere la selezione mentre copi
+   if(created || ObjectGetString(0,name,OBJPROP_TEXT)!=text)
+      ObjectSetString(0,name,OBJPROP_TEXT,text);
   }
 void Rect(string name,int x,int y,int w,int h,color bg,color border,bool back)
   {
