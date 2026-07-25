@@ -24,17 +24,17 @@
 
 //--- DEFAULT specifici per il Nasdaq (usati dal motore ABTG_ApertureCore)
 #define ABTG_DEF_NAME         "Nasdaq Apertura US OTT"
-#define ABTG_DEF_BUFFER       100      // OTT: buffer breakout ottimizzato (real tick)
-#define ABTG_DEF_MAGIC        970201
+#define ABTG_DEF_MAGIC        770211
 #define ABTG_DEF_SESSION_HOUR 15     // apertura Nasdaq cash (server) - ADATTA AL TUO BROKER!
 #define ABTG_DEF_SESSION_MIN  30
-#define ABTG_DEF_RANGE_MIN    25     // OTT: range ottimizzato (real tick)
+#define ABTG_DEF_RANGE_MIN    15     // (usato in gap fill o se passi a range di apertura)
 #define ABTG_DEF_RANGE_MODE   2      // 2=massimi/minimi della CANDELA PRECEDENTE (piano: su H1)
 #define ABTG_DEF_LEVEL_TF     PERIOD_H1  // piano Nasdaq: "ordini nel time frame H1"
 #define ABTG_DEF_CLOSE_HOUR   21     // flat prima della chiusura serale (server)
 #define ABTG_DEF_CLOSE_MIN    45
 #define ABTG_DEF_USE_GAPFILL  false  // metti true + InpEntryMode=GAPFILL per il gap fill
-#define ABTG_DEF_RISK         2.0    // rischio max 2% (money management del piano)
+#define ABTG_DEF_RISK         1.0    // OTT: rischio 1% (validato solo OHLC, prudenza)
+#define ABTG_DEF_BUFFER       150    // OTT: buffer robusto solo-LONG
 #define ABTG_DEF_TRAIL_MODE   1      // 1=base candela precedente su M1 (piano: "seguo su M1")
 
 //  VERSIONE TUTTO-IN-UNO: il motore e' incluso qui sotto, NON serve
@@ -170,7 +170,7 @@ input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra p
 input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
 input bool   InpAllowLong     = true;                 // Consenti operazioni long
-input bool   InpAllowShort    = true;                 // Consenti operazioni short
+input bool   InpAllowShort    = false;                // OTT: SOLO LONG (edge Nasdaq)
 input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/range in punti (live: 1700=17 punti; 0=off)
 input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
 
@@ -208,7 +208,7 @@ input bool   InpUseTrailing     = true;               // Attiva trailing stop
 input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Tipo di trailing
 input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
 input double InpTrailAtrMult    = 2.0;                // (TRAIL_ATR) trailing = X * ATR
-input double InpTrailFixedPts   = 500;                // (TRAIL_FIXED) trailing in punti (piano DAX: 410 punti)
+input double InpTrailFixedPts   = 410;                // (TRAIL_FIXED) trailing in punti (piano DAX: 410 punti)
 
 input group "=== Obiettivi a numeri tondi (approx. Multipivot/%Custom) ==="
 input bool   InpUseRoundLevels  = false;              // Usa i numeri tondi come 1o obiettivo
@@ -226,8 +226,8 @@ input string InpNewsCurrencies  = "";                 // Valute da filtrare, es.
 input bool   InpNewsFlatten     = true;               // Chiudi posizioni e cancella pendenti prima della news
 
 input group "=== Slippage & floor SL (consiglio amico) ==="
-input double InpSlippagePts   = 0;      // Slippage stimato in PUNTI: peggiora l'entry del breakout (backtest ONESTO + live). 0=off
-input double InpMinStopPts    = 0;      // Floor minimo di STOP in punti (~ spread+slippage+cuscinetto). 0=off
+input double InpSlippagePts   = 100;    // OTT: slippage onesto 100 pt
+input double InpMinStopPts    = 200;    // OTT: floor SL 200 pt (consiglio amico)
 input bool   InpSkipIfTight   = true;   // Se lo stop del breakout < floor -> SALTA il trade (invece di entrare troppo stretto)
 
 input group "=== Generali ==="
