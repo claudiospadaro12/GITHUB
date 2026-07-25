@@ -46,6 +46,24 @@ Write-Host ("Cartella dati: {0}" -f $DataFolder)
 if (-not $Terminal -or -not (Test-Path $Terminal)) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
 if (-not $DataFolder -or -not (Test-Path $DataFolder)) { Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1 }
 
+# --- MT5 deve essere CHIUSO: se e' aperto, /config non esegue il test ---
+$running = @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)
+if ($running.Count -gt 0) {
+    Write-Host "`n!!! MT5 e' APERTO su questo PC. Con MT5 aperto il test NON parte" -ForegroundColor Red
+    Write-Host "    (il comando passa all'istanza aperta ed esce subito -> 0 trade)." -ForegroundColor Red
+    Write-Host "    CHIUDI del tutto MetaTrader 5 (anche dalla barra in basso a destra)" -ForegroundColor Yellow
+    Write-Host "    e rilancia. Sul PC fisso puoi chiuderlo; NON farlo sul VPS live." -ForegroundColor Yellow
+    $r = Read-Host "`n    Vuoi che lo chiuda io adesso? (S/N)"
+    if ($r -match '^[SsYy]') {
+        $running | Stop-Process -Force
+        Start-Sleep -Seconds 3
+        Write-Host "    MT5 chiuso. Proseguo." -ForegroundColor Green
+    } else {
+        Write-Host "    Ok, chiudilo a mano e rilancia lo script." -ForegroundColor Yellow
+        exit 1
+    }
+}
+
 $MqlExperts  = Join-Path $DataFolder "MQL5\Experts"
 # Nel tester i file con FILE_COMMON finiscono qui (NON in MQL5\Files):
 $CommonFiles = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
@@ -137,6 +155,20 @@ foreach ($j in $jobs) {
         Copy-Item $sum -Destination $Results -Force
         Write-Host "   --- RIEPILOGO $($j.sym) ---" -ForegroundColor Cyan
         Get-Content $sum | ForEach-Object { Write-Host "   $_" }
+    }
+}
+
+if ($found -eq 0) {
+    Write-Host "`n--- DIAGNOSTICA (0 CSV) ---" -ForegroundColor Magenta
+    $markers = Get-ChildItem -Path $CommonFiles -Filter "ABTG_Apertura_Study_*_START.txt" -ErrorAction SilentlyContinue
+    if ($markers.Count -gt 0) {
+        Write-Host "   L'EA E' PARTITO (marker trovati) ma non ha scritto risultati:" -ForegroundColor Yellow
+        Write-Host "   => probabile MANCANZA di storico M5 per il periodo, oppure ora d'apertura sbagliata." -ForegroundColor Yellow
+        Write-Host "   Apri MT5 > grafico D30EUR M5, scorri indietro fino al 2024 per far scaricare lo storico, poi rilancia." -ForegroundColor Yellow
+    } else {
+        Write-Host "   Nessun marker START: l'EA NON e' partito nel tester." -ForegroundColor Yellow
+        Write-Host "   => quasi sempre MT5 era ancora aperto, oppure il simbolo non e' nel tester." -ForegroundColor Yellow
+        Write-Host "   Assicurati che MT5 sia CHIUSO e rilancia." -ForegroundColor Yellow
     }
 }
 

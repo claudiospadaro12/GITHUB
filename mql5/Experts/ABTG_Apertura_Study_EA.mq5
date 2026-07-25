@@ -58,10 +58,15 @@ int TimeMinOfDay(datetime t){ MqlDateTime s; TimeToStruct(t,s); return s.hour*60
 int DayKey(datetime t){ MqlDateTime s; TimeToStruct(t,s); return s.year*1000+s.day_of_year; }
 
 //+------------------------------------------------------------------+
+int gBars = 0;   // candele M5 chiuse processate (per diagnostica: 0 = niente dati)
+
 int OnInit()
   {
    gEmaH4 = iMA(_Symbol, PERIOD_H4, InpH4EmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
    ArrayResize(gDir,0); ArrayResize(gR,0); ArrayResize(gH4,0);
+   // marker: conferma che l'EA e' partito nel tester (in Common\Files)
+   int fm=FileOpen("ABTG_Apertura_Study_"+_Symbol+"_START.txt", FILE_WRITE|FILE_TXT|FILE_COMMON);
+   if(fm!=INVALID_HANDLE){ FileWrite(fm,"EA di studio avviato su "+_Symbol); FileClose(fm); }
    return(INIT_SUCCEEDED);
   }
 
@@ -96,6 +101,7 @@ void RecordTrade(int dir, double rmult, int h4)
 //+------------------------------------------------------------------+
 void ProcessBar(datetime t, double o, double h, double l, double c)
   {
+   gBars++;
    int dk = DayKey(t);
    if(dk!=gDayKey)
      {
@@ -239,7 +245,8 @@ void OnDeinit(const int reason)
    if(fs!=INVALID_HANDLE)
      {
       FileWrite(fs,"simbolo",_Symbol,"apertura",StringFormat("%02d:%02d",InpSessionHour,InpSessionMin),
-                "buffer",(int)InpBufferPts,"slippage",(int)InpSlippagePts,"TP_R",DoubleToString(InpTP_R,1));
+                "buffer",(int)InpBufferPts,"slippage",(int)InpSlippagePts,"TP_R",DoubleToString(InpTP_R,1),
+                "candeleM5_processate",gBars);
       FileWrite(fs,"scenario","trade","win%","aspettativa_R","totale_R","best_R","worst_R");
      }
    Print("================ STUDIO APERTURA ", _Symbol, " ================");
