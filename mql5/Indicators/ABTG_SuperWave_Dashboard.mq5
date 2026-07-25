@@ -415,9 +415,17 @@ void DrawTrade(int rt,const datetime &time[],const double &high[],const double &
       DrawTradePanel(false,0,0,0,0,0,0);
       return;
      }
+   // protezione: se lo stop non e' valido, niente operazione (evita numeri assurdi)
+   if(stop==EMPTY_VALUE || stop<=0 || MathAbs(entry-stop) > entry*0.5)
+     {
+      for(int i=0;i<9;i++) ObjectDelete(0,pre+names[i]);
+      ObjectDelete(0,pre+"tp1T"); ObjectDelete(0,pre+"tp2T"); ObjectDelete(0,pre+"tp3T");
+      DrawTradePanel(false,0,0,0,0,0,0);
+      return;
+     }
    // floor ATR sullo stop: su M3 il Supertrend e' troppo vicino -> non meno di N*ATR
    double ab[]; double atrv=0;
-   if(CopyBuffer(hAtr,0,rt-2,1,ab)==1) atrv=ab[0];
+   if(CopyBuffer(hAtr,0,1,1,ab)==1 && ab[0]>0 && ab[0]<entry) atrv=ab[0];  // ATR ultima barra chiusa
    double floor=InpStopAtrFloor*atrv;
    if(floor>0 && MathAbs(entry-stop)<floor) stop=(dir>0)?entry-floor:entry+floor;
    double risk=MathAbs(entry-stop);
