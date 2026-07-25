@@ -1,0 +1,43 @@
+; Preset SUPERFILTER (parte MECCANICA) - reversal su iper-estensione
+; ATTENZIONE: due dei tre segnali "sine qua non" della strategia sono INDICATORI
+; PROPRIETARI non replicabili (FILTER INDICATOR e SUPPLY & DEMAND). Questo EA automatizza
+; SOLO: prezzo fuori Bollinger(37, dev 3) + conferma W%R(140) + (opz.) fuori box asiatico,
+; con SL/parziale/pari/trailing ad ATR e ordini scale-in a 0,5 ATR.
+; USALO INSIEME alla dashboard SUPERFILTER, non come sostituto. Commento "SUPERFILTER". Magic 771801.
+; TF di default H1. Tabella SL x ATR: M15 2-2.5, H1 2, H4 1.5-2, D1 1-1.5.
+; "Profittevole" va verificato col backtest sullo storico del tuo broker.
+InpTF=16385
+InpBBPeriod=37
+InpBBDev=3.0
+InpAllowLong=true
+InpAllowShort=true
+InpUseWPR=true
+InpWPRperiod=140
+InpWPR_OB=-20.0
+InpWPR_OS=-80.0
+InpUseAsiaBox=false
+InpAsiaStartHour=1
+InpAsiaEndHour=9
+InpAtrPeriod=14
+InpSLmult=2.0
+InpTPmult=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpScaleInOrders=1
+InpScaleStepAtr=0.5
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=3
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=SUPERFILTER
+InpMagic=771801
+InpMaxSpread=0
+InpVerbose=true
