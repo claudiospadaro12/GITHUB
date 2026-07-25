@@ -171,7 +171,8 @@ def main() -> int:
     else:
         from pathlib import Path
         sdir = Path("data/statements")
-        candidates = [str(p) for p in sdir.glob("*.xlsx")] if sdir.exists() else []
+        candidates = ([str(p) for p in sdir.glob("*.xlsx")]
+                      + [str(p) for p in sdir.glob("*.csv")]) if sdir.exists() else []
     if statement:
         best_key = None
         for path in candidates:
