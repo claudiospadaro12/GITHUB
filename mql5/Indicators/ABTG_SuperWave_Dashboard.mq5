@@ -65,6 +65,7 @@ input ENUM_MA_METHOD InpMAmethod = MODE_SMA; // tipo medie
 input bool   InpShowCross = true;  // segna l'INCROCIO media50 x media200 a favore del Supertrend
 input int    InpCrossWindow = 20;  // quanto indietro cercare l'incrocio (barre)
 input int    InpMaxCandles= 10;    // accendi la cella solo se il segnale e' entro N candele
+input int    InpBatch     = 6;     // simboli ricalcolati per secondo (piu' basso = grafico piu' fluido)
 input bool   InpBlink     = true;  // lampeggio (dolce) dei simboli in confluenza H4/M3
 //--- OPERAZIONE (ingresso/stop/target + size) ---
 enum ENUM_TPMODE { TP_PRICEACTION, TP_RMULTIPLI };
@@ -120,6 +121,7 @@ bool     gCrossOK = false;  // incrocio medie a favore del Supertrend (condizion
 int      gCrossDir = 0;
 long     gcBull,gcBear,gcUp,gcDown;  // colori candele reali (per nasconderle in Heikin Ashi)
 bool     gcSaved = false;
+int      gUpdIdx = 0;       // indice del ricalcolo incrementale (a rotazione)
 uint     gTick   = 0;
 string   P = "SWD_";
 
@@ -221,7 +223,7 @@ void ApplyHA()
 void OnTimer()
   {
    gTick++;
-   if(gTick%3==0) UpdateAll();   // ricalcolo segnali ogni 3s (pesante)
+   UpdateBatch();                // pochi simboli per tick -> nessun blocco (fluido anche sotto carico)
    BlinkConfluence();            // lampeggio ogni secondo (leggero)
   }
 //+------------------------------------------------------------------+
@@ -596,7 +598,7 @@ void Txt(string name,datetime t,double price,string text,color col)
 int STdir(string sym, ENUM_TIMEFRAMES tf, int &barsSince)
   {
    barsSince=-1;
-   int need=InpAtrPeriod+120;
+   int need=InpAtrPeriod+70;   // basta per warmup ATR + contare le candele dal segnale
    MqlRates r[];
    int n=CopyRates(sym,tf,0,need,r);
    if(n<InpAtrPeriod+10) return 0;
@@ -667,41 +669,51 @@ void BuildPanel()
    ChartRedraw();
   }
 //+------------------------------------------------------------------+
+//--- calcola/ridisegna la riga di UN simbolo (usato dal ricalcolo incrementale)
+void UpdateSymbol(int s)
+  {
+   if(s<0 || s>=gNsym || StringLen(gSyms[s])==0) return;
+   int dH4=0,dM3=0;
+   for(int c=0;c<NTF;c++)
+     {
+      int bars=-1;
+      int d=STdir(gSyms[s],TFS[c],bars);
+      bool active = (d!=0 && bars>=0 && bars<=InpMaxCandles);  // segnale FRESCO (entro N candele)
+      if(TFS[c]==PERIOD_H4) dH4 = active? d:0;
+      if(TFS[c]==PERIOD_M3) dM3 = active? d:0;
+      string bg=P+"bg_"+(string)s+"_"+(string)c;
+      string tx=P+"cx_"+(string)s+"_"+(string)c;
+      if(active)
+        {
+         ObjectSetInteger(0,bg,OBJPROP_BGCOLOR,(d>0)?InpBuyCol:InpSellCol);
+         ObjectSetString (0,tx,OBJPROP_TEXT,(string)bars);
+         ObjectSetInteger(0,tx,OBJPROP_COLOR,clrWhite);
+         ObjectSetInteger(0,tx,OBJPROP_TIMEFRAMES,OBJ_ALL_PERIODS);
+        }
+      else
+        {
+         ObjectSetInteger(0,bg,OBJPROP_BGCOLOR,InpEmptyCol);
+         ObjectSetInteger(0,tx,OBJPROP_TIMEFRAMES,OBJ_NO_PERIODS);
+        }
+     }
+   gConfl[s] = (dH4!=0 && dH4==dM3) ? dH4 : 0;
+   ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,clrWhite);
+   if(gConfl[s]==0)
+      ObjectSetInteger(0,P+"sb_"+(string)s,OBJPROP_BGCOLOR,InpEmptyCol);
+  }
+//--- ricalcolo COMPLETO (all'avvio e su richiesta)
 void UpdateAll()
   {
    if(gHidden) return;
-   for(int s=0;s<gNsym;s++)
-     {
-      if(StringLen(gSyms[s])==0) continue;
-      int dH4=0,dM3=0;
-      for(int c=0;c<NTF;c++)
-        {
-         int bars=-1;
-         int d=STdir(gSyms[s],TFS[c],bars);
-         bool active = (d!=0 && bars>=0 && bars<=InpMaxCandles);  // segnale FRESCO (entro N candele)
-         if(TFS[c]==PERIOD_H4) dH4 = active? d:0;
-         if(TFS[c]==PERIOD_M3) dM3 = active? d:0;
-         string bg=P+"bg_"+(string)s+"_"+(string)c;
-         string tx=P+"cx_"+(string)s+"_"+(string)c;
-         if(active)
-           {
-            ObjectSetInteger(0,bg,OBJPROP_BGCOLOR,(d>0)?InpBuyCol:InpSellCol);
-            ObjectSetString (0,tx,OBJPROP_TEXT,(string)bars);   // numero di candele dal segnale
-            ObjectSetInteger(0,tx,OBJPROP_COLOR,clrWhite);
-            ObjectSetInteger(0,tx,OBJPROP_TIMEFRAMES,OBJ_ALL_PERIODS);
-           }
-         else
-           {
-            ObjectSetInteger(0,bg,OBJPROP_BGCOLOR,InpEmptyCol);
-            ObjectSetInteger(0,tx,OBJPROP_TIMEFRAMES,OBJ_NO_PERIODS);
-           }
-        }
-      // confluenza = H4 e M3 ENTRAMBI freschi e nella STESSA direzione -> lampeggia (raro)
-      gConfl[s] = (dH4!=0 && dH4==dM3) ? dH4 : 0;
-      ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,clrWhite);      // nome SEMPRE bianco
-      if(gConfl[s]==0)
-         ObjectSetInteger(0,P+"sb_"+(string)s,OBJPROP_BGCOLOR,InpEmptyCol);
-     }
+   for(int s=0;s<gNsym;s++) UpdateSymbol(s);
+   ChartRedraw();
+  }
+//--- ricalcolo INCREMENTALE: pochi simboli per tick -> non blocca il grafico
+void UpdateBatch()
+  {
+   if(gHidden) return;
+   int n=MathMin(InpBatch, gNsym);
+   for(int k=0;k<n;k++){ UpdateSymbol(gUpdIdx); gUpdIdx=(gUpdIdx+1)%gNsym; }
    ChartRedraw();
   }
 //+------------------------------------------------------------------+
