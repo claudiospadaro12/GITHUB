@@ -91,10 +91,16 @@ ribassista) e dal confronto con l'amico che crea EA.
       (no 4 EA long DAX insieme). Priorità alta.
 - [ ] **Rivedere DAX M3**: il 23/07 ha aperto 5 long a scendere (-220). Manca un
       filtro di trend robusto.
-- [ ] **Spia slippage + floor minimo SL** (idea amico, rifinita):
-      1) registrare prezzo richiesto vs eseguito su ogni ordine -> CSV (distribuzione, non solo media);
+- [~] **Spia slippage + floor minimo SL** (idea amico, rifinita):
+      1) registrare prezzo richiesto vs eseguito su ogni ordine -> CSV (distribuzione, non solo media); [DA FARE: logging live in OnTradeTransaction]
       2) floor SL = spread + 95° percentile slippage + cuscinetto ATR; se SL calcolato < floor -> allarga+riduci size (reversal) o salta (breakout).
       NB: il backtest NON misura lo slippage reale -> questi dati si prendono in demo/live.
+      FATTO (25/07): motore aperture ora paga InpSlippagePts sull'entry (backtest
+      ONESTO) e ha InpMinStopPts (floor) con InpSkipIfTight (salta il breakout se
+      lo stop e' troppo stretto). ea_config aperture v2 ottimizza buffer+floor+
+      direzione (Supertrend on/off = le due strade long/short), slippage fisso 100pt.
+      Studio dati: Scripts/ABTG_Apertura_Study.mq5 misura LONG vs SHORT e filtro H4
+      con slippage realistico -> capire DOVE sta l'edge prima di ri-ottimizzare.
 
 ## (?) Punto rimasto in sospeso
 Un messaggio si era interrotto su "...ottimizzazione con agente e ___".
