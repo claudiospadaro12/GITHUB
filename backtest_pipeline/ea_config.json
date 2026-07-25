@@ -1,166 +1,452 @@
 {
-  "_note": "Config di ottimizzazione automatica MT5. Ogni EA ottimizza 2-3 parametri (quelli che contano per l'edge; NON il rischio %, che resta fisso al valore del piano). 'symbol' = ticker della TUA Market Watch BCM: CONTROLLA che i nomi combacino e correggili qui se serve. start||step||stop definiscono la griglia; l'ottimizzatore genetico esplora le combinazioni. Criterio = Recovery Factor (OnTester).",
-  "defaults": {
-    "deposit": 10000,
-    "currency": "EUR",
-    "leverage": 100,
-    "model": 4,
-    "optimization": 2,
-    "optimization_criterion": 6,
-    "from_date": "2024.01.01",
-    "to_date": "2026.06.30"
-  },
-  "experts": [
-    {
-      "file": "ABTG_DAX_Apertura_EU", "symbol": "D30EUR", "period": "M5",
-      "params": {
-        "InpRangeMinutes":  {"start": 5,   "step": 5,   "stop": 60},
-        "InpBufferPoints":  {"start": 100, "step": 100, "stop": 1500},
-        "InpTrailFixedPts": {"start": 100, "step": 100, "stop": 800}
-      }
+ "_note": "Config di ottimizzazione automatica MT5. Ogni EA ottimizza 2-3 parametri (quelli che contano per l'edge; NON il rischio %, che resta fisso al valore del piano). 'symbol' = ticker della TUA Market Watch BCM: CONTROLLA che i nomi combacino e correggili qui se serve. start||step||stop definiscono la griglia; l'ottimizzatore genetico esplora le combinazioni. Criterio = Recovery Factor (OnTester).",
+ "defaults": {
+  "deposit": 10000,
+  "currency": "EUR",
+  "leverage": 100,
+  "model": 4,
+  "optimization": 2,
+  "optimization_criterion": 6,
+  "from_date": "2024.01.01",
+  "to_date": "2026.06.30"
+ },
+ "experts": [
+  {
+   "file": "ABTG_DAX_Apertura_EU",
+   "symbol": "D30EUR",
+   "period": "M5",
+   "_note": "v2: floor SL (amico) + slippage ONESTO fisso + filtro direzionale Supertrend (le 'due strade' long/short). Buffer ristretto.",
+   "params": {
+    "InpRangeMinutes": {
+     "start": 5,
+     "step": 5,
+     "stop": 30
     },
-    {
-      "file": "ABTG_DAX_Live5m", "symbol": "D30EUR", "period": "M5",
-      "params": {
-        "InpRangeMinutes":  {"start": 5,   "step": 5,   "stop": 60},
-        "InpBufferPoints":  {"start": 100, "step": 100, "stop": 1500},
-        "InpTrailFixedPts": {"start": 100, "step": 100, "stop": 800}
-      }
+    "InpBufferPoints": {
+     "start": 100,
+     "step": 100,
+     "stop": 700
     },
-    {
-      "file": "ABTG_Nasdaq_Apertura_US", "symbol": "NASUSD", "period": "M5",
-      "params": {
-        "InpRangeMinutes":  {"start": 5,   "step": 5,   "stop": 60},
-        "InpBufferPoints":  {"start": 100, "step": 100, "stop": 1500},
-        "InpTrailFixedPts": {"start": 100, "step": 100, "stop": 800}
-      }
+    "InpMinStopPts": {
+     "start": 0,
+     "step": 200,
+     "stop": 600
     },
-    {
-      "file": "ABTG_Nasdaq_Live5m", "symbol": "NASUSD", "period": "M5",
-      "params": {
-        "InpRangeMinutes":  {"start": 5,   "step": 5,   "stop": 60},
-        "InpBufferPoints":  {"start": 100, "step": 100, "stop": 1500},
-        "InpTrailFixedPts": {"start": 100, "step": 100, "stop": 800}
-      }
-    },
-    {
-      "file": "ABTG_ORB", "symbol": "NASUSD", "period": "M5",
-      "params": {
-        "InpEntryPoints": {"start": 2,   "step": 2,   "stop": 20},
-        "InpAtrSLmult":   {"start": 1.0, "step": 0.5, "stop": 3.0},
-        "InpTP_R":        {"start": 1.0, "step": 0.5, "stop": 3.0}
-      }
-    },
-    {
-      "file": "ABTG_ORB_Fibo", "symbol": "NASUSD", "period": "M5",
-      "params": {
-        "InpVolMult":      {"start": 1.0, "step": 0.25, "stop": 2.5},
-        "InpBodyMinRatio": {"start": 0.3, "step": 0.1,  "stop": 0.7},
-        "InpMinRR":        {"start": 0.0, "step": 0.5,  "stop": 2.0}
-      }
-    },
-    {
-      "file": "ABTG_Londra_ORB", "symbol": "GBPUSD", "period": "M5",
-      "params": {
-        "InpBufferPips":   {"start": 1.0, "step": 1.0,  "stop": 8.0},
-        "InpTPRangeMult":  {"start": 0.5, "step": 0.25, "stop": 2.0}
-      }
-    },
-    {
-      "file": "ABTG_MaxMinNotte", "symbol": "D30EUR", "period": "M15",
-      "params": {
-        "InpBufferPoints": {"start": 200, "step": 200, "stop": 2000},
-        "InpAtrSLmult":    {"start": 1.0, "step": 0.5, "stop": 3.0},
-        "InpTP2_R":        {"start": 1.5, "step": 0.5, "stop": 4.0}
-      }
-    },
-    {
-      "file": "ABTG_Nightly", "symbol": "EURUSD", "period": "M15",
-      "params": {
-        "InpEdgeOffsetPips": {"start": 0.0, "step": 1.0,  "stop": 10.0},
-        "InpSLatrMult":      {"start": 0.5, "step": 0.25, "stop": 2.0},
-        "InpTPfrac":         {"start": 0.3, "step": 0.1,  "stop": 0.8}
-      }
-    },
-    {
-      "file": "ABTG_PostNews", "symbol": "EURUSD", "period": "M5",
-      "params": {
-        "InpBuyOffsetPips": {"start": 1.0,  "step": 1.0,  "stop": 6.0},
-        "InpTPpips":        {"start": 20.0, "step": 10.0, "stop": 80.0},
-        "InpSLpips":        {"start": 15.0, "step": 5.0,  "stop": 40.0}
-      }
-    },
-    {
-      "file": "ABTG_SupertrendReversal", "symbol": "XAUUSD", "period": "H4",
-      "params": {
-        "InpStMult":      {"start": 1.5, "step": 0.5, "stop": 4.5},
-        "InpStAtrPeriod": {"start": 7,   "step": 1,   "stop": 14},
-        "InpTP_RR":       {"start": 1.5, "step": 0.5, "stop": 3.0}
-      }
-    },
-    {
-      "file": "ABTG_SupertrendReversal_Multi", "symbol": "XAUUSD", "period": "H4",
-      "params": {
-        "InpStMult":      {"start": 1.5, "step": 0.5, "stop": 4.5},
-        "InpStAtrPeriod": {"start": 7,   "step": 1,   "stop": 14},
-        "InpTP_RR":       {"start": 1.5, "step": 0.5, "stop": 3.0}
-      }
-    },
-    {
-      "file": "ABTG_SupertrendInvert", "symbol": "XAUUSD", "period": "H1",
-      "params": {
-        "InpStMult":       {"start": 1.5, "step": 0.5, "stop": 4.5},
-        "InpAdxMin":       {"start": 15.0,"step": 5.0, "stop": 30.0},
-        "InpTP1_ATRmult":  {"start": 0.5, "step": 0.5, "stop": 2.0}
-      }
-    },
-    {
-      "file": "ABTG_DAX_M3", "symbol": "D30EUR", "period": "M3",
-      "params": {
-        "InpStMult":     {"start": 1.5,  "step": 0.5, "stop": 4.5},
-        "InpSLFixedPts": {"start": 800,  "step": 300, "stop": 2500},
-        "InpTPPoints":   {"start": 1000, "step": 500, "stop": 3500}
-      }
-    },
-    {
-      "file": "ABTG_EMA200", "symbol": "XAUUSD", "period": "H4",
-      "params": {
-        "InpOrder1Atr": {"start": 0.05, "step": 0.05, "stop": 0.30},
-        "InpOrder2Atr": {"start": 0.20, "step": 0.10, "stop": 0.60},
-        "InpTP_RR":     {"start": 1.5,  "step": 0.5,  "stop": 3.0}
-      }
-    },
-    {
-      "file": "ABTG_GoldenCross", "symbol": "XAUUSD", "period": "H1",
-      "params": {
-        "InpAdxMin":    {"start": 15.0, "step": 5.0, "stop": 30.0},
-        "InpTP_R":      {"start": 1.5,  "step": 0.5, "stop": 3.0},
-        "InpAtrSLmult": {"start": 1.0,  "step": 0.5, "stop": 2.5}
-      }
-    },
-    {
-      "file": "ABTG_PTE", "symbol": "EURUSD", "period": "H4",
-      "params": {
-        "InpTmaFast":      {"start": 8,   "step": 4,   "stop": 24},
-        "InpMultFast":     {"start": 1.5, "step": 0.5, "stop": 3.0},
-        "InpTP2_ATRmult":  {"start": 1.5, "step": 0.5, "stop": 3.0}
-      }
-    },
-    {
-      "file": "ABTG_WOL", "symbol": "EURUSD", "period": "D1",
-      "params": {
-        "InpWolProximityAtr": {"start": 0.3, "step": 0.1,  "stop": 1.0},
-        "InpSLbufferAtr":     {"start": 0.1, "step": 0.05, "stop": 0.40},
-        "InpTP_RR":           {"start": 1.5, "step": 0.5,  "stop": 3.0}
-      }
-    },
-    {
-      "file": "ABTG_FiboH4_Multi", "symbol": "GBPUSD", "period": "H4",
-      "params": {
-        "InpEZ1ratio":     {"start": 1.5,  "step": 0.25, "stop": 2.5},
-        "InpMinDistPips":  {"start": 30.0, "step": 10.0, "stop": 80.0},
-        "InpTrailAtrMult": {"start": 1.5,  "step": 0.5,  "stop": 3.0}
-      }
+    "InpUseSupertrend": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
-  ]
+   },
+   "fixed": {
+    "InpSlippagePts": 100,
+    "InpSkipIfTight": 1,
+    "InpStMultiplier": 3.5,
+    "InpStAtrPeriod": 10
+   }
+  },
+  {
+   "file": "ABTG_DAX_Live5m",
+   "symbol": "D30EUR",
+   "period": "M5",
+   "params": {
+    "InpRangeMinutes": {
+     "start": 5,
+     "step": 5,
+     "stop": 60
+    },
+    "InpBufferPoints": {
+     "start": 100,
+     "step": 100,
+     "stop": 1500
+    },
+    "InpTrailFixedPts": {
+     "start": 100,
+     "step": 100,
+     "stop": 800
+    }
+   }
+  },
+  {
+   "file": "ABTG_Nasdaq_Apertura_US",
+   "symbol": "NASUSD",
+   "period": "M5",
+   "_note": "v2: floor SL (amico) + slippage ONESTO fisso + filtro direzionale Supertrend. Buffer ristretto (i vincitori erano bassi).",
+   "params": {
+    "InpBufferPoints": {
+     "start": 50,
+     "step": 50,
+     "stop": 400
+    },
+    "InpMinStopPts": {
+     "start": 0,
+     "step": 200,
+     "stop": 600
+    },
+    "InpTrailFixedPts": {
+     "start": 200,
+     "step": 150,
+     "stop": 800
+    },
+    "InpUseSupertrend": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    }
+   },
+   "fixed": {
+    "InpSlippagePts": 100,
+    "InpSkipIfTight": 1,
+    "InpStMultiplier": 3.5,
+    "InpStAtrPeriod": 10
+   }
+  },
+  {
+   "file": "ABTG_Nasdaq_Live5m",
+   "symbol": "NASUSD",
+   "period": "M5",
+   "params": {
+    "InpRangeMinutes": {
+     "start": 5,
+     "step": 5,
+     "stop": 60
+    },
+    "InpBufferPoints": {
+     "start": 100,
+     "step": 100,
+     "stop": 1500
+    },
+    "InpTrailFixedPts": {
+     "start": 100,
+     "step": 100,
+     "stop": 800
+    }
+   }
+  },
+  {
+   "file": "ABTG_ORB",
+   "symbol": "NASUSD",
+   "period": "M5",
+   "params": {
+    "InpEntryPoints": {
+     "start": 2,
+     "step": 2,
+     "stop": 20
+    },
+    "InpAtrSLmult": {
+     "start": 1.0,
+     "step": 0.5,
+     "stop": 3.0
+    },
+    "InpTP_R": {
+     "start": 1.0,
+     "step": 0.5,
+     "stop": 3.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_ORB_Fibo",
+   "symbol": "NASUSD",
+   "period": "M5",
+   "params": {
+    "InpVolMult": {
+     "start": 1.0,
+     "step": 0.25,
+     "stop": 2.5
+    },
+    "InpBodyMinRatio": {
+     "start": 0.3,
+     "step": 0.1,
+     "stop": 0.7
+    },
+    "InpMinRR": {
+     "start": 0.0,
+     "step": 0.5,
+     "stop": 2.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_Londra_ORB",
+   "symbol": "GBPUSD",
+   "period": "M5",
+   "params": {
+    "InpBufferPips": {
+     "start": 1.0,
+     "step": 1.0,
+     "stop": 8.0
+    },
+    "InpTPRangeMult": {
+     "start": 0.5,
+     "step": 0.25,
+     "stop": 2.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_MaxMinNotte",
+   "symbol": "D30EUR",
+   "period": "M15",
+   "params": {
+    "InpBufferPoints": {
+     "start": 200,
+     "step": 200,
+     "stop": 2000
+    },
+    "InpAtrSLmult": {
+     "start": 1.0,
+     "step": 0.5,
+     "stop": 3.0
+    },
+    "InpTP2_R": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 4.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_Nightly",
+   "symbol": "EURUSD",
+   "period": "M15",
+   "params": {
+    "InpEdgeOffsetPips": {
+     "start": 0.0,
+     "step": 1.0,
+     "stop": 10.0
+    },
+    "InpSLatrMult": {
+     "start": 0.5,
+     "step": 0.25,
+     "stop": 2.0
+    },
+    "InpTPfrac": {
+     "start": 0.3,
+     "step": 0.1,
+     "stop": 0.8
+    }
+   }
+  },
+  {
+   "file": "ABTG_PostNews",
+   "symbol": "EURUSD",
+   "period": "M5",
+   "params": {
+    "InpBuyOffsetPips": {
+     "start": 1.0,
+     "step": 1.0,
+     "stop": 6.0
+    },
+    "InpTPpips": {
+     "start": 20.0,
+     "step": 10.0,
+     "stop": 80.0
+    },
+    "InpSLpips": {
+     "start": 15.0,
+     "step": 5.0,
+     "stop": 40.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_SupertrendReversal",
+   "symbol": "XAUUSD",
+   "period": "H4",
+   "params": {
+    "InpStMult": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 4.5
+    },
+    "InpStAtrPeriod": {
+     "start": 7,
+     "step": 1,
+     "stop": 14
+    },
+    "InpTP_RR": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_SupertrendReversal_Multi",
+   "symbol": "XAUUSD",
+   "period": "H4",
+   "params": {
+    "InpStMult": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 4.5
+    },
+    "InpStAtrPeriod": {
+     "start": 7,
+     "step": 1,
+     "stop": 14
+    },
+    "InpTP_RR": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_SupertrendInvert",
+   "symbol": "XAUUSD",
+   "period": "H1",
+   "params": {
+    "InpStMult": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 4.5
+    },
+    "InpAdxMin": {
+     "start": 15.0,
+     "step": 5.0,
+     "stop": 30.0
+    },
+    "InpTP1_ATRmult": {
+     "start": 0.5,
+     "step": 0.5,
+     "stop": 2.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_DAX_M3",
+   "symbol": "D30EUR",
+   "period": "M3",
+   "params": {
+    "InpStMult": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 4.5
+    },
+    "InpSLFixedPts": {
+     "start": 800,
+     "step": 300,
+     "stop": 2500
+    },
+    "InpTPPoints": {
+     "start": 1000,
+     "step": 500,
+     "stop": 3500
+    }
+   }
+  },
+  {
+   "file": "ABTG_EMA200",
+   "symbol": "XAUUSD",
+   "period": "H4",
+   "params": {
+    "InpOrder1Atr": {
+     "start": 0.05,
+     "step": 0.05,
+     "stop": 0.3
+    },
+    "InpOrder2Atr": {
+     "start": 0.2,
+     "step": 0.1,
+     "stop": 0.6
+    },
+    "InpTP_RR": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_GoldenCross",
+   "symbol": "XAUUSD",
+   "period": "H1",
+   "params": {
+    "InpAdxMin": {
+     "start": 15.0,
+     "step": 5.0,
+     "stop": 30.0
+    },
+    "InpTP_R": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    },
+    "InpAtrSLmult": {
+     "start": 1.0,
+     "step": 0.5,
+     "stop": 2.5
+    }
+   }
+  },
+  {
+   "file": "ABTG_PTE",
+   "symbol": "EURUSD",
+   "period": "H4",
+   "params": {
+    "InpTmaFast": {
+     "start": 8,
+     "step": 4,
+     "stop": 24
+    },
+    "InpMultFast": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    },
+    "InpTP2_ATRmult": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_WOL",
+   "symbol": "EURUSD",
+   "period": "D1",
+   "params": {
+    "InpWolProximityAtr": {
+     "start": 0.3,
+     "step": 0.1,
+     "stop": 1.0
+    },
+    "InpSLbufferAtr": {
+     "start": 0.1,
+     "step": 0.05,
+     "stop": 0.4
+    },
+    "InpTP_RR": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    }
+   }
+  },
+  {
+   "file": "ABTG_FiboH4_Multi",
+   "symbol": "GBPUSD",
+   "period": "H4",
+   "params": {
+    "InpEZ1ratio": {
+     "start": 1.5,
+     "step": 0.25,
+     "stop": 2.5
+    },
+    "InpMinDistPips": {
+     "start": 30.0,
+     "step": 10.0,
+     "stop": 80.0
+    },
+    "InpTrailAtrMult": {
+     "start": 1.5,
+     "step": 0.5,
+     "stop": 3.0
+    }
+   }
+  }
+ ]
 }

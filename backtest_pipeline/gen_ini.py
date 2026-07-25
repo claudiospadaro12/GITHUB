@@ -30,9 +30,15 @@ def fmt_num(v):
     return str(v)
 
 
-def tester_inputs(params):
-    """Righe [TesterInputs] in formato MT5: nome=val||start||step||stop||Y."""
+def tester_inputs(params, fixed=None):
+    """Righe [TesterInputs] in formato MT5.
+    - params ottimizzati:  nome=start||start||step||stop||Y
+    - valori fissi (fixed): nome=val||val||0||val||N  (NON ottimizzato: es. lo
+      slippage onesto, che e' un COSTO da imporre, non da ottimizzare)."""
     lines = []
+    for name, v in (fixed or {}).items():
+        val = fmt_num(v)
+        lines.append("{}={}||{}||0||{}||N".format(name, val, val, val))
     for name, r in params.items():
         start = fmt_num(r["start"])
         step = fmt_num(r["step"])
@@ -67,7 +73,7 @@ def build_ini(ea, defaults, report_dir):
         "",
         "[TesterInputs]",
     ]
-    lines += tester_inputs(ea["params"])
+    lines += tester_inputs(ea["params"], ea.get("fixed"))
     lines.append("")
     return "\n".join(lines)
 

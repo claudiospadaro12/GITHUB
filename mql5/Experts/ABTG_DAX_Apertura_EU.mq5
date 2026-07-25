@@ -221,6 +221,11 @@ input int    InpNewsShiftMinutes= 0;                  // Sposta gli orari del fi
 input string InpNewsCurrencies  = "";                 // Valute da filtrare, es. "USD,EUR" (vuoto = tutte)
 input bool   InpNewsFlatten     = true;               // Chiudi posizioni e cancella pendenti prima della news
 
+input group "=== Slippage & floor SL (consiglio amico) ==="
+input double InpSlippagePts   = 0;      // Slippage stimato in PUNTI: peggiora l'entry del breakout (backtest ONESTO + live). 0=off
+input double InpMinStopPts    = 0;      // Floor minimo di STOP in punti (~ spread+slippage+cuscinetto). 0=off
+input bool   InpSkipIfTight   = true;   // Se lo stop del breakout < floor -> SALTA il trade (invece di entrare troppo stretto)
+
 input group "=== Generali ==="
 input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
 input int    InpMaxSpread      = 0;                   // Spread massimo in punti (0 = nessun limite)
@@ -571,35 +576,49 @@ bool TryPlaceBreakout()
 
    datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
 
-   //--- BUY STOP
+   //--- BUY STOP (con slippage sull'entry + floor minimo di SL - consiglio amico)
    if(InpAllowLong && longOK)
      {
-      double sl = (InpSLMode == ABTG_SL_RANGE) ? sellPx : buyPx - AtrValue()*InpAtrSlMult;
+      double entry = NormalizePrice(buyPx + InpSlippagePts*_Point);   // slippage: in realta' si riempie OLTRE il livello
+      double sl    = (InpSLMode == ABTG_SL_RANGE) ? sellPx : entry - AtrValue()*InpAtrSlMult;
       sl = NormalizePrice(sl);
-      double dist = buyPx - sl;
-      double lot  = CalcLotByRisk(dist);
-      double tp   = (InpTP1_R > 0) ? NormalizePrice(buyPx + dist*TpTotalR()) : 0.0;
-      if(lot > 0 && dist > 0)
+      double dist  = entry - sl;
+      bool   skip  = false;
+      if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
         {
-         if(gTrade.BuyStop(lot, buyPx, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" BUY"))
-           { gBuyTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("BUY STOP @ %.5f  SL %.5f  lot %.2f", buyPx, sl, lot)); }
+         if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("BUY saltato: stop %.0f pt < floor %.0f pt (troppo stretto per lo slippage).", dist/_Point, InpMinStopPts)); }
+         else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
+        }
+      double lot = skip ? 0.0 : CalcLotByRisk(dist);
+      double tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+      if(!skip && lot > 0 && dist > 0)
+        {
+         if(gTrade.BuyStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" BUY"))
+           { gBuyTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("BUY STOP @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
          else
             ABTGLog("BUY STOP fallito: "+gTrade.ResultRetcodeDescription());
         }
      }
 
-   //--- SELL STOP
+   //--- SELL STOP (con slippage sull'entry + floor minimo di SL - consiglio amico)
    if(InpAllowShort && shortOK)
      {
-      double sl = (InpSLMode == ABTG_SL_RANGE) ? buyPx : sellPx + AtrValue()*InpAtrSlMult;
+      double entry = NormalizePrice(sellPx - InpSlippagePts*_Point);  // slippage: in realta' si riempie OLTRE il livello
+      double sl    = (InpSLMode == ABTG_SL_RANGE) ? buyPx : entry + AtrValue()*InpAtrSlMult;
       sl = NormalizePrice(sl);
-      double dist = sl - sellPx;
-      double lot  = CalcLotByRisk(dist);
-      double tp   = (InpTP1_R > 0) ? NormalizePrice(sellPx - dist*TpTotalR()) : 0.0;
-      if(lot > 0 && dist > 0)
+      double dist  = sl - entry;
+      bool   skip  = false;
+      if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
         {
-         if(gTrade.SellStop(lot, sellPx, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" SELL"))
-           { gSellTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("SELL STOP @ %.5f  SL %.5f  lot %.2f", sellPx, sl, lot)); }
+         if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("SELL saltato: stop %.0f pt < floor %.0f pt (troppo stretto per lo slippage).", dist/_Point, InpMinStopPts)); }
+         else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
+        }
+      double lot = skip ? 0.0 : CalcLotByRisk(dist);
+      double tp  = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+      if(!skip && lot > 0 && dist > 0)
+        {
+         if(gTrade.SellStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" SELL"))
+           { gSellTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("SELL STOP @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
          else
             ABTGLog("SELL STOP fallito: "+gTrade.ResultRetcodeDescription());
         }
