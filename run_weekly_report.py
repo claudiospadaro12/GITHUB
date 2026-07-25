@@ -156,22 +156,39 @@ def main() -> int:
     week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
     snaps = snapshot.load_range(week_start, now)
 
-    # statement: da env, oppure il file .xlsx piu' recente in data/statements/
-    statement_path = os.getenv("STATEMENT_FILE", "")
-    if not statement_path:
-        from pathlib import Path
-        sdir = Path("data/statements")
-        files = sorted(sdir.glob("*.xlsx"), key=lambda p: p.stat().st_mtime, reverse=True) if sdir.exists() else []
-        statement_path = str(files[0]) if files else ""
-
-    # --- statement: parse UNA volta (per HTML, PDF e controllo freschezza) ---
+    # --- statement + parse UNA volta (per HTML, PDF e controllo freschezza) ---
+    # Selezione DETERMINISTICA: fra tutti gli .xlsx vince quello che copre piu'
+    # avanti nel tempo (ultimo trade piu' recente). Su GitHub Actions le date-file
+    # dopo il checkout sono tutte uguali, quindi NON si puo' usare l'mtime: cosi'
+    # puoi caricare un export nuovo senza cancellare il vecchio e vince il completo.
     since = week_start.strftime("%Y.%m.%d")
     st = None
-    if statement and statement_path and os.path.exists(statement_path):
-        try:
-            st = statement.parse(statement_path, since=since)
-        except Exception as exc:
-            print(f"[warn] statement non leggibile: {exc}")
+    statement_path = ""
+    env_file = os.getenv("STATEMENT_FILE", "")
+    candidates = []
+    if env_file:
+        candidates = [env_file]
+    else:
+        from pathlib import Path
+        sdir = Path("data/statements")
+        candidates = [str(p) for p in sdir.glob("*.xlsx")] if sdir.exists() else []
+    if statement:
+        best_key = None
+        for path in candidates:
+            if not os.path.exists(path):
+                continue
+            try:
+                cand = statement.parse(path, since=since)
+            except Exception as exc:
+                print(f"[warn] statement '{os.path.basename(path)}' non leggibile: {exc}")
+                continue
+            # chiave = ultima chiusura (copertura); a parita', piu' trade nel file
+            key = (cand.last_close, cand.total_in_file)
+            if best_key is None or key > best_key:
+                st, statement_path, best_key = cand, path, key
+        if len(candidates) > 1 and statement_path:
+            print(f"[info] scelto lo statement piu' aggiornato: {os.path.basename(statement_path)} "
+                  f"(copre fino a {st.last_close})")
 
     # --- guardia anti-statement-vecchio: copre fino a venerdi'? ---
     stale_warning = ""

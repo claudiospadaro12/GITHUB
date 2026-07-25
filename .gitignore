@@ -21,3 +21,5 @@ piano_trading/package*.json
 # output generati dai report (dry-run/test)
 weekly_output.html
 report_output.html
+weekly_output.html
+weekly_report.pdf
