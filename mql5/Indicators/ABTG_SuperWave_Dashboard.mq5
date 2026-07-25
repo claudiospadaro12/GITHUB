@@ -3,47 +3,39 @@
 //|                                                                  |
 //|  INDICATORE UNICO "SUPERWAVE" (strategia Chiari) - tutto in uno:  |
 //|                                                                  |
-//|   1) DASHBOARD: griglia SIMBOLI x TIMEFRAME che accende          |
-//|      BUY (verde) / SELL (rosso) quando il SUPERTREND (ATR 10,    |
-//|      molt. 3.5) si INVERTE. Clicca una cella -> vai su quel      |
-//|      simbolo. Nome colorato quando H4 e M3 concordano.          |
-//|   2) LINEE sul grafico: 3 SUPERTREND (3.5/3.0/2.5) + 3 MEDIE     |
-//|      (14/100/200).                                              |
-//|   3) LIVELLI di PRICE ACTION: supporti/resistenze (swing) col   |
-//|      prezzo -> dove il prezzo potrebbe reagire.                 |
-//|   4) OPERAZIONE PRONTA: in base al Supertrend mostra INGRESSO,   |
-//|      STOP e TARGET con i PREZZI da mettere nell'ordine manuale   |
-//|      (simbolo BUY verde / SELL rosso).                          |
+//|   1) DASHBOARD: griglia SIMBOLI x TIMEFRAME (BUY/SELL su          |
+//|      inversione Supertrend). CLICK su una cella -> vai su quel    |
+//|      simbolo E su quel timeframe. Simbolo LAMPEGGIA quando H4 e   |
+//|      M3 concordano (confluenza), testo bianco = leggibile.       |
+//|   2) LINEE (tasto SUPERTREND): 3 Supertrend + 3 medie.          |
+//|   3) LIVELLI price action (tasto LIVELLI): supporti/resistenze.  |
+//|   4) OPERAZIONE: pannello in alto a DESTRA con INGRESSO, STOP e   |
+//|      3 TARGET, con la SIZE al rischio 1% divisa sui 3 ordini.    |
+//|      Sul grafico: freccia BUY/SELL + linee ingresso/stop/3 tp.  |
 //|                                                                  |
-//|  Tasti: Heikin Ashi <-> Candele ; Nascondi/Mostra pannello.     |
 //|  Adatta InpSymbols ai TUOI ticker BCM. Metti su UN grafico.     |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "3.00"
+#property version   "4.00"
 #property indicator_chart_window
 #property indicator_buffers 14
 #property indicator_plots   7
-//--- 1) Heikin Ashi (tasto)
 #property indicator_label1  "HeikinAshi"
 #property indicator_type1   DRAW_COLOR_CANDLES
 #property indicator_color1  clrLimeGreen, clrRed
 #property indicator_width1  2
-//--- 2) Supertrend 3.5 (segnale)
 #property indicator_label2  "ST 3.5"
 #property indicator_type2   DRAW_COLOR_LINE
 #property indicator_color2  clrLimeGreen, clrRed
 #property indicator_width2  2
-//--- 3) Supertrend 3.0
 #property indicator_label3  "ST 3.0"
 #property indicator_type3   DRAW_COLOR_LINE
 #property indicator_color3  clrLimeGreen, clrRed
 #property indicator_width3  1
-//--- 4) Supertrend 2.5
 #property indicator_label4  "ST 2.5"
 #property indicator_type4   DRAW_COLOR_LINE
 #property indicator_color4  clrLimeGreen, clrRed
 #property indicator_width4  1
-//--- 5-7) Medie
 #property indicator_label5  "MA 14"
 #property indicator_type5   DRAW_LINE
 #property indicator_color5  clrAqua
@@ -65,13 +57,21 @@ input bool   InpShowST3   = true;  // mostra ST 2.5
 input int    InpMA1       = 14;    // Media veloce
 input int    InpMA2       = 100;   // Media media
 input int    InpMA3       = 200;   // Media lenta
-input ENUM_MA_METHOD InpMAmethod = MODE_SMA; // tipo medie (SMA/EMA...)
-input int    InpFlipBars  = 1;     // "Inversione" = flip entro N barre chiuse (dashboard)
-//--- OPERAZIONE (ingresso/stop/target) ---
-input bool   InpShowTrade = true;  // mostra INGRESSO/STOP/TARGET sul grafico
-input double InpTP_R      = 2.0;   // TARGET come multiplo del rischio (R)
+input ENUM_MA_METHOD InpMAmethod = MODE_SMA; // tipo medie
+input int    InpFlipBars  = 1;     // "Inversione" = flip entro N barre chiuse
+input bool   InpBlink     = true;  // lampeggia i simboli in confluenza H4/M3
+//--- OPERAZIONE (ingresso/stop/target + size) ---
+input bool   InpShowTrade = true;  // mostra operazione (grafico + pannello dx)
+input double InpRiskPct   = 1.0;   // Rischio per operazione, in % del conto
+input double InpTP1_R     = 1.0;   // TARGET 1 in R
+input double InpTP2_R     = 2.0;   // TARGET 2 in R
+input double InpTP3_R     = 3.0;   // TARGET 3 in R
+input double InpSize1     = 40;    // % della size sul TP1
+input double InpSize2     = 30;    // % della size sul TP2
+input double InpSize3     = 30;    // % della size sul TP3
 //--- LIVELLI price action ---
-input bool   InpShowLevels   = true; // mostra supporti/resistenze
+input bool   InpShowLevels   = false; // livelli ACCESI all'avvio? (c'e' il tasto)
+input bool   InpShowSTstart  = true;  // linee Supertrend ACCESE all'avvio?
 input int    InpLevelsLook   = 300;  // barre da analizzare per i livelli
 input int    InpFractal      = 2;    // ampiezza swing (barre a dx/sx)
 input int    InpMaxLevels    = 3;    // quanti supporti/resistenze per lato
@@ -101,11 +101,14 @@ int             NTF       = 7;
 
 string   gSyms[];
 int      gNsym = 0;
+int      gConfl[];        // per simbolo: +1 confl BUY, -1 confl SELL, 0 no
 bool     gHA     = false;
 bool     gHidden = false;
+bool     gShowLevels = false;
+bool     gShowST     = true;
+uint     gTick   = 0;
 string   P = "SWD_";
 
-//--- buffer: HA (5) + ST1(2) + ST2(2) + ST3(2) + MA1/2/3 (3) = 14
 double haO[], haH[], haL[], haC[], haCol[];
 double st1[], c1[], st2[], c2[], st3[], c3[];
 double ma1[], ma2[], ma3[];
@@ -138,16 +141,20 @@ int OnInit()
    if(hAtr==INVALID_HANDLE) return(INIT_FAILED);
    IndicatorSetString(INDICATOR_SHORTNAME,"SuperWave");
 
+   gShowLevels = InpShowLevels;
+   gShowST     = InpShowSTstart;
+
    gNsym = StringSplit(InpSymbols, ',', gSyms);
+   ArrayResize(gConfl, gNsym); ArrayInitialize(gConfl, 0);
    for(int i=0;i<gNsym;i++){ StringTrimLeft(gSyms[i]); StringTrimRight(gSyms[i]); if(StringLen(gSyms[i])>0) SymbolSelect(gSyms[i], true); }
 
    gHeaderY = InpY + InpCellH;
    gRow0Y   = gHeaderY + InpCellH;
 
    BuildPanel();
-   EventSetTimer(3);
+   EventSetTimer(1);            // 1s: lampeggio ogni sec, ricalcolo ogni 3
    UpdateAll();
-   PrintFormat("[SuperWave] AVVIATO: %d simboli, linee+livelli+operazione su %s %s.",
+   PrintFormat("[SuperWave] AVVIATO: %d simboli, operazione+linee+livelli su %s %s.",
                gNsym, _Symbol, EnumToString(_Period));
    return(INIT_SUCCEEDED);
   }
@@ -159,9 +166,25 @@ void OnDeinit(const int reason)
    ChartRedraw();
   }
 //+------------------------------------------------------------------+
-void OnTimer(){ UpdateAll(); }
+void OnTimer()
+  {
+   gTick++;
+   if(gTick%3==0) UpdateAll();   // ricalcolo segnali ogni 3s (pesante)
+   BlinkConfluence();            // lampeggio ogni secondo (leggero)
+  }
 //+------------------------------------------------------------------+
-//| Supertrend su un multiplo (per le LINEE del grafico corrente)    |
+void BlinkConfluence()
+  {
+   if(gHidden) return;
+   bool on = (!InpBlink) || (gTick%2==0);
+   for(int s=0;s<gNsym;s++)
+     {
+      if(gConfl[s]==0) continue;
+      color c = on ? ((gConfl[s]>0)?InpBuyCol:InpSellCol) : InpEmptyCol;
+      ObjectSetInteger(0,P+"sb_"+(string)s,OBJPROP_BGCOLOR,c);
+     }
+   ChartRedraw();
+  }
 //+------------------------------------------------------------------+
 void ComputeST(double mult,const double &high[],const double &low[],const double &close[],
                const double &atr[],int rates_total,int prev,double &val[],double &col[],
@@ -181,7 +204,7 @@ void ComputeST(double mult,const double &high[],const double &low[],const double
       else if(close[i]<dnF[i-1]) dir=-1;
       else                       dir=(val[i-1]==dnF[i-1])?1:-1;
       val[i]=(dir>0)?dnF[i]:upF[i];
-      col[i]=(dir>0)?0:1;    // 0=verde, 1=rosso
+      col[i]=(dir>0)?0:1;
      }
   }
 //+------------------------------------------------------------------+
@@ -192,7 +215,6 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
   {
    if(rates_total<InpAtrPeriod+5) return(0);
 
-   //--- Heikin Ashi (solo se attivo il tasto)
    if(!gHA)
      { for(int i=(prev_calculated>0?prev_calculated-1:0); i<rates_total; i++){ haO[i]=0;haH[i]=0;haL[i]=0;haC[i]=0;haCol[i]=0; } }
    else
@@ -204,69 +226,155 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
           haO[i]=o;haH[i]=MathMax(high[i],MathMax(o,c));haL[i]=MathMin(low[i],MathMin(o,c));haC[i]=c;haCol[i]=(c>=o?0:1); }
      }
 
-   //--- Supertrend + medie (linee)
    double atr[]; ArrayResize(atr,rates_total);
    if(CopyBuffer(hAtr,0,0,rates_total,atr)<=0) return(prev_calculated);
+
+   // ST 3.5 sempre calcolato (serve all'operazione), ma mostrato solo se gShowST
    ComputeST(InpMult1,high,low,close,atr,rates_total,prev_calculated,st1,c1,up1,dn1);
-   if(InpShowST2) ComputeST(InpMult2,high,low,close,atr,rates_total,prev_calculated,st2,c2,up2,dn2);
+   if(gShowST && InpShowST2) ComputeST(InpMult2,high,low,close,atr,rates_total,prev_calculated,st2,c2,up2,dn2);
    else for(int i=0;i<rates_total;i++) st2[i]=EMPTY_VALUE;
-   if(InpShowST3) ComputeST(InpMult3,high,low,close,atr,rates_total,prev_calculated,st3,c3,up3,dn3);
+   if(gShowST && InpShowST3) ComputeST(InpMult3,high,low,close,atr,rates_total,prev_calculated,st3,c3,up3,dn3);
    else for(int i=0;i<rates_total;i++) st3[i]=EMPTY_VALUE;
-   double m[];
-   if(CopyBuffer(hMa1,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma1[i]=m[i];
-   if(CopyBuffer(hMa2,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma2[i]=m[i];
-   if(CopyBuffer(hMa3,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma3[i]=m[i];
+
+   if(gShowST)
+     {
+      double m[];
+      if(CopyBuffer(hMa1,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma1[i]=m[i];
+      if(CopyBuffer(hMa2,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma2[i]=m[i];
+      if(CopyBuffer(hMa3,0,0,rates_total,m)>0) for(int i=0;i<rates_total;i++) ma3[i]=m[i];
+     }
+   else
+     { for(int i=0;i<rates_total;i++){ st1[i]=EMPTY_VALUE; ma1[i]=EMPTY_VALUE; ma2[i]=EMPTY_VALUE; ma3[i]=EMPTY_VALUE; } }
 
    DrawTrade(rates_total,time,close);
    DrawLevels(rates_total,time,high,low,close);
    return(rates_total);
   }
 //+------------------------------------------------------------------+
-//| INGRESSO / STOP / TARGET in base al Supertrend 3.5               |
+//| Calcola il segnale operativo corrente (dir/entry/stop)          |
+//+------------------------------------------------------------------+
+bool TradeSignal(int rt,const double &close[],int &dir,double &entry,double &stop)
+  {
+   int b=rt-2;
+   if(b<InpAtrPeriod+2) return false;
+   double stv;
+   // st1 puo' essere EMPTY se ST nascosto: ricalcolo al volo il valore
+   stv = st1[b];
+   if(stv==EMPTY_VALUE || stv<=0)
+     {
+      double a[]; if(CopyBuffer(hAtr,0,0,rt,a)<=0) return false;
+      double up[],dn[]; ArrayResize(up,rt); ArrayResize(dn,rt);
+      double v[],cc[]; ArrayResize(v,rt); ArrayResize(cc,rt);
+      MqlRates r[]; if(CopyRates(_Symbol,_Period,0,rt,r)<=0) return false;
+      double h2[],l2[],c2b[]; ArrayResize(h2,rt);ArrayResize(l2,rt);ArrayResize(c2b,rt);
+      for(int i=0;i<rt;i++){h2[i]=r[i].high;l2[i]=r[i].low;c2b[i]=r[i].close;}
+      ComputeST(InpMult1,h2,l2,c2b,a,rt,0,v,cc,up,dn);
+      stv=v[b]; if(stv==EMPTY_VALUE||stv<=0) return false;
+      dir=(cc[b]==0)?1:-1;
+     }
+   else dir=(c1[b]==0)?1:-1;
+   entry=close[rt-1];
+   stop=stv;
+   return (MathAbs(entry-stop)>0);
+  }
 //+------------------------------------------------------------------+
 void DrawTrade(int rt,const datetime &time[],const double &close[])
   {
-   string en=P+"op_entry", sl=P+"op_sl", tp=P+"op_tp";
-   string enT=P+"op_entryT", slT=P+"op_slT", tpT=P+"op_tpT", ar=P+"op_arrow";
-   if(!InpShowTrade){ ObjectDelete(0,en);ObjectDelete(0,sl);ObjectDelete(0,tp);
-                      ObjectDelete(0,enT);ObjectDelete(0,slT);ObjectDelete(0,tpT);ObjectDelete(0,ar); return; }
-   int b=rt-2;                       // ultima barra CHIUSA
-   if(b<InpAtrPeriod+2) return;
-   double stv=st1[b];
-   if(stv==EMPTY_VALUE || stv<=0) return;
-   int dir=(c1[b]==0)?1:-1;          // 0=verde/su, 1=rosso/giu'
-   double entry=close[rt-1];         // prezzo attuale
-   double stop=stv;                  // stop = linea Supertrend
+   string pre=P+"op_";
+   string names[9]={"entry","sl","tp1","tp2","tp3","entryT","slT","arrow","dir"};
+   int dir; double entry,stop;
+   if(!InpShowTrade || !TradeSignal(rt,close,dir,entry,stop))
+     {
+      for(int i=0;i<9;i++) ObjectDelete(0,pre+names[i]);
+      ObjectDelete(0,pre+"tp1T"); ObjectDelete(0,pre+"tp2T"); ObjectDelete(0,pre+"tp3T");
+      DrawTradePanel(false,0,0,0);
+      return;
+     }
    double risk=MathAbs(entry-stop);
-   if(risk<=0) return;
-   double target=(dir>0)? entry+InpTP_R*risk : entry-InpTP_R*risk;
-   int    dg=_Digits;
-   datetime tnow=time[rt-1];
-   color  ecol=(dir>0)?InpBuyCol:InpSellCol;
+   double tp1=(dir>0)?entry+InpTP1_R*risk:entry-InpTP1_R*risk;
+   double tp2=(dir>0)?entry+InpTP2_R*risk:entry-InpTP2_R*risk;
+   double tp3=(dir>0)?entry+InpTP3_R*risk:entry-InpTP3_R*risk;
+   int dg=_Digits; datetime tnow=time[rt-1];
+   color ecol=(dir>0)?InpBuyCol:InpSellCol;
    string etxt=(dir>0)?"BUY":"SELL";
 
-   HLine(en, entry, ecol,       STYLE_SOLID);
-   HLine(sl, stop,  InpStopCol,  STYLE_DASH);
-   HLine(tp, target,InpTargetCol,STYLE_DASH);
-   Txt(enT, tnow, entry,  etxt+"  "+DoubleToString(entry,dg),  ecol);
-   Txt(slT, tnow, stop,   "STOP  "+DoubleToString(stop,dg),    InpStopCol);
-   Txt(tpT, tnow, target, "TARGET  "+DoubleToString(target,dg),InpTargetCol);
-   if(ObjectFind(0,ar)<0) ObjectCreate(0,ar,OBJ_ARROW,0,0,0);
-   ObjectSetInteger(0,ar,OBJPROP_TIME,tnow);
-   ObjectSetDouble (0,ar,OBJPROP_PRICE,entry);
-   ObjectSetInteger(0,ar,OBJPROP_ARROWCODE,(dir>0)?233:234);
-   ObjectSetInteger(0,ar,OBJPROP_COLOR,ecol);
-   ObjectSetInteger(0,ar,OBJPROP_WIDTH,2);
-   ObjectSetInteger(0,ar,OBJPROP_ANCHOR,(dir>0)?ANCHOR_TOP:ANCHOR_BOTTOM);
-   ObjectSetInteger(0,ar,OBJPROP_SELECTABLE,false);
+   HLine(pre+"entry",entry,ecol,STYLE_SOLID);
+   HLine(pre+"sl",   stop, InpStopCol,STYLE_DASH);
+   HLine(pre+"tp1",  tp1,  InpTargetCol,STYLE_DOT);
+   HLine(pre+"tp2",  tp2,  InpTargetCol,STYLE_DOT);
+   HLine(pre+"tp3",  tp3,  InpTargetCol,STYLE_DASH);
+   Txt(pre+"entryT",tnow,entry,etxt+"  "+DoubleToString(entry,dg),ecol);
+   Txt(pre+"slT",   tnow,stop, "STOP  "+DoubleToString(stop,dg),  InpStopCol);
+   Txt(pre+"tp1T",  tnow,tp1,  "TP1  "+DoubleToString(tp1,dg),    InpTargetCol);
+   Txt(pre+"tp2T",  tnow,tp2,  "TP2  "+DoubleToString(tp2,dg),    InpTargetCol);
+   Txt(pre+"tp3T",  tnow,tp3,  "TP3  "+DoubleToString(tp3,dg),    InpTargetCol);
+   if(ObjectFind(0,pre+"arrow")<0) ObjectCreate(0,pre+"arrow",OBJ_ARROW,0,0,0);
+   ObjectSetInteger(0,pre+"arrow",OBJPROP_TIME,tnow);
+   ObjectSetDouble (0,pre+"arrow",OBJPROP_PRICE,entry);
+   ObjectSetInteger(0,pre+"arrow",OBJPROP_ARROWCODE,(dir>0)?233:234);
+   ObjectSetInteger(0,pre+"arrow",OBJPROP_COLOR,ecol);
+   ObjectSetInteger(0,pre+"arrow",OBJPROP_WIDTH,2);
+   ObjectSetInteger(0,pre+"arrow",OBJPROP_ANCHOR,(dir>0)?ANCHOR_TOP:ANCHOR_BOTTOM);
+   ObjectSetInteger(0,pre+"arrow",OBJPROP_SELECTABLE,false);
+
+   DrawTradePanel(true,dir,entry,stop);
   }
 //+------------------------------------------------------------------+
-//| Supporti / resistenze (swing) col prezzo                        |
+//| Pannello OPERAZIONE in alto a DESTRA: prezzi + size 1% x 3 TP    |
+//+------------------------------------------------------------------+
+void DrawTradePanel(bool ok,int dir,double entry,double stop)
+  {
+   string q=P+"q_";
+   int RM=8, BW=178, LH=15, y=20;
+   string ids[11]={"bg","t","dir","in","sl","h","tp1","tp2","tp3","risk","note"};
+   if(!ok)
+     { for(int i=0;i<11;i++) ObjectDelete(0,q+ids[i]); return; }
+
+   double risk=MathAbs(entry-stop);
+   double tp1=(dir>0)?entry+InpTP1_R*risk:entry-InpTP1_R*risk;
+   double tp2=(dir>0)?entry+InpTP2_R*risk:entry-InpTP2_R*risk;
+   double tp3=(dir>0)?entry+InpTP3_R*risk:entry-InpTP3_R*risk;
+   int dg=_Digits;
+   double bal=AccountInfoDouble(ACCOUNT_BALANCE);
+   double riskMoney=bal*InpRiskPct/100.0;
+   double tickVal=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE);
+   double tickSz =SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+   double lossPerLot=(tickSz>0)? (risk/tickSz)*tickVal : 0;
+   double totLots=(lossPerLot>0)? riskMoney/lossPerLot : 0;
+   double L1=NormLots(totLots*InpSize1/100.0);
+   double L2=NormLots(totLots*InpSize2/100.0);
+   double L3=NormLots(totLots*InpSize3/100.0);
+   double slPts=risk/_Point;
+   color ecol=(dir>0)?InpBuyCol:InpSellCol;
+
+   int BH=LH*10+8;
+   RectR(q+"bg", RM, y-4, BW, BH, InpPanelCol, InpGridCol);
+   LblR(q+"t",   RM+6, y,        "OPERAZIONE  "+_Symbol,           InpHeadCol, InpFont+1);
+   LblR(q+"dir", RM+6, y+LH,     (dir>0?"BUY":"SELL"),             ecol,       InpFont+1);
+   LblR(q+"in",  RM+6, y+2*LH,   "Ingresso  "+DoubleToString(entry,dg), InpTextCol, InpFont);
+   LblR(q+"sl",  RM+6, y+3*LH,   "Stop  "+DoubleToString(stop,dg)+"  ("+DoubleToString(slPts,0)+" pt)", InpStopCol, InpFont);
+   LblR(q+"h",   RM+6, y+4*LH,   "TARGET           prezzo      lotti", InpHeadCol, InpFont-1);
+   LblR(q+"tp1", RM+6, y+5*LH,   "TP1 ("+DoubleToString(InpTP1_R,1)+"R)  "+DoubleToString(tp1,dg)+"   "+DoubleToString(L1,2), InpTargetCol, InpFont);
+   LblR(q+"tp2", RM+6, y+6*LH,   "TP2 ("+DoubleToString(InpTP2_R,1)+"R)  "+DoubleToString(tp2,dg)+"   "+DoubleToString(L2,2), InpTargetCol, InpFont);
+   LblR(q+"tp3", RM+6, y+7*LH,   "TP3 ("+DoubleToString(InpTP3_R,1)+"R)  "+DoubleToString(tp3,dg)+"   "+DoubleToString(L3,2), InpTargetCol, InpFont);
+   LblR(q+"risk",RM+6, y+8*LH,   "Rischio "+DoubleToString(InpRiskPct,1)+"% = "+DoubleToString(riskMoney,2)+"  (tot "+DoubleToString(NormLots(totLots),2)+" lot)", InpTextCol, InpFont);
+   LblR(q+"note",RM+6, y+9*LH,   "size divisa "+DoubleToString(InpSize1,0)+"/"+DoubleToString(InpSize2,0)+"/"+DoubleToString(InpSize3,0)+"%", C'140,144,150', InpFont-1);
+  }
+//+------------------------------------------------------------------+
+double NormLots(double v)
+  {
+   double st=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP);
+   double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+   if(st<=0) st=0.01;
+   v=MathFloor(v/st+0.0000001)*st;
+   if(v<mn) v=0.0;
+   return v;
+  }
 //+------------------------------------------------------------------+
 void DrawLevels(int rt,const datetime &time[],const double &high[],const double &low[],const double &close[])
   {
    ObjectsDeleteAll(0, P+"lvl_");
-   if(!InpShowLevels) return;
+   if(!gShowLevels) return;
    int k=InpFractal; if(k<1) k=1;
    int look=MathMin(rt-1, InpLevelsLook);
    int from=rt-1-look; if(from<k) from=k;
@@ -282,11 +390,10 @@ void DrawLevels(int rt,const datetime &time[],const double &high[],const double 
       if(sh && high[i]>price){ int n=ArraySize(res); ArrayResize(res,n+1); res[n]=high[i]; }
       if(sl && low[i] <price){ int n=ArraySize(sup); ArrayResize(sup,n+1); sup[n]=low[i]; }
      }
-   ArraySort(res);                       // crescente: le prime = piu' vicine sopra
-   ArraySort(sup);                       // crescente: le ultime = piu' vicine sotto
-   double tol=price*0.0008;              // fonde livelli troppo vicini
+   ArraySort(res);
+   ArraySort(sup);
+   double tol=price*0.0008;
    int dg=_Digits; datetime tnow=time[rt-1];
-
    int drawn=0; double last=-1;
    for(int i=0;i<ArraySize(res) && drawn<InpMaxLevels;i++)
      { if(last>0 && MathAbs(res[i]-last)<tol) continue; last=res[i];
@@ -369,9 +476,15 @@ void BuildPanel()
    int panelH = (gNsym+2)*InpCellH + 10;
    Rect(P+"panel", InpX-3, InpY-3, panelW, panelH, InpPanelCol, InpPanelCol, false);
 
-   Lbl(P+"title", InpX+2, InpY, "SUPERWAVE  ST  INVERSION", InpHeadCol, InpFont+1);
-   Btn(P+"btnHA",   InpX+InpSymW+3*InpCellW, InpY-2, 3*InpCellW-2, 15, gHA?"HEIKIN ASHI":"CANDELE");
-   Btn(P+"btnHide", InpX+InpSymW+6*InpCellW, InpY-2, InpCellW,     15, "Nascondi");
+   Lbl(P+"title", InpX+2, InpY, "SUPERWAVE", InpHeadCol, InpFont+1);
+   int bw=54, gap=2, by=InpY-2;
+   int bx=InpX+panelW-4-(4*bw+3*gap);
+   Btn(P+"btnHA",   bx,               by, bw, 15, gHA?"HA":"CANDELE");
+   Btn(P+"btnLiv",  bx+(bw+gap),      by, bw, 15, "LIVELLI");
+   Btn(P+"btnST",   bx+2*(bw+gap),    by, bw, 15, "ST");
+   Btn(P+"btnHide", bx+3*(bw+gap),    by, bw, 15, "Nascondi");
+   BtnState(P+"btnLiv", gShowLevels);
+   BtnState(P+"btnST",  gShowST);
 
    Lbl(P+"h_sym", InpX+2, gHeaderY, "CROSS", InpHeadCol, InpFont);
    for(int c=0;c<NTF;c++)
@@ -420,20 +533,36 @@ void UpdateAll()
             ObjectSetInteger(0,tx,OBJPROP_TIMEFRAMES,OBJ_NO_PERIODS);
            }
         }
-      color nc=InpTextCol;
-      if(dH4!=0 && dH4==dM3) nc=(dH4>0)?InpBuyCol:InpSellCol;
-      ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,nc);
+      // confluenza H4/M3 -> il simbolo lampeggia (gestito da BlinkConfluence)
+      gConfl[s] = (dH4!=0 && dH4==dM3) ? dH4 : 0;
+      if(gConfl[s]!=0)
+         ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,clrWhite);   // testo bianco leggibile
+      else
+        {
+         ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,InpTextCol);
+         ObjectSetInteger(0,P+"sb_"+(string)s,OBJPROP_BGCOLOR,InpEmptyCol);
+        }
      }
    ChartRedraw();
   }
 //+------------------------------------------------------------------+
 int ColX(int col){ return (col==0)? InpX : InpX+InpSymW+(col-1)*InpCellW; }
 //+------------------------------------------------------------------+
+//| Estrae simbolo (s) e colonna TF (c) dal nome oggetto            |
+//+------------------------------------------------------------------+
+bool ParseCell(string name,int &s,int &c)
+  {
+   string body=StringSubstr(name,StringLen(P));
+   string parts[]; int np=StringSplit(body,'_',parts);
+   if(np>=3 && (parts[0]=="bg" || parts[0]=="cx"))
+     { s=(int)StringToInteger(parts[1]); c=(int)StringToInteger(parts[2]); return true; }
+   return false;
+  }
 int SymIndexFromObj(string name)
   {
    string body=StringSubstr(name,StringLen(P));
    string parts[]; int np=StringSplit(body,'_',parts);
-   if(np>=2 && (parts[0]=="bg" || parts[0]=="s" || parts[0]=="sb"))
+   if(np>=2 && (parts[0]=="s" || parts[0]=="sb"))
       return (int)StringToInteger(parts[1]);
    return -1;
   }
@@ -441,14 +570,20 @@ int SymIndexFromObj(string name)
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
   {
    if(id!=CHARTEVENT_OBJECT_CLICK) return;
+
    if(sparam==P+"btnHA")
-     {
-      gHA=!gHA;
-      ObjectSetString(0,P+"btnHA",OBJPROP_TEXT, gHA?"HEIKIN ASHI":"CANDELE");
-      ObjectSetInteger(0,P+"btnHA",OBJPROP_STATE,false);
-      ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT); // forza il ricalcolo delle candele HA
-      return;
-     }
+     { gHA=!gHA; ObjectSetString(0,P+"btnHA",OBJPROP_TEXT, gHA?"HA":"CANDELE");
+       ObjectSetInteger(0,P+"btnHA",OBJPROP_STATE,false);
+       ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT); return; }
+
+   if(sparam==P+"btnLiv")
+     { gShowLevels=!gShowLevels; ObjectSetInteger(0,P+"btnLiv",OBJPROP_STATE,false);
+       BtnState(P+"btnLiv",gShowLevels); ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT); return; }
+
+   if(sparam==P+"btnST")
+     { gShowST=!gShowST; ObjectSetInteger(0,P+"btnST",OBJPROP_STATE,false);
+       BtnState(P+"btnST",gShowST); ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT); return; }
+
    if(sparam==P+"btnHide")
      {
       gHidden=!gHidden;
@@ -468,6 +603,12 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
       if(!gHidden) UpdateAll(); else ChartRedraw();
       return;
      }
+
+   // CLICK su una cella -> vai su quel SIMBOLO + quel TIMEFRAME
+   int s2,c2;
+   if(ParseCell(sparam,s2,c2) && s2>=0 && s2<gNsym && StringLen(gSyms[s2])>0)
+     { ChartSetSymbolPeriod(0, gSyms[s2], TFS[c2]); return; }
+   // click sul nome/box -> simbolo al TF corrente
    int si=SymIndexFromObj(sparam);
    if(si>=0 && si<gNsym && StringLen(gSyms[si])>0)
       ChartSetSymbolPeriod(0, gSyms[si], PERIOD_CURRENT);
@@ -487,6 +628,21 @@ void Lbl(string name,int x,int y,string text,color col,int fs)
    ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
   }
+//--- Label ancorata in alto a DESTRA (pannello operazione)
+void LblR(string name,int x,int y,string text,color col,int fs)
+  {
+   if(ObjectFind(0,name)<0) ObjectCreate(0,name,OBJ_LABEL,0,0,0);
+   ObjectSetInteger(0,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+   ObjectSetInteger(0,name,OBJPROP_ANCHOR,ANCHOR_RIGHT_UPPER);
+   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,x);
+   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,y);
+   ObjectSetString (0,name,OBJPROP_TEXT,text);
+   ObjectSetInteger(0,name,OBJPROP_COLOR,col);
+   ObjectSetInteger(0,name,OBJPROP_FONTSIZE,fs);
+   ObjectSetString (0,name,OBJPROP_FONT,"Consolas");
+   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+   ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
+  }
 void Rect(string name,int x,int y,int w,int h,color bg,color border,bool back)
   {
    if(ObjectFind(0,name)<0) ObjectCreate(0,name,OBJ_RECTANGLE_LABEL,0,0,0);
@@ -499,6 +655,21 @@ void Rect(string name,int x,int y,int w,int h,color bg,color border,bool back)
    ObjectSetInteger(0,name,OBJPROP_BORDER_TYPE,BORDER_FLAT);
    ObjectSetInteger(0,name,OBJPROP_COLOR,border);
    ObjectSetInteger(0,name,OBJPROP_BACK,back);
+   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+   ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
+  }
+void RectR(string name,int x,int y,int w,int h,color bg,color border)
+  {
+   if(ObjectFind(0,name)<0) ObjectCreate(0,name,OBJ_RECTANGLE_LABEL,0,0,0);
+   ObjectSetInteger(0,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,x);
+   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,y);
+   ObjectSetInteger(0,name,OBJPROP_XSIZE,w);
+   ObjectSetInteger(0,name,OBJPROP_YSIZE,h);
+   ObjectSetInteger(0,name,OBJPROP_BGCOLOR,bg);
+   ObjectSetInteger(0,name,OBJPROP_BORDER_TYPE,BORDER_FLAT);
+   ObjectSetInteger(0,name,OBJPROP_COLOR,border);
+   ObjectSetInteger(0,name,OBJPROP_BACK,false);
    ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
   }
@@ -516,5 +687,9 @@ void Btn(string name,int x,int y,int w,int h,string text)
    ObjectSetInteger(0,name,OBJPROP_COLOR,clrWhite);
    ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
+  }
+void BtnState(string name,bool on)
+  {
+   ObjectSetInteger(0,name,OBJPROP_BGCOLOR, on?C'38,110,70':C'50,54,62');
   }
 //+------------------------------------------------------------------+
