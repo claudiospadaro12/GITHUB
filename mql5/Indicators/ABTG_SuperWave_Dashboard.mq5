@@ -54,12 +54,14 @@ input double InpMult2     = 3.0;   // Supertrend 2
 input double InpMult3     = 2.5;   // Supertrend 3
 input bool   InpShowST2   = true;  // mostra ST 3.0
 input bool   InpShowST3   = true;  // mostra ST 2.5
-input int    InpMA1       = 14;    // Media veloce
-input int    InpMA2       = 100;   // Media media
+input int    InpMA1       = 14;    // Media veloce (riferimento pullback)
+input int    InpMA2       = 50;    // Media media (per l'INCROCIO - Giorgio Bo: 50)
 input int    InpMA3       = 200;   // Media lenta
 input ENUM_MA_METHOD InpMAmethod = MODE_SMA; // tipo medie
-input int    InpFlipBars  = 1;     // "Inversione" = flip entro N barre chiuse
-input bool   InpBlink     = true;  // lampeggia i simboli in confluenza H4/M3
+input bool   InpShowCross = true;  // segna l'INCROCIO media50 x media200 a favore del Supertrend
+input int    InpCrossWindow = 20;  // quanto indietro cercare l'incrocio (barre)
+input int    InpMaxCandles= 10;    // accendi la cella solo se il segnale e' entro N candele
+input bool   InpBlink     = true;  // lampeggio (dolce) dei simboli in confluenza H4/M3
 //--- OPERAZIONE (ingresso/stop/target + size) ---
 input bool   InpShowTrade = true;  // mostra operazione (grafico + pannello dx)
 input double InpRiskPct   = 1.0;   // Rischio per operazione, in % del conto
@@ -106,6 +108,9 @@ bool     gHA     = false;
 bool     gHidden = false;
 bool     gShowLevels = false;
 bool     gShowST     = true;
+double   gRiskPct = 1.0;    // rischio % modificabile dal pannello (parte da InpRiskPct)
+bool     gCrossOK = false;  // incrocio medie a favore del Supertrend (condizione ottima)
+int      gCrossDir = 0;
 uint     gTick   = 0;
 string   P = "SWD_";
 
@@ -143,6 +148,7 @@ int OnInit()
 
    gShowLevels = InpShowLevels;
    gShowST     = InpShowSTstart;
+   gRiskPct    = InpRiskPct;
 
    gNsym = StringSplit(InpSymbols, ',', gSyms);
    ArrayResize(gConfl, gNsym); ArrayInitialize(gConfl, 0);
@@ -173,17 +179,27 @@ void OnTimer()
    BlinkConfluence();            // lampeggio ogni secondo (leggero)
   }
 //+------------------------------------------------------------------+
+color Dim(color c,double f)   // sfuma 'c' verso il colore pannello (f=0 pieno, 1 spento)
+  {
+   int r=(c&0xFF), g=(c>>8)&0xFF, b=(c>>16)&0xFF;
+   int r2=(InpPanelCol&0xFF), g2=(InpPanelCol>>8)&0xFF, b2=(InpPanelCol>>16)&0xFF;
+   int R=(int)(r+(r2-r)*f), G=(int)(g+(g2-g)*f), B=(int)(b+(b2-b)*f);
+   return (color)((B<<16)|(G<<8)|R);
+  }
 void BlinkConfluence()
   {
    if(gHidden) return;
-   bool on = (!InpBlink) || (gTick%2==0);
+   bool bright = (!InpBlink) || (((gTick/2)%2)==0);   // cambia ogni 2 secondi
+   bool any=false;
    for(int s=0;s<gNsym;s++)
      {
       if(gConfl[s]==0) continue;
-      color c = on ? ((gConfl[s]>0)?InpBuyCol:InpSellCol) : InpEmptyCol;
+      any=true;
+      color full = (gConfl[s]>0)?InpBuyCol:InpSellCol;
+      color c = bright ? full : Dim(full,0.55);        // pulsazione dolce, mai nero
       ObjectSetInteger(0,P+"sb_"+(string)s,OBJPROP_BGCOLOR,c);
      }
-   ChartRedraw();
+   if(any) ChartRedraw();
   }
 //+------------------------------------------------------------------+
 void ComputeST(double mult,const double &high[],const double &low[],const double &close[],
@@ -246,9 +262,42 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
    else
      { for(int i=0;i<rates_total;i++){ st1[i]=EMPTY_VALUE; ma1[i]=EMPTY_VALUE; ma2[i]=EMPTY_VALUE; ma3[i]=EMPTY_VALUE; } }
 
+   DrawCross(rates_total,time);
    DrawTrade(rates_total,time,close);
    DrawLevels(rates_total,time,high,low,close);
    return(rates_total);
+  }
+//+------------------------------------------------------------------+
+//| INCROCIO media50 x media200 a favore del Supertrend = ottimo    |
+//+------------------------------------------------------------------+
+void DrawCross(int rt,const datetime &time[])
+  {
+   string nm=P+"cross";
+   gCrossOK=false; gCrossDir=0;
+   ObjectDelete(0,nm); ObjectDelete(0,nm+"t");
+   if(!InpShowCross || !gShowST) return;
+   int w=MathMin(InpCrossWindow, rt-3);
+   for(int i=rt-2; i>=rt-2-w && i>1; i--)
+     {
+      if(ma2[i]==EMPTY_VALUE || ma3[i]==EMPTY_VALUE || ma2[i-1]==EMPTY_VALUE || ma3[i-1]==EMPTY_VALUE) continue;
+      bool up = (ma2[i-1]<=ma3[i-1] && ma2[i]>ma3[i]);
+      bool dn = (ma2[i-1]>=ma3[i-1] && ma2[i]<ma3[i]);
+      if(!up && !dn) continue;
+      int cdir  = up?1:-1;
+      int stdir = (c1[i]==0)?1:-1;          // direzione Supertrend a quella barra
+      bool agree = (cdir==stdir);           // l'incrocio "taglia" il Supertrend a favore
+      gCrossOK=agree; gCrossDir=cdir;
+      color col = agree ? (cdir>0?InpBuyCol:InpSellCol) : C'130,130,130';
+      if(ObjectFind(0,nm)<0) ObjectCreate(0,nm,OBJ_ARROW,0,0,0);
+      ObjectSetInteger(0,nm,OBJPROP_TIME,time[i]);
+      ObjectSetDouble (0,nm,OBJPROP_PRICE,ma2[i]);
+      ObjectSetInteger(0,nm,OBJPROP_ARROWCODE,118);   // diamante
+      ObjectSetInteger(0,nm,OBJPROP_COLOR,col);
+      ObjectSetInteger(0,nm,OBJPROP_WIDTH,3);
+      ObjectSetInteger(0,nm,OBJPROP_SELECTABLE,false);
+      Txt(nm+"t",time[i],ma2[i], agree?"INCROCIO OTTIMO":"incrocio 50x200", col);
+      break;                                 // il piu' recente
+     }
   }
 //+------------------------------------------------------------------+
 //| Calcola il segnale operativo corrente (dir/entry/stop)          |
@@ -326,9 +375,9 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop)
   {
    string q=P+"q_";
    int RM=8, BW=178, LH=15, y=20;
-   string ids[11]={"bg","t","dir","in","sl","h","tp1","tp2","tp3","risk","note"};
+   string ids[12]={"bg","t","dir","in","sl","h","tp1","tp2","tp3","risklbl","riskedit","note"};
    if(!ok)
-     { for(int i=0;i<11;i++) ObjectDelete(0,q+ids[i]); return; }
+     { for(int i=0;i<12;i++) ObjectDelete(0,q+ids[i]); return; }
 
    double risk=MathAbs(entry-stop);
    double tp1=(dir>0)?entry+InpTP1_R*risk:entry-InpTP1_R*risk;
@@ -336,7 +385,7 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop)
    double tp3=(dir>0)?entry+InpTP3_R*risk:entry-InpTP3_R*risk;
    int dg=_Digits;
    double bal=AccountInfoDouble(ACCOUNT_BALANCE);
-   double riskMoney=bal*InpRiskPct/100.0;
+   double riskMoney=bal*gRiskPct/100.0;
    double tickVal=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE);
    double tickSz =SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
    double lossPerLot=(tickSz>0)? (risk/tickSz)*tickVal : 0;
@@ -357,8 +406,12 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop)
    LblR(q+"tp1", RM+6, y+5*LH,   "TP1 ("+DoubleToString(InpTP1_R,1)+"R)  "+DoubleToString(tp1,dg)+"   "+DoubleToString(L1,2), InpTargetCol, InpFont);
    LblR(q+"tp2", RM+6, y+6*LH,   "TP2 ("+DoubleToString(InpTP2_R,1)+"R)  "+DoubleToString(tp2,dg)+"   "+DoubleToString(L2,2), InpTargetCol, InpFont);
    LblR(q+"tp3", RM+6, y+7*LH,   "TP3 ("+DoubleToString(InpTP3_R,1)+"R)  "+DoubleToString(tp3,dg)+"   "+DoubleToString(L3,2), InpTargetCol, InpFont);
-   LblR(q+"risk",RM+6, y+8*LH,   "Rischio "+DoubleToString(InpRiskPct,1)+"% = "+DoubleToString(riskMoney,2)+"  (tot "+DoubleToString(NormLots(totLots),2)+" lot)", InpTextCol, InpFont);
-   LblR(q+"note",RM+6, y+9*LH,   "size divisa "+DoubleToString(InpSize1,0)+"/"+DoubleToString(InpSize2,0)+"/"+DoubleToString(InpSize3,0)+"%", C'140,144,150', InpFont-1);
+   // riga RISCHIO: etichetta + casella modificabile (clicca e scrivi il %)
+   LblR (q+"risklbl", RM+56, y+8*LH, "Rischio % (clicca):  "+DoubleToString(riskMoney,2)+" =", InpTextCol, InpFont);
+   EditR(q+"riskedit",RM+6,  y+8*LH-1, 46, 15, DoubleToString(gRiskPct,2));
+   string crossN = gCrossOK ? "  ·  INCROCIO OTTIMO" : "";
+   color  noteC  = gCrossOK ? InpTargetCol : C'140,144,150';
+   LblR (q+"note",    RM+6,  y+9*LH,   "size "+DoubleToString(InpSize1,0)+"/"+DoubleToString(InpSize2,0)+"/"+DoubleToString(InpSize3,0)+"%  ·  tot "+DoubleToString(NormLots(totLots),2)+" lot"+crossN, noteC, InpFont-1);
   }
 //+------------------------------------------------------------------+
 double NormLots(double v)
@@ -433,10 +486,10 @@ void Txt(string name,datetime t,double price,string text,color col)
    ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
   }
 //+------------------------------------------------------------------+
-int STdir(string sym, ENUM_TIMEFRAMES tf, bool &flip)
+int STdir(string sym, ENUM_TIMEFRAMES tf, int &barsSince)
   {
-   flip=false;
-   int need=InpAtrPeriod+80;
+   barsSince=-1;
+   int need=InpAtrPeriod+120;
    MqlRates r[];
    int n=CopyRates(sym,tf,0,need,r);
    if(n<InpAtrPeriod+10) return 0;
@@ -464,10 +517,12 @@ int STdir(string sym, ENUM_TIMEFRAMES tf, bool &flip)
       else                         dir[i]=dir[i-1];
      }
    int last=n-2;
-   if(last<start+1) return 0;
-   for(int kk=0;kk<InpFlipBars && (last-kk)>start;kk++)
-      if(dir[last-kk]!=dir[last-kk-1]){ flip=true; break; }
-   return dir[last];
+   if(last<start+1){ barsSince=-1; return 0; }
+   int d=dir[last];
+   int bs=0;
+   for(int i=last;i>start;i--){ if(dir[i]==d) bs++; else break; }
+   barsSince=bs-1;    // 0 = inversione sull'ultima candela chiusa
+   return d;
   }
 //+------------------------------------------------------------------+
 void BuildPanel()
@@ -514,16 +569,17 @@ void UpdateAll()
       int dH4=0,dM3=0;
       for(int c=0;c<NTF;c++)
         {
-         bool flip=false;
-         int d=STdir(gSyms[s],TFS[c],flip);
-         if(TFS[c]==PERIOD_H4) dH4=d;
-         if(TFS[c]==PERIOD_M3) dM3=d;
+         int bars=-1;
+         int d=STdir(gSyms[s],TFS[c],bars);
+         bool active = (d!=0 && bars>=0 && bars<=InpMaxCandles);  // segnale FRESCO (entro N candele)
+         if(TFS[c]==PERIOD_H4) dH4 = active? d:0;
+         if(TFS[c]==PERIOD_M3) dM3 = active? d:0;
          string bg=P+"bg_"+(string)s+"_"+(string)c;
          string tx=P+"cx_"+(string)s+"_"+(string)c;
-         if(flip && d!=0)
+         if(active)
            {
             ObjectSetInteger(0,bg,OBJPROP_BGCOLOR,(d>0)?InpBuyCol:InpSellCol);
-            ObjectSetString (0,tx,OBJPROP_TEXT,(d>0)?"BUY":"SELL");
+            ObjectSetString (0,tx,OBJPROP_TEXT,(string)bars);   // numero di candele dal segnale
             ObjectSetInteger(0,tx,OBJPROP_COLOR,clrWhite);
             ObjectSetInteger(0,tx,OBJPROP_TIMEFRAMES,OBJ_ALL_PERIODS);
            }
@@ -533,15 +589,11 @@ void UpdateAll()
             ObjectSetInteger(0,tx,OBJPROP_TIMEFRAMES,OBJ_NO_PERIODS);
            }
         }
-      // confluenza H4/M3 -> il simbolo lampeggia (gestito da BlinkConfluence)
+      // confluenza = H4 e M3 ENTRAMBI freschi e nella STESSA direzione -> lampeggia (raro)
       gConfl[s] = (dH4!=0 && dH4==dM3) ? dH4 : 0;
-      if(gConfl[s]!=0)
-         ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,clrWhite);   // testo bianco leggibile
-      else
-        {
-         ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,InpTextCol);
+      ObjectSetInteger(0,P+"s_"+(string)s,OBJPROP_COLOR,clrWhite);      // nome SEMPRE bianco
+      if(gConfl[s]==0)
          ObjectSetInteger(0,P+"sb_"+(string)s,OBJPROP_BGCOLOR,InpEmptyCol);
-        }
      }
    ChartRedraw();
   }
@@ -569,6 +621,14 @@ int SymIndexFromObj(string name)
 //+------------------------------------------------------------------+
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
   {
+   // rischio % modificato -> ricalcola i lotti dei 3 TP
+   if(id==CHARTEVENT_OBJECT_ENDEDIT && sparam==P+"q_riskedit")
+     {
+      double v=StringToDouble(ObjectGetString(0,sparam,OBJPROP_TEXT));
+      if(v>0 && v<=100){ gRiskPct=v; ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT); }
+      else ObjectSetString(0,sparam,OBJPROP_TEXT,DoubleToString(gRiskPct,2)); // valore assurdo -> ripristino
+      return;
+     }
    if(id!=CHARTEVENT_OBJECT_CLICK) return;
 
    if(sparam==P+"btnHA")
@@ -642,6 +702,25 @@ void LblR(string name,int x,int y,string text,color col,int fs)
    ObjectSetString (0,name,OBJPROP_FONT,"Consolas");
    ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
+  }
+//--- casella EDITABILE ancorata a destra (rischio %)
+void EditR(string name,int x,int y,int w,int h,string text)
+  {
+   bool created=false;
+   if(ObjectFind(0,name)<0){ ObjectCreate(0,name,OBJ_EDIT,0,0,0); created=true; }
+   ObjectSetInteger(0,name,OBJPROP_CORNER,CORNER_RIGHT_UPPER);
+   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,x);
+   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,y);
+   ObjectSetInteger(0,name,OBJPROP_XSIZE,w);
+   ObjectSetInteger(0,name,OBJPROP_YSIZE,h);
+   ObjectSetInteger(0,name,OBJPROP_BGCOLOR,C'40,44,52');
+   ObjectSetInteger(0,name,OBJPROP_COLOR,clrWhite);
+   ObjectSetInteger(0,name,OBJPROP_BORDER_COLOR,clrGold);
+   ObjectSetInteger(0,name,OBJPROP_FONTSIZE,InpFont);
+   ObjectSetInteger(0,name,OBJPROP_ALIGN,ALIGN_CENTER);
+   ObjectSetInteger(0,name,OBJPROP_READONLY,false);
+   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+   if(created) ObjectSetString(0,name,OBJPROP_TEXT,text);  // NON sovrascrivo mentre l'utente digita
   }
 void Rect(string name,int x,int y,int w,int h,color bg,color border,bool back)
   {
