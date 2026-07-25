@@ -36,6 +36,16 @@
      "start": 0,
      "step": 1,
      "stop": 1
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
    },
    "fixed": {
@@ -89,6 +99,16 @@
      "stop": 800
     },
     "InpUseSupertrend": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
      "start": 0,
      "step": 1,
      "stop": 1
