@@ -67,9 +67,12 @@ input int    InpCrossWindow = 20;  // quanto indietro cercare l'incrocio (barre)
 input int    InpMaxCandles= 10;    // accendi la cella solo se il segnale e' entro N candele
 input bool   InpBlink     = true;  // lampeggio (dolce) dei simboli in confluenza H4/M3
 //--- OPERAZIONE (ingresso/stop/target + size) ---
+enum ENUM_TPMODE { TP_PRICEACTION, TP_RMULTIPLI };
 input bool   InpShowTrade = true;  // mostra operazione (grafico + pannello dx)
+input ENUM_TPMODE InpTPmode = TP_PRICEACTION; // criterio TP: livelli price action / multipli di R
+input double InpStopAtrFloor = 1.0; // stop minimo = N x ATR (evita stop troppo stretti su M3)
 input double InpRiskPct   = 1.0;   // Rischio per operazione, in % del conto
-input double InpTP1_R     = 1.0;   // TARGET 1 in R
+input double InpTP1_R     = 1.0;   // TARGET 1 in R (usato in modo R o come riserva)
 input double InpTP2_R     = 2.0;   // TARGET 2 in R
 input double InpTP3_R     = 3.0;   // TARGET 3 in R
 input double InpSize1     = 40;    // % della size sul TP1
@@ -115,6 +118,8 @@ bool     gShowST     = true;
 double   gRiskPct = 1.0;    // rischio % modificabile dal pannello (parte da InpRiskPct)
 bool     gCrossOK = false;  // incrocio medie a favore del Supertrend (condizione ottima)
 int      gCrossDir = 0;
+long     gcBull,gcBear,gcUp,gcDown;  // colori candele reali (per nasconderle in Heikin Ashi)
+bool     gcSaved = false;
 uint     gTick   = 0;
 string   P = "SWD_";
 
@@ -155,6 +160,11 @@ int OnInit()
    gShowLevels = InpShowLevels;
    gShowST     = InpShowSTstart;
    gRiskPct    = InpRiskPct;
+   gcBull=ChartGetInteger(0,CHART_COLOR_CANDLE_BULL);
+   gcBear=ChartGetInteger(0,CHART_COLOR_CANDLE_BEAR);
+   gcUp  =ChartGetInteger(0,CHART_COLOR_CHART_UP);
+   gcDown=ChartGetInteger(0,CHART_COLOR_CHART_DOWN);
+   gcSaved=true;
 
    gNsym = StringSplit(InpSymbols, ',', gSyms);
    ArrayResize(gConfl, gNsym); ArrayInitialize(gConfl, 0);
@@ -175,7 +185,37 @@ void OnDeinit(const int reason)
   {
    EventKillTimer();
    ObjectsDeleteAll(0, P);
+   if(gcSaved)   // ripristina le candele reali
+     {
+      ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,gcBull);
+      ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,gcBear);
+      ChartSetInteger(0,CHART_COLOR_CHART_UP,gcUp);
+      ChartSetInteger(0,CHART_COLOR_CHART_DOWN,gcDown);
+     }
    ChartRedraw();
+  }
+//+------------------------------------------------------------------+
+//| Heikin Ashi ON -> nasconde le candele reali (colori = sfondo);   |
+//| OFF -> ripristina i colori originali.                            |
+//+------------------------------------------------------------------+
+void ApplyHA()
+  {
+   if(!gcSaved) return;
+   if(gHA)
+     {
+      long bg=ChartGetInteger(0,CHART_COLOR_BACKGROUND);
+      ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,bg);
+      ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,bg);
+      ChartSetInteger(0,CHART_COLOR_CHART_UP,bg);
+      ChartSetInteger(0,CHART_COLOR_CHART_DOWN,bg);
+     }
+   else
+     {
+      ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,gcBull);
+      ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,gcBear);
+      ChartSetInteger(0,CHART_COLOR_CHART_UP,gcUp);
+      ChartSetInteger(0,CHART_COLOR_CHART_DOWN,gcDown);
+     }
   }
 //+------------------------------------------------------------------+
 void OnTimer()
@@ -270,7 +310,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
      { for(int i=0;i<rates_total;i++){ st1[i]=EMPTY_VALUE; ma1[i]=EMPTY_VALUE; ma2[i]=EMPTY_VALUE; ma3[i]=EMPTY_VALUE; ma4[i]=EMPTY_VALUE; } }
 
    DrawCross(rates_total,time);
-   DrawTrade(rates_total,time,close);
+   DrawTrade(rates_total,time,high,low,close);
    DrawLevels(rates_total,time,high,low,close);
    return(rates_total);
   }
@@ -334,7 +374,36 @@ bool TradeSignal(int rt,const double &close[],int &dir,double &entry,double &sto
    return (MathAbs(entry-stop)>0);
   }
 //+------------------------------------------------------------------+
-void DrawTrade(int rt,const datetime &time[],const double &close[])
+bool NearAny(double &arr[],double p,double tol)
+  { for(int i=0;i<ArraySize(arr);i++) if(MathAbs(arr[i]-p)<tol) return true; return false; }
+//--- sceglie i 3 TP: dai LIVELLI price action (modo C), riempiendo i mancanti coi multipli di R
+void PickTPs(int dir,double entry,double risk,double &res[],double &sup[],double &o1,double &o2,double &o3)
+  {
+   double cand[]; ArrayResize(cand,0);
+   double tol=risk*0.4;
+   if(InpTPmode==TP_PRICEACTION)
+     {
+      if(dir>0)
+         for(int i=0;i<ArraySize(res) && ArraySize(cand)<3;i++)
+           { double p=res[i]; if(p<=entry+risk*0.2 || NearAny(cand,p,tol)) continue;
+             int n=ArraySize(cand);ArrayResize(cand,n+1);cand[n]=p; }
+      else
+         for(int i=ArraySize(sup)-1;i>=0 && ArraySize(cand)<3;i--)
+           { double p=sup[i]; if(p>=entry-risk*0.2 || NearAny(cand,p,tol)) continue;
+             int n=ArraySize(cand);ArrayResize(cand,n+1);cand[n]=p; }
+     }
+   double rr[3]; rr[0]=InpTP1_R; rr[1]=InpTP2_R; rr[2]=InpTP3_R;
+   for(int i=0;i<3 && ArraySize(cand)<3;i++)
+     { double p=(dir>0)?entry+rr[i]*risk:entry-rr[i]*risk;
+       if(NearAny(cand,p,tol)) continue; int n=ArraySize(cand);ArrayResize(cand,n+1);cand[n]=p; }
+   for(int a=0;a<ArraySize(cand);a++) for(int b=a+1;b<ArraySize(cand);b++)
+      if(MathAbs(cand[b]-entry)<MathAbs(cand[a]-entry)){ double t=cand[a];cand[a]=cand[b];cand[b]=t; }
+   o1=(ArraySize(cand)>0)?cand[0]:entry;
+   o2=(ArraySize(cand)>1)?cand[1]:o1;
+   o3=(ArraySize(cand)>2)?cand[2]:o2;
+  }
+//+------------------------------------------------------------------+
+void DrawTrade(int rt,const datetime &time[],const double &high[],const double &low[],const double &close[])
   {
    string pre=P+"op_";
    string names[9]={"entry","sl","tp1","tp2","tp3","entryT","slT","arrow","dir"};
@@ -343,13 +412,18 @@ void DrawTrade(int rt,const datetime &time[],const double &close[])
      {
       for(int i=0;i<9;i++) ObjectDelete(0,pre+names[i]);
       ObjectDelete(0,pre+"tp1T"); ObjectDelete(0,pre+"tp2T"); ObjectDelete(0,pre+"tp3T");
-      DrawTradePanel(false,0,0,0);
+      DrawTradePanel(false,0,0,0,0,0,0);
       return;
      }
+   // floor ATR sullo stop: su M3 il Supertrend e' troppo vicino -> non meno di N*ATR
+   double ab[]; double atrv=0;
+   if(CopyBuffer(hAtr,0,rt-2,1,ab)==1) atrv=ab[0];
+   double floor=InpStopAtrFloor*atrv;
+   if(floor>0 && MathAbs(entry-stop)<floor) stop=(dir>0)?entry-floor:entry+floor;
    double risk=MathAbs(entry-stop);
-   double tp1=(dir>0)?entry+InpTP1_R*risk:entry-InpTP1_R*risk;
-   double tp2=(dir>0)?entry+InpTP2_R*risk:entry-InpTP2_R*risk;
-   double tp3=(dir>0)?entry+InpTP3_R*risk:entry-InpTP3_R*risk;
+   // TP dai livelli di price action (con riserva a multipli di R)
+   double res[],sup[]; ComputeLevels(rt,high,low,close,res,sup);
+   double tp1,tp2,tp3; PickTPs(dir,entry,risk,res,sup,tp1,tp2,tp3);
    int dg=_Digits; datetime tnow=time[rt-1];
    color ecol=(dir>0)?InpBuyCol:InpSellCol;
    string etxt=(dir>0)?"BUY":"SELL";
@@ -373,12 +447,12 @@ void DrawTrade(int rt,const datetime &time[],const double &close[])
    ObjectSetInteger(0,pre+"arrow",OBJPROP_ANCHOR,(dir>0)?ANCHOR_TOP:ANCHOR_BOTTOM);
    ObjectSetInteger(0,pre+"arrow",OBJPROP_SELECTABLE,false);
 
-   DrawTradePanel(true,dir,entry,stop);
+   DrawTradePanel(true,dir,entry,stop,tp1,tp2,tp3);
   }
 //+------------------------------------------------------------------+
 //| Pannello OPERAZIONE in alto a DESTRA: prezzi + size 1% x 3 TP    |
 //+------------------------------------------------------------------+
-void DrawTradePanel(bool ok,int dir,double entry,double stop)
+void DrawTradePanel(bool ok,int dir,double entry,double stop,double tp1,double tp2,double tp3)
   {
    string q=P+"q_";
    int RM=8, BW=210, LH=15, y=20;
@@ -387,9 +461,6 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop)
      { for(int i=0;i<12;i++) ObjectDelete(0,q+ids[i]); return; }
 
    double risk=MathAbs(entry-stop);
-   double tp1=(dir>0)?entry+InpTP1_R*risk:entry-InpTP1_R*risk;
-   double tp2=(dir>0)?entry+InpTP2_R*risk:entry-InpTP2_R*risk;
-   double tp3=(dir>0)?entry+InpTP3_R*risk:entry-InpTP3_R*risk;
    int dg=_Digits;
    double bal=AccountInfoDouble(ACCOUNT_BALANCE);
    double riskMoney=bal*gRiskPct/100.0;
@@ -410,10 +481,11 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop)
    LblR(q+"in",  RM+6, y+2*LH,   "Ingresso  "+DoubleToString(entry,dg), InpTextCol, InpFont);
    LblR(q+"sl",  RM+6, y+3*LH,   "Stop  "+DoubleToString(stop,dg)+"  ("+DoubleToString(slPts,0)+" pt)", InpStopCol, InpFont);
    double d1=MathAbs(tp1-entry)/_Point, d2=MathAbs(tp2-entry)/_Point, d3=MathAbs(tp3-entry)/_Point;
-   LblR(q+"h",   RM+6, y+4*LH,   "TARGET      prezzo     dist    lotti", InpHeadCol, InpFont-1);
-   LblR(q+"tp1", RM+6, y+5*LH,   "TP1 "+DoubleToString(InpTP1_R,1)+"R  "+DoubleToString(tp1,dg)+"  "+DoubleToString(d1,0)+"pt  "+DoubleToString(L1,2), InpTargetCol, InpFont);
-   LblR(q+"tp2", RM+6, y+6*LH,   "TP2 "+DoubleToString(InpTP2_R,1)+"R  "+DoubleToString(tp2,dg)+"  "+DoubleToString(d2,0)+"pt  "+DoubleToString(L2,2), InpTargetCol, InpFont);
-   LblR(q+"tp3", RM+6, y+7*LH,   "TP3 "+DoubleToString(InpTP3_R,1)+"R  "+DoubleToString(tp3,dg)+"  "+DoubleToString(d3,0)+"pt  "+DoubleToString(L3,2), InpTargetCol, InpFont);
+   double r1=(risk>0)?MathAbs(tp1-entry)/risk:0, r2=(risk>0)?MathAbs(tp2-entry)/risk:0, r3=(risk>0)?MathAbs(tp3-entry)/risk:0;
+   LblR(q+"h",   RM+6, y+4*LH,   "TARGET   prezzo     dist    R     lotti", InpHeadCol, InpFont-1);
+   LblR(q+"tp1", RM+6, y+5*LH,   "TP1  "+DoubleToString(tp1,dg)+"  "+DoubleToString(d1,0)+"pt  "+DoubleToString(r1,1)+"R  "+DoubleToString(L1,2), InpTargetCol, InpFont);
+   LblR(q+"tp2", RM+6, y+6*LH,   "TP2  "+DoubleToString(tp2,dg)+"  "+DoubleToString(d2,0)+"pt  "+DoubleToString(r2,1)+"R  "+DoubleToString(L2,2), InpTargetCol, InpFont);
+   LblR(q+"tp3", RM+6, y+7*LH,   "TP3  "+DoubleToString(tp3,dg)+"  "+DoubleToString(d3,0)+"pt  "+DoubleToString(r3,1)+"R  "+DoubleToString(L3,2), InpTargetCol, InpFont);
    // riga RISCHIO: etichetta + casella modificabile (clicca e scrivi il %)
    LblR (q+"risklbl", RM+56, y+8*LH, "Rischio % (clicca):  "+DoubleToString(riskMoney,2)+" =", InpTextCol, InpFont);
    EditR(q+"riskedit",RM+6,  y+8*LH-1, 46, 15, DoubleToString(gRiskPct,2));
@@ -432,16 +504,13 @@ double NormLots(double v)
    return v;
   }
 //+------------------------------------------------------------------+
-void DrawLevels(int rt,const datetime &time[],const double &high[],const double &low[],const double &close[])
+void ComputeLevels(int rt,const double &high[],const double &low[],const double &close[],double &res[],double &sup[])
   {
-   ObjectsDeleteAll(0, P+"lvl_");
-   if(!gShowLevels) return;
+   ArrayResize(res,0); ArrayResize(sup,0);
    int k=InpFractal; if(k<1) k=1;
    int look=MathMin(rt-1, InpLevelsLook);
    int from=rt-1-look; if(from<k) from=k;
    double price=close[rt-1];
-   double res[]; ArrayResize(res,0);
-   double sup[]; ArrayResize(sup,0);
    for(int i=from; i<rt-1-k; i++)
      {
       bool sh=true, sl=true;
@@ -451,8 +520,15 @@ void DrawLevels(int rt,const datetime &time[],const double &high[],const double 
       if(sh && high[i]>price){ int n=ArraySize(res); ArrayResize(res,n+1); res[n]=high[i]; }
       if(sl && low[i] <price){ int n=ArraySize(sup); ArrayResize(sup,n+1); sup[n]=low[i]; }
      }
-   ArraySort(res);
-   ArraySort(sup);
+   ArraySort(res); ArraySort(sup);
+  }
+//+------------------------------------------------------------------+
+void DrawLevels(int rt,const datetime &time[],const double &high[],const double &low[],const double &close[])
+  {
+   ObjectsDeleteAll(0, P+"lvl_");
+   if(!gShowLevels) return;
+   double res[],sup[]; ComputeLevels(rt,high,low,close,res,sup);
+   double price=close[rt-1];
    double tol=price*0.0008;
    int dg=_Digits; datetime tnow=time[rt-1];
    int drawn=0; double last=-1;
@@ -642,7 +718,10 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
    if(sparam==P+"btnHA")
      { gHA=!gHA; ObjectSetString(0,P+"btnHA",OBJPROP_TEXT, gHA?"HA":"CANDELE");
        ObjectSetInteger(0,P+"btnHA",OBJPROP_STATE,false);
-       ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT); return; }
+       BtnState(P+"btnHA",gHA);
+       ApplyHA();                                    // nasconde/mostra le candele reali
+       ChartSetSymbolPeriod(0,NULL,PERIOD_CURRENT);  // ricalcola le candele HA
+       return; }
 
    if(sparam==P+"btnLiv")
      { gShowLevels=!gShowLevels; ObjectSetInteger(0,P+"btnLiv",OBJPROP_STATE,false);
