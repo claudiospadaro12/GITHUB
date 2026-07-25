@@ -52,9 +52,26 @@ $Results    = Join-Path $RepoRoot "risultati_studio"
 $IniDir     = Join-Path $RepoRoot "ini_studio"
 New-Item -ItemType Directory -Force -Path $MqlExperts,$Results,$IniDir | Out-Null
 
-# --- copia + compila l'EA di studio ----------------------------------
+# --- trova (o scarica) l'EA di studio, poi compila -------------------
 Write-Host "`n[1/3] Copio e compilo $EAName ..." -ForegroundColor Yellow
-Copy-Item (Join-Path $RepoRoot "..\mql5\Experts\$EAName.mq5") -Destination $MqlExperts -Force
+$eaCandidates = @(
+    (Join-Path $RepoRoot "..\mql5\Experts\$EAName.mq5"),
+    (Join-Path $RepoRoot "$EAName.mq5"),
+    (Join-Path (Get-Location) "$EAName.mq5")
+)
+$eaSrc = $eaCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $eaSrc) {
+    Write-Host "   EA non trovato in locale: lo scarico da GitHub..." -ForegroundColor Yellow
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $rawBase = "https://raw.githubusercontent.com/claudiospadaro12/github/claude/creating-agents-SgGpD"
+        $eaSrc = Join-Path $env:TEMP "$EAName.mq5"
+        Invoke-WebRequest "$rawBase/mql5/Experts/$EAName.mq5" -OutFile $eaSrc -UseBasicParsing
+    } catch {
+        Write-Host "   Download fallito: $($_.Exception.Message)" -ForegroundColor Red; exit 1
+    }
+}
+Copy-Item $eaSrc -Destination $MqlExperts -Force
 $src = Join-Path $MqlExperts "$EAName.mq5"
 & $MetaEditor "/compile:$src" "/log" | Out-Null
 $ex5 = [System.IO.Path]::ChangeExtension($src, ".ex5")
