@@ -223,7 +223,9 @@ void Aggrega(int fsum, string titolo, int dirFilter, bool h4filter)
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-   int fh=FileOpen("ABTG_Apertura_Study_"+_Symbol+".csv", FILE_WRITE|FILE_CSV|FILE_ANSI, ';');
+   // FILE_COMMON: nel tester i file vanno nella sandbox dell'agente; con
+   // FILE_COMMON finiscono in ...\Terminal\Common\Files (raccoglibili).
+   int fh=FileOpen("ABTG_Apertura_Study_"+_Symbol+".csv", FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON, ';');
    if(fh!=INVALID_HANDLE)
      {
       FileWrite(fh,"idx","dir","risultato_R","H4trend");
@@ -233,7 +235,7 @@ void OnDeinit(const int reason)
       FileClose(fh);
      }
    // file di RIEPILOGO (comodo da mandare): una riga per scenario
-   int fs=FileOpen("ABTG_Apertura_Study_"+_Symbol+"_RIEPILOGO.csv", FILE_WRITE|FILE_CSV|FILE_ANSI, ';');
+   int fs=FileOpen("ABTG_Apertura_Study_"+_Symbol+"_RIEPILOGO.csv", FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON, ';');
    if(fs!=INVALID_HANDLE)
      {
       FileWrite(fs,"simbolo",_Symbol,"apertura",StringFormat("%02d:%02d",InpSessionHour,InpSessionMin),

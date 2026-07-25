@@ -46,9 +46,10 @@ Write-Host ("Cartella dati: {0}" -f $DataFolder)
 if (-not $Terminal -or -not (Test-Path $Terminal)) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
 if (-not $DataFolder -or -not (Test-Path $DataFolder)) { Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1 }
 
-$MqlExperts = Join-Path $DataFolder "MQL5\Experts"
-$MqlFiles   = Join-Path $DataFolder "MQL5\Files"
-$Results    = Join-Path $RepoRoot "risultati_studio"
+$MqlExperts  = Join-Path $DataFolder "MQL5\Experts"
+# Nel tester i file con FILE_COMMON finiscono qui (NON in MQL5\Files):
+$CommonFiles = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+$Results     = Join-Path $RepoRoot "risultati_studio"
 $IniDir     = Join-Path $RepoRoot "ini_studio"
 New-Item -ItemType Directory -Force -Path $MqlExperts,$Results,$IniDir | Out-Null
 
@@ -128,8 +129,8 @@ foreach ($j in $jobs) {
 Write-Host "`n[3/3] Raccolgo i CSV..." -ForegroundColor Yellow
 $found = 0
 foreach ($j in $jobs) {
-    $csv = Join-Path $MqlFiles ("ABTG_Apertura_Study_" + $j.sym + ".csv")
-    $sum = Join-Path $MqlFiles ("ABTG_Apertura_Study_" + $j.sym + "_RIEPILOGO.csv")
+    $csv = Join-Path $CommonFiles ("ABTG_Apertura_Study_" + $j.sym + ".csv")
+    $sum = Join-Path $CommonFiles ("ABTG_Apertura_Study_" + $j.sym + "_RIEPILOGO.csv")
     if (Test-Path $csv) { Copy-Item $csv -Destination $Results -Force; $found++; Write-Host "   OK  $($j.sym)" -ForegroundColor Green }
     else { Write-Host "   MANCA il CSV per $($j.sym) (0 trade? ora d'apertura sbagliata?)" -ForegroundColor Red }
     if (Test-Path $sum) {
