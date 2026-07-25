@@ -63,7 +63,7 @@ input int    InpMA3       = 100;   // Media media
 input int    InpMA4       = 200;   // Media lenta
 input ENUM_MA_METHOD InpMAmethod = MODE_SMA; // tipo medie
 input bool   InpShowCross = true;  // segna l'INCROCIO media50 x media200 a favore del Supertrend
-input int    InpCrossWindow = 20;  // quanto indietro cercare l'incrocio (barre)
+input int    InpCrossWindow = 60;  // quanto indietro cercare l'incrocio (barre) - asterisco visibile piu' a lungo
 input int    InpMaxCandles= 10;    // accendi la cella solo se il segnale e' entro N candele
 input int    InpBatch     = 6;     // simboli ricalcolati per secondo (piu' basso = grafico piu' fluido)
 input bool   InpBlink     = true;  // lampeggio (dolce) dei simboli in confluenza H4/M3
@@ -336,15 +336,17 @@ void DrawCross(int rt,const datetime &time[])
       int stdir = (c1[i]==0)?1:-1;          // direzione Supertrend a quella barra
       bool agree = (cdir==stdir);           // l'incrocio "taglia" il Supertrend a favore
       gCrossOK=agree; gCrossDir=cdir;
-      color col = agree ? (cdir>0?InpBuyCol:InpSellCol) : C'130,130,130';
+      color col = (cdir>0)?InpBuyCol:InpSellCol;   // sempre verde(BUY)/rosso(SELL)
+      // ASTERISCO grande (Wingdings, garantito) + freccia sul punto d'incrocio
       if(ObjectFind(0,nm)<0) ObjectCreate(0,nm,OBJ_ARROW,0,0,0);
       ObjectSetInteger(0,nm,OBJPROP_TIME,time[i]);
       ObjectSetDouble (0,nm,OBJPROP_PRICE,ma2[i]);
-      ObjectSetInteger(0,nm,OBJPROP_ARROWCODE,118);   // diamante
+      ObjectSetInteger(0,nm,OBJPROP_ARROWCODE,(cdir>0)?233:234);  // freccia su(BUY)/giu(SELL) - garantita
       ObjectSetInteger(0,nm,OBJPROP_COLOR,col);
-      ObjectSetInteger(0,nm,OBJPROP_WIDTH,3);
+      ObjectSetInteger(0,nm,OBJPROP_WIDTH,5);          // bella grande
+      ObjectSetInteger(0,nm,OBJPROP_ANCHOR,(cdir>0)?ANCHOR_BOTTOM:ANCHOR_TOP);
       ObjectSetInteger(0,nm,OBJPROP_SELECTABLE,false);
-      Txt(nm+"t",time[i],ma2[i], agree?"INCROCIO OTTIMO":"incrocio 50x200", col);
+      Txt(nm+"t",time[i],ma2[i], agree?"INCROCIO 50x200 OTTIMO":"incrocio 50x200", col);
       break;                                 // il piu' recente
      }
   }
@@ -788,10 +790,14 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
         }
       else
         {
-         // MOSTRA: ricostruisco la griglia da zero (pulita e colorata)
+         // MOSTRA: ricostruisco la griglia. Cancello anche i tasti cosi' BuildPanel li
+         // ricrea DOPO il pannello (restano SOPRA, non nascosti dallo sfondo).
+         ObjectDelete(0,P+"btnHA"); ObjectDelete(0,P+"btnLiv");
+         ObjectDelete(0,P+"btnST"); ObjectDelete(0,P+"btnHide");
          BuildPanel();
-         ObjectSetString(0,P+"btnHide",OBJPROP_TEXT,"Nascondi");
-         gUpdIdx=0; UpdateAll(); BlinkConfluence();
+         // niente UpdateAll pesante qui: le celle si riempiono col ricalcolo incrementale
+         // (fluido). Riparto dall'inizio del ciclo.
+         gUpdIdx=0;
         }
       ChartRedraw();
       return;
