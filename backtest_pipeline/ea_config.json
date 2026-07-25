@@ -447,6 +447,29 @@
      "stop": 3.0
     }
    }
+  },
+  {
+   "file": "ABTG_SuperWave_EA",
+   "symbol": "D30EUR",
+   "period": "M3",
+   "_note": "Strategia SuperWave variante A: direzione H4 + inversione Supertrend M3, TP price action, size 1% 40/30/30.",
+   "params": {
+    "InpStMult": {
+     "start": 2.5,
+     "step": 0.5,
+     "stop": 4.5
+    },
+    "InpStopAtrFloor": {
+     "start": 0.5,
+     "step": 0.5,
+     "stop": 2.0
+    },
+    "InpEntryFlipBars": {
+     "start": 1,
+     "step": 1,
+     "stop": 3
+    }
+   }
   }
  ]
 }
