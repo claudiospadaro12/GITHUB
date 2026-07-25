@@ -496,7 +496,7 @@ void DrawTradePanel(bool ok,int dir,double entry,double stop,double tp1,double t
    LblR(q+"tp3", RM+6, y+7*LH,   "TP3  "+DoubleToString(tp3,dg)+"  "+DoubleToString(d3,0)+"pt  "+DoubleToString(r3,1)+"R  "+DoubleToString(L3,2), InpTargetCol, InpFont);
    // riga RISCHIO: etichetta + casella modificabile (clicca e scrivi il %)
    LblR (q+"risklbl", RM+56, y+8*LH, "Rischio % (clicca):  "+DoubleToString(riskMoney,2)+" =", InpTextCol, InpFont);
-   EditR(q+"riskedit",RM+6,  y+8*LH-1, 46, 15, DoubleToString(gRiskPct,2));
+   EditR(q+"riskedit",RM+48, y+8*LH-1, 44, 15, DoubleToString(gRiskPct,2));  // X>larghezza: resta dentro
    string crossN = gCrossOK ? "  ·  INCROCIO OTTIMO" : "";
    color  noteC  = gCrossOK ? InpTargetCol : C'140,144,150';
    LblR (q+"note",    RM+6,  y+9*LH,   "size "+DoubleToString(InpSize1,0)+"/"+DoubleToString(InpSize2,0)+"/"+DoubleToString(InpSize3,0)+"%  ·  tot "+DoubleToString(NormLots(totLots),2)+" lot"+crossN, noteC, InpFont-1);
