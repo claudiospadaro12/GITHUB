@@ -77,6 +77,7 @@ int OnInit()
    BuildPanel();
    EventSetTimer(3);
    UpdateAll();
+   PrintFormat("[SuperWave] dashboard AVVIATA: %d simboli x %d TF (pannello a X=%d Y=%d). Se non la vedi, l'oggetto e' fuori schermo: riduci InpX/InpY.", gNsym, NTF, InpX, InpY);
    return(INIT_SUCCEEDED);
   }
 //+------------------------------------------------------------------+
@@ -157,7 +158,7 @@ void BuildPanel()
   {
    int panelW = InpSymW + NTF*InpCellW + 6;
    int panelH = (gNsym+2)*InpCellH + 10;
-   Rect(P+"panel", InpX-3, InpY-3, panelW, panelH, InpPanelCol, InpPanelCol, true);
+   Rect(P+"panel", InpX-3, InpY-3, panelW, panelH, InpPanelCol, InpPanelCol, false); // false = SOPRA le candele (opaco, ben visibile)
 
    Lbl(P+"title", InpX+2, InpY, "SUPERWAVE  ST  INVERSION", InpHeadCol, InpFont+1);
    Btn(P+"btnHA",   InpX+InpSymW+3*InpCellW, InpY-2, 3*InpCellW-2, 15, gHA?"HEIKIN ASHI":"CANDELE");
