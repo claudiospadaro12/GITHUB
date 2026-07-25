@@ -25,7 +25,7 @@
 //--- DEFAULT specifici per il Nasdaq (usati dal motore ABTG_ApertureCore)
 #define ABTG_DEF_NAME         "Nasdaq Apertura US OTT"
 #define ABTG_DEF_MAGIC        770211
-#define ABTG_DEF_SESSION_HOUR 15     // apertura Nasdaq cash (server) - ADATTA AL TUO BROKER!
+#define ABTG_DEF_SESSION_HOUR 14     // Nasdaq 15:30 IT = 14:30 server BCM
 #define ABTG_DEF_SESSION_MIN  30
 #define ABTG_DEF_RANGE_MIN    15     // (usato in gap fill o se passi a range di apertura)
 #define ABTG_DEF_RANGE_MODE   2      // 2=massimi/minimi della CANDELA PRECEDENTE (piano: su H1)

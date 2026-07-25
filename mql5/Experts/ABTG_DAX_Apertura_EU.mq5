@@ -23,7 +23,7 @@
 //--- DEFAULT specifici per il DAX (usati dal motore ABTG_ApertureCore)
 #define ABTG_DEF_NAME         "DAX Apertura EU"
 #define ABTG_DEF_MAGIC        770101
-#define ABTG_DEF_SESSION_HOUR 9      // apertura DAX (server) - ADATTA AL TUO BROKER!
+#define ABTG_DEF_SESSION_HOUR 8      // apertura DAX 09:00 IT = 08:00 server BCM
 #define ABTG_DEF_SESSION_MIN  0
 #define ABTG_DEF_RANGE_MIN    15     // range dei primi 15 minuti (PDF: "primi 15 minuti")
 #define ABTG_DEF_RANGE_MODE   0      // 0=range di apertura (breakout classico dell'apertura EU)
