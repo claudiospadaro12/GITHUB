@@ -116,9 +116,72 @@ def _order_comments(ws) -> dict:
     return comments
 
 
+def _add_trade(st: Stats, t: Trade, since, all_opens, all_closes) -> None:
+    st.total_in_file += 1
+    all_opens.append(t.open_time[:10])
+    if t.close_time and t.close_time[:1].isdigit():
+        all_closes.append(t.close_time[:10])
+    if since and t.open_time[:10] < since:
+        return
+    t.net = t.profit + t.commission + t.swap
+    st.trades.append(t)
+
+
+def _finalize(st: Stats, all_opens, all_closes) -> Stats:
+    if all_opens:
+        st.first_open = min(all_opens)
+    if all_closes:
+        st.last_close = max(all_closes)
+    for t in st.trades:
+        st.net_total += t.net
+        if t.net > 0:
+            st.gross_profit += t.net; st.wins += 1
+        else:
+            st.gross_loss += t.net; st.losses += 1
+        day = t.open_time[:10]
+        for key, bucket in ((t.symbol, st.by_symbol), (day, st.by_day),
+                            (t.strategy or "(manuale/senza commento)", st.by_strategy),
+                            (classify_asset(t.symbol), st.by_class)):
+            b = bucket.setdefault(key, {"n": 0, "wins": 0, "net": 0.0})
+            b["n"] += 1; b["wins"] += 1 if t.net > 0 else 0; b["net"] += t.net
+    return st
+
+
+def _parse_csv(path: str, since: str | None) -> Stats:
+    """Legge il CSV prodotto dall'EA ABTG_TradeExporter (una riga per trade
+    chiuso). Colonne (;): pid;symbol;side;volume;open_time;open_price;
+    close_time;close_price;commission;swap;profit;strategy."""
+    import csv as _csv
+    st = Stats()
+    all_opens: list[str] = []
+    all_closes: list[str] = []
+    with open(path, "r", encoding="cp1252", errors="replace", newline="") as fh:
+        for row in _csv.reader(fh, delimiter=";"):
+            if not row or len(row) < 11:
+                continue
+            if row[0].strip().lower() in ("pid", "position", "posizione"):
+                continue  # header
+            try:
+                t = Trade(
+                    pid=str(row[0]), symbol=str(row[1]), side=str(row[2]), volume=_num(row[3]),
+                    open_time=str(row[4]), open_price=_num(row[5]),
+                    close_time=str(row[6]), close_price=_num(row[7]),
+                    commission=_num(row[8]), swap=_num(row[9]), profit=_num(row[10]),
+                    net=0.0, strategy=(str(row[11]) if len(row) > 11 else ""),
+                )
+            except (IndexError, ValueError):
+                continue
+            _add_trade(st, t, since, all_opens, all_closes)
+    return _finalize(st, all_opens, all_closes)
+
+
 def parse(path: str, since: str | None = None) -> Stats:
-    """Legge lo statement. Se `since` (formato 'AAAA.MM.GG') e' dato, considera
-    solo i trade aperti da quella data in poi (per limitarsi alla settimana)."""
+    """Legge lo statement (xlsx MT5 o CSV dell'EA exporter). Se `since`
+    (formato 'AAAA.MM.GG') e' dato, considera solo i trade aperti da quella
+    data in poi (per limitarsi alla settimana)."""
+    if path.lower().endswith(".csv"):
+        return _parse_csv(path, since)
+
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     ws = wb[wb.sheetnames[0]]
     rows = list(ws.iter_rows(values_only=True))
@@ -155,34 +218,6 @@ def parse(path: str, since: str | None = None) -> Stats:
             )
         except (IndexError, ValueError):
             continue
-        st.total_in_file += 1
-        all_opens.append(t.open_time[:10])
-        if t.close_time and t.close_time[0].isdigit():
-            all_closes.append(t.close_time[:10])
-        # filtro settimana: salta i trade aperti prima di `since`
-        if since and t.open_time[:10] < since:
-            continue
-        t.net = t.profit + t.commission + t.swap
-        st.trades.append(t)
+        _add_trade(st, t, since, all_opens, all_closes)
 
-    # copertura del file: quando inizia e (soprattutto) fin dove arriva
-    if all_opens:
-        st.first_open = min(all_opens)
-    if all_closes:
-        st.last_close = max(all_closes)
-
-    # aggregati
-    for t in st.trades:
-        st.net_total += t.net
-        if t.net > 0:
-            st.gross_profit += t.net; st.wins += 1
-        else:
-            st.gross_loss += t.net; st.losses += 1
-        day = t.open_time[:10]
-        for key, bucket in ((t.symbol, st.by_symbol), (day, st.by_day),
-                            (t.strategy or "(manuale/senza commento)", st.by_strategy),
-                            (classify_asset(t.symbol), st.by_class)):
-            b = bucket.setdefault(key, {"n": 0, "wins": 0, "net": 0.0})
-            b["n"] += 1; b["wins"] += 1 if t.net > 0 else 0; b["net"] += t.net
-
-    return st
+    return _finalize(st, all_opens, all_closes)
