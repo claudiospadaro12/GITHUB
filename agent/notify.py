@@ -17,8 +17,10 @@ def _plain_text_fallback(html: str) -> str:
     )
 
 
-def send_email(settings: config.Settings, subject: str, html_body: str) -> None:
-    """Invia il report HTML all'indirizzo configurato."""
+def send_email(settings: config.Settings, subject: str, html_body: str,
+               attachments: list[str] | None = None) -> None:
+    """Invia il report HTML all'indirizzo configurato.
+    `attachments`: lista di percorsi file (es. il PDF) da allegare."""
     settings.require_email()
 
     msg = EmailMessage()
@@ -27,6 +29,18 @@ def send_email(settings: config.Settings, subject: str, html_body: str) -> None:
     msg["To"] = settings.email_to
     msg.set_content(_plain_text_fallback(html_body))
     msg.add_alternative(html_body, subtype="html")
+
+    import os
+    for path in (attachments or []):
+        if not path or not os.path.exists(path):
+            continue
+        with open(path, "rb") as fh:
+            data = fh.read()
+        name = os.path.basename(path)
+        if name.lower().endswith(".pdf"):
+            msg.add_attachment(data, maintype="application", subtype="pdf", filename=name)
+        else:
+            msg.add_attachment(data, maintype="application", subtype="octet-stream", filename=name)
 
     context = ssl.create_default_context()
     if settings.smtp_port == 465:

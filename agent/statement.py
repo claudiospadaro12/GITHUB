@@ -59,6 +59,9 @@ class Stats:
     by_day: dict = field(default_factory=dict)
     by_strategy: dict = field(default_factory=dict)
     by_class: dict = field(default_factory=dict)   # Indici/Valute/Cross/Metalli
+    first_open: str = ""     # data del primo trade nello statement (copertura)
+    last_close: str = ""     # data dell'ultimo trade CHIUSO (per capire se e' aggiornato)
+    total_in_file: int = 0   # trade totali nel file (prima del filtro settimana)
 
     @property
     def win_rate(self) -> float:
@@ -136,6 +139,8 @@ def parse(path: str, since: str | None = None) -> Stats:
     comments = _order_comments(ws)
 
     st = Stats()
+    all_opens: list[str] = []
+    all_closes: list[str] = []
     for r in rows[start:end]:
         if not r or r[1] is None:
             continue
@@ -150,11 +155,21 @@ def parse(path: str, since: str | None = None) -> Stats:
             )
         except (IndexError, ValueError):
             continue
+        st.total_in_file += 1
+        all_opens.append(t.open_time[:10])
+        if t.close_time and t.close_time[0].isdigit():
+            all_closes.append(t.close_time[:10])
         # filtro settimana: salta i trade aperti prima di `since`
         if since and t.open_time[:10] < since:
             continue
         t.net = t.profit + t.commission + t.swap
         st.trades.append(t)
+
+    # copertura del file: quando inizia e (soprattutto) fin dove arriva
+    if all_opens:
+        st.first_open = min(all_opens)
+    if all_closes:
+        st.last_close = max(all_closes)
 
     # aggregati
     for t in st.trades:
