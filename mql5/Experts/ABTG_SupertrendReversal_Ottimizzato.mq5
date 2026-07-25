@@ -70,7 +70,7 @@ input bool   InpTrailOnST      = true;  // trailing dello stop sul Supertrend
 input bool   InpExitOnFlip     = true;  // esci se il Supertrend gira contro
 
 input group "=== Rischio ==="
-input double InpRiskPercent   = 1.0;    // rischio per trade in % (sull'intera size)
+input double InpRiskPercent   = 2.0;    // OTT: rischio 2% (PF alto). DD backtest ~2,6% -> occhio alla concentrazione oro
 input int    InpMaxTradesPerDay = 0;    // 0 = illimitato
 
 input group "=== Filtro orari (ORA SERVER; opzionale) ==="
