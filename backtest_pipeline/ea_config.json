@@ -74,8 +74,24 @@
      "start": 100,
      "step": 100,
      "stop": 800
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpUseSupertrend": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
-   }
+   },
+   "_note": "v2: direzione LONG/SHORT separata + filtro Supertrend (stessa filosofia aperture). OHLC 1-min."
   },
   {
    "file": "ABTG_Nasdaq_Apertura_US",
@@ -140,8 +156,24 @@
      "start": 100,
      "step": 100,
      "stop": 800
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpUseSupertrend": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
-   }
+   },
+   "_note": "v2: direzione LONG/SHORT separata + filtro Supertrend (stessa filosofia aperture). OHLC 1-min."
   },
   {
    "file": "ABTG_ORB",
@@ -162,8 +194,19 @@
      "start": 1.0,
      "step": 0.5,
      "stop": 3.0
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
-   }
+   },
+   "_note": "v2: direzione LONG/SHORT separata (stessa filosofia aperture). OHLC 1-min."
   },
   {
    "file": "ABTG_ORB_Fibo",
@@ -184,8 +227,19 @@
      "start": 0.0,
      "step": 0.5,
      "stop": 2.0
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
-   }
+   },
+   "_note": "v2: direzione LONG/SHORT separata (stessa filosofia aperture). OHLC 1-min."
   },
   {
    "file": "ABTG_Londra_ORB",
@@ -201,8 +255,19 @@
      "start": 0.5,
      "step": 0.25,
      "stop": 2.0
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
-   }
+   },
+   "_note": "v2: direzione LONG/SHORT separata (stessa filosofia aperture). OHLC 1-min."
   },
   {
    "file": "ABTG_MaxMinNotte",
@@ -355,8 +420,19 @@
      "start": 1000,
      "step": 500,
      "stop": 3500
+    },
+    "InpAllowLong": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
+    },
+    "InpAllowShort": {
+     "start": 0,
+     "step": 1,
+     "stop": 1
     }
-   }
+   },
+   "_note": "v2: direzione LONG/SHORT separata (stessa filosofia aperture). OHLC 1-min."
   },
   {
    "file": "ABTG_EMA200",
