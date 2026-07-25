@@ -62,7 +62,7 @@ input int    InpMA2       = 50;    // Media 50 (per l'INCROCIO - Giorgio Bo)
 input int    InpMA3       = 100;   // Media media
 input int    InpMA4       = 200;   // Media lenta
 input ENUM_MA_METHOD InpMAmethod = MODE_SMA; // tipo medie
-input bool   InpShowCross = true;  // segna l'INCROCIO media50 x media200 a favore del Supertrend
+input bool   InpShowCross = true;  // segna l'INCROCIO media14 x media200 a favore del Supertrend
 input int    InpCrossWindow = 60;  // quanto indietro cercare l'incrocio (barre) - asterisco visibile piu' a lungo
 input int    InpMaxCandles= 10;    // accendi la cella solo se il segnale e' entro N candele
 input int    InpBatch     = 6;     // simboli ricalcolati per secondo (piu' basso = grafico piu' fluido)
@@ -317,7 +317,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
    return(rates_total);
   }
 //+------------------------------------------------------------------+
-//| INCROCIO media50 x media200 a favore del Supertrend = ottimo    |
+//| INCROCIO media14 x media200 a favore del Supertrend = ottimo    |
 //+------------------------------------------------------------------+
 void DrawCross(int rt,const datetime &time[])
   {
@@ -328,25 +328,27 @@ void DrawCross(int rt,const datetime &time[])
    int w=MathMin(InpCrossWindow, rt-3);
    for(int i=rt-2; i>=rt-2-w && i>1; i--)
      {
-      if(ma2[i]==EMPTY_VALUE || ma4[i]==EMPTY_VALUE || ma2[i-1]==EMPTY_VALUE || ma4[i-1]==EMPTY_VALUE) continue;
-      bool up = (ma2[i-1]<=ma4[i-1] && ma2[i]>ma4[i]);   // 50 incrocia 200 al rialzo
-      bool dn = (ma2[i-1]>=ma4[i-1] && ma2[i]<ma4[i]);   // 50 incrocia 200 al ribasso
+      // INCROCIO 14 x 200 (la strategia usa 14 e 200; la 50 era l'alternativa di Giorgio Bo)
+      if(ma1[i]==EMPTY_VALUE || ma4[i]==EMPTY_VALUE || ma1[i-1]==EMPTY_VALUE || ma4[i-1]==EMPTY_VALUE) continue;
+      bool up = (ma1[i-1]<=ma4[i-1] && ma1[i]>ma4[i]);   // 14 incrocia 200 al rialzo
+      bool dn = (ma1[i-1]>=ma4[i-1] && ma1[i]<ma4[i]);   // 14 incrocia 200 al ribasso
       if(!up && !dn) continue;
       int cdir  = up?1:-1;
       int stdir = (c1[i]==0)?1:-1;          // direzione Supertrend a quella barra
       bool agree = (cdir==stdir);           // l'incrocio "taglia" il Supertrend a favore
       gCrossOK=agree; gCrossDir=cdir;
-      color col = (cdir>0)?InpBuyCol:InpSellCol;   // sempre verde(BUY)/rosso(SELL)
-      // ASTERISCO grande (Wingdings, garantito) + freccia sul punto d'incrocio
-      if(ObjectFind(0,nm)<0) ObjectCreate(0,nm,OBJ_ARROW,0,0,0);
+      color col = (cdir>0)?InpBuyCol:InpSellCol;   // verde(BUY)/rosso(SELL)
+      // ASTERISCO grande sul punto d'incrocio ("*" - reso da qualunque font)
+      if(ObjectFind(0,nm)<0) ObjectCreate(0,nm,OBJ_TEXT,0,0,0);
       ObjectSetInteger(0,nm,OBJPROP_TIME,time[i]);
-      ObjectSetDouble (0,nm,OBJPROP_PRICE,ma2[i]);
-      ObjectSetInteger(0,nm,OBJPROP_ARROWCODE,(cdir>0)?233:234);  // freccia su(BUY)/giu(SELL) - garantita
+      ObjectSetDouble (0,nm,OBJPROP_PRICE,ma1[i]);
+      ObjectSetString (0,nm,OBJPROP_TEXT,"*");
+      ObjectSetString (0,nm,OBJPROP_FONT,"Arial Black");
+      ObjectSetInteger(0,nm,OBJPROP_FONTSIZE,28);
       ObjectSetInteger(0,nm,OBJPROP_COLOR,col);
-      ObjectSetInteger(0,nm,OBJPROP_WIDTH,5);          // bella grande
-      ObjectSetInteger(0,nm,OBJPROP_ANCHOR,(cdir>0)?ANCHOR_BOTTOM:ANCHOR_TOP);
+      ObjectSetInteger(0,nm,OBJPROP_ANCHOR,ANCHOR_CENTER);
       ObjectSetInteger(0,nm,OBJPROP_SELECTABLE,false);
-      Txt(nm+"t",time[i],ma2[i], agree?"INCROCIO 50x200 OTTIMO":"incrocio 50x200", col);
+      Txt(nm+"t",time[i],ma1[i], agree?"INCROCIO 14x200 OTTIMO":"incrocio 14x200", col);
       break;                                 // il piu' recente
      }
   }
