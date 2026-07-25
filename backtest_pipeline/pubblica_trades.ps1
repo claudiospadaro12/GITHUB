@@ -76,7 +76,16 @@ try {
         -Body ($body | ConvertTo-Json) -ContentType "application/json" | Out-Null
     Write-Host "OK pubblicato: $RepoPath" -ForegroundColor Green
 } catch {
+    $code = $null
+    try { $code = $_.Exception.Response.StatusCode.value__ } catch {}
     Write-Host "PUBBLICAZIONE FALLITA: $($_.Exception.Message)" -ForegroundColor Red
+    if ($code -eq 403 -or $code -eq 404) {
+        Write-Host ""
+        Write-Host ">> Il token NON ha il permesso di SCRIVERE file nel repo." -ForegroundColor Yellow
+        Write-Host "   Serve un Personal Access Token (classic) con scope 'repo'," -ForegroundColor Yellow
+        Write-Host "   oppure fine-grained con 'Contents: Read and write' su $Owner/$Repo." -ForegroundColor Yellow
+        Write-Host "   Rigeneralo su GitHub, salvalo nel file .gh_report_token.txt e rilancia." -ForegroundColor Yellow
+    }
     exit 1
 }
 
