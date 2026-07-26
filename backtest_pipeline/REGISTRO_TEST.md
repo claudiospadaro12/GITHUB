@@ -58,12 +58,15 @@ _Strategia = trend + rimbalzo (NON breakout). Su oro fa PF 3.17. Ottimizza StMul
 | S1 | DAX (D30EUR) | **H1** | **66% combo pos**, best +2254 PF 1.48 (419 tr) / +1955 **PF 2.01 DD 4.0%** (239 tr), 67 combo con PF>1.2 | 🟢 **grande candidato** (da validare real tick) |
 | S2 | DAX (D30EUR) | M5 | 0% pos, DD 30-37% | 🔴 morto |
 | S3 | Nasdaq (NASUSD) | H4 | 43% pos ma best solo 15-19 trade | 🟡 pochi trade, inaffidabile |
-| S4 | DAX (D30EUR) | H4 | — | ⏳ da rifare (ripresa) |
-| S5 | Nasdaq (NASUSD) | **H1** | — | ⏳ da rifare — **il più atteso** |
-| S6 | Nasdaq (NASUSD) | M5 | — | ⏳ da rifare (atteso morto) |
+| S4 | DAX (D30EUR) | **H4** | 55% pos, 68 combo PF>1.2; best +1196 PF 1.64 DD 6.6% (181tr), fino a PF 3.34 (85tr) | 🟢 edge robusto |
+| S5 | Nasdaq (NASUSD) | **H1** | 47% pos, **58 combo PF>1.2**; best **PF 1.79 DD 0.9% 135tr**, cluster PF 1.66-1.79 DD ~1% | 🟢 edge pulito |
+| S6 | Nasdaq (NASUSD) | M5 | 5% pos, best PF 1.10 DD 11.5% | 🔴 morto |
 
-**S1 = miglior scoperta indici finora (da discutere con Emiliano):**
-`SupertrendReversal su DAX H1 | StMult ~3.0-3.5 | StAtrPeriod ~8-9 | TP in R ~2.5-3.0 | rischio 1%` → PF 1.48-2.01, DD 4-9%, 240-420 trade/2,5 anni.
+**SCOPERTA INDICI (da validare in real tick, poi forward):**
+- `SupertrendReversal DAX **H1**` | StMult 3.0 / AtrP 9-10 / TP_RR 3.0 → PF 1.5-2.0, DD 4%, **419 tr**
+- `SupertrendReversal DAX **H4**` | StMult 3.0 / AtrP 8-9 / TP_RR 3.0 → PF 1.6-2.6, DD 3-7%, 85-181 tr
+- `SupertrendReversal Nasdaq **H1**` | StMult 3.0-3.5 / AtrP 10 / TP_RR 3.0 → PF 1.66-1.79, **DD ~1%**, 135-155 tr
+- M5 morto su entrambi. H4 Nasdaq pochi trade.
 
 ---
 
