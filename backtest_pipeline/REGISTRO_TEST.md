@@ -346,3 +346,20 @@ _Sweep buffer x SL-ATR x filtro box x correlazione S&P. La correlazione e' la CH
 - Promosso: `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` (magic 770411) — short only, corr S&P ON, buffer 1000, SL ATR x2.5, TP2 3.0, rischio 1%.
 - **Complementare all'aperture LONG:** sul DAX ora copriamo entrambe le direzioni (aperture LONG + night-box SHORT), con setup e orari diversi.
 - Nota metodologica: la correlazione S&P NON salvava il breakout M5 (test Marco/Emiliano) ma QUI salva il night-box. Il filtro giusto dipende dalla strategia.
+
+---
+
+## EA SuperWave — cross EMA14x200 a favore del Supertrend (26.07.26, screen OHLC)
+_Nuovo EA dalla dashboard SuperWave (magic 770501). Ingresso: incrocio EMA14xEMA200 confermato dal Supertrend. Griglia StMult 2.5/3.0/3.5 x TP_RR 2.0/2.5/3.0, entrambe direzioni, rischio 1%._
+
+| Sym | Strumento | TF | Migliore | PF | DD% | Trade | Verdetto |
+|---|---|---|---|---|---|---|---|
+| U30USD | Dow | **H1** | StMult 2.5 / TP 3.0 | **1.42** | 4.3% | 226 | 🟢 vincitore (tutte pos.) |
+| D30EUR | DAX | H4 | StMult 3.0 / TP 2.0 | 1.30 | 3.3% | 56 | 🟡 decente |
+| U30USD | Dow | H4 | StMult 3.5 | 2.5 | 5.9% | 23 | 🟡 pochi trade |
+| NASUSD | Nasdaq | H1 | StMult 3.0 / TP 2.0 | 1.26 | 2.0% | 95 | 🟡 marginale |
+| D30EUR | DAX | H1 | — | max 0.84 | 17% | — | 🔴 morto |
+| NASUSD | Nasdaq | H4 | — | negative | — | 16-18 | 🔴 morto |
+| XAUUSD | Oro | H1/H4 | — | ~1.0/neg | — | — | 🔴 morto (l'oro rende col SupRev, non col cross) |
+
+> **SuperWave: il cross 14x200 e' un motore di TREND** — vivo su Dow H1 (netto, 226tr) e DAX H4 (56tr). Su oro/Nasdaq no. Da validare real-tick: Dow H1 + DAX H4.
