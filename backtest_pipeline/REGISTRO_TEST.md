@@ -331,3 +331,18 @@ _Box 23:00-04:59 server, piazza 07:59, cutoff 08:30. Sweep direzione x buffer, S
 | Stoxx50 (E50EUR) | — | max 0.59 | — | — | 🔴 morto |
 
 > **Night-box: solo DAX SHORT ha edge (PF 1.19)** — la rottura al RIBASSO del range notturno (opposto dell'aperture che e' LONG). Complementare all'aperture. In raffinamento (`valid_MaxMin_DAX_short_refine`: buffer x SL-ATR x filtro ampiezza box x correlazione S&P). Nota: un AGENTE non puo' ottimizzare (non ha MT5); l'ottimizzazione gira sul PC di backtest.
+
+### ✅ RAFFINAMENTO DAX night-box SHORT (26.07.26) — CONFERMATO real-tick
+_Sweep buffer x SL-ATR x filtro box x correlazione S&P. La correlazione e' la CHIAVE._
+
+| Config (short) | PF | DD% | Trade | Note |
+|---|---|---|---|---|
+| **corr ON, buffer 1000, AtrSL 2.5, TP2 3.0** ⭐ | **2.05** | 3.1% | 41 | scelto (centrale del plateau) |
+| corr ON, buffer 1300, AtrSL 2.5 | 2.25 | 3.2% | 38 | miglior profitto |
+| corr ON, buffer 700, AtrSL 2.0 | 2.10 | 3.5% | 39 | |
+| corr OFF (qualsiasi) | 1.0-1.25 | 6-9% | ~100 | modesto |
+
+- **La correlazione S&P raddoppia il PF (1.2→2.0+) e dimezza il DD (7%→3%)**, taglia i trade a ~40. Filtro ampiezza box irrilevante (notti DAX sempre larghe).
+- Promosso: `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` (magic 770411) — short only, corr S&P ON, buffer 1000, SL ATR x2.5, TP2 3.0, rischio 1%.
+- **Complementare all'aperture LONG:** sul DAX ora copriamo entrambe le direzioni (aperture LONG + night-box SHORT), con setup e orari diversi.
+- Nota metodologica: la correlazione S&P NON salvava il breakout M5 (test Marco/Emiliano) ma QUI salva il night-box. Il filtro giusto dipende dalla strategia.
