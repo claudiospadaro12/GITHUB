@@ -20,9 +20,8 @@ $ErrorActionPreference = "Stop"
 $Branch  = "claude/creating-agents-SgGpD"
 $RawBase = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch/mql5/Experts"
 
-# EA da installare (i due _Ottimizzato delle aperture)
+# EA _Ottimizzato VALIDATI pronti per il forward (Nasdaq aperture TOLTO: morto in real tick)
 $EAs = @(
-    "ABTG_Nasdaq_Apertura_US_Ottimizzato",
     "ABTG_DAX_Apertura_EU_Ottimizzato"
 )
 
