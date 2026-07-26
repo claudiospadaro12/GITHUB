@@ -33,9 +33,11 @@ _Documento vivo: aggiornato ad ogni nuovo backtest. Pensato anche per condivider
 |---|---|---|---|---|---|---|
 | L1 | DAX_Live5m (orig.) | D30EUR | buffer 700, entrambe | real tick | 27/27 combo NEGATIVE | 🔴 morto |
 | L2 | Nasdaq_Live5m (orig.) | NASUSD | buffer 700, entrambe | real tick | 27/27 combo NEGATIVE | 🔴 morto |
-| L3 | DAX_Live5m_v2 | D30EUR | +floor +slippage +direzione, 3 varianti | real tick | solo V3 (PrevWin15+ST) marginale, PF 1.04 | 🟠 in pari |
+| L3 | DAX_Live5m_v2 | D30EUR | +floor +slippage +range filter (32 combo) | real tick | best PF **1.04** DD ~10% (solo con Supertrend ON + PrevWin15); resto negativo, DD 15-26% | 🔴 morto |
 
 _Nota: in OHLC i Live5m davano numeri finti enormi (+129k DAX, +30k Nasdaq). In real tick: morti. Lezione: M5/breakout → OHLC inganna._
+
+> **VERDETTO DEFINITIVO — capitolo BREAKOUT M5 CHIUSO (26.07.26).** Provati e morti in real-tick: Live5m nativo, Live5m_v2 (ricetta migliorata), DAX_M3, aperture Nasdaq, ORB_Fibo, Londra_ORB. Il breakout in apertura su M5 NON ha edge sul tick vero. **Non costruire altri v2 M5.** L'edge sta su H1/H4 (SupRev) e sull'apertura DAX LONG (che è M5 ma su livello H1, non breakout M5).
 
 ---
 
