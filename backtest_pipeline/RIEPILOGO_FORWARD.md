@@ -21,9 +21,10 @@ Regola: rischio 1%, girano in parallelo ai nativi (magic diversi). NIENTE hedgin
 | 10 | ABTG_SupRev_DOW_H4_Ottimizzato | Dow | U30USD | H4 | L/S | 2.77 | 4.0 | 970914 |
 | 11 | ABTG_SupRev_CAC_H4_Ottimizzato | CAC 40 | F40EUR | H4 | L/S | 1.79 | 3.5 | 970915 |
 | 12 | ABTG_SupRev_DOW_H1_Ottimizzato (opzionale) | Dow | U30USD | H1 | L/S | 1.20 | 10 | 970916 |
+| 13 | ABTG_SuperWave_DOW_H1_Ottimizzato | Dow | U30USD | H1 | L/S | 1.52 | 4.0 | 770511 |
+| 14 | ABTG_SuperWave_DAX_H4_Ottimizzato | DAX | D30EUR | H4 | L/S | 1.28 | 3.3 | 770512 |
 
-**In attesa di validazione real-tick (NON attaccare finche' non confermato):**
-- SuperWave Dow H1 (PF 1.42 OHLC) + DAX H4 (PF 1.30 OHLC) — magic 770501.
+_(SuperWave = cross EMA14x200 a favore del Supertrend, dalla dashboard. Validati real-tick 26.07.26.)_
 
 ---
 
@@ -46,12 +47,16 @@ Apri questi grafici e trascina l'EA indicato:
 
 **Dow — U30USD**
 - **U30USD H4** → SupRev_DOW_H4
+- **U30USD H1** → SuperWave_DOW_H1 (nuovo)  [+ opz. SupRev_DOW_H1 su altro grafico H1]
 - (opz.) **U30USD H1** → SupRev_DOW_H1
 
 **CAC — F40EUR**
 - **F40EUR H4** → SupRev_CAC_H4
 
-**Totale: 11 grafici (12 col Dow H1 opzionale).**
+**DAX SuperWave**
+- **D30EUR H4** → SuperWave_DAX_H4 (nuovo; grafico H4 separato da SupRev_DAX_H4)
+
+**Totale: 13 grafici (14 col Dow H1 SupRev opzionale).**
 Quando tutto e' a posto: File > Profili > Salva con nome ("FORWARD") per richiamarli in un click.
 
 ---
