@@ -20,8 +20,8 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from agent import analysis, config, correlation, market_data, notify, report, snapshot
-from agent.macro_calendar import fetch_today_events
+from agent import analysis, config, correlation, cot, market_data, notify, report, snapshot
+from agent.macro_calendar import fetch_today_events, fetch_week_central_bank_events
 
 # Mesi in italiano per l'intestazione.
 _MESI = [
@@ -66,6 +66,24 @@ def main() -> int:
     print("[info] Raccolta calendario macro...")
     events = fetch_today_events(tz=config.TIMEZONE)
     print(f"[info] {len(events)} eventi macro oggi.")
+
+    # 3-a. Calendario BANCHE CENTRALI della settimana (FOMC/ECB/BoE/BoJ...)
+    print("[info] Raccolta calendario banche centrali...")
+    try:
+        cb_events = fetch_week_central_bank_events(tz=config.TIMEZONE)
+        print(f"[info] {len(cb_events)} eventi banca centrale nel resto della settimana.")
+    except Exception as exc:
+        print(f"[warn] Calendario banche centrali non disponibile: {exc}")
+        cb_events = []
+
+    # 3-b. Posizionamento COT (CFTC) per Oro + 6 majors
+    print("[info] Raccolta posizionamento COT (CFTC)...")
+    try:
+        cot_rows = cot.fetch_cot()
+        print(f"[info] {len(cot_rows)} righe COT.")
+    except Exception as exc:
+        print(f"[warn] COT non disponibile: {exc}")
+        cot_rows = []
 
     # 3-bis. Correlazione DAX vs S&P/Nikkei (regola ABTG), multi-timeframe
     print("[info] Calcolo correlazione DAX vs S&P/Nikkei...")
@@ -118,7 +136,8 @@ def main() -> int:
         commentary = analysis.build_fallback_commentary(groups, events, corr, gold_dxy)
 
     # 5. Composizione e invio
-    html = report.build_html(date_str, commentary, groups, events, corr, gold_dxy)
+    html = report.build_html(date_str, commentary, groups, events, corr, gold_dxy,
+                             cb_events=cb_events, cot_rows=cot_rows)
     subject = f"📊 Report di Mercato — {now.day} {_MESI[now.month - 1]} {now.year}"
 
     if settings.dry_run:

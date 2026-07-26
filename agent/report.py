@@ -8,7 +8,8 @@ nei client di posta (incluso Gmail).
 from __future__ import annotations
 
 from .correlation import RefCorr, verdict as corr_verdict, gold_dxy_verdict
-from .macro_calendar import MacroEvent
+from .cot import CotRow
+from .macro_calendar import CbEvent, MacroEvent
 from .market_data import Instrument
 
 _BIAS_COLOR = {
@@ -315,6 +316,74 @@ def _gold_dxy_table(rc: RefCorr | None) -> str:
     )
 
 
+def _cb_calendar_table(events: list[CbEvent] | None) -> str:
+    """Calendario delle decisioni di politica monetaria della settimana."""
+    if not events:
+        return ("<p style='color:#999;'>Nessuna decisione di banca centrale nel feed "
+                "per il resto della settimana (o feed non disponibile).</p>")
+    rows = ""
+    for e in events:
+        badge = ('<span style="color:#b3261e;font-weight:700;">● Alto</span>'
+                 if e.impact.lower() == "high"
+                 else '<span style="color:#d28b00;">● Medio</span>')
+        rows += (
+            "<tr style='border-top:1px solid #eee;'>"
+            f"<td style='padding:5px 10px;font-weight:600;'>{e.day}</td>"
+            f"<td style='padding:5px 10px;'>{e.time}</td>"
+            f"<td style='padding:5px 10px;font-weight:600;'>{e.currency}</td>"
+            f"<td style='padding:5px 10px;'>{e.title}</td>"
+            f"<td style='padding:5px 10px;'>{badge}</td></tr>"
+        )
+    head = (
+        "<tr style='background:#f3f4f6;text-align:left;'>"
+        "<th style='padding:6px 10px;'>Giorno</th><th style='padding:6px 10px;'>Ora</th>"
+        "<th style='padding:6px 10px;'>Valuta</th><th style='padding:6px 10px;'>Evento</th>"
+        "<th style='padding:6px 10px;'>Impatto</th></tr>"
+    )
+    return (
+        f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{rows}</table>"
+        "<p style='font-size:11px;color:#aaa;margin-top:6px;'>"
+        "Orari nel fuso del report. Nei giorni di decisione banca centrale conviene "
+        "attivare il filtro news degli EA (o ridurre size) attorno all'annuncio.</p>"
+    )
+
+
+def _cot_table(rows: list[CotRow] | None) -> str:
+    """Posizionamento COT (CFTC): netto Non-Commercial + variazione settimanale."""
+    if not rows:
+        return ("<p style='color:#888;'>Dati COT non disponibili (feed CFTC non "
+                "raggiungibile). Il resto del report non è influenzato.</p>")
+    body = ""
+    date = rows[0].report_date if rows else ""
+    for r in rows:
+        net_color = "#0a7d32" if r.noncomm_net > 0 else ("#b3261e" if r.noncomm_net < 0 else "#666")
+        chg_color = "#0a7d32" if r.change > 0 else ("#b3261e" if r.change < 0 else "#666")
+        body += (
+            "<tr style='border-top:1px solid #eee;'>"
+            f"<td style='padding:6px 10px;font-weight:600;'>{r.label}</td>"
+            f"<td style='padding:6px 10px;text-align:right;color:{net_color};font-weight:600;'>{r.noncomm_net:+,}</td>"
+            f"<td style='padding:6px 10px;text-align:right;color:{chg_color};'>{r.change:+,}</td>"
+            f"<td style='padding:6px 10px;text-align:right;color:#666;'>{r.open_interest:,}</td>"
+            f"<td style='padding:6px 10px;'>{r.bias}</td></tr>"
+        )
+    head = (
+        "<tr style='background:#f3f4f6;text-align:left;'>"
+        "<th style='padding:6px 10px;'>Asset</th>"
+        "<th style='padding:6px 10px;text-align:right;'>Netto Non-Comm.</th>"
+        "<th style='padding:6px 10px;text-align:right;'>Var. 7g</th>"
+        "<th style='padding:6px 10px;text-align:right;'>Open Interest</th>"
+        "<th style='padding:6px 10px;'>Lettura</th></tr>"
+    )
+    return (
+        f"<table style='border-collapse:collapse;width:100%;font-size:13px;'>{head}{body}</table>"
+        "<p style='font-size:11px;color:#aaa;margin-top:6px;'>"
+        f"Fonte: CFTC Legacy Futures-Only, rilevazione {date} (martedì; pubblicata il venerdì, "
+        "lag ~3 giorni). Netto <strong>Non-Commercial</strong> = grandi speculatori (long − short): "
+        "positivo = posizionati al rialzo. Estremi molto sbilanciati = rischio di inversione "
+        "brusca (unwind). Contesto di fondo, non segnale intraday.</p>"
+    )
+
+
 def build_html(
     date_str: str,
     commentary_html: str,
@@ -322,6 +391,8 @@ def build_html(
     events: list[MacroEvent],
     correlation: list[RefCorr] | None = None,
     gold_dxy: RefCorr | None = None,
+    cb_events: list[CbEvent] | None = None,
+    cot_rows: list[CotRow] | None = None,
 ) -> str:
     """Assembla il corpo HTML completo dell'email."""
     return f"""\
@@ -366,9 +437,16 @@ def build_html(
     <h2 style="margin-top:26px;">Calendario macro di oggi</h2>
     {_calendar_table(events)}
 
+    <h2 style="margin-top:26px;">🏛️ Banche centrali — questa settimana</h2>
+    {_cb_calendar_table(cb_events)}
+
+    <h2 style="margin-top:26px;">📊 Posizionamento COT (grandi speculatori)</h2>
+    {_cot_table(cot_rows)}
+
     <p style="margin-top:24px;font-size:11px;color:#aaa;">
-      Fonti dati: Yahoo Finance (prezzi/indicatori), Forex Factory (calendario macro).
-      Sintesi generata con Claude. Generato automaticamente dall'agente di analisi.
+      Fonti dati: Yahoo Finance (prezzi/indicatori), Forex Factory (calendario macro
+      e banche centrali), CFTC (posizionamento COT). Sintesi generata con Claude.
+      Generato automaticamente dall'agente di analisi.
     </p>
   </div>
 </div>"""
