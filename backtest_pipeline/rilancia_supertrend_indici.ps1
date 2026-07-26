@@ -19,8 +19,10 @@ $Branch="claude/creating-agents-SgGpD"
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 $EA="ABTG_SupertrendReversal"
 $Targets=@(
+  @{ini="valid_SupRev_D30EUR_M5";sym="D30EUR";tf="M5"},
   @{ini="valid_SupRev_D30EUR_H1";sym="D30EUR";tf="H1"},
   @{ini="valid_SupRev_D30EUR_H4";sym="D30EUR";tf="H4"},
+  @{ini="valid_SupRev_NASUSD_M5";sym="NASUSD";tf="M5"},
   @{ini="valid_SupRev_NASUSD_H1";sym="NASUSD";tf="H1"},
   @{ini="valid_SupRev_NASUSD_H4";sym="NASUSD";tf="H4"}
 )
@@ -64,7 +66,7 @@ foreach($t in $Targets){
   $n++
   $csvSrc=Join-Path $MqlFiles "OptResults_${EA}_$($t.sym).csv"
   if(Test-Path $csvSrc){Remove-Item $csvSrc -Force}   # pulizia prima
-  Write-Host ("   [{0}/4] {1} {2} ..." -f $n,$t.sym,$t.tf) -ForegroundColor Cyan
+  Write-Host ("   [{0}/{1}] {2} {3} ..." -f $n,$Targets.Count,$t.sym,$t.tf) -ForegroundColor Cyan
   (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$(Join-Path $Work "ini\$($t.ini).ini")`"" -PassThru).WaitForExit()
   if(Test-Path $csvSrc){
     Copy-Item $csvSrc -Destination (Join-Path $Results "valid_SupRev_$($t.sym)_$($t.tf).csv") -Force
