@@ -245,6 +245,31 @@ Aggiungere al motore aperture, tutti toggle indipendenti (AND-gate, no conflitti
 - **Test M-base** (`valid_Marco_DAX_base`): tutti i filtri OFF, DAX ora 8, range 15, LONG, floor 200, buffer 400/600/800 → deve ridare **~PF 1.49** (conferma che l'EA è sano). Runner `rilancia_marco.ps1`. ⏳ da lanciare.
 - Poi: accendere i filtri uno alla volta (RSI, ADX, ATR, MA...) e vedere se migliorano PF/DD, con validazione del vincitore.
 
+### ✅ RISULTATI CACCIA MOTORE M5 (26.07.26) — filtri Emiliano nel motore Marco, real-tick
+_Sweep isolato: direzione × correlazione S&P × volumi × EMA. DAX ora 8, Nasdaq ora 14:30, rischio 1%._
+
+**DAX (D30EUR M5):**
+| Config | PF | DD% | Trade |
+|---|---|---|---|
+| baseline LONG buffer 600 (nessun filtro) ⭐ | **1.24** | 4.7% | 309 |
+| + Volumi | 1.21 | 5.0% | 264 |
+| + Correlazione S&P | 1.21 | 3.9% | 178 |
+| + EMA / qualsiasi SHORT | ≤0.92 ❌ | — | — |
+
+→ Motore sano (LONG edge confermato, PF 1.24; SHORT distrugge). **I filtri NON migliorano il PF**; la correlazione dimezza i trade e abbassa il DD ma taglia anche il profitto. L'`_Ottimizzato` esistente (logica candela H1, PF 1.49) resta il campione DAX.
+
+**NASDAQ (NASUSD M5):**
+| Config | PF (range) | Trade |
+|---|---|---|
+| baseline nudo | 0.63–0.84 ❌ | 336–454 |
+| + Volumi | 0.66–0.68 ❌ | 129–184 |
+| + Correlazione S&P | 0.51–0.66 ❌ | 199–215 |
+| + Corr + Vol | 0.60–0.67 ❌ | 122–181 |
+
+→ **IPOTESI FALSATA: la correlazione S&P NON salva il Nasdaq.** Nessuna combo supera PF 0.76. Il filtro funziona meccanicamente (taglia i trade da 336 a ~200 → dati S&P presenti, test valido), ma non crea edge dove non c'è.
+
+> **CONCLUSIONE M5 (definitiva).** Il breakout M5 in apertura è morto sul Nasdaq anche coi filtri di Emiliano; sul DAX funziona solo LONG e l'Ottimizzato esistente lo cattura meglio. **Fine della caccia al motore M5.** L'edge reale resta: DAX aperture LONG (M5 su candela H1) + SupRev su H1/H4 + oro. Nota: questo è un *proxy automatico* della regola di Emiliano (EMA 14/100 su S&P H1); la sua lettura discrezionale live è un'altra cosa e non è automatizzabile 1:1.
+
 ### Tassonomia famiglie EA (tutte → backtest → real-tick → forward)
 - **NOSTRI (validati):** Oro (SupRev_Multi/EMA200/GoldenCross), DAX aperture LONG, SupertrendReversal indici (DAX H1/H4, Nasdaq H1 in validazione).
 - **EMILIANO:** motore aperture + filtri (volumi/direzione D1/correlazione/ampiezza) — test A6.
