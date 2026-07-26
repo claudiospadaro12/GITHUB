@@ -16,9 +16,9 @@ $Branch="claude/creating-agents-SgGpD"
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 $EA="ABTG_DAX_Apertura_EU"
 $Targets=@(
-  @{ini="valid_Apertura_UK100"; sym="UK100"},
-  @{ini="valid_Apertura_US2000";sym="US2000"},
-  @{ini="valid_Apertura_US30";  sym="US30"}
+  @{ini="valid_Apertura_UK100"; sym="FTSE100GBP"},   # FTSE 100 (Londra, ora 8)
+  @{ini="valid_Apertura_US30";  sym="US30USD"}        # Dow Jones (USA, ora 14:30)
+  # Russell 2000 escluso: non quotato su BCM
 )
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== APERTURA su NUOVI INDICI (UK100 / Russell US2000 / Dow US30) ===" -ForegroundColor Cyan
