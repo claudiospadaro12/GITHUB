@@ -64,6 +64,8 @@ Write-Host "   compilato $EA.ex5" -ForegroundColor Green
 $src=Join-Path $MqlFiles "OptResults_${EA}_" ; $n=0
 foreach($t in $Targets){
   $n++
+  $done=Join-Path $Results "valid_SupRev_$($t.sym)_$($t.tf).csv"
+  if(Test-Path $done){Write-Host ("   [{0}/{1}] {2} {3} : gia' fatto, salto (ripresa)" -f $n,$Targets.Count,$t.sym,$t.tf) -ForegroundColor DarkGray; continue}
   $csvSrc=Join-Path $MqlFiles "OptResults_${EA}_$($t.sym).csv"
   if(Test-Path $csvSrc){Remove-Item $csvSrc -Force}   # pulizia prima
   Write-Host ("   [{0}/{1}] {2} {3} ..." -f $n,$Targets.Count,$t.sym,$t.tf) -ForegroundColor Cyan
@@ -75,4 +77,4 @@ foreach($t in $Targets){
   } else { Write-Host "        (manca il CSV)" -ForegroundColor Yellow }
 }
 Write-Host "`n=== FINITO === risultati in $Results" -ForegroundColor Cyan
-Write-Host "Mandami i 4 CSV: ti dico se il SupertrendReversal ha edge su DAX/Nasdaq e su quale TF." -ForegroundColor White
+Write-Host "Mandami i CSV mancanti: ti dico se il SupertrendReversal ha edge su DAX/Nasdaq e su quale TF." -ForegroundColor White
