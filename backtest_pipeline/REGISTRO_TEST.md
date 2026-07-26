@@ -68,6 +68,20 @@ _Strategia = trend + rimbalzo (NON breakout). Su oro fa PF 3.17. Ottimizza StMul
 - `SupertrendReversal Nasdaq **H1**` | StMult 3.0-3.5 / AtrP 10 / TP_RR 3.0 → PF 1.66-1.79, **DD ~1%**, 135-155 tr
 - M5 morto su entrambi. H4 Nasdaq pochi trade.
 
+### ✅ VALIDAZIONE REAL-TICK (26.07.26) — CONFERMATA, promossi a _Ottimizzato
+_Griglia stretta StMult 3.0/3.5 × AtrP 9/10 × TP_RR 2.5/3.0, rischio 1%, tick reali._
+
+| # | Sym | TF | Config vincente | Profit | PF | DD% | Trade | EA creato | Magic |
+|---|---|---|---|---|---|---|---|---|---|
+| S1v | DAX (D30EUR) | **H1** | StMult 3.5 / AtrP 10 / TP 3.0 | 1075 | **1.45** | 5.6% | 223 | `ABTG_SupRev_DAX_H1_Ottimizzato` | 970911 |
+| S4v | DAX (D30EUR) | **H4** | StMult 3.0 / AtrP 9 / TP 3.0 | 781 | **1.96** | 5.7% | 86 | `ABTG_SupRev_DAX_H4_Ottimizzato` | 970912 |
+| S5v | Nasdaq (NASUSD) | **H1** | StMult 3.0 / AtrP 10 / TP 3.0 | 479 | **1.57** | **1.17%** | 155 | `ABTG_SupRev_NAS_H1_Ottimizzato` | 970913 |
+
+- **DAX H1:** solo StMult **3.5** in positivo (4/8); StMult 3.0 tutte negative. Plateau pulito sulle 3.5.
+- **DAX H4:** 6/8 positive; 3.0/AtrP9 miglior profitto, 3.5/AtrP10 miglior DD (3.5%).
+- **Nasdaq H1:** **8/8 positive**, DD ~1-2.4%. Il più forte: prop-friendly. ⭐
+- CSV archiviati: `valid_SupRevRT_D30EUR_H1/H4.csv`, `valid_SupRevRT_NASUSD_H1.csv`.
+
 ---
 
 ## 5) ORO (baseline già validati — spina dorsale)

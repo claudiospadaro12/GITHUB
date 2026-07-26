@@ -27,7 +27,10 @@ $EAs = @(
     "ABTG_SupertrendReversal_Multi_Ottimizzato", # ORO (XAUUSD H4) - PF 3.17
     "ABTG_SupertrendReversal_Ottimizzato",     # ORO (XAUUSD H4) - PF 2.74
     "ABTG_EMA200_Ottimizzato",                 # ORO (XAUUSD) - PF 1.92
-    "ABTG_GoldenCross_Ottimizzato"             # ORO (XAUUSD) - PF 1.58
+    "ABTG_GoldenCross_Ottimizzato",            # ORO (XAUUSD) - PF 1.58
+    "ABTG_SupRev_DAX_H1_Ottimizzato",          # DAX (D30EUR H1) - PF 1.45 real tick
+    "ABTG_SupRev_DAX_H4_Ottimizzato",          # DAX (D30EUR H4) - PF 1.96 real tick
+    "ABTG_SupRev_NAS_H1_Ottimizzato"           # NASDAQ (NASUSD H1) - PF 1.57 DD 1.2% real tick
 )
 
 Write-Host "=== INSTALLO GLI EA _OTTIMIZZATO ===" -ForegroundColor Cyan
