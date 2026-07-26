@@ -20,9 +20,14 @@ $ErrorActionPreference = "Stop"
 $Branch  = "claude/creating-agents-SgGpD"
 $RawBase = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch/mql5/Experts"
 
-# EA _Ottimizzato VALIDATI pronti per il forward (Nasdaq aperture TOLTO: morto in real tick)
+# EA _Ottimizzato VALIDATI pronti per il forward.
+# (Nasdaq aperture ESCLUSO: morto in real tick.)
 $EAs = @(
-    "ABTG_DAX_Apertura_EU_Ottimizzato"
+    "ABTG_DAX_Apertura_EU_Ottimizzato",       # DAX aperture LONG (D30EUR M5) - validato real tick
+    "ABTG_SupertrendReversal_Multi_Ottimizzato", # ORO (XAUUSD H4) - PF 3.17
+    "ABTG_SupertrendReversal_Ottimizzato",     # ORO (XAUUSD H4) - PF 2.74
+    "ABTG_EMA200_Ottimizzato",                 # ORO (XAUUSD) - PF 1.92
+    "ABTG_GoldenCross_Ottimizzato"             # ORO (XAUUSD) - PF 1.58
 )
 
 Write-Host "=== INSTALLO GLI EA _OTTIMIZZATO ===" -ForegroundColor Cyan
