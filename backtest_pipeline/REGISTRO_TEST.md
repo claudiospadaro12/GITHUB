@@ -274,3 +274,15 @@ _Sweep isolato: direzione × correlazione S&P × volumi × EMA. DAX ora 8, Nasda
 - **NOSTRI (validati):** Oro (SupRev_Multi/EMA200/GoldenCross), DAX aperture LONG, SupertrendReversal indici (DAX H1/H4, Nasdaq H1 in validazione).
 - **EMILIANO:** motore aperture + filtri (volumi/direzione D1/correlazione/ampiezza) — test A6.
 - **MARCO:** `ABTG_Apertura_Marco` + filtri modulari (RSI/ADX/ATR/MA) + nuovi indici (UK100/Russell/Dow) — test A7.
+
+---
+
+## APERTURA su NUOVI INDICI — FTSE & Dow (26.07.26, real-tick)
+_Idea di Marco: Russell/Dow/UK100 in apertura > Nasdaq. Testato col motore aperture (ora 8 FTSE, 14:30 Dow), sweep direzione×buffer, rischio 1%. Russell 2000 NON quotato su BCM._
+
+| Sym | Strumento | Migliore config | Profit | PF | DD% | Verdetto |
+|---|---|---|---|---|---|---|
+| 100GBP | FTSE 100 | buffer 800 LONG | -302 | 0.90 | 9.6% | 🔴 morto |
+| U30USD | Dow Jones | buffer 200 LONG | -9 | 0.997 (pari) | 8.6% | 🔴 morto (a malapena in pari) |
+
+> **CONCLUSIONE APERTURA (definitiva).** Il breakout M5 in apertura funziona SOLO sul DAX, SOLO LONG. Su Nasdaq/FTSE/Dow → morto. Non è un motore generalizzabile: è un'anomalia del DAX. L'idea di Marco (Dow>Nasdaq) NON regge in versione automatica. **Fine dell'espansione della famiglia aperture.** Il vero motore generalizzabile resta il **SupertrendReversal** (DAX+Nasdaq+oro, H1/H4).
