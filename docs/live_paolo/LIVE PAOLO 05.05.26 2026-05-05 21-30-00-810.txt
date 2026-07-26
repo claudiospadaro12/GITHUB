@@ -1,0 +1,747 @@
+Buonasera a tutti. Buonasera a tutti. Ciao a tutti. 
+
+Ciao a tutti. Ciao. Buonasera. 
+
+Buonasera. Buonasera a tutti. Buonasera. 
+
+Buonasera. Buonasera. Ciao a tutti. 
+
+Ciao a tutti. Buonasera. Allora, stasera serata dedicata a Fibonacci. 
+
+Pertanto facciamo prima il ripasso di Fibonacci, lo contestualizziamo, dopodiché ripassiamo FibH4, che era la strategia dello scorso mese. Prima di fare questo però, visto che è martedì, farei un giro sull'Open Weekly per vedere se c'è qualche opportunità. Ciao ragazzi, buonasera. 
+
+Buonasera. Allora, vediamo un po' se c'è qualche... Tengo il monitor spento perché ho il problema che ogni tanto perdo il collegamento per caricare meno la banda. Comunque ci sono, sono presenti, vi faccio vedere, vi saluto con la faccia, vi saluto tutti. 
+
+Ciao a tutti. E poi risalutiamoci alla fine. Ciao a tutti. 
+
+Ciao. Allora, vediamo un po' cosa abbiamo con Fibonacci, con l'Open Weekly. Buonasera. 
+
+Questa potrebbe essere un'opportunità. Vediamo un po'. Mercato illaterale qui però. 
+
+Oddio, però c'è quattro settimane di trend. Qui sono tutti su dei minimi. Mettiamoci un attimo Bollinger. 
+
+Vediamo che ci dice Bollinger qua. Il prezzo è rientrato nelle bande. Sta testando proprio. 
+
+Qui è a retto, però è stato venendo da sotto. Qui è a retto. Vediamo in H12 che ci dice. 
+
+La banda è sempre diretta giù. Resistenza è come siamo messi. Ha resistito sulla resistenza in H12. 
+
+Trend di fondo in Weekly. Anche in Weekly siamo proprio in laterale. Qui c'è proprio un'area di supporto che sta reggendo. 
+
+Quanto siamo come distanza? 24 punti. Qui abbiamo la media a 200. La media a 200 l'abbiamo qua. 
+
+A 37 punti. Media a 200 in Weekly qua. Tiriamo Fibonacci. 
+
+Vediamo a che punto è questo ritracciamento. Il movimento è partito da qua. Abbiamo proprio, guardate, questo punto proprio al 50% che l'ha testato 3 o 4 volte.
+
+Sbagliato. Vista indicatori. Sbagliato qua. 
+
+Cancellarlo. Così introduciamo anche Fibonacci. Partiamo dalla strategia. 
+
+In D1 abbiamo 4 settimane di trend di bassista. Pertanto nonostante siamo in una fase complessiva di lateralizzazione, ma io questo lo considererei come un trend di bassista. Qui abbiamo la nostra Doji, anche se c'è il corpo un po' grande.
+
+Qui oggi ha già fatto la discesa e è tornato indietro. Abbiamo visto con Fibonacci in Weekly che, prendendo questo movimento, il prezzo ha ritracciato proprio sulla linea del 50% con 1, 2, 3, 4 tocchi in Weekly. Sotto abbiamo la media a 200 che è leggermente di bassista.
+
+Si può sicuramente ipotizzare che questa sia una zona che regga. È chiaro come concetto? È chiaro per tutti il ragionamento che ho fatto? Paolo, una domanda. Perché l'hai tracciato da lì Fibonacci e non da più in basso? Ho tracciato da dove è partito il movimento. 
+
+Sono andato in Weekly, questo è tutto il movimento di bassista, questa ha ritracciato, poi qui si è messo in una zona laterale, però cosa noto rispetto a questo movimento di alzista? L'ho tirato, guarda, senza... non l'avevo neanche guardata prima. Noto che proprio qui al 50% si è fermato. Pertanto qui questa è tutta una zona sicuramente di resistenza, dove gli istituzionali si sono posizionati per non far scendere il prezzo.
+
+Ora qui abbiamo la media di 200 migli, pertanto io qui se dovessi fare l'operazione, anzi la faccio, non entra a mercato ora, io metto un bel pendente sul ritracciamento. Lo metto, intanto questo non sarebbe il momento bello di metterlo ora, perché abbiamo sempre il discorso del rollover e il prezzo è molto vicino alla media. Comunque l'ideale sarebbe aspettare il rollover e metterlo verso mezzanotte, però noi lo mettiamo ora e ce ne freghiamo, perché se no a mezzanotte poi si dorme come al solito.
+
+Allora qui mettiamo un bel limitante qua, il secondo ordine io a questo punto me lo vado a mettere, me lo metto sempre un pochettino più grande, questo me lo metto a 0.15 anziché a 0.10, me lo metto sulla media 200, no questa è la media 50, lo metto poco prima della media 200 qua e poi ho eventualmente un terzo ordine che me lo vado a mettere quello più grosso su A61, anche se ho l'impressione che una volta rotta la media 200 questo viene giù. Pertanto faccio così, lo metto sotto la media 200 e metto invece uno stop estretto, lo stop lo metto bello strettino, qui sono 0.59, vediamo lo stop dove potrebbe essere messo per metterlo in formula tecnica, guarda proprio la media 200 va a toccare qui questo spike, pertanto se rompe questo viene giù. La media 200? Questa qua, la linea arancione è la media 200 in weekly, la media 200 in weekly mi va a prendere questo spike weekly, pertanto se rompe questo c'è proprio la rottura della struttura, qui c'è già il cambio di carattere, qui c'è già stato, questa c'è la rottura di struttura, questo viene giù, pertanto andarsi a mettere l'ordine dopo vuol dire andarsi a prendere lo stop, qui va messo lo stop sotto, magari uno stop estretto poco sotto questo, e al limite prende del rimbalzo sulla media 200, il secondo ordine va messo sopra questo livello, perché se rompe questo livello viene giù, siete d'accordo? Ma quanto distano i due ordini? Ma qui sono vicine, perché da qui a qui sono 37 pip, qui siamo sul weekly, da qui a qui sono 37 pip, 36 e 3, pertanto da qua a qua sono 32, 33, sono 31, e lo stop lo mettiamo sotto questo livello, vuol dire metterlo qua, 0,85, 900, c'è anche il numero tondo, pertanto lo metterei leggermente sotto il numero tondo, 0,85, 8,90, 0,85, 8,90, questo, qui ci scriviamo, perché non me lo fa mettere? 0,85, 8,90, e anche qui lo metto a 0,85, 8,90, 0,85, 8,90, bene, e questo ci siamo.
+
+Il take profit me lo porto qua su, un take profit tranquillo è sulla media 14, il che vuol dire che ho proprio qui il rischio di rendimento 1 a 1, qui sono 43 pip, e qua sono allo stop loss 47, pertanto qui ho proprio il rischio di rendimento 1 a 1, e qualora mi prenda il secondo ordine ho molto vantaggio, pertanto questo qui siamo al livello 0,86, 7,86, tenete conto che secondo me se dovesse prenderci il prezzo arriva qua, arriva fino a fibonacci, vediamo quindi uno cosa ce l'abbiamo, quindi uno ce l'abbiamo un pochettino più basso, 0,86, 5,64, facciamo l'ultimo, 0,86, facciamo l'ultimo controllo per vedere se domani come volatilità ci può arrivare qua, in modo che se va in porto la chiudiamo in un giorno, perché questo lo prende, è talmente vicino che lo prende qua, allora, range analysis, range analysis, range analysis, eccolo qua, mettiamolo qua, questa c'ha 31 pip di volatilità, pertanto è proprio ai limiti della volatilità media giornaliera, qui sono 19 pip, qua sono 31, perché l'altro era sulla media 200, comunque io lo lascio qui per ora, poi se dovesse avvicinarsi con forza lo alzo, però vediamo come va, perché se stanotte lo va a prendere, siamo contenti, domattina ci salsa, con quanto, con poco, ci salsa domattina se lo va a prendere, con 25 euro, va bene. Chiaro per tutti il mio ragionamento? Sì. Sentite? Chiaro, chiaro, sì.
+
+Allora, vediamo ora, GBB grade, anche se ne abbiamo fatto uno, questo siamo laterale sfacciato, lo lasciamo stare, non va bene, NZ10HF, NZ10HF qui come siamo, qui siamo, allora, tanto per vedere, allora, qui parte un movimento, movimento, guardate, 61,8, massimo, minimo, io lo leggo così per ora, Fibonacci me lo conferma questo 61,1, poi da qui mi riporto qua, vediamo un attimino come mi ha tracciato, qui è arrivato a toccare i massimi, sono stati respinti dai massimi, allora, pertanto, questo qua di fatto invalida il trend, però non ha cambiato la struttura, qui ha fatto questo lavoro, allora qui giriamolo, vediamo qui come ha ritracciato, qui ha invalidato la struttura, vediamo qui come ha ritracciato, qui ha ritracciato poco oltre la golden area, qui, allora qui ha fatto ta, ta, ta, ta, vediamo qui dove è arrivato, dove potrebbe arrivare, qui abbiamo 6,50 che ha toccato, è sotto, la doge è sotto, questo sembrerebbe un movimento di continuazione, vi ricordate quando la doge apre sotto l'open line in continuazione? Ve lo ricordate questo pattern? No, se me lo puoi rispiegare Paolo, per cortesia. Noi abbiamo, con la weekly open line, due pattern, abbiamo un pattern di inversione e un pattern di continuazione, prendo le slide, così si vedano meglio, 25, queste sono le ultime, sono queste le ultime, 0,5, 0,5, no, per il nightly, cosa ci combina, devo prendere l'open line, scusatemi, oggi il dentista si è divertito, l'ultimo video, questo è un Aulin, allora, Samsung, eccola, vi lascio tutta la premessa, e vado direttamente pattern, Paolo chiedo scusa, si vede ancora? Si, si, si, non l'ho ancora messo, ormai è bianca, sotto la giacca di verde, allora, siamo alla fine di un trend, se la doji, e la esemplifichiamo come doji, ma potrebbe essere anche uno spinning top, una farfalla, o una tombstone, apre, sopra la wick open line, la wick open line fa da supporto, pertanto andiamo a cercare un pattern di inversione, se invece la candela, apre sotto la wick open line, quindi non ce l'abbiamo, apre sotto la wick open line, cioè, in questo caso, se questa qui, avesse aperto sopra, andiamo a cercare un pattern di prosecuzione, chiaro? Chiaro. Vediamo un po', se l'ho fatto, il disegnino, se lo trovo, più bellino, ve lo condivido, la cima, punti, non è questo, se no ve lo scelgo, che poi ve lo mando, ultimo solo, vediamo se ce l'ho, qui non c'è, non ce l'ho, devo cercarlo con calma, e poi ve lo mando, d'accordo? In questo caso, nel nostro caso, pertanto, qua abbiamo, non è una bellissima doji, questa doji, aperto sotto, d'accordo? Pertanto, qui non andava cercato il pattern di inversione, ma il pattern di continuazione, pattern di continuazione, che se si va a vedere, c'è stato, perché la candela è arrivata fino a questo punto, ora, io cosa ho fatto? Io ho guardato il movimento che ha fatto il prezzo, in D1, in D1 che movimento ha fatto? Ha fatto un massimo, un minimo, è tornata a farmi un massimo superiore a questo, pertanto, se io qua dovevo farlo per azione, cosa dovevo domandarmi? Il prezzo, dove può arrivare questo movimento? Qua, ha fatto un movimento che rientra in quello che si chiama movimento abbastanza sano, perché poi, bene o male, ha invertito subito dopo 61,8, qua è stato respinto dalla media a 200 in D1, pertanto sarebbe stata una bella opportunità di farci un bel reverso sulla media a 200, e qua dove è arrivato? È arrivato proprio sotto la golden area, è arrivato proprio sotto la golden area, pertanto, qui cosa farà ora? Rimbalza e trovi io quest'operazione comunque non la faccio a questo punto, potrei darci un'occhiata con le bandi di bowling per vedere come si sono messe, le bandi di bowling sono in compressione, ecco, questa potrebbe essere una buona considerazione, pertanto, bandi di bowling sono in compressione, se il presser viene qua e viene respinto, l'obiettivo potrebbe essere la banda esterna, chiaro per tutti? Sì.
+
+Sì, sì. Qui c'è ancora spazio per arrivare sulla banda esterna. Paolo, posso farti una domanda? Sì.
+
+Il fatto è che ci sono uno, due, tre, quattro, cinque, sei candele, le ultime sei che di fatti sono tutte se non mi sbaglio candele di rifiuto verso il basso, nonostante questo quindi una continuazione verso... No, se io facessi... No, io siamo in una fase di compressione, qui siamo in una fase di compressione, pertanto non vado a fare l'avviso per l'anno, mi ricordo, questa era da fare in questo momento qua, la prima volta verso qua, pertanto entrare stamattina uno poteva stamattina entrare mettendo... Ora, io non so stamattina a che punto ha aperto il prezzo, comunque avrei preso con un reversa su questa parte, probabilmente sarà aperto più o meno da queste parti. Ora, il prezzo in compressione, questo qui, te lo possiamo anche insegnare e vederlo nei prossimi giorni cosa succede? Secondo me con le bande in questo modo qua, il prezzo rimarrà per qualche giorno in questa fascia, queste sono due bande molto parallele, qua sopra abbiamo la media 200 di uno, qua sotto è parallela pertanto, qui c'è da aspettarsi, ora quanto ci starà? Quanti giorni ci starà? E non lo so quanto ci starà, la distanza fra queste due bande quant'è? La distanza fra le due bande sono 51 pip, la volatilità media giornaliera è 33 pip, questo ci sta tanto questo rimbalza qua, capito? Non è sicuramente facile avvicinare quella linea ora, perché si è perso il pattern, si potrebbe pensare di tradarla quando il prezzo riarriva a toccare questa banda o arriva a toccare questa per darlo short, lo traderei in questo canale, qui dentro lo traderei, possiamo anche fare un altro tentativo qua, sulle bande di bowling in questo caso, si, la traderei con la strategia delle bande di bowling quando siamo in squeeze, io qui ora metto dentro la standard deviation, scommettiamo che troviamo la standard deviation sotto la media 50, eccola qua, era facile, era una scommessa facile questa, pertanto fino a che io non ho che questa riga sotto inizia a ripuntare verso l'alto, questi trader le posso fare con una discreta attendibilità, vedi, è qualcosa di questo genere qua da fare, tocca sopra riscende sotto, tocca sotto lo ritragli sopra, con l'obiettivo sempre la banda centrale, chiaro? Chiaro. Se questo dovesse arrivare qua e tu hai ancora la deviazione standard negativa, pertanto questo è proprio vicino al zero, vedi, posi di compressione a questo punto puoi fare un reverse qua sotto, con l'obiettivo sulla media, chiaro? Io penso che se si va anche sul frame frame più basso in H12 troviamo le bande quasi laterale, uguale anche in H12, vedi, deviazione standard bassa, in H12 ho sbagliato, ho pigiato qualcosa, era in ZDCHF, in H12 anche qui le bande sono parallele, addirittura non potrebbe farlo in H12 che è un po' più veloce, ecco, vedi che ha toccato proprio la banda centrale e sta tornando indietro, guarda qui come si vede bene che sta reggendo questa zona, vedi? Vediamolo anche in H4, e anche in H4 è proprio in compressione, in H4 se questo lo mettiamo qua, vediamo un po' come risponde con l'H12, come risulta con l'H12, con l'H12 alla media centrale, con la D1, con la D1 è poco sopra, si potrebbe anche trattare in H4 questo, aspettando che il prezzo torni qua su, torni sulla media qua, controllare che questo sia parallelo in H4, che la deviazione sia sotto e farsi il reversal dall'H4 qua su, chiaro? Chiarissimo.
+
+Qui abbiamo questo me la lascio aperta, questa me la scrivo e poi me la faccio domattina me la seguo, questa è nzfdchf me la metto sul quadernino batteria monitorare nzfdchf open line da D1 ad H4 ok si bene a lo scusi Paolo scusa scusa la mia ingaranzia io mi trovo il grafico completamente diverso dal tuo io questo qui sono quelle doji eh ah quelle Kenashi quelle Kenashi eh con le Kenashi scusa ecco perchè ahahah porca miseria allora ci era normale vabbeh ma intanto stavamo studiando le bande. No, ma perché io ce l'ho un altro colore di lei che nasce, quindi se non me le trovo uguali, scusami. Scusami, una cosa forse la Risa ha detto, perdonami. 
+
+Quella tabella con l'indicazione delle doji è una cosa tua che a Rocchi non è ancora a nostra disposizione. Questa è perché lo cambio direttamente da qua, ma io non vi avevo dato l'indicatore, quello che si passa dalle Akenashi alle altre parti? No, no. La tabella dove c'è l'indicazione delle doji. 
+
+Ma tu c'hai l'indicatore che si passa dalle Akenashi alle andrositi normali. Questi regali si fanno solo dopo le 11 e mezza. Aspetta Nante, vedo se ve lo posso dare se l'ho già licenziato. 
+
+Secondo solo, guarda, ve lo do subito. Se no mandagli la lettera di licenziamento. No, no, ve lo do a voi. 
+
+Secondo solo. Così devo farvi vedere anche come funziona, perché va settata la piattaforma. Quindi Paolo, perdonami, non ho capito io, scusami. 
+
+Quella tabella dove è l'indicatore? No, la tabella non ce l'avete ancora. Però vi do l'indicatore per cambiare da doji alle Akenashi senza impazzire. Grazie mille.
+
+La prossima settimana andremo a Milano e dovremmo riuscire con Emiliano a chiudere tutta la faccenda indicatore. Devo licenziarlo comunque. Finiamo la lezione e poi dopo le 11 ve lo do. 
+
+Vi faccio vedere come si fa, se no non si finisce Fibonacci. Invece voglio fare Fibonacci, perché me l'hanno chiesto in tanti e mi sembra giusto farlo. Tra l'altro fa parte del ciclo dei tre mesi. 
+
+Mi spiace ma non posso. Vedete che io ho usato Fibonacci. Fibonacci ti piace molto a te, Paolo, vero? Mi sta trovando bene, che ti devo dire? Mi da soddisfazioni per capire soprattutto quando uscire dal movimento e rientrare. 
+
+Poi sai, ognuno si adatta al suo sistema. Paolo, ma se sta toccando i massimi, Fibonacci potrebbe essere d'aiuto per capire fin dove potrebbe aiutare. Il concetto dei massimi è diverso. 
+
+Vediamo intanto i tre modi di come si usa Fibonacci, poi facciamo qualche esempio pratico e poi passiamo a Fibacca 4. Non vi sto a raccontare chi era Fibonacci, era un matematico e lui per contare le pecore alla fine ha individuato questo metodo che si basa su una serie di numeri dove il terzo numero è la somma di due numeri precedenti e viene fuori che va a costruire una regola aurea. Questa regola aurea si basa essenzialmente su due numeri che sono 1 e 618 che rappresenta la proporzione tra il numero sommato e il numero precedente o il suo inverso che è 0,61,8 che poi sono i due numeri che noi teniamo a riferimento quando lo tracciamo. Pertanto voi dovete ricordare che nella serie di Fibonacci i numeri fondamentali sono 1 e 618 o 6,18. 
+
+1 e 618 lo usiamo quando facciamo le estensioni invece 0,618 quando facciamo i ritracciamenti. Ricordatevi questi due numeri. Qui vi ho messo come poi Fibonacci regola tutto il mondo della cultura, dell'arte ma anche della natura perché mentre se nell'arte tanti artisti del passato da Raffaello a Leonardo da Vinci hanno conto delle proporzioni di Fibonacci per realizzare delle opere d'arte. 
+
+Qui c'è la Gioconda, questa è la dama con l'ermellino, l'uomo vitruviano. Vedete si inserisce direttamente nella figura di Fibonacci. Oppure gli artisti dell'era classic ad Alpartenone, al Brunelleschi che nelle loro figure geometriche rispettano la regola aurea di Fibonacci. 
+
+Ma se si va a vedere negli egiziani, nei babilonesi, dappertutto. La natura poi anche inespiegabilmente rispetta questa regola. Questa è la grande onna, è un quadro che ritende un'onda reale, la galassia spirale con chi le riprendono sempre la serie di Fibonacci. 
+
+Ora Fibonacci non è che sia magico nel trading, probabilmente questo rappresenta una guida per i trader istituzionali, per le smarmoni. Impariamo questo nome che intanto poi nei prossimi giorni e settimane vi diventerà sempre più orecchiabile. Le smarmoni sono le mani forte, l'uomo invisibile che muove il mercato. 
+
+Anche nel mercato Fibonacci ha un senso. Ha un senso perché probabilmente? Perché su questi livelli probabilmente sono prese a riferimento degli istituzionali per fare l'ingresso al mercato, fare l'uscita al mercato. Ovviamente, come è stata detta nella prima lezione della prex session, non sono regole fisse perché non è che si posiziona solo una persona su questi livelli, si posizionano migliaia, milioni di persone. 
+
+Pertanto ogni tanto questi livelli sono presi dai nostri smarmoni per prendere l'acquidità ai trader retail, che sono quelli che alimentano di liquidità il mercato. Pertanto quando si usa, bisogna sempre aspettare la cosiddetta candela di conferma, anticipare il mercato normalmente se non è detto che si faccia la cosa giusta. I due numeri che vi dovete ricordare appunto sono 0,618 e 1,618. 
+
+Questo lo usiamo per i ritracciamenti, 1,618 per le istensioni. Cosa vuol dire? Che 0,618 e 1,618 sono due livelli di target che sono normalmente in condizioni normali rispettati dal mercato, e l'abbiamo visto in più occasioni. Pertanto si dice che un trend è sano quando rispetta questi livelli. 
+
+Leggera digressione, specialmente per i nuovi. Per i nuovi cosa dobbiamo dire? Dobbiamo ricordare che questo è un trend, perché altrimenti tutto il nostro ragionamento crolla. Dobbiamo chiedere alcuni concetti di trend. 
+
+Il mercato si muove normalmente in tre direzioni, ma poi le direzioni sono due, perché il mercato è o in espansione o in congestione. Poi che l'espansione sia positiva, cioè sia long o sia negativa, è sempre un movimento di espansione. Pertanto c'è alcuni testi che dicono che c'è movimento di espansione, congestione e ritracciamento, altri testi che dicono che le posizioni sono due. 
+
+Addirittura c'è qualcuno che dice che sono quattro, perché considera il ritracciamento come un movimento, ma non è un movimento specifico il ritracciamento del mercato. Allora torniamo, vediamo un attimo per dire una cosa. Quando si parla di trend la prima cosa che dobbiamo capire è dire quando è che siamo in trend. 
+
+Uso questo come lavagna che mi trovo bene per disegnare. Il mercato si muove a onde, siamo in un trend, quando abbiamo una situazione di massimi e minimi crescenti o crescenti. A parte quelli che si sono allontanati perché hanno fatto lo scalping e quindi non ci sono più mannaggia. 
+
+Come ci sono allontanati, siamo sempre qua. No, non è vero, anche io. Sì, il gruppo è morto un pochino. 
+
+Prima c'erano sempre cento messaggi al giorno quando arrivavo ad essere zoddio, adesso zero. Però ci sta, ci sta. Ma che poi ritorniamo, oppure venite voi, ci incontriamo di nuovo. 
+
+Ma è pesante? Non abbiamo poca roba al momento da leggere, però abbiamo visto degli appunti, ci sono tanti tanti appunti da leggere, sì. Al momento abbiamo solo una dispensa per prepararci, però sì, c'è tanta roba. Solo 30 pagine da studiare in due giorni. 
+
+Comunque secondo me ha senso cominciare il percorso di scalping verso il termine del percorso Forex Trading Diary perché sennò uno si mette troppa carne a cuocere, due viene meno, secondo me sempre, il senso di aver acquistato Forex Trading Diary. Non ho capito Stefano, ripeti? Cioè prima potrebbe fare lo scalping? No, no, no, no, dico secondo me avrebbe senso acquistare, cominciare il percorso di scalping verso la fine del percorso Forex Trading Diary. Comunque ti sei fatto quasi un anno di strategie e studio di mercato e via dicendo e poi approfondisci il tutto anche con lo scalping. 
+
+Se si fa lo scalping in una fase iniziale, come la mia ad esempio, del percorso di Forex Trading Diary, non solo metto troppa carne a cuocere, ho l'impressione di dare meno senso al percorso di Forex Trading Diary, tutto qua. Non so se ci sono spiegato. Io ho fatto esattamente lo stesso ragionamento Stefano, per me non fa una piega, ho fatto lo scalping. 
+
+A me dipende, dipende dal tuo livello, puoi fare entrambi le cose tranquillamente. Se hai le basi, le strategie, comunque sono un po' più lente quelle che insegnano. Dipende da uno quanto tempo ha da dedicare. 
+
+La vera moneta di scambio è quello. Potresti fare solo quello dalle otto del mattino fino alle sei del pomeriggio. Farei scalping, farei le commodity, farei... Alla base di tutto c'è il tempo. 
+
+Il tempo è la risorsa più preziosa che abbiamo da donare. Il tempo è anche secondo me uno come di persona, perché ad esempio io mi sentirei a disagio con lo scalping, cioè il dover fare tutte le cose veloci. A me piace di più soffermarmi, studiare il grafico, mettere l'ordine in tranquillità e poi vedere domani come va o tra qualche ora come va.
+
+Il suo stile di trading è quello a secondare, perché poi se avete fatto casa, io faccio questa considerazione. Quindi le strategie ce ne stanno agli osa. Non è che si possono fare tutte, è un po' il tempo che ha. 
+
+Quando può farlo? Quello che è più nelle sue corde, perché ci sono delle cose che io mi rendo conto, ad esempio, che sono un po' lontane dal mio modus operandi. Allo stesso tempo il fatto che oggettivamente ci sono delle strategie trend following e non tutti hanno la possibilità di seguirle nel tempo. Quindi ci sono le strategie con gli ordini pendenti. 
+
+L'offerta è tanta, deve trovare un pochino, almeno parlo per me, quello che più o meno alla fine diventi profittevole, perché l'obiettivo è essere profittevoli. E' inutile che ne sappiamo 20, se poi alla fine non portiamo a casa il risultato. E' meglio 2 che ci portano a casa il risultato, che 20 che poi ci portano in perdita. 
+
+Poi dipende tutto dal carattere. Il carattere è fondamentale. A me per dire, aprire le posizioni per giornate mi mette l'ansia e non mi piace. 
+
+Assolutamente quello che è, esattamente. In due ore, in tre ore boh via, io il mio fatto, andiamo, chiuso e vado. Per le altre invece non è così. 
+
+Quindi dipende tutto dal carattere, secondo me. Sì, sì, ma è assolutamente d'accordo. Perché poi il carattere, cioè chiedo scusa, la strategia dovrebbe in qualche modo assecondare il carattere. 
+
+Perché se alla fine c'era Natalia, la settimana scorsa, che ha assorbito su Paolo, che mi è piaciuto tantissimo, perché sul fatto che lui dice io di notte dormo e Natalia ha assorbito. Perché a un certo punto ha detto, dice io, Paolo, non mi stresso più di tanto. Ma non è banale. 
+
+Cioè se io guadagno 100 euro e ho l'ansia e devo prendere l'ansiolitico, è meglio guadagnarne 50 e starmene tranquillo? Eh sì, eh sì. Non parte. Paolo se n'è andato. 
+
+Stiamo cercando di lavorare. L'ho scritto, torni e mi ha scritto, non parte. No, credo che sia a casa.
+
+Stefano Missinato, mi piacerebbe ogni tanto vederti, perché sei veramente una persona sul pezzo, preciso, ma non ho mai messo un volto alla tua voce. Eccomi! Io già l'ho visto quando quella sera, non so se era la sera o il giorno, che mi ha donato per quella posizione che ci ha mandato anche il stop. BCM mi ha rimborsato 670 euro, ragazzi.
+
+Ah, ti ha rimborsato poi? Ti ha rimborsato tutto? No. Praticamente alla fine erano 933, più o meno. Non ho voluto insistere perché mi hanno detto che la seconda posizione non me l'hanno conteggiata perché il take profit non era messo. 
+
+Nel video era palesce che i due take profit c'erano, ambe due, però diciamo che su 933 mi hanno rimborsato 650 euro. E broker? BCM. Comunque sono veramente maledetti. 
+
+È un volto che ci ho avuto anche fortuna che l'ho registrato. Quando ho visto quel comportamento strano l'ho registrato e ti chiedo anche com'è andata. Io ho chiamato Paolo, siamo stati insieme, mamma dedicata, è stato gentilissimo, più o meno nel stesso tempo. 
+
+Scusate, a volte mi esce qualche parola, cioè staccavano tutte le posizioni, non riuscivo a vederne a capo veramente. Alla fine ho chiuso, a un certo punto avevamo messo, prima avevamo tolto lo stop loss sul consiglio di Paolo perché stava fillando, poi al 930 euro e quel discorso che facevo agganciandomi a Natalia. Vi dico, questa cosa è durata tre ore, ma mi ha stressato parecchio, sono sincero. 
+
+Ma cos'è successo? A un certo punto c'è stato un movimento del monitore stranissimo, per cui tu vedevi le candele che salivano e discendevano, ma soprattutto io le candele sono scese in take profit. Il take profit non me l'ha dato, non me l'ha preso e ha cominciato a salire, a salire inesorabilmente. Quindi da un take profit, adesso vado a memoria di 100 euro, una cosa del genere, ho chiuso almeno 900. 
+
+Ho salito e discendevo, l'ho anche condiviso in una sera, non mi ricordo, l'ho fatto vedere. Allora, alla fine Cristian Bertacchi, quindi altro ancora rispetto ai docenti, che ci sentiamo ogni tanto perché lui fa la point break, io l'ho detto, gli ho fatto guardare, manda il video e intervengo io a BCM se c'è bisogno. Ho scritto a BCM, gli ho mandato il video, alla fine questo venerdì o il sabato. 
+
+L'unedì mi hanno rimborsato 655 euro, motivando il delta, quindi 300 euro rispetto a quanto ho chiuso in perdita, quindi 900 dispari, a ciò che una delle due posizioni una del take profit, che nel video era valese, però mi ha detto che non è così usuale che rimborsino. Perché c'era poca volatilità, il mercato era chiuso, ho fatto una cazzata io ragazzi. La premessa è che quando c'è mercato... Ma la cazzata l'hai fatto perché hai fatto l'operazione verso le 11 di sera? No, era il giorno in cui una parte dei mercati erano chiusi, quindi il mercato oggettivamente non è stabile. 
+
+Ho avuto anche la fortuna perché ero in reale su BCM e in demo su Totale, con Paolo abbiamo filmato che BCM faceva una cosa, stesso cross, stesso time frame. Che strumento era? Come? Strumento di tutta la storia? Ragazzi, sono tornato. Era il 3 aprile. 
+
+Mi sentite, sono tornato. Ciao Paolo. Abbiamo finito Fibonacci e siamo all'M3. 
+
+Scherzo dai. No, va bene, va benissimo. Stavamo condividendo un po' di esperienze. 
+
+È fatto bene. L'isolanza creativa fa sempre bene. Paolo stavo raccontando quel movimento strano del presso che c'è stato cortesissimo a seguirmi quando poi il BCM mi ha rimborsato. 
+
+Sì, va bene, meno male. 3 aprile. Scusa, ma se tu non filmavi non ti rimborsavano niente? No, con migliaia di clienti che hanno, se non li segnali l'anomalia.
+
+Dico, lui aveva filmato la cosa, ha detto. No, con i log la riescono a ricostruire, certo. Però se c'è la registrazione è meglio, insomma. 
+
+Però ricordatevi una cosa, quando i mercati sono chiusi ci sono sempre movimenti anomali del prezzo. Pertanto a mercati chiusi conviene non trattare. Paolo questa cosa me l'aveva raccomandata perché poi quando l'ho chiamato è stato un bel disagio, ragazzi. 
+
+Mi taccio perché non parlo quasi mai. Quando ho finito la serata alle sette e mezza ho dovuto camminare quasi tre quarti d'ora per riprendermi un attimo. Questo prezzo che saliva, scendeva, saliva, scendeva fuori controllo mi ha provato parecchio. 
+
+Quindi quello che mi ha raccomandato Paolo, che faccio un po' da cassa di risonanza, è che quando non ci sono delle condizioni abbastanza piccolette passate, ma normali, e quel giorno non era normale per il mercato, è meglio starsene lontano perché poi indipendentemente dalla perdita economica, è psicologica la cosa, non è bello. Io parlo per me, dico quello che ho provato. Andiamo avanti ragazzi, poi se no basta. 
+
+Tutto interessante, se no poi non si finisce. Allora torniamo a noi. Il mercato si muove a onde. 
+
+Ovviamente questi rientri, pertanto dopo che il mercato ha fatto un'espansione dei ferrari, un attimo di rientro per prendere benzina. Questi rientri normalmente rappresentano il 50 per cento della gamba. Noi si è parlato di 61,8. 
+
+Fibonacci il suo punto magico è 61,8, leggermente più basso. Come vedremo quest'area compresa tra 50 e 61,8 viene chiamata golden zone, perché è l'area ideale per il ritracciamento. Ovviamente non va mai da solo. 
+
+Se in quest'area coincidono dei massimi o dei minimi, coincidono delle resistenze, coincidono dei livelli tecnici, diventa un'area di ritracciamento più interessante e più solida. Pertanto noi quando si parla di tenere dobbiamo andare a cercare sempre massimi e minimi crescenti. E apriamoci il nostro Fibonacci dove eravamo arrivati.
+
+Ti posso fare una domanda? Ho visto che tu hai tracciato Fibonacci dall'anno prima, da maggio 2025. L'ho tracciato da dove è partito il movimento. È ovvio che io sono in Weekly e non è un po' troppo lontano. 
+
+No, perché ci sono dei movimenti che durano anche anni. Il mercato si dice che è frattale. Sì, però leggevo oggi sulle dispense che praticamente non bisogna andare troppo indietro. 
+
+Bisogna dire in quale contesto tradi. Noi stavamo osservando un'operazione in D1, mi pare era NZDCHF. Quando l'hai fatta era in Weekly? Sì, ma stavamo osservando in D1 e stavamo dicendo dove può arrivare questo movimento. 
+
+Perché in Weekly si è fatta l'altra operazione. No, era quell'altra prima. E' un GBP. 
+
+Esatto, bravissima questa. D'accordo. Allora, noi si è detto che questo movimento è partito, è tornato a short, si è rimesso in laterale. 
+
+A questo punto abbiamo questo segnale. Noi dobbiamo guardare il contesto. Il contesto cosa ci dice a livello generale? Che qua c'è un'area di resistenza. 
+
+Siccome nel momento che metto gli ordini pendenti devo andare a vedere il contesto dove mettere gli ordini pendenti e dove devo metterlo stop. Lo stop è dove lo vado a mettere. Mi vado a vedere sul time frame superiore e cosa vedo? Vedo che qua ci sono uno, due, tre spike più o meno sullo stesso livello. 
+
+Vedo che ho la media a 200 e vedo a verificare questa parte. Poi dico mi fai vedere quanto ha ritracciato questo movimento. Ti devi guardare il tempo, ti devi guardare il numero delle candele. 
+
+Perché qui sono in Weekly. Cioè una candela è una settimana. Questo è un movimento di un anno. 
+
+Questa è il primo giugno 2025, siamo al 3 maggio 2026. Questo è un movimento di nove mesi. Però è un movimento che ha continuato per nove mesi. 
+
+Non è mica che è durato una settimana. Ha avuto dei ritracciamenti. Però se io lo vado a vedere sotto questo qui ci sono dei movimenti Daily, dei movimenti in H4, dei movimenti in H15. 
+
+Però a questo punto qui sono molto vicino a delle resistenze Weekly. Questo qui è un punto forte. Si vede che qui è stato respinto. 
+
+Si dice dove è stato respinto. Guardo tutto il suo movimento e dico cavolo mi è stato proprio respinto sul 50%. Pertanto ho una coincidenza tra tibonacci 50%, resistenza statica e resistenza dinamica. 
+
+Questo è un punto di resistenza forte, di supporto forte scusate. Corrisponde anche su quegli altri tre rostri che sono dall'altra parte. È tutta un'area questa. 
+
+E' ovvio che questo è il ragionamento che dobbiamo fare. Se questo regge bene siamo contenti. Se questo non regge il prezzo cosa fa qui? Se lui rompe questo livello e chiude sotto il medio al 200, 99 su 100 scende giù. 
+
+Perché qui non ho solo la media al 200. Ho media al 200, ho tibonacci e una resistenza. E' tutta un'area. 
+
+Non è che dal 50% di tibonacci al supporto ha la media al 200. Questa è tutta un'area. Questa è la zona di rimbalzo dal primo in fondo. 
+
+Se mi rompe questa qui devo metterlo stop perché mi viene qua giù un fondo. Chiaro? Quello che va visto il contesto. Poi ti devi guardare il movimento, ti devi guardare le candele, non devi guardare il tempo. 
+
+Anzi questa se si va a vedere c'è uno, due, tre, quattro, cinque, sei spike che si fermano proprio su quel punto. Aspetta, c'è anche il numero tondo. Perché qui siamo 86 mila tondo tondo. 
+
+Pertanto quello è proprio un livello scelto. Ovvio che prima o poi questo lo rompe. Sai quante persone ci saranno posizionate qua per fare il reverso? Arriverà il momento che lo rompe e quelli vanno tutti in stop. 
+
+Prima o poi lo rompe questo livello. Capiti questi due livelli che per noi sono importantissimi. Qual è la prima regola di Fibonacci? Fibonacci funziona bene quando il mercato è in trend, non va usato quando il mercato è laterale. 
+
+Quando il mercato è laterale Fibonacci non si usa, si usa solo in trend. La regola è che serve per misurare il prezzo e non per prevedere il mercato. È ovvio che siccome il prezzo è un elastico, una volta che io ho tirato questo elastico fino a un punto indefinito, poi l'elastico deve tornare indietro. 
+
+Pertanto non può allungarsi all'infinito e noi vedremo che in determinate aree, in determinati punti, quando il prezzo arriva a quel punto, noi tendiamo che l'elastico sia allungato al massimo, che l'elastico deve tornare indietro. Va bene? Il contesto corretto quando può essere utilizzato, quando il trend è chiaro e definito, quando l'impulso è seguito da un ritracciamento, quando la volatilità normale è sana, quando abbiamo una volatilità normale con il contesto di mercato. Quando abbiamo degli spike importanti tipo questo, Fibonacci non si tira da qualsuncima. 
+
+Questo è un movimento anomalo, probabilmente legato a una notizia questo movimentone qua, due candele così. Fibonacci va sempre legato a contesti dove il movimento si dice è senza anomali di questo tipo. Posso una domanda Paolo? Sì. 
+
+Come faccio a sapere da dove posso iniziare a tracciare Fibonacci? Te lo dico tra un poco, ma si traccia sempre da dove è iniziato il movimento. Non si usa il mercato laterale quando abbiamo un range senza direzione, quando la volatilità è estrema, quando c'è una fase di accumulo di congestione. Mercato in range, massimi e minimi crescenti. 
+
+Mercato in laterale, pertanto range uguale trappola, non c'è struttura, movimento erratico, vedete il movimento avanti indietro senza direzione. Questo è un livello dove il setup non va bene, pertanto Fibonacci non va bene. Se qui arriviamo ad un mercato in range, quando ritraccia e inizia a fare questo movimento, Fibonacci non lo possiamo più usare. 
+
+Concetti basi che dobbiamo assimilare e capire bene anche a livello tecnologico. Impulso, cos'è un impulso? Un impulso è un movimento direzionale forte del prezzo, avviene sempre a favore di trend, mostra decisione e forza, è la base di misura per Fibonacci. Cos'è il ritracciamento? È una correzione temporanea contro trend, non è un movimento direzionale, serve per scaricare ed equilibrare il mercato, crea delle aree di interesse statistiche che per noi sono tra il 38 e il 61,8 per cento. 
+
+L'estensione cos'è invece? È la continuazione del movimento principale che avviene dopo il ritracciamento. L'estensione normalmente è quanto la gamba del primo impulso, ma si può estendere fino al livello di 161,8. Ora lo mettiamo sul grafico e vediamo. 
+
+Sono le estensioni quelle che creano profitto. Come scegliere l'ultimo impulso valido? Così c'è la risposta in Italia. Prima cosa, si individua il movimento che rompe una struttura.
+
+Movimento che rompe la struttura, abbiamo detto che cosa vuol dire? Vuol dire che abbiamo due massi minimi crescenti che rompono la struttura precedente. Qua dov'è che c'è il cambio di struttura in questo grafico? Il movimento scende, massimo, minimo, massimo, minimo. Il cambio di struttura non l'abbiamo qua. 
+
+Quando si rompe questo minimo? Non ho capito. Cambio di struttura nel senso anche minimo cambio? No, cambio di struttura è quando si inverte il movimento dei massimi e minimi crescenti. Tenendo in view avete un bell'indicatore che si chiama Smart Money Concept.
+
+Andatelo a prendere, specialmente per i nuovi. Questo indicatore vi illustra com'è la struttura del prezzo. Ma è gratuito? Sì, è gratuito. 
+
+L'indicatore si chiama Lux Algo Max Smart Money Concept. E' questo qua, Smart Money Concept di Lux Algo. E' il primo che esce, sì. 
+
+Poi così, Smart Money Concept. E' il primo che esce quando lo scrivi Smart Money. D'accordo? Ok, sì. 
+
+Ok, fatto. Bene. E cosa indica? Allora, prima cosa, noi si è detto che un mercato è in trend quando forma massimi e minimi crescenti. 
+
+Pertanto se io prendo mercato, qui parte il suo movimento, questo fa un massimo, qui fa un minimo, qui fa un massimo, qui fa un minimo, qui fa un massimo, qui fa un minimo, qui fa un massimo, qui fa un minimo, qui fa un massimo, qui fa un minimo, qui fa un massimo… Questo massimo per esempio è il primo massimo che non è crescente, siete d'accordo? Si potrebbe essere un sintomo di cancer, di struttura rifa un minimo che comunque è crescente rispetto a questo minimo, pertanto non l'ha invalidato e torna sul massimo minimo. Dopo tutti questi massimi crescenti, crescenti, crescenti, il mercato ci siete rispettato. Abbiamo perso un pochino Paolo. 
+
+Fa un minimo, mi sentite? La connessione internet non è stabile, vado sul telefonino perché la connessione internet a quest'ora mi fa impazzire. Vediamo se riesco a transitare sul telefonino. Mi sentite ora? Ho cambiato connessione, eccolo qua. 
+
+Allora riparto da qui. Pertanto dopo tutti questi massimi minimi, questo è l'ultimo massimo, qui riscende, ecco che fa un massimo decrescente. Dopo un massimo decrescente qua rifa un altro massimo decrescente. 
+
+Questo indicatore cosa vi dice qua? C'è un cambio di carattere su questo livello. Quando arriva su questo livello l'indicatore torna indietro, fa un altro massimo decrescente, al minimo decrescente successivo c'è il cambio di struttura. Qui viene scritto BOSS, Break Off Structure. 
+
+Cosa vuol dire? Vuol dire che da questo punto in poi il mercato ha perso il suo carattere rialzista. Chiaro come concetto? Sì, solo una cosa Paolo perché con la tecnologia ci si confonde un po', perché si dice cambio di struttura, quello che qui viene chiamato Change of Character. No, no, Change of Character non è la conferma. 
+
+Il Change of Character è quando te scendi sotto l'ultimo minimo. Fai scendi, torni giù, qui scende, pertanto lui va a rompere questo minimo. Qui c'è cambio di carattere però non hai ancora i due minimi decrescenti. 
+
+Il secondo minimo decrescente ce l'hai qua, quando ti va a rompere quest'altro minimo. Con la rottura di questo minimo c'è il cambio di struttura. Quindi il cambio di struttura è un completamento del cambio di carattere. 
+
+Esattamente, il cambio di carattere vuol dire che a un primo momento il mercato sta cambiando carattere. Il cambio di carattere potrebbe anche essere una fase di congestione. Questo è tutto un cambio di carattere in congestione. 
+
+Qui ti dà il cambio di carattere però non hai ancora il cambio di struttura. Qui guarda, cambio di carattere, cambio di carattere, cambio di carattere. Però il primo cambio di struttura ce l'ha qua giù, Break of Structure. 
+
+Eccolo qua, perché ha rotto questo massimo. Chiaro? Sì. Paolo, siccome siamo davanti all'indicatore smart money qui di Luxalgo, potresti spendere due parole anche sull'area premium e l'area discount? No, ora no. 
+
+Farò una lezione sulle smart money, Stefano, precisa, se no non chiudo il discorso d'Ax. Mettiamo una cosa alla volta in cantiere, se no facciamo confusione. Allora, torniamo al nostro Fibonacci e assimiliamo bene quello. 
+
+Pertanto, quando rompi minimi precedenti, Boss, Break of Structure, cambia lo stato del mercato, questo è un impulso di riferimento. Ignora i movimenti successivi correttivi che non invalidano l'impulso. Il rimbalzo verso C è correttivo. 
+
+Ecco qua, vedi, qui il mercato è salito, è sceso, cambio di carattere, arriva sul minimo precedente, torna su, a questo punto qui c'è il cambio di Break of Structure perché ha rotto il minimo B, pertanto lo vedete il movimento, scende giù, torna su, riscende giù. Paolo, posso farti una domanda? Il Boss, in teoria, una volta che rompe quello sarebbe un segnale di continuazione della struttura di stock? Il Boss vuol dire che sei entrato in trend. Il trend non è che è sempre continuo, va avanti a onde. 
+
+Certo, certo. D'accordo, pertanto a questo punto col Boss se ti sei in trend puoi tracciare Fibonacci. Tracci Fibonacci, lui quando ti torna indietro qua dici, fino a dove mi può tornare indietro? Sono in trend e mi può tornare indietro fino all'area della Golden Zone. 
+
+Pertanto io lo posso andare a aspettare in questa area, l'area tra 32 e 20 e l'area tra 61 e 50. La Golden Zone è tra 50 e 61,80, però 38 e 20 è già un punto di possibile tracciamento. Se io in quest'area mi trovo un supporto, un massimo minimo precedente, un livello tecnico statico, è un punto di possibile tracciamento. 
+
+Più il livello tecnico sul time frame è alto, più il punto di possibile tracciamento è solido. Concordi? Sì sì. Pertanto noi cosa dobbiamo fare? Questo qua è un elemento che ci dice in più, perché quando io vedo che il mercato torna indietro, dopo che ho il cambio di struttura, mi devo preoccupare? No, perché è un suo movimento tecnico. 
+
+Il mercato deve tornare indietro per prendere le liquidità. Pertanto supponiamo che io ero short, vedo che il mercato mi torna indietro, magari vado sul time frame inferiore perché poi Fibonacci una volta che tu l'hai tracciato su un time frame, io qui ho tracciato in Icri, ma se vado in D1 mi vale anche in D1 lo stesso Fibonacci. D'accordo? Pertanto ora qui non è l'esempio, perché è un esempio lungo, però nel momento che tu l'hai tracciato e ti è andata a ritracciare fino a 50, te una volta che ti torna indietro ti aspetti che torni su. 
+
+E fino a dove ti torna su? Questo movimento qua, secondo te, fino a che punto lo farà? Fino alla zona tra 50 e 61,8. Me lo vado a aspettare qua. Una volta che mi arriva qua e mi torna indietro, posso diventare short, perché a questo punto il trend è da questo punto in qua, è short. 
+
+Non me l'ha ancora shortato perché cosa mi manca in questo trend? Cosa mi manca attualmente? Non sono ancora in cambio di struttura, perché qui ho un primo minimo, è tornato indietro, però il cambio di struttura reale ce l'ha già fatto un primo movimento. Andiamola a vedere EurGBP. Scusami Paolo, ma è anche lo spike? Se è uno spike umano sì, se è disumano no. 
+
+Prendiamo EurGBP in D1. Vediamo qua cosa ci dice. Vedi, addirittura non ci dà neanche ancora il cambio di carattere l'indicatore, perché non ha rotto questo minimo. 
+
+Secondo me questo sarebbe un cambio di carattere, questo minimo qua. Comunque non lo segnala probabilmente nel suo linguaggio, non lo riesce. Vedete qua cosa dice? Lui è arrivato qua su, lui è arrivato, è tornato indietro. 
+
+Perché qua dice che c'è cambio di carattere? Perché ha rotto sotto questo minimo. Pertanto lui qui c'ha cambio di carattere, poi ritorna giù, arriva in questa zona qua e qui non c'è ancora un boss, non c'è niente. Pertanto il mercato in questo momento lo considera il laterale. 
+
+Quando ci avrò il cambio di carattere reale? Quando lui va a rompere questo livello, il cambio di struttura? Quando lui romperà questo livello c'è il cambio di struttura e il prezzo viene giù. Non c'è il cambio di carattere lì? Appena rompe quel livello? Qui c'è un mistro cambio di struttura che è dato qua, cambio di carattere. Secondo me il cambio di carattere me lo fa qua, me lo fa su questi livelli. 
+
+Qui il prezzo potrebbe fare, a mio avviso, che arriva qua, tocca qua, torna indietro e poi viene giù così. Il cambio di struttura, non di carattere. Qui fa il cambio di carattere e qua fa il cambio di struttura. 
+
+Esatto. Il cambio di carattere lo fa su questo livello. Quando arriva qua e rompe questo livello? Perché questo prima non l'ha rotto, è rimasto proprio allineato. 
+
+Ma lì sotto che livello è? Quale? Lì dove c'è il rettangolo blu, azzurro. No, questa qui è una zona di liquidità ancora. Vedi? Se rompe questo, qui è tutto vuoto, arriva fino qua giù il prezzo.
+
+È qui che si sta consumando la battaglia, in questa zona qua. Perché lì è la zona di liquidità? Quella è una famosa pre-section. È una zona di pre-section quella lì. 
+
+C'è anche liquidità lì, perché lì ci sono tutti gli ordini posizionati. Ci saranno gli ordini in reversal e gli ordini in breakout. Quella è una zona di liquidità e chi è che vede questa zona nell'order broker lo vede sull'order broker. 
+
+Sull'order broker sa dove sono gli ordini posizionati, pendenti. Giusto? Quindi Fibonacci si traccia dal massimo dove è arrivato e al minimo dove è arrivato. Giusto? Perché non ti sbagli mai. 
+
+Da dove parte il movimento? Fibonacci lo deve tracciare da dove parte il movimento, da dove parte il trend. Se io voglio vedere dove ho questo ritracciamento, se voglio misurare questo ritracciamento, qui c'è un primo trend. Questo lo posso misurare da qui a qui e mi ritraccia fino a 32,8. 
+
+Poi mi riparte. Lo ritraccio allora a questo punto da qui a qui e guarda dove si ferma a 61,8. Poi va in laterale. 
+
+Da dove parte il movimento? Una volta che è finito, da dove parte il movimento impulsivo? Questo ritracciamento invalida questo impulso. Da qui riparte il secondo impulso. Perché sono in D1. 
+
+Se io vado in Wikileaks e questo ritracciamento lo vedi? Probabile di no. Pertanto se io traccio Fibonacci in Wikileaks, lo vedi tutto verde, Fibonacci. Se io lo traccio in Wikileaks, il movimento in Wikileaks è tutto questo. 
+
+Chiaro? Te lo devi tracciare. Se vado in H4, sempre sullo stesso movimento in H4, avrò tanti sottomovimenti in H4. Eccoli qua. 
+
+Il che vuol dire non vale l'OM-M15 o l'OM-M30, giusto? No, vale sempre. Te devi scendere e ce l'avrai sempre. I movimenti del mercato sono frattali.
+
+I movimenti del mercato sono frattali. All'interno di un movimento d'eli, supponi che questo sia un movimento d'eli, ci sono tanti movimenti in H4. All'interno del movimento in H1 ci sono tanti movimenti in M15. 
+
+E sono spacchettati, sono proporzionati fra di loro. Questi sono proporzionali. Bisogna vedere su quale time frame operi. 
+
+Vedi, se tu sei in H4, è questo il movimento impulsivo in H4. Lo vedi? Sei d'accordo? Sei d'accordo che questo è il movimento impulsivo in H4? Pertanto io traccio da qua a qua, e dove mi ritraccia lui? A 50. E quindi so dove scende mentre sta scendendo? So dove scende. 
+
+Mi aspetto che riarrivi in questa zona. Una volta che lui mi torna indietro qua, io mi aspetto che il movimento mi riarrivi in questa zona. Non c'è nulla di matematico. 
+
+Magari fosse matematico. Io mi aspetto che il prezzo mi torni in questa zona. E il prezzo è andato a toccare la zona superiore. 
+
+È andato a 60. Questo mi aspetto la zona. Ma già 32 può andare bene. 
+
+Una volta che il movimento riparte, qui si mette il laterale, qui parte il movimento impulsivo. Il movimento impulsivo dove finisce? Finisce quassù. D'accordo? Dove mi aspetto che mi vada a ritracciare il prezzo? Tra 50 e 61.
+
+E' ovvio che tra 50 e 61 non mi basta solo fibonacci. Vado a vedere se ho dei supporti o delle resistenze. Vediamo se tante volte ci fosse. 
+
+Eccolo qua. Guarda. Senza nemmeno farlo apposta. 
+
+Qui c'è una resistenza weekly, qui mi sarei potuto posizionare e aspettarlo qua. Non c'è arrivato. Va bene. 
+
+Poi riparte il movimento impulsivo, sempre in H4. Il movimento impulsivo mi riparta qua. La cosa buona di Fibonacci è che mentre normalmente noi siamo a lavorare con indicatori che ci fanno vedere il passato, quando è che lo usi? Una volta che sei arrivata in cima con il movimento, tu lo sai dove parte il movimento, perché lo metti da dove ti parte. 
+
+Poi una volta che c'è il punto inizia a ritracciare. Ti dici va bene, mi sta ritracciando indietro. Allora te lo tracci sullo spike massimo, sullo swing che vi ha parlato Emiliano lunedì, e dici dove lo vado ad aspettare? Me lo vado ad aspettare tra 50 e 61. 
+
+Guarda dove è arrivato il prezzo? Da 50 e 61. Ma se sta andando oltre i massimi? Se sta andando oltre i massimi lo sposto questo. Supponiamo che prima lo metto qua, mi continui ad andare avanti e a mano a mano che il prezzo va avanti, sono qua. 
+
+Questo è il massimo qua. Lo metto qua, me lo aspetto qua. Perché non esco? Non esco perché non ho le due candele che mi torna indietro. 
+
+Io per esempio considero il movimento finito quando ho un pattern d'inversione. Qui ce l'hai un pattern d'inversione secondo te? No. Qui c'è solo una candela di indecisione, poi c'è una candela impulsiva, poi c'è un'altra candela. 
+
+Il pattern d'inversione lo inizi a vedere qua. Candela di indecisione, c'è uno spin top, un'altra candela di indecisione, candela di indecisione. Qui magari ci metti un po' di bande di bollinger. 
+
+Quindi scommettiamo che le bande di bollinger le troviamo piegate. Le bande di bollinger si iniziano a piegare. A questo punto hai portato intanto il tuo discorso qua, questo ti arriva a 23,6. 
+
+Banda di bollinger che si piega vuol dire che il movimento è finito qua. Chiaro? Il problema non è entrare al mercato, il problema è quando si deve uscire. Esatto, esatto quello. 
+
+E quando qua si deve rientrare. Se il mercato sta andando long e continua a andare long e continua a andare long, dici ok, dove metto lo stop loss dato che mi ha preso l'ordine? Allora, lo stop loss non è un problema. Scusami, il take profit.
+
+Allora, tanto per lo studio principale prima. Riportiamoci alle bande di bolling. Che caratteristica hanno qua le bande di bollinger? Ricordiamo le lezioni delle bande di bollinger dell'altra settimana.
+
+Caratteristica qua delle bande qual è? Pressione, si chiudono. E' uno squeeze, si chiudono. Non sono parallele, si chiudono proprio.
+
+Quando la banda si chiude, cosa vuol dire? Che il mercato parte, va bene? Siccome a me piace trattare con la deviazione standard, metto anche la deviazione standard che vi ho regalato. Che ce l'avete. E' tegno a dirlo, eh? Vi ho regalato.
+
+Lo fa sempre Miliana, però Miliana non glielo dice, ti piace dirlo. Mi va bene che ho levato l'uniforme, sennò giocavoli, eh? Ragazzi, dobbiamo stare zitti perché sono buoni, troppo buoni tutti e due, tutti e due. Teniamocelo buono Paolo Antonella, teniamocelo buono.
+
+Assolutamente sì. Lo sta deblandendo di brutto, eh? Cosa? Diciamo ti stanno lisciando di brutto. Non è vero.
+
+Paolo, stanno aspettando le 11.30 che regali qualcosa. Paolo, sono le 11.00. Paolo, volevamo dirti che sei il top. Lo so, lo so.
+
+Vabbè, pertanto qui abbiamo la nostra chiusura. Possibile espansione. Allora, l'unica cosa che non si sa dove il mercato espande.
+
+Non si sa se va a longo o se va a short. O meglio, ci sono delle tecniche che sono troppo avanzate, una cosa alla volta. L'unica cosa che sappiamo è che dopo questo movimento, qui c'è tutta la compressione.
+
+Qua le bande si stringono. Nel momento che le bande si stringono, ragazzi, smettete di fare i vai e vieni all'interno. Qui cosa abbiamo? La deviazione standard.
+
+Ci sta iniziando ad andare su. Vuol dire che è avviso di esplosione. Giusto? Sì.
+
+A questo punto, qualcuno di voi ha detto intelligentemente, ma io non mi posso mettere con un ordine sopra e un ordine sotto. Ci sto studiando perché mi sembra una cosa intelligente. Va bene? L'unica cosa che bisogna stare attenti è a farsi breakout.
+
+Esatto. Perché volete andare sopra un po' e poi parte dall'altra parte. Però uno non potrebbe aspettarsi la condizione.
+
+Vedi qua c'è questo spike, poi fa il pullback e poi riparte. Una volta che sei in questa condizione, hai tutti gli elementi chiari per sapere che il mercato ti va a long. Perché? Allora, vediamo se c'è qualcuno che ci dice perché c'ha gli elementi chiari che il mercato va a long.
+
+Perché la banda è bella ripida. La banda è ripida. Il prezzo che corre sulla banda deve essere standard.
+
+Le medie pure si sono alzate. Le medie si sono incrociate, aperte, belle, larghe. La media centrale è larga.
+
+Abbiamo tutti gli elementi che ci dicano a questo punto che il prezzo va a long. Anche le candele. Le candele ci dicono che c'è forza.
+
+Le candele poi ci dicono che sale forte. Una candela che sale così forte molto probabilmente ritraccia. Poi non si avvera qua però.
+
+Normalmente una candela quando c'è un'esplosione così ritraccia. Poi c'è anche un cambio di struttura in questo punto, no? Sì, a questo punto. Poi qui c'è prima il cambio di carattere e qui c'è il cambio di struttura.
+
+Qui ha rotto questo massimo. Qui torna indietro, fa il pull back e quando rompe quest'altro massimo c'ha i due massimi e i due minimi crescenti. Paolo, ci metti anche i volumi per quanto sia? No, non ce ne metto i volumi perché poi non sono aggiornati su questo livello massimo.
+
+Dovrei stare sul 3 in più. Torniamo a noi. Noi siamo entrati al mercato.
+
+Io direi che un punto d'ingresso al mercato ragionevole è su questa linea. Dove siamo, siamo. D'accordo? Da dove lo tracci Fibonacci? Chi era? Natalia.
+
+Da dove lo tracci Fibonacci secondo te? Da dove parte il movimento? Da qui? Da qui? Da dove parte voi? Da qui? Penso dal minimo dove si sono restrette le... Da dove ti partono i massimi e i minimi. Da dove ti parte l'impulso, no? O lo tracci da qui o lo tracci da lì. Lì, esatto.
+
+Perché questo è un massimo e un minimo. Questo è un altro massimo. Qui c'è il primo massimo che ti rompe.
+
+D'accordo? Lo metto appena prima di quella candela lunghissima. Io devo tracciare da qui. Lo traccio da qui.
+
+Perfetto. Lo traccio da qui. Il prezzo mi arriva qua.
+
+Mi torna indietro. Te cosa fai? Esci qua. Te sei entrata qua.
+
+Scusami, ho sbagliato. Te sei entrata qua. Il prezzo ti arriva qua.
+
+Te cosa fai? Esci. Perché? Non lo so. Devi farti una tua regola di piano di trading.
+
+Ti dico il mio piano di trading. Quando sono dentro così. Che normalmente va bene.
+
+Io mi metto lei che nasce. Con quell'indicatore fantastico. Sì.
+
+Aspetta, però qui devo levare l'indicatore. Natalia, a te lì tiri la monetina, dai. Deve funzionare.
+
+Mi metto lei che nasce. Questo mi va avanti. Qui sono con lei che nasce.
+
+E lei che nasce che mi torna indietro. Mi arriva a 61,8. Io a 61,8 esco.
+
+Perché è sotto la golden zone. C'ho lei che nasce che è una candela di trend. Va bene? Sì.
+
+Poi in base alla situazione o esco tutto o parzializzo l'80%. 75-80%. Non ho una regola fissa.
+
+D'accordo? Se entro con 1 parzializzo 0,6. Se entro con 0,5 parzializzo 0,3. Bene? Sì.
+
+Cosa vuol dire? Che porto lo stop a 61,8. In questo caso mi sarei preso lo stop in profit e avrei parzializzato a 50. Cosa vuol dire? Che mi sono portato qualcosa a casa.
+
+Perché ha fatto il suo movimento. Io sono entrato qua. Scusa un attimo, ho detto una festeria.
+
+Io sono entrato qua ma Fibonacci lo devo tracciare da dove è partito il movimento. Scusa, mi sono andato troppo veloce. Io Fibonacci lo devo tracciare da qua.
+
+Esatto. Da qua, scusa, ho detto una festeria. Perché da lì? Da dove parte il movimento.
+
+Perché diventa il movimento. Massimo, minimo, massimo, minimo. Ma le bande si chiudono più avanti? Sì, le bande chiudono più avanti, ma il movimento lo inizierei da dove inizia a capire che c'è la rottura della struttura.
+
+Se io ho messo questo come rottura di struttura, la banda si è mossa, però il movimento è iniziato qua. Perché qui c'è il primo minimo, massimo, minimo crescente, massimo crescente, minimo crescente, massimo crescente, minimo crescente. D'accordo? Qui c'è il primo massimo che non è crescente.
+
+Pertanto sono qua, 32,8, qui non sarei uscito. Perché fino a 50 anni… Scusami, è giusto che lo tiri da lì Fibonacci, dall'inizio, no? Però ad ogni break of structure non dovresti poi partire da più sopra. Ma no, ti devi vedere un po' il contesto generale.
+
+Perché ti devi partire da dove parte l'impulso. Il primo ritracciamento vero è dove ce l'hai. Secondo me questa è la zona di congestione.
+
+Cioè questo movimento impulsivo inizia da qua e finisce qua. Qui c'è una zona di congestione, da qui ti riparte un movimento impulsivo. Perché non consideri quella piccola congestione più sotto di candele rosse? Questa qua non l'avrei considerata onestamente.
+
+Comunque se lo mettevo qua cambiava poco o niente. Non cambiava molto. Scusa Paola, ma se noi lo facciamo che non abbiamo ancora quelle candele rosse? Perché noi lo facciamo quando è iniziato il movimento.
+
+No, te il movimento lo tracci qui Fibonacci, te lo tracci… Esatto. Quello che c'è dopo non ti interessa perché te lo tracci su questo. Te poi cosa dici? Il movimento mi ritraccia, se mi ritraccia fino a 50 sono nella norma.
+
+Giusto? No, aspetta. Tu hai detto che noi dobbiamo tracciare Fibonacci per uscire. No, esatto.
+
+Per sapere dove uscire. Per sapere dove uscire. Te lo tracci da dove inizia il movimento a dove finisce il movimento.
+
+Questa è zona di ritracciamento. Pertanto quando vedi che il prezzo ti riarriva a 32,8 io esco. Perché esco? Perché mi immagino che mi arrivi a 0,50 e mi sto pronto per rientrare.
+
+Però non so il livello fin dove arriva il mercato. Io intanto esco. Io sono entrato qua.
+
+Ho fatto profitto qua giù. Il prezzo mi torna indietro. Mi arriva a 32,8 di Fibonacci.
+
+Io suppongo che una volta che mi rompe 32,8 mi arriva a 0,50. Pertanto esco e l'aspetto a 0,50. Poi ti ripeto, devo fare un minimo di analisi di contesto.
+
+Qui c'è una media a 0,14. Devo vedere se ci sono supporti e resistenze. E se non scende a 0,50 cosa fai? Eh? Se non scende a 0,50... E sono uscito. 
+
+Sono uscito e ho preso profitto. Sì, non rientri più diciamo. Non è giusto.
+
+Aspetti un prossimo... Qui se l'hai rientrato. Perché il prezzo mi è rimasto sopra la media a 0,14. Con la quota che sono riuscito rientro con 0,30.
+
+Ho capito. Con il guadagno. E quando rientri a 0,30 in questo esempio qua? Dopo la doggi? Visto che qui non mi rientrava quando vedevo che mi ripartiva il movimento e mi rimaneva sopra.
+
+In questa zona che le mande sono alte. La deviazione standard qui com'è? La deviazione standard qui mi inizia a crescere e mi rimane sopra. Sicuramente in questa zona sarei rientrato.
+
+Magari rientravo un po' in ritardo. Rientravo qui quando partiva il prezzo. Quei massimi relativi? Sì.
+
+Poteva anche essere una buona idea la rottura dei massimi. Perché poi il prezzo è tornato indietro. Una volta che ti rimani in questa congestione, c'è le bande messe in questo modo, il prezzo non torna indietro.
+
+Il prezzo per tornare indietro deve fare una chiusura della banda. Qui un pochettino l'ho fatta. Probabilmente qui avrei aspettato e sarei ripartito quando mi riallargavo la banda.
+
+Magari su questo ritracciamento. Quando è arrivata qua c'era questo engalfi, questo gap, questa imbalance. Tu sei in H4? Eh? Sì, in H4.
+
+Sei in H4? Sono in H4, sì. Ok. Bene.
+
+Una volta che sei rientrato, ti rimetti a H100 e te lo continui a seguire. Quando sei arrivato qua, qui ti ritraccia a 2386, non esci. Ah, ok.
+
+Qui ti arriva qua, non c'è ritracciamento. Quando arrivi qua su cima, lo porti qua su cima, quando ti arriva 2308, 3208, se me lo tocca io esco. In questo caso non so se sarei uscito perché non me lo tocca.
+
+Comunque supponiamo che esco. Va bene? A questo punto il prezzo si muove in questo senso. Esco sempre con la parzializzazione.
+
+Sei rientrato con 03, esco con 03. Io lo 02 lo lascio fino alla morte. Una volta che vedo che il prezzo mi si gira così, che mi si chiude la banda, cosa faresti tu? Esco.
+
+Una volta che c'è la deviazione che ti cala, banda che ti chiude, cosa fai? Esci. Il movimento è finito. Se poi ti porti Fibonacci da quest'altra parte, vedi anche che ti è arrivato a 3208.
+
+L'ultimo punto di uscita sicura è 50. Su questo punto esci sicuramente. Però vedi, dopo fa un po' di laterali e poi riprende ancora.
+
+Sì, ma quanto lo vuoi tenere? Tutta la vita. Tieni conto che ogni candela sono quattro ore. Qui sei dentro da due giorni.
+
+Ma questo movimento si può fare in M15? Certo, in tutti i time frame. Andiamo a cercarne uno in M15. Non cambia niente.
+
+Facciamo lo short stavolta. Qui abbiamo le nostre bande che si stringono. Da una parte andiamo.
+
+Stop alto e stop basso. Non state proprio sulla banda. Vedete che qui c'è un falso breakout.
+
+Qui abbiamo la deviazione standard ed è già un aumento da qua. Pertanto da qui inizia a esserci il segnale che il pezzo si sta muovendo. Ma qui si sta ancora muovendo in modo erratico.
+
+Non si è ancora capita la direzione. E dove entreresti? Eh? Dove entreresti in quella situazione? In questa situazione sarei qui, più o meno. Qui c'è il pezzo che mi viene giù però non ho ancora la conferma.
+
+Così a occhio mi verrebbe da dire che va short. Però qui c'è sempre questo movimento erratico. Mettiamo dentro anche le nostre candeline A9 che non ci sono qua.
+
+A9 e A21. Mettiamogli anche quelle che ci aiutano sempre. Sono un buon segnale.
+
+Ragazzi, già fatto le 11.30. Vola il tempo. Sì, sono le 11.30, Paolo. Non freghiamo, 11.21. Ancora 9.09. Allora, 9 e 21.
+
+Fammi levare. 14. Oddio, qui non è che si incrociano forte.
+
+Comunque ho le bande incrociate. Sicuramente avrei aspettato qua che ho le bande ordinate. Qui ce l'ho il segnale delle bande, no? Eh, però sì, esatto.
+
+Sono molto chiari. Eh, ma però qui ce l'ho. La media che mi scende, bolling, la cosa che si allargata, la deviazione che mi è salita, le medie ordinate verso il basso, più di questo che devo avere.
+
+Lo stesso movimento c'era oggi su DAX, però in long. Non ho capito. Ho detto lo stesso movimento era su DAX ma in long.
+
+Sì, sì, certo. Si è fatto su e giù, su e giù, su e giù, però guarda. In questa zona, in questa zona qua, poteva essere sicuramente un punto di ingresso buono.
+
+Io probabilmente sarei entrato qua, mi sarei preso un po' di drawdown, se uno voleva aspettare un po' di più entrava qua giù, quella dopo a 15 si può aspettare qualche conferma in più. In questo caso, mentre scende, scende, scende, scende, tu dove esci? Ora ci arriviamo. Va bene? Allora, ipotizziamo che entro qui.
+
+Quando entro, io vi metto sempre una cosa che mi piace, il super trend. Il super trend mi aiuta tanto. Dove è il super trend? Eccolo qua.
+
+Bene, d'accordo, io sono entrato qua. Stop. Stretto.
+
+Lo metto sopra la mediana in questi casi, perché qui ormai è partito. Questo ormai è partito, va giù. Intanto inizia a dire che io me lo seguo sempre sul super trend.
+
+Scende il super trend e mi porto dietro il prezzo. Capito? E poi dietro lo stop? Lo stop. Me lo tengo sul super trend.
+
+E così non mi pongo ancora problemi di target. Io, a mano a mano, che il prezzo scende, io me lo seguo col super trend. Quando mi sono fatto 20, 30, 40 pip, dipende dal contesto, va bene? Ipotizziamo che si entrava qua.
+
+9, 30, a 20 pip. Qui siamo a 20 pip. A 20 pip qui avrei parzializzato.
+
+Tieni conto che EOGBP fa 35 pip al giorno, non è il massimo per fare queste cose. Va bene? Qui avrei parzializzato. E il super trend ce l'ho ancora alto.
+
+A questo punto il prezzo mi lateralizza. Va bene? Me ne sto tranquillo, perché il super trend ce l'ho alto. Io mi tengo in profit.
+
+Io sono in profit qui. D'accordo? Ho portato il take profit giù, ho sbagliato. Va bene? Io sono in profit qua.
+
+Qui mi lateralizza, mi lateralizza. Quando sono qua, io ho lo stop qua giù. Va bene? Sì.
+
+Mi continuo a scendere, e io continuo a scendere con lo stop. Arrivo qua, e mi esco con lo stop in profit. Sì.
+
+In questo caso non ho riferimenti, perché non vengo da un trend, esco da una compressione. Non so il prezzo dove mi arriva. La cosa migliore è seguirlo con il super trend.
+
+Chiaro. Chiaro? Paolo, scusami. Se invece lo faccio con un prezzo, ti prendo CHF Japan, che dovrebbe essere qualche opportunità migliore per capire... Eccola qua.
+
+Supponiamo che siamo su CHF Japan. Sempre M15? Sempre M15. Ok.
+
+M5, M15, questa strategia ne vale la pena. D'accordo? Mhm. Allora, questa risentata no, perché c'è la media 200 qua.
+
+Va bene? Ipotizziamo che rientravi su questo incrocio. Eh. Su questo incrocio potevi entrare, secondo te? Come? In questo incrocio potevi entrare? No.
+
+Sarei entrata quella dopo. Sarei entrata appena sopra la media, 200. Mi piace l'idea che sei anche sopra la deviazione standard.
+
+Esatto. Perfetto, brava. Questa è una soluzione più sicura.
+
+Va bene? Sì. Pertanto qui entri... Ecco, qui abbiamo una situazione di trend. Vedi? Massimo, minimo, massimo, minimo.
+
+Sì. D'accordo? Sì, sì. Secondo te qui, fino a quando hai ritracciato? A 61,8, un po' di più.
+
+A questo punto te te lo porti qua. C'ha la stessa gamba. Guarda dove ti arriva? Mhm.
+
+Proprio su questo punto. Allora, quando qui sei in trend, puoi usare i tibonacci per vedere l'estensione. Ok.
+
+Questa hai fatto una proiezione, perché abbiamo un po' anticipato. Questa, quando si trasferisce così, si chiama proiezione di tibonacci. Ok.
+
+Se no, se te lo tracci alla rovescia, tibonacci qua, invece dal basso verso l'alto, lo tracci dall'alto verso il basso e lo porti qua. Vedi? Sei fermata tra 127 e 161. Questa è l'alta golden zone.
+
+Pertanto, a 127 poteva essere un movimento di estensione. Poi, anche in questo caso, ti devi guardare le bande. Nel momento che... In M15 le bande sono molto più reattive Sì.
+
+che in H4. Dove era? Questa, questa, centrale. Questo era.
+
+Nel momento che c'è la banda che ti si chiede, qui esci, qui quanto avrà ritracciato? Qui si torna a 32,8. 50. Vedi? 32,8, ha ritracciato qua, ha testato, qui puoi rientrare.
+
+Perché il riprezzo ti rimane sopra le bande. Pertanto, orienti sempre con quello che ti sei portato a casa. Senti con 50, parzializzi 0,30.
+
+Senti con 1, parzializzi 0,60. Fai il ritracciamento e poi ributti dentro 0,60. Ok.
+
+L'importante è che... Non aspettiamo il ritracciamento. Aspettiamo il ritracciamento. Supponi che tu sei entrato, sei detto che noi si entrava qua.
+
+Giusto? Sì. Quando arrivi in cima, non è che ti vai a prendere lo stop e ti perdi tutto il guadagno. Allora, le cose sono due.
+
+O ti prendi tutto e stai tranquillo e chiudi la posizione più o meno in questa posizione. Io qui, quando mi gira così la banda, la chiudo. Cioè, al più tardi io l'avrei chiusa su questa candela.
+
+D'accordo? Perché su questa candela c'ho tutti gli elementi che mi dicano che il movimento è finito. Banda che mi scende, le deviazioni che mi scende. Ok.
+
+Siete d'accordo? Sì. Anche lei vuole dopo che si ferma. Non l'ho capito.
+
+Poi rientri. In questo caso non arriva a 50, arriva a 32. Quando vedi che il movimento poi riparte, rientri.
+
+Quando vedi che il movimento qui ti scende, per rientrare preciso, devi rientrare più o meno in questa zona. Devi rientrare proprio corretto, capito? Quando ti sale la deviazione standard. Però probabilmente non saresti entrato perché questo movimento impulsivo mi sa di notizia.
+
+A che ora è? Mi sa che è l'apertura del mercato. 15.45. Però il GCHF è già a panno. Non può darsi che sia qualcosa connesso al mercato americano.
+
+Perché è 14.30 al mercato americano. Un movimento strano quello. Però se vi tenete conto, deviazione, bande di bollinger, supertrend.
+
+Ora, se tu fossi entrata più bassa qua Natalia, se tu fossi entrata più bassa, questo ritracciamento, te eri sempre protetta dallo stop and profit sul supertrend. Al limite ti portavi un pochettino più sullo stop e lasciavi andare avanti il prezzo e lo continuavi a seguire col supertrend. Mi sa che poi avremmo preso… Dipende un pochettino da dove sei entrata, capito? Sì, sì.
+
+Infatti oggi era… cioè, è molto lento perché i volumi erano molto grandi, si vedeva. Però continuava comunque a andare in long, leggermente scendeva, poi riprendeva. Ti pare il DAX? Ma tutti e tre i mercati… Sono stati un po' erratici perché il Dow Jones è poi andato short, il DAX è rimasto long.
+
+No, no, mi credo standard impulse e Nasdaq, oltre al DAX. Ma il Nasdaq non è così correlato. Le correlazioni sono Dow Jones, standard impulse e DAX.
+
+No, ma stamattina erano tutti quelli correlati. Sì, ma il Nasdaq va per conto suo. Il Nasdaq segue normalmente i movimenti perché voi dovete guardare.
+
+Vi faccio vedere una cosa e poi basta. Stavo preparandovi una cosa. Marmone… Dove l'ho messa? Io ho notato oggi che invece era Dow Jones che andava per conto suo.
+
+Invece il Nasdaq… No, vi voglio far vedere una cosa carina. Perché voi dovete vedere cosa sono composti i mercati e capire perché sono correlati fra di loro. Se no uno non capisce perché sono correlati e come incidono a volte le notizie sui mercati.
+
+Allora, esamino… Non ci combina niente. Dove l'ho messo? Cavolo! Un po' all'extremo… Poi ci ho visto che c'era un problema. Su questo argomento.
+
+Mi stavo preparando per altre lezioni. Ho fatto proprio una slide su come sono composti i mercati. Perché per capire bene i mercati bisogna capirmi la composizione.
+
+Eccola qua. Deve essere questa. Non so se è corretto, Paolo.
+
+Io ho visto oggi che il DAX è comportato molto da un automobilistico. Il Brent scendeva giù tanto e lui saliva. Tutti aspettavano che il DAX scendesse.
+
+Invece il DAX non è sceso. O i DAX che in Germania abbiano fatto qualche misura di sostegno. Io ho visto che il Brent scendeva giù e il DAX saliva su.
+
+Proprio uguale. Non so se è una cosa… Uno scendeva e uno saliva. Esatto. 
+
+Il Brent scendeva giù e il DAX saliva su. La correlazione è… Questa cosa è diversa. Visto che era composta dall'automobilistico, pensavo che il petrolio scendeva giù.
+
+Allora. Ho fatto anche una slide. Ora la devo ricercare.
+
+Allora. Il Nasdaq… Ci sono le aziende e i tech. Le principali aziende del Nasdaq sono Apple, Microsoft, Nvidia, Amazon, Metaplatform e Alphabet.
+
+Scusami, 7? Sono le aziende… Magnifiche 7. D'accordo. E sono Apple, Microsoft, Nvidia, Amazon, Metaplatform e Alphabet. Queste hanno… ritengono il mercato tecnologico mondiale. 
+
+Pertanto, quando ci sono le trimestre di una di queste additte, quando c'è qualche cosa, il mercato basta un movimento di una di queste, il mercato Nasdaq ne risente. Sullo standard impulse, per esempio, Apple che prende lo standard impulse, che prende le 500 ditte più capitalizzate americane, queste ditte sono anche all'interno dello standard impulse. E, comunque, le prime 10 ditte dello standard impulse rappresentano, mi pare, l'80% del capitale americano.
+
+Pertanto è ovvio che quando si muovono loro, il mercato è correlato. Se poi prendi il Dow Jones, che invece prende le 30 ditte più capitalizzate, queste invece sono le aziende storiche americane, quelle che si chiamano Blue Chips. E c'è la Boeing, Coca-Cola, Golden Saks, McDonald's, eccetera, eccetera.
+
+La Ferrovia, mi sa pure, nel… Microsoft. La correlazione è che tutte quelle che sono in Dow Jones sono anche in standard impulse. Alcune di quelle che sono in Nasdaq sono anch'esse in standard impulse.
+
+Però standard impulse è mitigato molto dalle altre ditte, perché sono 500 ditte. Pertanto Nasdaq risente molto degli influssi tecnologici, mentre standard impulse, mentre il Dow Jones non è così sensibile, è più sensibile ai mercati. Tieni in conto che solo il 25-30% di standard impulse è tecnologia, mentre il resto è sanità, finanze, energie e consumi.
+
+Pertanto la correlazione la dovete cercare Dow Jones e standard impulse. Se andate su Mataf mi dici le correlazioni tra questi indici, quelli standard. Vedi? Nasdaq e standard impulse è correlato all'85-95%.
+
+Standard impulse e Dow Jones 80-90%, Nasdaq e Dow Jones 70-85%. Pertanto la correlazione io mi trovo bene a farla, Dow Jones e standard impulse e DAX si muovono proprio uno dietro l'altro. Se ve le mettete sul grafico vedete che si muovono nella stessa direzione.
+
+Ah, è vero, è vero. Oggi ho notato sta cosa. Però non tutti i giorni è uguale.
+
+No, è ovvio. Normalmente sono così perché poi metti caso che il giorno che c'è invidia che dà la trimestrale positivo o negativo il mercato ha un movimento anomalo. Vi do l'indicatore.
+
+Aspettate un attimo che mi metto... Ah, perfetto. Ve l'avevo promesso. Grazie Paolo.
+
+Grazie Paolo. Ci dai il regalino della buonanotte. Se no non ti molliamo.
+
+A posto del bacino ci dai il regalino. Indicatore della buonanotte. Paolo... Prima poi... Ormai siete... Paolo... dei ladri.
+
+No, perché dei ladri? Ai ai ai. Ma la cianta è disabilitata? Con Darcy? Sì, non l'ho abilitata. No, funziona.
+
+Ma cosa è la mia allora? No no, adesso funziona. Prima era disabilitata. Ah.
+
+Forse sono io il disabilitato. Fabrizio lo metti su tutti, no? Sì, io quando lo faccio lo faccio io. Ah, tutti, ecco sì.
+
+Ah, a volte anch'io mi confondo. Grazie. È che sono un dinosauro a volte su ste cose.
+
+Mannaggia. Mi si è inchiodata completamente la MT5. È ferma tre giorni fa.
+
+Non riesco a... Mamma mia. Penso sia ce l'ho sia scaricata con bcm che la MT5 originale. Sono inchiodate tutte e due.
+
+Non capisco. Mi è successo la scorsa settimana. Ho risolto installando la MT5.
+
+Eh, infatti sto provando. L'ho installato sopra, quindi non ho perso configurazioni, nulla. Probabilmente è andato in crash qualche file.
+
+Adesso ho compromesso qualche file. Ma tu Andrea hai Mac o Windows? Allora, ecco il codice. Perché io ho il Mac.
+
+Mandati in chat. Hai che nasce il switch. Vi dico come dovete fare.
+
+Lo facciamo in diretta. Aspetta che te richiamo. Te lo richiamo.
+
+Mannaggia. Allora. Sarebbe l'indicatore, giusto Paolo? Sì, sì, un indicatore. 
+
+Mettetelo su indicatori. Dove è andato? Si è inventata la piattaforma. Secondo solo.
+
+Allora. Tasto testo del mouse. Sullo schermo.
+
+Andate in proprietà. Dove andate a colori. Linea grafico.
+
+Scrivete none. Senza avere inserito ancora... Mettete un grafico qualsiasi. Ok.
+
+Dobbiamo fare dati ingresso? No, mettete un grafico qualsiasi. Hai detto proprietà? Proprietà. Colori dove c'è scritto linea del grafico.
+
+None, senza colore. Ok. Ok? Sì. 
+
+Perché verde? Sì, senza colore. None. Senza colore, va bene.
+
+Poi andate in alto. Dove avete le candele. Andate sul grafico a linea.
+
+E premete sul grafico a linea. Vi viene il grafico pulito. Vi viene il grafico tutto nero.
+
+Ho perso ancora la linea colori. In alto, dove c'è il nuovo ordine. Accanto al nuovo ordine vedete ci sono la possibilità di cambiare le candele.
+
+Dove c'è il none, Paolo. Scusi, ancora non ho capito. Proprietà.
+
+Colori. Colori. Linea del grafico.
+
+Apri qua e scrivi none. Ok. Eccolo qua, sì.
+
+Va bene. Poi ok. Poi andate in alto.
+
+Sì. Aspetta un attimo, perché ho visto che non c'è più lo schermo condiviso. Andate in alto.
+
+Quassù, dove ci sono la possibilità di scelta del grafico a candele, mettete grafico a linea. Ok. E sparisce tutto.
+
+Poi prendete l'indicatore Akenashi. Lo trovate tra tutti gli indicatori. Akenashi switch.
+
+Akenashi switch. Lo prendete e lo buttate dentro. Così come senza importazioni.
+
+C'è, c'è verde e rossa. Nell'angolo in basso a destra trovate H, Japan e Line. Ok.
+
+Akenashi. Prendete su H e A e vi vengono gli Akenashi. Se prendete su Japan vi vengono gli Akenashi.
+
+Se prendete su Line vi vengono gli Akenashi. Oh, che bello. Ciao.
+
+No, non ho capito. Ah sì, ok. H vuol dire Akenashi.
+
+Vengono le candele Akenashi. Ok. Se fai Japan ti vengono le candele giapponesi.
+
+Ok. Se fai Line ti vengono gli Akenashi. Se fai Line ti vengono gli Akenashi.
+
+E vale per tutti? Se per indici che per le valute? Per tutto. Ok. Allora poi ci spieghi come usarli.
+
+Bello. Dipende, quando usi gli Akenashi così non c'è da diventare matto, capito? Ma l'hai fatto tu, Paolo, questo? Sì. Grande, fantastico.
+
+Ma noi abbiamo un indicatore Akenashi e basta, senza lo switch. Sì, però devi, ma te ce l'hai qua. Bravo, bravo, devi caricarlo ogni volta.
+
+Devi caricarlo ogni volta, devi scaricarlo ogni volta, a me mi rompeva l'anima allora me lo sono fatto per conto mio. Ok. Se poi non vi piacciono questi colori, andate nel setting grafico e potete cambiare anche i colori delle candele.
+
+Paolo, adesso ti voglio lusingare, io mi sono fatta un modello con scritto Paolo. Addirittura. Io vi ho detto, i tuoi colori delle candele che sono impazzite a scegliere il tuo rosso, perché non è proprio un rosso rosso, è un altro rosso. 
+
+È un prism. Prism. Ecco, poi l'ho trovato.
+
+Il tuo set verde. Ho fatto proprio tutto e ho scritto Paolo. Capire che il tuo modello, sai, questo con la deviazione standard, la dx, tutto.
+
+Ok. Così ci avete tutto, potete studiarvi anche bene il grafico con le candele. Ok? Buonanotte Paolo.
+
+Grazie Paolo. Buonanotte a tutti. Ciao.
+
+Ciao. Ciao, buonanotte, grazie.
