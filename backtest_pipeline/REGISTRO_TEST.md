@@ -286,3 +286,22 @@ _Idea di Marco: Russell/Dow/UK100 in apertura > Nasdaq. Testato col motore apert
 | U30USD | Dow Jones | buffer 200 LONG | -9 | 0.997 (pari) | 8.6% | 🔴 morto (a malapena in pari) |
 
 > **CONCLUSIONE APERTURA (definitiva).** Il breakout M5 in apertura funziona SOLO sul DAX, SOLO LONG. Su Nasdaq/FTSE/Dow → morto. Non è un motore generalizzabile: è un'anomalia del DAX. L'idea di Marco (Dow>Nasdaq) NON regge in versione automatica. **Fine dell'espansione della famiglia aperture.** Il vero motore generalizzabile resta il **SupertrendReversal** (DAX+Nasdaq+oro, H1/H4).
+
+---
+
+## SupRev su NUOVI INDICI — screen OHLC (26.07.26)
+_SupertrendReversal (il motore che generalizza) su Dow/Stoxx50/CAC/FTSE/Nikkei, H1+H4, griglia StMult 2.5-3.5 x AtrP 8-10 x TP_RR 2.0-3.0, rischio 1%._
+
+| Sym | Strumento | TF | Migliore config | PF | DD% | Trade | Verdetto |
+|---|---|---|---|---|---|---|---|
+| U30USD | Dow | **H4** | StMult 3.5 / AtrP 8-9 / TP 3.0 | **2.1-2.58** | 3-4% | ~80 | 🟢 FORTE (cluster) |
+| U30USD | Dow | **H1** | StMult 3.5 / AtrP 9 / TP 3.0 | 1.2-1.33 | 7-8% | 273-454 | 🟢 buono |
+| F40EUR | CAC 40 | H4 | StMult 2.5 / AtrP 9 | ~1.7 | 3% | 65 | 🟡 decente |
+| E50EUR | Stoxx 50 | H1 | StMult 3.5 / AtrP 10 | 1.32-1.47 | 1.2% | 60 | 🟡 marginale |
+| E50EUR | Stoxx 50 | H4 | StMult 3.0 / AtrP 8 | 2.8 | 0.6% | 49 | 🟡 troppo pochi trade |
+| F40EUR | CAC 40 | H1 | StMult 3.5 / AtrP 9 | 1.29 | 6% | 131 | 🟡 debole |
+| 100GBP | FTSE | H4 | StMult 3.0 / AtrP 9 | 1.29 | 2% | 48 | 🔴 debole |
+| 100GBP | FTSE | H1 | — | tutte neg | — | — | 🔴 morto |
+| 225JPY | Nikkei | H1/H4 | StMult 3.5 | PF ~2 | 0.2% | 24-75 | 🔴 profitto irrisorio (~€50, lotto JPY minuscolo) |
+
+> **SCOPERTA: il SupRev generalizza sul Dow (U30USD).** H4 PF 2.5 DD ~3% (livello prop), H1 buono con tanti trade. Il Dow era morto in apertura, vivo col SupRev. CAC H4 secondario. FTSE/Nikkei scartati. **Da validare real-tick: Dow H4 + H1 (+ CAC H4 bonus).**
