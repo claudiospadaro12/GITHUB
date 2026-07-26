@@ -18,10 +18,11 @@
 #  SL ad ATR (agnostico). Rischio 1%.
 # =====================================================================
 param(
-  [Parameter(Mandatory=$true)][string]$EA,   # ABTG_MaxMinNotte | ABTG_Nightly
+  [Parameter(Mandatory=$true)][string]$Robot,   # ABTG_MaxMinNotte | ABTG_Nightly
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
+$EA=$Robot   # (rinominato: -EA e' riservato da PowerShell come alias di -ErrorAction)
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 $Branch="claude/creating-agents-SgGpD"
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
