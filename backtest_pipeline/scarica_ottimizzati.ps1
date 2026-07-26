@@ -34,7 +34,9 @@ $EAs = @(
     "ABTG_SupRev_DOW_H4_Ottimizzato",          # DOW (U30USD H4) - PF 2.77 real tick
     "ABTG_SupRev_CAC_H4_Ottimizzato",          # CAC40 (F40EUR H4) - PF 1.79 real tick
     "ABTG_SupRev_DOW_H1_Ottimizzato",          # DOW (U30USD H1) - PF 1.20 DD10% real tick (opzionale)
-    "ABTG_MaxMinNotte_DAX_Short_Ottimizzato"   # DAX (D30EUR M15) night-box SHORT + corr S&P - PF 2.05 DD 3.1% real tick
+    "ABTG_MaxMinNotte_DAX_Short_Ottimizzato",  # DAX (D30EUR M15) night-box SHORT + corr S&P - PF 2.05 DD 3.1% real tick
+    "ABTG_SuperWave_DOW_H1_Ottimizzato",       # DOW (U30USD H1) cross EMA14x200+ST - PF 1.52 real tick
+    "ABTG_SuperWave_DAX_H4_Ottimizzato"        # DAX (D30EUR H4) cross EMA14x200+ST - PF 1.28 real tick
 )
 
 Write-Host "=== INSTALLO GLI EA _OTTIMIZZATO ===" -ForegroundColor Cyan

@@ -26,7 +26,8 @@ Claudio carica il CSV qui → Claude parsa, calcola e compila le tabelle sotto.
 | 970914 | SupRev_DOW_H4_Ottimizzato | U30USD | H4 | 2.77 | 4.0% |
 | 970915 | SupRev_CAC_H4_Ottimizzato | F40EUR | H4 | 1.79 | 3.5% |
 | 970916 | SupRev_DOW_H1_Ottimizzato | U30USD | H1 | 1.20 | 10% |
-| 770501 | SuperWave (in validazione) | U30USD/D30EUR | H1/H4 | 1.42/1.30 (OHLC) | da confermare |
+| 770511 | SuperWave_DOW_H1_Ottimizzato | U30USD | H1 | 1.52 | 4.0% |
+| 770512 | SuperWave_DAX_H4_Ottimizzato | D30EUR | H4 | 1.28 | 3.3% |
 
 ### Nativi (in forward per verifica, anche i "morti" nel backtest)
 _Girano in parallelo agli ottimizzati (magic diversi). Verdetto backtest tra parentesi._

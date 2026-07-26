@@ -363,3 +363,13 @@ _Nuovo EA dalla dashboard SuperWave (magic 770501). Ingresso: incrocio EMA14xEMA
 | XAUUSD | Oro | H1/H4 | — | ~1.0/neg | — | — | 🔴 morto (l'oro rende col SupRev, non col cross) |
 
 > **SuperWave: il cross 14x200 e' un motore di TREND** — vivo su Dow H1 (netto, 226tr) e DAX H4 (56tr). Su oro/Nasdaq no. Da validare real-tick: Dow H1 + DAX H4.
+
+### ✅ VALIDAZIONE REAL-TICK SuperWave (26.07.26) — CONFERMATA
+| Sym | TF | Config | Profit | PF | DD% | Trade | EA creato | Magic |
+|---|---|---|---|---|---|---|---|---|
+| U30USD (Dow) | **H1** | StMult 2.5 / TP 3.0 | 1433 | **1.52** | 4.0% | 227 | `ABTG_SuperWave_DOW_H1_Ottimizzato` | 770511 |
+| D30EUR (DAX) | **H4** | StMult 3.0 / TP 2.0 | 278 | **1.28** | 3.3% | 56 | `ABTG_SuperWave_DAX_H4_Ottimizzato` | 770512 |
+
+- Dow H1: tutte 9 positive, real-tick (1.52) anche > OHLC (1.42). Robusto.
+- DAX H4: 7/9 positive, DD basso. Secondario.
+- La dashboard SuperWave (cross EMA14x200 + Supertrend) e' diventata un EA reale validato. Il Dow conferma di essere lo strumento piu' tradabile del parco (SupRev + SuperWave).
