@@ -317,3 +317,17 @@ _SupertrendReversal (il motore che generalizza) su Dow/Stoxx50/CAC/FTSE/Nikkei, 
 - **CAC H4:** StMult 2.5/AtrP9 → PF 1.70-1.79 DD 3%; StMult 3.0 negativo. 🟢 keeper.
 - **Dow H1:** positivo (PF 1.20, 273tr) ma DD ~10% → secondario/opzionale.
 - Il SupRev ora ha edge REAL-TICK confermato su: Oro, DAX (H1/H4), Nasdaq (H1), Dow (H4/H1), CAC (H4). **Motore che generalizza, dimostrato.**
+
+---
+
+## MaxMinNotte — rottura range notturno all'apertura europea (26.07.26, real-tick)
+_Box 23:00-04:59 server, piazza 07:59, cutoff 08:30. Sweep direzione x buffer, SL ad ATR, rischio 1%._
+
+| Indice | Migliore config | PF | DD% | Trade | Verdetto |
+|---|---|---|---|---|---|
+| DAX (D30EUR) | **SHORT only, buffer 1000, TP2 3.0** | **1.19** | 7.3% | 107 | 🟡 unica viva (edge modesto) |
+| FTSE (100GBP) | — | max 0.67 | — | — | 🔴 morto |
+| CAC (F40EUR) | — | max ~1.0 | — | — | 🔴 morto |
+| Stoxx50 (E50EUR) | — | max 0.59 | — | — | 🔴 morto |
+
+> **Night-box: solo DAX SHORT ha edge (PF 1.19)** — la rottura al RIBASSO del range notturno (opposto dell'aperture che e' LONG). Complementare all'aperture. In raffinamento (`valid_MaxMin_DAX_short_refine`: buffer x SL-ATR x filtro ampiezza box x correlazione S&P). Nota: un AGENTE non puo' ottimizzare (non ha MT5); l'ottimizzazione gira sul PC di backtest.
