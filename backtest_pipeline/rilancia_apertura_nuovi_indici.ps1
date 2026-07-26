@@ -16,8 +16,8 @@ $Branch="claude/creating-agents-SgGpD"
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 $EA="ABTG_DAX_Apertura_EU"
 $Targets=@(
-  @{ini="valid_Apertura_UK100"; sym="FTSE100GBP"},   # FTSE 100 (Londra, ora 8)
-  @{ini="valid_Apertura_US30";  sym="US30USD"}        # Dow Jones (USA, ora 14:30)
+  @{ini="valid_Apertura_UK100"; sym="100GBP"},   # FTSE 100 (Londra, ora 8) - codice BCM reale
+  @{ini="valid_Apertura_US30";  sym="U30USD"}     # Dow Jones (USA, ora 14:30) - codice BCM reale
   # Russell 2000 escluso: non quotato su BCM
 )
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
