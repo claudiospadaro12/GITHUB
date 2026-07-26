@@ -230,6 +230,11 @@ input double InpSlippagePts   = 100;    // v2: slippage onesto 100 pt
 input double InpMinStopPts    = 200;    // v2: FLOOR 200 pt -> allarga lo stop della candela piccola
 input bool   InpSkipIfTight   = false;  // v2: NON saltare -> ALLARGA lo stop al floor (tiene il trade, meno whipsaw)
 
+input group "=== Filtro VOLUMI (regola Emiliano: rottura valida solo con volumi) ==="
+input bool   InpUseVolumeFilter = false;  // Entra solo se il volume della rottura supera la media
+input double InpVolMult          = 1.5;    // Volume rottura >= X * media (Emiliano: 1.5 = +50%)
+input int    InpVolAvgBars       = 20;     // Barre per la media volume
+
 input group "=== Generali ==="
 input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
 input int    InpMaxSpread      = 0;                   // Spread massimo in punti (0 = nessun limite)
@@ -569,6 +574,7 @@ bool TryPlaceBreakout()
      { ABTGLog(StringFormat("candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
+   if(!VolumeOK()) { ABTGLog("volumi insufficienti alla rottura: niente trade (regola Emiliano)."); return(true); }
 
    double buffer  = EffectiveBuffer();
    double buyPx   = NormalizePrice(gRangeHigh + buffer);
@@ -1081,6 +1087,24 @@ bool SpreadOK()
    if(InpMaxSpread <= 0) return(true);
    long spread = SymbolInfoInteger(_Symbol, SYMBOL_SPREAD);
    return(spread <= InpMaxSpread);
+  }
+
+//+------------------------------------------------------------------+
+//| Volumi in crescita alla rottura? (Emiliano: >= mult * media)     |
+//+------------------------------------------------------------------+
+bool VolumeOK()
+  {
+   if(!InpUseVolumeFilter) return(true);
+   int n = InpVolAvgBars;
+   if(n < 2) return(true);
+   long v[];
+   ArraySetAsSeries(v, true);
+   if(CopyTickVolume(_Symbol, PERIOD_CURRENT, 1, n+1, v) < n+1) return(true); // dati insuff.: non blocco
+   double sum = 0;
+   for(int i = 1; i <= n; i++) sum += (double)v[i];                 // media delle n barre PRIMA della rottura
+   double avg = sum / n;
+   if(avg <= 0) return(true);
+   return((double)v[0] >= InpVolMult * avg);                        // volume dell'ultima barra chiusa (rottura)
   }
 //+------------------------------------------------------------------+
 
