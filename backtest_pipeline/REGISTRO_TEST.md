@@ -305,3 +305,15 @@ _SupertrendReversal (il motore che generalizza) su Dow/Stoxx50/CAC/FTSE/Nikkei, 
 | 225JPY | Nikkei | H1/H4 | StMult 3.5 | PF ~2 | 0.2% | 24-75 | 🔴 profitto irrisorio (~€50, lotto JPY minuscolo) |
 
 > **SCOPERTA: il SupRev generalizza sul Dow (U30USD).** H4 PF 2.5 DD ~3% (livello prop), H1 buono con tanti trade. Il Dow era morto in apertura, vivo col SupRev. CAC H4 secondario. FTSE/Nikkei scartati. **Da validare real-tick: Dow H4 + H1 (+ CAC H4 bonus).**
+
+### ✅ VALIDAZIONE REAL-TICK SupRev nuovi indici (26.07.26) — CONFERMATA
+| Sym | TF | Config vincente | Profit | PF | DD% | Trade | EA creato | Magic |
+|---|---|---|---|---|---|---|---|---|
+| U30USD (Dow) | **H4** | StMult 3.5 / AtrP 8 / TP 3.0 | 1661 | **2.77** | 4.0% | 79 | `ABTG_SupRev_DOW_H4_Ottimizzato` | 970914 |
+| F40EUR (CAC) | **H4** | StMult 2.5 / AtrP 9 / TP 2.5 | 519 | **1.79** | 3.5% | 65 | `ABTG_SupRev_CAC_H4_Ottimizzato` | 970915 |
+| U30USD (Dow) | **H1** | StMult 3.5 / AtrP 9 / TP 3.0 | 560 | 1.20 | 9.8% | 273 | `ABTG_SupRev_DOW_H1_Ottimizzato` (opzionale, DD alto) | 970916 |
+
+- **Dow H4:** cluster StMult 3.5 → PF 2.09-2.77, DD 3-4%. Identico all'OHLC. 🟢 forte (livello prop/oro).
+- **CAC H4:** StMult 2.5/AtrP9 → PF 1.70-1.79 DD 3%; StMult 3.0 negativo. 🟢 keeper.
+- **Dow H1:** positivo (PF 1.20, 273tr) ma DD ~10% → secondario/opzionale.
+- Il SupRev ora ha edge REAL-TICK confermato su: Oro, DAX (H1/H4), Nasdaq (H1), Dow (H4/H1), CAC (H4). **Motore che generalizza, dimostrato.**
