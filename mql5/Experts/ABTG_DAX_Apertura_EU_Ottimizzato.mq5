@@ -31,7 +31,7 @@
 #define ABTG_DEF_CLOSE_MIN    30
 #define ABTG_DEF_USE_GAPFILL  false  // sul DAX di default breakout, non gap fill
 #define ABTG_DEF_RISK         1.0    // OTT: rischio 1% (validato solo OHLC, prudenza)
-#define ABTG_DEF_BUFFER       400    // OTT: buffer robusto
+#define ABTG_DEF_BUFFER       600    // OTT: buffer 600 (validato real tick: PF 1.49, DD 3.8%)
 #define ABTG_DEF_TRAIL_MODE   2      // 2=punti fissi (piano DAX: trailing ~410 punti sugli indici)
 
 //  VERSIONE TUTTO-IN-UNO: il motore e' incluso qui sotto, NON serve
@@ -167,7 +167,7 @@ input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra p
 input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
 input bool   InpAllowLong     = true;                 // Consenti operazioni long
-input bool   InpAllowShort    = true;                 // Consenti operazioni short
+input bool   InpAllowShort    = false;                // OTT: SOLO LONG (validato real tick)
 input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/range in punti (live: 1700=17 punti; 0=off)
 input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
 
@@ -181,7 +181,7 @@ input bool   InpUseEmaFilter  = false;                // Filtro EMA: opera solo 
 input int    InpEmaFast       = 14;                   // EMA veloce
 input int    InpEmaSlow       = 200;                  // EMA lenta
 input ENUM_TIMEFRAMES InpFilterTF = PERIOD_H1;        // Timeframe del filtro EMA
-input bool   InpUseSupertrend = true;                 // OTT: filtro direzione Supertrend ON
+input bool   InpUseSupertrend = false;                // OTT: Supertrend OFF (la versione LONG-only rende di piu')
 input int    InpStAtrPeriod   = 10;                   // ATR del Supertrend
 input double InpStMultiplier  = 3.5;                  // OTT: multiplo robusto
 input ENUM_TIMEFRAMES InpStTF = PERIOD_H1;            // Timeframe del Supertrend
