@@ -1,0 +1,60 @@
+; Preset MAX-MIN NOTTE - EURUSD (miglior pass dallo scan 48 simboli, 2024.01-2026.06, OHLC)
+; Risultato del pass: Profit Factor 2.05, +1491, 61 operazioni, Drawdown 3.8% (rischio 1%).
+; EURUSD e' risultato lo strumento MIGLIORE per MinMax: robusto (18 combinazioni valide,
+; tutte in profitto, PF mediano ~1.96) e con drawdown molto basso.
+; Box notturno 00:00-05:59 CET = 23:00-04:59 SERVER (BCM = ora italiana - 1).
+; Ordini piazzati 08:59 CET = 07:59 server; flat/cancella 18:30 CET = 17:30 server.
+; Buffer 200 punti = 20 pip (EURUSD 5 decimali); SL su ATR M15; long+short.
+; ATTENZIONE: risultato IN-SAMPLE (ottimizzazione). Fai un forward/out-of-sample prima del reale.
+; Rischio impostato all'1% (come nel test): a 2% il drawdown raddoppia (~7.6%).
+; Carica in: finestra EA -> Dati in Ingresso -> Carica (EA: ABTG_MaxMinNotte). Attacca a EURUSD.
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=200
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=3000
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=1.5
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpMagic=770401
+InpMaxSpread=0
+InpVerbose=true
