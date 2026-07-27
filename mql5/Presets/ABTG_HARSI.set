@@ -1,0 +1,39 @@
+; Preset HARSI (scalping contro-trend, Giuseppe Ippolito) - PARTE MECCANICA
+; HARSI = Heikin-Ashi sull'RSI. 4 condizioni: HA-RSI in fascia + RSI OB/OS +
+; cambio colore HA + RSI che gira. Entrata a chiusura candela. SL oltre max/min,
+; TP piccolo (scalping). Commento "HARSI", magic 772001.
+;
+; ⚠️ Il video NON rivela SL/TP esatti, TF/asset migliori, ne' le 2 condizioni extra.
+;    Qui SL/TP/soglie/TF sono DA OTTIMIZZARE. Scalping contro-trend = fragilissimo
+;    su spread/slippage: tieni InpMaxSpread basso e VALIDA A TICK REALI (spread reale)
+;    prima di ogni giudizio. Rischio basso (0,5%). TF default M5, prova anche M1/M3.
+;    Asset: forex maggiori a spread stretto (EURUSD). Profitto NON garantito.
+InpTF=5
+InpRSIperiod=14
+InpHAdepth=300
+InpBandUpper=70.0
+InpBandLower=30.0
+InpRSI_OB=80.0
+InpRSI_OS=20.0
+InpAllowLong=true
+InpAllowShort=true
+InpSLlookback=3
+InpSLbufferPips=2.0
+InpTPpips=6.0
+InpTPasR=false
+InpTP_R=1.0
+InpMaxTradesPerDay=0
+InpCooldownBars=1
+InpMaxPositions=1
+InpRiskPercent=0.5
+InpMaxSpread=20
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=15
+InpNewsAfterMin=15
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=HARSI
+InpMagic=772001
+InpVerbose=true
