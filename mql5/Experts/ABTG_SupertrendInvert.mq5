@@ -94,6 +94,7 @@ input int    InpNewsShiftMinutes = 0;
 input string InpNewsCurrencies   = "";
 
 input group "=== Generali ==="
+input string InpComment   = "STINVERT";
 input long   InpMagic     = 770801;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
@@ -265,8 +266,8 @@ void Enter(bool isLong,double stLine)
    if(lot<=0){ Log("lotto nullo."); return; }
 
    gPart1=false;
-   bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,0,"STInvert L")
-                 :gTrade.Sell(lot,_Symbol,bid,sl,0,"STInvert S");
+   bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,0,InpComment+" L")
+                 :gTrade.Sell(lot,_Symbol,bid,sl,0,InpComment+" S");
    if(ok){ gTradesToday++; Log(StringFormat("%s @ %s SL %s lot %.2f",isLong?"LONG":"SHORT",
            DoubleToString(entry,_Digits),DoubleToString(sl,_Digits),lot)); }
    else Log("apertura fallita: "+gTrade.ResultRetcodeDescription());

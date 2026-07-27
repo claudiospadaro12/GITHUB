@@ -88,6 +88,7 @@ input int    InpNewsShiftMinutes = 0;
 input string InpNewsCurrencies = "";
 
 input group "=== Generali ==="
+input string InpComment   = "STREV OTT";
 input long   InpMagic     = 970901;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
@@ -247,8 +248,8 @@ void Enter(bool isLong,double stLine)
    double lotPend=NormVol(totLot-lotMkt);
    if(lotMkt<=0) lotMkt=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
 
-   bool ok=isLong?gTrade.Buy(lotMkt,_Symbol,ask,sl,tp,"STRev L 1/3")
-                 :gTrade.Sell(lotMkt,_Symbol,bid,sl,tp,"STRev S 1/3");
+   bool ok=isLong?gTrade.Buy(lotMkt,_Symbol,ask,sl,tp,InpComment+" L 1/3")
+                 :gTrade.Sell(lotMkt,_Symbol,bid,sl,tp,InpComment+" S 1/3");
    if(!ok){ Log("apertura a mercato fallita: "+gTrade.ResultRetcodeDescription()); return; }
    gTradesToday++;
    Log(StringFormat("%s mercato %.2f lot @ %s SL %s TP %s",isLong?"LONG":"SHORT",lotMkt,
@@ -260,8 +261,8 @@ void Enter(bool isLong,double stLine)
       double px = isLong ? NormalizePrice(entry+InpPendingPips*pip) : NormalizePrice(entry-InpPendingPips*pip);
       double tpP= isLong ? NormalizePrice(px+risk*InpTP_RR) : NormalizePrice(px-risk*InpTP_RR);
       datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
-      bool okp=isLong?gTrade.BuyStop(lotPend,px,_Symbol,sl,tpP,ORDER_TIME_SPECIFIED,exp,"STRev L 2/3")
-                     :gTrade.SellStop(lotPend,px,_Symbol,sl,tpP,ORDER_TIME_SPECIFIED,exp,"STRev S 2/3");
+      bool okp=isLong?gTrade.BuyStop(lotPend,px,_Symbol,sl,tpP,ORDER_TIME_SPECIFIED,exp,InpComment+" L 2/3")
+                     :gTrade.SellStop(lotPend,px,_Symbol,sl,tpP,ORDER_TIME_SPECIFIED,exp,InpComment+" S 2/3");
       if(okp){ gPendingBar=iTime(_Symbol,InpTF,0); Log(StringFormat("pendente 2/3 %.2f lot @ %s",lotPend,DoubleToString(px,_Digits))); }
      }
   }

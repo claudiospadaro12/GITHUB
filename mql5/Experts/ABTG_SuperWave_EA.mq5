@@ -42,6 +42,7 @@ input double InpSize2       = 30;    // % size sul TP2
 input double InpSize3       = 30;    // % size sul TP3
 input bool   InpBEafterTP1  = true;  // stop a pari sui restanti dopo il TP1
 input group "=== Generali ==="
+input string InpComment   = "SUPERWAVE EA";
 input long   InpMagic       = 990001;
 input int    InpMaxSpreadPts= 0;     // spread max in punti (0 = nessun limite)
 input bool   InpVerbose     = false;
@@ -233,9 +234,9 @@ void TryEnter()
 
    gEntry=entry; gDir=dir; gBEdone=false; gT1=0;gT2=0;gT3=0;
    double sl=NormalizeDouble(stop,_Digits);
-   if(L1>0){ if(dir>0?gTrade.Buy(L1,_Symbol,0,sl,NormalizeDouble(tp1,_Digits),"SW1"):gTrade.Sell(L1,_Symbol,0,sl,NormalizeDouble(tp1,_Digits),"SW1")) gT1=gTrade.ResultOrder(); }
-   if(L2>0){ if(dir>0?gTrade.Buy(L2,_Symbol,0,sl,NormalizeDouble(tp2,_Digits),"SW2"):gTrade.Sell(L2,_Symbol,0,sl,NormalizeDouble(tp2,_Digits),"SW2")) gT2=gTrade.ResultOrder(); }
-   if(L3>0){ if(dir>0?gTrade.Buy(L3,_Symbol,0,sl,NormalizeDouble(tp3,_Digits),"SW3"):gTrade.Sell(L3,_Symbol,0,sl,NormalizeDouble(tp3,_Digits),"SW3")) gT3=gTrade.ResultOrder(); }
+   if(L1>0){ if(dir>0?gTrade.Buy(L1,_Symbol,0,sl,NormalizeDouble(tp1,_Digits),InpComment+" 1"):gTrade.Sell(L1,_Symbol,0,sl,NormalizeDouble(tp1,_Digits),InpComment+" 1")) gT1=gTrade.ResultOrder(); }
+   if(L2>0){ if(dir>0?gTrade.Buy(L2,_Symbol,0,sl,NormalizeDouble(tp2,_Digits),InpComment+" 2"):gTrade.Sell(L2,_Symbol,0,sl,NormalizeDouble(tp2,_Digits),InpComment+" 2")) gT2=gTrade.ResultOrder(); }
+   if(L3>0){ if(dir>0?gTrade.Buy(L3,_Symbol,0,sl,NormalizeDouble(tp3,_Digits),InpComment+" 3"):gTrade.Sell(L3,_Symbol,0,sl,NormalizeDouble(tp3,_Digits),InpComment+" 3")) gT3=gTrade.ResultOrder(); }
    if(InpVerbose) PrintFormat("[SuperWave] %s entry %.5f stop %.5f tp %.5f/%.5f/%.5f lots %.2f/%.2f/%.2f",
                               (dir>0?"BUY":"SELL"),entry,stop,tp1,tp2,tp3,L1,L2,L3);
   }

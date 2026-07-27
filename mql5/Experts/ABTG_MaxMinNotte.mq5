@@ -97,6 +97,7 @@ input string InpNewsCurrencies= "";
 input bool   InpNewsFlatten   = true;
 
 input group "=== Generali ==="
+input string InpComment   = "MAXMIN";
 input long   InpMagic     = 770401;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
@@ -226,7 +227,7 @@ bool TryPlace()
         {
          double tp=NormalizePrice(buyPx+dist*InpTPfinal_R);
          double lot=LotByRisk(dist);
-         if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"MaxMin BUY"))
+         if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" BUY"))
             Log(StringFormat("BUY STOP @ %.2f SL %.2f TP %.2f lot %.2f",buyPx,sl,tp,lot));
         }
      }
@@ -238,7 +239,7 @@ bool TryPlace()
         {
          double tp=NormalizePrice(sellPx-dist*InpTPfinal_R);
          double lot=LotByRisk(dist);
-         if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"MaxMin SELL"))
+         if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" SELL"))
             Log(StringFormat("SELL STOP @ %.2f SL %.2f TP %.2f lot %.2f",sellPx,sl,tp,lot));
         }
      }

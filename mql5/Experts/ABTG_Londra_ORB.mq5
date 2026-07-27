@@ -84,6 +84,7 @@ input int    InpNewsShiftMinutes = 0;
 input string InpNewsCurrencies  = "GBP,USD";
 
 input group "=== Generali ==="
+input string InpComment   = "LONDRA ORB";
 input long   InpMagic     = 770701;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
@@ -216,7 +217,7 @@ bool TryPlace()
       if(dist>minStop)
         {
          double lot=LotByRisk(dist); if(halve) lot=NormVol(lot*0.5);
-         if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"Londra BUY"))
+         if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" BUY"))
             Log(StringFormat("BUY STOP @ %s SL %s TP %s lot %.2f (range %.1f pip)",
                 DoubleToString(buyPx,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits),lot,widthPips));
          else if(lot<=0) Log("lotto nullo (long).");
@@ -231,7 +232,7 @@ bool TryPlace()
       if(dist>minStop)
         {
          double lot=LotByRisk(dist); if(halve) lot=NormVol(lot*0.5);
-         if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"Londra SELL"))
+         if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" SELL"))
             Log(StringFormat("SELL STOP @ %s SL %s TP %s lot %.2f (range %.1f pip)",
                 DoubleToString(sellPx,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits),lot,widthPips));
          else if(lot<=0) Log("lotto nullo (short).");

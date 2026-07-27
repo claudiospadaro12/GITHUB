@@ -75,6 +75,7 @@ input string InpNewsCurrencies= "USD";
 input bool   InpNewsFlatten   = true;
 
 input group "=== Generali ==="
+input string InpComment   = "ORB FIBO";
 input long   InpMagic     = 770602;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
@@ -255,8 +256,8 @@ void EnterFibo(bool isLong,double slLevel,double tp)
    if(lot<=0){ gPhase=F_DONE; return; }
 
    gPart1=false; gTPlevel=NormalizePrice(tp);
-   bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,0,"ORB Fibo L")
-                 :gTrade.Sell(lot,_Symbol,bid,sl,0,"ORB Fibo S");
+   bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,0,InpComment+" L")
+                 :gTrade.Sell(lot,_Symbol,bid,sl,0,InpComment+" S");
    if(ok){ gPhase=F_INTRADE; Log(StringFormat("%s @ %.5f SL %.5f TP %.5f (R:R %.2f)",isLong?"LONG":"SHORT",entry,sl,tp,reward/risk)); }
    else { Log("apertura fallita: "+gTrade.ResultRetcodeDescription()); gPhase=F_DONE; }
   }

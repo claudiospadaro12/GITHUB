@@ -89,6 +89,7 @@ input int    InpNewsShiftMinutes = 0;
 input string InpNewsCurrencies= "EUR,USD";
 
 input group "=== Generali ==="
+input string InpComment   = "DAX M3";
 input long   InpMagic     = 770502;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
@@ -280,8 +281,8 @@ void Enter(bool isLong,double stLine)
    if(lot<=0){ Log("lotto nullo."); return; }
 
    gPart1=false; gPart2=false;
-   bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,0,"DAX M3 L")
-                 :gTrade.Sell(lot,_Symbol,bid,sl,0,"DAX M3 S");
+   bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,0,InpComment+" L")
+                 :gTrade.Sell(lot,_Symbol,bid,sl,0,InpComment+" S");
    if(ok){ gTradesToday++; Log(StringFormat("%s @ %.2f SL %.2f lot %.2f (rottura M3)",isLong?"LONG":"SHORT",entry,sl,lot)); }
    else Log("apertura fallita: "+gTrade.ResultRetcodeDescription());
   }

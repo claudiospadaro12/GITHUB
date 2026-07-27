@@ -100,6 +100,7 @@ input int    InpNewsShiftMinutes = 0;             // Sposta gli orari del file p
 input string InpNewsCurrencies= "USD";            // Valute da filtrare (vuoto = tutte)
 
 input group "=== Generali ==="
+input string InpComment   = "GOLDENCROSS";
 input long   InpMagic     = 770301;               // Numero magico
 input int    InpMaxSpread = 0;                    // Spread massimo in punti (0 = nessun limite)
 input bool   InpVerbose   = true;                 // Messaggi nel log
@@ -339,8 +340,8 @@ void Enter(bool isLong)
    gPartialDone=false;
    if(InpEntryMode==GC_MARKET)
      {
-      bool ok = isLong ? gTrade.Buy(lot,_Symbol,ask,sl,tp,"GoldenCross L")
-                       : gTrade.Sell(lot,_Symbol,bid,sl,tp,"GoldenCross S");
+      bool ok = isLong ? gTrade.Buy(lot,_Symbol,ask,sl,tp,InpComment+" L")
+                       : gTrade.Sell(lot,_Symbol,bid,sl,tp,InpComment+" S");
       Log(StringFormat("%s a mercato @ %.2f SL %.2f TP %.2f lot %.2f -> %s",
           isLong?"LONG":"SHORT", entry, sl, tp, lot, ok?"OK":gTrade.ResultRetcodeDescription()));
      }
@@ -348,8 +349,8 @@ void Enter(bool isLong)
      {
       datetime exp = TimeCurrent() + InpPendingExpiryBars*PeriodSeconds(InpTimeframe);
       bool ok;
-      if(isLong)  ok = gTrade.BuyLimit(lot,entry,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"GoldenCross L pb");
-      else        ok = gTrade.SellLimit(lot,entry,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,"GoldenCross S pb");
+      if(isLong)  ok = gTrade.BuyLimit(lot,entry,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" L pb");
+      else        ok = gTrade.SellLimit(lot,entry,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" S pb");
       Log(StringFormat("%s LIMIT (pullback) @ %.2f SL %.2f TP %.2f -> %s",
           isLong?"LONG":"SHORT", entry, sl, tp, ok?"OK":gTrade.ResultRetcodeDescription()));
      }
