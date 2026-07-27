@@ -55,6 +55,7 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 5. **Applicare i magic** → ricaricare DAX_M3 (770502) e Apertura_Marco (770311) sui grafici.
 6. **Ricompilare per i commenti** → lanciare `scarica_ottimizzati.ps1`.
 7. **Scan HARSI** → `-Robot ABTG_HARSI` (script pronto).
+8. **DRY-RUN PROP** (idea del 27/07, dopo forward) → vedi sezione dedicata sotto.
 
 ## Note per l'attribuzione forward
 - d30eur magic 770501 chiuso **a mano** il 27/07 → escludere da DAX_M3.
@@ -62,6 +63,27 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 
 ## Prop firm — sintesi
 Basso DD è necessario ma non basta: contano **perdita giornaliera (~5%)**, **DD totale (~10%)**, **consistenza**, **track record forward** e **regole EA ammessi**. Candidati migliori: SupRev_NAS_H1, oro (SupRev_Multi/EMA200/GoldenCross), MaxMinNotte_DAX_Short.
+
+## 🎯 PIANO DRY-RUN PROP (idea di Claudio, 27/07)
+Simulare una challenge prop su un **demo 100k separato**, gratis, prima di pagare la challenge vera.
+
+**Sequenza (in ordine):**
+1. **Finire backtest/scan** → migliori combo EA–simbolo *(prerequisito, promemoria #1)*.
+2. **Forward test** → confermare edge reale (PF/DD forward per EA).
+3. **Estrarre i TOP 3** validati.
+4. **Demo 100k + Guardiano** → dry run: si testano insieme EA e daily-stop.
+5. **Valutare** → avrebbe passato la challenge?
+
+**Accorgimenti (per renderlo rappresentativo):**
+- Configurare il demo 100k con le **regole ESATTE della prop scelta** (perdita giornaliera, DD totale statico/**trailing**, target, giorni minimi, consistenza) → il **guardiano** fa rispettare quei numeri.
+- Scegliere **3 EA DIVERSIFICATI** (strumenti/strategie diverse), non correlati → curva più liscia, meno rischio che un giorno storto sommi le perdite.
+- **Sizing prudente**: worst-case giornaliero sotto il limite prop (il guardiano è il paracadute, non l'unica difesa).
+- **Durata**: settimane / lunghezza-challenge, con abbastanza trade.
+- **Metriche giuste**: max perdita **giornaliera** toccata, max DD totale, giorni al target, **consistenza** (nessun giorno > 30–40% del profitto), giorno peggiore.
+
+**Onestà:** il demo 100k non è identico alla prop reale (server/spread/fill diversi, demo più ottimista) → dry run superato = **necessario ma non garanzia**.
+
+**Primo passo quando ci arriviamo:** decidere **quale prop firm** (le regole, soprattutto DD trailing vs statico e consistenza, cambiano come si tara il guardiano).
 
 ## Stile richiesto
 Precisione sopra tutto. Etichettare i fatti [VERIFICATO]/[INFERITO]/[INCERTO]. Niente riempitivi. Segnalare le premesse sbagliate PRIMA di rispondere. Mai inventare.
