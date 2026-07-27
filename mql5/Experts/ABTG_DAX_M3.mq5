@@ -89,7 +89,7 @@ input int    InpNewsShiftMinutes = 0;
 input string InpNewsCurrencies= "EUR,USD";
 
 input group "=== Generali ==="
-input long   InpMagic     = 770501;
+input long   InpMagic     = 770502;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
 

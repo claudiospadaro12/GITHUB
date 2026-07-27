@@ -46,6 +46,6 @@ InpNewsBeforeMin=30
 InpNewsAfterMin=30
 InpNewsShiftMinutes=0
 InpNewsCurrencies=EUR,USD
-InpMagic=770501
+InpMagic=770502
 InpMaxSpread=0
 InpVerbose=true
