@@ -21,25 +21,57 @@ $Branch  = "claude/creating-agents-SgGpD"
 $RawBase = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch/mql5/Experts"
 
 # EA _Ottimizzato VALIDATI pronti per il forward.
-# (Nasdaq aperture ESCLUSO: morto in real tick.)
+# Lista COMPLETA: tutti gli EA in forward (ottimizzati + nativi). Scaricare/compilare
+# un EA non attaccato a un grafico e' innocuo. Serve per applicare i COMMENTI nuovi
+# (InpComment): essendo un input nuovo, alla ricompilazione MT5 usa il default nuovo.
+# NB: i MAGIC cambiati (DAX_M3 770502, Apertura_Marco 770311) NON si applicano da soli
+#     (input esistente) -> vanno ricaricati a mano su quei 2 grafici (quando flat).
 $EAs = @(
-    "ABTG_DAX_Apertura_EU_Ottimizzato",       # DAX aperture LONG (D30EUR M5) - validato real tick
-    "ABTG_SupertrendReversal_Multi_Ottimizzato", # ORO (XAUUSD H4) - PF 3.17
-    "ABTG_SupertrendReversal_Ottimizzato",     # ORO (XAUUSD H4) - PF 2.74
-    "ABTG_EMA200_Ottimizzato",                 # ORO (XAUUSD) - PF 1.92
-    "ABTG_GoldenCross_Ottimizzato",            # ORO (XAUUSD) - PF 1.58
-    "ABTG_SupRev_DAX_H1_Ottimizzato",          # DAX (D30EUR H1) - PF 1.45 real tick
-    "ABTG_SupRev_DAX_H4_Ottimizzato",          # DAX (D30EUR H4) - PF 1.96 real tick
-    "ABTG_SupRev_NAS_H1_Ottimizzato",          # NASDAQ (NASUSD H1) - PF 1.57 DD 1.2% real tick
-    "ABTG_SupRev_DOW_H4_Ottimizzato",          # DOW (U30USD H4) - PF 2.77 real tick
-    "ABTG_SupRev_CAC_H4_Ottimizzato",          # CAC40 (F40EUR H4) - PF 1.79 real tick
-    "ABTG_SupRev_DOW_H1_Ottimizzato",          # DOW (U30USD H1) - PF 1.20 DD10% real tick (opzionale)
-    "ABTG_MaxMinNotte_DAX_Short_Ottimizzato",  # DAX (D30EUR M15) night-box SHORT + corr S&P - PF 2.05 DD 3.1% real tick
-    "ABTG_SuperWave_DOW_H1_Ottimizzato",       # DOW (U30USD H1) cross EMA14x200+ST - PF 1.52 real tick
-    "ABTG_SuperWave_DAX_H4_Ottimizzato"        # DAX (D30EUR H4) cross EMA14x200+ST - PF 1.28 real tick
+    # --- OTTIMIZZATI (portafoglio forward) ---
+    "ABTG_DAX_Apertura_EU_Ottimizzato",
+    "ABTG_Nasdaq_Apertura_US_Ottimizzato",
+    "ABTG_SupertrendReversal_Multi_Ottimizzato",
+    "ABTG_SupertrendReversal_Ottimizzato",
+    "ABTG_EMA200_Ottimizzato",
+    "ABTG_GoldenCross_Ottimizzato",
+    "ABTG_SupRev_DAX_H1_Ottimizzato",
+    "ABTG_SupRev_DAX_H4_Ottimizzato",
+    "ABTG_SupRev_NAS_H1_Ottimizzato",
+    "ABTG_SupRev_DOW_H4_Ottimizzato",
+    "ABTG_SupRev_CAC_H4_Ottimizzato",
+    "ABTG_SupRev_DOW_H1_Ottimizzato",
+    "ABTG_MaxMinNotte_DAX_Short_Ottimizzato",
+    "ABTG_SuperWave_DOW_H1_Ottimizzato",
+    "ABTG_SuperWave_DAX_H4_Ottimizzato",
+    "ABTG_Nightly_Ottimizzato",
+    # --- NATIVI ---
+    "ABTG_GoldenCross",
+    "ABTG_SupertrendReversal",
+    "ABTG_SupertrendReversal_Multi",
+    "ABTG_EMA200",
+    "ABTG_MaxMinNotte",
+    "ABTG_Nightly",
+    "ABTG_SuperWave",
+    "ABTG_SuperWave_EA",
+    "ABTG_SupertrendInvert",
+    "ABTG_DAX_Apertura_EU",
+    "ABTG_DAX_Live5m",
+    "ABTG_DAX_Live5m_v2",
+    "ABTG_DAX_M3",
+    "ABTG_Nasdaq_Apertura_US",
+    "ABTG_Nasdaq_Live5m",
+    "ABTG_ORB",
+    "ABTG_ORB_Fibo",
+    "ABTG_Londra_ORB",
+    "ABTG_Apertura_Marco",
+    "ABTG_PTE",
+    "ABTG_PostNews",
+    "ABTG_WOL",
+    "ABTG_HARSI",
+    "ABTG_FiboH4_Multi"
 )
 
-Write-Host "=== INSTALLO GLI EA _OTTIMIZZATO ===" -ForegroundColor Cyan
+Write-Host "=== AGGIORNO TUTTI GLI EA (ottimizzati + nativi) ===" -ForegroundColor Cyan
 
 # --- trova terminale + cartella dati --------------------------------
 if (-not $Terminal) {
