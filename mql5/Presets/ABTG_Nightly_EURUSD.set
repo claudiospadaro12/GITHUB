@@ -1,0 +1,45 @@
+; Preset NIGHTLY - EURUSD (miglior pass dallo scan 48 simboli, OHLC 2024.01-2026.06)
+; Risultato del pass #139: Profit Factor 1.27, +2719, 307 operazioni, Drawdown 6.3% (rischio 1%).
+; EURUSD e' il simbolo piu' ROBUSTO per Nightly: 88% delle combinazioni testate in profitto.
+; Fade del box notturno (sessione asiatica) con ordini LIMITE ai bordi. Esclude JPY/AUD/NZD.
+;
+; ⚠️ AVVERTENZE (leggere prima del reale):
+;  - Edge SOTTILE (PF ~1.27 con 300+ trade): spread e slippage pesano molto. In reale
+;    l'edge puo' assottigliarsi. Tieni InpMaxSpread basso e monitora il PF forward.
+;  - Risultato IN-SAMPLE su dati OHLC. VALIDA A TICK REALI prima di metterlo in forward
+;    (come per gli EA _Ottimizzato).
+;  - Rischio 1% (come nel test). A 2% il drawdown raddoppia (~12%).
+; Attacca a un grafico EURUSD (M15 consigliato). Box/ordini in ORA SERVER (BCM = italiana - 1h).
+InpBoxStartHour=22
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpPlaceHour=5
+InpPlaceMin=0
+InpCutoffHour=7
+InpCutoffMin=0
+InpCloseAtCutoff=false
+InpAllowLong=true
+InpAllowShort=true
+InpEdgeOffsetPips=1
+InpOneShotPerNight=true
+InpSLpips=0
+InpAtrPeriod=14
+InpSLatrMult=1.5
+InpTPfrac=0.4
+InpMaxNightVolPips=45
+InpMinRangePips=0
+InpMaxRangePips=0
+InpBlockNightActive=true
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=60
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=NIGHTLY
+InpMagic=771701
+InpMaxSpread=0
+InpVerbose=true
