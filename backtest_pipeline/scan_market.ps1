@@ -4,8 +4,9 @@
 #  strumenti rende di piu' in ~2,5 anni.
 #
 #  Uso:
-#    .\rilancia_scan_market.ps1 -EA ABTG_MaxMinNotte
-#    .\rilancia_scan_market.ps1 -EA ABTG_Nightly
+#    .\scan_market.ps1 -Robot ABTG_MaxMinNotte
+#    .\scan_market.ps1 -Robot ABTG_Nightly
+#    .\scan_market.ps1 -Robot ABTG_HARSI      (scalping, timeframe M5)
 #
 #  Come funziona: per ogni simbolo genera un .ini al volo, lancia l'EA
 #  in OHLC (Model 1) con una piccola griglia, salva un CSV per simbolo
@@ -18,7 +19,7 @@
 #  SL ad ATR (agnostico). Rischio 1%.
 # =====================================================================
 param(
-  [Parameter(Mandatory=$true)][string]$Robot,   # ABTG_MaxMinNotte | ABTG_Nightly
+  [Parameter(Mandatory=$true)][string]$Robot,   # ABTG_MaxMinNotte | ABTG_Nightly | ABTG_HARSI
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
@@ -43,6 +44,8 @@ $Symbols=@(
 )
 
 # --- GRIGLIA per EA (OHLC, Model 1) -----------------------------------
+# $Period = timeframe del Tester per questo EA (default H1; HARSI e' scalping -> M5)
+$Period="H1"
 if($EA -eq "ABTG_MaxMinNotte"){
   $Inputs=@"
 InpSLMode=1||1||0||1||N
@@ -60,7 +63,19 @@ InpRiskPercent=1.0||1.0||0||1.0||N
 InpAllowLong=0||0||1||1||Y
 InpAllowShort=0||0||1||1||Y
 "@
-} else { Write-Host "EA non gestito: usa ABTG_MaxMinNotte o ABTG_Nightly" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_HARSI"){
+  # Scalping contro-trend su M5. Ottimizza direzione + TP (pip) + buffer SL.
+  # NB: scan OHLC = solo SHORTLIST; per lo scalping il verdetto vero e' a TICK REALI.
+  $Period="M5"
+  $Inputs=@"
+InpTF=5||5||0||5||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpTPpips=4||4||2||10||Y
+InpSLbufferPips=1||1||1||3||Y
+"@
+} else { Write-Host "EA non gestito: usa ABTG_MaxMinNotte, ABTG_Nightly o ABTG_HARSI" -ForegroundColor Red; exit 1 }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== SCAN MARKET: $EA su $($Symbols.Count) simboli (OHLC) ===" -ForegroundColor Cyan
@@ -96,7 +111,7 @@ foreach($sym in $Symbols){
 [Tester]
 Expert=$EA.ex5
 Symbol=$sym
-Period=H1
+Period=$Period
 Model=1
 Optimization=2
 OptimizationCriterion=6
