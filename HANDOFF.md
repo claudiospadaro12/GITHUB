@@ -47,7 +47,16 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 
 ---
 
-## 📌 PROMEMORIA APERTI (7)
+## 🧭 ROADMAP / PIANO DI LAVORO (obiettivo di Claudio, 28/07)
+Obiettivo: **trovare il motore giusto per ogni simbolo** e rendere gli EA il più profittevoli possibile, poi prepararli per le **prop**. Metodo a imbuto, con calma e sui numeri.
+1. **SCOPERTA** — scan OHLC di ogni motore × 48 simboli → costruire la **matrice MOTORE × SIMBOLO** (quale motore ha edge su quale strumento). *(in corso: SupertrendReversal per primo)*
+2. **VALIDAZIONE** — backtest a **tick reali** solo sui vincitori dello scan.
+3. **FORWARD** — girano i validati, si raccoglie la **pagella reale** per EA (PF/DD forward).
+4. **PROP-HARDENING** — correggere il **R/R** (vincite piccole vs perdite grosse), aggiungere il **guardiano** (daily-stop), poi **dry-run su demo 100k** con le regole della prop.
+
+Man mano che arrivano i CSV degli scan, Claude aggiorna la matrice motore×simbolo.
+
+## 📌 PROMEMORIA APERTI (9)
 1. **Scan OHLC esteso** → SupertrendReversal, EMA200, GoldenCross su tutti i simboli → poi tick-real sui vincitori. **[PRONTO]** `scan_market.ps1` ora supporta `-Robot ABTG_SupertrendReversal` (H4), `ABTG_EMA200` (H4), `ABTG_GoldenCross` (H1). Da lanciare + mandarmi i CSV.
 2. **Forward test** → statement periodico → pagella forward (PF/DD reale per EA); riempire colonna "PF forward" in `CLASSIFICA_PF.md`.
 3. **Short M5 DAX** → decidere long-only vs filtro-trend, col backtest (i nativi apertura Apertura_EU/Live5m/Marco hanno InpAllowShort=true; l'ottimizzato è LONG-only).
