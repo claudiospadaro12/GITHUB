@@ -56,6 +56,7 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 6. **Ricompilare per i commenti** → lanciare `scarica_ottimizzati.ps1`.
 7. **Scan HARSI** → `-Robot ABTG_HARSI` (script pronto).
 8. **DRY-RUN PROP** (idea del 27/07, dopo forward) → vedi sezione dedicata sotto.
+9. **Rapporto Rischio/Rendimento** → dallo statement 28/07: win rate 85% ma netto +7,85 EUR perché vincita media +12 vs perdita media −63 (R/R invertito). Analizzare/correggere il R/R degli EA DAX intraday. **Focus: `Londra_ORB` e `DAX_M3`** = generano perdite (già "morti" nei backtest) → capire dove sbagliano ed eventualmente disattivarli/rifarli.
 
 ## Note per l'attribuzione forward
 - d30eur magic 770501 chiuso **a mano** il 27/07 → escludere da DAX_M3.
