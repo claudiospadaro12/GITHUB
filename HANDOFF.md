@@ -57,7 +57,7 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 7. **Scan HARSI** → `-Robot ABTG_HARSI` (script pronto).
 8. **DRY-RUN PROP** (idea del 27/07, dopo forward) → vedi sezione dedicata sotto.
 9. **Rapporto Rischio/Rendimento** → dallo statement 28/07: win rate 85% ma netto +7,85 EUR perché vincita media +12 vs perdita media −63 (R/R invertito). Analizzare/correggere il R/R degli EA DAX intraday.
-   → **DECISO (28/07): `DAX_M3` e `Londra_ORB` DA DISATTIVARE** (morti nei backtest + perdite in forward + difetti strutturali: whipsaw sui falsi break / rumore M3 / R/R invertito). Il DAX intraday M5 è già coperto da **DAX_Apertura_EU_Ottimizzato** (LONG). **Azione utente: rimuovere i 2 EA dai grafici.** Eventuale redesign = esperimento a parte, fuori dal live.
+   → **DECISO (28/07): `DAX_M3` e `Londra_ORB` DA DISATTIVARE** (morti nei backtest + perdite in forward + difetti strutturali: whipsaw sui falsi break / rumore M3 / R/R invertito). Il DAX intraday M5 è già coperto da **DAX_Apertura_EU_Ottimizzato** (LONG). **FATTO (28/07): DAX_M3 e Londra_ORB rimossi dai grafici del VPS.** ✅ Eventuale redesign = esperimento a parte, fuori dal live.
 
 ## Note per l'attribuzione forward
 - d30eur magic 770501 chiuso **a mano** il 27/07 → escludere da DAX_M3.
