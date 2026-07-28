@@ -6,6 +6,8 @@
 #  Uso (-Robot):
 #    ABTG_MaxMinNotte · ABTG_Nightly · ABTG_HARSI (M5)
 #    ABTG_SupertrendReversal (H4) · ABTG_EMA200 (H4) · ABTG_GoldenCross (H1)
+#  Opzionale -Tf M5/M15/M30/H1/H4/D1: forza il timeframe (es. confronto H1 vs H4).
+#    I risultati vanno in risultati_scan_<EA>_<Tf> (non si sovrascrivono).
 #
 #  Come funziona: per ogni simbolo genera un .ini al volo, lancia l'EA
 #  in OHLC (Model 1) con una piccola griglia, salva un CSV per simbolo
@@ -18,7 +20,8 @@
 #  SL ad ATR (agnostico). Rischio 1%.
 # =====================================================================
 param(
-  [Parameter(Mandatory=$true)][string]$Robot,   # ABTG_MaxMinNotte | ABTG_Nightly | ABTG_HARSI
+  [Parameter(Mandatory=$true)][string]$Robot,   # ABTG_MaxMinNotte | ABTG_Nightly | ABTG_HARSI | ...
+  [string]$Tf="",                                # opzionale: M5/M15/M30/H1/H4/D1 -> forza il timeframe
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
@@ -106,6 +109,19 @@ InpTP_R=1.5||1.5||0.5||3.0||Y
 "@
 } else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross" -ForegroundColor Red; exit 1 }
 
+# --- -Tf opzionale: forza il timeframe del test e dell'EA, e separa i risultati ---
+$EAtag=$EA
+if($Tf){
+  $map=@{ "M5"=5; "M15"=15; "M30"=30; "H1"=16385; "H4"=16388; "D1"=16408 }
+  if(-not $map.ContainsKey($Tf)){ Write-Host "-Tf non valido: usa M5, M15, M30, H1, H4, D1" -ForegroundColor Red; exit 1 }
+  $Period=$Tf
+  $en=$map[$Tf]
+  $Inputs=[regex]::Replace($Inputs,'InpTF=\d+\|\|\d+\|\|\d+\|\|\d+\|\|N',"InpTF=$en||$en||0||$en||N")
+  $Inputs=[regex]::Replace($Inputs,'InpTimeframe=\d+\|\|\d+\|\|\d+\|\|\d+\|\|N',"InpTimeframe=$en||$en||0||$en||N")
+  $EAtag="${EA}_$Tf"
+  Write-Host ("   -Tf $Tf -> Period $Period, risultati in risultati_scan_$EAtag") -ForegroundColor Yellow
+}
+
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== SCAN MARKET: $EA su $($Symbols.Count) simboli (OHLC) ===" -ForegroundColor Cyan
 New-Item -ItemType Directory -Force -Path (Join-Path $Work "src_v2"),(Join-Path $Work "ini_scan") | Out-Null
@@ -124,7 +140,7 @@ if($Terminal -and -not $DataFolder){
 }
 if(-not $DataFolder -or -not (Test-Path $DataFolder)){Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1}
 $MqlExperts=Join-Path $DataFolder "MQL5\Experts"; $MqlFiles=Join-Path $DataFolder "MQL5\Files"
-$Results=Join-Path $Work "risultati_scan_$EA"; New-Item -ItemType Directory -Force -Path $MqlExperts,$Results|Out-Null
+$Results=Join-Path $Work "risultati_scan_$EAtag"; New-Item -ItemType Directory -Force -Path $MqlExperts,$Results|Out-Null
 if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $Force){Write-Host "!!! Chiudi MetaTrader prima (0 CSV altrimenti)." -ForegroundColor Red; exit 1}
 Copy-Item (Join-Path $Work "src_v2\$EA.mq5") -Destination $MqlExperts -Force
 & $MetaEditor "/compile:$(Join-Path $MqlExperts "$EA.mq5")" "/log" | Out-Null
@@ -133,7 +149,7 @@ Write-Host "   compilato $EA.ex5" -ForegroundColor Green
 $n=0
 foreach($sym in $Symbols){
   $n++
-  $done=Join-Path $Results "scan_${EA}_$sym.csv"
+  $done=Join-Path $Results "scan_${EAtag}_$sym.csv"
   if(Test-Path $done){Write-Host ("   [{0}/{1}] {2}: gia' fatto, salto" -f $n,$Symbols.Count,$sym) -ForegroundColor DarkGray; continue}
   $iniPath=Join-Path $Work "ini_scan\scan_${EA}_$sym.ini"
   @"
@@ -153,7 +169,7 @@ Leverage=100
 ExecutionMode=0
 ReplaceReport=1
 ShutdownTerminal=1
-Report=OptReport_scan_${EA}_$sym
+Report=OptReport_scan_${EAtag}_$sym
 
 [TesterInputs]
 $Inputs
@@ -161,8 +177,8 @@ $Inputs
   $csv=Join-Path $MqlFiles "OptResults_${EA}_$sym.csv"; if(Test-Path $csv){Remove-Item $csv -Force}
   Write-Host ("   [{0}/{1}] {2} (OHLC)..." -f $n,$Symbols.Count,$sym) -ForegroundColor Cyan
   (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$iniPath`"" -PassThru).WaitForExit()
-  if(Test-Path $csv){Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force; Write-Host ("        OK -> scan_${EA}_$sym.csv") -ForegroundColor Green}
+  if(Test-Path $csv){Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force; Write-Host ("        OK -> scan_${EAtag}_$sym.csv") -ForegroundColor Green}
   else{Write-Host ("        (no CSV: {0} senza storico/nome diverso? salto)" -f $sym) -ForegroundColor Yellow}
 }
 Write-Host "`n=== FINITO === risultati in $Results" -ForegroundColor Cyan
-Write-Host "Zippa la cartella risultati_scan_$EA e caricamela (o mandami i CSV): classifico gli strumenti per PF." -ForegroundColor White
+Write-Host "Zippa la cartella risultati_scan_$EAtag e caricamela (o mandami i CSV): classifico gli strumenti per PF." -ForegroundColor White
