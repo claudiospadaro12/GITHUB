@@ -163,6 +163,14 @@ void OnTick()
       return;
      }
 
+   //--- GUARDIA ANTI-DUPLICATO (reload-safe): pendente/posizione del mio magic -> non ripiazzo
+   if(gPhase==MMP_WAIT)
+     {
+      bool _has=false;
+      for(int _i=OrdersTotal()-1;_i>=0 && !_has;_i--){ ulong _t=OrderGetTicket(_i); if(_t>0 && OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic) _has=true; }
+      for(int _j=PositionsTotal()-1;_j>=0 && !_has;_j--){ ulong _p=PositionGetTicket(_j); if(_p>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) _has=true; }
+      if(_has) gPhase=MMP_DONE;
+     }
    if(gPhase==MMP_WAIT && nowMin >= InpPlaceHour*60+InpPlaceMin)
      {
       if(newsBlk) return;                 // durante blackout news non piazzo

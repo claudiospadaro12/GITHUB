@@ -119,6 +119,11 @@ void OnTick()
    // barra d'azione = quella che si apre all'orario impostato
    if(now.hour!=InpActionHour || now.min!=InpActionMin) return;
    if(now.day_of_year==gPlacedDay) return;             // gia' operato oggi
+   //--- GUARDIA ANTI-DUPLICATO (reload-safe)
+   { bool _has=false;
+     for(int _i=OrdersTotal()-1;_i>=0 && !_has;_i--){ ulong _t=OrderGetTicket(_i); if(_t>0 && OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic) _has=true; }
+     for(int _j=PositionsTotal()-1;_j>=0 && !_has;_j--){ ulong _p=PositionGetTicket(_j); if(_p>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) _has=true; }
+     if(_has){ gPlacedDay=now.day_of_year; return; } }
 
    if(InpRestrictToNews && !NewsToday(t0)){ Log("nessuna notizia nel CSV oggi: niente ordini."); return; }
    if(!SpreadOK()){ Log("spread alto: niente ordini."); return; }

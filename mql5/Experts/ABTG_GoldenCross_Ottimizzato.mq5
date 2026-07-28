@@ -298,6 +298,9 @@ int Signal()
 //+------------------------------------------------------------------+
 void Enter(bool isLong)
   {
+   //--- GUARDIA ANTI-DUPLICATO (reload-safe): posizione/pendente del mio magic -> non entro
+   for(int _i=PositionsTotal()-1;_i>=0;_i--){ ulong _p=PositionGetTicket(_i); if(_p>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) return; }
+   for(int _i=OrdersTotal()-1;_i>=0;_i--){ ulong _t=OrderGetTicket(_i); if(_t>0 && OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic) return; }
    double atr[1];
    if(CopyBuffer(hAtr,0,1,1,atr)<1 || atr[0]<=0) return;
    double em[1];
