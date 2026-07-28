@@ -407,6 +407,19 @@ void ABTG_OnTick()
    ManagePosition();
    HandleOCO();
 
+   //--- GUARDIA ANTI-DUPLICATO (reload-safe): se ho gia' un pendente o una posizione
+   //    del mio magic, NON ripiazzo -> evita ordini doppi a ogni ricompilazione/reload.
+   if(gPhase==PH_WAIT_OPEN || gPhase==PH_BUILDING)
+     {
+      bool _hasOrd=false;
+      for(int _i=OrdersTotal()-1;_i>=0;_i--)
+        {
+         ulong _t=OrderGetTicket(_i);
+         if(_t>0 && OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic){ _hasOrd=true; break; }
+        }
+      if(_hasOrd || SelectMyPosition()) gPhase=PH_PLACED;
+     }
+
    //--- reset a inizio di ogni nuovo giorno
    MqlDateTime now;
    TimeToStruct(TimeCurrent(), now);

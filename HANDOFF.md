@@ -44,6 +44,7 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 - `scarica_ottimizzati.ps1`: ora scarica/compila **tutti i 40 EA**.
 - Agente: nuovo modulo `agent/cot.py` + calendario CB in `agent/macro_calendar.py` + sezioni in `agent/report.py`.
 - Artefatto **Classifica prop** pubblicato (PF/DD/idoneità).
+- **Fix duplicati aperture (28/07):** aggiunta GUARDIA ANTI-DUPLICATO agli 8 EA famiglia aperture (Apertura_EU/Ott, Nasdaq_Apertura/Ott, Live5m/v2, Nasdaq_Live5m, Marco): a ogni ricompilazione/reload NON ripiazzano se hanno gia' un pendente/posizione del loro magic. Causa dei 3 buy-stop doppi su D30EUR. **Va ricompilato per applicarlo.**
 
 ---
 
