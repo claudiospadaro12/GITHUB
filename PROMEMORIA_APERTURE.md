@@ -28,3 +28,10 @@
 
 ## Nota
 Entrambi sono su PC fisso. Il VPS resta ai soli EA in forward (non toccarlo per i backtest).
+
+## Osservazioni forward (decisioni di Claudio)
+- **28/07:** DAX Apertura EU nativo — **gamba SHORT lasciata ATTIVA** (InpAllowShort=true) per
+  raccogliere dati forward. Oggi lo short ha perso −86,70 (falso break ribassista, DAX in range).
+  Da rivedere tra qualche giorno: se lo short continua a perdere → passare a LONG-only.
+- **Da verificare sul VPS:** DAX_M3 e Londra_ORB (decisi "morti") oggi hanno ancora tradato e
+  perso −116 € insieme. Confermare che siano DAVVERO tolti dai grafici.
