@@ -3,10 +3,9 @@
 #  (tutti i simboli della lista) in OHLC, per scoprire su quali
 #  strumenti rende di piu' in ~2,5 anni.
 #
-#  Uso:
-#    .\scan_market.ps1 -Robot ABTG_MaxMinNotte
-#    .\scan_market.ps1 -Robot ABTG_Nightly
-#    .\scan_market.ps1 -Robot ABTG_HARSI      (scalping, timeframe M5)
+#  Uso (-Robot):
+#    ABTG_MaxMinNotte · ABTG_Nightly · ABTG_HARSI (M5)
+#    ABTG_SupertrendReversal (H4) · ABTG_EMA200 (H4) · ABTG_GoldenCross (H1)
 #
 #  Come funziona: per ogni simbolo genera un .ini al volo, lancia l'EA
 #  in OHLC (Model 1) con una piccola griglia, salva un CSV per simbolo
@@ -75,7 +74,37 @@ InpAllowShort=0||0||1||1||Y
 InpTPpips=4||4||2||10||Y
 InpSLbufferPips=1||1||1||3||Y
 "@
-} else { Write-Host "EA non gestito: usa ABTG_MaxMinNotte, ABTG_Nightly o ABTG_HARSI" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_SupertrendReversal"){
+  # Reversal su flip Supertrend. TF H4. Ottimizza direzione + moltiplicatore Supertrend.
+  $Period="H4"
+  $Inputs=@"
+InpTF=16388||16388||0||16388||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpStMult=2.5||2.5||1.0||4.5||Y
+"@
+} elseif($EA -eq "ABTG_EMA200"){
+  # Rimbalzo su EMA200. TF H4. Ottimizza direzione + rapporto TP.
+  $Period="H4"
+  $Inputs=@"
+InpTF=16388||16388||0||16388||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpTP_RR=1.5||1.5||0.5||3.0||Y
+"@
+} elseif($EA -eq "ABTG_GoldenCross"){
+  # Incrocio medie + ADX. TF H1 (usa InpTimeframe). Ottimizza direzione + TP.
+  $Period="H1"
+  $Inputs=@"
+InpTimeframe=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpTP_R=1.5||1.5||0.5||3.0||Y
+"@
+} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross" -ForegroundColor Red; exit 1 }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== SCAN MARKET: $EA su $($Symbols.Count) simboli (OHLC) ===" -ForegroundColor Cyan

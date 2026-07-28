@@ -48,7 +48,7 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 ---
 
 ## 📌 PROMEMORIA APERTI (7)
-1. **Scan OHLC esteso** → SupertrendReversal, EMA200, GoldenCross su tutti i simboli → poi tick-real sui vincitori.
+1. **Scan OHLC esteso** → SupertrendReversal, EMA200, GoldenCross su tutti i simboli → poi tick-real sui vincitori. **[PRONTO]** `scan_market.ps1` ora supporta `-Robot ABTG_SupertrendReversal` (H4), `ABTG_EMA200` (H4), `ABTG_GoldenCross` (H1). Da lanciare + mandarmi i CSV.
 2. **Forward test** → statement periodico → pagella forward (PF/DD reale per EA); riempire colonna "PF forward" in `CLASSIFICA_PF.md`.
 3. **Short M5 DAX** → decidere long-only vs filtro-trend, col backtest (i nativi apertura Apertura_EU/Live5m/Marco hanno InpAllowShort=true; l'ottimizzato è LONG-only).
 4. **Guardiano di portafoglio** (`ABTG_Guardian`, da creare): daily-stop + stop DD totale + limite esposizione. Modo A (autonomo) o B (interruttore condiviso). Serve per le prop.
@@ -56,7 +56,8 @@ Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
 6. **Ricompilare per i commenti** → lanciare `scarica_ottimizzati.ps1`.
 7. **Scan HARSI** → `-Robot ABTG_HARSI` (script pronto).
 8. **DRY-RUN PROP** (idea del 27/07, dopo forward) → vedi sezione dedicata sotto.
-9. **Rapporto Rischio/Rendimento** → dallo statement 28/07: win rate 85% ma netto +7,85 EUR perché vincita media +12 vs perdita media −63 (R/R invertito). Analizzare/correggere il R/R degli EA DAX intraday. **Focus: `Londra_ORB` e `DAX_M3`** = generano perdite (già "morti" nei backtest) → capire dove sbagliano ed eventualmente disattivarli/rifarli.
+9. **Rapporto Rischio/Rendimento** → dallo statement 28/07: win rate 85% ma netto +7,85 EUR perché vincita media +12 vs perdita media −63 (R/R invertito). Analizzare/correggere il R/R degli EA DAX intraday.
+   → **DECISO (28/07): `DAX_M3` e `Londra_ORB` DA DISATTIVARE** (morti nei backtest + perdite in forward + difetti strutturali: whipsaw sui falsi break / rumore M3 / R/R invertito). Il DAX intraday M5 è già coperto da **DAX_Apertura_EU_Ottimizzato** (LONG). **Azione utente: rimuovere i 2 EA dai grafici.** Eventuale redesign = esperimento a parte, fuori dal live.
 
 ## Note per l'attribuzione forward
 - d30eur magic 770501 chiuso **a mano** il 27/07 → escludere da DAX_M3.
