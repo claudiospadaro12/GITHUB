@@ -1,18 +1,20 @@
 //+------------------------------------------------------------------+
-//|                                    ABTG_DAX_Apertura_EU.mq5       |
+//|                                 ABTG_Nasdaq_Apertura_US.mq5       |
 //|                                                                  |
-//|  EA "APERTURA EUROPEA" (DAX / D30EUR) - MetaTrader 5             |
+//|  EA "APERTURA AMERICANA" (Nasdaq / NASUSD) - MetaTrader 5        |
 //|                                                                  |
-//|  Basato sul piano di trading "Apertura Europea":                |
-//|   - il DAX apre alle 09:00 (ora italiana): breakout del range   |
-//|     di apertura con ordini pendenti sopra il max / sotto il min |
+//|  Basato sul piano di trading "Apertura Americana - Nasdaq":     |
+//|   - apertura USA alle 15:30 (ora italiana): rottura dei         |
+//|     massimi/minimi in apertura (BUY STOP / SELL STOP)           |
 //|   - OCO, parziale al 1o obiettivo, stop in pari, trailing stop  |
-//|   - rischio in % del capitale, filtri EMA/Supertrend/correlaz.  |
+//|   - MODALITA' GAP FILL opzionale (apertura in gap -> ritorno    |
+//|     verso la chiusura precedente): imposta InpEntryMode=GAPFILL |
+//|     e InpUseGapFill=true                                        |
 //|                                                                  |
 //|  ⚠️ Gli ORARI sono quelli del SERVER del broker (quelli sul      |
 //|     grafico): imposta InpSessionHour cosi' che coincida con     |
-//|     l'apertura reale del DAX sul TUO grafico (spesso 10:00 su    |
-//|     broker GMT+2, 09:00 su broker GMT+3, ecc.).                  |
+//|     l'apertura reale del Nasdaq cash sul TUO grafico            |
+//|     (spesso 16:30 su broker GMT+2, 15:30 su GMT+3, ecc.).       |
 //|                                                                  |
 //|  ⚠️ Nessun EA garantisce profitti. TESTA SU DEMO prima.          |
 //+------------------------------------------------------------------+
@@ -20,18 +22,20 @@
 #property version   "1.00"
 #property strict
 
-//--- DEFAULT specifici per il DAX (usati dal motore ABTG_ApertureCore)
-#define ABTG_DEF_NAME         "DAX Apertura EU"
-#define ABTG_DEF_MAGIC        770101
-#define ABTG_DEF_SESSION_HOUR 8      // apertura DAX 09:00 IT = 08:00 server BCM
-#define ABTG_DEF_SESSION_MIN  0
-#define ABTG_DEF_RANGE_MIN    15     // range dei primi 15 minuti (PDF: "primi 15 minuti")
-#define ABTG_DEF_RANGE_MODE   0      // 0=range di apertura (breakout classico dell'apertura EU)
-#define ABTG_DEF_CLOSE_HOUR   17     // flat a fine mattinata/pomeriggio (server)
-#define ABTG_DEF_CLOSE_MIN    30
-#define ABTG_DEF_USE_GAPFILL  false  // sul DAX di default breakout, non gap fill
-#define ABTG_DEF_RISK         2.0    // rischio max 2% (money management del piano)
-#define ABTG_DEF_TRAIL_MODE   2      // 2=punti fissi (piano DAX: trailing ~410 punti sugli indici)
+//--- DEFAULT specifici per il Nasdaq (usati dal motore ABTG_ApertureCore)
+#define ABTG_DEF_NAME         "Nasdaq Apertura US OTT"
+#define ABTG_DEF_MAGIC        770211
+#define ABTG_DEF_SESSION_HOUR 14     // Nasdaq 15:30 IT = 14:30 server BCM
+#define ABTG_DEF_SESSION_MIN  30
+#define ABTG_DEF_RANGE_MIN    15     // (usato in gap fill o se passi a range di apertura)
+#define ABTG_DEF_RANGE_MODE   2      // 2=massimi/minimi della CANDELA PRECEDENTE (piano: su H1)
+#define ABTG_DEF_LEVEL_TF     PERIOD_H1  // piano Nasdaq: "ordini nel time frame H1"
+#define ABTG_DEF_CLOSE_HOUR   21     // flat prima della chiusura serale (server)
+#define ABTG_DEF_CLOSE_MIN    45
+#define ABTG_DEF_USE_GAPFILL  false  // metti true + InpEntryMode=GAPFILL per il gap fill
+#define ABTG_DEF_RISK         1.0    // OTT: rischio 1% (validato solo OHLC, prudenza)
+#define ABTG_DEF_BUFFER       150    // OTT: buffer robusto solo-LONG
+#define ABTG_DEF_TRAIL_MODE   1      // 1=base candela precedente su M1 (piano: "seguo su M1")
 
 //  VERSIONE TUTTO-IN-UNO: il motore e' incluso qui sotto, NON serve
 //  copiare nessun file .mqh ne creare la cartella Include\ABTG.
@@ -166,7 +170,7 @@ input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra p
 input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
 input bool   InpAllowLong     = true;                 // Consenti operazioni long
-input bool   InpAllowShort    = true;                 // Consenti operazioni short
+input bool   InpAllowShort    = false;                // OTT: SOLO LONG (edge Nasdaq)
 input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/range in punti (live: 1700=17 punti; 0=off)
 input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
 
@@ -222,8 +226,8 @@ input string InpNewsCurrencies  = "";                 // Valute da filtrare, es.
 input bool   InpNewsFlatten     = true;               // Chiudi posizioni e cancella pendenti prima della news
 
 input group "=== Slippage & floor SL (consiglio amico) ==="
-input double InpSlippagePts   = 0;      // Slippage stimato in PUNTI: peggiora l'entry del breakout (backtest ONESTO + live). 0=off
-input double InpMinStopPts    = 0;      // Floor minimo di STOP in punti (~ spread+slippage+cuscinetto). 0=off
+input double InpSlippagePts   = 100;    // OTT: slippage onesto 100 pt
+input double InpMinStopPts    = 200;    // OTT: floor SL 200 pt (consiglio amico)
 input bool   InpSkipIfTight   = true;   // Se lo stop del breakout < floor -> SALTA il trade (invece di entrare troppo stretto)
 
 input group "=== Filtro VOLUMI (regola Emiliano: rottura valida solo con volumi) ==="
@@ -1132,114 +1136,65 @@ void OnDeinit(const int reason)       { ABTG_OnDeinit(reason); }
 void OnTick()                         { ABTG_OnTick();         }
 //+------------------------------------------------------------------+
 
-
-//==================================================================
-//  OPTFRAME (incorporato) - raccolta risultati ottimizzazione -> CSV
-//  Incluso qui dentro cosi' l'EA non dipende da file esterni.
-//==================================================================
-// nome logico del frame (qualsiasi stringa)
+//==================================================================//
+//  OPTFRAME (inlined, self-contained) - export automatico dei      //
+//  risultati di OTTIMIZZAZIONE in CSV.  NON richiede include.       //
+//  Scrive MQL5\Files\OptResults_<EA>_<Symbol>.csv, leggibile da:    //
+//      python optimizer/batch_analyze.py <cartella>                 //
+//  In live/backtest singolo e inerte (gira solo in ottimizzazione).//
+//==================================================================//
 #define OPTFRAME_NAME "OptFrame"
 #define OPTFRAME_ID   1
 
-// file CSV di output (nella cartella MQL5\Files del terminale principale)
 string OptFrame_FileName()
   {
-   // un file per simbolo/EA: es. OptResults_NasdaqMasterEA_NAS100.csv
    return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
   }
 
-//+------------------------------------------------------------------+
-//| Lato AGENTE: a fine di ogni passata impacchetta le statistiche   |
-//| in un frame e lo invia al terminale principale.                 |
-//+------------------------------------------------------------------+
 double OnTester()
   {
    double stats[7];
-   stats[0] = TesterStatistics(STAT_PROFIT);                 // Profit
-   stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);        // Expected Payoff
-   stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);          // Profit Factor
-   stats[3] = TesterStatistics(STAT_RECOVERY_FACTOR);        // Recovery Factor
-   stats[4] = TesterStatistics(STAT_SHARPE_RATIO);           // Sharpe Ratio
-   stats[5] = TesterStatistics(STAT_EQUITY_DDREL_PERCENT);   // Equity DD %
-   stats[6] = TesterStatistics(STAT_TRADES);                 // Trades
-
-   // criterio restituito all'ottimizzatore: recovery factor (robusto).
-   // Cambialo se vuoi ordinare l'ottimizzazione per un'altra metrica.
-   double criterion = stats[3];
-
+   stats[0] = TesterStatistics(STAT_PROFIT);
+   stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
+   stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
+   stats[3] = TesterStatistics(STAT_RECOVERY_FACTOR);
+   stats[4] = TesterStatistics(STAT_SHARPE_RATIO);
+   stats[5] = TesterStatistics(STAT_EQUITY_DDREL_PERCENT);
+   stats[6] = TesterStatistics(STAT_TRADES);
+   double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
   }
 
-//+------------------------------------------------------------------+
-//| Lato TERMINALE: inizio ottimizzazione                            |
-//+------------------------------------------------------------------+
-int OnTesterInit()
-  {
-   return(INIT_SUCCEEDED);
-  }
+int OnTesterInit() { return(INIT_SUCCEEDED); }
 
-//+------------------------------------------------------------------+
-//| Lato TERMINALE: a fine ottimizzazione, scarica TUTTI i frame     |
-//| e scrive il CSV (una riga per passata).                          |
-//+------------------------------------------------------------------+
 void OnTesterDeinit()
   {
    string fname = OptFrame_FileName();
    int h = FileOpen(fname, FILE_WRITE | FILE_CSV | FILE_ANSI, ",");
    if(h == INVALID_HANDLE)
-     {
-      PrintFormat("OptFrame: impossibile creare %s (err %d)", fname, GetLastError());
-      return;
-     }
-
-   // riavvolge il flusso dei frame di questa ottimizzazione
+     { PrintFormat("OptFrame: impossibile creare %s (err %d)", fname, GetLastError()); return; }
    FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
-
-   ulong  pass;
-   string name;
-   long   id;
-   double value;
-   double data[];
-   bool   header_scritto = false;
-   int    righe = 0;
-
+   ulong pass; string name; long id; double value; double data[];
+   bool header_scritto = false; int righe = 0;
    while(FrameNext(pass, name, id, value, data))
      {
-      // parametri di input di QUESTA passata: array di stringhe "nome=valore"
-      string params[];
-      uint   pcount = 0;
+      string params[]; uint pcount = 0;
       FrameInputs(pass, params, pcount);
-
-      // --- intestazione (scritta alla prima passata, quando conosco i nomi) ---
       if(!header_scritto)
         {
          string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades";
          for(uint i = 0; i < pcount; i++)
-           {
-            string kv[];
-            if(StringSplit(params[i], '=', kv) == 2)
-               head += "," + kv[0];
-           }
-         FileWrite(h, head);
-         header_scritto = true;
+           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
+         FileWrite(h, head); header_scritto = true;
         }
-
-      // --- riga dei valori ---
       string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f",
-                                (int)pass, data[0], data[1], data[2],
-                                data[3], data[4], data[5], data[6]);
+                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
       for(uint i = 0; i < pcount; i++)
-        {
-         string kv[];
-         if(StringSplit(params[i], '=', kv) == 2)
-            row += "," + kv[1];
-        }
-      FileWrite(h, row);
-      righe++;
+        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
+      FileWrite(h, row); righe++;
      }
-
    FileClose(h);
    PrintFormat("OptFrame: scritte %d passate in MQL5\\Files\\%s", righe, fname);
   }
-//+------------------------------------------------------------------+
+//================== fine OPTFRAME inlined ==========================//

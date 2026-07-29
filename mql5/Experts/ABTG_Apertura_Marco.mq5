@@ -21,8 +21,8 @@
 #property strict
 
 //--- DEFAULT specifici per il DAX (usati dal motore ABTG_ApertureCore)
-#define ABTG_DEF_NAME         "DAX Apertura EU"
-#define ABTG_DEF_MAGIC        770101
+#define ABTG_DEF_NAME         "Apertura Marco"
+#define ABTG_DEF_MAGIC        770311
 #define ABTG_DEF_SESSION_HOUR 8      // apertura DAX 09:00 IT = 08:00 server BCM
 #define ABTG_DEF_SESSION_MIN  0
 #define ABTG_DEF_RANGE_MIN    15     // range dei primi 15 minuti (PDF: "primi 15 minuti")
@@ -225,6 +225,27 @@ input group "=== Slippage & floor SL (consiglio amico) ==="
 input double InpSlippagePts   = 0;      // Slippage stimato in PUNTI: peggiora l'entry del breakout (backtest ONESTO + live). 0=off
 input double InpMinStopPts    = 0;      // Floor minimo di STOP in punti (~ spread+slippage+cuscinetto). 0=off
 input bool   InpSkipIfTight   = true;   // Se lo stop del breakout < floor -> SALTA il trade (invece di entrare troppo stretto)
+
+input group "=== Filtri MARCO (tutti ON/OFF, regolabili a mano) ==="
+input bool   InpUseMaFilter = false;                  // Filtro media mobile: long se prezzo sopra la MA
+input int    InpMaPeriod    = 200;                    // periodo MA
+input int    InpMaMethod    = 1;                      // 0=SMA 1=EMA 2=SMMA 3=LWMA
+input ENUM_TIMEFRAMES InpMaTF = PERIOD_M15;           // TF della MA
+input bool   InpUseRsi      = false;                  // Filtro RSI
+input int    InpRsiMode     = 0;                      // 0=momentum(>50 long,<50 short)  1=ipercomprato/venduto(veto)
+input int    InpRsiPeriod   = 14;                     // periodo RSI
+input ENUM_TIMEFRAMES InpRsiTF = PERIOD_M15;          // TF RSI
+input double InpRsiOB       = 70;                     // (mode 1) niente LONG se RSI > OB
+input double InpRsiOS       = 30;                     // (mode 1) niente SHORT se RSI < OS
+input bool   InpUseAdx      = false;                  // Filtro ADX: opera solo se ADX >= min (trend presente)
+input int    InpAdxPeriod   = 14;                     // periodo ADX
+input ENUM_TIMEFRAMES InpAdxTF = PERIOD_M15;          // TF ADX
+input double InpAdxMin      = 20;                     // soglia minima ADX
+input bool   InpUseAtr      = false;                  // Filtro ATR: opera solo se ATR in [min,max] punti
+input int    InpAtrPeriod   = 14;                     // periodo ATR
+input ENUM_TIMEFRAMES InpAtrTF = PERIOD_M15;          // TF ATR
+input double InpAtrMinPts   = 0;                      // ATR minimo in punti (0=off)
+input double InpAtrMaxPts   = 0;                      // ATR massimo in punti (0=off)
 
 input group "=== Filtro VOLUMI (regola Emiliano: rottura valida solo con volumi) ==="
 input bool   InpUseVolumeFilter = false;  // Entra solo se il volume della rottura supera la media
@@ -584,6 +605,8 @@ bool TryPlaceBreakout()
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
    if(!VolumeOK()) { ABTGLog("volumi insufficienti alla rottura: niente trade (regola Emiliano)."); return(true); }
+   if(!AdxOK())       { ABTGLog("ADX sotto soglia: niente trade (filtro Marco)."); return(true); }
+   if(!AtrFilterOK()) { ABTGLog("ATR fuori range: niente trade (filtro Marco)."); return(true); }
 
    double buffer  = EffectiveBuffer();
    double buyPx   = NormalizePrice(gRangeHigh + buffer);
@@ -592,6 +615,7 @@ bool TryPlaceBreakout()
    int  bias    = TrendBias();                 // 0 entrambi, +1 solo long, -1 solo short, 2 conflitto (nessuno)
    bool longOK  = (bias == 0 || bias == +1);
    bool shortOK = (bias == 0 || bias == -1);
+   if(InpUseRsi && InpRsiMode==1) { double rv=RsiValue(); if(rv>InpRsiOB) longOK=false; if(rv<InpRsiOS) shortOK=false; }
 
    datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
 
@@ -749,6 +773,9 @@ int TrendBias()
       int c = SymbolTrendDir(InpCorrSymbol, InpCorrTF, InpCorrEmaFast, InpCorrEmaSlow);
       if(c != 0) bias = CombineBias(bias, c);
      }
+
+   if(InpUseMaFilter)                 { int mm=MaBias();  if(mm!=0) bias=CombineBias(bias,mm); }
+   if(InpUseRsi && InpRsiMode==0)     { int rr=RsiBias(); if(rr!=0) bias=CombineBias(bias,rr); }
 
    return(bias);
   }
@@ -1099,6 +1126,54 @@ bool HasOpenPosition() { return(SelectMyPosition()); }
 //+------------------------------------------------------------------+
 //| Spread accettabile?                                              |
 //+------------------------------------------------------------------+
+//==================================================================
+//  FILTRI MARCO (toggle indipendenti, handle creato/rilasciato al volo)
+//==================================================================
+int MaBias()
+  {
+   if(!InpUseMaFilter) return(0);
+   int h=iMA(_Symbol,InpMaTF,InpMaPeriod,0,(ENUM_MA_METHOD)InpMaMethod,PRICE_CLOSE);
+   if(h==INVALID_HANDLE) return(0);
+   double m[1]; double c=iClose(_Symbol,InpMaTF,1);
+   int r=CopyBuffer(h,0,1,1,m); IndicatorRelease(h);
+   if(r<1 || c<=0) return(0);
+   return(c>m[0] ? +1 : (c<m[0] ? -1 : 0));
+  }
+double RsiValue()
+  {
+   int h=iRSI(_Symbol,InpRsiTF,InpRsiPeriod,PRICE_CLOSE);
+   if(h==INVALID_HANDLE) return(50.0);
+   double x[1]; int r=CopyBuffer(h,0,1,1,x); IndicatorRelease(h);
+   return(r<1 ? 50.0 : x[0]);
+  }
+int RsiBias()
+  {
+   if(!InpUseRsi || InpRsiMode!=0) return(0);
+   double v=RsiValue();
+   return(v>50.0 ? +1 : (v<50.0 ? -1 : 0));
+  }
+bool AdxOK()
+  {
+   if(!InpUseAdx) return(true);
+   int h=iADX(_Symbol,InpAdxTF,InpAdxPeriod);
+   if(h==INVALID_HANDLE) return(true);
+   double x[1]; int r=CopyBuffer(h,0,1,1,x); IndicatorRelease(h);   // buffer 0 = ADX principale
+   if(r<1) return(true);
+   return(x[0]>=InpAdxMin);
+  }
+bool AtrFilterOK()
+  {
+   if(!InpUseAtr) return(true);
+   int h=iATR(_Symbol,InpAtrTF,InpAtrPeriod);
+   if(h==INVALID_HANDLE) return(true);
+   double x[1]; int r=CopyBuffer(h,0,1,1,x); IndicatorRelease(h);
+   if(r<1) return(true);
+   double pts=x[0]/_Point;
+   if(InpAtrMinPts>0 && pts<InpAtrMinPts) return(false);
+   if(InpAtrMaxPts>0 && pts>InpAtrMaxPts) return(false);
+   return(true);
+  }
+
 bool SpreadOK()
   {
    if(InpMaxSpread <= 0) return(true);
