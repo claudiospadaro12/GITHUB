@@ -966,7 +966,7 @@ void ManagePosition()
                if(InpBreakevenAtTP1)
                  {
                   double be = NormalizePrice(openP);
-                  gTrade.PositionModify(_Symbol, be, tp);
+                  gTrade.PositionModify(ticket, be, tp);
                  }
               }
            }
@@ -980,13 +980,13 @@ void ManagePosition()
         {
          double newSL = TrailStopBuy(bid);
          if(newSL > 0 && newSL > sl && newSL > openP)
-            gTrade.PositionModify(_Symbol, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
+            gTrade.PositionModify(ticket, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
         }
       else if(type == POSITION_TYPE_SELL)
         {
          double newSL = TrailStopSell(ask);
          if(newSL > 0 && (newSL < sl || sl == 0) && newSL < openP)
-            gTrade.PositionModify(_Symbol, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
+            gTrade.PositionModify(ticket, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
         }
      }
   }
@@ -1109,8 +1109,16 @@ void EndOfSession()
 //+------------------------------------------------------------------+
 bool SelectMyPosition()
   {
-   if(!PositionSelect(_Symbol)) return(false);
-   return(PositionGetInteger(POSITION_MAGIC) == InpMagic);
+   // Hedge-safe: scorro TUTTE le posizioni e seleziono la MIA (simbolo+magic).
+   // PositionSelect(_Symbol) prendeva la prima posizione qualsiasi sul simbolo:
+   // con piu' EA sullo stesso strumento la gestione saltava. Ora per ticket.
+   for(int _i=PositionsTotal()-1;_i>=0;_i--)
+     {
+      ulong _tk=PositionGetTicket(_i);
+      if(_tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic)
+         return(true); // PositionGetTicket ha gia' selezionato la posizione
+     }
+   return(false);
   }
 
 bool HasOpenPosition() { return(SelectMyPosition()); }
