@@ -30,11 +30,19 @@ $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 #  USA : apre 15:30 IT = 14:30 server ; chiusura studio 22:00 IT = 21:00 server
 #  ⚠️ Verifica l'apertura sul TUO grafico BCM e correggi qui se serve.
 $Jobs=@(
-  @{ Sym="D30EUR"; Nome="DAX";    SH=8;  SM=0;  CH=16; CM=30 },
-  @{ Sym="F40EUR"; Nome="CAC40";  SH=8;  SM=0;  CH=16; CM=30 },
-  @{ Sym="NASUSD"; Nome="Nasdaq"; SH=14; SM=30; CH=21; CM=0  },
-  @{ Sym="U30USD"; Nome="Dow";    SH=14; SM=30; CH=21; CM=0  },
-  @{ Sym="SPXUSD"; Nome="SP500";  SH=14; SM=30; CH=21; CM=0  }
+  # --- EUROPA: apertura 09:00 IT = 08:00 server, cutoff 17:30 IT = 16:30 server ---
+  @{ Sym="D30EUR"; Nome="DAX";        SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="F40EUR"; Nome="CAC40";      SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="E50EUR"; Nome="EuroStoxx";  SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="100GBP"; Nome="FTSE100";    SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="E35EUR"; Nome="IBEX35";     SH=8;  SM=0;  CH=16; CM=30 },
+  # --- USA: apertura 15:30 IT = 14:30 server, cutoff 22:00 IT = 21:00 server ---
+  @{ Sym="NASUSD"; Nome="Nasdaq";     SH=14; SM=30; CH=21; CM=0  },
+  @{ Sym="U30USD"; Nome="Dow";        SH=14; SM=30; CH=21; CM=0  },
+  @{ Sym="SPXUSD"; Nome="SP500";      SH=14; SM=30; CH=21; CM=0  }
+  # --- ASIA (opzionali): apertura notturna, ora server DA VERIFICARE sul grafico ---
+  # @{ Sym="225JPY"; Nome="Nikkei"; SH=1; SM=0; CH=7; CM=0 },   # Tokyo ~09:00 JST -> ~01:00 server (verifica!)
+  # @{ Sym="200AUD"; Nome="ASX";    SH=1; SM=0; CH=6; CM=0 },   # Sydney ~10:00 AEST -> ~01:00 server (verifica!)
 )
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
