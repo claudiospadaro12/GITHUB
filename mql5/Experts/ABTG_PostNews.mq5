@@ -7,7 +7,8 @@
 //|  Strategia POST-NEWS totalmente MECCANICA (Christian Bertacchi). |
 //|  Su una conferenza stampa (ECB o FOMC), a un orario preciso,     |
 //|  prende max/min delle due candele M5 di riferimento e piazza:   |
-//|    BUY STOP = max + 3 pip, SELL STOP = min - 2 pip (OCO NO).    |
+//|    BUY STOP = max + 3 pip, SELL STOP = min - 2 pip.             |
+//|    OCO configurabile (InpUseOCO): al 1o scatto cancella l'altra. |
 //|  Ogni ordine: TP 50 pip, SL 25 pip. Scadenza pendenti a orario. |
 //|  Size col rischio calcolato su 50 pip (worst case doppio stop). |
 //|  Un UNICO motore per ECB ed FOMC: cambiano solo i PRESET         |
@@ -46,6 +47,7 @@ input double InpBuyOffsetPips  = 3.0;  // BUY STOP = max + 3 pip
 input double InpSellOffsetPips = 2.0;  // SELL STOP = min - 2 pip
 input double InpTPpips         = 50.0; // take profit (pip)
 input double InpSLpips         = 25.0; // stop loss (pip)
+input bool   InpUseOCO         = true; // OCO: al 1o ordine che scatta, cancella l'altra gamba
 
 input group "=== Trailing (solo ECB) ==="
 input bool   InpUseTrail25     = true; // se +25 pip di profitto, accorcia lo SL
@@ -108,6 +110,7 @@ void OnTick()
    if(InpUseNewsFilter && _tc.day_of_year!=gNewsLoadedDay)
      { LoadNews(); gNewsLoadedDay=_tc.day_of_year; }
 
+   OcoCheck();
    ManageTrailing();
    FridayCloseCheck();
 
@@ -200,6 +203,32 @@ void PlaceOrders(datetime nowBar)
       else Log("SELL STOP fallito: "+gTrade.ResultRetcodeDescription());
      }
    else Log("prezzo gia' sotto il range: niente SELL STOP.");
+  }
+
+//+------------------------------------------------------------------+
+//| OCO: appena una gamba diventa POSIZIONE, cancella il pendente    |
+//| dell'altra gamba (stesso magic). Un solo trade per evento.       |
+//+------------------------------------------------------------------+
+void OcoCheck()
+  {
+   if(!InpUseOCO) return;
+   // ho una posizione aperta del mio magic?
+   bool hasPos=false;
+   for(int i=PositionsTotal()-1;i>=0 && !hasPos;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic)
+         hasPos=true;
+     }
+   if(!hasPos) return;
+   // si': cancello ogni pendente residuo del mio magic (l'altra gamba)
+   for(int j=OrdersTotal()-1;j>=0;j--)
+     {
+      ulong tk=OrderGetTicket(j);
+      if(tk==0) continue;
+      if(OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic)
+        { if(gTrade.OrderDelete(tk)) Log("OCO: cancellata la gamba opposta (ticket "+(string)tk+")."); }
+     }
   }
 
 //+------------------------------------------------------------------+
