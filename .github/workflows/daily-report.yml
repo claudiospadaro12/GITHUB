@@ -15,6 +15,9 @@ concurrency:
   group: daily-report
   cancel-in-progress: false
 
+permissions:
+  contents: write        # per fare il commit dell'archivio regime
+
 jobs:
   report:
     runs-on: ubuntu-latest
@@ -41,3 +44,16 @@ jobs:
           # Su esecuzione manuale forziamo l'invio ignorando il gate orario.
           FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: python run_report.py
+
+      - name: Archivia il regime log (commit del CSV storico)
+        if: always()
+        run: |
+          if [[ -n "$(git status --porcelain data/regime_log.csv)" ]]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/regime_log.csv
+            git commit -m "regime log: $(date -u +%Y-%m-%d)"
+            git push
+          else
+            echo "Nessuna nuova riga nel regime log: niente da committare."
+          fi

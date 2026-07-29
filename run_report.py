@@ -58,6 +58,14 @@ def main() -> int:
     print("[info] Raccolta dati di mercato...")
     groups = market_data.collect_all(config.INDICES, config.COMMODITIES, config.FOREX)
 
+    # 2-bis. Archivio storico del bias (mappa regime × EA, per il confronto futuro)
+    try:
+        from agent import regime_log
+        n_arch = regime_log.archive(groups, now)
+        print(f"[info] Regime log: {n_arch} righe archiviate in data/regime_log.csv.")
+    except Exception as exc:  # non bloccare mai il report per l'archivio
+        print(f"[warn] Archivio regime non riuscito: {exc}")
+
     # 3. Calendario macro
     print("[info] Raccolta calendario macro...")
     events = fetch_today_events(tz=config.TIMEZONE)
