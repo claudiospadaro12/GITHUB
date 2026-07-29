@@ -79,6 +79,15 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 - **Forward:** demo BCM **50503392** (EUR, Hedge, ~6k). Qui girano gli EA, NIENTE guardiano.
 - **Prop sim:** secondo demo portato a **~109.000** per il dry-run futuro (col guardiano).
 
+## 🚨 URGENTE — RICOMPILARE GLI EA (causa perdite evitabili)
+- **29/07:** account da **+804** a negativo. Causa: gli EA apertura hanno BE + dimezza-a-target + trailing
+  NEL CODICE e ACCESI nel preset, MA l'`.ex5` sul VPS è **vecchio** → la gestione profitto **non gira**.
+  Il TP1 (1R) è stato raggiunto ma niente parziale/BE → profitto restituito.
+- **FIX (una volta sola):** lanciare `scarica_ottimizzati.ps1` (ricompila tutti gli EA) → attiva BE/trailing/
+  dimezza + guardia anti-duplicato. Poi rimuovere/riattaccare gli EA. **Da fare PRIMA del dry-run prop.**
+- **Spegnere i Live5m** (DAX Live5m + v2): morti (PF<1), il 29/07 hanno perso −353 nel whipsaw. Come DAX_M3/Londra_ORB.
+- Duplicato apertura confermato di nuovo (2× DAX Apertura EU SELL, stesso secondo) → risolto dalla ricompilazione.
+
 ## 🔭 OSSERVAZIONI FORWARD (decisioni di Claudio)
 - **28/07:** DAX Apertura EU nativo — gamba SHORT lasciata ATTIVA per osservare (oggi lo short ha perso −86,70; il long-only l'avrebbe evitato). Da rivedere tra qualche giorno.
 - **Nasdaq apertura:** short riattivato (vedi sopra) — testa entrambe le direzioni.
