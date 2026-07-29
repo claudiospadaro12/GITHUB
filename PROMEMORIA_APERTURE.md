@@ -99,3 +99,9 @@ powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.
 powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/ea-market-openings-d79m8l/backtest_pipeline/studio_apertura.ps1' -OutFile studio_apertura.ps1; .\studio_apertura.ps1"
 ```
 > PC fisso = backtest/scan. VPS = solo EA in forward (non toccarlo per i backtest).
+
+## 🎥 FLUSSO TRASCRIZIONI LIVE (Paolo / Emiliano)
+Claudio carica le trascrizioni dei live di **Paolo** o **Emiliano** appena le ha.
+Per ognuna Claude: (1) estrae le regole meccaniche; (2) dice se e' automatizzabile o discrezionale;
+(3) se fattibile → scheletro EA tutto-in-uno → poi nell'imbuto (scan → tick reali → forward).
+Distinguere: STRATEGIA operativa → diventa EA; ANALISI macro → alimenta il report giornaliero (come il PDF di Emiliano).
