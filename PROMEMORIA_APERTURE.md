@@ -88,6 +88,14 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 - **Spegnere i Live5m** (DAX Live5m + v2): morti (PF<1), il 29/07 hanno perso −353 nel whipsaw. Come DAX_M3/Londra_ORB.
 - Duplicato apertura confermato di nuovo (2× DAX Apertura EU SELL, stesso secondo) → risolto dalla ricompilazione.
 
+## ⚖️ VALIDITÀ DEL FORWARD (regola importante)
+- I trade sul VPS **prima della ricompilazione** girano su un `.ex5` VECCHIO senza dimezza/BE/trailing →
+  **NON sono un giudizio valido** sugli EA (misurano un EA rotto, non la strategia). Es. 29/07: avrebbero
+  profittato bene, invece hanno restituito +800.
+- **La pagella forward RIPARTE dalla data di ricompilazione.** Tutto ciò che è prima si SCARTA dal verdetto.
+- I backtest/validazioni a tick reali NON sono contaminati (girano sul codice fresco dal repo).
+- Quindi ricompilare serve a: (1) smettere di perdere profitti, (2) rendere VALIDO il forward test.
+
 ## 🔭 OSSERVAZIONI FORWARD (decisioni di Claudio)
 - **28/07:** DAX Apertura EU nativo — gamba SHORT lasciata ATTIVA per osservare (oggi lo short ha perso −86,70; il long-only l'avrebbe evitato). Da rivedere tra qualche giorno.
 - **Nasdaq apertura:** short riattivato (vedi sopra) — testa entrambe le direzioni.
