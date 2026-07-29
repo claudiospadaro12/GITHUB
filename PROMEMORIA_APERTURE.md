@@ -96,6 +96,19 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 - I backtest/validazioni a tick reali NON sono contaminati (girano sul codice fresco dal repo).
 - Quindi ricompilare serve a: (1) smettere di perdere profitti, (2) rendere VALIDO il forward test.
 
+## 🐛 BUG SISTEMICO GESTIONE (Hedge) — trovato e in correzione (29/07)
+- **Causa (provata dal log):** `SelectMyPosition()` faceva `PositionSelect(_Symbol)` → prendeva la PRIMA
+  posizione qualsiasi sul simbolo. Con piu' EA sullo stesso strumento (DAX affollato), l'EA prendeva la
+  posizione di un ALTRO → "non e' mia" → **saltava dimezza/BE/trailing**. Intermittente. Ha causato il +800→neg del 29/07.
+  Prova: Live5m buy #2932708 gestito alle 09:00 (parziale+BE), short apertura #2596229/30 delle 09:53 IGNORATE.
+- **Affligge ~17 EA** (tutta la famiglia che usa quel pattern).
+- **FIX (fatto sul branch, DA COMPILARE/TESTARE):** SelectMyPosition ora scorre TUTTE le posizioni e prende la
+  PROPRIA (simbolo+magic); `PositionModify` per **ticket** (non per simbolo). Applicato a 5 EA core:
+  DAX_Apertura_EU (+Ott), Apertura_Marco, Nasdaq_Apertura_US (+Ott).
+- **DA FARE:** replicare a MaxMinNotte (struttura diversa), SupertrendInvert, GoldenCross/IchiTrend; i morti
+  (Live5m, DAX_M3, Londra_ORB, ORB, ORB_Fibo) si spengono. **VALIDARE in Strategy Tester** prima del live.
+- Anche: OCO aggiunto a PostNews. Guardia anti-duplicato gia' presente. Tutto attivo alla prossima ricompilazione.
+
 ## 🔭 OSSERVAZIONI FORWARD (decisioni di Claudio)
 - **28/07:** DAX Apertura EU nativo — gamba SHORT lasciata ATTIVA per osservare (oggi lo short ha perso −86,70; il long-only l'avrebbe evitato). Da rivedere tra qualche giorno.
 - **Nasdaq apertura:** short riattivato (vedi sopra) — testa entrambe le direzioni.
