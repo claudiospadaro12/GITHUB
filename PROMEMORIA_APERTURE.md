@@ -100,6 +100,15 @@ powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.
 ```
 > PC fisso = backtest/scan. VPS = solo EA in forward (non toccarlo per i backtest).
 
+## 🗂️ ARCHIVIO REGIME (già esistente — NON duplicare)
+- Il report giornaliero **salva già** ogni giorno `data/snapshots/AAAA-MM-GG.json` con bias/RSI/var/livelli/
+  correlazioni di TUTTI gli strumenti (branch default `creating-agents-SgGpD`). Accumula dal 22/07.
+- Il **report settimanale del sabato** (`run_weekly_report.py`) rilegge gli snapshot e confronta bias vs realtà.
+- ⚠️ NON serve postare il report a mano ogni giorno: è automatico. `agent/regime_log.py` (su questo branch) era
+  un doppione → **superato dallo snapshot**, lasciato inattivo.
+- **DA FARE (valore vero):** analizzatore che incrocia gli **snapshot** con lo **statement** → **mappa regime × EA**
+  (quale EA vince/perde in quale regime). Si costruisce quando Claudio manda gli statement.
+
 ## 🎥 FLUSSO TRASCRIZIONI LIVE (Paolo / Emiliano)
 Claudio carica le trascrizioni dei live di **Paolo** o **Emiliano** appena le ha.
 Per ognuna Claude: (1) estrae le regole meccaniche; (2) dice se e' automatizzabile o discrezionale;
