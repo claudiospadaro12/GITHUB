@@ -109,6 +109,13 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
   (Live5m, DAX_M3, Londra_ORB, ORB, ORB_Fibo) si spengono. **VALIDARE in Strategy Tester** prima del live.
 - Anche: OCO aggiunto a PostNews. Guardia anti-duplicato gia' presente. Tutto attivo alla prossima ricompilazione.
 
+## 🟢 FORWARD IN CORSO (dal 30/07) — SupRev tick-reali validati
+- 4 EA `ABTG_SupertrendReversal` in forward sul demo, parametri robusti (LONG-only, H4):
+  - **Oro** XAUUSD (magic 770921, StMult 2.5/TP 2.5) — candidato PROP nº1 (DD reale 1,2%, PFmed 1,46)
+  - **Argento** XAGUSD (770922, 3.0/2.5) · **DAX** D30EUR (770923, 3.5/2.5) · **Nikkei** 225JPY (770924, 3.0/2.5)
+- Dow e ASX SCARTATI: crollati a tick reali (PF <1, erano illusione OHLC).
+- Pagella forward vera da leggere tra ~2-3 mesi (H4 = poche operazioni/mese).
+
 ## 🔭 OSSERVAZIONI FORWARD (decisioni di Claudio)
 - **28/07:** DAX Apertura EU nativo — gamba SHORT lasciata ATTIVA per osservare (oggi lo short ha perso −86,70; il long-only l'avrebbe evitato). Da rivedere tra qualche giorno.
 - **Nasdaq apertura:** short riattivato (vedi sopra) — testa entrambe le direzioni.
