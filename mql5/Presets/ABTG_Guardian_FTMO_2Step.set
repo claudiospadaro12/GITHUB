@@ -1,0 +1,21 @@
+; ================================================================
+;  ABTG_Guardian - PRESET FTMO 2-Step (Challenge/Verifica)
+;  Da caricare SOLO sul demo per il dry-run prop (NON sul forward).
+;  Regole FTMO 2-Step 2026: -5% giorno / -10% totale STATICO.
+;  Metti il Guardian su UN grafico qualsiasi (governa tutto il conto).
+; ----------------------------------------------------------------
+;  InpStartBalance=0  -> cattura in automatico il saldo alla 1a
+;    partenza e lo blocca. Per replicare ESATTAMENTE FTMO 100k:
+;    porta prima il demo a ~100000 (poi lascia 0), oppure imposta 100000.
+; ================================================================
+InpStartBalance=0
+InpDailyLossPct=5.0
+InpTotalDDPct=10.0
+InpDDMode=0
+InpDailyResetHour=0
+InpAction=0
+InpCloseAllMagics=true
+InpShowPanel=true
+InpMagic=779001
+InpComment=GUARDIAN FTMO 2STEP
+InpVerbose=true

@@ -20,7 +20,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 5. 🟢 **MOTORE APERTURA M5 su tutti gli indici** → `studio_apertura.ps1` (8 indici) → analisi → `ABTG_Aperture_Universal`.
 6. 🟢 **FORWARD 4 SupRev** (Oro/Argento/DAX/Nikkei) → pagella tra ~2-3 mesi.
 7. 🔵 **Chiusura a tempo PostNews** (news+75min): decidere "sempre" o "solo se non a TP", poi aggiungere al codice.
-8. 🔵 **DRY-RUN PROP** su demo 109k + guardiano (dopo il forward). Scegliere la prop firm.
+8. 🔵 **DRY-RUN PROP** su demo 109k + guardiano (dopo il forward). Prop scelta: **FTMO 2-Step** (5%/10% statico, target +10%, no limite tempo, EA ok, split 80-90%). Preset guardiano pronto: `ABTG_Guardian_FTMO_2Step.set` (InpStartBalance=0 auto; per replica esatta 100k portare il demo a ~100000). Verificato regole FTMO aggiornate 2026.
 9. 🔵 **Analizzatore regime × EA** (incrocia snapshot giornalieri + statement).
 
 ## ✅ FATTO (archivio sintetico)
