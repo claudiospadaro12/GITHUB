@@ -202,6 +202,16 @@ Passare OGNI strategia nell'imbuto (scan OHLC → tick reali → forward) e cost
 - **30/07:** caricati in forward i 4 preset SupRev robusti (Oro/Argento/DAX/Nikkei) sui rispettivi grafici H4.
 - **30/07:** (in corso) lancio scan OHLC **H1** del SupertrendReversal sul PC fisso.
 
+## 🧩 RAFFINAMENTI DALLE LIVE (da valutare/implementare) — dettaglio in docs/live_emiliano/ANALISI_LIVE_storico.md
+Estratti dalle 24 live storiche (apr-mag) + luglio. Priorità:
+1. **SupertrendReversal**: MA50-taglia-ST + ordine MA200 + medie-non-intrecciate + DX(20/25/50) + StdDev + MA200-barriera; togliere stocastico.
+2. **Apertura**: filtro volume +50% su ORB + modulo Larry cost-to-cost + VWAP M15 + gap-fill.
+3. **PTE**: canali TMA fast/slow + candela HA fuori da ENTRAMBI + pattern inversione + livello S/R.
+4. **FiboH4**: laddering 50%/MA200/61.8 + TP MA14 + SL struttura + filtro ADR-giornata + re-entry su swing.
+5. **WOL**: 2 pattern (inversione se apre sopra / continuazione se sotto) + filtro mediana doji + no doji notturne + TP MA14.
+6. **NUOVA Bollinger squeeze/band-riding**; 7. **filtro FVG** trasversale; 8. cost-to-cost post-17:00 (priorità media).
+- ✅ **PostNews** già rifinito (OCO + chiusura 21:45 + sell offset 3). ⚠️ ECB: la fonte NON la trada → deprioritizzare.
+
 ## 🎥 FLUSSO TRASCRIZIONI LIVE (Paolo / Emiliano)
 Claudio carica le trascrizioni dei live di **Paolo** o **Emiliano** appena le ha.
 Per ognuna Claude: (1) estrae le regole meccaniche; (2) dice se e' automatizzabile o discrezionale;
