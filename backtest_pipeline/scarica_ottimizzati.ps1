@@ -68,7 +68,8 @@ $EAs = @(
     "ABTG_PostNews",
     "ABTG_WOL",
     "ABTG_HARSI",
-    "ABTG_FiboH4_Multi"
+    "ABTG_FiboH4_Multi",
+    "IchiTrend_Gold_Base"
 )
 
 Write-Host "=== AGGIORNO TUTTI GLI EA (ottimizzati + nativi) ===" -ForegroundColor Cyan
@@ -105,6 +106,15 @@ foreach ($ea in $EAs) {
         else { Write-Host ("   (compila a mano con F7: {0})" -f $ea) -ForegroundColor Yellow }
     }
 }
+
+# --- aggiorna il file news (date FOMC/ECB) in MQL5\Files -------------
+# Il PostNews legge questo CSV a runtime: va tenuto allineato al repo.
+$MqlFiles = Join-Path $DataFolder "MQL5\Files"
+New-Item -ItemType Directory -Force -Path $MqlFiles | Out-Null
+$newsDst = Join-Path $MqlFiles "abtg_news.csv"
+$NewsUrl = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch/mql5/Files/abtg_news.csv"
+try { Invoke-WebRequest -Uri $NewsUrl -OutFile $newsDst -UseBasicParsing; Write-Host "   aggiornato abtg_news.csv (date FOMC/ECB)" -ForegroundColor Green }
+catch { Write-Host ("   ERRORE download abtg_news.csv: {0}" -f $_.Exception.Message) -ForegroundColor Red }
 
 Write-Host "`n=== FATTO ===" -ForegroundColor Cyan
 Write-Host "In MetaTrader: se non li vedi subito, tasto destro su 'Expert Advisors' > Aggiorna." -ForegroundColor White
