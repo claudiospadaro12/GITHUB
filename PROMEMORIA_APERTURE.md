@@ -150,7 +150,11 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 
 ## 🧾 REGOLE PROP (sintesi)
 - Non tutte le prop ammettono EA. Vietati spesso: HFT, martingala/grid, copy-trading, a volte **news trading** (⚠️ la PostNews FOMC/BCE è news trading → a rischio regole).
-- "Quanti EA" = non un numero fisso: dipende dalla **perdita giornaliera COMBINATA** (< ~5%). EA **scorrelati** → puoi tenerne di più. Il dry-run sul 109k dà la risposta esatta.
+- "Quanti EA" = non un numero fisso: **nessun tetto al numero** in genere; il limite vero è la **perdita giornaliera COMBINATA** (< ~5%) + max lotti/consistenza. EA **scorrelati** → puoi tenerne di più. Raccomandazione: **2-4 diversificati**. Il dry-run sul 109k dà la risposta esatta.
+- **PROP DI RIFERIMENTO scelta (30/07): FTMO** (affidabile, EA ammessi, no time limit, DD statico ~5%/10%, consistenza non stringente). Alternativa per stile lento/swing: **The5ers**.
+  - Criteri EA-friendly: DD **statico** (non trailing), no/lieve consistenza, no time limit, hold overnight/weekend ok.
+  - ⚠️ Le regole cambiano: **verificare i termini attuali sul sito** prima di pagare. Claudio caricherà il PDF del regolamento quando sceglie.
+  - **DOPO il forward:** tarare il guardiano sui numeri tipo-FTMO → dry-run 109k. (Deciso 30/07: si aspetta il forward, niente pagamenti ora.)
 
 ## ⌨️ COMANDI POWERSHELL (PC fisso, MT5 chiuso)
 ```powershell
