@@ -201,6 +201,7 @@ Passare OGNI strategia nell'imbuto (scan OHLC → tick reali → forward) e cost
   Se manca → rilanciare `scarica_ottimizzati.ps1`.
 - **30/07:** caricati in forward i 4 preset SupRev robusti (Oro/Argento/DAX/Nikkei) sui rispettivi grafici H4.
 - **30/07:** (in corso) lancio scan OHLC **H1** del SupertrendReversal sul PC fisso.
+- **30/07:** ricompilato e sostituito il **PostNews aggiornato** (OCO + chiusura 21:45 + sell offset 3) SOLO su **EUR/USD (FOMC)** + caricato preset FOMC. ✅ (ECB su EUR/JPY NON ancora ricaricato — ma deprioritizzato, prossima BCE 10/09.)
 
 ## 🧩 RAFFINAMENTI DALLE LIVE (da valutare/implementare) — dettaglio in docs/live_emiliano/ANALISI_LIVE_storico.md
 Estratti dalle 24 live storiche (apr-mag) + luglio. Priorità:
