@@ -1,0 +1,44 @@
+; SUPERTREND REVERSAL - FORWARD D30EUR (parametri ROBUSTI da tick reali)
+; StMult 3.5 / TP_RR 2.5 / LONG-only. Backtest reale: PF~1.90, DD~2.1%.
+; Attacca su grafico D30EUR H4 e carica questo preset. Magic 770923.
+InpTF=16388
+InpStMult=3.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=false
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP_RR=2.5
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=STREV FW DAX
+InpMagic=770923
+InpMaxSpread=0
+InpVerbose=true
