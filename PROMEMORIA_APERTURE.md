@@ -55,7 +55,11 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 1. **VALIDAZIONE tick reali** dei vincitori → `valida_realtick.ps1` (default: Oro, Argento, Dow, Nikkei, DAX, ASX).
    Poi Claudio manda i CSV → confronto tick-reali vs OHLC → chi regge davvero.
 2. **SCAN H1** per confronto col H4 → `.\scan_market.ps1 -Robot ABTG_SupertrendReversal -Tf H1`. Claudio preferisce H1 (chiude in giornata).
-3. **STUDIO APERTURE** (FASE A) → `studio_apertura.ps1` (5 indici, EU 08:00 / USA 14:30 server). Misura MAE/MFE/ampiezza → SL/BE/trailing/dimezza-lotto → poi **motore unico** `ABTG_Aperture_Universal`.
+3. ⭐ **MOTORE APERTURA M5 SU TUTTI GLI INDICI** (progetto chiave di Claudio):
+   - **FASE A — misurare:** `studio_apertura.ps1` (già esteso a **8 indici**: DAX, CAC, EuroStoxx, FTSE100, IBEX @08:00 server; Nasdaq, Dow, S&P @14:30 server). Misura ampiezza/MAE/MFE/durata per indice.
+   - **FASE B — analizzare:** Claude dai CSV → SL / BE / trailing / dimezza-lotto ottimali per indice.
+   - **FASE C — costruire:** UN motore unico `ABTG_Aperture_Universal` (stesso motore delle aperture DAX/Nasdaq) applicato agli altri indici, con la gestione tarata.
+   - Idea di Claudio: "creare il TF 5 min col motore delle aperture, con gli altri indici." Verificare gli orari di apertura sul grafico BCM.
 4. **FORWARD** → statement periodico → pagella PF/DD reale per EA.
 5. **DRY-RUN PROP** sul demo 109k + guardiano (dopo il forward).
 6. Poi: EMA200 / GoldenCross scan; scan HARSI.
@@ -145,6 +149,16 @@ powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.
   un doppione → **superato dallo snapshot**, lasciato inattivo.
 - **DA FARE (valore vero):** analizzatore che incrocia gli **snapshot** con lo **statement** → **mappa regime × EA**
   (quale EA vince/perde in quale regime). Si costruisce quando Claudio manda gli statement.
+
+## 🗒️ ARCHIVIO — COSA HA FATTO CLAUDIO (con date)
+> Registro di ciò che Claudio conferma di aver eseguito lui. (Claudio dimentica → segnare SEMPRE.)
+- **29/07:** aggiornato `abtg_news.csv` sul VPS con la data FOMC. FOMC EA attivato (EUR/USD M5) → il buy è scattato, chiuso in profitto/in corso.
+- **29/07:** riattivato lo SHORT sull'apertura Nasdaq (test entrambe le direzioni).
+- **29/07 sera:** chiuso MT5 sul VPS e (da confermare) lanciato il comando di ricompilazione; riaperto MT5.
+  ⚠️ **DA VERIFICARE**: che la ricompilazione sia andata (test: F7 sul PostNews → deve esserci `InpUseOCO`).
+  Se manca → rilanciare `scarica_ottimizzati.ps1`.
+- **30/07:** caricati in forward i 4 preset SupRev robusti (Oro/Argento/DAX/Nikkei) sui rispettivi grafici H4.
+- **30/07:** (in corso) lancio scan OHLC **H1** del SupertrendReversal sul PC fisso.
 
 ## 🎥 FLUSSO TRASCRIZIONI LIVE (Paolo / Emiliano)
 Claudio carica le trascrizioni dei live di **Paolo** o **Emiliano** appena le ha.
