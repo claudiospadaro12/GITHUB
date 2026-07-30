@@ -86,6 +86,10 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
    Poi Claudio manda i CSV → confronto tick-reali vs OHLC → chi regge davvero.
 2. **SCAN H1** per confronto col H4 → `.\scan_market.ps1 -Robot ABTG_SupertrendReversal -Tf H1`. Claudio preferisce H1 (chiude in giornata).
 3. ⭐ **MOTORE APERTURA M5 SU TUTTI GLI INDICI** (progetto chiave di Claudio):
+   - 🟡 **IN CODA dopo lo scan H1** (PC fisso occupato, un backtest alla volta). Ordine: (1) finisce scan H1 → Claudio manda CSV → Claude classifica; (2) POI lancia lo studio apertura.
+   - **Comando pronto (PC FISSO, MT5 chiuso):**
+     `cd $HOME\Desktop; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/ea-market-openings-d79m8l/backtest_pipeline/studio_apertura.ps1" -OutFile studio_apertura.ps1; powershell -ExecutionPolicy Bypass -File .\studio_apertura.ps1`
+   - Decisione aperta (Claudio ha rimandato): **motore unico universale** (consigliato, 1 file) vs **1 nativo per indice**. Il motore apertura è GIÀ symbol-agnostico → non serve codice nuovo per farlo girare su un indice, serve solo ora+preset.
    - **FASE A — misurare:** `studio_apertura.ps1` (già esteso a **8 indici**: DAX, CAC, EuroStoxx, FTSE100, IBEX @08:00 server; Nasdaq, Dow, S&P @14:30 server). Misura ampiezza/MAE/MFE/durata per indice.
    - **FASE B — analizzare:** Claude dai CSV → SL / BE / trailing / dimezza-lotto ottimali per indice.
    - **FASE C — costruire:** UN motore unico `ABTG_Aperture_Universal` (stesso motore delle aperture DAX/Nasdaq) applicato agli altri indici, con la gestione tarata.
