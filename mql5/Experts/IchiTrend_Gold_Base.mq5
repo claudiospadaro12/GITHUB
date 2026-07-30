@@ -268,10 +268,9 @@ double CalcLotByRisk(double slDistancePrice)
 //+------------------------------------------------------------------+
 void ManageTrailing()
   {
-   if(!PositionSelect(_Symbol))
+   if(!SelMyPos())   // Hedge-safe: seleziona la MIA posizione per ticket
       return;
-   if(PositionGetInteger(POSITION_MAGIC) != InpMagic)
-      return;
+   ulong ticket = PositionGetInteger(POSITION_TICKET);
 
    double atr[1];
    if(CopyBuffer(hATR, 0, 1, 1, atr) < 1) return;
@@ -289,7 +288,7 @@ void ManageTrailing()
       double newSL  = NormalizeDouble(bid - trailDist, digits);
       //--- sposto lo SL solo IN SU e solo se siamo gia' in profitto rispetto all'ingresso
       if(newSL > curSL && newSL > openP)
-         trade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
+         trade.PositionModify(ticket, newSL, PositionGetDouble(POSITION_TP));
      }
    else if(type == POSITION_TYPE_SELL)
      {
@@ -297,18 +296,26 @@ void ManageTrailing()
       double newSL  = NormalizeDouble(ask + trailDist, digits);
       //--- sposto lo SL solo IN GIU e solo se siamo gia' in profitto
       if((newSL < curSL || curSL == 0) && newSL < openP)
-         trade.PositionModify(_Symbol, newSL, PositionGetDouble(POSITION_TP));
+         trade.PositionModify(ticket, newSL, PositionGetDouble(POSITION_TP));
      }
   }
 
 //+------------------------------------------------------------------+
 //| C'e' una posizione aperta di QUESTO ea?                          |
 //+------------------------------------------------------------------+
+bool SelMyPos()   // Hedge-safe: seleziona per ticket la posizione di QUESTO ea (simbolo+magic)
+  {
+   for(int _i=PositionsTotal()-1;_i>=0;_i--)
+     {
+      ulong _tk=PositionGetTicket(_i);
+      if(_tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) return(true);
+     }
+   return(false);
+  }
+
 bool HasOpenPosition()
   {
-   if(!PositionSelect(_Symbol))
-      return(false);
-   return(PositionGetInteger(POSITION_MAGIC) == InpMagic);
+   return(SelMyPos());
   }
 
 //+------------------------------------------------------------------+

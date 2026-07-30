@@ -13,10 +13,10 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 ## ⏳ DA FARE (lista viva — priorità) — dettagli nelle sezioni sotto
 1. 🔴 **VERIFICARE la ricompilazione sul VPS** → F7 sul PostNews: c'è `InpUseOCO`? Se **manca** → lanciare `scarica_ottimizzati.ps1`. Attiva: fix gestione Hedge + OCO + anti-duplicato. *(È il fix delle perdite del 29/07.)*
 2. 🔴 **Spegnere i morti** sul VPS: DAX_M3, Londra_ORB, DAX Live5m (+v2), ORB, ORB_Fibo.
-3. 🟠 **Completare fix gestione Hedge** sugli EA restanti (MaxMinNotte, SupertrendInvert, GoldenCross/IchiTrend) + **validare in Strategy Tester**.
+3. 🟠 **Validare in Strategy Tester** il fix gestione Hedge appena applicato (SupertrendInvert, GoldenCross+Ott, IchiTrend, MaxMinNotte short) — il codice è FATTO, manca la verifica in tester + il deploy con la ricompilazione (#1).
 4. 🟢 **CAMPAGNA VINCENTI multi-TF** (tutte le strategie → matrice motore×simbolo×TF):
    - In corso: SupRev **H1**. Poi SupRev **M30**. Poi EMA200, GoldenCross, HARSI, SuperWave, SupertrendInvert, PTE, WOL, FiboH4.
-   - Claude: **aggiungere a `scan_market.ps1`** i motori mancanti (SuperWave, SupertrendInvert, PTE, WOL, FiboH4).
+   - ✅ scan_market.ps1 ora **supporta** SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi (comando: `.\scan_market.ps1 -Robot ABTG_WOL` ecc.).
 5. 🟢 **MOTORE APERTURA M5 su tutti gli indici** → `studio_apertura.ps1` (8 indici) → analisi → `ABTG_Aperture_Universal`.
 6. 🟢 **FORWARD 4 SupRev** (Oro/Argento/DAX/Nikkei) → pagella tra ~2-3 mesi.
 7. 🔵 **Chiusura a tempo PostNews** (news+75min): decidere "sempre" o "solo se non a TP", poi aggiungere al codice.
@@ -27,6 +27,14 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 - **28/07:** scan SupRev H4 (48 simboli) analizzato · guardiano creato · studio-apertura EA esteso (MAE/MFE) · launcher validazione tick-reali.
 - **29/07:** FOMC configurato+attivato (buy scattato) · BCE preparata (10/09) · **trovato bug sistemico gestione Hedge** (SelectMyPosition) · fix su 5 EA apertura + OCO su PostNews (pushati sul default) · short Nasdaq riattivato.
 - **30/07:** validazione **tick reali** SupRev (Oro/Argento reggono, DAX/Nikkei marginali, **Dow/ASX scartati**) · 4 preset robusti creati e messi **in forward** · scan **H1** partito · dashboard promemoria riordinata.
+- **30/07 (pom.) — A+B+C+D "a tavolino":**
+  - **A** scan_market.ps1: aggiunti 5 motori (SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi) con griglia direzione+parametro chiave, TF nativo.
+  - **B** fix gestione **Hedge** completato su **SupertrendInvert, GoldenCross, GoldenCross_Ott, IchiTrend, MaxMinNotte_DAX_Short_Ott** (SelPos/SelMyPos per ticket + PositionModify/Close per ticket). 0 op `_Symbol` residue, parentesi ok. *(Da validare in tester + deploy con ricompilazione #1.)*
+  - **C** `abtg_news.csv`: aggiunte date **FOMC Set/Ott/Dic 2026 + Gen 2027** (+ ECB Ott/Dic) → PostNews continua a tradare dopo il 29/07. *(Il match è per GIORNO; l'ora d'azione resta nel preset. NB: verificare le date Fed prima di ogni meeting.)*
+  - **D** refinement da live, **opt-in default OFF** (nessun cambio di comportamento finché non testati):
+    - `ABTG_EMA200` (+Ott): filtro **ADR-distanza** (Paolo) — `InpUseAdrFilter`, opera solo se dist. prezzo-EMA200 ≤ ~0,8× ADR giornaliero.
+    - Motore **apertura** (DAX/Nasdaq/Marco, ×5): filtro **VWAP di sessione** (Emiliano) — `InpUseVwapFilter`, opera solo dal lato giusto della VWAP M15.
+  - ⚠️ **Il CSV `abtg_news.csv` va copiato sul VPS** in `MQL5/Files/` (non passa dalla ricompilazione EA).
 
 ---
 
