@@ -1,0 +1,20 @@
+; ================================================================
+;  APERTURA M5 - DOW (U30USD)  con filtro trend H4
+;  EA da usare: ABTG_Nasdaq_Apertura_US (motore US, symbol-agnostico)
+;  Grafico: U30USD  Timeframe: M5   AutoTrading ON
+;  Studio aperture: Dow = miglior aspettativa (+0.126 R/trade col filtro H4).
+; ----------------------------------------------------------------
+;  Filtro H4 = prezzo vs EMA50 su H4 (EmaFast=1 ~ prezzo, EmaSlow=50).
+;  Sessione/chiusura/range restano ai default US dell'EA (14:30 / 21:45 / candela H1).
+; ================================================================
+InpUseEmaFilter=true
+InpFilterTF=16388
+InpEmaFast=1
+InpEmaSlow=50
+InpUseSupertrend=false
+InpUseCorrelation=false
+InpUseVwapFilter=false
+InpAllowLong=true
+InpAllowShort=true
+InpRiskPercent=1.0
+InpMagic=770221

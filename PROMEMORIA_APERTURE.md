@@ -27,6 +27,13 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 - **28/07:** scan SupRev H4 (48 simboli) analizzato · guardiano creato · studio-apertura EA esteso (MAE/MFE) · launcher validazione tick-reali.
 - **29/07:** FOMC configurato+attivato (buy scattato) · BCE preparata (10/09) · **trovato bug sistemico gestione Hedge** (SelectMyPosition) · fix su 5 EA apertura + OCO su PostNews (pushati sul default) · short Nasdaq riattivato.
 - **30/07:** validazione **tick reali** SupRev (Oro/Argento reggono, DAX/Nikkei marginali, **Dow/ASX scartati**) · 4 preset robusti creati e messi **in forward** · scan **H1** partito · dashboard promemoria riordinata.
+- **30/07 (sera) — STUDIO APERTURE M5 (8 indici) analizzato:**
+  - Metrica: aspettativa R/trade. **Solo indici USA hanno edge; EU (tranne DAX marginale) NO.**
+  - **Dow (U30USD): ⭐ +0,126 R/trade col filtro H4** (+0,074 cieco). **Nasdaq: +0,055 SOLO col filtro H4** (cieco ≈ 0). DAX: marginale (+0,026 cieco, filtro H4 lo PEGGIORA). S&P/IBEX/EuroStoxx/CAC/FTSE: **negativi → scartati** (evitati 5 EA perdenti).
+  - **Filtro H4 = prezzo vs EMA50 su H4** (conferma live Emiliano: opera a favore del trend maggiore). Aiuta gli USA, danneggia EU/DAX.
+  - MAE/MFE: vincitori ritracciano ~0,4R (max ~1R), corrono ~2R → gestione attuale (SL=range, parziale 1R+BE, TP 2R) **gia' allineata**. Leva = direzione/filtro/simbolo, non SL/BE.
+  - **FATTO preset** (M5, EA `ABTG_Nasdaq_Apertura_US` symbol-agnostico): `ABTG_Apertura_Dow_U30_H4.set` (magic 770221) e `ABTG_Apertura_Nasdaq_US_H4.set` (770201). Filtro H4 ON, risk 1%.
+  - ⚠️ **DA CONFERMARE col backtest dell'EA reale**: lo studio usa TP fisso 2R; l'EA reale ha parziale+BE+trailing → validare in tester (OHLC poi tick reali) prima del live.
 - **30/07 (sera) — SCAN H1 SupRev analizzato + matrice a tick reali:**
   - Scan **H1** (InpTF=16385, 45 simboli) classificato. Vincitori OHLC H1 (PFmed≥1): D30EUR 1,13 · U30USD 1,13(S) · E35EUR 1,01 · NASUSD 1,00.
   - Incrociato con **validazioni a tick reali in archivio** (`risultati_archivio/`): **Nasdaq H1 = ⭐ PFmed 1,40 / DD 1,17% / 100% combo positive** → candidato prop top, diversifica con Oro. Dow→H4 (1,77) meglio che H1. DAX→H4 (1,31) meglio che H1. CAC H4 scarta.
