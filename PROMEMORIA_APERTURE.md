@@ -33,7 +33,8 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
   - **Filtro H4 = prezzo vs EMA50 su H4** (conferma live Emiliano: opera a favore del trend maggiore). Aiuta gli USA, danneggia EU/DAX.
   - MAE/MFE: vincitori ritracciano ~0,4R (max ~1R), corrono ~2R → gestione attuale (SL=range, parziale 1R+BE, TP 2R) **gia' allineata**. Leva = direzione/filtro/simbolo, non SL/BE.
   - **FATTO preset** (M5, EA `ABTG_Nasdaq_Apertura_US` symbol-agnostico): `ABTG_Apertura_Dow_U30_H4.set` (magic 770221) e `ABTG_Apertura_Nasdaq_US_H4.set` (770201). Filtro H4 ON, risk 1%.
-  - ⚠️ **DA CONFERMARE col backtest dell'EA reale**: lo studio usa TP fisso 2R; l'EA reale ha parziale+BE+trailing → validare in tester (OHLC poi tick reali) prima del live.
+  - ✅ **CONFERMATO col motore REALE (OHLC M5, filtro H4, 132 combo):** **Dow PFmed 1,84 (peggiore 1,76!), DD ~5%, 100% pass positivi** → edge solidissimo, la gestione reale MIGLIORA sullo studio. **Nasdaq PFmed 1,11, DD 7-8%** → positivo ma più debole. Script: `conferma_apertura_us.ps1`.
+  - ⏭️ **PROSSIMO:** tick reali `conferma_apertura_us.ps1 -Model 4` (i fill dei breakout sono spread-sensibili) → poi forward. Dow = candidato prop apertura.
 - **30/07 (sera) — SCAN H1 SupRev analizzato + matrice a tick reali:**
   - Scan **H1** (InpTF=16385, 45 simboli) classificato. Vincitori OHLC H1 (PFmed≥1): D30EUR 1,13 · U30USD 1,13(S) · E35EUR 1,01 · NASUSD 1,00.
   - Incrociato con **validazioni a tick reali in archivio** (`risultati_archivio/`): **Nasdaq H1 = ⭐ PFmed 1,40 / DD 1,17% / 100% combo positive** → candidato prop top, diversifica con Oro. Dow→H4 (1,77) meglio che H1. DAX→H4 (1,31) meglio che H1. CAC H4 scarta.
