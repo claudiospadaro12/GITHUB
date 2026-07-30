@@ -27,6 +27,13 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 - **28/07:** scan SupRev H4 (48 simboli) analizzato · guardiano creato · studio-apertura EA esteso (MAE/MFE) · launcher validazione tick-reali.
 - **29/07:** FOMC configurato+attivato (buy scattato) · BCE preparata (10/09) · **trovato bug sistemico gestione Hedge** (SelectMyPosition) · fix su 5 EA apertura + OCO su PostNews (pushati sul default) · short Nasdaq riattivato.
 - **30/07:** validazione **tick reali** SupRev (Oro/Argento reggono, DAX/Nikkei marginali, **Dow/ASX scartati**) · 4 preset robusti creati e messi **in forward** · scan **H1** partito · dashboard promemoria riordinata.
+- **30/07 (sera) — SCAN H1 SupRev analizzato + matrice a tick reali:**
+  - Scan **H1** (InpTF=16385, 45 simboli) classificato. Vincitori OHLC H1 (PFmed≥1): D30EUR 1,13 · U30USD 1,13(S) · E35EUR 1,01 · NASUSD 1,00.
+  - Incrociato con **validazioni a tick reali in archivio** (`risultati_archivio/`): **Nasdaq H1 = ⭐ PFmed 1,40 / DD 1,17% / 100% combo positive** → candidato prop top, diversifica con Oro. Dow→H4 (1,77) meglio che H1. DAX→H4 (1,31) meglio che H1. CAC H4 scarta.
+  - **MATRICE:** Oro/Argento/DAX/Dow → **H4** · **Nasdaq → H1**. Il TF sblocca simboli diversi.
+  - ⚠️ **Dow da RICONFERMARE**: archivio dice H4 buono (1,77) ma il run del 30/07 mattina lo dava scartato → contraddizione da sciogliere.
+  - Da validare a tick reali: **IBEX (E35EUR) H1** (unico vincitore H1 senza RT in archivio).
+  - TODO: preset forward **Nasdaq H1** (5° cavallo).
 - **30/07 (pom.) — A+B+C+D "a tavolino":**
   - **A** scan_market.ps1: aggiunti 5 motori (SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi) con griglia direzione+parametro chiave, TF nativo.
   - **B** fix gestione **Hedge** completato su **SupertrendInvert, GoldenCross, GoldenCross_Ott, IchiTrend, MaxMinNotte_DAX_Short_Ott** (SelPos/SelMyPos per ticket + PositionModify/Close per ticket). 0 op `_Symbol` residue, parentesi ok. *(Da validare in tester + deploy con ricompilazione #1.)*
