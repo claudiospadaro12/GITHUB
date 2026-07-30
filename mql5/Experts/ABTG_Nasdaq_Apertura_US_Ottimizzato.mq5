@@ -196,6 +196,10 @@ input ENUM_TIMEFRAMES InpCorrTF = PERIOD_H1;          // Timeframe correlazione
 input int    InpCorrEmaFast    = 14;                  // EMA veloce indice guida
 input int    InpCorrEmaSlow    = 100;                 // EMA lenta indice guida
 
+input group "=== Filtro VWAP (live Emiliano, opt-in) ==="
+input bool   InpUseVwapFilter = false;                // Opera solo dal lato giusto della VWAP di sessione
+input ENUM_TIMEFRAMES InpVwapTF = PERIOD_M15;         // TF per la VWAP (guida Emiliano: M15)
+
 input group "=== Rischio e gestione ==="
 input double InpRiskPercent    = ABTG_DEF_RISK;       // Rischio per trade in % (piano: max 2%)
 input ENUM_ABTG_SL InpSLMode   = ABTG_SL_RANGE;       // Come calcolo lo stop loss
@@ -725,6 +729,33 @@ double TpTotalR()
   }
 
 //+------------------------------------------------------------------+
+//| Bias VWAP di sessione (live Emiliano): +1 se prezzo sopra VWAP,  |
+//|  -1 se sotto. VWAP ancorata all'inizio del giorno, su InpVwapTF. |
+//+------------------------------------------------------------------+
+int VwapBias()
+  {
+   MqlRates r[]; ArraySetAsSeries(r, true);
+   int copied = CopyRates(_Symbol, InpVwapTF, 0, 300, r);
+   if(copied < 2) return(0);
+   MqlDateTime nowdt; TimeToStruct(TimeCurrent(), nowdt);
+   double pv = 0, vv = 0;
+   for(int i = 1; i < copied; i++)
+     {
+      MqlDateTime bt; TimeToStruct(r[i].time, bt);
+      if(bt.day != nowdt.day || bt.mon != nowdt.mon || bt.year != nowdt.year) break; // solo la sessione odierna
+      double tp = (r[i].high + r[i].low + r[i].close) / 3.0;
+      double vol = (double)r[i].tick_volume;
+      pv += tp * vol; vv += vol;
+     }
+   if(vv <= 0) return(0);
+   double vwap = pv / vv;
+   double px = r[1].close;
+   if(px > vwap) return(+1);
+   if(px < vwap) return(-1);
+   return(0);
+  }
+
+//+------------------------------------------------------------------+
 //| Bias di trend combinato (filtri EMA + Supertrend + correlazione)|
 //|  Ritorna +1 (solo long), -1 (solo short), 0 (entrambi consentiti)|
 //+------------------------------------------------------------------+
@@ -752,6 +783,12 @@ int TrendBias()
      {
       int c = SymbolTrendDir(InpCorrSymbol, InpCorrTF, InpCorrEmaFast, InpCorrEmaSlow);
       if(c != 0) bias = CombineBias(bias, c);
+     }
+
+   if(InpUseVwapFilter)
+     {
+      int v = VwapBias();
+      if(v != 0) bias = CombineBias(bias, v);
      }
 
    return(bias);

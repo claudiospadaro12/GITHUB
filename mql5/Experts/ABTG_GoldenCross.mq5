@@ -364,8 +364,7 @@ void Enter(bool isLong)
 //+------------------------------------------------------------------+
 void ManageOpen()
   {
-   if(!PositionSelect(_Symbol)) return;
-   if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) return;
+   if(!SelMyPos()) return;   // Hedge-safe: seleziona la MIA posizione per ticket
 
    long   type  = PositionGetInteger(POSITION_TYPE);
    bool   isLong= (type==POSITION_TYPE_BUY);
@@ -392,14 +391,14 @@ void ManageOpen()
          if(cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv))
            {
             gPartialDone=true;
-            if(InpBreakeven) gTrade.PositionModify(_Symbol, NormalizePrice(openP), tp);
+            if(InpBreakeven) gTrade.PositionModify(ticket, NormalizePrice(openP), tp);
             Log(StringFormat("parziale %.2f lotti a %.1fR, stop in pari.", cv, InpPartialR));
            }
         }
      }
 
    //--- 2) USCITE da segnale (a barra chiusa)
-   if(IsClosedBarExit(isLong)) { gTrade.PositionClose(_Symbol); Log("uscita da segnale (EMA/HA)."); return; }
+   if(IsClosedBarExit(isLong)) { gTrade.PositionClose(ticket); Log("uscita da segnale (EMA/HA)."); return; }
 
    //--- 3) TRAILING
    if(InpTrailMode!=GC_TR_OFF)
@@ -408,8 +407,8 @@ void ManageOpen()
       if(newSL>0)
         {
          newSL = NormalizePrice(newSL);
-         if(isLong && newSL>sl && newSL>openP) gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
-         if(!isLong && (newSL<sl||sl==0) && newSL<openP) gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
+         if(isLong && newSL>sl && newSL>openP) gTrade.PositionModify(ticket,newSL,PositionGetDouble(POSITION_TP));
+         if(!isLong && (newSL<sl||sl==0) && newSL<openP) gTrade.PositionModify(ticket,newSL,PositionGetDouble(POSITION_TP));
         }
      }
   }
@@ -498,10 +497,19 @@ bool SpreadOK()
    return(SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)<=InpMaxSpread);
   }
 
+bool SelMyPos()   // Hedge-safe: seleziona per ticket la posizione di QUESTO ea (simbolo+magic)
+  {
+   for(int _i=PositionsTotal()-1;_i>=0;_i--)
+     {
+      ulong _tk=PositionGetTicket(_i);
+      if(_tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) return(true);
+     }
+   return(false);
+  }
+
 bool HasOpenPos()
   {
-   if(!PositionSelect(_Symbol)) return(false);
-   return(PositionGetInteger(POSITION_MAGIC)==InpMagic);
+   return(SelMyPos());
   }
 
 bool HasPending()

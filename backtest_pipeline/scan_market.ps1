@@ -6,6 +6,8 @@
 #  Uso (-Robot):
 #    ABTG_MaxMinNotte · ABTG_Nightly · ABTG_HARSI (M5)
 #    ABTG_SupertrendReversal (H4) · ABTG_EMA200 (H4) · ABTG_GoldenCross (H1)
+#    ABTG_SuperWave (H4) · ABTG_SupertrendInvert (H1) · ABTG_PTE (H4)
+#    ABTG_WOL (D1) · ABTG_FiboH4_Multi (H4)
 #  Opzionale -Tf M5/M15/M30/H1/H4/D1: forza il timeframe (es. confronto H1 vs H4).
 #    I risultati vanno in risultati_scan_<EA>_<Tf> (non si sovrascrivono).
 #
@@ -107,7 +109,57 @@ InpAllowLong=0||0||1||1||Y
 InpAllowShort=0||0||1||1||Y
 InpTP_R=1.5||1.5||0.5||3.0||Y
 "@
-} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_SuperWave"){
+  # SuperWave: Supertrend + onda. TF H4. Ottimizza direzione + moltiplicatore Supertrend.
+  $Period="H4"
+  $Inputs=@"
+InpTF=16388||16388||0||16388||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpStMult=3.5||2.5||1.0||4.5||Y
+"@
+} elseif($EA -eq "ABTG_SupertrendInvert"){
+  # Supertrend "inverte" (reversal intraday). TF H1 nativo. Ottimizza direzione + moltiplicatore Supertrend.
+  $Period="H1"
+  $Inputs=@"
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpStMult=3.5||2.5||1.0||4.5||Y
+"@
+} elseif($EA -eq "ABTG_PTE"){
+  # PTE: canali TMA fast/slow su iperestensione. TF H4. Ottimizza direzione + ampiezza canale veloce.
+  $Period="H4"
+  $Inputs=@"
+InpTF=16388||16388||0||16388||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpMultFast=2.0||2.0||1.5||3.0||Y
+"@
+} elseif($EA -eq "ABTG_WOL"){
+  # WOL: Weekly Open Line + Doji del martedi'. TF D1 nativo. Ottimizza direzione + rapporto TP.
+  $Period="D1"
+  $Inputs=@"
+InpTF=16408||16408||0||16408||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpTP_RR=2.0||2.0||1.5||3.0||Y
+"@
+} elseif($EA -eq "ABTG_FiboH4_Multi"){
+  # FiboH4: laddering su ritracciamenti Fibonacci. TF H4. Ottimizza direzione + 1o target (R).
+  $Period="H4"
+  $Inputs=@"
+InpTF=16388||16388||0||16388||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpTP1_R=1.0||1.0||0.5||2.0||Y
+"@
+} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi" -ForegroundColor Red; exit 1 }
 
 # --- -Tf opzionale: forza il timeframe del test e dell'EA, e separa i risultati ---
 $EAtag=$EA

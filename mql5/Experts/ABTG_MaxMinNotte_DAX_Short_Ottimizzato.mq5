@@ -149,7 +149,7 @@ void OnTick()
    if(now.day_of_year!=gDay){ gDay=now.day_of_year; ResetDay(); }
 
    bool newsBlk = InNewsBlackout(TimeCurrent());
-   if(newsBlk && InpNewsFlatten){ CancelPendings(); if(SelPos()) gTrade.PositionClose(_Symbol); }
+   if(newsBlk && InpNewsFlatten){ CancelPendings(); if(SelPos()) gTrade.PositionClose(PositionGetInteger(POSITION_TICKET)); }
 
    int nowMin = now.hour*60+now.min;
    if(nowMin >= InpCloseHour*60+InpCloseMin){ EndOfDay(); return; }
@@ -300,7 +300,7 @@ void ManagePos()
         {
          double cv=NormVol(vol*InpTP1Pct/100.0);
          if(cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv))
-           { gPart1=true; if(InpBreakeven) gTrade.PositionModify(_Symbol,NormalizePrice(openP),tp);
+           { gPart1=true; if(InpBreakeven) gTrade.PositionModify(ticket,NormalizePrice(openP),tp);
              Log("1o target (1R): parziale + stop in pari."); }
         }
      }
@@ -322,8 +322,8 @@ void ManagePos()
       double e[1];
       if(CopyBuffer(hEma200,0,0,1,e)==1)
         {
-         if(isLong && e[0]>openP && bid>=e[0]) { gTrade.PositionClose(_Symbol); Log("3o target EMA200: chiuso."); return; }
-         if(!isLong && e[0]<openP && ask<=e[0]){ gTrade.PositionClose(_Symbol); Log("3o target EMA200: chiuso."); return; }
+         if(isLong && e[0]>openP && bid>=e[0]) { gTrade.PositionClose(ticket); Log("3o target EMA200: chiuso."); return; }
+         if(!isLong && e[0]<openP && ask<=e[0]){ gTrade.PositionClose(ticket); Log("3o target EMA200: chiuso."); return; }
         }
      }
    //--- TRAILING su ATR
@@ -332,8 +332,8 @@ void ManagePos()
       double a=AtrVal();
       if(a>0)
         {
-         if(isLong){ double n=NormalizePrice(bid-a*InpTrailAtrMult); if(n>sl && n>openP) gTrade.PositionModify(_Symbol,n,PositionGetDouble(POSITION_TP)); }
-         else      { double n=NormalizePrice(ask+a*InpTrailAtrMult); if((n<sl||sl==0)&&n<openP) gTrade.PositionModify(_Symbol,n,PositionGetDouble(POSITION_TP)); }
+         if(isLong){ double n=NormalizePrice(bid-a*InpTrailAtrMult); if(n>sl && n>openP) gTrade.PositionModify(ticket,n,PositionGetDouble(POSITION_TP)); }
+         else      { double n=NormalizePrice(ask+a*InpTrailAtrMult); if((n<sl||sl==0)&&n<openP) gTrade.PositionModify(ticket,n,PositionGetDouble(POSITION_TP)); }
         }
      }
   }
@@ -358,7 +358,7 @@ void CancelPendings()
 void EndOfDay()
   {
    CancelPendings();
-   if(InpCloseAtEnd && SelPos()){ gTrade.PositionClose(_Symbol); Log("fine finestra: posizione chiusa."); }
+   if(InpCloseAtEnd && SelPos()){ gTrade.PositionClose(PositionGetInteger(POSITION_TICKET)); Log("fine finestra: posizione chiusa."); }
    gPhase=MMP_DONE;
   }
 
@@ -425,7 +425,7 @@ double NormVol(double v)
 
 bool SpreadOK(){ if(InpMaxSpread<=0) return(true); return(SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)<=InpMaxSpread); }
 
-bool SelPos(){ if(!PositionSelect(_Symbol)) return(false); return(PositionGetInteger(POSITION_MAGIC)==InpMagic); }
+bool SelPos(){ for(int _i=PositionsTotal()-1;_i>=0;_i--){ ulong _tk=PositionGetTicket(_i); if(_tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) return(true); } return(false); }
 
 //==================================================================
 //  FILTRO NOTIZIE (CSV in MQL5/Files)

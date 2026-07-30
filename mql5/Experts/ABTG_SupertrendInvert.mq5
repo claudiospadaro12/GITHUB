@@ -170,8 +170,9 @@ void OnNewBar(MqlDateTime &now)
    if(SelPos())
      {
       long ptype=PositionGetInteger(POSITION_TYPE);
+      ulong ptk=PositionGetInteger(POSITION_TICKET);
       if(InpExitOnOpposite && ((ptype==POSITION_TYPE_BUY && invShort)||(ptype==POSITION_TYPE_SELL && invLong)))
-        { gTrade.PositionClose(_Symbol); Log("segnale opposto: uscita runner."); }
+        { gTrade.PositionClose(ptk); Log("segnale opposto: uscita runner."); }
      }
 
    if(!(invLong||invShort)) return;           // niente inversione = niente da fare
@@ -298,7 +299,7 @@ void ManagePosition()
            {
             double cv=NormVol(vol*InpTP1Pct/100.0);
             if(cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv))
-              { gPart1=true; if(InpBreakeven) gTrade.PositionModify(_Symbol,NormalizePrice(openP),PositionGetDouble(POSITION_TP));
+              { gPart1=true; if(InpBreakeven) gTrade.PositionModify(ticket,NormalizePrice(openP),PositionGetDouble(POSITION_TP));
                 Log("1o target (ATR): parziale 50% + stop in pari."); }
            }
         }
@@ -312,8 +313,8 @@ void ManagePosition()
         {
          double newSL=NormalizePrice(line[1]);
          double sl=PositionGetDouble(POSITION_SL);
-         if(isLong && newSL>sl && newSL<bid) gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
-         if(!isLong && (newSL<sl||sl==0) && newSL>ask) gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
+         if(isLong && newSL>sl && newSL<bid) gTrade.PositionModify(ticket,newSL,PositionGetDouble(POSITION_TP));
+         if(!isLong && (newSL<sl||sl==0) && newSL>ask) gTrade.PositionModify(ticket,newSL,PositionGetDouble(POSITION_TP));
         }
      }
   }
@@ -396,7 +397,7 @@ double NormVol(double v)
   }
 
 bool SpreadOK(){ if(InpMaxSpread<=0) return(true); return(SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)<=InpMaxSpread); }
-bool SelPos(){ if(!PositionSelect(_Symbol)) return(false); return(PositionGetInteger(POSITION_MAGIC)==InpMagic); }
+bool SelPos(){ for(int _i=PositionsTotal()-1;_i>=0;_i--){ ulong _tk=PositionGetTicket(_i); if(_tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) return(true); } return(false); }
 
 int CountPositions()
   {

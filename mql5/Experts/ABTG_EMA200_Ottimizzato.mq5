@@ -45,6 +45,12 @@ input bool   InpUseEma14Bias = true;       // richiedi EMA14 dallo stesso lato (
 input bool   InpAllowLong  = true;
 input bool   InpAllowShort = true;
 
+input group "=== Filtro ADR-distanza (live Paolo, opt-in) ==="
+input bool   InpUseAdrFilter = false; // opera solo se la dist. prezzo-EMA200 e' 'raggiungibile' vs ADR giornaliero
+input int    InpAdrDays      = 50;    // giorni per l'ADR (average daily range)
+input double InpAdrDistMin   = 0.0;   // dist. minima in frazioni di ADR (0 = nessun minimo)
+input double InpAdrDistMax   = 0.8;   // dist. massima in frazioni di ADR (guida Paolo ~0,8x ADR)
+
 input group "=== Ordini pendenti (limite) ==="
 input double InpOrder1Atr   = 0.05; // 1o ordine: verso il prezzo, oltre la EMA200 di N*ATR (guida ~5 pip)
 input double InpOrder2Atr   = 0.60; // 2o ordine: oltre la EMA200 (overshoot) di N*ATR (guida ~15 pip)
@@ -137,6 +143,17 @@ void OnTick()
 double EmaVal(int handle){ double e[1]; if(CopyBuffer(handle,0,1,1,e)!=1) return(0); return(e[0]); }
 double AtrVal(){ double a[1]; if(CopyBuffer(hAtr,0,1,1,a)!=1) return(0); return(a[0]); }
 
+//--- ADR: media del range giornaliero (high-low) sugli ultimi N giorni (live Paolo)
+double AdrValue()
+  {
+   int n=InpAdrDays; if(n<1) n=1;
+   double h[],l[];
+   if(CopyHigh(_Symbol,PERIOD_D1,1,n,h)<n) return(0);
+   if(CopyLow(_Symbol,PERIOD_D1,1,n,l)<n) return(0);
+   double s=0; for(int i=0;i<n;i++) s+=(h[i]-l[i]);
+   return(s/n);
+  }
+
 void OnNewBar()
   {
    if(HasPosition() || HasPending()) return;         // gia' impegnati
@@ -149,6 +166,11 @@ void OnNewBar()
    double close1=iClose(_Symbol,InpTF,1);
    double dist=MathAbs(close1-ema);
    if(dist < InpMinDistAtr*atr || dist > InpMaxDistAtr*atr) return; // prezzo nella fascia utile
+   if(InpUseAdrFilter)                                              // filtro ADR-distanza (live Paolo)
+     {
+      double adr=AdrValue();
+      if(adr>0 && (dist < InpAdrDistMin*adr || dist > InpAdrDistMax*adr)) return;
+     }
 
    bool up=(close1>ema);      // prezzo sopra EMA200 -> rimbalzo LONG; sotto -> SHORT
    if(up && !InpAllowLong) return;
