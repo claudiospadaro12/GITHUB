@@ -150,6 +150,22 @@ powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.
 - **DA FARE (valore vero):** analizzatore che incrocia gli **snapshot** con lo **statement** → **mappa regime × EA**
   (quale EA vince/perde in quale regime). Si costruisce quando Claudio manda gli statement.
 
+## 🏁 CAMPAGNA "TROVA I VINCENTI SU TUTTE LE STRATEGIE" (obiettivo Claudio 30/07)
+Passare OGNI strategia nell'imbuto (scan OHLC → tick reali → forward) e costruire la MATRICE MOTORE×SIMBOLO×TF.
+- **Categoria A (motori universali → scan market-wide 48 simboli):**
+  - Fatti: MaxMinNotte (EURUSD), Nightly (EURUSD), SupertrendReversal (H4 fatto → tick reali fatto; H1 in corso).
+  - Coda: EMA200 (H4), GoldenCross (H1), HARSI (M5), poi SuperWave, SupertrendInvert, PTE, WOL, FiboH4.
+  - `scan_market.ps1` supporta gia': MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross.
+    **DA AGGIUNGERE** al comando: SuperWave, SupertrendInvert, PTE, WOL, FiboH4.
+- **Categoria B (motori di contesto → studio mirato, NON scan cieco):**
+  - Aperture DAX/Nasdaq/Marco → progetto motore apertura M5 (`studio_apertura.ps1`).
+  - PostNews → eventi (FOMC/BCE). ORB/GapFill → studio apertura.
+- **MULTI-TF (richiesta Claudio 30/07):** per ogni motore scan OHLC su piu' TF (con `-Tf`), scegliendo i TF SENSATI per quel motore:
+  - Trend/reversal (SupRev, SupertrendInvert, EMA200, GoldenCross, SuperWave, PTE, WOL, FiboH4): **H4, H1, M30**.
+  - Scalp/intraday (HARSI, MaxMinNotte, Nightly, ORB): **M30, M15, M5**.
+  - Claude sceglie il miglior TF×simbolo dalla matrice; i vincitori vanno a tick reali al LORO TF migliore.
+- **Claude mantiene la MATRICE** (PF mediano OHLC + PF tick-reali, per TF) man mano che arrivano i CSV.
+
 ## 🗒️ ARCHIVIO — COSA HA FATTO CLAUDIO (con date)
 > Registro di ciò che Claudio conferma di aver eseguito lui. (Claudio dimentica → segnare SEMPRE.)
 - **29/07:** aggiornato `abtg_news.csv` sul VPS con la data FOMC. FOMC EA attivato (EUR/USD M5) → il buy è scattato, chiuso in profitto/in corso.
