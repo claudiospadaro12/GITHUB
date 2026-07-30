@@ -1,12 +1,34 @@
 # STATO PROGETTO — memoria scritta (branch claude/ea-market-openings-d79m8l)
 
 > **Da incollare in una chat nuova:** *"Leggi `PROMEMORIA_APERTURE.md` nel branch `claude/ea-market-openings-d79m8l` e riprendi da lì."*
-> Ultimo aggiornamento: **2026-07-28**.
+> Ultimo aggiornamento: **2026-07-30**.
 
 ## 🎯 OBIETTIVO DI CLAUDIO
 Avere **uno o più EA da portare in una prop firm**. Capire: (1) si possono portare EA in prop? (2) **quanti** contemporaneamente?
 Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 > ⚠️ Claudio lavora tutto il giorno e **non può stare davanti ai grafici** → i **sistemi automatici** e questa **memoria scritta** sono fondamentali. Segnare SEMPRE tutto.
+
+---
+
+## ⏳ DA FARE (lista viva — priorità) — dettagli nelle sezioni sotto
+1. 🔴 **VERIFICARE la ricompilazione sul VPS** → F7 sul PostNews: c'è `InpUseOCO`? Se **manca** → lanciare `scarica_ottimizzati.ps1`. Attiva: fix gestione Hedge + OCO + anti-duplicato. *(È il fix delle perdite del 29/07.)*
+2. 🔴 **Spegnere i morti** sul VPS: DAX_M3, Londra_ORB, DAX Live5m (+v2), ORB, ORB_Fibo.
+3. 🟠 **Completare fix gestione Hedge** sugli EA restanti (MaxMinNotte, SupertrendInvert, GoldenCross/IchiTrend) + **validare in Strategy Tester**.
+4. 🟢 **CAMPAGNA VINCENTI multi-TF** (tutte le strategie → matrice motore×simbolo×TF):
+   - In corso: SupRev **H1**. Poi SupRev **M30**. Poi EMA200, GoldenCross, HARSI, SuperWave, SupertrendInvert, PTE, WOL, FiboH4.
+   - Claude: **aggiungere a `scan_market.ps1`** i motori mancanti (SuperWave, SupertrendInvert, PTE, WOL, FiboH4).
+5. 🟢 **MOTORE APERTURA M5 su tutti gli indici** → `studio_apertura.ps1` (8 indici) → analisi → `ABTG_Aperture_Universal`.
+6. 🟢 **FORWARD 4 SupRev** (Oro/Argento/DAX/Nikkei) → pagella tra ~2-3 mesi.
+7. 🔵 **Chiusura a tempo PostNews** (news+75min): decidere "sempre" o "solo se non a TP", poi aggiungere al codice.
+8. 🔵 **DRY-RUN PROP** su demo 109k + guardiano (dopo il forward). Scegliere la prop firm.
+9. 🔵 **Analizzatore regime × EA** (incrocia snapshot giornalieri + statement).
+
+## ✅ FATTO (archivio sintetico)
+- **28/07:** scan SupRev H4 (48 simboli) analizzato · guardiano creato · studio-apertura EA esteso (MAE/MFE) · launcher validazione tick-reali.
+- **29/07:** FOMC configurato+attivato (buy scattato) · BCE preparata (10/09) · **trovato bug sistemico gestione Hedge** (SelectMyPosition) · fix su 5 EA apertura + OCO su PostNews (pushati sul default) · short Nasdaq riattivato.
+- **30/07:** validazione **tick reali** SupRev (Oro/Argento reggono, DAX/Nikkei marginali, **Dow/ASX scartati**) · 4 preset robusti creati e messi **in forward** · scan **H1** partito · dashboard promemoria riordinata.
+
+---
 
 ## ⏰ REGOLA FISSA — fuso BCM
 **Server BCM = ora italiana − 1.** Negli EA/preset gli orari vanno in ORA SERVER.
