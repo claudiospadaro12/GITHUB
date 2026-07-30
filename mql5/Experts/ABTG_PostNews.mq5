@@ -44,10 +44,11 @@ input int    InpNewsShiftMinutes = 0;
 
 input group "=== Ordini pendenti ==="
 input double InpBuyOffsetPips  = 3.0;  // BUY STOP = max + 3 pip
-input double InpSellOffsetPips = 2.0;  // SELL STOP = min - 2 pip
+input double InpSellOffsetPips = 3.0;  // SELL STOP = min - 3 pip (strategia: 3 pip)
 input double InpTPpips         = 50.0; // take profit (pip)
 input double InpSLpips         = 25.0; // stop loss (pip)
 input bool   InpUseOCO         = true; // OCO: al 1o ordine che scatta, cancella l'altra gamba
+input bool   InpCloseAtExpiry  = true; // chiudi la posizione all'orario di scadenza (21:45 IT), come da strategia
 
 input group "=== Trailing (solo ECB) ==="
 input bool   InpUseTrail25     = true; // se +25 pip di profitto, accorcia lo SL
@@ -112,6 +113,7 @@ void OnTick()
 
    OcoCheck();
    ManageTrailing();
+   ExpiryCloseCheck();
    FridayCloseCheck();
 
    datetime t0=iTime(_Symbol,PERIOD_M5,0);
@@ -257,6 +259,48 @@ void ManageTrailing()
   }
 
 //+------------------------------------------------------------------+
+//| Chiude TUTTE le mie posizioni e cancella i miei pendenti         |
+//+------------------------------------------------------------------+
+int CloseAllMine()
+  {
+   int acted=0;
+   for(int i=OrdersTotal()-1;i>=0;i--)
+     {
+      ulong t=OrderGetTicket(i);
+      if(t==0) continue;
+      if(OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic)
+        { if(gTrade.OrderDelete(t)) acted++; }
+     }
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong t=PositionGetTicket(i);
+      if(t==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic)
+        { if(gTrade.PositionClose(t)) acted++; }
+     }
+   return(acted);
+  }
+
+//+------------------------------------------------------------------+
+//| Chiusura a SCADENZA (strategia: tenere fino alle 21:45 IT =      |
+//| 20:45 server, poi chiudere). Chiude SEMPRE la posizione aperta   |
+//| se non e' gia' andata a TP/SL, e cancella i pendenti residui.    |
+//+------------------------------------------------------------------+
+void ExpiryCloseCheck()
+  {
+   if(!InpCloseAtExpiry) return;
+   MqlDateTime now; TimeToStruct(TimeCurrent(),now);
+   int nowMin = now.hour*60+now.min;
+   int expMin = InpExpiryHour*60+InpExpiryMin;
+   // finestra: dall'orario di scadenza fino a fine giornata (evita di
+   // toccare le posizioni prima della scadenza; l'azione e' alle 19:40).
+   if(nowMin < expMin) return;
+   if(CloseAllMine()>0)
+      Log(StringFormat("scadenza %02d:%02d server: chiuse posizioni/pendenti (fine finestra strategia).",
+          InpExpiryHour,InpExpiryMin));
+  }
+
+//+------------------------------------------------------------------+
 //| Chiusura venerdi sera: niente ordini/posizioni nel weekend       |
 //+------------------------------------------------------------------+
 void FridayCloseCheck()
@@ -265,19 +309,7 @@ void FridayCloseCheck()
    MqlDateTime now; TimeToStruct(TimeCurrent(),now);
    if(now.day_of_week!=5) return;                       // 5 = venerdi
    if(now.hour*60+now.min < InpFridayCloseHour*60+InpFridayCloseMin) return;
-   // cancella pendenti e chiudi posizioni del magic
-   for(int i=OrdersTotal()-1;i>=0;i--)
-     {
-      ulong t=OrderGetTicket(i);
-      if(t==0) continue;
-      if(OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic) gTrade.OrderDelete(t);
-     }
-   for(int i=PositionsTotal()-1;i>=0;i--)
-     {
-      ulong t=PositionGetTicket(i);
-      if(t==0) continue;
-      if(PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) gTrade.PositionClose(t);
-     }
+   CloseAllMine();
   }
 
 //==================================================================
