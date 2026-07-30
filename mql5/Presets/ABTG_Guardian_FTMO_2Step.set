@@ -4,11 +4,11 @@
 ;  Regole FTMO 2-Step 2026: -5% giorno / -10% totale STATICO.
 ;  Metti il Guardian su UN grafico qualsiasi (governa tutto il conto).
 ; ----------------------------------------------------------------
-;  InpStartBalance=0  -> cattura in automatico il saldo alla 1a
-;    partenza e lo blocca. Per replicare ESATTAMENTE FTMO 100k:
-;    porta prima il demo a ~100000 (poi lascia 0), oppure imposta 100000.
+;  InpStartBalance=100000 -> replica ESATTA FTMO 100k:
+;    limite giornaliero 5.000, pavimento totale 90.000, target +10.000.
+;    (Apri un demo NUOVO da 100.000 sullo stesso server BCM.)
 ; ================================================================
-InpStartBalance=0
+InpStartBalance=100000
 InpDailyLossPct=5.0
 InpTotalDDPct=10.0
 InpDDMode=0
