@@ -11,17 +11,34 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 ---
 
 ## ⏳ DA FARE (lista viva — priorità) — dettagli nelle sezioni sotto
-1. 🔴 **VERIFICARE la ricompilazione sul VPS** → F7 sul PostNews: c'è `InpUseOCO`? Se **manca** → lanciare `scarica_ottimizzati.ps1`. Attiva: fix gestione Hedge + OCO + anti-duplicato. *(È il fix delle perdite del 29/07.)*
-2. 🔴 **Spegnere i morti** sul VPS: DAX_M3, Londra_ORB, DAX Live5m (+v2), ORB, ORB_Fibo.
-3. 🟠 **Validare in Strategy Tester** il fix gestione Hedge appena applicato (SupertrendInvert, GoldenCross+Ott, IchiTrend, MaxMinNotte short) — il codice è FATTO, manca la verifica in tester + il deploy con la ricompilazione (#1).
-4. 🟢 **CAMPAGNA VINCENTI multi-TF** (tutte le strategie → matrice motore×simbolo×TF):
-   - In corso: SupRev **H1**. Poi SupRev **M30**. Poi EMA200, GoldenCross, HARSI, SuperWave, SupertrendInvert, PTE, WOL, FiboH4.
-   - ✅ scan_market.ps1 ora **supporta** SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi (comando: `.\scan_market.ps1 -Robot ABTG_WOL` ecc.).
-5. 🟢 **MOTORE APERTURA M5 su tutti gli indici** → `studio_apertura.ps1` (8 indici) → analisi → `ABTG_Aperture_Universal`.
-6. 🟢 **FORWARD 4 SupRev** (Oro/Argento/DAX/Nikkei) → pagella tra ~2-3 mesi.
-7. 🔵 **Chiusura a tempo PostNews** (news+75min): decidere "sempre" o "solo se non a TP", poi aggiungere al codice.
-8. 🔵 **DRY-RUN PROP** su demo 109k + guardiano (dopo il forward). Prop scelta: **FTMO 2-Step** (5%/10% statico, target +10%, no limite tempo, EA ok, split 80-90%). Preset guardiano pronto: `ABTG_Guardian_FTMO_2Step.set` (InpStartBalance=0 auto; per replica esatta 100k portare il demo a ~100000). Verificato regole FTMO aggiornate 2026.
-9. 🔵 **Analizzatore regime × EA** (incrocia snapshot giornalieri + statement).
+
+### 🖥️ VPS (quando FLAT: stasera dopo 22:00 IT o weekend)
+1. 🔴 **Ricompilare sul VPS** → `scarica_ottimizzati.ps1` (comando irm|iex del branch default). Attiva: fix gestione Hedge (tutti gli EA) + OCO + anti-duplicato + aggiorna `abtg_news.csv`. *(È il fix delle perdite del 29/07 e dei doppioni DAX.)* Verifica: F7 su un'apertura → deve comparire `InpUseVwapFilter`; su PostNews `InpUseOCO`.
+2. 🔴 **Ri-attaccare il DAX Apertura** (rimosso il 30/07 per fermare i doppioni) su **UN SOLO** grafico D30EUR M5, dopo la ricompilazione.
+3. 🔴 **Spegnere i morti** sul VPS: DAX_M3, Londra_ORB, DAX Live5m (+v2), ORB, ORB_Fibo.
+
+### 💻 PC FISSO — coda backtest (uno alla volta)
+4. ⏭️ **Conferma apertura US a TICK REALI**: `conferma_apertura_us.ps1 -Model 4` (Dow/Nasdaq M5). OHLC già fatto (Dow PF 1,84 / Nasdaq 1,11). Questo è l'ultimo filtro prima del forward apertura.
+5. 🟢 **Validare a tick reali IBEX (E35EUR) H1** (SupRev) — unico vincitore H1 senza RT in archivio: `valida_realtick.ps1 -Symbols E35EUR -Tf H1`.
+6. 🟠 **Riconfermare Dow SupRev H4 a tick reali** — contraddizione: archivio dice buono (PFmed 1,77), run 30/07 mattina lo dava scartato. Sciogliere.
+7. 🟢 **CAMPAGNA multi-TF altre strategie** → matrice motore×simbolo×TF. `scan_market.ps1` ora supporta anche SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi. Poi EMA200, GoldenCross, HARSI su più TF.
+8. 🔵 (Opz) validare a tick reali i forex SupRev H4 promettenti: AUDJPY (short), GBPJPY (long).
+
+### 🛠️ DA COSTRUIRE (Claude, quando arrivano i dati)
+9. 🟢 **Preset forward Nasdaq H1 SupRev** (5° cavallo SupRev) — parametri dal miglior pass.
+10. 🟢 **Preset forward Dow apertura** (dopo conferma tick reali) + decisione su Nasdaq apertura (positivo ma DD 7-8%).
+11. 🟡 **DAX apertura**: NON usa il filtro H4 (lo peggiora: +0,026→−0,017). Al più bias Short (+0,045). È marginale → confermare col motore reale prima di tenerlo sul serio.
+
+### 📈 FORWARD → PROP
+12. 🟢 **FORWARD** in corso: 4 SupRev H4 (Oro/Argento/DAX/Nikkei). Aggiungere Nasdaq H1 + Dow apertura quando pronti. Pagella tra ~2-3 mesi.
+13. 🔵 **Aprire demo NUOVO da 100.000** (stesso server BCM, EUR, leva 1:100, Hedge) — lasciarlo pronto per il dry-run. *(Claudio ha detto che può farlo.)*
+14. 🔵 **DRY-RUN PROP** su demo 100k + guardiano (dopo il forward). Prop: **FTMO 2-Step** (5%/10% statico, target +10%, no limite tempo, EA ok, split 80-90%). Preset pronto: `ABTG_Guardian_FTMO_2Step.set` (InpStartBalance=100000).
+
+### 🔵 MINORI / FUTURO
+15. **Chiusura a tempo PostNews** (news+75min): decidere "sempre" o "solo se non a TP", poi al codice.
+16. **Testare i refinement opt-in** già in codice (default OFF): EMA200 filtro ADR (`InpUseAdrFilter`), apertura filtro VWAP (`InpUseVwapFilter`).
+17. **Altri refinement live** (menu, Claudio sceglie): SupRev filtri MA50/ADX, PTE canali TMA, FiboH4 laddering, WOL, Bollinger squeeze, filtro FVG.
+18. **Analizzatore regime × EA** (incrocia snapshot giornalieri + statement).
 
 ## ✅ FATTO (archivio sintetico)
 - **28/07:** scan SupRev H4 (48 simboli) analizzato · guardiano creato · studio-apertura EA esteso (MAE/MFE) · launcher validazione tick-reali.
