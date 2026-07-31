@@ -86,6 +86,8 @@ input string InpNewsCurrencies = "";
 
 input group "=== Generali ==="
 input string InpComment   = "EMA200";
+input bool   InpFridayClose     = false;  // Chiudi tutto venerdi' prima della chiusura mercato (opt-in)
+input int    InpFridayCloseHour  = 20;     // Ora SERVER del venerdi' oltre cui chiudo (20 server = 21 IT)
 input long   InpMagic     = 771501;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
@@ -124,8 +126,20 @@ void OnDeinit(const int reason)
   }
 
 //+------------------------------------------------------------------+
+//--- Chiusura del venerdi' (opt-in): chiude posizioni e pendenti MIEI per ticket (Hedge-safe)
+bool FridayCloseCheck()
+  {
+   if(!InpFridayClose) return(false);
+   MqlDateTime _t; TimeToStruct(TimeCurrent(),_t);
+   if(_t.day_of_week!=5 || _t.hour<InpFridayCloseHour) return(false);
+   for(int _i=OrdersTotal()-1;_i>=0;_i--){ ulong _o=OrderGetTicket(_i); if(_o>0 && OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic) gTrade.OrderDelete(_o); }
+   for(int _i=PositionsTotal()-1;_i>=0;_i--){ ulong _p=PositionGetTicket(_i); if(_p>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) gTrade.PositionClose(_p); }
+   return(true);
+  }
+
 void OnTick()
   {
+   if(FridayCloseCheck()) return;   // venerdi' oltre l'ora: chiudo e non riapro
    ManageAll();
    CutoffCheck();
 

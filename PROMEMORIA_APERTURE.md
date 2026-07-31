@@ -81,6 +81,11 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
 
 ---
 
+## 🗓️ POLITICA WEEKEND (decisa 31/07)
+- **Swing (SupRev, GoldenCross, EMA200, SuperWave, SupertrendInvert, FiboH4, WOL): APERTI nel weekend** (default). Il backtest 2,5 anni include già gap+swap → DD basso *con* i weekend tenuti. Chiuderli = sistema diverso, peggiore.
+- **Intraday (aperture, HARSI, MaxMinNotte, Live5m): già flat ogni sera** (`InpCloseAtEnd`) → non vedono il weekend.
+- ✅ Aggiunto **opt-in `InpFridayClose` (default OFF)** + `InpFridayCloseHour` (server) su **SupRev, GoldenCross(+Ott), EMA200(+Ott)**: chiude posizioni+pendenti MIEI per ticket (Hedge-safe) il venerdì oltre l'ora. Default OFF = restano aperti come validato. Da estendere a SuperWave/SupertrendInvert/FiboH4/WOL quando entrano in forward.
+
 ## ⏰ REGOLA FISSA — fuso BCM
 **Server BCM = ora italiana − 1.** Negli EA/preset gli orari vanno in ORA SERVER.
 - DAX apre 09:00 IT = **08:00 server** · Nasdaq 15:30 IT = **14:30 server** · FOMC 20:00 IT = 19:00 server.
