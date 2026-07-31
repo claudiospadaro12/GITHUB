@@ -1,126 +1,99 @@
 # =====================================================================
-#  studio_apertura.ps1  --  STUDIO APERTURA (LONG vs SHORT) via PowerShell
-# ---------------------------------------------------------------------
-#  Fa girare l'EA di studio ABTG_Apertura_Study_EA nello Strategy Tester
-#  (UN passaggio, NON ottimizzazione) su DAX (D30EUR) e Nasdaq (NASUSD),
-#  pagando lo slippage realistico. A fine giro trovi i due CSV in
-#  .\risultati_studio\ e il riepilogo (aspettativa in R per LONG/SHORT/
-#  filtro H4) nel giornale del tester.
+#  studio_apertura.ps1  --  FASE A: MISURARE il comportamento delle
+#  aperture su piu' indici, per tarare UN motore unico.
 #
-#  USO:  powershell -ExecutionPolicy Bypass -File studio_apertura.ps1
+#  Lancia ABTG_Apertura_Study_EA (che SIMULA, non manda ordini) su ogni
+#  indice, ognuno alla SUA ora di apertura. L'EA misura per ogni giorno:
+#  ampiezza range, MAE (quanto va contro), MFE (quanto corre a favore),
+#  durata. Da questi numeri decidiamo SL, BE, trailing, dimezza-lotto.
 #
-#  L'UNICA cosa da controllare: le ORE D'APERTURA sul TUO broker (server).
-#  Se sul tuo grafico il DAX apre alle 10:00 e non alle 09:00, cambia
-#  $DaxOpenHour qui sotto. Idem per il Nasdaq.
+#  Va sul PC FISSO (non sul VPS: li' girano gli EA in forward).
+#  MetaTrader dev'essere CHIUSO prima di lanciarlo.
+#
+#  Uso:
+#    powershell -ExecutionPolicy Bypass -File .\studio_apertura.ps1
+#  Ripresa: salta gli indici gia' fatti (CSV gia' presente).
+#
+#  A fine giro: zippa .\risultati_studio_apertura e mandamela.
 # =====================================================================
 param(
-    [int]$DaxOpenHour = 9,   [int]$DaxOpenMin = 0,
-    [int]$NasOpenHour = 15,  [int]$NasOpenMin = 30,
-    [double]$BufferPts = 200, [double]$SlippagePts = 100, [double]$TP_R = 2.0,
-    [string]$FromDate = "2024.01.01", [string]$ToDate = "2026.07.01",
-    [switch]$UseSpare,            # usa il terminale di scorta -V3 (per girare in parallelo alle ottimizzazioni)
-    [string]$TerminalPath = ""    # oppure percorso esplicito a terminal64.exe
+  [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
+)
+$ErrorActionPreference="Stop"
+[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+$EA="ABTG_Apertura_Study_EA"
+$Branch="claude/ea-market-openings-d79m8l"     # dove sta l'EA di studio esteso (MAE/MFE)
+$RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
+
+# --- BUCKET: ogni indice con la SUA ora di apertura (ORA SERVER = IT-1) ---
+#  EU  : apre 09:00 IT = 08:00 server ; chiusura studio 17:30 IT = 16:30 server
+#  USA : apre 15:30 IT = 14:30 server ; chiusura studio 22:00 IT = 21:00 server
+#  ⚠️ Verifica l'apertura sul TUO grafico BCM e correggi qui se serve.
+$Jobs=@(
+  # --- EUROPA: apertura 09:00 IT = 08:00 server, cutoff 17:30 IT = 16:30 server ---
+  @{ Sym="D30EUR"; Nome="DAX";        SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="F40EUR"; Nome="CAC40";      SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="E50EUR"; Nome="EuroStoxx";  SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="100GBP"; Nome="FTSE100";    SH=8;  SM=0;  CH=16; CM=30 },
+  @{ Sym="E35EUR"; Nome="IBEX35";     SH=8;  SM=0;  CH=16; CM=30 },
+  # --- USA: apertura 15:30 IT = 14:30 server, cutoff 22:00 IT = 21:00 server ---
+  @{ Sym="NASUSD"; Nome="Nasdaq";     SH=14; SM=30; CH=21; CM=0  },
+  @{ Sym="U30USD"; Nome="Dow";        SH=14; SM=30; CH=21; CM=0  },
+  @{ Sym="SPXUSD"; Nome="SP500";      SH=14; SM=30; CH=21; CM=0  }
+  # --- ASIA (opzionali): apertura notturna, ora server DA VERIFICARE sul grafico ---
+  # @{ Sym="225JPY"; Nome="Nikkei"; SH=1; SM=0; CH=7; CM=0 },   # Tokyo ~09:00 JST -> ~01:00 server (verifica!)
+  # @{ Sym="200AUD"; Nome="ASX";    SH=1; SM=0; CH=6; CM=0 },   # Sydney ~10:00 AEST -> ~01:00 server (verifica!)
 )
 
-$ErrorActionPreference = "Stop"
-$RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$EAName   = "ABTG_Apertura_Study_EA"
+$Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
+Write-Host "=== STUDIO APERTURA: $($Jobs.Count) indici (passaggio singolo, OHLC) ===" -ForegroundColor Cyan
+New-Item -ItemType Directory -Force -Path (Join-Path $Work "src_v2"),(Join-Path $Work "ini_studio") | Out-Null
 
-Write-Host "=== STUDIO APERTURA (LONG vs SHORT, con slippage) ===" -ForegroundColor Cyan
+# --- scarica l'EA di studio ---
+try{Invoke-WebRequest -Uri "$RawBase/mql5/Experts/$EA.mq5" -OutFile (Join-Path $Work "src_v2\$EA.mq5") -UseBasicParsing; Write-Host "   OK src_v2\$EA.mq5" -ForegroundColor Green}
+catch{Write-Host "   ERRORE download $EA" -ForegroundColor Red; exit 1}
 
-# --- rileva terminale BCM + cartella dati (come run_all) -------------
-$Terminal=""; $MetaEditor=""; $DataFolder=""
-if ($TerminalPath -and (Test-Path $TerminalPath)) {
-    $Terminal=$TerminalPath; $MetaEditor=Join-Path (Split-Path -Parent $TerminalPath) "metaeditor64.exe"
-} else {
-    $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-    if ($UseSpare) {
-        # scorta: preferisci il -V3 (non occupato dalle ottimizzazioni)
-        $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*" } | Select-Object -First 1
-        if (-not $cand) { Write-Host "Terminale -V3 (scorta) non trovato: passa -TerminalPath col percorso giusto." -ForegroundColor Red; exit 1 }
-    } else {
-        $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-        if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-    }
-    if ($cand) { $Terminal=$cand.FullName; $MetaEditor=Join-Path $cand.DirectoryName "metaeditor64.exe" }
+# --- trova terminale/metaeditor/cartella dati (come lo scan) ---
+if(-not $Terminal){
+  $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
+  if($UseSpare){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select -First 1}
+  else{$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select -First 1}
+  if(-not $c){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*"}|Select -First 1}
+  if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
 }
-if ($Terminal) {
-    $instDir=Split-Path -Parent $Terminal
-    $termRoot=Join-Path $env:APPDATA "MetaQuotes\Terminal"
-    if (Test-Path $termRoot) {
-        $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
-            $o=Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir)
-        } | Select-Object -First 1 -ExpandProperty FullName
-    }
+if($Terminal -and -not $DataFolder){
+  $instDir=Split-Path -Parent $Terminal; $termRoot=Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  if(Test-Path $termRoot){$DataFolder=Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue|?{$o=Join-Path $_.FullName "origin.txt";(Test-Path $o)-and((Get-Content $o -Raw).Trim() -ieq $instDir)}|Select -First 1 -ExpandProperty FullName}
 }
-Write-Host ("Terminale : {0}" -f $Terminal)
-Write-Host ("Cartella dati: {0}" -f $DataFolder)
-if (-not $Terminal -or -not (Test-Path $Terminal)) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
-if (-not $DataFolder -or -not (Test-Path $DataFolder)) { Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1 }
+if(-not $DataFolder -or -not (Test-Path $DataFolder)){Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1}
+$MqlExperts=Join-Path $DataFolder "MQL5\Experts"
+# l'EA scrive con FILE_COMMON -> i CSV finiscono in ...\Terminal\Common\Files
+$CommonFiles=Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+$Results=Join-Path $Work "risultati_studio_apertura"; New-Item -ItemType Directory -Force -Path $MqlExperts,$Results,$CommonFiles|Out-Null
+if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $Force){Write-Host "!!! Chiudi MetaTrader prima (0 CSV altrimenti)." -ForegroundColor Red; exit 1}
 
-# --- QUESTO terminale deve essere CHIUSO (altri MT5 possono restare aperti) ---
-# Se stai ottimizzando sul terminale principale, lancia lo studio col -UseSpare:
-# usa il -V3, e qui blocchiamo solo se il -V3 stesso e' in esecuzione.
-$running = @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -ieq $Terminal })
-if ($running.Count -gt 0) {
-    Write-Host "`n!!! Questo terminale ($Terminal) e' APERTO: il test non partirebbe." -ForegroundColor Red
-    Write-Host "    Se qui sopra stanno girando le OTTIMIZZAZIONI, NON chiuderlo:" -ForegroundColor Yellow
-    Write-Host "    rilancia lo studio col terminale di scorta -> aggiungi  -UseSpare" -ForegroundColor Yellow
-    $r = Read-Host "`n    Altrimenti vuoi che chiuda QUESTO terminale adesso? (S/N)"
-    if ($r -match '^[SsYy]') {
-        $running | Stop-Process -Force
-        Start-Sleep -Seconds 3
-        Write-Host "    Terminale chiuso. Proseguo." -ForegroundColor Green
-    } else {
-        Write-Host "    Ok. Usa -UseSpare per girare in parallelo, oppure aspetta la fine e rilancia." -ForegroundColor Yellow
-        exit 1
-    }
-}
+# --- compila ---
+Copy-Item (Join-Path $Work "src_v2\$EA.mq5") -Destination $MqlExperts -Force
+& $MetaEditor "/compile:$(Join-Path $MqlExperts "$EA.mq5")" "/log" | Out-Null
+if(-not (Test-Path (Join-Path $MqlExperts "$EA.ex5"))){Write-Host "ERRORE compilazione $EA" -ForegroundColor Red; exit 1}
+Write-Host "   compilato $EA.ex5" -ForegroundColor Green
 
-$MqlExperts  = Join-Path $DataFolder "MQL5\Experts"
-# Nel tester i file con FILE_COMMON finiscono qui (NON in MQL5\Files):
-$CommonFiles = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
-$Results     = Join-Path $RepoRoot "risultati_studio"
-$IniDir     = Join-Path $RepoRoot "ini_studio"
-New-Item -ItemType Directory -Force -Path $MqlExperts,$Results,$IniDir | Out-Null
-
-# --- trova (o scarica) l'EA di studio, poi compila -------------------
-Write-Host "`n[1/3] Copio e compilo $EAName ..." -ForegroundColor Yellow
-$eaCandidates = @(
-    (Join-Path $RepoRoot "..\mql5\Experts\$EAName.mq5"),
-    (Join-Path $RepoRoot "$EAName.mq5"),
-    (Join-Path (Get-Location) "$EAName.mq5")
-)
-$eaSrc = $eaCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if (-not $eaSrc) {
-    Write-Host "   EA non trovato in locale: lo scarico da GitHub..." -ForegroundColor Yellow
-    try {
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $rawBase = "https://raw.githubusercontent.com/claudiospadaro12/github/claude/creating-agents-SgGpD"
-        $eaSrc = Join-Path $env:TEMP "$EAName.mq5"
-        Invoke-WebRequest "$rawBase/mql5/Experts/$EAName.mq5" -OutFile $eaSrc -UseBasicParsing
-    } catch {
-        Write-Host "   Download fallito: $($_.Exception.Message)" -ForegroundColor Red; exit 1
-    }
-}
-Copy-Item $eaSrc -Destination $MqlExperts -Force
-$src = Join-Path $MqlExperts "$EAName.mq5"
-& $MetaEditor "/compile:$src" "/log" | Out-Null
-$ex5 = [System.IO.Path]::ChangeExtension($src, ".ex5")
-if (-not (Test-Path $ex5)) { Write-Host "   ERRORE compilazione $EAName. Apri MetaEditor e premi F7 per vedere l'errore." -ForegroundColor Red; exit 1 }
-Write-Host "   OK compilato." -ForegroundColor Green
-
-# --- costruisce un .ini a passaggio singolo --------------------------
-function New-StudyIni($sym,$oh,$om) {
-@"
+# --- giro sugli indici ---
+$n=0
+foreach($j in $Jobs){
+  $n++; $sym=$j.Sym
+  $done=Join-Path $Results "Studio_$sym.csv"
+  if(Test-Path $done){Write-Host ("   [{0}/{1}] {2} ({3}): gia' fatto, salto" -f $n,$Jobs.Count,$sym,$j.Nome) -ForegroundColor DarkGray; continue}
+  $iniPath=Join-Path $Work "ini_studio\studio_$sym.ini"
+  @"
 [Tester]
-Expert=$EAName.ex5
+Expert=$EA.ex5
 Symbol=$sym
 Period=M5
 Model=1
 Optimization=0
-FromDate=$FromDate
-ToDate=$ToDate
+FromDate=2024.01.01
+ToDate=2026.06.30
 ForwardMode=0
 Deposit=10000
 Currency=EUR
@@ -128,65 +101,35 @@ Leverage=100
 ExecutionMode=0
 ReplaceReport=1
 ShutdownTerminal=1
-Report=StudyReport_$sym
+Report=Report_Studio_$sym
 
 [TesterInputs]
-InpSessionHour=$oh
-InpSessionMin=$om
+InpSessionHour=$($j.SH)
+InpSessionMin=$($j.SM)
 InpRangeMinutes=15
-InpBufferPts=$BufferPts
-InpSlippagePts=$SlippagePts
-InpTP_R=$TP_R
+InpCutoffHour=$($j.CH)
+InpCutoffMin=$($j.CM)
+InpBufferPts=200
+InpSlippagePts=100
+InpTP_R=2.0
 InpH4EmaPeriod=50
-"@
+"@ | Set-Content -Path $iniPath -Encoding ASCII
+
+  # pulisco eventuali CSV vecchi di questo simbolo in Common\Files
+  $det=Join-Path $CommonFiles "ABTG_Apertura_Study_$sym.csv"
+  $rie=Join-Path $CommonFiles "ABTG_Apertura_Study_${sym}_RIEPILOGO.csv"
+  foreach($f in @($det,$rie)){ if(Test-Path $f){Remove-Item $f -Force} }
+
+  Write-Host ("   [{0}/{1}] {2} ({3})  apertura {4:00}:{5:00} server..." -f $n,$Jobs.Count,$sym,$j.Nome,$j.SH,$j.SM) -ForegroundColor Cyan
+  (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$iniPath`"" -PassThru).WaitForExit()
+
+  if(Test-Path $det){
+    Copy-Item $det -Destination $done -Force
+    if(Test-Path $rie){ Copy-Item $rie -Destination (Join-Path $Results "Studio_${sym}_RIEPILOGO.csv") -Force }
+    Write-Host ("        OK -> Studio_$sym.csv  (+ _RIEPILOGO)") -ForegroundColor Green
+  } else {
+    Write-Host ("        (no CSV: {0} senza storico/nome diverso? verifica) " -f $sym) -ForegroundColor Yellow
+  }
 }
-
-$jobs = @(
-    @{ sym="D30EUR"; oh=$DaxOpenHour; om=$DaxOpenMin; label="DAX" },
-    @{ sym="NASUSD"; oh=$NasOpenHour; om=$NasOpenMin; label="Nasdaq" }
-)
-
-Write-Host "`n[2/3] Eseguo lo studio (1 passaggio per simbolo)..." -ForegroundColor Yellow
-foreach ($j in $jobs) {
-    $iniPath = Join-Path $IniDir ("studio_" + $j.sym + ".ini")
-    New-StudyIni $j.sym $j.oh $j.om | Set-Content -Path $iniPath -Encoding ASCII
-    Write-Host ("   {0} ({1}) apertura {2:00}:{3:00} ..." -f $j.label,$j.sym,$j.oh,$j.om) -ForegroundColor Cyan
-    $proc = Start-Process -FilePath $Terminal -ArgumentList "/config:`"$iniPath`"" -PassThru
-    $proc.WaitForExit()
-    Write-Host "        fatto." -ForegroundColor Green
-}
-
-# --- raccogli i CSV --------------------------------------------------
-Write-Host "`n[3/3] Raccolgo i CSV..." -ForegroundColor Yellow
-$found = 0
-foreach ($j in $jobs) {
-    $csv = Join-Path $CommonFiles ("ABTG_Apertura_Study_" + $j.sym + ".csv")
-    $sum = Join-Path $CommonFiles ("ABTG_Apertura_Study_" + $j.sym + "_RIEPILOGO.csv")
-    if (Test-Path $csv) { Copy-Item $csv -Destination $Results -Force; $found++; Write-Host "   OK  $($j.sym)" -ForegroundColor Green }
-    else { Write-Host "   MANCA il CSV per $($j.sym) (0 trade? ora d'apertura sbagliata?)" -ForegroundColor Red }
-    if (Test-Path $sum) {
-        Copy-Item $sum -Destination $Results -Force
-        Write-Host "   --- RIEPILOGO $($j.sym) ---" -ForegroundColor Cyan
-        Get-Content $sum | ForEach-Object { Write-Host "   $_" }
-    }
-}
-
-if ($found -eq 0) {
-    Write-Host "`n--- DIAGNOSTICA (0 CSV) ---" -ForegroundColor Magenta
-    $markers = Get-ChildItem -Path $CommonFiles -Filter "ABTG_Apertura_Study_*_START.txt" -ErrorAction SilentlyContinue
-    if ($markers.Count -gt 0) {
-        Write-Host "   L'EA E' PARTITO (marker trovati) ma non ha scritto risultati:" -ForegroundColor Yellow
-        Write-Host "   => probabile MANCANZA di storico M5 per il periodo, oppure ora d'apertura sbagliata." -ForegroundColor Yellow
-        Write-Host "   Apri MT5 > grafico D30EUR M5, scorri indietro fino al 2024 per far scaricare lo storico, poi rilancia." -ForegroundColor Yellow
-    } else {
-        Write-Host "   Nessun marker START: l'EA NON e' partito nel tester." -ForegroundColor Yellow
-        Write-Host "   => quasi sempre MT5 era ancora aperto, oppure il simbolo non e' nel tester." -ForegroundColor Yellow
-        Write-Host "   Assicurati che MT5 sia CHIUSO e rilancia." -ForegroundColor Yellow
-    }
-}
-
-Write-Host "`n=== FINITO ($found/2 CSV) ===" -ForegroundColor Cyan
-Write-Host "CSV in: $Results" -ForegroundColor White
-Write-Host "Il RIEPILOGO (LONG vs SHORT, filtro H4) e' nel giornale del tester:" -ForegroundColor White
-Write-Host "  MT5 > scheda 'Strategy Tester' > 'Giornale', oppure $DataFolder\Tester\logs\" -ForegroundColor Gray
-Write-Host "Mandami i 2 CSV (o le righe di riepilogo) e scegliamo i parametri dai dati." -ForegroundColor White
+Write-Host "`n=== FINITO === risultati in $Results" -ForegroundColor Cyan
+Write-Host "Zippa la cartella risultati_studio_apertura e caricamela: analizzo MAE/MFE/ampiezza e ti dico SL, BE, trailing e dimezza-lotto per indice." -ForegroundColor White

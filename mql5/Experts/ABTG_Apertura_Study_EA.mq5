@@ -38,6 +38,13 @@ input int    InpH4EmaPeriod   = 50;     // EMA su H4 per il filtro di trend
 int    gDir[];       // +1 long, -1 short
 double gR[];         // risultato in R
 int    gH4[];        // +1 up, -1 down, 0 ignoto
+//--- METRICHE NUOVE (una per trade, parallele a gDir)
+double gWidth[];     // ampiezza range di apertura (in PUNTI)
+double gMAEr[];      // massima escursione AVVERSA in R (quanto e' andato contro)
+double gMFEr[];      // massima escursione FAVOREVOLE in R (quanto e' corso a favore)
+double gMAEp[];      // MAE in PUNTI
+double gMFEp[];      // MFE in PUNTI
+int    gBarsIn[];    // barre M5 in trade (durata)
 
 //--- stato del giorno corrente
 int      gDayKey     = -1;
@@ -49,6 +56,12 @@ double   gHi, gLo, gBuy, gSell;
 int      gTradeDir;
 double   gEntry, gSL, gTP;
 int      gH4trend;
+//--- stato del trade corrente (per MAE/MFE/ampiezza/durata)
+double   gCurWidthPts = 0;  // ampiezza range del giorno, in PUNTI
+double   gCurRiskPrc  = 0;  // rischio (entry->SL) in PREZZO, per convertire in R
+double   gCurMAEprc   = 0;  // running max escursione avversa (PREZZO)
+double   gCurMFEprc   = 0;  // running max escursione favorevole (PREZZO)
+int      gCurBars     = 0;  // running barre in trade
 
 int      gEmaH4 = INVALID_HANDLE;
 datetime gLastBar = 0;
@@ -93,7 +106,30 @@ void RecordTrade(int dir, double rmult, int h4)
   {
    int sz=ArraySize(gDir);
    ArrayResize(gDir,sz+1); ArrayResize(gR,sz+1); ArrayResize(gH4,sz+1);
+   ArrayResize(gWidth,sz+1); ArrayResize(gMAEr,sz+1); ArrayResize(gMFEr,sz+1);
+   ArrayResize(gMAEp,sz+1); ArrayResize(gMFEp,sz+1); ArrayResize(gBarsIn,sz+1);
    gDir[sz]=dir; gR[sz]=rmult; gH4[sz]=h4;
+   gWidth[sz]=gCurWidthPts;                       // gia' in PUNTI
+   // gCurMAEprc / gCurMFEprc sono in PREZZO: converto a PUNTI e a R
+   gMAEp[sz]=gCurMAEprc/_Point; gMFEp[sz]=gCurMFEprc/_Point;
+   gMAEr[sz]=(gCurRiskPrc>0)? gCurMAEprc/gCurRiskPrc : 0;
+   gMFEr[sz]=(gCurRiskPrc>0)? gCurMFEprc/gCurRiskPrc : 0;
+   gBarsIn[sz]=gCurBars;
+  }
+
+//+------------------------------------------------------------------+
+//| Aggiorna MAE/MFE del trade aperto con l'escursione di 1 candela  |
+//| MAE = quanto va CONTRO (verso lo SL); MFE = quanto va A FAVORE.   |
+//| Lavora in PREZZO; la conversione a punti/R avviene in RecordTrade.|
+//+------------------------------------------------------------------+
+void UpdateExcursion(double h, double l)
+  {
+   double adv, fav;
+   if(gTradeDir>0){ adv=gEntry-l;  fav=h-gEntry; }   // LONG: contro=sotto entry, favore=sopra
+   else           { adv=h-gEntry;  fav=gEntry-l; }   // SHORT: contro=sopra entry, favore=sotto
+   if(adv>gCurMAEprc) gCurMAEprc=adv;
+   if(fav>gCurMFEprc) gCurMFEprc=fav;
+   gCurBars++;
   }
 
 //+------------------------------------------------------------------+
@@ -146,6 +182,7 @@ void ProcessBar(datetime t, double o, double h, double l, double c)
      {
       if(gOpened && !gFinished)
         {
+         UpdateExcursion(h,l); // conto anche l'ultima candela
          double risk=MathAbs(gEntry-gSL);
          double r=(gTradeDir>0)?(c-gEntry)/risk:(gEntry-c)/risk;
          RecordTrade(gTradeDir, r, gH4trend);
@@ -169,10 +206,15 @@ void ProcessBar(datetime t, double o, double h, double l, double c)
       if(risk<=0) return;
       gTP=(dir>0)?gEntry+InpTP_R*risk:gEntry-InpTP_R*risk;
       gTradeDir=dir; gOpened=true;
+      // inizializzo le metriche del trade (MAE/MFE/ampiezza/durata)
+      gCurWidthPts=(gHi-gLo)/_Point;
+      gCurRiskPrc =risk;
+      gCurMAEprc  =0; gCurMFEprc=0; gCurBars=0;
       return; // gestisco dalla candela successiva
      }
 
-   // 4) posizione aperta: TP o SL su questa candela?
+   // 4) posizione aperta: aggiorno MAE/MFE, poi TP o SL su questa candela?
+   UpdateExcursion(h,l);
    if(gTradeDir>0)
      {
       if(l<=gSL){ RecordTrade(gTradeDir,-1.0,gH4trend); gFinished=true; return; }
@@ -205,25 +247,36 @@ void OnTick()
 void Aggrega(int fsum, string titolo, int dirFilter, bool h4filter)
   {
    int nTot=0,nWin=0; double sumR=0,best=-1e9,worst=1e9;
+   double sumW=0, sumMFE=0;                 // su TUTTI i trade
+   double sumMAEwin=0, sumMFEwin=0, maeWinMax=0; // solo VINCENTI
    for(int i=0;i<ArraySize(gDir);i++)
      {
       if(dirFilter!=0 && gDir[i]!=dirFilter) continue;
       if(h4filter){ if(gH4[i]==0) continue; if(gDir[i]!=gH4[i]) continue; }
-      nTot++; sumR+=gR[i]; if(gR[i]>0) nWin++;
+      nTot++; sumR+=gR[i]; sumW+=gWidth[i]; sumMFE+=gMFEr[i];
       if(gR[i]>best) best=gR[i]; if(gR[i]<worst) worst=gR[i];
+      if(gR[i]>0)
+        {
+         nWin++; sumMAEwin+=gMAEr[i]; sumMFEwin+=gMFEr[i];
+         if(gMAEr[i]>maeWinMax) maeWinMax=gMAEr[i];
+        }
      }
    if(nTot==0)
      {
       PrintFormat("[%s] nessun trade.",titolo);
-      if(fsum!=INVALID_HANDLE) FileWrite(fsum,titolo,0,"-","-","-","-","-");
+      if(fsum!=INVALID_HANDLE) FileWrite(fsum,titolo,0,"-","-","-","-","-","-","-","-","-","-");
       return;
      }
    double exp=sumR/nTot, win=100.0*nWin/nTot;
-   PrintFormat("[%s]  trade=%d  win%%=%.1f  aspettativa=%.3f R/trade  totale=%.1f R  (best %.1f / worst %.1f)",
-               titolo, nTot, win, exp, sumR, best, worst);
+   double avgW=sumW/nTot, avgMFEall=sumMFE/nTot;
+   double avgMAEwin=(nWin>0)?sumMAEwin/nWin:0, avgMFEwin=(nWin>0)?sumMFEwin/nWin:0;
+   PrintFormat("[%s]  trade=%d  win%%=%.1f  attesa=%.3f R  tot=%.1f R  |  ampiezza=%.0f pt  MAE_vinc=%.2f R (max %.2f)  MFE_vinc=%.2f R",
+               titolo, nTot, win, exp, sumR, avgW, avgMAEwin, maeWinMax, avgMFEwin);
    if(fsum!=INVALID_HANDLE)
       FileWrite(fsum, titolo, nTot, DoubleToString(win,1), DoubleToString(exp,3),
-                DoubleToString(sumR,1), DoubleToString(best,1), DoubleToString(worst,1));
+                DoubleToString(sumR,1), DoubleToString(best,1), DoubleToString(worst,1),
+                DoubleToString(avgW,0), DoubleToString(avgMAEwin,2), DoubleToString(maeWinMax,2),
+                DoubleToString(avgMFEwin,2), DoubleToString(avgMFEall,2));
   }
 
 //+------------------------------------------------------------------+
@@ -234,10 +287,14 @@ void OnDeinit(const int reason)
    int fh=FileOpen("ABTG_Apertura_Study_"+_Symbol+".csv", FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON, ';');
    if(fh!=INVALID_HANDLE)
      {
-      FileWrite(fh,"idx","dir","risultato_R","H4trend");
+      FileWrite(fh,"idx","dir","risultato_R","H4trend","ampiezza_pt",
+                "MAE_pt","MFE_pt","MAE_R","MFE_R","barre");
       for(int i=0;i<ArraySize(gDir);i++)
          FileWrite(fh, i, (gDir[i]>0?"LONG":"SHORT"), DoubleToString(gR[i],2),
-                   (gH4[i]>0?"UP":(gH4[i]<0?"DOWN":"?")));
+                   (gH4[i]>0?"UP":(gH4[i]<0?"DOWN":"?")),
+                   DoubleToString(gWidth[i],0),
+                   DoubleToString(gMAEp[i],0), DoubleToString(gMFEp[i],0),
+                   DoubleToString(gMAEr[i],2), DoubleToString(gMFEr[i],2), gBarsIn[i]);
       FileClose(fh);
      }
    // file di RIEPILOGO (comodo da mandare): una riga per scenario
@@ -247,7 +304,8 @@ void OnDeinit(const int reason)
       FileWrite(fs,"simbolo",_Symbol,"apertura",StringFormat("%02d:%02d",InpSessionHour,InpSessionMin),
                 "buffer",(int)InpBufferPts,"slippage",(int)InpSlippagePts,"TP_R",DoubleToString(InpTP_R,1),
                 "candeleM5_processate",gBars);
-      FileWrite(fs,"scenario","trade","win%","aspettativa_R","totale_R","best_R","worst_R");
+      FileWrite(fs,"scenario","trade","win%","aspettativa_R","totale_R","best_R","worst_R",
+                "ampiezza_pt","MAE_R_vinc","MAE_R_max_vinc","MFE_R_vinc","MFE_R_tutti");
      }
    Print("================ STUDIO APERTURA ", _Symbol, " ================");
    PrintFormat("Parametri: apertura %02d:%02d  range %d min  buffer %.0f pt  slippage %.0f pt  TP %.1f R",
