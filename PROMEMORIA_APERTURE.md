@@ -26,7 +26,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
    ✅ **31/07: i 3 GoldenCross ATTACCATI in forward** (USDCHF/USDCAD/NZDUSD H4). Squadra forward AL COMPLETO e in osservazione.
 4. ⏭️ **Conferma apertura US a TICK REALI**: `conferma_apertura_us.ps1 -Model 4` (Dow/Nasdaq M5). OHLC già fatto (Dow PF 1,84 / Nasdaq 1,11). Questo è l'ultimo filtro prima del forward apertura.
 5. 🟢 **Validare a tick reali IBEX (E35EUR) H1** (SupRev) — unico vincitore H1 senza RT in archivio: `valida_realtick.ps1 -Symbols E35EUR -Tf H1`.
-6. 🟠 **Riconfermare Dow SupRev H4 a tick reali** — contraddizione: archivio dice buono (PFmed 1,77), run 30/07 mattina lo dava scartato. Sciogliere.
+6. ✅ **Dow SupRev H4 — RISOLTO: SCARTATO.** La revalidation pulita (PFmed su 6 indici) dà Dow 0,79 → crolla (illusione OHLC), come ASX 0,78. Il vecchio "1,77" era un run sporco. Dow fuori dai candidati.
 7. 🟢 **CAMPAGNA MATRICE motore×simbolo×TF — dal TF ALTO al BASSO** (uno scan alla volta; OHLC → io classifico → tick reali sui vincitori). `scan_market.ps1 -Robot <EA> -Tf <TF>` supporta: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi.
    - **FASE 1 — TF ALTI (H4 / D1):** SupRev H4✅ · GoldenCross H4✅ · **EMA200 H4** ⬅️ prossimo · SuperWave H4 · FiboH4 H4 · PTE H4 · SupertrendInvert H4 · WOL D1.
    - **FASE 2 — TF MEDI (H1 / M30):** GoldenCross H1 🔄 (in corso) · SupRev H1✅ · EMA200 H1 · SuperWave H1 · SupertrendInvert H1 · SupRev/GC/EMA200 M30 (check).
@@ -65,9 +65,9 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
   - 📌 **VERDETTO apertura:** i SupRev (Oro/Nasdaq H1, PF ~1,4 DD 1,2%) sono MOLTO meglio del Dow apertura (PF 1,16 DD 8%). Apertura = priorità bassa per la prop. Dow apertura: o variante "entra sul RETEST" (limit, non stop — leva di Emiliano contro lo slippage), o forward solo come osservazione. Nasdaq apertura preset da NON usare.
 - **30/07 (sera) — SCAN H1 SupRev analizzato + matrice a tick reali:**
   - Scan **H1** (InpTF=16385, 45 simboli) classificato. Vincitori OHLC H1 (PFmed≥1): D30EUR 1,13 · U30USD 1,13(S) · E35EUR 1,01 · NASUSD 1,00.
-  - Incrociato con **validazioni a tick reali in archivio** (`risultati_archivio/`): **Nasdaq H1 = ⭐ PFmed 1,40 / DD 1,17% / 100% combo positive** → candidato prop top, diversifica con Oro. Dow→H4 (1,77) meglio che H1. DAX→H4 (1,31) meglio che H1. CAC H4 scarta.
+  - Incrociato con **validazioni a tick reali in archivio** (`risultati_archivio/`): **Nasdaq H1 = ⭐ PFmed 1,40 / DD 1,17% / 100% combo positive** → candidato prop top, diversifica con Oro. **Dow SCARTATO** (revalidation pulita: PFmed reale 0,79, illusione OHLC). DAX→H4 marginale (1,05 reale). CAC H4 scarta (overfit).
   - **MATRICE:** Oro/Argento/DAX/Dow → **H4** · **Nasdaq → H1**. Il TF sblocca simboli diversi.
-  - ⚠️ **Dow da RICONFERMARE**: archivio dice H4 buono (1,77) ma il run del 30/07 mattina lo dava scartato → contraddizione da sciogliere.
+  - ✅ **Dow RISOLTO: SCARTATO** — revalidation pulita PFmed 0,79 (illusione OHLC). Il "1,77" era un run sporco.
   - Da validare a tick reali: **IBEX (E35EUR) H1** (unico vincitore H1 senza RT in archivio).
   - TODO: preset forward **Nasdaq H1** (5° cavallo).
 - **30/07 (pom.) — A+B+C+D "a tavolino":**
@@ -99,7 +99,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
    - `scan_market.ps1` — scan di un EA su tutti i simboli (OHLC). Supporta `-Tf` per il timeframe.
    - `valida_realtick.ps1` — **NEW**: valida i vincitori a **tick reali** (Model 4).
    - `studio_apertura.ps1` — **NEW**: studio aperture su indici (misura MAE/MFE/ampiezza).
-4. **Guardiano** (`ABTG_Guardian.mq5`) — **NEW**: fa rispettare le regole prop sul demo 109k (vedi sotto).
+4. **Guardiano** (`ABTG_Guardian.mq5`) — **NEW**: fa rispettare le regole prop sul demo 100k (vedi sotto).
 
 ---
 
@@ -109,7 +109,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
 2. VALIDAZIONE  tick reali sui vincitori ........ ◄── SIAMO QUI (launcher pronto)
 3. FORWARD  girano i validati, pagella reale .... da fare
 4. TOP 3 diversificati (2 indici + 1 metallo) ... da scegliere sui numeri veri
-5. DRY-RUN PROP  demo 109k + guardiano .......... da fare (guardiano pronto)
+5. DRY-RUN PROP  demo 100k + guardiano .......... da fare (guardiano pronto)
 6. VERDETTO  avrebbe passato? quanti EA reggono?  da fare
 ```
 
@@ -126,7 +126,7 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 | 225JPY (Nikkei) | INDICE | 1,17 | 2,44 | 0,17 | LONG |
 | D30EUR (DAX) | INDICE | 1,06 | 2,48 | 2,26 | LONG |
 | 200AUD (ASX) | INDICE | 1,01 | 3,91 | 0,84 | SHORT |
-- **Terna proposta per il Multi:** Oro (metallo) + Dow (indice USA) + Nikkei (indice Giappone) = poco correlati.
+- **Terna proposta per il Multi:** Oro (metallo) + Nikkei (indice Giappone, DD 0,14%) + un 2° indice — **NON Dow** (scartato a tick reali). Obiettivo: strumenti poco correlati.
 - ⚠️ È H4. Il **Nasdaq** qui è debole (PFmed 0,68) ma a **H1** rendeva (PF 1,57) → **il TF cambia tutto**: fare anche scan H1.
 
 ## 📌 PROMEMORIA APERTI (in coda — partono quando il PC fisso è libero)
@@ -143,7 +143,7 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
    - **FASE C — costruire:** UN motore unico `ABTG_Aperture_Universal` (stesso motore delle aperture DAX/Nasdaq) applicato agli altri indici, con la gestione tarata.
    - Idea di Claudio: "creare il TF 5 min col motore delle aperture, con gli altri indici." Verificare gli orari di apertura sul grafico BCM.
 4. **FORWARD** → statement periodico → pagella PF/DD reale per EA.
-5. **DRY-RUN PROP** sul demo 109k + guardiano (dopo il forward).
+5. **DRY-RUN PROP** sul demo 100k + guardiano (dopo il forward).
 6. Poi: EMA200 / GoldenCross scan; scan HARSI.
 
 ## ✅ FATTO IN QUESTA SESSIONE (28/07)
@@ -156,14 +156,14 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 - **Nasdaq apertura nativa:** riattivato lo SHORT (InpAllowShort=true) per testare entrambe le direzioni in forward.
 
 ## 🛡️ GUARDIANO (ABTG_Guardian.mq5) — come si usa
-- **Solo sul demo 109k**, per il dry-run. **MAI sul conto forward** (lì serve il comportamento grezzo).
+- **Solo sul demo 100k**, per il dry-run. **MAI sul conto forward** (lì serve il comportamento grezzo).
 - Modo A (autonomo): al limite giornaliero → chiude tutto + blocca fino a domani; al limite DD totale → chiude tutto + ferma.
-- Parametri: `InpStartBalance=109000`, `InpDailyLossPct`, `InpTotalDDPct`, `InpDDMode` (statico/trailing), `InpDailyResetHour`, `InpAction` (0=enforce, 1=solo allarme).
+- Parametri: `InpStartBalance=100000`, `InpDailyLossPct`, `InpTotalDDPct`, `InpDDMode` (statico/trailing), `InpDailyResetHour`, `InpAction` (0=enforce, 1=solo allarme).
 - Da attaccare a **UN solo grafico** (governa tutto il conto). Pannello di stato a video.
 
 ## 📈 CONTI
 - **Forward:** demo BCM **50503392** (EUR, Hedge, ~6k). Qui girano gli EA, NIENTE guardiano.
-- **Prop sim:** secondo demo portato a **~109.000** per il dry-run futuro (col guardiano).
+- **Prop sim:** secondo demo portato a **~100.000** per il dry-run futuro (col guardiano).
 
 ## 🚨 URGENTE — RICOMPILARE GLI EA (causa perdite evitabili)
 - **29/07:** account da **+804** a negativo. Causa: gli EA apertura hanno BE + dimezza-a-target + trailing
@@ -210,11 +210,11 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 
 ## 🧾 REGOLE PROP (sintesi)
 - Non tutte le prop ammettono EA. Vietati spesso: HFT, martingala/grid, copy-trading, a volte **news trading** (⚠️ la PostNews FOMC/BCE è news trading → a rischio regole).
-- "Quanti EA" = non un numero fisso: **nessun tetto al numero** in genere; il limite vero è la **perdita giornaliera COMBINATA** (< ~5%) + max lotti/consistenza. EA **scorrelati** → puoi tenerne di più. Raccomandazione: **2-4 diversificati**. Il dry-run sul 109k dà la risposta esatta.
+- "Quanti EA" = non un numero fisso: **nessun tetto al numero** in genere; il limite vero è la **perdita giornaliera COMBINATA** (< ~5%) + max lotti/consistenza. EA **scorrelati** → puoi tenerne di più. Raccomandazione: **2-4 diversificati**. Il dry-run sul 100k dà la risposta esatta.
 - **PROP DI RIFERIMENTO scelta (30/07): FTMO** (affidabile, EA ammessi, no time limit, DD statico ~5%/10%, consistenza non stringente). Alternativa per stile lento/swing: **The5ers**.
   - Criteri EA-friendly: DD **statico** (non trailing), no/lieve consistenza, no time limit, hold overnight/weekend ok.
   - ⚠️ Le regole cambiano: **verificare i termini attuali sul sito** prima di pagare. Claudio caricherà il PDF del regolamento quando sceglie.
-  - **DOPO il forward:** tarare il guardiano sui numeri tipo-FTMO → dry-run 109k. (Deciso 30/07: si aspetta il forward, niente pagamenti ora.)
+  - **DOPO il forward:** tarare il guardiano sui numeri tipo-FTMO → dry-run 100k. (Deciso 30/07: si aspetta il forward, niente pagamenti ora.)
 
 ## ⌨️ COMANDI POWERSHELL (PC fisso, MT5 chiuso)
 ```powershell
