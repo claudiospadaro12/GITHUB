@@ -26,7 +26,11 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 4. ⏭️ **Conferma apertura US a TICK REALI**: `conferma_apertura_us.ps1 -Model 4` (Dow/Nasdaq M5). OHLC già fatto (Dow PF 1,84 / Nasdaq 1,11). Questo è l'ultimo filtro prima del forward apertura.
 5. 🟢 **Validare a tick reali IBEX (E35EUR) H1** (SupRev) — unico vincitore H1 senza RT in archivio: `valida_realtick.ps1 -Symbols E35EUR -Tf H1`.
 6. 🟠 **Riconfermare Dow SupRev H4 a tick reali** — contraddizione: archivio dice buono (PFmed 1,77), run 30/07 mattina lo dava scartato. Sciogliere.
-7. 🟢 **CAMPAGNA multi-TF altre strategie** → matrice motore×simbolo×TF. `scan_market.ps1` ora supporta anche SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi. Poi EMA200, GoldenCross, HARSI su più TF.
+7. 🟢 **CAMPAGNA MATRICE motore×simbolo×TF** (uno scan alla volta sul PC). Regola TF: swing/trend (SupRev, GoldenCross, EMA200, SuperWave) → **sweet spot H4+H1, M30 solo check, M15 NO** (sotto H1 lo spread mangia l'edge — vedi apertura M5 crollata a tick reali). Scalping (HARSI) → M5/M15.
+   - **Stato:** SupRev H4✅ H1✅ (M30 da fare) · GoldenCross H4✅ (H1 prossimo, M30 check).
+   - **Round 1:** GoldenCross **H1** → poi SupRev+GoldenCross **M30** (esplorativi).
+   - **Round 2 (OHLC→tick reali):** EMA200 (H4,H1) · SuperWave (H4,H1) · SupertrendInvert (H1,M30) · FiboH4 (H4) · PTE (H4) · WOL (D1) · HARSI (M5/M15).
+   - `scan_market.ps1` supporta: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi. Uso: `-Robot <EA> -Tf <TF>`.
 8. 🔵 (Opz) validare a tick reali i forex SupRev H4 promettenti: AUDJPY (short), GBPJPY (long).
 
 ### 🛠️ DA COSTRUIRE (Claude, quando arrivano i dati)
