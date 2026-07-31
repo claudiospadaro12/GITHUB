@@ -22,6 +22,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
    ✅ **TICK REALI GoldenCross (31/07): REGGE! 2a strategia trovata.** USDCHF PFmed 1,71 (peggiore 1,37, DD 2,6%) ⭐ · USDCAD 1,58 · NZDUSD 1,45 SHORT · XAGUSD 2,06 (overlap SupRev) · CHFJPY 1,07 marginale · EURUSD/EURJPY scartati. DD tutti bassi (2,6-4,9%).
    ✅ **FATTO preset forward GoldenCross** (EA `ABTG_GoldenCross`, H4): `..._FW_USDCHF_H4.set` (770331, BOTH TP2.5 ADX25) · `..._FW_USDCAD_H4.set` (770332, BOTH TP2.5 ADX20) · `..._FW_NZDUSD_H4.set` (770333, SHORT TP1.5 ADX20).
    📌 **SQUADRA FORWARD ora: 5 SupRev + 3 GoldenCross = 8 EA, 2 strategie (reversal metalli/indici + trend forex), poco correlate.**
+   ✅ **31/07: i 3 GoldenCross ATTACCATI in forward** (USDCHF/USDCAD/NZDUSD H4). Squadra forward AL COMPLETO e in osservazione.
 4. ⏭️ **Conferma apertura US a TICK REALI**: `conferma_apertura_us.ps1 -Model 4` (Dow/Nasdaq M5). OHLC già fatto (Dow PF 1,84 / Nasdaq 1,11). Questo è l'ultimo filtro prima del forward apertura.
 5. 🟢 **Validare a tick reali IBEX (E35EUR) H1** (SupRev) — unico vincitore H1 senza RT in archivio: `valida_realtick.ps1 -Symbols E35EUR -Tf H1`.
 6. 🟠 **Riconfermare Dow SupRev H4 a tick reali** — contraddizione: archivio dice buono (PFmed 1,77), run 30/07 mattina lo dava scartato. Sciogliere.
@@ -34,7 +35,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 11. 🟡 **DAX apertura**: NON usa il filtro H4 (lo peggiora: +0,026→−0,017). Al più bias Short (+0,045). È marginale → confermare col motore reale prima di tenerlo sul serio.
 
 ### 📈 FORWARD → PROP
-12. 🟢 **FORWARD** in corso: 4 SupRev H4 (Oro/Argento/DAX/Nikkei). Aggiungere Nasdaq H1 + Dow apertura quando pronti. Pagella tra ~2-3 mesi.
+12. 🟢 **FORWARD in corso — SQUADRA AL COMPLETO (8 EA):** 5 SupRev (Oro/Argento/DAX/Nikkei H4 + Nasdaq H1) + 3 GoldenCross (USDCHF/USDCAD/NZDUSD H4). Ora serve TEMPO: pagella PF/DD reale tra ~2-3 mesi. Claudio manda lo statement periodicamente → Claude archivia e traccia.
 13. 🔵 **Aprire demo NUOVO da 100.000** (stesso server BCM, EUR, leva 1:100, Hedge) — lasciarlo pronto per il dry-run. *(Claudio ha detto che può farlo.)*
 14. 🔵 **DRY-RUN PROP** su demo 100k + guardiano (dopo il forward). Prop: **FTMO 2-Step** (5%/10% statico, target +10%, no limite tempo, EA ok, split 80-90%). Preset pronto: `ABTG_Guardian_FTMO_2Step.set` (InpStartBalance=100000).
 
