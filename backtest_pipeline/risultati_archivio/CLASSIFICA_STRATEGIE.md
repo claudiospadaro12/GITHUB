@@ -8,7 +8,7 @@ Legenda TF migliore: dove la strategia rende di più. ✅ = validato tick reali 
 
 | Strategia | TF migliore | Top simboli (PF OHLC) | Tick reali | Dettaglio |
 |---|---|---|---|---|
-| **SupertrendReversal** | **H4** | CAC 7.37⚠️, Oro 4.15, AUDUSD 4.02, CHFJPY 3.40, GBPJPY 3.27 | ✅ parziale (Oro/DOW/CAC/DAX già `_Ottimizzato`) | `SupertrendReversal/ANALISI_SUPERTRENDREVERSAL.md` |
+| **SupertrendReversal** | **H4** (indici); Nasdaq→H1 | OHLC: CAC 7.37⚠️, Oro 4.15, CHFJPY 3.40 · **Tick reali indici**: Nasdaq H1 (100% combo, DD 1.17)⭐, Dow H4 2.77, DAX H4 1.96 | ✅ indici validati (`TICK_REALI_INDICI_H1vsH4.md`); mancano XAU/CHFJPY/GBPJPY/AUDUSD | `SupertrendReversal/ANALISI_SUPERTRENDREVERSAL.md` + `TICK_REALI_INDICI_H1vsH4.md` |
 | **GoldenCross** | **H1** (ecc. USDCHF→H4) | H1: Oro 2.01, USDJPY 1.97, GBPUSD 1.78 · H4: USDCHF 2.20 | ✅ H4: USDCHF 2.63, XAGUSD 2.58, EURAUD 3.34 | `GoldenCross/ANALISI_GOLDENCROSS.md` |
 
 ## 🔑 Insight cross-strategia (importante)
