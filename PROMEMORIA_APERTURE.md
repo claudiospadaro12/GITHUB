@@ -3,9 +3,10 @@
 > **Da incollare in una chat nuova:** *"Leggi `PROMEMORIA_APERTURE.md` nel branch `claude/ea-market-openings-d79m8l` e riprendi da lì."*
 > Ultimo aggiornamento: **2026-07-30**.
 
-## 🎯 OBIETTIVO DI CLAUDIO
-Avere **uno o più EA da portare in una prop firm**. Capire: (1) si possono portare EA in prop? (2) **quanti** contemporaneamente?
-Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
+## 🎯 OBIETTIVO DI CLAUDIO — DUE LIVELLI
+1. **EA PROP-GRADE** (pochi, anche 1): DD basso + robusti → per la challenge FTMO. Selezione severa.
+2. **EA "conto personale"**: basta che siano **profittevoli** (anche se non da prop) → qui rientrano aperture e TF bassi. Selezione più permissiva.
+Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI gli EA, dal TF alto verso il basso**, e perfezionare anche le aperture (DAX/Nasdaq) e i TF bassi per il conto personale.
 > ⚠️ Claudio lavora tutto il giorno e **non può stare davanti ai grafici** → i **sistemi automatici** e questa **memoria scritta** sono fondamentali. Segnare SEMPRE tutto.
 
 ---
@@ -26,11 +27,10 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 4. ⏭️ **Conferma apertura US a TICK REALI**: `conferma_apertura_us.ps1 -Model 4` (Dow/Nasdaq M5). OHLC già fatto (Dow PF 1,84 / Nasdaq 1,11). Questo è l'ultimo filtro prima del forward apertura.
 5. 🟢 **Validare a tick reali IBEX (E35EUR) H1** (SupRev) — unico vincitore H1 senza RT in archivio: `valida_realtick.ps1 -Symbols E35EUR -Tf H1`.
 6. 🟠 **Riconfermare Dow SupRev H4 a tick reali** — contraddizione: archivio dice buono (PFmed 1,77), run 30/07 mattina lo dava scartato. Sciogliere.
-7. 🟢 **CAMPAGNA MATRICE motore×simbolo×TF** (uno scan alla volta sul PC). Regola TF: swing/trend (SupRev, GoldenCross, EMA200, SuperWave) → **sweet spot H4+H1, M30 solo check, M15 NO** (sotto H1 lo spread mangia l'edge — vedi apertura M5 crollata a tick reali). Scalping (HARSI) → M5/M15.
-   - **Stato:** SupRev H4✅ H1✅ (M30 da fare) · GoldenCross H4✅ (H1 prossimo, M30 check).
-   - **Round 1:** GoldenCross **H1** → poi SupRev+GoldenCross **M30** (esplorativi).
-   - **Round 2 (OHLC→tick reali):** EMA200 (H4,H1) · SuperWave (H4,H1) · SupertrendInvert (H1,M30) · FiboH4 (H4) · PTE (H4) · WOL (D1) · HARSI (M5/M15).
-   - `scan_market.ps1` supporta: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi. Uso: `-Robot <EA> -Tf <TF>`.
+7. 🟢 **CAMPAGNA MATRICE motore×simbolo×TF — dal TF ALTO al BASSO** (uno scan alla volta; OHLC → io classifico → tick reali sui vincitori). `scan_market.ps1 -Robot <EA> -Tf <TF>` supporta: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi.
+   - **FASE 1 — TF ALTI (H4 / D1):** SupRev H4✅ · GoldenCross H4✅ · **EMA200 H4** ⬅️ prossimo · SuperWave H4 · FiboH4 H4 · PTE H4 · SupertrendInvert H4 · WOL D1.
+   - **FASE 2 — TF MEDI (H1 / M30):** GoldenCross H1 🔄 (in corso) · SupRev H1✅ · EMA200 H1 · SuperWave H1 · SupertrendInvert H1 · SupRev/GC/EMA200 M30 (check).
+   - **FASE 3 — TF BASSI (M15 / M5) + perfezionare aperture:** HARSI M5/M15 · **aperture DAX/Nasdaq** (perfezionare, es. variante RETEST) · MaxMinNotte / Live5m sui loro TF. *(Qui i tick reali sono decisivi: sotto H1 lo spread mangia l'edge — apertura M5 crollata da 1,84 a 1,16.)* → più per il **conto personale** che per la prop.
 8. 🔵 (Opz) validare a tick reali i forex SupRev H4 promettenti: AUDJPY (short), GBPJPY (long).
 
 ### 🛠️ DA COSTRUIRE (Claude, quando arrivano i dati)
