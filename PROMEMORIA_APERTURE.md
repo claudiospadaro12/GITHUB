@@ -25,7 +25,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 8. 🔵 (Opz) validare a tick reali i forex SupRev H4 promettenti: AUDJPY (short), GBPJPY (long).
 
 ### 🛠️ DA COSTRUIRE (Claude, quando arrivano i dati)
-9. 🟢 **Preset forward Nasdaq H1 SupRev** (5° cavallo SupRev) — parametri dal miglior pass.
+9. ✅ **FATTO — Preset forward Nasdaq H1 SupRev**: `ABTG_SupertrendReversal_FW_Nasdaq_H1.set` (StMult 3.0, StAtr 10, TP 2.5R, BOTH, magic 770925, risk 1%). Da caricare su NASUSD H1 (EA `ABTG_SupertrendReversal`) → 5° cavallo del forward.
 10. 🟢 **Preset forward Dow apertura** (dopo conferma tick reali) + decisione su Nasdaq apertura (positivo ma DD 7-8%).
 11. 🟡 **DAX apertura**: NON usa il filtro H4 (lo peggiora: +0,026→−0,017). Al più bias Short (+0,045). È marginale → confermare col motore reale prima di tenerlo sul serio.
 
