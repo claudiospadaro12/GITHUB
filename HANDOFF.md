@@ -1,109 +1,58 @@
-# HANDOFF — messaggio di passaggio per una chat nuova
+# HANDOFF — punto d'ingresso per una chat nuova
 
-> **Da incollare in una chat nuova:** *"Leggi `HANDOFF.md`, `PROGETTO_STATO.md` e `RIEPILOGO_COMPLETO.md` nel branch `claude/creating-agents-SgGpD` e riprendi da lì."*
-> Ultimo aggiornamento: **2026-07-27**.
+> **Da incollare in una chat nuova:**
+> *"Leggi `HANDOFF.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `claude/chat-ea-market-openings-zoba2j` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
+>
+> Ultimo aggiornamento: **2026-07-31**. **Branch unico di lavoro: `claude/chat-ea-market-openings-zoba2j`** (qui è consolidato TUTTO: chat aperture + scan nuovi).
 
 ---
+
+## ⚠️ NOTA BRANCH (importante)
+Il lavoro delle chat vecchie viveva su branch diversi (`ea-market-openings-d79m8l`, `creating-agents-SgGpD`). **Il 31/07 è stato consolidato tutto in `claude/chat-ea-market-openings-zoba2j`**: preset forward, Guardian, walkforward, studio aperture, promemoria + tutti gli scan archiviati. Questo è ora **l'unico branch da usare**. Salvare SEMPRE qui (commit + push).
 
 ## Chi sono / contesto
-- Trader retail, conto **DEMO BCM Markets 50503392** (EUR, Hedge). Strumento principale: **ORO**.
-- Sviluppo su **GitHub** repo `claudiospadaro12/GITHUB`, branch di lavoro/default: **`claude/creating-agents-SgGpD`**.
-- Backtest sul PC fisso; gli EA girano in **forward su demo** (VPS/PC).
+- Trader retail, conto **DEMO BCM 50503392** (EUR, Hedge, ~6k). Backtest sul PC fisso; EA in **forward su demo** (VPS/PC).
+- **Doppio obiettivo**: (1) EA **PROP-GRADE** (DD basso, robusti → challenge FTMO); (2) EA **conto personale** (basta siano profittevoli).
+- ⏰ **Fuso BCM = ora italiana − 1**. Orari EA/.ini in ORA SERVER (DAX 08:00, Nasdaq 14:30).
 
-## ⏰ REGOLA FISSA — fuso BCM
-**Server BCM = ora italiana − 1** (in questo periodo). Negli EA/.ini gli orari vanno in **ORA SERVER**:
-- DAX apre 09:00 IT = **08:00 server** · Nasdaq 15:30 IT = **14:30 server**.
-
-## 🔧 REGOLE FISSE — EA
-- Ogni EA è **tutto-in-uno** (.mq5, compila con F7, niente Include).
-- Ogni EA ha **magic univoco** + **InpComment** riconoscibile (anche da cellulare).
-- Gli `_Ottimizzato` girano **in parallelo** ai nativi (magic diversi), mai sostituirli.
-- Backtest a **tick reali** (Model 4), periodo **2024.01.01 → 2026.06.30**, rischio 1%.
+## Metodo (imbuto, una strategia alla volta)
+**scan OHLC su più TF → classifico i migliori → tick reali sui vincitori → forward → walk-forward → dry-run prop.**
+Regola d'oro: conta il **PF a TICK REALI** (l'OHLC sovrastima, vedi CAC 7.37→0.96) e il **DD basso**.
 
 ---
 
-## Stato attuale (cosa gira e cosa abbiamo fatto)
+## 📊 DOVE SONO LE CLASSIFICHE
+- **`backtest_pipeline/risultati_archivio/CLASSIFICHE.md`** ← vista unica (EA + simboli + strategie). **Parti da qui.**
+- `backtest_pipeline/risultati_archivio/CLASSIFICA_STRATEGIE.md` — matrice motori × TF.
+- `backtest_pipeline/CLASSIFICA_PF.md` — i 14 EA `_Ottimizzato` per PF.
+- Per strategia: `risultati_archivio/<Strategia>/ANALISI_*.md` (GoldenCross, SupertrendReversal + TICK_REALI_INDICI).
 
-### 3 sistemi automatici
-1. **Report mercato giornaliero** (email 07:00, GitHub Actions). Ora con sezioni **Banche Centrali** (calendario settimanale) + **COT** (posizionamento CFTC). Fallback se manca la chiave AI.
-2. **Report settimanale** (sabato): analisi trade per EA/simbolo + verifica bias (legge `STATEMENT_FILE`).
-3. **Pipeline backtest** (`backtest_pipeline/`): `run_all.ps1` ottimizza tutti gli EA a tick reali; `scan_market.ps1` scansiona un EA su tutti i simboli in OHLC.
+## 🟢 SQUADRA FORWARD (8 EA, validati tick reali, in demo dal 30/07)
+5 SupRev: **Oro** (770921) · **Argento** (770922) · **DAX** (770923) · **Nikkei** (770924) H4 + **Nasdaq H1** (770925).
+3 GoldenCross H4: **USDCHF** (770331) · **USDCAD** (770332) · **NZDUSD** (770333).
+→ Serve TEMPO: pagella PF/DD reale tra ~2-3 mesi. Claudio manda statement → Claude archivia/traccia.
+**Scartati** (crollo tick reali): SupRev Dow, ASX, CAC.
 
-### Portafoglio FORWARD validato (14 `_Ottimizzato`, real-tick)
-Top: SupRev_Multi Oro H4 (PF 3.17) · SupRev_DOW_H4 (2.77) · SupRev Oro H4 (2.74) · MaxMinNotte_DAX_Short M15 (2.05) · SupRev_DAX_H4 (1.96) · EMA200 Oro (1.92) · SupRev_CAC_H4 (1.79) · GoldenCross Oro (1.58) · SupRev_NAS_H1 (1.57, DD 1.2%) · SuperWave_DOW_H1 (1.52) · DAX_Apertura_EU LONG (1.49) · SupRev_DAX_H1 (1.45) · SuperWave_DAX_H4 (1.28) · SupRev_DOW_H1 (1.20, DD 10%).
-Dettaglio in `backtest_pipeline/RIEPILOGO_FORWARD.md` e `CLASSIFICA_PF.md`.
+## 🎯 PROP — piano
+- Prop scelta: **FTMO 2-Step** (−5% giorno / −10% totale statico, target +10%, no time limit, EA ok). Alt: The5ers.
+- **Guardiano pronto**: `ABTG_Guardian.mq5` + `ABTG_Guardian_FTMO_2Step.set` (InpStartBalance=100000). Solo sul demo dry-run, MAI sul forward.
+- Sequenza: forward → walk-forward IS/OOS (`walkforward.ps1`) → aprire demo 100k → dry-run col guardiano → valutare. **Deciso 30/07: aspettare il forward, niente pagamenti ora.**
+- ⚠️ PostNews FOMC/BCE = news trading → a rischio regole prop.
 
-### Fatto in questa sessione
-- **Scan MinMax** (48 simboli): migliore = **EURUSD** → preset `ABTG_MaxMinNotte_EURUSD.set`.
-- **Scan Nightly** (48 simboli): migliore = **EURUSD** → preset `ABTG_Nightly_EURUSD.set`. (Nightly esclude JPY/AUD/NZD di default.)
-- Nuovo EA **HARSI** (`ABTG_HARSI.mq5`, magic 772001, scalping contro-trend, EURUSD M5) + preset. Scheletro meccanico; SL/TP da ottimizzare; **non validato**.
-- Nuovo EA **SuperFilter** (`ABTG_SuperFilter.mq5`, magic 771801) — parte meccanica; i segnali proprietari (Filter Indicator, S&D) NON inclusi.
-- `scan_market.ps1` ora supporta **-Robot ABTG_HARSI** (TF M5).
-- **Fix collisioni magic**: DAX_M3 **770501→770502**, Apertura_Marco **770301→770311** (keeper: SuperWave 770501, GoldenCross 770301). *Nel codice fatto; da riapplicare a mano sui 2 grafici quando flat.*
-- **Commenti**: aggiunto `InpComment` a 22 EA (nativi+ottimizzati) mantenendo direzione/gamba. Gli 8 aperture/live avevano già commento via `ABTG_DEF_NAME`.
-- `scarica_ottimizzati.ps1`: ora scarica/compila **tutti i 40 EA**.
-- Agente: nuovo modulo `agent/cot.py` + calendario CB in `agent/macro_calendar.py` + sezioni in `agent/report.py`.
-- Artefatto **Classifica prop** pubblicato (PF/DD/idoneità).
-- **Fix duplicati aperture (28/07):** aggiunta GUARDIA ANTI-DUPLICATO agli 8 EA famiglia aperture (Apertura_EU/Ott, Nasdaq_Apertura/Ott, Live5m/v2, Nasdaq_Live5m, Marco): a ogni ricompilazione/reload NON ripiazzano se hanno gia' un pendente/posizione del loro magic. Causa dei 3 buy-stop doppi su D30EUR. **Va ricompilato per applicarlo.**
-
----
-
-## 🧭 ROADMAP / PIANO DI LAVORO (obiettivo di Claudio, 28/07)
-Obiettivo: **trovare il motore giusto per ogni simbolo** e rendere gli EA il più profittevoli possibile, poi prepararli per le **prop**. Metodo a imbuto, con calma e sui numeri.
-1. **SCOPERTA** — scan OHLC di ogni motore × 48 simboli → costruire la **matrice MOTORE × SIMBOLO** (quale motore ha edge su quale strumento). *(in corso: SupertrendReversal per primo)*
-2. **VALIDAZIONE** — backtest a **tick reali** solo sui vincitori dello scan.
-3. **FORWARD** — girano i validati, si raccoglie la **pagella reale** per EA (PF/DD forward).
-4. **PROP-HARDENING** — correggere il **R/R** (vincite piccole vs perdite grosse), aggiungere il **guardiano** (daily-stop), poi **dry-run su demo 100k** con le regole della prop.
-
-Man mano che arrivano i CSV degli scan, Claude aggiorna la matrice motore×simbolo.
-
-## 📌 PROMEMORIA APERTI (9)
-1. **Scan OHLC esteso** → SupertrendReversal, EMA200, GoldenCross su tutti i simboli → poi tick-real sui vincitori. **[PRONTO]** `scan_market.ps1` ora supporta `-Robot ABTG_SupertrendReversal` (H4), `ABTG_EMA200` (H4), `ABTG_GoldenCross` (H1). Da lanciare + mandarmi i CSV.
-2. **Forward test** → statement periodico → pagella forward (PF/DD reale per EA); riempire colonna "PF forward" in `CLASSIFICA_PF.md`.
-3. **Short M5 DAX** → decidere long-only vs filtro-trend, col backtest (i nativi apertura Apertura_EU/Live5m/Marco hanno InpAllowShort=true; l'ottimizzato è LONG-only).
-4. **Guardiano di portafoglio** (`ABTG_Guardian`, da creare): daily-stop + stop DD totale + limite esposizione. Modo A (autonomo) o B (interruttore condiviso). Serve per le prop.
-5. **Applicare i magic** → ricaricare DAX_M3 (770502) e Apertura_Marco (770311) sui grafici.
-6. **Ricompilare per i commenti** → lanciare `scarica_ottimizzati.ps1`.
-7. **Scan HARSI** → `-Robot ABTG_HARSI` (script pronto).
-8. **DRY-RUN PROP** (idea del 27/07, dopo forward) → vedi sezione dedicata sotto.
-9. **Rapporto Rischio/Rendimento** → dallo statement 28/07: win rate 85% ma netto +7,85 EUR perché vincita media +12 vs perdita media −63 (R/R invertito). Analizzare/correggere il R/R degli EA DAX intraday.
-   → **DECISO (28/07): `DAX_M3` e `Londra_ORB` DA DISATTIVARE** (morti nei backtest + perdite in forward + difetti strutturali: whipsaw sui falsi break / rumore M3 / R/R invertito). Il DAX intraday M5 è già coperto da **DAX_Apertura_EU_Ottimizzato** (LONG). **FATTO (28/07): DAX_M3 e Londra_ORB rimossi dai grafici del VPS.** ✅ Eventuale redesign = esperimento a parte, fuori dal live.
-
-## Note per l'attribuzione forward
-- d30eur magic 770501 chiuso **a mano** il 27/07 → escludere da DAX_M3.
-- 2 trade **eurnzd senza magic** → non sono nostri EA (manuali o altro).
-
-## Prop firm — sintesi
-Basso DD è necessario ma non basta: contano **perdita giornaliera (~5%)**, **DD totale (~10%)**, **consistenza**, **track record forward** e **regole EA ammessi**. Candidati migliori: SupRev_NAS_H1, oro (SupRev_Multi/EMA200/GoldenCross), MaxMinNotte_DAX_Short.
-
-## 🎯 PIANO DRY-RUN PROP (idea di Claudio, 27/07)
-Simulare una challenge prop su un **demo 100k separato**, gratis, prima di pagare la challenge vera.
-
-**Sequenza (in ordine):**
-1. **Finire backtest/scan** → migliori combo EA–simbolo *(prerequisito, promemoria #1)*.
-2. **Forward test** → confermare edge reale (PF/DD forward per EA).
-3. **Estrarre i TOP 3** validati.
-4. **Demo 100k + Guardiano** → dry run: si testano insieme EA e daily-stop.
-5. **Valutare** → avrebbe passato la challenge?
-
-**Accorgimenti (per renderlo rappresentativo):**
-- Configurare il demo 100k con le **regole ESATTE della prop scelta** (perdita giornaliera, DD totale statico/**trailing**, target, giorni minimi, consistenza) → il **guardiano** fa rispettare quei numeri.
-- Scegliere **3 EA DIVERSIFICATI** (strumenti/strategie diverse), non correlati → curva più liscia, meno rischio che un giorno storto sommi le perdite.
-- **Sizing prudente**: worst-case giornaliero sotto il limite prop (il guardiano è il paracadute, non l'unica difesa).
-- **Durata**: settimane / lunghezza-challenge, con abbastanza trade.
-- **Metriche giuste**: max perdita **giornaliera** toccata, max DD totale, giorni al target, **consistenza** (nessun giorno > 30–40% del profitto), giorno peggiore.
-
-**Onestà:** il demo 100k non è identico alla prop reale (server/spread/fill diversi, demo più ottimista) → dry run superato = **necessario ma non garanzia**.
-
-**Primo passo quando ci arriviamo:** decidere **quale prop firm** (le regole, soprattutto DD trailing vs statico e consistenza, cambiano come si tara il guardiano).
+## ⏳ DA FARE (priorità)
+1. 🔄 **EMA200**: scan OHLC H4 (in corso) + H1 → poi tick reali sui vincitori.
+2. ⏳ **Tick reali mancanti**: SupRev IBEX (E35EUR) H1; GoldenCross H1 sui top OHLC (Oro/USDJPY/GBPUSD); SupRev non-indici H4 (XAU/CHFJPY/GBPJPY/AUDUSD).
+3. 🟢 **Campagna matrice** motore×simbolo×TF (FASE 1 TF alti → FASE 3 TF bassi): mancano SuperWave, SupertrendInvert, PTE, WOL, FiboH4 allo scan.
+4. ❓ **SupertrendInvert tick reali** — da ritrovare sul PC (non in archivio).
+5. 🔴 **VPS** (quando flat): ricompilare (`scarica_ottimizzati.ps1`), riattaccare DAX Apertura su 1 solo grafico, spegnere i morti (DAX_M3, Londra_ORB, Live5m, ORB, ORB_Fibo).
 
 ## Stile richiesto
-Precisione sopra tutto. Etichettare i fatti [VERIFICATO]/[INFERITO]/[INCERTO]. Niente riempitivi. Segnalare le premesse sbagliate PRIMA di rispondere. Mai inventare.
+Precisione sopra tutto. Etichettare [VERIFICATO]/[INFERITO]/[INCERTO]. Segnalare premesse sbagliate PRIMA di rispondere. Mai inventare. **Salvare SEMPRE tutto nel repo** (commit+push): ciò che non è pushato è perso.
 
-## Comandi utili (PowerShell)
+## Comandi utili (PowerShell) — branch zoba2j
 ```powershell
-# Aggiorna/compila tutti gli EA (applica i commenti nuovi)
-powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/creating-agents-SgGpD/backtest_pipeline/scarica_ottimizzati.ps1' -OutFile scarica_ottimizzati.ps1; .\scarica_ottimizzati.ps1"
-# Scan di un EA su tutto il market (OHLC): ABTG_MaxMinNotte | ABTG_Nightly | ABTG_HARSI
-powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/creating-agents-SgGpD/backtest_pipeline/scan_market.ps1' -OutFile scan_market.ps1; .\scan_market.ps1 -Robot ABTG_HARSI"
+# Scan di un EA su tutto il market (OHLC). -Tf opzionale per forzare il timeframe.
+powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/scan_market.ps1' -OutFile scan_market.ps1; .\scan_market.ps1 -Robot ABTG_EMA200 -Tf H1"
+# Validazione tick reali dei vincitori
+#   .\valida_realtick.ps1 -Symbols E35EUR -Tf H1
 ```
