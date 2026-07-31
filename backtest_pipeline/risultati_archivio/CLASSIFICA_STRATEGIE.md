@@ -10,6 +10,7 @@ Legenda TF migliore: dove la strategia rende di più. ✅ = validato tick reali 
 |---|---|---|---|---|
 | **SupertrendReversal** | **H4** (metalli/indici); Nasdaq→H1 | OHLC: CAC 7.37⚠️(overfit), Oro 4.15, CHFJPY 3.40 · **Tick reali (PFmed)**: Nasdaq H1 1.40⭐, Oro 1.46, Argento 1.37, DAX/Nikkei 1.05; **Dow 0.79 e ASX 0.78 CROLLANO** | ✅ 5 in forward (Oro/Argento/DAX/Nikkei H4 + Nasdaq H1); mancano XAU-H4/CHFJPY/GBPJPY/AUDUSD/IBEX-H1 | `SupertrendReversal/ANALISI_*.md` + `TICK_REALI_INDICI_H1vsH4.md` |
 | **GoldenCross** | **H1** (ecc. USDCHF→H4) | H1: Oro 2.01, USDJPY 1.97, GBPUSD 1.78 · H4: USDCHF 2.20 | ✅ H4: USDCHF 2.63, XAGUSD 2.58, EURAUD 3.34 | `GoldenCross/ANALISI_GOLDENCROSS.md` |
+| **EMA200** | **H4** (H1 da fare) | 200AUD 2.78, AUDJPY 2.68 (180tr), GBPUSD 2.61, Oro 2.22 · campioni ampi 100-300tr | ⏳ tick reali da fare (200AUD/AUDJPY/SPXUSD/225JPY/Oro) | `EMA200/ANALISI_EMA200.md` |
 
 ## 🔑 Insight cross-strategia (importante)
 - **Ogni motore ha il SUO timeframe naturale**:
@@ -38,8 +39,8 @@ Studiati 8 indici (MAE/MFE/aspettativa in R). Verdetto tick reali: **USA sì, EU
 - EU (FTSE/IBEX/EuroStoxx/CAC/S&P): tutti negativi → **non deployare**.
 
 ## 📋 Motori da analizzare (metodo a imbuto H1/H4/…)
-✅ Fatti: **SupertrendReversal** · **GoldenCross** · MaxMinNotte (EURUSD) · Nightly (EURUSD) · HARSI
-🔄 In corso: **EMA200** (H4 in corso, poi H1)
+✅ Fatti: **SupertrendReversal** · **GoldenCross** · **EMA200** (H4) · MaxMinNotte (EURUSD) · Nightly (EURUSD) · HARSI
+🔄 Prossimo: **EMA200 H1** (poi tick reali sui vincitori H4)
 ❌ Da aggiungere allo scan: **SuperWave** (H1/H4) · **SupertrendInvert** (H1) · **PTE/WOL/FiboH4** (H4/D1)
 
 _Man mano che arrivano gli scan, aggiungere una riga per strategia qui + cartella dedicata in `risultati_archivio/<Strategia>/`._

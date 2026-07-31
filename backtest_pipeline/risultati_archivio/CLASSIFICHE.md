@@ -62,10 +62,10 @@ _(GoldenCross OHLC H1 top: Oro 2.01, USDJPY 1.97, GBPUSD 1.78 — tick reali H1 
 |---|---|---|---|
 | **SupertrendReversal** | **H4** (Nasdaq→H1) | Oro, Argento, Nasdaq H1 | ✅ analizzato |
 | **GoldenCross** | **H1** (USDCHF→H4) | Oro, USDJPY (H1); USDCHF (H4) | ✅ analizzato |
+| **EMA200** | **H4** | 200AUD, AUDJPY, GBPUSD, Oro (+ molti) | ✅ H4 fatto (41/47 validi, campioni ampi) |
 | MaxMinNotte | M15 | EURUSD, DAX short | ✅ (EURUSD) |
 | Nightly | M15 | EURUSD | ✅ (EURUSD) |
 | HARSI | M5 | — | scan pronto |
-| EMA200 | H4 | Oro (+ scan in corso) | 🔄 H4 in corso |
 | SuperWave / SupertrendInvert / PTE / WOL / FiboH4 | H1/H4/D1 | — | ❌ da aggiungere allo scan |
 
 🔑 **Insight cross-strategia**: ogni motore ha il **suo** timeframe naturale (SupRev→H4, GoldenCross→H1). Il TF sblocca il simbolo (Nasdaq: spazzatura in H4, top in H1). → lo scan multi-TF è obbligatorio.
