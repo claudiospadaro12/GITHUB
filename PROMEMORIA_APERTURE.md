@@ -18,6 +18,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 3. 🔴 **Spegnere i morti** sul VPS: DAX_M3, Londra_ORB, DAX Live5m (+v2), ORB, ORB_Fibo.
 
 ### 💻 PC FISSO — coda backtest (uno alla volta)
+0. 🔄 **IN CORSO: scan GoldenCross H4** (cerca 2° motore trend, diversifica dai SupRev) → zippa `risultati_scan_ABTG_GoldenCross_H4` → Claude classifica.
 4. ⏭️ **Conferma apertura US a TICK REALI**: `conferma_apertura_us.ps1 -Model 4` (Dow/Nasdaq M5). OHLC già fatto (Dow PF 1,84 / Nasdaq 1,11). Questo è l'ultimo filtro prima del forward apertura.
 5. 🟢 **Validare a tick reali IBEX (E35EUR) H1** (SupRev) — unico vincitore H1 senza RT in archivio: `valida_realtick.ps1 -Symbols E35EUR -Tf H1`.
 6. 🟠 **Riconfermare Dow SupRev H4 a tick reali** — contraddizione: archivio dice buono (PFmed 1,77), run 30/07 mattina lo dava scartato. Sciogliere.
