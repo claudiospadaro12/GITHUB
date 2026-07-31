@@ -1,0 +1,35 @@
+; Preset POST-NEWS -- FOMC Press Conference -- EUR/USD -- M5
+; Notizia 20:30 IT (ora legale) / 19:30 IT (ora solare). Azione = news+10 min. Scadenza = news+75 min.
+; ESTATE (ora legale IT): azione 20:40 IT = 19:40 server; scadenza 21:45 IT = 20:45 server (valori sotto).
+; INVERNO (ora solare IT): azione 19:40 IT = 18:40 server; scadenza 20:45 IT = 19:45 server -> metti Action 18:40, Expiry 19:45.
+; Range = candela della notizia + la successiva. BUY STOP max+3, SELL STOP min-2, TP50/SL25. NIENTE trailing.
+; Attacca su grafico EUR/USD M5 e carica questo preset. Magic 771202.
+; NB: per operare servono le DATE FOMC nel file abtg_news.csv (valuta USD).
+InpActionHour=19
+InpActionMin=40
+InpExpiryHour=20
+InpExpiryMin=45
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsCurrencies=USD
+InpNewsTitleMatch=FOMC
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=3.0
+InpTPpips=50.0
+InpSLpips=25.0
+InpUseTrail25=false
+InpCloseAtExpiry=true
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpRiskPercent=3.0
+InpRiskRefSLpips=50.0
+InpComment=FOMC PostNews
+InpMagic=771202
+InpMaxSpread=0
+InpVerbose=true

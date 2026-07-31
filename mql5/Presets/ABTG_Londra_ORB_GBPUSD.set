@@ -1,0 +1,44 @@
+; Preset STRATEGIA MERCATI DI LONDRA - GBP/USD
+; Range = ora prima dell'apertura Londra: 07:00-08:00 CET = 06:00-07:00 SERVER (BCM = ora italiana - 1).
+; Ordini OCO piazzati alle 08:00 CET = 07:00 server. SL centro canale, TP = ingresso +/- ampiezza.
+; Carica in: finestra EA -> Dati in Ingresso -> Carica (EA: ABTG_Londra_ORB), grafico GBPUSD M1 o M5.
+InpRangeStartHour=6
+InpRangeStartMin=0
+InpRangeEndHour=7
+InpRangeEndMin=0
+InpMinRangePips=0
+InpMaxRangePips=0
+InpPlaceHour=7
+InpPlaceMin=0
+InpEntryCutoffHour=11
+InpEntryCutoffMin=0
+InpCloseHour=17
+InpCloseMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=240
+InpBufferPips=3.0
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=0
+InpHalveOnOpposite=true
+InpTPRangeMult=1.0
+InpUsePartial=false
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=false
+InpUseTrailing=false
+InpTrailTF=15
+InpAtrPeriod=14
+InpTrailAtrMult=2.0
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=60
+InpNewsShiftMinutes=0
+InpNewsCurrencies=GBP,USD
+InpMagic=770701
+InpMaxSpread=0
+InpVerbose=true

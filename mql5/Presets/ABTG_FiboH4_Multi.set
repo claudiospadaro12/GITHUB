@@ -1,0 +1,44 @@
+; Preset FIBO H4 MULTI-SIMBOLO - un solo grafico, scansiona piu' cross
+; Metti in InpSymbols i cross (separati da ; o ,). I simboli devono esistere sul broker con storico H4.
+; Valori Fibo proprietari 1.88/2.88, SL 4.236. Commento "FIBOH4". Magic 771602 (diverso dalla singola 771601).
+; Tetto InpMaxTotalPositions come sicurezza sull'esposizione totale. Attacca a UN grafico H4 qualsiasi.
+InpSymbols=GBPUSD;USDJPY;EURUSD
+InpTF=16388
+InpMaxTotalPositions=6
+InpEngulfLookback=12
+InpAllowTwoCandle=true
+InpMinEngulfBodyPct=25.0
+InpAllowLong=true
+InpAllowShort=true
+InpEZ1ratio=1.88
+InpEZ2ratio=2.88
+InpSLratio=4.236
+InpUseEZ2=true
+InpMinDistPips=50.0
+InpAtrPeriod=14
+InpMaxEngulfAtr=3.0
+InpPendingExpiryBars=6
+InpSLbufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpRiskPercent=1.0
+InpFirstFraction=0.3333
+InpUseCutoff=true
+InpCutoffHour=17
+InpCutoffMin=45
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=FIBOH4
+InpMagic=771602
+InpMaxSpread=0
+InpVerbose=true

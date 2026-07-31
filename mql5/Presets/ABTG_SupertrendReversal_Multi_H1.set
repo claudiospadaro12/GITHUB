@@ -1,0 +1,45 @@
+; Preset SUPERTREND REVERSAL - MULTI (ORO / INDICI / FOREX) - H1
+; Versione con distanze in ATR: si adatta da sola alla scala (XAUUSD, DAX, NAS, forex).
+; Rimbalzo sul Supertrend(10,3.5) + candela di conferma; confluenza EMA; 1/3 mercato + 2/3 pendente.
+; Magic 771001 (diverso dalla versione forex 770901, cosi lo riconosci a colpo d'occhio).
+; Attacca su grafico H1 (o H4) del simbolo scelto e carica questo preset.
+InpTF=16385
+InpStMult=3.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingAtr=0.5
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferAtr=0.2
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP_RR=2.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpMagic=771001
+InpMaxSpread=0
+InpVerbose=true

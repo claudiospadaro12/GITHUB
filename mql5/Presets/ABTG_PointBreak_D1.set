@@ -1,0 +1,44 @@
+; Preset POINT BREAK (mean-reversion) - D1 - multi-asset (forex/indici/materie prime)
+; Cuore meccanico della strategia POINT BREAK: prezzo fuori Bollinger(37,1.4) + Stocastico(5,3,3)
+; estremo/incrociato + EMA200 distante. TP = media Bollinger (RR>=1:1). SL spike/volatilita' (ATR).
+; NB: i PATTERN visivi (Montagna, W, M, Chiesa...) NON sono automatizzati: restano al tuo occhio.
+; Attacca su grafico D1 del simbolo scelto e carica questo preset. Magic 771101.
+InpTF=16408
+InpBBPeriod=37
+InpBBDev=1.4
+InpEmaPeriod=200
+InpStochK=5
+InpStochD=3
+InpStochSlow=3
+InpAtrPeriod=14
+InpAllowLong=true
+InpAllowShort=true
+InpStochOB=80.0
+InpStochOS=20.0
+InpRequireCross=true
+InpEma200DistAtr=1.5
+InpMinBandExcessAtr=0.0
+InpSLLookback=3
+InpSLBufferAtr=0.2
+InpVolFloorAtr=1.0
+InpMinRR=1.0
+InpPartialAtr=1.0
+InpPartialPct=60
+InpBreakeven=true
+InpDailyTrail=true
+InpRiskPercent=2.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpMagic=771101
+InpMaxSpread=0
+InpVerbose=true

@@ -1,0 +1,21 @@
+; ================================================================
+;  APERTURA M5 - NASDAQ (NASUSD)  con filtro trend H4
+;  EA da usare: ABTG_Nasdaq_Apertura_US
+;  Grafico: NASUSD  Timeframe: M5   AutoTrading ON
+;  Studio aperture: Nasdaq e' positivo SOLO col filtro H4 (+0.055 R/trade;
+;  "cieco" = break-even). Questo preset accende il filtro.
+; ----------------------------------------------------------------
+;  Filtro H4 = prezzo vs EMA50 su H4 (EmaFast=1 ~ prezzo, EmaSlow=50).
+;  Magic 770201 = stesso del Nasdaq apertura gia' in uso (lo aggiorna).
+; ================================================================
+InpUseEmaFilter=true
+InpFilterTF=16388
+InpEmaFast=1
+InpEmaSlow=50
+InpUseSupertrend=false
+InpUseCorrelation=false
+InpUseVwapFilter=false
+InpAllowLong=true
+InpAllowShort=true
+InpRiskPercent=1.0
+InpMagic=770201

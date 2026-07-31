@@ -1,0 +1,41 @@
+; Preset EMA 200 REVERSAL (bounce) - H4 - multi-asset (forex/indici/oro)
+; Rimbalzo sulla EMA200: due ordini LIMITE vicino alla media nella direzione del trend (prezzo vs EMA200).
+; Distanze in ATR (scala-indipendente). SL 1*ATR oltre il 2o ordine, TP RR 1:2, parziale EMA14 + pari, trailing.
+; Commento ordini: "EMA200". Magic 771501. Attacca su grafico H4 (o D1) del simbolo scelto.
+; Per operativita' H4 INTRADAY: metti InpUseCutoff=true (cancella pendenti alle 20:00 IT = 19:00 server).
+InpTF=16388
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpOrder1Atr=0.10
+InpOrder2Atr=0.35
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=EMA200
+InpMagic=771501
+InpMaxSpread=0
+InpVerbose=true

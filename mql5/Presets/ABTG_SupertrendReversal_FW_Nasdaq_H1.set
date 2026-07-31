@@ -1,0 +1,20 @@
+; ================================================================
+;  SUPERTREND REVERSAL - FORWARD - NASDAQ (NASUSD) H1
+;  EA: ABTG_SupertrendReversal   Grafico: NASUSD   TF: H1   AutoTrading ON
+;  5o cavallo del forward SupRev. Validato a TICK REALI:
+;  PFmed 1,40 (best 1,57), DD ~1,2%, 100% combo positive.
+;  Diversifica bene con l'Oro (metallo H4) -> indice USA su H1.
+; ----------------------------------------------------------------
+;  Parametri robusti (non il pass fortunato): StMult 3.0, StAtr 10,
+;  TP finale 2.5R, direzione BOTH (l'unica validata a tick reali).
+; ================================================================
+InpTF=16385
+InpStMult=3.0
+InpStAtrPeriod=10
+InpAllowLong=true
+InpAllowShort=true
+InpTP1_R=1.0
+InpTP1Pct=50
+InpTP_RR=2.5
+InpRiskPercent=1.0
+InpMagic=770925

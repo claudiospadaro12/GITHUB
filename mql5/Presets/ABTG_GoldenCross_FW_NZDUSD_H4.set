@@ -1,0 +1,14 @@
+; ================================================================
+;  GOLDENCROSS - FORWARD - NZDUSD H4  (2a strategia: trend forex)
+;  EA: ABTG_GoldenCross   Grafico: NZDUSD   TF: H4   AutoTrading ON
+;  Validato TICK REALI: PFmed 1,45 SHORT (peggiore 1,04), DD ~3,5%, 100% pass positivi.
+;  NB: SHORT-only (nettamente meglio del BOTH: 1,45 vs 1,16). TP piu' corto (1,5R).
+; ================================================================
+InpTimeframe=16388
+InpAllowLong=false
+InpAllowShort=true
+InpAtrSLmult=1.5
+InpTP_R=1.5
+InpAdxMin=20
+InpRiskPercent=1.0
+InpMagic=770333
