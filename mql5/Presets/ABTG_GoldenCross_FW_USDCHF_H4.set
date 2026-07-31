@@ -1,0 +1,14 @@
+; ================================================================
+;  GOLDENCROSS - FORWARD - USDCHF H4  (2a strategia: trend forex)
+;  EA: ABTG_GoldenCross   Grafico: USDCHF   TF: H4   AutoTrading ON
+;  Validato TICK REALI: PFmed 1,71 (peggiore 1,37), DD ~2,6%, 100% pass positivi.
+;  Il migliore forex del GoldenCross. Diversifica dai SupRev (metalli/indici).
+; ================================================================
+InpTimeframe=16388
+InpAllowLong=true
+InpAllowShort=true
+InpAtrSLmult=1.5
+InpTP_R=2.5
+InpAdxMin=25
+InpRiskPercent=1.0
+InpMagic=770331

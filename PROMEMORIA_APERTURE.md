@@ -19,7 +19,9 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
 
 ### 💻 PC FISSO — coda backtest (uno alla volta)
 0. ✅ **GoldenCross H4 scan analizzato (31/07):** è una **strategia da FOREX** (USDCHF, USDCAD, EURAUD, NZDUSD, CHFJPY, GBPCHF, EURUSD, EURJPY) → **diversifica dai SupRev** (metalli/indici). Vincitori PFmed≥1: 10. Più robusti (per #pass): USDCHF 1,66 SHORT (30p), CHFJPY 1,13 LONG (40p), EURJPY 1,02 (40p). ⚠️ Pochi trade (30-48) → campione sottile, tick reali essenziali. XAGUSD forte ma overlappa col SupRev.
-   ⏭️ **PROSSIMO: tick reali GoldenCross** → `valida_realtick_gc.ps1` (NUOVO, default 8 forex). Poi tick reali IBEX H1 (SupRev).
+   ✅ **TICK REALI GoldenCross (31/07): REGGE! 2a strategia trovata.** USDCHF PFmed 1,71 (peggiore 1,37, DD 2,6%) ⭐ · USDCAD 1,58 · NZDUSD 1,45 SHORT · XAGUSD 2,06 (overlap SupRev) · CHFJPY 1,07 marginale · EURUSD/EURJPY scartati. DD tutti bassi (2,6-4,9%).
+   ✅ **FATTO preset forward GoldenCross** (EA `ABTG_GoldenCross`, H4): `..._FW_USDCHF_H4.set` (770331, BOTH TP2.5 ADX25) · `..._FW_USDCAD_H4.set` (770332, BOTH TP2.5 ADX20) · `..._FW_NZDUSD_H4.set` (770333, SHORT TP1.5 ADX20).
+   📌 **SQUADRA FORWARD ora: 5 SupRev + 3 GoldenCross = 8 EA, 2 strategie (reversal metalli/indici + trend forex), poco correlate.**
 4. ⏭️ **Conferma apertura US a TICK REALI**: `conferma_apertura_us.ps1 -Model 4` (Dow/Nasdaq M5). OHLC già fatto (Dow PF 1,84 / Nasdaq 1,11). Questo è l'ultimo filtro prima del forward apertura.
 5. 🟢 **Validare a tick reali IBEX (E35EUR) H1** (SupRev) — unico vincitore H1 senza RT in archivio: `valida_realtick.ps1 -Symbols E35EUR -Tf H1`.
 6. 🟠 **Riconfermare Dow SupRev H4 a tick reali** — contraddizione: archivio dice buono (PFmed 1,77), run 30/07 mattina lo dava scartato. Sciogliere.
