@@ -40,6 +40,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
 
 ### 📈 FORWARD → PROP
 12. 🟢 **FORWARD in corso — SQUADRA AL COMPLETO (8 EA):** 5 SupRev (Oro/Argento/DAX/Nikkei H4 + Nasdaq H1) + 3 GoldenCross (USDCHF/USDCAD/NZDUSD H4). Ora serve TEMPO: pagella PF/DD reale tra ~2-3 mesi. Claudio manda lo statement periodicamente → Claude archivia e traccia.
+12b. 🟢 **WALK-FORWARD (IS vs OOS) sui finalisti** — ultimo cancello anti-overfit PRIMA del dry-run. Script `walkforward.ps1` (Oro SupRev H4 + USDCHF GoldenCross H4): stessa griglia su IS 2024.01-2025.06 e OOS 2025.07-2026.06; se i parametri robusti reggono anche in OOS = edge stabile. Non è "ottimizzare di più" ma verificare fuori campione. Default OHLC, `-Model 4` per tick reali.
 13. 🔵 **Aprire demo NUOVO da 100.000** (stesso server BCM, EUR, leva 1:100, Hedge) — lasciarlo pronto per il dry-run. *(Claudio ha detto che può farlo.)*
 14. 🔵 **DRY-RUN PROP** su demo 100k + guardiano (dopo il forward). Prop: **FTMO 2-Step** (5%/10% statico, target +10%, no limite tempo, EA ok, split 80-90%). Preset pronto: `ABTG_Guardian_FTMO_2Step.set` (InpStartBalance=100000).
 
