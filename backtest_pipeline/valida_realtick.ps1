@@ -9,19 +9,22 @@
 #
 #  Uso (default = vincitori robusti SupertrendReversal H4):
 #    powershell -ExecutionPolicy Bypass -File .\valida_realtick.ps1
+#  Cambia EA (SupertrendReversal | EMA200 | GoldenCross):
+#    .\valida_realtick.ps1 -Robot ABTG_EMA200 -Symbols 200AUD,AUDJPY,GBPUSD
 #  Personalizza i simboli:
 #    .\valida_realtick.ps1 -Symbols XAUUSD,U30USD,225JPY
 #  Cambia TF (per validare l'H1 quando lo scan H1 avra' i suoi vincitori):
 #    .\valida_realtick.ps1 -Tf H1
 # =====================================================================
 param(
+  [string]$Robot="ABTG_SupertrendReversal",  # EA da validare: ABTG_SupertrendReversal | ABTG_EMA200 | ABTG_GoldenCross
   [string[]]$Symbols=@("XAUUSD","XAGUSD","U30USD","225JPY","D30EUR","200AUD"), # metalli + indici (candidati Multi)
   [string]$Tf="H4",
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-$EA="ABTG_SupertrendReversal"
+$EA=$Robot
 $EABranch="claude/creating-agents-SgGpD"   # dove vivono gli EA di trading
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 
@@ -29,9 +32,29 @@ $tfmap=@{ "M5"=5; "M15"=15; "M30"=30; "H1"=16385; "H4"=16388; "D1"=16408 }
 if(-not $tfmap.ContainsKey($Tf)){ Write-Host "-Tf non valido: M5,M15,M30,H1,H4,D1" -ForegroundColor Red; exit 1 }
 $en=$tfmap[$Tf]
 
-# --- GRIGLIA FOCALIZZATA a tick reali (compatta: la validazione conferma, non riscopre) ---
-#   direzione (L/S) ottimizzata, StMult 2.0-3.5, TP_RR 2.0-3.0, StAtrPeriod fisso 10, rischio 1%.
-$Inputs=@"
+# --- GRIGLIA FOCALIZZATA a tick reali PER EA (compatta: la validazione conferma, non riscopre) ---
+if($EA -eq "ABTG_EMA200"){
+  # Rimbalzo su EMA200: direzione (L/S) + TP_RR 1.5-3.0.
+  $Inputs=@"
+InpTF=$en||$en||0||$en||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpTP_RR=1.5||1.5||0.5||3.0||Y
+"@
+} elseif($EA -eq "ABTG_GoldenCross"){
+  # Incrocio medie + ADX: direzione + TP.
+  $Inputs=@"
+InpTF=$en||$en||0||$en||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=0||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
+InpTP_R=1.5||1.5||0.5||3.0||Y
+InpAdxMin=25||20||5||30||Y
+"@
+} else {
+  # SupertrendReversal (default): direzione (L/S), StMult 2.0-3.5, TP_RR 2.0-3.0, StAtrPeriod fisso 10.
+  $Inputs=@"
 InpTF=$en||$en||0||$en||N
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpStAtrPeriod=10||10||0||10||N
@@ -40,6 +63,7 @@ InpAllowShort=0||0||1||1||Y
 InpStMult=2.5||2.0||0.5||3.5||Y
 InpTP_RR=2.0||2.0||0.5||3.0||Y
 "@
+}
 
 $EAtag="${EA}_${Tf}_realtick"
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
