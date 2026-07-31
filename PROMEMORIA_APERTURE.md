@@ -51,7 +51,8 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo a disposizione.
   - MAE/MFE: vincitori ritracciano ~0,4R (max ~1R), corrono ~2R → gestione attuale (SL=range, parziale 1R+BE, TP 2R) **gia' allineata**. Leva = direzione/filtro/simbolo, non SL/BE.
   - **FATTO preset** (M5, EA `ABTG_Nasdaq_Apertura_US` symbol-agnostico): `ABTG_Apertura_Dow_U30_H4.set` (magic 770221) e `ABTG_Apertura_Nasdaq_US_H4.set` (770201). Filtro H4 ON, risk 1%.
   - ✅ **CONFERMATO col motore REALE (OHLC M5, filtro H4, 132 combo):** **Dow PFmed 1,84 (peggiore 1,76!), DD ~5%, 100% pass positivi** → edge solidissimo, la gestione reale MIGLIORA sullo studio. **Nasdaq PFmed 1,11, DD 7-8%** → positivo ma più debole. Script: `conferma_apertura_us.ps1`.
-  - ⏭️ **PROSSIMO:** tick reali `conferma_apertura_us.ps1 -Model 4` (i fill dei breakout sono spread-sensibili) → poi forward. Dow = candidato prop apertura.
+  - ✅ **TICK REALI (31/07):** **Nasdaq apertura SCARTATO** (PF 0,82, 0% pass positivi, DD 17% — l'edge OHLC era finto, mangiato dai fill). **Dow apertura sopravvive ma modesto** (PF 1,16, 100% pass positivi ma DD ~8%). Il breakout con ordini STOP paga troppo slippage.
+  - 📌 **VERDETTO apertura:** i SupRev (Oro/Nasdaq H1, PF ~1,4 DD 1,2%) sono MOLTO meglio del Dow apertura (PF 1,16 DD 8%). Apertura = priorità bassa per la prop. Dow apertura: o variante "entra sul RETEST" (limit, non stop — leva di Emiliano contro lo slippage), o forward solo come osservazione. Nasdaq apertura preset da NON usare.
 - **30/07 (sera) — SCAN H1 SupRev analizzato + matrice a tick reali:**
   - Scan **H1** (InpTF=16385, 45 simboli) classificato. Vincitori OHLC H1 (PFmed≥1): D30EUR 1,13 · U30USD 1,13(S) · E35EUR 1,01 · NASUSD 1,00.
   - Incrociato con **validazioni a tick reali in archivio** (`risultati_archivio/`): **Nasdaq H1 = ⭐ PFmed 1,40 / DD 1,17% / 100% combo positive** → candidato prop top, diversifica con Oro. Dow→H4 (1,77) meglio che H1. DAX→H4 (1,31) meglio che H1. CAC H4 scarta.
