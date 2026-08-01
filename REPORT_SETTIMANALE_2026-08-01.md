@@ -6,10 +6,16 @@ _Conto: DEMO BCM **50503392** (EUR, Hedge). Bilancio fine periodo: **5.742,91 �
 ---
 
 ## ⚠️ 0. CONTESTO CRITICO (leggere prima dei numeri)
-Questa settimana (24-31/07) è **PRIMA della ricompilazione VPS del 01/08** che ha corretto:
-- il **bug gestione Hedge** e i **doppioni DAX**.
+Questa settimana (24-31/07) è **PRIMA della ricompilazione VPS del 01/08** che ha corretto il **bug gestione Hedge** (`SelectMyPosition`) → gestione ora **per-ticket**.
 
-👉 Quindi le perdite qui — **soprattutto sul DAX** — sono in gran parte il **bug già corretto**, NON un verdetto sugli EA validati. Il forward "pulito" parte dal **01/08**. Questa settimana serve come **baseline pre-fix** (e a quantificare quanto costava il bug).
+### 🔴 COSA È SUCCESSO DAVVERO SUL DAX (racconto di Claudio, confermato dai dati)
+> *"Ero +800 e sono finito −700 perché NON ha parzializzato né portato lo stop in pari."*
+
+**Confermato dallo statement.** Il 29/07 c'erano **molte posizioni DAX aperte contemporaneamente**; il bug Hedge faceva gestire all'EA **una sola** posizione per simbolo → le altre **senza parziale e senza breakeven** → i trade andati in profitto sono **tornati indietro fino allo STOP PIENO**.
+- **Prova nei dati:** il **29/07** su ~10 trade DAX **solo 1** ha lo SL portato a pari; tutti gli altri con SL fermo all'entrata → stop pieno. Il **30/07** invece (meno sovrapposizioni) il "SL=entry (BE)" compare su **molti** trade → lì la gestione è scattata.
+- Non è (solo) "doppioni": la **causa** è la gestione Hedge che non partiva sulle posizioni non-selezionate. **È esattamente il bug corretto il 01/08.**
+
+👉 Quindi il buco DAX **NON è un verdetto sul motore/EA**, ma sulla **gestione pre-fix**. Il forward "pulito" parte dal **01/08**. Questa settimana = **baseline pre-fix** + quantifica quanto costava il bug (≈ −900 € sul solo DAX).
 ⚠️ Lo statement **non ha la colonna magic** → attribuzione per SIMBOLO/direzione, non per singolo EA.
 
 ---
@@ -53,7 +59,7 @@ Questa settimana (24-31/07) è **PRIMA della ricompilazione VPS del 01/08** che 
 ---
 
 ## 2. 🔑 LE 3 LEZIONI DELLA SETTIMANA
-1. **Il buco è tutto DAX (−885 €)** e cade su 29-30/07 con trade identici simultanei = **il bug doppioni/Hedge già corretto il 01/08**. Senza il DAX, la settimana sarebbe stata **≈ +700 €**. → conferma che il fix era vitale; il vero forward parte ora.
+1. **Il buco è tutto DAX (−885 €)** e la causa NON è il motore ma la **gestione Hedge non scattata**: con più posizioni DAX aperte insieme (29/07), l'EA gestiva una sola posizione → le altre **senza parziale né stop-in-pari** → i profitti (+800) sono tornati a **stop pieno** (−700). **Bug corretto il 01/08** (gestione per-ticket). Senza il DAX la settimana era **≈ +700 €**. → il vero forward parte ora.
 2. **SHORT −698 vs LONG +512**: settimana **anti-trend** (coerente col bias al 25%). Gli short hanno sanguinato. Il DAX apertura era già noto come **"ottimo solo LONG"** → conferma sul campo.
 3. **Nasdaq è il cavallo** (+586, 83% win) — coerente col bias 80% e col fatto che NASUSD H1 SupRev è candidato prop top. **Dow positivo** (+99), **Oro settimana no** (ma size minima).
 
