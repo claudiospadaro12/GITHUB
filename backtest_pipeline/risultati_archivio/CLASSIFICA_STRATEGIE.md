@@ -10,7 +10,7 @@ Legenda TF migliore: dove la strategia rende di più. ✅ = validato tick reali 
 |---|---|---|---|---|
 | **SupertrendReversal** | **H4** (metalli/indici); Nasdaq→H1 | OHLC: CAC 7.37⚠️(overfit), Oro 4.15, CHFJPY 3.40 · **Tick reali (PFmed)**: Nasdaq H1 1.40⭐, Oro 1.46, Argento 1.37, DAX/Nikkei 1.05; **Dow 0.79 e ASX 0.78 CROLLANO** | ✅ 5 in forward (Oro/Argento/DAX/Nikkei H4 + Nasdaq H1); mancano XAU-H4/CHFJPY/GBPJPY/AUDUSD/IBEX-H1 | `SupertrendReversal/ANALISI_*.md` + `TICK_REALI_INDICI_H1vsH4.md` |
 | **GoldenCross** | **H1** (ecc. USDCHF→H4) | H1: Oro 2.01, USDJPY 1.97, GBPUSD 1.78 · H4: USDCHF 2.20 | ✅ H4: USDCHF 2.63, XAGUSD 2.58, EURAUD 3.34 | `GoldenCross/ANALISI_GOLDENCROSS.md` |
-| **EMA200** | **H4** (H1 da fare) | Tick reali (PFmed): 200AUD 1.59, AUDJPY 1.50 (180tr), GBPJPY 1.46, SPXUSD 1.44, GBPUSD 1.38, Oro 1.33 | ✅ **motore più robusto** (6/8 reggono, nessuno crolla, campioni 100-180tr) | `EMA200/ANALISI_EMA200.md` |
+| **EMA200** | **H4** (H1 scartato: PF più bassi, DD 6-15%) | Tick reali H4 (PFmed): 200AUD 1.59, AUDJPY 1.50 (180tr), GBPJPY 1.46, SPXUSD 1.44, GBPUSD 1.38, Oro 1.33 | ✅ **motore più robusto** (6/8 reggono tick reali; H1 confermato peggiore su ogni simbolo) | `EMA200/ANALISI_EMA200.md` |
 
 ## 🔑 Insight cross-strategia (importante)
 - **Ogni motore ha il SUO timeframe naturale**:

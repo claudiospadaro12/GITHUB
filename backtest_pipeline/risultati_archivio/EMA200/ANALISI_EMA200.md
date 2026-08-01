@@ -56,6 +56,27 @@ _Metodo robusto: PFmed (mediana dei pass con ≥20 trade, profit>0). Dati in `re
 - **Candidati prop migliori** (DD basso + robusti): **200AUD** (DD 1.4), **SPXUSD** (DD 1.9, 55% pass positivi = molto stabile), **AUDJPY** (180 trade).
 - **Nuove scoperte** (oltre all'Oro già in forward): **200AUD, AUDJPY, GBPJPY, SPXUSD, GBPUSD** → diversificano dal SupRev (metalli/indici) e dal GoldenCross (forex).
 
+## 📊 CONFRONTO H1 vs H4 (scan OHLC, fatto 01/08) — H4 VINCE NETTO
+_Dati H1 in `H1_OHLC/`. 27/48 validi in H1 vs 41/47 in H4._
+
+| Simbolo | H1 PF | H1 DD% | H1 tr | H4 PF | H4 DD% | Migliore |
+|---|---|---|---|---|---|---|
+| 200AUD | 1.08 | 4.1 | 431 | **2.78** | 1.4 | **H4** |
+| AUDJPY | 1.11 | 6.6 | 552 | **2.68** | 3.1 | **H4** |
+| GBPUSD | 1.02 | 10.4 | 701 | **2.61** | 4.3 | **H4** |
+| U30USD (Dow) | 1.84 | 3.8 | 300 | **2.39** | 2.6 | **H4** |
+| XAUUSD | 1.54 | 6.8 | 455 | **2.22** | 5.1 | **H4** |
+| GBPJPY | 1.01 | 14.9 | 745 | **2.11** | 3.4 | **H4** |
+| SPXUSD | 1.01 | 5.4 | 316 | **1.87** | 1.9 | **H4** |
+| 225JPY | 1.46 | 0.3 | 126 | 1.73 | 0.6 | **H4** |
+
+### 🔑 Verdetto: EMA200 è un motore da H4, NON da H1
+- **H4 batte H1 su OGNI simbolo**, spesso in modo netto (200AUD 1.08→2.78, AUDJPY 1.11→2.68, GBPUSD 1.02→2.61).
+- In H1: **PF molto più bassi** (quasi tutti 1.0-1.2) e **DD molto più alti** (6-15%), con moltissimi trade (300-870) → lo spread sui trade frequenti mangia l'edge.
+- Unico H1 dignitoso: **Dow (U30USD) 1.84** — ma anche lì l'H4 (2.39) è meglio.
+- ✅ **Conferma definitiva: EMA200 → H4.** L'H1 si scarta. (Coerente con "ogni motore ha il suo TF".)
+
 ## ✅ Prossimi passi
-- [ ] Creare **preset forward EMA200** per i 6 validati (200AUD/AUDJPY/GBPJPY/SPXUSD/GBPUSD, oltre a Oro) e metterli in forward → allargare la squadra.
-- [ ] (Opz) **Scan EMA200 H1** per confronto TF.
+- [x] ~~Scan EMA200 H1~~ → fatto, H4 confermato migliore.
+- [x] Preset forward EMA200 creati (200AUD/AUDJPY/GBPJPY/SPXUSD/GBPUSD/Oro H4).
+- [ ] Attaccare i 5 nuovi in forward sul VPS → aggiornare la squadra.
