@@ -122,7 +122,8 @@
 enum ENUM_ABTG_ENTRY
   {
    ABTG_BREAKOUT = 0,   // rottura del range di apertura (piani DAX + Nasdaq)
-   ABTG_GAPFILL  = 1    // chiusura del gap di apertura (tipico USA)
+   ABTG_GAPFILL  = 1,   // chiusura del gap di apertura (tipico USA)
+   ABTG_RETEST   = 2    // rottura + ritorno sul livello con LIMIT (Emiliano: niente slippage)
   };
 
 enum ENUM_ABTG_RANGE
@@ -169,6 +170,9 @@ input bool   InpAllowLong     = true;                 // Consenti operazioni lon
 input bool   InpAllowShort    = true;                 // Consenti operazioni short
 input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/range in punti (live: 1700=17 punti; 0=off)
 input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
+
+input group "=== Retest (InpEntryMode=RETEST, leva Emiliano) ==="
+input double InpRetestOffsetPts = 0;  // Offset del LIMIT DENTRO il livello, in punti (0=sul livello; >0 entra piu' in profondita', meglio ma piu' no-fill)
 
 input group "=== Gap Fill (opzionale, tipico USA) ==="
 input bool   InpUseGapFill    = ABTG_DEF_USE_GAPFILL; // Attiva modalita' gap fill se InpEntryMode=GAPFILL
@@ -252,7 +256,7 @@ int      gEmaSlowH = INVALID_HANDLE;
 int      gAtrH     = INVALID_HANDLE;
 
 // macchina a stati della giornata
-enum ENUM_PHASE { PH_WAIT_OPEN, PH_BUILDING, PH_PLACED, PH_DONE };
+enum ENUM_PHASE { PH_WAIT_OPEN, PH_BUILDING, PH_ARMED, PH_PLACED, PH_DONE };
 ENUM_PHASE gPhase   = PH_WAIT_OPEN;
 int      gDayStamp  = -1;          // per accorgersi del cambio giorno
 
@@ -262,6 +266,12 @@ ulong    gBuyTicket = 0;           // ticket ordine pendente buy
 ulong    gSellTicket= 0;           // ticket ordine pendente sell
 bool     gPartialDone = false;     // parziale gia' eseguita?
 bool     gBEdone      = false;     // BE indipendente (InpBEatR) gia' eseguito?
+
+// stato RETEST (rottura + ritorno sul livello con LIMIT)
+double   gBuffer    = 0;           // buffer effettivo memorizzato all'arming
+int      gBias      = 0;           // bias di trend memorizzato all'arming
+bool     gBrokeHigh = false;       // la rottura sopra e' gia' avvenuta?
+bool     gBrokeLow  = false;       // la rottura sotto e' gia' avvenuta?
 
 // calendario news caricato da file CSV
 datetime gNewsTime[];              // orario evento (server, gia' shiftato)
@@ -478,12 +488,24 @@ void ABTG_OnTick()
             if(nowMin >= rangeEndMin)   // aspetto almeno la prima finestra come "conferma"
               { if(TryPlaceGapFill()) gPhase = PH_PLACED; }
            }
+         else if(InpEntryMode == ABTG_RETEST)
+           {
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            if(nowMin >= refEndMin)
+              { if(ArmRetest()) gPhase = PH_ARMED; }
+           }
          else // BREAKOUT
            {
             int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
             if(nowMin >= refEndMin)
               { if(TryPlaceBreakout()) gPhase = PH_PLACED; }
            }
+         break;
+
+      case PH_ARMED:
+         // RETEST: aspetto la rottura del range e poi piazzo il LIMIT sul livello.
+         if(newsBlk) break;
+         MonitorRetest();
          break;
 
       case PH_PLACED:
@@ -504,6 +526,10 @@ void ResetDay()
    gSellTicket = 0;
    gPartialDone= false;
    gBEdone     = false;
+   gBuffer     = 0;
+   gBias       = 0;
+   gBrokeHigh  = false;
+   gBrokeLow   = false;
    ABTGLog("nuovo giorno: stato resettato, in attesa dell'apertura.");
   }
 
@@ -650,6 +676,118 @@ bool TryPlaceBreakout()
         }
      }
    return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| RETEST (leva Emiliano): calcola il range e i filtri, poi ARMA.   |
+//|  Non piazza nulla: aspetta la rottura e il ritorno sul livello.  |
+//|  Ritorna true quando la decisione e' presa; false = dati non     |
+//|  pronti (riprova al tick successivo).                            |
+//+------------------------------------------------------------------+
+bool ArmRetest()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("RETEST: livelli non ancora calcolabili (dati non pronti): riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("RETEST: candela %.0f pt < min %.0f: niente trade (whipsaw).", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("RETEST: candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK()) { ABTGLog("RETEST: spread troppo alto: nessun ordine oggi."); return(true); }
+
+   gBuffer    = EffectiveBuffer();
+   gBias      = TrendBias();           // 0 entrambi, +1 solo long, -1 solo short, 2 conflitto
+   gBrokeHigh = false;
+   gBrokeLow  = false;
+   ABTGLog(StringFormat("RETEST armato: range %.5f-%.5f, buffer %.0f pt, bias %d. Attendo rottura + ritorno sul livello.",
+                        gRangeHigh, gRangeLow, gBuffer/_Point, gBias));
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| RETEST: sorveglia la rottura; appena rotto il range piazza il    |
+//|  LIMIT sul livello (ritorno) -> fill a prezzo migliore, niente   |
+//|  slippage. SL uguale al breakout (bordo opposto) -> stop piu'    |
+//|  stretto -> R migliore. Se il prezzo scappa senza tornare, il    |
+//|  limit scade non eseguito (trade mancato = costo del metodo).    |
+//+------------------------------------------------------------------+
+void MonitorRetest()
+  {
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   if(ask <= 0 || bid <= 0) return;
+
+   double buyTrig  = NormalizePrice(gRangeHigh + gBuffer);   // livello di rottura sopra
+   double sellTrig = NormalizePrice(gRangeLow  - gBuffer);   // livello di rottura sotto
+   double buyPx    = buyTrig;                                // per l'SL a range (bordo opposto)
+   double sellPx   = sellTrig;
+   datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
+
+   bool longOK  = (gBias == 0 || gBias == +1);
+   bool shortOK = (gBias == 0 || gBias == -1);
+
+   //--- LONG: rottura sopra avvenuta -> BUY LIMIT sul livello rotto (ritorno)
+   if(InpAllowLong && longOK && !gBrokeHigh && ask >= buyTrig)
+     {
+      gBrokeHigh = true;
+      if(!VolumeOK())
+         ABTGLog("RETEST BUY: rottura con volumi insufficienti, salto (regola Emiliano).");
+      else
+        {
+         double entry = NormalizePrice(gRangeHigh - InpRetestOffsetPts*_Point); // limit sul livello (niente buffer/slippage)
+         double sl    = (InpSLMode == ABTG_SL_RANGE) ? sellPx : entry - AtrValue()*InpAtrSlMult;
+         sl = NormalizePrice(sl);
+         double dist  = entry - sl;
+         bool   skip  = false;
+         if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+           {
+            if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST BUY saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
+            else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
+           }
+         double lot = skip ? 0.0 : CalcLotByRisk(dist);
+         double tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+         if(!skip && lot > 0 && dist > 0)
+           {
+            if(gTrade.BuyLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" RETEST BUY"))
+              { gBuyTicket = gTrade.ResultOrder(); gPhase = PH_PLACED;
+                ABTGLog(StringFormat("BUY LIMIT (retest) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+            else
+               ABTGLog("BUY LIMIT (retest) fallito: "+gTrade.ResultRetcodeDescription());
+           }
+        }
+     }
+
+   //--- SHORT: rottura sotto avvenuta -> SELL LIMIT sul livello rotto (ritorno)
+   if(InpAllowShort && shortOK && !gBrokeLow && bid <= sellTrig)
+     {
+      gBrokeLow = true;
+      if(!VolumeOK())
+         ABTGLog("RETEST SELL: rottura con volumi insufficienti, salto (regola Emiliano).");
+      else
+        {
+         double entry = NormalizePrice(gRangeLow + InpRetestOffsetPts*_Point);
+         double sl    = (InpSLMode == ABTG_SL_RANGE) ? buyPx : entry + AtrValue()*InpAtrSlMult;
+         sl = NormalizePrice(sl);
+         double dist  = sl - entry;
+         bool   skip  = false;
+         if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+           {
+            if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST SELL saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
+            else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
+           }
+         double lot = skip ? 0.0 : CalcLotByRisk(dist);
+         double tp  = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+         if(!skip && lot > 0 && dist > 0)
+           {
+            if(gTrade.SellLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" RETEST SELL"))
+              { gSellTicket = gTrade.ResultOrder(); gPhase = PH_PLACED;
+                ABTGLog(StringFormat("SELL LIMIT (retest) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+            else
+               ABTGLog("SELL LIMIT (retest) fallito: "+gTrade.ResultRetcodeDescription());
+           }
+        }
+     }
   }
 
 //+------------------------------------------------------------------+
