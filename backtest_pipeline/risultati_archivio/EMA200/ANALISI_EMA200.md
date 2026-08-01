@@ -36,7 +36,26 @@ _(Validi 41/47. Coda 16-41 da PF 1.60 a 1.01: NZDJPY, F40EUR, EURUSD, EURAUD… 
 ## ⚠️ Cautela (lezione CAC)
 È OHLC: i PF vanno **confermati a tick reali** prima di fidarsi. Vantaggio: i campioni ampi (100-300 trade) rendono l'EMA200 meno esposto all'overfit rispetto a GoldenCross/SupRev.
 
+## 🎯 VALIDAZIONE TICK REALI H4 (fatta 01/08) — 8 simboli
+_Metodo robusto: PFmed (mediana dei pass con ≥20 trade, profit>0). Dati in `realtick_H4/`._
+
+| Simbolo | PFmed reale | PFbest | DD%best | Trade | pass pos/tot | PF OHLC | Esito |
+|---|---|---|---|---|---|---|---|
+| 200AUD (ASX) | **1.59** | 3.03 | 1.4 | 83 | 53/136 | 2.78 | ✅ REGGE ⭐ |
+| AUDJPY | **1.50** | 2.31 | 2.5 | 180 | 68/135 | 2.68 | ✅ REGGE ⭐ (180 trade) |
+| GBPJPY | **1.46** | 2.06 | 3.4 | 146 | 51/135 | 2.11 | ✅ REGGE |
+| SPXUSD (S&P) | **1.44** | 1.78 | 1.9 | 116 | 76/138 | 1.87 | ✅ REGGE ⭐ (55% pass +) |
+| GBPUSD | **1.38** | 2.25 | 4.2 | 141 | 64/135 | 2.61 | ✅ REGGE |
+| XAUUSD (Oro) | **1.33** | 2.20 | 5.1 | 86 | 89/145 | 2.22 | ✅ REGGE (già in forward) |
+| USDNOK | 1.28 | 1.71 | 2.3 | 162 | 32/135 | 2.30 | 🟡 marginale (solo 24% pass +) |
+| 225JPY (Nikkei) | 1.27 | 2.55 | **0.2** | 33 | 59/149 | 1.73 | 🟡 marginale (DD bassissimo ma pochi trade) |
+
+### 🔑 Conclusioni
+- **EMA200 = il motore PIÙ ROBUSTO finora.** OHLC→tick reali degrada poco e **NESSUN simbolo crolla sotto 1** (contrario di SupRev, dove Dow/ASX/CAC erano illusione OHLC). Merito dei **campioni grandi** (100-180 trade).
+- **6 REGGONO** (PFmed ≥ 1.3): 200AUD, AUDJPY, GBPJPY, SPXUSD, GBPUSD, XAUUSD.
+- **Candidati prop migliori** (DD basso + robusti): **200AUD** (DD 1.4), **SPXUSD** (DD 1.9, 55% pass positivi = molto stabile), **AUDJPY** (180 trade).
+- **Nuove scoperte** (oltre all'Oro già in forward): **200AUD, AUDJPY, GBPJPY, SPXUSD, GBPUSD** → diversificano dal SupRev (metalli/indici) e dal GoldenCross (forex).
+
 ## ✅ Prossimi passi
-- [ ] **Scan EMA200 H1** (`-Tf H1`) → confronto H1 vs H4 (l'EMA200 di default è H4).
-- [ ] **Tick reali H4** sui top: 200AUD, AUDJPY, GBPUSD, SPXUSD, 225JPY, USDNOK, Oro.
-- [ ] Se confermati → preset forward + inserire in `CLASSIFICHE.md`.
+- [ ] Creare **preset forward EMA200** per i 6 validati (200AUD/AUDJPY/GBPJPY/SPXUSD/GBPUSD, oltre a Oro) e metterli in forward → allargare la squadra.
+- [ ] (Opz) **Scan EMA200 H1** per confronto TF.

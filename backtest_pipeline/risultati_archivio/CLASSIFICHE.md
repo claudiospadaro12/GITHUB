@@ -62,7 +62,7 @@ _(GoldenCross OHLC H1 top: Oro 2.01, USDJPY 1.97, GBPUSD 1.78 — tick reali H1 
 |---|---|---|---|
 | **SupertrendReversal** | **H4** (Nasdaq→H1) | Oro, Argento, Nasdaq H1 | ✅ analizzato |
 | **GoldenCross** | **H1** (USDCHF→H4) | Oro, USDJPY (H1); USDCHF (H4) | ✅ analizzato |
-| **EMA200** | **H4** | 200AUD, AUDJPY, GBPUSD, Oro (+ molti) | ✅ H4 fatto (41/47 validi, campioni ampi) |
+| **EMA200** | **H4** | Tick reali: 200AUD 1.59, AUDJPY 1.50, GBPJPY 1.46, SPXUSD 1.44, GBPUSD 1.38, Oro 1.33 | ✅ **il più robusto** (6/8 reggono tick reali, nessuno crolla) |
 | MaxMinNotte | M15 | EURUSD, DAX short | ✅ (EURUSD) |
 | Nightly | M15 | EURUSD | ✅ (EURUSD) |
 | HARSI | M5 | — | scan pronto |
