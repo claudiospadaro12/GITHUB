@@ -12,20 +12,28 @@
 #
 #  PC FISSO, MetaTrader CHIUSO. Ripresa: salta i simboli gia' fatti.
 #
-#  Uso (default = OHLC veloce):
+#  Uso (default = OHLC veloce, BREAKOUT attuale):
 #    powershell -ExecutionPolicy Bypass -File .\conferma_apertura_us.ps1
 #  A TICK REALI (piu' lento, la verita' sui fill dei breakout):
 #    .\conferma_apertura_us.ps1 -Model 4
+#
+#  CONFRONTO MOTORE (la vera domanda: limit batte lo stop?):
+#    STOP  (attuale):  .\conferma_apertura_us.ps1 -Model 4 -EntryMode 0
+#    RETEST (Emiliano): .\conferma_apertura_us.ps1 -Model 4 -EntryMode 2
+#    -> due set di CSV separati (..._brk_... vs ..._retest_...), poi si confrontano.
+#    (RETEST = rottura + ritorno sul livello con LIMIT: niente slippage, SL piu' stretto.)
 # =====================================================================
 param(
   [string[]]$Symbols=@("U30USD","NASUSD"),
   [int]$Model=1,                              # 1=OHLC (veloce) · 4=tick reali (verita')
+  [int]$EntryMode=0,                          # 0=BREAKOUT (stop, attuale) · 2=RETEST (limit, leva Emiliano)
+  [double]$RetestOffset=0,                     # (solo RETEST) offset del limit DENTRO il livello, in punti
+  [string]$EABranch="claude/chat-ea-market-openings-zoba2j", # branch con l'EA aggiornato (RETEST)
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 $EA="ABTG_Nasdaq_Apertura_US"                 # motore US (symbol-agnostico)
-$EABranch="claude/creating-agents-SgGpD"      # dove vivono gli EA di trading
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 
 # --- INPUT: preset apertura + filtro H4 acceso; buffer in mini-griglia ---
@@ -45,8 +53,13 @@ InpRiskPercent=1.0||1.0||0||1.0||N
 InpBufferPoints=200||100||100||400||Y
 "@
 
+# --- modalita' d'ingresso: BREAKOUT (stop) vs RETEST (limit) ---
+$Inputs += "`nInpEntryMode=$EntryMode||$EntryMode||0||$EntryMode||N"
+if($EntryMode -eq 2){ $Inputs += "`nInpRetestOffsetPts=$RetestOffset||$RetestOffset||0||$RetestOffset||N" }
+
 $mtag = if($Model -eq 4){"realtick"}else{"ohlc"}
-$EAtag="APERT_US_M5_$mtag"
+$etag = if($EntryMode -eq 2){"retest"}else{"brk"}
+$EAtag="APERT_US_M5_${etag}_$mtag"
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== CONFERMA APERTURA US (M5, Model $Model) su $($Symbols -join ', ') ===" -ForegroundColor Cyan
 New-Item -ItemType Directory -Force -Path (Join-Path $Work "src_v2"),(Join-Path $Work "ini_apert") | Out-Null
