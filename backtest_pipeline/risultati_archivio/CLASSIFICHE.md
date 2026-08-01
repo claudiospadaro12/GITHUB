@@ -1,6 +1,6 @@
 # 🏆 CLASSIFICHE CONSOLIDATE — EA · Simboli · Strategie
 
-_Vista unica di tutte le classifiche. Aggiornato: 2026-07-31._
+_Vista unica di tutte le classifiche. Aggiornato: 2026-08-01 (13 EA in forward, EMA200 inclusi)._
 _Fonti: `CLASSIFICA_PF.md` (PF backtest), `CLASSIFICA_STRATEGIE.md` (matrice motori), analisi tick reali per strategia._
 _Regola d'oro: conta il **PF a TICK REALI** (non l'OHLC, che sovrastima) e il **DD basso** (per la prop)._
 
