@@ -54,6 +54,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
 - **28/07:** scan SupRev H4 (48 simboli) analizzato · guardiano creato · studio-apertura EA esteso (MAE/MFE) · launcher validazione tick-reali.
 - **29/07:** FOMC configurato+attivato (buy scattato) · BCE preparata (10/09) · **trovato bug sistemico gestione Hedge** (SelectMyPosition) · fix su 5 EA apertura + OCO su PostNews (pushati sul default) · short Nasdaq riattivato.
 - **30/07:** validazione **tick reali** SupRev (Oro/Argento reggono, DAX/Nikkei marginali, **Dow/ASX scartati**) · 4 preset robusti creati e messi **in forward** · scan **H1** partito · dashboard promemoria riordinata.
+- **01/08:** VPS confermato da Claudio: **squadra forward 8/8 ATTACCATA** (5 SupRev: XAUUSD/XAGUSD/D30EUR/225JPY H4 + NASUSD H1; 3 GoldenCross: USDCHF/USDCAD/NZDUSD H4). ⚠️ DA VERIFICARE ancora: (1) ricompilazione fatta (F7 → InpUseVwapFilter/InpUseOCO presenti), (2) abtg_news.csv in MQL5/Files, (3) morti spenti (DAX_M3/Londra_ORB/Live5m/ORB/ORB_Fibo).
 - **30/07 (sera) — STUDIO APERTURE M5 (8 indici) analizzato:**
   - Metrica: aspettativa R/trade. **Solo indici USA hanno edge; EU (tranne DAX marginale) NO.**
   - **Dow (U30USD): ⭐ +0,126 R/trade col filtro H4** (+0,074 cieco). **Nasdaq: +0,055 SOLO col filtro H4** (cieco ≈ 0). DAX: marginale (+0,026 cieco, filtro H4 lo PEGGIORA). S&P/IBEX/EuroStoxx/CAC/FTSE: **negativi → scartati** (evitati 5 EA perdenti).
