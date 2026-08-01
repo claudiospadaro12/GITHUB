@@ -78,6 +78,6 @@ _(Compilato da Claude dal CSV dell'exporter. In attesa del primo file.)_
 ---
 
 ## STORICO SINTESI (una riga per settimana)
-| Settimana | Trade tot | P/L tot | Miglior EA | Peggior EA | Note |
+| Settimana | Trade tot | P/L tot | Miglior simbolo | Peggior simbolo | Note |
 |---|---|---|---|---|---|
-| — | | | | | |
+| 24-31/07 | 84 | **−186,81 €** (PF 0,90, DD 18,2%) | NASUSD +586 · EURUSD +314 | **D30EUR −885** | ⚠️ PRE-FIX: buco DAX = bug doppioni/Hedge corretto il 01/08. Senza DAX ≈ +700. Short −698 vs Long +512 (settimana reversal). Forward pulito dal 01/08. |
