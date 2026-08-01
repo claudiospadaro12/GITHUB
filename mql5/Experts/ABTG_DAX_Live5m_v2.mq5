@@ -204,6 +204,7 @@ input int    InpAtrPeriodMgmt   = 14;                 // Periodo ATR per gestion
 input double InpTP1_R           = 1.0;                // 1o obiettivo in R (se non uso i numeri tondi)
 input double InpTP1_ClosePct    = 50;                 // % di posizione chiusa al 1o obiettivo (piano: "dimezzo")
 input bool   InpBreakevenAtTP1  = true;               // Sposta stop in pari dopo la parziale
+input double InpBEatR           = 0;                  // BE indipendente: sposta SL a pari a questo R (0=off; NON chiude nulla)
 input bool   InpUseTrailing     = true;               // Attiva trailing stop
 input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Tipo di trailing
 input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
@@ -260,6 +261,7 @@ double   gRangeLow  = 0;
 ulong    gBuyTicket = 0;           // ticket ordine pendente buy
 ulong    gSellTicket= 0;           // ticket ordine pendente sell
 bool     gPartialDone = false;     // parziale gia' eseguita?
+bool     gBEdone      = false;     // BE indipendente (InpBEatR) gia' eseguito?
 
 // calendario news caricato da file CSV
 datetime gNewsTime[];              // orario evento (server, gia' shiftato)
@@ -501,6 +503,7 @@ void ResetDay()
    gBuyTicket  = 0;
    gSellTicket = 0;
    gPartialDone= false;
+   gBEdone     = false;
    ABTGLog("nuovo giorno: stato resettato, in attesa dell'apertura.");
   }
 
@@ -947,6 +950,24 @@ void ManagePosition()
                  }
               }
            }
+        }
+     }
+
+   //--- 2b) BREAK-EVEN INDIPENDENTE (a InpBEatR, senza chiudere nulla)
+   if(InpBEatR > 0 && !gBEdone)
+     {
+      int dirSignBE = (type == POSITION_TYPE_BUY) ? +1 : -1;
+      double beTarget = openP + dirSignBE*riskDist*InpBEatR;
+      bool beHit = (type == POSITION_TYPE_BUY) ? (bid >= beTarget) : (ask <= beTarget);
+      if(beHit)
+        {
+         double be = NormalizePrice(openP);
+         // sposta a BE solo se migliora lo stop (mai arretrare)
+         if((type==POSITION_TYPE_BUY  && (be>sl || sl==0)) ||
+            (type==POSITION_TYPE_SELL && (be<sl || sl==0)))
+            gTrade.PositionModify(ticket, be, tp);
+         gBEdone = true;
+         ABTGLog(StringFormat("BE indipendente @ %.5f R=%.2f: stop a pari.", beTarget, InpBEatR));
         }
      }
 
