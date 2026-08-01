@@ -31,6 +31,7 @@ Metodo: con calma, **sui numeri**, fatto bene. C'è tempo. **Backtestare TUTTI g
    - **FASE 1 — TF ALTI (H4 / D1):** SupRev H4✅ · GoldenCross H4✅ · **EMA200 H4** ⬅️ prossimo · SuperWave H4 · FiboH4 H4 · PTE H4 · SupertrendInvert H4 · WOL D1.
    - **FASE 2 — TF MEDI (H1 / M30):** GoldenCross H1 🔄 (in corso) · SupRev H1✅ · EMA200 H1 · SuperWave H1 · SupertrendInvert H1 · SupRev/GC/EMA200 M30 (check).
    - **FASE 3 — TF BASSI (M15 / M5) + perfezionare aperture:** HARSI M5/M15 · **aperture DAX/Nasdaq** (perfezionare, es. variante RETEST) · MaxMinNotte / Live5m sui loro TF. *(Qui i tick reali sono decisivi: sotto H1 lo spread mangia l'edge — apertura M5 crollata da 1,84 a 1,16.)* → più per il **conto personale** che per la prop.
+     - 🎯 **DAX M3 (idea Claudio 01/08):** DOPO aver trovato il motore M5 sulle aperture, **riprovare/ridisegnare il DAX su M3** portandoci sopra il motore M5 validato + la gestione migliore (BE/trailing dallo studio gestione). NB: il DAX_M3 *originale* è scartato (whipsaw sui falsi break, rumore M3, R/R invertito) → questo è un **redesign sperimentale**, non la riaccensione del vecchio.
 8. 🔵 (Opz) validare a tick reali i forex SupRev H4 promettenti: AUDJPY (short), GBPJPY (long).
 
 ### 🛠️ DA COSTRUIRE (Claude, quando arrivano i dati)
