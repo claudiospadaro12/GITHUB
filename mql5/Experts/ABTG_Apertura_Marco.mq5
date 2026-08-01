@@ -281,8 +281,12 @@ double   gRangeHigh = 0;
 double   gRangeLow  = 0;
 ulong    gBuyTicket = 0;           // ticket ordine pendente buy
 ulong    gSellTicket= 0;           // ticket ordine pendente sell
-bool     gPartialDone = false;     // parziale gia' eseguita?
-bool     gBEdone      = false;     // BE indipendente (InpBEatR) gia' eseguito?
+// gestione PER-TICKET (Hedge-safe): ogni posizione ha il SUO stato, cosi'
+// parziale e breakeven scattano su OGNI posizione aperta, non solo la prima.
+// (Prima erano due bool globali -> con piu' posizioni la gestione saltava:
+//  i profitti tornavano indietro fino allo stop pieno.)
+ulong    gPartialTk[];             // ticket con parziale gia' eseguita
+ulong    gBETk[];                  // ticket con BE indipendente gia' eseguito
 
 // calendario news caricato da file CSV
 datetime gNewsTime[];              // orario evento (server, gia' shiftato)
@@ -523,8 +527,8 @@ void ResetDay()
    gRangeLow   = 0;
    gBuyTicket  = 0;
    gSellTicket = 0;
-   gPartialDone= false;
-   gBEdone     = false;
+   ArrayResize(gPartialTk, 0);
+   ArrayResize(gBETk, 0);
    ABTGLog("nuovo giorno: stato resettato, in attesa dell'apertura.");
   }
 
@@ -956,26 +960,47 @@ void HandleOCO()
 //+------------------------------------------------------------------+
 //| Gestione posizione: parziale al 1o target, breakeven, trailing  |
 //+------------------------------------------------------------------+
+//--- helper stato gestione per-ticket (Hedge-safe) ---
+bool TkDone(ulong t, const ulong &arr[]) { for(int i=ArraySize(arr)-1;i>=0;i--) if(arr[i]==t) return(true); return(false); }
+void TkMark(ulong t, ulong &arr[]) { if(TkDone(t,arr)) return; int n=ArraySize(arr); ArrayResize(arr,n+1); arr[n]=t; }
+
 void ManagePosition()
   {
-   if(!SelectMyPosition()) return;
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   // Hedge-safe: gestisco OGNI mia posizione (simbolo+magic), una per una.
+   // Prima si gestiva solo la PRIMA -> le altre restavano senza parziale/BE
+   // e i profitti tornavano indietro fino allo stop pieno.
+   for(int _i=PositionsTotal()-1; _i>=0; _i--)
+     {
+      ulong ticket = PositionGetTicket(_i);
+      if(ticket==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      ManageOneTicket(ticket, bid, ask);
+     }
+  }
 
+//+------------------------------------------------------------------+
+//| Gestione di UNA posizione (gia' selezionata da PositionGetTicket)|
+//|  parziale + breakeven + trailing, con stato PER-TICKET.          |
+//+------------------------------------------------------------------+
+void ManageOneTicket(ulong ticket, double bid, double ask)
+  {
    long   type   = PositionGetInteger(POSITION_TYPE);
    double openP  = PositionGetDouble(POSITION_PRICE_OPEN);
    double sl     = PositionGetDouble(POSITION_SL);
    double tp     = PositionGetDouble(POSITION_TP);
    double vol    = PositionGetDouble(POSITION_VOLUME);
-   ulong  ticket = PositionGetInteger(POSITION_TICKET);
 
-   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   bool partialDone = TkDone(ticket, gPartialTk);
 
    // distanza di rischio iniziale (per calcolare 1R)
-   double riskDist = (type == POSITION_TYPE_BUY) ? (openP - InitialSL(openP, sl, type)) : (InitialSL(openP, sl, type) - openP);
+   double riskDist = (type == POSITION_TYPE_BUY) ? (openP - InitialSL(openP, sl, type, partialDone)) : (InitialSL(openP, sl, type, partialDone) - openP);
    if(riskDist <= 0) riskDist = AtrValue()*InpAtrSlMult;
 
    //--- 1) PARZIALE al primo obiettivo
-   if(!gPartialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+   if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
      {
       int dirSign = (type == POSITION_TYPE_BUY) ? +1 : -1;
 
@@ -995,8 +1020,8 @@ void ManagePosition()
            {
             if(gTrade.PositionClosePartial(ticket, closeVol))
               {
-               gPartialDone = true;
-               ABTGLog(StringFormat("1o obiettivo @ %.5f: chiusa parziale %.2f lotti.", target, closeVol));
+               TkMark(ticket, gPartialTk);
+               ABTGLog(StringFormat("1o obiettivo @ %.5f: chiusa parziale %.2f lotti (ticket %I64u).", target, closeVol, ticket));
                //--- 2) BREAKEVEN sul residuo
                if(InpBreakevenAtTP1)
                  {
@@ -1009,7 +1034,7 @@ void ManagePosition()
      }
 
    //--- 2b) BREAK-EVEN INDIPENDENTE (a InpBEatR, senza chiudere nulla)
-   if(InpBEatR > 0 && !gBEdone)
+   if(InpBEatR > 0 && !TkDone(ticket, gBETk))
      {
       int dirSignBE = (type == POSITION_TYPE_BUY) ? +1 : -1;
       double beTarget = openP + dirSignBE*riskDist*InpBEatR;
@@ -1021,8 +1046,8 @@ void ManagePosition()
          if((type==POSITION_TYPE_BUY  && (be>sl || sl==0)) ||
             (type==POSITION_TYPE_SELL && (be<sl || sl==0)))
             gTrade.PositionModify(ticket, be, tp);
-         gBEdone = true;
-         ABTGLog(StringFormat("BE indipendente @ %.5f R=%.2f: stop a pari.", beTarget, InpBEatR));
+         TkMark(ticket, gBETk);
+         ABTGLog(StringFormat("BE indipendente @ %.5f R=%.2f: stop a pari (ticket %I64u).", beTarget, InpBEatR, ticket));
         }
      }
 
@@ -1033,13 +1058,13 @@ void ManagePosition()
         {
          double newSL = TrailStopBuy(bid);
          if(newSL > 0 && newSL > sl && newSL > openP)
-            gTrade.PositionModify(ticket, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
+            gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
         }
       else if(type == POSITION_TYPE_SELL)
         {
          double newSL = TrailStopSell(ask);
          if(newSL > 0 && (newSL < sl || sl == 0) && newSL < openP)
-            gTrade.PositionModify(ticket, NormalizePrice(newSL), PositionGetDouble(POSITION_TP));
+            gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
         }
      }
   }
@@ -1074,9 +1099,9 @@ double TrailStopSell(double ask)
 //| Stima dello stop iniziale (se e' gia' stato spostato a BE uso    |
 //| l'ATR come riferimento per il calcolo di R)                      |
 //+------------------------------------------------------------------+
-double InitialSL(double openP, double curSL, long type)
+double InitialSL(double openP, double curSL, long type, bool partialDone)
   {
-   if(gPartialDone || curSL == 0)
+   if(partialDone || curSL == 0)
       return((type == POSITION_TYPE_BUY) ? openP - AtrValue()*InpAtrSlMult
                                           : openP + AtrValue()*InpAtrSlMult);
    return(curSL);
