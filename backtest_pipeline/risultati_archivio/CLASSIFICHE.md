@@ -84,8 +84,15 @@ _(GoldenCross OHLC H1 top: Oro 2.01, USDJPY 1.97, GBPUSD 1.78 — tick reali H1 
 | GoldenCross | USDCHF | H4 | ~2.6 | 1.9 | 770331 |
 | GoldenCross | USDCAD | H4 | ~1.6 | 3.0 | 770332 |
 | GoldenCross | NZDUSD | H4 | ~1.7 | 2.8 | 770333 |
+| EMA200 | 200AUD (ASX) | H4 | 1.59 | 1.4 | 771511 |
+| EMA200 | AUDJPY | H4 | 1.50 | 2.5 | 771512 |
+| EMA200 | GBPJPY | H4 | 1.46 | 3.4 | 771513 |
+| EMA200 | SPXUSD (S&P) | H4 | 1.44 | 1.9 | 771514 |
+| EMA200 | GBPUSD (SHORT) | H4 | 1.38 | 4.2 | 771515 |
 
-→ In demo dal 30/07. Serve **tempo**: pagella forward reale ~2-3 mesi → walk-forward IS/OOS → dry-run prop 100k.
+_(5 EMA200 aggiunti 01/08 → squadra da 8 a **13 EA**, 3 strategie. Oro EMA200 già coperto da EMA200_Ott 771501, non duplicato.)_
+
+→ In demo dal 30/07 (EMA200 dal 01/08). Serve **tempo**: pagella forward reale ~2-3 mesi → walk-forward IS/OOS → dry-run prop 100k.
 
 **⭐ Candidati prop-grade (DD più basso):** Nasdaq H1 (1.2%), Oro H4 (1.2%), Nikkei H4 (0.14%), GoldenCross USDCHF (1.9%).
 
