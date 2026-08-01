@@ -41,7 +41,24 @@ La fonte spiega ESATTAMENTE la nostra strategia PostNews e dice che **"è meccan
 - Ha **bruciato un conto da 10k** lunedì sull'oro (discrezionale) → conferma: NON meccanizzare l'oro discrezionale.
 - Regole personali/scalping: uscita a tempo ("6 min 20 sec", "target 15-20 min"), ingresso in M5/M15 su livello H1, scenari A/B/C, volumi crescenti/decrescenti, max/min notte, retest. Framework che si sovrappone al motore apertura.
 
+## Paolo — 30/07 (Japan/JPY: EMA200 reversal + struttura) → ✅ arricchisce ABTG_EMA200
+Contesto: giornata di forte rafforzamento JPY su tutti i cross (fattore macro, BoJ/rifugio). Paolo non ha tradato ma spiega il metodo su AUD/NZD e Nasdaq.
+- **EMA200 reversal (2 scenari alla media 200):**
+  - (a) prezzo **sente la media 200 e torna** → ritracciamento ~50% dell'area, prende liquidità, riparte → *questa è la nostra configurazione EMA200 reversal*.
+  - (b) prezzo **rompe** la media → pullback a 23.6/38.2 **sulla EMA200**, poi prosegue il trend.
+- ⭐ **NOVITÀ azionabile — laddering a 2 ordini sull'EMA200:**
+  - **1° ordine pendente SULLA media 200** (non lontano: "se ipotizzo un rimbalzo, pendente sulla media").
+  - **2° ordine a Fibonacci 127** (proiezione) come copertura; quando il prezzo fa il **pullback sulla media 200**, si **chiude il 2° ordine in pari (BE)**.
+- ⭐ **Filtro VOLUME alla media 200:** arriva con **volumi crescenti → rompe** (continuazione); **volumi decrescenti → rimbalza** (reversal). Discrimina scenario (a) vs (b).
+- **Struttura (già nota, ribadita):** BOS vs cambio di carattere; serve **candela WEEKLY confermata** per validare la rottura ("finché il weekly non chiude sotto, non è short"); massimi/minimi decrescenti = microtrend ribassista.
+- **Imbalance/FVG:** si aspetta candela che **chiude l'imbalance** prima di ripartire (conferma filtro FVG già segnato).
+- **Bollinger:** dopo espansione la banda "si deve chiudere" → prezzo ritesta la **mediana** (confluenza media 9/21) = mean-reversion (conferma Bollinger squeeze già segnato).
+- **AZIONE:** valutare per `ABTG_EMA200` la variante **reversal a 2 ordini** (pendente su EMA200 + copertura a 127, chiusura 2° in pari sul pullback) e il **filtro volume** crescente/decrescente alla media.
+
+## Emiliano — 31/07 → ⛔ nessun contenuto (registrazione di soli saluti, vuota)
+
 ## Refinement estratti (da fare)
 1. Filtro **ADR-distanza** su `ABTG_EMA200` (Paolo 28/07).
 2. Correlazione **petrolio→DAX** nel report giornaliero (Emiliano 26/07).
 3. (Opzionale) filtro **VWAP 15min** come conferma sul motore apertura (Emiliano 20/07).
+4. (Nuovo, Paolo 30/07) `ABTG_EMA200` **reversal a 2 ordini** (pendente su EMA200 + copertura Fibo 127, 2° in pari sul pullback) + **filtro volume** alla media (crescente=rompe / decrescente=rimbalza).
