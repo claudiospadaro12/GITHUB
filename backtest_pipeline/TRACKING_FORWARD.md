@@ -29,6 +29,16 @@ Claudio carica il CSV qui → Claude parsa, calcola e compila le tabelle sotto.
 | 770511 | SuperWave_DOW_H1_Ottimizzato | U30USD | H1 | 1.52 | 4.0% |
 | 770512 | SuperWave_DAX_H4_Ottimizzato | D30EUR | H4 | 1.28 | 3.3% |
 
+### EMA200 nuovi in forward (attaccati 01/08 su VPS, H4, tick reali PFmed ≥1.3)
+_Motore più robusto finora. Girano in parallelo all'EMA200_Ott oro (771501). Oro NON riattaccato (doppione)._
+| Magic | Strumento | TF | Dir | PFmed reale | DD% |
+|---|---|---|---|---|---|
+| 771511 | 200AUD (ASX) | H4 | LONG | 1.59 | 1.4 |
+| 771512 | AUDJPY | H4 | LONG | 1.50 | 3.1 |
+| 771513 | GBPJPY | H4 | LONG | 1.46 | 3.4 |
+| 771514 | SPXUSD (S&P) | H4 | LONG | 1.44 | 1.9 |
+| 771515 | GBPUSD | H4 | SHORT | 1.38 | 4.2 |
+
 ### Nativi (in forward per verifica, anche i "morti" nel backtest)
 _Girano in parallelo agli ottimizzati (magic diversi). Verdetto backtest tra parentesi._
 | Magic | EA nativo | Note backtest |

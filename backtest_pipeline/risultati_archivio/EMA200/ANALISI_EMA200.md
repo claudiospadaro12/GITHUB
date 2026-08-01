@@ -79,4 +79,4 @@ _Dati H1 in `H1_OHLC/`. 27/48 validi in H1 vs 41/47 in H4._
 ## ✅ Prossimi passi
 - [x] ~~Scan EMA200 H1~~ → fatto, H4 confermato migliore.
 - [x] Preset forward EMA200 creati (200AUD/AUDJPY/GBPJPY/SPXUSD/GBPUSD/Oro H4).
-- [ ] Attaccare i 5 nuovi in forward sul VPS → aggiornare la squadra.
+- [x] Attaccare i 5 nuovi in forward sul VPS (fatto 01/08: 200AUD/AUDJPY/GBPJPY/SPXUSD/GBPUSD H4, magic 771511-771515). Oro NON riattaccato (doppione del 771501). → squadra forward ora 13 EA.
