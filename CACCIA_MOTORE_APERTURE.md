@@ -14,9 +14,9 @@
 | 1 | **STOP breakout** | rompe il range → entra oltre (stop) | ❌ Nasdaq 0,88 · DAX 0,77 · Dow 1,30 (solo Dow vivo) |
 | 2 | **RETEST** (limit) | rompe → rientra sul livello → limit | ❌ **BOCCIATO 02/08**: peggiora Dow (1,30→0,94), Nasdaq 0,73 (DD 27%), DAX 0,79. Selezione avversa (falsi break) |
 | 3 | **RANGE-FADE** | fada gli estremi del range (vendi max, compra min) | 🔄 **IMPLEMENTATO 02/08** (`InpEntryMode=RANGE_FADE`, `InpFadeOffsetPts`). Test tick reali: `confronto_fade.ps1`. Candidato per DAX whipsaw |
-| 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | ⬜ da implementare |
+| 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | 🔄 **IMPLEMENTATO 02/08** (`InpEntryMode=DELAYED`, `InpDelayMinutes`, `InpDelayDirMode`). Entra **a MERCATO** → niente stop da inseguire = niente slippage di rottura. Test: `confronto_ritardata.ps1` |
 | 5 | **GAP-FILL** | se apre in gap, opera verso la chiusura prec. | ⬜ già nel codice (InpEntryMode=GAPFILL), da testare |
-| 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | ⬜ idea |
+| 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | 🔄 **IMPLEMENTATO 02/08** come sotto-modo del #4: `InpDelayDirMode=2` (direzione del corpo della candela di apertura). Nella griglia del test #4 |
 | 7 | **ORB 15 min** (idea Claudio) | range primi 15 min (DAX 09:00-09:15 IT = 08:00-08:15 server), poi rottura. Salta il whipsaw iniziale | ⬜ **già testabile:** `InpRangeMinutes=15` + STOP o RETEST. Sweep InpRangeMinutes = 5/15/30 |
 
 ## 🔧 FILTRI DA SOVRAPPORRE (su ogni motore, uno alla volta)
@@ -40,12 +40,27 @@
 ### 🔑 VERDETTO 02/08: famiglia BREAKOUT (stop+limit) ELIMINATA per DAX/Nasdaq apertura.
 Solo **Dow STOP 1,30** sopravvive (conto personale). Il RETEST è selezione avversa (falsi break). **Prossimi motori da provare: RANGE-FADE (#3) e ORB-15/entrata ritardata (#7/#4).**
 
+## ▶️ I DUE TEST PRONTI ADESSO (PC di backtest, MT5 CHIUSO, uno alla volta)
+Entrambi girano su DAX + Dow + Nasdaq a **tick reali**. Lancia il primo, mandami i risultati, poi il secondo.
+
+```powershell
+# 1) RANGE-FADE (motore #3) — fada gli estremi del range
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_fade.ps1" | iex
+
+# 2) ENTRATA RITARDATA / FIRST-CANDLE (motori #4 e #6) — aspetta e poi entra a mercato
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_ritardata.ps1" | iex
+```
+Il test #2 gira da solo la griglia **attesa 15/30/45 min × direzione break/mid/candela** (9 combo per simbolo).
+Cartelle prodotte sul Desktop: `risultati_APERT_*_fade_realtick` e `risultati_APERT_*_delay_realtick` → zippa e caricamele.
+
 ## 🧭 LOGICA DI CACCIA (come decidiamo il prossimo passo)
-1. Il RETEST batte lo STOP? → se sì su Nasdaq, si rifinisce (offset, filtri). Se no →
-2. Prova **RANGE-FADE** (il Nasdaq apre spesso con spike + ritorno).
-3. Prova **ENTRATA RITARDATA** (salta il rumore dei primi minuti).
-4. Su ognuno, aggiungi **1 filtro alla volta** (VWAP → volume → ora → ADR) e rimisura.
-5. Ogni risultato → riga nel registro sopra. **Si tiene solo ciò che regge i tick reali.**
+1. ~~Il RETEST batte lo STOP?~~ → **no, bocciato 02/08**.
+2. Prova **RANGE-FADE** (il Nasdaq apre spesso con spike + ritorno) — implementato, test pronto.
+3. Prova **ENTRATA RITARDATA / FIRST-CANDLE** (salta il rumore dei primi minuti) — implementato, test pronto.
+4. Se anche questi falliscono → **ORB-15** (#7, `-RangeMin 15`) e **GAP-FILL** (#5) sono gli ultimi della famiglia.
+5. Su ognuno, aggiungi **1 filtro alla volta** (VWAP → volume → ora → ADR) e rimisura.
+6. Ogni risultato → riga nel registro sopra. **Si tiene solo ciò che regge i tick reali.**
+> Se nessun motore supera la barra su Nasdaq/DAX, il verdetto onesto è: **l'apertura M5 su quei due non ha edge** e resta solo il Dow STOP 1,30 per il conto personale. Chiudere la questione sui numeri è un risultato, non una sconfitta.
 
 ## ✅ Nota
 - Il motore trovato girerà **in demo accanto al nativo** (magic diverso), come da regola.

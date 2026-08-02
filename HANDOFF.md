@@ -1,7 +1,7 @@
 # HANDOFF — punto d'ingresso per una chat nuova
 
 > **Da incollare in una chat nuova:**
-> *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `claude/chat-ea-market-openings-zoba2j` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
+> *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `claude/chat-ea-market-openings-zoba2j` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
 >
 > Ultimo aggiornamento: **2026-08-02**. **Branch unico di lavoro: `claude/chat-ea-market-openings-zoba2j`** (qui è consolidato TUTTO).
 
@@ -9,13 +9,22 @@
 
 ## 🔴 STATO OGGI (02/08) — riparti da qui
 - **ROTTA (vedi `PIANO_PROP.md`):** PROP = priorità n°1. EA prop ideali: **H1**, trade chiusi in **1-2 gg** (max 4), gestione **parziale+BE+trailing**, **DD basso**. Conto personale: **aperture M5**.
-- **⏳ IN CORSO (Claudio, stasera):** backtest **tick reali STOP vs RETEST** su Dow/DAX/Nasdaq apertura M5 (`confronto_aperture.ps1` → `irm ...|iex`). Quando finisce: carica le cartelle `risultati_APERT_*` → confronto STOP vs RETEST.
+- **⏭️ TOCCA A TE (PC di backtest, MT5 CHIUSO, uno alla volta — vedi `CACCIA_MOTORE_APERTURE.md`):**
+  ```powershell
+  # 1) RANGE-FADE (motore #3)
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_fade.ps1" | iex
+  # 2) ENTRATA RITARDATA + FIRST-CANDLE (motori #4 e #6)
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_ritardata.ps1" | iex
+  ```
+  Poi zippa le cartelle `risultati_APERT_*_fade_realtick` / `*_delay_realtick` dal Desktop e caricamele.
 - **FATTO oggi (tutto pushato):**
-  1. **Motore RETEST** (opt-in `InpEntryMode=RETEST`, limit sul ritorno) su Nasdaq/DAX apertura — contro lo slippage che uccide il breakout STOP.
-  2. **FIX gestione PER-TICKET** su TUTTE le aperture (Nasdaq/DAX/Marco): parziale+BE su OGNI posizione (risolve il +800→−700 del 29/07). **Da ricompilare sul VPS per attivarlo in forward.**
-  3. **`REPORT_SETTIMANALE_2026-08-01.md`** + **`PAGELLA_EA_2026-08-01.md`**: statement 24-31/07 net −187€ (buco = DAX intraday, causa bug gestione ora corretto). Pagella per-EA dai COMMENTI ordini.
-  4. **`FLOTTA_ATTIVA.md`**: mappa 52 grafici VPS. Scoperte: **TradeExporter attivo** su NZDCADH1 (scrive `ABTG_Trades.csv` con magic → caricarlo per pagelle perfette); **D30EURM54 vuoto** (verificare).
-- **IPOTESI motore-per-mercato:** Nasdaq direzionale (breakout/RETEST) vs DAX whipsaw (RETEST o, se serve, 3° motore range-fade / entrata ritardata). Dettagli in `PROMEMORIA_APERTURE.md`.
+  1. **Motore RETEST** (opt-in `InpEntryMode=RETEST`) → testato a tick reali e **BOCCIATO**: peggiora il Dow (1,30→0,94), Nasdaq 0,73 (DD 27%), DAX 0,79. Selezione avversa sui falsi break. → **famiglia breakout (stop+limit) ELIMINATA** per DAX/Nasdaq apertura; sopravvive solo **Dow STOP 1,30**.
+  2. **Motore RANGE-FADE** (`InpEntryMode=RANGE_FADE`, `InpFadeOffsetPts`) su Nasdaq/DAX apertura — pensato per il whipsaw. **Da testare.**
+  3. **Motore ENTRATA RITARDATA/CONFERMATA** (`InpEntryMode=DELAYED`, `InpDelayMinutes`, `InpDelayDirMode`) su Nasdaq/DAX apertura: aspetta N minuti e poi entra **a mercato** dalla parte scelta → niente stop da inseguire, niente slippage di rottura. Il modo `InpDelayDirMode=2` copre anche il **first-candle follow**. **Da testare** (griglia 15/30/45 min × break/mid/candela).
+  4. **FIX gestione PER-TICKET** su TUTTE le aperture (Nasdaq/DAX/Marco): parziale+BE su OGNI posizione (risolve il +800→−700 del 29/07). **Da ricompilare sul VPS per attivarlo in forward.**
+  5. **`REPORT_SETTIMANALE_2026-08-01.md`** + **`PAGELLA_EA_2026-08-01.md`**: statement 24-31/07 net −187€ (buco = DAX intraday, causa bug gestione ora corretto). Pagella per-EA dai COMMENTI ordini.
+  6. **`FLOTTA_ATTIVA.md`**: mappa 52 grafici VPS. Scoperte: **TradeExporter attivo** su NZDCADH1 (scrive `ABTG_Trades.csv` con magic → caricarlo per pagelle perfette); **D30EURM54 vuoto** (verificare).
+- **IPOTESI motore-per-mercato:** Nasdaq direzionale vs DAX whipsaw. Il RETEST doveva servire a entrambi e ha fallito su entrambi → ora si prova a **non inseguire affatto la rottura** (fade / entrata ritardata). Registro completo in `CACCIA_MOTORE_APERTURE.md`.
 - **Dato nuovo:** Dow STOP tick reali col fix gestione = **PF 1,30** (era 1,16).
 - **Prossimo passo PROP:** validare **GoldenCross H1 tick reali** (TF preferito di Claudio).
 

@@ -127,7 +127,16 @@ enum ENUM_ABTG_ENTRY
    ABTG_BREAKOUT = 0,   // rottura del range di apertura (piani DAX + Nasdaq)
    ABTG_GAPFILL  = 1,   // chiusura del gap di apertura (tipico USA)
    ABTG_RETEST   = 2,   // rottura + ritorno sul livello con LIMIT (Emiliano: niente slippage)
-   ABTG_RANGE_FADE = 3  // fada gli estremi del range (mercati whipsaw, es. DAX)
+   ABTG_RANGE_FADE = 3, // fada gli estremi del range (mercati whipsaw, es. DAX)
+   ABTG_DELAYED    = 4  // entrata RITARDATA/CONFERMATA: aspetta N minuti, poi entra a mercato dalla parte scelta
+  };
+
+//--- come si sceglie la direzione nell'entrata ritardata (InpEntryMode=DELAYED)
+enum ENUM_ABTG_DELAYDIR
+  {
+   ABTG_DIR_BREAK  = 0,  // prezzo FUORI dal range di apertura (rottura confermata); dentro il range = niente trade
+   ABTG_DIR_MID    = 1,  // prezzo sopra/sotto il centro del range (c'e' sempre una direzione)
+   ABTG_DIR_CANDLE = 2   // direzione del CORPO della candela di apertura (first-candle follow)
   };
 
 enum ENUM_ABTG_RANGE
@@ -178,6 +187,10 @@ input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/ra
 input group "=== Retest (InpEntryMode=RETEST, leva Emiliano) ==="
 input double InpRetestOffsetPts = 0;  // Offset del LIMIT DENTRO il livello, in punti (0=sul livello; >0 entra piu' in profondita', meglio ma piu' no-fill)
 input double InpFadeOffsetPts   = 0;  // (RANGE_FADE) offset del LIMIT OLTRE l'estremo, in punti (0=sull'estremo; >0 fada uno spike piu' ampio)
+
+input group "=== Entrata ritardata/confermata (InpEntryMode=DELAYED) ==="
+input int    InpDelayMinutes = 30;  // Minuti DOPO l'apertura in cui si decide (salta il rumore iniziale)
+input ENUM_ABTG_DELAYDIR InpDelayDirMode = ABTG_DIR_BREAK; // Come si sceglie la direzione al momento della decisione
 
 input group "=== Gap Fill (opzionale, tipico USA) ==="
 input bool   InpUseGapFill    = ABTG_DEF_USE_GAPFILL; // Attiva modalita' gap fill se InpEntryMode=GAPFILL
@@ -509,6 +522,15 @@ void ABTG_OnTick()
             if(nowMin >= refEndMin)
               { if(TryPlaceRangeFade()) gPhase = PH_PLACED; }
            }
+         else if(InpEntryMode == ABTG_DELAYED)
+           {
+            // si decide DOPO InpDelayMinutes dall'apertura, mai prima che il range sia chiuso
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            int decideMin = openMin + InpDelayMinutes;
+            if(decideMin < refEndMin) decideMin = refEndMin;
+            if(nowMin >= decideMin)
+              { if(TryPlaceDelayed()) gPhase = PH_PLACED; }
+           }
          else // BREAKOUT
            {
             int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
@@ -759,6 +781,134 @@ bool TryPlaceRangeFade()
          else
             ABTGLog("BUY LIMIT (fade) fallito: "+gTrade.ResultRetcodeDescription());
         }
+     }
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| Direzione del CORPO della candela di apertura (first-candle):    |
+//|  apertura del primo minuto della finestra vs chiusura dell'ultimo|
+//|  +1 corpo rialzista, -1 ribassista, 0 doji / dati non pronti.    |
+//+------------------------------------------------------------------+
+int OpeningBodyDir()
+  {
+   int openMin = InpSessionHour*60 + InpSessionMin;
+   int fromMin, toMin;
+   if(InpRangeMode == ABTG_RANGE_PREV)
+     { fromMin = openMin - InpPrevWindowMin; toMin = openMin; }
+   else
+     { fromMin = openMin; toMin = openMin + InpRangeMinutes; }
+
+   MqlDateTime d;
+   TimeToStruct(TimeCurrent(), d);
+   d.hour = fromMin/60; d.min = fromMin%60; d.sec = 0;
+   datetime tStart = StructToTime(d);
+   d.hour = toMin/60;   d.min = toMin%60;   d.sec = 0;
+   datetime tEnd   = StructToTime(d);
+
+   int idxStart = iBarShift(_Symbol, PERIOD_M1, tStart, false);
+   int idxEnd   = iBarShift(_Symbol, PERIOD_M1, tEnd,   false);
+   if(idxStart < 0 || idxEnd < 0) return(0);
+
+   // su M1 l'indice piu' ALTO e' la barra piu' vecchia (inizio finestra)
+   double op = iOpen (_Symbol, PERIOD_M1, MathMax(idxStart, idxEnd));
+   double cl = iClose(_Symbol, PERIOD_M1, MathMin(idxStart, idxEnd));
+   if(op <= 0 || cl <= 0) return(0);
+   return(cl > op ? +1 : (cl < op ? -1 : 0));
+  }
+
+//+------------------------------------------------------------------+
+//| ENTRATA RITARDATA / CONFERMATA (motori #4 e #6 del menu caccia). |
+//|  All'apertura c'e' rumore: falsi break, whipsaw. Invece di       |
+//|  piazzare pendenti si ASPETTA InpDelayMinutes, poi si guarda da  |
+//|  che parte il mercato ha scelto di stare e si entra A MERCATO.   |
+//|  Nessuno stop da inseguire -> niente slippage di rottura (il     |
+//|  difetto che ha ucciso lo STOP breakout su Nasdaq/DAX).          |
+//|  Direzione secondo InpDelayDirMode:                              |
+//|    BREAK  = prezzo fuori dal range (rottura confermata)          |
+//|    MID    = prezzo sopra/sotto il centro del range               |
+//|    CANDLE = direzione del corpo della candela di apertura        |
+//|  SL: bordo opposto del range (o ATR), come nel breakout.         |
+//+------------------------------------------------------------------+
+bool TryPlaceDelayed()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("DELAYED: livelli non ancora calcolabili: riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("DELAYED: range %.0f pt < min %.0f: niente trade.", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("DELAYED: range %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK()) { ABTGLog("DELAYED: spread troppo alto: niente trade."); return(true); }
+   if(!VolumeOK()) { ABTGLog("DELAYED: volumi insufficienti: niente trade (regola Emiliano)."); return(true); }
+
+   //--- 1) la direzione CONFERMATA dopo l'attesa
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   if(bid <= 0 || ask <= 0) { ABTGLog("DELAYED: prezzi non disponibili: riprovo."); return(false); }
+
+   int dir = 0;
+   if(InpDelayDirMode == ABTG_DIR_BREAK)
+     {
+      if(bid > gRangeHigh)     dir = +1;
+      else if(bid < gRangeLow) dir = -1;
+      else
+        { ABTGLog("DELAYED: dopo l'attesa il prezzo e' ANCORA dentro il range: nessuna direzione, niente trade."); return(true); }
+     }
+   else if(InpDelayDirMode == ABTG_DIR_MID)
+     {
+      double mid = (gRangeHigh + gRangeLow) / 2.0;
+      dir = (bid >= mid) ? +1 : -1;
+     }
+   else // ABTG_DIR_CANDLE: seguo il corpo della candela di apertura
+     {
+      dir = OpeningBodyDir();
+      if(dir == 0)
+        { ABTGLog("DELAYED: candela di apertura senza corpo (doji) o dati non pronti: niente trade."); return(true); }
+     }
+
+   //--- 2) filtri di trend: se il bias contrasta la direzione, si sta fuori
+   int bias = TrendBias();                 // 0 = nessun vincolo, 2 = conflitto (blocca tutto)
+   if(bias != 0 && bias != dir)
+     { ABTGLog(StringFormat("DELAYED: direzione %d bocciata dal filtro di trend (bias %d): niente trade.", dir, bias)); return(true); }
+   if(dir > 0 && !InpAllowLong)  { ABTGLog("DELAYED: long non consentito: niente trade.");  return(true); }
+   if(dir < 0 && !InpAllowShort) { ABTGLog("DELAYED: short non consentito: niente trade."); return(true); }
+
+   //--- 3) stop sul bordo opposto del range (o ATR), col floor minimo
+   double entry = (dir > 0) ? ask : bid;
+   double sl    = (InpSLMode == ABTG_SL_RANGE)
+                  ? ((dir > 0) ? gRangeLow : gRangeHigh)
+                  : ((dir > 0) ? entry - AtrValue()*InpAtrSlMult : entry + AtrValue()*InpAtrSlMult);
+   sl = NormalizePrice(sl);
+   double dist = (dir > 0) ? (entry - sl) : (sl - entry);
+   if(dist <= 0)
+     { ABTGLog("DELAYED: stop dalla parte sbagliata (prezzo gia' oltre il bordo opposto): niente trade."); return(true); }
+   if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+     {
+      if(InpSkipIfTight)
+        { ABTGLog(StringFormat("DELAYED: stop %.0f pt < floor %.0f pt: trade saltato.", dist/_Point, InpMinStopPts)); return(true); }
+      sl   = NormalizePrice((dir > 0) ? entry - InpMinStopPts*_Point : entry + InpMinStopPts*_Point);
+      dist = (dir > 0) ? (entry - sl) : (sl - entry);
+     }
+
+   double lot = CalcLotByRisk(dist);
+   if(lot <= 0) { ABTGLog("DELAYED: lotto calcolato a 0: niente trade."); return(true); }
+   double tp = (InpTP1_R > 0) ? NormalizePrice((dir > 0) ? entry + dist*TpTotalR() : entry - dist*TpTotalR()) : 0.0;
+
+   if(dir > 0)
+     {
+      if(gTrade.Buy(lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" DELAY BUY"))
+        { gBuyTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("BUY a mercato (ritardata) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+      else
+         ABTGLog("BUY a mercato (ritardata) fallito: "+gTrade.ResultRetcodeDescription());
+     }
+   else
+     {
+      if(gTrade.Sell(lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" DELAY SELL"))
+        { gSellTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("SELL a mercato (ritardata) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+      else
+         ABTGLog("SELL a mercato (ritardata) fallito: "+gTrade.ResultRetcodeDescription());
      }
    return(true);
   }

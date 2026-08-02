@@ -17,14 +17,23 @@
 #    powershell -ExecutionPolicy Bypass -File .\conferma_apertura_dax.ps1 -Model 4 -EntryMode 0
 #    powershell -ExecutionPolicy Bypass -File .\conferma_apertura_dax.ps1 -Model 4 -EntryMode 2
 #    -> due set di CSV separati (..._brk_... vs ..._retest_...), poi si confrontano.
+#
+#  ENTRATA RITARDATA/CONFERMATA (motore #4 della caccia, dopo il fade):
+#    .\conferma_apertura_dax.ps1 -Model 4 -EntryMode 4
+#    Aspetta N minuti dall'apertura, poi entra A MERCATO dalla parte che il
+#    mercato ha scelto -> niente stop da inseguire, niente slippage di rottura.
+#    Griglia automatica: attesa 15/30/45 min x direzione break/mid/candela.
+#    CSV in ..._delay_realtick.
 # =====================================================================
 param(
   [string[]]$Symbols=@("D30EUR"),
   [int]$Model=1,                              # 1=OHLC (veloce) · 4=tick reali (verita')
-  [int]$EntryMode=0,                          # 0=BREAKOUT (stop) · 2=RETEST (limit) · 3=RANGE_FADE (fada gli estremi)
+  [int]$EntryMode=0,                          # 0=BREAKOUT (stop) · 2=RETEST (limit) · 3=RANGE_FADE (fada gli estremi) · 4=DELAYED (entrata ritardata)
   [double]$RetestOffset=0,                     # (solo RETEST) offset del limit DENTRO il livello, in punti
   [double]$FadeOffset=0,                        # (solo RANGE_FADE) offset del limit OLTRE l'estremo, in punti
   [int]$RangeMin=0,                            # se >0 forza InpRangeMinutes (es. 15 = ORB dei primi 15 min)
+  [int]$DelayMin=0,                            # (solo DELAYED) minuti d'attesa; 0 = griglia 15/30/45
+  [int]$DelayDir=-1,                           # (solo DELAYED) 0=break 1=mid 2=candela; -1 = griglia su tutti e 3
   [string]$EABranch="claude/chat-ea-market-openings-zoba2j", # branch con l'EA aggiornato
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
@@ -51,10 +60,19 @@ InpBufferPoints=200||100||100||400||Y
 $Inputs += "`nInpEntryMode=$EntryMode||$EntryMode||0||$EntryMode||N"
 if($EntryMode -eq 2){ $Inputs += "`nInpRetestOffsetPts=$RetestOffset||$RetestOffset||0||$RetestOffset||N" }
 if($EntryMode -eq 3){ $Inputs += "`nInpFadeOffsetPts=$FadeOffset||$FadeOffset||0||$FadeOffset||N" }
+if($EntryMode -eq 4){
+  # DELAYED: si entra a MERCATO -> il buffer del pendente non serve, lo fisso e uso
+  # la griglia per ATTESA (15/30/45 min) x MODO DIREZIONE (break / mid / candela).
+  $Inputs = $Inputs -replace 'InpBufferPoints=200\|\|100\|\|100\|\|400\|\|Y','InpBufferPoints=200||200||0||200||N'
+  if($DelayMin -gt 0){ $Inputs += "`nInpDelayMinutes=$DelayMin||$DelayMin||0||$DelayMin||N" }
+  else               { $Inputs += "`nInpDelayMinutes=30||15||15||45||Y" }
+  if($DelayDir -ge 0){ $Inputs += "`nInpDelayDirMode=$DelayDir||$DelayDir||0||$DelayDir||N" }
+  else               { $Inputs += "`nInpDelayDirMode=0||0||1||2||Y" }
+}
 if($RangeMin -gt 0){ $Inputs += "`nInpRangeMinutes=$RangeMin||$RangeMin||0||$RangeMin||N" }
 
 $mtag = if($Model -eq 4){"realtick"}else{"ohlc"}
-$etag = if($EntryMode -eq 3){"fade"}elseif($EntryMode -eq 2){"retest"}else{"brk"}
+$etag = if($EntryMode -eq 4){"delay"}elseif($EntryMode -eq 3){"fade"}elseif($EntryMode -eq 2){"retest"}else{"brk"}
 if($RangeMin -gt 0){ $etag = "${etag}_orb$RangeMin" }
 $EAtag="APERT_DAX_M5_${etag}_$mtag"
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
