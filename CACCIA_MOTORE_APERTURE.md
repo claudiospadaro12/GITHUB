@@ -11,8 +11,8 @@
 ## 🧰 MENU DEI MOTORI D'INGRESSO (da testare uno alla volta)
 | # | Motore | Idea | Stato |
 |---|---|---|---|
-| 1 | **STOP breakout** | rompe il range → entra oltre (stop) | ❌ Nasdaq 0,82 (slippage) |
-| 2 | **RETEST** (limit) | rompe → rientra sul livello → limit | 🔄 in test tick reali |
+| 1 | **STOP breakout** | rompe il range → entra oltre (stop) | ❌ Nasdaq 0,88 · DAX 0,77 · Dow 1,30 (solo Dow vivo) |
+| 2 | **RETEST** (limit) | rompe → rientra sul livello → limit | ❌ **BOCCIATO 02/08**: peggiora Dow (1,30→0,94), Nasdaq 0,73 (DD 27%), DAX 0,79. Selezione avversa (falsi break) |
 | 3 | **RANGE-FADE** | fada gli estremi del range (vendi max, compra min) | ⬜ da implementare se 1-2 falliscono |
 | 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | ⬜ da implementare |
 | 5 | **GAP-FILL** | se apre in gap, opera verso la chiusura prec. | ⬜ già nel codice (InpEntryMode=GAPFILL), da testare |
@@ -30,9 +30,15 @@
 ## 📋 REGISTRO PROVE (si aggiorna a ogni test)
 | Data | Simbolo | Motore | Filtri | PF med | DD% | Trade | Esito |
 |---|---|---|---|---|---|---|---|
-| 01/08 | NASUSD | STOP | H4 | 0,82 | 17 | — | ❌ morto |
-| 02/08 | U30USD | STOP | H4 (+fix gest.) | 1,30 | 7,9 | 348 | 🟡 debole ma vivo |
-| 02/08 | NAS/DAX/Dow | STOP vs RETEST | — | _in corso_ | | | 🔄 |
+| 02/08 | U30USD (Dow) | STOP | H4+fix gest. | 1,30 | 7,9 | 348 | 🟢 unico vivo (conto pers.) |
+| 02/08 | U30USD (Dow) | RETEST | — | 0,94 | 11,0 | 452 | ❌ peggiora lo STOP |
+| 02/08 | D30EUR (DAX) | STOP | — | 0,77 | 7,2 | 440 | ❌ morto (whipsaw) |
+| 02/08 | D30EUR (DAX) | RETEST | — | 0,79 | 7,5 | 436 | ❌ morto |
+| 02/08 | NASUSD | STOP | — | 0,88 | 14,5 | 328 | ❌ morto |
+| 02/08 | NASUSD | RETEST | — | 0,73 | 26,9 | 455 | ❌ morto (DD 27%) |
+
+### 🔑 VERDETTO 02/08: famiglia BREAKOUT (stop+limit) ELIMINATA per DAX/Nasdaq apertura.
+Solo **Dow STOP 1,30** sopravvive (conto personale). Il RETEST è selezione avversa (falsi break). **Prossimi motori da provare: RANGE-FADE (#3) e ORB-15/entrata ritardata (#7/#4).**
 
 ## 🧭 LOGICA DI CACCIA (come decidiamo il prossimo passo)
 1. Il RETEST batte lo STOP? → se sì su Nasdaq, si rifinisce (offset, filtri). Se no →
