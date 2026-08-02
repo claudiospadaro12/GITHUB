@@ -3,6 +3,9 @@
 > **Da incollare in una chat nuova:** *"Leggi `PROMEMORIA_APERTURE.md` nel branch `claude/ea-market-openings-d79m8l` e riprendi da lì."*
 > Ultimo aggiornamento: **2026-07-30**.
 
+## 🧭 ROTTA (brief 02/08): vedi **`PIANO_PROP.md`**
+**PROP = priorità n°1.** EA prop ideali: **H1**, trade chiusi in **1-2 gg** (max 4), gestione **parziale+BE+trailing** per profitti COSTANTI, **DD basso**. Candidato top: Nasdaq SupRev H1 (DD 1,2%, chiude ~1gg). Prossimo: validare **GoldenCross H1 tick reali**. Conto personale: **aperture M5** (RETEST vs STOP + gestione per-ticket).
+
 ## 🎯 OBIETTIVO DI CLAUDIO — DUE LIVELLI
 1. **EA PROP-GRADE** (pochi, anche 1): DD basso + robusti → per la challenge FTMO. Selezione severa.
 2. **EA "conto personale"**: basta che siano **profittevoli** (anche se non da prop) → qui rientrano aperture e TF bassi. Selezione più permissiva.
