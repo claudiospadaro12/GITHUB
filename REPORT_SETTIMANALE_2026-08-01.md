@@ -40,7 +40,7 @@ Questa settimana (24-31/07) è **PRIMA della ricompilazione VPS del 01/08** che 
 | EURNZD | 3 | −28,11 € | 1/3 | — |
 | U30USD (Dow) | 6 | +99,39 € | 4/6 | 🟢 positivo |
 | EURUSD | 4 | +314,11 € | 4/4 | 🟢 perfetto |
-| **NASUSD (Nasdaq)** | 12 | **+585,78 €** | 10/12 | ⭐ il migliore, 83% win |
+| **NASUSD (Nasdaq)** | 12 | **+585,78 €** | 10/12 | ⭐ il migliore, 83% win — **~518 € dall'APERTURA M5** (10 trade aperti 14:30-14:44 server), solo ~67 € da swing/notte. Attribuzione per orario (manca magic). |
 
 ### 🧭 LONG vs SHORT — enormemente direzionale
 - **LONG: +511,62 €** (36/52 win) 🟢
@@ -61,7 +61,7 @@ Questa settimana (24-31/07) è **PRIMA della ricompilazione VPS del 01/08** che 
 ## 2. 🔑 LE 3 LEZIONI DELLA SETTIMANA
 1. **Il buco è tutto DAX (−885 €)** e la causa NON è il motore ma la **gestione Hedge non scattata**: con più posizioni DAX aperte insieme (29/07), l'EA gestiva una sola posizione → le altre **senza parziale né stop-in-pari** → i profitti (+800) sono tornati a **stop pieno** (−700). **Bug corretto il 01/08** (gestione per-ticket). Senza il DAX la settimana era **≈ +700 €**. → il vero forward parte ora.
 2. **SHORT −698 vs LONG +512**: settimana **anti-trend** (coerente col bias al 25%). Gli short hanno sanguinato. Il DAX apertura era già noto come **"ottimo solo LONG"** → conferma sul campo.
-3. **Nasdaq è il cavallo** (+586, 83% win) — coerente col bias 80% e col fatto che NASUSD H1 SupRev è candidato prop top. **Dow positivo** (+99), **Oro settimana no** (ma size minima).
+3. **Nasdaq è il cavallo** (+586, 83% win) — ma attenzione: **~518 € vengono dall'APERTURA M5** (trade a 14:30 server), non dal SupRev H1. In forward l'apertura Nasdaq sta rendendo, mentre il backtest 2,5 anni la dava a 0,82 → campione piccolo (10 trade) vs lungo periodo: da verificare col RETEST. **Dow positivo** (+99), **Oro settimana no** (ma size minima).
 
 ---
 
@@ -77,7 +77,7 @@ _Una settimana pre-fix non cambia il ranking; lo confermano però Nasdaq/Dow/Lon
 **⭐ TOP prop-grade (DD più basso):**
 1. Nikkei 225 SupRev H4 — DD 0,14%
 2. Oro SupRev H4 — PF 1,46 / DD 1,2%
-3. **Nasdaq SupRev H1 — PF 1,40 / DD 1,2%** ← confermato dal forward (+586 €)
+3. **Nasdaq SupRev H1 — PF 1,40 / DD 1,2%** (NB: il +586 forward è quasi tutto APERTURA M5, non questo — vedi §1)
 4. 200AUD EMA200 H4 — PF 1,59 / DD 1,4%
 5. GoldenCross USDCHF H4 — PF ~2,6 / DD 1,9%
 
