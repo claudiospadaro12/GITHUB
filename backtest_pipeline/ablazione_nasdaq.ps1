@@ -10,6 +10,13 @@
 #  Questa scala lo dice: si aggiunge UN filtro alla volta e si guarda
 #  come si muovono INSIEME il PF e il numero di trade.
 #
+#  IL METRO DEL CAMPIONE (osservazione di Claudio, ed e' quella giusta):
+#   2,5 anni = ~625 giorni di borsa. Un'apertura M5 si imposta QUASI OGNI GIORNO.
+#   Il motore nudo faceva 328 trade (~52% dei giorni: normale, con gli ordini
+#   STOP c'e' il giorno in cui non scatta nulla). 72 trade = 11% dei giorni:
+#   NON e' un filtro, e' una mattanza. Sotto ~150 trade il risultato va guardato
+#   con sospetto, sotto ~80 il PF non e' un dato.
+#
 #  COME SI LEGGE (la parte che conta):
 #   - PF sale e i trade calano poco   -> filtro BUONO, tienilo
 #   - PF fermo e i trade crollano     -> filtro INUTILE, toglilo
@@ -39,15 +46,18 @@ if(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue){
   Write-Host "!!! MetaTrader e' APERTO: chiudilo e rilancia." -ForegroundColor Red; return
 }
 
-# scala cumulativa: si parte dai SOLI livelli del piano (candela H1 precedente),
-# poi si accende un filtro alla volta nell'ordine in cui i documenti li presentano
+# Si parte dai SOLI livelli del piano (candela H1 precedente), poi si accendono
+# i filtri. NB: volumi e ATR sono in OR (come dice il PDF), quindi il gradino 4
+# e' piu' PERMISSIVO dei gradini 2 e 3 presi da soli: e' voluto, serve a vedere
+# quanto campione recupera la conferma "una delle due" rispetto a "solo volumi".
 $scala = @(
-  @{ n="1/6  soli LIVELLI H1 (nessun filtro)"; f="" },
-  @{ n="2/6  + VOLUMI (>= +50%)";              f="vol" },
-  @{ n="3/6  + ATR (>= media)";                f="vol,atr" },
-  @{ n="4/6  + TREND H4";                      f="vol,atr,h4" },
-  @{ n="5/6  + CORRELAZIONE SPXUSD";           f="vol,atr,h4,corr" },
-  @{ n="6/6  + FILTRO NEWS (piano completo)";  f="vol,atr,h4,corr,news" }
+  @{ n="1/7  soli LIVELLI H1 (nessun filtro)";      f="" },
+  @{ n="2/7  solo VOLUMI (>= +50%)";                f="vol" },
+  @{ n="3/7  solo ATR (>= media)";                  f="atr" },
+  @{ n="4/7  VOLUMI *OPPURE* ATR (conferma PDF)";   f="vol,atr" },
+  @{ n="5/7  + TREND H4";                           f="vol,atr,h4" },
+  @{ n="6/7  + CORRELAZIONE SPXUSD";                f="vol,atr,h4,corr" },
+  @{ n="7/7  + FILTRO NEWS (piano completo)";       f="vol,atr,h4,corr,news" }
 )
 
 foreach($s in $scala){
@@ -56,7 +66,7 @@ foreach($s in $scala){
 }
 
 Write-Host "`n===== ABLAZIONE FINITA =====" -ForegroundColor Green
-Write-Host "Sul Desktop trovi 6 cartelle risultati_APERT_US_M5_doc_brk_*_realtick" -ForegroundColor White
-Write-Host "(nofilt, vol, volatr, volatrh4, volatrh4corr, volatrh4corrnews)." -ForegroundColor White
+Write-Host "Sul Desktop trovi 7 cartelle risultati_APERT_US_M5_doc_brk_*_realtick" -ForegroundColor White
+Write-Host "(nofilt, vol, atr, volatr, volatrh4, volatrh4corr, volatrh4corrnews)." -ForegroundColor White
 Write-Host "Zippale TUTTE e caricamele: ti dico quale filtro porta l'edge e quale" -ForegroundColor White
 Write-Host "sta solo tagliando il campione." -ForegroundColor White

@@ -120,6 +120,9 @@ if($Doc){
   #  (con InpRangeMode=2 il range in minuti non viene usato; se resta "Y" ereditato da una
   #   ottimizzazione precedente, MT5 lo spazzola comunque e moltiplica i pass a vuoto:
   #   e' successo il 02/08, 136 pass per 4 risultati veri)
+  # conferma della rottura: OR (volumi OPPURE ATR) come dice il PDF.
+  # Applicarle a cascata le renderebbe un AND -> campione moltiplicato via.
+  $Inputs = Set-Inp $Inputs "InpConfirmMode"  "0"
   $Inputs = Set-Inp $Inputs "InpRangeMinutes"  "15"
   $Inputs = Set-Inp $Inputs "InpTrailFixedPts" "410"
 

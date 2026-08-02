@@ -128,6 +128,13 @@ enum ENUM_ABTG_ENTRY
    ABTG_DELAYED    = 4  // entrata RITARDATA/CONFERMATA: aspetta N minuti, poi entra a mercato dalla parte scelta
   };
 
+//--- come si combinano le due conferme di rottura (volumi / ATR)
+enum ENUM_ABTG_CONFIRM
+  {
+   ABTG_CONF_OR  = 0,   // basta UNA delle due (PDF: "supportata da aumento di volumi O da una volatilita' coerente")
+   ABTG_CONF_AND = 1    // servono ENTRAMBE (piu' selettivo: taglia molto il campione)
+  };
+
 //--- come si sceglie la direzione nell'entrata ritardata (InpEntryMode=DELAYED)
 enum ENUM_ABTG_DELAYDIR
   {
@@ -258,6 +265,7 @@ input int    InpVolAvgBars       = 20;     // Barre per la media volume
 input bool   InpUseAtrFilter    = false;  // (PDF) Entra solo con volatilita' coerente: ATR >= media ATR
 input int    InpAtrFilterBars   = 20;     // Barre su cui calcolo la media dell'ATR
 input double InpAtrFilterMult   = 1.0;    // ATR ultima barra >= X * media (PDF: "ATR > media")
+input ENUM_ABTG_CONFIRM InpConfirmMode = ABTG_CONF_OR; // Se volumi E ATR sono entrambi accesi: basta una conferma (OR, come il PDF) o servono entrambe (AND)?
 
 input group "=== Generali ==="
 input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
@@ -654,8 +662,7 @@ bool TryPlaceBreakout()
      { ABTGLog(StringFormat("candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
-   if(!VolumeOK()) { ABTGLog("volumi insufficienti alla rottura: niente trade (regola Emiliano)."); return(true); }
-   if(!AtrOK())    { ABTGLog("volatilita' sotto la media (ATR): apertura fiacca, niente trade (PDF)."); return(true); }
+   if(!ConfirmOK()) { ABTGLog("rottura non confermata (ne' volumi ne' ATR sopra la media): niente trade."); return(true); }
 
    double buffer  = EffectiveBuffer();
    double buyPx   = NormalizePrice(gRangeHigh + buffer);
@@ -843,8 +850,7 @@ bool TryPlaceDelayed()
    if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
      { ABTGLog(StringFormat("DELAYED: range %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
    if(!SpreadOK()) { ABTGLog("DELAYED: spread troppo alto: niente trade."); return(true); }
-   if(!VolumeOK()) { ABTGLog("DELAYED: volumi insufficienti: niente trade (regola Emiliano)."); return(true); }
-   if(!AtrOK())    { ABTGLog("DELAYED: volatilita' sotto la media (ATR): niente trade (PDF)."); return(true); }
+   if(!ConfirmOK()) { ABTGLog("DELAYED: rottura non confermata (ne' volumi ne' ATR): niente trade."); return(true); }
 
    //--- 1) la direzione CONFERMATA dopo l'attesa
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -1568,6 +1574,26 @@ bool SpreadOK()
 //+------------------------------------------------------------------+
 //| Volumi in crescita alla rottura? (Emiliano: >= mult * media)     |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| CONFERMA DELLA ROTTURA (PDF, strategia breakout notturno):       |
+//|   "Entra solo se la rottura e' supportata da aumento di volumi   |
+//|    O da una volatilita' coerente (ATR > media)."                 |
+//|  E' un OR, non un AND: basta UNA delle due conferme. Applicarle  |
+//|  a cascata (prima i volumi, poi l'ATR) le rende un AND e         |
+//|  moltiplica via il campione -- errore del primo giro del 02/08,  |
+//|  che aveva ridotto il Nasdaq a 72 trade in 2,5 anni.             |
+//|  InpConfirmMode permette comunque di provare l'AND.              |
+//+------------------------------------------------------------------+
+bool ConfirmOK()
+  {
+   if(!InpUseVolumeFilter && !InpUseAtrFilter) return(true);   // nessuna conferma richiesta
+   if(InpUseVolumeFilter && !InpUseAtrFilter)  return(VolumeOK());
+   if(!InpUseVolumeFilter && InpUseAtrFilter)  return(AtrOK());
+   bool v = VolumeOK();
+   bool a = AtrOK();
+   return((InpConfirmMode == ABTG_CONF_AND) ? (v && a) : (v || a));
+  }
+
 //+------------------------------------------------------------------+
 //| Volatilita' coerente? (PDF: "ATR > media")                       |
 //|  Il piano ammette il breakout se e' sostenuto DA VOLUMI **O** da |
