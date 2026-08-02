@@ -64,6 +64,9 @@ Due correzioni di rotta che ne derivano:
 | 02/08 | NASUSD | STOP | — | 0,88 | 14,5 | 328 | ❌ morto |
 | 02/08 | NASUSD | RETEST | — | 0,73 | 26,9 | 455 | ❌ morto (DD 27%) |
 | 02/08 | D30EUR (DAX) | **RANGE-FADE** | — | **0,73** | **23,5** | 440 | ❌ **il peggiore dei tre** (0 pass su 136 sopra PF 1, max 0,94; DD quasi doppio) |
+| 02/08 | NASUSD | **STOP + CONFIG DOCUMENTI** | volumi+ATR+H4+corr+news, livelli H1 | **1,11–1,52** | 6,0–8,5 | **72** | 🟢 **SI RIBALTA** (era 0,88): 4/4 configurazioni sopra 1. ⚠️ campione sottile |
+| 02/08 | U30USD (Dow) | **STOP + CONFIG DOCUMENTI** | idem | **1,11–1,21** | 11–13,8 | 106 | 🟡 **peggiora** il nudo (1,30) e alza il DD (7,9→13,5) |
+| 02/08 | U30USD (Dow) | **RITARDATA + CONFIG DOC.** | idem | **0,66** | 8,3 | 116 | ❌ **morto**: 29 configurazioni distinte, TUTTE sotto 1 (max 0,98) |
 
 ### 🔑 VERDETTO 02/08 (a): famiglia BREAKOUT (stop+limit) ELIMINATA per DAX/Nasdaq apertura.
 Solo **Dow STOP 1,30** sopravvive (conto personale). Il RETEST è selezione avversa (falsi break).
@@ -73,6 +76,18 @@ Il fade doveva essere la risposta al DAX ballerino: è invece il **peggiore dei 
 Trade ~440 in tutti e tre i motori → non è campione sottile né problema di fill: è **assenza di edge, misurata tre volte in tre modi opposti**.
 Dettaglio: `backtest_pipeline/risultati_archivio/DAX_Apertura/ANALISI_MOTORI_DAX_M5.md` (+ i 3 CSV).
 **Prossimo e quasi ultimo: entrata ritardata (#4).** Poi restano solo ORB-15 (#7) e gap-fill (#5).
+
+### 🔑 VERDETTO 02/08 (c): sono i FILTRI, non il motore. Il Nasdaq si ribalta.
+I tre motori bocciati erano stati testati **a filtri tutti spenti** — cioè non come li prescrivono i documenti. Rimesso il piano com'è scritto (livelli H1, volumi +50%, ATR ≥ media, trend H4, correlazione SPXUSD, filtro news, risk 2%):
+- **NASUSD: da 0,88 a 1,11–1,52**, DD 6,0–8,5%, tutte e 4 le configurazioni sopra 1. **Primo segnale positivo vero sulle aperture.**
+- **U30USD (Dow): peggiora.** 1,30 nudo → 1,11–1,21, e il DD sale da 7,9% a 13,5%. I filtri danneggiano il Dow.
+- **Ingresso RITARDATO: morto** (29 configurazioni distinte, tutte sotto 1, max 0,98) → **le slide Nasdaq (ordini STOP) battono il PDF** ("entra dopo la chiusura della candela"). Conflitto fra le fonti risolto sui numeri.
+
+⚠️ **Due riserve, entrambe serie:**
+1. **Campione sottile**: 72 trade sul Nasdaq, sotto la soglia di ~80 che ci eravamo dati. Promettente ≠ validato.
+2. **La griglia era quasi tutta finta**: 136 pass per **4 risultati distinti**. Con `InpRangeMode=2` il parametro `InpRangeMinutes` non fa nulla, e sul motore US il trailing è "base candela M1" quindi `InpTrailFixedPts` non fa nulla — ma MT5 li spazzolava lo stesso, ereditati da un'ottimizzazione precedente (il `.ini` non li inchiodava). ~97% del tempo di backtest sprecato a ricalcolare la stessa cosa.
+**Corretto il 02/08**: la griglia `-Doc` ora inchioda i parametri inerti e spazzola quelli che mordono — **buffer 25→200 passo 25**, **InpVolMult 1,2/1,5/1,8**, **InpAtrFilterMult 0,8/1,0/1,2** (72 combinazioni vere).
+_Nota: il PF decresce in modo monotòno al crescere del buffer su entrambi i simboli (miglior valore al minimo, 100) → comportamento coerente, non un picco isolato. Per questo la nuova griglia scende fino a 25._
 
 ## ▶️ IL TEST PRONTO ADESSO (PC di backtest, MT5 CHIUSO)
 **ENTRATA RITARDATA / FIRST-CANDLE (motori #4 e #6)** — DAX + Dow + Nasdaq a tick reali:

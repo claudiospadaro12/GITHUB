@@ -109,6 +109,16 @@ if($Doc){
   # InpCorrSymbol: gia' "SPXUSD" di default nell'EA, non serve forzarlo
   $Inputs = Set-Inp $Inputs "InpUseNewsFilter"   "1"
   $Inputs = Set-Inp $Inputs "InpRiskPercent"     "2.0"
+  # --- griglia: spazzolo SOLO parametri che MORDONO davvero ---
+  #  (con InpRangeMode=2 il range in minuti NON viene usato; se resta "Y" da una
+  #   ottimizzazione precedente MT5 continua a spazzolarlo e moltiplica i pass
+  #   senza cambiare il risultato -> qui lo INCHIODO)
+  $Inputs = Set-Inp $Inputs "InpRangeMinutes"  "15"
+  $Inputs = $Inputs -replace '(?m)^InpBufferPoints=.*$','InpBufferPoints=100||25||25||200||Y'
+  $Inputs += "`nInpVolMult=1.5||1.2||0.3||1.8||Y"
+  $Inputs += "`nInpAtrFilterMult=1.0||0.8||0.2||1.2||Y"
+  # motore US: il trailing e' "base candela M1" -> InpTrailFixedPts non viene usato
+  $Inputs = Set-Inp $Inputs "InpTrailFixedPts" "410"
 }
 
 $mtag = if($Model -eq 4){"realtick"}else{"ohlc"}
