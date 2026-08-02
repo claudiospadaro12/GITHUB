@@ -19,6 +19,33 @@
 | 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | 🔄 **IMPLEMENTATO 02/08** come sotto-modo del #4: `InpDelayDirMode=2` (direzione del corpo della candela di apertura). Nella griglia del test #4 |
 | 7 | **ORB 15 min** (idea Claudio) | range primi 15 min (DAX 09:00-09:15 IT = 08:00-08:15 server), poi rottura. Salta il whipsaw iniziale | ⬜ **già testabile:** `InpRangeMinutes=15` + STOP o RETEST. Sweep InpRangeMinutes = 5/15/30 |
 
+## 🚨 SCOPERTA 02/08 — ABBIAMO TESTATO IL MOTORE **NUDO**, non il metodo di Emiliano
+Controllo colonna per colonna dei CSV dei 3 test (400+ pass, breakout/retest/fade su DAX): **ogni filtro era SPENTO in tutti i pass**.
+
+| Parametro | Nei nostri test | Emiliano (live 20/07 + trascrizioni apr–mag) |
+|---|---|---|
+| `InpUseVwapFilter` | **0** | acceso — VWAP M15 come spartiacque |
+| `InpUseVolumeFilter` | **0** | **volume +50% sulla rottura** ("se mi apre sotto l'orb **e c'è un incremento dei volumi**, io lì lo shorto") |
+| `InpUseEmaFilter` | **0** | medie **9/21 orientate** ("è una caratteristica importante avere le medie rivolte verso l'alto") |
+| `InpUseSupertrend` | **0** | Supertrend 3.5 su D1 |
+| `InpRangeMode` | **0** = range di apertura | anche **max/min della NOTTE** ("prendo i minimi da notte e prendo 10 punti") |
+| `InpBufferPoints` | 100–400 = **1–4 punti indice** | **10 punti indice** (= 1000) |
+| `InpRangeMinutes` | griglia 5–60 | **15 fisso** (prima candela M15), operativo **dalle 09:15 IT** |
+
+**Conseguenza:** i verdetti (a) e (b) qui sotto restano validi — ma valgono per lo **scheletro** dei motori, non per il metodo di Emiliano. Il livello dei filtri (passo 5 della logica di caccia) **non è mai stato acceso in un backtest**.
+
+I 5 pilastri di Emiliano sull'apertura DAX: (1) ORB prima candela 15 min · (2) max/min della notte + del giorno prima · (3) volume in aumento sulla rottura · (4) VWAP M15 + medie 9/21 · (5) ingresso sul **retest**, mai in corsa, con conferma multi-TF.
+
+### 📑 SLIDE ARRIVATE (02/08) → analisi completa in `docs/live_emiliano/ANALISI_SLIDE_APERTURE.md`
+Il PDF del corso («La Magia delle Aperture», ABTG, 41 pp.) dice **testuale**:
+> *"**Entra subito dopo la chiusura della candela di breakout, non durante.**"* — e in checklist: *"Candela di rottura **chiusa** oltre il livello tecnico? Breakout confermato da **volumi** e price action? **ATR** conferma volatilità adeguata?"*
+
+**Abbiamo testato l'esatto opposto**: ordini STOP riempiti *durante* la rottura, senza conferma di chiusura, senza volumi, senza ATR. Il metodo del corso **è** l'ingresso confermato = il motore `DELAYED` implementato ieri.
+
+Due correzioni di rotta che ne derivano:
+- **Nasdaq/Dow:** lo scheletro del nostro EA è **fedele** alle slide (ordini su max/min della **candela H1 precedente**, SL sui massimi precedenti, OCO, parziale+BE, trailing sulla base della candela M1). Manca solo il **livello dei filtri** (volumi/ATR/VWAP/correlazione SPX) e l'ingresso a size divisa.
+- **DAX:** le slide europee **non prescrivono affatto un ORB**. Prescrivono livelli D1/W1/MN (Larry Williams), correlazione **225JPY → SPXUSD → D30EUR**, **Supertrend ×3 (2.5/3.0/3.5) tutti e tre concordi**, medie 89/100/200/14, Bollinger M15. Emiliano nelle live: *"l'ORB è **un'altra strategia** che noi abbiamo"*. → **stiamo testando bene la strategia sbagliata sul DAX.**
+
 ## 🔧 FILTRI DA SOVRAPPORRE (su ogni motore, uno alla volta)
 - **VWAP di sessione** (Emiliano) — `InpUseVwapFilter` già opt-in.
 - **Volume rottura** (Emiliano) — `InpUseVolumeFilter` già opt-in.
@@ -66,7 +93,7 @@ _(Il fade su Nasdaq/Dow — `confronto_fade.ps1` — resta lanciabile, ma dopo i
 5. Su ognuno, aggiungi **1 filtro alla volta** (VWAP → volume → ora → ADR) e rimisura.
 6. Ogni risultato → riga nel registro sopra. **Si tiene solo ciò che regge i tick reali.**
 
-> ⚠️ **Punto di onestà (02/08).** Sul DAX sono ora **3 motori su 3 falliti**, ~440 trade ciascuno su 2,5 anni: non è sfortuna né campione sottile. La ritardata è l'ultima idea con una tesi vera dietro; ORB-15 e gap-fill sono varianti degli stessi motori già bocciati. Se la ritardata non passa la barra, il verdetto corretto è **il DAX all'apertura M5 non ha edge** → si chiude la questione e il tempo di backtest torna sulla PROP (GoldenCross H1 a tick reali). Chiudere sui numeri è un risultato, non una sconfitta.
+> ⚠️ **Punto di onestà — CORRETTO il 02/08 dopo le slide.** Avevo scritto che se la ritardata fallisce si chiude la questione DAX. **Era prematuro.** I 3 motori bocciati sono stati testati **a filtri spenti** e, sul DAX, con una strategia (ORB) che il piano europeo non prescrive nemmeno. Quello che è morto è lo **scheletro nudo**, non il metodo del corso. Prima di chiudere vanno girati i test della lista sopra — a partire dalla ritardata **con volumi+ATR accesi**, che è ciò che il PDF prescrive testualmente. Se falliscono *quelli*, allora sì: si chiude sui numeri, ed è un risultato.
 > Se nessun motore supera la barra su Nasdaq/DAX, il verdetto onesto è: **l'apertura M5 su quei due non ha edge** e resta solo il Dow STOP 1,30 per il conto personale. Chiudere la questione sui numeri è un risultato, non una sconfitta.
 
 ## ✅ Nota
