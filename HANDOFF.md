@@ -1,9 +1,23 @@
 # HANDOFF — punto d'ingresso per una chat nuova
 
 > **Da incollare in una chat nuova:**
-> *"Leggi `HANDOFF.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `claude/chat-ea-market-openings-zoba2j` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
+> *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `claude/chat-ea-market-openings-zoba2j` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
 >
-> Ultimo aggiornamento: **2026-07-31**. **Branch unico di lavoro: `claude/chat-ea-market-openings-zoba2j`** (qui è consolidato TUTTO: chat aperture + scan nuovi).
+> Ultimo aggiornamento: **2026-08-02**. **Branch unico di lavoro: `claude/chat-ea-market-openings-zoba2j`** (qui è consolidato TUTTO).
+
+---
+
+## 🔴 STATO OGGI (02/08) — riparti da qui
+- **ROTTA (vedi `PIANO_PROP.md`):** PROP = priorità n°1. EA prop ideali: **H1**, trade chiusi in **1-2 gg** (max 4), gestione **parziale+BE+trailing**, **DD basso**. Conto personale: **aperture M5**.
+- **⏳ IN CORSO (Claudio, stasera):** backtest **tick reali STOP vs RETEST** su Dow/DAX/Nasdaq apertura M5 (`confronto_aperture.ps1` → `irm ...|iex`). Quando finisce: carica le cartelle `risultati_APERT_*` → confronto STOP vs RETEST.
+- **FATTO oggi (tutto pushato):**
+  1. **Motore RETEST** (opt-in `InpEntryMode=RETEST`, limit sul ritorno) su Nasdaq/DAX apertura — contro lo slippage che uccide il breakout STOP.
+  2. **FIX gestione PER-TICKET** su TUTTE le aperture (Nasdaq/DAX/Marco): parziale+BE su OGNI posizione (risolve il +800→−700 del 29/07). **Da ricompilare sul VPS per attivarlo in forward.**
+  3. **`REPORT_SETTIMANALE_2026-08-01.md`** + **`PAGELLA_EA_2026-08-01.md`**: statement 24-31/07 net −187€ (buco = DAX intraday, causa bug gestione ora corretto). Pagella per-EA dai COMMENTI ordini.
+  4. **`FLOTTA_ATTIVA.md`**: mappa 52 grafici VPS. Scoperte: **TradeExporter attivo** su NZDCADH1 (scrive `ABTG_Trades.csv` con magic → caricarlo per pagelle perfette); **D30EURM54 vuoto** (verificare).
+- **IPOTESI motore-per-mercato:** Nasdaq direzionale (breakout/RETEST) vs DAX whipsaw (RETEST o, se serve, 3° motore range-fade / entrata ritardata). Dettagli in `PROMEMORIA_APERTURE.md`.
+- **Dato nuovo:** Dow STOP tick reali col fix gestione = **PF 1,30** (era 1,16).
+- **Prossimo passo PROP:** validare **GoldenCross H1 tick reali** (TF preferito di Claudio).
 
 ---
 
@@ -27,9 +41,11 @@ Regola d'oro: conta il **PF a TICK REALI** (l'OHLC sovrastima, vedi CAC 7.37→0
 - `backtest_pipeline/CLASSIFICA_PF.md` — i 14 EA `_Ottimizzato` per PF.
 - Per strategia: `risultati_archivio/<Strategia>/ANALISI_*.md` (GoldenCross, SupertrendReversal + TICK_REALI_INDICI).
 
-## 🟢 SQUADRA FORWARD (8 EA, validati tick reali, in demo dal 30/07)
+## 🟢 SQUADRA FORWARD (13 EA validati, in demo; EMA200 dal 01/08)
 5 SupRev: **Oro** (770921) · **Argento** (770922) · **DAX** (770923) · **Nikkei** (770924) H4 + **Nasdaq H1** (770925).
 3 GoldenCross H4: **USDCHF** (770331) · **USDCAD** (770332) · **NZDUSD** (770333).
+5 EMA200 H4: **200AUD** (771511) · **AUDJPY** (771512) · **GBPJPY** (771513) · **SPXUSD** (771514) · **GBPUSD**/SHORT (771515).
+_NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fino alla quadra del mese — decisione Claudio._
 → Serve TEMPO: pagella PF/DD reale tra ~2-3 mesi. Claudio manda statement → Claude archivia/traccia.
 **Scartati** (crollo tick reali): SupRev Dow, ASX, CAC.
 
