@@ -176,7 +176,21 @@ $Inputs
   for($__w=0;$__w -lt 20;$__w++){ if(-not (Get-Process -Name terminal64 -ErrorAction SilentlyContinue)){break}; Start-Sleep -Seconds 3 }
   Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
   Start-Sleep -Seconds 2
-  if(Test-Path $csv){Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force; Write-Host ("        OK -> apert_${EAtag}_$sym.csv") -ForegroundColor Green}
+  if(Test-Path $csv){
+    # salvataggio ROBUSTO: la cartella dei risultati puo' non esserci piu' (sync/AV la
+    # rimuovono se e' vuota) -> la ricreo qui. E se il salvataggio fallisce NON cancello
+    # il CSV sorgente e NON abortisco: gli altri simboli devono comunque girare.
+    try{
+      if(-not (Test-Path $Results)){ New-Item -ItemType Directory -Force -Path $Results | Out-Null }
+      Copy-Item $csv -Destination $done -Force
+      Remove-Item $csv -Force
+      Write-Host ("        OK -> apert_${EAtag}_$sym.csv") -ForegroundColor Green
+    }catch{
+      Write-Host ("        !! SALVATAGGIO FALLITO: {0}" -f $_.Exception.Message) -ForegroundColor Red
+      Write-Host ("        Il CSV NON e' stato cancellato, lo trovi qui: {0}" -f $csv) -ForegroundColor Yellow
+      Write-Host ("        (copialo a mano in {0} e mandamelo)" -f $Results) -ForegroundColor Yellow
+    }
+  }
   else{Write-Host ("        (no CSV: {0} senza storico/nome diverso? verifica)" -f $sym) -ForegroundColor Yellow}
 }
 Write-Host "`n=== FINITO === risultati in $Results" -ForegroundColor Cyan
