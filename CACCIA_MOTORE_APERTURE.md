@@ -17,6 +17,7 @@
 | 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | ⬜ da implementare |
 | 5 | **GAP-FILL** | se apre in gap, opera verso la chiusura prec. | ⬜ già nel codice (InpEntryMode=GAPFILL), da testare |
 | 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | ⬜ idea |
+| 7 | **ORB 15 min** (idea Claudio) | range primi 15 min (DAX 09:00-09:15 IT = 08:00-08:15 server), poi rottura. Salta il whipsaw iniziale | ⬜ **già testabile:** `InpRangeMinutes=15` + STOP o RETEST. Sweep InpRangeMinutes = 5/15/30 |
 
 ## 🔧 FILTRI DA SOVRAPPORRE (su ogni motore, uno alla volta)
 - **VWAP di sessione** (Emiliano) — `InpUseVwapFilter` già opt-in.
