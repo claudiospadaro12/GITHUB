@@ -13,7 +13,7 @@
 |---|---|---|---|
 | 1 | **STOP breakout** | rompe il range → entra oltre (stop) | ❌ Nasdaq 0,88 · DAX 0,77 · Dow 1,30 (solo Dow vivo) |
 | 2 | **RETEST** (limit) | rompe → rientra sul livello → limit | ❌ **BOCCIATO 02/08**: peggiora Dow (1,30→0,94), Nasdaq 0,73 (DD 27%), DAX 0,79. Selezione avversa (falsi break) |
-| 3 | **RANGE-FADE** | fada gli estremi del range (vendi max, compra min) | 🔄 **IMPLEMENTATO 02/08** (`InpEntryMode=RANGE_FADE`, `InpFadeOffsetPts`). Test tick reali: `confronto_fade.ps1`. Candidato per DAX whipsaw |
+| 3 | **RANGE-FADE** | fada gli estremi del range (vendi max, compra min) | ❌ **BOCCIATO 02/08 sul DAX**: PFmed 0,73, 0/136 pass sopra PF 1 (max 0,94), DD mediano 23,5% (quasi doppio degli altri). Il peggiore dei tre. Su Nasdaq/Dow non ancora girato |
 | 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | 🔄 **IMPLEMENTATO 02/08** (`InpEntryMode=DELAYED`, `InpDelayMinutes`, `InpDelayDirMode`). Entra **a MERCATO** → niente stop da inseguire = niente slippage di rottura. Test: `confronto_ritardata.ps1` |
 | 5 | **GAP-FILL** | se apre in gap, opera verso la chiusura prec. | ⬜ già nel codice (InpEntryMode=GAPFILL), da testare |
 | 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | 🔄 **IMPLEMENTATO 02/08** come sotto-modo del #4: `InpDelayDirMode=2` (direzione del corpo della candela di apertura). Nella griglia del test #4 |
@@ -36,30 +36,37 @@
 | 02/08 | D30EUR (DAX) | RETEST | — | 0,79 | 7,5 | 436 | ❌ morto |
 | 02/08 | NASUSD | STOP | — | 0,88 | 14,5 | 328 | ❌ morto |
 | 02/08 | NASUSD | RETEST | — | 0,73 | 26,9 | 455 | ❌ morto (DD 27%) |
+| 02/08 | D30EUR (DAX) | **RANGE-FADE** | — | **0,73** | **23,5** | 440 | ❌ **il peggiore dei tre** (0 pass su 136 sopra PF 1, max 0,94; DD quasi doppio) |
 
-### 🔑 VERDETTO 02/08: famiglia BREAKOUT (stop+limit) ELIMINATA per DAX/Nasdaq apertura.
-Solo **Dow STOP 1,30** sopravvive (conto personale). Il RETEST è selezione avversa (falsi break). **Prossimi motori da provare: RANGE-FADE (#3) e ORB-15/entrata ritardata (#7/#4).**
+### 🔑 VERDETTO 02/08 (a): famiglia BREAKOUT (stop+limit) ELIMINATA per DAX/Nasdaq apertura.
+Solo **Dow STOP 1,30** sopravvive (conto personale). Il RETEST è selezione avversa (falsi break).
 
-## ▶️ I DUE TEST PRONTI ADESSO (PC di backtest, MT5 CHIUSO, uno alla volta)
-Entrambi girano su DAX + Dow + Nasdaq a **tick reali**. Lancia il primo, mandami i risultati, poi il secondo.
+### 🔑 VERDETTO 02/08 (b): RANGE-FADE BOCCIATO sul DAX — l'ipotesi "whipsaw" è smentita.
+Il fade doveva essere la risposta al DAX ballerino: è invece il **peggiore dei tre motori**. PFmed 0,73, **nessuna combo su 136 raggiunge PF 1** (massimo 0,94, −5.532 €) e il **DD mediano raddoppia** (23,5% contro 12,6–13,0%). Fadare l'estremo nei giorni in cui il DAX parte davvero = mettersi davanti al treno.
+Trade ~440 in tutti e tre i motori → non è campione sottile né problema di fill: è **assenza di edge, misurata tre volte in tre modi opposti**.
+Dettaglio: `backtest_pipeline/risultati_archivio/DAX_Apertura/ANALISI_MOTORI_DAX_M5.md` (+ i 3 CSV).
+**Prossimo e quasi ultimo: entrata ritardata (#4).** Poi restano solo ORB-15 (#7) e gap-fill (#5).
+
+## ▶️ IL TEST PRONTO ADESSO (PC di backtest, MT5 CHIUSO)
+**ENTRATA RITARDATA / FIRST-CANDLE (motori #4 e #6)** — DAX + Dow + Nasdaq a tick reali:
 
 ```powershell
-# 1) RANGE-FADE (motore #3) — fada gli estremi del range
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_fade.ps1" | iex
-
-# 2) ENTRATA RITARDATA / FIRST-CANDLE (motori #4 e #6) — aspetta e poi entra a mercato
 irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_ritardata.ps1" | iex
 ```
-Il test #2 gira da solo la griglia **attesa 15/30/45 min × direzione break/mid/candela** (9 combo per simbolo).
-Cartelle prodotte sul Desktop: `risultati_APERT_*_fade_realtick` e `risultati_APERT_*_delay_realtick` → zippa e caricamele.
+Gira da solo la griglia **attesa 15/30/45 min × direzione break/mid/candela** (9 combo per simbolo).
+Cartelle prodotte sul Desktop: `risultati_APERT_DAX_M5_delay_realtick` e `risultati_APERT_US_M5_delay_realtick` → zippa e caricamele.
+
+_(Il fade su Nasdaq/Dow — `confronto_fade.ps1` — resta lanciabile, ma dopo il risultato DAX è a bassa priorità: servirebbe a chiudere formalmente il motore #3, non perché ci si aspetti un edge.)_
 
 ## 🧭 LOGICA DI CACCIA (come decidiamo il prossimo passo)
 1. ~~Il RETEST batte lo STOP?~~ → **no, bocciato 02/08**.
-2. Prova **RANGE-FADE** (il Nasdaq apre spesso con spike + ritorno) — implementato, test pronto.
-3. Prova **ENTRATA RITARDATA / FIRST-CANDLE** (salta il rumore dei primi minuti) — implementato, test pronto.
-4. Se anche questi falliscono → **ORB-15** (#7, `-RangeMin 15`) e **GAP-FILL** (#5) sono gli ultimi della famiglia.
+2. ~~**RANGE-FADE** per il whipsaw~~ → **no, bocciato 02/08 sul DAX: il peggiore dei tre.**
+3. Prova **ENTRATA RITARDATA / FIRST-CANDLE** (salta il rumore dei primi minuti) — implementato, ⬅️ **è il prossimo**.
+4. Se anche questa fallisce → **ORB-15** (#7, `-RangeMin 15`) e **GAP-FILL** (#5) sono gli ultimi della famiglia.
 5. Su ognuno, aggiungi **1 filtro alla volta** (VWAP → volume → ora → ADR) e rimisura.
 6. Ogni risultato → riga nel registro sopra. **Si tiene solo ciò che regge i tick reali.**
+
+> ⚠️ **Punto di onestà (02/08).** Sul DAX sono ora **3 motori su 3 falliti**, ~440 trade ciascuno su 2,5 anni: non è sfortuna né campione sottile. La ritardata è l'ultima idea con una tesi vera dietro; ORB-15 e gap-fill sono varianti degli stessi motori già bocciati. Se la ritardata non passa la barra, il verdetto corretto è **il DAX all'apertura M5 non ha edge** → si chiude la questione e il tempo di backtest torna sulla PROP (GoldenCross H1 a tick reali). Chiudere sui numeri è un risultato, non una sconfitta.
 > Se nessun motore supera la barra su Nasdaq/DAX, il verdetto onesto è: **l'apertura M5 su quei due non ha edge** e resta solo il Dow STOP 1,30 per il conto personale. Chiudere la questione sui numeri è un risultato, non una sconfitta.
 
 ## ✅ Nota

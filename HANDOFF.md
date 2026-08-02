@@ -9,17 +9,15 @@
 
 ## 🔴 STATO OGGI (02/08) — riparti da qui
 - **ROTTA (vedi `PIANO_PROP.md`):** PROP = priorità n°1. EA prop ideali: **H1**, trade chiusi in **1-2 gg** (max 4), gestione **parziale+BE+trailing**, **DD basso**. Conto personale: **aperture M5**.
-- **⏭️ TOCCA A TE (PC di backtest, MT5 CHIUSO, uno alla volta — vedi `CACCIA_MOTORE_APERTURE.md`):**
+- **⏭️ TOCCA A TE (PC di backtest, MT5 CHIUSO — vedi `CACCIA_MOTORE_APERTURE.md`):**
   ```powershell
-  # 1) RANGE-FADE (motore #3)
-  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_fade.ps1" | iex
-  # 2) ENTRATA RITARDATA + FIRST-CANDLE (motori #4 e #6)
+  # ENTRATA RITARDATA + FIRST-CANDLE (motori #4 e #6) — l'ultima idea vera sulle aperture
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_ritardata.ps1" | iex
   ```
-  Poi zippa le cartelle `risultati_APERT_*_fade_realtick` / `*_delay_realtick` dal Desktop e caricamele.
+  Poi zippa dal Desktop `risultati_APERT_DAX_M5_delay_realtick` e `risultati_APERT_US_M5_delay_realtick` e caricamele.
 - **FATTO oggi (tutto pushato):**
   1. **Motore RETEST** (opt-in `InpEntryMode=RETEST`) → testato a tick reali e **BOCCIATO**: peggiora il Dow (1,30→0,94), Nasdaq 0,73 (DD 27%), DAX 0,79. Selezione avversa sui falsi break. → **famiglia breakout (stop+limit) ELIMINATA** per DAX/Nasdaq apertura; sopravvive solo **Dow STOP 1,30**.
-  2. **Motore RANGE-FADE** (`InpEntryMode=RANGE_FADE`, `InpFadeOffsetPts`) su Nasdaq/DAX apertura — pensato per il whipsaw. **Da testare.**
+  2. **Motore RANGE-FADE** (`InpEntryMode=RANGE_FADE`) → testato a tick reali sul DAX e **BOCCIATO, il peggiore dei tre**: PFmed 0,73, **0 combo su 136 sopra PF 1** (max 0,94), DD mediano **23,5%** (quasi doppio di stop/retest). L'ipotesi "il DAX è whipsaw, quindi fada" è smentita dai numeri. Dettaglio: `risultati_archivio/DAX_Apertura/ANALISI_MOTORI_DAX_M5.md`.
   3. **Motore ENTRATA RITARDATA/CONFERMATA** (`InpEntryMode=DELAYED`, `InpDelayMinutes`, `InpDelayDirMode`) su Nasdaq/DAX apertura: aspetta N minuti e poi entra **a mercato** dalla parte scelta → niente stop da inseguire, niente slippage di rottura. Il modo `InpDelayDirMode=2` copre anche il **first-candle follow**. **Da testare** (griglia 15/30/45 min × break/mid/candela).
   4. **FIX gestione PER-TICKET** su TUTTE le aperture (Nasdaq/DAX/Marco): parziale+BE su OGNI posizione (risolve il +800→−700 del 29/07). **Da ricompilare sul VPS per attivarlo in forward.**
   5. **`REPORT_SETTIMANALE_2026-08-01.md`** + **`PAGELLA_EA_2026-08-01.md`**: statement 24-31/07 net −187€ (buco = DAX intraday, causa bug gestione ora corretto). Pagella per-EA dai COMMENTI ordini.
