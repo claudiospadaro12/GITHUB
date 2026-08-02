@@ -13,7 +13,7 @@
 |---|---|---|---|
 | 1 | **STOP breakout** | rompe il range → entra oltre (stop) | ❌ Nasdaq 0,88 · DAX 0,77 · Dow 1,30 (solo Dow vivo) |
 | 2 | **RETEST** (limit) | rompe → rientra sul livello → limit | ❌ **BOCCIATO 02/08**: peggiora Dow (1,30→0,94), Nasdaq 0,73 (DD 27%), DAX 0,79. Selezione avversa (falsi break) |
-| 3 | **RANGE-FADE** | fada gli estremi del range (vendi max, compra min) | ⬜ da implementare se 1-2 falliscono |
+| 3 | **RANGE-FADE** | fada gli estremi del range (vendi max, compra min) | 🔄 **IMPLEMENTATO 02/08** (`InpEntryMode=RANGE_FADE`, `InpFadeOffsetPts`). Test tick reali: `confronto_fade.ps1`. Candidato per DAX whipsaw |
 | 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | ⬜ da implementare |
 | 5 | **GAP-FILL** | se apre in gap, opera verso la chiusura prec. | ⬜ già nel codice (InpEntryMode=GAPFILL), da testare |
 | 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | ⬜ idea |

@@ -26,9 +26,11 @@
 param(
   [string[]]$Symbols=@("U30USD","NASUSD"),
   [int]$Model=1,                              # 1=OHLC (veloce) · 4=tick reali (verita')
-  [int]$EntryMode=0,                          # 0=BREAKOUT (stop, attuale) · 2=RETEST (limit, leva Emiliano)
+  [int]$EntryMode=0,                          # 0=BREAKOUT (stop) · 2=RETEST (limit) · 3=RANGE_FADE (fada gli estremi)
   [double]$RetestOffset=0,                     # (solo RETEST) offset del limit DENTRO il livello, in punti
-  [string]$EABranch="claude/chat-ea-market-openings-zoba2j", # branch con l'EA aggiornato (RETEST)
+  [double]$FadeOffset=0,                        # (solo RANGE_FADE) offset del limit OLTRE l'estremo, in punti
+  [int]$RangeMin=0,                            # se >0 forza InpRangeMinutes (es. 15 = ORB dei primi 15 min)
+  [string]$EABranch="claude/chat-ea-market-openings-zoba2j", # branch con l'EA aggiornato
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
@@ -53,12 +55,15 @@ InpRiskPercent=1.0||1.0||0||1.0||N
 InpBufferPoints=200||100||100||400||Y
 "@
 
-# --- modalita' d'ingresso: BREAKOUT (stop) vs RETEST (limit) ---
+# --- modalita' d'ingresso: BREAKOUT (0) / RETEST (2) / RANGE_FADE (3) ---
 $Inputs += "`nInpEntryMode=$EntryMode||$EntryMode||0||$EntryMode||N"
 if($EntryMode -eq 2){ $Inputs += "`nInpRetestOffsetPts=$RetestOffset||$RetestOffset||0||$RetestOffset||N" }
+if($EntryMode -eq 3){ $Inputs += "`nInpFadeOffsetPts=$FadeOffset||$FadeOffset||0||$FadeOffset||N" }
+if($RangeMin -gt 0){ $Inputs += "`nInpRangeMinutes=$RangeMin||$RangeMin||0||$RangeMin||N" }
 
 $mtag = if($Model -eq 4){"realtick"}else{"ohlc"}
-$etag = if($EntryMode -eq 2){"retest"}else{"brk"}
+$etag = if($EntryMode -eq 3){"fade"}elseif($EntryMode -eq 2){"retest"}else{"brk"}
+if($RangeMin -gt 0){ $etag = "${etag}_orb$RangeMin" }
 $EAtag="APERT_US_M5_${etag}_$mtag"
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== CONFERMA APERTURA US (M5, Model $Model) su $($Symbols -join ', ') ===" -ForegroundColor Cyan

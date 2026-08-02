@@ -123,7 +123,8 @@ enum ENUM_ABTG_ENTRY
   {
    ABTG_BREAKOUT = 0,   // rottura del range di apertura (piani DAX + Nasdaq)
    ABTG_GAPFILL  = 1,   // chiusura del gap di apertura (tipico USA)
-   ABTG_RETEST   = 2    // rottura + ritorno sul livello con LIMIT (Emiliano: niente slippage)
+   ABTG_RETEST   = 2,   // rottura + ritorno sul livello con LIMIT (Emiliano: niente slippage)
+   ABTG_RANGE_FADE = 3  // fada gli estremi del range (mercati whipsaw, es. DAX)
   };
 
 enum ENUM_ABTG_RANGE
@@ -173,6 +174,7 @@ input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/ra
 
 input group "=== Retest (InpEntryMode=RETEST, leva Emiliano) ==="
 input double InpRetestOffsetPts = 0;  // Offset del LIMIT DENTRO il livello, in punti (0=sul livello; >0 entra piu' in profondita', meglio ma piu' no-fill)
+input double InpFadeOffsetPts   = 0;  // (RANGE_FADE) offset del LIMIT OLTRE l'estremo, in punti (0=sull'estremo; >0 fada uno spike piu' ampio)
 
 input group "=== Gap Fill (opzionale, tipico USA) ==="
 input bool   InpUseGapFill    = ABTG_DEF_USE_GAPFILL; // Attiva modalita' gap fill se InpEntryMode=GAPFILL
@@ -498,6 +500,12 @@ void ABTG_OnTick()
             if(nowMin >= refEndMin)
               { if(ArmRetest()) gPhase = PH_ARMED; }
            }
+         else if(InpEntryMode == ABTG_RANGE_FADE)
+           {
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            if(nowMin >= refEndMin)
+              { if(TryPlaceRangeFade()) gPhase = PH_PLACED; }
+           }
          else // BREAKOUT
            {
             int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
@@ -688,6 +696,70 @@ bool TryPlaceBreakout()
 //|  Ritorna true quando la decisione e' presa; false = dati non     |
 //|  pronti (riprova al tick successivo).                            |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| RANGE-FADE: mercato che apre in whipsaw -> fada gli estremi.     |
+//|  SELL LIMIT sul massimo del range, BUY LIMIT sul minimo.         |
+//|  Sullo spike del falso break entra all'estremo e guadagna sul    |
+//|  ritorno verso il centro. SL poco oltre l'estremo (se rompe      |
+//|  davvero, taglia). Adatto ai mercati ballerini (DAX).            |
+//+------------------------------------------------------------------+
+bool TryPlaceRangeFade()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("FADE: livelli non ancora calcolabili: riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("FADE: candela %.0f pt < min %.0f: niente trade.", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("FADE: candela %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK()) { ABTGLog("FADE: spread troppo alto: niente trade."); return(true); }
+
+   int  bias    = TrendBias();
+   bool longOK  = (bias == 0 || bias == +1);   // BUY LIMIT sul minimo
+   bool shortOK = (bias == 0 || bias == -1);   // SELL LIMIT sul massimo
+   datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
+
+   double slDist = AtrValue()*InpAtrSlMult;
+   if(slDist <= 0) slDist = EffectiveBuffer();
+   if(InpMinStopPts > 0 && slDist < InpMinStopPts*_Point) slDist = InpMinStopPts*_Point;
+
+   //--- SELL LIMIT sul MASSIMO (fada lo spike in alto)
+   if(InpAllowShort && shortOK)
+     {
+      double entry = NormalizePrice(gRangeHigh + InpFadeOffsetPts*_Point);
+      double sl    = NormalizePrice(entry + slDist);
+      double dist  = sl - entry;
+      double lot   = CalcLotByRisk(dist);
+      double tp    = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+      if(lot > 0 && dist > 0)
+        {
+         if(gTrade.SellLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" FADE SELL"))
+           { gSellTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("SELL LIMIT (fade) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+         else
+            ABTGLog("SELL LIMIT (fade) fallito: "+gTrade.ResultRetcodeDescription());
+        }
+     }
+
+   //--- BUY LIMIT sul MINIMO (fada lo spike in basso)
+   if(InpAllowLong && longOK)
+     {
+      double entry = NormalizePrice(gRangeLow - InpFadeOffsetPts*_Point);
+      double sl    = NormalizePrice(entry - slDist);
+      double dist  = entry - sl;
+      double lot   = CalcLotByRisk(dist);
+      double tp    = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+      if(lot > 0 && dist > 0)
+        {
+         if(gTrade.BuyLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" FADE BUY"))
+           { gBuyTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("BUY LIMIT (fade) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+         else
+            ABTGLog("BUY LIMIT (fade) fallito: "+gTrade.ResultRetcodeDescription());
+        }
+     }
+   return(true);
+  }
+
 bool ArmRetest()
   {
    if(!ComputeLevels(gRangeHigh, gRangeLow))
