@@ -89,6 +89,23 @@ I tre motori bocciati erano stati testati **a filtri tutti spenti** — cioè no
 **Corretto il 02/08**: la griglia `-Doc` ora inchioda i parametri inerti e spazzola quelli che mordono — **buffer 25→200 passo 25**, **InpVolMult 1,2/1,5/1,8**, **InpAtrFilterMult 0,8/1,0/1,2** (72 combinazioni vere).
 _Nota: il PF decresce in modo monotòno al crescere del buffer su entrambi i simboli (miglior valore al minimo, 100) → comportamento coerente, non un picco isolato. Per questo la nuova griglia scende fino a 25._
 
+## 🧪 PROSSIMO TEST: L'ABLAZIONE DEI FILTRI (Nasdaq)
+Il piano ha ribaltato il Nasdaq ma con 72 trade. Prima di crederci bisogna sapere **quale filtro porta l'edge e quale sta solo tagliando il campione**. La scala accende un filtro alla volta:
+
+```powershell
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/ablazione_nasdaq.ps1" | iex
+```
+1. soli **livelli H1** (nessun filtro) → 2. **+volumi** → 3. **+ATR** → 4. **+trend H4** → 5. **+correlazione** → 6. **+news** (piano completo)
+
+**Come si legge:**
+| Cosa vedi | Cosa significa |
+|---|---|
+| PF sale, trade calano poco | filtro **buono**, si tiene |
+| PF fermo, trade crollano | filtro **inutile**, si toglie |
+| PF sale ma trade crollano | ⚠️ è **selezione, non edge** — con pochi trade il PF non è un dato |
+
+Il gradino 1 è il più importante: dice se l'edge viene già dai **livelli delle slide** (max/min candela H1 precedente) invece che dal range di apertura M5 che avevamo sempre usato. Se è così, la scoperta vera non sono i filtri ma **dove si guardano i livelli**.
+
 ## ▶️ IL TEST PRONTO ADESSO (PC di backtest, MT5 CHIUSO)
 **ENTRATA RITARDATA / FIRST-CANDLE (motori #4 e #6)** — DAX + Dow + Nasdaq a tick reali:
 

@@ -46,6 +46,7 @@ param(
   [int]$DelayMin=0,                            # (solo DELAYED) minuti d'attesa; 0 = griglia 15/30/45
   [int]$DelayDir=-1,                           # (solo DELAYED) 0=break 1=mid 2=candela; -1 = griglia su tutti e 3
   [switch]$Doc,                                # accende la CONFIGURAZIONE DEI DOCUMENTI (blocco piu' sotto)
+  [string]$Filters,                            # (con -Doc) quali filtri accendere, es. "vol,atr". Omesso = tutti; "" = nessuno
   [string]$EABranch="claude/chat-ea-market-openings-zoba2j", # branch con l'EA aggiornato
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
@@ -92,38 +93,60 @@ function Set-Inp([string]$txt,[string]$k,[string]$v){
   if($txt -match "(?m)^$k="){ return ($txt -replace "(?m)^$k=.*$", $line) }
   return ($txt + "`n" + $line)
 }
+
+# --- come Set-Inp ma con una GRIGLIA (start/step/stop) da ottimizzare ---
+function Set-InpGrid([string]$txt,[string]$k,[string]$v,[string]$start,[string]$step,[string]$stop){
+  $line = "$k=$v||$start||$step||$stop||Y"
+  if($txt -match "(?m)^$k="){ return ($txt -replace "(?m)^$k=.*$", $line) }
+  return ($txt + "`n" + $line)
+}
 if($Doc){
   # === CONFIGURAZIONE PRESCRITTA DAI DOCUMENTI (PDF ABTG + slide "Strategia Nasdaq") ===
-  #  livelli : max/min della candela H1 PRECEDENTE (slide: "si posizionano ordini nel time frame H1,
-  #            SELL STOP sotto i minimi precedenti, BUY STOP sopra i massimi precedenti")
-  #  conferma: volumi >= +50% E volatilita' coerente (ATR >= media)          [PDF, breakout notturno]
-  #  contesto: trend confermato su H4 (gia' nel preset) + correlazione SPXUSD [checklist pre-apertura]
-  #  news    : "nessuna notizia in uscita imminente"                          [checklist rischio]
-  #  rischio : max 2% del capitale                                            [PDF money management]
+  #  livelli : max/min della candela H1 PRECEDENTE ("ordini nel time frame H1, SELL STOP
+  #            sotto i minimi precedenti, BUY STOP sopra i massimi precedenti")
+  #  filtri  : vol=volumi>=+50% · atr=ATR>=media · h4=trend su H4 · corr=SPXUSD · news
+  #  rischio : max 2% del capitale
+  # --- quali filtri accendere: -Filters "vol,atr,..." per l'ABLAZIONE; se non lo passi, TUTTI ---
+  $fl = if($PSBoundParameters.ContainsKey('Filters')){ $Filters } else { "vol,atr,h4,corr,news" }
+  $on = @($fl -split ',' | ForEach-Object { $_.Trim().ToLower() } | Where-Object { $_ })
+  $useVol=[int]($on -contains 'vol'); $useAtr=[int]($on -contains 'atr')
+  $useH4=[int]($on -contains 'h4'); $useCorr=[int]($on -contains 'corr'); $useNews=[int]($on -contains 'news')
+
   $Inputs = Set-Inp $Inputs "InpRangeMode"       "2"
   $Inputs = Set-Inp $Inputs "InpLevelTF"         "16385"      # H1
-  $Inputs = Set-Inp $Inputs "InpUseVolumeFilter" "1"
-  $Inputs = Set-Inp $Inputs "InpVolMult"         "1.5"
-  $Inputs = Set-Inp $Inputs "InpUseAtrFilter"    "1"
-  $Inputs = Set-Inp $Inputs "InpUseCorrelation"  "1"
-  # InpCorrSymbol: gia' "SPXUSD" di default nell'EA, non serve forzarlo
-  $Inputs = Set-Inp $Inputs "InpUseNewsFilter"   "1"
   $Inputs = Set-Inp $Inputs "InpRiskPercent"     "2.0"
-  # --- griglia: spazzolo SOLO parametri che MORDONO davvero ---
-  #  (con InpRangeMode=2 il range in minuti NON viene usato; se resta "Y" da una
-  #   ottimizzazione precedente MT5 continua a spazzolarlo e moltiplica i pass
-  #   senza cambiare il risultato -> qui lo INCHIODO)
+  $Inputs = Set-Inp $Inputs "InpUseVolumeFilter" "$useVol"
+  $Inputs = Set-Inp $Inputs "InpUseAtrFilter"    "$useAtr"
+  $Inputs = Set-Inp $Inputs "InpUseEmaFilter"    "$useH4"
+  $Inputs = Set-Inp $Inputs "InpUseCorrelation"  "$useCorr"
+  $Inputs = Set-Inp $Inputs "InpUseNewsFilter"   "$useNews"
+  # InpCorrSymbol: gia' "SPXUSD" di default nell'EA, non serve forzarlo
+
+  # --- parametri INERTI in questa configurazione: li INCHIODO ---
+  #  (con InpRangeMode=2 il range in minuti non viene usato; se resta "Y" ereditato da una
+  #   ottimizzazione precedente, MT5 lo spazzola comunque e moltiplica i pass a vuoto:
+  #   e' successo il 02/08, 136 pass per 4 risultati veri)
   $Inputs = Set-Inp $Inputs "InpRangeMinutes"  "15"
-  $Inputs = $Inputs -replace '(?m)^InpBufferPoints=.*$','InpBufferPoints=100||25||25||200||Y'
-  $Inputs += "`nInpVolMult=1.5||1.2||0.3||1.8||Y"
-  $Inputs += "`nInpAtrFilterMult=1.0||0.8||0.2||1.2||Y"
-  # motore US: il trailing e' "base candela M1" -> InpTrailFixedPts non viene usato
   $Inputs = Set-Inp $Inputs "InpTrailFixedPts" "410"
+
+  # --- griglia: SOLO parametri che mordono, e solo se il filtro relativo e' acceso ---
+  $Inputs = Set-InpGrid $Inputs "InpBufferPoints" "100" "25" "25" "200"
+  if($useVol){ $Inputs = Set-InpGrid $Inputs "InpVolMult" "1.5" "1.2" "0.3" "1.8" }
+  else       { $Inputs = Set-Inp     $Inputs "InpVolMult" "1.5" }
+  if($useAtr){ $Inputs = Set-InpGrid $Inputs "InpAtrFilterMult" "1.0" "0.8" "0.2" "1.2" }
+  else       { $Inputs = Set-Inp     $Inputs "InpAtrFilterMult" "1.0" }
 }
 
 $mtag = if($Model -eq 4){"realtick"}else{"ohlc"}
 $etag = if($EntryMode -eq 4){"delay"}elseif($EntryMode -eq 3){"fade"}elseif($EntryMode -eq 2){"retest"}else{"brk"}
-if($Doc){ $etag = "doc_$etag" }
+if($Doc){
+  $etag = "doc_$etag"
+  # se sto facendo l'ablazione, il set di filtri finisce nel nome del CSV (niente collisioni)
+  if($PSBoundParameters.ContainsKey('Filters')){
+    $ftag = if($Filters.Trim()){ ($Filters -replace '[^a-zA-Z0-9]','') } else { "nofilt" }
+    $etag = "${etag}_$ftag"
+  }
+}
 if($RangeMin -gt 0){ $etag = "${etag}_orb$RangeMin" }
 $EAtag="APERT_US_M5_${etag}_$mtag"
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
