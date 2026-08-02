@@ -85,6 +85,13 @@ _Una settimana pre-fix non cambia il ranking; lo confermano però Nasdaq/Dow/Lon
 
 ---
 
+## 4b. 🧪 PRIMO DATO TICK-REALI col fix gestione (02/08) — Dow STOP
+Backtest tick reali Dow (U30USD) M5, STOP, **con la nuova gestione per-ticket**:
+- **PF mediano 1,30** · **100% pass positivi** (143/143) · DD ~7,9% · ~348 trade · distribuzione 1,14–1,31 (stretta = robusta).
+- 📈 **Prima del fix era 1,16 → ora 1,30**: il solo fix parziale/BE per-ticket ha migliorato il motore STOP. Conferma che il fix serviva.
+- DD ~8% resta alto per la prop → apertura resta roba da "conto personale".
+- ⏳ Mancano ancora: Dow RETEST, Nasdaq (no storico M5 sul tester), DAX STOP/RETEST → confronto STOP vs RETEST da completare (script corretto, vedi sotto).
+
 ## 5. ⏭️ AZIONI
 1. ✅ Statement completo ricevuto e analizzato.
 2. 🔴 **Verificare sul VPS che i doppioni DAX siano spariti** dal 01/08 (dopo il fix): controllare che non ci siano più trade identici simultanei su D30EUR. È la prova che il buco −885 non si ripete.

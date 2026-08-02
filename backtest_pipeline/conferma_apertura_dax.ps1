@@ -109,6 +109,11 @@ $Inputs
   $csv=Join-Path $MqlFiles "OptResults_${EA}_$sym.csv"; if(Test-Path $csv){Remove-Item $csv -Force}
   Write-Host ("   [{0}/{1}] {2} (M5 Model $Model)..." -f $n,$Symbols.Count,$sym) -ForegroundColor Cyan
   (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$iniPath`"" -PassThru).WaitForExit()
+  # il tester a volte lascia terminal64 appeso (es. simbolo senza storico) -> lo chiudo,
+  # cosi' il test successivo (o lo script successivo) non si blocca su "Chiudi MetaTrader".
+  for($__w=0;$__w -lt 20;$__w++){ if(-not (Get-Process -Name terminal64 -ErrorAction SilentlyContinue)){break}; Start-Sleep -Seconds 3 }
+  Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  Start-Sleep -Seconds 2
   if(Test-Path $csv){Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force; Write-Host ("        OK -> apert_${EAtag}_$sym.csv") -ForegroundColor Green}
   else{Write-Host ("        (no CSV: {0} senza storico/nome diverso? verifica)" -f $sym) -ForegroundColor Yellow}
 }
