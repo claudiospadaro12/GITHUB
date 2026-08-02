@@ -33,8 +33,8 @@ _⚠️ Periodo **PRE-FIX** (gestione per-ticket applicata il 01/08) → le perd
 3. **La parte DAX è gonfiata dal bug gestione** (parziale/BE non scattati, ora corretto il 01/08): Apertura Marco e DAX Apertura dovrebbero migliorare col fix. Da riverificare col forward pulito.
 4. **I validati (SupRev/GoldenCross/EMA200) quasi non compaiono:** girano H4/H1 → pochissimi trade in 2 settimane. Normale: la loro pagella arriva tra mesi, non ora.
 
-## ✅ AZIONI SUGGERITE
-- 🔴 **Spegnere i "morti" intraday sul DAX** (DAX Live5m, Live5m v2, Londra ORB) — costano e non hanno edge nel backtest. È il buco vero.
-- 🟡 **DAX Apertura + Apertura Marco:** riverificare col forward PULITO (post-fix) prima di giudicare — il bug li ha penalizzati.
-- 🟢 Lasciar girare i validati: la loro pagella è a mesi.
-- ⏳ Ripetere questa pagella ogni settimana (ora che so leggere i commenti) → pagella per-EA reale, non per simbolo.
+## ✅ STRATEGIA (decisione Claudio — confermata)
+- 🟢 **TENERE ACCESO TUTTO (anche i "morti") fino alla QUADRA del mese.** Sul demo non costa nulla di reale; serve il dataset COMPLETO per capire, dopo ~1 mese, dove sono i problemi e se hanno soluzione. Spegnere ora = buttare via l'informazione. → NON spegnere nulla.
+- ⏳ **Pagella per-EA OGNI settimana** (ora che leggo i commenti degli ordini) → si accumula il quadro reale EA per EA fino al mese.
+- 🎯 **Focus del lavoro: il MOTORE delle APERTURE** (priorità di Claudio). Le perdite DAX viste qui sono in gran parte bug gestione (corretto) + morti da osservare, non un verdetto.
+- 🟡 A fine mese: con la pagella cumulata si decide EA per EA sui numeri (chi ha edge, chi era bug, chi era rumore).
