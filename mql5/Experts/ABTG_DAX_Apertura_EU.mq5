@@ -203,6 +203,7 @@ input bool   InpUseSupertrend = false;                // Filtro Supertrend
 input int    InpStAtrPeriod   = 10;                   // ATR del Supertrend
 input double InpStMultiplier  = 2.5;                  // Moltiplicatore Supertrend
 input ENUM_TIMEFRAMES InpStTF = PERIOD_H1;            // Timeframe del Supertrend
+input bool   InpUseSupertrend3 = false;               // (Piano Europeo) TRE Supertrend 2.5/3.0/3.5: opero solo se concordano tutti e tre
 
 input group "=== Filtro di correlazione (opzionale) ==="
 input bool   InpUseCorrelation = false;               // Opera solo se l'indice guida concorda
@@ -254,6 +255,9 @@ input group "=== Filtro VOLUMI (regola Emiliano: rottura valida solo con volumi)
 input bool   InpUseVolumeFilter = false;  // Entra solo se il volume della rottura supera la media
 input double InpVolMult          = 1.5;    // Volume rottura >= X * media (Emiliano: 1.5 = +50%)
 input int    InpVolAvgBars       = 20;     // Barre per la media volume
+input bool   InpUseAtrFilter    = false;  // (PDF) Entra solo con volatilita' coerente: ATR >= media ATR
+input int    InpAtrFilterBars   = 20;     // Barre su cui calcolo la media dell'ATR
+input double InpAtrFilterMult   = 1.0;    // ATR ultima barra >= X * media (PDF: "ATR > media")
 
 input group "=== Generali ==="
 input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
@@ -651,6 +655,7 @@ bool TryPlaceBreakout()
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
    if(!VolumeOK()) { ABTGLog("volumi insufficienti alla rottura: niente trade (regola Emiliano)."); return(true); }
+   if(!AtrOK())    { ABTGLog("volatilita' sotto la media (ATR): apertura fiacca, niente trade (PDF)."); return(true); }
 
    double buffer  = EffectiveBuffer();
    double buyPx   = NormalizePrice(gRangeHigh + buffer);
@@ -839,6 +844,7 @@ bool TryPlaceDelayed()
      { ABTGLog(StringFormat("DELAYED: range %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
    if(!SpreadOK()) { ABTGLog("DELAYED: spread troppo alto: niente trade."); return(true); }
    if(!VolumeOK()) { ABTGLog("DELAYED: volumi insufficienti: niente trade (regola Emiliano)."); return(true); }
+   if(!AtrOK())    { ABTGLog("DELAYED: volatilita' sotto la media (ATR): niente trade (PDF)."); return(true); }
 
    //--- 1) la direzione CONFERMATA dopo l'attesa
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -1140,6 +1146,16 @@ int TrendBias()
      {
       int st = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, InpStMultiplier);
       if(st != 0) bias = CombineBias(bias, st);
+     }
+
+   //--- Piano Europeo: "Super Trend, quando cambiano TUTTI E TRE, posso entrare a mercato"
+   if(InpUseSupertrend3)
+     {
+      int s25 = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, 2.5);
+      int s30 = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, 3.0);
+      int s35 = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, 3.5);
+      if(s25 != 0 && s25 == s30 && s30 == s35) bias = CombineBias(bias, s25);
+      else                                     bias = 2;   // non concordi = nessun ordine
      }
 
    if(InpUseCorrelation && StringLen(InpCorrSymbol) > 0)
@@ -1552,6 +1568,28 @@ bool SpreadOK()
 //+------------------------------------------------------------------+
 //| Volumi in crescita alla rottura? (Emiliano: >= mult * media)     |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| Volatilita' coerente? (PDF: "ATR > media")                       |
+//|  Il piano ammette il breakout se e' sostenuto DA VOLUMI **O** da |
+//|  una volatilita' coerente. Qui confronto l'ATR dell'ultima barra |
+//|  chiusa con la sua media sulle ultime N barre: serve a NON       |
+//|  operare le aperture fiacche (dove il breakout e' rumore).       |
+//+------------------------------------------------------------------+
+bool AtrOK()
+  {
+   if(!InpUseAtrFilter) return(true);
+   int n = InpAtrFilterBars;
+   if(n < 2) return(true);
+   double a[];
+   ArraySetAsSeries(a, true);
+   if(CopyBuffer(gAtrH, 0, 1, n, a) < n) return(true);   // dati insuff.: non blocco
+   double sum = 0;
+   for(int i = 0; i < n; i++) sum += a[i];
+   double avg = sum / n;
+   if(avg <= 0) return(true);
+   return(a[0] >= InpAtrFilterMult * avg);               // ATR dell'ultima barra vs la sua media
+  }
+
 bool VolumeOK()
   {
    if(!InpUseVolumeFilter) return(true);

@@ -28,6 +28,12 @@
 #    mercato ha scelto -> niente stop da inseguire, niente slippage di rottura.
 #    Griglia automatica: attesa 15/30/45 min x direzione break/mid/candela.
 #    CSV in ..._delay_realtick.
+#
+#  ⭐ CONFIGURAZIONE DEI DOCUMENTI (PDF ABTG + slide) - aggiungi -Doc a qualunque motore:
+#    .\conferma_apertura_us.ps1 -Model 4 -EntryMode 4 -Doc     <- il PDF: "entra DOPO la chiusura
+#                                                    della candela di breakout, non durante"
+#    .\conferma_apertura_us.ps1 -Model 4 -EntryMode 0 -Doc     <- le slide Nasdaq: ordini STOP su H1
+#    -> CSV in ..._doc_delay_... / ..._doc_brk_...
 #    (RETEST = rottura + ritorno sul livello con LIMIT: niente slippage, SL piu' stretto.)
 # =====================================================================
 param(
@@ -39,6 +45,7 @@ param(
   [int]$RangeMin=0,                            # se >0 forza InpRangeMinutes (es. 15 = ORB dei primi 15 min)
   [int]$DelayMin=0,                            # (solo DELAYED) minuti d'attesa; 0 = griglia 15/30/45
   [int]$DelayDir=-1,                           # (solo DELAYED) 0=break 1=mid 2=candela; -1 = griglia su tutti e 3
+  [switch]$Doc,                                # accende la CONFIGURAZIONE DEI DOCUMENTI (blocco piu' sotto)
   [string]$EABranch="claude/chat-ea-market-openings-zoba2j", # branch con l'EA aggiornato
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
@@ -79,8 +86,34 @@ if($EntryMode -eq 4){
 }
 if($RangeMin -gt 0){ $Inputs += "`nInpRangeMinutes=$RangeMin||$RangeMin||0||$RangeMin||N" }
 
+# --- imposta un input SENZA duplicare la chiave (sostituisce se c'e' gia', altrimenti aggiunge) ---
+function Set-Inp([string]$txt,[string]$k,[string]$v){
+  $line = "$k=$v||$v||0||$v||N"
+  if($txt -match "(?m)^$k="){ return ($txt -replace "(?m)^$k=.*$", $line) }
+  return ($txt + "`n" + $line)
+}
+if($Doc){
+  # === CONFIGURAZIONE PRESCRITTA DAI DOCUMENTI (PDF ABTG + slide "Strategia Nasdaq") ===
+  #  livelli : max/min della candela H1 PRECEDENTE (slide: "si posizionano ordini nel time frame H1,
+  #            SELL STOP sotto i minimi precedenti, BUY STOP sopra i massimi precedenti")
+  #  conferma: volumi >= +50% E volatilita' coerente (ATR >= media)          [PDF, breakout notturno]
+  #  contesto: trend confermato su H4 (gia' nel preset) + correlazione SPXUSD [checklist pre-apertura]
+  #  news    : "nessuna notizia in uscita imminente"                          [checklist rischio]
+  #  rischio : max 2% del capitale                                            [PDF money management]
+  $Inputs = Set-Inp $Inputs "InpRangeMode"       "2"
+  $Inputs = Set-Inp $Inputs "InpLevelTF"         "16385"      # H1
+  $Inputs = Set-Inp $Inputs "InpUseVolumeFilter" "1"
+  $Inputs = Set-Inp $Inputs "InpVolMult"         "1.5"
+  $Inputs = Set-Inp $Inputs "InpUseAtrFilter"    "1"
+  $Inputs = Set-Inp $Inputs "InpUseCorrelation"  "1"
+  # InpCorrSymbol: gia' "SPXUSD" di default nell'EA, non serve forzarlo
+  $Inputs = Set-Inp $Inputs "InpUseNewsFilter"   "1"
+  $Inputs = Set-Inp $Inputs "InpRiskPercent"     "2.0"
+}
+
 $mtag = if($Model -eq 4){"realtick"}else{"ohlc"}
 $etag = if($EntryMode -eq 4){"delay"}elseif($EntryMode -eq 3){"fade"}elseif($EntryMode -eq 2){"retest"}else{"brk"}
+if($Doc){ $etag = "doc_$etag" }
 if($RangeMin -gt 0){ $etag = "${etag}_orb$RangeMin" }
 $EAtag="APERT_US_M5_${etag}_$mtag"
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
