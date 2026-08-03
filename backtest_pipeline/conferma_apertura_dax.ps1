@@ -120,6 +120,17 @@ if($Doc){
   #  (con InpRangeMode=2 il range in minuti non viene usato; se resta "Y" ereditato da una
   #   ottimizzazione precedente, MT5 lo spazzola comunque e moltiplica i pass a vuoto:
   #   e' successo il 02/08, 136 pass per 4 risultati veri)
+  # --- STOP come dicono i documenti: VICINO alla linea di rottura ---
+  #  PDF: "Stop Loss sempre vicino al punto di breakout utilizzando ATR, 5-10 punti
+  #  sotto/sopra la linea di breakout". NON sul bordo opposto del range!
+  #  Con i livelli D1 il bordo opposto e' l'INTERA giornata precedente -> stop enorme,
+  #  lotto schiacciato al minimo, P&L insignificante: il 02/08 il DAX -Doc ha prodotto
+  #  0,22 EUR di perdita lorda per trade e un PF 142 che era solo una divisione per zero.
+  $Inputs = Set-Inp $Inputs "InpSLMode"      "1"     # 1 = stop su ATR
+  $Inputs = Set-Inp $Inputs "InpAtrSlMult"   "1.5"
+  $Inputs = Set-Inp $Inputs "InpMinStopPts"  "500"   # floor = 5 punti indice (minimo del PDF)
+  $Inputs = Set-Inp $Inputs "InpSkipIfTight" "0"     # sotto il floor ALLARGA lo stop, non salta il trade
+
   # conferma della rottura: OR (volumi OPPURE ATR) come dice il PDF.
   # Applicarle a cascata le renderebbe un AND -> campione moltiplicato via.
   $Inputs = Set-Inp $Inputs "InpConfirmMode"  "0"

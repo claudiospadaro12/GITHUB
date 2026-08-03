@@ -32,7 +32,7 @@ _Fonti: PDF «La Magia delle Aperture Europee e Americane» (ABTG, 41 pp.) + `Pi
 | 18 | DAX: livelli da **D1/W1/MN** (Larry Williams) o max/min **giorno precedente** — il Piano Europeo **non prescrive un ORB** | `DAX_Apertura_EU` fa un **ORB dei primi 15 min** | ❌ **strategia diversa** |
 | 19 | Piano Europeo: *"Supertrend, quando cambiano **tutti e tre** (2.5/3.0/3.5), posso entrare"* | un solo Supertrend | ❌ mancante |
 | 20 | Nasdaq: *"non entriamo subito a mercato, ma **divido la size**"* (parte sul livello, parte sulla media 14) | ingresso unico | ❌ mancante |
-| 21 | SL: *"ATR, oppure **5-10 punti** sotto/sopra la linea di breakout"* | `InpMinStopPts = 0` (nessun floor) | ⚠️ da tarare |
+| 21 | SL: *"ATR, oppure **5-10 punti** sotto/sopra la linea di breakout"* | `InpSLMode = SL_RANGE` → stop sul **bordo opposto del range** | ❌ **sbagliato — ha invalidato i run DAX del 02/08** |
 
 **Punteggio: 11 regole rispettate su 21.** Le 10 mancanti sono **tutte** nel livello "conferma d'ingresso e contesto" — cioè esattamente ciò che distingue il metodo del corso da un breakout cieco.
 
@@ -46,6 +46,8 @@ _Fonti: PDF «La Magia delle Aperture Europee e Americane» (ABTG, 41 pp.) + `Pi
 - ✅ #14 → già coperto da `InpEntryMode=DELAYED` (implementato in mattinata: aspetta e poi entra a mercato dalla parte scelta).
 
 **Negli script** (`conferma_apertura_us.ps1`, `conferma_apertura_dax.ps1`): nuovo switch **`-Doc`** che accende in blocco la configurazione dei documenti (#3 #12 #13 #15 #16 #17 #18 #19 + risk 2%).
+
+**Corretto dopo i run DAX (02/08 sera):** `-Doc` usa ora `InpSLMode=ATR` (mult 1,5) + floor 500 punti (5 punti indice) + `InpSkipIfTight=0`. Col vecchio `SL_RANGE` sui livelli D1 lo stop era l'intera giornata precedente: lotto al minimo, 0,22 € di perdita per trade e un PF 142 privo di senso.
 
 **Restano non implementati:** #20 (size divisa in due ingressi) e la catena di correlazione a due simboli (#17). Sono modifiche più invasive: le faccio se il test dice che vale la pena.
 

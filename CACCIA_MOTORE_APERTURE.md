@@ -89,6 +89,21 @@ I tre motori bocciati erano stati testati **a filtri tutti spenti** — cioè no
 **Corretto il 02/08**: la griglia `-Doc` ora inchioda i parametri inerti e spazzola quelli che mordono — **buffer 25→200 passo 25**, **InpVolMult 1,2/1,5/1,8**, **InpAtrFilterMult 0,8/1,0/1,2** (72 combinazioni vere).
 _Nota: il PF decresce in modo monotòno al crescere del buffer su entrambi i simboli (miglior valore al minimo, 100) → comportamento coerente, non un picco isolato. Per questo la nuova griglia scende fino a 25._
 
+### 🚨 VERDETTO 02/08 (d): i due run DAX `-Doc` sono DA BUTTARE (errore di configurazione mio)
+| Run | PFmed | PFmax | trade | **perdita lorda per trade** |
+|---|---|---|---|---|
+| DAX doc_brk | 0,76 | 2,12 | 63 | **30 €** |
+| DAX doc_delay | 0,81 | **142,63** (!) | 124 | **0,22 €** |
+| _riferimento: DAX nudo_ | — | — | 429–440 | _75–106 €_ |
+| _riferimento: US -Doc_ | — | — | 71–106 | _239–424 €_ |
+
+Un PF di 142 su 88 trade con **19 € di perdite lorde totali** non è una strategia: è una divisione per quasi-zero. Causa: nella configurazione `-Doc` avevo lasciato `InpSLMode = SL_RANGE`, cioè **stop sul bordo opposto del range**. Con i livelli **D1** il bordo opposto è l'**intera giornata precedente** → stop enorme → lotto schiacciato al minimo → P&L insignificante.
+
+I documenti dicono un'altra cosa: *"Stop Loss sempre vicino al punto di breakout utilizzando ATR, **5-10 punti** sotto/sopra la linea di breakout"*. Era il punto **#21** dell'audit, segnato "⚠️ da tarare" e poi non tarato.
+
+**Corretto**: `-Doc` ora usa `InpSLMode=ATR` (mult 1,5), floor 500 punti = 5 punti indice, e `InpSkipIfTight=0` (sotto il floor **allarga** lo stop invece di saltare il trade, per non tagliare il campione).
+**I run DAX vanno rifatti.** I run US **non** sono affetti (rischio per trade in linea o superiore al baseline): il risultato Nasdaq resta valido, con la sua riserva separata dei 72 trade.
+
 ## 🧪 PROSSIMO TEST: L'ABLAZIONE DEI FILTRI (Nasdaq)
 Il piano ha ribaltato il Nasdaq ma con 72 trade. Prima di crederci bisogna sapere **quale filtro porta l'edge e quale sta solo tagliando il campione**. La scala accende un filtro alla volta:
 
