@@ -1,0 +1,6 @@
+simbolo;100GBP;apertura;08:00;buffer;200;slippage;100;TP_R;2.0;candeleM5_processate;113574
+scenario;trade;win%;aspettativa_R;totale_R;best_R;worst_R;ampiezza_pt;MAE_R_vinc;MAE_R_max_vinc;MFE_R_vinc;MFE_R_tutti
+TUTTI i breakout (cieco = come fa l'EA ora);431;32.9;-0.138;-59.6;2.0;-1.0;2008;0.41;0.99;1.82;0.96
+Solo LONG;216;35.6;-0.072;-15.5;2.0;-1.0;2036;0.40;0.97;1.82;0.96
+Solo SHORT;215;30.2;-0.205;-44.1;2.0;-1.0;1979;0.43;0.99;1.83;0.96
+Con FILTRO H4 (solo a favore del trend H4);213;33.3;-0.137;-29.2;2.0;-1.0;1893;0.44;0.97;1.80;0.95

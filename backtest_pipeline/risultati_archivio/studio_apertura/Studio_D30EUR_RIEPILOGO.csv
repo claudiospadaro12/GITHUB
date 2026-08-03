@@ -1,0 +1,6 @@
+simbolo;D30EUR;apertura;08:00;buffer;200;slippage;100;TP_R;2.0;candeleM5_processate;115914
+scenario;trade;win%;aspettativa_R;totale_R;best_R;worst_R;ampiezza_pt;MAE_R_vinc;MAE_R_max_vinc;MFE_R_vinc;MFE_R_tutti
+TUTTI i breakout (cieco = come fa l'EA ora);440;36.6;0.026;11.2;2.0;-1.0;6254;0.41;1.00;2.07;1.15
+Solo LONG;225;36.0;0.007;1.6;2.0;-1.0;5921;0.43;0.93;2.11;1.18
+Solo SHORT;215;37.2;0.045;9.6;2.0;-1.0;6603;0.39;1.00;2.02;1.12
+Con FILTRO H4 (solo a favore del trend H4);203;35.0;-0.017;-3.5;2.0;-1.0;5840;0.44;1.00;2.11;1.17

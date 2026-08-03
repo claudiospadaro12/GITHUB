@@ -1,0 +1,6 @@
+simbolo;SPXUSD;apertura;14:30;buffer;200;slippage;100;TP_R;2.0;candeleM5_processate;119684
+scenario;trade;win%;aspettativa_R;totale_R;best_R;worst_R;ampiezza_pt;MAE_R_vinc;MAE_R_max_vinc;MFE_R_vinc;MFE_R_tutti
+TUTTI i breakout (cieco = come fa l'EA ora);444;39.6;-0.017;-7.8;4.6;-3.1;1553;0.41;0.99;1.77;1.00
+Solo LONG;227;41.0;-0.022;-5.0;3.0;-2.7;1560;0.39;0.99;1.66;0.97
+Solo SHORT;217;38.2;-0.013;-2.7;4.6;-3.1;1546;0.44;0.98;1.89;1.02
+Con FILTRO H4 (solo a favore del trend H4);227;40.5;-0.002;-0.3;4.6;-1.2;1407;0.37;0.97;1.67;0.98

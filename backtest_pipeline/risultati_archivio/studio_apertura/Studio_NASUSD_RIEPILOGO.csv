@@ -1,0 +1,6 @@
+simbolo;NASUSD;apertura;14:30;buffer;200;slippage;100;TP_R;2.0;candeleM5_processate;119689
+scenario;trade;win%;aspettativa_R;totale_R;best_R;worst_R;ampiezza_pt;MAE_R_vinc;MAE_R_max_vinc;MFE_R_vinc;MFE_R_tutti
+TUTTI i breakout (cieco = come fa l'EA ora);447;37.8;0.001;0.3;5.1;-2.8;8523;0.38;0.98;2.04;1.12
+Solo LONG;226;37.6;-0.005;-1.2;3.2;-2.8;8218;0.36;0.98;2.00;1.14
+Solo SHORT;221;38.0;0.007;1.5;5.1;-1.5;8834;0.41;0.93;2.08;1.11
+Con FILTRO H4 (solo a favore del trend H4);234;39.3;0.055;12.9;5.1;-2.8;7843;0.36;0.93;1.90;1.11

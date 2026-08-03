@@ -30,6 +30,17 @@
 
 ---
 
+## 📐 FASE A FATTA (03/08) — `risultati_archivio/STUDIO_MOVIMENTO_RISULTATI.md`
+8 indici, ~3 500 trade, breakout cieco con stop 1R / TP 2R. **Risultato scomodo: sette indici su otto danno aspettativa ZERO o negativa.**
+- Aspettativa R/trade: **Dow +0,074** ✅ · DAX +0,026 · Nasdaq +0,001 · SPX −0,017 · IBEX/EuroStoxx −0,048 · CAC −0,056 · FTSE −0,138.
+- ⚠️ **Corregge la mia conclusione del 03/08** (*"entriamo bene, usciamo male"*): su 5 trade era plausibile, su 3 500 no. Sistemare l'uscita porta da negativo a **zero**, non a buono. Il margine sta nella **selezione** (coerente con l'ablazione: solo i volumi spostano).
+- **Nessun TP salva niente**: il migliore per simbolo resta ~0 e salta a caso → non esiste "la distanza giusta".
+- 💡 **DAX: il 48% dei perdenti era prima a +0,5R, il 23% a +1R.** La domanda *"ero a più e si è girato"* ha risposta strutturale. Argomento forte per il BE — costo da misurare in FASE B.
+- ⏱️ **Vincente mediano DAX = 135 min, Nasdaq = 80 min. Il nostro EA chiude in 39 secondi.**
+- ✅ **Stop a 1R confermato, non stringerlo**: un vincente su 10 va contro di 0,80R prima di girarsi.
+- 🌍 Filtro trend H4: **aiuta sui 3 indici USA, danneggia sui 4 europei** (netto e ordinato).
+- 🎯 **Il Dow è il mercato migliore e lo stiamo trascurando** — terzo riscontro indipendente (tick reali PF 1,30). Ipotesi derivata: **Dow + H4 + TP 1,5R + stop invariato + niente trailing nei primi 45 min**.
+
 ## ✅ ABLAZIONE NASDAQ CHIUSA (03/08) — tutti e 7 i gradini
 **Su sei filtri candidati ne funziona uno solo: i volumi di pre-apertura.**
 Nudo 0,90 → **volumi 1,15** → ATR 0,93 → volumi OR ATR **0,99** → +EMA H4 0,81 → +correlazione 0,80 → news non misurato.

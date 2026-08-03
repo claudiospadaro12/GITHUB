@@ -1,0 +1,6 @@
+simbolo;U30USD;apertura;14:30;buffer;200;slippage;100;TP_R;2.0;candeleM5_processate;119688
+scenario;trade;win%;aspettativa_R;totale_R;best_R;worst_R;ampiezza_pt;MAE_R_vinc;MAE_R_max_vinc;MFE_R_vinc;MFE_R_tutti
+TUTTI i breakout (cieco = come fa l'EA ora);446;41.5;0.074;33.1;2.0;-1.7;13150;0.38;1.00;1.96;1.14
+Solo LONG;231;42.9;0.095;22.0;2.0;-1.7;13255;0.36;0.95;1.95;1.17
+Solo SHORT;215;40.0;0.052;11.1;2.0;-1.2;13036;0.40;1.00;1.97;1.11
+Con FILTRO H4 (solo a favore del trend H4);212;43.9;0.126;26.6;2.0;-1.2;12415;0.40;1.00;2.00;1.23
