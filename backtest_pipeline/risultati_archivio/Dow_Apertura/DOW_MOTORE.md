@@ -45,18 +45,46 @@ Peggio: **sopra al filtro H4 fa danno**, e in modo monotòno — 1,24 → 1,21 �
 
 **È il miglior risultato che abbiamo su un sistema di aperture**, e l'unico che regge su tutti e tre i criteri insieme.
 
+## ✅ ROBUSTEZZA — l'altopiano c'è (fase 2, 03/08)
+
+Sweep dell'EMA dentro il filtro H4, da 20 a 200 periodi. 10 pass, tutto il resto fermo.
+
+| EmaSlow | PF | DD% | trade | profit |
+|---|---|---|---|---|
+| 20 | 1,274 | 8,81 | 324 | 4 424 |
+| **40** | **1,299** | **7,07** | 328 | **5 026** |
+| 60 | 1,241 | 7,53 | 334 | 3 946 |
+| 80 | 1,270 | 7,32 | 337 | 4 421 |
+| 100 | 1,202 | 11,04 | 342 | 3 176 |
+| 120 | 1,228 | 11,38 | 344 | 3 703 |
+| 140 | 1,211 | 10,81 | 345 | 3 401 |
+| 160 | 1,211 | 11,72 | 350 | 3 411 |
+| 180 | 1,241 | 11,48 | 351 | 4 011 |
+| 200 | 1,252 | 11,66 | 351 | 4 108 |
+
+**Tutti e 10 i valori stanno sopra PF 1,20** (min 1,202 · max 1,299 · mediana 1,241). Non c'è nessuna punta: il PF 1,24 dell'EMA 50 è un punto qualunque dentro una regione buona larga un ordine di grandezza. **Il filtro H4 sul Dow è una proprietà del mercato, non un artefatto di taratura.**
+
+### Una sottostruttura vera, non rumore
+
+| | PF mediano | **DD mediano** | trade mediani |
+|---|---|---|---|
+| **EMA 20–80** (corta) | **1,272** | **7,42%** | 331 |
+| EMA 100–200 (lunga) | 1,219 | **11,43%** | 348 |
+
+Lo stacco sul drawdown è di **4 punti percentuali** ed è coerente su 4 valori contro 6 — non è un singolo pass fortunato. Un'EMA corta su H4 reagisce prima ai cambi di regime e tiene fuori dai giorni peggiori, al costo di ~17 trade.
+
+**Scelta: si resta a `InpEmaSlow = 50`.** È dentro la regione buona, e prendere il 40 solo perché è il massimo della griglia sarebbe esattamente l'errore da cui questo test doveva proteggerci. La regola operativa vera è: **stare sotto i 100**.
+
 ## ⚠️ Cosa NON è ancora dimostrato
 
-1. **Il numero dentro l'interruttore non è mai stato testato.** Il filtro H4 usa una EMA a **50 periodi**, scelta e mai messa in discussione. Se il PF 1,24 esiste solo a 50 e crolla a 40 o 60, è una punta fortunata. → **fase `robustezza`**, 10 pass.
+1. ~~Il numero dentro l'interruttore non è mai stato testato~~ → **fatto: altopiano confermato**, 10/10 sopra PF 1,20.
 2. **Nessun out-of-sample.** Un solo periodo 2024.01–2026.06, nessuna divisione IS/OOS.
 3. **Gestione ancora nuda.** Qui non c'è né BE né trailing: il risultato è il valore *grezzo* del segnale. La fase `distanze` dirà quanto se ne può tenere.
 
 ## ▶️ Prossimi passi, in ordine
 
 ```powershell
-# 1) l'altopiano c'e' o no? 10 pass, ~1 ora. Decide se le ore dopo hanno senso.
-.\dow_apertura.ps1 -Fase robustezza
-
-# 2) solo se il punto 1 regge: le distanze di gestione. 48 pass.
+# ~~1) robustezza~~ -> FATTA, superata.
+# 2) le distanze di gestione. 48 pass.
 .\dow_apertura.ps1 -Fase distanze          # gia' tarato su -H4 1 -Vol 0
 ```

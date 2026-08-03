@@ -47,8 +47,9 @@ Tick reali, U30USD M5, gestione NUDA (solo stop+TP), 12 pass.
 - ❌ **Il filtro volumi NON si trasferisce dal Nasdaq**: da solo 1,01/0,99/1,05 (rumore), e sopra l'H4 fa danno in modo monotòno (1,24 → 0,96).
 - 📌 **Regola nuova: non esiste "il filtro giusto", esiste quello giusto per QUEL mercato.** Volumi = Nasdaq. Trend H4 = Dow (e dannoso sugli europei).
 - Miglior sistema di aperture che abbiamo: Dow+H4 (1,24 / 6,9% / 329) batte Nasdaq+volumi (1,15 / 9,6% / 152) su tutti e tre i criteri.
-- ⚠️ Non ancora dimostrato: l'EMA a 50 dentro il filtro non è mai stata testata (altopiano o punta?), nessun out-of-sample, gestione ancora nuda.
-- **⏭️ TOCCA A TE:** `.\dow_apertura.ps1 -Fase robustezza` (10 pass, ~1h) → se regge, `-Fase distanze` (48 pass).
+- ✅ **ROBUSTEZZA SUPERATA**: EMA del filtro da 20 a 200 → **10/10 sopra PF 1,20** (min 1,202, max 1,299). Nessuna punta, è un altopiano. Sottostruttura: EMA **corta (20-80) DD 7,4%** vs lunga (100-200) DD 11,4% → **restare sotto 100**; si tiene 50.
+- ⚠️ Resta non dimostrato: **nessun out-of-sample**, e la gestione è ancora nuda.
+- **⏭️ TOCCA A TE:** `.\dow_apertura.ps1 -Fase distanze` (48 pass).
 
 ## ✅ ABLAZIONE NASDAQ CHIUSA (03/08) — tutti e 7 i gradini
 **Su sei filtri candidati ne funziona uno solo: i volumi di pre-apertura.**
