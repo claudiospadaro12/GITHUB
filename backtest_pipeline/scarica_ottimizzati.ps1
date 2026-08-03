@@ -69,7 +69,12 @@ $EAs = @(
     "ABTG_WOL",
     "ABTG_HARSI",
     "ABTG_FiboH4_Multi",
-    "IchiTrend_Gold_Base"
+    "IchiTrend_Gold_Base",
+    # NON e' un EA che opera: e' quello che esporta i trade per la pagella
+    # serale. Mancava dalla lista, percio' il 03/08 il CSV usciva ancora con
+    # le colonne vecchie (senza close_reason / session_high / session_low)
+    # anche dopo aver ricompilato "tutto".
+    "ABTG_TradeExporter"
 )
 
 Write-Host "=== AGGIORNO TUTTI GLI EA (ottimizzati + nativi) ===" -ForegroundColor Cyan
