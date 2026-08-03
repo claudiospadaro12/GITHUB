@@ -46,6 +46,7 @@ param(
   [int]$DelayMin=0,                            # (solo DELAYED) minuti d'attesa; 0 = griglia 15/30/45
   [int]$DelayDir=-1,                           # (solo DELAYED) 0=break 1=mid 2=candela; -1 = griglia su tutti e 3
   [switch]$Doc,                                # accende la CONFIGURAZIONE DEI DOCUMENTI (blocco piu' sotto)
+  [switch]$VolSweep,                           # (con -Doc) griglia FINE della soglia volumi: 1,5->2,0 passo 0,1
   [string]$Filters,                            # (con -Doc) quali filtri accendere, es. "vol,atr". Omesso = tutti; "" = nessuno
   [string]$EABranch="lavoro", # branch con l'EA aggiornato
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
@@ -145,7 +146,8 @@ if($Doc){
 
   # --- griglia: SOLO parametri che mordono, e solo se il filtro relativo e' acceso ---
   $Inputs = Set-InpGrid $Inputs "InpBufferPoints" "100" "25" "25" "200"
-  if($useVol){ $Inputs = Set-InpGrid $Inputs "InpVolMult" "1.5" "1.2" "0.3" "1.8" }
+  if($useVol -and $VolSweep){ $Inputs = Set-InpGrid $Inputs "InpVolMult" "1.5" "1.5" "0.1" "2.0" }
+  elseif($useVol){ $Inputs = Set-InpGrid $Inputs "InpVolMult" "1.5" "1.2" "0.3" "1.8" }
   else       { $Inputs = Set-Inp     $Inputs "InpVolMult" "1.5" }
   if($useAtr){ $Inputs = Set-InpGrid $Inputs "InpAtrFilterMult" "1.0" "0.8" "0.2" "1.2" }
   else       { $Inputs = Set-Inp     $Inputs "InpAtrFilterMult" "1.0" }
@@ -156,6 +158,7 @@ $etag = if($EntryMode -eq 4){"delay"}elseif($EntryMode -eq 3){"fade"}elseif($Ent
 if($Doc){
   $etag = "doc_$etag"
   # se sto facendo l'ablazione, il set di filtri finisce nel nome del CSV (niente collisioni)
+  if($VolSweep){ $etag = "${etag}_sweep" }
   if($PSBoundParameters.ContainsKey('Filters')){
     $ftag = if($Filters.Trim()){ ($Filters -replace '[^a-zA-Z0-9]','') } else { "nofilt" }
     $etag = "${etag}_$ftag"
