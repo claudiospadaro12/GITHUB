@@ -135,7 +135,12 @@ if($Doc){
   # Applicarle a cascata le renderebbe un AND -> campione moltiplicato via.
   $Inputs = Set-Inp $Inputs "InpConfirmMode"  "0"
   $Inputs = Set-Inp $Inputs "InpRangeMinutes"  "15"
-  $Inputs = Set-Inp $Inputs "InpTrailFixedPts" "410"
+  # trailing: il piano dice 410 punti = 4,1 punti indice (D30EUR ha 2 decimali).
+  # Il 03/08 in forward TRE EA sono stati chiusi dal proprio trailing in 39 SECONDI,
+  # prendendo +12 punti su un movimento che ne ha fatti +83. All'apertura una candela
+  # M5 del DAX si muove 20-40 punti: 4 punti di trailing non sopravvivono.
+  # -> lo SPAZZOLO (410/940/1470/2000 = 4/9/15/20 punti indice) invece di inchiodarlo.
+  $Inputs = Set-InpGrid $Inputs "InpTrailFixedPts" "410" "410" "530" "2000"
 
   # --- griglia: SOLO parametri che mordono, e solo se il filtro relativo e' acceso ---
   $Inputs = Set-InpGrid $Inputs "InpBufferPoints" "100" "25" "25" "200"
