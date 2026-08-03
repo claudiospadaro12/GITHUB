@@ -1,4 +1,35 @@
-# 🎯 ORB Apertura America (ABTG ToolKit Vol. V) — la specifica completa vs il nostro EA
+# 🎯 SCHEDA ORB — strategia a sé, non un motore delle aperture
+
+> **Chiarimento 03/08 (Claudio):** l'ORB **non è** una variante d'ingresso dell'EA apertura. È una **terza strategia**, con un suo EA (`ABTG_ORB`, più `ABTG_ORB_Fibo` e `ABTG_Londra_ORB`). Emiliano nelle live: *"l'ORB è **un'altra strategia** che noi abbiamo"*. Era archiviata per errore dentro `CACCIA_MOTORE_APERTURE.md`.
+
+## Le tre strategie ABTG sulla stessa sessione
+| Strategia | Livelli | Ingresso |
+|---|---|---|
+| Apertura Nasdaq | candela H1 prec. / max-min 15 min pre-apertura | ordini STOP, gestione attiva |
+| Apertura Europea (DAX) | D1/W1/M (Larry Williams) | pendenti + Supertrend ×3 |
+| **ORB** | **primi 30 min DOPO l'apertura** | **chiusura candela**, stop fisso |
+
+---
+
+## 📊 DOVE SIAMO DAVVERO CON L'ORB (non è "morto")
+| Fonte | Numero | Lettura |
+|---|---|---|
+| Backtest tick reali (`REGISTRO_TEST` O1) | **625 trade**, 50% pass positivi, best PF **1,15**, DD 16% | 🟡 **marginale**, non morto — ed è l'unico con campione PIENO (100% dei giorni) |
+| Forward (pagella 01/08) | **+328,93 €** su 7 trade, 71% vinti | il migliore sul Nasdaq, ma 7 trade non sono un dato |
+| `ABTG_ORB_Fibo` | OHLC 29% pass positivi | 🔴 morto |
+| `ABTG_Londra_ORB` | OHLC 11% pass, DD 23% | 🔴 morto |
+
+**Quindi:** morti sono ORB_Fibo e Londra_ORB. `ABTG_ORB` è **marginale con 625 operazioni** — la base migliore che abbiamo per aggiungerci le conferme.
+
+## 🔑 La ricetta era già scritta nel nostro registro — e mai implementata
+`REGISTRO_TEST.md` riga 140, estratta dalle live **prima** che arrivasse il ToolKit:
+> *"ORB: si entra alla rottura del max/min **SOLO se**: (1) la candela **chiude col corpo fuori dal range** (non solo spike), (2) **volumi ≥ 1,5× la media(20)**, (3) **medie 9/21 inclinate** nella direzione."*
+
+Sono **esattamente** le tre conferme del ToolKit. Erano a registro da giorni e nessuna era nel codice.
+
+---
+
+## Il ToolKit (ABTG Vol. V) — la specifica completa
 
 _03/08/2026. Fonte: `ToolKit_05_ORB_Apertura_America.pdf` (44 pp., Realise 15.02.2026)._
 
@@ -55,7 +86,23 @@ Il ToolKit è esplicito anche sul timeframe del range:
 - News 2 ore prima → `InpUseNewsFilter=1`, `InpNewsBeforeMin=120`
 - Rischio 2% → `InpRiskPercent=2`
 
-**Da scrivere (due aggiunte):**
+**✅ FATTO 03/08 in `ABTG_ORB.mq5`** (tutto opt-in, default = comportamento attuale):
+- `InpUseCloseConfirm` — entra alla **chiusura** di una candela oltre il livello invece che con pendenti STOP (nuova fase `ORB_ARMED` + `TryCloseConfirmEntry`)
+- `InpMinBodyPct` — corpo minimo della candela di rottura in % del suo range
+- `InpUseEmaFilter` — EMA veloce/lenta allineate **E prezzo dalla parte giusta di entrambe** (`EmaSideOK`)
+- `InpUseVolumeFilter` + `InpVolMult`/`InpVolAvgBars` — volume **della candela di rottura** ≥ 1,5× media(20)
+- il range 30 min post-apertura non ha richiesto codice: bastano `InpRangeStart/End` (14:30→15:00 server)
+- stop fisso + TP 1:2: `InpBreakeven=0`, `InpUseTrailEMA=0`, `InpTP1Pct=0`, `InpTP_R=2`
+
+**▶️ IL TEST**
+```powershell
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/test_orb_toolkit.ps1" | iex
+```
+Scala a 6 gradini su NASUSD + U30USD + **SPXUSD** (il mercato su cui il ToolKit è tarato), ognuno cambia **una** variabile:
+**A** attuale (range 5 min pre) → **B** range 30 min post → **C** + chiusura confermata → **D** + corpo → **E** + medie 9/21 → **F** + volumi.
+A→B isola l'effetto del **range**, B→C quello dell'**ingresso**, C→F il peso di ogni **filtro**.
+
+_(riferimento storico delle due aggiunte richieste)_
 1. **Ingresso su CHIUSURA confermata**: sorvegliare le candele M5 dopo la fine del range e entrare a mercato quando **una candela chiude** oltre il livello (con filtro sul **corpo minimo**). È un motore nuovo — il `DELAYED` attuale decide a un orario fisso, non su un evento.
 2. **Condizione "prezzo dalla parte giusta di entrambe le medie"**: oggi `TrendBias()` confronta solo veloce vs lenta. Va aggiunta la posizione del prezzo rispetto a entrambe, e il caso **neutro** (medie intrecciate → nessun trade).
 

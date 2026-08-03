@@ -61,6 +61,14 @@ input int    InpEmaFast      = 9;
 input int    InpEmaSlow      = 21;
 input bool   InpExitOnEmaClose = true; // Esci se una candela chiude oltre l'EMA9 opposta
 
+input group "=== Ricetta ToolKit ABTG / live (tutto OPT-IN, default = comportamento attuale) ==="
+input bool   InpUseCloseConfirm  = false;  // Entra alla CHIUSURA di una candela oltre il livello, invece che con pendenti STOP
+input double InpMinBodyPct       = 50;     // (CLOSE_CONFIRM) corpo minimo della candela di rottura, in % del suo range (0=off)
+input bool   InpUseEmaFilter     = false;  // Filtro direzionale: EMA veloce/lenta allineate E prezzo dalla parte giusta di ENTRAMBE
+input bool   InpUseVolumeFilter  = false;  // Volume della candela di rottura >= X * media
+input double InpVolMult          = 1.5;    // (volumi) moltiplicatore: 1.5 = +50%, come da live
+input int    InpVolAvgBars       = 20;     // (volumi) barre per la media
+
 input group "=== Rischio ==="
 input double InpRiskPercent  = 1.0;    // Rischio per trade in %
 
@@ -84,7 +92,7 @@ input bool   InpVerbose   = true;
 //  STATO
 //==================================================================
 int      hAtr=INVALID_HANDLE, hEmaF=INVALID_HANDLE, hEmaS=INVALID_HANDLE;
-enum ENUM_ORBPHASE { ORB_WAIT, ORB_PLACED, ORB_DONE };
+enum ENUM_ORBPHASE { ORB_WAIT, ORB_ARMED, ORB_PLACED, ORB_DONE };
 ENUM_ORBPHASE gPhase=ORB_WAIT;
 int      gDay=-1;
 double   gRangeHigh=0, gRangeLow=0;
@@ -136,13 +144,28 @@ void OnTick()
 
    //--- gestione runner (EMA) a nuova barra M5
    datetime t=iTime(_Symbol,InpExecTF,0);
-   if(t!=gLastExec){ gLastExec=t; ManageRunner(); }
+   bool newBar=(t!=gLastExec);
+   if(newBar){ gLastExec=t; ManageRunner(); }
 
-   //--- piazzamento ordini alla fine del range
+   //--- fine del range: piazzo i pendenti (classico) oppure ARMO la sorveglianza (ToolKit)
    if(gPhase==ORB_WAIT && nowMin>=InpRangeEndHour*60+InpRangeEndMin)
      {
       if(newsBlk) return;
-      if(TryPlace()) gPhase=ORB_PLACED;
+      if(InpUseCloseConfirm)
+        {
+         if(ArmCloseConfirm()) gPhase=ORB_ARMED;
+        }
+      else
+        {
+         if(TryPlace()) gPhase=ORB_PLACED;
+        }
+     }
+
+   //--- ToolKit: aspetto che una candela CHIUDA oltre il livello. Valuto a nuova barra.
+   if(gPhase==ORB_ARMED && newBar)
+     {
+      if(newsBlk) return;
+      if(TryCloseConfirmEntry()) gPhase=ORB_PLACED;
      }
   }
 
@@ -211,6 +234,108 @@ bool TryPlace()
         }
      }
    return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| ToolKit ABTG (Vol. V) + ricetta dalle live: invece di piazzare    |
+//| pendenti STOP si ASPETTA che una candela CHIUDA oltre il livello. |
+//|  «Non basta che il prezzo tocchi il livello: la candela deve      |
+//|   chiudersi al di sopra. Questo conferma che la rottura e' reale.»|
+//| Qui si calcola solo il range e si arma la sorveglianza.           |
+//+------------------------------------------------------------------+
+bool ArmCloseConfirm()
+  {
+   if(!ComputeRange(gRangeHigh,gRangeLow))
+     { Log("range non ancora calcolabile (dati M1): riprovo."); return(false); }
+   Log(StringFormat("ARMATO (attesa chiusura confermata): range %.5f - %.5f", gRangeHigh, gRangeLow));
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| Filtro direzionale del ToolKit: EMA veloce/lenta allineate E      |
+//| prezzo dalla parte giusta di ENTRAMBE. Medie intrecciate o        |
+//| prezzo in mezzo = NESSUNA operazione.                             |
+//+------------------------------------------------------------------+
+bool EmaSideOK(int dir)
+  {
+   if(!InpUseEmaFilter) return(true);
+   double f[1], s[1];
+   if(CopyBuffer(hEmaF,0,1,1,f)<1 || CopyBuffer(hEmaS,0,1,1,s)<1) return(true); // dati insuff.: non blocco
+   double px=iClose(_Symbol,InpExecTF,1);
+   if(px<=0) return(true);
+   if(dir>0) return(f[0]>s[0] && px>f[0] && px>s[0]);
+   if(dir<0) return(f[0]<s[0] && px<f[0] && px<s[0]);
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Volume DELLA CANDELA DI ROTTURA >= X * media delle N precedenti   |
+//|  (live: "volumi >= +50%, cioe' 1,5x la media a 20")               |
+//+------------------------------------------------------------------+
+bool VolumeOK()
+  {
+   if(!InpUseVolumeFilter) return(true);
+   int n=InpVolAvgBars;
+   if(n<2) return(true);
+   long v[];
+   ArraySetAsSeries(v,true);
+   if(CopyTickVolume(_Symbol,InpExecTF,1,n+1,v)<n+1) return(true);  // dati insuff.: non blocco
+   double sum=0;
+   for(int i=1;i<=n;i++) sum+=(double)v[i];
+   double avg=sum/n;
+   if(avg<=0) return(true);
+   return((double)v[0] >= InpVolMult*avg);   // v[0] = la candela appena chiusa = quella che rompe
+  }
+
+//+------------------------------------------------------------------+
+//| Valuta l'ultima candela CHIUSA: ha rotto il range con un corpo    |
+//| ampio, con le medie allineate e i volumi in crescita? Allora      |
+//| entra A MERCATO. Altrimenti aspetta la prossima.                  |
+//+------------------------------------------------------------------+
+bool TryCloseConfirmEntry()
+  {
+   double o=iOpen (_Symbol,InpExecTF,1), c=iClose(_Symbol,InpExecTF,1);
+   double h=iHigh (_Symbol,InpExecTF,1), l=iLow  (_Symbol,InpExecTF,1);
+   if(o<=0 || c<=0 || h<=l) return(false);
+
+   int dir=0;
+   if(c>gRangeHigh)      dir=+1;
+   else if(c<gRangeLow)  dir=-1;
+   else                  return(false);          // chiusura DENTRO il range: non e' un breakout valido
+
+   if(dir>0 && !InpAllowLong)  return(false);
+   if(dir<0 && !InpAllowShort) return(false);
+
+   //--- corpo ampio: una candela con corpo piccolo e ombra lunga che attraversa
+   //    il livello e' spesso un falso breakout (ToolKit, errori comuni)
+   double rng=h-l, body=MathAbs(c-o);
+   if(InpMinBodyPct>0 && (rng<=0 || body < rng*InpMinBodyPct/100.0))
+     { Log("rottura con corpo piccolo: ignoro (probabile falso break)."); return(false); }
+
+   if(!EmaSideOK(dir)) { Log("medie non allineate col breakout: niente trade."); return(false); }
+   if(!VolumeOK())     { Log("volume della rottura sotto la media: niente trade."); return(false); }
+   if(!SpreadOK())     { Log("spread alto: niente trade."); return(false); }
+
+   double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+   double bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
+   if(ask<=0 || bid<=0) return(false);
+
+   double entry=(dir>0)?ask:bid;
+   double atr=AtrVal();
+   double sl=(dir>0)?SLforLong(entry,gRangeLow,atr):SLforShort(entry,gRangeHigh,atr);
+   double dist=(dir>0)?(entry-sl):(sl-entry);
+   if(dist<=0){ Log("stop dalla parte sbagliata: niente trade."); return(false); }
+
+   double tp=NormalizePrice((dir>0)?entry+dist*InpTP_R:entry-dist*InpTP_R);
+   double lot=LotByRisk(dist);
+   if(lot<=0){ Log("lotto 0: niente trade."); return(false); }
+
+   bool ok=(dir>0) ? gTrade.Buy (lot,_Symbol,0.0,sl,tp,InpComment+" BUY CC")
+                   : gTrade.Sell(lot,_Symbol,0.0,sl,tp,InpComment+" SELL CC");
+   if(ok) Log(StringFormat("%s a mercato su chiusura confermata @ %.5f SL %.5f TP %.5f lot %.2f",
+                           (dir>0?"BUY":"SELL"), entry, sl, tp, lot));
+   else   Log("ingresso su chiusura confermata FALLITO: "+gTrade.ResultRetcodeDescription());
+   return(ok);
   }
 
 double EntryDistance()

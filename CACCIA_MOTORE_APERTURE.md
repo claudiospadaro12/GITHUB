@@ -17,7 +17,7 @@
 | 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | 🔄 **IMPLEMENTATO 02/08** (`InpEntryMode=DELAYED`, `InpDelayMinutes`, `InpDelayDirMode`). Entra **a MERCATO** → niente stop da inseguire = niente slippage di rottura. Test: `confronto_ritardata.ps1` |
 | 5 | **GAP-FILL** | se apre in gap, opera verso la chiusura prec. | ⬜ già nel codice (InpEntryMode=GAPFILL), da testare |
 | 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | 🔄 **IMPLEMENTATO 02/08** come sotto-modo del #4: `InpDelayDirMode=2` (direzione del corpo della candela di apertura). Nella griglia del test #4 |
-| 7 | **ORB 30 min** (ToolKit ABTG Vol. V) | range primi **30 min** dall'apertura US, ingresso alla **CHIUSURA** di una candela M5 oltre il livello, filtro **EMA 9/21 su M5**, stop fisso mai spostato, TP 1:2 | ⭐ **SPECIFICA COMPLETA arrivata 03/08** → `docs/piani_abtg/ANALISI_ORB_AMERICA.md`. **Su 4 punti prescrive l'opposto di ciò che abbiamo testato.** Servono 2 aggiunte al codice |
+| 7 | ~~ORB~~ | — | ➡️ **NON è un motore di questo EA: è una STRATEGIA A SÉ** (Emiliano: *"l'ORB è un'altra strategia che noi abbiamo"*), con un suo EA (`ABTG_ORB`). Spostato su `docs/piani_abtg/ORB_SCHEDA.md` |
 
 ## 🚨 SCOPERTA 02/08 — ABBIAMO TESTATO IL MOTORE **NUDO**, non il metodo di Emiliano
 Controllo colonna per colonna dei CSV dei 3 test (400+ pass, breakout/retest/fade su DAX): **ogni filtro era SPENTO in tutti i pass**.
