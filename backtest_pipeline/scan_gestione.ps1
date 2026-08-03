@@ -29,7 +29,7 @@ $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 $EA=$Robot
 # gli EA con InpBEatR vivono sul branch di lavoro (non ancora sul default)
-$EABranch="claude/chat-ea-market-openings-zoba2j"
+$EABranch="lavoro"
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 
 # --- GRIGLIA STRUTTURA DI GESTIONE (48 combo; ingresso fissato ai default) ---

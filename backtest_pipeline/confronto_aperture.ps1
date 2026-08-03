@@ -6,7 +6,7 @@
 #     2) US  (Dow + Nasdaq)  RETEST      4) DAX  RETEST
 #
 #  Lancia con UNA riga (niente cd, niente execution policy):
-#    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_aperture.ps1" | iex
+#    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/confronto_aperture.ps1" | iex
 #
 #  ATTENZIONE: MetaTrader deve essere CHIUSO. A tick reali sono ore:
 #  fallo partire e lascialo lavorare. Alla fine: 4 cartelle sul Desktop.
@@ -15,7 +15,7 @@ $ErrorActionPreference="Stop"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 
-$b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline"
+$b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline"
 $Work=Join-Path $env:USERPROFILE "Desktop"
 if(-not (Test-Path $Work)){ $Work=(Get-Location).Path }
 Set-Location $Work

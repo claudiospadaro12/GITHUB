@@ -108,7 +108,7 @@ I documenti dicono un'altra cosa: *"Stop Loss sempre vicino al punto di breakout
 Il piano ha ribaltato il Nasdaq ma con 72 trade. Prima di crederci bisogna sapere **quale filtro porta l'edge e quale sta solo tagliando il campione**. La scala accende un filtro alla volta:
 
 ```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/ablazione_nasdaq.ps1" | iex
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/ablazione_nasdaq.ps1" | iex
 ```
 1. soli **livelli H1** (nessun filtro) → 2. **+volumi** → 3. **+ATR** → 4. **+trend H4** → 5. **+correlazione** → 6. **+news** (piano completo)
 
@@ -125,7 +125,7 @@ Il gradino 1 è il più importante: dice se l'edge viene già dai **livelli dell
 **ENTRATA RITARDATA / FIRST-CANDLE (motori #4 e #6)** — DAX + Dow + Nasdaq a tick reali:
 
 ```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_ritardata.ps1" | iex
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/confronto_ritardata.ps1" | iex
 ```
 Gira da solo la griglia **attesa 15/30/45 min × direzione break/mid/candela** (9 combo per simbolo).
 Cartelle prodotte sul Desktop: `risultati_APERT_DAX_M5_delay_realtick` e `risultati_APERT_US_M5_delay_realtick` → zippa e caricamele.

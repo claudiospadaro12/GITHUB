@@ -47,7 +47,7 @@ param(
   [int]$DelayDir=-1,                           # (solo DELAYED) 0=break 1=mid 2=candela; -1 = griglia su tutti e 3
   [switch]$Doc,                                # accende la CONFIGURAZIONE DEI DOCUMENTI (blocco piu' sotto)
   [string]$Filters,                            # (con -Doc) quali filtri accendere, es. "vol,atr". Omesso = tutti; "" = nessuno
-  [string]$EABranch="claude/chat-ea-market-openings-zoba2j", # branch con l'EA aggiornato
+  [string]$EABranch="lavoro", # branch con l'EA aggiornato
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"

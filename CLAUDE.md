@@ -2,7 +2,7 @@
 
 ## ⛑️ REGOLA #1 — SALVA SEMPRE SU GITHUB (richiesta esplicita di Claudio)
 **Ad OGNI passo significativo → commit + push su GitHub, SUBITO.** Claudio non deve MAI rischiare di perdere lavoro se la chat si blocca/riempie (è già successo spesso).
-- Branch di lavoro attuale: **`claude/chat-ea-market-openings-zoba2j`** (qui è consolidato TUTTO).
+- Branch di lavoro attuale: **`lavoro`** (qui è consolidato TUTTO).
 - Dopo ogni: analisi salvata, modifica EA, nuovo file, decisione presa → aggiorna il file giusto (`PROMEMORIA_APERTURE.md`, `CLASSIFICHE.md`, `HANDOFF.md`, ecc.) e **pusha**.
 - Ciò che non è pushato = perso. Nel dubbio, committa.
 - Per ripartire in una chat nuova: leggere `HANDOFF.md` + `PROMEMORIA_APERTURE.md` + `CLASSIFICHE.md` sul branch sopra.

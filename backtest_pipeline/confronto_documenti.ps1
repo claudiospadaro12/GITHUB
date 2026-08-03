@@ -24,13 +24,13 @@
 #  ⚠️ SUL PC DI BACKTEST (non il VPS). MetaTrader CHIUSO. E' lungo (ore).
 #
 #  Lancia con UNA riga:
-#    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_documenti.ps1" | iex
+#    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/confronto_documenti.ps1" | iex
 # =====================================================================
 $ErrorActionPreference="Stop"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 
-$b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline"
+$b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline"
 $Work=Join-Path $env:USERPROFILE "Desktop"
 if(-not (Test-Path $Work)){ $Work=(Get-Location).Path }
 Set-Location $Work

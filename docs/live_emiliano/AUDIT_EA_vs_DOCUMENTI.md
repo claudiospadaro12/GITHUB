@@ -64,7 +64,7 @@ Quindi: prima si misura la configurazione dei documenti a tick reali, poi — se
 ## ▶️ Il test
 
 ```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/chat-ea-market-openings-zoba2j/backtest_pipeline/confronto_documenti.ps1" | iex
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/confronto_documenti.ps1" | iex
 ```
 Gira 4 combinazioni a tick reali: US e DAX × (ordini **STOP** come le slide Nasdaq | ingresso **CONFERMATO** come il PDF).
 
