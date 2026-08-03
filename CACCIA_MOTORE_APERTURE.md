@@ -17,7 +17,7 @@
 | 4 | **ENTRATA RITARDATA/CONFERMATA** | entra dopo 15-30 min, quando la direzione è scelta | 🔄 **IMPLEMENTATO 02/08** (`InpEntryMode=DELAYED`, `InpDelayMinutes`, `InpDelayDirMode`). Entra **a MERCATO** → niente stop da inseguire = niente slippage di rottura. Test: `confronto_ritardata.ps1` |
 | 5 | **GAP-FILL** | se apre in gap, opera verso la chiusura prec. | ⬜ già nel codice (InpEntryMode=GAPFILL), da testare |
 | 6 | **FIRST-CANDLE follow** | segui la direzione della 1ª candela M5/M15 | 🔄 **IMPLEMENTATO 02/08** come sotto-modo del #4: `InpDelayDirMode=2` (direzione del corpo della candela di apertura). Nella griglia del test #4 |
-| 7 | **ORB 15 min** (idea Claudio) | range primi 15 min (DAX 09:00-09:15 IT = 08:00-08:15 server), poi rottura. Salta il whipsaw iniziale | ⬜ **già testabile:** `InpRangeMinutes=15` + STOP o RETEST. Sweep InpRangeMinutes = 5/15/30 |
+| 7 | **ORB 30 min** (ToolKit ABTG Vol. V) | range primi **30 min** dall'apertura US, ingresso alla **CHIUSURA** di una candela M5 oltre il livello, filtro **EMA 9/21 su M5**, stop fisso mai spostato, TP 1:2 | ⭐ **SPECIFICA COMPLETA arrivata 03/08** → `docs/piani_abtg/ANALISI_ORB_AMERICA.md`. **Su 4 punti prescrive l'opposto di ciò che abbiamo testato.** Servono 2 aggiunte al codice |
 
 ## 🚨 SCOPERTA 02/08 — ABBIAMO TESTATO IL MOTORE **NUDO**, non il metodo di Emiliano
 Controllo colonna per colonna dei CSV dei 3 test (400+ pass, breakout/retest/fade su DAX): **ogni filtro era SPENTO in tutti i pass**.
@@ -120,6 +120,20 @@ Arrivati i PDF `Piano_Trading__NASDAQ__ABTG` e `Piano_Trading__MAXMIN_ABTG` (in 
 🔑 **Nota che combacia:** il filtro volumi che funziona legge la candela M5 **15:25–15:30** — cioè **esattamente la finestra del canale di riferimento del piano**. Non sembra un caso: l'informazione sta nella **pre-apertura**.
 
 **Conseguenza operativa:** prima di dichiarare morto qualunque motore, va rifatto il test con **canale pre-apertura 15 min + buffer 7–10 punti**. È la configurazione del piano, e non l'abbiamo mai girata.
+
+### ⭐ SCOPERTA 03/08 (2) — il ToolKit ORB America: 4 scarti su 4
+`ToolKit_05_ORB_Apertura_America.pdf` è l'unico materiale ABTG con una **specifica chiusa**. E prescrive l'opposto di quello che abbiamo testato:
+
+| Il ToolKit dice | Noi | Nota |
+|---|---|---|
+| range **30 minuti** | 15 min o candela H1 | il documento definisce il range 5 min *"sconsigliato"*, 30 min *"CONSIGLIATO"* |
+| ingresso alla **CHIUSURA** della candela oltre il livello | ordini STOP riempiti **durante** | è l'**errore comune #1** del documento |
+| filtro **EMA 9/21 su M5** + prezzo dalla parte giusta di entrambe | EMA **1/50 su H4** | TF e periodi diversi; la condizione sul prezzo non esiste nel codice |
+| stop **mai spostato**, TP fisso 1:2 | parziale + BE + trailing | è l'**errore comune #3**: *"si imposta UNA volta e non si tocca più"* |
+
+⚠️ **L'ingresso ritardato bocciato a 0,66 NON era questo**: decideva a un orario fisso (15/30/45 min), non *quando una candela chiude oltre il livello*, e girava senza EMA 9/21 e col range sbagliato. **Quella bocciatura non vale per l'ORB del ToolKit.**
+
+Da scrivere: (1) motore "ingresso su chiusura confermata" con filtro sul corpo della candela; (2) condizione "prezzo dalla parte giusta di ENTRAMBE le medie" + caso neutro. Tutto il resto è già configurabile.
 
 ## 🧪 PROSSIMO TEST: L'ABLAZIONE DEI FILTRI (Nasdaq)
 Il piano ha ribaltato il Nasdaq ma con 72 trade. Prima di crederci bisogna sapere **quale filtro porta l'edge e quale sta solo tagliando il campione**. La scala accende un filtro alla volta:
