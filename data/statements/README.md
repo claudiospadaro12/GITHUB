@@ -1,4 +1,1 @@
-# Statement settimanali
-
-Metti qui l'export dello storico trade da MT5 (.xlsx): il report del sabato
-usa automaticamente il file piu' recente. (In futuro: export automatico.)
+# I CSV dei trade arrivano qui da pubblica_trades.ps1 (VPS)

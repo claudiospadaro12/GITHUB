@@ -41,9 +41,59 @@ struct PRec
    double   swap;
    double   profit;
    string   strat;
+   long     magic;      // magic dell'EA (attribuzione certa, non dal commento)
+   string   creason;    // perche' e' stata chiusa: sl / tp / expert / so / ...
+   double   sesHi;      // massimo raggiunto DOPO l'ingresso, entro fine giornata
+   double   sesLo;      // minimo   raggiunto DOPO l'ingresso, entro fine giornata
    bool     hasIn;
    bool     hasOut;
   };
+
+//+------------------------------------------------------------------+
+//| Perche' la posizione e' stata chiusa. Serve a distinguere lo stop |
+//| INIZIALE dal trailing/parziale: senza questo, dai soli prezzi non |
+//| si capisce se il trade e' stato tagliato dalla gestione o dal     |
+//| mercato (il nodo del 03/08).                                      |
+//+------------------------------------------------------------------+
+string ReasonToStr(long r)
+  {
+   switch((int)r)
+     {
+      case DEAL_REASON_CLIENT:  return("manuale");
+      case DEAL_REASON_MOBILE:  return("mobile");
+      case DEAL_REASON_WEB:     return("web");
+      case DEAL_REASON_EXPERT:  return("expert");   // chiusa dall'EA (parziale, flat di fine sessione)
+      case DEAL_REASON_SL:      return("sl");       // stop loss: INIZIALE o TRAILATO
+      case DEAL_REASON_TP:      return("tp");
+      case DEAL_REASON_SO:      return("stopout");
+      default:                  return("altro");
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Massimo/minimo raggiunti DOPO l'ingresso, fino a fine giornata.   |
+//| Da qui si calcola la FRAZIONE DI MOVIMENTO CATTURATA: e' il       |
+//| numero che il 03/08 ha mostrato il vero problema (14% sul DAX,    |
+//| 20% sul Nasdaq) e che finora si ricavava solo dagli screenshot.   |
+//+------------------------------------------------------------------+
+void SessionRange(const string sym, datetime from, double &hi, double &lo)
+  {
+   hi=0; lo=0;
+   if(sym=="" || from<=0) return;
+   MqlDateTime d; TimeToStruct(from,d);
+   d.hour=23; d.min=59; d.sec=0;
+   datetime to = StructToTime(d);
+   int iFrom = iBarShift(sym, PERIOD_M5, from, false);
+   int iTo   = iBarShift(sym, PERIOD_M5, to,   false);
+   if(iFrom<0 || iTo<0) return;
+   int start = MathMin(iFrom,iTo);
+   int count = MathAbs(iFrom-iTo)+1;
+   if(count<1) return;
+   int h = iHighest(sym, PERIOD_M5, MODE_HIGH, count, start);
+   int l = iLowest (sym, PERIOD_M5, MODE_LOW,  count, start);
+   if(h>=0) hi = iHigh(sym, PERIOD_M5, h);
+   if(l>=0) lo = iLow (sym, PERIOD_M5, l);
+  }
 
 //+------------------------------------------------------------------+
 int OnInit()
@@ -90,6 +140,7 @@ void ExportAll()
          recs[idx].pid=pid; recs[idx].sym=""; recs[idx].side=""; recs[idx].vol=0;
          recs[idx].otime=0; recs[idx].ctime=0; recs[idx].oprice=0; recs[idx].cprice=0;
          recs[idx].comm=0; recs[idx].swap=0; recs[idx].profit=0; recs[idx].strat="";
+         recs[idx].magic=0; recs[idx].creason=""; recs[idx].sesHi=0; recs[idx].sesLo=0;
          recs[idx].hasIn=false; recs[idx].hasOut=false;
         }
       // accumulo sempre i costi/profitto del deal
@@ -106,6 +157,7 @@ void ExportAll()
          recs[idx].oprice= HistoryDealGetDouble(tk, DEAL_PRICE);
          string cmt = HistoryDealGetString(tk, DEAL_COMMENT);
          if(cmt!="") recs[idx].strat = cmt;
+         recs[idx].magic = (long)HistoryDealGetInteger(tk, DEAL_MAGIC);
          recs[idx].hasIn = true;
         }
       else // DEAL_ENTRY_OUT / OUT_BY / INOUT: chiusura (l'ultima vince)
@@ -113,6 +165,7 @@ void ExportAll()
          recs[idx].ctime = (datetime)HistoryDealGetInteger(tk, DEAL_TIME);
          recs[idx].cprice= HistoryDealGetDouble(tk, DEAL_PRICE);
          if(recs[idx].sym=="") recs[idx].sym = HistoryDealGetString(tk, DEAL_SYMBOL);
+         recs[idx].creason = ReasonToStr(HistoryDealGetInteger(tk, DEAL_REASON));
          recs[idx].hasOut = true;
         }
      }
@@ -122,11 +175,13 @@ void ExportAll()
    int fh = FileOpen(InpFile, flags, ';');
    if(fh==INVALID_HANDLE){ Print("[TradeExporter] impossibile aprire ",InpFile); return; }
    FileWrite(fh,"pid","symbol","side","volume","open_time","open_price",
-             "close_time","close_price","commission","swap","profit","strategy");
+             "close_time","close_price","commission","swap","profit","strategy",
+             "magic","close_reason","session_high","session_low");
    int written=0;
    for(int i=0; i<ArraySize(recs); i++)
      {
       if(!recs[i].hasIn || !recs[i].hasOut) continue; // solo posizioni CHIUSE
+      SessionRange(recs[i].sym, recs[i].otime, recs[i].sesHi, recs[i].sesLo);
       int dg = 2;
       if(recs[i].sym!="") dg = (int)SymbolInfoInteger(recs[i].sym, SYMBOL_DIGITS);
       if(dg<=0) dg=2;
@@ -142,7 +197,11 @@ void ExportAll()
                 DoubleToString(recs[i].comm,2),
                 DoubleToString(recs[i].swap,2),
                 DoubleToString(recs[i].profit,2),
-                recs[i].strat);
+                recs[i].strat,
+                (string)recs[i].magic,
+                recs[i].creason,
+                DoubleToString(recs[i].sesHi,dg),
+                DoubleToString(recs[i].sesLo,dg));
       written++;
      }
    FileClose(fh);
