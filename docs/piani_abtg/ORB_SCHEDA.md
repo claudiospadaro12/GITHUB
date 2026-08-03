@@ -36,9 +36,32 @@ Sono **esattamente** le tre conferme del ToolKit. Erano a registro da giorni e n
 |---|---|---|---|---|
 | **ToolKit Vol. V** (base) | 30 min **dopo** l'apertura | alla **CHIUSURA** della candela oltre il range | bordo opposto range, 5–10 pt · **mai spostato** | RR 1:1,5 → 1:2 fisso |
 | **Webinar 02.03.2026** (avanzata, Emiliano Monza) | 30 min **dopo** l'apertura | ⭐ **ritracciamento in GOLDEN ZONE 50–61,8% di Fibonacci**, con **ordine LIMITE** | sotto il **78,6%** Fib o swing | TP1 = **0% Fib**, poi trailing su EMA |
-| **Il nostro `ABTG_ORB`** | **5 min PRIMA** dell'apertura (15:25–15:30) | ordini STOP pendenti | bordo opposto | TP 2R + parziale + BE + trailing |
+| **Indicatore ufficiale `ORB_Indicator_V15`** | **5 min PRIMA** dell'apertura (14:25:00–14:29:59 server) | linee a **±10 punti ×K** dal max/min | — (è un indicatore) | — |
+| **Il nostro `ABTG_ORB`** | **5 min PRIMA** (14:25–14:30 server) | ordini STOP a **10 punti ×K** | bordo opposto | TP 2R + parziale + BE + trailing |
 
-⚠️ **Il range del nostro `ABTG_ORB` non corrisponde a NESSUNA delle fonti ABTG.** Non è 30 min post-apertura (ToolKit e webinar) né 15 min pre (piano Nasdaq): è una finestra di 5 minuti pre-apertura che non è scritta da nessuna parte.
+### ✅ RISOLTO 03/08 con lo screenshot F7 dell'indicatore ufficiale
+Avevo scritto che *"il range del nostro ORB non corrisponde a nessuna fonte ABTG"*. **Era sbagliato.** I parametri di `ORB_Indicator_V15` (v1.14) sono:
+
+```
+InpTime1        = 14:25:00      InpTime2  = 14:29:59      InpTimeEnd = 22:59:59
+InpEntryPoints  = 10.0          InpHistoricalDays = 5
+K: D30EUR,SPXUSD,U30USD,NASUSD,XAUUSD = 1.0 · 225JPY = 10 · *JPY = 0.01 · forex = 0.0001 · USOIL/UKOIL = 0.01
+```
+
+Il nostro `ABTG_ORB` li riproduce **uno per uno**: range 14:25→14:30, `InpEntryPoints = 10.0`, fine giornata 22:59, e la stessa identica tabella dei coefficienti K nel commento di `InpK`. **Il nostro EA è una trasposizione fedele dell'indicatore ufficiale ABTG** — che è la fonte più autorevole di tutte, perché è lo strumento che ABTG distribuisce per operare.
+
+**Quindi la divergenza non è nostra: è dentro il materiale ABTG.** Tre fonti, due finestre diverse:
+| Fonte ABTG | Finestra del range |
+|---|---|
+| **Indicatore `ORB_Indicator_V15`** (lo strumento operativo) | **5 min PRIMA** dell'apertura |
+| ToolKit Vol. V | 30 min **dopo** |
+| Webinar 02.03.2026 | 30 min **dopo** |
+
+Quale delle due funzioni meglio **è esattamente il gradino A→B** del test già preparato. Il test era giusto; era sbagliata la mia ricostruzione del perché.
+
+### 🔍 Una convergenza che vale la pena notare
+Il filtro volumi che ha funzionato sul Nasdaq legge la candela M5 delle **14:25–14:30 server**. L'indicatore ufficiale ABTG definisce il range **esattamente su quella finestra** (14:25:00–14:29:59).
+Due indizi indipendenti — uno nostro, misurato; uno di ABTG, prescritto — che puntano allo stesso posto: **i 5 minuti prima dell'apertura contengono informazione**. [INFERITO, non provato: la coincidenza è suggestiva ma non dimostra causalità.]
 
 ### Il webinar ribalta il punto centrale del ToolKit
 Testuale: *"Il breakout è il segnale. **Il ritracciamento è l'entrata**."* e *"**Limit Orders Only.** Gli ordini a mercato all'apertura espongono a slippage che distrugge il R:R."*
@@ -59,7 +82,7 @@ _Nota di onestà: se il 29% fosse davvero solo OHLC, è comunque un segnale nega
 
 ### Gli altri due file
 - **`ABTG_ToolKit_05_ORB_Apertura_America_1.pdf`** — è lo **stesso documento** del primo: 20 blocchi di testo su 21 identici, cambia solo la copertina (il primo riporta "Volume V" e la data 15.02.2026). Nessuna informazione nuova.
-- **`ORB_Indicator_V15.ex5`** — binario MetaTrader compilato, **senza stringhe leggibili**: non posso ricavarne i parametri da qui. 👉 Per averli: caricalo su un grafico in MT5 e premi **F7** — la finestra mostra tutti gli input. Mandami quello screenshot e verifico se il nostro range 15:25–15:30 viene da lì.
+- **`ORB_Indicator_V15.ex5`** — binario compilato, illeggibile da qui. ✅ **Risolto con lo screenshot F7 di Claudio (03/08)**: i parametri sono sopra, e confermano che il nostro `ABTG_ORB` deriva da questo indicatore.
 - **`PROMPT_DI_INTELLIGENZA_PRECISA.docx`** — prompt generico di metodo (accuratezza, etichette [VERIFICATO]/[INFERITO]/[INCERTO], anti-allucinazione). Non contiene nulla di operativo sull'ORB. È già di fatto lo stile richiesto in `HANDOFF.md`.
 
 ### Un dato nuovo sul DAX
