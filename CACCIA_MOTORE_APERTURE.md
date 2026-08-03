@@ -104,6 +104,23 @@ I documenti dicono un'altra cosa: *"Stop Loss sempre vicino al punto di breakout
 **Corretto**: `-Doc` ora usa `InpSLMode=ATR` (mult 1,5), floor 500 punti = 5 punti indice, e `InpSkipIfTight=0` (sotto il floor **allarga** lo stop invece di saltare il trade, per non tagliare il campione).
 **I run DAX vanno rifatti.** I run US **non** sono affetti (rischio per trade in linea o superiore al baseline): il risultato Nasdaq resta valido, con la sua riserva separata dei 72 trade.
 
+### 🚨 SCOPERTA 03/08 — il PIANO UFFICIALE ABTG dà numeri che le slide non avevano
+Arrivati i PDF `Piano_Trading__NASDAQ__ABTG` e `Piano_Trading__MAXMIN_ABTG` (in `docs/piani_abtg/`). Contengono le regole **quantificate**, e su due punti **non abbiamo mai testato quello che il piano prescrive**:
+
+| Regola del piano ufficiale | Cosa abbiamo testato | Scarto |
+|---|---|---|
+| Canale = **MAX/MIN dei 15 minuti PRE-apertura** (15:25–15:30 CET) | max/min della **candela H1 precedente** | strategia diversa — `RangeMode=PREV` + `PrevWindowMin=15` **mai provato**, ed è già nel codice |
+| Ordini pendenti a **+7 / +10 punti** dal livello | buffer **0,25 – 2 punti** indice | **3,5–40× più stretto**: entriamo su ogni falso break |
+| Stop loss a **5 punti** | floor 5 punti indice | ✅ combacia |
+| Break-even a **+30 punti** | stop in pari a **1R (~5 punti)** | spostiamo in pari **6× prima** → tagliamo i runner |
+| RR minimo **1:2** | 1R + trailing | da allineare |
+| Non entrare con **ostacolo tecnico entro 10–15 punti** | non implementato | la regola che evita gli ingressi destinati a sbattere |
+| **«NON SI ADOTTA con bassi volumi o bassa volatilità»** | ✅ misurato: **i volumi contano, l'ATR no** | il piano aveva ragione a metà |
+
+🔑 **Nota che combacia:** il filtro volumi che funziona legge la candela M5 **15:25–15:30** — cioè **esattamente la finestra del canale di riferimento del piano**. Non sembra un caso: l'informazione sta nella **pre-apertura**.
+
+**Conseguenza operativa:** prima di dichiarare morto qualunque motore, va rifatto il test con **canale pre-apertura 15 min + buffer 7–10 punti**. È la configurazione del piano, e non l'abbiamo mai girata.
+
 ## 🧪 PROSSIMO TEST: L'ABLAZIONE DEI FILTRI (Nasdaq)
 Il piano ha ribaltato il Nasdaq ma con 72 trade. Prima di crederci bisogna sapere **quale filtro porta l'edge e quale sta solo tagliando il campione**. La scala accende un filtro alla volta:
 
