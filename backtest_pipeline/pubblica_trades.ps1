@@ -62,15 +62,27 @@ if ($Installa) {
     if ($dest -match '\s') {
         Write-Host "   ERRORE: il percorso '$dest' contiene spazi. Usa -DestDir C:\ABTG" -ForegroundColor Red; exit 1
     }
-    schtasks /Delete /TN $task /F 2>$null | Out-Null
-    schtasks /Create /TN $task /TR $azione /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST $Ora /F | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Host "   ERRORE nella creazione dell'attivita'." -ForegroundColor Red; exit 1 }
+    # schtasks scrive su stderr anche quando va tutto bene (es. /Delete di
+    # un'attivita' che non esiste ancora: e' NORMALE la prima volta). Con
+    # $ErrorActionPreference='Stop' PowerShell lo scambia per errore fatale
+    # e si ferma: qui lo sospendo e guardo solo il codice di uscita.
+    $eaOld = $ErrorActionPreference; $ErrorActionPreference = "SilentlyContinue"
+    cmd /c "schtasks /Delete /TN $task /F"  2>&1 | Out-Null
+    $creaOut = cmd /c "schtasks /Create /TN $task /TR ""$azione"" /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST $Ora /F" 2>&1
+    $creaRc  = $LASTEXITCODE
+    $ErrorActionPreference = $eaOld
+    if ($creaRc -ne 0) {
+        Write-Host "   ERRORE nella creazione dell'attivita' (codice $creaRc):" -ForegroundColor Red
+        $creaOut | ForEach-Object { Write-Host "     $_" -ForegroundColor Red }
+        Write-Host "   Se dice 'accesso negato', riapri PowerShell come amministratore." -ForegroundColor Yellow
+        exit 1
+    }
 
     Write-Host "   attivita' '$task' creata: lun-ven alle $Ora (ora del VPS)" -ForegroundColor Green
-    Write-Host "   provo subito una pubblicazione di controllo..." -ForegroundColor Cyan
-    schtasks /Run /TN $task | Out-Null
-    Start-Sleep -Seconds 8
-    schtasks /Query /TN $task /FO LIST | Select-String "Ultimo|Last|Prossimo|Next"
+    Write-Host ""
+    Write-Host "   --- prova di pubblicazione IMMEDIATA (cosi' vedi subito se il token va) ---" -ForegroundColor Cyan
+    # la lancio in linea, non via schtasks: se qualcosa non va voglio vedere il messaggio
+    & $dest -Owner $Owner -Repo $Repo -Branch $Branch -RepoPath $RepoPath -CsvName $CsvName -TokenFile $TokenFile
     Write-Host ""
     Write-Host ">> Fatto. Controlla che MetaTrader resti APERTO sul VPS: se e' chiuso" -ForegroundColor Yellow
     Write-Host "   l'EA non aggiorna il CSV e la pagella trova dati vecchi." -ForegroundColor Yellow
