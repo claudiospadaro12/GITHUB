@@ -29,6 +29,44 @@ Sono **esattamente** le tre conferme del ToolKit. Erano a registro da giorni e n
 
 ---
 
+## 🔍 VERIFICHE 03/08 sui file ORB (richieste da Claudio)
+
+### Esistono TRE specifiche ORB diverse, non una
+| Fonte | Range | Ingresso | Stop | Target |
+|---|---|---|---|---|
+| **ToolKit Vol. V** (base) | 30 min **dopo** l'apertura | alla **CHIUSURA** della candela oltre il range | bordo opposto range, 5–10 pt · **mai spostato** | RR 1:1,5 → 1:2 fisso |
+| **Webinar 02.03.2026** (avanzata, Emiliano Monza) | 30 min **dopo** l'apertura | ⭐ **ritracciamento in GOLDEN ZONE 50–61,8% di Fibonacci**, con **ordine LIMITE** | sotto il **78,6%** Fib o swing | TP1 = **0% Fib**, poi trailing su EMA |
+| **Il nostro `ABTG_ORB`** | **5 min PRIMA** dell'apertura (15:25–15:30) | ordini STOP pendenti | bordo opposto | TP 2R + parziale + BE + trailing |
+
+⚠️ **Il range del nostro `ABTG_ORB` non corrisponde a NESSUNA delle fonti ABTG.** Non è 30 min post-apertura (ToolKit e webinar) né 15 min pre (piano Nasdaq): è una finestra di 5 minuti pre-apertura che non è scritta da nessuna parte.
+
+### Il webinar ribalta il punto centrale del ToolKit
+Testuale: *"Il breakout è il segnale. **Il ritracciamento è l'entrata**."* e *"**Limit Orders Only.** Gli ordini a mercato all'apertura espongono a slippage che distrugge il R:R."*
+
+È **la stessa diagnosi che avevano dato i nostri numeri** sullo slippage degli ordini stop. Ma attenzione:
+
+> 🚨 **Il nostro RETEST bocciato (0,73–0,94) NON era questo.** Il nostro metteva il limit sul **bordo del range rotto**; il webinar lo mette nella **Golden Zone del movimento post-breakout** (Fibonacci tracciato dal session low al massimo raggiunto **dopo** la rottura). Sono due prezzi completamente diversi. **Quella bocciatura non si applica alla strategia del webinar.**
+
+### ✅ E la strategia del webinar è GIÀ IMPLEMENTATA da noi
+`ABTG_ORB_Fibo.mq5` la riproduce fedelmente: OR 30 min post-apertura (14:30 server +30), candela M5 che chiude fuori dal range, volume ≥1,5× media(20), corpo ≥50% del range, **Golden Zone 50–61,8%**, **SL al 78,6%**, TP1 allo 0%, filtro EMA 9/21, un trade a sessione.
+
+⚠️ **Contraddizione nel nostro registro, da risolvere:**
+- `REGISTRO_TEST` riga 49: *"ORB_Fibo · OHLC 29% pos · 🔴 morto"* → bocciato **solo in OHLC**
+- `REGISTRO_TEST` riga 40: *"provati e morti in **real-tick**: … ORB_Fibo …"* → bocciato **a tick reali**
+
+Le due righe dicono cose diverse e non c'è alcun CSV archiviato in `risultati_archivio/ORB/` per verificare. **Va rifatto un run pulito.**
+_Nota di onestà: se il 29% fosse davvero solo OHLC, è comunque un segnale negativo forte — l'OHLC **sovrastima**, e per gli ordini limite lo fa ancora di più (assume il fill al tocco). Un ORB_Fibo che fallisce in OHLC difficilmente rinasce a tick reali. Ma il run va fatto lo stesso: è l'unica implementazione fedele della strategia avanzata e non possiamo tenerci un verdetto contraddittorio._
+
+### Gli altri due file
+- **`ABTG_ToolKit_05_ORB_Apertura_America_1.pdf`** — è lo **stesso documento** del primo: 20 blocchi di testo su 21 identici, cambia solo la copertina (il primo riporta "Volume V" e la data 15.02.2026). Nessuna informazione nuova.
+- **`ORB_Indicator_V15.ex5`** — binario MetaTrader compilato, **senza stringhe leggibili**: non posso ricavarne i parametri da qui. 👉 Per averli: caricalo su un grafico in MT5 e premi **F7** — la finestra mostra tutti gli input. Mandami quello screenshot e verifico se il nostro range 15:25–15:30 viene da lì.
+- **`PROMPT_DI_INTELLIGENZA_PRECISA.docx`** — prompt generico di metodo (accuratezza, etichette [VERIFICATO]/[INFERITO]/[INCERTO], anti-allucinazione). Non contiene nulla di operativo sull'ORB. È già di fatto lo stile richiesto in `HANDOFF.md`.
+
+### Un dato nuovo sul DAX
+Il webinar dà l'ORB anche per il DAX: **OR 09:00–09:30 CET = 30 minuti**. Il nostro EA apertura DAX usa **15 minuti**. Un'altra finestra mai testata.
+
+---
+
 ## Il ToolKit (ABTG Vol. V) — la specifica completa
 
 _03/08/2026. Fonte: `ToolKit_05_ORB_Apertura_America.pdf` (44 pp., Realise 15.02.2026)._
