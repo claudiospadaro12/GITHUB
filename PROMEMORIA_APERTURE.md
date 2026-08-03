@@ -222,6 +222,20 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 - Pagella forward vera da leggere tra ~2-3 mesi (H4 = poche operazioni/mese).
 
 ## 🔭 OSSERVAZIONI FORWARD (decisioni di Claudio)
+- **03/08 — SECONDA PROVA REALE: il trailing a 4 punti regala il movimento.** Stessa mattina, stesso simbolo, tre EA "buoni":
+  | Ticket | EA | Ingresso | Uscita | **S/L** | Durata | P&L |
+  |---|---|---|---|---|---|---|
+  | #2972841 | Apertura Marco | 25 932,50 | 25 944,80 | **25 944,80** | 39 s | +14,76 |
+  | #2972839 | DAX Apertura EU | 25 932,50 | 25 944,80 | **25 944,80** | 39 s | +14,76 |
+  | #2972840 | DAX Apertura EU OTT | 25 937,50 | 25 944,80 | **25 944,80** | 34 s | +3,65 |
+  - **L'S/L è SOPRA l'ingresso** → non è lo stop iniziale, è il **trailing** già spostato in profitto. Chiusi dal proprio trailing, non dal mercato.
+  - ✅ **L'INGRESSO ERA GIUSTO:** massimo notturno **25 929,1**, comprato a **25 932,50** = 3 punti sopra la rottura del livello chiave. (I Live5m avevano comprato a 25 900, **29 punti sotto** lo stesso livello, e hanno perso −167 €. **Stesso mercato, stessa direzione, stessa mattina: uno usa il livello, l'altro no.**)
+  - ❌ **L'USCITA NO.** D30EUR ha 2 decimali → **1 punto indice = 100 punti MT5**, quindi `InpTrailFixedPts = 410` = **4,1 punti indice**. All'apertura una candela M5 del DAX si muove 20-40 punti: il trailing viene toccato dal primo respiro. 39 secondi di vita.
+  - 💸 **Costo:** presi **+33,17 €** su 2,9 lotti. Il DAX da 25 932,50 è andato a 26 015,9 (**+83 punti**, massimo di giornata ~26 037 = +105) → sarebbero stati **~+241 €**. E il TP a 26 210,60 era 278 punti sopra: irraggiungibile. **Sbagliati entrambi gli estremi.**
+  - 📌 Il 410 viene dal piano ABTG (*"sugli indici 410 punti = 4 punti indice"*) ed è a verbale nell'audit come regola rispettata ✅. Oggi abbiamo la **prova su un trade reale** che all'apertura del DAX non sopravvive 40 secondi.
+  - 🔑 Cade sulla domanda aperta del piano Dow: *parziale+BE+trailing* contro *stop fisso + TP 1:2*. Il ToolKit ORB dice **"lo stop si imposta UNA volta e non si tocca più"**. Oggi il mercato ha votato per il ToolKit.
+  - **[INFERITO] due ipotesi testabili sul 410:** (a) è tarato per una fase più calma, non per i primi minuti; (b) è tarato per un broker con 1 decimale (dove 410 punti = **41** punti indice, distanza sensata).
+  - ▶️ **AZIONE:** nella prossima griglia spazzolare `InpTrailFixedPts` = **410 / 1000 / 2000 / 4000** (4/10/20/40 punti indice) **e** la variante trailing SPENTO con TP fisso 1:2.
 - **03/08 — I Live5m colpiscono di nuovo: −167 € in 80 secondi.** Dallo storico di Claudio (D30EUR):
   - `#2972556` "DAX Live 5m BUY" · 2,70 lotti · 08:00:22 → 08:01:42 · 25 900,00 → **25 858,60** · **−111,78 €**
   - `#2972555` "DAX Live5m v2 BUY" · 1,30 lotti · 08:00:23 → 08:01:42 · 25 901,00 → **25 858,60** · **−55,12 €**
