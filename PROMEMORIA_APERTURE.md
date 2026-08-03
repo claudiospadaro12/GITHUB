@@ -222,6 +222,15 @@ Regola: conta il **PF MEDIANO** (robustezza), non il PF migliore (fluke/overfit)
 - Pagella forward vera da leggere tra ~2-3 mesi (H4 = poche operazioni/mese).
 
 ## 🔭 OSSERVAZIONI FORWARD (decisioni di Claudio)
+- **03/08 — I Live5m colpiscono di nuovo: −167 € in 80 secondi.** Dallo storico di Claudio (D30EUR):
+  - `#2972556` "DAX Live 5m BUY" · 2,70 lotti · 08:00:22 → 08:01:42 · 25 900,00 → **25 858,60** · **−111,78 €**
+  - `#2972555` "DAX Live5m v2 BUY" · 1,30 lotti · 08:00:23 → 08:01:42 · 25 901,00 → **25 858,60** · **−55,12 €**
+  - **Chiusi ESATTAMENTE sull'S/L** (uscita = S/L al centesimo) → nessun bug, nessuna gestione saltata: lo stop ha funzionato.
+  - Stop a ~41 punti dall'ingresso. Alle **08:16 il DAX era a 25 944**, cioè **86 punti sopra lo stop e 44 sopra l'ingresso**: direzione giusta, buttati fuori dallo scossone iniziale.
+  - ⚠️ **Due EA, stessa direzione, a un secondo di distanza, stesso stop**: Live5m e Live5m_v2 sono due versioni della stessa idea → **rischio doppio** (4 lotti sul DAX). È il tipo di correlazione che il Guardian prop dovrebbe bloccare.
+  - 📌 **Sono due dei "MORTI"** tenuti accesi per osservazione. Stessi EA che il **29/07 persero −353 €**. Costo cumulato dell'osservazione: **~520 € in due episodi**.
+  - 🔑 È il manuale del perché il DAX apertura ha bocciato 3 motori su 3: **stop stretto + whipsaw iniziale = ti stoppa e poi va nella tua direzione** (breakout 0,77 · retest 0,79 · fade 0,73).
+  - **Raccomandazione:** spegnere `DAX_Live5m` e `DAX_Live5m_v2`. Non producono più informazione nuova, confermano solo il backtest. Decisione di Claudio.
 - **28/07:** DAX Apertura EU nativo — gamba SHORT lasciata ATTIVA per osservare (oggi lo short ha perso −86,70; il long-only l'avrebbe evitato). Da rivedere tra qualche giorno.
 - **Nasdaq apertura:** short riattivato (vedi sopra) — testa entrambe le direzioni.
 - **Da verificare sul VPS:** DAX_M3 e Londra_ORB (decisi "morti") il 28/07 hanno ancora tradato e perso −116 € insieme. Confermare che siano tolti.
