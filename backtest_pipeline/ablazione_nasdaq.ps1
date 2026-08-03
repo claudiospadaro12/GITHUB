@@ -61,6 +61,22 @@ $scala = @(
 )
 
 foreach($s in $scala){
+  # --- RIPRESA: se il CSV di questo gradino c'e' gia', lo salto ---
+  $ftag = if($s.f.Trim()){ ($s.f -replace '[^a-zA-Z0-9]','') } else { "nofilt" }
+  $tag  = "APERT_US_M5_doc_brk_${ftag}_realtick"
+  $csv  = Join-Path $Work "risultati_$tag\apert_${tag}_NASUSD.csv"
+  if(Test-Path $csv){
+    Write-Host "`n===== $($s.n) : GIA' FATTO, salto =====" -ForegroundColor DarkGray
+    continue
+  }
+  # --- lo script scaricato puo' SPARIRE dal Desktop tra un run e l'altro
+  #     (antivirus/sync sui file presi da internet: successo il 03/08 al
+  #     gradino 3/7). Lo riscarico ogni volta: costa un secondo ed evita di
+  #     buttare via le ore gia' girate. ---
+  if(-not (Test-Path $us)){ Write-Host "   (lo script era sparito dal Desktop: lo riscarico)" -ForegroundColor Yellow }
+  try{ irm "$b/conferma_apertura_us.ps1" -OutFile $us }
+  catch{ Write-Host "   ERRORE nello scaricare conferma_apertura_us.ps1: $($_.Exception.Message)" -ForegroundColor Red; break }
+
   Write-Host "`n===== $($s.n) =====" -ForegroundColor Yellow
   & $us -Model 4 -EntryMode 0 -Doc -Filters $s.f -Symbols NASUSD
 }
