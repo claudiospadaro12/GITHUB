@@ -30,6 +30,17 @@
 
 ---
 
+## 🔁 ROUTINE ATTIVA — pagella giornaliera (dal 03/08)
+`trig_01G6JH3MTUd7ahc6aHXsy1CK` · **21:00 UTC = 23:00 italiane, lun-ven** (mercati chiusi, dopo l'ultimo export).
+Ogni sera parte una chat nuova che: scarica `lavoro` → lancia `backtest_pipeline/analizza_trades.py` su `data/statements/trades_auto.csv` → scrive `report/giornata_AAAA-MM-GG.md` con in fondo una **"🧠 Lettura"** ragionata → aggiunge una riga a `report/DIARIO.md` (la memoria che si accumula e segnala i problemi che si RIPETONO) → committa e pusha.
+
+**Perché serve:** il 03/08 cinque operazioni hanno insegnato più di una settimana di backtest, ma le ho ricostruite a mano da cinque screenshot. Ora si fa da sola.
+
+⚠️ **Precondizione sul VPS, altrimenti la pagella è cieca:**
+1. ricompilare `ABTG_TradeExporter.mq5` (colonne nuove: `magic`, `close_reason`, `session_high`, `session_low`);
+2. mettere `pubblica_trades.ps1` nel Task Scheduler, la sera.
+Senza `close_reason` non si distingue lo stop iniziale dal trailing — cioè il nodo del 03/08. Senza `session_high/low` non si calcola la frazione di movimento catturata (il 14% del DAX).
+
 ## ⚠️ NOTA BRANCH (importante)
 Il lavoro delle chat vecchie viveva su branch diversi (`ea-market-openings-d79m8l`, `creating-agents-SgGpD`). **Il 31/07 è stato consolidato tutto in `lavoro`**: preset forward, Guardian, walkforward, studio aperture, promemoria + tutti gli scan archiviati. Questo è ora **l'unico branch da usare**. Salvare SEMPRE qui (commit + push).
 
