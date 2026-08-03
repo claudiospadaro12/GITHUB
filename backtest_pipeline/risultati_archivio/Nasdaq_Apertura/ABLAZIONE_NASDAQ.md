@@ -64,7 +64,69 @@ irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_p
 VolMult **1,5 → 2,0 a passi di 0,1**, solo filtro volumi, buffer 50→200.
 Decide se esiste una soglia con **≥150 trade E PF ≥1,3**, oppure se il PF si compra solo pagando in campione — nel qual caso l'edge esiste ma è troppo raro per costruirci un EA.
 
+---
+
+# ✅ GRADINI 4–7 — completati il 03/08. L'ablazione è CHIUSA.
+
+| # | Gradino | Pass | PFmed | PF max | PF>1 | DDmed | Trade med |
+|---|---|---|---|---|---|---|---|
+| 1 | nudo, nessun filtro | 8 | 0,90 | 0,92 | **0/8** | 34,4% | 482 |
+| 2 | **+ volumi** | 24 | **1,15** | **1,52** | **16/24** | **9,6%** | 152 |
+| 3 | + ATR (da solo) | 24 | 0,93 | 0,97 | 0/24 | 28,7% | 332 |
+| 4 | **volumi OPPURE ATR** | 72 | 0,99 | 1,03 | 29/72 | 22,6% | 380 |
+| 5 | + EMA su H4 | 72 | 0,81 | 0,94 | 0/72 | 31,6% | 260 |
+| 6 | + correlazione SPXUSD H1 | 72 | 0,80 | 0,93 | 0/72 | 29,2% | 239 |
+| 7 | + filtro news | 72 | 0,80 | 0,93 | 0/72 | 29,2% | 240 |
+
+**Su sei filtri candidati ne funziona esattamente uno: i volumi.** Tutto il resto è neutro o dannoso.
+
+## 🎯 La previsione del gradino 4 era giusta — e costa cara
+
+Avevo scritto: *"l'OR aggiunge giornate cattive → il gradino 4 dovrebbe uscire PEGGIORE del gradino 2"*. **Confermato**, e il confronto a parità di soglia lo isola senza ambiguità:
+
+| Soglia volumi | solo volumi (gr. 2) | volumi **OR** ATR (gr. 4) |
+|---|---|---|
+| 1,2× | PF 0,96 · DD 17,9% · 296 trade | PF 0,95 · DD 20,4% · 411 trade |
+| 1,5× | PF **1,15** · DD **9,6%** · 152 trade | PF 1,01 · DD 22,9% · 380 trade |
+| 1,8× | PF **1,38** · DD **7,6%** · 80 trade | PF 0,99 · DD 21,9% · 349 trade |
+
+A soglia 1,8 l'OR riammette **269 trade** e il PF crolla da 1,38 a 0,99: sono **esattamente i trade che il filtro volumi aveva ragione a escludere**. Con l'OR il PF mediano (0,99) è indistinguibile dal motore nudo (0,90): l'unico beneficio residuo è il DD (34,4% → 22,6%).
+
+> ⚠️ **Correzione di una mia modifica.** L'`InpConfirmMode=OR` l'ho introdotto io il 02/08 dopo la tua osservazione *"questi 72 trade sono pochi, in M5 deve aprire tutti i giorni"*. L'osservazione sul campione era giusta e resta giusta. **L'OR però non è il rimedio**: rialza il numero di trade riammettendo proprio quelli sbagliati. Il PDF dice *"volumi **o** ATR"*, ma sul Nasdaq quella lettura letterale equivale a non filtrare. **Default da riportare ad AND — o meglio, ai soli volumi con l'ATR spento.**
+
+## ❌ Gradini 5 e 6: peggiorano, e il confronto è pulito
+
+Ogni gradino cambia **un solo toggle** rispetto al precedente [VERIFICATO sui parametri fissi nei CSV], quindi l'incremento è misurato correttamente anche se la base (gradino 4) è già compromessa:
+
+- **EMA 1/50 su H4** (`InpUseEmaFilter`, non Supertrend3 che resta a 0): PFmed **0,99 → 0,81**, DD 22,6% → 31,6%. Taglia 120 trade e peggiora entrambe le colonne: sta escludendo i trade buoni.
+- **Correlazione SPXUSD H1**: 0,81 → 0,80. Altri 21 trade in meno, nessun guadagno. **Irrilevante.**
+
+## ⚠️ Gradino 7: il filtro news NON è stato misurato
+
+Su 72 combo, 63 danno risultati **identici** al gradino 6 — coerente con un file news assente (l'EA lo scrive nel log: *"file news non trovato… filtro disattivato di fatto"*).
+Ma sulle **9 combo che cambiano, i trade AUMENTANO** (239 → 297, sempre +58):
+
+```
+vol 1.2  atr 0.8  buf 25 : trade 239->297   PF 0.74->0.79
+```
+
+**Un filtro non può aggiungere trade.** Delle due l'una: o il file news non c'era e la differenza viene da altro (dati scaricati diversi fra le due sessioni), o c'è un difetto. [INCERTO — si risolve leggendo nel log del tester la riga `news caricate: N eventi`.] Finché non è chiarito, **il gradino 7 non conta come risultato.**
+
+## 📏 Il buffer non è una leva
+
+A parità di tutto il resto, buffer **25 / 50 / 75 / 100 danno risultati identici al centesimo** (PF 1,37 · 79 trade). Normale: NASUSD quota a 2 decimali, quindi 100 punti MT5 = **1 punto indice** — sotto lo spread. Solo da 125 in su cambia qualcosa, e in modo irregolare (1,52 / 1,39 / 1,48 / 1,47): **rumore, non una tendenza.** Il PF 1,52 del "migliore in assoluto" è un punto fortunato dentro un intorno piatto: **il numero da citare è la mediana 1,38.**
+
+## 🧾 Verdetto finale dell'ablazione
+
+1. **L'unico filtro con informazione sul Nasdaq apertura è il volume di pre-apertura.** Curva monotòna su PF, DD e trade — un filtro casuale non fa una scala così ordinata.
+2. **Nessuna soglia supera entrambi i criteri** (≥150 trade *e* PF ≥1,3). Il punto onesto d'esercizio è **1,5×: PF 1,15, DD 9,6%, 152 trade** — campione appena sufficiente, edge modesto. A 1,8× il PF sale a 1,38 ma restano **80 trade**, cioè sotto la soglia del "non è un dato".
+3. **Non c'è altro da cercare fra i filtri.** Sei candidati, uno funziona. Continuare a impilare condizioni sul motore d'ingresso ha smesso di rendere.
+
+→ Questo **conferma dai numeri** la rotta scelta dopo il forward del 03/08: il margine che resta sta nella **gestione dell'uscita**, non nella selezione dell'ingresso. Vedi `STUDIO_MOVIMENTO_APERTURE.md`.
+
 ## Da fare dopo
-- ~~Gradino 3 (ATR)~~ → fatto 03/08: **rumore, bocciato**.
-- Gradini 4–7 in corso. Poi: **ladder pulito sopra i SOLI volumi** (+H4, +correlazione, +news, uno alla volta, senza ATR) per misurarne il contributo non contaminato.
-- Implementare e testare il filtro volumi **sulla candela di rottura** (quello vero dei documenti).
+- ~~Gradino 3 (ATR)~~ → **rumore, bocciato**. ~~Gradini 4–7~~ → **fatti, ablazione chiusa**.
+- 🔴 **Rimettere `InpConfirmMode` ad AND** (o spegnere l'ATR) nei preset forward del Nasdaq: oggi l'OR sta annullando l'unico filtro che funziona.
+- Sweep fine `VolMult` 1,5→2,0 a passi di 0,1 (`sweep_volumi_nasdaq.ps1`): unica cosa che resta da chiedere ai filtri, cioè se esiste il punto con ≥150 trade E PF ≥1,3.
+- Implementare e testare il filtro volumi **sulla candela di rottura** (quello vero dei documenti — quello testato è di pre-apertura).
+- Chiarire il gradino 7 leggendo il log del tester.

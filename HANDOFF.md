@@ -30,6 +30,14 @@
 
 ---
 
+## ✅ ABLAZIONE NASDAQ CHIUSA (03/08) — tutti e 7 i gradini
+**Su sei filtri candidati ne funziona uno solo: i volumi di pre-apertura.**
+Nudo 0,90 → **volumi 1,15** → ATR 0,93 → volumi OR ATR **0,99** → +EMA H4 0,81 → +correlazione 0,80 → news non misurato.
+- 🔴 **Azione:** l'`InpConfirmMode=OR` che avevo messo il 02/08 **annulla l'unico filtro buono** (a soglia 1,8: PF 1,38 → 0,99, riammette 269 trade sbagliati). Rimetterlo ad **AND** / spegnere l'ATR nei preset forward Nasdaq.
+- Punto d'esercizio onesto: **VolMult 1,5 → PF 1,15, DD 9,6%, 152 trade.** A 1,8 il PF è 1,38 ma restano 80 trade (sotto soglia campione).
+- **Non c'è altro da cercare nei filtri d'ingresso** → conferma dai numeri la rotta "studiare il movimento/l'uscita".
+- Dettaglio + CSV grezzi: `risultati_archivio/Nasdaq_Apertura/ABLAZIONE_NASDAQ.md` e `csv_ablazione/`.
+
 ## 🔁 ROUTINE ATTIVA — pagella giornaliera (dal 03/08)
 `trig_01G6JH3MTUd7ahc6aHXsy1CK` · **21:00 UTC = 23:00 italiane, lun-ven** (mercati chiusi, dopo l'ultimo export).
 Ogni sera parte una chat nuova che: scarica `lavoro` → lancia `backtest_pipeline/analizza_trades.py` su `data/statements/trades_auto.csv` → scrive `report/giornata_AAAA-MM-GG.md` con in fondo una **"🧠 Lettura"** ragionata → aggiunge una riga a `report/DIARIO.md` (la memoria che si accumula e segnala i problemi che si RIPETONO) → committa e pusha.
