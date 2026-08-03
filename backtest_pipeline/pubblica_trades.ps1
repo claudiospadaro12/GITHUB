@@ -5,12 +5,17 @@
 #  Common\Files e lo carica nel repo (data/statements/trades_auto.csv) via
 #  API GitHub, usando il tuo token. Il report del sabato lo leggera' da li'.
 #
-#  Da lanciare sul VPS (dove gira l'EA e c'e' il token). Puoi metterlo in
-#  Task Scheduler il sabato ~08:50, PRIMA del trigger del report.
+#  Da lanciare sul VPS (dove gira l'EA e c'e' il token).
 #
 #  USO:
+#    # una tantum, per provare:
 #    powershell -ExecutionPolicy Bypass -File pubblica_trades.ps1
-#    powershell -ExecutionPolicy Bypass -File pubblica_trades.ps1 -TriggerReport
+#    # per metterlo in automatico tutte le sere (una volta sola):
+#    powershell -ExecutionPolicy Bypass -File pubblica_trades.ps1 -Installa
+#
+#  Con -Installa lo script si copia in C:\ABTG e registra un'attivita'
+#  pianificata che lo rilancia da solo alle 22:45, lun-ven: cosi' il CSV
+#  e' gia' sul repo quando alle 23:00 parte la pagella in chat.
 #
 #  Il token si legge (in ordine) da: -TokenFile, C:\Users\Administrator\
 #  .gh_report_token.txt, %USERPROFILE%\.gh_report_token.txt.
@@ -18,15 +23,59 @@
 param(
     [string]$Owner      = "claudiospadaro12",
     [string]$Repo       = "github",
-    [string]$Branch     = "claude/creating-agents-SgGpD",
+    [string]$Branch     = "lavoro",
     [string]$RepoPath   = "data/statements/trades_auto.csv",
     [string]$CsvName    = "ABTG_Trades.csv",
     [string]$TokenFile  = "",
-    [switch]$TriggerReport
+    [switch]$TriggerReport,
+    [switch]$Installa,                 # registra l'attivita' pianificata e esce
+    [string]$Ora        = "22:45",     # ora VPS: PRIMA delle 23:00 della pagella
+    [string]$DestDir    = "C:\ABTG"
 )
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# =====================================================================
+#  -Installa : mette lo script in automatico e finisce qui.
+# =====================================================================
+if ($Installa) {
+    Write-Host "=== INSTALLO LA PUBBLICAZIONE AUTOMATICA DEI TRADE ===" -ForegroundColor Cyan
+    New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
+    $dest = Join-Path $DestDir "pubblica_trades.ps1"
+
+    # se lo script gira da file lo copio, se gira da 'irm | iex' lo riscarico
+    if ($PSCommandPath -and (Test-Path $PSCommandPath)) {
+        Copy-Item $PSCommandPath -Destination $dest -Force
+        Write-Host "   copiato in $dest" -ForegroundColor Green
+    } else {
+        $url = "https://raw.githubusercontent.com/$Owner/GITHUB/lavoro/backtest_pipeline/pubblica_trades.ps1"
+        Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
+        Write-Host "   scaricato in $dest" -ForegroundColor Green
+    }
+
+    # NB: $args e' una variabile automatica di PowerShell, non usarla.
+    # NB: niente virgolette dentro /TR (schtasks le maltratta): $DestDir
+    #     non deve contenere spazi, per questo il default e' C:\ABTG.
+    $task = "ABTG_PubblicaTrades"
+    $azione = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $dest -Branch $Branch"
+    if ($dest -match '\s') {
+        Write-Host "   ERRORE: il percorso '$dest' contiene spazi. Usa -DestDir C:\ABTG" -ForegroundColor Red; exit 1
+    }
+    schtasks /Delete /TN $task /F 2>$null | Out-Null
+    schtasks /Create /TN $task /TR $azione /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST $Ora /F | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Host "   ERRORE nella creazione dell'attivita'." -ForegroundColor Red; exit 1 }
+
+    Write-Host "   attivita' '$task' creata: lun-ven alle $Ora (ora del VPS)" -ForegroundColor Green
+    Write-Host "   provo subito una pubblicazione di controllo..." -ForegroundColor Cyan
+    schtasks /Run /TN $task | Out-Null
+    Start-Sleep -Seconds 8
+    schtasks /Query /TN $task /FO LIST | Select-String "Ultimo|Last|Prossimo|Next"
+    Write-Host ""
+    Write-Host ">> Fatto. Controlla che MetaTrader resti APERTO sul VPS: se e' chiuso" -ForegroundColor Yellow
+    Write-Host "   l'EA non aggiorna il CSV e la pagella trova dati vecchi." -ForegroundColor Yellow
+    exit 0
+}
 
 Write-Host "=== PUBBLICA TRADE CSV -> $Owner/$Repo ($Branch) ===" -ForegroundColor Cyan
 
