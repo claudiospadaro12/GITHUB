@@ -41,6 +41,15 @@
 - 🌍 Filtro trend H4: **aiuta sui 3 indici USA, danneggia sui 4 europei** (netto e ordinato).
 - 🎯 **Il Dow è il mercato migliore e lo stiamo trascurando** — terzo riscontro indipendente (tick reali PF 1,30). Ipotesi derivata: **Dow + H4 + TP 1,5R + stop invariato + niente trailing nei primi 45 min**.
 
+## 🎯 DOW APERTURA — miglior risultato finora (03/08) — `risultati_archivio/Dow_Apertura/DOW_MOTORE.md`
+Tick reali, U30USD M5, gestione NUDA (solo stop+TP), 12 pass.
+- **Filtro trend H4 ACCESO: PF 1,03 → 1,24 · DD 14,9% → 6,9% · 329 trade.** Migliora tutte e tre le colonne, campione ampio. Conferma sui P&L veri la previsione della FASE A (+0,052 R/trade).
+- ❌ **Il filtro volumi NON si trasferisce dal Nasdaq**: da solo 1,01/0,99/1,05 (rumore), e sopra l'H4 fa danno in modo monotòno (1,24 → 0,96).
+- 📌 **Regola nuova: non esiste "il filtro giusto", esiste quello giusto per QUEL mercato.** Volumi = Nasdaq. Trend H4 = Dow (e dannoso sugli europei).
+- Miglior sistema di aperture che abbiamo: Dow+H4 (1,24 / 6,9% / 329) batte Nasdaq+volumi (1,15 / 9,6% / 152) su tutti e tre i criteri.
+- ⚠️ Non ancora dimostrato: l'EMA a 50 dentro il filtro non è mai stata testata (altopiano o punta?), nessun out-of-sample, gestione ancora nuda.
+- **⏭️ TOCCA A TE:** `.\dow_apertura.ps1 -Fase robustezza` (10 pass, ~1h) → se regge, `-Fase distanze` (48 pass).
+
 ## ✅ ABLAZIONE NASDAQ CHIUSA (03/08) — tutti e 7 i gradini
 **Su sei filtri candidati ne funziona uno solo: i volumi di pre-apertura.**
 Nudo 0,90 → **volumi 1,15** → ATR 0,93 → volumi OR ATR **0,99** → +EMA H4 0,81 → +correlazione 0,80 → news non misurato.

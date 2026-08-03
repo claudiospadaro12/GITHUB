@@ -19,7 +19,7 @@
 #    .\dow_apertura.ps1 -Fase distanze
 # =====================================================================
 param(
-  [ValidateSet("motore","distanze")]
+  [ValidateSet("motore","robustezza","distanze")]
   [string]$Fase="motore",
   [string]$Symbol="U30USD",
   [int]$SessionHour=14,                   # ORA SERVER BCM: apertura USA 15:30 IT = 14:30 server
@@ -98,6 +98,20 @@ InpUseVolumeFilter=0||0||1||1||Y
 InpVolMult=1.5||1.2||0.3||1.8||Y
 "@
 $note="12 pass (4 ridondanti: col filtro volumi spento la soglia non conta). Solo stop+TP, gestione nuda."
+
+# === FASE "ROBUSTEZZA": il PF 1,24 e' un altopiano o una punta fortunata? ===
+#     Il filtro H4 e' un interruttore, ma dentro ha un numero mai testato:
+#     la EMA a 50 periodi. Se il risultato regge da 20 a 200 e' una
+#     proprieta' del mercato; se svetta solo a 50, e' rumore su cui non
+#     si costruisce niente. 10 pass, un'ora scarsa: costa poco e decide
+#     se le 4-8 ore della fase distanze hanno senso.
+if($Fase -eq "robustezza"){
+  $Inputs=$Inputs -replace "(?m)^InpUseEmaFilter=.*$","InpUseEmaFilter=1||1||0||1||N"
+  $Inputs=$Inputs -replace "(?m)^InpUseVolumeFilter=.*$","InpUseVolumeFilter=0||0||0||0||N"
+  $Inputs=$Inputs -replace "(?m)^InpVolMult=.*$","InpVolMult=1.5||1.5||0||1.5||N"
+  $Inputs=$Inputs -replace "(?m)^InpEmaSlow=.*$","InpEmaSlow=50||20||20||200||Y"
+  $note="10 pass: EMA del filtro H4 da 20 a 200. Cerco un ALTOPIANO, non il massimo."
+}
 
 # === FASE "DISTANZE": fissata la selezione, QUANTO larghi ===
 #     Il trailing e' espresso in FRAZIONI DI R misurato (non piu' a caso):
