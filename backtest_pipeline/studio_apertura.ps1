@@ -22,7 +22,7 @@ param(
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 $EA="ABTG_Apertura_Study_EA"
-$Branch="claude/ea-market-openings-d79m8l"     # dove sta l'EA di studio esteso (MAE/MFE)
+$Branch="lavoro"     # branch di lavoro (prima puntava a claude/ea-market-openings-d79m8l, ormai fermo)
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 
 # --- BUCKET: ogni indice con la SUA ora di apertura (ORA SERVER = IT-1) ---

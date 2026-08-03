@@ -23,6 +23,8 @@ param(
   [string]$Symbol="D30EUR",
   [int]$SessionHour=8,                    # ORA SERVER BCM (DAX=8, Nasdaq=14). NON l'ora italiana!
   [string]$Tf="M5",
+  [ValidateSet("struttura","distanze")]
+  [string]$Fase="struttura",              # struttura = QUALI toggle · distanze = QUANTO larghi
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
@@ -45,7 +47,35 @@ InpUseTrailing=0||0||1||1||Y
 InpTrailMode=0||0||1||2||Y
 "@
 
+# ---------------------------------------------------------------------
+#  FASE "DISTANZE": la struttura non basta.
+#  Il 03/08 in forward tre EA sul DAX sono stati chiusi dal proprio trailing
+#  in 39 SECONDI (+12 punti su un movimento da +83): il trailing era a
+#  InpTrailFixedPts=410 = 4,1 punti indice, mentre una candela M5 del DAX
+#  all'apertura si muove 20-40 punti. La fase "struttura" avrebbe detto
+#  "trailing FIXED e' cattivo" senza rivelare che era cattiva la DISTANZA.
+#  Qui la struttura si FISSA (parziale 50% + BE + trailing a punti fissi) e
+#  si spazzolano i tre numeri che decidono davvero:
+#    - TP1_R    dove metto il primo obiettivo
+#    - BEatR    QUANDO vado in pari (troppo presto = mi butta fuori il respiro)
+#    - TrailFixedPts  quanto largo il trailing (4 / 10 / 20 / 40 punti indice)
+# ---------------------------------------------------------------------
+if($Fase -eq "distanze"){
+  $Inputs=@"
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSessionHour=$SessionHour||$SessionHour||0||$SessionHour||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=2||2||0||2||N
+InpTP1_R=1.0||0.5||0.5||2.0||Y
+InpBEatR=0||0||0.5||1.5||Y
+InpTrailFixedPts=1000||410||1197||4000||Y
+"@
+}
+
 $EAtag="${EA}_${Symbol}_gestione"
+if($Fase -eq "distanze"){ $EAtag="${EAtag}_distanze" }
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== STUDIO GESTIONE: $EA su $Symbol $Tf (SessionHour SERVER=$SessionHour) a TICK REALI ===" -ForegroundColor Cyan
 Write-Host "   48 combinazioni BE/parziale/trailing. Ingresso ai default." -ForegroundColor Gray

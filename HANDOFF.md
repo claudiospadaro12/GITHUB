@@ -9,6 +9,8 @@
 
 ## 🔴 STATO OGGI (02/08) — riparti da qui
 - **ROTTA (vedi `PIANO_PROP.md`):** PROP = priorità n°1. EA prop ideali: **H1**, trade chiusi in **1-2 gg** (max 4), gestione **parziale+BE+trailing**, **DD basso**. Conto personale: **aperture M5**.
+- **🔬 ROTTA NUOVA (Claudio, 03/08): studiare il MOVIMENTO, non solo l'ingresso.** → `STUDIO_MOVIMENTO_APERTURE.md`
+  Il forward del 03/08 ha mostrato che l'ingresso giusto con la gestione sbagliata vale **+33 € invece di +241 €** (trailing a 4,1 punti indice, chiusi in 39 secondi). Due fasi: **A** misurare MAE/MFE/durata (`studio_apertura.ps1`, branch corretto), **B** spazzolare le distanze di BE/trailing/TP (`scan_gestione.ps1 -Fase distanze`, nuovo).
 - **⏭️ TOCCA A TE (PC di backtest, MT5 CHIUSO — vedi `CACCIA_MOTORE_APERTURE.md`):**
   ```powershell
   # ENTRATA RITARDATA + FIRST-CANDLE (motori #4 e #6) — l'ultima idea vera sulle aperture
