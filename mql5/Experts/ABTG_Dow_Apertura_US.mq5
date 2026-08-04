@@ -1,0 +1,1735 @@
+//+------------------------------------------------------------------+
+//|                                 ABTG_Nasdaq_Apertura_US.mq5       |
+//|                                                                  |
+//|  EA "APERTURA AMERICANA" (Nasdaq / NASUSD) - MetaTrader 5        |
+//|                                                                  |
+//|  Basato sul piano di trading "Apertura Americana - Nasdaq":     |
+//|   - apertura USA alle 15:30 (ora italiana): rottura dei         |
+//|     massimi/minimi in apertura (BUY STOP / SELL STOP)           |
+//|   - OCO, parziale al 1o obiettivo, stop in pari, trailing stop  |
+//|   - MODALITA' GAP FILL opzionale (apertura in gap -> ritorno    |
+//|     verso la chiusura precedente): imposta InpEntryMode=GAPFILL |
+//|     e InpUseGapFill=true                                        |
+//|                                                                  |
+//|  ⚠️ Gli ORARI sono quelli del SERVER del broker (quelli sul      |
+//|     grafico): imposta InpSessionHour cosi' che coincida con     |
+//|     l'apertura reale del Nasdaq cash sul TUO grafico            |
+//|     (spesso 16:30 su broker GMT+2, 15:30 su GMT+3, ecc.).       |
+//|                                                                  |
+//|  ⚠️ Nessun EA garantisce profitti. TESTA SU DEMO prima.          |
+//+------------------------------------------------------------------+
+#property copyright "Progetto EA Aperture Mercati"
+#property version   "1.00"
+#property strict
+
+//===================================================================
+//  DOW APERTURA USA  --  da mettere su U30USD M5
+//
+//  Ogni default qui sotto viene da un backtest a TICK REALI su
+//  2024.01-2026.06 (~625 giorni di borsa), non da una scelta a occhio:
+//
+//   * FASE A (8 indici, ~3500 trade): il breakout cieco all'apertura ha
+//     aspettativa ZERO o negativa su 7 indici su 8. L'unico che si
+//     stacca e' il Dow, +0,074 R/trade.
+//   * FASE MOTORE (12 pass): il filtro di trend H4 porta il Dow da
+//     PF 1,03 a 1,24 e dimezza il drawdown (14,9% -> 6,9%), lasciando
+//     329 trade. Il filtro VOLUMI, che sul Nasdaq e' l'unico che
+//     funziona, qui e' rumore e sopra l'H4 fa danno: resta SPENTO.
+//   * ROBUSTEZZA (10 pass): l'EMA del filtro regge da 20 a 200 periodi,
+//     10 valori su 10 sopra PF 1,20. Non e' una punta fortunata.
+//   * FASE DISTANZE (48 pass): parziale, breakeven e trailing a punti
+//     fissi PEGGIORANO il risultato. Nudo = 3917 di profit; la migliore
+//     configurazione gestita = 2575, e a parita di take profit 1701.
+//     Percio' qui la gestione e' VOLUTAMENTE assente.
+//
+//  Dettaglio e CSV: backtest_pipeline/risultati_archivio/Dow_Apertura/
+//
+//  ATTENZIONE: non e' ancora passato dal walk-forward. E' in forward
+//  per OSSERVAZIONE, non e' un sistema promosso.
+//
+//  NB: stesso motore dell'EA Nasdaq apertura, con altri default. Magic
+//      e commento sono DIVERSI, cosi' i due non si confondono e nella
+//      pagella serale restano distinguibili.
+//===================================================================
+#define ABTG_DEF_NAME         "Dow Apertura US"
+#define ABTG_DEF_MAGIC        770202      // distinto dal Nasdaq (770201)
+#define ABTG_DEF_SESSION_HOUR 14          // apertura USA 15:30 IT = 14:30 server BCM
+#define ABTG_DEF_SESSION_MIN  30
+#define ABTG_DEF_RANGE_MIN    15          // range = primi 15 minuti DOPO l'apertura
+#define ABTG_DEF_RANGE_MODE   0           // 0 = range di apertura (NON la candela precedente)
+#define ABTG_DEF_LEVEL_TF     PERIOD_H1   // inerte con RANGE_MODE=0
+#define ABTG_DEF_CLOSE_HOUR   17          // flat alle 17:30 server = 18:30 IT
+#define ABTG_DEF_CLOSE_MIN    30
+#define ABTG_DEF_USE_GAPFILL  false
+#define ABTG_DEF_RISK         1.0         // 1% per trade, come nel backtest
+#define ABTG_DEF_TRAIL_MODE   2           // inerte: il trailing e' SPENTO
+#define ABTG_DEF_BUFFER       200         // 2 punti indice oltre il range
+
+//  VERSIONE TUTTO-IN-UNO: il motore e' incluso qui sotto, NON serve
+//  copiare nessun file .mqh ne creare la cartella Include\ABTG.
+//  Basta mettere questo file in MQL5\Experts e compilarlo (F7).
+
+//+------------------------------------------------------------------+
+//|                                         ABTG_ApertureCore.mqh     |
+//|                                                                  |
+//|  MOTORE CONDIVISO per gli EA "Apertura Mercati" (DAX / Nasdaq).  |
+//|                                                                  |
+//|  Automatizza la parte MECCANICA dei piani di trading sulle       |
+//|  aperture (Europa 09:00 / USA 15:30):                            |
+//|                                                                  |
+//|   1) RANGE DI APERTURA: massimo/minimo dei primi N minuti dopo   |
+//|      l'apertura (oppure massimo/minimo della finestra precedente)|
+//|   2) BREAKOUT con ordini pendenti: BUY STOP sopra il massimo,    |
+//|      SELL STOP sotto il minimo (buffer configurabile)            |
+//|   3) OCO: quando uno parte, l'altro viene cancellato             |
+//|   4) GESTIONE: parziale al 1o obiettivo -> stop in pari ->       |
+//|      trailing stop (proprio come descritto nei piani)            |
+//|   5) RISCHIO: lotto calcolato in % del capitale sullo stop       |
+//|   6) FILTRI opzionali: EMA, Supertrend, correlazione (SPX/...)   |
+//|   7) MODALITA' GAP FILL opzionale (tipica dell'apertura USA)     |
+//|                                                                  |
+//|  I DEFAULT dei parametri si impostano nei singoli EA con delle   |
+//|  #define PRIMA dell'#include (vedi i file .mq5).                  |
+//|                                                                  |
+//|  ⚠️ Nessun EA garantisce profitti. Testare SEMPRE su DEMO nello  |
+//|     Strategy Tester prima di usare denaro reale.                 |
+//+------------------------------------------------------------------+
+#include <Trade/Trade.mqh>
+
+//==================================================================
+//  DEFAULT (sovrascrivibili con #define nel file .mq5 dell'EA)
+//==================================================================
+#ifndef ABTG_DEF_NAME
+   #define ABTG_DEF_NAME        "ABTG Apertura"
+#endif
+#ifndef ABTG_DEF_MAGIC
+   #define ABTG_DEF_MAGIC       770001
+#endif
+#ifndef ABTG_DEF_SESSION_HOUR
+   #define ABTG_DEF_SESSION_HOUR 9     // ora (SERVER/broker) dell'apertura cash
+#endif
+#ifndef ABTG_DEF_SESSION_MIN
+   #define ABTG_DEF_SESSION_MIN  0
+#endif
+#ifndef ABTG_DEF_RANGE_MIN
+   #define ABTG_DEF_RANGE_MIN    15    // minuti del range di apertura
+#endif
+#ifndef ABTG_DEF_RANGE_MODE
+   #define ABTG_DEF_RANGE_MODE   0     // 0=range apertura, 1=finestra prec., 2=candela prec.
+#endif
+#ifndef ABTG_DEF_LEVEL_TF
+   #define ABTG_DEF_LEVEL_TF     PERIOD_H1  // TF dei "massimi/minimi precedenti" (piano Nasdaq: H1)
+#endif
+#ifndef ABTG_DEF_RISK
+   #define ABTG_DEF_RISK         2.0   // rischio % per trade (piano: massimo 2%)
+#endif
+#ifndef ABTG_DEF_TRAIL_MODE
+   #define ABTG_DEF_TRAIL_MODE   1     // 0=ATR, 1=base candela prec., 2=punti fissi
+#endif
+#ifndef ABTG_DEF_CLOSE_HOUR
+   #define ABTG_DEF_CLOSE_HOUR   17    // ora (SERVER) di chiusura/flat della giornata
+#endif
+#ifndef ABTG_DEF_CLOSE_MIN
+   #define ABTG_DEF_CLOSE_MIN    30
+#endif
+#ifndef ABTG_DEF_USE_GAPFILL
+   #define ABTG_DEF_USE_GAPFILL  false
+#endif
+#ifndef ABTG_DEF_BUFFER
+   #define ABTG_DEF_BUFFER       200   // buffer oltre il range, in punti
+#endif
+#ifndef ABTG_DEF_PREVWIN
+   #define ABTG_DEF_PREVWIN      60    // (RANGE_PREV) finestra precedente in minuti
+#endif
+#ifndef ABTG_DEF_MINRANGE
+   #define ABTG_DEF_MINRANGE     0     // ampiezza minima del range/candela (punti; 0=off)
+#endif
+#ifndef ABTG_DEF_MAXRANGE
+   #define ABTG_DEF_MAXRANGE     0     // ampiezza massima del range/candela (punti; 0=off)
+#endif
+
+//==================================================================
+//  ENUM di supporto
+//==================================================================
+enum ENUM_ABTG_ENTRY
+  {
+   ABTG_BREAKOUT = 0,   // rottura del range di apertura (piani DAX + Nasdaq)
+   ABTG_GAPFILL  = 1,   // chiusura del gap di apertura (tipico USA)
+   ABTG_RETEST   = 2,   // rottura + ritorno sul livello con LIMIT (Emiliano: niente slippage)
+   ABTG_RANGE_FADE = 3, // fada gli estremi del range (mercati whipsaw, es. DAX)
+   ABTG_DELAYED    = 4  // entrata RITARDATA/CONFERMATA: aspetta N minuti, poi entra a mercato dalla parte scelta
+  };
+
+//--- come si combinano le due conferme di rottura (volumi / ATR)
+enum ENUM_ABTG_CONFIRM
+  {
+   ABTG_CONF_OR  = 0,   // basta UNA delle due (PDF: "supportata da aumento di volumi O da una volatilita' coerente")
+   ABTG_CONF_AND = 1    // servono ENTRAMBE (piu' selettivo: taglia molto il campione)
+  };
+
+//--- come si sceglie la direzione nell'entrata ritardata (InpEntryMode=DELAYED)
+enum ENUM_ABTG_DELAYDIR
+  {
+   ABTG_DIR_BREAK  = 0,  // prezzo FUORI dal range di apertura (rottura confermata); dentro il range = niente trade
+   ABTG_DIR_MID    = 1,  // prezzo sopra/sotto il centro del range (c'e' sempre una direzione)
+   ABTG_DIR_CANDLE = 2   // direzione del CORPO della candela di apertura (first-candle follow)
+  };
+
+enum ENUM_ABTG_RANGE
+  {
+   ABTG_RANGE_OPENING = 0,  // range = primi N minuti DOPO l'apertura (PDF: primi 15 min)
+   ABTG_RANGE_PREV    = 1,  // range = massimo/minimo dei N minuti PRIMA dell'apertura
+   ABTG_RANGE_PREVBAR = 2   // range = massimo/minimo della CANDELA PRECEDENTE su InpLevelTF
+                            //          (piano Nasdaq: "massimi/minimi precedenti" su H1)
+  };
+
+enum ENUM_ABTG_SL
+  {
+   ABTG_SL_RANGE = 0,   // stop sull'estremo opposto del range (piano: "stop sui massimi prec.")
+   ABTG_SL_ATR   = 1    // stop a X volte l'ATR
+  };
+
+enum ENUM_ABTG_TRAIL
+  {
+   ABTG_TRAIL_ATR     = 0,  // trailing a X volte l'ATR
+   ABTG_TRAIL_PREVBAR = 1,  // trailing alla BASE della candela precedente (piano: su M1)
+   ABTG_TRAIL_FIXED   = 2   // trailing a distanza fissa in punti (piano DAX: es. 410 punti)
+  };
+
+//==================================================================
+//  PARAMETRI DI INPUT (comuni a tutti gli EA che includono il core)
+//==================================================================
+input group "=== Sessione (ORARIO DEL SERVER/BROKER!) ==="
+input int    InpSessionHour  = ABTG_DEF_SESSION_HOUR; // Ora apertura (server) - controlla sul TUO grafico
+input int    InpSessionMin   = ABTG_DEF_SESSION_MIN;  // Minuti apertura (server)
+input int    InpRangeMinutes = ABTG_DEF_RANGE_MIN;    // Durata del range (minuti)
+input int    InpCloseHour    = ABTG_DEF_CLOSE_HOUR;   // Ora flat/chiusura (server)
+input int    InpCloseMin     = ABTG_DEF_CLOSE_MIN;    // Minuti flat/chiusura (server)
+input bool   InpCloseAtEnd   = true;                  // Chiudi posizioni residue a fine sessione
+input bool   InpOneTradePerDay = true;                // Un solo ciclo operativo al giorno
+
+input group "=== Ingresso ==="
+input ENUM_ABTG_ENTRY InpEntryMode = ABTG_BREAKOUT;   // Modalita' d'ingresso
+input ENUM_ABTG_RANGE InpRangeMode = (ENUM_ABTG_RANGE)ABTG_DEF_RANGE_MODE; // Da dove prendo max/min
+input ENUM_TIMEFRAMES InpLevelTF   = ABTG_DEF_LEVEL_TF; // (RANGE_PREVBAR) TF dei massimi/minimi prec. (Nasdaq: H1)
+input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra prec. in minuti (live: 5 = candela pre-apertura)
+input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
+input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
+input bool   InpAllowLong     = true;                 // Consenti operazioni long
+input bool   InpAllowShort    = true;                 // Consenti operazioni short
+input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/range in punti (live: 1700=17 punti; 0=off)
+input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
+
+input group "=== Retest (InpEntryMode=RETEST, leva Emiliano) ==="
+input double InpRetestOffsetPts = 0;  // Offset del LIMIT DENTRO il livello, in punti (0=sul livello; >0 entra piu' in profondita', meglio ma piu' no-fill)
+input double InpFadeOffsetPts   = 0;  // (RANGE_FADE) offset del LIMIT OLTRE l'estremo, in punti (0=sull'estremo; >0 fada uno spike piu' ampio)
+
+input group "=== Entrata ritardata/confermata (InpEntryMode=DELAYED) ==="
+input int    InpDelayMinutes = 30;  // Minuti DOPO l'apertura in cui si decide (salta il rumore iniziale)
+input ENUM_ABTG_DELAYDIR InpDelayDirMode = ABTG_DIR_BREAK; // Come si sceglie la direzione al momento della decisione
+
+input group "=== Gap Fill (opzionale, tipico USA) ==="
+input bool   InpUseGapFill    = ABTG_DEF_USE_GAPFILL; // Attiva modalita' gap fill se InpEntryMode=GAPFILL
+input double InpGapMinPoints  = 150;                  // Gap minimo (in punti) per operare
+input double InpGapMinRR      = 1.5;                  // Rapporto rischio/rendimento minimo (PDF: 1:1.5)
+
+input group "=== Filtro di trend (opzionale) ==="
+input bool   InpUseEmaFilter  = true;  // [DOW] IL filtro che fa il Dow: PF 1,03 -> 1,24, DD 14,9% -> 6,9%                // Filtro EMA: opera solo a favore di trend
+input int    InpEmaFast       = 1;  // [DOW] 1 = il prezzo stesso: confronto prezzo contro EMA lenta                   // EMA veloce
+input int    InpEmaSlow       = 50;  // [DOW] altopiano 20-200; sotto 100 il DD e' 7,4% invece di 11,4%                  // EMA lenta
+input ENUM_TIMEFRAMES InpFilterTF = PERIOD_H4;  // [DOW] il trend H4 aiuta gli indici USA e danneggia gli europei        // Timeframe del filtro EMA
+input bool   InpUseSupertrend = false;                // Filtro Supertrend
+input int    InpStAtrPeriod   = 10;                   // ATR del Supertrend
+input double InpStMultiplier  = 2.5;                  // Moltiplicatore Supertrend
+input ENUM_TIMEFRAMES InpStTF = PERIOD_H1;            // Timeframe del Supertrend
+input bool   InpUseSupertrend3 = false;               // (Piano Europeo) TRE Supertrend 2.5/3.0/3.5: opero solo se concordano tutti e tre
+
+input group "=== Filtro di correlazione (opzionale) ==="
+input bool   InpUseCorrelation = false;               // Opera solo se l'indice guida concorda
+input string InpCorrSymbol     = "SPXUSD";            // Indice guida (es. SPXUSD)
+input ENUM_TIMEFRAMES InpCorrTF = PERIOD_H1;          // Timeframe correlazione
+input int    InpCorrEmaFast    = 14;                  // EMA veloce indice guida
+input int    InpCorrEmaSlow    = 100;                 // EMA lenta indice guida
+
+input group "=== Filtro VWAP (live Emiliano, opt-in) ==="
+input bool   InpUseVwapFilter = false;                // Opera solo dal lato giusto della VWAP di sessione
+input ENUM_TIMEFRAMES InpVwapTF = PERIOD_M15;         // TF per la VWAP (guida Emiliano: M15)
+
+input group "=== Rischio e gestione ==="
+input double InpRiskPercent    = ABTG_DEF_RISK;       // Rischio per trade in % (piano: max 2%)
+input ENUM_ABTG_SL InpSLMode   = ABTG_SL_RANGE;  // [DOW] stop sull'estremo opposto del range, come nel backtest       // Come calcolo lo stop loss
+input double InpAtrSlMult       = 1.5;                // (SL_ATR) stop = X * ATR
+input int    InpAtrPeriodMgmt   = 14;                 // Periodo ATR per gestione
+input double InpTP1_R           = 0.5;  // [DOW] TpTotalR() moltiplica x3 -> TP totale 1,5R, l'ottimo misurato                // 1o obiettivo in R (se non uso i numeri tondi)
+input double InpTP1_ClosePct    = 0;  // [DOW] niente parziale: nella fase distanze toglie profit                 // % di posizione chiusa al 1o obiettivo (piano: "dimezzo")
+input bool   InpBreakevenAtTP1  = false;  // [DOW] niente BE: 6 confronti puliti su 8 in perdita, fino a -38%               // Sposta stop in pari dopo la parziale
+input double InpBEatR           = 0;                  // BE indipendente: sposta SL a pari a questo R (0=off; NON chiude nulla)
+input bool   InpUseTrailing     = false;  // [DOW] niente trailing: nudo 3917 contro 2575 del migliore gestito               // Attiva trailing stop
+input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Tipo di trailing
+input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
+input double InpTrailAtrMult    = 2.0;                // (TRAIL_ATR) trailing = X * ATR
+input double InpTrailFixedPts   = 410;                // (TRAIL_FIXED) trailing in punti (piano DAX: 410 punti)
+
+input group "=== Obiettivi a numeri tondi (approx. Multipivot/%Custom) ==="
+input bool   InpUseRoundLevels  = false;              // Usa i numeri tondi come 1o obiettivo
+input double InpRoundStep       = 100.0;              // Passo della griglia di numeri tondi (in PREZZO)
+input double InpRoundMinDistPts = 50;                 // Distanza minima dall'ingresso (punti) per validare il livello
+
+input group "=== Filtro notizie (file CSV in MQL5/Files) ==="
+input bool   InpUseNewsFilter   = false;              // Blocca il trading intorno alle news importanti
+input string InpNewsFile        = "abtg_news.csv";    // File CSV con le notizie (in MQL5/Files)
+input int    InpNewsMinImpact   = 3;                  // Impatto minimo da filtrare (3=High "3 tori")
+input int    InpNewsBeforeMin   = 30;                 // Minuti di stop PRIMA della news
+input int    InpNewsAfterMin    = 30;                 // Minuti di stop DOPO la news
+input int    InpNewsShiftMinutes= 0;                  // Sposta gli orari del file per allinearli al SERVER
+input string InpNewsCurrencies  = "";                 // Valute da filtrare, es. "USD,EUR" (vuoto = tutte)
+input bool   InpNewsFlatten     = true;               // Chiudi posizioni e cancella pendenti prima della news
+
+input group "=== Slippage & floor SL (consiglio amico) ==="
+input double InpSlippagePts   = 0;      // Slippage stimato in PUNTI: peggiora l'entry del breakout (backtest ONESTO + live). 0=off
+input double InpMinStopPts    = 500;  // [DOW] floor di stop: sotto e' rumore, non rischio      // Floor minimo di STOP in punti (~ spread+slippage+cuscinetto). 0=off
+input bool   InpSkipIfTight   = false;  // [DOW] non saltare il trade, applica il floor e basta   // Se lo stop del breakout < floor -> SALTA il trade (invece di entrare troppo stretto)
+
+input group "=== Filtro VOLUMI (regola Emiliano: rottura valida solo con volumi) ==="
+input bool   InpUseVolumeFilter = false;  // Entra solo se il volume della rottura supera la media
+input double InpVolMult          = 1.5;    // Volume rottura >= X * media (Emiliano: 1.5 = +50%)
+input int    InpVolAvgBars       = 20;     // Barre per la media volume
+input bool   InpUseAtrFilter    = false;  // (PDF) Entra solo con volatilita' coerente: ATR >= media ATR
+input int    InpAtrFilterBars   = 20;     // Barre su cui calcolo la media dell'ATR
+input double InpAtrFilterMult   = 1.0;    // ATR ultima barra >= X * media (PDF: "ATR > media")
+input ENUM_ABTG_CONFIRM InpConfirmMode = ABTG_CONF_OR; // Se volumi E ATR sono entrambi accesi: basta una conferma (OR, come il PDF) o servono entrambe (AND)?
+
+input group "=== Generali ==="
+input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
+input int    InpMaxSpread      = 0;                   // Spread massimo in punti (0 = nessun limite)
+input bool   InpVerbose        = true;                // Stampa messaggi nel log
+
+//==================================================================
+//  STATO INTERNO
+//==================================================================
+CTrade   gTrade;
+
+// handle indicatori
+int      gEmaFastH = INVALID_HANDLE;
+int      gEmaSlowH = INVALID_HANDLE;
+int      gAtrH     = INVALID_HANDLE;
+
+// macchina a stati della giornata
+enum ENUM_PHASE { PH_WAIT_OPEN, PH_BUILDING, PH_ARMED, PH_PLACED, PH_DONE };
+ENUM_PHASE gPhase   = PH_WAIT_OPEN;
+int      gDayStamp  = -1;          // per accorgersi del cambio giorno
+
+double   gRangeHigh = 0;
+double   gRangeLow  = 0;
+ulong    gBuyTicket = 0;           // ticket ordine pendente buy
+ulong    gSellTicket= 0;           // ticket ordine pendente sell
+// gestione PER-TICKET (Hedge-safe): ogni posizione ha il SUO stato, cosi'
+// parziale e breakeven scattano su OGNI posizione aperta, non solo la prima.
+// (Prima erano due bool globali -> con piu' posizioni la gestione saltava:
+//  i profitti tornavano indietro fino allo stop pieno.)
+ulong    gPartialTk[];             // ticket con parziale gia' eseguita
+ulong    gBETk[];                  // ticket con BE indipendente gia' eseguito
+
+// stato RETEST (rottura + ritorno sul livello con LIMIT)
+double   gBuffer    = 0;           // buffer effettivo memorizzato all'arming
+int      gBias      = 0;           // bias di trend memorizzato all'arming
+bool     gBrokeHigh = false;       // la rottura sopra e' gia' avvenuta?
+bool     gBrokeLow  = false;       // la rottura sotto e' gia' avvenuta?
+
+// calendario news caricato da file CSV
+datetime gNewsTime[];              // orario evento (server, gia' shiftato)
+int      gNewsImpact[];            // impatto: 3=High, 2=Medium, 1=Low
+string   gNewsCcy[];               // valuta dell'evento
+int      gNewsCount = 0;
+
+//+------------------------------------------------------------------+
+//| Log helper                                                       |
+//+------------------------------------------------------------------+
+void ABTGLog(string msg)
+  {
+   if(InpVerbose)
+      Print("[", ABTG_DEF_NAME, "] ", msg);
+  }
+
+//+------------------------------------------------------------------+
+//| Inizializzazione                                                 |
+//+------------------------------------------------------------------+
+int ABTG_OnInit()
+  {
+   gTrade.SetExpertMagicNumber(InpMagic);
+   gTrade.SetTypeFillingBySymbol(_Symbol);
+   gTrade.SetDeviationInPoints(20);
+
+   gAtrH = iATR(_Symbol, PERIOD_CURRENT, InpAtrPeriodMgmt);
+   if(gAtrH == INVALID_HANDLE)
+     {
+      Print("ERRORE: handle ATR non creato.");
+      return(INIT_FAILED);
+     }
+
+   if(InpUseEmaFilter)
+     {
+      gEmaFastH = iMA(_Symbol, InpFilterTF, InpEmaFast, 0, MODE_EMA, PRICE_CLOSE);
+      gEmaSlowH = iMA(_Symbol, InpFilterTF, InpEmaSlow, 0, MODE_EMA, PRICE_CLOSE);
+      if(gEmaFastH == INVALID_HANDLE || gEmaSlowH == INVALID_HANDLE)
+        {
+         Print("ERRORE: handle EMA non creati.");
+         return(INIT_FAILED);
+        }
+     }
+
+   if(InpUseNewsFilter)
+      LoadNews();
+
+   ABTGLog(StringFormat("avviato su %s. Apertura server %02d:%02d, range %d min, flat %02d:%02d.",
+                        _Symbol, InpSessionHour, InpSessionMin, InpRangeMinutes,
+                        InpCloseHour, InpCloseMin));
+   ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
+   return(INIT_SUCCEEDED);
+  }
+
+//+------------------------------------------------------------------+
+//| Carica le news da un file CSV in MQL5/Files.                     |
+//|  Formato per riga (separatore ';'):                              |
+//|    YYYY.MM.DD HH:MM ; Impatto ; Valuta ; Titolo                  |
+//|  Impatto: High/Medium/Low oppure 3/2/1. Righe non valide (es.    |
+//|  intestazione) vengono ignorate.                                 |
+//+------------------------------------------------------------------+
+void LoadNews()
+  {
+   gNewsCount = 0;
+   ArrayResize(gNewsTime, 0);
+   ArrayResize(gNewsImpact, 0);
+   ArrayResize(gNewsCcy, 0);
+
+   int h = FileOpen(InpNewsFile, FILE_READ|FILE_CSV|FILE_ANSI, ';');
+   if(h == INVALID_HANDLE)
+     {
+      ABTGLog("ATTENZIONE: file news '"+InpNewsFile+"' non trovato in MQL5/Files. Filtro news disattivato di fatto.");
+      return;
+     }
+
+   while(!FileIsEnding(h))
+     {
+      string sTime = FileReadString(h);
+      if(FileIsLineEnding(h) && StringLen(sTime) == 0) continue;
+      string sImp  = FileIsLineEnding(h) ? "" : FileReadString(h);
+      string sCcy  = FileIsLineEnding(h) ? "" : FileReadString(h);
+      // consumo eventuali colonne extra (es. titolo) fino a fine riga
+      while(!FileIsLineEnding(h) && !FileIsEnding(h)) FileReadString(h);
+
+      datetime t = StringToTime(sTime);
+      if(t <= 0) continue;                    // riga non valida (intestazione ecc.)
+      t += InpNewsShiftMinutes * 60;          // allineo all'orario del server
+
+      int imp = ImpactToInt(sImp);
+
+      int n = gNewsCount;
+      ArrayResize(gNewsTime,   n+1);
+      ArrayResize(gNewsImpact, n+1);
+      ArrayResize(gNewsCcy,    n+1);
+      gNewsTime[n]   = t;
+      gNewsImpact[n] = imp;
+      gNewsCcy[n]    = sCcy;
+      gNewsCount     = n+1;
+     }
+   FileClose(h);
+   ABTGLog(StringFormat("news caricate: %d eventi dal file '%s'.", gNewsCount, InpNewsFile));
+  }
+
+//+------------------------------------------------------------------+
+//| Converte l'impatto testuale/numerico in intero (3/2/1/0)        |
+//+------------------------------------------------------------------+
+int ImpactToInt(string s)
+  {
+   string u = s;
+   StringToUpper(u);
+   StringTrimLeft(u); StringTrimRight(u);
+   if(StringFind(u,"HIGH")>=0 || u=="3") return(3);
+   if(StringFind(u,"MED") >=0 || u=="2") return(2);
+   if(StringFind(u,"LOW") >=0 || u=="1") return(1);
+   return(0);
+  }
+
+//+------------------------------------------------------------------+
+//| Siamo nella finestra di blackout di una news importante?         |
+//+------------------------------------------------------------------+
+bool InNewsBlackout(datetime now)
+  {
+   if(!InpUseNewsFilter || gNewsCount == 0) return(false);
+   bool filterCcy = (StringLen(InpNewsCurrencies) > 0);
+
+   for(int i = 0; i < gNewsCount; i++)
+     {
+      if(gNewsImpact[i] < InpNewsMinImpact) continue;
+      if(filterCcy && StringFind(InpNewsCurrencies, gNewsCcy[i]) < 0) continue;
+
+      datetime from = gNewsTime[i] - InpNewsBeforeMin*60;
+      datetime to   = gNewsTime[i] + InpNewsAfterMin*60;
+      if(now >= from && now <= to) return(true);
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Deinizializzazione                                               |
+//+------------------------------------------------------------------+
+void ABTG_OnDeinit(const int reason)
+  {
+   if(gAtrH     != INVALID_HANDLE) IndicatorRelease(gAtrH);
+   if(gEmaFastH != INVALID_HANDLE) IndicatorRelease(gEmaFastH);
+   if(gEmaSlowH != INVALID_HANDLE) IndicatorRelease(gEmaSlowH);
+  }
+
+//+------------------------------------------------------------------+
+//| Loop principale                                                  |
+//+------------------------------------------------------------------+
+void ABTG_OnTick()
+  {
+   //--- la gestione della posizione va fatta ad ogni tick
+   ManagePosition();
+   HandleOCO();
+
+   //--- GUARDIA ANTI-DUPLICATO (reload-safe): se ho gia' un pendente o una posizione
+   //    del mio magic, NON ripiazzo -> evita ordini doppi a ogni ricompilazione/reload.
+   if(gPhase==PH_WAIT_OPEN || gPhase==PH_BUILDING)
+     {
+      bool _hasOrd=false;
+      for(int _i=OrdersTotal()-1;_i>=0;_i--)
+        {
+         ulong _t=OrderGetTicket(_i);
+         if(_t>0 && OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic){ _hasOrd=true; break; }
+        }
+      if(_hasOrd || SelectMyPosition()) gPhase=PH_PLACED;
+     }
+
+   //--- reset a inizio di ogni nuovo giorno
+   MqlDateTime now;
+   TimeToStruct(TimeCurrent(), now);
+   if(now.day_of_year != gDayStamp)
+     {
+      gDayStamp = now.day_of_year;
+      ResetDay();
+     }
+
+   //--- FILTRO NEWS: se siamo vicino a un dato importante, "tolgo tutto"
+   //    (come dice il piano: prima di un dato a 3 tori si azzera l'esposizione)
+   bool newsBlk = InNewsBlackout(TimeCurrent());
+   if(newsBlk && InpNewsFlatten)
+     {
+      CancelMyPendings();
+      if(SelectMyPosition()) gTrade.PositionClose(_Symbol);
+     }
+
+   //--- a fine sessione: cancella i pendenti ed (eventualmente) chiudi
+   if(TimeInMinutes(now) >= InpCloseHour*60 + InpCloseMin)
+     {
+      EndOfSession();
+      return;
+     }
+
+   int nowMin     = TimeInMinutes(now);
+   int openMin     = InpSessionHour*60 + InpSessionMin;
+   int rangeEndMin = openMin + InpRangeMinutes;
+
+   switch(gPhase)
+     {
+      case PH_WAIT_OPEN:
+         // per il gap fill valuto gia' all'apertura; per il breakout aspetto il range
+         if(nowMin >= openMin)
+            gPhase = PH_BUILDING;
+         break;
+
+      case PH_BUILDING:
+         // durante il blackout news non piazzo nulla: aspetto che passi
+         if(newsBlk) break;
+         // costruisco il range e poi piazzo gli ordini.
+         // avanzo a PH_PLACED SOLO se la decisione e' stata presa (orari/dati ok):
+         // se i dati M1 non sono ancora pronti riprovo al tick successivo.
+         if(InpEntryMode == ABTG_GAPFILL && InpUseGapFill)
+           {
+            if(nowMin >= rangeEndMin)   // aspetto almeno la prima finestra come "conferma"
+              { if(TryPlaceGapFill()) gPhase = PH_PLACED; }
+           }
+         else if(InpEntryMode == ABTG_RETEST)
+           {
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            if(nowMin >= refEndMin)
+              { if(ArmRetest()) gPhase = PH_ARMED; }
+           }
+         else if(InpEntryMode == ABTG_RANGE_FADE)
+           {
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            if(nowMin >= refEndMin)
+              { if(TryPlaceRangeFade()) gPhase = PH_PLACED; }
+           }
+         else if(InpEntryMode == ABTG_DELAYED)
+           {
+            // si decide DOPO InpDelayMinutes dall'apertura, mai prima che il range sia chiuso
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            int decideMin = openMin + InpDelayMinutes;
+            if(decideMin < refEndMin) decideMin = refEndMin;
+            if(nowMin >= decideMin)
+              { if(TryPlaceDelayed()) gPhase = PH_PLACED; }
+           }
+         else // BREAKOUT
+           {
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            if(nowMin >= refEndMin)
+              { if(TryPlaceBreakout()) gPhase = PH_PLACED; }
+           }
+         break;
+
+      case PH_ARMED:
+         // RETEST: aspetto la rottura del range e poi piazzo il LIMIT sul livello.
+         if(newsBlk) break;
+         MonitorRetest();
+         break;
+
+      case PH_PLACED:
+      case PH_DONE:
+         break;
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Reset dello stato a inizio giornata                              |
+//+------------------------------------------------------------------+
+void ResetDay()
+  {
+   gPhase      = PH_WAIT_OPEN;
+   gRangeHigh  = 0;
+   gRangeLow   = 0;
+   gBuyTicket  = 0;
+   gSellTicket = 0;
+   ArrayResize(gPartialTk, 0);
+   ArrayResize(gBETk, 0);
+   gBuffer     = 0;
+   gBias       = 0;
+   gBrokeHigh  = false;
+   gBrokeLow   = false;
+   ABTGLog("nuovo giorno: stato resettato, in attesa dell'apertura.");
+  }
+
+//+------------------------------------------------------------------+
+//| Minuti dall'inizio del giorno                                    |
+//+------------------------------------------------------------------+
+int TimeInMinutes(const MqlDateTime &t)
+  {
+   return(t.hour*60 + t.min);
+  }
+
+//+------------------------------------------------------------------+
+//| Calcola i livelli max/min secondo InpRangeMode                   |
+//|  - OPENING: primi N minuti dopo l'apertura                       |
+//|  - PREV:    finestra di N minuti prima dell'apertura             |
+//|  - PREVBAR: candela precedente su InpLevelTF (piano Nasdaq: H1)  |
+//+------------------------------------------------------------------+
+bool ComputeLevels(double &hi, double &lo)
+  {
+   if(InpRangeMode == ABTG_RANGE_PREVBAR)
+     {
+      // "massimi/minimi precedenti": massimo e minimo dell'ULTIMA candela chiusa su InpLevelTF
+      hi = iHigh(_Symbol, InpLevelTF, 1);
+      lo = iLow (_Symbol, InpLevelTF, 1);
+      return(hi > 0 && lo > 0 && hi > lo);
+     }
+
+   int openMin = InpSessionHour*60 + InpSessionMin;
+   int fromMin, toMin;
+   if(InpRangeMode == ABTG_RANGE_OPENING)
+     { fromMin = openMin; toMin = openMin + InpRangeMinutes; }
+   else // ABTG_RANGE_PREV
+     { fromMin = openMin - InpPrevWindowMin; toMin = openMin; }
+
+   return(ComputeRangeWindow(fromMin, toMin, hi, lo));
+  }
+
+//+------------------------------------------------------------------+
+//| Calcola il range (massimo/minimo) su una finestra in minuti     |
+//|  fromMin/toMin sono minuti dall'inizio giornata (server)         |
+//+------------------------------------------------------------------+
+bool ComputeRangeWindow(int fromMin, int toMin, double &hi, double &lo)
+  {
+   //--- costruisco i datetime di inizio/fine finestra per OGGI
+   MqlDateTime d;
+   TimeToStruct(TimeCurrent(), d);
+   d.hour = fromMin/60; d.min = fromMin%60; d.sec = 0;
+   datetime tStart = StructToTime(d);
+   d.hour = toMin/60;   d.min = toMin%60;   d.sec = 0;
+   datetime tEnd   = StructToTime(d);
+
+   int idxStart = iBarShift(_Symbol, PERIOD_M1, tStart, false);
+   int idxEnd   = iBarShift(_Symbol, PERIOD_M1, tEnd,   false);
+   if(idxStart < 0 || idxEnd < 0) return(false);
+
+   // su M1 l'indice piu' vecchio ha numero piu' alto
+   int count = MathAbs(idxStart - idxEnd) + 1;
+   if(count < 1) return(false);
+
+   int hIdx = iHighest(_Symbol, PERIOD_M1, MODE_HIGH, count, MathMin(idxStart,idxEnd));
+   int lIdx = iLowest (_Symbol, PERIOD_M1, MODE_LOW,  count, MathMin(idxStart,idxEnd));
+   if(hIdx < 0 || lIdx < 0) return(false);
+
+   hi = iHigh(_Symbol, PERIOD_M1, hIdx);
+   lo = iLow (_Symbol, PERIOD_M1, lIdx);
+   return(hi > 0 && lo > 0 && hi > lo);
+  }
+
+//+------------------------------------------------------------------+
+//| Piazza gli ordini pendenti di breakout (BUY STOP / SELL STOP)   |
+//|  Ritorna true quando la decisione e' presa (orari/dati ok),     |
+//|  false se i dati non sono pronti e conviene riprovare.          |
+//+------------------------------------------------------------------+
+bool TryPlaceBreakout()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("livelli non ancora calcolabili (dati non pronti): riprovo."); return(false); }
+
+   //--- FILTRO AMPIEZZA (strategia live: candela deve stare tra 17 e 40 punti indice)
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("candela %.0f pt < min %.0f: niente trade (whipsaw).", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
+
+   if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
+   if(!ConfirmOK()) { ABTGLog("rottura non confermata (ne' volumi ne' ATR sopra la media): niente trade."); return(true); }
+
+   double buffer  = EffectiveBuffer();
+   double buyPx   = NormalizePrice(gRangeHigh + buffer);
+   double sellPx  = NormalizePrice(gRangeLow  - buffer);
+
+   int  bias    = TrendBias();                 // 0 entrambi, +1 solo long, -1 solo short, 2 conflitto (nessuno)
+   bool longOK  = (bias == 0 || bias == +1);
+   bool shortOK = (bias == 0 || bias == -1);
+
+   datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
+
+   //--- BUY STOP (con slippage sull'entry + floor minimo di SL - consiglio amico)
+   if(InpAllowLong && longOK)
+     {
+      double entry = NormalizePrice(buyPx + InpSlippagePts*_Point);   // slippage: in realta' si riempie OLTRE il livello
+      double sl    = (InpSLMode == ABTG_SL_RANGE) ? sellPx : entry - AtrValue()*InpAtrSlMult;
+      sl = NormalizePrice(sl);
+      double dist  = entry - sl;
+      bool   skip  = false;
+      if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+        {
+         if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("BUY saltato: stop %.0f pt < floor %.0f pt (troppo stretto per lo slippage).", dist/_Point, InpMinStopPts)); }
+         else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
+        }
+      double lot = skip ? 0.0 : CalcLotByRisk(dist);
+      double tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+      if(!skip && lot > 0 && dist > 0)
+        {
+         if(gTrade.BuyStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" BUY"))
+           { gBuyTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("BUY STOP @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+         else
+            ABTGLog("BUY STOP fallito: "+gTrade.ResultRetcodeDescription());
+        }
+     }
+
+   //--- SELL STOP (con slippage sull'entry + floor minimo di SL - consiglio amico)
+   if(InpAllowShort && shortOK)
+     {
+      double entry = NormalizePrice(sellPx - InpSlippagePts*_Point);  // slippage: in realta' si riempie OLTRE il livello
+      double sl    = (InpSLMode == ABTG_SL_RANGE) ? buyPx : entry + AtrValue()*InpAtrSlMult;
+      sl = NormalizePrice(sl);
+      double dist  = sl - entry;
+      bool   skip  = false;
+      if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+        {
+         if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("SELL saltato: stop %.0f pt < floor %.0f pt (troppo stretto per lo slippage).", dist/_Point, InpMinStopPts)); }
+         else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
+        }
+      double lot = skip ? 0.0 : CalcLotByRisk(dist);
+      double tp  = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+      if(!skip && lot > 0 && dist > 0)
+        {
+         if(gTrade.SellStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" SELL"))
+           { gSellTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("SELL STOP @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+         else
+            ABTGLog("SELL STOP fallito: "+gTrade.ResultRetcodeDescription());
+        }
+     }
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| RETEST (leva Emiliano): calcola il range e i filtri, poi ARMA.   |
+//|  Non piazza nulla: aspetta la rottura e il ritorno sul livello.  |
+//|  Ritorna true quando la decisione e' presa; false = dati non     |
+//|  pronti (riprova al tick successivo).                            |
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| RANGE-FADE: mercato che apre in whipsaw -> fada gli estremi.     |
+//|  SELL LIMIT sul massimo del range, BUY LIMIT sul minimo.         |
+//|  Sullo spike del falso break entra all'estremo e guadagna sul    |
+//|  ritorno verso il centro. SL poco oltre l'estremo (se rompe      |
+//|  davvero, taglia). Adatto ai mercati ballerini (DAX).            |
+//+------------------------------------------------------------------+
+bool TryPlaceRangeFade()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("FADE: livelli non ancora calcolabili: riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("FADE: candela %.0f pt < min %.0f: niente trade.", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("FADE: candela %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK()) { ABTGLog("FADE: spread troppo alto: niente trade."); return(true); }
+
+   int  bias    = TrendBias();
+   bool longOK  = (bias == 0 || bias == +1);   // BUY LIMIT sul minimo
+   bool shortOK = (bias == 0 || bias == -1);   // SELL LIMIT sul massimo
+   datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
+
+   double slDist = AtrValue()*InpAtrSlMult;
+   if(slDist <= 0) slDist = EffectiveBuffer();
+   if(InpMinStopPts > 0 && slDist < InpMinStopPts*_Point) slDist = InpMinStopPts*_Point;
+
+   //--- SELL LIMIT sul MASSIMO (fada lo spike in alto)
+   if(InpAllowShort && shortOK)
+     {
+      double entry = NormalizePrice(gRangeHigh + InpFadeOffsetPts*_Point);
+      double sl    = NormalizePrice(entry + slDist);
+      double dist  = sl - entry;
+      double lot   = CalcLotByRisk(dist);
+      double tp    = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+      if(lot > 0 && dist > 0)
+        {
+         if(gTrade.SellLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" FADE SELL"))
+           { gSellTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("SELL LIMIT (fade) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+         else
+            ABTGLog("SELL LIMIT (fade) fallito: "+gTrade.ResultRetcodeDescription());
+        }
+     }
+
+   //--- BUY LIMIT sul MINIMO (fada lo spike in basso)
+   if(InpAllowLong && longOK)
+     {
+      double entry = NormalizePrice(gRangeLow - InpFadeOffsetPts*_Point);
+      double sl    = NormalizePrice(entry - slDist);
+      double dist  = entry - sl;
+      double lot   = CalcLotByRisk(dist);
+      double tp    = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+      if(lot > 0 && dist > 0)
+        {
+         if(gTrade.BuyLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" FADE BUY"))
+           { gBuyTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("BUY LIMIT (fade) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+         else
+            ABTGLog("BUY LIMIT (fade) fallito: "+gTrade.ResultRetcodeDescription());
+        }
+     }
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| Direzione del CORPO della candela di apertura (first-candle):    |
+//|  apertura del primo minuto della finestra vs chiusura dell'ultimo|
+//|  +1 corpo rialzista, -1 ribassista, 0 doji / dati non pronti.    |
+//+------------------------------------------------------------------+
+int OpeningBodyDir()
+  {
+   int openMin = InpSessionHour*60 + InpSessionMin;
+   int fromMin, toMin;
+   if(InpRangeMode == ABTG_RANGE_PREV)
+     { fromMin = openMin - InpPrevWindowMin; toMin = openMin; }
+   else
+     { fromMin = openMin; toMin = openMin + InpRangeMinutes; }
+
+   MqlDateTime d;
+   TimeToStruct(TimeCurrent(), d);
+   d.hour = fromMin/60; d.min = fromMin%60; d.sec = 0;
+   datetime tStart = StructToTime(d);
+   d.hour = toMin/60;   d.min = toMin%60;   d.sec = 0;
+   datetime tEnd   = StructToTime(d);
+
+   int idxStart = iBarShift(_Symbol, PERIOD_M1, tStart, false);
+   int idxEnd   = iBarShift(_Symbol, PERIOD_M1, tEnd,   false);
+   if(idxStart < 0 || idxEnd < 0) return(0);
+
+   // su M1 l'indice piu' ALTO e' la barra piu' vecchia (inizio finestra)
+   double op = iOpen (_Symbol, PERIOD_M1, MathMax(idxStart, idxEnd));
+   double cl = iClose(_Symbol, PERIOD_M1, MathMin(idxStart, idxEnd));
+   if(op <= 0 || cl <= 0) return(0);
+   return(cl > op ? +1 : (cl < op ? -1 : 0));
+  }
+
+//+------------------------------------------------------------------+
+//| ENTRATA RITARDATA / CONFERMATA (motori #4 e #6 del menu caccia). |
+//|  All'apertura c'e' rumore: falsi break, whipsaw. Invece di       |
+//|  piazzare pendenti si ASPETTA InpDelayMinutes, poi si guarda da  |
+//|  che parte il mercato ha scelto di stare e si entra A MERCATO.   |
+//|  Nessuno stop da inseguire -> niente slippage di rottura (il     |
+//|  difetto che ha ucciso lo STOP breakout su Nasdaq/DAX).          |
+//|  Direzione secondo InpDelayDirMode:                              |
+//|    BREAK  = prezzo fuori dal range (rottura confermata)          |
+//|    MID    = prezzo sopra/sotto il centro del range               |
+//|    CANDLE = direzione del corpo della candela di apertura        |
+//|  SL: bordo opposto del range (o ATR), come nel breakout.         |
+//+------------------------------------------------------------------+
+bool TryPlaceDelayed()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("DELAYED: livelli non ancora calcolabili: riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("DELAYED: range %.0f pt < min %.0f: niente trade.", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("DELAYED: range %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK()) { ABTGLog("DELAYED: spread troppo alto: niente trade."); return(true); }
+   if(!ConfirmOK()) { ABTGLog("DELAYED: rottura non confermata (ne' volumi ne' ATR): niente trade."); return(true); }
+
+   //--- 1) la direzione CONFERMATA dopo l'attesa
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   if(bid <= 0 || ask <= 0) { ABTGLog("DELAYED: prezzi non disponibili: riprovo."); return(false); }
+
+   int dir = 0;
+   if(InpDelayDirMode == ABTG_DIR_BREAK)
+     {
+      if(bid > gRangeHigh)     dir = +1;
+      else if(bid < gRangeLow) dir = -1;
+      else
+        { ABTGLog("DELAYED: dopo l'attesa il prezzo e' ANCORA dentro il range: nessuna direzione, niente trade."); return(true); }
+     }
+   else if(InpDelayDirMode == ABTG_DIR_MID)
+     {
+      double mid = (gRangeHigh + gRangeLow) / 2.0;
+      dir = (bid >= mid) ? +1 : -1;
+     }
+   else // ABTG_DIR_CANDLE: seguo il corpo della candela di apertura
+     {
+      dir = OpeningBodyDir();
+      if(dir == 0)
+        { ABTGLog("DELAYED: candela di apertura senza corpo (doji) o dati non pronti: niente trade."); return(true); }
+     }
+
+   //--- 2) filtri di trend: se il bias contrasta la direzione, si sta fuori
+   int bias = TrendBias();                 // 0 = nessun vincolo, 2 = conflitto (blocca tutto)
+   if(bias != 0 && bias != dir)
+     { ABTGLog(StringFormat("DELAYED: direzione %d bocciata dal filtro di trend (bias %d): niente trade.", dir, bias)); return(true); }
+   if(dir > 0 && !InpAllowLong)  { ABTGLog("DELAYED: long non consentito: niente trade.");  return(true); }
+   if(dir < 0 && !InpAllowShort) { ABTGLog("DELAYED: short non consentito: niente trade."); return(true); }
+
+   //--- 3) stop sul bordo opposto del range (o ATR), col floor minimo
+   double entry = (dir > 0) ? ask : bid;
+   double sl    = (InpSLMode == ABTG_SL_RANGE)
+                  ? ((dir > 0) ? gRangeLow : gRangeHigh)
+                  : ((dir > 0) ? entry - AtrValue()*InpAtrSlMult : entry + AtrValue()*InpAtrSlMult);
+   sl = NormalizePrice(sl);
+   double dist = (dir > 0) ? (entry - sl) : (sl - entry);
+   if(dist <= 0)
+     { ABTGLog("DELAYED: stop dalla parte sbagliata (prezzo gia' oltre il bordo opposto): niente trade."); return(true); }
+   if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+     {
+      if(InpSkipIfTight)
+        { ABTGLog(StringFormat("DELAYED: stop %.0f pt < floor %.0f pt: trade saltato.", dist/_Point, InpMinStopPts)); return(true); }
+      sl   = NormalizePrice((dir > 0) ? entry - InpMinStopPts*_Point : entry + InpMinStopPts*_Point);
+      dist = (dir > 0) ? (entry - sl) : (sl - entry);
+     }
+
+   double lot = CalcLotByRisk(dist);
+   if(lot <= 0) { ABTGLog("DELAYED: lotto calcolato a 0: niente trade."); return(true); }
+   double tp = (InpTP1_R > 0) ? NormalizePrice((dir > 0) ? entry + dist*TpTotalR() : entry - dist*TpTotalR()) : 0.0;
+
+   if(dir > 0)
+     {
+      if(gTrade.Buy(lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" DELAY BUY"))
+        { gBuyTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("BUY a mercato (ritardata) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+      else
+         ABTGLog("BUY a mercato (ritardata) fallito: "+gTrade.ResultRetcodeDescription());
+     }
+   else
+     {
+      if(gTrade.Sell(lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" DELAY SELL"))
+        { gSellTicket = gTrade.ResultOrder(); ABTGLog(StringFormat("SELL a mercato (ritardata) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+      else
+         ABTGLog("SELL a mercato (ritardata) fallito: "+gTrade.ResultRetcodeDescription());
+     }
+   return(true);
+  }
+
+bool ArmRetest()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("RETEST: livelli non ancora calcolabili (dati non pronti): riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("RETEST: candela %.0f pt < min %.0f: niente trade (whipsaw).", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("RETEST: candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK()) { ABTGLog("RETEST: spread troppo alto: nessun ordine oggi."); return(true); }
+
+   gBuffer    = EffectiveBuffer();
+   gBias      = TrendBias();           // 0 entrambi, +1 solo long, -1 solo short, 2 conflitto
+   gBrokeHigh = false;
+   gBrokeLow  = false;
+   ABTGLog(StringFormat("RETEST armato: range %.5f-%.5f, buffer %.0f pt, bias %d. Attendo rottura + ritorno sul livello.",
+                        gRangeHigh, gRangeLow, gBuffer/_Point, gBias));
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| RETEST: sorveglia la rottura; appena rotto il range piazza il    |
+//|  LIMIT sul livello (ritorno) -> fill a prezzo migliore, niente   |
+//|  slippage. SL uguale al breakout (bordo opposto) -> stop piu'    |
+//|  stretto -> R migliore. Se il prezzo scappa senza tornare, il    |
+//|  limit scade non eseguito (trade mancato = costo del metodo).    |
+//+------------------------------------------------------------------+
+void MonitorRetest()
+  {
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   if(ask <= 0 || bid <= 0) return;
+
+   double buyTrig  = NormalizePrice(gRangeHigh + gBuffer);   // livello di rottura sopra
+   double sellTrig = NormalizePrice(gRangeLow  - gBuffer);   // livello di rottura sotto
+   double buyPx    = buyTrig;                                // per l'SL a range (bordo opposto)
+   double sellPx   = sellTrig;
+   datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
+
+   bool longOK  = (gBias == 0 || gBias == +1);
+   bool shortOK = (gBias == 0 || gBias == -1);
+
+   //--- LONG: rottura sopra avvenuta -> BUY LIMIT sul livello rotto (ritorno)
+   if(InpAllowLong && longOK && !gBrokeHigh && ask >= buyTrig)
+     {
+      gBrokeHigh = true;
+      if(!VolumeOK())
+         ABTGLog("RETEST BUY: rottura con volumi insufficienti, salto (regola Emiliano).");
+      else
+        {
+         double entry = NormalizePrice(gRangeHigh - InpRetestOffsetPts*_Point); // limit sul livello (niente buffer/slippage)
+         double sl    = (InpSLMode == ABTG_SL_RANGE) ? sellPx : entry - AtrValue()*InpAtrSlMult;
+         sl = NormalizePrice(sl);
+         double dist  = entry - sl;
+         bool   skip  = false;
+         if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+           {
+            if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST BUY saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
+            else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
+           }
+         double lot = skip ? 0.0 : CalcLotByRisk(dist);
+         double tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+         if(!skip && lot > 0 && dist > 0)
+           {
+            if(gTrade.BuyLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" RETEST BUY"))
+              { gBuyTicket = gTrade.ResultOrder(); gPhase = PH_PLACED;
+                ABTGLog(StringFormat("BUY LIMIT (retest) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+            else
+               ABTGLog("BUY LIMIT (retest) fallito: "+gTrade.ResultRetcodeDescription());
+           }
+        }
+     }
+
+   //--- SHORT: rottura sotto avvenuta -> SELL LIMIT sul livello rotto (ritorno)
+   if(InpAllowShort && shortOK && !gBrokeLow && bid <= sellTrig)
+     {
+      gBrokeLow = true;
+      if(!VolumeOK())
+         ABTGLog("RETEST SELL: rottura con volumi insufficienti, salto (regola Emiliano).");
+      else
+        {
+         double entry = NormalizePrice(gRangeLow + InpRetestOffsetPts*_Point);
+         double sl    = (InpSLMode == ABTG_SL_RANGE) ? buyPx : entry + AtrValue()*InpAtrSlMult;
+         sl = NormalizePrice(sl);
+         double dist  = sl - entry;
+         bool   skip  = false;
+         if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+           {
+            if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST SELL saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
+            else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
+           }
+         double lot = skip ? 0.0 : CalcLotByRisk(dist);
+         double tp  = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+         if(!skip && lot > 0 && dist > 0)
+           {
+            if(gTrade.SellLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" RETEST SELL"))
+              { gSellTicket = gTrade.ResultOrder(); gPhase = PH_PLACED;
+                ABTGLog(StringFormat("SELL LIMIT (retest) @ %.5f  SL %.5f  lot %.2f", entry, sl, lot)); }
+            else
+               ABTGLog("SELL LIMIT (retest) fallito: "+gTrade.ResultRetcodeDescription());
+           }
+        }
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Modalita' GAP FILL: se apre in gap, opero verso la chiusura      |
+//| precedente. Gap up -> SELL verso il fill; gap down -> BUY.       |
+//+------------------------------------------------------------------+
+bool TryPlaceGapFill()
+  {
+   double prevClose = iClose(_Symbol, PERIOD_D1, 1);   // chiusura di ieri
+   double todayOpen = iOpen (_Symbol, PERIOD_D1, 0);   // apertura di oggi
+   if(prevClose <= 0 || todayOpen <= 0) return(false); // dati non pronti: riprovo
+
+   double gap = (todayOpen - prevClose) / _Point;      // gap in punti (segno = direzione)
+   if(MathAbs(gap) < InpGapMinPoints)
+     { ABTGLog(StringFormat("gap %.0f pt < soglia %.0f: nessuna operazione.", gap, InpGapMinPoints)); return(true); }
+
+   if(!SpreadOK()) { ABTGLog("spread troppo alto: salto il gap fill."); return(true); }
+
+   //--- livelli della prima finestra di apertura (la "conferma" del PDF, es. prime candele)
+   int openMin = InpSessionHour*60 + InpSessionMin;
+   double hi, lo;
+   if(!ComputeRangeWindow(openMin, openMin + InpRangeMinutes, hi, lo))
+     { ABTGLog("gap fill: livelli di apertura non pronti, riprovo."); return(false); }
+
+   double buffer = EffectiveBuffer();
+   double tp     = NormalizePrice(prevClose);   // obiettivo = chiusura precedente (fill completo)
+   datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
+
+   int  bias    = TrendBias();
+   bool longOK  = (bias == 0 || bias == +1);
+   bool shortOK = (bias == 0 || bias == -1);
+
+   if(gap > 0 && InpAllowShort && shortOK)
+     {
+      // GAP UP -> mi aspetto il ritorno giu': SELL STOP al break sotto il minimo iniziale,
+      // SL sopra il massimo iniziale, TP = chiusura precedente (come esempio Nasdaq del PDF)
+      double entry = NormalizePrice(lo - buffer);
+      double sl    = NormalizePrice(hi + buffer);
+      double risk  = sl - entry;
+      double reward= entry - tp;
+      if(risk <= 0 || reward <= 0) { ABTGLog("gap fill up: geometria non valida."); return(true); }
+      if(reward/risk < InpGapMinRR)
+        { ABTGLog(StringFormat("gap fill up: RR %.2f < %.2f, salto.", reward/risk, InpGapMinRR)); return(true); }
+      double lot = CalcLotByRisk(risk);
+      if(lot > 0 && gTrade.SellStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" GAPFILL SELL"))
+         ABTGLog(StringFormat("GAP UP %.0f pt -> SELL STOP @ %.5f  SL %.5f  TP %.5f (RR %.2f)", gap, entry, sl, tp, reward/risk));
+     }
+   else if(gap < 0 && InpAllowLong && longOK)
+     {
+      // GAP DOWN -> mi aspetto la risalita: BUY STOP al break sopra il massimo iniziale,
+      // SL sotto il minimo iniziale, TP = chiusura precedente
+      double entry = NormalizePrice(hi + buffer);
+      double sl    = NormalizePrice(lo - buffer);
+      double risk  = entry - sl;
+      double reward= tp - entry;
+      if(risk <= 0 || reward <= 0) { ABTGLog("gap fill down: geometria non valida."); return(true); }
+      if(reward/risk < InpGapMinRR)
+        { ABTGLog(StringFormat("gap fill down: RR %.2f < %.2f, salto.", reward/risk, InpGapMinRR)); return(true); }
+      double lot = CalcLotByRisk(risk);
+      if(lot > 0 && gTrade.BuyStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" GAPFILL BUY"))
+         ABTGLog(StringFormat("GAP DOWN %.0f pt -> BUY STOP @ %.5f  SL %.5f  TP %.5f (RR %.2f)", gap, entry, sl, tp, reward/risk));
+     }
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| Somma degli R fino al take profit finale (per gli ordini stop)  |
+//|  Se c'e' parziale a TP1_R lascio comunque un TP piu' ampio.     |
+//+------------------------------------------------------------------+
+double TpTotalR()
+  {
+   // TP dell'ordine impostato piu' lontano (es. 3R); la parziale a TP1_R
+   // e la gestione avvengono comunque via ManagePosition().
+   double r = InpTP1_R > 0 ? InpTP1_R*3.0 : 0.0;
+   return(r <= 0 ? 3.0 : r);
+  }
+
+//+------------------------------------------------------------------+
+//| Bias VWAP di sessione (live Emiliano): +1 se prezzo sopra VWAP,  |
+//|  -1 se sotto. VWAP ancorata all'inizio del giorno, su InpVwapTF. |
+//+------------------------------------------------------------------+
+int VwapBias()
+  {
+   MqlRates r[]; ArraySetAsSeries(r, true);
+   int copied = CopyRates(_Symbol, InpVwapTF, 0, 300, r);
+   if(copied < 2) return(0);
+   MqlDateTime nowdt; TimeToStruct(TimeCurrent(), nowdt);
+   double pv = 0, vv = 0;
+   for(int i = 1; i < copied; i++)
+     {
+      MqlDateTime bt; TimeToStruct(r[i].time, bt);
+      if(bt.day != nowdt.day || bt.mon != nowdt.mon || bt.year != nowdt.year) break; // solo la sessione odierna
+      double tp = (r[i].high + r[i].low + r[i].close) / 3.0;
+      double vol = (double)r[i].tick_volume;
+      pv += tp * vol; vv += vol;
+     }
+   if(vv <= 0) return(0);
+   double vwap = pv / vv;
+   double px = r[1].close;
+   if(px > vwap) return(+1);
+   if(px < vwap) return(-1);
+   return(0);
+  }
+
+//+------------------------------------------------------------------+
+//| Bias di trend combinato (filtri EMA + Supertrend + correlazione)|
+//|  Ritorna +1 (solo long), -1 (solo short), 0 (entrambi consentiti)|
+//+------------------------------------------------------------------+
+int TrendBias()
+  {
+   int bias = 0;   // 0 = nessun vincolo
+
+   if(InpUseEmaFilter)
+     {
+      double f[1], s[1];
+      if(CopyBuffer(gEmaFastH, 0, 1, 1, f) == 1 && CopyBuffer(gEmaSlowH, 0, 1, 1, s) == 1)
+        {
+         int e = (f[0] > s[0]) ? +1 : (f[0] < s[0] ? -1 : 0);
+         if(e != 0) bias = CombineBias(bias, e);
+        }
+     }
+
+   if(InpUseSupertrend)
+     {
+      int st = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, InpStMultiplier);
+      if(st != 0) bias = CombineBias(bias, st);
+     }
+
+   //--- Piano Europeo: "Super Trend, quando cambiano TUTTI E TRE, posso entrare a mercato"
+   if(InpUseSupertrend3)
+     {
+      int s25 = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, 2.5);
+      int s30 = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, 3.0);
+      int s35 = SupertrendDir(_Symbol, InpStTF, InpStAtrPeriod, 3.5);
+      if(s25 != 0 && s25 == s30 && s30 == s35) bias = CombineBias(bias, s25);
+      else                                     bias = 2;   // non concordi = nessun ordine
+     }
+
+   if(InpUseCorrelation && StringLen(InpCorrSymbol) > 0)
+     {
+      int c = SymbolTrendDir(InpCorrSymbol, InpCorrTF, InpCorrEmaFast, InpCorrEmaSlow);
+      if(c != 0) bias = CombineBias(bias, c);
+     }
+
+   if(InpUseVwapFilter)
+     {
+      int v = VwapBias();
+      if(v != 0) bias = CombineBias(bias, v);
+     }
+
+   return(bias);
+  }
+
+//+------------------------------------------------------------------+
+//| Combina due bias: se concordi tengo la direzione, se discordi   |
+//| blocco entrambe (ritorno un valore "impossibile" -> 2 nega tutto)|
+//+------------------------------------------------------------------+
+int CombineBias(int a, int b)
+  {
+   if(a == 0) return(b);
+   if(a == b) return(a);
+   return(2);   // 2 = conflitto: TrendBias>=0 e <=0 entrambi falsi -> nessun ordine
+  }
+
+//+------------------------------------------------------------------+
+//| Direzione EMA di un simbolo qualunque (per la correlazione)     |
+//+------------------------------------------------------------------+
+int SymbolTrendDir(string sym, ENUM_TIMEFRAMES tf, int fast, int slow)
+  {
+   int hf = iMA(sym, tf, fast, 0, MODE_EMA, PRICE_CLOSE);
+   int hs = iMA(sym, tf, slow, 0, MODE_EMA, PRICE_CLOSE);
+   if(hf == INVALID_HANDLE || hs == INVALID_HANDLE) return(0);
+   double f[1], s[1];
+   int dir = 0;
+   if(CopyBuffer(hf, 0, 1, 1, f) == 1 && CopyBuffer(hs, 0, 1, 1, s) == 1)
+      dir = (f[0] > s[0]) ? +1 : (f[0] < s[0] ? -1 : 0);
+   IndicatorRelease(hf);
+   IndicatorRelease(hs);
+   return(dir);
+  }
+
+//+------------------------------------------------------------------+
+//| Direzione del Supertrend (MT5 non lo ha nativo: lo calcolo qui) |
+//|  Ritorna +1 (rialzo), -1 (ribasso), 0 (dati insufficienti)      |
+//+------------------------------------------------------------------+
+int SupertrendDir(string sym, ENUM_TIMEFRAMES tf, int atrPeriod, double mult)
+  {
+   int need = atrPeriod + 205;
+   MqlRates r[];
+   ArraySetAsSeries(r, true);
+   int copied = CopyRates(sym, tf, 0, need, r);
+   if(copied < atrPeriod + 5) return(0);
+
+   int atrH = iATR(sym, tf, atrPeriod);
+   if(atrH == INVALID_HANDLE) return(0);
+   double atr[];
+   ArraySetAsSeries(atr, true);
+   if(CopyBuffer(atrH, 0, 0, copied, atr) < copied) { IndicatorRelease(atrH); return(0); }
+   IndicatorRelease(atrH);
+
+   // calcolo iterativo dalla candela piu' vecchia alla piu' recente chiusa (indice 1).
+   // parto da copied-2 perche' uso r[i+1] (la candela precedente) come riferimento.
+   double finalUpper = 0, finalLower = 0;
+   int    dir = +1;
+   for(int i = copied - 2; i >= 1; i--)
+     {
+      double hl2  = (r[i].high + r[i].low) / 2.0;
+      double bUp  = hl2 + mult * atr[i];
+      double bLo  = hl2 - mult * atr[i];
+
+      double prevFU = (finalUpper == 0) ? bUp : finalUpper;
+      double prevFL = (finalLower == 0) ? bLo : finalLower;
+      double prevClose = r[i+1].close;
+
+      double fU = (bUp < prevFU || prevClose > prevFU) ? bUp : prevFU;
+      double fL = (bLo > prevFL || prevClose < prevFL) ? bLo : prevFL;
+
+      if(r[i].close > (dir == -1 ? prevFU : fU))      dir = +1;
+      else if(r[i].close < (dir == +1 ? prevFL : fL)) dir = -1;
+
+      finalUpper = fU;
+      finalLower = fL;
+     }
+   return(dir);
+  }
+
+//+------------------------------------------------------------------+
+//| Valore ATR corrente (candela chiusa)                            |
+//+------------------------------------------------------------------+
+double AtrValue()
+  {
+   double a[1];
+   if(CopyBuffer(gAtrH, 0, 1, 1, a) < 1) return(0);
+   return(a[0]);
+  }
+
+//+------------------------------------------------------------------+
+//| Lotto in base al rischio % sullo stop                           |
+//+------------------------------------------------------------------+
+double CalcLotByRisk(double slDistancePrice)
+  {
+   if(slDistancePrice <= 0) return(0);
+   double balance   = AccountInfoDouble(ACCOUNT_BALANCE);
+   double riskMoney = balance * InpRiskPercent / 100.0;
+
+   double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+   double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   if(tickSize <= 0 || tickValue <= 0) return(0);
+
+   double ticks      = slDistancePrice / tickSize;
+   double lossPerLot = ticks * tickValue;
+   if(lossPerLot <= 0) return(0);
+
+   double lot = riskMoney / lossPerLot;
+
+   double minLot  = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   double maxLot  = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
+   double lotStep = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+   if(lotStep <= 0) lotStep = 0.01;
+
+   lot = MathFloor(lot / lotStep) * lotStep;
+   lot = MathMax(minLot, MathMin(maxLot, lot));
+   return(lot);
+  }
+
+//+------------------------------------------------------------------+
+//| Cancella tutti gli ordini pendenti di QUESTO EA sul simbolo      |
+//+------------------------------------------------------------------+
+void CancelMyPendings()
+  {
+   for(int i = OrdersTotal() - 1; i >= 0; i--)
+     {
+      ulong ticket = OrderGetTicket(i);
+      if(ticket == 0) continue;
+      if(OrderGetString(ORDER_SYMBOL) != _Symbol) continue;
+      if(OrderGetInteger(ORDER_MAGIC) != InpMagic) continue;
+      gTrade.OrderDelete(ticket);
+     }
+   gBuyTicket  = 0;
+   gSellTicket = 0;
+  }
+
+//+------------------------------------------------------------------+
+//| OCO: se una posizione dell'EA e' aperta, cancella i pendenti     |
+//+------------------------------------------------------------------+
+void HandleOCO()
+  {
+   if(!HasOpenPosition()) return;
+   CancelMyPendings();
+  }
+
+//+------------------------------------------------------------------+
+//| Gestione posizione: parziale al 1o target, breakeven, trailing  |
+//+------------------------------------------------------------------+
+//--- helper stato gestione per-ticket (Hedge-safe) ---
+bool TkDone(ulong t, const ulong &arr[]) { for(int i=ArraySize(arr)-1;i>=0;i--) if(arr[i]==t) return(true); return(false); }
+void TkMark(ulong t, ulong &arr[]) { if(TkDone(t,arr)) return; int n=ArraySize(arr); ArrayResize(arr,n+1); arr[n]=t; }
+
+void ManagePosition()
+  {
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   // Hedge-safe: gestisco OGNI mia posizione (simbolo+magic), una per una.
+   // Prima si gestiva solo la PRIMA -> le altre restavano senza parziale/BE
+   // e i profitti tornavano indietro fino allo stop pieno.
+   for(int _i=PositionsTotal()-1; _i>=0; _i--)
+     {
+      ulong ticket = PositionGetTicket(_i);
+      if(ticket==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      ManageOneTicket(ticket, bid, ask);
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Gestione di UNA posizione (gia' selezionata da PositionGetTicket)|
+//|  parziale + breakeven + trailing, con stato PER-TICKET.          |
+//+------------------------------------------------------------------+
+void ManageOneTicket(ulong ticket, double bid, double ask)
+  {
+   long   type   = PositionGetInteger(POSITION_TYPE);
+   double openP  = PositionGetDouble(POSITION_PRICE_OPEN);
+   double sl     = PositionGetDouble(POSITION_SL);
+   double tp     = PositionGetDouble(POSITION_TP);
+   double vol    = PositionGetDouble(POSITION_VOLUME);
+
+   bool partialDone = TkDone(ticket, gPartialTk);
+
+   // distanza di rischio iniziale (per calcolare 1R)
+   double riskDist = (type == POSITION_TYPE_BUY) ? (openP - InitialSL(openP, sl, type, partialDone)) : (InitialSL(openP, sl, type, partialDone) - openP);
+   if(riskDist <= 0) riskDist = AtrValue()*InpAtrSlMult;
+
+   //--- 1) PARZIALE al primo obiettivo
+   if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+     {
+      int dirSign = (type == POSITION_TYPE_BUY) ? +1 : -1;
+
+      // obiettivo: numero tondo (se attivo) oppure R-multiplo
+      double target;
+      if(InpUseRoundLevels && InpRoundStep > 0)
+         target = NextRoundLevel(openP, dirSign, InpRoundStep, InpRoundMinDistPts*_Point);
+      else
+         target = openP + dirSign*riskDist*InpTP1_R;
+
+      bool reached = (target > 0) &&
+                     ((type == POSITION_TYPE_BUY) ? (bid >= target) : (ask <= target));
+      if(reached)
+        {
+         double closeVol = NormalizeVolume(vol * InpTP1_ClosePct/100.0);
+         if(closeVol > 0 && closeVol < vol)
+           {
+            if(gTrade.PositionClosePartial(ticket, closeVol))
+              {
+               TkMark(ticket, gPartialTk);
+               ABTGLog(StringFormat("1o obiettivo @ %.5f: chiusa parziale %.2f lotti (ticket %I64u).", target, closeVol, ticket));
+               //--- 2) BREAKEVEN sul residuo
+               if(InpBreakevenAtTP1)
+                 {
+                  double be = NormalizePrice(openP);
+                  gTrade.PositionModify(ticket, be, tp);
+                 }
+              }
+           }
+        }
+     }
+
+   //--- 2b) BREAK-EVEN INDIPENDENTE (a InpBEatR, senza chiudere nulla)
+   if(InpBEatR > 0 && !TkDone(ticket, gBETk))
+     {
+      int dirSignBE = (type == POSITION_TYPE_BUY) ? +1 : -1;
+      double beTarget = openP + dirSignBE*riskDist*InpBEatR;
+      bool beHit = (type == POSITION_TYPE_BUY) ? (bid >= beTarget) : (ask <= beTarget);
+      if(beHit)
+        {
+         double be = NormalizePrice(openP);
+         // sposta a BE solo se migliora lo stop (mai arretrare)
+         if((type==POSITION_TYPE_BUY  && (be>sl || sl==0)) ||
+            (type==POSITION_TYPE_SELL && (be<sl || sl==0)))
+            gTrade.PositionModify(ticket, be, tp);
+         TkMark(ticket, gBETk);
+         ABTGLog(StringFormat("BE indipendente @ %.5f R=%.2f: stop a pari (ticket %I64u).", beTarget, InpBEatR, ticket));
+        }
+     }
+
+   //--- 3) TRAILING STOP (protegge i profitti)
+   if(InpUseTrailing)
+     {
+      if(type == POSITION_TYPE_BUY)
+        {
+         double newSL = TrailStopBuy(bid);
+         if(newSL > 0 && newSL > sl && newSL > openP)
+            gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
+        }
+      else if(type == POSITION_TYPE_SELL)
+        {
+         double newSL = TrailStopSell(ask);
+         if(newSL > 0 && (newSL < sl || sl == 0) && newSL < openP)
+            gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
+        }
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Nuovo stop di trailing per un LONG secondo InpTrailMode          |
+//+------------------------------------------------------------------+
+double TrailStopBuy(double bid)
+  {
+   if(InpTrailMode == ABTG_TRAIL_PREVBAR)
+      return(iLow(_Symbol, InpTrailTF, 1));                 // base (minimo) candela prec.
+   if(InpTrailMode == ABTG_TRAIL_FIXED)
+      return(bid - InpTrailFixedPts * _Point);
+   double atr = AtrValue();                                 // ABTG_TRAIL_ATR
+   return(atr > 0 ? bid - atr*InpTrailAtrMult : 0);
+  }
+
+//+------------------------------------------------------------------+
+//| Nuovo stop di trailing per uno SHORT secondo InpTrailMode        |
+//+------------------------------------------------------------------+
+double TrailStopSell(double ask)
+  {
+   if(InpTrailMode == ABTG_TRAIL_PREVBAR)
+      return(iHigh(_Symbol, InpTrailTF, 1));                // base (massimo) candela prec.
+   if(InpTrailMode == ABTG_TRAIL_FIXED)
+      return(ask + InpTrailFixedPts * _Point);
+   double atr = AtrValue();                                 // ABTG_TRAIL_ATR
+   return(atr > 0 ? ask + atr*InpTrailAtrMult : 0);
+  }
+
+//+------------------------------------------------------------------+
+//| Stima dello stop iniziale (se e' gia' stato spostato a BE uso    |
+//| l'ATR come riferimento per il calcolo di R)                      |
+//+------------------------------------------------------------------+
+double InitialSL(double openP, double curSL, long type, bool partialDone)
+  {
+   if(partialDone || curSL == 0)
+      return((type == POSITION_TYPE_BUY) ? openP - AtrValue()*InpAtrSlMult
+                                          : openP + AtrValue()*InpAtrSlMult);
+   return(curSL);
+  }
+
+//+------------------------------------------------------------------+
+//| Primo NUMERO TONDO nella direzione del trade, ad almeno         |
+//| minDistPrice dal prezzo (approssima i livelli %Custom/Multipivot)|
+//+------------------------------------------------------------------+
+double NextRoundLevel(double price, int dir, double stepPrice, double minDistPrice)
+  {
+   if(stepPrice <= 0) return(0);
+   double lvl;
+   if(dir > 0)
+     {
+      lvl = MathCeil(price/stepPrice)*stepPrice;
+      while(lvl - price < minDistPrice) lvl += stepPrice;
+     }
+   else
+     {
+      lvl = MathFloor(price/stepPrice)*stepPrice;
+      while(price - lvl < minDistPrice) lvl -= stepPrice;
+     }
+   return(lvl);
+  }
+
+//+------------------------------------------------------------------+
+//| Arrotonda un prezzo al TICK del simbolo (non solo ai decimali).  |
+//| Necessario sui simboli con tick size > point (es. indici a       |
+//| step 0.10 con 2 cifre), altrimenti il broker rifiuta l'ordine.   |
+//+------------------------------------------------------------------+
+double NormalizePrice(double price)
+  {
+   double ts = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   int    dg = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   if(ts <= 0) return(NormalizeDouble(price, dg));
+   return(NormalizeDouble(MathRound(price/ts)*ts, dg));
+  }
+
+//+------------------------------------------------------------------+
+//| Buffer effettivo in prezzo: almeno il "livello degli stop" del   |
+//| broker, cosi' gli ordini non vengono rifiutati perche' troppo    |
+//| vicini (es. NASUSD ha stops level = 100 punti).                  |
+//+------------------------------------------------------------------+
+double EffectiveBuffer()
+  {
+   double stopsLvl = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   double bufPts   = MathMax(InpBufferPoints, stopsLvl);
+   return(bufPts * _Point);
+  }
+
+//+------------------------------------------------------------------+
+//| Normalizza un volume ai vincoli del simbolo                     |
+//+------------------------------------------------------------------+
+double NormalizeVolume(double v)
+  {
+   double step = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+   double mn   = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   if(step <= 0) step = 0.01;
+   v = MathFloor(v/step)*step;
+   if(v < mn) v = 0;   // troppo piccolo per essere chiuso separatamente
+   return(v);
+  }
+
+//+------------------------------------------------------------------+
+//| A fine sessione: cancella pendenti ed (eventualmente) chiudi     |
+//+------------------------------------------------------------------+
+void EndOfSession()
+  {
+   // cancella eventuali ordini pendenti dell'EA
+   CancelMyPendings();
+   // chiudi la posizione se richiesto
+   if(InpCloseAtEnd && SelectMyPosition())
+     {
+      gTrade.PositionClose(_Symbol);
+      ABTGLog("fine sessione: posizione chiusa.");
+     }
+   gPhase = PH_DONE;
+  }
+
+//+------------------------------------------------------------------+
+//| Seleziona la posizione di QUESTO EA sul simbolo corrente         |
+//+------------------------------------------------------------------+
+bool SelectMyPosition()
+  {
+   // Hedge-safe: scorro TUTTE le posizioni e seleziono la MIA (simbolo+magic).
+   // PositionSelect(_Symbol) prendeva la prima posizione qualsiasi sul simbolo:
+   // con piu' EA sullo stesso strumento la gestione saltava. Ora per ticket.
+   for(int _i=PositionsTotal()-1;_i>=0;_i--)
+     {
+      ulong _tk=PositionGetTicket(_i);
+      if(_tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic)
+         return(true); // PositionGetTicket ha gia' selezionato la posizione
+     }
+   return(false);
+  }
+
+bool HasOpenPosition() { return(SelectMyPosition()); }
+
+//+------------------------------------------------------------------+
+//| Spread accettabile?                                              |
+//+------------------------------------------------------------------+
+bool SpreadOK()
+  {
+   if(InpMaxSpread <= 0) return(true);
+   long spread = SymbolInfoInteger(_Symbol, SYMBOL_SPREAD);
+   return(spread <= InpMaxSpread);
+  }
+
+//+------------------------------------------------------------------+
+//| Volumi in crescita alla rottura? (Emiliano: >= mult * media)     |
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| CONFERMA DELLA ROTTURA (PDF, strategia breakout notturno):       |
+//|   "Entra solo se la rottura e' supportata da aumento di volumi   |
+//|    O da una volatilita' coerente (ATR > media)."                 |
+//|  E' un OR, non un AND: basta UNA delle due conferme. Applicarle  |
+//|  a cascata (prima i volumi, poi l'ATR) le rende un AND e         |
+//|  moltiplica via il campione -- errore del primo giro del 02/08,  |
+//|  che aveva ridotto il Nasdaq a 72 trade in 2,5 anni.             |
+//|  InpConfirmMode permette comunque di provare l'AND.              |
+//+------------------------------------------------------------------+
+bool ConfirmOK()
+  {
+   if(!InpUseVolumeFilter && !InpUseAtrFilter) return(true);   // nessuna conferma richiesta
+   if(InpUseVolumeFilter && !InpUseAtrFilter)  return(VolumeOK());
+   if(!InpUseVolumeFilter && InpUseAtrFilter)  return(AtrOK());
+   bool v = VolumeOK();
+   bool a = AtrOK();
+   return((InpConfirmMode == ABTG_CONF_AND) ? (v && a) : (v || a));
+  }
+
+//+------------------------------------------------------------------+
+//| Volatilita' coerente? (PDF: "ATR > media")                       |
+//|  Il piano ammette il breakout se e' sostenuto DA VOLUMI **O** da |
+//|  una volatilita' coerente. Qui confronto l'ATR dell'ultima barra |
+//|  chiusa con la sua media sulle ultime N barre: serve a NON       |
+//|  operare le aperture fiacche (dove il breakout e' rumore).       |
+//+------------------------------------------------------------------+
+bool AtrOK()
+  {
+   if(!InpUseAtrFilter) return(true);
+   int n = InpAtrFilterBars;
+   if(n < 2) return(true);
+   double a[];
+   ArraySetAsSeries(a, true);
+   if(CopyBuffer(gAtrH, 0, 1, n, a) < n) return(true);   // dati insuff.: non blocco
+   double sum = 0;
+   for(int i = 0; i < n; i++) sum += a[i];
+   double avg = sum / n;
+   if(avg <= 0) return(true);
+   return(a[0] >= InpAtrFilterMult * avg);               // ATR dell'ultima barra vs la sua media
+  }
+
+bool VolumeOK()
+  {
+   if(!InpUseVolumeFilter) return(true);
+   int n = InpVolAvgBars;
+   if(n < 2) return(true);
+   long v[];
+   ArraySetAsSeries(v, true);
+   if(CopyTickVolume(_Symbol, PERIOD_CURRENT, 1, n+1, v) < n+1) return(true); // dati insuff.: non blocco
+   double sum = 0;
+   for(int i = 1; i <= n; i++) sum += (double)v[i];                 // media delle n barre PRIMA della rottura
+   double avg = sum / n;
+   if(avg <= 0) return(true);
+   return((double)v[0] >= InpVolMult * avg);                        // volume dell'ultima barra chiusa (rottura)
+  }
+//+------------------------------------------------------------------+
+
+
+//+------------------------------------------------------------------+
+int  OnInit()                         { return ABTG_OnInit();  }
+void OnDeinit(const int reason)       { ABTG_OnDeinit(reason); }
+void OnTick()                         { ABTG_OnTick();         }
+//+------------------------------------------------------------------+
+
+//==================================================================//
+//  OPTFRAME (inlined, self-contained) - export automatico dei      //
+//  risultati di OTTIMIZZAZIONE in CSV.  NON richiede include.       //
+//  Scrive MQL5\Files\OptResults_<EA>_<Symbol>.csv, leggibile da:    //
+//      python optimizer/batch_analyze.py <cartella>                 //
+//  In live/backtest singolo e inerte (gira solo in ottimizzazione).//
+//==================================================================//
+#define OPTFRAME_NAME "OptFrame"
+#define OPTFRAME_ID   1
+
+string OptFrame_FileName()
+  {
+   return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
+  }
+
+double OnTester()
+  {
+   double stats[7];
+   stats[0] = TesterStatistics(STAT_PROFIT);
+   stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
+   stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
+   stats[3] = TesterStatistics(STAT_RECOVERY_FACTOR);
+   stats[4] = TesterStatistics(STAT_SHARPE_RATIO);
+   stats[5] = TesterStatistics(STAT_EQUITY_DDREL_PERCENT);
+   stats[6] = TesterStatistics(STAT_TRADES);
+   double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
+   FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
+   return(criterion);
+  }
+
+int OnTesterInit() { return(INIT_SUCCEEDED); }
+
+void OnTesterDeinit()
+  {
+   string fname = OptFrame_FileName();
+   int h = FileOpen(fname, FILE_WRITE | FILE_CSV | FILE_ANSI, ",");
+   if(h == INVALID_HANDLE)
+     { PrintFormat("OptFrame: impossibile creare %s (err %d)", fname, GetLastError()); return; }
+   FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
+   ulong pass; string name; long id; double value; double data[];
+   bool header_scritto = false; int righe = 0;
+   while(FrameNext(pass, name, id, value, data))
+     {
+      string params[]; uint pcount = 0;
+      FrameInputs(pass, params, pcount);
+      if(!header_scritto)
+        {
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades";
+         for(uint i = 0; i < pcount; i++)
+           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
+         FileWrite(h, head); header_scritto = true;
+        }
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f",
+                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
+      for(uint i = 0; i < pcount; i++)
+        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
+      FileWrite(h, row); righe++;
+     }
+   FileClose(h);
+   PrintFormat("OptFrame: scritte %d passate in MQL5\\Files\\%s", righe, fname);
+  }
+//================== fine OPTFRAME inlined ==========================//

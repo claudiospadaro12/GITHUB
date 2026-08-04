@@ -17,7 +17,11 @@ param(
 )
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$Branch  = "claude/creating-agents-SgGpD"
+# ATTENZIONE (04/08/2026): qui c'era "claude/creating-agents-SgGpD", branch
+# fermo dal 31/07. Il VPS ha ricompilato per giorni scaricando i sorgenti
+# VECCHI: il fix del breakeven e le colonne nuove del TradeExporter non
+# sono mai arrivati, e non dava nessun errore. Il branco di lavoro e' `lavoro`.
+$Branch  = "lavoro"
 $RawBase = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch/mql5/Experts"
 
 # EA _Ottimizzato VALIDATI pronti per il forward.
@@ -59,6 +63,7 @@ $EAs = @(
     "ABTG_DAX_Live5m_v2",
     "ABTG_DAX_M3",
     "ABTG_Nasdaq_Apertura_US",
+    "ABTG_Dow_Apertura_US",
     "ABTG_Nasdaq_Live5m",
     "ABTG_ORB",
     "ABTG_ORB_Fibo",
