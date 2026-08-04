@@ -25,3 +25,13 @@ Portati 58 file (solo codice/documenti, 0 dump di risultati) dagli altri branch,
 ---
 ⚠️ `claude/chat-ea-market-openings-zoba2j` (vecchio nome): 0 file unici, da cancellare (il proxy blocca la cancellazione via git → cancellare dal web: GitHub → Branches → cestino).
 Gli altri branch NON sono stati cancellati: restano come backup finché non confermi che `lavoro` va bene.
+
+## ⏭️ PROSSIMO PASSO (con calma) — richiesto da Claudio 04/08
+Rivedere **uno per uno i progetti importati** per capire se c'è qualcosa da **migliorare**:
+- EA "prop-oriented": **DAX_MASTER_PROP**, BULGE_MASTER, DAX_M3_Supertrend
+- Oro: Gold_Ichimoku_TK_ATR, Gold_Scalper_TK_BB_BE, IchiCross_Gold, GoldBreakout_Levels
+- ORB: ORB_DAX_BASE/PM, ORB_GOLD_FIBONACCI, ORB_OpeningRange
+- Altri: BREAKOUT_EA_JPY (+Multi), EasyTrend_EURUSD, HARSI_Assistant
+- Pine (idee da portare in MT5): Universal_Scalper_Pro, Gold_Ichimoku_ATR, Ichimoku_TK_Cross_Bollinger
+- Documenti/playbook: Playbook_XAUUSD, Piano_di_Trading_Oro, Portafoglio_Strategie
+→ Per ognuno: che fa, stato, se ha edge, cosa si può migliorare. Priorità sempre: PROP (H1, trade 1-2gg, DD basso) + aperture M5 conto personale.
