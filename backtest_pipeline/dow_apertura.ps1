@@ -19,7 +19,7 @@
 #    .\dow_apertura.ps1 -Fase distanze
 # =====================================================================
 param(
-  [ValidateSet("motore","robustezza","distanze","trailing")]
+  [ValidateSet("motore","robustezza","distanze","trailing","trailing2")]
   [string]$Fase="motore",
   [string]$Symbol="U30USD",
   [int]$SessionHour=14,                   # ORA SERVER BCM: apertura USA 15:30 IT = 14:30 server
@@ -135,6 +135,21 @@ if($Fase -eq "trailing"){
   $Inputs="$Inputs`nInpTrailTF=1||1||4||5||Y"          # M1 e M5 (inerte con TrailMode=0)
   $Inputs="$Inputs`nInpTrailAtrMult=2.0||1.0||1.0||3.0||Y"  # inerte con TrailMode=1
   $note="12 pass (5 combo distinte): ATR vs base candela, su M1 e M5. Da battere: 3917 della gestione nuda."
+}
+
+# === FASE "TRAILING2": oltre M5 migliora ancora? ===
+#     Nella fase trailing il profit sale in modo ordinato con la candela:
+#     M1 1162 -> M2 2471 -> M3 2652 -> M4 2837 -> M5 3882. M5 era il bordo
+#     della griglia, quindi non sappiamo se l'ottimo sta oltre.
+#     4 pass: M5, M10, M15, M20.
+if($Fase -eq "trailing2"){
+  $Inputs=$Inputs -replace "(?m)^InpUseEmaFilter=.*$","InpUseEmaFilter=$H4||$H4||0||$H4||N"
+  $Inputs=$Inputs -replace "(?m)^InpUseVolumeFilter=.*$","InpUseVolumeFilter=$Vol||$Vol||0||$Vol||N"
+  $Inputs=$Inputs -replace "(?m)^InpVolMult=.*$","InpVolMult=$VolMult||$VolMult||0||$VolMult||N"
+  $Inputs=$Inputs -replace "(?m)^InpUseTrailing=.*$","InpUseTrailing=1||1||0||1||N"
+  $Inputs="$Inputs`nInpTrailMode=1||1||0||1||N"     # base candela precedente, il vincitore
+  $Inputs="$Inputs`nInpTrailTF=5||5||5||20||Y"      # M5, M10, M15, M20 (tutti TF validi)
+  $note="4 pass: trailing a base candela su M5/M10/M15/M20. Da battere: 3882 di profit e PF 1,371 di M5."
 }
 
 # === FASE "DISTANZE": fissata la selezione, QUANTO larghi ===

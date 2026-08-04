@@ -37,10 +37,13 @@
 //     funziona, qui e' rumore e sopra l'H4 fa danno: resta SPENTO.
 //   * ROBUSTEZZA (10 pass): l'EMA del filtro regge da 20 a 200 periodi,
 //     10 valori su 10 sopra PF 1,20. Non e' una punta fortunata.
-//   * FASE DISTANZE (48 pass): parziale, breakeven e trailing a punti
-//     fissi PEGGIORANO il risultato. Nudo = 3917 di profit; la migliore
-//     configurazione gestita = 2575, e a parita di take profit 1701.
-//     Percio' qui la gestione e' VOLUTAMENTE assente.
+//   * FASE DISTANZE (48 pass): parziale, breakeven e trailing A PUNTI
+//     FISSI peggiorano il risultato. Nudo = 3917 di profit; la migliore
+//     configurazione gestita = 2575. Percio' parziale e BE restano spenti.
+//   * FASE TRAILING (30 pass, 05/08): il trailing a BASE CANDELA e' un'altra
+//     cosa. Su M5: PF 1,371 contro 1,238 del nudo, DD 5,32% contro 6,92%,
+//     Sharpe 13,99 contro 8,26 — a parita di profit e di trade. Non era
+//     il trailing a essere sbagliato, era il TIPO di trailing.
 //
 //  Dettaglio e CSV: backtest_pipeline/risultati_archivio/Dow_Apertura/
 //
@@ -62,7 +65,7 @@
 #define ABTG_DEF_CLOSE_MIN    30
 #define ABTG_DEF_USE_GAPFILL  false
 #define ABTG_DEF_RISK         1.0         // 1% per trade, come nel backtest
-#define ABTG_DEF_TRAIL_MODE   2           // inerte: il trailing e' SPENTO
+#define ABTG_DEF_TRAIL_MODE   1           // 1 = base della candela precedente (vince il test del 05/08)
 #define ABTG_DEF_BUFFER       200         // 2 punti indice oltre il range
 
 //  VERSIONE TUTTO-IN-UNO: il motore e' incluso qui sotto, NON serve
@@ -264,9 +267,9 @@ input double InpTP1_R           = 0.5;  // [DOW] TpTotalR() moltiplica x3 -> TP 
 input double InpTP1_ClosePct    = 0;  // [DOW] niente parziale: nella fase distanze toglie profit                 // % di posizione chiusa al 1o obiettivo (piano: "dimezzo")
 input bool   InpBreakevenAtTP1  = false;  // [DOW] niente BE: 6 confronti puliti su 8 in perdita, fino a -38%               // Sposta stop in pari dopo la parziale
 input double InpBEatR           = 0;                  // BE indipendente: sposta SL a pari a questo R (0=off; NON chiude nulla)
-input bool   InpUseTrailing     = false;  // [DOW] niente trailing: nudo 3917 contro 2575 del migliore gestito               // Attiva trailing stop
+input bool   InpUseTrailing     = true;   // [DOW] trailing a BASE CANDELA M5: PF 1,24 -> 1,37 e DD 6,9% -> 5,3% a parita di profit               // Attiva trailing stop
 input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Tipo di trailing
-input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
+input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M5;         // [DOW] M5 batte M1 di netto: profit 3882 contro 1162, PF 1,371 contro 1,200
 input double InpTrailAtrMult    = 2.0;                // (TRAIL_ATR) trailing = X * ATR
 input double InpTrailFixedPts   = 410;                // (TRAIL_FIXED) trailing in punti (piano DAX: 410 punti)
 

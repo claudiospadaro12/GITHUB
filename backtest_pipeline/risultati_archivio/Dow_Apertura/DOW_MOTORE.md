@@ -158,3 +158,67 @@ Quindi la conclusione onesta è: *il trailing **a punti fissi** non paga sul Dow
 2. **Il BE anticipato si toglie**, sul Dow. Va contro l'intuizione, ma i numeri sono otto confronti puliti.
 3. **Prossimo test**: `InpTrailMode = 1` a parità di tutto il resto. È l'unica gestione che il forward ha mostrato funzionare e che il backtest non ha ancora visto.
 4. ⚠️ Tutto questo resta **in-sample**. Manca il walk-forward.
+
+---
+
+# 🔄 FASE TRAILING (05/08) — mi ero sbagliato: il trailing giusto paga
+
+30 pass. Stessi ingressi, **329 trade in ogni singolo pass** (il trailing non tocca la selezione): il confronto è pulitissimo, cambia solo cosa succede dopo l'ingresso.
+
+## Trailing a BASE CANDELA (`InpTrailMode = 1`)
+
+| TF della candela | profit | **PF** | **DD%** | Sharpe | recovery |
+|---|---|---|---|---|---|
+| M1 | 1 162 | 1,200 | 4,85 | 9,62 | 2,12 |
+| M2 | 2 471 | 1,337 | 5,56 | 14,19 | 3,68 |
+| M3 | 2 652 | 1,311 | 5,64 | 12,63 | 3,81 |
+| M4 | 2 837 | 1,300 | 6,18 | 11,69 | 4,19 |
+| **M5** | **3 882** | **1,371** | **5,32** | **13,99** | **6,51** |
+
+## Trailing ATR (`InpTrailMode = 0`)
+
+| moltiplicatore | profit | PF | DD% | Sharpe |
+|---|---|---|---|---|
+| 1× | 1 748 | 1,203 | 6,65 | 8,05 |
+| 2× | 3 311 | 1,242 | 7,34 | 8,57 |
+| 3× | 3 990 | 1,247 | **8,22** | 8,69 |
+
+## Il confronto che conta
+
+| | profit | PF | DD% | Sharpe | recovery |
+|---|---|---|---|---|---|
+| gestione **NUDA** | 3 917 | 1,238 | 6,92 | 8,26 | 4,20 |
+| **base candela M5** | 3 882 | **1,371** | **5,32** | **13,99** | **6,51** |
+| ATR ×3 | 3 990 | 1,247 | 8,22 | 8,69 | 3,57 |
+
+**A parità di profit e di trade, il trailing a base candela M5 migliora tutto il resto:**
+PF **+11%**, drawdown **−23%**, Sharpe **+69%**, recovery factor **+55%**.
+
+L'ATR invece fa più profit solo alzando il moltiplicatore, e paga con un DD che **cresce** (6,65 → 8,22): è indistinguibile dal non gestire, solo più rumoroso.
+
+## ⚠️ Correzione di quello che avevo scritto ieri
+
+Ieri, dopo la fase distanze, avevo concluso: *"non gestire batte qualunque gestione testata"*. Avevo anche segnalato il limite — `InpTrailMode` era pinnato a punti fissi in tutti e 48 i pass. **Adesso quel buco è chiuso, e la conclusione cambia:**
+
+> **Non era il trailing a essere sbagliato. Era il TIPO di trailing.**
+> A punti fissi peggiora sempre. A base candela migliora ogni metrica di rischio a parità di rendimento.
+
+E soprattutto: **è la stessa risposta che il forward aveva dato il 04/08**, quando sul DAX il trailing a base candela catturò 25,64 punti contro 1,90 del fisso, a parità di simbolo, ora e direzione. Due metodi indipendenti, stessa conclusione.
+
+## 🟡 Un dubbio onesto: M5 è il bordo della griglia
+
+Il profit sale in modo **ordinato** con la candela: 1 162 → 2 471 → 2 652 → 2 837 → **3 882**. Non c'è una gobba: **la curva sta ancora salendo quando la griglia finisce.** Non sappiamo se M10 o M15 facciano meglio.
+
+→ fase `trailing2`: M5 / M10 / M15 / M20, 4 pass.
+
+## ✅ Preset Dow aggiornato
+
+| | prima | **adesso** |
+|---|---|---|
+| `InpUseTrailing` | false | **true** |
+| `InpTrailMode` | — | **1 (base candela precedente)** |
+| `InpTrailTF` | — | **M5** |
+| parziale / BE | spenti | spenti (invariato) |
+| `InpTP1_R` | 0.5 (TP 1,5R) | 0.5 (invariato) |
+
+`ABTG_Dow_Apertura_US.mq5` aggiornato: **serve ricompilare sul VPS** perché l'EA in forward lo usi.
