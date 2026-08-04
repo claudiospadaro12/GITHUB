@@ -5,6 +5,12 @@
 
 ---
 
+## ⭐ PRINCIPIO GUIDA (Claudio, 04/08) — vale SEMPRE, soprattutto per la PROP e i TF alti
+**Portare a casa il profitto, anche se poco. Se il prezzo si gira, meglio incassare/proteggere che ridare indietro.**
+→ BE appena in profitto · parziale · trailing. **Consistenza > massimizzare.** Un vincitore non deve mai diventare perdente.
+Per la prop questo conta doppio: **DD basso + costanza** fanno passare la challenge, non i colpi grossi.
+_(Nota onesta: proteggere il profitto evita di ridare indietro, ma NON crea l'edge — serve comunque un ingresso/selezione con vantaggio. Le due cose insieme, dati 03/08.)_
+
 ## 1) 🏆 PROP — priorità massima
 
 ### Profilo EA prop ideale (parole di Claudio)
