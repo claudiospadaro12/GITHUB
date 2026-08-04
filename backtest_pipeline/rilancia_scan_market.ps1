@@ -24,7 +24,7 @@ param(
 $ErrorActionPreference="Stop"
 $EA=$Robot   # (rinominato: -EA e' riservato da PowerShell come alias di -ErrorAction)
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-$Branch="claude/creating-agents-SgGpD"
+$Branch="lavoro"   # era un branch fermo dal 31/07: scaricava sorgenti VECCHI senza dare errore
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 
 # --- LISTA SIMBOLI (modifica se sul tuo BCM hanno nomi diversi) -------

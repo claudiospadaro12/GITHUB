@@ -8,7 +8,7 @@
 param([switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force)
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-$Branch="claude/creating-agents-SgGpD"
+$Branch="lavoro"   # era un branch fermo dal 31/07: scaricava sorgenti VECCHI senza dare errore
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Branch"
 $EA="ABTG_SuperWave"
 $Targets=@(

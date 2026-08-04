@@ -19,7 +19,7 @@
 #    .\dow_apertura.ps1 -Fase distanze
 # =====================================================================
 param(
-  [ValidateSet("motore","robustezza","distanze","trailing","trailing2")]
+  [ValidateSet("motore","robustezza","distanze","trailing","trailing2","walkforward")]
   [string]$Fase="motore",
   [string]$Symbol="U30USD",
   [int]$SessionHour=14,                   # ORA SERVER BCM: apertura USA 15:30 IT = 14:30 server
@@ -152,6 +152,29 @@ if($Fase -eq "trailing2"){
   $note="4 pass: trailing a base candela su M5/M10/M15/M20. Da battere: 3882 di profit e PF 1,371 di M5."
 }
 
+# === FASE "WALKFORWARD": l'ultimo cancello, e l'unico che manca ===
+#     Tutti i numeri del Dow sono stati scelti guardando 2024.01-2026.06.
+#     Finche' non li si prova su un periodo MAI visto, restano in-sample.
+#     Qui si lancia la STESSA griglia su due finestre separate:
+#        IS  2024.01.01 - 2025.06.30   (18 mesi)
+#        OOS 2025.07.01 - 2026.06.30   (12 mesi, mai usati per scegliere)
+#     Non cerco il massimo: cerco se la REGIONE BUONA e' la stessa nelle
+#     due finestre. Se lo e', l'edge e' stabile nel tempo. Se in OOS
+#     crolla o si sposta, era curve-fitting e il Dow torna in panchina.
+#     Griglia: EMA del filtro (10 valori) x TP totale (4) = 40 pass per
+#     finestra, 80 in tutto. Il trailing resta fissato a base candela M5.
+if($Fase -eq "walkforward"){
+  $Inputs=$Inputs -replace "(?m)^InpUseEmaFilter=.*$","InpUseEmaFilter=1||1||0||1||N"
+  $Inputs=$Inputs -replace "(?m)^InpUseVolumeFilter=.*$","InpUseVolumeFilter=0||0||0||0||N"
+  $Inputs=$Inputs -replace "(?m)^InpVolMult=.*$","InpVolMult=1.5||1.5||0||1.5||N"
+  $Inputs=$Inputs -replace "(?m)^InpUseTrailing=.*$","InpUseTrailing=1||1||0||1||N"
+  $Inputs=$Inputs -replace "(?m)^InpEmaSlow=.*$","InpEmaSlow=50||20||20||200||Y"
+  $Inputs=$Inputs -replace "(?m)^InpTP1_R=.*$","InpTP1_R=0.5||0.33||0.17||0.84||Y"
+  $Inputs="$Inputs`nInpTrailMode=1||1||0||1||N"   # base candela: il vincitore del 05/08
+  $Inputs="$Inputs`nInpTrailTF=5||5||0||5||N"     # M5
+  $note="80 pass su DUE finestre (IS 18 mesi + OOS 12 mesi mai visti). Cerco la REGIONE stabile, non il massimo."
+}
+
 # === FASE "DISTANZE": fissata la selezione, QUANTO larghi ===
 #     Il trailing e' espresso in FRAZIONI DI R misurato (non piu' a caso):
 #       3000 = 0,24 R · 6000 = 0,48 R · 9000 = 0,72 R · 12500 = 1,00 R
@@ -204,7 +227,18 @@ Copy-Item (Join-Path $Work "src_dow\$EA.mq5") -Destination $MqlExperts -Force
 if(-not (Test-Path (Join-Path $MqlExperts "$EA.ex5"))){Write-Host "ERRORE compilazione $EA" -ForegroundColor Red; exit 1}
 Write-Host "    compilato $EA.ex5" -ForegroundColor Green
 
-$iniPath=Join-Path $Work "dow_$Fase.ini"
+# Una finestra sola per tutte le fasi, DUE per il walkforward.
+$Finestre = @( @{Tag=""; Da="2024.01.01"; A="2026.06.30"} )
+if($Fase -eq "walkforward"){
+  $Finestre = @(
+    @{Tag="_IS";  Da="2024.01.01"; A="2025.06.30"},   # qui si sceglie
+    @{Tag="_OOS"; Da="2025.07.01"; A="2026.06.30"}    # qui si verifica: mai visto prima
+  )
+}
+
+foreach($w in $Finestre){
+  $tag = "$Fase$($w.Tag)"
+  $iniPath = Join-Path $Work "dow_$tag.ini"
 @"
 [Tester]
 Expert=$EA.ex5
@@ -213,8 +247,8 @@ Period=$Tf
 Model=4
 Optimization=1
 OptimizationCriterion=6
-FromDate=2024.01.01
-ToDate=2026.06.30
+FromDate=$($w.Da)
+ToDate=$($w.A)
 ForwardMode=0
 Deposit=10000
 Currency=EUR
@@ -222,22 +256,24 @@ Leverage=100
 ExecutionMode=0
 ReplaceReport=1
 ShutdownTerminal=1
-Report=OptReport_$EAtag
+Report=OptReport_DOW_$tag
 
 [TesterInputs]
 $Inputs
 "@ | Set-Content -Path $iniPath -Encoding ASCII
 
-$csv=Join-Path $MqlFiles "OptResults_${EA}_$Symbol.csv"; if(Test-Path $csv){Remove-Item $csv -Force}
-Write-Host "    avvio ottimizzazione (TICK REALI M5, 2024.01 - 2026.06)... ci vuole parecchio" -ForegroundColor Cyan
-(Start-Process -FilePath $Terminal -ArgumentList "/config:`"$iniPath`"" -PassThru).WaitForExit()
+  $csv = Join-Path $MqlFiles "OptResults_${EA}_$Symbol.csv"
+  if(Test-Path $csv){ Remove-Item $csv -Force }
+  Write-Host "    avvio: $tag  (TICK REALI $Tf, $($w.Da) - $($w.A))... ci vuole parecchio" -ForegroundColor Cyan
+  (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$iniPath`"" -PassThru).WaitForExit()
 
-$done=Join-Path $Results "dow_$Fase.csv"
-if(Test-Path $csv){
-  try{ Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force
-       Write-Host "    OK -> $done" -ForegroundColor Green }
-  catch{ Write-Host "    salvataggio fallito, il CSV resta in $csv" -ForegroundColor Yellow }
-}else{
-  Write-Host "    (nessun CSV: storico tick mancante su $Symbol? scarica lo storico e rilancia)" -ForegroundColor Yellow
+  $done = Join-Path $Results "dow_$tag.csv"
+  if(Test-Path $csv){
+    try{ Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force
+         Write-Host "    OK -> $done" -ForegroundColor Green }
+    catch{ Write-Host "    salvataggio fallito, il CSV resta in $csv" -ForegroundColor Yellow }
+  }else{
+    Write-Host "    (nessun CSV per $tag: storico tick mancante su $Symbol?)" -ForegroundColor Yellow
+  }
 }
 Write-Host "`n=== FINITO === Zippa la cartella 'risultati_dow' e caricamela." -ForegroundColor White

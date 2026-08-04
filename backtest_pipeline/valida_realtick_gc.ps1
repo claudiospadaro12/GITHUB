@@ -19,7 +19,7 @@ param(
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 $EA="ABTG_GoldenCross"
-$EABranch="claude/creating-agents-SgGpD"
+$EABranch="lavoro"   # era un branch fermo dal 31/07: scaricava sorgenti VECCHI senza dare errore
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 
 $tfmap=@{ "M5"=5; "M15"=15; "M30"=30; "H1"=16385; "H4"=16388; "D1"=16408 }
