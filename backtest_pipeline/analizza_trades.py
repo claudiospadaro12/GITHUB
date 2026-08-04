@@ -55,7 +55,20 @@ def tempo(s):
 
 def frazione_catturata(r):
     """Quanta parte del movimento disponibile ha preso il trade.
-       Richiede session_high/session_low (aggiunti all'exporter il 03/08)."""
+
+    ATTENZIONE al denominatore: session_high/low li misura l'EA da
+    ingresso fino alle 23:59, cioe' su TUTTA la giornata. Per gli EA di
+    apertura, che chiudono entro mezz'ora, e' una finestra molto piu'
+    lunga della loro vita: le percentuali escono basse per costruzione e
+    vanno lette come "quanto ha preso di cio' che la giornata offriva",
+    non come "quanto ha preso del suo movimento".
+
+    Si calcola SOLO sui trade in profitto. Su un perdente il
+    denominatore e' l'escursione a favore, che puo' essere quasi zero:
+    il 04/08 un trade dava -1679%, un numero senza significato.
+    """
+    if num(r, "profit") <= 0:
+        return None
     hi, lo = num(r, "session_high"), num(r, "session_low")
     op, cp = num(r, "open_price"), num(r, "close_price")
     if hi <= 0 or lo <= 0 or op <= 0:
@@ -66,7 +79,8 @@ def frazione_catturata(r):
         disponibile, preso = op - lo, op - cp
     if disponibile <= 0:
         return None
-    return preso / disponibile
+    f = preso / disponibile
+    return f if -0.5 <= f <= 3.0 else None   # fuori range = dato inaffidabile
 
 
 def main():
@@ -94,7 +108,7 @@ def main():
         perEA[r.get("strategy") or ("magic " + str(r.get("magic", "?")))].append(r)
 
     out += ["## Chi ha operato", "",
-            "| EA | Trade | P&L | Durata media | Come sono usciti | Frazione media del movimento |",
+            "| EA | Trade | P&L | Durata media | Come sono usciti | Frazione del giorno (solo vincenti) |",
             "|---|---|---|---|---|---|"]
     for ea, tr in sorted(perEA.items(), key=lambda x: -sum(num(r, "profit") for r in x[1])):
         pnl = sum(num(r, "profit") + num(r, "swap") + num(r, "commission") for r in tr)
@@ -154,9 +168,11 @@ def main():
                           "gestione probabilmente troppo stretta" % (
                               r.get("strategy"), r.get("symbol"), d,
                               r.get("close_reason") or "?"))
-        elif f is not None and f < FRAZIONE_BASSA and num(r, "profit") > 0:
-            avvisi.append("📉 **%s** su %s: preso solo il **%.0f%%** del movimento disponibile" % (
-                r.get("strategy"), r.get("symbol"), 100 * f))
+        elif f is not None and f < FRAZIONE_BASSA:
+            avvisi.append("📉 **%s** su %s: preso il **%.0f%%** di quanto la giornata offriva "
+                          "dopo il suo ingresso (uscito con `%s`)" % (
+                              r.get("strategy"), r.get("symbol"), 100 * f,
+                              r.get("close_reason") or "?"))
 
     if avvisi:
         out += ["", "## ⚠️ Da guardare", ""] + ["- " + a for a in dict.fromkeys(avvisi)]
