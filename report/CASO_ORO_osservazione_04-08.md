@@ -18,7 +18,7 @@ Il SupRev sposta lo SL a **breakeven solo a +1R**. Questi sono a **~0,3R** da gi
 - [ ] **B) Oro risale a 4111 → SL**: profitto→perdita. ✅ **conferma che serve il BE a tempo.**
 - [ ] **C) resta a metà per altri giorni**: capitale bloccato senza edge chiaro.
 
-**ESITO: _(da aggiornare al report 23:00 / prossimi dati)_**
+**ESITO (report 23:00 del 04/08): ANCORA APERTI** — i 2 oro non hanno chiuso oggi, osservazione in corso.
 
 ## Cosa faremo comunque (indipendente da questo trade)
 La vera prova del "BE a tempo" è nel **backtest**: simulare *BE dopo N ore in profitto anche se <1R* sui SupRev/EMA200, su 2,5 anni. Questo trade live è la **conferma vivida**, il backtest è la **prova statistica**. Così non dipendiamo da un solo aneddoto.
