@@ -222,3 +222,63 @@ Il profit sale in modo **ordinato** con la candela: 1 162 → 2 471 → 2 652 �
 | `InpTP1_R` | 0.5 (TP 1,5R) | 0.5 (invariato) |
 
 `ABTG_Dow_Apertura_US.mq5` aggiornato: **serve ricompilare sul VPS** perché l'EA in forward lo usi.
+
+---
+
+# ✅ FASE TRAILING2 (05/08) — la cima c'è, ed è a M5. Dow chiuso.
+
+| TF candela | profit | **PF** | DD% | Sharpe | recovery |
+|---|---|---|---|---|---|
+| **M5** | 3 882 | **1,371** | **5,32** | **13,99** | **6,51** |
+| M6 | **4 180** | **1,371** | 5,88 | 13,85 | 5,14 |
+| M10 | 4 040 | 1,303 | 5,31 | 11,59 | 5,30 |
+| M12 | 3 910 | 1,281 | 5,81 | 10,91 | 4,63 |
+| M15 | 3 932 | 1,262 | 8,36 | 10,03 | 3,16 |
+| M20 | 3 824 | 1,251 | 7,94 | 9,22 | 3,28 |
+
+Mettendo insieme le due fasi, la curva completa del PF è una **gobba pulita**:
+
+`M1 1,200 → M2 1,337 → M3 1,311 → M4 1,300 → M5 1,371 = M6 1,371 → M10 1,303 → M12 1,281 → M15 1,262 → M20 1,251`
+
+**Sale fino a M5-M6, poi scende in modo monotòno.** Il dubbio della fase precedente ("il profit sale ancora al bordo della griglia") era legittimo ed è ora risolto: **l'ottimo non stava oltre, stava dove eravamo.**
+
+## Perché M5 e non M6
+
+M6 fa **298 € di profit in più** (4 180 contro 3 882), ma:
+- PF **identico** (1,371 entrambi)
+- DD **peggiore** (5,88% contro 5,32%)
+- recovery factor **molto peggiore** (5,14 contro 6,51)
+
+Più rendimento pagato con più rischio, a parità di qualità. Per un sistema destinato a una prop (dove comanda il DD) **si tiene M5**. E il fatto che due TF adiacenti diano lo stesso PF è la conferma che siamo su un altopiano, non su una punta.
+
+---
+
+# 🏁 IL DOW È FINITO — configurazione definitiva
+
+| | valore | da dove viene |
+|---|---|---|
+| Simbolo / TF | **U30USD M5** | FASE A: unico indice su 8 con aspettativa positiva |
+| Range | primi **15 min** dopo l'apertura (14:30 server) | fase motore |
+| Buffer | 200 punti | inerte sotto i 100, 200 è sicuro |
+| Filtro | **EMA 50 su H4**, prezzo dalla parte giusta | 1,03 → 1,24 · robustezza 10/10 |
+| Filtro volumi | **spento** | sul Dow è rumore, sopra l'H4 fa danno |
+| Stop | estremo opposto del range, floor 500 | p90 del MAE dei vincenti = 0,80R |
+| TP | `InpTP1_R = 0.5` → **1,5R** | ×3 interno; l'ottimo misurato |
+| Parziale / BE | **spenti** | fase distanze: tolgono profit, il BE anticipato fino a −38% |
+| **Trailing** | **base candela, M5** | fase trailing: PF 1,238 → 1,371, DD −23%, Sharpe +69% |
+
+## Il percorso, in una riga
+
+| | PF | DD% | trade |
+|---|---|---|---|
+| breakout cieco | 1,03 | 14,9 | 445 |
+| + filtro H4 | 1,24 | 6,9 | 329 |
+| **+ trailing base candela M5** | **1,371** | **5,32** | **329** |
+
+**106 pass a tick reali in tutto.** Il PF sale del 33% e il drawdown scende di due terzi rispetto al punto di partenza, senza toccare il numero di trade nell'ultimo passo.
+
+## ⚠️ Resta UNA cosa, e non è un dettaglio
+
+**Nessun out-of-sample.** Tutto vive su 2024.01–2026.06. Sei numeri sono stati scelti guardando quel periodo: se il walk-forward non regge, questo è un bell'esercizio e basta.
+
+→ **Prossimo e ultimo passo: walk-forward IS/OOS.**

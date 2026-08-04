@@ -53,7 +53,10 @@ Il report di giornata (`report/giornata_2026-08-04.md`) viene generato dal trigg
 
 ## 🧭 ROTTA DECISA DA CLAUDIO (05/08, notte) — tre binari, in quest'ordine
 
-**1. FINIRE IL DOW.** `trailing2` in corso (M5/M10/M15/M20) → poi **walk-forward**. È il primo sistema che può diventare validato.
+**1. ~~FINIRE IL DOW~~ → PARAMETRI CHIUSI (05/08).** `trailing2` ha risolto il dubbio: la curva del PF è una gobba (M1 1,200 … **M5-M6 1,371** … M20 1,251), l'ottimo non stava oltre il bordo. Si tiene **M5** (M6 fa 298 € in più ma con DD 5,88% contro 5,32% e recovery 5,14 contro 6,51).
+   **Configurazione definitiva: U30USD M5 · range 15 min · EMA50 su H4 · volumi OFF · stop sul range (floor 500) · TP 1,5R · niente parziale né BE · trailing a BASE CANDELA M5.**
+   **PF 1,371 · DD 5,32% · 329 trade.** Dal breakout cieco (1,03 / 14,9%): PF +33%, drawdown a un terzo. 106 pass a tick reali.
+   ⏭️ **Resta solo il WALK-FORWARD**, e non è un dettaglio: sei parametri sono stati scelti guardando 2024.01–2026.06.
 
 **2. MIGLIORARE ANCORA DAX E NASDAQ.** ⚠️ Correggo una mia frase di ieri (*"quella miniera è esaurita"*): era vera **per i filtri d'ingresso**, non per la gestione. Ci sono tre cose mai provate lì, e non sono scavare dove si è già scavato:
    - 🔑 **Il trailing a BASE CANDELA su DAX e Nasdaq.** È la scoperta del 05/08 sul Dow (PF 1,238 → 1,371, DD −23%), e — punto importante — **l'indizio originale veniva proprio dal DAX** (04/08: 25,64 punti contro 1,90). Mai misurato a backtest su quei due simboli. **Questo è il test numero uno.**
