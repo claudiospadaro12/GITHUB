@@ -300,9 +300,16 @@ void ManageAll()
             if(hit)
               {
                double cv=NormVol(vol*InpTP1Pct/100.0);
-               if(cv>0 && cv<vol && gTrade.PositionClosePartial(tk,cv))
-                 { if(InpBreakeven) gTrade.PositionModify(tk,NormalizePrice(openP),tp);
-                   Log("1o target: parziale + stop in pari."); }
+               // Lo STOP IN PARI non deve dipendere dalla riuscita del parziale.
+               // Al LOTTO MINIMO NormVol(vol*50%) arrotonda a 0: il parziale non
+               // parte mai e, prima del 04/08/2026, con lui saltava anche il
+               // breakeven. Misurato: due short oro a 0,01 lotti hanno toccato
+               // 1,28R di profitto con lo stop ancora all'originale, e sono
+               // tornati in perdita (-112,78 EUR di oscillazione).
+               bool parz = (cv>0 && cv<vol && gTrade.PositionClosePartial(tk,cv));
+               if(InpBreakeven) gTrade.PositionModify(tk,NormalizePrice(openP),tp);
+               Log(parz ? "1o target: parziale + stop in pari."
+                        : "1o target (1R): stop in pari (parziale impossibile al lotto minimo).");
               }
            }
         }
