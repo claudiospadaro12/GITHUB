@@ -5,6 +5,12 @@
 
 ---
 
+## ⭐ PRINCIPIO GUIDA (Claudio, 04/08) — vale SEMPRE, soprattutto per la PROP e i TF alti
+**Portare a casa il profitto, anche se poco. Se il prezzo si gira, meglio incassare/proteggere che ridare indietro.**
+→ BE appena in profitto · parziale · trailing. **Consistenza > massimizzare.** Un vincitore non deve mai diventare perdente.
+Per la prop questo conta doppio: **DD basso + costanza** fanno passare la challenge, non i colpi grossi.
+_(Nota onesta: proteggere il profitto evita di ridare indietro, ma NON crea l'edge — serve comunque un ingresso/selezione con vantaggio. Le due cose insieme, dati 03/08.)_
+
 ## 1) 🏆 PROP — priorità massima
 
 ### Profilo EA prop ideale (parole di Claudio)
@@ -23,6 +29,26 @@
 | EMA200 H4 | 200AUD/SPX | H4 | 1,4-1,6 | 1,4-1,9 | — | il motore più robusto |
 
 **Insight:** i motori **reversal (SupRev)** chiudono in fretta (7h-1gg) → sono i più adatti al vincolo "1-2 giorni". Il TF H1 accorcia ancora.
+
+### ⏱️ Durata dei trade (dato 04/08, da `trades_auto.csv`) — perché H1 > H4 per la prop
+- H4 swing (SupRev/GoldenCross/EMA200) **non hanno uscita a tempo**: chiudono solo su TP/SL/trailing → tengono **giorni** (posizioni del 29-31/07 ancora aperte = normale, non bug; +weekend ~2,5gg fermi).
+- Durata media misurata: **STREV Nasdaq H1 = 1,7gg**, EMA200 ~1gg, SupRev oro chiusi ~5-11h; la coda lunga (still-open) è ~1 settimana.
+- ⚠️ H4 = capitale bloccato + **gap del weekend** = scomodo per prop. **H1 = rotazione ~1-2gg** → preferito.
+- 🔲 DA FARE: misurare la **durata media H4 completa** (aperti+chiusi) su Claudio manda le posizioni aperte / statement completo.
+
+### 🧲 PRINCIPIO (intuizione Claudio 04/08): più tempo aperto = più il bias può girarsi
+Un H4 tenuto giorni attraversa più cambi di bias → un +2R può tornare in perdita. Rimedio = **proteggere il profitto**:
+- **BE** appena in profitto → un vincitore non diventa più perdente (nel peggio esci a pari).
+- **Trailing** → se il bias si gira, esci in profitto invece di ridare tutto.
+- ⚖️ La QUADRA è la **distanza**: troppo stretta = taglia presto (problema 03/08); troppo larga = ridà indietro (questo punto). Sono i due lati dello stesso bottone → è ciò che misura la FASE B "-Fase distanze".
+- **Weekend**: rischio gap del lunedì → valutare `InpFridayClose` (opt-in) sugli EA prop.
+- H1 riduce il tempo di esposizione → meno cambi di bias attraversati.
+
+### 🔧 IDEA Claudio 04/08 — trailing "in H4", non in M1 (da testare sugli EA swing prop)
+- **BE non negoziabile**: appena in profitto (dopo +1R o 1 candela H4 chiusa a favore) SL a pari → dopo giorni in profitto NON si perde più.
+- **Trailing su base H4/H1** (`InpTrailMode=PREVBAR`, `InpTrailTF=H4` o H1): segue il minimo/massimo della candela H4 → dà respiro, non taglia sul rumore (errore 03/08 = trailing M1 su trade grosso).
+- ⚖️ Cautela: su H4 i ritracciamenti in PUNTI sono grandi → il trailing H4 "ridà indietro" di più. Largo vs stretto = si decide sui numeri (fase distanze), non a intuito.
+- TEST prop: BE@1R + trailing H4/H1 **vs** trailing stretto → su SupRev/GoldenCross/EMA200 (i validati H4/H1).
 
 ### 📋 Piano d'attacco PROP (in ordine)
 1. **Validare a TICK REALI in H1** i motori sul TF che preferisci (l'H1 è poco esplorato):
