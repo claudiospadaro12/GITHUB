@@ -80,3 +80,69 @@ Da notare anche che il size è al contrario: **3,80 lotti** sull'EA senza livell
 4. La **fase distanze** in corso sul Dow spazzola esattamente questi due numeri, in frazioni di R. Questa giornata dice cosa aspettarsi e dà un valore di riferimento da battere.
 
 _Diario: seconda ricorrenza consecutiva dello schema "aperture DAX chiuse sotto il minuto dal proprio trailing". Con i dati storici (35–80% dei trade per EA) la soglia delle 3 è ampiamente superata._
+
+---
+
+# 🇺🇸 Stessa mattina, Nasdaq: la seconda prova, ancora più netta
+
+| # | EA | dir | lotti | ingresso | uscita | durata | P&L |
+|---|---|---|---|---|---|---|---|
+| 3072139 | `Nasdaq Live 5m` | **SELL** | 2,20 | 14:30:05 · 29 095,80 | 14:30:25 · 29 144,50 = **S/L** | **20 secondi** | **−93,03** |
+| 3072134 | **`ORB`** | **BUY** | 1,20 | 14:30:26 · 29 147,50 | 14:33:30 · 29 236,90 = **T/P** | 3 min 4 s | **+93,16** |
+
+**Netto: +0,13 €.** Due EA, stesso simbolo, stesso minuto, direzioni opposte, si sono annullati al centesimo.
+
+## 1. Il Live5m ha venduto sopra tutti i livelli chiave
+
+Dal grafico (indicatore "Livelli Chiave"): **massimo notturno 28 962,7**, **massimo del giorno precedente 28 846,7**.
+
+Ha venduto a **29 095,80**, cioè **133 punti sopra il massimo notturno** e **249 sopra il massimo del giorno prima**. Il Nasdaq aveva già rotto al rialzo *tutto* quello che c'era da rompere, e ha chiuso a **+1,80%**.
+
+Stoppato in **20 secondi**. Terza ricorrenza in due giorni dello stesso difetto — e la più evidente delle tre, perché stavolta non c'era ambiguità sulla direzione.
+
+## 2. 🔑 I due EA stanno sui lati opposti della STESSA candela
+
+| | `Nasdaq Live 5m` | `ABTG_ORB` |
+|---|---|---|
+| Range | candela **14:25–14:30** (5 min pre-apertura) | candela **14:25–14:30** (5 min pre-apertura) |
+| Ordine | **SELL STOP** sotto il minimo (buffer 7 pt) | **BUY STOP** sopra il massimo (10 unità K) |
+
+**Usano la stessa identica finestra e si mettono ai due lati.** Lo sweep dell'apertura è passato prima sotto (ha attivato il sell alle 14:30:05), poi è esploso sopra (stop del sell alle 14:30:25, ingresso dell'ORB alle 14:30:26).
+
+Non è diversificazione: è una **perdita garantita per costruzione**. Qualunque cosa faccia il mercato, uno dei due viene preso dallo sweep.
+
+## 3. La prova diretta sul take profit
+
+Calcolando gli R dai prezzi reali:
+
+| EA | rischio | reward | **TP in R** | esito |
+|---|---|---|---|---|
+| `Nasdaq Live 5m` | 48,70 | 146,10 | **3,00 R** | mai avvicinato |
+| **`ORB`** | 44,70 | 89,40 | **2,00 R** | ✅ **colpito in 3 minuti** |
+
+**[VERIFICATO]** Il TP a 3,00R conferma esattamente `TpTotalR() = 3 × InpTP1_R` col default 1,0. L'ORB invece ha un TP a **2R** — ed è arrivato.
+
+Non è una differenza di fortuna: è che un obiettivo a 2R sta dentro il movimento tipico e uno a 3R no.
+
+## 4. La frazione catturata: 40%
+
+L'ORB ha preso **89,4 punti** su ~224 disponibili fino al massimo di giornata (~29 371,5): **40%**.
+
+| | frazione catturata | come è uscito |
+|---|---|---|
+| `DAX Apertura EU` (04/08) | **3,3%** | trailing fisso a 0,07R |
+| `DAX Apertura EU` (03/08) | 14% | trailing fisso a 0,07R |
+| Nasdaq Apertura US (03/08) | 20% | trailing base candela |
+| **`ORB` (04/08)** | **40%** | **TP a 2R** |
+
+## 5. L'ORB è l'unico EA della flotta con un'uscita coerente
+
+Stop a 1R, obiettivo a 2R, nessun trailing che tagli prima. E i numeri storici lo confermano: **14 trade, +404 € netti, 0% chiusi sotto il minuto, durata mediana 5 minuti** — il miglior netto della flotta.
+
+Il 03/08 lo avevo criticato perché il suo primo intervento scatta a 2R e "non poteva scattare niente". Era vero quel giorno. Ma **è la stessa proprietà che oggi gli ha fatto raggiungere l'obiettivo**: non taglia sul rumore. Va riletto come un pregio con un costo, non come un difetto.
+
+## 📌 Conseguenze
+
+1. **`InpTP1_R = 0.5`** (TP totale 1,5R) o comunque ≤ 2R: oggi c'è la prova diretta sullo stesso mercato nello stesso minuto.
+2. **`Nasdaq Live 5m` e `ABTG_ORB` non vanno tenuti insieme sullo stesso simbolo**: condividono la finestra e si mettono ai lati opposti. È una decisione di flotta da prendere subito, non un parametro da tarare.
+3. L'**ORB sale nella considerazione**: è l'unico con una struttura d'uscita sensata, ed è il primo della flotta per netto.
