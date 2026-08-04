@@ -163,6 +163,18 @@ Cartelle prodotte sul Desktop: `risultati_APERT_DAX_M5_delay_realtick` e `risult
 
 _(Il fade su Nasdaq/Dow — `confronto_fade.ps1` — resta lanciabile, ma dopo il risultato DAX è a bassa priorità: servirebbe a chiudere formalmente il motore #3, non perché ci si aspetti un edge.)_
 
+## 🧠 MENTALITÀ / CRITERIO DECISIONALE (continuare vs raffinare vs parcheggiare)
+_Ottimismo rigoroso: si insiste finché ci sono ipotesi fondate; ci si ferma quando i numeri, ripetuti, dicono no. Ci si innamora del PROCESSO, non della strategia._
+
+| Risultato tick reali | Cosa vuol dire | Cosa facciamo |
+|---|---|---|
+| **PF ≥ ~1,3** robusto | edge vero | tieni → raffina → demo/forward |
+| **PF ~1,0-1,3** (pareggio) | il nucleo ha qualcosa | **RAFFINA con piccoli accorgimenti** (filtri: ora/VWAP/volume/ADR; SL-TP) — è il caso migliore per migliorare |
+| **PF < ~0,9** su più varianti | rotto alla base | nessun accorgimento lo salva → **cambia motore** |
+| **tutti i motori×filtri esauriti e nessuno ≥1,0** | l'apertura M5 non ha edge robusto | **PARCHEGGIA le aperture M5** (conto personale, nice-to-have) e concentra le forze sul **PROP H1** (dove l'edge c'è già). NON è arrendersi = è allocazione. |
+
+_NB: una cosa che funziona c'è già — **Dow STOP 1,30** (conto personale). Non si parte da zero._
+
 ## 🧭 LOGICA DI CACCIA (come decidiamo il prossimo passo)
 1. ~~Il RETEST batte lo STOP?~~ → **no, bocciato 02/08**.
 2. ~~**RANGE-FADE** per il whipsaw~~ → **no, bocciato 02/08 sul DAX: il peggiore dei tre.**
