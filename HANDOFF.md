@@ -51,6 +51,23 @@ Il report di giornata (`report/giornata_2026-08-04.md`) viene generato dal trigg
 - 🌍 Filtro trend H4: **aiuta sui 3 indici USA, danneggia sui 4 europei** (netto e ordinato).
 - 🎯 **Il Dow è il mercato migliore e lo stiamo trascurando** — terzo riscontro indipendente (tick reali PF 1,30). Ipotesi derivata: **Dow + H4 + TP 1,5R + stop invariato + niente trailing nei primi 45 min**.
 
+## 🧭 ROTTA DECISA DA CLAUDIO (05/08, notte) — tre binari, in quest'ordine
+
+**1. FINIRE IL DOW.** `trailing2` in corso (M5/M10/M15/M20) → poi **walk-forward**. È il primo sistema che può diventare validato.
+
+**2. MIGLIORARE ANCORA DAX E NASDAQ.** ⚠️ Correggo una mia frase di ieri (*"quella miniera è esaurita"*): era vera **per i filtri d'ingresso**, non per la gestione. Ci sono tre cose mai provate lì, e non sono scavare dove si è già scavato:
+   - 🔑 **Il trailing a BASE CANDELA su DAX e Nasdaq.** È la scoperta del 05/08 sul Dow (PF 1,238 → 1,371, DD −23%), e — punto importante — **l'indizio originale veniva proprio dal DAX** (04/08: 25,64 punti contro 1,90). Mai misurato a backtest su quei due simboli. **Questo è il test numero uno.**
+   - **Il filtro volumi sul DAX.** È l'unico filtro che funziona sul Nasdaq (0,90 → 1,15) e sul DAX **non è mai stato provato**.
+   - **`InpTP1_R = 0.5`** (TP totale 1,5R invece di 3R) su DAX e Nasdaq: la prova diretta è del 04/08 sul Nasdaq (2R colpito, 3R mai avvicinato nello stesso minuto).
+   - Già scritti e mai lanciati: motore **DELAYED**, **ORB con `InpUseCloseConfirm`** (la regola d'ingresso che Emiliano descrive nella live).
+
+**3. PROP SU H1** — priorità n°1 dichiarata in `PIANO_PROP.md`, ferma da lunedì.
+   - **GoldenCross H1 a tick reali** su **XAUUSD · EURCAD · GBPUSD · USDJPY** (mai fatto).
+   - Perché quei quattro: nello scan OHLC a 48 simboli l'oro è **primo** (PFmed 1,29). Il DAX è ottavo a **0,92**, sotto 1 → escluso.
+   - ⚠️ Da dire prima di spendere ore: campioni ~61 trade (soglia 150), il "2,01" del piano è il **massimo** non la mediana, ed è OHLC — che sovrastima (CAC 7,37 → 0,96).
+
+_I binari 2 e 3 si possono alternare: usano script diversi e non si pestano._
+
 ## 🎯 DOW APERTURA — miglior risultato finora (03/08) — `risultati_archivio/Dow_Apertura/DOW_MOTORE.md`
 Tick reali, U30USD M5, gestione NUDA (solo stop+TP), 12 pass.
 - **Filtro trend H4 ACCESO: PF 1,03 → 1,24 · DD 14,9% → 6,9% · 329 trade.** Migliora tutte e tre le colonne, campione ampio. Conferma sui P&L veri la previsione della FASE A (+0,052 R/trade).
