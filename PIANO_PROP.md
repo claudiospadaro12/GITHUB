@@ -24,6 +24,12 @@
 
 **Insight:** i motori **reversal (SupRev)** chiudono in fretta (7h-1gg) → sono i più adatti al vincolo "1-2 giorni". Il TF H1 accorcia ancora.
 
+### ⏱️ Durata dei trade (dato 04/08, da `trades_auto.csv`) — perché H1 > H4 per la prop
+- H4 swing (SupRev/GoldenCross/EMA200) **non hanno uscita a tempo**: chiudono solo su TP/SL/trailing → tengono **giorni** (posizioni del 29-31/07 ancora aperte = normale, non bug; +weekend ~2,5gg fermi).
+- Durata media misurata: **STREV Nasdaq H1 = 1,7gg**, EMA200 ~1gg, SupRev oro chiusi ~5-11h; la coda lunga (still-open) è ~1 settimana.
+- ⚠️ H4 = capitale bloccato + **gap del weekend** = scomodo per prop. **H1 = rotazione ~1-2gg** → preferito.
+- 🔲 DA FARE: misurare la **durata media H4 completa** (aperti+chiusi) su Claudio manda le posizioni aperte / statement completo.
+
 ### 📋 Piano d'attacco PROP (in ordine)
 1. **Validare a TICK REALI in H1** i motori sul TF che preferisci (l'H1 è poco esplorato):
    - **GoldenCross H1** ⬅️ primo: OHLC fortissimi (Oro 2,01 · USDJPY 1,97 · GBPUSD 1,78), tick reali H1 mai fatti.
