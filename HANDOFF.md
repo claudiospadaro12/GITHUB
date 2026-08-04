@@ -7,8 +7,10 @@
 
 ---
 
-## 🛡️ PENDING URGENTE (04/08) — trade in profitto da giorni ancora aperti
-Claudio teme che i trade H4 in profitto da giorni si girino e tornino in perdita. Non vede/non ho gli SL live (i dati hanno solo i trade chiusi). **Da fare appena arrivano dati/posizioni aperte:** verificare se gli SL delle posizioni aperte in profitto sono a **breakeven o meglio**; segnalare quelle NON protette. Consiglio dato: mettere SL a BE a mano (telefono/MT5) o incassare. Gli EA muovono SL solo in avanti → un BE manuale regge. Se Claudio manda screenshot posizioni aperte → dirgli subito quali sono al sicuro.
+## 🛡️ VERIFICATO 04/08 08:15 — 4 posizioni aperte (da ReportTrade50503392.xlsx)
+- 🟢 **CAC F40EUR ×2** (#2943866/69, STREV CAC H4): SL 8499 SOPRA ingresso 8478 → **protetti in profitto**, non possono perdere.
+- ⚠️ **ORO XAUUSD ×2** (#2957063 STREV MULTI, #2958388 STREV): SL 4111,19 = 36pt SOPRA ingresso ~4075 = **NON protetti**. Ora +10€ l'uno; se oro risale a 4111 → **−31€ l'uno**. Consigliato a Claudio: SL a BE ~4075 (o incassare). Causa: SupRev muove BE solo a +1R, questi a ~0,3R → EA non scattato.
+- 💡 INSIGHT per studio uscite: un trade in profitto da giorni ma <1R resta senza BE per giorni → valutare **BE a tempo** (se in profitto da N ore/giorni → SL a pari) sugli EA swing.
 
 ## ⏰ PENDING — alla PROSSIMA risposta a Claudio (accordo 04/08)
 Il report di giornata (`report/giornata_2026-08-04.md`) viene generato dal trigger delle **23:00** anche se Claudio non è al PC. **Appena Claudio riscrive (anche la mattina dopo), la PRIMA cosa da fare** è: presentargli **com'è andata oggi + le mie considerazioni per ridurre le perdite**, e **proporre di analizzare i dati insieme**. Non aspettare che lo chieda lui. (Branch unico = `lavoro`.)
