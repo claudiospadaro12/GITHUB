@@ -1,0 +1,148 @@
+//@version=5
+// =====================================================================
+//  DAX M3 — Supertrend Trend-Following (Claudio) — BACKTEST
+//  Replica il CUORE MECCANICO della strategia DAX M3 (ABTG):
+//   - Bias da H4: Supertrend + EMA200 + ADX (trend-following).
+//   - Trigger su M3: rottura del Supertrend in direzione del bias.
+//   - Filtro EMA200 su M3 (regime).
+//   - Solo dopo le 09:30 CET, intraday (chiude a fine sessione).
+//
+//  OMESSI di proposito (discrezionali, non codificabili): Wyckoff,
+//  aree di interesse/supply-demand, confluenza intermarket, coerenza
+//  H1-M15. Quindi questo backtest e' il PAVIMENTO (caso peggiore):
+//  prende piu' trade e di qualita' media piu' bassa della versione
+//  filtrata a mano. Se l'edge regge anche cosi', e' un buon segno.
+//
+//  USO: applicare su grafico DAX a M3. Validare in-sample/out-of-sample.
+// =====================================================================
+strategy("DAX M3 Supertrend - Claudio", overlay=true,
+     initial_capital=12817,
+     default_qty_type=strategy.fixed, default_qty_value=1,
+     pyramiding=0, process_orders_on_close=true, calc_on_every_tick=false,
+     commission_type=strategy.commission.cash_per_contract, commission_value=1.0,
+     slippage=2)
+// Costo modellato DI DEFAULT: 1.0 valuta per contratto per fill = ~2 punti
+// DAX a giro (entrata+uscita) = spread realistico/pessimista. NON usare
+// commissione "Percentuale" nel pannello: su un indice a 24.000 sarebbe enorme.
+
+// ----------------- INPUT: Supertrend / bias -------------------------
+stFactor = input.float(3.5, "Supertrend Factor", step=0.1, group="Supertrend")
+stATR    = input.int(10,   "Supertrend ATR period", minval=1, group="Supertrend")
+emaLen   = input.int(200,  "EMA regime", minval=1, group="Filtri")
+useEMA   = input.bool(true, "Filtro EMA200 (M3 + H4)", group="Filtri")
+htf      = input.timeframe("240", "Timeframe bias (H4)", group="Filtri")
+adxLen   = input.int(14,   "ADX Length", minval=1, group="Filtri")
+adxThr   = input.float(25, "ADX soglia (trend valido)", group="Filtri")
+useADX   = input.bool(true, "Filtro ADX su H4", group="Filtri")
+
+// ----------------- INPUT: Sessione ----------------------------------
+sess     = input.session("0930-1730", "Sessione operativa (CET)", group="Sessione")
+closeEOD = input.bool(true, "Chiudi a fine sessione (intraday)", group="Sessione")
+
+// ----------------- INPUT: Periodo (in-sample / out-of-sample) -------
+useDates = input.bool(false, "Limita periodo", group="Periodo",
+     tooltip="Accendi per testare un sotto-periodo: in-sample vs out-of-sample.")
+sY = input.int(2026, "Inizio: anno",   group="Periodo")
+sM = input.int(1,    "Inizio: mese",   minval=1, maxval=12, group="Periodo")
+sD = input.int(5,    "Inizio: giorno", minval=1, maxval=31, group="Periodo")
+eY = input.int(2026, "Fine: anno",     group="Periodo")
+eM = input.int(3,    "Fine: mese",     minval=1, maxval=12, group="Periodo")
+eD = input.int(31,   "Fine: giorno",   minval=1, maxval=31, group="Periodo")
+startD  = timestamp(syminfo.timezone, sY, sM, sD, 0, 0)
+endD    = timestamp(syminfo.timezone, eY, eM, eD, 23, 59)
+inRange = not useDates or (time >= startD and time <= endD)
+// barre nel periodo selezionato (diagnostica)
+var int barsInRange = 0
+if useDates and time >= startD and time <= endD
+    barsInRange += 1
+
+// ----------------- INPUT: Uscite / rischio --------------------------
+exitMode = input.string("Supertrend opposto + RR", "Uscita",
+     options=["Supertrend opposto + RR", "Solo RR", "Solo Supertrend opposto"], group="Trade")
+rr       = input.float(1.5, "Reward:Risk (TP)", step=0.5, group="Trade")
+useRisk  = input.bool(true, "Sizing a rischio %", group="Trade")
+riskPct  = input.float(1.0, "Rischio % per trade", step=0.25, group="Trade")
+
+// ----------------- SUPERTREND su M3 ---------------------------------
+[stVal, stDir] = ta.supertrend(stFactor, stATR)
+// stDir == -1 -> uptrend (prezzo sopra ST, rialzista)
+// stDir == +1 -> downtrend
+ema = ta.ema(close, emaLen)
+
+// ----------------- BIAS da H4 ---------------------------------------
+f_bias() =>
+    [hv, hd] = ta.supertrend(stFactor, stATR)
+    he = ta.ema(close, emaLen)
+    [dp, dm, adxv] = ta.dmi(adxLen, adxLen)
+    adxOk = not useADX or adxv > adxThr
+    emaOkL = not useEMA or close > he
+    emaOkS = not useEMA or close < he
+    b = (hd < 0 and emaOkL and adxOk) ? 1 : (hd > 0 and emaOkS and adxOk) ? -1 : 0
+    b
+biasHTF = request.security(syminfo.tickerid, htf, f_bias(), lookahead=barmerge.lookahead_off)
+
+// ----------------- TRIGGER su M3 ------------------------------------
+flipLong  = stDir < 0 and stDir[1] >= 0     // rottura ST al rialzo
+flipShort = stDir > 0 and stDir[1] <= 0     // rottura ST al ribasso
+emaOkL    = not useEMA or close > ema
+emaOkS    = not useEMA or close < ema
+inSess    = not na(time(timeframe.period, sess))
+
+longSig  = biasHTF ==  1 and flipLong  and emaOkL and inSess and inRange
+shortSig = biasHTF == -1 and flipShort and emaOkS and inSess and inRange
+
+// ----------------- SIZING (1% del capitale) -------------------------
+f_qty(stopDist) =>
+    q = 1.0
+    if useRisk and stopDist > 0 and syminfo.pointvalue > 0
+        q := (strategy.equity * riskPct / 100.0) / (stopDist * syminfo.pointvalue)
+    q
+
+// ----------------- INGRESSI -----------------------------------------
+useSTexit = exitMode != "Solo RR"
+useRRexit = exitMode != "Solo Supertrend opposto"
+
+if longSig and strategy.position_size == 0
+    sl = stVal
+    sd = close - sl
+    if sd > 0
+        strategy.entry("L", strategy.long, qty=f_qty(sd))
+        if useRRexit
+            strategy.exit("Lx", "L", stop=sl, limit=close + rr * sd)
+        else
+            strategy.exit("Lx", "L", stop=sl)
+
+if shortSig and strategy.position_size == 0
+    sl = stVal
+    sd = sl - close
+    if sd > 0
+        strategy.entry("S", strategy.short, qty=f_qty(sd))
+        if useRRexit
+            strategy.exit("Sx", "S", stop=sl, limit=close - rr * sd)
+        else
+            strategy.exit("Sx", "S", stop=sl)
+
+// uscita su Supertrend opposto
+if useSTexit
+    if strategy.position_size > 0 and flipShort
+        strategy.close("L", comment="ST opposto")
+    if strategy.position_size < 0 and flipLong
+        strategy.close("S", comment="ST opposto")
+
+// chiusura intraday a fine sessione
+if closeEOD and not inSess and inSess[1]
+    strategy.close_all(comment="EOD")
+
+// ----------------- VISUAL -------------------------------------------
+plot(stVal, "Supertrend", color = stDir < 0 ? color.new(color.green, 0) : color.new(color.red, 0), style=plot.style_linebr)
+plot(useEMA ? ema : na, "EMA200", color=color.new(color.orange, 0))
+bgcolor(biasHTF == 1 ? color.new(color.green, 92) : biasHTF == -1 ? color.new(color.red, 92) : na, title="Bias H4")
+bgcolor(useDates and inRange ? color.new(color.blue, 90) : na, title="Periodo selezionato")
+
+// etichetta diagnostica (in alto a destra): quante barre nel periodo
+if barstate.islast and useDates
+    var label lab = na
+    label.delete(lab)
+    lab := label.new(bar_index, high, "Periodo ON\nBarre nel range: " + str.tostring(barsInRange) +
+         "\nTrade: " + str.tostring(strategy.closedtrades),
+         style=label.style_label_down, color=color.navy, textcolor=color.white)

@@ -1,0 +1,73 @@
+//@version=5
+// =====================================================================
+//  HARSI Signals — INDICATORE con ALERT (Claudio)
+//  Stessa logica della strategia backtest, ma come INDICATORE:
+//  mostra le candele HA-RSI, le bande, le frecce LONG/SHORT quando le
+//  4 condizioni sono vere, e fa scattare gli ALERT (per il manuale).
+//
+//  NB: un indicatore NON apre trade ne' mette SL/TP. Serve solo ad
+//  avvisarti. Lo SL/TP/lotto in automatico li fa l'EA su MT5.
+// =====================================================================
+indicator("HARSI Signals - Claudio", overlay=false)
+
+// ----------------- INPUT --------------------------------------------
+rsiLen    = input.int(14, "RSI Length", minval=1, group="HARSI")
+rsiSmooth = input.int(1,  "RSI Smoothing (linea)", minval=1, group="HARSI")
+upExt     = input.float(30, "Banda estrema sup (+30 ~ RSI80)", group="HARSI")
+upMild    = input.float(20, "Banda lieve sup (+20)",           group="HARSI")
+loMild    = input.float(-20,"Banda lieve inf (-20)",           group="HARSI")
+loExt     = input.float(-30,"Banda estrema inf (-30 ~ RSI20)", group="HARSI")
+extLook   = input.int(3, "Barre entro cui l'RSI ha toccato l'estremo", minval=1, group="HARSI")
+useHours  = input.bool(false, "Filtro orario", group="Sessione")
+sessTxt   = input.session("0700-2000", "Sessione", group="Sessione")
+inSess    = not useHours or not na(time(timeframe.period, sessTxt))
+
+// ----------------- HEIKIN-ASHI + HARSI (identico al backtest) -------
+haClose = (open + high + low + close) / 4.0
+var float haOpen = na
+haOpen := na(haOpen[1]) ? (open + close) / 2.0 : (haOpen[1] + haClose[1]) / 2.0
+haHigh = math.max(high, math.max(haOpen, haClose))
+haLow  = math.min(low,  math.min(haOpen, haClose))
+
+rO = ta.rsi(haOpen,  rsiLen) - 50.0
+rH = ta.rsi(haHigh,  rsiLen) - 50.0
+rL = ta.rsi(haLow,   rsiLen) - 50.0
+rC = ta.rsi(haClose, rsiLen) - 50.0
+
+hrClose = (rO + rH + rL + rC) / 4.0
+var float hrOpen = na
+hrOpen := na(hrOpen[1]) ? (rO + rC) / 2.0 : (hrOpen[1] + hrClose[1]) / 2.0
+hrHigh = math.max(rH, math.max(hrOpen, hrClose))
+hrLow  = math.min(rL, math.min(hrOpen, hrClose))
+hrBull = hrClose >= hrOpen
+
+rsiRaw  = ta.rsi(close, rsiLen) - 50.0
+rsiLine = rsiSmooth > 1 ? ta.ema(rsiRaw, rsiSmooth) : rsiRaw
+
+// ----------------- 4 CONDIZIONI -------------------------------------
+shortSig = (hrClose >= upMild) and (ta.highest(rsiLine, extLook) >= upExt) and (hrBull[1] and not hrBull) and (rsiLine < rsiLine[1]) and inSess
+longSig  = (hrClose <= loMild) and (ta.lowest(rsiLine, extLook) <= loExt) and ((not hrBull[1]) and hrBull) and (rsiLine > rsiLine[1]) and inSess
+
+// ----------------- VISUAL -------------------------------------------
+plotcandle(hrOpen, hrHigh, hrLow, hrClose, "HARSI",
+     color = hrBull ? color.new(color.lime, 0) : color.new(color.red, 0),
+     wickcolor = color.gray, bordercolor = na)
+plot(rsiLine, "RSI", color=color.new(color.aqua, 0))
+hline(upExt,  "+30", color=color.new(color.red, 60),   linestyle=hline.style_dotted)
+hline(upMild, "+20", color=color.new(color.red, 80),   linestyle=hline.style_dotted)
+hline(0,      "0",   color=color.new(color.gray, 50),  linestyle=hline.style_dotted)
+hline(loMild, "-20", color=color.new(color.green, 80), linestyle=hline.style_dotted)
+hline(loExt,  "-30", color=color.new(color.green, 60), linestyle=hline.style_dotted)
+
+plotshape(shortSig, title="SHORT", style=shape.labeldown, location=location.top,
+     color=color.new(color.red, 0), text="SHORT", textcolor=color.white, size=size.small)
+plotshape(longSig, title="LONG", style=shape.labelup, location=location.bottom,
+     color=color.new(color.green, 0), text="LONG", textcolor=color.white, size=size.small)
+
+// ----------------- ALERT --------------------------------------------
+alertcondition(shortSig, "HARSI SHORT", "HARSI: segnale SHORT su {{ticker}} {{interval}}")
+alertcondition(longSig,  "HARSI LONG",  "HARSI: segnale LONG su {{ticker}} {{interval}}")
+if shortSig
+    alert("HARSI SHORT su " + syminfo.ticker + " " + timeframe.period, alert.freq_once_per_bar_close)
+if longSig
+    alert("HARSI LONG su " + syminfo.ticker + " " + timeframe.period, alert.freq_once_per_bar_close)
