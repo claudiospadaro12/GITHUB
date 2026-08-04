@@ -12,6 +12,8 @@
 - ⚠️ **ORO XAUUSD ×2** (#2957063 STREV MULTI, #2958388 STREV): SL 4111,19 = 36pt SOPRA ingresso ~4075 = **NON protetti**. Ora +10€ l'uno; se oro risale a 4111 → **−31€ l'uno**. Consigliato a Claudio: SL a BE ~4075 (o incassare). Causa: SupRev muove BE solo a +1R, questi a ~0,3R → EA non scattato.
 - 💡 INSIGHT per studio uscite: un trade in profitto da giorni ma <1R resta senza BE per giorni → valutare **BE a tempo** (se in profitto da N ore/giorni → SL a pari) sugli EA swing.
 
+- 🔬 **Oro lasciato correre (deciso 04/08):** i 2 oro NON protetti restano APERTI apposta (gruppo di controllo) → osservare se profitto→perdita. Caso tracciato in `report/CASO_ORO_osservazione_04-08.md`. Aggiornare l'ESITO al report 23:00.
+
 ## ⏰ PENDING — alla PROSSIMA risposta a Claudio (accordo 04/08)
 Il report di giornata (`report/giornata_2026-08-04.md`) viene generato dal trigger delle **23:00** anche se Claudio non è al PC. **Appena Claudio riscrive (anche la mattina dopo), la PRIMA cosa da fare** è: presentargli **com'è andata oggi + le mie considerazioni per ridurre le perdite**, e **proporre di analizzare i dati insieme**. Non aspettare che lo chieda lui. (Branch unico = `lavoro`.)
 
