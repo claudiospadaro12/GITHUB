@@ -273,7 +273,7 @@ $Inputs
          Write-Host "    OK -> $done" -ForegroundColor Green }
     catch{ Write-Host "    salvataggio fallito, il CSV resta in $csv" -ForegroundColor Yellow }
   }else{
-    Write-Host "    (nessun CSV per $tag: storico tick mancante su $Symbol?)" -ForegroundColor Yellow
+    Write-Host "    (nessun CSV per ${tag}: storico tick mancante su $Symbol?)" -ForegroundColor Yellow
   }
 }
 Write-Host "`n=== FINITO === Zippa la cartella 'risultati_dow' e caricamela." -ForegroundColor White
