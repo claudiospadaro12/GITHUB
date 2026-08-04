@@ -59,7 +59,10 @@ Tick reali, U30USD M5, gestione NUDA (solo stop+TP), 12 pass.
 - Miglior sistema di aperture che abbiamo: Dow+H4 (1,24 / 6,9% / 329) batte Nasdaq+volumi (1,15 / 9,6% / 152) su tutti e tre i criteri.
 - ✅ **ROBUSTEZZA SUPERATA**: EMA del filtro da 20 a 200 → **10/10 sopra PF 1,20** (min 1,202, max 1,299). Nessuna punta, è un altopiano. Sottostruttura: EMA **corta (20-80) DD 7,4%** vs lunga (100-200) DD 11,4% → **restare sotto 100**; si tiene 50.
 - ⚠️ Resta non dimostrato: **nessun out-of-sample**, e la gestione è ancora nuda.
-- **⏭️ TOCCA A TE:** `.\dow_apertura.ps1 -Fase distanze` (48 pass).
+- 📏 **FASE DISTANZE FATTA (04/08): la gestione DISTRUGGE valore sul Dow.** Nuda (stop 1R, TP 1,5R, niente parziale/BE/trailing) = **profit 3 917 · PF 1,24 · DD 6,9%**; la migliore gestita = 2 575 (−34%), a parità di TP = 1 701 (−57%). E con DD più alto.
+- ❌ **Il BE anticipato costa**: 6 confronti puliti su 8 in perdita, fino a **−38%**. Smentisce l'ipotesi che avevo tratto dalla fase A ("48% dei perdenti era prima a +0,5R"): quelli che ritracciano sono gli stessi che poi corrono.
+- 🟡 Trailing: largo (0,72–0,96 R) batte stretto (0,24 R), ma **niente batte tutti**. ⚠️ `InpTrailMode` era pinnato a 2 (punti fissi): **il trailing a base candela — quello che in forward ha fatto 13× — non è mai stato testato.**
+- **⏭️ TOCCA A TE:** testare `InpTrailMode=1` a parità di tutto il resto.
 
 ## ✅ ABLAZIONE NASDAQ CHIUSA (03/08) — tutti e 7 i gradini
 **Su sei filtri candidati ne funziona uno solo: i volumi di pre-apertura.**

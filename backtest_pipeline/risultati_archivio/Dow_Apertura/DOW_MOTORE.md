@@ -88,3 +88,73 @@ Lo stacco sul drawdown è di **4 punti percentuali** ed è coerente su 4 valori 
 # 2) le distanze di gestione. 48 pass.
 .\dow_apertura.ps1 -Fase distanze          # gia' tarato su -H4 1 -Vol 0
 ```
+
+---
+
+# 📏 FASE DISTANZE (04/08) — il risultato che non mi aspettavo
+
+48 pass a tick reali. Struttura fissata (**parziale 50% + BE al primo target + trailing a punti fissi**), spazzolati i tre numeri: `InpTP1_R`, `InpBEatR`, `InpTrailFixedPts` — quest'ultimo in **frazioni dell'R misurato del Dow** (12 532 punti MT5).
+
+## ⚠️ Prima: metà griglia era ridondante
+
+`InpBEatR` conta **solo quando è più piccolo di `InpTP1_R`**. Altrimenti il breakeven l'ha già fatto il parziale (`InpBreakevenAtTP1=1`) e il parametro non tocca niente. Su 48 pass, **le combinazioni distinte sono 16**.
+
+## Le 16 combinazioni (BE al primo target, nessun BE anticipato)
+
+| TP totale | trailing | in R | PF | DD% | trade | profit |
+|---|---|---|---|---|---|---|
+| 0,99R | 3 000 | 0,24 | 1,163 | 5,37 | 580 | 966 |
+| 0,99R | 9 000 | 0,72 | 1,199 | 5,86 | 567 | 1 403 |
+| 1,50R | 9 000 | 0,72 | 1,180 | 7,33 | 538 | 1 701 |
+| 2,01R | 9 000 | 0,72 | 1,159 | 6,84 | 530 | 1 833 |
+| 2,52R | 3 000 | 0,24 | **1,201** | **5,39** | 458 | 1 388 |
+| **2,52R** | **9 000** | **0,72** | 1,187 | 7,32 | 514 | 1 750 |
+| **2,52R** | **12 000** | **0,96** | 1,212 | 8,01 | 509 | **2 575** |
+
+## 🔴 1. La gestione, così com'è, DISTRUGGE valore sul Dow
+
+| | profit | PF | DD% |
+|---|---|---|---|
+| **NUDA** (stop 1R, TP 1,5R, niente parziale/BE/trailing) | **3 917** | **1,240** | **6,90** |
+| migliore con gestione, a parità di TP (1,5R) | 1 701 | 1,180 | 7,33 |
+| migliore con gestione, qualunque TP | 2 575 | 1,212 | 8,01 |
+
+**Non gestire batte qualunque gestione testata**: +52% di profit sul migliore in assoluto, **+130%** a parità di take profit. E con un drawdown *più basso*.
+
+Stesso periodo, stessi ingressi, stesso rischio per trade. L'unica differenza è cosa succede **dopo** l'ingresso.
+
+## 🔴 2. Il breakeven anticipato costa, e costa tanto
+
+Isolando i casi in cui il BE arriva **prima** del parziale:
+
+| TP totale | trailing | BE tardi | BE a 0,5R | Δ |
+|---|---|---|---|---|
+| 2,01R | 0,72R | 1 833 | 1 471 | **−362** |
+| 2,01R | 0,96R | 1 649 | 1 259 | **−391** |
+| 2,52R | 0,72R | 2 387 | 1 750 | **−637** |
+| **2,52R** | **0,96R** | **2 575** | **1 601** | **−974 (−38%)** |
+| 2,01R | 0,24R | 1 120 | 1 187 | +67 |
+| 2,52R | 0,24R | 1 270 | 1 388 | +118 |
+
+**Sei casi su otto in perdita**, e il danno cresce col trailing largo: quando il trade ha spazio per correre, il BE anticipato lo butta fuori prima.
+
+⚠️ **Questo smentisce l'ipotesi che avevo tratto dalla FASE A** (*"il 48% dei perdenti DAX era prima a +0,5R, quindi il BE è promettente"*). Vero che quei trade passano dal profitto: ma **portarli in pari costa più di quanto salva**, perché gli stessi che ritracciano sono quelli che poi corrono. Il conto complessivo, misurato, è negativo.
+
+## 🟡 3. Il trailing: largo meglio di stretto, ma niente meglio di tutti
+
+Dentro le combinazioni gestite, la direzione è quella attesa: **0,72–0,96 R battono 0,24 R** in profit (1 750–2 575 contro 1 388). Conferma dell'ordine di grandezza che il forward suggeriva — il `410` del DAX vale **0,07 R**, dieci volte più stretto del peggiore qui testato.
+
+Ma anche il trailing migliore perde contro il non-trailing. **La distanza giusta esiste; il trailing in sé, sul Dow, non paga.**
+
+## ⚠️ Il limite grosso di questa griglia
+
+`InpTrailMode` è stato **pinnato a 2 (punti fissi)** in tutti e 48 i pass. **Non abbiamo mai testato `InpTrailMode = 1` (base della candela precedente)** — che è proprio quello che il 04/08 in forward ha fatto **13× i punti** del trailing fisso sul DAX.
+
+Quindi la conclusione onesta è: *il trailing **a punti fissi** non paga sul Dow*. Sul trailing adattivo non abbiamo ancora un dato.
+
+## ✅ Cosa portiamo a casa
+
+1. **Preset Dow: `InpTP1_ClosePct = 0`, `InpBreakevenAtTP1 = 0`, `InpBEatR = 0`, `InpUseTrailing = false`, `InpTP1_R = 0.5`** (TP totale 1,5R). Profit 3 917, PF 1,24, DD 6,9%, 329 trade.
+2. **Il BE anticipato si toglie**, sul Dow. Va contro l'intuizione, ma i numeri sono otto confronti puliti.
+3. **Prossimo test**: `InpTrailMode = 1` a parità di tutto il resto. È l'unica gestione che il forward ha mostrato funzionare e che il backtest non ha ancora visto.
+4. ⚠️ Tutto questo resta **in-sample**. Manca il walk-forward.
