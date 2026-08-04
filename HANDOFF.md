@@ -7,6 +7,9 @@
 
 ---
 
+## 🛡️ PENDING URGENTE (04/08) — trade in profitto da giorni ancora aperti
+Claudio teme che i trade H4 in profitto da giorni si girino e tornino in perdita. Non vede/non ho gli SL live (i dati hanno solo i trade chiusi). **Da fare appena arrivano dati/posizioni aperte:** verificare se gli SL delle posizioni aperte in profitto sono a **breakeven o meglio**; segnalare quelle NON protette. Consiglio dato: mettere SL a BE a mano (telefono/MT5) o incassare. Gli EA muovono SL solo in avanti → un BE manuale regge. Se Claudio manda screenshot posizioni aperte → dirgli subito quali sono al sicuro.
+
 ## ⏰ PENDING — alla PROSSIMA risposta a Claudio (accordo 04/08)
 Il report di giornata (`report/giornata_2026-08-04.md`) viene generato dal trigger delle **23:00** anche se Claudio non è al PC. **Appena Claudio riscrive (anche la mattina dopo), la PRIMA cosa da fare** è: presentargli **com'è andata oggi + le mie considerazioni per ridurre le perdite**, e **proporre di analizzare i dati insieme**. Non aspettare che lo chieda lui. (Branch unico = `lavoro`.)
 
