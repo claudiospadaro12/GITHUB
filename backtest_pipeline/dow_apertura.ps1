@@ -19,7 +19,7 @@
 #    .\dow_apertura.ps1 -Fase distanze
 # =====================================================================
 param(
-  [ValidateSet("motore","robustezza","distanze")]
+  [ValidateSet("motore","robustezza","distanze","trailing")]
   [string]$Fase="motore",
   [string]$Symbol="U30USD",
   [int]$SessionHour=14,                   # ORA SERVER BCM: apertura USA 15:30 IT = 14:30 server
@@ -111,6 +111,30 @@ if($Fase -eq "robustezza"){
   $Inputs=$Inputs -replace "(?m)^InpVolMult=.*$","InpVolMult=1.5||1.5||0||1.5||N"
   $Inputs=$Inputs -replace "(?m)^InpEmaSlow=.*$","InpEmaSlow=50||20||20||200||Y"
   $note="10 pass: EMA del filtro H4 da 20 a 200. Cerco un ALTOPIANO, non il massimo."
+}
+
+# === FASE "TRAILING": l'unico buco lasciato dalla fase distanze ===
+#     Li' InpTrailMode era pinnato a 2 (punti fissi) in tutti e 48 i pass,
+#     e il verdetto e' stato "il trailing non paga". Ma il 04/08, in
+#     forward sul DAX, il trailing a BASE CANDELA (mode 1) ha catturato
+#     25,64 punti contro 1,90 del fisso, a parita di simbolo, ora e
+#     direzione: 13 volte tanto. Quel tipo di trailing non e' mai stato
+#     misurato a backtest.
+#     Confronto: ATR (mode 0) e PREVBAR (mode 1), su M1 e M5.
+#     Il riferimento da battere e' la gestione NUDA: profit 3917.
+#     12 pass, alcuni ridondanti (l'ATR ignora il TF, il PREVBAR ignora
+#     il moltiplicatore): le combinazioni distinte sono 5.
+if($Fase -eq "trailing"){
+  $Inputs=$Inputs -replace "(?m)^InpUseEmaFilter=.*$","InpUseEmaFilter=$H4||$H4||0||$H4||N"
+  $Inputs=$Inputs -replace "(?m)^InpUseVolumeFilter=.*$","InpUseVolumeFilter=$Vol||$Vol||0||$Vol||N"
+  $Inputs=$Inputs -replace "(?m)^InpVolMult=.*$","InpVolMult=$VolMult||$VolMult||0||$VolMult||N"
+  # tutto il resto della gestione resta SPENTO, come dice la fase distanze:
+  # qui si isola il solo effetto del TIPO di trailing.
+  $Inputs=$Inputs -replace "(?m)^InpUseTrailing=.*$","InpUseTrailing=1||1||0||1||N"
+  $Inputs="$Inputs`nInpTrailMode=0||0||1||1||Y"        # 0=ATR, 1=base candela precedente
+  $Inputs="$Inputs`nInpTrailTF=1||1||4||5||Y"          # M1 e M5 (inerte con TrailMode=0)
+  $Inputs="$Inputs`nInpTrailAtrMult=2.0||1.0||1.0||3.0||Y"  # inerte con TrailMode=1
+  $note="12 pass (5 combo distinte): ATR vs base candela, su M1 e M5. Da battere: 3917 della gestione nuda."
 }
 
 # === FASE "DISTANZE": fissata la selezione, QUANTO larghi ===
