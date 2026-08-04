@@ -30,6 +30,20 @@
 - ⚠️ H4 = capitale bloccato + **gap del weekend** = scomodo per prop. **H1 = rotazione ~1-2gg** → preferito.
 - 🔲 DA FARE: misurare la **durata media H4 completa** (aperti+chiusi) su Claudio manda le posizioni aperte / statement completo.
 
+### 🧲 PRINCIPIO (intuizione Claudio 04/08): più tempo aperto = più il bias può girarsi
+Un H4 tenuto giorni attraversa più cambi di bias → un +2R può tornare in perdita. Rimedio = **proteggere il profitto**:
+- **BE** appena in profitto → un vincitore non diventa più perdente (nel peggio esci a pari).
+- **Trailing** → se il bias si gira, esci in profitto invece di ridare tutto.
+- ⚖️ La QUADRA è la **distanza**: troppo stretta = taglia presto (problema 03/08); troppo larga = ridà indietro (questo punto). Sono i due lati dello stesso bottone → è ciò che misura la FASE B "-Fase distanze".
+- **Weekend**: rischio gap del lunedì → valutare `InpFridayClose` (opt-in) sugli EA prop.
+- H1 riduce il tempo di esposizione → meno cambi di bias attraversati.
+
+### 🔧 IDEA Claudio 04/08 — trailing "in H4", non in M1 (da testare sugli EA swing prop)
+- **BE non negoziabile**: appena in profitto (dopo +1R o 1 candela H4 chiusa a favore) SL a pari → dopo giorni in profitto NON si perde più.
+- **Trailing su base H4/H1** (`InpTrailMode=PREVBAR`, `InpTrailTF=H4` o H1): segue il minimo/massimo della candela H4 → dà respiro, non taglia sul rumore (errore 03/08 = trailing M1 su trade grosso).
+- ⚖️ Cautela: su H4 i ritracciamenti in PUNTI sono grandi → il trailing H4 "ridà indietro" di più. Largo vs stretto = si decide sui numeri (fase distanze), non a intuito.
+- TEST prop: BE@1R + trailing H4/H1 **vs** trailing stretto → su SupRev/GoldenCross/EMA200 (i validati H4/H1).
+
 ### 📋 Piano d'attacco PROP (in ordine)
 1. **Validare a TICK REALI in H1** i motori sul TF che preferisci (l'H1 è poco esplorato):
    - **GoldenCross H1** ⬅️ primo: OHLC fortissimi (Oro 2,01 · USDJPY 1,97 · GBPUSD 1,78), tick reali H1 mai fatti.
