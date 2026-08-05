@@ -282,3 +282,69 @@ Più rendimento pagato con più rischio, a parità di qualità. Per un sistema d
 **Nessun out-of-sample.** Tutto vive su 2024.01–2026.06. Sei numeri sono stati scelti guardando quel periodo: se il walk-forward non regge, questo è un bell'esercizio e basta.
 
 → **Prossimo e ultimo passo: walk-forward IS/OOS.**
+
+---
+
+# 🏁 WALK-FORWARD (05/08) — superato, con una lettura da fare bene
+
+80 pass. Stessa griglia (EMA del filtro × TP totale) su **due finestre separate**: IS 2024.01–2025.06 (18 mesi, dove si è scelto tutto) e OOS 2025.07–2026.06 (**12 mesi mai usati per scegliere niente**).
+
+## La superficie del Profit Factor
+
+| EMA | IS 1R | IS 1,5R | IS 2R | IS 2,5R | | OOS 1R | OOS 1,5R | OOS 2R | OOS 2,5R |
+|---|---|---|---|---|---|---|---|---|---|
+| 20 | 1,269 | 1,337 | 1,132 | **0,988** | | 1,452 | 1,451 | 1,477 | 1,492 |
+| 40 | 1,435 | **1,546** | 1,395 | 1,343 | | 1,367 | 1,340 | 1,373 | 1,393 |
+| 60 | 1,348 | 1,393 | 1,276 | 1,231 | | 1,421 | 1,358 | 1,392 | 1,421 |
+| 80 | 1,241 | 1,277 | 1,218 | 1,115 | | **1,560** | 1,457 | 1,430 | 1,471 |
+| 100 | 1,255 | 1,292 | 1,272 | 1,133 | | 1,430 | 1,378 | 1,343 | 1,372 |
+| 120 | 1,376 | 1,394 | 1,383 | 1,223 | | 1,349 | 1,314 | 1,291 | 1,351 |
+| 140 | 1,251 | 1,263 | 1,278 | 1,105 | | 1,319 | 1,311 | 1,267 | 1,319 |
+| 160 | 1,304 | 1,302 | 1,292 | 1,130 | | 1,349 | 1,327 | 1,286 | 1,348 |
+| 180 | 1,382 | 1,325 | 1,324 | 1,144 | | 1,400 | 1,354 | 1,311 | 1,376 |
+| 200 | 1,321 | 1,258 | 1,244 | 1,076 | | 1,499 | 1,512 | 1,465 | 1,546 |
+
+| | min | mediana | max | sopra 1 | sopra 1,2 |
+|---|---|---|---|---|---|
+| IN-SAMPLE | 0,988 | 1,277 | 1,546 | 39/40 | 32/40 |
+| **OUT-OF-SAMPLE** | **1,267** | **1,374** | 1,560 | **40/40** | **40/40** |
+
+## ✅ Cosa è passato
+
+**Tutte e 40 le combinazioni sono profittevoli su 12 mesi mai visti**, e nessuna scende sotto PF **1,267**. Non c'è un angolo della griglia che crolli. Drawdown massimo in OOS: **8,70%** contro il 12,47% dell'IS.
+
+**L'edge non è un artefatto del periodo su cui l'abbiamo cercato.** È la prima volta che un nostro sistema supera questo cancello.
+
+## ⚠️ Ma il PICCO non è stabile — e questa è la lezione
+
+| | migliore | quanto vale nell'altra finestra |
+|---|---|---|
+| ottimo IS | EMA **40** · PF 1,546 | in OOS → **1,340** |
+| ottimo OOS | EMA **80** · PF 1,560 | in IS → **1,241** |
+
+**L'ottimo si sposta.** Chi avesse scelto "EMA 40 perché è il massimo dell'IS" avrebbe preso, in OOS, un punto peggiore di altri sei.
+
+Peggio ancora sul take profit: **a 2,5R l'IS dà i risultati peggiori della griglia** (0,988–1,343), mentre **in OOS è spesso il migliore** (1,319–1,546). Un'inversione completa.
+
+> **La lettura giusta non è "PF 1,37". È: il margine sopravvive ovunque nella regione, ma il punto esatto è rumore.** Per questo si tiene un valore centrale e non il massimo — che è esattamente la scelta fatta il 03/08 con l'EMA 50 invece del 40.
+
+La nostra configurazione, in mezzo fra i due valori della griglia:
+
+| | IS | OOS |
+|---|---|---|
+| EMA 40 · TP 1,5R | PF 1,546 · DD 5,63% | PF 1,340 · DD 5,28% |
+| EMA 60 · TP 1,5R | PF 1,393 · DD 6,38% | PF 1,358 · DD 4,29% |
+
+Regge in entrambe, senza essere il massimo in nessuna. È quello che si vuole.
+
+## 🟡 Due cose che NON vanno raccontate meglio di così
+
+**1. L'OOS è andato MEGLIO dell'IS** (mediana 1,374 contro 1,277). Suona bene, ma è un **segnale giallo, non verde**: quasi sempre vuol dire che il secondo periodo era più favorevole, non che il sistema sia migliorato. Indizio a sostegno: l'OOS ha prodotto **186–198 trade in 12 mesi** contro i **138–154 dell'IS in 18** — molti più segnali per unità di tempo, cioè un mercato più mosso e direzionale. Con un OOS sfortunato avremmo visto numeri peggiori. **Una finestra OOS è un campione solo.**
+
+**2. Resta un simbolo, una strategia, i dati di un broker.** Il walk-forward esclude che i parametri siano cuciti sul periodo. Non esclude che il Dow 2024-2026 sia stato un mercato particolarmente gentile con i breakout d'apertura.
+
+## ▶️ Dove siamo
+
+Il Dow ha superato tutto quello che un backtest può chiedere: motore, robustezza, distanze, tipo di trailing, walk-forward. **186 pass a tick reali in totale.**
+
+Da qui in avanti il giudice non è più il backtest, è il **forward** — già in corso dal 05/08 — e poi il dry-run col Guardian sul demo da 100k.

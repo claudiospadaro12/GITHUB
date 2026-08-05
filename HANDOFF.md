@@ -56,7 +56,10 @@ Il report di giornata (`report/giornata_2026-08-04.md`) viene generato dal trigg
 **1. ~~FINIRE IL DOW~~ → PARAMETRI CHIUSI (05/08).** `trailing2` ha risolto il dubbio: la curva del PF è una gobba (M1 1,200 … **M5-M6 1,371** … M20 1,251), l'ottimo non stava oltre il bordo. Si tiene **M5** (M6 fa 298 € in più ma con DD 5,88% contro 5,32% e recovery 5,14 contro 6,51).
    **Configurazione definitiva: U30USD M5 · range 15 min · EMA50 su H4 · volumi OFF · stop sul range (floor 500) · TP 1,5R · niente parziale né BE · trailing a BASE CANDELA M5.**
    **PF 1,371 · DD 5,32% · 329 trade.** Dal breakout cieco (1,03 / 14,9%): PF +33%, drawdown a un terzo. 106 pass a tick reali.
-   ⏭️ **Resta solo il WALK-FORWARD**, e non è un dettaglio: sei parametri sono stati scelti guardando 2024.01–2026.06.
+   ✅ **WALK-FORWARD SUPERATO (05/08).** 80 pass su due finestre. In OOS (12 mesi mai usati per scegliere): **40 combinazioni su 40 profittevoli**, minimo PF **1,267**, DD massimo 8,70%. L'edge non è un artefatto del periodo. **Primo sistema della flotta a passare questo cancello.**
+   ⚠️ Ma il **picco si sposta**: ottimo IS = EMA 40 (1,546 → 1,340 in OOS); ottimo OOS = EMA 80 (1,560 → 1,241 in IS). E il TP a 2,5R è il **peggiore** in IS e fra i **migliori** in OOS. → si tiene un valore CENTRALE, non il massimo. La scelta dell'EMA 50 invece del 40 era giusta.
+   🟡 Segnale giallo da non nascondere: l'OOS è andato **meglio** dell'IS (mediana 1,374 vs 1,277) e ha prodotto 186-198 trade in 12 mesi contro 138-154 in 18 → periodo più mosso e favorevole, non sistema migliore. Una finestra OOS resta un campione solo.
+   ⏭️ Da qui il giudice non è più il backtest: **forward** (in corso dal 05/08) e poi **dry-run col Guardian sul demo 100k**.
 
 **2. MIGLIORARE ANCORA DAX E NASDAQ.** ⚠️ Correggo una mia frase di ieri (*"quella miniera è esaurita"*): era vera **per i filtri d'ingresso**, non per la gestione. Ci sono tre cose mai provate lì, e non sono scavare dove si è già scavato:
    - 🔑 **Il trailing a BASE CANDELA su DAX e Nasdaq.** È la scoperta del 05/08 sul Dow (PF 1,238 → 1,371, DD −23%), e — punto importante — **l'indizio originale veniva proprio dal DAX** (04/08: 25,64 punti contro 1,90). Mai misurato a backtest su quei due simboli. **Questo è il test numero uno.**
