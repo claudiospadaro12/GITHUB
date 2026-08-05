@@ -133,7 +133,10 @@ void OnStart()
    //  PrimaDataServer = il piu' vecchio dato che il broker POSSIEDE
    //  Se le due coincidono -> piu' indietro di cosi' non si va, punto.
    //  Se il server e' piu' indietro del locale -> manca solo il download.
-   int fh = FileOpen("ABTG_StoricoScaricato.csv", FILE_WRITE|FILE_CSV|FILE_ANSI, ",");
+   //  FILE_SHARE_READ: cosi' il driver PowerShell puo' leggere il CSV
+   //  MENTRE il download e' ancora in corso, senza andare in errore
+   //  "il file e' in uso da un altro processo".
+   int fh = FileOpen("ABTG_StoricoScaricato.csv", FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_SHARE_READ, ",");
    if(fh!=INVALID_HANDLE) FileWrite(fh, "Simbolo","Timeframe","Barre","PrimaDataLocale","PrimaDataServer","Verdetto");
 
    PrintFormat("=== DOWNLOAD STORICO: %d simboli x %d TF, da %s ===", nsym, ntf, TimeToString(from, TIME_DATE));

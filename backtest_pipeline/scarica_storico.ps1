@@ -42,6 +42,7 @@ param(
   [string] $Timeframes = "M1,M5,M15,M30,H1,H4,D1",
   [switch] $SenzaTick,
   [switch] $Auto,
+  [switch] $ChiudiMT5,
   [switch] $SoloReferto,
   [int]    $TimeoutMin = 90
 )
@@ -80,13 +81,33 @@ $CsvOut = Join-Path $DataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
 # ---------------------------------------------------------------------
 # funzione: rilegge il CSV e stampa il referto
 # ---------------------------------------------------------------------
+# legge il CSV anche se MT5 lo tiene ancora aperto (lettura condivisa,
+# copia in temp, e in ultima istanza rinuncia senza far morire lo script)
+function Leggi-Csv {
+  if (-not (Test-Path $CsvOut)) { return $null }
+  try {
+    $fs = [System.IO.File]::Open($CsvOut, 'Open', 'Read', 'ReadWrite')
+    $sr = New-Object System.IO.StreamReader($fs)
+    $testo = $sr.ReadToEnd(); $sr.Close(); $fs.Close()
+    if ([string]::IsNullOrWhiteSpace($testo)) { return $null }
+    return ($testo | ConvertFrom-Csv)
+  } catch {
+    try {
+      $tmp = Join-Path $env:TEMP "abtg_storico_peek.csv"
+      Copy-Item $CsvOut $tmp -Force -ErrorAction Stop
+      return (Import-Csv $tmp)
+    } catch { return $null }
+  }
+}
+
 function Mostra-Referto {
-  if (-not (Test-Path $CsvOut)) {
-    Write-Host "`nNessun referto trovato in:`n  $CsvOut" -ForegroundColor Yellow
-    Write-Host "Lo script non e' ancora stato eseguito dentro MT5." -ForegroundColor Yellow
+  $righe = Leggi-Csv
+  if (-not $righe) {
+    Write-Host "`nNessun referto leggibile in:`n  $CsvOut" -ForegroundColor Yellow
+    Write-Host "O lo script non e' ancora stato eseguito, o MT5 lo sta ancora scrivendo:" -ForegroundColor Yellow
+    Write-Host "chiudi MT5 e rilancia con -SoloReferto." -ForegroundColor Yellow
     return
   }
-  $righe = Import-Csv $CsvOut
   Write-Host "`n=== REFERTO STORICO ===" -ForegroundColor Cyan
   Write-Host ("{0}" -f $CsvOut) -ForegroundColor DarkGray
   $righe | Format-Table Simbolo, Timeframe, Barre, PrimaDataLocale, PrimaDataServer, Verdetto -AutoSize
@@ -184,11 +205,18 @@ if (-not $Auto) {
 # 4b. modalita' AUTOMATICA (solo PC di backtest, MT5 chiuso)
 # ---------------------------------------------------------------------
 $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
+if ($running -and $ChiudiMT5) {
+  Write-Host "`nMT5 e' aperto: lo chiudo (-ChiudiMT5)." -ForegroundColor Yellow
+  $running | Stop-Process -Force -ErrorAction SilentlyContinue
+  Start-Sleep -Seconds 5
+  $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
+}
 if ($running) {
   Write-Host "`nMT5 e' APERTO. In automatico non si puo': un secondo avvio" -ForegroundColor Red
   Write-Host "sulla stessa cartella dati non esegue lo script." -ForegroundColor Red
-  Write-Host "Chiudi MT5 e rilancia, oppure usa la modalita' manuale (senza -Auto)." -ForegroundColor Red
-  Write-Host "SUL VPS: NON chiudere MT5, usa la manuale." -ForegroundColor Red
+  Write-Host "Aggiungi -ChiudiMT5 per farlo chiudere da solo, oppure usa la" -ForegroundColor Red
+  Write-Host "modalita' manuale (senza -Auto)." -ForegroundColor Red
+  Write-Host "SUL VPS: NON usare -ChiudiMT5, spegneresti gli EA in forward." -ForegroundColor Red
   exit 1
 }
 
@@ -210,23 +238,39 @@ Period=M5
 Write-Host "`nAvvio MT5 in automatico (timeout $TimeoutMin min)..." -ForegroundColor Cyan
 Start-Process -FilePath $Terminal -ArgumentList "/config:$Ini"
 
+# Attesa: si guarda SOLO la dimensione del file, mai il contenuto.
+# (la prima versione faceva Import-Csv qui dentro e moriva con
+#  "il file e' in uso da un altro processo", lasciando MT5 aperto)
+$ErrorActionPreference = "Continue"
 $scaduto = (Get-Date).AddMinutes($TimeoutMin)
-$ultimo  = $null
+$ultimaLen  = -1
+$fermoDa    = 0
+$visto      = $false
 while ((Get-Date) -lt $scaduto) {
   Start-Sleep -Seconds 15
-  if (Test-Path $CsvOut) {
-    $ora = (Get-Item $CsvOut).LastWriteTime
-    # il file e' finito quando smette di crescere per 45 secondi
-    if ($ultimo -and $ora -eq $ultimo -and ((Get-Date) - $ora).TotalSeconds -gt 45) { break }
-    $ultimo = $ora
-    Write-Host ("  ... {0} righe finora" -f ((Import-Csv $CsvOut | Measure-Object).Count)) -ForegroundColor DarkGray
+  if (-not (Test-Path $CsvOut)) { continue }
+  $visto = $true
+  $len = 0
+  try { $len = (Get-Item $CsvOut -ErrorAction Stop).Length } catch { continue }
+  if ($len -eq $ultimaLen) {
+    $fermoDa += 15
+    if ($fermoDa -ge 60) { break }        # fermo da un minuto = ha finito
+  } else {
+    $fermoDa = 0
+    $ultimaLen = $len
+    Write-Host ("  ... {0} byte scritti" -f $len) -ForegroundColor DarkGray
   }
 }
-if (-not (Test-Path $CsvOut)) {
-  Write-Host "`nTimeout: nessun referto prodotto. Riprova in manuale (senza -Auto)." -ForegroundColor Red
+$ErrorActionPreference = "Stop"
+
+if (-not $visto) {
+  Write-Host "`nTimeout: nessun referto prodotto." -ForegroundColor Red
+  Write-Host "Controlla la scheda ESPERTI di MT5, poi riprova in manuale (senza -Auto)." -ForegroundColor Red
   exit 1
 }
 
+Write-Host "`nChiudo MT5..." -ForegroundColor DarkGray
 Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 3
 Mostra-Referto
 Write-Host "`nCopia il CSV qui sopra in chat: da li' si decide la nuova finestra IS." -ForegroundColor Cyan
