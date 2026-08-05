@@ -129,8 +129,12 @@ void OnStart()
    if(from<=0) from = D'2015.01.01';
 
    // --- CSV di riepilogo --------------------------------------------
+   //  PrimaDataLocale = il piu' vecchio dato che ho SUL DISCO
+   //  PrimaDataServer = il piu' vecchio dato che il broker POSSIEDE
+   //  Se le due coincidono -> piu' indietro di cosi' non si va, punto.
+   //  Se il server e' piu' indietro del locale -> manca solo il download.
    int fh = FileOpen("ABTG_StoricoScaricato.csv", FILE_WRITE|FILE_CSV|FILE_ANSI, ",");
-   if(fh!=INVALID_HANDLE) FileWrite(fh, "Simbolo","Timeframe","Barre","PrimaData");
+   if(fh!=INVALID_HANDLE) FileWrite(fh, "Simbolo","Timeframe","Barre","PrimaDataLocale","PrimaDataServer","Verdetto");
 
    PrintFormat("=== DOWNLOAD STORICO: %d simboli x %d TF, da %s ===", nsym, ntf, TimeToString(from, TIME_DATE));
 
@@ -156,13 +160,34 @@ void OnStart()
             tries++;
            }
          string tfn = StringSubstr(EnumToString(tf), 7); // "PERIOD_H4" -> "H4"
+
+         //--- LA DIAGNOSI CHE CONTA: quanto indietro arriva il BROKER?
+         //    Senza questa riga non si distingue "non l'ho scaricato"
+         //    da "il broker non ce l'ha", e sono due problemi diversi.
+         datetime srvFirst = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
+         datetime locFirst = (datetime)SeriesInfoInteger(sym, tf, SERIES_FIRSTDATE);
+         if(locFirst <= 0) locFirst = first;
+
+         string verdetto;
+         if(got <= 0)                       verdetto = "NESSUN DATO";
+         else if(srvFirst <= 0)             verdetto = "server non risponde";
+         else if(locFirst > srvFirst + 86400) verdetto = "MANCA STORICO LOCALE: rilancia";
+         else if(srvFirst > from + 86400)   verdetto = "IL BROKER NON HA PIU' STORICO";
+         else                               verdetto = "COMPLETO";
+
          if(got > 0)
-            PrintFormat("[%d/%d] %-12s %-4s : %6d barre (da %s)", s+1, nsym, sym, tfn, got, TimeToString(first, TIME_DATE));
+            PrintFormat("[%d/%d] %-12s %-4s : %6d barre  locale %s  server %s  -> %s",
+                        s+1, nsym, sym, tfn, got,
+                        TimeToString(locFirst, TIME_DATE),
+                        (srvFirst>0?TimeToString(srvFirst, TIME_DATE):"?"), verdetto);
          else
             PrintFormat("[%d/%d] %-12s %-4s : NESSUN DATO (timeout)", s+1, nsym, sym, tfn);
 
          if(fh!=INVALID_HANDLE)
-            FileWrite(fh, sym, tfn, (string)got, (got>0?TimeToString(first, TIME_DATE):"-"));
+            FileWrite(fh, sym, tfn, (string)got,
+                      (got>0?TimeToString(locFirst, TIME_DATE):"-"),
+                      (srvFirst>0?TimeToString(srvFirst, TIME_DATE):"-"),
+                      verdetto);
         }
 
       // --- TICK REALI (per i backtest a tick reali) ------------------
@@ -176,7 +201,10 @@ void OnStart()
          else
             PrintFormat("[%d/%d] %-12s TICK : nessun tick reale disponibile", s+1, nsym, sym);
          if(fh!=INVALID_HANDLE)
-            FileWrite(fh, sym, "TICK", (string)nticks, (nticks>0?TimeToString(tfirst, TIME_DATE):"-"));
+            FileWrite(fh, sym, "TICK", (string)nticks,
+                      (nticks>0?TimeToString(tfirst, TIME_DATE):"-"), "-",
+                      (nticks>0 ? (tfirst > from + 86400 ? "TICK REALI PARZIALI" : "COMPLETO")
+                                : "NESSUN TICK"));
         }
      }
 

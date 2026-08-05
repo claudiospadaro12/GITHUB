@@ -1,49 +1,204 @@
 # =====================================================================
-#  scarica_storico.ps1  --  installa lo script SCARICA-STORICO in MT5
+#  scarica_storico.ps1  --  scarica lo STORICO dal broker e dice
+#                           SE il broker ce l'ha davvero
 # ---------------------------------------------------------------------
-#  Copia e compila ABTG_HistoryDownloader dentro il tuo MT5 BCM.
-#  Dopo averlo lanciato: apri MT5, vai su "Navigatore > Script",
-#  trascina "ABTG_HistoryDownloader" su un grafico qualsiasi e premi OK.
-#  (MT5 puo' restare aperto: la compilazione non lo disturba.)
+#  PERCHE' ESISTE (walk-forward del 05/08/2026):
+#  la finestra IS 2024.01-2025.06 produceva 10,0 trade/mese contro i
+#  20,4 della OOS, con rapporto 2,03 IDENTICO su D30EUR e NASUSD (e lo
+#  stesso segno gia' visto sul Dow). Un EA che fa al massimo 1 trade al
+#  giorno, su ~21 giorni di borsa al mese, deve stare intorno a 20.
+#  Quindi meta' dei giorni del 2024 NON C'E'. Finche' non e' risolto,
+#  nessun confronto IS->OOS e' un test di overfitting valido.
+#
+#  COSA FA:
+#   1. installa e compila ABTG_HistoryDownloader nel terminale BCM
+#   2. (con -Auto) lancia MT5 che esegue lo script da solo
+#   3. rilegge MQL5\Files\ABTG_StoricoScaricato.csv e stampa il verdetto
+#
+#  LA COLONNA CHE CONTA e' l'ultima:
+#   COMPLETO                      -> a posto, si puo' testare da li'
+#   MANCA STORICO LOCALE          -> e' solo da scaricare, rilancia
+#   IL BROKER NON HA PIU' STORICO -> inutile insistere: si SPOSTA la
+#                                    finestra di test, non si scarica
+#
+#  ESEMPI
+#   .\scarica_storico.ps1                       # installa + istruzioni
+#   .\scarica_storico.ps1 -Auto                 # fa tutto da solo (MT5 chiuso)
+#   .\scarica_storico.ps1 -Auto -Da 2022.01.01  # piu' indietro
+#   .\scarica_storico.ps1 -Simboli "XAUUSD" -SenzaTick
+#   .\scarica_storico.ps1 -SoloReferto          # rileggi l'ultimo risultato
+#
+#  !! SUL VPS NON USARE -Auto: chiuderebbe il terminale che tiene su
+#     gli EA in forward. Sul VPS: installa e trascina lo script a mano.
 # =====================================================================
+param(
+  [string] $Simboli    = "D30EUR,NASUSD,U30USD",
+  [string] $Da         = "2023.01.01",
+  [string] $Timeframes = "M1,M5,M15,M30,H1,H4,D1",
+  [switch] $SenzaTick,
+  [switch] $Auto,
+  [switch] $SoloReferto,
+  [int]    $TimeoutMin = 90
+)
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-Write-Host "=== INSTALLO LO SCARICA-STORICO ===" -ForegroundColor Cyan
-
-# --- rileva terminale BCM + cartella dati (come run_all.ps1) ---------
+# ---------------------------------------------------------------------
+# 1. trova terminale BCM + cartella dati
+# ---------------------------------------------------------------------
 $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
 $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
 if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
 if (-not $cand) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
-$MetaEditor = Join-Path $cand.DirectoryName "metaeditor64.exe"
-$instDir    = $cand.DirectoryName
 
-$termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+$instDir    = $cand.DirectoryName
+$Terminal   = Join-Path $instDir "terminal64.exe"
+$MetaEditor = Join-Path $instDir "metaeditor64.exe"
+$termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
 $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
     $o = Join-Path $_.FullName "origin.txt"
     (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir)
 } | Select-Object -First 1 -ExpandProperty FullName
-if (-not $DataFolder) { Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1 }
+if (-not $DataFolder) { Write-Host "Cartella dati MT5 non trovata." -ForegroundColor Red; exit 1 }
 
-Write-Host ("MetaEditor : {0}" -f $MetaEditor)
-Write-Host ("Cartella dati: {0}" -f $DataFolder)
+$CsvOut = Join-Path $DataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
 
-# --- copia + compila lo script ---------------------------------------
-$src = Join-Path $RepoRoot "..\mql5\Scripts\ABTG_HistoryDownloader.mq5"
-if (-not (Test-Path $src)) { Write-Host "Non trovo ABTG_HistoryDownloader.mq5 nel repo." -ForegroundColor Red; exit 1 }
-$MqlScripts = Join-Path $DataFolder "MQL5\Scripts"
-New-Item -ItemType Directory -Force -Path $MqlScripts | Out-Null
-Copy-Item $src -Destination $MqlScripts -Force
-$dst = Join-Path $MqlScripts "ABTG_HistoryDownloader.mq5"
-& $MetaEditor "/compile:$dst" "/log" | Out-Null
-$ex5 = [System.IO.Path]::ChangeExtension($dst, ".ex5")
+# ---------------------------------------------------------------------
+# funzione: rilegge il CSV e stampa il referto
+# ---------------------------------------------------------------------
+function Mostra-Referto {
+  if (-not (Test-Path $CsvOut)) {
+    Write-Host "`nNessun referto trovato in:`n  $CsvOut" -ForegroundColor Yellow
+    Write-Host "Lo script non e' ancora stato eseguito dentro MT5." -ForegroundColor Yellow
+    return
+  }
+  $righe = Import-Csv $CsvOut
+  Write-Host "`n=== REFERTO STORICO ===" -ForegroundColor Cyan
+  Write-Host ("{0}" -f $CsvOut) -ForegroundColor DarkGray
+  $righe | Format-Table Simbolo, Timeframe, Barre, PrimaDataLocale, PrimaDataServer, Verdetto -AutoSize
 
-if (Test-Path $ex5) {
-    Write-Host "`nOK! Script installato e compilato." -ForegroundColor Green
-    Write-Host "Ora: apri MT5 > Navigatore > Script > trascina 'ABTG_HistoryDownloader' su un grafico." -ForegroundColor White
-    Write-Host "  - 1a volta: InpListaSoloNomi = true  (ti crea l'elenco dei simboli)" -ForegroundColor White
-    Write-Host "  - poi:      InpListaSoloNomi = false (scarica davvero tutto lo storico)" -ForegroundColor White
-} else {
-    Write-Host "Compilazione non riuscita. Fammi uno screenshot." -ForegroundColor Red
+  $bloccati = $righe | Where-Object { $_.Verdetto -like "*NON HA PIU'*" }
+  $daRifare = $righe | Where-Object { $_.Verdetto -like "*MANCA STORICO*" }
+  if ($bloccati) {
+    Write-Host "!! IL BROKER NON HA PIU' STORICO su queste righe:" -ForegroundColor Red
+    $bloccati | ForEach-Object { Write-Host ("   {0} {1} -> parte dal {2}" -f $_.Simbolo, $_.Timeframe, $_.PrimaDataServer) -ForegroundColor Red }
+    Write-Host "   Non si scarica quello che non esiste: si SPOSTA la finestra IS" -ForegroundColor Red
+    Write-Host "   alla prima data disponibile e si rifa' il walk-forward da li'." -ForegroundColor Red
+  }
+  if ($daRifare) {
+    Write-Host "!! Manca solo il download su queste righe: rilancia lo script." -ForegroundColor Yellow
+    $daRifare | ForEach-Object { Write-Host ("   {0} {1}" -f $_.Simbolo, $_.Timeframe) -ForegroundColor Yellow }
+  }
+  if (-not $bloccati -and -not $daRifare) {
+    Write-Host "OK: storico completo su tutte le righe. Si puo' rifare la fase IS." -ForegroundColor Green
+  }
 }
+
+if ($SoloReferto) { Mostra-Referto; exit 0 }
+
+# ---------------------------------------------------------------------
+# 2. installa + compila lo script
+# ---------------------------------------------------------------------
+Write-Host "=== SCARICO STORICO: $Simboli  (da $Da) ===" -ForegroundColor Cyan
+$Src = Join-Path $RepoRoot "..\mql5\Scripts\ABTG_HistoryDownloader.mq5"
+if (-not (Test-Path $Src)) { Write-Host "Sorgente non trovato: $Src" -ForegroundColor Red; exit 1 }
+$DstDir = Join-Path $DataFolder "MQL5\Scripts"
+New-Item -ItemType Directory -Force -Path $DstDir | Out-Null
+Copy-Item $Src -Destination $DstDir -Force
+$mq5 = Join-Path $DstDir "ABTG_HistoryDownloader.mq5"
+& $MetaEditor "/compile:$mq5" "/log" | Out-Null
+$ex5 = [System.IO.Path]::ChangeExtension($mq5, ".ex5")
+if (-not (Test-Path $ex5)) { Write-Host "ERRORE di compilazione." -ForegroundColor Red; exit 1 }
+Write-Host "  compilato: ABTG_HistoryDownloader.ex5" -ForegroundColor Green
+
+# ---------------------------------------------------------------------
+# 3. preset con i parametri
+# ---------------------------------------------------------------------
+$PresetDir = Join-Path $DataFolder "MQL5\Presets"
+New-Item -ItemType Directory -Force -Path $PresetDir | Out-Null
+$SetFile = Join-Path $PresetDir "abtg_storico.set"
+$tick = if ($SenzaTick) { "false" } else { "true" }
+@"
+InpSimboli=$Simboli
+InpTimeframes=$Timeframes
+InpDataInizio=$Da
+InpListaSoloNomi=false
+InpTuttiBroker=false
+InpTimeoutSec=120
+InpScaricaTick=$tick
+"@ | Set-Content -Path $SetFile -Encoding ASCII
+Write-Host "  preset:    MQL5\Presets\abtg_storico.set" -ForegroundColor Green
+
+# ---------------------------------------------------------------------
+# 4a. modalita' MANUALE (default, e l'unica ammessa sul VPS)
+# ---------------------------------------------------------------------
+if (-not $Auto) {
+  Write-Host @"
+
+--- ORA IN MT5 (2 minuti) ---------------------------------------------
+ 1. Strumenti > Opzioni > Grafici > "Max barre nel grafico" = ILLIMITATO
+    (e' il tappo numero uno: senza questo il download si ferma da solo)
+ 2. Navigatore > Script > tasto destro > Aggiorna
+ 3. Trascina ABTG_HistoryDownloader su un grafico qualsiasi
+ 4. Nella finestra parametri: Carica > abtg_storico.set
+    (contiene gia' InpSimboli=$Simboli e InpDataInizio=$Da)
+ 5. OK. Guarda la scheda ESPERTI (non Journal). I tick reali su piu'
+    anni possono richiedere parecchi minuti: lascialo finire.
+ 6. Poi torna qui e lancia:
+       .\scarica_storico.ps1 -SoloReferto
+-----------------------------------------------------------------------
+"@ -ForegroundColor Yellow
+  Mostra-Referto
+  exit 0
+}
+
+# ---------------------------------------------------------------------
+# 4b. modalita' AUTOMATICA (solo PC di backtest, MT5 chiuso)
+# ---------------------------------------------------------------------
+$running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
+if ($running) {
+  Write-Host "`nMT5 e' APERTO. In automatico non si puo': un secondo avvio" -ForegroundColor Red
+  Write-Host "sulla stessa cartella dati non esegue lo script." -ForegroundColor Red
+  Write-Host "Chiudi MT5 e rilancia, oppure usa la modalita' manuale (senza -Auto)." -ForegroundColor Red
+  Write-Host "SUL VPS: NON chiudere MT5, usa la manuale." -ForegroundColor Red
+  exit 1
+}
+
+if (Test-Path $CsvOut) { Remove-Item $CsvOut -Force }   # cosi' so che il referto e' nuovo
+
+$primoSym = ($Simboli -split ",")[0].Trim()
+$Ini = Join-Path $env:TEMP "abtg_storico.ini"
+@"
+[Charts]
+MaxBars=2000000000
+
+[StartUp]
+Script=ABTG_HistoryDownloader
+ScriptParameters=abtg_storico.set
+Symbol=$primoSym
+Period=M5
+"@ | Set-Content -Path $Ini -Encoding Unicode
+
+Write-Host "`nAvvio MT5 in automatico (timeout $TimeoutMin min)..." -ForegroundColor Cyan
+Start-Process -FilePath $Terminal -ArgumentList "/config:$Ini"
+
+$scaduto = (Get-Date).AddMinutes($TimeoutMin)
+$ultimo  = $null
+while ((Get-Date) -lt $scaduto) {
+  Start-Sleep -Seconds 15
+  if (Test-Path $CsvOut) {
+    $ora = (Get-Item $CsvOut).LastWriteTime
+    # il file e' finito quando smette di crescere per 45 secondi
+    if ($ultimo -and $ora -eq $ultimo -and ((Get-Date) - $ora).TotalSeconds -gt 45) { break }
+    $ultimo = $ora
+    Write-Host ("  ... {0} righe finora" -f ((Import-Csv $CsvOut | Measure-Object).Count)) -ForegroundColor DarkGray
+  }
+}
+if (-not (Test-Path $CsvOut)) {
+  Write-Host "`nTimeout: nessun referto prodotto. Riprova in manuale (senza -Auto)." -ForegroundColor Red
+  exit 1
+}
+
+Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Mostra-Referto
+Write-Host "`nCopia il CSV qui sopra in chat: da li' si decide la nuova finestra IS." -ForegroundColor Cyan
