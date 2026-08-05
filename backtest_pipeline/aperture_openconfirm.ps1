@@ -31,6 +31,7 @@
 #    powershell -ExecutionPolicy Bypass -File .\aperture_openconfirm.ps1
 # =====================================================================
 param(
+  [int]$OCTimeframe=0,   # 0 = TF del grafico (M5). Metti 15 per valutare come nelle live, su M15.
   [int]$TrailTF=5,
   [int]$UseTrailing=1,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
@@ -120,6 +121,7 @@ InpTrailMode=1||1||0||1||N
 InpTrailTF=$TrailTF||$TrailTF||0||$TrailTF||N
 InpVolMult=1.5||1.5||0||1.5||N
 InpVolAvgBars=20||20||0||20||N
+InpOCTimeframe=$OCTimeframe||$OCTimeframe||0||$OCTimeframe||N
 InpEntryMode=0||0||5||5||Y
 InpUseVolumeFilter=0||0||1||1||Y
 "@

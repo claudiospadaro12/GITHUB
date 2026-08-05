@@ -218,6 +218,10 @@ input ENUM_ABTG_RANGE InpRangeMode = (ENUM_ABTG_RANGE)ABTG_DEF_RANGE_MODE; // Da
 input ENUM_TIMEFRAMES InpLevelTF   = ABTG_DEF_LEVEL_TF; // (RANGE_PREVBAR) TF dei massimi/minimi prec. (Nasdaq: H1)
 input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra prec. in minuti (live: 5 = candela pre-apertura)
 input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
+input ENUM_TIMEFRAMES InpOCTimeframe = PERIOD_CURRENT; // (OPENCONFIRM) TF su cui si guarda l'APERTURA della candela.
+                                                       //  PERIOD_CURRENT = quello del grafico (M5): valuta ogni 5 min.
+                                                       //  PERIOD_M15 = come nelle live: una sola valutazione ogni 15 min,
+                                                       //  cioe' le candele 09:15, 09:30, 09:45... (ora italiana).
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
 input bool   InpAllowLong     = true;                 // Consenti operazioni long
 input bool   InpAllowShort    = true;                 // Consenti operazioni short
@@ -1007,11 +1011,13 @@ bool ArmOpenConfirm()
 //+------------------------------------------------------------------+
 void MonitorOpenConfirm()
   {
-   datetime bt = iTime(_Symbol, PERIOD_CURRENT, 0);
+   ENUM_TIMEFRAMES octf = (InpOCTimeframe == PERIOD_CURRENT) ? (ENUM_TIMEFRAMES)Period() : InpOCTimeframe;
+
+   datetime bt = iTime(_Symbol, octf, 0);
    if(bt <= 0 || bt == gLastOCBar) return;    // una sola valutazione per candela
    gLastOCBar = bt;
 
-   double op = iOpen(_Symbol, PERIOD_CURRENT, 0);
+   double op = iOpen(_Symbol, octf, 0);
    if(op <= 0) return;
 
    double buyTrig  = NormalizePrice(gRangeHigh + gBuffer);
@@ -1024,7 +1030,7 @@ void MonitorOpenConfirm()
    if(InpAllowShort && shortOK && op <= sellTrig) dir = -1;
    if(dir == 0) return;
 
-   if(!VolumeOK())
+   if(!VolumeOKtf(octf))
      { ABTGLog("OPENCONFIRM: candela aperta oltre il livello ma volumi insufficienti: salto."); return; }
 
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
@@ -1758,20 +1764,24 @@ bool AtrOK()
    return(a[0] >= InpAtrFilterMult * avg);               // ATR dell'ultima barra vs la sua media
   }
 
-bool VolumeOK()
+bool VolumeOKtf(ENUM_TIMEFRAMES tf)
   {
    if(!InpUseVolumeFilter) return(true);
    int n = InpVolAvgBars;
    if(n < 2) return(true);
    long v[];
    ArraySetAsSeries(v, true);
-   if(CopyTickVolume(_Symbol, PERIOD_CURRENT, 1, n+1, v) < n+1) return(true); // dati insuff.: non blocco
+   if(CopyTickVolume(_Symbol, tf, 1, n+1, v) < n+1) return(true); // dati insuff.: non blocco
    double sum = 0;
    for(int i = 1; i <= n; i++) sum += (double)v[i];                 // media delle n barre PRIMA della rottura
    double avg = sum / n;
    if(avg <= 0) return(true);
    return((double)v[0] >= InpVolMult * avg);                        // volume dell'ultima barra chiusa (rottura)
   }
+
+// Il volume va letto sulla STESSA candela di cui si guarda l'apertura:
+// se si valuta l'apertura su M15, non ha senso misurare il volume su M5.
+bool VolumeOK(){ return(VolumeOKtf(PERIOD_CURRENT)); }
 //+------------------------------------------------------------------+
 
 
