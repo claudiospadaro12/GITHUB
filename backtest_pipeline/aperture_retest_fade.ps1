@@ -112,6 +112,56 @@ if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $For
 
 # --- scarico e compilo una sola volta per EA ---
 $fatti=@{}
+# --- BLINDATURA (05/08) -------------------------------------------------
+# I parametri NON elencati qui MT5 se li tiene dallo stato precedente del
+# terminale, comprese le impostazioni di ottimizzazione. Risultato: nel
+# test del trailing e in quello dell'ingresso il terminale ha spazzolato
+# da solo InpTrailFixedPts su 8 valori, moltiplicando i pass per 8
+# (160 righe invece di 20). I numeri erano giusti - quel parametro e'
+# inerte con TrailMode=1 - ma il tempo macchina era 8 volte tanto.
+# Da qui in poi si pinna TUTTO. Niente resta al caso.
+$Blindatura=@"
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpVwapTF=15||15||0||15||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpMaxSpread=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpOCTimeframe=0||0||0||0||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpVerbose=1||1||0||1||N
+"@
+# ------------------------------------------------------------------------
+
 foreach($j in $Jobs){
   if($fatti.ContainsKey($j.EA)){ continue }
   $src=Join-Path $Work "src_rf\$($j.EA).mq5"
@@ -140,16 +190,12 @@ InpSessionHour=$($j.Ora)||$($j.Ora)||0||$($j.Ora)||N
 InpSessionMin=$($j.Min)||$($j.Min)||0||$($j.Min)||N
 InpRangeMinutes=15||15||0||15||N
 InpRangeMode=$($j.RMode)||$($j.RMode)||0||$($j.RMode)||N
-InpLevelTF=16385||16385||0||16385||N
 InpCloseHour=17||17||0||17||N
 InpCloseMin=30||30||0||30||N
 InpCloseAtEnd=1||1||0||1||N
 InpOneTradePerDay=1||1||0||1||N
-InpPendingExpiryMin=120||120||0||120||N
 InpAllowLong=1||1||0||1||N
 InpAllowShort=1||1||0||1||N
-InpMinRangePts=0||0||0||0||N
-InpMaxRangePts=0||0||0||0||N
 InpUseGapFill=0||0||0||0||N
 InpUseSupertrend=0||0||0||0||N
 InpUseSupertrend3=0||0||0||0||N
@@ -160,16 +206,9 @@ InpUseNewsFilter=0||0||0||0||N
 InpUseAtrFilter=0||0||0||0||N
 InpConfirmMode=1||1||0||1||N
 InpUseEmaFilter=$($j.Ema)||$($j.Ema)||0||$($j.Ema)||N
-InpEmaFast=1||1||0||1||N
-InpEmaSlow=50||50||0||50||N
-InpFilterTF=16388||16388||0||16388||N
 InpUseVolumeFilter=$($j.Vol)||$($j.Vol)||0||$($j.Vol)||N
-InpVolMult=1.5||1.5||0||1.5||N
-InpVolAvgBars=20||20||0||20||N
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpSLMode=0||0||0||0||N
-InpAtrSlMult=1.5||1.5||0||1.5||N
-InpAtrPeriodMgmt=14||14||0||14||N
 InpMinStopPts=500||500||0||500||N
 InpSkipIfTight=0||0||0||0||N
 InpTP1_R=0.5||0.5||0||0.5||N
@@ -179,6 +218,7 @@ InpBEatR=0||0||0||0||N
 InpUseTrailing=1||1||0||1||N
 InpTrailMode=1||1||0||1||N
 InpTrailTF=$TrailTF||$TrailTF||0||$TrailTF||N
+$Blindatura
 $($L.Fisso)
 $($L.Mode)
 $($L.Sweep)

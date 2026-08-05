@@ -72,6 +72,58 @@ New-Item -ItemType Directory -Force -Path $MqlExperts,$Results,(Join-Path $Work 
 if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $Force){
   Write-Host "!!! Chiudi MetaTrader prima di lanciare (altrimenti 0 CSV)." -ForegroundColor Red; exit 1 }
 
+# --- BLINDATURA (05/08) -------------------------------------------------
+# I parametri NON elencati qui MT5 se li tiene dallo stato precedente del
+# terminale, comprese le impostazioni di ottimizzazione. Risultato: nel
+# test del trailing e in quello dell'ingresso il terminale ha spazzolato
+# da solo InpTrailFixedPts su 8 valori, moltiplicando i pass per 8
+# (160 righe invece di 20). I numeri erano giusti - quel parametro e'
+# inerte con TrailMode=1 - ma il tempo macchina era 8 volte tanto.
+# Da qui in poi si pinna TUTTO. Niente resta al caso.
+$Blindatura=@"
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpVwapTF=15||15||0||15||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpMaxSpread=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpOCTimeframe=0||0||0||0||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpVerbose=1||1||0||1||N
+"@
+# ------------------------------------------------------------------------
+
 foreach($j in $Jobs){
   Write-Host ""
   Write-Host "--- $($j.Nome) : $($j.Sym), apertura $($j.Ora):$('{0:d2}' -f $j.Min) server ---" -ForegroundColor Cyan
@@ -119,14 +171,10 @@ InpUseTrailing=$UseTrailing||$UseTrailing||0||$UseTrailing||N
 InpTrailMode=1||1||0||1||N
 InpTrailTF=$TrailTF||$TrailTF||0||$TrailTF||N
 InpUseEmaFilter=$($j.Ema)||$($j.Ema)||0||$($j.Ema)||N
-InpEmaFast=1||1||0||1||N
-InpEmaSlow=50||50||0||50||N
-InpFilterTF=16388||16388||0||16388||N
 InpUseVolumeFilter=$($j.Vol)||$($j.Vol)||0||$($j.Vol)||N
-InpVolMult=1.5||1.5||0||1.5||N
-InpVolAvgBars=20||20||0||20||N
 InpRangeMinutes=15||5||10||45||Y
 InpBufferPoints=300||100||200||700||Y
+$Blindatura
 "@
 
   $tag="$($j.Nome)_ingresso"
