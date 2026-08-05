@@ -214,6 +214,19 @@ dal timeframe del grafico. **Va lanciato prima di ogni verdetto e dopo ogni modi
 python3 backtest_pipeline/audit_flotta.py
 ```
 
+### G3. `lint_ps1.py` — creato il 06/08, dopo l'ennesimo script rotto
+**Perché:** ho mandato a Claudio uno script con dentro `"$tag:"`, che PowerShell legge come nome
+di disco e rifiuta di eseguire. Qui non c'è PowerShell per provare gli script prima di mandarli,
+quindi il controllo va fatto a mano — cioè con questo.
+**Va lanciato PRIMA di ogni push che tocca un `.ps1`. Senza eccezioni.**
+
+```
+python3 backtest_pipeline/lint_ps1.py
+```
+
+Controlla: `$var:` letto come disco · `"$oggetto.Proprieta"` che non espande ·
+here-string aperte e mai chiuse · chiusure `"@` indentate (PowerShell le ignora).
+
 ### G2. La regola sui verdetti
 Prima di dire *"questo EA fa X"*: **estrarre i suoi default effettivi e metterli accanto a
 quelli del test.** Se non combaciano, il verdetto non vale — e va detto **prima**, non dopo.

@@ -226,7 +226,7 @@ foreach($j in $Jobs){
         $vecchio=Join-Path $Results "vecchi"
         New-Item -ItemType Directory -Force -Path $vecchio | Out-Null
         Move-Item $done (Join-Path $vecchio "$tag.csv") -Force
-        Write-Host "    $tag: il precedente e' stato spostato in 'vecchi\'" -ForegroundColor DarkYellow
+        Write-Host "    ${tag}: il precedente e' stato spostato in 'vecchi\'" -ForegroundColor DarkYellow
       }
       elseif(Test-Path $done){ Write-Host "    $tag gia' fatto, salto (usa -Rifai per rifarlo)" -ForegroundColor DarkGray; continue }
 
