@@ -348,3 +348,70 @@ Regge in entrambe, senza essere il massimo in nessuna. È quello che si vuole.
 Il Dow ha superato tutto quello che un backtest può chiedere: motore, robustezza, distanze, tipo di trailing, walk-forward. **186 pass a tick reali in totale.**
 
 Da qui in avanti il giudice non è più il backtest, è il **forward** — già in corso dal 05/08 — e poi il dry-run col Guardian sul demo da 100k.
+
+---
+
+# 🔁 Rilettura del walk-forward — 05/08, con il metodo di oggi
+
+Rifatto da zero perché su questo poggia la frase *"il Dow è l'unico EA validato"*, e oggi
+ho scoperto due volte di aver misurato cose diverse da quelle accese.
+
+Finestre verificate nello script: **IS 2024.01.01→2025.06.30**, **OOS 2025.07.01→2026.06.30**.
+Non si sovrappongono. Griglia: `InpEmaSlow` 20…200 × `InpTP1_R` 0,33/0,50/0,67/0,84 = 40 celle.
+
+## ✅ La validazione regge, ed è più forte di quanto pensassi
+
+| | IS | OOS |
+|---|---|---|
+| celle in utile | **39 / 40** | **40 / 40** |
+| PF | 0,99 → 1,55 | **1,267 → 1,560** (mediana 1,376) |
+| DD massimo | 12,47% | **8,70%** |
+
+**Tutte e quaranta le combinazioni sono in utile fuori campione**, con un PF che non scende
+mai sotto **1,267** e un drawdown che non supera mai l'**8,70%**. Questo è raro, ed è la
+cosa che distingue il Dow da tutto il resto della flotta.
+
+La cella scelta guardando **solo** l'IS (`EmaSlow=40`, `TP1_R=0,50`):
+
+| | PF | profit | DD | trade |
+|---|---:|---:|---:|---:|
+| IS | 1,546 | +2.332,48 | 5,63% | 140 |
+| **OOS** | **1,340** | **+1.755,58** | **5,28%** | 188 |
+
+Scelta al buio sull'IS, **regge fuori campione**. È il test passato.
+
+## ⚠️ Ma c'è una cosa che NON avevo visto, e cambia come si usa
+
+**La correlazione di rango IS→OOS è −0,357. Negativa.**
+
+Le cinque celle migliori sull'IS si piazzano **31ª, 23ª, 21ª, 35ª e 24ª su 40** nell'OOS.
+Cioè: **ottimizzare quei due parametri sull'IS porta a scegliere una cella sotto la media
+nell'OOS.**
+
+Non vuol dire che il sistema non funziona — funziona, tutte e 40 le celle lo dimostrano.
+Vuol dire che **l'edge sta nel MOTORE, non nella taratura**, e che la classifica dentro la
+griglia è rumore. Il PF OOS va da 1,267 a 1,560: una banda stretta, dentro la quale la
+posizione esatta non è prevedibile.
+
+**Conseguenza pratica:** su questi due parametri **non si ottimizza**. Si sceglie il centro
+dell'altopiano, non il picco. Ed è esattamente ciò che l'EA fa già — `InpEmaSlow = 50` è in
+mezzo, non è il migliore di nessuna delle due finestre.
+
+*(Nota: 50 **non era nella griglia**, che andava di 20 in 20. È fra il 40 e il 60, entrambi
+solidi sull'OOS — 1,340 e 1,358 di PF. Scelta difendibile, ma va detto che quel valore
+preciso non è mai stato misurato.)*
+
+## 🟡 Un'anomalia da verificare
+
+| | trade | mesi | trade/mese |
+|---|---:|---:|---:|
+| IS | 146 (mediana) | 18 | **8,1** |
+| OOS | 197 (mediana) | 12 | **16,4** |
+
+**Il doppio dei trade al mese nella finestra più corta.** Le spiegazioni possibili sono due:
+o il filtro EMA H4 ha bloccato molto di più nel 2024, oppure — più probabile, ed è successo
+con l'oro — **lo storico di U30USD non copre davvero l'inizio del 2024**.
+
+Se è la seconda, l'IS è più corto di quanto dichiarato e vale meno di quanto sembri.
+**Non tocca la conclusione** (l'OOS è pieno e sono 40/40), ma va verificato prima di dire
+che il sistema è stato provato su 30 mesi.
