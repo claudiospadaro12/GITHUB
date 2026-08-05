@@ -49,9 +49,17 @@ input bool   InpRequireAlignment = true;          // Pretendi EMA9>EMA21>EMA50 (
 input int    InpCrossLookback = 8;                // L'incrocio EMA9/21 deve essere nelle ultime N barre
 
 input group "=== Heiken Ashi (momentum) ==="
-input int    InpHACount     = 3;                  // Candele HA consecutive richieste
-input double InpHAWickRatio = 0.30;               // Max ombra contraria come frazione del corpo
+input int    InpHACount     = 3;                  // Candele HA consecutive richieste (se AutoCount = false)
+input bool   InpHAAutoCount = false;              // REGOLA LAVORENTI: fino a M15 servono 3 candele, da M15 in su ne bastano 2
+input double InpHAWickRatio = 0.30;               // Max ombra contraria come frazione del corpo (0 = "senza stoppino" stretto)
 input double InpHABodyFactor= 0.60;               // Il corpo non deve collassare (corpo recente >= X * corpo iniziale)
+
+input group "=== Bande di Bollinger in espansione (opt-in) ==="
+input bool   InpUseBBExpand = false;              // Pretendi bande in ESPANSIONE (volatilita' che si apre)
+input int    InpBBPeriod    = 20;                 // Periodo delle bande
+input double InpBBDev       = 2.0;                // Deviazioni standard
+input int    InpBBExpandBars= 3;                  // Confronta la larghezza con quella di N barre fa
+input double InpBBExpandMult= 1.05;               // Larghezza di ora >= X volte quella di allora (1.05 = +5%)
 
 input group "=== ADX / DI (forza) ==="
 input int    InpAdxPeriod = 14;                   // Periodo ADX
@@ -111,7 +119,7 @@ input bool   InpVerbose   = true;                 // Messaggi nel log
 //  STATO
 //==================================================================
 int      hEmaF=INVALID_HANDLE, hEmaM=INVALID_HANDLE, hEmaS=INVALID_HANDLE;
-int      hAdx=INVALID_HANDLE,  hAtr=INVALID_HANDLE;
+int      hAdx=INVALID_HANDLE,  hAtr=INVALID_HANDLE, hBB=INVALID_HANDLE;
 datetime gLastBar=0;
 bool     gPartialDone=false;
 
@@ -134,9 +142,16 @@ int OnInit()
    if(hEmaF==INVALID_HANDLE||hEmaM==INVALID_HANDLE||hEmaS==INVALID_HANDLE||hAdx==INVALID_HANDLE||hAtr==INVALID_HANDLE)
      { Print("ERRORE: handle indicatori non creati."); return(INIT_FAILED); }
 
+   if(InpUseBBExpand)
+     {
+      hBB = iBands(_Symbol, InpTimeframe, InpBBPeriod, 0, InpBBDev, PRICE_CLOSE);
+      if(hBB==INVALID_HANDLE){ Print("ERRORE: handle Bollinger non creato."); return(INIT_FAILED); }
+     }
+
    if(InpUseNewsFilter) LoadNews();
-   Log(StringFormat("avviato su %s TF %s. Rischio %.1f%%, max %d trade/giorno.",
-       _Symbol, EnumToString(InpTimeframe), InpRiskPercent, InpMaxTradesPerDay));
+   Log(StringFormat("avviato su %s TF %s. Rischio %.1f%%, max %d trade/giorno. Candele HA richieste: %d%s.",
+       _Symbol, EnumToString(InpTimeframe), InpRiskPercent, InpMaxTradesPerDay,
+       HACountEffettivo(), (InpHAAutoCount?" (regola sul TF)":"")));
    return(INIT_SUCCEEDED);
   }
 
@@ -147,6 +162,51 @@ void OnDeinit(const int reason)
    if(hEmaS!=INVALID_HANDLE) IndicatorRelease(hEmaS);
    if(hAdx !=INVALID_HANDLE) IndicatorRelease(hAdx);
    if(hAtr !=INVALID_HANDLE) IndicatorRelease(hAtr);
+   if(hBB  !=INVALID_HANDLE) IndicatorRelease(hBB);
+  }
+
+//+------------------------------------------------------------------+
+//| Quante candele HA servono davvero.                               |
+//|                                                                  |
+//| REGOLA LAVORENTI (riportata da Claudio il 05/08): "da 5 a 15 min |
+//| servono 3 candele senza stoppino, da TF 15 min in su ne bastano  |
+//| due". Il senso e' che sui TF bassi il rumore produce sequenze    |
+//| pulite per caso, sui TF alti no: la stessa conferma costa meno   |
+//| candele. Opt-in: con InpHAAutoCount=false resta InpHACount.      |
+//|                                                                  |
+//| ATTENZIONE: su H1 la regola chiede 2, l'EA finora ne chiedeva 3. |
+//| Non e' un dettaglio - e' una candela intera di ritardo su ogni   |
+//| ingresso. Va misurato, non dato per buono.                       |
+//+------------------------------------------------------------------+
+int HACountEffettivo()
+  {
+   if(!InpHAAutoCount) return(InpHACount);
+   ENUM_TIMEFRAMES tf = (InpTimeframe==PERIOD_CURRENT) ? (ENUM_TIMEFRAMES)Period() : InpTimeframe;
+   return( (PeriodSeconds(tf) < PeriodSeconds(PERIOD_M15)) ? 3 : 2 );
+  }
+
+//+------------------------------------------------------------------+
+//| Bande di Bollinger in espansione?                                |
+//|                                                                  |
+//| Intuizione di Claudio (05/08). La larghezza della banda e' una   |
+//| misura diretta della volatilita': se si allarga, il mercato si   |
+//| sta muovendo; se si stringe, l'incrocio delle EMA avviene dentro |
+//| una compressione e ha buone probabilita' di essere un falso.     |
+//| Confronto larghezza di [1] contro quella di [1+N].               |
+//+------------------------------------------------------------------+
+bool BBExpanding()
+  {
+   if(!InpUseBBExpand) return(true);
+   if(hBB==INVALID_HANDLE) return(false);
+   int n = InpBBExpandBars+2;
+   double up[], dn[];
+   if(CopyBuffer(hBB,1,1,n,up)!=n) return(false);   // 1 = banda superiore
+   if(CopyBuffer(hBB,2,1,n,dn)!=n) return(false);   // 2 = banda inferiore
+   // CopyBuffer senza ArraySetAsSeries: up[n-1] e' la barra [1], up[0] la piu' vecchia
+   double oggi  = up[n-1]-dn[n-1];
+   double prima = up[n-1-InpBBExpandBars]-dn[n-1-InpBBExpandBars];
+   if(oggi<=0 || prima<=0) return(false);
+   return(oggi >= InpBBExpandMult*prima);
   }
 
 //+------------------------------------------------------------------+
@@ -218,22 +278,24 @@ bool GetHA(int count, double &haO[], double &haC[], double &haH[], double &haL[]
   }
 
 //+------------------------------------------------------------------+
-//| Le ultime InpHACount candele HA confermano il momentum?          |
+//| Le ultime N candele HA confermano il momentum?                   |
+//| N = HACountEffettivo(): InpHACount, oppure la regola sul TF.     |
 //+------------------------------------------------------------------+
 bool HAConfirms(bool isLong)
   {
+   int need = HACountEffettivo();
    double hO[],hC[],hH[],hL[];
-   if(!GetHA(InpHACount+2, hO,hC,hH,hL)) return(false);
+   if(!GetHA(need+2, hO,hC,hH,hL)) return(false);
 
    double bodyRecent=0, bodyOldest=0;
-   for(int k=1; k<=InpHACount; k++)
+   for(int k=1; k<=need; k++)
      {
       double body = isLong ? (hC[k]-hO[k]) : (hO[k]-hC[k]);
       if(body<=0) return(false);                              // deve essere nella direzione giusta
       double wick = isLong ? (hO[k]-hL[k]) : (hH[k]-hO[k]);   // ombra contraria
       if(wick > InpHAWickRatio*body) return(false);           // ombra contraria troppo grande
       if(k==1) bodyRecent=body;
-      if(k==InpHACount) bodyOldest=body;
+      if(k==need) bodyOldest=body;
      }
    // il corpo non deve collassare (recente >= fattore * iniziale)
    if(bodyOldest>0 && bodyRecent < InpHABodyFactor*bodyOldest) return(false);
@@ -275,6 +337,9 @@ int Signal()
    // forza ADX comune
    bool adxOK   = (adx[0] >= InpAdxMin);
    bool adxRise = (!InpAdxRising) || (adx[0] >= adx[2]);
+
+   // volatilita' in espansione (opt-in): vale per entrambe le direzioni
+   if(!BBExpanding()) return(0);
 
    //====================== LONG =======================
    {
