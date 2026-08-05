@@ -68,7 +68,8 @@ param(
   [switch]$SoloSlippage,
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
-  [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
+  [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
+  [switch]$Rifai
 )
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
@@ -98,6 +99,21 @@ $TUTTO=@(
 $Fasi=@(
   @{ Tag="A_geometria"; Pass=20; Win=$WF
      Sweep="InpEntryMode=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpBufferPoints=300||100||200||700||Y`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N" },
+  # FASE B - IL MOTORE. Rifatta il 06/08 (C5) perche' la prima volta due
+  # motori su sei NON erano stati eseguiti:
+  #  - GAPFILL cadeva nel ramo breakout perche' subordinato al vecchio
+  #    flag InpUseGapFill (ora la modalita' comanda, e il flag e' messo a 1
+  #    cosi' il test e' corretto anche con un binario vecchio);
+  #  - DELAYED non poteva entrare PER COSTRUZIONE: con range OPENING la
+  #    decisione cade nell'istante in cui il range si chiude, quindi il
+  #    prezzo e' dentro il range per definizione, e il ramo chiudeva la
+  #    giornata. 0 trade su 22 mesi.
+  # Dopo la correzione, DELAYED con attesa 30 e range 35 aspetta la
+  # rottura VERA e poi entra A MERCATO. Non e' un doppione del breakout:
+  # il breakout appoggia un ordine STOP sul livello, ed e' esattamente
+  # quello che lo sweep d'apertura va a prendere (4 volte sui Live5m).
+  # Qui non c'e' nessun ordine appoggiato da sweepare: e' la risposta
+  # diretta al difetto che ci sta costando di piu'.
   @{ Tag="B_motore";    Pass=12; Win=$WF
      Sweep="InpRangeMinutes=$RangeCandidato||$RangeCandidato||0||$RangeCandidato||N`nInpBufferPoints=200||200||0||200||N`nInpEntryMode=0||0||5||5||Y`nInpUseVolumeFilter=0||0||1||1||Y`nInpSlippagePts=0||0||0||0||N" },
   # FASE C - IL COSTO. Il tester riempie gli ordini pendenti STOP al prezzo
@@ -203,7 +219,16 @@ foreach($j in $Jobs){
 
       $tag="$($j.Nome)_$($fase.Tag)_$($w.Tag)"
       $done=Join-Path $Results "$tag.csv"
-      if(Test-Path $done){ Write-Host "    $tag gia' fatto, salto" -ForegroundColor DarkGray; continue }
+      # -Rifai: rifa' una fase gia' fatta. Serve quando cambia l'EA e non
+      # il test - come il 06/08, con GAPFILL e DELAYED che nella prima
+      # FASE B non erano proprio stati eseguiti.
+      if((Test-Path $done) -and $Rifai){
+        $vecchio=Join-Path $Results "vecchi"
+        New-Item -ItemType Directory -Force -Path $vecchio | Out-Null
+        Move-Item $done (Join-Path $vecchio "$tag.csv") -Force
+        Write-Host "    $tag: il precedente e' stato spostato in 'vecchi\'" -ForegroundColor DarkYellow
+      }
+      elseif(Test-Path $done){ Write-Host "    $tag gia' fatto, salto (usa -Rifai per rifarlo)" -ForegroundColor DarkGray; continue }
 
       Write-Host ""
       Write-Host "--- $tag   ($($w.Da) -> $($w.A)) ---" -ForegroundColor Cyan
@@ -218,7 +243,7 @@ InpCloseAtEnd=1||1||0||1||N
 InpOneTradePerDay=1||1||0||1||N
 InpAllowLong=1||1||0||1||N
 InpAllowShort=1||1||0||1||N
-InpUseGapFill=0||0||0||0||N
+InpUseGapFill=1||1||0||1||N
 InpUseSupertrend=0||0||0||0||N
 InpUseSupertrend3=0||0||0||0||N
 InpUseCorrelation=0||0||0||0||N

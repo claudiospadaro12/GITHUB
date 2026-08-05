@@ -155,12 +155,34 @@ void OnStart()
          MqlRates r[];
          int got = -1, tries = 0, maxtries = InpTimeoutSec*4; // 250ms per giro
          datetime first = 0;
+
+         //  BUG 06/08: qui si usciva al PRIMO CopyRates riuscito. Ma la prima
+         //  risposta e' quella che sta gia' in cache: il download vero prosegue
+         //  in background. Sugli indici non si notava (il broker si ferma
+         //  comunque al 2024.09.26), sui cambi e sull'oro invece il referto
+         //  diceva "manca storico" subito dopo averlo scaricato.
+         //  Ora si insiste finche' il locale non raggiunge il bersaglio, dove
+         //  il bersaglio e' la data richiesta oppure - se il broker non ha
+         //  tanto storico - la sua prima data disponibile.
+         datetime bersaglio = from;
+         datetime srv0 = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
+         if(srv0 > 0 && srv0 > bersaglio) bersaglio = srv0;
+
          while(!IsStopped() && tries < maxtries)
            {
             got = CopyRates(sym, tf, from, TimeCurrent(), r); // se manca, avvia il download
-            if(got > 0){ first = r[0].time; break; }
+            if(got > 0)
+              {
+               first = r[0].time;
+               if(first <= bersaglio + 86400) break;          // arrivato in fondo
+              }
             Sleep(250);
             tries++;
+            if(srv0 <= 0)   // il server puo' rispondere qualche giro dopo
+              {
+               srv0 = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
+               if(srv0 > 0 && srv0 > bersaglio) bersaglio = srv0;
+              }
            }
          string tfn = StringSubstr(EnumToString(tf), 7); // "PERIOD_H4" -> "H4"
 
