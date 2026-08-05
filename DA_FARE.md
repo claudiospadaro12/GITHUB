@@ -79,6 +79,24 @@ continuare a dare per buono quel filtro.
 I "393 trade" del MaxMinNotte sono forse 130-180 posizioni. **La soglia di significatività
 va applicata alle posizioni.**
 
+### B7. 🔴 Lo storico di **D30EUR / NASUSD / U30USD** non copre il 2024 — l'IS è dimezzato
+**Prova:** walk-forward 05/08. L'EA fa **max 1 trade/giorno**, i mesi hanno ~21 giorni di borsa.
+Finestra OOS (12 mesi): **20,4 trade/mese** = quasi tutti i giorni. Finestra IS (18 mesi):
+**10,0 trade/mese** = metà dei giorni. Rapporto **2,03 sul DAX e 2,03 sul Nasdaq** — due simboli,
+due sessioni, stesso identico numero. Sul Dow era già comparso lo stesso segno (8,1 vs 16,4).
+**Non è un effetto di mercato: lo storico parte tardi**, probabilmente verso ottobre 2024.
+**Effetto:** ogni confronto **IS→OOS fatto finora non è un test di overfitting valido**, perché le
+due finestre non sono confrontabili. Anche lo Spearman −0,357 del Dow va riletto in questa luce.
+**Chiude quando:** verificata in MT5 la data del primo trade dei report IS, scaricato lo storico
+completo (Strumenti → Simboli → Barre/Tick), rifatte le fasi A e B in IS.
+**Finché non è chiuso: l'IS non decide niente. Vale solo l'OOS.**
+
+### B8. La FASE B del walk-forward va rifatta: 2 motori su 6 non sono mai stati eseguiti
+**Prova:** referto `risultati_archivio/Walkforward_Aperture/REFERTO_WALKFORWARD.md`.
+GAPFILL cadeva nel ramo breakout, RANGE_FADE ignorava il filtro volumi, DELAYED non poteva
+entrare per costruzione (vedi E6/E7/E8). I difetti sono corretti, i numeri no.
+**Chiude quando:** rilanciata la FASE B sui tre EA ricompilati.
+
 ### B6. Lo storico dell'oro parte davvero dal 2024?
 Lo studio della notte ha trovato dati M5 **solo dal 28/02/2025**, ma i backtest chiedono dal
 2024.01.01. Se anche l'M1 parte nel 2025, il test copre 16 mesi e non 30 — e sono i mesi in
@@ -95,7 +113,12 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 | C3 | `aperture_retest_fade.ps1` | 48 | RETEST e RANGE_FADE con la gestione buona (la bocciatura di luglio non vale) |
 | C4 | `maxmin_oro.ps1 -Fase 2 -SLMode 0` | 12 | il MaxMinNotte sull'oro a tick reali, griglia spostata dove puntavano i gradienti |
 
-**Ordine consigliato:** C1 (in corso) → C3 → C2 → C4. Mai due insieme: si rubano la CPU.
+| C5 | FASE B rifatta (walk-forward) | 24 | i 6 motori con GAPFILL/FADE/DELAYED **davvero attivi** (E6-E8) |
+| C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
+| C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
+
+**Ordine consigliato:** **B7 (scarica lo storico — blocca tutto il resto)** → C1 (in corso) → C5 → C6 → C3 → C2 → C4.
+Mai due insieme: si rubano la CPU.
 
 ---
 
@@ -122,6 +145,24 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 - **E3.** `InpTrailFixedPts = 410` sopravvive come default anche dove ora `TrailMode = 1`.
   Inerte, ma se qualcuno rimette il modo 2 da preset torna in gioco senza avvisare.
 - **E4.** `ABTG_SupertrendReversal_Multi` **non ha** `InpFridayClose`, che il fratello ha.
+- **E6.** ✅ *corretto 05/08* — **GAPFILL non veniva mai eseguito.** `if(InpEntryMode == ABTG_GAPFILL
+  && InpUseGapFill)`: col flag legacy a `false` l'EA cadeva nel ramo `else // BREAKOUT` **in
+  silenzio**. Nel walk-forward il motore 1 dava numeri identici al centesimo al motore 0 su
+  2 mercati × 2 finestre × 2 filtri. Ora comanda la modalità; il flag è solo storico.
+- **E7.** ✅ *corretto 05/08* — **il filtro volumi non toccava il RANGE_FADE.**
+  `TryPlaceRangeFade()` non chiamava né `VolumeOK()` né `ConfirmOK()`, a differenza di breakout,
+  retest e delayed. Filtro ON e OFF davano la stessa riga. Ora passa da `ConfirmOK()`.
+- **E8.** ✅ *corretto 05/08* — **DELAYED non poteva entrare, mai.** 0 trade su 30 mesi. Non era
+  il conflitto `DelayMinutes 30` vs `range 35` (il codice già allineava). La decisione cadeva
+  **nell'istante in cui il range si chiude**, e `DIR_BREAK` chiede il prezzo **fuori** dal range:
+  ma il range è l'high/low di quella stessa finestra, quindi il prezzo è dentro **per definizione**.
+  E il ramo faceva `return(true)`, bruciando la giornata. Ora aspetta la rottura vera entro
+  `InpPendingExpiryMin`. **Con filtri spenti e modalità BREAKOUT il comportamento è identico a
+  prima: nessun EA in forward cambia.**
+- **E9.** ⚠️ **Il motore delle aperture è copiato a mano in ~10 file.** `ABTG_ApertureCore.mqh`
+  esiste ma **nessuno lo include** (compare solo nei commenti): è codice morto. Le tre correzioni
+  di oggi sono state applicate 3 volte a mano. È esattamente il motivo per cui difetti come E6/E7/E8
+  sopravvivono per mesi. **Da unificare.**
 - **E5.** I **661 trade non etichettati** (−18.707 €, 485 su XAUUSD, lotti 0,5-1,0, fino al
   27/07): non sappiamo ancora di chi siano.
 

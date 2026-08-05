@@ -362,6 +362,12 @@ int ABTG_OnInit()
                         _Symbol, InpSessionHour, InpSessionMin, InpRangeMinutes,
                         InpCloseHour, InpCloseMin));
    ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
+   if(InpEntryMode == ABTG_GAPFILL && !InpUseGapFill)
+      ABTGLog("NOTA: modalita' GAPFILL attiva. Il vecchio flag InpUseGapFill=false viene IGNORATO (prima faceva ricadere l'EA nel breakout senza dirlo).");
+   if(InpEntryMode == ABTG_DELAYED && InpDelayDirMode == ABTG_DIR_BREAK &&
+      InpRangeMode == ABTG_RANGE_OPENING && InpDelayMinutes <= InpRangeMinutes)
+      ABTGLog(StringFormat("NOTA: DELAYED+BREAK con attesa %d min <= range %d min: la decisione cade alla chiusura del range, si aspetta la rottura fino a %d min dopo.",
+                           InpDelayMinutes, InpRangeMinutes, InpPendingExpiryMin));
    return(INIT_SUCCEEDED);
   }
 
@@ -523,7 +529,11 @@ void ABTG_OnTick()
          // costruisco il range e poi piazzo gli ordini.
          // avanzo a PH_PLACED SOLO se la decisione e' stata presa (orari/dati ok):
          // se i dati M1 non sono ancora pronti riprovo al tick successivo.
-         if(InpEntryMode == ABTG_GAPFILL && InpUseGapFill)
+         // BUG 05/08: la modalita' GAPFILL era subordinata al flag legacy InpUseGapFill.
+         // Con il flag a false l'EA cadeva nel ramo BREAKOUT SENZA dirlo: nel walk-forward
+         // il motore 1 ha prodotto risultati identici al centesimo al motore 0 e il gap fill
+         // non e' mai stato testato. Ora comanda la modalita'; il flag resta solo storico.
+         if(InpEntryMode == ABTG_GAPFILL)
            {
             if(nowMin >= rangeEndMin)   // aspetto almeno la prima finestra come "conferma"
               { if(TryPlaceGapFill()) gPhase = PH_PLACED; }
@@ -763,6 +773,9 @@ bool TryPlaceRangeFade()
    if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
      { ABTGLog(StringFormat("FADE: candela %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
    if(!SpreadOK()) { ABTGLog("FADE: spread troppo alto: niente trade."); return(true); }
+   // BUG 05/08: il fade non passava MAI dai filtri di conferma (volumi/ATR). Nel walk-forward
+   // le righe con filtro volumi ON e OFF erano identiche al centesimo: il filtro non faceva nulla.
+   if(!ConfirmOK()) { ABTGLog("FADE: conferma (volumi/ATR) assente: niente trade."); return(true); }
 
    int  bias    = TrendBias();
    bool longOK  = (bias == 0 || bias == +1);   // BUY LIMIT sul minimo
@@ -878,7 +891,24 @@ bool TryPlaceDelayed()
       if(bid > gRangeHigh)     dir = +1;
       else if(bid < gRangeLow) dir = -1;
       else
-        { ABTGLog("DELAYED: dopo l'attesa il prezzo e' ANCORA dentro il range: nessuna direzione, niente trade."); return(true); }
+        {
+         // BUG 05/08: qui si rispondeva "giornata chiusa" (return true) al primo controllo.
+         // Con RangeMode=OPENING il momento della decisione coincide con la chiusura del range,
+         // quindi il prezzo e' DENTRO il range PER COSTRUZIONE: DELAYED+BREAK non poteva mai
+         // entrare (0 trade su 30 mesi nel walk-forward). Ora si continua ad aspettare la
+         // rottura vera, entro una finestra di attesa limitata.
+         MqlDateTime _d; TimeToStruct(TimeCurrent(), _d);
+         int nowMin    = TimeInMinutes(_d);
+         int openMin   = InpSessionHour*60 + InpSessionMin;
+         int decideMin = openMin + InpDelayMinutes;
+         if(InpRangeMode == ABTG_RANGE_OPENING && decideMin < openMin + InpRangeMinutes)
+            decideMin = openMin + InpRangeMinutes;
+         int limite = (InpPendingExpiryMin > 0) ? decideMin + InpPendingExpiryMin
+                                                : InpCloseHour*60 + InpCloseMin;
+         if(nowMin >= limite)
+           { ABTGLog("DELAYED: nessuna rottura entro la finestra di attesa: niente trade."); return(true); }
+         return(false);   // riprovo al tick successivo: aspetto la rottura
+        }
      }
    else if(InpDelayDirMode == ABTG_DIR_MID)
      {
