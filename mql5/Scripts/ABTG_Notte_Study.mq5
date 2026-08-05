@@ -114,6 +114,15 @@ void OnStart()
 
    Notte notti[]; ArrayResize(notti,0);
 
+   // --- CONTROLLO: l'escursione di OGNI ora della notte, non solo di quella
+   //     "sospetta". Senza il termine di paragone un 48% non vuol dire nulla:
+   //     se tutte le ore stanno la', quel numero e' la norma, non un segnale.
+   //     Coppie (ora, quota%) accumulate su tutte le notti.
+   int    qOra[];  ArrayResize(qOra,0);
+   double qVal[];  ArrayResize(qVal,0);
+   int    notteCorta = 0;    // notti con meno ore del previsto (domenica, festivi)
+   int    oreAttese  = 0; for(int h=0;h<24;h++) if(InNotte(h)) oreAttese++;
+
    int i=0;
    while(i<n)
      {
@@ -123,6 +132,8 @@ void OnStart()
       double hi=0, lo=0; bool have=false;
       int    hiIdx=-1, loIdx=-1;
       double fHi=0, fLo=0; bool haveF=false;
+      double oHi[24], oLo[24]; bool oHave[24];
+      for(int h=0;h<24;h++){ oHi[h]=0; oLo[h]=0; oHave[h]=false; }
       int    j=i;
       for(; j<n && ChiaveNotte(m5[j].time)==key; j++)
         {
@@ -134,6 +145,8 @@ void OnStart()
             if(m5[j].high>hi){ hi=m5[j].high; hiIdx=j; }
             if(m5[j].low <lo){ lo=m5[j].low;  loIdx=j; }
            }
+         if(!oHave[ora]){ oHi[ora]=m5[j].high; oLo[ora]=m5[j].low; oHave[ora]=true; }
+         else { if(m5[j].high>oHi[ora]) oHi[ora]=m5[j].high; if(m5[j].low<oLo[ora]) oLo[ora]=m5[j].low; }
          if(InFocus(ora))
            {
             if(!haveF){ fHi=m5[j].high; fLo=m5[j].low; haveF=true; }
@@ -143,6 +156,18 @@ void OnStart()
       int fineGiorno = j;   // prima barra del giorno logico successivo
 
       if(!have || hi<=lo){ i=fineGiorno; continue; }
+
+      //--- quota di ciascuna ora sull'ampiezza della notte
+      int oreCoperte=0;
+      for(int h=0;h<24;h++)
+        {
+         if(!oHave[h]) continue;
+         oreCoperte++;
+         int sz=ArraySize(qOra);
+         ArrayResize(qOra,sz+1); ArrayResize(qVal,sz+1);
+         qOra[sz]=h; qVal[sz]=100.0*((oHi[h]-oLo[h])/pt)/((hi-lo)/pt);
+        }
+      if(oreCoperte < oreAttese) notteCorta++;
 
       Notte nt;
       nt.dataKey  = m5[i].time;
@@ -244,6 +269,43 @@ void OnStart()
    if(reale > atteso*1.3)      Print("       LETTURA: c'e' davvero una concentrazione. Il racconto regge.");
    else if(reale < atteso*0.8) Print("       LETTURA: in quell'ora ci sono MENO estremi del caso. Il racconto non regge.");
    else                        Print("       LETTURA: distribuzione piatta. L'ora, da sola, non e' un'informazione.");
+   Print("    ATTENZIONE alla PRIMA e all'ULTIMA ora della finestra: sono gonfiate per");
+   Print("    costruzione (gli estremi di un percorso casuale si addensano ai bordi).");
+   Print("    Il segnale vero, se c'e', e' una GOBBA in mezzo alla valle.");
+
+   //--- 1-bis. IL CONTROLLO: quanto pesa OGNI ora, non solo quella sospetta.
+   //    Serve il paragone: se tutte le ore prendono la stessa fetta, il numero
+   //    dell'ora sospetta non e' un segnale, e' la norma.
+   Print("");
+   Print("--- 1-bis) QUOTA DI OGNI ORA sull'ampiezza della notte (il controllo) ---");
+   Print("    ora | notti | quota mediana | quota media");
+   int nQ = ArraySize(qOra);
+   double migliore=-1; int oraMigliore=-1;
+   for(int h=0;h<24;h++)
+     {
+      if(!InNotte(h)) continue;
+      double v[]; ArrayResize(v,0);
+      double somma=0;
+      for(int k=0;k<nQ;k++)
+         if(qOra[k]==h){ int s=ArraySize(v); ArrayResize(v,s+1); v[s]=qVal[k]; somma+=qVal[k]; }
+      int nv=ArraySize(v);
+      if(nv==0) continue;
+      ArraySort(v);
+      double med = v[nv/2];
+      string marca = InFocus(h) ? "   <== l'ora sospetta" : "";
+      Print(StringFormat("   %02d:00 | %5d | %11.1f%% | %9.1f%%%s", h, nv, med, somma/nv, marca));
+      if(med>migliore){ migliore=med; oraMigliore=h; }
+     }
+   Print(StringFormat("    -> l'ora con la quota mediana piu' alta e' le %02d:00 server (%.1f%%).",
+                      oraMigliore, migliore));
+   if(InFocus(oraMigliore)) Print("       E' proprio l'ora sospetta: il racconto regge anche al controllo.");
+   else                     Print("       NON e' l'ora sospetta: il numero della finestra sospetta va ridimensionato.");
+   if(notteCorta>0)
+     {
+      Print(StringFormat("    NB: %d notti su %d sono INCOMPLETE (meno di %d ore piene): domenica,",
+                         notteCorta, N, oreAttese));
+      Print("        festivi, pausa giornaliera del broker. Sottostimano l'ampiezza.");
+     }
 
    //--- 2. QUANTO VALE lo swing della notte
    double sw[]; ArrayResize(sw,N);
