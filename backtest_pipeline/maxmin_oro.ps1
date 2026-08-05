@@ -50,18 +50,31 @@ $EA="ABTG_MaxMinNotte"
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 
-# I TF di gestione NON sono numeri consecutivi (M5=5, M15=15, M30=30, H1=16385):
-# uno sweep start||step||stop passerebbe da valori inesistenti (25, 35...).
-# Quindi si gira un lancio per TF, e dentro si spazzola il resto.
-$TFs=@(
-  @{Val=5;     Nome="M5"},
-  @{Val=15;    Nome="M15"},
-  @{Val=30;    Nome="M30"},
-  @{Val=16385; Nome="H1"}
-)
+# I TF di gestione NON sono numeri consecutivi (M5=5, M15=15, M30=30, H1=16385,
+# H4=16388): uno sweep start||step||stop passerebbe da valori inesistenti
+# (25, 35...). Quindi si gira un lancio per TF, e dentro si spazzola il resto.
+#
+# FASE 2: la griglia della fase 1 era messa male e i dati lo hanno detto.
+# Due gradienti MONOTONI che puntano entrambi al BORDO della griglia:
+#   buffer  200 -> 800 -> 1400 -> 2000 : PF 1,388 · 1,320 · 1,131 · 0,977
+#   TF gest. M5 -> M15 -> M30  -> H1   : PF 1,121 · 1,147 · 1,175 · 1,327
+# Il migliore sta all'estremo in entrambi i casi, cioe' l'ottimo e' FUORI.
+# Qui si guarda dall'altra parte: buffer piu' STRETTI (50/100/200/400) e
+# TF piu' ALTI (M30/H1/H4).
 if($Fase -eq 1){
+  $TFs=@(
+    @{Val=5;     Nome="M5"},
+    @{Val=15;    Nome="M15"},
+    @{Val=30;    Nome="M30"},
+    @{Val=16385; Nome="H1"}
+  )
   $Model=1; $Etichetta="FASE 1 - OHLC M1 (veloce, numeri gonfi: si legge in relativo)"; $PerTF=12
 }else{
+  $TFs=@(
+    @{Val=30;    Nome="M30"},
+    @{Val=16385; Nome="H1"},
+    @{Val=16388; Nome="H4"}
+  )
   $Model=4; $Etichetta="FASE 2 - TICK REALI (lento, numeri veri)"; $PerTF=4
 }
 $NPass=$PerTF*$TFs.Count
@@ -99,6 +112,10 @@ Write-Host "    compilato" -ForegroundColor Green
 # --- riga dello stop: in fase 1 e' in sweep, in fase 2 e' fissata ---
 if($Fase -eq 1){ $rigaSL="InpSLMode=0||0||1||2||Y" }
 else           { $rigaSL="InpSLMode=$SLMode||$SLMode||0||$SLMode||N" }
+
+# --- buffer: in fase 2 si guarda SOTTO i 200 punti, dove la fase 1 puntava ---
+if($Fase -eq 1){ $rigaBuffer="InpBufferPoints=200||200||600||2000||Y" }   # 200/800/1400/2000
+else           { $rigaBuffer="InpBufferPoints=50||50||100||350||Y" }      # 50/150/250/350
 
 foreach($tf in $TFs){
   Write-Host ""
@@ -139,7 +156,7 @@ InpTPfinal_R=4.0||4.0||0||4.0||N
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpMgmtTF=$($tf.Val)||$($tf.Val)||0||$($tf.Val)||N
 $rigaSL
-InpBufferPoints=200||200||600||2000||Y
+$rigaBuffer
 "@
 
   $tag="oro_maxmin_fase$($Fase)_$($tf.Nome)"
