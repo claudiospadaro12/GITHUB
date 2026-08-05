@@ -35,9 +35,23 @@
 #           RangeMinutes candidato (35). Dice se il DELAYED regge fuori
 #           campione, e se regge ANCHE con il range lungo.
 #           12 pass x 2 finestre x 2 mercati = 48 pass
+#  FASE C - IL COSTO, ed e' il test che ha piu' probabilita' di uccidere
+#           tutto. Il tester riempie gli ordini pendenti STOP al prezzo
+#           ESATTO del livello: su un breakout e' ottimista per
+#           costruzione, perche' nella realta' si entra peggio.
+#           InpSlippagePts peggiora l'entry di N punti.
+#           ⚠️ Funziona SOLO sul breakout: DELAYED e OPENCONFIRM entrano
+#           a mercato (gTrade.Buy), pagano gia' ask/bid e quindi il tester
+#           li simula onestamente - uno slippage extra su un market order
+#           non e' nemmeno riproducibile dall'EA. Ma va bene cosi': e' il
+#           breakout il motore ottimista, ed e' li' che vive il range 35.
+#           RangeMinutes 5/15/25/35/45 x slippage 0/100/200/300 punti
+#           (= 0/1/2/3 punti indice), sul periodo INTERO: il costo non e'
+#           una domanda di sovradattamento, e cosi' costa la meta'.
+#           20 pass x 1 finestra x 2 mercati = 40 pass
 #
-#  128 pass a tick reali in tutto. E' roba da notte.
-#  (con -SoloGeometria si ferma a 80; con -SoloMotore a 48)
+#  168 pass a tick reali in tutto. E' roba da notte piena.
+#  (-SoloGeometria = 80 · -SoloMotore = 48 · -SoloSlippage = 40)
 #
 #  Gestione fissata a quella validata: TP 1,5R, trailing base candela M5,
 #  niente parziale ne' BE, rischio 1%. Non e' quella accesa in forward -
@@ -51,6 +65,7 @@
 param(
   [switch]$SoloGeometria,
   [switch]$SoloMotore,
+  [switch]$SoloSlippage,
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
@@ -65,10 +80,15 @@ $Jobs=@(
   @{ Nome="NASDAQ"; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; Ora=14; Min=30; Vol=0 }
 )
 
-# Le due finestre. NON si sovrappongono: e' tutto il punto.
-$Finestre=@(
+# Le due finestre del walk-forward. NON si sovrappongono: e' tutto il punto.
+$WF=@(
   @{ Tag="IS";  Da="2024.01.01"; A="2025.06.30" },
   @{ Tag="OOS"; Da="2025.07.01"; A="2026.06.30" }
+)
+# La FASE C non e' una domanda di sovradattamento, e' una domanda di COSTI:
+# gira sul periodo intero, che e' anche piu' economico.
+$TUTTO=@(
+  @{ Tag="FULL"; Da="2024.01.01"; A="2026.06.30" }
 )
 
 # Le due fasi. In FASE A il motore e' pinnato e si spazzola la geometria;
@@ -76,16 +96,28 @@ $Finestre=@(
 # enum, IGNORA start||step||stop e li spazzola TUTTI - scoperto il 05/08.
 # Quindi in FASE B bastano due righe per avere sei motori.
 $Fasi=@(
-  @{ Tag="A_geometria"; Pass=20
-     Sweep="InpEntryMode=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpBufferPoints=300||100||200||700||Y`nInpUseVolumeFilter=0||0||0||0||N" },
-  @{ Tag="B_motore";    Pass=12
-     Sweep="InpRangeMinutes=$RangeCandidato||$RangeCandidato||0||$RangeCandidato||N`nInpBufferPoints=200||200||0||200||N`nInpEntryMode=0||0||5||5||Y`nInpUseVolumeFilter=0||0||1||1||Y" }
+  @{ Tag="A_geometria"; Pass=20; Win=$WF
+     Sweep="InpEntryMode=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpBufferPoints=300||100||200||700||Y`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N" },
+  @{ Tag="B_motore";    Pass=12; Win=$WF
+     Sweep="InpRangeMinutes=$RangeCandidato||$RangeCandidato||0||$RangeCandidato||N`nInpBufferPoints=200||200||0||200||N`nInpEntryMode=0||0||5||5||Y`nInpUseVolumeFilter=0||0||1||1||Y`nInpSlippagePts=0||0||0||0||N" },
+  # FASE C - IL COSTO. Il tester riempie gli ordini pendenti STOP al prezzo
+  # esatto del livello: su un breakout e' ottimista per costruzione. Nella
+  # realta' si entra PEGGIO. InpSlippagePts peggiora l'entry, e funziona
+  # SOLO sul breakout - gli altri motori entrano a mercato (gTrade.Buy) e
+  # pagano gia' ask/bid, quindi il tester li simula onestamente e uno
+  # slippage extra non e' nemmeno riproducibile dall'EA.
+  # Qui si spazzola tutto il gradiente del range contro quattro livelli di
+  # costo: la domanda non e' "il 35 vince", ma "il 35 vince ANCORA quando
+  # l'entry costa 1, 2 o 3 punti indice in piu'".
+  @{ Tag="C_slippage";  Pass=20; Win=$TUTTO
+     Sweep="InpEntryMode=0||0||0||0||N`nInpBufferPoints=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpSlippagePts=0||0||100||300||Y" }
 )
 if($SoloGeometria){ $Fasi = $Fasi | Where-Object { $_.Tag -eq "A_geometria" } }
 if($SoloMotore)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "B_motore" } }
+if($SoloSlippage) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "C_slippage" } }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
-$NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $Finestre.Count * $Jobs.Count }
+$NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }
 Write-Host "=== WALK-FORWARD DELLE APERTURE ===" -ForegroundColor Cyan
 Write-Host "    IS  2024.01.01 - 2025.06.30   (qui si sceglie)" -ForegroundColor Gray
 Write-Host "    OOS 2025.07.01 - 2026.06.30   (qui si verifica, e NON si guarda per scegliere)" -ForegroundColor Gray
@@ -152,7 +184,6 @@ InpNewsBeforeMin=30||30||0||30||N
 InpNewsAfterMin=30||30||0||30||N
 InpNewsShiftMinutes=0||0||0||0||N
 InpNewsFlatten=1||1||0||1||N
-InpSlippagePts=0||0||0||0||N
 InpAtrFilterBars=20||20||0||20||N
 InpAtrFilterMult=1.0||1.0||0||1.0||N
 InpMaxSpread=0||0||0||0||N
@@ -168,7 +199,7 @@ InpVerbose=1||1||0||1||N
 
 foreach($j in $Jobs){
   foreach($fase in $Fasi){
-    foreach($w in $Finestre){
+    foreach($w in $fase.Win){
 
       $tag="$($j.Nome)_$($fase.Tag)_$($w.Tag)"
       $done=Join-Path $Results "$tag.csv"
@@ -254,5 +285,5 @@ $Inputs
 
 Write-Host ""
 Write-Host "=== FINITO === Zippa 'risultati_walkforward' e caricamela." -ForegroundColor White
-Write-Host "    Devono esserci 8 CSV: 2 mercati x 2 fasi x 2 finestre." -ForegroundColor Gray
+Write-Host "    Devono esserci 12 CSV: 8 di walk-forward + 4 di slippage." -ForegroundColor Gray
 Write-Host "    NON guardare l'OOS per scegliere: e' l'unica regola che conta qui." -ForegroundColor Yellow
