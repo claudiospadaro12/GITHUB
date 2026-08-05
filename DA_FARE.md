@@ -79,23 +79,50 @@ continuare a dare per buono quel filtro.
 I "393 trade" del MaxMinNotte sono forse 130-180 posizioni. **La soglia di significatività
 va applicata alle posizioni.**
 
-### B7. 🔴 Lo storico di **D30EUR / NASUSD / U30USD** non copre il 2024 — l'IS è dimezzato
-**Prova:** walk-forward 05/08. L'EA fa **max 1 trade/giorno**, i mesi hanno ~21 giorni di borsa.
-Finestra OOS (12 mesi): **20,4 trade/mese** = quasi tutti i giorni. Finestra IS (18 mesi):
-**10,0 trade/mese** = metà dei giorni. Rapporto **2,03 sul DAX e 2,03 sul Nasdaq** — due simboli,
-due sessioni, stesso identico numero. Sul Dow era già comparso lo stesso segno (8,1 vs 16,4).
-**Non è un effetto di mercato: lo storico parte tardi**, probabilmente verso ottobre 2024.
-**Effetto:** ogni confronto **IS→OOS fatto finora non è un test di overfitting valido**, perché le
-due finestre non sono confrontabili. Anche lo Spearman −0,357 del Dow va riletto in questa luce.
-**Chiude quando:** verificata in MT5 la data del primo trade dei report IS, scaricato lo storico
-completo (Strumenti → Simboli → Barre/Tick), rifatte le fasi A e B in IS.
-**Finché non è chiuso: l'IS non decide niente. Vale solo l'OOS.**
+### B7. ✅ **CHIUSO 06/08** — lo storico BCM parte dal **26/09/2024**, e va bene così
+**Come è stato trovato:** walk-forward 05/08. L'EA fa max 1 trade/giorno su ~21 giorni di borsa
+al mese, quindi deve stare intorno a 20/mese. La finestra IS ne dava **10,0**, la OOS **20,4**:
+rapporto **2,03 identico su D30EUR e NASUSD** (e lo stesso segno sul Dow). Due simboli diversi,
+stesso identico numero → non è mercato, è storico.
+**Misurato:** `scarica_storico.ps1` con `SERIES_SERVER_FIRSTDATE`. **PrimaDataLocale =
+PrimaDataServer = 2024.09.26** su tutti e 3 i simboli e tutti e 7 i timeframe. Non manca niente
+in locale: **BCM prima di quella data non ha nulla.** Tick reali completi da lì (D30EUR 33,6 M ·
+NASUSD 162,7 M · U30USD 67,0 M).
+**Il conto torna:** la finestra IS non era di 18 mesi ma di **9,1**. Ricalcolato: DAX
+**19,80** trade/mese contro i 20,39 dell'OOS · Nasdaq **20,15** contro 20,75. L'anomalia sparisce.
+**Conseguenza — ed è l'opposto di quanto scritto il 05/08:**
+- il walk-forward **è valido**. IS 26/09/2024→30/06/2025 e OOS 01/07/2025→30/06/2026 sono due
+  finestre vere, contigue, non sovrapposte (43% / 57%). **Non c'è niente da riscaricare né da
+  rifare** per questo motivo.
+- l'IS pesa meno di quanto credessi: **181 trade, non 360**. Campione più piccolo = più rumore.
+  Motivo in più per fidarsi dell'altopiano e non della singola cella migliore.
+- i crolli IS→OOS **sono crolli veri**: OPENCONFIRM Nasdaq +2086 (PF 1,816) → −145 resta un caso
+  da manuale di sovra-ottimizzazione. E lo **Spearman −0,357 del Dow resta in piedi.**
+**Resta da fare (documentazione, non misura):** ogni CSV e ogni referto in archivio dice
+*"2024.01.01"* nel periodo. **È un'etichetta falsa**: il test parte dal 26/09/2024. Da correggere
+ovunque, e da mettere `2024.09.26` come data d'inizio in tutti i driver `.ps1`.
+**Tetto invalicabile:** nessun backtest su questi indici può risalire oltre il **26/09/2024**.
+Chi promette risultati su periodi più lunghi sta leggendo dati che non esistono.
 
 ### B8. La FASE B del walk-forward va rifatta: 2 motori su 6 non sono mai stati eseguiti
 **Prova:** referto `risultati_archivio/Walkforward_Aperture/REFERTO_WALKFORWARD.md`.
 GAPFILL cadeva nel ramo breakout, RANGE_FADE ignorava il filtro volumi, DELAYED non poteva
 entrare per costruzione (vedi E6/E7/E8). I difetti sono corretti, i numeri no.
 **Chiude quando:** rilanciata la FASE B sui tre EA ricompilati.
+
+### B9. Misurare la prima data vera anche di **XAUUSD, SPXUSD e i cambi**
+**Perché:** su D30EUR/NASUSD/U30USD è saltato fuori che i backtest partivano 9 mesi dopo
+l'etichetta. Gli altri simboli non sono stati misurati, e in `maxmin_oro.ps1`,
+`goldencross_lavorenti.ps1`, `studio_apertura.ps1`, `test_orb_toolkit.ps1`, `valida_realtick*.ps1`,
+`scan_market.ps1`, `walkforward.ps1` c'è ancora scritto `FromDate=2024.01.01`. **Non sono stati
+corretti apposta**: correggerli senza aver misurato sarebbe rimpiazzare un'etichetta falsa con
+un'altra. Sull'oro c'è già un indizio: lo studio della notte trovava M5 solo **dal 28/02/2025**.
+**Chiude quando:** lanciato una volta con l'elenco completo — bastano le barre, niente tick:
+```
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\scarica_storico.ps1" `
+  -Auto -ChiudiMT5 -SenzaTick -Simboli "XAUUSD,XAGUSD,SPXUSD,EURUSD,GBPUSD,USDJPY,AUDUSD,USDCAD,USDCHF,NZDUSD"
+```
+e poi corrette le date in quei driver.
 
 ### B6. Lo storico dell'oro parte davvero dal 2024?
 Lo studio della notte ha trovato dati M5 **solo dal 28/02/2025**, ma i backtest chiedono dal
@@ -117,8 +144,8 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 | C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
 | C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
 
-**Ordine consigliato:** **B7 (scarica lo storico — blocca tutto il resto)** → C1 (in corso) → C5 → C6 → C3 → C2 → C4.
-Mai due insieme: si rubano la CPU.
+**Ordine consigliato:** ~~B7~~ (chiuso: lo storico è quello che è, 26/09/2024) → C1 (in corso) →
+**C5** (i due motori mai eseguiti) → C6 → C3 → C2 → C4. Mai due insieme: si rubano la CPU.
 
 ---
 

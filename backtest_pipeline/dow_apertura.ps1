@@ -156,7 +156,7 @@ if($Fase -eq "trailing2"){
 #     Tutti i numeri del Dow sono stati scelti guardando 2024.01-2026.06.
 #     Finche' non li si prova su un periodo MAI visto, restano in-sample.
 #     Qui si lancia la STESSA griglia su due finestre separate:
-#        IS  2024.01.01 - 2025.06.30   (18 mesi)
+#        IS  2024.09.26 - 2025.06.30   (9,1 mesi: BCM non ha nulla prima)
 #        OOS 2025.07.01 - 2026.06.30   (12 mesi, mai usati per scegliere)
 #     Non cerco il massimo: cerco se la REGIONE BUONA e' la stessa nelle
 #     due finestre. Se lo e', l'edge e' stabile nel tempo. Se in OOS
@@ -228,10 +228,10 @@ if(-not (Test-Path (Join-Path $MqlExperts "$EA.ex5"))){Write-Host "ERRORE compil
 Write-Host "    compilato $EA.ex5" -ForegroundColor Green
 
 # Una finestra sola per tutte le fasi, DUE per il walkforward.
-$Finestre = @( @{Tag=""; Da="2024.01.01"; A="2026.06.30"} )
+$Finestre = @( @{Tag=""; Da="2024.09.26"; A="2026.06.30"} )
 if($Fase -eq "walkforward"){
   $Finestre = @(
-    @{Tag="_IS";  Da="2024.01.01"; A="2025.06.30"},   # qui si sceglie
+    @{Tag="_IS";  Da="2024.09.26"; A="2025.06.30"},   # qui si sceglie
     @{Tag="_OOS"; Da="2025.07.01"; A="2026.06.30"}    # qui si verifica: mai visto prima
   )
 }

@@ -15,7 +15,7 @@
 #  Qui si fa quello che si e' fatto sul Dow, l'unico EA validato che
 #  abbiamo: la stessa griglia girata su DUE finestre separate.
 #
-#     IS   2024.01.01 -> 2025.06.30   (18 mesi: qui si sceglie)
+#     IS   2024.09.26 -> 2025.06.30   (9,1 mesi: qui si sceglie - BCM non ha nulla prima)
 #     OOS  2025.07.01 -> 2026.06.30   (12 mesi: qui si verifica)
 #
 #  ⚠️ LA REGOLA, e vale piu' del test: **l'OOS non si guarda per
@@ -82,13 +82,13 @@ $Jobs=@(
 
 # Le due finestre del walk-forward. NON si sovrappongono: e' tutto il punto.
 $WF=@(
-  @{ Tag="IS";  Da="2024.01.01"; A="2025.06.30" },
+  @{ Tag="IS";  Da="2024.09.26"; A="2025.06.30" },
   @{ Tag="OOS"; Da="2025.07.01"; A="2026.06.30" }
 )
 # La FASE C non e' una domanda di sovradattamento, e' una domanda di COSTI:
 # gira sul periodo intero, che e' anche piu' economico.
 $TUTTO=@(
-  @{ Tag="FULL"; Da="2024.01.01"; A="2026.06.30" }
+  @{ Tag="FULL"; Da="2024.09.26"; A="2026.06.30" }
 )
 
 # Le due fasi. In FASE A il motore e' pinnato e si spazzola la geometria;
@@ -119,7 +119,7 @@ if($SoloSlippage) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "C_slippage" } }
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 $NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }
 Write-Host "=== WALK-FORWARD DELLE APERTURE ===" -ForegroundColor Cyan
-Write-Host "    IS  2024.01.01 - 2025.06.30   (qui si sceglie)" -ForegroundColor Gray
+Write-Host "    IS  2024.09.26 - 2025.06.30   (qui si sceglie)" -ForegroundColor Gray
 Write-Host "    OOS 2025.07.01 - 2026.06.30   (qui si verifica, e NON si guarda per scegliere)" -ForegroundColor Gray
 Write-Host "    $NPass pass a tick reali." -ForegroundColor Gray
 

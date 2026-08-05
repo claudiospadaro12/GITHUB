@@ -7,32 +7,40 @@ Gestione fissa in tutte le fasi: rischio 1%, SL a range, TP1_R 0.5 (=1.5R), trai
 
 ---
 
-## ⚠️ PRIMA DI TUTTO: la finestra IS ha meta' dei giorni mancanti
+## ⚠️ PRIMA DI TUTTO: le date scritte nei CSV sono FALSE — si parte dal 26/09/2024
 
-| finestra | mesi | trade medi | trade/mese |
+Il sospetto era nato da qui: l'EA fa **al massimo un trade al giorno** (`InpOneTradePerDay=1`) e i mesi
+hanno ~21 giorni di borsa, quindi deve stare intorno a 20 trade/mese. La OOS ne dava 20.4, la IS **10.0**.
+Rapporto **2.03 sul DAX e 2.03 sul Nasdaq** — due simboli, due sessioni, stesso identico numero. Non e'
+mercato, e' storico.
+
+**Misurato il 06/08** con `scarica_storico.ps1` (legge `SERIES_SERVER_FIRSTDATE`, cioe' cosa possiede il
+broker, accanto a cosa c'e' sul disco): su **D30EUR, NASUSD e U30USD**, su **tutti e 7 i timeframe**,
+locale e server coincidono al giorno — **2024.09.26**. Non manca nulla in locale: **BCM prima di quella
+data non ha nulla.** Tick reali completi da li' (33.6 M · 162.7 M · 67.0 M).
+
+Quindi la finestra "IS 2024.01.01 → 2025.06.30" non era di 18 mesi ma di **9.1**. Rifatto il conto:
+
+| finestra | mesi VERI | trade medi | trade/mese |
 |---|---:|---:|---:|
-| DAX IS | 18 | 180.8 | **10.04** |
-| DAX OOS | 12 | 244.7 | **20.39** |
-| NASDAQ IS | 18 | 184.0 | **10.22** |
-| NASDAQ OOS | 12 | 249.0 | **20.75** |
+| DAX IS | **9.1** | 180.8 | **19.80** |
+| DAX OOS | 12.0 | 244.7 | 20.39 |
+| NASDAQ IS | **9.1** | 184.0 | **20.15** |
+| NASDAQ OOS | 12.0 | 249.0 | 20.75 |
 
-L'EA fa **al massimo un trade al giorno** (`InpOneTradePerDay=1`) e i mesi hanno ~21 giorni di borsa.
-L'OOS gira a 20.4 trade/mese = **quasi tutti i giorni**. L'IS gira a 10.0 = **meta' dei giorni**.
-Il rapporto e' 2.03 su DAX e 2.03 su Nasdaq — due simboli diversi, sessioni diverse, stesso identico rapporto.
-Non e' un effetto di mercato: **e' lo storico BCM che non copre tutto il 2024**. Con ogni probabilita' parte
-verso ottobre 2024, quindi la finestra "18 mesi" ne contiene davvero ~9.
+L'anomalia sparisce. Stesso conto sul Dow (8.1 nominali → **16.0** reali contro 16.4): torna anche li'.
 
-Lo stesso rapporto era comparso sul Dow (8.1 IS vs 16.4 OOS). Tre simboli, stesso segno.
+**Conseguenze — e sono l'opposto di quello che avevo scritto la sera del 05/08:**
+1. **Il walk-forward e' valido.** IS 26/09/2024→30/06/2025 e OOS 01/07/2025→30/06/2026 sono due finestre
+   vere, contigue, non sovrapposte (43% / 57%). Non c'e' niente da riscaricare e niente da rifare.
+2. **I crolli IS→OOS sono crolli veri.** OPENCONFIRM Nasdaq +2086 (PF 1.816) → −145 resta un caso da
+   manuale di sovra-ottimizzazione, e lo **Spearman −0.357 del Dow resta in piedi**.
+3. **L'IS pesa meno di quanto sembrasse**: 181 trade, non 360. Campione piccolo = piu' rumore. Un motivo
+   in piu' per fidarsi dell'altopiano e non della cella migliore.
+4. **Il periodo massimo testabile su questi indici e' 26/09/2024 → oggi**, ~22 mesi. Oltre non si va.
 
-**Conseguenze, e vanno prese sul serio:**
-1. Il confronto IS→OOS **non e' un test di overfitting valido**: le due finestre non sono confrontabili.
-   Dove sotto scrivo "crolla fuori campione" sto descrivendo il dato, non dimostrando l'overfit.
-2. La FASE C su FULL mescola meta' vuota e meta' piena: i **valori assoluti** sono sottostimati, ma il
-   **confronto fra livelli di slippage** resta valido perche' avviene sullo stesso periodo.
-3. L'unica finestra di cui ci si puo' fidare in assoluto e' l'**OOS**.
-
-→ Da fare: verificare in MT5 la data del primo trade nel report IS, scaricare lo storico completo,
-rifare la FASE A/B in IS. Finche' non e' fatto, **l'IS non decide niente**.
+→ Resta da correggere la **documentazione**: ogni CSV e ogni referto scrive "2024.01.01" come inizio.
+E' un'etichetta falsa e va sostituita con `2024.09.26` anche nei driver `.ps1`.
 
 ---
 
@@ -168,13 +176,16 @@ mercati, in croce. Nasdaq IS +2086 con PF 1.816 → OOS −145. Chiuso.
    campione**, e il range 35 e' l'unico che regge **tutti e quattro** i livelli di slippage degradando in
    modo ordinato. E' la prima configurazione che passa i tre cancelli (fuori campione, robustezza di
    vicinato, costo). Da portare a **range 40, buffer 400** — centro dell'altopiano, non massimo.
-   *Non e' ancora un via libera al forward*: manca la verifica con lo storico completo in IS.
+   Verificato il 06/08 che lo storico non e' incompleto ma solo piu' corto del previsto: **il verdetto
+   regge**. Resta un limite di campione, non di dati: 12 mesi di OOS, 240 trade per cella.
 2. **Nasdaq, breakout d'apertura: bocciato.** 19 celle su 20 negative fuori campione, 20 su 20 negative
    sotto costo. Nella configurazione testata (BREAKOUT, volumi OFF, RangeMode OPENING) la linea va chiusa.
    **Ma non e' la parola definitiva sul Nasdaq**: la FASE B mostra che con **RETEST** il Nasdaq e'
    positivo in OOS sia con filtro volumi ON che OFF, e il forward gira con `RangeMode=2` (candela H1
    precedente) che **nessun test ha mai usato**. Prima di spegnere: provare RETEST e RangeMode 2.
-3. **Il walk-forward come l'abbiamo impostato non e' ancora valido**, per via dello storico IS dimezzato.
-   Il pezzo che tiene e' l'OOS, ed e' su quello che si basano i punti 1 e 2.
+3. **Il walk-forward e' valido** (verificato il 06/08): la IS non era corrotta, era **piu' corta di come
+   la chiamavamo** — 9.1 mesi invece di 18, perche' BCM parte dal 26/09/2024. Le due finestre sono vere e
+   contigue. Quindi i crolli IS→OOS della FASE B sono crolli veri, non artefatti.
+   Da correggere sono le **etichette**: ovunque c'e' scritto "dal 2024.01.01" va messo **2024.09.26**.
 4. **Tre difetti del motore trovati grazie a righe identiche in tabella.** Se due righe che dovrebbero
    differire coincidono al centesimo, non e' una coincidenza: e' un ramo di codice che non gira.
