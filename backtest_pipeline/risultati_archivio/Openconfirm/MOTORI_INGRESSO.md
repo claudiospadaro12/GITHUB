@@ -92,3 +92,56 @@ esattamente il problema che credevo di aver risolto.
 
 **Da rifare**: solo il giro con `-OCTimeframe 0`, 4 pass per mercato. Con lo script
 aggiornato il nome del CSV porta il TF e non si sovrascrive più.
+
+---
+
+# AGGIORNAMENTO — arrivato il Nasdaq su M5: OPENCONFIRM è bocciato
+
+Un'ora fa, visto il **+1.032,77** del DAX su M5, avevo scritto: *"prima di dire che
+l'OPENCONFIRM funziona voglio vederlo su due mercati."* Il secondo mercato è arrivato.
+
+## Le otto celle dell'OPENCONFIRM
+
+| | volumi | profit | PF | trade |
+|---|---|---:|---:|---:|
+| **DAX M5** | **ON** | **+1.032,77** | **1,086** | 429 |
+| DAX M5 | off | −1.377,66 | 0,890 | 440 |
+| DAX M15 | ON | −669,00 | 0,947 | 438 |
+| DAX M15 | off | +71,31 | 1,006 | 439 |
+| **Nasdaq M5** | **ON** | **−1.552,28** | **0,857** | 332 |
+| Nasdaq M5 | off | −2.944,39 | 0,735 | 444 |
+| Nasdaq M15 | ON | −450,16 | 0,955 | 403 |
+| Nasdaq M15 | off | −1.387,92 | 0,868 | 431 |
+
+**Una cella positiva su otto.** E cambia segno con qualunque cosa si tocchi: cambia il
+timeframe (M5 → M15: da +1.033 a −669), cambiano i volumi (ON → off: da +1.033 a −1.378),
+cambia il mercato (DAX → Nasdaq: da +1.033 a **−1.552**).
+
+Sul Nasdaq **tutte e quattro** le celle sono in perdita, e la peggiore è proprio quella su
+M5 senza volumi: −2.944,39 con PF 0,735.
+
+**Verdetto: OPENCONFIRM è bocciato.** Il +1.032,77 del DAX era una cella fortunata, non un
+motore. Non ci si costruisce sopra.
+
+## Cosa sopravvive: DELAYED + volumi
+
+| | volumi | profit | PF | DD | trade |
+|---|---|---:|---:|---:|---:|
+| **DAX** | **ON** | **+619,91** | **1,197** | **8,12%** | 120 |
+| DAX | off | +37,26 | 1,007 | 14,66% | 179 |
+| **Nasdaq** | **ON** | **+387,22** | **1,200** | **4,78%** | 99 |
+| Nasdaq | off | −445,36 | 0,909 | 8,74% | 204 |
+
+**È l'unica configurazione positiva su entrambi i mercati**, con PF 1,197 e 1,200 e DD
+8,1% e 4,8%. E il filtro volumi si comporta allo stesso modo su tutti e due (accendendolo
+migliora, spegnendolo peggiora): coerenza che l'OPENCONFIRM non ha mai avuto.
+
+Resta il suo limite, invariato: **120 e 99 trade**, ed è il migliore di 12 combinazioni per
+mercato. Va in walk-forward prima di qualunque altra cosa.
+
+## Cosa ho imparato su me stesso
+
+Ho annunciato un risultato basandomi su **un mercato solo**, con entusiasmo, dopo aver
+passato la giornata a scoprire che misuravo le cose sbagliate. La disciplina di aspettare
+il secondo mercato non era prudenza eccessiva: era l'unica cosa che ha impedito di mettere
+in forward un EA che sul Nasdaq perde 1.552 €.
