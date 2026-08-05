@@ -21,12 +21,17 @@
 #   IL BROKER NON HA PIU' STORICO -> inutile insistere: si SPOSTA la
 #                                    finestra di test, non si scarica
 #
-#  ESEMPI
-#   .\scarica_storico.ps1                       # installa + istruzioni
-#   .\scarica_storico.ps1 -Auto                 # fa tutto da solo (MT5 chiuso)
-#   .\scarica_storico.ps1 -Auto -Da 2022.01.01  # piu' indietro
-#   .\scarica_storico.ps1 -Simboli "XAUUSD" -SenzaTick
-#   .\scarica_storico.ps1 -SoloReferto          # rileggi l'ultimo risultato
+#  COME SI LANCIA (PC di backtest, il repo NON e' clonato):
+#   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/scarica_storico.ps1" -OutFile "$env:USERPROFILE\scarica_storico.ps1"
+#   powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\scarica_storico.ps1" -Auto
+#
+#  VARIANTI (si aggiungono in coda alla seconda riga)
+#   -Auto                     fa tutto da solo (richiede MT5 CHIUSO)
+#   (niente -Auto)            installa e stampa le istruzioni manuali
+#   -Da 2022.01.01            prova a risalire piu' indietro
+#   -Simboli "XAUUSD"         altri simboli
+#   -SenzaTick                solo barre, niente tick reali (molto piu' veloce)
+#   -SoloReferto              rilegge l'ultimo risultato senza rifare nulla
 #
 #  !! SUL VPS NON USARE -Auto: chiuderebbe il terminale che tiene su
 #     gli EA in forward. Sul VPS: installa e trascina lo script a mano.
@@ -41,7 +46,16 @@ param(
   [int]    $TimeoutMin = 90
 )
 $ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# Il sorgente .mq5 si prende da GitHub, come fanno gli altri driver: sul PC
+# di backtest il repo NON e' clonato, si scarica un .ps1 alla volta.
+# Se invece il repo c'e' (es. sul PC di sviluppo) si usa la copia locale.
+$EABranch = "lavoro"
+$RawBase  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Work     = Join-Path $env:USERPROFILE "abtg_storico"
+New-Item -ItemType Directory -Force -Path $Work | Out-Null
 
 # ---------------------------------------------------------------------
 # 1. trova terminale BCM + cartella dati
@@ -100,8 +114,22 @@ if ($SoloReferto) { Mostra-Referto; exit 0 }
 # 2. installa + compila lo script
 # ---------------------------------------------------------------------
 Write-Host "=== SCARICO STORICO: $Simboli  (da $Da) ===" -ForegroundColor Cyan
-$Src = Join-Path $RepoRoot "..\mql5\Scripts\ABTG_HistoryDownloader.mq5"
-if (-not (Test-Path $Src)) { Write-Host "Sorgente non trovato: $Src" -ForegroundColor Red; exit 1 }
+
+$Locale = Join-Path $RepoRoot "..\mql5\Scripts\ABTG_HistoryDownloader.mq5"
+if (Test-Path $Locale) {
+  $Src = $Locale
+  Write-Host "  sorgente:  repo locale" -ForegroundColor DarkGray
+} else {
+  $Src = Join-Path $Work "ABTG_HistoryDownloader.mq5"
+  try {
+    Invoke-WebRequest -Uri "$RawBase/mql5/Scripts/ABTG_HistoryDownloader.mq5" -OutFile $Src -UseBasicParsing
+    Write-Host "  sorgente:  scaricato da GitHub ($EABranch)" -ForegroundColor DarkGray
+  } catch {
+    Write-Host "ERRORE: non riesco a scaricare ABTG_HistoryDownloader.mq5 da GitHub." -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
+    exit 1
+  }
+}
 $DstDir = Join-Path $DataFolder "MQL5\Scripts"
 New-Item -ItemType Directory -Force -Path $DstDir | Out-Null
 Copy-Item $Src -Destination $DstDir -Force
@@ -145,7 +173,7 @@ if (-not $Auto) {
  5. OK. Guarda la scheda ESPERTI (non Journal). I tick reali su piu'
     anni possono richiedere parecchi minuti: lascialo finire.
  6. Poi torna qui e lancia:
-       .\scarica_storico.ps1 -SoloReferto
+       powershell -ExecutionPolicy Bypass -File "`$env:USERPROFILE\scarica_storico.ps1" -SoloReferto
 -----------------------------------------------------------------------
 "@ -ForegroundColor Yellow
   Mostra-Referto
