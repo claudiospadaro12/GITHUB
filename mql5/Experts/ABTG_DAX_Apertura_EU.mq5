@@ -125,7 +125,8 @@ enum ENUM_ABTG_ENTRY
    ABTG_GAPFILL  = 1,   // chiusura del gap di apertura (tipico USA)
    ABTG_RETEST   = 2,   // rottura + ritorno sul livello con LIMIT (Emiliano: niente slippage)
    ABTG_RANGE_FADE = 3, // fada gli estremi del range (mercati whipsaw, es. DAX)
-   ABTG_DELAYED    = 4  // entrata RITARDATA/CONFERMATA: aspetta N minuti, poi entra a mercato dalla parte scelta
+   ABTG_DELAYED    = 4, // entrata RITARDATA/CONFERMATA: aspetta N minuti, poi entra a mercato dalla parte scelta
+   ABTG_OPENCONFIRM = 5 // la candela deve APRIRE gia' oltre il livello, poi si entra a mercato (regola delle live)
   };
 
 //--- come si combinano le due conferme di rottura (volumi / ATR)
@@ -300,6 +301,7 @@ ulong    gBETk[];                  // ticket con BE indipendente gia' eseguito
 
 // stato RETEST (rottura + ritorno sul livello con LIMIT)
 double   gBuffer    = 0;           // buffer effettivo memorizzato all'arming
+datetime gLastOCBar = 0;          // (OPENCONFIRM) ultima candela gia' valutata: una sola verifica per barra
 int      gBias      = 0;           // bias di trend memorizzato all'arming
 bool     gBrokeHigh = false;       // la rottura sopra e' gia' avvenuta?
 bool     gBrokeLow  = false;       // la rottura sotto e' gia' avvenuta?
@@ -531,6 +533,12 @@ void ABTG_OnTick()
             if(nowMin >= refEndMin)
               { if(TryPlaceRangeFade()) gPhase = PH_PLACED; }
            }
+         else if(InpEntryMode == ABTG_OPENCONFIRM)
+           {
+            int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
+            if(nowMin >= refEndMin)
+              { if(ArmOpenConfirm()) gPhase = PH_ARMED; }
+           }
          else if(InpEntryMode == ABTG_DELAYED)
            {
             // si decide DOPO InpDelayMinutes dall'apertura, mai prima che il range sia chiuso
@@ -549,9 +557,9 @@ void ABTG_OnTick()
          break;
 
       case PH_ARMED:
-         // RETEST: aspetto la rottura del range e poi piazzo il LIMIT sul livello.
          if(newsBlk) break;
-         MonitorRetest();
+         if(InpEntryMode == ABTG_OPENCONFIRM) MonitorOpenConfirm();  // aspetto una candela che APRA oltre
+         else                                 MonitorRetest();       // RETEST: rottura poi LIMIT sul livello
          break;
 
       case PH_PLACED:
@@ -920,6 +928,105 @@ bool TryPlaceDelayed()
          ABTGLog("SELL a mercato (ritardata) fallito: "+gTrade.ResultRetcodeDescription());
      }
    return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| OPENCONFIRM -- la regola come la descrive Emiliano nelle live.    |
+//|                                                                  |
+//|  "se mi apre sotto l'orb, quindi la candela a 15 minuti, mi apre  |
+//|   la candela sotto E c'e' un incremento dei volumi, io li' lo     |
+//|   shorto"                                                         |
+//|                                                                  |
+//|  Cioe': NON si insegue la rottura con un ordine pendente sul      |
+//|  livello. Si aspetta che una candela APRA gia' oltre, e solo      |
+//|  allora si entra a mercato -- e solo con i volumi a favore.       |
+//|                                                                  |
+//|  Perche' conta: il 04/08 in forward lo sweep d'apertura ha preso  |
+//|  i due Live5m proprio perche' avevano pendenti appoggiati al      |
+//|  livello (DAX stoppato in 61 s, Nasdaq in 20 s dopo aver venduto  |
+//|  133 punti sopra il massimo notturno). Una candela che APRE oltre |
+//|  non puo' essere prodotta da uno sweep: lo sweep e' intra-candela.|
+//+------------------------------------------------------------------+
+bool ArmOpenConfirm()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("OPENCONFIRM: livelli non ancora calcolabili: riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("OPENCONFIRM: range %.0f pt < min %.0f: niente trade.", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("OPENCONFIRM: range %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK()) { ABTGLog("OPENCONFIRM: spread troppo alto: nessun trade oggi."); return(true); }
+
+   gBuffer    = EffectiveBuffer();
+   gBias      = TrendBias();
+   gLastOCBar = 0;
+   ABTGLog(StringFormat("OPENCONFIRM armato: range %.5f-%.5f, buffer %.0f pt, bias %d. Attendo una candela che APRA oltre.",
+                        gRangeHigh, gRangeLow, gBuffer/_Point, gBias));
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| OPENCONFIRM: a ogni candela nuova guarda la sua APERTURA.        |
+//+------------------------------------------------------------------+
+void MonitorOpenConfirm()
+  {
+   datetime bt = iTime(_Symbol, PERIOD_CURRENT, 0);
+   if(bt <= 0 || bt == gLastOCBar) return;    // una sola valutazione per candela
+   gLastOCBar = bt;
+
+   double op = iOpen(_Symbol, PERIOD_CURRENT, 0);
+   if(op <= 0) return;
+
+   double buyTrig  = NormalizePrice(gRangeHigh + gBuffer);
+   double sellTrig = NormalizePrice(gRangeLow  - gBuffer);
+   bool   longOK   = (gBias == 0 || gBias == +1);
+   bool   shortOK  = (gBias == 0 || gBias == -1);
+
+   int dir = 0;
+   if(InpAllowLong  && longOK  && op >= buyTrig)  dir = +1;
+   if(InpAllowShort && shortOK && op <= sellTrig) dir = -1;
+   if(dir == 0) return;
+
+   if(!VolumeOK())
+     { ABTGLog("OPENCONFIRM: candela aperta oltre il livello ma volumi insufficienti: salto."); return; }
+
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   if(ask <= 0 || bid <= 0) return;
+
+   double entry = (dir > 0) ? ask : bid;
+   double sl;
+   if(InpSLMode == ABTG_SL_RANGE) sl = (dir > 0) ? sellTrig : buyTrig;
+   else                           sl = (dir > 0) ? entry - AtrValue()*InpAtrSlMult
+                                                 : entry + AtrValue()*InpAtrSlMult;
+   sl = NormalizePrice(sl);
+
+   double dist = (dir > 0) ? (entry - sl) : (sl - entry);
+   if(dist <= 0) { ABTGLog("OPENCONFIRM: distanza di stop nulla, salto."); return; }
+   if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+     {
+      if(InpSkipIfTight)
+        { ABTGLog(StringFormat("OPENCONFIRM saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts));
+          gPhase = PH_DONE; return; }
+      dist = InpMinStopPts*_Point;
+      sl   = NormalizePrice((dir > 0) ? entry - dist : entry + dist);
+     }
+
+   double tp  = (InpTP1_R > 0) ? NormalizePrice((dir > 0) ? entry + dist*TpTotalR()
+                                                          : entry - dist*TpTotalR()) : 0.0;
+   double lot = CalcLotByRisk(dist);
+   if(lot <= 0) { ABTGLog("OPENCONFIRM: lotto nullo, niente trade."); gPhase = PH_DONE; return; }
+
+   bool ok = (dir > 0) ? gTrade.Buy (lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" OPENCONF BUY")
+                       : gTrade.Sell(lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" OPENCONF SELL");
+   if(ok)
+     {
+      gPhase = PH_PLACED;
+      ABTGLog(StringFormat("OPENCONFIRM %s: candela aperta a %.5f oltre %.5f, volumi ok -> entrato a mercato.",
+                           (dir > 0 ? "BUY" : "SELL"), op, (dir > 0 ? buyTrig : sellTrig)));
+     }
   }
 
 bool ArmRetest()
