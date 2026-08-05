@@ -90,17 +90,32 @@ def main():
     for r in righe:
         r["_ot"] = tempo(r.get("open_time", ""))
         r["_ct"] = tempo(r.get("close_time", ""))
-    righe = [r for r in righe if r["_ot"]]
+    righe = [r for r in righe if r["_ot"] and r["_ct"]]
 
+    # La giornata si sceglie sulla CHIUSURA, non sull'apertura.
+    # Il 05/08 questo filtro girava su open_time e ha buttato fuori due
+    # posizioni aperte il 31/07 e chiuse quel giorno: -61,59 euro spariti
+    # dal netto (-227,17 riportato contro -288,76 reale). Il P&L realizzato
+    # appartiene al giorno in cui si realizza, non a quello in cui si apre.
     if not giorno:
-        giorno = max(r["_ot"] for r in righe).strftime("%Y-%m-%d")
-    oggi = [r for r in righe if r["_ot"].strftime("%Y-%m-%d") == giorno]
+        giorno = max(r["_ct"] for r in righe).strftime("%Y-%m-%d")
+    oggi = [r for r in righe if r["_ct"].strftime("%Y-%m-%d") == giorno]
     if not oggi:
-        sys.exit("Nessun trade il %s." % giorno)
+        sys.exit("Nessun trade chiuso il %s." % giorno)
+
+    # Le posizioni aperte nei giorni precedenti si segnalano: la durata media
+    # e la "frazione del giorno" per loro non vogliono dire niente.
+    ereditate = [r for r in oggi if r["_ot"].strftime("%Y-%m-%d") != giorno]
 
     out = ["# 📅 Giornata %s — pagella automatica" % giorno, "",
            "_Generato da `analizza_trades.py` sul CSV del TradeExporter. "
-           "Solo posizioni CHIUSE._", ""]
+           "Posizioni **chiuse** in giornata._", ""]
+    if ereditate:
+        out += ["> ⚠️ %d posizion%s aperta in giorni precedenti e chiusa oggi "
+                "(%s). Per quelle la durata media e la frazione catturata non "
+                "sono indicative." %
+                (len(ereditate), "e" if len(ereditate) > 1 else "e",
+                 ", ".join(sorted({r.get("strategy", "?") for r in ereditate}))), ""]
 
     # ---------- riepilogo per EA ----------
     perEA = defaultdict(list)
