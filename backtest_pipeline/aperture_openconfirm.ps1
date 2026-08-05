@@ -126,7 +126,9 @@ InpEntryMode=0||0||5||5||Y
 InpUseVolumeFilter=0||0||1||1||Y
 "@
 
-  $tag="$($j.Nome)_openconfirm"
+  # il TF va nel nome: altrimenti due giri con -OCTimeframe diverso si sovrascrivono
+  $tfNome = if($OCTimeframe -eq 0){"graficoM5"}else{"M$OCTimeframe"}
+  $tag="$($j.Nome)_openconfirm_$tfNome"
   $ini=Join-Path $Work "oc_$tag.ini"
 @"
 [Tester]
