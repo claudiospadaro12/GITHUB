@@ -319,6 +319,7 @@ InpEmaSlow=50||50||0||50||N
 InpFilterTF=16388||16388||0||16388||N
 InpVolMult=1.5||1.5||0||1.5||N
 InpVolAvgBars=20||20||0||20||N
+InpMaxPosSimbolo=0||0||0||0||N
 InpVerbose=1||1||0||1||N
 "@
 

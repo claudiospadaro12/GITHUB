@@ -178,7 +178,8 @@ input int    InpRangeMinutes = ABTG_DEF_RANGE_MIN;    // Durata del range (minut
 input int    InpCloseHour    = ABTG_DEF_CLOSE_HOUR;   // Ora flat/chiusura (server)
 input int    InpCloseMin     = ABTG_DEF_CLOSE_MIN;    // Minuti flat/chiusura (server)
 input bool   InpCloseAtEnd   = true;                  // Chiudi posizioni residue a fine sessione
-input bool   InpOneTradePerDay = true;                // Un solo ciclo operativo al giorno
+input bool   InpOneTradePerDay = true;                // Un solo ciclo operativo al giorno (guardia reload-safe: legge lo storico deal del giorno)
+input int    InpMaxPosSimbolo  = 0;                   // A1: tetto di posizioni+pendenti sul simbolo contando TUTTI gli EA (0 = nessun limite)
 
 input group "=== Ingresso ==="
 input ENUM_ABTG_ENTRY InpEntryMode = ABTG_BREAKOUT;   // Modalita' d'ingresso
@@ -294,6 +295,7 @@ int      gAtrH     = INVALID_HANDLE;
 enum ENUM_PHASE { PH_WAIT_OPEN, PH_BUILDING, PH_ARMED, PH_PLACED, PH_DONE };
 ENUM_PHASE gPhase   = PH_WAIT_OPEN;
 int      gDayStamp  = -1;          // per accorgersi del cambio giorno
+int      gGuardiaGiorno = -1;     // A4: giorno in cui la guardia reload-safe e' gia' stata fatta
 
 double   gRangeHigh = 0;
 double   gRangeLow  = 0;
@@ -495,6 +497,20 @@ void ABTG_OnTick()
       ResetDay();
      }
 
+   //--- A4: guardia RELOAD-SAFE. Una volta al giorno (e a ogni riavvio,
+   //    perche' le variabili globali ripartono da -1) chiedo allo storico
+   //    se oggi ho gia' aperto. Se si', la giornata e' finita: non riarmo.
+   if(InpOneTradePerDay && gGuardiaGiorno != now.day_of_year &&
+      (gPhase == PH_WAIT_OPEN || gPhase == PH_BUILDING))
+     {
+      gGuardiaGiorno = now.day_of_year;   // una volta al giorno, non a ogni tick
+      if(HaGiaOperatoOggi())
+        {
+         ABTGLog("oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.");
+         gPhase = PH_DONE;
+        }
+     }
+
    //--- FILTRO NEWS: se siamo vicino a un dato importante, "tolgo tutto"
    //    (come dice il piano: prima di un dato a 3 tori si azzera l'esposizione)
    bool newsBlk = InNewsBlackout(TimeCurrent());
@@ -526,6 +542,14 @@ void ABTG_OnTick()
       case PH_BUILDING:
          // durante il blackout news non piazzo nulla: aspetto che passi
          if(newsBlk) break;
+         //--- A1: tetto di esposizione sul simbolo, contando TUTTI gli EA
+         if(InpMaxPosSimbolo > 0 && EsposizioneSimbolo() >= InpMaxPosSimbolo)
+           {
+            ABTGLog(StringFormat("su %s ci sono gia' %d fra posizioni e pendenti (tetto %d, tutti gli EA): non piazzo.",
+                                 _Symbol, EsposizioneSimbolo(), InpMaxPosSimbolo));
+            gPhase = PH_DONE;
+            break;
+           }
          // costruisco il range e poi piazzo gli ordini.
          // avanzo a PH_PLACED SOLO se la decisione e' stata presa (orari/dati ok):
          // se i dati M1 non sono ancora pronti riprovo al tick successivo.
@@ -588,6 +612,74 @@ void ABTG_OnTick()
 //+------------------------------------------------------------------+
 //| Reset dello stato a inizio giornata                              |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| A4 - HO GIA' OPERATO OGGI? (guardia reload-safe)                 |
+//|                                                                  |
+//|  InpOneTradePerDay esisteva come input ma NON ERA USATO da       |
+//|  nessuna parte: l'unica cosa che limitava a un ciclo al giorno   |
+//|  era la macchina a stati, che al riavvio riparte da zero.        |
+//|  Il 05/08 alle 09:46 il riattacco degli EA ha ripiazzato i       |
+//|  pendenti su una giornata gia' operata (buy stop 26.440,50,      |
+//|  ticket #3078825 e #3078827): la vecchia guardia guardava solo   |
+//|  se c'era un ordine APERTO in quel momento, e a trade gia'       |
+//|  chiuso non vedeva niente.                                       |
+//|                                                                  |
+//|  Questa invece legge lo STORICO dei deal del giorno per          |
+//|  simbolo+magic: se oggi una posizione l'ho gia' aperta, non      |
+//|  riarmo, anche se e' gia' chiusa e anche se l'EA e' stato        |
+//|  ricompilato nel frattempo.                                      |
+//+------------------------------------------------------------------+
+bool HaGiaOperatoOggi()
+  {
+   MqlDateTime d;
+   TimeToStruct(TimeCurrent(), d);
+   d.hour = 0; d.min = 0; d.sec = 0;
+   datetime inizioGiorno = StructToTime(d);
+
+   if(!HistorySelect(inizioGiorno, TimeCurrent() + 60)) return(false);
+
+   int n = HistoryDealsTotal();
+   for(int i = n - 1; i >= 0; i--)
+     {
+      ulong tk = HistoryDealGetTicket(i);
+      if(tk <= 0) continue;
+      if(HistoryDealGetString(tk, DEAL_SYMBOL) != _Symbol) continue;
+      if(HistoryDealGetInteger(tk, DEAL_MAGIC) != InpMagic) continue;
+      if(HistoryDealGetInteger(tk, DEAL_ENTRY) == DEAL_ENTRY_IN) return(true);
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| A1 - QUANTA ROBA C'E' GIA' SU QUESTO SIMBOLO, DI CHIUNQUE        |
+//|                                                                  |
+//|  Conta posizioni E pendenti sul simbolo IGNORANDO il magic.      |
+//|  Serve contro il caso `Apertura Marco` + `DAX Apertura EU`: due  |
+//|  EA identici che il 05/08 hanno fatto lo stesso trade allo       |
+//|  stesso secondo allo stesso prezzo, cioe' 2% + 2% = 4% su un     |
+//|  segnale solo.                                                   |
+//|                                                                  |
+//|  ⚠️ E' una MITIGAZIONE, non una garanzia: due EA possono         |
+//|  piazzare nello stesso tick e non vedersi a vicenda. La          |
+//|  soluzione pulita resta spegnerne uno. Default 0 = spento, cosi' |
+//|  nessun EA acceso cambia comportamento senza una scelta.         |
+//+------------------------------------------------------------------+
+int EsposizioneSimbolo()
+  {
+   int n = 0;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+     {
+      ulong tk = PositionGetTicket(i);
+      if(tk > 0 && PositionGetString(POSITION_SYMBOL) == _Symbol) n++;
+     }
+   for(int i = OrdersTotal() - 1; i >= 0; i--)
+     {
+      ulong tk = OrderGetTicket(i);
+      if(tk > 0 && OrderGetString(ORDER_SYMBOL) == _Symbol) n++;
+     }
+   return(n);
+  }
+
 void ResetDay()
   {
    gPhase      = PH_WAIT_OPEN;

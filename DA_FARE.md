@@ -7,12 +7,22 @@ _Aggiornare questo file a ogni chiusura. Quello che non è qui, non esiste._
 
 # 🔴 A — RISCHIO IMMEDIATO (sono soldi, adesso)
 
-### A1. `Apertura Marco` e `DAX Apertura EU` sono lo stesso EA
+### A1. ⏳ `Apertura Marco` e `DAX Apertura EU` sono lo stesso EA — **decisione a Claudio**
 **Prova:** `audit_flotta.py` → **100% su 64 parametri condivisi**. E il 05/08 hanno fatto
 lo stesso trade allo stesso secondo allo stesso prezzo (26.339,50 → 26.332,30, +7,20 × 2).
 **Effetto:** il segnale d'apertura del DAX rischia **2% + 2% = 4%**. Con una regola prop da
 −5% giornaliero, **un trade solo arriva a un passo dal limite**.
-**Chiude quando:** Claudio decide se spegnere Marco, o differenziarlo davvero (buffer/ora/lato).
+**🆕 06/08 — la cosa che il 05/08 non sapevo:** girano tutti e due `BREAKOUT` con range 15 e
+buffer 200, cioè **la zona misurata negativa**: 0 celle positive su 4 fuori campione col
+breakout, 0 su 4 col retest, e sul periodo intero a buffer 200 media −214,31. Il candidato
+validato fa +1198,79 con PF 1,237. **Non è più "quale spengo": tutti e due girano una geometria
+che non guadagna.**
+**Fatto nel codice (06/08):** nuovo `InpMaxPosSimbolo` (default **0 = spento**) che conta
+posizioni+pendenti sul simbolo **ignorando il magic** e blocca il piazzamento oltre il tetto.
+⚠️ È una **mitigazione, non una soluzione**: due EA possono piazzare nello stesso tick.
+**Raccomandazione:** spegnere `Apertura Marco`. Non solo per il rischio doppio — nel suo codice
+esistono **solo BREAKOUT e GAPFILL**, non può nemmeno eseguire il retest che abbiamo validato.
+**Chiude quando:** Claudio decide. → [report](report/A1_A4_rischio_immediato.md)
 
 ### A2. Tre EA sull'oro condividono il magic **250604**
 **Prova:** `audit_flotta.py` → `Gold_Ichimoku_TK_ATR_EA`, `IchiCross_Gold_722`,
@@ -30,13 +40,19 @@ al **5%**.
 al 38,96% misurato all'1% diventa un altro film al 2%.
 **Chiude quando:** o si porta il forward all'1%, o si rifanno i backtest al 2%. Non a metà.
 
-### A4. La guardia "un trade al giorno" non sopravvive al riavvio
-**Prova:** codice, riga 476. Guarda solo se **adesso** c'è un ordine o una posizione. Il
-05/08 alle 09:46 il riattacco degli EA ha **ripiazzato i pendenti** su una giornata già
-operata (buy stop 26.440,50, ticket #3078825 e #3078827).
-**Effetto:** riavviare a mercato aperto = secondo trade non previsto, e dal lato sbagliato.
-**Chiude quando:** la guardia legge lo storico deal del giorno per magic, non solo lo stato.
-**Nel frattempo:** riattaccare gli EA d'apertura solo **fuori** dalla loro finestra.
+### A4. ✅ **CORRETTO 06/08** — la guardia "un trade al giorno" non esisteva proprio
+**Cosa ho trovato:** `InpOneTradePerDay` era dichiarato alla riga 185 e **non era usato in nessun
+punto del codice**. L'unica cosa che limitava a un ciclo al giorno era la macchina a stati, e
+`gPhase` al riavvio riparte da `PH_WAIT_OPEN`. La guardia esistente vedeva solo se in quel momento
+c'era un ordine o una posizione: **a trade già chiuso non vedeva niente.** Da lì i pendenti
+riarmati il 05/08 alle 09:46 (ticket #3078825 e #3078827) su una giornata già operata alle 08:34.
+**Correzione:** `HaGiaOperatoOggi()` legge lo **storico dei deal del giorno** per simbolo+magic e
+cerca un `DEAL_ENTRY_IN`. Chiamata una volta al giorno **e a ogni riavvio** (le globali ripartono
+da −1), non a ogni tick. Applicata ai quattro EA d'apertura.
+**⚠️ Cambia il comportamento in forward, ed è voluto:** riattaccare un EA su una giornata già
+operata non riarma più niente. Nel log compare *"oggi ho GIA' operato (storico deal del giorno):
+non riarmo"*. **Va ricompilato e riattaccato sul VPS**, fuori dalla finestra operativa.
+→ [report](report/A1_A4_rischio_immediato.md)
 
 ### A5. Il `DAX Live5m` gira a **2 lotti**, il doppio degli altri
 **Prova:** trade del 05/08, −103,80 contro −52,90 del v2 sullo stesso identico segnale.
