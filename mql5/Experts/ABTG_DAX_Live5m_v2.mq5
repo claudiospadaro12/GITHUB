@@ -255,6 +255,7 @@ int      gAtrH     = INVALID_HANDLE;
 enum ENUM_PHASE { PH_WAIT_OPEN, PH_BUILDING, PH_PLACED, PH_DONE };
 ENUM_PHASE gPhase   = PH_WAIT_OPEN;
 int      gDayStamp  = -1;          // per accorgersi del cambio giorno
+int      gGuardiaGiorno = -1;     // A4: giorno in cui la guardia reload-safe e' gia' stata fatta
 
 double   gRangeHigh = 0;
 double   gRangeLow  = 0;
@@ -312,6 +313,11 @@ int ABTG_OnInit()
                         _Symbol, InpSessionHour, InpSessionMin, InpRangeMinutes,
                         InpCloseHour, InpCloseMin));
    ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
+   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | range=%d min | buffer=%.0f pt | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
+                        EnumToString(InpEntryMode), InpRangeMinutes, InpBufferPoints,
+                        InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
+                        (InpBreakevenAtTP1 ? "si" : "no"),
+                        EnumToString(InpTrailMode), EnumToString(InpTrailTF)));
    return(INIT_SUCCEEDED);
   }
 
@@ -439,6 +445,18 @@ void ABTG_OnTick()
       ResetDay();
      }
 
+   //--- A4: guardia RELOAD-SAFE (vedi report/A1_A4_rischio_immediato.md)
+   if(InpOneTradePerDay && gGuardiaGiorno != now.day_of_year &&
+      (gPhase == PH_WAIT_OPEN || gPhase == PH_BUILDING))
+     {
+      gGuardiaGiorno = now.day_of_year;
+      if(HaGiaOperatoOggi())
+        {
+         ABTGLog("oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.");
+         gPhase = PH_DONE;
+        }
+     }
+
    //--- FILTRO NEWS: se siamo vicino a un dato importante, "tolgo tutto"
    //    (come dice il piano: prima di un dato a 3 tori si azzera l'esposizione)
    bool newsBlk = InNewsBlackout(TimeCurrent());
@@ -495,6 +513,33 @@ void ABTG_OnTick()
 //+------------------------------------------------------------------+
 //| Reset dello stato a inizio giornata                              |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| A4 - HO GIA' OPERATO OGGI? (guardia reload-safe)                 |
+//|  Aggiunta il 06/08 anche qui. La prima volta l'avevo messa solo  |
+//|  sui quattro EA che si chiamano "Apertura": errore, perche' il   |
+//|  difetto sta nella MACCHINA A STATI, che e' identica in nove EA. |
+//|  Alle 19:17 del 06/08 il Nasdaq OTT, riattaccato su una giornata |
+//|  gia' operata, ha ripiazzato un BUY STOP a mercato aperto.       |
+//+------------------------------------------------------------------+
+bool HaGiaOperatoOggi()
+  {
+   MqlDateTime d;
+   TimeToStruct(TimeCurrent(), d);
+   d.hour = 0; d.min = 0; d.sec = 0;
+   datetime inizioGiorno = StructToTime(d);
+   if(!HistorySelect(inizioGiorno, TimeCurrent() + 60)) return(false);
+   int n = HistoryDealsTotal();
+   for(int i = n - 1; i >= 0; i--)
+     {
+      ulong tk = HistoryDealGetTicket(i);
+      if(tk <= 0) continue;
+      if(HistoryDealGetString(tk, DEAL_SYMBOL) != _Symbol) continue;
+      if(HistoryDealGetInteger(tk, DEAL_MAGIC) != InpMagic) continue;
+      if(HistoryDealGetInteger(tk, DEAL_ENTRY) == DEAL_ENTRY_IN) return(true);
+     }
+   return(false);
+  }
+
 void ResetDay()
   {
    gPhase      = PH_WAIT_OPEN;

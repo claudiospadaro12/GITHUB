@@ -58,6 +58,15 @@ da −1), non a ogni tick. Applicata ai quattro EA d'apertura.
 **⚠️ Cambia il comportamento in forward, ed è voluto:** riattaccare un EA su una giornata già
 operata non riarma più niente. Nel log compare *"oggi ho GIA' operato (storico deal del giorno):
 non riarmo"*. **Va ricompilato e riattaccato sul VPS**, fuori dalla finestra operativa.
+**✅ Verificato in diretta il 06/08 alle 19:25**: `DAX Apertura EU` e `Nasdaq Apertura US`
+riattaccati su una giornata già operata → *"oggi ho GIA' operato: non riarmo"*. Funziona.
+**🔴 MA la prima applicazione era incompleta, e si è visto subito.** Avevo messo la guardia solo
+sui quattro EA che si *chiamano* "Apertura", mentre la macchina a stati difettosa è identica in
+**nove** EA. Alle 19:17 dello stesso giorno `Nasdaq Apertura US OTT` (che non l'aveva) ha
+**ripiazzato un BUY STOP a mercato aperto** su una giornata già operata — esattamente il difetto
+che la guardia doveva impedire. Estesa il 06/08 sera a `DAX_Apertura_EU_Ottimizzato`,
+`Nasdaq_Apertura_US_Ottimizzato`, `DAX_Live5m`, `DAX_Live5m_v2`, `Nasdaq_Live5m`.
+**Ora 9 su 9.** *(Terza volta che correggo il caso invece della classe: vedi E10 e G5.)*
 → [report](report/A1_A4_rischio_immediato.md)
 
 ### A5. Il `DAX Live5m` gira a **2 lotti**, il doppio degli altri
@@ -103,7 +112,21 @@ risk 2%, Nasdaq in PREVBAR H1, chiusura 21:45.
 Gira in PREVBAR H1 dal primo giorno; **tutti** i test l'hanno misurato in OPENING.
 → coperto da `aperture_retest_fade.ps1` (job `NASDAQ_prevH1`).
 
-### B3. Quante volte il buy stop **non è piazzabile** in PREVBAR?
+### B3. ⬆️ **CONFERMATO IN DIRETTA 06/08** — il buy stop rifiutato lascia UN SOLO LATO
+**Prova nuova, dal log Esperti delle 19:17:56:**
+```
+ABTG_ORB  CTrade::OrderSend: buy stop 0.90 NASUSD at 29260.20 sl: 29202.50 tp: 29375.60 [invalid price]
+ABTG_ORB  [ORB] SELL STOP @ 29192.50000 SL 29250.20000 TP 29077.10000 lot 0.90
+```
+Il **BUY STOP viene rifiutato** dal broker (`invalid price`: il prezzo era già sopra il livello,
+quindi lo stop non è piazzabile) e **il SELL STOP passa**. L'EA resta armato **su un lato solo**,
+e per costruzione dal lato sbagliato: se il prezzo è già salito, l'unico ordine vivo è quello che
+scommette sulla discesa.
+Nel codice non c'è nessun controllo: solo un log. **Non è più un'ipotesi, è documentato.**
+**Chiude quando:** misurata la frequenza, e deciso cosa fare quando un lato non è piazzabile
+(saltare la giornata? entrare a mercato? aspettare?).
+
+### B3-bis. Il testo originale
 **Prova:** 05/08 ore 14:30, prezzo già a 29.866 sopra il livello (29.830,50): il `BUY STOP`
 è stato rifiutato dal broker e all'EA è rimasto **solo l'ordine dalla parte sbagliata**.
 Nel codice non c'è nessun controllo, solo un `ABTGLog("BUY STOP fallito")`.
