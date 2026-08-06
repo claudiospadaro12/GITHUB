@@ -126,3 +126,73 @@ che abbiamo misurato negativa e non puo' nemmeno eseguire quella positiva.
 Portare `ABTG_DAX_Apertura_EU` alla configurazione validata — `InpEntryMode=2`,
 `InpRangeMinutes=35`, `InpBufferPoints=500`, `InpRetestOffsetPts=200` — lasciando la gestione
 com'e'. Quattro parametri. Ma e' una decisione separata da A1 e A4, e va presa con calma.
+
+---
+
+# 📸 06/08/2026, ore 12:04 — A1 in diretta, e stavolta costa
+
+Non è più una ricostruzione dallo storico: sono due posizioni **aperte in questo momento**.
+
+| ticket | commento | apertura | lotti | entry | SL | TP | P&L |
+|---|---|---|---:|---:|---:|---:|---:|
+| **#3088160** | `DAX Apertura EU BUY` | 08:18:08 | 0,90 | 26 203,10 | 26 088,70 | 26 546,30 | **−102,96** |
+| **#3088161** | `Apertura Marco BUY` | 08:18:08 | 0,90 | 26 203,10 | 26 088,70 | 26 546,30 | **−102,96** |
+
+**Stesso secondo, stesso prezzo, stessi lotti, stesso stop, stesso target. Ticket consecutivi.**
+Non sono due operazioni: è **una operazione con la size doppia**.
+
+Il conto del rischio, su un saldo di 5 373,47 €:
+stop = 114,40 punti · 0,90 lotti = **102,96 € = 1,92% a testa** → **3,83% del conto su un segnale
+solo**. Con un limite giornaliero prop del 5%, **un trade solo consuma il 77% del margine di
+giornata**.
+
+## E c'è il secondo difetto, contemporaneo: direzioni opposte
+
+Alle 12:04 sul D30EUR ci sono, tutte aperte insieme:
+
+- **short 4,90 lotti** — `DAX Live 5m` (3,30) e `Live5m v2` (1,60), dalle 08:00:15
+- **long 1,80 lotti** — le due aperture, dalle 08:18:08
+
+È la **terza volta** che il rilevatore segnala direzioni opposte, ma le prime due erano posizioni
+*non contemporanee*. **Questa è la prima volta che sono simultanee e documentate.** Contatore a 3:
+soglia superata.
+
+Esposizione: **48,8× di leva lorda**, 31,4× netta compensando long e short.
+
+## La geometria è esattamente quella che avevamo misurato negativa
+
+Le due aperture hanno comprato alle **08:18:08**, tre minuti dopo la chiusura del range dei 15
+minuti, a **26 203,10** — cioè sul massimo. Il prezzo è poi sceso a 26 088, dove sta il loro stop.
+Rottura falsa, comprata in cima.
+
+È `BREAKOUT` con `RangeMinutes=15` e `Buffer=200`: la cella misurata **0 positiva su 4 fuori
+campione con il breakout e 0 su 4 con il retest**. Un trade non dimostra un backtest — ma questo è
+il caso da manuale di quello che la misura diceva.
+
+## Cosa ha retto e cosa no, oggi
+
+| | P&L |
+|---|---:|
+| `Live5m` short (il difetto strutturale più documentato) | **+280,21** |
+| le due aperture | **−205,92** |
+| `NIGHTLY L` su EURUSD | −52,51 |
+| **totale di oggi** | **+21,78** lordo · **+18,46** netto commissioni |
+
+La giornata è positiva **solo grazie ai `Live5m`**, cioè agli EA che avevamo indicato come i più
+difettosi. Vale come promemoria: un giorno non dice niente su nessuno dei due.
+
+## E un EA di cui non avevamo mai parlato: `NIGHTLY L`
+
+EURUSD buy 0,83 lotti, aperto alle 06:05:07. **SL 7,3 pip, TP 6,3 pip → rapporto rischio/rendimento
+0,86.** Perde più di quanto punta a guadagnare: serve un **53,7% di operazioni vinte solo per
+pareggiare**, prima delle commissioni — ed è l'unica posizione con commissione (−3,32).
+Adesso è a −52,51, esattamente sul suo stop.
+**Da mettere in lista e misurare**: un RR sotto 1 con commissioni è una struttura che va dimostrata,
+non data per buona.
+
+## Conclusione operativa
+
+`InpMaxPosSimbolo` è a 0 (default) e non avrebbe fermato niente. E anche a 1 **probabilmente non
+avrebbe funzionato lo stesso**: i due EA sono partiti nello stesso secondo, quindi nessuno dei due
+poteva vedere l'altro. È la conferma pratica di quello che avevo scritto ieri — **la mitigazione
+non basta, la strada è spegnerne uno.**
