@@ -154,6 +154,14 @@ def main():
     avvisi = []
 
     # 1) sovrapposizioni: stesso simbolo, ingressi entro 10 minuti
+    #
+    # ⚠️ 06/08: "DIREZIONI OPPOSTE" va detto SOLO se le due posizioni erano
+    #    aperte NELLO STESSO ISTANTE. Prima bastava che gli ingressi fossero
+    #    vicini, e oggi ha prodotto due falsi allarmi su NASUSD: l'`ORB` che
+    #    si gira DOPO essere stato stoppato non e' una copertura, e' un
+    #    whipsaw. E' lo stesso errore che avevo gia' fatto due volte a mano
+    #    leggendo lo Storico invece delle posizioni aperte: qui lo chiude
+    #    il codice, non la memoria.
     persym = defaultdict(list)
     for r in oggi:
         persym[r.get("symbol", "?")].append(r)
@@ -165,12 +173,21 @@ def main():
                 if dt > 600:
                     break
                 a, b = tr[i], tr[j]
-                opposti = a.get("side") != b.get("side")
+                # sovrapposizione vera: l'ultimo ad aprire lo fa prima che il primo chiuda
+                sovrapposte = True
+                if a["_ct"] and b["_ct"]:
+                    sovrapposte = max(a["_ot"], b["_ot"]) < min(a["_ct"], b["_ct"])
+                if a.get("side") != b.get("side"):
+                    coda = (" — ⚠️ **DIREZIONI OPPOSTE, contemporanee**" if sovrapposte
+                            else " — direzioni opposte ma **in sequenza**: la seconda apre "
+                                 "dopo la chiusura della prima (inversione, non copertura)")
+                else:
+                    coda = ("" if sovrapposte
+                            else " — **in sequenza**, non contemporanee")
                 avvisi.append(
                     "🔶 **%s**: `%s` (%s) e `%s` (%s) a **%.0f s** di distanza%s" % (
                         sym, a.get("strategy"), a.get("side"), b.get("strategy"),
-                        b.get("side"), dt,
-                        " — ⚠️ **DIREZIONI OPPOSTE**" if opposti else ""))
+                        b.get("side"), dt, coda))
 
     # 2) uscite troppo rapide o frazione bassa
     for r in oggi:
