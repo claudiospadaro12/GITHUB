@@ -436,7 +436,53 @@ log)"*. Corretto in tre punti + avviso in cima al `param()`, e la regola è fini
 **Controllo lampo:** l'ultima riga del log deve coincidere con l'orologio di Windows;
 l'ultima candela del grafico sta un'ora indietro.
 
-### C14. I trade che spariscono quando lo stop si allarga (aperto dalla FASE H)
+### C14. ✅ CHIUSO il 07/08 — e la mia ipotesi era SBAGLIATA
+**Non sparisce nessun trade.** Il lotto d'ingresso non va mai a zero: la funzione di
+dimensionamento fa `lot = MathMax(minLot, ...)`, quindi **arrotonda in SU al lotto minimo**.
+Un trade sottodimensionato viene preso lo stesso.
+
+**Quello che sparisce è la CHIUSURA PARZIALE**, e MT5 la conta come un trade a sé.
+Verifica aritmetica: la finestra OOS è di 12 mesi, ~250 giorni di borsa, e con
+`OneTradePerDay` non si possono superare ~250 posizioni. Il CSV ne dichiara **324**:
+i 74 in più sono parziali. Stessa cosa in campione (241 su ~195 giorni).
+Con lo stop largo il lotto scende al minimo, il 50% del minimo sta **sotto** il minimo,
+`NormalizeVolume` restituisce 0 e la parziale non viene fatta → meno "trade" contati.
+
+**Il conteggio non invalida la FASE H.** Ma la conclusione «stop largo = meglio» va letta
+sapendo che nelle celle a stop largo **la gestione non è tutta accesa**. Vedi E2.
+
+### E2. 🔴 Il breakeven è ANNIDATO dentro la chiusura parziale — 9 EA
+Trovato il 07/08 mentre chiudevo C14. Il codice è questo:
+
+```
+double closeVol = NormalizeVolume(vol * InpTP1_ClosePct/100.0);
+if(closeVol > 0 && closeVol < vol)
+   if(gTrade.PositionClosePartial(ticket, closeVol))
+     {
+      ...
+      if(InpBreakevenAtTP1) { ... }      // <-- sta QUI DENTRO
+     }
+```
+
+**Se la parziale non si può fare, non si fa nemmeno il breakeven.** E la parziale non si può
+fare ogni volta che la posizione è al **lotto minimo**: il 50% di 0,10 è 0,05, sotto il
+minimo, `NormalizeVolume` torna 0 e l'intero blocco viene saltato.
+
+**Conseguenza in forward: una posizione al lotto minimo gira senza protezione a pari.**
+Lo stop resta quello iniziale, a rischio pieno, anche dopo aver raggiunto il primo obiettivo.
+E `InpBEatR` (il breakeven indipendente del punto 2b) è a **0**, quindi non c'è rete.
+
+**Estensione verificata: 9 EA su 9** fra quelli con la macchina a stati delle aperture
+(`Marco`, `DAX_Apertura_EU`, `DAX_Apertura_EU_Ottimizzato`, `DAX_Live5m`, `DAX_Live5m_v2`,
+`Dow_Apertura_US`, `Nasdaq_Apertura_US`, `Nasdaq_Apertura_US_Ottimizzato`, `Nasdaq_Live5m`).
+⚠️ Gli **altri 31 EA** che usano `PositionClosePartial` **non sono stati controllati**: la
+scansione guardava solo i 700 caratteri dopo la chiamata. Da fare.
+
+**Correzione:** portare il breakeven **fuori** dal ramo della parziale — se la parziale non
+si può fare, il breakeven si fa lo stesso. È una modifica che può solo **aggiungere**
+protezione, mai toglierne.
+
+### C14-bis. I trade che sembravano sparire (nota storica)
 DAX OOS, offset 300: **324 trade a ×1,0 → 270 a ×2,5, il 17% in meno.** Con
 `InpOneTradePerDay=1`, `InpMinRangePts=0`, `InpMaxRangePts=0` e `InpSkipIfTight=0` quei
 trade non dovrebbero mancare.
