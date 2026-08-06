@@ -89,10 +89,23 @@ def main():
             "InpVwapTF":   22,
             "InpOCTimeframe": 22,
         }
-        celle, dettaglio, enum = 1, [], False
+        celle, dettaglio, enum, degeneri = 1, [], False, []
         for r in sweep:
             p = r.split("=", 1)[1].split("||")
             if len(p) >= 5 and p[4] == "Y":
+                # ⚠️ 07/08: una riga con flag Y ma start==stop e step==0 NON
+                # spazzola niente. Su un parametro normale resta pinnata; su un
+                # ENUM MT5 puo' non produrre NESSUN pass e il CSV esce VUOTO.
+                # E' successo con "InpTrailTF=5||5||0||5||Y" (FASE I, 4 CSV vuoti)
+                # e con "InpRangeMode=0||0||0||0||Y" (FASE L, enum rimasto a 0).
+                # Questo controllo diceva "ok" a tutte e due: era il controllo a
+                # essere sbagliato, non solo lo sweep.
+                try:
+                    a_, st_, b_ = float(p[1]), float(p[2]), float(p[3])
+                except ValueError:
+                    a_ = st_ = b_ = 0.0
+                if st_ == 0 or a_ == b_:
+                    degeneri.append(nome(r))
                 if nome(r) in ENUM_VALORI:
                     n = ENUM_VALORI[nome(r)]
                     celle *= n; enum = True
@@ -107,6 +120,9 @@ def main():
         stato = []
         if dup:    stato.append(f"DUPLICATI {dup}"); problemi.append(tag)
         if liberi: stato.append(f"NON PINNATI {liberi}"); problemi.append(tag)
+        if degeneri:
+            stato.append(f"SWEEP DEGENERE {degeneri}: flag Y ma start==stop o step==0 -> non spazzola, e su un enum il CSV esce VUOTO")
+            problemi.append(tag)
         if celle != npass: stato.append(f"celle {celle} != Pass dichiarati {npass}"); problemi.append(tag)
 
         esito = "  ".join(stato) if stato else "ok"

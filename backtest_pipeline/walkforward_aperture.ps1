@@ -273,10 +273,18 @@ $Fasi=@(
   # 05/08 perche' su 440 trade M1 dava -801 e M5 -79 -- ma quella misura e'
   # DEL DAX e non si trasferisce per analogia.
   #
-  # InpTrailTF e' un ENUM_TIMEFRAMES: con il flag Y, MT5 ignora start||step||stop
-  # e spazzola TUTTI i timeframe (~22). Qui la stranezza torna comoda: invece
-  # di confrontare due valori si ottiene la curva intera, e si vede se M5 e'
-  # un massimo o solo un punto meglio di M1.
+  # InpTrailTF e' un ENUM_TIMEFRAMES. Sugli enum MT5 ignora start||step||stop e
+  # spazzola TUTTI i valori -- MA SOLO SE LA RIGA E' NON DEGENERE.
+  #
+  # ⚠️ 07/08, sbagliato al primo colpo: avevo scritto "5||5||0||5||Y", cioe'
+  # start=stop e step=0. MT5 non ha prodotto NESSUN pass e i quattro CSV sono
+  # usciti vuoti. La forma che funziona e' quella della FASE B
+  # ("InpEntryMode=0||0||5||5||Y"): due estremi diversi e step != 0.
+  #
+  # Qui e' scritta in modo che vada bene comunque: "5||1||4||5" vale
+  # numericamente {M1, M5}. Se MT5 spazzola tutto l'enum esce la curva intera
+  # dei 22 timeframe; se invece rispettasse i numeri, escono comunque
+  # ESATTAMENTE i due valori che ci interessano. Nessun esito e' uno spreco.
   #
   # Tutto il resto e' pinnato sulla configurazione CHE GIRA ADESSO in forward
   # (BREAKOUT, range 15, buffer 300, gestione accesa, 1%): la domanda non e'
@@ -284,7 +292,7 @@ $Fasi=@(
   # avrebbe tenuto di piu'". Sul DAX serve anche da controllo del metodo:
   # deve ritrovare M5 meglio di M1, altrimenti la misura e' sbagliata.
   @{ Tag="I_trailing";  Pass=22; Win=$WF
-     Sweep="InpEntryMode=0||0||0||0||N`nInpRangeMode=0||0||0||0||N`nInpRangeMinutes=15||15||0||15||N`nInpBufferPoints=300||300||0||300||N`nInpRetestOffsetPts=0||0||0||0||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||5||0||5||Y" },
+     Sweep="InpEntryMode=0||0||0||0||N`nInpRangeMode=0||0||0||0||N`nInpRangeMinutes=15||15||0||15||N`nInpBufferPoints=300||300||0||300||N`nInpRetestOffsetPts=0||0||0||0||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||1||4||5||Y" },
   # ================================================================
   # FASE L - DA DOVE SI PRENDE IL RANGE (la vecchia C6).
   #
@@ -296,13 +304,16 @@ $Fasi=@(
   #   0 = OPENING  primi N minuti dopo l'apertura
   #   1 = PREV     massimo/minimo dei N minuti PRIMA
   #   2 = PREVBAR  massimo/minimo della candela precedente su InpLevelTF (H1)
-  # InpRangeMode e' un enum: con Y, MT5 spazzola tutti e tre da solo.
+  # InpRangeMode e' un enum: con Y, MT5 spazzola tutti e tre da solo -- purche'
+  # la riga NON sia degenere. Il 07/08 avevo scritto "0||0||0||0||Y" ed e'
+  # rimasto pinnato a 0: la fase ha girato, ma ha risposto a un'altra domanda.
+  # Adesso "0||0||1||2" copre i tre valori anche a numeri, non solo per l'enum.
   #
   # Motore RETEST e geometria del candidato validato, gestione accesa: se
   # nemmeno qui esce qualcosa di positivo fuori campione, sul Nasdaq
   # d'apertura non restano domande aperte, e la decisione e' una sola.
   @{ Tag="L_rangemode"; Pass=6; Win=$WF
-     Sweep="InpEntryMode=2||2||0||2||N`nInpRangeMode=0||0||0||0||Y`nInpRangeMinutes=15||15||20||35||Y`nInpBufferPoints=500||500||0||500||N`nInpRetestOffsetPts=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||5||0||5||N" },
+     Sweep="InpEntryMode=2||2||0||2||N`nInpRangeMode=0||0||1||2||Y`nInpRangeMinutes=15||15||20||35||Y`nInpBufferPoints=500||500||0||500||N`nInpRetestOffsetPts=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||5||0||5||N" },
   @{ Tag="E_retest_fill"; Pass=20; Win=$TUTTO
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=15||5||10||45||Y`nInpRetestOffsetPts=0||0||100||300||Y" }
 )

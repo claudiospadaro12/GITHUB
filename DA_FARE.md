@@ -564,3 +564,34 @@ peggior giornata. Quattro celle diverse, **la stessa giornata**, su un sistema d
 al giorno. Con una regola prop da −5% giornaliero **quella giornata chiudeva il conto**.
 Da identificare la data e capire se è un gap, uno spike o un difetto di dimensionamento.
 Sul DAX la stessa colonna non supera mai ~1,1× il rischio nominale.
+
+## 🐛 07/08 mattina — FASE I a vuoto e FASE L a metà: sweep degeneri
+
+**Cos'è successo.** Ho scritto due righe di sweep con il flag `Y` ma **start == stop e
+step == 0**:
+
+```
+InpTrailTF=5||5||0||5||Y      -> FASE I: ZERO pass, tutti e 4 i CSV VUOTI
+InpRangeMode=0||0||0||0||Y    -> FASE L: l'enum e' rimasto pinnato a 0, la fase ha
+                                 girato ma ha risposto a un'altra domanda
+```
+
+La forma che funziona era già nel file, in FASE B: `InpEntryMode=0||0||5||5||Y` — **due
+estremi diversi e step ≠ 0**. Sugli enum MT5 ignora i numeri e spazzola tutti i valori,
+**ma solo se la riga non è degenere**.
+
+**Corretto:**
+- `InpTrailTF=5||1||4||5||Y` → vale `{M1, M5}` anche a numeri. Se MT5 spazzola tutto l'enum
+  esce la curva dei 22 timeframe; se rispettasse i numeri escono **esattamente i due valori
+  che ci interessano**. Nessun esito è uno spreco.
+- `InpRangeMode=0||0||1||2||Y` → copre i tre valori sia a numeri sia come enum.
+
+**🔴 E `verifica_fasi.py` diceva «ok» a tutte e due.** Il controllo sapeva che gli enum
+vengono spazzolati per intero, ma non che la riga deve essere non degenere: ha promosso una
+configurazione che ha buttato una notte di macchina. **Seconda volta che un mio controllo
+convalida una cosa rotta.**
+Aggiunto il controllo `SWEEP DEGENERE`, e **verificato all'incontrario**: rimettendo la riga
+vecchia, adesso la boccia.
+
+**Regola:** un controllo nuovo va provato **anche sul caso che deve bocciare**, non solo su
+quello che deve passare. Se passa tutto, non hai un controllo — hai un timbro.
