@@ -1,5 +1,34 @@
 //+------------------------------------------------------------------+
-//|                                    ABTG_DAX_Apertura_EU.mq5       |
+//|                                    ABTG_Apertura_Marco.mq5        |
+//|                                                                  |
+//|  ####################################################################
+//|  ##  RITIRATO IL 06/08/2026 - NON RIATTACCARE                     ##
+//|  ####################################################################
+//|                                                                  |
+//|  Perche'. Questo file e' una COPIA di ABTG_DAX_Apertura_EU (lo    |
+//|  diceva perfino l'intestazione, che riportava l'altro nome).      |
+//|  Identico su 64 parametri, stessa ora, stesso simbolo, stesso     |
+//|  rischio 2%. Risultato: faceva LO STESSO TRADE dell'altro, allo   |
+//|  stesso secondo, e il conto rischiava 2%+2% = 4% su un segnale.   |
+//|                                                                  |
+//|  Documentato due volte:                                          |
+//|   05/08  08:34:46  entrambi SELL 26.339,50 -> 26.332,30  +7,20    |
+//|   06/08  08:18:08  entrambi BUY  0,90 lotti a 26.203,10           |
+//|                    ticket #3088160 e #3088161, -102,96 ciascuno   |
+//|                    = -205,92 su UN segnale sbagliato (3,83% del   |
+//|                    conto, su un limite prop del 5% giornaliero)   |
+//|                                                                  |
+//|  E non e' solo un doppione: la geometria che gira (BREAKOUT,      |
+//|  range 15, buffer 200) e' misurata NEGATIVA - 0 celle positive su |
+//|  4 fuori campione col breakout, 0 su 4 col retest. Inoltre qui    |
+//|  dentro esistono SOLO i motori BREAKOUT e GAPFILL: questo EA non  |
+//|  potrebbe nemmeno eseguire il RETEST che abbiamo validato.        |
+//|                                                                  |
+//|  Il file resta nel repo come storia, non come EA da usare.        |
+//|  InpMaxPosSimbolo e' portato a 1 come rete di sicurezza nel caso  |
+//|  qualcuno lo riattacchi per sbaglio - ma NON e' una garanzia: due |
+//|  EA che partono nello stesso tick non si vedono. Vedi             |
+//|  report/A1_A4_rischio_immediato.md                                |
 //|                                                                  |
 //|  EA "APERTURA EUROPEA" (DAX / D30EUR) - MetaTrader 5             |
 //|                                                                  |
@@ -160,7 +189,7 @@ input int    InpCloseHour    = ABTG_DEF_CLOSE_HOUR;   // Ora flat/chiusura (serv
 input int    InpCloseMin     = ABTG_DEF_CLOSE_MIN;    // Minuti flat/chiusura (server)
 input bool   InpCloseAtEnd   = true;                  // Chiudi posizioni residue a fine sessione
 input bool   InpOneTradePerDay = true;                // Un solo ciclo operativo al giorno (guardia reload-safe: legge lo storico deal del giorno)
-input int    InpMaxPosSimbolo  = 0;                   // A1: tetto di posizioni+pendenti sul simbolo contando TUTTI gli EA (0 = nessun limite)
+input int    InpMaxPosSimbolo  = 1;                   // A1: EA RITIRATO. Tetto a 1 come rete di sicurezza se qualcuno lo riattacca (0 = nessun limite)
 
 input group "=== Ingresso ==="
 input ENUM_ABTG_ENTRY InpEntryMode = ABTG_BREAKOUT;   // Modalita' d'ingresso

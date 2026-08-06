@@ -68,7 +68,10 @@ $EAs = @(
     "ABTG_ORB",
     "ABTG_ORB_Fibo",
     "ABTG_Londra_ORB",
-    "ABTG_Apertura_Marco",
+    # "ABTG_Apertura_Marco",  <- RITIRATO il 06/08: era un doppione di
+    #   ABTG_DAX_Apertura_EU e faceva lo stesso trade allo stesso secondo
+    #   (2%+2% = 4% su un segnale). Lasciato fuori apposta: se serve
+    #   ridistribuirlo, prima si rilegge report/A1_A4_rischio_immediato.md
     "ABTG_PTE",
     "ABTG_PostNews",
     "ABTG_WOL",

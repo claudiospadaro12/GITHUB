@@ -58,7 +58,7 @@ _Legenda stato: ✅ validato tick reali · 🟡 nativo/da verificare · ❌ scar
 |---|---|---|---|---|
 | D30EURM5 | DAX_Apertura_EU_Ottimizzato | DAX | M5 | apertura validata (770111) — fix gestione + RETEST pronti |
 | D30EURM56 | DAX_Apertura_EU | DAX | M5 | apertura nativo |
-| D30EURM53 | Apertura_Marco | DAX | M5 | apertura (−326 pre-fix) |
+| ~~D30EURM53~~ | ~~Apertura_Marco~~ | DAX | M5 | 🛑 **RITIRATO 06/08/2026** — doppione di `DAX_Apertura_EU`: stesso trade allo stesso secondo, 2%+2% = 4% su un segnale. Il 06/08 ha prodotto −205,92 insieme al gemello. [perché](report/A1_A4_rischio_immediato.md) |
 | NASUSDM5 | Nasdaq_Apertura_US_Ottimizzato | Nasdaq | M5 | apertura |
 | NASUSDM52 | Nasdaq_Apertura_US | Nasdaq | M5 | apertura nativo |
 

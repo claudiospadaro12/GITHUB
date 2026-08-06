@@ -7,7 +7,7 @@ _Aggiornare questo file a ogni chiusura. Quello che non è qui, non esiste._
 
 # 🔴 A — RISCHIO IMMEDIATO (sono soldi, adesso)
 
-### A1. ⏳ `Apertura Marco` e `DAX Apertura EU` sono lo stesso EA — **decisione a Claudio**
+### A1. ✅ **CHIUSO 06/08 — Claudio ha deciso: `Apertura Marco` si spegne**
 **Prova:** `audit_flotta.py` → **100% su 64 parametri condivisi**. E il 05/08 hanno fatto
 lo stesso trade allo stesso secondo allo stesso prezzo (26.339,50 → 26.332,30, +7,20 × 2).
 **Effetto:** il segnale d'apertura del DAX rischia **2% + 2% = 4%**. Con una regola prop da
@@ -22,7 +22,13 @@ posizioni+pendenti sul simbolo **ignorando il magic** e blocca il piazzamento ol
 ⚠️ È una **mitigazione, non una soluzione**: due EA possono piazzare nello stesso tick.
 **Raccomandazione:** spegnere `Apertura Marco`. Non solo per il rischio doppio — nel suo codice
 esistono **solo BREAKOUT e GAPFILL**, non può nemmeno eseguire il retest che abbiamo validato.
-**Chiude quando:** Claudio decide. → [report](report/A1_A4_rischio_immediato.md)
+**Decisione presa il 06/08**, dopo la seconda occorrenza documentata in diretta (−205,92 su un
+segnale). Fatto nel repo: banner di ritiro in testa al sorgente, `InpMaxPosSimbolo` portato a 1
+come rete di sicurezza, EA tolto dalla lista di `scarica_ottimizzati.ps1`, riga barrata in
+`FLOTTA_ATTIVA.md`.
+**⚠️ Resta da fare sul VPS, e l'ordine conta:** staccare l'EA **non** chiude la sua posizione né
+cancella i suoi pendenti, e da quel momento nessuno gestisce più trailing, breakeven e chiusura
+delle 17:30. Prima si chiude la posizione #3088161, poi si stacca. → [report](report/A1_A4_rischio_immediato.md)
 
 ### A2. Tre EA sull'oro condividono il magic **250604**
 **Prova:** `audit_flotta.py` → `Gold_Ichimoku_TK_ATR_EA`, `IchiCross_Gold_722`,
