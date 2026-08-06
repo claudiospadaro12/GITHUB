@@ -72,14 +72,31 @@ def main():
         dup = sorted({nome(r) for r in finali if [nome(x) for x in finali].count(nome(r)) > 1})
         liberi = [i for i in ea_inputs if i not in visti and i not in stringhe]
 
-        # celle della griglia. InpEntryMode e' un enum: MT5 ignora
-        # start/step/stop e li spazzola TUTTI e sei (scoperto il 05/08).
+        # celle della griglia. Sugli ENUM, MT5 ignora start||step||stop e
+        # spazzola TUTTI i valori (scoperto il 05/08 su InpEntryMode).
+        # Il numero qui sotto e' quello dei valori dell'enum nell'EA, e va
+        # aggiornato se l'enum cambia. Con il flag N l'enum resta pinnato:
+        # questa tabella vale solo per le righe con Y.
+        ENUM_VALORI = {
+            "InpEntryMode": 6,   # BREAKOUT GAPFILL RETEST RANGE_FADE DELAYED OPENCONFIRM
+            "InpRangeMode": 3,   # OPENING PREV PREVBAR
+            "InpTrailMode": 3,   # ATR PREVBAR FIXED
+            "InpTrailTF":  22,   # ENUM_TIMEFRAMES: CURRENT + 21 periodi
+            "InpLevelTF":  22,
+            "InpFilterTF": 22,
+            "InpStTF":     22,
+            "InpCorrTF":   22,
+            "InpVwapTF":   22,
+            "InpOCTimeframe": 22,
+        }
         celle, dettaglio, enum = 1, [], False
         for r in sweep:
             p = r.split("=", 1)[1].split("||")
             if len(p) >= 5 and p[4] == "Y":
-                if nome(r) == "InpEntryMode":
-                    celle *= 6; enum = True; dettaglio.append("InpEntryMode = tutti e 6 (enum)")
+                if nome(r) in ENUM_VALORI:
+                    n = ENUM_VALORI[nome(r)]
+                    celle *= n; enum = True
+                    dettaglio.append(f"{nome(r)} = tutti e {n} (enum, MT5 li spazzola comunque)")
                 else:
                     a, st, b = float(p[1]), float(p[2]), float(p[3])
                     k = int(round((b - a) / st)) + 1 if st else 1

@@ -107,6 +107,9 @@ param(
   [switch]$SoloRiempimento,
   [switch]$SoloGestione,
   [switch]$SoloDrawdown,
+  [switch]$SoloTrailing,        # FASE I - il TF del trailing (07/08)
+  [switch]$SoloRangeMode,       # FASE L - da dove si prende il range (C6)
+  [switch]$Notte,               # FASE I + FASE L insieme
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
@@ -261,6 +264,45 @@ $Fasi=@(
   # e va misurato invece che stimato. Gestione ACCESA, periodo intero.
   @{ Tag="G_rischio";   Pass=2; Win=$TUTTO
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=35||35||0||35||N`nInpRetestOffsetPts=200||200||0||200||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpRiskPercent=1.0||1.0||1.0||2.0||Y" },
+  # ================================================================
+  # FASE I - IL TIMEFRAME DEL TRAILING.  Aggiunta il 07/08/2026.
+  #
+  # Perche'. Il 06/08 le due aperture Nasdaq hanno preso 34,80 punti indice
+  # su 210,90 disponibili dopo il loro ingresso: il 17%, chiuse dal trailing
+  # in 4,4 minuti. Girano PREVBAR su M1. Il DAX e' stato spostato a M5 il
+  # 05/08 perche' su 440 trade M1 dava -801 e M5 -79 -- ma quella misura e'
+  # DEL DAX e non si trasferisce per analogia.
+  #
+  # InpTrailTF e' un ENUM_TIMEFRAMES: con il flag Y, MT5 ignora start||step||stop
+  # e spazzola TUTTI i timeframe (~22). Qui la stranezza torna comoda: invece
+  # di confrontare due valori si ottiene la curva intera, e si vede se M5 e'
+  # un massimo o solo un punto meglio di M1.
+  #
+  # Tutto il resto e' pinnato sulla configurazione CHE GIRA ADESSO in forward
+  # (BREAKOUT, range 15, buffer 300, gestione accesa, 1%): la domanda non e'
+  # "qual e' il sistema migliore", e' "con il sistema acceso, quale trailing
+  # avrebbe tenuto di piu'". Sul DAX serve anche da controllo del metodo:
+  # deve ritrovare M5 meglio di M1, altrimenti la misura e' sbagliata.
+  @{ Tag="I_trailing";  Pass=22; Win=$WF
+     Sweep="InpEntryMode=0||0||0||0||N`nInpRangeMode=0||0||0||0||N`nInpRangeMinutes=15||15||0||15||N`nInpBufferPoints=300||300||0||300||N`nInpRetestOffsetPts=0||0||0||0||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||5||0||5||Y" },
+  # ================================================================
+  # FASE L - DA DOVE SI PRENDE IL RANGE (la vecchia C6).
+  #
+  # L'apertura Nasdaq ha fallito CINQUE test indipendenti: geometria breakout,
+  # costo, geometria retest, realismo dei riempimenti, stop e drawdown. Resta
+  # in piedi una cosa sola, ed e' proprio quella che gira in forward e non e'
+  # mai stata testata: InpRangeMode. Finora tutti i test sono girati con
+  # RANGE_OPENING (0), cioe' i primi N minuti DOPO l'apertura.
+  #   0 = OPENING  primi N minuti dopo l'apertura
+  #   1 = PREV     massimo/minimo dei N minuti PRIMA
+  #   2 = PREVBAR  massimo/minimo della candela precedente su InpLevelTF (H1)
+  # InpRangeMode e' un enum: con Y, MT5 spazzola tutti e tre da solo.
+  #
+  # Motore RETEST e geometria del candidato validato, gestione accesa: se
+  # nemmeno qui esce qualcosa di positivo fuori campione, sul Nasdaq
+  # d'apertura non restano domande aperte, e la decisione e' una sola.
+  @{ Tag="L_rangemode"; Pass=6; Win=$WF
+     Sweep="InpEntryMode=2||2||0||2||N`nInpRangeMode=0||0||0||0||Y`nInpRangeMinutes=15||15||20||35||Y`nInpBufferPoints=500||500||0||500||N`nInpRetestOffsetPts=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||5||0||5||N" },
   @{ Tag="E_retest_fill"; Pass=20; Win=$TUTTO
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=15||5||10||45||Y`nInpRetestOffsetPts=0||0||100||300||Y" }
 )
@@ -271,6 +313,9 @@ if($SoloRetest)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "D_retest" } }
 if($SoloRiempimento){ $Fasi = $Fasi | Where-Object { $_.Tag -eq "E_retest_fill" } }
 if($SoloGestione)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "F_gestione" -or $_.Tag -eq "G_rischio" } }
 if($SoloDrawdown)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "H_drawdown" } }
+if($SoloTrailing)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "I_trailing" } }
+if($SoloRangeMode) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "L_rangemode" } }
+if($Notte)         { $Fasi = $Fasi | Where-Object { $_.Tag -eq "I_trailing" -or $_.Tag -eq "L_rangemode" } }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 $NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }
