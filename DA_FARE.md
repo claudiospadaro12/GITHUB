@@ -108,9 +108,13 @@ Chi promette risultati su periodi più lunghi sta leggendo dati che non esistono
 GAPFILL non è più identico a BREAKOUT (8 righe su 8), DELAYED entra (51-247 trade per riga
 invece di 0), RANGE_FADE distingue volumi ON da OFF (4 su 4). RETEST e OPENCONFIRM invariati
 al centesimo su 14 righe su 16 — le altre 2 sono in E11.
-**Esito:** vince il **RETEST a volumi spenti**, unico in utile fuori campione su due mercati con
-campione vero. **DELAYED bocciato** (era la mia ipotesi sullo sweep, ed era sbagliata: IS +1528
-sul DAX → OOS −379). **RANGE_FADE bocciato su misura finalmente valida.**
+**Esito:** vince il **RETEST a volumi spenti**. **DELAYED bocciato** (era la mia ipotesi sullo
+sweep, ed era sbagliata: IS +1528 sul DAX → OOS −379). **RANGE_FADE bocciato su misura
+finalmente valida.**
+⚠️ **Corretto il 06/08 da C8:** avevo scritto che il RETEST passava su **due** mercati. Il
++218,98 del Nasdaq era misurato a buffer 200, che nella griglia C8 sta **fra +275 (buf 100) e
+−194 (buf 300)**: una cella positiva circondata da celle negative. **Il RETEST passa sul DAX,
+non sul Nasdaq.**
 → [REFERTO_FASE_B_C5.md](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md)
 
 ### B9. Misurare la prima data vera anche di **XAUUSD, SPXUSD e i cambi**
