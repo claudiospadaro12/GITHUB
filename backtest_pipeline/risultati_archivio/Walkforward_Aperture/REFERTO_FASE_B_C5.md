@@ -1,6 +1,7 @@
 # FASE B RIFATTA (C5) — i sei motori, stavolta eseguiti davvero
 
-06/08/2026 · `walkforward_aperture.ps1 -SoloMotore -Rifai` · 24 pass a tick reali
+06/08/2026 · `walkforward_aperture.ps1 -SoloMotore -Rifai` · **48 pass** a tick reali
+(12 per finestra × 2 finestre × 2 mercati)
 Range 35, buffer 200, gestione fissa (rischio 1%, SL a range, TP 1.5R, trailing base candela M5).
 IS 26/09/2024→30/06/2025 (9.1 mesi) · OOS 01/07/2025→30/06/2026 (12 mesi).
 La versione precedente e' conservata in `faseB_v1/` per il confronto.

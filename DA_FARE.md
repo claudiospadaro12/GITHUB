@@ -143,10 +143,10 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 | C3 | `aperture_retest_fade.ps1` | 48 | RETEST e RANGE_FADE con la gestione buona (la bocciatura di luglio non vale) |
 | C4 | `maxmin_oro.ps1 -Fase 2 -SLMode 0` | 12 | il MaxMinNotte sull'oro a tick reali, griglia spostata dove puntavano i gradienti |
 
-| ~~C5~~ | ~~FASE B rifatta~~ | 24 | ✅ **FATTA 06/08**. I 3 controlli passati. Vince il **RETEST a volumi spenti**: unico in utile OOS su due mercati con campione vero (+392,96 DAX · +218,98 Nasdaq). DELAYED e RANGE_FADE bocciati su misura valida. GAPFILL interessante ma 19 trade. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md) |
-| C8 | **RETEST × geometria** (range × buffer, IS+OOS) | 40 | il RETEST è stato misurato solo a range 35/buffer 200: gli manca la griglia che il breakout ha già |
-| C9 | **GAPFILL × soglie** (`InpGapMinPoints` × `InpGapMinRR`) | 32 | PF 2,08 → 1,94 sul Nasdaq ma su 23 e 19 trade: le occasioni salgono restando redditizie? |
-| C10 | rifare la sola colonna **GAPFILL volumi ON** | 4 | col binario corretto (E10) |
+| ~~C5~~ | ~~FASE B rifatta~~ | 48 | ✅ **FATTA 06/08**. I 3 controlli passati. Vince il **RETEST a volumi spenti**: unico in utile OOS su due mercati con campione vero (+392,96 DAX · +218,98 Nasdaq). DELAYED e RANGE_FADE bocciati su misura valida. GAPFILL interessante ma 19 trade. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md) |
+| C8 | **RETEST × geometria** (range × buffer, IS+OOS) | 80 | il RETEST è stato misurato solo a range 35/buffer 200: gli manca la griglia che il breakout ha già |
+| C9 | **GAPFILL × soglie** (`InpGapMinPoints` × `InpGapMinRR`) | 64 | PF 2,08 → 1,94 sul Nasdaq ma su 23 e 19 trade: le occasioni salgono restando redditizie? |
+| C10 | rifare la sola colonna **GAPFILL volumi ON** | 8 | col binario corretto (E10) |
 | C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
 | C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
 

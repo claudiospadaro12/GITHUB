@@ -50,8 +50,14 @@
 #           una domanda di sovradattamento, e cosi' costa la meta'.
 #           20 pass x 1 finestra x 2 mercati = 40 pass
 #
-#  168 pass a tick reali in tutto. E' roba da notte piena.
-#  (-SoloGeometria = 80 · -SoloMotore = 48 · -SoloSlippage = 40)
+#  FASE D - la GEOMETRIA DEL RETEST (aggiunta il 06/08, "C8").
+#           Stessa griglia della FASE A ma col motore RETEST, che la FASE B
+#           ha eletto unico candidato: RangeMinutes 5/15/25/35/45 x
+#           BufferPoints 100/300/500/700, su IS e su OOS.
+#           20 pass x 2 finestre x 2 mercati = 80 pass
+#
+#  248 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
+#  (-SoloGeometria = 80 · -SoloMotore = 48 · -SoloSlippage = 40 · -SoloRetest = 80)
 #
 #  Gestione fissata a quella validata: TP 1,5R, trailing base candela M5,
 #  niente parziale ne' BE, rischio 1%. Non e' quella accesa in forward -
@@ -66,6 +72,7 @@ param(
   [switch]$SoloGeometria,
   [switch]$SoloMotore,
   [switch]$SoloSlippage,
+  [switch]$SoloRetest,
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
@@ -77,8 +84,8 @@ $EABranch="lavoro"
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 
 $Jobs=@(
-  @{ Nome="DAX";    EA="ABTG_DAX_Apertura_EU";    Sym="D30EUR"; Ora=8;  Min=0;  Vol=0 },
-  @{ Nome="NASDAQ"; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; Ora=14; Min=30; Vol=0 }
+  @{ Nome="DAX";    EA="ABTG_DAX_Apertura_EU";    Sym="D30EUR"; Ora=8;  Min=0;  Vol=0; Magic=770101 },
+  @{ Nome="NASDAQ"; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; Ora=14; Min=30; Vol=0; Magic=770201 }
 )
 
 # Le due finestre del walk-forward. NON si sovrappongono: e' tutto il punto.
@@ -126,11 +133,25 @@ $Fasi=@(
   # costo: la domanda non e' "il 35 vince", ma "il 35 vince ANCORA quando
   # l'entry costa 1, 2 o 3 punti indice in piu'".
   @{ Tag="C_slippage";  Pass=20; Win=$TUTTO
-     Sweep="InpEntryMode=0||0||0||0||N`nInpBufferPoints=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpSlippagePts=0||0||100||300||Y" }
+     Sweep="InpEntryMode=0||0||0||0||N`nInpBufferPoints=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpSlippagePts=0||0||100||300||Y" },
+  # FASE D - LA GEOMETRIA DEL RETEST (C8, 06/08).
+  # La FASE B ha eletto il RETEST a volumi spenti: unico motore in utile
+  # fuori campione sui DUE mercati con un campione vero (DAX +392.96 su 244
+  # trade, Nasdaq +218.98 su 240). Ma e' stato misurato in UN SOLO punto
+  # della griglia: range 35, buffer 200. Il breakout la sua griglia ce l'ha
+  # (FASE A), il retest no.
+  # Qui il buffer non e' dove si entra - si entra sul livello - ma quanto
+  # in la' deve andare il prezzo perche' la rottura "conti". E' un
+  # parametro diverso da quello della FASE A anche se si chiama uguale.
+  # Nota: InpEntryMode e' un enum e MT5 sugli enum ignora start||step||stop
+  # quando il flag finale e' Y. Con N resta pinnato, come in FASE A.
+  @{ Tag="D_retest";    Pass=20; Win=$WF
+     Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpBufferPoints=300||100||200||700||Y" }
 )
 if($SoloGeometria){ $Fasi = $Fasi | Where-Object { $_.Tag -eq "A_geometria" } }
 if($SoloMotore)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "B_motore" } }
 if($SoloSlippage) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "C_slippage" } }
+if($SoloRetest)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "D_retest" } }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 $NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }
@@ -234,6 +255,7 @@ foreach($j in $Jobs){
       Write-Host "--- $tag   ($($w.Da) -> $($w.A)) ---" -ForegroundColor Cyan
 
       $Inputs=@"
+InpMagic=$($j.Magic)||$($j.Magic)||0||$($j.Magic)||N
 InpSessionHour=$($j.Ora)||$($j.Ora)||0||$($j.Ora)||N
 InpSessionMin=$($j.Min)||$($j.Min)||0||$($j.Min)||N
 InpRangeMode=0||0||0||0||N
