@@ -144,14 +144,16 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 | C4 | `maxmin_oro.ps1 -Fase 2 -SLMode 0` | 12 | il MaxMinNotte sull'oro a tick reali, griglia spostata dove puntavano i gradienti |
 
 | ~~C5~~ | ~~FASE B rifatta~~ | 48 | ✅ **FATTA 06/08**. I 3 controlli passati. Vince il **RETEST a volumi spenti**: unico in utile OOS su due mercati con campione vero (+392,96 DAX · +218,98 Nasdaq). DELAYED e RANGE_FADE bocciati su misura valida. GAPFILL interessante ma 19 trade. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md) |
-| C8 | **RETEST × geometria** (range × buffer, IS+OOS) | 80 | il RETEST è stato misurato solo a range 35/buffer 200: gli manca la griglia che il breakout ha già |
+| ~~C8~~ | ~~RETEST × geometria~~ | 80 | ✅ **FATTA 06/08**. **Due motori diversi disegnano la stessa mappa sul DAX**: stesso segno in 18 celle su 20, zona 35–45 positiva **8/8** con tutti e due, zona 5–15 negativa **0/8** con tutti e due. Centro: **range 40, buffer 500**. **Il Nasdaq no**: 2 celle positive su 20, una è +0,01 €. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_D_C8.md) |
+| C11 | **FASE C sul RETEST** (slippage) | 20 | il costo l'abbiamo misurato solo sul breakout. Il retest entra con un LIMIT quindi dovrebbe soffrire meno, ma va misurato |
 | C9 | **GAPFILL × soglie** (`InpGapMinPoints` × `InpGapMinRR`) | 64 | PF 2,08 → 1,94 sul Nasdaq ma su 23 e 19 trade: le occasioni salgono restando redditizie? |
 | C10 | rifare la sola colonna **GAPFILL volumi ON** | 8 | col binario corretto (E10) |
 | C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
 | C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
 
-**Ordine consigliato:** ~~B7~~ ~~C5~~ → **C8** (la geometria del RETEST, è lì che si gioca) →
-C6 → C9 → C1 → C10 → C3 → C2 → C4. Mai due insieme: si rubano la CPU.
+**Ordine consigliato:** ~~B7~~ ~~C5~~ ~~C8~~ → **C11** (slippage sul retest: è l'ultimo cancello
+prima del forward) → C6 (ultima chance del Nasdaq) → C9 → C1 → C10 → C3 → C2 → C4.
+Mai due insieme: si rubano la CPU.
 
 ---
 
