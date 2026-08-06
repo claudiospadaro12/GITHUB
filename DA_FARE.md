@@ -207,6 +207,12 @@ C2 → C4. Mai due test insieme: si rubano la CPU.
 > ⚠️ E il **limite giornaliero non era mai stato misurato**: da oggi i CSV hanno la colonna
 > `Peggior Giornata %`.
 
+> ✅ **APPLICATO il 06/08 nel sorgente di `ABTG_DAX_Apertura_EU`** (non ancora sul VPS).
+> ⚠️ Non basta ricompilare: MT5 salva i parametri **sul grafico**. Serve staccare, riattaccare e
+> premere **RIPRISTINA**. Verifica dalla scheda Esperti: all'avvio l'EA scrive ora la riga
+> `CONFIG IN USO -> motore=... | range=... | buffer=... | offset retest=...`. Se non corrisponde,
+> il Ripristina non è stato preso.
+>
 > 🎯 **Candidato DAX al 06/08 — quattro cancelli su cinque:**
 > `InpEntryMode=2` (retest) · `InpRangeMinutes=35` · `InpBufferPoints=500` · `InpRetestOffsetPts=200`
 > · volumi OFF, gestione invariata (TP 3R + parziale 50% + BE).

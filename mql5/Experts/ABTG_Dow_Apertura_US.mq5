@@ -404,6 +404,14 @@ int ABTG_OnInit()
                         _Symbol, InpSessionHour, InpSessionMin, InpRangeMinutes,
                         InpCloseHour, InpCloseMin));
    ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
+   //--- Riga di CONTROLLO: MT5 salva i parametri SUL GRAFICO, quindi ricompilare
+   //    non basta. Questa riga dice quali valori sta usando DAVVERO l'EA adesso:
+   //    se dopo un aggiornamento non corrisponde, non e' stato premuto RIPRISTINA.
+   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | range=%d min | buffer=%.0f pt | offset retest=%.0f pt | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
+                        EnumToString(InpEntryMode), InpRangeMinutes, InpBufferPoints, InpRetestOffsetPts,
+                        InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
+                        (InpBreakevenAtTP1 ? "si" : "no"),
+                        EnumToString(InpTrailMode), EnumToString(InpTrailTF)));
    if(InpEntryMode == ABTG_GAPFILL && !InpUseGapFill)
       ABTGLog("NOTA: modalita' GAPFILL attiva. Il vecchio flag InpUseGapFill=false viene IGNORATO (prima faceva ricadere l'EA nel breakout senza dirlo).");
    if(InpEntryMode == ABTG_DELAYED && InpDelayDirMode == ABTG_DIR_BREAK &&

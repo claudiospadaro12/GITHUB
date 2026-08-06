@@ -25,11 +25,56 @@
 #define ABTG_DEF_MAGIC        770101
 #define ABTG_DEF_SESSION_HOUR 8      // apertura DAX 09:00 IT = 08:00 server BCM
 #define ABTG_DEF_SESSION_MIN  0
-#define ABTG_DEF_RANGE_MIN    15     // range dei primi 15 minuti (PDF: "primi 15 minuti")
+// ====================================================================
+//  06/08/2026 - CONFIGURAZIONE VALIDATA (walk-forward, tick reali)
+//  Quattro parametri cambiati insieme: motore, durata del range, buffer
+//  e profondita' del ritorno preteso. Non sono quattro scelte separate,
+//  sono UNA configurazione, e vanno insieme.
+//
+//  Da dove viene (referti in backtest_pipeline/risultati_archivio/
+//  Walkforward_Aperture/, finestre IS 26/09/2024-30/06/2025 e
+//  OOS 01/07/2025-30/06/2026, che NON si sovrappongono):
+//
+//   1. FUORI CAMPIONE. Con range 35-45 il DAX e' in utile in 8 celle su
+//      8; con range 5/15/25 e' in perdita in 12 su 12.
+//   2. DUE MOTORI INDIPENDENTI, STESSA MAPPA. Breakout (ordine STOP oltre
+//      il livello) e retest (LIMIT sul livello rotto) danno lo stesso
+//      segno in 18 celle su 20. Il confine dei 35 minuti non e' del
+//      motore: e' della mattina del DAX.
+//   3. REALISMO. Pretendendo un ritorno 300 punti piu' profondo si
+//      perde solo il 3,9% dei riempimenti (409 -> 393 trade) e il
+//      risultato resta positivo a tutti e quattro i livelli.
+//   4. GESTIONE VERA. Con TP 3R + parziale 50% + stop in pari - quella
+//      che gira davvero - fuori campione: +1198,79 · PF 1,237 · DD 10,49%
+//      (contro +834,12 · 1,164 · 11,65% della gestione dei test).
+//
+//  QUELLO CHE GIRAVA PRIMA: BREAKOUT, range 15, buffer 200, offset 0.
+//  E' la cella misurata NEGATIVA: 0 celle positive su 4 fuori campione
+//  col breakout, 0 su 4 col retest. Il 06/08 alle 08:18:08 ha comprato
+//  sul massimo a 26.203,10 ed e' finita sullo stop a 26.088,70.
+//
+//  ⚠️ COSA CAMBIA A VEDERSI, cosi' non sembra un guasto:
+//   - il range chiude alle 08:35, non alle 08:15: l'EA sembrera' "in
+//     ritardo" rispetto a prima. E' voluto.
+//   - gli ordini sono LIMIT SUL LIVELLO ROTTO, non STOP oltre il livello.
+//     Niente ordine appoggiato che lo sweep d'apertura possa prendere.
+//   - CI SARANNO GIORNI SENZA TRADE, quando il prezzo rompe e non torna.
+//     Non e' un difetto, e' il motivo per cui funziona.
+//
+//  ⚠️ NON basta ricompilare: MT5 salva i parametri SUL GRAFICO. Serve
+//  staccare, riattaccare e premere RIPRISTINA nella finestra dei
+//  parametri, altrimenti l'EA continua coi valori vecchi.
+//
+//  ⚠️ Il rischio resta al 2%: con questa configurazione il drawdown
+//  misurato e' 10,49% all'1% e 20,40% al 2%. Non l'ho toccato perche'
+//  e' una scelta di size, non di strategia.
+// ====================================================================
+#define ABTG_DEF_RANGE_MIN    35     // 06/08: era 15. Fuori campione 8 celle su 8 in utile con 35-45, 0 su 12 sotto
 #define ABTG_DEF_RANGE_MODE   0      // 0=range di apertura (breakout classico dell'apertura EU)
 #define ABTG_DEF_CLOSE_HOUR   17     // flat a fine mattinata/pomeriggio (server)
 #define ABTG_DEF_CLOSE_MIN    30
 #define ABTG_DEF_USE_GAPFILL  false  // sul DAX di default breakout, non gap fill
+#define ABTG_DEF_BUFFER       500    // 06/08: era 200. Centro dell'altopiano, l'unica colonna sopra PF 1,16 con tutti e due i motori
 #define ABTG_DEF_RISK         2.0    // rischio max 2% (money management del piano)
 // 05/08: era 2 (punti fissi, 410). Cambiato in 1 (base candela) su tre riscontri:
 //  - forward 04/08, stesso simbolo/ora/direzione: punti fissi 1,90 punti catturati
@@ -186,11 +231,11 @@ input bool   InpOneTradePerDay = true;                // Un solo ciclo operativo
 input int    InpMaxPosSimbolo  = 0;                   // A1: tetto di posizioni+pendenti sul simbolo contando TUTTI gli EA (0 = nessun limite)
 
 input group "=== Ingresso ==="
-input ENUM_ABTG_ENTRY InpEntryMode = ABTG_BREAKOUT;   // Modalita' d'ingresso
+input ENUM_ABTG_ENTRY InpEntryMode = ABTG_RETEST;     // 06/08: era BREAKOUT. Unico motore in utile fuori campione con campione vero (+392,96 · PF 1,065 · 244 trade)
 input ENUM_ABTG_RANGE InpRangeMode = (ENUM_ABTG_RANGE)ABTG_DEF_RANGE_MODE; // Da dove prendo max/min
 input ENUM_TIMEFRAMES InpLevelTF   = ABTG_DEF_LEVEL_TF; // (RANGE_PREVBAR) TF dei massimi/minimi prec. (Nasdaq: H1)
 input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra prec. in minuti (live: 5 = candela pre-apertura)
-input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
+input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Quanto in la' deve andare il prezzo perche' la rottura CONTI (500 = 5 punti indice). Col retest NON e' dove si entra: si entra sul livello
 input ENUM_TIMEFRAMES InpOCTimeframe = PERIOD_CURRENT; // (OPENCONFIRM) TF su cui si guarda l'APERTURA della candela.
                                                        //  PERIOD_CURRENT = quello del grafico (M5): valuta ogni 5 min.
                                                        //  PERIOD_M15 = come nelle live: una sola valutazione ogni 15 min,
@@ -202,7 +247,7 @@ input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/ra
 input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
 
 input group "=== Retest (InpEntryMode=RETEST, leva Emiliano) ==="
-input double InpRetestOffsetPts = 0;  // Offset del LIMIT DENTRO il livello, in punti (0=sul livello; >0 entra piu' in profondita', meglio ma piu' no-fill)
+input double InpRetestOffsetPts = 200;  // 06/08: era 0. Il LIMIT sta 2 punti indice DENTRO il livello: si pretende che il prezzo ci passi attraverso, non che lo sfiori. Costa il 3,9% dei riempimenti
 input double InpFadeOffsetPts   = 0;  // (RANGE_FADE) offset del LIMIT OLTRE l'estremo, in punti (0=sull'estremo; >0 fada uno spike piu' ampio)
 
 input group "=== Entrata ritardata/confermata (InpEntryMode=DELAYED) ==="
@@ -376,6 +421,14 @@ int ABTG_OnInit()
                         _Symbol, InpSessionHour, InpSessionMin, InpRangeMinutes,
                         InpCloseHour, InpCloseMin));
    ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
+   //--- Riga di CONTROLLO: MT5 salva i parametri SUL GRAFICO, quindi ricompilare
+   //    non basta. Questa riga dice quali valori sta usando DAVVERO l'EA adesso:
+   //    se dopo un aggiornamento non corrisponde, non e' stato premuto RIPRISTINA.
+   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | range=%d min | buffer=%.0f pt | offset retest=%.0f pt | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
+                        EnumToString(InpEntryMode), InpRangeMinutes, InpBufferPoints, InpRetestOffsetPts,
+                        InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
+                        (InpBreakevenAtTP1 ? "si" : "no"),
+                        EnumToString(InpTrailMode), EnumToString(InpTrailTF)));
    if(InpEntryMode == ABTG_GAPFILL && !InpUseGapFill)
       ABTGLog("NOTA: modalita' GAPFILL attiva. Il vecchio flag InpUseGapFill=false viene IGNORATO (prima faceva ricadere l'EA nel breakout senza dirlo).");
    if(InpEntryMode == ABTG_DELAYED && InpDelayDirMode == ABTG_DIR_BREAK &&
