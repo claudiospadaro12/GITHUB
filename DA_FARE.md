@@ -435,3 +435,25 @@ log)"*. Corretto in tre punti + avviso in cima al `param()`, e la regola è fini
 `CLAUDE.md`.
 **Controllo lampo:** l'ultima riga del log deve coincidere con l'orologio di Windows;
 l'ultima candela del grafico sta un'ora indietro.
+
+### C14. I trade che spariscono quando lo stop si allarga (aperto dalla FASE H)
+DAX OOS, offset 300: **324 trade a ×1,0 → 270 a ×2,5, il 17% in meno.** Con
+`InpOneTradePerDay=1`, `InpMinRangePts=0`, `InpMaxRangePts=0` e `InpSkipIfTight=0` quei
+trade non dovrebbero mancare.
+**Ipotesi:** stop più largo → lotto più piccolo → sotto il lotto minimo del broker → trade
+saltato in silenzio. Se è così, parte del "miglioramento" della FASE H è un **filtro
+involontario** sulle giornate a range ampio, non merito dello stop.
+**Va verificato PRIMA di agire sulla conclusione «stop largo = meglio».** Stessa famiglia
+del bug del breakeven al lotto minimo (E1).
+
+### C15. Estendere il moltiplicatore ATR e misurare quanto vale lo stop dal range
+Al ×2,5 la curva **sta ancora migliorando**: non sappiamo dov'è il massimo. Due cose insieme:
+provare **3,0 / 3,5 / 4,0**, e **misurare in quanti ATR si traduce lo stop preso dal range**,
+così si capisce se il riferimento è già il massimo o se sta solo più a destra.
+
+### B11. La coda del Nasdaq: −5,2% in una giornata sola, al rischio dell'1%
+FASE H, Nasdaq IS, le quattro celle ad ATR ×1,0: **−5,19 / −5,20 / −5,23 / −5,24%** di
+peggior giornata. Quattro celle diverse, **la stessa giornata**, su un sistema da un trade
+al giorno. Con una regola prop da −5% giornaliero **quella giornata chiudeva il conto**.
+Da identificare la data e capire se è un gap, uno spike o un difetto di dimensionamento.
+Sul DAX la stessa colonna non supera mai ~1,1× il rischio nominale.
