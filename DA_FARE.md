@@ -149,15 +149,21 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 
 | ~~C5~~ | ~~FASE B rifatta~~ | 48 | ✅ **FATTA 06/08**. I 3 controlli passati. Vince il **RETEST a volumi spenti**: unico in utile OOS su due mercati con campione vero (+392,96 DAX · +218,98 Nasdaq). DELAYED e RANGE_FADE bocciati su misura valida. GAPFILL interessante ma 19 trade. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md) |
 | ~~C8~~ | ~~RETEST × geometria~~ | 80 | ✅ **FATTA 06/08**. **Due motori diversi disegnano la stessa mappa sul DAX**: stesso segno in 18 celle su 20, zona 35–45 positiva **8/8** con tutti e due, zona 5–15 negativa **0/8** con tutti e due. Centro: **range 40, buffer 500**. **Il Nasdaq no**: 2 celle positive su 20, una è +0,01 €. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_D_C8.md) |
-| C11 | **FASE E — riempimento realistico del retest** (`InpRetestOffsetPts` × range) | 40 | ⚠️ **non è slippage**: `InpSlippagePts` è usato solo dentro `TryPlaceBreakout` (righe 709/733) e un LIMIT non può riempirsi peggio del suo prezzo. L'ottimismo del retest è un altro: il tester riempie appena il prezzo **tocca** il livello, mentre lì sopra ci sono gli ordini di tutti e serve che ci passi **attraverso**. Si simula pretendendo un ritorno più profondo |
+| ~~C11~~ | ~~FASE E — riempimento realistico~~ | 40 | ✅ **FATTA 06/08**. **Cancello passato sul DAX**: pretendendo un ritorno 300 punti più profondo si perde solo il **3,9% dei riempimenti** (409→393) e il range 35 resta positivo a **tutti e quattro** i livelli, in crescita monotona. **Nasdaq: 1 cella positiva su 20 e vale +9,93 €** — quarto fallimento indipendente. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_E_C11.md) |
+| C12 | **geometria dello stop del retest** (`InpSLMode` × `InpAtrSlMult` × `InpTP1_R`) | 48 | l'offset ha migliorato il sistema **accorciando lo stop**, non grazie al realismo: i due effetti sono confusi in C11 e vanno separati |
 | C9 | **GAPFILL × soglie** (`InpGapMinPoints` × `InpGapMinRR`) | 64 | PF 2,08 → 1,94 sul Nasdaq ma su 23 e 19 trade: le occasioni salgono restando redditizie? |
 | C10 | rifare la sola colonna **GAPFILL volumi ON** | 8 | col binario corretto (E10) |
 | C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
 | C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
 
-**Ordine consigliato:** ~~B7~~ ~~C5~~ ~~C8~~ → **C11** (slippage sul retest: è l'ultimo cancello
-prima del forward) → C6 (ultima chance del Nasdaq) → C9 → C1 → C10 → C3 → C2 → C4.
-Mai due insieme: si rubano la CPU.
+**Ordine consigliato:** ~~B7~~ ~~C5~~ ~~C8~~ ~~C11~~ → **B1** (rifare il candidato con la
+gestione ACCESA: senza quello nessun numero descrive l'EA che gira) → C6 (ultima chance del
+Nasdaq) → C12 → C9 → C1 → C10 → C3 → C2 → C4. Mai due insieme: si rubano la CPU.
+
+> 🎯 **Candidato DAX al 06/08:** RETEST · range 35 · buffer 500 · offset 200 · volumi OFF.
+> Tre cancelli su quattro passati (fuori campione · vicinato · realismo). **Manca il forward.**
+> ⚠️ E manca soprattutto **B1**: questi numeri sono a rischio 1% con TP 1,5R senza parziale né
+> breakeven; l'EA acceso gira al 2% con TP 3R + parziale + BE. **DD 11,8% all'1% → ~24% al 2%.**
 
 ---
 
