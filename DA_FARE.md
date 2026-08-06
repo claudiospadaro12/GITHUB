@@ -386,3 +386,29 @@ grafico. Sulla configurazione attuale (BREAKOUT + SL_RANGE + trailing a base can
 vengono chiamati**, quindi il grafico non conta. Diventano rilevanti appena si accende:
 **RANGE_FADE**, stop ad ATR, trailing ad ATR, filtro volumi. Da ricordare quando C3 darà i
 risultati.
+
+---
+
+## 🔴 Aperto il 06/08 sera, dalla verifica del deploy sul VPS
+
+Referto: [`report/VERIFICA_DEPLOY_06-08.md`](report/VERIFICA_DEPLOY_06-08.md)
+
+### A7. `ABTG_DAX_Apertura_EU_Ottimizzato` non risulta in forward
+Su 10 righe `CONFIG IN USO` del 06/08 non compare mai. O non è attaccato a nessun grafico,
+o è attaccato senza AutoTrading, o non è stato riavviato — e in questi ultimi due casi
+**non ha la guardia A4** e riarma i pendenti su una giornata già operata.
+**Da distinguere sul VPS guardando la faccina in alto a destra sul grafico.**
+
+### A8. `DAX Live 5m` e `DAX Live5m v2` sono lo stesso EA
+59 parametri in comune, **59 identici**. I 7 in più del v2 sono neutri per default:
+filtro volumi OFF, `InpSkipIfTight` false, `InpBEatR` 0. L'unica differenza vera è
+`InpMinStopPts = 200`, un **pavimento** sullo stop: lo allarga, **non salta il trade**.
+Quindi entrano sullo stesso segnale, stesso momento, stessa direzione — al 2% e all'1%,
+cioè **3% su un segnale solo**. È A1, identico a `Apertura Marco`.
+**Prima di decidere: confrontare i parametri sul GRAFICO**, non i default nel codice
+(il rischio 2% vs 1% è già una prova che sul grafico sono diversi dai default).
+
+### A9. Esposizione per simbolo — il tetto teorico è 11%
+D30EUR 5% (2+2+1) · NASUSD 5% (2+1+2) · U30USD 1%. Non è una previsione, è il tetto.
+Con una regola prop del 5% giornaliero, **un solo simbolo esaurisce la giornata**.
+Da riportare sotto controllo prima di parlare di prop.
