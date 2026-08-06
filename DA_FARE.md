@@ -260,6 +260,28 @@ dal timeframe del grafico. **Va lanciato prima di ogni verdetto e dopo ogni modi
 python3 backtest_pipeline/audit_flotta.py
 ```
 
+### G4. `verifica_fasi.py` — creato il 06/08, dopo la FASE F non partita
+**Perché:** sei CSV vuoti. Sei parametri finivano **due volte** in `[TesterInputs]` — una nel
+blocco job e una nello sweep — e MT5 non produceva nessun pass.
+**Ma il problema vero è un altro:** l'audit che avevo scritto a mano **non l'ha visto**, perché
+deduplicava sia il blocco job sia la blindatura mentre lo script deduplicava **solo** la
+blindatura. Stavo controllando un codice diverso da quello che girava.
+**Quindi questo script non "controlla i parametri": ricostruisce la composizione esatta leggendola
+dal `.ps1`**, e se il `.ps1` cambia in modo da rendere la ricostruzione infedele, se ne accorge e
+si rifiuta di dare un verdetto.
+**Va lanciato PRIMA di mandare un test.**
+
+```
+python3 backtest_pipeline/verifica_fasi.py
+```
+
+Controlla: duplicati in `[TesterInputs]` · input dell'EA non pinnati (escluse le stringhe, che MT5
+non può ottimizzare) · celle della griglia contro i pass dichiarati (sapendo che `InpEntryMode` è
+un enum e MT5 li spazzola tutti e sei).
+
+**Lezione generale:** un controllo che simula il codice a memoria non è un controllo. O legge il
+codice vero, o si accorge di non poterlo più leggere.
+
 ### G3. `lint_ps1.py` — creato il 06/08, dopo l'ennesimo script rotto
 **Perché:** ho mandato a Claudio uno script con dentro `"$tag:"`, che PowerShell legge come nome
 di disco e rifiuta di eseguire. Qui non c'è PowerShell per provare gli script prima di mandarli,

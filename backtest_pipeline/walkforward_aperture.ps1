@@ -352,7 +352,13 @@ foreach($j in $Jobs){
           if($nomiSweep -contains $n){ Write-Host "    (blindatura: $n lo spazzola la fase, tolgo il pin)" -ForegroundColor DarkGray; $false } else { $true }
         }) -join "`n"
 
-      $Inputs=@"
+      # Il blocco specifico del mercato. NON e' un pin definitivo: come la
+      # blindatura, cede il passo allo sweep se la fase spazzola lo stesso
+      # parametro. Il 06/08 la FASE F non e' partita proprio per questo -
+      # InpTP1_R, InpTP1_ClosePct, InpBreakevenAtTP1, InpRiskPercent,
+      # InpMinStopPts e InpSkipIfTight erano qui dentro E nello sweep, quindi
+      # finivano DUE volte in [TesterInputs] e MT5 non produceva nessun pass.
+      $BloccoJob=@"
 InpMagic=$($j.Magic)||$($j.Magic)||0||$($j.Magic)||N
 InpSessionHour=$($j.Ora)||$($j.Ora)||0||$($j.Ora)||N
 InpSessionMin=$($j.Min)||$($j.Min)||0||$($j.Min)||N
@@ -384,9 +390,34 @@ InpBEatR=0||0||0||0||N
 InpUseTrailing=1||1||0||1||N
 InpTrailMode=1||1||0||1||N
 InpTrailTF=$TrailTF||$TrailTF||0||$TrailTF||N
-$BlindFiltrata
-$($fase.Sweep)
 "@
+
+      # Composizione finale: job + blindatura + sweep, poi si tiene l'ULTIMA
+      # occorrenza di ogni parametro. L'ordine e' la priorita': lo sweep
+      # vince su tutto, la blindatura vince sul blocco job.
+      $Righe = @()
+      foreach($blocco in @($BloccoJob, $Blindatura, $fase.Sweep)){
+        $Righe += @($blocco -split "[`r`n]+" | Where-Object { $_ -match "=" })
+      }
+      $Visti = @{}
+      $Finali = New-Object System.Collections.ArrayList
+      for($i=$Righe.Count-1; $i -ge 0; $i--){
+        $n = ($Righe[$i] -split "=")[0].Trim()
+        if(-not $Visti.ContainsKey($n)){ $Visti[$n] = $true; [void]$Finali.Insert(0, $Righe[$i]) }
+      }
+      $rimosse = $Righe.Count - $Finali.Count
+      Write-Host "    parametri: $($Finali.Count) righe (tolte $rimosse ripetizioni)" -ForegroundColor DarkGray
+
+      # Guardia: un nome due volte in [TesterInputs] e' un test che non e'
+      # quello che credi. Meglio fermarsi che produrre numeri sbagliati.
+      $doppi = @($Finali | ForEach-Object { ($_ -split "=")[0].Trim() } | Group-Object | Where-Object { $_.Count -gt 1 })
+      if($doppi.Count -gt 0){
+        Write-Host "    ERRORE: parametri ancora duplicati: $($doppi.Name -join ', ')" -ForegroundColor Red
+        continue
+      }
+
+      $Inputs = ($Finali) -join "`n"
+
 
       $ini=Join-Path $Work "wf_$tag.ini"
 @"
