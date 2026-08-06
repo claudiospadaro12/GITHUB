@@ -131,7 +131,13 @@ com'e'. Quattro parametri. Ma e' una decisione separata da A1 e A4, e va presa c
 
 # 📸 06/08/2026, ore 12:04 — A1 in diretta, e stavolta costa
 
-Non è più una ricostruzione dallo storico: sono due posizioni **aperte in questo momento**.
+**⚠️ Correzione del 06/08 sera:** avevo scritto *"sono due posizioni aperte in questo momento"*.
+**Sbagliato**: quelle schermate erano lo **Storico → Posizioni**, cioè operazioni gia' CHIUSE, e il
+secondo prezzo di ogni riga era il prezzo di **chiusura**, non quello corrente. Da li' veniva anche
+il finto mistero dei "prezzi correnti diversi sullo stesso simbolo": erano chiusure diverse.
+**Quello che segue sul doppio trade resta valido al centesimo** — stesso secondo, stesso prezzo,
+stessi lotti, stesso SL, stesso TP, −205,92 in totale. **Cade invece la parte sulle direzioni
+opposte contemporanee e sulla leva 48,8×**: vedi in fondo.
 
 | ticket | commento | apertura | lotti | entry | SL | TP | P&L |
 |---|---|---|---:|---:|---:|---:|---:|
@@ -146,18 +152,25 @@ stop = 114,40 punti · 0,90 lotti = **102,96 € = 1,92% a testa** → **3,83% d
 solo**. Con un limite giornaliero prop del 5%, **un trade solo consuma il 77% del margine di
 giornata**.
 
-## E c'è il secondo difetto, contemporaneo: direzioni opposte
+## ❌ RITRATTATO — le direzioni opposte NON erano contemporanee
 
-Alle 12:04 sul D30EUR ci sono, tutte aperte insieme:
+Avevo scritto che short e long convivevano sul D30EUR e che il contatore saliva a 3. **È falso**, e
+lo dico chiaro perché è la **seconda volta** che sbaglio proprio questa lettura (la prima il 05/08).
 
-- **short 4,90 lotti** — `DAX Live 5m` (3,30) e `Live5m v2` (1,60), dalle 08:00:15
-- **long 1,80 lotti** — le due aperture, dalle 08:18:08
+Gli orari veri, dallo Storico:
 
-È la **terza volta** che il rilevatore segnala direzioni opposte, ma le prime due erano posizioni
-*non contemporanee*. **Questa è la prima volta che sono simultanee e documentate.** Contatore a 3:
-soglia superata.
+| | apertura | chiusura |
+|---|---|---|
+| `Live5m` short (3,30 + 1,60) | 08:00:15 | **08:03:58 e 08:04:01** |
+| aperture long (0,90 + 0,90) | **08:18:08** | 09:11:49 |
 
-Esposizione: **48,8× di leva lorda**, 31,4× netta compensando long e short.
+Il primo long nasce **14 minuti dopo** la chiusura dell'ultimo short. **Nessuna sovrapposizione.**
+Contatore riportato a **2**, e cade anche il calcolo della leva a 48,8×, che presupponeva tutto
+aperto insieme.
+
+**La lezione, e vale più dell'errore:** in MT5 mobile la scheda *Storico → Posizioni* e la scheda
+delle posizioni aperte si assomigliano. Prima di dire "contemporanee" **si guardano gli orari di
+chiusura**, non solo quelli di apertura.
 
 ## La geometria è esattamente quella che avevamo misurato negativa
 
