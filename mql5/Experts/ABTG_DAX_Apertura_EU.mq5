@@ -1701,13 +1701,25 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
               {
                TkMark(ticket, gPartialTk);
                ABTGLog(StringFormat("1o obiettivo @ %.5f: chiusa parziale %.2f lotti (ticket %I64u).", target, closeVol, ticket));
-               //--- 2) BREAKEVEN sul residuo
-               if(InpBreakevenAtTP1)
-                 {
-                  double be = NormalizePrice(openP);
-                  gTrade.PositionModify(ticket, be, tp);
-                 }
               }
+           }
+
+         //--- 2) BREAKEVEN al primo obiettivo -- FUORI dal ramo della parziale.
+         //  07/08/2026: stava DENTRO "se la parziale e' riuscita". Al lotto minimo il
+         //  50% arrotonda sotto il minimo del broker, NormalizeVolume torna 0, la
+         //  parziale non parte -- e cosi' il breakeven non veniva NEMMENO PROVATO:
+         //  la posizione restava a rischio pieno anche dopo il primo obiettivo.
+         //  (riskDist non cambia: con lo stop a pari InitialSL da' 0 e scatta lo
+         //   stesso ripiego sull'ATR che c'era gia' dopo la parziale.)
+         if(InpBreakevenAtTP1 && !TkDone(ticket, gBETk))
+           {
+            double be = NormalizePrice(openP);
+            if((type==POSITION_TYPE_BUY  && (be>sl || sl==0)) ||          // mai arretrare lo stop
+               (type==POSITION_TYPE_SELL && (be<sl || sl==0)))
+               gTrade.PositionModify(ticket, be, tp);
+            TkMark(ticket, gBETk);
+            if(closeVol <= 0)
+               ABTGLog(StringFormat("1o obiettivo @ %.5f: parziale impossibile al lotto %.2f (minimo del broker), stop a pari lo stesso (ticket %I64u).", target, vol, ticket));
            }
         }
      }

@@ -265,6 +265,7 @@ double   gRangeLow  = 0;
 ulong    gBuyTicket = 0;           // ticket ordine pendente buy
 ulong    gSellTicket= 0;           // ticket ordine pendente sell
 bool     gPartialDone = false;     // parziale gia' eseguita?
+bool     gBEDone     = false;     // 07/08: stop gia' portato a pari al 1o obiettivo?
 
 // calendario news caricato da file CSV
 datetime gNewsTime[];              // orario evento (server, gia' shiftato)
@@ -550,6 +551,7 @@ void ResetDay()
    gBuyTicket  = 0;
    gSellTicket = 0;
    gPartialDone= false;
+   gBEDone     = false;
    ABTGLog("nuovo giorno: stato resettato, in attesa dell'apertura.");
   }
 
@@ -1021,13 +1023,25 @@ void ManagePosition()
               {
                gPartialDone = true;
                ABTGLog(StringFormat("1o obiettivo @ %.5f: chiusa parziale %.2f lotti.", target, closeVol));
-               //--- 2) BREAKEVEN sul residuo
-               if(InpBreakevenAtTP1)
-                 {
-                  double be = NormalizePrice(openP);
-                  gTrade.PositionModify(ticket, be, tp);
-                 }
               }
+           }
+
+         //--- 2) BREAKEVEN al primo obiettivo -- FUORI dal ramo della parziale.
+         //  07/08/2026: stava DENTRO "se la parziale e' riuscita". Al lotto minimo il
+         //  50% arrotonda sotto il minimo del broker, NormalizeVolume torna 0, la
+         //  parziale non parte -- e cosi' il breakeven non veniva NEMMENO PROVATO:
+         //  la posizione restava a rischio pieno anche dopo il primo obiettivo.
+         //  (riskDist non cambia: con lo stop a pari InitialSL da' 0 e scatta lo
+         //   stesso ripiego sull'ATR che c'era gia' dopo la parziale.)
+         if(InpBreakevenAtTP1 && !gBEDone)
+           {
+            double be = NormalizePrice(openP);
+            if((type==POSITION_TYPE_BUY  && (be>sl || sl==0)) ||          // mai arretrare lo stop
+               (type==POSITION_TYPE_SELL && (be<sl || sl==0)))
+               gTrade.PositionModify(ticket, be, tp);
+            gBEDone = true;
+            if(closeVol <= 0)
+               ABTGLog(StringFormat("1o obiettivo @ %.5f: parziale impossibile al lotto %.2f (minimo del broker), stop a pari lo stesso.", target, vol));
            }
         }
      }

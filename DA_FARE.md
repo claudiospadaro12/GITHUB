@@ -478,9 +478,28 @@ E `InpBEatR` (il breakeven indipendente del punto 2b) è a **0**, quindi non c'�
 ⚠️ Gli **altri 31 EA** che usano `PositionClosePartial` **non sono stati controllati**: la
 scansione guardava solo i 700 caratteri dopo la chiamata. Da fare.
 
-**Correzione:** portare il breakeven **fuori** dal ramo della parziale — se la parziale non
-si può fare, il breakeven si fa lo stesso. È una modifica che può solo **aggiungere**
-protezione, mai toglierne.
+**✅ FATTA il 07/08 su tutti e 9 gli EA.** Il breakeven è ora **fuori** dal ramo della
+parziale: se la parziale non si può fare, il pari si fa lo stesso.
+
+Due generazioni di codice, due varianti della stessa correzione:
+- **4 EA a stato per-ticket** (`Marco`, `DAX_Apertura_EU`, `Dow`, `Nasdaq_Apertura_US`):
+  guardia `!TkDone(ticket, gBETk)`, che è lo stesso token del breakeven indipendente — così
+  i due non si pestano i piedi.
+- **5 EA a stato globale** (`DAX_Live5m`, `Live5m_v2`, `Nasdaq_Live5m`, i due `_Ottimizzato`):
+  aggiunta la globale `gBEDone`, azzerata dove si azzera `gPartialDone`.
+
+Aggiunte due cose che prima non c'erano:
+1. **la guardia «mai arretrare lo stop»** (`be > sl` per i long, `be < sl` per gli short).
+   Prima non serviva perché il ramo girava una volta sola; adesso che può essere
+   raggiunto anche senza parziale, serve.
+2. **una riga di log quando la parziale è impossibile**, così in forward si vede:
+   *«parziale impossibile al lotto X (minimo del broker), stop a pari lo stesso»*.
+
+`riskDist` non cambia: con lo stop a pari `InitialSL` restituisce 0 e scatta lo stesso
+ripiego sull'ATR che c'era già dopo la parziale. Verificato: 9 su 9, graffe bilanciate.
+
+⚠️ **Resta da fare:** vanno ricompilati e riattaccati sul VPS. E gli **altri 31 EA** che
+usano `PositionClosePartial` non sono ancora stati controllati.
 
 ### C14-bis. I trade che sembravano sparire (nota storica)
 DAX OOS, offset 300: **324 trade a ×1,0 → 270 a ×2,5, il 17% in meno.** Con
