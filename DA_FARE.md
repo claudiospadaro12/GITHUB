@@ -498,8 +498,50 @@ Aggiunte due cose che prima non c'erano:
 `riskDist` non cambia: con lo stop a pari `InitialSL` restituisce 0 e scatta lo stesso
 ripiego sull'ATR che c'era già dopo la parziale. Verificato: 9 su 9, graffe bilanciate.
 
-⚠️ **Resta da fare:** vanno ricompilati e riattaccati sul VPS. E gli **altri 31 EA** che
-usano `PositionClosePartial` non sono ancora stati controllati.
+### ✅ 07/08 — controllati TUTTI e 40 gli EA con la chiusura parziale. E ce n'erano altri 11.
+
+Non erano 31: gli EA che usano `PositionClosePartial` sono **40**. Classificati tutti.
+
+| gruppo | quanti | stato |
+|---|---:|---|
+| corretti stanotte (aperture + Live5m) | 9 | ✅ |
+| famiglia `bool parz = (...)` — `EMA200`, `PTE`, `SupRev*`, `SuperWave*`, `SupertrendReversal*`, `WOL` | 17 | ✅ **già corretti il 04/08** |
+| `IchiCross_Gold_722` · `DAX_MASTER_PROP` · `Gold_Scalper_TK_BB_BE_EA` | 3 | ✅ breakeven già indipendente |
+| **trovati difettosi il 07/08 e corretti** | **11** | ✅ |
+
+Gli **11 nuovi**: `ABTG_DAX_M3` · `ABTG_FiboH4_Multi` · `ABTG_GoldenCross` ·
+`ABTG_GoldenCross_Ottimizzato` · `ABTG_Londra_ORB` · `ABTG_MaxMinNotte` ·
+`ABTG_MaxMinNotte_DAX_Short_Ottimizzato` · `ABTG_ORB` · `ABTG_ORB_Fibo` ·
+`ABTG_SupertrendInvert` · `BULGE_MASTER`.
+
+Dieci avevano la forma compatta `if(cv>0 && cv<vol && PositionClosePartial(...)) { ...; if(InpBreakeven) ... }`
+— stesso difetto della forma lunga. `BULGE_MASTER` aveva una variante peggiore:
+`if(closeVol < lotMin) continue;` **saltava l'intera posizione**, breakeven compreso.
+
+**Come sono stati corretti** (idioma unico su tutta la flotta, quello degli `EMA200`):
+```
+bool parzOK = (cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv));
+if(parzOK) gPart1=true;
+bool beFatto = (InpBreakeven && ((dirLong && bePari>slPrec) ||
+                                 (!dirLong && (slPrec==0 || bePari<slPrec))));
+if(beFatto) gTrade.PositionModify(...);
+```
+La condizione «solo se **migliora** lo stop» fa due cose insieme: impedisce di arretrare lo
+stop, e **si autospegne** — appena lo stop è a pari la condizione è falsa e non si ripete a
+ogni tick. Su `BULGE_MASTER` la `GlobalVariable` di "già fatto" ora si scrive solo se il
+parziale **o** il breakeven sono riusciti, così un BE respinto dallo `STOPS_LEVEL` viene
+ritentato invece di essere perso.
+
+**Verifica finale: 40 EA su 40, zero breakeven annidati, graffe bilanciate ovunque.**
+
+📌 **Nota storica che vale più della correzione:** l'idioma giusto esisteva già dal **04/08**,
+con tanto di commento che documentava il danno misurato (*«due short oro a 0,01 lotti hanno
+toccato 1,28R di profitto con lo stop ancora all'originale, −112,78 EUR di oscillazione»*).
+Era stato applicato a 17 EA e **fermato lì**. Quarta volta che correggo il caso invece della
+classe. Da qui in poi: quando si corregge un difetto, **si conta quanti file lo hanno**,
+prima di dire che è chiuso.
+
+⚠️ **Resta da fare:** ricompilare e riattaccare sul VPS.
 
 ### C14-bis. I trade che sembravano sparire (nota storica)
 DAX OOS, offset 300: **324 trade a ×1,0 → 270 a ×2,5, il 17% in meno.** Con

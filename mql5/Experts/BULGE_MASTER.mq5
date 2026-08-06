@@ -954,35 +954,50 @@ void DoPartialCloseIfNeeded()
       double closeVol = MathFloor(volume * Partial_Close_Pct / lotStep) * lotStep;
       closeVol = MathMax(lotMin, closeVol);
       if(closeVol >= volume) closeVol = MathFloor((volume - lotMin) / lotStep) * lotStep;
-      if(closeVol < lotMin) continue;
-
+      // 07/08: qui c'era "if(closeVol < lotMin) continue;", che sulla posizione
+      // troppo piccola per essere parzializzata saltava anche il BREAK-EVEN e la
+      // lasciava a rischio pieno. Adesso il parziale e' facoltativo, il pari no.
       trade.SetTypeFilling(GetFillingMode(sym));
-      if(trade.PositionClosePartial(ticket, closeVol))
+
+      bool parzOK = false;
+      if(closeVol >= lotMin && trade.PositionClosePartial(ticket, closeVol))
       {
+         parzOK = true;
          Print("BULGE_MASTER | Partial Close | ", sym,
                " | R=", DoubleToString(curR, 2),
                " | Chiusi ", DoubleToString(closeVol, 2), " lotti");
-
-         // Sposta SL a break-even sul residuo (rispetta STOPS_LEVEL)
-         if(PositionSelectByTicket(ticket))
-         {
-            double newSL  = NormalizeDouble(entry, digits);
-            double minDist = (double)SymbolInfoInteger(sym, SYMBOL_TRADE_STOPS_LEVEL) * point;
-            double nowPrice = (type == POSITION_TYPE_BUY)
-                              ? SymbolInfoDouble(sym, SYMBOL_BID)
-                              : SymbolInfoDouble(sym, SYMBOL_ASK);
-
-            bool beValid = (type == POSITION_TYPE_BUY)
-                           ? ((nowPrice - newSL) > minDist)
-                           : ((newSL - nowPrice) > minDist);
-
-            if(beValid && trade.PositionModify(ticket, newSL, curTP))
-               Print("BULGE_MASTER | BE impostato | ", sym, " | BE=", DoubleToString(newSL, digits));
-         }
-
-         // Marca la posizione come gia' parzializzata
-         GlobalVariableSet(key, (double)TimeCurrent());
       }
+      else if(closeVol < lotMin)
+         Print("BULGE_MASTER | Parziale impossibile (volume ", DoubleToString(volume, 2),
+               " sotto il minimo) | ", sym, " | faccio comunque il BE");
+
+      // Sposta SL a break-even sul residuo (rispetta STOPS_LEVEL)
+      bool beOK = false;
+      if(PositionSelectByTicket(ticket))
+      {
+         double newSL  = NormalizeDouble(entry, digits);
+         double minDist = (double)SymbolInfoInteger(sym, SYMBOL_TRADE_STOPS_LEVEL) * point;
+         double nowPrice = (type == POSITION_TYPE_BUY)
+                           ? SymbolInfoDouble(sym, SYMBOL_BID)
+                           : SymbolInfoDouble(sym, SYMBOL_ASK);
+         double slNow  = PositionGetDouble(POSITION_SL);
+
+         // valido se rispetta lo STOPS_LEVEL e se MIGLIORA lo stop (mai arretrare)
+         bool beValid = ((type == POSITION_TYPE_BUY)
+                         ? ((nowPrice - newSL) > minDist && newSL > slNow)
+                         : ((newSL - nowPrice) > minDist && (slNow == 0 || newSL < slNow)));
+
+         if(beValid && trade.PositionModify(ticket, newSL, curTP))
+         {
+            beOK = true;
+            Print("BULGE_MASTER | BE impostato | ", sym, " | BE=", DoubleToString(newSL, digits));
+         }
+      }
+
+      // Marca solo se qualcosa e' andato a buon fine: se il BE non e' passato per
+      // lo STOPS_LEVEL, al tick dopo si riprova invece di perderlo per sempre.
+      if(parzOK || beOK)
+         GlobalVariableSet(key, (double)TimeCurrent());
    }
 }
 

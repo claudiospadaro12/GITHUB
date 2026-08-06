@@ -304,8 +304,21 @@ void ManageAll(string sym)
          if(hit)
            {
             double cv=NormVol(sym,vol*InpTP1Pct/100.0);
-            if(cv>0 && cv<vol && gTrade.PositionClosePartial(tk,cv))
-              { if(InpBreakeven) gTrade.PositionModify(tk,NormalizePrice(sym,openP),tp); }
+            // 07/08: lo stop in pari NON deve dipendere dalla riuscita del parziale.
+            // Al lotto minimo NormVol(vol*%) arrotonda a 0: il parziale non parte, e con
+            // lui saltava anche il breakeven. Stessa correzione gia' fatta il 04/08 sugli
+            // EMA200, dove era costata -112,78 EUR su due short oro a 0,01 lotti.
+            bool parzOK = (cv>0 && cv<vol && gTrade.PositionClosePartial(tk,cv));
+            double bePari  = NormalizePrice(sym,openP);
+            double slPrec  = PositionGetDouble(POSITION_SL);
+            bool   dirLong = (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY);
+            // il breakeven si fa SOLO se migliora lo stop: cosi' non si ripete a ogni tick
+            bool beFatto = (InpBreakeven && ((dirLong && bePari>slPrec) ||
+                                             (!dirLong && (slPrec==0 || bePari<slPrec))));
+            if(beFatto) gTrade.PositionModify(tk,bePari,tp);
+            if(parzOK || beFatto)
+               Log(parzOK ? "1o target: parziale + stop in pari."
+                          : "1o target: stop in pari (parziale impossibile al lotto minimo).");
            }
         }
       if(InpUseTrailing && beDone && atr>0)
