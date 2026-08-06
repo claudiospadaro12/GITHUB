@@ -56,8 +56,19 @@
 #           BufferPoints 100/300/500/700, su IS e su OOS.
 #           20 pass x 2 finestre x 2 mercati = 80 pass
 #
-#  248 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
-#  (-SoloGeometria = 80 · -SoloMotore = 48 · -SoloSlippage = 40 · -SoloRetest = 80)
+#  FASE E - il RIEMPIMENTO REALISTICO del retest (aggiunta il 06/08, "C11").
+#           NON e' slippage: InpSlippagePts non tocca il retest, e un LIMIT
+#           non puo' riempirsi peggio del suo prezzo. L'ottimismo del retest
+#           e' un altro: il tester riempie appena il prezzo TOCCA il livello,
+#           mentre nella realta' su un livello cosi' affollato serve che ci
+#           passi attraverso. Si simula con InpRetestOffsetPts.
+#           RangeMinutes 5/15/25/35/45 x offset 0/100/200/300, buffer 500,
+#           sul periodo INTERO.
+#           20 pass x 1 finestra x 2 mercati = 40 pass
+#
+#  288 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
+#  (-SoloGeometria 80 · -SoloMotore 48 · -SoloSlippage 40 · -SoloRetest 80 ·
+#   -SoloRiempimento 40)
 #
 #  Gestione fissata a quella validata: TP 1,5R, trailing base candela M5,
 #  niente parziale ne' BE, rischio 1%. Non e' quella accesa in forward -
@@ -73,6 +84,7 @@ param(
   [switch]$SoloMotore,
   [switch]$SoloSlippage,
   [switch]$SoloRetest,
+  [switch]$SoloRiempimento,
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
@@ -146,12 +158,44 @@ $Fasi=@(
   # Nota: InpEntryMode e' un enum e MT5 sugli enum ignora start||step||stop
   # quando il flag finale e' Y. Con N resta pinnato, come in FASE A.
   @{ Tag="D_retest";    Pass=20; Win=$WF
-     Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpBufferPoints=300||100||200||700||Y" }
+     Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpBufferPoints=300||100||200||700||Y" },
+  # FASE E - IL RIEMPIMENTO REALISTICO DEL RETEST (C11, 06/08).
+  #
+  # ⚠️ NON e' un test di slippage, ed e' importante capire perche'.
+  # InpSlippagePts esiste solo dentro TryPlaceBreakout (righe 709 e 733):
+  # sul retest non ha NESSUN effetto. E ha senso: un ordine LIMIT non puo'
+  # essere riempito peggio del suo prezzo. Lo slippage e' un problema dello
+  # STOP. Spazzolarlo qui avrebbe dato 4 righe identiche per ogni range.
+  #
+  # Il retest ha pero' un'ottimismo suo, e non e' minore: **il tester
+  # riempie un LIMIT appena il prezzo TOCCA il livello.** Nella realta' il
+  # livello rotto e' il prezzo piu' affollato del grafico - ci sono sopra
+  # gli ordini di tutti - e per essere eseguiti serve che il prezzo ci passi
+  # ATTRAVERSO, non che lo sfiori.
+  #
+  # Si simula con InpRetestOffsetPts, che sposta il LIMIT piu' in dentro:
+  #   BUY  entry = livello - offset      SELL entry = livello + offset
+  # Offset piu' grande = si pretende un ritorno piu' profondo = MENO
+  # riempimenti ma a prezzo migliore. E' esattamente il compromesso vero.
+  #
+  # ⚠️ Da tenere presente leggendo i risultati: l'offset non e' un puro
+  # costo. Cambiando l'entry cambia la distanza dallo stop, quindi cambiano
+  # il lotto e la distanza del TP. Non ci si aspetta un degrado monotono
+  # come sul breakout: qui esiste un ottimo, e la domanda e' se l'altopiano
+  # range 35-45 sopravvive in tutta la colonna.
+  #
+  # Buffer pinnato a 500: e' il centro dell'altopiano trovato in FASE D,
+  # cioe' la configurazione che si porterebbe davvero in forward.
+  # Periodo INTERO come la FASE C: e' una domanda di realismo, non di
+  # sovradattamento, e cosi' il campione e' piu' grande.
+  @{ Tag="E_retest_fill"; Pass=20; Win=$TUTTO
+     Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=15||5||10||45||Y`nInpRetestOffsetPts=0||0||100||300||Y" }
 )
 if($SoloGeometria){ $Fasi = $Fasi | Where-Object { $_.Tag -eq "A_geometria" } }
 if($SoloMotore)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "B_motore" } }
 if($SoloSlippage) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "C_slippage" } }
 if($SoloRetest)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "D_retest" } }
+if($SoloRiempimento){ $Fasi = $Fasi | Where-Object { $_.Tag -eq "E_retest_fill" } }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 $NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }
@@ -254,6 +298,16 @@ foreach($j in $Jobs){
       Write-Host ""
       Write-Host "--- $tag   ($($w.Da) -> $($w.A)) ---" -ForegroundColor Cyan
 
+      # Un parametro elencato DUE volte in [TesterInputs] e' un conflitto: vince
+      # l'ultima riga e il test non e' quello che credi (successo il 05/08 con
+      # gli offset di retest e fade). Qui la blindatura cede il passo allo
+      # sweep, sempre, e lo dice.
+      $nomiSweep = @($fase.Sweep -split "[`r`n]+" | Where-Object { $_ } | ForEach-Object { ($_ -split "=")[0].Trim() })
+      $BlindFiltrata = @($Blindatura -split "[`r`n]+" | Where-Object { $_ } | Where-Object {
+          $n = ($_ -split "=")[0].Trim()
+          if($nomiSweep -contains $n){ Write-Host "    (blindatura: $n lo spazzola la fase, tolgo il pin)" -ForegroundColor DarkGray; $false } else { $true }
+        }) -join "`n"
+
       $Inputs=@"
 InpMagic=$($j.Magic)||$($j.Magic)||0||$($j.Magic)||N
 InpSessionHour=$($j.Ora)||$($j.Ora)||0||$($j.Ora)||N
@@ -286,7 +340,7 @@ InpBEatR=0||0||0||0||N
 InpUseTrailing=1||1||0||1||N
 InpTrailMode=1||1||0||1||N
 InpTrailTF=$TrailTF||$TrailTF||0||$TrailTF||N
-$Blindatura
+$BlindFiltrata
 $($fase.Sweep)
 "@
 
