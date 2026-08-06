@@ -87,8 +87,20 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
   }
 }
 
+# --- il file lo scrivo SEMPRE, anche a zero righe -------------------
+#  Se non trova niente, il referto del "non trovato" e' informazione:
+#  dice quali cartelle e quali log esistono. Uscire senza scrivere
+#  lasciava Claudio a cercare un file che non era mai stato creato.
+$dest = Join-Path $env:USERPROFILE ("log_" + ($Filtro -replace '[^A-Za-z0-9]','_') + "_$Data.txt")
+
 if ($trovate -eq 0) {
   Write-Host "`nNessuna riga trovata." -ForegroundColor Yellow
+  [void]$out.Add("NESSUNA RIGA TROVATA")
+  [void]$out.Add("filtro : $Filtro")
+  [void]$out.Add("data   : $Data")
+  [void]$out.Add("finestra: " + $(if ($Tutto) { "tutta la giornata" } else { "$Da - $A (ora SERVER)" }))
+  [void]$out.Add("")
+  [void]$out.Add("Cartelle dati viste:")
   Write-Host "Prova cosi':" -ForegroundColor Yellow
   Write-Host "  - allarga la finestra:  -Tutto" -ForegroundColor Gray
   Write-Host "  - allarga il filtro:    -Filtro `"U30USD`"" -ForegroundColor Gray
@@ -96,13 +108,26 @@ if ($trovate -eq 0) {
   Write-Host "`nCartelle dati viste:" -ForegroundColor Gray
   Get-ChildItem $termRoot -Directory -EA SilentlyContinue | ForEach-Object {
     $e = Join-Path $_.FullName "MQL5\Logs\$Data.log"
-    Write-Host ("   {0}  log di oggi: {1}" -f $_.Name, $(if (Test-Path $e) { "SI" } else { "no" })) -ForegroundColor DarkGray
+    $g = Join-Path $_.FullName "logs\$Data.log"
+    $riga = "   {0}  esperti: {1}  giornale: {2}" -f $_.Name,
+            $(if (Test-Path $e) { "SI" } else { "no" }),
+            $(if (Test-Path $g) { "SI" } else { "no" })
+    Write-Host $riga -ForegroundColor DarkGray
+    [void]$out.Add($riga)
   }
-  exit 0
 }
 
-$dest = Join-Path $env:USERPROFILE ("log_" + ($Filtro -replace '[^A-Za-z0-9]','_') + "_$Data.txt")
 $out | Set-Content -Path $dest -Encoding UTF8
-Write-Host "`n$trovate righe salvate in:" -ForegroundColor Green
-Write-Host "  $dest" -ForegroundColor Green
-Write-Host "`nMandami questo file." -ForegroundColor Cyan
+
+Write-Host ""
+Write-Host "=====================================================" -ForegroundColor Green
+Write-Host " IL FILE DA MANDARMI E' QUESTO (uno solo):" -ForegroundColor Green
+Write-Host "   $dest" -ForegroundColor White
+Write-Host "   ($trovate righe)" -ForegroundColor Green
+Write-Host "=====================================================" -ForegroundColor Green
+
+# lo apro io, cosi' non serve cercarlo in mezzo agli altri file
+try { Start-Process notepad.exe $dest } catch { }
+# e metto il percorso negli appunti: basta incollarlo nella barra di Esplora risorse
+try { Set-Clipboard -Value $dest } catch { }
+Write-Host "`nL'ho aperto con Blocco note e copiato il percorso negli appunti." -ForegroundColor Cyan
