@@ -184,16 +184,22 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 | ~~C5~~ | ~~FASE B rifatta~~ | 48 | ✅ **FATTA 06/08**. I 3 controlli passati. Vince il **RETEST a volumi spenti**: unico in utile OOS su due mercati con campione vero (+392,96 DAX · +218,98 Nasdaq). DELAYED e RANGE_FADE bocciati su misura valida. GAPFILL interessante ma 19 trade. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md) |
 | ~~C8~~ | ~~RETEST × geometria~~ | 80 | ✅ **FATTA 06/08**. **Due motori diversi disegnano la stessa mappa sul DAX**: stesso segno in 18 celle su 20, zona 35–45 positiva **8/8** con tutti e due, zona 5–15 negativa **0/8** con tutti e due. Centro: **range 40, buffer 500**. **Il Nasdaq no**: 2 celle positive su 20, una è +0,01 €. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_D_C8.md) |
 | ~~C11~~ | ~~FASE E — riempimento realistico~~ | 40 | ✅ **FATTA 06/08**. **Cancello passato sul DAX**: pretendendo un ritorno 300 punti più profondo si perde solo il **3,9% dei riempimenti** (409→393) e il range 35 resta positivo a **tutti e quattro** i livelli, in crescita monotona. **Nasdaq: 1 cella positiva su 20 e vale +9,93 €** — quarto fallimento indipendente. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_E_C11.md) |
-| C12 | **geometria dello stop del retest** (`InpSLMode` × `InpAtrSlMult` × `InpTP1_R`) | 48 | l'offset ha migliorato il sistema **accorciando lo stop**, non grazie al realismo: i due effetti sono confusi in C11 e vanno separati |
+| ~~C12~~ | **FASE H — il drawdown** (`InpAtrSlMult` × offset, con SL ad ATR) | 64 | assorbe C12 e lo risolve alla radice: con `InpSLMode=ATR` la distanza dello stop **non dipende più da dove entro**, quindi l'offset torna a essere solo un filtro sui riempimenti. Se il DD migliora anche così erano i riempimenti, se il miglioramento sparisce era la geometria dello stop |
 | C9 | **GAPFILL × soglie** (`InpGapMinPoints` × `InpGapMinRR`) | 64 | PF 2,08 → 1,94 sul Nasdaq ma su 23 e 19 trade: le occasioni salgono restando redditizie? |
 | C10 | rifare la sola colonna **GAPFILL volumi ON** | 8 | col binario corretto (E10) |
 | C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
 | C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
 
-**Ordine consigliato:** ~~B7~~ ~~C5~~ ~~C8~~ ~~C11~~ ~~B1~~ → **A1 e A4** (non sono test, sono
-soldi: 4% su un segnale solo, e i pendenti riarmati al riavvio) → **decisione sui 4 parametri del
-DAX** → C6 (ultima chance del Nasdaq) → C12 → C9 → C1 → C10 → C3 → C2 → C4.
-Mai due test insieme: si rubano la CPU.
+**Ordine consigliato:** ~~B7~~ ~~C5~~ ~~C8~~ ~~C11~~ ~~B1~~ ~~A4~~ → **FASE H** (il drawdown: è
+lì che si gioca la prop) → decisione su A1 e sui 4 parametri del DAX → C6 → C9 → C1 → C10 → C3 →
+C2 → C4. Mai due test insieme: si rubano la CPU.
+
+> 🏦 **La domanda prop, con i numeri del 06/08.** Su 100k: all'1% di rischio +6 800 €/anno con
+> **10 490 € di DD**; al 2% +13 900 € con **20 400 €**. Un limite tipico è il 10% totale e il 5%
+> giornaliero → **al 2% si esce subito, all'1% si fallisce di un pelo.** Serve resa/DD sopra 1,5;
+> oggi è **0,65–0,68**. Il collo di bottiglia non è il profitto, è il drawdown — da qui la FASE H.
+> ⚠️ E il **limite giornaliero non era mai stato misurato**: da oggi i CSV hanno la colonna
+> `Peggior Giornata %`.
 
 > 🎯 **Candidato DAX al 06/08 — quattro cancelli su cinque:**
 > `InpEntryMode=2` (retest) · `InpRangeMinutes=35` · `InpBufferPoints=500` · `InpRetestOffsetPts=200`
@@ -215,6 +221,16 @@ Mai due test insieme: si rubano la CPU.
 - **D3.** Aperture con `RangeMode=PREV` sull'oro.
 - **D4.** Breakeven a 0,5R **con** parziale sul DAX (divergenza con le live).
 - **D5.** `InpAtrSlMult` per il fade, se il fade mostra qualcosa in C3.
+
+---
+
+### B10. La `Peggior Giornata %` misura UN SOLO EA, non il conto
+La nuova colonna viene dal tester, dove gira un EA alla volta. In forward il limite giornaliero
+di una prop si applica alla **somma di tutti gli EA**: se tre perdono lo stesso giorno, il conto
+vede la somma. Quindi il numero misurato è un **limite inferiore**, non la realtà.
+**Si lega ad A1 e ad A6:** proprio le giornate storte sono quelle in cui gli EA correlati perdono
+insieme. **Chiude quando:** esiste una misura della peggior giornata *di portafoglio*, presa dallo
+storico reale del conto invece che dal tester.
 
 ---
 

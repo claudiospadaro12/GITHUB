@@ -296,6 +296,14 @@ enum ENUM_PHASE { PH_WAIT_OPEN, PH_BUILDING, PH_ARMED, PH_PLACED, PH_DONE };
 ENUM_PHASE gPhase   = PH_WAIT_OPEN;
 int      gDayStamp  = -1;          // per accorgersi del cambio giorno
 int      gGuardiaGiorno = -1;     // A4: giorno in cui la guardia reload-safe e' gia' stata fatta
+//--- METRICHE DA PROP: la peggior giornata singola.
+//    Il drawdown di equity complessivo dice se il conto sopravvive nel tempo;
+//    una prop invece ti chiude per il LIMITE GIORNALIERO, che e' un'altra
+//    cosa e non era misurata da nessuna parte. Qui si segue l'equity dentro
+//    la giornata e si tiene la caduta peggiore rispetto all'apertura del giorno.
+double   gDayStartEquity = 0.0;   // equity all'inizio della giornata
+double   gDayMinEquity   = 0.0;   // minimo di equity toccato nella giornata
+double   gWorstDayPct    = 0.0;   // la peggiore di tutte, in % (numero NEGATIVO)
 
 double   gRangeHigh = 0;
 double   gRangeLow  = 0;
@@ -495,7 +503,18 @@ void ABTG_OnTick()
      {
       gDayStamp = now.day_of_year;
       ResetDay();
+      gDayStartEquity = AccountInfoDouble(ACCOUNT_EQUITY);
+      gDayMinEquity   = gDayStartEquity;
      }
+
+   //--- metrica da prop: quanto sono sceso OGGI rispetto all'apertura del giorno
+   {
+    double _eq = AccountInfoDouble(ACCOUNT_EQUITY);
+    if(gDayStartEquity <= 0) { gDayStartEquity = _eq; gDayMinEquity = _eq; }
+    if(_eq < gDayMinEquity)  gDayMinEquity = _eq;
+    double _giornata = 100.0 * (gDayMinEquity - gDayStartEquity) / gDayStartEquity;
+    if(_giornata < gWorstDayPct) gWorstDayPct = _giornata;
+   }
 
    //--- A4: guardia RELOAD-SAFE. Una volta al giorno (e a ogni riavvio,
    //    perche' le variabili globali ripartono da -1) chiedo allo storico
@@ -1903,7 +1922,7 @@ string OptFrame_FileName()
 
 double OnTester()
   {
-   double stats[7];
+   double stats[10];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1911,6 +1930,11 @@ double OnTester()
    stats[4] = TesterStatistics(STAT_SHARPE_RATIO);
    stats[5] = TesterStatistics(STAT_EQUITY_DDREL_PERCENT);
    stats[6] = TesterStatistics(STAT_TRADES);
+   //--- METRICHE DA PROP (06/08): il DD di equity dice se il conto sopravvive,
+   //    la prop ti chiude sul LIMITE GIORNALIERO e sulla serie di perdite.
+   stats[7] = gWorstDayPct;                          // Peggior Giornata % (negativo)
+   stats[8] = TesterStatistics(STAT_MAX_CONLOSSES);  // Perdite Consecutive Max
+   stats[9] = TesterStatistics(STAT_CONLOSSMAX);     // Serie Perdente Peggiore (denaro)
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1933,13 +1957,14 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f",
-                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
+                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
+                                data[7], data[8], data[9]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;

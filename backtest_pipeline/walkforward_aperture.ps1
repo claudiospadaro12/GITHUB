@@ -79,9 +79,16 @@
 #           regola prop il vincolo e' il DD, e va misurato non stimato.
 #           2 pass x 1 finestra x 2 mercati = 4 pass
 #
-#  324 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
+#  FASE H - IL DRAWDOWN (aggiunta il 06/08). Con InpSLMode=ATR la distanza
+#           dello stop non dipende piu' da dove entro, quindi l'offset torna
+#           a essere solo un filtro sui riempimenti: e' la separazione pulita
+#           dei due effetti che nella FASE E erano mescolati.
+#           InpAtrSlMult 1,0/1,5/2,0/2,5 x offset 0/100/200/300, su IS e OOS.
+#           16 pass x 2 finestre x 2 mercati = 64 pass
+#
+#  388 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
 #  (-SoloGeometria 80 · -SoloMotore 48 · -SoloSlippage 40 · -SoloRetest 80 ·
-#   -SoloRiempimento 40 · -SoloGestione 36)
+#   -SoloRiempimento 40 · -SoloGestione 36 · -SoloDrawdown 64)
 #
 #  Gestione delle fasi A-E: TP 1,5R, trailing base candela M5, niente
 #  parziale ne' BE, rischio 1%. NON e' quella accesa in forward - vedi
@@ -99,6 +106,7 @@ param(
   [switch]$SoloRetest,
   [switch]$SoloRiempimento,
   [switch]$SoloGestione,
+  [switch]$SoloDrawdown,
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
@@ -222,6 +230,28 @@ $Fasi=@(
   #     (TP 0.5, pct 0, BE 0) == (TP 0.5, pct 0, BE 1)
   #     (TP 1.0, pct 0, BE 0) == (TP 1.0, pct 0, BE 1)
   # Se vengono identiche ALTRE coppie, e' un ramo di codice che non gira.
+  # FASE H - IL DRAWDOWN, e la separazione dei due effetti dell'offset.
+  #
+  # Perche' questa fase esiste. La FASE E aveva mostrato il DD scendere da
+  # 12,01% a 7,28% alzando InpRetestOffsetPts, ma con due cause mescolate:
+  #   1) meno riempimenti (il realismo)
+  #   2) l'entry scende verso l'SL, quindi lo STOP SI ACCORCIA, il lotto
+  #      cresce a rischio fisso e il TP si avvicina
+  # Con InpSLMode=RANGE lo stop e' il bordo opposto, quindi la (2) c'e'
+  # sempre. Con InpSLMode=ATR invece la distanza dello stop e' ATR x mult,
+  # INDIPENDENTE da dove entro: l'offset torna a essere solo un filtro sui
+  # riempimenti. E' la separazione pulita, senza dover credere a un ragionamento.
+  #   - se il DD migliora ANCHE con stop ATR -> erano i riempimenti
+  #   - se il miglioramento sparisce        -> era la geometria dello stop
+  #
+  # E qui si spazzola quello che il drawdown lo muove davvero: quanto e'
+  # largo lo stop. Rischio fisso 1%: il rischio e' un moltiplicatore lineare
+  # (FASE G: profitto x2.03, DD x1.95) e non insegna niente sul DD.
+  #
+  # ⚠️ Da leggere nelle colonne NUOVE, non nel profitto: 'Peggior Giornata %'
+  # e' la metrica che chiude un conto prop, e prima di oggi non esisteva.
+  @{ Tag="H_drawdown";  Pass=16; Win=$WF
+     Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=35||35||0||35||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpSLMode=1||1||0||1||N`nInpAtrSlMult=1.0||1.0||0.5||2.5||Y`nInpRetestOffsetPts=0||0||100||300||Y" },
   @{ Tag="F_gestione";  Pass=8; Win=$WF
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=35||35||0||35||N`nInpRetestOffsetPts=200||200||0||200||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpTP1_R=0.5||0.5||0.5||1.0||Y`nInpTP1_ClosePct=0||0||50||50||Y`nInpBreakevenAtTP1=0||0||1||1||Y" },
   # FASE G - QUANTO COSTA DAVVERO IL 2%.
@@ -240,6 +270,7 @@ if($SoloSlippage) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "C_slippage" } }
 if($SoloRetest)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "D_retest" } }
 if($SoloRiempimento){ $Fasi = $Fasi | Where-Object { $_.Tag -eq "E_retest_fill" } }
 if($SoloGestione)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "F_gestione" -or $_.Tag -eq "G_rischio" } }
+if($SoloDrawdown)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "H_drawdown" } }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 $NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }
