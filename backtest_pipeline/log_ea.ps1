@@ -16,7 +16,8 @@
 #
 #  USO (sul VPS, MT5 puo' restare aperto):
 #    powershell -ExecutionPolicy Bypass -File .\log_ea.ps1
-#    powershell -ExecutionPolicy Bypass -File .\log_ea.ps1 -Filtro "Nasdaq|NASUSD" -Da 14:25 -A 15:05
+#    powershell -ExecutionPolicy Bypass -File .\log_ea.ps1 -Filtro "Nasdaq|NASUSD" -Da 15:25 -A 16:05
+#      (finestra in ORA LOCALE: il Nasdaq apre 14:30 server = 15:30 sul VPS)
 #    powershell -ExecutionPolicy Bypass -File .\log_ea.ps1 -Data 20260805 -Tutto
 #
 #  Scrive tutto in %USERPROFILE%\log_<filtro>_<data>.txt, pronto da mandare.
@@ -24,7 +25,13 @@
 param(
   [string] $Filtro = "Dow|U30USD|770202",   # regex: EA, simbolo, magic
   [string] $Data   = "",                    # AAAAMMGG. Vuoto = oggi
-  [string] $Da     = "14:30",               # finestra oraria (ora SERVER, come nei log)
+  # ⚠️ ORA LOCALE DEL PC, NON ORA SERVER.
+  #  Le date nella scheda Esperti / Giornale sono quelle dell'orologio di
+  #  Windows. Sul VPS Windows sta in ora italiana e il server BCM e' un'ora
+  #  indietro: un ordine che il log data 09:15 e' stato piazzato alle 08:15
+  #  server. Il GRAFICO invece e' in ora server. Non confonderli: il 06/08
+  #  ci ho creduto e ho annunciato un "ritardo di un'ora" che non esisteva.
+  [string] $Da     = "14:30",               # finestra oraria in ORA LOCALE (= italiana sul VPS)
   [string] $A      = "15:10",
   [switch] $Tutto,                          # ignora la finestra oraria
   [switch] $SoloEsperti                     # salta il Giornale
@@ -62,7 +69,7 @@ $out = New-Object System.Collections.ArrayList
 $trovate = 0
 
 Write-Host "=== LOG MT5 · filtro '$Filtro' · data $Data ===" -ForegroundColor Cyan
-if (-not $Tutto) { Write-Host "    finestra $Da - $A (ora SERVER, quella dei log)" -ForegroundColor Gray }
+if (-not $Tutto) { Write-Host "    finestra $Da - $A (ORA LOCALE del PC: sul VPS = ora italiana = server + 1h)" -ForegroundColor Gray }
 
 foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)) {
   $fonti = @(
@@ -98,7 +105,7 @@ if ($trovate -eq 0) {
   [void]$out.Add("NESSUNA RIGA TROVATA")
   [void]$out.Add("filtro : $Filtro")
   [void]$out.Add("data   : $Data")
-  [void]$out.Add("finestra: " + $(if ($Tutto) { "tutta la giornata" } else { "$Da - $A (ora SERVER)" }))
+  [void]$out.Add("finestra: " + $(if ($Tutto) { "tutta la giornata" } else { "$Da - $A (ORA LOCALE del PC = server + 1h)" }))
   [void]$out.Add("")
   [void]$out.Add("Cartelle dati viste:")
   Write-Host "Prova cosi':" -ForegroundColor Yellow

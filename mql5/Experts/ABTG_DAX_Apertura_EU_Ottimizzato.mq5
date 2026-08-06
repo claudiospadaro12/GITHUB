@@ -32,7 +32,9 @@
 #define ABTG_DEF_USE_GAPFILL  false  // sul DAX di default breakout, non gap fill
 #define ABTG_DEF_RISK         1.0    // OTT: rischio 1% (validato solo OHLC, prudenza)
 #define ABTG_DEF_BUFFER       600    // OTT: buffer 600 (validato real tick: PF 1.49, DD 3.8%)
-#define ABTG_DEF_TRAIL_MODE   2      // 2=punti fissi (piano DAX: trailing ~410 punti sugli indici)
+#define ABTG_DEF_TRAIL_MODE   1      // 06/08: era 2 (punti fissi 410). Mai stato in un backtest, e in
+                                     // forward chiudeva le aperture DAX sotto il minuto al 3% del target.
+                                     // Sull'originale corretto il 05/08, qui era rimasto indietro.
 
 //  VERSIONE TUTTO-IN-UNO: il motore e' incluso qui sotto, NON serve
 //  copiare nessun file .mqh ne creare la cartella Include\ABTG.
@@ -207,7 +209,7 @@ input double InpTP1_ClosePct    = 50;                 // % di posizione chiusa a
 input bool   InpBreakevenAtTP1  = true;               // Sposta stop in pari dopo la parziale
 input bool   InpUseTrailing     = true;               // Attiva trailing stop
 input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Tipo di trailing
-input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
+input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M5;         // (TRAIL_PREVBAR) TF della candela. 06/08: era M1, il PEGGIORE dei sei sul DAX (-801 contro -79 di M5 su 440 trade)
 input double InpTrailAtrMult    = 2.0;                // (TRAIL_ATR) trailing = X * ATR
 input double InpTrailFixedPts   = 410;                // (TRAIL_FIXED) trailing in punti (piano DAX: 410 punti)
 

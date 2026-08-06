@@ -412,3 +412,26 @@ cioè **3% su un segnale solo**. È A1, identico a `Apertura Marco`.
 D30EUR 5% (2+2+1) · NASUSD 5% (2+1+2) · U30USD 1%. Non è una previsione, è il tetto.
 Con una regola prop del 5% giornaliero, **un solo simbolo esaurisce la giornata**.
 Da riportare sotto controllo prima di parlare di prop.
+
+### A10. `DAX Apertura EU Ottimizzato` girava ancora il trailing a punti fissi
+Nel log del 06/08: `trail=ABTG_TRAIL_FIXED PERIOD_M1`. È il trailing a **410 punti fissi**
+trovato il 05/08 dopo tre aperture DAX chiuse sotto il minuto al 3% del target, e **mai
+entrato in nessun backtest**. Il 05/08 è stato corretto su `ABTG_DAX_Apertura_EU`
+(`ABTG_DEF_TRAIL_MODE` 2 → 1, `InpTrailTF` M1 → M5: su 440 trade M1 −801 · M5 −79).
+**Sull'`_Ottimizzato` era rimasto `2`.** Nella stessa schermata gli altri sette EA dicono
+tutti `TRAIL_PREVBAR`: era l'unico.
+**Fatto nel codice il 06/08** (`ABTG_DEF_TRAIL_MODE` 1, `InpTrailTF` M5).
+⚠️ **Non basta:** MT5 tiene i parametri sul GRAFICO, quindi l'EA acceso continua col
+trailing fisso finché non si cambia `InpTrailMode` a mano nelle sue proprietà.
+**Da fare sul VPS, decisione di Claudio.**
+
+### G5. Ora dei LOG ≠ ora del GRAFICO — e il 06/08 ci sono cascato
+Scheda Esperti e Giornale sono in **ora LOCALE del PC**; grafico, candele e `TimeCurrent()`
+sono in **ora SERVER**. Sul VPS Windows è in ora italiana, il server BCM un'ora indietro.
+Ho letto `BUY STOP alle 09:15` in un log e ho annunciato un **ritardo di un'ora** che non
+esisteva: erano le **08:15 server**, cioè la fine esatta del range 08:00–08:15.
+La colpa era di un mio file: `log_ea.ps1` diceva *"finestra oraria (ora SERVER, come nei
+log)"*. Corretto in tre punti + avviso in cima al `param()`, e la regola è finita in
+`CLAUDE.md`.
+**Controllo lampo:** l'ultima riga del log deve coincidere con l'orologio di Windows;
+l'ultima candela del grafico sta un'ora indietro.

@@ -16,6 +16,15 @@
 - Negli EA/`.ini` `InpSessionHour` va SEMPRE messo in ORA SERVER (quindi 8 per il DAX, 14:30 per il Nasdaq).
 - Verifica rapida di un CSV di risultati: colonna `InpSessionHour` deve essere **8** (DAX) / **14** (Nasdaq). Se è 9 / 15 → ora sbagliata, cestinare.
 
+### ⚠️ Ora dei LOG di MT5 ≠ ora del GRAFICO (imparata il 06/08, sbagliando)
+- **Schede Esperti e Giornale → ORA LOCALE del PC.** Sul VPS Windows sta in ora italiana,
+  quindi un ordine datato `09:15` nel log è stato piazzato alle **08:15 server**.
+- **Grafico, candele, `TimeCurrent()` → ORA SERVER.**
+- Controllo lampo: l'ultima riga del log deve coincidere con l'orologio di Windows; l'ultima
+  candela del grafico è un'ora indietro. Se le due cose combaciano, stai leggendo ore diverse.
+- Il 06/08 ho annunciato un "ritardo di un'ora" di un EA che invece aveva armato al secondo
+  giusto. **Prima di dire che un EA è in ritardo: stabilire in quale ora è scritto il numero.**
+
 ## Contesto
 - Conto DEMO BCM 50503392, tipo HEDGING.
 - Sviluppo sul branch `claude/creating-agents-SgGpD`.

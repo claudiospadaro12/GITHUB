@@ -113,3 +113,79 @@ solo simbolo che va male esaurisce la giornata.**
 2. Confrontare i parametri sul grafico di `DAX Live 5m` e `DAX Live5m v2`. Se sono
    davvero lo stesso EA, ne va spento uno — stessa logica di Marco.
 3. Riportare l'esposizione per simbolo sotto controllo prima di parlare di prop.
+
+---
+
+# Aggiornamento delle 20:00 — chiuso, con una mia correzione
+
+## ✅ 5 su 5
+
+Alle **19:57:14** `ABTG_DAX_Apertura_EU_Ottimizzato` ha finalmente scritto la sua riga.
+Il Giornale spiega perché prima non c'era:
+
+```
+19:14:01  removed
+19:17:41  loaded successfully     -> nessun CONFIG IN USO: era il .ex5 VECCHIO
+19:32:35  (compilazione del .ex5 nuovo)
+19:57:07  removed
+19:57:11  loaded successfully     -> CONFIG IN USO ✅
+```
+
+Il riavvio delle 19:17 era **prima** della compilazione delle 19:32. Nessun guasto:
+solo un riattacco fatto troppo presto.
+
+## ❌ RITRATTATO — il "ritardo di un'ora" non esiste
+
+Avevo scritto che l'EA aveva armato *"un'ora dopo"*, leggendo questa riga:
+
+```
+09:15:00.364  [DAX Apertura EU OTT]  BUY STOP @ 26208.10  SL 26084.70  lot 0.40
+```
+
+contro un `Apertura server 08:00, range 15 min`. **Sbagliato.**
+
+**Le date della scheda Esperti e del Giornale sono in ORA LOCALE del PC**, non in ora
+server. La prova sta nella schermata stessa: l'ultima riga del log dice `20:01:37` e
+l'orologio di Windows dice `20:01`. Il **grafico** invece è in ora server, e infatti la sua
+ultima candela è delle 18:55.
+
+Sul VPS Windows sta in ora italiana, il server BCM è un'ora indietro. Quindi:
+
+```
+09:15 locale  =  08:15 SERVER  =  fine esatta del range 08:00-08:15
+```
+
+**L'EA ha armato al secondo giusto.** Cade anche il collegamento che avevo fatto col Nasdaq
+del 05/08: era un'altra fonte, in ora server, e non c'entra niente.
+
+**Causa dell'errore, ed era mia:** l'intestazione di `log_ea.ps1` diceva
+*"finestra oraria (ora SERVER, come nei log)"*. Falso. Corretto nel file, in tre punti, con
+l'avviso in cima al blocco `param()` — così il prossimo che lo legge non ci ricasca.
+
+## 🔴 La cosa vera che il log ha tirato fuori: `TRAIL_FIXED`
+
+```
+[DAX Apertura EU OTT] CONFIG IN USO -> ... | trail=ABTG_TRAIL_FIXED PERIOD_M1
+```
+
+È il **trailing a punti fissi**, quello trovato il 05/08 dopo tre aperture DAX chiuse sotto
+il minuto prendendo il 3% del target — e che **non è mai stato in nessun backtest**.
+Il 05/08 è stato corretto su `DAX Apertura EU` (passato a base candela M5: su 440 trade,
+M1 −801 · M5 −79). **Sull'Ottimizzato no.**
+
+Nella stessa schermata tutti gli altri sette EA dicono `TRAIL_PREVBAR`. Lui è l'unico
+rimasto indietro. **È lo stesso schema di sempre: corretto il caso, non la classe.**
+
+## Il BUY STOP delle 08:15 server non si è riempito
+
+Deduzione dalla guardia A4, non dallo Storico: al riavvio delle 19:57 l'EA scrive
+*"nuovo giorno: stato resettato"* ma **non** scrive *"oggi ho GIA' operato"* — riga che
+invece compare su `DAX Live5m`, `Live5m v2`, `Nasdaq Live5m` e `Nasdaq Apertura US OTT`.
+La guardia legge i deal del giorno per simbolo e magic: se tace, deal non ce ne sono.
+Verificabile nello Storico, ma la fonte è affidabile.
+
+## Esposizione aggiornata su D30EUR
+
+Con l'Ottimizzato acceso all'1%: Apertura EU 2% + Live5m 2% + Live5m v2 1% + Apertura EU
+OTT 1% = **6% su un simbolo solo**, sopra il limite giornaliero di qualsiasi prop da solo.
+E l'Ottimizzato gira `range=15`, la geometria misurata **0 celle positive su 4** fuori campione.
