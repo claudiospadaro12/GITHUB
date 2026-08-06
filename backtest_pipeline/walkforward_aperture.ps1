@@ -66,14 +66,27 @@
 #           sul periodo INTERO.
 #           20 pass x 1 finestra x 2 mercati = 40 pass
 #
-#  288 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
-#  (-SoloGeometria 80 · -SoloMotore 48 · -SoloSlippage 40 · -SoloRetest 80 ·
-#   -SoloRiempimento 40)
+#  FASE F - la GESTIONE ACCESA (aggiunta il 06/08, "B1"). Le fasi A-E sono
+#           tutte a rischio 1% con TP 1,5R, senza parziale e senza
+#           breakeven. L'EA che gira sul VPS fa TP 3R, chiude il 50% al
+#           primo obiettivo e mette lo stop in pari: e' un altro sistema,
+#           quindi nessun numero delle fasi A-E lo descrive.
+#           Sul candidato (retest, range 35, buffer 500, offset 200):
+#           TP1_R 0,5/1,0 x parziale 0/50 x breakeven off/on.
+#           8 pass x 2 finestre x 2 mercati = 32 pass
+#  FASE G - quanto costa DAVVERO il 2%. Il rischio non e' un moltiplicatore
+#           pulito: il lotto si calcola su un saldo che cambia. Con una
+#           regola prop il vincolo e' il DD, e va misurato non stimato.
+#           2 pass x 1 finestra x 2 mercati = 4 pass
 #
-#  Gestione fissata a quella validata: TP 1,5R, trailing base candela M5,
-#  niente parziale ne' BE, rischio 1%. Non e' quella accesa in forward -
-#  vedi report/AUDIT_live_vs_backtest.md - ma e' quella con cui sono
-#  confrontabili tutti i numeri del 05/08.
+#  324 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
+#  (-SoloGeometria 80 · -SoloMotore 48 · -SoloSlippage 40 · -SoloRetest 80 ·
+#   -SoloRiempimento 40 · -SoloGestione 36)
+#
+#  Gestione delle fasi A-E: TP 1,5R, trailing base candela M5, niente
+#  parziale ne' BE, rischio 1%. NON e' quella accesa in forward - vedi
+#  report/AUDIT_live_vs_backtest.md - ma e' quella con cui sono
+#  confrontabili tutti i numeri del 05/08. La FASE F misura quella vera.
 #
 #  PC di backtest, MetaTrader CHIUSO.
 #  Uso:
@@ -85,6 +98,7 @@ param(
   [switch]$SoloSlippage,
   [switch]$SoloRetest,
   [switch]$SoloRiempimento,
+  [switch]$SoloGestione,
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
@@ -188,6 +202,35 @@ $Fasi=@(
   # cioe' la configurazione che si porterebbe davvero in forward.
   # Periodo INTERO come la FASE C: e' una domanda di realismo, non di
   # sovradattamento, e cosi' il campione e' piu' grande.
+  # FASE F - LA GESTIONE ACCESA (B1, 06/08).
+  #
+  # Tutti i numeri delle fasi A-E sono a rischio 1% con TP 1,5R, senza
+  # parziale e senza breakeven. L'EA che gira sul VPS fa un'altra cosa:
+  # TP 3R, chiude il 50% al primo obiettivo e mette lo stop in pari.
+  # Sono due sistemi diversi, quindi NESSUN numero di quelle fasi descrive
+  # l'EA acceso. Questa fase misura il candidato con la gestione VERA.
+  #
+  # Geometria pinnata sul candidato uscito da FASE D/E:
+  #   RETEST, range 35, buffer 500, offset 200, volumi OFF.
+  # Portati ai valori ACCESI anche MinStopPts (0, non 500) e SkipIfTight
+  # (true, non false): sono due delle sei divergenze dell'audit.
+  #
+  # ⚠️ PREVISIONE DA VERIFICARE PRIMA DI LEGGERE I PROFITTI. Alla riga 1518
+  # il blocco della parziale gira solo se InpTP1_ClosePct > 0, e il
+  # breakeven sta DENTRO quel blocco. Quindi con parziale a 0 il flag BE
+  # non puo' fare niente, e queste DUE coppie devono venire identiche:
+  #     (TP 0.5, pct 0, BE 0) == (TP 0.5, pct 0, BE 1)
+  #     (TP 1.0, pct 0, BE 0) == (TP 1.0, pct 0, BE 1)
+  # Se vengono identiche ALTRE coppie, e' un ramo di codice che non gira.
+  @{ Tag="F_gestione";  Pass=8; Win=$WF
+     Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=35||35||0||35||N`nInpRetestOffsetPts=200||200||0||200||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpTP1_R=0.5||0.5||0.5||1.0||Y`nInpTP1_ClosePct=0||0||50||50||Y`nInpBreakevenAtTP1=0||0||1||1||Y" },
+  # FASE G - QUANTO COSTA DAVVERO IL 2%.
+  # Il rischio non e' un moltiplicatore pulito: il lotto si calcola su un
+  # saldo che cambia, quindi il drawdown al 2% non e' esattamente il doppio
+  # di quello all'1%. Con una regola prop e' il DD il vincolo, non l'utile,
+  # e va misurato invece che stimato. Gestione ACCESA, periodo intero.
+  @{ Tag="G_rischio";   Pass=2; Win=$TUTTO
+     Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=35||35||0||35||N`nInpRetestOffsetPts=200||200||0||200||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpRiskPercent=1.0||1.0||1.0||2.0||Y" },
   @{ Tag="E_retest_fill"; Pass=20; Win=$TUTTO
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=15||5||10||45||Y`nInpRetestOffsetPts=0||0||100||300||Y" }
 )
@@ -196,6 +239,7 @@ if($SoloMotore)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "B_motore" } }
 if($SoloSlippage) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "C_slippage" } }
 if($SoloRetest)   { $Fasi = $Fasi | Where-Object { $_.Tag -eq "D_retest" } }
 if($SoloRiempimento){ $Fasi = $Fasi | Where-Object { $_.Tag -eq "E_retest_fill" } }
+if($SoloGestione)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "F_gestione" -or $_.Tag -eq "G_rischio" } }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 $NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }

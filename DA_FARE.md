@@ -52,7 +52,21 @@ l'EMA200 rientra short 2 punti più in alto, poi altre 3 volte scalando contro i
 
 # 🟠 B — MISURE DA RIFARE (i verdetti attuali non valgono)
 
-### B1. Rifare `aperture_trailing` sulla configurazione ACCESA
+### B1. ⏳ **IN CORSO 06/08** — misurare il candidato con la gestione ACCESA
+**Test pronto:** `walkforward_aperture.ps1 -SoloGestione` → FASE F (32 pass) + FASE G (4 pass).
+FASE F: sul candidato (retest · range 35 · buffer 500 · offset 200) spazzola
+`InpTP1_R` 0,5/1,0 × `InpTP1_ClosePct` 0/50 × `InpBreakevenAtTP1` off/on, su IS e OOS.
+Portati ai valori accesi anche `InpMinStopPts` (0, non 500) e `InpSkipIfTight` (true, non false).
+FASE G: rischio **1% contro 2%** sulla gestione accesa, periodo intero — il DD al 2% non è
+esattamente il doppio perché il lotto si calcola su un saldo che cambia.
+⚠️ **Previsione dichiarata prima**: alla riga 1518 il blocco della parziale gira solo se
+`InpTP1_ClosePct > 0` e il breakeven sta dentro quel blocco → **due coppie devono venire
+identiche** (parziale 0 con BE off e BE on). Altre coppie identiche = ramo di codice che non gira.
+⚠️ **Sul Nasdaq la FASE F non è un test di fedeltà**: gira in `RangeMode=0` e chiusura 17:30,
+mentre l'EA acceso usa la candela H1 precedente e chiude alle 21:45 (quello è C6). Vale come
+controllo sull'asse gestione, non come "ecco cosa fa il Nasdaq che gira".
+
+### B1-bis. Il testo originale — rifare `aperture_trailing` sulla configurazione ACCESA
 **Prova:** `AUDIT_live_vs_backtest.md`. **6 divergenze sul DAX, 9 sul Nasdaq.** Il test usava
 TP 1,5R senza parziale né BE, risk 1%; gli EA veri: **TP 3R + parziale 50% + stop in pari**,
 risk 2%, Nasdaq in PREVBAR H1, chiusura 21:45.
