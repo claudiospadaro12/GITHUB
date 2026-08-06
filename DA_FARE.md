@@ -52,19 +52,23 @@ l'EMA200 rientra short 2 punti più in alto, poi altre 3 volte scalando contro i
 
 # 🟠 B — MISURE DA RIFARE (i verdetti attuali non valgono)
 
-### B1. ⏳ **IN CORSO 06/08** — misurare il candidato con la gestione ACCESA
-**Test pronto:** `walkforward_aperture.ps1 -SoloGestione` → FASE F (32 pass) + FASE G (4 pass).
-FASE F: sul candidato (retest · range 35 · buffer 500 · offset 200) spazzola
-`InpTP1_R` 0,5/1,0 × `InpTP1_ClosePct` 0/50 × `InpBreakevenAtTP1` off/on, su IS e OOS.
-Portati ai valori accesi anche `InpMinStopPts` (0, non 500) e `InpSkipIfTight` (true, non false).
-FASE G: rischio **1% contro 2%** sulla gestione accesa, periodo intero — il DD al 2% non è
-esattamente il doppio perché il lotto si calcola su un saldo che cambia.
-⚠️ **Previsione dichiarata prima**: alla riga 1518 il blocco della parziale gira solo se
-`InpTP1_ClosePct > 0` e il breakeven sta dentro quel blocco → **due coppie devono venire
-identiche** (parziale 0 con BE off e BE on). Altre coppie identiche = ramo di codice che non gira.
-⚠️ **Sul Nasdaq la FASE F non è un test di fedeltà**: gira in `RangeMode=0` e chiusura 17:30,
-mentre l'EA acceso usa la candela H1 precedente e chiude alle 21:45 (quello è C6). Vale come
-controllo sull'asse gestione, non come "ecco cosa fa il Nasdaq che gira".
+### B1. ✅ **CHIUSO 06/08** — la gestione accesa non peggiora il candidato, lo migliora
+**Misurato:** FASE F (32 pass) + FASE G (4 pass) sul candidato retest · range 35 · buffer 500 ·
+offset 200. Il controllo dichiarato prima del test è passato: **8 coppie su 8 identiche come
+previsto** (parziale 0 → il flag breakeven non può fare niente), e nessun'altra coppia identica.
+**Risultato, DAX fuori campione:**
+| gestione | OOS | PF | DD |
+|---|---:|---:|---:|
+| TP 1,5R secco *(quella dei test A–E)* | +834,12 | 1,164 | 11,65% |
+| **TP 3R + parziale + BE — quella ACCESA** | **+1198,79** | **1,237** | **10,49%** |
+Più profitto, PF più alto, drawdown più basso. **Tutte e sei le gestioni sono positive in OOS**:
+la geometria regge da sola e la gestione la migliora.
+**Il 2% misurato (FASE G):** profitto **×2,03**, DD **×1,95** → DD reale **20,40%**, non il 24%
+che avevo stimato (la mia stima partiva dalla base sbagliata). Resa/DD **0,65 all'1% e 0,68 al 2%**:
+raddoppiare la size non migliora il sistema, ne raddoppia la scala.
+**Nasdaq:** la gestione accesa lo migliora (da −768,68 a −154,68) ma resta negativo, e al 2% ha
+**24,50% di DD**. Da spegnere.
+→ [REFERTO_FASE_F_G_B1.md](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_F_G_B1.md)
 
 ### B1-bis. Il testo originale — rifare `aperture_trailing` sulla configurazione ACCESA
 **Prova:** `AUDIT_live_vs_backtest.md`. **6 divergenze sul DAX, 9 sul Nasdaq.** Il test usava
@@ -170,14 +174,19 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 | C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
 | C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
 
-**Ordine consigliato:** ~~B7~~ ~~C5~~ ~~C8~~ ~~C11~~ → **B1** (rifare il candidato con la
-gestione ACCESA: senza quello nessun numero descrive l'EA che gira) → C6 (ultima chance del
-Nasdaq) → C12 → C9 → C1 → C10 → C3 → C2 → C4. Mai due insieme: si rubano la CPU.
+**Ordine consigliato:** ~~B7~~ ~~C5~~ ~~C8~~ ~~C11~~ ~~B1~~ → **A1 e A4** (non sono test, sono
+soldi: 4% su un segnale solo, e i pendenti riarmati al riavvio) → **decisione sui 4 parametri del
+DAX** → C6 (ultima chance del Nasdaq) → C12 → C9 → C1 → C10 → C3 → C2 → C4.
+Mai due test insieme: si rubano la CPU.
 
-> 🎯 **Candidato DAX al 06/08:** RETEST · range 35 · buffer 500 · offset 200 · volumi OFF.
-> Tre cancelli su quattro passati (fuori campione · vicinato · realismo). **Manca il forward.**
-> ⚠️ E manca soprattutto **B1**: questi numeri sono a rischio 1% con TP 1,5R senza parziale né
-> breakeven; l'EA acceso gira al 2% con TP 3R + parziale + BE. **DD 11,8% all'1% → ~24% al 2%.**
+> 🎯 **Candidato DAX al 06/08 — quattro cancelli su cinque:**
+> `InpEntryMode=2` (retest) · `InpRangeMinutes=35` · `InpBufferPoints=500` · `InpRetestOffsetPts=200`
+> · volumi OFF, gestione invariata (TP 3R + parziale 50% + BE).
+> ✅ fuori campione · ✅ vicinato (due motori) · ✅ realismo dei riempimenti · ✅ gestione vera.
+> ❌ **manca solo il forward.**
+> Fuori campione: **+1198,79 · PF 1,237 · DD 10,49%** all'1% · **DD 20,40%** al 2%.
+> ⚠️ **L'EA acceso oggi NON è questo**: gira in breakout con range 15 e buffer 200, cioè la zona
+> che fuori campione perde. Sono **quattro parametri** da cambiare, ed è una decisione di Claudio.
 
 ---
 
