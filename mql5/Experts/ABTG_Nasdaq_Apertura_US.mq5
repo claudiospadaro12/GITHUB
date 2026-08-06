@@ -1189,6 +1189,11 @@ bool TryPlaceGapFill()
      { ABTGLog(StringFormat("gap %.0f pt < soglia %.0f: nessuna operazione.", gap, InpGapMinPoints)); return(true); }
 
    if(!SpreadOK()) { ABTGLog("spread troppo alto: salto il gap fill."); return(true); }
+   // BUG 06/08: quarto motore trovato a ignorare i filtri di conferma, dopo il
+   // fade. Il 05/08 avevo corretto il fade senza controllare gli altri rami con
+   // lo stesso schema: nella FASE B rifatta GAPFILL con volumi ON e OFF dava di
+   // nuovo due righe identiche al centesimo.
+   if(!ConfirmOK()) { ABTGLog("GAP FILL: conferma (volumi/ATR) assente: niente trade."); return(true); }
 
    //--- livelli della prima finestra di apertura (la "conferma" del PDF, es. prime candele)
    int openMin = InpSessionHour*60 + InpSessionMin;

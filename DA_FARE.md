@@ -104,11 +104,14 @@ ovunque, e da mettere `2024.09.26` come data d'inizio in tutti i driver `.ps1`.
 **Tetto invalicabile:** nessun backtest su questi indici può risalire oltre il **26/09/2024**.
 Chi promette risultati su periodi più lunghi sta leggendo dati che non esistono.
 
-### B8. La FASE B del walk-forward va rifatta: 2 motori su 6 non sono mai stati eseguiti
-**Prova:** referto `risultati_archivio/Walkforward_Aperture/REFERTO_WALKFORWARD.md`.
-GAPFILL cadeva nel ramo breakout, RANGE_FADE ignorava il filtro volumi, DELAYED non poteva
-entrare per costruzione (vedi E6/E7/E8). I difetti sono corretti, i numeri no.
-**Chiude quando:** rilanciata la FASE B sui tre EA ricompilati.
+### B8. ✅ **CHIUSA 06/08** — FASE B rifatta, i tre controlli passati
+GAPFILL non è più identico a BREAKOUT (8 righe su 8), DELAYED entra (51-247 trade per riga
+invece di 0), RANGE_FADE distingue volumi ON da OFF (4 su 4). RETEST e OPENCONFIRM invariati
+al centesimo su 14 righe su 16 — le altre 2 sono in E11.
+**Esito:** vince il **RETEST a volumi spenti**, unico in utile fuori campione su due mercati con
+campione vero. **DELAYED bocciato** (era la mia ipotesi sullo sweep, ed era sbagliata: IS +1528
+sul DAX → OOS −379). **RANGE_FADE bocciato su misura finalmente valida.**
+→ [REFERTO_FASE_B_C5.md](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md)
 
 ### B9. Misurare la prima data vera anche di **XAUUSD, SPXUSD e i cambi**
 **Perché:** su D30EUR/NASUSD/U30USD è saltato fuori che i backtest partivano 9 mesi dopo
@@ -140,12 +143,15 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
 | C3 | `aperture_retest_fade.ps1` | 48 | RETEST e RANGE_FADE con la gestione buona (la bocciatura di luglio non vale) |
 | C4 | `maxmin_oro.ps1 -Fase 2 -SLMode 0` | 12 | il MaxMinNotte sull'oro a tick reali, griglia spostata dove puntavano i gradienti |
 
-| C5 | FASE B rifatta (walk-forward) | 24 | i 6 motori con GAPFILL/FADE/DELAYED **davvero attivi** (E6-E8) |
+| ~~C5~~ | ~~FASE B rifatta~~ | 24 | ✅ **FATTA 06/08**. I 3 controlli passati. Vince il **RETEST a volumi spenti**: unico in utile OOS su due mercati con campione vero (+392,96 DAX · +218,98 Nasdaq). DELAYED e RANGE_FADE bocciati su misura valida. GAPFILL interessante ma 19 trade. [referto](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md) |
+| C8 | **RETEST × geometria** (range × buffer, IS+OOS) | 40 | il RETEST è stato misurato solo a range 35/buffer 200: gli manca la griglia che il breakout ha già |
+| C9 | **GAPFILL × soglie** (`InpGapMinPoints` × `InpGapMinRR`) | 32 | PF 2,08 → 1,94 sul Nasdaq ma su 23 e 19 trade: le occasioni salgono restando redditizie? |
+| C10 | rifare la sola colonna **GAPFILL volumi ON** | 4 | col binario corretto (E10) |
 | C6 | Nasdaq **RETEST** OOS + `RangeMode=2` | 32 | prima di spegnere la linea Nasdaq: è l'unico motore positivo in OOS |
 | C7 | DAX **range 40 / buffer 400** con storico completo | — | conferma del centro dell'altopiano dopo aver chiuso B7 |
 
-**Ordine consigliato:** ~~B7~~ (chiuso: lo storico è quello che è, 26/09/2024) → C1 (in corso) →
-**C5** (i due motori mai eseguiti) → C6 → C3 → C2 → C4. Mai due insieme: si rubano la CPU.
+**Ordine consigliato:** ~~B7~~ ~~C5~~ → **C8** (la geometria del RETEST, è lì che si gioca) →
+C6 → C9 → C1 → C10 → C3 → C2 → C4. Mai due insieme: si rubano la CPU.
 
 ---
 
@@ -186,6 +192,20 @@ cui la volatilità dell'oro è **raddoppiata** (29,8 $ → 59,5 $ di ampiezza no
   E il ramo faceva `return(true)`, bruciando la giornata. Ora aspetta la rottura vera entro
   `InpPendingExpiryMin`. **Con filtri spenti e modalità BREAKOUT il comportamento è identico a
   prima: nessun EA in forward cambia.**
+- **E10.** ✅ *corretto 06/08* — **anche GAPFILL ignorava il filtro volumi.** `TryPlaceGapFill()`
+  non chiamava né `VolumeOK()` né `ConfirmOK()`: nella FASE B rifatta le righe volumi ON e OFF
+  erano di nuovo identiche al centesimo. **È lo stesso difetto del RANGE_FADE corretto il 05/08**:
+  avevo corretto il caso singolo invece della classe, senza controllare gli altri rami con lo
+  stesso schema. Ora c'è l'audit di tutti e sei i motori nel referto C5, e tutti applicano il
+  filtro al momento dell'ingresso.
+  **Lezione di processo: quando si trova un difetto, si cerca subito lo stesso schema altrove.**
+- **E11.** ⚠️ **`NASDAQ RETEST volumi ON` è cambiato fra le due FASE B senza motivo noto**
+  (IS +357,30 → +332,40; OOS +279,11 → +274,35; **stesso numero di trade**). L'unico input
+  diverso è `InpUseGapFill`, che nel codice compare solo dentro il ramo GAPFILL e non può toccare
+  il retest. Ipotesi: fra i due giri è stato riscaricato lo storico a tick reali, e il retest è
+  l'unico motore che legge i **volumi tick** nel momento della rottura. **Non dimostrato.**
+  Test decisivo, 2 pass: stesso binario, `InpEntryMode=2`, `InpUseVolumeFilter=1`, con
+  `InpUseGapFill` a 0 e a 1. Entità trascurabile (0,27 €/trade), nessun verdetto cambia.
 - **E9.** ⚠️ **Il motore delle aperture è copiato a mano in ~10 file.** `ABTG_ApertureCore.mqh`
   esiste ma **nessuno lo include** (compare solo nei commenti): è codice morto. Le tre correzioni
   di oggi sono state applicate 3 volte a mano. È esattamente il motivo per cui difetti come E6/E7/E8
