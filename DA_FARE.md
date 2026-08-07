@@ -823,3 +823,32 @@ Ci abbiamo guardato in **otto fasi**. Sta diventando una seconda finestra in cam
 lo stesso meccanismo documentato oggi due volte. **Da qui in avanti le conferme si prendono
 in forward**, non con altri backtest sulla stessa finestra. Se servirà un altro giudizio
 pulito, va tagliata una terza finestra mai guardata.
+
+
+### 🔴 A13. `InpAllowShort` con l'etichetta che dice il contrario — 07/08
+Nei due `_Ottimizzato` d'apertura l'input era:
+```
+input bool InpAllowShort = false;   // OTT: SOLO LONG (validato real tick)
+```
+L'etichetta descriveva **cosa succede col default**, non cosa significa il valore. Nella
+finestra dei parametri di MT5 si legge *«OTT: SOLO LONG»* con accanto `true`/`false`, e
+sembra un interruttore da **accendere** per avere il solo long. **È l'opposto:**
+`true` = short attivi, `false` = solo long.
+
+Claudio ci è cascato mentre applicava la modifica di FASE M: sul grafico quel valore era
+`true`, cioè short **accesi** su un EA che nel nome del parametro si dichiarava "solo long".
+
+**Corretto in tutti e due i file:** ora l'etichetta è
+`Consenti operazioni short (false = SOLO LONG)`.
+
+**Regola:** l'etichetta di un input deve dire **cosa fa il valore**, mai cosa fa il default.
+Chi legge la finestra dei parametri non vede il default: vede il valore corrente.
+
+### ⚠️ A14. `ABTG_DAX_Apertura_EU_Ottimizzato` non può eseguire il candidato
+Il suo enum dei motori ha **solo `BREAKOUT` e `GAPFILL`**: `RETEST` non esiste. È una copia
+di generazione più vecchia, come `Apertura Marco`.
+**Conseguenza: l'A/B in forward su due EA in parallelo non è possibile**, e la modifica
+`SOLO LONG` va applicata direttamente su `ABTG_DAX_Apertura_EU` (dove l'input si chiama
+`Consenti operazioni short`). Il confronto sarà **contro la misura**, non contro un secondo EA.
+**Se si vuole l'A/B**, va portato il motore RETEST dentro l'`_Ottimizzato` — lavoro di codice,
+da fare con calma e da testare prima.

@@ -170,7 +170,8 @@ input int    InpPrevWindowMin = ABTG_DEF_PREVWIN;     // (RANGE_PREV) finestra p
 input double InpBufferPoints  = ABTG_DEF_BUFFER;      // Buffer oltre il range, in punti (live: 700 = 7 punti indice)
 input int    InpPendingExpiryMin = 120;               // Cancella il pendente non eseguito dopo N minuti
 input bool   InpAllowLong     = true;                 // Consenti operazioni long
-input bool   InpAllowShort    = false;                // OTT: SOLO LONG (edge Nasdaq)
+input bool   InpAllowShort    = false;                // Consenti operazioni short (false = SOLO LONG). 07/08: l'etichetta diceva
+                                                     // "SOLO LONG" e sembrava un interruttore da mettere a true
 input double InpMinRangePts   = ABTG_DEF_MINRANGE;    // Ampiezza MIN candela/range in punti (live: 1700=17 punti; 0=off)
 input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/range in punti (live: 4000=40 punti; 0=off)
 
