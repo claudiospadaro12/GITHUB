@@ -24,7 +24,8 @@
 #  Scrive %USERPROFILE%\ea_attaccati.txt, pronto da mandare.
 # =====================================================================
 param(
-  [switch]$Tutto      # mostra anche i grafici senza EA
+  [switch]$Tutto,        # mostra anche i grafici senza EA
+  [switch]$Diagnostica   # se non trova niente: mostra cosa c'e' DENTRO un .chr
 )
 $ErrorActionPreference = "Continue"
 
@@ -46,6 +47,7 @@ if ($mt5Aperto) {
 }
 
 $trovati = 0
+$primoChr = $true
 foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)) {
   $profili = Join-Path $dir.FullName "MQL5\Profiles\Charts"
   if (-not (Test-Path $profili)) { continue }
@@ -56,27 +58,44 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
     Riga ("--- profilo '" + $prof.Name + "'   (" + $chr.Count + " grafici)") "Yellow"
 
     foreach ($f in ($chr | Sort-Object Name)) {
-      # il .chr e' binario: si estraggono le stringhe ASCII lunghe >= 4
+      # Il .chr e' binario ma i nomi ci stanno dentro come testo. Il nome
+      # dell'EA puo' essere attaccato ad altri byte leggibili, quindi NON si
+      # puo' pretendere che una "stringa estratta" cominci con ABTG_: si cerca
+      # DENTRO il testo. (07/08: la prima versione pretendeva l'inizio riga e
+      # ha trovato 0 EA su 29 grafici.)
       $bytes = [IO.File]::ReadAllBytes($f.FullName)
-      $sb = New-Object Text.StringBuilder
-      $stringhe = New-Object System.Collections.ArrayList
+      $testo = New-Object Text.StringBuilder
       foreach ($b in $bytes) {
-        if ($b -ge 32 -and $b -le 126) { [void]$sb.Append([char]$b) }
-        else {
-          if ($sb.Length -ge 4) { [void]$stringhe.Add($sb.ToString()) }
-          [void]$sb.Clear()
-        }
+        if ($b -ge 32 -and $b -le 126) { [void]$testo.Append([char]$b) } else { [void]$testo.Append(' ') }
       }
-      if ($sb.Length -ge 4) { [void]$stringhe.Add($sb.ToString()) }
+      $txt = $testo.ToString()
 
-      # simbolo: prima stringa che assomiglia a un simbolo del broker
-      $sym = ($stringhe | Where-Object { $_ -match '^[A-Z0-9]{5,8}$' } | Select-Object -First 1)
-      if (-not $sym) { $sym = "?" }
+      # simbolo: prima parola tutta maiuscola/cifre lunga 5-9
+      $sym = "?"
+      $noti = @('D30EUR','NASUSD','U30USD','XAUUSD','EURUSD','GBPUSD','F40EUR','SPXUSD',
+                'AUDCAD','AUDNZD','AUDUSD','AUDJPY','CADCHF','GBPJPY','NZDJPY','USDJPY','USDCAD')
+      foreach ($n in $noti) { if ($txt -match [regex]::Escape($n)) { $sym = $n; break } }
+      if ($sym -eq "?") {
+        $mSym = [regex]::Match($txt, '(?<![A-Z0-9])[A-Z][A-Z0-9]{4,8}(?![A-Z0-9])')
+        if ($mSym.Success) { $sym = $mSym.Value }
+      }
 
-      # EA: il nome del file .ex5 senza estensione, o una stringa ABTG_*
-      $ea = ($stringhe | Where-Object { $_ -match '\.ex5$' } | Select-Object -First 1)
-      if ($ea) { $ea = [IO.Path]::GetFileNameWithoutExtension($ea) }
-      if (-not $ea) { $ea = ($stringhe | Where-Object { $_ -match '^(ABTG_|BULGE|DAX_MASTER|Gold_|IchiCross|NQ_)' } | Select-Object -First 1) }
+      # EA: prima un nome di file .ex5, poi i prefissi noti, ovunque nel testo
+      $ea = $null
+      $m1 = [regex]::Match($txt, '([A-Za-z][A-Za-z0-9_\-]{2,60})\.ex5')
+      if ($m1.Success) { $ea = $m1.Groups[1].Value.Trim() }
+      if (-not $ea) {
+        $m2 = [regex]::Match($txt, '(ABTG_[A-Za-z0-9_]+|BULGE[A-Za-z0-9_]*|DAX_MASTER[A-Za-z0-9_]*|Gold_[A-Za-z0-9_]+|IchiCross[A-Za-z0-9_]*|NQ_[A-Za-z0-9_]+|SuperWave[A-Za-z0-9_]*)')
+        if ($m2.Success) { $ea = $m2.Groups[1].Value }
+      }
+
+      if ($Diagnostica -and $primoChr) {
+        $primoChr = $false
+        Riga "" ; Riga ("    [DIAGNOSTICA] " + $f.Name + " - le sequenze leggibili piu' lunghe:") "Magenta"
+        $pezzi = @($txt -split ' +' | Where-Object { $_.Length -ge 5 } | Select-Object -Unique -First 40)
+        foreach ($p in $pezzi) { Riga ("       " + $p) "DarkMagenta" }
+        Riga ""
+      }
 
       if ($ea) {
         $trovati++
@@ -92,8 +111,14 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
 Riga ""
 Riga ("=== TOTALE: $trovati grafici con un EA attaccato ===") "Cyan"
 if ($trovati -eq 0) {
-  Riga "Nessuno trovato. Puo' voler dire che i .chr non sono ancora stati salvati:" "Yellow"
-  Riga "chiudi MT5 e rilancia." "Yellow"
+  Riga "" "Yellow"
+  Riga "Nessun EA trovato. Le cause possibili, in ordine:" "Yellow"
+  Riga "  1. sei sul PC SBAGLIATO. Gli EA girano sul VPS (utente Administrator)," "Yellow"
+  Riga "     non sul PC di backtest (utente Master): li' i grafici non hanno EA." "Yellow"
+  Riga "  2. MT5 e' aperto e non ha ancora salvato i .chr: chiudilo e rilancia." "Yellow"
+  Riga "  3. il formato del .chr non e' quello che mi aspetto. In quel caso:" "Yellow"
+  Riga "       powershell -ExecutionPolicy Bypass -File .\elenco_ea_attaccati.ps1 -Diagnostica" "Yellow"
+  Riga "     e mandami l'output: dentro ci sara' scritto come sono salvati i nomi." "Yellow"
 }
 Riga ""
 Riga "Confronta questo elenco con backtest_pipeline/flotta_attesa.csv:"
