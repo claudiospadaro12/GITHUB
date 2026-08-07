@@ -1,0 +1,27 @@
+# =====================================================================
+#  PROVA: ABTG_PTE  --  quando scatta il breakeven, e su quale TF
+# =====================================================================
+#
+# IPOTESI (scritta il 07/08/2026, prima di qualsiasi numero)
+#   Il breakeven della PTE ha un solo grilletto: il primo target, che con
+#   InpTP1_ATRmult = 0 e' la EMA14 sul TF operativo. Su H4 quella media puo'
+#   stare lontanissima, e finche' non ci arriva la posizione resta a rischio
+#   pieno. Visto dal vivo il 06-07/08: short oro aperto alle 16:00, arrivato
+#   a +22,29, uscito sullo stop INIZIALE a -35,73 diciassette ore dopo.
+#     -> AVVICINARE IL PRIMO TARGET FA SCATTARE PRIMA IL BREAKEVEN E
+#        MIGLIORA LA RESA/DD SENZA DISTRUGGERE IL PROFITTO.
+#   La leva esiste gia' come parametro: InpTP1_ATRmult (0 = EMA14).
+#
+# CRITERI DI ACCETTAZIONE (dichiarati ora, non dopo)
+#   1. positiva in TUTTE E DUE le finestre, non solo fuori campione
+#   2. PF >= 1,10 fuori campione
+#   3. celle VICINE positive: non un picco isolato
+#   4. "Peggior Giornata %" fuori campione sopra -2,5% al rischio 1%
+#      (una prop chiude a -5%: sotto il -2,5% all'1%, al 2% si sfonda)
+#   Se una sola non e' soddisfatta, la PTE non e' pronta per una prop.
+#
+# NOTA SUGLI ENUM: InpTF e' ENUM_TIMEFRAMES. MT5 ignora lo step e spazzola
+# i membri fra start e stop: da H1 (16385) a H4 (16388) escono H1 H2 H3 H4.
+# =====================================================================
+InpTP1_ATRmult=0||0||0.5||1.5||Y
+InpTF=16388||16385||1||16388||Y

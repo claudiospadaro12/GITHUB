@@ -1139,7 +1139,47 @@ e analizzi tutto. **Due confini vanno detti prima:**
    probabilità di trovare rumore che sembra un risultato.
 
 **Non un agente che decide: un banco di prova che esegue.** Tre pezzi:
-`1. scheda dell'EA` (fatta) · `2. driver generico` (da fare) · `3. giudice automatico` (da fare).
+`1. scheda dell'EA` (fatta) · `2. driver generico` (**fatta**) · `3. giudice automatico` (da fare).
+
+### 🤖 Pezzo 2 — `walkforward_generico.ps1`: un driver per TUTTI, non uno per famiglia
+
+Finora ogni EA voleva **il suo** driver scritto a mano: `walkforward_aperture.ps1` sa fare solo
+le aperture, `walkforward_pte.ps1` solo la PTE. Con 39 EA testabili è sartoria che non finisce.
+
+Il driver generico **non sa niente di nessun EA**: legge il `.mq5`, si ricava da solo l'elenco
+degli input e li blinda tutti al loro default; poi legge da `prove/<EA>.txt` le **sole** righe
+da spazzolare, con l'ipotesi e i criteri già scritti sopra. **Aggiungere un EA alla coda adesso
+è scrivere un file di testo.**
+
+Verificato sui 61 sorgenti veri: **0 default non risolti**. Risolve `#define`, enum dell'EA,
+enum di MT5 e i cast alla C — senza il cast restavano fuori proprio `InpRangeMode` e
+`InpTrailMode` delle nove aperture, cioè i due parametri su cui abbiamo passato la notte.
+
+E il "vince la **prima** definizione" (imparato con `scheda_ea.py`) qui vale soldi: su
+`ABTG_DAX_Apertura_EU` il `#define ABTG_DEF_SESSION_HOUR` è **8** in cima e **9** nel ripiego
+`#ifndef`. Prendendo l'ultima, ogni backtest sarebbe partito **un'ora dopo l'apertura del DAX**.
+
+**Cosa blocca prima di partire** (tutte trappole già pagate):
+
+| controllo | cosa costava |
+|---|---|
+| sweep degenere (`start==stop` o `step==0`) | 4 CSV vuoti dopo una notte di macchina, 07/08 |
+| parametro doppio in `[TesterInputs]` | MT5 fa zero passate |
+| nome che l'EA non ha | MT5 lo ignora **in silenzio**: la fase risponde a un'altra domanda |
+| EA senza `OnTester` | gira e non produce niente da leggere (22 EA su 61) |
+| MT5 aperto | zero CSV |
+
+E **dice quante celle sono prima di lanciare**, contando gli enum come li conta MT5 (ignora lo
+step, spazzola i membri fra start e stop). Quel numero sono ore di macchina.
+
+`-SoloControllo` fa il giro a vuoto: non apre MT5, controlla tutto, stampa l'`.ini` che
+lancerebbe. **Va lanciato sempre per primo.**
+
+⚠️ **Il limite del pinning automatico, dichiarato:** prende il default **del sorgente**, non
+quello che gira sul grafico. Su `ABTG_DAX_Apertura_EU` il sorgente dice ancora
+`InpAllowShort = true` e `InpRiskPercent = 2.0`: senza correzione esplicita si misurerebbe un
+EA **diverso da quello acceso**. Per questo `prove/ABTG_DAX_Apertura_EU.txt` le riscrive a mano
+con flag `N`, e il `LEGGIMI` lo spiega come regola generale.
 
 ### Cosa dice la scheda su tutta la flotta — 61 EA
 

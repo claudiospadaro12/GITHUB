@@ -1,0 +1,63 @@
+# =====================================================================
+#  PROVA: ABTG_DAX_Apertura_EU  --  la FASE I RIFATTA sulla geometria giusta
+# =====================================================================
+#
+# PERCHE' (07/08/2026)
+#   La FASE I ha ordinato i timeframe del trailing su BREAKOUT range 15,
+#   cioe' la geometria che avevamo GIA' bocciato: tutte e dieci le celle
+#   fuori campione erano negative. Ordinare "modi di perdere" NON dice
+#   quale trailing vince su un sistema che guadagna. Il referto lo aveva
+#   scritto come limite dichiarato (REFERTO_FASE_I_L.md, punto 3 del
+#   "Da fare"), e lo stesso referto ha ammesso un secondo errore mio:
+#   avevo pinnato InpBufferPoints = 300, che e' il buffer del Nasdaq.
+#   Qui non lo pinna piu' nessuno a mano: il driver lo prende dal
+#   sorgente (ABTG_DEF_BUFFER = 500).
+#
+# IPOTESI (scritta prima di qualsiasi numero)
+#   Sul candidato VALIDATO -- RETEST, range 35, buffer 500, offset 200,
+#   SOLO LONG -- il timeframe della candela che tira il trailing conta
+#   MENO di quanto sembrava, perche' il retest entra gia' dentro il
+#   livello e lo stop parte piu' vicino. Se e' vero, le cinque celle
+#   staranno vicine fra loro e la scelta del 05/08 (M1 -> M5) non e'
+#   ne' un guadagno ne' un danno: e' rumore.
+#     -> MI ASPETTO CELLE VICINE, NON UN VINCITORE NETTO.
+#   Se invece esce di nuovo un ordine ROVESCIATO fra IS e OOS, allora il
+#   trailing su questo EA non e' un parametro scegliibile e va lasciato
+#   dov'e', qualunque numero faccia in campione.
+#
+# CRITERI DI ACCETTAZIONE (dichiarati ora, non dopo)
+#   1. NIENTE CAMBIA se lo Spearman IS->OOS sul profitto e' negativo.
+#      E' successo due volte in una notte (-0,60 sul trailing, -0,80 sul
+#      rangemode): con l'ordine rovesciato, scegliere sull'IS e' peggio
+#      che non scegliere.
+#   2. Per spostare M5 serve un TF che, FUORI CAMPIONE:
+#        a. faccia piu' profitto di M5 di almeno il 10%
+#        b. NON peggiori l'Equity DD %
+#        c. abbia un VICINO (TF adiacente) anch'esso migliore di M5
+#      Tutte e tre. Un picco isolato non e' un risultato: e' una cella
+#      fortunata, e ne abbiamo gia' presa una in faccia col Nasdaq.
+#   3. Controllo di sanita': la cella M5 deve riprodurre il numero gia'
+#      misurato tre volte sulla stessa geometria (OOS +1800,19 · PF 1,423
+#      · DD 6,72%, FASE M SOLO LONG range 35). Se NON lo riproduce, la
+#      misura e' sbagliata e il resto della tabella non si legge nemmeno.
+#   In assenza di tutto questo: NON SI TOCCA NIENTE. Il default e' fermo.
+#
+# ⚠️ DUE COSE CHE IL DRIVER PINNEREBBE SBAGLIATE, E QUI CORREGGO
+#   - InpAllowShort: nel SORGENTE e' ancora true. Il SOLO LONG del 07/08
+#     e' stato fatto sul GRAFICO, non nel codice. Senza la riga qui sotto
+#     misurerei long+short, cioe' un EA diverso da quello acceso.
+#   - InpRiskPercent: il sorgente dice 2,0 (ABTG_DEF_RISK). Tutte le fasi
+#     precedenti sono girate all'1%. Al 2% i numeri raddoppiano e non si
+#     confrontano piu' con niente.
+#
+# NOTA SUGLI ENUM: InpTrailTF e' ENUM_TIMEFRAMES. MT5 IGNORA LO STEP e
+# spazzola i membri fra start e stop: da M1 (1) a M5 (5) escono M1 M2 M3
+# M4 M5, cinque celle. Misurato il 07/08.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTrailTF=5||1||1||5||Y
