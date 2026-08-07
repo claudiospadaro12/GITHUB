@@ -695,3 +695,57 @@ in rosso — e il suggerimento giusto: **rilanciare lo stesso comando SENZA `-Ri
 quelli mancanti**, perché il salto "già fatto" si basa sull'esistenza del CSV.
 **Regola:** un riepilogo finale che stampa un numero fisso non è un riepilogo. Deve contare
 quello che è successo davvero in quella corsa.
+
+
+## 07/08 — FASE M: l'ultimo tentativo sul Nasdaq, con le regole scritte prima
+
+### La decisione presa oggi: rischio a 0,25%, non spegnimento
+Claudio non vuole arrendersi sul Nasdaq d'apertura. **Deciso: i due EA restano accesi ma a
+`InpRiskPercent = 0.25`.** Si continua a raccogliere forward vero — l'unico dato non
+contaminato che abbiamo — e il drawdown misurato del 26,29% all'1% scende sotto il 7%
+invece di superare il 50% come al 2%.
+
+### ⚠️ Il rischio di questa ricerca, scritto per non dimenticarlo
+Sul Nasdaq abbiamo fatto **sei test e falliti tutti e sei**. Continuare finché una
+configurazione non "passa" **trova sempre un vincitore, anche quando non c'è niente** — ed
+è esattamente il meccanismo che stanotte abbiamo misurato due volte (Spearman −0,60 e
+−0,80). **Contatore delle ipotesi provate sul Nasdaq d'apertura: 7 con la FASE M.**
+
+### La ragione strutturale che nessun parametro può cambiare
+Il DAX alle 08:00 server ha un'**apertura vera**: cash chiuso tutta la notte, gap,
+esplosione di liquidità in un istante. Il **NASUSD quota quasi 24 ore**: alle 14:30 arriva
+più volume, ma il prezzo è in movimento da ore. **Il concetto stesso di "range d'apertura"
+è più debole**, e questo è coerente con sei bocciature. Non chiude la porta, ma dice dove
+NON cercare: non in un'altra sfumatura del range d'apertura.
+
+### FASE M — cosa chiede, e i criteri dichiarati PRIMA
+`RETEST` · `OPENING` · buffer 500 · offset 200 · gestione accesa · 1%.
+Sweep: `InpAllowLong` × `InpAllowShort` × `InpRangeMinutes` {25, 35, 45} = **12 celle**,
+48 pass su due simboli e due finestre.
+
+**a) Il lato.** Gli indici hanno una deriva strutturale al rialzo: uno short sull'apertura la
+combatte, un long ci va insieme. **È una domanda sulla natura dello strumento, non un
+parametro da tarare** — e non è mai stata fatta su nessuno dei due simboli.
+
+**b) Il 35 è un altopiano o un picco?** L'unica cella positiva del Nasdaq è `OPENING 35`
+(+107,19 · PF 1,022). Se i vicini 25 e 45 sono negativi, è rumore.
+
+**CRITERIO DI ACCETTAZIONE, scritto prima di guardare i numeri:**
+1. la cella deve essere **positiva in TUTTE E DUE le finestre**, non solo fuori campione;
+2. **PF ≥ 1,10** fuori campione;
+3. **le celle vicine per range devono essere positive anche loro.**
+
+**Se una sola delle tre non è soddisfatta, il Nasdaq d'apertura è chiuso.**
+
+**Due controlli dentro la fase:**
+- `AllowLong=0 + AllowShort=0` deve dare **ZERO trade**. Se ne desse, l'EA entra ignorando i
+  filtri e tutta la tabella non vale niente.
+- gira **anche sul DAX**, dove serve da controllo: il candidato validato è a due lati. Se il
+  filtro migliorasse anche lui, abbiamo trovato qualcosa di vero sugli indici; se lo
+  peggiora, il candidato regge ed è una conferma in più.
+
+### Parcheggiato: l'ora della sessione
+Testare se le 14:30 sono l'evento giusto (contro 15:30 / 16:30) richiede uno sweep **per
+simbolo**: `InpSessionHour` sta nel blocco job (DAX 8, Nasdaq 14) e una fase condivisa lo
+sovrascriverebbe su entrambi. **Serve un meccanismo che sappia il simbolo** prima di poterlo
+fare.

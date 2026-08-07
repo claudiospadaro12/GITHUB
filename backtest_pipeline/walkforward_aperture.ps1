@@ -110,6 +110,7 @@ param(
   [switch]$SoloTrailing,        # FASE I - il TF del trailing (07/08)
   [switch]$SoloRangeMode,       # FASE L - da dove si prende il range (C6)
   [switch]$Notte,               # FASE I + FASE L insieme
+  [switch]$SoloDirezione,       # FASE M - filtro di direzione + altopiano del range (07/08)
   [int]$TrailTF=5,
   [int]$RangeCandidato=35,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
@@ -314,6 +315,43 @@ $Fasi=@(
   # d'apertura non restano domande aperte, e la decisione e' una sola.
   @{ Tag="L_rangemode"; Pass=6; Win=$WF
      Sweep="InpEntryMode=2||2||0||2||N`nInpRangeMode=0||0||1||2||Y`nInpRangeMinutes=15||15||20||35||Y`nInpBufferPoints=500||500||0||500||N`nInpRetestOffsetPts=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||5||0||5||N" },
+  # ================================================================
+  # FASE M - IL LATO DEL MERCATO, E SE IL 35 E' UN ALTOPIANO.  07/08/2026.
+  #
+  # ⚠️ IPOTESI E CRITERI SCRITTI PRIMA DI GUARDARE I NUMERI.
+  #
+  # Contesto: sull'apertura Nasdaq abbiamo gia' fatto SEI test e falliti tutti
+  # e sei. Continuare a provare configurazioni finche' una non "passa" e'
+  # il modo classico di trovare un vincitore che non esiste -- e stanotte
+  # abbiamo appena visto (FASE I e L, Spearman -0,60 e -0,80) quanto sia
+  # facile. Quindi qui si prova una cosa sola, con un motivo dietro, e con
+  # la regola di accettazione scritta prima.
+  #
+  # LE DUE DOMANDE
+  #  a) IL LATO. Gli indici hanno una deriva strutturale al rialzo. Uno short
+  #     sull'apertura di un indice combatte quella deriva, un long ci va
+  #     insieme. Non e' un parametro da tarare, e' una domanda sulla natura
+  #     dello strumento -- e non l'abbiamo mai fatta su nessuno dei due.
+  #  b) IL 35 E' UN ALTOPIANO O UN PICCO? L'unica cella positiva del Nasdaq
+  #     e' OPENING 35 (+107,19 OOS, PF 1,022). Se i vicini 25 e 45 sono
+  #     negativi, e' rumore e si chiude qui.
+  #
+  # CRITERIO DI ACCETTAZIONE (dichiarato ora, non dopo):
+  #   1. la cella deve essere POSITIVA IN TUTTE E DUE LE FINESTRE, non solo OOS
+  #   2. deve avere PF >= 1,10 fuori campione
+  #   3. le celle VICINE per range devono essere positive anche loro
+  #   Se una sola delle tre non e' soddisfatta, il Nasdaq d'apertura e' chiuso.
+  #
+  # CONTROLLI DENTRO LA FASE
+  #   - la combinazione AllowLong=0 + AllowShort=0 deve dare ZERO trade. Se
+  #     desse dei trade, l'EA sta entrando ignorando i filtri e tutto il
+  #     resto della tabella non vale niente.
+  #   - la fase gira anche sul DAX, dove serve da CONTROLLO: il candidato
+  #     validato e' a due lati. Se il filtro di direzione migliorasse anche
+  #     lui, abbiamo trovato qualcosa di vero sugli indici; se lo peggiora,
+  #     il candidato regge com'e' ed e' una conferma in piu'.
+  @{ Tag="M_direzione"; Pass=12; Win=$WF
+     Sweep="InpEntryMode=2||2||0||2||N`nInpRangeMode=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRetestOffsetPts=200||200||0||200||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpSLMode=0||0||0||0||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpUseTrailing=1||1||0||1||N`nInpTrailMode=1||1||0||1||N`nInpTrailTF=5||5||0||5||N`nInpAllowLong=1||0||1||1||Y`nInpAllowShort=1||0||1||1||Y`nInpRangeMinutes=25||25||10||45||Y" },
   @{ Tag="E_retest_fill"; Pass=20; Win=$TUTTO
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=15||5||10||45||Y`nInpRetestOffsetPts=0||0||100||300||Y" }
 )
@@ -327,6 +365,7 @@ if($SoloDrawdown)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "H_drawdown" } }
 if($SoloTrailing)  { $Fasi = $Fasi | Where-Object { $_.Tag -eq "I_trailing" } }
 if($SoloRangeMode) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "L_rangemode" } }
 if($Notte)         { $Fasi = $Fasi | Where-Object { $_.Tag -eq "I_trailing" -or $_.Tag -eq "L_rangemode" } }
+if($SoloDirezione) { $Fasi = $Fasi | Where-Object { $_.Tag -eq "M_direzione" } }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 $NPass=0; foreach($f in $Fasi){ $NPass += $f.Pass * $f.Win.Count * $Jobs.Count }
