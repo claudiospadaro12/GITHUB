@@ -66,12 +66,12 @@ if (-not (Test-Path $Attesa)) { Write-Host "flotta_attesa.csv non trovato." -For
 $righeAttesa = @(Get-Content $Attesa | Where-Object { $_ -notmatch '^\s*#' -and $_ -match ';' })
 $Attese = @($righeAttesa | Select-Object -Skip 1 | ForEach-Object {
   $c = $_ -split ';'
-  if ($c.Count -ge 13) {
+  if ($c.Count -ge 14) {
     [pscustomobject]@{
       ea=$c[0].Trim(); simbolo=$c[1].Trim(); stato=$c[2].Trim(); rischio=$c[3].Trim()
       motore=$c[4].Trim(); rangemode=$c[5].Trim(); range=$c[6].Trim(); buffer=$c[7].Trim()
       lati=$c[8].Trim(); trail=$c[9].Trim(); logga=$c[10].Trim(); verificato=$c[11].Trim()
-      fonte=$c[12].Trim()
+      trail_da=$c[12].Trim(); fonte=$c[13].Trim()
     }
   }
 })
@@ -142,6 +142,9 @@ foreach ($a in $Attese) {
   Confronta $a.ea "rangemode" $a.rangemode $v["rangemode"]     "rangemode"
   Confronta $a.ea "lati"      $a.lati      $v["lati"]          "lati"
   Confronta $a.ea "trail"     $a.trail     $v["trail"]         "trail"
+  # 07/08: la soglia del trailing. Nel log e' "trail da=0.00R", quindi una
+  # chiave diversa da "trail": lo split su '|' e poi su '=' non le confonde.
+  Confronta $a.ea "soglia trailing" $a.trail_da $v["trail da"] "trail da"
   if ($a.range  -ne '*') { $r = ($v["range"]  -replace '\D','') ; if ($r -ne $a.range)  { Rosso "$($a.ea): range = '$r' ma dichiarato '$($a.range)'" } }
   if ($a.buffer -ne '*') { $b = ($v["buffer"] -replace '\D','') ; if ($b -ne $a.buffer) { Rosso "$($a.ea): buffer = '$b' ma dichiarato '$($a.buffer)'" } }
 

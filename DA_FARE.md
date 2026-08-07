@@ -1126,6 +1126,47 @@ da_confermare 20     hanno operato in passato, non so se sono ancora attaccati
 **Uno solo su trentaquattro è validato.**
 
 
+## 🔧 07/08 sera — `InpTrailStartR`: la soglia che al trailing mancava
+
+La pagella di stasera ha misurato tre uscite del trailing sugli EA d'apertura: **+0,043 R dopo
+17 secondi**, +0,077 R dopo 32 minuti, **+0,027 R dopo 79 secondi**. Tre "vincenti" che insieme
+valgono **0,15 R**.
+
+**Non è un'impressione, è aritmetica**: per un BUY lo stop iniziale sta **sempre sotto**
+l'entrata e il breakeven lo mette **esattamente all'entrata**. Quelle tre uscite erano **oltre**
+l'entrata con ragione `sl`: le ha fatte il trailing, e non poteva farle nient'altro.
+
+La causa era nel codice, **identica su tutti e 9** gli EA della famiglia apertura:
+
+```mql5
+if(newSL > 0 && newSL > sl && newSL > openP)     // e basta
+```
+
+Nessuna soglia di profitto minimo, nessun legame col breakeven: appena il minimo della candela
+precedente supera l'ingresso, il trailing arma.
+
+**Aggiunto `InpTrailStartR`** — il trailing non arma prima di quel profitto in R. Usa `riskDist`,
+che la funzione calcolava già, e ricalca l'idioma di `InpBEatR` che era già lì.
+
+⚠️ **`DEFAULT 0` = comportamento identico a prima. In forward non cambia niente**, e non deve:
+il 05/08 il trailing è stato cambiato in forward su una misura in campione, e fuori campione era
+il **peggiore dei cinque**. Adesso è una **leva misurabile**, non una correzione applicata a occhio.
+
+`CONFIG IN USO` stampa `trail da=%.2fR`, e `flotta_attesa.csv` ha la colonna `trail_da`: senza,
+la soglia non sarebbe verificabile dal log — e un parametro non verificabile è un parametro di
+cui non sappiamo niente.
+
+**L'esperimento è una griglia sola, non due ricerche in fila.** `prove/ABTG_DAX_Apertura_EU.txt`
+spazzola **TF × soglia = 25 celle per finestra, 50 pass**. Timeframe e soglia sono la stessa leva
+vista da due parti (un TF più lungo *è* una soglia grossolana): misurarli uno dopo l'altro sulla
+stessa finestra sarebbe una ricerca in due passi, cioè il modo esatto in cui ci siamo fatti male
+due volte. Lo **zero è il controllo**, e senza di lui la tabella non ha un metro.
+
+Verificato a macchina su tutti e 9: segnaposto == argomenti nella riga di log, input unico con
+default 0, guardia unica e nessun `if(InpUseTrailing)` rimasto scoperto, `profR` nella stessa
+funzione di `riskDist` e dopo di essa, `bid`/`ask`/`openP`/`type` in scope, graffe bilanciate.
+E il driver generico se n'è accorto da solo: **80 input invece di 79**, 25 celle.
+
 ## 🤖 07/08 — `scheda_ea.py`: il primo pezzo del "banco di prova"
 
 Claudio chiede un agente che faccia backtest, ottimizzazioni, che trovi i motori in autonomia
