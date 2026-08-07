@@ -1,46 +1,62 @@
 # =====================================================================
-#  PROVA: ABTG_DAX_Apertura_EU  --  la FASE I RIFATTA sulla geometria giusta
+#  PROVA: ABTG_DAX_Apertura_EU
+#  Quando deve armare il trailing: la SOGLIA per il TIMEFRAME
 # =====================================================================
 #
-# PERCHE' (07/08/2026)
-#   La FASE I ha ordinato i timeframe del trailing su BREAKOUT range 15,
-#   cioe' la geometria che avevamo GIA' bocciato: tutte e dieci le celle
-#   fuori campione erano negative. Ordinare "modi di perdere" NON dice
-#   quale trailing vince su un sistema che guadagna. Il referto lo aveva
-#   scritto come limite dichiarato (REFERTO_FASE_I_L.md, punto 3 del
-#   "Da fare"), e lo stesso referto ha ammesso un secondo errore mio:
-#   avevo pinnato InpBufferPoints = 300, che e' il buffer del Nasdaq.
-#   Qui non lo pinna piu' nessuno a mano: il driver lo prende dal
-#   sorgente (ABTG_DEF_BUFFER = 500).
+# ⚠️ QUESTA PROVA SOSTITUISCE quella scritta prima (solo InpTrailTF), e
+#   dico perche': misurare prima il timeframe e poi la soglia sarebbe una
+#   ricerca IN DUE PASSI sulla stessa finestra -- esattamente il modo in
+#   cui ci siamo gia' fatti male due volte (trailing M5 il 05/08,
+#   RangeMode PREVBAR sul Nasdaq). Timeframe e soglia sono la STESSA leva
+#   vista da due parti: un TF piu' lungo e' una soglia grossolana, perche'
+#   la candela precedente ci mette di piu' a superare l'ingresso.
+#   Vanno guardati INSIEME, in una griglia sola.
 #
-# IPOTESI (scritta prima di qualsiasi numero)
-#   Sul candidato VALIDATO -- RETEST, range 35, buffer 500, offset 200,
-#   SOLO LONG -- il timeframe della candela che tira il trailing conta
-#   MENO di quanto sembrava, perche' il retest entra gia' dentro il
-#   livello e lo stop parte piu' vicino. Se e' vero, le cinque celle
-#   staranno vicine fra loro e la scelta del 05/08 (M1 -> M5) non e'
-#   ne' un guadagno ne' un danno: e' rumore.
-#     -> MI ASPETTO CELLE VICINE, NON UN VINCITORE NETTO.
-#   Se invece esce di nuovo un ordine ROVESCIATO fra IS e OOS, allora il
-#   trailing su questo EA non e' un parametro scegliibile e va lasciato
-#   dov'e', qualunque numero faccia in campione.
+# PERCHE' ORA (07/08/2026, sera)
+#   La pagella di oggi ha misurato tre uscite del trailing sugli EA
+#   d'apertura: +0,043 R dopo 17 SECONDI, +0,077 R dopo 32 minuti,
+#   +0,027 R dopo 79 SECONDI. Tre "vincenti" che insieme valgono 0,15 R.
+#   Non e' un'impressione: per un BUY lo stop iniziale sta SEMPRE sotto
+#   l'entrata e il breakeven lo mette ESATTAMENTE all'entrata; quelle tre
+#   uscite erano OLTRE l'entrata, quindi le ha fatte il trailing e basta.
+#   Nel codice la condizione era:
+#       if(newSL > 0 && newSL > sl && newSL > openP)
+#   nessuna soglia di profitto minimo, nessun legame col breakeven.
+#   Stasera e' stato aggiunto InpTrailStartR (default 0 = come prima).
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   Il trailing arma troppo presto e taglia i trade mentre stanno ancora
+#   sviluppando il movimento. Alzando la soglia il trailing smette di
+#   essere un'uscita e torna a essere una PROTEZIONE.
+#     -> MI ASPETTO CHE IL PROFITTO SALGA FINO A UNA SOGLIA INTERMEDIA E
+#        POI RICADA: a soglia troppo alta il trailing non arma mai piu' e
+#        si torna a subire lo stop iniziale per intero.
+#   Se questo massimo intermedio NON c'e' -- se la colonna a 0 e' gia' la
+#   migliore -- allora l'ipotesi di stasera e' SBAGLIATA, e lo scrivo qui
+#   adesso perche' non ci sia modo di raccontarla diversamente dopo.
 #
 # CRITERI DI ACCETTAZIONE (dichiarati ora, non dopo)
 #   1. NIENTE CAMBIA se lo Spearman IS->OOS sul profitto e' negativo.
-#      E' successo due volte in una notte (-0,60 sul trailing, -0,80 sul
-#      rangemode): con l'ordine rovesciato, scegliere sull'IS e' peggio
-#      che non scegliere.
-#   2. Per spostare M5 serve un TF che, FUORI CAMPIONE:
-#        a. faccia piu' profitto di M5 di almeno il 10%
+#      Con l'ordine rovesciato, scegliere sull'IS e' peggio che non
+#      scegliere. E' successo due volte in una notte: -0,60 sul trailing,
+#      -0,80 sul rangemode.
+#   2. Per spostare la configurazione accesa (TF M5, soglia 0) serve una
+#      cella che FUORI CAMPIONE:
+#        a. faccia almeno il 10% di profitto in piu'
 #        b. NON peggiori l'Equity DD %
-#        c. abbia un VICINO (TF adiacente) anch'esso migliore di M5
-#      Tutte e tre. Un picco isolato non e' un risultato: e' una cella
-#      fortunata, e ne abbiamo gia' presa una in faccia col Nasdaq.
-#   3. Controllo di sanita': la cella M5 deve riprodurre il numero gia'
-#      misurato tre volte sulla stessa geometria (OOS +1800,19 · PF 1,423
-#      · DD 6,72%, FASE M SOLO LONG range 35). Se NON lo riproduce, la
-#      misura e' sbagliata e il resto della tabella non si legge nemmeno.
-#   In assenza di tutto questo: NON SI TOCCA NIENTE. Il default e' fermo.
+#        c. abbia i VICINI nella griglia anch'essi migliori della cella
+#           accesa -- vicino di soglia E vicino di timeframe
+#      Tutte e tre. Un picco isolato non e' un risultato: il Nasdaq ce
+#      l'ha gia' insegnato (SOLO LONG 35 era una punta fra due buche).
+#   3. CONTROLLO DI SANITA', da fare PRIMA di leggere il resto: la cella
+#      TF=M5 / soglia=0 deve riprodurre il numero gia' misurato tre volte
+#      su questa geometria -- OOS +1800,19 - PF 1,423 - DD 6,72%
+#      (FASE M, SOLO LONG range 35). Se non lo riproduce, la misura e'
+#      sbagliata e la tabella non si legge nemmeno.
+#   4. La soglia scelta deve valere su ALMENO DUE timeframe diversi. Se
+#      funziona solo accoppiata a un TF preciso, non e' la soglia che
+#      conta: e' rumore che ha trovato un posto dove nascondersi.
+#   In assenza di tutto questo: NON SI TOCCA NIENTE. Il default resta 0.
 #
 # ⚠️ DUE COSE CHE IL DRIVER PINNEREBBE SBAGLIATE, E QUI CORREGGO
 #   - InpAllowShort: nel SORGENTE e' ancora true. Il SOLO LONG del 07/08
@@ -50,9 +66,13 @@
 #     precedenti sono girate all'1%. Al 2% i numeri raddoppiano e non si
 #     confrontano piu' con niente.
 #
-# NOTA SUGLI ENUM: InpTrailTF e' ENUM_TIMEFRAMES. MT5 IGNORA LO STEP e
-# spazzola i membri fra start e stop: da M1 (1) a M5 (5) escono M1 M2 M3
-# M4 M5, cinque celle. Misurato il 07/08.
+# LA GRIGLIA:  5 timeframe x 5 soglie = 25 celle per finestra, 50 pass.
+#   InpTrailTF     e' ENUM_TIMEFRAMES: MT5 IGNORA lo step e spazzola i
+#                  membri fra start e stop -> da M1 (1) a M5 (5) escono
+#                  M1 M2 M3 M4 M5. Misurato il 07/08.
+#   InpTrailStartR 0 / 0,25 / 0,50 / 0,75 / 1,00.
+#                  Lo ZERO E' IL CONTROLLO: e' quello che gira adesso, e
+#                  senza di lui la tabella non ha un metro.
 # =====================================================================
 @SIMBOLO  D30EUR
 @PERIODO  M5
@@ -61,3 +81,4 @@
 InpAllowShort=0||0||0||0||N
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpTrailTF=5||1||1||5||Y
+InpTrailStartR=0||0||0.25||1.0||Y
