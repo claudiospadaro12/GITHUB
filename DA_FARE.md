@@ -749,3 +749,42 @@ Testare se le 14:30 sono l'evento giusto (contro 15:30 / 16:30) richiede uno swe
 simbolo**: `InpSessionHour` sta nel blocco job (DAX 8, Nasdaq 14) e una fase condivisa lo
 sovrascriverebbe su entrambi. **Serve un meccanismo che sappia il simbolo** prima di poterlo
 fare.
+
+
+## 07/08 07:06 — il rischio 0,25% è confermato, ma un parametro è tornato al default
+
+### ✅ Confermato dal log
+```
+07:03:18  [Nasdaq Apertura US OTT]  rischio=0.25%
+07:03:59  [Nasdaq Apertura US]      rischio=0.25%
+```
+E il DAX regge la configurazione validata: `RETEST | range 35 | buffer 500 | offset 200`.
+
+### 🔴 A11. Il buffer di `Nasdaq Apertura US` è tornato da 300 a 200
+```
+06/08 19:17:56   buffer=300 pt
+07/08 00:32:19   buffer=200 pt      <- 200 e' il DEFAULT nel codice
+```
+Il cambio è avvenuto nel giro di riavvii delle 00:30–00:34, non stamattina con il rischio.
+**La spiegazione più probabile è un click su *Ripristina*** durante quel giro.
+
+Sull'effetto pratico è irrilevante — quell'EA gira una configurazione già bocciata sei
+volte, e adesso allo 0,25%. **Sul processo no**: un parametro sul grafico è cambiato senza
+che nessuno lo volesse, e ce ne siamo accorti per caso confrontando due log a distanza di
+un giorno.
+
+### ✅ A12. `CONFIG IN USO` adesso stampa anche RANGE MODE e i LATI — 9 EA su 9
+Il punto peggiore di A11 non è il buffer: è che **`InpRangeMode` non veniva stampato
+affatto**. È il parametro che fuori campione vale **−2444 €** sul Nasdaq (FASE L), e non
+avevamo modo di vedere dal log se fosse cambiato.
+
+Aggiunti alla riga:
+- `rangemode=` — il valore vero, come `EnumToString`;
+- `lati=` — `long+short` / `SOLO LONG` / `SOLO SHORT` / `NESSUNO!`, che serve anche a
+  leggere la FASE M in forward.
+
+Verificato su tutti e 9: **segnaposto e argomenti allineati** (11 o 12 secondo la
+generazione), graffe bilanciate. È lo stesso controllo che il 06/08 aveva pescato la patch
+delle metriche prop applicata a metà su Nasdaq e Dow.
+
+⚠️ Da ricompilare sul VPS insieme alle altre correzioni (breakeven su 20 EA).

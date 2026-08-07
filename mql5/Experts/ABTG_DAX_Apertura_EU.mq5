@@ -424,8 +424,13 @@ int ABTG_OnInit()
    //--- Riga di CONTROLLO: MT5 salva i parametri SUL GRAFICO, quindi ricompilare
    //    non basta. Questa riga dice quali valori sta usando DAVVERO l'EA adesso:
    //    se dopo un aggiornamento non corrisponde, non e' stato premuto RIPRISTINA.
-   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | range=%d min | buffer=%.0f pt | offset retest=%.0f pt | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
-                        EnumToString(InpEntryMode), InpRangeMinutes, InpBufferPoints, InpRetestOffsetPts,
+   // 07/08: aggiunti RANGE MODE e i LATI. Il 06/08 il buffer di un EA e' tornato
+   // al default senza che nessuno se ne accorgesse, e questa riga non bastava a
+   // vederlo: RangeMode e' il parametro che fuori campione vale -2444 EUR sul
+   // Nasdaq, e non veniva stampato affatto.
+   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | rangemode=%s | range=%d min | buffer=%.0f pt | offset retest=%.0f pt | lati=%s | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
+                        EnumToString(InpEntryMode), EnumToString(InpRangeMode), InpRangeMinutes, InpBufferPoints, InpRetestOffsetPts,
+                        (InpAllowLong && InpAllowShort ? "long+short" : (InpAllowLong ? "SOLO LONG" : (InpAllowShort ? "SOLO SHORT" : "NESSUNO!"))),
                         InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
                         (InpBreakevenAtTP1 ? "si" : "no"),
                         EnumToString(InpTrailMode), EnumToString(InpTrailTF)));

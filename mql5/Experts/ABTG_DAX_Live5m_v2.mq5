@@ -314,8 +314,10 @@ int ABTG_OnInit()
                         _Symbol, InpSessionHour, InpSessionMin, InpRangeMinutes,
                         InpCloseHour, InpCloseMin));
    ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
-   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | range=%d min | buffer=%.0f pt | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
-                        EnumToString(InpEntryMode), InpRangeMinutes, InpBufferPoints,
+   // 07/08: aggiunti RANGE MODE e i LATI (vedi nota nell'EA principale).
+   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | rangemode=%s | range=%d min | buffer=%.0f pt | lati=%s | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
+                        EnumToString(InpEntryMode), EnumToString(InpRangeMode), InpRangeMinutes, InpBufferPoints,
+                        (InpAllowLong && InpAllowShort ? "long+short" : (InpAllowLong ? "SOLO LONG" : (InpAllowShort ? "SOLO SHORT" : "NESSUNO!"))),
                         InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
                         (InpBreakevenAtTP1 ? "si" : "no"),
                         EnumToString(InpTrailMode), EnumToString(InpTrailTF)));
