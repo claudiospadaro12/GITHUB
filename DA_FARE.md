@@ -1124,3 +1124,55 @@ in_prova       8     ORB, PTE, SuperWave 1 e 2, NIGHTLY L, Dow, i due Live5m
 da_confermare 20     hanno operato in passato, non so se sono ancora attaccati
 ```
 **Uno solo su trentaquattro è validato.**
+
+
+## 🤖 07/08 — `scheda_ea.py`: il primo pezzo del "banco di prova"
+
+Claudio chiede un agente che faccia backtest, ottimizzazioni, che trovi i motori in autonomia
+e analizzi tutto. **Due confini vanno detti prima:**
+
+1. **Non posso lanciare MT5.** Gira sulle sue macchine. Ogni backtest ha bisogno che prema
+   un tasto. Questo non cambia.
+2. **Un agente non deve DECIDERE.** Scegliere da solo la configurazione migliore e applicarla
+   è il meccanismo che ci ha fregato due volte: trailing M5 e `RangeMode PREVBAR` erano i
+   migliori in campione e i **peggiori** fuori. Più test sulla stessa finestra = più
+   probabilità di trovare rumore che sembra un risultato.
+
+**Non un agente che decide: un banco di prova che esegue.** Tre pezzi:
+`1. scheda dell'EA` (fatta) · `2. driver generico` (da fare) · `3. giudice automatico` (da fare).
+
+### Cosa dice la scheda su tutta la flotta — 61 EA
+
+```
+esportano i risultati (testabili) :  39 su 61
+hanno le metriche da prop         :   5 su 61
+stampano CONFIG IN USO            :   9 su 61
+con almeno un difetto noto        :   1 su 61
+```
+
+🔴 **22 EA su 61 non esportano i risultati**: con la pipeline attuale **non sono testabili
+affatto**. Fra questi `DAX_MASTER_PROP` (109 input!), `BULGE_MASTER`, tutti gli `ORB_*`,
+`Gold_Scalper`, `IchiCross`.
+
+🔴 **56 su 61 non hanno le metriche da prop**: non misurano `Peggior Giornata %`, cioè
+proprio la colonna che chiude un conto prop.
+
+🔴 **A2 confermato meccanicamente**: magic **250604** condiviso da `Gold_Ichimoku_TK_ATR_EA`,
+`IchiCross_Gold_722`, `IchiTrend_Gold_Base`. Nello storico **i loro trade non si distinguono**.
+
+🔴 **Difetto nuovo**: `ABTG_SuperWave_EA` arrotonda il lotto sotto il minimo a **zero** invece
+che al minimo → **il trade sparisce in silenzio**. È l'opposto degli EA d'apertura, che
+arrotondano in su. Da guardare.
+
+🔎 E ritrova da solo l'errore del 07/08: **6 EA hanno `ENUM_ABTG_ENTRY` ma senza il motore
+`RETEST`** — sono quelli su cui avevo detto a Claudio di mettere il candidato validato.
+
+### Due falsi allarmi evitati SCRIVENDO IL CONTROLLO, non usandolo
+1. Il magic veniva letto solo se numerico: metà flotta risultava senza magic e le collisioni
+   non si vedevano. Risolti i `#define`.
+2. Risolvendoli, **vinceva l'ultima definizione** — che sta dentro un `#ifndef` ed è il
+   ripiego generico `770001`. Risultato: nove EA d'apertura con lo stesso magic, falso
+   allarme. **Ora vince la prima definizione**, e le collisioni vere restano una sola.
+
+**Vale la regola di sempre:** un controllo nuovo va provato anche sul caso che deve bocciare.
+Qui l'ho provato sulla flotta vera e i due difetti sono usciti prima di arrivare a Claudio.
