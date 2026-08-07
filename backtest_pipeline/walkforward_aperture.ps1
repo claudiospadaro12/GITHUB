@@ -548,6 +548,30 @@ $Inputs
 }
 
 Write-Host ""
-Write-Host "=== FINITO === Zippa 'risultati_walkforward' e caricamela." -ForegroundColor White
-Write-Host "    Devono esserci 12 CSV: 8 di walk-forward + 4 di slippage." -ForegroundColor Gray
+# --- REFERTO FINALE: quali CSV ci sono e quali NO -------------------
+#  Il 07/08 due passate su otto non hanno prodotto il CSV. Lo si e' capito
+#  dopo venti messaggi, perche' il messaggio "(nessun CSV per ...)" scorreva
+#  via in mezzo al resto e alla fine lo script diceva solo "FINITO".
+#  Adesso l'elenco di cosa manca sta in fondo, dove lo si legge.
+$Attesi = New-Object System.Collections.ArrayList
+foreach($j in $Jobs){ foreach($f in $Fasi){ foreach($w in $f.Win){
+  [void]$Attesi.Add("$($j.Nome)_$($f.Tag)_$($w.Tag).csv") } } }
+$Mancanti = @($Attesi | Where-Object { -not (Test-Path (Join-Path $Results $_)) })
+
+Write-Host ""
+Write-Host "=== FINITO ===" -ForegroundColor White
+Write-Host ("    CSV attesi: {0}   presenti: {1}   MANCANTI: {2}" -f `
+            $Attesi.Count, ($Attesi.Count - $Mancanti.Count), $Mancanti.Count) -ForegroundColor Gray
+if($Mancanti.Count -gt 0){
+  Write-Host ""
+  Write-Host "!!! QUESTI NON SONO STATI PRODOTTI:" -ForegroundColor Red
+  foreach($m in $Mancanti){ Write-Host "      $m" -ForegroundColor Red }
+  Write-Host ""
+  Write-Host "    Rilancia lo STESSO comando SENZA -Rifai: rifa' solo questi." -ForegroundColor Yellow
+  Write-Host "    (con MT5 CHIUSO: la causa piu' probabile e' il terminale aperto)" -ForegroundColor Yellow
+} else {
+  Write-Host "    Tutti prodotti. Zippa 'risultati_walkforward' e caricamela." -ForegroundColor Green
+}
+Write-Host ""
+Write-Host "    NON guardare l'OOS per scegliere: e' l'unica regola che conta qui." -ForegroundColor Gray
 Write-Host "    NON guardare l'OOS per scegliere: e' l'unica regola che conta qui." -ForegroundColor Yellow

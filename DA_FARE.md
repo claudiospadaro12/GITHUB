@@ -646,3 +646,16 @@ Non spazzola tutti i valori: spazzola **i membri compresi fra `start` e `stop`, 
 `step`**. `InpTrailTF=5||1||4||5||Y` ha prodotto **M1 M2 M3 M4 M5**, cinque celle, non 22.
 **Gli estremi contano, lo step no.** Da tenere presente progettando ogni sweep su enum —
 e `verifica_fasi.py` ancora non lo sa: continua a stimare "tutti i valori dell'enum".
+
+### G7. Lo script adesso dice in fondo QUALI CSV mancano
+Il 07/08 due passate su otto non hanno prodotto il CSV (`DAX_L_rangemode_OOS` e
+`NASDAQ_L_rangemode_IS`). Il messaggio *"(nessun CSV per ...)"* c'era, ma scorreva via in
+mezzo a cento righe, e in fondo lo script scriveva solo *"FINITO — devono esserci 12 CSV"*,
+un numero fisso che non c'entrava più niente con la fase lanciata.
+**Risultato: venti messaggi passati a cercare file che non esistevano**, con Claudio che
+pescava senza saperlo dalla cartella `vecchi\`.
+Adesso in fondo esce il conto vero — attesi / presenti / **mancanti**, con l'elenco dei nomi
+in rosso — e il suggerimento giusto: **rilanciare lo stesso comando SENZA `-Rifai` rifà solo
+quelli mancanti**, perché il salto "già fatto" si basa sull'esistenza del CSV.
+**Regola:** un riepilogo finale che stampa un numero fisso non è un riepilogo. Deve contare
+quello che è successo davvero in quella corsa.
