@@ -63,14 +63,19 @@ Prima **sempre** il giro a vuoto: non apre MT5, controlla tutto, dice quante
 celle sono e ti fa vedere l'`.ini` che lancerebbe.
 
 ```
-powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -EA ABTG_PTE -SoloControllo
+powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE -SoloControllo
 ```
 
 Poi, se il numero di celle torna:
 
 ```
-powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -EA ABTG_PTE
+powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE
 ```
+
+⚠️ Il parametro si chiama `-Expert`, **non** `-EA`: `-EA` è l'alias di `-ErrorAction` e
+PowerShell rifiuta di caricare lo script. (Provato: `MetadataError ... conflicts with the
+parameter alias of the same name`.) Si può anche omettere del tutto — il nome dell'EA è il
+primo argomento posizionale: `.\walkforward_generico.ps1 ABTG_PTE -SoloControllo`.
 
 I CSV finiscono in `risultati_prove\<EA>\<EA>_<SIMBOLO>_IS.csv` e `_OOS.csv`.
 Senza `-Rifai` i CSV già fatti non si rifanno: si può spegnere il PC e

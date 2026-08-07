@@ -22,6 +22,14 @@
 #
 # NOTA SUGLI ENUM: InpTF e' ENUM_TIMEFRAMES. MT5 ignora lo step e spazzola
 # i membri fra start e stop: da H1 (16385) a H4 (16388) escono H1 H2 H3 H4.
+# ⚠️ @DAQUANDO MANCA APPOSTA. Lo storico dell'oro su BCM non e' misurato:
+# sugli indici il driver diceva 2024.01.01 e i dati partivano dal 26/09/2024,
+# meta' finestra IS non esisteva. Finche' non e' misurato con
+#   scarica_storico.ps1 -Simboli "XAUUSD" -SoloReferto
+# il driver si ferma, ed e' giusto che si fermi.
 # =====================================================================
+@SIMBOLO XAUUSD
+@PERIODO H1
+
 InpTP1_ATRmult=0||0||0.5||1.5||Y
 InpTF=16388||16385||1||16388||Y

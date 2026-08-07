@@ -1175,6 +1175,39 @@ step, spazzola i membri fra start e stop). Quel numero sono ore di macchina.
 `-SoloControllo` fa il giro a vuoto: non apre MT5, controlla tutto, stampa l'`.ini` che
 lancerebbe. **Va lanciato sempre per primo.**
 
+### 🔬 Il driver è stato PROVATO, non solo scritto
+
+Claudio: *«DEVE ESSERE MANIACALE. NON VOGLIO ERRORI.»* Fino a oggi i `.ps1` li controllavo
+a occhio più `lint_ps1.py`, perché qui dentro PowerShell non c'era. **Adesso c'è**: PowerShell 7
+installato nell'ambiente di lavoro, e il driver è stato **eseguito**, non solo riletto.
+
+**Un bug vero, che a occhio non avrei mai visto:** il parametro si chiamava `-EA`, e `-EA` è
+l'alias di `-ErrorAction`. PowerShell **rifiuta di caricare lo script**:
+`MetadataError: the parameter 'EA' cannot be specified because it conflicts with the parameter
+alias of the same name for parameter 'ErrorAction'`. Il driver non sarebbe partito **mai**, su
+nessun EA. Adesso si chiama `-Expert`, ed è anche il primo argomento posizionale.
+
+**Le prove fatte, tutte eseguite:**
+
+| prova | esito |
+|---|---|
+| `ABTG_PTE` fino all'`.ini` | 41 parametri, **16 celle** — lo stesso numero del driver scritto a mano |
+| `ABTG_DAX_Apertura_EU` fino all'`.ini` | 78 parametri, 5 celle, e `InpSessionHour=8` (non 9) |
+| sweep degenere `5\|\|5\|\|0\|\|5\|\|Y` | **bloccato**, è l'errore esatto del 07/08 |
+| parametro che l'EA non ha | **bloccato**, con il nome stampato |
+| nessun parametro da spazzolare | **bloccato** |
+| EA senza `OnTester` (`DAX_MASTER_PROP`) | **bloccato** |
+| nome di EA inesistente | **bloccato** |
+| storico non dichiarato | **bloccato** |
+| riga del file prova contro il default del sorgente | vince il file prova (0,25% batte 1,0%) |
+| **tutti i 39 EA che esportano**, uno per uno | **39 su 39** arrivano all'`.ini`, 0 crash |
+| i 39 `.ini` prodotti, riletti a macchina | 0 duplicati, 0 sweep degeneri, intestazione completa |
+
+Altre tre correzioni uscite dall'averlo eseguito: margine `1e-9` nel conteggio celle (uno step
+0,1 dava `2,9999…` e `Floor` mangiava una cella), il suggerimento *«forse intendevi»* che con un
+nome corto pescava tre input a caso, e le righe con un nome inesistente che entravano lo stesso
+nel conteggio dei parametri.
+
 ⚠️ **Il limite del pinning automatico, dichiarato:** prende il default **del sorgente**, non
 quello che gira sul grafico. Su `ABTG_DAX_Apertura_EU` il sorgente dice ancora
 `InpAllowShort = true` e `InpRiskPercent = 2.0`: senza correzione esplicita si misurerebbe un

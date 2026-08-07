@@ -23,3 +23,9 @@ weekly_output.html
 report_output.html
 weekly_output.html
 weekly_report.pdf
+
+# artefatti del banco di prova (rigenerabili)
+backtest_pipeline/src_prove/
+backtest_pipeline/src_pte/
+backtest_pipeline/anteprima_*.ini
+backtest_pipeline/gen_*.ini

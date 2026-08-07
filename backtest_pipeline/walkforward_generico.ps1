@@ -39,15 +39,15 @@
 #     partivano dal 26/09/2024: meta' finestra IS non esisteva.
 #
 #  USO (PC di backtest, MT5 CHIUSO):
-#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -EA ABTG_PTE -SoloControllo
-#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -EA ABTG_PTE -DaQuando 2024.09.26
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE -SoloControllo
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE -DaQuando 2024.09.26
 #
 #  -SoloControllo NON apre MT5: scarica, legge, controlla tutto e ti
 #  fa vedere l'.ini che lancerebbe. Lancialo SEMPRE prima: costa dieci
 #  secondi e ti dice quante celle sono, cioe' quante ore di macchina.
 # =====================================================================
 param(
-  [Parameter(Mandatory=$true)][string]$EA,
+  [Parameter(Mandatory=$true,Position=0)][string]$Expert,   # nome del .mq5 senza estensione
   [string]$Simbolo   = "",           # se vuoto lo prende da @SIMBOLO nel file prova
   [string]$DaQuando  = "",           # inizio storico VERO, misurato
   [string]$Fino      = "2026.06.30",
@@ -67,18 +67,18 @@ $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $
 function Titolo($t){ Write-Host ""; Write-Host $t -ForegroundColor Cyan }
 function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exit 1 }
 
-Write-Host "=== WALK-FORWARD GENERICO - $EA ===" -ForegroundColor Cyan
+Write-Host "=== WALK-FORWARD GENERICO - $Expert ===" -ForegroundColor Cyan
 
 # =====================================================================
 #  1. IL SORGENTE
 # =====================================================================
 $SrcDir=Join-Path $Work "src_prove"
 New-Item -ItemType Directory -Force -Path $SrcDir | Out-Null
-$srcFile=Join-Path $SrcDir "$EA.mq5"
-try{ Invoke-WebRequest -Uri "$RawBase/mql5/Experts/$EA.mq5" -OutFile $srcFile -UseBasicParsing }
+$srcFile=Join-Path $SrcDir "$Expert.mq5"
+try{ Invoke-WebRequest -Uri "$RawBase/mql5/Experts/$Expert.mq5" -OutFile $srcFile -UseBasicParsing }
 catch{
   if(-not (Test-Path $srcFile)){
-    Muori ("non trovo l'EA '$EA'. Il nome deve essere quello del file .mq5 SENZA estensione,`n" +
+    Muori ("non trovo l'EA '$Expert'. Il nome deve essere quello del file .mq5 SENZA estensione,`n" +
            "    e maiuscole/minuscole contano: es. ABTG_PTE, ABTG_DAX_Apertura_EU.")
   }
   Write-Host "    (download fallito: uso la copia locale gia' scaricata)" -ForegroundColor Yellow
@@ -91,7 +91,7 @@ Write-Host ("    sorgente: {0} righe" -f (($src -split "`n").Count)) -Foreground
 #  22 NON sono testabili con questa pipeline, e va detto subito, non
 #  dopo una notte di macchina.
 if($src -notmatch 'double\s+OnTester\s*\('){
-  Muori ("$EA NON esporta i risultati (manca OnTester).`n" +
+  Muori ("$Expert NON esporta i risultati (manca OnTester).`n" +
          "    MT5 girerebbe lo stesso, ma non produrrebbe nessun CSV da leggere.`n" +
          "    Va aggiunto il blocco OnTester all'EA prima di poterlo misurare.")
 }
@@ -206,12 +206,13 @@ if($NonRisolti.Count -gt 0){
 # =====================================================================
 #  3. IL FILE PROVA: ipotesi, criteri, sweep
 # =====================================================================
-$ProvaFile= if($Prova){ $Prova } else { Join-Path $Work "prove\$EA.txt" }
+$ProvaFile= if($Prova){ $Prova } else { Join-Path $Work "prove\$Expert.txt" }
+if((-not (Test-Path $ProvaFile)) -and $Prova){ Muori "il file prova che mi hai passato non esiste: $Prova" }
 if(-not (Test-Path $ProvaFile)){
   New-Item -ItemType Directory -Force -Path (Join-Path $Work "prove") | Out-Null
-  try{ Invoke-WebRequest -Uri "$RawBase/backtest_pipeline/prove/$EA.txt" -OutFile $ProvaFile -UseBasicParsing }
+  try{ Invoke-WebRequest -Uri "$RawBase/backtest_pipeline/prove/$Expert.txt" -OutFile $ProvaFile -UseBasicParsing }
   catch{
-    Muori ("manca il file della prova: prove\$EA.txt`n" +
+    Muori ("manca il file della prova: prove\$Expert.txt`n" +
            "    Dentro ci vanno TRE cose, in quest'ordine:`n" +
            "      1. l'IPOTESI, in italiano: perche' ci aspettiamo che quel parametro conti`n" +
            "      2. i CRITERI DI ACCETTAZIONE, scritti PRIMA di vedere i numeri`n" +
@@ -233,7 +234,7 @@ foreach($r in $righeProva){
   }
   if($t -match "="){ [void]$RigheProvaUtili.Add($t) }
 }
-if($RigheProvaUtili.Count -eq 0){ Muori "in prove\$EA.txt non c'e' nessuna riga di parametri (Nome=...)." }
+if($RigheProvaUtili.Count -eq 0){ Muori "in prove\$Expert.txt non c'e' nessuna riga di parametri (Nome=...)." }
 
 if(-not $Simbolo  -and $Direttive.ContainsKey("SIMBOLO")){  $Simbolo =$Direttive["SIMBOLO"] }
 if(-not $Periodo  -and $Direttive.ContainsKey("PERIODO")){  $Periodo =$Direttive["PERIODO"] }
@@ -292,7 +293,8 @@ foreach($riga in $RigheProvaUtili){
     $celle=@($EnumMembri[$tipoP] | Where-Object { $_ -ge $lo -and $_ -le $hi }).Count
     [void]$Sweep.Add(@{ nome=$nome; celle=$celle; nota="enum $tipoP - lo step e' ignorato" })
   }else{
-    $celle=[math]::Floor([math]::Abs([double]$b.val-[double]$a.val)/[math]::Abs([double]$s.val))+1
+    # +1e-9: senza, uno step tipo 0,1 puo' dare 2,9999999998 e Floor mangia una cella.
+    $celle=[math]::Floor([math]::Abs([double]$b.val-[double]$a.val)/[math]::Abs([double]$s.val)+1e-9)+1
     [void]$Sweep.Add(@{ nome=$nome; celle=[int]$celle; nota="" })
   }
 }
@@ -301,7 +303,8 @@ if($Ignoti.Count -gt 0){
   Write-Host ""
   Write-Host "!!! QUESTI PARAMETRI L'EA NON CE LI HA:" -ForegroundColor Red
   foreach($n in $Ignoti){
-    $vicini=@($Inputs | Where-Object { $_.nome -like "*$($n.Substring([math]::Min(3,$n.Length)))*" } | Select-Object -First 3 -ExpandProperty nome)
+    $pezzo= if($n.Length -gt 6){ $n.Substring(3) } else { "" }
+    $vicini= if($pezzo){ @($Inputs | Where-Object { $_.nome -like "*$pezzo*" } | Select-Object -First 3 -ExpandProperty nome) } else { @() }
     if($vicini.Count -gt 0){ Write-Host ("      $n   -> forse intendevi: " + ($vicini -join ", ")) -ForegroundColor Red }
     else                   { Write-Host "      $n" -ForegroundColor Red }
   }
@@ -330,7 +333,10 @@ foreach($i in $Inputs){
   }
   else { [void]$Righe.Add("$($i.nome)=$($i.val)||$($i.val)||0||$($i.val)||N") }
 }
-foreach($r in $RigheProvaUtili){ [void]$Righe.Add($r) }
+foreach($r in $RigheProvaUtili){
+  $n=($r -split "=")[0].Trim()
+  if($NomiInput.ContainsKey($n)){ [void]$Righe.Add($r) }   # gli ignoti sono gia' un errore: non li conto qui
+}
 
 $Visti=@{}
 $Finali=New-Object System.Collections.ArrayList
@@ -387,10 +393,10 @@ $InputsTxt=($Finali) -join "`n"
 #  6. -SoloControllo: si ferma qui e fa vedere cosa lancerebbe
 # =====================================================================
 if($SoloControllo){
-  $anteprima=Join-Path $Work "anteprima_$($EA)_$Simbolo.ini"
+  $anteprima=Join-Path $Work "anteprima_$($Expert)_$Simbolo.ini"
 @"
 [Tester]
-Expert=$EA.ex5
+Expert=$Expert.ex5
 Symbol=$Simbolo
 Period=$Periodo
 Model=4
@@ -405,7 +411,7 @@ Leverage=100
 ExecutionMode=0
 ReplaceReport=1
 ShutdownTerminal=1
-Report=OptReport_$($EA)_$($Simbolo)_IS
+Report=OptReport_$($Expert)_$($Simbolo)_IS
 
 [TesterInputs]
 $InputsTxt
@@ -443,16 +449,16 @@ if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $For
 
 $MqlExperts=Join-Path $DataFolder "MQL5\Experts"
 $MqlFiles  =Join-Path $DataFolder "MQL5\Files"
-$Results   =Join-Path $Work "risultati_prove\$EA"
+$Results   =Join-Path $Work "risultati_prove\$Expert"
 New-Item -ItemType Directory -Force -Path $MqlExperts,$Results | Out-Null
 
 Copy-Item $srcFile -Destination $MqlExperts -Force
-& $MetaEditor "/compile:$(Join-Path $MqlExperts "$EA.mq5")" "/log" | Out-Null
-if(-not (Test-Path (Join-Path $MqlExperts "$EA.ex5"))){ Muori "compilazione fallita per $EA. Apri MetaEditor e guarda gli errori." }
-Write-Host "    compilato $EA" -ForegroundColor Green
+& $MetaEditor "/compile:$(Join-Path $MqlExperts "$Expert.mq5")" "/log" | Out-Null
+if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){ Muori "compilazione fallita per $Expert. Apri MetaEditor e guarda gli errori." }
+Write-Host "    compilato $Expert" -ForegroundColor Green
 
 foreach($w in $WF){
-  $tag="$($EA)_$($Simbolo)_$($w.Tag)"
+  $tag="$($Expert)_$($Simbolo)_$($w.Tag)"
   $done=Join-Path $Results "$tag.csv"
   if((Test-Path $done) -and -not $Rifai){
     Write-Host "    $tag gia' fatto, salto (usa -Rifai per rifarlo)" -ForegroundColor DarkGray; continue
@@ -468,7 +474,7 @@ foreach($w in $WF){
   $ini=Join-Path $Work "gen_$tag.ini"
 @"
 [Tester]
-Expert=$EA.ex5
+Expert=$Expert.ex5
 Symbol=$Simbolo
 Period=$Periodo
 Model=4
@@ -489,7 +495,7 @@ Report=OptReport_$tag
 $InputsTxt
 "@ | Set-Content -Path $ini -Encoding ASCII
 
-  $csv=Join-Path $MqlFiles "OptResults_$($EA)_$($Simbolo).csv"
+  $csv=Join-Path $MqlFiles "OptResults_$($Expert)_$($Simbolo).csv"
   if(Test-Path $csv){ Remove-Item $csv -Force }
   $prima=Get-Date
   Write-Host "    avvio $NCelle pass (tick reali)..." -ForegroundColor Cyan
@@ -515,7 +521,7 @@ $InputsTxt
 # =====================================================================
 #  8. IL REFERTO
 # =====================================================================
-$Attesi=@("$($EA)_$($Simbolo)_IS.csv","$($EA)_$($Simbolo)_OOS.csv")
+$Attesi=@("$($Expert)_$($Simbolo)_IS.csv","$($Expert)_$($Simbolo)_OOS.csv")
 $Mancanti=@($Attesi | Where-Object { -not (Test-Path (Join-Path $Results $_)) })
 
 Write-Host ""
@@ -532,5 +538,5 @@ if($Mancanti.Count -gt 0){
   try{ Set-Clipboard -Value $Results }catch{}
 }
 Write-Host ""
-Write-Host "    I criteri di accettazione sono scritti in cima a prove\$EA.txt." -ForegroundColor Gray
+Write-Host "    I criteri di accettazione sono scritti in cima a prove\$Expert.txt." -ForegroundColor Gray
 Write-Host "    Si leggono PRIMA di guardare la tabella, e non si spostano dopo." -ForegroundColor Gray
