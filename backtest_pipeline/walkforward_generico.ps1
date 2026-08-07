@@ -53,6 +53,7 @@ param(
   [string]$Fino      = "2026.06.30",
   [string]$Periodo   = "",           # TF del grafico nel tester (@PERIODO nel file prova)
   [double]$FrazioneIS = 0.40,        # 40% dentro campione, 60% fuori
+  [int]$Modello      = 4,            # 4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai verdetti
   [string]$Prova     = "",           # file prova alternativo (default: prove\<EA>.txt)
   [switch]$SoloControllo,            # controlla e stampa l'ini, NON lancia MT5
   [switch]$Rifai,
@@ -457,8 +458,9 @@ Copy-Item $srcFile -Destination $MqlExperts -Force
 if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){ Muori "compilazione fallita per $Expert. Apri MetaEditor e guarda gli errori." }
 Write-Host "    compilato $Expert" -ForegroundColor Green
 
+$Suffisso = if($Modello -eq 4){ "" } else { "_ohlc" }   # un OHLC non deve MAI sovrascrivere un tick reale
 foreach($w in $WF){
-  $tag="$($Expert)_$($Simbolo)_$($w.Tag)"
+  $tag="$($Expert)_$($Simbolo)_$($w.Tag)$Suffisso"
   $done=Join-Path $Results "$tag.csv"
   if((Test-Path $done) -and -not $Rifai){
     Write-Host "    $tag gia' fatto, salto (usa -Rifai per rifarlo)" -ForegroundColor DarkGray; continue
@@ -477,7 +479,7 @@ foreach($w in $WF){
 Expert=$Expert.ex5
 Symbol=$Simbolo
 Period=$Periodo
-Model=4
+Model=$Modello
 Optimization=1
 OptimizationCriterion=6
 FromDate=$($w.Da)
@@ -498,7 +500,8 @@ $InputsTxt
   $csv=Join-Path $MqlFiles "OptResults_$($Expert)_$($Simbolo).csv"
   if(Test-Path $csv){ Remove-Item $csv -Force }
   $prima=Get-Date
-  Write-Host "    avvio $NCelle pass (tick reali)..." -ForegroundColor Cyan
+  $comeGira = if($Modello -eq 4){ "tick reali" } else { "OHLC M1 - SOLO SCREENING, non un verdetto" }
+  Write-Host "    avvio $NCelle pass ($comeGira)..." -ForegroundColor Cyan
   (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$ini`"" -PassThru).WaitForExit()
 
   # l'EA compone il nome del CSV con MQL_PROGRAM_NAME e _Symbol. Se per
@@ -521,7 +524,7 @@ $InputsTxt
 # =====================================================================
 #  8. IL REFERTO
 # =====================================================================
-$Attesi=@("$($Expert)_$($Simbolo)_IS.csv","$($Expert)_$($Simbolo)_OOS.csv")
+$Attesi=@("$($Expert)_$($Simbolo)_IS$Suffisso.csv","$($Expert)_$($Simbolo)_OOS$Suffisso.csv")
 $Mancanti=@($Attesi | Where-Object { -not (Test-Path (Join-Path $Results $_)) })
 
 Write-Host ""

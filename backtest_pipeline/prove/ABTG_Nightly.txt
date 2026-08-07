@@ -1,0 +1,35 @@
+# =====================================================================
+#  PROVA FASE 0: ABTG_Nightly
+#  Generata il 07/08/2026 per la coda del weekend. MAI MISURATO prima.
+# =====================================================================
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   Questo EA gira in forward su EURUSD SENZA UNA SOLA MISURA a supporto
+#   (censimento VPS del 07/08). L'ipotesi da smontare e' la piu' semplice:
+#   CHE ABBIA UN EDGE. Se non ce l'ha nemmeno in backtest, in forward sta
+#   solo spendendo rischio.
+#
+# CRITERI DI ACCETTAZIONE (dichiarati ora; sono quelli della PTE)
+#   Per dire "CANDIDATO PROP" servono TUTTI E QUATTRO, a tick reali:
+#     1. positiva in TUTTE E DUE le finestre (IS e OOS)
+#     2. Profit Factor >= 1,10 fuori campione
+#     3. celle vicine positive: non un picco isolato
+#     4. drawdown compatibile con una prop (riferimento: DD OOS < 10% all'1%)
+#   Chi non li passa NON viene spento da un backtest: resta su MT5 al
+#   rischio che Claudio decide. Ma non tocca una prop.
+#
+# COME GIRA NEL WEEKEND (due stadi, dichiarati)
+#   Stadio 1: OHLC M1 su tutta la griglia -> SOLO SCREENING. Un numero
+#             OHLC non e' mai un verdetto.
+#   Stadio 2: SOLO chi ha almeno una cella positiva in ENTRAMBE le
+#             finestre OHLC (stessa cella) rigira TUTTO a tick reali.
+#             La promozione e' meccanica, non una scelta.
+#
+# LO SWEEP: questo EA NON ha un input per il timeframe (usa il TF del
+# grafico), quindi gira sul suo TF live. Ma l'export scrive il CSV solo
+# in ottimizzazione, percio' si spazzola il MAGIC su due valori: due
+# passate che DEVONO essere identiche al centesimo. Non e' uno spreco,
+# e' un controllo di coerenza gratis: se differiscono, qualcosa e' rotto.
+#
+# =====================================================================
+InpMagic=771701||771701||1||771702||Y

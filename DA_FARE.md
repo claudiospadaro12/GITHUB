@@ -1126,6 +1126,36 @@ da_confermare 20     hanno operato in passato, non so se sono ancora attaccati
 **Uno solo su trentaquattro è validato.**
 
 
+## 🤖 07/08 notte — LA CODA DEL WEEKEND: il banco di prova diventa autonomo
+
+Claudio: *"questo weekend l'agente lanci in autonomia tutti i test... poi io voglio il
+report"*. Costruito, con i due limiti fisici detti subito: MT5 gira solo sul suo PC (lui
+lancia UNA volta e lascia acceso), e "tutte le combinazioni" non esiste — si fa la domanda
+FASE 0 per ogni EA mai misurato, coi criteri scritti prima.
+
+**I pezzi:**
+- `prove/CODA.csv` — 42 lavori (29 EA × simboli dal censimento). 2 esclusi: HARSI e
+  SuperWave_EA non esportano (niente OnTester).
+- 28 file `prove/*.txt` FASE 0: ipotesi, criteri prop, sweep `InpTF` M15→D1 (11 celle) per
+  i 18 EA che ce l'hanno; per gli 11 senza, magic su 2 valori (l'export scrive solo in
+  ottimizzazione) → due righe che DEVONO essere identiche = controllo di coerenza gratis.
+- `walkforward_generico.ps1 -Modello` — 1 = OHLC M1 (screening), 4 = tick reali (verdetti).
+  Suffisso `_ohlc` nei file: uno screening non sovrascrive mai una verità.
+- `coda_weekend.ps1` — due stadi meccanici: tutto in OHLC, poi **promozione senza scelta di
+  celle** (una cella Profit>0 in ENTRAMBE le finestre, LA STESSA cella → l'EA rigira tutto a
+  tick reali). Pubblica ogni CSV sul repo man mano (token `pubblica_trades`), stato vivo in
+  `report/STATO_CODA_WEEKEND.md`. Riprendibile: i CSV fatti non si rifanno.
+- `report/CLASSIFICA_WEEKEND.md` — i criteri CONGELATI prima dei numeri, inclusa la regola
+  di Claudio sul TF: **prop preferibilmente H1** (chiude in giornata), H4 accettato solo se
+  batte l'H1 su profitto E PF fuori campione. Sotto H1 niente prop.
+
+**Il cancello di promozione è stato collaudato** su CSV sintetici: promuove la cella H4
+positiva in entrambe le finestre, boccia l'OOS tutto negativo, regge il file mancante.
+
+⚠️ Caveat dichiarato in testa a CODA.csv e alla classifica: `2024.09.26` è misurato SOLO
+sugli indici. Su oro/argento/forex/Nikkei il rapporto trade/mese IS↔OOS fa da rilevatore
+(≈2 = metà finestra vuota, come il 05/08).
+
 ## 🔧 07/08 sera — `InpTrailStartR`: la soglia che al trailing mancava
 
 La pagella di stasera ha misurato tre uscite del trailing sugli EA d'apertura: **+0,043 R dopo
