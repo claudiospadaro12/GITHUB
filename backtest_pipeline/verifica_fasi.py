@@ -72,8 +72,12 @@ def main():
         dup = sorted({nome(r) for r in finali if [nome(x) for x in finali].count(nome(r)) > 1})
         liberi = [i for i in ea_inputs if i not in visti and i not in stringhe]
 
-        # celle della griglia. Sugli ENUM, MT5 ignora start||step||stop e
-        # spazzola TUTTI i valori (scoperto il 05/08 su InpEntryMode).
+        # celle della griglia. Sugli ENUM, MT5 ignora lo STEP e spazzola i
+        # membri compresi fra start e stop (misurato il 07/08 su InpTrailTF:
+        # "5||1||4||5||Y" ha dato M1 M2 M3 M4 M5, cinque celle e non 22).
+        # ⚠️ La stima qui sotto usa il numero TOTALE di valori dell'enum:
+        # e' un TETTO, non il conteggio esatto. Se i pass reali sono meno,
+        # non e' per forza un errore -- controlla gli estremi dello sweep.
         # Il numero qui sotto e' quello dei valori dell'enum nell'EA, e va
         # aggiornato se l'enum cambia. Con il flag N l'enum resta pinnato:
         # questa tabella vale solo per le righe con Y.

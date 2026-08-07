@@ -595,3 +595,54 @@ vecchia, adesso la boccia.
 
 **Regola:** un controllo nuovo va provato **anche sul caso che deve bocciare**, non solo su
 quello che deve passare. Se passa tutto, non hai un controllo — hai un timbro.
+
+## 07/08 — FASE I e FASE L. Un controllo fallito che vale più di dieci riusciti.
+
+Referto: [`REFERTO_FASE_I_L.md`](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_I_L.md)
+
+### D1. 🔴 Il trailing M5 sul DAX è stato scelto in campione — da rifare
+Il 05/08 il `DAX Apertura EU` è passato da `PREVBAR M1` a `PREVBAR M5` in forward sulla base
+di *«440 trade: M1 −801 · M5 −79»*. La FASE I mostra che quel numero **è la riga IS**:
+fuori campione l'ordine si inverte (IS M5 +347,62 e M1 −493,33 · OOS M1 −855,73 e M5
+−1298,56, **Spearman −0,60**).
+**Non toccare niente adesso**: la fase gira sulla geometria bocciata (BREAKOUT 15) e tutte le
+celle OOS sono negative. **Va rifatta sul candidato `RETEST` 35/500/offset 200**, e solo
+allora si decide.
+
+### D2. ❌ ANNULLATO l'esperimento «trailing Nasdaq da M1 a M5»
+Lo avevo proposto dopo la pagella del 06/08 (17% di movimento catturato). **I numeri dicono
+il contrario**: Nasdaq OOS M1 −550,34 contro M5 −1513,57. Sarebbe costato quasi tre volte
+tanto. Il problema del 17% resta aperto, ma **la causa non è il timeframe del trailing.**
+
+### D3. 🔴 C6 CHIUSA — e il Nasdaq d'apertura gira la peggiore delle tre configurazioni
+`InpRangeMode`, Nasdaq fuori campione:
+
+| | Profit | PF | DD |
+|---|---:|---:|---:|
+| 0 OPENING 35 | +107,19 | 1,022 | 7,88% |
+| 0 OPENING 15 | −681,90 | 0,886 | 11,70% |
+| 1 PREV | −1600,74 | 0,798 | 17,35% |
+| **2 PREVBAR ← quello ACCESO** | **−2444,14** | **0,665** | **26,29%** |
+
+`ABTG_Nasdaq_Apertura_US` e `_Ottimizzato` hanno `ABTG_DEF_RANGE_MODE 2`, verificato nel
+codice. **Sesto test indipendente fallito**, e stavolta non è teoria: è la configurazione in
+forward. Al 2% di rischio quel drawdown supera il 50%.
+**Decisione di Claudio: spegnere o portare a rischio simbolico.**
+
+### D4. Mancano due CSV
+`DAX_L_rangemode_OOS` e `NASDAQ_L_rangemode_IS`. Senza il primo non si può dire niente su
+`RangeMode` per il DAX (in campione PREV e PREVBAR battono OPENING, ma questa stessa notte
+ha mostrato che l'IS si può invertire).
+
+### D5. Errore mio nella progettazione della FASE I
+Ho pinnato `InpBufferPoints = 300` su **entrambi** i simboli: è il buffer del Nasdaq live, il
+DAX live usa **200**. Le righe DAX non corrispondono a nessuna configurazione reale. Non
+cambia le conclusioni (il confronto fra timeframe è interno alla stessa configurazione) ma
+va corretto prima di rifarla. **Le fasi che pinnano valori "come il live" devono pinnarli
+PER SIMBOLO**, non una volta sola.
+
+### G6. Come MT5 spazzola davvero gli enum
+Non spazzola tutti i valori: spazzola **i membri compresi fra `start` e `stop`, ignorando lo
+`step`**. `InpTrailTF=5||1||4||5||Y` ha prodotto **M1 M2 M3 M4 M5**, cinque celle, non 22.
+**Gli estremi contano, lo step no.** Da tenere presente progettando ogni sweep su enum —
+e `verifica_fasi.py` ancora non lo sa: continua a stimare "tutti i valori dell'enum".
