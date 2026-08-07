@@ -1,30 +1,71 @@
 ﻿# =====================================================================
 #  flotta_attesa.csv  --  COSA DEVE GIRARE, dichiarato e versionato
 # ---------------------------------------------------------------------
-#  Questo file e' la VERITA' DICHIARATA. controllo_flotta.ps1 legge i log
-#  del VPS e confronta cosa gira DAVVERO con quello che c'e' scritto qui.
+#  controllo_flotta.ps1 legge i log del VPS e confronta cosa gira DAVVERO
+#  con quello che c'e' scritto qui.
 #
 #  REGOLA: un parametro che gira in forward deve corrispondere a una CELLA
 #  MISURATA, non a un default rimasto li'. La colonna "fonte" dice DOVE e'
-#  stata misurata. Se la fonte e' vuota, quella riga non e' validata e
-#  l'EA non puo' stare su un conto che conta.
+#  stata misurata. Fonte vuota o "nessuna" = non validato, e quell'EA non
+#  puo' stare su un conto che conta.
 #
 #  Un campo con * NON viene controllato. Si mette * quando non sappiamo
 #  ancora quale sia il valore giusto: meglio non controllare che dare un
-#  falso allarme (ne ho gia' dati tre).
+#  falso allarme (ne ho gia' dati tre in tre giorni).
 #
-#  stato:  validato    = ha passato criteri dichiarati PRIMA del test
-#          in_prova    = acceso per raccogliere forward, non validato
-#          bocciato    = misurato negativo, tenuto a rischio simbolico
-#          doppione    = fa lo stesso trade di un altro EA
-#          da_decidere = gira una configurazione senza misura a supporto
+#  ⚠️ COME E' STATO COSTRUITO QUESTO ELENCO (07/08/2026)
+#  Io NON posso sapere quali EA sono attaccati ai grafici: vedo solo chi ha
+#  operato. Quindi ogni riga dice COME lo so, nella colonna "verificato":
+#     log        = ha scritto CONFIG IN USO nei log del 06-07/08
+#     posizione  = ha una posizione aperta o chiusa il 06 o 07/08
+#     storico    = ha operato in passato. NON so se e' ancora attaccato
+#  Le righe "storico" sono IPOTESI, non fatti. Per avere l'elenco vero:
+#     powershell -ExecutionPolicy Bypass -File .\elenco_ea_attaccati.ps1
+#
+#  logga_config: si = l'EA stampa la riga CONFIG IN USO, quindi il
+#  controllo puo' verificarne i parametri. no = non la stampa, e allora
+#  di quell'EA il controllo NON puo' dire niente. Oggi sono 9 su 30.
+#
+#  stato:  validato     = ha passato criteri dichiarati PRIMA del test
+#          in_prova     = acceso per raccogliere forward, non validato
+#          bocciato     = misurato negativo, tenuto a rischio simbolico
+#          doppione     = fa lo stesso trade di un altro EA
+#          da_decidere  = gira una configurazione senza misura a supporto
+#          spento       = deve essere spento; se opera, e' un errore
+#          da_confermare= non so se e' ancora attaccato
 # =====================================================================
-ea;simbolo;stato;rischio;motore;rangemode;range;buffer;lati;trail;fonte
-DAX Apertura EU;D30EUR;validato;2.00;ABTG_RETEST;ABTG_RANGE_OPENING;35;500;SOLO LONG;ABTG_TRAIL_PREVBAR PERIOD_M5;FASE M + B1 + FASE L (6 celle positive su 6, OOS +1800.19 PF 1.423 DD 6.72%)
-Nasdaq Apertura US;NASUSD;bocciato;0.25;ABTG_BREAKOUT;ABTG_RANGE_PREVBAR;15;200;long+short;ABTG_TRAIL_PREVBAR PERIOD_M1;FASE L: OOS -2444.14 PF 0.665 DD 26.29% - peggiore delle 4. Tenuto solo per forward
-Nasdaq Apertura US OTT;NASUSD;bocciato;0.25;ABTG_BREAKOUT;ABTG_RANGE_PREVBAR;15;*;SOLO LONG;ABTG_TRAIL_PREVBAR PERIOD_M1;come sopra. Buffer * finche' non si chiarisce A15
-DAX Apertura EU OTT;D30EUR;da_decidere;1.00;ABTG_BREAKOUT;*;15;600;*;*;nessuna. Gira range 15 = 0 celle positive su 4 in OOS. Non ha il motore RETEST
-DAX Live 5m;D30EUR;in_prova;2.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;nessuna misura walk-forward
-DAX Live5m v2;D30EUR;doppione;1.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;identico a DAX Live 5m: 59 parametri comuni su 59. Forward 06/08 stesso secondo stessa direzione
-Nasdaq Live 5m;NASUSD;in_prova;2.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;nessuna misura walk-forward
-Dow Apertura US;U30USD;in_prova;1.00;ABTG_BREAKOUT;*;15;200;*;ABTG_TRAIL_PREVBAR PERIOD_M5;nessuna misura walk-forward
+ea;simbolo;stato;rischio;motore;rangemode;range;buffer;lati;trail;logga_config;verificato;fonte
+DAX Apertura EU;D30EUR;validato;2.00;ABTG_RETEST;ABTG_RANGE_OPENING;35;500;SOLO LONG;ABTG_TRAIL_PREVBAR PERIOD_M5;si;log;FASE M + B1 + FASE L: 6 celle positive su 6, OOS +1800.19 PF 1.423 DD 6.72%
+DAX Apertura EU OTT;D30EUR;da_decidere;1.00;ABTG_BREAKOUT;*;15;600;*;*;si;log;nessuna. Range 15 = 0 celle positive su 4 in OOS. Non ha il motore RETEST
+DAX Live 5m;D30EUR;in_prova;2.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;nessuna misura walk-forward
+DAX Live5m v2;D30EUR;doppione;1.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;identico a DAX Live 5m: 59 parametri comuni su 59. Forward 06/08 stesso secondo stessa direzione
+Nasdaq Apertura US;NASUSD;bocciato;0.25;ABTG_BREAKOUT;ABTG_RANGE_PREVBAR;15;200;long+short;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;FASE L: OOS -2444.14 PF 0.665 DD 26.29%, peggiore delle 4. Tenuto solo per forward
+Nasdaq Apertura US OTT;NASUSD;bocciato;0.25;ABTG_BREAKOUT;ABTG_RANGE_PREVBAR;15;*;SOLO LONG;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;come sopra. Buffer * finche' non si chiarisce A15
+Nasdaq Live 5m;NASUSD;in_prova;2.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;nessuna misura walk-forward
+Dow Apertura US;U30USD;in_prova;1.00;ABTG_BREAKOUT;*;15;200;*;ABTG_TRAIL_PREVBAR PERIOD_M5;si;posizione;nessuna misura walk-forward. Posizione aperta 07/08 15:25 server, TP/SL = 1.50R esatti
+Apertura Marco;D30EUR;spento;0.00;*;*;*;*;*;*;si;posizione;SPENTO il 06/08. Era identico a DAX Apertura EU su 64 parametri. Se opera, e' un errore
+ORB;NASUSD;in_prova;*;*;*;*;*;*;*;no;posizione;nessuna misura. B3: il 06/08 un buy stop rifiutato [invalid price] e poi un SELL STOP piazzato
+PTE;XAUUSD;in_prova;1.00;*;*;*;*;*;*;no;posizione;MAI MISURATA. walkforward_pte.ps1 pronto, manca lo storico oro. 07/08 uscita sullo stop iniziale
+SUPERWAVE EA 1;D30EUR;in_prova;*;*;*;*;*;*;*;no;posizione;nessuna misura. TP a 0.50R: serve oltre il 67% di vincenti per pareggiare
+SUPERWAVE EA 2;D30EUR;in_prova;*;*;*;*;*;*;*;no;posizione;nessuna misura. Stesso secondo e stesso stop di SUPERWAVE EA 1: e' lo stesso segnale
+SUPERWAVE EA 3;D30EUR;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 31/07
+NIGHTLY L;EURUSD;in_prova;*;*;*;*;*;*;*;no;posizione;nessuna misura. SL 7.3 pip contro TP 6.3: RR 0.86, serve il 53.7% di vincenti per pareggiare
+NIGHTLY S;EURUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 29/07
+EMA200 S1;D30EUR;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 05/08
+EMA200 S2;D30EUR;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 05/08
+EMA200 OTT S1;XAUUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 05/08
+EMA200 OTT S2;XAUUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 05/08
+STREV S 1/3;XAUUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 05/08. A2: magic 250604 condiviso da 3 EA sull'oro
+STREV MULTI S 2/3;XAUUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 05/08
+STREV CAC H4 L;F40EUR;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Chiuso in TP il 06/08 dopo 8 giorni: +67.64
+STREV NAS H1 L;NASUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 03/08
+STREV L 1/3;NASUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 03/08
+STREV DAX H1 L;D30EUR;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 31/07
+DAX M3;D30EUR;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 28/07
+Londra ORB;GBPUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 28/07. C13: verificare l'ora di sessione
+MaxMinNotte;D30EUR;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 24/07
+SUPERWAVE DOW H1;U30USD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 31/07
+FOMC PostNews;EURUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Un solo trade, 30/07
+BULGE MULTI SIGNAL;forex;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. 288 trade fino al 09/06, netto -1309.06. Non opera da due mesi
+IchiCross;XAUUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 19/06. A2: magic 250604 condiviso
+NIGHT_BREAK_BOX;XAUUSD;da_confermare;*;*;*;*;*;*;*;no;storico;nessuna misura. Ultimo trade 08/05

@@ -66,11 +66,12 @@ if (-not (Test-Path $Attesa)) { Write-Host "flotta_attesa.csv non trovato." -For
 $righeAttesa = @(Get-Content $Attesa | Where-Object { $_ -notmatch '^\s*#' -and $_ -match ';' })
 $Attese = @($righeAttesa | Select-Object -Skip 1 | ForEach-Object {
   $c = $_ -split ';'
-  if ($c.Count -ge 11) {
+  if ($c.Count -ge 13) {
     [pscustomobject]@{
       ea=$c[0].Trim(); simbolo=$c[1].Trim(); stato=$c[2].Trim(); rischio=$c[3].Trim()
       motore=$c[4].Trim(); rangemode=$c[5].Trim(); range=$c[6].Trim(); buffer=$c[7].Trim()
-      lati=$c[8].Trim(); trail=$c[9].Trim(); fonte=$c[10].Trim()
+      lati=$c[8].Trim(); trail=$c[9].Trim(); logga=$c[10].Trim(); verificato=$c[11].Trim()
+      fonte=$c[12].Trim()
     }
   }
 })
@@ -121,7 +122,13 @@ function Confronta($nomeEa, $etichetta, $atteso, $reale, $campoLog) {
 
 Write-Host ""
 Write-Host "--- confronto con la verita' dichiarata ---" -ForegroundColor Yellow
+$nonVerificabili = 0
 foreach ($a in $Attese) {
+  # Un EA che non stampa CONFIG IN USO non e' verificabile dal log: di lui
+  # il controllo NON puo' dire niente, e dirlo e' meglio che inventarselo.
+  if ($a.logga -ne 'si') { $nonVerificabili++; continue }
+  if ($a.stato -eq 'da_confermare' -or $a.stato -eq 'spento') { continue }
+
   $v = $Vive[$a.ea]
   if ($null -eq $v) {
     if ($a.stato -eq 'da_decidere' -or $a.stato -eq 'doppione') {
@@ -167,11 +174,20 @@ foreach ($a in $Attese) {
   if (-not $perSym.ContainsKey($a.simbolo)) { $perSym[$a.simbolo] = 0.0 }
   $perSym[$a.simbolo] += $r
 }
+# ⚠️ questa somma copre SOLO gli EA che stampano CONFIG IN USO. Gli altri
+#    rischiano anche loro, ma il loro rischio non lo sappiamo leggere.
+$senzaRischio = @($Attese | Where-Object { $_.logga -ne 'si' -and $_.stato -ne 'spento' -and $_.stato -ne 'da_confermare' })
 foreach ($s in ($perSym.Keys | Sort-Object)) {
   $tot = [math]::Round($perSym[$s], 2)
   $col = if ($tot -gt $Tetto) { "Red" } else { "Green" }
   Write-Host ("    {0,-10} {1,6}%   (tetto {2}%)" -f $s, $tot, $Tetto) -ForegroundColor $col
   if ($tot -gt $Tetto) { Rosso "$s : esposizione sommata $tot% SOPRA il tetto di $Tetto%" }
+}
+if ($senzaRischio.Count -gt 0) {
+  Write-Host ""
+  Write-Host ("    ⚠️ questa somma NON conta {0} EA accesi che non stampano CONFIG IN USO:" -f $senzaRischio.Count) -ForegroundColor Yellow
+  foreach ($x in $senzaRischio) { Write-Host ("       {0} ({1})" -f $x.ea, $x.simbolo) -ForegroundColor DarkYellow }
+  Giallo "L'esposizione reale e' PIU' ALTA di quella stampata: $($senzaRischio.Count) EA non dichiarano il loro rischio nel log."
 }
 
 # --- 6) stati che non dovrebbero girare a rischio pieno ---------------
@@ -217,6 +233,13 @@ foreach ($nome in $Vive.Keys) {
 
 # --- VERDETTO ---------------------------------------------------------
 if ($Brutale) { foreach ($g in $Gialli) { [void]$Rossi.Add($g) }; $Gialli.Clear() }
+
+Write-Host ""
+Write-Host ("  EA dichiarati: {0}   verificabili dal log: {1}   NON verificabili: {2}" -f `
+            $Attese.Count, ($Attese.Count - $nonVerificabili), $nonVerificabili) -ForegroundColor Gray
+if ($nonVerificabili -gt 0) {
+  Giallo "$nonVerificabili EA non stampano CONFIG IN USO: di loro questo controllo non puo' dire NIENTE."
+}
 
 Write-Host ""
 Write-Host "=====================================================" -ForegroundColor Cyan

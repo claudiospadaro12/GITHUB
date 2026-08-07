@@ -1064,3 +1064,63 @@ solo validato**, e due che fanno lo stesso trade.
 
 **Il controllo protegge dalla deriva, non dalle decisioni sbagliate.** Contro quelle c'è
 solo il metodo: criteri dichiarati prima, e **tempo in forward**.
+
+
+## 07/08 sera — `flotta_attesa.csv` completato: 34 EA, e il buco che si vede solo adesso
+
+Claudio: *«completa il file con tutti gli EA accesi.»* Fatto, ma con un limite dichiarato
+riga per riga, perché **io non posso sapere quali EA sono attaccati ai grafici: vedo solo
+chi ha operato.**
+
+### Come è stato costruito, e come si legge
+Nuova colonna **`verificato`**:
+
+| valore | quanti | cosa vuol dire |
+|---|---:|---|
+| `log` | 7 | ha scritto `CONFIG IN USO` nei log del 06-07/08 — **fatto** |
+| `posizione` | 7 | ha una posizione aperta o chiusa il 06 o 07/08 — **fatto** |
+| `storico` | 20 | ha operato in passato. **NON so se è ancora attaccato: è un'ipotesi** |
+
+### 🔴 Il buco vero, che si vede solo mettendo tutto in fila
+Nuova colonna **`logga_config`**:
+
+```
+EA dichiarati:              34
+stampano CONFIG IN USO:      9
+NON verificabili dal log:   25
+```
+
+**Venticinque EA su trentaquattro non dichiarano la propria configurazione.** Di loro il
+controllo **non può dire niente**: né se i parametri sono quelli giusti, né quanto
+rischiano. E siccome non dichiarano il rischio, **la somma dell'esposizione per simbolo è
+sistematicamente SOTTOSTIMATA** — il 6% calcolato su D30EUR non contava i due SuperWave.
+
+Il controllo adesso lo dice a voce alta invece di tacere:
+> *«questa somma NON conta N EA accesi che non stampano CONFIG IN USO. L'esposizione reale
+> è PIÙ ALTA di quella stampata.»*
+
+**Da fare: portare la riga `CONFIG IN USO` su tutti gli EA accesi.** È la condizione perché
+un controllo automatico abbia senso — e quindi perché si possa parlare di prop.
+
+### ✅ Nuovo: `elenco_ea_attaccati.ps1`
+MT5 salva la configurazione di ogni grafico in `MQL5\Profiles\Charts\<profilo>\chart*.chr`.
+Sono binari, ma nome dell'EA e simbolo ci stanno dentro come testo. Lo script li estrae:
+**è l'unica fonte che dice cosa è ATTACCATO, non cosa ha operato.**
+
+⚠️ Limite scritto dentro: il `.chr` viene riscritto quando il profilo si salva. Per un
+elenco certo, **chiudere MT5 e poi lanciarlo**.
+
+Con quell'elenco le 20 righe `storico` diventano `attaccato` o spariscono, e
+`flotta_attesa.csv` passa da ipotesi a fotografia.
+
+### Stati dichiarati oggi
+```
+validato       1     DAX Apertura EU
+bocciato       2     le due aperture Nasdaq (0,25%)
+doppione       1     DAX Live5m v2
+spento         1     Apertura Marco (se opera, e' un errore)
+da_decidere    1     DAX Apertura EU OTT
+in_prova       8     ORB, PTE, SuperWave 1 e 2, NIGHTLY L, Dow, i due Live5m
+da_confermare 20     hanno operato in passato, non so se sono ancora attaccati
+```
+**Uno solo su trentaquattro è validato.**
