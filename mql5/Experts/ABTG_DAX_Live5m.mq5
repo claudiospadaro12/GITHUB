@@ -204,6 +204,7 @@ input double InpTP1_R           = 1.0;                // 1o obiettivo in R (se n
 input double InpTP1_ClosePct    = 50;                 // % di posizione chiusa al 1o obiettivo (piano: "dimezzo")
 input bool   InpBreakevenAtTP1  = true;               // Sposta stop in pari dopo la parziale
 input bool   InpUseTrailing     = true;               // Attiva trailing stop
+input double InpTrailStartR     = 0;                  // Il trailing NON arma prima di questo profitto in R (0 = come prima: arma subito)
 input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Tipo di trailing
 input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
 input double InpTrailAtrMult    = 2.0;                // (TRAIL_ATR) trailing = X * ATR
@@ -302,12 +303,12 @@ int ABTG_OnInit()
                         InpCloseHour, InpCloseMin));
    ABTGLog("RICORDA: gli orari sono quelli del SERVER del broker (quelli sul grafico), non l'ora italiana.");
    // 07/08: aggiunti RANGE MODE e i LATI (vedi nota nell'EA principale).
-   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | rangemode=%s | range=%d min | buffer=%.0f pt | lati=%s | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s",
+   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | rangemode=%s | range=%d min | buffer=%.0f pt | lati=%s | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s | trail da=%.2fR",
                         EnumToString(InpEntryMode), EnumToString(InpRangeMode), InpRangeMinutes, InpBufferPoints,
                         (InpAllowLong && InpAllowShort ? "long+short" : (InpAllowLong ? "SOLO LONG" : (InpAllowShort ? "SOLO SHORT" : "NESSUNO!"))),
                         InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
                         (InpBreakevenAtTP1 ? "si" : "no"),
-                        EnumToString(InpTrailMode), EnumToString(InpTrailTF)));
+                        EnumToString(InpTrailMode), EnumToString(InpTrailTF), InpTrailStartR));
    return(INIT_SUCCEEDED);
   }
 
@@ -986,7 +987,25 @@ void ManagePosition()
      }
 
    //--- 3) TRAILING STOP (protegge i profitti)
-   if(InpUseTrailing)
+   //  07/08/2026 -- SOGLIA MINIMA PRIMA DI ARMARE IL TRAILING.
+   //  Prima non c'era: l'unica condizione era che la candela precedente fosse
+   //  gia' oltre il prezzo d'ingresso. Su M5, dentro un movimento veloce, quel
+   //  livello puo' stare due punti indice sopra l'entrata -- e la posizione e'
+   //  finita. Il 07/08 tre trade d'apertura sono usciti dal trailing a
+   //  +0,043R (17 secondi), +0,077R (32 min) e +0,027R (79 secondi): tre
+   //  "vincenti" che insieme valevano 0,15R. Dimostrato dai prezzi: per un BUY
+   //  lo stop iniziale sta SEMPRE sotto l'entrata e il breakeven lo mette
+   //  ESATTAMENTE all'entrata; quelle uscite erano OLTRE, quindi trailing.
+   //
+   //  DEFAULT 0 = COMPORTAMENTO IDENTICO A PRIMA. Non cambia niente in forward.
+   //  Adesso e' una LEVA MISURABILE, non una correzione applicata a occhio: il
+   //  05/08 il trailing e' stato cambiato in forward su una misura in campione
+   //  e fuori campione era il PEGGIORE dei cinque.
+   double profR = (riskDist > 0)
+                  ? (((type == POSITION_TYPE_BUY) ? (bid - openP) : (openP - ask)) / riskDist)
+                  : 0;
+   bool trailArmato = (InpTrailStartR <= 0) || (profR >= InpTrailStartR);
+   if(InpUseTrailing && trailArmato)
      {
       if(type == POSITION_TYPE_BUY)
         {
