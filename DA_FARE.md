@@ -909,3 +909,63 @@ powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "XAUUSD"
 e poi passare la data vera con `-DaQuando`. Il default nello script è una **ipotesi prudente
 copiata dagli indici, non una misura**, e lo script lo dice a schermo prima di partire.
 Questo chiude anche **B9**, aperto dal 05/08.
+
+
+## 07/08 13:23 — la PTE si è fermata sullo stop: l'ipotesi era giusta
+
+```
+XAUUSD sell 0.01   apertura 06/08 16:00 @ 4273.02
+                   chiusura 07/08 09:34 @ 4314.19  =  SL INIZIALE
+                   -35.73
+```
+
+**È uscita esattamente sul suo stop di partenza**, dopo essere arrivata a **+22,29**.
+Lo stop non si è mai mosso perché il primo target — la EMA14 su H4 — non è stato raggiunto,
+e in PTE **quello è l'unico grilletto del breakeven**.
+
+📌 **Vale la pena registrarlo per come è andata:** l'ipotesi e il criterio erano scritti in
+`walkforward_pte.ps1` **stamattina, prima che il trade si chiudesse**. Non è una prova — è
+un trade solo — ma è la prima volta che una previsione fatta in anticipo si verifica invece
+di essere ricostruita a posteriori. **Il walk-forward PTE ha adesso un motivo in più.**
+
+---
+
+## 🏦 Il conto demo da 100k — deciso il 07/08
+
+Claudio propone di spostare le strategie convalidate su un demo da **100.000**.
+**Sì, e c'è un motivo tecnico che va oltre l'idea di "provare in grande".**
+
+### Perché conta davvero: a 5k metà dei difetti sono artefatti della size
+Su un conto da ~5.300 €, al rischio 1%, sull'oro il lotto ideale viene **0,0147** e si
+arrotonda a **0,01** — il minimo del broker. Da lì discende una catena intera:
+- la **parziale al primo obiettivo non può partire** (il 50% del minimo sta sotto il minimo);
+- il **rischio effettivo non è quello nominale** (0,67% invece dell'1%);
+- il **breakeven** che dipendeva dalla parziale non scattava (corretto il 04/08 e il 07/08).
+
+**A 100k tutto questo sparisce**: 1% = 1.000 €, i lotti stanno lontano dal minimo, la
+gestione a tre pezzi funziona come è stata disegnata. **Il forward su 100k è più vicino al
+backtest di quanto lo sia il conto da 5k** — i backtest girano tutti con `Deposit=10000`.
+
+### La regola, altrimenti diventa un secondo calderone
+**Sul 100k entra SOLO quello che ha passato i criteri dichiarati PRIMA del test.**
+Oggi è **una** strategia sola:
+
+| strategia | stato |
+|---|---|
+| **DAX apertura — `RETEST` 35/500/offset 200, SOLO LONG** | ✅ passa i 3 criteri (6 celle su 6) |
+| Nasdaq apertura | ❌ 7 bocciature |
+| PTE | ⏳ mai misurata, walk-forward pronto |
+| Live5m / ORB / tutto il resto | ⏳ mai misurati con questo metodo |
+
+**Rischio di partenza: 1%, non 2%.** Il numero misurato (DD 6,72% · PF 1,423) è all'1%.
+Si parte con quello che è stato misurato, non con il doppio.
+
+### E prima di tutto: l'esposizione
+Sul conto attuale il tetto teorico è **11%** al giorno (D30EUR 6%, NASUSD 5%). Su una prop
+con limite giornaliero al 5% **è bocciatura immediata**. Sul 100k il conto parte pulito e
+questo problema non si porta dietro — **a patto di non ricopiarci sopra tutta la flotta.**
+
+### Cosa lasciamo dove
+- **Conto 5k = laboratorio.** Tutto quello che è in prova resta lì.
+- **Conto 100k = vetrina.** Ci va solo il validato, e ci entra una strategia alla volta,
+  quando passa i criteri.
