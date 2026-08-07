@@ -969,3 +969,40 @@ questo problema non si porta dietro — **a patto di non ricopiarci sopra tutta 
 - **Conto 5k = laboratorio.** Tutto quello che è in prova resta lì.
 - **Conto 100k = vetrina.** Ci va solo il validato, e ci entra una strategia alla volta,
   quando passa i criteri.
+
+
+### ❌ 07/08 15:32 — falso allarme mio: il SELL STOP "mancante" del Nasdaq OTT
+Avevo segnalato che sui cinque pendenti NASUSD mancava un `sell stop`, ipotizzando lo stesso
+difetto B3 del Dow. **Sbagliato.** I commenti degli ordini lo chiudono:
+
+```
+#3103558  buy stop  0.10 @ 29754.70   "Nasdaq Apertura US BUY"
+#3103561  sell stop 0.10 @ 29490.00   "Nasdaq Apertura US SELL"     <- coppia completa
+#3103559  buy stop  0.10 @ 29755.20   "Nasdaq Apertura US OTT BUY"
+                                      "OTT SELL" non esiste
+```
+
+**L'`_Ottimizzato` ha `InpAllowShort = false` per default** (è l'input etichettato
+*"OTT: SOLO LONG"*, quello di A13): **arma solo il buy per costruzione.**
+Differenza col Dow: lì `InpAllowShort = true` di default, quindi **lì** il SELL STOP mancante
+resta un'anomalia da spiegare. **Le due cose non vanno confuse.**
+
+**Regola:** prima di chiamare "difetto" un ordine che non c'è, **controllare il default di
+`InpAllowShort` di quell'EA**. Metà della flotta ha varianti long-only.
+
+Sbagliata anche l'attribuzione dei due ordini da 0,80: erano l'**ORB** (riempito alle 14:32,
+`ORB BUY` 0,80 @ 29635.70), non il `Live5m`.
+
+### 🔎 A15. Buffer del Nasdaq OTT: il buy stop sta dalla parte sbagliata
+```
+Nasdaq Apertura US       buy stop @ 29754.70    buffer dichiarato 200 pt
+Nasdaq Apertura US OTT   buy stop @ 29755.20    buffer dichiarato 150 pt
+```
+Buffer più piccolo → il buy stop dovrebbe stare **più in basso**, invece sta **0,50 punti
+indice più in alto**. O leggono un range diverso (`InpLevelTF` diverso?), o uno dei due
+buffer sul grafico non è quello che risulta dal log.
+**Non urgente** (girano allo 0,25%). Si chiarisce da solo al primo riavvio dopo la
+ricompilazione: la riga `CONFIG IN USO` ora stampa `rangemode=` e `lati=`.
+
+✅ Controllo di coerenza che invece PASSA: `Nasdaq Apertura US` buy 29754,70 · SL 29490,00 ·
+TP 30548,80 → **794,10 / 264,70 = 3,00R esatti**. Il TP a 3R fa quello che deve.
