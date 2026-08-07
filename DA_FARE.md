@@ -788,3 +788,38 @@ generazione), graffe bilanciate. È lo stesso controllo che il 06/08 aveva pesca
 delle metriche prop applicata a metà su Nasdaq e Dow.
 
 ⚠️ Da ricompilare sul VPS insieme alle altre correzioni (breakeven su 20 EA).
+
+
+## 07/08 — FASE M: il DAX va SOLO LONG, il Nasdaq è chiuso
+
+Referto: [`REFERTO_FASE_M.md`](backtest_pipeline/risultati_archivio/Walkforward_Aperture/REFERTO_FASE_M.md)
+
+### 🟢 D6. `SOLO LONG` sul DAX passa i tre criteri dichiarati prima
+6 celle positive su 6. A range 35, fuori campione: **+1800,19 · PF 1,423 · DD 6,72%** contro
++1198,79 · 1,237 · 10,49% della configurazione accesa. **Resa/DD da 114 a 268.**
+Meccanismo verificabile nei conteggi: SOLO LONG 256 trade, SOLO SHORT 243, insieme **316 e
+non 499** — con `OneTradePerDay` lo short **si prende il posto** del long su ~183 giornate.
+
+**DA FARE SUL VPS:** portare `ABTG_DAX_Apertura_EU_Ottimizzato` (magic diverso, stesso
+grafico) alla configurazione `SOLO LONG`, lasciando `ABTG_DAX_Apertura_EU` a due lati come
+**braccio di controllo**. Si ottiene un A/B in forward vero e si chiude anche A10
+(`TRAIL_FIXED`). Esposizione su D30EUR invariata: resta 1%.
+
+Parametri da mettere sull'`_Ottimizzato`:
+`InpEntryMode=2 (RETEST)` · `InpRangeMode=0 (OPENING)` · `InpRangeMinutes=35` ·
+`InpBufferPoints=500` · `InpRetestOffsetPts=200` · **`InpAllowShort=false`** ·
+`InpTrailMode=1 (PREVBAR)` · `InpTrailTF=M5` · `InpRiskPercent=1.0`
+
+### 🔴 D7. Nasdaq d'apertura: CHIUSO come ricerca — settima bocciatura
+`SOLO LONG 35` è positiva solo fuori campione (+342,32 · PF 1,129): in campione fa −105,58
+(criterio 1 ❌) e i vicini in OOS fanno −399,00 e −314,31 (criterio 3 ❌). Picco isolato.
+Sul DAX la stessa riga è positiva **6 su 6**, sul Nasdaq **1 su 6**: la differenza fra
+altopiano e rumore, vista nella stessa corsa.
+**Resta allo 0,25% per raccogliere forward. Nessun altro test finché non c'è un'ipotesi
+NUOVA e strutturale — non un'altra sfumatura del range d'apertura.**
+
+### ⚠️ D8. La finestra OOS si sta consumando
+Ci abbiamo guardato in **otto fasi**. Sta diventando una seconda finestra in campione, ed è
+lo stesso meccanismo documentato oggi due volte. **Da qui in avanti le conferme si prendono
+in forward**, non con altri backtest sulla stessa finestra. Se servirà un altro giudizio
+pulito, va tagliata una terza finestra mai guardata.
