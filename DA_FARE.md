@@ -852,3 +852,60 @@ di generazione più vecchia, come `Apertura Marco`.
 `Consenti operazioni short`). Il confronto sarà **contro la misura**, non contro un secondo EA.
 **Se si vuole l'A/B**, va portato il motore RETEST dentro l'`_Ottimizzato` — lavoro di codice,
 da fare con calma e da testare prima.
+
+
+## 07/08 sera — PTE: preparato tutto, da lanciare
+
+Claudio chiede se la **PTE** può andare bene per una prop. **Risposta onesta: non lo
+sappiamo.** Nell'export ci sono 1132 trade chiusi e **nessuno è della PTE**; in
+`backtest_pipeline` non esiste una riga di risultati; un driver non c'era. Quello che si è
+visto finora è il **profitto flottante** di una posizione aperta.
+
+### Cosa ho verificato leggendo il codice
+- ✅ **Il timeframe del GRAFICO non conta.** PTE usa `InpTF` in tutti e 16 i punti in cui
+  tocca i dati, compreso il rilevamento della nuova barra (`iTime(_Symbol, InpTF, 0)`).
+  Nessun `PERIOD_CURRENT`. Conta solo il **parametro** `TF operativo` (default H4).
+- ✅ **BE e trailing sono cablati bene** (famiglia già corretta il 04/08): il breakeven si fa
+  anche se la parziale non parte, e il trailing sull'EMA14 è condizionato a `beDone`.
+- 🔴 **A 0,01 lotti la parziale non può partire** (50% del minimo sta sotto il minimo). E il
+  dimensionamento produce proprio 0,01: rischio 1% ≈ 52 €, stop 41,17 $ ≈ 35 € per 0,01
+  lotto → lotto ideale 0,0147 → arrotondato a 0,01. **Della gestione a tre pezzi ne funziona
+  uno e mezzo.**
+- 🔴 **Il breakeven ha un solo grilletto: il primo target = EMA14 sul TF operativo.** Su H4
+  può stare lontanissima. Visto dal vivo il 06/08: short oro aperto alle 16:00, arrivato a
+  **+22,29**, tornato a **+1,41 con lo stop ancora all'originale (4314.19)**. Non esiste un
+  breakeven indipendente a N×R come sulle aperture (`InpBEatR`).
+
+### ✅ Fatto: metriche prop aggiunte alla PTE
+Il suo export aveva l'intestazione vecchia, **senza `Peggior Giornata %`** — cioè senza la
+colonna che risponde alla domanda che ha fatto Claudio. Portate da `ABTG_DAX_Apertura_EU`:
+`Peggior Giornata %`, `Perdite Consecutive Max`, `Serie Perdente Peggiore`.
+L'aggiornamento dell'equity sta **prima** del filtro sulla nuova barra: su H4 una candela
+dura quattro ore e la caduta peggiore di giornata succede in mezzo.
+Verificato: **11 segnaposto = 11 argomenti = 11 colonne**, graffe bilanciate.
+
+### ✅ Fatto: `backtest_pipeline/walkforward_pte.ps1`
+**Ipotesi dichiarata nel file, prima dei numeri:** *il breakeven arriva troppo tardi perché
+il primo target è la EMA14; avvicinarlo lo fa scattare prima e migliora la resa/DD senza
+distruggere il profitto.* La leva è `InpTP1_ATRmult`, che esiste già.
+
+Sweep: `InpTP1_ATRmult` {0 · 0,5 · 1,0 · 1,5} × `InpTF` {H1 · H2 · H3 · H4} = **16 celle**,
+32 pass su due finestre. Verificato: 39 parametri pinnati, **nessun input libero**, nessun
+duplicato, **nessuno sweep degenere**.
+
+**CRITERIO DI ACCETTAZIONE, scritto in cima al file:**
+1. positiva in **tutte e due** le finestre;
+2. **PF ≥ 1,10** fuori campione;
+3. **vicini positivi** — non un picco isolato;
+4. **`Peggior Giornata %` sopra −2,5%** all'1% di rischio (una prop chiude a −5%: al 2% si
+   sfonda).
+
+### ⚠️ PREREQUISITO — da fare PRIMA di lanciare
+**Non sappiamo da quando parte lo storico dell'oro su BCM.** Sugli indici i driver dicevano
+`2024.01.01` e i dati partivano dal **26/09/2024**: metà finestra IS non esisteva. Misurarlo:
+```
+powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "XAUUSD" -SoloReferto
+```
+e poi passare la data vera con `-DaQuando`. Il default nello script è una **ipotesi prudente
+copiata dagli indici, non una misura**, e lo script lo dice a schermo prima di partire.
+Questo chiude anche **B9**, aperto dal 05/08.
