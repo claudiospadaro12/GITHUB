@@ -58,6 +58,17 @@ def stringhe_doppie(riga):
 
 def controlla(path):
     righe = open(path, encoding="utf-8", errors="replace").read().split("\n")
+    # --- 0) caratteri che PowerShell 5.1 scambia per virgolette ---------
+    #  08/08/2026: PS 5.1 legge i .ps1 senza BOM come ANSI. I byte UTF-8 di
+    #  un em-dash riletti cosi' contengono una VIRGOLETTA tipografica, che
+    #  chiude la stringa a meta': ParserError su tutto il file. Successo con
+    #  "# CODA DEL WEEKEND [em-dash] stato vivo". PowerShell 7 legge UTF-8 e
+    #  NON se ne accorge: il collaudo su pwsh da solo non basta.
+    for i, riga in enumerate(righe, 1):
+        for ch in "\u2013\u2014\u2018\u2019\u201c\u201d":
+            if ch in riga:
+                segnala(path, i, "carattere tipografico U+%04X: su PowerShell 5.1 "
+                                 "diventa una virgoletta e TRONCA la stringa -> usa ASCII" % ord(ch), riga)
     dentro_here = False
     tag_here = None
     for i, riga in enumerate(righe, 1):

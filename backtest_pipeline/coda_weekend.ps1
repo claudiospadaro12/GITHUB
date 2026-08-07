@@ -14,7 +14,7 @@
 #      mai misurato, la domanda FASE 0 ("ha un edge? su quale TF?"),
 #      coi criteri di promozione scritti PRIMA nei file prove\*.txt.
 #
-#  COME LAVORA — due stadi, meccanici:
+#  COME LAVORA - due stadi, meccanici:
 #   STADIO 1  tutti i 42 lavori di prove\CODA.csv in OHLC M1 (veloce).
 #             L'OHLC e' SOLO screening: mai un verdetto.
 #   STADIO 2  chi ha almeno una cella con profitto > 0 in ENTRAMBE le
@@ -139,7 +139,7 @@ function Promosso($ea, $sym) {
 $Stato = New-Object System.Collections.ArrayList
 $StatoFile = Join-Path $Work "STATO_CODA_WEEKEND.md"
 function ScriviStato {
-  $testa = @("# CODA DEL WEEKEND — stato vivo","",
+  $testa = @("# CODA DEL WEEKEND - stato vivo","",
     ("aggiornato: " + (Get-Date -Format "yyyy-MM-dd HH:mm") + " (ora del PC di backtest)"),"",
     "Stadio 1 = OHLC M1, SOLO screening. Stadio 2 = tick reali, solo i promossi.",
     "Promozione MECCANICA: una cella con Profit>0 in ENTRAMBE le finestre OHLC.","",
