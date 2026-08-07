@@ -1,0 +1,30 @@
+﻿# =====================================================================
+#  flotta_attesa.csv  --  COSA DEVE GIRARE, dichiarato e versionato
+# ---------------------------------------------------------------------
+#  Questo file e' la VERITA' DICHIARATA. controllo_flotta.ps1 legge i log
+#  del VPS e confronta cosa gira DAVVERO con quello che c'e' scritto qui.
+#
+#  REGOLA: un parametro che gira in forward deve corrispondere a una CELLA
+#  MISURATA, non a un default rimasto li'. La colonna "fonte" dice DOVE e'
+#  stata misurata. Se la fonte e' vuota, quella riga non e' validata e
+#  l'EA non puo' stare su un conto che conta.
+#
+#  Un campo con * NON viene controllato. Si mette * quando non sappiamo
+#  ancora quale sia il valore giusto: meglio non controllare che dare un
+#  falso allarme (ne ho gia' dati tre).
+#
+#  stato:  validato    = ha passato criteri dichiarati PRIMA del test
+#          in_prova    = acceso per raccogliere forward, non validato
+#          bocciato    = misurato negativo, tenuto a rischio simbolico
+#          doppione    = fa lo stesso trade di un altro EA
+#          da_decidere = gira una configurazione senza misura a supporto
+# =====================================================================
+ea;simbolo;stato;rischio;motore;rangemode;range;buffer;lati;trail;fonte
+DAX Apertura EU;D30EUR;validato;2.00;ABTG_RETEST;ABTG_RANGE_OPENING;35;500;SOLO LONG;ABTG_TRAIL_PREVBAR PERIOD_M5;FASE M + B1 + FASE L (6 celle positive su 6, OOS +1800.19 PF 1.423 DD 6.72%)
+Nasdaq Apertura US;NASUSD;bocciato;0.25;ABTG_BREAKOUT;ABTG_RANGE_PREVBAR;15;200;long+short;ABTG_TRAIL_PREVBAR PERIOD_M1;FASE L: OOS -2444.14 PF 0.665 DD 26.29% - peggiore delle 4. Tenuto solo per forward
+Nasdaq Apertura US OTT;NASUSD;bocciato;0.25;ABTG_BREAKOUT;ABTG_RANGE_PREVBAR;15;*;SOLO LONG;ABTG_TRAIL_PREVBAR PERIOD_M1;come sopra. Buffer * finche' non si chiarisce A15
+DAX Apertura EU OTT;D30EUR;da_decidere;1.00;ABTG_BREAKOUT;*;15;600;*;*;nessuna. Gira range 15 = 0 celle positive su 4 in OOS. Non ha il motore RETEST
+DAX Live 5m;D30EUR;in_prova;2.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;nessuna misura walk-forward
+DAX Live5m v2;D30EUR;doppione;1.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;identico a DAX Live 5m: 59 parametri comuni su 59. Forward 06/08 stesso secondo stessa direzione
+Nasdaq Live 5m;NASUSD;in_prova;2.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;nessuna misura walk-forward
+Dow Apertura US;U30USD;in_prova;1.00;ABTG_BREAKOUT;*;15;200;*;ABTG_TRAIL_PREVBAR PERIOD_M5;nessuna misura walk-forward

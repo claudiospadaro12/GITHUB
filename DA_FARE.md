@@ -1006,3 +1006,61 @@ ricompilazione: la riga `CONFIG IN USO` ora stampa `rangemode=` e `lati=`.
 
 ✅ Controllo di coerenza che invece PASSA: `Nasdaq Apertura US` buy 29754,70 · SL 29490,00 ·
 TP 30548,80 → **794,10 / 264,70 = 3,00R esatti**. Il TP a 3R fa quello che deve.
+
+
+## 🚦 07/08 — `controllo_flotta.ps1`: verde o rosso prima di ogni volo
+
+Claudio: *«Dobbiamo controllare tutto per filo e per segno. Non possiamo permetterci errori,
+rischiamo poi in prop.»* Ha ragione, e il registro lo dimostra. Ma c'è una cosa scomoda
+dentro quel registro: **nessuno dei difetti è stato trovato guardando meglio.** Sono stati
+trovati tutti da un controllo **meccanico** — righe identiche al centesimo, un `grep` su 61
+file, un conteggio di trade che non tornava, due log a un giorno di distanza.
+E le **tre** volte che ho guardato con attenzione (posizioni "contemporanee", "ritardo di
+un'ora", SELL STOP "mancante") erano **tutti e tre falsi allarmi.**
+
+**Quindi "controllare tutto" non può voler dire stare più attenti. Deve voler dire un
+controllo che gira da solo.**
+
+### Due file nuovi
+
+**`flotta_attesa.csv` — la verità dichiarata, versionata.**
+Per ogni EA: simbolo, stato, rischio, motore, rangemode, range, buffer, lati, trailing, e
+soprattutto la **`fonte`**, cioè *dove è stata misurata* quella configurazione.
+**Un parametro che gira in forward deve corrispondere a una cella misurata, non a un default
+rimasto lì.** Se la fonte è vuota, quell'EA non può stare su un conto che conta.
+Un campo con `*` non viene controllato: si mette quando non sappiamo ancora quale sia il
+valore giusto. **Meglio non controllare che dare un falso allarme.**
+
+**`controllo_flotta.ps1` — il controllo.** Verifica:
+1. cosa gira **davvero** (riga `CONFIG IN USO`) contro cosa **deve** girare;
+2. l'`.ex5` più recente del `.mq5`, e l'EA ripartito **dopo** la compilazione;
+3. esposizione sommata per simbolo sotto un tetto (default 3%);
+4. EA in stato `doppione` o `bocciato` che girano sopra lo 0,5%;
+5. EA accesi che **non sono dichiarati da nessuna parte**;
+6. EA dichiarati `validato` **senza fonte di misura**.
+
+```
+powershell -ExecutionPolicy Bypass -File .\controllo_flotta.ps1
+powershell -ExecutionPolicy Bypass -File .\controllo_flotta.ps1 -Tetto 3.0 -Brutale
+```
+
+Parser provato sulle righe **vere** dei log del 06 e 07/08, vecchio formato e nuovo: legge
+entrambi e, dove `rangemode`/`lati` mancano, **lo dice invece di dare un falso allarme**.
+Nomi allineati alle etichette reali: 8 dichiarati, 8 visti nei log, **nessuno fuori posto**.
+
+### 🔴 Cosa dice già adesso, a occhio sui numeri dichiarati
+```
+D30EUR   6.00%   <<< SOPRA IL TETTO (Apertura EU 2 + OTT 1 + Live5m 2 + v2 1)
+NASUSD   2.50%   ok
+U30USD   1.00%   ok
+```
+**Il primo rosso è già lì**, ed è quello vero: su D30EUR ci sono quattro EA di cui **uno
+solo validato**, e due che fanno lo stesso trade.
+
+### ⚠️ Il limite di questo strumento, scritto dentro lo strumento
+> *Verde NON vuol dire "buona per una prop". Vuol dire: gira quello che è scritto in
+> `flotta_attesa.csv`. Se lì dentro c'è scritta una cosa sbagliata, questo controllo la
+> conferma.*
+
+**Il controllo protegge dalla deriva, non dalle decisioni sbagliate.** Contro quelle c'è
+solo il metodo: criteri dichiarati prima, e **tempo in forward**.
