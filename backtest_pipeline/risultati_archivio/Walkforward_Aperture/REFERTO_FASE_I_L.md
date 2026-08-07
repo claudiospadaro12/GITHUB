@@ -123,19 +123,70 @@ dell'1%. Al 2%, che è quello che gira, il drawdown va oltre il 50%.
 **C6 è chiusa, ed è la sesta bocciatura.** L'ultima ipotesi in piedi sul Nasdaq d'apertura
 non solo non salva niente: è la configurazione **peggiore** delle tre, e sta girando adesso.
 
-## DAX, in campione
+## 🔴 La tabella completa: l'ordine si ROVESCIA su tutti e due i simboli
 
-| RangeMode | Profit | PF | DD |
-|---|---:|---:|---:|
-| 1 PREV | +509,69 | 1,109 | 10,86% |
-| 2 PREVBAR | +380,16 | 1,080 | 10,00% |
-| 0 OPENING (35) | −9,02 | 0,998 | 8,41% |
-| 0 OPENING (15) | −1241,91 | 0,760 | 17,04% |
+Gli 8 CSV sono arrivati. Profitto, con Profit Factor e drawdown fuori campione:
 
-In campione `PREV` e `PREVBAR` battono l'apertura classica. **Ma questa fase ha appena
-mostrato, sul trailing, che l'IS può invertirsi del tutto fuori campione**, e il DAX gira
-`RangeMode 0`. **Serve `DAX_L_rangemode_OOS` prima di dire qualsiasi cosa**, ed è uno dei due
-file che mancano.
+### DAX
+
+| cella | IS | OOS | PF OOS | DD OOS |
+|---|---:|---:|---:|---:|
+| **OPENING 35** ← quello ACCESO | −9,02 | **+1198,79** | **1,237** | 10,49% |
+| OPENING 15 | −1241,91 | −318,43 | 0,950 | 13,30% |
+| PREVBAR | +380,16 | −748,39 | 0,883 | 14,93% |
+| PREV | **+509,69** | **−886,05** | 0,861 | 15,56% |
+
+```
+IS   migliore -> peggiore:   PREV > PREVBAR > OPENING 35 > OPENING 15
+OOS  migliore -> peggiore:   OPENING 35 > OPENING 15 > PREVBAR > PREV
+Spearman IS -> OOS:          -0,80
+```
+
+### Nasdaq
+
+| cella | IS | OOS | PF OOS | DD OOS |
+|---|---:|---:|---:|---:|
+| OPENING 35 | −261,87 | **+107,19** | 1,022 | 7,88% |
+| OPENING 15 | −702,75 | −681,90 | 0,886 | 11,70% |
+| PREV | +106,12 | −1600,74 | 0,798 | 17,35% |
+| **PREVBAR** ← quello ACCESO | **+434,08** | **−2444,14** | **0,664** | **26,29%** |
+
+```
+IS   migliore -> peggiore:   PREVBAR > PREV > OPENING 35 > OPENING 15
+OOS  migliore -> peggiore:   OPENING 35 > OPENING 15 > PREV > PREVBAR
+Spearman IS -> OOS:          -0,80
+```
+
+## Quello che questa tabella dimostra
+
+**Su tutti e due i simboli, la classifica in campione è quasi esattamente il contrario di
+quella fuori campione. Spearman −0,80 su entrambi, lo stesso numero.**
+
+Non è una sfumatura, è un ribaltamento:
+
+- **Sul DAX**, scegliere sull'IS avrebbe portato a `PREV`. Fuori campione `PREV` fa
+  **−886,05** contro i **+1198,79** della cella che il DAX già usa. **Duemilaottantacinque
+  euro di differenza**, presi scegliendo sulla finestra sbagliata.
+- **Sul Nasdaq**, `PREVBAR` è la **migliore in campione (+434,08, PF 1,096)** e la
+  **peggiore fuori campione (−2444,14, PF 0,664, DD 26,29%)**. Ed è **la configurazione che
+  gira in forward adesso.**
+
+## 🔑 E qui le due fasi di stanotte si saldano
+
+| decisione presa in forward | come appare in campione | com'è fuori campione |
+|---|---|---|
+| DAX: trailing `PREVBAR M5` (dal 05/08) | il migliore dei cinque | **il peggiore dei cinque** |
+| Nasdaq: `RangeMode PREVBAR` | il migliore dei quattro | **il peggiore dei quattro** |
+
+**Due configurazioni scelte su misure in campione, due volte la peggiore fuori campione.**
+Non è sfortuna: è la firma del sovradattamento, e adesso l'abbiamo misurata due volte in una
+notte con due parametri che non c'entrano niente l'uno con l'altro (Spearman −0,60 e −0,80).
+
+## ✅ Il candidato DAX ne esce rafforzato
+
+`RangeMode` non è una leva da tirare: **il DAX sta già sulla cella migliore delle quattro**,
+e di parecchio. La configurazione validata regge il quarto esame, e per la terza volta
+riproduce lo stesso numero al centesimo — **+1198,79 · PF 1,237 · DD 10,49%**.
 
 ---
 

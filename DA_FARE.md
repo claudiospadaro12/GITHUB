@@ -629,10 +629,46 @@ codice. **Sesto test indipendente fallito**, e stavolta non è teoria: è la con
 forward. Al 2% di rischio quel drawdown supera il 50%.
 **Decisione di Claudio: spegnere o portare a rischio simbolico.**
 
-### D4. Mancano due CSV
-`DAX_L_rangemode_OOS` e `NASDAQ_L_rangemode_IS`. Senza il primo non si può dire niente su
-`RangeMode` per il DAX (in campione PREV e PREVBAR battono OPENING, ma questa stessa notte
-ha mostrato che l'IS si può invertire).
+### D4. ✅ Arrivati gli ultimi due CSV — e ribaltano tutto
+`RangeMode` fuori campione **rovescia la classifica in campione su tutti e due i simboli**,
+con lo **stesso identico Spearman −0,80**.
+
+| DAX | IS | OOS |
+|---|---:|---:|
+| **OPENING 35** ← acceso | −9,02 | **+1198,79** (PF 1,237) |
+| OPENING 15 | −1241,91 | −318,43 |
+| PREVBAR | +380,16 | −748,39 |
+| PREV | **+509,69** | **−886,05** |
+
+| Nasdaq | IS | OOS |
+|---|---:|---:|
+| OPENING 35 | −261,87 | **+107,19** (PF 1,022) |
+| OPENING 15 | −702,75 | −681,90 |
+| PREV | +106,12 | −1600,74 |
+| **PREVBAR** ← acceso | **+434,08** | **−2444,14** (PF 0,664 · DD 26,29%) |
+
+**Sul DAX**: scegliere sull'IS avrebbe portato a `PREV`, che fuori campione fa −886,05 contro
+i +1198,79 della cella già in uso. **2085 € di differenza.**
+**✅ Il candidato ne esce rafforzato: `RangeMode` non è una leva, il DAX sta già sulla cella
+migliore delle quattro** — e per la terza volta riproduce +1198,79 al centesimo.
+
+**🔑 Il pezzo che unisce le due fasi:**
+
+| decisione presa in forward | in campione | fuori campione |
+|---|---|---|
+| DAX trailing `PREVBAR M5` (dal 05/08) | migliore dei 5 | **peggiore dei 5** (ρ −0,60) |
+| Nasdaq `RangeMode PREVBAR` | migliore dei 4 | **peggiore dei 4** (ρ −0,80) |
+
+Due parametri che non c'entrano niente l'uno con l'altro, **due volte lo stesso ribaltamento**.
+Non è sfortuna: è la firma del sovradattamento, misurata due volte in una notte.
+
+### G8. Mai aprire un file in scrittura mentre lo si sta ancora leggendo
+Il 07/08 ho scritto `open(p,'w').write(open(p).read().replace(...))`: Python apre in
+scrittura **e tronca subito**, poi legge un file ormai vuoto e ci scrive dentro il nulla.
+**`report/DIARIO.md` è andato a 0 byte.** Recuperato con `git checkout --` perché era
+committato — cioè la REGOLA #1 ha appena pagato per la prima volta in modo visibile.
+**Regola: si legge tutto, si trasforma in memoria, si apre in scrittura UNA volta sola alla
+fine.** E dopo ogni modifica a un file di testo si controlla che non sia diventato vuoto.
 
 ### D5. Errore mio nella progettazione della FASE I
 Ho pinnato `InpBufferPoints = 300` su **entrambi** i simboli: è il buffer del Nasdaq live, il
