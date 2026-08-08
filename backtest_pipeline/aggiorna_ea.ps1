@@ -2,8 +2,8 @@
 #  aggiorna_ea.ps1  --  aggiorna e RICOMPILA gli EA in MT5 (no ottimizz.)
 # ---------------------------------------------------------------------
 #  Copia i sorgenti .mq5 aggiornati del repo nel terminale BCM e li
-#  ricompila. Gli EA gia' attaccati ai grafici si ricaricano da soli
-#  (MT5 ricarica l'.ex5 dopo la ricompilazione). NON lancia backtest.
+#  ricompila. ATTENZIONE (imparato l'08/08): la ricompilazione SCARICA
+#  gli EA dai grafici e NON li ricarica -> dopo, RIAVVIARE MetaTrader.
 #
 #  USO:
 #    .\aggiorna_ea.ps1              -> aggiorna TUTTI gli EA

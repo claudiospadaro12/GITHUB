@@ -2031,8 +2031,45 @@ string OptFrame_FileName()
 //| Lato AGENTE: a fine di ogni passata impacchetta le statistiche   |
 //| in un frame e lo invia al terminale principale.                 |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| EXPORT PER-TRADE (09/08/2026) - serve al DD di PORTAFOGLIO.       |
+//| A fine test scrive nella cartella COMUNE (Files comuni) un CSV    |
+//| con una riga per ogni trade CHIUSO (ora di chiusura e netto):     |
+//| con le serie di piu' EA si calcolano DD combinato e Monte Carlo   |
+//| (backtest_pipeline/dd_portafoglio.py). Solo tester. In            |
+//| ottimizzazione ogni pass sovrascrive il file del proprio magic:   |
+//| usarlo su run singoli / magic-sweep, non sulle griglie larghe.    |
+//+------------------------------------------------------------------+
+void ExportTrades()
+  {
+   if(!HistorySelect(0,TimeCurrent())) return;
+   string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"+IntegerToString((long)InpMagic)+".csv";
+   int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
+   if(h==INVALID_HANDLE) return;
+   FileWrite(h,"close_time","symbol","magic","position_id","deal_type","volume","price","net_profit");
+   int n=HistoryDealsTotal();
+   for(int i=0;i<n;i++)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk==0) continue;
+      long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
+      if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_OUT_BY) continue;
+      double net=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
+      FileWrite(h,
+                TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                HistoryDealGetString(tk,DEAL_SYMBOL),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_MAGIC)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_POSITION_ID)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_TYPE)),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_VOLUME),2),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_PRICE),_Digits),
+                DoubleToString(net,2));
+     }
+   FileClose(h);
+  }
 double OnTester()
   {
+   ExportTrades();   // per-trade per il DD di portafoglio (ROTTA_PROP punto 4)
    double stats[10];
    stats[0] = TesterStatistics(STAT_PROFIT);                 // Profit
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);        // Expected Payoff
