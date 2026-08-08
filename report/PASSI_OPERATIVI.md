@@ -85,7 +85,7 @@ modifiche vere sono state 8 (range 35, RETEST, buffer 1000, offset 400, short OF
 battitura (parziale 5.0 invece di 50.0) beccato allo screenshot di controllo e corretto
 prima dell'OK. Da oggi il forward del Dow gira ESATTAMENTE la cella del round 6.
 
-## PASSO 5 — 🧪 Round 4: GoldenCross cross-symbol (PC di backtest, 3 lanci)
+## PASSO 5 — ✅ FATTO (08/08 sera) — Round 4: GoldenCross cross-symbol, verdetto ZERO su 3
 
 Test di robustezza già pronto (`R4_GoldenCross_cross.txt`), MAI girato. Non promuove
 nessuno per regola dichiarata: pesa la riga XAUUSD. Tre lanci, uno per simbolo, dalla
@@ -98,6 +98,15 @@ powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_GoldenC
 ```
 
 (Il TF viene dal file prova: H1, lo stesso del live. Poi zip dei CSV come al solito.)
+
+**ESITO: 3 lanci fatti, 6 CSV archiviati, coerenza 6/6 al centesimo. DAX rosso in IS
+(−385,67), Dow rosso in OOS (−519,48), Nasdaq rosso ovunque. Per la regola scritta
+prima: l'edge XAUUSD è oro-specifico o rumore — la riga pesa di meno in classifica,
+niente cambi al live. Referto: `REFERTO_ROUND4_GOLDENCROSS.md`.**
+
+---
+
+# 🏁 SCALETTA COMPLETATA — 5 passi su 5 nell'arco di una serata (08/08)
 
 ---
 
