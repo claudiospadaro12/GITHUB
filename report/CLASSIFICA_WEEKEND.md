@@ -51,15 +51,16 @@ H1/H4 · `Multi` H3. Più: `EMA200_Ott` XAUUSD (criterio 1 mai passato: IS rossa
 GBPUSD/GBPJPY (picchi isolati o campioni piccoli) · `SupRev_DAX_H1` (H4 con PF 1,026) ·
 XAGUSD **non giudicabile** (storico argento corto: 71 trade IS contro 336 OOS).
 
-## 🔴 MISURATI NEGATIVI A TICK REALI — e girano live
+## 🔴 MISURATI NEGATIVI A TICK REALI — ✅ SPENTI da Claudio l'08/08 sera
 
-| EA | rischio live | IS | OOS | DD OOS |
+| EA | rischio (era) | IS | OOS | DD OOS |
 |---|---:|---:|---:|---:|
 | DAX Live 5m | 2% | −626,33 | **−2218,56** | **39,74%** |
 | DAX Live5m v2 | 1% | +11,10 | −393,74 | 14,16% |
 | Nasdaq Live 5m | 2% | +98,96 | −326,54 | 19,40% |
 
-La decisione è di Claudio — ma non è più un sospetto del diario, è una misura.
+Decisione presa l'08/08 sera: **tutti e tre rimossi dai grafici** (passo 1 della
+scaletta operativa). Eventuale ritorno solo dal binario B (motore), non da tarature.
 (E la divergenza OHLC→tick su queste tre dice una regola nuova: **sotto M15 lo screening
 OHLC è fuorviante**, non impreciso.)
 

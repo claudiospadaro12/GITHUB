@@ -5,7 +5,7 @@ esatti: niente da ricordare a memoria. Spuntare e passare al successivo._
 
 ---
 
-## PASSO 1 — 🔴 Live5m: fermare l'emorragia (VPS, 2 minuti)
+## PASSO 1 — ✅ FATTO (08/08 sera) — Live5m: fermare l'emorragia
 
 I tre EA sono **misurati negativi a tick reali fuori campione** e girano live:
 
@@ -21,7 +21,7 @@ Proprietà → scheda Comune → togli la spunta ad "Consenti trading live".
 Alternativa se non vuoi spegnerli: Proprietà → `InpRiskPercent` a **0,25** su tutti e
 tre (continuano a produrre forward quasi gratis). La decisione è tua; la misura è quella.
 
-Se poi vorremo recuperarli, è lavoro di binario B (motore), non di parametri.
+**ESITO: Claudio li ha spenti tutti e 3 l'08/08 sera.** Eventuale ritorno dal binario B.
 
 ## PASSO 2 — 🔧 DAX OTT: allineare il trailing (VPS, Proprietà, 1 minuto)
 
