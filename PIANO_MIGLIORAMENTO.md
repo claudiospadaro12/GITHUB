@@ -58,6 +58,16 @@ esposizione live:
 Qui migliorare vuol dire prima di tutto **fermare l'emorragia** (decisione di Claudio),
 poi eventualmente binario B. Nessuna griglia li salva: sono negativi su tutta la linea.
 
+### ✅ Primo intervento del binario B: FATTO (08/08) — il sizing che mentiva
+
+`LotByRisk`/`CalcLotByRisk` usava `SYMBOL_TRADE_TICK_VALUE` nudo: su 225JPY arriva non
+convertito in valuta conto → lotto ~0 → sempre al minimo (misurato nel round 2). Corretto
+con `OrderCalcProfit` + tick value come ripiego, **su tutta la classe: 41 EA in un colpo**
+(la lezione del 05/08: si corregge la classe, non il caso). Sui simboli sani i due calcoli
+coincidono: il comportamento cambia SOLO dove il tick value mente. 16 EA legacy con
+pattern diversi (SuperWave_EA col lotto-a-zero, ORB_*, BULGE, Gold_*) restano da fare a
+parte. ⚠️ **Sul VPS niente ricompilazioni finché il round 5 non ha misurato il fix.**
+
 ## BINARIO D — NON MISURABILI → si aggiunge l'export, e diventano misurabili
 
 `HARSI` e `SuperWave_EA` girano live **senza OnTester**: non producono CSV, quindi non

@@ -937,12 +937,25 @@ double CalcLotByRisk(double slDistancePrice)
    double balance   = AccountInfoDouble(ACCOUNT_BALANCE);
    double riskMoney = balance * InpRiskPercent / 100.0;
 
-   double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
-   double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
-   if(tickSize <= 0 || tickValue <= 0) return(0);
-
-   double ticks      = slDistancePrice / tickSize;
-   double lossPerLot = ticks * tickValue;
+   //  08/08/2026 -- PERDITA PER LOTTO DAL BROKER, NON DAL TICK VALUE NUDO.
+   //  Su 225JPY il tick value arriva non convertito in valuta conto: il lotto
+   //  usciva ~0 e finiva SEMPRE al minimo (round 2: a deposito 100k profitti
+   //  identici al 10k, DD 0,01%). OrderCalcProfit converte correttamente; il
+   //  tick value resta come ripiego. Sui simboli sani i due calcoli coincidono:
+   //  il comportamento cambia SOLO dove il tick value mente.
+   double lossPerLot = 0;
+   double pxCalc  = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   double profCalc = 0;
+   if(pxCalc > slDistancePrice &&
+      OrderCalcProfit(ORDER_TYPE_BUY, _Symbol, 1.0, pxCalc, pxCalc - slDistancePrice, profCalc) && profCalc < 0)
+      lossPerLot = -profCalc;
+   if(lossPerLot <= 0)
+     {
+      double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+      double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+      if(tickSize <= 0 || tickValue <= 0) return(0);
+      lossPerLot = (slDistancePrice / tickSize) * tickValue;
+     }
    if(lossPerLot <= 0) return(0);
 
    double lot = riskMoney / lossPerLot;

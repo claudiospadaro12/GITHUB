@@ -365,10 +365,24 @@ double LotByRisk(string sym,double slDist,double riskPct)
   {
    if(slDist<=0) return(0);
    double risk=AccountInfoDouble(ACCOUNT_BALANCE)*riskPct/100.0;
-   double tv=SymbolInfoDouble(sym,SYMBOL_TRADE_TICK_VALUE);
-   double tsz=SymbolInfoDouble(sym,SYMBOL_TRADE_TICK_SIZE);
-   if(tv<=0||tsz<=0) return(0);
-   double lossPerLot=(slDist/tsz)*tv;
+   //  08/08/2026 -- PERDITA PER LOTTO DAL BROKER, NON DAL TICK VALUE NUDO.
+   //  Su 225JPY il tick value arriva non convertito in valuta conto: il lotto
+   //  usciva ~0 e finiva SEMPRE al minimo (round 2: a deposito 100k profitti
+   //  identici al 10k, DD 0,01%). OrderCalcProfit converte correttamente; il
+   //  tick value resta come ripiego. Sui simboli sani i due calcoli coincidono:
+   //  il comportamento cambia SOLO dove il tick value mente.
+   double lossPerLot=0;
+   double pxCalc=SymbolInfoDouble(sym,SYMBOL_ASK);
+   double profCalc=0;
+   if(pxCalc>slDist && OrderCalcProfit(ORDER_TYPE_BUY,sym,1.0,pxCalc,pxCalc-slDist,profCalc) && profCalc<0)
+      lossPerLot=-profCalc;
+   if(lossPerLot<=0)
+     {
+      double tv=SymbolInfoDouble(sym,SYMBOL_TRADE_TICK_VALUE);
+      double tsz=SymbolInfoDouble(sym,SYMBOL_TRADE_TICK_SIZE);
+      if(tv<=0||tsz<=0) return(0);
+      lossPerLot=(slDist/tsz)*tv;
+     }
    if(lossPerLot<=0) return(0);
    double lot=risk/lossPerLot;
    double mn=SymbolInfoDouble(sym,SYMBOL_VOLUME_MIN);

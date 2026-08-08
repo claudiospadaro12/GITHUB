@@ -1,0 +1,33 @@
+# =====================================================================
+#  ROUND 5: Nikkei DOPO il fix del sizing - la misura che il round 2
+#  non poteva dare.  Si lancia con:
+#    -Prova prove\R5_Nikkei_sizing_fix.txt -Deposito 100000 -Etichetta r5
+# =====================================================================
+# COSA E' CAMBIATO (08/08, fix nel codice)
+#   LotByRisk() ora calcola la perdita per lotto con OrderCalcProfit
+#   (conversione valuta corretta) invece del tick value nudo, che su
+#   225JPY arrivava non convertito: lotto ~0, sempre appoggiato al
+#   minimo. Il round 2 l'ha dimostrato: a 100k profitti identici al 10k.
+#   Il driver scarica il sorgente dal repo e RICOMPILA: questo giro usa
+#   automaticamente il codice corretto.
+# IPOTESI (scritta prima)
+#   Con il sizing sano i SEGNI per cella devono restare quelli del round
+#   2 (gli ingressi sono gli stessi; cambia il lotto) e i numeri devono
+#   andare IN SCALA: profitti in centinaia/migliaia, DD in punti percentuali
+#   veri. Se i segni cambiano molto, il sizing interagisce col percorso
+#   (compounding) piu' del previsto - da capire prima di fidarsi.
+# CRITERI (dichiarati ora)
+#   1. SCALA: la cella H3 OOS deve valere ordini di grandezza piu' dei
+#      17 euro del round 2, e il DD deve diventare misurabile (>0,5%).
+#      Se restano euro, il fix non ha morso e si riapre l'indagine.
+#   2. FORMA: H2-H3-H4 positive in ENTRAMBE le finestre (quarta conferma).
+#   3. PROP: sull'aggregato H2+H3+H4 (>=30 trade OOS gia' verificati):
+#      PF >= 1,10 e DD OOS < 10% all'1%. La regola TF resta quella di
+#      Claudio (fra le celle buone si preferisce la piu' corta).
+#   Tutti e tre -> il congelamento si toglie e il Nikkei torna candidato.
+# =====================================================================
+@SIMBOLO  225JPY
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16388||16385||1||16396||Y
