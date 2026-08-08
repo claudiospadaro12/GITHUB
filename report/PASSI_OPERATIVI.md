@@ -37,7 +37,7 @@ Tutto il resto invariato. (Niente ricompilazioni: solo F7 sul grafico → Propri
 **ESITO: screenshot delle 15:14 dell'08/08 — PREVBAR + 5 Minutes impostati, soglia 0.0R,
 rischio 1%, TP1 1R/50%, BE on. Confermato con OK.**
 
-## PASSO 3 — 🔧 Nikkei 225JPY: allineare il Supertrend (VPS, Proprietà, 1 minuto)
+## PASSO 3 — ✅ FATTO (08/08 15:23, verificato da screenshot) — Nikkei allineato alla cella H2
 
 Il forward del Nikkei (`ABTG_SupertrendReversal` su 225JPY) va allineato alla cella
 di riferimento misurata nel round 5 (H2, altopiano H2–H4). Proprietà dell'EA →
@@ -46,6 +46,13 @@ di riferimento misurata nel round 5 (H2, altopiano H2–H4). Proprietà dell'EA 
 
 ⚠️ Il grafico deve essere **H2**. Ricordo: finché non ricompili sul VPS l'EA gira col
 lotto minimo (sizing vecchio) — va bene così per ora, prima misura poi codice.
+
+**ESITO (più ricco del previsto): il confronto col CSV r5 ha trovato TRE disallineamenti,
+non uno** — il "H2" della candidatura è il TF OPERATIVO INTERNO (`InpTF`), non il periodo
+del grafico, e il grafico girava `InpTF=H4`, short spento e TP 2,5R contro i 2,0R della
+misura. Corretti tutti e tre da Proprietà: `InpTF=2 Hours` · `InpStMult=3.5` ·
+`InpAllowShort=true` · `InpTP_RR=2.0`. Ora il forward gira ESATTAMENTE la cella
+misurata (OOS +1863,34 · PF 1,653 · DD 0,88%). Lotto minimo finché non si ricompila.**
 
 ## PASSO 4 — 🚀 Dow: deploy della ricetta DAX (decisione + Proprietà, 3 minuti)
 
