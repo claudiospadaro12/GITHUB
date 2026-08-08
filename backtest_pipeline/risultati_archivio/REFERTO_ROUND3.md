@@ -67,3 +67,21 @@ _Primo dei cinque lavori arrivato. Criteri nei file prova, scritti prima._
   ribaltamento di segno, ma l'ennesima conferma che l'IS non ordina le celle.
   Verdetto: resta 🥈 **in cima** ai quasi; il forward su U30USD H1 è il giudice.
   In live non si tocca niente.
+
+## 4. SupertrendReversal_Multi_Ott @XAUUSD H4 — griglia sul moltiplicatore (live = 2,5)
+
+| StMult | IS | OOS | PF OOS | DD OOS | n OOS |
+|---:|---:|---:|---:|---:|---:|
+| 1,5 | −990,91 | +1664,42 | 1,714 | 5,79% | 105 |
+| 2,0 | **−643,61** | +303,90 | 1,121 | 8,40% | 75 |
+| **2,5 (live)** | +1098,26 | **+2108,11** | **2,907** | 4,50% | 49 |
+| 3,0 | +54,40 | +724,92 | 2,985 | 3,57% | 27 |
+| 3,5 | +160,68 | −576,93 | 0,319 | 6,18% | 19 |
+
+- ✅ Sanità: cella 2,5 riproduce la FASE 0 **al centesimo** (+2108,11) — sesta su sei.
+- ❌ Criterio NON passato: il 2,0 in campione fa −643,61.
+- 🔎 Cresta di due (2,5–3,0) verde nelle due finestre, ma il 3,0 poggia su 11/27 trade —
+  sotto il minimo. E il quadro d'insieme resta quello della FASE 0: sull'asse TF il suo
+  H4 era un picco con l'H3 a −701. Un picco che su un secondo asse mostra una mezza
+  cresta sottile non diventa un altopiano. **Resta su MT5**; l'OOS a PF 2,9 con 49 trade
+  merita rispetto nel forward, non un conto che conta.

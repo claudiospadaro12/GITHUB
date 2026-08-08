@@ -41,7 +41,7 @@ congelato sul sizing._
 ## 🖥️ RESTANO SU MT5 (misurati a tick reali, non da prop)
 
 Picchi isolati (il criterio 3 esiste per loro): `SupertrendReversal_Multi_Ott` XAUUSD H4
-(OOS +2108 PF 2,907 **ma H3 −701**) · `SupertrendReversal_Ott` XAUUSD H4 · `SupRev_DAX_H4`
+(OOS +2108 PF 2,907 **ma H3 −701**; R3: su StMult cresta 2,5–3,0 ma il 2,0 IS fa −643 e il 3,0 ha 27 trade — resta qui) · `SupertrendReversal_Ott` XAUUSD H4 · `SupRev_DAX_H4`
 H4 · `SupRev_DOW_H4` H4 · `SupRev_DOW_H1` H2/H4 · `SupertrendReversal` XAUUSD H3, NASUSD
 H1/H4 · `Multi` H3. Più: `EMA200_Ott` XAUUSD (criterio 1 mai passato: IS rossa, OOS verde
 — inversione di regime) · `GoldenCross` base XAUUSD (PF OOS 1,066) · `EMA200` XAUUSD/
