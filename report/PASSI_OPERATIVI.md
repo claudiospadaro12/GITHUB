@@ -54,7 +54,7 @@ misura. Corretti tutti e tre da Proprietà: `InpTF=2 Hours` · `InpStMult=3.5` �
 `InpAllowShort=true` · `InpTP_RR=2.0`. Ora il forward gira ESATTAMENTE la cella
 misurata (OOS +1863,34 · PF 1,653 · DD 0,88%). Lotto minimo finché non si ricompila.**
 
-## PASSO 4 — 🚀 Dow: deploy della ricetta DAX (decisione + Proprietà, 3 minuti)
+## PASSO 4 — ✅ FATTO (08/08 15:34, verificato da screenshot) — Dow: ricetta DAX deployata
 
 Round 6: 5 criteri su 5 (OOS +653,56 · PF 1,275 · DD 4,18% · 130 trade, altopiano).
 Vale mezzo punto (finestra non vergine): il punto intero lo dà il forward — che parte
@@ -77,6 +77,13 @@ E questi devono già essere così (verifica al volo): `InpRangeMode=0`, `InpAllo
 `InpUseTrailing=1`, `InpSessionHour=14`, `InpSessionMin=30` (ora server!),
 `InpOneTradePerDay=1`. **Magic: lasciare quello del grafico live** (non 770202, che era
 del tester).
+
+**ESITO: Claudio ha deciso SI' e deployato alle 15:34.** Il live girava una config [DOW]
+personalizzata (TP secco 1,5R senza parziale ne' BE) diversa da quella stimata: le
+modifiche vere sono state 8 (range 35, RETEST, buffer 1000, offset 400, short OFF, TP
+1R, parziale 50%, BE on); trailing gia' PREVBAR M5, magic gia' 770202. Un errore di
+battitura (parziale 5.0 invece di 50.0) beccato allo screenshot di controllo e corretto
+prima dell'OK. Da oggi il forward del Dow gira ESATTAMENTE la cella del round 6.
 
 ## PASSO 5 — 🧪 Round 4: GoldenCross cross-symbol (PC di backtest, 3 lanci)
 

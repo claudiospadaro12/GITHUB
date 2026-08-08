@@ -25,7 +25,7 @@ Claudio. Ma non tocca una prop.
 | **ABTG_MaxMinNotte_DAX_Short_Ott** | D30EUR (config live) | box notturno M15 | **+618,31** | **2,192** | **1,88%** | 🆕 R2: altopiano sul buffer 750–1500, cella live riprodotta AL CENTESIMO. ⚠️ ~20 trade OOS/cella: sotto il minimo dei 30, lo colma solo il forward |
 | **ABTG_SupertrendReversal** | **225JPY (Nikkei)** | **H2** (riferimento per la regola TF; altopiano H2·H3·H4, QUARTA conferma) | **+1863,34** (aggr. H2–H4: +4225,85/113 trade) | **1,653** | **0,88%** | 🆕 R5 col sizing corretto a 100k: tutti e 3 i criteri del file prova passati (scala ~70×, forma, prop). **Scongelato.** Caveat: OOS guardata 4 volte → conferma dal forward; sul VPS gira ancora il lotto minimo finché non si ricompila |
 
-| **ABTG_Dow_Apertura_US** (ricetta DAX) | U30USD | RETEST 35 · buffer 1000 · offset 400 · **SOLO LONG** · PREVBAR M5 | **+653,56** (vicini +1098/+1188) | **1,275** | **4,18%** | 🆕 R6: 5 criteri su 5, altopiano OOS su tutta la riga SOLO LONG (n=130). ⚠️ finestra non vergine (vale mezzo punto) e il live gira ANCORA la config vecchia (BREAKOUT 15/200 long+short): il deploy è una decisione |
+| **ABTG_Dow_Apertura_US** (ricetta DAX) | U30USD | RETEST 35 · buffer 1000 · offset 400 · **SOLO LONG** · PREVBAR M5 | **+653,56** (vicini +1098/+1188) | **1,275** | **4,18%** | 🆕 R6: 5 criteri su 5, altopiano OOS su tutta la riga SOLO LONG (n=130). ⚠️ finestra non vergine (vale mezzo punto). ✅ **DEPLOYATO 08/08 15:34**: il live ora gira la cella misurata (era BREAKOUT 15/200 long+short) — il forward è partito |
 
 _Tre candidati: MaxMinNotte, Nikkei e ora la ricetta DAX sul Dow — che promuove la
 ricetta stessa a METODO (2 indici su 3; il Nasdaq resta l'eccezione misurata). Per
