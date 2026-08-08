@@ -1,0 +1,35 @@
+# =====================================================================
+#  ROUND 2: ABTG_MaxMinNotte_DAX_Short_Ottimizzato - il criterio 3
+#  Si lancia con:  -Prova prove\R2_MaxMinNotte_DAX_Short.txt -Etichetta r2
+# =====================================================================
+#
+# PERCHE' (08/08/2026, dopo la FASE 0)
+#   La config LIVE e' il miglior "quasi" del weekend: IS +477,51 PF 1,921
+#   / OOS +618,31 PF 2,192 DD 1,88%. Ma e' UNA cella sola: il criterio 3
+#   (vicini positivi, non un picco isolato) non era verificabile.
+#   Questa griglia lo verifica sulla leva d'ingresso: il BUFFER oltre il
+#   box notturno. Il valore live e' 1000 (10 punti indice) e sta AL
+#   CENTRO della griglia, come dev'essere: 500 / 750 / 1000 / 1250 / 1500.
+#
+# IPOTESI (scritta prima)
+#   Se l'edge e' del BOX NOTTURNO e non del numero 1000, i vicini 750 e
+#   1250 devono essere anch'essi positivi nelle due finestre. Un 1000
+#   verde circondato da rosso = picco isolato = il criterio 3 boccia,
+#   e la riga resta "quasi" per sempre.
+#
+# CRITERI (dichiarati ora)
+#   - la cella 1000 deve riprodurre la FASE 0 (+618,31 OOS al centesimo:
+#     stesso driver, stesse finestre). Se non lo fa, non si legge niente.
+#   - promossa a CANDIDATO PROP se 750 e 1250 sono positivi in ENTRAMBE
+#     le finestre. ⚠️ Col limite, dichiarato: ~20 trade OOS per cella,
+#     sotto il minimo dei 30. Il criterio 5 qui NON e' superabile con
+#     una griglia (i trade sono quelli): passera' solo col forward che
+#     si accumula. Verra' scritto cosi', senza sconti.
+#   - se una qualsiasi cella mostra DD OOS > 10%, la strategia e' piu'
+#     fragile di come appare: si scrive e si tiene a MT5.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+InpBufferPoints=1000||500||250||1500||Y

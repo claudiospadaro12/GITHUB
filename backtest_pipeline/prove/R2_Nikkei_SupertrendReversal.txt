@@ -1,0 +1,38 @@
+# =====================================================================
+#  ROUND 2: ABTG_SupertrendReversal su 225JPY (Nikkei) A TAGLIA PROP
+#  Si lancia con:  -Prova prove\R2_Nikkei_SupertrendReversal.txt
+#                  -Deposito 100000 -Etichetta r2
+# =====================================================================
+#
+# PERCHE' (08/08/2026, dopo la FASE 0)
+#   Il Nikkei e' stato L'UNICO ALTOPIANO VERO del weekend: H2-H3-H4
+#   passano tutti e 4 i criteri e la riga H1-H12 e' quasi tutta verde
+#   nelle DUE finestre. Ma con deposito 10.000 il lotto usciva schiacciato
+#   al MINIMO del broker: profitti di pochi euro e drawdown dello 0,1%,
+#   cioe' numeri veri ma NON in scala col rischio dichiarato.
+#
+# IPOTESI (scritta prima di questo giro)
+#   A taglia prop (100.000) il lotto si sgancia dal minimo e i numeri
+#   vanno in scala: l'altopiano H2-H4 deve RESTARE con le stesse
+#   proporzioni (PF, forma), con profitti e DD ~10x. Se a taglia piena
+#   l'altopiano sparisce o si deforma, quello del weekend era un
+#   artefatto del lotto minimo, non un edge.
+#
+# CRITERI (i 4 congelati + i 2 nuovi, dichiarati ora)
+#   1-4. i soliti: positivo nelle due finestre, PF>=1,10 OOS, vicini
+#        positivi, DD OOS < 10% al rischio dell'EA (1%).
+#   5. MINIMO 30 TRADE OOS: le celle singole restano sotto (13-31),
+#      quindi IL GIUDIZIO SI DA' SULL'AGGREGATO DELL'ALTOPIANO H2+H3+H4
+#      (~68 trade OOS), dichiarandolo adesso: le tre celle devono essere
+#      positive TUTTE E TRE, non in media.
+#   6. Scala: profitto e DD devono crescere insieme al deposito. Se il
+#      profitto resta a pochi euro anche a 100k, il lotto e' ancora
+#      schiacciato e il test non risponde.
+#   Regola TF di Claudio: fra le celle che passano si preferisce la piu'
+#   vicina a H1; H4 solo se batte le piu' corte su profitto E PF OOS.
+# =====================================================================
+@SIMBOLO  225JPY
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16388||16385||1||16396||Y

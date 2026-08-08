@@ -54,6 +54,8 @@ param(
   [string]$Periodo   = "",           # TF del grafico nel tester (@PERIODO nel file prova)
   [double]$FrazioneIS = 0.40,        # 40% dentro campione, 60% fuori
   [int]$Modello      = 4,            # 4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai verdetti
+  [int]$Deposito     = 10000,        # deposito del tester. 100000 = taglia prop: serve dove il lotto minimo schiaccia il rischio
+  [string]$Etichetta = "",           # suffisso nei nomi dei CSV: un round nuovo NON sovrascrive il precedente
   [string]$Prova     = "",           # file prova alternativo (default: prove\<EA>.txt)
   [switch]$SoloControllo,            # controlla e stampa l'ini, NON lancia MT5
   [switch]$Rifai,
@@ -406,7 +408,7 @@ OptimizationCriterion=6
 FromDate=$($WF[0].Da)
 ToDate=$($WF[0].A)
 ForwardMode=0
-Deposit=10000
+Deposit=$Deposito
 Currency=EUR
 Leverage=100
 ExecutionMode=0
@@ -459,6 +461,7 @@ if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){ Muori "compilazione 
 Write-Host "    compilato $Expert" -ForegroundColor Green
 
 $Suffisso = if($Modello -eq 4){ "" } else { "_ohlc" }   # un OHLC non deve MAI sovrascrivere un tick reale
+if($Etichetta){ $Suffisso = $Suffisso + "_" + $Etichetta }
 foreach($w in $WF){
   $tag="$($Expert)_$($Simbolo)_$($w.Tag)$Suffisso"
   $done=Join-Path $Results "$tag.csv"
@@ -485,7 +488,7 @@ OptimizationCriterion=6
 FromDate=$($w.Da)
 ToDate=$($w.A)
 ForwardMode=0
-Deposit=10000
+Deposit=$Deposito
 Currency=EUR
 Leverage=100
 ExecutionMode=0

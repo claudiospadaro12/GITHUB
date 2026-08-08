@@ -1,0 +1,33 @@
+# =====================================================================
+#  ROUND 2: ABTG_GoldenCross_Ottimizzato su XAUUSD H1 - il criterio 3
+#  Si lancia con:  -Prova prove\R2_GoldenCross_Ott_XAUUSD.txt -Etichetta r2
+# =====================================================================
+#
+# PERCHE' (08/08/2026, dopo la FASE 0)
+#   Secondo miglior "quasi" del weekend, e per giunta su H1, il TF
+#   preferito per le prop: IS +299,35 PF 1,494 / OOS +308,30 PF 1,253
+#   DD 6,08% (57 trade OOS: sopra il minimo dei 30!). Config unica:
+#   il criterio 3 non era verificabile.
+#   La leva scelta e' la SOGLIA ADX (filtro di forza del trend): il live
+#   usa 15, il PDF della strategia suggeriva 25. Griglia 10/15/20/25,
+#   col live NON al bordo basso per un motivo: sotto 10 l'ADX non filtra
+#   piu' niente e la cella non risponde alla domanda.
+#
+# IPOTESI (scritta prima)
+#   Se l'edge e' del PATTERN (triplo incrocio EMA + Heiken Ashi + ADX) e
+#   non del numero 15, le celle 10 e 20 devono restare positive nelle due
+#   finestre. E se il PDF aveva ragione, 25 dovrebbe migliorare il PF al
+#   costo di meno trade - da guardare, NON da applicare.
+#
+# CRITERI (dichiarati ora)
+#   - la cella 15 deve riprodurre la FASE 0 (OOS +308,30 al centesimo).
+#   - CANDIDATO PROP se 10 e 20 sono positive in ENTRAMBE le finestre e
+#     la 15 tiene PF>=1,10 e DD<10% in OOS (gia' vero in FASE 0).
+#   - ⚠️ se la cella migliore in IS e' la peggiore in OOS (successo OTTO
+#     volte), NON si cambia la soglia live: si scrive e basta.
+# =====================================================================
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpAdxMin=15||10||5||25||Y
