@@ -26,3 +26,23 @@ _Primo dei cinque lavori arrivato. Criteri nei file prova, scritti prima._
   resta un'ipotesi affascinante, non un candidato. **La decide il forward.**
 
 → In classifica scende fra i 🥈 con questa motivazione. In live non cambia niente.
+
+## 2. SupRev_NAS_H1_Ott @NASUSD H1 — griglia sul moltiplicatore Supertrend (live = 3,0)
+
+| StMult | IS | OOS | PF OOS | DD OOS | n OOS |
+|---:|---:|---:|---:|---:|---:|
+| 2,0 | −220,94 | +13,36 | 1,014 | 3,12% | 154 |
+| 2,5 | −46,40 | −56,35 | 0,930 | 2,03% | 131 |
+| **3,0 (live)** | +118,82 | **+300,61** | **1,688** | **0,86%** | 86 |
+| **3,5** | +116,29 | **+203,66** | **1,475** | **0,75%** | 83 |
+| 4,0 | −58,75 | −12,80 | 0,973 | 2,29% | 79 |
+
+- ✅ Sanità: cella 3,0 riproduce la FASE 0 **al centesimo** (+300,61) — quarta su quattro.
+- ❌ Criterio stretto NON passato: serviva 2,5 E 3,5 positivi; il 2,5 è rosso in entrambe.
+- 🔎 **Ma il disegno va scritto**: una CRESTA di due celle (3,0–3,5) verdi nelle due
+  finestre, PF 1,47–1,69, DD sotto l'1%, 83–86 trade OOS (sopra il minimo). Ed è la
+  **stessa forma** che questo EA mostra sull'asse dei TF (isola H1+H2). Due assi
+  indipendenti, due creste da due celle, e la config live (3,0 · H1) sta **dentro
+  entrambe**. Non è l'altopiano largo che i criteri chiedono, ma non è nemmeno il picco
+  solitario del GoldenCross: è un edge con margini stretti. Verdetto: resta 🥈, il
+  forward (che già gira su questa config) è il giudice giusto. In live non si tocca niente.

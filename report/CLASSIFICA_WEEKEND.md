@@ -35,7 +35,7 @@ congelato sul sizing._
 | ABTG_EMA200 | SPXUSD H4 | OOS +567,07 PF 1,595 DD 2,22% (n=111); vicini TF verdi; sanità al centesimo | 🆕 R3: il periodo 225 è ROSSO nelle due finestre → criterio dichiarato non passato. Nota: il 200 non è un numero pescato — è l'identità (comportamentale) della strategia; il lato 150–175 è verde. La decide il forward |
 | **ABTG_GoldenCross_Ottimizzato** | XAUUSD **H1** | IS +299,35 PF 1,494 · OOS +308,30 PF 1,253 DD 6,08% (57 trade OOS) | R2: il vicinato ADX non è verde (20 → −136,56 OOS, ed era la migliore IS: NONO ribaltamento). 10≡15 al centesimo: il filtro ADX non contribuisce. Resta qui |
 | ABTG_SuperWave_DOW_H1_Ott | U30USD H1 | IS +1022 PF 1,849 · OOS +463 PF 1,328 DD 3,91% (n=143) | il vicino H2 chiude a **−13,73**: criterio 3 fallito per un soffio |
-| ABTG_SupRev_NAS_H1_Ott | NASUSD H1+H2 | H1: OOS +300,61 PF 1,688 DD 0,86% | isola di due celle fra negativi: il criterio 3 alla lettera dice no |
+| ABTG_SupRev_NAS_H1_Ott | NASUSD H1+H2 | H1: OOS +300,61 PF 1,688 DD 0,86% (n=86) | 🆕 R3: cresta di due anche su StMult (3,0–3,5 verdi, PF 1,47–1,69) ma il 2,5 è rosso → criterio stretto no. Due assi, due creste da due celle, la config live dentro entrambe: margini stretti, giudica il forward |
 | ABTG_EMA200 | AUDJPY H12/D1 | 4 criteri formali | **11–12 trade OOS**: sotto il minimo |
 
 ## 🖥️ RESTANO SU MT5 (misurati a tick reali, non da prop)
