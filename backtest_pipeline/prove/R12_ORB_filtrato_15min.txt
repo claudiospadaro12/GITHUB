@@ -1,0 +1,58 @@
+# =====================================================================
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il corso resta intatto)
+#  ROUND 12: "ORB filtrato" (articolo Fazen) - 15', stop a meta' range,
+#            target 1,5x l'ampiezza, uscita a orario
+#  Si lancia con: -Prova prove\R12_ORB_filtrato_15min.txt -Etichetta r12
+# =====================================================================
+# LA FONTE (terza scheda portata da Claudio l'08/08 sera)
+#   Indici USA: OR = primi 15 minuti (9:30-9:45 ET = 14:30-14:45 server).
+#   STOP appena sotto il PUNTO MEDIO del range (non l'estremo opposto:
+#   "troppo ampio, distrugge il rapporto rischio/rendimento").
+#   TARGET = breakout + 1,5x l'ampiezza del range. USCITA A TEMPO alle
+#   11:00 ET (16:00 server) se il target non arriva. Filtri: volume
+#   sopra media, VWAP dalla parte giusta, contesto pre-mercato.
+#   Claim dichiarato: 68-72% di successo su ES con retest+filtri.
+# CONVERGENZE/DIVERGENZE FRA LE QUATTRO FONTI (da misurare, non da credere)
+#   - Stop a meta' range: CONVERGE con gli utenti ABTG ("50% dell'ampiezza")
+#   - Finestra: 15' post-apertura (articolo) vs 30' (ToolKit) vs 5' pre (EA corso)
+#   - Target: 1,5x range (articolo) vs 1:1 (utenti) vs 2R (webinar)
+# COSA MANCA NELL'EA E VIENE DICHIARATO (niente finte fedelta')
+#   - VWAP: non c'e'. Contesto pre-mercato (terzo medio): non c'e'.
+#   - Entrata retest-limit: non c'e'; si usa la variante "immediata" del
+#     loro approccio ibrido (pendenti STOP sul breakout, buffer 10 pt) -
+#     che tiene anche lo stop fedele al punto medio (entry = bordo range).
+#   - Regime ATR (salta la congestione): non c'e'.
+#   Se la GEOMETRIA + volume mostra segnale, quei filtri diventano gli
+#   assi del giro successivo. Se non lo mostra, non saranno tre filtri
+#   assenti a resuscitarla (il claim 68-72% include il retest: qui si
+#   misura la versione povera, e va detto nel referto).
+# IPOTESI (falsificabile, scritta prima)
+#   La geometria dell'articolo (stop stretto a meta' range + target
+#   1,5x + taglio a tempo) e' il vero cambio rispetto a R7-R9: rischio
+#   dimezzato a parita' di segnale. Traguardo: almeno una cella positiva
+#   in ENTRAMBE le finestre con PF OOS >= 1,10 e n >= 30. Sotto: la
+#   geometria non basta, si chiude anche questa pista sul Nasdaq.
+# CRITERI: nessuna promozione diretta; cella verde -> giro di vicinato.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=16
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpSLMode=3
+InpTPMode=1
+InpTP1Pct=0
+InpBreakeven=0
+InpUseTrailEMA=0
+InpExitOnEmaClose=0
+InpUseEmaFilter=0
+InpUseEma200Filter=0
+
+InpTPRangeMult=1||1||0.5||2||Y
+InpUseVolumeFilter=0||0||1||1||Y

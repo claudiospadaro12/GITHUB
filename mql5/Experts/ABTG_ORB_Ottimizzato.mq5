@@ -32,6 +32,7 @@
 CTrade gTrade;
 
 enum ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1, ORB_SL_FIXED=2, ORB_SL_HALFRANGE=3 };
+enum ENUM_ORB_TP { ORB_TP_R=0, ORB_TP_RANGE=1 };  // target in R sullo stop, oppure in multipli dell'ampiezza del range
 
 //==================================================================
 //  INPUT
@@ -60,6 +61,8 @@ input int    InpAtrPeriod  = 14;
 input double InpAtrSLmult   = 1.5;
 input double InpSLFixedPts   = 1000;   // (FIXED) stop in punti
 input double InpTP_R         = 2.0;    // Take profit in R (webinar: min 1:2)
+input ENUM_ORB_TP InpTPMode  = ORB_TP_R;   // (articolo ORB filtrato) TP in R oppure in multipli del range
+input double InpTPRangeMult  = 1.5;    // (TP_RANGE) target = breakout +/- ampiezza range x questo
 input double InpTP1Pct       = 50;     // % chiusa al target
 input bool   InpBreakeven    = true;   // Stop in pari dopo la parziale
 input bool   InpUseTrailEMA  = true;   // Trailing dello stop sull'EMA veloce
@@ -249,7 +252,8 @@ bool TryPlace()
       double dist=buyPx-sl;
       if(dist>0)
         {
-         double tp=NormalizePrice(buyPx+dist*InpTP_R);
+         double tp=NormalizePrice(InpTPMode==ORB_TP_RANGE ? buyPx+(gRangeHigh-gRangeLow)*InpTPRangeMult
+                                                          : buyPx+dist*InpTP_R);
          double lot=LotByRisk(dist);
          if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" BUY"))
             Log(StringFormat("BUY STOP @ %.5f SL %.5f TP %.5f lot %.2f",buyPx,sl,tp,lot));
@@ -261,7 +265,8 @@ bool TryPlace()
       double dist=sl-sellPx;
       if(dist>0)
         {
-         double tp=NormalizePrice(sellPx-dist*InpTP_R);
+         double tp=NormalizePrice(InpTPMode==ORB_TP_RANGE ? sellPx-(gRangeHigh-gRangeLow)*InpTPRangeMult
+                                                          : sellPx-dist*InpTP_R);
          double lot=LotByRisk(dist);
          if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" SELL"))
             Log(StringFormat("SELL STOP @ %.5f SL %.5f TP %.5f lot %.2f",sellPx,sl,tp,lot));
@@ -377,7 +382,10 @@ bool TryCloseConfirmEntry()
    double dist=(dir>0)?(entry-sl):(sl-entry);
    if(dist<=0){ Log("stop dalla parte sbagliata: niente trade."); return(false); }
 
-   double tp=NormalizePrice((dir>0)?entry+dist*InpTP_R:entry-dist*InpTP_R);
+   double rngH=gRangeHigh-gRangeLow;
+   double tp;
+   if(InpTPMode==ORB_TP_RANGE) tp=NormalizePrice((dir>0)?entry+rngH*InpTPRangeMult:entry-rngH*InpTPRangeMult);
+   else                        tp=NormalizePrice((dir>0)?entry+dist*InpTP_R:entry-dist*InpTP_R);
    double lot=LotByRisk(dist);
    if(lot<=0){ Log("lotto 0: niente trade."); return(false); }
 
