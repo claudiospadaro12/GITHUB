@@ -1,0 +1,64 @@
+# =====================================================================
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il file del corso ABTG_ORB
+#   resta INTATTO per richiesta di Claudio dell'08/08 sera)
+#  ROUND 11: "Dax Open Range Breakout" - la scheda del sito, misurata
+#  Si lancia con: -Prova prove\R11_ORB_DAX_openrange.txt -Etichetta r11
+# =====================================================================
+# LA SCHEDA (riportata da Claudio l'08/08 sera, dal sito ABTG)
+#   Trend-following su M5. Range di apertura 08:00-09:05; il range vale
+#   solo se ampio almeno lo 0,2% dell'indice. Long solo se il prezzo M5
+#   sta sopra la EMA(50), short sotto. Ingresso con stop pendenti.
+#   SL = 1x ampiezza range, TP = 2x. Uscita a orario alle 21:50.
+#   Rischio 0,8-1%. ~1 segnale/giorno, successo dichiarato 40-45%.
+# ASSUNZIONI DICHIARATE (fuso!)
+#   - Gli orari della scheda sono ORA ITALIANA -> server BCM (IT-1):
+#     range 07:00->08:05 (finisce 5' dopo l'apertura Xetra delle 08:00
+#     server), uscita 20:50 server.
+#   - "SL = ampiezza range semplice": reso con SL sull'estremo opposto
+#     e buffer minimo (10 punti broker = 0,1 punti indice su D30EUR,
+#     dove 100 punti broker = 1 punto indice) -> distanza = range +
+#     briciole. La soglia 0,2% di ~24.000 = ~48 punti indice = ~4800
+#     punti broker: lo scarto del buffer e' trascurabile e dichiarato.
+#   - ATTENZIONE UNITA': InpMinRangePct e' in % del PREZZO, non serve
+#     conversione punti (0.2 = 0,2%): niente pasticci punti/pip.
+# IPOTESI (falsificabile, scritta prima)
+#   La scheda dichiara ~1 segnale/giorno e 40-45% di successo con R:R
+#   1:2: se i numeri sono onesti l'attesa e' positiva (0,45*2-0,55 =
+#   +0,35R/trade). Traguardo: almeno una cella positiva in ENTRAMBE le
+#   finestre con PF OOS >= 1,10 e n >= 30. In piu' il tasso di successo
+#   misurato deve stare nell'intervallo dichiarato (40-45%): se vince
+#   molto meno, la scheda ha numeri di fantasia e va scritto.
+#   CONTRO-IPOTESI: sul DAX il breakout puro d'apertura e' gia' stato
+#   misurato debole nella FASE M (range 5/15/25 tutti rossi in OOS.
+#   MA: quella finestra era DOPO l'apertura e senza filtro 0,2% ne'
+#   EMA50 - questa scheda e' abbastanza diversa da meritare la misura).
+# CRITERI (dichiarati ora)
+#   - Nessuna promozione diretta; cella verde -> giro di vicinato.
+#   - Cella giudicabile solo con >=30 trade OOS.
+#   - I due filtri della scheda (0,2% e EMA50) sono i due assi dello
+#     sweep: cosi' si misura il contributo di ciascuno. La cella
+#     "scheda completa" e' (0.2, EMA50 ON).
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartHour=7
+InpRangeStartMin=0
+InpRangeEndHour=8
+InpRangeEndMin=5
+InpEndHour=20
+InpEndMin=50
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpTP_R=2.0
+InpTP1Pct=0
+InpBreakeven=0
+InpUseTrailEMA=0
+InpExitOnEmaClose=0
+InpUseEmaFilter=0
+InpUseVolumeFilter=0
+InpEma200Period=50
+
+InpMinRangePct=0||0||0.2||0.2||Y
+InpUseEma200Filter=0||0||1||1||Y

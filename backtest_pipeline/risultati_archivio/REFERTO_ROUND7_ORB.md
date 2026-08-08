@@ -14,6 +14,9 @@ File prova: `R7a_ORB_finestra_attuale.txt` + `R7b_ORB_finestra_apertura.txt`
    mai letto — dopo lo stop il pendente opposto restava vivo 600' e riapriva al
    contrario (il "si gira e ristoppato" del 06/08 live). Fix nel sorgente (commit
    4dcf06f), attivo in questa misura; sul VPS arriva con la prossima ricompilazione.
+   _Aggiornamento 08/08 sera: su richiesta di Claudio il file del corso `ABTG_ORB`
+   e' stato RIPRISTINATO intatto; il fix (con cui r7/r8 sono stati misurati) vive
+   ora in `ABTG_ORB_Ottimizzato` (magic 770611), il laboratorio parallelo._
 
 ## I numeri (tick reali, griglia 2 finestre × buffer 10/150 × lati)
 

@@ -1,5 +1,7 @@
 # =====================================================================
-#  ROUND 9: ABTG_ORB - LA RICETTA DEGLI UTENTI (tiriamo le somme)
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il file del corso ABTG_ORB
+#   resta INTATTO per richiesta di Claudio dell'08/08 sera)
+#  ROUND 9: ABTG_ORB_Ottimizzato - LA RICETTA DEGLI UTENTI (tiriamo le somme)
 #  Si lancia con: -Prova prove\R9_ORB_ricetta_utenti.txt -Etichetta r9
 # =====================================================================
 # LE NOTE DEGLI UTENTI ABTG (riportate da Claudio l'08/08 sera, verbatim)

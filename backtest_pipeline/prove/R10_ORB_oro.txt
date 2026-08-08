@@ -1,4 +1,6 @@
 # =====================================================================
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il file del corso ABTG_ORB
+#   resta INTATTO per richiesta di Claudio dell'08/08 sera)
 #  ROUND 10: ABTG_ORB SULL'ORO - "come dice Emiliano" (webinar, pag. 13)
 #  Si lancia con: -Prova prove\R10_ORB_oro.txt -Etichetta r10
 # =====================================================================

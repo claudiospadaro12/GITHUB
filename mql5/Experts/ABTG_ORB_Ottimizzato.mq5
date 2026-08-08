@@ -1,7 +1,13 @@
 //+------------------------------------------------------------------+
-//|                                                  ABTG_ORB.mq5     |
+//|                                      ABTG_ORB_Ottimizzato.mq5    |
 //|                                                                  |
-//|  EA "ORB semplice" - MetaTrader 5 - VERSIONE TUTTO-IN-UNO        |
+//|  LABORATORIO parallelo dell'ORB del corso (che resta INTATTO).  |
+//|  Qui vivono fix e varianti misurabili; magic diverso, mai in     |
+//|  sostituzione dell'originale (regola della flotta, 08/08/2026): |
+//|   - fix InpOneTradePerDay (pendente opposto cancellato)          |
+//|   - filtro EMA lunga opzionale (utenti ABTG: 200; scheda DAX: 50)|
+//|   - SL 50%% del range (ORB_SL_HALFRANGE, utenti ABTG)             |
+//|   - ampiezza minima range in %% del prezzo (scheda ORB DAX)       |
 //|  (metti in MQL5\Experts e compila con F7: niente cartelle)      |
 //|                                                                  |
 //|  Replica la logica dell'ORB_Indicator_V15:                      |
@@ -25,7 +31,7 @@
 #include <Trade/Trade.mqh>
 CTrade gTrade;
 
-enum ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1, ORB_SL_FIXED=2 };
+enum ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1, ORB_SL_FIXED=2, ORB_SL_HALFRANGE=3 };
 
 //==================================================================
 //  INPUT
@@ -65,6 +71,9 @@ input group "=== Ricetta ToolKit ABTG / live (tutto OPT-IN, default = comportame
 input bool   InpUseCloseConfirm  = false;  // Entra alla CHIUSURA di una candela oltre il livello, invece che con pendenti STOP
 input double InpMinBodyPct       = 50;     // (CLOSE_CONFIRM) corpo minimo della candela di rottura, in % del suo range (0=off)
 input bool   InpUseEmaFilter     = false;  // Filtro direzionale: EMA veloce/lenta allineate E prezzo dalla parte giusta di ENTRAMBE
+input bool   InpUseEma200Filter  = false;  // (utenti ABTG) long solo sopra la EMA lunga, short solo sotto
+input int    InpEma200Period     = 200;    // periodo della EMA lunga (sul TF di esecuzione)
+input double InpMinRangePct      = 0;      // (ORB DAX) ampiezza minima del range in % del prezzo (0.2 = 0,2%); 0 = off
 input bool   InpUseVolumeFilter  = false;  // Volume della candela di rottura >= X * media
 input double InpVolMult          = 1.5;    // (volumi) moltiplicatore: 1.5 = +50%, come da live
 input int    InpVolAvgBars       = 20;     // (volumi) barre per la media
@@ -83,25 +92,26 @@ input string InpNewsCurrencies= "USD";
 input bool   InpNewsFlatten   = true;
 
 input group "=== Generali ==="
-input string InpComment   = "ORB";
-input long   InpMagic     = 770601;
+input string InpComment   = "ORB OTT";
+input long   InpMagic     = 770611;   // magic DIVERSO dal corso (770601)
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
 
 //==================================================================
 //  STATO
 //==================================================================
-int      hAtr=INVALID_HANDLE, hEmaF=INVALID_HANDLE, hEmaS=INVALID_HANDLE;
+int      hAtr=INVALID_HANDLE, hEmaF=INVALID_HANDLE, hEmaS=INVALID_HANDLE, hEma200=INVALID_HANDLE;
 enum ENUM_ORBPHASE { ORB_WAIT, ORB_ARMED, ORB_PLACED, ORB_DONE };
 ENUM_ORBPHASE gPhase=ORB_WAIT;
 int      gDay=-1;
 double   gRangeHigh=0, gRangeLow=0;
 bool     gPart1=false;
+bool     gHadPos=false;
 datetime gLastExec=0;
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 
-void Log(string m){ if(InpVerbose) Print("[ORB] ", m); }
+void Log(string m){ if(InpVerbose) Print("[ORB_OTT] ", m); }
 
 //+------------------------------------------------------------------+
 int OnInit()
@@ -112,7 +122,8 @@ int OnInit()
    hAtr =iATR(_Symbol,InpExecTF,InpAtrPeriod);
    hEmaF=iMA(_Symbol,InpExecTF,InpEmaFast,0,MODE_EMA,PRICE_CLOSE);
    hEmaS=iMA(_Symbol,InpExecTF,InpEmaSlow,0,MODE_EMA,PRICE_CLOSE);
-   if(hAtr==INVALID_HANDLE||hEmaF==INVALID_HANDLE||hEmaS==INVALID_HANDLE)
+   hEma200=iMA(_Symbol,InpExecTF,InpEma200Period,0,MODE_EMA,PRICE_CLOSE);
+   if(hAtr==INVALID_HANDLE||hEmaF==INVALID_HANDLE||hEmaS==INVALID_HANDLE||hEma200==INVALID_HANDLE)
      { Print("ERRORE: handle indicatori."); return(INIT_FAILED); }
    if(InpUseNewsFilter) LoadNews();
    Log(StringFormat("avviato su %s. Range server %02d:%02d-%02d:%02d, ingresso %.1f x K(%.4f), fine %02d:%02d.",
@@ -125,6 +136,21 @@ void OnDeinit(const int reason)
    if(hAtr !=INVALID_HANDLE) IndicatorRelease(hAtr);
    if(hEmaF!=INVALID_HANDLE) IndicatorRelease(hEmaF);
    if(hEmaS!=INVALID_HANDLE) IndicatorRelease(hEmaS);
+   if(hEma200!=INVALID_HANDLE) IndicatorRelease(hEma200);
+  }
+
+//+------------------------------------------------------------------+
+//| Filtro EMA lunga (utenti ABTG): long solo sopra, short solo sotto|
+//| Confronto sulla CHIUSURA dell'ultima candela chiusa del TF exec. |
+//+------------------------------------------------------------------+
+bool Ema200SideOK(int dir)
+  {
+   if(!InpUseEma200Filter) return(true);
+   double e[1];
+   if(CopyBuffer(hEma200,0,1,1,e)<1) return(true); // dati insuff.: non blocco
+   double px=iClose(_Symbol,InpExecTF,1);
+   if(px<=0) return(true);
+   return(dir>0 ? px>e[0] : px<e[0]);
   }
 
 //+------------------------------------------------------------------+
@@ -132,6 +158,13 @@ void OnTick()
   {
    ManageTP1();
    HandleOCO();
+
+   // 08/08/2026 -- InpOneTradePerDay era dichiarato e MAI letto: dopo lo stop
+   // il pendente opposto restava vivo (scadenza 600') e riapriva in giornata
+   // ("si gira e ristoppato", visto live il 06/08). Con il flag acceso, chiuso
+   // il trade del giorno si cancellano i pendenti superstiti.
+   if(SelPos()) gHadPos=true;
+   else if(gHadPos && InpOneTradePerDay) CancelPendings();
 
    MqlDateTime now; TimeToStruct(TimeCurrent(),now);
    if(now.day_of_year!=gDay){ gDay=now.day_of_year; ResetDay(); }
@@ -169,7 +202,7 @@ void OnTick()
      }
   }
 
-void ResetDay(){ gPhase=ORB_WAIT; gRangeHigh=0; gRangeLow=0; gPart1=false; Log("nuovo giorno."); }
+void ResetDay(){ gPhase=ORB_WAIT; gRangeHigh=0; gRangeLow=0; gPart1=false; gHadPos=false; Log("nuovo giorno."); }
 
 //+------------------------------------------------------------------+
 //| Calcola max/min del range (finestra server, anche a cavallo mezzanotte)|
@@ -201,6 +234,7 @@ bool TryPlace()
   {
    if(!ComputeRange(gRangeHigh,gRangeLow))
      { Log("range non ancora calcolabile (dati M1): riprovo."); return(false); }
+   if(!RangeWideEnough()){ return(true); }   // giornata senza setup: range sotto la soglia %
    if(!SpreadOK()){ Log("spread alto: niente ordini."); return(true); }
 
    double entryDist=EntryDistance();
@@ -209,7 +243,7 @@ bool TryPlace()
    double atr=AtrVal();
    datetime exp=TimeCurrent()+InpPendingExpiryMin*60;
 
-   if(InpAllowLong)
+   if(InpAllowLong && Ema200SideOK(+1))
      {
       double sl=SLforLong(buyPx,sellPx,atr);
       double dist=buyPx-sl;
@@ -221,7 +255,7 @@ bool TryPlace()
             Log(StringFormat("BUY STOP @ %.5f SL %.5f TP %.5f lot %.2f",buyPx,sl,tp,lot));
         }
      }
-   if(InpAllowShort)
+   if(InpAllowShort && Ema200SideOK(-1))
      {
       double sl=SLforShort(sellPx,buyPx,atr);
       double dist=sl-sellPx;
@@ -247,8 +281,24 @@ bool ArmCloseConfirm()
   {
    if(!ComputeRange(gRangeHigh,gRangeLow))
      { Log("range non ancora calcolabile (dati M1): riprovo."); return(false); }
+   if(!RangeWideEnough()){ gPhase=ORB_DONE; return(false); }   // giornata senza setup: chiusa qui
    Log(StringFormat("ARMATO (attesa chiusura confermata): range %.5f - %.5f", gRangeHigh, gRangeLow));
    return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| (ORB DAX) range valido solo se ampio almeno InpMinRangePct% del   |
+//| prezzo: un range sotto soglia = giornata compressa, niente setup. |
+//+------------------------------------------------------------------+
+bool RangeWideEnough()
+  {
+   if(InpMinRangePct<=0) return(true);
+   double px=SymbolInfoDouble(_Symbol,SYMBOL_BID);
+   if(px<=0) return(true);
+   bool ok=(gRangeHigh-gRangeLow) >= px*InpMinRangePct/100.0;
+   if(!ok) Log(StringFormat("range %.1f sotto la soglia %.2f%% del prezzo: niente setup oggi.",
+                            gRangeHigh-gRangeLow, InpMinRangePct));
+   return(ok);
   }
 
 //+------------------------------------------------------------------+
@@ -313,6 +363,7 @@ bool TryCloseConfirmEntry()
      { Log("rottura con corpo piccolo: ignoro (probabile falso break)."); return(false); }
 
    if(!EmaSideOK(dir)) { Log("medie non allineate col breakout: niente trade."); return(false); }
+   if(!Ema200SideOK(dir)) { Log("prezzo dal lato sbagliato della EMA lunga: niente trade."); return(false); }
    if(!VolumeOK())     { Log("volume della rottura sotto la media: niente trade."); return(false); }
    if(!SpreadOK())     { Log("spread alto: niente trade."); return(false); }
 
@@ -350,6 +401,7 @@ double SLforLong(double entry,double oppEntry,double atr)
    double sl;
    if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeLow;
    else if(InpSLMode==ORB_SL_FIXED) sl=entry-InpSLFixedPts*_Point;
+   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry-0.5*(gRangeHigh-gRangeLow);
    else sl=entry-atr*InpAtrSLmult;
    return(NormalizePrice(sl));
   }
@@ -358,6 +410,7 @@ double SLforShort(double entry,double oppEntry,double atr)
    double sl;
    if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeHigh;
    else if(InpSLMode==ORB_SL_FIXED) sl=entry+InpSLFixedPts*_Point;
+   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry+0.5*(gRangeHigh-gRangeLow);
    else sl=entry+atr*InpAtrSLmult;
    return(NormalizePrice(sl));
   }
