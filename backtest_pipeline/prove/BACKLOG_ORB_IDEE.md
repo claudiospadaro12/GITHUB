@@ -33,6 +33,24 @@ limite giornaliero di trade.
 6. Filtro VWAP + contesto pre-mercato (articolo Fazen): dichiarati assenti in
    R12; da valutare solo se una geometria base torna viva.
 
+## Potenziamenti del METODO (da Build Alpha "errori comuni", 08/08)
+
+La pagina sulla validazione descrive il nostro metodo punto per punto (OOS,
+walk-forward, limite trade/giorno, trappola delle 2000 combinazioni = la nostra
+regola del banco vergine e i 12 ribaltamenti). Tre strumenti che NON abbiamo:
+
+- **Monte Carlo sulla sequenza dei trade**: stima la gamma dei drawdown
+  possibili rimescolando l'ordine dei trade. Fattibile in Python, MA serve
+  l'elenco dei singoli trade: oggi l'export OnTester scrive solo il riepilogo.
+  Prerequisito: estendere l'export con le righe per-trade (binario D allargato).
+- **Benchmark contro ingressi casuali**: stessa gestione, ingressi random -
+  se l'EA non batte il caso, l'edge e' della gestione o non esiste. Fattibile
+  come EA-ombra con ingresso a orario fisso/random. Idea potente e onesta.
+- **Consapevolezza del regime** (trend vs mean-reversion): i nostri verdetti
+  valgono sul regime 2024-2026; un filtro ATR/ADX di regime e' nel lab gia'
+  possibile (ATR filter esiste nell'Apertura). Da considerare DOPO che
+  qualcosa mostra un edge - un filtro non salva un motore morto.
+
 ## Gia' misurato e chiuso (non riaprire senza fatti nuovi)
 
 - Breakout puro al tocco: perde/pareggia su NASUSD (100+ celle), D30EUR (R11).
