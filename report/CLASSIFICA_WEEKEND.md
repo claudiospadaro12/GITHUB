@@ -24,15 +24,15 @@ Claudio. Ma non tocca una prop.
 |---|---|---|---:|---:|---:|---|
 | **ABTG_MaxMinNotte_DAX_Short_Ott** | D30EUR (config live) | box notturno M15 | **+618,31** | **2,192** | **1,88%** | 🆕 R2: altopiano sul buffer 750–1500, cella live riprodotta AL CENTESIMO. ⚠️ ~20 trade OOS/cella: sotto il minimo dei 30, lo colma solo il forward |
 | ABTG_SupertrendReversal | **225JPY (Nikkei)** | **H2·H3·H4** (terza conferma dell'altopiano; aggregato OOS +37,54 su 69 trade) | +6/+17 €/cella | 1,24–1,80 | 0,01% | 🔴 R2 a 100k: il lotto NON si sgancia dal minimo — `SYMBOL_TRADE_TICK_VALUE` in yen non convertito nel motore di sizing. **Candidatura CONGELATA finché il sizing non è corretto (binario B)** |
-| ABTG_EMA200 | SPXUSD | H4 (vicini H3/H6 positivi; batte H1 su tutto) | +567,07 | 1,595 | 2,22% | ⚠️ IS a H4 = 21 trade |
 
-_Nessuno dei due è "pronto": sono gli unici con la FORMA giusta. Il Nikkei è l'unico
-altopiano vero del weekend._
+_Il MaxMinNotte è l'unico che ha passato tutti i criteri verificabili; il Nikkei è
+congelato sul sizing._
 
 ## 🥈 A UN CRITERIO DAL TRAGUARDO
 
 | EA | dove | cosa passa | cosa manca |
 |---|---|---|---|
+| ABTG_EMA200 | SPXUSD H4 | OOS +567,07 PF 1,595 DD 2,22% (n=111); vicini TF verdi; sanità al centesimo | 🆕 R3: il periodo 225 è ROSSO nelle due finestre → criterio dichiarato non passato. Nota: il 200 non è un numero pescato — è l'identità (comportamentale) della strategia; il lato 150–175 è verde. La decide il forward |
 | **ABTG_GoldenCross_Ottimizzato** | XAUUSD **H1** | IS +299,35 PF 1,494 · OOS +308,30 PF 1,253 DD 6,08% (57 trade OOS) | R2: il vicinato ADX non è verde (20 → −136,56 OOS, ed era la migliore IS: NONO ribaltamento). 10≡15 al centesimo: il filtro ADX non contribuisce. Resta qui |
 | ABTG_SuperWave_DOW_H1_Ott | U30USD H1 | IS +1022 PF 1,849 · OOS +463 PF 1,328 DD 3,91% (n=143) | il vicino H2 chiude a **−13,73**: criterio 3 fallito per un soffio |
 | ABTG_SupRev_NAS_H1_Ott | NASUSD H1+H2 | H1: OOS +300,61 PF 1,688 DD 0,86% | isola di due celle fra negativi: il criterio 3 alla lettera dice no |
