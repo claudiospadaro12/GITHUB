@@ -1,0 +1,57 @@
+# =====================================================================
+#  ROUND 9: ABTG_ORB - LA RICETTA DEGLI UTENTI (tiriamo le somme)
+#  Si lancia con: -Prova prove\R9_ORB_ricetta_utenti.txt -Etichetta r9
+# =====================================================================
+# LE NOTE DEGLI UTENTI ABTG (riportate da Claudio l'08/08 sera, verbatim)
+#   1. "Rimani sul timeframe da 5 minuti"            -> gia' cosi' (ExecTF M5)
+#   2. "Non aspetta un nuovo test" (niente retest)   -> gia' cosi' (breakout diretto)
+#   3. "Aggiungi un filtro EMA a 200: long solo sopra, short solo sotto"
+#      -> AGGIUNTO nel codice l'08/08 (InpUseEma200Filter, default spento)
+#   4. "Il rapporto rischio-rendimento 1:1 e' il migliore per questa strategia"
+#      -> mai misurato (R8 aveva 1,5 e 2,0)
+#   5. "Il tuo stop loss e' il 50% dell'ampiezza" (del range)
+#      -> AGGIUNTO nel codice l'08/08 (ORB_SL_HALFRANGE=3, default invariato)
+#
+# IPOTESI (falsificabile, scritta prima)
+#   Sono consigli ANEDDOTICI: vanno misurati con le stesse regole di
+#   tutti. Base = la config da manuale del round 8 nella sua versione
+#   migliore misurata (OR 30' post-apertura, chiusura M5 confermata,
+#   corpo 50%, EMA 9/21, volume ON: OOS +78,87 PF 1,032 - un pareggio).
+#   Se gli utenti hanno ragione, EMA200 e/o SL 50%/TP 1:1 devono
+#   spostare il PF fuori campione da 1,03 verso e oltre 1,10 su almeno
+#   una cella con >=30 trade OOS. FALSIFICAZIONE: se nessuna cella
+#   supera nettamente il pareggio del round 8, i consigli non aggiungono
+#   edge su questo mercato e IL CASO ORB E' CHIUSO DEFINITIVAMENTE.
+#
+# CRITERI (dichiarati ora)
+#   - Confronto col riferimento r8 (PF OOS 1,032): migliorare "un po'"
+#     non basta, il traguardo dichiarato e' PF OOS >= 1,10 con n>=30.
+#   - ATTENZIONE SL 50%: dimezza il rischio per trade -> il TP 1:1 in
+#     euro e' piu' vicino; conteggi e frazioni R non confrontabili a
+#     occhio col round 8, si confronta il PF e il profitto totale.
+#   - Nessuna promozione diretta in ogni caso: un'eventuale cella verde
+#     vera apre un giro di vicinato, non un deploy.
+#
+# PIN = manuale R8 + volume ON + TP 1:1 (nota 4). Sweep sui due assi
+# nuovi: EMA200 off/on (nota 3) x SL (nota 5).
+# NOTA TECNICA DICHIARATA: InpSLMode e' un enum e il tester spazzola
+# TUTTI i membri fra 0 e 3 -> 4 modi SL (0=estremo opposto, 1=ATR 1,5,
+# 2=fisso 1000, 3=50% range) x EMA200 = 8 celle, 16 pass tick reali.
+# Il confronto dichiarato resta 0 contro 3; ATR e fisso sono vicinato
+# gratis sull'asse dello stop, non oggetto dell'ipotesi.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=15
+InpRangeEndMin=0
+InpUseCloseConfirm=1
+InpMinBodyPct=50
+InpUseEmaFilter=1
+InpUseVolumeFilter=1
+InpTP_R=1.0
+
+InpUseEma200Filter=0||0||1||1||Y
+InpSLMode=0||0||3||3||Y

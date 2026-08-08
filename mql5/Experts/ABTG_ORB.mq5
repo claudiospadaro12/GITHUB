@@ -25,7 +25,7 @@
 #include <Trade/Trade.mqh>
 CTrade gTrade;
 
-enum ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1, ORB_SL_FIXED=2 };
+enum ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1, ORB_SL_FIXED=2, ORB_SL_HALFRANGE=3 };
 
 //==================================================================
 //  INPUT
@@ -65,6 +65,8 @@ input group "=== Ricetta ToolKit ABTG / live (tutto OPT-IN, default = comportame
 input bool   InpUseCloseConfirm  = false;  // Entra alla CHIUSURA di una candela oltre il livello, invece che con pendenti STOP
 input double InpMinBodyPct       = 50;     // (CLOSE_CONFIRM) corpo minimo della candela di rottura, in % del suo range (0=off)
 input bool   InpUseEmaFilter     = false;  // Filtro direzionale: EMA veloce/lenta allineate E prezzo dalla parte giusta di ENTRAMBE
+input bool   InpUseEma200Filter  = false;  // (utenti ABTG) long solo sopra la EMA lunga, short solo sotto
+input int    InpEma200Period     = 200;    // periodo della EMA lunga (sul TF di esecuzione)
 input bool   InpUseVolumeFilter  = false;  // Volume della candela di rottura >= X * media
 input double InpVolMult          = 1.5;    // (volumi) moltiplicatore: 1.5 = +50%, come da live
 input int    InpVolAvgBars       = 20;     // (volumi) barre per la media
@@ -91,7 +93,7 @@ input bool   InpVerbose   = true;
 //==================================================================
 //  STATO
 //==================================================================
-int      hAtr=INVALID_HANDLE, hEmaF=INVALID_HANDLE, hEmaS=INVALID_HANDLE;
+int      hAtr=INVALID_HANDLE, hEmaF=INVALID_HANDLE, hEmaS=INVALID_HANDLE, hEma200=INVALID_HANDLE;
 enum ENUM_ORBPHASE { ORB_WAIT, ORB_ARMED, ORB_PLACED, ORB_DONE };
 ENUM_ORBPHASE gPhase=ORB_WAIT;
 int      gDay=-1;
@@ -113,7 +115,8 @@ int OnInit()
    hAtr =iATR(_Symbol,InpExecTF,InpAtrPeriod);
    hEmaF=iMA(_Symbol,InpExecTF,InpEmaFast,0,MODE_EMA,PRICE_CLOSE);
    hEmaS=iMA(_Symbol,InpExecTF,InpEmaSlow,0,MODE_EMA,PRICE_CLOSE);
-   if(hAtr==INVALID_HANDLE||hEmaF==INVALID_HANDLE||hEmaS==INVALID_HANDLE)
+   hEma200=iMA(_Symbol,InpExecTF,InpEma200Period,0,MODE_EMA,PRICE_CLOSE);
+   if(hAtr==INVALID_HANDLE||hEmaF==INVALID_HANDLE||hEmaS==INVALID_HANDLE||hEma200==INVALID_HANDLE)
      { Print("ERRORE: handle indicatori."); return(INIT_FAILED); }
    if(InpUseNewsFilter) LoadNews();
    Log(StringFormat("avviato su %s. Range server %02d:%02d-%02d:%02d, ingresso %.1f x K(%.4f), fine %02d:%02d.",
@@ -126,6 +129,21 @@ void OnDeinit(const int reason)
    if(hAtr !=INVALID_HANDLE) IndicatorRelease(hAtr);
    if(hEmaF!=INVALID_HANDLE) IndicatorRelease(hEmaF);
    if(hEmaS!=INVALID_HANDLE) IndicatorRelease(hEmaS);
+   if(hEma200!=INVALID_HANDLE) IndicatorRelease(hEma200);
+  }
+
+//+------------------------------------------------------------------+
+//| Filtro EMA lunga (utenti ABTG): long solo sopra, short solo sotto|
+//| Confronto sulla CHIUSURA dell'ultima candela chiusa del TF exec. |
+//+------------------------------------------------------------------+
+bool Ema200SideOK(int dir)
+  {
+   if(!InpUseEma200Filter) return(true);
+   double e[1];
+   if(CopyBuffer(hEma200,0,1,1,e)<1) return(true); // dati insuff.: non blocco
+   double px=iClose(_Symbol,InpExecTF,1);
+   if(px<=0) return(true);
+   return(dir>0 ? px>e[0] : px<e[0]);
   }
 
 //+------------------------------------------------------------------+
@@ -217,7 +235,7 @@ bool TryPlace()
    double atr=AtrVal();
    datetime exp=TimeCurrent()+InpPendingExpiryMin*60;
 
-   if(InpAllowLong)
+   if(InpAllowLong && Ema200SideOK(+1))
      {
       double sl=SLforLong(buyPx,sellPx,atr);
       double dist=buyPx-sl;
@@ -229,7 +247,7 @@ bool TryPlace()
             Log(StringFormat("BUY STOP @ %.5f SL %.5f TP %.5f lot %.2f",buyPx,sl,tp,lot));
         }
      }
-   if(InpAllowShort)
+   if(InpAllowShort && Ema200SideOK(-1))
      {
       double sl=SLforShort(sellPx,buyPx,atr);
       double dist=sl-sellPx;
@@ -321,6 +339,7 @@ bool TryCloseConfirmEntry()
      { Log("rottura con corpo piccolo: ignoro (probabile falso break)."); return(false); }
 
    if(!EmaSideOK(dir)) { Log("medie non allineate col breakout: niente trade."); return(false); }
+   if(!Ema200SideOK(dir)) { Log("prezzo dal lato sbagliato della EMA lunga: niente trade."); return(false); }
    if(!VolumeOK())     { Log("volume della rottura sotto la media: niente trade."); return(false); }
    if(!SpreadOK())     { Log("spread alto: niente trade."); return(false); }
 
@@ -358,6 +377,7 @@ double SLforLong(double entry,double oppEntry,double atr)
    double sl;
    if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeLow;
    else if(InpSLMode==ORB_SL_FIXED) sl=entry-InpSLFixedPts*_Point;
+   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry-0.5*(gRangeHigh-gRangeLow);
    else sl=entry-atr*InpAtrSLmult;
    return(NormalizePrice(sl));
   }
@@ -366,6 +386,7 @@ double SLforShort(double entry,double oppEntry,double atr)
    double sl;
    if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeHigh;
    else if(InpSLMode==ORB_SL_FIXED) sl=entry+InpSLFixedPts*_Point;
+   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry+0.5*(gRangeHigh-gRangeLow);
    else sl=entry+atr*InpAtrSLmult;
    return(NormalizePrice(sl));
   }

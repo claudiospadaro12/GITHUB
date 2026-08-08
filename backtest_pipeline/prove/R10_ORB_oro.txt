@@ -1,0 +1,41 @@
+# =====================================================================
+#  ROUND 10: ABTG_ORB SULL'ORO - "come dice Emiliano" (webinar, pag. 13)
+#  Si lancia con: -Prova prove\R10_ORB_oro.txt -Etichetta r10
+# =====================================================================
+# PERCHE' (domanda di Claudio dell'08/08 sera)
+#   Il webinar indica esplicitamente il Gold fra i candidati ORB, con
+#   l'OR calcolato dall'apertura della sessione di New York (= 14:30
+#   server, le stesse ore dell'apertura USA) e il tick volume come
+#   proxy sul spot. Il verdetto dei round 7-8 e' SPECIFICO del Nasdaq
+#   ("il breakout sul NASUSD non paga"): sull'oro l'ORB non e' mai
+#   stato misurato. Lo storico oro e' VERIFICATO buono (B9 chiusa).
+# IPOTESI (falsificabile, scritta prima)
+#   Griglia IDENTICA al round 8 (config da manuale: OR 30' 14:30->15:00,
+#   chiusura M5 confermata, corpo 50%, EMA 9/21) cosi' il confronto
+#   Nasdaq/oro e' a parita' di tutto. Se l'oro e' un mercato migliore
+#   per l'ORB come sostiene il webinar, almeno una cella deve essere
+#   positiva in ENTRAMBE le finestre con PF OOS >= 1,10 e n >= 30.
+#   FALSIFICAZIONE: celle tutte rosse o al pareggio -> il breakout
+#   d'apertura non paga nemmeno sull'oro e la famiglia ORB si chiude
+#   su tutti i mercati misurati.
+# CRITERI (dichiarati ora)
+#   - Stessi 5 criteri prop di sempre per parlare di candidatura; per
+#     "segnale che esiste" basta il traguardo dichiarato sopra.
+#   - Nessuna promozione diretta: una cella verde apre il giro di
+#     vicinato, non un deploy.
+#   - Nota ingresso: con la chiusura confermata l'EntryPoints e'
+#     irrilevante (si entra a mercato sulla candela confermata).
+# =====================================================================
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=15
+InpRangeEndMin=0
+InpUseCloseConfirm=1
+InpMinBodyPct=50
+InpUseEmaFilter=1
+
+InpTP_R=1.5||1.5||0.5||2||Y
+InpUseVolumeFilter=0||0||1||1||Y
