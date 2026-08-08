@@ -33,6 +33,13 @@ limite giornaliero di trade.
    35'). Da considerare solo se fade/OR-ATR mostrano qualcosa.
 5. **ORB con gap** (solo nei giorni di gap): filtro di contesto, il lab non
    ce l'ha (il GAPFILL dell'Apertura e' un'altra cosa: entra NEL gap).
+5b. **ORB sull'apertura di LONDRA** (LiteFinance): forex/oro sull'apertura
+   della sessione europea (08:00 IT = 07:00 server) invece che su New York.
+   Sessione nuova, non solo mercato nuovo. Il lab lo fa gia' via input orari.
+   Caveat: il forex in FASE 0 non ha mai mostrato edge con nessun motore.
+5c. **Secondo tentativo dopo il primo stop** (LiteFinance): rientro con
+   tetto a 2 stop/giorno. Variante del OneTradePerDay, servirebbe un input
+   nuovo (max stop al giorno). Solo se un motore base torna vivo.
 6. Filtro VWAP + contesto pre-mercato (articolo Fazen): dichiarati assenti in
    R12; da valutare solo se una geometria base torna viva.
 
