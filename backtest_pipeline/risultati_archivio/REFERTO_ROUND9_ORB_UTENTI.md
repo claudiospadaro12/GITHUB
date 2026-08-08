@@ -11,6 +11,14 @@ File: `risultati_prove/ABTG_ORB_Ottimizzato/*_r9.csv`._
 Le 4 celle in comune col round 8 riproducono **al centesimo** (IS +914,94 e
 +1069,09; OOS +78,87 e +59,04): banco affidabile, confronti leciti.
 
+_Nota d'archivio: il round è girato DUE volte — il lancio largo (40 celle, sul
+sorgente del corso, file `*_r9largo.csv`) e il lancio pulito da 8 celle sul
+laboratorio `ABTG_ORB_Ottimizzato` (TP 1:1 pinnato, file `*_r9.csv`). Le celle
+sovrapponibili coincidono AL CENTESIMO (+678,51/+596,91 IS; −35,02/−19,81 OOS):
+i due sorgenti sono equivalenti a parità di config (con la chiusura confermata
+non ci sono pendenti, quindi il fix OneTradePerDay non entra in gioco). Il
+verdetto vale per entrambi._
+
 ## Le tre affermazioni degli utenti, alla prova
 
 1. **«Il rapporto 1:1 è il migliore»** — ROVESCIATA. Sulla riga dell'unico stop
