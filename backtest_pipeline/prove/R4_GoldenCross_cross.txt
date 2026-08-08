@@ -1,0 +1,28 @@
+# =====================================================================
+#  ROUND 4: ABTG_GoldenCross_Ottimizzato SU ALTRI INDICI - cross-symbol
+#  Un lancio per simbolo:  -Prova prove\R4_GoldenCross_cross.txt
+#                          -Simbolo D30EUR|U30USD|NASUSD -Etichetta r4
+# =====================================================================
+# PERCHE' (08/08, dopo il round 2)
+#   Su XAUUSD H1 il pattern regge (OOS +308,30 PF 1,253, 57 trade) ma il
+#   vicinato ADX non e' verde: resta a un criterio dal traguardo. Il
+#   cross-symbol e' un test di ROBUSTEZZA indipendente: un pattern che
+#   funziona su piu' mercati e' meno probabilmente rumore adattato a uno.
+#   Il pattern (triplo incrocio EMA + Heiken Ashi + ADX) non dipende da
+#   una sessione: e' lecito provarlo altrove senza toccare nulla.
+# IPOTESI (scritta prima)
+#   Se l'edge e' del pattern, su ALMENO UNO fra DAX, Dow e Nasdaq a H1
+#   esce positivo in entrambe le finestre. Se su tre indici e' rosso
+#   ovunque, quello su XAUUSD e' probabilmente oro-specifico (legittimo,
+#   ma va scritto) o rumore.
+# ⚠️ REGOLA ANTI-PESCA, dichiarata: questo giro NON promuove nessuno.
+#   Serve solo a pesare la riga XAUUSD: cross-symbol verde = la riga
+#   pesa di piu'; tutto rosso = pesa di meno. La promozione passa sempre
+#   dai 4 criteri sul SUO mercato.
+# NOTA: il TF viene dal grafico -> il Period del tester E' la strategia:
+#   H1, lo stesso del live. Sweep sul magic (export solo in ottimizzazione,
+#   due righe che DEVONO essere identiche = coerenza gratis).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+InpMagic=970301||970301||1||970302||Y
