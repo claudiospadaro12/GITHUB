@@ -1,0 +1,70 @@
+# =====================================================================
+#  ROUND 6: ABTG_Dow_Apertura_US - LA RICETTA DEL DAX REGGE SUL DOW?
+#  Si lancia con:  -Prova prove\R6_Dow_ricetta_DAX.txt -Etichetta r6
+# =====================================================================
+#
+# PERCHE' (09/08/2026)
+#   Il Dow e' il mezzo misurato: solo le fasi geometriche iniziali (in
+#   breakout), mai il percorso completo del DAX. E il DAX ha prodotto
+#   l'unico validato: RETEST - range 35 - buffer 500 - offset 200 -
+#   SOLO LONG - PREVBAR M5, OOS +1800 PF 1,42 DD 6,7%.
+#   Questo e' il test cross-symbol del candidato n.1: se la ricetta
+#   regge su DUE indici e' metodo; se regge solo sul DAX e' mercato-
+#   specifico (legittimo, ma da sapere - il Nasdaq ha gia' detto no 7
+#   volte, quindi non e' scontato per niente).
+#
+# LA SCELTA DI PROGETTO, DICHIARATA: SI SCALA, NON SI COPIA
+#   Buffer e offset sono in punti MT5, ma il Dow quota ~54.000 contro i
+#   ~24.000 del DAX e l'R misurato e' 12.532 contro 5.866 (rapporto
+#   2,14). Copiare 500/200 secchi = testare una geometria DIMEZZATA in
+#   proporzione. Quindi:
+#     buffer  500 x 2,14 ~= 1000 punti MT5 (10 punti indice Dow)
+#     offset  200 x 2,14 ~=  400 punti MT5 ( 4 punti indice Dow)
+#   Gestione del DAX: TP 3R, parziale 50%, BE, trailing PREVBAR M5, 1%.
+#   Sessione: quella del Dow (14:30 server), dai default del sorgente.
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   Il meccanismo del DAX - retest del livello rotto dopo l'apertura,
+#   solo dal lato della deriva - e' un comportamento delle APERTURE
+#   degli indici, non del DAX in particolare. Se e' vero, sul Dow:
+#     - il SOLO LONG batte long+short (lo short scalza il long, come
+#       misurato sul DAX: la porta e' una sola)
+#     - il range 35 sta su un altopiano coi vicini 25/45 verdi
+#   Se invece il Dow si comporta come il Nasdaq (tutto rosso), la
+#   ricetta e' DAX-specifica e il Dow resta in_prova com'e'.
+#
+# CRITERI (dichiarati ora):
+#   PROMOSSA la cella SOLO LONG range 35 se:
+#     1. positiva in ENTRAMBE le finestre
+#     2. PF >= 1,10 fuori campione
+#     3. vicini 25 e 45 (SOLO LONG) positivi in OOS: altopiano, non picco
+#     4. DD OOS < 10% all'1%
+#     5. almeno 30 trade OOS
+#   In piu', da guardare (non da promuovere): il confronto long-vs-both
+#   deve mostrare lo SPOSTAMENTO (n long+short < n long + n short teorici)
+#   come sul DAX - e' la firma del meccanismo, non un criterio.
+#   ⚠️ Qualunque esito: NESSUN cambio live. Il Dow che gira resta com'e'
+#   finche' un eventuale candidato non passa TUTTI i cancelli.
+#
+# NOTA FINESTRA: le fasi C5/C8 hanno gia' guardato il Dow in OOS (in
+#   breakout). Questa e' la prima volta col RETEST, ma la finestra non e'
+#   vergine: un esito positivo vale mezzo punto, la conferma e' forward.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpBufferPoints=1000||1000||0||1000||N
+InpRetestOffsetPts=400||400||0||400||N
+InpAllowLong=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpRangeMinutes=35||25||10||45||Y
+InpAllowShort=0||0||1||1||Y
