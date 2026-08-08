@@ -97,6 +97,7 @@ ENUM_ORBPHASE gPhase=ORB_WAIT;
 int      gDay=-1;
 double   gRangeHigh=0, gRangeLow=0;
 bool     gPart1=false;
+bool     gHadPos=false;
 datetime gLastExec=0;
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
@@ -132,6 +133,13 @@ void OnTick()
   {
    ManageTP1();
    HandleOCO();
+
+   // 08/08/2026 -- InpOneTradePerDay era dichiarato e MAI letto: dopo lo stop
+   // il pendente opposto restava vivo (scadenza 600') e riapriva in giornata
+   // ("si gira e ristoppato", visto live il 06/08). Con il flag acceso, chiuso
+   // il trade del giorno si cancellano i pendenti superstiti.
+   if(SelPos()) gHadPos=true;
+   else if(gHadPos && InpOneTradePerDay) CancelPendings();
 
    MqlDateTime now; TimeToStruct(TimeCurrent(),now);
    if(now.day_of_year!=gDay){ gDay=now.day_of_year; ResetDay(); }
@@ -169,7 +177,7 @@ void OnTick()
      }
   }
 
-void ResetDay(){ gPhase=ORB_WAIT; gRangeHigh=0; gRangeLow=0; gPart1=false; Log("nuovo giorno."); }
+void ResetDay(){ gPhase=ORB_WAIT; gRangeHigh=0; gRangeLow=0; gPart1=false; gHadPos=false; Log("nuovo giorno."); }
 
 //+------------------------------------------------------------------+
 //| Calcola max/min del range (finestra server, anche a cavallo mezzanotte)|

@@ -44,7 +44,7 @@ esposizione live:
 
 | priorità | EA | indizio da cui partire |
 |---|---|---|
-| 1 | **ORB** @NASUSD (live!) | 06/08: stoppato in 32 s, poi si gira e ristoppato — stop dentro il rumore dell'apertura, stessa malattia curata sul DAX col RETEST |
+| 1 | **ORB** @NASUSD (live!) | 🔄 **APERTO l'08/08 sera.** Diagnosi dal codice: range = candela di PRE-mercato 14:25-14:30 (stop dentro il rumore), buffer 10 punti, e un difetto meccanico VERO — `InpOneTradePerDay` dichiarato e mai letto: dopo lo stop il pendente opposto restava vivo 600' e riapriva al contrario (il "si gira e ristoppato" del 06/08). **Fix nel codice fatto**; prova R7a/R7b pronta (finestra pre-mercato vs finestra 14:30→15:05 × buffer 10/150 × lati). ⚠️ Stesso input mai letto anche in ORB_Fibo: da verificare quando tocca a lui |
 | 2 | **PTE** @XAUUSD (live!) | 16 celle TP1×TF tutte bocciate; il BE che non scatta mai (visto live). Il motore d'uscita va ripensato, non tarato |
 | 3 | ORB_Fibo @NASUSD (live!) | secondo ORB: probabile stessa cura del fratello |
 | 4 | Nightly @EURUSD (live!) | RR 0,86 dichiarato in flotta: serve il 54% di vincenti solo per pareggiare — è un problema di geometria, non di parametri |

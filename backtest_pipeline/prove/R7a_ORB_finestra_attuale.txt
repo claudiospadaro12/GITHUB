@@ -1,0 +1,47 @@
+# =====================================================================
+#  ROUND 7a: ABTG_ORB - la geometria e' la malattia? (finestra ATTUALE)
+#  Si lancia con: -Prova prove\R7a_ORB_finestra_attuale.txt -Etichetta r7a
+#  (gemello: R7b_ORB_finestra_apertura.txt - STESSA griglia, finestra spostata)
+# =====================================================================
+# DIAGNOSI DAL CODICE (08/08 sera, binario B, prima di qualunque numero)
+#   1. Il range e' la candela 14:25-14:30 server: i 5 minuti di PRE-mercato.
+#      Lo stop OPPRANGE sta sull'estremo opposto di quella candelina: sul
+#      Nasdaq sono poche decine di punti, DENTRO il rumore dell'apertura.
+#      Stessa malattia curata sul DAX spostando il range DOPO l'apertura.
+#   2. Buffer d'ingresso 10 punti: sul Nasdaq e' zero virgola.
+#   3. DIFETTO MECCANICO trovato e CORRETTO nel codice (08/08): il
+#      InpOneTradePerDay era dichiarato e mai letto - dopo lo stop il
+#      pendente opposto restava vivo 600 minuti e riapriva al contrario
+#      ("si gira e ristoppato", visto live il 06/08). Il fix e' nel
+#      sorgente che il driver ricompila: vale anche per questa prova.
+#   FASE 0 (OHLC M5, quindi SOLO indicativa - sotto M15 l'OHLC e'
+#   fuorviante per regola): IS -407,21 con DD 22,8%, OOS +2867.
+#
+# IPOTESI (falsificabile, scritta prima)
+#   La malattia e' la GEOMETRIA, non l'idea di breakout: con il range
+#   formato DOPO l'apertura (14:30-15:05, come la ricetta validata sul
+#   DAX e deployata sul Dow) e un buffer vero (150 punti, quello del
+#   Nasdaq Apertura live), le celle a tick reali devono migliorare
+#   NETTAMENTE rispetto alla finestra pre-mercato a parita' di tutto.
+#   FALSIFICAZIONE: se le celle 7b non sono migliori delle 7a in
+#   ENTRAMBE le finestre temporali, l'ipotesi geometria e' sbagliata e
+#   il problema sta altrove (o non c'e' edge da nessuna parte).
+#
+# CRITERI (dichiarati ora)
+#   - Questo giro NON promuove nessuno: e' una diagnosi, non una gara.
+#   - Cella giudicabile solo con >=30 trade OOS.
+#   - Se TUTTE le 8 celle (7a+7b) sono rosse in entrambe le finestre a
+#     tick reali, l'ORB non ha un edge distinto dal Nasdaq Apertura che
+#     gia' copre NASUSD col RETEST: candidato allo spegnimento
+#     (decisione di Claudio, non del backtest).
+#   - La cella 7a/10/short=1 e' la config live: misura anche QUANTO
+#     l'OHLC della FASE 0 mentiva (atteso: molto, e' M5).
+#
+# NOTA: l'EA usa PERIOD_CURRENT -> il Period del tester E' il TF live: M5.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpEntryPoints=10||10||140||150||Y
+InpAllowShort=1||0||1||1||Y

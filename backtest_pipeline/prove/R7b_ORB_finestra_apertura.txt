@@ -1,0 +1,19 @@
+# =====================================================================
+#  ROUND 7b: ABTG_ORB - la geometria e' la malattia? (finestra APERTURA)
+#  Si lancia con: -Prova prove\R7b_ORB_finestra_apertura.txt -Etichetta r7b
+#  Gemello di R7a: STESSA griglia, cambia SOLO la finestra del range.
+#  Ipotesi, criteri e falsificazione: scritti in R7a, valgono per tutti
+#  e due i lanci. Qui il range si forma DOPO l'apertura USA:
+#  14:30 -> 15:05 server (35 minuti, la durata validata su DAX e Dow).
+#  Lo stop OPPRANGE cosi' sta sull'estremo opposto di un range VERO.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=15
+InpRangeEndMin=5
+
+InpEntryPoints=10||10||140||150||Y
+InpAllowShort=1||0||1||1||Y
