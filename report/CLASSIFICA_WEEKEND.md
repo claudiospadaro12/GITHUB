@@ -23,7 +23,7 @@ Claudio. Ma non tocca una prop.
 | EA | dove | TF | OOS | PF OOS | DD OOS | nota |
 |---|---|---|---:|---:|---:|---|
 | **ABTG_MaxMinNotte_DAX_Short_Ott** | D30EUR (config live) | box notturno M15 | **+618,31** | **2,192** | **1,88%** | 🆕 R2: altopiano sul buffer 750–1500, cella live riprodotta AL CENTESIMO. ⚠️ ~20 trade OOS/cella: sotto il minimo dei 30, lo colma solo il forward |
-| ABTG_SupertrendReversal | **225JPY (Nikkei)** | **H2·H3·H4** (altopiano, H1–H12 quasi tutto verde) | +6/+18 €/cella | 1,24–1,86 | <0,2% | ⚠️ lotto minimo → euro, non centinaia; 13–31 trade/cella: **serve il giro con size sensata e celle aggregate** |
+| ABTG_SupertrendReversal | **225JPY (Nikkei)** | **H2·H3·H4** (terza conferma dell'altopiano; aggregato OOS +37,54 su 69 trade) | +6/+17 €/cella | 1,24–1,80 | 0,01% | 🔴 R2 a 100k: il lotto NON si sgancia dal minimo — `SYMBOL_TRADE_TICK_VALUE` in yen non convertito nel motore di sizing. **Candidatura CONGELATA finché il sizing non è corretto (binario B)** |
 | ABTG_EMA200 | SPXUSD | H4 (vicini H3/H6 positivi; batte H1 su tutto) | +567,07 | 1,595 | 2,22% | ⚠️ IS a H4 = 21 trade |
 
 _Nessuno dei due è "pronto": sono gli unici con la FORMA giusta. Il Nikkei è l'unico
