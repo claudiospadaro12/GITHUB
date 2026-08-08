@@ -1,0 +1,17 @@
+# ROUND 3: ABTG_SupertrendReversal_Multi_Ottimizzato @XAUUSD - il picco H4 e' vero?
+#   -Prova prove\R3_Multi_Ott_XAUUSD.txt -Etichetta r3
+# FASE 0: H4 fa OOS +2108 PF 2,907 DD 4,5% MA il vicino H3 fa -701: picco
+# isolato sull'asse TF, criterio 3 bocciato. PRIMA di buttarlo: un picco puo'
+# essere isolato su UN asse e largo su un altro. Qui si inchioda il TF a H4
+# (quello live) e si sonda l'asse del MOTORE: il moltiplicatore Supertrend.
+# IPOTESI: se l'edge e' del pattern e non del numero 2,5, i vicini 2,0 e 3,0
+# devono restare positivi nelle due finestre. Se solo 2,5 e' verde, il picco
+# e' isolato su DUE assi e si chiude qui.
+# CRITERI: cella 2,5 deve riprodurre la FASE 0 (+2108,11 al centesimo);
+# promossa se 2,0 e 3,0 positivi in ENTRAMBE le finestre; ~49 trade OOS: ok
+# il minimo dei 30. Ribaltamento IS->OOS = non si cambia niente (8 volte).
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+InpTF=16388||16388||0||16388||N
+InpStMult=2.5||1.5||0.5||3.5||Y

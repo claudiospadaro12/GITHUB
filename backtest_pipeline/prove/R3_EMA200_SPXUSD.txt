@@ -1,0 +1,15 @@
+# ROUND 3: ABTG_EMA200 @SPXUSD H4 - il "200" e' un numero magico?
+#   -Prova prove\R3_EMA200_SPXUSD.txt -Etichetta r3
+# FASE 0: H4 passa tutti e 4 i criteri (OOS +567,07 PF 1,595 DD 2,22%,
+# vicini H3/H6 verdi) ma con 21 trade IS. Qui TF inchiodato a H4 e sonda
+# sull'IDENTITA' della strategia: il periodo della media. Se l'edge e'
+# "il rimbalzo su una media lenta" regge con 150-250; se funziona SOLO
+# con esattamente 200, e' una coincidenza vestita da strategia.
+# CRITERI: cella 200 riproduce la FASE 0 (+567,07); promossa se 175 e 225
+# positive in ENTRAMBE le finestre. ⚠️ IS sottile (21 trade): l'esito pesa
+# sull'OOS, e lo dico prima.
+@SIMBOLO  SPXUSD
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||150||25||250||Y

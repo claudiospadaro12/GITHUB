@@ -1,0 +1,14 @@
+# ROUND 3: ABTG_SupRev_NAS_H1_Ottimizzato @NASUSD - l'isola H1+H2 regge?
+#   -Prova prove\R3_SupRev_NAS_H1.txt -Etichetta r3
+# FASE 0: H1 OOS +300,61 PF 1,688 DD 0,86% e H2 +88,16 PF 1,356 - isola di
+# due celle chiusa da negativi (M30, H3). E' l'EA che gia' GIRA live su H1.
+# Qui TF inchiodato a H1, sonda sul moltiplicatore Supertrend (live 3,0).
+# IPOTESI: se il pattern e' vero su H1, 2,5 e 3,5 restano positivi nelle due
+# finestre. CRITERI: cella 3,0 riproduce la FASE 0 (+300,61); promossa se
+# 2,5 e 3,5 positive in entrambe; n OOS ~86: sopra il minimo. H1 = il TF
+# preferito per le prop: se passa, e' il candidato migliore della famiglia.
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+InpTF=16385||16385||0||16385||N
+InpStMult=3.0||2.0||0.5||4.0||Y

@@ -1,0 +1,14 @@
+# ROUND 3: ABTG_SuperWave_DOW_H1_Ottimizzato @U30USD - perso per 13,73 euro
+#   -Prova prove\R3_SuperWave_DOW_H1.txt -Etichetta r3
+# FASE 0: H1 OOS +463,44 PF 1,328 DD 3,91% (n=143, sopra il minimo) ma il
+# vicino H2 chiude a -13,73: criterio 3 fallito per un soffio. TF inchiodato
+# a H1 (live), sonda sul moltiplicatore Supertrend (live 2,5).
+# IPOTESI: se il crinale e' largo sull'asse del motore, 2,0 e 3,0 restano
+# positivi nelle due finestre e la bocciatura per 13,73 euro era rumore.
+# CRITERI: cella 2,5 riproduce la FASE 0 (+463,44); promossa se 2,0 e 3,0
+# positive in entrambe. Ribaltamento IS->OOS = niente cambi.
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+InpTF=16385||16385||0||16385||N
+InpStMult=2.5||1.5||0.5||3.5||Y

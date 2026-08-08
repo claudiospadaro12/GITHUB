@@ -1,0 +1,14 @@
+# ROUND 3: ABTG_SupertrendReversal @XAUUSD - il picco H3
+#   -Prova prove\R3_STREV_XAUUSD_H3.txt -Etichetta r3
+# FASE 0: H3 OOS +284,74 PF 2,530 ma vicini H2/H4 negativi: picco isolato
+# sull'asse TF. TF inchiodato a H3, sonda sul moltiplicatore (default 3,5).
+# IPOTESI: come per il Multi: isolato su un asse puo' essere largo su un
+# altro. Se solo 3,5 e' verde, si chiude. ⚠️ n OOS = 21: sotto il minimo
+# dei 30 - qualunque esito e' un'indicazione, non un verdetto. Scritto ora.
+# CRITERI: cella 3,5 riproduce la FASE 0 (+284,74); interessante solo se
+# 3,0 e 4,0 positive in entrambe le finestre.
+@SIMBOLO  XAUUSD
+@PERIODO  H3
+@DAQUANDO 2024.09.26
+InpTF=16387||16387||0||16387||N
+InpStMult=3.5||2.5||0.5||4.5||Y
