@@ -36,10 +36,33 @@ $ExpertsSrc = Join-Path $RepoRoot "..\mql5\Experts"
 $MqlExperts = Join-Path $DataFolder "MQL5\Experts"
 New-Item -ItemType Directory -Force -Path $MqlExperts | Out-Null
 
-$eaFiles = Get-ChildItem -Path $ExpertsSrc -Filter "ABTG_*.mq5"
-if ($Only) { $eaFiles = $eaFiles | Where-Object { $_.Name -like "*$Only*" } }
-if (-not $eaFiles) { Write-Host "Nessun EA corrisponde a '$Only'." -ForegroundColor Red; exit 1 }
-foreach ($f in $eaFiles) { Copy-Item $f.FullName -Destination $MqlExperts -Force }
+if (Test-Path $ExpertsSrc) {
+  # PC col repo clonato: si copia da li'.
+  $eaFiles = Get-ChildItem -Path $ExpertsSrc -Filter "ABTG_*.mq5"
+  if ($Only) { $eaFiles = $eaFiles | Where-Object { $_.Name -like "*$Only*" } }
+  if (-not $eaFiles) { Write-Host "Nessun EA corrisponde a '$Only'." -ForegroundColor Red; exit 1 }
+  foreach ($f in $eaFiles) { Copy-Item $f.FullName -Destination $MqlExperts -Force }
+} else {
+  # 09/08: VPS, niente repo clonato -> si scarica dal repo il SOLO EA chiesto.
+  #  Serve il NOME ESATTO (cosi' non si toccano i fratelli con nomi simili:
+  #  "SupertrendReversal" da solo prenderebbe anche _Multi e _Ottimizzato).
+  if (-not $Only) {
+    Write-Host "Qui non c'e' il repo clonato: serve il nome esatto dell'EA." -ForegroundColor Red
+    Write-Host "  Esempio:  .\aggiorna_ea.ps1 ABTG_SupertrendReversal" -ForegroundColor Yellow
+    exit 1
+  }
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+  $nome = $Only -replace '\.mq5$',''
+  if ($nome -notlike "ABTG_*") { $nome = "ABTG_" + $nome }
+  $dest = Join-Path $MqlExperts "$nome.mq5"
+  try {
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/mql5/Experts/$nome.mq5" -OutFile $dest -UseBasicParsing
+  } catch {
+    Write-Host "Download fallito per '$nome.mq5': nome esatto? rete?" -ForegroundColor Red; exit 1
+  }
+  $eaFiles = @(Get-Item $dest)
+  Write-Host "Scaricato dal repo: $nome.mq5" -ForegroundColor Green
+}
 Write-Host "Copiati $($eaFiles.Count) EA. Compilo..." -ForegroundColor Yellow
 foreach ($f in $eaFiles) {
     $src = Join-Path $MqlExperts $f.Name
