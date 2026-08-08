@@ -85,3 +85,39 @@ _Primo dei cinque lavori arrivato. Criteri nei file prova, scritti prima._
   H4 era un picco con l'H3 a −701. Un picco che su un secondo asse mostra una mezza
   cresta sottile non diventa un altopiano. **Resta su MT5**; l'OOS a PF 2,9 con 49 trade
   merita rispetto nel forward, non un conto che conta.
+
+## 5. SupertrendReversal @XAUUSD H3 — griglia sul moltiplicatore (default 3,5)
+
+| StMult | IS | OOS | PF OOS | n OOS |
+|---:|---:|---:|---:|---:|
+| 2,5 | −103,47 | −44,35 | 0,906 | 33 |
+| **3,0** | +138,10 | **+580,09** | **4,419** | 35 |
+| **3,5** | +7,90 | +284,74 | 2,530 | 21 |
+| 4,0 | −19,02 | −58,23 | 0,466 | 15 |
+| 4,5 | −40,24 | −111,33 | 0,125 | 15 |
+
+- ✅ Sanità: cella 3,5 riproduce la FASE 0 **al centesimo** — settima su sette.
+- ❌ Criterio non passato (il 4,0 è rosso in entrambe). Cresta di due (3,0–3,5) come nel
+  resto della famiglia; campioni piccoli, come dichiarato in anticipo nel file prova.
+  **Resta su MT5.**
+
+---
+
+# Chiusura del ROUND 3 — cosa hanno detto le cinque sonde
+
+**Sette riproduzioni al centesimo su sette fra R2 e R3: il banco di prova è affidabile.**
+
+Nessuna delle cinque sonde ha promosso: è il loro mestiere. Il quadro:
+
+| EA | asse sondato | esito |
+|---|---|---|
+| EMA200 @SPXUSD | periodo EMA | ❌ 225 rosso — ma il "200" ha una storia comportamentale: giudica il forward |
+| SupRev_NAS_H1 | StMult | ❌ cresta di due su DUE assi, live dentro entrambe |
+| SuperWave_DOW_H1 | StMult | ❌ per −65 su 89 trade in IS — **OOS verde 5/5**, il più vicino alla promozione |
+| Multi_Ott @XAUUSD | StMult | ❌ resta MT5 |
+| STREV @XAUUSD H3 | StMult | ❌ resta MT5 |
+
+**La famiglia Supertrend ha una firma ricorrente: creste di due celle, mai altopiani.**
+L'edge c'è ma coi margini stretti — il tipo di edge che il forward conferma o consuma,
+non quello che si porta in prop sulla fiducia. L'unico promosso resta il MaxMinNotte
+(altopiano vero su 4 celle), col suo asterisco sul campione.
