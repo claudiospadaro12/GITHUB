@@ -1,0 +1,60 @@
+# =====================================================================
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il corso resta intatto)
+#  ROUND 13: geometria "edgeful" (tradethatswing) - target PICCOLO,
+#            stop PIENO, tetto sull'ampiezza del range
+#  Si lancia con: -Prova prove\R13_ORB_edgeful.txt -Etichetta r13
+# =====================================================================
+# LA FONTE (quinta scheda, portata da Claudio l'08/08 sera)
+#   ORB 15' (9:30-9:45 ET = 14:30-14:45 server), sessione fino alle
+#   16 ET (21:00 server). TARGET = 50% dell'ampiezza del range;
+#   STOP = 100% (l'estremo opposto - l'unico stop che regge nelle
+#   nostre 60 celle Nasdaq!). Filtro NUOVO: Max ORB size 0,8% del
+#   prezzo - se il range d'apertura e' gia' esploso, il movimento e'
+#   gia' fatto e si sta fermi (convergente col webinar: OR che copre
+#   il 70-80% dell'ATR). Solo long su NQ. Niente EMA, niente volume.
+# CAVEAT DELLA FONTE, scritti prima di misurare
+#   - Campione loro: 23 trade in 3 mesi (sotto ogni soglia di giudizio).
+#   - Win/loss ratio 0,55: servono >64% di successi solo per pareggiare.
+#   - L'autore ammette che i parametri "cambieranno nel tempo" e filtra
+#     per giorno della settimana: quello e' inseguire la curva e NON lo
+#     replichiamo. Qui si misura solo la GEOMETRIA.
+# IPOTESI (falsificabile, scritta prima)
+#   E' l'angolo OPPOSTO dello spazio esplorato finora: tutte le nostre
+#   celle avevano target >= 1R; questa vince spesso e poco, perde di
+#   rado e tanto. Se la geometria ha senso sul NASUSD, almeno una cella
+#   deve fare PF OOS >= 1,10 con n >= 30 E tasso di vincita coerente
+#   (>64%). FALSIFICAZIONE: PF sotto o win rate lontano dal necessario
+#   -> anche l'angolo "alto win rate" del Nasdaq e' chiuso, e il
+#   conteggio delle celle senza edge continua a salire.
+# CRITERI: nessuna promozione diretta; cella verde -> vicinato + banco
+#   vergine (regola dichiarata l'08/08). Occhio ai conteggi col tetto
+#   0,8%: se taglia troppi giorni, celle non giudicabili e va detto.
+# PIN = fedele alla fonte: stop pendenti (niente close-confirm), solo
+#   long, stop OPPRANGE, TP a multipli del range, niente filtri EMA/
+#   volume/news, un trade al giorno. Sweep: TP 0,5/1,0/1,5 x tetto
+#   range off/0,8% -> 6 celle.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpAllowShort=0
+InpSLMode=0
+InpTPMode=1
+InpTP1Pct=0
+InpBreakeven=0
+InpUseTrailEMA=0
+InpExitOnEmaClose=0
+InpUseEmaFilter=0
+InpUseEma200Filter=0
+InpUseVolumeFilter=0
+
+InpTPRangeMult=0.5||0.5||0.5||1.5||Y
+InpMaxRangePct=0||0||0.8||0.8||Y

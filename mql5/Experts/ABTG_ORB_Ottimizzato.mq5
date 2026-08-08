@@ -77,6 +77,7 @@ input bool   InpUseEmaFilter     = false;  // Filtro direzionale: EMA veloce/len
 input bool   InpUseEma200Filter  = false;  // (utenti ABTG) long solo sopra la EMA lunga, short solo sotto
 input int    InpEma200Period     = 200;    // periodo della EMA lunga (sul TF di esecuzione)
 input double InpMinRangePct      = 0;      // (ORB DAX) ampiezza minima del range in % del prezzo (0.2 = 0,2%); 0 = off
+input double InpMaxRangePct      = 0;      // (edgeful) ampiezza MASSIMA del range in % del prezzo (0.8 = 0,8%); 0 = off
 input bool   InpUseVolumeFilter  = false;  // Volume della candela di rottura >= X * media
 input double InpVolMult          = 1.5;    // (volumi) moltiplicatore: 1.5 = +50%, come da live
 input int    InpVolAvgBars       = 20;     // (volumi) barre per la media
@@ -297,13 +298,14 @@ bool ArmCloseConfirm()
 //+------------------------------------------------------------------+
 bool RangeWideEnough()
   {
-   if(InpMinRangePct<=0) return(true);
    double px=SymbolInfoDouble(_Symbol,SYMBOL_BID);
    if(px<=0) return(true);
-   bool ok=(gRangeHigh-gRangeLow) >= px*InpMinRangePct/100.0;
-   if(!ok) Log(StringFormat("range %.1f sotto la soglia %.2f%% del prezzo: niente setup oggi.",
-                            gRangeHigh-gRangeLow, InpMinRangePct));
-   return(ok);
+   double rng=gRangeHigh-gRangeLow;
+   if(InpMinRangePct>0 && rng < px*InpMinRangePct/100.0)
+     { Log(StringFormat("range %.1f sotto la soglia %.2f%%: niente setup oggi.",rng,InpMinRangePct)); return(false); }
+   if(InpMaxRangePct>0 && rng > px*InpMaxRangePct/100.0)
+     { Log(StringFormat("range %.1f sopra il tetto %.2f%% (movimento gia' fatto): niente setup oggi.",rng,InpMaxRangePct)); return(false); }
+   return(true);
   }
 
 //+------------------------------------------------------------------+
