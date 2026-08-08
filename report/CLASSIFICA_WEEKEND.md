@@ -40,6 +40,7 @@ tutti la conferma finale è il forward._
 | **ABTG_SuperWave_DOW_H1_Ott** | U30USD **H1** | IS +1022 PF 1,849 · OOS +463 PF 1,328 DD 3,91% (n=143) | 🆕 R3: **OOS verde su TUTTE e 5 le celle StMult** (+144…+746, PF 1,10–1,61, n≥134) — la superficie più larga vista. Ma il 2,0 in IS fa −65 → criterio stretto no, per la seconda volta per un soffio. In cima ai quasi, giudica il forward |
 | ABTG_SupRev_NAS_H1_Ott | NASUSD H1+H2 | H1: OOS +300,61 PF 1,688 DD 0,86% (n=86) | 🆕 R3: cresta di due anche su StMult (3,0–3,5 verdi, PF 1,47–1,69) ma il 2,5 è rosso → criterio stretto no. Due assi, due creste da due celle, la config live dentro entrambe: margini stretti, giudica il forward |
 | ABTG_EMA200 | AUDJPY H12/D1 | 4 criteri formali | **11–12 trade OOS**: sotto il minimo |
+| 🆕 **ORB-EMA200 (laboratorio)** | U30USD+NASUSD M5 | R13+R14 (08-09/08): solo long, OR 15', stop 50% range, EMA200, TP 1,0–1,5× range. Altopiano su 2 assi, verde in entrambe le finestre su ENTRAMBI i mercati (banco vergine Dow passato: OOS +1861 PF 1,223 n=119); PF OOS 1,10–1,23 | **DD OOS 14–17%** all'1%: criterio 4 non passa. R15 (gestione) in preparazione. Mai stato live: niente deploy da backtest |
 
 ## 🖥️ RESTANO SU MT5 (misurati a tick reali, non da prop)
 

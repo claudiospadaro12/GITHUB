@@ -1,0 +1,56 @@
+# =====================================================================
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il corso resta intatto)
+#  ROUND 15: GESTIONE del DD sulla pista confermata (Dow)
+#  Si lancia con: -Prova prove\R15_ORB_gestione_DD.txt -Etichetta r15
+# =====================================================================
+# PERCHE' (dal referto R14)
+#   La pista ORB-EMA200 ha passato il banco vergine (5/8 celle verdi in
+#   entrambe le finestre, cuore 50%-range 4/4, PF OOS 1,18-1,23) ma il
+#   DD OOS e' 14-17% all'1%: il criterio prop (<10%) non passa. La
+#   regione e' stata misurata SENZA gestione (niente parziale, BE,
+#   trailing): questo round misura se la gestione doma il DD senza
+#   uccidere il PF.
+# IPOTESI (falsificabile, scritta prima)
+#   TRAGUARDO: almeno una cella con gestione che tenga PF OOS >= 1,10
+#   E DD OOS < 10% con n >= 30, restando positiva in IS.
+#   FALSIFICAZIONE: se ogni forma di gestione porta il PF sotto 1,10
+#   (come il trailing soglia fece sul DAX) o il DD resta sopra il 10%,
+#   la pista resta 4 criteri su 5 e la parola passa solo a un eventuale
+#   forward demo a rischio ridotto (decisione di Claudio, non mia).
+# BASE (la regione confermata, centro dell'altopiano, non la cella max)
+#   Solo long, OR 15' (14:30->14:45), pendenti, EMA200 M5, stop 50%
+#   range, tetto 0,8%, un trade/giorno, chiusura 21:00, rischio 1%.
+# ASSI (la gestione, un ingrediente per asse)
+#   - TP finale: 1,0x vs 1,5x l'ampiezza (i due centri visti su Dow/Nasdaq)
+#   - Parziale 50% a +1R con stop in pari: OFF vs ON (InpTP_R=1.0 e'
+#     il raggio del parziale in questo EA; InpBreakeven pinnato 1 e'
+#     inerte finche' il parziale e' spento)
+#   - Trailing sulla EMA9 M5: OFF vs ON
+#   8 celle. NOTA: niente ExitOnEmaClose in questo giro (un asse alla
+#   volta; e' il candidato del giro successivo se serve).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpAllowShort=0
+InpSLMode=3
+InpTPMode=1
+InpMaxRangePct=0.8
+InpUseEma200Filter=1
+InpUseEmaFilter=0
+InpUseVolumeFilter=0
+InpTP_R=1.0
+InpBreakeven=1
+InpExitOnEmaClose=0
+
+InpTPRangeMult=1.0||1.0||0.5||1.5||Y
+InpTP1Pct=0||0||50||50||Y
+InpUseTrailEMA=0||0||1||1||Y
