@@ -46,3 +46,24 @@ _Primo dei cinque lavori arrivato. Criteri nei file prova, scritti prima._
   entrambe**. Non è l'altopiano largo che i criteri chiedono, ma non è nemmeno il picco
   solitario del GoldenCross: è un edge con margini stretti. Verdetto: resta 🥈, il
   forward (che già gira su questa config) è il giudice giusto. In live non si tocca niente.
+
+## 3. SuperWave_DOW_H1_Ott @U30USD H1 — griglia sul moltiplicatore (live = 2,5)
+
+| StMult | IS | OOS | PF OOS | DD OOS | n OOS |
+|---:|---:|---:|---:|---:|---:|
+| 1,5 | +189,49 | **+746,21** | 1,606 | 3,28% | 165 |
+| 2,0 | **−65,33** | +649,44 | 1,484 | 3,67% | 153 |
+| **2,5 (live)** | +1022,29 | +463,44 | 1,328 | 3,91% | 143 |
+| 3,0 | +711,71 | +144,32 | 1,096 | 5,11% | 143 |
+| 3,5 | +674,88 | +282,25 | 1,187 | 5,02% | 134 |
+
+- ✅ Sanità: cella 2,5 riproduce la FASE 0 **al centesimo** (+463,44) — quinta su cinque.
+- ❌ Criterio stretto NON passato: il 2,0 è negativo in campione (−65,33 su 89 trade).
+- 🔎 **Ma questa è la superficie più larga vista finora**: fuori campione TUTTE e cinque
+  le celle sono verdi (da +144 a +746, PF 1,10–1,61) con 134–165 trade ciascuna — ben
+  sopra il minimo. In campione 4 su 5. L'EA ha perso la promozione due volte "per un
+  soffio": alla FASE 0 per l'H2 a −13,73, qui per un −65 su 89 trade, che è rumore.
+  Nota di metodo: in OOS il moltiplicatore migliore è 1,5, in IS è 2,5 — nessun
+  ribaltamento di segno, ma l'ennesima conferma che l'IS non ordina le celle.
+  Verdetto: resta 🥈 **in cima** ai quasi; il forward su U30USD H1 è il giudice.
+  In live non si tocca niente.
