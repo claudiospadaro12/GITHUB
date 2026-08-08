@@ -75,6 +75,6 @@ Write-Host ""
 #  08/08: FALSO che si ricarichino da soli. La compilazione da riga di
 #  comando fa 'removed' dell'EA dal grafico e NON lo ricarica: l'EA torna
 #  solo al riavvio del terminale (Giornale: removed 14:16:41, loaded
-#  14:19:54 — tre minuti SENZA EA, e nessuno se n'era accorto).
+#  14:19:54 - tre minuti SENZA EA, e nessuno se n'era accorto).
 Write-Host "!!! ORA RIAVVIA METATRADER: la ricompilazione SCARICA gli EA dai grafici" -ForegroundColor Red
 Write-Host "    e NON li ricarica da sola. Tornano su solo al riavvio del terminale." -ForegroundColor Red
