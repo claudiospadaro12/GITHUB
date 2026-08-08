@@ -1,4 +1,4 @@
-# 📋 BACKLOG ORB — idee raccolte dalle fonti, in attesa del loro round
+# 📋 BACKLOG ORB - idee raccolte dalle fonti, in attesa del loro round
 
 _Aggiornato 08/08/2026 notte. Regola: prima si chiude la batteria in corso
 (R10 oro, R13 edgeful), poi si pesca da qui UN'idea alla volta, con file prova,
@@ -8,7 +8,7 @@ vergine sempre attiva._
 ## La scoperta trasversale delle fonti (Build Alpha, 08/08)
 
 Build Alpha chiama il **"Retest + ordine limite" la configurazione a piu' alta
-probabilita'** — cioe' ESATTAMENTE il motore RETEST della famiglia Apertura,
+probabilita'** - cioe' ESATTAMENTE il motore RETEST della famiglia Apertura,
 l'unica cosa verde sul Nasdaq in FASE M e la ricetta validata su DAX/Dow.
 Conferma esterna indipendente della nostra scoperta principale: il breakout
 puro non paga, il retest si'. Coerente anche su stop (estremo opposto) e
@@ -18,7 +18,7 @@ limite giornaliero di trade.
 
 1. **FADE del falso breakout** (Build Alpha setup 2): vendere il rientro nel
    range dopo la falsa rottura. L'EA Apertura ha gia' il ramo `RANGE_FADE`
-   (offset del LIMIT oltre l'estremo) quasi inesplorato — si puo' misurare
+   (offset del LIMIT oltre l'estremo) quasi inesplorato - si puo' misurare
    SENZA scrivere codice, su NASUSD dove i falsi breakout abbondano (100+
    celle lo dimostrano). Candidato naturale al prossimo round dopo la batteria.
 2. **Filtro OR/ATR** (Build Alpha): ampiezza del range normalizzata sull'ATR
