@@ -1,0 +1,47 @@
+# =====================================================================
+#  ROUND 8: ABTG_ORB - LA STRATEGIA COME DA MANUALE (ultima spiaggia,
+#  chiesta da Claudio l'08/08 sera dopo il confronto coi PDF del sito)
+#  Si lancia con: -Prova prove\R8_ORB_come_da_manuale.txt -Etichetta r8
+# =====================================================================
+# PERCHE' (dal confronto ToolKit 05 + Webinar 02/03 vs codice)
+#   L'EA live NON fa la strategia dei documenti: range 5' di PRE-mercato
+#   invece dei 30' DOPO l'apertura; ingresso al tocco (l'errore n.1 del
+#   ToolKit) invece che su chiusura M5 confermata con corpo ampio; filtro
+#   EMA 9/21 "regola d'oro" spento; volume spento. La config documentata
+#   non e' MAI stata misurata: ne' in FASE 0 ne' nel round 7.
+# IPOTESI (falsificabile, scritta prima)
+#   I documenti sostengono che i FILTRI facciano la differenza fra
+#   breakout veri e fakeout. Se e' vero, la config da manuale (30' post
+#   apertura + chiusura confermata + corpo 50% + medie allineate) deve
+#   essere positiva in ENTRAMBE le finestre in almeno una cella.
+#   CONTRO-IPOTESI (dalle misure): FASE M dice che il breakout sul
+#   Nasdaq non paga (19/20 celle rosse) - se nemmeno la versione da
+#   manuale e' verde, la questione e' chiusa dai dati, non da me.
+# CRITERI (dichiarati ora)
+#   - ULTIMA SPIAGGIA dichiarata: nessuna cella positiva in entrambe le
+#     finestre (con >=30 trade OOS) -> si conferma il candidato
+#     spegnimento del round 7. Una cella verde -> si guarda il vicinato
+#     PRIMA di qualsiasi entusiasmo (e resta il precedente FASE M).
+#   - ATTENZIONE ai conteggi: chiusura confermata + medie tagliano
+#     molti giorni; celle sotto i 30 trade OOS = non giudicabili,
+#     dichiararlo nel referto senza barare.
+#   - News filter SPENTO per confrontabilita' con FASE 0/R7 (il doc lo
+#     vorrebbe acceso: se il round promuove qualcosa, la sonda news
+#     sara' un giro successivo, un asse alla volta).
+# PIN = la ricetta del ToolKit, sweep sui due assi che i doc lasciano
+# aperti: TP 1,5R (minimo) vs 2R (ideale); volume OFF (ToolKit base)
+# vs ON +50% (webinar).
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=15
+InpRangeEndMin=0
+InpUseCloseConfirm=1
+InpMinBodyPct=50
+InpUseEmaFilter=1
+
+InpTP_R=1.5||1.5||0.5||2||Y
+InpUseVolumeFilter=0||0||1||1||Y
