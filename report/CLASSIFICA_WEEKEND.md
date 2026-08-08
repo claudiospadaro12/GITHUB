@@ -23,10 +23,10 @@ Claudio. Ma non tocca una prop.
 | EA | dove | TF | OOS | PF OOS | DD OOS | nota |
 |---|---|---|---:|---:|---:|---|
 | **ABTG_MaxMinNotte_DAX_Short_Ott** | D30EUR (config live) | box notturno M15 | **+618,31** | **2,192** | **1,88%** | 🆕 R2: altopiano sul buffer 750–1500, cella live riprodotta AL CENTESIMO. ⚠️ ~20 trade OOS/cella: sotto il minimo dei 30, lo colma solo il forward |
-| ABTG_SupertrendReversal | **225JPY (Nikkei)** | **H2·H3·H4** (terza conferma dell'altopiano; aggregato OOS +37,54 su 69 trade) | +6/+17 €/cella | 1,24–1,80 | 0,01% | 🔴 R2 a 100k: il lotto NON si sgancia dal minimo — `SYMBOL_TRADE_TICK_VALUE` in yen non convertito nel motore di sizing. **Candidatura CONGELATA finché il sizing non è corretto (binario B)** |
+| **ABTG_SupertrendReversal** | **225JPY (Nikkei)** | **H2** (riferimento per la regola TF; altopiano H2·H3·H4, QUARTA conferma) | **+1863,34** (aggr. H2–H4: +4225,85/113 trade) | **1,653** | **0,88%** | 🆕 R5 col sizing corretto a 100k: tutti e 3 i criteri del file prova passati (scala ~70×, forma, prop). **Scongelato.** Caveat: OOS guardata 4 volte → conferma dal forward; sul VPS gira ancora il lotto minimo finché non si ricompila |
 
-_Il MaxMinNotte è l'unico che ha passato tutti i criteri verificabili; il Nikkei è
-congelato sul sizing._
+_Due candidati veri: MaxMinNotte (altopiano sul buffer) e Nikkei (altopiano sui TF,
+sizing corretto). Per entrambi la conferma finale è il forward._
 
 ## 🥈 A UN CRITERIO DAL TRAGUARDO
 

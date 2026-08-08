@@ -88,7 +88,7 @@ ABTG_GoldenCross;XAUUSD;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 
 ABTG_GoldenCross_Ottimizzato;XAUUSD;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 07/08: MAI DICHIARATO. Grafico H1. Nessuna misura
 ABTG_GoldenCross;forex;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 07/08: MAI DICHIARATO. TRE grafici H4 su NZDUSD, USDCAD, USDCHF. Nessuna misura
 ABTG_SupertrendReversal (base);XAGUSD;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 07/08: MAI DICHIARATO. ARGENTO, H4. Nessuna misura
-ABTG_SupertrendReversal (base);225JPY;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 07/08: MAI DICHIARATO. NIKKEI, H4 (nei grafici il simbolo usciva come SERVER: e' un limite del rilevatore, il log dice 225JPY). Nessuna misura
+ABTG_SupertrendReversal (base);225JPY;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;R5 09/08 col sizing corretto: CANDIDATO PROP - H2 OOS +1863,34 PF 1,653 DD 0,88% (50 trade), altopiano H2-H4 confermato 4 volte, aggregato +4225,85/113. MA il grafico live gira ancora a lotto minimo (codice vecchio) e la finestra OOS e' stata guardata 4 volte: conferma dal forward
 ABTG_SupertrendReversal (base);D30EUR;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 07/08: MAI DICHIARATO. H4, in piu' rispetto allo STREV DAX H1 OTT dichiarato. Nessuna misura
 ABTG_SupRev_DAX_H4_Ottimizzato;D30EUR;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 07/08: MAI DICHIARATO. Nessuna misura
 ABTG_SupRev_DOW_H1_Ottimizzato;U30USD;non_dichiarato;*;*;*;*;*;*;*;no;censimento;*;censimento 07/08: MAI DICHIARATO. Nessuna misura
