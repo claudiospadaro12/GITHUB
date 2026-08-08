@@ -22,6 +22,7 @@ Claudio. Ma non tocca una prop.
 
 | EA | dove | TF | OOS | PF OOS | DD OOS | nota |
 |---|---|---|---:|---:|---:|---|
+| **ABTG_MaxMinNotte_DAX_Short_Ott** | D30EUR (config live) | box notturno M15 | **+618,31** | **2,192** | **1,88%** | 🆕 R2: altopiano sul buffer 750–1500, cella live riprodotta AL CENTESIMO. ⚠️ ~20 trade OOS/cella: sotto il minimo dei 30, lo colma solo il forward |
 | ABTG_SupertrendReversal | **225JPY (Nikkei)** | **H2·H3·H4** (altopiano, H1–H12 quasi tutto verde) | +6/+18 €/cella | 1,24–1,86 | <0,2% | ⚠️ lotto minimo → euro, non centinaia; 13–31 trade/cella: **serve il giro con size sensata e celle aggregate** |
 | ABTG_EMA200 | SPXUSD | H4 (vicini H3/H6 positivi; batte H1 su tutto) | +567,07 | 1,595 | 2,22% | ⚠️ IS a H4 = 21 trade |
 
@@ -32,8 +33,7 @@ altopiano vero del weekend._
 
 | EA | dove | cosa passa | cosa manca |
 |---|---|---|---|
-| **ABTG_MaxMinNotte_DAX_Short_Ott** | D30EUR (config live) | IS +477,51 PF 1,921 · **OOS +618,31 PF 2,192 DD 1,88%** | criterio 3 non verificabile su config unica → serve la griglia sulla SUA leva |
-| **ABTG_GoldenCross_Ottimizzato** | XAUUSD **H1** | IS +299,35 PF 1,494 · OOS +308,30 PF 1,253 DD 6,08% | criterio 3 non verificabile (config unica). È H1, il TF preferito |
+| **ABTG_GoldenCross_Ottimizzato** | XAUUSD **H1** | IS +299,35 PF 1,494 · OOS +308,30 PF 1,253 DD 6,08% (57 trade OOS) | R2: il vicinato ADX non è verde (20 → −136,56 OOS, ed era la migliore IS: NONO ribaltamento). 10≡15 al centesimo: il filtro ADX non contribuisce. Resta qui |
 | ABTG_SuperWave_DOW_H1_Ott | U30USD H1 | IS +1022 PF 1,849 · OOS +463 PF 1,328 DD 3,91% (n=143) | il vicino H2 chiude a **−13,73**: criterio 3 fallito per un soffio |
 | ABTG_SupRev_NAS_H1_Ott | NASUSD H1+H2 | H1: OOS +300,61 PF 1,688 DD 0,86% | isola di due celle fra negativi: il criterio 3 alla lettera dice no |
 | ABTG_EMA200 | AUDJPY H12/D1 | 4 criteri formali | **11–12 trade OOS**: sotto il minimo |
