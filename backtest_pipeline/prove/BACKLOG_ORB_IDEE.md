@@ -26,6 +26,9 @@ limite giornaliero di trade.
    laboratorio. Richiede un piccolo input nuovo nel lab.
 3. **Rimbalzo su ORL** (Build Alpha setup 4): comprare il supporto del range
    nei giorni senza breakout. Motore nuovo (mean-reversion dentro il range).
+3b. **Target 2x/3x l'ampiezza del range** (ORB Setups): R13 arriva a 1,5x -
+   se la direzione OOS di R13 punta verso l'alto, 2x/3x e' il vicinato del
+   giro successivo (coerente con R9: piu' il target e' ambizioso, meglio OOS).
 4. **Finestra 60' / Initial Balance**: mai provata (abbiamo 5' pre, 15', 30',
    35'). Da considerare solo se fade/OR-ATR mostrano qualcosa.
 5. **ORB con gap** (solo nei giorni di gap): filtro di contesto, il lab non
