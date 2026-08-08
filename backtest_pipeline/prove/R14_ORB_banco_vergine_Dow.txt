@@ -1,0 +1,60 @@
+# =====================================================================
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il corso resta intatto)
+#  ROUND 14: BANCO VERGINE sul Dow per l'altopiano del round 13
+#  Si lancia con: -Prova prove\R14_ORB_banco_vergine_Dow.txt -Etichetta r14
+# =====================================================================
+# PERCHE' (regola pre-dichiarata l'08/08: "cio' che vince conferma su
+# banco vergine prima di crederci")
+#   R13 sul NASUSD ha trovato il PRIMO altopiano verde della batteria:
+#   solo long + EMA200 su M5 + OR 15' (14:30-14:45) + TP a multipli del
+#   range (1,0-1,5x) + stop ATR o 50% range + sessione fino alle 21:00.
+#   8 celle positive in ENTRAMBE le finestre, 6 con PF OOS >= 1,10 e
+#   n >= 135. MA e' la ~150a cella esaminata sul Nasdaq: il rischio che
+#   sia il vincitore fortunato del multiple-testing e' CONCRETO.
+#   Il Dow (U30USD) non e' MAI stato toccato dal motore ORB in nessun
+#   round: e' il banco vergine perfetto.
+# IPOTESI (falsificabile, scritta prima)
+#   Se l'altopiano e' un edge del MECCANISMO (trend-following filtrato
+#   dalla EMA200 sull'apertura USA) e non un adattamento al Nasdaq,
+#   sul Dow la stessa regione deve restare riconoscibile:
+#   TRAGUARDO: maggioranza delle celle della regione (stop ATR/50% x
+#   TP 1,0/1,5x) positiva in ENTRAMBE le finestre, e almeno una cella
+#   con PF OOS >= 1,10 e n >= 30.
+#   FALSIFICAZIONE: regione rossa o piatta sul Dow -> l'altopiano del
+#   round 13 era rumore selezionato dal multiple-testing, e va scritto
+#   nel referto senza sconti. (Nessun "pero' il Nasdaq...": il banco
+#   vergine esiste per questo.)
+# CRITERI
+#   - Anche se passa: NIENTE deploy automatico. Si apre semmai il
+#     percorso normale (referto, classifica, decisione di Claudio) e
+#     resta il problema DD (sul Nasdaq 11-15% all'1%: sopra il criterio
+#     prop del 10% - da capire prima di qualsiasi conto vero).
+#   - NOTA enum: lo sweep InpSLMode 1->3 spazzola anche il 2 (FIXED
+#     1000): vicinato gratis non oggetto dell'ipotesi, come in R9.
+#   - 12 celle: 3 stop x 2 TP x tetto range off/0,8%. EMA200 PINNATA ON
+#     (e' l'ingrediente portante, non un asse da ottimizzare qui).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpAllowShort=0
+InpTPMode=1
+InpTP1Pct=0
+InpBreakeven=0
+InpUseTrailEMA=0
+InpExitOnEmaClose=0
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpUseVolumeFilter=0
+
+InpSLMode=1||1||1||3||Y
+InpTPRangeMult=1.0||1.0||0.5||1.5||Y
+InpMaxRangePct=0||0||0.8||0.8||Y
