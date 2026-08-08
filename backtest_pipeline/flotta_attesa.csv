@@ -48,7 +48,7 @@
 # =====================================================================
 ea;simbolo;stato;rischio;motore;rangemode;range;buffer;lati;trail;logga_config;verificato;trail_da;fonte
 DAX Apertura EU;D30EUR;validato;2.00;ABTG_RETEST;ABTG_RANGE_OPENING;35;500;SOLO LONG;ABTG_TRAIL_PREVBAR PERIOD_M5;si;log;0.00R;FASE M + B1 + FASE L: 6 celle positive su 6, OOS +1800.19 PF 1.423 DD 6.72%. 08/08 14:33 log VPS: lati=SOLO LONG VERIFICATO, binario nuovo (trail da=0.00R), tutta la config = cella misurata
-DAX Apertura EU OTT;D30EUR;da_decidere;1.00;ABTG_BREAKOUT;*;15;600;*;*;si;log;0.00R;nessuna. Range 15 = 0 celle positive su 4 in OOS. Non ha il motore RETEST
+DAX Apertura EU OTT;D30EUR;da_decidere;1.00;ABTG_BREAKOUT;*;15;600;*;ABTG_TRAIL_PREVBAR PERIOD_M5;si;log;0.00R;nessuna. Range 15 = 0 celle positive su 4 in OOS. Non ha il motore RETEST. 08/08 15:14: trailing allineato da Proprieta' (PREVBAR M5, soglia 0R, verificato da screenshot) - passo 2 scaletta
 DAX Live 5m;D30EUR;SPENTO 08/08;2.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;0.00R;FASE 0 weekend 08/08 a tick reali: IS -626,33 OOS -2218,56 DD 39,74%. Gira al 2%: decisione di Claudio, ma ora e' una misura, non un sospetto
 DAX Live5m v2;D30EUR;SPENTO 08/08;1.00;ABTG_BREAKOUT;*;15;700;*;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;0.00R;doppione di DAX Live 5m E misurato in proprio: OOS -393,74 DD 14,16% (FASE 0 weekend)
 Nasdaq Apertura US;NASUSD;bocciato;0.25;ABTG_BREAKOUT;ABTG_RANGE_PREVBAR;15;200;long+short;ABTG_TRAIL_PREVBAR PERIOD_M1;si;log;0.00R;FASE L: OOS -2444.14 PF 0.665 DD 26.29%, peggiore delle 4. Tenuto solo per forward

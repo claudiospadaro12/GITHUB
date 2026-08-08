@@ -23,7 +23,7 @@ tre (continuano a produrre forward quasi gratis). La decisione è tua; la misura
 
 **ESITO: Claudio li ha spenti tutti e 3 l'08/08 sera.** Eventuale ritorno dal binario B.
 
-## PASSO 2 — 🔧 DAX OTT: allineare il trailing (VPS, Proprietà, 1 minuto)
+## PASSO 2 — ✅ FATTO (08/08 15:14, verificato da screenshot) — DAX OTT: trailing allineato
 
 Il grafico `ABTG_DAX_Apertura_EU_Ottimizzato` su D30EUR gira ancora TRAIL FIXED su M1
 (i parametri vivono sul grafico: la ricompilazione NON li ha toccati). La config
@@ -33,6 +33,9 @@ validata è PREVBAR su M5. Proprietà dell'EA →
 - `InpTrailTF`  = **5** (M5)
 
 Tutto il resto invariato. (Niente ricompilazioni: solo F7 sul grafico → Proprietà.)
+
+**ESITO: screenshot delle 15:14 dell'08/08 — PREVBAR + 5 Minutes impostati, soglia 0.0R,
+rischio 1%, TP1 1R/50%, BE on. Confermato con OK.**
 
 ## PASSO 3 — 🔧 Nikkei 225JPY: allineare il Supertrend (VPS, Proprietà, 1 minuto)
 
