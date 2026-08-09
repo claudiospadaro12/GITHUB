@@ -18,4 +18,8 @@
 @PERIODO  M15
 @DAQUANDO 2024.09.26
 
-InpMagic=770411||770411||1||770412||Y
+# MAGIC VERGINI (09/08 sera): 770413/770414. I 770411/770412 sono gia' in
+# cache dal primo lancio: la cache NON riesegue le celle note e non
+# scriverebbe i file per-trade. Serie gia' valida in archivio: questo
+# rilancio col driver corretto e' un doppio controllo.
+InpMagic=770413||770413||1||770414||Y
