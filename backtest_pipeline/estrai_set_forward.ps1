@@ -43,9 +43,18 @@ $targets = @{
   "ABTG_ORB_Ottimizzato"                    = "orb_forward|0.3"
 }
 
-$chrs = Get-ChildItem (Join-Path $old.FullName "Profiles\Charts") -Recurse -Filter "*.chr" -ErrorAction SilentlyContinue |
-        Sort-Object LastWriteTime -Descending
-if (-not $chrs) { Write-Host "Nessun grafico (.chr) trovato nella vecchia istanza." -ForegroundColor Red; exit 1 }
+# MT5 tiene i grafici sotto MQL5\Profiles\Charts (visto sul VPS il 09/08);
+# si guarda anche il vecchio percorso Profiles\Charts per sicurezza.
+$chrs = @()
+foreach ($sub in @("MQL5\Profiles\Charts", "Profiles\Charts")) {
+  $p = Join-Path $old.FullName $sub
+  if (Test-Path $p) {
+    $chrs += Get-ChildItem $p -Recurse -Filter "*.chr" -ErrorAction SilentlyContinue
+  }
+}
+$chrs = $chrs | Sort-Object LastWriteTime -Descending
+if (-not $chrs) { Write-Host "Nessun grafico (.chr) trovato nella vecchia istanza (ne' in MQL5\Profiles\Charts ne' in Profiles\Charts)." -ForegroundColor Red; exit 1 }
+Write-Host ("Grafici trovati: {0} (il piu' recente salvato {1:dd/MM HH:mm})" -f @($chrs).Count, $chrs[0].LastWriteTime) -ForegroundColor Gray
 
 foreach ($ea in $targets.Keys) {
   $parts = $targets[$ea] -split '\|'
