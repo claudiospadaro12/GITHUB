@@ -43,18 +43,19 @@ $targets = @{
   "ABTG_ORB_Ottimizzato"                    = "orb_forward|0.3"
 }
 
-# MT5 tiene i grafici sotto MQL5\Profiles\Charts (visto sul VPS il 09/08);
-# si guarda anche il vecchio percorso Profiles\Charts per sicurezza.
-$chrs = @()
-foreach ($sub in @("MQL5\Profiles\Charts", "Profiles\Charts")) {
-  $p = Join-Path $old.FullName $sub
-  if (Test-Path $p) {
-    $chrs += Get-ChildItem $p -Recurse -Filter "*.chr" -ErrorAction SilentlyContinue
-  }
+# VERSIONE 3 (09/08 sera): si cercano i .chr in TUTTA la cartella dati
+# della vecchia istanza, ovunque MT5 li tenga (esclusi i file del tester).
+$chrs = Get-ChildItem $old.FullName -Recurse -Filter "*.chr" -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notlike "*\Tester\*" } |
+        Sort-Object LastWriteTime -Descending
+if (-not $chrs) {
+  Write-Host "VERSIONE 3 - Nessun file .chr in tutta la cartella dati della vecchia istanza:" -ForegroundColor Red
+  Write-Host ("  " + $old.FullName) -ForegroundColor Red
+  Write-Host "Possibile causa: il vecchio MT5 gira in modalita' PORTABLE (dati dentro" -ForegroundColor Yellow
+  Write-Host "Program Files). Dimmelo e adattiamo lo script." -ForegroundColor Yellow
+  exit 1
 }
-$chrs = $chrs | Sort-Object LastWriteTime -Descending
-if (-not $chrs) { Write-Host "Nessun grafico (.chr) trovato nella vecchia istanza (ne' in MQL5\Profiles\Charts ne' in Profiles\Charts)." -ForegroundColor Red; exit 1 }
-Write-Host ("Grafici trovati: {0} (il piu' recente salvato {1:dd/MM HH:mm})" -f @($chrs).Count, $chrs[0].LastWriteTime) -ForegroundColor Gray
+Write-Host ("VERSIONE 3 - Grafici trovati: {0} (il piu' recente salvato {1:dd/MM HH:mm})" -f @($chrs).Count, $chrs[0].LastWriteTime) -ForegroundColor Gray
 
 foreach ($ea in $targets.Keys) {
   $parts = $targets[$ea] -split '\|'
