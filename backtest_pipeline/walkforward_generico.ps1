@@ -338,7 +338,16 @@ foreach($i in $Inputs){
 }
 foreach($r in $RigheProvaUtili){
   $n=($r -split "=")[0].Trim()
-  if($NomiInput.ContainsKey($n)){ [void]$Righe.Add($r) }   # gli ignoti sono gia' un errore: non li conto qui
+  if(-not $NomiInput.ContainsKey($n)){ continue }          # gli ignoti sono gia' un errore: non li conto qui
+  $resto=$r.Substring($r.IndexOf("=")+1)
+  if(($resto -split '\|\|').Count -ge 5){ [void]$Righe.Add($r); continue }
+  # PIN SECCO: va blindato in forma completa v||v||0||v||N. Scoperto il
+  # 09/08 (pt6c): un pin scritto 'Nome=35' imposta il VALORE ma NON spegne
+  # il flag di ottimizzazione che MT5 ricorda dall'ultima griglia di
+  # quell'EA -> il tester rispazzola la griglia vecchia nonostante il pin.
+  $v=$resto.Trim()
+  if($NomiInput[$n].kind -eq "stringa"){ [void]$Righe.Add("$n=$v") }
+  else { [void]$Righe.Add("$n=$v||$v||0||$v||N") }
 }
 
 $Visti=@{}

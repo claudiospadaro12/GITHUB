@@ -1,95 +1,75 @@
-# PROCEDURA pt6 -- serie per-trade pulite di Dow e DAX (magic nuovi anti-cache)
+# PROCEDURA pt7 -- serie per-trade pulite di Dow e DAX
 
-Aggiornato: 09/08/2026 sera. Sostituisce integralmente la versione pt5.
+Aggiornato: 09/08/2026 sera (terza revisione). Sostituisce pt5 e pt6.
 
-## IL COLPEVOLE VERO (scoperto col lancio pt5c del 09/08 sera)
+## STORIA DEI DUE DIFETTI TROVATI OGGI (per non ripeterli)
 
-Il lancio pt5c del Dow era GIUSTO (spazzolati: 1, 2 celle) eppure il CSV
-dei risultati conteneva 12 righe, identiche pass-per-pass alla vecchia
-griglia ptc. Spiegazione: il tester di MT5 ha una CACHE delle
-ottimizzazioni. Le 2 celle chieste (35/0, magic 770202/770203) erano
-gia' state calcolate dentro la griglia -> MT5 le ha servite dalla cache
-SENZA rieseguirle, e un pass non eseguito NON scrive i file per-trade.
-Per questo Nikkei e MaxMinNotte (celle mai calcolate prima) sono usciti
-puliti al primo colpo e Dow/DAX no, qualunque cosa venisse lanciato.
+1. CACHE del tester: una cella gia' calcolata NON viene rieseguita ->
+   ExportTrades non scrive i file per-trade. Rimedio: magic mai usati.
+2. PIN SECCHI nel driver (trovato col lancio pt6c, che ha rispazzolato
+   la griglia coi magic nuovi): un pin scritto 'Nome=35' nell'ini imposta
+   il VALORE ma NON spegne il flag di ottimizzazione che MT5 ricorda
+   dall'ultima griglia di quell'EA -> il tester rispazzola la griglia
+   vecchia nonostante il pin. Corretto nel driver il 09/08 sera: ora i
+   pin vengono scritti in forma completa v||v||0||v||N.
 
-Rimedio: MAGIC MAI USATI PRIMA. La cache non li conosce, quindi i 2
-pass girano per forza e scrivono i file. I file prova sono gia' stati
-aggiornati sul repo:
+Conseguenza: i magic 770202-770205 (Dow) e 770111-770114 (DAX) sono
+BRUCIATI (in cache). Terza serie, vergine: Dow 770206/770207,
+DAX 770115/770116.
 
-- Dow:  InpMagic 770204 e 770205  (prima 770202/770203)
-- DAX:  InpMagic 770113 e 770114  (prima 770111/770112)
+## La procedura (PowerShell in C:\Users\Master -- se il prompt dice
+## solo C:\> dare prima:  cd $env:USERPROFILE )
 
-NOTA: il CSV dei risultati potra' contenere ANCHE le righe vecchie della
-griglia ripescate dalla cache (es. 14 righe invece di 2). NON e' un
-problema: il verdetto si fa sui file abtg_trades_*, che vengono solo
-dai 2 pass nuovi. Il driver ora stampa un avviso che spiega proprio questo.
+### Passo 0 -- aggiornare il DRIVER (OBBLIGATORIO: il fix dei pin e' qui)
 
-## La procedura (PowerShell in C:\Users\Master)
+```powershell
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/walkforward_generico.ps1" -OutFile walkforward_generico.ps1
+```
 
-### Passo 0 -- pulizia
+### Passo 1 -- pulizia dei file per-trade
 
 ```powershell
 del "$env:APPDATA\MetaQuotes\Terminal\Common\Files\abtg_trades_*.csv"
 ```
 
-### Passo 1 -- controllo lampo del Dow (30 secondi, non lancia nulla)
+### Passo 2 -- Dow (etichetta pt7c, magic 770206/770207)
 
 ```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16c_pertrade_Dow.txt" -OutFile prove\R16c_pertrade_Dow.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_Dow_Apertura_US -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta pt6c -SoloControllo
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16c_pertrade_Dow.txt" -OutFile prove\R16c_pertrade_Dow.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_Dow_Apertura_US -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta pt7c
 ```
 
-La console DEVE dire: `spazzolati : 1`, `InpMagic  2 celle`.
-
-### Passo 2 -- lancio vero del Dow
+### Passo 3 -- DAX (etichetta pt7d, magic 770115/770116)
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_Dow_Apertura_US -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta pt6c
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16d_pertrade_DAX.txt" -OutFile prove\R16d_pertrade_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000 -Etichetta pt7d
 ```
 
-### Passo 3 -- controllo lampo del DAX
+### Passo 4 -- invio
 
-```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16d_pertrade_DAX.txt" -OutFile prove\R16d_pertrade_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000 -Etichetta pt6d -SoloControllo
-```
+Da `%APPDATA%\MetaQuotes\Terminal\Common\Files` mandami SOLO questi 4:
 
-Stesso controllo: `spazzolati : 1`, `InpMagic  2 celle`.
+- abtg_trades_ABTG_Dow_Apertura_US_U30USD_770206.csv
+- abtg_trades_ABTG_Dow_Apertura_US_U30USD_770207.csv
+- abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770115.csv
+- abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770116.csv
 
-### Passo 4 -- lancio vero del DAX
+## Controlli in corsa e all'arrivo
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000 -Etichetta pt6d
-```
-
-### Passo 5 -- invio
-
-Da `%APPDATA%\MetaQuotes\Terminal\Common\Files` mandami SOLO questi 4
-(nota i magic NUOVI nei nomi):
-
-- abtg_trades_ABTG_Dow_Apertura_US_U30USD_770204.csv
-- abtg_trades_ABTG_Dow_Apertura_US_U30USD_770205.csv
-- abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770113.csv
-- abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770114.csv
-
-Se nella cartella compaiono file coi magic VECCHI (770202/770203,
-770111/770112) dopo il Passo 0, qualcosa non va: fermati e screenshot.
-
-## Controlli d'arrivo (li faccio io)
-
-- Dow: 770204 e 770205 gemelli al centesimo, 130 trade, +6721,93, zero short.
-- DAX: 770113 e 770114 gemelli al centesimo, 270 trade, +18029,58, zero short.
-
-(I file per-trade contengono la sola finestra OOS: la passata IS viene
-sovrascritta da quella OOS, ed e' quello che vogliamo per il portafoglio.)
+- In console: `spazzolati : 1`, `InpMagic  2 celle`, `4 pass in tutto`.
+- Ogni finestra deve produrre un CSV da 2 RIGHE (non 12, non 360): col
+  driver nuovo, righe diverse dalle celle chieste fanno scattare un
+  avviso rosso. Se scatta: screenshot e fermati.
+- All'arrivo (li faccio io): Dow 770206/770207 gemelli al centesimo,
+  130 trade, +6721,93, zero short; DAX 770115/770116 gemelli, 270 trade,
+  +18029,58, zero short.
+- I file per-trade contengono la sola finestra OOS (la passata IS viene
+  sovrascritta): e' quello che serve per il portafoglio.
 
 ## Regole d'oro
 
-1. NON lanciare nessun'altra prova tra il Passo 0 e il Passo 5.
-2. NON allargare le griglie: 2 celle e basta.
+1. Prima il Passo 0: senza driver nuovo i pin non pinnano.
+2. NON lanciare altre prove tra il Passo 1 e il Passo 4.
 3. Copiare le righe da QUESTO file, non dalla cronologia di PowerShell.
-4. Se il driver mostra l'avviso "righe nel CSV ma N celle chieste":
-   leggere l'avviso, NON fermarsi -- conta solo che i 4 file freschi
-   coi magic nuovi siano comparsi in Common\Files.
 
 ## Dopo (lo faccio io)
 

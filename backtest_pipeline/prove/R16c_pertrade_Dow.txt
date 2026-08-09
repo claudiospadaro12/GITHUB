@@ -32,8 +32,10 @@ InpBreakevenAtTP1=1
 InpUseTrailing=1
 InpTrailMode=1
 InpTrailTF=5
-# MAGIC NUOVI DI ZECCA (09/08 sera): 770204/770205 al posto di 770202/770203.
-# Il tester ha una CACHE: le celle gia' calcolate (anche in griglie vecchie)
-# NON vengono rieseguite, quindi ExportTrades non scrive i file per-trade.
+# MAGIC VERGINI (2a rotazione, 09/08 sera): 770206/770207.
+# I 770204/770205 sono bruciati: il lancio pt6c ha rispazzolato la griglia
+# (difetto dei pin secchi nel driver, corretto il 09/08) e ha messo in cache
+# anche la cella giusta con quei magic. Il tester ha una CACHE: una cella
+# gia' calcolata NON viene rieseguita e ExportTrades non scrive i file.
 # Un magic mai usato non e' in cache -> i 2 pass girano per forza.
-InpMagic=770204||770204||1||770205||Y
+InpMagic=770206||770206||1||770207||Y
