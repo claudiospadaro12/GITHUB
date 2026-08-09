@@ -251,3 +251,111 @@ void OnTick()
    TryEnter();
   }
 //+------------------------------------------------------------------+
+
+//==================================================================//
+//  Blocco misurabilita' aggiunto il 09/08/2026 (BINARIO D della     //
+//  ROTTA_PROP): questo EA girava live SENZA OnTester, quindi non    //
+//  entrava in nessuna pipeline di backtest. Da oggi esporta come    //
+//  tutti gli altri 40: riepilogo in ottimizzazione (OPTFRAME) +     //
+//  per-trade nella cartella comune (ExportTrades).                  //
+//==================================================================//
+
+//==================================================================//
+//  OPTFRAME (inlined, self-contained) - export automatico dei      //
+//  risultati di OTTIMIZZAZIONE in CSV.  NON richiede include.       //
+//  Scrive MQL5\Files\OptResults_<EA>_<Symbol>.csv, leggibile da:    //
+//      python optimizer/batch_analyze.py <cartella>                 //
+//  In live/backtest singolo e inerte (gira solo in ottimizzazione).//
+//==================================================================//
+#define OPTFRAME_NAME "OptFrame"
+#define OPTFRAME_ID   1
+
+string OptFrame_FileName()
+  {
+   return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
+  }
+
+//+------------------------------------------------------------------+
+//| EXPORT PER-TRADE (09/08/2026) - serve al DD di PORTAFOGLIO.       |
+//| A fine test scrive nella cartella COMUNE (Files comuni) un CSV    |
+//| con una riga per ogni trade CHIUSO (ora di chiusura e netto):     |
+//| con le serie di piu' EA si calcolano DD combinato e Monte Carlo   |
+//| (backtest_pipeline/dd_portafoglio.py). Solo tester. In            |
+//| ottimizzazione ogni pass sovrascrive il file del proprio magic:   |
+//| usarlo su run singoli / magic-sweep, non sulle griglie larghe.    |
+//+------------------------------------------------------------------+
+void ExportTrades()
+  {
+   if(!HistorySelect(0,TimeCurrent())) return;
+   string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"+IntegerToString((long)InpMagic)+".csv";
+   int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
+   if(h==INVALID_HANDLE) return;
+   FileWrite(h,"close_time","symbol","magic","position_id","deal_type","volume","price","net_profit");
+   int n=HistoryDealsTotal();
+   for(int i=0;i<n;i++)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk==0) continue;
+      long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
+      if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_OUT_BY) continue;
+      double net=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
+      FileWrite(h,
+                TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                HistoryDealGetString(tk,DEAL_SYMBOL),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_MAGIC)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_POSITION_ID)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_TYPE)),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_VOLUME),2),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_PRICE),_Digits),
+                DoubleToString(net,2));
+     }
+   FileClose(h);
+  }
+double OnTester()
+  {
+   ExportTrades();   // per-trade per il DD di portafoglio (ROTTA_PROP punto 4)
+   double stats[7];
+   stats[0] = TesterStatistics(STAT_PROFIT);
+   stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
+   stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
+   stats[3] = TesterStatistics(STAT_RECOVERY_FACTOR);
+   stats[4] = TesterStatistics(STAT_SHARPE_RATIO);
+   stats[5] = TesterStatistics(STAT_EQUITY_DDREL_PERCENT);
+   stats[6] = TesterStatistics(STAT_TRADES);
+   double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
+   FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
+   return(criterion);
+  }
+
+int OnTesterInit() { return(INIT_SUCCEEDED); }
+
+void OnTesterDeinit()
+  {
+   string fname = OptFrame_FileName();
+   int h = FileOpen(fname, FILE_WRITE | FILE_CSV | FILE_ANSI, ",");
+   if(h == INVALID_HANDLE)
+     { PrintFormat("OptFrame: impossibile creare %s (err %d)", fname, GetLastError()); return; }
+   FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
+   ulong pass; string name; long id; double value; double data[];
+   bool header_scritto = false; int righe = 0;
+   while(FrameNext(pass, name, id, value, data))
+     {
+      string params[]; uint pcount = 0;
+      FrameInputs(pass, params, pcount);
+      if(!header_scritto)
+        {
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades";
+         for(uint i = 0; i < pcount; i++)
+           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
+         FileWrite(h, head); header_scritto = true;
+        }
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f",
+                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
+      for(uint i = 0; i < pcount; i++)
+        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
+      FileWrite(h, row); righe++;
+     }
+   FileClose(h);
+   PrintFormat("OptFrame: scritte %d passate in MQL5\\Files\\%s", righe, fname);
+  }
+//================== fine OPTFRAME inlined ==========================//
