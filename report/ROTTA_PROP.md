@@ -43,8 +43,11 @@ EU) e 2%+1% sui gemelli Live5m. Regole di rotta:
    il tempo lavora da solo; 30 trade OOS-forward per verdetto.
 2. **R15**: domare il DD della pista ORB (in coda sul PC backtest).
 3. **Ricompilazione VPS weekend** (sizing Nikkei a lotto vero + fix ORB corso).
-4. **Export per-trade** nell'OnTester -> DD di portafoglio + Monte Carlo
-   (prerequisito per "accenderli simultaneamente" con cognizione).
+4. ✅ **FATTO il 09/08 sera** -- Export per-trade -> DD di portafoglio + Monte
+   Carlo. Primo referto: `risultati_archivio/REFERTO_PORTAFOGLIO_R16.md`.
+   4 serie OOS a 100k: netto +32.758, DD storico 5,51%, correlazioni ~zero,
+   MC p95 10,56% / p99 12,66% -> per FTMO 10% il rischio a taglia prop va
+   a ~0,7% per trade. Manca la 5a serie (ORB-EMA200, R16e).
 5. **Binario D**: OnTester per HARSI/SuperWave_EA -> allargare il misurabile.
 6. **Un motore a settimana dal binario B** (prossimi: ORB_Fibo, PTE, Nightly).
 7. Quando 2-3 candidati hanno il forward maturo: **demo 100k dry-run col
