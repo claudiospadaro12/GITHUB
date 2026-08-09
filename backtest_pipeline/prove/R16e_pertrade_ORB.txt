@@ -1,0 +1,47 @@
+# =====================================================================
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il corso resta intatto)
+#  ROUND 16e: PER-TRADE del candidato ORB-EMA200 (cella R15) a 100k
+#  Si lancia con: -Prova prove\R16e_pertrade_ORB.txt -Deposito 100000 -Etichetta pt7e
+# =====================================================================
+# PERCHE' (REFERTO_PORTAFOGLIO_R16, punto aperto n.1)
+#   Il portafoglio a 4 serie e' misurato (DD storico 5,51%, MC p95
+#   10,56%). Manca la QUINTA serie: ORB-EMA200, il candidato nato in
+#   laboratorio (R15: OOS PF 1,657 · DD 9,92% · n=119 a 10k). Qui si
+#   raccoglie la sua serie per-trade alla taglia del Guardiano (100k)
+#   per rifare il referto a 5 serie. Non si giudica: si raccoglie.
+# LA CELLA (R15, centro promosso: doppio asterisco dichiarato nel referto)
+#   Solo long, OR 15' (14:30->14:45 server), pendenti STOP, EMA200 M5,
+#   stop 50% range (SLMode=3), TP 1,5x l'ampiezza (TPMode=1, Mult 1.5),
+#   NIENTE parziale (TP1Pct=0), trailing EMA9 ON, tetto range 0,8%,
+#   un trade/giorno, chiusura 21:00, rischio 1%.
+# MAGIC VERGINI: 770612/770613. Il 770611 (default EA, demo live e round
+#   R13-R15) e' in cache: la cache NON riesegue le celle note e non
+#   scriverebbe i file per-trade. Il magic-sweep e' il solito controllo
+#   di coerenza: le due passate DEVONO essere gemelle al centesimo.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpAllowShort=0
+InpSLMode=3
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0
+InpUseTrailEMA=1
+InpMaxRangePct=0.8
+InpUseEma200Filter=1
+InpUseEmaFilter=0
+InpUseVolumeFilter=0
+InpTP_R=1.0
+InpBreakeven=1
+InpExitOnEmaClose=0
+
+InpMagic=770612||770612||1||770613||Y
