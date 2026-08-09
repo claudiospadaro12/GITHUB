@@ -1,0 +1,21 @@
+# =====================================================================
+#  ROUND 16b: PER-TRADE del candidato -- MaxMinNotte DAX Short (cella live = default, r2)
+#  Si lancia con: -Prova prove\R16b_pertrade_MaxMinNotte.txt -Deposito 100000 -Etichetta ptb
+# =====================================================================
+# PERCHE' (ROTTA_PROP punto 4, via libera di Claudio del 09/08)
+#   Serie per-trade dei 4 candidati alla STESSA taglia (100k, quella del
+#   Guardiano FTMO) per calcolare il DD DI PORTAFOGLIO combinato e il
+#   Monte Carlo con dd_portafoglio.py. La cella e' quella promossa nei
+#   referti; il magic-sweep e' il solito controllo di coerenza (le due
+#   passate DEVONO avere gli stessi profitti). L'ExportTrades() scrive
+#   abtg_trades_*.csv nella cartella COMUNE di MT5:
+#   C:\Users\<utente>\AppData\Roaming\MetaQuotes\Terminal\Common\Files
+#   NOTA: a deposito 100k i numeri NON coincidono con i referti a 10k
+#   (posizioni scalate): e' atteso e non e' un verdetto nuovo. Qui non
+#   si giudica nessuno: si raccolgono le serie.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+InpMagic=770411||770411||1||770412||Y

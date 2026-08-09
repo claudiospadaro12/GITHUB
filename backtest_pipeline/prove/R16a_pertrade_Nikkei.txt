@@ -1,0 +1,22 @@
+# =====================================================================
+#  ROUND 16a: PER-TRADE del candidato -- SupertrendReversal sul Nikkei (cella H2, r5)
+#  Si lancia con: -Prova prove\R16a_pertrade_Nikkei.txt -Deposito 100000 -Etichetta pta
+# =====================================================================
+# PERCHE' (ROTTA_PROP punto 4, via libera di Claudio del 09/08)
+#   Serie per-trade dei 4 candidati alla STESSA taglia (100k, quella del
+#   Guardiano FTMO) per calcolare il DD DI PORTAFOGLIO combinato e il
+#   Monte Carlo con dd_portafoglio.py. La cella e' quella promossa nei
+#   referti; il magic-sweep e' il solito controllo di coerenza (le due
+#   passate DEVONO avere gli stessi profitti). L'ExportTrades() scrive
+#   abtg_trades_*.csv nella cartella COMUNE di MT5:
+#   C:\Users\<utente>\AppData\Roaming\MetaQuotes\Terminal\Common\Files
+#   NOTA: a deposito 100k i numeri NON coincidono con i referti a 10k
+#   (posizioni scalate): e' atteso e non e' un verdetto nuovo. Qui non
+#   si giudica nessuno: si raccolgono le serie.
+# =====================================================================
+@SIMBOLO  225JPY
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16386
+InpMagic=770901||770901||1||770902||Y

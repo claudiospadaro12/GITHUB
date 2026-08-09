@@ -1,0 +1,35 @@
+# =====================================================================
+#  ROUND 16c: PER-TRADE del candidato -- Dow Apertura ricetta DAX (cella r6 SOLO LONG 35)
+#  Si lancia con: -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta ptc
+# =====================================================================
+# PERCHE' (ROTTA_PROP punto 4, via libera di Claudio del 09/08)
+#   Serie per-trade dei 4 candidati alla STESSA taglia (100k, quella del
+#   Guardiano FTMO) per calcolare il DD DI PORTAFOGLIO combinato e il
+#   Monte Carlo con dd_portafoglio.py. La cella e' quella promossa nei
+#   referti; il magic-sweep e' il solito controllo di coerenza (le due
+#   passate DEVONO avere gli stessi profitti). L'ExportTrades() scrive
+#   abtg_trades_*.csv nella cartella COMUNE di MT5:
+#   C:\Users\<utente>\AppData\Roaming\MetaQuotes\Terminal\Common\Files
+#   NOTA: a deposito 100k i numeri NON coincidono con i referti a 10k
+#   (posizioni scalate): e' atteso e non e' un verdetto nuovo. Qui non
+#   si giudica nessuno: si raccolgono le serie.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpEntryMode=2
+InpRangeMode=0
+InpRangeMinutes=35
+InpBufferPoints=1000
+InpRetestOffsetPts=400
+InpAllowLong=1
+InpAllowShort=0
+InpRiskPercent=1.0
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpMagic=770202||770202||1||770203||Y
