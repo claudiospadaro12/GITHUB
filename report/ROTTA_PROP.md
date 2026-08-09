@@ -44,10 +44,13 @@ EU) e 2%+1% sui gemelli Live5m. Regole di rotta:
 2. **R15**: domare il DD della pista ORB (in coda sul PC backtest).
 3. **Ricompilazione VPS weekend** (sizing Nikkei a lotto vero + fix ORB corso).
 4. ✅ **FATTO il 09/08 sera** -- Export per-trade -> DD di portafoglio + Monte
-   Carlo. Primo referto: `risultati_archivio/REFERTO_PORTAFOGLIO_R16.md`.
-   4 serie OOS a 100k: netto +32.758, DD storico 5,51%, correlazioni ~zero,
-   MC p95 10,56% / p99 12,66% -> per FTMO 10% il rischio a taglia prop va
-   a ~0,7% per trade. Manca la 5a serie (ORB-EMA200, R16e).
+   Carlo. Referto: `risultati_archivio/REFERTO_PORTAFOGLIO_R16.md`.
+   **5 serie OOS a 100k**: netto +73.815 (di cui +41k dell'ORB, il piu'
+   giovane), DD storico 8,91% contro 22,11% di somma, correlazioni ~zero
+   (Dow vs ORB +0,06 sulla stessa apertura), MC p95 12,80% / p99 15,96%
+   -> per FTMO 10% il rischio a taglia prop va a **0,6-0,65% per trade**
+   (p99 sotto il 10%). Versione prudente senza ORB: +32.758, DD 5,51%,
+   p95 10,56%.
 5. **Binario D**: OnTester per HARSI/SuperWave_EA -> allargare il misurabile.
 6. **Un motore a settimana dal binario B** (prossimi: ORB_Fibo, PTE, Nightly).
 7. Quando 2-3 candidati hanno il forward maturo: **demo 100k dry-run col
