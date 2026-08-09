@@ -32,4 +32,8 @@ InpBreakevenAtTP1=1
 InpUseTrailing=1
 InpTrailMode=1
 InpTrailTF=5
-InpMagic=770202||770202||1||770203||Y
+# MAGIC NUOVI DI ZECCA (09/08 sera): 770204/770205 al posto di 770202/770203.
+# Il tester ha una CACHE: le celle gia' calcolate (anche in griglie vecchie)
+# NON vengono rieseguite, quindi ExportTrades non scrive i file per-trade.
+# Un magic mai usato non e' in cache -> i 2 pass girano per forza.
+InpMagic=770204||770204||1||770205||Y

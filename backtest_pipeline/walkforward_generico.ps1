@@ -519,6 +519,15 @@ $InputsTxt
     Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force
     if($n -le 1){ Write-Host "    ATTENZIONE: $tag.csv ha solo l'intestazione, ZERO passate." -ForegroundColor Red }
     else        { Write-Host ("    OK -> $tag.csv   ({0} righe)" -f ($n-1)) -ForegroundColor Green }
+    if(($n-1) -ne $NCelle){
+      Write-Host ("    ATTENZIONE: {0} righe nel CSV ma {1} celle chieste." -f ($n-1), $NCelle) -ForegroundColor Red
+      Write-Host "    E' la CACHE del tester: MT5 ripesca pass gia' calcolati (anche di" -ForegroundColor Red
+      Write-Host "    griglie vecchie) e NON riesegue le celle chieste se le ha in cache." -ForegroundColor Red
+      Write-Host "    Un pass non rieseguito NON scrive i file per-trade (abtg_trades_*)." -ForegroundColor Red
+      Write-Host "    Verifica: se i file abtg_trades_* dei magic chiesti sono comparsi" -ForegroundColor Red
+      Write-Host "    freschi in Common\Files, i pass sono girati e va tutto bene." -ForegroundColor Red
+      Write-Host "    Se NON ci sono: magic MAI usato prima, oppure svuotare Tester\cache." -ForegroundColor Red
+    }
   }else{
     Write-Host "    (nessun CSV per ${tag}: storico mancante su $Simbolo? MT5 gia' aperto?)" -ForegroundColor Yellow
   }
