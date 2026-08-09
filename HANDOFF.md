@@ -152,6 +152,10 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
    `report/DEPLOY_GUARDIANO_100K.md` (nuovo conto BCM 100k EUR hedging, seconda
    istanza MT5 sul VPS, Guardian FTMO preset per primo, 5 EA a rischio 0,65% con
    ORB a 0,3%, legge dello screenshot a ogni fase).
+0-ter. 🔵 **PAGELLA DOPPIA (prossimo lavoro mio)**: estendere `analizza_trades.py`
+   a leggere anche `ABTG_Trades_100k.csv` (conto 50504263, dry-run Guardiano) —
+   sezione FTMO con distanza dai pavimenti 95k/90k giorno per giorno. L'exporter
+   sul -V3 e' gia' attivo (EURUSD H1, export ogni 30').
 1. 🔄 **EMA200**: scan OHLC H4 (in corso) + H1 → poi tick reali sui vincitori.
 2. ⏳ **Tick reali mancanti**: SupRev IBEX (E35EUR) H1; GoldenCross H1 sui top OHLC (Oro/USDJPY/GBPUSD); SupRev non-indici H4 (XAU/CHFJPY/GBPJPY/AUDUSD).
 3. 🟢 **Campagna matrice** motore×simbolo×TF (FASE 1 TF alti → FASE 3 TF bassi): mancano SuperWave, SupertrendInvert, PTE, WOL, FiboH4 allo scan.

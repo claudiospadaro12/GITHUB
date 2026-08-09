@@ -18,6 +18,11 @@
   vecchio MT5, col rischio riscritto dallo script.
 - Primi appuntamenti (ora server): box MaxMin 23:00 di stasera; DAX
   08:00; Dow/ORB 14:30.
+- 22:08 -- settimo grafico: ABTG_TradeExporter su EURUSD H1 con
+  InpFile=ABTG_Trades_100k.csv (file SEPARATO dal vecchio conto nella
+  Common condivisa -- quinto errore di deploy beccato dallo screenshot:
+  il primo tentativo aveva il nome file di default). Da domani la
+  pagella puo' leggere entrambi i conti.
 
 Il resto del documento e' la scaletta originale, conservata come
 riferimento.
