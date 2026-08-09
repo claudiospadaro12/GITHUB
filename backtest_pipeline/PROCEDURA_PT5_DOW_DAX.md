@@ -33,7 +33,7 @@ del "$env:APPDATA\MetaQuotes\Terminal\Common\Files\abtg_trades_*.csv"
 ### Passo 1 -- controllo lampo del Dow (30 secondi, non lancia nulla)
 
 ```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16c_pertrade_Dow.txt" -OutFile prove\R16c_pertrade_Dow.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta pt5c -SoloControllo
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16c_pertrade_Dow.txt" -OutFile prove\R16c_pertrade_Dow.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_Dow_Apertura_US -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta pt5c -SoloControllo
 ```
 
 La console DEVE dire: `spazzolati : 1`, `InpMagic  2 celle`.
@@ -42,13 +42,13 @@ Se dice un numero diverso, FERMATI e mandami lo screenshot.
 ### Passo 2 -- lancio vero del Dow
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta pt5c
+powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_Dow_Apertura_US -Prova prove\R16c_pertrade_Dow.txt -Deposito 100000 -Etichetta pt5c
 ```
 
 ### Passo 3 -- controllo lampo del DAX
 
 ```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16d_pertrade_DAX.txt" -OutFile prove\R16d_pertrade_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000 -Etichetta pt5d -SoloControllo
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prove/R16d_pertrade_DAX.txt" -OutFile prove\R16d_pertrade_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000 -Etichetta pt5d -SoloControllo
 ```
 
 Stesso controllo: `spazzolati : 1`, `InpMagic  2 celle`.
@@ -56,8 +56,14 @@ Stesso controllo: `spazzolati : 1`, `InpMagic  2 celle`.
 ### Passo 4 -- lancio vero del DAX
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000 -Etichetta pt5d
+powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000 -Etichetta pt5d
 ```
+
+NOTA (09/08 sera): nelle prime versioni di queste righe mancava il nome
+dell'EA subito dopo walkforward_generico.ps1 -- e' un parametro
+OBBLIGATORIO e PowerShell si ferma a chiedere "Expert:". Se succede,
+si puo' scrivere il nome a mano (ABTG_Dow_Apertura_US oppure
+ABTG_DAX_Apertura_EU) e premere INVIO: il lancio prosegue normalmente.
 
 ### Passo 5 -- invio
 
