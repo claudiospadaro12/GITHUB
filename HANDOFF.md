@@ -143,6 +143,13 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
 - ⚠️ PostNews FOMC/BCE = news trading → a rischio regole prop.
 
 ## ⏳ DA FARE (priorità)
+0. 🔴 **Commenti ordini negli EA della flotta** (richiesta esplicita di Claudio, 09/08 sera):
+   aggiungere `InpComment` a Dow_Apertura_US, DAX_Apertura_EU (+_Ottimizzato),
+   Nasdaq_Apertura_US (+_Ottimizzato), Apertura_Marco — oggi piazzano ordini SENZA
+   commento (solo magic). Default parlanti tipo "DOW APERT US". ORB del corso NON si
+   tocca. **DA FARE SOLO DOPO che i 4 file per-trade pt6c/pt6d sono arrivati e
+   verificati**: il driver walk-forward ricompila l'EA da GitHub a ogni lancio, non
+   si toccano i sorgenti a raccolta in corso. Poi VPS: `aggiorna_ea.ps1` + riavvio MT5.
 1. 🔄 **EMA200**: scan OHLC H4 (in corso) + H1 → poi tick reali sui vincitori.
 2. ⏳ **Tick reali mancanti**: SupRev IBEX (E35EUR) H1; GoldenCross H1 sui top OHLC (Oro/USDJPY/GBPUSD); SupRev non-indici H4 (XAU/CHFJPY/GBPJPY/AUDUSD).
 3. 🟢 **Campagna matrice** motore×simbolo×TF (FASE 1 TF alti → FASE 3 TF bassi): mancano SuperWave, SupertrendInvert, PTE, WOL, FiboH4 allo scan.
