@@ -143,13 +143,15 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
 - ⚠️ PostNews FOMC/BCE = news trading → a rischio regole prop.
 
 ## ⏳ DA FARE (priorità)
-0. 🔴 **Commenti ordini negli EA della flotta** (richiesta esplicita di Claudio, 09/08 sera):
-   aggiungere `InpComment` a Dow_Apertura_US, DAX_Apertura_EU (+_Ottimizzato),
-   Nasdaq_Apertura_US (+_Ottimizzato), Apertura_Marco — oggi piazzano ordini SENZA
-   commento (solo magic). Default parlanti tipo "DOW APERT US". ORB del corso NON si
-   tocca. **DA FARE SOLO DOPO che i 4 file per-trade pt6c/pt6d sono arrivati e
-   verificati**: il driver walk-forward ricompila l'EA da GitHub a ogni lancio, non
-   si toccano i sorgenti a raccolta in corso. Poi VPS: `aggiorna_ea.ps1` + riavvio MT5.
+0. ✅ **RISOLTO senza toccare codice (09/08 sera)** — Commenti ordini: il censimento
+   cercava solo `InpComment`, ma la famiglia Apertura passa il commento via
+   `#define ABTG_DEF_NAME` su OGNI ordine ("Dow Apertura US BUY", "DAX Apertura EU
+   BUY", ecc.). TUTTA la squadra del 100k ha commenti riconoscibili. Nessuna
+   modifica necessaria.
+0-bis. 🟢 **IN CORSO: deploy demo 100k col Guardiano** — scaletta completa in
+   `report/DEPLOY_GUARDIANO_100K.md` (nuovo conto BCM 100k EUR hedging, seconda
+   istanza MT5 sul VPS, Guardian FTMO preset per primo, 5 EA a rischio 0,65% con
+   ORB a 0,3%, legge dello screenshot a ogni fase).
 1. 🔄 **EMA200**: scan OHLC H4 (in corso) + H1 → poi tick reali sui vincitori.
 2. ⏳ **Tick reali mancanti**: SupRev IBEX (E35EUR) H1; GoldenCross H1 sui top OHLC (Oro/USDJPY/GBPUSD); SupRev non-indici H4 (XAU/CHFJPY/GBPJPY/AUDUSD).
 3. 🟢 **Campagna matrice** motore×simbolo×TF (FASE 1 TF alti → FASE 3 TF bassi): mancano SuperWave, SupertrendInvert, PTE, WOL, FiboH4 allo scan.
