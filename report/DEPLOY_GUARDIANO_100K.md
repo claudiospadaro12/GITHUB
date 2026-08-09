@@ -1,5 +1,28 @@
 # DEPLOY -- DEMO 100K COL GUARDIANO (dry-run FTMO 2-Step)
 
+## ✅ COMPLETATO il 09/08/2026 alle 20:22 -- IL DRY-RUN E' IN ACQUA
+
+- Conto: **50504263** (BCM demo, 100.000 EUR, hedge) su istanza separata
+  "BCM Markets MT5 Terminal **-V3**" del VPS; il vecchio 50503392 continua
+  il forward sull'istanza originale, intoccato.
+- Guardian su AUDCAD H1 col preset FTMO (verificato 11/11); pannello
+  "Stato: OK - operativo", limiti 5%/10%, CHIUDI+BLOCCA.
+- 5 EA verificati campo-per-campo da screenshot (legge rispettata; il
+  Nikkei ha DI NUOVO salvato il deploy: lo script aveva pescato un
+  grafico STREV sbagliato -- magic 770925, TF H1, mult 3.0, TP 2.5 --
+  corretto a mano in 2H/3.5/2.0/770901):
+  Guardian 779001 · DAX 770101 (0.65) · Dow 770202 (0.65) ·
+  MaxMin 770411 (0.65) · Nikkei 770901 (0.65) · ORB 770611 (**0.3**).
+- Algo Trading VERDE, profilo "SQUADRA 100K" salvato.
+- .set generati con `estrai_set_forward.ps1` (v3) dai grafici del
+  vecchio MT5, col rischio riscritto dallo script.
+- Primi appuntamenti (ora server): box MaxMin 23:00 di stasera; DAX
+  08:00; Dow/ORB 14:30.
+
+Il resto del documento e' la scaletta originale, conservata come
+riferimento.
+
+
 Deciso da Claudio il 09/08/2026 sera, dopo il referto di portafoglio
 (`REFERTO_PORTAFOGLIO_R16.md`). Domenica sera = momento perfetto:
 mercati chiusi, lunedi' si parte puliti.
