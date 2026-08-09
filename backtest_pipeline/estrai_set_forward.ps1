@@ -18,11 +18,13 @@ $folders = Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | Where-
 $map = @{}
 foreach ($f in $folders) { $map[$f.FullName] = (Get-Content (Join-Path $f.FullName "origin.txt") -Raw).Trim() }
 
-$new = $folders | Where-Object { $map[$_.FullName] -like "*PROP*" } | Select-Object -First 1
-$old = $folders | Where-Object { $map[$_.FullName] -notlike "*PROP*" -and $map[$_.FullName] -like "*BCM*" } | Select-Object -First 1
+# VPS di Claudio (visto il 09/08): vecchia = "BCM Markets MT5 Terminal",
+# nuova (conto 100k) = "BCM Markets MT5 Terminal -V3". MT4 e altri broker ignorati.
+$new = $folders | Where-Object { $map[$_.FullName] -like "*BCM*MT5*-V3*" } | Select-Object -First 1
+$old = $folders | Where-Object { $map[$_.FullName] -like "*BCM*MT5*" -and $map[$_.FullName] -notlike "*-V3*" -and $map[$_.FullName] -notlike "*MT4*" } | Select-Object -First 1
 
 if (-not $new -or -not $old) {
-  Write-Host "Non trovo le due istanze (vecchia BCM / nuova con 'PROP' nel percorso):" -ForegroundColor Red
+  Write-Host "Non trovo le due istanze (vecchia 'BCM Markets MT5 Terminal' / nuova '...-V3'):" -ForegroundColor Red
   foreach ($f in $folders) { Write-Host ("  {0} -> {1}" -f $f.Name, $map[$f.FullName]) }
   exit 1
 }
