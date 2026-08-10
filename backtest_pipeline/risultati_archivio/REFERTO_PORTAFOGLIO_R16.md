@@ -66,6 +66,24 @@ DD storico 5,51%, MC p50 6,51% / p95 10,56% / p99 12,66%. Regola di
 buon senso per il dry-run: accendere l'ORB nel Guardiano a rischio
 ridotto o aspettare i suoi 30 trade forward prima di dargli peso pieno.
 
+## AGGIORNAMENTO 10/08 -- SESTA SERIE: L'ORO NOTTURNO MIGLIORA TUTTO
+
+Serie R19b (MaxMinNotte XAUUSD, cella R17 250/H2, magic 770405/06 gemelli,
+riepiloghi identici al centesimo al giro senza export; scarto per-trade
+26,41 = 0,17%, arrotondamenti di chiusura forzata; finestra OOS oro
+set 2025 -> giu 2026, piu' corta delle altre: dichiarato).
+
+- Netto totale: **+89.690 (+89,7%)** · max DD storico **8,79%** (SCESO
+  dal 8,91% a 5 serie) · somma singoli 25,09% -> **-16,3 punti**
+- Peggior giornata -3,84% (a 0,65% ~ -2,5%)
+- **La risposta alla domanda della sesta sedia: oro vs MaxMin DAX +0,07,
+  oro vs DAX Apertura -0,16** -- la notte dell'oro e' scorrelata dalla
+  notte del DAX, MISURATO. Tutte le correlazioni fra -0,16 e +0,08.
+- Monte Carlo: p50 6,82% · **p95 11,60% · p99 14,83%** -- code MIGLIORI
+  del portafoglio a 5: l'oro aggiunge rendimento togliendo rischio.
+- Taratura: a **0,65%** p95 ~7,5% / p99 ~9,6% -> sotto il 10% FTMO
+  anche al p99. La taratura attuale del 100k regge il portafoglio a 6.
+
 ## Cosa resta aperto
 
 1. La finestra e' UNA (12,6 mesi OOS): il Monte Carlo allarga le
