@@ -21,7 +21,7 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 **Fascia A — tick reali mancanti (candidati quasi pronti, ore di macchina):**
 - ~~SupRev IBEX (E35EUR) H1~~ — ❌ BOCCIATO R18 (10/08): OOS 12/12 negativo, 14° ribaltamento. `REFERTO_ROUND18_IBEX.md`
 - ~~GoldenCross H1 su Oro/USDJPY/GBPUSD~~ — ❌ CAPITOLO CHIUSO R20 (10/08): forex 0/6 (USDJPY IS rosso 3/3, GBPUSD 15° ribaltamento). `REFERTO_ROUND20_GOLDENCROSS_FOREX.md`
-- ~~SupRev non-indici H4~~ — ❌ R21 (10/08): nessuna promozione (XAUUSD storico corto, CHFJPY/AUDUSD 0/12, GBPJPY riga di bordo NON promossa). UNICO seguito: **R22 GBPJPY oltre-bordo** (ultimo giro, poi fascia B). `REFERTO_ROUND21_SUPREV_H4.md`
+- ~~SupRev non-indici H4~~ — ❌ R21 (10/08): nessuna promozione (XAUUSD storico corto, CHFJPY/AUDUSD 0/12, GBPJPY riga di bordo NON promossa). R22 oltre-bordo: **3/9, capitolo CHIUSO** (crinale isolato, non altopiano). `REFERTO_ROUND22_GBPJPY_BORDO.md`. **FASCIA A SVUOTATA: 0 sedie da 4 round — lo screening OHLC promuove ipotesi, non candidati.** Prossimo: fascia B nel weekend.
 
 **Fascia B — scan larghi OHLC dei motori mai visti (notti di coda weekend):**
 - SuperWave · SupertrendInvert · PTE · WOL · FiboH4 · Nightly
