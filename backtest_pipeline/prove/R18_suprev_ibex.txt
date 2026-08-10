@@ -1,0 +1,60 @@
+# =====================================================================
+#  ROUND 18: SupertrendReversal su IBEX (E35EUR) H1 -- tick reali
+#  Si lancia con: -Prova prove\R18_suprev_ibex.txt -Etichetta r18
+#  (FASCIA A della campagna arsenale: vincitore OHLC mai passato a tick reali)
+# =====================================================================
+# PERCHE' (CAMPAGNA_ARSENALE.md, fascia A)
+#   Lo screening OHLC ha promosso SupRev su E35EUR H1. Qui il verdetto
+#   vero: walk-forward a tick reali con la stessa struttura del Nikkei
+#   (il fratello gia' in squadra). Se passa, entra nel vivaio.
+# IPOTESI (falsificabile, scritta prima)
+#   TRAGUARDO: una regione con entrambe le finestre in utile, PF OOS
+#   >= 1,10, DD OOS < 10% all'1%, n >= 30 trade OOS.
+#   FALSIFICAZIONE: se la regione non c'e', l'IBEX si archivia e si
+#   passa al prossimo di fascia A. Nessun accanimento.
+# NOTA STORICO: 2024.09.26 e' l'IPOTESI misurata sugli altri indici BCM.
+#   Controllare il rilevatore trade/mese IS vs OOS nel referto.
+# =====================================================================
+@SIMBOLO  E35EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- la struttura del documento (come il Nikkei r5), pinnata ---
+InpTF=16385
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseConfluence=1
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=1
+InpPendingPips=20
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTrailOnST=1
+InpExitOnFlip=1
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=0
+InpUseNewsFilter=0
+
+# MAGIC VERGINE (cache): 770926, mai usato.
+InpMagic=770926
+
+# =====================================================================
+#  GLI SWEEP -- i due assi che contano per un reversal:
+#  quanto e' lento il Supertrend e dove sta il TP finale.
+#  celle = 4 x 3 = 12 per finestra -> 24 pass a tick reali su H1
+# =====================================================================
+InpStMult=2.5||2.5||0.5||4.0||Y
+InpTP_RR=2.0||2.0||0.5||3.0||Y
