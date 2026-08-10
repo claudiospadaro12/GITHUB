@@ -1,0 +1,67 @@
+# =====================================================================
+#  ROUND 21: SupertrendReversal H4 sui NON-indici -- ultimo di fascia A
+#  Un lancio per simbolo:
+#    -Prova prove\R21_suprev_h4_nonindici.txt -Simbolo XAUUSD -Etichetta r21
+#    -Prova prove\R21_suprev_h4_nonindici.txt -Simbolo CHFJPY -Etichetta r21
+#    -Prova prove\R21_suprev_h4_nonindici.txt -Simbolo GBPJPY -Etichetta r21
+#    -Prova prove\R21_suprev_h4_nonindici.txt -Simbolo AUDUSD -Etichetta r21
+# =====================================================================
+# PERCHE' (CAMPAGNA_ARSENALE fascia A, ultimo nome rimasto)
+#   Top dello screening OHLC su H4 mai passati a tick reali. Il motore
+#   e' lo stesso del Nikkei (gia' in squadra su H2): qui si chiede se
+#   il rimbalzo sul Supertrend vive anche su metalli e cross H4.
+#   Un promosso qui = scorrelazione vera (ne' indici ne' sessione).
+# IPOTESI (falsificabile, scritta prima)
+#   TRAGUARDO per OGNI simbolo sul SUO mercato: entrambe le finestre in
+#   utile, PF OOS >= 1,10, DD OOS < 10% all'1%, n >= 30 trade OOS, e
+#   regione stabile sui due assi (niente cella isolata).
+#   FALSIFICAZIONE: rosso in OOS o regione instabile -> si archivia.
+#   Con questo la fascia A si svuota comunque: o con una sedia in piu'
+#   o con la certezza che i "quasi pronti" erano miraggi OHLC.
+# NOTA STORICO: 2024.09.26 e' un'IPOTESI (su XAUUSD l'M5 partiva dal
+#   28/02/2025 ma l'H4 puo' arrivare piu' indietro): guardare SEMPRE il
+#   rilevatore trade/mese IS<->OOS.
+# NOTA TF: InpTF pinnato a H4; @PERIODO H4 allineato.
+# MAGIC VERGINI (cache): 770927/770928, mai usati.
+# =====================================================================
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+# --- la struttura del documento, pinnata (come R18/Nikkei) ---
+InpTF=16388
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseConfluence=1
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=1
+InpPendingPips=20
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTrailOnST=1
+InpExitOnFlip=1
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=0
+InpUseNewsFilter=0
+
+InpMagic=770927
+
+# =====================================================================
+#  GLI SWEEP -- gli stessi due assi del R18 (lentezza del Supertrend e
+#  TP finale), 12 celle per finestra. Su H4 i campioni sono piccoli:
+#  n < 30 in OOS = bocciatura AUTOMATICA, senza appello.
+# =====================================================================
+InpStMult=2.5||2.5||0.5||4.0||Y
+InpTP_RR=2.0||2.0||0.5||3.0||Y
