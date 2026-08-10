@@ -1,0 +1,58 @@
+# =====================================================================
+#  ROUND 19: PER-TRADE del candidato ORO NOTTURNO (cella R17) a 100k
+#  Si lancia con: -Prova prove\R19_pertrade_oro.txt -Deposito 100000 -Etichetta r19
+# =====================================================================
+# PERCHE' (REFERTO_ROUND17_ORO_NOTTE, prossimo passo n.1)
+#   Serie per-trade della cella promossa alla taglia del Guardiano, per
+#   il referto di portafoglio a 6 serie. La domanda che conta: la notte
+#   dell'oro e' scorrelata dalla notte del DAX? Si misura, non si crede.
+# LA CELLA (R17, centro dell'altopiano)
+#   Box 22:00-6:59 server, piazzamento 7:00, cutoff 9:30, flat 17:30,
+#   buffer 250, stop al box opposto, TF gestione H2, gestione MaxMin
+#   standard, entrambi i lati, correlazione off, news off, rischio 1%.
+# MAGIC VERGINI (cache): 770403/770404. Il magic-sweep e' il solito
+#   controllo di coerenza: gemelli al centesimo o niente.
+# =====================================================================
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+@DAQUANDO 2025.03.01
+
+InpBoxStartHour=22
+InpBoxStartMin=0
+InpBoxEndHour=6
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=0
+InpEntryCutoffHour=9
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=90
+InpAllowLong=1
+InpAllowShort=1
+InpSLMode=0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=3000
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTP2_R=2.5
+InpTP2Pct=50
+InpUseEMA200Target=1
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=1
+InpTrailAtrMult=2.0
+InpUseCorrelation=0
+InpRiskPercent=1.0
+InpUseNewsFilter=0
+
+InpBufferPoints=250
+InpMgmtTF=16386
+
+InpMagic=770403||770403||1||770404||Y
