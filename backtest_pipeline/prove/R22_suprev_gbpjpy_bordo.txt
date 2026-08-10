@@ -1,0 +1,52 @@
+# =====================================================================
+#  ROUND 22: GBPJPY H4 -- oltre il bordo della griglia R21 (ULTIMO giro)
+#  Si lancia con: -Prova prove\R22_suprev_gbpjpy_bordo.txt -Simbolo GBPJPY -Etichetta r22
+# =====================================================================
+# PERCHE' (REFERTO_ROUND21_SUPREV_H4)
+#   In R21 la riga StMult 4,0 su GBPJPY passa i criteri numerici
+#   (OOS PF 1,37-1,78, DD ~4%, n 40) ma sta sul BORDO della griglia con
+#   un vicinato pieno di ribaltamenti. La regola del bordo (v. oro R17:
+#   il buffer 250 fu trovato cosi') dice: si allarga e si misura.
+# IPOTESI (falsificabile, scritta prima)
+#   TRAGUARDO: un ALTOPIANO 4,0-5,0 con entrambe le finestre in utile,
+#   PF OOS >= 1,10, DD < 10%, n >= 30 OOS su ALMENO 6 celle su 9
+#   contigue. Una riga sola non basta piu': serve la regione.
+#   FALSIFICAZIONE: se l'altopiano non c'e', il capitolo SupRev-forex
+#   si CHIUDE senza appello e si passa alla fascia B. Nessun R23.
+# MAGIC VERGINE (cache): 770929.
+# =====================================================================
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16388
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseConfluence=1
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=1
+InpPendingPips=20
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTrailOnST=1
+InpExitOnFlip=1
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=0
+InpUseNewsFilter=0
+
+InpMagic=770929
+
+InpStMult=4.0||4.0||0.5||5.0||Y
+InpTP_RR=2.0||2.0||0.5||3.0||Y
