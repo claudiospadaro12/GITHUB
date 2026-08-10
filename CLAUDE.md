@@ -7,6 +7,14 @@
 - Ciò che non è pushato = perso. Nel dubbio, committa.
 - Per ripartire in una chat nuova: leggere `HANDOFF.md` + `PROMEMORIA_APERTURE.md` + `CLASSIFICHE.md` sul branch sopra.
 
+## REGOLA DELLE RIGHE DI LANCIO (richiesta esplicita di Claudio, 10/08)
+Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
+1. **l'`irm` davanti** che riscarica script e prova dal branch `lavoro` (il 10/08
+   una copia vecchia di `maxmin_oro.ps1` ha rifatto la griglia sbagliata);
+2. **a fine test, la riga di raccolta**: copia i risultati in una cartella sul
+   Desktop e crea lo zip pronto da mandare (`Compress-Archive`), con l'elenco
+   dei file attesi da verificare in console.
+
 ## FUSO ORARIO BCM (regola fissa)
 **Il server BCM è 1 ORA INDIETRO rispetto all'ora italiana** (in questo periodo dell'anno).
 - Ora italiana − 1 = ora server BCM.
