@@ -10,8 +10,14 @@
 #   Box 22:00-6:59 server, piazzamento 7:00, cutoff 9:30, flat 17:30,
 #   buffer 250, stop al box opposto, TF gestione H2, gestione MaxMin
 #   standard, entrambi i lati, correlazione off, news off, rischio 1%.
-# MAGIC VERGINI (cache): 770403/770404. Il magic-sweep e' il solito
-#   controllo di coerenza: gemelli al centesimo o niente.
+# MAGIC VERGINI (2a rotazione, 10/08 pomeriggio): 770405/770406.
+#   Il primo giro (770403/04) ha girato PRIMA che l'EA generico avesse
+#   ExportTrades (aggiunto il 10/08): riepiloghi validi, file per-trade
+#   mai scritti. I magic bruciati sono in cache: servono numeri nuovi.
+#   Il magic-sweep e' il solito controllo di coerenza: gemelli o niente.
+#   CONTROLLO EXTRA: i nuovi riepiloghi devono coincidere AL CENTESIMO
+#   coi vecchi (IS +3788,45/59 · OOS +15848,75/92): l'export non deve
+#   cambiare nemmeno un numero.
 # =====================================================================
 @SIMBOLO  XAUUSD
 @PERIODO  M5
@@ -55,4 +61,4 @@ InpUseNewsFilter=0
 InpBufferPoints=250
 InpMgmtTF=16386
 
-InpMagic=770403||770403||1||770404||Y
+InpMagic=770405||770405||1||770406||Y
