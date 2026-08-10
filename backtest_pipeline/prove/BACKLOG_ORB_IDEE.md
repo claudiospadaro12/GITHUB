@@ -69,3 +69,21 @@ regola del banco vergine e i 12 ribaltamenti). Tre strumenti che NON abbiamo:
 - Filtro EMA200: senza direzione (R9); EMA50+0,2% (scheda DAX): pareggio (R11).
 - Filtro volume: FUNZIONA ma solo in modalita' chiusura confermata (perimetro
   documentato in R12) e porta al pareggio, non all'edge (R8).
+
+
+## Idee ORO da fonte esterna (articolo ThinkMarkets, portato da Claudio il 10/08)
+Setacciate col solito criterio: solo cio' che e' falsificabile al banco.
+1. **London breakout sull'oro** -- range asiatico fino alle 08:00 GMT,
+   rottura con conferma di candela 30m/1h. Cugino diurno del box
+   notturno promosso (R17); la voce "sessione Londra" del backlog ORB
+   ora ha una seconda fonte. Da imbuto completo, prova dedicata.
+2. **Filtro rapporto oro/argento** (XAGUSD disponibile su BCM):
+   >80 = oro caro/trend stanco, <60 = trend-friendly. Gemello
+   concettuale del filtro S&P del MaxMin DAX. Ipotesi misurabile:
+   il box notturno oro filtrato col ratio batte il box nudo?
+   ATTENZIONE: non si tocca la cella promossa 250/H2 -- eventuale
+   filtro solo come NUOVA variante da walk-forward.
+NOTA: il resto dell'articolo (ATR sizing, stop dinamici, vola 150-200$)
+CONFERMA le scoperte gia' misurate in NOTTE_ORO; le 4 strategie
+generiche EMA20/50+RSI sono il GoldenCross sotto altro nome (capitolo
+chiuso con 9 lanci, R2/R4/R20).
