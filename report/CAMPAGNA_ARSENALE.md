@@ -19,7 +19,7 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 ## La coda, in ordine di vicinanza alla sedia
 
 **Fascia A — tick reali mancanti (candidati quasi pronti, ore di macchina):**
-- SupRev IBEX (E35EUR) H1 — vincitore OHLC, mai passato a tick reali
+- ~~SupRev IBEX (E35EUR) H1~~ — ❌ BOCCIATO R18 (10/08): OOS 12/12 negativo, 14° ribaltamento. `REFERTO_ROUND18_IBEX.md`
 - GoldenCross H1 su Oro/USDJPY/GBPUSD — top OHLC (la bocciatura R4 era
   sugli INDICI: 0/3; su oro/forex il verdetto non c'è ancora)
 - SupRev non-indici H4 (XAUUSD/CHFJPY/GBPJPY/AUDUSD) — top OHLC
