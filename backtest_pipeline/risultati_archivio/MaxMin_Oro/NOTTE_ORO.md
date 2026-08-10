@@ -97,7 +97,28 @@ parametri da tarare (l'ATR ne ha uno, il fisso pure).
    parte nel 2025, il test copre ~16 mesi e non 30 — e quei 16 mesi sono proprio quelli in
    cui l'oro è raddoppiato di volatilità. **Da verificare** prima di dare peso ai numeri.
 
-## Prossimo passo
+## Aggiornamento 10/08 -- la "fase 2" del vecchio script (tick reali, griglia larga)
 
-`maxmin_oro.ps1 -Fase 2 -SLMode 0` → 12 pass a **tick reali**, buffer 50/150/250/350 ×
-TF M30/H1/H4.
+Il lancio del 10/08 e' partito con la COPIA VECCHIA dello script (la riga
+dettata non aveva l'irm davanti -- errore di procedura, corretto: ogni riga
+ora ha sempre l'irm). Ha rifatto la griglia della fase 1 (buffer
+200/800/1400/2000 x TF M5-H1) a TICK REALI con SLMode=0. Non era il piano,
+ma i numeri sono veri e CONFERMANO i gradienti:
+
+| TF | buf 200 | buf 800 | buf 1400 | buf 2000 |
+|---|---|---|---|---|
+| M5  | +709 (PF 1,24) | +57 (1,08) | -156 | -91 |
+| M15 | +1181 (PF 1,28) | +165 (1,20) | -167 | -15 |
+| M30 | +1824 (PF 1,37) | +418 (1,46) | +23 | +40 |
+| H1  | **+2615 (PF 1,48 · DD 4,0%)** | +518 (1,54) | +104 | +116 |
+
+Buffer stretti e TF alti vincono anche a tick reali; 1400/2000 morti.
+LIMITE: finestra unica (niente IS/OOS) -> nessun verdetto. File in
+`risultati_prove/MaxMin_Oro_fase2_vecchioscript/`.
+
+## Prossimo passo (aggiornato 10/08)
+
+**R17**: walk-forward vero col driver corretto -- `prove/R17_oro_notte.txt`
+(pins completi + sweep buffer 50/150/250/350 x TF M30..H4, stop box
+opposto, magic vergine 770402, @DAQUANDO 2025.03.01 = storico misurato).
+Criteri congelati scritti nella prova PRIMA dei numeri.

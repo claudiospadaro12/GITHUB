@@ -1,0 +1,80 @@
+# =====================================================================
+#  ROUND 17: ORO NOTTURNO a walk-forward -- MaxMinNotte su XAUUSD
+#  Si lancia con: -Prova prove\R17_oro_notte.txt -Etichetta r17
+# =====================================================================
+# PERCHE' (NOTTE_ORO.md + fase2-vecchio-script del 10/08)
+#   Lo studio (371 notti) e due giri di griglia (OHLC 05/08, tick reali
+#   10/08 col vecchio script) dicono la stessa cosa: buffer STRETTI e
+#   TF di gestione ALTI. A tick reali, buffer 200 e' positivo su tutti
+#   i TF (H1: PF 1,48 DD 4,0%) e 1400/2000 sono morti. Ma erano numeri
+#   a FINESTRA UNICA: qui l'oro passa l'imbuto vero (IS sceglie la
+#   regione, OOS verifica).
+# IPOTESI (falsificabile, scritta prima)
+#   TRAGUARDO: una regione (non una cella) con entrambe le finestre in
+#   utile, PF OOS >= 1,10, DD OOS < 10% all'1%, n >= 30 posizioni OOS.
+#   FALSIFICAZIONE: se la regione buffer 50-350 non regge l'OOS, il
+#   gradiente era un artefatto del periodo e la pista si chiude.
+# ATTENZIONE STORICO: l'M5 dell'oro parte dal 28/02/2025 (misurato
+#   nello studio). @DAQUANDO qui sotto riflette QUELLO, non l'etichetta
+#   del broker. Controllare il conteggio trade/mese IS vs OOS.
+# NOTA CONTEGGIO: ogni posizione produce fino a 3 chiusure (2 parziali
+#   + residuo): i "Trades" del tester vanno divisi ~2,5 per avere le
+#   posizioni vere.
+# =====================================================================
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+@DAQUANDO 2025.03.01
+
+# --- il box notturno dell'oro (dallo studio: la notte vera, 22->6:59 server)
+InpBoxStartHour=22
+InpBoxStartMin=0
+InpBoxEndHour=6
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=0
+InpEntryCutoffHour=9
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=90
+InpAllowLong=1
+InpAllowShort=1
+
+# --- stop: fissato al box opposto (vincitore fase 1 E fase 2 vecchia)
+InpSLMode=0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=3000
+
+# --- gestione (quella del MaxMin, invariata)
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTP2_R=2.5
+InpTP2Pct=50
+InpUseEMA200Target=1
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=1
+InpTrailAtrMult=2.0
+
+# --- niente filtri: prima il motore nudo, i filtri dopo (se serve)
+InpUseCorrelation=0
+InpRiskPercent=1.0
+InpUseNewsFilter=0
+
+# MAGIC VERGINE (cache): 770402, mai usato nelle griglie oro precedenti.
+InpMagic=770402
+
+# =====================================================================
+#  GLI SWEEP -- dove i due gradienti puntavano
+#  buffer: 50/150/250/350 (sotto il bordo della vecchia griglia)
+#  TF gestione: enum da M30 a H4 (il driver conta i membri: M30/H1/H2/H3/H4)
+#  celle = 4 x 5 = 20 per finestra -> 40 pass a tick reali (nottata)
+# =====================================================================
+InpBufferPoints=50||50||100||350||Y
+InpMgmtTF=30||30||1||16388||Y
