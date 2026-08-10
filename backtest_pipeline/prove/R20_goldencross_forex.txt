@@ -1,0 +1,33 @@
+# =====================================================================
+#  ROUND 20: GoldenCross H1 su USDJPY e GBPUSD -- fascia A della campagna
+#  Un lancio per simbolo:
+#    -Prova prove\R20_goldencross_forex.txt -Simbolo USDJPY -Etichetta r20
+#    -Prova prove\R20_goldencross_forex.txt -Simbolo GBPUSD -Etichetta r20
+# =====================================================================
+# PERCHE' (CAMPAGNA_ARSENALE fascia A + storia del pattern)
+#   Il GoldenCross (triplo incrocio EMA + Heiken Ashi + ADX) su XAUUSD
+#   H1 e' un near-miss archiviato (R2: OOS +308 PF 1,25 ma vicinato ADX
+#   non verde); sugli INDICI e' bocciato (R4: 0/3). USDJPY e GBPUSD sono
+#   i top dello screening OHLC mai passati a tick reali. Un EA forex
+#   promosso sarebbe la scorrelazione piu' preziosa per il portafoglio
+#   (decisione D2 della campagna).
+# IPOTESI (falsificabile, scritta prima)
+#   TRAGUARDO per OGNI simbolo, sul SUO mercato: entrambe le finestre
+#   in utile, PF OOS >= 1,10, DD OOS < 10% all'1%, n >= 30 trade OOS,
+#   e VICINATO ADX VERDE (le 3 celle ADX non devono ribaltarsi: e' il
+#   criterio che manco' all'oro).
+#   FALSIFICAZIONE: rosso in OOS o vicinato instabile -> si archivia,
+#   prossimo della fascia A. Nessun accanimento.
+# NOTA STORICO: 2024.09.26 e' un'IPOTESI sul forex BCM -- controllare
+#   il rilevatore trade/mese IS<->OOS nel referto.
+# NOTA TF: l'EA ha InpTimeframe=H1 interno; @PERIODO H1 allineato.
+# MAGIC VERGINI (cache): 970303/970304, mai usati.
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- tutto il resto blindato ai default del documento (li blinda il driver) ---
+
+# --- gli sweep: il vicinato ADX (la lezione dell'oro) + coerenza magic ---
+InpAdxMin=15||15||5||25||Y
+InpMagic=970303||970303||1||970304||Y
