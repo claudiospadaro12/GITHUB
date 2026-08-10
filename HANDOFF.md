@@ -160,7 +160,7 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
 2. ⏳ **Tick reali mancanti**: SupRev IBEX (E35EUR) H1; GoldenCross H1 sui top OHLC (Oro/USDJPY/GBPUSD); SupRev non-indici H4 (XAU/CHFJPY/GBPJPY/AUDUSD).
 3. 🟢 **Campagna matrice** motore×simbolo×TF (FASE 1 TF alti → FASE 3 TF bassi): mancano SuperWave, SupertrendInvert, PTE, WOL, FiboH4 e **Nightly** allo scan (Nightly: bocciato in FASE 0 su EURUSD, mai provato altrove — decisione di Claudio 10/08: "si deve guadagnare il posto in squadra").
 4. ❓ **SupertrendInvert tick reali** — da ritrovare sul PC (non in archivio).
-5. 🔴 **VPS** (quando flat): ricompilare (`scarica_ottimizzati.ps1`), riattaccare DAX Apertura su 1 solo grafico, spegnere i morti (DAX_M3, Londra_ORB, Live5m, ORB, ORB_Fibo, **Nightly** — bocciato in FASE 0 su EURUSD, deciso 10/08).
+5. 🟢 **VPS — PULIZIA IN CORSO (via libera di Claudio 10/08 sera)**: checklist completa in `report/PULIZIA_VPS_10-08.md` — 15 voci Tier 1 (bocciati con referto: ORB corso, ORB_Fibo, Nightly, MaxMin EURUSD, GoldenCross ×5, PTE, WOL, SupertrendInvert, PostNews ×2, SupRev CAC, doppioni STREV, EMA200 base ×6, HARSI), Tier 2 da verificare, whitelist squadra+vivaio. Prima di staccare: chiudere le posizioni aperte dei morti (incluso il gruppo di controllo oro del 04/08 → annotare esito). La ricompilazione coi log del filtro (5-bis) resta per un momento calmo, NON stasera.
 5-bis. 🟡 **Log del filtro nel MaxMinNotte_DAX_Short** (deciso 10/08, alla prossima
    ricompilazione — MAI a forward caldo): quando il filtro di correlazione S&P
    nega il piazzamento, oggi l'EA salta IN SILENZIO (verificato nel codice:
