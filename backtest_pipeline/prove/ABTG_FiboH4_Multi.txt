@@ -1,0 +1,24 @@
+# =====================================================================
+#  FASE 0 -- ABTG_FiboH4_Multi (piano FiboH4 di Paolo): ha un edge? dove?
+#  Lanciato dalla coda del weekend su piu' simboli (CODA.csv).
+# =====================================================================
+# IPOTESI (scritta prima): il pattern engulfing + entry zone Fibonacci
+#   (ratios proprietari del piano) produce almeno una cella con profitto
+#   positivo in ENTRAMBE le finestre sul simbolo del grafico.
+#   L'OHLC e' SOLO screening: chi passa rigira a tick reali (stadio 2).
+# NOTA CRITICA: InpSymbols VUOTO = opera sul solo simbolo del grafico.
+#   Senza questo pin l'EA scannerizza la lista di default (3 cross) e i
+#   risultati mischierebbero simboli: il pin sotto e' OBBLIGATORIO.
+# MAGIC: 772002/772003 vergini (default 771602 non si tocca).
+# =====================================================================
+InpSymbols=
+InpTF=16388
+InpMaxTotalPositions=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseEZ2=1
+InpUseNewsFilter=0
+
+# sweep di robustezza sul lookback dell'engulfing (default 12) + coerenza magic
+InpEngulfLookback=8||8||4||16||Y
+InpMagic=772002||772002||1||772003||Y

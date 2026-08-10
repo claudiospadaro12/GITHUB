@@ -24,9 +24,12 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 - ~~SupRev non-indici H4~~ — ❌ R21 (10/08): nessuna promozione (XAUUSD storico corto, CHFJPY/AUDUSD 0/12, GBPJPY riga di bordo NON promossa). R22 oltre-bordo: **3/9, capitolo CHIUSO** (crinale isolato, non altopiano). `REFERTO_ROUND22_GBPJPY_BORDO.md`. **FASCIA A SVUOTATA: 0 sedie da 4 round — lo screening OHLC promuove ipotesi, non candidati.** Prossimo: fascia B nel weekend.
 
 **Fascia B — scan larghi OHLC dei motori mai visti (notti di coda weekend):**
-- SuperWave · SupertrendInvert · PTE · WOL · FiboH4 · Nightly
-  (tutti col metodo matrice motore×simbolo×TF; chi passa lo screening
-  entra in fascia A)
+- ✅ **CODA PRONTA (10/08 sera)**: 48 lavori in `prove/CODA.csv` — 6 motori × 8
+  simboli ciascuno (SuperWave H4 · SupertrendInvert H1 · PTE H1 · WOL D1 ·
+  Nightly M15 · FiboH4_Multi H4, con prova nuova e InpSymbols pinnato vuoto).
+  Si lancia con `coda_weekend.ps1` (doppio click o Task Scheduler venerdì
+  23:30); risultati auto-pubblicati sul repo; analisi automatica alle sveglie
+  del weekend. Chi passa lo screening entra in fascia A.
 
 **Fascia C — laboratorio (idee dal backlog ORB, una per volta):**
 - fade del range (primo della lista) · OR/ATR adattivo · ORL short ·
