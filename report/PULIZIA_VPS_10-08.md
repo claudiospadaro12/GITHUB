@@ -1,5 +1,23 @@
 # PULIZIA VPS -- 10/08/2026 sera (decisione di Claudio: "VAI")
 
+## ✅ ESEGUITA alle 23:28 (verificata dal Journal del riavvio)
+
+Da 52 grafici a **~18**: nessun morto e' partito al riavvio (niente ORB
+corso, Nightly, GoldenCross, PTE, WOL, SupertrendInvert, PostNews,
+EMA200 base, MaxMin EURUSD, HARSI, doppioni STREV). Squadra al completo
+con le faccine, **MAXMIN ORO vivo** (la regola per-simbolo ha retto).
+Backup completo sul Desktop. Unica posizione aperta: STREV DOW H1 OTT
+(magic 970916) -- EA superstite, gestita, nessun orfano.
+
+**FUORI LISTA sopravvissuti (~8 grafici, decisione per domani, regola
+"o si misura o si spegne")**: DAX_Apertura_EU_Ottimizzato ·
+Nasdaq_Apertura_US (base+Ott) · SupRev_DAX_H1_Ott · SupRev_DAX_H4_Ott ·
+SupRev_DOW_H1_Ott (posizione aperta: spegnere solo da flat) ·
+SupRev_DOW_H4_Ott · SupertrendReversal_Ottimizzato XAUUSD H4.
+
+Caso oro 04/08 (gruppo di controllo): posizioni non piu' presenti --
+verificare in CronoStoria l'esito e chiudere il caso nel report.
+
 Conto: **50503392** (demo piccolo, vecchio MT5). Il -V3/100k NON si tocca.
 Meccanica: per staccare un EA basta CHIUDERE IL SUO GRAFICO (o tasto
 destro sul grafico -> Consulenti Esperti -> Rimuovi). A fine pulizia:
