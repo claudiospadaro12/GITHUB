@@ -20,8 +20,7 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 
 **Fascia A — tick reali mancanti (candidati quasi pronti, ore di macchina):**
 - ~~SupRev IBEX (E35EUR) H1~~ — ❌ BOCCIATO R18 (10/08): OOS 12/12 negativo, 14° ribaltamento. `REFERTO_ROUND18_IBEX.md`
-- GoldenCross H1 su Oro/USDJPY/GBPUSD — top OHLC (la bocciatura R4 era
-  sugli INDICI: 0/3; su oro/forex il verdetto non c'è ancora)
+- ~~GoldenCross H1 su Oro/USDJPY/GBPUSD~~ — ❌ CAPITOLO CHIUSO R20 (10/08): forex 0/6 (USDJPY IS rosso 3/3, GBPUSD 15° ribaltamento). `REFERTO_ROUND20_GOLDENCROSS_FOREX.md`
 - SupRev non-indici H4 (XAUUSD/CHFJPY/GBPJPY/AUDUSD) — top OHLC
 
 **Fascia B — scan larghi OHLC dei motori mai visti (notti di coda weekend):**
