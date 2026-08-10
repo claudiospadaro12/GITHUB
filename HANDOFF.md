@@ -161,6 +161,14 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
 3. 🟢 **Campagna matrice** motore×simbolo×TF (FASE 1 TF alti → FASE 3 TF bassi): mancano SuperWave, SupertrendInvert, PTE, WOL, FiboH4 e **Nightly** allo scan (Nightly: bocciato in FASE 0 su EURUSD, mai provato altrove — decisione di Claudio 10/08: "si deve guadagnare il posto in squadra").
 4. ❓ **SupertrendInvert tick reali** — da ritrovare sul PC (non in archivio).
 5. 🔴 **VPS** (quando flat): ricompilare (`scarica_ottimizzati.ps1`), riattaccare DAX Apertura su 1 solo grafico, spegnere i morti (DAX_M3, Londra_ORB, Live5m, ORB, ORB_Fibo, **Nightly** — bocciato in FASE 0 su EURUSD, deciso 10/08).
+5-bis. 🟡 **Log del filtro nel MaxMinNotte_DAX_Short** (deciso 10/08, alla prossima
+   ricompilazione — MAI a forward caldo): quando il filtro di correlazione S&P
+   nega il piazzamento, oggi l'EA salta IN SILENZIO (verificato nel codice:
+   nessuna Log() sul ramo bias). Aggiungere una riga tipo
+   "filtro S&P contrario: niente short oggi" nel punto in cui CorrBias() blocca.
+   Motivo: i rami silenziosi sono ambigui — il 10/08 il silenzio delle 08:59 sul
+   100k ha richiesto un'ispezione del sorgente per capire che era tutto regolare.
+   Stessa occasione: valutare la stessa riga anche nel MaxMinNotte generico.
 
 ## Stile richiesto
 Precisione sopra tutto. Etichettare [VERIFICATO]/[INFERITO]/[INCERTO]. Segnalare premesse sbagliate PRIMA di rispondere. Mai inventare. **Salvare SEMPRE tutto nel repo** (commit+push): ciò che non è pushato è perso.
