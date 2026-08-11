@@ -1,0 +1,15 @@
+# CODA_FUORILISTA.csv -- gli EA fuori-lista MAI MISURATI (11/08 sera)
+# Regola di Claudio dalla pulizia del 10/08: "o si misura o si spegne".
+# Stanotte si misurano: domani si decide ogni grafico coi numeri.
+# Prove usate: prove/<EA>.txt (07/08, criteri congelati stile PTE).
+# Stadio 1 OHLC = solo screening; stadio 2 tick reali automatico.
+# NB XAUUSD: storico M1 misurato dal 28/02/2025 -> daquando dedicato.
+# NB: i 3 grafici Apertura del fuori-lista NON sono qui: Nasdaq base
+# misurato stasera in R24 (osservato); le varianti _Ottimizzato si
+# giudicano domani sui dati dei titolari (doppioni, non strategie nuove).
+ea;simbolo;periodo;daquando
+ABTG_SupRev_DAX_H1_Ottimizzato;D30EUR;H1;2024.09.26
+ABTG_SupRev_DAX_H4_Ottimizzato;D30EUR;H4;2024.09.26
+ABTG_SupRev_DOW_H1_Ottimizzato;U30USD;H1;2024.09.26
+ABTG_SupRev_DOW_H4_Ottimizzato;U30USD;H4;2024.09.26
+ABTG_SupertrendReversal_Ottimizzato;XAUUSD;H4;2025.03.01
