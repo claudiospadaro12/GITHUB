@@ -1,0 +1,29 @@
+# =====================================================================
+#  ROUND 23a: PER-TRADE del candidato PTE @ DOW (U30USD) H1 a 100k
+#  Lancio: ABTG_PTE -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26
+#          -Modello 4 -Prova prove\R23a_pertrade_PTE_Dow.txt
+#          -Deposito 100000 -Etichetta r23a
+# =====================================================================
+# PERCHE' (REFERTO_CODA_FASCIA_B, prossimo passo n.1)
+#   Serie per-trade della cella candidata alla taglia del Guardiano, per
+#   correlazione e DD combinato col portafoglio a 6 serie.
+# LA CELLA (centro dell'altopiano H1: BE 0/0,5/1 tutti PASS -> si tiene 0,5.
+#   STESSA cella su Dow, GBPUSD e USDJPY: una configurazione, tre mercati,
+#   nessuna scelta per-mercato.)
+#   Coda 10-11/08 a deposito 10k: IS +86,87 (27 trade) · OOS +108,37
+#   (40 trade, PF 1,18, DD 3,12%, pegg. giornata -0,98%).
+# MAGIC VERGINI: 771311/771312 (verificato: mai usati in repo/flotta).
+#   Il magic-sweep e' il controllo di coerenza: 2 celle GEMELLE o niente.
+# CONTROLLI (deposito 100k, quindi NIENTE confronto al centesimo col 10k):
+#   1. le due celle del magic-sweep identiche fra loro al centesimo;
+#   2. stesso numero di trade della coda (27 IS / 40 OOS) e PF vicino;
+#   3. i file abtg_trades_ABTG_PTE_U30USD_771311/12.csv freschi in Common.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpTP1_ATRmult=0.5
+
+InpMagic=771311||771311||1||771312||Y

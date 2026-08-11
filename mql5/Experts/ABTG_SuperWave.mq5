@@ -528,8 +528,37 @@ string OptFrame_FileName()
    return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
   }
 
+void ExportTrades()
+  {
+   if(!HistorySelect(0,TimeCurrent())) return;
+   string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"+IntegerToString((long)InpMagic)+".csv";
+   int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
+   if(h==INVALID_HANDLE) return;
+   FileWrite(h,"close_time","symbol","magic","position_id","deal_type","volume","price","net_profit");
+   int n=HistoryDealsTotal();
+   for(int i=0;i<n;i++)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk==0) continue;
+      long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
+      if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_OUT_BY) continue;
+      double net=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
+      FileWrite(h,
+                TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                HistoryDealGetString(tk,DEAL_SYMBOL),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_MAGIC)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_POSITION_ID)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_TYPE)),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_VOLUME),2),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_PRICE),_Digits),
+                DoubleToString(net,2));
+     }
+   FileClose(h);
+  }
+
 double OnTester()
   {
+   ExportTrades();
    double stats[7];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);

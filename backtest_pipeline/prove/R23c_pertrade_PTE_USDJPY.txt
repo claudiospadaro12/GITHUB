@@ -1,0 +1,25 @@
+# =====================================================================
+#  ROUND 23c: PER-TRADE del candidato PTE @ USDJPY H1 a 100k
+#  Lancio: ABTG_PTE -Simbolo USDJPY -Periodo H1 -DaQuando 2024.09.26
+#          -Modello 4 -Prova prove\R23c_pertrade_PTE_USDJPY.txt
+#          -Deposito 100000 -Etichetta r23c
+# =====================================================================
+# LA CELLA (stessa configurazione di R23a/b: H1, BE 0,5 -- una cella, tre
+#   mercati; su USDJPY H1 e' anche l'UNICA cella PASS della riga).
+#   Coda 10-11/08 a deposito 10k: IS +1,49 (33 trade) · OOS +159,08
+#   (35 trade, PF 1,29, DD 4,85%, pegg. giornata -1,04%).
+#   ⚠️ IS quasi a zero: e' la piu' fragile delle tre PTE. Il per-trade
+#   serve anche a vedere COME sta in piedi (pochi trade grossi o tanti
+#   piccoli?).
+# MAGIC VERGINI: 771315/771316.
+# CONTROLLI: come R23a (gemelli al centesimo; 33 IS / 35 OOS trade;
+#   abtg_trades_ABTG_PTE_USDJPY_771315/16.csv freschi in Common).
+# =====================================================================
+@SIMBOLO  USDJPY
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpTP1_ATRmult=0.5
+
+InpMagic=771315||771315||1||771316||Y

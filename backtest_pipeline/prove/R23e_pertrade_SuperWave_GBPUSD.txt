@@ -1,0 +1,22 @@
+# =====================================================================
+#  ROUND 23e: PER-TRADE del candidato SUPERWAVE @ GBPUSD H2 a 100k
+#  Lancio: ABTG_SuperWave -Simbolo GBPUSD -Periodo H4 -DaQuando 2024.09.26
+#          -Modello 4 -Prova prove\R23e_pertrade_SuperWave_GBPUSD.txt
+#          -Deposito 100000 -Etichetta r23e
+# =====================================================================
+# LA CELLA (H2: 63 trade OOS, PF 2,09, la piu' forte della notte -- ma coi
+#   vicini H1/H3/H4 rossi IS: sapore di regime, il per-trade e la
+#   correlazione decidono).
+#   Coda 10-11/08 a deposito 10k: IS +152,42 (28 trade) · OOS +392,70
+#   (63 trade, PF 2,09, DD 2,13%).
+# MAGIC VERGINI: 770523/770524.
+# CONTROLLI: gemelli al centesimo; 28 IS / 63 OOS trade;
+#   abtg_trades_ABTG_SuperWave_GBPUSD_770523/24.csv freschi in Common.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16386
+
+InpMagic=770523||770523||1||770524||Y

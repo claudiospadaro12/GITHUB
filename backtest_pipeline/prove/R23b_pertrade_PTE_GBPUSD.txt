@@ -1,0 +1,21 @@
+# =====================================================================
+#  ROUND 23b: PER-TRADE del candidato PTE @ GBPUSD H1 a 100k
+#  Lancio: ABTG_PTE -Simbolo GBPUSD -Periodo H1 -DaQuando 2024.09.26
+#          -Modello 4 -Prova prove\R23b_pertrade_PTE_GBPUSD.txt
+#          -Deposito 100000 -Etichetta r23b
+# =====================================================================
+# LA CELLA (stessa configurazione di R23a: H1, BE 0,5 -- una cella, tre
+#   mercati). Coda 10-11/08 a deposito 10k: IS +478,74 (20 trade) ·
+#   OOS +203,24 (49 trade, PF 1,37, DD 3,23%, pegg. giornata -1,02%).
+# MAGIC VERGINI: 771313/771314.
+# CONTROLLI: come R23a (gemelli al centesimo; 20 IS / 49 OOS trade;
+#   abtg_trades_ABTG_PTE_GBPUSD_771313/14.csv freschi in Common).
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpTP1_ATRmult=0.5
+
+InpMagic=771313||771313||1||771314||Y

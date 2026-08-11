@@ -1,0 +1,26 @@
+# =====================================================================
+#  ROUND 23d: PER-TRADE del candidato SUPERWAVE @ DOW (U30USD) H2 a 100k
+#  Lancio: ABTG_SuperWave -Simbolo U30USD -Periodo H4 -DaQuando 2024.09.26
+#          -Modello 4 -Prova prove\R23d_pertrade_SuperWave_Dow.txt
+#          -Deposito 100000 -Etichetta r23d
+#  (NB: -Periodo H4 come nella coda: e' il TF del GRAFICO del tester;
+#   il TF operativo dell'EA e' InpTF=H2, pinnato qui sotto.)
+# =====================================================================
+# LA CELLA (H2: la PASS col campione vero della riga; vicini H1 positivo
+#   e H6 PASS, ma H3 rosso OOS -> mezzo altopiano, il per-trade decide).
+#   Coda 10-11/08 a deposito 10k: IS +764,61 (22 trade) · OOS +513,92
+#   (61 trade, PF 1,73, DD 5,46%).
+#   Nota famiglia: la variante _Ottimizzato su DOW H1 e' GIA' in squadra
+#   sul piccolo (magic 770511) -- per questo i magic qui NON sono 7705xx
+#   bassi ma 77052x, verificati vergini.
+# MAGIC VERGINI: 770521/770522.
+# CONTROLLI: gemelli al centesimo; 22 IS / 61 OOS trade;
+#   abtg_trades_ABTG_SuperWave_U30USD_770521/22.csv freschi in Common.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16386
+
+InpMagic=770521||770521||1||770522||Y
