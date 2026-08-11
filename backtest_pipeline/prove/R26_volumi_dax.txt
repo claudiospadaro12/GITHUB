@@ -1,0 +1,37 @@
+# =====================================================================
+#  R26: il filtro VOLUMI sul DAX Apertura — mai provato (HANDOFF binario 2)
+#  Lancio: ABTG_DAX_Apertura_EU -Prova prove\R26_volumi_dax.txt
+#          -Etichetta r26
+# =====================================================================
+# PERCHE' STASERA (11/08): R25 ha appena isolato il filtro volumi come
+#   l'UNICO edge del Nasdaq (+1.240 EUR di OOS da solo). Sul Dow invece
+#   fu bocciato (03/08: "non si trasferisce", danno monotono sopra l'H4).
+#   Sul DAX — il titolare migliore del 100k — non e' MAI stato misurato.
+# IPOTESI (dichiarata prima dei numeri, e prudente):
+#   la lezione del 03/08 dice "il filtro giusto esiste per QUEL mercato";
+#   il precedente Dow dice che sui breakout d'indice europei/USA lenti il
+#   filtro non trasferisce. MI ASPETTO CHE SUL DAX NON AGGIUNGA NULLA O
+#   FACCIA DANNO. Se invece migliorasse il titolare in ENTRAMBE le
+#   finestre su 2+ soglie, sarebbe un upgrade da valutare (MAI a caldo:
+#   eventuale cambio solo con la trafila deploy completa).
+# LA GRIGLIA (6 celle per finestra):
+#   InpUseVolumeFilter 0/1  x  InpVolMult 1,2 / 1,5 / 1,8.
+#   Le 3 celle a filtro SPENTO sono IDENTICHE per costruzione ->
+#   controllo gemelli integrato + baseline che deve riprodurre i numeri
+#   noti del titolare (solo long, 1%).
+# CRITERI (congelati ora):
+#   1. le 3 baseline identiche al centesimo, o il round non si legge;
+#   2. il filtro "vince" SOLO se batte la baseline in ENTRAMBE le
+#      finestre su ALMENO 2 delle 3 soglie (coerenza, regola R24);
+#   3. qualunque esito: il 100k NON si tocca da stasera — un eventuale
+#      upgrade passa da referto + decisione + deploy verificato.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpAllowShort=0
+InpRiskPercent=1.0
+
+InpUseVolumeFilter=0||0||1||1||Y
+InpVolMult=1.2||1.2||0.3||1.8||Y
