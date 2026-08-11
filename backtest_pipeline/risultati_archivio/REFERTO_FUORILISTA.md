@@ -58,3 +58,17 @@ coda di spegnimento: SOLO quando la posizione aperta (970916) si
 chiude da sola** — promemoria attivo alle pagelle. Restano in forward
 con referto: SupRev_DAX_H4, SupRev_DOW_H4 (osservato speciale),
 STREV oro H4, Nasdaq Apertura base.
+
+## ✅ SPEGNIMENTO ESEGUITO (11/08 19:41, verificato dal Journal del riavvio)
+20 EA caricati su 20 attesi: squadra (8) + TradeExporter + MAXMIN ORO +
+vivaio R23 (5, con PERIOD_H2 giusto sui SuperWave) + 4 osservati +
+SupRev_DOW_H1 (vivo fino al flat). I 3 bocciati NON sono partiti.
+Guardie reload-safe OK ("oggi ho gia' operato: non riarmo").
+
+⚠️ SCOPERTA DAL LOG (dossier per domani): il Nasdaq Apertura BASE vivo
+gira con motore=BREAKOUT + rangemode=RANGE_PREVBAR + rischio 0,25% +
+long/short — NON la config misurata in R24 (volumi 1,5 AND). Nota bene:
+PREVBAR e' il RangeMode del vizio storico (cella cherry-picked che si
+ribalto'). A 0,25% il rischio e' minimo, ma la regola vale: o si
+allinea il grafico a una config misurata, o si misura la config accesa.
+Decisione per domani, non stasera a mercati aperti.
