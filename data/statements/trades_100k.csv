@@ -1,0 +1,3 @@
+pid;symbol;side;volume;open_time;open_price;close_time;close_price;commission;swap;profit;strategy;magic;close_reason;session_high;session_low
+3113525;U30USD;buy;4.40;2026.08.10 15:53:40;54007.50;2026.08.10 16:25:28;54036.50;0.00;0.00;110.47;Dow Apertura US RETEST BUY;770202;sl;54062.50;53851.50
+3120078;D30EUR;buy;8.30;2026.08.11 13:22:02;26382.80;2026.08.11 13:22:49;26385.80;0.00;0.00;24.90;DAX Apertura EU RETEST BUY;770101;sl;26403.90;26367.70
