@@ -40,7 +40,8 @@ param(
   [switch]$SoloControllo,     # gira i controlli di ogni lavoro senza aprire MT5
   [switch]$SoloOhlc,          # si ferma allo stadio 1
   [int]$Primi = 0,            # solo i primi N lavori (per provare)
-  [string]$Branch = "lavoro"
+  [string]$Branch = "lavoro",
+  [string]$Coda = "CODA.csv"  # quale coda (in prove\): es. CODA_ALTAV.csv
 )
 $ErrorActionPreference = "Continue"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -66,8 +67,10 @@ function Scarica($nome, $dest) {
 $Gen = Join-Path $Work "walkforward_generico.ps1"
 if (-not (Scarica "walkforward_generico.ps1" $Gen)) { Write-Host "Non ho il driver e non riesco a scaricarlo." -ForegroundColor Red; exit 1 }
 New-Item -ItemType Directory -Force -Path (Join-Path $Work "prove") | Out-Null
-$CodaFile = Join-Path $Work "prove\CODA.csv"
-if (-not (Scarica "prove/CODA.csv" $CodaFile)) { Write-Host "Non ho prove\CODA.csv." -ForegroundColor Red; exit 1 }
+$CodaFile = Join-Path $Work "prove\$Coda"
+if (-not (Scarica "prove/$Coda" $CodaFile)) { Write-Host "Non ho prove\$Coda." -ForegroundColor Red; exit 1 }
+# lo stato prende il nome dalla coda (la coda storica tiene il nome vecchio)
+$StatoNome = if ($Coda -eq "CODA.csv") { "STATO_CODA_WEEKEND.md" } else { "STATO_" + ($Coda -replace '\.csv$','') + ".md" }
 
 $Lavori = @(Get-Content $CodaFile | Where-Object { $_ -notmatch '^\s*#' -and $_ -match ';' } |
   Select-Object -Skip 1 | ForEach-Object {
@@ -137,7 +140,7 @@ function Promosso($ea, $sym) {
 
 # --- lo stato, riscritto e ripubblicato dopo OGNI lavoro
 $Stato = New-Object System.Collections.ArrayList
-$StatoFile = Join-Path $Work "STATO_CODA_WEEKEND.md"
+$StatoFile = Join-Path $Work $StatoNome
 function ScriviStato {
   $testa = @("# CODA DEL WEEKEND - stato vivo","",
     ("aggiornato: " + (Get-Date -Format "yyyy-MM-dd HH:mm") + " (ora del PC di backtest)"),"",
@@ -145,7 +148,7 @@ function ScriviStato {
     "Promozione MECCANICA: una cella con Profit>0 in ENTRAMBE le finestre OHLC.","",
     "| EA | simbolo | OHLC | promosso | tick reali |","|---|---|---|---|---|")
   ($testa + $Stato) -join "`n" | Set-Content -Path $StatoFile -Encoding UTF8
-  Pubblica $StatoFile "report/STATO_CODA_WEEKEND.md" "coda weekend: stato"
+  Pubblica $StatoFile ("report/" + $StatoNome) "coda: stato"
 }
 
 function EseguiGenerico($j, [int]$modello) {
@@ -199,5 +202,5 @@ if ($SoloControllo) { ScriviStato }
 Write-Host ""
 Write-Host "=== CODA FINITA ===" -ForegroundColor White
 Write-Host ("    lavori: {0}   promossi al tick reale: {1}   falliti: {2}" -f $Lavori.Count, $promossi, $falliti) -ForegroundColor Gray
-Write-Host "    Lo stato completo e' in STATO_CODA_WEEKEND.md (e sul repo, se c'era il token)." -ForegroundColor Gray
+Write-Host ("    Lo stato completo e' in " + $StatoNome + " (e sul repo, se c'era il token).") -ForegroundColor Gray
 Write-Host "    Per riprendere dopo uno stop: rilancia LO STESSO comando. I CSV fatti non si rifanno." -ForegroundColor Gray

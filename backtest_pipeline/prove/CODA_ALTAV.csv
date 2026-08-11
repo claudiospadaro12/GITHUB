@@ -1,0 +1,17 @@
+# CODA_ALTAV.csv -- FASE 0 di ABTG_AltaVelocita su 8 simboli (11/08)
+# Si lancia SOLO dopo il collaudo su GBPUSD (compilazione + trade > 0).
+# Prova usata: prove/ABTG_AltaVelocita.txt (ciclo H4, ingresso M5,
+# sweep InpStMult 2,5-4,0 = 4 celle; criteri congelati in cima al file).
+# Stadio 1 OHLC = SOLO screening (strategia management-heavy: qui
+# l'OHLC vale ancora meno del solito); stadio 2 tick reali automatico.
+# daquando 2024.09.26: MISURATO sugli indici BCM, IPOTESI su forex/oro
+# (controllare trade/mese IS vs OOS nel referto).
+ea;simbolo;periodo;daquando
+ABTG_AltaVelocita;GBPUSD;M5;2024.09.26
+ABTG_AltaVelocita;EURUSD;M5;2024.09.26
+ABTG_AltaVelocita;USDJPY;M5;2024.09.26
+ABTG_AltaVelocita;USDCHF;M5;2024.09.26
+ABTG_AltaVelocita;AUDUSD;M5;2024.09.26
+ABTG_AltaVelocita;GBPJPY;M5;2024.09.26
+ABTG_AltaVelocita;XAUUSD;M5;2024.09.26
+ABTG_AltaVelocita;U30USD;M5;2024.09.26
