@@ -1,0 +1,36 @@
+# =====================================================================
+#  R27: motore DELAYED sul DAX Apertura — scritto il 02/08, MAI lanciato
+#  Lancio: ABTG_DAX_Apertura_EU -Prova prove\R27_delayed_dax.txt
+#          -Etichetta r27
+# =====================================================================
+# L'IDEA (dal 02/08): aspettare N minuti dopo l'apertura e poi entrare
+#   A MERCATO dalla parte scelta — niente ordini stop da inseguire,
+#   niente slippage di rottura, si salta il rumore iniziale.
+# IPOTESI (dichiarata prima dei numeri, prudente): il titolare RETEST
+#   e' forte (OOS +1.811, tripla certificazione) e la FASE A insegno'
+#   che sul DAX il margine sta nella SELEZIONE, non nel timing. Mi
+#   aspetto che il DELAYED non batta il RETEST. E' l'ultimo motore mai
+#   provato della famiglia: qualunque esito, il capitolo motori si
+#   chiude con la mappa completa.
+# LA GRIGLIA (9 celle per finestra): 3 attese x 3 modi di direzione.
+#   InpDelayMinutes 15 / 30 / 45.
+#   InpDelayDirMode 0=BREAK (fuori dal range o niente) / 1=MID (lato
+#   del centro) / 2=CANDLE (corpo della candela di apertura).
+# CRITERI (congelati ora):
+#   1. il DELAYED "vince" SOLO se una regione CONTIGUA (2+ celle
+#      adiacenti) batte la baseline RETEST (IS +381 / OOS +1.811, da
+#      R24/R26) in ENTRAMBE le finestre;
+#   2. celle singole belle = appunto, non azione (18 ribaltamenti);
+#   3. il 100k NON si tocca comunque: eventuale seguito solo con
+#      referto + trafila completa.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpAllowShort=0
+InpRiskPercent=1.0
+InpEntryMode=4
+
+InpDelayMinutes=15||15||15||45||Y
+InpDelayDirMode=0||0||1||2||Y
