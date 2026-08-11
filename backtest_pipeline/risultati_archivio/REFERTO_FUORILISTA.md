@@ -47,3 +47,14 @@ aperta (magic 970916): aspettare che chiuda da sola, poi spegnere.
 
 _CSV in `risultati_prove/<EA>/` (11 celle x IS/OOS, ohlc+tick). Stato
 coda in `report/STATO_CODA_FUORILISTA.md`._
+
+---
+
+## ✅ DECISIONE DI CLAUDIO (11/08 sera): "VAI CON LO SPEGNIMENTO"
+Approvata la proposta integrale: spenti subito SupRev_DAX_H1_Ott,
+Nasdaq_Apertura_US_Ott e DAX_Apertura_EU_Ott (chiusura manuale dei 3
+grafici + salva profilo, verifica dai .chr); **SupRev_DOW_H1_Ott in
+coda di spegnimento: SOLO quando la posizione aperta (970916) si
+chiude da sola** — promemoria attivo alle pagelle. Restano in forward
+con referto: SupRev_DAX_H4, SupRev_DOW_H4 (osservato speciale),
+STREV oro H4, Nasdaq Apertura base.
