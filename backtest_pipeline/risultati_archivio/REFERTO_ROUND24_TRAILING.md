@@ -30,8 +30,24 @@ prova PRIMA del lancio (07/08).
   prova lo aveva previsto come esito possibile, per iscritto: "se la
   colonna a 0 e' gia' la migliore, l'ipotesi di stasera e' sbagliata".
 
-## Lato Nasdaq (griglia gemella, LANCIATA l'11/08 sera)
-Prova: `prove/R24_trailing_nasdaq.txt` (config forward pinnata: volumi
-1,5 AND, ATR off, rischio 1%). Attesa dichiarata: che anche qui la
-soglia 0 regga; un'eventuale preferenza per soglie alte vale SOLO con
-Spearman positivo e coerenza su 2+ TF. Esito al rientro dei CSV.
+## Lato Nasdaq (eseguito e letto l'11/08 sera — entro 24h, come promesso)
+
+25 celle gemelle (config forward: volumi 1,5 AND, ATR off, rischio 1%).
+
+**VERDETTO: anche sul Nasdaq NON SI TOCCA NIENTE — la soglia 0 resta.**
+- Medie OOS per soglia: 0 -> **+159** (migliore) · 0,25 -> +76 ·
+  0,5 -> +34 · 0,75 -> +70 · 1R -> **-238** (peggiore).
+- Spearman IS->OOS +0,15: positivo ma debole — e NESSUNA soglia batte
+  la 0 su 2+ TF (criterio ereditato dal file DAX): la 0 e' la migliore
+  o quasi su M1, M3 e M5. La 1R e' di nuovo la peggiore OOS.
+- L'attesa dichiarata nel file di prova ("che anche qui la 0 regga")
+  e' confermata.
+
+**CAPITOLO "InpTrailStartR" CHIUSO SU TUTTA LA FAMIGLIA APERTURA:
+il default 0 e' giusto su DAX e Nasdaq. Nessun preset da toccare.**
+
+Nota a margine per il dossier FUORI-LISTA (il Nasdaq Apertura e' fra
+gli 8 da giudicare): la sua config forward (trailing M1, soglia 0,
+volumi AND) misura IS +70 (PF 1,07) / OOS +476 (PF 1,27, 99 trade) —
+positiva in entrambe le finestre ma ESILE in campione. Non e' un
+cadavere, non e' un candidato: e' materiale per la decisione di domani.
