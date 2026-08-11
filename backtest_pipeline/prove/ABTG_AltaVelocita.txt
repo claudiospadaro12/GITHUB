@@ -1,0 +1,41 @@
+# =====================================================================
+#  PROVA FASE 0: ABTG_AltaVelocita (v1, scritto l'11/08/2026)
+#  PRIMO LANCIO = COLLAUDO: compila? la macchina a stati produce trade?
+#  Lancio: ABTG_AltaVelocita -Prova prove\ABTG_AltaVelocita.txt
+#          (simbolo/periodo/daquando presi dalle direttive qui sotto)
+# =====================================================================
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   La strategia "Alta Velocita'" (tesi in ALTA_VELOCITA_TESI.md) ha un
+#   edge meccanizzabile: sequenza rottura/ritest/ripartenza multi-TF con
+#   gestione a scala. La v1 semplifica (RSI a lookback, niente 100-tick,
+#   niente divergenze): quello che testiamo e' LA V1, non "quello che fa
+#   Manuela a mano". Se la v1 non ha edge, il verdetto vale per la v1.
+#
+# CRITERI DI ACCETTAZIONE (congelati ORA; sono quelli della PTE)
+#   Per dire "CANDIDATO" servono TUTTI E QUATTRO, a tick reali:
+#     1. positiva in TUTTE E DUE le finestre (IS e OOS)
+#     2. Profit Factor >= 1,10 fuori campione
+#     3. celle vicine positive: non un picco isolato
+#     4. Peggior Giornata % OOS sopra -2,5% al rischio 1%
+#   ⚠️ Strategia management-heavy: l'OHLC qui vale ancora MENO del
+#   solito (trailing multi-TF e chiusure anticipate sballano senza
+#   tick). FASE 0 OHLC = solo "la macchina scatta e non e' rotta".
+#
+# LO SWEEP: InpStMult 2,5-4,0 = sensibilita' attorno all'ipotesi
+#   "Supertrend standard 3,0" (il parametro NON dichiarato dal corso).
+#   4 celle. Ciclo pinnato H4 (ingresso M5, l'Esempio 1 del manuale).
+#   Simbolo GBPUSD: il terreno di casa della strategia sono i cross.
+#
+# COLLAUDO (prima dei numeri): con InpVerbose=true nel journal devono
+#   comparire le fasi (ROTTURA/RITEST/RIPARTENZA) e i trade scartati
+#   per R/R < 3. Zero trade su 23 mesi = macchina rotta, non verdetto.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpCicloTF=16388
+InpStMult=2.5||2.5||0.5||4||Y
+
+InpMagic=771401
