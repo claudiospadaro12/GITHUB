@@ -21,6 +21,14 @@ from datetime import datetime
 CSV_IN  = "data/statements/trades_auto.csv"
 OUT_DIR = "report"
 
+# --- pagella DOPPIA (HANDOFF 0-ter, 11/08): il secondo CSV e' il conto
+#     100k del dry-run FTMO (50504263). Lo scrive il TradeExporter sul -V3
+#     (InpFile=ABTG_Trades_100k.csv) e lo pubblica pubblica_trades.ps1.
+CSV_100K  = "data/statements/trades_100k.csv"
+DEP_100K  = 100000.0
+FTMO_PAV_TOTALE = 90000.0   # pavimento statico -10%
+FTMO_LIM_GIORNO = 5000.0    # perdita massima giornaliera -5%
+
 # soglie di lettura, dalle regole del progetto
 FRAZIONE_BASSA = 0.30   # sotto il 30% del movimento catturato = la gestione taglia troppo presto
 DURATA_SOSPETTA = 120   # secondi: sotto = quasi certamente trailing/BE troppo stretti
@@ -211,6 +219,67 @@ def main():
     else:
         out += ["", "_Nessuna anomalia rilevata: nessuna sovrapposizione, "
                 "nessuna uscita anomala._"]
+
+    # ---------- CONTO 100K (dry-run FTMO col Guardiano) ----------
+    # Perimetro dichiarato SEMPRE: la lettura del 10/08 e' nata proprio dal
+    # fatto che la pagella vedeva solo il piccolo mentre la giornata vera
+    # era sul 100k.
+    out += ["", "## 🛡️ Conto 100k — dry-run FTMO (50504263)", ""]
+    if not os.path.exists(CSV_100K):
+        out += ["_CSV del 100k non ancora sul repo: questa sezione si accende "
+                "quando sul VPS gira il `pubblica_trades.ps1` aggiornato "
+                "(pubblica anche `ABTG_Trades_100k.csv`)._"]
+    else:
+        with open(CSV_100K, encoding="utf-8-sig", newline="") as f:
+            r100 = list(csv.DictReader(f, delimiter=";"))
+        for r in r100:
+            r["_ot"] = tempo(r.get("open_time", ""))
+            r["_ct"] = tempo(r.get("close_time", ""))
+        r100 = [r for r in r100 if r["_ot"] and r["_ct"]]
+
+        def _netto(r):
+            return num(r, "profit") + num(r, "swap") + num(r, "commission")
+
+        netto_storico = sum(_netto(r) for r in r100)
+        saldo = DEP_100K + netto_storico
+        oggi100 = [r for r in r100 if r["_ct"].strftime("%Y-%m-%d") == giorno]
+        netto_oggi = sum(_netto(r) for r in oggi100)
+
+        perGiorno100 = defaultdict(float)
+        for r in r100:
+            perGiorno100[r["_ct"].strftime("%Y-%m-%d")] += _netto(r)
+
+        if oggi100:
+            perEA100 = defaultdict(list)
+            for r in oggi100:
+                perEA100[r.get("strategy") or ("magic " + str(r.get("magic", "?")))].append(r)
+            out += ["| EA | Trade | P&L | Come sono usciti |", "|---|---|---|---|"]
+            for ea, tr in sorted(perEA100.items(), key=lambda x: -sum(_netto(r) for r in x[1])):
+                motivi = defaultdict(int)
+                for r in tr:
+                    motivi[r.get("close_reason") or "?"] += 1
+                out.append("| %s | %d | **%+.2f** | %s |" % (
+                    ea, len(tr), sum(_netto(r) for r in tr),
+                    " · ".join("%s×%d" % (k, v) for k, v in sorted(motivi.items()))))
+            out.append("")
+        else:
+            out += ["_Nessuna posizione chiusa oggi sul 100k._", ""]
+
+        margine_tot = saldo - FTMO_PAV_TOTALE
+        usato_oggi = max(0.0, -netto_oggi)
+        margine_giorno = FTMO_LIM_GIORNO - usato_oggi
+        peggior_g = min(perGiorno100.values()) if perGiorno100 else 0.0
+        out += ["**Saldo realizzato: %.2f**  (netto di oggi: %+.2f · dal via: %+.2f)" % (
+                    saldo, netto_oggi, netto_storico), "",
+                "| Regola FTMO | Pavimento | Margine attuale |", "|---|---|---|",
+                "| Perdita totale (statico -10%%) | 90.000 | **%+.2f** (%.2f%% del conto) |" % (
+                    margine_tot, 100.0 * margine_tot / DEP_100K),
+                "| Perdita giornaliera (-5%%) | -5.000/giorno | oggi usati %.2f -> restano **%.2f** |" % (
+                    usato_oggi, margine_giorno),
+                "",
+                "Peggior giornata dal via: **%+.2f**. _Numeri dal solo REALIZZATO " % peggior_g +
+                "(il CSV non vede il floating): l'arbitro vero dei pavimenti resta "
+                "il Guardian, che legge l'equity._"]
 
     os.makedirs(OUT_DIR, exist_ok=True)
     dest = os.path.join(OUT_DIR, "giornata_%s.md" % giorno)

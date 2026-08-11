@@ -26,6 +26,10 @@ param(
     [string]$Branch     = "lavoro",
     [string]$RepoPath   = "data/statements/trades_auto.csv",
     [string]$CsvName    = "ABTG_Trades.csv",
+    # --- pagella DOPPIA (11/08): anche il CSV del conto 100k (dry-run FTMO).
+    #     Lo scrive il TradeExporter del -V3 nella STESSA Common condivisa.
+    [string]$RepoPath100k = "data/statements/trades_100k.csv",
+    [string]$CsvName100k  = "ABTG_Trades_100k.csv",
     [string]$TokenFile  = "",
     [switch]$TriggerReport,
     [switch]$Installa,                 # registra l'attivita' pianificata e esce
@@ -101,54 +105,62 @@ foreach ($p in $tokenCandidates) {
 }
 if (-not $tok) { Write-Host "Token non trovato. Passa -TokenFile col percorso del .gh_report_token.txt" -ForegroundColor Red; exit 1 }
 
-# --- CSV sorgente (Common\Files) ---
-$common = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
-$csv = Join-Path $common $CsvName
-if (-not (Test-Path $csv)) {
-    Write-Host "CSV non trovato: $csv" -ForegroundColor Red
-    Write-Host "Assicurati che l'EA ABTG_TradeExporter sia attaccato a un grafico sul VPS." -ForegroundColor Yellow
-    exit 1
-}
-$bytes = [IO.File]::ReadAllBytes($csv)
-$b64   = [Convert]::ToBase64String($bytes)
-$righe = (Get-Content $csv | Measure-Object -Line).Lines
-Write-Host ("CSV: {0}  ({1} righe, {2} byte)" -f $csv, $righe, $bytes.Length)
-
+# --- pubblicazione di UN file (usata due volte: piccolo + 100k) ---
+$common  = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
 $headers = @{ Authorization = "token $tok"; "User-Agent" = "ABTG-Publisher"; Accept = "application/vnd.github+json" }
 $apiBase = "https://api.github.com/repos/$Owner/$Repo"
 
-# --- SHA attuale del file (se esiste gia') ---
-$sha = $null
-try {
-    $cur = Invoke-RestMethod -Method Get -Uri "$apiBase/contents/$RepoPath`?ref=$Branch" -Headers $headers
-    $sha = $cur.sha
-    Write-Host "File gia' presente, aggiorno (sha $($sha.Substring(0,7)))." -ForegroundColor DarkGray
-} catch {
-    if ($_.Exception.Response.StatusCode.value__ -eq 404) { Write-Host "Nuovo file, lo creo." -ForegroundColor DarkGray }
-    else { Write-Host "Attenzione controllo SHA: $($_.Exception.Message)" -ForegroundColor Yellow }
+function Pubblica-Csv([string]$nomeCsv, [string]$repoPath, [bool]$obbligatorio) {
+    $csv = Join-Path $common $nomeCsv
+    if (-not (Test-Path $csv)) {
+        if ($obbligatorio) {
+            Write-Host "CSV non trovato: $csv" -ForegroundColor Red
+            Write-Host "Assicurati che l'EA ABTG_TradeExporter sia attaccato a un grafico sul VPS." -ForegroundColor Yellow
+            exit 1
+        }
+        Write-Host "CSV facoltativo non trovato (salto): $csv" -ForegroundColor Yellow
+        Write-Host "  (e' quello del 100k: compare col primo export del TradeExporter sul -V3)" -ForegroundColor DarkGray
+        return
+    }
+    $bytes = [IO.File]::ReadAllBytes($csv)
+    $b64   = [Convert]::ToBase64String($bytes)
+    $righe = (Get-Content $csv | Measure-Object -Line).Lines
+    Write-Host ("CSV: {0}  ({1} righe, {2} byte)" -f $csv, $righe, $bytes.Length)
+
+    $sha = $null
+    try {
+        $cur = Invoke-RestMethod -Method Get -Uri "$apiBase/contents/$repoPath`?ref=$Branch" -Headers $headers
+        $sha = $cur.sha
+        Write-Host "File gia' presente, aggiorno (sha $($sha.Substring(0,7)))." -ForegroundColor DarkGray
+    } catch {
+        if ($_.Exception.Response.StatusCode.value__ -eq 404) { Write-Host "Nuovo file, lo creo." -ForegroundColor DarkGray }
+        else { Write-Host "Attenzione controllo SHA: $($_.Exception.Message)" -ForegroundColor Yellow }
+    }
+
+    $body = @{ message = "Aggiornamento automatico trades ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
+               content = $b64; branch = $Branch }
+    if ($sha) { $body.sha = $sha }
+    try {
+        Invoke-RestMethod -Method Put -Uri "$apiBase/contents/$repoPath" -Headers $headers `
+            -Body ($body | ConvertTo-Json) -ContentType "application/json" | Out-Null
+        Write-Host "OK pubblicato: $repoPath" -ForegroundColor Green
+    } catch {
+        $code = $null
+        try { $code = $_.Exception.Response.StatusCode.value__ } catch {}
+        Write-Host "PUBBLICAZIONE FALLITA: $($_.Exception.Message)" -ForegroundColor Red
+        if ($code -eq 403 -or $code -eq 404) {
+            Write-Host ""
+            Write-Host ">> Il token NON ha il permesso di SCRIVERE file nel repo." -ForegroundColor Yellow
+            Write-Host "   Serve un Personal Access Token (classic) con scope 'repo'," -ForegroundColor Yellow
+            Write-Host "   oppure fine-grained con 'Contents: Read and write' su $Owner/$Repo." -ForegroundColor Yellow
+            Write-Host "   Rigeneralo su GitHub, salvalo nel file .gh_report_token.txt e rilancia." -ForegroundColor Yellow
+        }
+        if ($obbligatorio) { exit 1 }
+    }
 }
 
-# --- PUT (crea/aggiorna) ---
-$body = @{ message = "Aggiornamento automatico trades ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
-           content = $b64; branch = $Branch }
-if ($sha) { $body.sha = $sha }
-try {
-    Invoke-RestMethod -Method Put -Uri "$apiBase/contents/$RepoPath" -Headers $headers `
-        -Body ($body | ConvertTo-Json) -ContentType "application/json" | Out-Null
-    Write-Host "OK pubblicato: $RepoPath" -ForegroundColor Green
-} catch {
-    $code = $null
-    try { $code = $_.Exception.Response.StatusCode.value__ } catch {}
-    Write-Host "PUBBLICAZIONE FALLITA: $($_.Exception.Message)" -ForegroundColor Red
-    if ($code -eq 403 -or $code -eq 404) {
-        Write-Host ""
-        Write-Host ">> Il token NON ha il permesso di SCRIVERE file nel repo." -ForegroundColor Yellow
-        Write-Host "   Serve un Personal Access Token (classic) con scope 'repo'," -ForegroundColor Yellow
-        Write-Host "   oppure fine-grained con 'Contents: Read and write' su $Owner/$Repo." -ForegroundColor Yellow
-        Write-Host "   Rigeneralo su GitHub, salvalo nel file .gh_report_token.txt e rilancia." -ForegroundColor Yellow
-    }
-    exit 1
-}
+Pubblica-Csv $CsvName     $RepoPath     $true    # conto piccolo (come sempre)
+Pubblica-Csv $CsvName100k $RepoPath100k $false   # conto 100k (pagella doppia)
 
 # --- opzionale: lancia subito il report settimanale ---
 if ($TriggerReport) {
