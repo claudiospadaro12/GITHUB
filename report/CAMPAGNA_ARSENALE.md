@@ -4,7 +4,7 @@ L'obiettivo dichiarato: **10 candidati validati** per poter ragionare sulla
 doppia prop. Oggi le sedie occupate sono 5 (+1 in macchina). Questo file è
 il piano della campagna + le decisioni aperte che spettano a Claudio.
 
-## Lo stato delle sedie
+## Lo stato delle sedie (aggiornato 11/08 sera)
 
 | # | Candidato | Stato |
 |---|---|---|
@@ -13,8 +13,19 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 | 3 | MaxMinNotte DAX Short | ✅ in dry-run 100k |
 | 4 | Nikkei STREV H2 | ✅ in dry-run 100k |
 | 5 | ORB-EMA200 | ✅ in dry-run 100k (mezzo peso) |
-| 6 | **Oro notturno (R17)** | 🔄 walk-forward IN MACCHINA oggi |
-| 7-10 | da trovare | 👇 la coda qui sotto |
+| 6 | **Oro notturno (R17)** | 🌱 VIVAIO dal 10/08 (770402) |
+| 7 | **PTE Dow H1** (fascia B→R23) | 🌱 VIVAIO dall'11/08 (771321) |
+| 8 | **PTE GBPUSD H1** | 🌱 VIVAIO dall'11/08 (771322) |
+| 9 | **PTE USDJPY H1** | 🌱 VIVAIO dall'11/08 (771323) |
+| 10 | **SuperWave Dow H2** | 🌱 VIVAIO dall'11/08 (770531) |
+| +1 | **SuperWave GBPUSD H2** | 🌱 VIVAIO dall'11/08 (770532) |
+
+**Le 10 sedie sono NOMINATE** (5 titolari + 6 in vivaio): l'obiettivo
+della campagna e' passato da "trovare candidati" a "maturare il vivaio"
+(10 trade/mercato = collaudo, 30/famiglia = verdetto). D2 (perimetro
+forex): risposta ARRIVATA dai fatti — 3 sedie su 6 del vivaio sono forex.
+Nota dell'11/08: Alta Velocita' testata (2 versioni, 1 giorno) e CHIUSA
+con referto — il tritacarne funziona anche in bocciatura.
 
 ## La coda, in ordine di vicinanza alla sedia
 
