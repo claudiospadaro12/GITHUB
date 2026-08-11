@@ -1,0 +1,27 @@
+# =====================================================================
+#  PROVA v2 — ABTG_AltaVelocita, COMBO B: ciclo DAILY -> ingresso M15
+#  Lancio: ABTG_AltaVelocita -Prova prove\ABTG_AltaVelocita_D1.txt
+#          -Modello 1 -Etichetta v2d1
+#  (riga ufficiale della tabella del manuale: D -> M15, Williams H1,
+#   RSI H4, target 2 x ATR Daily. Combo dichiarata nella tesi v2 PRIMA
+#   dei numeri, insieme alla combo A: non e' stata scelta dopo.)
+# =====================================================================
+# PERCHE' QUESTA COMBO: costi e rumore pesano meno (stop piu' larghi su
+#   M15, spread irrilevante in proporzione), cicli piu' lenti = meno
+#   trade ma piu' puliti. E' il banco dove la meccanizzazione ha la
+#   strada piu' in discesa.
+# SWEEP identico alla combo A (4 celle): InpUseRsiPunte 0/1 x
+#   InpRequireDivergence 0/1. Stessi criteri, stessa lettura, stesso
+#   patto di chiusura.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+InpCicloTF=16408
+InpStMult=3.0
+
+InpUseRsiPunte=0||0||1||1||Y
+InpRequireDivergence=0||0||1||1||Y
+
+InpMagic=771403

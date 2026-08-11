@@ -1,7 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                          ABTG_AltaVelocita.mq5   |
 //|                                                                  |
-//|  EA "ALTA VELOCITA'" (metodo Manuela Negro) - MT5 - v1           |
+//|  EA "ALTA VELOCITA'" (metodo Manuela Negro) - MT5 - v2           |
 //|  (metti in MQL5\Experts e compila con F7: nessuna dipendenza)    |
 //|                                                                  |
 //|  COSA FA                                                         |
@@ -51,13 +51,62 @@
 //|    - SL e TP restano ORDINI VERI sul server; le uscite sopra     |
 //|      sono chiusure anticipate via codice.                        |
 //|                                                                  |
-//|  LE 3 APPROSSIMAZIONI DICHIARATE DELLA v1                        |
-//|    1. Le TRENDLINE sulle PUNTE dell'RSI ("una punta per ciclo,   |
-//|       mai saltarne uno") sono ridotte a un confronto a lookback: |
-//|       RSI in discesa = RSI[1] < RSI[1+InpRsiLookback]. La        |
-//|       lettura fine (ventagli, canali, divergenza vera) NON c'e'. |
-//|       Di conseguenza l'uscita anticipata usa MA9 + RSI contro    |
-//|       al posto della divergenza del manuale.                     |
+//|  ---------------------------------------------------------------|
+//|  NOVITA' DELLA v2 (11/08): IL MOTORE DELLE PUNTE RSI PER CICLO   |
+//|  ---------------------------------------------------------------|
+//|  La v1/v1.1 leggeva l'RSI con un surrogato a lookback            |
+//|  ("RSI giu' = RSI[1] < RSI[1+InpRsiLookback]"): il referto        |
+//|  ROSSO su GBPUSD indicava proprio li' il cuore mancante, perche' |
+//|  il manuale NON guarda l'RSI barra-contro-barra ma le sue PUNTE, |
+//|  UNA PER CICLO, "mai saltarne uno".                              |
+//|                                                                  |
+//|  La v2 costruisce quelle punte:                                  |
+//|    - l'oscillatore CICLO (composito di 4 stocastici - SMA9)      |
+//|      segmenta il tempo: un ciclo si CHIUDE quando il CICLO cambia|
+//|      segno su barra chiusa;                                      |
+//|    - per OGNI ciclo si registra UNA punta dell'RSI(4): nel ciclo |
+//|      POSITIVO il MASSIMO dell'RSI (col MASSIMO di PREZZO del     |
+//|      ciclo), nel ciclo NEGATIVO il MINIMO dell'RSI (col MINIMO   |
+//|      di prezzo). Nessun ciclo viene saltato, nemmeno minuscolo;  |
+//|    - "RSI ribassista" (SELL) = le ultime DUE punte-MASSIMO sono  |
+//|      DECRESCENTI; "RSI rialzista" (BUY) = le ultime due punte-   |
+//|      MINIMO sono CRESCENTI;                                      |
+//|    - classificazione rispetto al PREZZO (esempio SELL):          |
+//|        DIVERGENZA  = massimi di prezzo crescenti + RSI decresc.  |
+//|                      -> il caso migliore del manuale;            |
+//|        CONVERGENZA = massimi di prezzo decrescenti + RSI decr.   |
+//|                      -> valido;                                  |
+//|        DOPPIO MASSIMO = due punte quasi uguali (entro            |
+//|                      InpRsiFlatTol punti di RSI) -> NON valido,  |
+//|                      "si aspetta" (regola esplicita del manuale).|
+//|      Specchiato per il BUY sulle punte-minimo.                   |
+//|                                                                  |
+//|  Dove entra nella macchina a stati:                              |
+//|    ROTTURA    -> due punte NELLA direzione (conv. o div.);       |
+//|    RITEST     -> due punte CONTRARIE (per un sell: minimi RSI    |
+//|                  crescenti);                                     |
+//|    RIPARTENZA -> di nuovo nella direzione E classificazione:     |
+//|                  InpRequireDivergence=1 accetta SOLO divergenza, |
+//|                  =0 accetta divergenza O convergenza; il doppio  |
+//|                  massimo/minimo non e' MAI valido.               |
+//|    Anche l'RSI di CONTESTO (2 gradini sopra l'ingresso) e' letto |
+//|    con le punte del SUO ciclo (CICLO calcolato sul TF di         |
+//|    contesto), non piu' col confronto a lookback.                 |
+//|                                                                  |
+//|  FALLBACK: InpUseRsiPunte=false riproduce ESATTAMENTE la v1.1    |
+//|  (torna il lookback InpRsiLookback, il ciclo di contesto non     |
+//|  viene nemmeno calcolato). Serve per il confronto A/B nel tester:|
+//|  stessa griglia, una sola variabile cambiata.                    |
+//|                                                                  |
+//|  COSTO: le punte si ricostruiscono in modo INCREMENTALE, una     |
+//|  barra alla volta sul TF relativo (una sola ricostruzione piena  |
+//|  all'avvio o dopo un buco nella continuita' delle barre).        |
+//|                                                                  |
+//|  LE APPROSSIMAZIONI ANCORA DICHIARATE                            |
+//|    1. Delle trendline sulle punte resta la lettura a DUE punte:  |
+//|       ventagli, canali e "pallina" restano fuori. L'uscita       |
+//|       anticipata della gestione usa ancora MA9 + RSI a lookback  |
+//|       (non toccata dalla v2: si cambia una cosa alla volta).     |
 //|    2. Il gradino 100-tick non esiste nel tester MT5: la scala    |
 //|       parte da M1 e le combo 100tick restano manuali.            |
 //|    3. Niente hedging multiday, niente doppia uscita del Williams |
@@ -73,7 +122,7 @@
 //|  codice: compilare in MetaEditor e validare nel tester.          |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.10"
+#property version   "2.00"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -98,7 +147,12 @@ input int    InpWprGraceBars  = 10;    // Barre di tolleranza dopo l'uscita dall
 
 input group "=== RSI (4) ==="
 input int    InpRsiPeriod     = 4;     // Periodo RSI (manuale: 4)
-input int    InpRsiLookback   = 6;     // Barre di confronto per "RSI in discesa/salita" (v1)
+input int    InpRsiLookback   = 6;     // FALLBACK v1.1: barre di confronto per "RSI giu'/su" (usato solo se InpUseRsiPunte=false)
+
+input group "=== RSI: motore delle PUNTE per ciclo (v2 - il cuore del manuale) ==="
+input bool   InpUseRsiPunte      = true; // true = punte di ciclo (v2); false = lookback (comportamento v1.1)
+input int    InpRequireDivergence= 0;    // RIPARTENZA: 1 = SOLO divergenza; 0 = divergenza O convergenza (sweepabile)
+input double InpRsiFlatTol       = 3.0;  // "doppio massimo/minimo": punte entro N punti RSI -> si aspetta (sweepabile)
 
 input group "=== Ciclo / stato ==="
 input int    InpMaxCicloAgeBars = 2;   // Max barre del ciclo direzionale dal cambio di segno
@@ -145,6 +199,16 @@ input bool   InpVerbose   = true;
 #define CYC_MAXSEG 120      // ricerca massima all'indietro per UN segmento di ciclo
 #define CYC_NEED   (2*CYC_MAXSEG+6)  // barre di CICLO/prezzo servite sul ciclo direzionale
 
+//--- v2: motore delle PUNTE dell'RSI (una per ciclo)
+#define PUNTE_MAX       8   // punte tenute in memoria per TF (>=6: ne servono 2 per segno)
+#define PUNTE_SEED_BARS 400 // ricostruzione UNA TANTUM all'avvio (poi solo incrementale)
+
+//--- esito della lettura delle punte
+#define RSIP_NONE  0        // dati insufficienti oppure punte NON nella direzione chiesta
+#define RSIP_FLAT  1        // doppio massimo / doppio minimo: il manuale dice "aspetta"
+#define RSIP_CONV  2        // convergenza: valida
+#define RSIP_DIV   3        // divergenza: il caso migliore
+
 //--- scala fissa (niente M30/M2: i parametri del metodo sono tarati su questa)
 ENUM_TIMEFRAMES gScale[8]={PERIOD_M1,PERIOD_M5,PERIOD_M15,PERIOD_H1,PERIOD_H4,PERIOD_D1,PERIOD_W1,PERIOD_MN1};
 
@@ -163,11 +227,11 @@ int hMa9   =INVALID_HANDLE;
 //    si legge SOLO da 1 in su: niente ripaint)
 double gStOp[],  gStUp[];
 double gDirOp[], gDirUp[];      // +1 verde / -1 rosso (double per uniformita' di copia)
-double gCycOp[], gCycDir[];
+double gCycOp[], gCycDir[], gCycCtx[];
 double gRsiOpA[],gRsiCtxA[];
 double gWprOpA[],gWprCtxA[];
 double gMa9A[];
-MqlRates gRatesOp[], gRatesDir[];
+MqlRates gRatesOp[], gRatesDir[], gRatesCtx[];
 
 datetime gLastBar=0;
 int  gDay=-1, gTradesToday=0;
@@ -200,6 +264,36 @@ struct SetupState
    int      bars;        // barre operative trascorse nella sequenza (timeout)
   };
 SetupState gSell, gBuy;
+
+//--- v2: UNA punta di RSI per ciclo.
+//    'rsi'   = estremo dell'RSI dentro il ciclo (max se ciclo positivo, min se negativo);
+//    'price' = estremo di PREZZO dentro lo STESSO ciclo (il manuale: il max/min di ciclo
+//              e' quello del PREZZO, non la punta dell'indicatore) -> i due estremi
+//              possono cadere su barre diverse e vengono seguiti separatamente;
+//    'chiusa'= true quando il ciclo ha cambiato segno: punta CONSOLIDATA. Finche' e'
+//              false la punta e' PROVVISORIA (ciclo in corso) e puo' ancora peggiorare/
+//              migliorare: si usa lo stesso, perche' la RIPARTENZA arriva quasi sempre
+//              a ciclo non chiuso, ma la differenza viene marcata e loggata.
+struct RsiPunta
+  {
+   datetime bar;      // barra su cui e' stato toccato l'estremo di RSI
+   double   rsi;      // valore dell'RSI alla punta
+   double   price;    // estremo di prezzo del ciclo (high se ciclo +, low se ciclo -)
+   int      segno;    // +1 ciclo positivo (punta di MASSIMO) / -1 negativo (punta di MINIMO)
+   bool     chiusa;   // true = ciclo chiuso -> punta consolidata
+  };
+
+//--- buffer circolare delle ultime PUNTE_MAX punte di un TF
+struct PunteTracker
+  {
+   RsiPunta p[PUNTE_MAX];
+   int      head;      // indice della punta piu' recente
+   int      count;     // quante punte valide
+   datetime lastBar;   // ultima barra CHIUSA gia' contabilizzata (continuita' incrementale)
+   int      segnoCorr; // segno del ciclo in corso
+   bool     init;
+  };
+PunteTracker gPunteOp, gPunteCtx;   // TF operativo (ingresso) e TF dell'RSI di contesto
 
 void Log(string m){ if(InpVerbose) Print("[ALTAV] ", m); }
 
@@ -252,6 +346,7 @@ int OnInit()
    gIndBars = (int)MathMax(60, (double)(MathMax(InpRsiLookback, MathMax(InpWprGraceBars,InpMa9Bars))+20));
 
    ResetSetup(gSell); ResetSetup(gBuy);
+   PunteReset(gPunteOp); PunteReset(gPunteCtx);
 
    if(_Period!=gTfOp)
       Log(StringFormat("ATTENZIONE: il grafico e' %s ma il TF operativo derivato e' %s. "
@@ -264,6 +359,12 @@ int OnInit()
                     "Supertrend(%d,%.2f) IPOTESI, ATR target %d IPOTESI.",
                     _Symbol,EnumToString(gTfCiclo),EnumToString(gTfOp),EnumToString(gTfWpr),
                     EnumToString(gTfRsi),EnumToString(gTfUp),InpStAtrPeriod,InpStMult,InpAtrPeriod));
+   if(InpUseRsiPunte)
+      Log(StringFormat("RSI: motore PUNTE per ciclo ATTIVO (v2). Divergenza obbligatoria: %s. "
+                       "Tolleranza doppio massimo/minimo: %.2f punti RSI.",
+                       (InpRequireDivergence==1?"SI":"no (conv. o div.)"),InpRsiFlatTol));
+   else
+      Log(StringFormat("RSI: motore PUNTE DISATTIVATO -> fallback v1.1 a lookback %d barre.",InpRsiLookback));
    return(INIT_SUCCEEDED);
   }
 
@@ -321,6 +422,11 @@ bool RefreshData()
    ArraySetAsSeries(gRatesOp,true);
    if(CopyRates(_Symbol,gTfOp,0,gIndBars,gRatesOp)<gIndBars) return(false);
 
+   //--- v2: la punta dell'RSI del ciclo OPERATIVO, aggiornata con la sola
+   //    barra appena chiusa (tutte le serie qui sopra sono gia' verificate).
+   if(InpUseRsiPunte)
+      PunteUpdateTF(gPunteOp,gTfOp,hRsiOp,gCycOp,gRsiOpA,gRatesOp);
+
    //--- TF SUPERIORE (gestione) e Williams di CONTESTO: per costruzione sono
    //    lo stesso timeframe (operativo + 1), quindi un solo timbro di barra.
    datetime tUp=iTime(_Symbol,gTfUp,0);
@@ -338,6 +444,19 @@ bool RefreshData()
    if(tRs!=gLastBarRsi || ArraySize(gRsiCtxA)<3)
      {
       if(!CopyInd(hRsiCtx,gIndBars,gRsiCtxA)) return(false);
+      //--- v2: le punte del contesto vogliono il CICLO del LORO timeframe.
+      //    Costa poco: si calcola una sola volta per barra del TF di contesto
+      //    e solo se il motore delle punte e' acceso (col fallback v1.1 non
+      //    viene nemmeno chiamato, cosi' l'A/B confronta solo la logica).
+      if(InpUseRsiPunte)
+        {
+         if(CycleSeries(gTfRsi,3,gCycCtx))
+           {
+            ArraySetAsSeries(gRatesCtx,true);
+            if(CopyRates(_Symbol,gTfRsi,0,8,gRatesCtx)>=4)
+               PunteUpdateTF(gPunteCtx,gTfRsi,hRsiCtx,gCycCtx,gRsiCtxA,gRatesCtx);
+           }
+        }
       gLastBarRsi=tRs;
      }
 
@@ -470,6 +589,205 @@ bool CycleSeries(ENUM_TIMEFRAMES tf,int need,double &cycOut[])
    return(true);
   }
 
+//==================================================================
+//  v2 - MOTORE DELLE PUNTE DELL'RSI (una punta per ciclo)
+//==================================================================
+//  Il manuale non guarda l'RSI barra per barra: guarda le sue PUNTE,
+//  UNA PER CICLO ("mai saltarne uno"), e traccia la trendline su quelle.
+//  Qui il ciclo e' quello dell'oscillatore CICLO del TF in esame: cambia
+//  segno = ciclo chiuso = la punta appena maturata si CONSOLIDA.
+//  Costruzione INCREMENTALE: a ogni barra chiusa si aggiorna solo la punta
+//  del ciclo in corso; la storia si ricostruisce una volta sola (avvio o
+//  buco nella continuita' delle barre), MAI a ogni tick.
+//==================================================================
+void PunteReset(PunteTracker &t)
+  {
+   t.head=-1; t.count=0; t.lastBar=0; t.segnoCorr=0; t.init=false;
+   for(int i=0;i<PUNTE_MAX;i++) PuntaZero(t.p[i]);
+  }
+
+void PuntaZero(RsiPunta &p)
+  {
+   p.bar=0; p.rsi=0.0; p.price=0.0; p.segno=0; p.chiusa=false;
+  }
+
+//--- k=0 -> punta piu' recente (PROVVISORIA se il ciclo e' ancora aperto)
+int PuntaIdx(const PunteTracker &t,int k)
+  {
+   if(k<0 || k>=t.count) return(-1);
+   int i=t.head-k;
+   while(i<0) i+=PUNTE_MAX;
+   return(i%PUNTE_MAX);
+  }
+
+//+------------------------------------------------------------------+
+//| Una barra CHIUSA in pasto al tracker.                             |
+//|  - segno diverso da quello in corso -> il ciclo precedente si e'   |
+//|    chiuso: la sua punta diventa consolidata e ne nasce una nuova   |
+//|    (provvisoria) sulla barra corrente;                             |
+//|  - stesso segno -> si aggiorna la punta provvisoria: l'estremo di   |
+//|    RSI e, separatamente, l'estremo di PREZZO del ciclo.            |
+//+------------------------------------------------------------------+
+void PunteFeed(PunteTracker &t,datetime bt,double cyc,double rsi,double hi,double lo)
+  {
+   int sgn=(cyc>=0.0)?+1:-1;      // cyc==0 conta come positivo (come CycleSegStart)
+
+   if(!t.init || sgn!=t.segnoCorr)
+     {
+      if(t.count>0)
+        { int ip=PuntaIdx(t,0); if(ip>=0) t.p[ip].chiusa=true; }
+      t.head=(t.head+1)%PUNTE_MAX;
+      if(t.head<0) t.head=0;
+      if(t.count<PUNTE_MAX) t.count++;
+      t.p[t.head].bar   = bt;
+      t.p[t.head].rsi   = rsi;
+      t.p[t.head].price = (sgn>0)?hi:lo;
+      t.p[t.head].segno = sgn;
+      t.p[t.head].chiusa= false;
+      t.segnoCorr=sgn;
+      t.init=true;
+     }
+   else
+     {
+      int i=PuntaIdx(t,0);
+      if(i>=0)
+        {
+         if(sgn>0)
+           {
+            if(rsi>t.p[i].rsi){ t.p[i].rsi=rsi; t.p[i].bar=bt; }
+            if(hi >t.p[i].price) t.p[i].price=hi;
+           }
+         else
+           {
+            if(rsi<t.p[i].rsi){ t.p[i].rsi=rsi; t.p[i].bar=bt; }
+            if(lo <t.p[i].price) t.p[i].price=lo;
+           }
+        }
+     }
+   t.lastBar=bt;
+  }
+
+//+------------------------------------------------------------------+
+//| Ricostruzione UNA TANTUM su 'bars' barre di storia del TF.        |
+//| Serve solo all'avvio (o dopo un buco): senza, il warm-up sarebbe  |
+//| di decine di cicli. Ritorna false se la storia non basta ancora:  |
+//| in quel caso si riprova alla barra dopo (niente crash, niente     |
+//| segnali finche' le punte non ci sono).                            |
+//+------------------------------------------------------------------+
+bool PunteSeed(PunteTracker &t,ENUM_TIMEFRAMES tf,int rsiHandle,int bars)
+  {
+   if(bars<10) bars=10;
+   double cyc[];
+   if(!CycleSeries(tf,bars,cyc)) return(false);
+   int n=ArraySize(cyc);                 // indici 0..bars (0 = barra in corso)
+   if(n<10) return(false);
+
+   double rsi[]; ArraySetAsSeries(rsi,true);
+   if(CopyBuffer(rsiHandle,0,0,n,rsi)<n) return(false);
+   MqlRates r[]; ArraySetAsSeries(r,true);
+   if(CopyRates(_Symbol,tf,0,n,r)<n)     return(false);
+
+   PunteReset(t);
+   //--- si parte dalla PRIMA barra di un ciclo nuovo dentro la finestra: cosi'
+   //    la punta piu' vecchia non e' il troncone di un ciclo cominciato fuori.
+   int k=n-1;
+   int sgn0=(cyc[k]>=0.0)?+1:-1;
+   while(k>1 && (((cyc[k-1]>=0.0)?+1:-1)==sgn0)) k--;
+   int start=(k>1)?(k-1):(n-1);
+   for(int i=start;i>=1;i--)
+      PunteFeed(t,r[i].time,cyc[i],rsi[i],r[i].high,r[i].low);
+   return(t.count>0);
+  }
+
+//+------------------------------------------------------------------+
+//| Aggiornamento a ogni barra chiusa del TF: UNA barra, non la storia|
+//| (la storia solo se manca la continuita' con l'ultima contabiliz-  |
+//| zata, cioe' all'avvio o dopo una barra saltata per dati mancanti).|
+//+------------------------------------------------------------------+
+void PunteUpdateTF(PunteTracker &t,ENUM_TIMEFRAMES tf,int rsiHandle,
+                   const double &cyc[],const double &rsi[],const MqlRates &r[])
+  {
+   if(ArraySize(cyc)<3 || ArraySize(rsi)<3 || ArraySize(r)<3) return;
+   datetime bt=r[1].time;
+   if(bt<=0) return;
+   if(t.init && t.lastBar==bt) return;                 // barra gia' contabilizzata
+
+   if(t.init && t.lastBar==r[2].time)
+     { PunteFeed(t,bt,cyc[1],rsi[1],r[1].high,r[1].low); return; }
+
+   //--- prima volta o continuita' persa: ricostruzione (rara e non a ogni tick).
+   //    Se la finestra lunga non e' disponibile si ripiega su una corta: meglio
+   //    poche punte che nessuna. Se fallisce anche quella si riprova alla barra
+   //    dopo, senza toccare il tracker (PunteSeed azzera solo a copie riuscite).
+   if(!PunteSeed(t,tf,rsiHandle,PUNTE_SEED_BARS) &&
+      !PunteSeed(t,tf,rsiHandle,PUNTE_SEED_BARS/4))
+     {
+      static int warn=0;
+      if(warn<5){ warn++; Log("punte RSI: storia insufficiente su "+EnumToString(tf)+", riprovo alla prossima barra."); }
+     }
+  }
+
+//--- le ultime DUE punte con un dato segno (recente = la piu' nuova)
+bool PunteUltimeDue(const PunteTracker &t,int segno,RsiPunta &recente,RsiPunta &prec)
+  {
+   PuntaZero(recente); PuntaZero(prec);
+   int found=0;
+   for(int k=0;k<t.count;k++)
+     {
+      int i=PuntaIdx(t,k);
+      if(i<0) break;
+      if(t.p[i].segno!=segno) continue;
+      if(found==0) recente=t.p[i];
+      else { prec=t.p[i]; return(true); }
+      found++;
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Lettura del manuale sulle ultime due punte.                       |
+//|  ribassista=true  -> punte di MASSIMO (cicli positivi): valide se  |
+//|                      DECRESCENTI;                                  |
+//|  ribassista=false -> punte di MINIMO (cicli negativi): valide se   |
+//|                      CRESCENTI.                                    |
+//| Poi la classificazione rispetto al PREZZO:                        |
+//|   massimi di prezzo crescenti + massimi RSI decrescenti = DIVERG.; |
+//|   massimi di prezzo decrescenti + RSI decrescenti      = CONVERG.; |
+//|   punte quasi uguali (entro InpRsiFlatTol)             = DOPPIO    |
+//|   MASSIMO -> si aspetta (mai valido).                             |
+//| 'provvisoria' esce true se la punta piu' recente appartiene a un   |
+//| ciclo ancora APERTO (caso normale alla ripartenza).                |
+//+------------------------------------------------------------------+
+int RsiPunteStato(const PunteTracker &t,bool ribassista,bool &provvisoria)
+  {
+   provvisoria=false;
+   if(t.count<2) return(RSIP_NONE);                 // warm-up: nessun giudizio
+   int segno = ribassista ? +1 : -1;   // sell -> punte di MASSIMO (cicli positivi)
+   RsiPunta a,b;
+   PuntaZero(a); PuntaZero(b);
+   if(!PunteUltimeDue(t,segno,a,b)) return(RSIP_NONE);
+   provvisoria=(!a.chiusa);
+
+   double d=a.rsi-b.rsi;
+   if(MathAbs(d)<=InpRsiFlatTol) return(RSIP_FLAT); // doppio massimo / doppio minimo
+
+   if(ribassista)
+     {
+      if(d>0.0) return(RSIP_NONE);                  // punte crescenti: non e' ribassista
+      return( (a.price>b.price) ? RSIP_DIV : RSIP_CONV );
+     }
+   if(d<0.0) return(RSIP_NONE);                     // punte decrescenti: non e' rialzista
+   return( (a.price<b.price) ? RSIP_DIV : RSIP_CONV );
+  }
+
+string RsiPunteNome(int st)
+  {
+   if(st==RSIP_DIV)  return("DIVERGENZA");
+   if(st==RSIP_CONV) return("convergenza");
+   if(st==RSIP_FLAT) return("doppio massimo/minimo");
+   return("nessuna");
+  }
+
 //+------------------------------------------------------------------+
 //| Inizio del segmento di segno costante del ciclo che contiene idx  |
 //| (ritorna l'indice piu' VECCHIO del segmento, cioe' quanto e' "vec-|
@@ -527,6 +845,8 @@ int CicloEtaBarre()
 //==================================================================
 //  CONDIZIONI ELEMENTARI
 //==================================================================
+//--- FALLBACK v1.1: il surrogato a lookback (usato solo con InpUseRsiPunte=false
+//    e, per scelta, ancora dall'uscita anticipata della gestione).
 bool RsiGiu(const double &r[])
   {
    if(ArraySize(r)<InpRsiLookback+2) return(false);
@@ -536,6 +856,36 @@ bool RsiSu(const double &r[])
   {
    if(ArraySize(r)<InpRsiLookback+2) return(false);
    return(r[1] > r[1+InpRsiLookback]);
+  }
+
+//--- v2: "RSI nella direzione" = ultime due punte di ciclo nella direzione,
+//    convergenti o divergenti (il doppio massimo/minimo non conta mai).
+//    Usato da ROTTURA, da RITEST (a direzione invertita) e dall'RSI di contesto.
+bool RsiDirOk(const PunteTracker &t,const double &fb[],bool ribassista)
+  {
+   if(!InpUseRsiPunte) return(ribassista ? RsiGiu(fb) : RsiSu(fb));
+   bool prov=false;
+   int st=RsiPunteStato(t,ribassista,prov);
+   return(st>=RSIP_CONV);
+  }
+
+//--- v2: alla RIPARTENZA si applica la classificazione del manuale.
+//    InpRequireDivergence=1 -> solo DIVERGENZA (il caso migliore);
+//    InpRequireDivergence=0 -> divergenza O convergenza;
+//    doppio massimo/minimo -> mai valido, si aspetta.
+bool RsiRipartenzaOk(const PunteTracker &t,const double &fb[],bool ribassista,string tag)
+  {
+   if(!InpUseRsiPunte) return(ribassista ? RsiGiu(fb) : RsiSu(fb));
+   bool prov=false;
+   int st=RsiPunteStato(t,ribassista,prov);
+   if(st==RSIP_NONE) return(false);
+   if(st==RSIP_FLAT)
+     { Log(tag+": RIPARTENZA rimandata, doppio massimo/minimo dell'RSI (si aspetta)."); return(false); }
+   if(InpRequireDivergence==1 && st!=RSIP_DIV)
+     { Log(tag+": RIPARTENZA scartata, richiesta la DIVERGENZA ma le punte sono in convergenza."); return(false); }
+   Log(StringFormat("%s: punte RSI ok (%s, punta piu' recente %s).",
+       tag,RsiPunteNome(st),(prov?"PROVVISORIA - ciclo aperto":"consolidata")));
+   return(true);
   }
 
 //--- flip del Supertrend sulla barra chiusa 1
@@ -596,7 +946,10 @@ void UpdateOneSetup(SetupState &s,bool isSell)
    if(s.fase==FASE_ATTESA)
      {
       bool flip = isSell ? FlipRosso(gDirOp) : FlipVerde(gDirOp);
-      bool rsiOk= isSell ? RsiGiu(gRsiOpA)   : RsiSu(gRsiOpA);
+      //--- v2: "RSI ribassista" = due punte-massimo di ciclo decrescenti
+      //    (per il buy: due punte-minimo crescenti). Nessuna classificazione
+      //    qui: la divergenza si pretende, semmai, alla ripartenza.
+      bool rsiOk= RsiDirOk(gPunteOp,gRsiOpA,isSell);
       if(flip && rsiOk)
         {
          double est=0.0;
@@ -644,7 +997,9 @@ void UpdateOneSetup(SetupState &s,bool isSell)
          if(isSell){ if(gRatesOp[i].close>gRatesOp[i+1].close) cnt++; else break; }
          else      { if(gRatesOp[i].close<gRatesOp[i+1].close) cnt++; else break; }
         }
-      bool rsiRitest = isSell ? RsiSu(gRsiOpA) : RsiGiu(gRsiOpA);
+      //--- v2: nel RITEST l'RSI deve girare dalla parte CONTRARIA al trade:
+      //    per un sell servono due punte-MINIMO di ciclo CRESCENTI.
+      bool rsiRitest = RsiDirOk(gPunteOp,gRsiOpA,!isSell);
       if(cnt>=InpRitestBars || rsiRitest)
         { s.fase=FASE_RITEST; Log(tag+": RITEST in corso."); }
       return;
@@ -655,9 +1010,12 @@ void UpdateOneSetup(SetupState &s,bool isSell)
      {
       bool stOk  = isSell ? (gDirOp[1]<0 && gRatesOp[1].close<gStOp[1])
                           : (gDirOp[1]>0 && gRatesOp[1].close>gStOp[1]);
-      bool rsiOk = isSell ? RsiGiu(gRsiOpA) : RsiSu(gRsiOpA);
       bool cycOk = isSell ? (gCycOp[1]<0.0) : (gCycOp[1]>0.0);
-      if(!(stOk && rsiOk && cycOk)) return;
+      //--- l'RSI si valuta per ULTIMO: cosi' il log della classificazione
+      //    (divergenza / convergenza / doppio massimo) esce solo quando
+      //    Supertrend e ciclo sono gia' d'accordo, non a ogni barra.
+      if(!(stOk && cycOk)) return;
+      if(!RsiRipartenzaOk(gPunteOp,gRsiOpA,isSell,tag)) return;
 
       //--- filtri di contesto
       if(!WprCtxEstremo(isSell))
@@ -666,9 +1024,11 @@ void UpdateOneSetup(SetupState &s,bool isSell)
       //    e' gia' scaduto: e' la "benzina" che manca)
       if(isSell){ if(gWprOpA[1] <= InpWprMid) return; }
       else      { if(gWprOpA[1] >= InpWprMid) return; }
-      //--- RSI di contesto gia' nella direzione
-      if(isSell){ if(!RsiGiu(gRsiCtxA)) return; }
-      else      { if(!RsiSu(gRsiCtxA))  return; }
+      //--- RSI di contesto (2 gradini sopra l'ingresso) gia' nella direzione:
+      //    v2 lo legge con le punte del CICLO DEL SUO timeframe. Qui basta la
+      //    direzione (conv. o div.): la divergenza si pretende, se richiesta,
+      //    solo sul grafico d'ingresso.
+      if(!RsiDirOk(gPunteCtx,gRsiCtxA,isSell)) return;
       //--- non arrivare in ritardo sul ciclo direzionale
       bool cycDirNeg=(gCycDir[1]<0.0);
       int  eta=CicloEtaBarre();
@@ -807,6 +1167,9 @@ void ManagePosition()
 
       //--- 4) uscita anticipata: N chiusure oltre la MA9 contro posizione
       //    + RSI operativo contro. (v1: al posto della divergenza vera.)
+      //    v2 NON la tocca di proposito: si cambia una cosa alla volta, cosi'
+      //    l'A/B su InpUseRsiPunte misura SOLO la lettura d'ingresso. Qui
+      //    resta quindi il confronto a lookback.
       if(InpMa9Bars>0 && ArraySize(gMa9A)>InpMa9Bars+1 && ArraySize(gRatesOp)>InpMa9Bars+1)
         {
          int cnt=0;
