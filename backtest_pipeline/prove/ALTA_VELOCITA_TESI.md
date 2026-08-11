@@ -121,6 +121,23 @@ scala -> lo screening dira' poco, il giudizio vero e' tutto nei tick.
   stessa griglia. Tick rossi -> v1 senza edge li' (e la coda si valuta
   con quel dato in mano); tick diversi -> l'OHLC era il bugiardo atteso.
 
+## TESI v2 (congelata l'11/08 sera, PRIMA dei numeri — decisione di
+## Claudio: "NON DOBBIAMO MOLLARE", incanalata nel modo giusto)
+La v1/v1.1 e' bocciata (referto REFERTO_ALTA_VELOCITA_V1.md). L'ipotesi
+v2, dichiarata ora: **il pezzo che guadagna e' la lettura delle punte
+dell'RSI** (una punta per ciclo, due punte decrescenti = direzione,
+divergenza = via libera, doppio massimo = niente), che la v1 surrogava
+con un lookback banale. La v2 la implementa DAVVERO (motore delle punte
+per-ciclo, classificazione divergenza/convergenza/doppio-massimo, anche
+sull'RSI di contesto).
+- **Due combo dichiarate da subito** (righe ufficiali del manuale):
+  ciclo H4 -> ingresso M5, e ciclo Daily -> ingresso M15 (costi e rumore
+  minori). NON si aggiungeranno combo dopo aver visto i numeri.
+- **Criteri: gli stessi 4 congelati.** Percorso: collaudo OHLC -> tick.
+- **Patto di chiusura**: la v2 e' l'ULTIMO tentativo di meccanizzazione
+  senza un'idea esterna nuova. Rossa su entrambe le combo ai tick =
+  capitolo chiuso definitivamente, senza appello ne' v3.
+
 ## TICK REALI 11/08 (GBPUSD): rosso CONFERMATO -> v1.1
 - 8/8 celle negative anche ai tick (PF 0,54-0,82, DD fino al 37%):
   perdita media ~0,1R a trade. Su GBPUSD/ciclo H4 la v1 non ha edge.
