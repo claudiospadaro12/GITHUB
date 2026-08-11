@@ -88,3 +88,12 @@ prima di guadagnarsi il 100k. Trafila fissa: imbuto → vivaio → 100k.*
 - **Ogni candidato promosso**: giro per-trade (stile R16) → aggiornamento
   del referto di portafoglio → eventuale ingresso nel vivaio.
 - **Pagella doppia ogni sera**: il 100k è il banco di prova che decide.
+
+**D5 — Taglia vera per i quasi-validati (proposta di Claudio, 12/08).**
+Idea: un secondo demo 100k per gli EA "a un test dal traguardo". Merito
+tecnico reale (la taglia cambia i parziali: R23, 88 vs 61 chiusure), ma
+RINVIATA al primo collaudo del vivaio (10 trade/mercato): li' si decide
+tra (a) ingresso a mezzo peso sul 100k esistente (precedente ORB 0,3%)
+e (b) secondo conto — che comunque avra' il suo momento naturale come
+prova generale della SECONDA PROP (D3, stesso portafoglio su due ditte).
+Fino ad allora: il vivaio sul piccolo E' il banco dei quasi-validati.
