@@ -161,13 +161,15 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
 3. ✅ **CODA FASCIA B ESEGUITA (notte 10-11/08, 48/48 lavori)** — referto completo in `risultati_archivio/REFERTO_CODA_FASCIA_B.md`. Capitoli CHIUSI: Nightly 0/8 (il posto non se l'è guadagnato), FiboH4_Multi 0/8, SupertrendInvert (non opera: 0-2 trade), WOL (profitti da spread). **Sorpresa: PTE** — bocciata a casa sua (oro), passa i criteri congelati su **Dow H1 (altopiano BE 0-1, 43 trade OOS, PF 1,32), GBPUSD H1 (51 trade, PF 1,45), USDJPY (12 celle su 16)** + DAX H1 con riserve. SuperWave: Dow H2 (61 trade, PF 1,73) e GBPUSD H2 (63 trade, PF 2,09). ⚠️ Righe H3 PTE = pattern regime (IS rosso/OOS verde), non contarle. **Prossimo: R23 per-trade dei 5 candidati** (magic vergini) → dd_portafoglio → eventuale vivaio, decisione di Claudio.
 4. ❓ **SupertrendInvert tick reali** — da ritrovare sul PC (non in archivio).
 5. 🟢 **VPS — PULIZIA IN CORSO (via libera di Claudio 10/08 sera)**: checklist completa in `report/PULIZIA_VPS_10-08.md` — 15 voci Tier 1 (bocciati con referto: ORB corso, ORB_Fibo, Nightly, MaxMin EURUSD, GoldenCross ×5, PTE, WOL, SupertrendInvert, PostNews ×2, SupRev CAC, doppioni STREV, EMA200 base ×6, HARSI), Tier 2 da verificare, whitelist squadra+vivaio. Prima di staccare: chiudere le posizioni aperte dei morti (incluso il gruppo di controllo oro del 04/08 → annotare esito). La ricompilazione coi log del filtro (5-bis) resta per un momento calmo, NON stasera.
-6. 🆕 **ALTA VELOCITA' (strategia di Manuela Negro, portata da Claudio l'11/08)**:
-   tesi in `backtest_pipeline/prove/ALTA_VELOCITA_TESI.md`, formula originale
-   del ciclo in `alta_velocita_ciclo.pine` (confermata da 3 fonti), EA v1
-   `mql5/Experts/ABTG_AltaVelocita.mq5` scritto (1044 righe, semplificazioni
-   dichiarate nell'header; Supertrend 10/3 e ATR 14 = IPOTESI sweepabili).
-   Prossimo: collaudo compilazione + FASE 0 con `prove/ABTG_AltaVelocita.txt`
-   (GBPUSD M5, ciclo H4, sweep StMult). Criteri congelati = quelli PTE.
+6. ✅ **ALTA VELOCITA' — CAPITOLO CHIUSO IN GIORNATA (11/08, referto:
+   `REFERTO_ALTA_VELOCITA_V1.md`)**: manuale → tesi → formula originale del
+   ciclo (3 fonti) → EA 1.045 righe (compilato al 1° colpo) → collaudo →
+   v1.1 (regola stop del manuale) → **BOCCIATO su GBPUSD coi criteri
+   congelati** (v1 tick 8/8 rosse; v1.1 OOS 4/4 rosse). La macchina
+   funziona, l'edge della traduzione meccanica no: il cuore non tradotto
+   (trendline sulle punte RSI) e' probabilmente IL cuore. Niente coda a
+   8 simboli (sarebbe pesca); `CODA_ALTAV.csv` resta pronta SOLO per
+   un'eventuale v2 con tesi nuova. Zero forward speso.
 5-bis. 🟡 **Log del filtro nel MaxMinNotte_DAX_Short** (deciso 10/08, alla prossima
    ricompilazione — MAI a forward caldo): quando il filtro di correlazione S&P
    nega il piazzamento, oggi l'EA salta IN SILENZIO (verificato nel codice:
