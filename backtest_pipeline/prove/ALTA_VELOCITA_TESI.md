@@ -92,10 +92,13 @@ superiore, uscita su MA9+condizione, filtro direzionale della linea viola.
    fine (ventagli, canali, "pallina") resta fuori;
 3. il 100-tick NON esiste nel tester MT5 in ottimizzazione: si parte
    dalle combo M1/M5 (ciclo H1/H4/D), il gradino 100tick resta manuale.
-**ANCORA MANCANTE per la fedelta' piena:** i parametri esatti del
-Supertrend (il manuale dice solo "standard"): chiesti a Claudio
-(file AltaVelocita.mq5 o screenshot dei settaggi; default di riserva:
-ATR 10 x mult 3, da dichiarare come ipotesi se non arriva di meglio).
+**Supertrend:** parametri esatti non reperibili (Claudio, 11/08: "non ho
+trovato altro, dovrebbe essere standard"). DICHIARATO COME IPOTESI:
+ATR 10 x mult 3.0, reso SWEEPABILE nell'EA cosi' la FASE 0 misura la
+sensibilita' attorno all'ipotesi invece di fidarsi.
+**Conferme incrociate (11/08):** la formula del ciclo arriva identica da
+3 fonti indipendenti (odt, .pine TradingView, manifest del .algo cTrader
+con gli stessi default 5/3, 14/3, 45/14, 75/20, MM 9).
 **FUORI dalla v1:** hedging multiday, doppia uscita del Williams come
 pattern esplicito, scelta discrezionale del cross.
 **Percorso deciso:** EA `ABTG_AltaVelocita` (combo di partenza: ciclo H4,
