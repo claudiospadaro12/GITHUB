@@ -1,0 +1,2 @@
+pid;symbol;side;volume;open_time;open_price;close_time;close_price;commission;swap;profit;strategy;magic;close_reason;session_high;session_low
+3113525;U30USD;buy;4.40;2026.08.10 15:53:40;54007.50;2026.08.10 16:25:28;54036.50;0.00;0.00;110.47;Dow Apertura US RETEST BUY;770202;sl;54062.50;53851.50
