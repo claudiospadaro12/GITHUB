@@ -120,3 +120,15 @@ scala -> lo screening dira' poco, il giudizio vero e' tutto nei tick.
   di lanciare la coda a 8 simboli: UNA verifica a tick reali su GBPUSD,
   stessa griglia. Tick rossi -> v1 senza edge li' (e la coda si valuta
   con quel dato in mano); tick diversi -> l'OHLC era il bugiardo atteso.
+
+## TICK REALI 11/08 (GBPUSD): rosso CONFERMATO -> v1.1
+- 8/8 celle negative anche ai tick (PF 0,54-0,82, DD fino al 37%):
+  perdita media ~0,1R a trade. Su GBPUSD/ciclo H4 la v1 non ha edge.
+- **Rilettura del codice: mancava una regola ESPLICITA del manuale** —
+  il pavimento dello stop ("ATR M5 5 pip -> stop 5-6 pip; 1,5 pip e'
+  rumore; 20 pip = grafico sbagliato"). La v1 stringeva alla cuspide
+  senza limiti -> stop-rumore in serie, mangiati dallo spread.
+- **v1.1 (11/08 sera)**: `InpMinStopAtrOp=0.8` e `InpMaxStopAtrOp=4.0`
+  — stop fuori da [0,8-4]x ATR operativo = segnale scartato. E' fedelta'
+  al manuale, dichiarata PRIMA di rivedere i numeri, non tuning: una
+  sola iterazione, poi ricolludo (OHLC lampo -> tick) e verdetto.

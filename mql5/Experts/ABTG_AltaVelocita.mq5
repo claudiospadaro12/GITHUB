@@ -73,7 +73,7 @@
 //|  codice: compilare in MetaEditor e validare nel tester.          |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -111,6 +111,8 @@ input int    InpAtrPeriod     = 14;    // ATR del target sul ciclo direzionale (
 input double InpTargetATRmult = 2.0;   // Target = estremo di ciclo -/+ N x ATR (manuale: 2)
 input int    InpSLBufferPoints= 10;    // Buffer dello stop in points, oltre l'estremo
 input double InpMinRR         = 3.0;   // R/R minimo: sotto, il segnale NON si prende
+input double InpMinStopAtrOp  = 0.8;   // v1.1 pavimento stop: >= x ATR operativo (manuale: stop ~ ATR M5; sotto = rumore da spread)
+input double InpMaxStopAtrOp  = 4.0;   // v1.1 tetto stop: oltre = "grafico sbagliato" (manuale: 20 pip su ATR 5)
 
 input group "=== Gestione ==="
 input int    InpMa9Bars       = 2;     // Chiusure consecutive oltre la MA9 per l'uscita anticipata
@@ -743,6 +745,19 @@ bool TryEnter(bool isSell,double estremo)
           tag,rr,InpMinRR,DoubleToString(sl,_Digits),DoubleToString(tp,_Digits)));
       return(true);   // il setup e' consumato: si riparte da ATTESA
      }
+
+   //--- REGOLA DEL MANUALE (v1.1 — nella v1 mancava, dichiarato l'11/08):
+   //    lo stop si giudica con l'ATR del TF operativo. "Se l'ATR M5 e' 5
+   //    pip, uno stop di 5-6 pip e' giusto; 1,5 pip e' rumore (lo tocca
+   //    lo spread); 20 pip = grafico sbagliato." Senza questo pavimento
+   //    la stretta alla cuspide produce stop-rumore in serie.
+   double ao[1];
+   if(CopyBuffer(hAtrStOp,0,1,1,ao)!=1 || ao[0]<=0.0) { Log("ATR operativo non disponibile."); return(false); }
+   double stopDist=MathAbs(entry-sl);
+   if(stopDist < InpMinStopAtrOp*ao[0])
+     { Log(StringFormat("%s scartato: stop-rumore %.1f pt < %.2f x ATR operativo.",tag,stopDist/_Point,InpMinStopAtrOp)); return(true); }
+   if(stopDist > InpMaxStopAtrOp*ao[0])
+     { Log(StringFormat("%s scartato: stop %.1f pt > %.2f x ATR operativo (grafico sbagliato).",tag,stopDist/_Point,InpMaxStopAtrOp)); return(true); }
 
    sl=NormalizePrice(sl); tp=NormalizePrice(tp);
    double minDist=(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
