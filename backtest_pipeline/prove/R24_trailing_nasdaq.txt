@@ -1,0 +1,38 @@
+# =====================================================================
+#  R24 (lato Nasdaq): soglia x TF del trailing su ABTG_Nasdaq_Apertura_US
+#  Lancio: ABTG_Nasdaq_Apertura_US -Prova prove\R24_trailing_nasdaq.txt
+#          -Etichetta r24
+# =====================================================================
+# CONTESTO (11/08 sera): la griglia GEMELLA sul DAX era gia' stata
+#   eseguita l'8/08 e giaceva non letta. Analizzata oggi coi criteri
+#   congelati nel suo file: Spearman IS->OOS = -0,44 (NEGATIVO) e
+#   colonna 0 la migliore OOS su TUTTI i TF (medie OOS: 1.767 a soglia 0
+#   -> 349 a soglia 1R, discesa monotona). VERDETTO DAX: l'ipotesi della
+#   soglia era SBAGLIATA, il default 0 resta, NON SI TOCCA NIENTE.
+#   E' la 17^ apparizione del fenomeno IS-che-si-ribalta: in campione
+#   vinceva la soglia 1R, fuori campione e' l'ULTIMA. Il criterio scritto
+#   prima l'ha parata.
+# IPOTESI PER IL NASDAQ (scritta ora, prima dei numeri)
+#   Stessa domanda del DAX sul suo mercato: il trailing che arma subito
+#   e' protezione o tagliola? DOPO il verdetto DAX l'attesa onesta e'
+#   che anche qui la soglia 0 regga: se cosi' sara', il capitolo
+#   "InpTrailStartR" si chiude su TUTTA la famiglia con un solo referto.
+#   Se invece il Nasdaq preferisse soglie alte, varrebbe SOLO con
+#   Spearman positivo e coerenza su 2+ TF (criteri del file DAX,
+#   ereditati identici).
+# CONFIG PINNATA = quella del forward (ablazione 03/08):
+#   volumi ON a 1,5 in AND, ATR OFF, rischio 1%, trailing base candela.
+# GRIGLIA: 5 TF (M1..M5) x 5 soglie (0/0,25/0,5/0,75/1) = 25 celle.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRiskPercent=1.0
+InpUseVolumeFilter=1
+InpVolMult=1.5
+InpUseAtrFilter=0
+InpConfirmMode=1
+
+InpTrailTF=5||1||1||5||Y
+InpTrailStartR=0||0||0.25||1.0||Y
