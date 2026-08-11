@@ -1,5 +1,13 @@
 # VIVAIO R23 — deploy dei 5 candidati sul demo piccolo (scaletta)
 
+## ✅ ESEGUITO l'11/08 alle 12:45 — verifica meccanica 5/5
+Deploy fatto da Claudio coi preset di `deploy_vivaio_r23.ps1`; controllo
+campo-per-campo via `verifica_vivaio_r23.ps1` sui .chr salvati:
+**TUTTO OK 5/5** (le prime 3 passate al primo colpo; SW GBPUSD mancava
+solo il Salva-profilo, sistemato e riverificato). Magic, TF, BE, rischio
+e commenti tutti esatti. Il conteggio del vivaio parte da ora:
+10 trade/mercato = collaudo, 30/famiglia = verdetto.
+
 Conto: **50503392** (demo piccolo, VECCHIO MT5 — NON il -V3/100k).
 Schema: identico al MAXMIN ORO (primo deploy pulito 24/24). Verifica con
 screenshot campo-per-campo PRIMA di attivare: la legge dello screenshot
