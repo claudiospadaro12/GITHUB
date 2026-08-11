@@ -107,3 +107,16 @@ nell'IMBUTO NORMALE: criteri congelati PRIMA, FASE 0 OHLC solo screening,
 verdetti a tick reali, walk-forward. Nessuna corsia preferenziale.
 ⚠️ Strategia management-heavy: l'OHLC sottostima/sballa la gestione a
 scala -> lo screening dira' poco, il giudizio vero e' tutto nei tick.
+
+## COLLAUDO 11/08 (GBPUSD, ciclo H4, OHLC)
+- **Tecnico: SUPERATO.** Compilato al PRIMO colpo (1.045 righe, 32 input).
+  La macchina a stati produce trade in abbondanza: 93-259 per cella.
+- **Numeri: ROSSO PIENO in screening.** 8 celle su 8 negative in ENTRAMBE
+  le finestre (PF 0,59-0,85; peggior giornata gia' oltre -2% all'1%).
+  Col cancello meccanico GBPUSD non verrebbe promosso.
+- **MA vale l'avvertenza scritta sopra PRIMA dei numeri**: le uscite di
+  questa strategia (stop-a-zero, trailing multi-TF, uscita MA9) vivono
+  DENTRO la barra: l'OHLC M1 le calpesta. Percio' PRIMA di condannare o
+  di lanciare la coda a 8 simboli: UNA verifica a tick reali su GBPUSD,
+  stessa griglia. Tick rossi -> v1 senza edge li' (e la coda si valuta
+  con quel dato in mano); tick diversi -> l'OHLC era il bugiardo atteso.
