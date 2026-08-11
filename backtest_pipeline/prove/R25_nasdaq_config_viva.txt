@@ -1,0 +1,38 @@
+# =====================================================================
+#  R25: la CONFIG VIVA del Nasdaq Apertura base — misurarla com'e'
+#  Lancio: ABTG_Nasdaq_Apertura_US -Prova prove\R25_nasdaq_config_viva.txt
+#          -Etichetta r25
+# =====================================================================
+# PERCHE' (scoperta dell'11/08 sera, Journal del riavvio): il grafico
+#   vivo sul piccolo gira con motore=BREAKOUT + rangemode=PREVBAR +
+#   long/short + range 15' + buffer 200 — NON la config misurata in R24
+#   (volumi 1,5 AND). Regola: o si allinea il grafico a una config
+#   misurata, o si misura la config accesa. Qui si misura.
+# IPOTESI (dichiarata prima dei numeri, e scomoda per la cella viva):
+#   la famiglia BREAKOUT fu eliminata su DAX/Nasdaq (02/08) e PREVBAR
+#   e' il RangeMode del vizio storico. Mi aspetto che la cella viva NON
+#   passi i criteri. Se li passa, tanto meglio: restera' accesa con
+#   referto. Lo sweep sul RangeMode (OPENING/PREV/PREVBAR a parita' di
+#   tutto) dice anche SE il range giusto esiste per questo motore.
+# CRITERI: i soliti 4 congelati (positiva in entrambe le finestre,
+#   PF OOS >= 1,10, vicini non a picco, pegg. giornata > -2,5% all'1%).
+# DECISIONE COLLEGATA (domani): cella viva bocciata -> il grafico si
+#   allinea alla config R24 (volumi AND, che una misura ce l'ha) o si
+#   spegne; cella viva promossa -> resta com'e', con referto.
+# NB rischio pinnato 1% (la cella vive a 0,25%: solo taglia, i numeri
+#   cosi' si confrontano con tutto il resto dell'archivio).
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpEntryMode=0
+InpRangeMinutes=15
+InpBufferPoints=200
+InpAllowLong=1
+InpAllowShort=1
+InpUseVolumeFilter=0
+InpUseAtrFilter=0
+InpRiskPercent=1.0
+
+InpRangeMode=0||0||1||2||Y
