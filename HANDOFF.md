@@ -176,6 +176,13 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
    Motivo: i rami silenziosi sono ambigui — il 10/08 il silenzio delle 08:59 sul
    100k ha richiesto un'ispezione del sorgente per capire che era tutto regolare.
    Stessa occasione: valutare la stessa riga anche nel MaxMinNotte generico.
+   📌 CASO 11/08 (secondo silenzio in due giorni): DAX giu' di ~100 punti in
+   mattinata, nessun ingresso short sul 100k. DAX Apertura = corretto (la
+   cella validata e' SOLO LONG; il piccolo con lo short vecchio il 10/08 ha
+   pagato -101,83). MaxMin DAX Short = DA VERIFICARE nel journal del -V3
+   (07:00-09:30 server): pendente piazzato e mai preso, oppure veto S&P
+   muto? Se e' il veto, sono 2 giornate short-vincenti bloccate in 2 giorni:
+   il log del 5-bis serve anche a MISURARE il costo del filtro.
 
 ## Stile richiesto
 Precisione sopra tutto. Etichettare [VERIFICATO]/[INFERITO]/[INCERTO]. Segnalare premesse sbagliate PRIMA di rispondere. Mai inventare. **Salvare SEMPRE tutto nel repo** (commit+push): ciò che non è pushato è perso.
