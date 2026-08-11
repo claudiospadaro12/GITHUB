@@ -14,6 +14,10 @@ Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
 2. **a fine test, la riga di raccolta**: copia i risultati in una cartella sul
    Desktop e crea lo zip pronto da mandare (`Compress-Archive`), con l'elenco
    dei file attesi da verificare in console.
+3. **vale anche sul VPS (richiesta 11/08)**: ogni risultato destinato a
+   Claudio arriva SEMPRE anche sul Desktop del VPS. La pagella serale ci
+   arriva da sola: `scarica_pagella.ps1 -Installa` (attivita' 23:15,
+   scrive `Desktop\pagella_AAAA-MM-GG.txt`).
 
 ## FUSO ORARIO BCM (regola fissa)
 **Il server BCM è 1 ORA INDIETRO rispetto all'ora italiana** (in questo periodo dell'anno).
