@@ -50,3 +50,34 @@ non erano (solo) gli stop-rumore.
 
 _CSV: `risultati_prove/ABTG_AltaVelocita/` (v1 ohlc+tick, v1.1 ohlc con
 suffisso _v11)._
+
+---
+
+## AGGIORNAMENTO v2 (11/08 sera) — VERDETTO DEFINITIVO: CHIUSO
+
+La v2 col motore VERO delle punte RSI (una per ciclo, classificazione
+divergenza/convergenza/doppio-massimo, A/B pulito col fallback v1.1) e'
+stata collaudata sulle due combo dichiarate nella tesi. Controlli
+perfetti: baseline gemelle = v1.1 al centesimo; trade -80/-93% col
+motore acceso (la selettivita' funziona).
+
+| Combo | Cella | IS | OOS |
+|---|---|---|---|
+| H4->M5 | v1.1 base | -1.172 (108 tr) | -1.598 (166 tr) |
+| H4->M5 | punte div/conv | -303 (22 tr) | -523 (35 tr) |
+| H4->M5 | punte SOLO div | -261 (7 tr) | -149 (12 tr) |
+| D1->M15 | v1.1 base | -259 (26 tr) | -786 (52 tr) |
+| D1->M15 | punte div/conv | -254 (3 tr) | -161 (13 tr) |
+| D1->M15 | punte SOLO div | -107 (1 tr) | -85 (3 tr) |
+
+**Il dato che chiude la questione: anche le SOLE divergenze da manuale
+perdono.** Il motore seleziona meno ma non seleziona meglio. Nessuna
+cella >0 in entrambe le finestre -> niente promozione ai tick -> come
+da patto congelato nella tesi: **capitolo CHIUSO, nessuna v3.**
+
+Cio' che resta in cassa: la formula originale del ciclo (indicatore di
+studio), la tesi distillata, un EA-laboratorio con A/B integrato, e la
+prova piu' pulita finora del metodo: DUE versioni testate e bocciate in
+UN giorno, zero euro di forward, zero mesi persi. La strategia resta
+quello che il suo stesso manuale dichiara: un metodo dove l'ultimo
+strato — quello che guadagna — e' umano.
