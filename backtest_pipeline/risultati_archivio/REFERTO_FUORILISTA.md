@@ -1,0 +1,49 @@
+# REFERTO — GLI 8 FUORI-LISTA (11/08/2026 sera): la partita si chiude
+
+Regola di Claudio (pulizia del 10/08): **"o si misura o si spegne"**.
+Stasera: 5 walk-forward a tick reali in 40 minuti di coda (11 celle TF
+ciascuno, criteri congelati nei file del 07/08) + la misura R24 del
+Nasdaq. Ora OGNI grafico ha numeri. La cella che conta e' quella su cui
+il grafico GIRA davvero in forward.
+
+## I verdetti, grafico per grafico
+
+| Grafico (cella live) | La sua cella a tick reali | Verdetto proposto |
+|---|---|---|
+| **SupRev_DAX_H1** (H1) | IS **-240** / OOS +1.312 — IS ROSSO (pattern regime) | 🔴 **SPEGNERE** |
+| **SupRev_DAX_H4** (H4) | IS +464 / OOS +320, PF 1,53, 60 tr — ma vicini H3/H6 rossi (picco isolato) | 🟡 TENERE in forward, osservato. Non candidato |
+| **SupRev_DOW_H1** (H1) | IS **-103** / OOS +623 — IS ROSSO | 🔴 **SPEGNERE (SOLO DA FLAT: ha posizione aperta)** |
+| **SupRev_DOW_H4** (H4) | **IS +993 / OOS +622, PF 2,32, 49 tr, DD 2,7% — il migliore del lotto** | 🟢 TENERE, osservato SPECIALE (vicini quasi-zero: picco non confermato, ma la cella e' forte in ENTRAMBE le finestre) |
+| **STREV_Ott @ XAUUSD** (H4) | IS +463 / OOS +532, PF 2,25, 30 tr (campione al minimo, storico oro corto) | 🟢 TENERE, osservato |
+| **Nasdaq_Apertura base** | R24: IS +70 (PF 1,07) / OOS +476 (PF 1,27) — esile ma positivo | 🟡 TENERE, osservato |
+| **Nasdaq_Apertura_Ott** | mai misurato; variante del precedente | 🔴 **SPEGNERE il doppione** (la base misurata basta) |
+| **DAX_Apertura_EU_Ott** | mai misurato; TERZA variante di una strategia che gia' gira in 2 config (100k validata + piccolo 2%) | 🔴 **SPEGNERE il doppione** |
+
+Bilancio proposto: **4 spegnimenti** (2 celle H1 bocciate dai tick + 2
+doppioni mai misurati) e **4 tenute** con referto (2 forti su H4, 2 esili
+ma positivi). Nessuno promosso a candidato prop: le due celle H4 forti
+hanno i vicini rossi/quasi-zero — coi criteri congelati sono picchi non
+confermati, e i 17 ribaltamenti insegnano a non innamorarsi dei picchi.
+
+## Le tre osservazioni che restano agli atti
+
+1. **Il pattern H1-rosso/H4-verde e' identico su DAX e Dow**: sui SupRev
+   l'H1 perde in campione e "vince" solo fuori (regime), l'H4 regge in
+   entrambe. Coerente con la squadra: il Nikkei validato gira su H2/H4,
+   il NAS H1 col suo criterio non passo'. La famiglia SupRev respira
+   sui TF alti.
+2. **SupRev_DOW_H4 e STREV oro H4 sono i sorvegliati di lusso**: se il
+   forward dei prossimi mesi conferma (la pagella li conta gia'), un
+   giro per-trade stile R16 e' giustificato DA DATI NUOVI, non da
+   ripescaggio.
+3. I due spegnimenti H1 liberano rischio senza perdere nulla di
+   misurato: le loro celle vive erano rosse in campione.
+
+## Esecuzione (dopo il via di Claudio)
+Spegnere 4 grafici sul vecchio MT5: SupRev_DAX_H1, SupRev_DOW_H1 (SOLO
+quando flat!), Nasdaq_Apertura_Ott, DAX_Apertura_EU_Ott. Basta chiudere
+i 4 grafici + Salva profilo. Il SupRev_DOW_H1 ha la posizione STREV DOW
+aperta (magic 970916): aspettare che chiuda da sola, poi spegnere.
+
+_CSV in `risultati_prove/<EA>/` (11 celle x IS/OOS, ohlc+tick). Stato
+coda in `report/STATO_CODA_FUORILISTA.md`._
