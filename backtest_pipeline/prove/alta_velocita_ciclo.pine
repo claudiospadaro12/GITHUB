@@ -1,0 +1,49 @@
+// CICLO "Alta Velocita'" — formula ORIGINALE (da Ciclo_TW1.odt di Claudio, 11/08/2026)
+// Pine Script v5 (TradingView). Questa sostituisce il proxy detrended
+// citato dal manuale (Appendice D, avvertenza 2).
+//
+// In sintesi: composito pesato di 4 stocastici lisciati, meno la sua SMA9.
+//   K1 = SMA( Stoch%K(5), 3 )
+//   K2 = SMA( Stoch%K(14), 3 )
+//   K3 = SMA( Stoch%K(45), 14 )
+//   K4 = SMA( Stoch%K(75), 20 )
+//   I  = (4.1*K1 + 2.5*K2 + K3 + 4*K4) / 11.6
+//   CICLO = I - SMA(I, 9)
+// Cambio di segno del CICLO = fine ciclo (positivo->negativo = massimo di
+// ciclo formato; negativo->positivo = minimo di ciclo formato).
+//
+//@version=5
+indicator("Cycle - Ciclo", overlay=false, precision=2)
+k1_len = input.int(5,  title="Stoch 1 - K length", minval=1)
+k1_smo = input.int(3,  title="Stoch 1 - smooth",   minval=1)
+k2_len = input.int(14, title="Stoch 2 - K length", minval=1)
+k2_smo = input.int(3,  title="Stoch 2 - smooth",   minval=1)
+k3_len = input.int(45, title="Stoch 3 - K length", minval=1)
+k3_smo = input.int(14, title="Stoch 3 - smooth",   minval=1)
+k4_len = input.int(75, title="Stoch 4 - K length", minval=1)
+k4_smo = input.int(20, title="Stoch 4 - smooth",   minval=1)
+mm_len = input.int(9,  title="MM - media mobile",  minval=1)
+
+stochK(kLen, smooth) =>
+    lo  = ta.lowest(low, kLen)
+    hi  = ta.highest(high, kLen)
+    raw = (close - lo) / (hi - lo) * 100
+    ta.sma(raw, smooth)
+
+K1 = stochK(k1_len, k1_smo)
+K2 = stochK(k2_len, k2_smo)
+K3 = stochK(k3_len, k3_smo)
+K4 = stochK(k4_len, k4_smo)
+
+I     = (4.1 * K1 + 2.5 * K2 + K3 + 4 * K4) / 11.6
+mm    = ta.sma(I, mm_len)
+cycle = I - mm
+
+colorUp = color.new(color.green, 0)
+colorDn = color.new(color.red, 0)
+fillUp  = color.new(color.green, 60)
+fillDn  = color.new(color.red, 60)
+lineColor = cycle >= 0 ? colorUp : colorDn
+p1 = plot(cycle, title="Cycle", color=lineColor, linewidth=1)
+p0 = plot(0, title="Zero", color=color.new(color.blue, 0), linewidth=1)
+fill(p1, p0, top_value = math.max(cycle, 0), bottom_value = math.min(cycle, 0), top_color = fillUp, bottom_color = fillDn, title = "Area fill")

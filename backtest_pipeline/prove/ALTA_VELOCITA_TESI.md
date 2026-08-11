@@ -23,7 +23,7 @@ M15=1,5h · H1=6h · H4=24h · D=6gg · W=6sett.
 | Indicatore | Setup | Compito |
 |---|---|---|
 | Supertrend | "standard" (⚠️ parametri esatti non dichiarati nel manuale) | livelli veri, colore del trend, stop sulla CUSPIDE; conta la CHIUSURA oltre il gradino, non l'ombra |
-| Oscillatore ciclico | ⚠️ FORMULA NON RIVELATA nel percorso (l'indicatore allegato usa un detrended proxy) | tempi: cambio di segno = fine ciclo; max/min di ciclo = estremo di PREZZO nel ciclo (non la punta dell'indicatore); arriva tardi ~1 ATR: NON si usa per entrare |
+| Oscillatore ciclico | ✅ FORMULA ORIGINALE OTTENUTA (11/08, `alta_velocita_ciclo.pine`): composito di 4 stocastici lisciati I=(4,1·K1+2,5·K2+K3+4·K4)/11,6 con K1=SMA(St(5),3), K2=SMA(St(14),3), K3=SMA(St(45),14), K4=SMA(St(75),20); CICLO = I − SMA(I,9) | tempi: cambio di segno = fine ciclo; max/min di ciclo = estremo di PREZZO nel ciclo (non la punta dell'indicatore); arriva tardi ~1 ATR: NON si usa per entrare |
 | Williams %R | 140 periodi | la benzina: zona estrema = accumulazione/distribuzione. Limite: segnale valido solo con W fra estremo e -50. "Doppia uscita" dalla zona = tipica della laterale pre-inversione |
 | RSI | 4 periodi | direzione della forza, anticipo 2-3 barre: trendline sulle PUNTE (una per ciclo, mai saltarne uno). Divergenza = caso migliore; doppio massimo = aspetta |
 
@@ -84,12 +84,18 @@ limite -50), stop su cuspide, target 2xATR dal max/min di ciclo, R/R>=3
 come filtro, stop a zero, scala di gestione col Supertrend del TF
 superiore, uscita su MA9+condizione, filtro direzionale della linea viola.
 **APPROSSIMATO (si codifica con perdita dichiarata):**
-1. l'oscillatore ciclico e' un PROXY (formula originale segreta);
+1. ~~l'oscillatore ciclico e' un PROXY~~ → RISOLTO l'11/08: Claudio ha
+   fornito la formula originale (`alta_velocita_ciclo.pine`), si traduce
+   1:1 in MQL5;
 2. le trendline sulle punte dell'RSI ("una punta per ciclo, mai saltarne
    uno") vanno ridotte a regole su massimi/minimi di ciclo — la lettura
    fine (ventagli, canali, "pallina") resta fuori;
 3. il 100-tick NON esiste nel tester MT5 in ottimizzazione: si parte
    dalle combo M1/M5 (ciclo H1/H4/D), il gradino 100tick resta manuale.
+**ANCORA MANCANTE per la fedelta' piena:** i parametri esatti del
+Supertrend (il manuale dice solo "standard"): chiesti a Claudio
+(file AltaVelocita.mq5 o screenshot dei settaggi; default di riserva:
+ATR 10 x mult 3, da dichiarare come ipotesi se non arriva di meglio).
 **FUORI dalla v1:** hedging multiday, doppia uscita del Williams come
 pattern esplicito, scelta discrezionale del cross.
 **Percorso deciso:** EA `ABTG_AltaVelocita` (combo di partenza: ciclo H4,
