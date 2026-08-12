@@ -1,0 +1,18 @@
+LL	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] EURUSD PERIOD_H1  pattern=0  endMode=1 dirMode=1 postAtrRef=1
+PO	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 1  tentati=267 | morti in fase: oltre20candele=0 bandriding=0
+DR	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 1  arrivati a validazione=267 | scartati: corti=91 senzaImpulsive=82 nonUnidirezionali=0 nettoScarso=32 vicinoMediana=0  ==> BULGE VALIDI=62
+PD	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 2 CONT  morti: candela>1.50xATR=19 zigzag=24 spike=1 rigonfio=4 bandriding=0 ritornoBanda=0
+NJ	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 2 INV   morti: rientroViolento(3 cand>1.00xATR)=29 spike=2 rigonfio=8 bandriding=0 toccoBandaOpposta=12
+GP	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 2  scaduti(>30 barre)=1 | mediana raggiunta=41 | retest banda impulso=11 | tocco banda opposta=13
+CO	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 3 CONT  scarti: bandeNonChiuse=4 stdNonInCalo=0 ombre=0 range=0 candelaRigetto=0 solidita=0 bloccati=0  ==> OK=9
+IJ	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 3 INV   scarti: pendenzaContro=0 bandeNonChiuse=0 stdNonInCalo=0 rigonfioRetest=0 ombre=0 range=0 candelaRigetto=0 solidita=0 bloccati=0  ==> OK=0
+HK	0	21:19:09.735	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] ORDINI  segnali=9 | scartati in Enter: tp=1 sl=0 lotto=0 invioFallito=0 | trade eseguiti=8
+QG	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] EURUSD PERIOD_H1  pattern=0  endMode=1 dirMode=1 postAtrRef=1
+EE	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 1  tentati=267 | morti in fase: oltre20candele=0 bandriding=0
+MH	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 1  arrivati a validazione=267 | scartati: corti=91 senzaImpulsive=82 nonUnidirezionali=0 nettoScarso=32 vicinoMediana=0  ==> BULGE VALIDI=62
+IM	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 2 CONT  morti: candela>1.50xATR=19 zigzag=24 spike=1 rigonfio=4 bandriding=0 ritornoBanda=0
+OS	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 2 INV   morti: rientroViolento(3 cand>1.00xATR)=29 spike=2 rigonfio=8 bandriding=0 toccoBandaOpposta=12
+RG	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 2  scaduti(>30 barre)=1 | mediana raggiunta=41 | retest banda impulso=11 | tocco banda opposta=13
+JP	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 3 CONT  scarti: bandeNonChiuse=4 stdNonInCalo=0 ombre=0 range=0 candelaRigetto=0 solidita=0 bloccati=0  ==> OK=9
+LP	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] FASE 3 INV   scarti: pendenzaContro=0 bandeNonChiuse=0 stdNonInCalo=0 rigonfioRetest=0 ombre=0 range=0 candelaRigetto=0 solidita=0 bloccati=0  ==> OK=0
+MR	0	21:22:34.420	Core 1	2026.06.29 23:59:59   [BB-FUNNEL] ORDINI  segnali=9 | scartati in Enter: tp=1 sl=0 lotto=0 invioFallito=0 | trade eseguiti=8

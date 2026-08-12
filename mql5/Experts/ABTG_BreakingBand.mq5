@@ -161,7 +161,7 @@
 //|        da OnTester (PrintFunnel). Nessun impatto sul CSV.         |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -184,13 +184,13 @@ input group "=== Pattern da operare ==="
 input int    InpPatternMode    = 2;     // 0=SOLO CONTINUAZIONE, 1=SOLO INVERSIONE, 2=ENTRAMBI
 
 input group "=== FASE 1: riconoscimento del BULGE ==="
-input double InpBulgeWidthMult = 1.5;   // SCELTA NOSTRA: larghezza bande >= N x media delle barre precedenti
+input double InpBulgeWidthMult = 1.35;  // [1.02 - era 1.5] taratura CAL1 12/08: centro altopiano frequenza (criterio: 1-4 trade/mese, profitto non guardato)
 input int    InpBulgeRefBars   = 20;    // SCELTA NOSTRA: barre di riferimento per la larghezza media
 input int    InpBulgeMinBars   = 3;     // SCELTA NOSTRA: candele minime (un singolo spike NON e' bulge)
 input int    InpBulgeMaxBars   = 20;    // GUIDA: impulso <= 20 candele (oltre = band riding)
 input int    InpBulgeMinImpBars= 1;     // SCELTA NOSTRA: candele impulsive minime dentro il bulge
 input double InpBulgeCandleMaxATR = 0.0;// GUIDA "1.5-3 x ATR": 0 = nessun tetto (il 3x e' 'tipico', non un limite)
-input double InpBulgeNetMoveATR= 1.5;   // SCELTA NOSTRA: movimento netto minimo del bulge (in ATR)
+input double InpBulgeNetMoveATR= 1.0;   // [1.02 - era 1.5] taratura CAL1 12/08: centro altopiano frequenza
 input double InpBulgeMedianDistPct = 0.75; // SCELTA NOSTRA: max allontanamento dalla mediana in frazione di semiampiezza (0.75 = 1.5 sigma, e' un MASSIMO sulla fase: non e' il collo di bottiglia)
 input int    InpBulgeEndMode   = 1;     // [1.01 - era 0] fine della fase: 0=larghezza sotto la soglia (v1.00: dura ~20 barre PER COSTRUZIONE e sfora il tetto della guida) 1=espansione esaurita, larghezza che si contrae
 input int    InpBulgeDirMode   = 1;     // [1.01 - era 0] direzione del bulge: 0=colore della PRIMA candela della fase (v1.00) 1=segno del movimento NETTO della fase
