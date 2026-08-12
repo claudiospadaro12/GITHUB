@@ -1,0 +1,106 @@
+✅ PROMPT PRONTO ALL’USO PER VALUTARE UNO SCREENSHOT BREAKING BAND
+PROMPT:
+Analizza esclusivamente lo screenshot che ti fornirò applicando rigorosamente e senza eccezioni la Strategia BREAKING BAND, attenendoti unicamente a:
+Guida Operativa ufficiale BREAKING BAND (fonte normativa primaria)
+Checklist Tabellare ufficiale BREAKING BAND (strumento vincolante di validazione)
+Esempi Operativi ufficiali (solo come riferimento comparativo, non normativo)
+⛔ È severamente vietato:
+introdurre criteri, filtri, interpretazioni o pesi non esplicitamente presenti nei documenti ufficiali;
+dedurre regole da analogie visive, intuizioni personali o conoscenze generiche di Bollinger Bands;
+compensare un criterio “NO” con bonus, giudizi qualitativi o somiglianze con esempi;
+modificare, ammorbidire o reinterpretare le regole strutturali e di invalidazione.
+📌 La Checklist Tabellare ha valore di giudizio finale:
+se anche un solo criterio obbligatorio risulta “NO”, il pattern è automaticamente NON valido, indipendentemente dall’aspetto visivo o da eventuali esempi simili.
+🔒 REGOLA TECNICA DEL TOCCO DELLA BANDA (VINCOLANTE)
+Il tocco della banda è valido SOLO se:
+il corpo o lo spike della candela interseca visivamente la linea della banda;
+non è sufficiente una semplice prossimità;
+se l’immagine non consente di distinguere chiaramente il contatto → segnare “NON verificabile” e considerare il criterio NO.
+Non è ammessa interpretazione per approssimazione.
+🔒 REGOLA TECNICA DEVIAZIONE STANDARD (VINCOLANTE)
+La deviazione standard è considerata:
+✔ IN ESPANSIONE solo se:
+visivamente sopra la SMA50 per almeno 1 candela completa;
+oppure in evidente accelerazione rispetto alla fase precedente.
+✔ IN CALO solo se:
+mostra almeno 2 candele consecutive di discesa;
+oppure è sotto la SMA50.
+In caso di dubbio visivo, il criterio deve essere segnato NO.
+L’eventuale invalidazione dipenderà, secondo la gerarchia ufficiale del modello, dalla natura vincolante o ponderata della sezione in cui il criterio è inserito.
+Non è ammessa interpretazione per approssimazione.
+Segui esattamente questa sequenza:
+TITOLO CHAT: 
+salva la chat con il formato:  [data formato USA] “Analisi nBB” [scrivere PAIR] es: 20250812 Analisi BB EURUSD
+1️⃣ CLASSIFICAZIONE INIZIALE DEL PATTERN (OBBLIGATORIA)
+Compila esclusivamente la voce:
+“VALUTAZIONE UFFICIALE DEL PATTERN – CONTINUAZIONE o INVERSIONE”
+Indica:
+il tipo di pattern rilevato (solo se classificabile);
+la motivazione sintetica e strutturale, basata solo su:
+presenza del bulge;
+struttura del ritracciamento/rientro;
+direzionalità e test richiesto.
+Se il pattern non è classificabile, dichiararlo esplicitamente e passare alla checklist per conferma dell’invalidazione.
+2️⃣ COMPILAZIONE INTEGRALE DELLA CHECKLIST (VINCOLANTE)
+Compila tutte le sezioni della Checklist Tabellare ufficiale con SÌ / NO, senza omissioni:
+Congestione iniziale (CS o CDA)
+Bulge
+Identificazione del pattern
+Struttura del ritracciamento / rientro
+Comportamento delle bande
+Test chiave del pattern
+Conferme tecniche
+Invalidazioni assolute
+📌 Regola assoluta:
+Se una sezione richiede “TUTTI SÌ” e anche un solo criterio è NO, la sezione è NON valida.
+Se è presente anche una sola invalidazione assoluta, il pattern è NON valido.
+3️⃣ CALCOLO DELLA SOLIDITÀ (%) — SOLO SE IL PATTERN È VALIDO
+Calcola la solidità esclusivamente secondo il modello pesato ufficiale:
+25% Congestione iniziale
+25% Bulge
+20% Ritracciamento / Rientro
+15% Comportamento delle bande
+10% Test del pattern
+5% Conferme tecniche
+Indica:
+percentuale finale;
+categoria corrispondente: Ottimo / Buono / Medio / Debole.
+⛔ Se il pattern è NON valido → NON calcolare la solidità.
+4️⃣ BONUS DI QUALITÀ (NON PESATI)
+Valuta i bonus solo se il pattern è valido e senza modificarne la solidità:
+candela di reazione;
+rigetto pulito;
+fluidità del movimento;
+bonus specifici del tipo di pattern.
+Indica:
+numero totale dei bonus;
+giudizio qualitativo:
+0–1 → valido ma non eccellente
+2–3 → buono
+4+ → qualità superiore
+⛔ I bonus non possono mai correggere errori strutturali o invalidazioni.
+5️⃣ CONCLUSIONI OPERATIVE
+Fornisci:
+sintesi finale coerente con checklist e guida;
+motivi tecnici di eventuale scarto;
+probabile esito dell’operazione secondo il modello BB;
+raccomandazioni operative senza suggerimenti esterni al metodo.
+🔎 CONTROLLO DI COERENZA FINALE (OBBLIGATORIO)
+Prima di concludere:
+Verifica nuovamente l’intersezione reale corpo/spike con la banda.
+Verifica nuovamente la posizione della deviazione standard rispetto alla SMA50.
+Se uno dei criteri risulta incerto → il pattern deve essere considerato NON valido.
+6️⃣ FORMATO DI OUTPUT (OBBLIGATORIO)
+Restituisci l’analisi in forma tabellare, ordinata e strutturata, pronta per essere copiata nel diario di trading, senza commenti extra o spiegazioni non richieste.
+7️⃣ RIEPILOGO FINALE SINTETICO (OBBLIGATORIO 🔒)
+Al termine dell’analisi, dopo il controllo di coerenza finale, devi sempre aggiungere un riepilogo conclusivo nel seguente formato esatto:
+Valutazione ufficiale del pattern:
+Struttura corretta:
+Invalidazioni assolute:
+Esito:
+Valutazione sintetica:
+Bonus qualità:
+Solidità Finale
+Categoria
+Probabilità Stimata
+Verdetto finale:

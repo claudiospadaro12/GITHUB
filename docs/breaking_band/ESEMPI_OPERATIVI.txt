@@ -1,0 +1,389 @@
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+Group Coaching Forex 
+
+Strategia Breaking Band  
+
+Esempi Operativi 
+
+Realise 23.12.2025 
+
+0 
+
+ 
+  
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+Strategia Breakin Band – Esempi Operativi  
+
+Sommario 
+
+1    Esempio n° 1 – CONTINUAZONE VALIDO ............................................................................... 3 
+
+1.1 
+
+1.2 
+
+Analisi pre-trade ..................................................................................................................................3 
+
+Follow-up post trade ...........................................................................................................................3 
+
+2    Esempio n° 2 – CONTINUAZIONE VALIDO .............................................................................. 4 
+
+2.1 
+
+2.2 
+
+Analisi pre-trade ..................................................................................................................................4 
+
+Follow-up post trade ...........................................................................................................................4 
+
+3    Esempio n° 3 –  CONTINUAZIONE VALIDO ............................................................................. 5 
+
+3.1 
+
+3.2 
+
+Analisi pre-trade ..................................................................................................................................5 
+
+Follow-up post trade ...........................................................................................................................5 
+
+4    Esempio n°4 – CONTINUAZIONE NON VALIDO ...................................................................... 6 
+
+4.1 
+
+4.2 
+
+Analisi pre-trade ..................................................................................................................................6 
+
+Follow-up post trade ...........................................................................................................................6 
+
+5    Esempio n° 5 –  CONTINUAZIONE NON VALIDO .................................................................... 7 
+
+5.1 
+
+Analisi pre-trade ..................................................................................................................................7 
+
+6    Esempio n° 6 – INVERSIONE VALIDO ...................................................................................... 8 
+
+6.1 
+
+6.2 
+
+Analisi pre-trade ..................................................................................................................................8 
+
+Follow-up post trade ...........................................................................................................................8 
+
+7    Esempio n° 7 – ........................................................................................................................ 9 
+
+7.1 
+
+7.2 
+
+Analisi pre-trade ..................................................................................................................................9 
+
+Follow-up post trade ...........................................................................................................................9 
+
+8    Esempio n° 8 – ...................................................................................................................... 11 
+
+8.1 
+
+8.2 
+
+Analisi pre-trade ............................................................................................................................... 11 
+
+Follow-up post trade ................................................................... Errore. Il segnalibro non è definito. 
+
+9    Esempio n° 9 – ...................................................................................................................... 10 
+
+9.1 
+
+9.2 
+
+Analisi pre-trade ............................................................................................................................... 10 
+
+Follow-up post trade ........................................................................................................................ 10 
+
+10    Esempio n° 10 – .................................................................................................................... 12 
+
+10.1  Analisi pre-trade ............................................................................................................................... 12 
+
+10.2  Follow-up post trade ................................................................... Errore. Il segnalibro non è definito. 
+
+1 
+
+ 
+  
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+Disclaimer 
+
+Questa  pubblicazione  ha  finalità  esclusivamente  didattiche  e  informative  e  non  costituisce  in  alcun 
+modo una sollecitazione al pubblico risparmio, un invito all’investimento né una consulenza finanziaria 
+personalizzata ai sensi dell’Art. 1, comma 5-septies del D.Lgs. 58/1998 (TUF), come modificato dal D.Lgs. 
+167/2007. 
+
+Le strategie, i concetti e le analisi presentati in questa guida sono il frutto di esperienze operative e studi 
+condotti nel contesto del trading sui mercati finanziari, con particolare riferimento all’approccio analitico 
+del Metodo Wyckoff. Le informazioni contenute non garantiscono risultati di alcun tipo e devono essere 
+considerate come strumenti di supporto allo studio individuale, rivolti a un pubblico indistinto. 
+
+Il trading finanziario, in particolare su strumenti ad alta volatilità come valute, indici e materie prime, 
+comporta rischi significativi di perdita economica. Ogni decisione operativa è responsabilità esclusiva 
+del lettore, che è tenuto a valutarla in base alla propria esperienza, conoscenza e tolleranza al rischio. 
+
+Si  raccomanda  di  testare  ogni  strategia  o  tecnica  descritta  in  modalità  demo  prima  di  applicarla  in 
+contesti  reali.  Solo  dopo  aver  acquisito  un’adeguata  dimestichezza  e  un  solido  controllo  emotivo,  il 
+lettore potrà valutare se e come integrare tali strumenti nel proprio approccio operativo. 
+
+L’autore e l’editore declinano ogni responsabilità per eventuali danni, diretti o indiretti, economici o di 
+altra  natura,  derivanti  dall’uso  improprio  delle  informazioni  riportate  o  dall’affidamento  acritico  a 
+scenari o esempi illustrati. Non si garantisce inoltre l’accuratezza o l’attualità dei dati e delle opinioni 
+esposte. 
+
+Tutti  i  marchi  menzionati  appartengono  ai  rispettivi  proprietari.  Il  lettore  è  invitato  a  operare  con 
+consapevolezza, preparazione e senso critico: questa guida intende offrire una base di apprendimento 
+strutturata, utile a sviluppare competenze operative e analitiche autonome. 
+
+🎯 Finalità degli esempi operativi 
+
+Gli esempi operativi contenuti in questo documento hanno una funzione didattica e strutturale duplice. 
+
+In primo luogo, sono progettati per fornire ai discenti casi reali di operatività, documentati passo dopo 
+passo, che illustrano in modo concreto l’applicazione della Strategia BREAKING BAND attraverso pattern 
+validi e non validi, sia di continuazione sia di inversione. 
+
+L’obiettivo è sviluppare la capacità di riconoscimento oggettivo delle strutture, rafforzare l’uso corretto 
+della Checklist Operativa ufficiale e allenare il trader a scartare consapevolmente i setup non conformi, 
+anche quando risultano visivamente attraenti. 
+
+In secondo luogo, questo insieme di esempi costituisce un corpus di riferimento comparativo destinato 
+all’utilizzo da parte di sistemi di intelligenza artificiale, con lo scopo di fornire una base strutturata di 
+pattern correttamente classificati e motivati. 
+
+Tali  esempi  consentono  all’AI  di  replicare  analisi  coerenti,  solide  e  aderenti  al  metodo,  evitando 
+interpretazioni discrezionali, analogie visive improprie o deviazioni dalle regole ufficiali della Strategia 
+BREAKING BAND. 
+
+Gli esempi operativi non hanno valore normativo, non introducono nuove regole e non sostituiscono 
+in alcun modo la Guida Operativa e la Checklist Tabellare, che restano le uniche fonti vincolanti per la 
+validazione dei pattern. 
+
+Il loro ruolo è esclusivamente quello di  rafforzare la comprensione pratica del metodo e favorire un 
+apprendimento rigoroso, replicabile e verificabile. 
+
+2 
+
+ 
+  
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+LA STRATEGIA BREAKING BAND 
+Guida Operativa 
+
+1  🔷 Esempio n° 1 – CONTINUAZONE VALIDO 
+
+1.1  Analisi pre-trade 
+
+1.2  Follow-up post trade 
+
+3 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+2  🔷 Esempio n° 2 – CONTINUAZIONE VALIDO 
+
+2.1  Analisi pre-trade 
+
+2.2  Follow-up post trade 
+
+4 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+3  🔷 Esempio n° 3 –  CONTINUAZIONE VALIDO 
+
+3.1  Analisi pre-trade 
+
+3.2  Follow-up post trade 
+
+5 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+4  🔷 Esempio n°4 – CONTINUAZIONE NON VALIDO 
+
+4.1  Analisi pre-trade 
+
+4.2  Follow-up post trade 
+
+6 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+5  🔷 Esempio n° 5 –  CONTINUAZIONE NON VALIDO 
+
+5.1  Analisi pre-trade 
+
+7 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+6  🔷 Esempio n° 6 – INVERSIONE VALIDO 
+
+6.1  Analisi pre-trade 
+
+6.2  Follow-up post trade 
+
+8 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+7  🔷 Esempio n° 7 – INVERSIONE VALIDO 
+
+7.1  Analisi pre-trade 
+
+7.2  Follow-up post trade 
+
+9 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+8  🔷 Esempio n° 8 – INVERSIONE RIBASSISTA VALIDA 
+
+8.1  Analisi pre-trade 
+
+8.2  Follow-up post trade 
+
+10 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+9  🔷 Esempio n° 9 – INVERSIONE NON VALIDO 
+
+9.1  Analisi pre-trade 
+
+11 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+Group Coaching Forex  
+
+Strategia Breakin Band – Esempi Operativi 
+
+10  🔷 Esempio n° 10 – INVERSIONE RIALZISTA NON VALIDO 
+
+10.1  Analisi pre-trade 
+
+12 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+

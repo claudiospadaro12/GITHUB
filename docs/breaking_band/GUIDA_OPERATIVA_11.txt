@@ -1,0 +1,457 @@
+Realise 23.12.2025
+Realise 23.12.2025
+Group Coaching Forex
+Group Coaching Forex
+Strategia Breaking Band 
+Guida Operativa - – Versione didattica
+Strategia Breaking Band 
+Guida Operativa - – Versione didattica
+Strategia Breakin Band 
+Sommario
+1🔷 Principi Fondamentali della Strategia BREAKING BAND3
+1.1Strategia di Continuazione4
+1.2Strategia di Inversione4
+2🟦 FASE DI SCANSIONE5
+3🔶 INDIVIDUAZIONE DEL BULGE (FASE ESSENZIALE)5
+3.1🔵 A. Cos’è un Bulge? – Definizione Operativa5
+3.2🔵 B. Come si riconosce un Bulge? – Check-list ufficiale6
+3.3🔹 Criteri ufficiali di riconoscimento del Bulge6
+3.3.1Espansione evidente delle Bande di Bollinger (20/2)6
+3.3.2Deviazione standard in espansione6
+3.3.3Candele impulsive e direzionalità chiara7
+3.3.4Allontanamento del prezzo dalla mediana7
+3.3.5Autonomia strutturale della fase7
+3.3.6Limiti strutturali7
+3.4🧠 Nota didattica conclusiva (fondamentale)8
+4🟦 DEFINIZIONE OPERATIVA DI “RITRACCIAMENTO ORDINATO” vs RIENTRO/CORREZIONE ORDINATA8
+6🟩 TABELLA COMPARATIVA11
+7🟩 FILTRI DI QUALITÀ FONDAMENTALE (regola chiave)13
+8❌ INVALIDAZIONE DEI PATTERN15
+9🟥 ENTRATA A MERCATO16
+10🟩 REVISIONE E MIGLIORAMENTO18
+11✅ Processo di analisi del PATTERN19
+Disclaimer
+Questa pubblicazione ha finalità esclusivamente didattiche e informative e non costituisce in alcun modo una sollecitazione al pubblico risparmio, un invito all’investimento né una consulenza finanziaria personalizzata ai sensi dell’Art. 1, comma 5-septies del D.Lgs. 58/1998 (TUF), come modificato dal D.Lgs. 167/2007.
+Le strategie, i concetti e le analisi presentati in questa guida sono il frutto di esperienze operative e studi condotti nel contesto del trading sui mercati finanziari, con particolare riferimento all’approccio analitico del Metodo Wyckoff. Le informazioni contenute non garantiscono risultati di alcun tipo e devono essere considerate come strumenti di supporto allo studio individuale, rivolti a un pubblico indistinto.
+Il trading finanziario, in particolare su strumenti ad alta volatilità come valute, indici e materie prime, comporta rischi significativi di perdita economica. Ogni decisione operativa è responsabilità esclusiva del lettore, che è tenuto a valutarla in base alla propria esperienza, conoscenza e tolleranza al rischio.
+Si raccomanda di testare ogni strategia o tecnica descritta in modalità demo prima di applicarla in contesti reali. Solo dopo aver acquisito un’adeguata dimestichezza e un solido controllo emotivo, il lettore potrà valutare se e come integrare tali strumenti nel proprio approccio operativo.
+L’autore e l’editore declinano ogni responsabilità per eventuali danni, diretti o indiretti, economici o di altra natura, derivanti dall’uso improprio delle informazioni riportate o dall’affidamento acritico a scenari o esempi illustrati. Non si garantisce inoltre l’accuratezza o l’attualità dei dati e delle opinioni esposte.
+Tutti i marchi menzionati appartengono ai rispettivi proprietari. Il lettore è invitato a operare con consapevolezza, preparazione e senso critico: questa guida intende offrire una base di apprendimento strutturata, utile a sviluppare competenze operative e analitiche autonome.
+🎯 A chi è destinato questo materiale
+Questo documento ha finalità esclusivamente didattiche e operative e si propone di fornire una struttura metodologica rigorosa, replicabile e verificabile per l’applicazione della Strategia BREAKING BAND nei contesti di scalping e intraday.
+La strategia è fondata sull’analisi della volatilità attraverso l’individuazione di fasi di espansione significativa (Bulge) e sulla successiva normalizzazione del prezzo verso la mediana delle Bande di Bollinger, secondo criteri oggettivi e formalizzati.
+Il nucleo centrale del metodo è rappresentato dalla Checklist Operativa ufficiale, strumento vincolante che consente di:
+classificare in modo univoco i pattern operativi (Continuazione o Inversione);
+filtrare preventivamente i setup non conformi alle regole strutturali della strategia;
+attribuire una percentuale di solidità al pattern prima dell’ingresso a mercato, riducendo l’interpretazione discrezionale.
+Il materiale è destinato a trader che possiedono già le basi dell’analisi tecnica e che intendono strutturare un approccio operativo fondato su:
+lettura e gestione della volatilità;
+price action pulita e contestualizzata;
+regole oggettive di validazione e invalidazione, applicate in modo sistematico.
+Questa non è una guida introduttiva né un corso di avviamento al trading.
+È pensata per:
+utenti di piattaforme MT4, MT5 o TradingView;
+trader che desiderano ridurre o eliminare l’uso discrezionale degli indicatori e operare attraverso strutture tecniche ripetibili, verificabili e coerenti con un modello operativo definito.
+LA STRATEGIA BREAKING BAND
+Guida Operativa
+🔷 Principi Fondamentali della Strategia BREAKING BAND
+La strategia opera su Bollinger Bands (20/2) e identifica strutture di continuazione e di  mean reversion avanzata dopo un impulso violento (bulge). Il pattern valido deve rispettare rigorosamente una delle seguenti sequenze:
+REGOLE UFFICIALI
+PATTERN di CONTINUAZIONE
+PATTERN di INVERSIONE
+🔹1. Condizioni
+Bulge evidente (bande molto aperte, impulso forte).
+Il prezzo deve ritracciare lentamente, con candele piccole, in modo diretto, verso la banda opposta.
+Nessuna candela impulsiva nel ritracciamento.
+Nessuno zig-zag marcato.
+Nessun band riding (20+ candele sulla banda dell’impulso)
+🔹 2. Banda opposta
+NON richiede alcuna compressione
+NON richiede inclinazione particolare
+Le bande devono essere in fase di chiusura 
+🔹 3. Entry
+ingresso al tocco della banda opposta (corpo o spike)
+❌ 4. Invalidazioni
+Ritracciamento violento (candele grandi)
+Candela impulsiva >1.5 ×ATR
+Zig-zag prima della banda 
+Band riding prolungato sulla banda dell’impulso
+Test della banda troppo “violento”
+🔹 1. Condizioni
+Bulge forte
+Test del livello della mediana o oltre, con candele piccole, in modo diretto, senza mai toccare la banda opposta;
+Volatilità in calo
+🔹 2. Banda dell'impulso
+Deve essere piatta o Inclinata a favore del trade 
+NON deve gonfiarsi di nuovo
+🔹 3. Entry
+Ritorno sulla banda dell’impulso dopo test della mediana
+❌ 4. Invalidazioni
+La banda dell’impulso si gonfia nuovamente durante il retest.
+La banda è inclinata contro la posizione prevista.
+Il rientro è violento composto da candele impulsive.
+Il prezzo tocca la banda opposta (pattern non è più inversione).
+🟩 ANALISI DEL CONTESTO OPERATIVO 
+Strategia di Continuazione
+Per la strategia di continuazione sono molto più efficaci le bulge che si creano in contesti di inversione, ovvero:
+una bulge ribassista alla fine di un trend rialzista;
+una bulge rialzista alla fine di un trend ribassista;
+la prima bulge dopo una fase laterale.
+In questi casi si tratta di primi movimenti direzionali, nei quali abbiamo una maggiore probabilità di continuazione.
+🧠 Logica:  Essendo il primo movimento direzionale, il mercato è ancora “carico” e il movimento è appena partito.
+Per questo motivo è più probabile puntare sulla continuazione del movimento.
+Strategia di Inversione
+Per la strategia di inversione sono molto più probabili le bulge che si trovano in contesti di trend già formati, ad esempio:
+una bulge rialzista alla fine di un trend rialzista;
+una bulge ribassista alla fine di un trend ribassista;
+È fondamentale dare il massimo grado di probabilità alle bulge che si trovano in trend composti da almeno due bulge precedenti.
+Se la bulge che stiamo analizzando è la terza bulge all’interno del trend, allora l’inversione avrà il massimo grado di probabilità.
+🧠 Logica: Alla fine di un trend il movimento è più probabilmente stanco o in esaurimento.
+Di conseguenza aumenta la probabilità di intercettare un movimento di inversione o correttivo.
+🟦 FASE DI SCANSIONE
+Obiettivo
+Individuare se il setup è potenzialmente valido prima dell’entrata attribuendo una percentuale di solidità del pattern.
+Strumenti
+Piattaforma di analisi: TradingView, MT4, MT5;
+Pairs: MAJOR e MINOR;
+Time frame: D1 - H4 – H1 – M30;
+Bande di bollinger (20/2);
+Standard Deviation with SMA 50.
+Cosa deve essere presente
+Impulso forte;
+Bulge evidente: bande aperte, deviazione standars in aumento;
+Struttura ordinata: ritracciamento verso banda opposta (continuazione) nel patterb di inversione non è richiesta la struttura di rientro ordinata.
+Chiarimento operativo:
+La congestione iniziale (CS o CDA) rappresenta una fase preparatoria.
+La strategia BREAKING BAND si attiva solo se, e solo dopo, la congestione è seguita da un bulge valido.
+In assenza di una successiva esplosione di volatilità, qualsiasi struttura di congestione — anche direzionale e ordinata — non costituisce un setup Breaking Band.
+🔶 INDIVIDUAZIONE DEL BULGE (FASE ESSENZIALE)
+Il Bulge è il cuore della Strategia BREAKING BAND.
+Rappresenta una fase autonoma di espansione significativa della volatilità che si sviluppa dopo una fase di congestione (CS o CDA) ed è la condizione necessaria e non negoziabile per l’attivazione di qualsiasi pattern operativo.
+👉 Senza bulge, il pattern è automaticamente invalido.
+🔵 A. Cos’è un Bulge? – Definizione Operativa
+Il bulge è una fase di mercato caratterizzata da un’esplosione di volatilità, riconoscibile attraverso:
+Bande di Bollinger fortemente espanse
+Deviazione standard in aumento significativo
+Candele direzionali ampie e coerenti
+Il bulge è l’opposto della compressione e non coincide con una singola candela o con un semplice breakout:
+è una fase strutturata, anche di breve durata, ma chiaramente distinguibile dalla congestione precedente.
+🔵 B. Come si riconosce un Bulge? – Check-list ufficiale
+Il Bulge è una fase autonoma di mercato caratterizzata da una espansione significativa della volatilità, visibile attraverso l’apertura delle Bande di Bollinger.
+Rappresenta la condizione necessaria e non negoziabile per l’attivazione della Strategia BREAKING BAND.
+👉 Senza Bulge, la strategia non è applicabile.
+🔑 Principio fondamentale (da fissare)
+Il Bulge NON è la congestione.
+Il Bulge NON è un canale direzionale, anche se ordinato.
+Il Bulge NON è una semplice inclinazione o larghezza delle bande.
+Il Bulge è esclusivamente la fase in cui il mercato passa da compressione a espansione di volatilità.
+La congestione iniziale (CS o CDA) rappresenta solo la fase preparatoria e non definisce il Bulge.
+🔹 Definizione operativa
+Un movimento è classificabile come Bulge valido solo se è identificabile una fase autonoma di espansione della volatilità, chiaramente distinguibile dal contesto precedente, indipendentemente dalla presenza o meno di una congestione direzionale.
+Il criterio discriminante è il cambio di regime della volatilità, non la forma grafica.
+🔹 Criteri ufficiali di riconoscimento del Bulge
+TUTTI obbligatori – se uno solo è assente → Bulge NON valido.
+Espansione evidente delle Bande di Bollinger (20/2)
+Le bande devono mostrare una chiara espansione di ampiezza, riconoscibile come:
+apertura progressiva (“bocca di coccodrillo”), oppure
+conformazione complessiva a “palloncino”, intesa come una fase in cui le bande risultano ampiamente distanziate per più candele, formando una struttura visivamente riconoscibile di espansione di volatilità.
+📌 Nota vincolante
+La conformazione a “palloncino” è pienamente valida se rappresenta una fase di mercato sviluppata su più candele, anche se emerge in continuità con una congestione direzionale ordinata.
+❌ Non è richiesto uno “stacco netto” o una rottura violenta.
+Deviazione standard in espansione
+La deviazione standard deve indicare:
+un aumento significativo della volatilità rispetto alla fase precedente;
+una transizione chiara da compressione a espansione.
+È considerata valida se:
+supera la propria SMA50, oppure
+mostra una fase di allontanamento strutturato da valori compressi.
+📌 Un singolo spike isolato non costituisce Bulge.
+📌 Una crescita graduale ma persistente sì.
+Candele impulsive e direzionalità chiara
+Durante il Bulge devono essere presenti:
+candele prevalentemente direzionali;
+ampiezza tipica compresa tra 1.5× e 3× ATR;
+assenza di lateralità interna o zig-zag impulsivi.
+📌 È ammesso che una singola candela sia dominante,
+purché sia inserita in una fase complessiva di espansione.
+Allontanamento del prezzo dalla mediana
+Nel corso della fase di bulge:
+il prezzo deve allontanarsi in modo evidente dalla banda mediana;
+la mediana deve risultare temporaneamente “abbandonata”;
+non devono esserci rientri immediati e ripetuti verso la mediana.
+Autonomia strutturale della fase
+Il Bulge deve essere riconoscibile come una fase autonoma di mercato, caratterizzata da:
+espansione di volatilità distinta dalla compressione precedente;
+percezione chiara di mercato in accelerazione, non in semplice scorrimento.
+📌 Una congestione direzionale che evolve in espansione
+📌 NON invalida il Bulge
+📌 se l’espansione è reale e strutturata.
+Limiti strutturali
+Il bulge:
+non deve trasformarsi in band riding prolungato (oltre 20 candele);
+deve mostrare segnali di esaurimento prima del ritracciamento/rientro:
+candele più piccole,
+deviazione standard in calo,
+perdita di spinta direzionale.
+✅ Regola finale vincolante
+Un Bulge è valido solo se esiste una fase autonoma e riconoscibile di espansione della volatilità.
+La congestione iniziale:
+non è il Bulge,
+non lo definisce,
+non lo sostituisce.
+👉 In assenza di espansione reale delle Bande di Bollinger e della volatilità,
+il Bulge NON è presente e la Strategia BREAKING BAND non è applicabile.
+🧠 Nota didattica conclusiva (fondamentale)
+Il Bulge va valutato:
+per ciò che FA la volatilità,
+non per come “sembra” il contesto narrativo.
+Una congestione direzionale ben costruita che sfocia in espansione reale
+👉 rafforza il Bulge,
+👉 non lo indebolisce.
+Il bulge è considerato concluso quando l’espansione di volatilità mostra segnali chiari di 
+🟦 DEFINIZIONE OPERATIVA DI “RITRACCIAMENTO ORDINATO” vs RIENTRO/CORREZIONE ORDINATA
+NOTA DI INTERPRETAZIONE OPERATIVA
+Nota interpretativa (ambito operativo/didattico)
+Il concetto di ritracciamento ordinato va inteso prioritariamente come fase di scarico controllato della volatilità post-bulge e non come linearità geometrica perfetta del movimento.
+Sono pertanto ammissibili micro-rotazioni, piccoli zig-zag e rimbalzi intermedi, a condizione che:
+non siano presenti candele impulsive;
+non vi siano accelerazioni improvvise di volatilità;
+il movimento rimanga coerente con una struttura di decompressione e non di nuovo impulso.
+La valutazione dell’ordine del ritracciamento deve quindi basarsi sull’assenza di violenza e discontinuità, più che sulla perfetta direzionalità del percorso.
+RITRACCIAMENTO ORDINATO”
+RIENTRO/CORREZIONE
+👉 Movimento ordinato, composto da candele piccole e volatilità in calo, che riporta il prezzo dalla bulge alla banda opposta dell’impulso.
+È la struttura tecnica che prepara un setup di continuazione.
+Il ritracciamento ordinato è una condizione fondamentale per ritenere il pattern di continuazione maturo. Deve rispettare almeno l’80% dei criteri seguenti.
+🔵 A. Struttura delle candele. Nessuna candela con range > 1.5×ATR del timeframe.
+Ombre non superiori a 1.5× il corpo..
+Range medio delle candele ridotto del 30–50% rispetto all’impulso (parametri che non compaiono nelle lezioni originali; sono linee guida avanzate facoltative, utili per migliorare la selezione del setup).
+👉 Movimento di decompressione post-bulge, composto da candele piccole e bande in restringimento, che riporta il prezzo alla mediana senza toccare la banda opposta.
+È la fase preparatoria del setup di inversione (contro-bulge).
+Nell’inversione non è richiesto rientro ordinato.
+🔵 B. Direzionalità controllata 
+Sono ammessi solo piccoli rimbalzi non impulsivi.
+Nessuna candela che sembri un nuovo impulso contro il trend..
+🔵 B. Direzionalità controllata - Inversione
+Differenza chiave rispetto al ritracciamento ordinato
+➡️ Non deve arrivare alla banda opposta (se la tocca → setup invalido).
+➡️ Deve “fermarsi” in prossimità della mediana, potendola superare.
+🔵 C. Comportamento delle Bande
+Le bande possono rimanere anche gonfie dopo il bulge.
+Non è richiesto nessun requisito di compressione o inclinazione sulla banda opposta.
+L’unica regola strutturale è che il prezzo raggiunga la banda opposta con ritracciamento ordinato.
+➜ Questa è una condizione essenziale: se il prezzo non raggiunge la banda opposta, il pattern è invalido.
+Nella continuazione le bande possono essere ancora gonfie, il ritracciamento è il vero filtro.
+🔵 C. Comportamento delle Bande
+Durante il retest della banda dell’impulso, devono essere contemporaneamente soddisfatte le seguenti condizioni:
+le Bande di Bollinger devono mostrare fase di restringimento successiva alla bulge;
+la deviazione standard deve risultare in calo;
+la banda dell’impulso NON deve inclinarsi contro il trade atteso.
+🔒 Condizioni essenziali e criteri vincolanti
+Divieto di contatto con la banda opposta
+La banda opposta a quella dell’impulso NON deve essere raggiunta durante il rientro.
+Se il prezzo la tocca → pattern automaticamente NON valido.
+Valutazione della banda dell’impulso (regola vincolante)
+La banda dell’impulso che viene ritestata deve risultare piatta o inclinata a favore del trade atteso, valutata esclusivamente sulle tre candele immediatamente precedenti la candela di retest.
+Trend atteso SHORT (inversione ribassista): banda piatta o discendente → criterio valido;
+Trend atteso LONG (inversione rialzista): banda piatta o ascendente → criterio valido.
+Qualsiasi inclinazione contro il trade atteso, rilevata nelle tre candele pre-test, comporta invalidazione automatica del pattern, indipendentemente da ogni altra condizione.
+Definizione operativa di banda “piatta”
+La banda dell’impulso è considerata piatta se, nelle tre candele pre-test, la pendenza della mediana risulta neutra o lievemente contraria all’impulso precedente, purché non orientata contro la direzione del trade atteso.
+🔵D. Deviazione standard
+La deviazione  standard deve essere in calo.
+Idealmente deve tagliare al ribasso la media semplice a 50 periodi settata sui dati della  deviazione standard.
+In pratica: il bulge deve essere finito.
+🔵 E. Aspettativa operativa: Dopo aver testato la banda opposta, il prezzo dovrebbe mostrare segnali di maturazione per un rientro verso la mediana (mean-reversion prevedibile).
+Segnali di qualità
+Rientro post-bulge fatto di candele piccole.
+Retest “pulito”, senza candele direzionali giganti.
+🔵 E. Posizione e obiettivo del rientro
+Per essere ordinato:
+Il rientro deve andare verso la mediana.
+Può superarla leggermente 
+NON deve mai toccare la banda opposta.
+👉 Questo è il tratto distintivo rispetto al ritracciamento ordinato.
+🟣 F. Aspettativa operativa
+Dopo un rientro ordinato, il mercato dovrebbe:
+mostrare maturazione tecnica,
+rallentare la sua corsa,
+creare le condizioni per un retest pulito della banda dell’impulso,
+che sarà il punto di entrata SHORT o LONG del contro-bulge.
+🟩 TABELLA COMPARATIVA
+Elemento
+PATTERN DI CONTINUAZIONE
+PATTERN DI INVERSIONE
+Target
+Il prezzo deve raggiungere la mediana dopo test della banda opposta
+Il prezzo deve raggiungere la mediana dopo retest della banda dell’impulso
+Movimento richiesto dopo la bulge
+Ritracciamento ordinato verso la banda opposta
+Rientro ordinato verso la mediana (senza mai toccare la banda opposta)
+Test chiave del pattern
+Test della banda opposta
+reTest della banda dell’impulso
+Banda da valutare
+Banda opposta
+Banda dell’impulso
+Inclinazione della banda da valutare (3 candele precedenti)
+n.n.
+Banda dell’impulso piatta o inclinata a favore (discendente per short, ascendente per long)
+Regola sul test della banda opposta
+Obbligatorio: il ritracciamento deve raggiungerla o superarla
+Proibito: se il rientro la raggiunge → non è inversione
+Entry (ingresso)
+Sulla banda opposta dell’impulso
+Sulla banda dell’impulso (secondo tocco dopo il ritorno dalla mediana)
+Condizioni delle bande al momento dell’entry
+Banda in restringimento 
+Banda dell’impulso compressa, piatta o inclinata a favore
+Cosa invalida il pattern
+Test impulsivo (>1.5×ATR) della banda opposta
+ritracciamento violento
+zig–zag
+band riding
+• Il rientro raggiunge la banda opposta (pattern non esiste più)
+• Retest impulsivo della banda dell’impulso
+• Banda dell’impulso inclinata contro
+• band riding
+• Candele >1×ATR nel rientro
+Take Profit
+Mediana
+Mediana
+Stop Loss
+3×ATR
+3×ATR
+⚠️ REGOLE STRUTTURALE DEL PATTERN (da non confondere con invalidazioni)
+Regola
+Continuazione
+Inversione
+Test obbligatorio / proibito
+Il prezzo deve raggiungere la banda opposta
+Il prezzo non deve raggiungere la banda opposta (se la tocca → non è inversionE)
+ESEMPI DI PATTER SI CONTINUAZIONE VALIDO
+ESEMPI DI PATTER DI INVERSIONE VALIDO
+🟩 FILTRI DI QUALITÀ FONDAMENTALE (regola chiave)
+Filtro di Qualità
+Pattern di Continuazione
+Pattern di Inversione
+1. Inclinazione della banda da ritestare (valutata sulle 3 candele precedenti)
+Non rilevante: la banda opposta non richiede inclinazione.
+La banda dell’impulso deve essere:
+• piatta
+• o inclinata a favore del trade (short → discendente; long → ascendente)
+2. Compressione della banda del frigger
+In restringimento
+Deve essere in restringimento, piatta o inclinata a favore della posizione
+3. Candele >1×ATR durante la fase critica
+Una candela >1.5 ×ATR durante il ritracciamento → invalidazione
+Una candela >1×ATR durante il rientro o il retest → invalidazione
+4. Pulizia strutturale del movimento
+Ritracciamento ordinato: candele piccole, coerenti, senza impulsi
+Rientro ordinato: micro-rotazioni non impulsive, movimento di scarico
+5. Bande di Bollinger
+Devono mostrare restringimento dopo la bulge
+6. Direzione del test
+Il prezzo deve testare la banda opposta con candela non impulsiva
+Il prezzo deve ritestare la banda dell’impulso con candela non impulsiva
+7. Comportamento della banda durante il test
+Banda opposta: nessun requisito, può essere gonfia.
+Banda dell’impulso deve rimanere piatta/in compressione, a favore del trade 
+8. Candela di inversione sul livello di test.
+(regola opzionale)
+Quando la candela che effettua il test della banda (banda opposta nella continuazione, banda dell’impulso nell’inversione) mostra una chiara struttura di inversione — pin bar, doji di rigetto, piccolo engulfing non impulsivo — può essere considerata un segnale di qualità aggiuntivo.
+Indica reattività del livello e presenza di ordini, migliorando la probabilità del rientro verso la mediana.
+Non sostituisce i criteri ufficiali del ritracciamento/rientro ordinato e non è valida se la candela è impulsiva o compare prima del test.
+9. News ad alto impatto
+Evitare news rosse (H1-M30)
+10. Pattern sporchi / irregolari
+Da evitare se la struttura del ritracciamento è disordinata o zig-zag. Per zig-zag invalidante si intende una struttura composta da impulsi contrari o accelerazioni di volatilità; sono escluse micro-rotazioni lente di scarico.
+n.n..
+11. Regola del test obbligatorio
+Test banda opposta = obbligatorio
+Non deve raggiungere la banda opposta (se la tocca → non è inversione)
+❌ INVALIDAZIONE DEI PATTERN
+👉 Questi scenari indicano pericolo – PATTER NON SOLIDO - e va scartato.
+Invalidazione
+PATTERN DI CONTINUAZIONE
+PATTERN DI INVERSIONE
+1. Test impulsivo (>1.5×ATR)
+Test della banda opposta con candela impulsiva
+Test della banda dell’impulso con candela impulsiva
+2. Banda inclinata contro
+Non rilevante: nella continuazione l’inclinazione della banda opposta non si valuta
+Banda dell’impulso inclinata contro
+3. Banda si gonfia di nuovo
+Nessun requisito, può essere gonfia
+La banda dell’impulso si gonfia di nuovo
+4. Movimento troppo violento
+Ritracciamento violento, non ordinato
+Rientro violento, non ordinato
+5. Condizioni strutturali sporche
+candele erratiche  nel ritracciamento
+NN
+ESEMPI DI PATTER DI CONTINUAZIONE NON VALIDO
+ESEMPI DI PATTER DI INVERSIONE NON VALIDO
+🟧 Conferme tecniche fondamentali:
+✔ Bande di Bollinger: Devono RESTRINGERSI dopo l’esplosione (bulge).
+✔ Deviazione standard: La deviazione standard attuale HA TAGLIATO la sua media a 50 periodi.
+Questa fase serve a verificare che l’impulso sia davvero esaurito.
+La regola significa: “Non entrare finché la volatilità non è tornata normale. La deviazione standard deve scendere sotto la sua SMA 50, il che significa che la bulge è finito.
+🟥 ENTRATA A MERCATO
+PATTERN di CONTINUAZIONE
+PATTERN di INVERSIONE
+L’entry si effettua sulla banda opposta del bulge.
+🔥 Formula definitiva:
+Dopo la bulge e l’impulso, il prezzo deve ritracciare lentamente e in modo diretto verso la banda opposta (candeline piccole).
+Per “diretto” si intende privo di impulsi contrari e accelerazioni di volatilità; sono ammesse micro-rotazioni lente
+La banda opposta non deve mostrare alcun requisito specifico (può essere ancora gonfia).
+Entry al tocco della banda opposta (corpo o spike).
+L’entry si effettua sulla banda del bulge dopo il test della mediana.
+🔥 Formula definitiva:
+Bulge su una banda → Correzione verso la banda mediana → Rientro sulla banda del bulge
+entry sulla banda del bulge, ma solo se è inclinata a favore e in fase di compressione o piatta
+🔑 Trigger operativo (entrata)
+Il prezzo deve testare la banda opposta rispetto alla bulge.
+Il ritracciamento deve essere diretto, composto da candeline piccole, senza zig-zag impulsivi o violenti. La valutazione del ritracciamento deve privilegiare l’assenza di violenza e impulsi rispetto alla linearità del percorso.
+Nessuna candela impulsiva contro l’impulso principale.
+L’impulso precedente deve essere chiaro e forte (bulge evidente).
+❌ Non entrare se:
+Il ritracciamento non è diretto (zig-zag, indecisione).
+Il ritracciamento contiene candele impulsive contro il trend.
+Si verifica un band riding prolungato (20+ candele sulla banda dell’impulso).
+Il prezzo raggiunge la banda opposta con violenza (no “gradini”, ma candele grandi).
+🔑 Trigger operativo (entrata)
+Il prezzo deve ritestare la banda del bulge.
+La banda testata deve essere piatta o inclinata a favore del trade .
+Nessuna candela impulsiva nel rientro.
+Deviazione standard in calo.
+❌ Non entrare se:
+La banda testata si gonfia di nuovo.
+È inclinata contro la direzione dell’operazione valutata sulle 3 candele precedenti rispetto al test
+Si verifica un band riding prolungato (20+ candele sulla banda dell’impulso).
+Il ritracciamento è troppo violento.
+🛑 Stop Loss: SL = 3×ATR del timeframe. Regola fissa.
+🎯 Take Profit: TP obbligatorio sulla mediana delle Bande. Aggiornare il TP ogni 2–3 candele.
+🟪 5. GESTIONE DELLA POSIZIONE
+✔ Aggiornare il TP ogni 2–3 ore. La mediana si muove → tu devi seguirla.
+✔ Esito del trade:
+si chiude alla mediana, oppure
+in Stop Loss.
+✔ Gestione rischio (opzionale)
+Dopo un movimento a favore di ≥ 1 × ATR:
+puoi ridurre il rischio,
+portare SL a metà, o a BE.
+MAI allargare lo stop loss.
+🟩 REVISIONE E MIGLIORAMENTO
+Obbligatorio:
+Tenere un trading journal.
+Annotare pattern, motivazioni, entrate e uscite.
+Analizzare le operazioni per migliorare.
+👉 La disciplina è la vera differenza tra un buon trader e un trader incostante.
+✅ Processo di analisi del PATTERN
+bande molto aperte,
+deviazione standard in aumento
+espansione di volatilità.
+bande molto aperte,
+deviazione standard in aumento
+espansione di volatilità.
