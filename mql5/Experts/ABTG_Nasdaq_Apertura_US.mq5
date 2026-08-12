@@ -1003,7 +1003,7 @@ bool TryPlaceRangeFade()
       double entry = NormalizePrice(gRangeHigh + InpFadeOffsetPts*_Point);
       double sl    = NormalizePrice(entry + slDist);
       double dist  = sl - entry;
-      double lot   = CalcLotByRisk(dist);
+      double lot   = SRBlocked(entry, -1) ? 0.0 : CalcLotByRisk(dist);   // R30: filtro S/R
       double tp    = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
       if(lot > 0 && dist > 0)
         {
@@ -1020,7 +1020,7 @@ bool TryPlaceRangeFade()
       double entry = NormalizePrice(gRangeLow - InpFadeOffsetPts*_Point);
       double sl    = NormalizePrice(entry - slDist);
       double dist  = entry - sl;
-      double lot   = CalcLotByRisk(dist);
+      double lot   = SRBlocked(entry, +1) ? 0.0 : CalcLotByRisk(dist);   // R30: filtro S/R
       double tp    = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
       if(lot > 0 && dist > 0)
         {
@@ -1091,6 +1091,8 @@ bool TryPlaceDelayed()
    if(!SpreadOK()) { ABTGLog("DELAYED: spread troppo alto: niente trade."); return(true); }
    if(!ConfirmOK()) { ABTGLog("DELAYED: rottura non confermata (ne' volumi ne' ATR): niente trade."); return(true); }
 
+   UpdateVolRegime();   // R30: qui si decide, quindi qui si misura il regime
+
    //--- 1) la direzione CONFERMATA dopo l'attesa
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
@@ -1145,10 +1147,11 @@ bool TryPlaceDelayed()
    double sl    = (InpSLMode == ABTG_SL_RANGE)
                   ? ((dir > 0) ? gRangeLow : gRangeHigh)
                   : ((dir > 0) ? entry - AtrValue()*InpAtrSlMult : entry + AtrValue()*InpAtrSlMult);
-   sl = NormalizePrice(sl);
+   sl = NormalizePrice(VolRegimeSL(entry, sl));   // R30: scala lo stop col regime
    double dist = (dir > 0) ? (entry - sl) : (sl - entry);
    if(dist <= 0)
      { ABTGLog("DELAYED: stop dalla parte sbagliata (prezzo gia' oltre il bordo opposto): niente trade."); return(true); }
+   if(SRBlocked(entry, dir)) return(true);        // R30: livello S/R addosso -> niente trade
    if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
      {
       if(InpSkipIfTight)
@@ -1207,6 +1210,8 @@ bool ArmOpenConfirm()
      { ABTGLog(StringFormat("OPENCONFIRM: range %.0f pt > max %.0f: niente trade.", rangePts, InpMaxRangePts)); return(true); }
    if(!SpreadOK()) { ABTGLog("OPENCONFIRM: spread troppo alto: nessun trade oggi."); return(true); }
 
+   UpdateVolRegime();   // R30: il regime si misura all'ARMING, come gBuffer e gBias
+
    gBuffer    = EffectiveBuffer();
    gBias      = TrendBias();
    gLastOCBar = 0;
@@ -1251,10 +1256,13 @@ void MonitorOpenConfirm()
    if(InpSLMode == ABTG_SL_RANGE) sl = (dir > 0) ? sellTrig : buyTrig;
    else                           sl = (dir > 0) ? entry - AtrValue()*InpAtrSlMult
                                                  : entry + AtrValue()*InpAtrSlMult;
-   sl = NormalizePrice(sl);
+   sl = NormalizePrice(VolRegimeSL(entry, sl));   // R30: scala lo stop col regime
 
    double dist = (dir > 0) ? (entry - sl) : (sl - entry);
    if(dist <= 0) { ABTGLog("OPENCONFIRM: distanza di stop nulla, salto."); return; }
+   //--- R30: filtro S/R. Si SALTA questa candela (come per i volumi): il
+   //    prezzo si muove, alla candela dopo il livello puo' non essere piu' addosso.
+   if(SRBlocked(entry, dir)) return;
    if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
      {
       if(InpSkipIfTight)
@@ -1290,6 +1298,8 @@ bool ArmRetest()
    if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
      { ABTGLog(StringFormat("RETEST: candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
    if(!SpreadOK()) { ABTGLog("RETEST: spread troppo alto: nessun ordine oggi."); return(true); }
+
+   UpdateVolRegime();   // R30: il regime si misura all'ARMING, come gBuffer e gBias
 
    gBuffer    = EffectiveBuffer();
    gBias      = TrendBias();           // 0 entrambi, +1 solo long, -1 solo short, 2 conflitto
@@ -1332,10 +1342,11 @@ void MonitorRetest()
         {
          double entry = NormalizePrice(gRangeHigh - InpRetestOffsetPts*_Point); // limit sul livello (niente buffer/slippage)
          double sl    = (InpSLMode == ABTG_SL_RANGE) ? sellPx : entry - AtrValue()*InpAtrSlMult;
-         sl = NormalizePrice(sl);
+         sl = NormalizePrice(VolRegimeSL(entry, sl));                           // R30: scala lo stop col regime
          double dist  = entry - sl;
          bool   skip  = false;
-         if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+         if(SRBlocked(entry, +1)) skip = true;                                  // R30: filtro S/R
+         if(!skip && InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
            {
             if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST BUY saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
             else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
@@ -1363,10 +1374,11 @@ void MonitorRetest()
         {
          double entry = NormalizePrice(gRangeLow + InpRetestOffsetPts*_Point);
          double sl    = (InpSLMode == ABTG_SL_RANGE) ? buyPx : entry + AtrValue()*InpAtrSlMult;
-         sl = NormalizePrice(sl);
+         sl = NormalizePrice(VolRegimeSL(entry, sl));                           // R30: scala lo stop col regime
          double dist  = sl - entry;
          bool   skip  = false;
-         if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+         if(SRBlocked(entry, -1)) skip = true;                                  // R30: filtro S/R
+         if(!skip && InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
            {
             if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST SELL saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
             else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
@@ -1406,6 +1418,8 @@ bool TryPlaceGapFill()
    // nuovo due righe identiche al centesimo.
    if(!ConfirmOK()) { ABTGLog("GAP FILL: conferma (volumi/ATR) assente: niente trade."); return(true); }
 
+   UpdateVolRegime();   // R30: qui si decide, quindi qui si misura il regime
+
    //--- livelli della prima finestra di apertura (la "conferma" del PDF, es. prime candele)
    int openMin = InpSessionHour*60 + InpSessionMin;
    double hi, lo;
@@ -1425,10 +1439,11 @@ bool TryPlaceGapFill()
       // GAP UP -> mi aspetto il ritorno giu': SELL STOP al break sotto il minimo iniziale,
       // SL sopra il massimo iniziale, TP = chiusura precedente (come esempio Nasdaq del PDF)
       double entry = NormalizePrice(lo - buffer);
-      double sl    = NormalizePrice(hi + buffer);
+      double sl    = NormalizePrice(VolRegimeSL(entry, hi + buffer));   // R30: scala lo stop col regime
       double risk  = sl - entry;
       double reward= entry - tp;
       if(risk <= 0 || reward <= 0) { ABTGLog("gap fill up: geometria non valida."); return(true); }
+      if(SRBlocked(entry, -1)) return(true);                            // R30: filtro S/R
       if(reward/risk < InpGapMinRR)
         { ABTGLog(StringFormat("gap fill up: RR %.2f < %.2f, salto.", reward/risk, InpGapMinRR)); return(true); }
       double lot = CalcLotByRisk(risk);
@@ -1440,10 +1455,11 @@ bool TryPlaceGapFill()
       // GAP DOWN -> mi aspetto la risalita: BUY STOP al break sopra il massimo iniziale,
       // SL sotto il minimo iniziale, TP = chiusura precedente
       double entry = NormalizePrice(hi + buffer);
-      double sl    = NormalizePrice(lo - buffer);
+      double sl    = NormalizePrice(VolRegimeSL(entry, lo - buffer));   // R30: scala lo stop col regime
       double risk  = entry - sl;
       double reward= tp - entry;
       if(risk <= 0 || reward <= 0) { ABTGLog("gap fill down: geometria non valida."); return(true); }
+      if(SRBlocked(entry, +1)) return(true);                            // R30: filtro S/R
       if(reward/risk < InpGapMinRR)
         { ABTGLog(StringFormat("gap fill down: RR %.2f < %.2f, salto.", reward/risk, InpGapMinRR)); return(true); }
       double lot = CalcLotByRisk(risk);

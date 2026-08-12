@@ -1,0 +1,36 @@
+# =====================================================================
+#  R30: le due idee dell'EA dell'amico, innestate nel NOSTRO lab Nasdaq
+#  Lancio: ABTG_Nasdaq_Apertura_US -Prova prove\R30_regali_amico_nasdaq.txt
+#          -Etichetta r30
+# =====================================================================
+# DA DOVE VIENE (12/08): parametri di un EA esterno (NasdaqOpeningBreakout
+#   v21) girati dall'amico di Claudio. Le 2 idee mai testate da noi sono
+#   state innestate OPT-IN (default spento, v1.01) nel nostro EA:
+#   - REGIME DI VOLATILITA' (percentili ATR -> buffer/SL/size adattivi)
+#   - FILTRO PROSSIMITA' S/R (PDH/PDL + numeri tondi addosso = salta)
+# IPOTESI (dichiarate prima dei numeri):
+#   VolRegime: stesso numero di trade circa, DD e peggior giornata GIU'.
+#   SRFilter: MENO trade (~15-25%) e PF SU — se il PF non sale, sta solo
+#   tagliando campione e non seleziona nulla.
+# BASE PINNATA = la config MISURATA di R24 (volumi 1,5 AND, ATR off,
+#   1%, motore/range di fabbrica). Griglia 2x2 = 4 celle per finestra:
+#   baseline / solo VolRegime / solo SRFilter / entrambe.
+# CRITERI (congelati): una feature si adotta SOLO se batte la baseline
+#   in ENTRAMBE le finestre secondo la SUA ipotesi (VolRegime: stesso
+#   profitto circa con DD/peggior giornata migliori; SRFilter: PF su con
+#   profitto non peggiore). Celle singole belle = appunto, non azione.
+#   Qualunque esito: il grafico vivo NON si tocca da questo round senza
+#   referto + decisione + verifica.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRiskPercent=1.0
+InpUseVolumeFilter=1
+InpVolMult=1.5
+InpUseAtrFilter=0
+InpConfirmMode=1
+
+InpUseVolRegime=0||0||1||1||Y
+InpUseSRFilter=0||0||1||1||Y
