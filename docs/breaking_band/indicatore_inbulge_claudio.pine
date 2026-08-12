@@ -1,0 +1,9 @@
+// Indicatore TradingView di CLAUDIO (postato 12/08 sera, salvato da Claude)
+// "IN-BULGE + POST-BULGE [Claudio]" — sua implementazione dei 2 pattern
+// Note di lettura (Claude): bulge = width >= 1.1 x SMA50(width) [rolling,
+// non congelata]; impulso LEGGERO (tocco banda + corpo >= 0.2 ATR);
+// banda piatta = |delta 6 barre| <= 0.6 ATR; segnale = candela di
+// REAZIONE (rejection). POST-BULGE fedele alla guida; IN-BULGE entra
+// in fade sulla banda DELL'IMPULSO (la guida entra sul retest della
+// banda OPPOSTA): da chiarire con Claudio quale versione intende.
+// (sorgente integrale come postato in chat — vedi conversazione 12/08)
