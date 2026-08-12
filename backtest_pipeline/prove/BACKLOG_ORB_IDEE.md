@@ -102,6 +102,13 @@ edge misurato). Ma DUE idee mai testate da noi meritano il laboratorio:_
    prima / numeri tondi / swing; proximity 15pt, merge 10pt). Mai
    misurato nel lab. Tesi: i breakout nati sotto resistenza muoiono li'.
 Campanelli annotati: lotto fisso (MM spento), "v21 OPTIMIZED" (curve
-fitting probabile), TradeStartTime 16:25 incoerente con BCM (Nasdaq
-apre 14:30 server — chiedere all'amico broker/fuso). Se arrivano .set
-completo / .ex5 / risultati, si riapre la valutazione.
+fitting probabile). RISOLTO l'orario (Claudio, 12/08): 16:25 = 5 minuti
+PRIMA dell'apertura su un broker UTC+3 (Nasdaq apre 16:30 li'). Non era
+un campanello: era un altro fuso. Se arrivano .set/.ex5/risultati, si
+riapre la valutazione dell'EA originale.
+-> **IN CODA COME R30** (decisione di Claudio 12/08: "dobbiamo sapere
+come sarebbe coi nostri criteri"): le due feature vengono innestate
+OPT-IN (default spento) nel NOSTRO ABTG_Nasdaq_Apertura_US e testate
+nell'imbuto — baseline (config misurata R24: volumi 1,5 AND) vs
++VolRegime vs +SRFilter vs entrambi. Criteri congelati prima del lancio,
+nel file di prova R30.
