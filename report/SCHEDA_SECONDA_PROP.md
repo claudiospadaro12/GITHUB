@@ -141,7 +141,40 @@ diverse).
 
 ---
 
-## SCHEDA COMPILATA #1 — <nome ditta>
+## SCHEDA COMPILATA #1 — FundedNext (Stellar CFD)
+- Data studio: 12/08/2026 (screenshot Claudio dell'articolo ufficiale
+  "Quali sono i limiti di rischio di un conto FundedNext?", 6 lug 2026)
+- 1 EA: ✅ ammessi ("tutti gli stili, inclusi automatizzati")
+- 2 Limiti: 10% statico / 5% daily ✅ — MA vedi regola 3% sotto
+- 3 News: taglio profitti, no violazione ✅ (fonte terza, non riverificata)
+- 5 Consistency: nessuna su Stellar CFD ✅
+- **LA REGOLA CHE DECIDE — rischio cumulativo max 3% "in qualsiasi
+  momento" sul conto finanziato.** Parole esatte: rischio = massima
+  perdita potenziale DALLA POSIZIONE DELLO STOP-LOSS, e SOMMA delle
+  perdite massime realizzate e non realizzate su TUTTE le operazioni,
+  sul saldo iniziale. Si applica a tutti gli stili, automatizzati
+  inclusi. Enforcement: 1a violazione = ammonimento + confisca 100% dei
+  profitti "non conformi" del ciclo; 2a violazione = **riclassificazione
+  PERMANENTE a rischio cumulativo 1%**. Swap/commissioni esclusi.
+- **Incrocio con la NOSTRA misura** (sovrapposizioni 16 mesi OOS):
+  6-8 serie attive nello stesso giorno nei giorni pieni, blocco
+  14:30-17:30. A 0,65% la somma degli SL aperti puo' plausibilmente
+  superare il 3% PROPRIO NEI GIORNI MIGLIORI (piu' setup = piu'
+  posizioni): la regola confischerebbe i profitti delle giornate
+  buone, e alla seconda segnalazione il conto scende a 1% cumulativo
+  = portafoglio morto. Stare sotto con certezza = taratura ~0,375%
+  (rendimento quasi dimezzato rispetto allo 0,65%) o un coordinatore
+  che salta trade (= divergenza dal comportamento misurato).
+- **VERDETTO: ❌ SCARTATA come seconda prop per il portafoglio pieno.**
+  La regola non uccide il conto ma tassa esattamente cio' che ci rende
+  forti: la diversificazione simultanea. Resta tecnicamente possibile
+  per un sotto-portafoglio 4-5 serie, ma D3 chiede la REPLICA del
+  portafoglio completo: non e' questa la ditta.
+- Prossima da studiare: **The5ers High Stakes** (limiti FTMO-like;
+  da mappare il divieto di esecuzioni ±2 min sulle news contro i
+  nostri orari fissi di ingresso).
+
+## SCHEDA COMPILATA #2 — <nome ditta>
 - Data studio:
 - Piano/programma:
 - 1 EA: ⬜ ok ⬜ dubbio ⬜ no — note:
