@@ -174,14 +174,35 @@ diverse).
   da mappare il divieto di esecuzioni ±2 min sulle news contro i
   nostri orari fissi di ingresso).
 
-## SCHEDA COMPILATA #2 — <nome ditta>
-- Data studio:
-- Piano/programma:
-- 1 EA: ⬜ ok ⬜ dubbio ⬜ no — note:
-- 2 Limiti: daily __% / totale __% / ⬜ statico ⬜ trailing / reset ore __
-- 3 News: ⬜ libere ⬜ ristrette — note:
-- 4 Notturno/weekend: ⬜ ok ⬜ no — note:
-- 5 Consistency: ⬜ nessuna ⬜ soglia __% — note:
-- 6 Costo 100k __ / refund ⬜ / split __% / payout ogni __ gg
-- 7 Spread DAX __ / Dow __ / Nasdaq __ / fuso server __
-- **Verdetto: ⬜ candidata ⬜ scartata — perche':**
+## SCHEDA COMPILATA #2 — The5ers (High Stakes) — IN CORSO
+- Data studio: 12/08/2026 (screenshot Claudio delle FAQ ufficiali
+  the5ers.com, last update 10/08/2026)
+- **3 NEWS — VERIFICATA, testo ufficiale:**
+  - Tenere posizioni aperte sulle news: PERMESSO ✅
+  - VIETATO eseguire QUALSIASI ordine (market, stop, limit) da 2 min
+    prima a 2 min dopo una news ad alto impatto (red folder Forex
+    Factory) SULLA valuta/indice correlato. Ora del LORO server.
+  - Violazione = **SOFT BREACH**: profitti di quel trade detratti,
+    perdite restano al trader. NON e' una chiusura del conto ✅
+  - SL/TP preimpostati che scattano durante le news: ESPLICITAMENTE
+    non e' violazione ✅ (salva trailing e stop della flotta)
+  - ⚠️ IL PUNTO PER NOI: "la regola si applica al momento in cui
+    l'ordine viene ESEGUITO, non a quando il pending e' stato
+    piazzato" — un pending che scatta dentro la finestra E' soft
+    breach. I nostri box MaxMin (DAX notte, oro) scattano sulla
+    rottura: se la rottura arriva su una news (l'oro sui dati USA!),
+    quel trade e' tassato. Tassa occasionale (finestre da 4 min),
+    non struttura: accettabile, ma da stimare in forward.
+  - Nota a margine: il divieto di "bracketing" sulle news (buy stop +
+    sell stop insieme) e' scritto SOLO per Instant Funding/Bootcamp —
+    il MaxMin e' un bracket: se mai si guardasse un altro programma
+    loro, questo lo esclude. Su High Stakes vale solo la finestra 2 min.
+- DA COMPLETARE (prossimi screenshot):
+  - 2 Limiti: daily/totale, STATICO o trailing, da cosa si calcola
+  - 🚩 tetto di esposizione aggregata (lezione FundedNext: cercare
+    "maximum exposure/open risk/lots" nelle FAQ)
+  - 1 EA: politica ufficiale (EA propri vs commerciali)
+  - 4 notturno/weekend · 5 consistency/requisiti payout
+  - 6 costo 100k / split / frequenza payout · 7 spread e fuso server
+- **Verdetto: in corso — la regola news e' COMPATIBILE (tassa
+  occasionale, nessun rischio conto). Si prosegue.**
