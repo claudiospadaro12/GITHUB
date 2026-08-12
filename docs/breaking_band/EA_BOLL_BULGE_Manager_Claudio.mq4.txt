@@ -1,0 +1,12 @@
+// Trade Manager MQ4 di CLAUDIO (creato con ChatGPT, postato 12/08 sera)
+// EA_BOLL_BULGE_Manager_PRO_MULTI_TF: NON apre ordini, gestisce i manuali:
+// SL auto 3xATR se manca, TP sulla mediana Bollinger aggiornato a ogni
+// barra, BE a 1R, trailing a gradini di R.
+// GIUDIZIO CLAUDE (12/08): struttura robusta (retry, clamp stoplevel,
+// guardia spread, notifiche push). E' la gestione di Leonardo
+// meccanizzata (TP mediana mobile = "correggi il TP ogni 2-3 ore").
+// DIFETTO VERO trovato: il motore R usa lo SL CORRENTE come rischio
+// iniziale -> dopo il break-even riskPts ~ 0 e i multipli R esplodono
+// (il trailing perde senso). Serve memorizzare lo SL INIZIALE per
+// ticket (come fanno gli ABTG). E' MQ4: sul BCM MT5 non gira.
+// (sorgente integrale nella chat del 12/08)
