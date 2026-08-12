@@ -1,6 +1,6 @@
 # =====================================================================
-#  verifica_vivaio_r23.ps1 -- controlla campo-per-campo i 5 grafici del
-#  VIVAIO R23 leggendo i .chr del VECCHIO MT5 (demo 50503392).
+#  verifica_vivaio_r23.ps1 -- controlla campo-per-campo i 6 grafici del
+#  VIVAIO (R23 + EMA200) leggendo i .chr del VECCHIO MT5 (demo 50503392).
 #  ⚠️ I .chr si aggiornano al SALVATAGGIO del profilo: prima di lanciare
 #  fai File -> Profili -> Salva (sovrascrivi), poi esegui.
 #  Scrive anche Desktop\verifica_vivaio.txt da mandare a Claude.
@@ -37,7 +37,7 @@ foreach ($chr in $chrs) {
   $em = [regex]::Match($txt, "(?s)<expert>.*?path=Experts\\([^\r\n]+)\.ex5")
   if (-not $em.Success) { continue }
   $ea = $em.Groups[1].Value.Trim()
-  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave") { continue }
+  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200") { continue }
   $sm = [regex]::Match($txt, "symbol=([A-Za-z0-9#\.]+)"); $sym = if($sm.Success){$sm.Groups[1].Value}else{"?"}
   $ins = @{}
   $im = [regex]::Match($txt, "(?s)<inputs>(.*?)</inputs>")
@@ -82,7 +82,7 @@ foreach ($k in $trovati.Keys) {
   if (-not $atteso) { Rec ("FUORI LISTA: {0} @ {1} magic {2} ({3})" -f $parts[0],$parts[1],$parts[2],$trovati[$k].file) Cyan }
 }
 Rec "" White
-if ($errori -eq 0) { Rec "TUTTO OK: 5/5. Vivaio in campo." Green } else { Rec ("{0} PROBLEMI: correggi e rilancia." -f $errori) Red }
+if ($errori -eq 0) { Rec ("TUTTO OK: {0}/{0}. Vivaio in campo." -f $Attesi.Count) Green } else { Rec ("{0} PROBLEMI: correggi e rilancia." -f $errori) Red }
 
 $out = Join-Path $env:USERPROFILE "Desktop\verifica_vivaio.txt"
 $Righe -join "`r`n" | Set-Content -Path $out -Encoding ASCII
