@@ -3,7 +3,38 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
 >
-> Ultimo aggiornamento: **2026-08-02**. **Branch unico di lavoro: `lavoro`** (qui è consolidato TUTTO).
+> Ultimo aggiornamento: **2026-08-12 sera**. **Branch unico di lavoro: `lavoro`** (qui è consolidato TUTTO).
+
+---
+
+## 🟢 RIPARTI DA QUI — stato al 12/08 sera (le sezioni sotto questa sono STORICHE)
+**Per il quadro vivo leggere, in ordine:** `report/DIARIO.md` (righe 11-12/08),
+`report/CAMPAGNA_ARSENALE.md` (12 sedie), `report/SCHEDA_SECONDA_PROP.md`
+(dossier D3), `backtest_pipeline/prove/BREAKING_BAND_TESI.md`.
+
+- **Vivaio a 7 sul conto piccolo 50503392** (verificato 6/6 dai .chr):
+  MAXMIN ORO 770402 · PTE Dow/GBP/JPY 771321-23 · SW Dow/GBP 770531-32 ·
+  **EMA200 Dow 771531 (sedia 12, deployata 12/08)**. Collaudo 10 trade/
+  mercato, verdetto 30/famiglia. Squadra 100k sul -V3 invariata (+ pagella
+  doppia automatica ogni sera 23:15 sul Desktop VPS).
+- **Nasdaq base ALLINEATO 12/08** (volumi ON + AND, rischio 0,25, verificato
+  5/5): primo collaudo dal vivo nelle pagelle.
+- **Pulizia chiusa 4/4** (ultimo: SupRev_DOW_H1 da flat). Flotta 20 grafici,
+  tutti referto-giustificati.
+- **v21 dell'amico**: intercettato sul vivo, spento pre-apertura, misurato nel
+  tester (bocciato: fuso+unita' punti), referto `REFERTO_V21_ESTERNO.md`.
+- **Referti nuovi**: R30 (S/R bocciato 20° ribaltamento, VolRegime in
+  cassetta), R31 (portafoglio 12 serie +126.255), R32 (oro 0/30, Nikkei 21°
+  ribaltamento a regione intera: EMA200 = specialista del Dow).
+- **D3 (seconda prop) AVVIATA**: FundedNext SCARTATA (3% cumulativo),
+  The5ers candidata CON RISERVE (3 chiarimenti scritti dovuti), FTMO da
+  istruire con scheda dedicata. Due prop da ads Instagram investigate e
+  DA EVITARE (`report/INDAGINE_PROP_INSTAGRAM.md`).
+- **Nuovo fronte strategie del corso**: tesi Breaking Band distillata
+  (motore = squeeze Bollinger; servono da Claudio: slide, indicatore StdDev
+  di Paolo, regole di Leonardo). CATALOGO completo delle strategie del corso
+  in lavorazione (agente). In canna anche R33 (sweep range apertura 15-60').
+- **Stile chat**: titoli grandi + emoji + hype (regola in CLAUDE.md).
 
 ---
 
