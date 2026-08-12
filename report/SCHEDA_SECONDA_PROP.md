@@ -203,9 +203,15 @@ diverse).
     prima**, fotografato alle **00:00 ora del loro server** ✅
   - Sforare uno dei due = chiusura del conto (hard, come FTMO)
   - Struttura IDENTICA a FTMO: il Guardian e la taratura 0,65%
-    (p99 ~9,4% < 10%) si trasferiscono cosi' come sono. Unica
-    differenza operativa: l'ora del reset giornaliero (00:00 server
-    LORO — da mappare sul fuso quando si conoscera' il broker/feed).
+    (p99 ~9,4% < 10%) si trasferiscono cosi' come sono.
+  - Seconda conferma ufficiale (FAQ 10/06/2026, incollata da Claudio):
+    daily 5% dal max(equity, balance) di INIZIO giornata, **MT5 Server
+    Time GMT+2 inverno / GMT+3 estate**. Quindi il LORO server d'estate
+    e' ~2 ORE AVANTI rispetto a BCM (che sta a ora italiana −1):
+    lezione v21 gia' in cassa — se un giorno si passa a The5ers, OGNI
+    InpSessionHour va ricalcolato e OGNI EA riverificato sul loro
+    feed (fuso + unita' punti + spread). Trafila prevista, non
+    sorpresa.
 - **1 EA — VERIFICATO, testo ufficiale (incollato da Claudio 12/08):**
   - EA ammessi purche' NON: copino segnali altrui, tick scalping,
     arbitraggi (latency/reverse/hedge), HFT, emulatori. I nostri:
@@ -216,10 +222,28 @@ diverse).
     nostro perfetto — tutti gli ABTG hanno sorgente nel repo ✅✅
     (nota gustosa: il v21 dell'amico questa regola l'avrebbe FALLITA —
     solo ex5, niente sorgente. Terza conferma della scelta di oggi.)
+- **5/6 PAYOUT E CONSISTENCY — VERIFICATI in parte (testo ufficiale
+  11/08/2026, articolo "conto finanziato $200K"):**
+  - Split: **80/20** al trader (meno generoso di altri, accettabile)
+  - Prelievo minimo $250 — **🚩 TETTO $3.000 PER CICLO DI PAYOUT**:
+    la regola col morso. Sul conto 200k = 1,5% a ciclo. Il nostro
+    scenario da ~4.400-5.500 EUR/mese di quota trader regge SOLO se
+    il ciclo e' quindicinale (2 x 3.000 = ~6k/mese) e/o se il tetto
+    CRESCE con lo scaling. DA CHIARIRE: frequenza del ciclo, crescita
+    del tetto nel tempo, e se l'articolo (conto $200K) e' proprio il
+    percorso High Stakes 100k. Nota strategica: e' l'argomento PIU'
+    FORTE mai trovato a favore della replica su 2-3 ditte (D3
+    estesa): i tetti per-ditta si sommano.
+  - **Daily consistency 50%**: nessun giorno singolo puo' valere piu'
+    del 50% del profitto totale AL MOMENTO della richiesta di payout.
+    Piu' morbida della soglia 20-30% temuta in checklist, e si gestisce
+    ASPETTANDO (richiedi quando il totale >= 2x la miglior giornata).
+    Coi 12 motori il profitto e' gia' distribuito; da modellare sulle
+    nostre giornate DAX grosse, ma non e' un blocco: e' un ritmo.
 - DA COMPLETARE (prossimi screenshot):
   - 🚩 tetto di esposizione aggregata (lezione FundedNext: cercare
     "maximum exposure/open risk/lots" nelle FAQ)
-  - 4 notturno/weekend · 5 consistency/requisiti payout
-  - 6 costo 100k / split / frequenza payout · 7 spread e fuso server
+  - frequenza del ciclo di payout + crescita del tetto $3k (scaling)
+  - 4 notturno/weekend · 6 costo challenge · 7 spread e fuso server
 - **Verdetto: in corso — la regola news e' COMPATIBILE (tassa
   occasionale, nessun rischio conto). Si prosegue.**
