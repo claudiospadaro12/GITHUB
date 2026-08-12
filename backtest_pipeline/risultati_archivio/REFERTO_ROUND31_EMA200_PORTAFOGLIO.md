@@ -40,3 +40,12 @@ velocita': a ~40 trade/mese, il collaudo (10) arriva in DIECI GIORNI e
 il verdetto (30) in UN MESE — il candidato piu' rapido mai avuto.
 Bandierina gialla di R29 sempre valida (OOS > IS: una finestra e' un
 campione): un motivo in piu' per cui il vivaio decide, non il backtest.
+
+## ✅ ESEGUITO (12/08 mattina): vivaio verificato 6/6
+Deploy sul demo piccolo completato: ABTG_EMA200 su U30USD H1, magic
+771531, O1 0,20 / O2 0,3 / TP 2,0, rischio 1,0, commento "EMA200 DOW".
+La legge dello screenshot ha parato il 6° errore (preset SW caricato per
+sbaglio, magic 770531 gia' vivo); la verifica meccanica dai .chr ha dato
+"TUTTO OK: 6/6" (script v4, dopo 5 difetti corretti nello script stesso
+— il MANCA persistente era colpa della verifica, non del deploy).
+Collaudo: 10 trade (~10 giorni a 40 trade/mese), verdetto: 30.
