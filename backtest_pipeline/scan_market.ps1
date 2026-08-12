@@ -159,7 +159,20 @@ InpAllowLong=0||0||1||1||Y
 InpAllowShort=0||0||1||1||Y
 InpTP1_R=1.0||1.0||0.5||2.0||Y
 "@
-} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_BreakingBand"){
+  # Breaking Band (bulge Bollinger, guida ufficiale del corso). TF H1
+  # di default (-Tf per cambiarlo). Spazzola SOLO il PatternMode:
+  # 0=continuazione, 1=inversione, 2=entrambi -> 3 celle per simbolo.
+  # Gestione TP = Leonardo puro (mediana secca), soglie ai default
+  # dichiarati in tesi: le soglie fini NON si spazzolano allo screening.
+  $Period="H1"
+  $Inputs=@"
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpPatternMode=0||0||1||2||Y
+InpTPMode=0||0||0||0||N
+"@
+} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand" -ForegroundColor Red; exit 1 }
 
 # --- -Tf opzionale: forza il timeframe del test e dell'EA, e separa i risultati ---
 $EAtag=$EA
