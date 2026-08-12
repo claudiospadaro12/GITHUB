@@ -1,0 +1,71 @@
+# =====================================================================
+#  CONFIG NasdaqOpeningBreakout_EA_v21_OPTIMIZED dell'amico di Claudio
+#  Riestratta dal .chr del grafico vivo (spento 12/08 14:22, backup
+#  Desktop backup_v21_20260812_1422). Grafico: NASUSD M20(!), .chr
+#  chart26. Fonte: v21_config.txt sul Desktop del VPS + screenshot.
+#  NOTE DI LETTURA (12/08):
+#   - TradeStartTime=16:25 e' l'orario del BROKER DELL'AMICO (UTC+3,
+#     apertura Nasdaq 16:30 la'). Su BCM (apertura 14:30 server)
+#     sarebbe scattato alle 16:25 server = DUE ORE DOPO l'apertura:
+#     sul nostro VPS l'EA era anche FUORI ORARIO, non solo fuori imbuto.
+#   - Lotto FISSO 0.1 (UseRiskPercent=false): niente money management.
+#   - Magic 123456 (default da esempio!), MaxTradesPerDay 2,
+#     MaxDailyLoss 2%.
+#   - Feature accese: S/R filter (bocciata da noi in R30, 20o
+#     ribaltamento) + VolatilityRegime (la nostra R30: qualita' su,
+#     profitto giu') + PrevDayLevels + numeri tondi. Correlation e
+#     MTF spenti.
+# =====================================================================
+TradeStartTime=16:25
+BaseEntryOffset=7.0
+PendingOrderLifetimeMin=7
+BaseLotSize=0.1
+UseRiskPercent=false
+RiskPercent=1.0
+BaseStopLoss=50.0
+BaseTakeProfit=100.0
+UsePartialClose=true
+PartialClosePercent=50.0
+PartialCloseTarget=30.0
+UseBreakEven=true
+BreakEvenActivation=20.0
+BreakEvenOffset=5.0
+UseTrailingStop=true
+TrailingStart=30.0
+TrailingStep=10.0
+EnableSR_Detection=true
+EnableSR_Filter=true
+SR_ProximityPoints=15.0
+SwingStrength=5
+UsePreviousDayLevels=true
+UseRoundNumbers=true
+RoundNumberInterval=100.0
+SR_MergeDistance=10.0
+UseVolatilityRegime=true
+ATR_Period=14
+ATR_LookbackBars=100
+LowVolPercentile=20.0
+HighVolPercentile=80.0
+LowVol_OffsetMult=0.7
+HighVol_OffsetMult=1.5
+LowVol_SL_Mult=0.75
+HighVol_SL_Mult=1.5
+HighVol_SizeReduction=0.5
+UseCorrelationFilter=false
+CorrelationSymbol=US500
+CorrelationPeriod=50
+MinCorrelation=0.7
+UseMTF_Filter=false
+MTF_Timeframe=16385
+MTF_EMA_Period=50
+BlockCounterTrend=false
+TrendBias_SizeMult=2.0
+MaxTradesPerDay=2
+MaxDailyLossPercent=2.0
+AvoidMonday=false
+AvoidFriday=false
+UpdateIntervalSec=60
+MinimalLogs=false
+DisableDashboard=false
+MagicNumber=123456
+EnableDebugLogs=true
