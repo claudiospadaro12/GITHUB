@@ -76,6 +76,16 @@ regolamento prop (da poltrona/telefono):
    vivono lì)
 *Nessuna spesa ora: regola del 30/07 invariata — prima 30 trade forward.*
 
+**Estensione 12/08 (domanda di Claudio: "2-3 prop con gli stessi EA?")**:
+SI', la replica e' il moltiplicatore del progetto — con 4 regole:
+(1) ditte DIVERSE, mai conti multipli sulla stessa (le ditte aggregano;
+diversificazione del rischio-ditta); (2) il rischio di replica e'
+CORRELATO al 100%: la giornata cattiva arriva uguale su tutti i conti
+nello stesso momento — si accetta sapendolo; (3) checklist regolamenti
+sopra, per OGNI ditta nuova; (4) SEQUENZA AUTOFINANZIATA: prop 1 al
+primo payout -> il payout paga la challenge 2 -> ecc. Mai 2-3 challenge
+comprate insieme prima che il forward abbia parlato.
+
 **D4 — Il conto piccolo dopo la pulizia.** Quando i morti saranno spenti,
 che ruolo ha il 50503392? *Raccomandazione: diventa il VIVAIO — ogni
 candidato nuovo che passa l'imbuto fa lì i suoi 30 trade forward a 1%,
