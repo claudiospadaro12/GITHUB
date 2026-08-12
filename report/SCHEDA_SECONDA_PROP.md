@@ -104,6 +104,29 @@ Confermati (sempre da fonti terze): 10% statico / 5% daily dal saldo di
 chiusura del giorno prima, news = taglio profitti (no violazione),
 no consistency su Stellar CFD.
 
+### 📊 ANALISI SOVRAPPOSIZIONI (12/08 sera) — la risposta alla domanda del 3%
+Misurata sui per-trade OOS delle 12 serie (16 mesi). Gli export hanno
+solo le chiusure, quindi la misura e' la COINCIDENZA PER GIORNATA
+(tetto superiore della simultaneita' vera):
+- 8 serie attive nello stesso giorno: 1 volta (15/10/2025)
+- 6 serie: 7 giorni · 5 serie: 21 giorni · 4 serie: 52 giorni
+- Il blocco affollato e' il POMERIGGIO 14:30-17:30 server: DAX+MaxMin+
+  oro (aperti dal mattino, flat 17:30) incrociano Dow+ORB (dalle 14:30)
+  + EMA200/PTE/SW che possono essere dentro a qualunque ora.
+**Lettura**: se la regola FundedNext e' "somma del rischio delle
+posizioni aperte <= 3%", il caso peggiore osservato (8 posizioni)
+sfora a QUALSIASI taratura sopra lo 0,375%: 8 x 0,65% = 5,2%.
+Attenuanti reali: (1) meta' delle nostre posizioni dopo il TP1 sono a
+BE con rischio ~0 (la somma vera e' piu' bassa del conteggio x
+rischio); (2) stesso-giorno non e' stesso-istante. Ma la conclusione
+operativa non cambia: **le PAROLE ESATTE della regola (rischio da SL?
+perdita flottante? margine?) decidono se FundedNext e' compatibile col
+portafoglio pieno** — e' il primo screenshot da fare.
+Nota di riflesso: FTMO non ha un tetto del genere — un motivo in piu'
+per cui e' il metro di paragone. Prossimo passo tecnico possibile:
+misurare le sovrapposizioni VERE dal conto demo (la cronologia MT5 ha
+anche gli ingressi), se la regola confermata lo rendera' necessario.
+
 _Pre-studio 12/08 da fonti terze (riassunti 2026, non i siti ufficiali):
 ogni affermazione va CONFERMATA sulle FAQ ufficiali della ditta prima
 del verdetto. La differenza chiave emersa: davanti alle news, FundedNext
