@@ -1,0 +1,23 @@
+# =====================================================================
+#  R29b: EMA200 H1 su U30USD (Dow) — il cancello WALK-FORWARD
+#  Lancio: ABTG_EMA200 -Prova prove\R29b_ema200_dow.txt -Etichetta r29b
+# =====================================================================
+# DA DOVE VIENE (R28): FASE 2 tick — 84/84 celle vive positive (100%),
+#   best +2.797 PF 1,41 DD 8%. Stessa regione e stessi criteri di R29a
+#   (vedi quel file). Nota portafoglio: sarebbe il QUARTO motore sul
+#   Dow (Apertura, SuperWave, PTE, EMA200) — se passa, il per-trade
+#   dovra' misurare la correlazione coi fratelli prima di ogni deploy.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpAllowLong=1
+InpAllowShort=1
+InpUseOrder2=1
+InpRiskPercent=1.0
+
+InpOrder1Atr=0.10||0.10||0.05||0.30||Y
+InpOrder2Atr=0.2||0.2||0.1||0.3||Y
+InpTP_RR=1.5||1.5||0.5||2.5||Y

@@ -1,0 +1,33 @@
+# =====================================================================
+#  R29a: EMA200 H1 su EURUSD — il cancello WALK-FORWARD dell'altopiano
+#  Lancio: ABTG_EMA200 -Prova prove\R29a_ema200_eurusd.txt -Etichetta r29a
+# =====================================================================
+# DA DOVE VIENE (R28, 12/08): FASE 2 a tick reali — TUTTE le 94 celle
+#   vive positive (100%), best +3.760 PF 1,24 con 1.294 trade. Il piu'
+#   largo altopiano tick del progetto. Ma la FASE 2 e' full-period:
+#   QUESTO e' il giudice (IS 40% / OOS 60%).
+# LA REGIONE (dichiarata nel referto R28 PRIMA di questo round, presa
+#   dal CENTRO dell'altopiano, non dal best):
+#   InpOrder1Atr 0,10-0,30 (5) x InpOrder2Atr 0,2-0,3 (2) x
+#   InpTP_RR 1,5-2,5 (3) = 30 celle per finestra. Direzioni ENTRAMBE
+#   accese (in FASE 2 long e short positivi anche da soli).
+# CRITERI (i soliti 4, congelati): positiva in ENTRAMBE le finestre;
+#   PF OOS >= 1,10; REGIONE (non celle isolate: qui l'attesa e' che
+#   regga quasi tutto — se passa solo qualche cella sparsa, e' un no);
+#   DD OOS < 10% all'1%. In piu': trade/mese IS vs OOS coerenti
+#   (daquando 2024.09.26 e' IPOTESI su EURUSD: controllare nel referto)
+#   e MAI scegliere la cella migliore — se passa, si va al centro.
+# =====================================================================
+@SIMBOLO  EURUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpAllowLong=1
+InpAllowShort=1
+InpUseOrder2=1
+InpRiskPercent=1.0
+
+InpOrder1Atr=0.10||0.10||0.05||0.30||Y
+InpOrder2Atr=0.2||0.2||0.1||0.3||Y
+InpTP_RR=1.5||1.5||0.5||2.5||Y
