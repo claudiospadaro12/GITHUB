@@ -97,8 +97,71 @@
 //|  DEMO. Nessuna garanzia. Non compilato ne' testato dall'autore   |
 //|  del codice: compilare in MetaEditor e validare nel tester.      |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//|  CHANGELOG                                                        |
+//|                                                                   |
+//|  1.01 - AUTOPSIA DELLA CASCATA DI RILEVAMENTO.                    |
+//|    Il primo scan OHLC (48 simboli x H1/H4 x 3 modi pattern, ~21   |
+//|    mesi) ha prodotto mediana 0 trade per cella e 153/288 celle a  |
+//|    zero: la macchina non sparava. Diagnosi e correzioni:          |
+//|                                                                   |
+//|    [A] BUG DI MAPPATURA REGOLA->CODICE (corretti)                 |
+//|     A1. INVERSIONE uccisa da UNA candela > 1 x ATR nel rientro.   |
+//|         La guida dice l'opposto: "Nell'inversione NON e' richiesto|
+//|         rientro ordinato"; l'invalidazione e' "il rientro E'      |
+//|         VIOLENTO composto da candelE impulsivE" (plurale) e       |
+//|         "impulsiva" nella guida vale > 1.5 x ATR. Ora serve un    |
+//|         NUMERO di candele impulsive (InpInvViolentBars).          |
+//|     A2. Direzione del bulge presa dal COLORE della prima candela  |
+//|         della fase: se quella candela era di segno opposto al     |
+//|         movimento, il bulge moriva dopo per "movimento non        |
+//|         unidirezionale". Ora si puo' derivare dal movimento netto |
+//|         della fase (InpBulgeDirMode).                             |
+//|     A3. Il tetto di 20 candele della guida (band riding) era      |
+//|         applicato alla durata della fase misurata come "larghezza |
+//|         >= 1.5 x riferimento congelato". Ma la larghezza delle    |
+//|         bande e' una deviazione standard a 20 periodi: dopo un    |
+//|         impulso resta alta ~20 barre PER COSTRUZIONE, quindi la   |
+//|         fase sforava il tetto e il setup veniva distrutto.        |
+//|         Nuovo InpBulgeEndMode=1: la fase finisce quando           |
+//|         l'espansione si esaurisce (larghezza che si contrae),     |
+//|         come dice la guida ("candele piu' piccole, deviazione     |
+//|         standard in calo, perdita di spinta").                    |
+//|                                                                   |
+//|    [B] SOGLIE STRUTTURALMENTE TROPPO SEVERE (default rivisti,     |
+//|        vecchio valore dichiarato nel commento dell'input)         |
+//|     B1. InpZigZagATR   1.0 -> 1.5 (la guida ammette micro-        |
+//|         rotazioni e piccoli rimbalzi; "impulso" = 1.5 x ATR).     |
+//|     B2. InpDeepSpikeATR 1.0 -> 1.5 (in guida il retest "pulito"   |
+//|         e' un SEGNALE DI QUALITA', non un'invalidazione).         |
+//|     B3. InpRientroMaxATR 1.0 -> 1.5 (definizione di impulsiva).   |
+//|     B4. InpReinflateTolPct 1.00 -> 1.05 (tolleranza zero = un     |
+//|         solo tick sopra il massimo del bulge uccideva tutto).     |
+//|     B5. InpPostATRRef=1: le invalidazioni della fase post usano   |
+//|         l'ATR CONGELATO a fine bulge. Con l'ATR corrente le       |
+//|         soglie si stringevano da sole man mano che il mercato si  |
+//|         calmava (effetto cricchetto: piu' il rientro era          |
+//|         ordinato, piu' era facile invalidarlo).                   |
+//|                                                                   |
+//|    [C] SEVERITA' LEGITTIMA DELLA GUIDA (NON toccata, solo resa    |
+//|        misurabile nel funnel): candela > 1.5 x ATR nel            |
+//|        ritracciamento, fase >= 3 candele, candele impulsive       |
+//|        obbligatorie nel bulge, divieto di toccare la banda        |
+//|        opposta nell'inversione, band riding > 20 candele,         |
+//|        tocco della banda opposta obbligatorio (continuazione).    |
+//|                                                                   |
+//|    [D] Bande in chiusura / deviazione standard in calo per la     |
+//|        CONTINUAZIONE: la guida si contraddice (tabella "REGOLE    |
+//|        UFFICIALI" le pretende, sezione C dice "nella             |
+//|        continuazione le bande possono essere ancora gonfie, il    |
+//|        ritracciamento e' il vero filtro"). Restano ACCESE di      |
+//|        default ma sono ora due input, per poterle misurare in A/B.|
+//|                                                                   |
+//|    [E] DIAGNOSTICA: contatori del funnel di mortalita' stampati   |
+//|        da OnTester (PrintFunnel). Nessun impatto sul CSV.         |
+//+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -128,16 +191,20 @@ input int    InpBulgeMaxBars   = 20;    // GUIDA: impulso <= 20 candele (oltre =
 input int    InpBulgeMinImpBars= 1;     // SCELTA NOSTRA: candele impulsive minime dentro il bulge
 input double InpBulgeCandleMaxATR = 0.0;// GUIDA "1.5-3 x ATR": 0 = nessun tetto (il 3x e' 'tipico', non un limite)
 input double InpBulgeNetMoveATR= 1.5;   // SCELTA NOSTRA: movimento netto minimo del bulge (in ATR)
-input double InpBulgeMedianDistPct = 0.75; // SCELTA NOSTRA: distanza prezzo-mediana in frazione di semiampiezza
+input double InpBulgeMedianDistPct = 0.75; // SCELTA NOSTRA: max allontanamento dalla mediana in frazione di semiampiezza (0.75 = 1.5 sigma, e' un MASSIMO sulla fase: non e' il collo di bottiglia)
+input int    InpBulgeEndMode   = 1;     // [1.01 - era 0] fine della fase: 0=larghezza sotto la soglia (v1.00: dura ~20 barre PER COSTRUZIONE e sfora il tetto della guida) 1=espansione esaurita, larghezza che si contrae
+input int    InpBulgeDirMode   = 1;     // [1.01 - era 0] direzione del bulge: 0=colore della PRIMA candela della fase (v1.00) 1=segno del movimento NETTO della fase
 
 input group "=== FASE 2: ritracciamento / rientro (invalidazioni) ==="
-input double InpImpulseATR     = 1.5;   // GUIDA: candela > 1.5 x ATR nel ritracciamento/test -> CONTINUAZIONE invalida
-input double InpRientroMaxATR  = 1.0;   // GUIDA: candela > 1 x ATR nel rientro/retest -> INVERSIONE invalida
-input double InpZigZagATR      = 1.0;   // SCELTA NOSTRA: candela CONTRARIA al ritracciamento >= N x ATR = zig-zag
-input double InpDeepSpikeATR   = 1.0;   // SCELTA NOSTRA: ombra >= N x ATR = "spike profondo" (invalidazione)
+input double InpImpulseATR     = 1.5;   // GUIDA (invalidazione assoluta, NON ammorbidita): candela > 1.5 x ATR nel ritracciamento -> CONTINUAZIONE invalida
+input double InpRientroMaxATR  = 1.5;   // [1.01 - era 1.0] candela "impulsiva" nel rientro/retest: la guida definisce impulsiva > 1.5 x ATR
+input int    InpInvViolentBars = 3;     // [1.01 - era 1 di fatto] quante candele impulsive rendono il rientro "VIOLENTO" (guida: "il rientro e' violento composto da candelE impulsivE"; "nell'inversione NON e' richiesto rientro ordinato")
+input double InpZigZagATR      = 1.5;   // [1.01 - era 1.0] SCELTA NOSTRA: candela CONTRARIA al ritracciamento >= N x ATR = zig-zag. Con 1.0 uccideva il 37% dei setup: la guida ammette micro-rotazioni e piccoli rimbalzi
+input double InpDeepSpikeATR   = 1.5;   // [1.01 - era 1.0] SCELTA NOSTRA: ombra >= N x ATR = "spike profondo". In guida il retest "pulito" e' un SEGNALE DI QUALITA', non un'invalidazione
+input int    InpPostATRRef     = 1;     // [1.01 - era 0 di fatto] ATR di riferimento nella fase post: 0=ATR corrente (si stringe da solo mentre il mercato si calma) 1=ATR congelato a fine bulge
 input int    InpBandRidingMaxBars = 20; // GUIDA: band riding oltre 20 candele sulla banda dell'impulso
 input int    InpPostBulgeMaxBars  = 30; // SCELTA NOSTRA: durata massima della fase post-bulge (poi setup scaduto)
-input double InpReinflateTolPct= 1.00;  // SCELTA NOSTRA: la larghezza non deve superare N x il massimo del bulge
+input double InpReinflateTolPct= 1.05;  // [1.01 - era 1.00] SCELTA NOSTRA: la larghezza non deve superare N x il massimo del bulge (1.00 = tolleranza ZERO)
 input bool   InpUseShadowFilter= false; // GUIDA (facoltativo): ombre <= 1.5 x corpo nel ritracciamento
 input double InpShadowBodyMult = 1.5;   // ombra massima in multipli del corpo
 input bool   InpUseRangeReduction = false; // GUIDA (facoltativo): range medio ridotto vs bulge
@@ -150,6 +217,8 @@ input int    InpStdDownMode    = 0;     // 0 = 2 candele giu' OPPURE sotto SMA50
 input double InpFlatSlopeATR   = 0.05;  // SCELTA NOSTRA: pendenza massima per dire banda "piatta" (frazione di ATR per barra)
 input int    InpSlopeSource    = 0;     // 0 = banda dell'impulso (tabella/filtri); 1 = mediana (nota "definizione operativa")
 input double InpRetestBufferATR= 0.15;  // LEONARDO: buffer del limit sul retest (0.1-0.2 x ATR) - solo INVERSIONE
+input bool   InpContRequireNarrow  = true; // CONTINUAZIONE: pretendi bande in chiusura. La guida si contraddice (tabella REGOLE UFFICIALI: si; sezione C: "le bande possono essere ancora gonfie"). Esposto per A/B
+input bool   InpContRequireStdDown = true; // CONTINUAZIONE: pretendi deviazione standard in calo (idem: regola dichiarata per l'inversione, dedotta per la continuazione). Esposto per A/B
 input bool   InpUseReversalCandle = false; // GUIDA (regola OPZIONALE): candela di inversione sul livello di test
 input double InpRevBodyMaxPct  = 33.0;  // SCELTA NOSTRA: corpo massimo % del range per dirla "di rigetto"
 input double InpRevShadowMinPct= 50.0;  // SCELTA NOSTRA: ombra di rigetto minima % del range
@@ -238,6 +307,22 @@ double   gRetrRangeSum=0.0;
 int      gRetrBars=0;
 int      gRetrShadowViol=0;    // candele con ombra > InpShadowBodyMult x corpo
 int      gRideBars=0;          // candele consecutive appoggiate alla banda dell'impulso
+double   gPostAtrRef=0.0;      // 1.01: ATR congelato a fine bulge (InpPostATRRef=1)
+int      gInvViolBars=0;       // 1.01: candele impulsive contate nel rientro (rientro "violento")
+
+//--- 1.01 CONTATORI DEL FUNNEL DI MORTALITA' (solo diagnostica, stampati da
+//    OnTester: servono a capire DOVE muore la cascata, senza toccare il CSV)
+long cB_start=0, cB_maxbars=0, cB_riding=0, cB_end=0, cB_short=0, cB_noimp=0,
+     cB_dir=0, cB_net=0, cB_med=0, cB_valid=0;
+long cP_expired=0, cX_contImp=0, cX_contZig=0, cX_contSpike=0, cX_contReinf=0,
+     cX_contRide=0, cX_contRitorno=0, cX_invViol=0, cX_invSpike=0, cX_invReinf=0,
+     cX_invRide=0, cX_invOpp=0;
+long cInv_mediana=0, cInv_retest=0, cCont_test=0;
+long cE_contNarrow=0, cE_contStd=0, cE_contShadow=0, cE_contRange=0, cE_contRev=0,
+     cE_contSolid=0, cE_contBlocked=0;
+long cE_invSlope=0, cE_invNarrow=0, cE_invStd=0, cE_invReinf=0, cE_invShadow=0,
+     cE_invRange=0, cE_invRev=0, cE_invSolid=0, cE_invBlocked=0;
+long cO_cont=0, cO_inv=0, cO_failTP=0, cO_failSL=0, cO_failLot=0, cO_failSend=0;
 
 //--- stato per posizione (SL iniziale: serve alla riduzione del rischio, che
 //    deve essere IDEMPOTENTE e non trasformarsi in un trailing barra per barra;
@@ -270,6 +355,17 @@ int OnInit()
      { Print("ERRORE: InpBulgeMinBars/InpBulgeMaxBars incoerenti."); return(INIT_FAILED); }
    if(InpBulgeRefBars<2 || InpNarrowBars<1)
      { Print("ERRORE: InpBulgeRefBars/InpNarrowBars troppo piccoli."); return(INIT_FAILED); }
+   //--- 1.01: i nuovi selettori devono restare nel dominio dichiarato, altrimenti
+   //    si ricadrebbe di nascosto in comportamenti non voluti (es. InpInvViolentBars
+   //    a 0 farebbe morire l'inversione ancora prima di v1.00).
+   if(InpBulgeEndMode<0 || InpBulgeEndMode>1)
+     { Print("ERRORE: InpBulgeEndMode deve essere 0 o 1."); return(INIT_FAILED); }
+   if(InpBulgeDirMode<0 || InpBulgeDirMode>1)
+     { Print("ERRORE: InpBulgeDirMode deve essere 0 o 1."); return(INIT_FAILED); }
+   if(InpPostATRRef<0 || InpPostATRRef>1)
+     { Print("ERRORE: InpPostATRRef deve essere 0 o 1."); return(INIT_FAILED); }
+   if(InpInvViolentBars<1)
+     { Print("ERRORE: InpInvViolentBars deve essere >= 1 (1 = comportamento v1.00)."); return(INIT_FAILED); }
 
    gTrade.SetExpertMagicNumber(InpMagic);
    gTrade.SetTypeFillingBySymbol(_Symbol);
@@ -542,6 +638,7 @@ void ResetPattern(string motivo)
    gPostBars=0; gContAlive=false; gInvAlive=false;
    gTouchedOpposite=false; gReachedMedian=false; gMedianBar=-1; gWidthAtMedian=0.0;
    gRetrRangeSum=0.0; gRetrBars=0; gRetrShadowViol=0; gRideBars=0;
+   gPostAtrRef=0.0; gInvViolBars=0;
   }
 
 void AdvanceMachine()
@@ -570,8 +667,13 @@ void TryStartBulge(int i,double atr,double w)
    if(InpUseCongestionFilter && cong<=0.0) return;   // filtro opzionale (default OFF)
 
    gState=ST_BULGE;
+   cB_start++;
    gCongScore=cong;
    gBulgeRefWidth=ref;
+   //--- direzione PROVVISORIA (serve solo al conteggio del band riding dentro
+   //    la fase): con InpBulgeDirMode=1 viene riscritta in ValidateBulge dal
+   //    movimento netto. In v1.00 restava quella del colore della prima
+   //    candela e mandava a morte i bulge nati su una candela di segno opposto.
    gBulgeDir=(gR[i].close>=gR[i].open)?+1:-1;
    gBulgeStartPrice=gR[i].open;
    gBulgeBars=0; gBulgeImpBars=0; gBulgeRangeSum=0.0;
@@ -606,15 +708,28 @@ void AccumulaBulge(int i,double atr,double w)
 //--- FASE 1c: la fase continua o e' finita?
 void UpdateBulge(int i,double atr,double w)
   {
-   bool ancoraInEspansione = (w >= InpBulgeWidthMult*gBulgeRefWidth) && (gStd[i] > gStdSma[i]);
+   //--- QUANDO FINISCE LA FASE DI ESPANSIONE (bug A3 della v1.00)
+   //    Modo 0 (v1.00): la fase dura finche' la larghezza resta >= 1.5 x il
+   //    riferimento congelato. Ma la larghezza delle bande E' una deviazione
+   //    standard a 20 periodi: dopo un impulso resta alta finche' le candele
+   //    grandi non escono dalla finestra, cioe' ~20 barre PER COSTRUZIONE.
+   //    Risultato: la fase sforava sistematicamente InpBulgeMaxBars e il
+   //    setup veniva DISTRUTTO prima ancora di essere validato.
+   //    Modo 1 (default 1.01): la fase finisce quando l'espansione si
+   //    esaurisce, cioe' quando la larghezza smette di crescere - che e'
+   //    esattamente quello che dice la guida ("candele piu' piccole,
+   //    deviazione standard in calo, perdita di spinta direzionale").
+   bool ancoraInEspansione;
+   if(InpBulgeEndMode==1) ancoraInEspansione = (w >= Width(i+1))                    && (gStd[i] > gStdSma[i]);
+   else                   ancoraInEspansione = (w >= InpBulgeWidthMult*gBulgeRefWidth) && (gStd[i] > gStdSma[i]);
 
    if(ancoraInEspansione)
      {
       AccumulaBulge(i,atr,w);
       if(gBulgeBars>InpBulgeMaxBars)
-        { ResetPattern(StringFormat("impulso oltre %d candele (limite della guida).",InpBulgeMaxBars)); return; }
+        { cB_maxbars++; ResetPattern(StringFormat("impulso oltre %d candele (limite della guida).",InpBulgeMaxBars)); return; }
       if(gRideBars>InpBandRidingMaxBars)
-        { ResetPattern("band riding prolungato sulla banda dell'impulso."); return; }
+        { cB_riding++; ResetPattern("band riding prolungato sulla banda dell'impulso."); return; }
       return;
      }
 
@@ -625,17 +740,24 @@ void UpdateBulge(int i,double atr,double w)
 void ValidateBulge(int i,double atr,double w)
   {
    //--- criteri UFFICIALI del bulge (checklist: tutti obbligatori)
+   cB_end++;
    if(gBulgeBars<InpBulgeMinBars)
-     { ResetPattern(StringFormat("fase troppo corta (%d candele): un singolo spike non e' un bulge.",gBulgeBars)); return; }
+     { cB_short++; ResetPattern(StringFormat("fase troppo corta (%d candele): un singolo spike non e' un bulge.",gBulgeBars)); return; }
    if(gBulgeImpBars<InpBulgeMinImpBars)
-     { ResetPattern("nessuna candela impulsiva dentro la fase."); return; }
+     { cB_noimp++; ResetPattern("nessuna candela impulsiva dentro la fase."); return; }
    double netto=gBulgeEndClose-gBulgeStartPrice;
+   //--- DIREZIONE DELLA FASE (bug A2 della v1.00): con InpBulgeDirMode=1 la
+   //    direzione e' quella del movimento NETTO della fase, non il colore
+   //    della prima candela. Il requisito di direzionalita' resta comunque
+   //    garantito dal controllo sul movimento netto minimo qui sotto.
+   if(InpBulgeDirMode==1 && netto!=0.0) gBulgeDir=(netto>0.0)?+1:-1;
    if((gBulgeDir>0 && netto<=0.0) || (gBulgeDir<0 && netto>=0.0))
-     { ResetPattern("movimento non unidirezionale."); return; }
+     { cB_dir++; ResetPattern("movimento non unidirezionale."); return; }
    if(MathAbs(netto) < InpBulgeNetMoveATR*atr)
-     { ResetPattern("movimento netto insufficiente."); return; }
+     { cB_net++; ResetPattern("movimento netto insufficiente."); return; }
    if(gBulgeMaxMedDist < InpBulgeMedianDistPct)
-     { ResetPattern("il prezzo non si e' allontanato abbastanza dalla mediana."); return; }
+     { cB_med++; ResetPattern("il prezzo non si e' allontanato abbastanza dalla mediana."); return; }
+   cB_valid++;
 
    Log(StringFormat("BULGE VALIDO (%s): %d candele, %d impulsive, netto %.5f, distanza mediana %.2f, "
                     "larghezza max %.5f / a fine fase %.5f. Congestione iniziale: %s.",
@@ -649,6 +771,11 @@ void ValidateBulge(int i,double atr,double w)
    gContAlive=true; gInvAlive=true;
    gTouchedOpposite=false; gReachedMedian=false; gMedianBar=-1; gWidthAtMedian=0.0;
    gRetrRangeSum=0.0; gRetrBars=0; gRetrShadowViol=0; gRideBars=0;
+   //--- ATR CONGELATO a fine bulge: e' il metro con cui la guida misura le
+   //    candele del ritracciamento ("grandi rispetto all'impulso"). Con l'ATR
+   //    corrente le soglie si stringono da sole mentre il mercato si calma:
+   //    piu' il rientro e' ordinato, piu' diventa facile invalidarlo.
+   gPostAtrRef=atr; gInvViolBars=0;
 
    //--- la candela corrente e' gia' la prima del ritracciamento/rientro
    UpdatePost(i,atr,w);
@@ -659,7 +786,10 @@ void UpdatePost(int i,double atr,double w)
   {
    gPostBars++;
    if(gPostBars>InpPostBulgeMaxBars)
-     { ResetPattern("fase post-bulge scaduta senza test valido."); return; }
+     { cP_expired++; ResetPattern("fase post-bulge scaduta senza test valido."); return; }
+
+   //--- metro di misura della fase post (vedi InpPostATRRef)
+   double aref = (InpPostATRRef==1 && gPostAtrRef>0.0) ? gPostAtrRef : atr;
 
    double rg   = gR[i].high-gR[i].low;
    double body = MathAbs(gR[i].close-gR[i].open);
@@ -671,24 +801,42 @@ void UpdatePost(int i,double atr,double w)
    gRetrRangeSum+=rg;
    if(body>0.0 && ombra > InpShadowBodyMult*body) gRetrShadowViol++;
 
-   //--- INVALIDAZIONI ASSOLUTE (guida + checklist): NON sono disattivabili.
-   if(rg > InpImpulseATR*atr && gContAlive)
-     { gContAlive=false; Log("continuazione invalidata: candela > 1.5 x ATR nel ritracciamento/test."); }
-   if(rg > InpRientroMaxATR*atr && gInvAlive)
-     { gInvAlive=false; Log("inversione invalidata: candela > 1 x ATR nel rientro/retest."); }
-   if(ombra >= InpDeepSpikeATR*atr)
+   //--- INVALIDAZIONE ASSOLUTA DELLA CONTINUAZIONE (guida, categoria C:
+   //    "Nessuna candela con range > 1.5 x ATR nel ritracciamento"). NON si tocca.
+   if(rg > InpImpulseATR*aref && gContAlive)
+     { gContAlive=false; cX_contImp++; Log("continuazione invalidata: candela > 1.5 x ATR nel ritracciamento/test."); }
+
+   //--- INVERSIONE (bug A1 della v1.00). La guida dice testualmente
+   //    "Nell'inversione NON e' richiesto rientro ordinato" e l'invalidazione
+   //    e' "il rientro E' VIOLENTO composto da candelE impulsivE": e' una
+   //    QUALITA' DELLA FASE, non una singola candela. In v1.00 bastava UNA
+   //    candela > 1 x ATR e il 99% delle inversioni moriva li' dentro.
+   if(rg > InpRientroMaxATR*aref && gInvAlive)
+     {
+      gInvViolBars++;
+      if(gInvViolBars>=InpInvViolentBars)
+        { gInvAlive=false; cX_invViol++;
+          Log(StringFormat("inversione invalidata: rientro VIOLENTO (%d candele impulsive > %.2f x ATR).",
+              gInvViolBars,InpRientroMaxATR)); }
+     }
+
+   if(ombra >= InpDeepSpikeATR*aref)
      {
       if(gContAlive||gInvAlive) Log("pattern invalidato: spike profondo (struttura sporca).");
+      if(gContAlive) cX_contSpike++;
+      if(gInvAlive)  cX_invSpike++;
       gContAlive=false; gInvAlive=false;
      }
    //--- zig-zag: impulso CONTRARIO al ritracciamento (torna verso la banda dell'impulso)
    bool contraria=(gBulgeDir>0)?(gR[i].close>gR[i].open):(gR[i].close<gR[i].open);
-   if(contraria && rg >= InpZigZagATR*atr && gContAlive)
-     { gContAlive=false; Log("continuazione invalidata: zig-zag (impulso contrario nel ritracciamento)."); }
+   if(contraria && rg >= InpZigZagATR*aref && gContAlive)
+     { gContAlive=false; cX_contZig++; Log("continuazione invalidata: zig-zag (impulso contrario nel ritracciamento)."); }
    //--- espansione contraria / la banda si gonfia di nuovo
    if(gBulgeMaxWidth>0.0 && w > InpReinflateTolPct*gBulgeMaxWidth)
      {
       if(gContAlive||gInvAlive) Log("pattern invalidato: le bande si gonfiano di nuovo (espansione contraria).");
+      if(gContAlive) cX_contReinf++;
+      if(gInvAlive)  cX_invReinf++;
       gContAlive=false; gInvAlive=false;
      }
    //--- band riding sulla banda dell'impulso
@@ -696,6 +844,8 @@ void UpdatePost(int i,double atr,double w)
    if(gRideBars>InpBandRidingMaxBars)
      {
       if(gContAlive||gInvAlive) Log("pattern invalidato: band riding prolungato.");
+      if(gContAlive) cX_contRide++;
+      if(gInvAlive)  cX_invRide++;
       gContAlive=false; gInvAlive=false;
      }
    if(!gContAlive && !gInvAlive){ ResetPattern(""); return; }
@@ -705,10 +855,11 @@ void UpdatePost(int i,double atr,double w)
    if(TouchOppositeBand(i))
      {
       gTouchedOpposite=true;
-      if(gInvAlive){ gInvAlive=false; Log("inversione invalidata: il prezzo ha toccato la banda opposta."); }
+      if(gInvAlive){ gInvAlive=false; cX_invOpp++; Log("inversione invalidata: il prezzo ha toccato la banda opposta."); }
       if(gContAlive)
         {
-         if(ModoConsente(PAT_CONT)) CheckEntryContinuazione(i,atr);
+         cCont_test++;
+         if(ModoConsente(PAT_CONT)) CheckEntryContinuazione(i,aref);
          //--- il test obbligatorio e' avvenuto: il setup di continuazione e' consumato
          gContAlive=false;
         }
@@ -719,20 +870,21 @@ void UpdatePost(int i,double atr,double w)
    //--- RIENTRO ALLA MEDIANA (inversione): puo' superarla, mai la banda opposta
    if(gInvAlive && !gReachedMedian && TouchMedian(i))
      {
-      gReachedMedian=true; gMedianBar=gPostBars; gWidthAtMedian=w;
+      gReachedMedian=true; gMedianBar=gPostBars; gWidthAtMedian=w; cInv_mediana++;
       Log("rientro: mediana raggiunta senza toccare la banda opposta.");
      }
 
    //--- LEONARDO (opzionale): la continuazione muore se, dopo la mediana, il
    //    prezzo torna sulla banda dell'impulso e solo dopo ritesta l'opposta.
    if(InpContNoImpulseBandReturn && gContAlive && gReachedMedian && TouchImpulseBand(i,0.0))
-     { gContAlive=false; Log("continuazione invalidata (regola Leonardo): ritorno sulla banda dell'impulso."); }
+     { gContAlive=false; cX_contRitorno++; Log("continuazione invalidata (regola Leonardo): ritorno sulla banda dell'impulso."); }
 
    //--- RETEST DELLA BANDA DELL'IMPULSO (inversione)
    if(gInvAlive && gReachedMedian && gPostBars>gMedianBar &&
-      TouchImpulseBand(i,InpRetestBufferATR*atr))
+      TouchImpulseBand(i,InpRetestBufferATR*aref))
      {
-      if(ModoConsente(PAT_INV)) CheckEntryInversione(i,atr);
+      cInv_retest++;
+      if(ModoConsente(PAT_INV)) CheckEntryInversione(i,aref);
       gInvAlive=false;                  // il retest e' avvenuto: setup consumato
      }
 
@@ -755,24 +907,29 @@ bool TradingConsentito()
 //    dell'impulso originario. Bande in fase di chiusura + volatilita' rientrata.
 void CheckEntryContinuazione(int i,double atr)
   {
-   if(!TradingConsentito()) return;
-   if(!BandeInChiusura(i))
-     { Log("continuazione scartata: bande NON in fase di chiusura."); return; }
-   if(!StdInCalo(i))
-     { Log("continuazione scartata: deviazione standard non in calo (bulge non finito)."); return; }
+   if(!TradingConsentito()){ cE_contBlocked++; return; }
+   //--- [D] la guida si contraddice sulla continuazione: la tabella delle
+   //    REGOLE UFFICIALI pretende le bande in chiusura, la sezione C dice
+   //    "nella continuazione le bande possono essere ancora gonfie, il
+   //    ritracciamento e' il vero filtro". Restano accese ma sono input.
+   if(InpContRequireNarrow && !BandeInChiusura(i))
+     { cE_contNarrow++; Log("continuazione scartata: bande NON in fase di chiusura."); return; }
+   if(InpContRequireStdDown && !StdInCalo(i))
+     { cE_contStd++; Log("continuazione scartata: deviazione standard non in calo (bulge non finito)."); return; }
    if(InpUseShadowFilter && gRetrShadowViol>0)
-     { Log("continuazione scartata: ombre oltre il limite nel ritracciamento."); return; }
+     { cE_contShadow++; Log("continuazione scartata: ombre oltre il limite nel ritracciamento."); return; }
    if(InpUseRangeReduction && !RangeRidotto())
-     { Log("continuazione scartata: range del ritracciamento non ridotto abbastanza."); return; }
+     { cE_contRange++; Log("continuazione scartata: range del ritracciamento non ridotto abbastanza."); return; }
 
    bool isLong=(gBulgeDir>0);
    if(InpUseReversalCandle && !CandelaDiInversione(i,isLong,atr))
-     { Log("continuazione scartata: nessuna candela di rigetto sul test (regola opzionale attiva)."); return; }
+     { cE_contRev++; Log("continuazione scartata: nessuna candela di rigetto sul test (regola opzionale attiva)."); return; }
 
    string det="";
    double solid=CalcSolidita(true,i,true,det);
    if(InpMinSolidita>0.0 && solid<InpMinSolidita)
-     { Log(StringFormat("continuazione scartata: solidita' %.1f%% < %.1f%%. %s",solid,InpMinSolidita,det)); return; }
+     { cE_contSolid++; Log(StringFormat("continuazione scartata: solidita' %.1f%% < %.1f%%. %s",solid,InpMinSolidita,det)); return; }
+   cO_cont++;
 
    Log(StringFormat("CONTINUAZIONE valida (%s). Solidita' %.1f%%. %s",(isLong?"LONG":"SHORT"),solid,det));
    Enter(isLong,PAT_CONT,solid);
@@ -782,9 +939,11 @@ void CheckEntryContinuazione(int i,double atr)
 //    che deve essere piatta o inclinata a favore (3 candele pre-test).
 void CheckEntryInversione(int i,double atr)
   {
-   if(!TradingConsentito()) return;
-   //--- doppia guardia sulla regola strutturale: se la banda opposta e' stata
-   //    toccata, il pattern NON e' piu' un'inversione (guida, regola assoluta).
+   if(!TradingConsentito()){ cE_invBlocked++; return; }
+   //--- guardia RIDONDANTE per costruzione (chi tocca la banda opposta esce
+   //    con gInvAlive=false e non arriva mai qui): resta come rete di
+   //    sicurezza esplicita sulla regola assoluta della guida. NON e' lei a
+   //    uccidere i setup - il contatore lo dimostra.
    if(gTouchedOpposite){ Log("inversione scartata: banda opposta gia' toccata."); return; }
 
    bool isLong=(gBulgeDir<0);                     // contro-bulge
@@ -792,24 +951,25 @@ void CheckEntryInversione(int i,double atr)
    double tol=InpFlatSlopeATR*atr;
    bool bandaOk = isLong ? (slope >= -tol) : (slope <= tol);
    if(!bandaOk)
-     { Log("inversione scartata: banda dell'impulso inclinata CONTRO il trade (3 candele pre-test)."); return; }
+     { cE_invSlope++; Log("inversione scartata: banda dell'impulso inclinata CONTRO il trade (3 candele pre-test)."); return; }
    if(!BandeInChiusura(i))
-     { Log("inversione scartata: bande non in restringimento."); return; }
+     { cE_invNarrow++; Log("inversione scartata: bande non in restringimento."); return; }
    if(!StdInCalo(i))
-     { Log("inversione scartata: deviazione standard non in calo (bulge non finito)."); return; }
+     { cE_invStd++; Log("inversione scartata: deviazione standard non in calo (bulge non finito)."); return; }
    if(gWidthAtMedian>0.0 && Width(i) > InpReinflateTolPct*gWidthAtMedian)
-     { Log("inversione scartata: la banda si e' rigonfiata durante il retest."); return; }
+     { cE_invReinf++; Log("inversione scartata: la banda si e' rigonfiata durante il retest."); return; }
    if(InpUseShadowFilter && gRetrShadowViol>0)
-     { Log("inversione scartata: ombre oltre il limite nel rientro."); return; }
+     { cE_invShadow++; Log("inversione scartata: ombre oltre il limite nel rientro."); return; }
    if(InpUseRangeReduction && !RangeRidotto())
-     { Log("inversione scartata: range del rientro non ridotto abbastanza."); return; }
+     { cE_invRange++; Log("inversione scartata: range del rientro non ridotto abbastanza."); return; }
    if(InpUseReversalCandle && !CandelaDiInversione(i,isLong,atr))
-     { Log("inversione scartata: nessuna candela di rigetto sul retest (regola opzionale attiva)."); return; }
+     { cE_invRev++; Log("inversione scartata: nessuna candela di rigetto sul retest (regola opzionale attiva)."); return; }
 
    string det="";
    double solid=CalcSolidita(false,i,true,det);
    if(InpMinSolidita>0.0 && solid<InpMinSolidita)
-     { Log(StringFormat("inversione scartata: solidita' %.1f%% < %.1f%%. %s",solid,InpMinSolidita,det)); return; }
+     { cE_invSolid++; Log(StringFormat("inversione scartata: solidita' %.1f%% < %.1f%%. %s",solid,InpMinSolidita,det)); return; }
+   cO_inv++;
 
    Log(StringFormat("INVERSIONE valida (%s). Pendenza banda %.6f. Solidita' %.1f%%. %s",
        (isLong?"LONG":"SHORT"),slope,solid,det));
@@ -896,26 +1056,26 @@ void Enter(bool isLong,int pattern,double solid)
 
    double minDist=StopsMinDist();
    double risk=isLong?(entry-sl):(sl-entry);
-   if(risk<=minDist){ Log("SL troppo vicino al prezzo (stops level): nessun ingresso."); return; }
+   if(risk<=minDist){ cO_failSL++; Log("SL troppo vicino al prezzo (stops level): nessun ingresso."); return; }
 
    bool tpOk = isLong ? (mediana > entry+minDist) : (mediana < entry-minDist);
-   if(!tpOk){ Log("mediana troppo vicina/gia' superata: nessun ingresso."); return; }
+   if(!tpOk){ cO_failTP++; Log("mediana troppo vicina/gia' superata: nessun ingresso."); return; }
    if(InpMinTPatATR>0.0 && MathAbs(mediana-entry) < InpMinTPatATR*atr)
-     { Log("distanza dalla mediana sotto il minimo richiesto: nessun ingresso."); return; }
+     { cO_failTP++; Log("distanza dalla mediana sotto il minimo richiesto: nessun ingresso."); return; }
    if(InpTPMode==1)
      {
       bool bandaOk = isLong ? (bandaRunner > entry+minDist) : (bandaRunner < entry-minDist);
-      if(!bandaOk){ Log("banda opposta troppo vicina/gia' superata: nessun ingresso (variante TPMode 1)."); return; }
+      if(!bandaOk){ cO_failTP++; Log("banda opposta troppo vicina/gia' superata: nessun ingresso (variante TPMode 1)."); return; }
      }
 
    double lot=LotByRisk(risk);
-   if(lot<=0.0){ Log("lotto nullo: nessun ingresso."); return; }
+   if(lot<=0.0){ cO_failLot++; Log("lotto nullo: nessun ingresso."); return; }
 
    string cm=InpComment+((pattern==PAT_CONT)?" CONT":" INV")+(isLong?" L":" S");
    bool ok = isLong ? gTrade.Buy(lot,_Symbol,ask,sl,tp,cm)
                     : gTrade.Sell(lot,_Symbol,bid,sl,tp,cm);
    if(!ok)
-     { Log("apertura FALLITA: "+gTrade.ResultRetcodeDescription()); return; }
+     { cO_failSend++; Log("apertura FALLITA: "+gTrade.ResultRetcodeDescription()); return; }
 
    gTradesToday++;
    ulong tk=gTrade.ResultOrder();
@@ -1320,8 +1480,50 @@ void ExportTrades()
    FileClose(h);
   }
 
+//==================================================================
+//  1.01 - FUNNEL DI MORTALITA' (solo Print a fine test).
+//  Un singolo run nel tester dice DOVE muore la cascata: quanti bulge
+//  vengono tentati, quanti validati, per quale invalidazione muore
+//  ogni setup e quanti ingressi ne escono. Nessun impatto sul CSV
+//  (il CSV nasce da FrameAdd/OnTesterDeinit, che qui non si toccano).
+//==================================================================
+void PrintFunnel()
+  {
+   PrintFormat("[BB-FUNNEL] %s %s  pattern=%d  endMode=%d dirMode=%d postAtrRef=%d",
+               _Symbol,EnumToString(InpTF),InpPatternMode,InpBulgeEndMode,InpBulgeDirMode,InpPostATRRef);
+   PrintFormat("[BB-FUNNEL] FASE 1  tentati=%d | morti in fase: oltre%dcandele=%d bandriding=%d",
+               (int)cB_start,InpBulgeMaxBars,(int)cB_maxbars,(int)cB_riding);
+   PrintFormat("[BB-FUNNEL] FASE 1  arrivati a validazione=%d | scartati: corti=%d senzaImpulsive=%d "
+               "nonUnidirezionali=%d nettoScarso=%d vicinoMediana=%d  ==> BULGE VALIDI=%d",
+               (int)cB_end,(int)cB_short,(int)cB_noimp,(int)cB_dir,(int)cB_net,(int)cB_med,(int)cB_valid);
+   PrintFormat("[BB-FUNNEL] FASE 2 CONT  morti: candela>%.2fxATR=%d zigzag=%d spike=%d rigonfio=%d "
+               "bandriding=%d ritornoBanda=%d",
+               InpImpulseATR,(int)cX_contImp,(int)cX_contZig,(int)cX_contSpike,(int)cX_contReinf,
+               (int)cX_contRide,(int)cX_contRitorno);
+   PrintFormat("[BB-FUNNEL] FASE 2 INV   morti: rientroViolento(%d cand>%.2fxATR)=%d spike=%d rigonfio=%d "
+               "bandriding=%d toccoBandaOpposta=%d",
+               InpInvViolentBars,InpRientroMaxATR,(int)cX_invViol,(int)cX_invSpike,(int)cX_invReinf,
+               (int)cX_invRide,(int)cX_invOpp);
+   PrintFormat("[BB-FUNNEL] FASE 2  scaduti(>%d barre)=%d | mediana raggiunta=%d | retest banda impulso=%d | "
+               "tocco banda opposta=%d",
+               InpPostBulgeMaxBars,(int)cP_expired,(int)cInv_mediana,(int)cInv_retest,(int)cCont_test);
+   PrintFormat("[BB-FUNNEL] FASE 3 CONT  scarti: bandeNonChiuse=%d stdNonInCalo=%d ombre=%d range=%d "
+               "candelaRigetto=%d solidita=%d bloccati=%d  ==> OK=%d",
+               (int)cE_contNarrow,(int)cE_contStd,(int)cE_contShadow,(int)cE_contRange,(int)cE_contRev,
+               (int)cE_contSolid,(int)cE_contBlocked,(int)cO_cont);
+   PrintFormat("[BB-FUNNEL] FASE 3 INV   scarti: pendenzaContro=%d bandeNonChiuse=%d stdNonInCalo=%d "
+               "rigonfioRetest=%d ombre=%d range=%d candelaRigetto=%d solidita=%d bloccati=%d  ==> OK=%d",
+               (int)cE_invSlope,(int)cE_invNarrow,(int)cE_invStd,(int)cE_invReinf,(int)cE_invShadow,
+               (int)cE_invRange,(int)cE_invRev,(int)cE_invSolid,(int)cE_invBlocked,(int)cO_inv);
+   PrintFormat("[BB-FUNNEL] ORDINI  segnali=%d | scartati in Enter: tp=%d sl=%d lotto=%d invioFallito=%d | "
+               "trade eseguiti=%d",
+               (int)(cO_cont+cO_inv),(int)cO_failTP,(int)cO_failSL,(int)cO_failLot,(int)cO_failSend,
+               (int)TesterStatistics(STAT_TRADES));
+  }
+
 double OnTester()
   {
+   PrintFunnel();
    ExportTrades();
    double stats[10];
    stats[0] = TesterStatistics(STAT_PROFIT);
