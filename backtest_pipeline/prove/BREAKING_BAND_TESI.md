@@ -85,3 +85,29 @@ curve-fitting), falsi breakout ammessi dagli stessi docenti.
    conferma opzionale.
 4. Imbuto: OHLC screening multi-simbolo -> tick -> walk-forward,
    i 4 cancelli congelati di sempre.
+
+## 🧊 TESI CONGELATA v2 (12/08 sera, PRIMA dei numeri) — EA costruito
+EA: mql5/Experts/ABTG_BreakingBand.mq5 (1.375 righe, 74 input, magic
+772101, export standard identico a PTE). Fonti normative nell'header,
+gerarchia del corso rispettata; invalidazioni assolute NON disattivabili;
+14 scelte dichiarate dove la guida era visiva (elenco nel rapporto
+dell'agente, principali: espansione = larghezza >=1.5x media 20 barre
+congelata a inizio fase; bulge = fase >=3 candele; banda piatta =
+|pendenza| <= 0.05xATR/barra su 3 candele; ingresso a mercato su
+chiusura barra del tocco; buffer retest 0.15xATR).
+Default = LEONARDO PURO (TPMode 0 mediana secca, PatternMode 2).
+Variante Emiliano (TPMode 1: parziale su mediana + BE + runner a banda
+opposta) implementata per A/B, mai default.
+
+CRITERI DI PROMOZIONE (i soliti 4, congelati ORA):
+- screening OHLC multi-simbolo H1 (poi H4) a default: SOLO ipotesi,
+  promuove al tick chi ha profitto >0; guardare anche il CONTEGGIO dei
+  bulge riconosciuti (vicino a zero o esploso = soglie da ritarare
+  PRIMA di leggere il P/L, non dopo);
+- tick reali sulle ipotesi; poi walk-forward IS 40/OOS 60 coi 4
+  cancelli: positiva in ENTRAMBE le finestre, PF OOS >= 1.10, REGIONE
+  non celle sparse, DD OOS < 10% all'1%;
+- pattern misurati SEPARATI (mode 0/1) prima del combinato; TPMode
+  0 vs 1 solo sui simboli promossi (mai grid larghe su tutte le
+  soglie: lezione dei 21 ribaltamenti);
+- se passa: per-trade a 100k, correlazioni col portafoglio, vivaio.
