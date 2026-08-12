@@ -85,6 +85,25 @@ dei passaggi ambigui -> si valutano insieme.
 | E8 Markets | popolare, ma verificare consistency e trailing | ⬜ da leggere |
 | Alpha Capital | EA dichiaratamente ammessi | ⬜ da leggere |
 
+### ⚠️ Aggiornamento pre-studio FundedNext (12/08 sera)
+Claudio e' finito per errore su helpfutures.fundednext.com (prodotto
+FUTURES: daily 1,25%, drawdown EOD progressivo = trailing — NON e' il
+nostro; conferma vissuta che "il piano specifico conta"). Posto giusto:
+**help.fundednext.com**, articoli del piano **Stellar 2-Step (CFD/MT5)**.
+Dal pre-studio, TRE regole nuove da verificare con screenshot:
+1. **Rischio totale aperto max 3%** sul conto finanziato (somma delle
+   posizioni aperte) — 🚩 LA domanda per noi: con 12 serie a 0,65-1%
+   l'una, quante posizioni CONTEMPORANEE abbiamo nei momenti peggiori?
+   (misurabile dai nostri per-trade). Se la regola e' com'e' scritta,
+   puo' imporre taratura 0,5% o un tetto ai simultanei.
+2. **Stop-loss obbligatorio entro 3 minuti dall'apertura** sul funded —
+   i nostri EA mettono sempre SL al piazzamento (verificare per tutti).
+3. **EA = add-on A PAGAMENTO per account** su MT4/MT5 — costo extra
+   da mettere nel punto 6.
+Confermati (sempre da fonti terze): 10% statico / 5% daily dal saldo di
+chiusura del giorno prima, news = taglio profitti (no violazione),
+no consistency su Stellar CFD.
+
 _Pre-studio 12/08 da fonti terze (riassunti 2026, non i siti ufficiali):
 ogni affermazione va CONFERMATA sulle FAQ ufficiali della ditta prima
 del verdetto. La differenza chiave emersa: davanti alle news, FundedNext
