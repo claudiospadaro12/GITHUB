@@ -171,6 +171,8 @@ InpTF=16385||16385||0||16385||N
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpPatternMode=0||0||1||2||Y
 InpTPMode=0||0||0||0||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
 "@
 } else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand" -ForegroundColor Red; exit 1 }
 
