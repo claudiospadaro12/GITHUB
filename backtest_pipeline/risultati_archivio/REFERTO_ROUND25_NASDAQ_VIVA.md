@@ -36,3 +36,12 @@ volumi sul Nasdaq base del piccolo — 2 input da cambiare:
 il default; ATR gia' spento). Da fare A MERCATO FERMO (domattina prima
 delle 14:30 server), con screenshot di verifica. Il rischio resta 0,25%.
 Status invariato: osservato, non candidato (IS +70 resta esile).
+
+## ✅ ESEGUITO (12/08 ore 09:25, a mercato fermo)
+Allineato via preset completo `ALLINEA_NASDAQ_VOLUMI.set` (tutti i campi
+dalla config misurata, rischio 0,25, magic 770201, SOLO le 2 modifiche
+autorizzate). Legge dello screenshot rispettata (3 foto verificate campo
+per campo prima dell'OK) + verifica meccanica dai .chr salvati
+(`verifica_nasdaq_volumi.ps1`): filtro volumi ON, conferma AND, VolMult
+1,5, rischio 0,25, ATR off — TUTTO OK 5/5. Primo collaudo dal vivo:
+la pagella di stasera.
