@@ -240,10 +240,58 @@ diverse).
     ASPETTANDO (richiedi quando il totale >= 2x la miglior giornata).
     Coi 12 motori il profitto e' gia' distribuito; da modellare sulle
     nostre giornate DAX grosse, ma non e' un blocco: e' un ritmo.
-- DA COMPLETARE (prossimi screenshot):
-  - 🚩 tetto di esposizione aggregata (lezione FundedNext: cercare
-    "maximum exposure/open risk/lots" nelle FAQ)
-  - frequenza del ciclo di payout + crescita del tetto $3k (scaling)
-  - 4 notturno/weekend · 6 costo challenge · 7 spread e fuso server
+- **⚠️ PRATICHE VIETATE (testo integrale 28/07/2026, trovato da
+  Claudio OLTRE la checklist — la scoperta piu' importante):**
+  Violarle = TERMINAZIONE del rapporto + ban + niente rimborso (NON
+  soft breach). Lista lunga e in parte SCRITTA VAGA, con TRE punti che
+  toccano la nostra flotta:
+  1. 🚩🚩 **"Bulk trading: piu' trade aperti simultaneamente...
+     strumenti automatici che aprono piu' trade insieme, mostrando
+     chiaramente che dietro non c'e' un trader"** — 12 EA che alle
+     14:30-14:45 possono aprire 3-4 posizioni quasi insieme SONO
+     "piu' trade aperti simultaneamente da strumenti automatici".
+     Noi siamo un portafoglio legittimo, ma la regola com'e' scritta
+     non distingue.
+  2. 🚩🚩 **"Bracketing: pending buy stop + sell stop vicino al prezzo
+     attorno alle news"** — il MaxMin E' un bracket per costruzione
+     (box con buy stop + sell stop). Lo piazza a orario fisso, non
+     "attorno alle news" — ma nei giorni in cui una news rossa cade in
+     mattinata, il lato che scatta sullo spike e' INDISTINGUIBILE
+     dalla situazione vietata. Rischio strutturale per MaxMin DAX
+     notte e MaxMin ORO.
+  3. 🚩 **"One-sided bets: posizioni costantemente in una sola
+     direzione"** — DAX Apertura (SOLO LONG), Dow Apertura (SOLO
+     LONG), MaxMin DAX Short (SOLO SHORT) sono mono-direzione PER
+     SCELTA MISURATA. La regola com'e' scritta li descrive.
+  4. (minore) "Concentrazione ripetuta su strumento singolo/correlati"
+     — i 5 motori sul Dow: correlazioni misurate basse, ma lo
+     strumento e' lo stesso; dipende dall'interpretazione.
+  Cose invece a posto: niente arbitraggi/HFT/tick scalping/copy ✅,
+  sorgente posseduto ✅, richieste server nella norma ✅, il
+  cross-firm vietato e' quello MANIPOLATIVO (posizioni OPPOSTE fra
+  ditte) — la replica D3 e' STESSA direzione, non e' l'esempio
+  vietato, ma resta zona grigia da chiarire ✅/⚠️.
+- **STATO VERDETTO #2 (12/08 sera): CANDIDATA CON RISERVE.** Numeri
+  e regole quantitative tutte compatibili (news soft-breach, drawdown
+  FTMO-like, EA col sorgente). MA le pratiche vietate contengono 3
+  clausole vaghe che un revisore potrebbe applicare alla nostra
+  flotta, con pena massima. PASSO OBBLIGATO prima di ogni acquisto:
+  **chiarimenti SCRITTI dal loro supporto** su (a) portafoglio di EA
+  propri che aprono piu' posizioni simultanee, (b) bracket OCO a
+  orario fisso notturno/alba, (c) EA mono-direzione da backtest.
+  Se le risposte scritte sono positive, e' la candidata; se sono
+  evasive, si passa alla prossima ditta.
+- **SCALING (testo ufficiale 10/06/2026):** a $350k di saldo ->
+  payout fisso mensile $4.000; a $500k -> $10.000/mese. Quindi il
+  tetto da $3.000/ciclo e' della FASE INIZIALE e l'economia CRESCE
+  con lo scaling: la traiettoria del flusso c'e', e' solo piu' lenta
+  in partenza. (Resta da capire la frequenza del ciclo iniziale.)
+- DA COMPLETARE:
+  - 🚩 tetto di esposizione aggregata ("maximum exposure" nelle FAQ)
+  - frequenza del ciclo di payout iniziale
+  - 4 notturno/weekend · 6 costo challenge · 7 spread
+- LEZIONE DI METODO (da aggiungere alla checklist per ogni ditta
+  futura): leggere SEMPRE per intero la pagina "Prohibited Trading
+  Practices" — le 7 domande non bastano, le trappole vivono li'.
 - **Verdetto: in corso — la regola news e' COMPATIBILE (tassa
   occasionale, nessun rischio conto). Si prosegue.**
