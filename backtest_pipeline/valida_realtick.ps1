@@ -52,6 +52,16 @@ InpAllowShort=0||0||1||1||Y
 InpTP_R=1.5||1.5||0.5||3.0||Y
 InpAdxMin=25||20||5||30||Y
 "@
+} elseif($EA -eq "ABTG_BreakingBand"){
+  # Breaking Band: taratura CAL1 PINNATA (1.35/1.0), spazzola solo PatternMode.
+  $Inputs=@"
+InpTF=$en||$en||0||$en||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpPatternMode=0||0||1||2||Y
+InpTPMode=0||0||0||0||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+"@
 } else {
   # SupertrendReversal (default): direzione (L/S), StMult 2.0-3.5, TP_RR 2.0-3.0, StAtrPeriod fisso 10.
   $Inputs=@"
