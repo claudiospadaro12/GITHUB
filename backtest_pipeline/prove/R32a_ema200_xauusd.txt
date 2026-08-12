@@ -1,0 +1,36 @@
+# =====================================================================
+#  R32a: EMA200 H1 su XAUUSD (oro) — cancello WALK-FORWARD
+#  Lancio: ABTG_EMA200 -Prova prove\R32a_ema200_xauusd.txt -Etichetta r32a
+# =====================================================================
+# DA DOVE VIENE: scan EMA200 H1 a 48 simboli (allegato R27, 12/08):
+#   XAUUSD e' il terzo simbolo per celle positive dopo EURUSD e U30USD.
+#   EURUSD poi e' stato BOCCIATO al walk-forward (R29: edge debole
+#   diffuso), U30USD PROMOSSO 30/30 (sedia 12, oggi in vivaio).
+# PERCHE' SI SALTA LA FASE 2 full-period: il walk-forward a tick E' il
+#   giudice finale — andare diretti costa solo macchina, non rigore.
+# LA REGIONE: la STESSA dichiarata in R29 (uniformita' del cancello,
+#   centro dell'altopiano, mai il best):
+#   InpOrder1Atr 0,10-0,30 (5) x InpOrder2Atr 0,2-0,3 (2) x
+#   InpTP_RR 1,5-2,5 (3) = 30 celle per finestra. Se il simbolo vive
+#   solo FUORI da questa regione, e' un no per costruzione.
+# CRITERI (i soliti 4, congelati): positiva in ENTRAMBE le finestre;
+#   PF OOS >= 1,10; REGIONE (celle sparse = no); DD OOS < 10% all'1%.
+#   In piu': trade/mese IS vs OOS coerenti, e MAI scegliere la cella
+#   migliore — se passa, si va al centro.
+# NOTA PORTAFOGLIO (da dichiarare ora): l'oro ha gia' UN vivaio
+#   (MAXMIN ORO notturno 770402). Se R32a passa, il per-trade dovra'
+#   misurare la correlazione col fratello prima di ogni deploy.
+# =====================================================================
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpAllowLong=1
+InpAllowShort=1
+InpUseOrder2=1
+InpRiskPercent=1.0
+
+InpOrder1Atr=0.10||0.10||0.05||0.30||Y
+InpOrder2Atr=0.2||0.2||0.1||0.3||Y
+InpTP_RR=1.5||1.5||0.5||2.5||Y
