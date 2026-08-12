@@ -10,3 +10,10 @@
 // (il trailing perde senso). Serve memorizzare lo SL INIZIALE per
 // ticket (come fanno gli ABTG). E' MQ4: sul BCM MT5 non gira.
 // (sorgente integrale nella chat del 12/08)
+// DECISIONE 12/08 notte: Claudio conferma che era per MT4 (quando la
+// usava a mano). SE si decidera' di riusarlo: porting a MT5 come
+// utility ABTG_ManagerBB con (1) bug del rischio R corretto (SL
+// INIZIALE memorizzato per ticket, non quello corrente), (2) filtro
+// magic che ignora SEMPRE gli EA della flotta, (3) uso SOLO su un
+// conto separato dal vivaio/squadra (i trade manuali sporcherebbero
+// pagella e collaudi). A backlog, si attiva su richiesta.
