@@ -206,10 +206,19 @@ diverse).
     (p99 ~9,4% < 10%) si trasferiscono cosi' come sono. Unica
     differenza operativa: l'ora del reset giornaliero (00:00 server
     LORO — da mappare sul fuso quando si conoscera' il broker/feed).
+- **1 EA — VERIFICATO, testo ufficiale (incollato da Claudio 12/08):**
+  - EA ammessi purche' NON: copino segnali altrui, tick scalping,
+    arbitraggi (latency/reverse/hedge), HFT, emulatori. I nostri:
+    nessuna di queste categorie ✅
+  - **Lo stop-loss deve essere VISIBILE in piattaforma** (niente SL
+    "stealth"): i nostri EA piazzano sempre SL reali sulle posizioni ✅
+  - **"Il trader deve POSSEDERE il codice sorgente dell'EA"**: caso
+    nostro perfetto — tutti gli ABTG hanno sorgente nel repo ✅✅
+    (nota gustosa: il v21 dell'amico questa regola l'avrebbe FALLITA —
+    solo ex5, niente sorgente. Terza conferma della scelta di oggi.)
 - DA COMPLETARE (prossimi screenshot):
   - 🚩 tetto di esposizione aggregata (lezione FundedNext: cercare
     "maximum exposure/open risk/lots" nelle FAQ)
-  - 1 EA: politica ufficiale (EA propri vs commerciali)
   - 4 notturno/weekend · 5 consistency/requisiti payout
   - 6 costo 100k / split / frequenza payout · 7 spread e fuso server
 - **Verdetto: in corso — la regola news e' COMPATIBILE (tassa
