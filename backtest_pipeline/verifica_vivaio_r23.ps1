@@ -12,7 +12,8 @@ $folders = Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | Where-
   Test-Path (Join-Path $_.FullName "origin.txt") }
 $old = $folders | Where-Object {
   $o = (Get-Content (Join-Path $_.FullName "origin.txt") -Raw).Trim()
-  $o -like "*BCM*MT5*" -and $o -notlike "*-V3*" -and $o -notlike "*MT4*" } | Select-Object -First 1
+  $o -like "*BCM*MT5*" -and $o -notlike "*-V3*" -and $o -notlike "*MT4*" } |
+  Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $old) { Write-Host "Vecchio MT5 non trovato." -ForegroundColor Red; exit 1 }
 
 # atteso: EA -> simbolo -> @{input=valore} (numerici confrontati come numeri)
@@ -30,7 +31,9 @@ $TFnum = @{ "H1"="16385"; "H2"="16386" }
 $Righe = New-Object System.Collections.ArrayList
 function Rec($s,$col){ [void]$Righe.Add($s); Write-Host $s -ForegroundColor $col }
 
-$chrs = Get-ChildItem $old.FullName -Recurse -Filter "*.chr" -ErrorAction SilentlyContinue
+# ordinati dal piu' vecchio al piu' recente: a parita' di chiave vince l'ultimo salvataggio
+$chrs = Get-ChildItem $old.FullName -Recurse -Filter "*.chr" -ErrorAction SilentlyContinue |
+  Sort-Object LastWriteTime
 $trovati = @{}
 foreach ($chr in $chrs) {
   $txt = Get-Content $chr.FullName -Raw
@@ -40,8 +43,10 @@ foreach ($chr in $chrs) {
   $ea = ($em.Groups[1].Value.Trim() -split '\\')[-1]
   if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200") { continue }
   $sm = [regex]::Match($txt, "symbol=([A-Za-z0-9#\.]+)"); $sym = if($sm.Success){$sm.Groups[1].Value}else{"?"}
+  $sym = $sym -replace '[\.#].*$',''   # via eventuali suffissi broker (U30USD.i, U30USD#)
   $ins = @{}
-  $im = [regex]::Match($txt, "(?s)<inputs>(.*?)</inputs>")
+  # ancorato a <expert>: sul grafico possono esserci indicatori custom col proprio blocco <inputs>
+  $im = [regex]::Match($txt, "(?s)<expert>.*?<inputs>(.*?)</inputs>")
   if ($im.Success) {
     foreach ($l in ($im.Groups[1].Value -split "\r?\n")) {
       if ($l -match "^\s*([A-Za-z0-9_]+)=(.*)$") { $ins[$Matches[1]]=$Matches[2].Trim() }
@@ -51,15 +56,18 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO v3 (6 grafici, EMA200 incluso) ===" White
+Rec "=== VERIFICA VIVAIO v4 (6 grafici, EMA200 incluso) ===" White
+Rec ("terminal letto: {0}" -f $old.Name) Gray
 $errori = 0
 foreach ($a in $Attesi) {
   $key = "$($a.ea)|$($a.sym)|$($a.magic)"
   $t = $trovati[$key]
   if (-not $t) {
     # cerca lo stesso EA+simbolo con magic diverso (errore tipico)
-    $alt = $trovati.Values | Where-Object { $_.ea -eq $a.ea -and $_.sym -eq $a.sym } | Select-Object -First 1
-    if ($alt) { Rec ("ERRORE  {0} @ {1}: trovato ma MAGIC={2} (atteso {3})" -f $a.ea,$a.sym,$alt.ins["InpMagic"],$a.magic) Red }
+    $alt = @($trovati.Values | Where-Object { $_.ea -eq $a.ea -and $_.sym -eq $a.sym })
+    if ($alt.Count -gt 0) {
+      $magics = ($alt | ForEach-Object { $_.ins["InpMagic"] }) -join ", "
+      Rec ("ERRORE  {0} @ {1}: trovato ma MAGIC={2} (atteso {3})" -f $a.ea,$a.sym,$magics,$a.magic) Red }
     else { Rec ("MANCA   {0} @ {1} (magic {2}): nessun grafico salvato. Hai fatto Salva profilo?" -f $a.ea,$a.sym,$a.magic) Red }
     $errori++; continue
   }
