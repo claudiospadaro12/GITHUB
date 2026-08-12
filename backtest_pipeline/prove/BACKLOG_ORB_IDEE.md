@@ -112,3 +112,10 @@ OPT-IN (default spento) nel NOSTRO ABTG_Nasdaq_Apertura_US e testate
 nell'imbuto — baseline (config misurata R24: volumi 1,5 AND) vs
 +VolRegime vs +SRFilter vs entrambi. Criteri congelati prima del lancio,
 nel file di prova R30.
+-> **ESITO R30 (12/08, tick reali)**: SRFilter BOCCIATO (20° ribaltamento:
+migliore cella IS, unica rossa OOS). VolRegime NON adottato (profitto giu'
+in entrambe le finestre) ma il profilo di rischio migliora OVUNQUE (DD,
+peggior giornata, serie perdente, PF OOS): resta in cassetta come attrezzo
+di risk-shaping per motori VALIDATI se serviranno limiti piu' stretti.
+Con questo l'idea "OR/ATR adattivo" (Build Alpha #2) e' MISURATA: scende
+di priorita'. Referto: `REFERTO_ROUND30_REGALI_AMICO.md`.
