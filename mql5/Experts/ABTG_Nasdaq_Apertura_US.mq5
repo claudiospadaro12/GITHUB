@@ -17,9 +17,20 @@
 //|     (spesso 16:30 su broker GMT+2, 15:30 su GMT+3, ecc.).       |
 //|                                                                  |
 //|  ⚠️ Nessun EA garantisce profitti. TESTA SU DEMO prima.          |
+//|                                                                  |
+//|  ROUND 30 (R30) - due leve OPT-IN, default SPENTO (comportamento |
+//|  identico a prima se non si tocca niente):                       |
+//|    1) InpUseVolRegime  = regime di volatilita' adattivo          |
+//|       (percentile ATR -> buffer, stop e size cambiano di scala)  |
+//|    2) InpUseSRFilter   = filtro prossimita' supporti/resistenze  |
+//|       (max/min del giorno prec. + numeri tondi)                  |
+//|  FONTE: idee prese dai PARAMETRI di un EA esterno (amico di       |
+//|  Claudio); qui NON sono copiate come verita', sono messe          |
+//|  nell'imbuto del progetto e testate una alla volta come tutte le  |
+//|  altre. Finche' non passano il walk-forward restano spente.       |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 //--- DEFAULT specifici per il Nasdaq (usati dal motore ABTG_ApertureCore)
@@ -277,6 +288,38 @@ input int    InpAtrFilterBars   = 20;     // Barre su cui calcolo la media dell'
 input double InpAtrFilterMult   = 1.0;    // ATR ultima barra >= X * media (PDF: "ATR > media")
 input ENUM_ABTG_CONFIRM InpConfirmMode = ABTG_CONF_OR; // Se volumi E ATR sono entrambi accesi: basta una conferma (OR, come il PDF) o servono entrambe (AND)?
 
+input group "=== Regime di volatilita' (R30, opt-in) ==="
+//  IDEA (da EA esterno, da validare nell'imbuto): non tutti i giorni sono
+//  uguali. Si misura l'ATR corrente e lo si mette in PERCENTILE rispetto alle
+//  ultime N barre: giornata CALMA (percentile basso) -> buffer e stop stretti,
+//  giornata di TEMPESTA (percentile alto) -> buffer e stop larghi e size
+//  ridotta. Non e' un filtro che blocca: e' una SCALA sui parametri.
+//  ⚠️ Con InpUseVolRegime=false tutti i moltiplicatori restano 1.0 e non
+//     viene creato nemmeno l'handle ATR: comportamento identico a prima.
+input bool   InpUseVolRegime   = false;  // Attiva il regime di volatilita' adattivo (R30)
+input int    InpVolAtrPeriod   = 14;     // ATR del regime
+input int    InpVolLookback    = 100;    // Barre per il calcolo dei percentili
+input double InpVolLowPct      = 20.0;   // Sotto questo percentile = CALMA
+input double InpVolHighPct     = 80.0;   // Sopra questo percentile = TEMPESTA
+input double InpVolLowOffMult  = 0.7;    // Moltiplicatore del BUFFER in calma
+input double InpVolHighOffMult = 1.5;    // Moltiplicatore del BUFFER in tempesta
+input double InpVolLowSlMult   = 0.75;   // Moltiplicatore dello STOP in calma
+input double InpVolHighSlMult  = 1.5;    // Moltiplicatore dello STOP in tempesta
+input double InpVolHighSizeMult= 0.5;    // Riduzione della SIZE in tempesta (1.0 = nessuna)
+
+input group "=== Filtro S/R (R30, opt-in) ==="
+//  IDEA (da EA esterno, da validare nell'imbuto): non comprare con una
+//  resistenza addosso e non vendere con un supporto sotto il naso. Si
+//  guardano massimo/minimo del GIORNO PRECEDENTE e i numeri tondi: se il
+//  livello d'ingresso ci sbatte contro entro InpSRProximityPts, il segnale
+//  si salta. Blocca SOLO l'ingresso, mai la gestione di una posizione aperta.
+//  ⚠️ Punti MT5: il Nasdaq quota a 2 decimali -> 1500 punti = 15 punti indice.
+input bool   InpUseSRFilter      = false;  // Attiva il filtro di prossimita' S/R (R30)
+input double InpSRProximityPts   = 1500;   // Distanza minima dal livello, in punti (1500 = 15 punti indice)
+input bool   InpSRUsePrevDay     = true;   // Usa massimo/minimo del GIORNO PRECEDENTE (PDH/PDL)
+input bool   InpSRUseRoundNumbers= true;   // Usa i numeri tondi
+input double InpSRRoundInterval  = 10000;  // Passo dei numeri tondi, in punti (10000 = 100 punti indice)
+
 input group "=== Generali ==="
 input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
 input int    InpMaxSpread      = 0;                   // Spread massimo in punti (0 = nessun limite)
@@ -291,6 +334,18 @@ CTrade   gTrade;
 int      gEmaFastH = INVALID_HANDLE;
 int      gEmaSlowH = INVALID_HANDLE;
 int      gAtrH     = INVALID_HANDLE;
+
+//--- R30: regime di volatilita' (tutto inerte se InpUseVolRegime=false).
+//    I moltiplicatori restano a 1.0 finche' la feature non e' accesa, cosi'
+//    anche se per errore qualcuno li leggesse fuori dai rami if non
+//    cambierebbe nulla.
+int      gVolAtrH    = INVALID_HANDLE;  // handle ATR DEDICATO al regime
+double   gVolOffMult = 1.0;             // scala del buffer d'ingresso
+double   gVolSlMult  = 1.0;             // scala della distanza di stop
+double   gVolSizeMult= 1.0;             // scala della size (solo in tempesta)
+double   gVolPct     = -1.0;            // ultimo percentile calcolato
+int      gVolRegime  = 0;               // -1 calma, 0 normale, +1 tempesta
+datetime gVolBar     = 0;               // barra dell'ultimo calcolo (1 volta per barra)
 
 // macchina a stati della giornata
 enum ENUM_PHASE { PH_WAIT_OPEN, PH_BUILDING, PH_ARMED, PH_PLACED, PH_DONE };
@@ -365,6 +420,29 @@ int ABTG_OnInit()
          return(INIT_FAILED);
         }
      }
+
+   //--- R30: handle ATR DEDICATO al regime di volatilita'. Creato SOLO se la
+   //    feature e' accesa: a default spento l'EA non alloca niente in piu'.
+   if(InpUseVolRegime)
+     {
+      gVolAtrH = iATR(_Symbol, PERIOD_CURRENT, InpVolAtrPeriod);
+      if(gVolAtrH == INVALID_HANDLE)
+        {
+         Print("ERRORE: handle ATR del regime di volatilita' (R30) non creato.");
+         return(INIT_FAILED);
+        }
+      ABTGLog(StringFormat("R30 REGIME VOLATILITA' ATTIVO: ATR(%d) su %s, lookback %d barre, soglie %.0f/%.0f percentile | calma: buffer x%.2f SL x%.2f | tempesta: buffer x%.2f SL x%.2f size x%.2f",
+                           InpVolAtrPeriod, EnumToString((ENUM_TIMEFRAMES)Period()), InpVolLookback,
+                           InpVolLowPct, InpVolHighPct,
+                           InpVolLowOffMult, InpVolLowSlMult,
+                           InpVolHighOffMult, InpVolHighSlMult, InpVolHighSizeMult));
+     }
+
+   if(InpUseSRFilter)
+      ABTGLog(StringFormat("R30 FILTRO S/R ATTIVO: soglia %.0f pt | giorno prec.=%s | numeri tondi=%s (passo %.0f pt)",
+                           InpSRProximityPts,
+                           (InpSRUsePrevDay ? "si" : "no"),
+                           (InpSRUseRoundNumbers ? "si" : "no"), InpSRRoundInterval));
 
    if(InpUseNewsFilter)
       LoadNews();
@@ -486,6 +564,7 @@ void ABTG_OnDeinit(const int reason)
    if(gAtrH     != INVALID_HANDLE) IndicatorRelease(gAtrH);
    if(gEmaFastH != INVALID_HANDLE) IndicatorRelease(gEmaFastH);
    if(gEmaSlowH != INVALID_HANDLE) IndicatorRelease(gEmaSlowH);
+   if(gVolAtrH  != INVALID_HANDLE) IndicatorRelease(gVolAtrH);   // R30
   }
 
 //+------------------------------------------------------------------+
@@ -814,6 +893,8 @@ bool TryPlaceBreakout()
    if(!SpreadOK()) { ABTGLog("spread troppo alto: nessun ordine oggi."); return(true); }
    if(!ConfirmOK()) { ABTGLog("rottura non confermata (ne' volumi ne' ATR sopra la media): niente trade."); return(true); }
 
+   UpdateVolRegime();   // R30: qui si decide, quindi qui si misura il regime
+
    double buffer  = EffectiveBuffer();
    double buyPx   = NormalizePrice(gRangeHigh + buffer);
    double sellPx  = NormalizePrice(gRangeLow  - buffer);
@@ -829,10 +910,11 @@ bool TryPlaceBreakout()
      {
       double entry = NormalizePrice(buyPx + InpSlippagePts*_Point);   // slippage: in realta' si riempie OLTRE il livello
       double sl    = (InpSLMode == ABTG_SL_RANGE) ? sellPx : entry - AtrValue()*InpAtrSlMult;
-      sl = NormalizePrice(sl);
+      sl = NormalizePrice(VolRegimeSL(entry, sl));                    // R30: scala lo stop col regime
       double dist  = entry - sl;
       bool   skip  = false;
-      if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+      if(SRBlocked(entry, +1)) skip = true;                           // R30: resistenza addosso -> salto
+      if(!skip && InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
         {
          if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("BUY saltato: stop %.0f pt < floor %.0f pt (troppo stretto per lo slippage).", dist/_Point, InpMinStopPts)); }
          else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
@@ -853,10 +935,11 @@ bool TryPlaceBreakout()
      {
       double entry = NormalizePrice(sellPx - InpSlippagePts*_Point);  // slippage: in realta' si riempie OLTRE il livello
       double sl    = (InpSLMode == ABTG_SL_RANGE) ? buyPx : entry + AtrValue()*InpAtrSlMult;
-      sl = NormalizePrice(sl);
+      sl = NormalizePrice(VolRegimeSL(entry, sl));                    // R30: scala lo stop col regime
       double dist  = sl - entry;
       bool   skip  = false;
-      if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+      if(SRBlocked(entry, -1)) skip = true;                           // R30: supporto addosso -> salto
+      if(!skip && InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
         {
          if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("SELL saltato: stop %.0f pt < floor %.0f pt (troppo stretto per lo slippage).", dist/_Point, InpMinStopPts)); }
          else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
@@ -902,6 +985,8 @@ bool TryPlaceRangeFade()
    // le righe con filtro volumi ON e OFF erano identiche al centesimo: il filtro non faceva nulla.
    if(!ConfirmOK()) { ABTGLog("FADE: conferma (volumi/ATR) assente: niente trade."); return(true); }
 
+   UpdateVolRegime();   // R30: qui si decide, quindi qui si misura il regime
+
    int  bias    = TrendBias();
    bool longOK  = (bias == 0 || bias == +1);   // BUY LIMIT sul minimo
    bool shortOK = (bias == 0 || bias == -1);   // SELL LIMIT sul massimo
@@ -909,6 +994,7 @@ bool TryPlaceRangeFade()
 
    double slDist = AtrValue()*InpAtrSlMult;
    if(slDist <= 0) slDist = EffectiveBuffer();
+   if(InpUseVolRegime) slDist *= gVolSlMult;                          // R30: scala lo stop col regime
    if(InpMinStopPts > 0 && slDist < InpMinStopPts*_Point) slDist = InpMinStopPts*_Point;
 
    //--- SELL LIMIT sul MASSIMO (fada lo spike in alto)
@@ -1538,6 +1624,159 @@ double AtrValue()
    return(a[0]);
   }
 
+//==================================================================
+//  R30 - REGIME DI VOLATILITA' ADATTIVO (opt-in, default spento)
+//
+//  Perche': con buffer e stop FISSI in punti, la stessa impostazione e'
+//  troppo larga nelle giornate morte e troppo stretta nelle giornate
+//  isteriche. Qui l'ATR corrente viene messo in PERCENTILE rispetto alle
+//  ultime InpVolLookback barre e si scalano buffer / stop / size.
+//
+//  ⚠️ NON e' un filtro: non blocca mai un trade. Se i dati mancano si
+//     torna a regime NORMAL (moltiplicatori 1.0) e si logga: un dato
+//     assente non deve cambiare le decisioni operative.
+//  ⚠️ Il calcolo si fa UNA VOLTA PER BARRA, non a ogni tick: le funzioni
+//     di ingresso possono essere richiamate a raffica mentre aspettano
+//     che i dati siano pronti.
+//==================================================================
+void SetVolRegimeNormal()
+  {
+   gVolRegime   = 0;
+   gVolOffMult  = 1.0;
+   gVolSlMult   = 1.0;
+   gVolSizeMult = 1.0;
+  }
+
+string VolRegimeName(int r)
+  {
+   if(r > 0) return("TEMPESTA");
+   if(r < 0) return("CALMA");
+   return("NORMALE");
+  }
+
+void UpdateVolRegime()
+  {
+   if(!InpUseVolRegime) return;                       // percorso di default: mai eseguito
+
+   datetime bt = iTime(_Symbol, PERIOD_CURRENT, 0);
+   if(bt > 0 && bt == gVolBar) return;                // gia' calcolato su questa barra
+   gVolBar = bt;
+
+   int n = InpVolLookback;
+   if(n < 10) n = 10;                                 // sotto le 10 letture il percentile e' rumore
+
+   double a[];
+   ArraySetAsSeries(a, true);
+   if(gVolAtrH == INVALID_HANDLE || CopyBuffer(gVolAtrH, 0, 1, n, a) < n)
+     {
+      SetVolRegimeNormal();
+      gVolPct = -1.0;
+      ABTGLog("[VolRegime] dati ATR insufficienti: regime NORMALE (nessuna scala applicata).");
+      return;
+     }
+
+   double cur = a[0];                                 // ATR dell'ultima barra CHIUSA
+   if(cur <= 0)
+     {
+      SetVolRegimeNormal();
+      gVolPct = -1.0;
+      ABTGLog("[VolRegime] ATR corrente nullo: regime NORMALE.");
+      return;
+     }
+
+   int sotto = 0;
+   for(int i = 1; i < n; i++)
+      if(a[i] < cur) sotto++;
+   gVolPct = 100.0 * sotto / (n - 1);                 // rango percentile della lettura corrente
+
+   if(gVolPct < InpVolLowPct)
+     {
+      gVolRegime   = -1;
+      gVolOffMult  = InpVolLowOffMult;
+      gVolSlMult   = InpVolLowSlMult;
+      gVolSizeMult = 1.0;                             // in calma la size non si tocca
+     }
+   else if(gVolPct > InpVolHighPct)
+     {
+      gVolRegime   = +1;
+      gVolOffMult  = InpVolHighOffMult;
+      gVolSlMult   = InpVolHighSlMult;
+      gVolSizeMult = InpVolHighSizeMult;
+     }
+   else
+      SetVolRegimeNormal();
+
+   ABTGLog(StringFormat("[VolRegime] percentile %.0f -> %s: buffer x%.2f, SL x%.2f, size x%.2f (ATR %.5f)",
+                        gVolPct, VolRegimeName(gVolRegime), gVolOffMult, gVolSlMult, gVolSizeMult, cur));
+  }
+
+//+------------------------------------------------------------------+
+//| R30 - riscala la DISTANZA di stop secondo il regime.             |
+//|  Lavora sul segno (sl-entry): vale sia per i long sia per gli    |
+//|  short senza doversi passare la direzione.                       |
+//+------------------------------------------------------------------+
+double VolRegimeSL(double entry, double sl)
+  {
+   if(!InpUseVolRegime || gVolSlMult == 1.0 || sl <= 0 || entry <= 0) return(sl);
+   return(entry + (sl - entry) * gVolSlMult);
+  }
+
+//==================================================================
+//  R30 - FILTRO PROSSIMITA' SUPPORTI / RESISTENZE (opt-in)
+//
+//  Ritorna TRUE se il livello d'ingresso ha un ostacolo davanti entro
+//  InpSRProximityPts NELLA DIREZIONE del trade (per un buy: livello
+//  SOPRA l'ingresso; per un sell: livello SOTTO). In quel caso il
+//  segnale si salta: il trade parte gia' con poco spazio prima di
+//  incontrare il livello che tutti guardano.
+//
+//  ⚠️ Blocca SOLO l'apertura. Non tocca mai parziale, breakeven,
+//     trailing o chiusura di fine sessione.
+//==================================================================
+bool SRBlocked(double entryPx, int dir)
+  {
+   if(!InpUseSRFilter) return(false);                 // percorso di default: esce subito
+   if(entryPx <= 0 || dir == 0) return(false);
+   double thr = InpSRProximityPts * _Point;
+   if(thr <= 0) return(false);
+
+   double lv[8];
+   string nm[8];
+   int    n = 0;
+
+   //--- massimo/minimo del GIORNO PRECEDENTE (PDH/PDL)
+   if(InpSRUsePrevDay)
+     {
+      double pdh = iHigh(_Symbol, PERIOD_D1, 1);
+      double pdl = iLow (_Symbol, PERIOD_D1, 1);
+      if(pdh > 0) { lv[n] = pdh; nm[n] = "PDH"; n++; }
+      if(pdl > 0) { lv[n] = pdl; nm[n] = "PDL"; n++; }
+     }
+
+   //--- numeri tondi immediatamente sopra e sotto l'ingresso
+   if(InpSRUseRoundNumbers && InpSRRoundInterval > 0)
+     {
+      double step = InpSRRoundInterval * _Point;
+      if(step > 0)
+        {
+         lv[n] = MathCeil (entryPx/step)*step; nm[n] = "numero tondo"; n++;
+         lv[n] = MathFloor(entryPx/step)*step; nm[n] = "numero tondo"; n++;
+        }
+     }
+
+   for(int i = 0; i < n; i++)
+     {
+      double d = (dir > 0) ? (lv[i] - entryPx) : (entryPx - lv[i]);   // solo davanti al trade
+      if(d >= 0 && d <= thr)
+        {
+         ABTGLog(StringFormat("[SR] %s saltato: %s a %.0f pt (livello %.5f, soglia %.0f pt).",
+                              (dir > 0 ? "buy" : "sell"), nm[i], d/_Point, lv[i], InpSRProximityPts));
+         return(true);
+        }
+     }
+   return(false);
+  }
+
 //+------------------------------------------------------------------+
 //| Lotto in base al rischio % sullo stop                           |
 //+------------------------------------------------------------------+
@@ -1569,6 +1808,12 @@ double CalcLotByRisk(double slDistancePrice)
    if(lossPerLot <= 0) return(0);
 
    double lot = riskMoney / lossPerLot;
+
+   //--- R30: in TEMPESTA si riduce la size (il rischio % nominale resta
+   //    quello, ma il colpo preso su uno stop saltato e' piu' piccolo).
+   //    Con la feature spenta questa riga non tocca niente.
+   if(InpUseVolRegime && gVolSizeMult > 0 && gVolSizeMult != 1.0)
+      lot *= gVolSizeMult;
 
    double minLot  = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
    double maxLot  = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
@@ -1828,7 +2073,13 @@ double NormalizePrice(double price)
 double EffectiveBuffer()
   {
    double stopsLvl = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL);
-   double bufPts   = MathMax(InpBufferPoints, stopsLvl);
+   double bufPts   = InpBufferPoints;
+   //--- R30: il buffer si stringe in calma e si allarga in tempesta.
+   //    Il pavimento dello "stops level" del broker resta comunque sotto:
+   //    non si scende mai a un livello che il broker rifiuterebbe.
+   if(InpUseVolRegime && gVolOffMult > 0 && gVolOffMult != 1.0)
+      bufPts *= gVolOffMult;
+   bufPts = MathMax(bufPts, stopsLvl);
    return(bufPts * _Point);
   }
 

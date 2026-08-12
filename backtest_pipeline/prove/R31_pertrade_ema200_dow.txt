@@ -1,0 +1,34 @@
+# =====================================================================
+#  R31: PER-TRADE del promosso R29 — EMA200 H1 sul Dow, a 100k
+#  Lancio: ABTG_EMA200 -Prova prove\R31_pertrade_ema200_dow.txt
+#          -Deposito 100000 -Etichetta r31
+# =====================================================================
+# DA DOVE VIENE: R29 (12/08) — IL PRIMO 30/30 della storia dell'imbuto:
+#   l'intera regione passa tutti i criteri sul Dow. Cella CENTRO
+#   dichiarata nel referto (mai il best): O1 0,20 / O2 0,3 / TP 2,0.
+#   Attesi (deposito 10k): IS +434 (216ca trade) · OOS +2.090 (444
+#   trade, PF 1,52). A 100k contano trade-count e PF, non i centesimi.
+# PERCHE': serie per-trade per dd_portafoglio a 12 serie. LA DOMANDA
+#   VERA e' la correlazione: sarebbe il QUINTO motore sul Dow
+#   (Apertura, SuperWave, PTE, ORB gia' in squadra/vivaio). Se i P&L
+#   giornalieri si sovrappongono coi fratelli, la sedia non vale.
+# MAGIC VERGINI: 771521/771522 (verificati 12/08). Gemelli al centesimo
+#   o niente.
+# CONTROLLI: 2 celle gemelle identiche; trade-count coerente con R29
+#   (~216 IS / ~444 OOS); abtg_trades_ABTG_EMA200_U30USD_771521/22.csv
+#   freschi in Common.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpAllowLong=1
+InpAllowShort=1
+InpUseOrder2=1
+InpRiskPercent=1.0
+InpOrder1Atr=0.20
+InpOrder2Atr=0.3
+InpTP_RR=2.0
+
+InpMagic=771521||771521||1||771522||Y
