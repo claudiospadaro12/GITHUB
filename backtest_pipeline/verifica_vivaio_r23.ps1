@@ -36,7 +36,8 @@ foreach ($chr in $chrs) {
   $txt = Get-Content $chr.FullName -Raw
   $em = [regex]::Match($txt, "(?s)<expert>.*?path=Experts\\([^\r\n]+)\.ex5")
   if (-not $em.Success) { continue }
-  $ea = $em.Groups[1].Value.Trim()
+  # solo il nome file: l'ex5 puo' stare in una sottocartella del Navigatore
+  $ea = ($em.Groups[1].Value.Trim() -split '\\')[-1]
   if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200") { continue }
   $sm = [regex]::Match($txt, "symbol=([A-Za-z0-9#\.]+)"); $sym = if($sm.Success){$sm.Groups[1].Value}else{"?"}
   $ins = @{}
@@ -50,7 +51,7 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO R23 (dai .chr salvati) ===" White
+Rec "=== VERIFICA VIVAIO v3 (6 grafici, EMA200 incluso) ===" White
 $errori = 0
 foreach ($a in $Attesi) {
   $key = "$($a.ea)|$($a.sym)|$($a.magic)"
