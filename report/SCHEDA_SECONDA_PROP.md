@@ -197,8 +197,16 @@ diverse).
     sell stop insieme) e' scritto SOLO per Instant Funding/Bootcamp —
     il MaxMin e' un bracket: se mai si guardasse un altro programma
     loro, questo lo esclude. Su High Stakes vale solo la finestra 2 min.
+- **2 LIMITI — VERIFICATI, testo ufficiale (FAQ 10/08/2026):**
+  - Max loss: **10% dal SALDO INIZIALE (absolute drawdown) = STATICO** ✅
+  - Daily: **5% dal massimo tra equity e balance di chiusura del giorno
+    prima**, fotografato alle **00:00 ora del loro server** ✅
+  - Sforare uno dei due = chiusura del conto (hard, come FTMO)
+  - Struttura IDENTICA a FTMO: il Guardian e la taratura 0,65%
+    (p99 ~9,4% < 10%) si trasferiscono cosi' come sono. Unica
+    differenza operativa: l'ora del reset giornaliero (00:00 server
+    LORO — da mappare sul fuso quando si conoscera' il broker/feed).
 - DA COMPLETARE (prossimi screenshot):
-  - 2 Limiti: daily/totale, STATICO o trailing, da cosa si calcola
   - 🚩 tetto di esposizione aggregata (lezione FundedNext: cercare
     "maximum exposure/open risk/lots" nelle FAQ)
   - 1 EA: politica ufficiale (EA propri vs commerciali)
