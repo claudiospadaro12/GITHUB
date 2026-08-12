@@ -1,0 +1,28 @@
+# =====================================================================
+#  R33: Breaking Band — il cancello WALK-FORWARD (tick reali, IS/OOS)
+#  Lancio: ABTG_BreakingBand -Prova prove\R33_bb_walkforward.txt
+#          -Simbolo <SYM> -Etichetta r33   (GBPUSD, EURUSD, AUDUSD, NZDJPY)
+# =====================================================================
+# DA DOVE VIENE: fase tick full-period (12/08 notte) — 7/7 simboli
+#   positivi sul combinato; GBPUSD +500 PF 2,31 (entrambi i pattern),
+#   EURUSD specialista CONT (+452 PF 6,21, INV -343), AUDUSD +351.
+#   Ipotesi di Claudio CONFERMATA: In-Bulge (CONT) piu' rischiosa,
+#   Post-Bulge (INV) positiva 6/7 con DD minuscoli ma campioni piccoli.
+# CRITERI (i soliti 4, congelati): per OGNI cella pattern: positiva in
+#   ENTRAMBE le finestre; PF OOS >= 1,10; DD OOS < 10% all'1%.
+#   AVVERTENZA CAMPIONI (dichiarata ORA): con ~30-40 trade totali le
+#   finestre sono sottili — un pattern che passa con <10 trade OOS e'
+#   un "quasi": collaudo vivaio piu' lungo, non promozione piena.
+#   MAI scegliere la cella migliore: il pattern si sceglie per simbolo
+#   SOLO se conferma il verdetto full-period (niente ribaltoni).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpTPMode=0
+InpRiskPercent=1.0
+InpBulgeWidthMult=1.35
+InpBulgeNetMoveATR=1.0
+
+InpPatternMode=0||0||1||2||Y
