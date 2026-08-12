@@ -1,0 +1,29 @@
+# =====================================================================
+#  CAL1: TARATURA del detector Breaking Band — NON e' un round di
+#  strategia, e' la calibrazione della macchina (come da tesi: "se il
+#  conteggio e' vicino a zero, le soglie si ritarano PRIMA del P/L").
+#  Lancio: ABTG_BreakingBand -Prova prove\CAL_BB_DETECTOR.txt
+#          -Modello 1 -Etichetta cal1   (x3 simboli: EURUSD, EURCAD, GBPJPY)
+# =====================================================================
+# CRITERIO DI SCELTA (congelato PRIMA dei numeri): la combinazione si
+#   sceglie per FREQUENZA SANA e STABILE — obiettivo 1-4 trade/mese per
+#   simbolo (Leonardo la usa cosi'), coerente sui 3 simboli campione.
+#   IL PROFITTO NON SI GUARDA in questa fase: guardarlo qui = il vizio
+#   dei 21 ribaltamenti. Il P/L parla solo al prossimo scan a 48.
+# COSA SI SPAZZOLA (solo il RILEVAMENTO, 12 celle):
+#   - larghezza minima del bulge: 1.2 / 1.35 / 1.5 (default v1.01: 1.5)
+#   - durata minima fase: 2 / 3 candele (guida: "non un singolo spike")
+#   - movimento netto minimo: 1.0 / 1.5 ATR
+# Tutto il resto pinnato ai default v1.01. Pattern ENTRAMBI.
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=2
+InpTPMode=0
+InpRiskPercent=1.0
+
+InpBulgeWidthMult=1.2||1.2||0.15||1.5||Y
+InpBulgeMinBars=2||2||1||3||Y
+InpBulgeNetMoveATR=1.0||1.0||0.5||1.5||Y
