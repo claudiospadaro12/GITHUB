@@ -1,0 +1,9 @@
+=== VERIFICA VIVAIO R23 (dai .chr salvati) ===
+OK      ABTG_PTE @ U30USD  magic 771321  TF H1  rischio 1.0  'PTE DOW'
+OK      ABTG_PTE @ GBPUSD  magic 771322  TF H1  rischio 1.0  'PTE GBPUSD'
+OK      ABTG_PTE @ USDJPY  magic 771323  TF H1  rischio 1.0  'PTE USDJPY'
+OK      ABTG_SuperWave @ U30USD  magic 770531  TF H2  rischio 1.0  'SW DOW H2'
+OK      ABTG_SuperWave @ GBPUSD  magic 770532  TF H2  rischio 1.0  'SW GBPUSD H2'
+MANCA   ABTG_EMA200 @ U30USD (magic 771531): nessun grafico salvato. Hai fatto Salva profilo?
+
+1 PROBLEMI: correggi e rilancia.
