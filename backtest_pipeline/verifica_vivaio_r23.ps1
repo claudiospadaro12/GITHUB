@@ -21,7 +21,9 @@ $Attesi = @(
   @{ea="ABTG_PTE";       sym="GBPUSD"; tf="H1"; magic=771322; be="0.5"; comm="PTE GBPUSD"},
   @{ea="ABTG_PTE";       sym="USDJPY"; tf="H1"; magic=771323; be="0.5"; comm="PTE USDJPY"},
   @{ea="ABTG_SuperWave"; sym="U30USD"; tf="H2"; magic=770531; be=$null; comm="SW DOW H2"},
-  @{ea="ABTG_SuperWave"; sym="GBPUSD"; tf="H2"; magic=770532; be=$null; comm="SW GBPUSD H2"}
+  @{ea="ABTG_SuperWave"; sym="GBPUSD"; tf="H2"; magic=770532; be=$null; comm="SW GBPUSD H2"},
+  # sedia 12 (12/08): EMA200 Dow, cella centro R29 (O1/O2/TP verificati sotto)
+  @{ea="ABTG_EMA200";    sym="U30USD"; tf="H1"; magic=771531; be=$null; comm="EMA200 DOW"}
 )
 $TFnum = @{ "H1"="16385"; "H2"="16386" }
 
@@ -63,6 +65,11 @@ foreach ($a in $Attesi) {
   $ins = $t.ins; $ok = $true; $note = @()
   if ($ins["InpTF"] -ne $TFnum[$a.tf]) { $ok=$false; $note += ("InpTF={0} atteso {1} ({2})" -f $ins["InpTF"],$TFnum[$a.tf],$a.tf) }
   if ($a.be -ne $null -and [double]$ins["InpTP1_ATRmult"] -ne [double]$a.be) { $ok=$false; $note += ("InpTP1_ATRmult={0} atteso {1}" -f $ins["InpTP1_ATRmult"],$a.be) }
+  if ($a.ea -eq "ABTG_EMA200") {
+    if ([double]$ins["InpOrder1Atr"] -ne 0.20) { $ok=$false; $note += ("InpOrder1Atr={0} atteso 0.20" -f $ins["InpOrder1Atr"]) }
+    if ([double]$ins["InpOrder2Atr"] -ne 0.3)  { $ok=$false; $note += ("InpOrder2Atr={0} atteso 0.3" -f $ins["InpOrder2Atr"]) }
+    if ([double]$ins["InpTP_RR"] -ne 2.0)      { $ok=$false; $note += ("InpTP_RR={0} atteso 2.0" -f $ins["InpTP_RR"]) }
+  }
   if ([double]$ins["InpRiskPercent"] -ne 1.0) { $ok=$false; $note += ("InpRiskPercent={0} atteso 1.0" -f $ins["InpRiskPercent"]) }
   if ($ins["InpComment"] -ne $a.comm) { $ok=$false; $note += ("InpComment='{0}' atteso '{1}'" -f $ins["InpComment"],$a.comm) }
   if ($ok) { Rec ("OK      {0} @ {1}  magic {2}  TF {3}  rischio {4}  '{5}'" -f $a.ea,$a.sym,$a.magic,$a.tf,$ins["InpRiskPercent"],$ins["InpComment"]) Green }

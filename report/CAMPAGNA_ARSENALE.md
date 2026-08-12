@@ -19,6 +19,7 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 | 9 | **PTE USDJPY H1** | 🌱 VIVAIO dall'11/08 (771323) |
 | 10 | **SuperWave Dow H2** | 🌱 VIVAIO dall'11/08 (770531) |
 | +1 | **SuperWave GBPUSD H2** | 🌱 VIVAIO dall'11/08 (770532) |
+| 12 | **EMA200 Dow H1** (scan→R29 primo 30/30→R31) | 🌱 VIVAIO dal 12/08 (771531) |
 
 **Le 10 sedie sono NOMINATE** (5 titolari + 6 in vivaio): l'obiettivo
 della campagna e' passato da "trovare candidati" a "maturare il vivaio"
