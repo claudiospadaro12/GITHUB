@@ -87,3 +87,21 @@ NOTA: il resto dell'articolo (ATR sizing, stop dinamici, vola 150-200$)
 CONFERMA le scoperte gia' misurate in NOTTE_ORO; le 4 strategie
 generiche EMA20/50+RSI sono il GoldenCross sotto altro nome (capitolo
 chiuso con 9 lanci, R2/R4/R20).
+
+## Idee dall'EA dell'amico di Claudio (NasdaqOpeningBreakout v21, 12/08)
+_Solo parametri visti (2 screenshot), niente codice/risultati. La base
+(breakout d'apertura con pendenti sul Nasdaq) e' gia' bocciata 3 volte
+dal nostro imbuto (R7, 02/08, R25) e NON ha il filtro volumi (l'unico
+edge misurato). Ma DUE idee mai testate da noi meritano il laboratorio:_
+1. **REGIME DI VOLATILITA' ADATTIVO** (percentili ATR 20/80 -> offset
+   x0,7/x1,5, SL x0,75/x1,5, size dimezzata in alta vol). Seconda
+   conferma indipendente dell'idea "OR/ATR adattivo" gia' in backlog
+   (Build Alpha #2) -> SALE DI PRIORITA'. Testabile sui nostri Apertura
+   con pochi input nuovi.
+2. **FILTRO PROSSIMITA' S/R** (no ingressi vicino a livelli del giorno
+   prima / numeri tondi / swing; proximity 15pt, merge 10pt). Mai
+   misurato nel lab. Tesi: i breakout nati sotto resistenza muoiono li'.
+Campanelli annotati: lotto fisso (MM spento), "v21 OPTIMIZED" (curve
+fitting probabile), TradeStartTime 16:25 incoerente con BCM (Nasdaq
+apre 14:30 server — chiedere all'amico broker/fuso). Se arrivano .set
+completo / .ex5 / risultati, si riapre la valutazione.
