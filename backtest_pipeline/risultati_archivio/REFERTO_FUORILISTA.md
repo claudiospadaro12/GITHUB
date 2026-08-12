@@ -72,3 +72,15 @@ PREVBAR e' il RangeMode del vizio storico (cella cherry-picked che si
 ribalto'). A 0,25% il rischio e' minimo, ma la regola vale: o si
 allinea il grafico a una config misurata, o si misura la config accesa.
 Decisione per domani, non stasera a mercati aperti.
+
+## ✅ 4° SPEGNIMENTO ESEGUITO (12/08 ore 14:01)
+SupRev_DOW_H1_Ottimizzato spento DA FLAT (posizione 970916 chiusa in TP
+l'11/08, verificato in pagella). Output dello script: SPENTI (1) -- solo
+lui; RESTANO 21 con SupRev_DOW_H4 regolarmente al suo posto. Backup del
+grafico sul Desktop (backup_dow_h1_20260812_1401): reversibile. Al
+riavvio il log conferma: DOW_H1 non parte, DOW_H4 e DAX_H4 vivi, guardie
+reload-safe attive. LA PARTITA DELLA PULIZIA E' CHIUSA: 4 spenti coi
+numeri, 4 tenuti con referto.
+Conteggio flotta: 20 di ieri -1 (DOW_H1) +1 (vivaio EMA200) +1
+(NasdaqOpeningBreakout v21 dell'amico, aggiunto oggi FUORI imbuto:
+decisione in corso, vedi diario 12/08).
