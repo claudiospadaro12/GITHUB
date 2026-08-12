@@ -42,3 +42,9 @@ Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
 - Sviluppo sul branch `claude/creating-agents-SgGpD`.
 - Ottimizzazioni/backtest sul PC di backtest; gli EA girano in forward sul VPS.
 - Regola EA: gli `_Ottimizzato` girano in parallelo agli originali (magic diversi), mai sostituirli.
+
+## STILE MESSAGGI IN CHAT (richiesta di Claudio, 12/08)
+Claudio vuole messaggi con PIU' HYPE ed energia: titoli grandi (##),
+emoji sui concetti chiave, tono carico ma sempre coi numeri veri sotto.
+Confermato da lui: "SI, COSI VA BENISSIMO". Vale per tutte le chat.
+Nota: il font non lo controlliamo noi — ricordagli Ctrl+ per ingrandire.
