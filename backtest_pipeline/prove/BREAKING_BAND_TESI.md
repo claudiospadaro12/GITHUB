@@ -111,3 +111,13 @@ CRITERI DI PROMOZIONE (i soliti 4, congelati ORA):
   0 vs 1 solo sui simboli promossi (mai grid larghe su tutte le
   soglie: lezione dei 21 ribaltamenti);
 - se passa: per-trade a 100k, correlazioni col portafoglio, vivaio.
+
+## VARIANTE PERSONALE DI CLAUDIO (12/08 notte) — a backlog
+Nel suo indicatore Pine, l'"IN-BULGE" e' una variante INVENTATA DA
+CLAUDIO: fade sulla banda DELL'IMPULSO (rigetto del breakdown/breakout
+fallito senza tocco della mediana), diversa dall'In-Bulge della guida
+(retest della banda OPPOSTA). Parere di Fasciano (dal corso): "difficile
+intuire se va a profitto". STATO: backlog — da testare come eventuale
+PatternMode aggiuntivo SOLO dopo i verdetti sui 2 pattern ufficiali.
+Nota di metodo: e' una variante da occhio pratico, stessa origine
+dell'EMA200 — merita il suo A/B, al suo turno.
