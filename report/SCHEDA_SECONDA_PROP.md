@@ -1,5 +1,21 @@
 # SCHEDA SECONDA PROP — studio regolamenti (D3, avviato 12/08)
 
+## 🏁 CLASSIFICA ATTUALE (aggiornata 12/08 sera)
+| # | Ditta | Stato | Nota |
+|---|---|---|---|
+| 1 | **FTMO** | 🎯 prima prop designata — MA scheda dedicata DA FARE | e' il metro su cui e' tarato tutto (10%/5% statici, Guardian, dry-run 100k). Attenzione: finora l'abbiamo ASSUNTA, mai istruita con questa trafila — stessa lettura completa (news su funded, pratiche vietate, payout) dovuta anche a lei |
+| 2 | **The5ers (High Stakes)** | 🟡 candidata CON RISERVE | numeri tutti compatibili; 3 chiarimenti SCRITTI dal supporto obbligatori pre-acquisto (bulk simultaneo, bracket MaxMin, mono-direzione) |
+| 3 | **Funding Pips** | ⬜ da istruire | prossima della lista |
+| 4 | **E8 Markets** | ⬜ da istruire | verificare subito trailing e consistency |
+| 5 | **Alpha Capital** | ⬜ da istruire | — |
+| ❌ | **FundedNext** | SCARTATA (12/08) | regola 3% cumulativo in qualsiasi momento: tassa la diversificazione simultanea, escalation a 1% permanente |
+
+Strategia confermata dai fatti di oggi: i TETTI di payout per-ditta
+(es. The5ers $3k/ciclo in partenza) rendono la replica su 2-3 ditte
+(D3 estesa) non solo diversificazione ma LA via di scala del flusso.
+Sequenza invariata: niente acquisti prima del forward maturo (30/07);
+prima ditta FTMO al traguardo del dry-run; seconda dalla classifica.
+
 **Perche'**: la strategia decisa e' stesso portafoglio su DUE DITTE
 DIVERSE (mai 5+5, mai due conti sulla stessa ditta). FTMO e' il metro
 di paragone (il 100k dry-run simula i SUOI limiti: 10% totale, 5%
