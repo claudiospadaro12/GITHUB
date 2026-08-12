@@ -79,11 +79,18 @@ dei passaggi ambigui -> si valutano insieme.
 
 | Ditta | Perche' in lista | Stato studio |
 |---|---|---|
-| FundedNext | grande, EA-friendly dichiarata, limiti statici su alcuni piani | ⬜ da leggere |
+| **FundedNext (Stellar 2-Step)** | **PRIMA DA STUDIARE** — pre-studio Claude 12/08 (fonti terze): DD statico, NESSUNA consistency su Stellar CFD, EA personali ammessi (vietati solo i commerciali), news = niente violazione ma "taglio 40%" sui profitti in finestra news sul conto finanziato | 🟡 pre-studio ok, DA VERIFICARE sul sito |
+| The5ers (High Stakes) | seconda scelta — limiti molto simili a FTMO (10% assoluto + 5% daily statici), EA propri ammessi; 🚩 MA vieta ESECUZIONI nei 2 min attorno alle news ad alto impatto: per EA senza filtro news e' un rischio di violazione, va mappato contro i nostri orari fissi d'ingresso | 🟡 pre-studio ok, DA VERIFICARE |
 | Funding Pips | costi bassi, payout frequenti | ⬜ da leggere |
-| The5ers | storica, programmi "high stakes" con regole semplici | ⬜ da leggere |
 | E8 Markets | popolare, ma verificare consistency e trailing | ⬜ da leggere |
 | Alpha Capital | EA dichiaratamente ammessi | ⬜ da leggere |
+
+_Pre-studio 12/08 da fonti terze (riassunti 2026, non i siti ufficiali):
+ogni affermazione va CONFERMATA sulle FAQ ufficiali della ditta prima
+del verdetto. La differenza chiave emersa: davanti alle news, FundedNext
+taglia i profitti (nessuna violazione possibile), The5ers vieta le
+esecuzioni (violazione possibile per un EA non filtrato). Per una
+flotta che gira da sola, la prima formula e' strutturalmente piu' sicura._
 
 ⚠️ Le regole delle prop CAMBIANO SPESSO: ogni riga sopra va verificata
 sul sito ufficiale IL GIORNO dello studio, mai per sentito dire. E il
