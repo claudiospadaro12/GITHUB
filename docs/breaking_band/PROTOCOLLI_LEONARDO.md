@@ -35,3 +35,10 @@
    MAI allargare lo SL.
 5. Evitare: news rosse vicino all'entry (soprattutto H1/M30); banda
    dell'impulso inclinata contro.
+
+## VARIANTE DI EMILIANO (riferita da Claudio, 12/08 sera)
+Emiliano usa una strategia simile ma con DUE take profit: TP1 sulla
+mediana (come Leonardo) + un SECONDO TP sulla banda OPPOSTA. Mai
+approfondita dal docente. Nel laboratorio diventa InpTPMode=1
+(parziale su mediana + runner a banda opposta, BE sul runner) da
+misurare in A/B contro il default Leonardo (mediana secca).
