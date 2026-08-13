@@ -1,0 +1,50 @@
+# =====================================================================
+#  ROUND 44b: ABTG_ORB_Ottimizzato - TARGET 2x/3x sul NASDAQ (base R13)
+#  Si lancia con:  -Prova prove\R44b_target_NASUSD.txt -Etichetta r44b
+# =====================================================================
+#
+# PERCHE': il gemello PULITO del R44a. Sul Nasdaq la base R13
+#   (altopiano: solo long, EMA200 M5, stop ATR 1,5, tetto 0,8,
+#   NIENTE parziale/BE/trailing) esce SOLO al target o allo stop:
+#   qui la leva TP e' viva davvero, non silenziata dal trailing.
+#   R13 misuro' 0,5/1,0/1,5 e la curva saliva col target (1,5 il
+#   migliore: OOS +1.610, PF 1,16). Si prosegue: 1,5/2,0/2,5/3,0.
+#
+# IPOTESI (prima dei numeri)
+#   1. La curva continua a salire fino a 2,0-2,5 e poi si piega:
+#      i target lontani si riempiono di rado e il time-exit delle
+#      21:00 li tronca. Trovare DOVE si piega = mappare il bordo.
+#   2. Onesta': OOS Nasdaq guardato molte volte (R13 gia' ~150 celle
+#      in batteria) -> qualunque verde vale MEZZO punto, conferma
+#      solo da banco vergine o forward. Nessuna candidatura diretta.
+#
+# CRITERI (congelati): lettura di mappa, NON promozione. Si annota
+#   il bordo dell'altopiano; se 2,0+ battesse 1,5 con vicini verdi
+#   e DD<10%, l'eventuale strada e' un giro di gestione stile R15
+#   sul Nasdaq - round separato, criteri suoi.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpAllowShort=0
+InpSLMode=1
+InpAtrSLmult=1.5
+InpTPMode=1
+InpMaxRangePct=0.8
+InpUseEma200Filter=1
+InpUseEmaFilter=0
+InpUseVolumeFilter=0
+InpTP_R=1.0
+InpBreakeven=0
+InpTP1Pct=0
+InpUseTrailEMA=0
+InpExitOnEmaClose=0
+InpTPRangeMult=1.5||1.5||0.5||3.0||Y

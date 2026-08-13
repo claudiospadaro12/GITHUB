@@ -39,6 +39,9 @@ limite giornaliero di trade.
 3b. **Target 2x/3x l'ampiezza del range** (ORB Setups): R13 arriva a 1,5x -
    se la direzione OOS di R13 punta verso l'alto, 2x/3x e' il vicinato del
    giro successivo (coerente con R9: piu' il target e' ambizioso, meglio OOS).
+   -> **IN MISURA COME R44** (13/08 notte): TP 1,5/2,0/2,5/3,0 su U30USD
+   (firma live R15, trailing attivo - cancelli R35 per toccare la sedia)
+   e NASUSD (base pulita R13, la leva TP e' viva). Prove `R44a/b_target_*.txt`.
 4. ~~**Finestra 60' / Initial Balance**~~ — ❌ CHIUSO R35 (13/08): griglia
    15-60' su DAX e Dow, tick reali. Il 60' e' la PEGGIORE cella OOS del DAX
    (+47, e migliore IS: 23° ribaltamento) e quart'ultima sul Dow. Bonus: la

@@ -1,0 +1,56 @@
+# =====================================================================
+#  ROUND 44a: ABTG_ORB_Ottimizzato - TARGET 2x/3x sul DOW (firma R15)
+#  Si lancia con:  -Prova prove\R44a_target_DOW.txt -Etichetta r44a
+# =====================================================================
+#
+# PERCHE' (13/08/2026 notte - fascia C, backlog ORB 3b, ultima idea calda)
+#   R9 e R13 hanno lasciato una scia: "piu' il target e' ambizioso,
+#   meglio OOS" - ma la griglia si e' sempre fermata a 1,5x l'ampiezza
+#   del range. Qui si prosegue la strada: 1,5 (ancora live) / 2,0 /
+#   2,5 / 3,0. Base = LA FIRMA ESATTA della sedia 5 (R15, U30USD,
+#   magic dry-run 770612): solo long, OR 15' (14:30-14:45 server),
+#   EMA200 M5, SL 50% range, trailing EMA9 attivo, niente parziale,
+#   tetto range 0,8%, chiusura 21:00. UNA leva libera, il resto
+#   pinnato per nome (regola R35).
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   1. Col trailing EMA9 ATTIVO il TP conta poco: molte uscite le fa
+#      il trailing prima del target. Atteso: differenze piccole tra
+#      1,5 e 3,0 - e se e' cosi', e' una risposta anche quella (la
+#      leva vera era la gestione, non il target).
+#   2. Se invece 2,0-2,5 migliora DAVVERO, la scia di R13 aveva
+#      sostanza anche sotto gestione attiva.
+#
+# CRITERI (congelati ora - il round tocca una SEDIA, quindi cancelli R35)
+#   1. La cella live (1,5x) e' l'ancora. Per proporre un cambio serve
+#      che una cella nuova FUORI campione: (a) +10% di profitto,
+#      (b) DD non peggiore, (c) vicino/i di griglia anch'essi migliori
+#      dell'ancora (FASE M). Tutte e tre insieme.
+#   3. In ogni caso NESSUN cambio al dry-run senza referto e senza
+#      decisione esplicita di Claudio: la sedia 5 e' in collaudo, i
+#      collaudi non si disturbano a meta' corsa.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpAllowShort=0
+InpSLMode=3
+InpTPMode=1
+InpMaxRangePct=0.8
+InpUseEma200Filter=1
+InpUseEmaFilter=0
+InpUseVolumeFilter=0
+InpTP_R=1.0
+InpBreakeven=1
+InpTP1Pct=0
+InpUseTrailEMA=1
+InpExitOnEmaClose=0
+InpTPRangeMult=1.5||1.5||0.5||3.0||Y
