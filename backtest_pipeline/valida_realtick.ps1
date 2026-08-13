@@ -62,6 +62,22 @@ InpTPMode=0||0||0||0||N
 InpBulgeWidthMult=1.35||1.35||0||1.35||N
 InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
 "@
+} elseif($EA -eq "ABTG_GapFill"){
+  # Gap-fill weekend: taratura di tesi PINNATA, spazzola solo il target.
+  # A tick reali il filtro spread e' ACCESO (300 = 3 pip forex): la
+  # riapertura domenicale e' la trappola n.1 dichiarata in tesi.
+  $Inputs=@"
+InpTF=$en||$en||0||$en||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpGapMinATR=0.3||0.3||0||0.3||N
+InpGapMaxATR=2.0||2.0||0||2.0||N
+InpSLMode=0||0||0||0||N
+InpSLGapMult=1.0||1.0||0||1.0||N
+InpMaxHours=48||48||0||48||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpFillPct=100||50||25||100||Y
+"@
 } else {
   # SupertrendReversal (default): direzione (L/S), StMult 2.0-3.5, TP_RR 2.0-3.0, StAtrPeriod fisso 10.
   $Inputs=@"

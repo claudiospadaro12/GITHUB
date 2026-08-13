@@ -174,7 +174,27 @@ InpTPMode=0||0||0||0||N
 InpBulgeWidthMult=1.35||1.35||0||1.35||N
 InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
 "@
-} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_GapFill"){
+  # Gap-fill del weekend (Emiliano 19.04, tesi GAP_FILL_TESI.md). ~52
+  # eventi/anno a simbolo: allo screening si spazzola SOLO il target
+  # (fill 50/75/100%) -> 3 celle per simbolo. Soglie ATR e time-stop
+  # ai default di tesi, pinnati per nome. Spread filter SPENTO qui:
+  # l'OHLC lo spread della riapertura non lo vede comunque (i verdetti
+  # veri saranno solo a tick reali, con filtro acceso).
+  $Period="H1"
+  $Inputs=@"
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpGapMinATR=0.3||0.3||0||0.3||N
+InpGapMaxATR=2.0||2.0||0||2.0||N
+InpSLMode=0||0||0||0||N
+InpSLGapMult=1.0||1.0||0||1.0||N
+InpMaxHours=48||48||0||48||N
+InpMaxSpreadPts=0||0||0||0||N
+InpEntryWindowBars=3||3||0||3||N
+InpFillPct=100||50||25||100||Y
+"@
+} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill" -ForegroundColor Red; exit 1 }
 
 # --- -Tf opzionale: forza il timeframe del test e dell'EA, e separa i risultati ---
 $EAtag=$EA
