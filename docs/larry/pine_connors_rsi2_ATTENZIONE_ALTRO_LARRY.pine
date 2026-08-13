@@ -1,0 +1,9 @@
+// ⚠️ ATTENZIONE: questo e' Larry CONNORS, NON Larry Williams!
+// Fonte: TradingView "Larry Connors RSI 3 Strategy" — archiviato 13/08/2026.
+// Strategia: mean reversion con RSI(2) — solo long sopra SMA200; ingresso
+// quando RSI2 scende 3 giorni di fila (partendo da >60) e oggi e' <10;
+// uscita quando RSI2 > 70. Classico Connors, storicamente forte su
+// azioni/indici USA. CANDIDATO SEPARATO futuro (motore a oscillatore,
+// che non abbiamo): eventuale tesi e trafila proprie, FUORI dal
+// capitolo punte di Larry Williams.
+// [codice completo fornito da Claudio in conversazione]
