@@ -1,0 +1,55 @@
+# =====================================================================
+#  ROUND 36: ABTG_GapFill - WALK-FORWARD dei 9 sopravvissuti al tick
+#  Si lancia PER SIMBOLO:  -Simbolo XXX -Prova prove\R36_gapfill_walkforward.txt -Etichetta r36
+# =====================================================================
+#
+# PERCHE' (13/08/2026)
+#   Il gap-fill del weekend (tesi GAP_FILL_TESI.md) ha passato scan
+#   (48 simboli) e tick reali con filtro spread ACCESO: 9 positivi su
+#   9 giudicabili, tenuta 63-102% vs OHLC. Manca il cancello che conta:
+#   la stabilita' nel TEMPO. Split 40/60 del generico, stessa taratura
+#   di tesi pinnata, sweep del solo target (fill 50/75/100).
+#   Simboli: 225JPY U30USD F40EUR SPXUSD UKOIL USOIL EURUSD AUDUSD
+#   GBPUSD. (E35EUR: ZERO storico tick su BCM -> non giudicabile,
+#   fuori dall'imbuto senza bocciatura.)
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   Il riallineamento del gap e' un fatto STRUTTURALE (microstruttura
+#   della riapertura), non un regime: mi aspetto che il segno OOS
+#   tenga sulla maggioranza dei simboli, e che il fill preferito in IS
+#   (100 quasi ovunque, 75 sul Nikkei) resti quello in OOS. Se invece
+#   l'OOS ribalta i fill o i segni, era curve-fitting sulla finestra.
+#
+# CRITERI (congelati ORA, prima dei numeri)
+#   La cella si SCEGLIE sull'IS (miglior profitto IS del simbolo);
+#   si GIUDICA quella cella in OOS. PROMOSSO il simbolo se la cella
+#   scelta, fuori campione:
+#     1. profitto > 0
+#     2. PF >= 1,10
+#     3. DD < 10% all'1% di rischio
+#     4. almeno 8 trade (l'evento e' settimanale: n piccoli sono
+#        strutturali, vedi riserva sotto)
+#   NOTA sui 3 fill: tre valori discreti non fanno un altopiano — il
+#   fill e' una scelta di gestione, non una taratura fine. Nessun
+#   requisito di vicinato, ma un OOS col segno OPPOSTO sugli altri
+#   due fill del simbolo va segnalato nel referto come fragilita'.
+#
+# RISERVA CAMPIONI (dichiarata ora, come per la Breaking Band)
+#   Con ~1 evento/settimana filtrato, l'OOS avra' ~8-20 trade a
+#   simbolo: i promossi entrano come FAMIGLIA (piu' simboli sommati)
+#   e il verdetto operativo resta quello del vivaio (regola dei 15
+#   trade/famiglia). Nessun simbolo promosso qui e' "validato da solo".
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpGapMinATR=0.3||0.3||0||0.3||N
+InpGapMaxATR=2.0||2.0||0||2.0||N
+InpSLMode=0||0||0||0||N
+InpSLGapMult=1.0||1.0||0||1.0||N
+InpMaxHours=48||48||0||48||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpFillPct=100||50||25||100||Y
