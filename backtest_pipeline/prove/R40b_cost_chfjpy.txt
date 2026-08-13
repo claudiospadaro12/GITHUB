@@ -1,0 +1,26 @@
+# =====================================================================
+#  R40b_cost_chfjpy: Cost-to-cost WALK-FORWARD — CHFJPY (H4)
+#  Lancio: ABTG_CostToCost -Simbolo CHFJPY -Prova prove\R40b_cost_chfjpy.txt
+#          -Periodo H4 -Etichetta r40
+#  Cella dallo scan H4 (exit 0); si spazzolano SOLO i lati.
+#  CRITERI CONGELATI (come R36/R38): cella lati scelta sull'IS;
+#  PROMOSSO se in OOS: profitto>0, PF>=1.10, DD<10%, n>=8.
+#  Nota onesta: campo scan 28/48 rosso -> rischio selezione fortunata
+#  su 48 simboli; il WF esiste per questo. E35EUR escluso (no tick).
+# =====================================================================
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16388||16388||0||16388||N
+InpExitMode=0||0||0||0||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpSLBufferATR=0.2||0.2||0||0.2||N
+InpAtrPeriod=14||14||0||14||N
+InpMinRangeATR=0.0||0.0||0||0.0||N
+InpMaxBarsHold=100||100||0||100||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpWarmupBars=500||500||0||500||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=1||0||1||1||Y
