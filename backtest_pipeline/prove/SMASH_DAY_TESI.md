@@ -43,6 +43,11 @@
    completi). NON e' una strategia (niente stop/target/costi). Il
    titolo dichiara che **il risultato cambia parecchio fra lato long
    e lato short** (conclusione dietro paywall).
+8. Scheda divulgativa OOPS (fornita da Claudio, probabile sintesi
+   AI/sito): NESSUNA regola nuova — conferma integrale di 2/5/7
+   (definizione, gap minimo, stop oltre l'estremo del gap, first
+   profitable open, contesto di trend come filtro opzionale). Vale
+   come quorum sulle definizioni, non come fonte autonoma.
 
 ## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
 - La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto
