@@ -1,6 +1,6 @@
 # =====================================================================
-#  verifica_vivaio_r23.ps1 -- controlla campo-per-campo i 6 grafici del
-#  VIVAIO (R23 + EMA200) leggendo i .chr del VECCHIO MT5 (demo 50503392).
+#  verifica_vivaio_r23.ps1 -- controlla campo-per-campo i 9 grafici del
+#  VIVAIO (R23 + EMA200 + BB) leggendo i .chr del VECCHIO MT5 (50503392).
 #  ⚠️ I .chr si aggiornano al SALVATAGGIO del profilo: prima di lanciare
 #  fai File -> Profili -> Salva (sovrascrivi), poi esegui.
 #  Scrive anche Desktop\verifica_vivaio.txt da mandare a Claude.
@@ -24,7 +24,11 @@ $Attesi = @(
   @{ea="ABTG_SuperWave"; sym="U30USD"; tf="H2"; magic=770531; be=$null; comm="SW DOW H2"},
   @{ea="ABTG_SuperWave"; sym="GBPUSD"; tf="H2"; magic=770532; be=$null; comm="SW GBPUSD H2"},
   # sedia 12 (12/08): EMA200 Dow, cella centro R29 (O1/O2/TP verificati sotto)
-  @{ea="ABTG_EMA200";    sym="U30USD"; tf="H1"; magic=771531; be=$null; comm="EMA200 DOW"}
+  @{ea="ABTG_EMA200";    sym="U30USD"; tf="H1"; magic=771531; be=$null; comm="EMA200 DOW"},
+  # sedie 13-15 (13/08): Breaking Band R33/R34 (pattern e taratura sotto)
+  @{ea="ABTG_BreakingBand"; sym="GBPUSD"; tf="H1"; magic=772161; be=$null; comm="BB GBPUSD"; pat="2"},
+  @{ea="ABTG_BreakingBand"; sym="EURUSD"; tf="H1"; magic=772162; be=$null; comm="BB EURUSD"; pat="0"},
+  @{ea="ABTG_BreakingBand"; sym="AUDUSD"; tf="H1"; magic=772163; be=$null; comm="BB AUDUSD"; pat="1"}
 )
 $TFnum = @{ "H1"="16385"; "H2"="16386" }
 
@@ -41,7 +45,7 @@ foreach ($chr in $chrs) {
   if (-not $em.Success) { continue }
   # solo il nome file: l'ex5 puo' stare in una sottocartella del Navigatore
   $ea = ($em.Groups[1].Value.Trim() -split '\\')[-1]
-  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200") { continue }
+  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200" -and $ea -ne "ABTG_BreakingBand") { continue }
   $sm = [regex]::Match($txt, "symbol=([A-Za-z0-9#\.]+)"); $sym = if($sm.Success){$sm.Groups[1].Value}else{"?"}
   $sym = $sym -replace '[\.#].*$',''   # via eventuali suffissi broker (U30USD.i, U30USD#)
   $ins = @{}
@@ -56,7 +60,7 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO v4 (6 grafici, EMA200 incluso) ===" White
+Rec "=== VERIFICA VIVAIO v5 (9 grafici: R23 + EMA200 + BB) ===" White
 Rec ("terminal letto: {0}" -f $old.Name) Gray
 $errori = 0
 foreach ($a in $Attesi) {
@@ -78,6 +82,12 @@ foreach ($a in $Attesi) {
     if ([double]$ins["InpOrder1Atr"] -ne 0.20) { $ok=$false; $note += ("InpOrder1Atr={0} atteso 0.20" -f $ins["InpOrder1Atr"]) }
     if ([double]$ins["InpOrder2Atr"] -ne 0.3)  { $ok=$false; $note += ("InpOrder2Atr={0} atteso 0.3" -f $ins["InpOrder2Atr"]) }
     if ([double]$ins["InpTP_RR"] -ne 2.0)      { $ok=$false; $note += ("InpTP_RR={0} atteso 2.0" -f $ins["InpTP_RR"]) }
+  }
+  if ($a.ea -eq "ABTG_BreakingBand") {
+    if ($ins["InpPatternMode"] -ne $a.pat)               { $ok=$false; $note += ("InpPatternMode={0} atteso {1}" -f $ins["InpPatternMode"],$a.pat) }
+    if ([double]$ins["InpBulgeWidthMult"] -ne 1.35)      { $ok=$false; $note += ("InpBulgeWidthMult={0} atteso 1.35" -f $ins["InpBulgeWidthMult"]) }
+    if ([double]$ins["InpBulgeNetMoveATR"] -ne 1.0)      { $ok=$false; $note += ("InpBulgeNetMoveATR={0} atteso 1.0" -f $ins["InpBulgeNetMoveATR"]) }
+    if ($ins["InpTPMode"] -ne "0")                       { $ok=$false; $note += ("InpTPMode={0} atteso 0 (Leonardo)" -f $ins["InpTPMode"]) }
   }
   if ([double]$ins["InpRiskPercent"] -ne 1.0) { $ok=$false; $note += ("InpRiskPercent={0} atteso 1.0" -f $ins["InpRiskPercent"]) }
   if ($ins["InpComment"] -ne $a.comm) { $ok=$false; $note += ("InpComment='{0}' atteso '{1}'" -f $ins["InpComment"],$a.comm) }
