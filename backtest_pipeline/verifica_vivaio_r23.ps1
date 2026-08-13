@@ -42,9 +42,13 @@ $Attesi = @(
   @{ea="ABTG_PunteLarry"; sym="XAUUSD"; tf="H1"; magic=772343; be=$null; comm="LARRY ORO";    pat="0"; ex="1"; al="1"; ash="0"},
   @{ea="ABTG_PunteLarry"; sym="GBPJPY"; tf="H1"; magic=772344; be=$null; comm="LARRY GBPJPY"; pat="1"; ex="1"; al="1"; ash="0"},
   @{ea="ABTG_PunteLarry"; sym="GBPUSD"; tf="H1"; magic=772345; be=$null; comm="LARRY GBPUSD"; pat="0"; ex="0"; al="0"; ash="1"},
-  @{ea="ABTG_PunteLarry"; sym="EURCAD"; tf="H1"; magic=772346; be=$null; comm="LARRY EURCAD"; pat="1"; ex="0"; al="1"; ash="0"}
+  @{ea="ABTG_PunteLarry"; sym="EURCAD"; tf="H1"; magic=772346; be=$null; comm="LARRY EURCAD"; pat="1"; ex="0"; al="1"; ash="0"},
+  # sedie 27-29 (13/08): Cost-to-cost R40/R41 (H4! exit/lati sotto)
+  @{ea="ABTG_CostToCost"; sym="EURJPY"; tf="H4"; magic=772361; be=$null; comm="COST EURJPY"; ex="2"; al="1"; ash="0"},
+  @{ea="ABTG_CostToCost"; sym="GBPCAD"; tf="H4"; magic=772362; be=$null; comm="COST GBPCAD"; ex="1"; al="1"; ash="0"},
+  @{ea="ABTG_CostToCost"; sym="XAGUSD"; tf="H4"; magic=772363; be=$null; comm="COST XAGUSD"; ex="0"; al="1"; ash="0"}
 )
-$TFnum = @{ "H1"="16385"; "H2"="16386" }
+$TFnum = @{ "H1"="16385"; "H2"="16386"; "H4"="16388" }
 
 $Righe = New-Object System.Collections.ArrayList
 function Rec($s,$col){ [void]$Righe.Add($s); Write-Host $s -ForegroundColor $col }
@@ -59,7 +63,7 @@ foreach ($chr in $chrs) {
   if (-not $em.Success) { continue }
   # solo il nome file: l'ex5 puo' stare in una sottocartella del Navigatore
   $ea = ($em.Groups[1].Value.Trim() -split '\\')[-1]
-  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200" -and $ea -ne "ABTG_BreakingBand" -and $ea -ne "ABTG_GapFill" -and $ea -ne "ABTG_PunteLarry") { continue }
+  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200" -and $ea -ne "ABTG_BreakingBand" -and $ea -ne "ABTG_GapFill" -and $ea -ne "ABTG_PunteLarry" -and $ea -ne "ABTG_CostToCost") { continue }
   $sm = [regex]::Match($txt, "symbol=([A-Za-z0-9#\.]+)"); $sym = if($sm.Success){$sm.Groups[1].Value}else{"?"}
   $sym = $sym -replace '[\.#].*$',''   # via eventuali suffissi broker (U30USD.i, U30USD#)
   $ins = @{}
@@ -74,7 +78,7 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO v8.1 (20 grafici; bool true/false normalizzati) ===" White
+Rec "=== VERIFICA VIVAIO v9 (23 grafici: R23 + EMA200 + BB + GAP + LARRY + COST) ===" White
 Rec ("terminal letto: {0}" -f $old.Name) Gray
 $errori = 0
 foreach ($a in $Attesi) {
@@ -113,6 +117,15 @@ foreach ($a in $Attesi) {
     if ($ash -ne $a.ash)                          { $ok=$false; $note += ("InpAllowShort={0} atteso {1}" -f $ins["InpAllowShort"],$a.ash) }
     if ([double]$ins["InpMaxSpreadPts"] -ne 300)  { $ok=$false; $note += ("InpMaxSpreadPts={0} atteso 300" -f $ins["InpMaxSpreadPts"]) }
     if ([double]$ins["InpMaxDaysHold"] -ne 5)     { $ok=$false; $note += ("InpMaxDaysHold={0} atteso 5" -f $ins["InpMaxDaysHold"]) }
+  }
+  if ($a.ea -eq "ABTG_CostToCost") {
+    $al  = $ins["InpAllowLong"]  -replace '^true$','1' -replace '^false$','0'
+    $ash = $ins["InpAllowShort"] -replace '^true$','1' -replace '^false$','0'
+    if ($ins["InpExitMode"] -ne $a.ex)            { $ok=$false; $note += ("InpExitMode={0} atteso {1}" -f $ins["InpExitMode"],$a.ex) }
+    if ($al -ne $a.al)                            { $ok=$false; $note += ("InpAllowLong={0} atteso {1}" -f $ins["InpAllowLong"],$a.al) }
+    if ($ash -ne $a.ash)                          { $ok=$false; $note += ("InpAllowShort={0} atteso {1}" -f $ins["InpAllowShort"],$a.ash) }
+    if ([double]$ins["InpMaxSpreadPts"] -ne 300)  { $ok=$false; $note += ("InpMaxSpreadPts={0} atteso 300" -f $ins["InpMaxSpreadPts"]) }
+    if ([double]$ins["InpMaxBarsHold"] -ne 100)   { $ok=$false; $note += ("InpMaxBarsHold={0} atteso 100" -f $ins["InpMaxBarsHold"]) }
   }
   if ($a.ea -eq "ABTG_GapFill") {
     if ([double]$ins["InpFillPct"] -ne [double]$a.fill)  { $ok=$false; $note += ("InpFillPct={0} atteso {1}" -f $ins["InpFillPct"],$a.fill) }
