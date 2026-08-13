@@ -21,10 +21,11 @@ limite giornaliero di trade.
    (offset del LIMIT oltre l'estremo) quasi inesplorato - si puo' misurare
    SENZA scrivere codice, su NASUSD dove i falsi breakout abbondano (100+
    celle lo dimostrano). Candidato naturale al prossimo round dopo la batteria.
-   -> **IN MISURA COME R42** (13/08 sera, scelta di Claudio "opzione A
-   fascia C"): griglia 12 celle su NASUSD + D30EUR, tick reali M5,
-   ipotesi e criteri congelati in `R42a_fade_NASUSD.txt` /
-   `R42b_fade_DAX.txt`.
+   -> ❌ **CHIUSO R42 (13/08 sera): BOCCIATO 48/48** — nessuna cella
+   positiva in nessuna finestra su nessuno dei due simboli (PF 0,50-0,93,
+   campioni 195-333 trade/cella). Agli estremi del range di apertura non
+   c'e' edge in NESSUNA direzione: paga solo il RETEST. Non riaprire
+   senza fatti nuovi. `REFERTO_ROUND42_FADE.md`
 2. **Filtro OR/ATR** (Build Alpha): ampiezza del range normalizzata sull'ATR
    invece che su % fissa del prezzo. Piu' adattivo del min/max % attuale del
    laboratorio. Richiede un piccolo input nuovo nel lab.
