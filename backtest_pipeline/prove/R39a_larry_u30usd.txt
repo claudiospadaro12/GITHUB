@@ -1,0 +1,28 @@
+# =====================================================================
+#  R39a_larry_u30usd: Punte di Larry PER-TRADE a 100k — U30USD
+#  Lancio: ABTG_PunteLarry -Prova prove\R39a_larry_u30usd.txt -Simbolo U30USD
+#          -Deposito 100000 -Etichetta r39
+#  Cella promossa in R38 (pattern 1, exit 1, lati 1/1).
+#  Magic VERGINI 772321/772322 (gemelli: identici al centesimo o non vale).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=1
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpAllowLong=1
+InpAllowShort=1
+
+InpMagic=772321||772321||1||772322||Y

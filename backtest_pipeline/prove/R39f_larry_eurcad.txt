@@ -1,0 +1,28 @@
+# =====================================================================
+#  R39f_larry_eurcad: Punte di Larry PER-TRADE a 100k — EURCAD
+#  Lancio: ABTG_PunteLarry -Prova prove\R39f_larry_eurcad.txt -Simbolo EURCAD
+#          -Deposito 100000 -Etichetta r39
+#  Cella promossa in R38 (pattern 1, exit 0, lati 1/0).
+#  Magic VERGINI 772331/772332 (gemelli: identici al centesimo o non vale).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=1
+InpExitMode=0
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+InpMagic=772331||772331||1||772332||Y

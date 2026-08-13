@@ -1,0 +1,28 @@
+# =====================================================================
+#  R39e_larry_gbpusd: Punte di Larry PER-TRADE a 100k — GBPUSD
+#  Lancio: ABTG_PunteLarry -Prova prove\R39e_larry_gbpusd.txt -Simbolo GBPUSD
+#          -Deposito 100000 -Etichetta r39
+#  Cella promossa in R38 (pattern 0, exit 0, lati 0/1).
+#  Magic VERGINI 772329/772330 (gemelli: identici al centesimo o non vale).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=0
+InpExitMode=0
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpAllowLong=0
+InpAllowShort=1
+
+InpMagic=772329||772329||1||772330||Y

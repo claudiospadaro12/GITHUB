@@ -1,0 +1,18 @@
+# STATO NOTTE LARRY (2026-08-13 17:54)
+
+Criteri congelati: best cell Profit>0, PF>=1.10, n>=25; top 8; pattern+exit pinnati dallo scan.
+
+PROMOSSO EURAUD: profit 1886,73, PF 1,72, n 76, pattern 1, exit 1, lati 1/1
+PROMOSSO EURCAD: profit 1754,10, PF 1,70, n 90, pattern 1, exit 0, lati 1/1
+PROMOSSO GBPJPY: profit 1425,95, PF 1,68, n 59, pattern 1, exit 1, lati 1/0
+PROMOSSO U30USD: profit 1257,08, PF 1,75, n 55, pattern 1, exit 1, lati 1/1
+PROMOSSO GBPUSD: profit 1210,03, PF 1,51, n 88, pattern 0, exit 0, lati 1/1
+PROMOSSO XAUUSD: profit 1207,29, PF 2,88, n 25, pattern 0, exit 1, lati 1/0
+PROMOSSO NZDCAD: profit 1192,10, PF 1,67, n 70, pattern 0, exit 0, lati 1/1
+PROMOSSO GBPAUD: profit 1191,34, PF 1,55, n 86, pattern 1, exit 0, lati 1/1
+
+[17:54:48] compilato ABTG_PunteLarry.ex5
+[17:54:48] FASE 1: scan OHLC su 48 simboli (24 celle l'uno)
+[17:54:48] FASE 2: selezione coi criteri congelati (Profit>0, PF>=1.10, n>=25; top 8)
+[17:54:49] promossi al tick: EURAUD(P1/E1), EURCAD(P1/E0), GBPJPY(P1/E1), U30USD(P1/E1), GBPUSD(P0/E0), XAUUSD(P0/E1), NZDCAD(P0/E0), GBPAUD(P1/E0)
+FINITO 2026-08-13 17:54 - promossi al tick: 8
