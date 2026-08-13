@@ -215,7 +215,25 @@ InpExitMode=0||0||1||2||Y
 InpAllowLong=1||0||1||1||Y
 InpAllowShort=1||0||1||1||Y
 "@
-} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill, CostToCost" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_EasyTrend"){
+  # Easy Trend (tesi EASY_TREND_TESI.md). Detector PINNATO dalla CAL del
+  # 14/08 (criterio congelato: solo frequenza, banda 2-8 trade/mese ->
+  # PivotSource 0 come il Pine di TISTA, PivotR 3). H1. Spazzola SOLO
+  # TP_R e lati: 2 x 4 = 8 celle/simbolo. Spread spento allo screening.
+  $Period="H1"
+  $Inputs=@"
+InpTF=16385||16385||0||16385||N
+InpPivotSource=0||0||0||0||N
+InpPivotR=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxSpreadPts=0||0||0||0||N
+InpEntryWindowBars=3||3||0||3||N
+InpWarmupBars=500||500||0||500||N
+InpTP_R=1.0||1.0||0.5||1.5||Y
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=1||0||1||1||Y
+"@
+} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill, CostToCost, EasyTrend" -ForegroundColor Red; exit 1 }
 
 # --- -Tf opzionale: forza il timeframe del test e dell'EA, e separa i risultati ---
 $EAtag=$EA
