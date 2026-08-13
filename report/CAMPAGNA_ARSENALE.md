@@ -4,7 +4,7 @@ L'obiettivo dichiarato: **10 candidati validati** per poter ragionare sulla
 doppia prop. Oggi le sedie occupate sono 5 (+1 in macchina). Questo file è
 il piano della campagna + le decisioni aperte che spettano a Claudio.
 
-## Lo stato delle sedie (aggiornato 13/08 sera)
+## Lo stato delle sedie (aggiornato 13/08 pomeriggio, secondo giro)
 
 | # | Candidato | Stato |
 |---|---|---|
@@ -26,8 +26,10 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 | 16 | **Gap-fill GBPUSD H1** (fill 100, R36→R37) | 🌱 VIVAIO dal 13/08 (772231, verificato 12/12) |
 | 17 | **Gap-fill EURUSD H1** (fill 50, R36→R37) | 🌱 VIVAIO dal 13/08 (772232, verificato 12/12) |
 | 18 | **Gap-fill AUDUSD H1** (fill 100, R36→R37) | 🌱 VIVAIO dal 13/08 (772233, verificato 12/12) |
+| 19 | **Gap-fill Dow H1** (fill 100, R36) | 👁️ OSSERVAZIONE dal 13/08 (772234, verificato 14/14) — porta 100k CHIUSA (R37: cumulo lunedì, bocciato anche a mezzo peso) |
+| 20 | **Gap-fill Nikkei H1** (fill 75, R36) | 👁️ OSSERVAZIONE dal 13/08 (772235, verificato 14/14) — porta 100k CHIUSA (idem) |
 
-**18 sedie NOMINATE** (5 titolari + 13 in vivaio, obiettivo dei 10
+**20 sedie NOMINATE** (5 titolari + 13 in vivaio + 2 in osservazione, obiettivo dei 10
 candidati SUPERATO — e il gap-fill di Emiliano e' passato dall'aula al
 campo in UN giorno, record assoluto): l'obiettivo della campagna e' passato da "trovare
 candidati" a "maturare il vivaio". **Regola vivaio AGGIORNATA (decisione
