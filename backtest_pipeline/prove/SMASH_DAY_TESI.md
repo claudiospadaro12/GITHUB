@@ -94,6 +94,13 @@
    short); uscite alternative: R-based o flip di struttura. Da
    formalizzare in tesi propria PRIMA di scrivere l'EA del ramo B.
    Archivio: docs/larry/pine_market_structure_smollet.pine
+12. **Pine "Larry Williams Strategies Indicator" (aberger96, 2021)**
+   — seconda conferma indipendente: punta di breve = pattern a 3
+   barre "ringed" (estremo piu' basso/alto di entrambe le vicine),
+   valida quando il mercato supera l'estremo opposto della barra-
+   punta. BONUS: canale SMA(3) dei massimi e dei minimi (attrezzo di
+   gestione/trailing dal libro, in cassetta, non nei pattern).
+   Archivio: docs/larry/pine_williams_strategies_aberger96.pine
 
 ## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
 - La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto

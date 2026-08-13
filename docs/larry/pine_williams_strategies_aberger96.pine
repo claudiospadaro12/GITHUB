@@ -1,0 +1,7 @@
+// Fonte: TradingView, "Larry Williams Strategies Indicator" (c) aberger96,
+// marzo 2021, Pine v3 — archiviato il 13/08/2026 per studio.
+// Decodifica ABTG: punta a 3 barre (ringed: estremo piu' basso/alto di
+// entrambe le vicine) + conferma con superamento dell'estremo opposto
+// della barra-punta; canale SMA(3) di massimi e minimi come attrezzo
+// di gestione. Complementare alla regola della violazione (fonte 11).
+// [codice completo fornito da Claudio in conversazione]
