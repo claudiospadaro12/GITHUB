@@ -1,6 +1,6 @@
 # =====================================================================
-#  verifica_vivaio_r23.ps1 -- controlla campo-per-campo i 9 grafici del
-#  VIVAIO (R23 + EMA200 + BB) leggendo i .chr del VECCHIO MT5 (50503392).
+#  verifica_vivaio_r23.ps1 -- controlla campo-per-campo i 12 grafici del
+#  VIVAIO (R23 + EMA200 + BB + GAP) leggendo i .chr del VECCHIO MT5 (50503392).
 #  ⚠️ I .chr si aggiornano al SALVATAGGIO del profilo: prima di lanciare
 #  fai File -> Profili -> Salva (sovrascrivi), poi esegui.
 #  Scrive anche Desktop\verifica_vivaio.txt da mandare a Claude.
@@ -28,7 +28,11 @@ $Attesi = @(
   # sedie 13-15 (13/08): Breaking Band R33/R34 (pattern e taratura sotto)
   @{ea="ABTG_BreakingBand"; sym="GBPUSD"; tf="H1"; magic=772161; be=$null; comm="BB GBPUSD"; pat="2"},
   @{ea="ABTG_BreakingBand"; sym="EURUSD"; tf="H1"; magic=772162; be=$null; comm="BB EURUSD"; pat="0"},
-  @{ea="ABTG_BreakingBand"; sym="AUDUSD"; tf="H1"; magic=772163; be=$null; comm="BB AUDUSD"; pat="1"}
+  @{ea="ABTG_BreakingBand"; sym="AUDUSD"; tf="H1"; magic=772163; be=$null; comm="BB AUDUSD"; pat="1"},
+  # sedie 16-18 (13/08): Gap-fill R36/R37 (fill e taratura sotto)
+  @{ea="ABTG_GapFill"; sym="GBPUSD"; tf="H1"; magic=772231; be=$null; comm="GAP GBPUSD"; fill="100"},
+  @{ea="ABTG_GapFill"; sym="EURUSD"; tf="H1"; magic=772232; be=$null; comm="GAP EURUSD"; fill="50"},
+  @{ea="ABTG_GapFill"; sym="AUDUSD"; tf="H1"; magic=772233; be=$null; comm="GAP AUDUSD"; fill="100"}
 )
 $TFnum = @{ "H1"="16385"; "H2"="16386" }
 
@@ -45,7 +49,7 @@ foreach ($chr in $chrs) {
   if (-not $em.Success) { continue }
   # solo il nome file: l'ex5 puo' stare in una sottocartella del Navigatore
   $ea = ($em.Groups[1].Value.Trim() -split '\\')[-1]
-  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200" -and $ea -ne "ABTG_BreakingBand") { continue }
+  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200" -and $ea -ne "ABTG_BreakingBand" -and $ea -ne "ABTG_GapFill") { continue }
   $sm = [regex]::Match($txt, "symbol=([A-Za-z0-9#\.]+)"); $sym = if($sm.Success){$sm.Groups[1].Value}else{"?"}
   $sym = $sym -replace '[\.#].*$',''   # via eventuali suffissi broker (U30USD.i, U30USD#)
   $ins = @{}
@@ -60,7 +64,7 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO v5 (9 grafici: R23 + EMA200 + BB) ===" White
+Rec "=== VERIFICA VIVAIO v6 (12 grafici: R23 + EMA200 + BB + GAP) ===" White
 Rec ("terminal letto: {0}" -f $old.Name) Gray
 $errori = 0
 foreach ($a in $Attesi) {
@@ -88,6 +92,13 @@ foreach ($a in $Attesi) {
     if ([double]$ins["InpBulgeWidthMult"] -ne 1.35)      { $ok=$false; $note += ("InpBulgeWidthMult={0} atteso 1.35" -f $ins["InpBulgeWidthMult"]) }
     if ([double]$ins["InpBulgeNetMoveATR"] -ne 1.0)      { $ok=$false; $note += ("InpBulgeNetMoveATR={0} atteso 1.0" -f $ins["InpBulgeNetMoveATR"]) }
     if ($ins["InpTPMode"] -ne "0")                       { $ok=$false; $note += ("InpTPMode={0} atteso 0 (Leonardo)" -f $ins["InpTPMode"]) }
+  }
+  if ($a.ea -eq "ABTG_GapFill") {
+    if ([double]$ins["InpFillPct"] -ne [double]$a.fill)  { $ok=$false; $note += ("InpFillPct={0} atteso {1}" -f $ins["InpFillPct"],$a.fill) }
+    if ([double]$ins["InpGapMinATR"] -ne 0.3)            { $ok=$false; $note += ("InpGapMinATR={0} atteso 0.3" -f $ins["InpGapMinATR"]) }
+    if ([double]$ins["InpGapMaxATR"] -ne 2.0)            { $ok=$false; $note += ("InpGapMaxATR={0} atteso 2.0" -f $ins["InpGapMaxATR"]) }
+    if ([double]$ins["InpMaxHours"] -ne 48)              { $ok=$false; $note += ("InpMaxHours={0} atteso 48" -f $ins["InpMaxHours"]) }
+    if ([double]$ins["InpMaxSpreadPts"] -ne 300)         { $ok=$false; $note += ("InpMaxSpreadPts={0} atteso 300 (ACCESO: trappola riapertura)" -f $ins["InpMaxSpreadPts"]) }
   }
   if ([double]$ins["InpRiskPercent"] -ne 1.0) { $ok=$false; $note += ("InpRiskPercent={0} atteso 1.0" -f $ins["InpRiskPercent"]) }
   if ($ins["InpComment"] -ne $a.comm) { $ok=$false; $note += ("InpComment='{0}' atteso '{1}'" -f $ins["InpComment"],$a.comm) }
