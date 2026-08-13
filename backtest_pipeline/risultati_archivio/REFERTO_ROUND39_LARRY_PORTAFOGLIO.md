@@ -36,7 +36,14 @@ Shortlist su dati full-period (mezzo punto, conferma forward); XAUUSD
 di FAMIGLIA (regola dei 15, famiglia = 6 mercati: ~11 trade/mese
 attesi, verdetto vivaio in ~6-8 settimane!).
 
-## PROPOSTA (decisione a Claudio): VIVAIO famiglia LARRY = 6 grafici
+## PROPOSTA (decisione a Claudio): VIVAIO famiglia LARRY = 6 grafici — ✅ ESEGUITA il 13/08
+**"VAI COL VIVAIO LARRY" (13/08 sera).** `deploy_vivaio_larry.ps1` sul
+VPS (EA compilato in loco, 71.798 byte, pinnato v1.00) + 6 preset;
+legge dello screenshot su tutte e sei le finestre — e ha parato il
+**9° errore**: sul GBPUSD era stato caricato il preset del GAP (magic
+772231 duplicato!), ricaricato quello giusto prima dell'OK. Verifica
+meccanica v8.1: **TUTTO OK 20/20** (falsi errori bool true/false
+corretti nel controllore, non nei grafici). Terzo deploy di giornata.
 U30USD (punta/R/L+S) · EURAUD (punta/R/L+S) · XAUUSD (libro/R/L) ·
 GBPJPY (punta/R/L) · GBPUSD (libro/FPO/S) · EURCAD (punta/FPO/L) —
 sedie 21-26, H1, rischio 1%, spread 300 acceso, magic forward VERGINI
