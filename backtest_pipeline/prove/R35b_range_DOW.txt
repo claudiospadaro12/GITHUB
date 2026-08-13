@@ -1,0 +1,56 @@
+# =====================================================================
+#  ROUND 35b: ABTG_Dow_Apertura_US - LA FINESTRA DEL RANGE (15-60')
+#  Si lancia con:  -Prova prove\R35b_range_DOW.txt -Etichetta r35
+# =====================================================================
+#
+# PERCHE' (13/08/2026)
+#   Gemello del R35a sul secondo indice validato. La ricetta Dow (R6:
+#   geometria del DAX SCALATA sul prezzo, buffer 1000 / offset 400,
+#   SOLO LONG - decimo ribaltamento sui lati) ha visto solo il range
+#   25/35/45. Qui 15-60 a passi di 5, unica leva libera, tutto il
+#   resto pinnato per nome. 10 celle IS + 10 OOS.
+#   Il confronto coi risultati DAX dice se il confine dell'altopiano
+#   e' un fatto delle APERTURE (stesso profilo su due indici) o un
+#   fatto del singolo mercato.
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   Stessa gobba del DAX, centro 35: il meccanismo e' delle aperture,
+#   non del DAX. Se il Dow preferisce sistematicamente finestre piu'
+#   LUNGHE (50-60), la spiegazione candidata e' la sessione USA (piu'
+#   volume, movimento che parte dopo) - ma andrebbe RI-provata su
+#   finestra fresca prima di crederci.
+#
+# CRITERI (congelati ora, identici al R35a)
+#   1. Spearman IS->OOS negativo -> NIENTE cambia.
+#   2. Cella sfidante promossa SOLO se OOS: +10% profitto, DD non
+#      peggiore, ENTRAMBI i vicini migliori della cella live (35).
+#   3. Nessun cambio live senza i tre cancelli. Mappa, non caccia.
+#
+# NOTA FINESTRA: il Dow in retest l'ha gia' vista in R6 (stessa
+#   avvertenza: mezzo punto, la conferma e' forward).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpBufferPoints=1000||1000||0||1000||N
+InpRetestOffsetPts=400||400||0||400||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpRangeMinutes=35||15||5||60||Y

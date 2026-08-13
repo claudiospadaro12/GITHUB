@@ -1,0 +1,63 @@
+# =====================================================================
+#  ROUND 35a: ABTG_DAX_Apertura_EU - LA FINESTRA DEL RANGE (15-60')
+#  Si lancia con:  -Prova prove\R35a_range_DAX.txt -Etichetta r35
+# =====================================================================
+#
+# PERCHE' (13/08/2026)
+#   Backlog ORB, punto 4: la finestra 60' (Initial Balance) non e' MAI
+#   stata provata. Le fasi A/D/M hanno spazzolato 5-45 su uno split
+#   diverso (IS fino a giugno 2025 / OOS da luglio); qui si rifa' la
+#   domanda INTERA, 15-60 a passi di 5, in UNA griglia sola, con lo
+#   split 40/60 del generico e la ricetta VALIDATA pinnata per nome:
+#   RETEST - buffer 500 - offset 200 - SOLO LONG - TP1 1R/50%/BE -
+#   trailing PREVBAR M5 soglia 0 (R24) - rischio 1%.
+#   L'unica leva libera e' la durata del range. 10 celle IS + 10 OOS.
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   La curva OOS e' una GOBBA centrata su 35-45:
+#     - 15-20: il range e' rumore (FASE A l'ha gia' mostrato);
+#     - 50-60: la finestra chiude troppo tardi, il movimento e' gia'
+#       partito, il retest arriva piu' raro -> meno trade, meno profitto.
+#   Se invece 50-60 DOMINA, il concetto "Initial Balance" ha sostanza
+#   vera e merita un round dedicato. Lo scrivo adesso perche' dopo non
+#   si possa raccontare diversamente.
+#
+# CRITERI (congelati ora, non dopo)
+#   1. Spearman IS->OOS sul profitto negativo -> NIENTE cambia, punto.
+#   2. Per spostare la cella live (35) serve una cella che FUORI
+#      campione: (a) faccia almeno +10% di profitto, (b) NON peggiori
+#      l'Equity DD %, (c) abbia ENTRAMBI i vicini di griglia anch'essi
+#      migliori della cella live. Tutte e tre insieme (regola FASE M:
+#      un picco isolato non e' un risultato).
+#   3. Qualunque esito, NESSUN cambio live senza i tre cancelli sopra:
+#      il round serve a mappare il CONFINE dell'altopiano, che e'
+#      conoscenza comunque (centro dell'altopiano, mai la cella top).
+#
+# NOTA FINESTRA: non vergine (A/D/M l'hanno gia' guardata su split
+#   diverso). Un esito positivo vale mezzo punto; la conferma e' forward.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpBufferPoints=500||500||0||500||N
+InpRetestOffsetPts=200||200||0||200||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpRangeMinutes=35||15||5||60||Y
