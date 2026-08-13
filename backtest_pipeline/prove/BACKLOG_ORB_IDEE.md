@@ -21,6 +21,10 @@ limite giornaliero di trade.
    (offset del LIMIT oltre l'estremo) quasi inesplorato - si puo' misurare
    SENZA scrivere codice, su NASUSD dove i falsi breakout abbondano (100+
    celle lo dimostrano). Candidato naturale al prossimo round dopo la batteria.
+   -> **IN MISURA COME R42** (13/08 sera, scelta di Claudio "opzione A
+   fascia C"): griglia 12 celle su NASUSD + D30EUR, tick reali M5,
+   ipotesi e criteri congelati in `R42a_fade_NASUSD.txt` /
+   `R42b_fade_DAX.txt`.
 2. **Filtro OR/ATR** (Build Alpha): ampiezza del range normalizzata sull'ATR
    invece che su % fissa del prezzo. Piu' adattivo del min/max % attuale del
    laboratorio. Richiede un piccolo input nuovo nel lab.

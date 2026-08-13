@@ -1,0 +1,75 @@
+# =====================================================================
+#  ROUND 42a: ABTG_Nasdaq_Apertura_US - FADE DEL FALSO BREAKOUT (NASUSD)
+#  Si lancia con:  -Prova prove\R42a_fade_NASUSD.txt -Etichetta r42
+# =====================================================================
+#
+# PERCHE' (13/08/2026 sera - prima idea di fascia C, backlog ORB n.1)
+#   Il breakout puro sul Nasdaq NON paga: 100+ celle l'hanno mostrato
+#   (R7, 02/08, R25), e Build Alpha indica il fade del falso breakout
+#   come setup n.2. L'EA Apertura ha GIA' il ramo RANGE_FADE (LIMIT
+#   contro gli estremi del range di apertura, SL oltre l'estremo in
+#   ATR, TP in R verso il centro): si misura SENZA scrivere codice.
+#   NASUSD e' il candidato naturale: dove il breakout fallisce, i
+#   falsi breakout abbondano per definizione.
+#
+# COME (griglia 12 celle, tick reali M5)
+#   Ricetta di gestione PINNATA alla famiglia (TP1 1R/50% + BE +
+#   trailing PREVBAR M5, un ciclo al giorno, rischio 1%, filtro
+#   volumi SPENTO: il fade non e' una rottura da confermare).
+#   Tre leve libere, tutte SPECIFICHE del fade:
+#     - InpRangeMinutes 15/35 (range corto classico vs il 35 che
+#       R35 ha incoronato sul DAX);
+#     - InpFadeOffsetPts 0/200/400 (sull'estremo vs 2/4 punti
+#       indice oltre: si fada solo lo spike piu' profondo);
+#     - InpAtrSlMult 1.0/1.5 (stop stretto vs standard famiglia).
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   1. Il fade e' POSITIVO su NASUSD dove il breakout era rosso:
+#      stessa geometria, lato opposto del bancone.
+#   2. L'offset AIUTA (200-400 > 0): entrare solo sullo spike
+#      profondo filtra i tocchi timidi che poi rompono davvero.
+#   3. Rischio onesto dichiarato: la gestione della famiglia
+#      (parziale+trailing) e' nata per i trend post-rottura, non
+#      per il ritorno al centro - puo' strozzare il motore. Se il
+#      round muore, prima di seppellire l'idea va detto se e' morto
+#      il MOTORE o la GESTIONE.
+#
+# CRITERI (congelati ora, non dopo)
+#   1. Cella scelta sull'IS (miglior profitto con n>=30), giudicata
+#      FUORI campione: Profit>0, PF>=1,10, DD<10%, n>=30.
+#   2. Regola FASE M: la cella promossa deve avere i vicini di
+#      griglia anch'essi verdi OOS (un picco isolato non e' un
+#      risultato).
+#   3. Vale la regola del regime (fascia B): IS rosso / OOS verde =
+#      riserva regime, non promozione.
+#   4. Se passa: giro per-trade a 100k con magic vergini, poi
+#      portafoglio contro le 27 serie - lo standard "aggiunge e
+#      abbassa" decide, come per tutti.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpEntryMode=3||3||0||3||N
+InpRangeMode=0||0||0||0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=120||120||0||120||N
+InpRangeMinutes=15||15||20||35||Y
+InpFadeOffsetPts=0||0||200||400||Y
+InpAtrSlMult=1.0||1.0||0.5||1.5||Y

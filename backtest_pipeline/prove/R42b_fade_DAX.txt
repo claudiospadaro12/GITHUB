@@ -1,0 +1,62 @@
+# =====================================================================
+#  ROUND 42b: ABTG_DAX_Apertura_EU - FADE DEL FALSO BREAKOUT (D30EUR)
+#  Si lancia con:  -Prova prove\R42b_fade_DAX.txt -Etichetta r42
+# =====================================================================
+#
+# PERCHE' (13/08/2026 sera - gemello del R42a, stesso round)
+#   Il commento nel codice del ramo RANGE_FADE dice da mesi "mercati
+#   whipsaw, es. DAX" - e non e' MAI stato misurato. Il DAX ha gia'
+#   un titolare (Apertura EU, RETEST long) che vive sulla rottura
+#   RIUSCITA: il fade vivrebbe sui giorni opposti, quelli in cui
+#   l'apertura sbatte sugli estremi e torna indietro. Se entrambi
+#   avessero un edge, sarebbero complementari per costruzione.
+#   ATTENZIONE dichiarata: stesso mercato e stessa sessione del
+#   titolare - se il fade passasse, la prova di portafoglio dovra'
+#   guardare il cumulo DAX con occhio cattivo (lezione R37: il
+#   cumulo della riapertura ha bocciato la famiglia gap intera).
+#
+# COME: griglia IDENTICA al R42a (12 celle, tick reali M5), sessione
+#   DAX 08:00 server BCM (09:00 IT). Stesse tre leve libere:
+#   RangeMinutes 15/35, FadeOffsetPts 0/200/400, AtrSlMult 1.0/1.5.
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   1. Il fade DAX e' positivo ma meno pulito del Nasdaq: il DAX
+#      ha piu' mattine direzionali (il RETEST long ci vive sopra),
+#      quindi piu' stop-out del fade.
+#   2. Il 35' batte il 15' anche qui (coerenza con R35: l'apertura
+#      DAX "vera" si scrive in mezz'ora, non in un quarto d'ora).
+#   3. Rischio onesto: come R42a, la gestione parziale+trailing
+#      puo' strozzare il ritorno al centro.
+#
+# CRITERI: IDENTICI e congelati col R42a (cella scelta sull'IS con
+#   n>=30, giudicata OOS: Profit>0, PF>=1,10, DD<10%, n>=30; regola
+#   FASE M sui vicini; regola del regime; se passa -> per-trade e
+#   portafoglio con lo standard "aggiunge e abbassa").
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpEntryMode=3||3||0||3||N
+InpRangeMode=0||0||0||0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=120||120||0||120||N
+InpRangeMinutes=15||15||20||35||Y
+InpFadeOffsetPts=0||0||200||400||Y
+InpAtrSlMult=1.0||1.0||0.5||1.5||Y
