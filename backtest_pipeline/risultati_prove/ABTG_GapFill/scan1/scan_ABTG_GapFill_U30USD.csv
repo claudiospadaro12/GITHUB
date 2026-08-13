@@ -1,0 +1,4 @@
+Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,InpFillPct,InpTF,InpAtrPeriodD1,InpGapMinATR,InpGapMaxATR,InpSLMode,InpSLGapMult,InpAtrSlMult,InpMaxHours,InpMaxSpreadPts,InpEntryWindowBars,InpRiskPercent,InpMagic,InpComment,InpVerbose
+2,549.79,18.32633,1.52642,1.80383,4.13122,2.9928,30,-1.1313,-186,-185.80,100,16385,14,0.3,2,0,1,1.5,48,0,3,1,772201,GAPFILL,1
+0,-163.07,-5.43567,0.82962,-0.47480,-1.89801,3.4115,30,-1.1690,-186,-185.80,50,16385,14,0.3,2,0,1,1.5,48,0,3,1,772201,GAPFILL,1
+1,159.59,5.31967,1.15795,0.52361,1.45621,3.0097,30,-1.1509,-186,-185.80,75,16385,14,0.3,2,0,1,1.5,48,0,3,1,772201,GAPFILL,1
