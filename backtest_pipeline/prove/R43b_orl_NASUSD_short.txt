@@ -1,6 +1,6 @@
 # =====================================================================
 #  ROUND 43b: ABTG_Nasdaq_Apertura_US - SPECCHIO: SELL SU ORH, SOLO SHORT
-#  Si lancia con:  -Prova prove\R43b_orl_NASUSD_short.txt -Etichetta r43
+#  Si lancia con:  -Prova prove\R43b_orl_NASUSD_short.txt -Etichetta r43b
 # =====================================================================
 #
 # PERCHE': lo specchio del R43a (SELL LIMIT sul massimo del range,

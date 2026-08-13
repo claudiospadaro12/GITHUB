@@ -1,6 +1,6 @@
 # =====================================================================
 #  ROUND 43a: ABTG_Nasdaq_Apertura_US - RIMBALZO SU ORL, SOLO LONG
-#  Si lancia con:  -Prova prove\R43a_orl_NASUSD_long.txt -Etichetta r43
+#  Si lancia con:  -Prova prove\R43a_orl_NASUSD_long.txt -Etichetta r43a
 # =====================================================================
 #
 # PERCHE' (13/08/2026 sera - fascia C n.3, Build Alpha setup 4)

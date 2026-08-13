@@ -1,6 +1,6 @@
 # =====================================================================
 #  ROUND 43d: ABTG_DAX_Apertura_EU - SPECCHIO: SELL SU ORH, SOLO SHORT
-#  Si lancia con:  -Prova prove\R43d_orl_DAX_short.txt -Etichetta r43
+#  Si lancia con:  -Prova prove\R43d_orl_DAX_short.txt -Etichetta r43d
 # =====================================================================
 #
 # PERCHE': lo specchio DAX del R43c (SELL LIMIT sull'ORH). Completa

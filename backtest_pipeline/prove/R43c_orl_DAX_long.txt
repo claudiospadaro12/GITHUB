@@ -1,6 +1,6 @@
 # =====================================================================
 #  ROUND 43c: ABTG_DAX_Apertura_EU - RIMBALZO SU ORL, SOLO LONG (D30EUR)
-#  Si lancia con:  -Prova prove\R43c_orl_DAX_long.txt -Etichetta r43
+#  Si lancia con:  -Prova prove\R43c_orl_DAX_long.txt -Etichetta r43c
 # =====================================================================
 #
 # PERCHE': gemello DAX del R43a - comprare il supporto del range di
