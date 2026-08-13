@@ -9,7 +9,9 @@
 
 ## 🟢 RIPARTI DA QUI — stato al 13/08 sera (le sezioni sotto questa sono STORICHE)
 **Per il quadro vivo leggere, in ordine:** `report/DIARIO.md` (righe 11-13/08),
-`report/CAMPAGNA_ARSENALE.md` (29 sedie), `report/SCHEDA_SECONDA_PROP.md`
+`report/ASPETTATIVE_REALISTICHE.md` (**leggere PRIMA di citare qualunque
+cifra**: il portafoglio simulato e' un metro di laboratorio, non uno
+stipendio), `report/CAMPAGNA_ARSENALE.md` (29 sedie), `report/SCHEDA_SECONDA_PROP.md`
 (dossier D3), `backtest_pipeline/prove/BREAKING_BAND_TESI.md` e
 `prove/GAP_FILL_TESI.md`.
 
