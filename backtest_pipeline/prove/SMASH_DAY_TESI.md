@@ -61,6 +61,15 @@
    regole d'uso dalle live. Trappola gia' nota: il cost-to-cost e'
    mean reversion dentro il range — parente del rimbalzo su ORL
    (backlog ORB n.3), da non confondere con questo EA.
+10. **File "EM__Indicator__Punte_Di_Larry__MT5.ex5"** (caricato da
+   Claudio, 13/08 — archiviato in `mql5/Indicators/esterni/`):
+   SECONDO indicatore del corso su Larry (oltre ad "A Cena Con
+   Larry"). Ex5 CIFRATO (17.948 byte, build moderna: leggibile solo
+   il copyright): logica NON estraibile dal binario. Per ricostruirla
+   servono: screenshot della finestra INPUT + screenshot di un
+   GRAFICO con l'indicatore attivo (dal comportamento visivo si
+   ricava la geometria, come per il Pine di Claudio). Ramo B resta
+   in istruttoria.
 
 ## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
 - La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto
