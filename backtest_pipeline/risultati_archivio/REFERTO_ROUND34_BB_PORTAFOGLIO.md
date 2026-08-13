@@ -31,7 +31,13 @@ assoluto (+7.400 in 13 mesi) ma pregiato in diversificazione. Il vivaio
 decide, con collaudo pieno: 10 trade/mercato, 30/famiglia (BB = 3
 mercati sommati, ~4-5 trade/mese di famiglia -> verdetto in ~6 mesi).
 
-## PROPOSTA (decisione a Claudio): VIVAIO a 3 grafici
+## PROPOSTA (decisione a Claudio): VIVAIO a 3 grafici — ✅ ESEGUITA il 13/08
+**"VAI COL VIVAIO BB" (13/08 mattina).** `deploy_vivaio_bb.ps1` sul VPS
+(EA compilato in loco, 103.450 byte, sorgente pinnato al commit v1.02) +
+3 preset caricati; screenshot delle 3 finestre verificati campo-per-campo
+(legge dello screenshot) e **verifica meccanica dai .chr: TUTTO OK 9/9**.
+Chiesto il salto diretto al 100k: NO — trafila imbuto→vivaio→100k
+invariata (regola 30/07 + D5 legata al primo collaudo).
 GBPUSD H1 combinato · EURUSD H1 solo Continuazione · AUDUSD H1 solo
 Inversione — rischio 1%, TPMode 0 (Leonardo), taratura 1,35/1,0,
 magic forward VERGINI 772161/772162/772163, commenti "BB GBPUSD" /

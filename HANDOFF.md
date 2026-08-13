@@ -3,20 +3,26 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
 >
-> Ultimo aggiornamento: **2026-08-12 sera**. **Branch unico di lavoro: `lavoro`** (qui è consolidato TUTTO).
+> Ultimo aggiornamento: **2026-08-13 mattina**. **Branch unico di lavoro: `lavoro`** (qui è consolidato TUTTO).
 
 ---
 
-## 🟢 RIPARTI DA QUI — stato al 12/08 sera (le sezioni sotto questa sono STORICHE)
-**Per il quadro vivo leggere, in ordine:** `report/DIARIO.md` (righe 11-12/08),
-`report/CAMPAGNA_ARSENALE.md` (12 sedie), `report/SCHEDA_SECONDA_PROP.md`
+## 🟢 RIPARTI DA QUI — stato al 13/08 mattina (le sezioni sotto questa sono STORICHE)
+**Per il quadro vivo leggere, in ordine:** `report/DIARIO.md` (righe 11-13/08),
+`report/CAMPAGNA_ARSENALE.md` (15 sedie), `report/SCHEDA_SECONDA_PROP.md`
 (dossier D3), `backtest_pipeline/prove/BREAKING_BAND_TESI.md`.
 
-- **Vivaio a 7 sul conto piccolo 50503392** (verificato 6/6 dai .chr):
-  MAXMIN ORO 770402 · PTE Dow/GBP/JPY 771321-23 · SW Dow/GBP 770531-32 ·
-  **EMA200 Dow 771531 (sedia 12, deployata 12/08)**. Collaudo 10 trade/
-  mercato, verdetto 30/famiglia. Squadra 100k sul -V3 invariata (+ pagella
-  doppia automatica ogni sera 23:15 sul Desktop VPS).
+- **Vivaio a 10 sul conto piccolo 50503392** (verificato **9/9** dai .chr,
+  13/08): MAXMIN ORO 770402 · PTE Dow/GBP/JPY 771321-23 · SW Dow/GBP
+  770531-32 · EMA200 Dow 771531 · **Breaking Band GBPUSD/EURUSD/AUDUSD
+  772161-63 (sedie 13-15, deployate 13/08: pattern 2/0/1, taratura CAL1
+  1,35/1,0, TPMode 0)**. Collaudo 10 trade/mercato, verdetto 30/famiglia
+  (BB = famiglia unica sui 3 mercati). Squadra 100k sul -V3 invariata
+  (+ pagella doppia automatica ogni sera 23:15 sul Desktop VPS).
+- **Breaking Band: dall'aula al vivaio in ~36 ore** — tesi → EA v1.02 →
+  CAL1 → tick 7/7 → R33 walk-forward (3 promossi) → R34 portafoglio
+  **12→15 serie, +133.654, DD 8,74%, code MC tutte giù** (seconda volta
+  nella storia). Salto diretto al 100k RIFIUTATO: trafila invariata.
 - **Nasdaq base ALLINEATO 12/08** (volumi ON + AND, rischio 0,25, verificato
   5/5): primo collaudo dal vivo nelle pagelle.
 - **Pulizia chiusa 4/4** (ultimo: SupRev_DOW_H1 da flat). Flotta 20 grafici,

@@ -4,7 +4,7 @@ L'obiettivo dichiarato: **10 candidati validati** per poter ragionare sulla
 doppia prop. Oggi le sedie occupate sono 5 (+1 in macchina). Questo file è
 il piano della campagna + le decisioni aperte che spettano a Claudio.
 
-## Lo stato delle sedie (aggiornato 11/08 sera)
+## Lo stato delle sedie (aggiornato 13/08 mattina)
 
 | # | Candidato | Stato |
 |---|---|---|
@@ -20,11 +20,16 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 | 10 | **SuperWave Dow H2** | 🌱 VIVAIO dall'11/08 (770531) |
 | +1 | **SuperWave GBPUSD H2** | 🌱 VIVAIO dall'11/08 (770532) |
 | 12 | **EMA200 Dow H1** (scan→R29 primo 30/30→R31) | 🌱 VIVAIO dal 12/08 (771531, verificato 6/6) |
+| 13 | **Breaking Band GBPUSD H1** (combinato, R33→R34) | 🌱 VIVAIO dal 13/08 (772161, verificato 9/9) |
+| 14 | **Breaking Band EURUSD H1** (solo CONT, R33→R34) | 🌱 VIVAIO dal 13/08 (772162, verificato 9/9) |
+| 15 | **Breaking Band AUDUSD H1** (solo INV, R33→R34) | 🌱 VIVAIO dal 13/08 (772163, verificato 9/9) |
 
-**Le 10 sedie sono NOMINATE** (5 titolari + 6 in vivaio): l'obiettivo
-della campagna e' passato da "trovare candidati" a "maturare il vivaio"
-(10 trade/mercato = collaudo, 30/famiglia = verdetto). D2 (perimetro
-forex): risposta ARRIVATA dai fatti — 3 sedie su 6 del vivaio sono forex.
+**15 sedie NOMINATE** (5 titolari + 10 in vivaio, obiettivo dei 10
+candidati SUPERATO): l'obiettivo della campagna e' passato da "trovare
+candidati" a "maturare il vivaio" (10 trade/mercato = collaudo,
+30/famiglia = verdetto; la famiglia BB = 3 mercati sommati). D2
+(perimetro forex): risposta ARRIVATA dai fatti — 6 sedie su 10 del
+vivaio sono forex, e le tre BB (13/08) sono figlie del corso di Claudio.
 Nota dell'11/08: Alta Velocita' testata (2 versioni, 1 giorno) e CHIUSA
 con referto — il tritacarne funziona anche in bocciatura.
 
