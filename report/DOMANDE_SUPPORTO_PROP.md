@@ -1,5 +1,10 @@
 # DOMANDE SCRITTE AI SUPPORTI PROP (D3) — pronte da inviare, 13/08/2026
 
+⏸️ DECISIONE DI CLAUDIO (13/08): INVIO RINVIATO — prima 1-2 settimane
+di forward del vivaio nuovo (BB + GAP), poi si mandano. Le domande
+restano pronte qui sotto; quando si inviano, aggiungere una riga tipo
+"my portfolio has been running live for X weeks" per dare peso.
+
 REGOLA: si manda dal proprio account/email, si chiede risposta SCRITTA,
 si salva la risposta (PDF o screenshot con data). Niente acquisti prima
 delle risposte. Le domande citano i comportamenti REALI dei nostri EA,
