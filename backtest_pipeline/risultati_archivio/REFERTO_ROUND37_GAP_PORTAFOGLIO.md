@@ -30,7 +30,13 @@ sommano a serie esistenti sugli stessi simboli (il Dow avrebbe la
 SESTA serie). **Il trio forex AUD+GBP+EUR e' invece da manuale**:
 +10.381, DD storico invariato, p50 e p95 in DISCESA, p99 +0,09.
 
-## PROPOSTA (decisione a Claudio): VIVAIO famiglia GAP = 3 forex
+## PROPOSTA (decisione a Claudio): VIVAIO famiglia GAP = 3 forex — ✅ ESEGUITA il 13/08
+**"VAI COL VIVAIO GAP" (13/08 pomeriggio).** `deploy_vivaio_gap.ps1` sul
+VPS (EA compilato in loco, 59.464 byte, sorgente pinnato al commit
+v1.00) + 3 preset; legge dello screenshot su tutte e tre le finestre
+(fill 100/50/100, spread 300 acceso, magic 772231-33) e **verifica
+meccanica v6 dai .chr: TUTTO OK 12/12**. Stesso giorno del deploy BB:
+due famiglie in campo in una giornata.
 GAP AUDUSD (fill 100) · GAP GBPUSD (fill 100) · GAP EURUSD (fill 50) —
 sedie 16-17-18, H1, rischio 1%, spread filter ACCESO (300), time-stop
 48h, magic forward VERGINI da assegnare al deploy. U30USD e 225JPY:

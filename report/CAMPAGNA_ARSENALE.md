@@ -4,7 +4,7 @@ L'obiettivo dichiarato: **10 candidati validati** per poter ragionare sulla
 doppia prop. Oggi le sedie occupate sono 5 (+1 in macchina). Questo file è
 il piano della campagna + le decisioni aperte che spettano a Claudio.
 
-## Lo stato delle sedie (aggiornato 13/08 mattina)
+## Lo stato delle sedie (aggiornato 13/08 sera)
 
 | # | Candidato | Stato |
 |---|---|---|
@@ -23,9 +23,13 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 | 13 | **Breaking Band GBPUSD H1** (combinato, R33→R34) | 🌱 VIVAIO dal 13/08 (772161, verificato 9/9) |
 | 14 | **Breaking Band EURUSD H1** (solo CONT, R33→R34) | 🌱 VIVAIO dal 13/08 (772162, verificato 9/9) |
 | 15 | **Breaking Band AUDUSD H1** (solo INV, R33→R34) | 🌱 VIVAIO dal 13/08 (772163, verificato 9/9) |
+| 16 | **Gap-fill GBPUSD H1** (fill 100, R36→R37) | 🌱 VIVAIO dal 13/08 (772231, verificato 12/12) |
+| 17 | **Gap-fill EURUSD H1** (fill 50, R36→R37) | 🌱 VIVAIO dal 13/08 (772232, verificato 12/12) |
+| 18 | **Gap-fill AUDUSD H1** (fill 100, R36→R37) | 🌱 VIVAIO dal 13/08 (772233, verificato 12/12) |
 
-**15 sedie NOMINATE** (5 titolari + 10 in vivaio, obiettivo dei 10
-candidati SUPERATO): l'obiettivo della campagna e' passato da "trovare
+**18 sedie NOMINATE** (5 titolari + 13 in vivaio, obiettivo dei 10
+candidati SUPERATO — e il gap-fill di Emiliano e' passato dall'aula al
+campo in UN giorno, record assoluto): l'obiettivo della campagna e' passato da "trovare
 candidati" a "maturare il vivaio". **Regola vivaio AGGIORNATA (decisione
 di Claudio, 13/08)**: 10 trade/mercato = collaudo tecnico (esecuzione
 come da tester); **15 trade/famiglia = VERDETTO vivaio** (era 30) →

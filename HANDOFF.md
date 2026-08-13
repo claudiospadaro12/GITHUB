@@ -3,20 +3,24 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
 >
-> Ultimo aggiornamento: **2026-08-13 mattina**. **Branch unico di lavoro: `lavoro`** (qui è consolidato TUTTO).
+> Ultimo aggiornamento: **2026-08-13 sera**. **Branch unico di lavoro: `lavoro`** (qui è consolidato TUTTO).
 
 ---
 
-## 🟢 RIPARTI DA QUI — stato al 13/08 mattina (le sezioni sotto questa sono STORICHE)
+## 🟢 RIPARTI DA QUI — stato al 13/08 sera (le sezioni sotto questa sono STORICHE)
 **Per il quadro vivo leggere, in ordine:** `report/DIARIO.md` (righe 11-13/08),
-`report/CAMPAGNA_ARSENALE.md` (15 sedie), `report/SCHEDA_SECONDA_PROP.md`
-(dossier D3), `backtest_pipeline/prove/BREAKING_BAND_TESI.md`.
+`report/CAMPAGNA_ARSENALE.md` (18 sedie), `report/SCHEDA_SECONDA_PROP.md`
+(dossier D3), `backtest_pipeline/prove/BREAKING_BAND_TESI.md` e
+`prove/GAP_FILL_TESI.md`.
 
-- **Vivaio a 10 sul conto piccolo 50503392** (verificato **9/9** dai .chr,
-  13/08): MAXMIN ORO 770402 · PTE Dow/GBP/JPY 771321-23 · SW Dow/GBP
+- **Vivaio a 13 sul conto piccolo 50503392** (verificato **12/12** dai .chr,
+  13/08 sera): MAXMIN ORO 770402 · PTE Dow/GBP/JPY 771321-23 · SW Dow/GBP
   770531-32 · EMA200 Dow 771531 · **Breaking Band GBPUSD/EURUSD/AUDUSD
-  772161-63 (sedie 13-15, deployate 13/08: pattern 2/0/1, taratura CAL1
-  1,35/1,0, TPMode 0)**. **Regola vivaio aggiornata 13/08 (Claudio):
+  772161-63 (sedie 13-15: pattern 2/0/1, taratura CAL1 1,35/1,0, TPMode
+  0)** · **Gap-fill GBPUSD/EURUSD/AUDUSD 772231-33 (sedie 16-18: fill
+  100/50/100, spread 300 acceso, time-stop 48h — R35...R37 in un giorno;
+  Dow/Nikkei gap in panchina di portafoglio, 4 IS-rossi in riserva
+  regime, E35EUR senza tick)**. **Regola vivaio aggiornata 13/08 (Claudio):
   collaudo 10 trade/mercato, VERDETTO a 15 trade/famiglia (era 30)** →
   se in linea, promozione al 100k demo a mezzo peso; regola 30/07 sulla
   prop pagata INTOCCATA (BB = famiglia unica sui 3 mercati). Squadra
