@@ -35,7 +35,14 @@ $Attesi = @(
   @{ea="ABTG_GapFill"; sym="AUDUSD"; tf="H1"; magic=772233; be=$null; comm="GAP AUDUSD"; fill="100"},
   # sedie 19-20 (13/08): Gap indici in OSSERVAZIONE (R37: fuori dal portafoglio)
   @{ea="ABTG_GapFill"; sym="U30USD"; tf="H1"; magic=772234; be=$null; comm="GAP DOW"; fill="100"},
-  @{ea="ABTG_GapFill"; sym="225JPY"; tf="H1"; magic=772235; be=$null; comm="GAP NIKKEI"; fill="75"}
+  @{ea="ABTG_GapFill"; sym="225JPY"; tf="H1"; magic=772235; be=$null; comm="GAP NIKKEI"; fill="75"},
+  # sedie 21-26 (13/08): Punte di Larry R38/R39 (pattern/exit/lati sotto)
+  @{ea="ABTG_PunteLarry"; sym="U30USD"; tf="H1"; magic=772341; be=$null; comm="LARRY DOW";    pat="1"; ex="1"; al="1"; ash="1"},
+  @{ea="ABTG_PunteLarry"; sym="EURAUD"; tf="H1"; magic=772342; be=$null; comm="LARRY EURAUD"; pat="1"; ex="1"; al="1"; ash="1"},
+  @{ea="ABTG_PunteLarry"; sym="XAUUSD"; tf="H1"; magic=772343; be=$null; comm="LARRY ORO";    pat="0"; ex="1"; al="1"; ash="0"},
+  @{ea="ABTG_PunteLarry"; sym="GBPJPY"; tf="H1"; magic=772344; be=$null; comm="LARRY GBPJPY"; pat="1"; ex="1"; al="1"; ash="0"},
+  @{ea="ABTG_PunteLarry"; sym="GBPUSD"; tf="H1"; magic=772345; be=$null; comm="LARRY GBPUSD"; pat="0"; ex="0"; al="0"; ash="1"},
+  @{ea="ABTG_PunteLarry"; sym="EURCAD"; tf="H1"; magic=772346; be=$null; comm="LARRY EURCAD"; pat="1"; ex="0"; al="1"; ash="0"}
 )
 $TFnum = @{ "H1"="16385"; "H2"="16386" }
 
@@ -52,7 +59,7 @@ foreach ($chr in $chrs) {
   if (-not $em.Success) { continue }
   # solo il nome file: l'ex5 puo' stare in una sottocartella del Navigatore
   $ea = ($em.Groups[1].Value.Trim() -split '\\')[-1]
-  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200" -and $ea -ne "ABTG_BreakingBand" -and $ea -ne "ABTG_GapFill") { continue }
+  if ($ea -ne "ABTG_PTE" -and $ea -ne "ABTG_SuperWave" -and $ea -ne "ABTG_EMA200" -and $ea -ne "ABTG_BreakingBand" -and $ea -ne "ABTG_GapFill" -and $ea -ne "ABTG_PunteLarry") { continue }
   $sm = [regex]::Match($txt, "symbol=([A-Za-z0-9#\.]+)"); $sym = if($sm.Success){$sm.Groups[1].Value}else{"?"}
   $sym = $sym -replace '[\.#].*$',''   # via eventuali suffissi broker (U30USD.i, U30USD#)
   $ins = @{}
@@ -67,7 +74,7 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO v7 (14 grafici: R23 + EMA200 + BB + GAP forex/indici) ===" White
+Rec "=== VERIFICA VIVAIO v8 (20 grafici: R23 + EMA200 + BB + GAP + LARRY) ===" White
 Rec ("terminal letto: {0}" -f $old.Name) Gray
 $errori = 0
 foreach ($a in $Attesi) {
@@ -95,6 +102,14 @@ foreach ($a in $Attesi) {
     if ([double]$ins["InpBulgeWidthMult"] -ne 1.35)      { $ok=$false; $note += ("InpBulgeWidthMult={0} atteso 1.35" -f $ins["InpBulgeWidthMult"]) }
     if ([double]$ins["InpBulgeNetMoveATR"] -ne 1.0)      { $ok=$false; $note += ("InpBulgeNetMoveATR={0} atteso 1.0" -f $ins["InpBulgeNetMoveATR"]) }
     if ($ins["InpTPMode"] -ne "0")                       { $ok=$false; $note += ("InpTPMode={0} atteso 0 (Leonardo)" -f $ins["InpTPMode"]) }
+  }
+  if ($a.ea -eq "ABTG_PunteLarry") {
+    if ($ins["InpPatternMode"] -ne $a.pat)        { $ok=$false; $note += ("InpPatternMode={0} atteso {1}" -f $ins["InpPatternMode"],$a.pat) }
+    if ($ins["InpExitMode"] -ne $a.ex)            { $ok=$false; $note += ("InpExitMode={0} atteso {1}" -f $ins["InpExitMode"],$a.ex) }
+    if ($ins["InpAllowLong"] -ne $a.al)           { $ok=$false; $note += ("InpAllowLong={0} atteso {1}" -f $ins["InpAllowLong"],$a.al) }
+    if ($ins["InpAllowShort"] -ne $a.ash)         { $ok=$false; $note += ("InpAllowShort={0} atteso {1}" -f $ins["InpAllowShort"],$a.ash) }
+    if ([double]$ins["InpMaxSpreadPts"] -ne 300)  { $ok=$false; $note += ("InpMaxSpreadPts={0} atteso 300" -f $ins["InpMaxSpreadPts"]) }
+    if ([double]$ins["InpMaxDaysHold"] -ne 5)     { $ok=$false; $note += ("InpMaxDaysHold={0} atteso 5" -f $ins["InpMaxDaysHold"]) }
   }
   if ($a.ea -eq "ABTG_GapFill") {
     if ([double]$ins["InpFillPct"] -ne [double]$a.fill)  { $ok=$false; $note += ("InpFillPct={0} atteso {1}" -f $ins["InpFillPct"],$a.fill) }
