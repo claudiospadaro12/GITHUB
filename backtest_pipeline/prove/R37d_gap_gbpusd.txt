@@ -1,0 +1,23 @@
+# =====================================================================
+#  R37d_gap_gbpusd: Gap-fill PER-TRADE a 100k — GBPUSD, fill 100
+#  Lancio: ABTG_GapFill -Prova prove\R37d_gap_gbpusd.txt -Simbolo GBPUSD
+#          -Deposito 100000 -Etichetta r37
+#  Cella promossa in R36 (criteri congelati). Magic VERGINI 772217/772218
+#  (gemelli del magic-sweep: righe identiche al centesimo o il round
+#  non vale).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpFillPct=100
+InpRiskPercent=1.0
+InpGapMinATR=0.3
+InpGapMaxATR=2.0
+InpSLMode=0
+InpSLGapMult=1.0
+InpMaxHours=48
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+
+InpMagic=772217||772217||1||772218||Y
