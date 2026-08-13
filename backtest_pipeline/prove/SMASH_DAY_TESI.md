@@ -27,6 +27,26 @@
    al raggiungimento dell'estremo di ieri; **SL oltre l'estremo del
    GIORNO DEL GAP** (la candela che apre il pattern); chiusura alla
    prima open in guadagno, altrimenti stop o gain. Esempio sul DAX.
+6. **Video team Unger — BACKTEST dell'Oops su DAX future 2010-oggi**
+   (fornito da Claudio, il pezzo che vale di piu'): setup base e con
+   filtro 15 punti, stop 2000 EUR, uscita first profitable open.
+   VERDETTO LORO: funzionava fino a OTTOBRE 2022 (netto storico 163k,
+   long meglio), poi declino inesorabile — 2023/2024/2025 in FORTE
+   perdita, oggi sul max drawdown. Causa indiziata: sessione estesa
+   ~23h (dal 2019) digerita dagli operatori -> niente gap giornalieri
+   -> pattern morente. "Nulla e' per sempre."
+
+## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
+- La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto
+  dell'Oops secondo il test Unger: ATTESA = Oops DAX ROSSO. Se il
+  nostro scan lo boccia, e' una CONFERMA incrociata; se lo promuove,
+  massimo sospetto (regime? differenze CFD/future?).
+- Sul CFD BCM il D30EUR quota anche di notte (il MaxMin notturno ci
+  lavora): NIENTE gap giornaliero -> sul nostro broker l'Oops esiste
+  quasi solo il LUNEDI' = quasi-doppione del GapFill. Frequenza attesa
+  bassissima; il funnel lo dira'.
+- Il baricentro del capitolo si sposta sullo SMASH DAY (modi 0/1), che
+  NON dipende dai gap di sessione e resta testabile sui mercati 24h.
 
 ## Il meccanismo comune (ipotesi)
 Tutte le "punte" sono TRAPPOLE del breakout giornaliero: un'estensione
