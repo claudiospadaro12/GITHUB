@@ -1,0 +1,24 @@
+# =====================================================================
+#  R41a_cost_eurjpy: Cost-to-cost PER-TRADE a 100k — EURJPY (H4, SOLO L)
+#  Lancio: ABTG_CostToCost -Simbolo EURJPY -Prova prove\R41a_cost_eurjpy.txt
+#          -Deposito 100000 -Etichetta r41
+#  Cella promossa in R40. Magic VERGINI 772351/772352 (gemelli al centesimo).
+# =====================================================================
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpTF=16388
+InpExitMode=2
+InpTP_R=1.5
+InpSLBufferATR=0.2
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpMaxBarsHold=100
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpWarmupBars=500
+InpRiskPercent=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+InpMagic=772351||772351||1||772352||Y
