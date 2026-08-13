@@ -1,0 +1,9 @@
+// Fonte: TradingView "Larry Williams Large Trade Index (LWTI) [Loxx]"
+// (c) loxx, MPL 2.0 — archiviato 13/08/2026. WILLIAMS AUTENTICO.
+// Meccanica: SMA(close - close[per], per) / ATR(per) * 50 + 50 ->
+// oscillatore attorno a 50 (sopra = spinta long, sotto = short),
+// smoothing opzionale, segnali al cross del 50.
+// CLASSIFICAZIONE ABTG: ATTREZZO (filtro di direzione), non strategia.
+// In cassetta con VolRegime/SRFilter: eventuale filtro per i pattern
+// del ramo A (Smash/Oops) SOLO se il pattern nudo mostra un edge.
+// [codice completo fornito da Claudio in conversazione]
