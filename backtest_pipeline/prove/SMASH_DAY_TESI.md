@@ -48,6 +48,19 @@
    (definizione, gap minimo, stop oltre l'estremo del gap, first
    profitable open, contesto di trend come filtro opzionale). Vale
    come quorum sulle definizioni, non come fonte autonoma.
+9. **INDICATORE UFFICIALE DEL CORSO: "ABTG - A Cena Con Larry" (MT5)**
+   (trovato da Claudio sulla sua piattaforma, 13/08): disegna i
+   LIVELLI delle "punte" multi-timeframe (Monthly->M1, tolleranza in
+   points, 270 barre, selezione "con piu' opposing"). Molto probabile
+   implementazione dei "ringed highs/lows" di Williams. SCOPERTA
+   CHIAVE: le "punte di Larry" del CORSO sono (anche) LIVELLI di
+   struttura per il cost-to-cost (tradare DENTRO il range, da punta a
+   punta), NON solo i pattern Smash/Oops. Il capitolo ha DUE RAMI:
+   (A) Smash/Oops = questa tesi; (B) punte-livelli + cost-to-cost =
+   ramo NUOVO, da istruire con: file dell'indicatore (mq5 o ex5) +
+   regole d'uso dalle live. Trappola gia' nota: il cost-to-cost e'
+   mean reversion dentro il range — parente del rimbalzo su ORL
+   (backlog ORB n.3), da non confondere con questo EA.
 
 ## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
 - La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto
