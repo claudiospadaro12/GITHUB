@@ -1,0 +1,7 @@
+Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,InpTP_R,InpAllowLong,InpAllowShort,InpTF,InpLinRegLen,InpPlotMode,InpPlotLen,InpCciPeriod,InpPivotL,InpPivotR,InpPivotSource,InpMaxPivotDist,InpDivMaxBars,InpDivDieOnFail,InpHourStart,InpHourEnd,InpPrevBars,InpEntryWindowBars,InpMarketIfTooClose,InpSLBufferPts,InpWarmupBars,InpMaxSpreadPts,InpRiskPercent,InpMagic,InpComment,InpVerbose
+5,-1252.61,-15.85582,0.74964,-0.80489,-2.15205,15.4025,79,-2.3824,-946,-946.41,1.5,0,1,16385,11,0,11,20,5,3,0,60,0,0,8,18,3,3,1,30,500,0,1,772401,EZ TREND,1
+2,-143.86,-2.56893,0.94905,-0.15509,-0.34207,8.7864,56,-1.5170,-495,-495.19,1.0,1,0,16385,11,0,11,20,5,3,0,60,0,0,8,18,3,3,1,30,500,0,1,772401,EZ TREND,1
+3,-937.19,-17.68283,0.71819,-0.71143,-1.56568,12.8339,53,-2.0956,-966,-965.51,1.5,1,0,16385,11,0,11,20,5,3,0,60,0,0,8,18,3,3,1,30,500,0,1,772401,EZ TREND,1
+4,-993.47,-12.57557,0.76120,-0.71614,-2.16592,13.7898,79,-2.2543,-587,-586.81,1.0,0,1,16385,11,0,11,20,5,3,0,60,0,0,8,18,3,3,1,30,500,0,1,772401,EZ TREND,1
+6,-631.15,-5.00913,0.89875,-0.49772,-0.79596,12.3211,126,-2.2736,-515,-514.56,1.0,1,1,16385,11,0,11,20,5,3,0,60,0,0,8,18,3,3,1,30,500,0,1,772401,EZ TREND,1
+7,-1354.68,-11.38387,0.81011,-0.70925,-1.31912,18.5211,119,-2.3929,-845,-844.68,1.5,1,1,16385,11,0,11,20,5,3,0,60,0,0,8,18,3,3,1,30,500,0,1,772401,EZ TREND,1

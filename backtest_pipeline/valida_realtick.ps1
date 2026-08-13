@@ -78,6 +78,23 @@ InpMaxSpreadPts=300||300||0||300||N
 InpEntryWindowBars=3||3||0||3||N
 InpFillPct=100||50||25||100||Y
 "@
+} elseif($EA -eq "ABTG_EasyTrend"){
+  # Easy Trend: detector PINNATO dalla CAL (src0/R3), spazzola solo il
+  # target (1.0 = il RR 1:1 della fonte, 1.5 = quello che vince nello
+  # scan) x i lati. A tick reali lo spread e' ACCESO (30 = 3 pip forex,
+  # coerente col buffer di stop della strategia).
+  $Inputs=@"
+InpTF=$en||$en||0||$en||N
+InpPivotSource=0||0||0||0||N
+InpPivotR=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxSpreadPts=30||30||0||30||N
+InpEntryWindowBars=3||3||0||3||N
+InpWarmupBars=500||500||0||500||N
+InpTP_R=1.0||1.0||0.5||1.5||Y
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=1||0||1||1||Y
+"@
 } else {
   # SupertrendReversal (default): direzione (L/S), StMult 2.0-3.5, TP_RR 2.0-3.0, StAtrPeriod fisso 10.
   $Inputs=@"

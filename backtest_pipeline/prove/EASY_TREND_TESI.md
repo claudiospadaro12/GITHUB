@@ -112,3 +112,45 @@ segnali, quanti invalidati per orario) -> scan 48 OHLC -> tick reali
 -> walk-forward criteri congelati -> per-trade -> portafoglio ->
 eventuale vivaio. Nessuno sconto: "expert vincente" lo decide l'imbuto,
 non l'entusiasmo.
+
+---
+
+## ESITO CAL (14/08/2026) — detector scelto SOLO sulla frequenza
+
+9 celle (PivotSource 0/1/2 x PivotR 3/5/7) su EURUSD, EURGBP, EURCAD,
+Modello 1. **Compilazione al primo colpo** (quinto EA su cinque).
+Frequenze OOS (13 mesi): src0/R3 = 57 / 45 / 64 trade sui tre simboli
+(4-5/mese: la banda dichiarata dalla fonte, ~140 trade in 2,5 anni);
+src2 (ENTRAMBI, il piu' severo) crolla a 10-25 trade = motore strozzato,
+com'era il sospetto dell'agente; src1 (solo prezzo) sta in mezzo.
+**Scelto src0 + PivotR 3** (il modo del Pine di TISTA citato in tesi):
+frequenza sana e coerente sui tre simboli e sulle due finestre.
+Il P/L NON e' stato guardato in questa fase (criterio congelato).
+
+## ESITO SCAN 48 (14/08/2026) — campo debole, testa della classifica viva
+
+288 celle (8 per simbolo: TP 1,0/1,5 x 4 combinazioni di lati),
+Modello 1 OHLC 2024.01-2026.06.
+
+- **Il campo e' ROSSO come il cost-to-cost H4**: solo 57 celle positive
+  su 288 (20%); **24 simboli su 48 hanno la miglior cella in perdita**.
+  Aggregato per combinazione: TUTTE negative in somma; la meno peggio
+  e' SOLO LONG (19/48 celle positive a TP 1,5 contro 6/48 dello short).
+  L'asimmetria dei lati colpisce per la QUARTA famiglia di fila.
+- **Il TP 1,5 batte il RR 1:1 della fonte** quasi ovunque: la regola
+  [FONTE] "rapporto 1 a 1" NON e' confermata dal nostro banco.
+- **EURUSD, il banco dichiarato dalla fonte, e' nono** (+1.012, PF 1,34)
+  e per giunta SOLO SHORT: il claim "198%, win rate 70%, DD 8%" non
+  trova riscontro nella nostra misura. Terza fonte su tre con numeri
+  fuori scala rispetto al banco (edgeful, ThinkMarkets, ora questa).
+- Testa della classifica (miglior cella con n>=20): EURGBP +2.461
+  (PF 1,98, DD 3,5, 54 trade, solo short) · CHFJPY +1.968 (PF 1,29,
+  122 trade) · GBPUSD +1.769 (PF 1,61, solo long) · AUDJPY +1.632
+  (PF 1,94) · CADJPY +1.534 · USDCHF +1.301 · XAUUSD +1.152 (PF 1,72)
+  · USDJPY +1.040 · EURUSD +1.012.
+- E35EUR (+906, PF 1,85) e' FUORI a priori: niente storico tick su BCM
+  (gia' escluso in gap e cost, terza volta).
+
+**Prossimo cancello**: tick reali con spread ACCESO (30 pt) sui 9 di
+testa. La domanda vera e' quella scritta nelle trappole: il RR 1:1
+(o 1,5) regge quando il win rate scende sotto il 70% dichiarato?
