@@ -31,10 +31,11 @@ limite giornaliero di trade.
    laboratorio. Richiede un piccolo input nuovo nel lab.
 3. **Rimbalzo su ORL** (Build Alpha setup 4): comprare il supporto del range
    nei giorni senza breakout. Motore nuovo (mean-reversion dentro il range).
-   -> **IN MISURA COME R43** (13/08 sera): lati SEPARATI (la lezione
-   mono-lato delle famiglie) + finestra pendente 120/300 come leva
-   nuova, su NASUSD e D30EUR. Prove `R43a-d_orl_*.txt`. Se muoiono
-   tutti e 4 i file, capitolo estremi-del-range CHIUSO per sempre.
+   -> ❌ **CHIUSO R43 (13/08 notte): BOCCIATI TUTTI E 4 I LATI** —
+   2 celle verdi su 64, entrambe IS-only e ribaltate (26° ribaltamento:
+   miglior IS short NASUSD +183 -> OOS −2.961). **Capitolo "estremi del
+   range di apertura" CHIUSO DEFINITIVAMENTE** (criterio pre-congelato):
+   paga solo il RETEST. `REFERTO_ROUND43_ORL.md`
 3b. **Target 2x/3x l'ampiezza del range** (ORB Setups): R13 arriva a 1,5x -
    se la direzione OOS di R13 punta verso l'alto, 2x/3x e' il vicinato del
    giro successivo (coerente con R9: piu' il target e' ambizioso, meglio OOS).
