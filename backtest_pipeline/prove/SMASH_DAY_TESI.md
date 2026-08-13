@@ -70,6 +70,14 @@
    GRAFICO con l'indicatore attivo (dal comportamento visivo si
    ricava la geometria, come per il Pine di Claudio). Ramo B resta
    in istruttoria.
+   INPUT LETTI dallo screenshot (13/08): LICENZA SCADUTA 31/12/2025
+   (probabile indicatore MORTO sul grafico); disegna FRECCE Long/Short
+   (= segnali, non livelli); "Periodo Trend (min 2)" = 5; "Numero
+   barre min/max" = 10; alert on/off. Ricostruzione candidata: punta =
+   estremo locale a 10 barre (ringed high/low), freccia col filtro di
+   trend a 5 barre. Se il grafico conferma il decesso per licenza, la
+   geometria si ricostruisce in casa dalla definizione del libro, con
+   regole di trading dichiarate come SCELTA NOSTRA.
 
 ## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
 - La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto
