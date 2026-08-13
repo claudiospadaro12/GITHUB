@@ -1,0 +1,13 @@
+// ⚠️ NON e' il Larry Williams canonico (probabile educatore/canale USA;
+// la logica e' anzi OPPOSTA al Williams vero: fade dello stretch invece
+// del breakout dello stretch). Fonte: TradingView "Larry 9:29 Rubber
+// Band ENTRY ONLY - MNQ [1min]" — archiviato 13/08/2026.
+// Strategia: fair price dalla candela 1' delle 9:29 NY, bande +-75pt,
+// ingresso CONTRO l'allungo su barra di inversione, finestra 9:29-11:00,
+// 1 trade/giorno, SL 75pt, trail 75/25.
+// AVVERTENZA ABTG: fade intraday M1 sull'apertura USA = il terreno dove
+// il tritacarne ha gia' bocciato RANGE_FADE (0/136 sopra PF 1), Live5m
+// (sweep d'apertura seriali) e Alta Velocita' (M1). PRIORITA' MINIMA:
+// eventuale test solo dopo che i rami Williams veri hanno parlato, e
+// SOLO a tick reali.
+// [codice completo fornito da Claudio in conversazione]
