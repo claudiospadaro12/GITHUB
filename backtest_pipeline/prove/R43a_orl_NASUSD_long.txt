@@ -1,0 +1,70 @@
+# =====================================================================
+#  ROUND 43a: ABTG_Nasdaq_Apertura_US - RIMBALZO SU ORL, SOLO LONG
+#  Si lancia con:  -Prova prove\R43a_orl_NASUSD_long.txt -Etichetta r43
+# =====================================================================
+#
+# PERCHE' (13/08/2026 sera - fascia C n.3, Build Alpha setup 4)
+#   R42 ha bocciato il fade 48/48 MA misurava i due lati INSIEME e col
+#   pendente morto dopo 2 ore. La storia delle famiglie (LARRY, COST,
+#   GBPJPY, GBPUSD...) dice che gli edge veri sono quasi sempre
+#   MONO-LATO: il rosso di una cella L+S puo' nascondere un lato verde
+#   mangiato dall'altro. Il rimbalzo ORL di Build Alpha e' UN lato
+#   preciso: COMPRARE il supporto del range di apertura (BUY LIMIT
+#   sull'ORL, offset 0), col tocco che puo' arrivare anche ore dopo.
+#   Meccanica: ramo RANGE_FADE con SOLO LONG + finestra pendente come
+#   leva (120' come R42 vs 300' = quasi tutta la sessione).
+#
+# COME (griglia 8 celle, tick reali M5)
+#   Gestione PINNATA identica a R42 (TP1 1R/50% + BE + trailing
+#   PREVBAR M5, rischio 1%, volumi OFF, offset 0). Leve:
+#     - InpRangeMinutes 15/35
+#     - InpAtrSlMult 1.0/1.5
+#     - InpPendingExpiryMin 120/300 (la leva NUOVA del round)
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   1. Il lato LONG da solo fa MEGLIO della cella L+S di R42 (bias
+#      long strutturale degli indici + asimmetria di famiglia).
+#   2. La finestra 300' aiuta: il supporto si tocca anche a meta'
+#      sessione, non solo nello spike d'apertura.
+#   3. Onesta' pre-verdetto: R42 era rosso PROFONDO (PF 0,60-0,91 sul
+#      Nasdaq). Perche' questo round passi, il lato short doveva
+#      essere IL responsabile del rosso. Possibile, non probabile:
+#      aspettativa dichiarata = round in salita, si misura per
+#      chiudere il capitolo "range di apertura" con la mappa completa.
+#
+# CRITERI (congelati ora, non dopo - identici a R42)
+#   1. Cella scelta sull'IS (miglior profitto con n>=30), giudicata
+#      OOS: Profit>0, PF>=1,10, DD<10%, n>=30.
+#   2. Regola FASE M sui vicini di griglia.
+#   3. Regola del regime: IS rosso/OOS verde = riserva, non promozione.
+#   4. Se TUTTI e 4 i file R43 muoiono: capitolo "estremi del range di
+#      apertura" CHIUSO DEFINITIVAMENTE, in ogni direzione e su ogni
+#      lato, senza riaperture senza fatti nuovi.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpEntryMode=3||3||0||3||N
+InpRangeMode=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpRangeMinutes=15||15||20||35||Y
+InpAtrSlMult=1.0||1.0||0.5||1.5||Y
+InpPendingExpiryMin=120||120||180||300||Y

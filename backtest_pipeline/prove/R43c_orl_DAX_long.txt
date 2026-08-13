@@ -1,0 +1,45 @@
+# =====================================================================
+#  ROUND 43c: ABTG_DAX_Apertura_EU - RIMBALZO SU ORL, SOLO LONG (D30EUR)
+#  Si lancia con:  -Prova prove\R43c_orl_DAX_long.txt -Etichetta r43
+# =====================================================================
+#
+# PERCHE': gemello DAX del R43a - comprare il supporto del range di
+#   apertura (BUY LIMIT su ORL, offset 0), lati separati, finestra
+#   del pendente come leva nuova. Sessione 08:00 server BCM.
+#
+# IPOTESI (prima dei numeri): come R43a - il long da solo puo'
+#   respirare dove la cella L+S di R42 affogava. Il DAX in R42 era
+#   il peggiore del lotto: qui l'asticella e' ancora piu' alta.
+#
+# COME e CRITERI: identici e congelati col R43a (griglia 8 celle;
+#   gestione pinnata R42; cella IS n>=30 giudicata OOS Profit>0/
+#   PF>=1,10/DD<10%/n>=30; FASE M; regola del regime; se tutti e 4
+#   i file R43 muoiono, capitolo estremi-del-range CHIUSO).
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpEntryMode=3||3||0||3||N
+InpRangeMode=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpRangeMinutes=15||15||20||35||Y
+InpAtrSlMult=1.0||1.0||0.5||1.5||Y
+InpPendingExpiryMin=120||120||180||300||Y
