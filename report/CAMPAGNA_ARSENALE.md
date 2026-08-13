@@ -34,8 +34,11 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 | 24 | **Larry GBPJPY H1** (Smash punta, R, SOLO L) | 🌱 VIVAIO dal 13/08 (772344, verificato 20/20) |
 | 25 | **Larry GBPUSD H1** (Smash libro, FPO, SOLO S) | 🌱 VIVAIO dal 13/08 (772345, verificato 20/20) |
 | 26 | **Larry EURCAD H1** (Smash punta, FPO, SOLO L) | 🌱 VIVAIO dal 13/08 (772346, verificato 20/20) |
+| 27 | **Cost-to-cost EURJPY H4** (exit FLIP, SOLO L — R40→R41) | 🌱 VIVAIO dal 13/08 (772361, verificato 23/23) ⚠️ famiglia con avvertenza R41 |
+| 28 | **Cost-to-cost GBPCAD H4** (exit R, SOLO L) | 🌱 VIVAIO dal 13/08 (772362, verificato 23/23) ⚠️ idem |
+| 29 | **Cost-to-cost XAGUSD H4** (exit COST puro, SOLO L) | 🌱 VIVAIO dal 13/08 (772363, verificato 23/23) ⚠️ idem |
 
-**26 sedie NOMINATE** (5 titolari + 19 in vivaio + 2 in osservazione, obiettivo dei 10
+**29 sedie NOMINATE** (5 titolari + 22 in vivaio + 2 in osservazione, obiettivo dei 10
 candidati SUPERATO — e il gap-fill di Emiliano e' passato dall'aula al
 campo in UN giorno, record assoluto): l'obiettivo della campagna e' passato da "trovare
 candidati" a "maturare il vivaio". **Regola vivaio AGGIORNATA (decisione

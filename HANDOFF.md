@@ -9,11 +9,11 @@
 
 ## 🟢 RIPARTI DA QUI — stato al 13/08 sera (le sezioni sotto questa sono STORICHE)
 **Per il quadro vivo leggere, in ordine:** `report/DIARIO.md` (righe 11-13/08),
-`report/CAMPAGNA_ARSENALE.md` (26 sedie), `report/SCHEDA_SECONDA_PROP.md`
+`report/CAMPAGNA_ARSENALE.md` (29 sedie), `report/SCHEDA_SECONDA_PROP.md`
 (dossier D3), `backtest_pipeline/prove/BREAKING_BAND_TESI.md` e
 `prove/GAP_FILL_TESI.md`.
 
-- **Vivaio a 20 sul conto piccolo 50503392** (verificato **20/20** dai .chr,
+- **Vivaio a 23 sul conto piccolo 50503392** (verificato **23/23** dai .chr,
   13/08 sera): MAXMIN ORO 770402 · PTE Dow/GBP/JPY 771321-23 · SW Dow/GBP
   770531-32 · EMA200 Dow 771531 · **Breaking Band GBPUSD/EURUSD/AUDUSD
   772161-63 (sedie 13-15: pattern 2/0/1, taratura CAL1 1,35/1,0, TPMode
@@ -25,8 +25,13 @@
   senza tick)** · **Punte di Larry 772341-46 (sedie 21-26: Smash
   punta/libro, exit R/FPO, lati per referto R38 — Dow e EURAUD L+S,
   oro/GBPJPY/EURCAD solo L, GBPUSD solo S; spread 300, time-stop 5gg;
-  portafoglio simulato 24 serie: +181.996, DD 5,95%, p99 13,17;
-  verdetto famiglia atteso in 6-8 settimane)**. **Regola vivaio aggiornata 13/08 (Claudio):
+  verdetto famiglia atteso in 6-8 settimane)** · **Cost-to-cost
+  EURJPY/GBPCAD/XAGUSD 772361-63 (sedie 27-29, primi grafici H4 del
+  vivaio: exit FLIP/R/COST puro, tutti SOLO LONG, spread 300,
+  MaxBarsHold 100 — R40→R41, quarto "aggiunge e abbassa"; ⚠️ famiglia
+  con avvertenza: campo scan 28/48 rosso, il forward qui pesa piu' che
+  altrove; verdetto dei 15 in ~3 mesi). Portafoglio simulato 27 serie:
+  +223.230, DD 5,50%, p99 12,47 (a 0,65% = 8,1%)**. **Regola vivaio aggiornata 13/08 (Claudio):
   collaudo 10 trade/mercato, VERDETTO a 15 trade/famiglia (era 30)** →
   se in linea, promozione al 100k demo a mezzo peso; regola 30/07 sulla
   prop pagata INTOCCATA (BB = famiglia unica sui 3 mercati). Squadra

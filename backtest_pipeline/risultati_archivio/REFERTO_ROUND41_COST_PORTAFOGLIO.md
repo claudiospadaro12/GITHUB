@@ -35,11 +35,17 @@ correlazioni PTE vs COST tutte fra -0,09 e +0,08.
 3. E35EUR di nuovo fuori per mancanza tick (2ª volta: gap e cost).
 4. Shortlist su dati full-period: mezzo punto, conferma forward.
 
-## PROPOSTA (decisione a Claudio): VIVAIO famiglia COST = 3 grafici H4
-EURJPY (flip) · GBPCAD (R-based) · XAGUSD (cost puro) — tutti SOLO
-LONG, sedie 27-29, rischio 1%, spread 300, magic forward VERGINI
-772361-363. Vivaio a 23 grafici. ~5-6 trade/mese di famiglia ->
-verdetto dei 15 in ~3 mesi.
+## PROPOSTA — ✅ ESEGUITA (13/08 sera, "VAI COL VIVAIO COST")
+VIVAIO famiglia COST = 3 grafici H4: EURJPY (flip) · GBPCAD (R-based) ·
+XAGUSD (cost puro) — tutti SOLO LONG, sedie 27-29, rischio 1%, spread
+300, magic forward VERGINI 772361-363. Vivaio a 23 grafici. ~5-6
+trade/mese di famiglia -> verdetto dei 15 in ~3 mesi.
+
+**Deploy eseguito il 13/08 sera** (`deploy_vivaio_cost.ps1`, EA compilato
+sul VPS: 65.572 byte, primi grafici H4 del vivaio): legge dello
+screenshot 3/3 conformi al primo colpo, Salva Profilo ORO, verifica
+meccanica v9 dai .chr → **TUTTO OK: 23/23**. Quarto deploy della
+giornata dei record.
 
 _CSV in `risultati_prove/ABTG_CostToCost/r41/`, serie in
 `risultati_prove/trades_cost/`._
