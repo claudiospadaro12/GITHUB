@@ -16,9 +16,12 @@
   13/08): MAXMIN ORO 770402 · PTE Dow/GBP/JPY 771321-23 · SW Dow/GBP
   770531-32 · EMA200 Dow 771531 · **Breaking Band GBPUSD/EURUSD/AUDUSD
   772161-63 (sedie 13-15, deployate 13/08: pattern 2/0/1, taratura CAL1
-  1,35/1,0, TPMode 0)**. Collaudo 10 trade/mercato, verdetto 30/famiglia
-  (BB = famiglia unica sui 3 mercati). Squadra 100k sul -V3 invariata
-  (+ pagella doppia automatica ogni sera 23:15 sul Desktop VPS).
+  1,35/1,0, TPMode 0)**. **Regola vivaio aggiornata 13/08 (Claudio):
+  collaudo 10 trade/mercato, VERDETTO a 15 trade/famiglia (era 30)** →
+  se in linea, promozione al 100k demo a mezzo peso; regola 30/07 sulla
+  prop pagata INTOCCATA (BB = famiglia unica sui 3 mercati). Squadra
+  100k sul -V3 invariata (+ pagella doppia automatica ogni sera 23:15
+  sul Desktop VPS).
 - **Breaking Band: dall'aula al vivaio in ~36 ore** — tesi → EA v1.02 →
   CAL1 → tick 7/7 → R33 walk-forward (3 promossi) → R34 portafoglio
   **12→15 serie, +133.654, DD 8,74%, code MC tutte giù** (seconda volta

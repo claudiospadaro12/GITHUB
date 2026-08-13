@@ -26,8 +26,15 @@ il piano della campagna + le decisioni aperte che spettano a Claudio.
 
 **15 sedie NOMINATE** (5 titolari + 10 in vivaio, obiettivo dei 10
 candidati SUPERATO): l'obiettivo della campagna e' passato da "trovare
-candidati" a "maturare il vivaio" (10 trade/mercato = collaudo,
-30/famiglia = verdetto; la famiglia BB = 3 mercati sommati). D2
+candidati" a "maturare il vivaio". **Regola vivaio AGGIORNATA (decisione
+di Claudio, 13/08)**: 10 trade/mercato = collaudo tecnico (esecuzione
+come da tester); **15 trade/famiglia = VERDETTO vivaio** (era 30) →
+se in linea (nessun disastro, DD entro atteso, comportamento coerente
+col backtest), promozione al demo 100k a mezzo peso (sblocca la D5).
+Motivo onesto: il forward verifica l'ESECUZIONE, non ri-dimostra l'edge
+(quello l'ha giudicato il walk-forward: nemmeno 30 trade basterebbero a
+distinguere un PF). La regola 30/07 sulla prop PAGATA resta INTOCCATA:
+soldi veri = forward maturo. La famiglia BB = 3 mercati sommati. D2
 (perimetro forex): risposta ARRIVATA dai fatti — 6 sedie su 10 del
 vivaio sono forex, e le tre BB (13/08) sono figlie del corso di Claudio.
 Nota dell'11/08: Alta Velocita' testata (2 versioni, 1 giorno) e CHIUSA
