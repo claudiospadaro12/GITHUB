@@ -1,0 +1,30 @@
+# =====================================================================
+#  CAL-EZ: TARATURA del detector Easy Trend — NON e' un round di
+#  strategia, e' la calibrazione della macchina (come CAL1 della BB).
+#  Lancio: ABTG_EasyTrend -Prova prove\CAL_EZ_DETECTOR.txt
+#          -Modello 1 -Etichetta cal   (x3 simboli: EURUSD, EURGBP, EURCAD)
+# =====================================================================
+# CRITERIO DI SCELTA (congelato PRIMA dei numeri): la combinazione si
+#   sceglie per FREQUENZA SANA e STABILE — la fonte dichiara ~140
+#   operazioni in 2,5 anni su EURUSD = ~4-5 trade/mese; banda accettata
+#   2-8/mese, coerente fra i simboli e fra le due finestre IS/OOS.
+#   IL PROFITTO NON SI GUARDA IN QUESTA FASE (il vizio dei 26
+#   ribaltamenti): il P/L parla solo dallo scan a 48 in poi.
+# COSA SI SPAZZOLA (solo il RILEVAMENTO, 9 celle):
+#   - InpPivotSource 0/1/2: pivot sul CCI (il Pine di TISTA lavora
+#     cosi'), sul PREZZO, o su ENTRAMBI (lettura letterale della
+#     consegna, la piu' severa — default dell'EA). E' IL bottone n.1
+#     segnalato dall'agente.
+#   - InpPivotR 3/5/7: il trade-off centrale reattivita'/falsi pivot
+#     (il ritardo strutturale: la divergenza nasce PivotR barre dopo).
+# Tutto il resto pinnato ai default v1.00 (orario 8-18 letterale: la
+#   domanda del fuso avra' il suo confronto DOPO la scelta del pivot).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpRiskPercent=1.0
+
+InpPivotSource=2||0||1||2||Y
+InpPivotR=5||3||2||7||Y
