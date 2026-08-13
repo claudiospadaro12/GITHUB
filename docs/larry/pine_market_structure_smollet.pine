@@ -1,0 +1,9 @@
+// Fonte: TradingView, script open source "Larry Williams: Market Structure"
+// (c) Smollet, Mozilla Public License 2.0 — archiviato il 13/08/2026 per studio.
+// Decodifica ABTG: punte via REGOLA DELLA VIOLAZIONE (massimo confermato quando
+// il prezzo scende sotto il low della barra del massimo; specchio per i minimi);
+// trend intermedio = massimi decrescenti / minimi crescenti delle punte.
+//@version=6
+indicator("Larry Williams: Market Structure", overlay = true, max_lines_count = 500, max_labels_count = 500)
+// [codice completo fornito da Claudio il 13/08/2026 — vedi conversazione;
+//  la logica chiave e' riassunta sopra e nella tesi SMASH_DAY_TESI.md fonte 11]

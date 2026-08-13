@@ -78,6 +78,22 @@
    trend a 5 barre. Se il grafico conferma il decesso per licenza, la
    geometria si ricostruisce in casa dalla definizione del libro, con
    regole di trading dichiarate come SCELTA NOSTRA.
+11. **Pine open source "Larry Williams: Market Structure" (Smollet,
+   TradingView, MPL 2.0)** — trovato da Claudio, IL PEZZO CHE SBLOCCA
+   IL RAMO B: codice leggibile. MECCANICA DECODIFICATA: (a) punta
+   CONFERMATA con la REGOLA DELLA VIOLAZIONE — in salita il massimo
+   diventa punta quando il prezzo scende sotto il LOW della barra del
+   massimo; specchio per i minimi (conforme al libro: "toglie il low
+   del giorno del massimo"); (b) zig-zag fra punte confermate;
+   (c) TREND INTERMEDIO: punta-massimo piu' bassa della precedente =
+   giu'; punta-minimo piu' alta = su. NIENTE parametro N-barre: la
+   struttura e' auto-adattiva. Regole di TRADING assenti nel Pine
+   (e' un detector): per il cost-to-cost del corso la bozza ABTG e':
+   trend intermedio SU -> long alla conferma della punta-minimo,
+   stop sotto la punta, target la punta-massimo opposta (specchio
+   short); uscite alternative: R-based o flip di struttura. Da
+   formalizzare in tesi propria PRIMA di scrivere l'EA del ramo B.
+   Archivio: docs/larry/pine_market_structure_smollet.pine
 
 ## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
 - La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto
