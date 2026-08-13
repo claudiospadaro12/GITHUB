@@ -1,0 +1,18 @@
+# =====================================================================
+#  R34a_bb_gbpusd: Breaking Band PER-TRADE a 100k — GBPUSD, pattern 2
+#  Lancio: ABTG_BreakingBand -Prova prove\R34a_bb_gbpusd.txt -Simbolo GBPUSD
+#          -Deposito 100000 -Etichetta r34
+#  Cella promossa in R33. Magic VERGINI 772111/772112 (gemelli del
+#  magic-sweep: righe identiche al centesimo o il round non vale).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=2
+InpTPMode=0
+InpRiskPercent=1.0
+InpBulgeWidthMult=1.35
+InpBulgeNetMoveATR=1.0
+
+InpMagic=772111||772111||1||772112||Y

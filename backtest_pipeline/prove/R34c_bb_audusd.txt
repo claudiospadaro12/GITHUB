@@ -1,0 +1,18 @@
+# =====================================================================
+#  R34c_bb_audusd: Breaking Band PER-TRADE a 100k — AUDUSD, pattern 1
+#  Lancio: ABTG_BreakingBand -Prova prove\R34c_bb_audusd.txt -Simbolo AUDUSD
+#          -Deposito 100000 -Etichetta r34
+#  Cella promossa in R33. Magic VERGINI 772115/772116 (gemelli del
+#  magic-sweep: righe identiche al centesimo o il round non vale).
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=1
+InpTPMode=0
+InpRiskPercent=1.0
+InpBulgeWidthMult=1.35
+InpBulgeNetMoveATR=1.0
+
+InpMagic=772115||772115||1||772116||Y
