@@ -42,7 +42,9 @@
 - **Nuovo fronte strategie del corso**: tesi Breaking Band distillata
   (motore = squeeze Bollinger; servono da Claudio: slide, indicatore StdDev
   di Paolo, regole di Leonardo). CATALOGO completo delle strategie del corso
-  in lavorazione (agente). In canna anche R33 (sweep range apertura 15-60').
+  in lavorazione (agente). Sweep range apertura 15-60' ESEGUITO come R35
+  (13/08): nessun cambio, cella live DAX = migliore OOS, Initial Balance
+  archiviata (`REFERTO_ROUND35_RANGE_APERTURA.md`).
 - **Stile chat**: titoli grandi + emoji + hype (regola in CLAUDE.md).
 
 ---

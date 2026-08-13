@@ -29,8 +29,10 @@ limite giornaliero di trade.
 3b. **Target 2x/3x l'ampiezza del range** (ORB Setups): R13 arriva a 1,5x -
    se la direzione OOS di R13 punta verso l'alto, 2x/3x e' il vicinato del
    giro successivo (coerente con R9: piu' il target e' ambizioso, meglio OOS).
-4. **Finestra 60' / Initial Balance**: mai provata (abbiamo 5' pre, 15', 30',
-   35'). Da considerare solo se fade/OR-ATR mostrano qualcosa.
+4. ~~**Finestra 60' / Initial Balance**~~ — ❌ CHIUSO R35 (13/08): griglia
+   15-60' su DAX e Dow, tick reali. Il 60' e' la PEGGIORE cella OOS del DAX
+   (+47, e migliore IS: 23° ribaltamento) e quart'ultima sul Dow. Bonus: la
+   cella live DAX (35) e' la migliore OOS delle 10. `REFERTO_ROUND35_RANGE_APERTURA.md`
 5. **ORB con gap** (solo nei giorni di gap): filtro di contesto, il lab non
    ce l'ha (il GAPFILL dell'Apertura e' un'altra cosa: entra NEL gap).
 5b. **ORB sull'apertura di LONDRA** (LiteFinance): forex/oro sull'apertura
