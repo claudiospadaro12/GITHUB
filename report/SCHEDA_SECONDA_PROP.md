@@ -1,11 +1,11 @@
 # SCHEDA SECONDA PROP — studio regolamenti (D3, avviato 12/08)
 
-## 🏁 CLASSIFICA ATTUALE (aggiornata 13/08 — FTMO istruita)
+## 🏁 CLASSIFICA ATTUALE (aggiornata 13/08 sera — FTMO e Funding Pips istruite)
 | # | Ditta | Stato | Nota |
 |---|---|---|---|
 | 1 | **FTMO** | 🟡 ISTRUITA 13/08 — candidata SOLO **2-Step + SWING** | scheda #0 sotto + dossier `docs/REGOLAMENTO_FTMO_2026-08.md`. Conto Standard incompatibile (news ±2min anche su SL/TP, niente overnight con pause >2h = niente DAX notturno). 3 chiarimenti SCRITTI dovuti: gap-fill domenicale (zona grigia Forbidden Practices!), bracket pendenti, replica su altre ditte |
 | 2 | **The5ers (High Stakes)** | 🟡 candidata CON RISERVE | numeri tutti compatibili; 3 chiarimenti SCRITTI dal supporto obbligatori pre-acquisto (bulk simultaneo, bracket MaxMin, mono-direzione) |
-| 3 | **Funding Pips** | ⬜ da istruire | prossima della lista |
+| 3 | **Funding Pips** | 🔴 SCONSIGLIATA per il portafoglio pieno (13/08) | scheda #3 + dossier `docs/REGOLAMENTO_FUNDINGPIPS_2026-08.md`. Tre killer: weekend BAN sui funded (dal 29/01/26), "gap trading" vietato esplicitamente, Risk Per Trade Idea 2% hard breach. Split alti (fino al 100%) ma non compensano; storia di cambi regole retroattivi. Eventuale uso residuo: sotto-famiglia intraday su 2 Step Flex, dopo risposte scritte |
 | 4 | **E8 Markets** | ⬜ da istruire | verificare subito trailing e consistency |
 | 5 | **Alpha Capital** | ⬜ da istruire | — |
 | ❌ | **FundedNext** | SCARTATA (12/08) | regola 3% cumulativo in qualsiasi momento: tassa la diversificazione simultanea, escalation a 1% permanente |
@@ -213,6 +213,41 @@ diverse).
      ditte in parallelo = problema?
   Se la risposta 1 e' no/ambigua: famiglia GAP esclusa dal conto FTMO
   (resta sulle altre ditte candidate), il resto del portafoglio passa.
+
+## SCHEDA COMPILATA #3 — Funding Pips (istruita il 13/08)
+- Data studio: 13/08/2026 (agente su help center ufficiale; fetch
+  diretto bloccato -> citazioni via ricerche, URL nel dossier
+  `docs/REGOLAMENTO_FUNDINGPIPS_2026-08.md`)
+- 1 EA: ✅ proprietari ammessi (con prova di proprieta', da confermare
+  scritto); EA COMMERCIALI solo come risk manager
+- 2 Limiti (2 Step Standard): 5% daily sul MAGGIORE balance/equity di
+  apertura giornata (reset 00:00 UTC+3) / 10% statico ✅ — Flex: 4%/12%
+- 3 News: valutazione libera ✅; Master: profitti DECURTATI per trade
+  aperti/chiusi entro ±5 min da red news (soft rule, ma coi nostri EA
+  senza filtro = tassa ricorrente); NESSUN conto esente stile Swing ❌
+- 4 Overnight/weekend: overnight ok; **WEEKEND VIETATO SU TUTTI I
+  MASTER dal 29/01/2026** (auto-close il venerdi') ❌ = gap-fill e
+  tenute weekend morti PROPRIO dove si viene pagati
+- 5 Consistency: 35% solo su reward on-demand (payout trattenuto);
+  **"Risk Per Trade Idea" 2% = HARD BREACH** (somma le posizioni
+  stessa direzione entro 10 min: 3 x 0,65% = 1,95%, a un soffio) ⚠️
+- 6 Vietati: **"gap trading" ESPLICITO in lista** (lettera = aprire
+  prima delle chiusure; riapertura ambigua), hedging generico (bracket
+  OCO a rischio interpretativo), opposite accounts, HFT/arb/tick ecc.
+- 7 Economics: 100k ~$499; split fino al 100% (monthly) / 90%
+  on-demand 🏆; refund al 4° payout; PRIME fino $2M ma trailing 8%
+- 8 Storia: MetaQuotes ban 2024 (risolto, MT5 tornato 2025);
+  Trustpilot 4.5 con 51k rec., $260M payout; MA cambi regole
+  RETROATTIVI sui funded (weekend ban, PRIME peggiorato) = rischio
+  regolamentare strutturale
+- **VERDETTO: 🔴 SCONSIGLIATA per il portafoglio pieno.** Tre killer
+  (weekend ban funded, gap trading vietato, Risk Per Trade Idea) piu'
+  la tassa news. FTMO 2-Step+Swing resta NETTAMENTE superiore per noi;
+  The5ers in mezzo. Uso residuo eventuale: sotto-famiglia intraday
+  senza gap-fill su 2 Step Flex (12% statico) — solo dopo risposte
+  scritte e comunque non prioritario.
+- Prossima da studiare: **E8 Markets** (verificare subito trailing e
+  consistency).
 
 ## SCHEDA COMPILATA #1 — FundedNext (Stellar CFD)
 - Data studio: 12/08/2026 (screenshot Claudio dell'articolo ufficiale
