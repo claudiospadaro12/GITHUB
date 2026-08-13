@@ -32,7 +32,10 @@ $Attesi = @(
   # sedie 16-18 (13/08): Gap-fill R36/R37 (fill e taratura sotto)
   @{ea="ABTG_GapFill"; sym="GBPUSD"; tf="H1"; magic=772231; be=$null; comm="GAP GBPUSD"; fill="100"},
   @{ea="ABTG_GapFill"; sym="EURUSD"; tf="H1"; magic=772232; be=$null; comm="GAP EURUSD"; fill="50"},
-  @{ea="ABTG_GapFill"; sym="AUDUSD"; tf="H1"; magic=772233; be=$null; comm="GAP AUDUSD"; fill="100"}
+  @{ea="ABTG_GapFill"; sym="AUDUSD"; tf="H1"; magic=772233; be=$null; comm="GAP AUDUSD"; fill="100"},
+  # sedie 19-20 (13/08): Gap indici in OSSERVAZIONE (R37: fuori dal portafoglio)
+  @{ea="ABTG_GapFill"; sym="U30USD"; tf="H1"; magic=772234; be=$null; comm="GAP DOW"; fill="100"},
+  @{ea="ABTG_GapFill"; sym="225JPY"; tf="H1"; magic=772235; be=$null; comm="GAP NIKKEI"; fill="75"}
 )
 $TFnum = @{ "H1"="16385"; "H2"="16386" }
 
@@ -64,7 +67,7 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO v6 (12 grafici: R23 + EMA200 + BB + GAP) ===" White
+Rec "=== VERIFICA VIVAIO v7 (14 grafici: R23 + EMA200 + BB + GAP forex/indici) ===" White
 Rec ("terminal letto: {0}" -f $old.Name) Gray
 $errori = 0
 foreach ($a in $Attesi) {
