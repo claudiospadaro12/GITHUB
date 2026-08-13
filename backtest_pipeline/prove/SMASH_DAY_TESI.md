@@ -35,6 +35,14 @@
    perdita, oggi sul max drawdown. Causa indiziata: sessione estesa
    ~23h (dal 2019) digerita dagli operatori -> niente gap giornalieri
    -> pattern morente. "Nulla e' per sempre."
+7. **Pietro Froio (ago 2026) — test Oops su E-mini S&P 500, dati 1'**
+   (fornito da Claudio, parziale: articolo a pagamento): definizione
+   coerente con le fonti 2/5 (gap down + rientro = LONG; gap up +
+   rientro = SHORT). Numeri: su 796 aperture fuori range in sessione
+   RTH, il 66,1% produce il rientro/trigger (195 long / 325 short
+   completi). NON e' una strategia (niente stop/target/costi). Il
+   titolo dichiara che **il risultato cambia parecchio fra lato long
+   e lato short** (conclusione dietro paywall).
 
 ## ⚠️ ATTESE RIVISTE dopo la fonte 6 (scritte PRIMA dei nostri numeri)
 - La nostra finestra (2024-2026) cade INTERAMENTE nel periodo morto
@@ -95,6 +103,14 @@ SOVRAPPOSIZIONE DA MISURARE, vedi trappole).
   (0=off), come nel GapFill: sotto il minimo e' rumore/spread, sopra
   il massimo e' rottura vera (news).
 - Allo screening: filtri MINIMI (lezione BB: prima la frequenza).
+- **LATI SEPARATI OBBLIGATORI** (fonte 7 + le nostre cicatrici: 10°
+  ribaltamento sui lati del Dow, FASE M sul DAX): l'EA ha
+  InpAllowLong/InpAllowShort e lo scan LI SPAZZOLA. L'asimmetria
+  long/short e' un'attesa dichiarata, non una sorpresa.
+- Nota sessioni: il test Froio usa la sessione RTH ricostruita; sui
+  nostri CFD la "giornata" e' la candela D1 del broker. Su mercati
+  quasi-24h il gap d'apertura D1 e' raro (attesa gia' dichiarata):
+  il 66% di trigger di Froio vale per mercati CON sessione.
 
 ## Le trappole dichiarate subito
 1. **Sovrapposizione con ABTG_GapFill il lunedi'**: l'Oops sul gap
