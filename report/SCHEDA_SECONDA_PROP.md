@@ -1,9 +1,9 @@
 # SCHEDA SECONDA PROP — studio regolamenti (D3, avviato 12/08)
 
-## 🏁 CLASSIFICA ATTUALE (aggiornata 12/08 sera)
+## 🏁 CLASSIFICA ATTUALE (aggiornata 13/08 — FTMO istruita)
 | # | Ditta | Stato | Nota |
 |---|---|---|---|
-| 1 | **FTMO** | 🎯 prima prop designata — MA scheda dedicata DA FARE | e' il metro su cui e' tarato tutto (10%/5% statici, Guardian, dry-run 100k). Attenzione: finora l'abbiamo ASSUNTA, mai istruita con questa trafila — stessa lettura completa (news su funded, pratiche vietate, payout) dovuta anche a lei |
+| 1 | **FTMO** | 🟡 ISTRUITA 13/08 — candidata SOLO **2-Step + SWING** | scheda #0 sotto + dossier `docs/REGOLAMENTO_FTMO_2026-08.md`. Conto Standard incompatibile (news ±2min anche su SL/TP, niente overnight con pause >2h = niente DAX notturno). 3 chiarimenti SCRITTI dovuti: gap-fill domenicale (zona grigia Forbidden Practices!), bracket pendenti, replica su altre ditte |
 | 2 | **The5ers (High Stakes)** | 🟡 candidata CON RISERVE | numeri tutti compatibili; 3 chiarimenti SCRITTI dal supporto obbligatori pre-acquisto (bulk simultaneo, bracket MaxMin, mono-direzione) |
 | 3 | **Funding Pips** | ⬜ da istruire | prossima della lista |
 | 4 | **E8 Markets** | ⬜ da istruire | verificare subito trailing e consistency |
@@ -156,6 +156,63 @@ piano specifico conta (lo stesso nome puo' avere programmi con regole
 diverse).
 
 ---
+
+## SCHEDA COMPILATA #0 — FTMO (la prima designata, istruita il 13/08)
+- Data studio: 13/08/2026 (agente su fonti ufficiali ftmo.com; fetch
+  diretto bloccato dall'egress -> citazioni via ricerche mirate, URL
+  nel dossier `docs/REGOLAMENTO_FTMO_2026-08.md` per la verifica visiva)
+- 1 EA: ✅ permessi senza restrizioni (anche algoritmici); tetto 2.000
+  richieste server/giorno; EA COMMERCIALI di terzi rischiano il tetto
+  strategie identiche — i nostri proprietari ok
+- 2 Limiti (2-Step): Max Daily Loss **5% su EQUITY**, baseline =
+  balance delle **00:00 CE(S)T** (mezzanotte italiana) · Max Loss
+  **10% STATICO** ✅ = esattamente il metro del nostro dry-run.
+  (1-Step: ML trailing EOD + MDL 3% + Best Day Rule 50% + niente
+  Swing + fee non rimborsata = ❌ NON per noi)
+- 3 News: su **funded Standard** vietato aprire/chiudere ±2 min sugli
+  strumenti dell'evento, e conta ANCHE **SL/TP eseguiti nella
+  finestra** ("this will also be considered a breach") = coi nostri EA
+  senza filtro news e' un breach quasi certo. **Conto SWING: zero
+  restrizioni news** ✅
+- 4 Overnight/weekend: funded Standard = chiusura pre-weekend E niente
+  posizioni attraverso pause di mercato >2h (**il DAX notturno muore
+  anche infrasettimana**). **SWING: nessuna restrizione** ✅ — e Swing
+  esiste SOLO sul 2-Step
+- 5 Consistency: **nessuna sul 2-Step** ✅ (Discipline Score solo
+  informativo)
+- 6 Pratiche vietate: latency/feed arb, posizioni opposte fra conti,
+  terzi sul conto, >2.000 req/giorno, distribuzione artificiale dei
+  profitti, "overleveraging, overexposure, one-sided bets, account
+  rolling"... e **"gap trading"**: testualmente vieta aprire trade
+  (i) a ridosso di news majors o (ii) **nelle 2h PRIMA di una chiusura
+  di mercato >=2h**. La lettera NON copre l'ingresso ALLA RIAPERTURA
+  (il nostro gap-fill), lo spirito forse si' -> **ZONA GRIGIA: la
+  famiglia GAP su FTMO e' FERMA senza ok scritto**
+- 7 Conti/replica: tetto **$400k per trader O PER STRATEGIA** (strategie
+  identiche su piu' conti FTMO vengono rilevate); copy verso ALTRE
+  ditte NON regolamentato -> da chiedere
+- 8 Economics 100k: ~€540 listino (promo attuale €439), fee rimborsata
+  al primo reward, split **80/20 -> 90/10** con scaling, payout
+  **on-demand dal 14° giorno**, scaling +25%/4 mesi fino a $2M ✅
+- 9 Piattaforme: MT4/MT5/cTrader/DXtrade; **server GMT+2/+3 ≠ BCM**
+  (tutti gli InpSessionHour da RIMAPPARE al passaggio); leva Standard
+  1:100, **Swing 1:30** (⚠️ verificare i margini di MaxMin oro/indici
+  a 0,65% con leva 30); indici senza commissioni; conti demo simulati
+  con payout reali. Novita' 2025-26: FTMO ha COMPRATO OANDA (prima
+  prop con broker regolamentato), USA riaperti
+- **Incrocio col NOSTRO portafoglio**: la combinazione obbligata e'
+  **2-Step + SWING** — lo Standard boccia da solo news (SL/TP inclusi)
+  e overnight DAX. Sul 2-Step+Swing i limiti coincidono col dry-run
+  (10/5 statici, p99 a 0,65% = 8,7% < 10%). Restano TRE zone grigie.
+- **VERDETTO: 🟡 CANDIDATA CONFERMATA #1, SOLO 2-Step + SWING, con 3
+  chiarimenti SCRITTI obbligatori pre-acquisto:**
+  1. il gap-fill che ENTRA alla riapertura domenicale e' "gap trading"
+     vietato? (anche su Swing e in Challenge)
+  2. bracket di pendenti opposti sullo stesso conto (MaxMin) = ok?
+  3. stessa strategia proprietaria replicata su conti funded di ALTRE
+     ditte in parallelo = problema?
+  Se la risposta 1 e' no/ambigua: famiglia GAP esclusa dal conto FTMO
+  (resta sulle altre ditte candidate), il resto del portafoglio passa.
 
 ## SCHEDA COMPILATA #1 — FundedNext (Stellar CFD)
 - Data studio: 12/08/2026 (screenshot Claudio dell'articolo ufficiale
