@@ -1,0 +1,34 @@
+# =====================================================================
+#  ROUND 45b: ABTG_ORB_Ottimizzato - ORB DI LONDRA su EURUSD
+#  Si lancia con:  -Prova prove\R45b_londra_EURUSD.txt -Etichetta r45b
+# =====================================================================
+#
+# PERCHE': gemello forex del R45a (stessa griglia, stessa sessione
+#   07:00 server). EURUSD = il major di Londra per eccellenza.
+#
+# IPOTESI (prima dei numeri): ONESTA' - il forex in FASE 0 non ha mai
+#   mostrato edge con nessun motore di breakout, e il GoldenCross
+#   forex e' morto in R20. Atteso rosso o pareggio; se l'oro passa e
+#   il forex no, la lezione "il breakout paga sui mercati con
+#   sessione vera, non sui cambi 24h" si scolpisce da sola.
+#
+# COME e CRITERI: identici e congelati col R45a.
+# =====================================================================
+@SIMBOLO  EURUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartHour=7
+InpRangeStartMin=0
+InpRangeEndHour=7
+InpEndHour=12
+InpEndMin=0
+InpUseCloseConfirm=1
+InpMinBodyPct=50
+InpUseEmaFilter=1
+InpUseEma200Filter=0
+InpSLMode=0
+InpTPMode=0
+InpRangeEndMin=15||15||15||30||Y
+InpTP_R=1.5||1.5||0.5||2||Y
+InpUseVolumeFilter=0||0||1||1||Y

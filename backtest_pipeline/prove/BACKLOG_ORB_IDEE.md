@@ -55,6 +55,11 @@ limite giornaliero di trade.
    della sessione europea (08:00 IT = 07:00 server) invece che su New York.
    Sessione nuova, non solo mercato nuovo. Il lab lo fa gia' via input orari.
    Caveat: il forex in FASE 0 non ha mai mostrato edge con nessun motore.
+   -> **IN MISURA COME R45** (13/08 notte): config IDENTICA a R10 (chiusura
+   confermata, corpo 50%, EMA 9/21), cambia SOLO la sessione (07:00->12:00
+   server). XAUUSD (la speranza: cugino diurno del box notturno R17) +
+   EURUSD + GBPUSD. Prove `R45a-c_londra_*.txt`. Se muoiono tutti e 3,
+   la famiglia ORB chiude su ogni sessione misurata.
 5c. **Secondo tentativo dopo il primo stop** (LiteFinance): rientro con
    tetto a 2 stop/giorno. Variante del OneTradePerDay, servirebbe un input
    nuovo (max stop al giorno). Solo se un motore base torna vivo.

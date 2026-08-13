@@ -1,0 +1,60 @@
+# =====================================================================
+#  ROUND 45a: ABTG_ORB_Ottimizzato - ORB DI LONDRA sull'ORO
+#  Si lancia con:  -Prova prove\R45a_londra_XAUUSD.txt -Etichetta r45a
+# =====================================================================
+#
+# PERCHE' (13/08/2026 notte - fascia C 5b, DUE fonti indipendenti)
+#   LiteFinance indica l'ORB sull'apertura EUROPEA (08:00 IT = 07:00
+#   server BCM) per forex/oro; ThinkMarkets (portato da Claudio il
+#   10/08) indica il London breakout sull'oro come setup dedicato.
+#   L'ORB sull'oro e' gia' stato bocciato sull'apertura di NEW YORK
+#   (R10: nessuna cella verde) - ma la sessione di Londra NON e' mai
+#   stata misurata, ed e' il cugino DIURNO del box notturno promosso
+#   (R17, oggi in vivaio). Questo round misura LA SESSIONE: config
+#   IDENTICA a R10 (chiusura M5 confermata, corpo 50%, EMA 9/21),
+#   cambia SOLO la finestra oraria.
+#
+# SCELTE dichiarate:
+#   - range 07:00 -> 07:15/07:30 server (le due durate classiche);
+#   - giornata chiusa alle 12:00 server (13:00 IT): il round misura
+#     la MATTINA di Londra; alle 14:30 aprono gli USA dove lavorano
+#     gia' i titolari - niente sovrapposizioni per costruzione;
+#   - ingresso a chiusura confermata = niente buffer K: il confronto
+#     oro/forex e' a parita' di meccanica.
+#
+# IPOTESI (scritta prima di qualunque numero)
+#   1. L'oro e' il candidato con piu' speranza del round (il box
+#      notturno R17 dimostra che sull'oro i breakout di fascia
+#      oraria POSSONO pagare; e Londra e' la sessione dei metalli).
+#   2. Onesta': la lezione R10 dice che l'ORB oro su NY non paga;
+#      se paga Londra, il valore e' della SESSIONE, non del motore.
+#
+# CRITERI (congelati ora, non dopo)
+#   1. "Segnale che esiste": almeno una cella positiva in ENTRAMBE
+#      le finestre con PF OOS >= 1,10 e n >= 30.
+#   2. Per parlare di CANDIDATURA: i criteri prop di sempre
+#      (DD < 10%, vicini di griglia verdi - FASE M, poi trafila
+#      per-trade -> portafoglio -> vivaio, come tutti).
+#   3. Regola del regime: IS rosso / OOS verde = riserva, non si conta.
+#   4. Se tutti e 3 i simboli muoiono: la voce "sessione Londra" del
+#      backlog chiude, e con lei la famiglia ORB su ogni sessione
+#      misurata.
+# =====================================================================
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartHour=7
+InpRangeStartMin=0
+InpRangeEndHour=7
+InpEndHour=12
+InpEndMin=0
+InpUseCloseConfirm=1
+InpMinBodyPct=50
+InpUseEmaFilter=1
+InpUseEma200Filter=0
+InpSLMode=0
+InpTPMode=0
+InpRangeEndMin=15||15||15||30||Y
+InpTP_R=1.5||1.5||0.5||2||Y
+InpUseVolumeFilter=0||0||1||1||Y

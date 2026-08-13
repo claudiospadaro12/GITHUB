@@ -1,0 +1,33 @@
+# =====================================================================
+#  ROUND 45c: ABTG_ORB_Ottimizzato - ORB DI LONDRA su GBPUSD
+#  Si lancia con:  -Prova prove\R45c_londra_GBPUSD.txt -Etichetta r45c
+# =====================================================================
+#
+# PERCHE': terzo banco del R45 - il cable e' IL cambio della piazza
+#   di Londra, e GBPUSD e' gia' un mercato "amico" del progetto
+#   (BB, GAP, LARRY ci hanno trovato edge con altri motori).
+#
+# IPOTESI (prima dei numeri): come R45b - atteso difficile (breakout
+#   su cambi 24h), ma GBPUSD e' il forex col miglior curriculum del
+#   progetto: se un cambio deve sorprendere, e' lui.
+#
+# COME e CRITERI: identici e congelati col R45a.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartHour=7
+InpRangeStartMin=0
+InpRangeEndHour=7
+InpEndHour=12
+InpEndMin=0
+InpUseCloseConfirm=1
+InpMinBodyPct=50
+InpUseEmaFilter=1
+InpUseEma200Filter=0
+InpSLMode=0
+InpTPMode=0
+InpRangeEndMin=15||15||15||30||Y
+InpTP_R=1.5||1.5||0.5||2||Y
+InpUseVolumeFilter=0||0||1||1||Y
