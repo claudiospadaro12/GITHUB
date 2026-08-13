@@ -194,7 +194,28 @@ InpMaxSpreadPts=0||0||0||0||N
 InpEntryWindowBars=3||3||0||3||N
 InpFillPct=100||50||25||100||Y
 "@
-} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_CostToCost"){
+  # Cost-to-cost sulle punte di Larry (tesi COSTTOCOST_TESI.md). H1 di
+  # default (-Tf H4 per il secondo giro). Spazzola SOLO uscita e lati:
+  # 3 exit x 4 lati = 12 celle/simbolo. Struttura auto-adattiva, filtri
+  # spenti allo screening (lezione BB: prima la frequenza).
+  $Period="H1"
+  $Inputs=@"
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpSLBufferATR=0.2||0.2||0||0.2||N
+InpAtrPeriod=14||14||0||14||N
+InpMinRangeATR=0.0||0.0||0||0.0||N
+InpMaxBarsHold=100||100||0||100||N
+InpMaxSpreadPts=0||0||0||0||N
+InpEntryWindowBars=3||3||0||3||N
+InpWarmupBars=500||500||0||500||N
+InpExitMode=0||0||1||2||Y
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=1||0||1||1||Y
+"@
+} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill, CostToCost" -ForegroundColor Red; exit 1 }
 
 # --- -Tf opzionale: forza il timeframe del test e dell'EA, e separa i risultati ---
 $EAtag=$EA
