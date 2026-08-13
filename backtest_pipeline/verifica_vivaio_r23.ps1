@@ -74,7 +74,7 @@ foreach ($chr in $chrs) {
   $trovati["$ea|$sym|$magic"] = @{ea=$ea; sym=$sym; ins=$ins; file=$chr.Name}
 }
 
-Rec "=== VERIFICA VIVAIO v8 (20 grafici: R23 + EMA200 + BB + GAP + LARRY) ===" White
+Rec "=== VERIFICA VIVAIO v8.1 (20 grafici; bool true/false normalizzati) ===" White
 Rec ("terminal letto: {0}" -f $old.Name) Gray
 $errori = 0
 foreach ($a in $Attesi) {
@@ -104,10 +104,13 @@ foreach ($a in $Attesi) {
     if ($ins["InpTPMode"] -ne "0")                       { $ok=$false; $note += ("InpTPMode={0} atteso 0 (Leonardo)" -f $ins["InpTPMode"]) }
   }
   if ($a.ea -eq "ABTG_PunteLarry") {
+    # i .chr salvano i bool come true/false O come 1/0: si normalizza prima del confronto
+    $al  = $ins["InpAllowLong"]  -replace '^true$','1' -replace '^false$','0'
+    $ash = $ins["InpAllowShort"] -replace '^true$','1' -replace '^false$','0'
     if ($ins["InpPatternMode"] -ne $a.pat)        { $ok=$false; $note += ("InpPatternMode={0} atteso {1}" -f $ins["InpPatternMode"],$a.pat) }
     if ($ins["InpExitMode"] -ne $a.ex)            { $ok=$false; $note += ("InpExitMode={0} atteso {1}" -f $ins["InpExitMode"],$a.ex) }
-    if ($ins["InpAllowLong"] -ne $a.al)           { $ok=$false; $note += ("InpAllowLong={0} atteso {1}" -f $ins["InpAllowLong"],$a.al) }
-    if ($ins["InpAllowShort"] -ne $a.ash)         { $ok=$false; $note += ("InpAllowShort={0} atteso {1}" -f $ins["InpAllowShort"],$a.ash) }
+    if ($al -ne $a.al)                            { $ok=$false; $note += ("InpAllowLong={0} atteso {1}" -f $ins["InpAllowLong"],$a.al) }
+    if ($ash -ne $a.ash)                          { $ok=$false; $note += ("InpAllowShort={0} atteso {1}" -f $ins["InpAllowShort"],$a.ash) }
     if ([double]$ins["InpMaxSpreadPts"] -ne 300)  { $ok=$false; $note += ("InpMaxSpreadPts={0} atteso 300" -f $ins["InpMaxSpreadPts"]) }
     if ([double]$ins["InpMaxDaysHold"] -ne 5)     { $ok=$false; $note += ("InpMaxDaysHold={0} atteso 5" -f $ins["InpMaxDaysHold"]) }
   }
