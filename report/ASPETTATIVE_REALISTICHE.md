@@ -99,6 +99,38 @@ dalla finestra, non la correttezza della misura dentro.
 - **Monte Carlo (gia' in uso)**: rimescola i trade esistenti, NON crea
   regimi nuovi. Non risolve questo problema, e non va spacciato per farlo.
 
+### Dati esterni per allungare la storia (idea di Claudio, 14/08)
+
+Fattibile, con una gerarchia di pulizia (dalla piu' pulita alla piu' sporca):
+1. **Storico BCM che gia' abbiamo** — da referto, forse basta sul forex. Primo
+   passo obbligatorio: costa 2 minuti e potrebbe chiudere la questione.
+2. **Conto DEMO su un altro broker MT5** con storico lungo (IC Markets,
+   Pepperstone — quest'ultimo e' anche il feed usato nei video del corso):
+   dati NATIVI MT5, tick reali del broker, zero import. **La strada
+   consigliata**: si installa un secondo terminale, si scarica lo storico e
+   si lancia il tester li'.
+3. **Import di tick esterni (Dukascopy, Darwinex) come CUSTOM SYMBOL** in
+   MT5 (`CustomTicksReplace`): tecnicamente possibile e gratuito, storia dal
+   2003 sul forex. Ma e' la strada piu' sporca — vedi trappole sotto.
+
+**LE TRE TRAPPOLE, dichiarate prima di partire:**
+- **FUSO E DST**: Dukascopy e' UTC senza ora legale, i broker MT5 sono
+  GMT+2/+3 CON ora legale. Tutti i nostri EA hanno orari in ORA SERVER (DAX 8,
+  Nasdaq 14:30, fasce EasyTrend, box notturno oro): senza rimappatura
+  dinamica ogni verdetto orario e' spazzatura.
+- **UNITA' E VALORE PUNTO**: gia' pagata col v21 dell'amico (il suo stop di
+  "50 punti" su BCM valeva mezzo punto indice). Contract size, tick value e
+  digits di un simbolo importato vanno impostati a mano: se sbagliati, i P&L
+  non significano nulla.
+- **SPREAD E COMMISSIONI**: sono del broker dei dati, non di BCM. Su
+  strategie con stop stretti (EasyTrend: 20-25 pips) questo sposta il verdetto.
+
+**REGOLA D'USO (congelata ora):** i dati esterni servono SOLO come **prova di
+regime** — celle e parametri CONGELATI, nessuna ri-ottimizzazione, domanda
+unica: "questa strategia sopravvive a un mercato orso / a un altro
+contesto?". Non si tara MAI un parametro operativo su dati di un altro
+broker; la taratura resta su BCM, dove si opera.
+
 ## Il numero che decide davvero
 
 Non e' il portafoglio simulato: e' **quanto i 15 trade di ogni famiglia
