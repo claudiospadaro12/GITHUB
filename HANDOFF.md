@@ -21,7 +21,12 @@
   sulla frequenza) -> scan 48 (campo rosso 24/48, testa viva) -> **tick
   reali 4/4 con tenute 85-104%: lo spread NON uccide** -> **R48
   walk-forward IN CORSO** (EURGBP short / GBPUSD, AUDJPY, CHFJPY long).
-  QUINTA famiglia mono-lato di fila.
+  QUINTA famiglia mono-lato di fila. **R48 tre promossi** (GBPUSD, AUDJPY,
+  CHFJPY, +2.667 OOS) ma **R49 BOCCIA la famiglia in portafoglio** (alza
+  tutte le code: p99 12,47 -> 14,63) e **nessun sottoinsieme viene
+  ripescato** (senza tesi strutturale sarebbe pesca a posteriori) ->
+  **sedie 30-32 in OSSERVAZIONE sul 50503392** (magic 772421-23, verifica
+  **26/26**), porta del 100k CHIUSA. Vivaio: 23 in prova + 5 osservati.
 - **DOSSIER USCITE (3 ricorrenze del "vincente chiuso stretto") APERTO e
   gia' con un verdetto**: R46 ha ASSOLTO il trailing PREVBAR (e' la
   migliore gestione su entrambi gli indici) e ha indicato il **parziale
