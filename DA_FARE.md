@@ -21,9 +21,13 @@ appendici: `report/DAX_14-08_DUE_MOTORI.md`.
 che generano ini del tester blindati con `[Experts] AllowLiveTrading=false` ·
 guardia A4 corretta (confondeva "non lo so" con "non ho operato").
 
-**Resta da fare, stesso difetto della guardia A4:**
-`ABTG_Dow_Apertura_US.mq5:704`, `ABTG_Nasdaq_Apertura_US.mq5:751`,
-`ABTG_Apertura_Marco.mq5:636`.
+**Guardia A4 — CHIUSA anche sugli altri tre (14/08 sera):**
+`ABTG_Dow_Apertura_US` 1.00->1.01, `ABTG_Nasdaq_Apertura_US` 1.01->1.02,
+`ABTG_Apertura_Marco` 1.00->1.01. Adesso `HaGiaOperatoOggi()` restituisce
+anche `storicoOk`: se lo storico non ha risposto, la giornata NON viene
+timbrata e il controllo si ripete al tick dopo. **Da ricompilare sul VPS**
+alla prossima occasione (nel tester non cambia niente: li' lo storico c'e'
+sempre).
 
 ## 0-bis. R51 — LO SHORT DI RITORNO (codice pronto, da lanciare)
 
@@ -88,6 +92,28 @@ vince su 3 simboli su 4**, altrimenti si tiene 8-18.
 Perche' vale la pena: R48, R49 e R50 hanno giudicato Easy Trend con una regola
 forse spostata di un'ora. E il risultato vale per **ogni** strategia futura
 della stessa fonte, non solo per questa.
+
+## 1-quater. R54 — I DUE LATI MAI MISURATI DEL DOW (**pronto, si lancia subito**)
+
+Non dipende da Pepperstone: gira sul feed nativo BCM coi dati gia' in casa.
+Dal censimento R52: **Dow Apertura** (770202) e **ORB-EMA200 Dow** (770611)
+girano solo long, e su tutte e due il **solo-short non e' MAI stato lanciato**
+(R6 confronto' solo-long contro long+short; sull'ORB il lato viene dalla fonte
+ed e' pinnato da R13 in poi). Tutte e due stanno sul conto da 100k.
+
+Tesi e 7 criteri congelati: `prove/R54_LATO_MAI_MISURATO_TESI.md`. In breve:
+n>=30 OOS o il verdetto e' "non misurabile"; il long+short entra solo se
+aggiunge profitto **senza** alzare il DD; **da questo round non esce nessun
+cambio al forward**. Limite dichiarato: un solo regime non separa l'asimmetria
+del mercato da quella del periodo.
+
+PC di BACKTEST, MT5 CHIUSO. 16 passate a tick reali, si lascia girare:
+
+```
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/f7eb5b2ad126acd0ae58bdb52a141140d9ace823/backtest_pipeline/lancia_r54.ps1" -OutFile "$env:TEMP\lancia_r54.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r54.ps1" -Rif f7eb5b2ad126acd0ae58bdb52a141140d9ace823
+```
+
+Zip in `Desktop\r54.zip`, 4 CSV attesi controllati uno per uno.
 
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 
