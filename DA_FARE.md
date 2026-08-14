@@ -17,7 +17,7 @@ forward. Dettagli e prova aritmetica: `report/DAX_14-08_DUE_MOTORI.md`.
 Sul **VPS** (non tocca niente, MT5 puo' restare aperto):
 
 ```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/config_in_uso.ps1" -OutFile "$env:TEMP\config_in_uso.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\config_in_uso.ps1"
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/7dc4b65b688c1f8a0168f7b237ba6d6364fcbe86/backtest_pipeline/config_in_uso.ps1" -OutFile "$env:TEMP\config_in_uso.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\config_in_uso.ps1"
 ```
 
 Stampa l'**ultima** riga `CONFIG IN USO` di ogni EA su **ogni** terminale
