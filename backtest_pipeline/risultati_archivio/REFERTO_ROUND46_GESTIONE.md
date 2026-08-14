@@ -93,3 +93,50 @@ la decisione l'hanno gia' presa i cancelli, ed e' "si resta come si e'".
 
 _Dati: `risultati_prove/aperture_r46/` (4 CSV). Prove coi criteri congelati:
 `prove/R46a_gestione_DAX.txt`, `prove/R46b_gestione_DOW.txt`._
+
+---
+
+# FASE 2 (R47) — I NUMERI CHE SPIEGANO IL CONTO (14/08/2026)
+
+Per-trade a 100k, magic VERGINI in sweep gemello: **igiene 4/4, le otto
+serie coincidono al centesimo** (772501=772502, 772503=772504,
+772505=772506, 772507=772508).
+
+## Win rate e payoff delle due strutture
+
+| | chiusure | win rate | vincita media | perdita media | **payoff** | expectancy |
+|---|---|---|---|---|---|---|
+| **DAX LIVE** (parziale) | 269 | **81,0%** | 291 | 890 | **0,327** | +67 |
+| DAX senza parziale | 192 | 74,0% | 505 | 961 | **0,525** | +123 |
+| **DOW LIVE** (parziale) | 129 | **72,9%** | 336 | 711 | **0,473** | +52 |
+| DOW senza parziale | 95 | 64,2% | 587 | 837 | **0,701** | +77 |
+
+## Le due risposte
+
+**1) Il payoff basso NON e' un difetto: e' il volto normale di questi EA.**
+Il conto 100k in forward ha payoff **0,385**, cioe' esattamente dentro la
+banda del tester (0,327-0,701). Le vincite piccole rispetto alle perdite
+sono il MODO in cui questa famiglia guadagna: paga poco per volta, ma
+vince quasi sempre. L'expectancy nel tester e' positiva (+52...+123 per
+trade) proprio grazie al win rate alto.
+
+**2) Il conto e' sotto per il WIN RATE, non per il payoff.** Il tester dice
+73-81%; il forward ha fatto 60% (3 su 5). Con payoff 0,385 il pareggio
+richiede il 72%. **Ma con un win rate vero del 75%, vedere 3 o meno
+vincenti su 5 trade capita nel 36,7% dei casi**: e' varianza pura, non un
+segnale. Cinque trade non dicono nulla — e ora sappiamo esattamente quale
+numero guardare quando ne avremo quindici: **il win rate**, non il P/L.
+
+## Il parziale, confermato come leva
+
+Togliere il parziale al 50% **compra payoff vendendo win rate**:
+0,327 -> 0,525 sul DAX (81% -> 74%), 0,473 -> 0,701 sul Dow (73% -> 64%),
+con expectancy per trade quasi raddoppiata sul DAX. E' il meccanismo che
+R46 aveva ipotizzato, ora misurato.
+
+**La decisione NON cambia**: R46 ha bocciato lo scambio sul cancello del
+drawdown del Dow, e quel cancello era scritto prima. Il parziale resta.
+Ma il quadro e' ora completo: sappiamo cosa costa e cosa compra.
+
+_Dati fase 2: `risultati_prove/aperture_r47/` (8 griglie + 8 serie
+per-trade). Attrezzo: `analizza_payoff.py`._
