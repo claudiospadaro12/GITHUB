@@ -1,0 +1,93 @@
+# =====================================================================
+#  ROUND 51: ABTG_DAX_Apertura_EU - IL SECONDO CICLO (InpAllowReverse)
+#  Si lancia con:  -Prova prove\R51_reverse_DAX.txt -Etichetta r51
+# =====================================================================
+#
+# PERCHE' (14/08/2026 - idea di Claudio dopo il DAX di stamattina)
+#   Il retest e' simmetrico: MonitorRetest() ha due rami, uno per lato.
+#   Ma appena il primo LIMIT veniva piazzato la macchina a stati andava
+#   in PH_PLACED e non chiamava piu' il monitor: il lato opposto era
+#   abbandonato per la giornata. Succedeva sia col LIMIT riempito sia
+#   col LIMIT scaduto inevaso. Cioe' il motore promosso (RETEST, l'unico
+#   in utile fuori campione della famiglia Apertura) lavorava mezza
+#   giornata. Oggi: long stoppato alle 09:18 = rottura del minimo del
+#   range nello stesso istante, e nessuno ha guardato il ritorno a
+#   26.428,90.
+#   Il flag InpAllowReverse (v1.01, default false) riapre quel lato con
+#   tetto rigido di 2 cicli/giorno e obbligo di ripartire da flat.
+#
+#   ⚠️ NON e' la "mediazione" bocciata il 12/08: la size resta 1R e non
+#   dipende da quanto si e' perso prima; il secondo ingresso e' lo
+#   stesso setup di sempre e si prenderebbe anche se il primo trade
+#   avesse chiuso in utile.
+#
+# COME (2 celle: la cella VALIDATA con reverse spento vs acceso)
+#   Tutto pinnato alla configurazione in produzione dal 06/08
+#   (RETEST, range 35, buffer 500, offset 200, TP 3R, parziale 50% a
+#   1R, BE, trailing PREVBAR M5), rischio all'1% come tutti i round.
+#   L'UNICA leva libera e' InpAllowReverse: cosi' la differenza fra le
+#   due righe e' il secondo ciclo e NIENT'ALTRO. Niente griglia: qui
+#   non si cerca un parametro, si misura un pezzo di motore.
+#
+# IPOTESI (scritte prima di qualunque numero)
+#   1. I trade del secondo ciclo hanno lo STESSO edge del primo, perche'
+#      sono lo stesso motore: PF nella banda 1,10-1,25.
+#   2. Il campione e' piccolo. Servono tre cose insieme: il primo LIMIT
+#      si arma, il prezzo rompe DALL'ALTRA parte, e poi TORNA sul
+#      livello. La terza uccide la frequenza.
+#      Stima onesta a priori: meno di 1 giorno su 5.
+#   3. Rischio dichiarato che conta piu' del PF: nelle giornate a due
+#      cicli il rischio di giornata diventa 2R e la coda del drawdown
+#      si allunga anche con PF > 1.
+#
+# CRITERI (congelati il 14/08, a numeri non visti - vedi R51_REVERSE_TESI.md)
+#   1. FREQUENZA: meno di 20 attivazioni del secondo ciclo in OOS ->
+#      "misurato, non conclusivo". Nessuna promozione su un pugno di
+#      trade.
+#   2. MERITO OOS sui soli trade del secondo ciclo: Profit > 0,
+#      PF >= 1,10, n >= 20.
+#   3. CANCELLO DEL DRAWDOWN (quello che decide): la serie completa con
+#      reverse acceso deve avere DD <= DD della riga con reverse spento.
+#      Aggiunge profitto ma alza il DD -> BOCCIATO. E' lo standard di
+#      portafoglio applicato dentro la singola serie.
+#   4. REGOLA DEI DUE BANCHI: IS e OOS devono andare nella stessa
+#      direzione. Un solo lato verde = riserva, non promozione.
+#   5. SIMMETRIA: si guarda anche il caso speculare (short stoppato ->
+#      long di ritorno). Se paga un lato solo, e' rumore direzionale
+#      della finestra e si boccia.
+#   6. Se passa: giro per-trade a 100k con magic vergine, poi
+#      dd_portafoglio.py contro le 27 serie. Nessuna scorciatoia.
+#
+# NOTA TECNICA
+#   Nel tester non ci sono reload, quindi il limite dichiarato nel
+#   codice (reverse spento per la giornata se l'EA riparte con un
+#   pendente vivo) non tocca questa misura.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpBufferPoints=500||500||0||500||N
+InpRetestOffsetPts=200||200||0||200||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowReverse=0||0||1||1||Y

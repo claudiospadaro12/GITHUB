@@ -16,8 +16,15 @@
 //|                                                                  |
 //|  ⚠️ Nessun EA garantisce profitti. TESTA SU DEMO prima.          |
 //+------------------------------------------------------------------+
+//  14/08/2026 - R51: aggiunto InpAllowReverse (opt-in, DEFAULT false).
+//  Il retest e' simmetrico ma dopo il primo LIMIT la macchina a stati
+//  andava in PH_PLACED e smetteva di sorvegliare il lato opposto: il
+//  motore promosso lavorava mezza giornata. Col flag acceso il secondo
+//  lato resta sorvegliato, con tetto rigido di 2 cicli al giorno letti
+//  dallo storico e con l'obbligo di ripartire da flat. Default false:
+//  i conti vivi non cambiano comportamento finche' non passa il banco.
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 //--- DEFAULT specifici per il DAX (usati dal motore ABTG_ApertureCore)
@@ -249,6 +256,7 @@ input double InpMaxRangePts   = ABTG_DEF_MAXRANGE;    // Ampiezza MAX candela/ra
 input group "=== Retest (InpEntryMode=RETEST, leva Emiliano) ==="
 input double InpRetestOffsetPts = 200;  // 06/08: era 0. Il LIMIT sta 2 punti indice DENTRO il livello: si pretende che il prezzo ci passi attraverso, non che lo sfiori. Costa il 3,9% dei riempimenti
 input double InpFadeOffsetPts   = 0;  // (RANGE_FADE) offset del LIMIT OLTRE l'estremo, in punti (0=sull'estremo; >0 fada uno spike piu' ampio)
+input bool   InpAllowReverse    = false; // R51: dopo il PRIMO ciclo continua a sorvegliare il lato OPPOSTO (solo RETEST). Tetto rigido 2 cicli/giorno, mai due cose vive insieme. DEFAULT false = forward invariato
 
 input group "=== Entrata ritardata/confermata (InpEntryMode=DELAYED) ==="
 input int    InpDelayMinutes = 30;  // Minuti DOPO l'apertura in cui si decide (salta il rumore iniziale)
@@ -373,6 +381,15 @@ int      gBias      = 0;           // bias di trend memorizzato all'arming
 bool     gBrokeHigh = false;       // la rottura sopra e' gia' avvenuta?
 bool     gBrokeLow  = false;       // la rottura sotto e' gia' avvenuta?
 
+// stato REVERSE (R51: secondo ciclo sul lato opposto, opt-in)
+//  gCicliGiorno lo rileggo dallo STORICO, non lo tengo a mente: cosi' il
+//  tetto di 2 cicli regge anche a una ricompilazione a meta' giornata.
+//  Leggere lo storico costa, quindi lo faccio al massimo ogni 5 secondi.
+int      gCicliGiorno    = 0;      // posizioni gia' APERTE oggi da questo magic
+datetime gUltimoConteggio = 0;     // quando ho riletto lo storico l'ultima volta
+bool     gRipristinaLong  = false; // riavvio a meta' giornata: il long era gia' stato giocato
+bool     gRipristinaShort = false; // idem per lo short
+
 // calendario news caricato da file CSV
 datetime gNewsTime[];              // orario evento (server, gia' shiftato)
 int      gNewsImpact[];            // impatto: 3=High, 2=Medium, 1=Low
@@ -429,14 +446,20 @@ int ABTG_OnInit()
    // al default senza che nessuno se ne accorgesse, e questa riga non bastava a
    // vederlo: RangeMode e' il parametro che fuori campione vale -2444 EUR sul
    // Nasdaq, e non veniva stampato affatto.
-   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | rangemode=%s | range=%d min | buffer=%.0f pt | offset retest=%.0f pt | lati=%s | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s | trail da=%.2fR",
+   ABTGLog(StringFormat("CONFIG IN USO -> motore=%s | rangemode=%s | range=%d min | buffer=%.0f pt | offset retest=%.0f pt | reverse=%s | lati=%s | rischio=%.2f%% | TP=%.1fR | parziale=%.0f%% | BE=%s | trail=%s %s | trail da=%.2fR",
                         EnumToString(InpEntryMode), EnumToString(InpRangeMode), InpRangeMinutes, InpBufferPoints, InpRetestOffsetPts,
+                        (InpAllowReverse ? "SI (2 cicli)" : "no"),
                         (InpAllowLong && InpAllowShort ? "long+short" : (InpAllowLong ? "SOLO LONG" : (InpAllowShort ? "SOLO SHORT" : "NESSUNO!"))),
                         InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
                         (InpBreakevenAtTP1 ? "si" : "no"),
                         EnumToString(InpTrailMode), EnumToString(InpTrailTF), InpTrailStartR));
    if(InpEntryMode == ABTG_GAPFILL && !InpUseGapFill)
       ABTGLog("NOTA: modalita' GAPFILL attiva. Il vecchio flag InpUseGapFill=false viene IGNORATO (prima faceva ricadere l'EA nel breakout senza dirlo).");
+   // R51: un flag che non fa niente e non lo dice e' il bug del 05/08 daccapo.
+   if(InpAllowReverse && InpEntryMode != ABTG_RETEST)
+      ABTGLog("NOTA: InpAllowReverse=true ma il motore NON e' RETEST: il secondo ciclo NON si attivera'. Il reverse esiste solo per il retest.");
+   if(InpAllowReverse && !(InpAllowLong && InpAllowShort))
+      ABTGLog("NOTA: InpAllowReverse=true con un solo lato consentito: il secondo ciclo puo' partire solo se il lato mancante e' abilitato. Cosi' com'e', quasi mai.");
    if(InpEntryMode == ABTG_DELAYED && InpDelayDirMode == ABTG_DIR_BREAK &&
       InpRangeMode == ABTG_RANGE_OPENING && InpDelayMinutes <= InpRangeMinutes)
       ABTGLog(StringFormat("NOTA: DELAYED+BREAK con attesa %d min <= range %d min: la decisione cade alla chiusura del range, si aspetta la rottura fino a %d min dopo.",
@@ -586,10 +609,26 @@ void ABTG_OnTick()
       (gPhase == PH_WAIT_OPEN || gPhase == PH_BUILDING))
      {
       gGuardiaGiorno = now.day_of_year;   // una volta al giorno, non a ogni tick
-      if(HaGiaOperatoOggi())
+      bool fattoLong, fattoShort;
+      int  cicli = CicliOggi(fattoLong, fattoShort);
+      // R51: col reverse acceso il tetto e' 2, non 1. Resta reload-safe perche'
+      // il conto viene dallo storico, non da una variabile in memoria.
+      int  tetto = (InpAllowReverse && InpEntryMode == ABTG_RETEST) ? 2 : 1;
+      if(cicli >= tetto)
         {
-         ABTGLog("oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.");
+         ABTGLog(StringFormat("oggi ho gia' fatto %d ciclo/i (storico deal del giorno, tetto %d): non riarmo. Guardia reload-safe.", cicli, tetto));
          gPhase = PH_DONE;
+        }
+      else if(cicli > 0)
+        {
+         // Riavvio a meta' giornata col reverse acceso: si riarma, ma il lato
+         // gia' giocato va marcato come rotto. Senza questo, il riarmo
+         // rimetterebbe in gioco la STESSA direzione di prima - che e' un
+         // doppione, non un reverse.
+         gRipristinaLong  = fattoLong;
+         gRipristinaShort = fattoShort;
+         ABTGLog(StringFormat("riavvio a giornata iniziata: %d ciclo/i gia' fatti (long=%s short=%s). Riarmo solo il lato mancante.",
+                              cicli, (fattoLong ? "si" : "no"), (fattoShort ? "si" : "no")));
         }
      }
 
@@ -686,6 +725,14 @@ void ABTG_OnTick()
          break;
 
       case PH_PLACED:
+         // R51: di norma qui non si fa piu' niente (un ciclo, giornata finita).
+         // Col reverse acceso si continua a sorvegliare il lato OPPOSTO, che
+         // altrimenti resterebbe scoperto sia se il LIMIT si e' riempito sia
+         // se e' scaduto inevaso.
+         if(newsBlk) break;
+         MonitorReverse();
+         break;
+
       case PH_DONE:
          break;
      }
@@ -711,15 +758,24 @@ void ABTG_OnTick()
 //|  riarmo, anche se e' gia' chiusa e anche se l'EA e' stato        |
 //|  ricompilato nel frattempo.                                      |
 //+------------------------------------------------------------------+
-bool HaGiaOperatoOggi()
+//  R51: la stessa lettura serve anche a CONTARE i cicli (per il tetto del
+//  reverse) e a sapere DA CHE LATO ho gia' operato. Se dopo un reload non
+//  sapessi il lato, il riarmo rimetterebbe in gioco anche la direzione gia'
+//  giocata: con un contatore solo si evita il terzo trade, non il doppione
+//  dallo stesso lato.
+int CicliOggi(bool &fattoLong, bool &fattoShort)
   {
+   fattoLong  = false;
+   fattoShort = false;
+
    MqlDateTime d;
    TimeToStruct(TimeCurrent(), d);
    d.hour = 0; d.min = 0; d.sec = 0;
    datetime inizioGiorno = StructToTime(d);
 
-   if(!HistorySelect(inizioGiorno, TimeCurrent() + 60)) return(false);
+   if(!HistorySelect(inizioGiorno, TimeCurrent() + 60)) return(0);
 
+   int cicli = 0;
    int n = HistoryDealsTotal();
    for(int i = n - 1; i >= 0; i--)
      {
@@ -727,9 +783,85 @@ bool HaGiaOperatoOggi()
       if(tk <= 0) continue;
       if(HistoryDealGetString(tk, DEAL_SYMBOL) != _Symbol) continue;
       if(HistoryDealGetInteger(tk, DEAL_MAGIC) != InpMagic) continue;
-      if(HistoryDealGetInteger(tk, DEAL_ENTRY) == DEAL_ENTRY_IN) return(true);
+      // ENTRY_IN = apertura. Le parziali sono ENTRY_OUT e NON contano come ciclo.
+      if(HistoryDealGetInteger(tk, DEAL_ENTRY) != DEAL_ENTRY_IN) continue;
+      cicli++;
+      if(HistoryDealGetInteger(tk, DEAL_TYPE) == DEAL_TYPE_BUY)  fattoLong  = true;
+      if(HistoryDealGetInteger(tk, DEAL_TYPE) == DEAL_TYPE_SELL) fattoShort = true;
+     }
+   return(cicli);
+  }
+
+//  (il vecchio wrapper booleano HaGiaOperatoOggi() e' stato tolto: con due
+//   tetti diversi - 1 senza reverse, 2 con - una risposta si/no non basta
+//   piu', e lasciarlo in giro invitava a richiamare la semantica vecchia.)
+
+//+------------------------------------------------------------------+
+//| R51 - HO QUALCOSA DI VIVO ADESSO? (posizione o pendente MIO)      |
+//|                                                                  |
+//|  Il secondo ciclo del reverse parte SOLO da flat. Il conto e'     |
+//|  HEDGING: senza questo controllo il LIMIT sul lato opposto        |
+//|  potrebbe convivere con la posizione ancora aperta, cioe' 2R a    |
+//|  rischio nello stesso momento. Il reverse deve aggiungere una     |
+//|  seconda occasione, non raddoppiare l'esposizione istantanea.     |
+//+------------------------------------------------------------------+
+bool HoRobaViva()
+  {
+   if(SelectMyPosition()) return(true);
+   for(int i = OrdersTotal() - 1; i >= 0; i--)
+     {
+      ulong tk = OrderGetTicket(i);
+      if(tk > 0 && OrderGetString(ORDER_SYMBOL) == _Symbol &&
+         OrderGetInteger(ORDER_MAGIC) == InpMagic) return(true);
      }
    return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| R51 - IL SECONDO CICLO: sorveglia il lato NON ancora rotto        |
+//|                                                                  |
+//|  PERCHE' (14/08/2026, idea di Claudio dopo il DAX di quel         |
+//|  giorno): il retest e' simmetrico, MonitorRetest() ha due rami.   |
+//|  Ma appena il primo LIMIT viene piazzato la macchina a stati va   |
+//|  in PH_PLACED e non chiama piu' il monitor: il lato opposto e'    |
+//|  abbandonato per la giornata. Lo stesso succede se il LIMIT       |
+//|  scade inevaso. Il motore promosso lavorava mezza giornata.       |
+//|                                                                  |
+//|  ⚠️ Questo NON e' la "mediazione": la size resta quella del       |
+//|  rischio (1R), non dipende da quanto si e' perso prima, e il      |
+//|  secondo ingresso e' lo stesso setup di sempre - il ritorno sul   |
+//|  livello dopo una rottura. Se il primo trade avesse chiuso in     |
+//|  utile, il secondo si prenderebbe lo stesso.                      |
+//|                                                                  |
+//|  Paletti: max 2 cicli al giorno (letti dallo storico, quindi      |
+//|  reload-safe), mai armare mentre c'e' roba viva, e il bias di     |
+//|  trend deciso all'arming resta quello - se diceva "solo long",    |
+//|  lo short non si prende.                                          |
+//|                                                                  |
+//|  LIMITE DICHIARATO: se l'EA viene ricompilato/riavviato mentre    |
+//|  c'e' un PENDENTE vivo, la guardia anti-duplicato porta subito    |
+//|  in PH_PLACED e il range in memoria e' perso (gRangeHigh=0):      |
+//|  per quel giorno il reverse resta spento. Fallisce CHIUSO, che    |
+//|  e' il verso giusto in cui sbagliare. Nel tester non capita mai   |
+//|  (non ci sono reload), quindi la misura di R51 non ne risente.    |
+//+------------------------------------------------------------------+
+void MonitorReverse()
+  {
+   if(!InpAllowReverse) return;
+   if(InpEntryMode != ABTG_RETEST) return;
+   if(gRangeHigh <= 0 || gRangeLow <= 0) return;
+   if(gBrokeHigh && gBrokeLow) return;      // niente piu' da armare: entrambi i lati gia' giocati
+   if(HoRobaViva()) return;                 // si riparte solo da flat
+
+   if(TimeCurrent() - gUltimoConteggio >= 5)
+     {
+      bool l, s;
+      gCicliGiorno     = CicliOggi(l, s);
+      gUltimoConteggio = TimeCurrent();
+     }
+   if(gCicliGiorno >= 2) return;            // tetto rigido: due cicli, mai tre
+
+   MonitorRetest();                          // il ramo del lato gia' rotto e' inibito da gBrokeHigh/gBrokeLow
   }
 
 //+------------------------------------------------------------------+
@@ -775,6 +907,10 @@ void ResetDay()
    gBias       = 0;
    gBrokeHigh  = false;
    gBrokeLow   = false;
+   gCicliGiorno     = 0;
+   gUltimoConteggio = 0;
+   gRipristinaLong  = false;
+   gRipristinaShort = false;
    ABTGLog("nuovo giorno: stato resettato, in attesa dell'apertura.");
   }
 
@@ -1256,10 +1392,16 @@ bool ArmRetest()
 
    gBuffer    = EffectiveBuffer();
    gBias      = TrendBias();           // 0 entrambi, +1 solo long, -1 solo short, 2 conflitto
-   gBrokeHigh = false;
-   gBrokeLow  = false;
-   ABTGLog(StringFormat("RETEST armato: range %.5f-%.5f, buffer %.0f pt, bias %d. Attendo rottura + ritorno sul livello.",
-                        gRangeHigh, gRangeLow, gBuffer/_Point, gBias));
+   // R51: normalmente si riparte con tutti e due i lati liberi. Dopo un
+   // riavvio a giornata iniziata invece il lato gia' giocato resta chiuso
+   // (i due flag li ha messi la guardia A4 leggendo lo storico).
+   gBrokeHigh = gRipristinaLong;
+   gBrokeLow  = gRipristinaShort;
+   gRipristinaLong  = false;
+   gRipristinaShort = false;
+   ABTGLog(StringFormat("RETEST armato: range %.5f-%.5f, buffer %.0f pt, bias %d, lati liberi=%s. Attendo rottura + ritorno sul livello.",
+                        gRangeHigh, gRangeLow, gBuffer/_Point, gBias,
+                        (!gBrokeHigh && !gBrokeLow ? "entrambi" : (gBrokeHigh ? "solo short" : "solo long"))));
    return(true);
   }
 
