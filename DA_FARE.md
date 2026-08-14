@@ -93,6 +93,17 @@ Perche' vale la pena: R48, R49 e R50 hanno giudicato Easy Trend con una regola
 forse spostata di un'ora. E il risultato vale per **ogni** strategia futura
 della stessa fonte, non solo per questa.
 
+**LANCIATO il 14/08 sera.** PC di BACKTEST, MT5 CHIUSO. 128 passate
+(16 celle x 2 finestre x 4 simboli): e' il round piu' lungo finora.
+
+```
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d78c80b8009be6b0c1a27aad06f804e51bc34e02/backtest_pipeline/lancia_r53.ps1" -OutFile "$env:TEMP\lancia_r53.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r53.ps1" -Rif d78c80b8009be6b0c1a27aad06f804e51bc34e02
+```
+
+Zip in `Desktop\r53.zip`, 8 CSV attesi. Per spezzarlo:
+`-Simboli "GBPUSD,EURGBP"`. Per vedere l'ini senza lanciare:
+`-SoloControllo`.
+
 ## 1-quater. R54 — **CHIUSO** (14/08 sera): i due short sono BOCCIATI
 
 Girato: 16 passate, 4 CSV su 4, sweep gemello identico al centesimo, e le due
