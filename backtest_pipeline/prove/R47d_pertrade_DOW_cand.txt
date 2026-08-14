@@ -12,6 +12,9 @@
 # CRITERI: nessuna decisione da questo file. R46 ha gia' deciso (cancelli
 #   non superati -> nessun cambio live). Qui si CAPISCE il fenomeno e si
 #   costruisce il metro per confrontare tester e forward.
+#   NOTA 14/08: il magic e' in SWEEP GEMELLO (due valori) — serve al
+#   generico, che rifiuta una prova senza righe da spazzolare, ed e'
+#   anche il controllo di igiene: le due serie devono uscire identiche.
 # =====================================================================
 @SIMBOLO  U30USD
 @PERIODO  M5
@@ -39,4 +42,4 @@ InpOneTradePerDay=1||1||0||1||N
 InpUseTrailing=1||1||0||1||N
 InpTrailMode=1||1||0||1||N
 InpTP1_ClosePct=0||0||0||0||N
-InpMagic=772504||772504||0||772504||N
+InpMagic=772507||772507||1||772508||Y
