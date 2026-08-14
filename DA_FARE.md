@@ -93,27 +93,26 @@ Perche' vale la pena: R48, R49 e R50 hanno giudicato Easy Trend con una regola
 forse spostata di un'ora. E il risultato vale per **ogni** strategia futura
 della stessa fonte, non solo per questa.
 
-## 1-quater. R54 — I DUE LATI MAI MISURATI DEL DOW (**pronto, si lancia subito**)
+## 1-quater. R54 — **CHIUSO** (14/08 sera): i due short sono BOCCIATI
 
-Non dipende da Pepperstone: gira sul feed nativo BCM coi dati gia' in casa.
-Dal censimento R52: **Dow Apertura** (770202) e **ORB-EMA200 Dow** (770611)
-girano solo long, e su tutte e due il **solo-short non e' MAI stato lanciato**
-(R6 confronto' solo-long contro long+short; sull'ORB il lato viene dalla fonte
-ed e' pinnato da R13 in poi). Tutte e due stanno sul conto da 100k.
+Girato: 16 passate, 4 CSV su 4, sweep gemello identico al centesimo, e le due
+celle vive riprodotte al centesimo (Dow = R46 riga 33; ORB = R15, stesso n=119).
 
-Tesi e 7 criteri congelati: `prove/R54_LATO_MAI_MISURATO_TESI.md`. In breve:
-n>=30 OOS o il verdetto e' "non misurabile"; il long+short entra solo se
-aggiunge profitto **senza** alzare il DD; **da questo round non esce nessun
-cambio al forward**. Limite dichiarato: un solo regime non separa l'asimmetria
-del mercato da quella del periodo.
+- **Dow Apertura**: short OOS PF **0,840** (n=73) -> bocciato per merito, non
+  per campione piccolo. Long+short fa **-42% di profitto** OOS e **DD doppio**.
+- **ORB-EMA200 Dow**: short rosso in **entrambe** le finestre (PF 0,681 / 0,520,
+  DD 26,4%). Long+short: -87% di profitto e DD da 9,76% a 17,16%.
+- **28° RIBALTAMENTO**: sul Dow Apertura lo short e' la cella MIGLIORE in
+  campione (PF 1,511, DD 2,68% contro 5,67% del long) e va **rosso** fuori.
+  9.000 EUR di differenza sulla stessa ricetta.
 
-PC di BACKTEST, MT5 CHIUSO. 16 passate a tick reali, si lascia girare:
+**Nessun cambio al forward** (criterio 5, scritto prima): le due celle vive
+girano gia' nella configurazione migliore delle tre, su profitto E su DD.
+Referto: `risultati_archivio/REFERTO_ROUND54_LATI_DOW.md`, CSV in
+`risultati_archivio/csv_r54/`.
 
-```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/f7eb5b2ad126acd0ae58bdb52a141140d9ace823/backtest_pipeline/lancia_r54.ps1" -OutFile "$env:TEMP\lancia_r54.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r54.ps1" -Rif f7eb5b2ad126acd0ae58bdb52a141140d9ace823
-```
-
-Zip in `Desktop\r54.zip`, 4 CSV attesi controllati uno per uno.
+Del censimento R52 restano **9 celle su 11** col lato spento a mano: tutte
+bloccate in attesa di storico che oggi non abbiamo.
 
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 
