@@ -23,7 +23,7 @@
 #    Quindi: si lancia questo script SU TUTTE E DUE LE MACCHINE (PC e
 #    VPS) e si guarda dove compaiono i numeri.
 #
-#  ⚠️ IL CONTROLLO POSITIVO, ed e' la parte che rende valido il test:
+#  ATTENZIONE - IL CONTROLLO POSITIVO, ed e' la parte che rende valido il test:
 #    fra i ticket cercati c'e' anche #3160534, di cui SAPPIAMO GIA' la
 #    risposta (sta nel giornale del PC). Se lo script non trova nemmeno
 #    quello sul PC, allora lo script e' rotto e le altre due risposte
@@ -111,7 +111,7 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
   $intestato = $false
 
   foreach ($c in $cartelle) {
-    $etichetta = $c[0]   # "logs" = Giornale (il broker) · "MQL5\Logs" = Esperti (l'EA)
+    $etichetta = $c[0]   # "logs" = Giornale (il broker); "MQL5\Logs" = Esperti (l'EA)
     $percorso  = $c[1]
     $files = @(Get-ChildItem $percorso -Filter "*.log" -ErrorAction SilentlyContinue |
                Where-Object { $_.LastWriteTime -ge $limite } | Sort-Object Name)
