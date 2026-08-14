@@ -70,6 +70,35 @@ param(
   [switch] $ChiudiMT5,
   [int]    $TimeoutMin    = 30
 )
+
+# --- CHIUSURA PULITA DI MT5 (14/08/2026) -----------------------------
+#  PERCHE': l'import creava il custom symbol e lo selezionava in Market
+#  Watch, ma poi qui si ammazzava il terminale con Stop-Process -Force.
+#  Le BARRE sopravvivono (MT5 le scrive man mano in bases\Custom\history),
+#  la REGISTRAZIONE del simbolo no: quella viene salvata alla chiusura
+#  pulita. Risultato: 148 MB di storico sul disco e un terminale che il
+#  giorno dopo dice "symbol GBPUSD_EXT not exist" e non avvia il tester.
+#  E' costato l'intero round R50 del 14/08, 32 lanci a vuoto.
+#  Adesso si chiede prima la chiusura educata, e si ammazza solo se non
+#  obbedisce.
+function Chiudi-MT5-Pulito([int]$Secondi = 60) {
+  $procs = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
+  if ($procs.Count -eq 0) { return }
+  foreach ($p in $procs) {
+    try { [void]$p.CloseMainWindow() } catch { }
+  }
+  $scade = (Get-Date).AddSeconds($Secondi)
+  while ((Get-Date) -lt $scade) {
+    Start-Sleep -Seconds 2
+    if (@(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue).Count -eq 0) {
+      Write-Host "  MT5 chiuso in modo pulito (simboli personalizzati salvati)." -ForegroundColor Green
+      return
+    }
+  }
+  Write-Host "  MT5 non si e' chiuso da solo entro $Secondi s: lo forzo." -ForegroundColor Yellow
+  Write-Host "  ATTENZIONE: i simboli personalizzati creati adesso potrebbero non essere salvati." -ForegroundColor Yellow
+  Chiudi-MT5-Pulito
+}
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -426,7 +455,7 @@ $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
 if ($running -and $ChiudiMT5) {
   Write-Host ""
   Write-Host "MT5 e' aperto: lo chiudo (-ChiudiMT5)." -ForegroundColor Yellow
-  $running | Stop-Process -Force -ErrorAction SilentlyContinue
+  Chiudi-MT5-Pulito
   Start-Sleep -Seconds 5
   $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
 }
@@ -472,7 +501,7 @@ foreach ($p in $presets) {
   }
   $ErrorActionPreference = "Stop"
 
-  Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  Chiudi-MT5-Pulito
   Start-Sleep -Seconds 3
 
   if ($fatto) {

@@ -70,6 +70,35 @@ param(
   [int]    $TimeoutMin      = 240,
   [int]    $TimeoutInstallMin = 20
 )
+
+# --- CHIUSURA PULITA DI MT5 (14/08/2026) -----------------------------
+#  PERCHE': l'import creava il custom symbol e lo selezionava in Market
+#  Watch, ma poi qui si ammazzava il terminale con Stop-Process -Force.
+#  Le BARRE sopravvivono (MT5 le scrive man mano in bases\Custom\history),
+#  la REGISTRAZIONE del simbolo no: quella viene salvata alla chiusura
+#  pulita. Risultato: 148 MB di storico sul disco e un terminale che il
+#  giorno dopo dice "symbol GBPUSD_EXT not exist" e non avvia il tester.
+#  E' costato l'intero round R50 del 14/08, 32 lanci a vuoto.
+#  Adesso si chiede prima la chiusura educata, e si ammazza solo se non
+#  obbedisce.
+function Chiudi-MT5-Pulito([int]$Secondi = 60) {
+  $procs = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
+  if ($procs.Count -eq 0) { return }
+  foreach ($p in $procs) {
+    try { [void]$p.CloseMainWindow() } catch { }
+  }
+  $scade = (Get-Date).AddSeconds($Secondi)
+  while ((Get-Date) -lt $scade) {
+    Start-Sleep -Seconds 2
+    if (@(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue).Count -eq 0) {
+      Write-Host "  MT5 chiuso in modo pulito (simboli personalizzati salvati)." -ForegroundColor Green
+      return
+    }
+  }
+  Write-Host "  MT5 non si e' chiuso da solo entro $Secondi s: lo forzo." -ForegroundColor Yellow
+  Write-Host "  ATTENZIONE: i simboli personalizzati creati adesso potrebbero non essere salvati." -ForegroundColor Yellow
+  Chiudi-MT5-Pulito
+}
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -798,7 +827,7 @@ if (-not $visto) {
   Write-Host "simboli sbagliati (non esistono su questo broker), 3) lo script" -ForegroundColor Red
   Write-Host "non e' partito. Guarda la scheda ESPERTI di MT5, poi riprova" -ForegroundColor Red
   Write-Host "in manuale (senza -Auto)." -ForegroundColor Red
-  Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  Chiudi-MT5-Pulito
   exit 1
 }
 if (-not $finito -and $chiuso) {
@@ -817,7 +846,7 @@ if (-not $finito -and -not $chiuso) {
 
 Write-Host ""
 Write-Host "Chiudo MT5..." -ForegroundColor DarkGray
-Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Chiudi-MT5-Pulito
 Start-Sleep -Seconds 3
 
 Mostra-Referto

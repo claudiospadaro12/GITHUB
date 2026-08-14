@@ -141,6 +141,24 @@ if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $For
   Muori "chiudi MetaTrader prima di lanciare (altrimenti zero CSV)."
 }
 
+# --- CANCELLO ZERO OPERATIVO (14/08/2026, dopo 32 lanci a vuoto) ------
+#  Le BARRE in bases\Custom\history NON bastano: il 14/08 c'erano 148 MB
+#  per simbolo e MT5 rispondeva lo stesso "symbol GBPUSD_EXT not exist,
+#  tester didn't start". La registrazione del simbolo si perde se il
+#  terminale viene ammazzato invece che chiuso, ed e' esattamente quello
+#  che faceva l'import. Qui si controlla PRIMA di bruciare mezz'ora: se
+#  manca la cartella delle barre lo dico subito; se c'e' ma il tester
+#  fallisce, il messaggio dopo il primo lancio dice dove guardare.
+foreach($sym in @($Lista | ForEach-Object { "{0}{1}" -f $_.Simbolo, $Suffisso } | Sort-Object -Unique)){
+  $q = Join-Path $DataFolder ("bases\Custom\history\{0}" -f $sym)
+  if(-not (Test-Path $q)){
+    Muori ("il simbolo $sym non ha nemmeno le barre in bases\Custom\history.`n" +
+           "    Rilancia importa_storico_esterno.ps1 (versione dal 14/08 in poi,`n" +
+           "    quella che chiude MT5 in modo pulito).")
+  }
+}
+Write-Host ("    barre custom trovate per tutti i simboli richiesti.") -ForegroundColor Green
+
 # --- 3. compila gli EA che servono (una volta per EA) ---
 $EAfatti = @{}
 foreach($c in $Lista){
@@ -256,7 +274,13 @@ $blocco
       else        { Write-Host ("    OK -> {0}.csv  ({1} righe)" -f $tag,$n) -ForegroundColor Green }
       $fatti++
     } else {
-      Write-Host ("    NESSUN CSV per {0}: il simbolo {1} esiste? lo storico copre {2}-{3}?" -f $tag,$sym,$f.da,$f.a) -ForegroundColor Yellow
+      # 14/08: qui prima c'era una DOMANDA. La risposta stava nel giornale
+      # del terminale, che nessuno leggeva: "symbol X not exist / tester
+      # didn't start". Adesso si indica dove sta scritta.
+      Write-Host ("    NESSUN CSV per {0}." -f $tag) -ForegroundColor Yellow
+      Write-Host ("    Il motivo lo scrive MT5 qui: {0}" -f (Join-Path $DataFolder "logs")) -ForegroundColor Yellow
+      Write-Host ("    Se dice 'symbol {0} not exist' le barre ci sono ma il simbolo NON e' registrato:" -f $sym) -ForegroundColor Yellow
+      Write-Host ("    va rifatto l'import chiudendo MT5 in modo pulito.") -ForegroundColor Yellow
     }
     $magic += 2
     if($SoloUno){
