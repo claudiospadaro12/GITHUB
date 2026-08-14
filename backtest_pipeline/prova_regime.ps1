@@ -119,6 +119,10 @@ Write-Host ("    risultati:  {0}" -f $Results) -ForegroundColor DarkGray
 
 if($SoloControllo){
   Write-Host ""
+  Write-Host "    gli .ini nasceranno con [Experts] AllowLiveTrading=false:" -ForegroundColor Green
+  Write-Host "    lanciare il tester AVVIA il terminale, che senza questa riga" -ForegroundColor Gray
+  Write-Host "    riarmerebbe gli EA sui grafici del conto collegato (14/08/2026)." -ForegroundColor Gray
+  Write-Host ""
   Write-Host "SoloControllo: non lancio niente. Se i simboli _EXT non esistono ancora," -ForegroundColor Yellow
   Write-Host "prima gira importa_storico_esterno.ps1." -ForegroundColor Yellow
   exit 0
@@ -212,18 +216,43 @@ $blocco
 }
 
 # --- 5. raccolta (regola delle righe di lancio) ---
-$Dest = Join-Path ([Environment]::GetFolderPath("Desktop")) "regime_$Etichetta"
-New-Item -ItemType Directory -Force -Path $Dest | Out-Null
-Copy-Item (Join-Path $Results "*$Etichetta.csv") $Dest -Force -ErrorAction SilentlyContinue
-$zip = Join-Path ([Environment]::GetFolderPath("Desktop")) "regime_$Etichetta.zip"
-Compress-Archive -Path (Join-Path $Dest "*") -DestinationPath $zip -Force -ErrorAction SilentlyContinue
+#  Il Desktop si cerca in tre modi e gli errori NON si ingoiano: dopo 32
+#  lanci, uno zip che non nasce in silenzio e' il modo peggiore di finire.
+function Trova-Desktop {
+  foreach($p in @([Environment]::GetFolderPath("Desktop"),
+                  (Join-Path $env:USERPROFILE "Desktop"),
+                  (Join-Path $env:USERPROFILE "OneDrive\Desktop"))){
+    if($p -and (Test-Path $p)){ return $p }
+  }
+  return $env:USERPROFILE
+}
+$desktop = Trova-Desktop
+$Dest = Join-Path $desktop "regime_$Etichetta"
+$zip  = Join-Path $desktop "regime_$Etichetta.zip"
+$zipOk = $false
+$motivoZip = ""
+try{
+  New-Item -ItemType Directory -Force -Path $Dest -ErrorAction Stop | Out-Null
+  Copy-Item (Join-Path $Results "*$Etichetta.csv") $Dest -Force -ErrorAction SilentlyContinue
+  if(Test-Path $zip){ Remove-Item $zip -Force -ErrorAction Stop }
+  Compress-Archive -Path (Join-Path $Dest "*") -DestinationPath $zip -Force -ErrorAction Stop
+  $zipOk = Test-Path $zip
+}catch{
+  $motivoZip = $_.Exception.Message
+}
 $n = (Get-ChildItem $Dest -File -ErrorAction SilentlyContinue | Measure-Object).Count
 
 Write-Host ""
 Write-Host "=== FINITO ===" -ForegroundColor Cyan
 Write-Host ("    lanci eseguiti: {0}   saltati (gia' fatti): {1}" -f $fatti, $saltati) -ForegroundColor Gray
 Write-Host ("    ATTESI {0} CSV -> raccolti {1} in {2}" -f ($Lista.Count*$Finestre.Count), $n, $Dest) -ForegroundColor White
-Write-Host ("    zip pronto: {0}" -f $zip) -ForegroundColor Green
+if($zipOk){
+  Write-Host ("    zip pronto: {0}" -f $zip) -ForegroundColor Green
+}else{
+  Write-Host "    ZIP NON CREATO" -ForegroundColor Yellow
+  if($motivoZip){ Write-Host ("    motivo: " + $motivoZip) -ForegroundColor Red }
+  Write-Host ("    I CSV stanno comunque qui, mandami questa cartella: {0}" -f $Results) -ForegroundColor Yellow
+}
 Write-Host ""
 Write-Host "    Il verdetto si scrive coi criteri di PROVA_REGIME_CRITERI.md," -ForegroundColor Yellow
 Write-Host "    citando il criterio (A sopravvivenza, B tenuta, C rango, D due banchi)." -ForegroundColor Yellow
