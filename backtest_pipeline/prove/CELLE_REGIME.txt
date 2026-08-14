@@ -12,4 +12,11 @@ GAP_EURUSD | ABTG_GapFill | EURUSD | H1 | InpTF=16385;InpRiskPercent=1.0;InpGapM
 LARRY_GBPUSD | ABTG_PunteLarry | GBPUSD | H1 | InpTF=16385;InpTP_R=1.5;InpSLMode=0;InpSLBufferATR=0.1;InpAtrSlMult=1.5;InpAtrPeriodD1=14;InpSizeMinATR=0.0;InpSizeMaxATR=0.0;InpMaxDaysHold=5;InpMaxSpreadPts=300;InpEntryWindowBars=3;InpRiskPercent=1.0;InpPatternMode=0;InpExitMode=0;InpAllowLong=0;InpAllowShort=1
 EZ_GBPUSD | ABTG_EasyTrend | GBPUSD | H1 | InpTF=16385;InpPivotSource=0;InpPivotR=3;InpPivotL=5;InpLinRegLen=11;InpPlotMode=0;InpPlotLen=11;InpCciPeriod=20;InpMaxPivotDist=60;InpHourStart=8;InpHourEnd=18;InpPrevBars=3;InpEntryWindowBars=3;InpSLBufferPts=30;InpWarmupBars=500;InpMaxSpreadPts=30;InpRiskPercent=1.0;InpTP_R=1.5;InpAllowLong=1;InpAllowShort=1
 PTE_GBPUSD | ABTG_PTE | GBPUSD | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpRiskPercent=1.0
-SW_GBPUSD | ABTG_SuperWave | GBPUSD | H4 | InpTF=16388;InpRiskPercent=1.0
+# 14/08 sera, CORREZIONE DI UNA MIA CORREZIONE: la riga diceva "H4" nella
+# colonna del periodo ma passava InpTF=16386, che e' H2. Ho "sistemato"
+# InpTF portandolo a 16388 (H4) e ho peggiorato le cose: la cella VIVA e'
+# SuperWave GBPUSD **H2** (CAMPAGNA_ARSENALE, sedia +1, magic 770532), e il
+# file OOS di riferimento e' a TF 16386. Sbagliata era l'etichetta H4, non
+# il numero. Rimesso H2/16386: il lancio R50 fatto con 16388 ha misurato una
+# cella che in vivaio non esiste e va rifatto.
+SW_GBPUSD | ABTG_SuperWave | GBPUSD | H2 | InpTF=16386;InpRiskPercent=1.0

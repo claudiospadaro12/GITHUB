@@ -53,7 +53,28 @@ non-sanguinamento (0,90). Non guadagna, ma non si distrugge — che e'
 esattamente cio' che il criterio B chiede. Numeri piccoli in valore assoluto
 (−144 e −4 EUR): e' una cella che nelle finestre avverse **quasi non opera**.
 
-### SW_GBPUSD -> **SOPRAVVIVE** (criterio B), **ma con avvertenza**
+### SW_GBPUSD -> **MISURA ANNULLATA, DA RIFARE** (errore mio nel file celle)
+
+**La riga di SuperWave in `CELLE_REGIME.txt` era sbagliata, e l'ho peggiorata
+io poche ore prima del lancio.** Diceva `H4` nella colonna del periodo ma
+passava `InpTF=16386`, che e' **H2**. Su segnalazione dell'audit ho
+"corretto" il numero portandolo a 16388 (H4). Era il contrario: la cella VIVA
+e' **SuperWave GBPUSD H2** (`CAMPAGNA_ARSENALE`, sedia +1, magic 770532), e il
+file fuori campione di riferimento e' a TF 16386. Sbagliata era l'etichetta,
+non il parametro.
+
+**Conseguenza:** le quattro finestre di SW_GBPUSD hanno misurato una cella che
+in vivaio non esiste. I numeri qui sotto restano agli atti ma **non valgono
+come verdetto**, e i quattro lanci vanno rifatti con `InpTF=16386`.
+
+Come si e' scoperto: cercando il DD fuori campione per chiudere il criterio A,
+il file archiviato conteneva TF 16386 e non 16388. **La verifica di un criterio
+ha trovato l'errore in un altro punto**: e' il motivo per cui i criteri si
+scrivono prima.
+
+_Quello che segue vale solo come annotazione sulla cella H4, che non esiste:_
+
+### SW_GBPUSD (H4, cella inesistente) — annotazione, NON un verdetto
 
 PF 0,96 e 1,07 nelle avverse: criterio B passato. Pero' e' **negativo in tre
 finestre su quattro**, e la peggiore e' il **TORO 2021** (−2.419, PF 0,63),
@@ -119,12 +140,25 @@ fatta affatto.
 
 ## 3. QUELLO CHE IL ROUND NON HA POTUTO CHIUDERE
 
-**Criterio A, la meta' relativa.** Il criterio dice: DD non oltre **il doppio**
-del DD misurato fuori campione, **e comunque mai il 20%**. La seconda meta' e'
-verificata per tutte: il DD peggiore di tutto il round e' **9,96%** (EZ
-nell'orso). La prima meta' no: manca una tabella dei DD OOS per singola cella,
-e non li invento. **[DA COMPLETARE]** prima di scrivere qualunque decisione di
-peso.
+**Criterio A, la meta' assoluta: verificata per tutte.** Il DD peggiore di
+tutto il round e' **9,96%** (EZ nell'orso), contro un tetto del 20%.
+
+**Criterio A, la meta' relativa: CHIUSA per PTE, aperta per le altre.**
+Ripescato dall'archivio il fuori campione della cella promossa
+(`risultati_prove/ABTG_PTE/ABTG_PTE_GBPUSD_OOS_r23b.csv`, TF 16385,
+TP1_ATRmult 0,5, rischio 1%):
+
+| | DD | soglia (2x) | ORSO | CROLLO | esito |
+|---|---|---|---|---|---|
+| **PTE_GBPUSD** | OOS **3,27%** | 6,54% | **1,99%** | **1,41%** | ✅ passato con larghezza |
+
+Quindi per PTE il criterio A e' soddisfatto in tutte e due le meta', e la
+promozione di rango **non e' piu' sospesa**.
+
+Per BB, LARRY e GAP i CSV fuori campione stanno in sottocartelle di round
+diversi (`r33`/`r34`, `r39`, `r36`/`r37`) e vanno ripescati uno per uno:
+**[DA COMPLETARE]**, ma nessuna di quelle celle e' in promozione, quindi non
+blocca nessuna decisione.
 
 **I campioni sono piccoli.** Nelle finestre avverse si va da 1 a 51 operazioni,
 con la maggior parte fra 3 e 18. Il crollo 2020 dura tre mesi: su strategie
@@ -143,7 +177,9 @@ solo della fascia forex, e va citato cosi' ogni volta che se ne parla.
    soddisfatto. Da qui in avanti va trattato come motore da entrambi i
    regimi — dopo il completamento del criterio A.
 2. **EZ resta fuori.** Seconda bocciatura, motivo indipendente.
-3. **BB_GBPUSD e SW_GBPUSD restano dove sono.** Sopravvivono, non promuovono.
+3. **BB_GBPUSD resta dov'e'.** Sopravvive (criterio B), non promuove.
+3-bis. **SW_GBPUSD: misura annullata.** Quattro lanci da rifare con
+   `InpTF=16386` (H2), la cella che gira davvero.
 4. **LARRY e BB_EURUSD: nessuna decisione**, per regola dei due banchi.
 5. **GAP: prova non valida**, da rifare altrove. Nessun effetto sulla squadra.
 6. **Da fare prima di muovere pesi:** la tabella dei DD fuori campione per
