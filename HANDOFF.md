@@ -7,6 +7,49 @@
 
 ---
 
+## 🟢🟢 AGGIORNAMENTO 14/08 MATTINA (la notte piu' lunga: R42->R48)
+
+- **FASCIA C ESAURITA in una serata**: R42 fade BOCCIATO 48/48 · R43
+  rimbalzo ORL/ORH bocciato su tutti e 4 i lati (**26° ribaltamento**) ·
+  R44 target 2x/3x: scia VERA sul Dow (PF 1,955 a 3,0x) ma **cambio
+  bocciato dal cancello DD** · R45 ORB di Londra bocciato 48/48 ->
+  **famiglia ORB chiusa su ogni sessione misurata**. Zero codice scritto,
+  3 capitoli sigillati, backlog ORB esaurito.
+- **QUINTO EA NATO: ABTG_EasyTrend v1.00** (1.605 righe, magic base
+  772401, zero repaint) dalle 7 trascrizioni del corso ->
+  `prove/EASY_TREND_TESI.md`. CAL (detector src0/PivotR 3, scelto SOLO
+  sulla frequenza) -> scan 48 (campo rosso 24/48, testa viva) -> **tick
+  reali 4/4 con tenute 85-104%: lo spread NON uccide** -> **R48
+  walk-forward IN CORSO** (EURGBP short / GBPUSD, AUDJPY, CHFJPY long).
+  QUINTA famiglia mono-lato di fila.
+- **DOSSIER USCITE (3 ricorrenze del "vincente chiuso stretto") APERTO e
+  gia' con un verdetto**: R46 ha ASSOLTO il trailing PREVBAR (e' la
+  migliore gestione su entrambi gli indici) e ha indicato il **parziale
+  50% a 1R** come causa vera della vincita media bassa. Toglierlo dava
+  DAX +30,9% ma **cancelli falliti sul Dow -> NESSUN CAMBIO LIVE**.
+  **27° ribaltamento** (TP 3R secco: migliore IS, peggiore OOS, 63k di
+  differenza). Fase 2 pronta: `prove/R47a-d_pertrade_*.txt` (magic
+  vergini 772501-04) per win rate e payoff esatti.
+- **DUE DOMANDE DI CLAUDIO CHE VALGONO PIU' DI UN ROUND** (entrambe
+  registrate in `report/ASPETTATIVE_REALISTICHE.md`, da leggere PRIMA di
+  citare qualunque cifra): (1) il portafoglio simulato **non e' uno
+  stipendio** — scenario centrale onesto 2.500-3.500 EUR/mese netti su
+  una prop, primo payout realistico nov-dic 2026; (2) **la finestra e'
+  corta** (21 mesi, un solo regime, nessun orso) -> strada dichiarata
+  per allungarla sul forex (demo altro broker > import Dukascopy, come
+  sola PROVA DI REGIME, mai per tarare).
+- **Pagella 13/08**: piccolo −15,15 · 100k −139,98 (saldo 99.820,96).
+  Lo stop dell'ORB ha EVITATO una perdita 6 volte piu' grande. Payoff dal
+  via: 3 vinti su 5 ma vincita media 82 contro perdita media 212 ->
+  servirebbe il 72% di win rate.
+- **Attrezzi corretti**: `valida_realtick.ps1` ora raccoglie e zippa da
+  solo sul Desktop, e **il bug `-Symbols` con `powershell -File`** (la
+  lista arrivava come UN simbolo, zero CSV senza errore) e' stato
+  normalizzato in **6 script**. Nuovo: `riordina_desktop.ps1` (anteprima,
+  log, comando -Annulla) — Desktop del PC di backtest riordinato il 14/08.
+
+---
+
 ## 🟢 RIPARTI DA QUI — stato al 13/08 sera (le sezioni sotto questa sono STORICHE)
 **Per il quadro vivo leggere, in ordine:** `report/DIARIO.md` (righe 11-13/08),
 `report/ASPETTATIVE_REALISTICHE.md` (**leggere PRIMA di citare qualunque
