@@ -1,0 +1,64 @@
+# =====================================================================
+#  ROUND 54b: ORB-EMA200 DOW - IL LATO SHORT, MAI MISURATO SUL DOW
+#  Si lancia con: -Prova prove\R54b_lato_ORB_DOW.txt -Deposito 100000
+#                 -Etichetta r54b
+#  (EA: ABTG_ORB_Ottimizzato - il laboratorio; il corso resta intatto)
+# =====================================================================
+# PERCHE'
+#   Censimento R52, riga 5: la cella viva ORB-EMA200 (U30USD M5, magic
+#   770611) gira SOLO LONG. Quel "solo long" viene dalla FONTE
+#   (tradethatswing, R13) e da li' e' rimasto PINNATO in R14 e in R15
+#   (R15:43 InpAllowShort=0). Sul DOW il lato non e' mai stato
+#   spazzolato: lo sweep e' esistito solo sul Nasdaq (R7a/b). Anche
+#   questa cella sta sul conto da 100k (mezzo peso, 0,3%).
+#
+# LA BASE (non si tocca): e' la cella vincitrice di R15, firma completa
+#   in risultati_archivio/REFERTO_ROUND15_ORB_GESTIONE.md -
+#   OR 15' (14:30->14:45 SERVER), pendenti STOP buffer 10, EMA200 M5,
+#   SL 50% del range, TP RANGE 1,5x, trailing EMA9 M5 acceso, NIENTE
+#   parziale, tetto range 0,8%, un trade/giorno, chiusura 21:00,
+#   rischio 1%. Il filtro EMA200 e' simmetrico per costruzione ("long
+#   solo sopra, short solo sotto"): e' lui che rendera' pochi i trade
+#   short in un campione che sale.
+#
+# LE CELLE: 4 = InpAllowLong x InpAllowShort
+#     1/0  solo long   -> com'e' oggi: il METRO, non un candidato
+#     0/1  solo short  -> IL BUCO
+#     1/1  entrambi
+#     0/0  non opera   -> SI IGNORA
+#
+# CRITERI: gli stessi di R54a, congelati in
+#   prove/R54_LATO_MAI_MISURATO_TESI.md. Da ricordare in piu' per
+#   questa cella: R15 l'ha promossa con DOPPIO ASTERISCO (il DD passava
+#   per 8 centesimi e non su tutto l'altopiano). Il DD qui pesa piu'
+#   del PF: una variante che aggiunge profitto alzando il DD NON passa.
+#
+# MAGIC VERGINE (772611), sweep gemello come controllo d'igiene.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpSLMode=3
+InpTPMode=1
+InpTPRangeMult=1.5
+InpMaxRangePct=0.8
+InpUseEma200Filter=1
+InpUseEmaFilter=0
+InpUseVolumeFilter=0
+InpTP_R=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpExitOnEmaClose=0
+
+InpMagic=772611||772611||1||772612||Y
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=0||0||1||1||Y

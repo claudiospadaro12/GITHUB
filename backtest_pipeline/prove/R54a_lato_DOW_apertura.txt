@@ -1,0 +1,76 @@
+# =====================================================================
+#  ROUND 54a: DOW APERTURA - IL LATO SHORT, MAI MISURATO
+#  Si lancia con: -Prova prove\R54a_lato_DOW_apertura.txt -Deposito 100000
+#                 -Etichetta r54a
+# =====================================================================
+# PERCHE'
+#   Censimento R52, riga 2: la cella viva del Dow Apertura (U30USD M5,
+#   magic 770202) gira SOLO LONG. Quel "solo long" viene dal round 6,
+#   che pero' ha confrontato "solo long" contro "long+short": il
+#   SOLO SHORT non e' mai stato lanciato. E' un buco vero su una cella
+#   che sta sul conto da 100k.
+#
+# LA BASE (non si tocca): e' la geometria VIVA, quella deployata il
+#   09/08 e descritta in report/PASSI_OPERATIVI.md righe 70-85 -
+#   RETEST, range 35', buffer 1000, offset 400, TP 1R con parziale 50%
+#   e BE, trailing PREVBAR M5, apertura 14:30 SERVER (=15:30 IT),
+#   rischio 1%. Il filtro EMA H4 resta acceso al default [DOW]: e'
+#   direzionale ed e' pinnato qui esplicitamente perche' non resti
+#   implicito - e' lui che rendera' pochi i trade short.
+#
+# LE CELLE: 4 = InpAllowLong x InpAllowShort
+#     1/0  solo long   -> com'e' oggi: il METRO, non un candidato
+#     0/1  solo short  -> IL BUCO
+#     1/1  entrambi    -> quello che R6 aveva gia' confrontato
+#     0/0  non opera   -> SI IGNORA (come le 12 fuori diagonale di R53)
+#
+# CRITERI: congelati a numeri non visti in
+#   prove/R54_LATO_MAI_MISURATO_TESI.md. In breve:
+#   - n >= 30 OOS o il verdetto e' "non misurabile", non "non funziona";
+#   - lo short e' candidato solo con PF OOS >= 1,10 E positivo in IS;
+#   - il long+short sostituisce il long-only solo se fa PIU' profitto
+#     OOS E NON alza il DD (standard di portafoglio);
+#   - da questo round NON esce nessun cambio al forward.
+#
+# MAGIC VERGINE (772601): il tester non deve incrociare i deal del
+#   forward. Sweep gemello 772601/772602 anche come controllo d'igiene -
+#   le due serie devono uscire identiche al centesimo.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpBufferPoints=1000||1000||0||1000||N
+InpRetestOffsetPts=400||400||0||400||N
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpUseVwapFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpMagic=772601||772601||1||772602||Y
+
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=0||0||1||1||Y
