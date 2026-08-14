@@ -1,0 +1,112 @@
+=== DA QUALE MACCHINA E' PARTITO L'ORDINE? ===
+MACCHINA: DESKTOP-H4D7CAJ   utente: Master
+letto il  2026-08-15 00:13:59
+ticket cercati: 3088160, 3109763, 3160534
+(l'ULTIMO della lista e' il CONTROLLO POSITIVO: sul PC DEVE uscire.)
+
+--- terminale 215D85D767A1C39E22D242C8114BF9F5 ---
+  [logs 20260810]  FI	0	09:16:12.748	Trades	'50503392': order #3109763 sell stop 1.7 / 1.7 D30EUR at 26313.00 done in 57.049 ms
+  [logs 20260810]  NG	0	09:16:16.368	Trades	'50503392': deal #2686904 sell 1.7 D30EUR at 26313.00 done (based on order #3109763)
+  [logs 20260814]  JM	0	09:25:01.180	Trades	'50503392': order #3160534 buy stop 2 / 2 D30EUR at 26479.00 done in 70.989 ms
+
+=== RIEPILOGO SU QUESTA MACCHINA ===
+  #3088160 : non trovato
+  #3109763 : TROVATO (2 righe)
+  #3160534 : TROVATO (1 righe)
+  (letti 52 file di log negli ultimi 45 giorni)
+
+CONTROLLO POSITIVO OK: #3160534 e' stato trovato, quindi lo script
+sa cercare e i 'non trovato' qui sopra sono risposte VERE.
+
+=== CONTESTO: righe su D30EUR nelle giornate sospette ===
+--- 2026.08.06 (log 20260806) ---
+  (nessuna riga: questo terminale non ha toccato il simbolo quel giorno)
+
+--- 2026.08.10 (log 20260810) ---
+  [215D85D7 logs]  EJ	0	09:16:12.629	Trades	'50503392': buy stop 1.7 D30EUR at 26372.90 sl: 26313.00 tp: 26552.60
+  [215D85D7 logs]  NG	0	09:16:12.690	Trades	'50503392': accepted buy stop 1.7 D30EUR at 26372.90 sl: 26313.00 tp: 26552.60
+  [215D85D7 logs]  QM	0	09:16:12.691	Trades	'50503392': order #3109762 buy stop 1.7 / 1.7 D30EUR at 26372.90 done in 61.968 ms
+  [215D85D7 logs]  DQ	0	09:16:12.691	Trades	'50503392': sell stop 1.7 D30EUR at 26313.00 sl: 26372.90 tp: 26133.30
+  [215D85D7 logs]  FG	0	09:16:12.748	Trades	'50503392': accepted sell stop 1.7 D30EUR at 26313.00 sl: 26372.90 tp: 26133.30
+  [215D85D7 logs]  FI	0	09:16:12.748	Trades	'50503392': order #3109763 sell stop 1.7 / 1.7 D30EUR at 26313.00 done in 57.049 ms
+  [215D85D7 logs]  NG	0	09:16:16.368	Trades	'50503392': deal #2686904 sell 1.7 D30EUR at 26313.00 done (based on order #3109763)
+  [215D85D7 MQL5\Logs]  RI	0	09:16:12.691	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] BUY STOP @ 26372.90000  SL 26313.00000  lot 1.70
+  [215D85D7 MQL5\Logs]  GE	0	09:16:12.748	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] SELL STOP @ 26313.00000  SL 26372.90000  lot 1.70
+  [215D85D7 MQL5\Logs]  EO	0	09:17:20.989	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  HH	0	15:29:00.313	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  GO	0	15:29:35.217	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  LD	0	15:37:18.463	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  OP	0	15:37:51.249	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  CL	0	15:42:15.931	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  KQ	0	15:43:49.683	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  OF	0	15:45:54.441	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  JM	0	15:46:42.668	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  PO	0	15:59:08.112	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  FI	0	16:13:14.930	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  CM	0	16:47:07.282	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  ED	0	17:04:22.104	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  PG	0	17:26:43.757	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  PM	0	17:36:36.136	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  KH	0	19:18:20.039	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  MF	0	19:26:40.230	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  OJ	0	19:42:07.770	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  HG	0	19:55:29.777	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+
+--- 2026.08.14 (log 20260814) ---
+  [215D85D7 logs]  NI	0	09:25:01.109	Trades	'50503392': buy stop 2 D30EUR at 26479.00 sl: 26426.70 tp: 26635.90
+  [215D85D7 logs]  KG	0	09:25:01.178	Trades	'50503392': accepted buy stop 2 D30EUR at 26479.00 sl: 26426.70 tp: 26635.90
+  [215D85D7 logs]  JM	0	09:25:01.180	Trades	'50503392': order #3160534 buy stop 2 / 2 D30EUR at 26479.00 done in 70.989 ms
+  [215D85D7 logs]  MP	0	09:25:01.180	Trades	'50503392': sell stop 2 D30EUR at 26426.70 sl: 26479.00 tp: 26269.80
+  [215D85D7 logs]  JF	0	09:25:01.241	Trades	'50503392': accepted sell stop 2 D30EUR at 26426.70 sl: 26479.00 tp: 26269.80
+  [215D85D7 logs]  QH	0	09:25:01.242	Trades	'50503392': order #3160535 sell stop 2 / 2 D30EUR at 26426.70 done in 62.803 ms
+  [215D85D7 logs]  OL	0	16:17:43.444	Trades	'50503392': buy stop 1.9 D30EUR at 26479.00 sl: 26426.70 tp: 26635.90
+  [215D85D7 logs]  NJ	0	16:17:43.516	Trades	'50503392': accepted buy stop 1.9 D30EUR at 26479.00 sl: 26426.70 tp: 26635.90
+  [215D85D7 logs]  OI	0	16:17:43.517	Trades	'50503392': order #3165434 buy stop 1.9 / 1.9 D30EUR at 26479.00 done in 73.104 ms
+  [215D85D7 logs]  FJ	0	16:17:43.517	Trades	'50503392': sell stop 1.9 D30EUR at 26426.70 sl: 26479.00 tp: 26269.80
+  [215D85D7 logs]  GL	0	16:17:43.575	Trades	'50503392': accepted sell stop 1.9 D30EUR at 26426.70 sl: 26479.00 tp: 26269.80
+  [215D85D7 logs]  FM	0	16:17:43.575	Trades	'50503392': order #3165435 sell stop 1.9 / 1.9 D30EUR at 26426.70 done in 58.425 ms
+  [215D85D7 logs]  JI	0	16:18:43.887	Trades	'50503392': cancel order #3165434 buy stop 1.9 D30EUR at 26479.00 sl: 26426.70 tp: 26635.90
+  [215D85D7 logs]  FO	0	16:18:43.952	Trades	'50503392': cancel #3165434 buy stop 1.9 D30EUR at 26479.00 done in 64.856 ms
+  [215D85D7 logs]  FH	0	16:18:48.454	Trades	'50503392': cancel order #3165435 sell stop 1.9 D30EUR at 26426.70 sl: 26479.00 tp: 26269.80
+  [215D85D7 logs]  KK	0	16:18:48.520	Trades	'50503392': cancel #3165435 sell stop 1.9 D30EUR at 26426.70 done in 66.323 ms
+  [215D85D7 MQL5\Logs]  PH	0	09:25:01.180	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] BUY STOP @ 26479.00000  SL 26426.70000  lot 2.00
+  [215D85D7 MQL5\Logs]  RJ	0	09:25:01.243	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] SELL STOP @ 26426.70000  SL 26479.00000  lot 2.00
+  [215D85D7 MQL5\Logs]  EO	0	16:17:43.517	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] BUY STOP @ 26479.00000  SL 26426.70000  lot 1.90
+  [215D85D7 MQL5\Logs]  OS	0	16:17:43.575	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] SELL STOP @ 26426.70000  SL 26479.00000  lot 1.90
+  [215D85D7 MQL5\Logs]  GS	0	16:38:19.272	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  GM	0	16:38:29.370	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  KL	0	16:38:39.423	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  IE	0	16:39:09.742	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  GQ	0	16:39:19.482	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  GK	0	16:39:29.922	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  LO	0	16:39:50.190	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  PD	0	16:40:00.182	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  DG	0	16:40:30.576	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  EK	0	16:40:51.879	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  MG	0	16:41:01.688	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  FN	0	16:41:22.105	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  KM	0	16:41:32.417	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  KL	0	16:41:42.472	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  PP	0	16:42:02.702	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  CM	0	16:42:12.467	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  QG	0	16:42:22.963	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  OK	0	16:42:33.240	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  ME	0	16:42:43.025	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  QD	0	16:42:53.226	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  FD	0	16:43:03.461	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  JH	0	16:43:23.564	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  JS	0	16:50:07.814	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  QM	0	16:50:28.740	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  GG	0	16:50:40.650	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  KF	0	16:50:52.822	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  QN	0	16:56:49.749	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  NK	0	16:58:25.186	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [215D85D7 MQL5\Logs]  DD	0	17:10:09.879	ABTG_DAX_Apertura_EU (D30EUR,M3)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+
+=== COME SI LEGGE ===
+Un ordine compare nel giornale della macchina CHE L'HA PIAZZATO.
+  - trovato sul PC   -> quell'ordine e' partito dall'istanza del PC;
+  - trovato sul VPS  -> e' un trade regolare della flotta;
+  - trovato su TUTTI E DUE -> guarda l'ora: chi lo PIAZZA lo scrive
+    per primo, l'altro terminale lo vede solo come esecuzione.
+Va lanciato su ENTRAMBE le macchine: una sola meta' non decide niente.

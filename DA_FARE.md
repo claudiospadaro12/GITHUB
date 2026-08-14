@@ -17,6 +17,19 @@ gemello, sul conto 50503392. Motore breakout, buffer 20 pt, rischio 2%, cioe'
 una configurazione mai validata. Referto completo con tutte e quattro le
 appendici: `report/DAX_14-08_DUE_MOTORI.md`.
 
+**VERIFICATO il 15/08 alle 00:14** (`caccia_ticket.ps1` su PC e VPS, con
+controllo positivo): dei tre stop pieni del magic 770101, **DUE sono del PC**
+(10/08 #3109763 -101,83 e 14/08 #3160534 -104,60 = **-206,43 riattribuiti**) e
+**uno e' del VPS** (06/08 #3088160 -102,96, trade regolare che resta a carico
+del portafoglio). L'inferenza della pagella era sbagliata per un terzo.
+Referto: `report/CACCIA_TICKET_770101.md`.
+
+**DOMANDA APERTA, piu' grande di quella chiusa:** sul PC ci sono 52 giornali e
+12 righe `order #` nei soli tre giorni guardati. **Quante ALTRE volte il PC ha
+piazzato sul conto vivo?** Si risponde elencando TUTTI gli `order #` del
+giornale del PC e incrociandoli col CSV dei trade. Costa quanto la caccia ai
+tre ticket.
+
 **Fatto:** AutoTrading spento sul PC · EA staccato dal grafico M3 · 23 driver
 che generano ini del tester blindati con `[Experts] AllowLiveTrading=false` ·
 guardia A4 corretta (confondeva "non lo so" con "non ho operato").

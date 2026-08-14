@@ -1,0 +1,190 @@
+=== DA QUALE MACCHINA E' PARTITO L'ORDINE? ===
+MACCHINA: VMI3047753   utente: Administrator
+letto il  2026-08-15 00:14:44
+ticket cercati: 3088160, 3109763, 3160534
+(l'ULTIMO della lista e' il CONTROLLO POSITIVO: sul PC DEVE uscire.)
+
+--- terminale 215D85D767A1C39E22D242C8114BF9F5 ---
+  [logs 20260806]  JP	0	09:15:00.397	Trades	'50503392': order #3088160 buy stop 0.9 / 0.9 D30EUR at 26203.10 done in 298.475 ms
+  [logs 20260806]  FS	0	09:18:08.029	Trades	'50503392': deal #2666867 buy 0.9 D30EUR at 26203.10 done (based on order #3088160)
+  [logs 20260810]  PR	0	09:16:16.126	Trades	'50503392': deal #2686904 sell 1.7 D30EUR at 26313.00 done (based on order #3109763)
+  [logs 20260814]  PG	0	09:49:24.678	Trades	'50503392': deal #2735926 buy 2 D30EUR at 26479.00 done (based on order #3160534)
+
+=== RIEPILOGO SU QUESTA MACCHINA ===
+  #3088160 : TROVATO (2 righe)
+  #3109763 : TROVATO (1 righe)
+  #3160534 : TROVATO (1 righe)
+  (letti 75 file di log negli ultimi 45 giorni)
+
+CONTROLLO POSITIVO OK: #3160534 e' stato trovato, quindi lo script
+sa cercare e i 'non trovato' qui sopra sono risposte VERE.
+
+=== CONTESTO: righe su D30EUR nelle giornate sospette ===
+--- 2026.08.06 (log 20260806) ---
+  [215D85D7 logs]  NQ	2	04:18:04.851	Trades	'50503392': failed market buy 0.4 D30EUR sl: 26152.89 tp: 26215.90 [Invalid stops]
+  [215D85D7 logs]  CO	2	04:18:04.851	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26152.89 tp: 26234.00 [Invalid stops]
+  [215D85D7 logs]  OJ	2	04:18:04.851	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26152.89 tp: 26252.60 [Invalid stops]
+  [215D85D7 logs]  CL	2	08:57:07.889	Trades	'50503392': failed market buy 0.4 D30EUR sl: 26150.75 tp: 26217.60 [Invalid stops]
+  [215D85D7 logs]  DK	2	08:57:07.889	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26150.75 tp: 26239.60 [Invalid stops]
+  [215D85D7 logs]  HI	2	08:57:07.889	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26150.75 tp: 26262.20 [Invalid stops]
+  [215D85D7 logs]  FQ	0	09:00:00.409	Trades	'50503392': buy stop 1.6 D30EUR at 26214.00 sl: 26181.50 tp: 26311.50
+  [215D85D7 logs]  RH	0	09:00:00.471	Trades	'50503392': accepted buy stop 1.6 D30EUR at 26214.00 sl: 26181.50 tp: 26311.50
+  [215D85D7 logs]  QG	0	09:00:00.485	Trades	'50503392': order #3088006 buy stop 1.6 / 1.6 D30EUR at 26214.00 done in 75.471 ms
+  [215D85D7 logs]  QH	0	09:00:00.489	Trades	'50503392': sell stop 1.6 D30EUR at 26180.50 sl: 26213.00 tp: 26083.00
+  [215D85D7 logs]  CS	0	09:00:00.519	Trades	'50503392': buy stop 3.3 D30EUR at 26213.00 sl: 26181.50 tp: 26307.50
+  [215D85D7 logs]  NR	0	09:00:00.571	Trades	'50503392': accepted sell stop 1.6 D30EUR at 26180.50 sl: 26213.00 tp: 26083.00
+  [215D85D7 logs]  NH	0	09:00:00.597	Trades	'50503392': order #3088007 sell stop 1.6 / 1.6 D30EUR at 26180.50 done in 107.636 ms
+  [215D85D7 logs]  MJ	0	09:00:00.617	Trades	'50503392': accepted buy stop 3.3 D30EUR at 26213.00 sl: 26181.50 tp: 26307.50
+  [215D85D7 logs]  OJ	0	09:00:00.617	Trades	'50503392': order #3088008 buy stop 3.3 / 3.3 D30EUR at 26213.00 done in 103.734 ms
+  [215D85D7 logs]  GJ	0	09:00:00.618	Trades	'50503392': sell stop 3.3 D30EUR at 26181.50 sl: 26213.00 tp: 26087.00
+  [215D85D7 logs]  LL	0	09:00:00.647	Trades	'50503392': accepted sell stop 3.3 D30EUR at 26181.50 sl: 26213.00 tp: 26087.00
+  [215D85D7 logs]  MM	0	09:00:00.648	Trades	'50503392': order #3088009 sell stop 3.3 / 3.3 D30EUR at 26181.50 done in 30.171 ms
+  [215D85D7 logs]  ED	0	09:00:15.450	Trades	'50503392': deal #2666726 sell 1.6 D30EUR at 26180.50 done (based on order #3088007)
+  [215D85D7 logs]  QF	0	09:00:15.460	Trades	'50503392': deal #2666727 sell 3.3 D30EUR at 26181.50 done (based on order #3088009)
+  [215D85D7 logs]  GK	0	09:00:15.475	Trades	'50503392': cancel order #3088006 buy stop 1.6 D30EUR at 26214.00 sl: 26181.50 tp: 26311.50
+  [215D85D7 logs]  JK	0	09:00:15.495	Trades	'50503392': accepted cancel order #3088006 buy stop 1.6 D30EUR at 26214.00 sl: 26181.50 tp: 26311.50
+  [215D85D7 logs]  KE	0	09:00:15.497	Trades	'50503392': cancel #3088006 buy stop 1.6 D30EUR at market done in 22.192 ms
+  [215D85D7 logs]  QM	0	09:00:29.472	Trades	'50503392': market buy 0.8 D30EUR, close #3088007 sell 1.6 D30EUR 26180.50
+  [215D85D7 logs]  NR	0	09:00:29.506	Trades	'50503392': accepted market buy 0.8 D30EUR, close #3088007 sell 1.6 D30EUR 26180.50
+  [215D85D7 logs]  HL	0	09:00:29.507	Trades	'50503392': deal #2666732 buy 0.8 D30EUR at 26145.90 done (based on order #3088021)
+  [215D85D7 logs]  CF	0	09:00:29.535	Trades	'50503392': order #3088021 buy 0.8 / 0.8 D30EUR at 26145.90 done in 64.303 ms
+  [215D85D7 logs]  NH	0	09:00:29.539	Trades	'50503392': modify #3088007 sell 0.8 D30EUR sl: 26213.00, tp: 26083.00 -> sl: 26180.50, tp: 26083.00
+  [215D85D7 logs]  FJ	0	09:00:29.620	Trades	'50503392': accepted modify #3088007 sell 0.8 D30EUR sl: 26180.50, tp: 26083.00 -> sl: 26180.50, tp: 26083.00
+  [215D85D7 logs]  JD	0	09:00:29.620	Trades	'50503392': modify #3088007 sell 0.8 D30EUR -> sl: 26180.50, tp: 26083.00 done in 82.796 ms
+  [215D85D7 logs]  FM	0	09:02:00.064	Trades	'50503392': modify #3088007 sell 0.8 D30EUR sl: 26180.50, tp: 26083.00 -> sl: 26160.90, tp: 26083.00
+  [215D85D7 logs]  DO	0	09:02:00.100	Trades	'50503392': accepted modify #3088007 sell 0.8 D30EUR sl: 26160.90, tp: 26083.00 -> sl: 26160.90, tp: 26083.00
+  [215D85D7 logs]  KO	0	09:02:00.101	Trades	'50503392': modify #3088007 sell 0.8 D30EUR -> sl: 26160.90, tp: 26083.00 done in 36.786 ms
+  [215D85D7 logs]  EM	0	09:03:00.119	Trades	'50503392': modify #3088007 sell 0.8 D30EUR sl: 26160.90, tp: 26083.00 -> sl: 26118.10, tp: 26083.00
+  [215D85D7 logs]  MO	0	09:03:00.144	Trades	'50503392': accepted modify #3088007 sell 0.8 D30EUR sl: 26118.10, tp: 26083.00 -> sl: 26118.10, tp: 26083.00
+  [215D85D7 logs]  LO	0	09:03:00.145	Trades	'50503392': modify #3088007 sell 0.8 D30EUR -> sl: 26118.10, tp: 26083.00 done in 25.897 ms
+  [215D85D7 logs]  NQ	0	09:03:58.504	Trades	'50503392': deal #2666771 buy 0.8 D30EUR at 26118.10 done (based on order #3088068)
+  [215D85D7 logs]  GP	0	09:03:58.511	Trades	'50503392': market buy 1.6 D30EUR, close #3088009 sell 3.3 D30EUR 26181.50
+  [215D85D7 logs]  DQ	0	09:03:58.528	Trades	'50503392': accepted market buy 1.6 D30EUR, close #3088009 sell 3.3 D30EUR 26181.50
+  [215D85D7 logs]  KJ	0	09:03:58.535	Trades	'50503392': deal #2666772 buy 1.6 D30EUR at 26118.30 done (based on order #3088069)
+  [215D85D7 logs]  PK	0	09:03:58.536	Trades	'50503392': order #3088069 buy 1.6 / 1.6 D30EUR at 26118.30 done in 26.513 ms
+  [215D85D7 logs]  HK	0	09:03:58.537	Trades	'50503392': modify #3088009 sell 1.7 D30EUR sl: 26213.00, tp: 26087.00 -> sl: 26181.50, tp: 26087.00
+  [215D85D7 logs]  JI	0	09:03:58.559	Trades	'50503392': accepted modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26181.50, tp: 26087.00
+  [215D85D7 logs]  OI	0	09:03:58.561	Trades	'50503392': modify #3088009 sell 1.7 D30EUR -> sl: 26181.50, tp: 26087.00 done in 24.137 ms
+  [215D85D7 logs]  KJ	2	09:03:58.561	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26118.10, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  DK	0	09:03:58.561	Trades	'50503392': cancel order #3088008 buy stop 3.3 D30EUR at 26213.00 sl: 26181.50 tp: 26307.50
+  [215D85D7 logs]  GP	0	09:03:58.593	Trades	'50503392': cancel #3088008 buy stop 3.3 D30EUR at market done in 31.552 ms
+  [215D85D7 logs]  LS	2	09:03:58.704	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26118.10, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  HN	2	09:03:58.957	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26118.10, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  CL	2	09:03:59.201	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26118.10, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  DK	2	09:03:59.446	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26118.10, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  DF	2	09:03:59.903	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26118.10, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  CE	2	09:04:00.117	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26121.80, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  RS	2	09:04:00.361	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26121.80, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  RN	2	09:04:00.563	Trades	'50503392': failed modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26121.80, tp: 26087.00 [Invalid stops]
+  [215D85D7 logs]  LL	0	09:04:00.766	Trades	'50503392': modify #3088009 sell 1.7 D30EUR sl: 26181.50, tp: 26087.00 -> sl: 26121.80, tp: 26087.00
+  [215D85D7 logs]  HN	0	09:04:00.791	Trades	'50503392': accepted modify #3088009 sell 1.7 D30EUR sl: 26121.80, tp: 26087.00 -> sl: 26121.80, tp: 26087.00
+  [215D85D7 logs]  CH	0	09:04:00.791	Trades	'50503392': modify #3088009 sell 1.7 D30EUR -> sl: 26121.80, tp: 26087.00 done in 25.503 ms
+  [215D85D7 logs]  JS	0	09:04:01.923	Trades	'50503392': deal #2666774 buy 1.7 D30EUR at 26121.80 done (based on order #3088071)
+  [215D85D7 logs]  KQ	0	09:15:00.097	Trades	'50503392': buy stop 0.4 D30EUR at 26208.10 sl: 26084.70 tp: 26578.30
+  [215D85D7 logs]  DM	0	09:15:00.099	Trades	'50503392': buy stop 0.9 D30EUR at 26203.10 sl: 26088.70 tp: 26546.30
+  [215D85D7 logs]  RI	0	09:15:00.196	Trades	'50503392': buy stop 0.9 D30EUR at 26203.10 sl: 26088.70 tp: 26546.30
+  [215D85D7 logs]  HG	0	09:15:00.354	Trades	'50503392': accepted buy stop 0.4 D30EUR at 26208.10 sl: 26084.70 tp: 26578.30
+  [215D85D7 logs]  GM	0	09:15:00.354	Trades	'50503392': order #3088159 buy stop 0.4 / 0.4 D30EUR at 26208.10 done in 260.439 ms
+  [215D85D7 logs]  HL	0	09:15:00.355	Trades	'50503392': accepted buy stop 0.9 D30EUR at 26203.10 sl: 26088.70 tp: 26546.30
+  [215D85D7 logs]  JP	0	09:15:00.397	Trades	'50503392': order #3088160 buy stop 0.9 / 0.9 D30EUR at 26203.10 done in 298.475 ms
+  [215D85D7 logs]  ND	0	09:15:00.406	Trades	'50503392': sell stop 0.9 D30EUR at 26088.70 sl: 26203.10 tp: 25745.50
+  [215D85D7 logs]  QE	0	09:15:00.459	Trades	'50503392': accepted buy stop 0.9 D30EUR at 26203.10 sl: 26088.70 tp: 26546.30
+  [215D85D7 logs]  QO	0	09:15:00.459	Trades	'50503392': order #3088161 buy stop 0.9 / 0.9 D30EUR at 26203.10 done in 280.525 ms
+  [215D85D7 logs]  QO	0	09:15:00.465	Trades	'50503392': sell stop 0.9 D30EUR at 26088.70 sl: 26203.10 tp: 25745.50
+  [215D85D7 logs]  JQ	0	09:15:00.481	Trades	'50503392': accepted sell stop 0.9 D30EUR at 26088.70 sl: 26203.10 tp: 25745.50
+  [215D85D7 logs]  MJ	0	09:15:00.483	Trades	'50503392': order #3088163 sell stop 0.9 / 0.9 D30EUR at 26088.70 done in 77.620 ms
+  [215D85D7 logs]  QD	0	09:15:00.501	Trades	'50503392': accepted sell stop 0.9 D30EUR at 26088.70 sl: 26203.10 tp: 25745.50
+  [215D85D7 logs]  KE	0	09:15:00.503	Trades	'50503392': order #3088164 sell stop 0.9 / 0.9 D30EUR at 26088.70 done in 38.560 ms
+  [215D85D7 logs]  FS	0	09:18:08.029	Trades	'50503392': deal #2666867 buy 0.9 D30EUR at 26203.10 done (based on order #3088160)
+  [215D85D7 logs]  QQ	0	09:18:08.040	Trades	'50503392': deal #2666868 buy 0.9 D30EUR at 26203.10 done (based on order #3088161)
+  [215D85D7 logs]  PL	0	09:18:08.043	Trades	'50503392': cancel order #3088163 sell stop 0.9 D30EUR at 26088.70 sl: 26203.10 tp: 25745.50
+  [215D85D7 logs]  KM	0	09:18:08.043	Trades	'50503392': cancel order #3088164 sell stop 0.9 D30EUR at 26088.70 sl: 26203.10 tp: 25745.50
+  [215D85D7 logs]  IH	0	09:18:08.062	Trades	'50503392': cancel #3088164 sell stop 0.9 D30EUR at market done in 19.352 ms
+  [215D85D7 logs]  DP	0	09:18:08.066	Trades	'50503392': cancel #3088163 sell stop 0.9 D30EUR at market done in 23.733 ms
+  [215D85D7 logs]  OI	0	10:11:49.423	Trades	'50503392': deal #2667347 sell 0.9 D30EUR at 26088.70 done (based on order #3088698)
+  [215D85D7 logs]  NK	0	10:11:49.424	Trades	'50503392': deal #2667348 sell 0.9 D30EUR at 26088.70 done (based on order #3088699)
+  [215D85D7 logs]  ES	2	10:39:00.236	Trades	'50503392': failed market buy 0.2 D30EUR sl: 26086.42 tp: 26188.50 [Invalid stops]
+  [215D85D7 logs]  PN	2	10:39:00.237	Trades	'50503392': failed market buy 0.1 D30EUR sl: 26086.42 tp: 26223.00 [Invalid stops]
+  [215D85D7 logs]  OL	2	10:39:00.237	Trades	'50503392': failed market buy 0.1 D30EUR sl: 26086.42 tp: 26262.20 [Invalid stops]
+  [215D85D7 logs]  OJ	2	15:42:00.169	Trades	'50503392': failed market buy 0.2 D30EUR sl: 26092.29 tp: 26188.50 [Invalid stops]
+  [215D85D7 logs]  JI	2	15:42:00.169	Trades	'50503392': failed market buy 0.1 D30EUR sl: 26092.29 tp: 26223.10 [Invalid stops]
+  [215D85D7 logs]  NG	2	15:42:00.169	Trades	'50503392': failed market buy 0.1 D30EUR sl: 26092.29 tp: 26262.20 [Invalid stops]
+  [215D85D7 logs]  IL	2	22:03:01.026	Trades	'50503392': failed market buy 0.4 D30EUR sl: 26135.49 tp: 26193.90 [Invalid stops]
+  [215D85D7 logs]  JJ	2	22:03:01.026	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26135.49 tp: 26214.90 [Invalid stops]
+  [215D85D7 logs]  LI	2	22:03:01.026	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26135.49 tp: 26239.60 [Invalid stops]
+
+--- 2026.08.10 (log 20260810) ---
+  [215D85D7 logs]  ?CM	2	03:39:00.249	Trades	'50503392': failed market buy 0.5 D30EUR sl: 26286.41 tp: 26342.90 [Invalid stops]
+  [215D85D7 logs]  IH	2	03:39:00.250	Trades	'50503392': failed market buy 0.4 D30EUR sl: 26286.41 tp: 26360.80 [Invalid stops]
+  [215D85D7 logs]  KF	2	03:39:00.250	Trades	'50503392': failed market buy 0.4 D30EUR sl: 26286.41 tp: 26379.40 [Invalid stops]
+  [215D85D7 logs]  IO	2	09:03:00.333	Trades	'50503392': failed market buy 0.5 D30EUR sl: 26318.02 tp: 26367.40 [Invalid stops]
+  [215D85D7 logs]  GJ	2	09:03:00.334	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26318.02 tp: 26397.20 [Invalid stops]
+  [215D85D7 logs]  IH	2	09:03:00.334	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26318.02 tp: 26437.65 [Invalid stops]
+  [215D85D7 logs]  KG	0	09:15:00.139	Trades	'50503392': buy stop 0.8 D30EUR at 26379.70 sl: 26313.80 tp: 26577.40
+  [215D85D7 logs]  GQ	0	09:15:00.161	Trades	'50503392': accepted buy stop 0.8 D30EUR at 26379.70 sl: 26313.80 tp: 26577.40
+  [215D85D7 logs]  QO	0	09:15:00.162	Trades	'50503392': order #3109750 buy stop 0.8 / 0.8 D30EUR at 26379.70 done in 31.159 ms
+  [215D85D7 logs]  PR	0	09:16:16.126	Trades	'50503392': deal #2686904 sell 1.7 D30EUR at 26313.00 done (based on order #3109763)
+  [215D85D7 logs]  JG	0	09:16:16.131	Trades	'50503392': cancel order #3109762 buy stop 1.7 D30EUR at 26372.90 sl: 26313.00 tp: 26552.60
+  [215D85D7 logs]  NE	0	09:16:16.157	Trades	'50503392': cancel #3109762 buy stop 1.7 D30EUR at market done in 25.410 ms
+  [215D85D7 logs]  HL	0	10:00:08.123	Trades	'50503392': deal #2687175 buy 1.7 D30EUR at 26372.90 done (based on order #3110062)
+  [215D85D7 logs]  CI	0	10:55:47.466	Trades	'50503392': deal #2687505 buy 0.8 D30EUR at 26379.70 done (based on order #3109750)
+  [215D85D7 logs]  RH	0	11:25:00.277	Trades	'50503392': modify #3109750 buy 0.8 D30EUR sl: 26313.80, tp: 26577.40 -> sl: 26382.30, tp: 26577.40
+  [215D85D7 logs]  NJ	0	11:25:00.298	Trades	'50503392': accepted modify #3109750 buy 0.8 D30EUR sl: 26313.80, tp: 26577.40 -> sl: 26382.30, tp: 26577.40
+  [215D85D7 logs]  RJ	0	11:25:00.303	Trades	'50503392': modify #3109750 buy 0.8 D30EUR -> sl: 26382.30, tp: 26577.40 done in 27.108 ms
+  [215D85D7 logs]  LG	0	11:25:02.827	Trades	'50503392': market sell 0.4 D30EUR, close #3109750 buy 0.8 D30EUR 26379.70
+  [215D85D7 logs]  DI	0	11:25:02.857	Trades	'50503392': accepted market sell 0.4 D30EUR, close #3109750 buy 0.8 D30EUR 26379.70
+  [215D85D7 logs]  IM	0	11:25:02.874	Trades	'50503392': deal #2687696 sell 0.4 D30EUR at 26401.40 done (based on order #3110600)
+  [215D85D7 logs]  RS	0	11:25:02.881	Trades	'50503392': order #3110600 sell 0.4 / 0.4 D30EUR at 26401.40 done in 54.828 ms
+  [215D85D7 logs]  DM	0	11:30:00.186	Trades	'50503392': modify #3109750 buy 0.4 D30EUR sl: 26382.30, tp: 26577.40 -> sl: 26396.80, tp: 26577.40
+  [215D85D7 logs]  NO	0	11:30:00.226	Trades	'50503392': accepted modify #3109750 buy 0.4 D30EUR sl: 26396.80, tp: 26577.40 -> sl: 26396.80, tp: 26577.40
+  [215D85D7 logs]  EM	0	11:30:00.238	Trades	'50503392': modify #3109750 buy 0.4 D30EUR -> sl: 26396.80, tp: 26577.40 done in 52.425 ms
+  [215D85D7 logs]  LL	0	11:35:00.136	Trades	'50503392': modify #3109750 buy 0.4 D30EUR sl: 26396.80, tp: 26577.40 -> sl: 26397.50, tp: 26577.40
+  [215D85D7 logs]  FN	0	11:35:00.160	Trades	'50503392': accepted modify #3109750 buy 0.4 D30EUR sl: 26397.50, tp: 26577.40 -> sl: 26397.50, tp: 26577.40
+  [215D85D7 logs]  CN	0	11:35:00.161	Trades	'50503392': modify #3109750 buy 0.4 D30EUR -> sl: 26397.50, tp: 26577.40 done in 25.003 ms
+  [215D85D7 logs]  IN	2	11:37:32.646	Trades	'50503392': failed cancel order #3110713 sell 0.4 D30EUR at 26397.50000 [Invalid request]
+  [215D85D7 logs]  DE	0	11:37:32.651	Trades	'50503392': deal #2687805 sell 0.4 D30EUR at 26397.50 done (based on order #3110713)
+  [215D85D7 logs]  JK	2	16:18:00.146	Trades	'50503392': failed market buy 0.3 D30EUR sl: 26293.71 tp: 26372.50 [Invalid stops]
+  [215D85D7 logs]  OF	2	16:18:00.154	Trades	'50503392': failed market buy 0.2 D30EUR sl: 26293.71 tp: 26400.40 [Invalid stops]
+  [215D85D7 logs]  FD	2	16:18:00.155	Trades	'50503392': failed market buy 0.2 D30EUR sl: 26293.71 tp: 26434.30 [Invalid stops]
+  [215D85D7 logs]  GN	2	21:09:09.219	Trades	'50503392': failed market buy 0.8 D30EUR sl: 26302.74 tp: 26333.40 [Invalid stops]
+  [215D85D7 logs]  CM	2	21:09:09.219	Trades	'50503392': failed market buy 0.6 D30EUR sl: 26302.74 tp: 26345.50 [Invalid stops]
+  [215D85D7 logs]  GK	2	21:09:09.219	Trades	'50503392': failed market buy 0.6 D30EUR sl: 26302.74 tp: 26356.50 [Invalid stops]
+  [215D85D7 MQL5\Logs]  CE	0	03:39:00.250	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.50 D30EUR sl: 26286.41 tp: 26342.90 [invalid stops]
+  [215D85D7 MQL5\Logs]  ME	0	03:39:00.250	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.40 D30EUR sl: 26286.41 tp: 26360.80 [invalid stops]
+  [215D85D7 MQL5\Logs]  KR	0	03:39:00.250	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.40 D30EUR sl: 26286.41 tp: 26379.40 [invalid stops]
+  [215D85D7 MQL5\Logs]  NL	0	09:03:00.334	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.50 D30EUR sl: 26318.02 tp: 26367.40 [invalid stops]
+  [215D85D7 MQL5\Logs]  QL	0	09:03:00.334	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.30 D30EUR sl: 26318.02 tp: 26397.20 [invalid stops]
+  [215D85D7 MQL5\Logs]  GM	0	09:03:00.334	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.30 D30EUR sl: 26318.02 tp: 26437.65 [invalid stops]
+  [215D85D7 MQL5\Logs]  IJ	0	09:15:00.163	ABTG_DAX_Apertura_EU_Ottimizzato (D30EUR,M5)	[DAX Apertura EU OTT] BUY STOP @ 26379.70000  SL 26313.80000  lot 0.80
+  [215D85D7 MQL5\Logs]  IG	0	11:37:32.647	ABTG_DAX_Apertura_EU_Ottimizzato (D30EUR,M5)	CTrade::OrderSend: cancel #3110713 [invalid request]
+  [215D85D7 MQL5\Logs]  RQ	0	16:18:00.146	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.30 D30EUR sl: 26293.71 tp: 26372.50 [invalid stops]
+  [215D85D7 MQL5\Logs]  LN	0	16:18:00.155	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.20 D30EUR sl: 26293.71 tp: 26400.40 [invalid stops]
+  [215D85D7 MQL5\Logs]  FN	0	16:18:00.155	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.20 D30EUR sl: 26293.71 tp: 26434.30 [invalid stops]
+  [215D85D7 MQL5\Logs]  IG	0	21:09:09.219	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.80 D30EUR sl: 26302.74 tp: 26333.40 [invalid stops]
+  [215D85D7 MQL5\Logs]  ED	0	21:09:09.219	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.60 D30EUR sl: 26302.74 tp: 26345.50 [invalid stops]
+  [215D85D7 MQL5\Logs]  QD	0	21:09:09.219	ABTG_SuperWave_EA (D30EUR,M3)	CTrade::OrderSend: market buy 0.60 D30EUR sl: 26302.74 tp: 26356.50 [invalid stops]
+  [BCA8AD18 logs]  DQ	0	10:55:30.545	Trades	'50504263': buy limit 9.7 D30EUR at 26370.70 sl: 26303.90 tp: 26571.10
+  [BCA8AD18 logs]  FF	0	10:55:30.584	Trades	'50504263': accepted buy limit 9.7 D30EUR at 26370.70 sl: 26303.90 tp: 26571.10
+  [BCA8AD18 logs]  CI	0	10:55:30.584	Trades	'50504263': order #3110409 buy limit 9.7 / 9.7 D30EUR at 26370.70 done in 40.595 ms
+  [BCA8AD18 MQL5\Logs]  CL	0	10:55:30.584	ABTG_DAX_Apertura_EU (D30EUR,M5)	[DAX Apertura EU] BUY LIMIT (retest) @ 26370.70000  SL 26303.90000  lot 9.70
+
+--- 2026.08.14 (log 20260814) ---
+  [215D85D7 logs]  PG	0	09:49:24.678	Trades	'50503392': deal #2735926 buy 2 D30EUR at 26479.00 done (based on order #3160534)
+  [215D85D7 logs]  NQ	0	09:49:24.687	Trades	'50503392': cancel order #3160535 sell stop 2 D30EUR at 26426.70 sl: 26479.00 tp: 26269.80
+  [215D85D7 logs]  PS	0	09:49:24.726	Trades	'50503392': cancel #3160535 sell stop 2 D30EUR at market done in 39.787 ms
+  [215D85D7 logs]  RG	0	10:17:54.619	Trades	'50503392': deal #2737314 sell 2 D30EUR at 26426.70 done (based on order #3162207)
+  [215D85D7 MQL5\Logs]  IQ	0	16:11:04.255	ABTG_DAX_Apertura_EU (D30EUR,M5)	[DAX Apertura EU] oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.
+  [BCA8AD18 logs]  DR	0	09:50:14.895	Trades	'50504263': buy limit 11.8 D30EUR at 26476.80 sl: 26421.90 tp: 26641.50
+  [BCA8AD18 logs]  KE	0	09:50:14.918	Trades	'50504263': accepted buy limit 11.8 D30EUR at 26476.80 sl: 26421.90 tp: 26641.50
+  [BCA8AD18 logs]  RI	0	09:50:14.918	Trades	'50504263': order #3160789 buy limit 11.8 / 11.8 D30EUR at 26476.80 done in 23.609 ms
+  [BCA8AD18 logs]  PE	0	09:50:21.407	Trades	'50504263': deal #2735935 buy 11.8 D30EUR at 26476.80 done (based on order #3160789)
+  [BCA8AD18 logs]  FH	0	10:18:21.013	Trades	'50504263': deal #2737316 sell 11.8 D30EUR at 26421.90 done (based on order #3162210)
+  [BCA8AD18 MQL5\Logs]  KM	0	09:50:14.919	ABTG_DAX_Apertura_EU (D30EUR,M5)	[DAX Apertura EU] BUY LIMIT (retest) @ 26476.80000  SL 26421.90000  lot 11.80
+
+=== COME SI LEGGE ===
+Un ordine compare nel giornale della macchina CHE L'HA PIAZZATO.
+  - trovato sul PC   -> quell'ordine e' partito dall'istanza del PC;
+  - trovato sul VPS  -> e' un trade regolare della flotta;
+  - trovato su TUTTI E DUE -> guarda l'ora: chi lo PIAZZA lo scrive
+    per primo, l'altro terminale lo vede solo come esecuzione.
+Va lanciato su ENTRAMBE le macchine: una sola meta' non decide niente.
