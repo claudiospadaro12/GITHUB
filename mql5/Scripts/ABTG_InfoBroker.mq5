@@ -1,36 +1,60 @@
 //+------------------------------------------------------------------+
 //|                                            ABTG_InfoBroker.mq5    |
 //|                                                                  |
-//|  IL RICOGNITORE DI UN BROKER NUOVO.                              |
+//|  IL RICOGNITORE DI UN BROKER (va lanciato su TUTTI E DUE i        |
+//|  terminali: BCM e quello esterno).                                |
 //|                                                                  |
 //|  PERCHE' ESISTE (14/08/2026):                                    |
 //|  lo storico BCM sugli INDICI parte dal 26/09/2024. Per la prova   |
 //|  di regime (prove\PROVA_REGIME_CRITERI.md) servono il 2022 e il   |
 //|  2020, quindi un SECONDO terminale (demo Pepperstone) che quegli  |
-//|  anni ce li ha. Prima di scaricare gigabyte e di lanciare test,   |
-//|  bisogna sapere DUE cose, e nessuna delle due si puo' indovinare: |
+//|  anni ce li ha. Prima di scaricare gigabyte e di lanciare test    |
+//|  bisogna sapere TRE cose, e nessuna delle tre si puo' indovinare: |
 //|                                                                  |
-//|   1. IL FUSO DEL SERVER. Tutti i nostri EA hanno gli orari in ORA |
-//|      SERVER (DAX InpSessionHour=8, Nasdaq 14:30, box notturno     |
-//|      23:00-04:59...). Se il broker nuovo ha un offset diverso e   |
-//|      non si rimappa, l'EA opera a un'ora che non c'entra niente   |
-//|      con l'apertura di borsa: OGNI VERDETTO E' SPAZZATURA.        |
-//|      Qui l'offset si MISURA (TimeTradeServer - TimeGMT), non si   |
-//|      stima. Lo stesso script va lanciato anche su BCM: cosi' la   |
-//|      DIFFERENZA fra i due server e' misurata, non supposta.       |
-//|                                                                  |
-//|   2. I NOMI DEI SIMBOLI. Su BCM il DAX e' D30EUR, altrove e'      |
+//|   1. I NOMI DEI SIMBOLI. Su BCM il DAX e' D30EUR, altrove e'      |
 //|      GER40 / DE40 / GER30... Qui NON si inventa nessuna mappa:    |
 //|      si ELENCA quello che il broker ha davvero, con descrizione,  |
 //|      digits, point, contract size, tick value e la PRIMA DATA     |
-//|      disponibile. La mappa la compila un umano, guardando questo  |
+//|      disponibile. La mappa la compila un umano guardando questo   |
 //|      elenco (docs\BROKER_ESTERNO_MAPPA.md).                       |
+//|                                                                  |
+//|   2. IL FUSO DEL SERVER, ADESSO. Tutti i nostri EA hanno gli      |
+//|      orari in ORA SERVER (DAX InpSessionHour=8, apertura USA      |
+//|      14:30, box notturno 23:00-04:59...). Se il broker nuovo ha   |
+//|      un offset diverso e non si rimappa, l'EA opera a un'ora che  |
+//|      non c'entra niente con l'apertura di borsa: OGNI VERDETTO    |
+//|      E' SPAZZATURA. Qui l'offset si MISURA (TimeTradeServer -     |
+//|      TimeGMT), non si stima.                                      |
+//|                                                                  |
+//|   3. IL FUSO NEL PASSATO, che e' un'ALTRA cosa. TimeGMT dice solo |
+//|      com'e' oggi. Pepperstone segue il DST AMERICANO (GMT+3 da    |
+//|      marzo a novembre, GMT+2 il resto), l'Europa cambia in DATE   |
+//|      DIVERSE: per 2-3 settimane l'anno la differenza fra i due    |
+//|      server vale 1 ora invece di 2, e succede OGNI ANNO del       |
+//|      backtest. Quindi qui si misura il fuso ANCHE SUI DATI:       |
+//|       a) si esportano le chiusure H1 di due finestre (una in ora  |
+//|          solare, una in ora legale) -> ABTG_InfoBroker_H1.csv.    |
+//|          Lanciato sui due terminali, il driver PowerShell prova   |
+//|          gli shift da -6 a +6 e trova quello che minimizza la     |
+//|          differenza: SHIFT MISURATO SU DATI, non dedotto.         |
+//|       b) si misura l'ORA SERVER DELLA PRIMA BARRA della giornata  |
+//|          in date campione sparse su tutto l'anno (sezione         |
+//|          [SESSIONI]). Se l'apertura cade a ore server diverse fra |
+//|          gennaio e luglio, quel server NON segue il DST del       |
+//|          mercato -> gli EA a orario fisso sono sbagliati per      |
+//|          meta' anno. Vale anche per BCM, sui SOLDI VERI: la       |
+//|          nostra regola "server BCM = ora italiana -1" non e' mai  |
+//|          stata verificata d'inverno.                              |
 //|                                                                  |
 //|  USO: trascina lo script su un grafico qualsiasi e premi OK.      |
 //|       Con InpFiltro restringi (es. "GER", "US", "XAU").           |
+//|       Per i punti 3a/3b metti in InpSimboloFuso un INDICE (il     |
+//|       DAX): sui cambi, che girano 24h, la "prima barra del        |
+//|       giorno" e' sempre 00:00 e non dice niente.                  |
 //|                                                                  |
-//|  PRODUCE: log nella scheda ESPERTI + MQL5\Files\ABTG_InfoBroker.csv|
-//|           in due sezioni: [SERVER] e [SIMBOLI].                   |
+//|  PRODUCE: log nella scheda ESPERTI +                               |
+//|    MQL5\Files\ABTG_InfoBroker.csv     ([SERVER],[SIMBOLI],[SESSIONI])
+//|    MQL5\Files\ABTG_InfoBroker_H1.csv  (chiusure H1 delle 2 finestre)
 //|                                                                  |
 //|  NOTA: i simboli esaminati vengono AGGIUNTI al Market Watch (per  |
 //|  interrogarne le serie storiche serve che siano selezionati). Se  |
@@ -42,8 +66,16 @@
 input string          InpFiltro          = "";        // sottostringa nel nome o nella descrizione (vuoto = TUTTI)
 input bool            InpSoloMarketWatch = false;     // true = solo i simboli gia' in Market Watch
 input ENUM_TIMEFRAMES InpTF              = PERIOD_H1; // TF su cui misurare la prima data (D1 e' sempre misurato)
+input string          InpSimboloFuso     = "";        // simbolo per fuso/sessioni: METTI UN INDICE (vuoto = il primo esaminato)
+input ENUM_TIMEFRAMES InpTFSessione      = PERIOD_M5; // TF con cui si cerca la prima barra della giornata
+input int             InpAnniSessione    = 3;         // quanti anni indietro nella tabella per stagione
+input string          InpDateCampione    = "01.15,03.20,04.15,07.15,10.15,10.28,11.20"; // mese.giorno: 03.20 e 10.28 sono le settimane di DISALLINEAMENTO USA/EU
+input bool            InpEsportaH1       = true;      // esporta le chiusure H1 per il confronto fra broker
+input string          InpFinestraSolare  = "2025.01.06-2025.01.31"; // finestra in ORA SOLARE (dentro lo storico BCM: dal 26/09/2024)
+input string          InpFinestraLegale  = "2025.07.01-2025.07.31"; // finestra in ORA LEGALE
 
 #define ABTG_INFO_FILE "ABTG_InfoBroker.csv"
+#define ABTG_H1_FILE   "ABTG_InfoBroker_H1.csv"
 #define ABTG_ATTESA_GIRI 8      // 8 x 250ms = 2 secondi per serie: bastano per la
                                 // risposta del server, senza far durare ore un
                                 // elenco di 1000 simboli
@@ -66,13 +98,13 @@ string Pulisci(string s)
 string Maiuscolo(string s){ StringToUpper(s); return s; }
 
 //+------------------------------------------------------------------+
-//| L'OFFSET DEL SERVER, MISURATO.                                   |
+//| L'OFFSET DEL SERVER, MISURATO (ma valido SOLO OGGI).             |
 //|  TimeTradeServer() = ora corrente del server CALCOLATA dal        |
 //|  terminale: vale anche a mercato chiuso, mentre TimeCurrent()     |
 //|  resta ferma all'ultimo tick (venerdi' sera). Usare TimeCurrent() |
 //|  per l'offset di sabato darebbe un valore sballato di due giorni. |
-//|  Arrotondo a passi di 15 minuti per togliere il jitter di qualche |
-//|  secondo fra i due orologi.                                       |
+//|  Arrotondo a passi di 15 minuti per togliere il jitter fra i due  |
+//|  orologi.                                                         |
 //+------------------------------------------------------------------+
 int OffsetServerGMTMinuti()
   {
@@ -87,6 +119,18 @@ string OreMinuti(int minuti)
    string segno = (minuti < 0 ? "-" : "+");
    int a = (int)MathAbs(minuti);
    return StringFormat("%s%02d:%02d", segno, a/60, a%60);
+  }
+
+string OraDiBarra(datetime t)
+  {
+   MqlDateTime d; TimeToStruct(t, d);
+   return StringFormat("%02d:%02d", d.hour, d.min);
+  }
+
+int MinutiDiBarra(datetime t)
+  {
+   MqlDateTime d; TimeToStruct(t, d);
+   return d.hour*60 + d.min;
   }
 
 //+------------------------------------------------------------------+
@@ -114,7 +158,7 @@ string DataOTrattino(datetime t){ return (t>0 ? TimeToString(t, TIME_DATE) : "-"
 
 //+------------------------------------------------------------------+
 //| Il verdetto per un simbolo, sul TF richiesto.                     |
-//|  "DA SCARICARE" NON e' un errore: e' lo stato normale su un       |
+//|  "da scaricare" NON e' un errore: e' lo stato normale su un       |
 //|  terminale appena installato. Serve a distinguerlo da "il broker  |
 //|  questo simbolo non ce l'ha proprio".                             |
 //+------------------------------------------------------------------+
@@ -126,6 +170,187 @@ string Verdetto(long barre, datetime primaLoc, datetime primaSrv)
    if(primaLoc <= 0)               return "da scaricare";
    if(primaLoc > primaSrv + 2*86400) return "da scaricare (parziale)";
    return "COMPLETO";
+  }
+
+//+------------------------------------------------------------------+
+//| "2025.01.06-2025.01.31" -> due datetime. Torna false se non si   |
+//| capisce: meglio saltare l'export che esportare una finestra a    |
+//| caso.                                                            |
+//+------------------------------------------------------------------+
+bool LeggiFinestra(string s, datetime &da, datetime &a)
+  {
+   string p[];
+   if(StringSplit(s, '-', p) != 2) return false;
+   StringTrimLeft(p[0]); StringTrimRight(p[0]);
+   StringTrimLeft(p[1]); StringTrimRight(p[1]);
+   da = StringToTime(p[0] + " 00:00");
+   a  = StringToTime(p[1] + " 23:59");
+   return (da > 0 && a > da);
+  }
+
+//+------------------------------------------------------------------+
+//| ESPORTA LE CHIUSURE H1 DI UNA FINESTRA.                          |
+//|  Il confronto fra i due broker NON si puo' fare qui: un          |
+//|  terminale vede un solo server. Quindi ognuno dei due esporta le |
+//|  sue chiusure e il driver PowerShell prova gli shift -6..+6 e    |
+//|  stampa la tabella. E' la stessa logica di ABTG_ImportaStorico-  |
+//|  Esterno.mq5 (CalibraShift), spostata di la' dove i due feed     |
+//|  possono stare nella stessa stanza.                              |
+//+------------------------------------------------------------------+
+int EsportaH1(int fh2, string sym, string nomeFinestra, string finestra)
+  {
+   datetime da=0, a=0;
+   if(!LeggiFinestra(finestra, da, a))
+     {
+      PrintFormat("  finestra '%s' non interpretabile (formato: 2025.01.06-2025.01.31): salto.", finestra);
+      return 0;
+     }
+   MqlRates r[];
+   int got = -1;
+   for(int tent=0; tent<60 && !IsStopped(); tent++)
+     {
+      got = CopyRates(sym, PERIOD_H1, da, a, r);
+      if(got > 0) break;
+      Sleep(250);
+     }
+   if(got <= 0)
+     {
+      PrintFormat("  %-8s %s -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').",
+                  nomeFinestra, finestra);
+      return 0;
+     }
+   int digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+   for(int i=0; i<got; i++)
+      FileWrite(fh2, nomeFinestra, sym,
+                TimeToString(r[i].time, TIME_DATE|TIME_MINUTES),
+                DoubleToString(r[i].close, digits));
+   PrintFormat("  %-8s %s -> %d barre H1 esportate (dal %s al %s, ORA SERVER)",
+               nomeFinestra, finestra, got,
+               TimeToString(r[0].time, TIME_DATE|TIME_MINUTES),
+               TimeToString(r[got-1].time, TIME_DATE|TIME_MINUTES));
+   return got;
+  }
+
+//+------------------------------------------------------------------+
+//| APERTURA DI SESSIONE PER STAGIONE.                                |
+//|                                                                  |
+//| La domanda: "a che ora, SULL'OROLOGIO DEL SERVER, apre il mercato |
+//| a gennaio? e a luglio?".                                          |
+//|  - se e' la STESSA ora -> il server segue il DST del mercato, e   |
+//|    un InpSessionHour fisso va bene tutto l'anno;                  |
+//|  - se CAMBIA -> quel server ha offset fisso (o un calendario DST  |
+//|    diverso) e per meta' anno i nostri EA a orario fisso operano   |
+//|    all'ora sbagliata. Sui soldi veri, non solo nel backtest.      |
+//|                                                                  |
+//| Le date 03.20 e 10.28 sono li' apposta: cadono nelle settimane in |
+//| cui USA ed Europa NON sono d'accordo (USA cambia 2a dom. di marzo |
+//| e 1a dom. di novembre, Europa ultima dom. di marzo e ultima dom.  |
+//| di ottobre).                                                      |
+//+------------------------------------------------------------------+
+void TabellaSessioni(int fh, string sym, int &minSolare, int &minLegale, int &minDisall)
+  {
+   minSolare = -1; minLegale = -1; minDisall = -1;
+
+   string date[];
+   int nd = StringSplit(InpDateCampione, ',', date);
+   if(nd <= 0) return;
+
+   MqlDateTime oggiSt; TimeToStruct(TimeTradeServer(), oggiSt);
+   int annoFine = oggiSt.year;
+   int annoDa   = annoFine - InpAnniSessione + 1;
+
+   // non si va piu' indietro di quello che il broker ha davvero
+   datetime srvD1 = (datetime)SeriesInfoInteger(sym, PERIOD_D1, SERIES_SERVER_FIRSTDATE);
+   if(srvD1 > 0)
+     {
+      MqlDateTime st; TimeToStruct(srvD1, st);
+      if(st.year > annoDa) annoDa = st.year;
+     }
+
+   string tfn = StringSubstr(EnumToString(InpTFSessione), 7);
+   Print("--- APERTURA DI SESSIONE PER STAGIONE (", sym, ", TF ", tfn, ") ---");
+   Print("    data        prima barra   ultima barra   barre   nota");
+
+   // somme per gruppo: il valore rappresentativo e' la MODA grezza, cioe'
+   // il primo valore visto che si ripete; con poche date basta la media
+   // arrotondata dei valori uguali, quindi tengo semplicemente il piu'
+   // frequente con due array paralleli.
+   int valori[64]; int quante[64]; int gruppi[64]; int nv = 0;
+
+   for(int anno = annoDa; anno <= annoFine; anno++)
+     {
+      for(int i=0; i<nd; i++)
+        {
+         string g = date[i];
+         StringTrimLeft(g); StringTrimRight(g);
+         string md[];
+         if(StringSplit(g, '.', md) != 2) continue;
+         int mese = (int)StringToInteger(md[0]);
+         int gior = (int)StringToInteger(md[1]);
+         if(mese < 1 || mese > 12 || gior < 1 || gior > 31) continue;
+
+         datetime giorno = StringToTime(StringFormat("%04d.%02d.%02d 00:00", anno, mese, gior));
+         if(giorno <= 0) continue;
+         if(giorno > TimeTradeServer()) continue;      // date future: non esistono ancora
+
+         // se e' festivo/weekend si scivola in avanti, fino a 4 giorni
+         MqlRates r[];
+         int got = 0, spost = 0;
+         datetime usato = giorno;
+         for(spost = 0; spost <= 4; spost++)
+           {
+            usato = giorno + spost*86400;
+            got = CopyRates(sym, InpTFSessione, usato, usato + 86399, r);
+            if(got > 0) break;
+            Sleep(150);
+            got = CopyRates(sym, InpTFSessione, usato, usato + 86399, r);
+            if(got > 0) break;
+           }
+
+         string nota = "";
+         if(got <= 0)
+           {
+            PrintFormat("    %04d.%02d.%02d   %-13s %-14s %5s   %s",
+                        anno, mese, gior, "-", "-", "-", "da scaricare / nessun dato");
+            if(fh != INVALID_HANDLE)
+               FileWrite(fh, sym, StringFormat("%04d.%02d.%02d", anno, mese, gior),
+                         "-", "-", "0", tfn, "da scaricare / nessun dato");
+            continue;
+           }
+         if(spost > 0) nota = StringFormat("giorno spostato di +%d (festivo/weekend)", spost);
+
+         int mPrima = MinutiDiBarra(r[0].time);
+         PrintFormat("    %04d.%02d.%02d   %-13s %-14s %5d   %s",
+                     anno, mese, gior, OraDiBarra(r[0].time), OraDiBarra(r[got-1].time), got, nota);
+         if(fh != INVALID_HANDLE)
+            FileWrite(fh, sym, StringFormat("%04d.%02d.%02d", anno, mese, gior),
+                      OraDiBarra(r[0].time), OraDiBarra(r[got-1].time), (string)got, tfn,
+                      (nota=="" ? "ok" : nota));
+
+         // gruppo: 0 = ora solare (gen, nov), 1 = ora legale (apr, lug, ott15),
+         //         2 = settimane di disallineamento USA/EU (20 marzo, 28 ottobre)
+         int gruppo = 1;
+         if(mese == 1 || mese == 11) gruppo = 0;
+         if((mese == 3) || (mese == 10 && gior >= 25)) gruppo = 2;
+         if(spost > 0 && gruppo == 2) continue;   // se e' scivolata, non e' piu' la settimana giusta
+
+         bool trovato = false;
+         for(int k=0; k<nv; k++)
+            if(valori[k] == mPrima && gruppi[k] == gruppo){ quante[k]++; trovato = true; break; }
+         if(!trovato && nv < 64){ valori[nv]=mPrima; quante[nv]=1; gruppi[nv]=gruppo; nv++; }
+        }
+     }
+
+   // il valore piu' frequente per gruppo
+   for(int gr=0; gr<3; gr++)
+     {
+      int best = -1, bestN = 0;
+      for(int k=0; k<nv; k++)
+         if(gruppi[k]==gr && quante[k] > bestN){ bestN = quante[k]; best = valori[k]; }
+      if(gr==0) minSolare = best;
+      if(gr==1) minLegale = best;
+      if(gr==2) minDisall = best;
+     }
   }
 
 //+------------------------------------------------------------------+
@@ -142,7 +367,7 @@ void OnStart()
       Print("ATTENZIONE: non riesco a scrivere ", ABTG_INFO_FILE, " (errore ", GetLastError(), "). Continuo solo a schermo.");
 
    //================================================================
-   // SEZIONE 1: IL SERVER (il fuso, che e' meta' del lavoro)
+   // SEZIONE 1: IL SERVER (il fuso di OGGI)
    //================================================================
    datetime srv    = TimeTradeServer();
    datetime tick   = TimeCurrent();
@@ -163,14 +388,17 @@ void OnStart()
    Print("  Ora ultimo tick  : ", TimeToString(tick, TIME_DATE|TIME_SECONDS), "   mercato aperto: ", aperto);
    Print("  Ora GMT          : ", TimeToString(gmt, TIME_DATE|TIME_SECONDS));
    Print("  Ora locale PC    : ", TimeToString(loc, TIME_DATE|TIME_SECONDS));
-   Print("  OFFSET SERVER-GMT: ", OreMinuti(offMin), "   (", DoubleToString(offMin/60.0, 2), " ore)  <== IL NUMERO CHE CONTA");
+   Print("  OFFSET SERVER-GMT: ", OreMinuti(offMin), "   (", DoubleToString(offMin/60.0, 2), " ore)  <== IL NUMERO DI OGGI");
    Print("  Ora legale sul PC: ", (dstPC != 0 ? "SI" : "NO"),
-         "   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dall'offset)");
+         "   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dalle sezioni sotto)");
    Print("  Simboli broker   : ", (string)totB, "   in Market Watch: ", (string)totM);
    Print("---------------------------------------------------------------------");
-   Print("  L'offset qui sopra e' quello di OGGI. Se il broker segue un");
-   Print("  calendario di ora legale diverso da BCM, la differenza fra i due");
-   Print("  server CAMBIA due volte l'anno: vedi docs\\BROKER_ESTERNO_MAPPA.md.");
+   Print("  ATTENZIONE: l'offset qui sopra vale OGGI. Non e' l'offset storico.");
+   Print("  Pepperstone segue il DST AMERICANO, l'Europa cambia in date diverse:");
+   Print("  per 2-3 settimane l'anno la differenza fra i due server e' di 1 ora");
+   Print("  invece di 2, e succede ogni anno del backtest. Il numero che vale");
+   Print("  per il PASSATO e' quello misurato sui dati (ABTG_InfoBroker_H1.csv +");
+   Print("  sezione [SESSIONI]). Vedi docs\\BROKER_ESTERNO_MAPPA.md.");
    Print("=====================================================================");
 
    if(fh != INVALID_HANDLE)
@@ -211,10 +439,11 @@ void OnStart()
    string tfn = StringSubstr(EnumToString(InpTF), 7);
    PrintFormat("=== SIMBOLI (%s) - TF misurato: %s - filtro: '%s' ===",
                (mw ? "solo Market Watch" : "TUTTO IL BROKER"), tfn, InpFiltro);
-   PrintFormat("%-16s %-6s %-8s %-10s %-12s %-12s %s",
-               "SIMBOLO","DIGITS","POINT","CONTRACT","PRIMA "+tfn,"PRIMA D1","STATO / DESCRIZIONE");
+   PrintFormat("%-16s %-6s %-10s %-10s %-12s %-12s %s",
+               "SIMBOLO","DIGITS","POINT","CONTRACT","PRIMA "+tfn,"PRIMA D1","STATO | DESCRIZIONE");
 
-   int esaminati = 0;
+   int    esaminati = 0;
+   string primoSym  = "";
    for(int i=0; i<tot && !IsStopped(); i++)
      {
       string sym = SymbolName(i, mw);
@@ -237,6 +466,7 @@ void OnStart()
          continue;
         }
       esaminati++;
+      if(primoSym == "") primoSym = sym;
 
       int    digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
       double point  = SymbolInfoDouble(sym, SYMBOL_POINT);
@@ -255,7 +485,7 @@ void OnStart()
       // PrimaData: si scrive quella del SERVER (quello che il broker POSSIEDE),
       // perche' e' l'unica che dice se il 2018 e' raggiungibile o no. Quella
       // locale conta solo per sapere se resta da scaricare.
-      PrintFormat("%-16s %-6d %-8s %-10s %-12s %-12s %s | %s",
+      PrintFormat("%-16s %-6d %-10s %-10s %-12s %-12s %s | %s",
                   sym, digits, DoubleToString(point, 8), DoubleToString(csize, 2),
                   DataOTrattino(srvTF), DataOTrattino(srvD1), stato, desc);
 
@@ -267,7 +497,101 @@ void OnStart()
                    (string)barD1, DataOTrattino(srvD1), stato);
      }
 
+   //================================================================
+   // SEZIONE 3: LE SESSIONI PER STAGIONE (il DST del server, sui dati)
+   //================================================================
+   string symFuso = InpSimboloFuso;
+   StringTrimLeft(symFuso); StringTrimRight(symFuso);
+   if(symFuso == "") symFuso = primoSym;
+
+   if(symFuso != "" && SymbolSelect(symFuso, true))
+     {
+      if(fh != INVALID_HANDLE)
+        {
+         FileWrite(fh, "[SESSIONI]");
+         FileWrite(fh, "Simbolo","Data","PrimaBarra","UltimaBarra","NBarre","TF","Nota");
+        }
+      int mSol=-1, mLeg=-1, mDis=-1;
+      TabellaSessioni(fh, symFuso, mSol, mLeg, mDis);
+
+      Print("--- LETTURA DELLA TABELLA ---");
+      if(mSol < 0 || mLeg < 0)
+        {
+         Print("    DATI INSUFFICIENTI: manca lo storico su una delle due stagioni.");
+         Print("    Scarica lo storico e rilancia: senza questa misura il fuso");
+         Print("    storico resta una supposizione.");
+         if(fh != INVALID_HANDLE)
+            FileWrite(fh, symFuso, "VERDETTO_DST", "-", "-", "0", "-", "DATI INSUFFICIENTI");
+        }
+      else
+        {
+         string oraSol = StringFormat("%02d:%02d", mSol/60, mSol%60);
+         string oraLeg = StringFormat("%02d:%02d", mLeg/60, mLeg%60);
+         PrintFormat("    apertura tipica in ORA SOLARE (gen/nov) : %s", oraSol);
+         PrintFormat("    apertura tipica in ORA LEGALE (apr/lug) : %s", oraLeg);
+         if(mDis >= 0)
+            PrintFormat("    settimane di disallineamento USA/EU     : %02d:%02d (20 marzo / 28 ottobre)", mDis/60, mDis%60);
+         string verdetto;
+         if(mSol == mLeg)
+           {
+            verdetto = "SERVER ALLINEATO AL DST DEL MERCATO";
+            Print("    -> ", verdetto, ": l'apertura cade alla STESSA ora server tutto");
+            Print("       l'anno. Un InpSessionHour fisso e' corretto sempre.");
+           }
+         else
+           {
+            int diff = (mLeg - mSol) / 60;
+            verdetto = StringFormat("ATTENZIONE: L'ORA DI APERTURA CAMBIA DI %+d ORE FRA LE STAGIONI", diff);
+            Print("    -> ", verdetto);
+            Print("       QUESTO SERVER NON SEGUE IL DST DEL MERCATO (offset fisso, o");
+            Print("       calendario diverso). Gli EA con orari fissi operano all'ora");
+            Print("       SBAGLIATA per meta' anno: sul backtest e SUI SOLDI VERI.");
+            Print("       Va deciso: due set di orari stagionali, oppure un input di");
+            Print("       correzione DST nell'EA. Non e' un dettaglio.");
+           }
+         if(mDis >= 0 && mDis != mLeg && mDis != mSol)
+           {
+            Print("    -> Le settimane di disallineamento hanno un'ora ANCORA DIVERSA:");
+            Print("       in quei giorni i risultati degli EA a fascia oraria non sono");
+            Print("       validi e vanno esclusi o dichiarati.");
+           }
+         if(fh != INVALID_HANDLE)
+            FileWrite(fh, symFuso, "VERDETTO_DST", oraSol, oraLeg, "0",
+                      StringSubstr(EnumToString(InpTFSessione), 7), verdetto);
+        }
+     }
+   else
+     {
+      Print("--- SESSIONI: nessun simbolo utilizzabile per la misura del DST. ---");
+      Print("    Passa un indice in InpSimboloFuso (es. GER40 su Pepperstone,");
+      Print("    D30EUR su BCM): sui cambi 24h la prima barra e' sempre 00:00.");
+     }
+
    if(fh != INVALID_HANDLE) FileClose(fh);
+
+   //================================================================
+   // SEZIONE 4: LE CHIUSURE H1 PER IL CONFRONTO FRA BROKER
+   //================================================================
+   if(InpEsportaH1 && symFuso != "")
+     {
+      int fh2 = FileOpen(ABTG_H1_FILE, FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_SHARE_READ, ",");
+      if(fh2 == INVALID_HANDLE)
+         Print("ATTENZIONE: non riesco a scrivere ", ABTG_H1_FILE, " (errore ", GetLastError(), ").");
+      else
+        {
+         FileWrite(fh2, "Finestra","Simbolo","DataOra","Close");
+         Print("--- EXPORT CHIUSURE H1 (per misurare lo shift SUI DATI) ---");
+         Print("  simbolo: ", symFuso, "   (le stesse due finestre vanno esportate anche sull'ALTRO terminale)");
+         int n1 = EsportaH1(fh2, symFuso, "SOLARE", InpFinestraSolare);
+         int n2 = EsportaH1(fh2, symFuso, "LEGALE", InpFinestraLegale);
+         FileClose(fh2);
+         PrintFormat("  totale esportato: %d barre H1 in MQL5\\Files\\%s", n1+n2, ABTG_H1_FILE);
+         Print("  Il confronto lo fa prepara_broker_esterno.ps1: prova gli shift");
+         Print("  da -6 a +6 ore e sceglie quello che minimizza la differenza media.");
+         Print("  Se lo shift della finestra SOLARE e quello della LEGALE sono");
+         Print("  DIVERSI, l'offset fra i due broker NON e' costante: e' la prova.");
+        }
+     }
 
    PrintFormat("=== FINITO: %d simboli esaminati su %d. Referto in MQL5\\Files\\%s ===",
                esaminati, tot, ABTG_INFO_FILE);

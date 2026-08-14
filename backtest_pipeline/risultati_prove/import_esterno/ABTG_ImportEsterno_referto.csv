@@ -1,0 +1,3 @@
+SimboloEXT,SimboloSorgente,FileCsv,Formato,Barre,RigheScartate,PrimaData,UltimaData,ShiftOre,ShiftAuto,DiffMediaPunti,DiffMaxPunti,DiffMediaPct,QuandoDiffMax,BarreH1Confrontate,CoperturaPct,ProprietaGuaste,Verdetto
+EURUSD_EXT,EURUSD,EURUSD_M1.csv,0,2554556,0,2018.01.01 22:00,2024.12.31 21:58,+5,SI,4.6,1090.0,0.0041,2024.12.18 19:00,42613,99.6,0,OK CONFRONTABILE
+GBPUSD_EXT,GBPUSD,GBPUSD_M1.csv,0,2554820,0,2018.01.01 22:00,2024.12.31 21:58,+5,SI,6.7,1163.0,0.0052,2024.12.18 19:00,42601,99.6,0,OK CONFRONTABILE
