@@ -362,6 +362,20 @@ if($doppi.Count -gt 0){ [void]$Errori.Add("parametri duplicati: " + ($doppi.Name
 $NCelle=1
 foreach($s in $Sweep){ $NCelle=$NCelle * $s.celle }
 
+# --- 14/08: celle SPENTE per costruzione. Quando si spazzolano ENTRAMBI i
+#     lati (AllowLong 0-1 e AllowShort 0-1) la combinazione "0 e 0" non
+#     opera: zero trade, nessuna riga utile nel CSV. Il conteggio grezzo
+#     faceva scattare l'allarme rosso della cache su un caso normalissimo
+#     (8 chieste, 6 righe). Qui si scala la quota di celle mute.
+$nomiSweep = @($Sweep | ForEach-Object { $_.nome })
+$NMute = 0
+if(($nomiSweep -contains "InpAllowLong") -and ($nomiSweep -contains "InpAllowShort")){
+  $cL = ($Sweep | Where-Object { $_.nome -eq "InpAllowLong"  }).celle
+  $cS = ($Sweep | Where-Object { $_.nome -eq "InpAllowShort" }).celle
+  if($cL -ge 2 -and $cS -ge 2){ $NMute = [int]($NCelle / ($cL * $cS)) }
+}
+$NAttese = $NCelle - $NMute
+
 Write-Host ""
 Write-Host "    parametri in [TesterInputs] : $($Finali.Count)" -ForegroundColor Gray
 Write-Host "    spazzolati                  : $($Sweep.Count)" -ForegroundColor Gray
@@ -528,8 +542,11 @@ $InputsTxt
     Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force
     if($n -le 1){ Write-Host "    ATTENZIONE: $tag.csv ha solo l'intestazione, ZERO passate." -ForegroundColor Red }
     else        { Write-Host ("    OK -> $tag.csv   ({0} righe)" -f ($n-1)) -ForegroundColor Green }
-    if(($n-1) -ne $NCelle){
-      Write-Host ("    ATTENZIONE: {0} righe nel CSV ma {1} celle chieste." -f ($n-1), $NCelle) -ForegroundColor Red
+    if(($n-1) -eq $NAttese -and $NMute -gt 0){
+      Write-Host ("    (regolare: {0} celle chieste meno {1} con ENTRAMBI i lati spenti = {2} righe)" -f $NCelle, $NMute, $NAttese) -ForegroundColor DarkGray
+    }
+    if(($n-1) -ne $NCelle -and ($n-1) -ne $NAttese){
+      Write-Host ("    ATTENZIONE: {0} righe nel CSV ma {1} celle chieste ({2} attese)." -f ($n-1), $NCelle, $NAttese) -ForegroundColor Red
       Write-Host "    E' la CACHE del tester: MT5 ripesca pass gia' calcolati (anche di" -ForegroundColor Red
       Write-Host "    griglie vecchie) e NON riesegue le celle chieste se le ha in cache." -ForegroundColor Red
       Write-Host "    Un pass non rieseguito NON scrive i file per-trade (abtg_trades_*)." -ForegroundColor Red
