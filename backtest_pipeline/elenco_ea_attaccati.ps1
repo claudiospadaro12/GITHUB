@@ -7,7 +7,7 @@
 #  non ha ancora operato e' INVISIBILE da li'. Venti righe su trentaquattro
 #  sono marcate "storico", cioe' IPOTESI.
 #
-#  ⚠️ RISCRITTO LA SERA DEL 07/08, DOPO UN FALLIMENTO.
+#  !! RISCRITTO LA SERA DEL 07/08, DOPO UN FALLIMENTO.
 #  La prima versione leggeva solo i file di profilo .chr e ha trovato
 #  ZERO EA su ventinove grafici -- anche sul VPS, dove ce ne girano piu'
 #  di trenta. Il motivo quasi certo: MT5 salva le stringhe nei .chr in
@@ -119,7 +119,7 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
     $logLetti++
     foreach ($r in $righe) {
       # "ABTG_PTE (XAUUSD,H4)".
-      #  ⚠️ NIENTE SPAZI nel nome: la riga di MT5 e' "expert ABTG_PTE (XAUUSD,H4)
+      #  !! NIENTE SPAZI nel nome: la riga di MT5 e' "expert ABTG_PTE (XAUUSD,H4)
       #  loaded successfully", e permettendo gli spazi usciva un EA fantasma
       #  chiamato "expert ABTG_PTE". Nessuno dei 61 .mq5 ha spazi nel nome,
       #  quindi vietarli e' gratis e toglie il problema alla radice.
@@ -127,13 +127,18 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
       if (-not $m.Success) { continue }
       $ea = $m.Groups["ea"].Value.Trim()
       if ($ea -match '^\d') { continue }
-      $k = "$conto|$ea|$($m.Groups["sym"].Value)"
+      # 14/08, SECONDA CORREZIONE: la chiave era conto+EA+simbolo e il TF
+      # veniva SOVRASCRITTO a ogni riga. Cosi' due grafici dello stesso EA
+      # sullo stesso simbolo ma su timeframe diversi (il caso vero: DAX
+      # Apertura su M5 e su M3) collassavano in UNA riga, e il TF mostrato
+      # era quello dell'ultima riga letta. Cioe' lo strumento nascondeva
+      # proprio il doppione che doveva far vedere. Ora il TF e' nella chiave.
+      $k = "$conto|$ea|$($m.Groups["sym"].Value)|$($m.Groups["tf"].Value)"
       $eaSymLog["$ea|$($m.Groups["sym"].Value)"] = $true
       if (-not $daLog.ContainsKey($k)) {
         $daLog[$k] = [pscustomobject]@{ conto=$conto; ea=$ea; sym=$m.Groups["sym"].Value; tf=$m.Groups["tf"].Value; righe=0; giorno=$g }
       }
       $daLog[$k].righe++
-      $daLog[$k].tf = $m.Groups["tf"].Value
     }
   }
 }
@@ -144,12 +149,12 @@ if ($daLog.Count -eq 0) {
   Riga "    Se il terminale e' partito oggi, prova ad allargare:  -Giorni 7" "Yellow"
 } else {
   Riga ("    {0,-10} {1,-38} {2,-9} {3,-5} {4}" -f "CONTO", "EA", "SIMBOLO", "TF", "righe di log")
-  foreach ($v in ($daLog.Values | Sort-Object conto, ea, sym)) {
+  foreach ($v in ($daLog.Values | Sort-Object conto, ea, sym, tf)) {
     Riga ("    {0,-10} {1,-38} {2,-9} {3,-5} {4}" -f $v.conto, $v.ea, $v.sym, $v.tf, $v.righe) "Green"
   }
   Riga ""
   Riga ("    TOTALE dai log: $($daLog.Count) coppie EA+simbolo") "Cyan"
-  Riga "    ⚠️ i log dicono chi ha GIRATO in questi giorni, non chi e' attaccato ADESSO." "DarkYellow"
+  Riga "    !! i log dicono chi ha GIRATO in questi giorni, non chi e' attaccato ADESSO." "DarkYellow"
 }
 Riga ""
 
@@ -186,7 +191,7 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
       }
       # (b) UTF-16: e' come MT5 salva le stringhe. SENZA QUESTO la prima
       #     versione leggeva "A B T G _ P T E" e non riconosceva niente.
-      #     ⚠️ E VA FATTO SU TUTTI E DUE GLI ALLINEAMENTI: dentro un .chr le
+      #     !! E VA FATTO SU TUTTI E DUE GLI ALLINEAMENTI: dentro un .chr le
       #     stringhe non cominciano per forza a un offset pari. Provato con un
       #     file finto: con il solo allineamento 0 trovava ZERO EA su tre.
       function Stampabili($s) {
