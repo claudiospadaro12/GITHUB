@@ -81,13 +81,36 @@ function Leggi-Log($path) {
   return ($enc.GetString($b) -split "`r?`n")
 }
 
-$daLog = @{}     # "Nome|SIMBOLO" -> @{ ea; sym; tf; righe; ultimo }
+# --- di CHE CONTO e' questo terminale? --------------------------------
+#  14/08: la prima versione aggregava tutti i terminali insieme. Con due
+#  conti sulla stessa macchina (il piccolo e il 100k) usciva UNA riga per
+#  EA+simbolo e non si capiva su quale conto girasse: proprio la domanda
+#  che stavamo cercando di chiudere sul DAX Apertura.
+function Trova-Conto($dirTerminale) {
+  foreach ($f in @((Join-Path $dirTerminale "config\accounts.ini"),
+                   (Join-Path $dirTerminale "config\common.ini"))) {
+    if (-not (Test-Path $f)) { continue }
+    foreach ($enc in @("Unicode", "UTF8", "Default")) {
+      try {
+        $t = Get-Content -Path $f -Encoding $enc -ErrorAction Stop
+        $m = $t | Select-String -Pattern "Login\s*=\s*(\d{4,})" | Select-Object -First 1
+        if ($m) { return $m.Matches[0].Groups[1].Value }
+      } catch { }
+    }
+  }
+  return ""
+}
+
+$daLog = @{}     # "CONTO|Nome|SIMBOLO" -> @{ conto; ea; sym; tf; righe }
+$eaSymLog = @{}  # "Nome|SIMBOLO" senza conto: serve al confronto con i .chr
 $logLetti = 0
 $giorniCercati = @(0..($Giorni-1) | ForEach-Object { (Get-Date).AddDays(-$_).ToString("yyyyMMdd") })
 
 foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)) {
   $logDir = Join-Path $dir.FullName "MQL5\Logs"
   if (-not (Test-Path $logDir)) { continue }
+  $conto = Trova-Conto $dir.FullName
+  if (-not $conto) { $conto = $dir.Name.Substring(0, [Math]::Min(8, $dir.Name.Length)) }
   foreach ($g in $giorniCercati) {
     $f = Join-Path $logDir "$g.log"
     if (-not (Test-Path $f)) { continue }
@@ -104,9 +127,10 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContin
       if (-not $m.Success) { continue }
       $ea = $m.Groups["ea"].Value.Trim()
       if ($ea -match '^\d') { continue }
-      $k = "$ea|$($m.Groups["sym"].Value)"
+      $k = "$conto|$ea|$($m.Groups["sym"].Value)"
+      $eaSymLog["$ea|$($m.Groups["sym"].Value)"] = $true
       if (-not $daLog.ContainsKey($k)) {
-        $daLog[$k] = [pscustomobject]@{ ea=$ea; sym=$m.Groups["sym"].Value; tf=$m.Groups["tf"].Value; righe=0; giorno=$g }
+        $daLog[$k] = [pscustomobject]@{ conto=$conto; ea=$ea; sym=$m.Groups["sym"].Value; tf=$m.Groups["tf"].Value; righe=0; giorno=$g }
       }
       $daLog[$k].righe++
       $daLog[$k].tf = $m.Groups["tf"].Value
@@ -119,9 +143,9 @@ if ($daLog.Count -eq 0) {
   Riga "    nessuna riga di log riconosciuta." "Yellow"
   Riga "    Se il terminale e' partito oggi, prova ad allargare:  -Giorni 7" "Yellow"
 } else {
-  Riga ("    {0,-38} {1,-9} {2,-5} {3}" -f "EA", "SIMBOLO", "TF", "righe di log")
-  foreach ($v in ($daLog.Values | Sort-Object ea, sym)) {
-    Riga ("    {0,-38} {1,-9} {2,-5} {3}" -f $v.ea, $v.sym, $v.tf, $v.righe) "Green"
+  Riga ("    {0,-10} {1,-38} {2,-9} {3,-5} {4}" -f "CONTO", "EA", "SIMBOLO", "TF", "righe di log")
+  foreach ($v in ($daLog.Values | Sort-Object conto, ea, sym)) {
+    Riga ("    {0,-10} {1,-38} {2,-9} {3,-5} {4}" -f $v.conto, $v.ea, $v.sym, $v.tf, $v.righe) "Green"
   }
   Riga ""
   Riga ("    TOTALE dai log: $($daLog.Count) coppie EA+simbolo") "Cyan"
@@ -229,8 +253,8 @@ if ($trovati -eq 0) {
 if ($daLog.Count -gt 0 -and $trovati -gt 0) {
   Riga ""
   Riga "--- le due fonti a confronto ---" "Yellow"
-  $soloLog = @($daLog.Keys | Where-Object { $daChr -notcontains $_ })
-  $soloChr = @($daChr | Where-Object { -not $daLog.ContainsKey($_) })
+  $soloLog = @($eaSymLog.Keys | Where-Object { $daChr -notcontains $_ })
+  $soloChr = @($daChr | Where-Object { -not $eaSymLog.ContainsKey($_) })
   if ($soloLog.Count -gt 0) {
     Riga "    ha girato ma NON risulta attaccato (staccato? profilo non salvato?):" "DarkYellow"
     foreach ($k in $soloLog) { Riga "      $k" "DarkYellow" }
