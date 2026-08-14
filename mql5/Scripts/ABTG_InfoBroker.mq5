@@ -251,8 +251,8 @@ void TabellaSessioni(int fh, string sym, int &minSolare, int &minLegale, int &mi
   {
    minSolare = -1; minLegale = -1; minDisall = -1;
 
-   string date[];
-   int nd = StringSplit(InpDateCampione, ',', date);
+   string campioni[];
+   int nd = StringSplit(InpDateCampione, ',', campioni);
    if(nd <= 0) return;
 
    MqlDateTime oggiSt; TimeToStruct(TimeTradeServer(), oggiSt);
@@ -281,7 +281,7 @@ void TabellaSessioni(int fh, string sym, int &minSolare, int &minLegale, int &mi
      {
       for(int i=0; i<nd; i++)
         {
-         string g = date[i];
+         string g = campioni[i];
          StringTrimLeft(g); StringTrimRight(g);
          string md[];
          if(StringSplit(g, '.', md) != 2) continue;
@@ -555,6 +555,10 @@ void OnStart()
             Print("       in quei giorni i risultati degli EA a fascia oraria non sono");
             Print("       validi e vanno esclusi o dichiarati.");
            }
+         // riga di sintesi: nelle colonne PrimaBarra/UltimaBarra ci sono le
+         // due ORE DI APERTURA (solare / legale), non le barre di un giorno.
+         // E' il modo per farla leggere al driver PowerShell senza inventare
+         // una terza sezione nel CSV.
          if(fh != INVALID_HANDLE)
             FileWrite(fh, symFuso, "VERDETTO_DST", oraSol, oraLeg, "0",
                       StringSubstr(EnumToString(InpTFSessione), 7), verdetto);

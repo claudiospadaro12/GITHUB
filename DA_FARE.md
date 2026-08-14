@@ -67,6 +67,22 @@ in pre-mercato). Il ricognitore misurera' l'ora della PRIMA BARRA della
 giornata in gennaio contro luglio: quello e' il dato definitivo.
 **Scadenza: prima del 25/10/2026.**
 
+## 3-bis. LA MISURA CHE CONVIENE FARE PER PRIMA (10 minuti, sul PC di backtest)
+
+Il ricognitore e' pronto e sa misurare il DST **anche su BCM**, senza
+aspettare Pepperstone. Va fatto ADESSO, perche' se la risposta e' "BCM non
+segue il cambio d'ora europeo" allora il 25/10 vanno corretti gli EA VIVI:
+
+```
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prepara_broker_esterno.ps1" -OutFile "$env:USERPROFILE\prepara_broker_esterno.ps1"
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\prepara_broker_esterno.ps1" -BrokerPattern "BCM" -SoloElenco -Auto -Filtro "D30EUR" -SimboloFuso "D30EUR" -SimboloGrafico "D30EUR"
+```
+
+Legge la prima barra della giornata del DAX su date campione (gennaio,
+marzo, aprile, luglio, ottobre, novembre) e dice se l'ora di apertura
+CAMBIA fra le stagioni. Serve anche come riferimento per il delta con
+Pepperstone. Zip pronto in `Desktop\broker_esterno.zip`.
+
 ## 4. ROBA DI ROUTINE
 
 - **Pagella serale**: da adesso si guarda **il win rate**, non il P/L

@@ -42,6 +42,15 @@
 #    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE -SoloControllo
 #    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE -DaQuando 2024.09.26
 #
+#  -BrokerPattern (14/08/2026): su QUALE terminale girare. Default "BCM",
+#  cioe' esattamente quello che facevamo prima. Con un altro broker (demo
+#  Pepperstone, che sugli indici ha gli anni che a BCM mancano) parte un
+#  avviso rosso e i CSV escono col suffisso del broker, cosi' non si
+#  mescolano mai ai nostri. PRIMA DI USARLO: gli orari degli EA sono in
+#  ORA SERVER e vanno rimappati (docs\BROKER_ESTERNO_MAPPA.md), altrimenti
+#  l'EA opera a un'ora che non c'entra niente con l'apertura di borsa.
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_ORB -BrokerPattern "Pepperstone" -Simbolo "GER40" -DaQuando 2018.01.01
+#
 #  -SoloControllo NON apre MT5: scarica, legge, controlla tutto e ti
 #  fa vedere l'.ini che lancerebbe. Lancialo SEMPRE prima: costa dieci
 #  secondi e ti dice quante celle sono, cioe' quante ore di macchina.
@@ -657,3 +666,13 @@ if($Mancanti.Count -gt 0){
 Write-Host ""
 Write-Host "    I criteri di accettazione sono scritti in cima a prove\$Expert.txt." -ForegroundColor Gray
 Write-Host "    Si leggono PRIMA di guardare la tabella, e non si spostano dopo." -ForegroundColor Gray
+if(-not $BrokerBCM){
+  Write-Host ""
+  Write-Host "    PROMEMORIA: questi CSV vengono da '$BrokerPattern', non da BCM." -ForegroundColor Red
+  Write-Host "    Si leggono SOLO in confronto relativo dentro questo stesso feed" -ForegroundColor Red
+  Write-Host "    (finestra avversa vs finestra favorevole). Nessun numero assoluto" -ForegroundColor Red
+  Write-Host "    va messo nelle nostre classifiche, e nessun parametro va ritarato" -ForegroundColor Red
+  Write-Host "    qui: la taratura resta su BCM." -ForegroundColor Red
+  Write-Host "    E ricontrolla di aver rimappato gli orari: se non l'hai fatto," -ForegroundColor Red
+  Write-Host "    questi numeri non misurano l'EA, misurano un EA diverso." -ForegroundColor Red
+}
