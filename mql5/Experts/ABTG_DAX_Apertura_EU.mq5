@@ -608,9 +608,17 @@ void ABTG_OnTick()
    if(InpOneTradePerDay && gGuardiaGiorno != now.day_of_year &&
       (gPhase == PH_WAIT_OPEN || gPhase == PH_BUILDING))
      {
+      bool fattoLong, fattoShort, storicoOk;
+      int  cicli = CicliOggi(fattoLong, fattoShort, storicoOk);
+      // Si timbra la giornata SOLO se lo storico ha risposto davvero.
+      // Timbrarla prima di sapere era il difetto: a storico non ancora
+      // sincronizzato la guardia passava e non si ripeteva mai piu'.
+      if(!storicoOk)
+        {
+         ABTGLog("storico deal non ancora pronto: rimando il controllo A4 al prossimo tick.");
+         return;
+        }
       gGuardiaGiorno = now.day_of_year;   // una volta al giorno, non a ogni tick
-      bool fattoLong, fattoShort;
-      int  cicli = CicliOggi(fattoLong, fattoShort);
       // R51: col reverse acceso il tetto e' 2, non 1. Resta reload-safe perche'
       // il conto viene dallo storico, non da una variabile in memoria.
       int  tetto = (InpAllowReverse && InpEntryMode == ABTG_RETEST) ? 2 : 1;
@@ -763,10 +771,21 @@ void ABTG_OnTick()
 //  sapessi il lato, il riarmo rimetterebbe in gioco anche la direzione gia'
 //  giocata: con un contatore solo si evita il terzo trade, non il doppione
 //  dallo stesso lato.
-int CicliOggi(bool &fattoLong, bool &fattoShort)
+//  14/08/2026 - AGGIUNTO storicoOk, DOPO UN CASO VERO.
+//  Alle 16:17:43 di quel giorno un'istanza appena avviata ha riarmato i
+//  pendenti su una giornata GIA' operata (aveva gia' perso 1R alle 08:49):
+//  esattamente cio' che la guardia A4 doveva impedire. Il motivo e' che
+//  appena il terminale parte lo storico dei deal puo' non essere ancora
+//  sincronizzato: HistorySelect ritorna false, la funzione rispondeva
+//  "zero cicli" e la guardia leggeva "oggi non ho operato". Il chiamante
+//  intanto aveva gia' timbrato gGuardiaGiorno, quindi non ci riprovava
+//  mai piu'. Adesso "non lo so" e "non ho operato" sono due risposte
+//  diverse, e con "non lo so" il controllo si ripete al tick dopo.
+int CicliOggi(bool &fattoLong, bool &fattoShort, bool &storicoOk)
   {
    fattoLong  = false;
    fattoShort = false;
+   storicoOk  = false;
 
    MqlDateTime d;
    TimeToStruct(TimeCurrent(), d);
@@ -774,6 +793,7 @@ int CicliOggi(bool &fattoLong, bool &fattoShort)
    datetime inizioGiorno = StructToTime(d);
 
    if(!HistorySelect(inizioGiorno, TimeCurrent() + 60)) return(0);
+   storicoOk = true;
 
    int cicli = 0;
    int n = HistoryDealsTotal();
@@ -855,9 +875,11 @@ void MonitorReverse()
 
    if(TimeCurrent() - gUltimoConteggio >= 5)
      {
-      bool l, s;
-      gCicliGiorno     = CicliOggi(l, s);
-      gUltimoConteggio = TimeCurrent();
+      bool l, s, ok;
+      int n = CicliOggi(l, s, ok);
+      // storico non pronto: NON aggiorno il conteggio (meglio non sapere
+      // che sapere il numero sbagliato) e riprovo al giro dopo.
+      if(ok){ gCicliGiorno = n; gUltimoConteggio = TimeCurrent(); }
      }
    if(gCicliGiorno >= 2) return;            // tetto rigido: due cicli, mai tre
 

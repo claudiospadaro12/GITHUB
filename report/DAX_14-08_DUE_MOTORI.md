@@ -276,3 +276,82 @@ Due referti identici nell'aspetto arrivavano da due macchine diverse e non
 c'era modo di distinguerli: ci sono volute quattro deduzioni indirette. Ora
 `elenco_ea_attaccati.ps1` e `config_in_uso.ps1` scrivono in testa
 **`MACCHINA: <nome> utente: <utente>`**.
+
+---
+
+# APPENDICE 3 — LA PROVA DEL GIORNALE (e un secondo episodio, oggi)
+
+Claudio ha contestato la ricostruzione: "e' impossibile che MT5 da PC fosse
+aperto, io ero al mare". Giusto contestare, e la risposta non poteva venire da
+un'altra deduzione: doveva venire dal **giornale**, dove il broker registra gli
+ordini. Filtro sul prezzo dell'ordine, `26479`, sul PC:
+
+```
+09:25:01.109  Trades  '50503392': buy stop 2 D30EUR at 26479.00 sl 26426.70 tp 26635.90
+09:25:01.180  Trades  '50503392': order #3160534 buy stop 2/2 D30EUR at 26479.00 done in 70.989 ms
+09:25:01.180  Trades  '50503392': sell stop 2 D30EUR at 26426.70 sl 26479.00 tp 26269.80
+09:25:01.242  Trades  '50503392': order #3160535 sell stop 2/2 D30EUR at 26426.70 done in 62.803 ms
+```
+
+**L'ordine e' partito dal PC.** Non e' piu' un'inferenza: c'e' il ticket
+(#3160534), il conto (50503392) e il millisecondo. Gli ordini sono stati
+piazzati alle **09:25:01 locali** dall'istanza sul grafico **M3**, e il BUY
+STOP e' stato riempito alle 08:49 server (09:49 locali) — un'ora e mezza
+prima che Claudio tornasse.
+
+## Due cose che questo referto aggiunge
+
+**1. L'EA piazza ENTRAMBI i lati.** Buy stop a 26479,00 e sell stop a 26426,70,
+nello stesso secondo. Il breakout arma sopra e sotto: quello riempito e' stato
+il long, l'altro e' morto per OCO. La geometria ricavata a mano il mattino
+combacia anche qui.
+
+**2. E' RISUCCESSO OGGI, alle 16:17:43.**
+
+```
+16:17:43.444  buy stop 1.9 D30EUR at 26479.00      -> order #3165434
+16:17:43.517  sell stop 1.9 D30EUR at 26426.70     -> order #3165435
+16:18:43.887  cancel order #3165434
+16:18:48.454  cancel order #3165435
+```
+
+Stessi prezzi, lotto 1,90 invece di 2,00 (il conto e' piu' piccolo dopo la
+perdita del mattino). Sono ordini VERI su un conto VIVO, piazzati mentre
+stavamo diagnosticando. E i due `cancel` un minuto dopo hanno un nome preciso:
+sono l'effetto di **Claudio che spegne AutoTrading**. Nel giornale si vede il
+gesto.
+
+## Il difetto che ha permesso il secondo episodio (e la correzione)
+
+Il secondo armamento **non sarebbe dovuto avvenire**: la guardia A4
+(`InpOneTradePerDay`) esiste apposta per non riarmare in una giornata gia'
+operata, e alle 08:49 il trade c'era gia' stato. Ha ceduto per una ragione
+precisa, visibile nel codice:
+
+```
+gGuardiaGiorno = now.day_of_year;   // <-- si timbra PRIMA di sapere
+if(HaGiaOperatoOggi()) { ... gPhase = PH_DONE; }
+```
+
+e dentro, `CicliOggi()` faceva:
+
+```
+if(!HistorySelect(inizioGiorno, TimeCurrent()+60)) return(0);   // 0 = "non ho operato"
+```
+
+Appena il terminale parte lo storico dei deal puo' non essere ancora
+sincronizzato. `HistorySelect` ritorna false, la funzione risponde **zero
+cicli**, la guardia legge "oggi non ho operato" e lascia armare. E siccome
+`gGuardiaGiorno` era gia' stato timbrato, il controllo **non si ripete mai
+piu'** per quella giornata. E' lo stesso difetto del 05/08 in un vestito
+nuovo: allora la guardia guardava solo le posizioni aperte, adesso confonde
+"non lo so" con "no".
+
+**Correzione** (`ABTG_DAX_Apertura_EU.mq5`): `CicliOggi()` restituisce anche
+`storicoOk`. Se lo storico non ha risposto, la giornata **non si timbra** e il
+controllo si ripete al tick successivo. "Non lo so" e "non ho operato" sono
+due risposte diverse.
+
+**Da fare, stesso difetto:** `ABTG_Dow_Apertura_US.mq5:704`,
+`ABTG_Nasdaq_Apertura_US.mq5:751`, `ABTG_Apertura_Marco.mq5:636` hanno la
+stessa riga e vanno corretti allo stesso modo.
