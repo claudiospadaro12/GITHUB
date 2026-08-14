@@ -74,35 +74,38 @@ Tesi e criteri congelati il 14/08 a numeri non visti:
 `prove/R52_LATI_TESI.md`. Regola madre: **i dati _EXT PROPONGONO, non
 validano**. Da fare dopo R50 e dopo Pepperstone.
 
-## 1-ter. R53 — DOVE CADE LA FASCIA ORARIA DI EASY TREND
+## 1-ter. R53 — **CHIUSO** (14/08 notte): la fascia NON decide, si tiene 8-18
 
-La regola "candela del segnale fra le 8 e le 18" e' **[FONTE]**, viene dal
-coach e non si tocca. Ma lui legge quell'ora **sul suo grafico**, cioe'
-sull'ora server del SUO broker: noi l'abbiamo messa letterale su BCM. Se il
-suo broker e' GMT+2 o GMT+3 la stessa regola cade a **7-17** o **6-16**.
-Scritto e mai chiuso: `prove/EASY_TREND_TESI.md` righe 41-44 e
-`ABTG_EasyTrend.mq5:140-144`.
+128 passate, 8 CSV su 8. Igiene: la cella 8-18 riproduce R48 (GBPUSD stesso
+n=41, PF 1,483 contro 1,49; CHFJPY PF 1,250 contro 1,25).
 
-Non si cerca la finestra migliore: si cerca **dove cade quella della fonte**.
-Si spostano start e fine insieme tenendo la larghezza di 10 ore, e le uniche
-quattro combinazioni che contano sono quelle che corrispondono a un fuso vero.
-Criteri congelati in testa a `prove/R53_fuso_EZ.txt`: **un fuso vince solo se
-vince su 3 simboli su 4**, altrimenti si tiene 8-18.
+Miglior PF fuori campione, un voto per simbolo: **7-17 due voti** (GBPUSD,
+EURGBP) e **8-18 due voti** (AUDJPY, CHFJPY). Serviva **3 su 4**: nessuno ci
+arriva. Con la coerenza IS richiesta dal criterio 2, **un solo simbolo su 4**
+ha un fuso coerente. -> **criterio 3: si tiene il valore letterale 8-18**.
 
-Perche' vale la pena: R48, R49 e R50 hanno giudicato Easy Trend con una regola
-forse spostata di un'ora. E il risultato vale per **ogni** strategia futura
-della stessa fonte, non solo per questa.
+Il risultato e' piu' forte di un pareggio: se fosse un fuso vincerebbe
+DAPPERTUTTO. Invece GBPUSD preferisce piu' presto (Londra) e AUDJPY piu'
+tardi: e' il pattern delle sessioni proprie di ogni cambio, non di un
+orologio spostato. **Ipotesi 1 della tesi falsificata.** Conseguenza per ogni
+strategia futura della stessa fonte: **orario letterale, niente rimappatura**.
 
-**LANCIATO il 14/08 sera.** PC di BACKTEST, MT5 CHIUSO. 128 passate
-(16 celle x 2 finestre x 4 simboli): e' il round piu' lungo finora.
+- **29° RIBALTAMENTO** (AUDJPY): 8-18 e' la PEGGIORE in campione (PF 0,649,
+  -5.395) e la MIGLIORE fuori (PF 1,521, +14.787). ~20.000 EUR di differenza,
+  e riguarda proprio la fascia che usiamo.
+- **Trappola disinnescata dal criterio 1**: su 3 simboli su 4 la cella piu'
+  bella fra tutte e 16 ha larghezza SBAGLIATA (8 o 13 ore), e batte la
+  diagonale per 2-27 millesimi di PF. Si sarebbe rotta la regola del coach
+  per niente.
+- EURGBP rosso in tutte e 8 le celle: conferma indipendente di R48.
+- Limite dichiarato: il file pinna TP 1,5 su tutti, ma la cella viva AUDJPY e'
+  TP 1,0. Non cambia il verdetto (senza AUDJPY la soglia e' ancora piu'
+  lontana).
 
-```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d78c80b8009be6b0c1a27aad06f804e51bc34e02/backtest_pipeline/lancia_r53.ps1" -OutFile "$env:TEMP\lancia_r53.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r53.ps1" -Rif d78c80b8009be6b0c1a27aad06f804e51bc34e02
-```
-
-Zip in `Desktop\r53.zip`, 8 CSV attesi. Per spezzarlo:
-`-Simboli "GBPUSD,EURGBP"`. Per vedere l'ini senza lanciare:
-`-SoloControllo`.
+**Easy Trend resta fuori** da portafoglio (R49) e prova di regime (R50), e le
+tre sedie in osservazione non si toccano (criterio 4). Referto:
+`risultati_archivio/REFERTO_ROUND53_FUSO_EASYTREND.md`, CSV in
+`risultati_archivio/csv_r53/`.
 
 ## 1-quater. R54 — **CHIUSO** (14/08 sera): i due short sono BOCCIATI
 
