@@ -154,3 +154,31 @@ Modello 1 OHLC 2024.01-2026.06.
 **Prossimo cancello**: tick reali con spread ACCESO (30 pt) sui 9 di
 testa. La domanda vera e' quella scritta nelle trappole: il RR 1:1
 (o 1,5) regge quando il win rate scende sotto il 70% dichiarato?
+
+## ESITO TICK REALI (14/08/2026) — LO SPREAD NON UCCIDE: 4 su 4 REGGONO
+
+Spread ACCESO (30 pt = 3 pip), Model 4, 2024.01-2026.06, 6 celle
+(TP 1,0/1,5 x lati) sui primi 4 dello scan. **Tenuta rispetto all'OHLC:**
+
+| Simbolo | miglior cella tick | Profit | PF | DD | n | tenuta vs OHLC |
+|---|---|---|---|---|---|---|
+| EURGBP | TP1,5 **SOLO SHORT** | +2.502 | 1,98 | 3,55 | 54 | **102%** |
+| GBPUSD | TP1,5 **SOLO LONG** | +1.843 | 1,63 | 5,70 | 58 | **104%** |
+| AUDJPY | TP1,0 **SOLO LONG** | +1.386 | 1,79 | 4,37 | 46 | 85% |
+| CHFJPY | TP1,5 **SOLO LONG** | +1.188 | 1,52 | 4,25 | 44 | 60% (la cella OHLC era L+S) |
+
+**La trappola n.2 della tesi NON si e' materializzata**: temevo che 3 pip
+di spread su stop da 20-25 pips mangiassero il 12-15% del rischio; le
+tenute 85-104% dicono che il motore regge (per confronto, il gap-fill
+teneva 63-102%). Il primo cancello vero e' passato.
+
+**QUINTA famiglia di fila con edge MONO-LATO**, e stavolta i lati sono
+NETTI: EURGBP vive solo short (il long fa **-1.824**), gli altri tre solo
+long (lo short e' negativo su tutti e tre). Il TP invece NON ha un
+vincitore unico (1,5 su tre simboli, 1,0 su AUDJPY): l'affermazione dello
+scan "1,5 batte 1:1" vale in media, non simbolo per simbolo.
+
+**Prossimo cancello: R48, walk-forward IS/OOS** con criteri congelati
+(`prove/R48a-d_ez_*.txt`), detector pinnato, si spazzolano solo TP e lati.
+I 5 simboli restanti dello scan (CADJPY, USDCHF, XAUUSD, USDJPY, EURUSD)
+restano in coda al tick: non servono per il verdetto della famiglia.

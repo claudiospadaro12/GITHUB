@@ -1,0 +1,40 @@
+# =====================================================================
+#  ROUND 48c: ABTG_EasyTrend - WALK-FORWARD su GBPUSD
+#  Si lancia con: -Prova prove\R48c_ez_GBPUSD.txt -Etichetta r48c
+# =====================================================================
+# PERCHE' (14/08/2026): il tick reale con spread ACCESO (30 pt) ha
+#   promosso 4 simboli su 4 con tenute 85-104% rispetto all'OHLC — la
+#   trappola n.2 della tesi (stop stretti mangiati dallo spread) NON si
+#   e' materializzata. Ora il cancello vero: IS/OOS con criteri
+#   congelati. Il detector resta PINNATO alla CAL (src0 / PivotR 3):
+#   qui si spazzolano SOLO target e lati, come per tutte le famiglie.
+#
+# IPOTESI (prima dei numeri): GBPUSD e' un caso SOLO LONG al tick (lo
+#   short e' negativo). Mi aspetto che la cella IS sia long e regga
+#   fuori campione; se l'IS indica lo short, il campione e' rumore.
+
+#
+# CRITERI (congelati ora, identici alle altre famiglie)
+#   1. Cella scelta sull'IS = miglior profitto con n >= 20.
+#   2. Giudizio OOS: Profit > 0, PF >= 1,10, DD < 10%, n >= 20.
+#   3. Regola del regime: IS rosso / OOS verde = riserva, non promozione.
+#   4. Coerenza del LATO fra IS e OOS: se il lato migliore si ribalta
+#      fra le due finestre, il simbolo NON si promuove (e' il pattern
+#      dei 27 ribaltamenti).
+#   5. Se promosso: per-trade a 100k con magic vergini, poi portafoglio
+#      contro le 27 serie. Lo standard "aggiunge e abbassa" decide.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385||16385||0||16385||N
+InpPivotSource=0||0||0||0||N
+InpPivotR=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxSpreadPts=30||30||0||30||N
+InpEntryWindowBars=3||3||0||3||N
+InpWarmupBars=500||500||0||500||N
+InpTP_R=1.0||1.0||0.5||1.5||Y
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=1||0||1||1||Y
