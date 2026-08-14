@@ -26,6 +26,16 @@ param(
   [int]   $Deposito   = 100000,
   [string]$Etichetta  = "r50",
   [switch]$SoloControllo,
+  # --- 14/08, per il collaudo a due tempi (bisezione) ---
+  #  Il blocco [Experts] l'ho aggiunto io stamattina agli ini di TUTTI i
+  #  driver. Da allora l'unica cosa che ha girato e' R50, che non ha mai
+  #  funzionato: quindi non ho nessun caso "con il blocco e funzionante".
+  #  Avevo scritto che era innocente perche' l'ini lo conteneva e
+  #  l'ottimizzazione non partiva: e' un ragionamento circolare, non una
+  #  prova. Con questi due interruttori si fa l'esperimento vero, un
+  #  lancio solo per volta.
+  [switch]$SoloUno,             # esegue UN solo lancio e si ferma
+  [switch]$SenzaBlindatura,     # NON scrive il blocco [Experts] nell'ini
   [string]$Terminal   = "",[string]$MetaEditor = "",[string]$DataFolder = "",[switch]$Force
 )
 $ErrorActionPreference = "Stop"
@@ -177,12 +187,9 @@ foreach($c in $Lista){
     $blocco += "InpMagic=$magic||$magic||1||$m2||Y`r`n"
 
     $ini = Join-Path $IniDir "$tag.ini"
+    $blindatura = if($SenzaBlindatura){ "" } else { "[Experts]`r`nAllowLiveTrading=false`r`nAllowDllImport=false`r`n`r`n" }
     @"
-[Experts]
-AllowLiveTrading=false
-AllowDllImport=false
-
-[Tester]
+$blindatura[Tester]
 Expert=$($c.EA).ex5
 Symbol=$sym
 Period=$($c.Periodo)
@@ -221,6 +228,14 @@ $blocco
       Write-Host ("    NESSUN CSV per {0}: il simbolo {1} esiste? lo storico copre {2}-{3}?" -f $tag,$sym,$f.da,$f.a) -ForegroundColor Yellow
     }
     $magic += 2
+    if($SoloUno){
+      Write-Host ""
+      Write-Host "-SoloUno: mi fermo qui." -ForegroundColor Yellow
+      Write-Host ("    blindatura [Experts] nell'ini: " + $(if($SenzaBlindatura){"NO"}else{"SI"})) -ForegroundColor Yellow
+      Write-Host ("    CSV atteso: " + $done) -ForegroundColor Yellow
+      Write-Host ("    ESITO: " + $(if(Test-Path $done){"CSV CREATO"}else{"NESSUN CSV"})) -ForegroundColor $(if(Test-Path $done){"Green"}else{"Red"})
+      exit 0
+    }
   }
 }
 
