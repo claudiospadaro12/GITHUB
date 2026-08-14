@@ -1,0 +1,42 @@
+# =====================================================================
+#  ROUND 47d: DOW - PER-TRADE della struttura CANDIDATA (senza parziale)
+#  Si lancia con: -Prova prove\R47d_pertrade_DOW_cand.txt -Deposito 100000
+#                 -Etichetta r47d
+# =====================================================================
+# PERCHE': fase 2 del dossier MAE/MFE (R46). Il CSV di ottimizzazione da'
+#   profitto/PF/DD ma NON separa vincite e perdite: senza per-trade non si
+#   calcolano win rate e payoff (vincita media / perdita media), cioe' i due
+#   numeri che spiegano l'osservazione di Claudio sul conto 100k (3 vinti su
+#   5 e conto in rosso). Cella UNICA, magic VERGINE, export per-trade.
+# COSA MISURA: la struttura LIVE = trailing PREVBAR M5 + parziale 50% a 1R.
+# CRITERI: nessuna decisione da questo file. R46 ha gia' deciso (cancelli
+#   non superati -> nessun cambio live). Qui si CAPISCE il fenomeno e si
+#   costruisce il metro per confrontare tester e forward.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpBufferPoints=1000||1000||0||1000||N
+InpRetestOffsetPts=400||400||0||400||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTP1_ClosePct=0||0||0||0||N
+InpMagic=772504||772504||0||772504||N

@@ -1,0 +1,42 @@
+# =====================================================================
+#  ROUND 47a: DAX - PER-TRADE della struttura LIVE (baseline)
+#  Si lancia con: -Prova prove\R47a_pertrade_DAX_base.txt -Deposito 100000
+#                 -Etichetta r47a
+# =====================================================================
+# PERCHE': fase 2 del dossier MAE/MFE (R46). Il CSV di ottimizzazione da'
+#   profitto/PF/DD ma NON separa vincite e perdite: senza per-trade non si
+#   calcolano win rate e payoff (vincita media / perdita media), cioe' i due
+#   numeri che spiegano l'osservazione di Claudio sul conto 100k (3 vinti su
+#   5 e conto in rosso). Cella UNICA, magic VERGINE, export per-trade.
+# COSA MISURA: la struttura LIVE = trailing PREVBAR M5 + parziale 50% a 1R.
+# CRITERI: nessuna decisione da questo file. R46 ha gia' deciso (cancelli
+#   non superati -> nessun cambio live). Qui si CAPISCE il fenomeno e si
+#   costruisce il metro per confrontare tester e forward.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpBufferPoints=500||500||0||500||N
+InpRetestOffsetPts=200||200||0||200||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTP1_ClosePct=50||50||0||50||N
+InpMagic=772501||772501||0||772501||N

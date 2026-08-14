@@ -171,4 +171,13 @@ $Inputs
   else{Write-Host ("        (no CSV: {0} senza storico tick/nome diverso? verifica)" -f $sym) -ForegroundColor Yellow}
 }
 Write-Host "`n=== FINITO === risultati in $Results" -ForegroundColor Cyan
-Write-Host "Zippa risultati_valid_$EAtag e caricamela: confronto PF/DD tick-reali vs OHLC e ti dico chi regge davvero." -ForegroundColor White
+# --- raccolta automatica sul Desktop + zip (regola delle righe di lancio:
+#     il risultato deve SEMPRE arrivare pronto da mandare, senza path a mano) ---
+$Dest = Join-Path ([Environment]::GetFolderPath("Desktop")) "valid_$EAtag"
+New-Item -ItemType Directory -Force -Path $Dest | Out-Null
+Copy-Item (Join-Path $Results "*.csv") $Dest -Force -ErrorAction SilentlyContinue
+$zip = Join-Path ([Environment]::GetFolderPath("Desktop")) "valid_$EAtag.zip"
+Compress-Archive -Path (Join-Path $Dest "*") -DestinationPath $zip -Force
+$n = (Get-ChildItem $Dest -File -ErrorAction SilentlyContinue | Measure-Object).Count
+Write-Host ("RACCOLTA: {0} CSV in {1} -> {2}" -f $n, $Dest, $zip) -ForegroundColor Green
+Write-Host "Carica lo zip: confronto PF/DD tick-reali vs OHLC e ti dico chi regge davvero." -ForegroundColor White
