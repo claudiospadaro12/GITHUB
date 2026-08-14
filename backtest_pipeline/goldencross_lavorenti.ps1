@@ -45,6 +45,12 @@ param(
 )
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+
+# --- 14/08: "powershell -File" passa gli argomenti come STRINGHE letterali,
+#     quindi "-Symbols A,B,C" arrivava come UN elemento solo. Normalizzo. ---
+if($Symbols.Count -eq 1 -and $Symbols[0] -like "*,*"){
+  $Symbols = $Symbols[0].Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
+}
 $EA="ABTG_GoldenCross"
 $EABranch="lavoro"
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"

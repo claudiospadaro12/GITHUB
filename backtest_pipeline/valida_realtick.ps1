@@ -24,6 +24,14 @@ param(
 )
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+
+# --- 14/08: con "powershell -File" gli argomenti arrivano come STRINGHE
+#     LETTERALI: "-Symbols A,B,C" diventava UN solo simbolo di nome
+#     "A,B,C" (il tester cercava uno strumento inesistente e scriveva
+#     zero CSV, senza errore rosso). Qui la lista si normalizza sempre.
+if($Symbols.Count -eq 1 -and $Symbols[0] -like "*,*"){
+  $Symbols = $Symbols[0].Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
+}
 $EA=$Robot
 $EABranch="lavoro"   # era un branch fermo dal 31/07: scaricava sorgenti VECCHI senza dare errore   # dove vivono gli EA di trading
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
