@@ -257,3 +257,37 @@ Dal punto 2 di `prove/PROVA_REGIME_CRITERI.md`, e vale identico qui:
 - **Tick reali**: sul broker esterno potrebbero non esserci per gli anni
   vecchi. Con solo OHLC M1 il modello e' di **screening**, non da verdetti
   (stessa regola di sempre: `-Modello 1` non promuove niente).
+
+---
+
+## PEPPERSTONE — primo tentativo, 14/08/2026 sera: NON connesso
+
+Terminale installato (`C:\Program Files\Pepperstone MetaTrader 5`, cartella dati
+`73B7A2420D6397DFF9014A20F1201F97`, build **6111**). Il Giornale dice tutto:
+
+```
+18:17:29  Broker   PepperstoneUK-Live: no demo/preliminary groups on server side
+18:17:29  Broker   PepperstoneUK-Demo: no demo/preliminary groups on server side
+18:18:47  Network  '62128200': authorization on PepperstoneUK-Demo failed (Invalid account)
+18:24:53  Network  '62128200': connecting to an access point with 50 % quality
+18:25:04  Network  '62128200': no connection to PepperstoneUK-Demo
+```
+
+**Due fatti distinti, tutti e due utili:**
+
+1. **`Invalid account`** — il server `PepperstoneUK-Demo` non conosce il conto
+   62128200. La rete c'e' (l'access point risponde), e' l'autorizzazione che
+   viene respinta.
+2. **`no demo/preliminary groups on server side`** su UK-Demo **e** su UK-Live
+   — su quei due server il terminale **non puo' nemmeno creare** un conto
+   demo. Quindi il 62128200 non e' nato li'.
+
+**Conseguenza operativa:** serve il server dell'entita' giusta. La lista
+completa dei server Pepperstone la mostra il terminale stesso
+(File > Apri un conto > cercare "Pepperstone"); il nome autorevole e' quello
+scritto nell'email di apertura del demo. **Non si indovina.**
+
+**Nota di metodo:** i prezzi fermi al novembre 2021 nel Market Watch erano la
+fotografia che l'installer si porta dietro, non un feed. Il segnale vero era
+il **Bilancio 0,00** con l'indicatore rosso e 2 Kb di traffico. E MT5 **non
+apre nessun popup** quando l'autorizzazione fallisce: lo scrive solo qui.
