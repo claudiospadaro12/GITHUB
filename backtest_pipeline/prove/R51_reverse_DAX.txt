@@ -90,4 +90,10 @@ InpMaxRangePts=0||0||0||0||N
 InpSlippagePts=0||0||0||0||N
 InpOneTradePerDay=1||1||0||1||N
 InpPendingExpiryMin=120||120||0||120||N
+# MAGIC VERGINE in SWEEP GEMELLO (aggiunto il 14/08 notte, prima del lancio):
+#   non tocca nessun criterio - nel tester il magic non cambia il
+#   comportamento - ma raddoppia ogni cella e da' il controllo d'igiene
+#   che usiamo da R47: le due serie devono uscire IDENTICHE al centesimo,
+#   altrimenti il round non vale. Celle: 2 x 2 = 4, cioe' 8 passate.
+InpMagic=772701||772701||1||772702||Y
 InpAllowReverse=0||0||1||1||Y
