@@ -9,25 +9,34 @@ min, MT5 si apre da solo) -> **1 R50** (32 lanci, si lascia girare).
 
 ---
 
-## 0. PRIORITA' ALTA — DUE DAX APERTURA CON LO STESSO MAGIC (trovato 14/08)
+## 0. IL DAX FANTASMA — **MISURATO**, resta da chiudere (14/08)
 
-I trade gemelli di stamattina hanno commenti **diversi**: il 100k
-`DAX Apertura EU RETEST BUY` (BUY LIMIT), il piccolo `DAX Apertura EU BUY`
-(BUY STOP). Sono due rami di codice che non si incrociano: sul conto piccolo
-gira **anche** il motore BREAKOUT, quello bocciato dal banco cinque volte —
-e gira **con lo stesso magic 770101** della cella validata, quindi sporca il
-forward. Dettagli e prova aritmetica: `report/DAX_14-08_DUE_MOTORI.md`.
+Il referto `config_in_uso.txt` ha confermato tutto, e il buffer al centesimo:
+sul conto **50503392** gira `ABTG_DAX_Apertura_EU` su un grafico **D30EUR M3**
+con **motore BREAKOUT, range 15, buffer 20 pt, trailing FIXED M1, rischio
+2,00 per cento** e lo **stesso magic 770101** della cella promossa. Non e' una
+vecchia taratura: il pre-06/08 era breakout/15/**200**/0, qui il buffer e'
+**20** — 200 con uno zero in meno. Referto completo, con l'appendice della
+misura: `report/DAX_14-08_DUE_MOTORI.md`.
 
-Sul **VPS** (non tocca niente, MT5 puo' restare aperto):
+**Manca l'altra meta': chi e' ATTACCATO adesso.** `CONFIG IN USO` la scrive
+solo chi si riavvia, quindi l'istanza a RETEST (quella dei trade 07/08 e
+11/08) non e' comparsa: e' accesa da settimane e non si e' mai riavviata.
+Sul **VPS** (legge log + profili .chr, non tocca niente):
 
 ```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/7dc4b65b688c1f8a0168f7b237ba6d6364fcbe86/backtest_pipeline/config_in_uso.ps1" -OutFile "$env:TEMP\config_in_uso.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\config_in_uso.ps1"
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/e0267dcd45c9d92320bb013d1dc8d02e60406564/backtest_pipeline/elenco_ea_attaccati.ps1" -OutFile "$env:TEMP\elenco_ea_attaccati.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\elenco_ea_attaccati.ps1" -Giorni 30
 ```
 
-Stampa l'**ultima** riga `CONFIG IN USO` di ogni EA su **ogni** terminale
-(conto per conto), con motore/range/buffer/offset/rischio/TP. Zip pronto in
-`Desktop\config_dax.zip`. Poi si decide: spegnere l'istanza breakout, oppure
-tenerla come confronto ma **con un magic suo** (es. 770102).
+Zip pronto in `Desktop\ea_attaccati.zip`. Poi la decisione, che e' di
+Claudio: **staccare l'istanza M3** (grafico di prova, motore bocciato, 2 per
+cento di rischio), oppure tenerla ma **con un magic suo** (es. 770102) perche'
+le due statistiche restino separate.
+
+Domanda ancora aperta: **perche' quell'EA si e' riavviato alle 09:25:23
+locali di stamattina**, 24 minuti prima di comprare? Un EA si
+re-inizializza solo se lo si attacca, ricompila, o gli si cambiano
+parametri/timeframe.
 
 ## 0-bis. R51 — LO SHORT DI RITORNO — **CODICE PRONTO** (14/08)
 
