@@ -1,7 +1,11 @@
 # DA FARE — lista di ripresa (aggiornata 14/08/2026, mattina)
 
-_Claudio e' via. Questa e' la lista esatta di cosa fare quando torna al PC,
-in ordine. Tutto cio' che serve e' gia' scritto e pushato sul branch `lavoro`._
+_Lista esatta, in ordine di lancio. Tutto cio' che serve e' gia' scritto e
+pushato sul branch `lavoro`. Le righe sono pinnate al commit SHA._
+
+**Ordine consigliato (il tester serializza tutto):** 0 sul VPS (30 secondi,
+in parallelo) - poi sul PC: **0-bis R51** (corto) -> **3-bis DST** (10-20
+min, MT5 si apre da solo) -> **1 R50** (32 lanci, si lascia girare).
 
 ---
 
@@ -39,7 +43,7 @@ solo):
 
 ```
 irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/c88d160afb8fb0125d4843a0a3e81caf4ca4ff05/backtest_pipeline/walkforward_generico.ps1" -OutFile walkforward_generico.ps1
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/c88d160afb8fb0125d4843a0a3e81caf4ca4ff05/backtest_pipeline/prove/R51_reverse_DAX.txt" -OutFile prove\R51_reverse_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R51_reverse_DAX.txt -Etichetta r51
+New-Item -ItemType Directory -Force -Path prove | Out-Null; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/c88d160afb8fb0125d4843a0a3e81caf4ca4ff05/backtest_pipeline/prove/R51_reverse_DAX.txt" -OutFile prove\R51_reverse_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R51_reverse_DAX.txt -Etichetta r51
 ```
 
 Due righe sole: cella validata con reverse SPENTO vs ACCESO, tutto il resto
@@ -56,7 +60,7 @@ proprieta' guaste -> **cancello zero SUPERATO**.
 Sul PC di BACKTEST, MT5 CHIUSO:
 
 ```
-irm https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prova_regime.ps1 -OutFile "$env:TEMP\prova_regime.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\prova_regime.ps1" -SoloControllo
+irm https://raw.githubusercontent.com/claudiospadaro12/GITHUB/8ab7219826b61a391f05f7c7b03b228307921615/backtest_pipeline/prova_regime.ps1 -OutFile "$env:TEMP\prova_regime.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\prova_regime.ps1" -SoloControllo
 ```
 
 Se il controllo e' pulito, si rilancia SENZA `-SoloControllo`: 8 celle x 4
@@ -115,7 +119,7 @@ aspettare Pepperstone. Va fatto ADESSO, perche' se la risposta e' "BCM non
 segue il cambio d'ora europeo" allora il 25/10 vanno corretti gli EA VIVI:
 
 ```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/prepara_broker_esterno.ps1" -OutFile "$env:USERPROFILE\prepara_broker_esterno.ps1"
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/8ab7219826b61a391f05f7c7b03b228307921615/backtest_pipeline/prepara_broker_esterno.ps1" -OutFile "$env:USERPROFILE\prepara_broker_esterno.ps1"
 powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\prepara_broker_esterno.ps1" -BrokerPattern "BCM" -SoloElenco -Auto -Filtro "D30EUR" -SimboloFuso "D30EUR" -SimboloGrafico "D30EUR"
 ```
 
