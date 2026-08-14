@@ -1,0 +1,95 @@
+# =====================================================================
+#  ROUND 46a: ABTG_DAX_Apertura_EU - IL DOSSIER MAE/MFE, FASE 1:
+#  quanto lascia sul tavolo la GESTIONE (D30EUR)
+#  Si lancia con:  -Prova prove\R46a_gestione_DAX.txt -Etichetta r46a
+# =====================================================================
+#
+# PERCHE' (13/08/2026 sera - TERZA RICORRENZA, soglia del diario
+# raggiunta e via libera di Claudio)
+#   Tre volte su tre giornate i vincenti sono stati chiusi strettissimi:
+#   05/08 (famiglia intera, zero TP raggiunti), 12/08 (6% del movimento
+#   disponibile), 13/08 (2,3%). E il conto 100k lo conferma dal suo
+#   lato: 3 vinti su 5 ma netto -179,04, perche' la vincita media (82)
+#   e' un TERZO della perdita media (212) -> servirebbe un win rate del
+#   72%, ne abbiamo il 60%. Le perdite sono normali (0,17-0,25% del
+#   conto, e il 13/08 lo stop ORB ha evitato una perdita 6 volte piu'
+#   grande): **il numero anomalo e' la VINCITA media.**
+#
+# LA DOMANDA (una sola, precisa)
+#   NON "quale soglia di trailing" — R24 l'ha gia' misurata (soglia 0 =
+#   migliore OOS) e quella risposta NON si rimette in discussione qui.
+#   La domanda nuova e': **il TIPO di gestione (trailing PREVBAR M5 +
+#   parziale 50%) e' il migliore dei disponibili, o ce n'e' uno che
+#   raccoglie di piu' dello stesso movimento?**
+#
+# LE 8 CELLE = 3 leve di STRUTTURA (l'ingresso e' pinnato alla ricetta
+# live per nome: retest, buffer 500, offset 200, range 35', solo long,
+# SL estremo opposto, TP1 1R, TP totale 3R, rischio 1%)
+#   - InpUseTrailing   0/1
+#   - InpTrailMode     0=ATR(2.0) / 1=PREVBAR M5
+#   - InpTP1_ClosePct  0 (niente parziale) / 50 (parziale come live)
+#   Le strutture che ne escono:
+#     A = 1/1/50  LIVE ATTUALE (baseline)
+#     B = 1/0/50  trailing ATR invece di PREVBAR
+#     E = 1/0/0   runner puro con trailing ATR
+#     F = 0/-/0   TP 3R secco + stop iniziale (nessuna gestione)
+#     D = 0/-/50  parziale + BE, poi il resto corre fino a 3R
+#   ATTENZIONE - GEMELLI DI CONTROLLO GRATIS: con UseTrailing=0 il
+#   TrailMode e' irrilevante, quindi le celle 0/0/x e 0/1/x DEVONO
+#   uscire IDENTICHE AL CENTESIMO. Se non lo sono, il round non vale
+#   e si cerca il bug prima di leggere qualunque numero.
+#
+# IPOTESI (scritta prima dei numeri)
+#   1. Il PREVBAR M5 e' il piu' stretto dei tre: mi aspetto che
+#      raccolga MENO profitto totale ma con DD piu' basso e win rate
+#      piu' alto. Se e' cosi', il "difetto" e' in realta' un prezzo
+#      pagato per la stabilita' — e va detto, non corretto.
+#   2. Il TP 3R e' un ornamento (diario 07/08: zero TP raggiunti in 3
+#      giornate): mi aspetto che la struttura F (TP secco) sia la
+#      peggiore, confermando che senza gestione il motore non vive.
+#   3. Non mi aspetto che una struttura vinca su ENTRAMBI i cancelli
+#      (profitto E drawdown): se succede, e' una scoperta vera.
+#
+# CRITERI (congelati ora - il round tocca UNA SEDIA TITOLARE)
+#   1. Igiene prima di tutto: gemelli 0/0/x = 0/1/x al centesimo.
+#   2. Si giudica sul FUORI CAMPIONE. Per proporre un cambio alla
+#      ricetta live servono TUTTI e tre i cancelli R35:
+#      (a) +10% di profitto OOS sulla baseline A,
+#      (b) Equity DD % NON peggiore,
+#      (c) stessa direzione anche sul Dow (R46b) — un miglioramento su
+#          un solo indice e' un picco isolato, non un risultato.
+#   3. Win rate e payoff (vincita media / perdita media) si guardano
+#      per CAPIRE il fenomeno, NON per decidere: decide il profitto
+#      OOS coi cancelli sopra. Il payoll esatto si misura in FASE 2
+#      (per-trade con magic vergini) solo sulle strutture superstiti.
+#   4. NESSUN cambio ai grafici vivi senza referto e senza decisione
+#      esplicita di Claudio. Il forward in corso non si disturba a
+#      meta' corsa.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpBufferPoints=500||500||0||500||N
+InpRetestOffsetPts=200||200||0||200||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailStartR=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpOneTradePerDay=1||1||0||1||N
+InpUseTrailing=1||0||1||1||Y
+InpTrailMode=1||0||1||1||Y
+InpTP1_ClosePct=50||0||50||50||Y
