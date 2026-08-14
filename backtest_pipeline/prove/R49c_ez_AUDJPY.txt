@@ -1,0 +1,30 @@
+# =====================================================================
+#  ROUND 49c: ABTG_EasyTrend - PER-TRADE a 100k su AUDJPY
+#  Si lancia con: -Prova prove\R49c_ez_AUDJPY.txt -Deposito 100000
+#                 -Etichetta r49c
+# =====================================================================
+# PERCHE': R48 ha promosso AUDJPY col criterio congelato (cella scelta
+#   sull'IS con n>=20, giudicata OOS: profit>0, PF>=1,10, DD<10%, n>=20,
+#   lato coerente fra le finestre). Ora la misura vera: serie a 100k con
+#   i parziali giusti, magic VERGINI e SWEEP GEMELLO (due magic: le due
+#   serie devono uscire identiche al centesimo, altrimenti il round non
+#   vale). Poi portafoglio contro le 27 serie.
+# CELLA PINNATA: TP 1,0 - entrambi i lati (OOS +894,41 PF 1,37 DD 4,29 n 54)
+# CRITERI: nessuno nuovo. Decide lo standard di portafoglio: si entra
+#   solo se AGGIUNGE profitto E NON alza le code MC (p95/p99).
+# =====================================================================
+@SIMBOLO  AUDJPY
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPivotSource=0
+InpPivotR=3
+InpRiskPercent=1.0
+InpMaxSpreadPts=30
+InpEntryWindowBars=3
+InpWarmupBars=500
+InpTP_R=1.0
+InpAllowLong=1
+InpAllowShort=1
+InpMagic=772415||772415||1||772416||Y

@@ -1,0 +1,30 @@
+# =====================================================================
+#  ROUND 49b: ABTG_EasyTrend - PER-TRADE a 100k su GBPUSD
+#  Si lancia con: -Prova prove\R49b_ez_GBPUSD.txt -Deposito 100000
+#                 -Etichetta r49b
+# =====================================================================
+# PERCHE': R48 ha promosso GBPUSD col criterio congelato (cella scelta
+#   sull'IS con n>=20, giudicata OOS: profit>0, PF>=1,10, DD<10%, n>=20,
+#   lato coerente fra le finestre). Ora la misura vera: serie a 100k con
+#   i parziali giusti, magic VERGINI e SWEEP GEMELLO (due magic: le due
+#   serie devono uscire identiche al centesimo, altrimenti il round non
+#   vale). Poi portafoglio contro le 27 serie.
+# CELLA PINNATA: TP 1,5 - entrambi i lati (OOS +1.007,87 PF 1,49 DD 4,58 n 41)
+# CRITERI: nessuno nuovo. Decide lo standard di portafoglio: si entra
+#   solo se AGGIUNGE profitto E NON alza le code MC (p95/p99).
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPivotSource=0
+InpPivotR=3
+InpRiskPercent=1.0
+InpMaxSpreadPts=30
+InpEntryWindowBars=3
+InpWarmupBars=500
+InpTP_R=1.5
+InpAllowLong=1
+InpAllowShort=1
+InpMagic=772413||772413||1||772414||Y
