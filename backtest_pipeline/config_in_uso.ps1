@@ -158,14 +158,33 @@ if ($tot -eq 0) {
 $out | Set-Content -Path $dest -Encoding ASCII
 
 # --- raccolta sul Desktop + zip (regola delle righe di lancio) -------
-$cart = Join-Path ([Environment]::GetFolderPath("Desktop")) "config_dax"
-if (Test-Path $cart) { Remove-Item $cart -Recurse -Force -ErrorAction SilentlyContinue }
-New-Item -ItemType Directory -Path $cart -Force | Out-Null
-Copy-Item $dest $cart -Force -ErrorAction SilentlyContinue
-
-$zip = Join-Path ([Environment]::GetFolderPath("Desktop")) "config_dax.zip"
-if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
-Compress-Archive -Path (Join-Path $cart "*") -DestinationPath $zip -Force -ErrorAction SilentlyContinue
+#  Il Desktop si cerca in TRE modi: GetFolderPath puo' tornare vuoto
+#  (Desktop reindirizzato, OneDrive, profilo di servizio) e allora non
+#  usciva ne' lo zip ne' un motivo. E niente SilentlyContinue: un
+#  fallimento muto e' peggio di un fallimento.
+function Trova-Desktop {
+  foreach ($p in @([Environment]::GetFolderPath("Desktop"),
+                   (Join-Path $env:USERPROFILE "Desktop"),
+                   (Join-Path $env:USERPROFILE "OneDrive\Desktop"))) {
+    if ($p -and (Test-Path $p)) { return $p }
+  }
+  return $env:USERPROFILE
+}
+$desktop = Trova-Desktop
+$cart = Join-Path $desktop "config_dax"
+$zip   = Join-Path $desktop "config_dax.zip"
+$zipOk = $false
+$motivo = ""
+try {
+  if (Test-Path $cart) { Remove-Item $cart -Recurse -Force -ErrorAction Stop }
+  New-Item -ItemType Directory -Path $cart -Force -ErrorAction Stop | Out-Null
+  Copy-Item $dest $cart -Force -ErrorAction Stop
+  if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction Stop }
+  Compress-Archive -Path (Join-Path $cart "*") -DestinationPath $zip -Force -ErrorAction Stop
+  $zipOk = Test-Path $zip
+} catch {
+  $motivo = $_.Exception.Message
+}
 
 Write-Host "`n!!! COSA QUESTO REFERTO NON PUO' DIRE !!!" -ForegroundColor Yellow
 Write-Host "    Compare solo chi si e' RIAVVIATO negli ultimi $Giorni giorni." -ForegroundColor Gray
@@ -176,9 +195,15 @@ Write-Host "    Per sapere chi e' ATTACCATO adesso: elenco_ea_attaccati.ps1" -Fo
 Write-Host "`n=== RACCOLTA ===" -ForegroundColor Cyan
 Write-Host "  righe trovate : $tot"
 Write-Host "  referto       : $dest"
-Write-Host "  cartella      : $cart"
-Write-Host "  zip da mandare: $zip" -ForegroundColor Green
-Write-Host "`nFile attesi nello zip (1):" -ForegroundColor Gray
-Get-ChildItem $cart -ErrorAction SilentlyContinue | ForEach-Object {
-  Write-Host ("   {0}  ({1} byte)" -f $_.Name, $_.Length)
+if ($zipOk) {
+  Write-Host "  zip da mandare: $zip" -ForegroundColor Green
+  Write-Host "`nFile attesi nello zip (1):" -ForegroundColor Gray
+  Get-ChildItem $cart -ErrorAction SilentlyContinue | ForEach-Object {
+    Write-Host ("   {0}  ({1} byte)" -f $_.Name, $_.Length)
+  }
+} else {
+  Write-Host "  ZIP NON CREATO" -ForegroundColor Yellow
+  if ($motivo) { Write-Host ("  motivo        : " + $motivo) -ForegroundColor Red }
+  Write-Host "  Desktop usato : $desktop" -ForegroundColor Gray
+  Write-Host "  MANDAMI DIRETTAMENTE IL REFERTO QUI SOPRA: va bene uguale." -ForegroundColor Yellow
 }

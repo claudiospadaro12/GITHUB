@@ -275,25 +275,63 @@ $dest = Join-Path $env:USERPROFILE "ea_attaccati.txt"
 $out | Set-Content -Path $dest -Encoding UTF8
 
 # --- raccolta sul Desktop + zip (regola delle righe di lancio) -------
-#  14/08: mancava. Ogni risultato destinato a Claudio arriva SEMPRE anche
-#  sul Desktop, VPS compreso, gia' zippato e pronto da mandare.
-$cart = Join-Path ([Environment]::GetFolderPath("Desktop")) "ea_attaccati"
-if (Test-Path $cart) { Remove-Item $cart -Recurse -Force -ErrorAction SilentlyContinue }
-New-Item -ItemType Directory -Path $cart -Force | Out-Null
-Copy-Item $dest $cart -Force -ErrorAction SilentlyContinue
+#  14/08, PRIMA STESURA SBAGLIATA: il Desktop lo chiedevo solo a
+#  [Environment]::GetFolderPath("Desktop"), e ogni passo aveva
+#  -ErrorAction SilentlyContinue. Risultato: se quella chiamata torna
+#  vuota (Desktop reindirizzato, OneDrive, profilo di servizio) non
+#  usciva nessuno zip E NESSUN MOTIVO. Adesso il Desktop si cerca in
+#  tre modi, e se qualcosa fallisce lo dice a voce alta.
+function Trova-Desktop {
+  foreach ($p in @([Environment]::GetFolderPath("Desktop"),
+                   (Join-Path $env:USERPROFILE "Desktop"),
+                   (Join-Path $env:USERPROFILE "OneDrive\Desktop"))) {
+    if ($p -and (Test-Path $p)) { return $p }
+  }
+  # nessun Desktop utilizzabile: si ripiega sulla home, che c'e' sempre
+  return $env:USERPROFILE
+}
 
-$zip = Join-Path ([Environment]::GetFolderPath("Desktop")) "ea_attaccati.zip"
-if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
-Compress-Archive -Path (Join-Path $cart "*") -DestinationPath $zip -Force -ErrorAction SilentlyContinue
+$desktop = Trova-Desktop
+$cart = Join-Path $desktop "ea_attaccati"
+$zip  = Join-Path $desktop "ea_attaccati.zip"
+$zipOk = $false
+$motivo = ""
+try {
+  if (Test-Path $cart) { Remove-Item $cart -Recurse -Force -ErrorAction Stop }
+  New-Item -ItemType Directory -Path $cart -Force -ErrorAction Stop | Out-Null
+  Copy-Item $dest $cart -Force -ErrorAction Stop
+  if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction Stop }
+  Compress-Archive -Path (Join-Path $cart "*") -DestinationPath $zip -Force -ErrorAction Stop
+  $zipOk = Test-Path $zip
+} catch {
+  $motivo = $_.Exception.Message
+}
 
 Write-Host ""
-Write-Host "=====================================================" -ForegroundColor Green
-Write-Host " IL FILE DA MANDARMI E' QUESTO:" -ForegroundColor Green
-Write-Host "   $zip" -ForegroundColor White
-Write-Host "=====================================================" -ForegroundColor Green
-Write-Host "File attesi nello zip (1):" -ForegroundColor Gray
-Get-ChildItem $cart -ErrorAction SilentlyContinue | ForEach-Object {
-  Write-Host ("   {0}  ({1} byte)" -f $_.Name, $_.Length)
+if ($zipOk) {
+  Write-Host "=====================================================" -ForegroundColor Green
+  Write-Host " IL FILE DA MANDARMI E' QUESTO:" -ForegroundColor Green
+  Write-Host "   $zip" -ForegroundColor White
+  Write-Host "=====================================================" -ForegroundColor Green
+  Write-Host "File attesi nello zip (1):" -ForegroundColor Gray
+  Get-ChildItem $cart -ErrorAction SilentlyContinue | ForEach-Object {
+    Write-Host ("   {0}  ({1} byte)" -f $_.Name, $_.Length)
+  }
+} else {
+  Write-Host "=====================================================" -ForegroundColor Yellow
+  Write-Host " LO ZIP NON E' STATO CREATO." -ForegroundColor Yellow
+  if ($motivo) { Write-Host ("   motivo: " + $motivo) -ForegroundColor Red }
+  Write-Host "   Desktop usato : $desktop" -ForegroundColor Gray
+  Write-Host " MANDAMI DIRETTAMENTE QUESTO FILE, va bene uguale:" -ForegroundColor Yellow
+  Write-Host "   $dest" -ForegroundColor White
+  Write-Host "=====================================================" -ForegroundColor Yellow
 }
+Write-Host ""
+Write-Host "Se la finestra si e' fermata a meta' e il titolo diceva" -ForegroundColor DarkYellow
+Write-Host "'Seleziona Windows PowerShell', l'avevi cliccata dentro:" -ForegroundColor DarkYellow
+Write-Host "la console si mette in pausa e lo script NON va avanti." -ForegroundColor DarkYellow
+Write-Host "Si sblocca con ESC (o tasto destro). Per non rischiare," -ForegroundColor DarkYellow
+Write-Host "rilancia mandando l'output su file:  ... -Giorni 30 *> out.txt" -ForegroundColor DarkYellow
+
 try { Start-Process notepad.exe $dest } catch { }
 try { Set-Clipboard -Value $dest } catch { }
