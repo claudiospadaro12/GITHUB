@@ -48,8 +48,14 @@ function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exi
 # --- 1. le celle ---
 if(-not $Celle){ $Celle = Join-Path $Work "prove\CELLE_REGIME.txt" }
 if(-not (Test-Path $Celle)){
+  # 14/08: lo scaricamento falliva SEMPRE quando lo script veniva lanciato da
+  # %TEMP% (cioe' con la riga irm), perche' la sottocartella prove\ non c'era e
+  # Invoke-WebRequest non la crea. Il messaggio diceva "manca il file delle
+  # celle" e faceva pensare a un file mancante sul repo: era una cartella.
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Celle) | Out-Null
   try{ Invoke-WebRequest -Uri "$RawBase/backtest_pipeline/prove/CELLE_REGIME.txt" -OutFile $Celle -UseBasicParsing }
-  catch{ Muori "manca il file delle celle: $Celle" }
+  catch{ Muori ("non riesco a procurarmi il file delle celle: $Celle`n" +
+                "    motivo: " + $_.Exception.Message) }
 }
 $Lista = @()
 foreach($riga in (Get-Content $Celle)){
