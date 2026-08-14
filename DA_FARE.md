@@ -29,12 +29,40 @@ timbrata e il controllo si ripete al tick dopo. **Da ricompilare sul VPS**
 alla prossima occasione (nel tester non cambia niente: li' lo storico c'e'
 sempre).
 
-## 0-bis. R51 — LO SHORT DI RITORNO (codice pronto, da lanciare)
+## 0-bis. R51 — **CHIUSO** (14/08 notte): RISERVA, il reverse resta spento
 
-`InpAllowReverse` in `ABTG_DAX_Apertura_EU` v1.01, default **false**.
-Tesi e criteri congelati: `prove/R51_REVERSE_TESI.md`. Si lancia col
-walkforward generico e il file `prove/R51_reverse_DAX.txt`.
-**Il verdetto lo da' il drawdown, non il PF.**
+8 passate, 2 CSV su 2, gemelli identici al centesimo. L'EA v1.01 con
+`InpAllowReverse` compila e gira (era la prima volta).
+
+| | profitto | DD | trade | peggior giornata |
+|---|---|---|---|---|
+| **IS** off -> on | 3.158 -> **2.763** | 7,20 -> **8,79%** | 208 -> 313 | -1,07 -> **-2,06%** |
+| **OOS** off -> on | 9.062 -> **15.821** | 10,75 -> **10,30%** | 332 -> 527 | -1,08 -> **-2,06%** |
+
+- **Criterio 1 (frequenza): PASSATO**, 195 attivazioni contro una soglia di 20.
+  **La mia ipotesi 2 e' falsificata**: stimavo "meno di 1 giorno su 5", sono
+  **3 su 5** (+59% di operativita'). Motivo: il reverse parte anche quando il
+  primo LIMIT **scade inevaso**, che e' il caso piu' comune - scritto nella
+  tesi §3 e poi dimenticato nella stima.
+- **Criterio 3 (DD)**: passa fuori (10,30 <= 10,75, e Recovery +81%), **fallisce
+  dentro** (8,79 contro 7,20).
+- **Criterio 4 (due banchi): FALLITO.** I trade aggiunti rendono **-3,76 in
+  campione** e **+34,66 fuori**: direzioni opposte. -> **RISERVA**.
+- **Criteri 2 e 5**: non misurabili senza per-trade, come dichiarato prima del
+  lancio. Il criterio 6 dice "se passa tutto": non si spende.
+
+**Il numero che decide: la peggior giornata RADDOPPIA** (-1,07 -> -2,06%), su
+entrambe le finestre. Era l'ipotesi 3 scritta prima, confermata al decimale. Il
+pavimento FTMO e' -5% al giorno e le serie che lo condividono sono 27+.
+
+**30° RIBALTAMENTO**: negativo in campione, +74,6% fuori. Nessuna delle due
+letture da sola sarebbe stata affidabile.
+
+**Nessun cambio al forward**, `InpAllowReverse` resta **false**. Il diritto di
+riaprire il caso lo da' il **forward**, non un altro giro sulla stessa finestra
+OOS (gia' guardata otto volte). Referto:
+`risultati_archivio/REFERTO_ROUND51_REVERSE_DAX.md`, CSV in
+`risultati_archivio/csv_r51/`.
 
 ## 1. R50 — **COLLAUDATO, PRONTO AL ROUND VERO**
 
