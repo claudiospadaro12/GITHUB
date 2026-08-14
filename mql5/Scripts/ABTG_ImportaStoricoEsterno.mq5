@@ -130,13 +130,24 @@ void CopiaStringa(string dst, string src, ENUM_SYMBOL_INFO_STRING p)
   }
 
 //--- confronto con stampa: ritorna true se coincidono
-bool VerificaDouble(string etichetta, string src, string dst, ENUM_SYMBOL_INFO_DOUBLE p)
+//  14/08/2026 - LA TOLLERANZA DIVENTA UN PARAMETRO, dopo un falso allarme.
+//  Con 1e-9 fisso, EURUSD_EXT e' stato bocciato ("ERRORE UNITA: NON USARE")
+//  per questa differenza sul tick_value:
+//      sorgente = 0.8636026046     nuovo = 0.8635951466
+//  cioe' 9 parti per milione. Non e' un difetto dell'import: il tick_value
+//  NON e' una costante del simbolo, MT5 lo ricalcola dal cambio corrente
+//  (tick_size x contract_size convertito nella valuta del conto), quindi
+//  due letture a microsecondi di distanza possono gia' differire. Digits,
+//  point, tick_size e contract_size invece sono fissi davvero e restano a
+//  1e-9. Pretendere la stessa esattezza da una grandezza che si muove da
+//  sola voleva dire buttare via un import perfetto.
+bool VerificaDouble(string etichetta, string src, string dst, ENUM_SYMBOL_INFO_DOUBLE p, double tolleranza = 1e-9)
   {
    double a = SymbolInfoDouble(src, p);
    double b = SymbolInfoDouble(dst, p);
    //  tolleranza relativa: i double non si confrontano con ==
    double rif = MathMax(MathAbs(a), 1e-12);
-   bool   ok  = (MathAbs(a - b) / rif) < 1e-9;
+   bool   ok  = (MathAbs(a - b) / rif) < tolleranza;
    PrintFormat("   %-22s sorgente=%.10g   nuovo=%.10g   %s",
                etichetta, a, b, (ok ? "OK" : "<<< DIVERSO"));
    return ok;
@@ -221,7 +232,9 @@ int PreparaSimbolo(string src, string dst)
    if(!VerificaIntero("digits",          src, dst, SYMBOL_DIGITS))               guasti++;
    if(!VerificaDouble("point",           src, dst, SYMBOL_POINT))                guasti++;
    if(!VerificaDouble("tick_size",       src, dst, SYMBOL_TRADE_TICK_SIZE))      guasti++;
-   if(!VerificaDouble("tick_value",      src, dst, SYMBOL_TRADE_TICK_VALUE))     guasti++;
+   //  0,1% e' larghissimo per un errore di unita' (che sarebbe un fattore
+   //  10, 100 o 100000) e strettissimo per l'oscillazione del cambio.
+   if(!VerificaDouble("tick_value",      src, dst, SYMBOL_TRADE_TICK_VALUE, 1e-3)) guasti++;
    if(!VerificaDouble("contract_size",   src, dst, SYMBOL_TRADE_CONTRACT_SIZE))  guasti++;
    //--- questi non bloccano ma vanno visti
    VerificaDouble("volume_min",     src, dst, SYMBOL_VOLUME_MIN);
