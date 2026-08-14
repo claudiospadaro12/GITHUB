@@ -1,0 +1,88 @@
+# =====================================================================
+#  ROUND 53: ABTG_EasyTrend - DOVE CADE DAVVERO LA FASCIA ORARIA
+#  Si lancia con:  -Prova prove\R53_fuso_EZ.txt -Simbolo <SYM> -Etichetta r53
+# =====================================================================
+#
+# PERCHE' (14/08/2026 sera)
+#   La regola n.3 della fonte dice: "la candela del segnale sta nella
+#   fascia 8:00-18:00". E' marcata [FONTE] nel codice e NON si tocca.
+#   Ma il coach legge quell'orario SUL SUO GRAFICO, cioe' sull'ora
+#   server del SUO broker, che non conosciamo. Noi l'abbiamo messa
+#   letterale sull'ora server di BCM. Se il suo broker e' GMT+2 o GMT+3
+#   - i piu' comuni - la stessa regola su BCM cade a 7-17 o 6-16.
+#   E' scritto nella tesi (prove/EASY_TREND_TESI.md righe 41-44,
+#   "[INCERTO] il fuso ... DA RIMAPPARE") e nel codice
+#   (ABTG_EasyTrend.mq5:140-144). Non e' mai stato chiuso.
+#
+#   Conseguenza che rende il round necessario: R48, R49 e R50 hanno
+#   giudicato Easy Trend con una regola forse spostata di un'ora. Non
+#   si riapre un caso per simpatia - si controlla se era misurato bene.
+#
+# COSA SI PROVA (e cosa NON si prova)
+#   Si spostano start e fine INSIEME, tenendo la LARGHEZZA della fonte
+#   (10 ore, estremi inclusi). Le uniche combinazioni che contano sono
+#   le quattro della diagonale, ognuna corrispondente a un fuso reale:
+#
+#     6-16  = il coach su GMT+3   (BCM = GMT+1)
+#     7-17  = il coach su GMT+2
+#     8-18  = il coach sullo stesso fuso di BCM  <- quella in uso oggi
+#     9-19  = il coach su GMT+0
+#
+#   MT5 spazzola il prodotto cartesiano, quindi escono 16 celle: si
+#   leggono SOLO le quattro diagonali, le altre 12 hanno larghezza
+#   sbagliata e NON sono candidate. E' scritto qui perche' non venga in
+#   mente a nessuno di pescare la migliore fra le 16.
+#
+#   NON si tocca nessun altro parametro. Non si cerca la finestra
+#   migliore: si cerca DOVE CADE quella della fonte.
+#
+# IPOTESI (scritte prima di qualunque numero)
+#   1. Se la fascia e' oggi spostata, il fuso giusto vince su TUTTI i
+#      simboli della famiglia, non su uno: un fuso e' una proprieta'
+#      dell'orologio, non del cambio.
+#   2. Se invece i simboli si contraddicono, vuol dire che la fascia
+#      conta poco: informazione utile lo stesso, e si tiene 8-18.
+#   3. Rischio dichiarato: con quattro candidate e quattro simboli la
+#      tentazione di pescare la cella piu' bella e' forte. I criteri
+#      sotto esistono per impedirlo.
+#
+# CRITERI (congelati il 14/08/2026, a numeri non visti)
+#   1. Si guardano SOLO le 4 celle diagonali. Le altre 12 si ignorano.
+#   2. Un fuso vince solo se e' il migliore (per PF fuori campione) su
+#      ALMENO 3 SIMBOLI SU 4, e nella stessa direzione anche IN
+#      campione. Un fuso che vince su un simbolo solo NON vince.
+#   3. Se nessuno raggiunge 3 su 4: verdetto "la fascia non decide", e
+#      si tiene il valore letterale della fonte (8-18). Il default non
+#      si sposta senza una ragione, e "ha reso di piu'" non lo e'.
+#   4. Questo round NON riapre Easy Trend. Anche se un fuso vince, la
+#      famiglia resta fuori dal portafoglio (R49) e dalla prova di
+#      regime (R50): per rientrare servirebbe rifare QUEI round con la
+#      fascia corretta, coi loro criteri, non questo.
+#   5. Il risultato vale per OGNI strategia futura della stessa fonte:
+#      e' il fuso del coach che si sta misurando, non un parametro di
+#      Easy Trend.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385||16385||0||16385||N
+InpPivotSource=0||0||0||0||N
+InpPivotR=3||3||0||3||N
+InpPivotL=5||5||0||5||N
+InpLinRegLen=11||11||0||11||N
+InpPlotMode=0||0||0||0||N
+InpPlotLen=11||11||0||11||N
+InpCciPeriod=20||20||0||20||N
+InpMaxPivotDist=60||60||0||60||N
+InpPrevBars=3||3||0||3||N
+InpEntryWindowBars=3||3||0||3||N
+InpSLBufferPts=30||30||0||30||N
+InpWarmupBars=500||500||0||500||N
+InpMaxSpreadPts=30||30||0||30||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpHourStart=8||6||1||9||Y
+InpHourEnd=18||16||1||19||Y

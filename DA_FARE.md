@@ -70,6 +70,25 @@ Tesi e criteri congelati il 14/08 a numeri non visti:
 `prove/R52_LATI_TESI.md`. Regola madre: **i dati _EXT PROPONGONO, non
 validano**. Da fare dopo R50 e dopo Pepperstone.
 
+## 1-ter. R53 — DOVE CADE LA FASCIA ORARIA DI EASY TREND
+
+La regola "candela del segnale fra le 8 e le 18" e' **[FONTE]**, viene dal
+coach e non si tocca. Ma lui legge quell'ora **sul suo grafico**, cioe'
+sull'ora server del SUO broker: noi l'abbiamo messa letterale su BCM. Se il
+suo broker e' GMT+2 o GMT+3 la stessa regola cade a **7-17** o **6-16**.
+Scritto e mai chiuso: `prove/EASY_TREND_TESI.md` righe 41-44 e
+`ABTG_EasyTrend.mq5:140-144`.
+
+Non si cerca la finestra migliore: si cerca **dove cade quella della fonte**.
+Si spostano start e fine insieme tenendo la larghezza di 10 ore, e le uniche
+quattro combinazioni che contano sono quelle che corrispondono a un fuso vero.
+Criteri congelati in testa a `prove/R53_fuso_EZ.txt`: **un fuso vince solo se
+vince su 3 simboli su 4**, altrimenti si tiene 8-18.
+
+Perche' vale la pena: R48, R49 e R50 hanno giudicato Easy Trend con una regola
+forse spostata di un'ora. E il risultato vale per **ogni** strategia futura
+della stessa fonte, non solo per questa.
+
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 
 HistData non ha gli indici, quindi **4 titolari su 5 (DAX, Dow, Nasdaq,
