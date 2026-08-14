@@ -25,16 +25,26 @@ Stampa l'**ultima** riga `CONFIG IN USO` di ogni EA su **ogni** terminale
 `Desktop\config_dax.zip`. Poi si decide: spegnere l'istanza breakout, oppure
 tenerla come confronto ma **con un magic suo** (es. 770102).
 
-## 0-bis. R51 — LO SHORT DI RITORNO (idea di Claudio, 14/08)
+## 0-bis. R51 — LO SHORT DI RITORNO — **CODICE PRONTO** (14/08)
 
-Tesi e criteri gia' congelati: `backtest_pipeline/prove/R51_REVERSE_TESI.md`.
-In due righe: il ramo SHORT del retest esiste gia' nel codice ma non parte mai
-(riga 1311 `gPhase = PH_PLACED` + `InpOneTradePerDay`), quindi **il motore
-promosso lavora solo mezza giornata**. Serve un input opt-in
-`InpAllowReverse` (default false = forward invariato), ~50 righe.
-Il verdetto lo dara' il **drawdown**, non il PF: le giornate a due cicli
-valgono 2R. **Da fare DOPO il punto 0** (prima si sa quante copie del DAX
-Apertura girano davvero).
+`ABTG_DAX_Apertura_EU` e' passato alla **v1.01**: nuovo input
+**`InpAllowReverse`** (default **false**, quindi i conti vivi NON cambiano
+comportamento). Col flag acceso il lato opposto resta sorvegliato dopo il
+primo ciclo, con tetto rigido di 2 cicli/giorno e obbligo di ripartire da
+flat (mai due cose vive insieme, mai 2R contemporanei).
+Tesi e criteri: `prove/R51_REVERSE_TESI.md`.
+
+Sul PC di BACKTEST, MT5 CHIUSO (il driver si scarica e ricompila l'EA da
+solo):
+
+```
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/c88d160afb8fb0125d4843a0a3e81caf4ca4ff05/backtest_pipeline/walkforward_generico.ps1" -OutFile walkforward_generico.ps1
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/c88d160afb8fb0125d4843a0a3e81caf4ca4ff05/backtest_pipeline/prove/R51_reverse_DAX.txt" -OutFile prove\R51_reverse_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R51_reverse_DAX.txt -Etichetta r51
+```
+
+Due righe sole: cella validata con reverse SPENTO vs ACCESO, tutto il resto
+pinnato. **Il verdetto lo da' il drawdown, non il PF** (criterio 3): se
+aggiunge profitto ma alza il DD, e' bocciato.
 
 ## 1. IL ROUND CHE ASPETTA: la prova di regime sul forex (R50)
 
