@@ -76,6 +76,42 @@ function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exi
 Write-Host "=== WALK-FORWARD GENERICO - $Expert ===" -ForegroundColor Cyan
 
 # =====================================================================
+#  0. SU QUALE BROKER SI STA GIRANDO
+#  Default "BCM" = comportamento identico a sempre. Con un altro broker
+#  (14/08: demo Pepperstone, che sugli indici ha lo storico che a BCM
+#  manca) cambiano DUE cose e vanno dette PRIMA, non dopo.
+# =====================================================================
+$BrokerBCM  = ($BrokerPattern -match '^(?i)bcm$')
+$SuffBroker = ""
+if(-not $BrokerBCM){
+  $SuffBroker = "_" + ($BrokerPattern -replace '[^A-Za-z0-9]','').ToLower()
+  Write-Host ""
+  Write-Host "#####################################################################" -ForegroundColor Red
+  Write-Host "#  ATTENZIONE: NON stai girando su BCM, ma su '$BrokerPattern'." -ForegroundColor Red
+  Write-Host "#####################################################################" -ForegroundColor Red
+  Write-Host "#  1) GLI ORARI DEGLI EA SONO IN ORA SERVER, E VANNO RIMAPPATI." -ForegroundColor Red
+  Write-Host "#     DAX InpSessionHour=8, apertura USA 14:30, box notturno 23:00," -ForegroundColor Red
+  Write-Host "#     fascia 8-18 dell'EasyTrend: sono ore del server BCM. Un altro" -ForegroundColor Red
+  Write-Host "#     broker ha un altro offset (e un altro calendario di ora legale)." -ForegroundColor Red
+  Write-Host "#     Se non li rimappi, l'EA opera a un'ora che non c'entra niente" -ForegroundColor Red
+  Write-Host "#     con l'apertura di borsa: IL VERDETTO E' SPAZZATURA." -ForegroundColor Red
+  Write-Host "#     La formula e la tabella dei valori nuovi le stampa:" -ForegroundColor Red
+  Write-Host "#        prepara_broker_esterno.ps1 -BrokerPattern `"$BrokerPattern`" -SoloReferto" -ForegroundColor Yellow
+  Write-Host "#     e stanno in docs\BROKER_ESTERNO_MAPPA.md (sezione FUSO)." -ForegroundColor Red
+  Write-Host "#" -ForegroundColor Red
+  Write-Host "#  2) QUESTI RISULTATI NON SI CONFRONTANO CON QUELLI BCM." -ForegroundColor Red
+  Write-Host "#     Spread, commissioni e composizione del feed sono diversi: il" -ForegroundColor Red
+  Write-Host "#     confronto ASSOLUTO fra feed non significa niente. Vale solo il" -ForegroundColor Red
+  Write-Host "#     confronto RELATIVO DENTRO LO STESSO FEED (periodo calante vs" -ForegroundColor Red
+  Write-Host "#     crescente sui dati di questo broker) - criterio congelato al" -ForegroundColor Red
+  Write-Host "#     punto 2 di prove\PROVA_REGIME_CRITERI.md." -ForegroundColor Red
+  Write-Host "#     E i parametri NON si ritarano qui: la taratura resta su BCM." -ForegroundColor Red
+  Write-Host "#####################################################################" -ForegroundColor Red
+  Write-Host ""
+  Write-Host "    (i CSV usciranno con il suffisso '$SuffBroker': non sovrascrivono mai i nostri)" -ForegroundColor Yellow
+}
+
+# =====================================================================
 #  1. IL SORGENTE
 # =====================================================================
 $SrcDir=Join-Path $Work "src_prove"
@@ -422,7 +458,7 @@ $InputsTxt=($Finali) -join "`n"
 #  6. -SoloControllo: si ferma qui e fa vedere cosa lancerebbe
 # =====================================================================
 if($SoloControllo){
-  $anteprima=Join-Path $Work "anteprima_$($Expert)_$Simbolo.ini"
+  $anteprima=Join-Path $Work "anteprima_$($Expert)_$Simbolo$SuffBroker.ini"
 @"
 [Tester]
 Expert=$Expert.ex5
@@ -457,12 +493,46 @@ $InputsTxt
 # =====================================================================
 #  7. MT5: trova, compila, gira
 # =====================================================================
-if(-not $Terminal){
+if(-not $Terminal -and $BrokerBCM){
   $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   if($UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select-Object -First 1}
   else{$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select-Object -First 1}
   if(-not $c){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*"}|Select-Object -First 1}
   if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
+}
+if(-not $Terminal -and -not $BrokerBCM){
+  # TERMINALE DI UN ALTRO BROKER. Si parte da origin.txt (ogni cartella
+  # dati dice da quale installazione arriva): e' l'unico modo affidabile,
+  # perche' un broker puo' installarsi dove vuole e chiamarsi come vuole.
+  # Solo se li' non si trova niente si spazzola Program Files.
+  $termRoot=Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  foreach($d in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)){
+    if($d.Name -ieq "Common"){ continue }
+    $o=Join-Path $d.FullName "origin.txt"
+    if(-not (Test-Path $o)){ continue }
+    $inst=""
+    try{ $inst=(Get-Content $o -Raw -ErrorAction Stop).Trim() }catch{ continue }
+    if($inst -notlike "*$BrokerPattern*"){ continue }
+    $t=Join-Path $inst "terminal64.exe"
+    if(-not (Test-Path $t)){ continue }
+    $Terminal=$t
+    $MetaEditor=Join-Path $inst "metaeditor64.exe"
+    if(-not $DataFolder){ $DataFolder=$d.FullName }
+    break
+  }
+  if(-not $Terminal){
+    $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
+    $c=$allTerm|Where-Object{$_.DirectoryName -like "*$BrokerPattern*"}|Select-Object -First 1
+    if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
+  }
+  if(-not $Terminal){
+    Muori ("non trovo nessun terminale che contenga '$BrokerPattern'.`n" +
+           "    Va installato e APERTO almeno una volta (col login demo), altrimenti`n" +
+           "    MT5 non crea nemmeno la sua cartella dati. La sequenza completa e' in`n" +
+           "    docs\BROKER_ESTERNO_MAPPA.md; per vedere i terminali che hai:`n" +
+           "      powershell -ExecutionPolicy Bypass -File .\prepara_broker_esterno.ps1 -SoloElenco")
+  }
+  Write-Host "    terminale: $Terminal" -ForegroundColor Yellow
 }
 if(-not $Terminal){ Muori "non trovo terminal64.exe. Passalo con -Terminal `"C:\...\terminal64.exe`"." }
 if($Terminal -and -not $DataFolder){
@@ -488,6 +558,9 @@ Write-Host "    compilato $Expert" -ForegroundColor Green
 
 $Suffisso = if($Modello -eq 4){ "" } else { "_ohlc" }   # un OHLC non deve MAI sovrascrivere un tick reale
 if($Etichetta){ $Suffisso = $Suffisso + "_" + $Etichetta }
+# il broker va IN CODA al nome: un CSV girato su un altro feed non deve
+# nemmeno poter finire nella stessa tabella dei nostri (es. _r50_pepperstone)
+$Suffisso = $Suffisso + $SuffBroker
 foreach($w in $WF){
   $tag="$($Expert)_$($Simbolo)_$($w.Tag)$Suffisso"
   $done=Join-Path $Results "$tag.csv"
