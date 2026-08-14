@@ -147,6 +147,10 @@ InpUseBBExpand=0||0||1||1||Y
   $tag="gc_${sym}_$Tf"
   $ini=Join-Path $Work "gcl_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$sym

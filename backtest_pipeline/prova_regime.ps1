@@ -159,6 +159,10 @@ foreach($c in $Lista){
 
     $ini = Join-Path $IniDir "$tag.ini"
     @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$($c.EA).ex5
 Symbol=$sym

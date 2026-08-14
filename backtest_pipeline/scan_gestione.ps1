@@ -105,6 +105,10 @@ Write-Host "   compilato $EA.ex5" -ForegroundColor Green
 
 $iniPath=Join-Path $Work "gestione_${EA}_$Symbol.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$Symbol

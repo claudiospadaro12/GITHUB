@@ -144,6 +144,10 @@ foreach($s in $scala){
     if(Test-Path $done){ Write-Host "   $sym : gia' fatto, salto" -ForegroundColor DarkGray; continue }
     $ini=Join-Path $Work "ini_orb\orb_${tag}_$sym.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$sym

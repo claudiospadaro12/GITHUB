@@ -104,6 +104,10 @@ foreach ($w in $WF) {
   $rep = "V21_" + $w.Tag
   $ini = Join-Path $env:TEMP ("gen_v21_" + $w.Tag + ".ini")
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=esterni\NasdaqOpeningBreakout_EA_v21_OPTIMIZED.ex5
 Symbol=NASUSD

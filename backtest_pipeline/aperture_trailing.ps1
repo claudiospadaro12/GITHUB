@@ -175,6 +175,10 @@ $Blindatura
   $tag="$($j.Nome)_trailing"
   $ini=Join-Path $Work "at_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$($j.EA).ex5
 Symbol=$($j.Sym)

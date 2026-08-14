@@ -226,6 +226,10 @@ $($L.Sweep)
 
     $ini=Join-Path $Work "rf_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$($j.EA).ex5
 Symbol=$($j.Sym)

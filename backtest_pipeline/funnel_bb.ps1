@@ -26,6 +26,10 @@ if (-not (Test-Path $ex5)) { Write-Host "ABTG_BreakingBand.ex5 non trovato: lanc
 
 $ini = Join-Path $env:TEMP "gen_funnel_bb.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=ABTG_BreakingBand.ex5
 Symbol=$Simbolo

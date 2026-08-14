@@ -162,6 +162,10 @@ $rigaBuffer
   $tag="oro_maxmin_fase$($Fase)_$($tf.Nome)"
   $ini=Join-Path $Work "mmo_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$Sym

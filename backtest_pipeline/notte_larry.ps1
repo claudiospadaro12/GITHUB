@@ -127,6 +127,10 @@ foreach($sym in $Symbols){
   if(Test-Path $done){ Write-Host ("   [{0}/{1}] {2}: gia' fatto, salto" -f $n,$Symbols.Count,$sym) -ForegroundColor DarkGray; continue }
   $ini=Join-Path $Results "ini_scan_$sym.ini"
   @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$sym
@@ -227,6 +231,10 @@ InpAllowShort=1||0||1||1||Y
     if(Test-Path $done){ Write-Host "   $tag gia' fatto, salto" -ForegroundColor DarkGray; continue }
     $ini=Join-Path $Results "ini_$tag.ini"
     @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$sym

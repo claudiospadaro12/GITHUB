@@ -86,6 +86,10 @@ foreach($j in $Jobs){
   if(Test-Path $done){Write-Host ("   [{0}/{1}] {2} ({3}): gia' fatto, salto" -f $n,$Jobs.Count,$sym,$j.Nome) -ForegroundColor DarkGray; continue}
   $iniPath=Join-Path $Work "ini_studio\studio_$sym.ini"
   @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$sym

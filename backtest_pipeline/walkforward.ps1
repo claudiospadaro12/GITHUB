@@ -88,6 +88,10 @@ foreach($job in $Jobs){
     if(Test-Path $done){Write-Host "   $($job.Name) $($w.Tag): gia' fatto, salto" -ForegroundColor DarkGray; continue}
     $iniPath=Join-Path $Work "ini_wf\wf_$($job.Name)_$($w.Tag).ini"
     @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$($job.EA).ex5
 Symbol=$($job.Sym)

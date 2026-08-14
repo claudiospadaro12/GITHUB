@@ -151,6 +151,10 @@ foreach($sym in $Symbols){
   if(Test-Path $done){Write-Host ("   [{0}/{1}] {2}: gia' fatto, salto" -f $n,$Symbols.Count,$sym) -ForegroundColor DarkGray; continue}
   $iniPath=Join-Path $Work "ini_valid\valid_${EA}_${Tf}_$sym.ini"
   @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$sym

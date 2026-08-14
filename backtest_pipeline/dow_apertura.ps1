@@ -240,6 +240,10 @@ foreach($w in $Finestre){
   $tag = "$Fase$($w.Tag)"
   $iniPath = Join-Path $Work "dow_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$EA.ex5
 Symbol=$Symbol

@@ -469,6 +469,10 @@ $InputsTxt=($Finali) -join "`n"
 if($SoloControllo){
   $anteprima=Join-Path $Work "anteprima_$($Expert)_$Simbolo$SuffBroker.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$Expert.ex5
 Symbol=$Simbolo
@@ -585,7 +589,20 @@ foreach($w in $WF){
   Write-Host "--- $tag   ($($w.Da) -> $($w.A))   $NCelle celle ---" -ForegroundColor Cyan
 
   $ini=Join-Path $Work "gen_$tag.ini"
+  # 14/08/2026 - [Experts] AllowLiveTrading=false: NON e' cosmetica.
+  #  Lanciare il tester con /config: AVVIA IL TERMINALE, che carica l'ultimo
+  #  profilo con i suoi grafici e gli EA attaccati sopra. Sul PC di backtest
+  #  quel terminale e' collegato al conto VIVO 50503392: ogni backtest
+  #  riaccendeva di fatto gli EA su grafico, che piazzavano ordini veri.
+  #  E' cosi' che il 14/08 e' partito un DAX Apertura in BREAKOUT con buffer
+  #  20 pt da un grafico M3 di prova. Questa riga spegne il trading dal vivo
+  #  per quella sessione; il TESTER non ne risente, perche' simula e non
+  #  passa dal permesso di trading reale.
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$Expert.ex5
 Symbol=$Simbolo

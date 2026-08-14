@@ -189,6 +189,10 @@ foreach($j in $Jobs){
 
       $ini=Join-Path $Work "pte_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$($j.EA).ex5
 Symbol=$($j.Sym)

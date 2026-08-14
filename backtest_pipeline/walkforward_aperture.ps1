@@ -548,6 +548,10 @@ InpTrailTF=$TrailTF||$TrailTF||0||$TrailTF||N
 
       $ini=Join-Path $Work "wf_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$($j.EA).ex5
 Symbol=$($j.Sym)

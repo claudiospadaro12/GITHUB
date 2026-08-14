@@ -180,6 +180,10 @@ $Blindatura
   $tag="$($j.Nome)_openconfirm_$tfNome"
   $ini=Join-Path $Work "oc_$tag.ini"
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Tester]
 Expert=$($j.EA).ex5
 Symbol=$($j.Sym)
