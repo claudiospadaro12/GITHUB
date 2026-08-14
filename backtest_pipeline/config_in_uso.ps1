@@ -33,7 +33,11 @@
 # =====================================================================
 param(
   [string] $Filtro  = "",                       # regex extra sul testo della riga (vuoto = tutte)
-  [int]    $Giorni  = 30,                       # quanti giorni di log guardare indietro
+  # 14/08, DOPO il primo lancio: era 30 e ha trovato UNA riga sola. Non
+  # perche' giri un EA solo, ma perche' la riga CONFIG IN USO la scrive
+  # solo chi si e' RIAVVIATO nel periodo guardato: un EA acceso da tre
+  # mesi e mai toccato e' invisibile. 120 giorni li ripesca quasi tutti.
+  [int]    $Giorni  = 120,                      # quanti giorni di log guardare indietro
   [switch] $Tutte                               # mostra TUTTE le righe, non solo l'ultima per EA
 )
 $ErrorActionPreference = "Continue"
@@ -162,6 +166,12 @@ Copy-Item $dest $cart -Force -ErrorAction SilentlyContinue
 $zip = Join-Path ([Environment]::GetFolderPath("Desktop")) "config_dax.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
 Compress-Archive -Path (Join-Path $cart "*") -DestinationPath $zip -Force -ErrorAction SilentlyContinue
+
+Write-Host "`n!!! COSA QUESTO REFERTO NON PUO' DIRE !!!" -ForegroundColor Yellow
+Write-Host "    Compare solo chi si e' RIAVVIATO negli ultimi $Giorni giorni." -ForegroundColor Gray
+Write-Host "    Un EA acceso da mesi e mai toccato NON scrive CONFIG IN USO e" -ForegroundColor Gray
+Write-Host "    quindi NON compare: assenza non vuol dire 'non gira'." -ForegroundColor Gray
+Write-Host "    Per sapere chi e' ATTACCATO adesso: elenco_ea_attaccati.ps1" -ForegroundColor Gray
 
 Write-Host "`n=== RACCOLTA ===" -ForegroundColor Cyan
 Write-Host "  righe trovate : $tot"

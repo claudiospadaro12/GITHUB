@@ -115,3 +115,80 @@ La seconda istanza a 770101 non e' in mappa. Si risolve leggendo la riga
 - Non dice che il breakout perde: quattro trade non misurano niente. Lo dicono
   i cinque round di banco, e questi quattro trade ci vanno soltanto d'accordo.
 - Non tocca il 100k, che sta girando **la cella giusta**.
+
+---
+
+# APPENDICE — LA MISURA (14/08, referto `config_in_uso.txt`)
+
+Lanciato `config_in_uso.ps1` sul VPS. **Una riga sola**, sul terminale del
+conto **50503392**:
+
+```
+20260814  09:25:23  ABTG_DAX_Apertura_EU (D30EUR,M3)
+  CONFIG IN USO -> motore=ABTG_BREAKOUT | rangemode=ABTG_RANGE_OPENING |
+  range=15 min | buffer=20 pt | offset retest=0 pt | lati=long+short |
+  rischio=2.00% | TP=3.0R | parziale=50% | BE=si |
+  trail=ABTG_TRAIL_FIXED PERIOD_M1 | trail da=0.00R
+```
+
+## 1. L'aritmetica di stamattina era giusta al centesimo
+
+Dai due prezzi degli screenshot avevo ricavato **buffer = 0,20 punti indice
+= 20 punti**. Il referto dice **`buffer=20 pt`**. La derivazione (stesso
+range di apertura, due geometrie diverse) era corretta, e ora e' confermata
+da una misura indipendente.
+
+## 2. Che cos'e' davvero quell'istanza
+
+| parametro | l'istanza trovata | la cella VALIDATA (06/08) | giudizio |
+|---|---|---|---|
+| motore | **BREAKOUT** | RETEST | bocciato 5 volte al banco |
+| range | **15 min** | 35 min | 0 celle positive su 12 sotto i 35 |
+| buffer | **20 pt** | 500 pt | mai stato ne' default ne' validato |
+| offset retest | 0 | 200 | — |
+| trailing | **FIXED M1** | PREVBAR M5 | M1 e' il PEGGIORE dei sei sul DAX (-801 contro -79 su 440 trade) |
+| rischio | 2,00% | 2,00% | uguale |
+| grafico | **D30EUR M3** | M5 | in `FLOTTA_ATTIVA.md` l'M3 e' del `SuperWave_EA` |
+
+**Non e' una configurazione vecchia rimasta indietro: e' una configurazione
+che non e' MAI esistita.** Il pre-06/08 era breakout/15/**200**/0. Qui il
+buffer e' **20**, cioe' 200 con uno zero in meno — un numero digitato a mano
+in una casella, non un parametro scelto. E il trailing FIXED M1 non e' la
+ricetta di famiglia di nessuna epoca.
+
+Tradotto: un EA su un grafico di prova (M3), con parametri buttati dentro a
+mano, che opera al **2% di rischio** col motore bocciato e **con lo stesso
+magic 770101** della cella promossa. Il 14/08 ha perso 1R (−104,60).
+
+## 3. ⚠️ QUELLO CHE IL REFERTO NON DIMOSTRA
+
+`CONFIG IN USO` la scrive **solo chi si riavvia**. Con la finestra a 30
+giorni e' uscita una riga sola — e non perche' giri un EA solo, ma perche'
+gli altri sono accesi da mesi e non si sono mai riavviati. **Assenza non
+vuol dire "non gira".** In particolare:
+
+- **il conto 100k (50504263) non compare affatto**: o il suo terminale non
+  sta su quella macchina, o nessuno dei suoi EA si e' riavviato di recente.
+  Non e' un problema di per se'.
+- **l'istanza a RETEST esiste quasi certamente**: i trade del 07/08 e
+  dell'11/08 (magic 770101, commento `RETEST BUY`) non possono venire da
+  questa, che il retest non lo sa fare. Semplicemente non si e' riavviata
+  nel periodo guardato.
+
+Correzioni gia' fatte allo strumento: finestra di default portata a **120
+giorni**, e in coda al referto viene ora stampato a chiare lettere che
+l'assenza non e' una prova.
+
+## 4. La domanda che resta aperta (una sola)
+
+Perche' quell'EA si e' **riavviato stamattina alle 09:25:23 locali** (08:25
+server), 24 minuti prima di comprare? Un EA si re-inizializza quando viene
+attaccato, ricompilato, o quando gli si cambiano i parametri o il
+timeframe. Nessuna di queste cose succede da sola.
+
+## 5. Prossimo passo
+
+`elenco_ea_attaccati.ps1` incrocia **due** fonti (i log + i profili `.chr`)
+e dice chi e' **attaccato adesso**, anche se muto. E' l'altra meta' della
+risposta: `config_in_uso` dice *con che parametri e' partito chi e'
+ripartito*, questo dice *chi c'e*'.

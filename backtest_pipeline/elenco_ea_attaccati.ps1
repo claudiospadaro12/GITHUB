@@ -249,10 +249,27 @@ Riga "  - nel csv e NON qui  -> il csv dichiara un EA che non gira"
 
 $dest = Join-Path $env:USERPROFILE "ea_attaccati.txt"
 $out | Set-Content -Path $dest -Encoding UTF8
+
+# --- raccolta sul Desktop + zip (regola delle righe di lancio) -------
+#  14/08: mancava. Ogni risultato destinato a Claudio arriva SEMPRE anche
+#  sul Desktop, VPS compreso, gia' zippato e pronto da mandare.
+$cart = Join-Path ([Environment]::GetFolderPath("Desktop")) "ea_attaccati"
+if (Test-Path $cart) { Remove-Item $cart -Recurse -Force -ErrorAction SilentlyContinue }
+New-Item -ItemType Directory -Path $cart -Force | Out-Null
+Copy-Item $dest $cart -Force -ErrorAction SilentlyContinue
+
+$zip = Join-Path ([Environment]::GetFolderPath("Desktop")) "ea_attaccati.zip"
+if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
+Compress-Archive -Path (Join-Path $cart "*") -DestinationPath $zip -Force -ErrorAction SilentlyContinue
+
 Write-Host ""
 Write-Host "=====================================================" -ForegroundColor Green
 Write-Host " IL FILE DA MANDARMI E' QUESTO:" -ForegroundColor Green
-Write-Host "   $dest" -ForegroundColor White
+Write-Host "   $zip" -ForegroundColor White
 Write-Host "=====================================================" -ForegroundColor Green
+Write-Host "File attesi nello zip (1):" -ForegroundColor Gray
+Get-ChildItem $cart -ErrorAction SilentlyContinue | ForEach-Object {
+  Write-Host ("   {0}  ({1} byte)" -f $_.Name, $_.Length)
+}
 try { Start-Process notepad.exe $dest } catch { }
 try { Set-Clipboard -Value $dest } catch { }
