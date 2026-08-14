@@ -355,3 +355,51 @@ due risposte diverse.
 **Da fare, stesso difetto:** `ABTG_Dow_Apertura_US.mq5:704`,
 `ABTG_Nasdaq_Apertura_US.mq5:751`, `ABTG_Apertura_Marco.mq5:636` hanno la
 stessa riga e vanno corretti allo stesso modo.
+
+---
+
+# APPENDICE 4 — LA CONTROPROVA DAL VPS: il quadro si chiude
+
+Stesso filtro sul VPS (utente Administrator). Due cartelle dati diverse dicono
+due cose diverse, ed e' proprio quello che serviva.
+
+## 1. Il terminale del conto piccolo ha visto arrivare l'ordine, non l'ha mandato
+
+```
+09:49:24.678  '50503392': deal #2735926 buy 2 D30EUR at 26479.00 done (based on order #3160534)
+09:49:24.687  '50503392': cancel order #3160535 sell stop 2 D30EUR at 26426.70
+10:17:54.619  '50503392': deal #2737314 sell 2 D30EUR at 26426.70 done (based on order #3162207)
+```
+
+Il numero d'ordine e' **#3160534**: lo stesso che il PC aveva **piazzato** alle
+09:25:01. Qui c'e' solo il **riempimento** — il VPS e' collegato allo stesso
+conto e quindi registra i deal, ma la riga "buy stop ... done in NN ms" (cioe'
+l'invio) sul VPS **non c'e'**. Piazzato dal PC, eseguito sul conto, visto da
+tutti e due. La catena e' completa.
+
+Si vede anche l'OCO che spegne il lato opposto 9 millisecondi dopo il fill, e
+la chiusura sullo stop alle 10:17:54 locali (= 09:17:54 server): il fuso
+"server = ora italiana meno uno" torna al secondo.
+
+## 2. L'altro terminale del VPS conferma l'aritmetica del mattino
+
+```
+09:35:00.055  ABTG_DAX_Apertura_EU (D30EUR,M5)
+  [DAX Apertura EU] RETEST armato: range 26478.80000-26426.90000,
+  buffer 500 pt, bias 0. Attendo rottura + ritorno sul livello.
+```
+
+Il mattino, dai soli due prezzi degli screenshot, avevo ricavato
+**H = 26.478,80** e **L = 26.426,90**. L'EA scrive nel suo log esattamente
+quei due numeri, alla quinta cifra. La derivazione era giusta, e adesso non e'
+piu' una derivazione: e' una lettura.
+
+## 3. La mappa finale
+
+| dove | terminale | grafico | motore | esito del 14/08 |
+|---|---|---|---|---|
+| **PC** DESKTOP-H4D7CAJ | 215D85D7... | D30EUR **M3** | BREAKOUT, buffer 20 | ha PIAZZATO #3160534/#3160535 -> -104,60 sul conto piccolo |
+| **VPS** Administrator | BCA8AD18... | D30EUR **M5** | RETEST, buffer 500 | armato 09:35, e' la cella validata (il trade del 100k) |
+| **VPS** Administrator | 215D85D7... | — | — | collegato al conto: registra i deal, non li manda |
+
+Il VPS non ha colpe: fa quello che deve. La seconda flotta era sul PC.
