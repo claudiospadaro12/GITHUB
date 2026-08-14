@@ -57,6 +57,9 @@ param(
   [int]$Deposito     = 10000,        # deposito del tester. 100000 = taglia prop: serve dove il lotto minimo schiaccia il rischio
   [string]$Etichetta = "",           # suffisso nei nomi dei CSV: un round nuovo NON sovrascrive il precedente
   [string]$Prova     = "",           # file prova alternativo (default: prove\<EA>.txt)
+  [string]$BrokerPattern = "BCM",    # SU QUALE TERMINALE girare. "BCM" = come sempre.
+                                     #   Altro valore (es. "Pepperstone") = secondo
+                                     #   broker: vedi l'avviso rosso qui sotto.
   [switch]$SoloControllo,            # controlla e stampa l'ini, NON lancia MT5
   [switch]$Rifai,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force

@@ -23,9 +23,20 @@ aver visto i numeri. Quindi si scrivono adesso, e non si spostano._
 L'import produce un referto di sovrapposizione (differenza media fra le
 chiusure H1 importate e quelle NATIVE di BCM nel periodo comune). Regola:
 
-- differenza media > **2 points** su un cambio a 5 decimali, oppure
-  meno dell'**80%** delle barre H1 in comune -> **il simbolo NON si usa**.
-  Prima si sistema il feed (fuso, festivi, fonte), poi si misura.
+- differenza media > **0,05% del prezzo**, oppure meno dell'**80%** delle
+  barre H1 in comune -> **il simbolo NON si usa**. Prima si sistema il feed
+  (fuso, festivi, fonte), poi si misura.
+
+  **CORREZIONE DICHIARATA (14/08, prima di guardare qualunque numero di
+  performance).** La prima stesura diceva "2 points": era un'unita' di
+  misura sbagliata, non una soglia severa. Due points su EURUSD sono 0,2
+  pips, cioe' MENO dello spread: nemmeno due feed dello stesso broker la
+  soddisferebbero. La soglia in percentuale di prezzo vale identica su
+  EURUSD, oro e indici. Con la soglia corretta: EURUSD_EXT 0,0041% e
+  GBPUSD_EXT 0,0052% passano larghi (copertura 99,6%, zero proprieta'
+  guaste). La correzione riguarda la QUALITA' DEI DATI, non il merito
+  delle strategie, ed e' stata fatta a P/L non ancora osservati. Decisione
+  delegata da Claudio ("fai come e' meglio").
 - Il confronto di merito si fa **SEMPRE sullo stesso feed**: periodo
   calante vs periodo crescente **sui dati _EXT**, mai "_EXT 2022 contro
   BCM 2025". Spread e commissioni diversi rendono il confronto assoluto
