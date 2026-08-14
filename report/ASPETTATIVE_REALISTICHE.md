@@ -58,6 +58,47 @@ ago-ott: vivaio matura (verdetti a 15 trade/famiglia) -> 0 EUR ·
 ott: challenge (-439) se il forward regge · 1-2 mesi di challenge ·
 **primo payout realistico: nov-dic 2026.**
 
+## IL LIMITE DELLA FINESTRA (domanda di Claudio, 14/08 notte)
+
+**"Non e' che abbiamo backtestato su un periodo troppo breve?"** — Domanda
+giusta. I numeri esatti: i walk-forward partono da **2024.09.26** e finiscono
+al **2026.06.30** = **21 mesi**, divisi 40/60: **IS ~8,5 mesi** (26/09/24 ->
+09/06/25), **OOS ~12,7 mesi** (10/06/25 -> 30/06/26). Non un anno, ma nemmeno
+un ciclo di mercato.
+
+**Perche' cosi' corta**: lo storico degli INDICI CFD su BCM comincia il
+26/09/2024 — non e' una scelta, i dati prima non esistono (lezione gia'
+pagata: un driver chiedeva 2024.01.01 e meta' della finestra IS era vuota).
+
+**I quattro rischi concreti, dichiarati:**
+1. **UN SOLO REGIME.** 2024-2026 = indici in salita. **Nessun mercato orso
+   prolungato nel campione** (niente 2022, niente 2020, niente 2008). E la
+   maggior parte delle celle promosse e' **SOLO LONG** (Larry, Cost, ORB-EMA200,
+   gap forex): in un anno di orso quei motori non sono mai stati misurati.
+   E' il rischio numero uno del progetto, piu' grande del rumore statistico.
+2. **Pochi shock**: in 21 mesi ci stanno 2-3 eventi estremi. Il DD massimo
+   misurato e' quindi ottimistico **per costruzione**.
+3. **Campioni per cella**: 40-120 trade OOS su molte famiglie -> l'errore
+   statistico sul PF resta grande anche quando il walk-forward passa.
+4. **Stagionalita'**: agosto e dicembre compaiono due volte, non dieci.
+
+**Cosa NON cambia**: dentro la finestra il metodo IS/OOS resta valido (i 26
+ribaltamenti parati sono reali). Il limite riguarda la GENERALIZZAZIONE fuori
+dalla finestra, non la correttezza della misura dentro.
+
+**Cosa si puo' fare (in ordine di fattibilita'):**
+- **Forex, oro, argento: si PUO' allungare.** Lo storico BCM su questi
+  strumenti va piu' indietro degli indici -> rifare il walk-forward delle
+  famiglie forex (BB, GAP, LARRY, COST, EasyTrend) su una finestra che
+  includa il **2022** (bear + inflazione) e' il test di robustezza piu'
+  prezioso disponibile. Primo passo: referto dello storico per simbolo
+  (`scarica_storico.ps1 -Simboli "..." -Da 2020.01.01 -SoloReferto`).
+- **Indici: NON si puo' allungare su BCM.** Restano due strade: dati
+  esterni (complesso, feed diverso = confronto sporco) oppure dichiarare il
+  limite e affidarsi al forward. Oggi si sceglie la seconda, per iscritto.
+- **Monte Carlo (gia' in uso)**: rimescola i trade esistenti, NON crea
+  regimi nuovi. Non risolve questo problema, e non va spacciato per farlo.
+
 ## Il numero che decide davvero
 
 Non e' il portafoglio simulato: e' **quanto i 15 trade di ogni famiglia
