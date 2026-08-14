@@ -148,6 +148,15 @@ foreach($c in $Lista){
 #     magic in SWEEP GEMELLO (due valori): serve al tester per produrre il
 #     CSV di ottimizzazione, ed e' il controllo di igiene (le due righe
 #     devono uscire identiche al centesimo).
+#
+#     14/08: il primo giro ha prodotto ZERO CSV su 32 lanci. Causa:
+#     l'ini diceva Optimization=2, cioe' l'algoritmo GENETICO, su uno
+#     spazio di DUE sole combinazioni. Il genetico ha bisogno di una
+#     popolazione: con due punti non ha niente da far evolvere e non
+#     produce passate. scan_market.ps1 usa 2 e funziona, ma li' le
+#     combinazioni sono centinaia; walkforward_generico.ps1, che gira da
+#     mesi, usa 1. Qui la scelta giusta e' 1 (enumerazione completa):
+#     con due combinazioni e' anche la piu' veloce.
 $magic = 772601
 $fatti = 0; $saltati = 0
 foreach($c in $Lista){
@@ -178,7 +187,7 @@ Expert=$($c.EA).ex5
 Symbol=$sym
 Period=$($c.Periodo)
 Model=$Modello
-Optimization=2
+Optimization=1
 OptimizationCriterion=6
 FromDate=$($f.da)
 ToDate=$($f.a)

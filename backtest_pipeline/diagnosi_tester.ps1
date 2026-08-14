@@ -61,11 +61,20 @@ foreach ($dir in $cartelle) {
   #     MT5 li tiene in bases\Custom\ . Se la cartella non c'e', di
   #     simboli costruiti non ne esiste nemmeno uno.
   # ---------------------------------------------------------------
+  #  14/08, PRIMA STESURA SBAGLIATA: guardavo le cartelle dentro
+  #  bases\Custom e mi usciva "history / ticks", cioe' i CONTENITORI, non i
+  #  simboli. I nomi veri stanno un livello piu' sotto: bases\Custom\history\
+  #  <SIMBOLO>. Elencare il livello sbagliato faceva sembrare che di simboli
+  #  costruiti non ce ne fosse nessuno, mentre c'erano 297 MB di storico.
   $custom = Join-Path $dir.FullName "bases\Custom"
   if (Test-Path $custom) {
-    $sym = @(Get-ChildItem $custom -Directory -ErrorAction SilentlyContinue)
+    $sym = @()
+    foreach ($sotto in @("history", "ticks", ".")) {
+      $q = Join-Path $custom $sotto
+      if (Test-Path $q) { $sym += @(Get-ChildItem $q -Directory -ErrorAction SilentlyContinue) }
+    }
+    $sym = @($sym | Sort-Object Name -Unique)
     if ($sym.Count -eq 0) {
-      # in certe build i simboli non sono cartelle ma file
       $sym = @(Get-ChildItem $custom -ErrorAction SilentlyContinue)
     }
     if ($sym.Count -gt 0) {
@@ -115,6 +124,24 @@ foreach ($dir in $cartelle) {
     }
   } else {
     Riga "  Tester\logs NON ESISTE: il tester non e' mai partito su questa cartella dati." "Red"
+  }
+
+  #  Il log di Tester\logs e' spesso quasi vuoto: le passate vere girano
+  #  negli AGENTI, che hanno i loro log. E' li' che si trova "symbol not
+  #  found" o il motivo per cui l'ottimizzazione non e' partita.
+  $agenti = @(Get-ChildItem (Join-Path $dir.FullName "Tester") -Directory -EA SilentlyContinue |
+              Where-Object { $_.Name -like "Agent*" })
+  foreach ($ag in $agenti) {
+    $al = Join-Path $ag.FullName "logs"
+    if (-not (Test-Path $al)) { continue }
+    $af = @(Get-ChildItem $al -Filter "*.log" -EA SilentlyContinue |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1)
+    if ($af.Count -eq 0) { continue }
+    $atxt = Leggi-Testo $af[0].FullName
+    $ar = @($atxt -split "`r?`n" | Where-Object { $_.Trim() -ne "" })
+    if ($ar.Count -eq 0) { continue }
+    Riga ("  agente " + $ag.Name + " -> " + $af[0].Name + "  (" + $af[0].LastWriteTime + ")") "Yellow"
+    foreach ($r in ($ar | Select-Object -Last 12)) { Riga ("    " + $r.Trim()) }
   }
 
   # ---------------------------------------------------------------
