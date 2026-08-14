@@ -30,7 +30,7 @@
 //|  altre. Finche' non passano il walk-forward restano spente.       |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
 //--- DEFAULT specifici per il Nasdaq (usati dal motore ABTG_ApertureCore)
@@ -615,8 +615,19 @@ void ABTG_OnTick()
    if(InpOneTradePerDay && gGuardiaGiorno != now.day_of_year &&
       (gPhase == PH_WAIT_OPEN || gPhase == PH_BUILDING))
      {
+      // Si timbra la giornata SOLO se lo storico ha risposto davvero.
+      // Timbrarla PRIMA di sapere era il difetto trovato il 14/08/2026:
+      // a storico non ancora sincronizzato la guardia passava una volta
+      // sola, in silenzio, e non ci riprovava mai piu'.
+      bool storicoOk = false;
+      bool giaFatto  = HaGiaOperatoOggi(storicoOk);
+      if(!storicoOk)
+        {
+         ABTGLog("storico deal non ancora pronto: rimando il controllo A4 al prossimo tick.");
+         return;
+        }
       gGuardiaGiorno = now.day_of_year;   // una volta al giorno, non a ogni tick
-      if(HaGiaOperatoOggi())
+      if(giaFatto)
         {
          ABTGLog("oggi ho GIA' operato (storico deal del giorno): non riarmo. Guardia reload-safe.");
          gPhase = PH_DONE;
@@ -741,14 +752,22 @@ void ABTG_OnTick()
 //|  riarmo, anche se e' gia' chiusa e anche se l'EA e' stato        |
 //|  ricompilato nel frattempo.                                      |
 //+------------------------------------------------------------------+
-bool HaGiaOperatoOggi()
+//  14/08/2026 - AGGIUNTO storicoOk (stesso difetto corretto sul DAX).
+//  Appena il terminale parte lo storico dei deal puo' non essere ancora
+//  sincronizzato: HistorySelect ritorna false e la vecchia versione
+//  rispondeva "no, oggi non ho operato" - indistinguibile da "non lo so".
+//  Adesso sono due risposte diverse, e con "non lo so" il chiamante non
+//  timbra la giornata e ripete il controllo al tick dopo.
+bool HaGiaOperatoOggi(bool &storicoOk)
   {
+   storicoOk = false;
    MqlDateTime d;
    TimeToStruct(TimeCurrent(), d);
    d.hour = 0; d.min = 0; d.sec = 0;
    datetime inizioGiorno = StructToTime(d);
 
    if(!HistorySelect(inizioGiorno, TimeCurrent() + 60)) return(false);
+   storicoOk = true;
 
    int n = HistoryDealsTotal();
    for(int i = n - 1; i >= 0; i--)
