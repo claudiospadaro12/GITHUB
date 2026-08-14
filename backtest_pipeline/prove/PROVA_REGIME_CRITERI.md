@@ -110,3 +110,49 @@ per nessun motivo, nemmeno se i numeri faranno male a un EA a cui teniamo:
 e' esattamente il momento in cui una regola scritta prima vale qualcosa.
 Da qui in avanti ogni verdetto della prova di regime cita il criterio che
 lo produce.
+
+---
+
+## CORREZIONE DICHIARATA n.2 — il criterio B parlava di celle che non ci sono
+
+**Fatta il 14/08/2026 sera, a R50 in corso e a NUMERI NON ANCORA VISTI.**
+Nata da una domanda di Claudio: *"se un EA e' tarato solo su long, il test
+valuta se lo short sarebbe potuto entrare?"*.
+
+Andando a controllare i lati veri delle 8 celle in prova, viene fuori che
+**nessuna e' long-only**:
+
+| cella | lati | da dove |
+|---|---|---|
+| BB_GBPUSD, BB_EURUSD | **entrambi** | `ABTG_BreakingBand` non ha nemmeno gli input `InpAllowLong/Short`: opera nei due sensi per costruzione |
+| GAP_GBPUSD, GAP_EURUSD | **entrambi** | idem per `ABTG_GapFill` |
+| PTE_GBPUSD | entrambi | default `InpAllowLong=true`, `InpAllowShort=true` |
+| SW_GBPUSD | entrambi | idem |
+| EZ_GBPUSD | entrambi | scritto esplicitamente nella cella |
+| LARRY_GBPUSD | **SOLO SHORT** | `InpAllowLong=0; InpAllowShort=1` nella cella |
+
+Il criterio B diceva: *"quasi tutte le nostre celle sono long-only, ed e'
+NORMALE che un long-only guadagni poco o niente in un mercato che scende"*.
+**Per queste otto celle e' falso.** Sette lavorano nei due sensi e una e'
+short-only.
+
+### Cosa cambia, in concreto
+
+- **La clemenza del criterio B qui NON si applica.** Un motore che opera in
+  entrambi i sensi e nell'orso 2022 fa PF sotto 0,90 non ha l'attenuante
+  "e' long-only": sta sbagliando in un mercato in cui poteva anche guadagnare.
+  La correzione rende il giudizio **piu' severo**, non piu' morbido: e'
+  l'unica direzione in cui e' lecito correggere un criterio dopo il via.
+- **LARRY va letto al contrario.** E' short-only: l'orso 2022 e il crollo
+  2020 sono il SUO terreno. Se non guadagna li', e' un dato pesante; se
+  guadagna SOLO li', e' un motore di regime e va etichettato cosi', non
+  promosso come motore per tutte le stagioni.
+- La frase originale del criterio B resta valida per **altre** parti del
+  portafoglio (le celle sugli indici), che pero' in R50 non ci sono perche'
+  HistData non ha gli indici.
+
+### Perche' era sbagliata
+
+L'avevo scritta al mattino ragionando sul portafoglio nel suo insieme,
+**senza aprire il file delle celle**. E' lo stesso errore di metodo della
+giornata: dedurre invece di leggere.

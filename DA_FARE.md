@@ -53,6 +53,23 @@ Le 4 finestre: ORSO 2022 - CROLLO 2020 - TORO 2021 - LATERALE 2019.
 `prove/PROVA_REGIME_CRITERI.md` (A sopravvivenza, B tenuta, C rango, D due
 banchi, E ripescaggi). Non si spostano, e ogni verdetto cita il criterio.
 
+## 1-bis. R52 — IL LATO SCARTATO (domanda di Claudio, tesi gia' congelata)
+
+"Se un EA e' tarato solo su long, il test valuta se lo short sarebbe potuto
+entrare?" Su R50 la risposta e' NO, e non serve: **sette celle su otto
+lavorano gia' in tutti e due i sensi** (BB e GAP non hanno nemmeno gli input
+del lato; PTE, SW, EZ hanno entrambi a true). L'unica in cui il lato e' stato
+una scelta e' **LARRY, short-only**.
+
+Dove la domanda morde davvero e' sulle celle degli INDICI, che entreranno con
+Pepperstone: sono state tarate su 21 mesi di mercato che saliva, quindi il
+lato scelto li' dentro puo' essere un riflesso del campione piu' che una
+scoperta.
+
+Tesi e criteri congelati il 14/08 a numeri non visti:
+`prove/R52_LATI_TESI.md`. Regola madre: **i dati _EXT PROPONGONO, non
+validano**. Da fare dopo R50 e dopo Pepperstone.
+
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 
 HistData non ha gli indici, quindi **4 titolari su 5 (DAX, Dow, Nasdaq,
