@@ -68,12 +68,29 @@ $mt5Aperto = [bool](Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
 # =====================================================================
 #  FONTE 1 - I LOG. Ogni riga porta in testa "Nome (SIMBOLO,TF)".
 # =====================================================================
+# --- lettura CONDIVISA (14/08/2026) ---------------------------------
+#  [IO.File]::ReadAllBytes apre in lettura esclusiva: se MT5 e' aperto e
+#  sta scrivendo il log, la chiamata fallisce con "il processo non puo'
+#  accedere al file perche' e' in uso da un altro processo". E' successo
+#  la sera del 14/08 sul terminale Pepperstone. Con FileShare::ReadWrite
+#  si legge anche un file che qualcun altro tiene aperto in scrittura.
+function Leggi-Bytes($path) {
+  try {
+    $fs = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+    $b  = New-Object byte[] $fs.Length
+    [void]$fs.Read($b, 0, $b.Length)
+    $fs.Close()
+    return $b
+  } catch { return $null }
+}
+
 function Leggi-Log($path) {
   # L'encoding NON si indovina provando: un file UTF-8 letto come Unicode da'
   # caratteri strani ma NESSUN byte nullo, quindi il controllo "ci sono zeri?"
   # lo accetterebbe per buono. Si guarda il BOM, e senza BOM si contano gli
   # zeri in posizione dispari: in UTF-16 latino un byte su due e' zero.
-  try { $b = [IO.File]::ReadAllBytes($path) } catch { return $null }
+  $b = Leggi-Bytes $path
+  if ($null -eq $b) { return $null }
   if ($b.Count -lt 4) { return $null }
   $utf16 = ($b[0] -eq 0xFF -and $b[1] -eq 0xFE)
   if (-not $utf16) {
