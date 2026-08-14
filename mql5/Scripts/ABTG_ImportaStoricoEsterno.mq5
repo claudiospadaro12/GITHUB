@@ -642,8 +642,10 @@ void OnStart()
      {
       PrintFormat("   diff media H1 ....... %.1f points (%.4f%% del prezzo)", esito.diffMediaPti, esito.diffMediaPct);
       PrintFormat("   diff massima H1 ..... %.1f points il %s", esito.diffMaxPti, TimeToString(esito.quandoMax, TIME_DATE|TIME_MINUTES));
-      PrintFormat("   copertura ........... %.1f%% (%d barre H1 presenti in ENTRAMBI su %d)",
-                  esito.coperturaPct, esito.barre, esito.barreNative);
+      PrintFormat("   copertura ........... %.1f%% (%d ore H1 presenti in ENTRAMBI i feed,",
+                  esito.coperturaPct, esito.barre);
+      PrintFormat("                         su %d ore importate che cadono dentro il", esito.barreNative);
+      Print("                         periodo dello storico nativo BCM)");
       Print("   NOTA: il picco di differenza massima cade quasi sempre nelle due");
       Print("   settimane l'anno in cui l'ora legale USA e quella europea non");
       Print("   coincidono. Uno shift COSTANTE non le puo' correggere: se una");
