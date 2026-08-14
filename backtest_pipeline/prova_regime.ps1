@@ -150,6 +150,20 @@ foreach($c in $Lista){
   catch{ Muori "non riesco a scaricare l'EA $($c.EA)" }
   & $MetaEditor "/compile:$src" "/log" | Out-Null
   if(-not (Test-Path (Join-Path $MqlExperts ("{0}.ex5" -f $c.EA)))){ Muori "compilazione fallita: $($c.EA)" }
+  # LA TRAPPOLA N.1, quella che walkforward_generico documenta in testa:
+  # MT5 RICORDA per ogni EA i flag di ottimizzazione dell'ultima griglia,
+  # e li tiene in MQL5\Profiles\Tester\<EA>.set. Passare in [TesterInputs]
+  # solo ALCUNI parametri non spegne il flag sugli altri: se uno di quelli
+  # rimasti ha uno sweep degenere (start uguale a stop, oppure passo zero)
+  # il tester calcola ZERO combinazioni e non avvia niente - nessun agente,
+  # nessun log, nessun CSV. Walkforward lo evita blindando TUTTI gli input;
+  # qui si fa la cosa piu' diretta e senza rischio di sbagliare un default:
+  # si butta via la memoria e MT5 riparte dai valori compilati.
+  $ricordo = Join-Path $DataFolder ("MQL5\Profiles\Tester\{0}.set" -f $c.EA)
+  if(Test-Path $ricordo){
+    Remove-Item $ricordo -Force -ErrorAction SilentlyContinue
+    Write-Host ("    buttata la memoria del tester per {0}" -f $c.EA) -ForegroundColor DarkYellow
+  }
   Write-Host ("    compilato {0}" -f $c.EA) -ForegroundColor Green
   $EAfatti[$c.EA] = $true
 }
@@ -216,8 +230,25 @@ $blocco
 
     Write-Host ""
     Write-Host ("--- {0}  ({1} -> {2})  su {3} {4} ---" -f $tag, $f.da, $f.a, $sym, $c.Periodo) -ForegroundColor Cyan
-    Start-Process -FilePath $Terminal -ArgumentList "/config:$ini" -Wait
+    $prima = Get-Date
+    # percorso QUOTATO e attesa sul solo terminale, come nei due driver che
+    # funzionano da mesi: prova_regime era l'unico script del repo a fare
+    # diversamente, e non c'e' ragione di restare l'eccezione.
+    (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$ini`"" -PassThru).WaitForExit()
 
+    # RIPIEGO (ce l'ha walkforward_generico, qui mancava): se l'EA compone il
+    # nome in modo diverso da come lo prevedo, senza questo direi "NESSUN CSV"
+    # anche a tester andato benissimo. Cerco qualunque OptResults_ scritto
+    # DOPO l'avvio di questo lancio.
+    if(-not (Test-Path $csv)){
+      $alt = @(Get-ChildItem $MqlFiles -Filter "OptResults_*.csv" -EA SilentlyContinue |
+               Where-Object { $_.LastWriteTime -ge $prima } |
+               Sort-Object LastWriteTime -Descending | Select-Object -First 1)
+      if($alt.Count -gt 0){
+        Write-Host ("    CSV trovato con un altro nome: {0}" -f $alt[0].Name) -ForegroundColor Yellow
+        $csv = $alt[0].FullName
+      }
+    }
     if(Test-Path $csv){
       Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force
       $n = @(Get-Content $done).Count - 1

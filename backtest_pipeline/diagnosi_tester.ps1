@@ -145,6 +145,26 @@ foreach ($dir in $cartelle) {
   }
 
   # ---------------------------------------------------------------
+  #  2-bis. IL GIORNALE DEL TERMINALE
+  #     Mancava nella prima stesura: e' qui che MT5 scrive "unknown
+  #     symbol", "cannot open" e i motivi per cui il tester non parte.
+  # ---------------------------------------------------------------
+  $gio = Join-Path $dir.FullName "logs"
+  if (Test-Path $gio) {
+    $gf = @(Get-ChildItem $gio -Filter "*.log" -EA SilentlyContinue |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1)
+    if ($gf.Count -gt 0) {
+      $gt = Leggi-Testo $gf[0].FullName
+      $gr = @($gt -split "`r?`n" | Where-Object { $_.Trim() -ne "" })
+      $gs = @($gr | Where-Object {
+        $_ -match "(?i)error|fail|not found|no history|cannot|unknown|symbol|tester|optimi"
+      })
+      Riga ("  giornale " + $gf[0].Name + ": " + $gr.Count + " righe, " + $gs.Count + " interessanti") "Yellow"
+      foreach ($r in ($gs | Select-Object -Last $Righe)) { Riga ("    " + $r.Trim()) }
+    }
+  }
+
+  # ---------------------------------------------------------------
   #  3. I CSV che l'EA avrebbe dovuto scrivere
   # ---------------------------------------------------------------
   $files = Join-Path $dir.FullName "MQL5\Files"
