@@ -53,34 +53,64 @@ non-sanguinamento (0,90). Non guadagna, ma non si distrugge — che e'
 esattamente cio' che il criterio B chiede. Numeri piccoli in valore assoluto
 (−144 e −4 EUR): e' una cella che nelle finestre avverse **quasi non opera**.
 
-### SW_GBPUSD -> **MISURA ANNULLATA, DA RIFARE** (errore mio nel file celle)
+### SW_GBPUSD -> **SOPRAVVIVE** (criteri A + B), nessuna promozione
 
-**La riga di SuperWave in `CELLE_REGIME.txt` era sbagliata, e l'ho peggiorata
-io poche ore prima del lancio.** Diceva `H4` nella colonna del periodo ma
-passava `InpTF=16386`, che e' **H2**. Su segnalazione dell'audit ho
-"corretto" il numero portandolo a 16388 (H4). Era il contrario: la cella VIVA
-e' **SuperWave GBPUSD H2** (`CAMPAGNA_ARSENALE`, sedia +1, magic 770532), e il
-file fuori campione di riferimento e' a TF 16386. Sbagliata era l'etichetta,
-non il parametro.
+Rilanciato con `InpTF=16386` (H2) e periodo H2. Numeri definitivi:
 
-**Conseguenza:** le quattro finestre di SW_GBPUSD hanno misurato una cella che
-in vivaio non esiste. I numeri qui sotto restano agli atti ma **non valgono
-come verdetto**, e i quattro lanci vanno rifatti con `InpTF=16386`.
+| finestra | Profit | PF | DD | n |
+|---|---:|---:|---:|---:|
+| ORSO 2022 | −205 | 0,956 | 4,04% | 51 |
+| CROLLO 2020 | +115 | 1,066 | 1,60% | 17 |
+| TORO 2021 | **−3.187** | **0,564** | 5,48% | 65 |
+| LATERALE 2019 | −938 | 0,799 | 3,23% | 61 |
 
-Come si e' scoperto: cercando il DD fuori campione per chiudere il criterio A,
-il file archiviato conteneva TF 16386 e non 16388. **La verifica di un criterio
-ha trovato l'errore in un altro punto**: e' il motivo per cui i criteri si
-scrivono prima.
+**Criterio B:** PF 0,956 e 1,066 nelle finestre avverse, sopra la soglia di
+non-sanguinamento. Passato.
+**Criterio A:** fuori campione la cella ha DD **2,29%**
+(`ABTG_SuperWave_GBPUSD_OOS_r23e.csv`, TF 16386, rischio 1%), quindi la soglia
+e' **4,59%**. Nelle avverse ha fatto 4,04% e 1,60%: passato, ma nell'orso con
+poco margine.
+**Criterio C:** PF 0,956 nell'orso, sotto 1,10. Niente promozione.
 
-_Quello che segue vale solo come annotazione sulla cella H4, che non esiste:_
+#### La bandiera, e questa e' pesante
 
-### SW_GBPUSD (H4, cella inesistente) — annotazione, NON un verdetto
+Fuori campione (2024-2026, mercato in salita) questa cella ha fatto **+3.560
+con PF 1,84 su 63 operazioni**. Nel **TORO 2021** — il regime piu' simile —
+fa **−3.187 con PF 0,56 su 65 operazioni**. Stesso numero di trade, risultato
+opposto, contesto analogo.
 
-PF 0,96 e 1,07 nelle avverse: criterio B passato. Pero' e' **negativo in tre
-finestre su quattro**, e la peggiore e' il **TORO 2021** (−2.419, PF 0,63),
-cioe' il regime piu' simile a quello in cui e' stata tarata. I criteri di R50
-non giudicano le finestre non avverse, quindi **questo non e' un verdetto**:
-e' un dato che va portato al prossimo round di portafoglio.
+I criteri di R50 guardano solo le finestre avverse, quindi **non e' un
+verdetto**. Ma e' il dato piu' scomodo del round: dice che il buon fuori
+campione di SuperWave GBPUSD potrebbe non essere una proprieta' del motore.
+Va portato al prossimo round di portafoglio, non archiviato.
+
+#### E l'annullamento di prima era sbagliato: ecco perche'
+
+Avevo scritto che i primi quattro lanci di SW misuravano una cella
+inesistente (H4). **Non era vero, e la ritrattazione e' dovuta.**
+
+Il fatto che ha smontato la mia ricostruzione: rilanciando a 16386, **tre
+finestre su quattro sono uscite identiche al centesimo** al giro precedente
+(−205,35 · +114,92 · −937,50). L'EA usa `InpTF` per tutti i suoi indicatori
+(`ABTG_SuperWave.mq5:120-124, 144, 218, 323`): con due timeframe diversi
+quei numeri non potevano coincidere.
+
+La spiegazione sta nel driver, ed e' verificabile:
+`prova_regime.ps1:60` scarica il file delle celle **solo se manca**. La copia
+in `%TEMP%\prove\` era stata scaricata alle 16:44, quando la riga diceva
+ancora `InpTF=16386`. Il mio 16388 (commit 31dce3a) **non e' mai stato
+scaricato**: ogni lancio successivo ha continuato a usare la copia vecchia.
+
+Quindi il primo giro girava gia' sulla cella giusta, e l'unica cosa cambiata
+col rilancio e' il **periodo del grafico** (H4 -> H2), che sposta solo il
+TORO. Il verdetto sopra e' identico in entrambi i giri.
+
+**Due lezioni, non una.** La prima e' del driver: un file di configurazione
+che si scarica "solo se manca" e' una trappola a scoppio ritardato, perche'
+una correzione pushata non arriva mai a destinazione. La seconda e' mia: ho
+dichiarato annullata una misura senza avere in mano l'ini con cui era stata
+prodotta — un'inferenza presentata come fatto, lo stesso errore ripetuto in
+un'altra forma.
 
 ### LARRY_GBPUSD -> **NESSUNA DECISIONE** (criterio D)
 
@@ -178,8 +208,9 @@ solo della fascia forex, e va citato cosi' ogni volta che se ne parla.
    regimi — dopo il completamento del criterio A.
 2. **EZ resta fuori.** Seconda bocciatura, motivo indipendente.
 3. **BB_GBPUSD resta dov'e'.** Sopravvive (criterio B), non promuove.
-3-bis. **SW_GBPUSD: misura annullata.** Quattro lanci da rifare con
-   `InpTF=16386` (H2), la cella che gira davvero.
+3-bis. **SW_GBPUSD sopravvive** (A + B) ma va in **osservazione speciale**:
+   perde 3.187 nel toro 2021 dove fuori campione guadagnava 3.560. Da portare
+   al prossimo round di portafoglio.
 4. **LARRY e BB_EURUSD: nessuna decisione**, per regola dei due banchi.
 5. **GAP: prova non valida**, da rifare altrove. Nessun effetto sulla squadra.
 6. **Da fare prima di muovere pesi:** la tabella dei DD fuori campione per

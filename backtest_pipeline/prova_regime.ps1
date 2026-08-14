@@ -56,7 +56,17 @@ $Finestre = @(
 function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exit 1 }
 
 # --- 1. le celle ---
+#  14/08 sera, TRAPPOLA A SCOPPIO RITARDATO: il file si scaricava SOLO se
+#  mancava. La copia presa alle 16:44 e' rimasta in %TEMP% per tutta la
+#  serata, e una correzione pushata alle 17:05 non e' mai arrivata a
+#  destinazione: i lanci successivi hanno continuato a usare la versione
+#  vecchia, e io ho dichiarato annullata una misura che era invece giusta.
+#  Adesso: se il file NON e' stato passato a mano con -Celle, si riscarica
+#  sempre. Chi vuole una copia locale la passa esplicitamente.
+$CelleMie = ($Celle -ne "")
 if(-not $Celle){ $Celle = Join-Path $Work "prove\CELLE_REGIME.txt" }
+if($CelleMie -and -not (Test-Path $Celle)){ Muori "il file celle che mi hai passato non esiste: $Celle" }
+if(-not $CelleMie -and (Test-Path $Celle)){ Remove-Item $Celle -Force -ErrorAction SilentlyContinue }
 if(-not (Test-Path $Celle)){
   # 14/08: lo scaricamento falliva SEMPRE quando lo script veniva lanciato da
   # %TEMP% (cioe' con la riga irm), perche' la sottocartella prove\ non c'era e
