@@ -1,9 +1,144 @@
 # HANDOFF — punto d'ingresso per una chat nuova
 
 > **Da incollare in una chat nuova:**
-> *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da lì."*
+> *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-08-13 sera**. **Branch unico di lavoro: `lavoro`** (qui è consolidato TUTTO).
+> Ultimo aggiornamento: **2026-08-14 sera**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🔴🟢 AGGIORNAMENTO 14/08 SERA — la giornata in cui abbiamo scoperto CHI operava, e i primi dati di regime
+
+### 1. UN EA FANTASMA OPERAVA SUL CONTO DAL **PC**, non dal VPS
+
+Partito dalla domanda di Claudio "cosa e' successo?" su una perdita del DAX.
+I due trade gemelli del mattino avevano commenti **diversi**: sul 100k
+`DAX Apertura EU RETEST BUY` (BUY LIMIT), sul piccolo `DAX Apertura EU BUY`
+(BUY STOP). Sono due rami di codice che non si incrociano.
+
+**Provato dal giornale**, non dedotto: alle 09:25:01 il terminale del **PC di
+backtest** (DESKTOP-H4D7CAJ, utente Master, conto **50503392**) ha piazzato
+`buy stop 2 D30EUR at 26479.00` (ticket **#3160534**) e il sell stop gemello,
+da un grafico **D30EUR M3** con **motore BREAKOUT, range 15, buffer 20 pt,
+trailing FIXED M1, rischio 2%** — una configurazione **mai validata**, col
+**magic 770101** della cella promossa. Ha perso 1R (−104,60).
+
+**Il meccanismo** (questa e' la parte che vale): i driver lanciano MT5 con
+`/config:<ini>` del tester, ma `/config` **avvia il terminale**, che carica
+l'ultimo profilo coi grafici e gli EA attaccati. Con AutoTrading acceso quegli
+EA operano sul conto collegato. **Ogni backtest sul PC accendeva una seconda
+flotta sul conto vivo.** Spiega l'alternanza retest/breakout sul magic 770101
+dal 07/08 in poi: i giorni "breakout" sono i giorni in cui si lanciavano
+round.
+
+Ed e' **risuccesso alle 16:17:43** dello stesso giorno, mentre indagavamo: due
+pendenti veri, cancellati un minuto dopo — nel giornale si vede il gesto di
+Claudio che spegne AutoTrading.
+
+**Chiuso con tre lucchetti:** AutoTrading spento sul PC · EA staccato dal
+grafico M3 · **23 driver** che generano ini del tester ora scrivono
+`[Experts] AllowLiveTrading=false`.
+Referto completo, 4 appendici: `report/DAX_14-08_DUE_MOTORI.md`.
+
+### 2. BUG VERO NELLA GUARDIA A4 (corretto)
+
+Il secondo armamento non doveva avvenire. `CicliOggi()` faceva
+`if(!HistorySelect(...)) return(0)` — cioe' rispondeva **"non ho operato"**
+anche quando lo storico non era ancora sincronizzato all'avvio; e il chiamante
+timbrava `gGuardiaGiorno` **prima** di sapere, quindi non ci riprovava mai
+piu'. Confondere "non lo so" con "no". Corretto in
+`ABTG_DAX_Apertura_EU.mq5` (ora `CicliOggi` restituisce anche `storicoOk`).
+**Stesso difetto ancora da correggere** in `ABTG_Dow_Apertura_US.mq5:704`,
+`ABTG_Nasdaq_Apertura_US.mq5:751`, `ABTG_Apertura_Marco.mq5:636`.
+
+### 3. R50 — LA PRIMA PROVA DI REGIME DELLA STORIA DEL PROGETTO
+
+8 celle congelate x 4 finestre (**ORSO 2022 · CROLLO 2020 · TORO 2021 ·
+LATERALE 2019**) su storico importato `GBPUSD_EXT`/`EURUSD_EXT` (2,55 milioni
+di barre M1, differenza dal feed BCM 0,004-0,005%, copertura 99,6%).
+32 CSV su 32, righe gemelle del magic identiche in tutti.
+
+| cella | verdetto | criterio |
+|---|---|---|
+| **PTE_GBPUSD** | **PROMOSSO DI RANGO** | C (PF 1,62 orso · 1,07 crollo) + A (DD OOS 3,27% -> soglia 6,54%; fatti 1,99% e 1,41%) + D |
+| **EASY TREND** | **FUORI, definitivo** | E negato: fallisce B (crollo PF 0,39, −4.507) |
+| **SW_GBPUSD** | sopravvive, **osservazione speciale** | A+B passati; ma nel TORO fa −3.187 PF 0,56 dove fuori campione faceva +3.560 PF 1,84 |
+| **BB_GBPUSD** | resta dov'e' | B (0,93 e 1,00) |
+| **LARRY · BB_EURUSD** | nessuna decisione | D: orso e crollo si contraddicono (e crollo con n=3 / n=1) |
+| **GAP x2** | **non misurabile** | 0 trade: dipende dai confini di sessione, che il feed esterno con shift costante non riproduce |
+
+Referto: `risultati_archivio/REFERTO_ROUND50_REGIME.md` · CSV in
+`risultati_prove/regime_r50/`.
+
+**Limite da citare SEMPRE:** niente indici e niente oro (HistData non li ha),
+cioe' **4 titolari su 5 fuori**. Questo round parla solo della fascia forex.
+
+### 4. SEI DIFETTI DELLA PIPELINE TROVATI ARRIVANDOCI
+
+R50 non era mai girato prima e ha fatto emergere, tutti corretti:
+1. l'import **ammazzava MT5** con `Stop-Process -Force`: le barre custom
+   restavano su disco ma la **registrazione del simbolo si perdeva** ->
+   `Tester: symbol GBPUSD_EXT not exist`. Era **la causa dei 32 lanci a
+   vuoto**. Ora `Chiudi-MT5-Pulito` in 3 script.
+2. il file celle si scaricava **solo se mancante** -> una correzione pushata
+   non arrivava mai al tester. Ora si riscarica sempre.
+3. la memoria dei flag di ottimizzazione (`Profiles\Tester\<EA>.set`) non
+   veniva buttata.
+4. `/config` con percorso non quotato e `-Wait` invece dell'attesa sul solo
+   terminale.
+5. nessun ripiego se il CSV usciva con un altro nome.
+6. il messaggio di fallimento **faceva una domanda** invece di indicare il
+   giornale, dove MT5 scrive il motivo a parole sue.
+
+### 5. R51 e R52 — SCRITTI, NON ANCORA LANCIATI
+
+- **R51, lo short di ritorno** (idea di Claudio): il retest e' simmetrico ma
+  dopo il primo LIMIT la macchina a stati va in `PH_PLACED` e abbandona il
+  lato opposto — il motore promosso **lavorava mezza giornata**. Aggiunto
+  `InpAllowReverse` (v1.01, **default false**), tetto 2 cicli/giorno, solo da
+  flat. Tesi e criteri: `prove/R51_REVERSE_TESI.md`, prova pronta
+  `prove/R51_reverse_DAX.txt`. **Il verdetto lo da' il drawdown, non il PF.**
+- **R52, il lato scartato**: sulle 8 celle di R50 **nessuna e' long-only**
+  (7 bidirezionali, LARRY short-only), quindi li' la domanda non morde. Morde
+  sulle celle **indici**, tarate su 21 mesi di mercato in salita. Tesi
+  congelata: `prove/R52_LATI_TESI.md`. **Regola madre: i dati `_EXT`
+  PROPONGONO, non validano.**
+
+### 6. CORREZIONI DICHIARATE AI CRITERI (fatte a numeri non visti)
+
+In coda a `prove/PROVA_REGIME_CRITERI.md`:
+- **n.1** la soglia del cancello zero era in "points" (unita' sbagliata) ->
+  **0,05% del prezzo**;
+- **n.2** il criterio B parlava di celle "quasi tutte long-only" che **in R50
+  non esistono** -> la clemenza non si applica, il giudizio diventa **piu'
+  severo**.
+
+### 7. ERRORI MIEI DELLA GIORNATA, per non ripeterli
+
+Tutti della stessa famiglia: **dedurre invece di leggere**.
+- ho letto il livello sbagliato di `bases\Custom` e detto che i simboli non
+  c'erano (c'erano, 148 MB ciascuno);
+- ho letto `Tester\logs` invece del **giornale del terminale**, dove la
+  risposta era scritta in chiaro dalle 16:50;
+- ho dato la colpa a `Optimization=2`, poi ho definito "innocente" il blocco
+  `[Experts]` con un ragionamento circolare;
+- ho "corretto" `InpTF` di SuperWave da 16386 a 16388 peggiorandolo, e poi ho
+  **dichiarato annullata** una misura che era giusta, senza avere in mano
+  l'ini con cui era stata prodotta (**ritrattato**).
+
+Regola operativa che ne esce: **prima si legge il log, poi si formula
+l'ipotesi.** E quando MT5 non parte, il file da aprire e'
+`<CartellaDati>\logs\AAAAMMGG.log`.
+
+### 8. STATO CONTI (14/08 sera)
+
+- **100k (50504263)**: saldo **99.173,14** (−0,83% dal via), 6 trade 3/3.
+  Pavimento FTMO 90.000 -> **9.173 di margine**. La perdita del DAX di oggi
+  e' **1R esatto**, cioe' la taratura prevista.
+- **piccolo (50503392)**: contaminato fino a oggi dall'istanza fantasma del
+  PC. Da qui in avanti i numeri del DAX tornano leggibili.
+- **Vivaio**: 23 in prova + 5 in osservazione. Verdetti a **15 trade per
+  famiglia**. Pagella serale: si guarda **il win rate**, non il P/L.
 
 ---
 
