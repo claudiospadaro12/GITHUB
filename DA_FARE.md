@@ -25,6 +25,17 @@ Stampa l'**ultima** riga `CONFIG IN USO` di ogni EA su **ogni** terminale
 `Desktop\config_dax.zip`. Poi si decide: spegnere l'istanza breakout, oppure
 tenerla come confronto ma **con un magic suo** (es. 770102).
 
+## 0-bis. R51 — LO SHORT DI RITORNO (idea di Claudio, 14/08)
+
+Tesi e criteri gia' congelati: `backtest_pipeline/prove/R51_REVERSE_TESI.md`.
+In due righe: il ramo SHORT del retest esiste gia' nel codice ma non parte mai
+(riga 1311 `gPhase = PH_PLACED` + `InpOneTradePerDay`), quindi **il motore
+promosso lavora solo mezza giornata**. Serve un input opt-in
+`InpAllowReverse` (default false = forward invariato), ~50 righe.
+Il verdetto lo dara' il **drawdown**, non il PF: le giornate a due cicli
+valgono 2R. **Da fare DOPO il punto 0** (prima si sa quante copie del DAX
+Apertura girano davvero).
+
 ## 1. IL ROUND CHE ASPETTA: la prova di regime sul forex (R50)
 
 **Stato: PRONTO, si puo' lanciare subito.** L'import ha gia' funzionato:
