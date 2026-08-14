@@ -90,5 +90,12 @@ con un round di portafoglio dedicato — **non entrano per simpatia**.
 5. Verdetti secondo A-E, referto, e SOLO DOPO le decisioni su squadra e
    portafoglio.
 
-_Approvazione di Claudio richiesta su questi criteri PRIMA del punto 3.
-Una volta approvati, non si spostano — nemmeno se i numeri fanno male._
+## APPROVATO (Claudio, 14/08/2026)
+
+> "Voglio fare i controlli del caso. Ci servono piu' anni. Ce la dobbiamo fare."
+
+I criteri A-E sopra sono **CONGELATI da questo momento**. Non si spostano
+per nessun motivo, nemmeno se i numeri faranno male a un EA a cui teniamo:
+e' esattamente il momento in cui una regola scritta prima vale qualcosa.
+Da qui in avanti ogni verdetto della prova di regime cita il criterio che
+lo produce.
