@@ -9,79 +9,49 @@ min, MT5 si apre da solo) -> **1 R50** (32 lanci, si lascia girare).
 
 ---
 
-## 0. IL DAX FANTASMA — **MISURATO**, resta da chiudere (14/08)
+## 0. DAX FANTASMA — **CHIUSO** (14/08 sera)
 
-Il referto `config_in_uso.txt` ha confermato tutto, e il buffer al centesimo:
-sul conto **50503392** gira `ABTG_DAX_Apertura_EU` su un grafico **D30EUR M3**
-con **motore BREAKOUT, range 15, buffer 20 pt, trailing FIXED M1, rischio
-2,00 per cento** e lo **stesso magic 770101** della cella promossa. Non e' una
-vecchia taratura: il pre-06/08 era breakout/15/**200**/0, qui il buffer e'
-**20** — 200 con uno zero in meno. Referto completo, con l'appendice della
-misura: `report/DAX_14-08_DUE_MOTORI.md`.
+Provato dal giornale del PC: alle 09:25:01 l'istanza sul grafico **D30EUR M3**
+ha piazzato buy stop 2 D30EUR a 26479.00 (ticket **#3160534**) e il sell stop
+gemello, sul conto 50503392. Motore breakout, buffer 20 pt, rischio 2%, cioe'
+una configurazione mai validata. Referto completo con tutte e quattro le
+appendici: `report/DAX_14-08_DUE_MOTORI.md`.
 
-**Manca l'altra meta': chi e' ATTACCATO adesso.** `CONFIG IN USO` la scrive
-solo chi si riavvia, quindi l'istanza a RETEST (quella dei trade 07/08 e
-11/08) non e' comparsa: e' accesa da settimane e non si e' mai riavviata.
-Sul **VPS** (legge log + profili .chr, non tocca niente):
+**Fatto:** AutoTrading spento sul PC · EA staccato dal grafico M3 · 23 driver
+che generano ini del tester blindati con `[Experts] AllowLiveTrading=false` ·
+guardia A4 corretta (confondeva "non lo so" con "non ho operato").
 
-```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/e0267dcd45c9d92320bb013d1dc8d02e60406564/backtest_pipeline/elenco_ea_attaccati.ps1" -OutFile "$env:TEMP\elenco_ea_attaccati.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\elenco_ea_attaccati.ps1" -Giorni 30
-```
+**Resta da fare, stesso difetto della guardia A4:**
+`ABTG_Dow_Apertura_US.mq5:704`, `ABTG_Nasdaq_Apertura_US.mq5:751`,
+`ABTG_Apertura_Marco.mq5:636`.
 
-Zip pronto in `Desktop\ea_attaccati.zip`. Poi la decisione, che e' di
-Claudio: **staccare l'istanza M3** (grafico di prova, motore bocciato, 2 per
-cento di rischio), oppure tenerla ma **con un magic suo** (es. 770102) perche'
-le due statistiche restino separate.
+## 0-bis. R51 — LO SHORT DI RITORNO (codice pronto, da lanciare)
 
-Domanda ancora aperta: **perche' quell'EA si e' riavviato alle 09:25:23
-locali di stamattina**, 24 minuti prima di comprare? Un EA si
-re-inizializza solo se lo si attacca, ricompila, o gli si cambiano
-parametri/timeframe.
+`InpAllowReverse` in `ABTG_DAX_Apertura_EU` v1.01, default **false**.
+Tesi e criteri congelati: `prove/R51_REVERSE_TESI.md`. Si lancia col
+walkforward generico e il file `prove/R51_reverse_DAX.txt`.
+**Il verdetto lo da' il drawdown, non il PF.**
 
-## 0-bis. R51 — LO SHORT DI RITORNO — **CODICE PRONTO** (14/08)
+## 1. R50 — **COLLAUDATO, PRONTO AL ROUND VERO**
 
-`ABTG_DAX_Apertura_EU` e' passato alla **v1.01**: nuovo input
-**`InpAllowReverse`** (default **false**, quindi i conti vivi NON cambiano
-comportamento). Col flag acceso il lato opposto resta sorvegliato dopo il
-primo ciclo, con tetto rigido di 2 cicli/giorno e obbligo di ripartire da
-flat (mai due cose vive insieme, mai 2R contemporanei).
-Tesi e criteri: `prove/R51_REVERSE_TESI.md`.
-
-Sul PC di BACKTEST, MT5 CHIUSO (il driver si scarica e ricompila l'EA da
-solo):
-
-```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/c88d160afb8fb0125d4843a0a3e81caf4ca4ff05/backtest_pipeline/walkforward_generico.ps1" -OutFile walkforward_generico.ps1
-New-Item -ItemType Directory -Force -Path prove | Out-Null; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/c88d160afb8fb0125d4843a0a3e81caf4ca4ff05/backtest_pipeline/prove/R51_reverse_DAX.txt" -OutFile prove\R51_reverse_DAX.txt; powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 ABTG_DAX_Apertura_EU -Prova prove\R51_reverse_DAX.txt -Etichetta r51
-```
-
-Due righe sole: cella validata con reverse SPENTO vs ACCESO, tutto il resto
-pinnato. **Il verdetto lo da' il drawdown, non il PF** (criterio 3): se
-aggiunge profitto ma alza il DD, e' bocciato.
-
-## 1. IL ROUND CHE ASPETTA: la prova di regime sul forex (R50)
-
-**Stato: PRONTO, si puo' lanciare subito.** L'import ha gia' funzionato:
-EURUSD_EXT e GBPUSD_EXT, **2018-2024**, 2,55 milioni di barre, 0 righe
-scartate, differenza dal feed BCM **0,004%**, copertura 99,6%, zero
-proprieta' guaste -> **cancello zero SUPERATO**.
+Il 14/08 sera il primo CSV e' uscito: `BB_GBPUSD_ORSO_r50.csv (2 righe)`.
+Sei difetti trovati e corretti per arrivarci, l'ultimo dei quali era la causa
+vera: l'import ammazzava MT5 con `Stop-Process -Force` e la registrazione dei
+simboli custom non veniva salvata (le barre si, il simbolo no). Storia
+completa: `risultati_archivio/REFERTO_ROUND50_AVVIO.md`.
 
 Sul PC di BACKTEST, MT5 CHIUSO:
 
 ```
-irm https://raw.githubusercontent.com/claudiospadaro12/GITHUB/8ab7219826b61a391f05f7c7b03b228307921615/backtest_pipeline/prova_regime.ps1 -OutFile "$env:TEMP\prova_regime.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\prova_regime.ps1" -SoloControllo
+irm https://raw.githubusercontent.com/claudiospadaro12/GITHUB/63627eb1e181ea83496f30a200095fd02161f486/backtest_pipeline/prova_regime.ps1 -OutFile "$env:TEMP\prova_regime.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\prova_regime.ps1"
 ```
 
-Se il controllo e' pulito, si rilancia SENZA `-SoloControllo`: 8 celle x 4
-finestre = 32 lanci, zip pronto in `Desktop\regime_r50.zip`.
-
-Le 8 celle sono quelle VIVE su EURUSD/GBPUSD (BB x2, GAP x2, LARRY, EZ,
-PTE, SW), coi parametri copiati dai preset del vivaio e **congelati**.
+8 celle x 4 finestre = 32 lanci. Zip in `Desktop\regime_r50.zip`.
 Le 4 finestre: ORSO 2022 - CROLLO 2020 - TORO 2021 - LATERALE 2019.
 
-**Il verdetto si scrive coi criteri gia' approvati** in
-`prove/PROVA_REGIME_CRITERI.md` (A sopravvivenza, B tenuta, C rango,
-D regola dei due banchi, E ripescaggi). Non si spostano.
+**Il verdetto si scrive coi criteri approvati** in
+`prove/PROVA_REGIME_CRITERI.md` (A sopravvivenza, B tenuta, C rango, D due
+banchi, E ripescaggi). Non si spostano, e ogni verdetto cita il criterio.
 
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 
