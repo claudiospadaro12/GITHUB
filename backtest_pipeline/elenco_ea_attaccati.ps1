@@ -56,6 +56,10 @@ $out = New-Object System.Collections.ArrayList
 function Riga($t, $col = "Gray") { Write-Host $t -ForegroundColor $col; [void]$out.Add($t) }
 
 Riga "=== EA CHE GIRANO SUL TERMINALE ===" "Cyan"
+# 14/08: due referti identici nell'aspetto arrivavano da DUE MACCHINE diverse
+# (VPS e PC di backtest) e non c'era modo di distinguerli. Il nome del computer
+# in testa costa niente e toglie l'ambiguita' alla radice.
+Riga ("MACCHINA: " + $env:COMPUTERNAME + "   utente: " + $env:USERNAME) "Cyan"
 Riga ("letto il  " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + "  (ora locale del PC)")
 Riga ""
 

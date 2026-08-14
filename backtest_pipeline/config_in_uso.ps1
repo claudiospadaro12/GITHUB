@@ -86,6 +86,11 @@ $out    = New-Object System.Collections.ArrayList
 $tot    = 0
 
 Write-Host "=== CONFIG IN USO - che cosa gira davvero ===" -ForegroundColor Cyan
+# Il nome della macchina in testa: senza, due referti di VPS e PC sono
+# indistinguibili (successo il 14/08).
+$intestMacchina = "MACCHINA: " + $env:COMPUTERNAME + "   utente: " + $env:USERNAME
+Write-Host $intestMacchina -ForegroundColor Cyan
+[void]$out.Add($intestMacchina)
 Write-Host "    ultimi $Giorni giorni di log - ora LOCALE del PC (VPS = server BCM + 1h)" -ForegroundColor Gray
 if ($Filtro) { Write-Host "    filtro extra: $Filtro" -ForegroundColor Gray }
 

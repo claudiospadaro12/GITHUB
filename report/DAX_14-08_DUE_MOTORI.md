@@ -192,3 +192,87 @@ timeframe. Nessuna di queste cose succede da sola.
 e dice chi e' **attaccato adesso**, anche se muto. E' l'altra meta' della
 risposta: `config_in_uso` dice *con che parametri e' partito chi e'
 ripartito*, questo dice *chi c'e*'.
+
+---
+
+# APPENDICE 2 — IL SECONDO DAX NON E' SUL VPS: E' SUL PC DI BACKTEST
+
+Il referto delle **16:13** non viene dalla stessa macchina di quello delle
+13:11. Si riconosce da quattro cose, tutte dentro il file:
+
+1. c'e' **un conto solo** (50503392), mentre alle 13:11 ce n'erano tre
+   (50503392, 50504263, 25336156);
+2. compaiono **`ABTG_ImportaStoricoEsterno`** (EURUSD e GBPUSD, 17 righe) e
+   **`ABTG_HistoryDownloader`**: sono gli script dell'import, girati **sul PC**;
+3. ci sono **511 coppie EA+simbolo** con ogni EA su **tutti i 50 simboli**
+   (BreakingBand H1+H4, CostToCost, EasyTrend, EMA200, GapFill, PunteLarry...):
+   e' la firma di `scan_market.ps1`, cioe' del **tester**;
+4. **manca l'avviso "MT5 e' APERTO"**: sul PC il terminale era chiuso, quindi
+   qui i profili `.chr` sono **freschi e affidabili** (al contrario del VPS).
+
+## 1. Il numero che chiude la questione
+
+```
+50503392   ABTG_DAX_Apertura_EU   D30EUR   M3   5678
+50503392   ABTG_DAX_Apertura_EU   D30EUR   M5     46
+```
+
+E dai profili, letti a terminale chiuso:
+
+```
+profilo 'Default'   (20 grafici)
+  D30EUR      ABTG_DAX_Apertura_EU     <-- ATTACCATO
+```
+
+**Il grafico M3 col motore breakout e il buffer da 20 punti sta sul PC di
+backtest, non sul VPS.** E il PC e' collegato al conto **50503392**, lo stesso
+del VPS: qualunque ordine parta da li' finisce sul conto vivo.
+
+Questo spiega tutto quello che restava aperto:
+
+- perche' l'EA si e' **re-inizializzato alle 09:25:23** (Claudio era al PC);
+- perche' i parametri sono **scritti a mano** (buffer 20 = 200 con uno zero in
+  meno, trailing FIXED M1): e' un grafico di prova, non un deploy;
+- perche' non e' in `FLOTTA_ATTIVA.md`, che descrive **il VPS**;
+- perche' dal 07/08 il magic 770101 alternava retest e breakout: **erano due
+  macchine diverse** che scrivevano sullo stesso conto con lo stesso magic.
+
+## 2. Non e' solo il DAX Apertura
+
+Sempre sul PC, sempre conto 50503392, attaccati a grafici (fonte affidabile):
+
+```
+D30EUR   PTE_V3_23                      D30EUR   GOLDEN_CROSS_V03
+D30EUR   HeikinAshi_Switch_3Mode_V10 x2 NASUSD   NQ_v21_S
+USDCAD   BULGE_MULTI_SIGNAL_VIOLA_L     XAUUSD   NIGHT_BREAK_BOX_BRK_UP x2
+GBPUSD   BULGE_MULTI_SIGNAL_ARANCIO_S   EURUSD   BULGE_MULTI_SIGNAL_BLU_S
+```
+
+Dieci EA di terzi attaccati a grafici del conto vivo, piu' il nostro. Nei log:
+`PTE_V3_23 EURNZD H1` **15.238 righe**, `GOLDEN_CROSS_V03` **2.636** su USDCAD
+e altrettante su XAUUSD.
+
+## 3. La regola che questo caso scrive
+
+Il PC e' il **banco di prova**, il VPS e' dove **lavorano i conti**. La regola
+esisteva gia' per il tester ("mai lanciare il tester sul VPS"); mancava il
+verso opposto, che e' quello che ha fatto danno:
+
+> **Sul PC di backtest, AutoTrading SPENTO e nessun EA attaccato a grafici del
+> conto vivo.** Se serve provare un EA su grafico, si usa un conto demo
+> separato - mai il 50503392 e mai il 50504263.
+
+## 4. Cosa NON e' ancora dimostrato
+
+Che il trade delle 08:49 sia partito dal PC e non dal VPS e' **molto
+probabile** ma non certificato: lo dimostra solo la riga
+`BUY STOP @ 26479.00 SL 26426.70` nel log della macchina che l'ha piazzato.
+Si cerca con `log_ea.ps1 -Filtro "STOP|LIMIT|2647" -Tutto` sulle due macchine:
+quella che ce l'ha e' quella che ha operato.
+
+## 5. Correzione allo strumento
+
+Due referti identici nell'aspetto arrivavano da due macchine diverse e non
+c'era modo di distinguerli: ci sono volute quattro deduzioni indirette. Ora
+`elenco_ea_attaccati.ps1` e `config_in_uso.ps1` scrivono in testa
+**`MACCHINA: <nome> utente: <utente>`**.
