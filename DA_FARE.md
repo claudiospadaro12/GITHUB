@@ -5,6 +5,26 @@ in ordine. Tutto cio' che serve e' gia' scritto e pushato sul branch `lavoro`._
 
 ---
 
+## 0. PRIORITA' ALTA — DUE DAX APERTURA CON LO STESSO MAGIC (trovato 14/08)
+
+I trade gemelli di stamattina hanno commenti **diversi**: il 100k
+`DAX Apertura EU RETEST BUY` (BUY LIMIT), il piccolo `DAX Apertura EU BUY`
+(BUY STOP). Sono due rami di codice che non si incrociano: sul conto piccolo
+gira **anche** il motore BREAKOUT, quello bocciato dal banco cinque volte —
+e gira **con lo stesso magic 770101** della cella validata, quindi sporca il
+forward. Dettagli e prova aritmetica: `report/DAX_14-08_DUE_MOTORI.md`.
+
+Sul **VPS** (non tocca niente, MT5 puo' restare aperto):
+
+```
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/config_in_uso.ps1" -OutFile "$env:TEMP\config_in_uso.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\config_in_uso.ps1"
+```
+
+Stampa l'**ultima** riga `CONFIG IN USO` di ogni EA su **ogni** terminale
+(conto per conto), con motore/range/buffer/offset/rischio/TP. Zip pronto in
+`Desktop\config_dax.zip`. Poi si decide: spegnere l'istanza breakout, oppure
+tenerla come confronto ma **con un magic suo** (es. 770102).
+
 ## 1. IL ROUND CHE ASPETTA: la prova di regime sul forex (R50)
 
 **Stato: PRONTO, si puo' lanciare subito.** L'import ha gia' funzionato:
