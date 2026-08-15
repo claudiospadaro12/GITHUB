@@ -1,5 +1,31 @@
 # BROKER ESTERNO - MAPPA E AVVERTENZE (14/08/2026)
 
+> ## 🟢 15/08/2026 ore 13:59 — IL CONTO DEMO PEPPERSTONE ESISTE ED E' COLLEGATO
+>
+> `conto_attivo.ps1` sul PC legge dal Giornale:
+>
+> ```
+> --- cartella 73B7A2420D6397DFF9014A20F1201F97 ---
+>   CONTO ATTIVO : 62128200    server: PepperstoneUK-Demo through LD2-O
+> ```
+>
+> **Il blocco di ieri sera e' superato.** Il 14/08 il Giornale diceva
+> `Invalid account` e "no demo/preliminary groups on server side", e il
+> ricognitore era andato in timeout con 0 file. Adesso il terminale
+> (`C:\Program Files\Pepperstone MetaTrader 5`) e' loggato sul **62128200**.
+>
+> Il terminale e' pero' **nuovo e quasi inutilizzato**: 3 file di giornale,
+> **zero** log esperti. Il prossimo passo e' il ricognitore `-SoloElenco`, che
+> da' i **nomi veri dei simboli** e il **fuso misurato** — le due cose senza cui
+> non si scarica niente.
+>
+> **Attenzione al motivo del timeout di ieri**: lo script apre un grafico per
+> far girare lo script MQL5, e ieri gli era stato passato `-SimboloGrafico
+> "EURUSD.p"`, un nome preso dallo snapshot del server VECCHIO. Se il simbolo
+> non esiste, MT5 non apre niente e si va in timeout. Il default e' `EURUSD`:
+> se fallisce di nuovo, il nome vero si legge in dieci secondi nel **Market
+> Watch** di quel terminale.
+
 **Stato: SCHELETRO DA COMPILARE.** Le tabelle qui sotto sono vuote apposta:
 si riempiono con l'elenco VERO prodotto da `ABTG_InfoBroker`, non con nomi
 plausibili. Finche' una riga non ha la data nella colonna "verificato il",
