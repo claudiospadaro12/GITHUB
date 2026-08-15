@@ -20,3 +20,28 @@ PTE_GBPUSD | ABTG_PTE | GBPUSD | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpRiskPerc
 # il numero. Rimesso H2/16386: il lancio R50 fatto con 16388 ha misurato una
 # cella che in vivaio non esiste e va rifatto.
 SW_GBPUSD | ABTG_SuperWave | GBPUSD | H2 | InpTF=16386;InpRiskPercent=1.0
+
+# =====================================================================
+#  15/08/2026 - SEI SIMBOLI NUOVI IMPORTATI (fase 0 superata)
+#  AUDJPY CHFJPY EURJPY GBPCAD XAUUSD USDJPY: cancello ZERO passato da
+#  tutti e sei (diff media 0,0054-0,0110% contro la soglia 0,05%,
+#  copertura 99,2-99,6% contro l'80%). Referto:
+#  risultati_prove/import_esterno/ABTG_ImportEsterno_referto.csv
+#
+#  I parametri qui sotto sono COPIATI dai deploy vivi, riga per riga:
+#    EZ    -> deploy_vivaio_ez.ps1   (celle promosse R48, H1, L+S)
+#    COST  -> deploy_vivaio_cost.ps1 (H4, SOLO LONG)
+#    LARRY -> deploy_vivaio_larry.ps1 (VIVAIO_LARRY_ORO, SOLO LONG)
+#    PTE   -> deploy_vivaio_r23.ps1  (VIVAIO_PTE_USDJPY)
+#  Nessun valore inventato, nessuno cambiato.
+#
+#  NOTA: COST gira anche su XAGUSD, ma l'import ha portato XAUUSD e non
+#  XAGUSD. Quella cella NON e' misurabile in questo giro: va dichiarata
+#  scoperta, non dimenticata.
+# =====================================================================
+EZ_CHFJPY | ABTG_EasyTrend | CHFJPY | H1 | InpTP_R=1.5;InpTF=16385;InpPivotSource=0;InpPivotR=3;InpPivotL=5;InpLinRegLen=11;InpPlotMode=0;InpPlotLen=11;InpCciPeriod=20;InpMaxPivotDist=60;InpDivMaxBars=0;InpDivDieOnFail=0;InpHourStart=8;InpHourEnd=18;InpPrevBars=3;InpEntryWindowBars=3;InpMarketIfTooClose=1;InpSLBufferPts=30;InpWarmupBars=500;InpMaxSpreadPts=30;InpRiskPercent=1.0;InpAllowLong=1;InpAllowShort=1
+EZ_AUDJPY | ABTG_EasyTrend | AUDJPY | H1 | InpTP_R=1.0;InpTF=16385;InpPivotSource=0;InpPivotR=3;InpPivotL=5;InpLinRegLen=11;InpPlotMode=0;InpPlotLen=11;InpCciPeriod=20;InpMaxPivotDist=60;InpDivMaxBars=0;InpDivDieOnFail=0;InpHourStart=8;InpHourEnd=18;InpPrevBars=3;InpEntryWindowBars=3;InpMarketIfTooClose=1;InpSLBufferPts=30;InpWarmupBars=500;InpMaxSpreadPts=30;InpRiskPercent=1.0;InpAllowLong=1;InpAllowShort=1
+COST_EURJPY | ABTG_CostToCost | EURJPY | H4 | InpExitMode=2;InpTF=16388;InpTP_R=1.5;InpSLBufferATR=0.2;InpAtrPeriod=14;InpMinRangeATR=0.0;InpMaxBarsHold=100;InpMaxSpreadPts=300;InpEntryWindowBars=3;InpWarmupBars=500;InpRiskPercent=1.0;InpAllowLong=1;InpAllowShort=0
+COST_GBPCAD | ABTG_CostToCost | GBPCAD | H4 | InpExitMode=1;InpTF=16388;InpTP_R=1.5;InpSLBufferATR=0.2;InpAtrPeriod=14;InpMinRangeATR=0.0;InpMaxBarsHold=100;InpMaxSpreadPts=300;InpEntryWindowBars=3;InpWarmupBars=500;InpRiskPercent=1.0;InpAllowLong=1;InpAllowShort=0
+LARRY_ORO | ABTG_PunteLarry | XAUUSD | H1 | InpPatternMode=0;InpExitMode=1;InpAllowLong=1;InpAllowShort=0;InpTF=16385;InpTP_R=1.5;InpSLMode=0;InpSLBufferATR=0.1;InpAtrSlMult=1.5;InpAtrPeriodD1=14;InpSizeMinATR=0.0;InpSizeMaxATR=0.0;InpMaxDaysHold=5;InpMaxSpreadPts=300;InpEntryWindowBars=3;InpRiskPercent=1.0
+PTE_USDJPY | ABTG_PTE | USDJPY | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpRiskPercent=1.0
