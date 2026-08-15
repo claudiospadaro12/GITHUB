@@ -52,6 +52,12 @@
 #   -Filtro "GER"                  restringe l'elenco dei simboli
 #   -SenzaTick                     solo barre, niente tick reali
 #   -SoloReferto                   rilegge l'ultimo referto, non apre MT5
+#   -SimboloGrafico "EURUSD.a"     il grafico su cui far cadere lo script.
+#                                  SENZA questo parametro lo script prova
+#                                  da solo le varianti note di EURUSD e si
+#                                  accorge in 90 secondi se non e' partito
+#                                  (il 14/08 un nome sbagliato ci e' costato
+#                                  20 minuti di finestra muta).
 #
 #  !!! SUL VPS NON SI LANCIA MAI QUESTO SCRIPT IN MODALITA' -Auto !!!
 #      -Auto (e -ChiudiMT5) chiudono terminal64: spegnerebbero i
@@ -105,7 +111,14 @@ function Chiudi-MT5-Pulito([int]$Secondi = 60) {
   }
   Write-Host "  MT5 non si e' chiuso da solo entro $Secondi s: lo forzo." -ForegroundColor Yellow
   Write-Host "  ATTENZIONE: i simboli personalizzati creati adesso potrebbero non essere salvati." -ForegroundColor Yellow
-  Chiudi-MT5-Pulito
+  # NOTA (15/08/2026): qui prima c'era una chiamata a Chiudi-MT5-Pulito,
+  # cioe' la funzione richiamava SE STESSA: se MT5 non si chiudeva entro
+  # i 60 s la ricorsione non finiva piu' e lo script restava appeso per
+  # sempre. Adesso si forza davvero.
+  foreach ($p in @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)) {
+    try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch { }
+  }
+  Start-Sleep -Seconds 2
 }
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -733,7 +746,35 @@ Write-Host "    preset: MQL5\Presets\abtg_storico.set" -ForegroundColor Green
 # =====================================================================
 #  4. LANCIO
 # =====================================================================
-function Lancia-Auto([string]$scriptName, [string]$setName, [string]$simbolo, [string]$periodo, [string]$fileAtteso, [int]$minuti) {
+# --- legge la CODA dei log MT5 (solo i byte aggiunti dopo l'avvio) ----
+#  Serve a capire se lo script e' PARTITO DAVVERO. I log MT5 sono UTF-16,
+#  quindi l'offset da cui si riprende va portato a un numero pari.
+function Coda-Log([hashtable]$lunghezzePrima) {
+  $logDir = Join-Path $DataFolder "MQL5\Logs"
+  if (-not (Test-Path $logDir)) { return "" }
+  $tutto = ""
+  foreach ($f in (Get-ChildItem $logDir -Filter "*.log" -ErrorAction SilentlyContinue)) {
+    $da = 0
+    if ($lunghezzePrima.ContainsKey($f.FullName)) { $da = [int64]$lunghezzePrima[$f.FullName] }
+    if ($da % 2 -ne 0) { $da = $da - 1 }
+    try {
+      $fs = New-Object System.IO.FileStream($f.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+      if ($da -gt 0 -and $da -lt $fs.Length) { [void]$fs.Seek($da, [System.IO.SeekOrigin]::Begin) }
+      $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Unicode, $false)
+      $tutto = $tutto + $sr.ReadToEnd()
+      $sr.Close(); $fs.Close()
+    } catch { }
+  }
+  return $tutto
+}
+
+#  $avvioMax = dopo quanti secondi, se lo script NON risulta partito,
+#  si smette di aspettare. 0 = aspetta comunque tutto il timeout.
+#  PERCHE' (14/08/2026): con -SimboloGrafico "EURUSD.p" (nome preso dal
+#  server vecchio) MT5 non apriva nessun grafico, lo script non partiva
+#  mai e restavamo 20 minuti davanti a una finestra muta. Adesso la
+#  differenza fra "non e' partito" e "sta lavorando" si vede in un minuto.
+function Lancia-Auto([string]$scriptName, [string]$setName, [string]$simbolo, [string]$periodo, [string]$fileAtteso, [int]$minuti, [int]$avvioMax = 0) {
   $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
   if ($running -and $ChiudiMT5) {
     Write-Host "MT5 e' aperto: lo chiudo (-ChiudiMT5)." -ForegroundColor Yellow
@@ -763,19 +804,50 @@ Symbol=$simbolo
 Period=$periodo
 "@ | Set-Content -Path $ini -Encoding Unicode
 
+  # fotografia dei log PRIMA di partire: cosi' dopo si legge solo il nuovo
+  $lenPrima = @{}
+  $logDirL = Join-Path $DataFolder "MQL5\Logs"
+  if (Test-Path $logDirL) {
+    foreach ($f in (Get-ChildItem $logDirL -Filter "*.log" -ErrorAction SilentlyContinue)) {
+      $lenPrima[$f.FullName] = $f.Length
+    }
+  }
+
   Write-Host ""
-  Write-Host ("Avvio MT5 in automatico: {0} (timeout {1} min)..." -f $scriptName, $minuti) -ForegroundColor Cyan
+  Write-Host ("Avvio MT5 in automatico: {0} su {1} (timeout {2} min)..." -f $scriptName, $simbolo, $minuti) -ForegroundColor Cyan
   Start-Process -FilePath $Terminal -ArgumentList "/config:$ini"
 
   $ErrorActionPreference = "Continue"
-  $scaduto   = (Get-Date).AddMinutes($minuti)
+  $partenza  = Get-Date
+  $scaduto   = $partenza.AddMinutes($minuti)
   $ultimaLen = -1
   $fermoDa   = 0
   $visto     = $false
+  $partito   = $false
+  $script:UltimoAvvioFallito = $false
   while ((Get-Date) -lt $scaduto) {
     Start-Sleep -Seconds 15
+    # --- lo script e' partito davvero? (prima di stare li' 20 minuti) ---
+    if ($avvioMax -gt 0 -and -not $partito -and -not (Test-Path $fileAtteso)) {
+      $coda = Coda-Log $lenPrima
+      if ($coda -match [regex]::Escape($scriptName)) {
+        $partito = $true
+        Write-Host ("  {0} risulta partito (traccia nel log)." -f $scriptName) -ForegroundColor DarkGray
+      } elseif (((Get-Date) - $partenza).TotalSeconds -ge $avvioMax) {
+        Write-Host ""
+        Write-Host ("{0} NON e' partito entro {1} s su '{2}'." -f $scriptName, $avvioMax, $simbolo) -ForegroundColor Yellow
+        Write-Host "  Quasi sempre vuol dire: quel simbolo non esiste su questo broker," -ForegroundColor Yellow
+        Write-Host "  quindi MT5 non apre nessun grafico e lo script non parte mai." -ForegroundColor Yellow
+        Chiudi-MT5-Pulito
+        Start-Sleep -Seconds 3
+        $ErrorActionPreference = "Stop"
+        $script:UltimoAvvioFallito = $true
+        return $false
+      }
+    }
     if (-not (Test-Path $fileAtteso)) { continue }
-    $visto = $true
+    $visto   = $true
+    $partito = $true
     $len = 0
     try { $len = (Get-Item $fileAtteso -ErrorAction Stop).Length } catch { continue }
     if ($len -eq $ultimaLen) {
@@ -825,8 +897,39 @@ if ($SoloElenco) {
   Write-Host "    E' la prima cosa da fare: prima si guarda cosa c'e', poi si" -ForegroundColor Gray
   Write-Host "    scaricano i gigabyte (e solo dei simboli giusti)." -ForegroundColor Gray
   if ($Auto) {
-    $ok = Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $SimboloGrafico "H1" $InfoCsv 20
-    if (-not $ok) { Raccogli-SulDesktop; exit 1 }
+    # --- i nomi da provare per il grafico di lancio ---------------------
+    #  Se Claudio passa -SimboloGrafico, si usa SOLO quello (comanda lui).
+    #  Altrimenti si provano le varianti con cui i broker chiamano EURUSD:
+    #  la ricognizione non dipende dal simbolo, serve solo un grafico su
+    #  cui far cadere lo script. Ogni tentativo sbagliato costa 90 secondi,
+    #  non 20 minuti.
+    $candidati = New-Object System.Collections.ArrayList
+    if ($PSBoundParameters.ContainsKey("SimboloGrafico")) {
+      [void]$candidati.Add($SimboloGrafico)
+    } else {
+      foreach ($c in @("EURUSD", "EURUSD.p", "EURUSD.a", "EURUSD.r", "EURUSD.i",
+                       "EURUSD.raw", "EURUSD.pro", "EURUSD.sd", "EURUSDx")) {
+        [void]$candidati.Add($c)
+      }
+    }
+    $ok = $false
+    foreach ($sym in $candidati) {
+      $ok = Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $sym "H1" $InfoCsv 20 90
+      if ($ok) { $SimboloGrafico = $sym; break }
+      if (-not $script:UltimoAvvioFallito) { break }   # partito ma finito male: inutile cambiare simbolo
+      Write-Host ("  provo il nome successivo...") -ForegroundColor DarkGray
+    }
+    if (-not $ok) {
+      Write-Host ""
+      Write-Host "=== NESSUN NOME DI GRAFICO HA FUNZIONATO ===" -ForegroundColor Red
+      Write-Host "Adesso che il terminale Pepperstone e' LOGGATO ci vogliono dieci secondi:" -ForegroundColor Yellow
+      Write-Host "  1. apri MT5 Pepperstone, guarda il Market Watch" -ForegroundColor White
+      Write-Host "  2. leggi come si chiama esattamente l'euro-dollaro" -ForegroundColor White
+      Write-Host "  3. chiudi MT5 e rilancia questa riga aggiungendo in fondo:" -ForegroundColor White
+      Write-Host "       -SimboloGrafico ""<il nome vero>""" -ForegroundColor White
+      Raccogli-SulDesktop
+      exit 1
+    }
   } else {
     Istruzioni-Manuali "ABTG_InfoBroker" "abtg_infobroker.set"
   }
@@ -852,7 +955,7 @@ $primoSym = ($Simboli -split ",")[0].Trim()
 if (-not $SimboloFuso) { $SimboloFuso = $primoSym }
 
 if ($Auto) {
-  $ok = Lancia-Auto "ABTG_HistoryDownloader" "abtg_storico.set" $primoSym "M5" $StoricoCsv $TimeoutMin
+  $ok = Lancia-Auto "ABTG_HistoryDownloader" "abtg_storico.set" $primoSym "M5" $StoricoCsv $TimeoutMin 180
   if ($ok) {
     # ricognizione DOPO il download: adesso le prime date e la tabella
     # delle sessioni sono misurate su dati veri, non su serie vuote
@@ -861,7 +964,7 @@ if ($Auto) {
     Write-Host "delle sessioni e l'export H1 hanno dati veri sotto." -ForegroundColor Cyan
     $SetInfo2 = Join-Path $PresetDir "abtg_infobroker.set"
     (Get-Content $SetInfo2) -replace "^InpSimboloFuso=.*", ("InpSimboloFuso=" + $SimboloFuso) | Set-Content -Path $SetInfo2 -Encoding ASCII
-    Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $primoSym "H1" $InfoCsv 20 | Out-Null
+    Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $primoSym "H1" $InfoCsv 20 180 | Out-Null
   }
 } else {
   Istruzioni-Manuali "ABTG_HistoryDownloader" "abtg_storico.set"
