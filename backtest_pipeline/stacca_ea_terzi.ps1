@@ -173,6 +173,23 @@ function Nome-EA($txt) {
   if ($m2.Success) { return $m2.Groups[1].Value }
   return ""
 }
+# Il SIMBOLO del grafico: serve per ritrovarlo in MT5, dove le schede si
+# chiamano col simbolo e non "chart07". Prima si prova con i simboli noti
+# del broker, poi con una regola generica; se non lo trovo lo dico, non
+# invento un nome.
+$noti = @("D30EUR","NASUSD","U30USD","F40EUR","E35EUR","225JPY","200AUD","SPXUSD",
+          "XAUUSD","XAGUSD","XPDUSD","USOIL","XNGUSD",
+          "EURUSD","GBPUSD","USDJPY","USDCHF","USDCAD","AUDUSD","NZDUSD",
+          "EURGBP","EURJPY","EURAUD","EURNZD","EURCAD","EURCHF",
+          "GBPJPY","GBPAUD","GBPNZD","GBPCAD","GBPCHF",
+          "AUDJPY","AUDNZD","AUDCAD","AUDCHF","CADJPY","CADCHF","CHFJPY","NZDJPY")
+function Simbolo-Chr($txt) {
+  foreach ($n in $noti) { if ($txt -match [regex]::Escape($n)) { return $n } }
+  $m = [regex]::Match($txt, '(?<![A-Z0-9])[A-Z][A-Z0-9]{4,8}(?![A-Z0-9])')
+  if ($m.Success) { return $m.Value }
+  return "?"
+}
+
 function E-Nostro($ea) {
   foreach ($n in $nostri) { if ($ea -like ($n + "*")) { return $true } }
   return $false
@@ -198,12 +215,13 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -EA SilentlyContinue)) {
       $txt = Testo-Chr $f.FullName
       $ea  = Nome-EA $txt
       if (-not $ea) { $nVuoti++; Riga ("      " + $f.Name + "   (nessun EA)"); continue }
+      $sym = Simbolo-Chr $txt
       if (E-Nostro $ea) {
         $nNostri++
-        Riga ("      " + $f.Name + "   NOSTRO  " + $ea) "Green"
+        Riga ("      " + $f.Name + "   NOSTRO  " + $sym.PadRight(8) + " " + $ea) "Green"
       } else {
-        Riga ("      " + $f.Name + "   NON NOSTRO  " + $ea + "   <- DA STACCARE") "Red"
-        [void]$daStaccare.Add([pscustomobject]@{ file=$f.FullName; nome=$f.Name; profilo=$prof.Name; ea=$ea; radice=(Join-Path $dir.FullName "MQL5\Profiles") })
+        Riga ("      " + $f.Name + "   NON NOSTRO  " + $sym.PadRight(8) + " " + $ea + "   <- DA STACCARE") "Red"
+        [void]$daStaccare.Add([pscustomobject]@{ file=$f.FullName; nome=$f.Name; profilo=$prof.Name; ea=$ea; sym=$sym; radice=(Join-Path $dir.FullName "MQL5\Profiles") })
       }
     }
   }
@@ -222,6 +240,24 @@ if ($daStaccare.Count -gt 0) {
   }
 }
 Riga ""
+
+if ($daStaccare.Count -gt 0) {
+  Riga ""
+  Riga "=== CHECKLIST DA SPUNTARE IN MT5 (via manuale, quella pulita) ===" "Cyan"
+  Riga "Per ognuno: apri la scheda del grafico, tasto destro sul grafico," "Cyan"
+  Riga "Consulenti esperti > Rimuovi. Il grafico e il template RESTANO." "Cyan"
+  Riga ""
+  $i = 0
+  foreach ($g in ($daStaccare | Sort-Object sym, ea)) {
+    $i++
+    Riga ("  [ ] " + $i.ToString().PadLeft(2) + ".  " + $g.sym.PadRight(8) + "  " + $g.ea + "     (profilo '" + $g.profilo + "', " + $g.nome + ")")
+  }
+  Riga ""
+  Riga "Quando hai finito: CHIUDI MT5 e rilancia questa stessa riga SENZA" "Yellow"
+  Riga "-Applica. Deve uscire   grafici con EA NON NOSTRI: 0   ." "Yellow"
+  Riga "Se non esce 0, qualcuno e' rimasto attaccato: la lista dice quale." "Yellow"
+  Riga ""
+}
 
 if (-not $Applica) {
   Riga "ANTEPRIMA: non ho toccato NIENTE." "Yellow"
