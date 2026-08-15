@@ -1,0 +1,544 @@
+CENSIMENTO ORDINI - VMI3047753 (utente Administrator)
+letto il 2026-08-15 06:21:13  -  ultimi 60 giorni
+giornali letti: 85
+PIAZZATI: 500   eseguiti: 1261   annullati/falliti: 462
+
+NB: le ore sono ORA LOCALE di questa macchina, non ora server.
+
+conto 50503392 : 490 ordini PIAZZATI da questa macchina
+    20260616    5 ordini   [USDCAD,GBPNZD,EURNZD,CHFJPY,XAUUSD]
+        #2443576  16:10:11  buy 0.4 USDCAD @ 1.40031
+        #2443589  16:12:16  sell 0.4 GBPNZD @ 2.29920
+        #2443616  16:15:35  sell 0.4 EURNZD @ 1.98728
+        #2443663  16:17:09  buy 0.4 CHFJPY @ 201.953
+        #2446609  20:04:07  sell 0.25 XAUUSD @ 4340.95
+    20260619    2 ordini   [XAUUSD]
+        #2479640  12:46:06  sell 0.1 XAUUSD @ 4152.39
+        #2480520  14:49:00  sell 0.11 XAUUSD @ 4149.93
+    20260623    1 ordini   [XAUUSD]
+        #2496658  07:09:39  buy stop 0.4 XAUUSD @ 4172.87
+    20260624    8 ordini   [CADJPY,USDCAD,D30EUR,XAUUSD,AUDNZD,AUDUSD,GBPNZD]
+        #2522153  18:23:07  sell 0.1 CADJPY @ 113.686
+        #2522170  18:25:26  buy 0.1 USDCAD @ 1.42269
+        #2522189  18:27:02  sell 0.1 D30EUR @ 24734.50
+        #2522201  18:29:13  sell 0.02 XAUUSD @ 4016.55
+        #2522636  19:29:05  buy 0.02 XAUUSD @ 3993.86
+        #2522906  19:54:12  buy 0.1 AUDNZD @ 1.22093
+        #2522926  19:56:18  buy 0.2 AUDUSD @ 0.68872
+        #2522999  20:00:23  sell 0.2 GBPNZD @ 2.33313
+    20260703   11 ordini   [D30EUR,XAUUSD]
+        #2612597  09:00:12  buy 0.5 D30EUR @ 25760.00
+        #2612923  09:24:13  buy stop 0.5 D30EUR @ 25800.00
+        #2612929  09:24:55  buy stop 0.5 D30EUR @ 25800.00
+        #2612960  09:26:55  sell stop 0.5 D30EUR @ 25698.00
+        #2612966  09:27:34  sell stop 0.5 D30EUR @ 25698.00
+        #2613766  10:21:25  buy stop 0.5 XAUUSD @ 4203.00
+        #2613770  10:22:04  buy stop 0.5 XAUUSD @ 4203.00
+        #2613774  10:22:44  sell stop 0.5 XAUUSD @ 4168.00
+        #2613780  10:23:16  sell stop 0.5 XAUUSD @ 4168.00
+        #2614782  11:53:54  buy stop 0.5 XAUUSD @ 4203.00
+        #2614784  11:54:16  buy stop 0.5 XAUUSD @ 4203.00
+    20260720   18 ordini   [D30EUR,NASUSD]
+        #2847812  08:59:00  buy stop 2.4 D30EUR @ 24892.20
+        #2847863  09:00:00  sell stop 2.7 D30EUR @ 24722.60
+        #2847862  09:00:00  buy stop 2.7 D30EUR @ 24761.10
+        #2848061  09:15:00  buy stop 1.4 D30EUR @ 24800.60
+        #2848151  09:23:01  sell 1.3 D30EUR @ 24800.10
+        #2848570  09:44:52  sell 0.6 D30EUR @ 24876.70
+        #2849981  12:18:00  sell 0.6 D30EUR @ 24860.70
+        #2850099  12:39:16  buy 0.2 D30EUR @ 24839.00
+        #2850229  13:00:54  sell stop 1.6 D30EUR @ 24751.90
+        #2850228  13:00:54  buy stop 1.6 D30EUR @ 24892.20
+        #2852310  15:30:01  sell stop 1.1 NASUSD @ 28833.90
+        #2852311  15:30:01  buy stop 1 NASUSD @ 28901.10
+        #2852312  15:30:01  sell stop 1 NASUSD @ 28801.20
+        #2852307  15:30:01  buy stop 2.1 NASUSD @ 28887.90
+        #2852308  15:30:01  buy stop 1.1 NASUSD @ 28890.90
+        #2852309  15:30:01  sell stop 2.1 NASUSD @ 28836.90
+        #2852509  15:36:01  sell 1 NASUSD @ 28949.90
+        #2853278  16:15:04  buy 0.5 NASUSD @ 28785.70
+    20260721   23 ordini   [D30EUR,XPDUSD,GBPUSD,NASUSD,USDJPY]
+        #2857106  00:05:00  sell limit 0.2 D30EUR @ 24993.20
+        #2857105  00:05:00  sell limit 0.1 D30EUR @ 24930.30
+        #2857117  00:06:45  sell limit 1.36 XPDUSD @ 1288.20
+        #2857116  00:06:45  sell limit 0.94 XPDUSD @ 1278.56
+        #2859625  08:00:00  sell stop 0.99 GBPUSD @ 1.34356
+        #2859624  08:00:00  buy stop 0.99 GBPUSD @ 1.34490
+        #2860196  08:59:00  sell stop 3.5 D30EUR @ 24651.50
+        #2860208  09:00:00  sell stop 2.6 D30EUR @ 24832.00
+        #2860207  09:00:00  buy stop 2.6 D30EUR @ 24875.40
+        #2860275  09:02:20  sell 1.3 D30EUR @ 24923.10
+        #2860472  09:15:00  buy stop 1.3 D30EUR @ 24936.20
+        #2865436  15:30:00  sell stop 1.3 NASUSD @ 28935.00
+        #2865435  15:30:00  sell stop 1 NASUSD @ 28994.60
+        #2865434  15:30:00  buy stop 1 NASUSD @ 29059.30
+        #2866394  16:10:35  buy 0.6 NASUSD @ 28900.00
+        #2870026  18:55:30  buy limit 0.05 USDJPY @ 161.979
+        #2870027  18:55:30  buy limit 0.18 USDJPY @ 161.727
+        #2870024  18:55:30  sell limit 0.03 GBPUSD @ 1.34788
+        #2870025  18:55:30  sell limit 0.1 GBPUSD @ 1.35053
+        #2871145  21:00:00  sell limit 0.03 GBPUSD @ 1.34788
+        #2871146  21:00:00  sell limit 0.1 GBPUSD @ 1.35053
+        #2871141  21:00:00  buy limit 0.05 USDJPY @ 161.979
+        #2871142  21:00:00  buy limit 0.18 USDJPY @ 161.727
+    20260722   23 ordini   [USDJPY,GBPUSD,XAUUSD,EURUSD,D30EUR,NASUSD]
+        #2871809  01:00:01  buy limit 0.18 USDJPY @ 161.727
+        #2871808  01:00:01  buy limit 0.05 USDJPY @ 161.979
+        #2871811  01:00:05  sell limit 0.1 GBPUSD @ 1.35053
+        #2871810  01:00:05  sell limit 0.03 GBPUSD @ 1.34788
+        #2873218  05:00:00  sell limit 0.01 XAUUSD @ 4166.33
+        #2873217  05:00:00  sell limit 0.01 XAUUSD @ 4152.57
+        #2873480  06:00:00  buy limit 1.01 EURUSD @ 1.13971
+        #2873479  06:00:00  sell limit 1.01 EURUSD @ 1.14100
+        #2873972  08:00:00  sell stop 0.79 GBPUSD @ 1.33735
+        #2873971  08:00:00  buy stop 0.79 GBPUSD @ 1.33895
+        #2874280  08:59:00  buy stop 2.9 D30EUR @ 25112.40
+        #2874286  09:00:00  sell stop 3.3 D30EUR @ 24949.90
+        #2874285  09:00:00  buy stop 3.3 D30EUR @ 24982.60
+        #2874462  09:15:00  sell stop 1.5 D30EUR @ 24968.80
+        #2877685  13:00:00  buy limit 0.2 D30EUR @ 24895.20
+        #2877684  13:00:00  buy limit 0.1 D30EUR @ 24959.30
+        #2879990  15:30:00  sell stop 3 NASUSD @ 28901.60
+        #2879993  15:30:00  sell stop 1 NASUSD @ 28795.90
+        #2879989  15:30:00  buy stop 3 NASUSD @ 28939.90
+        #2879985  15:30:00  buy stop 1.6 NASUSD @ 28942.90
+        #2879987  15:30:00  sell stop 1.6 NASUSD @ 28898.60
+        #2880253  15:37:41  sell 0.8 NASUSD @ 28994.40
+        #2880340  15:42:33  sell 1.5 NASUSD @ 29011.70
+    20260723   35 ordini   [EURUSD,GBPUSD,D30EUR,NASUSD]
+        #2886212  06:00:00  buy limit 1.17 EURUSD @ 1.14057
+        #2886211  06:00:00  sell limit 1.17 EURUSD @ 1.14305
+        #2886656  08:00:00  sell stop 1.19 GBPUSD @ 1.33790
+        #2886655  08:00:00  buy stop 1.17 GBPUSD @ 1.33907
+        #2887091  08:59:00  buy stop 2.7 D30EUR @ 25223.60
+        #2887101  09:00:00  sell stop 2.5 D30EUR @ 24996.90
+        #2887100  09:00:00  buy stop 2.5 D30EUR @ 25044.80
+        #2887411  09:15:00  sell stop 0.9 D30EUR @ 24891.00
+        #2887409  09:15:00  buy stop 0.9 D30EUR @ 25018.00
+        #2887508  09:25:00  sell stop 0.9 D30EUR @ 24888.00
+        #2887507  09:25:00  buy stop 0.9 D30EUR @ 25021.00
+        #2888112  10:10:15  sell 0.1 D30EUR @ 25033.00
+        #2888415  10:21:00  buy 0.5 D30EUR @ 25041.70
+        #2888911  10:57:00  buy 1 D30EUR @ 25017.40
+        #2888939  11:00:00  buy 0.8 D30EUR @ 25026.40
+        #2889622  12:48:00  buy 0.8 D30EUR @ 25018.30
+        #2889724  13:00:00  sell limit 0.11 EURUSD @ 1.14875
+        #2889722  13:00:00  sell limit 0.03 EURUSD @ 1.14599
+        #2892379  15:30:00  sell stop 2.8 NASUSD @ 28525.20
+        #2892380  15:30:00  buy stop 0.5 NASUSD @ 28803.40
+        #2892378  15:30:00  buy stop 2.8 NASUSD @ 28564.80
+        #2892375  15:30:00  buy stop 1.5 NASUSD @ 28567.80
+        #2892377  15:30:00  sell stop 1.5 NASUSD @ 28522.20
+        #2893105  15:45:00  buy 0.5 D30EUR @ 24844.80
+        #2893334  15:55:12  sell 0.2 D30EUR @ 24865.10
+        #2894473  17:00:00  sell limit 0.12 GBPUSD @ 1.34368
+        #2894472  17:00:00  sell limit 0.03 GBPUSD @ 1.34136
+        #2896584  21:00:00  sell limit 0.03 EURUSD @ 1.14599
+        #2896585  21:00:00  sell limit 0.1 EURUSD @ 1.14875
+        #2896582  21:00:00  sell limit 0.03 GBPUSD @ 1.34136
+        #2896583  21:00:00  sell limit 0.12 GBPUSD @ 1.34368
+        #2896840  23:17:35  sell limit 0.03 EURUSD @ 1.14599
+        #2896841  23:17:35  sell limit 0.1 EURUSD @ 1.14875
+        #2896838  23:17:35  sell limit 0.03 GBPUSD @ 1.34136
+        #2896839  23:17:35  sell limit 0.12 GBPUSD @ 1.34368
+    20260724   28 ordini   [D30EUR,GBPUSD,EURUSD,NASUSD]
+        #2896991  01:00:00  sell limit 0.12 GBPUSD @ 1.34368
+        #2896992  01:00:00  sell limit 0.03 EURUSD @ 1.14599
+        #2896993  01:00:00  sell limit 0.1 EURUSD @ 1.14875
+        #2896987  01:00:00  sell limit 0.1 D30EUR @ 24934.90
+        #2896988  01:00:00  sell limit 0.1 D30EUR @ 24997.40
+        #2896990  01:00:00  sell limit 0.03 GBPUSD @ 1.34136
+        #2897811  06:00:00  buy limit 0.92 EURUSD @ 1.13732
+        #2897810  06:00:00  sell limit 0.92 EURUSD @ 1.13876
+        #2898215  08:00:00  sell stop 0.91 GBPUSD @ 1.33056
+        #2898214  08:00:00  buy stop 0.92 GBPUSD @ 1.33193
+        #2898579  08:59:00  sell stop 2.5 D30EUR @ 24684.60
+        #2898578  08:59:00  buy stop 2.5 D30EUR @ 24801.40
+        #2898604  09:00:00  sell stop 2.1 D30EUR @ 24710.40
+        #2898603  09:00:00  buy stop 2.1 D30EUR @ 24760.90
+        #2898801  09:06:42  sell 1.2 D30EUR @ 24845.20
+        #2899183  09:15:00  sell stop 0.6 D30EUR @ 24730.70
+        #2899181  09:15:00  buy stop 0.6 D30EUR @ 24899.20
+        #2899252  09:17:34  sell 1 D30EUR @ 24901.40
+        #2899251  09:17:34  sell 1.3 D30EUR @ 24901.70
+        #2899441  09:25:00  sell stop 0.6 D30EUR @ 24727.70
+        #2899440  09:25:00  buy stop 0.6 D30EUR @ 24929.80
+        #2901345  12:21:00  sell 1.1 D30EUR @ 24944.70
+        #2903067  15:30:00  sell stop 0.6 NASUSD @ 28365.70
+        #2903066  15:30:00  buy stop 1 NASUSD @ 28537.20
+        #2903065  15:30:00  buy stop 0.6 NASUSD @ 28464.10
+        #2903161  15:35:00  buy 0.6 NASUSD @ 28444.10
+        #2907367  21:00:00  sell limit 0.12 EURUSD @ 1.14472
+        #2907366  21:00:00  sell limit 0.03 EURUSD @ 1.14226
+    20260727   34 ordini   [EURUSD,GBPUSD,U30USD,D30EUR,NASUSD]
+        #2909271  06:00:00  buy limit 0.65 EURUSD @ 1.13694
+        #2909270  06:00:00  sell limit 0.65 EURUSD @ 1.14142
+        #2909680  08:00:01  sell stop 1.07 GBPUSD @ 1.33464
+        #2909679  08:00:01  buy stop 1.09 GBPUSD @ 1.33589
+        #2910085  08:59:00  sell stop 1.19 EURUSD @ 1.13679
+        #2910084  08:59:00  buy stop 1.19 EURUSD @ 1.14342
+        #2910105  09:00:00  buy stop 2.1 D30EUR @ 25455.80
+        #2910106  09:00:00  sell stop 2.1 D30EUR @ 25402.20
+        #2910100  09:00:00  buy 0.1 U30USD @ 52351.50
+        #2910102  09:00:00  buy stop 0.2 U30USD @ 52351.70
+        #2910384  09:15:00  sell stop 1.3 D30EUR @ 25392.00
+        #2910382  09:15:00  buy stop 1.3 D30EUR @ 25479.90
+        #2910381  09:15:00  buy stop 0.5 D30EUR @ 25484.90
+        #2910685  09:33:00  buy 1.2 D30EUR @ 25411.70
+        #2910729  09:35:41  sell 0.5 D30EUR @ 25432.10
+        #2911419  10:12:00  buy 1.8 D30EUR @ 25398.10
+        #2911490  10:23:07  sell 0.9 D30EUR @ 25419.60
+        #2912561  12:00:00  sell 0.1 U30USD @ 52483.50
+        #2913320  13:23:21  sell stop 1.3 D30EUR @ 25392.00
+        #2913325  13:24:28  sell stop 1.73 EURUSD @ 1.12879
+        #2913324  13:24:28  buy stop 1.73 EURUSD @ 1.15142
+        #2913327  13:24:45  sell stop 1.7 D30EUR @ 25390.40
+        #2913329  13:25:38  sell stop 2.8 NASUSD @ 28521.00
+        #2913328  13:25:38  buy stop 2.8 NASUSD @ 28561.70
+        #2913330  13:26:13  buy stop 1.06 GBPUSD @ 1.33589
+        #2913398  13:34:13  sell stop 1.3 D30EUR @ 25392.00
+        #2913647  13:55:15  sell 0.9 D30EUR @ 25537.90
+        #2914866  15:30:00  buy stop 1.6 NASUSD @ 28539.60
+        #2914867  15:30:00  buy stop 0.8 NASUSD @ 28540.10
+        #2914864  15:30:00  buy stop 0.9 NASUSD @ 28490.00
+        #2914865  15:30:00  sell stop 0.9 NASUSD @ 28418.50
+        #2915202  15:40:12  buy 0.4 NASUSD @ 28360.00
+        #2915239  15:42:00  buy 0.8 D30EUR @ 25535.80
+        #2915432  15:49:07  sell 0.4 D30EUR @ 25556.50
+    20260728   28 ordini   [D30EUR,EURUSD,GBPUSD,NASUSD]
+        #2920777  03:36:04  buy 0.3 D30EUR @ 25419.40
+        #2920776  03:36:04  buy 0.3 D30EUR @ 25419.40
+        #2920775  03:36:04  buy 0.4 D30EUR @ 25419.40
+        #2921163  06:00:00  buy limit 0.98 EURUSD @ 1.13666
+        #2921162  06:00:00  sell limit 0.98 EURUSD @ 1.13801
+        #2921607  08:00:00  sell stop 0.87 GBPUSD @ 1.32823
+        #2921606  08:00:00  buy stop 0.87 GBPUSD @ 1.32979
+        #2921916  08:59:00  sell stop 2.63 EURUSD @ 1.12666
+        #2921915  08:59:00  buy stop 2.63 EURUSD @ 1.14801
+        #2921914  08:59:00  sell stop 0.7 D30EUR @ 25360.80
+        #2921932  09:00:00  sell stop 3 D30EUR @ 25444.40
+        #2921933  09:00:00  sell stop 1.4 D30EUR @ 25443.40
+        #2921930  09:00:00  buy stop 3 D30EUR @ 25483.80
+        #2921931  09:00:00  buy stop 1.4 D30EUR @ 25484.80
+        #2922154  09:15:00  sell stop 1.4 D30EUR @ 25429.20
+        #2922155  09:15:00  sell stop 1.4 D30EUR @ 25429.20
+        #2922152  09:15:00  buy stop 0.6 D30EUR @ 25517.60
+        #2922150  09:15:00  buy stop 1.4 D30EUR @ 25512.60
+        #2922151  09:15:00  buy stop 1.4 D30EUR @ 25512.60
+        #2922769  10:03:00  buy 0.9 D30EUR @ 25484.40
+        #2923297  10:47:31  sell 0.4 D30EUR @ 25504.80
+        #2924600  12:18:00  buy 2.5 D30EUR @ 25498.60
+        #2926376  15:30:00  buy stop 1.3 NASUSD @ 27882.40
+        #2926378  15:30:00  buy stop 0.6 NASUSD @ 27882.90
+        #2926373  15:30:00  buy stop 0.8 NASUSD @ 27856.50
+        #2926374  15:30:00  sell stop 0.8 NASUSD @ 27776.90
+        #2926595  15:37:31  buy 0.4 NASUSD @ 27697.80
+        #2929800  18:30:00  buy 1.5 D30EUR @ 25488.80
+    20260729   39 ordini   [D30EUR,EURUSD,NASUSD,F40EUR,XAUUSD,U30USD]
+        #2931321  00:06:00  buy 0.4 D30EUR @ 25534.90
+        #2931320  00:06:00  buy 0.5 D30EUR @ 25534.90
+        #2932402  06:00:00  buy limit 0.84 EURUSD @ 1.13821
+        #2932401  06:00:00  sell limit 0.84 EURUSD @ 1.14007
+        #2932708  08:00:00  buy stop 0.4 D30EUR @ 25387.30
+        #2932707  08:00:00  buy 0.1 D30EUR @ 25387.10
+        #2933001  08:59:00  sell stop 2.4 EURUSD @ 1.12821
+        #2933000  08:59:00  buy stop 2.4 EURUSD @ 1.15007
+        #2932999  08:59:00  sell stop 0.6 D30EUR @ 25280.30
+        #2933013  09:00:00  sell stop 1.1 D30EUR @ 25452.80
+        #2933014  09:00:00  sell stop 2.3 D30EUR @ 25453.80
+        #2933012  09:00:00  sell 0.2 D30EUR @ 25498.50
+        #2933010  09:00:00  buy stop 1.1 D30EUR @ 25506.50
+        #2933011  09:00:00  buy stop 2.3 D30EUR @ 25505.50
+        #2933137  09:15:00  sell stop 1.6 D30EUR @ 25484.80
+        #2933138  09:15:00  sell stop 1.6 D30EUR @ 25484.80
+        #2933136  09:15:00  buy stop 1.6 D30EUR @ 25560.30
+        #2933134  09:15:00  buy stop 1.6 D30EUR @ 25560.30
+        #2933135  09:15:00  buy stop 0.7 D30EUR @ 25565.30
+        #2937586  15:30:00  buy stop 0.6 NASUSD @ 27861.10
+        #2937587  15:30:00  sell stop 0.6 NASUSD @ 27694.00
+        #2937585  15:30:00  buy stop 0.3 NASUSD @ 27860.60
+        #2937582  15:30:00  buy stop 0.9 NASUSD @ 27800.20
+        #2937583  15:30:00  sell stop 0.9 NASUSD @ 27733.00
+        #2938162  15:52:10  buy 0.2 NASUSD @ 27599.80
+        #2942870  20:40:00  sell stop 0.35 EURUSD @ 1.14045
+        #2942867  20:40:00  buy stop 0.35 EURUSD @ 1.14307
+        #2943871  21:00:00  sell limit 0.01 XAUUSD @ 4140.88
+        #2943870  21:00:00  sell limit 0.01 XAUUSD @ 4149.08
+        #2943875  21:00:00  sell stop 0.6 U30USD @ 52210.30
+        #2943873  21:00:00  sell 0.2 U30USD @ 52210.50
+        #2943867  21:00:00  sell limit 0.01 XAUUSD @ 4127.75
+        #2943866  21:00:00  buy 0.1 F40EUR @ 8478.00
+        #2943869  21:00:00  buy stop 0.4 F40EUR @ 8478.20
+        #2943868  21:00:00  sell limit 0.01 XAUUSD @ 4126.11
+        #2943992  21:03:51  buy 0.1 U30USD @ 52163.50
+        #2943991  21:03:51  buy 0.2 U30USD @ 52163.50
+        #2945171  22:13:46  buy stop 0.1 NASUSD @ 27955.30
+        #2945170  22:13:46  buy stop 0.5 NASUSD @ 27808.30
+    20260730   26 ordini   [NASUSD,D30EUR,XAUUSD,EURUSD]
+        #2945736  01:00:00  buy 0.1 NASUSD @ 27312.40
+        #2946486  03:06:00  buy 0.2 D30EUR @ 25479.90
+        #2946485  03:06:00  buy 0.2 D30EUR @ 25479.90
+        #2946487  03:06:01  buy 0.2 D30EUR @ 25479.90
+        #2946917  05:00:00  sell stop 0.01 XAUUSD @ 4043.70
+        #2946916  05:00:00  sell 0.01 XAUUSD @ 4063.68
+        #2946915  05:00:00  sell 0.01 XAUUSD @ 4063.68
+        #2946996  06:00:00  buy limit 0.37 EURUSD @ 1.14476
+        #2946994  06:00:00  sell limit 0.37 EURUSD @ 1.14747
+        #2947641  08:59:00  sell stop 2.09 EURUSD @ 1.13476
+        #2947640  08:59:00  buy stop 2.09 EURUSD @ 1.15747
+        #2947647  09:00:00  sell stop 2.3 D30EUR @ 25316.00
+        #2947648  09:00:00  sell stop 1.1 D30EUR @ 25315.00
+        #2947645  09:00:00  buy stop 2.3 D30EUR @ 25361.60
+        #2947646  09:00:00  buy stop 1.1 D30EUR @ 25362.60
+        #2947998  09:15:00  sell stop 1.1 D30EUR @ 25322.20
+        #2947999  09:15:00  sell stop 1.1 D30EUR @ 25322.20
+        #2947997  09:15:00  buy stop 0.5 D30EUR @ 25422.70
+        #2947995  09:15:00  buy stop 1.1 D30EUR @ 25417.70
+        #2947996  09:15:00  buy stop 1.1 D30EUR @ 25417.70
+        #2952738  15:30:00  sell stop 0.7 NASUSD @ 27551.70
+        #2952737  15:30:00  sell stop 0.9 NASUSD @ 27685.80
+        #2952735  15:30:00  buy stop 0.9 NASUSD @ 27750.80
+        #2957063  21:00:00  sell stop 0.01 XAUUSD @ 4075.45
+        #2957061  21:00:00  sell 0.01 XAUUSD @ 4099.66
+        #2957060  21:00:00  sell 0.01 XAUUSD @ 4099.66
+    20260731   33 ordini   [XAUUSD,U30USD,EURUSD,D30EUR,NASUSD]
+        #2957646  01:05:00  sell limit 0.01 XAUUSD @ 4150.75
+        #2957647  01:05:00  sell limit 0.01 XAUUSD @ 4140.53
+        #2957643  01:05:00  sell limit 0.01 XAUUSD @ 4124.18
+        #2957644  01:05:00  sell limit 0.01 XAUUSD @ 4122.14
+        #2958389  05:00:00  buy stop 0.2 U30USD @ 52414.70
+        #2958388  05:00:00  sell 0.01 XAUUSD @ 4075.88
+        #2958387  05:00:00  buy 0.1 U30USD @ 52414.50
+        #2958448  06:00:00  buy limit 0.5 EURUSD @ 1.15062
+        #2958447  06:00:00  sell limit 0.5 EURUSD @ 1.15312
+        #2960150  08:59:00  sell stop 1.6 EURUSD @ 1.14062
+        #2960149  08:59:00  buy stop 1.6 EURUSD @ 1.16312
+        #2960164  09:00:00  sell stop 2.3 D30EUR @ 25686.70
+        #2960165  09:00:00  sell stop 1.1 D30EUR @ 25685.70
+        #2960162  09:00:00  buy stop 2.3 D30EUR @ 25731.20
+        #2960163  09:00:00  buy stop 1.1 D30EUR @ 25732.20
+        #2960304  09:08:03  sell 1.1 D30EUR @ 25762.80
+        #2960367  09:11:27  sell 0.5 D30EUR @ 25792.60
+        #2960389  09:12:50  sell 0.1 U30USD @ 52523.50
+        #2960445  09:15:00  sell stop 0.8 D30EUR @ 25692.80
+        #2960444  09:15:00  buy stop 0.3 D30EUR @ 25829.90
+        #2960443  09:15:00  buy stop 0.8 D30EUR @ 25824.90
+        #2965053  15:30:00  sell stop 2.3 NASUSD @ 28421.00
+        #2965054  15:30:00  sell stop 1.2 NASUSD @ 28418.00
+        #2965051  15:30:00  buy stop 1.2 NASUSD @ 28471.00
+        #2965049  15:30:00  sell stop 0.8 NASUSD @ 28307.00
+        #2965050  15:30:00  buy stop 2.3 NASUSD @ 28468.00
+        #2965122  15:32:02  sell 1.1 NASUSD @ 28515.00
+        #2965655  15:44:58  buy 0.4 NASUSD @ 28298.60
+        #2966615  16:45:00  buy 0.1 D30EUR @ 25662.80
+        #2966614  16:45:00  buy 0.1 D30EUR @ 25662.80
+        #2966613  16:45:00  buy 0.2 D30EUR @ 25662.80
+        #2967539  19:00:00  buy 0.1 NASUSD @ 28244.40
+        #2967537  19:00:00  buy 0.1 NASUSD @ 28244.40
+    20260803   24 ordini   [200AUD,EURUSD,F40EUR,D30EUR,NASUSD]
+        #2970552  01:51:00  buy limit 0.5 200AUD @ 8813.50
+        #2970551  01:51:00  buy limit 0.3 200AUD @ 8838.30
+        #2971846  06:00:00  buy limit 0.42 EURUSD @ 1.15268
+        #2971845  06:00:00  sell limit 0.42 EURUSD @ 1.15587
+        #2972154  08:01:00  sell 0.1 F40EUR @ 8566.20
+        #2972153  08:01:00  sell 0.2 F40EUR @ 8565.50
+        #2972542  08:59:00  sell stop 2.29 EURUSD @ 1.14268
+        #2972541  08:59:00  buy stop 2.29 EURUSD @ 1.16587
+        #2972557  09:00:00  sell stop 1.3 D30EUR @ 25857.60
+        #2972558  09:00:00  sell stop 2.7 D30EUR @ 25858.60
+        #2972555  09:00:00  buy stop 1.3 D30EUR @ 25901.00
+        #2972556  09:00:00  buy stop 2.7 D30EUR @ 25900.00
+        #2972842  09:15:00  sell stop 1.2 D30EUR @ 25839.80
+        #2972845  09:15:00  sell stop 1.2 D30EUR @ 25839.80
+        #2972841  09:15:00  buy stop 1.2 D30EUR @ 25932.50
+        #2972839  09:15:00  buy stop 1.2 D30EUR @ 25932.50
+        #2972840  09:15:00  buy stop 0.5 D30EUR @ 25937.50
+        #2978262  15:30:00  buy stop 0.5 NASUSD @ 28372.00
+        #2978263  15:30:00  sell stop 0.9 NASUSD @ 28259.10
+        #2978261  15:30:00  buy stop 0.9 NASUSD @ 28372.50
+        #2978257  15:30:00  buy stop 0.7 NASUSD @ 28355.00
+        #2978260  15:30:00  sell stop 0.7 NASUSD @ 28265.60
+        #2978366  15:32:09  buy 0.4 NASUSD @ 28199.70
+        #2989907  15:57:56  sell 0.2 NASUSD @ 28462.80
+    20260804   23 ordini   [EURUSD,D30EUR,NASUSD,XAUUSD]
+        #3064314  06:00:00  buy limit 0.79 EURUSD @ 1.15021
+        #3064312  06:00:00  sell limit 0.79 EURUSD @ 1.15149
+        #3065267  08:59:00  sell stop 2.45 EURUSD @ 1.14021
+        #3065266  08:59:00  buy stop 2.45 EURUSD @ 1.16149
+        #3065289  09:00:00  sell stop 1.8 D30EUR @ 26124.10
+        #3065290  09:00:00  sell stop 3.8 D30EUR @ 26125.10
+        #3065287  09:00:00  buy stop 1.8 D30EUR @ 26155.20
+        #3065288  09:00:00  buy stop 3.8 D30EUR @ 26154.20
+        #3065362  09:02:07  sell 1.8 D30EUR @ 26184.00
+        #3065548  09:15:00  sell stop 0.9 D30EUR @ 26113.40
+        #3065549  09:15:00  sell stop 0.9 D30EUR @ 26113.40
+        #3065547  09:15:00  buy stop 0.4 D30EUR @ 26237.40
+        #3065545  09:15:00  buy stop 0.9 D30EUR @ 26232.40
+        #3065546  09:15:00  buy stop 0.9 D30EUR @ 26232.40
+        #3072137  15:30:00  sell stop 1.2 NASUSD @ 29092.80
+        #3072139  15:30:00  sell stop 2.2 NASUSD @ 29095.80
+        #3072136  15:30:00  buy stop 2.2 NASUSD @ 29144.50
+        #3072134  15:30:00  buy stop 1.2 NASUSD @ 29147.50
+        #3072135  15:30:00  sell stop 2 NASUSD @ 29068.80
+        #3073469  17:00:00  sell limit 0.01 XAUUSD @ 4130.72
+        #3073470  17:00:00  sell limit 0.01 XAUUSD @ 4124.42
+        #3073467  17:00:00  sell limit 0.01 XAUUSD @ 4114.34
+        #3073468  17:00:00  sell limit 0.01 XAUUSD @ 4113.08
+    20260805   19 ordini   [EURUSD,D30EUR,NASUSD]
+        #3076656  06:00:00  buy limit 0.87 EURUSD @ 1.15266
+        #3076655  06:00:00  sell limit 0.87 EURUSD @ 1.15404
+        #3077557  08:59:01  sell stop 2.4 EURUSD @ 1.14266
+        #3077556  08:59:01  buy stop 2.4 EURUSD @ 1.16404
+        #3077572  09:00:00  sell stop 2 D30EUR @ 26384.70
+        #3077573  09:00:00  sell stop 1 D30EUR @ 26383.70
+        #3077570  09:00:00  buy stop 2 D30EUR @ 26436.60
+        #3077571  09:00:00  buy stop 1 D30EUR @ 26437.60
+        #3077757  09:11:23  buy 0.5 D30EUR @ 26352.50
+        #3077810  09:15:00  sell stop 1 D30EUR @ 26339.50
+        #3077811  09:15:00  sell stop 1 D30EUR @ 26339.50
+        #3077809  09:15:00  buy stop 1 D30EUR @ 26440.50
+        #3077807  09:15:00  buy stop 1 D30EUR @ 26440.50
+        #3077808  09:15:00  buy stop 0.4 D30EUR @ 26445.50
+        #3078825  10:46:23  buy stop 1 D30EUR @ 26440.50
+        #3078827  10:46:46  buy stop 1 D30EUR @ 26440.50
+        #3081578  15:30:00  sell stop 0.6 NASUSD @ 29778.80
+        #3081577  15:30:00  sell stop 1.7 NASUSD @ 29768.90
+        #3081575  15:30:00  buy stop 0.6 NASUSD @ 29866.90
+    20260806   26 ordini   [EURUSD,D30EUR,NASUSD,U30USD,XAUUSD]
+        #3087343  06:00:00  buy limit 0.83 EURUSD @ 1.15468
+        #3087342  06:00:00  sell limit 0.83 EURUSD @ 1.15595
+        #3087995  08:59:00  sell stop 2.84 EURUSD @ 1.14468
+        #3087994  08:59:00  buy stop 2.84 EURUSD @ 1.16595
+        #3088008  09:00:00  buy stop 3.3 D30EUR @ 26213.00
+        #3088009  09:00:00  sell stop 3.3 D30EUR @ 26181.50
+        #3088006  09:00:00  buy stop 1.6 D30EUR @ 26214.00
+        #3088007  09:00:00  sell stop 1.6 D30EUR @ 26180.50
+        #3088021  09:00:29  buy 0.8 D30EUR @ 26145.90
+        #3088069  09:03:58  buy 1.6 D30EUR @ 26118.30
+        #3088163  09:15:00  sell stop 0.9 D30EUR @ 26088.70
+        #3088164  09:15:00  sell stop 0.9 D30EUR @ 26088.70
+        #3088161  09:15:00  buy stop 0.9 D30EUR @ 26203.10
+        #3088159  09:15:00  buy stop 0.4 D30EUR @ 26208.10
+        #3088160  09:15:00  buy stop 0.9 D30EUR @ 26203.10
+        #3092173  15:30:00  buy stop 1.1 NASUSD @ 29250.20
+        #3092174  15:30:00  sell stop 2 NASUSD @ 29195.50
+        #3092175  15:30:00  sell stop 1.1 NASUSD @ 29192.50
+        #3092170  15:30:00  buy stop 0.5 NASUSD @ 29357.70
+        #3092171  15:30:00  buy stop 2 NASUSD @ 29247.20
+        #3092172  15:30:00  buy stop 1.1 NASUSD @ 29358.20
+        #3092787  15:45:00  buy stop 0.2 U30USD @ 54520.50
+        #3092856  15:48:05  sell 0.5 NASUSD @ 29401.40
+        #3094005  17:00:00  sell 0.01 XAUUSD @ 4273.02
+        #3095663  19:17:56  sell stop 0.9 NASUSD @ 29192.50
+        #3095662  19:17:56  buy stop 0.4 NASUSD @ 29442.80
+    20260807   20 ordini   [EURUSD,D30EUR,NASUSD,U30USD]
+        #3097600  06:00:00  buy limit 0.94 EURUSD @ 1.15180
+        #3097599  06:00:00  sell limit 0.94 EURUSD @ 1.15256
+        #3098680  08:59:00  sell stop 3.35 EURUSD @ 1.14180
+        #3098679  08:59:00  buy stop 3.35 EURUSD @ 1.16256
+        #3098691  09:00:00  sell stop 2.9 D30EUR @ 26172.90
+        #3098692  09:00:00  sell stop 1.4 D30EUR @ 26171.90
+        #3098689  09:00:00  buy stop 2.9 D30EUR @ 26208.20
+        #3098690  09:00:00  buy stop 1.4 D30EUR @ 26209.20
+        #3098722  09:02:10  sell 1.4 D30EUR @ 26226.40
+        #3098837  09:15:00  buy stop 0.5 D30EUR @ 26273.80
+        #3098971  09:40:24  buy limit 1.2 D30EUR @ 26266.90
+        #3103561  15:30:00  sell stop 0.1 NASUSD @ 29490.00
+        #3103562  15:30:00  sell stop 0.8 NASUSD @ 29563.40
+        #3103560  15:30:00  buy stop 0.8 NASUSD @ 29635.70
+        #3103558  15:30:00  buy stop 0.1 NASUSD @ 29754.70
+        #3103559  15:30:00  buy stop 0.1 NASUSD @ 29755.20
+        #3104054  15:45:00  buy stop 0.2 U30USD @ 54031.50
+        #3105289  16:30:00  buy 0.2 D30EUR @ 26382.20
+        #3105288  16:30:00  buy 0.2 D30EUR @ 26380.20
+        #3106571  18:30:00  sell 0.2 U30USD @ 53923.50
+    20260810   18 ordini   [EURUSD,D30EUR,NASUSD,U30USD]
+        #3109169  06:00:00  buy limit 0.8 EURUSD @ 1.15487
+        #3109168  06:00:00  sell limit 0.8 EURUSD @ 1.15662
+        #3109646  08:59:00  sell stop 3.14 EURUSD @ 1.14487
+        #3109645  08:59:00  buy stop 3.14 EURUSD @ 1.16619
+        #3109750  09:15:00  buy stop 0.8 D30EUR @ 26379.70
+        #3110600  11:25:02  sell 0.4 D30EUR @ 26401.40
+        #3112307  15:30:01  buy stop 0.1 NASUSD @ 29771.30
+        #3112308  15:30:01  sell stop 0.1 NASUSD @ 29655.80
+        #3112306  15:30:01  buy stop 0.1 NASUSD @ 29771.80
+        #3112303  15:30:01  buy stop 1.2 NASUSD @ 29718.50
+        #3112304  15:30:01  sell stop 1.2 NASUSD @ 29667.20
+        #3112807  16:00:00  buy 0.1 NASUSD @ 29694.30
+        #3112806  16:00:00  buy 0.1 NASUSD @ 29694.30
+        #3113524  16:46:14  buy limit 0.3 U30USD @ 54007.50
+        #3113665  17:00:00  buy stop 0.3 U30USD @ 53994.70
+        #3113664  17:00:00  buy 0.1 U30USD @ 53994.50
+        #3115527  22:00:00  buy stop 0.3 U30USD @ 53961.70
+        #3115526  22:00:00  buy 0.1 U30USD @ 53961.50
+    20260811   15 ordini   [XAUUSD,D30EUR,U30USD,NASUSD]
+        #3117200  08:00:00  sell stop 0.01 XAUUSD @ 4364.99
+        #3117199  08:00:00  buy stop 0.01 XAUUSD @ 4437.58
+        #3117812  09:15:00  buy stop 0.7 D30EUR @ 26391.80
+        #3119062  12:00:00  buy stop 0.6 U30USD @ 53909.70
+        #3119061  12:00:00  buy 0.2 U30USD @ 53909.50
+        #3119257  12:28:18  sell 0.1 U30USD @ 53951.50
+        #3119259  12:28:20  sell 0.2 U30USD @ 53952.50
+        #3120077  14:06:21  buy limit 1.3 D30EUR @ 26382.80
+        #3121147  15:30:00  sell stop 0.2 NASUSD @ 29704.90
+        #3121146  15:30:00  buy stop 0.2 NASUSD @ 29760.70
+        #3121145  15:30:00  buy stop 0.2 NASUSD @ 29760.20
+        #3121262  15:31:16  buy 0.1 NASUSD @ 29646.60
+        #3122202  15:45:00  buy stop 0.7 U30USD @ 54178.50
+        #3123116  17:07:51  buy stop 0.6 U30USD @ 54190.50
+        #3123801  18:30:00  buy 0.01 XAUUSD @ 4383.18
+    20260812    8 ordini   [XAUUSD,U30USD]
+        #3125886  08:00:00  sell stop 0.01 XAUUSD @ 4360.01
+        #3125885  08:00:00  buy stop 0.01 XAUUSD @ 4418.43
+        #3128566  14:01:39  sell stop 0.01 XAUUSD @ 4360.01
+        #3128565  14:01:39  buy stop 0.01 XAUUSD @ 4418.43
+        #3128709  14:23:53  sell stop 0.01 XAUUSD @ 4360.01
+        #3128708  14:23:53  buy stop 0.01 XAUUSD @ 4418.43
+        #3134875  22:00:00  buy limit 0.2 U30USD @ 53612.10
+        #3134874  22:00:00  buy limit 0.1 U30USD @ 53657.90
+    20260813    9 ordini   [U30USD,XAUUSD]
+        #3136544  05:00:00  buy limit 0.3 U30USD @ 53621.60
+        #3136543  05:00:00  buy limit 0.2 U30USD @ 53662.90
+        #3137165  08:00:00  sell stop 0.01 XAUUSD @ 4378.01
+        #3137163  08:00:00  buy stop 0.01 XAUUSD @ 4452.22
+        #3141558  15:45:00  buy stop 0.8 U30USD @ 53993.50
+        #3142968  16:05:24  buy limit 0.3 U30USD @ 53983.50
+        #3152184  18:30:00  buy 0.01 XAUUSD @ 4362.75
+        #3153299  19:00:00  buy limit 0.3 U30USD @ 53644.20
+        #3153298  19:00:00  buy limit 0.2 U30USD @ 53687.10
+    20260814   14 ordini   [EURAUD,XAUUSD,EURJPY,U30USD,GBPUSD]
+        #3158560  01:00:00  sell stop 0.17 EURAUD @ 1.63151
+        #3158568  01:05:00  buy stop 0.01 XAUUSD @ 4449.72
+        #3160053  08:00:00  sell stop 0.01 XAUUSD @ 4308.37
+        #3160052  08:00:00  buy stop 0.01 XAUUSD @ 4366.56
+        #3162959  13:00:00  buy 0.3 EURJPY @ 183.948
+        #3165340  16:11:04  sell stop 0.01 XAUUSD @ 4308.37
+        #3165918  17:00:00  buy limit 0.2 U30USD @ 53711.60
+        #3165919  17:00:01  buy limit 0.4 U30USD @ 53680.40
+        #3166766  19:00:00  sell 0.33 GBPUSD @ 1.35388
+        #3166791  19:10:01  buy 0.16 GBPUSD @ 1.35324
+        #3167082  20:13:30  sell 0.2 U30USD @ 53768.50
+        #3167083  20:13:31  sell 0.1 U30USD @ 53768.50
+        #3167178  21:00:00  buy limit 0.3 U30USD @ 53676.60
+        #3167177  21:00:00  buy limit 0.2 U30USD @ 53715.70
+
+conto 50503635 : 2 ordini PIAZZATI da questa macchina
+    20260807    2 ordini   [NASUSD]
+        #3107171  21:30:03  sell stop 3.4 NASUSD @ 29562.60
+        #3107170  21:30:03  sell stop 17 NASUSD @ 29561.30
+
+conto 50504263 : 8 ordini PIAZZATI da questa macchina
+    20260810    2 ordini   [D30EUR,U30USD]
+        #3110409  10:55:30  buy limit 9.7 D30EUR @ 26370.70
+        #3113525  16:46:14  buy limit 4.4 U30USD @ 54007.50
+    20260811    2 ordini   [D30EUR,U30USD]
+        #3120078  14:06:21  buy limit 8.3 D30EUR @ 26382.80
+        #3122201  15:45:00  buy stop 4.1 U30USD @ 54178.50
+    20260812    1 ordini   [D30EUR]
+        #3126861  10:52:10  buy limit 9.7 D30EUR @ 26457.20
+    20260813    2 ordini   [U30USD]
+        #3141557  15:45:00  buy stop 5 U30USD @ 53993.50
+        #3142969  16:05:24  buy limit 4.7 U30USD @ 53983.50
+    20260814    1 ordini   [D30EUR]
+        #3160789  09:50:14  buy limit 11.8 D30EUR @ 26476.80
+

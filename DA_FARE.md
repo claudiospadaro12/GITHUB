@@ -24,7 +24,29 @@ controllo positivo): dei tre stop pieni del magic 770101, **DUE sono del PC**
 del portafoglio). L'inferenza della pagella era sbagliata per un terzo.
 Referto: `report/CACCIA_TICKET_770101.md`.
 
-**DOMANDA APERTA, piu' grande di quella chiusa:** sul PC ci sono 52 giornali e
+**RISPOSTA (15/08, `censimento_ordini.ps1` su entrambe le macchine): NON DUE
+GIORNATE, SEDICI.** Il PC ha piazzato **174 ordini** sul conto vivo dal 06/07
+al 14/08, **33 sono diventati trade veri** per **-511,28**. Controllo che
+valida tutto: dei trade non attribuiti, quelli con magic di EA sono **ZERO**
+(gli altri sono manuali/mobile, tutti prima del 22/07) -> **per gli EA
+l'attribuzione e' completa al 100%**.
+
+**Il numero che ribalta due settimane di letture: dal 22/07 il conto piccolo
+fa -340,70, ma il PC ci mette -475,56 e il VPS +93,14. Senza il fantasma la
+flotta e' a +134,86: NON e' in perdita.** Referto:
+`report/CENSIMENTO_ORDINI_PC.md`.
+
+**DA FARE ORA:**
+1. **Controllo di tenuta**: rilanciare il censimento **fra una settimana**. Se
+   il PC ha piazzato zero ordini nuovi, il lucchetto tiene e il caso si chiude.
+   E' l'unica prova che vale.
+2. Ricalcolare le classifiche del forward **escludendo i 33 trade del PC**.
+3. Il magic 770101 va ricalcolato **solo sui trade del VPS** prima di
+   confrontarlo con qualunque backtest (era un miscuglio: 15 PC + 11 VPS).
+4. Staccare i 10 EA di terzi dai grafici del PC (sono la fonte dei 104
+   `Invalid price`).
+
+**DOMANDA CHIUSA (era: piu' grande di quella aperta):** sul PC ci sono 52 giornali e
 12 righe `order #` nei soli tre giorni guardati. **Quante ALTRE volte il PC ha
 piazzato sul conto vivo?** Si risponde elencando TUTTI gli `order #` del
 giornale del PC e incrociandoli col CSV dei trade. Costa quanto la caccia ai
