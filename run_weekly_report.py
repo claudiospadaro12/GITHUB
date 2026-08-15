@@ -192,6 +192,16 @@ def main() -> int:
                   f"(copre fino a {st.last_close})")
 
     # --- guardia anti-statement-vecchio: copre fino a venerdi'? ---
+    # 15/08/2026: da dove sta girando questo report. La pagella del 15/08 e'
+    # uscita vuota perche' il VPS lanciava il workflow sul branch VECCHIO
+    # (claude/creating-agents-SgGpD, fermo al 31/07): lo statement li' dentro
+    # si ferma al 24/07. Il messaggio diceva "esporta un nuovo storico da MT5",
+    # cioe' mandava a cercare nel posto sbagliato. Adesso la provenienza e'
+    # scritta nell'avviso: se ricapita, la causa si legge subito.
+    _branch = os.getenv("GITHUB_REF_NAME", "") or os.getenv("GITHUB_REF", "")
+    _sha    = (os.getenv("GITHUB_SHA", "") or "")[:7]
+    _prov   = f" [report generato dal branch '{_branch}'" + (f", commit {_sha}" if _sha else "") + "]" if _branch else ""
+
     stale_warning = ""
     friday = week_start + timedelta(days=4)
     expected = min(now, friday)
@@ -199,11 +209,13 @@ def main() -> int:
         lc = st.last_close.replace(".", "/")
         stale_warning = (f"⚠️ Lo statement arriva solo al {lc}, ma la settimana va fino al "
                          f"{expected:%d/%m}. Mancano dei trade: esporta da MT5 un nuovo storico "
-                         f"COMPLETO e ripubblicalo, poi rilancia il report.")
+                         f"COMPLETO e ripubblicalo, poi rilancia il report." + _prov +
+                         " Se il branch qui sopra non e' 'lavoro', il problema NON e' lo "
+                         "statement: il report sta leggendo un repo vecchio.")
         print(f"[warn] statement STALE: ultimo trade {st.last_close}, atteso >= {expected:%Y.%m.%d}")
     elif st is None:
         stale_warning = ("⚠️ Nessuno statement disponibile: l'analisi dei trade è vuota. "
-                         "Pubblica l'export dello storico MT5 in data/statements/.")
+                         "Pubblica l'export dello storico MT5 in data/statements/." + _prov)
 
     res = verify.verify(snaps) if snaps else None
 

@@ -6,7 +6,13 @@
 #  sul VPS (dopo il report). L'EA PostNews lo ricarica da solo ogni giorno.
 # =====================================================================
 $ErrorActionPreference = "Stop"
-$RawUrl = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/claude/creating-agents-SgGpD/data/abtg_news.csv"
+# ⚠️ IL BRANCH (corretto il 15/08/2026, dopo una pagella vuota)
+#  Qui c'era "claude/creating-agents-SgGpD", il vecchio branch di default:
+#  fermo al 31/07, con trades_auto.csv che si ferma al 24/07. La pagella
+#  settimanale del 15/08 e' uscita con "Nessuno statement con trade nel
+#  periodo" per QUESTO - non per un problema di export, di parser o di
+#  MT5. Il lavoro sta tutto su `lavoro`.
+$RawUrl = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/data/abtg_news.csv"
 
 Write-Host "=== AGGIORNO abtg_news.csv IN MT5 ===" -ForegroundColor Cyan
 

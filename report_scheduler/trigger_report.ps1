@@ -21,7 +21,13 @@ $token = (Get-Content $tokenFile -Raw).Trim()
 $owner    = "claudiospadaro12"
 $repo     = "GITHUB"
 $workflow = "daily-report.yml"
-$ref      = "claude/creating-agents-SgGpD"
+# ⚠️ IL BRANCH (corretto il 15/08/2026, dopo una pagella vuota)
+#  Qui c'era "claude/creating-agents-SgGpD", il vecchio branch di default:
+#  fermo al 31/07, con trades_auto.csv che si ferma al 24/07. La pagella
+#  settimanale del 15/08 e' uscita con "Nessuno statement con trade nel
+#  periodo" per QUESTO - non per un problema di export, di parser o di
+#  MT5. Il lavoro sta tutto su `lavoro`.
+$ref      = "lavoro"
 
 $uri = "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow/dispatches"
 $headers = @{
