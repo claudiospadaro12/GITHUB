@@ -191,54 +191,43 @@ Referto: `risultati_archivio/REFERTO_ROUND54_LATI_DOW.md`, CSV in
 Del censimento R52 restano **9 celle su 11** col lato spento a mano: tutte
 bloccate in attesa di storico che oggi non abbiamo.
 
-## 1-quinquies. R55 — QUANTO SCALA OGNI CELLA (tesi pronta, serve codice)
+## 1-quinquies. R55 — **CHIUSO** (15/08): scala lo STOP LARGO, non il tipo di ordine
 
-Nato dalla domanda di Claudio sui conti prop da 1,5M. **Il round che avevo
-proposto NON si puo' fare come l'avevo scritto**: `InpSlippagePts` esiste solo
-nel ramo BREAKOUT della famiglia Apertura, e le celle vive girano in RETEST,
-che entra a LIMIT e non legge quell'input. Sarebbero uscite righe identiche.
+40 passate, 4 CSV su 4, gemelli 20/20 identici. **Controllo d'igiene passato**:
+la riga a slippage 0 dell'ORB riproduce R54b **al centesimo** (+41.057,00 ·
+1,6742 · 9,7623 · n=119); il PTE combacia a <0,8% con lo stesso n=40.
+(Scarto dichiarato: PTE in campione fa 28 trade contro i 27 della coda a 10k.)
 
-**Mappa degli ingressi letta dal codice** (`prove/R55_SCALABILITA_TESI.md` §1):
-- **a MERCATO** (slippage pieno): PTE, BreakingBand, GapFill, CostToCost
-- **a STOP** (slippage sulla rottura): MaxMinNotte, ORB, Larry, SuperWave, STREV
-- **a LIMIT** (niente slippage, ma rischio di NON riempirsi): EMA200, EasyTrend,
-  Larry(limit), **Apertura in RETEST**
+| | slip 0 -> 200 pt (OOS) | DD | esito |
+|---|---|---|---|
+| **PTE** (a mercato) | 1.093 -> **928** (-15%), PF 1,171 -> **1,142** | 3,2166 -> **3,2711%** | 🟢 **SCALA** |
+| **ORB** (a stop) | 41.057 -> **35.755** (-13%), PF 1,674 -> **1,570** | 9,76 -> 🔴 **10,34%** | 🔴 **solo taglia piccola** |
 
-**Scoperta**: il RETEST **scala meglio** del breakout — a taglia grande chi
-entra a stop entra comunque a prezzo peggiore (perde soldi), chi entra a limit
-rischia di non entrare (perde un'occasione). Beneficio collaterale della scelta
-di R6, mai notato prima. **La cella che scala peggio non e' il DAX: e' il PTE**,
-a mercato, la famiglia con piu' serie in classifica.
+**L'ORB non muore di PF: muore di DRAWDOWN.** Sfonda il cancello del 10% con
+appena **150 punti = 1,5 punti indice**. R15 l'aveva promossa con DD 9,92% e
+doppio asterisco ("cella di confine"): R55 misura quanto e' sottile quel
+confine.
 
-**Dai giornali (60 gg, gia' in casa)**: sul D30EUR **20 pendenti su 187 sono
-scaduti INEVASI** (10,7%) gia' a 11,80 lotti. NASUSD 11,7%, U30USD 21,4%,
-XAUUSD 32,0%. (La colonna "annullati" NON e' non-fill: contiene le
-cancellazioni volontarie del gemello. L'unico dato pulito e' "scaduti".)
+**Costo per trade a 200 punti**: PTE **-4,12 EUR** (0,41% di R) · ORB
+**-44,55 EUR** (4,5% di R) = **undici volte**.
 
-**Per misurare serve prima toccare il codice**: aggiungere `InpSlippagePts`
-(default 0 = forward invariato, come si e' fatto con `InpAllowReverse`) a
-**ABTG_PTE** e **ABTG_ORB_Ottimizzato**. Poi il round e' corto: 5 valori x 2
-finestre x 2 EA = 20 passate. Criteri gia' congelati nella tesi.
+🔑 **La scoperta**: il tipo di ordine NON spiega la differenza. La spiega la
+**LARGHEZZA DELLO STOP** — `lotto = R / distanza stop`, quindi stop stretto =
+piu' lotti = ogni punto di slippage costa di piu'. L'ORB ha lo stop al 50% del
+range, il PTE a 1 ATR + buffer. **Stessa lezione della FASE H** (07/08: "il
+drawdown non lo fa la geometria, lo fa lo stop stretto") da un'altra porta:
+**una cella con lo stop stretto e' fragile due volte**.
 
-**FATTO il 15/08**: `InpSlippagePts` aggiunto a **ABTG_PTE v1.01** (ingresso a
-mercato) e **ABTG_ORB_Ottimizzato v1.01** (due pendenti STOP + il ramo a
-mercato della chiusura confermata, coperto anche se oggi e' spento).
-**Default 0 = forward invariato per costruzione**, come `InpAllowReverse`.
+**Criterio gratis per tutte e 32 le celle vive**: si guarda `InpSLMode` e si sa
+gia' quali reggono la taglia e quali no, senza un altro round.
 
-Modello: SL e TP si spostano di X punti nel verso contrario al trade, **dopo**
-il calcolo del lotto -> netto **-X punti su ogni trade**, vincente o perdente;
-il lotto resta sul rischio ORIGINALE, quindi lo slippage si vede come un R piu'
-grande del previsto, come nella realta'.
+**Nessun cambio ai parametri vivi**: `InpSlippagePts` resta 0 su entrambi gli
+EA. Referto: `risultati_archivio/REFERTO_ROUND55_SLIPPAGE.md`, CSV in
+`risultati_archivio/csv_r55/`.
 
-PC di BACKTEST, MT5 CHIUSO. 40 passate (5 valori x 2 magic x 2 finestre x 2 EA):
-
-```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/4c424e2bba8fd34686dc9cc7ffd3139fb475621e/backtest_pipeline/lancia_r55.ps1" -OutFile "$env:TEMP\lancia_r55.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r55.ps1" -Rif 4c424e2bba8fd34686dc9cc7ffd3139fb475621e
-```
-
-Zip in `Desktop\r55.zip`, 4 CSV attesi. **Controllo d'igiene numero uno: la
-riga con slippage 0 deve riprodurre i numeri gia' noti della cella.** Se non lo
-fa, il round non vale e si guarda cosa e' cambiato nell'EA.
+**Resta aperto e non lo chiude nessun backtest**: riempimento parziale e
+profondita' del book a 177 lotti. MT5 non li modella. Risponde solo il forward
+a taglia crescente.
 
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 
