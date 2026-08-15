@@ -25,7 +25,7 @@
 //|  DEMO. Nessuna garanzia.                                        |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -93,6 +93,33 @@ input string InpComment   = "PTE";     // commento ordini
 input long   InpMagic     = 771301;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
+
+input group "=== Slippage stimato (R55: quanto scala questa cella) ==="
+//  PERCHE' (15/08/2026, R55). Tutti i backtest del progetto girano con
+//  riempimento PERFETTO: entry esatta, sempre. E' un'approssimazione
+//  ragionevole alle taglie di oggi, non lo e' piu' a taglia prop grande
+//  (su 1,5M il DAX vorrebbe ~177 lotti per trade). Questo input serve a
+//  misurare QUANTO edge resta con un'esecuzione peggiore.
+//
+//  COME E' MODELLATO, e perche' cosi':
+//  nel tester non si puo' cambiare il prezzo a cui il broker riempie.
+//  Ma uno slippage di X punti equivale, sul conto economico, a chiudere
+//  X punti piu' in la' nel verso sfavorevole: quindi si spostano SL e TP
+//  di X nel verso contrario al trade, DOPO aver calcolato il lotto.
+//  Effetto netto: -X punti su OGNI trade, vincente o perdente. Che e'
+//  esattamente cosa fa lo slippage.
+//  Il lotto resta calcolato sul rischio ORIGINALE, quello che l'EA vede
+//  al momento di decidere: cosi' lo slippage si manifesta come un R
+//  leggermente piu' grande del previsto, come nella realta'.
+//
+//  LIMITE DICHIARATO: e' un modello del PRIMO ORDINE. Non simula il
+//  riempimento parziale ne' la profondita' del book, che MT5 non
+//  modella affatto. E la gestione a runtime (trailing, BE, parziali)
+//  ricalcola i suoi livelli per conto suo.
+//
+//  DEFAULT 0 = comportamento identico a prima, forward invariato.
+input double InpSlippagePts = 0;   // R55: slippage stimato in PUNTI (0 = off, come sempre)
+
 
 //==================================================================
 //  STATO
@@ -311,8 +338,19 @@ void Enter(bool isLong,double dojiHigh,double dojiLow)
    double tp = isLong ? entry+atr*InpTP2_ATRmult : entry-atr*InpTP2_ATRmult;
    tp=NormalizePrice(tp);
 
-   double lot=LotByRisk(risk);
+   double lot=LotByRisk(risk);   // il lotto viene dal rischio ORIGINALE, prima dello slippage
    if(lot<=0){ Log("lotto nullo."); return; }
+
+   // R55: slippage. SL e TP si spostano di X punti nel verso contrario al
+   //      trade: lo stop scatta X piu' in la' (si perde di piu') e il TP
+   //      X prima (si guadagna di meno). Netto: -X punti su ogni trade.
+   if(InpSlippagePts>0)
+     {
+      double sp=InpSlippagePts*_Point;
+      sl = NormalizePrice(isLong ? sl-sp : sl+sp);
+      tp = NormalizePrice(isLong ? tp-sp : tp+sp);
+      Log(StringFormat("slippage stimato %.0f pt applicato a SL/TP (R55).",InpSlippagePts));
+     }
 
    string cm=InpComment+(isLong?" L":" S");
    bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,tp,cm)

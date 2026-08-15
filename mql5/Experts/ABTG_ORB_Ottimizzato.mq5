@@ -25,7 +25,7 @@
 //|  ⚠️ Orari in ORA SERVER. Nessun EA garantisce profitti. DEMO.   |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -100,6 +100,26 @@ input string InpComment   = "ORB OTT";
 input long   InpMagic     = 770611;   // magic DIVERSO dal corso (770601)
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
+
+input group "=== Slippage stimato (R55: quanto scala questa cella) ==="
+//  PERCHE' (15/08/2026, R55). Tutti i backtest del progetto girano con
+//  riempimento PERFETTO. Qui l'ingresso e' un pendente STOP, cioe' il
+//  caso in cui lo slippage morde di piu': la rottura e' il momento in
+//  cui il book e' piu' sottile.
+//
+//  COME E' MODELLATO: nel tester non si puo' cambiare il prezzo a cui
+//  il broker riempie, ma uno slippage di X punti equivale a chiudere X
+//  punti piu' in la' nel verso sfavorevole. Quindi SL e TP si spostano
+//  di X nel verso contrario al trade, DOPO il calcolo del lotto (che
+//  resta sul rischio ORIGINALE, quello visto al momento di decidere).
+//  Netto: -X punti su ogni trade, vincente o perdente.
+//
+//  LIMITE DICHIARATO: modello del primo ordine. Non simula riempimento
+//  parziale ne' profondita' del book - MT5 non li modella affatto.
+//
+//  DEFAULT 0 = comportamento identico a prima, forward invariato.
+input double InpSlippagePts = 0;   // R55: slippage stimato in PUNTI (0 = off, come sempre)
+
 
 //==================================================================
 //  STATO
@@ -255,7 +275,9 @@ bool TryPlace()
         {
          double tp=NormalizePrice(InpTPMode==ORB_TP_RANGE ? buyPx+(gRangeHigh-gRangeLow)*InpTPRangeMult
                                                           : buyPx+dist*InpTP_R);
-         double lot=LotByRisk(dist);
+         double lot=LotByRisk(dist);   // lotto dal rischio ORIGINALE, prima dello slippage
+         if(InpSlippagePts>0)          // R55: SL e TP scendono di X -> -X punti sul trade
+           { double sp=InpSlippagePts*_Point; sl=NormalizePrice(sl-sp); tp=NormalizePrice(tp-sp); }
          if(lot>0 && gTrade.BuyStop(lot,buyPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" BUY"))
             Log(StringFormat("BUY STOP @ %.5f SL %.5f TP %.5f lot %.2f",buyPx,sl,tp,lot));
         }
@@ -268,7 +290,9 @@ bool TryPlace()
         {
          double tp=NormalizePrice(InpTPMode==ORB_TP_RANGE ? sellPx-(gRangeHigh-gRangeLow)*InpTPRangeMult
                                                           : sellPx-dist*InpTP_R);
-         double lot=LotByRisk(dist);
+         double lot=LotByRisk(dist);   // lotto dal rischio ORIGINALE, prima dello slippage
+         if(InpSlippagePts>0)          // R55: SL e TP salgono di X -> -X punti sul trade
+           { double sp=InpSlippagePts*_Point; sl=NormalizePrice(sl+sp); tp=NormalizePrice(tp+sp); }
          if(lot>0 && gTrade.SellStop(lot,sellPx,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,InpComment+" SELL"))
             Log(StringFormat("SELL STOP @ %.5f SL %.5f TP %.5f lot %.2f",sellPx,sl,tp,lot));
         }
@@ -388,8 +412,17 @@ bool TryCloseConfirmEntry()
    double tp;
    if(InpTPMode==ORB_TP_RANGE) tp=NormalizePrice((dir>0)?entry+rngH*InpTPRangeMult:entry-rngH*InpTPRangeMult);
    else                        tp=NormalizePrice((dir>0)?entry+dist*InpTP_R:entry-dist*InpTP_R);
-   double lot=LotByRisk(dist);
+   double lot=LotByRisk(dist);   // lotto dal rischio ORIGINALE, prima dello slippage
    if(lot<=0){ Log("lotto 0: niente trade."); return(false); }
+
+   // R55: anche il ramo a mercato (chiusura confermata) paga lo slippage.
+   // Coperto qui apposta: la cella viva gira con InpUseCloseConfirm=0, ma se
+   // qualcuno lo accendesse lo slippage sparirebbe in silenzio, ed e' il
+   // genere di buco che poi non si trova piu'.
+   if(InpSlippagePts>0)
+     { double sp=InpSlippagePts*_Point;
+       sl=NormalizePrice((dir>0)?sl-sp:sl+sp);
+       tp=NormalizePrice((dir>0)?tp-sp:tp+sp); }
 
    bool ok=(dir>0) ? gTrade.Buy (lot,_Symbol,0.0,sl,tp,InpComment+" BUY CC")
                    : gTrade.Sell(lot,_Symbol,0.0,sl,tp,InpComment+" SELL CC");

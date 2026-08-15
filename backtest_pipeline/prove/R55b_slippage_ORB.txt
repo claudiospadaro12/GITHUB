@@ -1,0 +1,61 @@
+# =====================================================================
+#  ROUND 55b: ABTG_ORB_Ottimizzato - SLIPPAGE SULLA CELLA A STOP
+#  Si lancia con: -Prova prove\R55b_slippage_ORB.txt -Deposito 100000
+#                 -Etichetta r55b
+# =====================================================================
+# PERCHE'
+#   L'ORB entra con pendenti STOP, cioe' il caso in cui lo slippage
+#   morde di piu': la rottura e' il momento in cui il book e' piu'
+#   sottile. Questa cella sta sul conto da 100k a mezzo peso (0,3%) ed
+#   e' la seconda piu' esposta del portafoglio dopo il PTE.
+#
+# LA CELLA: la vincitrice di R15, identica a quella di R54b -
+#   OR 15' (14:30->14:45 SERVER), pendenti STOP buffer 10, EMA200 M5,
+#   SL 50% del range, TP RANGE 1,5x, trailing EMA9 M5, NIENTE parziale,
+#   tetto range 0,8%, un trade/giorno, chiusura 21:00, solo long.
+#   Si cambia UNA COSA SOLA: InpSlippagePts.
+#
+# COME E' MODELLATO (ABTG_ORB_Ottimizzato v1.01): SL e TP si spostano di
+#   X punti nel verso contrario al trade, dopo il calcolo del lotto.
+#   Coperti tutti e tre gli ingressi (buy stop, sell stop, e il ramo a
+#   mercato della chiusura confermata, che qui e' spento ma se qualcuno
+#   lo accendesse lo slippage sparirebbe in silenzio).
+#
+# I VALORI: 0, 50, 100, 150, 200 punti MT5 (start 0, passo 50, stop 200).
+#   Cinque valori x 2 magic = 10 celle x 2 finestre = 20 passate. Su U30USD 100 punti = 1
+#   punto indice. Si legge in % di R, non in punti.
+#
+# CRITERI: prove\R55_SCALABILITA_TESI.md 4. Da ricordare in piu' per
+#   questa cella: R15 l'ha promossa con DOPPIO ASTERISCO (DD passato per
+#   8 centesimi). Qui il margine e' gia' sottile in partenza.
+#
+# MAGIC VERGINE in sweep gemello, come controllo d'igiene.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpAllowLong=1
+InpAllowShort=0
+InpSLMode=3
+InpTPMode=1
+InpTPRangeMult=1.5
+InpMaxRangePct=0.8
+InpUseEma200Filter=1
+InpUseEmaFilter=0
+InpUseVolumeFilter=0
+InpTP_R=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpExitOnEmaClose=0
+
+InpMagic=772811||772811||1||772812||Y
+InpSlippagePts=0||0||50||200||Y

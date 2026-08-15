@@ -220,7 +220,25 @@ cancellazioni volontarie del gemello. L'unico dato pulito e' "scaduti".)
 **ABTG_PTE** e **ABTG_ORB_Ottimizzato**. Poi il round e' corto: 5 valori x 2
 finestre x 2 EA = 20 passate. Criteri gia' congelati nella tesi.
 
-**Oggi non c'e' una riga da lanciare.**
+**FATTO il 15/08**: `InpSlippagePts` aggiunto a **ABTG_PTE v1.01** (ingresso a
+mercato) e **ABTG_ORB_Ottimizzato v1.01** (due pendenti STOP + il ramo a
+mercato della chiusura confermata, coperto anche se oggi e' spento).
+**Default 0 = forward invariato per costruzione**, come `InpAllowReverse`.
+
+Modello: SL e TP si spostano di X punti nel verso contrario al trade, **dopo**
+il calcolo del lotto -> netto **-X punti su ogni trade**, vincente o perdente;
+il lotto resta sul rischio ORIGINALE, quindi lo slippage si vede come un R piu'
+grande del previsto, come nella realta'.
+
+PC di BACKTEST, MT5 CHIUSO. 40 passate (5 valori x 2 magic x 2 finestre x 2 EA):
+
+```
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/SHA_R55/backtest_pipeline/lancia_r55.ps1" -OutFile "$env:TEMP\lancia_r55.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r55.ps1" -Rif SHA_R55
+```
+
+Zip in `Desktop\r55.zip`, 4 CSV attesi. **Controllo d'igiene numero uno: la
+riga con slippage 0 deve riprodurre i numeri gia' noti della cella.** Se non lo
+fa, il round non vale e si guarda cosa e' cambiato nell'EA.
 
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 

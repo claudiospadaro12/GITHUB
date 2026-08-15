@@ -1,0 +1,51 @@
+# =====================================================================
+#  ROUND 55a: ABTG_PTE - QUANTO SLIPPAGE REGGE LA CELLA A MERCATO
+#  Si lancia con: -Prova prove\R55a_slippage_PTE.txt -Simbolo <SYM>
+#                 -Deposito 100000 -Etichetta r55a
+# =====================================================================
+# PERCHE'
+#   Tutti i backtest del progetto girano con riempimento PERFETTO
+#   (InpSlippagePts=0 ovunque). E' ragionevole a 11 lotti, non lo e' a
+#   taglia prop grande. Il PTE entra A MERCATO, quindi paga lo slippage
+#   PIENO su ogni trade: e' la famiglia con piu' serie in classifica ed
+#   e' la cella che scala peggio del portafoglio.
+#   Mappa completa degli ingressi: prove\R55_SCALABILITA_TESI.md 1.
+#
+# LA CELLA: la stessa di R23 (centro dell'altopiano H1, TP1_ATR 0,5),
+#   quella usata su Dow, GBPUSD e USDJPY senza scelte per-mercato.
+#   Si cambia UNA COSA SOLA: InpSlippagePts.
+#
+# COME E' MODELLATO (ABTG_PTE v1.01): SL e TP si spostano di X punti nel
+#   verso contrario al trade, DOPO il calcolo del lotto. Netto: -X punti
+#   su OGNI trade, vincente o perdente. Il lotto resta calcolato sul
+#   rischio ORIGINALE, quindi lo slippage si vede come un R piu' grande
+#   del previsto - come nella realta'.
+#   LIMITE: modello del primo ordine. Niente riempimento parziale ne'
+#   profondita' del book: MT5 non li modella affatto, e nessun backtest
+#   rispondera' mai a quella domanda.
+#
+# I VALORI: 0, 50, 100, 150, 200 punti MT5 (start 0, passo 50, stop 200).
+#   Cinque valori x 2 magic = 10 celle x 2 finestre = 20 passate.
+#   Su GBPUSD (5 digits) 100 punti = 10 pip. Su U30USD 100 punti = 1
+#   punto indice. NON sono la stessa cosa: ogni simbolo si legge da solo,
+#   e il confronto fra simboli si fa in % di R, mai in punti.
+#
+# CRITERI: congelati in prove\R55_SCALABILITA_TESI.md 4. In breve:
+#   - la cella "scala" se resta positiva OOS con slippage pari al 10% di
+#     un R; sotto quella soglia si dice "vive solo a taglia piccola";
+#   - nessun cambio ai parametri vivi esce da qui;
+#   - il risultato NON autorizza nessuna taglia: la taglia la decide il
+#     forward.
+#
+# MAGIC VERGINE in sweep gemello: controllo d'igiene, le coppie devono
+#   uscire identiche al centesimo.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpTP1_ATRmult=0.5
+
+InpMagic=772801||772801||1||772802||Y
+InpSlippagePts=0||0||50||200||Y
