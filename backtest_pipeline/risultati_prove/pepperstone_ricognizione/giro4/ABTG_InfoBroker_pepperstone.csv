@@ -1,0 +1,164 @@
+[SERVER]
+Campo,Valore
+Broker,Pepperstone Limited
+Server,PepperstoneUK-Demo
+Conto,62128200
+TipoConto,DEMO
+Valuta,EUR
+OraServer,2026.08.15 13:40:13
+OraUltimoTick,2026.08.15 16:34:59
+OraGMT,2026.08.15 13:40:13
+OraLocalePC,2026.08.15 15:40:13
+OffsetServerGMT_min,0
+OffsetServerGMT_ore,0.00
+OffsetServerGMT_hhmm,+00:00
+OraLegalePC,SI
+MercatoAperto,NO
+SimboliBroker,1722
+SimboliMarketWatch,120
+TF_Misurato,H1
+Filtro,
+MisuratoIl,2026.08.15
+[SIMBOLI]
+Simbolo,Descrizione,Digits,Point,ContractSize,TickValue,TickSize,SpreadPt,TF,BarreTF,PrimaDataTF,BarreD1,PrimaDataD1,Stato
+EURUSD,Euro vs US Dollar,5,0.00001000,100000.00,0.00000,0.00001000,4,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPUSD,Great Britain Pound vs US Dollar,5,0.00001000,100000.00,0.00000,0.00001000,3,H1,0,-,0,-,solo nomi (storico non sondato)
+USDJPY,US Dollar vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,7,H1,0,-,0,-,solo nomi (storico non sondato)
+USDCAD,US Dollar vs Canadian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,4,H1,0,-,0,-,solo nomi (storico non sondato)
+AUDUSD,Australian Dollar vs US Dollar,5,0.00001000,100000.00,0.00000,0.00001000,3,H1,0,-,0,-,solo nomi (storico non sondato)
+EURGBP,Euro vs Great Britain Pound,5,0.00001000,100000.00,0.00000,0.00001000,3,H1,0,-,0,-,solo nomi (storico non sondato)
+US30,US Wall Street 30 Index,1,0.10000000,1.00,0.00000,0.10000000,20,H1,0,-,0,-,solo nomi (storico non sondato)
+NAS100,US Tech 100 Index,1,0.10000000,1.00,0.00000,0.10000000,10,H1,0,-,0,-,solo nomi (storico non sondato)
+US500,US 500 Index,1,0.10000000,1.00,0.00000,0.10000000,4,H1,0,-,0,-,solo nomi (storico non sondato)
+UK100,UK 100 Index,1,0.10000000,1.00,0.00000,0.10000000,18,H1,0,-,0,-,solo nomi (storico non sondato)
+GER40,Germany DAX 40 Index,1,0.10000000,1.00,0.00000,0.10000000,9,H1,0,-,0,-,solo nomi (storico non sondato)
+XAUUSD,Gold vs US Dollar,2,0.01000000,100.00,0.00000,0.01000000,17,H1,0,-,0,-,solo nomi (storico non sondato)
+XAGUSD,Silver vs US Dollar,3,0.00100000,5000.00,0.00000,0.00100000,23,H1,0,-,0,-,solo nomi (storico non sondato)
+SpotCrude,WTI Cash (or Spot) Contract,3,0.00100000,100.00,0.00000,0.00100000,24,H1,0,-,0,-,solo nomi (storico non sondato)
+SpotBrent,Brent Crude vs US dollar,3,0.00100000,100.00,0.00000,0.00100000,32,H1,0,-,0,-,solo nomi (storico non sondato)
+NatGas,Natural Gas vs US Dollar,3,0.00100000,10000.00,0.00000,0.00100000,3,H1,0,-,0,-,solo nomi (storico non sondato)
+BTCUSD,Bitcoin vs US Dollar,2,0.01000000,1.00,0.00000,0.01000000,1500,H1,0,-,0,-,solo nomi (storico non sondato)
+ETHUSD,Ethereum vs US Dollar,2,0.01000000,1.00,0.00000,0.01000000,200,H1,0,-,0,-,solo nomi (storico non sondato)
+USDCHF,US Dollar vs Swiss Franc,5,0.00001000,100000.00,0.00000,0.00001000,5,H1,0,-,0,-,solo nomi (storico non sondato)
+CADCHF,Canadian Dollar vs Swiss Franc,5,0.00001000,100000.00,0.00000,0.00001000,15,H1,0,-,0,-,solo nomi (storico non sondato)
+CADJPY,Canadian Dollar vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,13,H1,0,-,0,-,solo nomi (storico non sondato)
+CHFJPY,Swiss Franc vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,28,H1,0,-,0,-,solo nomi (storico non sondato)
+EURCAD,Euro vs Canadian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,25,H1,0,-,0,-,solo nomi (storico non sondato)
+EURCHF,Euro vs Swiss Franc,5,0.00001000,100000.00,0.00000,0.00001000,5,H1,0,-,0,-,solo nomi (storico non sondato)
+EURJPY,Euro vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,19,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPCAD,Great Britain Pound vs Canadian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,29,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPCHF,Great Britain Pound vs Swiss Franc,5,0.00001000,100000.00,0.00000,0.00001000,13,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPJPY,Great Britain Pound vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,21,H1,0,-,0,-,solo nomi (storico non sondato)
+AUDCAD,Australian Dollar vs Canadian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,10,H1,0,-,0,-,solo nomi (storico non sondato)
+AUDCHF,Australian Dollar vs Swiss Franc,5,0.00001000,100000.00,0.00000,0.00001000,10,H1,0,-,0,-,solo nomi (storico non sondato)
+AUDJPY,Australian Dollar vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,10,H1,0,-,0,-,solo nomi (storico non sondato)
+AUDNZD,Australian Dollar vs New Zealand Dollar,5,0.00001000,100000.00,0.00000,0.00001000,14,H1,0,-,0,-,solo nomi (storico non sondato)
+AUDSGD,Australian Dollar vs Singapore Dollar,5,0.00001000,100000.00,0.00000,0.00001000,205,H1,0,-,0,-,solo nomi (storico non sondato)
+CHFSGD,Swiss Franc vs Singapore Dollar,5,0.00001000,100000.00,0.00000,0.00001000,230,H1,0,-,0,-,solo nomi (storico non sondato)
+EURCZK,Euro vs Czech Republic Koruna,5,0.00001000,100000.00,0.00000,0.00001000,2660,H1,0,-,0,-,solo nomi (storico non sondato)
+EURAUD,Euro vs Australian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,12,H1,0,-,0,-,solo nomi (storico non sondato)
+EURHUF,Euro vs Hungarian Forint,3,0.00100000,100000.00,0.00000,0.00100000,1032,H1,0,-,0,-,solo nomi (storico non sondato)
+EURMXN,Euro vs Mexican Peso,5,0.00001000,100000.00,0.00000,0.00001000,1408,H1,0,-,0,-,solo nomi (storico non sondato)
+EURNOK,Euro vs Norwegian Krone,5,0.00001000,100000.00,0.00000,0.00001000,1050,H1,0,-,0,-,solo nomi (storico non sondato)
+EURNZD,Euro vs New Zealand Dollar,5,0.00001000,100000.00,0.00000,0.00001000,27,H1,0,-,0,-,solo nomi (storico non sondato)
+EURPLN,Euro vs Polish Zloty,5,0.00001000,100000.00,0.00000,0.00001000,299,H1,0,-,0,-,solo nomi (storico non sondato)
+EURSEK,Euro vs Swedish Krona,5,0.00001000,100000.00,0.00000,0.00001000,1362,H1,0,-,0,-,solo nomi (storico non sondato)
+EURSGD,Euro vs Singapore Dollar,5,0.00001000,100000.00,0.00000,0.00001000,230,H1,0,-,0,-,solo nomi (storico non sondato)
+EURTRY,Euro vs Turkish Lira,5,0.00001000,100000.00,0.00000,0.00001000,7636,H1,0,-,0,-,solo nomi (storico non sondato)
+EURZAR,Euro vs South African Rand,5,0.00001000,100000.00,0.00000,0.00001000,2051,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPAUD,Great Britain Pound vs Australian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,15,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPMXN,Great Britain Pound vs Mexican Peso,5,0.00001000,100000.00,0.00000,0.00001000,2014,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPNOK,Great Britain Pound vs Norwegian Krone,5,0.00001000,100000.00,0.00000,0.00001000,2508,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPNZD,Great Britain Pound vs New Zealand Dollar,5,0.00001000,100000.00,0.00000,0.00001000,56,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPSEK,Great Britain Pound vs Swedish Krona,5,0.00001000,100000.00,0.00000,0.00001000,2071,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPSGD,Great Britain Pound vs Singapore Dollar,5,0.00001000,100000.00,0.00000,0.00001000,388,H1,0,-,0,-,solo nomi (storico non sondato)
+GBPTRY,Great Britain Pound vs Turkish Lira,5,0.00001000,100000.00,0.00000,0.00001000,9068,H1,0,-,0,-,solo nomi (storico non sondato)
+NOKJPY,Norwegian Krone vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,36,H1,0,-,0,-,solo nomi (storico non sondato)
+NOKSEK,Norwegian Krone vs Swedish Krona,5,0.00001000,100000.00,0.00000,0.00001000,198,H1,0,-,0,-,solo nomi (storico non sondato)
+NZDCAD,New Zealand Dollar vs Canadian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,18,H1,0,-,0,-,solo nomi (storico non sondato)
+NZDCHF,New Zealand Dollar vs Swiss Franc,5,0.00001000,100000.00,0.00000,0.00001000,15,H1,0,-,0,-,solo nomi (storico non sondato)
+NZDJPY,New Zealand Dollar vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,15,H1,0,-,0,-,solo nomi (storico non sondato)
+NZDUSD,New Zealand Dollar vs US Dollar,5,0.00001000,100000.00,0.00000,0.00001000,5,H1,0,-,0,-,solo nomi (storico non sondato)
+SEKJPY,Swedish Krona vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,60,H1,0,-,0,-,solo nomi (storico non sondato)
+SGDJPY,Singapore Dollar vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,167,H1,0,-,0,-,solo nomi (storico non sondato)
+USDCNH,US Dollar vs Chinese Yuan,5,0.00001000,100000.00,0.00000,0.00001000,246,H1,0,-,0,-,solo nomi (storico non sondato)
+USDCZK,US Dollar vs Czech Republic Koruna,5,0.00001000,100000.00,0.00000,0.00001000,1920,H1,0,-,0,-,solo nomi (storico non sondato)
+USDHUF,US Dollar vs Hungarian Forint,3,0.00100000,100000.00,0.00000,0.00100000,631,H1,0,-,0,-,solo nomi (storico non sondato)
+USDMXN,US Dollar vs Mexican Peso,5,0.00001000,100000.00,0.00000,0.00001000,888,H1,0,-,0,-,solo nomi (storico non sondato)
+USDNOK,US Dollar vs Norwegian Krone,5,0.00001000,100000.00,0.00000,0.00001000,1144,H1,0,-,0,-,solo nomi (storico non sondato)
+USDPLN,US Dollar vs Polish Zloty,5,0.00001000,100000.00,0.00000,0.00001000,354,H1,0,-,0,-,solo nomi (storico non sondato)
+USDSEK,US Dollar vs Swedish Krona,5,0.00001000,100000.00,0.00000,0.00001000,1502,H1,0,-,0,-,solo nomi (storico non sondato)
+USDSGD,US Dollar vs Singapore Dollar,5,0.00001000,100000.00,0.00000,0.00001000,267,H1,0,-,0,-,solo nomi (storico non sondato)
+USDTHB,US Dollar vs Thai Baht,5,0.00001000,100000.00,0.00000,0.00001000,7100,H1,0,-,0,-,solo nomi (storico non sondato)
+USDTRY,US Dollar vs Turkish Lira,5,0.00001000,100000.00,0.00000,0.00001000,3958,H1,0,-,0,-,solo nomi (storico non sondato)
+USDZAR,US Dollar vs South African Rand,5,0.00001000,100000.00,0.00000,0.00001000,918,H1,0,-,0,-,solo nomi (storico non sondato)
+ZARJPY,South African Rand vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,13,H1,0,-,0,-,solo nomi (storico non sondato)
+USDHKD,US Dollar vs Hong Kong Dollar,5,0.00001000,100000.00,0.00000,0.00001000,285,H1,0,-,0,-,solo nomi (storico non sondato)
+XAUAUD,Gold vs Australian Dollar,2,0.01000000,100.00,0.00000,0.01000000,156,H1,0,-,0,-,solo nomi (storico non sondato)
+XAUCHF,Gold vs Swiss Franc,2,0.01000000,100.00,0.00000,0.01000000,91,H1,0,-,0,-,solo nomi (storico non sondato)
+XAUEUR,Gold vs Euro,2,0.01000000,100.00,0.00000,0.01000000,82,H1,0,-,0,-,solo nomi (storico non sondato)
+XAUGBP,Gold vs Great Britain Pound,2,0.01000000,100.00,0.00000,0.01000000,75,H1,0,-,0,-,solo nomi (storico non sondato)
+XAUJPY,Gold vs Japanese Yen,0,1.00000000,100.00,0.00000,1.00000000,165,H1,0,-,0,-,solo nomi (storico non sondato)
+XAGAUD,Silver vs Australian Dollar,3,0.00100000,5000.00,0.00000,0.00100000,31,H1,0,-,0,-,solo nomi (storico non sondato)
+XAGEUR,Silver vs Euro,3,0.00100000,5000.00,0.00000,0.00100000,17,H1,0,-,0,-,solo nomi (storico non sondato)
+XPDUSD,Palladium vs US Dollar,2,0.01000000,100.00,0.00000,0.01000000,460,H1,0,-,0,-,solo nomi (storico non sondato)
+XPTUSD,Platinum vs US Dollar,2,0.01000000,100.00,0.00000,0.01000000,253,H1,0,-,0,-,solo nomi (storico non sondato)
+Gasoline,Gasoline Cash Contract,4,0.00010000,1000.00,0.00000,0.00010000,50,H1,0,-,0,-,solo nomi (storico non sondato)
+AUS200,Australia 200 Index,1,0.10000000,1.00,0.00000,0.10000000,20,H1,0,-,0,-,solo nomi (storico non sondato)
+EUSTX50,EU 50 Index,1,0.10000000,1.00,0.00000,0.10000000,17,H1,0,-,0,-,solo nomi (storico non sondato)
+FRA40,France 40 Index,1,0.10000000,1.00,0.00000,0.10000000,12,H1,0,-,0,-,solo nomi (storico non sondato)
+JPN225,Japan 225 Index,1,0.10000000,100.00,0.00000,0.10000000,80,H1,0,-,0,-,solo nomi (storico non sondato)
+CN50,China 50 Index,1,0.10000000,1.00,0.00000,0.10000000,100,H1,0,-,0,-,solo nomi (storico non sondato)
+HK50,Hong Kong 50 Index,1,0.10000000,1.00,0.00000,0.10000000,50,H1,0,-,0,-,solo nomi (storico non sondato)
+SPA35,Spain 35 Index,1,0.10000000,1.00,0.00000,0.10000000,100,H1,0,-,0,-,solo nomi (storico non sondato)
+US2000,US 2000 Index,1,0.10000000,1.00,0.00000,0.10000000,3,H1,0,-,0,-,solo nomi (storico non sondato)
+VIX,Volatility Index,2,0.01000000,1.00,0.00000,0.01000000,17,H1,0,-,0,-,solo nomi (storico non sondato)
+SCI25,Singapore 25 Index Cash,1,0.10000000,1.00,0.00000,0.10000000,4,H1,0,-,0,-,solo nomi (storico non sondato)
+CA60,Canada 60 Index,2,0.01000000,1.00,0.00000,0.01000000,80,H1,0,-,0,-,solo nomi (storico non sondato)
+CHINAH,Hong Kong China H-shares Index,2,0.01000000,1.00,0.00000,0.01000000,1200,H1,0,-,0,-,solo nomi (storico non sondato)
+NETH25,Netherlands 25 Index,2,0.01000000,1.00,0.00000,0.01000000,26,H1,0,-,0,-,solo nomi (storico non sondato)
+SWI20,Switzerland 20 Index,2,0.01000000,1.00,0.00000,0.01000000,500,H1,0,-,0,-,solo nomi (storico non sondato)
+Cocoa,Cocoa Cash Contract,1,0.10000000,1.00,0.00000,0.10000000,70,H1,0,-,0,-,solo nomi (storico non sondato)
+Coffee,Coffee Cash Contract,2,0.01000000,10.00,0.00000,0.01000000,48,H1,0,-,0,-,solo nomi (storico non sondato)
+Cotton,Cotton Cash Contract,3,0.00100000,100.00,0.00000,0.00100000,150,H1,0,-,0,-,solo nomi (storico non sondato)
+Sugar,Sugar Cash Contract,3,0.00100000,100.00,0.00000,0.00100000,40,H1,0,-,0,-,solo nomi (storico non sondato)
+Soybeans,Soybeans Cash Contract,1,0.10000000,1.00,0.00000,0.10000000,12,H1,0,-,0,-,solo nomi (storico non sondato)
+LDSugar,London Sugar Cash Contract,1,0.10000000,1.00,0.00000,0.10000000,6,H1,0,-,0,-,solo nomi (storico non sondato)
+Wheat,Wheat Cash Contract,1,0.10000000,1.00,0.00000,0.10000000,8,H1,0,-,0,-,solo nomi (storico non sondato)
+Corn,Corn Cash Contract,4,0.00010000,100.00,0.00000,0.00010000,80,H1,0,-,0,-,solo nomi (storico non sondato)
+Cattle,Live Cattle Cash Contract,5,0.00001000,1000.00,0.00000,0.00001000,150,H1,0,-,0,-,solo nomi (storico non sondato)
+Copper,Copper Cash Contract,4,0.00010000,2000.00,0.00000,0.00010000,30,H1,0,-,0,-,solo nomi (storico non sondato)
+EURX,Euro Currency Index,1,0.10000000,100.00,0.00000,0.10000000,10,H1,0,-,0,-,solo nomi (storico non sondato)
+JPYX,Japanese Yen Currency Index,1,0.10000000,100.00,0.00000,0.10000000,10,H1,0,-,0,-,solo nomi (storico non sondato)
+USDX,US Dollar Index,3,0.00100000,100.00,0.00000,0.00100000,54,H1,0,-,0,-,solo nomi (storico non sondato)
+BCHUSD,Bitcoin Cash vs US Dollar,2,0.01000000,1.00,0.00000,0.01000000,72,H1,0,-,0,-,solo nomi (storico non sondato)
+DOTUSD,Polkadot vs US Dollar,3,0.00100000,10.00,0.00000,0.00100000,30,H1,0,-,0,-,solo nomi (storico non sondato)
+LINKUSD,Chainlink vs US Dollar,3,0.00100000,10.00,0.00000,0.00100000,20,H1,0,-,0,-,solo nomi (storico non sondato)
+XLMUSD,Stellar Lumens vs US Dollar,4,0.00010000,100.00,0.00000,0.00010000,12,H1,0,-,0,-,solo nomi (storico non sondato)
+XRPUSD,Ripple vs US Dollar,4,0.00010000,100.00,0.00000,0.00010000,50,H1,0,-,0,-,solo nomi (storico non sondato)
+UNIUSD,Uniswap vs US Dollar,3,0.00100000,10.00,0.00000,0.00100000,40,H1,0,-,0,-,solo nomi (storico non sondato)
+DOGEUSD,Dogecoin vs US Dollar,5,0.00001000,1000.00,0.00000,0.00001000,90,H1,0,-,0,-,solo nomi (storico non sondato)
+ADAUSD,Cardano vs US Dollar,4,0.00010000,100.00,0.00000,0.00010000,40,H1,0,-,0,-,solo nomi (storico non sondato)
+LTCUSD,Litecoin vs US Dollar,2,0.01000000,1.00,0.00000,0.01000000,25,H1,0,-,0,-,solo nomi (storico non sondato)
+BNBUSD,Binance Coin vs US Dollar,2,0.01000000,1.00,0.00000,0.01000000,113,H1,0,-,0,-,solo nomi (storico non sondato)
+[SESSIONI]
+Simbolo,Data,PrimaBarra,UltimaBarra,NBarre,TF,Nota
+EURUSD,2024.01.15,00:00,23:55,288,M5,ok
+EURUSD,2024.03.20,00:00,23:55,288,M5,ok
+EURUSD,2024.04.15,00:00,23:55,288,M5,ok
+EURUSD,2024.07.15,00:00,23:55,288,M5,ok
+EURUSD,2024.10.15,00:00,23:55,288,M5,ok
+EURUSD,2024.10.28,00:00,23:55,288,M5,ok
+EURUSD,2024.11.20,00:00,23:55,288,M5,ok
+EURUSD,2025.01.15,00:00,23:55,288,M5,ok
+EURUSD,2025.03.20,00:00,23:55,288,M5,ok
+EURUSD,2025.04.15,00:00,23:55,288,M5,ok
+EURUSD,2025.07.15,00:00,23:55,288,M5,ok
+EURUSD,2025.10.15,00:00,23:55,288,M5,ok
+EURUSD,2025.10.28,00:00,23:55,288,M5,ok
+EURUSD,2025.11.20,00:00,23:55,288,M5,ok
+EURUSD,2026.01.15,00:00,23:55,288,M5,ok
+EURUSD,2026.03.20,00:00,23:50,287,M5,ok
+EURUSD,2026.04.15,00:00,23:55,288,M5,ok
+EURUSD,2026.07.15,00:00,23:55,288,M5,ok
+EURUSD,VERDETTO_DST,00:00,00:00,0,M5,SERVER ALLINEATO AL DST DEL MERCATO

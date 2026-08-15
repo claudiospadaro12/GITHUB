@@ -417,3 +417,73 @@ due feed resta ignoto e nessun backtest su dati Pepperstone e' validato.
 Solo **dopo**, e su pochi simboli per volta, la prima data di `US30`.
 
 **Nessun parametro degli EA in forward cambia per questi numeri.**
+
+
+---
+---
+
+# 🏁 QUARTO GIRO — 15/08/2026 ore 15:40 — **120 SU 120 IN 41 MILLISECONDI**
+
+_Dati grezzi: `backtest_pipeline/risultati_prove/pepperstone_ricognizione/giro4/`_
+
+```
+=== FINITO: 120 simboli esaminati su 120 ===
+inizio 15:40:13.211   fine 15:40:13.252   DURATA 0,041 s
+```
+
+**Da 913 secondi per 7 simboli a 41 millisecondi per 120.** La diagnosi del
+terzo giro era quella giusta: bloccava la richiesta della prima data al server,
+e la scansione non ne ha bisogno per fare il suo mestiere.
+
+## 18. 🗺️ LA MAPPA — i nomi veri, tutti
+
+| BCM | Pepperstone | descrizione | digits | point | contract | spread pt |
+|---|---|---|---:|---:|---:|---:|
+| D30EUR | **GER40** | Germany DAX 40 Index | 1 | 0,1 | 1,00 | 9 |
+| U30USD | **US30** | US Wall Street 30 Index | 1 | 0,1 | 1,00 | 20 |
+| NASUSD | **NAS100** | US Tech 100 Index | 1 | 0,1 | 1,00 | 10 |
+| SPXUSD | **US500** | US 500 Index | 1 | 0,1 | 1,00 | 4 |
+| 225JPY | **JPN225** | Japan 225 Index | 1 | 0,1 | **100,00** ⚠️ | 80 |
+| F40EUR | **FRA40** | France 40 Index | 1 | 0,1 | 1,00 | 12 |
+| E35EUR | **SPA35** | Spain 35 Index | 1 | 0,1 | 1,00 | 100 |
+| UKOIL | **SpotBrent** | Brent Crude vs US dollar | 3 | 0,001 | 100,00 | 32 |
+| USOIL | **SpotCrude** | WTI Cash (or Spot) Contract | 3 | 0,001 | 100,00 | 24 |
+| XAUUSD | **XAUUSD** | Gold vs US Dollar | 2 | 0,01 | 100,00 | 17 |
+| XAGUSD | **XAGUSD** | Silver vs US Dollar | 3 | 0,001 | 5000,00 | 23 |
+
+In piu', gia' presenti: UK100, AUS200, EUSTX50, CN50, HK50, US2000, VIX, SCI25,
+CA60, CHINAH, NETH25, SWI20, USDX — e 60 cambi.
+
+## 19. ⚠️ DUE COSE DA NON COPIARE ALLA CIECA
+
+**1. Gli spread sono di SABATO.** `MercatoAperto,NO`: sono i valori larghi del
+weekend, non quelli operativi, e vanno rimisurati a mercato aperto.
+
+Detto questo, **un numero merita gia' attenzione**: **US30 sta a 20 punti =
+2,0 punti indice**, e **R55 ha misurato che sull'ORB 1,5 punti indice sfondano
+il cancello del 10%**. Se anche a mercato aperto restasse sopra 1,5, l'ORB su
+questo feed **non e' testabile in modo onesto** — e sarebbe un limite del test,
+non un verdetto sulla strategia. Da confrontare: **GER40 a 0,9** e **US500 a
+0,4** sono un altro mondo.
+
+**2. `JPN225` ha ContractSize 100**, mentre tutti gli altri indici hanno **1**.
+Un lotto li' vale **cento volte**. `lotto = R / distanza_stop` va **rifatto**,
+non copiato — sarebbe un errore da due ordini di grandezza.
+
+## 20. ✅ Il fuso, quarta conferma
+
+`OffsetServerGMT +00:00` per la quarta corsa consecutiva. E il verdetto DST
+resta `SERVER ALLINEATO AL DST DEL MERCATO`.
+
+## 21. ▶️ Cosa resta, in ordine
+
+1. **Prima data degli indici** (`-SondaStorico` + `-Filtro "GER40"`, uno alla
+   volta, **a mercato aperto**). E' il numero che decide tutto: se GER40/US30
+   non arrivano al 2020/2022, questa strada non serve.
+2. **Ricognitore su BCM** (`-BrokerPattern "BCM"`): chiude la misura del fuso
+   storico — la meta' Pepperstone (1032 barre H1) e' gia' in cassaforte — e
+   verifica per la prima volta la regola "ora italiana − 1", mai controllata
+   d'inverno.
+3. **Spread a mercato aperto**, per sapere se l'ORB e' testabile.
+
+**Nessun parametro degli EA in forward cambia per questi numeri.**

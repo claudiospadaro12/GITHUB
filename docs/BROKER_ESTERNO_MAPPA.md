@@ -228,19 +228,40 @@ dei **candidati**, ma un nome simile puo' essere un future con scadenza,
 un mini, o lo stesso indice quotato in un'altra valuta: la conferma si da'
 guardando **descrizione, contract size, tick value e prima data**.
 
-| BCM | Che cos'e' | Broker esterno | Digits | Contract | Prima data D1 | Verificato il |
-|---|---|---|---|---|---|---|
-| D30EUR | DAX 40 | | | | | |
-| U30USD | Dow Jones 30 | | | | | |
-| NASUSD | Nasdaq 100 | | | | | |
-| 225JPY | Nikkei 225 | | | | | |
-| F40EUR | CAC 40 | | | | | |
-| E35EUR | IBEX 35 | | | | | |
-| SPXUSD | S&P 500 | | | | | |
-| UKOIL | Brent | | | | | |
-| USOIL | WTI | | | | | |
-| XAUUSD | Oro | | | | | |
-| XAGUSD | Argento | | | | | |
+| BCM | Che cos'e' | **Pepperstone** | Digits | Point | Contract | Spread pt (weekend) | Prima data D1 | Verificato il |
+|---|---|---|---|---|---|---|---|---|
+| D30EUR | DAX 40 | **GER40** "Germany DAX 40 Index" | 1 | 0,1 | 1,00 | 9 | **da misurare** | 15/08/2026 |
+| U30USD | Dow Jones 30 | **US30** "US Wall Street 30 Index" | 1 | 0,1 | 1,00 | 20 | **da misurare** | 15/08/2026 |
+| NASUSD | Nasdaq 100 | **NAS100** "US Tech 100 Index" | 1 | 0,1 | 1,00 | 10 | **da misurare** | 15/08/2026 |
+| 225JPY | Nikkei 225 | **JPN225** "Japan 225 Index" | 1 | 0,1 | **100,00** ⚠️ | 80 | **da misurare** | 15/08/2026 |
+| F40EUR | CAC 40 | **FRA40** "France 40 Index" | 1 | 0,1 | 1,00 | 12 | **da misurare** | 15/08/2026 |
+| E35EUR | IBEX 35 | **SPA35** "Spain 35 Index" | 1 | 0,1 | 1,00 | 100 | **da misurare** | 15/08/2026 |
+| SPXUSD | S&P 500 | **US500** "US 500 Index" | 1 | 0,1 | 1,00 | 4 | **da misurare** | 15/08/2026 |
+| UKOIL | Brent | **SpotBrent** "Brent Crude vs US dollar" | 3 | 0,001 | 100,00 | 32 | **da misurare** | 15/08/2026 |
+| USOIL | WTI | **SpotCrude** "WTI Cash (or Spot) Contract" | 3 | 0,001 | 100,00 | 24 | **da misurare** | 15/08/2026 |
+| XAUUSD | Oro | **XAUUSD** (stesso nome) | 2 | 0,01 | 100,00 | 17 | **da misurare** | 15/08/2026 |
+| XAGUSD | Argento | **XAGUSD** (stesso nome) | 3 | 0,001 | 5000,00 | 23 | **da misurare** | 15/08/2026 |
+
+**Altri indici disponibili** (non ci servono oggi, ma ci sono): UK100 (FTSE 100,
+18), AUS200 (20), EUSTX50 (17), CN50 (100), HK50 (50), US2000 (3), VIX (17),
+SCI25 (4), CA60 (80), CHINAH (1200), NETH25 (26), SWI20 (500), USDX (54).
+
+> ⚠️ **DUE AVVERTENZE SU QUESTA TABELLA**
+>
+> 1. **Gli spread sono letti a MERCATO CHIUSO** (sabato 15/08, `MercatoAperto,NO`):
+>    sono i valori larghi del weekend, **non** quelli operativi. Vanno rimisurati
+>    a mercato aperto prima di usarli in qualunque conto. Detto questo, il numero
+>    da tenere d'occhio c'e' gia': **US30 a 20 punti = 2,0 punti indice**, e
+>    R55 ha misurato che sull'ORB **1,5 punti indice sfondano il cancello del
+>    10%**. Se anche a mercato aperto restasse sopra 1,5, l'ORB su questo feed
+>    non e' testabile in modo onesto.
+> 2. **`JPN225` ha ContractSize 100**, mentre tutti gli altri indici hanno 1.
+>    Un lotto li' vale cento volte. Il calcolo `lotto = R / distanza_stop` va
+>    rifatto, non copiato.
+>
+> **Le prime date NON sono in questa tabella perche' non sono state misurate.**
+> Chiederle al server blocca lo script (misurato: 913 s su US30 a mercato
+> chiuso). Si misurano a parte, su pochi simboli e a mercato aperto.
 
 > Attenzione al **contract size**: se sul broker esterno un lotto di DAX
 > vale 25 EUR/punto invece di 1, il profitto in valuta non e' confrontabile
@@ -300,8 +321,8 @@ terminali (sezione `[SERVER]` del CSV):
 | Terminale | Offset GMT misurato | Misurato il |
 |---|---|---|
 | BCM | | |
-| Pepperstone | | |
-| **Delta (Pepperstone - BCM)** | | |
+| Pepperstone | **+00:00 (UTC)** | 15/08/2026, quattro corse concordi |
+| **Delta (Pepperstone - BCM)** | **da misurare** (BCM non ancora sondato) | |
 
 **(b) Sul passato** - shift che minimizza la differenza fra le chiusure H1
 dei due feed, provando da -6 a +6 ore, su due finestre distinte. E'
