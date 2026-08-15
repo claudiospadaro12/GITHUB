@@ -105,6 +105,83 @@ PC fantasma (`CENSIMENTO_ORDINI_PC.md`). Il rubinetto e' chiuso dal 14/08.
 **Vuol dire che il forward PULITO comincia adesso, non due settimane fa.**
 La settimana di dati su cui volevamo decidere non esiste ancora.
 
+## 7. 💰 "Ma ci sono conti da 1.500.000, mi sembrava interessante" (Claudio, 15/08)
+
+Domanda legittima, e merita numeri.
+
+**Primo fatto, contro-intuitivo: la taglia NON cambia la probabilita' di
+passare.** Le regole prop sono tutte in percentuale — target 8-10%, DD 10%,
+daily 5%. Il nostro p99 di drawdown e' **12,47%** a rischio 1% e **~8,1%** a
+0,65%: quelle due percentuali sono identiche su 100k e su 1,5M. Se passiamo,
+passiamo a tutte le taglie; se non passiamo, non passiamo a nessuna.
+**La taglia cambia solo quanto vinci se passi.**
+
+**Secondo fatto, e questo cambia le cose in NATURA, non in scala: il LOTTO.**
+
+| | 100k | **1,5M** |
+|---|---:|---:|
+| rischio per trade a 0,65% | 650 EUR | **9.750 EUR** |
+| lotti sul DAX (misurato il 14/08) | **11,80** | **177** |
+| valore di **1 punto indice** | 11,80 EUR | **177 EUR** |
+
+**Centosettantasette lotti sul DAX in un colpo solo, alle 08:00 in punto,
+tutti i giorni.** Quello non e' piu' un ordine che passa liscio: e' impatto sul
+book, riempimento parziale, slippage vero.
+
+**E qui c'e' il numero che decide.** Dal per-trade R47 il DAX Apertura ha win
+rate **81,0%** e payoff **0,327**, cioe' un'aspettativa per trade di
+
+> 0,81 x 0,327R - 0,19 x 1R = **+0,075R**, cioe' **il 7,5% di un R**.
+
+Quanto vale lo slippage a queste taglie?
+
+| slippage | costo su 177 lotti | in % di un R (9.750) | resta dell'aspettativa |
+|---|---:|---:|---|
+| 1 punto indice | 177 EUR | 1,8% | 5,7% di R |
+| 3 punti | 531 EUR | 5,4% | **2,1% di R** |
+| **5 punti** | 885 EUR | **9,1%** | **NEGATIVA** |
+
+**A 1,5M bastano cinque punti indice di slippage per portare a zero l'edge del
+nostro EA migliore.** A 100k lo stesso EA gira a 11,80 lotti: mezzo punto di
+slippage costa 5,90 EUR su un R di 650, cioe' lo 0,9% — irrilevante.
+
+**Non e' lo stesso mestiere.** E' la stessa strategia su un mercato che ti
+vede arrivare.
+
+### 🚨 E la cosa che mi preoccupa di piu': non l'abbiamo MAI misurato
+
+`InpSlippagePts` esiste nell'EA. In **tutte** le prove del progetto vale
+**zero**:
+
+```
+R35a, R35b, R42a, R42b, R43a-d, R47c, R47d, R54a ...  InpSlippagePts=0
+```
+
+Tutti i nostri numeri — profit, PF, drawdown, portafoglio, Monte Carlo —
+sono calcolati **come se il riempimento fosse perfetto**. A 100k e'
+un'approssimazione ragionevole. A 1,5M non lo e' piu'.
+
+**Questo non riguarda solo Upcomers**: riguarda ogni taglia sopra la nostra,
+e in parte anche quella attuale.
+
+### La proposta concreta: R55 — LA SOGLIA DI SLIPPAGE
+
+Un round corto, sui dati che abbiamo, che risponde a una domanda sola:
+
+> **Quanti punti di slippage regge ogni cella prima che l'aspettativa vada a
+> zero?**
+
+Si spazzola `InpSlippagePts` (0, 100, 300, 500, 1000 punti MT5 = 0/1/3/5/10
+punti indice) sulla cella viva del DAX e su quella del Dow. Otto-dieci
+passate. Il risultato e' il **margine di sicurezza esecutivo** di ogni EA, e
+si legge cosi':
+- margine largo -> la cella scala bene, si puo' pensare a taglie grosse;
+- margine stretto -> quella cella **vive solo a taglia piccola**, e va detto
+  prima di comprare, non dopo.
+
+E' il pezzo che manca per rispondere sul serio alla domanda "conviene un conto
+da 1,5M?". Senza, la risposta e' un'opinione.
+
 ---
 
 # ⚖️ RACCOMANDAZIONE
