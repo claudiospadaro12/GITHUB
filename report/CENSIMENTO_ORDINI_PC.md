@@ -129,7 +129,12 @@ operare, oltre alle 174 volte in cui c'è riuscita.
 2. ⬜ **Il controllo di tenuta**: rilanciare questo censimento fra una
    settimana. Se il PC ha piazzato **zero** ordini nuovi, il lucchetto tiene e
    il caso si chiude. È l'unica prova che vale.
-3. ⬜ Staccare gli EA non nostri dai grafici del PC — sono loro la fonte dei
+3. ✅ **FATTO il 15/08 alle 13:53** — staccato l'ultimo (`Default\chart01.chr`,
+   `BULGE_MULTI_SIGNAL_ARANCIO_L` su CADCHF), salvato in
+   `MQL5\Profiles\_STACCATI_20260815_135315`, reversibile con `-Annulla`.
+   **Sul PC ora ci sono ZERO EA attaccati, su entrambi i terminali.**
+
+   _(storia)_ Staccare gli EA non nostri dai grafici del PC — sono loro la fonte dei
    104 `Invalid price`. **Censiti il 15/08: sono 11 grafici, 8 EA distinti**,
    tutti nel profilo `Default` del terminale `215D85D7...` (il referto del
    14/08 ne contava 10: ce n'era uno in piu', un secondo
@@ -169,7 +174,16 @@ operare, oltre alle 174 volte in cui c'è riuscita.
    > bande verdi sul grafico sono la Bulge. Non guardava il profilo sbagliato:
    > guardava il grafico giusto senza vedere la faccina.
    >
-   > **Resta una cosa sola da fare, ed e' un grafico.**
+   > **Resta una cosa sola da fare, ed e' un grafico.** -> **fatto alle 13:53.**
+   >
+   > **E le date di salvataggio hanno confermato l'inferenza**: il profilo
+   > `Default` di BCM risulta salvato **il 15/08 alle 10:07** (gli altri tre
+   > profili BCM sono fermi al **06/07**). Cioe' e' stato riscritto proprio
+   > quando Claudio ha chiuso MT5 in mattinata. Non era piu' un'ipotesi.
+   >
+   > **Identificati anche i due terminali** (da `origin.txt`):
+   > `215D85D7...` = `C:\Program Files\BCM Markets MT5 Terminal` (il conto
+   > vivo) · `73B7A242...` = `C:\Program Files\Pepperstone MetaTrader 5`.
 4. ⬜ Ricalcolare le classifiche del forward escludendo i 33 trade del PC.
 
 ## 5-bis. 🚨 LA COSA PIU' GRAVE, vista in uno screenshot del 15/08 alle 07:00
