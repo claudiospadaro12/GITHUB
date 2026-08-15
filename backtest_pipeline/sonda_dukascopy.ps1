@@ -54,8 +54,17 @@ Riga ""
 #  ATTENZIONE: questi nomi sono CANDIDATI, non fatti. Il nome con cui
 #  Dukascopy chiama il DAX non lo sappiamo: lo scopre questa sonda.
 #  EURUSD in fondo NON e' un candidato: e' il controllo positivo.
+# NOTA 15/08/2026: nella prima corsa USA30IDXUSD e GERIDXEUR non hanno
+# risposto, mentre gli altri sette indici si'. Il Dow e' il nostro cavallo
+# sull'ORB e sull'Apertura US: prima di dire "Dukascopy non ha il Dow" si
+# provano tutte le grafie plausibili.
 $candidati = @(
   @{ N="USA30IDXUSD";   Che="Dow Jones 30" },
+  @{ N="US30IDXUSD";    Che="Dow (grafia alt. 1)" },
+  @{ N="USA30USD";      Che="Dow (grafia alt. 2)" },
+  @{ N="DJIIDXUSD";     Che="Dow (grafia alt. 3)" },
+  @{ N="WS30IDXUSD";    Che="Dow (grafia alt. 4)" },
+  @{ N="USA2000IDXUSD"; Che="Russell 2000 (controllo di schema)" },
   @{ N="USATECHIDXUSD"; Che="Nasdaq 100" },
   @{ N="USA500IDXUSD";  Che="S&P 500" },
   @{ N="DEUIDXEUR";     Che="DAX 40" },
@@ -116,11 +125,18 @@ function ChiediAnno([string]$sym, [int]$anno, [int]$ora) {
 # --- 1. il simbolo esiste? (data recente) ----------------------------
 Riga "1) quali di questi nomi esistono davvero (sonda su giugno dell'anno piu' recente)" "Yellow"
 $annoRecente = ($anniLista | Select-Object -Last 1)
-$vivi = New-Object System.Collections.ArrayList
+$vivi  = New-Object System.Collections.ArrayList
+$righe = New-Object System.Collections.ArrayList
 foreach ($c in $candidati) {
   $r = ChiediAnno $c.N $annoRecente $Ora
   $col = if ($r.Esito -eq "OK") { "Green" } elseif ($r.Esito -like "ERRORE*") { "Red" } else { "DarkGray" }
   Riga ("   {0,-16} {1,-28} {2}  ({3} byte)" -f $c.N, $c.Che, $r.Esito, $r.Byte) $col
+  # ANCHE I FALLITI VANNO NEL REFERTO (difetto trovato il 15/08: USA30IDXUSD
+  # e GERIDXEUR erano spariti dal CSV senza lasciare traccia, e nel file
+  # sembrava che non fossero mai stati chiesti).
+  [void]$righe.Add([pscustomobject]@{
+    Simbolo=$c.N; Che=$c.Che; Anno=$annoRecente; Esito=$r.Esito; Byte=$r.Byte; Url=$r.Url; Fase="1-esiste?"
+  })
   if ($r.Esito -eq "OK") { [void]$vivi.Add($c) }
 }
 
@@ -137,18 +153,39 @@ if (-not $ctrlOk) {
 
 # --- 2. fin dove indietro? -------------------------------------------
 Riga "2) per i simboli vivi: fin dove arriva lo storico" "Yellow"
-$righe = New-Object System.Collections.ArrayList
 foreach ($c in $vivi) {
   Riga ("   --- " + $c.N + "  (" + $c.Che + ") ---") "White"
   $primoAnnoOk = 0
+  $ultimoNo    = 0
+  $precedente  = 0
   foreach ($anno in $anniLista) {
     $r = ChiediAnno $c.N $anno $Ora
     $col = if ($r.Esito -eq "OK") { "Green" } else { "DarkGray" }
     Riga ("       {0}   {1,-10} {2} byte" -f $anno, $r.Esito, $r.Byte) $col
     [void]$righe.Add([pscustomobject]@{
-      Simbolo=$c.N; Che=$c.Che; Anno=$anno; Esito=$r.Esito; Byte=$r.Byte; Url=$r.Url
+      Simbolo=$c.N; Che=$c.Che; Anno=$anno; Esito=$r.Esito; Byte=$r.Byte; Url=$r.Url; Fase="2-scala"
     })
-    if ($r.Esito -eq "OK" -and $primoAnnoOk -eq 0) { $primoAnnoOk = $anno }
+    if ($r.Esito -eq "OK" -and $primoAnnoOk -eq 0) { $primoAnnoOk = $anno; $ultimoNo = $precedente }
+    if ($r.Esito -ne "OK") { $precedente = $anno }
+  }
+
+  # --- STRINGI: fra l'ultimo anno senza dati e il primo con dati puo'
+  #     esserci di mezzo un buco di due o tre anni. Qui si dimezza finche'
+  #     non resta un anno solo, cosi' la prima data e' un numero, non un
+  #     intervallo.
+  if ($primoAnnoOk -gt 0 -and $ultimoNo -gt 0 -and ($primoAnnoOk - $ultimoNo) -gt 1) {
+    $lo = $ultimoNo; $hi = $primoAnnoOk
+    while (($hi - $lo) -gt 1) {
+      $mid = [int][Math]::Floor(($lo + $hi) / 2)
+      $r = ChiediAnno $c.N $mid $Ora
+      $col = if ($r.Esito -eq "OK") { "Green" } else { "DarkGray" }
+      Riga ("       {0}   {1,-10} {2} byte   (stringo)" -f $mid, $r.Esito, $r.Byte) $col
+      [void]$righe.Add([pscustomobject]@{
+        Simbolo=$c.N; Che=$c.Che; Anno=$mid; Esito=$r.Esito; Byte=$r.Byte; Url=$r.Url; Fase="3-stringo"
+      })
+      if ($r.Esito -eq "OK") { $hi = $mid } else { $lo = $mid }
+    }
+    $primoAnnoOk = $hi
   }
   if ($primoAnnoOk -gt 0) {
     $col = if ($primoAnnoOk -le 2020) { "Green" } else { "Yellow" }
@@ -174,7 +211,7 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine("controllo positivo EURUSD: " + $(if ($ctrlOk) { "OK" } else { "FALLITO - la corsa non vale" }))
 [void]$sb.AppendLine("")
 foreach ($r in $righe) {
-  [void]$sb.AppendLine(("{0,-16} {1}  {2,-10} {3} byte" -f $r.Simbolo, $r.Anno, $r.Esito, $r.Byte))
+  [void]$sb.AppendLine(("{0,-16} {1}  {2,-10} {3,-9} byte  {4}" -f $r.Simbolo, $r.Anno, $r.Esito, $r.Byte, $r.Fase))
 }
 [System.IO.File]::WriteAllText($txt, $sb.ToString(), [System.Text.Encoding]::ASCII)
 
