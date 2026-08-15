@@ -273,4 +273,39 @@ Write-Host "`nChiudo MT5..." -ForegroundColor DarkGray
 Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 3
 Mostra-Referto
-Write-Host "`nCopia il CSV qui sopra in chat: da li' si decide la nuova finestra IS." -ForegroundColor Cyan
+
+# =====================================================================
+#  RACCOLTA SUL DESKTOP (regola delle righe di lancio, punto 2)
+# ---------------------------------------------------------------------
+#  MANCAVA, e il 15/08 e' costata a Claudio una caccia al file: il
+#  referto finiva SOLO in <cartella dati>\MQL5\Files, cioe' sepolto
+#  sotto %APPDATA%\MetaQuotes\Terminal\<codice lunghissimo>. Tutti gli
+#  altri script del progetto raccolgono sul Desktop e fanno lo zip:
+#  questo no. Adesso si'.
+# =====================================================================
+try {
+  $dest = Join-Path ([Environment]::GetFolderPath("Desktop")) "storico_bcm"
+  New-Item -ItemType Directory -Force -Path $dest | Out-Null
+  if (Test-Path $CsvOut) { Copy-Item $CsvOut $dest -Force }
+  $logDir = Join-Path $DataFolder "MQL5\Logs"
+  if (Test-Path $logDir) {
+    Get-ChildItem $logDir -Filter "*.log" -ErrorAction SilentlyContinue |
+      Sort-Object LastWriteTime -Descending | Select-Object -First 2 |
+      ForEach-Object { Copy-Item $_.FullName $dest -Force -ErrorAction SilentlyContinue }
+  }
+  $zip = Join-Path ([Environment]::GetFolderPath("Desktop")) "storico_bcm.zip"
+  try { Compress-Archive -Path (Join-Path $dest "*") -DestinationPath $zip -Force } catch { }
+  Write-Host ""
+  Write-Host ("RACCOLTA: " + $dest) -ForegroundColor Green
+  Write-Host ("ZIP PRONTO DA MANDARE: " + $zip) -ForegroundColor Green
+  Write-Host "Verifica che dentro ci siano:" -ForegroundColor DarkGray
+  Write-Host "   - ABTG_StoricoScaricato.csv" -ForegroundColor DarkGray
+  Write-Host "   - gli ultimi 2 log di MT5 (*.log)" -ForegroundColor DarkGray
+} catch {
+  Write-Host ("La raccolta sul Desktop non e' riuscita: " + $_.Exception.Message) -ForegroundColor Yellow
+  Write-Host ("Il referto resta comunque qui: " + $CsvOut) -ForegroundColor Yellow
+}
+
+Write-Host ""
+Write-Host "La colonna che serve e' PrimaDataServer: e' la data VERA da cui" -ForegroundColor Cyan
+Write-Host "parte lo storico, quella da passare a -DaQuando." -ForegroundColor Cyan
