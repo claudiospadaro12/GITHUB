@@ -1,6 +1,31 @@
 # =====================================================================
 #  stacca_ea_terzi.ps1  --  TOGLIE DAI GRAFICI DEL PC GLI EA NON NOSTRI
 # ---------------------------------------------------------------------
+#  ATTENZIONE AL NOME - "TERZI" E' UNA SCORCIATOIA IMPRECISA
+#    Lo script chiama "NON NOSTRO" tutto cio' che non si chiama ABTG_*.
+#    Ma il 15/08 Claudio ha fatto notare la cosa giusta: quelli sul PC
+#    NON sono di sconosciuti, sono LE FONTI del nostro lavoro -
+#    PTE_V3_23 e' l'originale da cui viene ABTG_PTE, GOLDEN_CROSS_V03
+#    da cui viene ABTG_GoldenCross, BULGE_MULTI_SIGNAL da cui viene
+#    ABTG_BreakingBand, NIGHT_BREAK_BOX da cui viene ABTG_MaxMinNotte,
+#    NQ_v21_S e' l'EA dell'amico (misurato e bocciato il 12/08).
+#    Il motivo per staccarli non e' la proprieta': e' che stanno su un
+#    terminale COLLEGATO AL CONTO VIVO, su una macchina che serve da
+#    banco di prova. Nessun file .mq5/.ex5 viene toccato.
+#
+#  E QUESTO NON GUARDA MT4
+#    Legge solo MQL5\Profiles\Charts, che esiste solo in MT5. Un
+#    terminale MT4 usa profiles\ (senza MQL5) e viene saltato: se hai
+#    gli stessi EA su un MT4, questo script non li vede e non li tocca.
+#
+#  COSA SI PERDE STACCANDO (leggilo prima di -Applica)
+#    Sposta via il GRAFICO INTERO, non solo l'EA: se su quel grafico
+#    c'e' un template o degli indicatori che usi per guardare a occhio
+#    (la bulge, per dire), sparisce anche quello. Torna tutto con
+#    -Annulla. Se vuoi TENERE il grafico e togliere solo l'EA, si fa a
+#    mano in MT5: tasto destro sul grafico > Consulenti esperti >
+#    Rimuovi. Trenta secondi a grafico, ed e' la via piu' pulita.
+#
 #  PERCHE' ESISTE (15/08/2026, dal censimento degli ordini)
 #    Il PC di backtest ha piazzato 174 ordini sul conto VIVO in sedici
 #    giorni, e ha collezionato 126 ordini falliti (104 "Invalid price").
@@ -177,7 +202,7 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -EA SilentlyContinue)) {
         $nNostri++
         Riga ("      " + $f.Name + "   NOSTRO  " + $ea) "Green"
       } else {
-        Riga ("      " + $f.Name + "   TERZI   " + $ea + "   <- DA STACCARE") "Red"
+        Riga ("      " + $f.Name + "   NON NOSTRO  " + $ea + "   <- DA STACCARE") "Red"
         [void]$daStaccare.Add([pscustomobject]@{ file=$f.FullName; nome=$f.Name; profilo=$prof.Name; ea=$ea; radice=(Join-Path $dir.FullName "MQL5\Profiles") })
       }
     }
@@ -187,11 +212,11 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -EA SilentlyContinue)) {
 
 Riga "=== RIEPILOGO ===" "Cyan"
 Riga ("  grafici con EA NOSTRI    : " + $nNostri) "Green"
-Riga ("  grafici con EA DI TERZI  : " + $daStaccare.Count) "Red"
+Riga ("  grafici con EA NON NOSTRI: " + $daStaccare.Count) "Red"
 Riga ("  grafici senza EA         : " + $nVuoti)
 if ($daStaccare.Count -gt 0) {
   Riga ""
-  Riga "  EA di terzi trovati:" "Red"
+  Riga "  EA non nostri trovati (spesso sono LE FONTI del corso):" "Red"
   foreach ($g in ($daStaccare | Group-Object ea | Sort-Object Name)) {
     Riga ("    " + $g.Name + "   (" + $g.Count + " grafici)") "Red"
   }
@@ -200,12 +225,14 @@ Riga ""
 
 if (-not $Applica) {
   Riga "ANTEPRIMA: non ho toccato NIENTE." "Yellow"
+  Riga "RICORDA: sposta il GRAFICO INTERO, non solo l'EA. Template e" "Yellow"
+  Riga "indicatori di quel grafico se ne vanno con lui (tornano con -Annulla)." "Yellow"
   Riga "Leggi l'elenco qui sopra. Se e' giusto, rilancia la stessa riga" "Yellow"
   Riga "aggiungendo   -Applica   in fondo." "Yellow"
-  Riga "Se qualcosa marcato TERZI e' invece nostro, dimmelo PRIMA: si" "Yellow"
+  Riga "Se qualcosa marcato NON NOSTRO e' invece nostro, dimmelo PRIMA: si" "Yellow"
   Riga "aggiunge al parametro -NostriPattern, non si tocca a mano." "Yellow"
 } elseif ($daStaccare.Count -eq 0) {
-  Riga "Niente da staccare: nessun EA di terzi sui grafici. " "Green"
+  Riga "Niente da staccare: nessun EA non nostro sui grafici." "Green"
 } else {
   Riga "APPLICO." "Cyan"
   foreach ($g in $daStaccare) {
