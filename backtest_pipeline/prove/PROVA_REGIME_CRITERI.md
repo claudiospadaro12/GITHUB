@@ -156,3 +156,115 @@ short-only.
 L'avevo scritta al mattino ragionando sul portafoglio nel suo insieme,
 **senza aprire il file delle celle**. E' lo stesso errore di metodo della
 giornata: dedurre invece di leggere.
+
+
+---
+---
+
+# 📐 EMENDAMENTO 1 — IL CAMPIONE MINIMO (15/08/2026)
+
+_Richiesta di Claudio: "non pensi che dobbiamo abbassare leggermente i
+parametri di valutazione? Rischiamo di scartare EA che sarebbero
+profittevoli"._
+
+**Aveva ragione, ma il difetto non era dove pensavamo lui e io.** Non erano
+le soglie a essere troppo severe: era che **le stavamo applicando a campioni
+che non esistono**.
+
+## E.1 Il conto che ha fatto scattare l'emendamento
+
+Operazioni per cella, nelle due finestre avverse di R56:
+
+| finestra | celle con **n >= 20** | con n 8-19 | con **n < 8** |
+|---|---|---|---|
+| **ORSO 2022** | **7** su 14 | 3 | 4 |
+| **CROLLO 2020** | **1** su 14 | 6 | **7** |
+
+> 🚨 **Sulla finestra CROLLO, UNA sola cella su quattordici ha un campione
+> sufficiente** (`COST_EURJPY`, n=23). Sette celle stanno **sotto le otto
+> operazioni**.
+>
+> E su quei numeri erano stati scritti dei verdetti: `PTE_USDJPY` "le due
+> finestre dicono il contrario" poggiava su **n=7**; `LARRY_GBPUSD` su
+> **n=3**. **Non avevamo un test del crollo Covid: avevamo l'illusione di
+> averlo.**
+
+## E.2 LA REGOLA (vale dal prossimo round)
+
+Per **ogni cella, in ogni finestra**, prima di leggere qualunque numero di
+merito si guarda `n`:
+
+| campione | cosa si puo' dire |
+|---|---|
+| **n >= 20** | ✅ **verdetto pieno**: i criteri A-E si applicano |
+| **8 <= n <= 19** | 🟡 **VERDETTO SOSPESO — campione sottile.** Il numero si scrive, la decisione no |
+| **n < 8** | ⬜ **NON MISURATO.** La finestra e' scoperta per quella cella |
+
+**La soglia 20 non e' inventata: e' gia' la nostra.** In R48 `EURGBP` fu
+bocciato pur avendo la cella migliore in entrambe le finestre, *"solo perche'
+in campione ha 14 trade invece dei 20 richiesti"*. Lo stesso numero, con la
+stessa severita', anche quando ci farebbe comodo il contrario.
+
+### ⚠️ E.3 LA VALVOLA — il campione sottile sospende il MERITO, mai il RISCHIO
+
+Questa distinzione e' il cuore dell'emendamento: senza, la regola diventerebbe
+una scappatoia.
+
+| grandezza | che cos'e' | vale a n basso? |
+|---|---|---|
+| **PF, profitto, payoff** | una **STIMA** su un campione | ❌ sotto n=20 e' rumore |
+| **Drawdown, peggior giornata** | un **FATTO ACCADUTO** | ✅ **SI', sempre** |
+
+**Un drawdown del 18,9% e' successo.** Non e' un'inferenza statistica, e non
+si annulla dicendo "erano solo tre trade". Quindi **il tetto assoluto del
+criterio A (mai oltre il 20%) vale a QUALUNQUE n**, e una cella che si
+distrugge resta declassata anche con campione sottile.
+
+> **Si sospende il giudizio su "quanto e' bravo", mai su "quanto puo' farmi
+> male".**
+
+### E.4 Retroattivita', asimmetrica
+
+L'emendamento si applica ai referti gia' scritti **SOLO per SOSPENDERE
+verdetti**, **mai per emetterne di nuovi**.
+
+- Togliere un verdetto = ammettere di non sapere -> **sempre lecito**.
+- Aggiungerne uno dopo aver visto i numeri = **mai**: e' la cosa che il metodo
+  esiste per impedire.
+
+## E.5 Cosa cambia in R56, applicando la regola
+
+| cella | prima | dopo |
+|---|---|---|
+| `COST_EURJPY` | D non passa | ✅ **REGGE** — unica con entrambe le finestre piene (43 e 23). Il PF 0,02 nel crollo e' **vero** |
+| `COST_GBPCAD` | declassato | ✅ **REGGE** — orso n=48 pieno, **piu'** il DD 18,9% che vale a qualunque n |
+| `PTE_USDJPY` | "le due finestre dicono il contrario" | 🟡 **SOSPESO** — il crollo era **n=7** |
+| `LARRY_GBPUSD` | D non passa | 🟡 **SOSPESO** — crollo **n=3** |
+| `EZ_CHFJPY` · `EZ_GBPUSD` | tenuta persa nel crollo | 🟡 **SOSPESI** — n=9 e n=10 |
+| `EZ_AUDJPY` · `SW_GBPUSD` | tengono | 🟡 tenuta confermata **solo nell'ORSO** (n=35 e n=51) |
+| `BB_*` · `LARRY_ORO` | non giudicabili | ⬜ confermato **NON MISURATO** |
+| `PTE_GBPUSD` | promosso -> ritirato da R57 | 🟡 sarebbe stato **SOSPESO comunque**: crollo n=11 |
+
+> 🔍 **La nota che conta**: la promozione di PTE sarebbe caduta **per due
+> strade indipendenti** — il modello (R57) e il campione (questo
+> emendamento). Due controlli diversi che dicono la stessa cosa valgono piu'
+> di due indizi.
+
+## E.6 EMENDAMENTO 2 — la finestra CROLLO e' troppo corta, e si sdoppia
+
+Tre mesi non bastano per accumulare venti operazioni: e' un **difetto di
+progetto della finestra**, non delle strategie. Ma allungarla diluirebbe lo
+shock, che e' proprio cio' che vogliamo misurare. Quindi si sdoppia, coerente
+con la valvola E.3:
+
+| finestra | periodo | a cosa serve |
+|---|---|---|
+| **CROLLO** | 2020.02.01 - 2020.04.30 | **il RISCHIO**: drawdown e peggior giornata, che valgono a qualunque n |
+| **CROLLO_ANNO** *(nuova)* | 2020.01.01 - 2020.12.31 | **il MERITO**: PF e profitto, con abbastanza operazioni per contarli |
+
+Le altre tre finestre restano **identiche**. Nessun altro criterio si muove.
+
+---
+
+**Firmato prima di rilanciare qualunque cosa.** Le celle vive in forward non
+cambiano di un parametro per questo emendamento.
