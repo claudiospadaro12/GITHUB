@@ -233,7 +233,7 @@ grande del previsto, come nella realta'.
 PC di BACKTEST, MT5 CHIUSO. 40 passate (5 valori x 2 magic x 2 finestre x 2 EA):
 
 ```
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/SHA_R55/backtest_pipeline/lancia_r55.ps1" -OutFile "$env:TEMP\lancia_r55.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r55.ps1" -Rif SHA_R55
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/4c424e2bba8fd34686dc9cc7ffd3139fb475621e/backtest_pipeline/lancia_r55.ps1" -OutFile "$env:TEMP\lancia_r55.ps1"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\lancia_r55.ps1" -Rif 4c424e2bba8fd34686dc9cc7ffd3139fb475621e
 ```
 
 Zip in `Desktop\r55.zip`, 4 CSV attesi. **Controllo d'igiene numero uno: la
