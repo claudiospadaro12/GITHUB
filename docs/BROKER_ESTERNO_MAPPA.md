@@ -98,6 +98,31 @@
 > chiusura il primo `CopyRates` non partiva **nemmeno una volta**, mentre
 > EURUSD aveva 22.524 barre in cache. Corretto: il primo tentativo si fa sempre.
 
+> ## 🔴 15/08/2026 ore 15:34 — TERZO GIRO: il colpevole non era CopyRates
+>
+> US30 si e' bloccato **913,1 secondi** (15 min 13 s) **con CopyRates gia'
+> tolto dalla scansione**. Sei cambi in 0,134 s, poi il muro. La sequenza dei
+> tre giri e' la prova: 69,5 s (AUDCHF) -> 312,9 s (US30) -> **913,1 s** (US30).
+> Ogni volta avevamo alzato la soglia del driver invece di curare la causa.
+>
+> **A bloccare e' `SeriesInfoInteger(SERIES_SERVER_FIRSTDATE)`**: se la storia
+> non c'e', la chiede al server e ASPETTA. A mercato chiuso, oltre il quarto
+> d'ora per UN simbolo.
+>
+> **Correzione: `InpSondaStorico=false` di default.** La scansione elenca i
+> NOMI (nome, descrizione, digits, point, contract, tick value, spread) e non
+> tocca la storia. Le date si chiedono dopo, con `-SondaStorico` e `-Filtro`
+> stretto, possibilmente a mercato aperto.
+>
+> **✅ Export H1 riparato: 1032 barre** di EURUSD (480 SOLARE gen-2025 + 552
+> LEGALE lug-2025). E' meta' del confronto: **manca il lato BCM**, e finche'
+> manca lo shift storico fra i due feed resta ignoto.
+>
+> **📅 USDCAD in tre corse ha detto 1993.04.28, poi 2026.07.29, poi 2026.01.02.**
+> Tre risposte diverse in 26 minuti. Per questo il **2023.01.02** di EURUSD,
+> GBPUSD e USDJPY si scrive: e' identico in **tre corse su tre**, con 22.524
+> barre H1 e 939 D1 sempre uguali.
+
 **Stato: SCHELETRO DA COMPILARE.** Le tabelle qui sotto sono vuote apposta:
 si riempiono con l'elenco VERO prodotto da `ABTG_InfoBroker`, non con nomi
 plausibili. Finche' una riga non ha la data nella colonna "verificato il",

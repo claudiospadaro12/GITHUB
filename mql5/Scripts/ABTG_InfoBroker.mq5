@@ -70,6 +70,7 @@ input string          InpSimboloFuso     = "";        // simbolo per fuso/sessio
 input ENUM_TIMEFRAMES InpTFSessione      = PERIOD_M5; // TF con cui si cerca la prima barra della giornata
 input int             InpAnniSessione    = 3;         // quanti anni indietro nella tabella per stagione
 input string          InpDateCampione    = "01.15,03.20,04.15,07.15,10.15,10.28,11.20"; // mese.giorno: 03.20 e 10.28 sono le settimane di DISALLINEAMENTO USA/EU
+input bool            InpSondaStorico    = false;     // false = elenca solo i NOMI, senza toccare lo storico (vedi nota)
 input bool            InpNonBloccare     = true;      // true = NON chiamare CopyRates nella scansione (vedi nota sotto)
 input int             InpMaxSecScansione = 600;       // tetto di tempo per la scansione dei simboli (0 = nessuno)
 input bool            InpEsportaH1       = true;      // esporta le chiusure H1 per il confronto fra broker
@@ -482,6 +483,13 @@ void OnStart()
                (mw ? "solo Market Watch" : "TUTTO IL BROKER"), tfn, InpFiltro);
    PrintFormat("%-16s %-6s %-10s %-10s %-12s %-12s %s",
                "SIMBOLO","DIGITS","POINT","CONTRACT","PRIMA "+tfn,"PRIMA D1","STATO | DESCRIZIONE");
+   if(!InpSondaStorico)
+     {
+      Print("  MODO SOLO NOMI: le colonne PRIMA H1 / PRIMA D1 restano vuote APPOSTA.");
+      Print("  Chiedere la prima data al server, a mercato chiuso, blocca lo script");
+      Print("  per oltre un quarto d'ora PER SIMBOLO (misurato su US30 il 15/08).");
+      Print("  Per le date: rilancia con InpSondaStorico=true e un InpFiltro STRETTO.");
+     }
 
    int    esaminati = 0;
    string primoSym  = "";
@@ -547,10 +555,30 @@ void OnStart()
 
       long     barTF=0, barD1=0;
       datetime locTF=0, srvTF=0, locD1=0, srvD1=0;
-      MisuraSerie(sym, InpTF,      barTF, locTF, srvTF);
-      MisuraSerie(sym, PERIOD_D1,  barD1, locD1, srvD1);
-
-      string stato = Verdetto(barTF, locTF, srvTF);
+      string   stato;
+      // ---------------------------------------------------------------
+      //  PERCHE' DI DEFAULT NON SI TOCCA LO STORICO (15/08/2026).
+      //  Il 15/08 la ricognizione si e' fermata TRE volte sullo stesso
+      //  scoglio, e ogni volta avevamo incolpato la cosa sbagliata:
+      //    1o giro  AUDCHF  fermo   69,5 s  -> "colpa della soglia a 60 s"
+      //    2o giro  US30    fermo  312,9 s  -> "colpa di CopyRates"
+      //    3o giro  US30    fermo  913,1 s  -> con CopyRates GIA' TOLTO
+      //  Il terzo giro e' la prova: a bloccare non e' CopyRates, e'
+      //  SeriesInfoInteger(SERIES_SERVER_FIRSTDATE), che sulla storia non
+      //  ancora disponibile la chiede al server e ASPETTA. A mercato
+      //  chiuso quell'attesa supera il quarto d'ora PER UN SIMBOLO.
+      //  Quindi: la scansione elenca i NOMI, che sono cio' per cui esiste,
+      //  e non tocca la storia. Le date si misurano dopo, su POCHI simboli
+      //  (-Filtro) e possibilmente a mercato aperto, con InpSondaStorico.
+      // ---------------------------------------------------------------
+      if(InpSondaStorico)
+        {
+         MisuraSerie(sym, InpTF,      barTF, locTF, srvTF);
+         MisuraSerie(sym, PERIOD_D1,  barD1, locD1, srvD1);
+         stato = Verdetto(barTF, locTF, srvTF);
+        }
+      else
+         stato = "solo nomi (storico non sondato)";
 
       // PrimaData: si scrive quella del SERVER (quello che il broker POSSIEDE),
       // perche' e' l'unica che dice se il 2018 e' raggiungibile o no. Quella
@@ -576,7 +604,7 @@ void OnStart()
    // qui le si rilegge, sempre senza bloccare.
    //================================================================
    int corrette = 0, restano = 0;
-   if(InpNonBloccare && nBuf > 0 && !IsStopped())
+   if(InpSondaStorico && InpNonBloccare && nBuf > 0 && !IsStopped())
      {
       Print("--- SECONDO GIRO: rileggo le date che non erano ancora arrivate ---");
       Sleep(3000);

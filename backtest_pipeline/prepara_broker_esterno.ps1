@@ -47,6 +47,10 @@
 #   -BrokerPattern "Pepperstone"   quale terminale usare (default)
 #   -BrokerPattern "BCM"           misura il RIFERIMENTO (fallo una volta)
 #   -SoloElenco                    solo ricognizione, niente download
+#   -SondaStorico                  chiede al server la PRIMA DATA di ogni
+#                                  simbolo. ATTENZIONE: blocca. Misurato
+#                                  913 s su un solo simbolo (US30, mercato
+#                                  chiuso). Usalo SOLO con -Filtro stretto.
 #   -SoloMarketWatch               scandisce i 120 del Market Watch, non i
 #                                  1722 del broker (una scansione completa
 #                                  e' impraticabile: fino a 70 s a simbolo
@@ -83,6 +87,7 @@ param(
   [int]    $AnniSessione       = 3,
   [switch] $SoloElenco,
   [switch] $SoloMarketWatch,
+  [switch] $SondaStorico,
   [switch] $SoloReferto,
   [switch] $SenzaTick,
   [switch] $Auto,
@@ -737,11 +742,17 @@ $tfInfo = if ($TFNum.ContainsKey($TF.ToUpper())) { $TFNum[$TF.ToUpper()] } else 
 # fino a 70 secondi, e 1722 simboli farebbero giorni. Il Market Watch
 # di Pepperstone contiene gia' i maggiori indici.
 $mwStr = if ($SoloMarketWatch) { "true" } else { "false" }
+# -SondaStorico: chiedere al server la prima data BLOCCA. Misurato il
+# 15/08 su US30 a mercato chiuso: 913 secondi PER UN SIMBOLO. Di default
+# la scansione elenca i NOMI e basta; le date si chiedono dopo, con un
+# -Filtro stretto e possibilmente a mercato aperto.
+$sondaStr = if ($SondaStorico) { "true" } else { "false" }
 if (-not $SimboloFuso -and $SimboloGrafico) { $SimboloFuso = $SimboloGrafico }
 $SetInfo = Join-Path $PresetDir "abtg_infobroker.set"
 @"
 InpFiltro=$Filtro
 InpSoloMarketWatch=$mwStr
+InpSondaStorico=$sondaStr
 InpNonBloccare=true
 InpMaxSecScansione=600
 InpTF=$tfInfo

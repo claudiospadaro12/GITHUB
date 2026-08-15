@@ -329,3 +329,91 @@ e il ricognitore **su BCM** — senza il quale nessuna rimappatura di orari e'
 verificata.
 
 **Nessun parametro degli EA in forward cambia per questi numeri.**
+
+
+---
+---
+
+# 🛰️ TERZO GIRO — 15/08/2026 ore 15:34
+
+_Dati grezzi: `backtest_pipeline/risultati_prove/pepperstone_ricognizione/giro3/`_
+
+## 13. ✅ Due fix su tre hanno funzionato
+
+| fix | esito |
+|---|---|
+| export H1 (`IsStopped` nell'intestazione del ciclo) | ✅ **1032 barre** — 480 SOLARE + 552 LEGALE, EURUSD |
+| stato `da svegliare` al posto di `NESSUN DATO` | ✅ compare su US30, come previsto |
+| `CopyRates` fuori dalla scansione | ❌ **non e' bastato** |
+
+## 14. 🔴 Avevo indicato il colpevole sbagliato
+
+**US30 si e' bloccato lo stesso, per 913,1 secondi** — quindici minuti e tredici
+secondi — **con `CopyRates` gia' tolto dalla scansione.** Sei cambi in
+**0,134 secondi**, poi il muro.
+
+| giro | simbolo | blocco | cosa avevo incolpato |
+|---|---|---:|---|
+| 1o (14:53) | AUDCHF | 69,5 s | la soglia a 60 s del driver |
+| 2o (15:05) | US30 | 312,9 s | `CopyRates` |
+| **3o (15:19)** | **US30** | **913,1 s** | — **con `CopyRates` gia' rimosso** |
+
+Il terzo giro e' la prova che serviva. A bloccare e'
+**`SeriesInfoInteger(SERIES_SERVER_FIRSTDATE)`**: quando la storia non e'
+disponibile, la chiede al server e **aspetta**. Avevo assunto che fosse
+non-bloccante — assunzione sbagliata, e i 913 secondi la smentiscono.
+
+> 📏 Ogni giro il blocco e' cresciuto — 69 s, 313 s, 913 s — perche' ogni volta
+> avevamo alzato la soglia del driver. **Non stavamo curando la causa,
+> stavamo allungando la corda.** A chiudere e' stato di nuovo il driver, ai
+> 900 s di rete.
+
+### La correzione vera: la scansione non tocca piu' lo storico
+
+**`InpSondaStorico=false` (nuovo default).** La scansione elenca nome,
+descrizione, digits, point, contract size, tick value e spread — **cioe' quello
+per cui il ricognitore esiste** — e non fa **nessuna** chiamata sulla storia.
+Le colonne `PRIMA H1` / `PRIMA D1` restano vuote **apposta**, e lo script lo
+dichiara a schermo.
+
+Le date si chiedono **dopo**, con `-SondaStorico` e un **`-Filtro` stretto**,
+e possibilmente **a mercato aperto**.
+
+## 15. 📅 USDCAD: tre corse, tre risposte diverse
+
+| simbolo | 1o giro | 2o giro | 3o giro | |
+|---|---|---|---|---|
+| EURUSD | 2023.01.02 | 2023.01.02 | **2023.01.02** | ✅ 3 su 3 |
+| GBPUSD | 2023.01.02 | 2023.01.02 | **2023.01.02** | ✅ 3 su 3 |
+| USDJPY | 2023.01.02 | 2023.01.02 | **2023.01.02** | ✅ 3 su 3 |
+| **USDCAD** | 1993.04.28 | 2026.07.29 | **2026.01.02** | ❌ **3 risposte diverse** |
+| AUDUSD | 2026.01.02 | 2025.07.17 | **2025.07.17** | ⚠️ instabile |
+
+Lo stesso simbolo, sullo stesso broker, in 26 minuti, ha detto **1993**, **luglio
+2026** e **gennaio 2026**. Non e' un dettaglio da nota a pie' di pagina: e' il
+motivo per cui il **2023.01.02** si scrive solo perche' e' **identico in tre
+corse su tre**, con 22.524 barre H1 e 939 D1 sempre uguali.
+
+## 16. 🕐 Il fuso storico: meta' della misura e' in cassaforte
+
+`ABTG_InfoBroker_H1_pepperstone.csv` adesso ha **1032 righe di chiusure H1**
+di EURUSD:
+
+- **SOLARE** 2025.01.06–01.31 → **480 barre** (dalle 00:00 alle 23:00)
+- **LEGALE** 2025.07.01–07.31 → **552 barre**
+
+E' il lato Pepperstone del confronto. ⚠️ **Manca l'altra meta'**: le stesse due
+finestre esportate **dal terminale BCM**. Senza quelle, lo shift storico fra i
+due feed resta ignoto e nessun backtest su dati Pepperstone e' validato.
+
+## 17. ▶️ I due passi, in quest'ordine
+
+1. **I NOMI** (secondi, mercato chiuso non conta): scansione senza sonda
+   storica. Deve uscire `FINITO: 120 simboli su 120` e l'elenco degli indici.
+2. **BCM** (`-BrokerPattern "BCM"`): stesse due finestre H1, e finalmente lo
+   shift si misura invece di dedurlo — insieme alla verifica della regola
+   "ora italiana − 1", mai controllata d'inverno.
+
+Solo **dopo**, e su pochi simboli per volta, la prima data di `US30`.
+
+**Nessun parametro degli EA in forward cambia per questi numeri.**
