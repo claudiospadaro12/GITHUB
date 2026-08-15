@@ -114,8 +114,24 @@ operare, oltre alle 174 volte in cui c'è riuscita.
 2. ⬜ **Il controllo di tenuta**: rilanciare questo censimento fra una
    settimana. Se il PC ha piazzato **zero** ordini nuovi, il lucchetto tiene e
    il caso si chiude. È l'unica prova che vale.
-3. ⬜ Staccare i 10 EA di terzi ancora appesi ai grafici del PC — sono loro
-   la fonte dei 104 `Invalid price`, e sono ancora lì.
+3. ⬜ Staccare gli EA non nostri dai grafici del PC — sono loro la fonte dei
+   104 `Invalid price`. **Censiti il 15/08: sono 11 grafici, 8 EA distinti**,
+   tutti nel profilo `Default` del terminale `215D85D7...` (il referto del
+   14/08 ne contava 10: ce n'era uno in piu', un secondo
+   `BULGE_MULTI_SIGNAL_ARANCIO_S`).
+
+   **Non sono "di terzi": sono LE FONTI del nostro lavoro** — PTE_V3_23 ->
+   ABTG_PTE, GOLDEN_CROSS_V03 -> ABTG_GoldenCross, BULGE_MULTI_SIGNAL ->
+   ABTG_BreakingBand, NIGHT_BREAK_BOX -> ABTG_MaxMinNotte, NQ_v21_S e' l'EA
+   dell'amico gia' misurato e bocciato il 12/08. Vanno staccati perche' stanno
+   su un terminale collegato al conto vivo, non perche' non siano nostri.
+
+   Si fa **a mano in MT5** (tasto destro > Consulenti esperti > Rimuovi): cosi'
+   grafici e template restano, e la bulge si continua a guardare a occhio.
+   `backtest_pipeline/stacca_ea_terzi.ps1` stampa la checklist coi simboli e,
+   rilanciato a lavoro finito, verifica che il conto sia sceso a zero.
+
+   **Controllo di chiusura: `grafici con EA NON NOSTRI: 0`.**
 4. ⬜ Ricalcolare le classifiche del forward escludendo i 33 trade del PC.
 
 ## 6. Il limite, dichiarato
