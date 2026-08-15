@@ -33,6 +33,65 @@ per una curva che sale a scalini come la nostra il secondo e' sempre peggiore.
 challenge col trailing e' comprare un biglietto per una gara di cui non
 conosciamo il percorso.
 
+### 1-bis. 🧱 DOVE STA IL MURO, e quanto spesso lo tocchiamo
+
+_Domanda di Claudio, 15/08: "se non riesco a tornare positivo, su una prop da
+100k quando sarei buttato fuori? Tipo 80k?"_
+
+**No: molto prima. A 90.000.** Il margine e' **10.000 €**, non 20.000.
+
+| muro | soglia tipica | su 100k |
+|---|---|---|
+| **DD massimo totale** | 10% | 🧱 **90.000** |
+| **DD giornaliero** | 5% | 🧱 **−5.000 in un solo giorno** |
+
+⚠️ **Il secondo butta fuori anche col primo intatto**: chiudere una giornata a
+94.900 partendo da 100.000 e' fuori, pur essendo **sopra** i 90.000.
+
+#### Quanto e' vicino, in R
+
+A rischio **0,65%** su 100k, **1R = 650 €**:
+
+| | distanza | in R |
+|---|---:|---:|
+| pavimento totale (90.000) | 10.000 € | **~15,4 R** |
+| cap giornaliero (5%) | 5.000 € | **~7,7 R in un giorno** |
+
+La nostra peggior giornata misurata (R51) e' **−2,06%**, cioe' **~3,2 R**:
+**due giornate come quella di fila sono gia' meta' del cap giornaliero.**
+
+#### 🎯 Ma la domanda vera e' un'altra: **quanto spesso lo tocchiamo**
+
+| rischio per trade | p99 del drawdown | contro il muro del 10% |
+|---|---:|---|
+| **1%** | **12,47%** | 🔴 lo **sfonda** in **piu'** dell'1% dei casi |
+| **0,65%** | **~8,1%** | 🟢 lo sfonda in **meno** dell'1% dei casi |
+
+> **E' QUESTO il motivo per cui giriamo a 0,65% e non a 1%.** Non e' prudenza
+> generica: a 1% la Monte Carlo dice che il muro lo tocchiamo piu' di una
+> volta su cento, a 0,65% no. La taratura del rischio non e' un'opinione, e'
+> la distanza fra quei due numeri.
+
+#### E col DD TRAILING il muro si muove
+
+Il margine non e' "quanto sto sopra 90.000": e' **"quanto sto sopra il picco
+meno il 10%"**.
+
+| | picco | muro | margine |
+|---|---:|---:|---:|
+| parti | 100.000 | 90.000 | 10.000 |
+| sali a 105.000 | 105.000 | 95.000 | — |
+| torni a 96.000 | 105.000 | 95.000 | **1.000** |
+
+Sei **sotto** il capitale iniziale di appena 4.000 € e ti restano **1.000 €**,
+non 6.000. **E' lo scenario che fa fuori mentre si pensa di stare comodi**, ed
+e' il motivo per cui la domanda "il trailing si blocca al breakeven?" (§9)
+vale piu' di tutte le altre.
+
+> ⚠️ 10% e 5% sono lo **standard**, non una legge: ogni prop le scrive a modo
+> suo (8%, 12%, daily 4%...). Vale la **regola D3**: si confermano per
+> iscritto prima di comprare.
+
 ### 2. Il cap di perdita **GIORNALIERA** quant'e'?
 
 **Il nostro numero:** R51 ha misurato la peggior giornata del portafoglio a
