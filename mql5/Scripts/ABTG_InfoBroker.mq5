@@ -76,6 +76,7 @@ input string          InpFinestraLegale  = "2025.07.01-2025.07.31"; // finestra 
 
 #define ABTG_INFO_FILE "ABTG_InfoBroker.csv"
 #define ABTG_H1_FILE   "ABTG_InfoBroker_H1.csv"
+#define ABTG_TOLL_DST_MIN 30  // minuti di scarto sotto i quali NON si grida al DST
 #define ABTG_ATTESA_GIRI 8      // 8 x 250ms = 2 secondi per serie: bastano per la
                                 // risposta del server, senza far durare ore un
                                 // elenco di 1000 simboli
@@ -531,17 +532,33 @@ void OnStart()
          PrintFormat("    apertura tipica in ORA LEGALE (apr/lug) : %s", oraLeg);
          if(mDis >= 0)
             PrintFormat("    settimane di disallineamento USA/EU     : %02d:%02d (20 marzo / 28 ottobre)", mDis/60, mDis%60);
+         // TOLLERANZA (15/08/2026): il 15/08 questo blocco ha gridato
+         // "ATTENZIONE: CAMBIA DI +0 ORE" su AUDUSD perche' l'apertura
+         // risultava 00:00 in alcuni giorni e 00:05 in altri. Cinque
+         // minuti non sono un cambio di fuso: e' la prima barra M5 che
+         // manca. Con la divisione intera quei 5 minuti diventavano
+         // "+0 ORE", cioe' un allarme che diceva "non cambia niente".
+         // Sotto la mezz'ora si considera la stessa ora; sopra, il
+         // numero si stampa in ore E minuti, mai troncato.
          string verdetto;
-         if(mSol == mLeg)
+         int scarto = mLeg - mSol;
+         if(MathAbs(scarto) <= ABTG_TOLL_DST_MIN)
            {
             verdetto = "SERVER ALLINEATO AL DST DEL MERCATO";
             Print("    -> ", verdetto, ": l'apertura cade alla STESSA ora server tutto");
             Print("       l'anno. Un InpSessionHour fisso e' corretto sempre.");
+            if(scarto != 0)
+               PrintFormat("       (scarto misurato: %+d minuti, sotto la tolleranza di %d: e'",
+                           scarto, ABTG_TOLL_DST_MIN);
+            if(scarto != 0)
+               Print("       una barra mancante all'apertura, non un cambio di fuso.)");
            }
          else
            {
-            int diff = (mLeg - mSol) / 60;
-            verdetto = StringFormat("ATTENZIONE: L'ORA DI APERTURA CAMBIA DI %+d ORE FRA LE STAGIONI", diff);
+            int diffOre = scarto / 60;
+            int diffMin = MathAbs(scarto) % 60;
+            verdetto = StringFormat("ATTENZIONE: L'ORA DI APERTURA CAMBIA DI %+d ORE E %d MINUTI FRA LE STAGIONI",
+                                    diffOre, diffMin);
             Print("    -> ", verdetto);
             Print("       QUESTO SERVER NON SEGUE IL DST DEL MERCATO (offset fisso, o");
             Print("       calendario diverso). Gli EA con orari fissi operano all'ora");

@@ -47,6 +47,10 @@
 #   -BrokerPattern "Pepperstone"   quale terminale usare (default)
 #   -BrokerPattern "BCM"           misura il RIFERIMENTO (fallo una volta)
 #   -SoloElenco                    solo ricognizione, niente download
+#   -SoloMarketWatch               scandisce i 120 del Market Watch, non i
+#                                  1722 del broker (una scansione completa
+#                                  e' impraticabile: fino a 70 s a simbolo
+#                                  per quelli senza dati)
 #   -Simboli "GER40,US30,NAS100"   cosa scaricare (nomi VERI del broker)
 #   -Da 2018.01.01                 da quando
 #   -Filtro "GER"                  restringe l'elenco dei simboli
@@ -78,6 +82,7 @@ param(
   [string] $FinestraLegale     = "2025.07.01-2025.07.31",
   [int]    $AnniSessione       = 3,
   [switch] $SoloElenco,
+  [switch] $SoloMarketWatch,
   [switch] $SoloReferto,
   [switch] $SenzaTick,
   [switch] $Auto,
@@ -485,6 +490,18 @@ function Mostra-Info($ref, [string]$titolo) {
   }
   $n = @($ref.Simboli).Count
   Write-Host ("    simboli nel referto    {0}" -f $n) -ForegroundColor Gray
+  # --- il referto e' COMPLETO? (15/08/2026: 9 su 1722, e non si vedeva)
+  $attesi = 0
+  if ($i.ContainsKey("SimboliBroker")) { $attesi = [int]("0" + ($i["SimboliBroker"] -replace "[^0-9]", "")) }
+  $inMW = 0
+  if ($i.ContainsKey("SimboliMarketWatch")) { $inMW = [int]("0" + ($i["SimboliMarketWatch"] -replace "[^0-9]", "")) }
+  if ($attesi -gt 0 -and $n -gt 0 -and $n -lt $attesi -and $n -lt $inMW) {
+    Write-Host ""
+    Write-Host ("    !!! REFERTO INCOMPLETO: {0} simboli elencati su {1} del broker." -f $n, $attesi) -ForegroundColor Red
+    Write-Host  "    La scansione si e' interrotta prima della fine: NON si puo'" -ForegroundColor Red
+    Write-Host  "    concludere che un simbolo 'non c'e'' guardando questo elenco." -ForegroundColor Red
+    Write-Host  "    Rilancia con -SoloMarketWatch (o con -Filtro stretto)." -ForegroundColor Yellow
+  }
   $ses = @($ref.Sessioni | Where-Object { $_.Data -eq "VERDETTO_DST" })
   if ($ses.Count -gt 0) {
     Write-Host ""
@@ -715,10 +732,16 @@ New-Item -ItemType Directory -Force -Path $PresetDir | Out-Null
 $TFNum = @{ "M1"=1; "M5"=5; "M15"=15; "M30"=30; "H1"=16385; "H4"=16388; "D1"=16408 }
 $tfInfo = if ($TFNum.ContainsKey($TF.ToUpper())) { $TFNum[$TF.ToUpper()] } else { 16385 }
 
+# -SoloMarketWatch: 120 simboli invece di 1722. Il 15/08 la scansione
+# completa e' risultata impraticabile: ogni simbolo SENZA dati costa
+# fino a 70 secondi, e 1722 simboli farebbero giorni. Il Market Watch
+# di Pepperstone contiene gia' i maggiori indici.
+$mwStr = if ($SoloMarketWatch) { "true" } else { "false" }
+if (-not $SimboloFuso -and $SimboloGrafico) { $SimboloFuso = $SimboloGrafico }
 $SetInfo = Join-Path $PresetDir "abtg_infobroker.set"
 @"
 InpFiltro=$Filtro
-InpSoloMarketWatch=false
+InpSoloMarketWatch=$mwStr
 InpTF=$tfInfo
 InpSimboloFuso=$SimboloFuso
 InpTFSessione=5
@@ -845,6 +868,20 @@ Period=$periodo
         return $false
       }
     }
+    # --- HA FINITO DAVVERO? -------------------------------------------
+    #  Il segnale buono e' la riga di chiusura che lo script MQL5 stampa
+    #  da solo ("=== FINITO:"). Il silenzio NON e' un segnale: il
+    #  15/08/2026 la ricognizione Pepperstone si e' fermata a 9 simboli
+    #  su 1722 perche' AUDCHF, che non ha dati, ha tenuto lo script
+    #  fermo 69,5 secondi -> la vecchia soglia di 60 s ha creduto che
+    #  avesse finito e ha chiuso MT5 a meta' scansione. Adesso il
+    #  silenzio deve durare molto di piu' della pausa piu' lunga vista.
+    $coda2 = Coda-Log $lenPrima
+    if ($coda2 -match "=== FINITO") {
+      Write-Host "  lo script ha stampato la sua riga di chiusura: ha finito." -ForegroundColor Green
+      $visto = $true
+      break
+    }
     if (-not (Test-Path $fileAtteso)) { continue }
     $visto   = $true
     $partito = $true
@@ -852,7 +889,11 @@ Period=$periodo
     try { $len = (Get-Item $fileAtteso -ErrorAction Stop).Length } catch { continue }
     if ($len -eq $ultimaLen) {
       $fermoDa += 15
-      if ($fermoDa -ge 60) { break }     # fermo da un minuto = ha finito
+      if ($fermoDa -ge 300) {            # 5 minuti di silenzio, non 1
+        Write-Host "  fermo da 5 minuti senza riga di chiusura: mi fermo qui." -ForegroundColor Yellow
+        Write-Host "  ATTENZIONE: il referto potrebbe essere INCOMPLETO." -ForegroundColor Yellow
+        break
+      }
     } else {
       $fermoDa = 0
       $ultimaLen = $len
@@ -913,7 +954,16 @@ if ($SoloElenco) {
       }
     }
     $ok = $false
+    $fusoScelto = $PSBoundParameters.ContainsKey("SimboloFuso")
     foreach ($sym in $candidati) {
+      # se il nome del grafico cambia, cambia anche il simbolo su cui si
+      # misurano fuso e sessioni: altrimenti il preset punterebbe a un
+      # simbolo che su questo broker non esiste, e [SESSIONI] e l'export
+      # H1 uscirebbero vuoti (com'e' successo il 15/08).
+      if (-not $fusoScelto) {
+        (Get-Content $SetInfo) -replace '^InpSimboloFuso=.*', ("InpSimboloFuso=" + $sym) |
+          Set-Content -Path $SetInfo -Encoding ASCII
+      }
       $ok = Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $sym "H1" $InfoCsv 20 90
       if ($ok) { $SimboloGrafico = $sym; break }
       if (-not $script:UltimoAvvioFallito) { break }   # partito ma finito male: inutile cambiare simbolo

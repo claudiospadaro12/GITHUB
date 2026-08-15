@@ -1,0 +1,74 @@
+﻿NQ	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+GH	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=== ABTG_InfoBroker - RICOGNIZIONE BROKER ===
+QJ	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Broker           : Pepperstone Limited
+OS	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Server           : PepperstoneUK-Demo
+ON	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Conto            : 62128200  (DEMO)
+DF	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora server       : 2026.08.15 12:53:43
+DS	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora ultimo tick  : 2026.08.15 08:01:22   mercato aperto: NO (ultimo tick vecchio: mercato chiuso o simbolo fermo)
+CI	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora GMT          : 2026.08.15 12:53:43
+FP	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora locale PC    : 2026.08.15 14:53:43
+NR	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  OFFSET SERVER-GMT: +00:00   (0.00 ore)  <== IL NUMERO DI OGGI
+GI	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora legale sul PC: SI   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dalle sezioni sotto)
+RR	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Simboli broker   : 1722   in Market Watch: 120
+DF	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	---------------------------------------------------------------------
+LH	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  ATTENZIONE: l'offset qui sopra vale OGGI. Non e' l'offset storico.
+GH	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Pepperstone segue il DST AMERICANO, l'Europa cambia in date diverse:
+OK	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  per 2-3 settimane l'anno la differenza fra i due server e' di 1 ora
+IK	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  invece di 2, e succede ogni anno del backtest. Il numero che vale
+HL	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  per il PASSATO e' quello misurato sui dati (ABTG_InfoBroker_H1.csv +
+NO	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  sezione [SESSIONI]). Vedi docs\BROKER_ESTERNO_MAPPA.md.
+PR	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+JL	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=== SIMBOLI (TUTTO IL BROKER) - TF misurato: H1 - filtro: '' ===
+LJ	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	SIMBOLO          DIGITS POINT      CONTRACT   PRIMA H1     PRIMA D1     STATO | DESCRIZIONE
+CO	0	14:53:43.099	ABTG_InfoBroker (EURUSD,H1)	AUDUSD           5      0.00001000 100000.00  2026.01.02   2026.01.02   COMPLETO | Australian Dollar vs US Dollar
+QS	0	14:53:43.256	ABTG_InfoBroker (EURUSD,H1)	EURUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Euro vs US Dollar
+CN	0	14:53:43.399	ABTG_InfoBroker (EURUSD,H1)	GBPUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Great Britain Pound vs US Dollar
+CK	0	14:53:43.479	ABTG_InfoBroker (EURUSD,H1)	USDCHF           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Swiss Franc
+PF	0	14:53:43.670	ABTG_InfoBroker (EURUSD,H1)	USDJPY           3      0.00100000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Japanese Yen
+DR	0	14:53:44.298	ABTG_InfoBroker (EURUSD,H1)	USDCAD           5      0.00001000 100000.00  1993.04.28   1993.04.28   da scaricare (parziale) | US Dollar vs Canadian Dollar
+JK	0	14:53:44.847	ABTG_InfoBroker (EURUSD,H1)	AUDNZD           5      0.00001000 100000.00  1993.04.05   1993.04.05   da scaricare (parziale) | Australian Dollar vs New Zealand Dollar
+PR	0	14:53:45.332	ABTG_InfoBroker (EURUSD,H1)	AUDCAD           5      0.00001000 100000.00  1993.04.27   1993.04.27   da scaricare (parziale) | Australian Dollar vs Canadian Dollar
+PP	0	14:54:54.841	ABTG_InfoBroker (EURUSD,H1)	AUDCHF           5      0.00001000 100000.00  -            -            NESSUN DATO | Australian Dollar vs Swiss Franc
+QJ	0	14:54:54.842	ABTG_InfoBroker (EURUSD,H1)	--- APERTURA DI SESSIONE PER STAGIONE (AUDUSD, TF M5) ---
+PH	0	14:54:54.842	ABTG_InfoBroker (EURUSD,H1)	    data        prima barra   ultima barra   barre   nota
+QR	0	14:54:54.919	ABTG_InfoBroker (EURUSD,H1)	    2024.01.15   -             -                  -   da scaricare / nessun dato
+ER	0	14:54:54.999	ABTG_InfoBroker (EURUSD,H1)	    2024.03.20   -             -                  -   da scaricare / nessun dato
+MR	0	14:54:55.076	ABTG_InfoBroker (EURUSD,H1)	    2024.04.15   -             -                  -   da scaricare / nessun dato
+LR	0	14:54:55.155	ABTG_InfoBroker (EURUSD,H1)	    2024.07.15   -             -                  -   da scaricare / nessun dato
+OR	0	14:54:55.233	ABTG_InfoBroker (EURUSD,H1)	    2024.10.15   -             -                  -   da scaricare / nessun dato
+FR	0	14:54:55.311	ABTG_InfoBroker (EURUSD,H1)	    2024.10.28   -             -                  -   da scaricare / nessun dato
+FR	0	14:54:55.390	ABTG_InfoBroker (EURUSD,H1)	    2024.11.20   -             -                  -   da scaricare / nessun dato
+GR	0	14:54:55.469	ABTG_InfoBroker (EURUSD,H1)	    2025.01.15   -             -                  -   da scaricare / nessun dato
+FR	0	14:54:55.549	ABTG_InfoBroker (EURUSD,H1)	    2025.03.20   -             -                  -   da scaricare / nessun dato
+LR	0	14:54:55.627	ABTG_InfoBroker (EURUSD,H1)	    2025.04.15   -             -                  -   da scaricare / nessun dato
+KR	0	14:54:55.706	ABTG_InfoBroker (EURUSD,H1)	    2025.07.15   -             -                  -   da scaricare / nessun dato
+KM	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2025.10.15   00:00         23:50            287   giorno spostato di +2 (festivo/weekend)
+KL	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2025.10.28   00:00         23:55            288   
+HO	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2025.11.20   00:00         23:55            288   
+PS	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.01.15   00:00         23:55            288   
+JF	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.03.20   00:00         23:50            287   
+MI	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.04.15   00:05         23:55            287   
+PL	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.07.15   00:05         23:55            287   
+DL	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	--- LETTURA DELLA TABELLA ---
+DJ	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA SOLARE (gen/nov) : 00:00
+GF	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA LEGALE (apr/lug) : 00:05
+FQ	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    settimane di disallineamento USA/EU     : 00:00 (20 marzo / 28 ottobre)
+GM	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    -> ATTENZIONE: L'ORA DI APERTURA CAMBIA DI +0 ORE FRA LE STAGIONI
+NP	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       QUESTO SERVER NON SEGUE IL DST DEL MERCATO (offset fisso, o
+RS	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       calendario diverso). Gli EA con orari fissi operano all'ora
+IR	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       SBAGLIATA per meta' anno: sul backtest e SUI SOLDI VERI.
+FD	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       Va deciso: due set di orari stagionali, oppure un input di
+DD	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       correzione DST nell'EA. Non e' un dettaglio.
+RI	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	--- EXPORT CHIUSURE H1 (per misurare lo shift SUI DATI) ---
+IQ	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  simbolo: AUDUSD   (le stesse due finestre vanno esportate anche sull'ALTRO terminale)
+RS	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  SOLARE   2025.01.06-2025.01.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+KF	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  LEGALE   2025.07.01-2025.07.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+KH	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  totale esportato: 0 barre H1 in MQL5\Files\ABTG_InfoBroker_H1.csv
+RK	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Il confronto lo fa prepara_broker_esterno.ps1: prova gli shift
+KG	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  da -6 a +6 ore e sceglie quello che minimizza la differenza media.
+HI	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Se lo shift della finestra SOLARE e quello della LEGALE sono
+OP	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  DIVERSI, l'offset fra i due broker NON e' costante: e' la prova.
+IR	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	=== FINITO: 9 simboli esaminati su 1722. Referto in MQL5\Files\ABTG_InfoBroker.csv ===
+KO	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Le colonne PrimaData sono quelle che il BROKER dichiara di avere:
+GN	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  se dicono 2018 lo storico e' raggiungibile, se dicono 2024 non lo e'.
+NL	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Lo stato 'da scaricare' significa solo che sul disco non c'e' ancora.

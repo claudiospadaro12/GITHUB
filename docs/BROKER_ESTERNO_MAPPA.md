@@ -26,6 +26,38 @@
 > se fallisce di nuovo, il nome vero si legge in dieci secondi nel **Market
 > Watch** di quel terminale.
 
+> ## 🟡 15/08/2026 ore 14:55 — PRIMA RICOGNIZIONE FATTA, MA TAGLIATA A 9/1722
+>
+> Referto completo: `backtest_pipeline/risultati_archivio/REFERTO_RICOGNIZIONE_PEPPERSTONE.md`
+> Dati grezzi: `backtest_pipeline/risultati_prove/pepperstone_ricognizione/`
+>
+> **Il buono, misurato:** `PepperstoneUK-Demo` e' a **UTC+0**
+> (`TimeTradeServer - TimeGMT = +00:00`, letto alle 12:53:43 server).
+> Conto **62128200**, DEMO, valuta **EUR**, **1722** simboli (**120** in
+> Market Watch).
+>
+> **Il taglio:** la scansione si e' fermata a **9 simboli su 1722**, perche'
+> il driver PowerShell trattava 60 s di silenzio come "ha finito" e `AUDCHF`
+> (nessun dato) ha tenuto lo script fermo **69,5 s**. Corretto lo stesso
+> giorno: il segnale di fine adesso e' la riga `=== FINITO` dello script,
+> la soglia di silenzio sale a 300 s, e c'e' `-SoloMarketWatch`.
+>
+> **Quindi NON e' vero, e non va scritto da nessuna parte, che Pepperstone
+> "non ha gli indici": non li abbiamo ancora guardati.**
+>
+> **Due allarmi da ignorare, entrambi difetti nostri (corretti oggi):**
+> - `ATTENZIONE: L'ORA DI APERTURA CAMBIA DI +0 ORE` = falso. Erano **5
+>   minuti** (00:00 vs 00:05) su AUDUSD, stampati con la divisione intera.
+>   E il DST non si misura su un cambio: serve un **indice**.
+> - `PrimaData 1993.04.xx` su tre simboli = falso: l'attesa della risposta
+>   del server e' di soli **2 secondi**. Per questo il **2023.01.02** di
+>   EURUSD/GBPUSD/USDCHF/USDJPY resta **[INCERTO]** e va riverificato prima
+>   di dichiarare che il 2022 e il 2020 su Pepperstone non ci sono.
+>
+> **Il fuso NEL PASSATO resta ignoto**: l'export H1 e' uscito con la sola
+> intestazione (0 barre), perche' `InpSimboloFuso` era vuoto ed e' finito su
+> AUDUSD, che quei mesi in locale non li aveva.
+
 **Stato: SCHELETRO DA COMPILARE.** Le tabelle qui sotto sono vuote apposta:
 si riempiono con l'elenco VERO prodotto da `ABTG_InfoBroker`, non con nomi
 plausibili. Finche' una riga non ha la data nella colonna "verificato il",

@@ -1,0 +1,53 @@
+[SERVER]
+Campo,Valore
+Broker,Pepperstone Limited
+Server,PepperstoneUK-Demo
+Conto,62128200
+TipoConto,DEMO
+Valuta,EUR
+OraServer,2026.08.15 12:53:43
+OraUltimoTick,2026.08.15 08:01:22
+OraGMT,2026.08.15 12:53:43
+OraLocalePC,2026.08.15 14:53:43
+OffsetServerGMT_min,0
+OffsetServerGMT_ore,0.00
+OffsetServerGMT_hhmm,+00:00
+OraLegalePC,SI
+MercatoAperto,NO
+SimboliBroker,1722
+SimboliMarketWatch,120
+TF_Misurato,H1
+Filtro,
+MisuratoIl,2026.08.15
+[SIMBOLI]
+Simbolo,Descrizione,Digits,Point,ContractSize,TickValue,TickSize,SpreadPt,TF,BarreTF,PrimaDataTF,BarreD1,PrimaDataD1,Stato
+AUDUSD,Australian Dollar vs US Dollar,5,0.00001000,100000.00,0.00000,0.00001000,3,H1,3864,2026.01.02,161,2026.01.02,COMPLETO
+EURUSD,Euro vs US Dollar,5,0.00001000,100000.00,0.00000,0.00001000,4,H1,22524,2023.01.02,939,2023.01.02,COMPLETO
+GBPUSD,Great Britain Pound vs US Dollar,5,0.00001000,100000.00,0.00000,0.00001000,3,H1,22524,2023.01.02,939,2023.01.02,COMPLETO
+USDCHF,US Dollar vs Swiss Franc,5,0.00001000,100000.00,0.00000,0.00001000,5,H1,2714,2023.01.02,114,2023.01.02,COMPLETO
+USDJPY,US Dollar vs Japanese Yen,3,0.00100000,100000.00,0.00000,0.00100000,7,H1,22520,2023.01.02,939,2023.01.02,COMPLETO
+USDCAD,US Dollar vs Canadian Dollar,5,0.00001000,100000.00,0.00000,0.00001000,4,H1,312,1993.04.28,13,1993.04.28,da scaricare (parziale)
+AUDNZD,Australian Dollar vs New Zealand Dollar,5,0.00001000,100000.00,0.50906,0.00001000,14,H1,312,1993.04.05,13,1993.04.05,da scaricare (parziale)
+AUDCAD,Australian Dollar vs Canadian Dollar,5,0.00001000,100000.00,0.62303,0.00001000,10,H1,312,1993.04.27,13,1993.04.27,da scaricare (parziale)
+AUDCHF,Australian Dollar vs Swiss Franc,5,0.00001000,100000.00,1.06263,0.00001000,10,H1,0,-,0,-,NESSUN DATO
+[SESSIONI]
+Simbolo,Data,PrimaBarra,UltimaBarra,NBarre,TF,Nota
+AUDUSD,2024.01.15,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2024.03.20,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2024.04.15,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2024.07.15,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2024.10.15,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2024.10.28,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2024.11.20,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2025.01.15,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2025.03.20,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2025.04.15,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2025.07.15,-,-,0,M5,da scaricare / nessun dato
+AUDUSD,2025.10.15,00:00,23:50,287,M5,giorno spostato di +2 (festivo/weekend)
+AUDUSD,2025.10.28,00:00,23:55,288,M5,ok
+AUDUSD,2025.11.20,00:00,23:55,288,M5,ok
+AUDUSD,2026.01.15,00:00,23:55,288,M5,ok
+AUDUSD,2026.03.20,00:00,23:50,287,M5,ok
+AUDUSD,2026.04.15,00:05,23:55,287,M5,ok
+AUDUSD,2026.07.15,00:05,23:55,287,M5,ok
+AUDUSD,VERDETTO_DST,00:00,00:05,0,M5,ATTENZIONE: L'ORA DI APERTURA CAMBIA DI +0 ORE FRA LE STAGIONI
