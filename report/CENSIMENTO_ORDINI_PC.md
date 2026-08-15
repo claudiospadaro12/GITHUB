@@ -57,6 +57,21 @@ quando il conto lo operano gli EA e non più le mani:
 Per due settimane abbiamo letto quel rosso come "varianza sul win rate"
 (R47). La varianza c'è, ed è misurata. Ma **il segno lo dava un'altra cosa.**
 
+> ### ⚠️ PRECISAZIONE OBBLIGATORIA (15/08, dopo un'obiezione di Claudio)
+>
+> **Tutto quello scritto qui sopra riguarda SOLO il conto piccolo (50503392).**
+> Il fantasma ha toccato **quel conto e basta**: sul **100k (50504263) i trade
+> piazzati dal PC sono ZERO**, verificato.
+>
+> **Il 100k e' a −826,86 dal via, e quel rosso e' vero al 100%.** Non c'e'
+> niente da depurare.
+>
+> Citare il "+134,86" o il "+31,84" **senza mettere accanto il −826,86 del
+> 100k e' fuorviante**, ed e' esattamente l'errore che ho fatto nel
+> presentarlo. Il conto che conta per la prop e' il 100k, ed e' in perdita.
+>
+> **Settimana 09-15/08, i due conti insieme, gia' depurati: −795,02.**
+
 ## 2. Il magic 770101 era un miscuglio di due macchine
 
 | | trade | netto |
