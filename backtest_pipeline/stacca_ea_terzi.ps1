@@ -67,6 +67,7 @@ param(
   [string] $NostriPattern  = "ABTG_,EasyTrend",   # cosa consideriamo "nostro"
   [switch] $Applica,                              # senza questo NON tocca niente
   [switch] $Annulla,                              # rimette com'era dall'ultimo backup
+  [string] $SoloQuesti = "",                      # se valorizzato, tocca SOLO gli EA il cui nome contiene questo (es. "BULGE")
   [switch] $ForzaMacchina                         # scavalca la guardia (da usare quasi mai)
 )
 $ErrorActionPreference = "Continue"
@@ -236,6 +237,20 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -EA SilentlyContinue)) {
       }
     }
   }
+  Riga ""
+}
+
+# --- filtro chirurgico: se -SoloQuesti e' dato, il resto non si tocca -----
+#  15/08: Claudio ha chiesto di staccare SOLO i BULGE. Senza questo filtro
+#  lo script avrebbe portato via anche PTE_V3, GOLDEN_CROSS, HeikinAshi,
+#  NIGHT_BREAK e NQ_v21 - roba sua, che magari vuole tenere sul grafico.
+if ($SoloQuesti) {
+  $prima  = $daStaccare.Count
+  $tenuti = @($daStaccare | Where-Object { $_.ea -like ("*" + $SoloQuesti + "*") })
+  $daStaccare = New-Object System.Collections.ArrayList
+  foreach ($x in $tenuti) { [void]$daStaccare.Add($x) }
+  Riga ("FILTRO -SoloQuesti '" + $SoloQuesti + "': dei " + $prima + " grafici non nostri ne resto su " + $daStaccare.Count + ".") "Cyan"
+  Riga "Gli altri NON vengono toccati." "Cyan"
   Riga ""
 }
 
