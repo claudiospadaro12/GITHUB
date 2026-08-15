@@ -1,0 +1,56 @@
+# =====================================================================
+#  PROVA R58: LA CELLA VIVA DELLA PTE, A TICK REALI SU BCM
+#  (15/08/2026 sera - VALIDAZIONE, non ricerca)
+# =====================================================================
+#
+# PERCHE' UN FILE NUOVO E NON prove\ABTG_PTE.txt
+#   Quel file e' una GRIGLIA: InpTP1_ATRmult su 4 valori per InpTF da H1 a
+#   H4 = 16 celle. Serviva il 07/08 per CERCARE dove sta il breakeven, ed
+#   e' giusto cosi'. Ma oggi la domanda e' un'altra e opposta: la cella che
+#   gia' gira, presa com'e', regge ai tick veri del NOSTRO broker?
+#   Spazzolare 16 celle a tick reali significherebbe ritrovarsi davanti una
+#   tabella da cui scegliere la migliore - cioe' l'ottimizzazione che
+#   Spearman ci dice di non fare (misure nostre: -1,00 su R11 ORB DAX,
+#   -0,90 sul DAX, -0,80 sul Nasdaq... undici negative su dodici).
+#   Qui si spazzola ZERO. Un lancio, una cella, un numero.
+#
+# LA CELLA, copiata da prove\CELLE_REGIME.txt riga PTE_GBPUSD:
+#   InpTF=16385 (H1) ; InpTP1_ATRmult=0.5 ; InpRiskPercent=1.0
+#   Non e' stato cambiato un carattere.
+#
+# IPOTESI (scritta PRIMA dei numeri)
+#   R56 (OHLC) e R57 (tick generati) sulle stesse finestre di regime hanno
+#   dato risposte OPPOSTE: l'ORSO passava da +1.245 PF 1,62 a -1.249 PF
+#   0,75 cambiando SOLO il modello di riempimento. Quindi il modello, su
+#   questa cella, non e' un dettaglio: sposta il segno.
+#     -> A TICK REALI IL RISULTATO SARA' PIU' VICINO A R57 CHE A R56,
+#        perche' i tick veri toccano stop e target DENTRO la barra, come
+#        i tick generati e a differenza dell'OHLC.
+#   Se invece somigliasse a R56, vorrebbe dire che i tick generati sono
+#   piu' severi della realta', e andrebbe riletto tutto R57.
+#
+# CRITERI (dichiarati ora)
+#   1. PF fuori campione >= 1,10
+#   2. positiva in ENTRAMBE le finestre, non solo fuori campione
+#   3. "Peggior Giornata %" fuori campione sopra -2,5% al rischio 1%
+#   4. il numero di trade dev'essere dello stesso ordine dell'atteso: un
+#      dimezzamento come quello visto in R57 (37->19) e' esso stesso un
+#      risultato, e va scritto.
+#
+# ⚠️ COSA QUESTO ROUND NON PUO' DIRE
+#   I tick reali su BCM partono dal 2024.07.05 (misurato il 15/08:
+#   70.491.074 tick). Quindi NON c'e' ne' l'orso 2022 ne' il crollo 2020.
+#   R58 valida il RIEMPIMENTO, mai la robustezza di regime. E non e'
+#   nemmeno un confronto diretto con R56/R57, che girano su un ALTRO feed
+#   (_EXT HistData) e su ALTRE finestre: per isolare il modello si lancia
+#   la coppia R58/R58b sullo stesso periodo, cambiando solo -Modello.
+#
+# @DAQUANDO e' scritto qui perche' e' MISURATO, non ipotizzato.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 2024.07.05
+
+InpTF=16385||16385||0||16385||N
+InpTP1_ATRmult=0.5||0.5||0||0.5||N
+InpRiskPercent=1.0||1.0||0||1.0||N
