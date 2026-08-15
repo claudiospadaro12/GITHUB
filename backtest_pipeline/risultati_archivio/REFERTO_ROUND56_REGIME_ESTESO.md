@@ -12,6 +12,21 @@ Nessuna cella ha risposto in modo diverso a se stessa.
 
 ---
 
+> ## 🔻 RITRATTAZIONE — 15/08/2026 sera, dopo R57
+> **La promozione di rango di `PTE_GBPUSD` scritta in questo referto E'
+> RITIRATA.** Rilanciando le stesse celle con gli stessi parametri e
+> cambiando **solo il modello del tester** (OHLC → tick generati dentro la
+> barra M1), la finestra ORSO passa da **+1.245 PF 1,62** a **−1.249 PF
+> 0,75**: cambia segno, e il criterio B (PF ≥ 0,90 nelle finestre avverse)
+> non e' piu' soddisfatto.
+>
+> Il resto della tabella qui sotto resta valido **come screening OHLC**, che
+> e' l'unica cosa che ha sempre dichiarato di essere. Ma nessun verdetto di
+> promozione puo' poggiarci sopra.
+> Vedi `REFERTO_ROUND57_PTE_MODELLO.md`.
+
+---
+
 ## 1. LA TABELLA
 
 Profit in EUR su 100.000 al rischio 1%. `n` = operazioni.
