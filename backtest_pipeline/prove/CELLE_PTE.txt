@@ -1,0 +1,16 @@
+# =====================================================================
+#  R57 - SOLO LE DUE CELLE PTE, PER IL COLLAUDO A MODELLO DURO
+#  (15/08/2026, dopo la promozione di rango di PTE_GBPUSD in R56)
+#
+#  Parametri IDENTICI a CELLE_REGIME.txt: non e' cambiato un carattere.
+#  L'unica cosa che cambia nel lancio e' il MODELLO del tester.
+#
+#  ATTENZIONE ALL'ETICHETTA: qui NON ci sono tick reali. Il feed _EXT
+#  e' fatto di BARRE M1 di HistData: i tick veri del 2018-2024 non li
+#  abbiamo e non li avremo. Il modello 2 GENERA i tick dentro ogni
+#  barra M1 secondo l'algoritmo di MT5. E' un riempimento piu' severo
+#  dell'OHLC - dice se stop e target vengono toccati dentro la barra -
+#  ma va chiamato col suo nome: "tick generati", mai "tick reali".
+# =====================================================================
+PTE_GBPUSD | ABTG_PTE | GBPUSD | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpRiskPercent=1.0
+PTE_USDJPY | ABTG_PTE | USDJPY | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpRiskPercent=1.0
