@@ -1027,7 +1027,13 @@ if ($Auto) {
     Write-Host "Rilancio il ricognitore: ora lo storico c'e', quindi la tabella" -ForegroundColor Cyan
     Write-Host "delle sessioni e l'export H1 hanno dati veri sotto." -ForegroundColor Cyan
     $SetInfo2 = Join-Path $PresetDir "abtg_infobroker.set"
-    (Get-Content $SetInfo2) -replace "^InpSimboloFuso=.*", ("InpSimboloFuso=" + $SimboloFuso) | Set-Content -Path $SetInfo2 -Encoding ASCII
+    # Qui la sonda storica si PUO' riaccendere: dopo il download le serie
+    # sono in locale, quindi SeriesInfoInteger risponde subito e non blocca.
+    # (Bloccava solo perche' doveva chiedere al server dati che non c'erano.)
+    (Get-Content $SetInfo2) `
+      -replace "^InpSimboloFuso=.*",  ("InpSimboloFuso=" + $SimboloFuso) `
+      -replace "^InpSondaStorico=.*", "InpSondaStorico=true" |
+      Set-Content -Path $SetInfo2 -Encoding ASCII
     Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $primoSym "H1" $InfoCsv 20 180 | Out-Null
   }
 } else {
