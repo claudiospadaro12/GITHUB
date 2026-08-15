@@ -194,3 +194,80 @@ copre **l'intero portafoglio indici** con Covid e orso 2022 dentro — e diventa
 la strada principale, non la riserva.
 
 **Nessun parametro degli EA in forward cambia per questi numeri.**
+
+
+---
+---
+
+# 🏆 TERZO GIRO — 15/08/2026 ore 16:45 — **LA MISURA E' CHIUSA**
+
+_Dati grezzi: `backtest_pipeline/risultati_prove/dukascopy_sonda/giro3/`_
+
+## 11. ✅ Controllo positivo: `EURUSD OK, 24.043 byte`. La corsa vale.
+
+## 12. 🎯 GLI OTTO INDICI, CON IL PRIMO ANNO INCHIODATO
+
+| simbolo Dukascopy | che cos'e' | byte (giu 2025) | **primo anno** |
+|---|---|---:|---|
+| **`USA30IDXUSD`** | **Dow Jones 30** | 49.445 | **2012** |
+| **`USATECHIDXUSD`** | **Nasdaq 100** | 95.995 | **2012** |
+| **`USA500IDXUSD`** | **S&P 500** | 29.018 | **2012** |
+| **`DEUIDXEUR`** | **DAX 40** | 17.875 | **2012** |
+| `GBRIDXGBP` | FTSE 100 | 17.583 | **2012** |
+| `FRAIDXEUR` | CAC 40 | 10.011 | **2012** |
+| `EUSIDXEUR` | Euro Stoxx 50 | 1.814 | **2012** |
+| **`JPNIDXJPY`** | **Nikkei 225** | 8.722 | **2013** |
+
+**La fase "stringo" ha fatto il suo lavoro:** il 2011 e' stato sondato e non
+risponde, il 2012 si'. Non e' piu' "fra 2010 e 2012": e' **2012**. Sul Nikkei
+ha inchiodato **2013** (2012 negativo).
+
+## 13. 🔎 E i nomi sono decisi, non intuiti
+
+| tentativo | esito |
+|---|---|
+| `US30IDXUSD` · `USA30USD` · `WS30IDXUSD` | **ASSENTE** (404 veri) |
+| `GERIDXEUR` | **ASSENTE** |
+
+Quindi **`USA30IDXUSD` e' IL nome del Dow** e **`DEUIDXEUR` e' IL nome del
+DAX**, non due candidati fra tanti. Il falso negativo del primo giro e'
+spiegato e chiuso.
+
+⚠️ **Due caselle restano non decise, e lo dico**: `DJIIDXUSD` ha dato
+`ERRORE 0` (rete) e `USA2000IDXUSD` un `503`. Sono una grafia alternativa e
+il controllo di schema: **non ci servono**, ma **non sono state misurate** e
+non vanno contate come assenze.
+
+## 14. 📅 CHE COSA ABBIAMO IN MANO ADESSO
+
+**Otto indici × quattordici anni (2012→2026).** Contro i **21 mesi e un solo
+regime** di BCM.
+
+| regime | anno | coperto |
+|---|---|---|
+| **crollo Covid** | 2020 | ✅ |
+| **orso + inflazione** | 2022 | ✅ |
+| Volmageddon / Q4 storto | 2018 | ✅ |
+| svalutazione yuan | 2015 | ✅ |
+| taper tantrum / Cina | 2013-2016 | ✅ |
+| **crisi 2008** | 2008 | ❌ **non c'e'**, e non ci sara' |
+
+> 🎯 **La FASE 1 del piano di ri-test e' sbloccata sugli indici**, cioe' dove
+> stanno le sedie grosse: Apertura EU, Apertura US, ORB, EMA200, SuperWave.
+
+## 15. ▶️ L'unico ostacolo rimasto: portarli dentro
+
+I `.bi5` sono **LZMA**, e PowerShell 5.1 non lo decomprime. Le tre vie, in
+ordine di costo:
+
+| via | codice nuovo | note |
+|---|---|---|
+| 🥇 **Tool web ufficiale** Dukascopy | **zero** | esporta CSV; `ABTG_ImportaStoricoEsterno` lo legge gia' (`-Formato 1`). Si scarica a pezzi, a mano |
+| 🥈 **TickStory** | zero | gia' citato in due nostri documenti; fa il lavoro e sputa CSV |
+| 🥉 decompressore nostro | **si'** | l'unica che aggiunge codice da verificare |
+
+**Nel frattempo il forex non aspetta**: HistData e' gia' validato (EURUSD/
+GBPUSD 2018-2024, copertura 99,6%, differenza 0,004%) e l'import degli altri
+simboli si puo' lanciare subito.
+
+**Nessun parametro degli EA in forward cambia per questi numeri.**

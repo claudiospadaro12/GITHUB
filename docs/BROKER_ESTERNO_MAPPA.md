@@ -172,6 +172,36 @@
 >    del 10%**: su un test di regime dell'ORB il P&L NON si legge, si legge
 >    solo "sopravvive o no".
 
+> ## 🏆 15/08/2026 ore 16:45 — DUKASCOPY: OTTO INDICI DAL 2012, DOW COMPRESO
+>
+> Terzo giro della sonda, controllo positivo OK (EURUSD 24.043 byte).
+> Referto: `risultati_archivio/REFERTO_SONDA_DUKASCOPY.md`
+>
+> | BCM | Pepperstone | **Dukascopy** | primo anno |
+> |---|---|---|---|
+> | D30EUR | GER40 | **`DEUIDXEUR`** | **2012** |
+> | U30USD | US30 | **`USA30IDXUSD`** | **2012** |
+> | NASUSD | NAS100 | **`USATECHIDXUSD`** | **2012** |
+> | SPXUSD | US500 | **`USA500IDXUSD`** | **2012** |
+> | 225JPY | JPN225 | **`JPNIDXJPY`** | **2013** |
+> | F40EUR | FRA40 | `FRAIDXEUR` | 2012 |
+> | — | UK100 | `GBRIDXGBP` | 2012 |
+> | — | EUSTX50 | `EUSIDXEUR` | 2012 |
+>
+> I nomi sono **decisi, non intuiti**: `US30IDXUSD`, `USA30USD`, `WS30IDXUSD`
+> e `GERIDXEUR` tornano **404 veri**. La fase "stringo" ha sondato il 2011 e
+> non risponde: il primo anno e' **2012**, non un intervallo.
+>
+> **Copre**: crollo Covid 2020, orso 2022, 2018, 2015. **Non copre** il 2008.
+> Contro i 21 mesi e un solo regime di BCM.
+>
+> ⚠️ Restano non misurati `DJIIDXUSD` (errore di rete) e `USA2000IDXUSD`
+> (503): non ci servono, ma non sono assenze.
+>
+> **Ostacolo rimasto**: i `.bi5` sono LZMA e PowerShell 5.1 non li apre. Vie:
+> tool web ufficiale (esporta CSV, zero codice), TickStory, o un
+> decompressore nostro (l'unica che aggiunge codice da verificare).
+
 **Stato: SCHELETRO DA COMPILARE.** Le tabelle qui sotto sono vuote apposta:
 si riempiono con l'elenco VERO prodotto da `ABTG_InfoBroker`, non con nomi
 plausibili. Finche' una riga non ha la data nella colonna "verificato il",
