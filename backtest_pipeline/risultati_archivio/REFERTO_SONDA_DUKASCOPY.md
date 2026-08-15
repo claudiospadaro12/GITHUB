@@ -114,3 +114,83 @@ abbiamo. Le vie possibili:
    li' c'e', e resta l'unica fonte per `US30`.
 
 **Nessun parametro degli EA in forward cambia per questi numeri.**
+
+
+---
+---
+
+# 🎉 SECONDO GIRO — 15/08/2026 ore 16:25 — **IL DOW C'E'**
+
+_Dati grezzi: `backtest_pipeline/risultati_prove/dukascopy_sonda/giro2/`_
+
+## 7. La riga che cambia il quadro
+
+```
+USA30IDXUSD   Dow Jones 30   OK  (49445 byte)
+https://datafeed.dukascopy.com/datafeed/USA30IDXUSD/2025/05/16/15h_ticks.bi5
+```
+
+**[VERIFICATO] `USA30IDXUSD` esiste**, con **49.445 byte** di tick veri per il
+16 giugno 2025 alle 15 UTC.
+
+**Il "non risponde" del primo giro era un falso negativo.** E non e' un caso
+che non ce ne fossimo accorti: al primo giro quel simbolo **non finiva nel
+referto**, quindi non si poteva nemmeno distinguere un 404 da un errore di
+rete. La correzione fatta stamattina — far finire nel referto anche i falliti —
+**ha pagato al primo utilizzo**: stavolta i quattordici fallimenti sono tutti
+scritti, con il loro codice.
+
+## 8. 🔴 Ma la corsa e' da buttare, e lo dice lo script
+
+```
+controllo positivo EURUSD: FALLITO - la corsa non vale
+```
+
+Subito dopo il primo successo, Dukascopy ha risposto **`503 Server non
+disponibile`** a **tutto**: quattordici simboli su quindici, controllo positivo
+compreso. La corsa e' durata **55 secondi** (16:24:39 → 16:25:34).
+
+**Il 503 non e' un "non c'e'": e' un "adesso no".** Un 404 dice che il file non
+esiste; un 503 dice che il server sta rifiutando. E' quasi certamente **rate
+limiting**: il primo giro aveva fatto qualche centinaio di richieste, il
+secondo ne ha aperte altrettante a raffica.
+
+> 🎯 **La regola del controllo positivo ha fatto esattamente il suo mestiere.**
+> Senza EURUSD in fondo alla lista, questo referto sarebbe stato letto come
+> _"Dukascopy non ha piu' nessun indice"_ — un ribaltamento clamoroso e
+> completamente falso.
+
+## 9. 🐛 Due difetti miei, esposti da questa corsa
+
+**1. Nessuna gestione dei codici temporanei.** Un 503 finiva a referto come un
+errore secco, senza un solo tentativo in piu'. **Corretto**: su
+`429 / 500 / 502 / 503 / 504` e sui guasti di rete si **ritenta con attesa
+crescente — 2, 5, 15, 30 secondi** — e solo dopo si dichiara errore. Il 404
+resta immediato, perche' quello e' una risposta vera.
+Aggiunta anche una **pausa di 250 ms** fra le richieste (`-PausaMs`).
+
+**2. Lo script ha continuato dopo il fallimento del controllo.** Ha stampato
+l'avviso... e poi ha fatto tutta la fase 2 su USA30IDXUSD, nove anni di
+richieste, tutte in errore. **Corretto**: il controllo positivo adesso e' la
+**fase 0**, va per primo, e se fallisce **ci si ferma** (si forza solo con
+`-ProsegiuComunque`, esplicito).
+
+> Se il metro non funziona, non si misura niente. Sembra ovvio scritto qui;
+> nel codice non lo era.
+
+## 10. 📊 Dove siamo adesso
+
+| indice | Dukascopy | prima data |
+|---|---|---|
+| DAX (`DEUIDXEUR`) | ✅ | **2012** |
+| Nasdaq (`USATECHIDXUSD`) | ✅ | **2012** |
+| S&P (`USA500IDXUSD`) | ✅ | **2012** |
+| FTSE · CAC · Stoxx | ✅ | **2012** |
+| Nikkei (`JPNIDXJPY`) | ✅ | **2015** |
+| **Dow (`USA30IDXUSD`)** | ✅ **c'e'** | **da misurare** |
+
+**Manca solo la prima data del Dow.** Se anche lui parte dal 2012, Dukascopy
+copre **l'intero portafoglio indici** con Covid e orso 2022 dentro — e diventa
+la strada principale, non la riserva.
+
+**Nessun parametro degli EA in forward cambia per questi numeri.**

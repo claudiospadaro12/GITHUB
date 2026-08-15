@@ -1,0 +1,30 @@
+=== SONDA DUKASCOPY ===
+macchina : DESKTOP-H4D7CAJ
+letto il : 2026-08-15 16:25:34
+ora UTC sondata: 15
+controllo positivo EURUSD: FALLITO - la corsa non vale
+
+USA30IDXUSD      2025  OK         49445     byte  1-esiste?
+US30IDXUSD       2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+USA30USD         2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+DJIIDXUSD        2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+WS30IDXUSD       2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+USA2000IDXUSD    2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+USATECHIDXUSD    2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+USA500IDXUSD     2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+DEUIDXEUR        2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+GERIDXEUR        2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+JPNIDXJPY        2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+EUSIDXEUR        2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+GBRIDXGBP        2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+FRAIDXEUR        2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+EURUSD           2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  1-esiste?
+USA30IDXUSD      2008  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2010  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2012  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2015  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2018  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2020  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2022  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2024  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala
+USA30IDXUSD      2025  ERRORE 503 Errore del server remoto: (503) Server non disponibile. 0         byte  2-scala

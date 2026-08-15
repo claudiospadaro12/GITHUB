@@ -38,7 +38,9 @@
 param(
   [string] $Simboli = "",
   [string] $Anni    = "2008,2010,2012,2015,2018,2020,2022,2024,2025",
-  [int]    $Ora     = 15
+  [int]    $Ora     = 15,
+  [int]    $PausaMs = 250,      # respiro fra una richiesta e l'altra
+  [switch] $ProsegiuComunque    # prosegue anche se il controllo positivo fallisce
 )
 $ErrorActionPreference = "Continue"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -90,21 +92,44 @@ $anniLista = $anniLista | Sort-Object
 
 # --- una domanda sola ------------------------------------------------
 #  Torna un oggetto: Esito = OK / VUOTO / ASSENTE / ERRORE, e i byte.
+#  IL 503 NON E' UN "NON C'E'" (imparato il 15/08/2026, secondo giro).
+#  Dopo la prima richiesta andata a buon fine, Dukascopy ha risposto
+#  "503 Server non disponibile" a TUTTO, controllo positivo compreso:
+#  e' rate limiting, non assenza di dati. Un 404 dice "questo file non
+#  esiste"; un 503 dice "adesso no". Confonderli vorrebbe dire cancellare
+#  simboli veri dal catalogo - lo stesso errore, per la terza volta oggi.
+#  Quindi: sui codici temporanei si RITENTA con attesa crescente, e solo
+#  dopo si dichiara errore.
+$script:AttesePost503 = @(2, 5, 15, 30)   # secondi
+
 function Chiedi([string]$sym, [int]$anno, [int]$mese1, [int]$giorno, [int]$ora) {
   $url = "https://datafeed.dukascopy.com/datafeed/{0}/{1:0000}/{2:00}/{3:00}/{4:00}h_ticks.bi5" -f `
          $sym, $anno, ($mese1 - 1), $giorno, $ora
-  try {
-    $r = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 25 -ErrorAction Stop
-    $n = 0
-    if ($r.Content -ne $null) { $n = $r.Content.Length }
-    if ($n -gt 0) { return @{ Esito="OK"; Byte=$n; Url=$url } }
-    return @{ Esito="VUOTO"; Byte=0; Url=$url }
-  } catch {
-    $cod = 0
-    try { $cod = [int]$_.Exception.Response.StatusCode } catch { }
-    if ($cod -eq 404) { return @{ Esito="ASSENTE"; Byte=0; Url=$url } }
-    return @{ Esito=("ERRORE " + $cod + " " + $_.Exception.Message); Byte=0; Url=$url }
+  $ultimo = ""
+  for ($t = 0; $t -le $script:AttesePost503.Count; $t++) {
+    if ($PausaMs -gt 0) { Start-Sleep -Milliseconds $PausaMs }
+    try {
+      $r = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 25 -ErrorAction Stop
+      $n = 0
+      if ($r.Content -ne $null) { $n = $r.Content.Length }
+      if ($n -gt 0) { return @{ Esito="OK"; Byte=$n; Url=$url } }
+      return @{ Esito="VUOTO"; Byte=0; Url=$url }
+    } catch {
+      $cod = 0
+      try { $cod = [int]$_.Exception.Response.StatusCode } catch { }
+      if ($cod -eq 404) { return @{ Esito="ASSENTE"; Byte=0; Url=$url } }
+      $ultimo = ("ERRORE " + $cod + " " + $_.Exception.Message)
+      # 429/500/502/503/504 e i guasti di rete (cod 0) sono TEMPORANEI
+      $temporaneo = ($cod -eq 0 -or $cod -eq 429 -or ($cod -ge 500 -and $cod -le 504))
+      if (-not $temporaneo) { return @{ Esito=$ultimo; Byte=0; Url=$url } }
+      if ($t -lt $script:AttesePost503.Count) {
+        $att = $script:AttesePost503[$t]
+        Write-Host ("       ({0}: il server dice {1}, riprovo fra {2} s)" -f $sym, $cod, $att) -ForegroundColor DarkYellow
+        Start-Sleep -Seconds $att
+      }
+    }
   }
+  return @{ Esito=$ultimo; Byte=0; Url=$url }
 }
 
 # Un giorno solo non basta: puo' essere festivo. Si provano tre giorni
@@ -123,11 +148,43 @@ function ChiediAnno([string]$sym, [int]$anno, [int]$ora) {
 }
 
 # --- 1. il simbolo esiste? (data recente) ----------------------------
-Riga "1) quali di questi nomi esistono davvero (sonda su giugno dell'anno piu' recente)" "Yellow"
 $annoRecente = ($anniLista | Select-Object -Last 1)
 $vivi  = New-Object System.Collections.ArrayList
 $righe = New-Object System.Collections.ArrayList
+
+# --- 0. IL CONTROLLO POSITIVO VA PER PRIMO ---------------------------
+#  Il 15/08 (secondo giro) era in fondo alla lista: quando ha fallito,
+#  lo script aveva gia' sprecato tutte le altre richieste E ha continuato
+#  lo stesso con la fase 2, producendo un referto di soli errori.
+#  Se il metro non funziona, non si misura niente.
+Riga "0) controllo positivo (EURUSD): se non risponde lui, non si misura niente" "Yellow"
+$rc = ChiediAnno "EURUSD" $annoRecente $Ora
+[void]$righe.Add([pscustomobject]@{
+  Simbolo="EURUSD"; Che="<<< CONTROLLO POSITIVO >>>"; Anno=$annoRecente;
+  Esito=$rc.Esito; Byte=$rc.Byte; Url=$rc.Url; Fase="0-controllo"
+})
+$ctrlOk = ($rc.Esito -eq "OK")
+if ($ctrlOk) {
+  Riga ("   EURUSD risponde: {0} byte. Si puo' misurare." -f $rc.Byte) "Green"
+} else {
+  Riga ("   EURUSD NON risponde: {0}" -f $rc.Esito) "Red"
+  Riga ""
+  Riga "!!! IL CONTROLLO POSITIVO E' FALLITO. MI FERMO QUI." "Red"
+  Riga "    NON e' Dukascopy che non ha i dati: e' la connessione, o il" "Red"
+  Riga "    server che sta rifiutando le richieste (503 = rate limiting)." "Red"
+  Riga "    Continuare produrrebbe solo un referto di errori scambiabili" "Red"
+  Riga "    per assenze. Aspetta qualche minuto e rilancia." "Yellow"
+  Riga "    (Per forzare comunque: -ProsegiuComunque)" "DarkGray"
+}
+
+Riga ""
+Riga "1) quali di questi nomi esistono davvero (sonda su giugno dell'anno piu' recente)" "Yellow"
+if (-not $ctrlOk -and -not $ProsegiuComunque) {
+  Riga "   saltata: il controllo positivo e' fallito." "DarkGray"
+  $candidati = @()
+}
 foreach ($c in $candidati) {
+  if ($c.N -eq "EURUSD") { continue }
   $r = ChiediAnno $c.N $annoRecente $Ora
   $col = if ($r.Esito -eq "OK") { "Green" } elseif ($r.Esito -like "ERRORE*") { "Red" } else { "DarkGray" }
   Riga ("   {0,-16} {1,-28} {2}  ({3} byte)" -f $c.N, $c.Che, $r.Esito, $r.Byte) $col
@@ -140,17 +197,7 @@ foreach ($c in $candidati) {
   if ($r.Esito -eq "OK") { [void]$vivi.Add($c) }
 }
 
-$ctrl = @($candidati | Where-Object { $_.N -eq "EURUSD" })
-$ctrlOk = @($vivi | Where-Object { $_.N -eq "EURUSD" }).Count -gt 0
 Riga ""
-if (-not $ctrlOk) {
-  Riga "!!! IL CONTROLLO POSITIVO E' FALLITO: nemmeno EURUSD risponde." "Red"
-  Riga "    Quindi NON e' Dukascopy che non ha i dati: e' la connessione." "Red"
-  Riga "    Nessun 'ASSENTE' di questa corsa vale niente. Controlla rete/proxy" "Red"
-  Riga "    e rilancia. (Se sei dietro un proxy aziendale, provalo da casa.)" "Red"
-  Riga ""
-}
-
 # --- 2. fin dove indietro? -------------------------------------------
 Riga "2) per i simboli vivi: fin dove arriva lo storico" "Yellow"
 foreach ($c in $vivi) {
