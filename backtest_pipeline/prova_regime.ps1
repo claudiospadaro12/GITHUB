@@ -46,11 +46,23 @@ $EABranch = "lavoro"
 $RawBase  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 
 # --- LE QUATTRO FINESTRE (fissate nei criteri, non si toccano qui) ---
+#  EMENDAMENTO 2 del 15/08/2026 (PROVA_REGIME_CRITERI.md, E.6): la finestra
+#  CROLLO da tre mesi non accumula abbastanza operazioni per giudicare il
+#  MERITO - su 14 celle, sette ne facevano meno di otto. Ma allungarla
+#  diluirebbe lo shock, che e' proprio cio' che vogliamo misurare. Quindi si
+#  sdoppia, coerentemente con la valvola E.3:
+#    CROLLO      -> il RISCHIO (drawdown, peggior giornata): valgono a
+#                   QUALUNQUE numero di operazioni, perche' sono fatti
+#                   accaduti e non stime
+#    CROLLO_ANNO -> il MERITO (PF, profitto): abbastanza operazioni per
+#                   contarli
+#  Le altre tre finestre NON si toccano.
 $Finestre = @(
-  @{ nome="ORSO";     da="2022.01.01"; a="2022.10.31" },
-  @{ nome="CROLLO";   da="2020.02.01"; a="2020.04.30" },
-  @{ nome="TORO";     da="2021.01.01"; a="2021.12.31" },
-  @{ nome="LATERALE"; da="2019.01.01"; a="2019.12.31" }
+  @{ nome="ORSO";        da="2022.01.01"; a="2022.10.31" },
+  @{ nome="CROLLO";      da="2020.02.01"; a="2020.04.30" },
+  @{ nome="CROLLO_ANNO"; da="2020.01.01"; a="2020.12.31" },
+  @{ nome="TORO";        da="2021.01.01"; a="2021.12.31" },
+  @{ nome="LATERALE";    da="2019.01.01"; a="2019.12.31" }
 )
 
 function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exit 1 }
