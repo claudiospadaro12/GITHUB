@@ -58,6 +58,46 @@
 > intestazione (0 barre), perche' `InpSimboloFuso` era vuoto ed e' finito su
 > AUDUSD, che quei mesi in locale non li aveva.
 
+> ## 🎉 15/08/2026 ore 15:11 — GLI INDICI CI SONO: il Dow su Pepperstone e' `US30`
+>
+> Secondo giro, con `-SoloMarketWatch`. **[VERIFICATO]**
+>
+> | | BCM | Pepperstone |
+> |---|---|---|
+> | Dow | `U30USD` | **`US30`** — "US Wall Street 30 Index", digits 1, point 0,1, contract 1,00, spread 20 pt |
+>
+> Da qui si intuisce la famiglia (DAX `GER40`/`DE40`, Nasdaq `NAS100`/`US100`),
+> ma **restano da LEGGERE, non da indovinare**: la regola della mappa non cambia.
+>
+> **[VERIFICATO] Il DST: `SERVER ALLINEATO AL DST DEL MERCATO`** — apertura
+> 00:00 su **17 date campione** da apr 2024 a lug 2026. L'allarme del primo
+> giro era un artefatto da 5 minuti. Limite onesto: misurato su **EURUSD**,
+> cioe' un cambio, che apre 00:00 ovunque. La misura vera va fatta su `US30`.
+>
+> **[VERIFICATO] Le prime date dei cambi: 2023.01.02** — EURUSD, GBPUSD e
+> USDJPY danno lo stesso numero in **due corse** a 12 minuti di distanza
+> (22.524 barre H1, 939 D1). Invece USDCAD (1993.04.28 -> 2026.07.29) e AUDUSD
+> (2026.01.02 -> 2025.07.17) **cambiano fra le due corse**: quelle erano
+> spazzatura, e la riserva del primo giro era giustificata.
+> ⚠️ **La prima data di `US30` non e' ancora stata misurata**, ed e' quella che
+> decide se la prova di regime su Pepperstone si puo' fare.
+>
+> **Anche il secondo giro e' stato tagliato: 7 simboli su 120.** Sei cambi in
+> **0,15 secondi**, poi **312,9 secondi** fermo su US30. La causa non era la
+> soglia del driver: dentro uno **script** MQL5 `CopyRates` su una serie non
+> sincronizzata **blocca**. Corretto togliendola dalla scansione
+> (`InpNonBloccare=true`, letture con `SeriesInfoInteger`, SECONDO GIRO per le
+> date mancanti, tetto interno `InpMaxSecScansione=600`, nuovo stato
+> **`da svegliare`** al posto di `NESSUN DATO`).
+>
+> **`da svegliare` non vuol dire "il broker non ce l'ha".** Confondere le due
+> cose avrebbe cancellato US30 dal catalogo.
+>
+> **Terzo difetto**: l'export H1 e' uscito vuoto **due volte su due** perche'
+> `EsportaH1` aveva `!IsStopped()` nell'intestazione del ciclo — a terminale in
+> chiusura il primo `CopyRates` non partiva **nemmeno una volta**, mentre
+> EURUSD aveva 22.524 barre in cache. Corretto: il primo tentativo si fa sempre.
+
 **Stato: SCHELETRO DA COMPILARE.** Le tabelle qui sotto sono vuote apposta:
 si riempiono con l'elenco VERO prodotto da `ABTG_InfoBroker`, non con nomi
 plausibili. Finche' una riga non ha la data nella colonna "verificato il",

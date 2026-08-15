@@ -742,6 +742,8 @@ $SetInfo = Join-Path $PresetDir "abtg_infobroker.set"
 @"
 InpFiltro=$Filtro
 InpSoloMarketWatch=$mwStr
+InpNonBloccare=true
+InpMaxSecScansione=600
 InpTF=$tfInfo
 InpSimboloFuso=$SimboloFuso
 InpTFSessione=5
@@ -871,11 +873,12 @@ Period=$periodo
     # --- HA FINITO DAVVERO? -------------------------------------------
     #  Il segnale buono e' la riga di chiusura che lo script MQL5 stampa
     #  da solo ("=== FINITO:"). Il silenzio NON e' un segnale: il
-    #  15/08/2026 la ricognizione Pepperstone si e' fermata a 9 simboli
-    #  su 1722 perche' AUDCHF, che non ha dati, ha tenuto lo script
-    #  fermo 69,5 secondi -> la vecchia soglia di 60 s ha creduto che
-    #  avesse finito e ha chiuso MT5 a meta' scansione. Adesso il
-    #  silenzio deve durare molto di piu' della pausa piu' lunga vista.
+    #  15/08/2026 la ricognizione Pepperstone si e' fermata DUE VOLTE
+    #  per questo motivo: a 9 simboli su 1722 (AUDCHF fermo 69,5 s) e
+    #  poi a 7 su 120 (US30 fermo 312,9 s). Alzare la soglia non basta:
+    #  la causa vera era CopyRates che dentro uno script BLOCCA, ed e'
+    #  stata tolta dalla scansione (InpNonBloccare). Qui la soglia resta
+    #  solo come rete, e sta sopra al tetto interno dello script.
     $coda2 = Coda-Log $lenPrima
     if ($coda2 -match "=== FINITO") {
       Write-Host "  lo script ha stampato la sua riga di chiusura: ha finito." -ForegroundColor Green
@@ -889,8 +892,8 @@ Period=$periodo
     try { $len = (Get-Item $fileAtteso -ErrorAction Stop).Length } catch { continue }
     if ($len -eq $ultimaLen) {
       $fermoDa += 15
-      if ($fermoDa -ge 300) {            # 5 minuti di silenzio, non 1
-        Write-Host "  fermo da 5 minuti senza riga di chiusura: mi fermo qui." -ForegroundColor Yellow
+      if ($fermoDa -ge 900) {            # 15 minuti: piu' del tetto interno
+        Write-Host "  fermo da 15 minuti senza riga di chiusura: mi fermo qui." -ForegroundColor Yellow
         Write-Host "  ATTENZIONE: il referto potrebbe essere INCOMPLETO." -ForegroundColor Yellow
         break
       }
@@ -964,7 +967,7 @@ if ($SoloElenco) {
         (Get-Content $SetInfo) -replace '^InpSimboloFuso=.*', ("InpSimboloFuso=" + $sym) |
           Set-Content -Path $SetInfo -Encoding ASCII
       }
-      $ok = Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $sym "H1" $InfoCsv 20 90
+      $ok = Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $sym "H1" $InfoCsv 30 90
       if ($ok) { $SimboloGrafico = $sym; break }
       if (-not $script:UltimoAvvioFallito) { break }   # partito ma finito male: inutile cambiare simbolo
       Write-Host ("  provo il nome successivo...") -ForegroundColor DarkGray

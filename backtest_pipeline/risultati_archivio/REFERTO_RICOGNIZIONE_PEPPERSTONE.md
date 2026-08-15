@@ -195,3 +195,137 @@ lancia lo stesso ricognitore **su BCM**, che e' il termine di paragone senza
 il quale nessuna rimappatura di orari e' verificata.
 
 **Nessun parametro degli EA in forward cambia per questi numeri.**
+
+
+---
+---
+
+# 🛰️ SECONDO GIRO — 15/08/2026 ore 15:11 (`-SoloMarketWatch`)
+
+_Dati grezzi: `backtest_pipeline/risultati_prove/pepperstone_ricognizione/giro2/`_
+
+## 7. 🎉 IL RISULTATO CHE CERCAVAMO: gli indici ci sono
+
+```
+US30   1   0.10000000   1.00   -   -   NESSUN DATO | US Wall Street 30 Index
+```
+
+**[VERIFICATO] Pepperstone ha gli indici, e li chiama alla maniera corta.**
+Il Dow su questo broker si chiama **`US30`**, non `U30USD` come su BCM.
+
+| campo | valore |
+|---|---|
+| Simbolo | **US30** |
+| Descrizione | US Wall Street 30 Index |
+| Digits | **1** |
+| Point | **0,1** |
+| Contract size | **1,00** |
+| Spread | **20 punti** (= 2,0 punti indice) |
+
+> ⚠️ Il `NESSUN DATO` **non vuol dire che il broker non abbia lo storico**:
+> vuol dire che sul disco non c'era niente e il server non ha fatto in tempo
+> a rispondere. Vedi il §8: e' esattamente il simbolo su cui la corsa si e'
+> impiccata.
+>
+> 📐 Da qui si ricava anche la **famiglia dei nomi**: se il Dow e' `US30`, il
+> DAX sara' `GER40`/`DE40` e il Nasdaq `NAS100`/`US100`. **Ma restano da
+> LEGGERE, non da indovinare** — la regola della mappa non cambia.
+
+## 8. La corsa si e' fermata di nuovo: **7 su 120**
+
+E stavolta la colpa non e' della soglia: e' di `CopyRates`.
+
+| ora | evento |
+|---|---|
+| 15:05:48,111 | parte su EURUSD, `solo Market Watch` ✅ (`-SoloMarketWatch` ha funzionato) |
+| 15:05:48,120 → 15:05:48,263 | **6 simboli forex in 0,15 secondi** |
+| 15:05:48,263 → **15:11:01,125** | 🧱 **312,9 secondi** — cinque minuti e tredici secondi — su **US30** |
+| 15:11:01,320 | chiusura, `FINITO: 7 simboli esaminati su 120` |
+
+Sei cambi in **un settimo di secondo**, un indice in **cinque minuti**.
+
+**La causa vera, e non e' la pazienza del driver:** dentro uno **script** MQL5,
+`CopyRates` su una serie non sincronizzata **non torna: aspetta**. Alzare la
+soglia da 60 a 300 secondi ha solo spostato il punto di rottura di un simbolo.
+Con 120 simboli a quel ritmo servirebbero **dieci ore**, e la maggior parte
+sarebbero indici — cioe' proprio quelli che ci servono.
+
+### Correzione: `CopyRates` esce dalla scansione
+
+1. **`InpNonBloccare=true`** (nuovo, di default): la scansione legge solo
+   `SeriesInfoInteger`, che **non blocca** e torna 0 se il dato non e' ancora
+   arrivato. La richiesta al server parte lo stesso.
+2. **SECONDO GIRO**: alla fine della scansione lo script rilegge le date che
+   mancavano, sempre senza bloccare, e **il CSV si scrive solo dopo** — cosi'
+   nel referto non resta congelato un "non ha risposto" che tre secondi dopo
+   era gia' una data vera.
+3. **`InpMaxSecScansione=600`**: tetto di tempo interno. Se scatta, lo script
+   lo dichiara: `ELENCO PARZIALE ... NON usarlo per dire che un simbolo non esiste`.
+4. Nuovo stato **`da svegliare`** al posto di `NESSUN DATO` quando il server
+   semplicemente non ha ancora risposto. **Confondere le due cose vuol dire
+   cancellare dal catalogo simboli che esistono** — ed e' quello che US30
+   stava per farci fare.
+
+## 9. ✅ Il DST: verdetto ribaltato (e adesso e' quello giusto)
+
+```
+apertura tipica in ORA SOLARE (gen/nov) : 00:00
+apertura tipica in ORA LEGALE (apr/lug) : 00:00
+-> SERVER ALLINEATO AL DST DEL MERCATO
+```
+
+Su **17 date campione** da aprile 2024 a luglio 2026, sempre 00:00. L'allarme
+del primo giro era, come scritto, **un artefatto da 5 minuti**.
+
+> Resta valido l'unico limite che conta: **e' misurato su EURUSD, un cambio.**
+> Un cambio gira 24 ore e apre a 00:00 su qualunque server: non prova niente
+> sugli indici. La misura vera si fa su **US30**, appena avra' i dati.
+
+## 10. 🔍 Le prime date: la prova che la mia riserva era giusta
+
+Confronto fra le due corse dello stesso giorno, stesso broker, a 12 minuti di distanza:
+
+| simbolo | 1o giro (14:53) | 2o giro (15:05) | |
+|---|---|---|---|
+| EURUSD | 2023.01.02 | **2023.01.02** | ✅ identica |
+| GBPUSD | 2023.01.02 | **2023.01.02** | ✅ identica |
+| USDJPY | 2023.01.02 | **2023.01.02** | ✅ identica |
+| USDCAD | 1993.04.28 | **2026.07.29** | ❌ **cambiata** |
+| AUDUSD | 2026.01.02 | **2025.07.17** | ❌ **cambiata** |
+
+**Il 2023.01.02 e' solido**: tre simboli, due corse, 22.524 barre H1 e 939 D1
+identiche. **Le altre due date erano spazzatura**, come sospettato: la stessa
+misura, sullo stesso simbolo, a 12 minuti di distanza, da' numeri diversi.
+
+Quindi, per i **cambi**, Pepperstone dichiara il **2023**. Ma la prova di
+regime serve **sugli indici**, e su `US30` la prima data **non e' stata
+misurata**: e' proprio quella che manca. 🎯 **Il filone non si chiude ne' si
+apre finche' non si legge la prima data di US30.**
+
+## 11. 🐛 Terzo difetto trovato: l'export H1 vuoto (2 volte su 2)
+
+`ABTG_InfoBroker_H1_pepperstone.csv` esce con la sola intestazione anche al
+secondo giro, e stavolta il motivo si vede: `EsportaH1` aveva
+`!IsStopped()` **nell'intestazione del ciclo**. Con il terminale gia' in
+chiusura, il corpo non veniva eseguito **nemmeno una volta** e il verdetto
+usciva `NESSUNA BARRA H1` — mentre EURUSD aveva **22.524 barre dal
+2023.01.02**, e le sessioni M5 di gennaio e luglio 2025 nello stesso referto
+mostrano **288 barre a testa**. Le barre c'erano tutte.
+
+**Corretto**: adesso il primo `CopyRates` si esegue sempre, e `IsStopped()`
+ferma solo i tentativi successivi.
+
+## 12. ▶️ Terzo giro
+
+Con `CopyRates` fuori dalla scansione, i 120 del Market Watch devono uscire in
+**secondi**. Cosa guardare in console:
+
+- `FINITO: 120 simboli esaminati su 120` (o comunque **molto** piu' di 7)
+- l'elenco degli **indici** con i loro nomi veri
+- l'export H1 **non piu' a zero barre**
+
+Poi, con i nomi in mano: prima data di `US30`, DST misurato **su un indice**,
+e il ricognitore **su BCM** — senza il quale nessuna rimappatura di orari e'
+verificata.
+
+**Nessun parametro degli EA in forward cambia per questi numeri.**

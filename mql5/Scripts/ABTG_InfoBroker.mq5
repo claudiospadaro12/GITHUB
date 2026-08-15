@@ -70,6 +70,8 @@ input string          InpSimboloFuso     = "";        // simbolo per fuso/sessio
 input ENUM_TIMEFRAMES InpTFSessione      = PERIOD_M5; // TF con cui si cerca la prima barra della giornata
 input int             InpAnniSessione    = 3;         // quanti anni indietro nella tabella per stagione
 input string          InpDateCampione    = "01.15,03.20,04.15,07.15,10.15,10.28,11.20"; // mese.giorno: 03.20 e 10.28 sono le settimane di DISALLINEAMENTO USA/EU
+input bool            InpNonBloccare     = true;      // true = NON chiamare CopyRates nella scansione (vedi nota sotto)
+input int             InpMaxSecScansione = 600;       // tetto di tempo per la scansione dei simboli (0 = nessuno)
 input bool            InpEsportaH1       = true;      // esporta le chiusure H1 per il confronto fra broker
 input string          InpFinestraSolare  = "2025.01.06-2025.01.31"; // finestra in ORA SOLARE (dentro lo storico BCM: dal 26/09/2024)
 input string          InpFinestraLegale  = "2025.07.01-2025.07.31"; // finestra in ORA LEGALE
@@ -142,14 +144,41 @@ int MinutiDiBarra(datetime t)
 //+------------------------------------------------------------------+
 void MisuraSerie(string sym, ENUM_TIMEFRAMES tf, long &barre, datetime &primaLoc, datetime &primaSrv)
   {
-   MqlRates r[];
-   CopyRates(sym, tf, 0, 2, r);
+   // ATTENZIONE (15/08/2026) - PERCHE' QUI NON SI CHIAMA CopyRates.
+   //  Dentro uno SCRIPT, CopyRates su una serie non sincronizzata NON
+   //  torna subito: ASPETTA. Il 15/08, a mercato chiuso, e' costata
+   //   - 69,5 secondi su AUDCHF  (1a ricognizione, tagliata a 9/1722)
+   //   - 312,9 secondi su US30   (2a ricognizione, tagliata a 7/120)
+   //  cioe' oltre 5 minuti per UN simbolo. Con 120 simboli sarebbero
+   //  dieci ore, e non e' un problema di pazienza del driver: e' che
+   //  la scansione bloccante non e' praticabile.
+   //  SeriesInfoInteger invece NON blocca: torna 0 se il dato non c'e'
+   //  ancora, e la richiesta al server parte lo stesso. Le date che
+   //  mancano si rileggono nel secondo giro, alla fine della scansione.
+   //  Con InpNonBloccare=false si torna al vecchio comportamento (utile
+   //  solo su pochi simboli, con -Filtro stretto e mercato aperto).
    primaSrv = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
-   for(int k=0; k<ABTG_ATTESA_GIRI && primaSrv<=0 && !IsStopped(); k++)
+   if(primaSrv <= 0)
      {
-      Sleep(250);
-      CopyRates(sym, tf, 0, 2, r);
-      primaSrv = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
+      if(InpNonBloccare)
+        {
+         // una sveglia sola, senza bloccare: se il server risponde in
+         // fretta bene, altrimenti si riprova nel secondo giro
+         Sleep(50);
+         primaSrv = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
+        }
+      else
+        {
+         MqlRates r[];
+         CopyRates(sym, tf, 0, 2, r);
+         primaSrv = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
+         for(int k=0; k<ABTG_ATTESA_GIRI && primaSrv<=0 && !IsStopped(); k++)
+           {
+            Sleep(250);
+            CopyRates(sym, tf, 0, 2, r);
+            primaSrv = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
+           }
+        }
      }
    primaLoc = (datetime)SeriesInfoInteger(sym, tf, SERIES_FIRSTDATE);
    barre    = SeriesInfoInteger(sym, tf, SERIES_BARS_COUNT);
@@ -165,7 +194,10 @@ string DataOTrattino(datetime t){ return (t>0 ? TimeToString(t, TIME_DATE) : "-"
 //+------------------------------------------------------------------+
 string Verdetto(long barre, datetime primaLoc, datetime primaSrv)
   {
-   if(primaSrv <= 0 && barre <= 0) return "NESSUN DATO";
+   // con InpNonBloccare non si puo' dire "NESSUN DATO": si puo' solo
+   // dire che il server non ha ancora risposto. Confondere le due cose
+   // vorrebbe dire cancellare dal catalogo simboli che esistono.
+   if(primaSrv <= 0 && barre <= 0) return (InpNonBloccare ? "da svegliare (server non ha ancora risposto)" : "NESSUN DATO");
    if(barre <= 0)                  return "da scaricare";
    if(primaSrv <= 0)               return "server non risponde";
    if(primaLoc <= 0)               return "da scaricare";
@@ -208,10 +240,18 @@ int EsportaH1(int fh2, string sym, string nomeFinestra, string finestra)
      }
    MqlRates r[];
    int got = -1;
-   for(int tent=0; tent<60 && !IsStopped(); tent++)
+   // ALMENO UN TENTATIVO, SEMPRE (15/08/2026). Prima la condizione
+   // !IsStopped() stava nell'intestazione del ciclo: se il terminale era
+   // gia' in chiusura, il corpo non veniva eseguito NEMMENO UNA VOLTA e
+   // usciva "NESSUNA BARRA H1" anche quando le barre c'erano tutte in
+   // cache. E' successo in entrambe le ricognizioni Pepperstone del
+   // 15/08: EURUSD aveva 22.524 barre H1 dal 2023.01.02, e il file e'
+   // uscito con la sola intestazione.
+   for(int tent=0; tent<60; tent++)
      {
       got = CopyRates(sym, PERIOD_H1, da, a, r);
       if(got > 0) break;
+      if(IsStopped()) break;
       Sleep(250);
      }
    if(got <= 0)
@@ -445,8 +485,37 @@ void OnStart()
 
    int    esaminati = 0;
    string primoSym  = "";
+   //  Il CSV NON si scrive dentro il ciclo: le righe si mettono da parte e
+   //  si scrivono DOPO il secondo giro, con le date aggiornate. Scriverle
+   //  subito vorrebbe dire congelare nel referto dei "non ha risposto" che
+   //  tre secondi dopo sono diventati date vere.
+   int     cap = (tot > 0 ? tot : 1);
+   string  bSym[],  bDesc[], bStato[];
+   int     bDig[],  bSpread[];
+   double  bPoint[], bCsize[], bTval[], bTsize[];
+   long    bBarTF[], bBarD1[];
+   datetime bSrvTF[], bLocTF[], bSrvD1[];
+   ArrayResize(bSym,cap);   ArrayResize(bDesc,cap);  ArrayResize(bStato,cap);
+   ArrayResize(bDig,cap);   ArrayResize(bSpread,cap);
+   ArrayResize(bPoint,cap); ArrayResize(bCsize,cap); ArrayResize(bTval,cap); ArrayResize(bTsize,cap);
+   ArrayResize(bBarTF,cap); ArrayResize(bBarD1,cap);
+   ArrayResize(bSrvTF,cap); ArrayResize(bLocTF,cap); ArrayResize(bSrvD1,cap);
+   int     nBuf = 0;
+   uint    tScan0   = GetTickCount();
+   bool    tagliato = false;
    for(int i=0; i<tot && !IsStopped(); i++)
      {
+      // TETTO DI TEMPO: meglio un elenco dichiaratamente parziale che una
+      // corsa infinita che poi qualcuno spegne credendo sia finita.
+      if(InpMaxSecScansione > 0 &&
+         (int)((GetTickCount() - tScan0) / 1000) >= InpMaxSecScansione)
+        {
+         tagliato = true;
+         PrintFormat("!!! SCANSIONE FERMATA DAL TETTO DI TEMPO (%d s) a %d simboli su %d.",
+                     InpMaxSecScansione, esaminati, tot);
+         Print("    L'elenco qui sotto e' PARZIALE e va dichiarato tale.");
+         break;
+        }
       string sym = SymbolName(i, mw);
       if(StringLen(sym) == 0) continue;
 
@@ -490,13 +559,62 @@ void OnStart()
                   sym, digits, DoubleToString(point, 8), DoubleToString(csize, 2),
                   DataOTrattino(srvTF), DataOTrattino(srvD1), stato, desc);
 
-      if(fh != INVALID_HANDLE)
-         FileWrite(fh, sym, desc, (string)digits,
-                   DoubleToString(point, 8), DoubleToString(csize, 2),
-                   DoubleToString(tval, 5),  DoubleToString(tsize, 8),
-                   (string)spread, tfn, (string)barTF, DataOTrattino(srvTF),
-                   (string)barD1, DataOTrattino(srvD1), stato);
+      if(nBuf < cap)
+        {
+         bSym[nBuf]=sym;      bDesc[nBuf]=desc;    bStato[nBuf]=stato;
+         bDig[nBuf]=digits;   bSpread[nBuf]=(int)spread;
+         bPoint[nBuf]=point;  bCsize[nBuf]=csize;  bTval[nBuf]=tval;  bTsize[nBuf]=tsize;
+         bBarTF[nBuf]=barTF;  bBarD1[nBuf]=barD1;
+         bSrvTF[nBuf]=srvTF;  bLocTF[nBuf]=locTF;  bSrvD1[nBuf]=srvD1;
+         nBuf++;
+        }
      }
+
+   //================================================================
+   // SECONDO GIRO: le date che al primo passaggio non erano ancora
+   // arrivate. La richiesta al server e' partita durante la scansione;
+   // qui le si rilegge, sempre senza bloccare.
+   //================================================================
+   int corrette = 0, restano = 0;
+   if(InpNonBloccare && nBuf > 0 && !IsStopped())
+     {
+      Print("--- SECONDO GIRO: rileggo le date che non erano ancora arrivate ---");
+      Sleep(3000);
+      for(int j=0; j<nBuf && !IsStopped(); j++)
+        {
+         if(bSrvTF[j] > 0) continue;
+         datetime s2 = (datetime)SeriesInfoInteger(bSym[j], InpTF,     SERIES_SERVER_FIRSTDATE);
+         datetime d2 = (datetime)SeriesInfoInteger(bSym[j], PERIOD_D1, SERIES_SERVER_FIRSTDATE);
+         if(s2 > 0)
+           {
+            bSrvTF[j]  = s2;
+            if(d2 > 0) bSrvD1[j] = d2;
+            bBarTF[j]  = SeriesInfoInteger(bSym[j], InpTF,     SERIES_BARS_COUNT);
+            bBarD1[j]  = SeriesInfoInteger(bSym[j], PERIOD_D1, SERIES_BARS_COUNT);
+            bLocTF[j]  = (datetime)SeriesInfoInteger(bSym[j], InpTF, SERIES_FIRSTDATE);
+            bStato[j]  = Verdetto(bBarTF[j], bLocTF[j], bSrvTF[j]);
+            corrette++;
+            PrintFormat("    %-16s -> %s  (%s)", bSym[j], DataOTrattino(s2), bStato[j]);
+           }
+         else restano++;
+        }
+      PrintFormat("    date recuperate: %d   ancora senza risposta: %d", corrette, restano);
+      if(restano > 0)
+        {
+         Print("    ATTENZIONE: 'da svegliare' NON vuol dire che il simbolo non esiste.");
+         Print("    A mercato chiuso il server puo' non rispondere: la prima data si");
+         Print("    rimisura a mercato aperto, o con -Filtro su pochi simboli.");
+        }
+     }
+
+   // --- adesso, e solo adesso, il CSV ---
+   if(fh != INVALID_HANDLE)
+      for(int j=0; j<nBuf; j++)
+         FileWrite(fh, bSym[j], bDesc[j], (string)bDig[j],
+                   DoubleToString(bPoint[j], 8), DoubleToString(bCsize[j], 2),
+                   DoubleToString(bTval[j], 5),  DoubleToString(bTsize[j], 8),
+                   (string)bSpread[j], tfn, (string)bBarTF[j], DataOTrattino(bSrvTF[j]),
+                   (string)bBarD1[j], DataOTrattino(bSrvD1[j]), bStato[j]);
 
    //================================================================
    // SEZIONE 3: LE SESSIONI PER STAGIONE (il DST del server, sui dati)
@@ -614,6 +732,9 @@ void OnStart()
         }
      }
 
+   if(tagliato)
+      PrintFormat("=== ELENCO PARZIALE: fermato dal tetto di %d s. NON usarlo per dire che un simbolo non esiste. ===",
+                  InpMaxSecScansione);
    PrintFormat("=== FINITO: %d simboli esaminati su %d. Referto in MQL5\\Files\\%s ===",
                esaminati, tot, ABTG_INFO_FILE);
    Print("  Le colonne PrimaData sono quelle che il BROKER dichiara di avere:");
