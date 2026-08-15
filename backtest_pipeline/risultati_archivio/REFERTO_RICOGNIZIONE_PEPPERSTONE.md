@@ -487,3 +487,89 @@ resta `SERVER ALLINEATO AL DST DEL MERCATO`.
 3. **Spread a mercato aperto**, per sapere se l'ORB e' testabile.
 
 **Nessun parametro degli EA in forward cambia per questi numeri.**
+
+
+---
+---
+
+# 🚫 QUINTO GIRO — 15/08/2026 ore 16:23 — **IL DOWNLOAD A MERCATO CHIUSO NON SI PUO' FARE**
+
+_Dati grezzi: `.../pepperstone_ricognizione/giro5_download/`_
+
+## 22. Il risultato, in una riga
+
+```
+=== DOWNLOAD STORICO: 5 simboli x 1 TF, da 2015.01.01 ===   15:53:16
+[1/5] GER40   D1 : NESSUN DATO (timeout)                    16:08:29
+```
+
+**913 secondi per il primo simbolo. Zero barre. Gli altri quattro non sono
+nemmeno partiti.** `ABTG_StoricoScaricato_pepperstone.csv` contiene una riga
+sola:
+
+```
+GER40,D1,-1,-,-,NESSUN DATO
+```
+
+## 23. 🎯 Ma NON e' un problema degli indici — ed e' il punto
+
+Nella stessa corsa, la ricognizione successiva si e' impiccata **altri 913
+secondi** su **`AUDCHF`**, che e' un **cambio**. E le 18 date campione delle
+sessioni su GER40 sono **tutte** "da scaricare / nessun dato".
+
+**La lettura corretta e' quella semplice: a mercato chiuso questo server non
+serve storia che non sia gia' in cache locale.** I simboli che hanno risposto
+subito (EURUSD, GBPUSD, USDJPY...) sono quelli che i dati ce li avevano gia'
+sul disco. Non e' il DAX che manca: e' **sabato**.
+
+> ⚠️ Quindi **la prima data di GER40 e US30 resta IGNOTA.** Questa corsa non
+> l'ha misurata, e non ha nemmeno dimostrato che non ci sia.
+
+## 24. 🙋 Due errori miei, scritti qui perche' non si ripetano
+
+**1. Ho dato la riga di sabato.** Avevo scritto io stesso "possibilmente a
+mercato aperto" — come una parentesi, non come una condizione. Non era una
+parentesi: era **la** condizione. Costo: mezz'ora di attesa per zero barre.
+
+**2. La riga non aveva `-SoloMarketWatch`.** Cosi' la ricognizione
+post-download e' ripartita su **tutti e 1722** i simboli **con la sonda
+storica accesa** — la combinazione peggiore possibile — e si e' fermata a 9.
+
+### Correzioni, perche' il codice non permetta piu' di sbagliare
+
+- **Guardia mercato chiuso**: prima di scaricare, il driver legge
+  `MercatoAperto` dall'ultima ricognizione. Se e' `NO`, **si ferma e lo dice**,
+  con il numero di oggi (913 s per zero barre) scritto nel messaggio. Si puo'
+  forzare solo con `-AncheAMercatoChiuso`, esplicito.
+- **La corsa post-download e' forzata a `InpSoloMarketWatch=true`**: sonda
+  accesa e scansione totale **non stanno insieme**.
+
+## 25. 📅 Un dato nuovo e scomodo: nemmeno EURUSD e' stabile
+
+| corsa | EURUSD | USDCAD | AUDNZD |
+|---|---|---|---|
+| 1a (14:53) | 2023.01.02 | 1993.04.28 | 1993.04.05 |
+| 2a (15:05) | 2023.01.02 | 2026.07.29 | — |
+| 3a (15:19) | 2023.01.02 | 2026.01.02 | — |
+| **5a (16:08)** | **2022.12.13** | 2026.01.02 | **2026.07.29** |
+
+Per tre corse EURUSD ha detto **2023.01.02**; alla quarta lettura dice
+**2022.12.13**. La data si e' spostata **indietro** man mano che il terminale
+sincronizzava.
+
+**Cosa insegna**: `SERIES_SERVER_FIRSTDATE` non e' una proprieta' fissa del
+broker, e' **lo stato della sincronizzazione in quel momento**. Quindi
+"da quando parte lo storico" **si misura solo dopo aver scaricato davvero**,
+non chiedendolo. E' esattamente il motivo per cui la strada giusta e' il
+download, non la sonda — a mercato aperto.
+
+## 26. ▶️ Lunedi', in quest'ordine
+
+1. `-SoloElenco -SoloMarketWatch` per rileggere `MercatoAperto = SI`.
+2. Download **D1** dei 5 indici. Adesso la guardia lo lascia partire solo se
+   il mercato e' davvero aperto.
+3. Da li' escono **la prima data vera** e, con `InpSimboloFuso GER40`, **il DST
+   misurato su un indice** e l'**export H1** per lo shift contro BCM.
+
+**Nel frattempo Dukascopy resta l'unica fonte con una prima data MISURATA
+(2012 su DAX, Nasdaq, S&P).**

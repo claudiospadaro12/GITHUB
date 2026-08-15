@@ -1,0 +1,466 @@
+﻿NQ	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+GH	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=== ABTG_InfoBroker - RICOGNIZIONE BROKER ===
+QJ	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Broker           : Pepperstone Limited
+OS	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Server           : PepperstoneUK-Demo
+ON	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Conto            : 62128200  (DEMO)
+DF	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora server       : 2026.08.15 12:53:43
+DS	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora ultimo tick  : 2026.08.15 08:01:22   mercato aperto: NO (ultimo tick vecchio: mercato chiuso o simbolo fermo)
+CI	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora GMT          : 2026.08.15 12:53:43
+FP	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora locale PC    : 2026.08.15 14:53:43
+NR	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  OFFSET SERVER-GMT: +00:00   (0.00 ore)  <== IL NUMERO DI OGGI
+GI	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Ora legale sul PC: SI   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dalle sezioni sotto)
+RR	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Simboli broker   : 1722   in Market Watch: 120
+DF	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	---------------------------------------------------------------------
+LH	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  ATTENZIONE: l'offset qui sopra vale OGGI. Non e' l'offset storico.
+GH	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  Pepperstone segue il DST AMERICANO, l'Europa cambia in date diverse:
+OK	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  per 2-3 settimane l'anno la differenza fra i due server e' di 1 ora
+IK	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  invece di 2, e succede ogni anno del backtest. Il numero che vale
+HL	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  per il PASSATO e' quello misurato sui dati (ABTG_InfoBroker_H1.csv +
+NO	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	  sezione [SESSIONI]). Vedi docs\BROKER_ESTERNO_MAPPA.md.
+PR	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+JL	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	=== SIMBOLI (TUTTO IL BROKER) - TF misurato: H1 - filtro: '' ===
+LJ	0	14:53:43.067	ABTG_InfoBroker (EURUSD,H1)	SIMBOLO          DIGITS POINT      CONTRACT   PRIMA H1     PRIMA D1     STATO | DESCRIZIONE
+CO	0	14:53:43.099	ABTG_InfoBroker (EURUSD,H1)	AUDUSD           5      0.00001000 100000.00  2026.01.02   2026.01.02   COMPLETO | Australian Dollar vs US Dollar
+QS	0	14:53:43.256	ABTG_InfoBroker (EURUSD,H1)	EURUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Euro vs US Dollar
+CN	0	14:53:43.399	ABTG_InfoBroker (EURUSD,H1)	GBPUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Great Britain Pound vs US Dollar
+CK	0	14:53:43.479	ABTG_InfoBroker (EURUSD,H1)	USDCHF           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Swiss Franc
+PF	0	14:53:43.670	ABTG_InfoBroker (EURUSD,H1)	USDJPY           3      0.00100000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Japanese Yen
+DR	0	14:53:44.298	ABTG_InfoBroker (EURUSD,H1)	USDCAD           5      0.00001000 100000.00  1993.04.28   1993.04.28   da scaricare (parziale) | US Dollar vs Canadian Dollar
+JK	0	14:53:44.847	ABTG_InfoBroker (EURUSD,H1)	AUDNZD           5      0.00001000 100000.00  1993.04.05   1993.04.05   da scaricare (parziale) | Australian Dollar vs New Zealand Dollar
+PR	0	14:53:45.332	ABTG_InfoBroker (EURUSD,H1)	AUDCAD           5      0.00001000 100000.00  1993.04.27   1993.04.27   da scaricare (parziale) | Australian Dollar vs Canadian Dollar
+PP	0	14:54:54.841	ABTG_InfoBroker (EURUSD,H1)	AUDCHF           5      0.00001000 100000.00  -            -            NESSUN DATO | Australian Dollar vs Swiss Franc
+QJ	0	14:54:54.842	ABTG_InfoBroker (EURUSD,H1)	--- APERTURA DI SESSIONE PER STAGIONE (AUDUSD, TF M5) ---
+PH	0	14:54:54.842	ABTG_InfoBroker (EURUSD,H1)	    data        prima barra   ultima barra   barre   nota
+QR	0	14:54:54.919	ABTG_InfoBroker (EURUSD,H1)	    2024.01.15   -             -                  -   da scaricare / nessun dato
+ER	0	14:54:54.999	ABTG_InfoBroker (EURUSD,H1)	    2024.03.20   -             -                  -   da scaricare / nessun dato
+MR	0	14:54:55.076	ABTG_InfoBroker (EURUSD,H1)	    2024.04.15   -             -                  -   da scaricare / nessun dato
+LR	0	14:54:55.155	ABTG_InfoBroker (EURUSD,H1)	    2024.07.15   -             -                  -   da scaricare / nessun dato
+OR	0	14:54:55.233	ABTG_InfoBroker (EURUSD,H1)	    2024.10.15   -             -                  -   da scaricare / nessun dato
+FR	0	14:54:55.311	ABTG_InfoBroker (EURUSD,H1)	    2024.10.28   -             -                  -   da scaricare / nessun dato
+FR	0	14:54:55.390	ABTG_InfoBroker (EURUSD,H1)	    2024.11.20   -             -                  -   da scaricare / nessun dato
+GR	0	14:54:55.469	ABTG_InfoBroker (EURUSD,H1)	    2025.01.15   -             -                  -   da scaricare / nessun dato
+FR	0	14:54:55.549	ABTG_InfoBroker (EURUSD,H1)	    2025.03.20   -             -                  -   da scaricare / nessun dato
+LR	0	14:54:55.627	ABTG_InfoBroker (EURUSD,H1)	    2025.04.15   -             -                  -   da scaricare / nessun dato
+KR	0	14:54:55.706	ABTG_InfoBroker (EURUSD,H1)	    2025.07.15   -             -                  -   da scaricare / nessun dato
+KM	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2025.10.15   00:00         23:50            287   giorno spostato di +2 (festivo/weekend)
+KL	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2025.10.28   00:00         23:55            288   
+HO	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2025.11.20   00:00         23:55            288   
+PS	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.01.15   00:00         23:55            288   
+JF	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.03.20   00:00         23:50            287   
+MI	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.04.15   00:05         23:55            287   
+PL	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    2026.07.15   00:05         23:55            287   
+DL	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	--- LETTURA DELLA TABELLA ---
+DJ	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA SOLARE (gen/nov) : 00:00
+GF	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA LEGALE (apr/lug) : 00:05
+FQ	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    settimane di disallineamento USA/EU     : 00:00 (20 marzo / 28 ottobre)
+GM	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	    -> ATTENZIONE: L'ORA DI APERTURA CAMBIA DI +0 ORE FRA LE STAGIONI
+NP	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       QUESTO SERVER NON SEGUE IL DST DEL MERCATO (offset fisso, o
+RS	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       calendario diverso). Gli EA con orari fissi operano all'ora
+IR	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       SBAGLIATA per meta' anno: sul backtest e SUI SOLDI VERI.
+FD	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       Va deciso: due set di orari stagionali, oppure un input di
+DD	0	14:54:55.754	ABTG_InfoBroker (EURUSD,H1)	       correzione DST nell'EA. Non e' un dettaglio.
+RI	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	--- EXPORT CHIUSURE H1 (per misurare lo shift SUI DATI) ---
+IQ	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  simbolo: AUDUSD   (le stesse due finestre vanno esportate anche sull'ALTRO terminale)
+RS	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  SOLARE   2025.01.06-2025.01.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+KF	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  LEGALE   2025.07.01-2025.07.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+KH	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  totale esportato: 0 barre H1 in MQL5\Files\ABTG_InfoBroker_H1.csv
+RK	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Il confronto lo fa prepara_broker_esterno.ps1: prova gli shift
+KG	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  da -6 a +6 ore e sceglie quello che minimizza la differenza media.
+HI	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Se lo shift della finestra SOLARE e quello della LEGALE sono
+OP	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  DIVERSI, l'offset fra i due broker NON e' costante: e' la prova.
+IR	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	=== FINITO: 9 simboli esaminati su 1722. Referto in MQL5\Files\ABTG_InfoBroker.csv ===
+KO	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Le colonne PrimaData sono quelle che il BROKER dichiara di avere:
+GN	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  se dicono 2018 lo storico e' raggiungibile, se dicono 2024 non lo e'.
+NL	0	14:54:55.755	ABTG_InfoBroker (EURUSD,H1)	  Lo stato 'da scaricare' significa solo che sul disco non c'e' ancora.
+EP	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+PI	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	=== ABTG_InfoBroker - RICOGNIZIONE BROKER ===
+JK	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Broker           : Pepperstone Limited
+HP	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Server           : PepperstoneUK-Demo
+HO	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Conto            : 62128200  (DEMO)
+DG	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Ora server       : 2026.08.15 13:05:48
+GP	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Ora ultimo tick  : 2026.08.15 15:54:55   mercato aperto: NO (ultimo tick vecchio: mercato chiuso o simbolo fermo)
+CH	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Ora GMT          : 2026.08.15 13:05:48
+FS	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Ora locale PC    : 2026.08.15 15:05:48
+ES	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  OFFSET SERVER-GMT: +00:00   (0.00 ore)  <== IL NUMERO DI OGGI
+PH	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Ora legale sul PC: SI   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dalle sezioni sotto)
+IS	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Simboli broker   : 1722   in Market Watch: 120
+KG	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	---------------------------------------------------------------------
+CK	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  ATTENZIONE: l'offset qui sopra vale OGGI. Non e' l'offset storico.
+PG	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  Pepperstone segue il DST AMERICANO, l'Europa cambia in date diverse:
+HJ	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  per 2-3 settimane l'anno la differenza fra i due server e' di 1 ora
+RH	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  invece di 2, e succede ogni anno del backtest. Il numero che vale
+OK	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  per il PASSATO e' quello misurato sui dati (ABTG_InfoBroker_H1.csv +
+EN	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	  sezione [SESSIONI]). Vedi docs\BROKER_ESTERNO_MAPPA.md.
+GM	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+GL	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	=== SIMBOLI (solo Market Watch) - TF misurato: H1 - filtro: '' ===
+OL	0	15:05:48.111	ABTG_InfoBroker (EURUSD,H1)	SIMBOLO          DIGITS POINT      CONTRACT   PRIMA H1     PRIMA D1     STATO | DESCRIZIONE
+NL	0	15:05:48.120	ABTG_InfoBroker (EURUSD,H1)	EURUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Euro vs US Dollar
+CL	0	15:05:48.136	ABTG_InfoBroker (EURUSD,H1)	GBPUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Great Britain Pound vs US Dollar
+IH	0	15:05:48.168	ABTG_InfoBroker (EURUSD,H1)	USDJPY           3      0.00100000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Japanese Yen
+EK	0	15:05:48.200	ABTG_InfoBroker (EURUSD,H1)	USDCAD           5      0.00001000 100000.00  2026.07.29   2026.07.29   COMPLETO | US Dollar vs Canadian Dollar
+GN	0	15:05:48.216	ABTG_InfoBroker (EURUSD,H1)	AUDUSD           5      0.00001000 100000.00  2025.07.17   2025.07.17   COMPLETO | Australian Dollar vs US Dollar
+QN	0	15:05:48.263	ABTG_InfoBroker (EURUSD,H1)	EURGBP           5      0.00001000 100000.00  2025.12.02   2025.12.02   COMPLETO | Euro vs Great Britain Pound
+EJ	0	15:11:01.125	ABTG_InfoBroker (EURUSD,H1)	US30             1      0.10000000 1.00       -            -            NESSUN DATO | US Wall Street 30 Index
+KD	0	15:11:01.125	ABTG_InfoBroker (EURUSD,H1)	--- APERTURA DI SESSIONE PER STAGIONE (EURUSD, TF M5) ---
+LI	0	15:11:01.125	ABTG_InfoBroker (EURUSD,H1)	    data        prima barra   ultima barra   barre   nota
+MQ	0	15:11:01.203	ABTG_InfoBroker (EURUSD,H1)	    2024.01.15   -             -                  -   da scaricare / nessun dato
+IQ	0	15:11:01.283	ABTG_InfoBroker (EURUSD,H1)	    2024.03.20   -             -                  -   da scaricare / nessun dato
+PN	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2024.04.15   00:00         23:55            288   giorno spostato di +1 (festivo/weekend)
+LK	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2024.07.15   00:00         23:55            288   
+FO	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2024.10.15   00:00         23:55            288   
+LR	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2024.10.28   00:00         23:55            288   
+OE	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2024.11.20   00:00         23:55            288   
+QH	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2025.01.15   00:00         23:55            288   
+IL	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2025.03.20   00:00         23:55            288   
+FO	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2025.04.15   00:00         23:55            288   
+OR	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2025.07.15   00:00         23:55            288   
+QE	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2025.10.15   00:00         23:55            288   
+OI	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2025.10.28   00:00         23:55            288   
+DL	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2025.11.20   00:00         23:55            288   
+LO	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2026.01.15   00:00         23:55            288   
+FR	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2026.03.20   00:00         23:50            287   
+GF	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2026.04.15   00:00         23:55            288   
+FI	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    2026.07.15   00:00         23:55            288   
+HP	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	--- LETTURA DELLA TABELLA ---
+HN	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA SOLARE (gen/nov) : 00:00
+HJ	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA LEGALE (apr/lug) : 00:00
+JF	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    settimane di disallineamento USA/EU     : 00:00 (20 marzo / 28 ottobre)
+CF	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	    -> SERVER ALLINEATO AL DST DEL MERCATO: l'apertura cade alla STESSA ora server tutto
+ED	0	15:11:01.319	ABTG_InfoBroker (EURUSD,H1)	       l'anno. Un InpSessionHour fisso e' corretto sempre.
+OO	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	--- EXPORT CHIUSURE H1 (per misurare lo shift SUI DATI) ---
+JR	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  simbolo: EURUSD   (le stesse due finestre vanno esportate anche sull'ALTRO terminale)
+GQ	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  SOLARE   2025.01.06-2025.01.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+FD	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  LEGALE   2025.07.01-2025.07.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+FF	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  totale esportato: 0 barre H1 in MQL5\Files\ABTG_InfoBroker_H1.csv
+GJ	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  Il confronto lo fa prepara_broker_esterno.ps1: prova gli shift
+FF	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  da -6 a +6 ore e sceglie quello che minimizza la differenza media.
+QO	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  Se lo shift della finestra SOLARE e quello della LEGALE sono
+RR	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  DIVERSI, l'offset fra i due broker NON e' costante: e' la prova.
+IO	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	=== FINITO: 7 simboli esaminati su 120. Referto in MQL5\Files\ABTG_InfoBroker.csv ===
+PQ	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  Le colonne PrimaData sono quelle che il BROKER dichiara di avere:
+PL	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  se dicono 2018 lo storico e' raggiungibile, se dicono 2024 non lo e'.
+QN	0	15:11:01.320	ABTG_InfoBroker (EURUSD,H1)	  Lo stato 'da scaricare' significa solo che sul disco non c'e' ancora.
+RF	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+GK	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	=== ABTG_InfoBroker - RICOGNIZIONE BROKER ===
+EI	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Broker           : Pepperstone Limited
+CR	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Server           : PepperstoneUK-Demo
+OI	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Conto            : 62128200  (DEMO)
+GF	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Ora server       : 2026.08.15 13:19:45
+ES	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Ora ultimo tick  : 2026.08.15 16:11:01   mercato aperto: NO (ultimo tick vecchio: mercato chiuso o simbolo fermo)
+LJ	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Ora GMT          : 2026.08.15 13:19:45
+MQ	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Ora locale PC    : 2026.08.15 15:19:45
+NE	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  OFFSET SERVER-GMT: +00:00   (0.00 ore)  <== IL NUMERO DI OGGI
+CJ	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Ora legale sul PC: SI   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dalle sezioni sotto)
+RQ	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Simboli broker   : 1722   in Market Watch: 120
+DE	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	---------------------------------------------------------------------
+PI	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  ATTENZIONE: l'offset qui sopra vale OGGI. Non e' l'offset storico.
+CI	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  Pepperstone segue il DST AMERICANO, l'Europa cambia in date diverse:
+CH	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  per 2-3 settimane l'anno la differenza fra i due server e' di 1 ora
+IJ	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  invece di 2, e succede ogni anno del backtest. Il numero che vale
+LM	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  per il PASSATO e' quello misurato sui dati (ABTG_InfoBroker_H1.csv +
+RL	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	  sezione [SESSIONI]). Vedi docs\BROKER_ESTERNO_MAPPA.md.
+PS	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+DO	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	=== SIMBOLI (solo Market Watch) - TF misurato: H1 - filtro: '' ===
+DJ	0	15:19:45.785	ABTG_InfoBroker (EURUSD,H1)	SIMBOLO          DIGITS POINT      CONTRACT   PRIMA H1     PRIMA D1     STATO | DESCRIZIONE
+HN	0	15:19:45.791	ABTG_InfoBroker (EURUSD,H1)	EURUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Euro vs US Dollar
+LR	0	15:19:45.807	ABTG_InfoBroker (EURUSD,H1)	GBPUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Great Britain Pound vs US Dollar
+HN	0	15:19:45.839	ABTG_InfoBroker (EURUSD,H1)	USDJPY           3      0.00100000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Japanese Yen
+LD	0	15:19:45.887	ABTG_InfoBroker (EURUSD,H1)	USDCAD           5      0.00001000 100000.00  2026.01.02   2026.01.02   COMPLETO | US Dollar vs Canadian Dollar
+LH	0	15:19:45.903	ABTG_InfoBroker (EURUSD,H1)	AUDUSD           5      0.00001000 100000.00  2025.07.17   2025.07.17   COMPLETO | Australian Dollar vs US Dollar
+IQ	0	15:19:45.919	ABTG_InfoBroker (EURUSD,H1)	EURGBP           5      0.00001000 100000.00  2025.12.02   2025.12.02   COMPLETO | Euro vs Great Britain Pound
+OO	0	15:34:58.979	ABTG_InfoBroker (EURUSD,H1)	US30             1      0.10000000 1.00       -            -            da svegliare (server non ha ancora risposto) | US Wall Street 30 Index
+QF	0	15:34:58.979	ABTG_InfoBroker (EURUSD,H1)	--- APERTURA DI SESSIONE PER STAGIONE (EURUSD, TF M5) ---
+RK	0	15:34:58.979	ABTG_InfoBroker (EURUSD,H1)	    data        prima barra   ultima barra   barre   nota
+KG	0	15:34:59.058	ABTG_InfoBroker (EURUSD,H1)	    2024.01.15   -             -                  -   da scaricare / nessun dato
+CH	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2024.03.20   00:00         23:55            288   giorno spostato di +1 (festivo/weekend)
+II	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2024.04.15   00:00         23:55            288   
+DL	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2024.07.15   00:00         23:55            288   
+NP	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2024.10.15   00:00         23:55            288   
+DS	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2024.10.28   00:00         23:55            288   
+GF	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2024.11.20   00:00         23:55            288   
+II	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2025.01.15   00:00         23:55            288   
+QM	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2025.03.20   00:00         23:55            288   
+NP	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2025.04.15   00:00         23:55            288   
+GS	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2025.07.15   00:00         23:55            288   
+IF	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2025.10.15   00:00         23:55            288   
+GJ	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2025.10.28   00:00         23:55            288   
+LM	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2025.11.20   00:00         23:55            288   
+DP	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2026.01.15   00:00         23:55            288   
+NS	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2026.03.20   00:00         23:50            287   
+OG	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2026.04.15   00:00         23:55            288   
+NJ	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    2026.07.15   00:00         23:55            288   
+PQ	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	--- LETTURA DELLA TABELLA ---
+PO	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA SOLARE (gen/nov) : 00:00
+PK	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA LEGALE (apr/lug) : 00:00
+RG	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    settimane di disallineamento USA/EU     : 00:00 (20 marzo / 28 ottobre)
+KG	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	    -> SERVER ALLINEATO AL DST DEL MERCATO: l'apertura cade alla STESSA ora server tutto
+MG	0	15:34:59.090	ABTG_InfoBroker (EURUSD,H1)	       l'anno. Un InpSessionHour fisso e' corretto sempre.
+RN	0	15:34:59.091	ABTG_InfoBroker (EURUSD,H1)	--- EXPORT CHIUSURE H1 (per misurare lo shift SUI DATI) ---
+GM	0	15:34:59.091	ABTG_InfoBroker (EURUSD,H1)	  simbolo: EURUSD   (le stesse due finestre vanno esportate anche sull'ALTRO terminale)
+LQ	0	15:34:59.091	ABTG_InfoBroker (EURUSD,H1)	  SOLARE   2025.01.06-2025.01.31 -> 480 barre H1 esportate (dal 2025.01.06 00:00 al 2025.01.31 23:00, ORA SERVER)
+EE	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  LEGALE   2025.07.01-2025.07.31 -> 552 barre H1 esportate (dal 2025.07.01 00:00 al 2025.07.31 23:00, ORA SERVER)
+JJ	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  totale esportato: 1032 barre H1 in MQL5\Files\ABTG_InfoBroker_H1.csv
+QK	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  Il confronto lo fa prepara_broker_esterno.ps1: prova gli shift
+LG	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  da -6 a +6 ore e sceglie quello che minimizza la differenza media.
+GI	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  Se lo shift della finestra SOLARE e quello della LEGALE sono
+HS	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  DIVERSI, l'offset fra i due broker NON e' costante: e' la prova.
+OQ	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	=== FINITO: 7 simboli esaminati su 120. Referto in MQL5\Files\ABTG_InfoBroker.csv ===
+FN	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  Le colonne PrimaData sono quelle che il BROKER dichiara di avere:
+JN	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  se dicono 2018 lo storico e' raggiungibile, se dicono 2024 non lo e'.
+KL	0	15:34:59.092	ABTG_InfoBroker (EURUSD,H1)	  Lo stato 'da scaricare' significa solo che sul disco non c'e' ancora.
+EQ	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+HI	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	=== ABTG_InfoBroker - RICOGNIZIONE BROKER ===
+RK	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Broker           : Pepperstone Limited
+PP	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Server           : PepperstoneUK-Demo
+PO	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Conto            : 62128200  (DEMO)
+IG	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Ora server       : 2026.08.15 13:40:13
+HP	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Ora ultimo tick  : 2026.08.15 16:34:59   mercato aperto: NO (ultimo tick vecchio: mercato chiuso o simbolo fermo)
+JH	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Ora GMT          : 2026.08.15 13:40:13
+GS	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Ora locale PC    : 2026.08.15 15:40:13
+MS	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  OFFSET SERVER-GMT: +00:00   (0.00 ore)  <== IL NUMERO DI OGGI
+PI	0	15:40:13.211	ABTG_InfoBroker (EURUSD,H1)	  Ora legale sul PC: SI   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dalle sezioni sotto)
+HS	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  Simboli broker   : 1722   in Market Watch: 120
+NG	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	---------------------------------------------------------------------
+FH	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  ATTENZIONE: l'offset qui sopra vale OGGI. Non e' l'offset storico.
+QG	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  Pepperstone segue il DST AMERICANO, l'Europa cambia in date diverse:
+QJ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  per 2-3 settimane l'anno la differenza fra i due server e' di 1 ora
+OK	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  invece di 2, e succede ogni anno del backtest. Il numero che vale
+JK	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  per il PASSATO e' quello misurato sui dati (ABTG_InfoBroker_H1.csv +
+DO	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  sezione [SESSIONI]). Vedi docs\BROKER_ESTERNO_MAPPA.md.
+RM	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	=====================================================================
+RL	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	=== SIMBOLI (solo Market Watch) - TF misurato: H1 - filtro: '' ===
+RM	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	SIMBOLO          DIGITS POINT      CONTRACT   PRIMA H1     PRIMA D1     STATO | DESCRIZIONE
+GP	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  MODO SOLO NOMI: le colonne PRIMA H1 / PRIMA D1 restano vuote APPOSTA.
+IM	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  Chiedere la prima data al server, a mercato chiuso, blocca lo script
+PD	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  per oltre un quarto d'ora PER SIMBOLO (misurato su US30 il 15/08).
+FG	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	  Per le date: rilancia con InpSondaStorico=true e un InpFiltro STRETTO.
+OE	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURUSD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs US Dollar
+EM	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPUSD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs US Dollar
+HE	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	USDJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Japanese Yen
+EQ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	USDCAD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Canadian Dollar
+HO	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	AUDUSD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Australian Dollar vs US Dollar
+RJ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURGBP           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Great Britain Pound
+PR	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	US30             1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | US Wall Street 30 Index
+KI	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	NAS100           1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | US Tech 100 Index
+EM	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	US500            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | US 500 Index
+IP	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	UK100            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | UK 100 Index
+OJ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GER40            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Germany DAX 40 Index
+IF	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	XAUUSD           2      0.01000000 100.00     -            -            solo nomi (storico non sondato) | Gold vs US Dollar
+CL	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	XAGUSD           3      0.00100000 5000.00    -            -            solo nomi (storico non sondato) | Silver vs US Dollar
+MK	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	SpotCrude        3      0.00100000 100.00     -            -            solo nomi (storico non sondato) | WTI Cash (or Spot) Contract
+QO	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	SpotBrent        3      0.00100000 100.00     -            -            solo nomi (storico non sondato) | Brent Crude vs US dollar
+PN	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	NatGas           3      0.00100000 10000.00   -            -            solo nomi (storico non sondato) | Natural Gas vs US Dollar
+LJ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	BTCUSD           2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Bitcoin vs US Dollar
+QR	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	ETHUSD           2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Ethereum vs US Dollar
+LH	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	USDCHF           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Swiss Franc
+KD	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	CADCHF           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Canadian Dollar vs Swiss Franc
+CS	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	CADJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Canadian Dollar vs Japanese Yen
+NH	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	CHFJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Swiss Franc vs Japanese Yen
+FN	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURCAD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Canadian Dollar
+KH	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURCHF           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Swiss Franc
+IL	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Japanese Yen
+RP	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPCAD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Canadian Dollar
+IH	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPCHF           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Swiss Franc
+IN	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Japanese Yen
+GF	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	AUDCAD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Australian Dollar vs Canadian Dollar
+LN	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	AUDCHF           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Australian Dollar vs Swiss Franc
+HG	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	AUDJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Australian Dollar vs Japanese Yen
+EP	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	AUDNZD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Australian Dollar vs New Zealand Dollar
+RG	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	AUDSGD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Australian Dollar vs Singapore Dollar
+JN	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	CHFSGD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Swiss Franc vs Singapore Dollar
+RF	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURCZK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Czech Republic Koruna
+CR	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURAUD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Australian Dollar
+KS	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURHUF           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Hungarian Forint
+RH	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURMXN           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Mexican Peso
+NQ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURNOK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Norwegian Krone
+JJ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURNZD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs New Zealand Dollar
+HM	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURPLN           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Polish Zloty
+HL	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURSEK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Swedish Krona
+MG	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURSGD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Singapore Dollar
+JO	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURTRY           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs Turkish Lira
+PM	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	EURZAR           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Euro vs South African Rand
+IJ	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPAUD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Australian Dollar
+RL	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPMXN           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Mexican Peso
+DK	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPNOK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Norwegian Krone
+NR	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPNZD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs New Zealand Dollar
+NK	0	15:40:13.212	ABTG_InfoBroker (EURUSD,H1)	GBPSEK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Swedish Krona
+JM	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	GBPSGD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Singapore Dollar
+KD	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	GBPTRY           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Great Britain Pound vs Turkish Lira
+PS	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	NOKJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Norwegian Krone vs Japanese Yen
+KF	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	NOKSEK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | Norwegian Krone vs Swedish Krona
+ON	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	NZDCAD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | New Zealand Dollar vs Canadian Dollar
+NF	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	NZDCHF           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | New Zealand Dollar vs Swiss Franc
+LO	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	NZDJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | New Zealand Dollar vs Japanese Yen
+PK	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	NZDUSD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | New Zealand Dollar vs US Dollar
+PO	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	SEKJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Swedish Krona vs Japanese Yen
+QJ	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	SGDJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | Singapore Dollar vs Japanese Yen
+HO	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDCNH           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Chinese Yuan
+HQ	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDCZK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Czech Republic Koruna
+II	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDHUF           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Hungarian Forint
+JS	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDMXN           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Mexican Peso
+LJ	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDNOK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Norwegian Krone
+HL	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDPLN           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Polish Zloty
+NI	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDSEK           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Swedish Krona
+EH	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDSGD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Singapore Dollar
+FO	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDTHB           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Thai Baht
+HJ	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDTRY           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Turkish Lira
+LS	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDZAR           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs South African Rand
+JD	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	ZARJPY           3      0.00100000 100000.00  -            -            solo nomi (storico non sondato) | South African Rand vs Japanese Yen
+MP	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	USDHKD           5      0.00001000 100000.00  -            -            solo nomi (storico non sondato) | US Dollar vs Hong Kong Dollar
+DJ	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	XAUAUD           2      0.01000000 100.00     -            -            solo nomi (storico non sondato) | Gold vs Australian Dollar
+PE	0	15:40:13.213	ABTG_InfoBroker (EURUSD,H1)	XAUCHF           2      0.01000000 100.00     -            -            solo nomi (storico non sondato) | Gold vs Swiss Franc
+KN	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XAUEUR           2      0.01000000 100.00     -            -            solo nomi (storico non sondato) | Gold vs Euro
+CE	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XAUGBP           2      0.01000000 100.00     -            -            solo nomi (storico non sondato) | Gold vs Great Britain Pound
+HJ	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XAUJPY           0      1.00000000 100.00     -            -            solo nomi (storico non sondato) | Gold vs Japanese Yen
+JN	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XAGAUD           3      0.00100000 5000.00    -            -            solo nomi (storico non sondato) | Silver vs Australian Dollar
+GH	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XAGEUR           3      0.00100000 5000.00    -            -            solo nomi (storico non sondato) | Silver vs Euro
+EO	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XPDUSD           2      0.01000000 100.00     -            -            solo nomi (storico non sondato) | Palladium vs US Dollar
+DO	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XPTUSD           2      0.01000000 100.00     -            -            solo nomi (storico non sondato) | Platinum vs US Dollar
+LG	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Gasoline         4      0.00010000 1000.00    -            -            solo nomi (storico non sondato) | Gasoline Cash Contract
+MM	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	AUS200           1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Australia 200 Index
+KH	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	EUSTX50          1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | EU 50 Index
+HG	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	FRA40            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | France 40 Index
+FM	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	JPN225           1      0.10000000 100.00     -            -            solo nomi (storico non sondato) | Japan 225 Index
+DL	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	CN50             1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | China 50 Index
+DI	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	HK50             1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Hong Kong 50 Index
+QL	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	SPA35            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Spain 35 Index
+LQ	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	US2000           1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | US 2000 Index
+QJ	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	VIX              2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Volatility Index
+HL	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	SCI25            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Singapore 25 Index Cash
+GS	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	CA60             2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Canada 60 Index
+CH	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	CHINAH           2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Hong Kong China H-shares Index
+FP	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	NETH25           2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Netherlands 25 Index
+ED	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	SWI20            2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Switzerland 20 Index
+QF	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Cocoa            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Cocoa Cash Contract
+JO	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Coffee           2      0.01000000 10.00      -            -            solo nomi (storico non sondato) | Coffee Cash Contract
+MK	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Cotton           3      0.00100000 100.00     -            -            solo nomi (storico non sondato) | Cotton Cash Contract
+QG	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Sugar            3      0.00100000 100.00     -            -            solo nomi (storico non sondato) | Sugar Cash Contract
+EO	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Soybeans         1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Soybeans Cash Contract
+EK	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	LDSugar          1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | London Sugar Cash Contract
+MQ	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Wheat            1      0.10000000 1.00       -            -            solo nomi (storico non sondato) | Wheat Cash Contract
+HM	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Corn             4      0.00010000 100.00     -            -            solo nomi (storico non sondato) | Corn Cash Contract
+MF	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Cattle           5      0.00001000 1000.00    -            -            solo nomi (storico non sondato) | Live Cattle Cash Contract
+GP	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	Copper           4      0.00010000 2000.00    -            -            solo nomi (storico non sondato) | Copper Cash Contract
+FG	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	EURX             1      0.10000000 100.00     -            -            solo nomi (storico non sondato) | Euro Currency Index
+CG	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	JPYX             1      0.10000000 100.00     -            -            solo nomi (storico non sondato) | Japanese Yen Currency Index
+DP	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	USDX             3      0.00100000 100.00     -            -            solo nomi (storico non sondato) | US Dollar Index
+HE	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	BCHUSD           2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Bitcoin Cash vs US Dollar
+FQ	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	DOTUSD           3      0.00100000 10.00      -            -            solo nomi (storico non sondato) | Polkadot vs US Dollar
+DN	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	LINKUSD          3      0.00100000 10.00      -            -            solo nomi (storico non sondato) | Chainlink vs US Dollar
+RK	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XLMUSD           4      0.00010000 100.00     -            -            solo nomi (storico non sondato) | Stellar Lumens vs US Dollar
+PR	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	XRPUSD           4      0.00010000 100.00     -            -            solo nomi (storico non sondato) | Ripple vs US Dollar
+PG	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	UNIUSD           3      0.00100000 10.00      -            -            solo nomi (storico non sondato) | Uniswap vs US Dollar
+DH	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	DOGEUSD          5      0.00001000 1000.00    -            -            solo nomi (storico non sondato) | Dogecoin vs US Dollar
+LR	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	ADAUSD           4      0.00010000 100.00     -            -            solo nomi (storico non sondato) | Cardano vs US Dollar
+JK	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	LTCUSD           2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Litecoin vs US Dollar
+OO	0	15:40:13.217	ABTG_InfoBroker (EURUSD,H1)	BNBUSD           2      0.01000000 1.00       -            -            solo nomi (storico non sondato) | Binance Coin vs US Dollar
+QN	0	15:40:13.218	ABTG_InfoBroker (EURUSD,H1)	--- APERTURA DI SESSIONE PER STAGIONE (EURUSD, TF M5) ---
+RS	0	15:40:13.218	ABTG_InfoBroker (EURUSD,H1)	    data        prima barra   ultima barra   barre   nota
+ES	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2024.01.15   00:00         23:55            288   
+EF	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2024.03.20   00:00         23:55            288   
+RI	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2024.04.15   00:00         23:55            288   
+KL	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2024.07.15   00:00         23:55            288   
+EP	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2024.10.15   00:00         23:55            288   
+KS	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2024.10.28   00:00         23:55            288   
+PF	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2024.11.20   00:00         23:55            288   
+RI	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2025.01.15   00:00         23:55            288   
+JM	0	15:40:13.249	ABTG_InfoBroker (EURUSD,H1)	    2025.03.20   00:00         23:55            288   
+MP	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2025.04.15   00:00         23:55            288   
+HS	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2025.07.15   00:00         23:55            288   
+JF	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2025.10.15   00:00         23:55            288   
+HJ	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2025.10.28   00:00         23:55            288   
+KM	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2025.11.20   00:00         23:55            288   
+CP	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2026.01.15   00:00         23:55            288   
+MS	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2026.03.20   00:00         23:50            287   
+PG	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2026.04.15   00:00         23:55            288   
+MJ	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    2026.07.15   00:00         23:55            288   
+OQ	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	--- LETTURA DELLA TABELLA ---
+CH	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA SOLARE (gen/nov) : 00:00
+OK	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    apertura tipica in ORA LEGALE (apr/lug) : 00:00
+MG	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    settimane di disallineamento USA/EU     : 00:00 (20 marzo / 28 ottobre)
+LG	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	    -> SERVER ALLINEATO AL DST DEL MERCATO: l'apertura cade alla STESSA ora server tutto
+NG	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	       l'anno. Un InpSessionHour fisso e' corretto sempre.
+RN	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	--- EXPORT CHIUSURE H1 (per misurare lo shift SUI DATI) ---
+CM	0	15:40:13.250	ABTG_InfoBroker (EURUSD,H1)	  simbolo: EURUSD   (le stesse due finestre vanno esportate anche sull'ALTRO terminale)
+KQ	0	15:40:13.251	ABTG_InfoBroker (EURUSD,H1)	  SOLARE   2025.01.06-2025.01.31 -> 480 barre H1 esportate (dal 2025.01.06 00:00 al 2025.01.31 23:00, ORA SERVER)
+JE	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  LEGALE   2025.07.01-2025.07.31 -> 552 barre H1 esportate (dal 2025.07.01 00:00 al 2025.07.31 23:00, ORA SERVER)
+IJ	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  totale esportato: 1032 barre H1 in MQL5\Files\ABTG_InfoBroker_H1.csv
+RK	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  Il confronto lo fa prepara_broker_esterno.ps1: prova gli shift
+KG	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  da -6 a +6 ore e sceglie quello che minimizza la differenza media.
+HI	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  Se lo shift della finestra SOLARE e quello della LEGALE sono
+GS	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  DIVERSI, l'offset fra i due broker NON e' costante: e' la prova.
+LQ	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	=== FINITO: 120 simboli esaminati su 120. Referto in MQL5\Files\ABTG_InfoBroker.csv ===
+EN	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  Le colonne PrimaData sono quelle che il BROKER dichiara di avere:
+EN	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  se dicono 2018 lo storico e' raggiungibile, se dicono 2024 non lo e'.
+LL	0	15:40:13.252	ABTG_InfoBroker (EURUSD,H1)	  Lo stato 'da scaricare' significa solo che sul disco non c'e' ancora.
+ML	0	15:53:16.338	ABTG_HistoryDownloader (GER40,M5)	=== DOWNLOAD STORICO: 5 simboli x 1 TF, da 2015.01.01 ===
+MI	0	16:08:29.930	ABTG_HistoryDownloader (GER40,M5)	[1/5] GER40        D1   : NESSUN DATO (timeout)
+ED	0	16:08:29.931	ABTG_HistoryDownloader (GER40,M5)	=== FINITO. Riepilogo in MQL5\Files\ABTG_StoricoScaricato.csv ===
+QF	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	=====================================================================
+JK	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	=== ABTG_InfoBroker - RICOGNIZIONE BROKER ===
+RQ	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Broker           : Pepperstone Limited
+RD	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Server           : PepperstoneUK-Demo
+LI	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Conto            : 62128200  (DEMO)
+PM	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Ora server       : 2026.08.15 14:08:37
+GD	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Ora ultimo tick  : 2026.08.15 17:08:29   mercato aperto: NO (ultimo tick vecchio: mercato chiuso o simbolo fermo)
+GM	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Ora GMT          : 2026.08.15 14:08:37
+DF	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Ora locale PC    : 2026.08.15 16:08:37
+KF	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  OFFSET SERVER-GMT: +00:00   (0.00 ore)  <== IL NUMERO DI OGGI
+HM	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Ora legale sul PC: SI   (TimeDaylightSavings e' del PC, NON del server: sul server si deduce dalle sezioni sotto)
+CF	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Simboli broker   : 1722   in Market Watch: 120
+OR	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	---------------------------------------------------------------------
+IM	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  ATTENZIONE: l'offset qui sopra vale OGGI. Non e' l'offset storico.
+PR	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  Pepperstone segue il DST AMERICANO, l'Europa cambia in date diverse:
+JN	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  per 2-3 settimane l'anno la differenza fra i due server e' di 1 ora
+FN	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  invece di 2, e succede ogni anno del backtest. Il numero che vale
+MI	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  per il PASSATO e' quello misurato sui dati (ABTG_InfoBroker_H1.csv +
+MJ	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	  sezione [SESSIONI]). Vedi docs\BROKER_ESTERNO_MAPPA.md.
+MG	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	=====================================================================
+EI	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	=== SIMBOLI (TUTTO IL BROKER) - TF misurato: H1 - filtro: '' ===
+QO	0	16:08:37.496	ABTG_InfoBroker (GER40,H1)	SIMBOLO          DIGITS POINT      CONTRACT   PRIMA H1     PRIMA D1     STATO | DESCRIZIONE
+IK	0	16:08:37.498	ABTG_InfoBroker (GER40,H1)	AUDUSD           5      0.00001000 100000.00  2025.07.17   2025.07.17   COMPLETO | Australian Dollar vs US Dollar
+PG	0	16:08:37.560	ABTG_InfoBroker (GER40,H1)	EURUSD           5      0.00001000 100000.00  2022.12.13   2022.12.13   COMPLETO | Euro vs US Dollar
+CK	0	16:08:37.576	ABTG_InfoBroker (GER40,H1)	GBPUSD           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | Great Britain Pound vs US Dollar
+OQ	0	16:08:37.719	ABTG_InfoBroker (GER40,H1)	USDCHF           5      0.00001000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Swiss Franc
+GR	0	16:08:37.751	ABTG_InfoBroker (GER40,H1)	USDJPY           3      0.00100000 100000.00  2023.01.02   2023.01.02   COMPLETO | US Dollar vs Japanese Yen
+CH	0	16:08:37.783	ABTG_InfoBroker (GER40,H1)	USDCAD           5      0.00001000 100000.00  2026.01.02   2026.01.02   COMPLETO | US Dollar vs Canadian Dollar
+QE	0	16:08:37.815	ABTG_InfoBroker (GER40,H1)	AUDNZD           5      0.00001000 100000.00  2026.07.29   2026.07.29   COMPLETO | Australian Dollar vs New Zealand Dollar
+IS	0	16:08:37.846	ABTG_InfoBroker (GER40,H1)	AUDCAD           5      0.00001000 100000.00  2026.07.29   2026.07.29   COMPLETO | Australian Dollar vs Canadian Dollar
+GO	0	16:23:50.929	ABTG_InfoBroker (GER40,H1)	AUDCHF           5      0.00001000 100000.00  -            -            da svegliare (server non ha ancora risposto) | Australian Dollar vs Swiss Franc
+KP	0	16:23:50.929	ABTG_InfoBroker (GER40,H1)	--- APERTURA DI SESSIONE PER STAGIONE (GER40, TF M5) ---
+PH	0	16:23:50.929	ABTG_InfoBroker (GER40,H1)	    data        prima barra   ultima barra   barre   nota
+FH	0	16:23:51.007	ABTG_InfoBroker (GER40,H1)	    2024.01.15   -             -                  -   da scaricare / nessun dato
+NH	0	16:23:51.085	ABTG_InfoBroker (GER40,H1)	    2024.03.20   -             -                  -   da scaricare / nessun dato
+DH	0	16:23:51.163	ABTG_InfoBroker (GER40,H1)	    2024.04.15   -             -                  -   da scaricare / nessun dato
+OK	0	16:23:51.242	ABTG_InfoBroker (GER40,H1)	    2024.07.15   -             -                  -   da scaricare / nessun dato
+RK	0	16:23:51.322	ABTG_InfoBroker (GER40,H1)	    2024.10.15   -             -                  -   da scaricare / nessun dato
+CK	0	16:23:51.400	ABTG_InfoBroker (GER40,H1)	    2024.10.28   -             -                  -   da scaricare / nessun dato
+HK	0	16:23:51.479	ABTG_InfoBroker (GER40,H1)	    2024.11.20   -             -                  -   da scaricare / nessun dato
+CK	0	16:23:51.557	ABTG_InfoBroker (GER40,H1)	    2025.01.15   -             -                  -   da scaricare / nessun dato
+EK	0	16:23:51.636	ABTG_InfoBroker (GER40,H1)	    2025.03.20   -             -                  -   da scaricare / nessun dato
+GK	0	16:23:51.714	ABTG_InfoBroker (GER40,H1)	    2025.04.15   -             -                  -   da scaricare / nessun dato
+MK	0	16:23:51.793	ABTG_InfoBroker (GER40,H1)	    2025.07.15   -             -                  -   da scaricare / nessun dato
+DJ	0	16:23:51.871	ABTG_InfoBroker (GER40,H1)	    2025.10.15   -             -                  -   da scaricare / nessun dato
+IJ	0	16:23:51.948	ABTG_InfoBroker (GER40,H1)	    2025.10.28   -             -                  -   da scaricare / nessun dato
+HJ	0	16:23:52.028	ABTG_InfoBroker (GER40,H1)	    2025.11.20   -             -                  -   da scaricare / nessun dato
+RJ	0	16:23:52.107	ABTG_InfoBroker (GER40,H1)	    2026.01.15   -             -                  -   da scaricare / nessun dato
+QJ	0	16:23:52.184	ABTG_InfoBroker (GER40,H1)	    2026.03.20   -             -                  -   da scaricare / nessun dato
+JJ	0	16:23:52.263	ABTG_InfoBroker (GER40,H1)	    2026.04.15   -             -                  -   da scaricare / nessun dato
+EJ	0	16:23:52.340	ABTG_InfoBroker (GER40,H1)	    2026.07.15   -             -                  -   da scaricare / nessun dato
+RJ	0	16:23:52.340	ABTG_InfoBroker (GER40,H1)	--- LETTURA DELLA TABELLA ---
+FN	0	16:23:52.340	ABTG_InfoBroker (GER40,H1)	    DATI INSUFFICIENTI: manca lo storico su una delle due stagioni.
+KJ	0	16:23:52.340	ABTG_InfoBroker (GER40,H1)	    Scarica lo storico e rilancia: senza questa misura il fuso
+NE	0	16:23:52.340	ABTG_InfoBroker (GER40,H1)	    storico resta una supposizione.
+JR	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	--- EXPORT CHIUSURE H1 (per misurare lo shift SUI DATI) ---
+IR	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  simbolo: GER40   (le stesse due finestre vanno esportate anche sull'ALTRO terminale)
+DL	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  SOLARE   2025.01.06-2025.01.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+KI	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  LEGALE   2025.07.01-2025.07.31 -> NESSUNA BARRA H1 (storico da scaricare, o il broker non arriva li').
+MK	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  totale esportato: 0 barre H1 in MQL5\Files\ABTG_InfoBroker_H1.csv
+ND	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  Il confronto lo fa prepara_broker_esterno.ps1: prova gli shift
+EL	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  da -6 a +6 ore e sceglie quello che minimizza la differenza media.
+PQ	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  Se lo shift della finestra SOLARE e quello della LEGALE sono
+MP	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  DIVERSI, l'offset fra i due broker NON e' costante: e' la prova.
+MR	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	=== FINITO: 9 simboli esaminati su 1722. Referto in MQL5\Files\ABTG_InfoBroker.csv ===
+MM	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  Le colonne PrimaData sono quelle che il BROKER dichiara di avere:
+GP	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  se dicono 2018 lo storico e' raggiungibile, se dicono 2024 non lo e'.
+PD	0	16:23:52.341	ABTG_InfoBroker (GER40,H1)	  Lo stato 'da scaricare' significa solo che sul disco non c'e' ancora.

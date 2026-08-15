@@ -88,6 +88,7 @@ param(
   [switch] $SoloElenco,
   [switch] $SoloMarketWatch,
   [switch] $SondaStorico,
+  [switch] $AncheAMercatoChiuso,
   [switch] $SoloReferto,
   [switch] $SenzaTick,
   [switch] $Auto,
@@ -1014,6 +1015,43 @@ if (-not $Simboli) {
 }
 
 Write-Host ""
+# =====================================================================
+#  GUARDIA MERCATO CHIUSO (15/08/2026, imparata sbagliando)
+# ---------------------------------------------------------------------
+#  Il 15/08, un SABATO, il download di GER40 D1 e' finito cosi':
+#      [1/5] GER40  D1 : NESSUN DATO (timeout)     dopo 913 secondi
+#  e gli altri 4 simboli non sono nemmeno partiti. Non e' un problema
+#  degli indici: nella stessa corsa anche AUDCHF, che e' un cambio, e'
+#  rimasto 913 secondi senza risposta. A mercato chiuso questo server
+#  NON serve storia che non sia gia' in cache locale.
+#  Costo dell'errore: mezz'ora di attesa per zero barre. Adesso lo si
+#  dice PRIMA, non dopo.
+$statoMercato = ""
+$refPrec = Leggi-Info $InfoCsv
+if ($refPrec -and $refPrec.Info.ContainsKey("MercatoAperto")) {
+  $statoMercato = [string]$refPrec.Info["MercatoAperto"]
+}
+if ($statoMercato -eq "NO" -and -not $AncheAMercatoChiuso) {
+  Write-Host ""
+  Write-Host "=== MERCATO CHIUSO: NON SCARICO NIENTE ===" -ForegroundColor Red
+  Write-Host ("L'ultima ricognizione dice MercatoAperto = NO (letta il {0})." -f `
+              $(if ($refPrec.Info.ContainsKey("MisuratoIl")) { $refPrec.Info["MisuratoIl"] } else { "?" })) -ForegroundColor Yellow
+  Write-Host "A mercato chiuso questo server non risponde alle richieste di" -ForegroundColor Yellow
+  Write-Host "storia nuova: il 15/08 GER40 ha aspettato 913 secondi per zero" -ForegroundColor Yellow
+  Write-Host "barre, e con lui AUDCHF, che e' un cambio. Non e' un problema" -ForegroundColor Yellow
+  Write-Host "degli indici: e' il weekend." -ForegroundColor Yellow
+  Write-Host ""
+  Write-Host "RILANCIA A MERCATO APERTO (lunedi', dopo l'apertura)." -ForegroundColor Cyan
+  Write-Host "Se vuoi provare lo stesso, aggiungi -AncheAMercatoChiuso." -ForegroundColor DarkGray
+  exit 1
+}
+if ($statoMercato -eq "") {
+  Write-Host ""
+  Write-Host "NOTA: non so se il mercato e' aperto (nessuna ricognizione precedente)." -ForegroundColor Yellow
+  Write-Host "      Se e' weekend, il download tornera' a mani vuote dopo minuti" -ForegroundColor Yellow
+  Write-Host "      di attesa. Fai prima -SoloElenco." -ForegroundColor Yellow
+}
+
 Write-Host ("--- DOWNLOAD STORICO: {0}  (da {1}) ---" -f $Simboli, $Da) -ForegroundColor Cyan
 $primoSym = ($Simboli -split ",")[0].Trim()
 if (-not $SimboloFuso) { $SimboloFuso = $primoSym }
@@ -1030,9 +1068,14 @@ if ($Auto) {
     # Qui la sonda storica si PUO' riaccendere: dopo il download le serie
     # sono in locale, quindi SeriesInfoInteger risponde subito e non blocca.
     # (Bloccava solo perche' doveva chiedere al server dati che non c'erano.)
+    # ...ma SOLO sul Market Watch: il 15/08 la corsa post-download e'
+    # ripartita su TUTTI E 1722 i simboli con la sonda accesa e si e'
+    # impiccata su AUDCHF per altri 913 secondi. La sonda accesa e la
+    # scansione totale non stanno insieme.
     (Get-Content $SetInfo2) `
-      -replace "^InpSimboloFuso=.*",  ("InpSimboloFuso=" + $SimboloFuso) `
-      -replace "^InpSondaStorico=.*", "InpSondaStorico=true" |
+      -replace "^InpSimboloFuso=.*",     ("InpSimboloFuso=" + $SimboloFuso) `
+      -replace "^InpSondaStorico=.*",    "InpSondaStorico=true" `
+      -replace "^InpSoloMarketWatch=.*", "InpSoloMarketWatch=true" |
       Set-Content -Path $SetInfo2 -Encoding ASCII
     Lancia-Auto "ABTG_InfoBroker" "abtg_infobroker.set" $primoSym "H1" $InfoCsv 20 180 | Out-Null
   }
