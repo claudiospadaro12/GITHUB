@@ -134,6 +134,34 @@ operare, oltre alle 174 volte in cui c'è riuscita.
    **Controllo di chiusura: `grafici con EA NON NOSTRI: 0`.**
 4. ⬜ Ricalcolare le classifiche del forward escludendo i 33 trade del PC.
 
+## 5-bis. 🚨 LA COSA PIU' GRAVE, vista in uno screenshot del 15/08 alle 07:00
+
+Barra del titolo di MT5 **sul PC**:
+
+```
+50503392 - BCMMarkets-Server: Conto Demo - Hedge - BCM Markets Ltd - [CADCHF,H1]
+```
+
+> **Il PC di backtest e' LOGGATO SUL CONTO VIVO.**
+
+Le posizioni e i pendenti che si vedono in basso (`EMA200 DOW L1/L2`,
+`LARRY EURAUD S`, `LARRY ORO L`) **non sono aperti da li'**: un terminale
+collegato a un conto vede tutto quello che c'e' sul conto, chiunque l'abbia
+messo. Quelli sono della flotta del VPS. Nessun allarme su quello.
+
+**L'allarme e' la riga del titolo.** Tutto il caso del fantasma — 174 ordini,
+33 trade, −511,28 — sta in piedi su una condizione sola: **il PC e' collegato
+al conto che vale soldi**. Gli EA attaccati e AutoTrading sono i due
+interruttori, ma il filo e' quello.
+
+Finche' il filo c'e', bastano due distrazioni in fila (apro il profilo
+sbagliato + accendo AutoTrading per una prova) e riparte tutto. E le abbiamo
+gia' viste succedere.
+
+**La chiusura vera del caso non e' staccare gli EA: e' scollegare il PC dal
+conto vivo.** Il tester non ne ha bisogno — gira sullo storico, non sul conto —
+e per scaricare i dati basta un conto demo qualunque, separato.
+
 ## 6. Il limite, dichiarato
 
 La finestra è di **60 giorni** e i giornali disponibili sono 22 sul PC e 47 sul
