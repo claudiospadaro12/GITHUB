@@ -61,10 +61,39 @@ Tutte le celle vive, **esattamente come sono**, sulle 4 finestre di regime.
 
 Risponde alla domanda vera: **chi sopravvive a un mercato che non sale?**
 
-Esito per ogni cella, dichiarato ora:
-- positiva in **≥3 regimi su 4** → 🟢 **robusta**, resta e puo' passare alla fase 2
-- positiva in **2 su 4** → 🟡 resta a **taglia ridotta**, con l'avvertenza scritta
-- positiva in **≤1 su 4** → 🔴 **esce dal portafoglio**
+> ### ✍️ CORREZIONE, fatta prima di lanciare qualunque cosa
+> La prima stesura di questo file introduceva una regola nuova ("positiva in
+> ≥3 regimi su 4 = robusta"). **È sbagliata, e i criteri veri erano già
+> congelati dal 14/08** in `PROVA_REGIME_CRITERI.md`. Il difetto della mia
+> regola è preciso e grave:
+>
+> **quasi tutte le nostre celle sono LONG-ONLY.** È *normale* che un
+> long-only non guadagni in un mercato che scende. Contare i regimi "in
+> positivo" avrebbe **bocciato le celle sane per il motivo sbagliato**.
+>
+> **Valgono i criteri del 14/08, non questi.** Li riporto qui perché siano
+> sotto gli occhi quando si lancia:
+
+**A. SOPRAVVIVENZA.** Nelle finestre ORSO e CROLLO il DD non deve superare
+**il doppio** del DD della finestra OOS originale, e **mai il 20%**. Chi
+sfonda entrambe le finestre avverse va **declassato** (peso dimezzato).
+
+**B. TENUTA — e non e' un criterio di profitto.** Nelle finestre avverse il
+PF deve restare **>= 0,90**. E' un criterio di **NON-SANGUINAMENTO**:
+_"bocciare un long-only perche' non guadagna nell'orso sarebbe un errore di
+lettura; bocciarlo perche' si distrugge, no."_
+
+**C. PROMOZIONE DI RANGO.** Chi nell'ORSO fa **PF >= 1,10** con DD dentro il
+criterio A **sale di rango**: lavora in entrambi i regimi. _"Questi sono gli
+EA che cerchiamo davvero."_
+
+**D. REGOLA DEI DUE BANCHI.** Nessuna decisione da UNA sola finestra: serve
+la stessa direzione in **ORSO e CROLLO**. Un solo periodo avverso e' un
+aneddoto.
+
+**E. RIPESCAGGI.** Chi oggi e' in panchina si rimisura con gli stessi
+criteri: se supera A e C torna in gioco con un round di portafoglio dedicato
+— **non entra per simpatia**.
 
 ### FASE 2 — RI-OTTIMIZZAZIONE, ma SOLO sui sopravvissuti e SOLO a finestre multiple
 Qui si cercano davvero parametri migliori, e stavolta si puo':
