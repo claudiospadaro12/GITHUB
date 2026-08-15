@@ -89,7 +89,62 @@ comunicati tedeschi delle 08:00 lo sono. **Da chiarire.**
 ## 🟢 LE CINQUE DI CONTORNO (contano, ma non chiudono)
 
 ### 8. Profit target, numero di fasi, giorni minimi e massimi
-### 9. Payout: frequenza, tetto del primo, split, tempi reali
+### 9. 💧 Payout: la LINEA DI GALLEGGIAMENTO (high water mark)
+
+_Domanda di Claudio, 15/08: "se perdo 1000 in un giorno e il giorno dopo ne
+guadagno 500, per portare soldi a casa devo comunque superare i 100k?"_
+
+**Si'.** Il payout si calcola sul **profitto netto rispetto al saldo
+iniziale**, non sul guadagno dell'ultima giornata.
+
+| giorno | operazione | saldo | ritirabile |
+|---|---|---:|---|
+| parti | — | **100.000** | 0 |
+| 1 | −1.000 | 99.000 | **0** |
+| 2 | +500 | **99.500** | **0** |
+
+Servono **altri +500 solo per tornare a pari**. Da 100.000 in su e' ritirabile
+l'eccedenza, secondo lo split.
+
+> **Il conto ha una linea di galleggiamento a 100.000. Sotto quella linea si
+> lavora per recuperare, non per guadagnare.**
+
+#### E il DD trailing la rende peggiore
+
+Se il drawdown e' trailing (§1), quel −1.000 non fa solo perdere terreno sul
+profitto: **il pavimento ti segue e non riscende.**
+
+| | picco | pavimento (DD 10%) |
+|---|---:|---:|
+| parti | 100.000 | 90.000 |
+| sali a 105.000 | 105.000 | **95.000** ⬆️ |
+| scendi a 99.000 | 105.000 | **95.000** (resta su) |
+
+**Da chiedere per iscritto: il trailing si BLOCCA al breakeven?** Cioe',
+arrivato a 100.000 si ferma li'? E' una clausola **buona**, e cambia molto.
+
+#### 📐 La conseguenza, coi nostri numeri
+
+> **In una prop il drawdown conta piu' del rendimento**, perche' una perdita
+> costa **due volte**: il denaro, e il tempo per recuperarlo prima di poter
+> ritirare qualcosa.
+
+500 € su 100k e' lo **0,5%**. Il DAX Apertura ha aspettativa **+0,075R** per
+trade e a rischio 0,65% un R vale 650 €, cioe' circa **49 € al giorno**:
+servono **~10 giorni di operativita' solo per tornare a pari**. Col
+portafoglio intero e' piu' veloce, ma il principio non cambia.
+
+E' anche il motivo per cui giriamo a **0,65% e non a 1%**: la Monte Carlo
+dice p99 **12,47%** a rischio 1% e **~8,1%** a 0,65%.
+
+#### Le altre caselle del payout, da spuntare
+
+- **frequenza** del ciclo (14 giorni? 30?)
+- **tetto del primo prelievo** (su Upcomers le recensioni dicevano $500)
+- **split** (80%? 90%?) — e ricorda: _lo split e' l'ultima cosa che conta se
+  il payout viene negato_
+- **tempi reali** di accredito, non quelli dichiarati
+
 ### 10. Costo, e cosa dice il **modello di business**
 
 > Upcomers vendeva un 100k a **$115,90 invece di $1.159**. Non e' un affare da
