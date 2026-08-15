@@ -148,6 +148,27 @@ slippage costa 5,90 EUR su un R di 650, cioe' lo 0,9% — irrilevante.
 **Non e' lo stesso mestiere.** E' la stessa strategia su un mercato che ti
 vede arrivare.
 
+### ⚠️ CORREZIONE del 15/08 (poche ore dopo): l'esempio era quello sbagliato
+
+Il conto qui sopra vale per gli ingressi **a mercato o a stop**. **Il DAX
+Apertura vivo non e' fra quelli**: gira in RETEST, che entra con
+`BuyLimit`/`SellLimit` (`ABTG_DAX_Apertura_EU.mq5:1474`), e **un limit non
+subisce slippage negativo per costruzione** — o si riempie al prezzo chiesto,
+o non si riempie.
+
+Ho usato come esempio **la cella meno esposta di tutte**. Il ragionamento sui
+177 lotti resta in piedi; l'esempio no.
+
+**E la correzione porta una notizia buona**: il RETEST **scala meglio** del
+breakout. A taglia grande chi entra a stop **entra comunque, a un prezzo
+peggiore** (perde soldi); chi entra a limit **rischia di non entrare** (perde
+un'occasione). La scelta del RETEST fatta in R6 aveva un beneficio collaterale
+che non avevamo mai notato.
+
+**Le celle davvero esposte sono altre**: PTE, BreakingBand, GapFill,
+CostToCost (a mercato) e ORB Dow, MaxMinNotte, Larry (a stop). Mappa completa
+in `prove/R55_SCALABILITA_TESI.md` §1.
+
 ### 🚨 E la cosa che mi preoccupa di piu': non l'abbiamo MAI misurato
 
 `InpSlippagePts` esiste nell'EA. In **tutte** le prove del progetto vale
@@ -164,7 +185,7 @@ un'approssimazione ragionevole. A 1,5M non lo e' piu'.
 **Questo non riguarda solo Upcomers**: riguarda ogni taglia sopra la nostra,
 e in parte anche quella attuale.
 
-### La proposta concreta: R55 — LA SOGLIA DI SLIPPAGE
+### La proposta concreta: R55 — QUANTO SCALA OGNI CELLA
 
 Un round corto, sui dati che abbiamo, che risponde a una domanda sola:
 

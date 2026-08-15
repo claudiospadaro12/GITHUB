@@ -191,6 +191,37 @@ Referto: `risultati_archivio/REFERTO_ROUND54_LATI_DOW.md`, CSV in
 Del censimento R52 restano **9 celle su 11** col lato spento a mano: tutte
 bloccate in attesa di storico che oggi non abbiamo.
 
+## 1-quinquies. R55 — QUANTO SCALA OGNI CELLA (tesi pronta, serve codice)
+
+Nato dalla domanda di Claudio sui conti prop da 1,5M. **Il round che avevo
+proposto NON si puo' fare come l'avevo scritto**: `InpSlippagePts` esiste solo
+nel ramo BREAKOUT della famiglia Apertura, e le celle vive girano in RETEST,
+che entra a LIMIT e non legge quell'input. Sarebbero uscite righe identiche.
+
+**Mappa degli ingressi letta dal codice** (`prove/R55_SCALABILITA_TESI.md` §1):
+- **a MERCATO** (slippage pieno): PTE, BreakingBand, GapFill, CostToCost
+- **a STOP** (slippage sulla rottura): MaxMinNotte, ORB, Larry, SuperWave, STREV
+- **a LIMIT** (niente slippage, ma rischio di NON riempirsi): EMA200, EasyTrend,
+  Larry(limit), **Apertura in RETEST**
+
+**Scoperta**: il RETEST **scala meglio** del breakout — a taglia grande chi
+entra a stop entra comunque a prezzo peggiore (perde soldi), chi entra a limit
+rischia di non entrare (perde un'occasione). Beneficio collaterale della scelta
+di R6, mai notato prima. **La cella che scala peggio non e' il DAX: e' il PTE**,
+a mercato, la famiglia con piu' serie in classifica.
+
+**Dai giornali (60 gg, gia' in casa)**: sul D30EUR **20 pendenti su 187 sono
+scaduti INEVASI** (10,7%) gia' a 11,80 lotti. NASUSD 11,7%, U30USD 21,4%,
+XAUUSD 32,0%. (La colonna "annullati" NON e' non-fill: contiene le
+cancellazioni volontarie del gemello. L'unico dato pulito e' "scaduti".)
+
+**Per misurare serve prima toccare il codice**: aggiungere `InpSlippagePts`
+(default 0 = forward invariato, come si e' fatto con `InpAllowReverse`) a
+**ABTG_PTE** e **ABTG_ORB_Ottimizzato**. Poi il round e' corto: 5 valori x 2
+finestre x 2 EA = 20 passate. Criteri gia' congelati nella tesi.
+
+**Oggi non c'e' una riga da lanciare.**
+
 ## 2. GLI INDICI: Pepperstone (il pezzo grosso che manca)
 
 HistData non ha gli indici, quindi **4 titolari su 5 (DAX, Dow, Nasdaq,
