@@ -119,3 +119,101 @@ posto giusto dove metterla e' un round con la sua tesi e i suoi criteri
 scritti prima**, come abbiamo fatto 55 volte. Se un'idea adattiva passa un
 walk-forward con i cancelli congelati **e** la prova di regime, entra. Le
 regole non cambiano per l'entusiasmo, e non cambiano nemmeno per la prudenza.
+
+
+---
+
+# 🔄 PRECISAZIONE DI CLAUDIO — e una correzione a quanto ho scritto sopra
+
+_15/08/2026: "adattarsi intendo che se il mercato va long o short o laterale,
+i nostri EA devono capire il mercato e quindi entrare o non entrare."_
+
+Questa e' una cosa **diversa e molto piu' precisa** di "EA adattivo": e' un
+**filtro di direzione/regime**. Ed e' testabile — anzi, **l'abbiamo gia'
+testata parecchie volte**. I risultati si dividono in due gruppi netti, e la
+riga di separazione **non e' quella che avevo scritto sopra**.
+
+## A. ❌ Filtro APPICCICATO a un motore gia' tarato: 0 successi su 5
+
+| round | il filtro | esito |
+|---|---|---|
+| **R20** GBPUSD | **ADX 25** — il filtro canonico "trend o laterale" | unica cella IS verde (**PF 1,46**) = **la PEGGIORE OOS** (PF 1,08) |
+| **R12** Nasdaq | EMA200 + volumi sull'ORB, 48 celle | **tutte e 48 negative OOS**. Con EMA200 l'IS migliora (−1.306 → −299) e l'**OOS resta rossa**. 12o ribaltamento |
+| **R26** DAX | filtro volumi | baseline OOS **+1.811**; col filtro **+1.649 / +893 / +1.138** → **0 su 3**, non si adotta |
+| **R45** ORB Londra | filtro volumi | _"attenua ma non inverte mai"_ |
+| **R54** Dow | il lato short ("se scende, vendi") | **PF OOS 0,840** su 73 trade, bocciato |
+
+> 🔍 **R26 e' il piu' istruttivo di tutti.** Alla soglia 1,8 il filtro fa
+> **salire il PF a 2,37** e **scendere il DD a 2,59%** — sembra un trionfo. Ma
+> il **profitto crolla da 1.811 a 1.138**, perche' i trade passano da 270 a 62.
+> **Il filtro migliora la qualita' dei trade e peggiora il conto**: taglia piu'
+> vincitori che perdenti. Un filtro che "capisce il mercato" **sembra** sempre
+> bravo se lo guardi col PF.
+
+## B. ✅ Filtro che E' IL MOTORE, nato con lui e validato dall'inizio: il nostro miglior risultato di sempre
+
+**`ABTG_EMA200` sul Dow** e' esattamente questo: **entra solo dalla parte in
+cui sta il mercato rispetto alla media a 200**. Cioe' letteralmente _"capire
+se va long o short, e quindi entrare o non entrare"_.
+
+**R29 — walk-forward:**
+> **30 celle su 30 a PASS PIENO.** PF OOS da **1,44 a 1,61** (nemmeno una sotto
+> 1,10). DD OOS **5,97-8,50%** (nemmeno una sopra 10). 400-500 trade OOS per
+> cella. **_"Mai, in 29 round, una regione intera aveva superato il cancello."_**
+
+**R31 — in portafoglio (la SEDIA 12):**
+
+| | 11 serie | **12 serie** |
+|---|---|---|
+| Netto OOS | +102.933 | **+126.255 (+23%)** |
+| MAX DD storico | 10,08% | **9,50% — SCESO** |
+| MC p99 | 14,79 | **14,45 — giu'** |
+
+> _"Prima volta che un ingresso abbassa il DD storico E le code MC mentre
+> aggiunge il 23% di profitto."_
+
+## ✍️ La correzione che devo a Claudio
+
+Sopra avevo scritto che "adattivo e robusto sono in conflitto". **Detta cosi'
+e' troppo larga, e i nostri dati la smentiscono**: l'EMA200 e' un filtro di
+direzione, ed e' una delle nostre sedie migliori.
+
+**La riga di separazione vera non e' "filtro si' / filtro no". E' questa:**
+
+| | esito |
+|---|---|
+| Filtro **aggiunto dopo** a un motore gia' tarato | **0 su 5**. Aggiunge un parametro, taglia trade, e fuori campione perde |
+| Filtro che **E' la strategia**, con i suoi cancelli fin dall'inizio | **puo' essere il migliore in assoluto** (R29: 30/30) |
+
+**Non e' l'idea a essere sbagliata: e' il momento in cui la si aggiunge.**
+
+## 🌍 E la prova di regime dice una terza cosa, ancora piu' importante
+
+R50 ha misurato **8 celle congelate su 4 regimi veri**. Guarda cosa esce:
+
+| cella | ORSO 2022 | CROLLO 2020 | TORO 2021 | LATERALE 2019 |
+|---|---|---|---|---|
+| **PTE_GBPUSD** | +1.245 | +70 | +1.362 | +5.284 |
+| **LARRY_GBPUSD** | +1.587 | **−708** | +4.095 | **−6.445** |
+| **BB_EURUSD** | +932 | +502 | **−1.561** | **−2.381** |
+
+- **PTE e' positivo in TUTTI E QUATTRO i regimi** — senza nessun filtro di
+  regime. E' gia' robusto: non gliel'ha insegnato nessuno, ce l'ha nella
+  meccanica.
+- **LARRY muore nel laterale** (−6.445) e **BB muore nel toro** (−1.561)... ma
+  **BB regge dove Larry crolla** (crollo 2020: +502 contro −708).
+
+> 🎯 **"Capire il mercato" non lo fa il singolo EA: lo fa il PORTAFOGLIO**,
+> tenendo insieme motori che vivono in regimi diversi. E questo non e' una
+> teoria: sono i numeri di R50.
+
+## 🧭 Quindi, in pratica
+
+1. **Non aggiungiamo filtri di regime alle sedie vive.** Cinque tentativi su
+   cinque hanno perso OOS, e le sedie vive sono collaudate.
+2. **Se vuoi un EA che legge la direzione, si costruisce come motore nuovo**,
+   con la sua tesi e i suoi cancelli — come e' nato l'EMA200. **Quella strada
+   e' aperta e ha gia' dato il miglior risultato del progetto.**
+3. **La prova di regime dice CHI COPRE COSA**: e' la mappa che serve per
+   scegliere la prossima sedia. Oggi ce l'abbiamo solo sul forex (R50); con
+   Dukascopy 2012 la avremo **sugli indici**, dove stanno le sedie grosse.
