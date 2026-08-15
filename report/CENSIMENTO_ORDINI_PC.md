@@ -147,6 +147,29 @@ operare, oltre alle 174 volte in cui c'è riuscita.
    rilanciato a lavoro finito, verifica che il conto sia sceso a zero.
 
    **Controllo di chiusura: `grafici con EA NON NOSTRI: 0`.**
+
+   > ### 🔄 AGGIORNAMENTO 15/08 ore 13:50 — ne resta UNO
+   >
+   > Rilanciata l'anteprima, il profilo `Default` **non ha piu' 19 grafici: ne
+   > ha UNO**, e sopra c'e' `BULGE_MULTI_SIGNAL_ARANCIO_L` su **CADCHF**.
+   > Gli altri dieci EA non nostri non compaiono piu'.
+   >
+   > **[VERIFICATO]** dal referto: 1 grafico con EA non nostro, 28 senza, 0
+   > nostri. Il secondo terminale (`73B7A242...`) e' pulito su tutti e quattro
+   > i profili.
+   >
+   > **[INFERITO] il perche'**: MT5 riscrive il profilo attivo quando si
+   > chiude. Claudio ha aperto MT5 la mattina (screenshot delle 07:00, grafico
+   > **CADCHF,H1**, profilo `Default` in basso a destra) e chiudendolo ha
+   > salvato **lo stato a schermo** — un grafico solo. I 19 di prima erano
+   > l'ultimo salvataggio precedente.
+   >
+   > **E spiega lo screenshot delle 07:00**: Claudio scriveva "non c'e' nemmeno
+   > un EA attaccato", ma su quel CADCHF **l'EA c'era** — e si vedeva pure, le
+   > bande verdi sul grafico sono la Bulge. Non guardava il profilo sbagliato:
+   > guardava il grafico giusto senza vedere la faccina.
+   >
+   > **Resta una cosa sola da fare, ed e' un grafico.**
 4. ⬜ Ricalcolare le classifiche del forward escludendo i 33 trade del PC.
 
 ## 5-bis. 🚨 LA COSA PIU' GRAVE, vista in uno screenshot del 15/08 alle 07:00
