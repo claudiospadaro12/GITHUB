@@ -3,7 +3,121 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-08-14 sera**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-08-15 mattina**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🧾 AGGIORNAMENTO 15/08 — quattro round chiusi in una notte, e il fantasma misurato fino in fondo
+
+### 0. IL NUMERO CHE RIBALTA DUE SETTIMANE DI LETTURE
+
+Il fantasma sul PC **non erano due giornate: erano SEDICI**. Censimento di
+tutti gli `order #` nei giornali di entrambe le macchine
+(`report/CENSIMENTO_ORDINI_PC.md`):
+
+| il PC ha piazzato | |
+|---|---:|
+| ordini sul conto vivo 50503392 | **174** |
+| giorni distinti (06/07 -> 14/08) | **16** |
+| di cui diventati trade veri | **33** |
+| netto dei 33 | **-511,28** |
+
+**Il controllo che valida tutto**: dei trade non attribuiti, quelli con un
+magic di EA sono **ZERO** — sono tutti manuali/mobile (che non passano dal
+giornale desktop) e stanno prima del 22/07. **Per gli EA l'attribuzione e'
+completa al 100%.**
+
+> ### Dal 22/07 il conto piccolo fa -340,70, ma il PC ci mette -475,56 e il
+> ### VPS **+93,14**. Tolto il fantasma: **+134,86**.
+> **La flotta sul VPS non e' in perdita. E' in leggero utile.** Il rosso del
+> periodo del vivaio era il fantasma, non la varianza.
+
+Conseguenze scritte e non ancora eseguite:
+- il magic **770101 era un miscuglio di due macchine** (15 trade PC per
+  -437,87 + 11 VPS per -211,65): va ricalcolato **solo sul VPS** prima di
+  confrontarlo con qualunque backtest;
+- le classifiche del forward vanno rifatte **escludendo i 33 trade del PC**;
+- R47 resta valido come misura del payoff, ma **la premessa "il conto e'
+  sotto" era in parte falsa**.
+
+**E il 29/07 alle 08:53:56 lo stesso segnale e' stato eseguito DUE VOLTE da
+due macchine** (VPS SELL 1,60 -120,80 · PC SELL 1,60 -115,04 = **-235,84 su un
+segnale solo**). La mitigazione A1 non poteva vederlo: un terminale non vede i
+pendenti dell'altro.
+
+### 0-bis. 🚨 IL FILO, non gli interruttori
+
+Screenshot del 15/08 alle 07:00, barra del titolo di MT5 **sul PC**:
+`50503392 - BCMMarkets-Server`. **Il PC di backtest e' LOGGATO SUL CONTO
+VIVO.** Gli EA attaccati e AutoTrading sono i due interruttori; il filo e'
+quello. **La chiusura vera del caso non e' staccare gli EA: e' scollegare il PC
+dal conto vivo** — il tester gira sullo storico e non ne ha bisogno.
+
+**Metodo che ne esce, e vale piu' del caso**: la firma che distingue chi ha
+piazzato da chi guarda e' `order #N ... done in NNN ms` (ha piazzato) contro
+`deal #M (based on order #N)` (vede l'esecuzione). E **il controllo positivo**:
+in ogni caccia si cerca anche un ticket di cui si conosce gia' la risposta,
+altrimenti "non trovato" e' ambiguo — puo' voler dire "non c'e'" oppure "non so
+cercare". Strumenti: `caccia_ticket.ps1`, `censimento_ordini.ps1`.
+
+**Onesta' sull'errore**: nella pagella del 14/08 avevo inferito che **tre** stop
+pieni fossero del fantasma. Erano **due**: il 06/08 e' del VPS, trade regolare.
+Era marcato [INFERITO] ed e' servito a far fare la verifica, ma "tre indizi
+convergenti" non vuol dire "vero".
+
+### 1. QUATTRO ROUND CHIUSI, e tre ribaltamenti nuovi
+
+| round | verdetto | il numero |
+|---|---|---|
+| **R51** reverse DAX | **RISERVA**, resta spento | OOS +74,6% e DD giu', **ma la peggior giornata RADDOPPIA** (-1,07 -> -2,06%) e i due banchi vanno in direzioni opposte. **30° ribaltamento** |
+| **R53** fuso Easy Trend | **la fascia NON decide**, si tiene 8-18 | 7-17 e 8-18 pari a 2 voti: serviva 3 su 4. Se fosse un fuso vincerebbe DAPPERTUTTO: e' il pattern delle sessioni di ogni cambio. **29° ribaltamento** (AUDJPY) |
+| **R54** i lati mai misurati del Dow | **due short BOCCIATI** | Dow short PF 0,840 (n=73, bocciato per merito); ORB short rosso in entrambe le finestre. **28° ribaltamento**: lo short e' la cella MIGLIORE in campione |
+| **R55** slippage | **scala lo STOP LARGO**, non il tipo di ordine | PTE a 200 pt: DD 3,2166 -> 3,2711% (**scala**). ORB: DD 9,76 -> **10,34%**, fuori dal cancello prop con **1,5 punti indice** |
+
+**La scoperta di R55 vale piu' del suo verdetto**: stesso slippage in punti,
+sensibilita' che differisce di **undici volte**. Non lo spiega il tipo di
+ordine, lo spiega la **larghezza dello stop** (`lotto = R / distanza_stop`).
+E' la stessa lezione della FASE H del 07/08 da un'altra porta: **una cella con
+lo stop stretto e' fragile due volte.** Criterio gratis su tutte e 32 le celle
+vive: basta leggere `InpSLMode`.
+
+**Igiene, tutte e quattro le volte**: gemelli identici al centesimo, e le celle
+vive riprodotte contro i round precedenti (R54b = R46 riga 33 al centesimo ·
+R53 8-18 = R48 con stesso n=41 · R55 slip 0 = R54b al centesimo).
+
+### 2. FATTO ANCHE
+
+- **Guardia A4 chiusa su tutti e quattro** gli EA Apertura (Dow 1.01, Nasdaq
+  1.02, Marco 1.01): `HaGiaOperatoOggi()` restituisce anche `storicoOk`. **E i
+  log del 14/08 contengono la fotografia del difetto** — riarmo alle 16:17:43
+  su giornata gia' operata, guardia che funziona dalle 16:38. Non era teorica.
+  **Da ricompilare sul VPS.**
+- **`InpSlippagePts` aggiunto** a `ABTG_PTE` v1.01 e `ABTG_ORB_Ottimizzato`
+  v1.01, **default 0 = forward invariato**, come si e' fatto con
+  `InpAllowReverse`.
+- **Scheda prop Upcomers** (`report/SCHEDA_PROP_UPCOMERS.md`): **NO adesso**.
+  Il loro DD e' **TRAILING** e tutte le nostre MC sono su DD statico; piu'
+  "best day rule" e payout negati con motivazioni soggettive
+  ("one-sided betting") che colpiscono proprio le strategie direzionali
+  d'apertura. **Il lavoro che vale comunque: rifare la MC col trailing.**
+- **Fuso BCM riconfermato al secondo** su un caso reale: stesso evento, log PC
+  09:16:16 (ora locale) e CSV VPS 08:16:16 (ora server).
+
+### 3. DA FARE, in ordine
+
+1. **Controllo di tenuta**: rilanciare `censimento_ordini.ps1` **fra una
+   settimana**. Se il PC ha piazzato **zero** ordini nuovi, il caso si chiude.
+   **E' l'unica prova che vale.**
+2. **Scollegare il PC dal conto vivo** (o metterci un demo separato): e' il
+   filo, non l'interruttore.
+3. **Staccare gli 11 EA non nostri** dai grafici del PC — a mano in MT5 (tasto
+   destro > Consulenti esperti > Rimuovi), cosi' grafici e template restano.
+   Checklist coi simboli: `backtest_pipeline/stacca_ea_terzi.ps1` (anteprima,
+   non tocca niente). Controllo di chiusura: `EA NON NOSTRI: 0`.
+4. Ricalcolare classifiche del forward e magic 770101 **senza i trade del PC**.
+5. **Monte Carlo col DD trailing** (serve per qualunque prop moderna).
+6. Misura **DST su BCM** (scadenza 25/10/2026) e **Pepperstone** (il conto demo
+   non risulta creato: `Invalid account`, ricognitore a 0 file).
 
 ---
 
@@ -48,8 +162,8 @@ anche quando lo storico non era ancora sincronizzato all'avvio; e il chiamante
 timbrava `gGuardiaGiorno` **prima** di sapere, quindi non ci riprovava mai
 piu'. Confondere "non lo so" con "no". Corretto in
 `ABTG_DAX_Apertura_EU.mq5` (ora `CicliOggi` restituisce anche `storicoOk`).
-**Stesso difetto ancora da correggere** in `ABTG_Dow_Apertura_US.mq5:704`,
-`ABTG_Nasdaq_Apertura_US.mq5:751`, `ABTG_Apertura_Marco.mq5:636`.
+~~**Stesso difetto ancora da correggere** in Dow, Nasdaq, Marco.~~
+**-> CHIUSO il 14/08 sera su tutti e tre** (vedi aggiornamento 15/08 §2).
 
 ### 3. R50 — LA PRIMA PROVA DI REGIME DELLA STORIA DEL PROGETTO
 
@@ -90,7 +204,7 @@ R50 non era mai girato prima e ha fatto emergere, tutti corretti:
 6. il messaggio di fallimento **faceva una domanda** invece di indicare il
    giornale, dove MT5 scrive il motivo a parole sue.
 
-### 5. R51 e R52 — SCRITTI, NON ANCORA LANCIATI
+### 5. R51 e R52 — SCRITTI (R51 poi CHIUSO il 14/08 notte: RISERVA, vedi §1 del 15/08)
 
 - **R51, lo short di ritorno** (idea di Claudio): il retest e' simmetrico ma
   dopo il primo LIMIT la macchina a stati va in `PH_PLACED` e abbandona il
@@ -137,6 +251,8 @@ l'ipotesi.** E quando MT5 non parte, il file da aprire e'
   e' **1R esatto**, cioe' la taratura prevista.
 - **piccolo (50503392)**: contaminato fino a oggi dall'istanza fantasma del
   PC. Da qui in avanti i numeri del DAX tornano leggibili.
+  **-> MISURATO il 15/08**: 33 trade del PC per -511,28; dal 22/07 la flotta
+  vera e' a **+93,14**, non in perdita. Saldo 5.150,99. Vedi §0 del 15/08.
 - **Vivaio**: 23 in prova + 5 in osservazione. Verdetti a **15 trade per
   famiglia**. Pagella serale: si guarda **il win rate**, non il P/L.
 
