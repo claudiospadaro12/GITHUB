@@ -206,11 +206,22 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -EA SilentlyContinue)) {
   $charts = Join-Path $dir.FullName "MQL5\Profiles\Charts"
   if (-not (Test-Path $charts)) { continue }
   Riga ("--- terminale " + $dir.Name + " ---") "Yellow"
+  # Da quale installazione viene questo terminale: sul PC ce ne sono due e
+  # l'ID cartella NON basta a distinguerle (MT5 lo ricava dall'hash del
+  # percorso, quindi due macchine con la stessa cartella hanno lo stesso ID).
+  $orig = Join-Path $dir.FullName "origin.txt"
+  if (Test-Path $orig) {
+    try { Riga ("    installato in: " + ((Get-Content $orig -Raw).Trim())) "DarkGray" } catch {}
+  }
 
   foreach ($prof in (Get-ChildItem $charts -Directory -EA SilentlyContinue | Sort-Object Name)) {
     $chr = @(Get-ChildItem $prof.FullName -Filter "chart*.chr" -EA SilentlyContinue | Sort-Object Name)
     if ($chr.Count -eq 0) { continue }
-    Riga ("  profilo '" + $prof.Name + "'  (" + $chr.Count + " grafici)") "DarkYellow"
+    # MT5 riscrive i .chr del profilo ATTIVO quando salva o si chiude: il
+    # profilo coi file piu' recenti e' quasi sempre quello in uso. E' un
+    # indizio, non una certezza - la spunta vera si vede in File > Profili.
+    $ultimo = ($chr | Sort-Object LastWriteTime -Descending)[0].LastWriteTime
+    Riga ("  profilo '" + $prof.Name + "'  (" + $chr.Count + " grafici)   ultimo salvataggio: " + $ultimo.ToString("yyyy-MM-dd HH:mm")) "DarkYellow"
     foreach ($f in $chr) {
       $txt = Testo-Chr $f.FullName
       $ea  = Nome-EA $txt
@@ -229,6 +240,12 @@ foreach ($dir in (Get-ChildItem $termRoot -Directory -EA SilentlyContinue)) {
 }
 
 Riga "=== RIEPILOGO ===" "Cyan"
+Riga "NB: se in MT5 non vedi nessun EA attaccato, quasi sempre e' perche'" "Yellow"
+Riga "hai aperto UN ALTRO PROFILO o L'ALTRO TERMINALE. Guarda qui sopra" "Yellow"
+Riga "in quale profilo stanno, e vai la' con File > Profili." "Yellow"
+Riga "Un profilo non attivo non gira - ma resta armato per il giorno in" "Yellow"
+Riga "cui lo riapri. Per questo va svuotato lo stesso." "Yellow"
+Riga ""
 Riga ("  grafici con EA NOSTRI    : " + $nNostri) "Green"
 Riga ("  grafici con EA NON NOSTRI: " + $daStaccare.Count) "Red"
 Riga ("  grafici senza EA         : " + $nVuoti)
