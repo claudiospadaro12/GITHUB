@@ -84,18 +84,47 @@ RETEST +3,90.
 COST EURJPY L −51,02 · **ORB BUY −42,91 (0/1)** · Nasdaq OTT BUY −10,00 ·
 MAXMIN ORO −2,60.
 
-### 🆕 Sul conto piccolo girano DUE ORB, non uno
+### ⚠️ CORREZIONE — avevo scritto "girano DUE ORB". È FALSO.
 
-| commento | magic | trade | netto |
-|---|---|---:|---:|
-| `ORB BUY` | **770601** — l'ORB **del corso** | 1 (1,20 lotti) | −42,91 |
-| `ORB OTT BUY` | **770611** — il nostro laboratorio | 2 | −69,77 |
-| | | **3** | **−112,68**, **0 vinti su 3** |
+Nella prima stesura avevo dedotto che sul conto piccolo girassero due ORB.
+**Verificato: no.** Il magic **770601 non opera più dal 10/08**, e quel trade è
+il suo **ultimo in assoluto**: è finito nella settimana solo perché la settimana
+comincia il 10/08.
 
-R15 dice esplicitamente _"magic DIVERSO dal corso (770601)"_: sono due EA
-distinti che operano sullo stesso setup. **Da verificare se il 770601 è
-dichiarato in `FLOTTA_ATTIVA.md`** — se non lo è, è un'altra riga non censita
-sul conto vivo.
+| commento | magic | ultimo trade | stato |
+|---|---|---|---|
+| `ORB BUY` | **770601** (corso) | **10/08 14:30:11** — questo | 🔴 **SPENTO** |
+| `ORB OTT BUY` | 770611 (nostro) | 13/08 15:05 | 🟢 vivo |
+
+**Ed era previsto**: il 770601 era il **numero 1 della lista TIER 1 "SPEGNERE"**
+di `report/PULIZIA_VPS_10-08.md`, con la motivazione _"bug pendente noto; oggi
+−42,91 in 4 min; magic 770601"_ — cioè **proprio quel trade**. La pulizia è
+stata eseguita, e quel −42,91 è il suo ultimo respiro, non un EA che continua.
+
+> **Nota onesta**: il 770601 chiude con **+351,51 su 20 trade**. Era **in
+> utile**: è stato spento per un **difetto tecnico**, non per il rendimento.
+
+Quindi la famiglia ORB **oggi ha una sola riga viva** (770611, −69,77 su 2), non
+tre. Il conteggio "−112,68 con 0 vinti su 3" della prima stesura **mescolava un
+EA vivo con uno spento** ed è da scartare.
+
+## 4-bis. ✅ CONTROLLO DI TENUTA DELLA PULIZIA DEL 10/08 — passato
+
+Occasione colta: se il 770601 è davvero spento, **lo sono anche gli altri 14**
+della lista TIER 1? Contati i magic che hanno operato **dopo il 10/08**:
+
+**Sono NOVE, e sono tutti quelli giusti**: 770101 DAX Apertura · 770202 Dow
+Apertura · 770201 Nasdaq Apertura · 770611 ORB OTT · 770402 MAXMIN ORO ·
+771531 EMA200 DOW · 771322 PTE GBPUSD · 772361 COST EURJPY · 970916 STREV DOW.
+
+> ### Nessuno dei 15 EA spenti il 10/08 è tornato a operare. La pulizia ha
+> ### tenuto al 100%, ed è la prima volta che lo verifichiamo.
+
+Fra i morti, il più pesante della storia del conto: **`BULGE_MULTI_SIGNAL_BLU_L`
+(magic 20250001) — 297 trade, −1.158,06**, fermo dall'8 giugno.
+
+**Nota su `FLOTTA_ATTIVA.md`**: esiste, ma sta nella **root** del repo, non in
+`report/`. Il primo controllo l'aveva cercato nel posto sbagliato.
 
 ## 5. Cosa NON si decide da qui
 
