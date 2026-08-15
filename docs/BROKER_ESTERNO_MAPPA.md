@@ -123,6 +123,55 @@
 > GBPUSD e USDJPY si scrive: e' identico in **tre corse su tre**, con 22.524
 > barre H1 e 939 D1 sempre uguali.
 
+> ## 🛤️ 15/08/2026 — "LO STORICO PEPPERSTONE LO POSSIAMO CARICARE SU BCM?"
+>
+> Domanda di Claudio. **Si', e la macchina c'e' gia'.** Ma le strade sono due
+> e non sono equivalenti.
+>
+> ### A) Testare DIRETTAMENTE sul terminale Pepperstone
+> `walkforward_generico.ps1 -Expert ... -BrokerPattern "Pepperstone" -Simbolo "US30"`
+> esiste dal 14/08. Zero conversione: prezzi, spread, specifiche e storico
+> vengono tutti dallo stesso broker, quindi sono coerenti fra loro.
+> **Costo:** gli orari dei nostri EA sono in ORA SERVER BCM. Su un server a
+> UTC+0 vanno RIMAPPATI, e oggi il numero che avremmo per farlo e'
+> **[INFERITO], non misurato**.
+>
+> ### B) Importare in BCM come `US30_EXT`  ← **RACCOMANDATA**
+> `ABTG_ImportaStoricoEsterno.mq5` crea il simbolo custom clonando le
+> proprieta' di `U30USD` (digits, point, contract size, tick value) e
+> **CALIBRA DA SOLO lo shift orario** confrontando le chiusure H1 importate
+> con quelle native BCM (`CustomSymbolCreate` + `CustomRatesUpdate`).
+>
+> **Due vantaggi, e il secondo e' quello che decide:**
+> 1. BCM ha `U30USD` **dal 26/09/2024**: sono **21 mesi di sovrapposizione**
+>    con Pepperstone. Lo shift non si stima, si **misura** su ventun mesi di
+>    barre comuni.
+> 2. **Gli orari degli EA non si toccano.** Il simbolo custom vive nel fuso
+>    BCM per costruzione: `InpSessionHour=8` resta 8. La domanda "che ora e'
+>    sul server?" esce dal problema — ed e' esattamente il punto dove un
+>    errore di un'ora rende spazzatura ogni verdetto.
+>
+> **Il pezzo che manca:** `ABTG_HistoryDownloader.mq5` scarica lo storico
+> DENTRO MT5 ma **non esporta le barre in CSV** (scrive solo un riepilogo).
+> Serve un esportatore lato Pepperstone che scriva il **formato 1**
+> (`YYYY.MM.DD HH:MM,open,high,low,close,volume`), quello che
+> `ABTG_ImportaStoricoEsterno` gia' legge. E' da scrivere.
+>
+> ### ⛔ MA NON SI SCRIVE ADESSO
+> Prima serve sapere se `US30` su Pepperstone **arriva davvero al 2020/2022**.
+> Se parte dal 2023 come i cambi (EURUSD/GBPUSD/USDJPY, confermato 3 corse su
+> 3), tutta questa strada non porta da nessuna parte e l'esportatore sarebbe
+> lavoro buttato. **Ordine: nomi -> prima data degli indici -> esportatore.**
+>
+> ### I limiti, validi per ENTRAMBE le strade
+> 1. **Prova di regime, non taratura** (regola gia' congelata in
+>    `report/ASPETTATIVE_REALISTICHE.md`): _"un parametro pescato qui e'
+>    PEGGIO di nessun test, perche' sembra validato"_.
+> 2. **Spread e commissioni sono quelli del tester, non quelli storici.** R55
+>    ha appena misurato che sull'ORB **1,5 punti indice sfondano il cancello
+>    del 10%**: su un test di regime dell'ORB il P&L NON si legge, si legge
+>    solo "sopravvive o no".
+
 **Stato: SCHELETRO DA COMPILARE.** Le tabelle qui sotto sono vuote apposta:
 si riempiono con l'elenco VERO prodotto da `ABTG_InfoBroker`, non con nomi
 plausibili. Finche' una riga non ha la data nella colonna "verificato il",
