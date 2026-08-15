@@ -242,19 +242,68 @@ Start-Process -FilePath $Terminal -ArgumentList "/config:$Ini"
 # (la prima versione faceva Import-Csv qui dentro e moriva con
 #  "il file e' in uso da un altro processo", lasciando MT5 aperto)
 $ErrorActionPreference = "Continue"
+
+# --- fotografia dei log PRIMA di partire: cosi' dopo si legge solo il nuovo
+$logDirW  = Join-Path $DataFolder "MQL5\Logs"
+$lenPrima = @{}
+if (Test-Path $logDirW) {
+  foreach ($f in (Get-ChildItem $logDirW -Filter "*.log" -ErrorAction SilentlyContinue)) {
+    $lenPrima[$f.FullName] = $f.Length
+  }
+}
+function Coda-Log-Storico {
+  if (-not (Test-Path $logDirW)) { return "" }
+  $tutto = ""
+  foreach ($f in (Get-ChildItem $logDirW -Filter "*.log" -ErrorAction SilentlyContinue)) {
+    $da = 0
+    if ($lenPrima.ContainsKey($f.FullName)) { $da = [int64]$lenPrima[$f.FullName] }
+    if ($da % 2 -ne 0) { $da = $da - 1 }
+    try {
+      $fs = New-Object System.IO.FileStream($f.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+      if ($da -gt 0 -and $da -lt $fs.Length) { [void]$fs.Seek($da, [System.IO.SeekOrigin]::Begin) }
+      $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Unicode, $false)
+      $tutto = $tutto + $sr.ReadToEnd(); $sr.Close(); $fs.Close()
+    } catch { }
+  }
+  return $tutto
+}
+
 $scaduto = (Get-Date).AddMinutes($TimeoutMin)
 $ultimaLen  = -1
 $fermoDa    = 0
 $visto      = $false
 while ((Get-Date) -lt $scaduto) {
   Start-Sleep -Seconds 15
+
+  # --- HA FINITO DAVVERO? -------------------------------------------
+  #  IL SILENZIO NON E' UN SEGNALE DI FINE (imparato il 15/08/2026).
+  #  Questo script trattava 60 secondi di silenzio come "ha finito". Ma
+  #  il downloader, sul PRIMO simbolo, chiede al server anni di barre e
+  #  di tick: sta zitto per minuti prima di scrivere la prima riga. Il
+  #  15/08 e' partito QUATTRO volte e ogni volta e' stato ammazzato dopo
+  #  la sola riga di intestazione, lasciando un CSV da ZERO byte.
+  #  E' lo stesso difetto gia' corretto in prepara_broker_esterno.ps1:
+  #  il segnale buono e' la riga di chiusura che lo script MQL5 stampa
+  #  da solo. Il silenzio resta solo come rete, e molto piu' lungo.
+  $coda = Coda-Log-Storico
+  if ($coda -match "=== FINITO") {
+    Write-Host "  lo script ha stampato la sua riga di chiusura: ha finito." -ForegroundColor Green
+    $visto = $true
+    break
+  }
+  if ($coda -match "ABTG_HistoryDownloader") { $visto = $true }
+
   if (-not (Test-Path $CsvOut)) { continue }
   $visto = $true
   $len = 0
   try { $len = (Get-Item $CsvOut -ErrorAction Stop).Length } catch { continue }
   if ($len -eq $ultimaLen) {
     $fermoDa += 15
-    if ($fermoDa -ge 60) { break }        # fermo da un minuto = ha finito
+    if ($fermoDa -ge 900) {               # 15 minuti, non 1
+      Write-Host "  fermo da 15 minuti senza riga di chiusura: mi fermo qui." -ForegroundColor Yellow
+      Write-Host "  ATTENZIONE: il referto potrebbe essere INCOMPLETO." -ForegroundColor Yellow
+      break
+    }
   } else {
     $fermoDa = 0
     $ultimaLen = $len
