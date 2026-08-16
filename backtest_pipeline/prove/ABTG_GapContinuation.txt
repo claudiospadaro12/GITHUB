@@ -6,28 +6,34 @@
 # =====================================================================
 #
 # 🛑 ATTENZIONE, LEGGERE PRIMA DI LANCIARE
-#   L'EA `ABTG_GapContinuation.mq5` **NON ESISTE ANCORA** nel nostro repo.
-#   Questo file e' l'ipotesi congelata PRIMA dei numeri, ed e' l'ordine
-#   giusto. Il driver fallira' finche' l'EA non c'e' — ed e' giusto che
-#   fallisca.
 #
-#   ⚠️ MA QUI NON SI RISCRIVE NIENTE. A differenza di ABTG_BandFade e
-#   ABTG_RangeBudget, il sorgente originale e' COMPLETO, PULITO e gia'
-#   nella nostra grammatica. Il lavoro di `mql5-ea-developer` e' una
-#   ADOZIONE MINIMA, tre cose e basta (dettaglio nel dossier §"le tre
-#   modifiche"):
-#     1. 🔴 AGGIUNGERE `double OnTester()` — NON C'E' nel sorgente, e
-#        senza di esso il driver rifiuta di partire per progetto
-#        (walkforward_generico.ps1 righe 144-147, verificato):
-#          "$Expert NON esporta i risultati (manca OnTester)."
-#        E' l'unico vero blocco. Tutto il resto e' gia' a posto.
-#     2. intestazione di attribuzione (autore + URL + licenza, §9).
-#     3. la conversione oraria: vedi il blocco FUSO qui sotto. La strada
-#        piu' pulita e' NON toccare il codice e usare il modo MANUALE
-#        che l'EA gia' ha (e' quello che fa questo file prova).
+#   ✅ AGGIORNAMENTO 16/08 pomeriggio — L'EA ADESSO ESISTE.
+#      `mql5/Experts/ABTG_GapContinuation.mq5`, 1.520 righe, commit
+#      `899e7c1`. L'adozione minima e' FATTA, tutte e tre le cose:
+#        1. ✅ `double OnTester()` aggiunto, col blocco OPTFRAME preso da
+#           ABTG_BreakingBand (righe 1441-1577) e le tre colonne prop.
+#           Era l'unico vero blocco: il driver ora parte.
+#        2. ✅ intestazione di attribuzione (autore, URL, data, licenza
+#           NON dichiarata) in testa al file.
+#        3. ✅ il fuso: codice NON toccato, si usa il modo MANUALE che
+#           l'EA gia' aveva. Verificato nel sorgente (SessionTimeForDate,
+#           ~riga 172): con SESSION_MANUAL_SERVER ritorna l'ora scritta,
+#           senza conversioni.
+#      🔴 MA NON E' ANCORA COMPILATO. Nessun agente puo' compilare: il
+#         primo F7 in MetaEditor e' di Claudio, e va fatto PRIMA di
+#         qualunque lancio. Se F7 da' un solo errore, il driver non parte
+#         comunque.
+#      📌 La logica di trading dell'originale NON e' stata toccata. Sono
+#         invece stati DICHIARATI 4 difetti dell'originale (dossier §5),
+#         il piu' grave: `HasAnyPositionOnSymbol()` non filtra per magic,
+#         quindi in forward una posizione aperta di ABTG_SupertrendReversal
+#         su 225JPY SPEGNE del tutto questo EA. Invisibile nel backtest.
+#
 #   🔴 I NOMI DEGLI INPUT NON SI CAMBIANO. Sono copiati dal sorgente uno
 #      per uno: se cambiano, ogni riga di questo file punta nel vuoto e
 #      MT5 la ignora IN SILENZIO (LEGGIMI.md, trappola "nome inesistente").
+#      ✅ Verificato dopo l'adozione: i 31 nomi sono intatti e tutte le
+#         righe di questo file puntano a un input che esiste.
 #
 # ---------------------------------------------------------------------
 # ORIGINE E ATTRIBUZIONE (obbligatoria anche in testa al .mq5)
@@ -381,9 +387,16 @@ InpStopBufferPoints=0.0||0.0||0||0.0||N
 InpFixedLots=0.0||0.0||0||0.0||N
 InpMaxLots=0.0||0.0||0||0.0||N
 InpUseRealVolumeIfAvailable=1||1||0||1||N
-# esecuzione. Il magic e' quello dell'autore: nel tester non conta, ma
-# PRIMA di qualunque forward va cambiato in un magic VERGINE nostro.
-InpMagicNumber=2250101||2250101||0||2250101||N
+# esecuzione. MAGIC NOSTRO VERGINE: 774101, verificato contro tutti i 72 EA
+# del repo, zero collisioni. E' anche il default compilato nell'EA adottato
+# (ABTG_GapContinuation.mq5:156), quindi codice e file prova dicono la stessa
+# cosa.
+# (16/08: qui c'era 2250101, il magic dell'AUTORE, ereditato dal sorgente.
+#  Nel tester non cambia i risultati, ma il file prova VINCE sulle blindature
+#  del driver: la corsa sarebbe girata col magic altrui e il CSV per-trade
+#  sarebbe uscito come ..._225JPY_2250101.csv, cioe' con un nome che non e'
+#  nostro e non si ritrova. Allineato.)
+InpMagicNumber=774101||774101||0||774101||N
 InpMaxSlippagePoints=30||30||0||30||N
 # pannello e diagnostica SPENTI nella griglia: 54 celle x un print al
 # giorno sono log inutilizzabili. Si riaccende InpPrintDailyDiagnostics
