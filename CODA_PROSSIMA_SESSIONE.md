@@ -1,5 +1,33 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## 🌙 PIANO DELLA NOTTE 16→17/08 — deciso da Claudio
+>
+> Claudio voleva mettere i tre EA nuovi sul VPS per l'apertura di stanotte.
+> **Ha scelto invece di misurarli prima**, e la ragione sta nei numeri: i tre
+> EA hanno **ZERO backtest, ZERO referti**, e due non hanno nemmeno
+> `@DAQUANDO`. In piu' **non c'e' fretta**: GAPFILL fa ~2 trade al mese,
+> TurnaroundTuesday 1 a settimana, CanaleLento tiene le posizioni per
+> settimane. Perdere un'apertura non costa niente; accendere codice mai
+> misurato costa il conto (il 14/08, −104,60 per UN EA non previsto).
+>
+> **Il VPS resta com'e'. Stanotte lavora il PC.**
+>
+> | passo | dove | cosa |
+> |---|---|---|
+> | 1 | MetaEditor | **compilare i 3 EA** (F7). Se uno da' errore, si manda il messaggio esatto |
+> | 2 | MT5 aperto | misurare lo storico di **GBPUSD H1** e **XAUUSD D1** |
+> | 3 | — | **chiudere MT5** |
+> | 4 | PowerShell | i **tre screening in OHLC**, uno dopo l'altro (una macchina, un lavoro) |
+>
+> **Le tre griglie:** `CanaleLento` XAUUSD D1 **20 celle** · `TurnaroundTuesday`
+> GBPUSD H1 **24 celle** · `GapContinuation` 225JPY M1 **54 celle**.
+> Tutte e tre **Modello 1 (OHLC)**: e' screening, e i file prova lo dicono
+> tutti e tre. 🔴 **Il verdetto sara' solo a tick reali** (R57: cambiando
+> solo il modello il segno dell'orso si e' ribaltato).
+>
+> ⚠️ `@DAQUANDO` di GBPUSD e XAUUSD **non si inventa**: esce dal passo 2 e si
+> passa con `-DaQuando`. Domattina va scritto nei due file prova.
+
 > ## ✅ AGGIORNAMENTO 16/08 ore 14:30 — I PRIMI DUE PUNTI SONO FATTI
 >
 > **1. Screening `ABTG_MeanRevert`: FATTO e BOCCIATO.** 12 celle su 12 in
