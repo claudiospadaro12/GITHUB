@@ -1,0 +1,112 @@
+# =====================================================================
+#  PROVA R66: GapContinuation -- DOVE FINISCE DAVVERO L'ALTOPIANO
+#  Seguito di R65. Referto: risultati_archivio/REFERTO_ROUND65_GAPCONTINUATION.md
+# =====================================================================
+#
+# PERCHE' ESISTE QUESTO ROUND
+#   R65 ha promosso la cella `gap 1,00 / OR 15 / TP_R 3` -- e 1,00 era
+#   IL VALORE PIU' ALTO SPAZZOLATO. La regione IS-positiva stava tutta
+#   nell'ANGOLO della griglia. Un altopiano che tocca il bordo non e' un
+#   altopiano: e' un pendio tagliato, e non si sa da che parte scende.
+#   👉 Qui il gap si spazzola da 1,00 a 2,00. Tre esiti, tutti utili:
+#     A) l'IS continua a salire oltre 1,00 -> la cella di R65 era al bordo
+#        sbagliato e va rifatta la scelta;
+#     B) l'IS scende dopo 1,00 -> 1,00 e' un vero massimo interno e la
+#        cella di R65 e' confermata, stavolta con l'altopiano intero;
+#     C) l'IS resta piatto ma n crolla -> il limite e' il campione, non
+#        il rendimento, e si dichiara.
+#
+# 🔴 SI SCEGLIE SOLO SULLA DIAGONALE (buy == sell), come in R65: le 20
+#   celle fuori diagonale MISURANO l'asimmetria, non si adottano.
+#
+# CRITERI: gli stessi di R65, non si toccano.
+#   - si sceglie sull'IS, centro dell'altopiano MAI il picco
+#   - n >= 15 per cella, PF non si giudica sotto n=20
+#   - OOS > 0 e PF >= 1,10 sulla cella scelta
+#   - DD OOS < 20%, peggior giornata sopra -2,5% a rischio 1%
+#   🔴 E il criterio 2 resta gia' NON passato (lo short perde -2.182 a
+#      tick reali): questo round NON lo rimette in discussione.
+#
+# ⚠️ Screening in OHLC. Il verdetto della cella eventualmente nuova va
+#   rifatto a tick reali, come e' stato fatto per quella di R65.
+#
+# GRIGLIA: 5 x 5 = 25 celle (di cui 5 sulla diagonale).
+#   OR e TP_R sono PINNATI ai valori della cella R65: si muove un asse
+#   solo, altrimenti non si sa cosa ha spostato cosa.
+# =====================================================================
+@SIMBOLO  225JPY
+@PERIODO  M1
+@DAQUANDO 2024.09.26
+
+# --- assi spazzolati (sweep STRETTO: si cerca l'altopiano, non il picco) ---
+# La soglia di gap e' L'EVENTO, ed e' anche l'unica leva sul campione:
+# si spazzola VERSO IL BASSO (0,50-1,00), non verso l'alto, perche' il
+# vincolo che ci puo' uccidere il round e' n, non il rendimento.
+# Le 3 celle DIAGONALI (buy == sell) sono le uniche da cui si SCEGLIE;
+# le 6 fuori diagonale MISURANO l'asimmetria che abbiamo spento.
+InpMinimumBuyGapPercent=1.50||1.00||0.25||2.00||Y
+InpMinimumSellGapPercent=1.50||1.00||0.25||2.00||Y
+# quanto dura il range di apertura: 5/10/15 e' TUTTO l'intervallo che
+# l'EA accetta (OnInit riga 1032). Non e' una taratura fine, sono i tre
+# soli valori possibili.
+# OR pinnato al valore della cella R65 (era un asse, ora e' fermo)
+InpOpeningRangeMinutes=15||15||0||15||N
+# il runner: 2R contro 3R. Il parziale resta fermo a 1R.
+# TP_R pinnato al valore della cella R65
+InpFinalTargetR=3.0||3.0||0||3.0||N
+
+# --- IL FUSO: congelato in ORA SERVER BCM. Vedi il calcolo qui sopra. ---
+# modo MANUALE (=1): gli orari sono presi come ora server, senza conversioni
+InpSessionTimeMode=1||1||0||1||N
+InpSessionOpenHour=1||1||0||1||N
+InpSessionOpenMinute=0||0||0||0||N
+InpSessionCloseHour=7||7||0||7||N
+InpSessionCloseMinute=30||30||0||30||N
+
+# --- L'ASIMMETRIA: SPENTA, e i due lati messi allo stesso rischio ---
+InpReduceRiskOnSmallSellGap=0||0||0||0||N
+InpBuyRiskPercent=1.0||1.0||0||1.0||N
+InpSellRiskPercent=1.0||1.0||0||1.0||N
+# i due seguenti restano INERTI finche' il flag qui sopra e' 0.
+# Li scrivo lo stesso, per non lasciarli al default del sorgente.
+InpSellFullRiskFromGapPct=1.25||1.25||0||1.25||N
+InpSmallSellRiskPercent=0.25||0.25||0||0.25||N
+
+# --- congelati: sono la tesi, o non c'entrano con la tesi ---
+# entrambi i lati accesi: la simmetria e' meta' del motivo per cui l'EA esiste
+InpEnableBuyGaps=1||1||0||1||N
+InpEnableSellGaps=1||1||0||1||N
+# finestra d'ingresso 90' dall'apertura = fino alle 02:30 server (10:30 JST),
+# prima della pausa pranzo di Tokyo. Default dell'autore, non spazzolato:
+# in questo round e' una scelta di disegno, non una manopola.
+InpMaxEntryMinutesFromOpen=90||90||0||90||N
+InpExitMinutesBeforeClose=5||5||0||5||N
+# gestione: quella delle nostre sedie DAX/Dow (parziale + breakeven + runner)
+InpPartialClosePercent=40.0||40.0||0||40.0||N
+InpPartialTargetR=1.0||1.0||0||1.0||N
+InpMoveStopToBreakEven=1||1||0||1||N
+# spread: il filtro dinamico (% dello stop) e' il modo giusto (R55);
+# quello a punti fissi resta spento
+InpMaxSpreadPoints=0.0||0.0||0||0.0||N
+InpMaxSpreadToStopPercent=10.0||10.0||0||10.0||N
+InpStopBufferPoints=0.0||0.0||0||0.0||N
+# sizing: SEMPRE a rischio %, mai lotto fisso
+InpFixedLots=0.0||0.0||0||0.0||N
+InpMaxLots=0.0||0.0||0||0.0||N
+InpUseRealVolumeIfAvailable=1||1||0||1||N
+# esecuzione. MAGIC NOSTRO VERGINE: 774101, verificato contro tutti i 72 EA
+# del repo, zero collisioni. E' anche il default compilato nell'EA adottato
+# (ABTG_GapContinuation.mq5:156), quindi codice e file prova dicono la stessa
+# cosa.
+# (16/08: qui c'era 2250101, il magic dell'AUTORE, ereditato dal sorgente.
+#  Nel tester non cambia i risultati, ma il file prova VINCE sulle blindature
+#  del driver: la corsa sarebbe girata col magic altrui e il CSV per-trade
+#  sarebbe uscito come ..._225JPY_2250101.csv, cioe' con un nome che non e'
+#  nostro e non si ritrova. Allineato.)
+InpMagicNumber=774101||774101||0||774101||N
+InpMaxSlippagePoints=30||30||0||30||N
+# pannello e diagnostica SPENTI nella griglia: 54 celle x un print al
+# giorno sono log inutilizzabili. Si riaccende InpPrintDailyDiagnostics
+# a 1 SOLO nella passata singola di diagnosi (vedi limite b).
+InpShowStatusOnChart=0||0||0||0||N
+InpPrintDailyDiagnostics=0||0||0||0||N
