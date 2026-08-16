@@ -105,6 +105,28 @@ timeframe che abbiamo?** Se no, e' cultura, non un candidato.
 ### 🥈 B. MQL5 Code Base — **la fonte piu' ricca, e la piu' velenosa**
 `mql5.com/it/code` · `mql5.com/en/code/mt5/experts`
 
+⚠️ **MQL5 ha TRE sezioni e due sono fuori perimetro in modo permanente.**
+Non riaprire la questione a ogni caccia:
+
+| sezione | cosa da' | perimetro |
+|---|---|---|
+| **`/code/`** — Code Base | EA gratuiti **col sorgente `.mq5`** | 🟢 **l'unica utile** |
+| `/market/` — Market | EA compilati, a pagamento, **senza sorgente** | 🔴 **MAI** |
+| `/signals/` — Segnali | copy-trading, abbonamento mensile, **nessun codice** | 🔴 **MAI** |
+
+Il motivo e' lo stesso per entrambe: **senza sorgente il setaccio del §4 non e'
+applicabile** — non posso escludere un martingala che non posso leggere — e
+**senza EA non c'e' backtest**, quindi l'imbuto (IS/OOS, regime, tick reali)
+non ha nulla su cui girare. Non e' severita': e' che il metodo non parte.
+
+📌 Misurato sulla pagina Segnali il 16/08/2026, i primi nove per crescita:
+drawdown **19% · 24% · 24% · 26% · 33% · 34% · 41% · 46% · 53%**. Il muro
+prop e' **10%**, il DD storico del nostro portafoglio a 27 serie e' **5,50%**.
+**Nemmeno il migliore di quella pagina sopravvive a una challenge** — e win
+rate 76-82% con DD 24-53% e leva 1:500 e' la firma del martingala, non della
+fortuna. In piu' quasi tutte le prop vietano il copy-trading da segnali
+esterni (**regola D3**: da confermare per iscritto prima di comprare).
+
 **Perche':** sorgente `.mq5` pronto, gia' nella nostra lingua tecnica, zero
 traduzione. Un candidato promosso qui puo' andare al tester **in giornata**.
 
