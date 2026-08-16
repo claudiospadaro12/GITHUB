@@ -696,3 +696,56 @@ numero trentuno**.
 > (pesi liberi) · doppia taratura per simbolo**.
 >
 > Restano i tre buchi veri, misurati: **LATERALE · CROLLO · SHORT simmetrico**.
+
+---
+
+## 16/08/2026 — `Pending_tread.mq5` · 🔴 **GRIGLIA** dichiarata negli input
+
+**Autore:** Mir Mostofa Kamal · `mql5.com/en/users/bokul` · 283 righe, 15 input.
+
+```cpp
+input double PipStep       = 100;    // Distance between orders (pips)
+input bool   EnableBuyGrid  = true;  // Enable Buy grid
+input bool   EnableSellGrid = true;  // Enable Sell grid
+input double LotSize        = 0.10;  // Lot size
+```
+
+**Griglia di pendenti a distanza fissa, su entrambi i lati, a lotto fisso.**
+Non serve leggere altro: bandiera rossa §4 due volte (griglia + lotto fisso).
+
+E porta anche il **difetto della scala dei pip** gia' visto in
+`ProAutoSL_DynamicTP`:
+```cpp
+double pipMultiplier = (digits == 3 || digits == 5) ? 10.0 : 1.0;
+```
+su oro e indici i 100 "pip" di `PipStep` diventano un'altra cosa.
+
+Ha una protezione sull'equity (`MaxLossPercent = 20.0`) — che pero' su una
+prop non serve a niente: il muro e' al **10%**, e a quel punto il conto e'
+gia' chiuso.
+
+## 16/08/2026 — `SmartTradeManager.mq5` · 🟡 **FUORI IMBUTO — altro attrezzo**
+
+**Autore:** Waseem Shahrukh · 386 righe, 34 input.
+
+**Zero `trade.Buy`, zero `trade.Sell`, zero `OrderSend`, zero `PositionOpen`:
+non apre niente.** E' un gestore di posizioni gia' aperte, come
+`ProAutoSL_DynamicTP` del primo giro. `InpOnlyManual = true` (magic 0).
+
+> ✅ **Ma e' scritto molto meglio del primo**, e va detto perche' fa da
+> capitolato se un giorno ci servisse davvero:
+> ```cpp
+> InpStructTF      = PERIOD_M15;  // swing + ATR
+> InpSwingLookback = 20;          // SL sullo swing recente
+> InpATRBuffer     = 0.6;         // margine oltre lo swing
+> InpMinSL_ATR     = 1.2;         // pavimento anti-stop-stretto
+> InpMaxSL_ATR     = 4.0;         // tetto anti-stop-enorme
+> ```
+> **SL strutturale sullo swing, in ATR, con pavimento e tetto** — cioe'
+> esattamente la correzione che avevo scritto per `ProAutoSL`
+> ("SL in ATR o in percentuale di rischio, mai in pip fissi"). Il difetto
+> della scala su oro e indici **qui non c'e'**.
+
+Resta fuori dall'imbuto per lo stesso motivo del primo: **zero ingressi =
+zero edge = niente da backtestare**. Ma se un giorno serve un salvagente per
+le operazioni manuali, **si parte da questo, non da quello**.
