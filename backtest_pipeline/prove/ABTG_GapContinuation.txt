@@ -293,23 +293,41 @@
 #      il verdetto stia SOLO ai tick reali.
 #
 # ---------------------------------------------------------------------
-# ⚠️ @DAQUANDO MANCA APPOSTA — NON E' UNA DIMENTICANZA
+# ✅ @DAQUANDO — MISURATO IL 16/08/2026. La trappola c'era, e non ha morso.
 #
-#   E qui c'e' una trappola specifica, che vale la pena scrivere:
-#   nei file R36/R37 su 225JPY compare `@DAQUANDO 2024.09.26`. **Quella
-#   data NON si puo' riusare qui.** R36/R37 giravano su **H1**; questo
-#   EA legge **PERIOD_M1 e nient'altro** — chiusura precedente, range di
-#   apertura e VWAP passano tutti da `CopyRates(_Symbol,PERIOD_M1,...)`
-#   (righe 358, 375, 397). La profondita' dello storico **M1** di 225JPY
-#   su BCM non e' misurata da nessuna parte nel repo, ed e' quasi sempre
-#   piu' corta di quella oraria.
-#   Se lo storico M1 comincia dopo, meta' finestra IS non esiste — ed e'
-#   esattamente l'errore gia' pagato sugli indici (il driver diceva
-#   2024.01.01, i dati partivano dal 26/09/2024).
+#   IL TIMORE (scritto qui prima della misura, e va tenuto agli atti):
+#   nei file R36/R37 su 225JPY compare `@DAQUANDO 2024.09.26`, ma quelli
+#   giravano su **H1**, mentre questo EA legge **PERIOD_M1 e nient'altro**
+#   (chiusura precedente, range di apertura e VWAP passano tutti da
+#   `CopyRates(_Symbol,PERIOD_M1,...)`, righe 358/375/397). Lo storico M1
+#   e' quasi sempre piu' corto di quello orario: se cominciava dopo, meta'
+#   finestra IS non esisteva — l'errore gia' pagato sugli indici.
 #
-#   👉 SI MISURA COSI', e poi si passa la data vera con -DaQuando:
-#      powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "225JPY" -Timeframes "M1" -Da 2015.01.01 -SoloReferto
-#      (senza -SoloReferto se lo storico va prima scaricato davvero)
+#   LA MISURA, fatta sul PC di backtest con ABTG_HistoryDownloader
+#   (scheda Experts, 16/08/2026 ore 16:22:59):
+#      [1/1] 225JPY   M1 : 100000 barre  locale 2026.05.05  server 2024.09.26
+#   `server` e' **SERIES_SERVER_FIRSTDATE** letto dal terminale
+#   (ABTG_HistoryDownloader.mq5:190-199): e' la data da cui il BROKER ha i
+#   dati, non un'ipotesi.
+#
+#   👉 **RISULTATO: 2024.09.26 — la STESSA data dell'orario.** Il timore
+#      era legittimo ma qui non si applica: su BCM lo storico comincia li'
+#      per tutti i timeframe, perche' e' quando comincia il broker.
+#      Quindi la finestra IS 2024.09.26 -> 2025.06.09 esiste per intero.
+#
+#   🔴 MA ATTENZIONE, E' UN'ALTRA COSA DALLO STORICO **LOCALE**:
+#      alla misura il locale partiva dal **2026.05.05** (100.000 barre),
+#      cioe' meno di tre mesi. Il verdetto dello script era
+#      "MANCA STORICO LOCALE: rilancia" (`locFirst > srvFirst + 86400`).
+#      **Lanciare il backtest in quello stato misurerebbe tre mesi
+#      credendo di misurarne ventuno, e in silenzio.**
+#      👉 Prima di lanciare: rilanciare `ABTG_HistoryDownloader` finche' il
+#         verdetto NON e' piu' "MANCA STORICO LOCALE".
+#      👉 Quando il locale sara' pieno il verdetto diventera'
+#         **"IL BROKER NON HA PIU' STORICO"** (`srvFirst > from + 86400`,
+#         perche' abbiamo chiesto dal 2015 e il broker parte dal 2024).
+#         **Non e' un errore: e' la risposta.** Non e' un motivo per
+#         rilanciare ancora.
 #
 # ---------------------------------------------------------------------
 # PERCHE' 225JPY M1
@@ -331,7 +349,7 @@
 # =====================================================================
 @SIMBOLO  225JPY
 @PERIODO  M1
-@DAQUANDO
+@DAQUANDO 2024.09.26
 
 # --- assi spazzolati (sweep STRETTO: si cerca l'altopiano, non il picco) ---
 # La soglia di gap e' L'EVENTO, ed e' anche l'unica leva sul campione:
