@@ -101,22 +101,48 @@ cosa che i nostri trent'anni di ribaltamenti vietano.
 `=1`, tutte le "migliori" IS hanno `=0`. **Un parametro che cambia segno fra
 le due finestre non e' una manopola: e' un avvertimento.**
 
-### 🏛️ E il cancello prop lo boccia comunque
+### 🏛️ Il cancello prop — ✍️ CORREZIONE: lo passa, non lo sfonda
 
-| | valore |
-|---|---|
-| DD OOS sulla cella scelta dal metodo | **14,41%** (muro: 10%) |
-| **peggior giornata** su quella cella | **−5,89%** (muro: **−5%**) |
-| peggior giornata sulle celle verdi | da −2,94% a −4,96% |
+> **Prima versione di questo paragrafo: SBAGLIATA.** Avevo scritto che la
+> cella sfonda entrambi i muri prop, confrontando numeri **misurati a
+> rischio 1%** con muri che si applicano alla **taglia prop dello 0,65%**.
+> Correzione dovuta a un'obiezione di Claudio: _"ma il guardiano lo avrebbe
+> chiuso prima"_.
 
-**La cella che il metodo sceglie sfonda ENTRAMBI i muri prop.** Anche se
-fosse stata verde, non sarebbe entrata.
+| | misurato a **1%** | a taglia prop **0,65%** | muro |
+|---|---:|---:|---|
+| peggior giornata (cella scelta) | −5,89% | **−3,83%** | −5% 🟢 |
+| DD OOS (cella scelta) | 14,41% | **9,37%** | −10% 🟢 |
+| peggior giornata (celle verdi) | da −2,94% a −4,96% | da −1,91% a −3,22% | 🟢 |
+| DD (celle verdi) | da 5,60% a 15,27% | da 3,64% a 9,93% | 🟢 |
+
+**Alla taglia a cui giriamo davvero, il profilo di rischio di questa
+famiglia sta dentro i muri.** E sopra c'e' comunque `ABTG_Guardian.mq5`,
+che esiste nel repo, come ultima rete.
+
+⚠️ **Ma il guardiano non e' un argomento per promuovere**, e la regola di
+casa lo dice (`ROTTA_PROP.md` §3): _"il guardiano e' l'ultima rete, non la
+strategia: **se scatta spesso, il portafoglio e' sbagliato a monte**"_.
+Serve a non morire, non a far passare una cella.
+
+🎯 **Il che lascia in piedi UNA sola ragione per non promuovere, ed e'
+quella vera: la cella che il metodo sceglie PERDE (−812,26 OOS).** Nessun
+guardiano e nessuna taglia aggiustano un segno meno.
 
 ### 🚦 Verdetto
 
 **Non promosso, e non chiuso.** La famiglia mostra qualcosa (13 su 20 verdi
-non e' rumore), ma **questa griglia non sa scegliere una cella — e una cella
-che non si sa scegliere non e' un edge che si puo' tradare.**
+non e' rumore) e **il suo rischio, alla taglia vera, e' accettabile**: il
+problema non e' che sia pericolosa. Il problema e' che **questa griglia non
+sa scegliere una cella — e una cella che non si sa scegliere non e' un edge
+che si puo' tradare.**
+
+📌 **La distinzione conta, ed e' generale:** un candidato puo' essere
+scartato per **rischio** (sfonda i muri) o per **selezionabilita'** (non
+sappiamo indicare quale cella accendere). Sono due bocciature diverse, con
+due rimedi diversi — la prima si cura con la taglia e col guardiano, la
+seconda no. **Tenerle sullo stesso cancello fa sembrare morto cio' che e'
+solo non ancora scegliibile.**
 
 Se un giorno si riapre, si riapre con una **tesi nuova scritta prima** sul
 perche' `ExitMiddle=1` dovrebbe essere giusto, non ripescando la cella verde
