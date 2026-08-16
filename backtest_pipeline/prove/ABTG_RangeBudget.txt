@@ -1,0 +1,202 @@
+# =====================================================================
+#  PROVA: ABTG_RangeBudget  --  un motore SIMMETRICO con UNA sola manopola
+#                               copre il buco del CROLLO e degli SHORT?
+#  Nato dalla SECONDA battuta di caccia del 16/08/2026
+#  -> caccia_strategie/CACCIA_2026-08-16_B.md
+# =====================================================================
+#
+# 🛑 ATTENZIONE, LEGGERE PRIMA DI LANCIARE
+#   L'EA `ABTG_RangeBudget.mq5` **NON ESISTE ANCORA**. Questo file e'
+#   l'ipotesi congelata PRIMA che il codice sia scritto, ed e' l'ordine
+#   giusto. Va scritto da `mql5-ea-developer` seguendo la MECCANICA qui
+#   sotto. Il driver fallira' finche' l'EA non c'e' — ed e' giusto che
+#   fallisca.
+#
+# ---------------------------------------------------------------------
+# ORIGINE E ATTRIBUZIONE (obbligatoria anche in testa al .mq5)
+#
+#   Meccanica derivata da "Range Follower", Copyright (c) Mokara
+#     https://www.mql5.com/en/users/mokara
+#   Sorgente letto (273 righe, per intero) via mirror del Code Base MQL5:
+#     https://github.com/GeneralTradingSarl/expert-mt5
+#     branch `main`, commit ed5ff23 (11/07/2026)
+#     path: mql5_experts_mt5/Range Follower/rangefollower.mq5
+#
+#   ⚠️ LICENZA DELL'ORIGINALE: **NON DICHIARATA** nel repo mirror (nessun
+#      file LICENSE). Il copyright "Mokara" e' pero' intatto nell'header.
+#      I termini del Code Base MQL5 NON sono verificabili da qui:
+#      www.mql5.com risponde 403 al CONNECT del gateway. Prima di
+#      qualunque distribuzione va verificato. Uso interno di ricerca.
+#
+#   🔴 NON portiamo:
+#      - il LOTTO FISSO (`iLots = 0.1`, riga 100 dell'originale)
+#      - le due chiamate a `ExpertRemove()` (righe 224 e 232): nel tester
+#        TERMINANO LA PASSATA e farebbero mentire ogni cella della griglia
+#   🔴 NON adottiamo i suoi parametri. Prendiamo MECCANICA e TESI.
+#      Il verdetto lo da' il nostro imbuto, non l'autore (mandato §0).
+#
+# ---------------------------------------------------------------------
+# IPOTESI (scritta il 16/08/2026, prima di qualsiasi numero)
+#
+#   La prova di regime R50 dice dove muoiono le nostre celle:
+#       LARRY_GBPUSD  crollo 2020:  −708      laterale 2019:  −6.445
+#       BB_EURUSD     toro 2021:  −1.561      laterale 2019:  −2.381
+#   e ROBUSTEZZA.md dice che quasi tutte le 14 celle vive sono LONG-ONLY.
+#   Il CROLLO e il lato SHORT sono due buchi MISURATI, non ipotizzati.
+#
+#   La gamma giornaliera media (ATR su D1) e' un BUDGET di movimento.
+#   Quando in giornata il prezzo si e' gia' allontanato di una frazione X
+#   di quel budget da uno dei due estremi della seduta, la parte restante
+#   del budget tende a essere completata NELLA STESSA DIREZIONE.
+#     -> In un giorno di panico il prezzo si allontana dal MASSIMO di oggi:
+#        il motore VA SHORT e insegue il resto del budget verso il basso.
+#     -> In un giorno di euforia fa lo specchio esatto al rialzo.
+#
+#   E' un motore in cui il filtro E' LA STRATEGIA fin dall'inizio: la
+#   direzione non e' scelta da un indicatore appiccicato sopra, la decide
+#   DA QUALE ESTREMO DELLA GIORNATA il prezzo si e' mosso. Distinzione che
+#   nei nostri dati vale tutto (ROBUSTEZZA.md):
+#       filtro appiccicato dopo  -> 0 successi su 5 (R20, R12, R26, R45, R54)
+#       filtro che E' il motore  -> ABTG_EMA200, R29: 30 celle su 30 a PASS
+#
+#   ⭐ E c'e' un secondo motivo, che e' il vero motivo per cui ho scelto
+#      QUESTO fra 1.185 sorgenti del Code Base:
+#      **HA UNA SOLA MANOPOLA DI STRATEGIA.**
+#      Su tredici misure di Spearman IS->OOS, DODICI sono negative. Meno
+#      parametri ci sono, meno il backtest puo' girarli verso il passato.
+#      Un motore a un parametro e' il piu' difficile da fittare che
+#      abbiamo mai messo sul tester.
+#
+# ---------------------------------------------------------------------
+# MECCANICA DA IMPLEMENTARE (rangefollower.mq5, righe 44-72 e 205-250)
+#
+#   BASE       ADR = ATR(PERIOD_D1, InpADRPeriod) letto sulla BARRA D1
+#              CHIUSA di ieri -> indice [1] della serie. In punti.
+#              🔴 Mai l'indice [0]: sarebbe la barra D1 in corso.
+#
+#   LIVELLI    trigger = ADR * InpTriggerPct / 100
+#              resto   = ADR - trigger
+#
+#   INGRESSO   (specchio esatto, nessuna asimmetria)
+#     LONG  se (Bid - minimo di OGGI)   > trigger   e InpAllowLong
+#     SHORT se (massimo di OGGI - Ask)  > trigger   e InpAllowShort
+#     dove "minimo/massimo di OGGI" = iLow/iHigh(PERIOD_D1, 0), cioe'
+#     l'escursione corrente della seduta: informazione legittima, non
+#     look-ahead (verificato nell'originale).
+#
+#   USCITA     TP = resto punti     SL = trigger punti
+#              + chiusura forzata a fine giornata di trading
+#
+#   ⭐ IL PUNTO CHE RENDE LA GRIGLIA HONESTA:
+#      SL e TP sono I DUE PEZZI DELLO STESSO BUDGET.
+#        InpTriggerPct=30 -> SL 30 %, TP 70 %, payoff 2,33 (win-rate basso)
+#        InpTriggerPct=60 -> SL 60 %, TP 40 %, payoff 0,67 (win-rate alto)
+#      Una sola manopola muove win-rate e payoff in senso OPPOSTO: se
+#      esiste un altopiano, e' un altopiano vero e non un artefatto.
+#
+#   🔴 VINCOLI NON NEGOZIABILI PER CHI SCRIVE IL CODICE:
+#     - UNA SOLA POSIZIONE PER GIORNATA. Nessuna riapertura dopo lo stop:
+#       nell'originale il flag `trade_opened` lo garantisce ed e' parte
+#       della tesi, non un dettaglio.
+#     - Nessuna griglia, nessun averaging, nessun raddoppio, mai.
+#     - SL VERO mandato al broker. Mai virtuale, mai "ignora SL".
+#     - **VIETATO `ExpertRemove()`**: nell'originale c'e' due volte e nel
+#       tester termina la passata.
+#     - Rischio in PERCENTUALE legato alla distanza di stop, che qui e'
+#       gia' nota in punti (= trigger): il calcolo e' banale e non c'e'
+#       nessuna scusa per il lotto fisso.
+#     - `OnTester` obbligatorio, altrimenti il driver rifiuta di partire
+#       (LEGGIMI.md: 22 EA su 61 gia' bocciati per questo).
+#     - Niente trailing e niente break-even nello screening: sono manopole
+#       in piu' e non fanno parte della tesi.
+#     - Se l'EA legge un'ora di chiusura giornaliera, va scritta in ORA
+#       SERVER (BCM = ora italiana − 1) e dichiarata.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (dichiarati ORA, prima dei numeri)
+#
+#   1. 🎯 IL CRITERIO CHE CONTA — deve coprire IL BUCO:
+#        POSITIVA nella finestra CROLLO 2020, quella dove LARRY_GBPUSD
+#        fa −708. Se e' rossa anche li', la tesi e' morta e si chiude la
+#        famiglia. Non e' negoziabile e non si ammorbidisce dopo.
+#
+#   2. 🎯 IL SECONDO CRITERIO, GEMELLO: **IL LATO SHORT SI MISURA DA SOLO.**
+#        Long e short vanno letti SEPARATAMENTE. Se regge solo il long,
+#        NON ha riempito il buco degli short e va dichiarato cosi', anche
+#        se il totale e' verde. Meta' del motivo per cui questo EA esiste
+#        e' che sia simmetrico VERO.
+#
+#   3. SOPRAVVIVENZA nelle finestre avverse (criteri congelati il 14/08,
+#      PROVA_REGIME_CRITERI.md): nelle finestre ORSO e LATERALE
+#        PF >= 0,90  -> criterio di NON-SANGUINAMENTO, non di profitto.
+#      Un motore di continuazione intraday puo' non guadagnare nel
+#      laterale; non deve distruggersi.
+#
+#   4. DD fuori campione mai sopra il 20 %, e "Peggior Giornata %" sopra
+#      −2,5 % al rischio 1 % (una prop chiude a −5 %).
+#
+#   5. ALTOPIANO, non picco: le celle VICINE devono essere positive.
+#      Si prende IL CENTRO DELL'ALTOPIANO, MAI la cella migliore.
+#      Dodici Spearman IS->OOS negativi su tredici: la cella migliore in
+#      campione e' peggio di una scelta a caso.
+#
+#   6. n >= 15 trade per famiglia prima di qualunque verdetto. Il PF sotto
+#      n=20 e' una stima e non si giudica; il DD e' un fatto accaduto e
+#      vale a qualunque n.
+#
+#   7. 🎯 STANDARD DI AMMISSIONE AL PORTAFOGLIO, quello vero, passato
+#      QUATTRO volte in tutto il progetto: **"aggiunge profitto E abbassa
+#      le code"**. Vincere da solo non basta.
+#
+#   Screening in OHLC. 🔴 VERDETTO SOLO A TICK REALI: R57 ha misurato che
+#   cambiando SOLO il modello il segno dell'orso si e' ribaltato.
+#
+# ---------------------------------------------------------------------
+# ⚠️ UN LIMITE DELLO SCREENING CHE DICHIARO ADESSO, NON DOPO
+#   Questo motore controlla una DISTANZA PERCORSA dentro la giornata. In
+#   OHLC su H1 il tester vede 4 prezzi per barra: il momento esatto in cui
+#   il trigger scatta sara' approssimato, e il risultato dello screening
+#   sara' ottimista o pessimista in modo NON prevedibile. Non e' un motivo
+#   per non fare lo screening — e' un motivo in piu' perche' il verdetto
+#   stia SOLO ai tick reali. Se lo screening e' verde, il passo successivo
+#   e' M15/M5 a tick reali, non un altro giro OHLC.
+#
+# ---------------------------------------------------------------------
+# ⚠️ @DAQUANDO MANCA APPOSTA — NON E' UNA DIMENTICANZA
+#   Non ho misurato lo storico di GBPUSD su questo terminale e NON lo
+#   invento. Sugli indici il driver diceva 2024.01.01 e i dati partivano
+#   dal 26/09/2024: meta' finestra IS non esisteva. Si misura con
+#       scarica_storico.ps1 -Simboli "GBPUSD" -SoloReferto
+#   e si passa la data vera con -DaQuando. Finche' non e' misurata, il
+#   driver si ferma — ed e' giusto che si fermi.
+#
+# ---------------------------------------------------------------------
+# PERCHE' GBPUSD H1
+#   Perche' e' l'unico posto dove il buco e' MISURATO e confrontabile:
+#   LARRY_GBPUSD (−708 nel crollo 2020, −6.445 nel laterale 2019) e le
+#   celle di regime di CELLE_REGIME.txt stanno tutte su GBPUSD H1, e il
+#   simbolo _EXT Dukascopy copre le quattro finestre di regime dal 2012.
+#   Misurare altrove vorrebbe dire non poter rispondere alla domanda.
+#   👉 Il seguito naturale, se passa, sono gli INDICI: un motore di budget
+#      giornaliero e' piu' a casa sul DAX che sul cable. Ma quello e' il
+#      round dopo, non questo.
+#
+# GRIGLIA: 5 x 2 = 10 celle. E' uno SCREENING, non un verdetto.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO
+
+# --- assi spazzolati (sweep STRETTO: si cerca l'altopiano, non il picco) ---
+# InpTriggerPct e' L'UNICA manopola di strategia. 30..70 passo 10 attraversa
+# il punto di pareggio del payoff (50 %) da entrambi i lati: se c'e' un
+# altopiano si vede, se c'e' solo un picco si vede altrettanto bene.
+InpTriggerPct=50||30||10||70||Y
+# secondo asse, tenuto CORTO apposta: e' la finestra dell'ADR, non la tesi
+InpADRPeriod=20||10||10||20||Y
+
+# --- congelati: NON si spazzolano, sono la tesi ---
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
