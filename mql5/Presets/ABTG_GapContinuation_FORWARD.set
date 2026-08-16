@@ -1,0 +1,46 @@
+; ABTG_GapContinuation - PRESET FORWARD (vivaio, conto piccolo 50503392)
+; Cella validata in R65 + R66: gap 1,00 / OR 15 / TP_R 3
+;   OOS a TICK REALI: +8.339,62 - PF 1,398 - n=70 - DD 11,59%
+;   peggior giornata -1,10% a rischio 1% - zero esposizione overnight
+; Rischio 1%: taglia del VIVAIO, confrontabile con l'archivio.
+;   (la rotta prop gira a 0,65%: quella e' la taglia del 100k, non di qui)
+; Magic 774101, vergine, verificato contro tutti gli EA del repo.
+; ⚠️ RICHIEDE la build del 16/08 con la correzione a
+;    HasAnyPositionOnSymbol(): senza, l'EA si autozittisce quando
+;    SupertrendReversal o GapFill hanno una posizione su 225JPY.
+; ⚠️ CRITERIO 2 NON PASSATO: il lato short perde (-2.182 OOS). L'EA entra
+;    simmetrico per costruzione e NON riempie il buco degli short: si
+;    osserva cosi', non si spegne un lato guardando i risultati (R52).
+
+InpSessionTimeMode=1
+InpSessionOpenHour=1
+InpSessionOpenMinute=0
+InpSessionCloseHour=7
+InpSessionCloseMinute=30
+InpOpeningRangeMinutes=15
+InpMaxEntryMinutesFromOpen=90
+InpExitMinutesBeforeClose=5
+InpEnableBuyGaps=1
+InpMinimumBuyGapPercent=1.00
+InpEnableSellGaps=1
+InpMinimumSellGapPercent=1.00
+InpUseRealVolumeIfAvailable=1
+InpMaxSpreadPoints=0.0
+InpMaxSpreadToStopPercent=10.0
+InpStopBufferPoints=0.0
+InpBuyRiskPercent=1.0
+InpSellRiskPercent=1.0
+InpReduceRiskOnSmallSellGap=0
+InpSellFullRiskFromGapPct=1.25
+InpSmallSellRiskPercent=0.25
+InpFixedLots=0.0
+InpMaxLots=0.0
+InpPartialClosePercent=40.0
+InpPartialTargetR=1.0
+InpFinalTargetR=3.0
+InpMoveStopToBreakEven=1
+InpMagicNumber=774101
+InpMaxSlippagePoints=30
+InpShowStatusOnChart=1
+InpPrintDailyDiagnostics=0
+InpComment=GAPCONT
