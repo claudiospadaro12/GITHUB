@@ -222,9 +222,10 @@ non e' un esperimento: e' una spazzolata.
 
 ### D. 🕳️ Scorrelazione — leggi i BUCHI prima di cercare
 La robustezza sta nel portafoglio. Un candidato che fa la **stessa cosa** di
-una sedia viva vale poco anche se e' buono. Apri `report/CLASSIFICHE.md`,
-`backtest_pipeline/prove/CELLE_REGIME.txt` e i referti di regime, e cerca il
-buco vero. Quelli noti (verificali, non fidarti di questa lista):
+una sedia viva vale poco anche se e' buono. Apri `report/ROTTA_PROP.md`
+(l'arsenale con DD e PF OOS), `backtest_pipeline/prove/CELLE_REGIME.txt` e i
+referti di regime, e cerca il buco vero. Quelli noti (verificali, non fidarti
+di questa lista):
 - motori **short** o simmetrici veri — quasi tutte le nostre celle sono long-only
 - roba che **lavora nel laterale** (LARRY muore li': **−6.445** nel 2019)
 - roba che **lavora nel crollo** (BB regge dove Larry cede: +502 contro −708)
@@ -235,12 +236,54 @@ timeframe (o funziona sul `Period()` del tester), e codice leggibile. Se sono
 3.000 righe illeggibili, il costo di validazione supera il valore atteso — e
 va detto, non nascosto.
 
+### F. 🔧 CERCA IL MOTORE GREZZO, NON IL PRODOTTO FINITO
+_Mandato di Claudio, 16/08/2026: **"voglio che i cacciatori, oltre a trovare
+migliorie alle nostre strategie, trovino EA che non abbiamo che alla base
+hanno un buon motore e che in base alla nostra esperienza possiamo
+migliorare, anche in vista delle prop."**_
+
+**Sono due mestieri, e il secondo e' quello che rende di piu'.**
+
+| | cosa cerchi |
+|---|---|
+| **migliorie** | un pezzo di meccanica che rifinisce una sedia viva |
+| 🎯 **motori nuovi** | un EA che **non abbiamo**, con una **tesi di mercato che non copriamo**, anche **grezzo** — purche' il motore sotto sia sano |
+
+**Il criterio NON e' "e' gia' buono". E' "il motore e' sano E noi sappiamo
+rifinirlo".** La rifinitura e' esattamente cio' in cui questo progetto e'
+bravo, e si vede nelle sedie vive:
+
+- gestione a **parziale 1R + breakeven + runner a 2R** (le nostre DAX/Dow)
+- **rischio in percentuale** dell'equity, mai lotto fisso
+- **spread come percentuale dello stop**, non in punti (R55)
+- **centro dell'altopiano**, mai la cella migliore (12 Spearman IS→OOS
+  negative su 13)
+- orari in **ora server**, sfrondatura degli input al tetto di ~15
+
+> ✅ **Quindi un candidato con un motore sensato e una gestione scadente e'
+> un BUON candidato**, non uno scarto: la gestione gliela mettiamo noi, ed e'
+> la parte che sappiamo fare. Dichiara sempre **cosa terresti** (il motore) e
+> **cosa rifaresti** (la gestione), separati.
+>
+> 🔴 **Resta invece SCARTO** tutto cio' che e' marcio nel motore: martingala,
+> griglia, niente stop, repaint, look-ahead. Quelli non si rifiniscono —
+> il §4 non si ammorbidisce per l'entusiasmo.
+
+**Non scartare per "grezzo".** Scarta per "rotto", per "doppione", o per
+"costo di validazione superiore al valore atteso". Sono cose diverse, e nel
+dossier vanno scritte diverse.
+
 ---
 
 ## 6. 📋 IL PROCEDIMENTO
 
 1. **Leggi il repo prima di uscire.** `report/ROBUSTEZZA.md`,
-   `report/CLASSIFICHE.md`, `PIANO_RITEST_TOTALE.md`, `CELLE_REGIME.txt`.
+   `report/ROTTA_PROP.md`, `backtest_pipeline/prove/CELLE_REGIME.txt`,
+   `backtest_pipeline/prove/R52_CENSIMENTO_LATI.md` (il censimento dei lati),
+   e `backtest_pipeline/caccia_strategie/SETACCIO_MANUALE.md` (cio' che e'
+   gia' stato setacciato non si ricontrolla).
+   ⚠️ _Correzione 16/08: qui erano citati `report/CLASSIFICHE.md` e
+   `PIANO_RITEST_TOTALE.md`, che **non esistono** sul branch `lavoro`._
    Devi sapere **quale buco stai cercando di riempire** prima di aprire un
    browser. Una caccia senza bersaglio torna con rumore.
 2. **Controllo positivo** su ogni fonte che usi. Se fallisce, quella fonte e'
@@ -293,6 +336,60 @@ PERCHE'    una riga, e deve reggere fra un mese
 che non conosciamo, su un periodo che non sappiamo, quasi sempre in OHLC e
 quasi sempre senza costi. Riportali solo etichettati **"dichiarato
 dall'autore, NON verificato"** — e non farli mai pesare sul punteggio.
+
+---
+
+## 7-bis. 🏛️ IL CANCELLO PROP — una riga per ogni promosso
+
+L'obiettivo dichiarato di Claudio sono **le prop** (`report/ROTTA_PROP.md`:
+_"devo trovare piu' EA possibili con DD bassi per accenderli simultaneamente
+col guardiano"_). Quindi ogni candidato promosso porta **una riga in piu'**
+nella scheda: _"in ottica prop, questo motore..."_.
+
+**I muri veri, su un conto da 100k** (`report/METRO_PROP.md`):
+
+| muro | soglia | su 100k |
+|---|---|---|
+| DD massimo totale | 10% | 🧱 **90.000** |
+| **DD giornaliero** | 5% | 🧱 **−5.000 in una sola giornata** |
+
+⚠️ **Il muro giornaliero butta fuori anche col totale intatto**: chiudere a
+94.900 partendo da 100.000 e' fuori, pur essendo sopra 90.000.
+
+**Perche' giriamo a 0,65% e non a 1%** — e' il numero che spiega tutto:
+
+| rischio/trade | p99 del DD (Monte Carlo, 27 serie) | contro il muro del 10% |
+|---|---:|---|
+| 1% | **12,47%** | 🔴 lo sfonda in **piu'** dell'1% dei casi |
+| **0,65%** | **~8,1%** | 🟢 lo sfonda in **meno** dell'1% dei casi |
+
+### Cosa guardare in un candidato, in ottica prop
+
+1. **La peggior giornata, non solo il DD totale.** Un motore che concentra le
+   perdite in poche sedute e' pericoloso anche con un DD complessivo basso: la
+   nostra peggior giornata misurata (R51) e' **−2,06%**, cioe' ~3,2R a 0,65%.
+   **Due giornate cosi' di fila sono gia' meta' del cap giornaliero.**
+2. **La frequenza e la concentrazione.** Un EA che spara 5 trade correlati la
+   stessa mattina e' un rischio giornaliero, non un edge diversificato.
+3. **🎯 La SCORRELAZIONE e' un criterio prop, non estetico.** _"Il DD della
+   prop e' UNO: quello del conto. Accendere N EA a DD basso aiuta solo se NON
+   perdono insieme."_ Regola di rotta: **mai due EA sullo stesso
+   segnale/simbolo/lato allo stesso rischio pieno.** Un candidato che lavora
+   in una **fascia oraria** o su un **evento** che non copriamo vale piu' di
+   uno piu' profittevole ma sovrapposto.
+4. ⚠️ **DD trailing.** Diverse prop usano un DD che **insegue l'equity**
+   (Upcomers: _"trailing drawdowns that shift with your equity"_). Le nostre
+   Monte Carlo sono tutte su **DD statico dal deposito**: col trailing quei
+   numeri **non valgono**, e non l'abbiamo ancora ricalcolato. Se un candidato
+   ha una curva a scalini con lunghi ritorni dal picco, **segnalalo**: e'
+   proprio la forma che il trailing punisce.
+5. **Scalabilita' a 100k.** Rischio in percentuale, non lotto fisso — un EA a
+   lotto fisso non e' confrontabile e non e' scalabile (ed e' gia' motivo di
+   scarto ricorrente nel `SETACCIO_MANUALE.md`).
+
+> Questa riga **non entra nel punteggio 0-10** del §7: non e' un sesto voto.
+> E' l'informazione che serve a Claudio per decidere l'ordine della coda,
+> e va scritta anche quando e' sfavorevole.
 
 ---
 
