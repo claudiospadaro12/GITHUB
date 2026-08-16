@@ -72,6 +72,105 @@ ingressi viene **rifiutata** (distanza minima del broker / stops level), e
 la PTE viva starebbe **saltando in silenzio circa un quarto dei suoi
 segnali**. Va verificato nel log, non dedotto da qui.
 
+
+---
+
+## 2-bis. ✍️ VERIFICA DEI RIFIUTI — **la mia inferenza era SBAGLIATA, e sotto c'era di meglio**
+
+_Claudio ha chiesto di verificare l'ipotesi dei "rifiuti". Verificata nel
+sorgente, e **non regge**. Ma cercandola e' saltato fuori il meccanismo vero._
+
+### Il rifiuto esiste come codice, ma non puo' scattare sulla config viva
+
+`ABTG_PTE.mq5:334-335` ha esattamente quel percorso:
+
+```cpp
+double risk    = isLong ? (entry-sl) : (sl-entry);
+double minDist = SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
+if(risk <= minDist){ Log("SL non valido: skip."); return; }
+```
+
+**Ma con `InpSLfromDoji=false` — cioe' la configurazione viva — lo stop e':**
+
+```cpp
+sl = entry - (atr + InpSLbufferPips*pip)   ->   risk = ATR + buffer
+```
+
+**`risk` e' sempre >= ATR**, che su GBPUSD H1 vale decine di pip: ordini di
+grandezza sopra qualunque `STOPS_LEVEL`. **Quel `return` non scatta mai.**
+
+🔴 **Quindi i 281 trade contro 348 NON sono rifiuti. Ritiro l'inferenza.**
+
+### Il meccanismo vero, e vale piu' dell'ipotesi che ha sostituito
+
+Guardando le due righe accanto:
+
+```cpp
+tp   = entry +- atr * InpTP2_ATRmult      // <- SOLO ATR
+risk = atr + InpSLbufferPips * pip        // <- ATR + buffer
+```
+
+> ### 🎯 Il target e' in ATR puro, lo stop e' ATR + buffer. Quindi l'R del target CAMBIA col buffer, senza che nessuno lo abbia deciso:
+> **`R_target = (ATR x TP2mult) / (ATR + buffer)`**
+
+**[INFERITO]** con un ATR di ~20 pip su GBPUSD H1 e `TP2mult = 2,0`:
+
+| buffer | risk | TP (pip) | **R effettivo del target** |
+|---:|---:|---:|---:|
+| 5 | 25 pip | 40 | **1,60 R** |
+| 10 | 30 pip | 40 | 1,33 R |
+| 15 | 35 pip | 40 | 1,14 R |
+| 20 | 40 pip | 40 | **1,00 R** |
+
+**Ed e' la spiegazione dei 281 contro 348:** col buffer 5 il target sta a
+1,60R, si raggiunge meno spesso, le posizioni durano di piu' e in sedici anni
+ne entrano meno. Col buffer 20 il target sta a 1R, si tocca spesso, le
+posizioni si chiudono presto e ne entrano di piu'. **Nessun rifiuto: solo un
+target che si e' spostato.**
+
+### 🔬 E questo E' il disaccoppiamento, trovato da un'altra porta
+
+La caccia L aveva detto: _"stop e target sono calcolati indipendentemente, il
+rapporto R regge per caso"_. **Il §1 di questo referto sembrava smentirlo**
+(il `TP2mult` migliore non si sposta). **Le due cose stanno insieme:**
+
+| | |
+|---|---|
+| il **ranking** di `TP2mult` | non dipende dallo stop -> **2,5 vince ovunque** ✅ |
+| l'**R effettivo** del target | **dipende eccome dallo stop**, tramite il buffer 🔴 |
+
+> **`InpSLbufferPips` sembra un parametro dello stop. In realta' e' una
+> manopola sul TARGET IN R, e nessuno lo sapeva.** Muovendo lo stop si sposta
+> il target senza accorgersene: e' esattamente il difetto che la caccia L
+> aveva individuato, solo che si manifesta sull'asse sbagliato.
+>
+> **Leung & Li non sono smentiti: l'accoppiamento c'e', ma e' implicito e
+> involontario.**
+
+### E spiega anche il disastro di `SLfromDoji=1` con buffer piccolo
+
+Con `SLfromDoji=true` lo stop e' `dojiLow - buffer*pip`: **il range di una
+doji e' piccolo per definizione**, quindi `risk` diventa minuscolo. Col sizing
+a rischio percentuale, **rischio piccolo = LOTTO ENORME**. Ecco da dove
+vengono i **DD del 21-24%** di quelle otto celle — non da rifiuti, ma da
+**posizioni sovradimensionate**. (E li' si', il `return` della riga 335 puo'
+scattare davvero, quando la doji e' cosi' stretta da finire sotto lo
+`STOPS_LEVEL`.)
+
+### 👉 Cosa cambia per il round del buffer
+
+Il seguito indicato al §5 **resta valido ma cambia tesi**. Non e' piu'
+_"lo stop stretto fa rifiutare gli ingressi"_ — quella e' morta. E':
+
+> **"il buffer e' un target-in-R travestito da stop, e va misurato come tale:
+> a `R_target` costante, il buffer conta ancora?"**
+
+Si prova cosi': si spazzola il buffer **compensando `TP2mult`** per tenere
+`R_target` fisso. Se a R costante il buffer smette di contare, allora l'unica
+manopola vera era il target — **e la PTE ha un parametro in meno**.
+
+---
+
 ## 3. 🟠 IL SECONDO: `SLfromDoji` ha un'interazione fortissima col buffer
 
 | `SLfromDoji=1` | OOS |
@@ -112,7 +211,7 @@ altrove:
 >
 > **Ma il round ha trovato altro:** `InpSLbufferPips = 5` — il valore che
 > gira in forward — e' il peggiore dei quattro testati su drawdown, peggior
-> giornata e profitto in campione, e fa il **24% di trade in meno**.
+> giornata e profitto in campione, e fa il **24% di trade in meno** (il perche' e' nel §2-bis, e **non e' quello che avevo inferito**).
 
 **Il seguito giusto NON e' cambiare il parametro: e' misurarlo come si
 deve.** Un round suo, con:
