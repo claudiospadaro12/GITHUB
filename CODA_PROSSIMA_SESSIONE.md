@@ -1,5 +1,37 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## 🌙 CHIUSURA DELLA SERATA 16/08 — sei round e una sedia nuova
+>
+> **R61 · R62** GAPFILL Nasdaq (cella confermata, l'asse `pts` e' ridondante)
+> **R63** `TurnaroundTuesday` ⚰️ **MORTO** (0/24 OOS su 11.928 trade) — famiglia chiusa
+> **R64** `CanaleLento` 🟡 non scegliibile (la cella del metodo perde −812)
+> **R65 · R66** `GapContinuation` ✅ **PASSA**: PF **1,398** a tick reali,
+> gemello sciolto, bordo della griglia chiuso. Unico criterio non passato:
+> il **lato short** (−2.182).
+>
+> 🆕 **DEPLOY**: `ABTG_GapContinuation` su **225JPY M1, magic 774101**, conto
+> piccolo, VPS, rischio 1%. E' la **prima sedia arrivata dalla caccia
+> esterna**. Scheda completa in `FLOTTA_ATTIVA.md`.
+> ⏳ Attesa **~3,7 operazioni/mese** → 15 trade a **dicembre**, 30 a **aprile**.
+>
+> ### 🎯 IL PROSSIMO PASSO E' LA PTE, ed e' pronto da lanciare
+> `prove/PTE_ACCOPPIAMENTO_TP_SL.txt` — **32 celle, ZERO righe di codice**:
+> le tre leve esistono gia' come input. Testa il difetto trovato dalla
+> caccia L: in `ABTG_PTE.mq5` **stop e target sono calcolati
+> indipendentemente** (`:329-330` vs `:338`), quindi il rapporto R regge
+> **per caso, non per costruzione**.
+> 🟢 **E adesso si puo' fare su 16 ANNI**: lo storico GBPUSD H1 e' stato
+> misurato stasera — **locale dal 2010.07.06**, server dal **1993.05.11**.
+> Si lancia con `-DaQuando 2010.07.06`.
+>
+> ### Cosa resta in fila dopo
+> 1. **Pivot Supertrend** (9/10, dossier I) — l'EA va scritto, 3-4h
+> 2. **Controllo ATR sullo STREV** — mezz'ora, sblocca tre candidati
+> 3. **RETEST col filtro volumi** sul Nasdaq (+274,35 · PF 1,109 · DD 3,68%)
+> 4. **Decisione sul lato short** di `GapContinuation` — a mente fredda
+> 5. **Bug OPTFRAME**: "Perdite Consecutive Max" non e' un conteggio (39 EA)
+
+
 > ## 🌙 PIANO DELLA NOTTE 16→17/08 — deciso da Claudio
 >
 > Claudio voleva mettere i tre EA nuovi sul VPS per l'apertura di stanotte.
