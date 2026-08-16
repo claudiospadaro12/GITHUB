@@ -86,3 +86,48 @@ _Legenda stato: ✅ validato tick reali · 🟡 nativo/da verificare · ❌ scar
 
 ---
 **Totale:** 52 grafici → ~50 EA di trading attivi + 1 exporter + 1 grafico da verificare.
+
+---
+
+## 🆕 SEDIA NUOVA — deploy del 16/08/2026 (conto piccolo 50503392, VPS)
+
+| Grafico | EA | Simbolo | TF | Magic | Stato |
+|---|---|---|---|---|---|
+| 225JPY M1 | **ABTG_GapContinuation** | Nikkei | M1 | **774101** | 🆕 forward dal 16/08, rischio 1% |
+
+**Prima sedia arrivata dalla caccia esterna al Code Base** (origine:
+`mql5.com/en/code/75301`, Francesc Jordi Mallol Nolden — attribuzione in
+testa al `.mq5`). Validata in **R65 + R66**.
+
+**Cosa gira:** cella `gap 1,00 / OR 15 / TP_R 3`, sessione **01:00-07:30 ora
+server** (cash di Tokyo), commento ordini **`GAPCONT`**.
+
+**Numeri a tick reali** (OOS 2025.06.10 → 2026.06.30, rischio 1%):
+**+8.339,62 · PF 1,398 · n=70 · DD 11,59% · peggior giornata −1,10% · zero
+overnight** (max 6h10m in posizione).
+
+### ⚠️ Le tre cose da sapere su questa sedia
+
+1. 🔴 **Il lato SHORT perde** (−2.182 OOS): il profitto e' tutto del long.
+   **NON riempie il buco n.3 degli short**, e va ricordato ogni volta che lo
+   si cita. Gira simmetrico per costruzione: **non si spegne un lato
+   guardando i risultati** (malattia R52).
+2. 🔴 **Le perdite arrivano in gruppo**: Z-Score **−4,03 (99,74%)**, 6
+   perdite consecutive misurate. Una serie storta **e' nel carattere del
+   motore**, non un guasto. E le Monte Carlo del progetto assumono
+   indipendenza: **su questo EA sottostimano la coda**.
+3. 🟡 **La cella e' un PICCO in campione, non un altopiano** (R66): scelta
+   difendibile per metodo, non per robustezza del parametro.
+
+### 📅 Cosa aspettarsi, in tempo
+
+**~3,7 operazioni al mese** (47 in 12,7 mesi, `InpOneTradePerDay=true`).
+Quindi: **~4 mesi** per i 15 trade della regola di casa, **~8 mesi** per i
+30 trade OOS-forward di `ROTTA_PROP`. **E' un passeggero, non un pilota:
+entra per la fascia oraria e la scorrelazione, non per il rendimento.**
+
+⚠️ **Richiede la build del 16/08** con la correzione a
+`HasAnyPositionOnSymbol()`: la versione precedente si autozittiva quando
+`SupertrendReversal 225JPY` o `GapFill 225JPY` avevano una posizione aperta.
+Se il pannello dice _"Blocked: another position exists on the symbol"_ mentre
+un altro EA e' in posizione, il `.ex5` e' vecchio.
