@@ -1,0 +1,107 @@
+# =====================================================================
+#  PROVA R68: PTE -- IL BUFFER E' UN TARGET-IN-R TRAVESTITO DA STOP?
+#  Seguito di R67. Referto: risultati_archivio/REFERTO_ROUND67_PTE_ACCOPPIAMENTO.md
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# LA TESI, scritta PRIMA dei numeri
+#
+#   R67 ha trovato che nella PTE il target e' in ATR puro e lo stop e'
+#   ATR + buffer (ABTG_PTE.mq5:329-330 e :338):
+#       tp   = entry +- atr * InpTP2_ATRmult      <- SOLO ATR
+#       risk = atr   +  InpSLbufferPips * pip     <- ATR + buffer
+#   quindi        R_target = (ATR * TP2mult) / (ATR + buffer)
+#
+#   👉 **`InpSLbufferPips` NON e' un parametro dello stop: e' una manopola
+#      sul TARGET IN R, e nessuno lo sapeva.** Muovendo il buffer si sposta
+#      il target senza accorgersene.
+#
+#   LA DOMANDA DI QUESTO ROUND, in una riga:
+#      **una volta tolto l'effetto sul target, il buffer conta ancora?**
+#      Cioe': il buffer serve a qualcosa DI SUO (protegge lo stop dal
+#      rumore) oppure e' solo un modo storto di scrivere l'R?
+#
+# ---------------------------------------------------------------------
+# 🔑 LA SCORCIATOIA CHE RENDE IL ROUND POSSIBILE SENZA CODICE
+#
+#   Per tenere R costante servirebbe l'ATR tipico di GBPUSD H1, che NON e'
+#   misurato. Ma non serve, perche':
+#
+#      con **buffer = 0**  ->  risk = ATR  ->  **R_target = TP2mult ESATTO**
+#
+#   La riga `buffer 0` e' quindi il RIFERIMENTO IN R PURO: li' il target
+#   in R e' esattamente il numero che scriviamo, senza dipendere dall'ATR.
+#   Tutte le altre righe hanno lo stesso target in PREZZO ma un R piu'
+#   basso, tanto piu' basso quanto e' grande il buffer.
+#
+#   ⚠️ buffer 0 e' legale: `sl = entry-(atr+0)` -> risk = ATR, sempre
+#   positivo e ordini di grandezza sopra lo STOPS_LEVEL. Il controllo di
+#   riga 335 non scatta.
+#
+# ---------------------------------------------------------------------
+# COME SI LEGGE (deciso ORA, prima dei numeri)
+#
+#   1. **La riga buffer=0 e' la baseline.** Si guarda la sua curva su
+#      TP2mult: e' la vera curva "profitto contro R", pulita.
+#   2. **Poi si confrontano le righe a buffer crescente.** Due esiti:
+#      A) le righe col buffer sono spiegate dallo SPOSTAMENTO DI R
+#         (cioe' buffer 10 a TP2mult X somiglia a buffer 0 a un TP2mult
+#         piu' basso) -> **il buffer non ha vita propria: e' l'R.
+#         La PTE ha un parametro in piu' che non serve.**
+#      B) le righe col buffer stanno SISTEMATICAMENTE sopra (o sotto) la
+#         baseline a parita' di R -> **il buffer fa qualcosa di suo**
+#         (probabilmente protegge lo stop dal rumore) e va tenuto, ma
+#         allora va tarato SAPENDO che muove anche il target.
+#   3. 🔴 In nessuno dei due casi si cambia qualcosa in forward con questo
+#      round: e' OHLC. Il verdetto e' a tick reali, e la PTE e' una sedia
+#      viva (unico motore positivo in tutti e 4 i regimi di R50).
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (congelati, gli stessi di casa)
+#
+#   0. n >= 15 per cella; sotto n=20 il PF non si giudica.
+#   1. La cella si sceglie SOLO sull'IS, centro dell'altopiano MAI il
+#      picco (diciassette Spearman negative su diciotto).
+#   2. Confronto di riferimento: la config VIVA (buffer 5 / TP2 2,0) che
+#      in R67 ha fatto IS -1.068 / OOS +3.931, PF 1,074, DD 13,38%.
+#      Una configurazione entra in discussione solo se **abbassa il DD
+#      SENZA perdere profitto OOS**.
+#   3. 🔴 NESSUNA MODIFICA IN FORWARD da questo round, qualunque cosa esca.
+#      La PTE gira come gira finche' non c'e' un round a tick reali E una
+#      decisione esplicita di Claudio.
+#
+# ---------------------------------------------------------------------
+# ⚠️ LIMITI DICHIARATI ADESSO
+#
+#   a) **OHLC**: R57 ha misurato che cambiando SOLO il modello il segno si
+#      ribalta. Questo round PROPONE, non decide.
+#   b) **Un simbolo solo.** La PTE e' una famiglia (Dow, GBPUSD, USDJPY -
+#      celle 7/8/9 di R52) e i verdetti sono di famiglia. Se qui esce
+#      qualcosa, va ripetuto sugli altri due prima di crederci.
+#   c) `InpSLfromDoji` e' **PINNATO A 0**: in R67 il ramo doji con buffer
+#      piccolo faceva DD del 21-24% per posizioni sovradimensionate (stop
+#      minuscolo + sizing a rischio %). Non e' il tema di questo round e
+#      si muove un asse alla volta.
+#
+# ---------------------------------------------------------------------
+# GRIGLIA: 6 x 4 = 24 celle
+#   buffer 0,5,10,15,20,30  x  TP2mult 1,5/2,0/2,5/3,0
+#   Il buffer arriva a 30 per avere una riga oltre l'intervallo di R67
+#   (che si fermava a 20) e vedere dove la curva gira.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO 2010.07.06
+
+# --- l'asse che porta la domanda: 0 = R puro, poi il buffer cresce ---
+InpSLbufferPips=10.0||0.0||5.0||30.0||Y
+# --- il target: stesso intervallo di R67, per poter confrontare ---
+InpTP2_ATRmult=2.0||1.5||0.5||3.0||Y
+
+# --- pinnati: identici a R67, si muove un asse alla volta ---
+# SLfromDoji SPENTO: in R67 il ramo doji era il disastro (DD 21-24%)
+InpSLfromDoji=0||0||0||0||N
+InpTF=16385||16385||0||16385||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
