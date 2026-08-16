@@ -449,6 +449,48 @@ Registrati perche' non si ricerchino il giro dopo.
 
 ---
 
+## 8-bis. 🚀 LA RIGA DI LANCIO — passata dalla `CHECKLIST_RIGA_DI_LANCIO.md`
+
+**I quattro controlli, eseguiti (non promessi):**
+
+1. ✅ **Ho aperto lo script.** `walkforward_generico.ps1`, righe 60-75 (i
+   parametri) e 260-264 (come risolve il file prova). Da li' vengono i due
+   flag che seguono, non dalla memoria.
+2. ✅ **Difetti gemelli.** Nessuna correzione fatta oggi da propagare: questa
+   caccia non ha toccato nessuno script.
+3. 🎯 **CERCA o VERIFICA? → CERCA.** E' una griglia da **32 celle**, quindi
+   **`-Modello 1` (OHLC M1, SOLO screening)**. E' esattamente l'errore di R58
+   evitato: quella riga puntava a una griglia mentre serviva la cella
+   congelata. Qui la griglia e' voluta — **e per la stessa ragione il verdetto
+   NON si legge da qui** (§9: verdetti solo a tick reali).
+4. ✅ **SHA.** Nessun SHA da pinnare: non propongo operazioni git.
+
+```
+# 0. PREREQUISITO — @DAQUANDO NON ESISTE ANCORA. Prima si MISURA:
+powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "GBPUSD" -SoloReferto
+
+# 1. GIRO A VUOTO (non apre MT5, dice quante celle sono: devono uscire 32)
+powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE `
+  -Prova "prove\PTE_ACCOPPIAMENTO_TP_SL.txt" -Modello 1 -Etichetta "R_TPSL" -SoloControllo
+
+# 2. SOLO SE il conteggio torna 32 e @DaQuando e' la data MISURATA al passo 0
+powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_PTE `
+  -Prova "prove\PTE_ACCOPPIAMENTO_TP_SL.txt" -Modello 1 -Etichetta "R_TPSL" -DaQuando <DATA_MISURATA>
+```
+
+- **`-Prova`** serve perche' il file **non** si chiama come l'EA: il default e'
+  `prove\<EA>.txt` (riga 260), e senza questo flag il driver prenderebbe la
+  **vecchia griglia della PTE** — di nuovo l'errore di R58.
+- **`-Etichetta "R_TPSL"`** perche' i CSV non sovrascrivano quelli PTE esistenti.
+- ⚠️ **UNA MACCHINA, UN LAVORO.** Apre MT5 sul PC di backtest: prima deve
+  essere finito **tutto** quello che ci gira adesso.
+- ⚠️ **Il file prova esiste su QUESTA macchina.** Il driver, se non lo trova in
+  locale, lo scarica da `raw.githubusercontent` sul branch **`lavoro`**
+  (righe 77-78, 264). **Non ho eseguito nessun comando git** (vincolo del
+  mandato): sul PC di backtest il file va portato li' da te.
+
+---
+
 ## 9. 📌 IN UNA RIGA
 
 > Il Code Base non ha niente per due motori a 30/30 — **e questa e' la

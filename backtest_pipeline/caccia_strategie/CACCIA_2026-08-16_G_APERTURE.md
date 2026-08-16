@@ -329,6 +329,27 @@ perde insieme a nulla di quello che gia' gira di giorno.
 il cumulo dei due va guardato con occhio cattivo (lezione R37, dove il cumulo
 della riapertura ha bocciato una famiglia intera).
 
+### ⚠️ E il DAX? Ho guardato, e la risposta e' no — con il numero
+
+Il bersaglio di Claudio dice "DAX **e** Nasdaq". Ho misurato tutti e due.
+`DAX_B_motore_*.csv`, stessa FASE B, sessione **08:00 server** (09:00 IT −1):
+
+| `InpEntryMode` | IS Profit | n IS | OOS Profit | PF OOS | n OOS |
+|---|---:|---:|---:|---:|---:|
+| **1 GAPFILL** | −1,36 | **7** | +33,10 | 1,110 | **9** |
+| 2 RETEST | +807,30 | 180 | **+392,96** | 1,065 | 244 |
+
+**Sul DAX il gap d'apertura fa 9 trade in nove mesi.** Non e' poco: e'
+niente. Il motivo e' strutturale — un indice europeo apre con gap molto
+piu' piccoli di un indice americano, e la soglia geometrica (`GapMinRR`)
+li taglia quasi tutti.
+
+Quindi **la spazzolata si fa sul Nasdaq, non sul DAX**, e il DAX non e' un
+secondo asse di questo round: sarebbe una griglia su 9 trade.
+✅ E il DAX il suo motore d'apertura **ce l'ha gia' ed e' vivo**: il RETEST,
++392,96 OOS, win rate **81,0%** in forward. Il buco era il Nasdaq, e il
+Nasdaq aveva una sola casella verde.
+
 📄 **File prova:** `backtest_pipeline/prove/ABTG_Nasdaq_Apertura_US_GAP.txt`
 — 24 celle, `@DAQUANDO 2024.09.26` **misurato** (lo stesso di R7a/R12 su
 NASUSD M5, non inventato), tutti i pin copiati dalla riga vincente della
