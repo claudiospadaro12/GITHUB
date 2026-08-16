@@ -593,3 +593,106 @@ dove abbiamo **~210 celle a tick reali** e due sedie vive.
 > misurate** (6), **martingala/griglia** (2), **indicatori che non operano**
 > (3), **MQL4 che non compila** (2), **lotto fisso** (2), **troppe manopole**
 > (2). _(Un file puo' cadere per piu' motivi.)_
+
+---
+
+# 🥇 16/08/2026 — CINQUE FILE SULL'ORO: **zero promossi, e quattro sono gravi**
+
+| # | file | righe | input | verdetto |
+|---|---|---:|---:|---|
+| 1 | `XANDER_Gold_Recovery.mq5` | 482 | 24 | 🔴🔴 **MARTINGALA** dichiarata nel nome dell'input |
+| 2 | `DailyZoneRecovery.mq5` **(x2)** | 636 | 38 | 🔴🔴 **TRE GRIGLIE** in parallelo |
+| 3 | `Quantum Gold Silver Trader.mq5` | 1.679 | **81** | 🔴 fattoria di manopole |
+| 4 | `Gold Dust.mq5` | 836 | 19 | 🔴 **8 pesi liberi**: 2,7 miliardi di miliardi di combinazioni |
+
+_(Il n.2 e' arrivato in due zip diversi: e' lo stesso identico file.)_
+
+---
+
+## 🔴🔴 `XANDER_Gold_Recovery` — la martingala e' nel NOME dell'input
+
+```cpp
+input double xr_RecoveryMultiplier = 1.4;   // Lot multiplier per step
+...
+double next_volume = NormalizeVolume(last_volume * xr_RecoveryMultiplier);
+```
+
+**`ultimo_volume x 1,4` a ogni passo.** E' la stessa meccanica di `Ilan` e di
+`Mean_Reversion`, col nome cambiato: "recovery" e' come si chiama la
+martingala quando la si vende.
+
+⚠️ **E il `#property link` non porta a MQL5: porta a un canale Telegram**
+(`t.me/xandertool`). Non e' una bandiera rossa del §4, ma dice tutto su cosa
+sia questo file. In piu' e' **sintassi MQL4**: non compila come `.mq5`.
+
+## 🔴🔴 `DailyZoneRecovery` — non una griglia, **TRE**
+
+```cpp
+input double InpStrategy1GridStepPct = 0.34;   // Grid step (%)
+input double InpStrategy2GridStepPct = 0.01;   // Grid step (%)
+input double InpStrategy3GridStepPct = 0.32;   // Grid step (%)
+```
+
+Tre motori a griglia in parallelo, **lotto fisso `InpLot = 0.01`** (nessun
+rischio in percentuale), 38 input, e il `#property link` finisce in
+**`/seller`**: e' un prodotto del Market.
+
+Lo "Zone Recovery" e' la variante con copertura: si apre il lato opposto per
+non chiudere in perdita. **Colpisce tre bandiere rosse insieme** — griglia,
+hedge di copertura, lotto fisso.
+
+## 🔴 `Quantum Gold Silver Trader` — **81 input**, e due tarature separate
+
+1.679 righe, **13 gruppi di parametri**, commenti in russo, header con
+copyright MetaQuotes. **Nessuna martingala** (i 38 "multiplier" sono tutti
+moltiplicatori di ATR, verificato riga per riga) e ha persino `OnTester`.
+
+Ma:
+- **81 input contro il nostro tetto di ~15.** Cinque volte e mezzo.
+- **12 parametri `Gold_` e 12 `Silver_`**: due tarature separate cucite dentro
+  lo stesso EA. Non e' un motore che funziona su due mercati — sono **due
+  overfitting nello stesso file**.
+
+## 🔴 `Gold Dust` — e questo merita di essere raccontato
+
+**Non e' martingala. Compila davvero** (usa `CTrade` e si definisce da solo
+`bool RefreshRates(void)`, quindi il mio primo controllo automatico l'aveva
+segnato MQL4 per sbaglio — **verificato a mano, e corretto**). Ha uno
+**stop loss vero** (150 pip) e un trailing. Yury V. Reshetov, 2011.
+
+E allora perche' esce? Per gli input:
+
+```cpp
+input int x11=100;  input int x21=100;  input int x31=100;  input int x41=100;
+input int x12=100;  input int x22=100;  input int x32=100;  input int x42=100;
+input int pass=1;
+...
+int Perceptron(int x1,int x2,int x3,int x4)
+  { double w1 = x1 - 100.0; ... double result = w1*a1+w2*a2+w3*a3+w4*a4; }
+```
+
+**Sono due percettroni con OTTO PESI LIBERI.** I pesi non hanno alcun
+significato di mercato: sono numeri che l'ottimizzatore riempie. Ognuno
+spazza 0-200:
+
+> ### 🚨 **201⁸ = 2.664.210.032.449.121.601 combinazioni.**
+> **Due miliardi di miliardi di modi di sembrare bravi sul passato.**
+
+Con **dodici Spearman IS→OOS negativi su tredici** — l'ultimo (R58) misurato
+sui tick reali del nostro broker — un motore i cui parametri **sono solo
+output dell'ottimizzatore** e' l'oggetto piu' lontano da noi che esista.
+`ROBUSTEZZA.md` in una riga: _"ogni parametro in piu' e' una manopola che il
+backtest gira verso il passato"_. Qui **il motore E' la manopola.**
+
+Non e' un EA scritto male. E' **la macchina per costruire il ribaltamento
+numero trentuno**.
+
+---
+
+> ### 🧭 Correzione di mira, terza edizione
+> **Sull'oro e sul "recovery" siamo pieni di veleno.** Le parole che nel
+> titolo o negli input valgono uno scarto immediato, senza aprire il file:
+> **recovery · zone · grid · multiplier sul LOTTO · martingale · x11/w1
+> (pesi liberi) · doppia taratura per simbolo**.
+>
+> Restano i tre buchi veri, misurati: **LATERALE · CROLLO · SHORT simmetrico**.
