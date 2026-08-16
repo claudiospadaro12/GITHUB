@@ -173,9 +173,10 @@
 //|                                                                   |
 //|   CORREZIONE 6 - Magic VERGINE 774201 (verificato contro i 69 EA  |
 //|     del repo: nessuna collisione) e InpComment riconoscibile.     |
-//|     ATTENZIONE: il file prova pinna InpMagic=20260816. Nel        |
-//|     tester il magic non conta, ma PRIMA DI QUALUNQUE FORWARD va   |
-//|     deciso quale dei due vale, e messo sul grafico.               |
+//|     RISOLTO 16/08: il file prova pinnava 20260816, cioe' una      |
+//|     seconda identita' per lo stesso EA. Ora pinna 774201 come     |
+//|     qui: codice e file prova dicono la stessa cosa, e il CSV      |
+//|     per-trade esce col nostro numero.                             |
 //|                                                                   |
 //|   CORREZIONE 7 - Attribuzione completa in testa al file (sopra).  |
 //|                                                                   |

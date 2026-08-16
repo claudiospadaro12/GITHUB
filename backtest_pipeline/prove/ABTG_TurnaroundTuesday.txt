@@ -351,6 +351,15 @@ InpATRPeriodD1=14||14||0||14||N
 InpCloseHourServer=22||22||0||22||N
 # timeframe di lavoro dell'EA: H1, come le celle di regime.
 InpTF=16385||16385||0||16385||N
-# magic VERGINE nostro. Nel tester non conta, ma prima di qualunque forward
-# va comunque verificato che non collida con la flotta.
-InpMagic=20260816||20260816||0||20260816||N
+# magic VERGINE nostro: 774201, verificato contro tutti i 69 EA del repo,
+# zero collisioni. E' anche il default compilato nell'EA
+# (ABTG_TurnaroundTuesday.mq5:288), quindi codice e file prova dicono la
+# stessa cosa.
+# (16/08: qui c'era 20260816, un magic a data. Nel tester non cambia i
+#  numeri, ma il file prova VINCE sulle blindature del driver: il CSV
+#  per-trade sarebbe uscito come ..._20260816.csv mentre il codice dice
+#  774201 -- cioe' due identita' per lo stesso EA. E' lo schema esatto
+#  dell'incidente "il magic 770101 era un miscuglio di due macchine"
+#  (CENSIMENTO_ORDINI_PC.md): 15 trade dal PC e 11 dal VPS sotto lo stesso
+#  numero, e ogni statistica mescolava due popolazioni. Allineato.)
+InpMagic=774201||774201||0||774201||N
