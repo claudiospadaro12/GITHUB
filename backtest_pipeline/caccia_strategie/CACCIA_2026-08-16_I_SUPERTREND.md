@@ -8,11 +8,21 @@ come **cella nuova**. NON filtri da appiccicare alle sedie vive._
 
 ## 0. LA RIGA CHE CONTA
 
-> **Su 27 candidati guardati su 5 fonti, 7 sono arrivati al sorgente (o al
-> paper), 3 li proverei — e il primo e' il `Pivot Supertrend`, perche' e'
+> **Su 41 candidati guardati su 6 fonti interrogate (2 delle quali in 403),
+> 10 sono arrivati al sorgente o all'abstract — di cui 2 letti riga per riga
+> nel `.mq5` — e 3 li proverei. Il primo e' il `Pivot Supertrend`, perche' e'
 > l'unica cosa trovata che cambia il MOTORE (la base di calcolo passa dal
 > punto medio dell'ultima candela alla STRUTTURA di swing) invece di
 > aggiungere una condizione al motore che gia' abbiamo.**
+
+**Il conto, per esteso** — perche' "guardati" e "letti" non sono la stessa cosa:
+
+| | quanti | quali |
+|---|---:|---|
+| candidati **guardati** (titolo + scheda o elenco) | **41** | 7 Code Base · 2 articoli MQL5 · 14 `/market/` (respinti in blocco per perimetro) · 8 TradingView · 8 GitHub · 2 arXiv pertinenti |
+| arrivati al **sorgente o all'abstract** | **10** | 75110, 57063, 72345, 72110, 15239, 19875, art. 20908, art. 23541, arXiv 2405.14262, arXiv 1701.03960 |
+| **letti riga per riga nel `.mq5`** | **2** | **75110** (1.073 righe, scaricato) e **57063** (MIT, scaricato) |
+| **promossi** | **3** | §3 |
 
 E la cosa piu' utile della caccia **non e' un candidato**: e' che leggendo le
 implementazioni altrui ho trovato **due cose che non sapevamo del NOSTRO
@@ -48,7 +58,7 @@ al posto).
 
 | fonte | controllo positivo | esito | visti |
 |---|---|---|---|
-| **MQL5 Code Base** `/en/code/mt5/experts` + `/indicators` | ✅ la lista rende titoli e ID veri (es. 76165 ProAutoSL, 75110 Pivot SuperTrend) | 🟢 **usata, la piu' produttiva** | ~120 titoli sfogliati (elenco experts p.1, indicators p.1-2) + 6 schede aperte |
+| **MQL5 Code Base** `/en/code/mt5/experts` + `/indicators` | ✅ la lista rende titoli e ID veri (es. 76165 ProAutoSL, 75110 Pivot SuperTrend) | 🟢 **usata, la piu' produttiva: 3 promossi su 3 vengono da qui** | ~120 titoli sfogliati (elenco experts p.1, indicators p.1-2) + 6 schede aperte + 2 sorgenti scaricati |
 | **arXiv / export.arxiv.org** | ✅ API risponde, restituisce titoli+autori+date reali | 🟢 usata, **resa quasi nulla** su questo bersaglio | 3 query, ~25 abstract |
 | **TradingView** | ✅ 200, script "open source" visibili | 🟡 usata solo per **risalire all'origine** del Pivot Supertrend | ~10 script |
 | **GitHub** | ✅ 200, repo veri | 🟡 usata, **valore inferiore** al Code Base (vedi §5) | ~10 repo |
