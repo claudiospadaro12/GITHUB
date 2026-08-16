@@ -332,11 +332,15 @@ InpEntryHourServer=8||0||8||8||Y
 # nudo e' rosso, la famiglia si chiude e NON si ripesca col filtro.
 InpUseATRFilter=0||0||0||0||N
 InpMinDayATR=1.5||1.5||0||1.5||N
-# entrambi i lati accesi: la simmetria e' meta' del motivo per cui esiste.
-# Per il criterio 2 si spengono UNO ALLA VOLTA, in due passate diagnostiche
-# sulla sola cella scelta — mai come asse della griglia.
-InpAllowLong=1||1||0||1||N
-InpAllowShort=1||1||0||1||N
+# Entrambi i lati accesi: la simmetria e' meta' del motivo per cui esiste.
+# (16/08: qui c'erano due righe InpAllowLong=1 / InpAllowShort=1 pinnate. Sono
+#  state TOLTE DALLA GRIGLIA: il driver blinda da solo ogni input al default
+#  compilato, che per entrambi e' `true`, quindi le righe non aggiungevano
+#  nulla e mettevano un interruttore di lato dentro il file dell'ipotesi —
+#  proprio la forma che R52 documenta come malattia.
+#  Gli input RESTANO nell'EA come maschera diagnostica, e il criterio 2 qui
+#  sopra li usa cosi': DUE PASSATE SEPARATE sulla sola cella scelta, a mano,
+#  fuori da questa griglia. Mai come asse.)
 # rischio: 1,0% come tutte le celle di confronto (la rotta prop gira a 0,65%,
 # ma i confronti storici sono tutti all'1% e si resta confrontabili).
 InpRiskPercent=1.0||1.0||0||1.0||N
