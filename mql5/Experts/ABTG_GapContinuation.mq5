@@ -477,12 +477,32 @@ ulong FindOurPosition()
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| CORREZIONE 16/08 - PRIMA guardava QUALUNQUE posizione sul         |
+//| simbolo, di chiunque:                                            |
+//|     if(ticket>0 && PositionGetString(POSITION_SYMBOL)==_Symbol)  |
+//| Nel tester non si vede (gira un EA solo), ma in FORWARD su        |
+//| 225JPY girano gia' ABTG_SupertrendReversal H2 (magic 770901, uno  |
+//| swing che tiene le posizioni per GIORNI) e ABTG_GapFill H1        |
+//| (772235): con la versione vecchia questo EA si sarebbe            |
+//| AUTOZITTITO quasi sempre, e in forward il sintomo e' "non fa      |
+//| niente" -- cioe' quello che si scambia per "la tesi non           |
+//| funziona".                                                        |
+//| Ora conta SOLO le proprie posizioni. La semantica voluta e'       |
+//| "una posizione alla volta per QUESTO EA", che e' quella che       |
+//| l'EA gia' applica altrove (FindOurPosition, HasEnteredToday).     |
+//| ⚠️ NON cambia nessun numero di R65/R66: nel tester le uniche      |
+//| posizioni sul simbolo erano gia' le sue.                          |
+//+------------------------------------------------------------------+
 bool HasAnyPositionOnSymbol()
   {
    for(int i=PositionsTotal()-1;i>=0;i--)
      {
       ulong ticket=PositionGetTicket(i);
-      if(ticket>0 && PositionGetString(POSITION_SYMBOL)==_Symbol)
+      if(ticket==0)
+         continue;
+      if(PositionGetString(POSITION_SYMBOL)==_Symbol &&
+         (ulong)PositionGetInteger(POSITION_MAGIC)==InpMagicNumber)
          return(true);
      }
    return(false);
