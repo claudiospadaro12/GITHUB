@@ -359,3 +359,111 @@ non c'e' niente da misurare.
 > 💡 **La regola pratica per il prossimo giro**, in un `Ctrl+F`: se trovi
 > **`OnCalculate`** e' un indicatore → salta. Se trovi **`OnTick`** e
 > **`OrderSend`** o **`trade.Buy`** e' un EA → mandalo.
+
+---
+
+# 🧱 16/08/2026 — CINQUE FILE SUL BREAKOUT: **zero promossi**
+
+| # | file | righe | tipo | verdetto |
+|---|---|---:|---|---|
+| 1 | `SessionORB_EA (4).mq5` | 466 | EA MQL5 **pulito** | 🟡 **DOPPIONE** — famiglia gia' misurata a morte |
+| 2 | `Universal Breakout Study.mq5` | 542 | EA MQL5 | 🔴 **38 input**, con gli interruttori per giorno della settimana |
+| 3 | `BreakOut.mq4` | 444 | EA **MQL4** | 🔴 non compila su MT5 |
+| 4 | `Open Range Breakout-H-Max.mq5` | 690 | **INDICATORE** | 🔴 non apre posizioni |
+| 5 | `AsianSessionBreakoutBhanuCodeLab.mq5` | 2.100 | **INDICATORE** + MQL4 | 🔴 non apre posizioni |
+
+---
+
+## 🎯 IL PUNTO CHE VALE PIU' DEI CINQUE FILE
+
+**Il breakout e' l'unico spazio dove abbiamo gia' misurato quasi tutto — e i
+numeri sono negativi.** Non e' un'opinione, e' l'archivio:
+
+| round | cosa | esito |
+|---|---|---|
+| batteria ORB (R7-R13) | 7 fonti, 8 round, 4 mercati, **~210 celle a tick reali** | _"il breakout puro al tocco e' morto ovunque"_ |
+| **R45** | ORB sulla sessione di Londra, 48 celle | **0 celle verdi su 48** |
+| **R12** | ORB + EMA200 + volumi sul Nasdaq, 48 celle | **48 su 48 negative OOS** |
+| R44 | target 2x/3x sul Dow | il bordo era gia' a 1,5x: R13 aveva trovato il massimo |
+| R55 | slippage sull'ORB | sfonda il cancello del 10% con 1,5 punti indice |
+
+E cio' che **e' sopravvissuto** a quella batteria **e' gia' in campo**:
+`ABTG_DAX_Apertura_EU` (live, win rate **81,0%**) e `Dow Apertura`, piu' la
+pista ORB-EMA200 di R13/R15.
+
+> 🔴 **Quindi un ORB di sessione generico non ci porta niente di nuovo:
+> ci porta la 211-esima cella di una famiglia che conosciamo meglio
+> dell'autore.** Vale la regola del mandato §5.D: un candidato che fa la
+> stessa cosa di una sedia viva **vale poco anche se e' buono**.
+
+---
+
+## 🟡 `SessionORB_EA (4).mq5` — **il migliore dei cinque, e comunque non entra**
+
+**Ed e' scritto bene**, va detto: `CTrade`, `SetExpertMagicNumber`,
+`SetTypeFillingBySymbol`, rischio in percentuale, lati separabili
+(`InpAllowLongTrades` / `InpAllowShortTrades`), SL oltre il bordo opposto del
+range, TP come multiplo di R. Zero bandiere rosse del §4.
+
+E ha persino il dettaglio che sbagliano quasi tutti:
+```
+input group "===== Session Settings (broker/server time) ====="
+input int InpSessionStartHour = 8;    // Session start hour (0-23)
+```
+**Ora del SERVER, dichiarata** — che e' la nostra regola del fuso BCM
+(DAX 09:00 IT = **08:00 server**), e il default e' proprio 8.
+
+**Perche' non entra lo stesso:** meccanica identica a
+`ABTG_DAX_Apertura_EU` / `ABTG_ORB` (range di apertura, buffer di conferma,
+finestra di trading, SL al bordo opposto, TP a R multipli). Anche il suo unico
+asse davvero diverso — `InpBreakoutBufferPoints` — e' gia' misurato: e' il
+buffer di R11 e l'offset di C11 (_"preteso un ritorno 300 punti piu' profondo:
+16 riempimenti persi su 409, l'edge non dipende da riempimenti ottimistici"_).
+
+📌 **Messo in archivio come riferimento**, non in coda: se un giorno servisse
+un secondo motore ORB su un banco vergine, questo e' un buon scheletro. Ma non
+si spende una macchina per rimisurare cio' che ha gia' 210 celle.
+
+## 🔴 `Universal Breakout Study.mq5` — **38 input, e tre sono giorni della settimana**
+
+```cpp
+input group "=== Days trading ===";
+input ENUM_ED Monday    = false;      // <-- SPENTO di default
+input ENUM_ED Tuesday   = true;
+input ENUM_ED Wednesday = true;
+...
+```
+
+> 🚨 **Un interruttore per giorno della settimana, col lunedi' spento, e' la
+> forma piu' pura di curve-fitting che esista**: vuol dire "nel mio backtest
+> il lunedi' perdeva, quindi l'ho tolto". Non e' una regola di mercato: e'
+> una cicatrice del passato di qualcun altro.
+
+Il resto e' un vivaio di manopole: box di 48 candele da un'ora GMT, `Shift`
+dagli estremi, **due tipi di stop e due di take profit** con i rispettivi
+coefficienti, breakeven, trailing classico con tre parametri, uscita a tempo
+con due. **38 input contro il nostro tetto di ~15.** Non ha bandiere rosse —
+ha troppe manopole, che nei nostri dati e' lo stesso problema con un altro
+nome (`ROBUSTEZZA.md`: _"ogni parametro in piu' e' una manopola che il
+backtest gira verso il passato"_).
+
+## 🔴 Gli altri tre, in una riga a testa
+
+- **`BreakOut.mq4`** (Soubra2003, 2016) — **MQL4**: `extern`, `OrderSend(Symbol(),...)`,
+  `MarketInfo`. Non compila come `.mq5`. E il link porta alla pagina `/seller`.
+- **`Open Range Breakout-H-Max.mq5`** — **indicatore**: `OnCalculate`, nessun
+  `OnTick`, nessun ordine. Disegna il range, non lo opera.
+- **`AsianSessionBreakoutBhanuCodeLab.mq5`** — **indicatore** (e con sintassi
+  MQL4), 2.100 righe e **45 input**. Doppiamente fuori.
+
+---
+
+> ### 🧭 La correzione di mira che vale per i prossimi giri
+> **Sul breakout siamo pieni.** Le zone dove ci manca davvero qualcosa restano
+> tre, e sono misurate: **il LATERALE** (`LARRY_GBPUSD` −6.445 nel 2019), il
+> **CROLLO** (dove `BB` regge e `Larry` cede), e **lo SHORT simmetrico**
+> (14 celle vive quasi tutte long-only).
+>
+> Parole utili nel titolo: _mean reversion, fade, range, reversal,
+> counter-trend, exhaustion, short_. Parole gia' coperte: _breakout, opening
+> range, ORB, session, EMA, trend following_.
