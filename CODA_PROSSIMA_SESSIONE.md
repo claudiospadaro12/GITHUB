@@ -1,5 +1,46 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## 🧬 AGGIORNAMENTO 16/08 SERA TARDI — R67 · R68 · R69, la PTE ha un parametro tarato male
+>
+> **R67** ha trovato che nella PTE il target e' in ATR puro e lo stop e'
+> ATR+buffer: **`InpSLbufferPips` e' una manopola sul TARGET IN R travestita
+> da stop** (`R = ATR*TP2mult/(ATR+buffer)`). L'ipotesi dei "rifiuti" e'
+> stata **verificata nel sorgente e ritirata** (con `SLfromDoji=0` quel
+> `return` non scatta mai).
+>
+> **R68** (GBPUSD, 28 celle, 16 anni): a **R costante** il buffer fa **5 volte
+> il profitto e META' del drawdown**. DD OOS da **17,9%** (buffer 0) a
+> **6,7%** (buffer 30). **La config viva e' buffer 5: la seconda peggiore.**
+>
+> **R69** (USDJPY + U30USD, stessa griglia): 🎯 **la tesi regge — e' una
+> proprieta' del motore.**
+> - **USDJPY**: DD da **15,5% a 8,1%**, e a R costante il buffer **ribalta il
+>   segno** (−2.584 → +6.796). 🔴 **La config viva (buf 5, magic 771323) e'
+>   una delle TRE celle OOS-negative su 28** (−1.738, PF 0,976). E l'**IS e'
+>   0/28**: con l'imbuto fatto bene, PTE USDJPY non sarebbe mai entrato in
+>   vivaio (**ribaltamento n. 31**).
+> - **U30USD**: asse **MORTO** — 46 trade in tutte e 28 le celle, DD identico
+>   allo 0,007. Motivo trovato nel codice (`ABTG_PTE.mq5:146-150`): il buffer
+>   e' in **pip**, l'ATR in **unita' dello strumento**. Sul Dow 30 pip valgono
+>   **~0,03 ATR**. **Non e' un controesempio: e' una misura nulla.**
+>
+> 🔴 **NIENTE E' STATO TOCCATO IN FORWARD** (criterio 3 congelato prima dei numeri).
+>
+> ### Cosa fare da qui, in ordine
+> 1. 🔧 **Buffer in multipli di ATR** (`sl = entry − atr*(1+InpSLbufferATR)`)
+>    su una copia **`_Ottimizzato`**, mai sulla sedia viva. Rende il parametro
+>    portabile su tutta la famiglia e rende il Dow misurabile.
+> 2. 🔬 **Sonda da 2 minuti**: stampare `SYMBOL_DIGITS`, `PipSize()` e
+>    `iATR(14)` su U30USD/USDJPY/GBPUSD → chiude l'unico **[INFERITO]** di R69.
+> 3. ⏱️ **Tick reali** sulla cella che sopravvive ai due cambi (**buf 20-25**,
+>    sta nell'altopiano di entrambi). **Prima di allora non c'e' verdetto.**
+> 4. 🪑 **Solo dopo**: la domanda su `PTE USDJPY` in forward — decisione di Claudio.
+>
+> ⚠️ **Da fare comunque**: verificare che sul **PC** non ci siano EA attaccati
+> ai grafici del conto vivo (`ABTG_GapContinuation` e `ABTG_GapFill` sembravano
+> esserci). Regola di `DAX_14-08_DUE_MOTORI.md`: sul PC di backtest AutoTrading
+> spento e nessun EA sui grafici del conto vivo.
+
 > ## 🌙 CHIUSURA DELLA SERATA 16/08 — sei round e una sedia nuova
 >
 > **R61 · R62** GAPFILL Nasdaq (cella confermata, l'asse `pts` e' ridondante)
