@@ -230,6 +230,62 @@ assumono indipendenza: **su questo EA non valgono come sono.**
 
 ---
 
+## 4-quater. ✅ IL SOSPETTO DEL GEMELLO — **SCIOLTO: sono due motori diversi**
+
+_`ABTG_GapFill` cella promossa R36 (fill 75, spread 300, minATR 0.3, time-stop
+48h, magic 772235) su **225JPY H1**, **tick reali**, **stessa finestra OOS**.
+Risultato: +811,56 · PF 1,144 · **15 posizioni** · DD 4,36%. Coerente col
++76 / PF 1,14 di R36._
+
+Il criterio 1 aveva ordinato di confrontare **i giorni operati, non i
+totali**. Ecco i giorni:
+
+| | posizioni | **giorni operati** | giorni della settimana |
+|---|---:|---:|---|
+| `ABTG_GapFill` | 15 | **15** | **Lun 10 · Dom 5** — e basta |
+| `ABTG_GapContinuation` | 70 | **47** | Lun 13 · Mar 7 · Mer 11 · Gio 6 · Ven 10 |
+| **in comune** | | **5** | 33% dei giorni di GapFill, **11%** di GapContinuation |
+
+> ### 🎯 **`GapFill` opera SOLO di lunedi' e domenica: e' il gap del WEEKEND. `GapContinuation` opera tutti i giorni della settimana: e' il gap di SESSIONE.**
+>
+> **Non sono la stessa scommessa in due direzioni: sono due eventi diversi.**
+> L'ipotesi letta nel codice (`InpTF:115`, _"il TF su cui si rileva il cambio
+> **settimana**"_) e' confermata dai trade.
+>
+> ✅ **Il sospetto del criterio 1 e' sciolto: nessuno dei due sta leggendo il
+> rumore dell'altro.** Il problema era solo che i nomi si somigliano.
+
+### ⚠️ Ma i 5 giorni in comune dicono una cosa scomoda
+
+| giorno | GapContinuation | GapFill |
+|---|---|---|
+| 2025.09.08 | LONG −13,40 | SHORT −1.005,03 |
+| 2025.10.13 | SHORT −1.042,18 | SHORT −987,80 |
+| 2025.10.27 | LONG +666,67 | SHORT −601,71 |
+| 2026.03.02 | SHORT −1.077,99 | LONG +685,86 |
+| 2026.03.09 | SHORT −1.057,93 | LONG +715,89 |
+
+**Quattro volte su cinque prendono direzioni opposte** — il che e' coerente
+col fatto che uno scommette sul riallineamento e l'altro sulla
+continuazione. Ma sommando le chiusure, **i 7 giorni in cui chiudono
+entrambi valgono −2.469,05**: le giornate che condividono sono quelle in cui
+**perdono insieme**.
+
+### 🏛️ E il portafoglio a due, misurato
+
+| | valore | a taglia prop 0,65% | muro |
+|---|---:|---:|---|
+| totale combinato OOS | **+9.151,18** | — | — |
+| **peggior giornata combinata** | **−2.037,62** (−2,04%), il 2025.10.14 | **−1,32%** | −5% 🟢 |
+| peggior giornata dei due da soli | −1.102 e −1.031 | −0,72% / −0,67% | 🟢 |
+
+**Girare i due insieme raddoppia la peggior giornata** (da ~−1.100 a −2.038)
+ma resta **abbondantemente dentro il muro**. E non viola la regola 1 di
+`ROTTA_PROP.md`: non sono _"due EA sullo stesso segnale"_, sono due segnali
+diversi con l'11% di sovrapposizione.
+
+---
+
 ## 5. ⚠️ COSA QUESTO ROUND NON DICE
 2. 🔴 **E' OHLC, quindi non e' un verdetto** (R57: cambiando solo il modello
    il segno dell'orso si e' ribaltato). Il verdetto e' a tick reali — e su
@@ -259,8 +315,10 @@ assumono indipendenza: **su questo EA non valgono come sono.**
 > - 🔴 **il criterio 2 NON PASSA**: il lato short perde **−3.453,94**, il
 >   profitto e' tutto del long. **Non riempie il buco n.3**, che era meta'
 >   del motivo per cui era stato promosso dal setaccio;
-> - 🔴 **il criterio 1 ha fatto scattare l'avvertimento del gemello**
->   (`GapFill` verde nella direzione opposta sullo stesso evento);
+> - ✅ ~~il criterio 1 ha fatto scattare l'avvertimento del gemello~~
+>   **SCIOLTO: `GapFill` opera solo lunedi'/domenica (gap del weekend),
+>   `GapContinuation` tutti i giorni (gap di sessione). Solo 5 giorni in
+>   comune su 57. Sono due motori diversi.**
 > - ✅ ~~e resta da fare il verdetto a tick reali~~ **FATTO: passa, PF 1,398.**
 >
 > 🟢 **Quello che invece regge, ed e' molto:** PF 1,36 su 5.610 trade OOS,
@@ -271,8 +329,13 @@ assumono indipendenza: **su questo EA non valgono come sono.**
 **I prossimi passi, in ordine:**
 1. ✅ ~~Leggere i lati~~ **FATTO: lo short perde** (confermato a tick reali).
 2. ✅ ~~Tick reali~~ **FATTO: passa e migliora, PF 1,398.**
-3. 🎯 **Confronto giorno per giorno con `ABTG_GapFill`** → sciogliere il
-   sospetto del gemello. **E' l'ultima cosa che lo separa da una promozione.**
+3. ✅ ~~Confronto col gemello~~ **FATTO: sono due eventi diversi, sospetto
+   sciolto.**
+4. 🎯 **Resta UNA cosa sola: il lato short.** E' l'unico criterio non
+   passato. Le strade sono due, e vanno decise a mente fredda — **tenerlo
+   simmetrico e dichiarare che non riempie il buco n.3**, oppure aprire un
+   round suo con una tesi scritta prima sul perche' lo short del gap non
+   funziona su questo mercato.
 4. estendere il gap **oltre 1,00** → verificare che l'altopiano non sia un
    bordo;
 5. **solo dopo** la prova di regime e l'eventuale forward.
