@@ -554,3 +554,22 @@ powershell -ExecutionPolicy Bypass -Command "iwr 'https://raw.githubusercontent.
 # Validazione tick reali dei vincitori
 #   .\valida_realtick.ps1 -Symbols E35EUR -Tf H1
 ```
+
+---
+
+## 📌 IN SOSPESO (16/08/2026) — sbloccare le fonti per la caccia
+
+Claudio ha chiesto di riprendere **"il discorso che tu puoi entrare a trovare
+sui vari siti"**. Non e' urgente e non blocca niente, ma moltiplica la resa.
+
+👉 **Procedura completa, misurata, con la lista dei domini da incollare:**
+`backtest_pipeline/caccia_strategie/PROMEMORIA_SBLOCCO_FONTI.md`
+
+In due righe: l'ambiente ha una allowlist e **`mql5.com`, `arxiv.org`,
+`tradingview.com`, `ssrn.com`, `forexfactory.com`, `quantpedia.com` e
+`quantconnect.com` rispondono 403 al CONNECT** (misurato al proxy, non
+ipotizzato). Si sblocca da **claude.ai/code** → icona a nuvola sopra la
+casella del messaggio → ingranaggio sull'ambiente → **Network access:
+`Custom`** → domini uno per riga → ⚠️ **spuntare "Also include default list
+of common package managers"**, altrimenti si perde GitHub. Poi serve una
+**sessione nuova**.
