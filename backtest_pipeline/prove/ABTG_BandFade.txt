@@ -1,0 +1,134 @@
+# =====================================================================
+#  PROVA: ABTG_BandFade  --  un FADE simmetrico copre il buco del LATERALE?
+#  Nato dalla caccia del 16/08/2026 -> caccia_strategie/CACCIA_2026-08-16.md
+# =====================================================================
+#
+# 🛑 ATTENZIONE, LEGGERE PRIMA DI LANCIARE
+#   L'EA `ABTG_BandFade.mq5` **NON ESISTE ANCORA**. Questo file e' l'ipotesi
+#   congelata PRIMA che il codice sia scritto, apposta: e' l'ordine giusto.
+#   Va scritto da `mql5-ea-developer` seguendo la MECCANICA qui sotto.
+#   Il driver fallira' finche' l'EA non c'e' — ed e' giusto che fallisca.
+#
+# ---------------------------------------------------------------------
+# ORIGINE E ATTRIBUZIONE (obbligatoria anche in testa al .mq5)
+#   Meccanica di ingresso derivata da BBRSI.mq5
+#   Copyright (c) 2023-2024 Geraked — MIT License
+#   https://github.com/geraked/metatrader5  (Experts/BBRSI.mq5, 205 righe)
+#   🔴 NON portiamo: la griglia, la martingala (GridVolMult 1,1 x 20 livelli)
+#      e il `if (grid) isl = true` che nell'originale SPEGNE LO STOP LOSS.
+#   🔴 NON adottiamo i suoi parametri (BBLen=500 su M5 XAUUSD e' il SUO
+#      overfitting, non il nostro edge — mandato del cacciatore §0).
+#      Prendiamo la MECCANICA e la TESI. Il verdetto lo da' il nostro imbuto.
+#
+# ---------------------------------------------------------------------
+# IPOTESI (scritta il 16/08/2026, prima di qualsiasi numero)
+#
+#   Tutte e 14 le celle vive sono motori di TREND o di BREAKOUT, e la prova
+#   di regime R50 dice dove muoiono:
+#       LARRY_GBPUSD  laterale 2019:  −6.445
+#       BB_EURUSD     laterale 2019:  −2.381
+#   Nessuna delle nostre sedie compra la debolezza per rivenderla al ritorno
+#   verso la media. Il laterale e' un buco SCOPERTO, misurato, non ipotizzato.
+#
+#   In un mercato senza direzione una chiusura FUORI dalla banda di Bollinger
+#   con RSI in eccesso e' ESAURIMENTO, non inizio di trend. Il rientro dentro
+#   la banda e' il grilletto del ritorno verso la media.
+#     -> UN FADE SIMMETRICO DEVE GUADAGNARE PROPRIO DOVE I NOSTRI TREND
+#        FOLLOWER PERDONO, E DEVE FARLO SENZA FILTRI APPICCICATI.
+#
+#   E' un motore in cui il filtro E' LA STRATEGIA fin dall'inizio: la
+#   condizione di mean-reversion non e' un cerotto su un motore gia' tarato.
+#   Distinzione che nei nostri dati vale tutto (ROBUSTEZZA.md):
+#       filtro appiccicato dopo  -> 0 successi su 5 (R20, R12, R26, R45, R54)
+#       filtro che E' il motore  -> ABTG_EMA200, R29: 30 celle su 30 a PASS
+#
+# ---------------------------------------------------------------------
+# MECCANICA DA IMPLEMENTARE (BBRSI.mq5:76-100, simmetrica al 100%)
+#
+#   LONG : barra[2] chiude SOTTO la banda inferiore  E  RSI[2] < 30
+#          barra[1] RICONQUISTA la banda (close > BB_L)  E  RSI[1] > 30
+#          E ancora RSI[1] < 50  E  close[1] < BB_medio
+#   SHORT: lo specchio ESATTO sulla banda superiore
+#          (RSI[2] > 70 -> RSI[1] < 70, RSI[1] > 50, close[1] > BB_medio)
+#
+#   SL   : banda -/+ InpSLCoef x semiampiezza   (STRUTTURALE, mai virtuale)
+#   TP   : InpTP_R x |entrata - SL|             (multiplo di R, come i nostri)
+#
+#   🔴 VINCOLI NON NEGOZIABILI PER CHI SCRIVE IL CODICE:
+#     - decidere SOLO su barre CHIUSE, leggere solo [1] e [2] (come l'originale,
+#       che su questo e' pulito: verificato alle righe 180-191). Niente shift 0.
+#     - soglie RSI 30/50/70 CABLATE, non input. Sono canoniche e non fittate:
+#       tre manopole in meno che il backtest puo' girare verso il passato.
+#     - UNA posizione alla volta. Nessuna griglia, nessun averaging, mai.
+#     - SL VERO mandato al broker. Mai `ignore SL`.
+#     - `OnTester` obbligatorio, altrimenti il driver rifiuta di partire
+#       (LEGGIMI.md: 22 EA su 61 gia' bocciati per questo).
+#     - niente trailing nello screening (nell'originale e' acceso al 50%:
+#       e' una manopola in piu' e non fa parte della tesi).
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (dichiarati ORA, prima dei numeri)
+#
+#   1. 🎯 IL CRITERIO CHE CONTA — deve coprire IL BUCO:
+#        POSITIVA nella finestra LATERALE 2019, quella dove LARRY_GBPUSD
+#        fa −6.445. Se e' rossa anche li', la tesi e' morta e si chiude
+#        la famiglia. Non e' negoziabile e non si ammorbidisce dopo.
+#
+#   2. SOPRAVVIVENZA nelle finestre avverse (criteri congelati il 14/08,
+#      PROVA_REGIME_CRITERI.md): nelle finestre ORSO e CROLLO
+#        PF >= 0,90  -> criterio di NON-SANGUINAMENTO, non di profitto.
+#      Un fade puo' non guadagnare nel crollo; non deve distruggersi.
+#
+#   3. DD fuori campione mai sopra il 20%, e "Peggior Giornata %" sopra
+#      −2,5% al rischio 1% (una prop chiude a −5%).
+#
+#   4. ALTOPIANO, non picco: le celle VICINE devono essere positive.
+#      Si prende IL CENTRO DELL'ALTOPIANO, MAI la cella migliore.
+#      Su tredici misure di Spearman IS->OOS, DODICI sono negative: la
+#      cella migliore in campione e' peggio di una scelta a caso.
+#
+#   5. n >= 15 trade per famiglia prima di qualunque verdetto. Il PF sotto
+#      n=20 e' una stima e non si giudica; il DD e' un fatto accaduto e
+#      vale a qualunque n.
+#
+#   6. SIMMETRIA VERA, ed e' meta' del motivo per cui questo EA esiste:
+#      long e short si misurano SEPARATAMENTE. Se regge solo il lato long,
+#      NON ha riempito il buco degli short e va dichiarato cosi'.
+#
+#   Screening in OHLC. 🔴 VERDETTO SOLO A TICK REALI: R57 ha misurato che
+#   cambiando SOLO il modello il segno si e' ribaltato.
+#
+# ---------------------------------------------------------------------
+# ⚠️ @DAQUANDO MANCA APPOSTA — NON E' UNA DIMENTICANZA
+#   Non ho misurato lo storico di GBPUSD su questo terminale e NON lo invento.
+#   Sugli indici il driver diceva 2024.01.01 e i dati partivano dal 26/09/2024:
+#   meta' finestra IS non esisteva. Si misura con
+#       scarica_storico.ps1 -Simboli "GBPUSD" -SoloReferto
+#   e si passa la data vera con -DaQuando. Finche' non e' misurata, il driver
+#   si ferma — ed e' giusto che si fermi.
+#
+# ---------------------------------------------------------------------
+# PERCHE' GBPUSD H1
+#   Perche' e' esattamente dove il buco e' MISURATO: LARRY_GBPUSD −6.445 nel
+#   laterale 2019 e' la nostra ferita documentata, e su GBPUSD H1 abbiamo gia'
+#   le celle di regime (CELLE_REGIME.txt) per il confronto diretto.
+#   Il simbolo _EXT Dukascopy copre le 4 finestre di regime dal 2012.
+#
+# GRIGLIA: 4 x 2 x 2 x 3 x 2 = 96 celle. E' uno SCREENING, non un verdetto.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO
+
+# --- assi spazzolati (sweep STRETTO: si cerca l'altopiano, non il picco) ---
+InpBBPeriod=20||20||20||80||Y
+InpBBDev=2.0||2.0||0.5||2.5||Y
+InpRSIPeriod=14||7||7||14||Y
+InpTP_R=1.5||1.0||0.5||2.0||Y
+InpSLCoef=1.0||0.5||0.5||1.0||Y
+
+# --- congelati: NON si spazzolano, sono la tesi ---
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
