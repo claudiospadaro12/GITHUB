@@ -1,0 +1,163 @@
+# =====================================================================
+#  PROVA — ABTG_PivotSupertrendReversal   (CANDIDATO 1 della CACCIA I)
+#  Scritta il 16/08/2026 dal cacciatore-strategie.
+#  Dossier: caccia_strategie/CACCIA_2026-08-16_I_SUPERTREND.md
+# =====================================================================
+#
+# 🛑 STATO: L'EA NON ESISTE ANCORA. QUESTO FILE NON E' LANCIABILE OGGI.
+#
+#   Questo file esiste per un motivo solo: congelare IPOTESI e CRITERI
+#   **prima** che esista un numero da guardare. E' la regola di LEGGIMI.md,
+#   ed e' la difesa contro lo spostamento dell'asticella a tabella aperta.
+#
+#   L'EA va scritto da `mql5-ea-developer` (io non tocco EA nostri).
+#   ⚠️ I NOMI DEGLI INPUT QUI SOTTO SONO PROPOSTI, NON VERIFICATI: vanno
+#   riconciliati con il sorgente vero prima del lancio. Un nome che l'EA
+#   non ha, MT5 **lo ignora in silenzio** (trappola gia' pagata, LEGGIMI.md)
+#   — e si misurerebbe un EA diverso da quello che si crede.
+#
+# ---------------------------------------------------------------------
+# COS'E'
+#   Copia esatta di ABTG_SupertrendReversal (stessa meccanica di rimbalzo,
+#   stessa gestione: rischio %, 1/3 a mercato + 2/3 pendente, parziale 1R,
+#   stop in pari, runner, uscita su flip) con **UNA SOLA DIFFERENZA**:
+#
+#     la base della banda Supertrend NON e' piu' hl2 dell'ultima candela
+#     (ABTG_SupertrendReversal.mq5:361)
+#     ma il CENTRO PESATO DEI PIVOT DI SWING CONFERMATI:
+#         centro = (2*centro_precedente + pivot_nuovo) / 3
+#     bande = centro +/- InpStMult * ATR   (l'ATR RESTA)
+#
+#   Origine: Pivot SuperTrend, Bhanu Chandra Raju Indukuri, 19/07/2026,
+#   https://www.mql5.com/en/code/75110  (idea originale: LonesomeTheBlue,
+#   TradingView, open source). L'AUTORE VA CITATO IN TESTA AL .mq5 (§9).
+#
+#   ✅ Controllo look-ahead gia' fatto sul sorgente: il pivot alla barra
+#   `bar` e' quello di `bar - radius` e guarda avanti al massimo fino a
+#   `bar`. NON legge barre future. Il costo e' il RITARDO (radius barre),
+#   non il repaint.
+#
+# ---------------------------------------------------------------------
+# IPOTESI (scritta prima di qualunque numero)
+#
+#   Il nostro Supertrend ricentra la banda a ogni candela sul suo punto
+#   medio. Sugli indici, nelle sessioni disordinate, questo fa ballare la
+#   banda con il rumore: il flip arriva perche' una candela e' storta, non
+#   perche' il trend e' finito — e nel nostro EA il flip e' un'USCITA
+#   (InpExitOnFlip, .mq5:177-178), quindi il rumore chiude i runner.
+#
+#   IPOTESI: ancorando la base alla STRUTTURA (pivot di swing confermati),
+#   la banda si muove solo quando si muove la struttura. Attesa:
+#     - MENO flip  -> meno uscite per rumore -> trade meno numerosi e piu' lunghi
+#     - stop piu' vicino a livelli che il mercato ha davvero girato
+#
+#   IPOTESI DA SMONTARE (e' questa quella che si testa):
+#     "la geometria della base NON conta: cambiarla non sposta l'OOS".
+#   Se i numeri OOS sono indistinguibili da quelli della cella STREV di
+#   riferimento, l'ipotesi resta in piedi e il candidato si chiude. E'
+#   un esito valido e va scritto.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (congelati ORA, prima dei numeri)
+#
+#   Il metro NON e' "guadagna". Il metro e' il confronto testa-a-testa
+#   contro una cella MISURATA: 225JPY H2 STREV, DD OOS 0,88% / PF OOS
+#   1,653 a rischio 1% (report/ROTTA_PROP.md riga 1).
+#
+#   Per dire 🟢 "MERITA UN ROUND VERO" servono TUTTI E QUATTRO, a TICK REALI:
+#     1. positiva in ENTRAMBE le finestre (IS e OOS), stessa cella
+#     2. PF OOS >= 1,10
+#     3. NON un picco isolato: le celle vicine positive (altopiano),
+#        e si prende IL CENTRO DELL'ALTOPIANO, mai la cella migliore
+#        (12 Spearman IS->OOS negative su 13)
+#     4. DD OOS < 10% all'1%
+#
+#   Per dire 🥇 "BATTE il Supertrend classico" serve, IN PIU':
+#     5. DD OOS <= 0,88%  **oppure**  PF OOS >= 1,653  — a parita' di
+#        simbolo, TF, finestre e rischio. Non basta "e' buono": deve
+#        essere meglio DI QUELLO CHE ABBIAMO, altrimenti e' una sedia
+#        doppia sullo stesso segnale (vietata dal §7-bis punto 3).
+#
+#   🏛️ SI MISURA ANCHE, e si scrive anche se sfavorevole:
+#     - la PEGGIOR GIORNATA (non solo il DD totale): il muro giornaliero
+#       del 5% butta fuori col totale intatto. Riferimento nostro: -2,06%
+#       (R51). Tenere posizioni piu' a lungo puo' PEGGIORARLA: e' il
+#       rischio noto di questa variante.
+#     - il numero di trade: se crollano sotto n=20 il PF non si giudica
+#       (il DD invece e' un fatto e vale a qualunque n).
+#
+#   ⚠️ 15 trade per famiglia = verdetto, mai prima.
+#   ⚠️ OHLC solo screening. Nessun verdetto senza tick reali (R57: cambiando
+#      SOLO il modello, il segno si e' ribaltato).
+#
+# ---------------------------------------------------------------------
+# COME GIRA (due stadi, dichiarati prima)
+#   Stadio 1: OHLC M1 su tutta la griglia -> SOLO SCREENING.
+#   Stadio 2: rigira a TICK REALI solo chi ha almeno una cella positiva
+#             in ENTRAMBE le finestre OHLC (la STESSA cella). La
+#             promozione e' meccanica, non una scelta.
+#
+# ---------------------------------------------------------------------
+
+@SIMBOLO  225JPY
+@PERIODO  H2
+@DAQUANDO 2024.09.26
+
+# @DAQUANDO E' MISURATO, NON IPOTIZZATO.
+#   2024.09.26 e' l'inizio dello storico ORARIO di 225JPY su BCM, gia'
+#   usato in R2 (225JPY H4) e in R36/R37 (225JPY H1). Questa prova gira su
+#   H2 -- cioe' orario-e-oltre, la stessa profondita' -- quindi la data si
+#   riusa legittimamente.
+#   ⚠️ NON si riuserebbe per un TF sotto l'ora: lo storico M1 di 225JPY su
+#   BCM non e' misurato da nessuna parte nel repo (avvertenza in
+#   ABTG_GapContinuation.txt:290-302). Se un giorno si scende sotto H1,
+#   la data si RIMISURA con scarica_storico.ps1.
+
+# ---------------------------------------------------------------------
+# LO SWEEP — 3 x 3 = 9 celle per finestra. Stretto apposta: e' uno
+# SCREENING, non un verdetto, e ogni manopola in piu' e' un modo di
+# sembrare bravi sul passato.
+#
+# InpPivotRadius: quante barre per lato confermano un pivot. E' IL
+#   parametro nuovo, quello che decide quanto e' "grossa" la struttura
+#   a cui ci ancoriamo -- e quanto ritardo paghiamo (radius barre).
+# InpStMult: si spazzola perche' cambiando la base cambia anche la
+#   larghezza giusta della banda. Il 3.5 del documento ABTG e' tarato su
+#   hl2, e NON c'e' motivo di credere che resti giusto sui pivot.
+
+InpPivotRadius=2||2||1||4||Y
+InpStMult=3.5||2.5||0.5||3.5||Y
+
+# ---------------------------------------------------------------------
+# PIN ESPLICITI (flag N) — perche' il confronto sia onesto
+#   Il driver pinna tutto il resto al default del sorgente. Questi li
+#   scrivo a mano perche' devono valere ANCHE se il default del nuovo
+#   EA fosse diverso: sono le condizioni della cella di riferimento.
+
+InpStAtrPeriod=10||10||0||10||N
+InpTF=16386||16386||0||16386||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# InpTF=16386 = PERIOD_H2. Va confermato contro l'enum del sorgente vero.
+# Rischio 1%: e' quello a cui e' misurata TUTTA la tabella di ROTTA_PROP.
+#   A rischio diverso i numeri non si confrontano piu' con niente.
+# L+S entrambi: la cella STREV di riferimento gira L+S (R52, cella 4).
+#   Pinnare i lati qui evita di "scegliere il lato sull'IS", che e' un
+#   errore gia' pagato (R38, LARRY).
+
+# ---------------------------------------------------------------------
+# ⚠️ PRIMA DI LANCIARE — due cose, in quest'ordine
+#
+#  1. IL CONTROLLO SULL'ATR (§6.A del dossier). Non sappiamo se l'iATR
+#     di MT5 usa lo smoothing di Wilder (memoria ~2N-1, cioe' ~19 barre
+#     a periodo 10) o una SMA del True Range (10 barre). Finche' non e'
+#     misurato, "Supertrend 10/3.5" e' una ricetta che non conosciamo, e
+#     confrontare due motori su una base ignota non misura niente.
+#     Si stampa iATR contro un Wilder calcolato a mano sulle stesse barre.
+#     E' mezz'ora, e va fatta prima -- non dopo aver visto una tabella.
+#
+#  2. La riga di lancio passa da backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md
+#
+# ---------------------------------------------------------------------

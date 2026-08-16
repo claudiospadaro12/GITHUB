@@ -1,0 +1,194 @@
+# =====================================================================
+#  ABTG_Nasdaq_Apertura_US - IL GAP DI APERTURA, SPAZZOLATO (NASUSD M5)
+#  Nato dalla CACCIA G del 16/08/2026 (aperture DAX/Nasdaq).
+#  Si lancia con:  -Expert ABTG_Nasdaq_Apertura_US
+#                  -Prova prove\ABTG_Nasdaq_Apertura_US_GAP.txt
+#                  -Etichetta gapnas
+# =====================================================================
+#
+# PERCHE' ESISTE QUESTO FILE (e non e' un'idea nuova: e' un compito
+# lasciato aperto dal NOSTRO stesso referto)
+#
+#   `risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md`,
+#   sezione "Cosa fare adesso", punto 2, parola per parola:
+#     "GAPFILL: misura da rifare in grande, spazzolando InpGapMinPoints
+#      e InpGapMinRR per vedere se le occasioni salgono restando
+#      redditizie. Con 19 trade non si decide niente."
+#   Quella spazzolata NON e' mai stata fatta. Verificato il 16/08/2026
+#   su TUTTI i CSV dell'archivio: `InpGapMinPoints` e `InpGapMinRR`
+#   hanno UN SOLO valore ovunque (150 e 1.5). Zero celle.
+#
+# IL NUMERO CHE LO GIUSTIFICA (FASE B, NASUSD, sei motori a confronto,
+# tick reali M5, rischio 1%, RangeMode=0, sessione 14:30 server)
+#
+#   | InpEntryMode        | OOS Profit | PF     | DD %   | n   |
+#   |---------------------|-----------:|-------:|-------:|----:|
+#   | 1 GAPFILL           |   +487.09  | 1.937  |  3.28  |  19 |
+#   | 2 RETEST            |   +218.98  | 1.041  |  8.79  | 240 |
+#   | 0 BREAKOUT          |   -281.55  | 0.949  |  9.60  | 244 |
+#   | 5 OPENCONFIRM       |   -365.50  | 0.927  |  7.18  | 240 |
+#   | 3 RANGE_FADE        |   -392.49  | 0.930  | 17.29  | 244 |
+#   | 4 DELAYED           |   -615.74  | 0.890  | 12.18  | 247 |
+#
+#   Il GAPFILL e' l'UNICO dei sei con PF OOS quasi 2 e il DD piu' basso
+#   di tutti (3,28% contro 7-17% degli altri). Ed e' anche l'unico che
+#   nessuno ha mai spazzolato, perche' n=19 sembrava troppo poco per
+#   giudicare. E' vero che n=19 non giudica: ma e' esattamente il
+#   motivo per cui si spazzola, non per cui si archivia.
+#
+# LA MECCANICA VERA, LETTA NEL SORGENTE (righe 1423-1487) - e NON e'
+# il "fade" che R42 ha ucciso
+#
+#   riga 1425-1429:  gap = (open D1 di oggi - close D1 di ieri)
+#   riga 1430:       se |gap| < InpGapMinPoints -> nessuna operazione
+#   riga 1445:       costruisce hi/lo della prima finestra di apertura
+#   riga 1456-1459:  GAP UP  -> SELL **STOP** sotto il MINIMO d'apertura
+#   riga 1471-1474:  GAP DOWN-> BUY  **STOP** sopra il MASSIMO d'apertura
+#   riga 1449:       TP = chiusura di ieri (il riempimento completo)
+#   riga 1465/1481:  se reward/risk < InpGapMinRR -> salta il trade
+#
+#   Quindi NON entra sull'estremo del range con un LIMIT (quello e' il
+#   RANGE_FADE, motore 3, gia' bocciato: 0 celle positive su 48 in R42
+#   e -392 qui). Entra con uno STOP dalla parte OPPOSTA al gap, cioe'
+#   pretende che il gap PRIMA FALLISCA. E' un "failed opening drive",
+#   non un fade.
+#
+# LE DUE MANOPOLE, E PERCHE' PROPRIO QUESTE DUE
+#
+#   InpGapMinPoints - il cancello di TAGLIA. 150 punti = 1,5 punti
+#     indice sul Nasdaq (scala verificata: nel sorgente "700 = 7 punti
+#     indice"). Sembra minuscolo, eppure passano solo ~19 giorni su 9
+#     mesi. Il motivo e' meccanico e va detto: il gap e' misurato su
+#     barre **D1** (riga 1425-1426), e su un CFD che gira 24/5 il gap
+#     D1 e' quasi sempre ~0. Quello che questo motore intercetta e'
+#     in pratica il **gap del fine settimana**, non il gap della
+#     campanella delle 15:30. [INFERITO dalle righe 1425-1429]
+#
+#   InpGapMinRR - il cancello di GEOMETRIA, ed e' quello che stringe
+#     davvero. reward = distanza dal prezzo alla chiusura di ieri;
+#     risk = larghezza della finestra d'apertura + 2 buffer. Chiedere
+#     RR >= 1.5 vuol dire chiedere che il gap sia almeno ~1,5 volte
+#     l'ampiezza dell'apertura. Sul Nasdaq l'apertura e' larga: e'
+#     questo, piu' della taglia, che riduce le occasioni a 19.
+#     Ci si aspetta quindi che n salga piu' in fretta abbassando l'RR
+#     che abbassando i punti.
+#
+# IPOTESI (scritte PRIMA di qualunque numero)
+#   1. Abbassando InpGapMinRR da 1.5 a 0.5 le occasioni almeno
+#      RADDOPPIANO (n >= 40 in OOS su almeno una cella).
+#   2. La redditivita' NON sopravvive intatta a quell'allargamento:
+#      il PF 1,94 di n=19 e' una stima su un campione da niente e
+#      scendera'. La domanda vera non e' "resta 1,94" - e' "resta
+#      sopra 1,10 quando n arriva a 40+".
+#   3. Il DD resta il punto forte: essendo un trade raro, con SL sul
+#      lato opposto dell'apertura e un solo ciclo al giorno, il DD
+#      dovrebbe restare sotto il 6% anche allargando.
+#   4. Rischio onesto e dichiarato: se il motore vive sui gap del
+#      FINE SETTIMANA, allargare i cancelli non porta giornate nuove,
+#      porta solo lunedi' peggiori. In quel caso n sale poco e il PF
+#      crolla: e' il modo in cui questa ipotesi puo' morire.
+#
+# CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri)
+#   Si sceglie il CENTRO DELL'ALTOPIANO, mai la cella migliore
+#   (12 Spearman IS->OOS negative su 13; e su questo stesso mercato
+#   la FASE L ha fatto -2.444 OOS partendo dalla cella migliore in IS).
+#
+#   PASSA se esiste una REGIONE (>= 3 celle adiacenti) in cui, in OOS:
+#     - Profit > 0
+#     - PF >= 1.10          (il pavimento di casa)
+#     - n >= 30             (sotto i 30 non e' un verdetto)
+#     - DD < 8%
+#     - peggior giornata > -2,06%  (la nostra peggiore misurata, R51)
+#   Se la regione non esiste e restano solo celle isolate positive,
+#   il verdetto e' NEGATIVO: "una cella positiva circondata da celle
+#   negative non e' un edge, e' dove e' caduta la monetina"
+#   (REFERTO_FASE_D_C8.md, e li' e' costato un candidato).
+#
+#   Se passa: prova di regime a parametri CONGELATI, poi per-trade e
+#   portafoglio con lo standard "aggiunge profitto E abbassa le code".
+#
+# ⚠️ SCORRELAZIONE - da guardare male, non bene
+#   Abbiamo gia' `ABTG_GapFill` su 225JPY (R36/R37, 5 celle vive) che
+#   fa LA STESSA COSA su un altro mercato e un altro fuso. Se questa
+#   passa, la prova di portafoglio deve guardare il cumulo dei due con
+#   occhio cattivo: il gap del lunedi' e' un evento MONDIALE, e due
+#   motori di gap su due indici possono perdere lo stesso lunedi'.
+#   Lezione R37: il cumulo della riapertura ha bocciato una famiglia
+#   intera.
+#
+# ⚠️ FUSO BCM - il calcolo, non la fiducia
+#   Ora server BCM = ora italiana - 1.
+#   Nasdaq apre 15:30 IT  ->  15:30 - 1 = **14:30 server**.
+#   Quindi InpSessionHour=14, InpSessionMin=30. Verificato che e' anche
+#   il valore con cui girano tutti i CSV NASDAQ_* dell'archivio.
+#   (Controllo di CLAUDE.md: colonna InpSessionHour = 14 -> corretto.
+#    Se uscisse 15, i risultati vanno cestinati.)
+#
+# ⚠️ PERCHE' I PIN QUI SOTTO SONO TANTI
+#   La FASE B non girava con i default del sorgente: chiusura 17:30
+#   invece di 21:45, rischio 1% invece di 2%, nessuna parziale,
+#   MinStopPts 500, SkipIfTight spento. Se non li ripino, le celle
+#   nuove NON sono confrontabili con il +487.09 che le giustifica.
+#   Ogni riga N qui sotto e' copiata dalla riga vincente di
+#   NASDAQ_B_motore_OOS.csv, non scelta da me.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (15:30 IT - 1 = 14:30) ---
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+
+# --- motore: GAPFILL (1). E' la modalita' che comanda: il flag
+#     legacy InpUseGapFill non gate piu' nulla (commento riga 679-682) ---
+InpEntryMode=1||1||0||1||N
+InpUseGapFill=1||1||0||1||N
+InpRangeMode=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpBufferPoints=200||200||0||200||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+
+# --- filtri: TUTTI SPENTI, come in FASE B. Un filtro aggiunto a un
+#     motore gia' tarato ha 0 successi su 5 nel nostro storico ---
+InpUseVolumeFilter=0||0||0||0||N
+InpUseAtrFilter=0||0||0||0||N
+InpUseEmaFilter=0||0||0||0||N
+InpUseSupertrend=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpUseVwapFilter=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseRoundLevels=0||0||0||0||N
+
+# --- rischio e gestione: identici alla riga vincente della FASE B ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0||0||0||0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+
+# --- LE DUE UNICHE MANOPOLE LIBERE: 6 x 4 = 24 celle ---
+InpGapMinPoints=150||50||50||300||Y
+InpGapMinRR=1.5||0.5||0.5||2.0||Y
+
+# NOTA: `InpRangeMinutes` e' il TERZO asse naturale (entra nel
+# denominatore dell'RR: apertura piu' stretta = RR piu' alto a parita'
+# di gap). E' pinnato apposta a 35 in questo giro. Se la griglia a due
+# assi mostra una regione, il giro dopo lo apre; se non mostra niente,
+# aprirlo sarebbe solo cercare la monetina in tre dimensioni.
