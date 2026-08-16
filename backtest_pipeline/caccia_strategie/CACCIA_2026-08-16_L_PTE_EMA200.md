@@ -8,7 +8,7 @@ _Bersaglio: le due sedie piu' collaudate del progetto. Barra la piu' alta._
 ## 🔴 LA RIGA DEL §8.3 — leggila prima di tutto il resto
 
 > **Su ~280 EA sfogliati sul Code Base MQL5 (7 pagine) e ~50 titoli su arXiv,
-> 5 sorgenti sono stati scaricati e letti, 7 abstract letti per intero.
+> **4 sorgenti `.mq5` scaricati e letti**, 7 abstract letti per intero.
 > ZERO EA esterni promossi. Nessuno regge il confronto con un motore che ha
 > fatto 30 celle su 30.**
 >
@@ -457,6 +457,9 @@ Registrati perche' non si ricerchino il giro dopo.
 > righe 329-338 del nostro sorgente, misurabile domani senza scrivere codice.**
 
 ---
-_Fonti aperte davvero: 7 pagine di elenco MQL5 · 5 schede EA · 5 sorgenti `.mq5`
-scaricati (HTTP 200 verificato) · 7 query arXiv · 7 abstract · 1 pagina
-Quantpedia. Nessuna riga di questo dossier viene dalla memoria._
+_Fonti aperte davvero: 7 pagine di elenco MQL5 (~280 titoli) · 5 schede EA ·
+**4 sorgenti `.mq5` scaricati** (HTTP 200 verificato: 73958, 39931, 45379,
+58268) · 7 query arXiv · 7 abstract · 1 pagina Quantpedia.
+Il quinto EA (53022) e' stato letto **solo sulla scheda**, ed e' scartato su
+una frase dell'autore, non su una riga di codice: e' etichettato cosi' in §7.
+Nessuna riga di questo dossier viene dalla memoria._
