@@ -67,3 +67,52 @@ fondo al messaggio.
 > **Il criterio con cui giudicare questa lista**: se la prossima riga di
 > lancio e' sbagliata, il problema non e' che manca un controllo — e' che non
 > l'ho eseguita.
+
+---
+
+## 5. 🧪 SE LA RIGA USA `-Prova`: PRIMA UN GIRO A VUOTO
+
+**Aggiunto il 16/08/2026, dopo aver capito R58.**
+
+Il driver ha `-SoloControllo`: non lancia niente e stampa **esattamente** cosa
+passerebbe a MT5.
+
+```
+    parametri in [TesterInputs] : N
+    spazzolati                  : N
+        <NomeParametro>          N celle
+    celle per finestra          : N
+```
+
+**Si legge quella stampa e si confronta col file prova. Se non coincide, ci si
+ferma li'** — in un minuto, non dopo due ore di tick reali.
+
+### Perche' esiste questo punto
+
+In R58 avevo scritto un file prova con **tutte le righe a flag `N`**, cioe'
+zero assi da spazzolare. Il driver, in quel caso, **rifiuta di lanciare**:
+
+```powershell
+if($Sweep.Count -eq 0 -and $Errori.Count -eq 0){
+  [void]$Errori.Add("nessun parametro da spazzolare: sarebbe un backtest singolo, non un walk-forward")
+}
+```
+
+La corsa e' andata avanti con la **griglia di default** dell'EA, e me ne sono
+accorto solo leggendo le `.ini` a posteriori. **Un giro a vuoto da un minuto
+lo avrebbe mostrato prima di partire.**
+
+### E il difetto gemello da ricordare (documentato nel driver, riga ~393)
+
+> _"un pin scritto `Nome=35` imposta il VALORE ma NON spegne il flag di
+> ottimizzazione che MT5 ricorda dall'ultima griglia di quell'EA -> il tester
+> rispazzola la griglia vecchia nonostante il pin."_
+
+**MT5 si ricorda i flag della griglia precedente.** Per questo i pin si
+scrivono sempre in forma completa `v||v||0||v||N`, mai `Nome=v` secco.
+
+### Regola pratica
+
+> **Un file prova deve avere almeno UN asse con flag `Y`.**
+> Se la domanda e' "voglio misurare UNA sola cella", non e' un walk-forward:
+> serve un altro strumento, non questo driver.
