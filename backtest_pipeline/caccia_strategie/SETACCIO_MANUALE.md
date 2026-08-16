@@ -749,3 +749,64 @@ non apre niente.** E' un gestore di posizioni gia' aperte, come
 Resta fuori dall'imbuto per lo stesso motivo del primo: **zero ingressi =
 zero edge = niente da backtestare**. Ma se un giorno serve un salvagente per
 le operazioni manuali, **si parte da questo, non da quello**.
+
+---
+
+## 16/08/2026 — `BreakoutEA.mq5` v1.30 · 🔴 **il report e' la lezione, non il codice**
+
+**Autore:** Yashar Seyyedin — **lo stesso di `MeanReversion.mq5`**, il nostro
+unico promosso. 145 righe, **4 input**.
+
+### ✅ Il codice e' pulito, e in due punti e' MEGLIO del suo fratello promosso
+
+- decide **solo all'apertura di una nuova barra**, su `[1]` e `[2]` chiuse → **niente repaint**
+- **SL e TP veri** al broker · magic impostato
+- posizioni contate per **simbolo + magic** (il fratello usa `PositionsTotal()`, di conto)
+- lotto arrotondato **verso il basso** e, se sotto il minimo, **non opera** invece di forzare
+
+### 🔴 Ma non entra, e i motivi sono quattro
+
+1. **LONG-ONLY.** `if(closeBar1 > highBar2) ... trade.Buy(...)`. Nessuno short.
+   E' l'opposto del buco che dobbiamo riempire.
+2. **`InpRiskAmount = 20.0` — rischio in VALUTA FISSA, non in percentuale.**
+   Venti dollari a operazione: su 100k sono lo **0,02%**. Non scala col conto,
+   non si legge nei nostri confronti.
+3. 🚩 **L'autore etichetta due input `-> Optimize`** — e `InpMinSLPoints = 5000`
+   e' un filtro di selezione tarato sull'ottimizzatore, non una regola di mercato.
+4. Il segnale e' **una barra che chiude sopra il massimo della precedente**:
+   la famiglia breakout, dove abbiamo **~210 celle a tick reali**.
+
+### 🔬 E ORA IL PEZZO CHE VALE: il report allegato
+
+Nello zip c'erano `report.png`, `curve.png` e `setting.png`. **La curva sale.**
+Poi si leggono le impostazioni:
+
+```
+Symbol:     US100.cash  H4
+Date:       2023.01.01 -> 2026.06.01
+Forward:    No                              <-- NESSUN out-of-sample
+Delays:     Zero latency, ideal execution   <-- slippage ZERO
+Modelling:  1 minute OHLC                   <-- NON tick reali
+Deposit:    10000 USD
+```
+
+| il risultato | il nostro metro |
+|---|---|
+| Net Profit **520,74** su 10.000 in 3,4 anni | **+1,53% l'anno** |
+| **Profit Factor 1,10** | il nostro pavimento e' 1,10: **zero margine** |
+| **589 operazioni**, Expected Payoff **0,88** | **88 centesimi di margine per operazione** |
+| Short trades: **0 (0,00%)** | long-only confermato dai numeri |
+| Largest profit **20,00** / loss **−28,00** | ogni vincita e' il rischio fisso: 589 lanci di moneta al **54,16%** |
+| **OnTester result: 0** | conferma: `OnTester` non c'e' |
+
+> 🚨 **Tre delle nostre regole, tutte violate nello stesso screenshot:**
+> - **`Modelling: 1 minute OHLC`** → _"OHLC solo screening, verdetti solo a tick reali"_. **R57** ha misurato che cambiando **solo** il modello il segno dell'orso si ribalta.
+> - **`Delays: Zero latency, ideal execution`** → **R55** ha misurato che l'ORB **sfonda il cancello del 10% con 1,5 punti indice di slippage**. Qui lo slippage e' **zero per impostazione**, su un **indice**.
+> - **`Forward: No`** → nessun fuori campione. E' **tutto in campione**, con due parametri dichiarati "da ottimizzare" su quella stessa finestra.
+>
+> 🎯 **Il margine e' 88 centesimi per operazione, misurati a latenza zero.**
+> Qualunque attrito reale mangia una fetta di quel margine, e non ce n'e'.
+
+**Non e' un EA disonesto: e' un EA misurato col metodo che noi abbiamo
+abbandonato dopo trenta ribaltamenti.** Il codice si potrebbe anche riusare;
+**il numero no**.

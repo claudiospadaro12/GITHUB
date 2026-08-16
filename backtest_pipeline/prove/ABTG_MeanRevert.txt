@@ -94,13 +94,25 @@
 #   chiede di non distruggersi (criterio 3).
 #
 # ---------------------------------------------------------------------
-# @DAQUANDO MANCA APPOSTA -- NON E' UNA DIMENTICANZA
-#   Lo storico di GBPUSD su questo terminale non e' misurato, e non lo
-#   invento. Sugli indici il driver diceva 2024.01.01 e i dati partivano
-#   dal 26/09/2024: meta' finestra IS non esisteva. Si misura con
-#       scarica_storico.ps1 -Simboli "GBPUSD" -Auto
-#   e si passa la data vera con -DaQuando. Finche' non e' misurata il
-#   driver si ferma -- ed e' giusto che si fermi.
+# @DAQUANDO: 2015.01.01 -- SCELTA DENTRO UN INTERVALLO MISURATO
+#   Misura del 15/08/2026 (risultati_prove/storico_bcm/, file in archivio):
+#       GBPUSD H1   : 72.199 barre, prima data LOCALE 2010.07.06
+#       GBPUSD TICK : 70.491.074 tick, dal 2024.07.05
+#   [VERIFICATO] le barre H1 ci sono dal 2010.07.06.
+#   [INFERITO]   il verdetto della colonna diceva "MANCA STORICO LOCALE",
+#                ma e' innescato dalla PrimaDataServer = 1993.05.11, che
+#                e' l'artefatto gia' documentato (vedi
+#                REFERTO_RICOGNIZIONE_PEPPERSTONE: tre simboli rispondono
+#                1993.04.xx, data che nessun broker ha davvero). Non e'
+#                un buco reale nelle barre.
+#   Quindi si parte dal 2015.01.01: NON e' il bordo, e' cinque anni DENTRO
+#   il misurato. Prudente per costruzione, e copre lo stesso le tre
+#   finestre che contano -- laterale 2019, crollo 2020, orso 2022.
+#
+#   ATTENZIONE PER LA FASE 2: i TICK REALI partono dal 2024.07.05.
+#   Lo screening OHLC gira dal 2015; il VERDETTO a tick reali potra'
+#   coprire solo da meta' 2024. Sono due finestre diverse e non si
+#   confrontano fra loro.
 #
 # ---------------------------------------------------------------------
 # PERCHE' GBPUSD H1
@@ -114,7 +126,7 @@
 # =====================================================================
 @SIMBOLO GBPUSD
 @PERIODO H1
-@DAQUANDO
+@DAQUANDO 2015.01.01
 
 # --- l'unico asse spazzolato: LA manopola della strategia ---
 InpLookback=200||50||50||300||Y
