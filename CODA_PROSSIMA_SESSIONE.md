@@ -1,5 +1,39 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## ✅ AGGIORNAMENTO 16/08 ore 14:30 — I PRIMI DUE PUNTI SONO FATTI
+>
+> **1. Screening `ABTG_MeanRevert`: FATTO e BOCCIATO.** 12 celle su 12 in
+> perdita su 11 anni e mezzo, PF massimo 0,986, DD fino al 37%. Famiglia
+> chiusa, prova di regime NON lanciata (sarebbe una macchina su un cadavere).
+> Referto: `risultati_archivio/REFERTO_ROUND60_MEANREVERT.md`.
+>
+> **2. Sblocco dei domini: FATTO E VERIFICATO.** `mql5.com` risponde
+> **HTTP 200** ("Free download of trading robots... MQL5 Code Base") e
+> `arxiv.org` **HTTP 200** (API `export.arxiv.org` con risultati reali).
+> 🔓 **Il Code Base e la letteratura adesso si aprono da soli.**
+>
+> ### ⚠️ TRAPPOLA GIA' PAGATA: LA SESSIONE NUOVA PARTE SUL BRANCH SBAGLIATO
+> La prima sessione lanciata dopo lo sblocco e' partita su
+> `claude/verifica-siti-caccia-strategie-v5pzqv`, che punta a un commit di
+> **due mesi fa** — e quindi non trovava ne' questo file, ne' l'agente
+> `cacciatore-strategie`, ne' il `SETACCIO_MANUALE.md`. **Non e' un bug: e'
+> il branch.** Prima cosa da fare in ogni sessione nuova:
+> ```
+> git fetch origin lavoro && git checkout lavoro && git log --oneline -3
+> ```
+>
+> ### 🎯 QUINDI IL PROSSIMO PASSO E' IL 3, non l'1 e non il 2
+> E prima di cacciare: **leggere `caccia_strategie/SETACCIO_MANUALE.md`**
+> (22 file gia' setacciati, non si ricontrollano) e usare **l'agente
+> `cacciatore-strategie`**, non dei general-purpose.
+>
+> ⚠️ **I tre buchi NON si deducono: sono misurati.** Stanno in
+> `report/ROBUSTEZZA.md` e nei referti R50/R59 —
+> **LATERALE** (`LARRY_GBPUSD` −6.445 nel 2019) ·
+> **CROLLO** (`BB` +502 dove Larry fa −708) ·
+> **SHORT simmetrico** (14 celle vive quasi tutte long-only).
+
+
 _Scritta il 16/08/2026 su sua richiesta: **"metti tutto in coda, quando arrivo
 a casa davanti al pc facciamo tutto"**. Ordine pensato: prima le cose che
 sbloccano le altre._
@@ -10,7 +44,7 @@ sbloccano le altre._
 
 ---
 
-## 1. 🧪 SCREENING DI `ABTG_MeanRevert` — due righe, in quest'ordine
+## 1. ✅ ~~SCREENING DI `ABTG_MeanRevert`~~ — **FATTO, BOCCIATO (R60)**
 
 **Stato:** EA **scritto e COMPILATO** (44.394 byte, verificato il 16/08),
 file prova con `@DAQUANDO 2015.01.01` misurato. **Manca solo lanciarlo.**
@@ -40,7 +74,7 @@ anche li', la tesi e' morta e la famiglia si chiude.
 
 ---
 
-## 2. 🔓 SBLOCCARE I DOMINI DELLE FONTI
+## 2. ✅ ~~SBLOCCARE I DOMINI DELLE FONTI~~ — **FATTO E VERIFICATO**
 
 **Il passo che moltiplica tutto il resto.** Procedura completa, lista dei 14
 domini pronta da incollare, avvertenze:
