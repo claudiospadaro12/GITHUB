@@ -255,10 +255,72 @@ Prima di proporre qualunque cosa ho fatto il controllo di duplicazione
 (§5.D: un candidato che fa la stessa cosa di una sedia viva vale poco).
 Il controllo ha trovato altro.
 
-### `ABTG_Nasdaq_Apertura_US` ha SEI motori d'apertura. Cinque sono misurati e morti. Il sesto ha PF OOS 1,94 e nessuno l'ha mai spazzolato.
+### ~~`ABTG_Nasdaq_Apertura_US` ha SEI motori d'apertura. Cinque sono misurati e morti.~~ Il GAPFILL ha PF OOS 1,94 e nessuno l'ha mai spazzolato.
+
+> 🔴 **Il titolo qui sopra e' sbagliato ed e' barrato apposta** (correzione
+> 16/08, riquadro sotto): i motori positivi OOS sono **tre, non uno** —
+> GAPFILL, e poi RETEST e BREAKOUT col filtro volumi acceso. Resta vero
+> che il GAPFILL e' il migliore dei sei e che **nessuno l'ha mai
+> spazzolato**, che e' il punto di questa sezione.
 
 `risultati_archivio/Walkforward_Aperture/NASDAQ_B_motore_OOS.csv`, tick
 reali M5, rischio 1%, sessione **14:30 server**, RangeMode 0:
+
+> ## 🔴 CORREZIONE 16/08, dopo una domanda di Claudio
+>
+> **La tabella qui sotto era METa' TABELLA, e la conclusione che ne
+> traeva era sbagliata.** Il referto `REFERTO_FASE_B_C5.md` misura ogni
+> motore in **DUE varianti** — filtro volumi **off** e **on** — e questo
+> dossier aveva copiato solo le righe `off`. Da li' la frase "cinque
+> misurati e morti, uno mai spazzolato", che **non regge**.
+>
+> Ecco la tabella COMPLETA del Nasdaq (referto righe 43-55), con la
+> colonna che era stata persa:
+>
+> | motore | vol | OOS | PF | n | DD OOS |
+> |---|---|---:|---:|---:|---:|
+> | **GAPFILL** | off | **+487,09** | **1,937** | 19 | **3,28%** |
+> | **RETEST** | **on** | **+274,35** | **1,109** | 94 | **3,68%** |
+> | **BREAKOUT** | **on** | **+122,28** | **1,063** | 108 | 4,13% |
+> | RETEST | off | +218,98 | 1,041 | 240 | 8,79% |
+> | BREAKOUT | off | −281,55 | 0,949 | 244 | 9,60% |
+> | OPENCONFIRM | on | −145,20 | 0,956 | 104 | 6,72% |
+> | DELAYED | on | −356,42 | 0,696 | 51 | 4,61% |
+> | OPENCONFIRM | off | −365,50 | 0,927 | 240 | 7,18% |
+> | RANGE_FADE | off | −392,49 | 0,930 | 244 | 17,29% |
+> | DELAYED | off | −615,74 | 0,890 | 247 | 12,18% |
+> | RANGE_FADE | on | −786,98 | 0,696 | 108 | 12,73% |
+>
+> 👉 **Sul Nasdaq i motori positivi OOS sono TRE, non uno.** Il filtro
+> volumi ribalta il segno di BREAKOUT (−281 → +122) e quasi dimezza il
+> drawdown di RETEST (8,79% → 3,68%).
+>
+> ⚠️ **E il filtro volumi qui NON e' il caso di R26.** Su quel round (DAX)
+> il filtro alzava il PF e **abbassava il profitto**, tagliando piu'
+> vincitori che perdenti. Qui alza il PF **e** il profitto **e** abbassa
+> il DD. Sono due esiti diversi e vanno letti diversi — ma resta un
+> filtro dell'autore misurato su una finestra sola: **conta come indizio,
+> non come promozione.**
+>
+> ### E la conseguenza operativa, che e' la domanda vera di Claudio
+> _"Non possiamo avere piu' expert sul Nasdaq — uno sul retest, uno sul
+> breakout, uno sul limit — e si attiva quello giusto al momento?"_
+>
+> | | verdetto |
+> |---|---|
+> | motori su eventi **DISGIUNTI** (GAPFILL scatta sui giorni di gap, n=19; RETEST/BREAKOUT sulla rottura del range) | 🟢 **si', e' il portafoglio** |
+> | un **selettore** che decide quale motore "va bene adesso" | 🔴 **no: e' un filtro appiccicato, 0 successi su 5** (R20, R12, R26, R45, R54) |
+> | **RETEST + BREAKOUT insieme** | 🔴 **no: sono lo STESSO evento** letto in due modi (108 e 94 trade dalla stessa rottura). Raddoppiare li' viola la regola 1 di `ROTTA_PROP.md` — mai due EA sullo stesso segnale/simbolo/lato a rischio pieno — ed e' il caso DAX 2%+2% (Apertura Marco + DAX EU) |
+>
+> 🔴 **Trappola meccanica**: `InpOneTradePerDay=true` vale **per magic**.
+> Due istanze sullo stesso simbolo hanno due guardie separate, quindi
+> **fanno due trade lo stesso giorno** = doppio rischio nella stessa
+> seduta, contro un muro prop che chiude a −5% giornaliero.
+>
+> **Combinazione consigliata: GAPFILL + RETEST(vol on).** Non tutti e
+> tre. Fra RETEST e BREAKOUT vince RETEST su tutto: PF piu' alto (1,109
+> vs 1,063), DD piu' basso (3,68% vs 4,13%), e meno trade per fare piu'
+> soldi. Da misurare come round proprio, dopo il GAPFILL.
 
 | `InpEntryMode` | Profit OOS | PF | DD % | n |
 |---|---:|---:|---:|---:|
@@ -269,7 +331,12 @@ reali M5, rischio 1%, sessione **14:30 server**, RangeMode 0:
 | 3 RANGE_FADE | −392,49 | 0,930 | 17,29 | 244 |
 | 4 DELAYED | −615,74 | 0,890 | 12,18 | 247 |
 
-**Il GAPFILL ha il PF piu' alto E il drawdown piu' basso dei sei.** Non e'
+_(⚠️ tabella INCOMPLETA: solo le righe a filtro volumi **spento**. La
+versione corretta e' nel riquadro qui sopra. Lasciata come traccia
+dell'errore, non come dato.)_
+
+**Il GAPFILL ha il PF piu' alto E il drawdown piu' basso dei sei**, e
+questo resta vero anche nella tabella completa. Non e'
 stato seguito perche' n=19. E il referto stesso, `REFERTO_FASE_B_C5.md`,
 "Cosa fare adesso" punto 2, lo aveva scritto:
 
