@@ -1,0 +1,38 @@
+; ABTG_GapContinuation - CELLA SCELTA in R65 (gap 1,00 / OR 15 / TP_R 3)
+; Passata SINGOLA (niente ottimizzazione): serve a produrre il CSV per-trade
+;   Common\Files\abtg_trades_ABTG_GapContinuation_225JPY_774101.csv
+; Finestra OOS: 2025.06.10 -> 2026.06.30 - simbolo 225JPY - periodo M1
+; Diagnostica ACCESA apposta: una passata sola, il log serve.
+
+InpComment=GAPCONT||GAPCONT||0||GAPCONT||N
+InpMinimumBuyGapPercent=1.00||1.00||0||1.00||N
+InpMinimumSellGapPercent=1.00||1.00||0||1.00||N
+InpOpeningRangeMinutes=15||15||0||15||N
+InpFinalTargetR=3.0||3.0||0||3.0||N
+InpSessionTimeMode=1||1||0||1||N
+InpSessionOpenHour=1||1||0||1||N
+InpSessionOpenMinute=0||0||0||0||N
+InpSessionCloseHour=7||7||0||7||N
+InpSessionCloseMinute=30||30||0||30||N
+InpReduceRiskOnSmallSellGap=0||0||0||0||N
+InpBuyRiskPercent=1.0||1.0||0||1.0||N
+InpSellRiskPercent=1.0||1.0||0||1.0||N
+InpSellFullRiskFromGapPct=1.25||1.25||0||1.25||N
+InpSmallSellRiskPercent=0.25||0.25||0||0.25||N
+InpEnableBuyGaps=1||1||0||1||N
+InpEnableSellGaps=1||1||0||1||N
+InpMaxEntryMinutesFromOpen=90||90||0||90||N
+InpExitMinutesBeforeClose=5||5||0||5||N
+InpPartialClosePercent=40.0||40.0||0||40.0||N
+InpPartialTargetR=1.0||1.0||0||1.0||N
+InpMoveStopToBreakEven=1||1||0||1||N
+InpMaxSpreadPoints=0.0||0.0||0||0.0||N
+InpMaxSpreadToStopPercent=10.0||10.0||0||10.0||N
+InpStopBufferPoints=0.0||0.0||0||0.0||N
+InpFixedLots=0.0||0.0||0||0.0||N
+InpMaxLots=0.0||0.0||0||0.0||N
+InpUseRealVolumeIfAvailable=1||1||0||1||N
+InpMagicNumber=774101||774101||0||774101||N
+InpMaxSlippagePoints=30||30||0||30||N
+InpShowStatusOnChart=0||0||0||0||N
+InpPrintDailyDiagnostics=1||1||0||1||N
