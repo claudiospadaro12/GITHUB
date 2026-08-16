@@ -573,3 +573,19 @@ casella del messaggio → ingranaggio sull'ambiente → **Network access:
 `Custom`** → domini uno per riga → ⚠️ **spuntare "Also include default list
 of common package managers"**, altrimenti si perde GitHub. Poi serve una
 **sessione nuova**.
+
+---
+
+## 🗂️ CODA DELLA PROSSIMA SESSIONE (16/08/2026)
+
+Tutto quello che era in sospeso quando Claudio ha lasciato il PC sta in
+**`CODA_PROSSIMA_SESSIONE.md`**, in ordine di esecuzione, con le righe di
+lancio gia' scritte e passate dalla checklist.
+
+Sintesi: **(1)** screening di `ABTG_MeanRevert` — EA gia' scritto e compilato,
+due righe pronte, giro a vuoto per primo · **(2)** sbloccare i domini delle
+fonti · **(3)** `Nikkei Gap Continuation` dopo aver sfrondato gli input e
+risolto il fuso · **(4)** misure aperte (DD OOS di `COST_EURJPY`, indici a
+tick reali, Pepperstone, LZMA) · **(5)** filone nuovo: **motori per le
+aperture di DAX e Nasdaq**, con la bussola di R42 (_"agli estremi del range
+di apertura non c'e' edge in nessuna direzione: paga solo il RETEST"_).
