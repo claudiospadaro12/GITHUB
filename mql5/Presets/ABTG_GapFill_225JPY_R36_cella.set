@@ -1,0 +1,22 @@
+; ABTG_GapFill - CELLA PROMOSSA su 225JPY (R36: fill 75, +76 OOS, PF 1,14, n=15)
+; Taratura di tesi pinnata da R36 "Igiene": spread 300, minATR 0.3, time-stop 48h
+; Magic 225JPY = 772235 (R52 cella 20)
+; Serve per il CONFRONTO GIORNO PER GIORNO con ABTG_GapContinuation:
+;   stessa finestra OOS 2025.06.10 -> 2026.06.30, stesso simbolo.
+; Periodo del tester: H1 (l'EA rileva il cambio SETTIMANA su InpTF).
+
+InpTF=16385||16385||0||16385||N
+InpAtrPeriodD1=14||14||0||14||N
+InpGapMinATR=0.3||0.3||0||0.3||N
+InpGapMaxATR=2.0||2.0||0||2.0||N
+InpFillPct=75.0||75.0||0||75.0||N
+InpSLMode=0||0||0||0||N
+InpSLGapMult=1.0||1.0||0||1.0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpMaxHours=48||48||0||48||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMagic=772235||772235||0||772235||N
+InpComment=GAPFILL||GAPFILL||0||GAPFILL||N
+InpVerbose=1||1||0||1||N
