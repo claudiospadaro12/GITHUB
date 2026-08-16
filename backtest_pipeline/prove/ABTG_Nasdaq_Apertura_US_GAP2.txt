@@ -1,0 +1,165 @@
+# =====================================================================
+#  PROVA R62: GAPFILL Nasdaq -- LA SOGLIA VERSO IL BASSO
+#             (il seguito di R61, che aveva spazzolato dalla parte
+#              sbagliata e ha prodotto 6 risposte invece di 24)
+#  Referto precedente: risultati_archivio/REFERTO_ROUND61_GAPFILL_NASDAQ.md
+#  Origine della domanda: Walkforward_Aperture/REFERTO_FASE_B_C5.md
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# PERCHE' ESISTE QUESTO ROUND
+#
+#   La FASE B aveva ordinato: "GAPFILL: misura da rifare in grande,
+#   spazzolando InpGapMinPoints e InpGapMinRR per vedere se LE OCCASIONI
+#   SALGONO restando redditizie. Con 19 trade non si decide niente."
+#
+#   R61 ha spazzolato 50..300 e la domanda e' rimasta senza risposta,
+#   perche' la soglia NON MORDE in quell'intervallo: da 100 a 300 le
+#   righe sono identiche al centesimo, in IS e in OOS. Le occasioni
+#   salgono ABBASSANDO la soglia (150->50 porta l'OOS da 19 a 26 trade a
+#   RR 1,0), ma 50 era il valore piu' BASSO spazzolato.
+#   👉 Qui si va sotto: 0..50. E' la direzione che la FASE B chiedeva.
+#
+# ---------------------------------------------------------------------
+# 🔬 LA SCOPERTA CHE CAMBIA IL DISEGNO — LEGGERE PRIMA DI TUTTO
+#
+#   Il gap e' calcolato su barre D1 (ABTG_Nasdaq_Apertura_US.mq5:1425-1429):
+#       prevClose = iClose(_Symbol, PERIOD_D1, 1)
+#       todayOpen = iOpen (_Symbol, PERIOD_D1, 0)
+#       gap       = (todayOpen - prevClose) / _Point
+#
+#   Su un CFD che quota quasi 24 ore, fra la chiusura D1 di ieri e
+#   l'apertura D1 di oggi NON C'E' QUASI NULLA -- tranne nel fine
+#   settimana. E i conti di R61 lo dicono:
+#     - la finestra IS copre ~37 settimane
+#     - le celle sopra i 100 punti fanno **n = 36**
+#     - fra 100 e 300 punti NON si perde nemmeno un trade
+#   cioe' i gap infrasettimanali sono quasi zero, quelli del lunedi' sono
+#   enormi, e in mezzo il vuoto.
+#
+#   👉 **IPOTESI [INFERITO]: questo motore non trada "il gap di apertura",
+#      trada IL GAP DEL WEEKEND. Un trade per lunedi'.**
+#      Non e' una bocciatura -- e' una tesi diversa da quella dichiarata,
+#      e va saputa PRIMA di leggere i numeri, non dopo.
+#
+# ---------------------------------------------------------------------
+# IPOTESI DI QUESTO ROUND (scritta prima dei numeri)
+#
+#   Abbassando la soglia sotto i 50 punti entrano i giorni
+#   INFRASETTIMANALI, dove il "gap" e' quasi zero. Due esiti, ed
+#   ENTRAMBI rispondono a qualcosa:
+#
+#   A) le occasioni salgono E la redditivita' regge
+#      -> il gap NON e' l'edge: l'edge e' il ritorno verso la chiusura
+#         precedente, e vale tutti i giorni. Il motore e' un
+#         mean-reversion giornaliero travestito da gap-fill, ed e' una
+#         notizia migliore (piu' campione, piu' occasioni).
+#   B) le occasioni salgono e la redditivita' CROLLA
+#      -> il gap E' l'edge, la soglia serve, e R61 aveva gia' la
+#         risposta giusta: si resta sopra i 50 punti e ci si tiene
+#         n~25 trade l'anno.
+#
+#   🎯 LA CELLA DI CONTROLLO E' `InpGapMinPoints = 0`: nessun filtro di
+#      gap, ogni giorno e' buono. E' il controllo di falsificazione della
+#      tesi "il gap e' l'edge". Se a 0 il motore resta verde con 4-5
+#      volte i trade, la tesi dichiarata dall'EA e' sbagliata (e va
+#      riscritta la scheda, non festeggiato il risultato).
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (congelati ORA, prima dei numeri)
+#
+#   0. 🎯 SI GUARDA PRIMA **n**, e si guarda la CURVA di n contro la
+#      soglia. La domanda del round e' "le occasioni salgono?": la
+#      risposta e' una curva, non una cella.
+#
+#   1. La cella si sceglie **SOLO sull'IS**, e col **CENTRO
+#      DELL'ALTOPIANO, mai il picco** (12 Spearman IS->OOS negative su 13).
+#
+#   2. Il confronto e' contro la cella scelta in R61:
+#      **RR 1,0 / pts 50-300 -> OOS +7.260/+7.772, PF ~2,0, n 23-26,
+#      DD 3,90%.** Una cella nuova entra solo se **aggiunge campione
+#      SENZA peggiorare il PF sotto 1,50 e senza portare il DD sopra il 6%**.
+#
+#   3. 🏛️ CANCELLO PROP, e qui e' piu' severo del solito perche'
+#      abbassare la soglia puo' far scattare piu' trade nello stesso
+#      giorno: **peggior giornata OOS non oltre -2,0%** (in R61 era
+#      -1,03%, cioe' un solo stop). Se peggiora, e' il segnale che
+#      `InpOneTradePerDay` non sta piu' bastando.
+#
+#   4. Il PF sotto n=20 non si giudica; il DD e' un fatto accaduto e vale
+#      a qualunque n.
+#
+#   5. 🔴 SE LA CELLA A `pts=0` E' LA MIGLIORE, **NON SI PROMUOVE
+#      NIENTE** in questo round: si apre un round nuovo con la tesi
+#      giusta scritta ("mean-reversion sulla chiusura precedente"), i
+#      suoi criteri e il suo nome. Rinominare la tesi dopo aver visto i
+#      numeri e' il modo piu' elegante di overfittare.
+#
+# ---------------------------------------------------------------------
+# ⚠️ LIMITI, DICHIARATI ADESSO
+#
+#   a) Il "gap" su CFD 24/5 (vedi sopra): resta da verificare guardando
+#      se ci sono barre M1 fuori sessione su NASUSD. Questo round rende
+#      la verifica PIU' urgente, non meno.
+#   b) Una finestra sola, un simbolo solo. I numeri di R61 sono i
+#      migliori dell'arsenale: la reazione giusta e' il sospetto.
+#   c) La colonna "Perdite Consecutive Max" del CSV **non e' un
+#      conteggio** (bug OPTFRAME trovato in R61, riguarda tutti gli EA):
+#      non usarla come se lo fosse.
+#
+# ---------------------------------------------------------------------
+# GRIGLIA: 6 x 3 = 18 celle -> 36 pass a tick reali.
+#   pts 0,10,20,30,40,50  x  RR 0,5 / 1,0 / 1,5
+#   RR 2,0 e' stato TOLTO: in R61 dava n=16 OOS, sotto la soglia in cui
+#   il PF si giudica. Tenerlo sarebbe stato spazzolare rumore.
+#   Tutti gli altri pin sono IDENTICI a R61, riga per riga, perche' il
+#   confronto abbia senso.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- i due assi ---
+# la soglia VERSO IL BASSO: 0 e' il controllo di falsificazione
+InpGapMinPoints=20||0||10||50||Y
+# RR: gli stessi tre valori vivi di R61 (2,0 tolto per campione)
+InpGapMinRR=1.0||0.5||0.5||1.5||Y
+
+# --- tutto il resto: IDENTICO a R61 (prove/ABTG_Nasdaq_Apertura_US_GAP.txt) ---
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpEntryMode=1||1||0||1||N
+InpUseGapFill=1||1||0||1||N
+InpRangeMode=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpBufferPoints=200||200||0||200||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpUseAtrFilter=0||0||0||0||N
+InpUseEmaFilter=0||0||0||0||N
+InpUseSupertrend=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpUseVwapFilter=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0||0||0||0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailStartR=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
