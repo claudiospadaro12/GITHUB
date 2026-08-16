@@ -523,26 +523,59 @@ Passata dai quattro controlli di `CHECKLIST_RIGA_DI_LANCIO.md`:
 2. ✅ **Difetti gemelli**: nessuna correzione fatta oggi su questi script.
 3. ✅ **Il file e' quello giusto**: questa riga **CERCA** (24 celle) e il
    file e' una griglia. Coerenti. (L'errore R58 era l'opposto.)
-4. 🔴 **SHA: NON lo scrivo.** Il file prova e' appena stato creato e **non e'
-   ancora committato** — e non eseguo comandi git. **La riga va rigenerata
-   con lo SHA vero dopo il commit**, oppure con `HEAD`. Un SHA inventato qui
-   sarebbe esattamente l'errore del 15/08.
+4. ✅ **SHA RISOLTO — `b3a22c3`** _(riempito il 16/08, dopo il commit)_. Il
+   cacciatore aveva lasciato la riga senza SHA di proposito, perche' il file
+   prova non era ancora committato. Ora lo e', e il controllo del §4 e'
+   stato eseguito: l'ultimo commit di **ognuno** dei tre file coinvolti e'
+   **piu' vecchio** dello SHA scritto, quindi lo SHA li contiene tutti.
 
-⚙️ **UNA MACCHINA, UN LAVORO**: apre MT5 sul PC di backtest. Prima di
-mandarla, dichiarare che non c'e' un'altra corsa viva.
+   | file | ultimo commit |
+   |---|---|
+   | `prove/ABTG_Nasdaq_Apertura_US_GAP.txt` | `ff3251c` |
+   | `walkforward_generico.ps1` | `51922fa` |
+   | `mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5` | `8b92214` |
+
+   🔒 **`51922fa` e' il commit che conta di piu'**: e' quello che ha messo
+   `AllowLiveTrading=false` nella `.ini` generata (driver righe 592-600).
+   Senza, **lanciare il tester avvia il terminale, che ricarica l'ultimo
+   profilo e riaccende gli EA sul conto VIVO 50503392** — e' cosi' che il
+   14/08 e' partito un DAX Apertura vero da un grafico M3 di prova. Lo SHA
+   scritto qui **contiene la correzione**.
+
+5. ✅ **Nomi degli input verificati meccanicamente**: tutte le **39** righe
+   parametro del file prova hanno il loro `input` in `ABTG_Nasdaq_Apertura_US.mq5`.
+   Zero nomi orfani, cioe' zero righe che MT5 ignorerebbe in silenzio.
+   `OnTester` presente: il driver non si ferma.
+
+⚙️ **UNA MACCHINA, UN LAVORO**: apre MT5 sul PC di backtest.
+🛑 **MT5 DEVE ESSERE CHIUSO**: il driver lo pretende (riga 558 —
+_"chiudi MetaTrader prima di lanciare, altrimenti escono 0 CSV"_) e si ferma
+da solo se lo trova aperto. Non e' un consiglio in fondo al messaggio: e' un
+cancello dello script.
 
 ```
-# giro a vuoto (deve stampare: spazzolati 24 celle)
-powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\walkforward_generico.ps1" `
-  -Expert ABTG_Nasdaq_Apertura_US `
-  -Prova "$env:USERPROFILE\ABTG_Nasdaq_Apertura_US_GAP.txt" `
-  -Modello 4 -Deposito 100000 -Etichetta gapnas -SoloControllo
+# RIGA 1 - giro a vuoto: scarica e controlla, non lancia niente (un minuto)
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/b3a22c3/backtest_pipeline/prove/ABTG_Nasdaq_Apertura_US_GAP.txt" -OutFile "$env:USERPROFILE\ABTG_Nasdaq_Apertura_US_GAP.txt"; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/b3a22c3/backtest_pipeline/walkforward_generico.ps1" -OutFile "$env:USERPROFILE\walkforward_generico.ps1"; powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\walkforward_generico.ps1" -Expert ABTG_Nasdaq_Apertura_US -Prova "$env:USERPROFILE\ABTG_Nasdaq_Apertura_US_GAP.txt" -Modello 4 -Deposito 100000 -Etichetta gapnas -SoloControllo
 ```
 
 ✅ Deve stampare **`spazzolati: 24`**, `InpGapMinPoints 6 celle`,
 `InpGapMinRR 4 celle`, e **`InpSessionHour 14`**.
 🛑 Se stampa `InpSessionHour 15` → ora italiana invece di ora server:
 **fermarsi e cestinare** (regola fissa di `CLAUDE.md`).
+🛑 Se stampa un numero di celle diverso da 24, **fermarsi e mandare la
+stampa**: e' il controllo che in R58 non e' stato fatto, e la corsa e'
+andata avanti per due ore con la griglia di default.
+
+```
+# RIGA 2 - la spazzolata vera. SOLO se la riga 1 ha detto 24 celle.
+# In fondo raccoglie CSV e .ini sul Desktop e ne fa uno zip.
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\walkforward_generico.ps1" -Expert ABTG_Nasdaq_Apertura_US -Prova "$env:USERPROFILE\ABTG_Nasdaq_Apertura_US_GAP.txt" -Modello 4 -Deposito 100000 -Etichetta gapnas; $d=Join-Path ([Environment]::GetFolderPath("Desktop")) "gapnas"; New-Item -ItemType Directory -Force -Path $d | Out-Null; Copy-Item "$env:USERPROFILE\risultati_prove\ABTG_Nasdaq_Apertura_US\*gapnas*" $d -Force -EA SilentlyContinue; Copy-Item "$env:USERPROFILE\gen_*gapnas*.ini" $d -Force -EA SilentlyContinue; Get-ChildItem $d | Select-Object Name,Length | Format-Table -AutoSize; Compress-Archive -Path "$d\*" -DestinationPath (Join-Path ([Environment]::GetFolderPath("Desktop")) "gapnas.zip") -Force; Write-Host "`nZIP: Desktop\gapnas.zip" -ForegroundColor Green
+```
+
+📦 Nello zip devono esserci **i CSV e le `.ini`**: le `.ini` servono a
+controllare cosa ha ricevuto MT5 davvero, senza doverle chiedere dopo.
+⏱️ **Modello 4 = tick reali su M5**: e' una corsa lunga, non un minuto.
+Va lanciata quando il PC puo' restare occupato.
 
 ---
 
