@@ -176,6 +176,60 @@ portafoglio.
 
 ---
 
+## 4-ter. ✅ VERDETTO A TICK REALI — **PASSA, E MIGLIORA**
+
+_Passata singola nel Tester, 16/08 sera. **Qualita' storico: 100% tick
+reali**, 17.680.280 tick. Cella **designata** (`gap 1,00 / OR 15 / TP_R 3`),
+stessa finestra OOS 2025.06.10 → 2026.06.30, deposito 100.000, rischio 1%._
+
+E' il cancello di casa — _"OHLC solo screening, verdetti solo a tick reali"_ —
+e c'era un motivo preciso per temerlo: **R57 aveva misurato che cambiando
+SOLO il modello il segno dell'orso si e' ribaltato.**
+
+| | OHLC (griglia R65) | **TICK REALI** | |
+|---|---:|---:|---|
+| Profitto netto | +7.542,65 | **+8.339,62** | 🟢 +10,6% |
+| **Profit Factor** | 1,363 | **1,398** | 🟢 |
+| posizioni | 69 | 70 | = |
+| Equity DD | 11,78% | 11,59% | 🟢 |
+| Payoff atteso | — | **119,14** | |
+
+> ### 🎯 **Il ribaltamento di R57 NON si e' materializzato. A tick reali il numero non solo tiene: migliora.**
+>
+> E' il **primo dei tre EA adottati oggi ad arrivare fin qui**, ed e' il
+> cancello che aveva ucciso famiglie intere in passato.
+
+### I lati, riconfermati a tick reali
+
+| lato | posizioni | **P&L** |
+|---|---:|---:|
+| **LONG** | 50 | **+10.521,69** |
+| **SHORT** | 20 | **−2.182,07** |
+| **TOTALE** | 70 | **+8.339,62** ✅ *(quadra col report)* |
+
+**Lo short perde anche a tick reali.** La perdita si riduce (−2.182 contro
+−3.454 in OHLC) ma il segno non cambia: **il criterio 2 resta NON passato**,
+e la conclusione del §4-bis vale confermata sul modello buono.
+
+### Il profilo prop, sui numeri veri
+
+| | a rischio 1% | **a taglia prop 0,65%** | muro |
+|---|---:|---:|---|
+| peggior giornata | −1.102,24 (−1,10%) | **−0,72%** | −5% 🟢 |
+| Equity DD massima | 11,59% | **7,53%** | 10% 🟢 |
+| perdite consecutive max | 6 (−6.389,01) | −4,15% | — |
+| tempo max in posizione | **6h 10m** | — | **zero overnight** 🟢 |
+| giornate operate | 47 (23 negative) | ~3,7 al mese | — |
+
+🔴 **E l'allarme statistico PEGGIORA sul modello buono: Z-Score −4,03
+(99,74%)** contro −2,85 dell'OHLC. La dipendenza seriale e' ancora piu' forte:
+**le perdite arrivano in gruppo.** Con 6 perdite consecutive misurate
+(−4,15% a taglia prop), **una serie sfortunata mangia da sola il cap
+giornaliero della prop se capita concentrata.** Le Monte Carlo del progetto
+assumono indipendenza: **su questo EA non valgono come sono.**
+
+---
+
 ## 5. ⚠️ COSA QUESTO ROUND NON DICE
 2. 🔴 **E' OHLC, quindi non e' un verdetto** (R57: cambiando solo il modello
    il segno dell'orso si e' ribaltato). Il verdetto e' a tick reali — e su
@@ -207,7 +261,7 @@ portafoglio.
 >   del motivo per cui era stato promosso dal setaccio;
 > - 🔴 **il criterio 1 ha fatto scattare l'avvertimento del gemello**
 >   (`GapFill` verde nella direzione opposta sullo stesso evento);
-> - 🟡 e resta da fare il **verdetto a tick reali**.
+> - ✅ ~~e resta da fare il verdetto a tick reali~~ **FATTO: passa, PF 1,398.**
 >
 > 🟢 **Quello che invece regge, ed e' molto:** PF 1,36 su 5.610 trade OOS,
 > **zero esposizione overnight**, peggior giornata **−0,71%** e DD **5,79%**
@@ -215,10 +269,10 @@ portafoglio.
 > uscito oggi. Come tassello per il buco degli short, non serve.**
 
 **I prossimi passi, in ordine:**
-1. ✅ ~~Leggere i lati~~ **FATTO: lo short perde.**
-2. **Confronto giorno per giorno con `ABTG_GapFill`** → sciogliere il sospetto
-   del gemello;
-3. **Tick reali** sulla stessa finestra (i tick di 225JPY ci sono) → verdetto;
+1. ✅ ~~Leggere i lati~~ **FATTO: lo short perde** (confermato a tick reali).
+2. ✅ ~~Tick reali~~ **FATTO: passa e migliora, PF 1,398.**
+3. 🎯 **Confronto giorno per giorno con `ABTG_GapFill`** → sciogliere il
+   sospetto del gemello. **E' l'ultima cosa che lo separa da una promozione.**
 4. estendere il gap **oltre 1,00** → verificare che l'altopiano non sia un
    bordo;
 5. **solo dopo** la prova di regime e l'eventuale forward.
