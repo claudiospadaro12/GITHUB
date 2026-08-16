@@ -1,0 +1,111 @@
+# =====================================================================
+#  PROVA: ABTG_PTE -- il target si muove INSIEME allo stop, o sono
+#                     davvero indipendenti come li abbiamo scritti?
+#  (caccia L del 16/08/2026 -- CACCIA_2026-08-16_L_PTE_EMA200.md)
+# =====================================================================
+#
+# IPOTESI (scritta il 16/08/2026, PRIMA di qualsiasi numero)
+#
+#   Nel nostro sorgente lo stop e il target della PTE sono calcolati in
+#   modo INDIPENDENTE l'uno dall'altro:
+#       ABTG_PTE.mq5:329-330   sl = ATR + buffer   (oppure estremo Doji)
+#       ABTG_PTE.mq5:338       tp = entry +/- atr * InpTP2_ATRmult
+#   Non c'e' nessuna riga che leghi `tp` a `risk`. Nel modo di default
+#   (InpSLfromDoji=false) tutti e due scalano con l'ATR, quindi il
+#   rapporto R resta ~stabile PER CASO, non per costruzione. Nel modo
+#   InpSLfromDoji=true lo stop viene dall'ampiezza della Doji mentre il
+#   target resta 2*ATR: il target NON E' PIU' ESPRESSO IN R AFFATTO, e
+#   il rischio/rendimento reale oscilla con la larghezza della Doji.
+#
+#   Leung & Li 2014 (arXiv:1411.5062), "Optimal Mean Reversion Trading
+#   with Transaction Costs and Stop-Loss Exit", dimostrano su processo
+#   Ornstein-Uhlenbeck che il target ottimo e' funzione MONOTONA dello
+#   stop -- verbatim dall'abstract:
+#       "a higher stop-loss level always implies a lower optimal
+#        take-profit level"
+#   cioe': stop piu' stretto -> target piu' vicino; stop piu' largo ->
+#   target piu' lontano. Che e' la forma di un TARGET IN R, non di un
+#   target in ATR fisso.
+#
+#     -> SE LA TESI REGGE SUI NOSTRI DATI, il InpTP2_ATRmult migliore
+#        DEVE SPOSTARSI al variare della geometria dello stop.
+#        SE NON SI SPOSTA, i due sono davvero indipendenti e l'idea
+#        muore qui, a costo zero.
+#
+# PERCHE' QUESTA PROVA COSTA ZERO
+#   Non serve scrivere una riga di codice: le tre leve esistono gia'
+#   come input dell'EA che gira. Questa prova NON e' la variante --
+#   e' il test che decide SE la variante vale la pena di essere scritta.
+#
+# CRITERI DI ACCETTAZIONE (dichiarati ORA, non dopo aver visto il CSV)
+#
+#   La domanda e' binaria e si legge sull'INTERAZIONE, non sul massimo:
+#
+#   1. INTERAZIONE. Il InpTP2_ATRmult migliore a InpSLfromDoji=1 deve
+#      differire di ALMENO UNO STEP (0,5) da quello a InpSLfromDoji=0.
+#      Stessa lettura lungo InpSLbufferPips.
+#      -> se NON si sposta: TESI BOCCIATA, nessuna variante EA. FINE.
+#   2. ALTOPIANO, non picco. La cella migliore deve avere le VICINE
+#      positive. Un massimo isolato non conta (12 Spearman IS->OOS
+#      negative su 13: la cella migliore e' quella piu' fortunata).
+#   3. CAMPIONE. Sotto n=20 trade il PF non si giudica. Le celle sotto
+#      i 20 trade si leggono SOLO per il drawdown, che e' un fatto
+#      accaduto e vale a qualunque n.
+#   4. PROP. "Peggior Giornata %" sopra -2,5% al rischio 1%. Sotto quel
+#      livello, al 2% si sfonda il cap giornaliero da -5%.
+#
+#   ⚠️ IL WIN RATE NON E' UN CRITERIO, ED E' DELIBERATO.
+#   Potters & Bouchaud 2005 (arXiv:physics/0508104) dimostrano che la
+#   frazione di trade vincenti "does not give any information on the
+#   reliability of the strategy but is indicative of the trading style".
+#   Spostando un target il win rate cambia PER GEOMETRIA, senza che sia
+#   cambiato un centesimo di edge. Si riporta e non si usa per decidere.
+#
+# 🛑 QUESTA PROVA NON TOCCA IL FORWARD.
+#   Gira sul PC di backtest. La PTE viva (celle 7-9: Dow, GBPUSD,
+#   USDJPY, magic 771321/22/23) continua esattamente com'e' (§9).
+#   Se lo screening passa, l'esito e' un EA NUOVO che gira IN PARALLELO
+#   con magic diverso -- regola `_Ottimizzato` -- MAI una modifica alla
+#   sedia viva.
+#
+# PERCHE' GBPUSD H1
+#   E' la cella PTE meglio documentata che abbiamo: R50 la misura
+#   POSITIVA IN TUTTI E QUATTRO I REGIMI (ORSO 2022 +1.245 / CROLLO
+#   2020 +70 / TORO 2021 +1.362 / LATERALE 2019 +5.284). Se
+#   l'accoppiamento conta, deve vedersi sulla base piu' solida.
+#
+# ⚠️ InpTF PINNATO A MANO, CON FLAG N -- NON E' UNA SVISTA.
+#   Il default del sorgente e' PERIOD_H4 (16388), ma la cella VIVA gira
+#   su H1 (R52_CENSIMENTO_LATI.md, celle 7-9). Senza questa riga si
+#   misurerebbe un EA che non esiste. Stesso motivo per AllowLong /
+#   AllowShort (R52: entrambi attivi) e per InpRiskPercent all'1%, che
+#   e' il rischio a cui sono girate tutte le nostre misure confrontabili.
+#
+# 🔴 @DAQUANDO MANCA APPOSTA, ESATTAMENTE COME IN prove/ABTG_PTE.txt.
+#   Lo storico GBPUSD su BCM NON e' misurato da me e NON si inventa:
+#   sugli indici il driver diceva 2024.01.01 e i dati partivano dal
+#   26/09/2024 -- meta' finestra IS non esisteva. Si misura con
+#       scarica_storico.ps1 -Simboli "GBPUSD" -SoloReferto
+#   e finche' non e' misurato il driver si ferma, ed e' giusto cosi'.
+#
+# CONTEGGIO CELLE: 2 (SLfromDoji) x 4 (buffer) x 4 (TP2) = 32.
+#   Sweep stretto apposta: e' uno SCREENING, non un verdetto.
+#   E la regola di sempre: mai la cella migliore, sempre il centro
+#   dell'altopiano.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+
+# --- pinnati al valore che gira DAVVERO (R52), non al default del sorgente
+InpTF=16385||16385||0||16385||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- LE TRE LEVE DELLA DOMANDA
+# geometria dello stop: 0 = ATR+buffer (default vivo) | 1 = estremo della Doji
+InpSLfromDoji=0||0||1||1||Y
+# quanto e' largo lo stop nel modo di default
+InpSLbufferPips=5.0||5.0||5.0||20.0||Y
+# il target: e' QUESTO che deve spostarsi, se Leung & Li ha ragione
+InpTP2_ATRmult=2.0||1.5||0.5||3.0||Y
