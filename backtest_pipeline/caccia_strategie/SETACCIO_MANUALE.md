@@ -209,3 +209,153 @@ un nome rassicurante.
 > Il setaccio si applica al sorgente, sempre. Questo file da solo copre due
 > delle bandiere rosse piu' gravi del §4 — ed e' uno dei **219 su 1.185**
 > (18,5%) che il grep del mirror aveva gia' classificato martingala/griglia.
+
+---
+
+# 📦 16/08/2026 — CINQUE FILE IN UN COLPO
+
+| # | file | righe | autore | verdetto |
+|---|---|---:|---|---|
+| 1 | `BreakRevertPro.mq5` | 1.699 | Mustafa Seyyid Sahin | 🔴 **SCARTO** — cambia comportamento NEL TESTER |
+| 2 | **`MeanReversion.mq5`** | **135** | Yashar Seyyedin | 🟢 **PROMOSSO 9/10** |
+| 3 | `Mean Reverse.mq5` | 678 | Mustafa Seyyid Sahin | 🔴 **SCARTO** — stesso trucco del n.1 + lotto fisso |
+| 4 | `RMA` (10 file) | 3.765 | — | 🟡 **IN CODA** — 44 input, lotto fisso |
+| 5 | `BBStochRSIXReversal.mq5` | 617 | tshalgo | 🔴 **FUORI** — e' un INDICATORE, non un EA |
+
+---
+
+## 🟢 `MeanReversion.mq5` — **PROMOSSO, 9/10**
+
+**Autore:** Yashar Seyyedin · `https://www.mql5.com/en/users/yashar.seyyedin` ·
+header `Copyright 2025, MetaQuotes Ltd.` · **[INCERTO]** licenza esatta.
+
+### TESI IN UNA RIGA
+> Quando una barra segna il **minimo delle ultime 200**, il prezzo e'
+> statisticamente lontano dal centro del proprio intervallo: si compra
+> l'estremo e si punta al **punto medio del range**.
+
+### MECCANICA — tutta qui, ed e' tutto il file
+
+```cpp
+if(PositionsTotal()>0) return;
+if(iLowest (_Symbol, PERIOD_CURRENT, MODE_LOW,  lookback, 0)==0) Buy();
+if(iHighest(_Symbol, PERIOD_CURRENT, MODE_HIGH, lookback, 0)==0) Sell();
+
+double tp = Mean();          // (massimo + minimo delle 200 barre) / 2
+double sl = 2*Ask - tp;      // simmetrico -> R:R esattamente 1:1
+```
+
+### PERCHE' E' IL MIGLIORE ARRIVATO FINORA
+
+| criterio | punti | perche' |
+|---|---|---|
+| **semplicita'** | **2** | **135 righe, DUE input**: `lookback=200` e `risk_per_trade=1`. Una sola manopola e' la strategia. |
+| **il filtro E' il motore** | **2** | la mean-reversion e' costitutiva, non un cerotto. Vale il confronto di `ROBUSTEZZA.md`: **0 su 5** quando e' appiccicata, **30 su 30** quando nasce con la tesi. |
+| **tesi scrivibile** | **2** | vedi sopra, una riga |
+| **riempie un buco** | **2** | **DUE in un colpo: il LATERALE** (dove `LARRY_GBPUSD` fa **−6.445** nel 2019) **e lo SHORT simmetrico** — il ramo sell e' lo specchio esatto, e le nostre 14 celle vive sono quasi tutte long-only |
+| **testabile senza riscritture** | **1** | serve un `ABTG_` nuovo: manca il magic, manca `OnTester`, il conteggio posizioni e' di conto |
+
+✅ **SL e TP veri mandati al broker** · ✅ **rischio in percentuale** · ✅ **una
+posizione alla volta** · ✅ **zero bandiere rosse del §4** · ✅ **decide su dati
+gia' formati** (nessun indicatore ridipingente).
+
+### 🔴 I DIFETTI, tutti da correggere nella riscrittura
+
+1. **`PositionsTotal()` e' DI CONTO, non di simbolo/magic.** Sul nostro conto
+   con la flotta accesa **non aprirebbe mai**. Va per simbolo + magic.
+2. **Nessun magic number impostato.** `trade.Buy()` senza
+   `SetExpertMagicNumber` → magic **0**, indistinguibile da un'operazione
+   manuale. Per la nostra pipeline e' bloccante.
+3. **`NormalizeVolume()` e' codice morto**: tutti e tre i `return` stanno
+   dentro il `while(true)`, quello finale e' irraggiungibile. Il lotto resta
+   valido solo perche' parte dal minimo e cresce di step — ma l'accumulo di
+   `double` puo' derivare e MT5 rifiuta un volume fuori passo.
+4. **Errore di un passo sul rischio**: il ciclo restituisce il **primo lotto
+   che SUPERA** il budget (`if(pnl < -balance*risk/100) return lot;`), non
+   l'ultimo che ci sta dentro. **Rischia sempre un po' piu' del dichiarato.**
+5. **Valuta a OGNI TICK** e `iLowest(...,0)` include la barra in formazione:
+   l'ingresso dipende dal momento dentro la barra. 🔴 **Lo screening OHLC
+   sara' fuorviante** — R57 ha misurato che cambiando solo il modello il segno
+   si ribalta. **Verdetto solo a tick reali, e sensibile al modello.**
+6. **Manca `OnTester`**: il driver si rifiuta di partire (22 EA su 61 gia'
+   bocciati per questo).
+
+### ⚠️ E il limite di merito, dichiarato prima dei numeri
+**R:R 1:1 con uno stop LARGO** (la distanza entrata→media di un range di 200
+barre). Serve un win rate **sopra il 50%** per stare in piedi. In un trend
+forte prendera' stop a ripetizione: **e' uno specialista del laterale, e va
+giudicato li'** — non gli si chiede di guadagnare nell'orso.
+
+---
+
+## 🔴 `BreakRevertPro.mq5` — SCARTO: **cambia comportamento quando capisce di essere in un test**
+
+Niente martingala, rischio in percentuale, `max_positions=1`: sul setaccio
+automatico e' **pulito**. Poi si legge il codice.
+
+**PROVA 1 — apre un trade FANTASMA nel tester**
+```cpp
+bool CTradeValidator::ExecuteSafetyTrade() {
+    if(!IsInTester())        return false;
+    if(HistoryDealsTotal()>0) return false;
+    ...
+    request.magic = 999999;  // "Safety Trade"
+    OrderSend(request,result);
+}
+```
+In **ogni** backtest, prima della prima operazione, spara un BUY vero al lotto
+minimo — solo per non risultare "senza operazioni" al validatore del Market.
+**Inquina ogni CSV che produrremmo.**
+
+**PROVA 2 — riconosce l'ambiente di test e cambia il sizing**
+```cpp
+if(MQLInfoInteger(MQL_TESTER) && (small_balance || known_test_symbol))
+   m_is_validation_run = true;
+...
+if(m_is_validation_run || balance < 500)  return min_lot;   // niente rischio %
+```
+e `IsTestSymbol()` elenca **EURUSD H1, XAUUSD D1, GBPUSD M30, EURUSD M1**.
+
+> 🚨 **Su EURUSD H1 questo EA gira al LOTTO MINIMO invece che al rischio
+> dichiarato.** Un EA che si comporta diversamente quando lo misuri **non e'
+> misurabile**, e non c'e' backtest che possa dire qualcosa di vero su di lui.
+
+Contorno: 1.699 righe, 12 input, nessun `OnTester`, e una facciata
+probabilistica (`Weibull`, `Poisson`, `Exponential`) sopra un segnale che poi
+e' `trend su + volatilita' > 10 punti`.
+
+## 🔴 `Mean Reverse.mq5` (MeanReversionTrendEA) — SCARTO
+
+Stesso autore del n.1 e **stesso trucco**: 19 occorrenze di `safety`. In piu'
+**`LotSize = 0.1` fisso** (nessun rischio %, non scalabile a 100k) e SL/TP in
+**punti fissi** (500/1000) — che su oro e indici sono la scala sbagliata,
+lo stesso difetto gia' visto in `ProAutoSL_DynamicTP`. Nessun `OnTester`.
+
+## 🟡 `RMA` — IN CODA, non scartato
+
+10 file, **3.765 righe**, architettura seria: `SignalEngine`, `RegimeDetector`,
+`TradeManager`, `AdverseMonitor`, pannello. **Nessuna bandiera rossa**, e ha
+`OnTester`. Il `RegimeDetector` e' concettualmente proprio la cosa che
+cerchiamo.
+
+**Ma:** **44 `input` nel solo `RMA.mq5`** (il nostro tetto e' ~15 — troppe
+manopole da girare verso il passato), **lotto fisso `InpLotSize=0.01`**, e
+serve compilare **tre programmi** con gli include al posto giusto, perche'
+l'EA chiama l'indicatore via `iCustom(_Symbol,_Period,"RMA\\RMA_Engine",...)`.
+**Si riapre solo dopo che il candidato n.2 ha avuto il suo verdetto.**
+
+## 🔴 `BBStochRSIXReversal.mq5` — FUORI: **e' un INDICATORE**
+
+```
+#property indicator_chart_window
+#property indicator_buffers 7
+#property indicator_plots   6
+int OnCalculate(...)
+```
+**Zero `OnTick`, zero `OrderSend`, zero `CTrade`.** Disegna frecce, non apre
+niente. Come il n.1 del setaccio manuale (`ProAutoSL`): fuori imbuto perche'
+non c'e' niente da misurare.
+
+> 💡 **La regola pratica per il prossimo giro**, in un `Ctrl+F`: se trovi
+> **`OnCalculate`** e' un indicatore → salta. Se trovi **`OnTick`** e
+> **`OrderSend`** o **`trade.Buy`** e' un EA → mandalo.
