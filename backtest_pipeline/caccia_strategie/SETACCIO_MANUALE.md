@@ -95,3 +95,117 @@ posizione**. Con piu' posizioni i ritardi si sommano, e l'EA resta fermo.
 > catalogo dove **522 file su 1.185 (44%) non nominano nemmeno lo stop loss**,
 > Claudio ha pescato uno dei pochi scritti bene. **Continua a pescare cosi'** —
 > serve solo che sia roba che **APRE** posizioni, non che le sistema.
+
+---
+
+## 16/08/2026 — `Mean_Reversion` v1.00 (AHARON TZADIK)
+
+**Autore:** AHARON TZADIK · `https://5d3071208c5e2.site123.me/` · **[INCERTO]**
+licenza e provenienza esatta: `mql5.com` non raggiungibile da qui.
+
+### VERDETTO: 🔴 **SCARTO IMMEDIATO — MARTINGALA, e non compila su MT5**
+
+Il nome dice "Mean Reversion". **Il codice dice martingala.** E' esattamente
+il caso per cui la regola del mandato e' *"si scarta leggendo il SORGENTE, non
+la descrizione"*.
+
+### 💣 PROVA 1 — la martingala e' una riga sola, esplicita
+
+```cpp
+extern double LotExponent = 1.44;     //Lots size Exponent
+input  int    Max_Trades  = 10;
+...
+double LOT = Lots * MathPow(LotExponent, CountTrades());
+```
+
+**Il lotto cresce di 1,44 volte per ogni posizione gia' aperta**, fino a 10.
+Con `Lots=0.01`:
+
+| livello | lotto |
+|---|---:|
+| 1 | 0,010 |
+| 5 | 0,062 |
+| 10 | **0,266** |
+| **esposizione totale** | **0,85 lotti = 85 volte il lotto iniziale** |
+
+E l'ingresso non chiede **nessuna** conferma che il prezzo si sia mosso a
+favore: basta `CountTrades() < Max_Trades`. **Somma posizioni mentre perde.**
+
+### 💣 PROVA 2 — c'e' una SECONDA martingala, nascosta nel sizing
+
+```cpp
+double LotsOptimized(double llots) {
+   ...
+   if(OrderSymbol()!=Symbol()) continue;   // <-- NESSUN filtro sul magic
+   if(OrderProfit()<0) losses++;
+   ...
+   if(losses>1) lot = AccountFreeMargin()*IncreaseFactor/1000.0;
+```
+
+Il lotto **dipende dalle perdite consecutive nello storico**. E il conteggio
+non filtra per magic: **conta anche le perdite dei NOSTRI altri EA** sullo
+stesso simbolo.
+
+### 🛑 PROVA 3 — sul nostro conto chiuderebbe le posizioni degli altri EA
+
+```cpp
+void RemoveAllOrders() {
+   if(OrderSymbol() != Symbol()) continue;   // <-- e basta
+   ... OrderClose(...)
+```
+
+`RemoveAllOrders()` chiude **tutto quello che sta sul simbolo**, senza
+guardare il magic — e viene chiamata da `Take_Profit_In_Money()`,
+`Take_Profit_In_percent()` e dal trailing in denaro. Su un conto con piu' EA
+come il nostro **e' un'arma puntata sulla flotta**.
+
+### ⛔ PROVA 4 — e comunque **e' MQL4, non MQL5**
+
+`extern`, `#property strict`, `OrderSend(Symbol(),OP_BUY,...)`, `MarketInfo`,
+`AccountFreeMargin()`, `RefreshRates()`, `MODE_STOPLEVEL`, `Bid`/`Ask`/
+`Digits`/`Time[0]`, `iMA(NULL,L,8,0,MODE_LWMA,PRICE_TYPICAL,0)` con firma MQL4,
+`HideTestIndicators`, `AccountStopoutMode()`.
+
+> **Non compila in MetaEditor come `.mq5`.** Anche volendo ignorare tutto il
+> resto, non c'e' niente da mettere sul tester.
+
+### 🐛 E i difetti di mestiere, per completezza
+
+1. **L'"equity high" non e' un high water mark** — ed e' proprio il concetto
+   di `METRO_PROP.md`:
+   ```cpp
+   if(AccountEquityHighAmt<PrevEquity) AccountEquityHighAmt=PrevEquity;
+   else AccountEquityHighAmt=AccountEquity();   // <-- puo' SCENDERE
+   ```
+   Il ramo `else` lo riporta all'equity corrente: **il "massimo" torna
+   indietro.** L'EA dichiara uno stop sull'equity di picco e non ce l'ha.
+2. **`NDTP()` confronta un PREZZO con una DISTANZA**:
+   `if(val < StopLevel*pips + SPREAD*pips)` — `val` e' un prezzo (1,0850),
+   il termine destro e' una distanza (0,0003). Il clamp non scatta mai; se
+   scattasse, metterebbe lo stop a un prezzo di 0,0003. Stesso errore in
+   `Trail1()`.
+3. **Codice morto**: `OnInit()` fa `return(INIT_SUCCEEDED)` **prima** del
+   blocco `freeze_level`, che quindi non viene mai eseguito.
+4. **`L` non e' mai inizializzato** e viene usato come timeframe in tutte le
+   `iMA()`. Vale 0 (PERIOD_CURRENT) per caso, non per scelta. E `T` resta 0
+   sui timeframe W1 e MN.
+5. **Condizioni decorative**: `if(Low[2]<High[1])` e `if(Low[1]<High[2])`
+   sono vere quasi sempre. Non filtrano niente.
+6. **Unita' confuse**: `CANDLE_TRIGER_OPEN = CandlesToRetrace * _Point` — una
+   variabile che si chiama "numero di candele" moltiplicata per un punto.
+7. **`Sleep(1000)` dentro il ciclo di chiusura**: chiudere 10 posizioni
+   richiede 10 secondi. Durante uno stop-out.
+8. `Close_All_Buy_Trades()` chiude anche i sell (copia-incolla), ed e' morta.
+
+### 🧭 La lezione che vale oltre questo file
+
+L'idea di fondo — **comprare la debolezza dentro un trend rialzista** — non e'
+folle, ed e' persino imparentata con il buco del laterale che stiamo cercando
+di coprire. **Ma non si recupera niente da qui**: la meccanica di ingresso e'
+tre condizioni di cui due decorative, e tutto il resto e' una martingala con
+un nome rassicurante.
+
+> 🔴 **"Mean Reversion" nel titolo non vuol dire mean reversion nel codice.**
+> Il setaccio si applica al sorgente, sempre. Questo file da solo copre due
+> delle bandiere rosse piu' gravi del §4 — ed e' uno dei **219 su 1.185**
+> (18,5%) che il grep del mirror aveva gia' classificato martingala/griglia.
