@@ -1,0 +1,129 @@
+# =====================================================================
+#  PROVA: ABTG_MeanRevert -- il fade dell'estremo copre il LATERALE
+#                            e ci da' finalmente uno SHORT simmetrico?
+#  Nato dal setaccio manuale del 16/08/2026
+#     -> caccia_strategie/SETACCIO_MANUALE.md  (candidato 9/10)
+# =====================================================================
+#
+# ORIGINE E ATTRIBUZIONE (ripetuta in testa al .mq5)
+#   Meccanica derivata da "MeanReversion.mq5" di Yashar Seyyedin
+#   https://www.mql5.com/en/users/yashar.seyyedin  -- 135 righe, 2 input.
+#   Presa la MECCANICA e la TESI. NON presi i suoi parametri: il verdetto
+#   lo da' il nostro imbuto, non l'autore.
+#
+# ---------------------------------------------------------------------
+# IPOTESI (scritta il 16/08/2026, PRIMA di qualsiasi numero)
+#
+#   Tutte e 14 le celle vive sono motori di TREND o di BREAKOUT, e la
+#   prova di regime dice dove muoiono:
+#       LARRY_GBPUSD   laterale 2019:  -6.445
+#       BB_EURUSD      laterale 2019:  -2.381
+#   E quasi tutte sono LONG-ONLY: il lato short e' scoperto per costruzione.
+#
+#   In un mercato senza direzione, una barra che segna il minimo delle
+#   ultime N e' un ESTREMO di un intervallo, non l'inizio di una discesa:
+#   il prezzo tende a tornare verso il centro di quell'intervallo.
+#     -> UN FADE SIMMETRICO DEVE GUADAGNARE PROPRIO DOVE I NOSTRI
+#        TREND-FOLLOWER PERDONO, E DEVE FARLO SU ENTRAMBI I LATI.
+#
+#   E' un motore in cui il filtro E' LA STRATEGIA fin dall'inizio.
+#   Distinzione che nei nostri dati vale tutto (report/ROBUSTEZZA.md):
+#       filtro appiccicato dopo  -> 0 successi su 5 (R20, R12, R26, R45, R54)
+#       filtro che E' il motore  -> ABTG_EMA200, R29: 30 celle su 30 a PASS
+#
+# ---------------------------------------------------------------------
+# MECCANICA (gia' implementata in mql5/Experts/ABTG_MeanRevert.mq5)
+#
+#   LONG  : la barra APPENA CHIUSA e' il minimo delle ultime InpLookback
+#   SHORT : ... o il massimo (specchio esatto, nessuna asimmetria)
+#   TP    : (massimo + minimo del range) / 2   -- il centro dell'intervallo
+#   SL    : specchio del TP rispetto all'entrata  -> R:R esattamente 1:1
+#   Una posizione alla volta, per SIMBOLO + MAGIC.
+#
+#   LE SEI CORREZIONI FATTE ALL'ORIGINALE, tutte dichiarate:
+#     1. decide su BARRE CHIUSE (shift 1), non sulla barra in formazione.
+#        E' una DIFFERENZA di comportamento, non un abbellimento: nell'originale
+#        l'ingresso dipende dal momento dentro la candela, e R57 ha misurato
+#        che cambiando SOLO il modello del tester il segno si ribalta.
+#     2. posizioni contate per simbolo+magic (l'originale usa PositionsTotal(),
+#        che e' di CONTO: con la nostra flotta accesa non aprirebbe mai).
+#     3. magic number impostato (l'originale lascia 0).
+#     4. sizing corretto: il lotto piu' grande DENTRO il budget di rischio.
+#        L'originale restituisce il primo che lo SUPERA.
+#     5. volume arrotondato allo step e verificato con OrderCalcProfit.
+#     6. OnTester + OPTFRAME, altrimenti il driver non parte.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (dichiarati ORA, prima dei numeri)
+#
+#   1. IL CRITERIO CHE CONTA -- deve coprire IL BUCO:
+#        POSITIVA nella finestra LATERALE 2019, quella dove LARRY_GBPUSD
+#        fa -6.445. Se e' rossa anche li', la tesi e' morta e si chiude
+#        la famiglia. Non negoziabile, non si ammorbidisce dopo.
+#
+#   2. SIMMETRIA VERA -- ed e' meta' del motivo per cui questo EA esiste:
+#        long e short si misurano SEPARATAMENTE (InpAllowLong/InpAllowShort).
+#        Se regge solo il lato long NON ha riempito il buco degli short,
+#        e va dichiarato cosi'.
+#
+#   3. SOPRAVVIVENZA nelle finestre avverse (criteri congelati il 14/08,
+#      PROVA_REGIME_CRITERI.md): nelle finestre ORSO e CROLLO PF >= 0,90.
+#      E' un criterio di NON-SANGUINAMENTO, non di profitto.
+#      ATTENZIONE: un fade compra la debolezza. Il CROLLO e' il suo esame
+#      piu' duro ed e' li' che va guardato il DRAWDOWN, non il PF.
+#
+#   4. DD fuori campione mai sopra il 20%, e "Peggior Giornata %" sopra
+#      -2,5% al rischio 1% (una prop chiude a -5%).
+#
+#   5. ALTOPIANO, non picco: le celle VICINE di InpLookback devono essere
+#      positive. Si prende IL CENTRO DELL'ALTOPIANO, MAI la cella migliore.
+#      Su tredici misure di Spearman IS->OOS, DODICI sono negative.
+#
+#   6. n >= 15 trade per famiglia prima di qualunque verdetto. Il PF sotto
+#      n=20 e' una stima e non si giudica; il DD e' un fatto accaduto e
+#      vale a qualunque n.
+#
+#   Screening in OHLC. VERDETTO SOLO A TICK REALI.
+#
+# ---------------------------------------------------------------------
+# IL LIMITE DI MERITO, dichiarato PRIMA dei numeri
+#   R:R 1:1 con uno STOP LARGO (entrata -> centro di un range di N barre).
+#   Serve un win rate SOPRA IL 50% per stare in piedi. In un trend forte
+#   prendera' stop a ripetizione: e' uno SPECIALISTA DEL LATERALE e va
+#   giudicato li'. Non gli si chiede di guadagnare nell'orso -- gli si
+#   chiede di non distruggersi (criterio 3).
+#
+# ---------------------------------------------------------------------
+# @DAQUANDO MANCA APPOSTA -- NON E' UNA DIMENTICANZA
+#   Lo storico di GBPUSD su questo terminale non e' misurato, e non lo
+#   invento. Sugli indici il driver diceva 2024.01.01 e i dati partivano
+#   dal 26/09/2024: meta' finestra IS non esisteva. Si misura con
+#       scarica_storico.ps1 -Simboli "GBPUSD" -Auto
+#   e si passa la data vera con -DaQuando. Finche' non e' misurata il
+#   driver si ferma -- ed e' giusto che si fermi.
+#
+# ---------------------------------------------------------------------
+# PERCHE' GBPUSD H1
+#   Perche' e' dove il buco e' MISURATO: LARRY_GBPUSD -6.445 nel laterale
+#   2019 e' la nostra ferita documentata, e su GBPUSD abbiamo gia' le celle
+#   di regime (CELLE_REGIME.txt) per il confronto diretto. Il simbolo _EXT
+#   Dukascopy copre le quattro finestre di regime.
+#
+# GRIGLIA: 6 celle. E' uno SCREENING dell'unica manopola, non un verdetto.
+#   InpLookback 50 -> 300: si cerca il bordo dell'altopiano, non il picco.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO
+
+# --- l'unico asse spazzolato: LA manopola della strategia ---
+InpLookback=200||50||50||300||Y
+
+# --- congelati: sono la tesi, non si spazzolano ---
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMaxSpreadPts=0||0||0||0||N
+InpMagic=773101||773101||0||773101||N
+InpVerbose=0||0||0||0||N
