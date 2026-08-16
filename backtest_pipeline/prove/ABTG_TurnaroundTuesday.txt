@@ -1,0 +1,352 @@
+# =====================================================================
+#  PROVA: ABTG_TurnaroundTuesday
+#         -- un ribaltamento ancorato al CALENDARIO, non a un livello
+#            di prezzo, copre il buco del LATERALE?
+#  Nato dalla caccia D del 16/08/2026
+#     -> caccia_strategie/CACCIA_2026-08-16_D_LATERALE.md
+# =====================================================================
+#
+# 🛑 ATTENZIONE, LEGGERE PRIMA DI LANCIARE
+#   L'EA `ABTG_TurnaroundTuesday.mq5` **NON ESISTE ANCORA** nel nostro repo.
+#   Questo file e' l'ipotesi congelata PRIMA che il codice sia scritto, ed e'
+#   l'ordine giusto. Il driver fallira' finche' l'EA non c'e' — ed e' giusto
+#   che fallisca.
+#
+#   🔴 I NOMI DEGLI INPUT QUI SOTTO SONO VINCOLANTI per chi scrive il codice.
+#      Se il .mq5 ne usa altri, MT5 ignora queste righe **in silenzio** e la
+#      fase risponde a un'altra domanda (LEGGIMI.md, trappola "nome
+#      inesistente"). Non e' un dettaglio di stile: e' un round buttato.
+#
+# ---------------------------------------------------------------------
+# ORIGINE E ATTRIBUZIONE (obbligatoria anche in testa al .mq5)
+#
+#   Meccanica derivata da "001 - Turnaround Tuesday"
+#   Copyright 2026, Sergei Ermolov (dj_ermoloff) | IT Trader
+#     scheda:   https://www.mql5.com/en/code/73674
+#     sorgente: https://www.mql5.com/en/code/download/73674/001-Turnaround-Tuesday.mq5
+#     autore:   https://www.mql5.com/en/users/dj_ermoloff
+#   Scaricato e letto per intero il 16/08/2026: HTTP 200, 11.475 byte,
+#   306 righe, 10 input veri + 4 `input group`. Pubblicato 05/06/2026,
+#   versione 1.1, 3.096 viste, voto 3/5 su 348 valutazioni. [VERIFICATO]
+#   ⚠️ LICENZA: non dichiarata nel file (solo il copyright); la scheda del
+#      Code Base dichiara sorgente aperto e modificabile. [INCERTO]
+#      Uso interno di ricerca. Prima di qualunque distribuzione: verificare.
+#
+#   TESI DI MERCATO, fonte accademica (letta il 16/08/2026):
+#     Quantpedia, "Short Term Reversal Effect in Stocks" — pagina gratuita
+#     https://quantpedia.com/strategies/short-term-reversal-in-stocks
+#     fonte primaria che cita: de Groot, Huij, Zhou, SSRN 1605049
+#     🔴 il paper NON l'ho letto: SSRN da qui risponde 403 Cloudflare.
+#
+#   🔴 NON adottiamo i parametri dell'autore, e NON adottiamo il suo filtro.
+#      Sono il suo overfitting, non il nostro edge (mandato §0).
+#      I numeri che dichiara (XAUUSD +38%, SP500 +40%, DD 11%, col filtro
+#      ATR acceso) sono "dichiarati dall'autore, NON verificati" e NON
+#      pesano su niente. In piu' quell'11% e' gia' oltre il muro prop.
+#
+# ---------------------------------------------------------------------
+# IPOTESI (scritta il 16/08/2026, prima di qualsiasi numero)
+#
+#   Il buco n.1 e' MISURATO, non dedotto (R50, 8 celle congelate su 4 regimi):
+#       LARRY_GBPUSD  laterale 2019:  −6.445
+#       BB_EURUSD     laterale 2019:  −2.381
+#       (PTE_GBPUSD, per contrasto:   +5.284)
+#   Due celle su tre muoiono nel laterale. Nessuna delle 14 celle vive esiste
+#   per lavorare li'.
+#
+#   ⭐ MA LA DOMANDA DI QUESTO ROUND E' PIU' STRETTA DI "un motore per il
+#      laterale", e la strettezza e' tutto il valore del round.
+#      Tutto cio' che abbiamo puntato su questo buco ancora il ribaltamento
+#      a un LIVELLO DI PREZZO:
+#        ABTG_MeanRevert   estremo di N barre -> centro del range   🔻 MORTO (R60)
+#        ABTG_BandFade     fuori dalla banda di Bollinger -> rientro 🟡 in coda
+#        Trade in Channel  bordi di un canale che non si espande     🟡 in coda
+#      Sono tre modi di dire la stessa frase: "il prezzo e' andato troppo
+#      lontano da un riferimento, torna indietro". E il primo dei tre e' gia'
+#      stato falsificato su GBPUSD H1, su 11 anni e mezzo, 12 celle su 12.
+#
+#   👉 QUESTO MOTORE NON GUARDA NESSUN LIVELLO. Guarda il CALENDARIO:
+#        lunedi' ha chiuso ROSSO  -> martedi' si COMPRA
+#        lunedi' ha chiuso VERDE  -> martedi' si VENDE
+#      e basta. Una riga di codice, `tradeUp = !isBullish`.
+#
+#   PERCHE' DOVREBBE GUADAGNARE (la tesi in una riga):
+#     "una giornata storta e' in buona parte SOVRAREAZIONE e squilibrio di
+#      ordini: chi la assorbe viene pagato quando lo squilibrio si riassorbe
+#      il giorno dopo — e viene pagato SOLO se il mercato non ha una
+#      direzione vera da seguire."
+#   Quantpedia da' due spiegazioni, e la seconda e' quella che ci riguarda:
+#     1. sovrareazione dell'investitore + correzione a breve orizzonte
+#     2. il rendimento del ribaltamento e' "a proxy for the returns from
+#        liquidity provision" — cioe' il COMPENSO DI CHI FORNISCE LIQUIDITA'.
+#   👉 Se e' compenso per fornire liquidita', allora vive dove gli squilibri
+#      si riassorbono (IL LATERALE) e muore quando lo squilibrio e' informato
+#      (il trend, il crollo). E' esattamente la forma del buco da riempire —
+#      e dice anche dove NON aspettarsi niente.
+#
+#   ⭐ E' un motore in cui IL FILTRO E' LA STRATEGIA, non un cerotto: la
+#      direzione non la sceglie un indicatore appiccicato sopra, la decide
+#      IL SEGNO DELLA GIORNATA PRECEDENTE. Distinzione che nei nostri dati
+#      vale tutto (ROBUSTEZZA.md):
+#        filtro appiccicato dopo  -> 0 successi su 5 (R20, R12, R26, R45, R54)
+#        filtro che E' il motore  -> ABTG_EMA200 Dow, R29: 30 celle su 30 a PASS
+#
+#   ⭐ Ed e' SIMMETRICO per costruzione: lo short e' la stessa riga con il `!`
+#      davanti. Il buco "SHORT simmetrico" e' uno dei tre misurati (14 celle
+#      vive quasi tutte long-only).
+#
+# ---------------------------------------------------------------------
+# MECCANICA DA IMPLEMENTARE (letta riga per riga nel sorgente originale)
+#
+#   QUANDO   una volta a settimana, all'ora InpEntryHourServer di MARTEDI'.
+#            Nell'originale: primo tick dopo la mezzanotte server, con
+#            cancello a nuovo giorno (`tc - tc%86400`, righe 76-91).
+#
+#   COSA GUARDA  la candela del LUNEDI' appena chiuso, e SOLO IL SUO SEGNO:
+#                isBullish = (close > open).  Niente ampiezza, niente
+#                indicatori, niente soglie. (GetCheckDayData, righe 265-306)
+#
+#   INGRESSO  tradeUp = !isBullish        <- E' TUTTA LA STRATEGIA
+#             LONG se lunedi' rosso · SHORT se lunedi' verde
+#             UNA posizione, UN trade a settimana.
+#
+#   STOP   SL = InpSLDailyATRMult x ATR(D1, InpATRPeriodD1) della barra
+#          CHIUSA, con pavimento al SYMBOL_TRADE_STOPS_LEVEL.
+#          🔴 STRUTTURALE E VERO, mandato al broker nell'ordine. Mai virtuale,
+#             mai in "pip" fissi (il difetto di ProAutoSL e di EXSR).
+#
+#   TARGET TP = InpTP_R x la distanza di stop  -> multiplo di R.
+#
+#   USCITA chiusura forzata a InpCloseHourServer (default 22 = 23:00 IT),
+#          in ORA SERVER. L'originale usa gia' TimeCurrent, non TimeLocal:
+#          su questo l'autore ci e' arrivato da solo.
+#
+#   🔴 VINCOLI NON NEGOZIABILI PER CHI SCRIVE IL CODICE:
+#     - IL GIORNO E LA DIREZIONE RESTANO CABLATI, mai input. Nell'originale
+#       sono `const ENUM_DAY_OF_WEEK CHECK_DAY = MONDAY` e `!isBullish`, e
+#       questo e' il motivo per cui promuovo il 001 e SCARTO il suo fratello
+#       003 (`/en/code/74137`), che li mette fra gli input e lascia scegliere
+#       all'ottimizzatore SE la tesi e' ribaltamento o continuazione.
+#       Mettere la tesi fra le manopole e' il modo piu' rapido di costruire
+#       il ribaltamento numero trentuno.
+#     - decidere SOLO su barre CHIUSE (ATR da CopyBuffer shift 1, candela del
+#       giorno gia' finito). Niente shift 0, niente repaint. L'originale su
+#       questo e' pulito: verificato.
+#     - UNA posizione alla volta. Nessuna griglia, nessun averaging, mai.
+#     - `OnTester` OBBLIGATORIO, altrimenti il driver rifiuta di partire
+#       (walkforward_generico.ps1: 22 EA su 61 gia' bocciati per questo).
+#     - conteggio posizioni per SIMBOLO + MAGIC. L'originale usa
+#       `PositionsTotal()` di CONTO (riga 94): con la flotta accesa non
+#       aprirebbe MAI. E' lo stesso difetto di MeanReversion.mq5.
+#     - rischio sull'EQUITY CORRENTE. L'originale legge `balance` una volta
+#       sola in OnInit ("% Risk from Start Balance"): e' rischio fisso in
+#       valuta travestito da percentuale, e il DD% non sarebbe confrontabile
+#       con le altre 14 celle.
+#     - lotto via OrderCalcProfit, NON via SYMBOL_TRADE_TICK_VALUE nudo
+#       (originale riga 213). E' il bug che ci ha ucciso il round 2 sul
+#       Nikkei: su GBPUSD non morde, su 225JPY si'. Si mette adesso.
+#     - niente trailing, niente breakeven, niente parziale in questo round:
+#       sono manopole in piu' e non fanno parte della tesi. Se il motore
+#       vive, la gestione delle nostre sedie DAX/Dow si innesta dopo.
+#
+# ---------------------------------------------------------------------
+# ⏰ IL FUSO — e qui non e' un dettaglio, e' un ASSE DELLA GRIGLIA
+#
+#   Regola fissa di progetto: ORA SERVER BCM = ora italiana − 1
+#   (controprova nota: il DAX apre 09:00 IT = 08:00 server).
+#   InpEntryHourServer e InpCloseHourServer sono in ORA SERVER, sempre.
+#
+#   🔴 PERCHE' L'ORA D'INGRESSO SI SPAZZOLA, invece di ereditare l'autore:
+#      l'originale entra al primo tick dopo la MEZZANOTTE SERVER. Su GBPUSD
+#      quello e' L'ISTANTE DEL ROLLOVER, cioe' il momento della giornata in
+#      cui lo spread e' al massimo. Con uno stop di 0,5 x ATR(D1) (~40 pip su
+#      GBPUSD) uno spread che passa da 1 a 15 pip si mangia un terzo del
+#      rischio prima che il trade cominci — e R55 ha misurato che 1,5 punti
+#      indice di slippage bastano a sfondare il cancello del 10% sull'ORB.
+#      👉 Due soli valori: 0 (com'e' scritto dall'autore) e 8 (apertura della
+#         liquidita' europea, la stessa ora del DAX in ora server).
+#         Non e' gusto: e' la differenza fra misurare la strategia e misurare
+#         il rollover.
+#
+#   🛠️ TRAPPOLA PER CHI SCRIVE IL CODICE, DA LEGGERE DUE VOLTE:
+#      nell'originale il controllo del giorno guarda L'ULTIMA BARRA H1 CHIUSA
+#      (`iTime(_Symbol,PERIOD_H1,1)`, riga 82). A mezzanotte quella barra e'
+#      lunedi' 23:00 ✅ — ma ALLE 08:00 DI MARTEDI' e' martedi' 07:00, quindi
+#      `closedDay != MONDAY` e l'EA NON APRE MAI, IN SILENZIO.
+#      Le 12 celle a InpEntryHourServer=8 tornerebbero VUOTE senza un errore.
+#      👉 Il controllo va riscritto sul GIORNO DI CALENDARIO PRECEDENTE, non
+#         sull'ultima barra chiusa.
+#      👉 Se le celle a ora 8 tornano con ZERO trade, il primo sospetto e'
+#         QUESTO, non la tesi.
+#
+# ---------------------------------------------------------------------
+# 🚫 IL FILTRO ATR DELL'AUTORE: PINNATO SPENTO, E IL MOTIVO E' L'ARCHIVIO
+#
+#   L'originale ha un filtro opzionale (`FilterATR`, spento di default) che
+#   salta il trade se la candela del lunedi' e' piu' piccola di
+#   MinCheckDayATR x ATR. L'autore dichiara che SENZA filtro il baseline
+#   PERDE, e che col filtro arriva a +38%/+40%.
+#
+#   👉 QUI RESTA SPENTO (InpUseATRFilter = 0), e non e' prudenza: e' il
+#      nostro dato piu' caro.
+#        filtro appiccicato a un motore gia' tarato -> 0 successi su 5
+#        R45, parola per parola: "un filtro non salva un motore morto"
+#        R26, il piu' istruttivo: il filtro alza il PF a 2,37 e ABBASSA il
+#             profitto da 1.811 a 1.138, perche' taglia piu' vincitori che
+#             perdenti. Un filtro "che capisce il mercato" SEMBRA sempre
+#             bravo se lo guardi col PF.
+#   🔴 QUINDI: se il motore NUDO e' rosso, LA FAMIGLIA SI CHIUDE. Non si
+#      ripesca accendendo la manopola dell'autore. Scritto ora, prima dei
+#      numeri, apposta perche' dopo sarebbe facilissimo cambiare idea.
+#      (I due input del filtro restano nel codice e vengono pinnati: cosi'
+#      sono dichiarati, non nascosti.)
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (dichiarati ORA, prima dei numeri)
+#
+#   1. 🎯 IL CRITERIO CHE CONTA — deve coprire IL BUCO:
+#        POSITIVA nella finestra LATERALE 2019, quella dove LARRY_GBPUSD fa
+#        −6.445 e BB_EURUSD −2.381. Se e' rossa anche li', la tesi e' morta
+#        su questo banco e si chiude la famiglia. Non e' negoziabile e non si
+#        ammorbidisce dopo. (E' lo stesso criterio che ha chiuso R60 in un
+#        pomeriggio: ha funzionato, si riusa uguale.)
+#
+#   2. 🎯 IL LATO SHORT SI MISURA DA SOLO. Long e short sono disgiunti per
+#      costruzione (il segno del lunedi' decide il lato) e vanno letti
+#      SEPARATAMENTE. Se regge solo il long, NON ha riempito il buco degli
+#      short e va dichiarato cosi', anche se il totale e' verde.
+#      Se il CSV non separa i lati, si fanno DUE passate diagnostiche in piu'
+#      sulla cella scelta (InpAllowLong=0 / InpAllowShort=0). Due pass, non
+#      una nuova griglia.
+#
+#   3. SOPRAVVIVENZA nelle finestre avverse (PROVA_REGIME_CRITERI.md, 14/08):
+#      nelle finestre ORSO 2022 e CROLLO 2020, PF >= 0,90.
+#      E' un criterio di NON-SANGUINAMENTO, non di profitto: la tesi stessa
+#      dice che nel trend e nel crollo questo motore non deve guadagnare.
+#      Non deve distruggersi.
+#
+#   4. DD fuori campione mai sopra il 20%, e "Peggior Giornata %" sopra
+#      −2,5% al rischio 1% (una prop chiude a −5%).
+#      📌 Su questo motore la peggior giornata e' quasi un controllo di
+#         igiene: fa UN trade a settimana e UNA posizione alla volta, quindi
+#         non puo' fisicamente fare due stop nello stesso giorno. Se la
+#         peggior giornata risulta peggiore di ~1R, c'e' un BUG, non un
+#         risultato.
+#
+#   5. ALTOPIANO, non picco: le celle VICINE devono essere positive, e si
+#      prende IL CENTRO DELL'ALTOPIANO, MAI la cella migliore. Su tredici
+#      misure di Spearman IS->OOS, DODICI sono negative: la cella migliore
+#      in campione e' peggio di una scelta a caso.
+#      📌 L'altopiano si legge sul piano (InpSLDailyATRMult x InpTP_R)
+#         SEPARATAMENTE per ciascuna delle due ore d'ingresso: l'ora non e'
+#         una manopola da centrare, e' una scelta di esecuzione fra due.
+#
+#   6. n >= 15 trade per famiglia prima di qualunque verdetto. Il PF sotto
+#      n=20 e' una stima e non si giudica; il DD e' un fatto accaduto e vale
+#      a qualunque n.
+#      📌 CRITERIO ZERO DA GUARDARE PER PRIMO, QUI: ~52 trade all'anno.
+#         Su una finestra IS di ~4 anni e mezzo sono ~230 trade: abbondante.
+#         Ma su UNA SOLA finestra di regime (il laterale 2019) sono ~52, e
+#         nel criterio 2 si dividono su due lati: ~26 per lato. Sono pochi
+#         per un PF e sufficienti per un segno. **Il verdetto del criterio 1
+#         si legge sul SEGNO e sul DD, non sul PF del solo 2019.**
+#
+#   Screening in OHLC. 🔴 VERDETTO SOLO A TICK REALI: R57 ha misurato che
+#   cambiando SOLO il modello il segno dell'orso si e' ribaltato.
+#
+# ---------------------------------------------------------------------
+# ⚠️ I LIMITI DELLO SCREENING, DICHIARATI ADESSO E NON DOPO
+#
+#   a) 🔴 LA LETTERATURA DI QUESTO EFFETTO STA SULL'AZIONARIO.
+#      Quantpedia dice "stocks"; l'autore lo prova su SP500 e XAUUSD. Io lo
+#      mando su GBPUSD perche' e' li' che il buco e' MISURATO (LARRY −6.445)
+#      e perche' li' abbiamo gia' le celle di regime per il confronto.
+#      👉 Un esito rosso falsifica la tesi SU GBPUSD, non l'effetto.
+#      🔴 E il vincolo che impedisce che questa frase diventi una scusa: se
+#         e' rosso, la famiglia si chiude come si e' chiusa ABTG_MeanRevert.
+#         L'unica riapertura ammessa e' SU INDICE, con la stessa griglia e i
+#         criteri riscritti prima. **Cercare il simbolo giusto dopo un rosso
+#         e' pesca**, ed e' il vizio che l'imbuto esiste per impedire.
+#
+#   b) L'ORA D'INGRESSO E' MISURATA, NON SCELTA. Vedi il blocco FUSO: a ora 0
+#      si misura anche il rollover. Se le due ore danno esiti opposti, il
+#      referto deve dire QUALE dei due sta misurando la strategia — e la
+#      risposta la da' lo spread, non il profitto.
+#
+#   c) OHLC APPROSSIMA L'ISTANTE D'INGRESSO. L'ingresso e' a mercato a
+#      un'ora fissa, quindi qui pesa meno che su un motore a rottura — ma
+#      nel modello a barre lo spread e' quello medio del tester, e il punto
+#      (b) riguarda proprio uno spread che medio non e'. Motivo in piu'
+#      perche' il verdetto stia SOLO ai tick reali.
+#
+#   d) FESTIVI E SETTIMANE CORTE. Se il lunedi' e' festivo, la candela
+#      "del giorno precedente" e' un'altra cosa. L'originale ricostruisce la
+#      giornata dalle barre H1 e non ha un calendario: va guardato quante
+#      volte capita, non scoperto dopo.
+#
+# ---------------------------------------------------------------------
+# ⚠️ @DAQUANDO MANCA APPOSTA — NON E' UNA DIMENTICANZA
+#   Non ho misurato lo storico di GBPUSD su questo terminale e NON lo invento.
+#   Sugli indici il driver diceva 2024.01.01 e i dati partivano dal
+#   26/09/2024: meta' finestra IS non esisteva.
+#   👉 Si misura cosi', e poi si passa la data vera con -DaQuando:
+#      powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "GBPUSD" -Timeframes "H1" -SoloReferto
+#   Finche' non e' misurata, il driver si ferma — ed e' giusto che si fermi.
+#   📌 Nota: l'EA legge ATR su D1 e ricostruisce la giornata da barre H1.
+#      Serve storico H1 pieno; l'ATR D1 chiede almeno DailyATRPeriod+5 barre
+#      giornaliere prima dell'inizio (l'originale rifiuta di partire senza,
+#      OnInit righe 52-57) — quindi la finestra utile comincia ~3 settimane
+#      dopo l'inizio dello storico, non il primo giorno.
+#
+# ---------------------------------------------------------------------
+# PERCHE' GBPUSD H1
+#   Perche' e' esattamente dove il buco e' MISURATO: LARRY_GBPUSD −6.445 nel
+#   laterale 2019 e' la nostra ferita documentata, con un numero.
+#   E perche' su GBPUSD H1 abbiamo gia' le celle di regime (CELLE_REGIME.txt)
+#   per il confronto diretto — e ABTG_BandFade va sullo stesso banco: i due
+#   candidati del laterale diventano confrontabili FRA LORO, non solo col
+#   passato. Il simbolo _EXT Dukascopy copre le 4 finestre di regime dal 2012.
+#   @PERIODO H1 perche' l'EA ricostruisce la giornata da barre H1 e perche'
+#   e' il TF delle celle di regime con cui va confrontato.
+#
+# GRIGLIA: 3 x 4 x 2 = 24 celle. E' uno SCREENING, non un verdetto.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO
+
+# --- assi spazzolati (sweep STRETTO: si cerca l'altopiano, non il picco) ---
+# lo stop, in frazioni di gamma giornaliera. 0,5 e' il valore dell'autore ed
+# e' il bordo BASSO della griglia, non il centro: non si eredita una taratura.
+InpSLDailyATRMult=0.75||0.50||0.25||1.00||Y
+# il payoff. 1,5 e' il valore delle nostre sedie vive; 2,5 e' quello
+# dell'autore e sta al bordo. Il centro dell'altopiano lo decide la misura.
+InpTP_R=1.5||1.0||0.5||2.5||Y
+# l'ora d'ingresso, in ORA SERVER BCM. DUE valori, ed e' esecuzione, non
+# taratura: 0 = come l'autore (rollover, spread massimo), 8 = apertura della
+# liquidita' europea. Vedi il blocco FUSO e la trappola del controllo giorno.
+InpEntryHourServer=8||0||8||8||Y
+
+# --- congelati: sono la tesi, o la difendono ---
+# il filtro dell'autore RESTA SPENTO. Vedi il blocco dedicato: se il motore
+# nudo e' rosso, la famiglia si chiude e NON si ripesca col filtro.
+InpUseATRFilter=0||0||0||0||N
+InpMinDayATR=1.5||1.5||0||1.5||N
+# entrambi i lati accesi: la simmetria e' meta' del motivo per cui esiste.
+# Per il criterio 2 si spengono UNO ALLA VOLTA, in due passate diagnostiche
+# sulla sola cella scelta — mai come asse della griglia.
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+# rischio: 1,0% come tutte le celle di confronto (la rotta prop gira a 0,65%,
+# ma i confronti storici sono tutti all'1% e si resta confrontabili).
+InpRiskPercent=1.0||1.0||0||1.0||N
+# ATR giornaliero: 14 e' canonico e NON si spazzola. E' una manopola in meno.
+InpATRPeriodD1=14||14||0||14||N
+# uscita forzata, ORA SERVER: 22 server = 23:00 IT, a ridosso della chiusura
+# della giornata. Non spazzolata: in questo round e' una scelta di disegno.
+InpCloseHourServer=22||22||0||22||N
+# timeframe di lavoro dell'EA: H1, come le celle di regime.
+InpTF=16385||16385||0||16385||N
+# magic VERGINE nostro. Nel tester non conta, ma prima di qualunque forward
+# va comunque verificato che non collida con la flotta.
+InpMagic=20260816||20260816||0||20260816||N
