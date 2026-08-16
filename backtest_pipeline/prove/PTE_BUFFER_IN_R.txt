@@ -84,10 +84,13 @@
 #      si muove un asse alla volta.
 #
 # ---------------------------------------------------------------------
-# GRIGLIA: 6 x 4 = 24 celle
-#   buffer 0,5,10,15,20,30  x  TP2mult 1,5/2,0/2,5/3,0
-#   Il buffer arriva a 30 per avere una riga oltre l'intervallo di R67
+# GRIGLIA: 7 x 4 = 28 celle
+#   buffer 0,5,10,15,20,25,30  x  TP2mult 1,5/2,0/2,5/3,0
+#   Il buffer arriva a 30 per avere due righe oltre l'intervallo di R67
 #   (che si fermava a 20) e vedere dove la curva gira.
+#   (16/08: nel commento avevo scritto "6 x 4 = 24" sbagliando il conto -
+#    step 5 da 0 a 30 fa SETTE valori, non sei. Il giro a vuoto ha detto
+#    28 e aveva ragione lui. Corretto: la griglia e' giusta com'e'.)
 # =====================================================================
 @SIMBOLO GBPUSD
 @PERIODO H1
