@@ -1,0 +1,174 @@
+# =====================================================================
+#  ABTG_CanaleLento — SCREENING R-nuovo
+#  Origine: `BreakoutStrategy.mq5` (QuanDuong / "QuanAlpha"),
+#           MQL5 Code Base /en/code/49272, pubblicato 2024.04.17.
+#           [VERIFICATO] pagina aperta, sorgente scaricato e letto (290 righe).
+#  Dossier: caccia_strategie/CACCIA_2026-08-16_E_CROLLO.md
+#
+#  ⚠️ QUESTO FILE NON E' LANCIABILE OGGI. Serve prima `ABTG_CanaleLento.mq5`
+#     con ESATTAMENTE i nomi di input scritti qui sotto. Un nome che l'EA
+#     non ha, MT5 lo ignora IN SILENZIO e la fase risponde a un'altra
+#     domanda (LEGGIMI.md, trappola gia' pagata).
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# IPOTESI
+#
+#   Quando il mercato si rompe, il prezzo esce dal canale delle ultime N
+#   barre GIORNALIERE e ci RESTA. Un motore che entra sulla rottura, dai
+#   DUE LATI, con lo stop sul bordo opposto del canale e **senza take
+#   profit**, incassa la coda del movimento invece di tagliarla.
+#
+#   La coda e' tutta la tesi: la skewness positiva del trend following e'
+#   STRUTTURALE (Sepp & Lucic, arXiv 2607.19497, 21/07/2026 — "the positive
+#   skewness of TF returns is structural under various model assumptions").
+#   Chi mette un take profit compra un motore diverso.
+#
+#   Il buco che punta: il CROLLO. Nel 2020 `LARRY_GBPUSD` cede (-708) dove
+#   `BB_EURUSD` regge (+502) e `PTE_GBPUSD` passa appena (+70) — R50.
+#   Nessuna delle 32 celle censite in R52 tiene una posizione per SETTIMANE,
+#   e nessuna vive su D1: tutte stanno fra M5 e H4.
+#
+# ---------------------------------------------------------------------
+# PERCHE' D1 E PERCHE' L'ORO — e non e' un gusto, e' una tabella
+#
+#   Kurth, Eisler, Rej & Bouchaud (CFM), arXiv 2607.01550, 02/07/2026,
+#   ~100 futures liquidi 1995-2025. Tabella 1, Sharpe del segnale EWM-n-4n:
+#
+#       scala veloce n | Sharpe 1995-2009 | Sharpe 2009-2025
+#              5 giorni|       0,84       |      0,12
+#             10 giorni|       0,83       |      0,22
+#             20 giorni|       0,79       |      0,27
+#             50 giorni|       0,70       |      0,40
+#
+#   Prima del 2009 il veloce batteva il lento. Dopo il 2008 **l'ordine si
+#   ribalta**: il veloce crolla a 0,12, il lento e' l'unico ancora in piedi.
+#   👉 Per questo `InpTF` e' CONGELATO a D1 e non si spazzola: un canale a
+#      55 barre su H4 sono 9 giorni (il ramo morto), su D1 sono 55 giorni
+#      (il ramo sopravvissuto). Il TF non e' una manopola: e' la tesi.
+#
+#   §3.3 dello stesso paper: "Trend has effectively vanished for IDX
+#   (indici azionari) and FXR (valute), while YLD (obbligazioni) and CMD
+#   (materie prime) show no appreciable degradation."
+#   👉 Indici e forex sono ESATTAMENTE i due settori dove giriamo, ed e'
+#      dove ~210 celle ORB a tick reali sono morte. Le due cose si
+#      spiegano a vicenda. L'unico pezzo di CMD che abbiamo e' l'ORO.
+#
+# ---------------------------------------------------------------------
+# COSA NON E' — il confine col breakout gia' chiuso (~210 celle, R7-R13,
+#               R45, R12). Quattro differenze STRUTTURALI, non di taratura:
+#
+#     1. NIENTE TAKE PROFIT. Tutte le celle ORB hanno un TP a multipli di
+#        R (R13 trovo' il bordo a 1,5x; R44 provo' 2x/3x e il DD sfondo').
+#        Qui la coda destra non si taglia: e' l'unica fonte di guadagno.
+#     2. NIENTE ANCORA DI SESSIONE. Il canale sono le ultime N barre, non
+#        i primi N minuti dopo la campanella.
+#     3. SIMMETRICO VINCOLATO. Il lato lo decide quale bordo si rompe, non
+#        un input: non c'e' `InpAllowShort` da spegnere sull'IS (R52: 4
+#        titolari su 5 hanno un lato SCELTO su 21 mesi di mercato in salita).
+#     4. ORIZZONTE A SETTIMANE, non a ore.
+#
+#   🔴 Ma il rischio va detto: **entra al tocco**, e "il breakout puro al
+#      tocco e' morto ovunque" e' il verdetto di 8 round su 4 mercati.
+#      Se muore, muore per quel motivo — e allora la famiglia breakout si
+#      chiude anche nel suo ramo lento. Anche quella e' una risposta, e
+#      costa 20 celle.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE — CONGELATI PRIMA DI VEDERE QUALUNQUE NUMERO
+#
+#   0. CAMPIONE. Sotto n=20 OOS la cella e' **NON GIUDICABILE**, non
+#      bocciata (R59: un PF 2,08 su 7 operazioni diventava 0,72 su 52).
+#      Se TUTTE le celle restano sotto n=20, il round non ha un verdetto e
+#      si dichiara cosi', senza ripescare soglie.
+#
+#   1. NON SANGUINA. PF OOS >= 0,90 sul campione pieno. Non gli si chiede
+#      di guadagnare in condizioni normali: gli si chiede di non
+#      distruggersi mentre aspetta il crollo. E' una GAMBA DI ASSICURAZIONE.
+#
+#   2. CANCELLO PROP. DD OOS <= 10%. Sopra, esce senza discussione.
+#
+#   3. ALTOPIANO. Servono almeno **3 celle contigue** che passano 1 e 2, e
+#      si prende il **CENTRO**, mai la migliore (12 Spearman IS->OOS
+#      negative su 13, l'ultima R58 sui tick reali di BCM). Una cella sola
+#      che passa, isolata, vale ZERO e non si porta avanti.
+#
+#   4. IL VERDETTO VERO E' AL ROUND 2, non qui. Questo e' uno SCREENING che
+#      serve solo a congelare UNA cella. Il round 2 e' `prova_regime.ps1`
+#      sul feed esterno, e li' il cancello e' **PF >= 1,10 in CROLLO_ANNO
+#      (2020.01.01-2020.12.31)**, che e' l'unica domanda per cui questo
+#      candidato esiste.
+#
+#   DIAGNOSTICA (non e' un cancello, e' un controllo di identita'):
+#      un trend follower senza TP deve uscire con **win rate BASSO** (atteso
+#      sotto il 40%) e **payoff ALTO**. Se esce win rate alto e payoff
+#      basso, il motore NON sta facendo trend following e il trailing lo
+#      sta strozzando: si guarda il codice, non si tara il parametro.
+#
+# ---------------------------------------------------------------------
+# @DAQUANDO — LASCIATO VUOTO APPOSTA. NON E' UNA DIMENTICANZA.
+#
+#   Lo storico dell'ORO non e' misurato: `ABTG_PTE.txt:25` lo dice gia'
+#   ("Lo storico dell'oro su BCM non e' misurato"). E su `XAUUSD_EXT`
+#   (importato il 15/08, cancello ZERO passato) io **non ho misurato la
+#   prima data**: il commento del driver dice 2018-2024, ma un commento non
+#   e' una misura, e sugli indici il driver diceva 2024.01.01 mentre i dati
+#   partivano dal 26/09/2024 — meta' finestra IS non esisteva.
+#
+#   👉 SI MISURA COSI', e poi si passa la data vera con -DaQuando:
+#      powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 `
+#                 -Simboli "XAUUSD_EXT" -SoloReferto
+#
+#   ⚠️ E c'e' un vincolo aritmetico che va guardato PRIMA di lanciare:
+#      su D1, sei anni sono ~1.560 barre. Con un canale a 55 barre e
+#      posizioni tenute settimane, sono **poche decine di operazioni in
+#      tutto**, e l'OOS ne prende una frazione. Il vincolo che puo'
+#      uccidere questo round e' **n**, non il rendimento. Se il referto
+#      dice n<20 ovunque, la strada non e' abbassare la soglia: e'
+#      **allargare ai simboli**, rifacendo la stessa cella congelata sugli
+#      8 `_EXT` disponibili (AUDJPY CHFJPY EURJPY EURUSD GBPCAD GBPUSD
+#      USDJPY XAUUSD), che e' il modello di R59.
+#
+# ---------------------------------------------------------------------
+# SCREENING IN OHLC. VERDETTO SOLO A TICK REALI.
+#   R57: cambiando SOLO il modello, il segno dell'orso si e' ribaltato.
+#
+# GRIGLIA: 5 x 2 x 2 = **20 celle**. E' uno screening di UN asse
+#   (la lunghezza del canale), non un verdetto.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  D1
+@DAQUANDO
+
+# --- L'ASSE VERO: la lunghezza del canale d'ingresso, in GIORNI ---
+#     20 e 50 sono i due punti della tabella di Kurth et al. (0,27 e 0,40).
+#     Si cerca il BORDO DELL'ALTOPIANO, non il picco.
+InpEntryPeriod=55||20||10||60||Y
+
+# --- L'uscita: quanto stretto e' il trailing di canale ---
+#     10 = uscita "tartaruga" classica; 20 = simmetrica all'ingresso.
+InpExitPeriod=20||10||10||20||Y
+
+# --- Trailing sul bordo opposto (0) o sulla mediana del canale (1) ---
+#     La mediana e' piu' stretta: taglia prima la coda. E' l'unico modo
+#     onesto di misurare quanto costa stringere.
+InpExitMiddle=1||0||1||1||Y
+
+# --- CONGELATI: sono la tesi, non si spazzolano ---
+# D1 = 16408. Vedi la tabella di Kurth et al. qui sopra: il TF NON e' una
+# manopola, e' il ramo del trend che nei dati e' ancora vivo.
+InpTF=16408||16408||0||16408||N
+# Simmetria vincolata: entrambi i lati sempre accesi. NON si spazzolano e
+# NON si spengono sull'IS — e' la malattia documentata in R52.
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+# Rischio all'1% per MISURARE (confrontabile con tutto l'archivio).
+# In prop si gira a 0,65%: METRO_PROP, p99 12,47% a 1% contro ~8,1% a 0,65%.
+InpRiskPercent=1.0||1.0||0||1.0||N
+# Spread come PERCENTUALE dello stop, non in punti (lezione R55).
+InpMaxSpreadPctSL=10.0||10.0||0||10.0||N
+
+# ⛔ NON esiste `InpTakeProfit` e non deve esistere.
+# ⛔ NON esiste `InpMaxBarsHold` e non deve esistere: un tetto sulla durata
+#    taglia la coda destra, cioe' la sola cosa che questo motore produce.
