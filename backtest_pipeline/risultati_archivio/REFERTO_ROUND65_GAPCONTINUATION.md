@@ -108,14 +108,75 @@ operano in giorni diversi, sono due motori diversi col nome sbagliato.
 
 ---
 
-## 5. ⚠️ COSA QUESTO ROUND NON DICE
+## 4-bis. 🔴 CRITERIO 2 — VALUTATO, E **NON PASSA**
 
-1. 🔴 **Il criterio 2 NON e' stato valutato.** Diceva: _"il lato SHORT si
-   misura da solo, long e short vanno letti SEPARATAMENTE. Se regge solo il
-   long, NON ha riempito il buco degli short."_ Il CSV di riepilogo **non
-   separa i lati**. Serve `abtg_trades_ABTG_GapContinuation_225JPY_774101.csv`
-   dalla cartella comune. **Finche' non e' letto, non si puo' dire che questo
-   EA riempia il buco n.3.**
+_Aggiunto il 16/08 sera, da una passata SINGOLA nel Tester
+(`ReportTester50503392.xlsx`), qualita' storico **100%**, stessa finestra OOS
+2025.06.10 → 2026.06.30._
+
+⚠️ **Nota sulla cella**: nel Tester il `.set` non e' stato caricato, quindi la
+passata ha girato coi default `InpOpeningRangeMinutes=10` e
+`InpFinalTargetR=2.0` — cioe' la cella **`gap 1,00 / OR 10 / TP_R 2`**, non
+quella scelta (`OR 15 / TP_R 3`). E' comunque **una cella della diagonale
+simmetrica e IS-positiva** (+334,59), e il totale OOS **+7.727,28 con PF
+1,3607** combacia al centesimo con la riga corrispondente della griglia R65.
+**La passata e' valida, ma e' di una cella vicina, non di quella designata.**
+
+### I due lati, separati
+
+| lato | posizioni | **P&L** | vincenti (per posizione, da MT5) |
+|---|---:|---:|---:|
+| **LONG** | 53 | **+11.181,22** | 75,47% |
+| **SHORT** | 22 | **−3.453,94** | 54,55% |
+| **TOTALE** | **75** | **+7.727,28** | 69,33% |
+
+✅ *Controllo di quadratura: la somma dei due lati fa esattamente il Profitto
+Netto del report. La ripartizione e' completa.*
+
+> ## 🎯 **IL LATO SHORT PERDE. Il profitto e' TUTTO del long, e lo short ne toglie 3.454.**
+>
+> Il file prova lo aveva scritto prima dei numeri:
+> _"Se regge solo il long, **NON ha riempito il buco degli short** e va
+> dichiarato cosi', **anche se il totale e' verde**."_
+>
+> **Dichiarato. `ABTG_GapContinuation` NON riempie il buco n.3.**
+
+E' il risultato piu' importante del round, perche' ribalta la ragione per cui
+questo candidato era stato promosso: il dossier C lo aveva scelto anche
+perche' _"simmetrico per costruzione: gap positivo → long, gap negativo →
+short"_. **La simmetria c'e' nel codice, ma non nei risultati.**
+
+📌 **Cosa NON significa**: non e' un motivo per spegnere il lato short con un
+input. Sarebbe **esattamente** la malattia di R52 — scegliere il lato dentro
+la finestra amica — e su 22 posizioni il campione non basta comunque per
+decidere (regola di casa: sotto n=20 il PF non si giudica, e 22 e' al
+limite). **Si dichiara e si tiene simmetrico**, oppure si riapre come round
+suo con una tesi scritta prima.
+
+### Altri numeri della passata singola
+
+| | valore | a taglia prop 0,65% |
+|---|---:|---:|
+| giornate operate | **50** in 12,7 mesi (~4/mese) | — |
+| peggior giornata | **−1.085,96** (−1,09%) | **−0,71%** (muro −5%) 🟢 |
+| Equity DD massima | 8,90% | **5,79%** (muro 10%) 🟢 |
+| perdite consecutive max | **6** (−6.241,70) | −4,06% |
+| tempo medio in posizione | 2h 53m (max 6h 15m) | intraday, **zero overnight** 🟢 |
+
+🟢 **Zero esposizione overnight**: apre e chiude dentro la sessione di Tokyo.
+E' il profilo prop migliore incontrato oggi — nessun rischio di gap contro,
+e compatibile anche con le prop che vietano di tenere posizioni la notte.
+
+🔴 **Ma un allarme statistico**: **Z-Score −2,85 (99,56%)**. Significa che i
+risultati **NON sono indipendenti**: vincite e perdite si raggruppano in
+serie molto piu' del caso. ⚠️ **Le nostre Monte Carlo assumono indipendenza**
+(`METRO_PROP.md`: p50 5,74% · p95 9,89% · p99 12,47%): su un EA con questo
+Z, **la MC sottostima la coda vera**. Va tenuto presente prima di sommarlo al
+portafoglio.
+
+---
+
+## 5. ⚠️ COSA QUESTO ROUND NON DICE
 2. 🔴 **E' OHLC, quindi non e' un verdetto** (R57: cambiando solo il modello
    il segno dell'orso si e' ribaltato). Il verdetto e' a tick reali — e su
    225JPY i tick ci sono dal **2024.09.26**, quindi la finestra tick-real
@@ -140,13 +201,21 @@ operano in giorni diversi, sono due motori diversi col nome sbagliato.
 > giornata −0,65% a taglia prop**. Nessun altro candidato di oggi era
 > arrivato a questo punto.
 >
-> **Ma NON e' promosso**, e per due ragioni scritte prima dei numeri: il
-> **criterio 2 non e' stato valutato** (lati non separati) e il **criterio 1
-> ha fatto scattare l'avvertimento del gemello** (`GapFill` verde nella
-> direzione opposta sullo stesso evento).
+> **Ma NON e' promosso**, e adesso le ragioni sono queste:
+> - 🔴 **il criterio 2 NON PASSA**: il lato short perde **−3.453,94**, il
+>   profitto e' tutto del long. **Non riempie il buco n.3**, che era meta'
+>   del motivo per cui era stato promosso dal setaccio;
+> - 🔴 **il criterio 1 ha fatto scattare l'avvertimento del gemello**
+>   (`GapFill` verde nella direzione opposta sullo stesso evento);
+> - 🟡 e resta da fare il **verdetto a tick reali**.
+>
+> 🟢 **Quello che invece regge, ed e' molto:** PF 1,36 su 5.610 trade OOS,
+> **zero esposizione overnight**, peggior giornata **−0,71%** e DD **5,79%**
+> a taglia prop. **Come motore intraday sul Nikkei e' il miglior candidato
+> uscito oggi. Come tassello per il buco degli short, non serve.**
 
 **I prossimi passi, in ordine:**
-1. **Leggere i lati** dai `abtg_trades_*.csv` → criterio 2;
+1. ✅ ~~Leggere i lati~~ **FATTO: lo short perde.**
 2. **Confronto giorno per giorno con `ABTG_GapFill`** → sciogliere il sospetto
    del gemello;
 3. **Tick reali** sulla stessa finestra (i tick di 225JPY ci sono) → verdetto;
