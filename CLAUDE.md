@@ -19,6 +19,39 @@ Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
    arriva da sola: `scarica_pagella.ps1 -Installa` (attivita' 23:15,
    scrive `Desktop\pagella_AAAA-MM-GG.txt`).
 
+## 📏 EMENDAMENTO DELLA FINESTRA (congelato da Claudio, 16/08 sera) — REGOLA DI CASA
+**Nato dalla sua osservazione: _"dal 2010 sono tantissimi anni, poche EA ce la
+farebbero, stiamo scartando opportunita'"_. Ed e' misurato, non opinato: in R69
+l'IS di `PTE USDJPY` 2010-2016 (yen di Abenomics) e' **0 celle positive su 28**,
+mentre l'OOS ne fa **25 su 28**. Quella finestra bocciava per un'epoca morta.**
+
+Le quattro regole, valide da qui in avanti (NON retroattive: i round gia'
+giudicati restano com'erano — i criteri si cambiano prima dei numeri, non dopo):
+
+**A. 📏 L'unita' di misura e' l'OPERAZIONE, non l'anno.**
+L'IS e' la finestra **piu' RECENTE** che contiene almeno **~150 operazioni**,
+non il primo 40% di tutto lo storico disponibile. Su un H1 forex fanno 3-4 anni,
+non sedici. Se la finestra piu' recente non arriva a 150 trade, la si allunga
+all'indietro finche' non ci arriva — e si dichiara quanto e' stata allungata.
+
+**B. ⚖️ Il VECCHIO giudica il RISCHIO. Il RECENTE giudica il MERITO.**
+Estensione della valvola di R59 (_"il campione sottile sospende il giudizio sul
+MERITO, mai sul RISCHIO"_):
+- ❌ **NON si boccia un motore perche' non guadagnava nel 2012.**
+- ✅ **SI boccia se nel 2020 avrebbe fatto un drawdown del 25%** — perche' un
+  drawdown e' un fatto accaduto, non una stima.
+
+**C. 🧪 La PROVA DI REGIME batte la storia contigua.**
+Sedici anni di fila **diluiscono**: sei anni brutti + dieci buoni fanno una media
+che non descrive nessun mercato. Le quattro finestre scelte (toro / orso /
+laterale / crollo, macchina gia' fatta in R50-R56-R59) dicono di piu'.
+
+**D. 🛑 E IL LIMITE IN BASSO RESTA — non ci si sposta nell'altro fosso.**
+Il difetto ricorrente vero del progetto e' l'opposto: **110 file prova su 153
+girano gia' su 21 mesi** (`@DAQUANDO 2024.09.26`), e il 2010 e' stato usato UNA
+volta sola. Con questa regola il round R69 sul Dow (27 trade IS, 46 OOS, **un
+solo regime**) e' **non misurabile anche per il MERITO**, non solo per il rischio.
+
 ## FUSO ORARIO BCM (regola fissa)
 **Il server BCM è 1 ORA INDIETRO rispetto all'ora italiana** (in questo periodo dell'anno).
 - Ora italiana − 1 = ora server BCM.

@@ -1,0 +1,108 @@
+# =====================================================================
+#  PROVA R70: LA FINESTRA VECCHIA SELEZIONA PEGGIO DI QUELLA RECENTE?
+#  Verifica dell'EMENDAMENTO DELLA FINESTRA (CLAUDE.md, congelato 16/08)
+#  Precedenti: REFERTO_ROUND68_PTE_BUFFER.md · REFERTO_ROUND69_PTE_BUFFER_FAMIGLIA.md
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# DA DOVE NASCE
+#
+#   Claudio, 16/08 sera: "dal 2010 sono tantissimi anni, poche EA ce la
+#   farebbero, secondo me stiamo perdendo tante opportunita' e le stiamo
+#   scartando".
+#
+#   Non e' un'opinione: R69 l'ha misurato. L'IS di PTE su USDJPY nella
+#   finestra 2010.07.06 -> 2016.11.26 e' **0 CELLE POSITIVE SU 28** (da
+#   -9.412 a -25.810), mentre l'OOS 2016 -> 2026 ne fa **25 su 28**. Quella
+#   finestra e' lo yen di Abenomics (76 -> 125): un trend dritto di sei anni
+#   contro cui un motore di pullback sbatte per costruzione. E non torna.
+#
+#   👉 Con l'imbuto applicato alla lettera, PTE USDJPY sarebbe stato ucciso
+#      in fase IS **per aver perso in un'epoca morta**.
+#
+# ---------------------------------------------------------------------
+# LE TRE DOMANDE, SCRITTE PRIMA DEI NUMERI
+#
+#   1. **L'IS recente smette di essere 0/28 su USDJPY?**
+#      Se SI  -> la finestra vecchia bocciava per il regime, non per il
+#                motore. L'emendamento ha la sua prova.
+#      Se NO  -> il motore perde anche di recente, e il 2010-2016 non
+#                c'entrava niente. L'emendamento resta valido come regola
+#                ma NON e' questo il caso che lo dimostra, e si scrive.
+#
+#   2. **Quale finestra IS avrebbe scelto la cella migliore in OOS?**
+#      L'IS vecchio (2010-2016) ha indicato **buffer 30 / TP2 3,0**.
+#      L'ottimo OOS vero sta a **buffer 15-20**, e il minimo di drawdown a
+#      **buffer 20**. Se l'IS recente indica una cella piu' vicina a
+#      quelle, allora **la finestra recente e' il selezionatore migliore,
+#      MISURATO** — che e' esattamente il punto A dell'emendamento.
+#
+#   3. **La conclusione di R68/R69 sul buffer sopravvive alla finestra corta?**
+#      Se il drawdown OOS scende ancora col buffer -> il risultato non
+#      dipendeva dalla lunghezza della storia, ed e' la terza conferma
+#      indipendente (GBPUSD 16 anni, USDJPY 16 anni, entrambi su 7 anni).
+#
+# ---------------------------------------------------------------------
+# ⚠️ LA TRAPPOLA, DICHIARATA ADESSO E NON DOPO
+#
+#   L'OOS nuovo (2022 -> 2026) e' un **SOTTOINSIEME** dell'OOS vecchio
+#   (2016 -> 2026). Le due misure **NON sono indipendenti**: e' vietato
+#   scrivere "confermato su due campioni".
+#
+#   👉 Questo round confronta **LA SCELTA DELLA CELLA**, non la performance.
+#      La domanda legittima e' UNA: *dato lo stesso motore, quale finestra IS
+#      indica la cella che poi va meglio fuori?* Tutto il resto e' rumore
+#      travestito da conferma.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (congelati)
+#
+#   0. **n >= 150 nell'IS** per considerare valida la selezione (punto A
+#      dell'emendamento). Su USDJPY H1 l'OOS di R69 ha fatto 297-470 trade
+#      in 9,6 anni = ~31-49/anno; i 3 anni di IS dovrebbero fare ~95-150.
+#      🔴 Se l'IS esce sotto 150, **la selezione e' SOSPESA e si dichiara**:
+#      il round risponde solo alle domande 1 e 3, non alla 2.
+#   1. La cella si sceglie SOLO sull'IS, centro dell'altopiano MAI il picco.
+#   2. Nessun confronto di performance tra R70 e R69: OOS annidati (v. sopra).
+#   3. 🔴 NESSUNA MODIFICA IN FORWARD da questo round, qualunque cosa esca.
+#      Vale il criterio 3 di R68, non decade. La PTE gira come gira finche'
+#      non c'e' un round A TICK REALI **e** una decisione esplicita di Claudio.
+#   4. E' **OHLC**: R57 ha misurato che cambiando solo il modello il segno di
+#      questo stesso motore si ribalta. Questo round PROPONE, non decide.
+#
+# ---------------------------------------------------------------------
+# LE FINESTRE
+#
+#   @DAQUANDO 2019.01.01 -> il driver taglia 40/60:
+#       IS   2019.01.01 -> ~2022.01   (3,0 anni: covid + ripresa 2021)
+#       OOS  ~2022.01   -> 2026.06.30 (4,5 anni: dollaro 2022 + tassi)
+#
+#   Contro R68/R69 che partivano dal 2010.07.06 (IS 6,4 anni / OOS 9,6).
+#   Due regimi distinti in ciascuna finestra: non e' una sola epoca.
+#
+#   Si lancia su **ENTRAMBI** i cambi (USDJPY con -Simbolo/-DaQuando,
+#   GBPUSD di default): il Dow NON si rilancia, perche' R69 ha stabilito
+#   che li' l'asse del buffer e' inerte (30 "pip" = ~0,03 ATR) e la
+#   finestra non c'entra.
+#
+# ---------------------------------------------------------------------
+# GRIGLIA: 7 x 4 = 28 celle -- IDENTICA a R68/R69, carattere per carattere
+#   Cambia SOLO la data di partenza. E' l'unica variabile del round.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO 2019.01.01
+
+# --- l'asse che porta la domanda: 0 = R puro, poi il buffer cresce ---
+InpSLbufferPips=10.0||0.0||5.0||30.0||Y
+# --- il target: stesso intervallo di R67/R68/R69 ---
+InpTP2_ATRmult=2.0||1.5||0.5||3.0||Y
+
+# --- pinnati: identici a R68/R69, si muove un asse alla volta ---
+# SLfromDoji SPENTO: in R67 il ramo doji faceva DD del 21-24% per
+# posizioni sovradimensionate (stop minuscolo + sizing a rischio %)
+InpSLfromDoji=0||0||0||0||N
+InpTF=16385||16385||0||16385||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
