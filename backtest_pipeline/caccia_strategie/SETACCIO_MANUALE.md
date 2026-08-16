@@ -467,3 +467,129 @@ backtest gira verso il passato"_).
 > Parole utili nel titolo: _mean reversion, fade, range, reversal,
 > counter-trend, exhaustion, short_. Parole gia' coperte: _breakout, opening
 > range, ORB, session, EMA, trend following_.
+
+---
+
+# 🧪 16/08/2026 — ALTRI QUATTRO: **uno merita la coda, tre no**
+
+| # | file | righe | input | verdetto |
+|---|---|---:|---:|---|
+| 1 | **`Nikkei225_Gap_Continuation_EA.mq5`** | 1.160 | 39 | 🟡 **IN CODA — tesi NUOVA** |
+| 2 | `Range_BreakOut_EA_1.02.mq5` | 274 | 6 | 🔴 lotto fisso + doppione |
+| 3 | `GoldLondonBreakout.mq5` | 383 | 19 | 🔴 **e' esattamente R45** |
+| 4 | `ilan_1_6_dynamic_ht.mq5` (+6 include) | 628 | 34 | 🔴🔴 **MARTINGALA CERTIFICATA** |
+
+---
+
+## 🟡 `Nikkei225_Gap_Continuation_EA` — **il primo con una tesi che NON abbiamo**
+
+**Autore:** Francesc Jordi Mallol Nolden.
+
+### 🎯 Perche' e' diverso da tutto quello arrivato finora
+
+Noi abbiamo `ABTG_GapFill` (R36/R37): scommette che **il gap si CHIUDE**, e
+`225JPY` e' fra i promossi (**+76 OOS, PF 1,14**, "il piu' tirato").
+
+**Questo scommette l'esatto contrario: che il gap CONTINUI.** Stesso evento,
+stesso mercato, **direzione opposta** — e su quella direzione non abbiamo
+**nemmeno una misura**.
+
+> E' l'unica cosa arrivata oggi che non e' ne' un doppione ne' spazzatura:
+> una **tesi complementare** su un evento che sappiamo gia' mappare, su un
+> simbolo di cui abbiamo lo storico e un precedente diretto per il confronto.
+
+### ✅ Ed e' scritto con la nostra stessa grammatica di gestione
+
+```
+InpPartialClosePercent = 40.0   // chiusura parziale (%)
+InpPartialTargetR      = 1.0    // parziale a 1R
+InpFinalTargetR        = 2.0    // target finale a 2R
+InpMoveStopToBreakEven = true   // breakeven dopo il parziale
+```
+E' **la gestione delle nostre sedie DAX/Dow** (parziale + breakeven + runner),
+scritta in multipli di R. Rischio in **percentuale dell'equity**, magic
+number, uscita forzata prima della chiusura, e un'idea che non avevamo:
+`InpMaxSpreadToStopPercent` — **lo spread massimo come percentuale dello
+stop**, che e' il modo giusto di misurarlo (R55 docet).
+
+### 🔴 I tre motivi per cui NON parte adesso
+
+1. **39 input.** Il tetto nostro e' ~15. Molti sono pinnabili (pannello,
+   diagnostica, orari strutturali), ma le manopole vere restano ~7: soglie
+   di gap buy/sell, minuti di opening range, finestra d'ingresso, parziale,
+   e i due target in R. **Va sfrondato prima, non dopo.**
+2. ⚠️ **`InpSessionTimeMode = SESSION_JST_DARWINEX_AUTO`** — e' costruito per
+   il Nikkei di **Darwinex**. Da noi il simbolo e' `225JPY` su **BCM**, dove
+   **il server e' un'ora indietro rispetto all'Italia**. Il fuso e' la prima
+   cosa che va risolta e la piu' facile da sbagliare: e' una regola fissa di
+   progetto, e un EA di sessione con l'ora sbagliata misura un altro mercato.
+3. 🚩 **Un odore di taratura, da dichiarare:**
+   ```
+   InpReduceRiskOnSmallSellGap = true
+   InpSellFullRiskFromGapPct   = 1.25   // rischio pieno solo sopra 1,25%
+   InpSmallSellRiskPercent     = 0.25   // meta' rischio sotto
+   ```
+   **Rischio diverso fra long e short, con una soglia a 1,25%**, e' il tipo di
+   asimmetria che nasce guardando i risultati. Se entra, entra **simmetrico**
+   e quella soglia si misura, non si eredita.
+
+📌 **Posizione in coda: dopo `ABTG_MeanRevert`.** Una macchina, un lavoro.
+
+---
+
+## 🔴🔴 `ilan_1_6_dynamic_ht` — **MARTINGALA, e per giunta l'archetipo**
+
+`Ilan` e' **il** grid-martingala del forex retail. La prova sta in due righe:
+
+```cpp
+input double LotExponent = 1.4;                                    // riga 32
+return NormalizeDouble(Lots * MathPow(LotExponent,
+                       Environment.GetPositionsTotal()+1), lotdecimal);   // riga 573
+```
+
+**Il lotto cresce di 1,4 volte per ogni posizione gia' aperta** — e
+l'esponente parte da `+1`, quindi **la prima aggiunta e' gia' maggiorata**.
+
+Colpisce **quattro** bandiere rosse del §4 insieme:
+**martingala** · **averaging** · **hedge** (46 riferimenti nel solo
+`drawhedgeposition.mqh`, 141 in `prototypes.mqh`) · **`#import`**.
+
+> Il commento dell'autore lo dice da solo, alla riga 29:
+> _"if LotExponent = 1.4: the first lot is 0.1, the following..."_
+> **Non e' nascosto. E' il prodotto.**
+
+## 🔴 `GoldLondonBreakout` — **l'abbiamo gia' fatto, e si chiama R45**
+
+Oro + rottura della sessione di Londra. E' **letteralmente** il nostro
+`backtest_pipeline/prove/R45a_londra_XAUUSD.txt`:
+
+> **R45 — ORB su sessione di Londra: ZERO celle verdi su 48.**
+> Il filtro volumi _"attenua ma non inverte mai"_.
+
+19 input, nessuna bandiera rossa, codice ordinato — e **48 celle di prova
+gia' spese su questa identica idea, con verdetto**. Non si rimisura.
+
+## 🔴 `Range_BreakOut_EA_1.02` — pulito, minuscolo, e non serve
+
+**6 input, tutti orari** (range 01:00→06:00 = **range asiatico**, operativita'
+fino alle 22:00). Copyright MetaQuotes: e' un **esempio didattico** del Code
+Base. SL al bordo opposto, TP = rottura + ampiezza del range.
+
+Due motivi, e il primo basta:
+```cpp
+trade.Buy(minLot, Symbol(), 0, rangeLow, tp);   // <-- LOTTO MINIMO FISSO
+```
+**Nessun sizing sul rischio** → non scalabile a 100k e non confrontabile coi
+nostri numeri (bandiera rossa §4). E la meccanica e' di nuovo la famiglia ORB,
+dove abbiamo **~210 celle a tick reali** e due sedie vive.
+
+---
+
+> ### 📊 Il bilancio del setaccio manuale di oggi
+> **14 file guardati nel sorgente · 1 promosso (`MeanReversion` → scritto come
+> `ABTG_MeanRevert`) · 1 in coda (`Nikkei Gap Continuation`) · 12 scartati.**
+>
+> Motivi ricorrenti degli scarti, in ordine: **doppioni di famiglie gia'
+> misurate** (6), **martingala/griglia** (2), **indicatori che non operano**
+> (3), **MQL4 che non compila** (2), **lotto fisso** (2), **troppe manopole**
+> (2). _(Un file puo' cadere per piu' motivi.)_
