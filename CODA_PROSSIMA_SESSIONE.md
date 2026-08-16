@@ -22,6 +22,42 @@
 > git fetch origin lavoro && git checkout lavoro && git log --oneline -3
 > ```
 >
+> ### ✅ AGGIORNAMENTO 16/08 ore 15:15 — PUNTO 3 FATTO, E LE TRE CACCE ANCHE
+>
+> **Punto 3 — `Nikkei225_Gap_Continuation`: sorgente ripescato e lavorato.**
+> Trovato sul Code Base (`mql5.com/en/code/75301`, v1.50, 43.393 byte) e letto
+> per intero. Gli input erano **31, non 39** (8 erano `input group`); fuso
+> risolto in ora server BCM (**01:00-07:30**, col calcolo e col buco DST
+> dichiarato); asimmetria 1,25% spenta e messa in misura come assi separati.
+> 🔴 **Non lanciabile: nel sorgente manca `OnTester`** — serve
+> `mql5-ea-developer`. Poi la misura di `@DAQUANDO` sullo storico **M1** di
+> `225JPY` (non si eredita da R36/R37: quelli erano H1).
+> Dossier: `caccia_strategie/CACCIA_2026-08-16_C_NIKKEI_GAP.md`.
+>
+> **Tre cacce sui tre buchi, chiuse.** Mandato nuovo di Claudio applicato
+> (§5.F "motore grezzo da rifinire" + §7-bis "cancello prop", scritti nel
+> file dell'agente):
+>
+> | caccia | buco | promosso |
+> |---|---|---|
+> | **D** | laterale | 🥇 `001 - Turnaround Tuesday` (Code Base 73674) **9/10** |
+> | **E** | crollo | 🥇 `BreakoutStrategy` (Code Base 49272) **9/10** |
+> | **F** | short simmetrico | 🥇 **lo stesso `001 - Turnaround Tuesday`, 10/10** |
+>
+> 🎯 **D e F sono arrivate allo stesso EA partendo da due buchi diversi, senza
+> parlarsi.** Un solo file prova, `prove/ABTG_TurnaroundTuesday.txt`.
+>
+> 🔬 **La scoperta che pesa piu' dei tre candidati** e' nel dossier E:
+> **arXiv 2607.01550** (Kurth, Eisler, Rej, Bouchaud — CFM, 02/07/2026, ~100
+> futures, 1995-2025) misura che il trend **veloce** e' passato da Sharpe
+> **0,84 a 0,12** dopo il 2009, ed e' svanito **proprio su indici e valute**
+> mentre regge su materie prime e tassi. **Il nostro universo e' il
+> sottoinsieme dove e' morto, e le ~210 celle ORB sono la versione piu'
+> veloce di quel segnale.** Non ribalta nessun verdetto: dice dove cercare.
+>
+> ⚠️ **Nessuno dei tre e' lanciabile oggi**: a tutti manca `OnTester`, e i
+> due `@DAQUANDO` non misurati restano vuoti apposta.
+>
 > ### 🎯 QUINDI IL PROSSIMO PASSO E' IL 3, non l'1 e non il 2
 > E prima di cacciare: **leggere `caccia_strategie/SETACCIO_MANUALE.md`**
 > (22 file gia' setacciati, non si ricontrollano) e usare **l'agente
