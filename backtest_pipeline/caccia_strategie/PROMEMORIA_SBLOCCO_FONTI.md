@@ -39,11 +39,15 @@ mentre il materiale che ci serve e' **pubblico e gratuito**.
 Tutto dentro **claude.ai/code**: non c'e' una pagina impostazioni ne' un URL
 diretto.
 
-1. Cliccare l'**icona a nuvola** col nome dell'ambiente (`Default`), nella
-   riga **sopra la casella del messaggio**.
-2. Passare il mouse sull'ambiente → **icona ingranaggio** a destra.
+1. Cliccare l'**icona a nuvola** nella riga **sopra la casella del
+   messaggio**. ⚠️ **L'ambiente di Claudio NON si chiama `Default`: si chiama
+   `Claudio`** (`env_01Q6nDunTuex3xmeRPbtgzQs`, descrizione _"Claudio -
+   trusted network access"_). E' l'unico che ha. Verificato il 16/08 con
+   `list_environments`: cercare "Default" e' tempo perso.
+2. Nella sezione **Cloud** del menu, passare il mouse sulla riga
+   **`Claudio`** → compare a destra l'**icona ingranaggio**. Cliccarla.
    _(Oppure **Add cloud environment** per crearne uno nuovo e lasciare
-   `Default` intatto.)_
+   quello attuale intatto.)_
 3. Alla voce **Network access**: da `Trusted` a **`Custom`**.
 4. Nel campo **Allowed domains**, una riga per dominio:
 
