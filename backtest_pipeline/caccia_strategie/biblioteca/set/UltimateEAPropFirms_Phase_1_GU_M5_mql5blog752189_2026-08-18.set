@@ -1,0 +1,96 @@
+; saved on 2023.08.06 14:36:07
+; this file contains input parameters for testing/optimizing Ultimate EA for Prop Firms expert advisor
+; to use it in the strategy tester, click Load in the context menu of the Inputs tab
+;
+; RISKS AND PROFITS(DEFAULT COMBO GBPUSD M5 JAN 2020-AUG 2023)
+inpString0=---YOU CAN BACKTEST THE DEFAULT INPUT PARAMETERS ON GBPUSD M5 FROM JAN 2020 TO MAR 2023
+initialCapital=20000
+takeProfitType=0
+i_tpFactor=7.35||6||0.05||9||N
+riskPercentage=1.0||1.0||0.100000||10.000000||N
+profitTargetPercentage=8
+strategia=0
+assetScelto=0
+restartMensile=true
+recuperoPerdita=false
+martingala=false
+inpString1=-----ENABLE THE FOLLOWING TEST MODE IF YOU WANT TO BACKTEST THE EA-----
+modalitaTest=true
+; GENERAL SETTINGS
+magicN=1
+maxSpread=50
+chiusuraTradeSpread=0
+chiusuraTradeOgniGiorno=false
+chiusuraTradeVenerdi=false
+; TIME GRID
+initialLotSize=0.3||0.2||0.1||0.5||Y
+nextLotSize=0.1||0.1||0.1||0.5||Y
+maxTrades=15||4||2||20||Y
+takeProfitAggregatoPercentuale=1||1.0||0.5||3||Y
+stopLossAggregatoPercentuale=2||2||0.5||4||Y
+; DRAWDOWN
+dailyDrawdownPercentage=4.9
+monthlyDrawdownPercentage=11.0
+; BREAKEVEN AND PARTIAL TP (NO TIME GRID)
+inpString2=-----MORE INFO ON MQL5 DETAILED GUIDE-----
+breakeven=0.3||0||0.05||0.9||N
+tp1=0||0||0.05||1||N
+tp2=0||0||0.05||1||N
+; PIPS (NO TIME GRID)
+pipsAggiuntivi=0.2||0||0.100000||0.4||N
+maxPipsStop=17||15||1.000000||19||N
+minPipsStop=1||1||1||3||N
+; TRADING DAYS
+lunedi=1||0||0||1||N
+martedi=0||0||0||1||N
+mercoledi=0||0||0||1||N
+giovedi=0||0||0||1||N
+venerdi=0||0||0||1||N
+; TIME
+timezone=1
+oraInizio=4||2||1||6||N
+minutiInizio=30||0||15||59||N
+oraFine=15||13||1||17||N
+minutiFine=45||0||15||59||N
+; GENERIC INDICATORS
+usoMedia=0||0||0||1||N
+maPeriod=175||150||5||190||Y
+maDistance=0.0||0.0||0.000000||0.000000||N
+; MACD STRATEGY PARAMETERS
+fastEmaPeriodMACD=20||5||1||18||N
+slowEmaPeriodMACD=25||18||1||30||N
+signalPeriodMACD=9||5||1||15||N
+fastEmaPeriodMACDclose=5||5||1||18||N
+slowEmaPeriodMACDclose=15||10||1||25||N
+signalPeriodMACDclose=5||5||1||18||N
+; ALLIGATOR STRATEGY PARAMETERS
+tipoSL=1
+jawPeriod=13||5||1||18||N
+teethPeriod=8||5||1||18||N
+lipsPeriod=5||5||1||18||N
+jawShift=8||0||1||10||N
+teethShift=5||0||1||10||N
+lipsShift=3||0||1||10||N
+atrPeriod=14||10||1||20||N
+atrMultiplier=2||1||1||5||N
+; MACD+STOCH+RSI STRATEGY PARAMETERS
+fastEmaPeriodMSRV=12||5||1||18||N
+slowEmaPeriodMSRV=26||18||1||30||N
+signalPeriodMSRV=9||5||1||15||N
+rsiPeriod=14||5||1||20||N
+stochPeriod=14||5||1||20||N
+kPeriod=3||1||1||5||N
+dPeriod=3||1||1||5||N
+StochDifference=0||-5||1||5||N
+candeleArretrateStoch=10||0||1||10||N
+; PARABOLIC SAR STRATEGY PARAMETERS
+InpSARStep=0.02||0.02||0.01||0.200000||N
+InpSARMaximum=0.2||0.2||0.020000||2.000000||N
+atrPeriodPsar=14||14||1||140||N
+; ICHIMOKU STRATEGY PARAMETERS
+periodoConversione=9||9||1||90||N
+periodoBase=26||26||1||260||N
+periodoLeading=52||52||1||520||N
+; SUPERTREND STRATEGY PARAMETERS
+stPeriod=10||5||1||25||Y
+stMultiplier=3.0||3.0||0.5||10||Y
