@@ -1,0 +1,117 @@
+# =====================================================================
+#  PROVA R72: IL BUFFER DELLA PTE **A TICK REALI** -- il primo verdetto
+#  Seguito di R68/R69/R70/R71 (tutti OHLC = tutti PROPOSTE, nessun verdetto)
+#  Precedente a tick reali: REFERTO_ROUND58_PTE_TICK_REALI.md
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# PERCHE' QUESTO ROUND E' DIVERSO DAI QUATTRO PRIMA
+#
+#   R68-R71 hanno misurato una cosa sola, sei volte su sei, su due simboli
+#   e tre finestre: **il drawdown scende col buffer**.
+#       GBPUSD 17,91 -> 6,70 (R68) · 8,13 -> 2,88 (R70) · 11,07 -> 3,42 (R71)
+#       USDJPY 15,48 -> 8,13 (R69) · 6,45 -> 4,28 (R70) · 12,55 -> 6,06 (R71)
+#
+#   Ma sono TUTTI in OHLC. E **R57 ha misurato che cambiando SOLO il modello
+#   il segno di questo stesso motore si ribalta** (PTE_GBPUSD nell'orso 2022:
+#   da +1.245 PF 1,62 a -1.249 PF 0,75, stessi parametri carattere per
+#   carattere). Per questo la regola di casa dice: **OHLC solo screening,
+#   verdetti solo a tick reali.**
+#
+#   👉 LA DOMANDA DEL ROUND, in una riga:
+#      **il crollo del drawdown col buffer SOPRAVVIVE al modello?**
+#
+#      Se SI  -> settima conferma, e la PRIMA che vale come verdetto.
+#      Se NO  -> era un artefatto del modello OHLC e cade tutto, esattamente
+#                come in R57 cadde la promozione di rango. **E si scrive.**
+#
+# ---------------------------------------------------------------------
+# LE DUE CELLE, NOMINATE ADESSO E NON DOPO
+#
+#   🪑 VIVA       `buffer 5  / TP2 2,0`  <- quello che gira in forward oggi
+#                 (magic 771321 GBPUSD, 771323 USDJPY)
+#   🎯 CANDIDATA  `buffer 25 / TP2 3,0`  <- centro dell'altopiano IS su
+#                 ENTRAMBI i simboli in R71, sopravvive a tutte le finestre
+#
+#   Sono nominate PRIMA perche' questo round **NON SCEGLIE**: giudica due
+#   celle decise in anticipo. La scelta e' gia' stata fatta in OHLC, dove il
+#   campione c'era.
+#
+# ---------------------------------------------------------------------
+# ⚠️ IL CAMPIONE, DICHIARATO PRIMA DI VEDERLO
+#
+#   I tick reali di BCM partono dal **2024.07.05** — MISURATO in R58, non
+#   ipotizzato (70.491.074 tick). Quindi:
+#     - la finestra totale e' ~2 anni, **stesse date di R58** (FrazioneIS 0,40
+#       di default: IS 2024.07.05 -> ~2025.04, OOS -> 2026.06.30);
+#     - R58 su questa finestra ha fatto **n=25 IS / 49 OOS** per cella.
+#
+#   👉 Quindi, applicando le regole di casa senza sconti:
+#      ✅ **n>=20 -> le celle NOMINATE si possono giudicare** (emendamento R59).
+#      🔴 **n<<150 -> la SELEZIONE resta SOSPESA** (punto A, ricongelato dopo
+#         R71). **Da questo round NON esce una cella nuova.** Se qualcuno
+#         volesse promuovere una terza cella guardando questi numeri, sta
+#         violando il criterio: e' scritto qui, prima dei numeri.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (congelati)
+#
+#   0. n >= 20 per cella per giudicarla; sotto, giudizio sospeso sul MERITO
+#      ma **mai sul RISCHIO** (valvola R59: un drawdown e' un fatto accaduto).
+#   1. 🔬 DOMANDA PRINCIPALE (rischio): il DD scende col buffer anche qui?
+#      Si guarda la COLONNA del drawdown lungo l'asse del buffer, non la
+#      singola cella. E' l'unica cosa che questo round puo' dimostrare bene.
+#   2. ⚖️ DOMANDA SECONDARIA (merito): la CANDIDATA **abbassa il DD SENZA
+#      perdere profitto OOS** contro la VIVA? E' lo stesso criterio 2 di R68,
+#      non ne invento uno nuovo.
+#   3. 🚦 E SOLO SE il punto 1 E il punto 2 passano ENTRAMBI, allora — e solo
+#      allora — si puo' PROPORRE a Claudio un cambio in forward. **La
+#      decisione resta sua. Questo file non autorizza niente.**
+#   4. 🔴 Fino a quel momento resta il criterio 3 di R68: **NESSUNA MODIFICA
+#      IN FORWARD**, qualunque cosa esca.
+#
+# ---------------------------------------------------------------------
+# 🚫 QUELLO CHE QUESTO ROUND **NON** PUO' DIRE
+#
+#   a) I tick reali partono dal 2024.07.05: **niente crollo 2020, niente orso
+#      2022, niente laterale 2016-2021.** Valida il RIEMPIMENTO (spread, stop
+#      presi dentro la barra, ordini eseguiti davvero), **mai la robustezza di
+#      regime**. Identico limite gia' dichiarato in R58.
+#   b) **Non ribalta R57**: la promozione di rango di PTE_GBPUSD resta caduta.
+#   c) **Non tocca il Dow**: li' l'asse del buffer e' inerte per unita' di
+#      misura (30 "pip" = ~0,03 ATR, R69 §3). Si rilancera' dopo il buffer in
+#      multipli di ATR.
+#
+# ---------------------------------------------------------------------
+# ⚠️ CONTROLLO OBBLIGATORIO SULLE gen_*.ini (trappola pagata in R58)
+#
+#   In R58 le direttive `@` erano passate ma **le righe di parametro NO**, e
+#   il tester ha girato una griglia vecchia da 16 celle. Prima di leggere
+#   qualunque numero si verifica nelle `gen_*.ini` che ci siano:
+#       InpSLbufferPips con 7 valori (0..30 step 5)
+#       InpTP2_ATRmult  con 2 valori (2,0 e 3,0)
+#       InpSLfromDoji = 0
+#   Se la griglia non e' 7x2 = **14 celle**, il round si cestina e si rilancia.
+#
+# ---------------------------------------------------------------------
+# GRIGLIA: 7 x 2 = 14 celle
+#   Stretta apposta: a tick reali ogni cella costa, e le due celle che
+#   interessano (5/2,0 e 25/3,0) sono DENTRO. Le altre 12 servono a
+#   rispondere alla domanda 1 -- che e' una domanda sulla COLONNA, non sulla
+#   cella, e senza l'asse intero non si puo' rispondere.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO 2024.07.05
+
+# --- l'asse della domanda 1: identico a R68-R71 ---
+InpSLbufferPips=10.0||0.0||5.0||30.0||Y
+# --- solo i due target che contengono le due celle nominate ---
+InpTP2_ATRmult=2.0||2.0||1.0||3.0||Y
+
+# --- pinnati: identici a R68/R69/R70/R71, si muove un asse alla volta ---
+InpSLfromDoji=0||0||0||0||N
+InpTF=16385||16385||0||16385||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
