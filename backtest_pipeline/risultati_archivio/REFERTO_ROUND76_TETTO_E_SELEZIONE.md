@@ -1,5 +1,20 @@
 # 🔓 R76 — **IL TESTER LEGGE DAL 2000.** E per la prima volta la regola della finestra è SODDISFATTA.
 
+> ## ✍️ CORREZIONE (aggiunta con R77, stesso giorno)
+> **Questo round ha girato con `InpTP1_ATRmult = 0`**, non con lo `0.5` delle
+> sedie del vivaio R23: il file prova `PTE_FINESTRA_VECCHIA_O_RECENTE.txt` non
+> pinna quel parametro e passa il default del sorgente. È lo stesso difetto
+> trovato fra R72 e R73.
+> - ✅ **I confronti fra celle restano validi** (tutte hanno lo stesso `TP1`).
+> - 🔴 **La riga chiamata "VIVA" NON è la sedia viva**: va letta come
+>   **`buffer 5 (TP1=0)`**.
+> - 🔴 **RITIRATA la frase «su tredici anni la configurazione viva avrebbe
+>   sfondato il muro della prop»**: quel 13,7% è di una configurazione che in
+>   forward non gira. Il fatto che *`buffer 0` e `buffer 5` sfondino* resta,
+>   ma riferito a `TP1=0`.
+>
+> La corsa che chiude il punto è **R78**, con `TP1` pinnato a 0,5.
+
 _Chiude l'`[INCERTO]` aperto dalla sonda: il tetto delle 100.000 barre
 bloccava anche lo Strategy Tester?_
 
