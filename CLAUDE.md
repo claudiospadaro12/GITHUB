@@ -29,10 +29,26 @@ Le quattro regole, valide da qui in avanti (NON retroattive: i round gia'
 giudicati restano com'erano — i criteri si cambiano prima dei numeri, non dopo):
 
 **A. 📏 L'unita' di misura e' l'OPERAZIONE, non l'anno.**
-L'IS e' la finestra **piu' RECENTE** che contiene almeno **~150 operazioni**,
-non il primo 40% di tutto lo storico disponibile. Su un H1 forex fanno 3-4 anni,
-non sedici. Se la finestra piu' recente non arriva a 150 trade, la si allunga
-all'indietro finche' non ci arriva — e si dichiara quanto e' stata allungata.
+_(riscritto il 16/08 dopo R71, congelato da Claudio — la prima stesura diceva
+anche "l'IS dev'essere la finestra piu' RECENTE", e **quella meta' e' stata
+MISURATA E NON REGGE**: su USDJPY la finestra vecchia sceglie meglio (92,4%
+contro 83,5%), su GBPUSD il contrario. Un simbolo per parte = non dimostrato.)_
+
+L'IS si dimensiona sulle **OPERAZIONI (>=150)**, non sugli anni.
+**DOVE collocarla NON e' deciso**: si usa la finestra che lascia un OOS di
+almeno 150 trade, e **si DICHIARA quale REGIME contiene**.
+
+- ⚠️ La soglia dei 150 **morde davvero**: in R70 con n=75-159 la superficie IS
+  era frastagliata (una cella che sporge, il resto su e giu' = selezione che
+  insegue il rumore); in R71 con n=190-256 l'altopiano si legge.
+- 📐 Quanti anni servono lo detta la **frequenza del motore**, non il calendario:
+  PTE su H1 forex fa 25-53 trade/anno -> **~5 anni di IS**. Si misura, non si
+  sceglie.
+- 🚫 E la selezione della cella resta quella di casa: **centro dell'altopiano,
+  MAI il picco**. In R70 avevo calcolato i confronti col picco e il risultato
+  si e' ribaltato quando li ho rifatti con la regola giusta. **La regola di
+  selezione va dichiarata insieme al numero, altrimenti il numero non vuol
+  dire niente.**
 
 **B. ⚖️ Il VECCHIO giudica il RISCHIO. Il RECENTE giudica il MERITO.**
 Estensione della valvola di R59 (_"il campione sottile sospende il giudizio sul

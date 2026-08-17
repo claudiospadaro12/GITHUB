@@ -1,5 +1,43 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## ⚖️ AGGIORNAMENTO 16/08 NOTTE — R70 · R71, l'emendamento e' stato messo alla prova
+>
+> Claudio: _"dal 2010 sono tantissimi anni, stiamo scartando opportunita'"_.
+> L'emendamento e' stato **congelato in `CLAUDE.md`** e poi **verificato**.
+>
+> **R70** (IS 2019-2022) e **R71** (IS 2016-2021), stessa griglia di R68/R69
+> carattere per carattere, cambia solo la finestra. 8 CSV su 8, cancelli ok.
+>
+> ### Cosa e' uscito
+> - ❌ **L'epoca NON era il colpevole.** L'IS e' **0/28 su ENTRAMBI i simboli**
+>   anche nel 2016-2021 e nel 2019-2022, e l'OOS 2021-2026 e' **28/28 e 27/28**.
+>   🎯 **NON E' IL CALENDARIO, E' IL 2021** (tassi zero+covid prima, dollaro
+>   forte e tassi dopo). **La regola C e' dimostrata.**
+> - ⚖️ **"La finestra recente sceglie meglio" = NON DIMOSTRATO**: USDJPY premia
+>   la vecchia (92,4% vs 83,5%), GBPUSD la nuova (95,1% vs 57,7%). Un simbolo
+>   per parte. 👉 **Il punto A e' stato RISCRITTO e ricongelato.**
+> - ✍️ **RITRATTATO R70 §2**: i rapporti di cattura usavano il **picco** dell'IS,
+>   che il criterio 1 vieta. Con la regola giusta il vantaggio si ribalta.
+>   Nota in testa a `REFERTO_ROUND70_FINESTRA.md`.
+> - 📉 **Buffer: 5ª e 6ª conferma sul DD** (GBPUSD 11,07 → 3,42%). Il profitto
+>   invece si sposta ogni volta: **rischio stabile, rendimento instabile**.
+> - 🪑 **`buffer 5` (config viva) finita male in 6 misure su 6.**
+> - 🗃️ CSV archiviati in `risultati_archivio/csv_R69`, `csv_R70`, `csv_R71`
+>   (quelli di R68 mancavano: errore corretto da R69 in poi).
+>
+> ### Prossimi passi, in ordine
+> 1. ⏱️ **TICK REALI su `buf 25 / TP 3,0`** — centro dell'altopiano su
+>    **entrambi** i simboli, sopravvive a tutte le finestre. **E' qui che
+>    inizia il verdetto: tutto quanto sopra e' OHLC e PROPONE.**
+> 2. 🔧 **Buffer in multipli di ATR** (`sl = entry − atr*(1+InpSLbufferATR)`)
+>    su copia **`_Ottimizzato`** — R69 §7. Rende il parametro portabile e rende
+>    il Dow misurabile (li' 30 pip valgono ~0,03 ATR).
+> 3. 🔬 Sonda da 2 minuti: `SYMBOL_DIGITS` + `PipSize()` + `iATR(14)` sui tre
+>    simboli → chiude l'unico **[INFERITO]** di R69.
+> 4. 🪑 **Solo dopo**, e solo con la parola di Claudio, `PTE` in forward.
+>
+> 🔴 **NIENTE E' STATO TOCCATO IN FORWARD** in nessuno dei round R67-R71.
+
 > ## 🧬 AGGIORNAMENTO 16/08 SERA TARDI — R67 · R68 · R69, la PTE ha un parametro tarato male
 >
 > **R67** ha trovato che nella PTE il target e' in ATR puro e lo stop e'
