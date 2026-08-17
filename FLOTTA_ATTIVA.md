@@ -94,8 +94,8 @@ _Legenda stato: ✅ validato tick reali · 🟡 nativo/da verificare · ❌ scar
 | Grafico | EA | Simbolo | TF | Magic | Stato |
 |---|---|---|---|---|---|
 | 225JPY M1 | **ABTG_GapContinuation** | Nikkei | M1 | **774101** | 🆕 forward dal 16/08, rischio 1% |
-| GBPUSD H1 | **ABTG_PTE** _(candidata R78)_ | Cable | H1 | **771332** | 🆕🧪 dal 17/08 — `buffer 25 / TP2 3,0`, rischio **0,5%** |
-| GBPUSD H1 | **ABTG_PTE** _(sedia storica)_ | Cable | H1 | **771322** | ⚠️ rischio portato da 1,0% a **0,5%** il 17/08 — vedi nota sotto |
+| GBPUSD H1 | **ABTG_PTE** _(candidata R78)_ | Cable | H1 | **771332** | 🆕🧪 dal 17/08 — `buffer 25 / TP2 3,0`, rischio **0,5%** · ✅ verificata 7/7 |
+| GBPUSD H1 | **ABTG_PTE** _(sedia storica)_ | Cable | H1 | **771322** | ⚠️ rischio 1,0% → **0,5%** il 17/08 · ✅ verificata 7/7 |
 
 **Prima sedia arrivata dalla caccia esterna al Code Base** (origine:
 `mql5.com/en/code/75301`, Francesc Jordi Mallol Nolden — attribuzione in
@@ -184,9 +184,27 @@ dopo il 17/08 non sono confrontabili fra loro**. Il contatore dei TRADE si'.
    facciano nel frattempo. Le due sedie condividono lo stesso segnale di
    ingresso: le prime settimane diranno poco.
 
-### ✅ Verifica meccanica del deploy
-`771322` -> buffer **5**, TP2 **2,0**, TP1 0,5, rischio **0,5**
-`771332` -> buffer **25**, TP2 **3,0**, TP1 0,5, rischio **0,5**
-🔴 **I due magic devono essere DIVERSI**: `CountPositions()` filtra per simbolo
-**e** magic (`ABTG_PTE.mq5:484`), quindi con magic diversi non si bloccano a
-vicenda — con magic uguali si', e il duello non esisterebbe.
+### ✅ VERIFICA DEL DEPLOY — **FATTA il 17/08 alle 21:18-21:19, 7 campi su 7**
+
+Controllata dagli screenshot degli input **prima dell'OK**, campo per campo:
+
+| campo | `771322` storica | `771332` candidata |
+|---|---|---|
+| `InpTF` | **1 Hour** ✅ | **1 Hour** ✅ |
+| `InpSLbufferPips` | **5.0** ✅ | **25.0** ✅ |
+| `InpTP2_ATRmult` | **2.0** ✅ | **3.0** ✅ |
+| `InpTP1_ATRmult` | **0.5** ✅ | **0.5** ✅ |
+| `InpRiskPercent` | **0.5** ✅ | **0.5** ✅ |
+| `InpMagic` | **771322** ✅ | **771332** ✅ |
+| `InpComment` | `PTE GBPUSD` ✅ | `PTE GBPUSD B25` ✅ |
+
+🔴 **I due magic sono DIVERSI**, ed e' la condizione che rende possibile il
+duello: `CountPositions()` filtra per simbolo **e** magic (`ABTG_PTE.mq5:484`),
+quindi le due sedie **non si bloccano a vicenda**. Con magic uguali si sarebbero
+mutate a vicenda e non ce ne saremmo accorti se non dopo settimane.
+
+✅ **E tutto il resto e' identico sulle due sedie**, come dev'essere: TMA
+56/100/2,0 e 14/30/2,0, doji 10%, Heikin Ashi on, color-flip on, long **e**
+short attivi, EMA200-bias off, WPR off, ATR uscita 14, `SLfromDoji` off,
+TP1Pct 50, breakeven on, trailing on, max 1 posizione, filtro news off.
+**Cambiano SOLO buffer e target: e' un esperimento a una variabile per parte.**
