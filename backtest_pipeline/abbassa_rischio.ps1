@@ -70,8 +70,14 @@ foreach($d in $dirs){
     if(-not $ins.ContainsKey("InpRiskPercent")){ continue }
     $visti++
 
+    # ATTENZIONE: TryParse senza cultura, su Windows in ITALIANO, legge
+    # "2.0" come VENTI (il punto e' il separatore delle migliaia in it-IT).
+    # Successo il 17/08: 0 file corretti su 2. Cultura INVARIANTE, sempre.
     $val = 0.0
-    if(-not [double]::TryParse($ins["InpRiskPercent"], [ref]$val)){ continue }
+    $okParse = [double]::TryParse($ins["InpRiskPercent"],
+                 [System.Globalization.NumberStyles]::Float,
+                 [System.Globalization.CultureInfo]::InvariantCulture, [ref]$val)
+    if(-not $okParse){ continue }
     if([math]::Abs($val - $Da) -gt 0.0001){
       Rec ("  lasciato  {0,-36} magic {1}  rischio {2}  ({3})" -f $ea, $ins["InpMagic"], $ins["InpRiskPercent"], $chr.Name) Gray
       continue
