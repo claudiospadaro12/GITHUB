@@ -45,6 +45,7 @@ $regole = @(
 $nonToccare = @(".lnk",".url",".exe",".msi",".bat",".ps1")
 
 $Righe = New-Object System.Collections.ArrayList
+$Mosse = New-Object System.Collections.ArrayList
 function Rec($s,$col){ [void]$Righe.Add($s); if($col){Write-Host $s -ForegroundColor $col}else{Write-Host $s} }
 
 $titolo = if($Prova){"PROVA (non tocco niente)"}else{"SPOSTAMENTO VERO"}
@@ -92,19 +93,35 @@ foreach($f in $file){
     $nomeDest = Join-Path $cartDest ($f.BaseName + "_" + $n + $f.Extension)
     $n++
   }
-  Move-Item -Path $f.FullName -Destination $nomeDest
-  Rec ("  spostato: " + $f.Name + "  ->  ARCHIVIO_DESKTOP\" + $dest) Green
-  $spostati++
+  try{
+    Move-Item -LiteralPath $f.FullName -Destination $nomeDest -ErrorAction Stop
+    [void]$Mosse.Add([pscustomobject]@{ Origine=$f.FullName; Destinazione=$nomeDest })
+    Rec ("  spostato: " + $f.Name + "  ->  ARCHIVIO_DESKTOP\" + $dest) Green
+    $spostati++
+  } catch {
+    Rec ("  NON spostato (file in uso o protetto): " + $f.Name + " -- " + $_.Exception.Message) Red
+    $lasciati++
+  }
 }
 
 Rec ""
 Rec ("file " + $(if($Prova){"da spostare"}else{"spostati"}) + ": " + $spostati + "   lasciati: " + $lasciati) White
 if($Prova){
   Rec "Era solo la PROVA. Per spostare davvero: rilancia SENZA -Prova" Yellow
+  $ref = Join-Path $desk ("prova_sistemazione_desktop_" + (Get-Date -Format "yyyy-MM-dd_HHmm") + ".txt")
+  $Righe | Set-Content -Path $ref -Encoding UTF8
+  Write-Host ("Referto della prova (unico file creato): " + $ref) -ForegroundColor Cyan
 } else {
   Rec ("Tutto dentro: " + $arch) Cyan
   Rec "NIENTE e' stato cancellato: solo spostato. Le cartelle e i collegamenti non sono stati toccati." Gray
-  $log = Join-Path $arch ("log_sistemazione_" + (Get-Date -Format "yyyy-MM-dd_HHmm") + ".txt")
+  if(-not (Test-Path $arch)){ New-Item -ItemType Directory -Path $arch -Force | Out-Null }
+  $stamp = Get-Date -Format "yyyy-MM-dd_HHmm"
+  $log = Join-Path $arch ("log_sistemazione_" + $stamp + ".txt")
   $Righe | Set-Content -Path $log -Encoding UTF8
+  if($Mosse.Count -gt 0){
+    $csv = Join-Path $arch ("mosse_" + $stamp + ".csv")
+    $Mosse | Export-Csv -Path $csv -NoTypeInformation -Encoding UTF8
+    Write-Host ("Elenco per rimettere tutto a posto: " + $csv) -ForegroundColor Cyan
+  }
   Write-Host ("Log scritto in: " + $log) -ForegroundColor Cyan
 }
