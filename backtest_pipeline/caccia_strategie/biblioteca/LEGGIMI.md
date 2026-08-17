@@ -6,13 +6,14 @@ che e' GRATUITO, PUBBLICO e LEGITTIMO si scarica e si archivia QUI**, cosi'
 nessuna caccia butta via il bottino e ogni analisi futura parte dal file
 vero, non dal ricordo di una chat._
 
-## Le tre stanze
+## Le stanze
 
 | cartella | cosa ci va | regola |
 |---|---|---|
 | `set/` | file `.set`/`.ini` di preset scaricati (prop e non) | nome: `<EA>_<preset>_<fonte>_<AAAA-MM-GG>.set` |
 | `sorgenti/` | sorgenti `.mq5`/`.mqh` GRATUITI col loro sorgente pubblico | SEMPRE con licenza e autore in testa al file o in una riga del catalogo |
 | `schede/` | estratti testuali: pannelli input trascritti, manuali pubblici, regole | una scheda = un file `.md` con URL e data |
+| `dati/` | dataset scaricati (calendari news CSV, storici, liste eventi) | nome: `<COSA>_<periodo>_<fuso se noto>_<fonte>_<AAAA-MM-GG>.<ext>` — il FUSO si dichiara SEMPRE |
 
 ## Le regole della biblioteca
 
