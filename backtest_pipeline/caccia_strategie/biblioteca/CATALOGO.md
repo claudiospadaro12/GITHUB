@@ -31,3 +31,4 @@
 > (`UltimateEAPropFirms_*`, `RangeBreakoutDaytrader_*`). Sono archiviati **come
 > sono**, per poterli ricaricare in MT5 senza conversioni. Per leggerli a riga di
 > comando: `iconv -f UTF-16 -t UTF-8 file.set`.
+| 2026-08-18 | schede/RangeBreakoutDaytrader_GRADINO1_cancello_2026-08-18.md | mql5.com/en/market/product/114061 | scheda gradino 1 del cancello acquisti + criteri demo congelati | chiude M10 del PIANO_PROP: primo candidato all acquisto | chat principale |
