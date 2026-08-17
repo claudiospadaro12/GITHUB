@@ -1,5 +1,20 @@
 # 📏 CENSIMENTO DELLA REGOLA DELLA FINESTRA — quali EA la possono rispettare
 
+> ## 📡 AGGIORNATO DALLA SONDA (17/08, sera) — **le [STIMA] sono cadute**
+> La sonda `ABTG_InfoBroker` ha misurato **59 simboli su 59**, e due assunzioni
+> di questo file erano sbagliate:
+> - 🟢 **i METALLI hanno storico profondo** (XAUUSD **2004.06.11**, XAGUSD
+>   **2008.11.07**): qui erano dati per corti (`2024.09.26`);
+> - 🟢 **il FOREX parte dal 1971-1993**, non dal 2010: quello era il limite del
+>   **disco**, non del broker.
+> - 🔴 **Gli INDICI restano a `2024.09.26` con stato `COMPLETO`**: non manca sul
+>   disco, **il broker non ce l'ha**. Il buco è confermato e definitivo.
+>
+> **Censimento rifatto: da 22 coppie che rispettavano la regola a 88 su 158**, e
+> delle 53 che ancora non ce la fanno **44 sono indici o energia**.
+> 👉 Numeri aggiornati in **`REFERTO_SONDA_STORICO_17-08.md`**. Le tabelle qui
+> sotto restano come documento del prima.
+
 _Chiesto da Claudio il 16/08 subito dopo aver congelato il punto A
 dell'**EMENDAMENTO DELLA FINESTRA** (`CLAUDE.md`): **"è una regola che vale per
 tutti?"**. Sì, vale per tutti. Questo file dice **cosa costa**, motore per
