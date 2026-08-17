@@ -1,5 +1,38 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## 🧨 AGGIORNAMENTO 17/08 — il difetto "pip" e' una FAMIGLIA, non un caso
+>
+> Trovato dal vivo sulle due gambe SuperWave aperte oggi sul Dow:
+> `SUPERWAVE DOW H1 S 1/3` @ **53.648,50** e `S 2/3` @ **53.648,30**.
+> **Venti centesimi**, non venti punti. `PipSize()` torna `_Point` quando
+> `digits!=3,5`, quindi su U30USD (digits=2) `InpPendingPips=20` vale
+> **0,20 punti = zero**: l'ingresso frazionato NON ESISTE su questo simbolo,
+> ne' in forward ne' in nessun backtest fatto finora (R3 compreso).
+> Stessa famiglia di R69/R74 (`InpSLbufferPips` della PTE sul Dow).
+>
+> ### ✅ FATTO OGGI — solo SuperWave
+> `ABTG_SuperWave.mq5` + `_DOW_H1_Ottimizzato` + `_DAX_H4_Ottimizzato`:
+> due manopole nuove, **`InpPendingAtr`** e **`InpSLBufferAtr`**.
+> **Default 0 = si torna esattamente al calcolo in pip di prima.** Nessun EA
+> in forward cambia comportamento finche' non le si mette a mano.
+>
+> Prova pronta: **`prove/R75_SuperWave_DOW_PENDING_ATR.txt`** — 7 celle,
+> tick reali, e la **cella 0 e' il controllo** che riproduce il
+> comportamento di oggi. Criteri congelati dentro il file.
+>
+> 🤝 **La PTE l'ha gia' fatta l'altra sessione** (`ABTG_PTE_Ottimizzato`,
+> magic 771331, `InpSLbufferMode`, commit `dc16e7a` + R74). Il mio doppione
+> e' stato **ritirato**: `ABTG_PTE.mq5` non e' toccato.
+>
+> ### 🔎 I GEMELLI ANCORA DA SISTEMARE (cercati, non ancora toccati)
+> Tutti su indici a 2 decimali, quindi tutti con il buffer INERTE:
+> `ABTG_SupRev_CAC_H4_Ottimizzato` · `_DAX_H1_` · `_DAX_H4_` · `_DOW_H1_` ·
+> `_DOW_H4_` · `_NAS_H1_` (sei file, `InpSLBufferPips=3` -> 0,03 punti).
+> Su forex il difetto NON c'e' (`ABTG_HARSI`, `ABTG_Londra_ORB`,
+> `ABTG_Nightly`, `ABTG_PostNews`, `ABTG_FiboH4_Multi`, `EasyTrend_EURUSD`).
+> **Non sono stati patchati oggi apposta**: sei EA = sei round, e la regola
+> di casa e' una domanda per volta.
+
 > ## ⚖️ AGGIORNAMENTO 16/08 NOTTE — R70 · R71, l'emendamento e' stato messo alla prova
 >
 > Claudio: _"dal 2010 sono tantissimi anni, stiamo scartando opportunita'"_.

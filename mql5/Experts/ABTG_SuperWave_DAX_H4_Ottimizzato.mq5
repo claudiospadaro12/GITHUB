@@ -58,11 +58,13 @@ input group "=== Ingresso frazionato ==="
 input double InpFirstFraction = 0.3333; // quota a mercato (documento: 1/3)
 input bool   InpUsePending    = true;   // resto (2/3) su ordine pendente stop
 input double InpPendingPips    = 20;    // distanza del pendente dal 1o ingresso (documento: ~20 pip)
+input double InpPendingAtr    = 0;    // >0: distanza del pendente in ATR del TF operativo (IGNORA InpPendingPips). 0 = come prima
 input int    InpPendingExpiryBars = 3;  // scadenza del pendente in barre del TF operativo
 
 input group "=== Stop / target ==="
 input int    InpSLLookback    = 5;      // barre per il minimo/massimo recente dello SL
 input double InpSLBufferPips   = 3;     // buffer extra sullo SL, in pip
+input double InpSLBufferAtr   = 0;     // >0: buffer SL in ATR del TF operativo (IGNORA InpSLBufferPips). 0 = come prima
 input double InpTP1_R         = 1.0;    // 1o target in R -> parziale + stop in pari
 input double InpTP1Pct        = 50;     // % chiusa al 1o target
 input bool   InpBreakeven     = true;
@@ -211,13 +213,17 @@ bool ConfluenceOK(double level,double atr)
 void Enter(bool isLong,double stLine)
   {
    double pip=PipSize();
+   //--- 17/08/2026: le distanze "in pip" sono INERTI sugli strumenti a 2 decimali.
+   //    PipSize() torna _Point quando digits!=3,5 -> su U30USD (digits=2) 20 pip = 0,20 punti.
+   //    L'ATR e' in unita' dello STRUMENTO e vale su forex e indici allo stesso modo.
+   double atrDist=AtrVal();
    double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
    double entry=isLong?ask:bid;
 
    //--- SL dinamico: Supertrend o estremo recente (il piu' protettivo), + buffer
    double ext = isLong ? iLow(_Symbol,InpTF,iLowest(_Symbol,InpTF,MODE_LOW,InpSLLookback,1))
                        : iHigh(_Symbol,InpTF,iHighest(_Symbol,InpTF,MODE_HIGH,InpSLLookback,1));
-   double buf=InpSLBufferPips*pip;
+   double buf = (InpSLBufferAtr>0 && atrDist>0) ? InpSLBufferAtr*atrDist : InpSLBufferPips*pip;
    double sl = isLong ? MathMin(stLine,ext)-buf : MathMax(stLine,ext)+buf;
    sl=NormalizePrice(sl);
 
@@ -245,7 +251,8 @@ void Enter(bool isLong,double stLine)
    //--- 2/3 su pendente stop nella direzione del trade
    if(InpUsePending && lotPend>0)
      {
-      double px = isLong ? NormalizePrice(entry+InpPendingPips*pip) : NormalizePrice(entry-InpPendingPips*pip);
+      double off = (InpPendingAtr>0 && atrDist>0) ? InpPendingAtr*atrDist : InpPendingPips*pip;
+      double px = isLong ? NormalizePrice(entry+off) : NormalizePrice(entry-off);
       double tpP= isLong ? NormalizePrice(px+risk*InpTP_RR) : NormalizePrice(px-risk*InpTP_RR);
       datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
       bool okp=isLong?gTrade.BuyStop(lotPend,px,_Symbol,sl,tpP,ORDER_TIME_SPECIFIED,exp,InpComment+" L 2/3")

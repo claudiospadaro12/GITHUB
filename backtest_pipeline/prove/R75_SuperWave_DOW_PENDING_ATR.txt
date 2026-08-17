@@ -1,0 +1,76 @@
+# =====================================================================
+#  R75 - ABTG_SuperWave_DOW_H1_Ottimizzato @ U30USD
+#  L'INGRESSO FRAZIONATO 1/3 + 2/3 E' MAI ESISTITO SUL DOW?
+#  Scritto il 17/08/2026, PRIMA di qualunque numero di questo round.
+# =====================================================================
+#
+# IL FATTO CHE FA NASCERE IL ROUND (misurato dal vivo, non ipotizzato)
+#   Le due gambe aperte in forward il 17/08 sono entrate a:
+#       SUPERWAVE DOW H1 S 1/3   ->  53.648,50
+#       SUPERWAVE DOW H1 S 2/3   ->  53.648,30
+#   Venti CENTESIMI di distanza, non venti punti. Il motivo e' nel codice:
+#
+#       double PipSize(){ int d=DIGITS; return (d==3||d==5)? _Point*10 : _Point; }
+#       px = entry -/+ InpPendingPips*pip;      // 20 * 0.01 = 0,20 punti
+#
+#   Su U30USD (digits=2) PipSize() vale 0,01. Quindi InpPendingPips=20 NON
+#   e' "20 punti": e' 0,20 punti, cioe' ZERO. Le due gambe entrano di fatto
+#   allo stesso prezzo: l'ingresso frazionato NON ESISTE su questo simbolo,
+#   ne' in forward ne' in tutti i backtest fatti finora (R3 compreso).
+#
+#   E' la STESSA famiglia di difetto di R69 sulla PTE (InpSLbufferPips sul
+#   Dow = ~0,007 ATR): un parametro scritto "in pip" e' INERTE sugli
+#   strumenti a 2 decimali.
+#
+# IPOTESI DA SMONTARE
+#   "Scaglionare davvero l'ingresso migliora il Dow."
+#   L'ipotesi NULLA e' che non cambi niente, o che peggiori: entrare piu'
+#   lontano significa 2/3 della size a un prezzo migliore ma con il rischio
+#   che il pendente NON venga preso (scade dopo InpPendingExpiryBars=3) e il
+#   trade resti da 1/3 di size. Non sappiamo quale dei due effetti pesa di
+#   piu': per questo si misura invece di decidere.
+#
+# COSA CAMBIA NEL CODICE (gia' dentro, commit di oggi)
+#   InpPendingAtr:  >0 -> distanza = InpPendingAtr * ATR(InpStAtrPeriod) sul
+#                   TF operativo, cioe' nell'unita' dello STRUMENTO.
+#                   =0 -> si torna esattamente al vecchio calcolo in pip.
+#   DEFAULT 0. Nessun EA in forward cambia comportamento finche' non lo si
+#   mette diverso da zero A MANO. La correzione non e' una decisione: e'
+#   solo una manopola che prima non c'era.
+#
+# LO SWEEP: 7 celle per finestra
+#   InpPendingAtr = 0 / 0,1 / 0,2 / 0,3 / 0,4 / 0,5 / 0,6
+#   La cella 0 E' IL CONTROLLO: riproduce ESATTAMENTE il comportamento di
+#   oggi (0,20 punti = gambe sovrapposte). Se le celle >0 non la battono in
+#   entrambe le finestre, la risposta e' "il frazionamento non serve" e si
+#   lascia InpPendingAtr=0 in forward.
+#
+# CRITERI DI ACCETTAZIONE (congelati QUI, prima dei numeri)
+#   Per dire "si cambia il forward" servono TUTTI E QUATTRO:
+#     1. la cella vincente e' positiva in ENTRAMBE le finestre (IS e OOS)
+#     2. batte la cella 0 (il controllo) in ENTRAMBE le finestre
+#     3. NON e' un picco isolato: le due celle vicine restano positive OOS
+#        e nessuna delle due ribalta il segno -> si prende il CENTRO del
+#        pianoro, mai il massimo
+#     4. drawdown OOS non peggiore della cella 0 di piu' di 1 punto %
+#   Se il segno IS->OOS si ribalta (Spearman negativo, come 12 volte su 13
+#   in questo progetto): NIENTE CAMBIA IN FORWARD. Il round e' comunque
+#   servito, perche' avra' MISURATO che il frazionamento e' rumore.
+#
+# PERCHE' TICK REALI E NON OHLC
+#   Qui la domanda E' se un ordine PENDENTE viene preso o no: e' esattamente
+#   la cosa che un modello OHLC M1 inventa. Uno screening OHLC su questa
+#   domanda non sarebbe veloce, sarebbe falso. 7 celle x 2 finestre = 14
+#   pass, la stessa taglia di R3 (5 celle) che era girato senza problemi.
+#
+# LO STORICO
+#   U30USD a BCM parte dal 26/09/2024 (misurato). Sono 21 mesi: R3 su questa
+#   stessa configurazione aveva prodotto 143 trade OOS, sopra il minimo. Il
+#   campione regge il MERITO, non solo il RISCHIO.
+#
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+InpTF=16385||16385||0||16385||N
+InpPendingAtr=0||0||0.10||0.60||Y
