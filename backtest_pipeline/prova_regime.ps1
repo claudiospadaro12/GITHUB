@@ -36,8 +36,17 @@ param(
   #  lancio solo per volta.
   [switch]$SoloUno,             # esegue UN solo lancio e si ferma
   [switch]$SenzaBlindatura,     # NON scrive il blocco [Experts] nell'ini
+  # --- 17/08: il giro sui dati NATIVI del broker -----------------------
+  #  `-Suffisso ""` da riga di comando NON funziona: con `powershell -File`
+  #  la stringa vuota viene mangiata dal parser e il parametro risulta
+  #  mancante. Quindi un interruttore dedicato, che non si puo' sbagliare.
+  #  Serve dal 17/08, quando la sonda ha misurato che il BCM nativo ha
+  #  USDJPY dal 1971 e GBPUSD dal 1993: tutte le finestre di regime ci
+  #  sono, e sono i dati su cui gli EA operano davvero.
+  [switch]$Nativo,
   [string]$Terminal   = "",[string]$MetaEditor = "",[string]$DataFolder = "",[switch]$Force
 )
+if($Nativo){ $Suffisso = "" }
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
