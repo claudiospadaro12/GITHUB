@@ -21,6 +21,13 @@
 >
 > Il resto del referto è lasciato com'era scritto: **si corregge in testa, non
 > si riscrive la storia.**
+>
+> ### 🛑 ESITO (R73, stesso giorno): **LA PROPOSTA È RITIRATA.**
+> Con `InpTP1_ATRmult = 0.5` la sedia viva su USDJPY **non è negativa: fa
+> +979** (era −837 col pin sbagliato), e la candidata `buf 25 / TP 3,0` fa
+> **+654** — un terzo in meno. Su GBPUSD **+2.091 contro +1.172**. **Il
+> criterio 2 non passa su nessuno dei due simboli: le sedie della PTE non si
+> toccano.** Referto: `REFERTO_ROUND73_SEDIA_VIVA_TICK_REALI.md`.
 
 
 _Il primo round della serie del buffer che vale come **VERDETTO** e non come
