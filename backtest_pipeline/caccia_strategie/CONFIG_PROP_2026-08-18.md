@@ -671,3 +671,28 @@ Vedi il file separato: **`PROPOSTE_PROP_2026-08-18.md`** (stessa cartella).
 5. **Numeri di performance dei vendor**: letti, **non riportati**, per regola.
 6. **Le regole di consistenza di E8** vengono da fonti terze, non dal loro
    help center: **[INCERTO]**.
+
+---
+
+## ➡️ SEGUITO — la seconda notte (18/08, tarda)
+
+Il dossier della **raccolta mirata di `.set`** sta in un file separato:
+**`CONFIG_PROP_RACCOLTA_SET_2026-08-18.md`** (stessa cartella).
+
+**Le tre cose che quel file cambia rispetto a questo:**
+1. 🔴 **Correzione all'evidenza del pattern 4/9.** Qui sopra (§1A-ZERO) c'e'
+   scritto "tre vendor indipendenti". **Non lo sono**: il file
+   `GoldPhantom_Propfirm.set` dichiara l'EA `The_Gold_Phantom_V1.0_WSC` e la
+   pagina Market conferma il venditore **Wim Schrynemakers / Profalgo Limited**
+   — lo **stesso autore** di The Gold Reaper, con la **stessa lista di input**.
+   Il principio "guardiano prima del muro" ha 5+ fonti; **il valore 4/9 ne ha
+   due** (Profalgo + Eriksson), e tre fonti indipendenti usano invece **0,1
+   punto** di buffer (4,9 / 9,9).
+2. 🔴 **Il buco n.8 non e' piu' di nessuno.** "Riduzione del rischio in
+   prossimita' dei muri": trovata due volte (The Impossible Bullion, con zone
+   Yellow/Red e moltiplicatori di rischio; Range Breakout Daytrader, con scala
+   manuale a due gradini).
+3. 🔴 **Il §1C di questo dossier va integrato.** Qui c'e' scritto che un filtro
+   news "non e' backtestabile". La FUNZIONE non risponde nel tester, ma il
+   calendario **si esporta in CSV** in `Common/Files` e da li' si legge: due CSV
+   pubblici (2021→2025, 37.799 righe) sono gia' in `biblioteca/schede/`.
