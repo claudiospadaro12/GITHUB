@@ -93,6 +93,30 @@ come da progetto), e le tre righe sparite sono grafici chiusi in giornata i cui
 `abbassa_rischio.txt` sul Desktop: se non esiste, lo script non ha mai corretto
 niente.
 
+## 4-ter. ✅ CHIUSA — controprova delle 00:01 del 18/08 PASSATA
+
+Percorso completo, coi due inciampi documentati:
+
+1. 23:55 — primo giro correzione: **0 corretti**. Bug mio: `TryParse` senza
+   cultura su Windows it-IT legge "2.0" come VENTI. Corretto con
+   `InvariantCulture` (commit `81fe75d`).
+2. 23:57 — secondo giro: ancora 0, la cache di GitHub raw (~5 min) ha
+   riservito la versione vecchia. Risolto puntando la stringa al commit.
+3. **23:59 — terzo giro: `CORRETTO 2.0 -> 1` su `770101` (chart10) e `970901`
+   (chart05)**, copie 100k a 0.65 lasciate intatte, backup `.prima_rischio`.
+4. **00:01 — censimento a MT5 riaperto: ZERO righe rosse**, somma dichiarata
+   scesa da 49,55% a **44,55%**. Output in
+   `censimento_rischio_2026-08-18_0001.txt`.
+
+📌 Nota di lettura sull'ultimo output: le righe finali *"le perdite da -2%
+vengono dallo stop saltato"* sono il testo generico del ramo "niente sopra
+l'1%" dello script, scritto per il caso in cui il censimento non avesse
+trovato NULLA fin dall'inizio. Qui non si applica: la causa era il 2%
+dichiarato, trovata e corretta — lo stop non c'entrava.
+
+**Effetto pratico da oggi: la peggior perdita singola attesa sulle sedie
+corrette scende da ~2% a ~1% del conto.**
+
 ## 5. 🚦 Cosa resta aperto dopo questo referto
 
 - ✅ ~~perché il 100k va meglio del piccolo~~ → **misurato: rischia meno, non
