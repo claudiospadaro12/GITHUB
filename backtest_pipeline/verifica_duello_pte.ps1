@@ -3,7 +3,7 @@
 #  771322 (storica) contro 771332 (candidata R78), e verifica che le
 #  ALTRE due sedie PTE non siano state toccate per sbaglio.
 #
-#  ⚠️ I .chr si aggiornano SOLO al salvataggio del profilo:
+#  I .chr si aggiornano SOLO al salvataggio del profilo:
 #     PRIMA di lanciare -> MT5 -> File -> Profili -> Salva
 #
 #  Perche' dai file e non dagli screenshot: al deploy R23 la verifica dai
@@ -92,7 +92,7 @@ $mg = @($g | ForEach-Object { $_.ins["InpMagic"] })
 if ($g.Count -ne 2) {
   Rec ("ATTENZIONE: su GBPUSD ci sono {0} grafici PTE salvati, ne servono 2." -f $g.Count) Red; $errori++
 } elseif (($mg | Select-Object -Unique).Count -ne 2) {
-  Rec ("🔴 MAGIC UGUALI ({0}): le due sedie si bloccherebbero a vicenda. Il duello NON esisterebbe." -f ($mg -join ", ")) Red; $errori++
+  Rec ("MAGIC UGUALI ({0}): le due sedie si bloccherebbero a vicenda. Il duello NON esisterebbe." -f ($mg -join ", ")) Red; $errori++
 } else {
   Rec ("OK      magic DIVERSI su GBPUSD: {0}" -f ($mg -join " / ")) Green
 }

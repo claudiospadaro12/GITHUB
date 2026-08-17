@@ -18,6 +18,14 @@ Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
    Claudio arriva SEMPRE anche sul Desktop del VPS. La pagella serale ci
    arriva da sola: `scarica_pagella.ps1 -Installa` (attivita' 23:15,
    scrive `Desktop\pagella_AAAA-MM-GG.txt`).
+4. **NIENTE EMOJI DENTRO I FILE `.ps1` (imparata il 17/08, sbagliando).**
+   Windows PowerShell 5.1 sul VPS legge i `.ps1` come **ANSI, non UTF-8**:
+   un'emoji dentro una **stringa** diventa byte spuri e il parser esplode con
+   `Token imprevisto` / `Carattere di terminazione mancante nella stringa`.
+   Le lettere accentate nei commenti passano (vengono solo storpiate a
+   schermo), **l'emoji dentro una stringa no**. Regola pratica:
+   **i `.ps1` si scrivono in ASCII puro.** Le emoji vanno nei referti `.md`
+   e nei messaggi in chat, dove servono e dove funzionano.
 
 ## 📏 EMENDAMENTO DELLA FINESTRA (congelato da Claudio, 16/08 sera) — REGOLA DI CASA
 **Nato dalla sua osservazione: _"dal 2010 sono tantissimi anni, poche EA ce la
