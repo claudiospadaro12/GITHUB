@@ -180,15 +180,24 @@ if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $For
 #  che faceva l'import. Qui si controlla PRIMA di bruciare mezz'ora: se
 #  manca la cartella delle barre lo dico subito; se c'e' ma il tester
 #  fallisce, il messaggio dopo il primo lancio dice dove guardare.
-foreach($sym in @($Lista | ForEach-Object { "{0}{1}" -f $_.Simbolo, $Suffisso } | Sort-Object -Unique)){
-  $q = Join-Path $DataFolder ("bases\Custom\history\{0}" -f $sym)
-  if(-not (Test-Path $q)){
-    Muori ("il simbolo $sym non ha nemmeno le barre in bases\Custom\history.`n" +
-           "    Rilancia importa_storico_esterno.ps1 (versione dal 14/08 in poi,`n" +
-           "    quella che chiude MT5 in modo pulito).")
+#  17/08: questo controllo vale SOLO per i simboli CUSTOM (gli _EXT
+#  importati, che stanno in bases\Custom). I simboli NATIVI del broker
+#  stanno in bases\<Server>\history e non passano di li': con -Nativo il
+#  controllo cercava una cartella che non deve esistere e fermava tutto.
+if($Suffisso -ne ""){
+  foreach($sym in @($Lista | ForEach-Object { "{0}{1}" -f $_.Simbolo, $Suffisso } | Sort-Object -Unique)){
+    $q = Join-Path $DataFolder ("bases\Custom\history\{0}" -f $sym)
+    if(-not (Test-Path $q)){
+      Muori ("il simbolo $sym non ha nemmeno le barre in bases\Custom\history.`n" +
+             "    Rilancia importa_storico_esterno.ps1 (versione dal 14/08 in poi,`n" +
+             "    quella che chiude MT5 in modo pulito).")
+    }
   }
+  Write-Host ("    barre custom trovate per tutti i simboli richiesti.") -ForegroundColor Green
+} else {
+  Write-Host ("    giro NATIVO: i simboli sono quelli del broker, niente controllo su bases\Custom.") -ForegroundColor Green
+  Write-Host ("    (storico misurato dalla sonda del 17/08: USDJPY dal 1971, GBPUSD dal 1993)") -ForegroundColor DarkGray
 }
-Write-Host ("    barre custom trovate per tutti i simboli richiesti.") -ForegroundColor Green
 
 # --- 3. compila gli EA che servono (una volta per EA) ---
 $EAfatti = @{}
