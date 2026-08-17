@@ -1,0 +1,19 @@
+Benvenuti in questo video, ragazzi. Sarà un'esperienza davvero bella di me e di Alex sulla metodologia di stop loss. Ho riuscito a codificarla, quindi ho riuscito a codificare qualcosa che basicamente prende la maggior parte delle regole che usiamo come uomini e ciò che abbiamo fatto attraverso il nostro testo di base e attraverso la sua sviluppazione e ci permette di eseguire come un modello d'avviso esperto.
+
+Non è così buono come le decisioni umane, sicuramente direi che la profittabilità spesso sarebbe più alta, perché ci sono soltanto decisioni che puoi fare e che il computero non può fare, rispetto a rischi, rispetto a entri, targetti, tutto questo. Ma ovviamente non voglio stare qui a fare testi di riscaldamento e insegnare le persone gratis su YouTube con questo metodo, perché ovviamente le persone stanno pagando per impararlo con noi in privato. Ma posso mostrare l'EA che funziona attraverso i parametri che usiamo, quindi prende le regole, più o meno, che usiamo quando stiamo testando di nuovo e quando trattiamo a live e le mette in gioco nei mercati.
+
+Il lavoro di codificazione ha preso un certo tempo, ho avuto molti dolori. Non codifico normalmente, ma ho diversi strumenti e persone da liaisare. Quindi questo è come può essere, ma come ho detto, ovviamente può essere migliore se lo fai da persona.
+
+Quindi lo sposterò e vedremo dove finisce. E ricordate che è un unico assetto, ovviamente avrete una lunga varietà di assetti che potete usare, quindi ci sono periodi in cui non prendete nessun entro, perché gli entri non sono validi, ma ovviamente tratterete altri assetti per riempire quei ghiacci. Quindi lo sposterò ora e poi vedremo i risultati alla fine.
+
+Potete vedere le statistiche velocemente in questo testo, potete vedere l'inizio qui in alto, quindi la quantità di inizio è di 100.000, è quello che molte persone iniziano con, nelle sfide PROC e cose del genere. Profitto grosso 19.439, perdita grossa 10.011, quindi il profitto totale è di 9.427. Come ho detto all'inizio di questo video, ricordate che questo è solo un'assetto nell'intero portfoglio in cui trattate. Quindi prenderete più aziende e più assetti.
+
+Non sarebbe solo il caso che state qui facendo 9.4% in questo periodo, perché ovviamente non è molto. Potete trattare 30 o 40 asset portfoglio, probabilmente almeno 10 di questi non si intercambieranno, quindi si muovono esattamente lo stesso. Quindi avete 10 a 13 asset che potete scegliere e per questo non dovrete aspettare mesi tra i portfogli come state qui.
+
+È solo perché avete un assetto, ma questo dimostra la profittabilità di ogni assetto con il tempo. Quindi 20 portfogli in totale, 75% vantaggio, ok? Le perdite consecutive erano 2, le perdite aversi consecutive 1, le perdite max consecutive erano 7, perché spesso chiudiamo molto prima di target, a causa dell'algoritmo e della natura dei mercati Forex, spesso la valutazione diminuisce con il tempo e potete vedere che le perdite consecutive avevano 3, la perdita max è arrivata a circa 5%, credo circa 5% e la perdita max è stata questa in totale. Quindi potrebbe essere il caso, è 96.000 ma il grafo non è terribilmente chiaro.
+
+Quindi 4-5% di perdita max è sotto i vostri parametri che vi chiuseranno su Prop e poi, naturalmente, dopo quei dipendenti iniziate ad andare all'alto. Quindi la varianza è arrivata prima, seguito da le probabilità che avvengono. E potete vedere gli entri in tempo qui, alcuni sono più alti, alcuni più bassi, principalmente hanno capito solo 2%, simile alla quantità di entri che perdiamo con il nostro modello di rischio più basso.
+
+Quindi, molti entri qui, potete vedere che sono passati dal 3 marzo del 2022 al 5 novembre del 2024. Quindi una quantità abbastanza di tempo, ma questo è 2 anni, 8 mesi, 9,4%. Quindi spero che questo vi dà un'idea di cosa questo sembra.
+
+Ripliciamo lo stesso processo su diversi assetti. Grazie per l'attenzione. Ci vediamo al prossimo.
