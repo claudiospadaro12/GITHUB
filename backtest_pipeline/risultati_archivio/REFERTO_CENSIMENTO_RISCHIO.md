@@ -93,6 +93,13 @@ come da progetto), e le tre righe sparite sono grafici chiusi in giornata i cui
 `abbassa_rischio.txt` sul Desktop: se non esiste, lo script non ha mai corretto
 niente.
 
+✅ **RISOLTO (18/08, conferma di Claudio): il grafico del Nasdaq Live5m
+(`770203`) era stato chiuso APPOSTA giorni fa, su indicazione di una chat
+precedente.** Il primo censimento lo vedeva ancora solo perché il `.chr`
+restava su disco: il riavvio di MT5 lo ha ripulito. Quindi la sedia al 2% su
+NASUSD era già spenta — e le sue perdite di agosto (−2,17% ecc.) risalgono a
+PRIMA della chiusura. Nessuna anomalia residua.
+
 ## 4-ter. ✅ CHIUSA — controprova delle 00:01 del 18/08 PASSATA
 
 Percorso completo, coi due inciampi documentati:
