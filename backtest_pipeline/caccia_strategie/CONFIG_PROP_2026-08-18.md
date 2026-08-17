@@ -400,6 +400,39 @@ Ho cercato i 7 su MQL5 Market e sui siti dei vendor. Ecco cosa hanno detto le
 
 ---
 
+## 1E. 🎧 LE 11 TRASCRIZIONI TURBOSCRIBE — rimando all'analisi
+
+Analisi completa il **18/08/2026** delle 11 trascrizioni caricate da Claudio in
+`trascrizioni_2026-08-18/`. **Referto separato (non duplico qui):**
+**`ANALISI_TRASCRIZIONI_2026-08-18.md`** (stessa cartella).
+
+**Cosa dicono, in tre righe:**
+- **Resa numerica BASSA:** i video dettano **concetti e trucchi**, quasi zero
+  parametri di config (a differenza dei tre `.set` del §1A-ZERO). Nessun `.set`
+  è mai stato letto ad alta voce.
+- **I 4 punti caldi restano NON confermati dal parlato:** ❌ il buffer 4/9 non
+  compare (resta appeso ai soli `.set`); ❌ nessuno detta l'ora di reset del muro
+  né il fuso di reset; ❌ nessun valore di filtro news in minuti; ❌ nessuno dei 4
+  EA schedati (FX JetBot / Dark / Infinity / UnitedEuro) è nominato.
+- **Indipendenza:** su 11 video le fonti reali sono **7** — **Petko / EA Forex
+  Academy** copre 3 video (contano 1), il canale "Cash & Prop" ne copre 2
+  (contano 1).
+
+**Le convergenze utili (fra fonti indipendenti):**
+- 🟢 **RR-alto + win-rate-alto + varianza-bassa** per sopravvivere al muro → 3
+  fonti su 7. È il dato più solido e SANO, ma è un **principio**, non un numero.
+- ⚠️ 🔴 **randomizzazione/mascheramento anti-detection** (3 fonti) e **hedge
+  cross-account** (3 fonti): documentati come **INTELLIGENCE, marcati VIETATO
+  PER NOI** (violano i termini prop — es. FundedNext vieta l'hedge multi-account).
+- ✅ **static-not-trailing** confermato a voce (`PropEA`): rinforza la proposta
+  **P7**. **FundedNext 1-step 3%/6%** aggiunto dalla voce (dossier §2B aveva solo
+  il 2-step): rinforza §2B/§2G.
+
+> 🔴 **La proposta P2 (buffer 4/9) NON guadagna una terza gamba dal parlato:** i
+> video non dettano protezioni numeriche. Il 4/9 resta un fatto dei `.set`.
+
+---
+
 # 🥈 PARTE 2 — CENSIMENTO PROP (versione compatta, come richiesto)
 
 ⚠️ **Tutte le righe qui sotto sono [LETTO-VIA-SEARCH] del 18/08/2026**, non
