@@ -94,6 +94,8 @@ _Legenda stato: ✅ validato tick reali · 🟡 nativo/da verificare · ❌ scar
 | Grafico | EA | Simbolo | TF | Magic | Stato |
 |---|---|---|---|---|---|
 | 225JPY M1 | **ABTG_GapContinuation** | Nikkei | M1 | **774101** | 🆕 forward dal 16/08, rischio 1% |
+| GBPUSD H1 | **ABTG_PTE** _(candidata R78)_ | Cable | H1 | **771332** | 🆕🧪 dal 17/08 — `buffer 25 / TP2 3,0`, rischio **0,5%** |
+| GBPUSD H1 | **ABTG_PTE** _(sedia storica)_ | Cable | H1 | **771322** | ⚠️ rischio portato da 1,0% a **0,5%** il 17/08 — vedi nota sotto |
 
 **Prima sedia arrivata dalla caccia esterna al Code Base** (origine:
 `mql5.com/en/code/75301`, Francesc Jordi Mallol Nolden — attribuzione in
@@ -131,3 +133,60 @@ entra per la fascia oraria e la scorrelazione, non per il rendimento.**
 `SupertrendReversal 225JPY` o `GapFill 225JPY` avevano una posizione aperta.
 Se il pannello dice _"Blocked: another position exists on the symbol"_ mentre
 un altro EA e' in posizione, il `.ex5` e' vecchio.
+
+
+---
+
+## 🧪 IL DUELLO GBPUSD — `771322` contro `771332` (dal 17/08/2026)
+
+**Scelta di Claudio: strada A di R78.** Invece di decidere quale banco ha
+ragione, si mettono in campo tutte e due le configurazioni e si guarda.
+
+| | magic | buffer | TP2 | rischio |
+|---|---|---:|---:|---:|
+| 🪑 **sedia storica** | **771322** | 5 | 2,0 | **0,5%** |
+| 🧪 **candidata R78** | **771332** | **25** | **3,0** | **0,5%** |
+
+_(TP1 0,5 / 50% e TF H1 su entrambe: cambiano SOLO buffer e target.)_
+
+### Perche' due sedie e non un cambio
+
+| banco | dice |
+|---|---|
+| **R78** — OHLC, **13 anni** (OOS 2013-2026, n 447/477) | la storica **perde** −2.125 (PF 0,972, DD 17,68%), la candidata **guadagna** +4.323 (PF 1,095, DD 9,87%) |
+| **R73** — tick reali, **2 anni** (OOS 2025-2026, n 49/51) | il contrario: storica **+2.091**, candidata +1.172 |
+
+🔴 **Non e' conciliabile coi dati che abbiamo**: i tick reali di BCM partono
+dal 2024.07.05, quindi il round lungo a tick reali **non si puo' fare**.
+**O la finestra lunga o il riempimento vero.** Il forward e' l'unico giudice
+che li ha tutti e due.
+
+### ⚠️ Il tocco alla sedia viva, dichiarato
+
+**E' il primo cambio in forward dopo dodici round.** Non e' la strategia: e'
+**solo il rischio, da 1,0% a 0,5%**, e per due motivi:
+1. le due sedie devono avere la **stessa taglia**, altrimenti il confronto non
+   vale niente;
+2. **0,5 + 0,5 = 1,0**: l'esposizione totale su GBPUSD **resta quella di ieri**.
+
+📌 **Conseguenza da ricordare**: i profitti in euro della `771322` **prima e
+dopo il 17/08 non sono confrontabili fra loro**. Il contatore dei TRADE si'.
+
+### 🔒 Le regole del duello, congelate PRIMA dei numeri
+
+1. Si confronta **a PARI NUMERO DI TRADE, non a pari data**: la candidata opera
+   di piu' (in R78: 477 contro 447).
+2. **Collaudo a 10 trade per sedia, verdetto a 30.** A ~34 trade/anno fanno
+   **~3,5 mesi** e **~10 mesi**.
+3. Si giudica su **profitto, PF, drawdown e peggior giornata** — gli stessi
+   quattro di sempre.
+4. 🔴 **Fino ai 30 trade non si tocca nessuna delle due**, qualunque cosa
+   facciano nel frattempo. Le due sedie condividono lo stesso segnale di
+   ingresso: le prime settimane diranno poco.
+
+### ✅ Verifica meccanica del deploy
+`771322` -> buffer **5**, TP2 **2,0**, TP1 0,5, rischio **0,5**
+`771332` -> buffer **25**, TP2 **3,0**, TP1 0,5, rischio **0,5**
+🔴 **I due magic devono essere DIVERSI**: `CountPositions()` filtra per simbolo
+**e** magic (`ABTG_PTE.mq5:484`), quindi con magic diversi non si bloccano a
+vicenda — con magic uguali si', e il duello non esisterebbe.
