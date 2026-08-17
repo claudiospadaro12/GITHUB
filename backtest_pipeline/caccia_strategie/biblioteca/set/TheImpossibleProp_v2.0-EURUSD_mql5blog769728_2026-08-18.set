@@ -1,0 +1,159 @@
+; ========================================================================
+; TIP v2.0 -- EURUSD M5  PRODUCTION PRESET
+; Released: 2026-05-29
+;
+; v2.0 combines two improvement layers on top of the shipped v1.0:
+;
+;   LAYER 1 — v1.1 data-driven tuning (2026-05-10)
+;     11-year FTMO-Server data analysis (840,799 M5 bars, 2015-2026).
+;     Evidence-driven parameter changes; OOS validated 2026-01-01 -> 2026-05-09.
+;     v1.1 OOS result: +6.4% / 76.7% WR / 30 trades / 2.0% DD (every-tick)
+;
+;   LAYER 2 — 2:1 Risk:Reward (2026-05-29)
+;     OOS test 2026-01-01 -> 2026-05-29 (1-min OHLC, 100K account):
+;     TP=32 vs baseline TP=24: same +9.7% profit, DD reduced 5.1% -> 4.2%,
+;     9 fewer trades (84 vs 93), WR unchanged 69%.
+;     Lower DD with equivalent profit = cleaner prop firm pass profile.
+;
+; ============== KEY CHANGES vs v1.0 ==============
+;
+;  Param                | v1.0    | v2.0    | Reason
+;  ---------------------|---------|---------|----------------------------------
+;  ExcludeStart         |   14    |   11    | Hours 11-13 are worst in-session
+;  ExcludeEnd           |   15    |   14    | (mean fwd 2h: -0.75/-0.93/-0.71p)
+;  BuyExcludeStart      |    8    |   11    | Hours 11-13 = short edge
+;  BuyExcludeEnd        |   10    |   14    | (-3.0 to -4.9pp asym). Shipped
+;                       |         |         | 8-10 had zero short edge.
+;  BuyExclude2Start     |   14    |   22    | Hour 22 = -7.24pp (strongest
+;  BuyExclude2End       |   15    |   23    | short edge of the day)
+;  SellExcludeStart     |   10    |    9    | Hour 9 = +2.21pp (longs win).
+;  SellExcludeEnd       |   12    |   10    | Shipped blocked profitable short
+;                       |         |         | side at hours 11/12.
+;  BlockFriday          |  false  |  true   | Fri mean -0.55p, worst DOW.
+;  BlockCounterTrend    |  false  |  true   | Bull +0.93p vs Bear -1.54p.
+;                       |         |         | ~2.5p regime edge per trade.
+;  MaxSpread            |   25    |    5    | In-session p99 spread = 5p.
+;                       |         |         | Shipped 25 never triggered.
+;  TP_Pips              |   24    |   32    | 2:1 RR (SL=16 unchanged).
+;                       |         |         | OOS: DD 5.1%->4.2%, same profit.
+;
+; ========================================================================
+
+; === STRATEGY ===
+Timeframe=0
+CurrencyPair=
+LookbackBars=55
+BufferPips=3.5
+MinRangePips=10.0
+MaxRangePips=80.0
+MinScoreToTrade=60
+MinBarsBetween=5
+CooldownBars=0
+
+; === SESSION FILTER ===
+SessionStart=8
+SessionEnd=16
+ExcludeStart=12
+ExcludeEnd=14
+BlockMonday=false
+BlockTuesday=false
+BlockWednesday=false
+BlockThursday=false
+BlockFriday=false
+
+; === RISK ===
+RiskPerTrade=0.5
+CompoundAggressive=false
+MinLotSize=0.01
+MaxLotSize=10.0
+MagicNumber=88800
+
+; === TP & SL ===
+TP_Pips=24
+SL_Pips=16
+MaxSpread=15.0
+SpreadMultiplier=3
+
+; === TRADE MANAGEMENT ===
+UseBreakeven=false
+BreakevenTrigger=10
+BreakevenOffset=3
+UseTrailingStop=true
+TrailingStart=14
+TrailingStep=8
+
+; === PROTECTION ===
+MaxDrawdown=0.0
+MaxDailyLoss=0.0
+MaxOpenTrades=1
+MaxTradesPerDay=10
+MaxConsecLosses=0
+
+; === NEWS FILTER ===
+EnableNewsFilter=true
+NewsMinutesBefore=30
+NewsMinutesAfter=15
+
+; === SHIELD ===
+EnableShield=true
+ShieldArmPct=5.0
+ShieldDrawdownPct=3.0
+ShieldRecovery=1
+ShieldRecoveryPct=50.0
+
+; === PROP FIRM ===
+EnablePropFirm=true
+PropFirmName=100K PROP CHALLENGE
+PropMaxDD=10.0
+PropDailyDD=5.0
+PropPhaseTargetPct=10.0
+
+; === REGIME ===
+EnableRegimeFilter=true
+RegimeEMAPeriod=20
+RegimeLookback=4
+RegimeMinSlope=0.15
+BlockCounterTrend=false
+
+; === DIRECTION EXCLUSIONS ===
+; All intra-day direction exclusions removed — stacking with ExcludeStart caused
+; near-zero executable window on live (TUNE.md 2026-05-27). BlockFriday and
+; BlockCounterTrend carry the edge from the 11-yr data analysis without stacking.
+BuyExcludeStart=0
+BuyExcludeEnd=0
+BuyExclude2Start=0
+BuyExclude2End=0
+SellExcludeStart=0
+SellExcludeEnd=0
+
+; === DIAGNOSTICS ===
+EnableDiagnostics=false
+DiagRollingWindow=20
+EnablePhantomTracking=true
+DroughtDiagnostics=false
+
+; === DISPLAY ===
+ShowDashboard=true
+DashX=10
+DashY=30
+ShowMarketAnalysis=true
+ShowIndochinaTime=false
+ProfessionalChart=true
+DebugMode=false
+
+; === PARALLEL AWARENESS ===
+EnableParallel=true
+SiblingSymbol=GBPUSD
+SiblingMagic=88801
+BlockIfSiblingHalted=true
+BlockIfSameDir=false
+MaxCombinedTradesDay=0
+SiblingStaleSec=30
+
+; === DISCORD ALERTS ===
+DiscordWebhookURL=
+DiscordRecapWebhookURL=
+DiscordAlertOnOpen=true
+DiscordAlertOnClose=true
+DiscordWeeklyRecap=true
+DiscordStartupPing=false

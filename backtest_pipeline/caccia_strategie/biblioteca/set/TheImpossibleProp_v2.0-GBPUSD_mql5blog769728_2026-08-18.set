@@ -1,0 +1,165 @@
+; ========================================================================
+; TIP v2.0 -- GBPUSD M5  PRODUCTION PRESET
+; Released: 2026-05-29
+;
+; v2.0 combines two improvement layers on top of the shipped v1.0:
+;
+;   LAYER 1 — v1.1 data-driven tuning (2026-05-10)
+;     11-year FTMO-Server data analysis (759,319 M5 bars, 2015-2026).
+;     Evidence-driven parameter changes; OOS validated 2026-01-01 -> 2026-05-09.
+;     v1.1 OOS result: +3.6% / 91.7% WR / 12 trades / 1.0% DD (every-tick)
+;
+;   LAYER 2 — 2:1 Risk:Reward (2026-05-29)
+;     OOS test 2026-01-01 -> 2026-05-29 (1-min OHLC, 100K account):
+;     TP=32 vs baseline TP=34: +6.3% / 66.1% WR / 62 trades / 4.1% DD.
+;     Exact 2:1 RR (TP=32, SL=16) standardises risk profile across EUR+GBP.
+;
+; ============== KEY CHANGES vs v1.0 ==============
+;
+;  Param                | v1.0    | v2.0    | Reason
+;  ---------------------|---------|---------|----------------------------------
+;  BlockWednesday        |  true   |  false  | 11-yr data: Wed = +1.08p mean,
+;                        |         |         | BEST day of week. Shipped block
+;                        |         |         | was overfitted to 2024-25 IS.
+;  BlockThursday         |  false  |  true   | Thu = -0.62p mean. 2nd worst day.
+;  BlockFriday           |  false  |  true   | Fri = -2.33p mean, WR 48.35%.
+;  BufferPips            |   5.0   |   7.0   | Sweep: buf=7p first crossover >50%
+;                        |         |         | WR. GBPUSD needs wider buffer than
+;                        |         |         | EUR due to larger ATR.
+;  SessionStart          |    8    |    9    | Hour 8 = -0.72p (worst in-session).
+;  SessionEnd            |   16    |   17    | Hour 16 = +0.91p best hour,
+;                        |         |         | was cut by shipped SessionEnd=16.
+;  ExcludeStart          |   14    |   13    | Hour 13 = -0.81p worst in new
+;  ExcludeEnd            |   15    |   14    | 9-17 session window.
+;  BuyExcludeStart       |    8    |   12    | Hours 12-13 = short edge
+;  BuyExcludeEnd         |   10    |   14    | (-1.87/-2.44pp asym).
+;  BuyExclude2Start      |   14    |   22    | Hour 22 = -13.97pp strongest
+;  BuyExclude2End        |   15    |   23    | short-edge bar of the day.
+;  SellExcludeStart      |   13    |   16    | Hours 16-17 = long edge
+;  SellExcludeEnd        |   15    |   17    | (+2.01/+1.28pp asym).
+;  BlockCounterTrend     |  false  |  true   | Bull +1.64p vs Bear -2.14p.
+;                        |         |         | ~3.8p regime edge per trade.
+;  MaxSpread             |   30    |    5    | In-session p99 spread = 5p.
+;  TP_Pips               |   34    |   32    | Exact 2:1 RR (SL=16).
+;                        |         |         | Standardises EUR+GBP risk profile.
+;
+; ========================================================================
+
+; === STRATEGY ===
+Timeframe=0
+CurrencyPair=
+LookbackBars=55
+BufferPips=5.0
+MinRangePips=10.0
+MaxRangePips=80.0
+MinScoreToTrade=55
+MinBarsBetween=5
+CooldownBars=0
+
+; === SESSION FILTER ===
+SessionStart=6
+SessionEnd=17
+ExcludeStart=0
+ExcludeEnd=0
+BlockMonday=false
+BlockTuesday=false
+BlockWednesday=false
+BlockThursday=false
+BlockFriday=false
+
+; === RISK ===
+RiskPerTrade=0.5
+CompoundAggressive=false
+MinLotSize=0.01
+MaxLotSize=10.0
+MagicNumber=88801
+
+; === TP & SL ===
+TP_Pips=34
+SL_Pips=16
+MaxSpread=30.0
+SpreadMultiplier=3
+
+; === TRADE MANAGEMENT ===
+UseBreakeven=false
+BreakevenTrigger=12
+BreakevenOffset=4
+UseTrailingStop=true
+TrailingStart=14
+TrailingStep=8
+
+; === PROTECTION ===
+MaxDrawdown=0.0
+MaxDailyLoss=0.0
+MaxOpenTrades=1
+MaxTradesPerDay=10
+MaxConsecLosses=0
+
+; === NEWS FILTER ===
+EnableNewsFilter=true
+NewsMinutesBefore=30
+NewsMinutesAfter=15
+
+; === SHIELD ===
+EnableShield=true
+ShieldArmPct=5.0
+ShieldDrawdownPct=3.0
+ShieldRecovery=1
+ShieldRecoveryPct=50.0
+
+; === PROP FIRM ===
+EnablePropFirm=true
+PropFirmName=100K PROP CHALLENGE
+PropMaxDD=10.0
+PropDailyDD=5.0
+PropPhaseTargetPct=10.0
+
+; === REGIME ===
+EnableRegimeFilter=true
+RegimeEMAPeriod=20
+RegimeLookback=4
+RegimeMinSlope=0.15
+BlockCounterTrend=false
+
+; === DIRECTION EXCLUSIONS ===
+; All intra-day direction exclusions removed - stacking caused near-zero
+; executable window on live (TUNE.md 2026-05-27). BlockFriday, BlockThursday
+; and BlockCounterTrend carry the edge without filter stacking.
+BuyExcludeStart=0
+BuyExcludeEnd=0
+BuyExclude2Start=0
+BuyExclude2End=0
+SellExcludeStart=0
+SellExcludeEnd=0
+
+; === DIAGNOSTICS ===
+EnableDiagnostics=true
+DiagRollingWindow=20
+EnablePhantomTracking=true
+DroughtDiagnostics=false
+
+; === DISPLAY ===
+ShowDashboard=true
+DashX=10
+DashY=30
+ShowMarketAnalysis=true
+ShowIndochinaTime=false
+ProfessionalChart=true
+DebugMode=false
+
+; === PARALLEL AWARENESS ===
+EnableParallel=true
+SiblingSymbol=EURUSD
+SiblingMagic=88800
+BlockIfSiblingHalted=true
+BlockIfSameDir=false
+MaxCombinedTradesDay=0
+SiblingStaleSec=30
+
+; === DISCORD ALERTS ===
+DiscordWebhookURL=
+DiscordRecapWebhookURL=
+DiscordAlertOnOpen=true
+DiscordAlertOnClose=true
+DiscordWeeklyRecap=true
+DiscordStartupPing=false

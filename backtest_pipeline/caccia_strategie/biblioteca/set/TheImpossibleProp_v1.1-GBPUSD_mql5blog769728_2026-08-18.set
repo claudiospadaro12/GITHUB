@@ -1,0 +1,228 @@
+; ========================================================================
+; TIP v1.1 -- GBPUSD M5  REVIEW (data-driven)  2026-05-10
+; Source: analysis/notebooks/forex_prop_edge_discovery.ipynb run on
+;         FTMO-Server data 2015-01-02 .. 2026-05-08 (759,319 M5 bars).
+;
+; *** OOS VALIDATED 2026-05-10 -- see results block below. ***
+;
+; Tuned against shipped TIP_v1.0_GBPUSD.set. Only listed deltas changed;
+; everything else kept identical to the shipped set.
+;
+; ============== OOS VALIDATION ==============
+;   Broker:    FTMO-Server (Portable_FTMO_Pro)
+;   Symbol:    GBPUSD M5, every-tick from real ticks
+;   Window:    2026-01-01 -> 2026-05-09 (~4 months, fully out-of-sample)
+;   Deposit:   $100,000  Leverage 1:30
+;   Result:    Final $103,562.11  (+$3,562.11  +3.6%)
+;   Peak DD:   1.0% from peak equity / 0.0% from start (FTMO limit 10% / 5%)
+;   Trades:    12   Win Rate: 91.7%   Halts: 0
+;   Verdict:   Matched shipped pre-release IS performance on a fully held-out window.
+;              The surprising BlockWednesday=true -> false flip survived OOS;
+;              the 11-year DOW evidence beat the 2024-25 IS optimisation.
+;
+; ============== EVIDENCE-DRIVEN DELTAS ==============
+;
+;  Param                | Shipped | Recommended | Evidence
+;  ---------------------|---------|-------------|-----------------------------
+;  *** FLAG -- shipped block looks INVERTED vs data ***
+;  BlockWednesday       |  true   |    false    | Cell 4 DOW: Wed = +1.08p mean,
+;                                               |   the BEST day of the week.
+;                                               |   Shipped block kills the best day.
+;                                               |   Recommend unblocking; investigate
+;                                               |   the optimisation pass that produced
+;                                               |   this -- likely overfitted to 2024-25 IS.
+;
+;  BlockFriday          |  false  |    true     | Cell 4 DOW: Fri = -2.33p mean,
+;                                               |   WR 48.35%. Catastrophic. Block.
+;
+;  BlockThursday        |  false  |    true     | Cell 4 DOW: Thu = -0.62p mean.
+;                                               |   Second worst day after Fri.
+;                                               |   Marginal -- consider also leaving
+;                                               |   on if you want more trades.
+;
+;  BlockCounterTrend    |  false  |    true     | Cell 7 regime: bull = +1.64p,
+;                                               |   bear = -2.14p. ~3.8p edge per trade.
+;                                               |   Largest single filter improvement.
+;
+;  BufferPips           |   5.0   |     7.0     | Cell 9 sweep:
+;                                               |     buf=5p:  up_wr 49.6%, up_mean +0.5p
+;                                               |     buf=7p:  up_wr 51.0%, up_mean +2.0p
+;                                               |     buf=10p: up_wr 52.7%, up_mean +2.95p
+;                                               |   First crossover above 50% WR is at 7p.
+;                                               |   GBPUSD wants WIDER buffer than EUR (3.5p)
+;                                               |   -- consistent with its larger ATR.
+;                                               |   Shipped header notes "HIT UPPER BOUND";
+;                                               |   data agrees the bound was too low.
+;
+;  SessionStart         |     8   |      9      | Cell 1 hourly: hour 8 mean = -0.72p
+;                                               |   (worst in-session hour). Skip it.
+;
+;  SessionEnd           |    16   |     17      | Cell 1 hourly: hour 16 mean = +0.91p
+;                                               |   (BEST in-session hour, currently
+;                                               |   excluded by SessionEnd=16).
+;                                               |   Hour 17 still positive (+0.35p).
+;
+;  ExcludeStart         |    14   |     13      | Cell 1: hour 13 = -0.81p (worst hour
+;  ExcludeEnd           |    15   |     14      |   inside new 9-17 session).
+;                                               |   Hour 14 = -0.59p still negative.
+;                                               |   Excludes the 13-13:59 sink only.
+;
+;  BuyExcludeStart      |     8   |     12      | Cell 10 asym: hour 12 = -1.87,
+;  BuyExcludeEnd        |    10   |     14      |   13 = -2.44 (short edge).
+;                                               |   Shipped BuyExcl 8-10 has no
+;                                               |   short edge (asym -1.6 / -0.5 / +1.5).
+;
+;  BuyExclude2Start     |    14   |     22      | Cell 10 asym: hour 22 = -13.97 pp
+;  BuyExclude2End       |    15   |     23      |   (strongest short-edge bar of the day).
+;
+;  SellExcludeStart     |    13   |     16      | Cell 10 asym: hour 16 = +2.01,
+;  SellExcludeEnd       |    15   |     17      |   17 = +1.28 (long edge).
+;                                               |   Shipped SellExcl 13-15 was blocking
+;                                               |   shorts during their best hours
+;                                               |   (asym -2.4 / -0.2 / +1.1).
+;
+;  MaxSpread            |   30    |      5      | Cell 8: in-session p99 spread = 5p
+;                                               |   (broker clamp). Hour 0 has 15.5p
+;                                               |   p99 but is outside session.
+;
+; ============== UNCHANGED (validated or untested) ==============
+;
+;   LookbackBars=60         (sweep used N=60; no comparison to alt window)
+;   MinScoreToTrade=55      (lower than EUR=65 -- fewer trades available, accept more)
+;   SL_Pips=16, TP_Pips=34  (cell 11: H1 ATR(14) session median 11-12p;
+;                            SL=1.5x ATR, TP=3.0x ATR -- TP slightly aggressive
+;                            for a 2.1 R:R but kept as shipped)
+;   BE/Trail (12/4, 12/8)   (no microstructure data to override)
+;   RegimeMinSlope=0.30     (untested; left as shipped)
+;
+; ============== KNOWN LIMITATIONS ==============
+;
+;  - BlockWednesday=true in the shipped set is the most surprising disagreement
+;    with the data. The shipped header says "Pass #63 from genetic optimisation
+;    2026-04-27 over IS 2024-01-01 -> 2025-12-31". The 2024-25 window may have
+;    had a Wed-bias that doesn't survive the full 11-year sample. Recommend
+;    re-running the optimisation across the full 2015-2026 range before
+;    accepting either Wed=block or Wed=trade.
+;  - Buffer sweep tested at fixed N_LOOK=60. A grid search over (LookbackBars,
+;    BufferPips) is the right next step.
+;  - Spread clamp at 5p means MaxSpread=5 is conservative-by-data; live broker
+;    feed may show wider hour-0 spreads (15p p99 observed) but those are outside
+;    the new 9-17 session anyway.
+;
+; ========================================================================
+
+; === STRATEGY ===
+Timeframe=PERIOD_M5
+CurrencyPair=
+LookbackBars=60
+BufferPips=7.0
+MinRangePips=10.0
+MaxRangePips=80.0
+MinScoreToTrade=55
+MinBarsBetween=5
+CooldownBars=0
+
+; === SESSION FILTER ===
+SessionStart=9
+SessionEnd=17
+ExcludeStart=13
+ExcludeEnd=14
+BlockMonday=false
+BlockTuesday=false
+BlockWednesday=false
+BlockThursday=true
+BlockFriday=true
+
+; === RISK ===
+RiskPerTrade=0.75
+CompoundAggressive=false
+MinLotSize=0.01
+MaxLotSize=10.0
+MagicNumber=88801
+
+; === TP & SL ===
+TP_Pips=34
+SL_Pips=16
+MaxSpread=5.0
+SpreadMultiplier=3
+
+; === TRADE MANAGEMENT ===
+UseBreakeven=true
+BreakevenTrigger=12
+BreakevenOffset=4
+UseTrailingStop=true
+TrailingStart=12
+TrailingStep=8
+
+; === PROTECTION ===
+MaxDrawdown=0
+MaxDailyLoss=0
+MaxOpenTrades=1
+MaxTradesPerDay=10
+MaxConsecLosses=0
+
+; === NEWS FILTER ===
+EnableNewsFilter=true
+NewsMinutesBefore=30
+NewsMinutesAfter=15
+
+; === SHIELD ===
+EnableShield=true
+ShieldArmPct=5.0
+ShieldDrawdownPct=3.0
+ShieldRecovery=1
+ShieldRecoveryPct=50.0
+
+; === PROP FIRM ===
+EnablePropFirm=true
+PropFirmName=100K PROP CHALLENGE
+PropMaxDD=10.0
+PropDailyDD=5.0
+PropPhaseTargetPct=10.0
+
+; === REGIME ===
+EnableRegimeFilter=true
+RegimeEMAPeriod=50
+RegimeLookback=4
+RegimeMinSlope=0.20
+BlockCounterTrend=true
+
+; === DIRECTION EXCLUSIONS ===
+BuyExcludeStart=12
+BuyExcludeEnd=14
+BuyExclude2Start=22
+BuyExclude2End=23
+SellExcludeStart=16
+SellExcludeEnd=17
+
+; === DIAGNOSTICS ===
+EnableDiagnostics=true
+DiagRollingWindow=20
+EnablePhantomTracking=true
+DroughtDiagnostics=false
+
+; === DISCORD ALERTS ===
+DiscordWebhookURL=
+DiscordRecapWebhookURL=
+DiscordAlertOnOpen=true
+DiscordAlertOnClose=true
+DiscordWeeklyRecap=true
+DiscordStartupPing=false
+
+; === DISPLAY ===
+ShowDashboard=true
+DashX=10
+DashY=30
+ShowMarketAnalysis=true
+ShowIndochinaTime=false
+ProfessionalChart=true
+DebugMode=false
+
+; === PARALLEL AWARENESS ===
+EnableParallel=true
+SiblingSymbol=EURUSD
+SiblingMagic=88800
+BlockIfSiblingHalted=true
+BlockIfSameDir=false
+MaxCombinedTradesDay=0
+SiblingStaleSec=30

@@ -1,0 +1,23 @@
+DISTENCE=105
+TAKE_PROFIT=4
+EMA_Signal=15
+Friday=1
+DOWN_LOTS=0.02
+UP_DESTENCE=129
+UP_TAKE_PROFIT=65
+first_st=1
+second_st=1	EMA_Trend=200
+Candle_ID=1
+Fix_Spread_pips=6
+Monday=0
+Tuesday=1
+Wednesday=1
+Thursday=1
+Saturday=0
+Sunday=0
+MAX_LOTS=1
+equity_stop=0
+DAILY_DD_=-2000
+turn_on_real_trading=1
+fake_strategy=0
+MagicStart=9358
