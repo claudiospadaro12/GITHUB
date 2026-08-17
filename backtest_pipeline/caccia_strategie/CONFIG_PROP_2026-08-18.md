@@ -400,9 +400,10 @@ Ho cercato i 7 su MQL5 Market e sui siti dei vendor. Ecco cosa hanno detto le
 
 ---
 
-## 1E. 🎧 LE 11 TRASCRIZIONI TURBOSCRIBE — rimando all'analisi
+## 1E. 🎧 LE 12 TRASCRIZIONI TURBOSCRIBE — rimando all'analisi
 
-Analisi completa il **18/08/2026** delle 11 trascrizioni caricate da Claudio in
+Analisi completa il **18/08/2026** delle **12** trascrizioni caricate da Claudio
+(11 col primo zip + 1 col secondo: la recensione `XT Prop Firms MT5`) in
 `trascrizioni_2026-08-18/`. **Referto separato (non duplico qui):**
 **`ANALISI_TRASCRIZIONI_2026-08-18.md`** (stessa cartella).
 
@@ -414,8 +415,8 @@ Analisi completa il **18/08/2026** delle 11 trascrizioni caricate da Claudio in
   compare (resta appeso ai soli `.set`); ❌ nessuno detta l'ora di reset del muro
   né il fuso di reset; ❌ nessun valore di filtro news in minuti; ❌ nessuno dei 4
   EA schedati (FX JetBot / Dark / Infinity / UnitedEuro) è nominato.
-- **Indipendenza:** su 11 video le fonti reali sono **7** — **Petko / EA Forex
-  Academy** copre 3 video (contano 1), il canale "Cash & Prop" ne copre 2
+- **Indipendenza:** su 12 video le fonti reali sono **7** — **Petko / EA Forex
+  Academy** copre 4 video (contano 1), il canale "Cash & Prop" ne copre 2
   (contano 1).
 
 **Le convergenze utili (fra fonti indipendenti):**

@@ -1,7 +1,9 @@
 # 🎧 ANALISI TRASCRIZIONI — 18/08/2026
 
-_Analista-trascrizioni. Fonte UNICA: le 11 trascrizioni TurboScribe caricate da
-Claudio in `trascrizioni_2026-08-18/`. Nessuna navigazione, nessuna integrazione
+_Analista-trascrizioni. Fonte UNICA: le **12** trascrizioni TurboScribe caricate
+da Claudio in `trascrizioni_2026-08-18/` (11 col primo zip + 1 col secondo zip
+del 18/08 sera; il secondo file di quello zip era un doppione byte-per-byte di
+`Prop EA Review` ed è stato scartato). Nessuna navigazione, nessuna integrazione
 "da memoria", nessun buco riempito. Ogni estrazione porta il nome del file e la
 citazione. I numeri dei relatori sono **[dichiarato, NON verificato]**._
 
@@ -17,20 +19,21 @@ citazione. I numeri dei relatori sono **[dichiarato, NON verificato]**._
 
 ## ⚠️ Nota di indipendenza (si legge PRIMA di contare le convergenze)
 
-Le 11 trascrizioni **non sono 11 fonti indipendenti.** Due gruppi vanno contati
+Le 12 trascrizioni **non sono 12 fonti indipendenti.** Due gruppi vanno contati
 come UNA fonte ciascuno:
 
 - **FONTE PETKO** (Petko Aleksandrov / EA Forex Academy — riconoscibile da: app
-  **"PropFirm Robots"**, **"EA Studio"**, il broker "8Cap", i coupon affiliati):
-  copre **3 video** → `#1 Prop Firm HACK`, `I found the Best Prop Firm`,
-  `Prop EA Review`. **Contano come 1.**
+  **"PropFirm Robots"**, **"EA Studio"**, il broker "8Cap", il corso FTMO
+  proprio, i coupon affiliati, il congedo "ti amo ragazzi / amo voi"):
+  copre **4 video** → `#1 Prop Firm HACK`, `I found the Best Prop Firm`,
+  `Prop EA Review`, `Prop firm EA... XT Prop Firms MT5 Review`. **Contano come 1.**
 - **FONTE "CASH & PROP" (me + Alex)** (stile identico: varianza, portafoglio
   multi-asset, MT4 strategy tester, "single asset shown"): copre **2 video** →
   `EA Passing Prop Firm With 10% Max Drawdown`, `Profitable EA - Stop Loss
   Strategy`. **Contano come 1.**
 
-Quindi le fonti realmente indipendenti sono **7**, non 11:
-1. Petko / EA Forex Academy (3 video)
+Quindi le fonti realmente indipendenti sono **7**, non 12:
+1. Petko / EA Forex Academy (4 video)
 2. Cash & Prop / me+Alex (2 video)
 3. BM Trading — range breakout (`FTMO Challenge Passed`)
 4. Recensore-sviluppatore Gold Longbow (`Prop Firm Gold EA Review`)
@@ -50,6 +53,10 @@ Quindi le fonti realmente indipendenti sono **7**, non 11:
 | Qualcuno detta **valori di filtro news** (finestre in minuti)? | ❌ **NO.** `This Prop Firm Robot` (Titan X) dichiara un "news filter" che "ti fa uscire dalle news di alto impatto" **senza un solo numero in minuti**. Nessun video dà finestre in minuti. Contrasto netto coi `.set` (Gold Phantom NFP 100/60). |
 | Qualcuno detta **recovery/griglia** per gli EA già schedati (FX JetBot, Dark, Infinity, UnitedEuro)? | ❌ **NO incrocio diretto.** Nessuno dei 4 EA è nominato in nessuna trascrizione. Conferma solo GENERICA: `Why This... Survives` dice _"le EA più popolari che vedo sono Martingale o grid style"_ [TRASCRITTO] — coerente col rischio già segnalato nel dossier §1D, ma non tocca i nostri nomi. |
 
+> _(Aggiornamento secondo zip: la 12ª trascrizione — `XT Prop Firms MT5 Review`,
+> Scheda 12 — **non cambia nessuna delle quattro risposte**: niente buffer,
+> niente ora di reset, niente minuti news, nessuno dei 4 EA schedati.)_
+
 > **In una riga:** le trascrizioni **NON confermano** nessuno dei quattro punti
 > caldi con un numero. Dove i `.set` davano parametri, il parlato dà **concetti
 > e trucchi**. La resa numerica di queste 11 trascrizioni è **molto più bassa**
@@ -65,6 +72,8 @@ Quindi le fonti realmente indipendenti sono **7**, non 11:
 | **Hedge su un conto reale/live per recuperare il costo della challenge** | 🔴 hedge cross-account | Petko (`PropEA`), Venditore-86%, Blue Edge (Titan X) | **3 su 7** — ⚠️ bandiera |
 | **Drawdown STATICO, mai trailing** (per l'hedge / per il calcolo) | "usalo solo su firme con drawdown statico, non trailing — importante" | Petko (`PropEA`) | 1 su 7 — ma **coincide col dossier P7** |
 | **FundedNext daily/total** | 5%/10% (2-step) · **3%/6% (1-step)** | Petko (`I found the Best`), Top-3 | 2 su 7 — **coincide col dossier §2B** |
+| **I muri 1-step sono più stretti: daily 3-4%, total 6%** | FundedNext 1-step 3%/6% · theforexpropfirm.com 1-step **4%/6%** (e 2-step 12% senza daily) | entrambe le voci sono di Petko | **1 su 7** — NON è convergenza fra fonti, ma coincide col pattern del dossier (E8 daily 4%, FTMO 1-step 3%) |
+| **Misurare il max DD del backtest CONTRO il muro della sfida prima di comprarla** | XT review: DD 6,62% > muro 6% → "perderei l'account" → riduce il rischio e rimisura | Petko (`XT Review`) | 1 su 7 — ma è **esattamente il metodo del nostro `METRO_PROP.md`**, detto ad alta voce |
 | **Rischio per trade "regola semplice"** | **1% per trade** | Petko (`I found the Best`) | 1 su 7 |
 | **FTMO minimo giorni di trading** | **4 giorni** | Petko (`PropEA`) | 1 su 7 — coincide col dossier §2A |
 
@@ -127,7 +136,7 @@ buchi da colmare con uno screenshot:
 
 ---
 
-# 📇 LE 11 SCHEDE
+# 📇 LE 12 SCHEDE
 
 ---
 
@@ -663,6 +672,82 @@ COSA NE COPIAMO
 
 ---
 
+## SCHEDA 12 — `Prop firm EA that might be a Game Changer! XT Prop Firms MT5 Review Scam or Not.txt`
+
+_(secondo zip TurboScribe, 18/08 sera — commit 4de2d39)_
+
+```
+FILE            Prop firm EA that might be a Game Changer! XT Prop Firms MT5
+                Review Scam or Not.txt
+RELATORE/CANALE Petko / EA Forex Academy [INFERITO: corso FTMO proprio con EA
+                inclusi, coupon in descrizione, congedo "amo voi... fate un
+                sicuro trattamento" — stessa firma verbale del cluster A]
+                → NON è un'ottava fonte: si somma alla FONTE PETKO (4° video)
+OGGETTO         Recensione dell'EA "XT Prop Firms MT5" (MQL5 Market, $600) +
+                regole della prop "theforexpropfirm.com"
+```
+
+⚠️ "Game Changer!" + "Scam or Not" nel titolo = marketing da recensione: qui si
+estraggono i **meccanismi e i valori dettati**, i giudizi del relatore no.
+
+PARAMETRI CON VALORE
+- **EA XT Prop Firms MT5:** prezzo **$600**; simboli dichiarati **EURUSD,
+  GBPUSD, USDJPY**; versioni MT4 e MT5, "qualsiasi broker"; **rischio
+  suggerito dallo sviluppatore: 5%** (input "risk percent"); test suggerito:
+  **every tick**, deposito minimo **$1.000** [TRASCRITTO chiaro].
+- **theforexpropfirm.com** [dichiarato dal relatore, NON verificato]:
+  - **1-step:** rischio totale **6%**, rischio giornaliero **4%**, target
+    **10%**, **niente giorni minimi né massimi** di trading;
+  - **2-step:** rischio totale **12%** in fase 1 e fase 2, **NESSUN rischio
+    giornaliero**, max **35 giorni** (fase 1) / **60 giorni** (fase 2);
+  - **instant funding:** capitale 10k-200k, drawdown **5%**; il 200k instant
+    costa **$10.000**; la challenge 200k ~**$900** (825+ secondo il piano).
+
+MECCANISMI (di METODO, i più utili della scheda)
+1. ✅ **Backtest misurato CONTRO il muro specifico della sfida**: col rischio 5%
+   il max DD equity del backtest è **6,62%** > muro 6% → _"se l'equità va sotto
+   6% perderei l'account"_ → **riduce il rischio e rimisura** (arriva a 5,32%)
+   [TRASCRITTO]. È il nostro metodo (`METRO_PROP.md`) pronunciato ad alta voce.
+2. ✅ **Test sulla finestra recente** (ultimo mese, poi da inizio maggio) per
+   stimare se il target 10% è raggiungibile nel tempo reale della sfida:
+   $970/mese e $2.820/2 mesi su 10k → _"dipende abbastanza da quando inizierai"_.
+3. ✅ **Due diligence sul venditore**: una sola recensione negativa → Google del
+   nome → **Forex Peace Army "guilty case" (79 guilty / 0 not guilty)** +
+   "scammers hall of shame" + feedback negativi su Forex Factory [dichiarato,
+   visto a schermo dal relatore]. Conclusione del relatore: backtest
+   "troppo ottimizzato", l'EA non farà come il test.
+
+REGOLE PROP CITATE
+- Vedi sopra (theforexpropfirm.com). Nota del relatore: senza max giorni,
+  _"non mi forza a correre... c'è più tempo per l'EA di raggiungere il 10%"_.
+
+NUMERI DI PERFORMANCE [dichiarato, NON verificato]
+- Backtest full history ~**$300k** di profitto — che il relatore STESSO
+  giudica _"sembra un'ottimizzazione"_ e poi smonta con la due diligence.
+
+BANDIERE ROSSE
+- 🔴 **Il venditore dell'EA XT ha un dossier FPA "guilty" 79-0** e recensioni
+  che dicono _"i risultati non hanno nulla a che fare con il backtest"_. È il
+  caso da manuale del §1D del dossier: **"prop-ready" nel marketing non
+  garantisce niente** — e stavolta nemmeno il backtest del recensore lo salva.
+- ⚠️ [INFERITO] **Rischio 5% per trade suggerito dal vendor contro un muro
+  giornaliero del 4%**: aritmetica — UN solo stop pieno buca il daily. Il
+  DD 6,62% misurato dal recensore lo conferma.
+
+COSA C'ERA A SCHERMO E NON NEL PARLATO
+- La **lista input dell'EA** ("voglio imparare di più sulle input... ce ne sono
+  molte"): mostrata, **non dettata**. La pagina prezzi completa della prop.
+
+COSA NE COPIAMO
+- **Il metodo, non l'EA:** (a) DD del backtest contro il muro esatto della
+  sfida, con riduzione del rischio finché ci sta (già nostro metro); (b) la
+  **checklist di due diligence sul vendor** (recensioni → Google del nome →
+  FPA → Forex Factory) come passo formale prima di considerare qualunque EA di
+  mercato; (c) la voce **theforexpropfirm 1-step 4%/6%** come ennesimo caso di
+  muro daily al 4% — da verificare col supporto se mai interessasse (regola D3).
+
+---
+
 # 🗑️ GLI SCARTI (dichiarati, col motivo)
 
 - **`Why This... Survives` (Scheda 11):** file **troncato**, nessun parametro.
@@ -671,6 +756,9 @@ COSA NE COPIAMO
   giudizi che non pesano. Trattenuto solo il dato FundedTrading+ (incerto).
 - **`Profitable EA - Stop Loss` (Scheda 5):** stessa fonte della Scheda 2 → il
   concetto non conta come fonte in più; nessun `.set`.
+- **Secondo zip (18/08 sera):** conteneva 2 file; uno era un **doppione
+  byte-per-byte** di `Prop EA Review How to Pass Prop Firm Challenges` (già
+  Scheda 6) → scartato senza rianalisi. L'altro è la Scheda 12.
 
 ---
 
