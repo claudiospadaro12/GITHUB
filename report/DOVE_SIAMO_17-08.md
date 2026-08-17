@@ -93,10 +93,39 @@ usato per la PTE: **hanno ancora una ragione di stare lì?**
 
 ---
 
-## 6. 📌 UNA COSA CHE NON SO E VA MISURATA
+## 6. ✅ MISURATO: **IL 100k NON VA MEGLIO. RISCHIA MENO.**
 
-Il dry-run FTMO da 100k è a **−826,86 dal via (−0,83%)**, il conto piccolo a
-**−11% in agosto**. **Non so perché la differenza sia così grande** — meno
-sedie? rischio diverso? partito dopo? **[NON MISURATO]**, e va capito: se il
-100k è messo davvero così meglio, allora il problema è la configurazione del
-conto piccolo e non i motori.
+_Verificato subito dopo, sui due CSV pubblicati._
+
+**Il 100k ha fatto SEI operazioni in tutto** (10→14/08, poi piu' niente), su
+tre soli magic. Non e' un conto che va meglio: **e' un conto che ha operato
+quasi niente.** Ma il confronto ha tirato fuori una cosa molto piu' importante:
+
+### 🎯 Le perdite singole, in percentuale del conto
+
+| | peggiori perdite |
+|---|---|
+| **conto piccolo** | **−2,19% · −2,17% · −2,05% · −2,04% · −2,02% · −2,00%** |
+| **100k** | **−0,65%** · −0,25% · −0,17% |
+
+**Sul conto piccolo, 15 perdite su 42 superano l'1%. Sei superano il 2%.**
+**Sul 100k la peggiore e' −0,65%: esattamente il rischio di casa.**
+
+> ## 🔴 **Le sedie sul conto piccolo rischiano il DOPPIO di quanto crediamo.**
+> **Non e' il numero di sedie: e' la taglia di ognuna.** E il 100k dimostra che
+> quando la taglia e' giusta, gli stessi identici motori stanno dentro lo 0,65%.
+
+📌 **E le sei perdite oltre il 2% sono TUTTE su `D30EUR` e `NASUSD`**, tutte in
+apertura o Live5m: i momenti di massima volatilita' della giornata.
+
+### Due spiegazioni possibili, e si distinguono da un file
+
+| | ipotesi | come si verifica |
+|---|---|---|
+| **a** | quelle sedie hanno `InpRiskPercent` piu' alto di quanto crediamo | `censimento_rischio.ps1` legge i `.chr` e stampa il rischio di ogni sedia |
+| **b** | il rischio e' giusto ma lo **STOP viene SALTATO** (gap/slippage in apertura), e la perdita supera il rischio previsto | se tutte dichiarano 1.0, resta questa |
+
+🔴 **[NON ANCORA MISURATO] quale delle due.** Ma qualunque sia, **e' il primo
+problema del conto**, e viene prima di qualunque round: su una prop una perdita
+del 2,2% in una singola operazione consuma **un quinto** del muro totale in un
+colpo.
