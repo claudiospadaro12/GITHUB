@@ -52,10 +52,169 @@ alcune porte si sono APERTE, altre si sono chiuse.**
 Riga = un esempio trovato. Colonne = i **valori veri** dichiarati.
 Ultima colonna = cosa ce ne portiamo a casa.
 
-## 1A. 🔧 Esempi con VALORI NUMERICI dichiarati
+## 1A-ZERO. 🏆 I TRE FILE `.set` VERI, SCARICATI E APERTI
+
+**Questa e' la parte che vale il giro.** Tre preset "prop firm" **ufficiali dei
+vendor**, scaricati da `c.mql5.com` e letti riga per riga il **18/08/2026**.
+Non sono opinioni di forum: sono i file che il venditore consegna al cliente
+che va su una prop.
+
+### 🥇 `The Gold Reaper MT5` — preset `propfirm__1.set`
+`https://c.mql5.com/31/1047/propfirm__1.set` · HTTP 200 · **20 parametri, file
+completo** · autore Profalgo Limited (Wim Schrynemakers) · [VERIFICATO 18/08]
+
+```
+TradeFrequency=2          MaxSpread=500            FridayStopHour=25   (=disabilitato)
+setSL_TP_After_Entry=0    Virtual_expiration=1     Randomization=0.00
+ST1_MagicNumber=8000      Risk=1234                StartLots=0.01
+MaxAllowedDD=9.00         PropFirmMaxDailyDD=4.00
+UseEquity=0               OnlyUp=0                 CheckMargin=1
+```
+
+### 🥇 `The Gold Phantom` — archivio `The_Gold_Phantom_setFiles.zip`
+`https://c.mql5.com/31/1765/The_Gold_Phantom_setFiles.zip` · HTTP 200 ·
+**7 file `.set`** salvati il **15/01/2026** + `readMe.txt` · [VERIFICATO 18/08]
+
+I sette file sono: `LowRisk`, `MediumRisk`, `HighRisk`, `combo`, **`Propfirm`**,
+**`Propfirm_combo`**, `live account settings`.
+Il `readMe.txt`, parola per parola:
+> _"the **Combo** Set files are for running the EA **together with other EAs on
+> the same account** (lower risk per EA...) · the **prop firm** set files are
+> for prop firm accounts · The **Live signal** set file is what I'm running on
+> my own live account (on Intense with 30% max DD)"_
+
+Valori del preset **`Propfirm`**:
+```
+TradeFrequency=5          MaxSpread=500            FridayStopHour=25 (disabilitato)
+AutoGMT=true              Broker_GMT_OFFSET_Winter=2   Broker_GMT_OFFSET_Summer=3
+UseMQL5Calendar=true
+EnableNFP_Filter=true     NFP_CloseOpenTrades=true     NFP_ClosePendingOrders=true
+NFP_MinutesBefore=100     NFP_MinutesAfter=60
+EnableIR_Filter=false     IR_MinutesBefore=100    IR_MinutesAfter=60
+EnableCPI_Filter=false    CPI_MinutesBefore=100   CPI_MinutesAfter=60
+Randomization=50          AdjustEntry=0  AdjustSL=0  AdjustTP=0
+PropFirmMaxDailyDD=4      MaxAllowedDD=9           MaxRiskPerStrategy_=1.0
+StartLots=0.01            UseEquity=false          OnlyUp=false   CheckMargin=true
+```
+
+#### 🎯 IL DIFF — cosa cambia ESATTAMENTE passando da "conto normale" a "prop"
+
+Ho fatto il `diff` dei file base. **Cambiano solo QUATTRO parametri**:
+
+| parametro | MediumRisk (conto normale) | **Propfirm** |
+|---|---:|---:|
+| `Randomization` | 0.0 | **50** |
+| `PropFirmMaxDailyDD` | 0.0 (spento) | **4** |
+| `MaxAllowedDD` | **30** | **9** |
+| `OnlyUp` | true | false |
+
+E dal `live account settings` del venditore (quello che dichiara di girare lui):
+`MaxAllowedDD=30.0`, `PropFirmMaxDailyDD=0.0`, `Randomization=0.0`,
+`TradeFrequency=3`.
+
+#### 🎯 IL SECONDO DIFF — cosa cambia quando l'EA CONDIVIDE il conto
+
+`Propfirm` vs `Propfirm_combo`: **un solo parametro**.
+
+| parametro | `Propfirm` (EA da solo) | **`Propfirm_combo`** (con altri EA) |
+|---|---:|---:|
+| `MaxAllowedDD` | 9 | **4** |
+
+> 🔴 **QUESTA E' LA RIGA PIU' IMPORTANTE DEL DOSSIER PER NOI.**
+> Il venditore, quando il suo EA divide il conto con altri, gli **taglia il
+> budget di drawdown personale da 9% a 4%** — **meno della meta'** — per
+> lasciare spazio agli altri. **Noi facciamo l'esatto contrario**: ogni sedia
+> gira col suo rischio pieno (0,65%) come se fosse sola, e il muro del conto
+> e' UNO solo. La `ROTTA_PROP.md` lo dice gia' a parole (_"il DD della prop e'
+> UNO: quello del conto"_); qui c'e' il numero di come lo si traduce in
+> configurazione.
+
+### 🥇 `Prop Firm Pass EA` — archivio `V2_Set_Files.zip` + documentazione PDF
+`https://c.mql5.com/31/1790/V2_Set_Files.zip` (5 `.set`, salvati il
+**07/02/2026**) e `https://c.mql5.com/31/1790/PropFirmPass_V2_Documentation_pdf.zip`
+· autore ALGOECLIPSE LTD (Bailey Wickens) · [VERIFICATO 18/08]
+
+**E' la lista di input piu' vicina alla nostra**: usa perfino il prefisso
+`Inp`. Valori del set n.2 "Aggressive":
+
+```
+; --- Prop Firm Challenge (Top Priority) ---
+InpStartingBalance=0            (0 = usa il saldo corrente)
+InpMaxDailyLossPercent=5        InpMaxOverallLossPercent=10   InpProfitTargetPercent=10
+InpSafetyBufferPercent=0.1      <-- il BUFFER, con un numero vero
+InpClosePositionsOnLimitBreach=true
+InpResetChallengeState=false
+InpDailyDDPauseEnabled=true     InpDailyDDPausePercent=4      InpDailyDDPauseDays=1
+InpTargetAction=2
+InpBuyEntryRandomPoints=0       InpSellEntryRandomPoints=0
+; --- Broker Setup ---
+InpMaxSpreadPoints=0            InpSlippagePoints=0           InpStrictBrokerChecks=true
+InpAutoAdjustStops=true         InpMinStopDistanceOverridePoints=100
+InpStopDistanceSafetyPoints=1   InpStopRetryExtraPoints=10
+; --- Risk Settings ---
+InpLots=0                       InpPercentageRiskOfAccount=0.5
+; --- Strategy ---
+InpTimeframe=5   InpBarZ=2   InpScanBars=100   InpMinBarsRequired=400
+InpExpirationInHours=1          InpMinOppositeOrderDistancePoints=9000
+InpDailyResetHour=0             InpDailyResetMinute=0     <-- ORA **E MINUTO**
+; --- Trade Management ---
+InpTpPoints=0   InpSlPoints=2000   InpTslTriggerPoints=1000   InpTslPoints=250
+; --- Trading Schedule (Server Time) ---
+InpTradeMonday..Friday=true     InpTradeSaturday=false    InpTradeSunday=false
+InpTradeStartHour=0  InpTradeStartMinute=0  InpTradeEndHour=23  InpTradeEndMinute=59
+InpCancelPendingOutsideHours=true
+InpMagic=6145985
+```
+
+Dal PDF di documentazione (testo estratto, [VERIFICATO 18/08]), le definizioni
+che contano:
+- **`Max daily equity loss %`** = _"Daily loss limit (percent) computed from the
+  **daily start balance versus current equity**"_ → **identica alla formula del
+  nostro Guardian**;
+- **`Max overall equity loss %`** = _"computed from the challenge **starting
+  balance** versus current equity"_ → statico, come il nostro `InpDDMode=0`;
+- **`Buffer % for loss target thresholds`** = _"Extra buffer added to loss
+  target thresholds **for safety**"_;
+- **`Pause trading when daily DD hits threshold`** = _"Enables a **cooldown**
+  when daily drawdown reaches the specified threshold"_, con
+  **`Daily DD % trigger (0 = disabled)`** e **`Pause duration in days`**;
+- **`Action when profit target reached`** = _"**lock, reset or pause for a
+  day**"_;
+- **`Entry Randomization`** = _"Random points added to buy stop entry **for
+  entry diversification**"_;
+- **`Reset stats (set true once, then false)`** = _"Clears stored baseline,
+  locks daily stats on next init"_.
+
+I 5 set differiscono **solo** su `InpBarZ`, `InpScanBars`, `InpMinBarsRequired`,
+`InpMinOppositeOrderDistancePoints`, `InpSlPoints` (1500→3000) e
+`InpTslTriggerPoints` (500→1000): **i parametri di rischio prop restano
+IDENTICI in tutti e cinque.** Cioe': l'aggressivita' si cambia nel motore,
+**mai** nelle protezioni.
+
+### 🧮 LA CONVERGENZA — tre vendor indipendenti, gli stessi due numeri
+
+| preset | cap giornaliero interno | cap totale interno | muro della prop |
+|---|---:|---:|---|
+| Gold Reaper `propfirm` | **4%** | **9%** | 5% / 10% |
+| Gold Phantom `Propfirm` | **4%** | **9%** | 5% / 10% |
+| Gold Phantom `Propfirm_combo` | **4%** | **4%** | 5% / 10% |
+| Prop Firm Pass (pausa morbida) | **4%** (+ buffer 0,1) | 10% − buffer | 5% / 10% |
+| Blog MQL5 "Best EA Settings" (31/07/2025) | **2,5%** | 5% | — |
+
+> ### 🎯 LA REGOLA CHE ESCE DA SOLA
+> **Chi configura per una prop non mette il guardiano SUL muro: lo mette
+> UN PUNTO PERCENTUALE PRIMA.** 4 invece di 5. 9 invece di 10.
+> **Il nostro preset `ABTG_Guardian_FTMO_2Step.set` mette 5,0 e 10,0 —
+> esattamente sul muro.** Quando il nostro Guardian scatta, la challenge e'
+> **gia' persa**: chiude le posizioni un istante dopo la violazione, non un
+> istante prima.
+
+## 1A. 🔧 Altri esempi con VALORI NUMERICI dichiarati
 
 | # | esempio / fonte | rischio per trade | cap giornaliero | DD totale | filtro news | orari / sessione | altri cap | cosa ne copiamo |
 |---|---|---|---|---|---|---|---|---|
+| E0 | **Blog MQL5 "Best EA Settings to Pass Prop Firm Challenges"** — Diego Arribas Lopez, 31/07/2025 · [VERIFICATO 18/08] `mql5.com/en/blogs/post/763469` | **0,25% – 0,4%** | **2,5%** | 5% | attivo su alto impatto | **08:00–18:00** (solo sovrapposizione Londra/NY) | **max 1-2 posizioni aperte alla volta** · target 8% | il rischio per trade **piu' basso del nostro 0,65%**, e un cap giornaliero al **2,5%** cioe' meta' del muro |
+| E0-bis | **Blog MQL5 "Prop-Firm Friendly EA Settings"** — stesso autore, 29/06/2025 · [VERIFICATO 18/08] `mql5.com/en/blogs/post/762821` | lotto fisso | 5% | 10% | — | — | **fase 2: lotto ridotto della meta'** (o −20%) · niente martingala/griglia | l'idea di **cambiare taglia fra fase 1 e fase 2** |
 | E1 | **NYAO Scalper MT5** — profilo `safe` · [VERIFICATO], README letto su raw.githubusercontent 18/08 | **0,5% equity** | — (usa basket) | **basket stop 3% equity** | **45 min prima / 45 dopo** | ore configurabili | max 3 posizioni · max lot 0,01 · max spread 0,20×ATR · min vol ratio 0,70 | il **basket stop** = cap su perdita FLOTTANTE totale, che noi non abbiamo |
 | E2 | **NYAO Scalper MT5** — profilo `balanced` | 0,8% equity | — | basket stop **6%** | 30/30 min | " | max 6 posizioni · max lot 0,05 | rapporto **SL×maxpos ≈ basket stop** (0,8×6=4,8 vs 6) |
 | E3 | **NYAO Scalper MT5** — profilo `default` | 1,0% equity | — | basket stop **8%** | 30/30 min | " | max 8 posizioni · max lot 0,05 | idem (1,0×8=8,0 vs 8) — **regola di taratura esplicita** |
