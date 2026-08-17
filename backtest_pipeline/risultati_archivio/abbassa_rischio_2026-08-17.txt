@@ -1,0 +1,13 @@
+﻿=== ABBASSA RISCHIO: da 2 a 1 sui magic 770101, 770203, 970901 ===
+data: 2026.08.17 23:59
+
+  CORRETTO  ABTG_SupertrendReversal_Ottimizzato  magic 970901  2.0 -> 1  (chart05.chr)
+  CORRETTO  ABTG_DAX_Apertura_EU                 magic 770101  2.0 -> 1  (chart10.chr)
+  lasciato  ABTG_DAX_Apertura_EU                 magic 770101  rischio 0.65  (chart02.chr)
+  lasciato  ABTG_DAX_Apertura_EU                 magic 770101  rischio 0.65  (chart02.chr)
+
+grafici dei magic bersaglio visti: 4   corretti: 2
+Copie di sicurezza: accanto a ogni file, estensione .prima_rischio
+
+ADESSO: riapri MT5 e rilancia il censimento per la controprova.
+Le righe rosse a 2.0 devono essere sparite.
