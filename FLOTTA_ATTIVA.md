@@ -184,7 +184,25 @@ dopo il 17/08 non sono confrontabili fra loro**. Il contatore dei TRADE si'.
    facciano nel frattempo. Le due sedie condividono lo stesso segnale di
    ingresso: le prime settimane diranno poco.
 
-### ✅ VERIFICA DEL DEPLOY — **FATTA il 17/08 alle 21:18-21:19, 7 campi su 7**
+### ✅✅ VERIFICA DOPPIA — screenshot **e** file `.chr`, tutto verde
+
+**Secondo controllo (17/08 ore 21:29, `verifica_duello_pte.ps1`): letto dai
+`.chr` salvati alle 21:21, quattro sedie su quattro OK.**
+
+```
+GBPUSD  magic 771322  buf  5.0  TP2 2.0  TP1 0.5  risk 0.5  'PTE GBPUSD'
+GBPUSD  magic 771332  buf 25.0  TP2 3.0  TP1 0.5  risk 0.5  'PTE GBPUSD B25'
+U30USD  magic 771321  buf  5.0  TP2 2.0  TP1 0.5  risk 1.0  'PTE DOW'      <- NON toccata
+USDJPY  magic 771323  buf  5.0  TP2 2.0  TP1 0.5  risk 1.0  'PTE USDJPY'   <- NON toccata
+-> magic DIVERSI su GBPUSD: 771322 / 771332
+=== TUTTO A POSTO. Il duello e' in campo. ===
+```
+
+📌 **Le due sedie non-GBPUSD sono ancora a rischio 1,0**: la conferma che il
+preset non e' finito sul grafico sbagliato. E' il controllo che gli screenshot
+**non** possono dare, perche' guardano solo il pannello che hai aperto.
+
+### ✅ Primo controllo — screenshot degli input, 17/08 21:18-21:19, 7 campi su 7
 
 Controllata dagli screenshot degli input **prima dell'OK**, campo per campo:
 
