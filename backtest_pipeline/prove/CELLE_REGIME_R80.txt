@@ -1,0 +1,35 @@
+# =====================================================================
+#  CELLE PER R80 -- LA PROVA DI REGIME SU PTE (USDJPY e GBPUSD)
+#  Formato:  etichetta | EA | simbolo | periodo grafico | input
+#  Driver: prova_regime.ps1   Criteri: prove/PROVA_REGIME_CRITERI.md
+#  Le finestre sono fissate nel driver e NON si toccano qui:
+#    ORSO 2022.01-2022.10 · CROLLO 2020.02-2020.04 (rischio)
+#    CROLLO_ANNO 2020 (merito) · TORO 2021 · LATERALE 2019
+# =====================================================================
+#
+#  PERCHE' QUESTE QUATTRO CELLE
+#
+#  R77 (0/28), R78 (1/14) e R79 (0/8) hanno misurato che su tredici anni
+#  fuori campione `PTE USDJPY` perde in ~50 configurazioni su ~50. Non e'
+#  la taratura (R77/R78) e non e' un lato (R79). Resta l'ultima domanda
+#  tecnica dell'ipotesi 3 di R78: **in quali regimi funziona?**
+#
+#  E si portano dietro anche le due celle di GBPUSD, che costano poco e
+#  servono a una cosa che ci riguarda da stasera: **in quali regimi vince
+#  la candidata del duello** (`771332`, in campo dal 17/08). Serve a
+#  leggere il forward dei prossimi mesi sapendo cosa aspettarsi.
+#
+#  🔴 I parametri sono COPIATI, non scelti qui. Vietato cambiarne uno.
+# =====================================================================
+
+# --- USDJPY: la sedia viva 771323, esattamente com'e' sul VPS ---
+PTEJPY_VIVA | ABTG_PTE | USDJPY | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpTP1Pct=50;InpTP2_ATRmult=2.0;InpSLbufferPips=5.0;InpSLfromDoji=0;InpAllowLong=1;InpAllowShort=1;InpRiskPercent=1.0
+
+# --- USDJPY: la meno peggiore di R79 (solo short, buffer 25): -515, PF 0,979, DD 7,68% ---
+PTEJPY_S25 | ABTG_PTE | USDJPY | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpTP1Pct=50;InpTP2_ATRmult=2.0;InpSLbufferPips=25.0;InpSLfromDoji=0;InpAllowLong=0;InpAllowShort=1;InpRiskPercent=1.0
+
+# --- GBPUSD: la sedia storica 771322 (il termine di paragone del duello) ---
+PTEGBP_VIVA | ABTG_PTE | GBPUSD | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpTP1Pct=50;InpTP2_ATRmult=2.0;InpSLbufferPips=5.0;InpSLfromDoji=0;InpAllowLong=1;InpAllowShort=1;InpRiskPercent=1.0
+
+# --- GBPUSD: la candidata 771332 in campo dal 17/08 (buffer 25 / TP2 3,0) ---
+PTEGBP_B25 | ABTG_PTE | GBPUSD | H1 | InpTF=16385;InpTP1_ATRmult=0.5;InpTP1Pct=50;InpTP2_ATRmult=3.0;InpSLbufferPips=25.0;InpSLfromDoji=0;InpAllowLong=1;InpAllowShort=1;InpRiskPercent=1.0
