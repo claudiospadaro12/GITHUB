@@ -1,5 +1,28 @@
 # 🏁 R72 — **IL BUFFER SOPRAVVIVE AI TICK REALI.** Quattro superfici su quattro, monotone.
 
+> ## ✍️ CORREZIONE, scritta lo stesso giorno e PRIMA che Claudio decidesse
+> **La cella che in questo referto chiamo "VIVA" NON è la configurazione che
+> gira in forward.** La griglia ha `InpTP1_ATRmult = 0` (il default del
+> sorgente), mentre le sedie del vivaio R23 — **771321/22/23** — girano con
+> **`InpTP1_ATRmult = 0.5`** (`report/VIVAIO_R23_DEPLOY.md` righe 38-40): metà
+> posizione chiusa a **0,5 ATR**. Vale per **tutta la serie R68-R72**.
+>
+> **Cosa cambia e cosa no:**
+> - ✅ **Il §1 (buffer → drawdown) NON è toccato**: è una relazione lungo tutta
+>   la griglia, misurata a `TP1` costante. Le otto conferme reggono.
+> - 🔴 **Il §2 e la PROPOSTA sì**: il criterio 2 confronta la candidata contro
+>   una cella che **non è la sedia viva**. Quel confronto **non è valido**, e
+>   la frase _"la config viva è l'unica cella negativa"_ **è ritirata**: quella
+>   cella è `buffer 5 senza TP1 parziale`, che in forward non gira da nessuna
+>   parte.
+> - ⏸️ **La proposta passa da FORMALE a SOSPESA**, in attesa di **R73**: stessa
+>   griglia con `InpTP1_ATRmult = 0.5` pinnato, così dentro c'è davvero la
+>   sedia viva.
+>
+> Il resto del referto è lasciato com'era scritto: **si corregge in testa, non
+> si riscrive la storia.**
+
+
 _Il primo round della serie del buffer che vale come **VERDETTO** e non come
 proposta. R68-R71 erano tutti OHLC._
 
