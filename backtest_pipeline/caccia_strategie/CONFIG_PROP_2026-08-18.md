@@ -359,6 +359,45 @@ Due cose, entrambe pesanti per noi:
    news" per costruzione, e questo va scritto accanto a ogni numero. Non e'
    un dettaglio: e' un limite strutturale del nostro imbuto.
 
+## 1D. 📺 La pista del video segnalato da Claudio
+
+**Fonte:** video YouTube di Petko Aleksandrov (canale EA Forex Academy /
+`algotradingspace.com`), _"7 Expert Advisor adatti a conti finanziati (e
+societa' di trading proprietario)"_, pubblicato **17/08/2026**,
+`youtube.com/watch?v=XzNrfSUVa3M`.
+⚠️ **YouTube e' bloccato dal proxy: il video NON e' stato aperto.** I nomi dei
+7 EA arrivano dagli **screenshot della descrizione caricati da Claudio in chat
+il 18/08/2026**. Il recensore usa **link affiliati e codici sconto**: i suoi
+giudizi **non pesano**, i nomi si', perche' sono verificabili altrove.
+
+Ho cercato i 7 su MQL5 Market e sui siti dei vendor. Ecco cosa hanno detto le
+**loro** pagine:
+
+| EA | dove l'ho letto | prezzo | 🚩 griglia / martingala / recovery? | input coi default? |
+|---|---|---|---|---|
+| **Dark Venus MT5** (Marco Solito) | `mql5.com/en/market/product/56365` · v5.70 · agg. **15/07/2026** · [VERIFICATO 18/08] | **GRATIS** | ✅ **NO** — la pagina dichiara esplicitamente niente griglia, niente martingala, niente recovery | ❌ elenca i nomi (Magic, Max Spread, Lots, Money Management + Risk Percent, periodo/deviazioni Bollinger, filtri orari) **ma NON i valori** |
+| **Dark Algo MT5** (Marco Solito) | `mql5.com/en/market/product/92403` · v2.20 · agg. **05/02/2026** · [VERIFICATO 18/08] | $399 | ✅ **NO** ("No Martingale, No Grid, No Averaging") | ❌ nomi si' (Max Number of Orders, Max one Trade per Bar, Max Spread, Max Average Spread, Risk Percent, Stocastico, ATR, Entry Timing), valori no. Dichiara **"FTMO-compatible"** |
+| **Dark Nova** (Marco Solito) | ricerca su `mql5.com` · [LETTO-VIA-SEARCH 18/08] | — | [INCERTO] | ❌ |
+| **Dark Titan** _(nel video "Dark Tian" — [INFERITO]: e' un refuso)_ | `mql5.com/en/market/product/65522` (MT4) · [LETTO-VIA-SEARCH 18/08] | — | [INCERTO] | ❌ |
+| **FX JetBot** (Forex Store) | ricerca web, recensioni terze · [LETTO-VIA-SEARCH 18/08] | — | 🚩 **SI'** — descritto come **trend + "controlled grid recovery system"**; una recensione parla di ingresso con **lotto ~5 volte piu' grande dopo una perdita**. Altre fonti dicono "lotto fisso, niente martingala": **fonti in contraddizione** | ❌ |
+| **Infinity Trader** | ricerca web · [LETTO-VIA-SEARCH 18/08] | — | 🚩 **SI'/CONTRADDITTORIO** — alcune fonti "grid trading robot", il vendor "no martingala, FIFO, risk cap" | ❌ |
+| **UnitedEuro** (Robot Forex Pro) | ricerca web · [LETTO-VIA-SEARCH 18/08] | — | **[INCERTO]** — non ho trovato una pagina prodotto attendibile | ❌ |
+
+### 📌 Cosa ci portiamo a casa da questa pista
+
+1. **Nessuno dei 7 pubblica i default degli input.** Zero valori copiabili.
+   La resa e' **molto** piu' bassa dei tre `.set` del §1A-ZERO.
+2. **Il dato che vale e' proprio il conteggio delle bandiere:** su 7 EA
+   venduti come "adatti a conti finanziati", **almeno 2 sono recovery/griglia
+   dichiarati o fortemente indiziati**, e per 3 non si sa. Solo la famiglia
+   "Dark" dichiara nero su bianco niente griglia/martingala/averaging.
+   > 🚩 **"Prop-ready" nel marketing non vuol dire "senza recovery".** E un
+   > motore recovery su un muro giornaliero del 4-5% e' una bomba a orologeria:
+   > il drawdown flottante di una griglia viola il cap **prima** di rientrare.
+3. **Dark Venus e' GRATIS**: se un giorno serve vedere un pannello input
+   completo di un EA "prop-ready", **si scarica e si guarda in MT5** — costo
+   zero, e non e' un acquisto. (Non e' una proposta operativa, e' una nota.)
+
 ---
 
 # 🥈 PARTE 2 — CENSIMENTO PROP (versione compatta, come richiesto)
@@ -553,14 +592,20 @@ input dei nostri EA.
 | 28 | **allarme di avvicinamento** al limite (non solo alla violazione) | PROPstyle · Take a Break | ❌ **NO** |
 | 29 | **notifiche push/email/Telegram** | tutti | ❌ **NO** |
 | 30 | **cap sulle richieste al server** (FTMO: 2.000/giorno) | FTMO | ❌ **NO** — [INCERTO] quante ne facciamo |
+| 31 | **BUDGET DI DD RIDOTTO quando l'EA condivide il conto** (9%→4%) | Gold Phantom `Propfirm_combo` | ❌ **NO** — ogni sedia gira col rischio pieno come se fosse sola |
+| 32 | **pausa MORBIDA di N giorni** a una soglia sotto il muro duro | Prop Firm Pass (`InpDailyDDPausePercent=4`, `InpDailyDDPauseDays=1`) | ❌ **NO** — abbiamo un solo livello, e sta sul muro |
+| 33 | **randomizzazione degli ingressi** per non risultare "strategia identica" | Gold Phantom (`Randomization=50`) · Gold Reaper · Prop Firm Pass (`InpBuy/SellEntryRandomPoints`) · Gold Atlas | ❌ **NO** — e FTMO ($400k/strategia) ed E8 (1 strategia/utente) lo misurano |
+| 34 | **auto-rilevamento dell'offset GMT del broker** | Gold Phantom (`AutoGMT=true`, `Broker_GMT_OFFSET_Winter=2` / `Summer=3`) | ❌ **NO** — i nostri orari sono **cablati in ora server BCM** |
+| 35 | **azione al raggiungimento del TARGET** (lock / reset / pausa un giorno) | Prop Firm Pass (`InpTargetAction`) | ❌ **NO** — non abbiamo neanche il concetto di target |
+| 36 | **cancellazione dei pendenti fuori orario** | Prop Firm Pass (`InpCancelPendingOutsideHours=true`) | ⚠️ **[INCERTO]** EA per EA |
 
 ### 📐 Il conto
 
-**30 meccanismi censiti. Ne abbiamo interi 4 (nn. 1, 2, 3, 23), parziali 5
-(6, 20, 22, 24 e in parte 12). Ne mancano 21.**
+**36 meccanismi censiti. Ne abbiamo interi 4 (nn. 1, 2, 3, 23), parziali 6
+(6, 12, 20, 22, 24, 36). Ne mancano 26.**
 
-Ma il numero da solo mente: molti dei 21 sono nastro adesivo. **I sette che
-contano davvero, coi nostri numeri accanto, sono nelle proposte.**
+Ma il numero da solo mente: molti dei 26 sono nastro adesivo. **I sette che
+contano davvero, coi numeri copiabili accanto, sono nelle proposte.**
 
 ---
 
