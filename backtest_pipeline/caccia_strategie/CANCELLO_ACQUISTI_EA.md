@@ -19,6 +19,7 @@ a pagamento. Questa pagina fissa COME, perche' "posso pagarli" non diventi
 | # | gradino | chi lo fa |
 |---|---|---|
 | 1 | **Scheda del prodotto** (meccanismo dichiarato, input, recensioni, autore, attivazioni/licenza, prezzo pieno vs NOLEGGIO mensile) | cacciatori |
+| 1-bis | **Due diligence sul VENDITORE** _(aggiunta 18/08 dalla scheda 12: il vendor di "XT Prop Firms" ha un dossier Forex Peace Army "guilty" 79-0 e consiglia rischio 5% contro un muro del 4%)_: recensioni sul Market → Google del nome → Forex Peace Army → Forex Factory. Un vendor marcio boccia il prodotto QUI, prima di ogni test | cacciatori |
 | 2 | **Setaccio delle bandiere rosse** — vale IDENTICO per il pagato: recovery/griglia/martingala dichiarati o inferiti = SCARTO anche se costasse 10 euro | cacciatori |
 | 3 | **Demo nel tester**: prova a tick reali sui nostri simboli/anni, finestre di regime, criteri scritti PRIMA | file prova dei cacciatori + lancio di Claudio |
 | 4 | **Verdetto col metro di casa** (PF, DD, campione, regimi — come per gli EA nostri) | referto |
