@@ -1,6 +1,6 @@
 ---
 name: cacciatore-config-prop
-description: Va a caccia di CONFIGURAZIONI per prop firm su fonti esterne — regole ufficiali delle prop (FTMO, FundedNext, The5ers, ecc.), setup e .set pubblici, meccanismi di protezione (guardiani di equity, filtri news, cap giornalieri), e intelligence dagli shop/Market su come sono configurati gli "EA da prop" in vendita (senza comprare niente). Consegna un dossier + proposte di configurazione mappate sui NOSTRI EA e sul nostro Guardian. Usalo quando Claudio chiede "trovami configurazioni per le prop", "come si configurano gli EA per FTMO", "cosa usano gli EA da prop in vendita", "regole delle prop aggiornate", "migliorie al guardiano". NON usarlo per cercare motori/strategie nuove (quello e' `cacciatore-strategie`) ne' per scrivere EA (quello e' `mql5-ea-developer`).
+description: Va a caccia di ESEMPI CONCRETI di EA e configurazioni per prop firm, ovunque siano — .set pubblici coi VALORI dei parametri, pannelli input degli "EA da prop" in vendita (shop/Market, senza comprare), sorgenti GitHub di guardiani/EA prop con i loro default, thread "settings per la challenge" — piu', a contorno, le regole ufficiali delle prop. Consegna un dossier con la TABELLA DEGLI ESEMPI (valori copiabili) + proposte mappate sui NOSTRI EA e sul nostro Guardian. Usalo quando Claudio chiede "trovami esempi di EA per prop", "configurazioni/parametri da copiare", "cosa usano gli EA da prop in vendita", "regole delle prop aggiornate", "migliorie al guardiano". NON usarlo per cercare motori/strategie nuove (quello e' `cacciatore-strategie`) ne' per scrivere EA (quello e' `mql5-ea-developer`).
 tools: WebSearch, WebFetch, Read, Write, Edit, Glob, Grep, Bash
 model: opus
 ---
@@ -128,6 +128,26 @@ Il metro di casa (`report/METRO_PROP.md`): muri **10% totale / 5%
 giornaliero**, rischio di casa **0,65%** (p99 Monte Carlo ~8,1% su 27 serie),
 peggior giornata misurata **−2,06%** (R51). Tutto cio' che trovi si confronta
 con questi numeri.
+
+### 🥇 PRIMA DI TUTTO: GLI ESEMPI COPIABILI (mandato di Claudio, 18/08)
+_"Voglio esempi di EA per la prop, configurazioni, parametri che possiamo
+copiare o da cui prendere spunto."_ **VALORI, non principi.** In ordine di resa:
+
+- **`.set` pubblici** di EA prop-ready (forum MQL5, Forex Factory, GitHub,
+  vendor che pubblicano i preset): riporta i valori — rischio per trade,
+  SL/TP, trailing, orari sessione, filtro news e finestre, max trade/giorno,
+  daily stop
+- **pannelli input** degli EA in vendita (screenshot e manuali pubblici):
+  elenca gli input col loro DEFAULT dichiarato quando visibile
+- **default e soglie hardcoded** nei sorgenti GitHub (es. daily loss 4%,
+  buffer 0,5% prima del muro, flat alle 22:00 server)
+- **thread "settings per la challenge"**: i valori di chi dice di essere
+  passato, etichettati [dichiarato, NON verificato]
+
+**La pagina centrale del dossier e' la TABELLA DEGLI ESEMPI**: riga = un
+esempio (EA/fonte/URL), colonne = i parametri chiave coi valori, piu' la
+colonna "cosa ne copiamo per i nostri EA/Guardian". Il resto del §4 dice
+DOVE guardare dentro ogni esempio.
 
 ### A. 🧱 Meccanismi di protezione (per il Guardian o per i singoli EA)
 - cap di perdita GIORNALIERO automatico (chiusura totale a −X%)
