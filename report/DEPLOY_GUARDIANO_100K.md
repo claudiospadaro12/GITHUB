@@ -1,24 +1,32 @@
 # DEPLOY -- DEMO 100K COL GUARDIANO (dry-run FTMO 2-Step)
 
-> # 🔴 NON E' PIU' IN ACQUA — **il conto e' stato cancellato (17/08/2026)**
+> # ⚠️ STATO DA VERIFICARE — **un conto e' stato cancellato (17/08/2026)**
 >
-> Claudio: _"Non ho piu' il conto da 109k. L'ho cancellato."_
+> Claudio, 17/08: _"Non ho piu' il conto da 109k. L'ho cancellato."_ e subito
+> dopo: _"Ne ho una da 100k e uno da circa 5k."_
 >
-> **Tutto quello che c'e' sotto e' STORIA, non stato attuale.** Il conto
-> **50504263** non esiste piu', quindi:
-> - il dry-run FTMO partito il **09/08 alle 20:22** e' **finito**;
-> - `ABTG_Guardian` **non sta sorvegliando niente**, da nessuna parte;
-> - qualunque frase del progetto che dica _"il dry-run e' in acqua"_
->   (compreso `DIARIO.md` al 2026-08-09) va letta **al passato**.
+> **Quindi un conto di taglia prop C'E' ANCORA.** Quello che NON si sa, e che
+> non va indovinato, e' **se il 100k di oggi e' ancora `50504263`** (quello di
+> questo verbale, col Guardiano gia' attaccato e il dry-run partito il 09/08
+> alle 20:22) **oppure un conto nuovo**, che avrebbe bisogno delle 5 fasi qui
+> sotto rifatte da capo.
 >
-> ⚠️ **I DATI POSSONO ESSERE SOPRAVVISSUTI AL CONTO.** MT5 scrive i CSV
-> nella cartella dati, non nel conto: `ABTG_Trades_100k.csv` e gli
-> `abtg_trades_*.csv` **possono essere ancora sul VPS** anche se il conto
-> e' sparito. Prima di dare per persi quei giorni, si cercano.
+> ### 🔍 La risposta si legge, non si stima
+> ```
+> powershell -ExecutionPolicy Bypass -File .\conto_attivo.ps1
+> ```
+> Legge il **giornale** di ogni terminale (`logs\AAAAMMGG.log`), che e'
+> l'unica fonte vera del conto collegato — `accounts.ini` elenca i conti
+> **salvati**, non quello attivo, e il 14/08 questa differenza aveva gia'
+> fatto sbagliare una conclusione intera.
 >
-> 📄 La procedura in 5 fasi qui sotto resta **valida e riutilizzabile** il
-> giorno in cui si riapre un demo di taglia prop: e' scritta, testata, e ha
-> gia' intercettato quattro errori di deploy.
+> - se esce **`50504263`** → il dry-run e' **vivo**, non si tocca niente
+> - se esce **un numero diverso** → il 100k e' nuovo: si rifanno le 5 fasi
+>
+> 📦 E in ogni caso i **dati** del conto cancellato possono essere
+> sopravvissuti: MT5 scrive i CSV nella **cartella dati**, non dentro il
+> conto (`recupera_100k.ps1`).
+
 
 
 ## ✅ COMPLETATO il 09/08/2026 alle 20:22 -- IL DRY-RUN E' IN ACQUA

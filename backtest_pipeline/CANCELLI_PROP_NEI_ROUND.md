@@ -62,40 +62,46 @@ Ed e' il cancello che **nessun nostro referto ha mai calcolato**.
 
 ---
 
-## 3. 🧪 IL PASSO ZERO — **e il 17/08 ha perso la sua casa**
+## 3. 🧪 IL PASSO ZERO — **la casa c'e' ancora, va solo identificata**
 
-L'idea era: accendere `ABTG_Guardian` in **monitor** su un conto di taglia
-prop e lasciarlo misurare la flotta vera. Il conto c'era: **50504263**, demo
-BCM 100k su istanza `-V3` del VPS, dry-run FTMO acceso il **09/08 alle 20:22**
-con 5 EA a rischio 0,65%.
+L'idea: accendere `ABTG_Guardian` su un conto di **taglia prop** e lasciarlo
+misurare la flotta vera. La casa era **50504263** (demo BCM 100k, istanza
+`-V3` del VPS), dry-run FTMO acceso il **09/08 alle 20:22** con 5 EA a
+rischio 0,65%.
 
-> ### 🔴 **Claudio lo ha cancellato il 17/08. Il dry-run non esiste piu'.**
+Il 17/08 Claudio ha cancellato un conto — _"non ho piu' quello da 109k"_ — ma
+**ne ha ancora due: uno da 100k e uno da circa 5k.**
 
-### 3.1 ♻️ PRIMA DI TUTTO: i DATI possono essere sopravvissuti al CONTO
+> ### 🔍 QUINDI LA PRIMA DOMANDA NON E' "CHE FACCIAMO", E' **"QUAL E' IL 100k"**
+>
+> ```
+> powershell -ExecutionPolicy Bypass -File .\conto_attivo.ps1
+> ```
+> Legge il **giornale** di ogni terminale, l'unica fonte vera del conto
+> collegato (`accounts.ini` elenca i conti *salvati*, e il 14/08 questa
+> differenza aveva gia' fatto sbagliare una conclusione intera).
+>
+> | esce | vuol dire | cosa si fa |
+> |---|---|---|
+> | **`50504263`** | il dry-run del 09/08 **e' vivo** | 🟢 non si tocca niente: si raccolgono gli **otto giorni** gia' misurati |
+> | **un numero nuovo** | il 100k e' un conto diverso | 🔧 si rifanno le **5 fasi** di `DEPLOY_GUARDIANO_100K.md`, che sono gia' scritte e testate |
+
+### 3.1 ♻️ E i DATI del conto cancellato possono essere sopravvissuti
 MT5 scrive i CSV nella **cartella dati**, non dentro il conto.
 `ABTG_Trades_100k.csv`, gli `abtg_trades_*.csv` e le `pagella_*.txt` sul
-Desktop **possono essere ancora sul VPS**. Otto giorni di dry-run con il
-guardiano acceso sono l'unico dato prop vero che questo progetto abbia mai
-prodotto: **si cercano prima di dichiararli persi.**
+Desktop possono essere ancora li'. Li cerca **`recupera_100k.ps1`** — legge,
+copia sul Desktop, zippa, e **non cancella niente**.
 
-### 3.2 🚪 E POI, LE DUE STRADE — sono diverse, e la differenza conta
+### 3.2 🪑 E IL CONTO DA 5k RESTA IL FORWARD, non un banco prop
+Il ~5k e' **50503392**: li' vive il forward e **non si tocca**. Non e' un
+posto dove misurare le percentuali di una prop: a quella taglia il **lotto
+minimo schiaccia il rischio** (e' lo stesso motivo per cui il driver ha
+`-Deposito 100000`), e un solo trade e' gia' arrivato al **3,83% del conto**,
+cioe' il **77% del margine giornaliero** di una prop
+(`A1_A4_rischio_immediato.md`). Quelle sono le percentuali di un conto
+piccolo, non di una challenge.
 
-| | **A. Riaprire un demo taglia prop** | **B. Guardian in monitor sul forward 50503392** |
-|---|---|---|
-| costo | un login nuovo + le 5 fasi gia' scritte in `DEPLOY_GUARDIANO_100K.md` | dieci minuti, un grafico |
-| rischio | zero (demo nuovo, forward intoccato) | zero **solo se `InpAction=1`** (monitor: non chiude niente) |
-| che numero da' | **percentuali confrontabili** con una challiange vera | percentuali **distorte** |
-
-🔴 **Perche' B e' zoppo, e va detto:** il forward gira su un saldo di circa
-**5.373 €**. A quella taglia il **lotto minimo schiaccia il rischio** — e'
-lo stesso motivo per cui il driver ha l'opzione `-Deposito 100000`. Su quel
-conto un trade solo e' arrivato a **3,83%**, cioe' il **77% del margine
-giornaliero** di una prop, in un colpo (`A1_A4_rischio_immediato.md`).
-**Quelle non sono le percentuali di una challenge: sono le percentuali di un
-conto piccolo.**
-
-👉 **B si puo' fare subito e non fa male. Ma solo A produce un numero che
-vuol dire qualcosa.** E A e' quasi gratis, perche' la procedura c'e' gia'.
+> **Il 100k misura. Il 5k opera. Non si scambiano.**
 
 ## 4. 🧱 E IL MURO CHE RESTA IN PIEDI
 
