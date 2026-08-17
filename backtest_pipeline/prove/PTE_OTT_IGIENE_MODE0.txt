@@ -1,0 +1,54 @@
+# =====================================================================
+#  PROVA R74-A: IGIENE DELLA COPIA -- `_Ottimizzato` con MODE 0
+#  DEVE riprodurre R73 AL CENTESIMO. Se non lo fa, il resto non vale.
+#  Referto di riferimento: REFERTO_ROUND73_SEDIA_VIVA_TICK_REALI.md
+# =====================================================================
+#
+#   `ABTG_PTE_Ottimizzato.mq5` e' una copia di `ABTG_PTE.mq5` con UNA sola
+#   modifica: il buffer dello stop puo' essere espresso in PIP (mode 0,
+#   default) oppure in MULTIPLI DI ATR (mode 1).
+#
+#   Con **InpSLbufferMode = 0** il ramo del codice e' identico all'originale:
+#       buf = InpSLbufferPips * pip;   sl = entry -+ (atr + buf)
+#   che e' esattamente la riga di prima. Quindi:
+#
+#   👉 **QUESTO ROUND NON DEVE SCOPRIRE NIENTE. Deve riprodurre.**
+#
+#   La cella viva `buffer 5 / TP2 2,0` su GBPUSD, tick reali, finestre di
+#   R58/R72/R73, ha fatto **OOS +2.091 · PF 1,38 · DD 3,27% · n=49 ·
+#   peggior giornata -1,02%** — e lo stesso numero era gia' uscito in R58,
+#   mesi prima. **Se qui esce un numero diverso, la copia e' sbagliata** e
+#   il round R74-B va cestinato senza nemmeno guardarlo.
+#
+#   ⚠️ Questo e' il controllo che in R58 e' mancato (le righe di parametro
+#   non erano passate e giro' una griglia vecchia), ed e' lo stesso spirito
+#   del controllo che in R73 ha salvato una proposta sbagliata.
+#
+# ---------------------------------------------------------------------
+# CRITERIO, uno solo e congelato
+#
+#   Le 14 celle di questo round devono coincidere con le 14 di R73
+#   (`risultati_archivio/csv_R73/ABTG_PTE_GBPUSD_*_pte73gbp.csv`)
+#   **al centesimo su Profit, PF, Equity DD % e Trades**.
+#   - coincidono  -> la copia e' pulita, si passa a R74-B;
+#   - non coincidono -> si cerca il perche' PRIMA di misurare altro.
+#     🔴 Non si "spiega" una differenza: si trova.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO 2024.07.05
+
+# --- griglia IDENTICA a R73, carattere per carattere ---
+InpSLbufferPips=10.0||0.0||5.0||30.0||Y
+InpTP2_ATRmult=2.0||2.0||1.0||3.0||Y
+
+# --- 🔴 IL PIN CHE RENDE QUESTO ROUND UN CONTROLLO E NON UNA SCOPERTA ---
+InpSLbufferMode=0||0||0||0||N
+# --- e i pin della sedia viva (vivaio R23) ---
+InpTP1_ATRmult=0.5||0.5||0||0.5||N
+InpTP1Pct=50||50||0||50||N
+InpSLfromDoji=0||0||0||0||N
+InpTF=16385||16385||0||16385||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N

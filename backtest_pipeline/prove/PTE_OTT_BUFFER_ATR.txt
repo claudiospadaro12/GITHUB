@@ -1,0 +1,105 @@
+# =====================================================================
+#  PROVA R74-B: IL BUFFER IN MULTIPLI DI ATR -- la manopola gira anche
+#  sul DOW, adesso?
+#  Nasce da R69 §3 e chiude la serie R67-R73.
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# IL FATTO DA CUI NASCE (misurato dieci volte, non ipotizzato)
+#
+#   Il drawdown della PTE scende col buffer dello stop, **monotonamente,
+#   in dieci misure su dieci**: due modelli (OHLC e tick reali), tre
+#   finestre (2010, 2016, 2019, 2024), due simboli, due impostazioni di
+#   TP1. E' il risultato piu' solido che questo progetto abbia su questo
+#   motore.
+#
+#   MA in R69 il Dow ha dato una **misura nulla**: 28 celle, **46 trade
+#   identici in tutte e 28**, DD uguale allo 0,007 di punto, profitto che
+#   varia di 39 euro da buffer 0 a buffer 30. **L'asse non muoveva niente.**
+#
+#   Causa trovata nel sorgente (`ABTG_PTE.mq5:146-150`):
+#       PipSize() = (digits==3 || digits==5) ? Point*10 : Point
+#   Il buffer e' in **PIP**, l'ATR a cui viene sommato e' in **UNITA' DELLO
+#   STRUMENTO**. Sui cambi a 5 cifre le due grandezze hanno la stessa scala
+#   (30 pip ~ 1,5 ATR). Sul Dow 30 "pip" valgono **~0,03 ATR** [INFERITO]:
+#   la manopola c'e' ma non gira.
+#
+#   👉 **La cosa da sistemare e' l'UNITA', non il valore.** In
+#      `ABTG_PTE_Ottimizzato.mq5` con `InpSLbufferMode = 1`:
+#          buf = ATR * InpSLbufferATR      ->      sl = entry -+ ATR*(1+X)
+#      che e' adimensionale e vale uguale su qualunque strumento.
+#
+# ---------------------------------------------------------------------
+# LE DUE DOMANDE, SCRITTE PRIMA DEI NUMERI
+#
+#   1. 🔬 **MECCANICA (e vale su qualunque n): sul DOW l'asse gira?**
+#      In R69 le 28 celle facevano 46 trade IDENTICI. Qui basta guardare
+#      la colonna `Trades` e la colonna `Equity DD %`:
+#        - se cambiano lungo l'asse -> **il difetto era l'unita', ed e'
+#          risolto.** E' una domanda MECCANICA: risponde anche con n=27,
+#          perche' non chiede "quanto rende" ma "il parametro fa qualcosa".
+#        - se restano identiche -> la mia diagnosi di R69 e' SBAGLIATA e
+#          il difetto sta altrove. **Si scrive cosi', e si ricomincia.**
+#
+#   2. 📉 **RISCHIO: sui due cambi il DD scende come prima?**
+#      L'intervallo e' costruito per essere lo STESSO di R68-R73 in unita'
+#      portabili: con ATR H1 ~20 pip sui cambi, `InpSLbufferATR` 0->1,5
+#      copre `InpSLbufferPips` 0->30. Se la curva del DD si ricalca, la
+#      riscrittura non ha rotto niente ed e' l'undicesima conferma.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (congelati)
+#
+#   0. 🔴 **PREREQUISITO: R74-A deve essere passato.** Se la copia in
+#      mode 0 non riproduce R73 al centesimo, questi numeri non si guardano.
+#   1. n >= 20 per cella per giudicare il MERITO (R59). Sul Dow n sara'
+#      ~27/46: **basta per la domanda 1 (meccanica), NON per la 2.**
+#   2. ⏸️ **SELEZIONE SOSPESA su tutti e tre i simboli**: n << 150
+#      (punto A dell'emendamento). **Da questo round NON esce una cella
+#      da mettere in forward.** Serve a capire se il parametro funziona,
+#      non a scegliere quanto vale.
+#   3. 🔴 **NESSUNA MODIFICA IN FORWARD.** Vale il criterio 3 di R68 e la
+#      decisione di R73 (proposta ritirata: le sedie PTE non si toccano).
+#      Questo EA e' una copia `_Ottimizzato`: gira in parallelo, con magic
+#      **771331**, e non sostituisce niente.
+#
+# ---------------------------------------------------------------------
+# ⚠️ LIMITI DICHIARATI ADESSO
+#
+#   a) 🔴 **Il Dow gira in OHLC (Modello 1) e dal 2024.09.26**: sono le
+#      stesse identiche condizioni di R69, ed e' l'unico modo di rendere
+#      il confronto "prima l'asse era morto / adesso?" un confronto vero.
+#      I due cambi girano a **tick reali (Modello 4) dal 2024.07.05**, come
+#      R72/R73. **Sono due banchi diversi e non si confrontano fra loro.**
+#   b) Il Dow ha 21 mesi e **un solo regime**: qualunque cosa esca sul
+#      RENDIMENTO non e' giudicabile (regola D dell'emendamento).
+#   c) `InpSLfromDoji` resta pinnato a 0. In mode 1 quel ramo diventa
+#      `dojiLow - ATR*X`, che e' anche una possibile cura al disastro di
+#      R67 (stop minuscolo -> lotto enorme -> DD 21-24%). **Non e' il tema
+#      di questo round: si muove un asse alla volta.**
+#
+# ---------------------------------------------------------------------
+# GRIGLIA: 7 x 2 = 14 celle
+#   InpSLbufferATR 0 / 0,25 / 0,50 / 0,75 / 1,00 / 1,25 / 1,50
+#   (sui cambi ~= 0 / 5 / 10 / 15 / 20 / 25 / 30 pip: lo stesso intervallo
+#    di R68-R73, ma in unita' che valgono anche sugli indici)
+#   x InpTP2_ATRmult 2,0 e 3,0, come R72/R73.
+# =====================================================================
+@SIMBOLO GBPUSD
+@PERIODO H1
+@DAQUANDO 2024.07.05
+
+# --- 🔴 IL MODO NUOVO: buffer in multipli di ATR ---
+InpSLbufferMode=1||1||0||1||N
+# --- l'asse della domanda, in unita' portabili ---
+InpSLbufferATR=0.5||0.0||0.25||1.5||Y
+InpTP2_ATRmult=2.0||2.0||1.0||3.0||Y
+
+# --- pin della sedia viva (vivaio R23), identici a R73 ---
+InpTP1_ATRmult=0.5||0.5||0||0.5||N
+InpTP1Pct=50||50||0||50||N
+InpSLfromDoji=0||0||0||0||N
+InpTF=16385||16385||0||16385||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
