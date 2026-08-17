@@ -1,0 +1,119 @@
+# =====================================================================
+#  PROVA R79: PTE USDJPY -- E' UN LATO CHE PORTA TUTTA LA PERDITA?
+#  Nasce da R77/R78. Referto: REFERTO_ROUND78_SEDIA_VERA_FINESTRA_LUNGA.md
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# DA DOVE NASCE, E PERCHE' NON E' UN ALTRO GIRO DI TARATURA
+#
+#   R78, con la configurazione VERA (TP1 0,5) e campione pieno
+#   (n IS 392-428, n OOS 440-487), su USDJPY ha misurato:
+#
+#       OOS 2013-2026:  UNA cella positiva su 14
+#       e quell'una fa +590 euro in tredici anni, PF 1,011 = zero.
+#       La sedia viva (771323) fa -5.012, PF 0,935, DD 20,04%.
+#
+#   👉 **La taratura e' gia' stata esclusa**: R77 (0/28) e R78 (1/14) hanno
+#      spazzato l'intera griglia di buffer e target. Rifare un altro sweep
+#      sarebbe chiedere due volte la stessa cosa.
+#
+#   Restano TRE spiegazioni possibili, e questo round ne prova UNA:
+#     1. il motore non ha edge su USDJPY, punto -> si spegne la sedia;
+#     2. **UN LATO (long o short) porta tutta la perdita** -> si spegne
+#        quel lato e il motore torna vivo;
+#     3. funziona solo in certi regimi -> prova di regime (R50/R56/R59).
+#
+#   Si prova la 2 per prima perche' e' **la piu' economica e la piu'
+#   decisiva**: costa due corse e, se la risposta e' si', la cura e' un
+#   input booleano invece di una sedia da rottamare.
+#
+#   E c'e' una ragione fisica per aspettarselo: **USDJPY e' il simbolo dei
+#   trend lunghi** (Abenomics 2013-2016 da 100 a 125; dollaro 2022-2024).
+#   Un motore di mean-reversion che prende ENTRAMBI i lati contro un trend
+#   persistente sanguina sul lato contro-trend e basta. **[IPOTESI]**, e
+#   questo round la mette alla prova invece di raccontarla.
+#
+# ---------------------------------------------------------------------
+# LA DOMANDA, SCRITTA PRIMA DEI NUMERI
+#
+#   **Separando i due lati, uno dei due e' positivo su tredici anni?**
+#
+#   - SI, e l'altro e' molto negativo -> 🎯 la cura c'e' ed e' un flag.
+#     Si scrive la proposta e la decide Claudio (e va comunque messa alla
+#     prova come si deve: e' OHLC).
+#   - NO, perdono tutti e due -> 🔴 **il motore non ha edge su USDJPY.**
+#     A quel punto la domanda non e' piu' tecnica: e' se quella sedia
+#     debba restare in forward, e si scrive cosi'.
+#   - Solo uno dei due opera davvero (l'altro n<20) -> giudizio sospeso
+#     sul MERITO, mai sul RISCHIO (valvola R59).
+#
+# ---------------------------------------------------------------------
+# 🔬 E IL CONTROLLO CHE RENDE IL ROUND UTILE: **GBPUSD IN PARALLELO**
+#
+#   La stessa griglia gira anche su GBPUSD. Serve a separare due cose che
+#   tutto il progetto ha imparato a non confondere:
+#     - se lo squilibrio fra i lati c'e' su ENTRAMBI  -> e' del MOTORE;
+#     - se c'e' solo su USDJPY                        -> e' del SIMBOLO,
+#       ed e' coerente con R78 (i due cambi si ribaltano in direzioni
+#       opposte sulla stessa finestra).
+#   Costa una corsa in piu' e raddoppia quello che il round puo' dire.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (congelati)
+#
+#   0. 🧪 **IGIENE**: la cella `AllowLong=0 + AllowShort=0` DEVE dare
+#      **0 trade**. Se opera lo stesso, l'EA ignora i flag e il round si
+#      cestina prima di leggere qualunque altro numero.
+#   1. n >= 150 per cella per SELEZIONARE (punto A). Atteso ~200-350 per
+#      lato: i lati singoli fanno circa meta' dei 440-487 di R78.
+#      Sotto soglia -> selezione sospesa e dichiarata.
+#   2. 🔴 **CLAUSOLA DI SEGNO** (congelata dopo R77): si promuove **solo**
+#      una cella con **profitto OOS POSITIVO**. "Perde meno" non e' una
+#      promozione.
+#   3. Il confronto di riferimento e' la sedia viva `771323`:
+#      **OOS -5.012 · PF 0,935 · DD 20,04% · n 456** (R78, stessa finestra,
+#      stesso modello, stessi pin: confrontabile al centesimo).
+#   4. 🔴 **NESSUNA MODIFICA IN FORWARD da questo round.** E' OHLC, e vale
+#      il criterio 3 di R68 piu' la decisione di R73.
+#
+# ---------------------------------------------------------------------
+# ⚠️ LIMITI DICHIARATI ADESSO
+#
+#   a) **OHLC**: R57 ha misurato che il solo cambio di modello ribalta il
+#      segno di questo motore. Questo round PROPONE.
+#   b) L'OOS 2013-2026 **contiene** quello di R73 (2025-2026): non sono
+#      misure indipendenti e non si sommano.
+#   c) Spegnere un lato **dimezza le operazioni**: quello che resta va
+#      ricontato contro la soglia dei 150, non dato per buono.
+#   d) 🔎 Se un lato risulta positivo, **non e' finita**: prima di
+#      proporlo va guardato **quando** guadagna (prova di regime), perche'
+#      un lato solo su un simbolo che trenda puo' essere semplicemente
+#      "ho preso la direzione giusta di quei tredici anni" — cioe' un
+#      regime travestito da edge. **Scritto adesso, non dopo.**
+#
+# ---------------------------------------------------------------------
+# GRIGLIA: 2 x 2 x 2 = 8 celle
+#   InpAllowLong  {0,1}  x  InpAllowShort {0,1}  x  InpSLbufferPips {5,25}
+#   Il buffer entra a due valori (quello VIVO e quello scelto in R78) per
+#   rispondere anche a: **la risposta sui lati dipende dalla taratura?**
+#   Se il lato buono e' lo stesso con buffer 5 e con buffer 25, la
+#   conclusione e' robusta; se cambia, non lo e' e si scrive.
+#   `InpTP2_ATRmult` pinnato a **2,0** (il valore vivo): si muove un
+#   asse per volta, e il target e' gia' stato spazzato in R77/R78.
+# =====================================================================
+@SIMBOLO USDJPY
+@PERIODO H1
+@DAQUANDO 2000.01.01
+
+# --- gli assi della domanda ---
+InpAllowLong=1||0||1||1||Y
+InpAllowShort=1||0||1||1||Y
+InpSLbufferPips=5.0||5.0||20.0||25.0||Y
+
+# --- pin della sedia viva (vivaio R23), identici a R78 ---
+InpTP2_ATRmult=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.5||0.5||0||0.5||N
+InpTP1Pct=50||50||0||50||N
+InpSLfromDoji=0||0||0||0||N
+InpTF=16385||16385||0||16385||N
+InpRiskPercent=1.0||1.0||0||1.0||N
