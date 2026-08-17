@@ -10,7 +10,7 @@ Una cosa sola: **allargare il campione dei `.set` veri e dei valori copiabili.**
 > `CATALOGO.md`: le pagine spariscono (ne e' sparita una stanotte, §7).
 
 **Questo file e' il seguito di `CONFIG_PROP_2026-08-18.md`** (prima notte:
-3 preset, censimento 6 prop, 36 buchi). Qui ci sono i **44 `.set` nuovi**.
+3 preset, censimento 6 prop, 36 buchi). Qui ci sono i **50 `.set` nuovi**.
 
 ---
 
@@ -31,7 +31,7 @@ file ha restituito un HTTP 200 con byte veri, e il file e' in biblioteca.
 
 ---
 
-# 1. 🥇 IL BOTTINO — 44 `.set` nuovi, letti riga per riga
+# 1. 🥇 IL BOTTINO — 50 `.set` nuovi, letti riga per riga
 
 | famiglia | n. file | fonte (aperta il 18/08) | cosa contiene di prop |
 |---|---:|---|---|
@@ -441,11 +441,11 @@ Tester cannot reproduce them, Market validation rejects them"_).
 
 # 8. 📊 IL CONTO DELLA NOTTE
 
-- **44 file `.set` nuovi** scaricati e letti (32 + 8 + 4 + 6, meno i 6 conteggiati
-  a parte) → **50 `.set` totali in biblioteca** contando i 13 riscaricati della
-  prima notte.
-- **11 pagine** aperte con contenuto vero · **2 morte** (302) · 1 canale nullo
-  (ricerca interna).
+- **50 file `.set` nuovi** scaricati e letti (32 Range Breakout + 8 Ultimate EA
+  + 6 FTMO Smart Trader + 4 Impossible Prop) → **63 `.set` in biblioteca**
+  contando i 13 riscaricati e depositati dalla prima notte.
+- **11 fonti** che hanno prodotto materiale · **2 pagine morte** (302) ·
+  1 canale nullo (ricerca interna di MQL5).
 - **2 sorgenti gratuiti completi** (969 righe in tutto) · **6 schede** ·
   **2 calendari news** (37.799 righe).
 - **4 righe del PIANO guadagnano una gamba** (B6, C1, C4, D1, E3 = 5) ·
