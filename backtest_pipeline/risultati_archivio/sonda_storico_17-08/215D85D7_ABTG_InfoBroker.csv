@@ -1,0 +1,103 @@
+[SERVER]
+Campo,Valore
+Broker,BCM Markets Ltd
+Server,BCMMarkets-Server
+Conto,50503392
+TipoConto,DEMO
+Valuta,EUR
+OraServer,2026.08.17 17:34:09
+OraUltimoTick,2026.08.17 17:34:09
+OraGMT,2026.08.17 16:34:09
+OraLocalePC,2026.08.17 18:34:09
+OffsetServerGMT_min,60
+OffsetServerGMT_ore,1.00
+OffsetServerGMT_hhmm,+01:00
+OraLegalePC,SI
+MercatoAperto,SI
+SimboliBroker,59
+SimboliMarketWatch,21
+TF_Misurato,H1
+Filtro,
+MisuratoIl,2026.08.17
+[SIMBOLI]
+Simbolo,Descrizione,Digits,Point,ContractSize,TickValue,TickSize,SpreadPt,TF,BarreTF,PrimaDataTF,BarreD1,PrimaDataD1,Stato
+EURUSD,Euro vs US Dollar Forward contract,5,0.00001000,100000.00,0.86287,0.00001000,4,H1,100000,1971.01.03,6820,1971.01.03,da scaricare (parziale)
+GBPUSD,Great Britain Pound vs US Dollar Forward contract  ?????,5,0.00001000,100000.00,0.86287,0.00001000,2,H1,100008,1993.05.11,6412,1993.05.11,da scaricare (parziale)
+USDCHF,US Dollar vs Swiss Franc Forward contract  ???????,5,0.00001000,100000.00,1.06559,0.00001000,0,H1,57535,1971.01.03,2875,1971.01.03,da scaricare (parziale)
+USDJPY,US Dollar vs Japanese Yen Forward contract  ?????,3,0.00100000,100000.00,0.54147,0.00100000,3,H1,100008,1971.01.03,6726,1971.01.03,da scaricare (parziale)
+USDCAD,US Dollar vs Canadian Dollar Forward contract  ?????,5,0.00001000,100000.00,0.62214,0.00001000,0,H1,31961,1993.04.27,1592,1993.04.27,da scaricare (parziale)
+AUDUSD,Australian Dollar vs US Dollar Forward contract,5,0.00001000,100000.00,0.86287,0.00001000,0,H1,72217,1993.04.26,3610,1993.04.26,da scaricare (parziale)
+AUDNZD,Australian Dollar vs New Zealand Dollar  Forward contract,5,0.00001000,100000.00,0.50982,0.00001000,0,H1,83251,1993.04.04,4168,1993.04.04,da scaricare (parziale)
+AUDCAD,Australian Dollar vs Canadian Dollar  Forward contract,5,0.00001000,100000.00,0.62214,0.00001000,0,H1,28722,1993.04.26,1429,1993.04.26,da scaricare (parziale)
+AUDCHF,Australian Dollar vs Swiss Franc  Forward contract,5,0.00001000,100000.00,1.06559,0.00001000,0,H1,28721,1993.05.13,1430,1993.05.13,da scaricare (parziale)
+AUDJPY,Australian Dollar vs Japanese Yen  Forward contract,3,0.00100000,100000.00,0.54147,0.00100000,0,H1,58447,1993.05.16,2920,1993.05.16,da scaricare (parziale)
+CHFJPY,Swiss Franc vs Japanese Yen  Forward contract,3,0.00100000,100000.00,0.54148,0.00100000,0,H1,58182,1992.02.18,2907,1992.02.18,da scaricare (parziale)
+EURGBP,Euro vs Great Britain Pound Forward contract,5,0.00001000,100000.00,1.17026,0.00001000,3,H1,100000,1993.05.02,6721,1993.05.02,da scaricare (parziale)
+EURAUD,Euro vs Australian Dollar  Forward contract,5,0.00001000,100000.00,0.61372,0.00001000,0,H1,59792,2004.06.16,2988,2004.06.16,da scaricare (parziale)
+EURCHF,Euro vs Swiss Franc Forward contract,5,0.00001000,100000.00,1.06550,0.00001000,5,H1,55685,1993.04.27,2781,1993.04.27,da scaricare (parziale)
+EURJPY,Euro vs Japanese Yen Forward contract,3,0.00100000,100000.00,0.54147,0.00100000,4,H1,100000,1993.04.26,6726,1993.04.26,da scaricare (parziale)
+EURNZD,Euro vs New Zealand Dollar  Forward contract,5,0.00001000,100000.00,0.50988,0.00001000,18,H1,28712,1999.01.04,1430,1999.01.04,da scaricare (parziale)
+EURCAD,Euro vs Canadian Dollar  Forward contract,5,0.00001000,100000.00,0.62216,0.00001000,10,H1,55640,1999.08.01,2780,1999.08.01,da scaricare (parziale)
+GBPCHF,Great Britain Pound vs Swiss Franc Forward contract  ???????,5,0.00001000,100000.00,1.06550,0.00001000,0,H1,47375,1993.04.06,2365,1993.04.06,da scaricare (parziale)
+GBPJPY,Great Britain Pound vs Japanese Yen Forward contract  ?????,3,0.00100000,100000.00,0.54147,0.00100000,0,H1,28723,1993.04.18,1429,1993.04.18,da scaricare (parziale)
+CADCHF,Canadian Dollar vs Swiss Franc  Forward contract,5,0.00001000,100000.00,1.06550,0.00001000,0,H1,28723,1993.05.18,1430,1993.05.18,da scaricare (parziale)
+CADJPY,Canadian Dollar vs Japanese Yen  Forward contract,3,0.00100000,100000.00,0.54147,0.00100000,0,H1,28725,2007.02.12,1430,2007.02.12,da scaricare (parziale)
+GBPAUD,Great Britain Pound vs Australian Dollar  Fwd contract  ?????,5,0.00001000,100000.00,0.61380,0.00001000,0,H1,28725,2007.08.21,1430,2007.08.21,da scaricare (parziale)
+GBPCAD,Great Britain Pound vs Canadian Dollar  Forward contract  ?????,5,0.00001000,100000.00,0.62216,0.00001000,12,H1,56982,2007.08.21,2850,2007.08.21,da scaricare (parziale)
+GBPNZD,Great Britain Pound vs New Zealand Dollar  ??????,5,0.00001000,100000.00,0.50989,0.00001000,0,H1,28492,2010.05.10,1423,2010.05.10,da scaricare (parziale)
+NZDCAD,New Zealand Dollar vs Canadian Dollar  Forward contract  ??????,5,0.00001000,100000.00,0.62216,0.00001000,0,H1,26742,2007.08.20,1331,2007.08.20,da scaricare (parziale)
+NZDCHF,New Zealand Dollar vs Swiss Franc  Forward contract  ?????????,5,0.00001000,100000.00,1.06550,0.00001000,0,H1,26643,2007.08.20,1326,2007.08.20,da scaricare (parziale)
+NZDJPY,New Zealand Dollar vs Japanese Yen  Forward contract  ???????,3,0.00100000,100000.00,0.54147,0.00100000,0,H1,26693,2007.02.12,1328,2007.02.12,da scaricare (parziale)
+NZDUSD,New Zealand Dollar vs US Dollar Forward contract  ???????,5,0.00001000,100000.00,0.86289,0.00001000,0,H1,26670,1994.01.31,1327,1994.01.31,da scaricare (parziale)
+EURNOK,Euro vs Norway Krone  Forward contract,5,0.00001000,100000.00,0.09155,0.00001000,0,H1,26738,2013.03.31,1331,2013.03.31,da scaricare (parziale)
+USDNOK,US Dollar vs Norway Krone  Forward contract  ??????,5,0.00001000,100000.00,0.09155,0.00001000,0,H1,26644,2006.02.06,1325,2006.02.06,da scaricare (parziale)
+EURPLN,US Dollar vs Poland Zloty,5,0.00001000,100000.00,0.23184,0.00001000,0,H1,26763,2015.01.01,1332,2015.01.01,da scaricare (parziale)
+USDPLN,US Dollar vs Poland Zloty  Forward contract  ???????,5,0.00001000,100000.00,0.23184,0.00001000,0,H1,26575,2013.03.18,1323,2013.03.18,da scaricare (parziale)
+EURSEK,Euro vs Sweden Krona  Forward contract,5,0.00001000,100000.00,0.09087,0.00001000,0,H1,26669,2013.03.18,1330,2013.03.18,da scaricare (parziale)
+USDSEK,US Dollar vs Sweden Krona  Forward contract  ??????,5,0.00001000,100000.00,0.09085,0.00001000,0,H1,26705,1998.04.14,1329,1998.04.14,da scaricare (parziale)
+XAGUSD,Silver vs US Dollar  5000 oz  Forward contract  ????,3,0.00100000,5000.00,4.31444,0.00100000,41,H1,26036,2008.11.07,1326,2008.11.07,da scaricare (parziale)
+XAUUSD,Gold vs US Dollar  100 oz  Forward contract  ????,2,0.01000000,100.00,0.86289,0.01000000,16,H1,100000,2004.06.11,6795,2004.06.11,da scaricare (parziale)
+XPDUSD,Palladium vs US Dollar,2,0.01000000,100.00,0.01000,0.01000000,0,H1,26619,2015.03.29,1326,2015.03.29,da scaricare (parziale)
+XPTUSD,Platinum vs US Dollar,2,0.01000000,100.00,0.01000,0.01000000,0,H1,26734,2015.03.29,1332,2015.03.29,da scaricare (parziale)
+100GBP,UK100 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,160,H1,10338,2024.09.26,497,2024.09.26,COMPLETO
+200AUD,AUS 200 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,160,H1,10345,2024.09.26,483,2024.09.26,COMPLETO
+225JPY,Nikkei 225 Index CFD,0,1.00000000,10.00,10.00000,1.00000000,35,H1,11009,2024.09.26,509,2024.09.26,COMPLETO
+D30EUR,DAX Index CFD,2,0.01000000,10.00,0.10000,0.10000000,280,H1,10553,2024.09.26,532,2024.09.26,COMPLETO
+E35EUR,IBEX35 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,540,H1,5423,2024.09.26,481,2024.09.26,COMPLETO
+E50EUR,EURO STOXX 50 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,200,H1,7499,2024.09.26,500,2024.09.26,COMPLETO
+F40EUR,CAC 40 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,170,H1,6713,2024.09.26,481,2024.09.26,COMPLETO
+NASUSD,Nasdaq 100 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,180,H1,10861,2024.09.26,543,2024.09.26,COMPLETO
+SPXUSD,S&P500 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,140,H1,10860,2024.09.26,543,2024.09.26,COMPLETO
+U30USD,Dow Jones Index  CFD,2,0.01000000,10.00,0.10000,0.10000000,200,H1,10859,2024.09.26,543,2024.09.26,COMPLETO
+UKOIL,ICE BRENT Crude Oil Spot Commodity CFD,3,0.00100000,10.00,0.10000,0.00100000,50,H1,10320,2024.09.26,487,2024.09.26,COMPLETO
+USOIL,LIGHT SWEET Crude Oil Spot Commodity CFD (WTI),3,0.00100000,10.00,0.10000,0.00100000,50,H1,10699,2024.09.26,487,2024.09.26,COMPLETO
+XNGUSD,Natural Gas,3,0.00100000,10000.00,10.00000,0.00100000,0,H1,30445,2016.08.23,1607,2016.08.23,da scaricare (parziale)
+EURUSD_EXT,ABTG storico esterno clonato da EURUSD - SOLO prova di regime,5,0.00001000,100000.00,0.86360,0.00001000,0,H1,42779,2018.01.01,2188,2018.01.01,COMPLETO
+GBPUSD_EXT,ABTG storico esterno clonato da GBPUSD - SOLO prova di regime,5,0.00001000,100000.00,0.86357,0.00001000,0,H1,42761,2018.01.01,2186,2018.01.01,COMPLETO
+AUDJPY_EXT,ABTG storico esterno clonato da AUDJPY - SOLO prova di regime,3,0.00100000,100000.00,0.00000,0.00100000,0,H1,42766,2018.01.01,2188,2018.01.01,COMPLETO
+CHFJPY_EXT,ABTG storico esterno clonato da CHFJPY - SOLO prova di regime,3,0.00100000,100000.00,0.00000,0.00100000,0,H1,42752,2018.01.01,2186,2018.01.01,COMPLETO
+EURJPY_EXT,ABTG storico esterno clonato da EURJPY - SOLO prova di regime,3,0.00100000,100000.00,0.00000,0.00100000,0,H1,42755,2018.01.01,2188,2018.01.01,COMPLETO
+GBPCAD_EXT,ABTG storico esterno clonato da GBPCAD - SOLO prova di regime,5,0.00001000,100000.00,0.00000,0.00001000,0,H1,42684,2018.01.01,2179,2018.01.01,COMPLETO
+XAUUSD_EXT,ABTG storico esterno clonato da XAUUSD - SOLO prova di regime,2,0.01000000,100.00,0.00000,0.01000000,0,H1,40732,2018.01.01,2162,2018.01.01,COMPLETO
+USDJPY_EXT,ABTG storico esterno clonato da USDJPY - SOLO prova di regime,3,0.00100000,100000.00,0.00000,0.00100000,0,H1,42760,2018.01.01,2186,2018.01.01,COMPLETO
+[SESSIONI]
+Simbolo,Data,PrimaBarra,UltimaBarra,NBarre,TF,Nota
+EURUSD,2024.01.15,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2024.03.20,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2024.04.15,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2024.07.15,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2024.10.15,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2024.10.28,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2024.11.20,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2025.01.15,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2025.03.20,-,-,0,M5,da scaricare / nessun dato
+EURUSD,2025.04.15,00:00,23:55,286,M5,ok
+EURUSD,2025.07.15,00:00,23:55,285,M5,ok
+EURUSD,2025.10.15,00:00,23:55,285,M5,ok
+EURUSD,2025.10.28,00:00,23:55,285,M5,ok
+EURUSD,2025.11.20,00:00,23:55,285,M5,ok
+EURUSD,2026.01.15,00:00,23:55,285,M5,ok
+EURUSD,2026.03.20,00:00,21:50,263,M5,ok
+EURUSD,2026.04.15,00:00,23:55,286,M5,ok
+EURUSD,2026.07.15,00:00,23:55,286,M5,ok
+EURUSD,VERDETTO_DST,00:00,00:00,0,M5,SERVER ALLINEATO AL DST DEL MERCATO

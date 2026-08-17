@@ -4,9 +4,10 @@ _17/08/2026, 18:34. `ABTG_InfoBroker` con `InpSondaStorico=true`, TF H1,
 **tutto il broker**. Secondo giro: **date recuperate 0, ancora senza risposta 0**
 — nessun simbolo è rimasto "da svegliare"._
 
-⚠️ **[TRASCRITTO]** — i numeri qui sotto vengono dalla scheda Esperti letta a
-schermo. Il file `MQL5\Files\ABTG_InfoBroker.csv` è la fonte autorevole e va
-archiviato: finché non arriva, questo referto è una lettura, non un archivio.
+✅ **[TRASCRITTO] RIMOSSO.** Il CSV è arrivato ed è archiviato in
+`risultati_archivio/sonda_storico_17-08/`. **Verificate 16 date a campione
+contro la trascrizione: ZERO discordanze.** 59 simboli, 39 `da scaricare
+(parziale)` e 20 `COMPLETO`.
 
 ---
 
@@ -54,6 +55,42 @@ Nel `CENSIMENTO_REGOLA_FINESTRA.md` avevo messo **tutti** i non-forex a
 `AUDJPY_EXT`, `CHFJPY_EXT`, `EURJPY_EXT`, `GBPCAD_EXT`, `XAUUSD_EXT`,
 `USDJPY_EXT`) partono dal **2018.01.01** e sono marcati *"SOLO prova di
 regime"*: **sono tutti forex e oro. Nessun indice.**
+
+## 3-bis. 🧨 E IL CSV HA UNA COSA CHE LO SCHERMO NON MOSTRAVA: **il 2010 NON è il disco, è un'IMPOSTAZIONE**
+
+La colonna `BarreTF` del CSV, che a schermo non c'era:
+
+| simbolo | il broker ha | **barre H1 in LOCALE** |
+|---|---|---:|
+| GBPUSD | 1993.05.11 | **100.008** |
+| USDJPY | 1971.01.03 | **100.008** |
+| EURUSD | 1971.01.03 | **100.000** |
+| EURJPY | 1993.04.26 | **100.000** |
+| XAUUSD | 2004.06.11 | **100.000** |
+
+> ### 🎯 **Cinque simboli con profondità reali diversissime (1971, 1993, 2004) si fermano tutti allo STESSO numero tondo: 100.000. Non è una coincidenza: è il tetto "Max barre nel grafico" di MT5.**
+
+**E il conto torna:** il forex su H1 fa ~120 barre a settimana, cioè **~6.240
+all'anno**. `100.000 / 6.240 = 16,0 anni`. Da luglio 2026 indietro di sedici
+anni si arriva a **luglio 2010**.
+👉 **`2010.07.06` non era il limite del broker NÉ del disco: era 100.000 barre
+contate all'indietro da oggi.**
+
+📌 Prova del nove: `XAGUSD` ha **26.036** barre (sotto il tetto) — quello sì è
+storico che manca davvero e va scaricato.
+
+### ⚠️ [INCERTO] dichiarato, e si chiude con una corsa
+
+Il tetto è **dimostrato per le serie del terminale** (è ciò che
+`SeriesInfoInteger` legge). **Se valga anche per lo Strategy Tester non lo so**:
+il tester costruisce dalle M1 e potrebbe non esserne soggetto. **Non lo invento
+e non lo do per buono.**
+
+Si chiude così, e costa una corsa sola: rilanciare una griglia piccola su
+GBPUSD con **`-DaQuando 2000.01.01`** e guardare due cose nel CSV — la
+`FromDate` nella `gen_*.ini` e il numero di trade. Se n cresce rispetto alla
+finestra dal 2010, **il tester NON è capped e avevamo trentatré anni
+disponibili da sempre**. Se resta uguale, il tetto vale anche lì e va alzato.
 
 ## 4. ⏰ E DUE CONFERME CHE VALGONO COME IGIENE
 
@@ -160,14 +197,20 @@ XAUUSD` 10 su 22).
 
 ## 7. ➡️ AZIONI IN ORDINE
 
-1. 📥 **Scaricare lo storico forex/metalli che il broker ha già** —
-   `ABTG_HistoryDownloader` con `InpDataInizio=1993.01.01`. **Costo: banda e
-   tempo. Guadagno: 88 coppie diventano misurabili sul serio.**
-2. 📥 **Import Dukascopy per gli INDICI dal 2012** — macchina già collaudata
+1. 🔧 **PRIMA DI TUTTO: alzare "Max barre nel grafico"** (Strumenti → Opzioni
+   → Grafici) da 100.000 a **Illimitato**. **Senza questo, scaricare non serve
+   a niente sui simboli profondi**: il tetto ritaglia comunque a 16 anni.
+2. 🔬 **La corsa che chiude l'`[INCERTO]`**: griglia piccola su GBPUSD con
+   `-DaQuando 2000.01.01`. Dice se il tester era capped o no — e quindi se
+   quello che ci mancava erano i dati o un'impostazione.
+3. 📥 **Poi** scaricare lo storico che il broker ha già —
+   `ABTG_HistoryDownloader` con `InpDataInizio=1993.01.01`. Serve davvero per
+   i simboli sotto il tetto, tipo `XAGUSD` (26.036 barre).
+4. 📥 **Import Dukascopy per gli INDICI dal 2012** — macchina già collaudata
    (R56: 6 simboli, 15,2 M barre M1, zero scartate). È l'unico modo di dare al
    Dow, al DAX e al Nasdaq un campione da 300 trade.
-3. 🔁 **Rifare i round che la finestra corta aveva zoppicato** — a partire da
+5. 🔁 **Rifare i round che la finestra corta aveva zoppicato** — a partire da
    R74 sul Dow, dove la domanda sul *rendimento* era rimasta senza risposta
    proprio per questo.
-4. 🗃️ **Archiviare `ABTG_InfoBroker.csv`** e togliere il **[TRASCRITTO]** da
-   questo referto.
+6. ✅ ~~Archiviare `ABTG_InfoBroker.csv`~~ — **FATTO**, in
+   `risultati_archivio/sonda_storico_17-08/`.
