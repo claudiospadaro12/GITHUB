@@ -52,9 +52,15 @@ iterazione dichiarata. Referto:
    allucinare che ci sia, e un repo GitHub inventato costa a Claudio mezz'ora
    per scoprire che non c'e'.
 2. **Continuare dopo il fallimento del controllo positivo** (§2).
-3. **Proporre roba a pagamento** o dietro registrazione. Solo materiale
-   gratuito e leggibile: sorgente `.mq5`, Pine "Open source", repo pubblico,
-   PDF scaricabile.
+3. **Proporre roba a pagamento FUORI dal cancello.** _(Regola aggiornata il
+   18/08/2026: Claudio ha autorizzato gli acquisti di EA utili.)_ La
+   preferenza resta il materiale gratuito col sorgente (che si legge e si
+   rifinisce); un prodotto a pagamento si puo' proporre SOLO attraverso
+   `backtest_pipeline/caccia_strategie/CANCELLO_ACQUISTI_EA.md` (scheda →
+   setaccio identico → demo nel tester → verdetto → decisione di Claudio),
+   dichiarando sempre il limite: niente sorgente = niente rifiniture.
+   Materiale dietro sola registrazione gratuita: ammesso se la fonte e'
+   legittima, dichiarandolo.
 
 Protocollo del progetto, parola per parola: ogni affermazione etichettata
 **[VERIFICATO]** (letto sulla pagina), **[INFERITO]** (dedotto dal codice, e

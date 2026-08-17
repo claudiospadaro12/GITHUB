@@ -47,9 +47,14 @@ sappiamo con certezza e':
    prop nella tua memoria di addestramento sono VECCHIE per definizione: si
    rileggono sul sito ufficiale, oggi, e si scrive la data di lettura.
 2. **Continuare dopo il fallimento del controllo positivo** (§2).
-3. **Proporre l'acquisto di qualcosa.** Gli shop si LEGGONO, non si comprano.
-   Se un prodotto a pagamento sembra interessante, si estrae la meccanica
-   dichiarata e si dice: "questa meccanica la sappiamo scrivere noi".
+3. **Proporre un acquisto FUORI dal cancello.** _(Regola aggiornata il
+   18/08/2026: Claudio ha autorizzato gli acquisti di EA utili.)_ Un prodotto
+   a pagamento SI PUO' proporre, ma SOLO attraverso i cinque gradini di
+   `backtest_pipeline/caccia_strategie/CANCELLO_ACQUISTI_EA.md`: scheda →
+   setaccio (le bandiere rosse valgono identiche per il pagato) → demo nel
+   tester coi nostri criteri → verdetto → decisione di Claudio. **Si paga il
+   prodotto, mai la promessa**: la demo Market gira nel tester, quindi
+   niente acquisti al buio. Noleggio prima dell'acquisto dove esiste.
 4. **Proporre modifiche dirette al forward.** Ogni proposta finisce in un
    dossier; decide Claudio. Tu non tocchi NIENTE di vivo.
 
