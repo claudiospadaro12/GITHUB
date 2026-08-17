@@ -1,5 +1,17 @@
 # 🔬 R70 — LA FINESTRA RECENTE **SCEGLIE MEGLIO**, ma il ribaltamento **NON ERA L'EPOCA: È IL REGIME**
 
+> ## ✍️ RITRATTAZIONE (aggiunta dopo R71, 16/08)
+> **Il §2 di questo referto e' SBAGLIATO nella parte numerica.** I rapporti di
+> cattura (97,3% / 61,1% contro 51,5% / 54,5%) erano calcolati sulla **cella
+> migliore dell'IS — il PICCO** — mentre il criterio 1 di casa dice _"centro
+> dell'altopiano, MAI il picco"_. Rifatto con la regola giusta, la finestra
+> vecchia su USDJPY cattura **92,4%** contro l'**83,5%** di quella nuova: **il
+> vantaggio della finestra recente sparisce.** Il §2 era gia' dichiarato
+> "sospeso, non un verdetto" per n sotto soglia, e per fortuna. Numeri corretti
+> e conclusione in **`REFERTO_ROUND71_FINESTRA_CAMPIONE_PIENO.md` §1-2**.
+> Gli altri paragrafi (regime, buffer, config viva) **reggono e sono stati
+> riconfermati da R71**.
+
 _Verifica dell'**EMENDAMENTO DELLA FINESTRA** congelato in `CLAUDE.md` il 16/08
 su richiesta di Claudio. Le tre domande erano scritte in
 `prove/PTE_FINESTRA_VECCHIA_O_RECENTE.txt` **prima** di aprire lo zip._
