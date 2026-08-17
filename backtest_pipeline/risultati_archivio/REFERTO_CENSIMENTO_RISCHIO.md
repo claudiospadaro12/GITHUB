@@ -75,6 +75,24 @@ il rischio di casa prop). Tre F7, tre minuti:
 📌 Peraltro `770101` è **anche** la sedia peggiore del conto (−649 storico su
 26 op): il 2% raddoppiava proprio il motore che perde di più.
 
+## 4-bis. 🔴 CONTROPROVA delle 23:45 — NON PASSATA (secondo giro archiviato in `censimento_rischio_2026-08-17_2345.txt`)
+
+Il secondo censimento, dopo il tentativo di correzione, dice:
+
+- **`770101` e `970901` sono ANCORA a 2.0** → la correzione non risulta
+  applicata su quei file;
+- **`770203` (Nasdaq Live5m) è SPARITO del tutto dal censimento** — e con lui
+  `770121` (DAX Live5m v2) e `DAXMasterEA_v2_0`: 60 → 57 righe. Un grafico che
+  non compare più nei `.chr` è un grafico chiuso: **quell'EA non sta più
+  girando**, il che va bene solo se è stato chiuso apposta.
+
+**[IPOTESI, non misurata]** la sequenza più compatibile coi fatti: lo script di
+correzione non è mai arrivato in fondo (MT5 ancora aperto → si è rifiutato,
+come da progetto), e le tre righe sparite sono grafici chiusi in giornata i cui
+`.chr` sono stati ripuliti all'uscita di MT5. Si chiude leggendo
+`abbassa_rischio.txt` sul Desktop: se non esiste, lo script non ha mai corretto
+niente.
+
 ## 5. 🚦 Cosa resta aperto dopo questo referto
 
 - ✅ ~~perché il 100k va meglio del piccolo~~ → **misurato: rischia meno, non
