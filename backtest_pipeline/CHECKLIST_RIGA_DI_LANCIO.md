@@ -116,3 +116,38 @@ scrivono sempre in forma completa `v||v||0||v||N`, mai `Nome=v` secco.
 > **Un file prova deve avere almeno UN asse con flag `Y`.**
 > Se la domanda e' "voglio misurare UNA sola cella", non e' un walk-forward:
 > serve un altro strumento, non questo driver.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 — tre giri a vuoto in una notte, tre controlli nuovi
+
+_Contesto: la correzione del rischio nei .chr ha richiesto TRE tentativi.
+Nessuno dei tre difetti era nella checklist. Adesso ci sono._
+
+## 5. 🌍 CULTURA INVARIANTE, SEMPRE (il VPS e' Windows in ITALIANO)
+
+`[double]::TryParse("2.0")` senza cultura, su it-IT, legge il punto come
+separatore delle MIGLIAIA: viene fuori VENTI. Il 18/08 lo script "abbassa
+rischio" ha visto 4 file e ne ha corretti 0 per questo.
+**Ogni parse/format di numeri decimali nei .ps1 destinati al VPS usa
+`InvariantCulture`. Grep secco: `TryParse|::Parse|ToString` senza
+`InvariantCulture` vicino = riga da rifare.**
+
+## 6. ⏱️ LA CACHE DI GITHUB RAW TIENE ~5 MINUTI
+
+Se lo script e' stato pushato da poco, `raw.githubusercontent.com/.../lavoro/...`
+puo' servire la versione VECCHIA (successo il 18/08: fix pushato, Claudio ha
+rilanciato dopo 2 minuti, ha girato il bug). **Dopo un push fresco la riga
+punta all'HASH del commit, non al branch — e quando possibile aggiunge il
+controllo di versione (`Select-String` su un marcatore che esiste solo nella
+versione nuova) PRIMA di eseguire.**
+
+## 7. 🛑 GLI SCRIPT CHE SCRIVONO NEI FILE DI MT5 PRETENDONO MT5 CHIUSO
+
+MT5 riscrive i .chr e i config all'uscita: una correzione applicata con MT5
+aperto viene cancellata. **Ogni script che scrive in `MetaQuotes\Terminal`
+apre con la guardia `Get-Process terminal64` e SI RIFIUTA se lo trova. E la
+riga in chat dice esplicitamente: prima chiudi MT5, poi lancia, poi riapri.**
+Bonus imparato lo stesso giorno: se il referto sul Desktop ha una riga
+`data:` interna, dire a Claudio QUALE data deve leggerci — due volte ha
+rimandato in buona fede il file vecchio delle 23:57.
