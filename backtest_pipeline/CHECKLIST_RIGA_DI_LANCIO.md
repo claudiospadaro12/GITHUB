@@ -151,3 +151,48 @@ riga in chat dice esplicitamente: prima chiudi MT5, poi lancia, poi riapri.**
 Bonus imparato lo stesso giorno: se il referto sul Desktop ha una riga
 `data:` interna, dire a Claudio QUALE data deve leggerci — due volte ha
 rimandato in buona fede il file vecchio delle 23:57.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 (sera) — trovate verificando `sistema_desktop.ps1`
+
+## 8. 🕳️ SE L'`irm` FALLISCE, IL `;` TIRA DRITTO E GIRA LA COPIA VECCHIA
+
+`irm ...; & "$env:USERPROFILE\script.ps1"` — il punto e virgola **non e' un
+`&&`** (e su PS 5.1 il `&&` non esiste nemmeno). Se il download fallisce
+(rete, 404, path sbagliato nella URL, TLS) l'errore rosso scorre via e la
+riga esegue **la copia vecchia rimasta nel profilo**: e' esattamente il bug
+del 10/08 (`maxmin_oro.ps1`) che l'`irm` doveva uccidere, tornato dalla
+finestra. Tre pezzi, sempre tutti e tre:
+
+```powershell
+Remove-Item $p -ErrorAction SilentlyContinue          # 1: niente copia vecchia da eseguire
+irm $u -OutFile $p -ErrorAction Stop                  # 2: errore TERMINANTE = la riga muore qui
+if(-not (Select-String -Path $p -SimpleMatch -Pattern '<marcatore nuovo>' -Quiet)){ throw 'SCRIPT VECCHIO' }
+```
+
+Il marcatore e' una stringa che esiste **solo** nella versione nuova: copre
+insieme la cache raw (punto 6) e il download andato a male.
+
+## 9. 🧯 LA RISCRITTURA NON PUO' PERDERE LA SICUREZZA DEL GEMELLO
+
+Il punto 2 dice "se correggo un difetto, lo cerco negli altri script". Il
+rovescio e' altrettanto vero e costa di piu': `riordina_desktop.ps1` (14/08)
+aveva `-Annulla` e un **log CSV `Origine,Destinazione`** per rimettere tutto
+al suo posto; `sistema_desktop.ps1` (18/08), che fa lo stesso mestiere, era
+nato con un log di sole frasi — **irreversibile**. Prima di mandare la riga
+di uno script che ne rifa un altro: elencare le funzioni di SICUREZZA del
+gemello (annulla, log macchina, guardie, `-Prova`) e verificare che ci siano
+tutte. Corollario: due script che archiviano lo stesso Desktop in DUE alberi
+diversi vanno dichiarati in chat, o Claudio si ritrova due archivi.
+
+## 10. 💥 `$ErrorActionPreference = "Stop"` + ciclo di file = corsa monca e senza log
+
+In un ciclo che sposta/scrive N file, **un solo file bloccato** (aperto in
+Excel, in uso da MT5) fa saltare tutto lo script: quello che era gia' stato
+mosso resta mosso e **il log finale non viene mai scritto**. Nei cicli su
+file: `try{...}catch{ segnala e continua }`, e il log si scrive **sempre**,
+anche a corsa interrotta. Stessa famiglia: il file di log scritto in una
+cartella creata solo dentro il ramo "ho spostato qualcosa" esplode il giorno
+in cui non si sposta niente — la cartella del log si crea **prima** di
+scriverci.
