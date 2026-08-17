@@ -74,13 +74,13 @@ if($tutte.Count -eq 0){ Rec "Nessun grafico con EA salvato. Hai fatto File -> Pr
 
 Rec ("sedie trovate: " + $tutte.Count) Gray
 Rec ""
-Rec ("{0,-36} {1,-8} {2,-8} {3,>6}  {4}" -f "EA","simbolo","magic","rischio","commento") White
+Rec ("{0,-36} {1,-8} {2,-8} {3,6}  {4}" -f "EA","simbolo","magic","rischio","commento") White
 Rec ("-" * 92) Gray
 
 $sospette = 0
 foreach($t in ($tutte | Sort-Object @{e={ if($_.Risk){[double]$_.Risk}else{-1} }; Descending=$true}, EA)){
   $r = if($t.Risk){ $t.Risk } else { "n/d" }
-  $riga = ("{0,-36} {1,-8} {2,-8} {3,>6}  {4}" -f $t.EA, $t.Sym, $t.Magic, $r, $t.Comm)
+  $riga = ("{0,-36} {1,-8} {2,-8} {3,6}  {4}" -f $t.EA, $t.Sym, $t.Magic, $r, $t.Comm)
   if($t.Risk -and [double]$t.Risk -gt 1.0){ Rec $riga Red; $sospette++ }
   elseif(-not $t.Risk){ Rec ($riga + "   <- nessun input di rischio trovato" + $(if($t.Lotto){" ("+$t.Lotto+")"}else{""})) Yellow }
   else{ Rec $riga Gray }
