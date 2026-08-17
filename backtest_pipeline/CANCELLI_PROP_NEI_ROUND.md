@@ -62,23 +62,40 @@ Ed e' il cancello che **nessun nostro referto ha mai calcolato**.
 
 ---
 
-## 3. 🧪 IL PASSO ZERO, che vale piu' di tutti e tre
+## 3. 🧪 IL PASSO ZERO — **e il 17/08 ha perso la sua casa**
 
-# ⚡ ACCENDERE `ABTG_Guardian` SUL DEMO 109k. IN MONITOR, NON IN ENFORCE.
+L'idea era: accendere `ABTG_Guardian` in **monitor** su un conto di taglia
+prop e lasciarlo misurare la flotta vera. Il conto c'era: **50504263**, demo
+BCM 100k su istanza `-V3` del VPS, dry-run FTMO acceso il **09/08 alle 20:22**
+con 5 EA a rischio 0,65%.
 
-`InpAction = 1` (**SOLO ALLARME**: guarda e scrive, non chiude niente),
-`InpDDMode = 1` (**TRAILING**, il muro cattivo), `InpDailyLossPct = 5`,
-`InpTotalDDPct = 10`.
+> ### 🔴 **Claudio lo ha cancellato il 17/08. Il dry-run non esiste piu'.**
 
-**Costa dieci minuti e zero rischio** — in monitor non tocca un ordine.
-E in cambio, ogni giorno, dice **quanto vicino al muro e' passata la flotta
-vera**, non una simulazione.
+### 3.1 ♻️ PRIMA DI TUTTO: i DATI possono essere sopravvissuti al CONTO
+MT5 scrive i CSV nella **cartella dati**, non dentro il conto.
+`ABTG_Trades_100k.csv`, gli `abtg_trades_*.csv` e le `pagella_*.txt` sul
+Desktop **possono essere ancora sul VPS**. Otto giorni di dry-run con il
+guardiano acceso sono l'unico dato prop vero che questo progetto abbia mai
+prodotto: **si cercano prima di dichiararli persi.**
 
-🔴 **NON sul conto forward** e **NON in enforce**: sul forward vogliamo il
-comportamento grezzo, altrimenti misuriamo il guardiano invece dell'EA.
-Lo dice il file stesso nell'intestazione.
+### 3.2 🚪 E POI, LE DUE STRADE — sono diverse, e la differenza conta
 
----
+| | **A. Riaprire un demo taglia prop** | **B. Guardian in monitor sul forward 50503392** |
+|---|---|---|
+| costo | un login nuovo + le 5 fasi gia' scritte in `DEPLOY_GUARDIANO_100K.md` | dieci minuti, un grafico |
+| rischio | zero (demo nuovo, forward intoccato) | zero **solo se `InpAction=1`** (monitor: non chiude niente) |
+| che numero da' | **percentuali confrontabili** con una challiange vera | percentuali **distorte** |
+
+🔴 **Perche' B e' zoppo, e va detto:** il forward gira su un saldo di circa
+**5.373 €**. A quella taglia il **lotto minimo schiaccia il rischio** — e'
+lo stesso motivo per cui il driver ha l'opzione `-Deposito 100000`. Su quel
+conto un trade solo e' arrivato a **3,83%**, cioe' il **77% del margine
+giornaliero** di una prop, in un colpo (`A1_A4_rischio_immediato.md`).
+**Quelle non sono le percentuali di una challenge: sono le percentuali di un
+conto piccolo.**
+
+👉 **B si puo' fare subito e non fa male. Ma solo A produce un numero che
+vuol dire qualcosa.** E A e' quasi gratis, perche' la procedura c'e' gia'.
 
 ## 4. 🧱 E IL MURO CHE RESTA IN PIEDI
 

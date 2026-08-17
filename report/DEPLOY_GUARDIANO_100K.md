@@ -1,5 +1,26 @@
 # DEPLOY -- DEMO 100K COL GUARDIANO (dry-run FTMO 2-Step)
 
+> # 🔴 NON E' PIU' IN ACQUA — **il conto e' stato cancellato (17/08/2026)**
+>
+> Claudio: _"Non ho piu' il conto da 109k. L'ho cancellato."_
+>
+> **Tutto quello che c'e' sotto e' STORIA, non stato attuale.** Il conto
+> **50504263** non esiste piu', quindi:
+> - il dry-run FTMO partito il **09/08 alle 20:22** e' **finito**;
+> - `ABTG_Guardian` **non sta sorvegliando niente**, da nessuna parte;
+> - qualunque frase del progetto che dica _"il dry-run e' in acqua"_
+>   (compreso `DIARIO.md` al 2026-08-09) va letta **al passato**.
+>
+> ⚠️ **I DATI POSSONO ESSERE SOPRAVVISSUTI AL CONTO.** MT5 scrive i CSV
+> nella cartella dati, non nel conto: `ABTG_Trades_100k.csv` e gli
+> `abtg_trades_*.csv` **possono essere ancora sul VPS** anche se il conto
+> e' sparito. Prima di dare per persi quei giorni, si cercano.
+>
+> 📄 La procedura in 5 fasi qui sotto resta **valida e riutilizzabile** il
+> giorno in cui si riapre un demo di taglia prop: e' scritta, testata, e ha
+> gia' intercettato quattro errori di deploy.
+
+
 ## ✅ COMPLETATO il 09/08/2026 alle 20:22 -- IL DRY-RUN E' IN ACQUA
 
 - Conto: **50504263** (BCM demo, 100.000 EUR, hedge) su istanza separata
