@@ -36,10 +36,11 @@
 >    sta nell'altopiano di entrambi). **Prima di allora non c'e' verdetto.**
 > 4. 🪑 **Solo dopo**: la domanda su `PTE USDJPY` in forward — decisione di Claudio.
 >
-> ⚠️ **Da fare comunque**: verificare che sul **PC** non ci siano EA attaccati
-> ai grafici del conto vivo (`ABTG_GapContinuation` e `ABTG_GapFill` sembravano
-> esserci). Regola di `DAX_14-08_DUE_MOTORI.md`: sul PC di backtest AutoTrading
-> spento e nessun EA sui grafici del conto vivo.
+> ✅ ~~**Da fare comunque**: verificare che sul PC non ci siano EA attaccati ai
+> grafici del conto vivo~~ — **CHIUSO il 17/08 da Claudio: "Algo trading e'
+> staccato su MT5 desktop".** Anche se un EA fosse rimasto su un grafico, con
+> l'AutoTrading spento non puo' mandare ordini. Regola di
+> `DAX_14-08_DUE_MOTORI.md` rispettata.
 
 > ## 🌙 CHIUSURA DELLA SERATA 16/08 — sei round e una sedia nuova
 >
