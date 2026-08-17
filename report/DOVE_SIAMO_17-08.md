@@ -125,7 +125,9 @@ apertura o Live5m: i momenti di massima volatilita' della giornata.
 | **a** | quelle sedie hanno `InpRiskPercent` piu' alto di quanto crediamo | `censimento_rischio.ps1` legge i `.chr` e stampa il rischio di ogni sedia |
 | **b** | il rischio e' giusto ma lo **STOP viene SALTATO** (gap/slippage in apertura), e la perdita supera il rischio previsto | se tutte dichiarano 1.0, resta questa |
 
-🔴 **[NON ANCORA MISURATO] quale delle due.** Ma qualunque sia, **e' il primo
-problema del conto**, e viene prima di qualunque round: su una prop una perdita
-del 2,2% in una singola operazione consuma **un quinto** del muro totale in un
-colpo.
+✅ **MISURATO (23:34, censimento sui `.chr`): e' la (a).**
+**Tre sedie dichiarano il 2,0%**: `770101` (DAX Apertura), `770203` (Nasdaq
+Live5m), `970901` (STREV OTT oro). Le prime due sono ESATTAMENTE le sedie delle
+perdite oltre il 2% — i conti tornano al decimale (2,0% + spread/slippage =
+−2,00…−2,19). Lo stop NON viene saltato. Referto completo:
+`backtest_pipeline/risultati_archivio/REFERTO_CENSIMENTO_RISCHIO.md`.
