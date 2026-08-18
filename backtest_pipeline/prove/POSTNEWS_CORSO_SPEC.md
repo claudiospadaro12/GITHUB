@@ -693,3 +693,86 @@ E i tre diventano **le tre gambe di uno sweep**, perche' su ognuno **le due
 fonti umane si contraddicono**: e' il caso in cui si misura invece di scegliere.
 
 ---
+
+## 10. 🧭 IL ROUND CHE PROPONGO (se Claudio lo autorizza)
+
+**Nessuna di queste righe e' stata eseguita.**
+
+| # | prova | perche' | costo |
+|---|---|---|---|
+| **P0** | **Rigirare FASE 0 con `abtg_news.csv` popolato dal calendario di biblioteca** (70 eventi 2021-2025) | il round precedente ha misurato zero trade | 1 conversione CSV + 4 passate |
+| **P1** 🥇 | **stessa meccanica su TUTTE le conferenze stampa del CSV**: BoJ (58 righe), BoC (41), RBNZ (34), SNB (26) sui rispettivi cross | porta il campione da 70 a **oltre 250 eventi** e distingue **"il post-news funziona"** da **"funzionano quelle 70 date"** | 1 sweep per valuta |
+| **P2** 🥈 | **PLACEBO: stessa meccanica, stessi orari, GIORNI SENZA NOTIZIA** (`InpRestrictToNews=false`) | e' il test che falsifica la tesi del §1: se il placebo rende quanto l'originale, **la notizia e' decorazione** | gratis, l'interruttore c'e' gia' |
+| **P3** | sweep a 3 gambe: OCO on/off · chiusura a scadenza on/off · skip 0/1 candela | i tre punti su cui **le fonti si contraddicono** | 8 combinazioni |
+| **P4** | offset base 1-4 pip con spread aggiunto solo al buy (§5.4) | il +3/−2 e' la taratura di spread di un altro broker | 4 valori |
+
+⚠️ **Regola di lettura, dichiarata PRIMA dei numeri:** con 70 eventi
+**non si applica il criterio IS/OOS a 150 operazioni**. Il verdetto possibile e'
+la **prova di regime** (Emendamento C) e vale **solo sul RISCHIO**
+(Emendamento B): se il DD misurato sfonda, si boccia; se il profitto e' buono,
+**non si promuove** — si scrive "campione sottile".
+
+🥇 **P2 e' la prova piu' importante di tutte**: risponde alla domanda che il
+corso non si pone mai in 9 lezioni — **serve davvero la notizia?**
+
+---
+
+## 11. 🏛️ ATTRITI PROP — qui non e' contorno, e' il cuore
+
+Fonte delle regole: `caccia_strategie/CONFIG_PROP_2026-08-18.md` §2A-2F
+(dichiarazioni raccolte, **nessuna confermata dal supporto**: regola D3).
+
+### 11.1 La finestra di divieto vs il nostro istante d'esecuzione
+
+L'ordine e' **piazzato** a notizia +15 (ECB) / **+10** (FOMC) e puo' scattare in
+qualunque momento successivo. Quindi il confronto giusto e' fra la finestra di
+divieto e **+10 minuti**.
+
+| prop | regola news dichiarata | ECB (azione +15) | FOMC (azione +10) |
+|---|---|---|---|
+| **FTMO 2-Step Standard** | vietato aprire/chiudere **±2 min** | ✅ **eseguibile** (13 min di margine) | ✅ **eseguibile** (8 min) |
+| **FTMO Swing** | **nessuna restrizione** | ✅ **libera** | ✅ **libera** |
+| **FTMO 1-Step** | idem ±2 min | ✅ news ok — 🔴 **ma daily 3%**: un doppio stop al 3% del corso = **breccia secca** | idem |
+| **The5ers High Stakes** | ±2 min per **eseguire**; tenere e' permesso — ma _"i news trader devono scegliere Hyper Growth"_ | 🟠 **tecnicamente si, di categoria no**: questa E' una strategia di news trading | 🟠 idem |
+| **FundingPips** | ❌ **nessuna posizione aperta, chiusa O TENUTA entro ±10 min** — violazione = **hard breach** | 🟠 5 minuti di margine, zero tolleranza sui ritardi | 🔴 **l'azione cade ESATTAMENTE sul bordo**: piazzare a +10:00 e vedersi eseguire a +10:0x e' un hard breach a **secondi** di distanza |
+| **E8 Markets** | ❌ ±5 min per aprire E chiudere | ✅ eseguibile | ✅ eseguibile (5 min di margine) |
+| **E8 Signature** | 🔴 **tutte le posizioni chiuse alle 23:00 server** | 🟠 la scadenza e' alle 18:15 IT: ok | 🔴 **incompatibile**: l'esempio-principe della lez. 9 **tiene la posizione tutta la notte e incassa alle 8 del mattino** |
+| **Alpha Capital** | ✅ news permesse; ≥50% dei profitti da trade > 2 min | ✅ **libera** | ✅ **libera** (i trade durano ore) |
+
+### 11.2 🔴 I due killer strutturali che NON dipendono dalla finestra news
+
+Valgono **anche** dove le news sono libere, e sono figli della frequenza: **8+8
+= 16 operazioni all'anno**.
+
+1. **GIORNI MINIMI DI TRADING.** FTMO chiede **4 giorni** di trading; The5ers
+   **3 giorni profittevoli** (≥0,5% ciascuno). Con **1,3 eventi al mese**, la
+   Post News da sola impiega **mesi** solo per sbloccare il requisito. 🔴 **Da
+   sola non passa una challenge, a prescindere da quanto guadagni.**
+2. **REGOLA DI CONSISTENZA.** FTMO: nessun giorno > **50%** del profitto totale;
+   E8 ~35-40%; FundedNext 40% su Rapid Pro. Con **2-3 operazioni per fase di
+   challenge**, un singolo TP da 50 pip e' facilmente **>50% del profitto**. 🔴
+   **La Post News da sola viola la consistenza quasi per costruzione.**
+
+> 🎯 **Verdetto prop, in una riga:** **eseguibile** su FTMO (Standard e Swing),
+> E8 Markets e Alpha Capital; **di fatto vietata** su FundingPips (±10 min anche
+> solo TENENDO, e il FOMC agisce esattamente a +10); **impossibile da sola** su
+> qualunque prop per giorni minimi e consistenza. **La sua unica collocazione
+> sensata e' come SATELLITE di un portafoglio piu' denso** — che e', guarda
+> caso, esattamente il modo in cui il corso la presenta `[T]`: _"e' perfetta
+> anche da aggiungere a qualsiasi altra strategia"_.
+
+### 11.3 ✅ Setaccio bandiere rosse: PULITO
+
+Martingala ❌ · griglia ❌ · recovery/averaging ❌ · hedging ❌ · assenza di stop
+❌ · trucchi anti-rilevamento ❌. **Stop loss sempre presente, perdita massima
+nota in partenza, due ordini di size identica.** Zero bandiere rosse in 9
+lezioni: **e' il modulo piu' pulito dei sei**.
+
+⚠️ Unica riserva di metodo: il relatore **asserisce** che sulle conferenze
+stampa lo stop e' garantito `[T]` (_"mettendo uno stop loss ne avremo la
+certezza che a quel prezzo sara' eseguito"_). **Non e' vero in senso stretto**:
+lo slippage esiste anche in conferenza stampa. E' un'affermazione commerciale su
+un rischio reale, e va trattata come **da misurare** (il tester a tick reali lo
+dira').
+
+---
