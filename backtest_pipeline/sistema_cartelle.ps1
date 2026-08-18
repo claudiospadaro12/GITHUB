@@ -22,13 +22,15 @@
 #    .\sistema_cartelle.ps1           -> sposta davvero
 # =====================================================================
 param(
-  [switch]$Prova
+  [switch]$Prova,
+  [switch]$ConTematiche
 )
 $ErrorActionPreference = "Stop"
 
 $desk = [Environment]::GetFolderPath("Desktop")
 $arch = Join-Path $desk "ARCHIVIO_DESKTOP"
 $dest = Join-Path $arch "cartelle_test"
+$tema = Join-Path $arch "cartelle_tema"
 
 # i nomi dei NOSTRI test (dallo screenshot del 18/08). -like, case-insensitive.
 $riconosciute = @(
@@ -36,9 +38,13 @@ $riconosciute = @(
   "sonda_*","storico_*","diag_*","pertrade_*","mr[0-9]*","tetto*",
   "censiment*","broker_est*","caccia_ticket","da_setacciare","stacca_ea*",
   "config_dax","estrai_set*","import_est*","ea_attaccati","conferma_*",
-  "dow_apertura","trades","ReportTester*","NOTTE*","EASYTREND","BREAKOUT",
-  "PROCE*","INDICATORI","ALTA VELOCIT*","NASDAQ APERTU*","DAX E NASD*",
-  "PIANO DI TRADI*","FILE WORD*","FILE CHE SCARICO*","wetransfer_*","Ciclo"
+  "dow_apertura","trades","ReportTester*","wetransfer_*","Ciclo"
+)
+# le cartelle TEMATICHE di Claudio: gia' ordine suo, NON sono test.
+# Si spostano (in cartelle_tema, non in cartelle_test) SOLO con -ConTematiche.
+$tematiche = @(
+  "NOTTE*","EASYTREND","BREAKOUT","PROCE*","INDICATORI","ALTA VELOCIT*",
+  "NASDAQ APERTU*","DAX E NASD*","PIANO DI TRADI*","FILE WORD*","FILE CHE SCARICO*"
 )
 # mai toccare, nemmeno se un pattern combaciasse
 $protette = @("ARCHIVIO_DESKTOP")
@@ -60,8 +66,16 @@ foreach($c in $cartelle){
     $lasciate++
     continue
   }
-  $match = $false
+  $match = $false; $dirDest = $dest; $etichetta = "cartelle_test"
   foreach($p in $riconosciute){ if($c.Name -like $p){ $match = $true; break } }
+  if(-not $match){
+    foreach($p in $tematiche){ if($c.Name -like $p){ $match = $true; $dirDest = $tema; $etichetta = "cartelle_tema"; break } }
+    if($match -and -not $ConTematiche){
+      Rec ("  tematica, resta (per archiviarla: rilancia con -ConTematiche): " + $c.Name) Gray
+      $lasciate++
+      continue
+    }
+  }
   if(-not $match){
     Rec ("  NON riconosciuta, resta (dimmelo se va archiviata): " + $c.Name) Yellow
     $lasciate++
@@ -69,16 +83,16 @@ foreach($c in $cartelle){
   }
 
   if($Prova){
-    Rec ("  [PROVA] " + $c.Name + "  ->  ARCHIVIO_DESKTOP\cartelle_test") Cyan
+    Rec ("  [PROVA] " + $c.Name + "  ->  ARCHIVIO_DESKTOP\" + $etichetta) Cyan
     $daSpostare++
     continue
   }
 
-  if(-not (Test-Path $dest)){ New-Item -ItemType Directory -Path $dest -Force | Out-Null }
-  $nomeDest = Join-Path $dest $c.Name
+  if(-not (Test-Path -LiteralPath $dirDest)){ New-Item -ItemType Directory -Path $dirDest -Force | Out-Null }
+  $nomeDest = Join-Path $dirDest $c.Name
   $n = 2
-  while(Test-Path $nomeDest){
-    $nomeDest = Join-Path $dest ($c.Name + "_" + $n)
+  while(Test-Path -LiteralPath $nomeDest){
+    $nomeDest = Join-Path $dirDest ($c.Name + "_" + $n)
     $n++
   }
   try{
