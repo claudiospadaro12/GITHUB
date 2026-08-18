@@ -336,7 +336,11 @@ tre cose, tutte gia' scritte in `SETACCIO_MANUALE.md`:
   quella cella da una promozione di rango (criterio A di R59).
 - **Indici a tick reali su BCM**: `-Simboli "D30EUR,U30USD" -Timeframes "M1,H1" -Da 2015.01.01 -Auto`
 - **Storico Pepperstone degli indici**, a mercato aperto.
-- **Blocco LZMA** per i `.bi5` di Dukascopy (14 anni di indici fermi li').
+- ~~**Blocco LZMA** per i `.bi5` di Dukascopy~~ → **FATTO il 18/08**: pipeline
+  Python pronta in `backtest_pipeline/dukascopy/dukascopy_m1.py` (autotest
+  6/6). Dal cloud la rete e' bloccata (403 misurato): **gira sul PC di
+  Claudio**. Prossimo passo suo: `--validazione` (righe di lancio in
+  `risultati_archivio/REFERTO_DUKASCOPY_FATTIBILITA.md`, sez. 7).
 
 ---
 

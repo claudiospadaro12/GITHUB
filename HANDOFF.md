@@ -7,6 +7,27 @@
 
 ---
 
+## 🧾 AGGIORNAMENTO 18/08 (agente in background) — DUKASCOPY: la pipeline e' pronta, tocca al PC
+
+Missione "storico indici Dukascopy" chiusa lato cloud
+(`backtest_pipeline/risultati_archivio/REFERTO_DUKASCOPY_FATTIBILITA.md`):
+- **dal cloud NON si scarica** (proxy: 403 sul CONNECT, misurato su due
+  canali) → strada (b), la pipeline gira **sul PC di Claudio**;
+- date gia' misurate dalla sonda del 15/08: **DAX/Dow/Nasdaq dal 2012,
+  Nikkei dal 2013** → le finestre di regime 2019-2022 degli indici sono a
+  portata di mano;
+- deliverable: `backtest_pipeline/dukascopy/dukascopy_m1.py` — tick `.bi5`
+  → M1 CSV **Formato 1** (quello che `ABTG_ImportaStoricoEsterno` legge
+  gia'), ordine campi e divisore **misurati a runtime**, fuso `ny` =
+  convenzione HistData (controprova obbligatoria: **shift calibrato +5**),
+  autotest sintetico 6/6 passato;
+- **prossimo passo di Claudio**: le due righe del passo 1 (`--autotest` +
+  `--validazione`, referto sez. 7) e mandare lo zip in chat. Poi la corsa
+  notturna 2019→oggi, un simbolo alla volta, e l'ultimo miglio verso
+  `D30EUR_EXT` e fratelli (cancello ZERO + lezione R80 obbligatori).
+
+---
+
 ## 🧾 AGGIORNAMENTO 15/08 — quattro round chiusi in una notte, e il fantasma misurato fino in fondo
 
 ### 0. IL NUMERO CHE RIBALTA DUE SETTIMANE DI LETTURE
