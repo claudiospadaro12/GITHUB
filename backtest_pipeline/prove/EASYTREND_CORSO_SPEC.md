@@ -91,6 +91,31 @@ l'ora del **fuso scelto dall'utente**, che non e' visibile nel parlato.
 > diagonali) → **la fascia non decide, si tiene 8-18 letterale**. Il buco resta
 > un buco della FONTE; da noi e' chiuso per misura.
 
+> 🆕 **18/08 sera — IL MODULO BASE DA' UN APPIGLIO NUOVO (e non e' TradingView).**
+> `[TRASCRITTO chiaro, lez. 3 modulo base "I PRIMI PASSI SULLA PIATTAFORMA"]`
+> > _"Questa e' una piattaforma che, scaricata dal broker **BlackRidge**, **non
+> > da' l'ora italiana, cioe' e' settata sostanzialmente sul GMT** ... **e non puo'
+> > essere modificata questo orario** ... quando in Italia [c'e'] l'ora legale,
+> > quindi da fine marzo a fine ottobre, **qui la piattaforma sara' DUE ORE
+> > INDIETRO rispetto all'ora italiana**. Quando invece ... [c'e'] l'ora solare
+> > ... **la piattaforma risultera' UN'ORA INDIETRO**"_
+>
+> ⚖️ **Cosa cambia e cosa NON cambia.**
+> - ✅ **La piattaforma MT4 del corso e' a UTC+0.** Ed e' un dato che si allaccia
+>   a una misura nostra: `report/METRO_PROP.md` §11 registra che
+>   **`PepperstoneUK-Demo` e' a UTC+0** — e il feed usato in questo modulo su
+>   TradingView e' **Pepperstone** (lez. 12). **Due indizi che puntano allo
+>   stesso orologio.**
+> - ⚠️ **MA NON E' UNA PROVA per questa strategia:** su TradingView il fuso e'
+>   **quello scelto dall'utente**, non quello del feed, e nel parlato non si
+>   vede. La fascia 8-18 resta senza orologio dichiarato.
+> - 🟢 **E in pratica non morde:** R53 ha gia' misurato che **la fascia non
+>   decide**. Se il fuso fosse UTC+0, "8-18 piattaforma" = **9-19 BCM** in
+>   agosto: uno spostamento di un'ora dentro una fascia che le 128 passate
+>   hanno mostrato indifferente.
+>
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.5.
+
 ---
 
 ## 3. 🔧 GLI INDICATORI — e il buco BLOCCANTE (doppio)
@@ -465,8 +490,18 @@ rischio **2%** per operazione con sizing su saldo × %÷(pip × pip di stop).
    *→ risolta per procedura, ed e' la divergenza del nostro EA.*
 
 ### 🕳️ 12 BUCHI
-1. 🔴 **Parametri di Linear Regression Candles — BLOCCANTE**
-2. 🔴 **Parametri di CCI Divergences (CCI + pivot) — BLOCCANTE**
+
+> 🆕 **18/08 sera — i 41 file dei MODULI BASE sono stati letti a caccia proprio
+> di questi due.** Il n.1 **non c'e'** (Linear Regression Candles non compare mai:
+> il corso base e' tutto MT4, quell'indicatore e' TradingView). Il n.2 esce
+> **dimezzato ma vivo**, e con **due numeri che vanno contro le nostre
+> assunzioni** → §10.1. Referto:
+> `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.7.
+
+1. 🔴 **Parametri di Linear Regression Candles — BLOCCANTE** *(cercato nei moduli
+   base: l'indicatore non e' mai nominato — buco confermato)*
+2. 🔴 **Parametri di CCI Divergences (CCI + pivot) — BLOCCANTE** *(🟡 due parziali
+   nuovi, §10.1)*
 3. scadenza dell'ordine pendente
 4. scadenza della divergenza in attesa del taglio
 5. massimo di posizioni contemporanee (con 3 cross ammessi)
@@ -475,9 +510,62 @@ rischio **2%** per operazione con sizing su saldo × %÷(pip × pip di stop).
 8. filtro news (mai nominato)
 9. cap di perdita giornaliera (mai nominato)
 10. tetto di drawdown complessivo (questo modulo non ne da' nessuno)
-11. definizione di pip fuori dai cambi a 5 decimali
+11. ✅ ~~definizione di pip fuori dai cambi a 5 decimali~~ — **CHIUSO dal modulo
+    base, dettato quattro volte** (lez. 6, 11, 19, 21): non-JPY = 5 decimali, la
+    **4ª e' il pip**, la 5ª il punto; **JPY = 3 decimali, la 2ª e' il pip**, la
+    3ª il punto; **10 punti = 1 pip**, sempre.
+    `[T]` _"in tutti i cambi con lo yen troverai questa situazione ... quella
+    scritta in piccolino e' il punto, questa invece e' il pip"_.
+    **Per l'EA: i "3 pip oltre l'estremo" della regola dello stop = 30 punti.**
 12. broker / spread / date / lista operazioni del backtest della lez. 17 —
     e il **ritardo/repaint** dell'indicatore di divergenza, mai discusso
+    *(🆕 sul repaint il modulo base da' almeno la dottrina: `[T]` an.tec. lez. 5
+    _"**l'ultima candela non e' mai un bottom** ... andrebbe sempre lasciata in
+    sospeso"_ — cioe' **niente pivot sulla candela in formazione**)*
+
+### 10.1 🆕 18/08 sera — I DUE PARZIALI SUL BUCO n.2, e vanno CONTRO di noi
+
+Il modulo base **nomina esplicitamente il CCI come indicatore di una strategia
+del master**, e questa e' l'unica che lo usa.
+
+`[TRASCRITTO chiaro, lez. 13 modulo base "WILLIAM PERCENT RANGE, CCI E RSI"]`
+> _"L'indicatore CCI nasce come indicatore per lo studio delle commodity ... In
+> questo caso, pero', **lo andremo ad inserire soltanto perche' e' frutto dello
+> studio di una strategia che vedrai nel corso del master, che prevede appunto
+> l'utilizzo di questo indicatore** ... Quindi aggiungiamo anche questo
+> indicatore, **facciamo ok, settaggio a 14 periodi** ... **queste due linee
+> centrali, che corrispondono ai valori di 100 e valori di meno 100**"_
+
+> 🟡 **PARZIALE n.1 — il CCI del corso e' a 14 periodi (default MT4), non 20.**
+> ⚠️ **Caveat onesto, e pesa:** il modulo base e' **MT4**, questa strategia gira
+> su **TradingView** con lo script _"CCI Divergences" (TISTA)_. **Non e' lo
+> stesso oggetto.** Ma **e' l'unico numero che il corso pronunci per il CCI**, e
+> la nostra assunzione e' **20**. → **candidato primario dell'A/B.**
+
+**PARZIALE n.2 — il pivot.** La definizione di swing del corso, dettata:
+`[TRASCRITTO chiaro, lez. 4 modulo base an.tec. "BOTTOM, TOP E TRENDLINE"]`
+> _"Prendiamo tre candele, tale che quella centrale e' piu' alta di quelle
+> laterali ... il **top** e' il massimo piu' alto di tutti e tre ... il massimo di
+> un piccolo trend, formato da **due, meglio ancora tre**, candele rialziste che
+> poi hanno **due, meglio ancora tre**, candele ribassiste successive"_
+
+> 🟡 **Il "pivot" del corso e' 2-3 barre per lato, SIMMETRICO.** La nostra
+> assunzione e' **5 a sinistra / 3 a destra**: **non coincide**, e la differenza
+> cambia **quali divergenze esistono**. → **secondo candidato dell'A/B.**
+
+**E tre regole di igiene del pivot, dettate** (`[T]` an.tec. lez. 5), che valgono
+per qualunque rilevatore di swing nostro:
+1. _"il top e il bottom devono essere sempre **su candele differenti**"_
+2. _"**dopo un top c'e' sempre un bottom e dopo un bottom c'e' sempre un top**"_
+   → **alternanza obbligatoria**: due top consecutivi ⇒ il bottom in mezzo non e'
+   significativo e si salta
+3. _"**l'ultima candela non e' mai un bottom** ... andrebbe sempre lasciata in
+   sospeso"_ → **la regola anti-repaint, dettata dal corso**
+
+> ⚖️ **Cosa NON hanno chiuso:** restano ignoti la lunghezza della regressione
+> lineare, la sua SMA, e il fatto che i pivot dello script TISTA siano contati
+> sul **CCI** e non sul prezzo. **Il buco n.2 resta BLOCCANTE**: questi due
+> numeri sono **candidati per un A/B**, non parametri del corso.
 
 ### 📐 GRADO DI MECCANIZZABILITA' — **78%**
 Decisioni che un EA deve prendere = **21 certe + 6 ambigue = 27**.
