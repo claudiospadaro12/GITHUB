@@ -729,28 +729,209 @@ dopo). Togliendo dalla diff attuale il contributo DST stimato al 14-bis.2:
 > numeri sul tavolo — non una modifica del criterio dopo aver visto i numeri
 > fatta di nascosto.
 
-### 14-bis.6 BOZZE DI RIGHE DI LANCIO — **BOZZA-DA-VERIFICARE**
+### 14-bis.6 LE RIGHE DI LANCIO — verificate il 19/08
 
-**NON dettarle a Claudio cosi' come sono.** Le scrive/verifica la sessione
-principale domattina (regola di casa: `irm` davanti + riga di raccolta finale,
-`backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`). Qui c'e' solo la sostanza da
-verificare:
+> 🔴 **LE QUATTRO BOZZE (A)(B)(C)(D) SONO BOCCIATE.** Erano "la sostanza da
+> verificare", e verificandola sono venuti fuori **5 difetti veri** (sotto). Qui
+> sotto ci sono le righe **CORRETTE**: **tre blocchi PowerShell** (A, C, E) e
+> **due passi a mano in MT5** (B, D). Si incolla **un blocco INTERO per volta**,
+> graffe comprese, e ci si ferma fra un passo e l'altro.
 
-- **BOZZA-DA-VERIFICARE (A)** — portare la v2 in `MQL5\Scripts` del terminale
-  di backtest e compilarla. Da verificare: il percorso esatto del terminale, se
-  si usa `metaeditor64.exe /compile`, e che il `.ex5` finisca nella cartella
-  giusta. `importa_storico_esterno.ps1` **oggi scarica e compila la v1**
-  (nome hardcodato in 5 punti, righe ~383-483): o si adatta il `.ps1` con un
-  interruttore di versione, oppure per questo giro si fa **a mano**
-  (trascinamento sullo script), che e' la strada gia' usata al passo 4.
-- **BOZZA-DA-VERIFICARE (B)** — giro di autotest: trascinare la v2 su un
-  grafico qualsiasi con `InpAutoTest=true`, salvare il Journal.
-- **BOZZA-DA-VERIFICARE (C)** — re-import dei tre: `NASUSD/225JPY/SPXUSD` con
-  `InpFormato=1`, `InpAutoShift=true`, `InpShiftMax=6`, `InpShiftDstAware=true`.
-- **BOZZA-DA-VERIFICARE (D)** — raccolta: copiare
-  `MQL5\Files\ABTG_ImportEsterno_referto_v2.csv` + il Journal sul Desktop e
-  fare lo zip da mandare (obbligatoria dalla regola di casa, e **il CSV v2 e'
-  un file nuovo**: la prima riga scritta crea l'intestazione).
+**🛣️ LA STRADA SCELTA, e perche' (era la domanda della bozza A):**
+**NON si tocca `importa_storico_esterno.ps1`.** Adattarlo con un `-Versione`
+vorrebbe dire cambiare il nome in **7 punti** (sorgente locale, URL, `$mq5`,
+messaggio, `Script=` dell'`.ini`, nome del referto, lettura del referto) **piu'**
+i due input nuovi nei preset — su uno script che oggi e' la catena riproducibile
+con cui sono stati promossi gli **8 forex del 15/08**. E per giunta ri-farebbe
+download e concatenazione degli ZIP, lavoro che **e' gia' fatto**: i tre CSV
+sono in `MQL5\Files` dal 18/08. Costo/beneficio: **strada (b)**, righe una-tantum
+modellate sul PASSO 1a di `REFERTO_R83_R84_PREPARAZIONE.md`, import a mano dalla
+finestra dello script (Claudio ne ha gia' fatti tre ieri). **Codice nuovo: zero
+file, zero righe nella v1.**
+
+**I 5 difetti trovati nelle bozze:**
+1. **(B) e (D) dicevano "Journal": e' la scheda SBAGLIATA.** `Print()` di uno
+   *script* finisce nella scheda **Esperti** e nel file `MQL5\Logs\<data>.log`;
+   il Journal e' un altro log, in `logs\`. Il gemello lo sa gia'
+   (`importa_storico_esterno.ps1`, riga 442: *"guarda la scheda ESPERTI"*).
+   E' la famiglia del punto 20: si chiede un output e si indica il posto dove
+   non nasce.
+2. **La trappola del preset che non spegne il flag** (stessa famiglia del
+   difetto gemello del punto 5). I tre `.set` del 18/08 **non contengono**
+   `InpAutoTest`: dopo il giro di autotest MT5 si **ricorda** l'ultimo valore
+   usato, quindi caricando il preset per l'import **`InpAutoTest` resta `true`**
+   e i tre import stampano *"MODO AUTOTEST: NON viene importato nulla"*
+   sembrando riusciti. Il PASSO A **riscrive i tre preset** con
+   `InpAutoTest=false` e `InpShiftDstAware=true` dentro: la trappola muore li'.
+3. **Il referto v2 si ACCODA** (`FileSeek(fh, 0, SEEK_END)`, riga 900): righe di
+   un tentativo precedente resterebbero mischiate a quelle buone. Il PASSO A lo
+   **cancella prima** e il PASSO E ne controlla **l'eta'** (punto 23).
+4. **Nessuna guardia MT5-chiuso, in nessuna delle quattro** (punto 7): il PASSO
+   A scrive in `MQL5\Scripts`, `MQL5\Presets` e `MQL5\Files`. E il PASSO E
+   pretende MT5 chiuso **da menu**: la registrazione dei simboli personalizzati
+   si salva **solo alla chiusura pulita** — ucciderlo e' costato l'intero R50 il
+   14/08 (`importa_storico_esterno.ps1`, righe 74-83).
+5. **Nessun controllo degli artefatti** (punti 14 e 22): che i tre `_M1.csv` e i
+   tre `.set` esistano **ancora**, che il `.ex5` sia nato **adesso** (si cancella
+   prima), che l'autotest sia **davvero** uscito `0 ROTTI`. Nelle righe nuove
+   l'autotest si legge **dal log, non da uno screenshot**.
+
+**Il pin e' `5413e3e080f6177e6bcc6af1ba56134d40facd09`** — e' il commit che
+contiene la v2 finale (`git log -1` sul file lo conferma), ed e' su `origin/lavoro`.
+La riga scarica **solo** quel `.mq5`: nessun gemello scarica niente da HEAD, quindi
+il punto 24 qui e' coperto per intero.
+
+#### PASSO A — installazione + compilazione della v2 (MT5 CHIUSO, ~2 min)
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo (File > Esci). Questo passo scrive in MQL5\Scripts, MQL5\Presets e MQL5\Files." }
+  $h="5413e3e080f6177e6bcc6af1ba56134d40facd09"
+  $t=@(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter terminal64.exe -EA SilentlyContinue | Where-Object { $_.DirectoryName -like "*BCM Markets*" })
+  if($t.Count -eq 0){ throw "terminale BCM non trovato" }
+  $inst=$t[0].DirectoryName
+  $df=@(Get-ChildItem (Join-Path $env:APPDATA "MetaQuotes\Terminal") -Directory -EA SilentlyContinue | Where-Object { $o=Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $inst) })
+  if($df.Count -eq 0){ throw "cartella dati MT5 non trovata (origin.txt)" }
+  $data=$df[0].FullName
+  foreach($f in @('NASUSD_M1.csv','225JPY_M1.csv','SPXUSD_M1.csv')){
+    $x=Join-Path $data "MQL5\Files\$f"
+    if(-not (Test-Path -LiteralPath $x)){ throw "manca $f in MQL5\Files: senza i CSV del 18/08 non c'e' niente da re-importare" }
+    $i=Get-Item -LiteralPath $x
+    Write-Host ("    c'e': " + $i.Name + "  " + [int]($i.Length/1MB) + " MB  del " + $i.LastWriteTime.ToString('yyyy-MM-dd HH:mm')) -ForegroundColor Green
+  }
+  foreach($s in @('NASUSD','225JPY','SPXUSD')){
+    $sf=Join-Path $data ("MQL5\Presets\abtg_import_" + $s + ".set")
+    if(-not (Test-Path -LiteralPath $sf)){ throw "manca il preset abtg_import_$s.set (lo scrive importa_storico_esterno.ps1)" }
+    $righe=@(Get-Content -LiteralPath $sf | Where-Object { $_ -notmatch '^(InpAutoTest|InpShiftDstAware)=' })
+    $righe += "InpShiftDstAware=true"
+    $righe += "InpAutoTest=false"
+    Set-Content -LiteralPath $sf -Value $righe -Encoding ASCII
+    Write-Host ("    preset messo a posto (InpAutoTest=false): abtg_import_" + $s + ".set") -ForegroundColor Green
+  }
+  $sc=Join-Path $data "MQL5\Scripts"
+  New-Item -ItemType Directory -Force -Path $sc | Out-Null
+  $mq=Join-Path $sc "ABTG_ImportaStoricoEsterno_v2.mq5"
+  $ex5=[IO.Path]::ChangeExtension($mq,'.ex5')
+  $log=[IO.Path]::ChangeExtension($mq,'.log')
+  $ref=Join-Path $data "MQL5\Files\ABTG_ImportEsterno_referto_v2.csv"
+  Remove-Item $mq,$ex5,$log -Force -EA SilentlyContinue
+  Remove-Item $ref -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/mql5/Scripts/ABTG_ImportaStoricoEsterno_v2.mq5" -OutFile $mq -EA Stop
+  if(-not (Select-String -Path $mq -SimpleMatch -Pattern 'IMP-EXT-v2' -Quiet)){ throw "SORGENTE VECCHIO O TRONCO: manca il marcatore IMP-EXT-v2" }
+  & (Join-Path $inst "metaeditor64.exe") "/compile:$mq" "/log" | Out-Null
+  $fine=(Get-Date).AddMinutes(2)
+  while((-not (Test-Path $ex5)) -and ((Get-Date) -lt $fine)){ Start-Sleep -Seconds 2 }
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  $rac=Join-Path $dsk 'IMPORT_EXT_v2'
+  Remove-Item $rac -Recurse -Force -EA SilentlyContinue
+  New-Item -ItemType Directory -Force -Path $rac | Out-Null
+  if(Test-Path $log){ Copy-Item $log (Join-Path $rac 'compilazione_v2.log') -Force }
+  if(-not (Test-Path $ex5)){ throw "COMPILAZIONE FALLITA: gli errori sono in Desktop\IMPORT_EXT_v2\compilazione_v2.log - NON si importa niente e la v1 resta intatta." }
+  Write-Host "COMPILATO: ABTG_ImportaStoricoEsterno_v2.ex5" -ForegroundColor Green
+  Write-Host "Adesso il PASSO B, a mano in MT5." -ForegroundColor Cyan
+}
+```
+🛑 **Stop.** Se non compila, si e' perso un minuto: la v1 e gli 8 forex promossi
+non sono stati sfiorati.
+
+#### PASSO B — l'autotest, a mano in MT5 (MT5 APERTO, ~2 min)
+1. **apri MT5**;
+2. **Navigatore > Script > tasto destro > Aggiorna** (senza questo il nome nuovo
+   non compare);
+3. trascina **`ABTG_ImportaStoricoEsterno_v2`** su **un grafico qualsiasi**;
+4. nella finestra dei parametri metti **`InpAutoTest = true`** (a mano: e' l'unico
+   valore che cambia rispetto ai default) e premi OK;
+5. guarda la **scheda "Esperti"** — **non** il Journal: `Print()` di uno script
+   scrive li'. Devono comparire i blocchi da A a I e, in fondo,
+   **`=== AUTOTEST: 41 controlli, 0 ROTTI ===`** e **`=== ESITO: OK ===`**.
+6. **lascia MT5 aperto** e passa al PASSO C, che legge il log e ti dice se e'
+   andata davvero (cosi' non serve nessuno screenshot).
+
+#### PASSO C — verifica dell'autotest, letta dal log (MT5 puo' restare aperto)
+```powershell
+& {
+  $t=@(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter terminal64.exe -EA SilentlyContinue | Where-Object { $_.DirectoryName -like "*BCM Markets*" })
+  if($t.Count -eq 0){ throw "terminale BCM non trovato" }
+  $inst=$t[0].DirectoryName
+  $df=@(Get-ChildItem (Join-Path $env:APPDATA "MetaQuotes\Terminal") -Directory -EA SilentlyContinue | Where-Object { $o=Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $inst) })
+  if($df.Count -eq 0){ throw "cartella dati MT5 non trovata (origin.txt)" }
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  $rac=Join-Path $dsk 'IMPORT_EXT_v2'
+  if(-not (Test-Path $rac)){ throw "manca Desktop\IMPORT_EXT_v2: il PASSO A non e' stato fatto" }
+  $lg=@(Get-ChildItem (Join-Path $df[0].FullName "MQL5\Logs") -Filter "*.log" -EA SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
+  if($lg.Count -eq 0){ throw "nessun log in MQL5\Logs: l'autotest non e' mai partito" }
+  $fs=New-Object System.IO.FileStream($lg[0].FullName,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
+  $sr=New-Object System.IO.StreamReader($fs,[System.Text.Encoding]::Unicode,$true)
+  $testo=$sr.ReadToEnd(); $sr.Close(); $fs.Close()
+  Copy-Item $lg[0].FullName (Join-Path $rac ("esperti_" + $lg[0].Name)) -Force
+  $i=$testo.LastIndexOf("MODO AUTOTEST")
+  if($i -lt 0){ throw "nel log non c'e' nessun autotest: InpAutoTest era false? Rifai il PASSO B." }
+  $coda=$testo.Substring($i)
+  ($coda -split "`r?`n") | Where-Object { $_ -match "AUTOTEST|ROTTO|ESITO|controlli 2010-2030|giorni sfasati|aggiustamento" } | ForEach-Object { Write-Host $_ }
+  if($coda -match "<<< ROTTO"){ throw "AUTOTEST ROTTO: NON si importa niente. Il log e' gia' sul Desktop, mandalo in chat." }
+  if($coda -notmatch "=== AUTOTEST: 41 controlli, 0 ROTTI ==="){ throw "non trovo la riga '=== AUTOTEST: 41 controlli, 0 ROTTI ===': leggi il log copiato sul Desktop." }
+  if($coda -notmatch "ESITO: OK"){ throw "manca la riga 'ESITO: OK'." }
+  Write-Host "AUTOTEST OK: 41 controlli, 0 ROTTI (e i 126 su 2010-2030 tutti buoni)." -ForegroundColor Green
+  Write-Host "Adesso il PASSO D: i tre import." -ForegroundColor Cyan
+}
+```
+🛑 **Stop obbligatorio.** Legge **solo l'ultimo** autotest del log (dall'ultimo
+`MODO AUTOTEST` in poi): un tentativo rotto di mezz'ora prima non puo' ne'
+salvare ne' condannare quello di adesso — e' la lezione del punto 23-bis.
+
+#### PASSO D — i tre re-import, a mano in MT5 (~5 min in tutto)
+Per **ognuno** dei tre (`NASUSD`, `225JPY`, `SPXUSD`), uno per volta:
+1. trascina **`ABTG_ImportaStoricoEsterno_v2`** su un grafico qualsiasi;
+2. nella finestra parametri: **Carica** > `abtg_import_NASUSD.set` (poi
+   `abtg_import_225JPY.set`, poi `abtg_import_SPXUSD.set`);
+3. controlla a occhio che nella lista ci sia **`InpAutoTest = false`** e
+   **`InpShiftDstAware = true`** (ce li ha messi il PASSO A) e premi OK;
+4. **scheda "Esperti"**: la tabella degli shift e, in fondo,
+   `Referto aggiornato: MQL5\Files\ABTG_ImportEsterno_referto_v2.csv`.
+5. Alla fine dei tre: **chiudi MT5 da File > Esci**. ⚠️ **Chiusura pulita, mai
+   il Task Manager**: la registrazione dei simboli personalizzati si salva solo
+   cosi' (il 14/08 questo errore e' costato l'intero round R50).
+
+#### PASSO E — raccolta, tabella del cancello e zip (MT5 CHIUSO)
+```powershell
+& {
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' ANCORA APERTO: chiudilo da File > Esci (chiusura PULITA, o i simboli personalizzati non restano registrati), poi rilancia questo blocco." }
+  $t=@(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter terminal64.exe -EA SilentlyContinue | Where-Object { $_.DirectoryName -like "*BCM Markets*" })
+  if($t.Count -eq 0){ throw "terminale BCM non trovato" }
+  $inst=$t[0].DirectoryName
+  $df=@(Get-ChildItem (Join-Path $env:APPDATA "MetaQuotes\Terminal") -Directory -EA SilentlyContinue | Where-Object { $o=Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $inst) })
+  if($df.Count -eq 0){ throw "cartella dati MT5 non trovata (origin.txt)" }
+  $data=$df[0].FullName
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  $rac=Join-Path $dsk 'IMPORT_EXT_v2'
+  New-Item -ItemType Directory -Force -Path $rac | Out-Null
+  $ref=Join-Path $data "MQL5\Files\ABTG_ImportEsterno_referto_v2.csv"
+  if(-not (Test-Path -LiteralPath $ref)){ throw "il referto v2 non c'e': i tre import non sono stati fatti, oppure InpAutoTest era rimasto true e non e' stato importato niente." }
+  $eta=(New-TimeSpan -Start (Get-Item -LiteralPath $ref).LastWriteTime -End (Get-Date)).TotalHours
+  if($eta -gt 12){ throw ("il referto v2 ha " + [int]$eta + " ore: e' di un tentativo vecchio, non di adesso. Rifai il PASSO D.") }
+  $r=@(Import-Csv -LiteralPath $ref)
+  foreach($s in @('NASUSD_EXT','225JPY_EXT','SPXUSD_EXT')){
+    if(@($r | Where-Object { $_.SimboloEXT -eq $s }).Count -eq 0){ throw "nel referto v2 manca la riga di $s : quell'import non e' andato." }
+  }
+  Write-Host ""
+  Write-Host "  IL CANCELLO: DiffMediaPct_USATA (DST-aware) <= 0,0500" -ForegroundColor White
+  $r | Format-Table SimboloEXT,ShiftBase,DstAware,DiffMediaPct_USATA,DiffMediaPct_FISSO,DiffMediaPct_DENTRO_finestre,DiffMediaPct_FUORI_finestre,BiasMedianoPct,ScanMigliore_FISSO,ScanMigliore_DST,Verdetto -AutoSize
+  Copy-Item $ref $rac -Force
+  Get-ChildItem (Join-Path $data "MQL5\Logs") -Filter "*.log" -EA SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 2 | ForEach-Object { Copy-Item $_.FullName $rac -Force }
+  @(("data: " + (Get-Date -Format 'yyyy-MM-dd HH:mm')), ("pin : 5413e3e080f6177e6bcc6af1ba56134d40facd09"), ("righe nel referto v2: " + $r.Count), "La riga data: qui sopra deve essere di ADESSO.") | Set-Content (Join-Path $rac 'REFERTO_RACCOLTA_IMPORT_v2.txt') -Encoding ASCII
+  Compress-Archive -Path (Join-Path $rac '*') -DestinationPath (Join-Path $dsk 'IMPORT_EXT_v2.zip') -Force
+  Write-Host ""
+  Write-Host "PRONTO DA MANDARE: Desktop\IMPORT_EXT_v2.zip" -ForegroundColor Cyan
+  Write-Host "Si legge nell'ordine del par. 14-bis.5: shift base +5 in ENTRAMBE le" -ForegroundColor Yellow
+  Write-Host "scansioni, la DST-aware piu' bassa della FISSA, DENTRO che si avvicina" -ForegroundColor Yellow
+  Write-Host "a FUORI, e il bias mediano. Il cancello da solo non basta a promuovere." -ForegroundColor Yellow
+}
+```
+
+**Cosa NON fanno queste righe, dichiarato:** non re-importano i forex (par.
+14-bis.2: decide Claudio), non toccano `D30EUR` (bocciato al par. 13), non
+cambiano nessun criterio. E se il cancello **non** passa, il par. 14-bis.5 dice
+gia' cosa si fa: si misura il **bias**, non si aggiungono pezze.
 
 ### 14-bis.7 LIMITI DICHIARATI DELLA v2
 
