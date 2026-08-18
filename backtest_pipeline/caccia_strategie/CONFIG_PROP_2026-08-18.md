@@ -748,3 +748,43 @@ invece **intatti** i punti 1 (nessun filtro news) e 2 (nessun cap giornaliero):
 **nessuna slide li smentisce**, e nessuna slide li tratta.
 
 Dettaglio in `ANALISI_CORSO_BREAKOUT_2026-08-18.md` §2b.6.
+
+---
+
+## 🧭 AGGIUNTA 18/08 (sera) — IL FRAMEWORK UFFICIALE DEL CORSO (POINT BREAK)
+
+Analizzato il **materiale di framework** dello stesso editore (ABTG / Alfio
+Bardolla Training Group), coach **Christian Bertacchi**: 4 PDF + 2 PPTX.
+**Referto completo: `ANALISI_POINTBREAK_2026-08-18.md` — qui solo i punti che
+toccano la conformita' prop. Non duplico: linko.**
+
+| punto prop | cosa dice il framework ufficiale |
+|---|---|
+| **rischio per trade** | **2/3% del capitale** `[T]` = **3,1x-4,6x** il nostro A1 (0,65%) e **2x-3x** il tetto A4 (1%, firmato oggi). E' il secondo rischio/trade piu' alto letto in tutto il dossier |
+| **cap giornaliero** | 🔴 **NON ESISTE.** Non e' un numero diverso dal nostro: e' un **meccanismo assente** dal piano ufficiale |
+| **cap totale** | 🔴 **NON ESISTE** — e il documento «METODI DI GESTIONE OPERAZIONI NEGATIVE» propone come accettabili DD del **10% / 20% / 30%**: il loro *minimo* e' il nostro *muro* |
+| **rischio aperto simultaneo (C1)** | 🔴 nessun vincolo. Col 2/3% bastano **DUE posizioni** per superare il cap C1 di 3,25% firmato oggi |
+| **correlazione** | 🔴 **43 coefficienti, ZERO regole.** Il PDF CORRELAZIONI non contiene una sola soglia operativa — e la sua matrice grafica **contraddice le sue stesse tabelle** (una riga e' aritmeticamente impossibile) |
+| **filtro news** | 🟡 solo consigli qualitativi (_"non tradare senza sapere cosa sta per uscire"_ `[T]`). **Nessun minuto dichiarato** → nessuna gamba nuova per D1/D2 |
+| **stop loss** | 🚨 **il pacchetto si contraddice**: il PIANO e i PPTX dicono «SL sempre definito» `[T]`, il documento sulle operazioni negative descrive **tre metodi che funzionano solo togliendo lo stop** |
+
+### 🔴 Intelligence difensiva (riga E6 del `PIANO_PROP`) — VIETATO PER NOI
+
+«METODI DI GESTIONE OPERAZIONI NEGATIVE» e' **il miglior catalogo che abbiamo di
+cio' che una prop cerca in una cronologia ordini**: martingala `S x 2^n`,
+martingala modificata +30/+50%, averaging a fasce ogni 50 pip, **griglia senza
+SL** con passo 20-50 pip, hedging long+short di pari size come sostituto dello
+stop, stop mentale su equity, reverse entry con size maggiorata.
+**Si documenta, si etichetta VIETATO PER NOI, non entra MAI in un EA, in un
+preset o in una proposta.** L'unico uso e' saperlo riconoscere.
+
+⚠️ **Due buchi di casa che il catalogo illumina** (gia' noti, qui riconfermati):
+1. le posizioni **senza SL** non consumano il cap C1 (`OpenRiskPct()` le logga
+   come warning, non le blocca);
+2. la **griglia BULGE** e' l'unico meccanismo di casa con la forma segnalata
+   (10 posizioni = 6,50% con UNA sedia) — gia' agli atti in `PIANO_PROP` C1.
+
+**Nessun parametro di questo dossier cambia.** Il framework non porta un solo
+numero che regga il metro di casa: porta la conferma che **le regole prop
+vanno costruite fuori dal corso**, punto gia' scritto sopra e ora esteso dal
+singolo modulo al framework intero.

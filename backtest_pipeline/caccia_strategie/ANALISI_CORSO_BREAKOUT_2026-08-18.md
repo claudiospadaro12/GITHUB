@@ -900,3 +900,34 @@ minimo con l'oscillatore in ipercomprato = **un fade**).
 | `report/CONTRATTI_SEDIE.md` riga 46 | la sedia `BREAKOUT_EA_JPY_v3` **senza contratto** |
 | `docs/Portafoglio_Strategie.md` §Breakout JPY | il backtest 2022-24 che contraddice il corso |
 | `mql5/Experts/BREAKOUT_EA_JPY.mq5` | il codice confrontato (⚠️ **non e' la v3**) |
+
+---
+
+# 🔗 AGGIORNAMENTO 18/08 (sera) — IL BUCO «CORRELAZIONE» HA UNA RISPOSTA
+
+Questo referto ha registrato tre volte che **il corso non nomina mai la
+correlazione fra i 7 cross JPY** (§ lez. 39, §buco n.4, e la lista dei "mai
+detti" qui sopra). La sera del 18/08 e' arrivato dell'altro materiale dello
+stesso editore (ABTG), e la risposta ora c'e' — **ed e' peggio di un silenzio**:
+
+> 📄 **`ANALISI_POINTBREAK_2026-08-18.md`** (referto completo, non duplico qui)
+>
+> - 🟢 Un documento sulle correlazioni **esiste** (`POINT BREAK - CORRELAZIONI.pdf`),
+>   e i suoi «JPY Cross» sono **esattamente i 7 del nostro torneo**.
+> - 🔴 **Ma non contiene una sola REGOLA operativa**: 43 coefficienti, zero
+>   soglie, zero cap, zero imperativi. La correlazione e' **documentata e poi
+>   orfana** — sta in un'altra cartella rispetto ai moduli strategia, e nessun
+>   modulo la richiama.
+> - 🟨 I suoi numeri, presi per quel che valgono, **sostengono l'intuizione di
+>   Claudio**: **5 righe su 15** delle «correlazioni positive forti» sono
+>   **JPY contro JPY** (+0,81 … +0,88), e USD/JPY compare in altre 5 su 15 fra
+>   le negative forti.
+> - 🚩 **Ma il documento e' inutilizzabile come misura**: la matrice grafica
+>   allegata contraddice le sue stesse tabelle, la legenda dichiara i colori
+>   invertiti, e una riga (EUR/GBP) e' **aritmeticamente impossibile**.
+>
+> ➡️ **Effetto sul buco n.4: si chiude come DOMANDA, resta aperto come MISURA.**
+> Sappiamo che il corso non ha una regola di correlazione. La regola di
+> portafoglio firmata stamattina (_"dalla famiglia JPY al massimo UNA sedia"_,
+> `prove/TORNEO_JPY_CRITERI.md` §2) **regge sulla base che aveva gia'**, non su
+> questo PDF.
