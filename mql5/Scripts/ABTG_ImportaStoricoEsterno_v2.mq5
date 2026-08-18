@@ -301,6 +301,36 @@ int AggiustamentoDst(datetime tNy)
 //+==================================================================+
 int g_testFatti = 0, g_testRotti = 0;
 
+//+------------------------------------------------------------------+
+//| GUARDIA: 126 controlli muti generati dalla REGOLA su 21 anni.     |
+//| Gira SEMPRE, anche nell'import vero, prima di toccare i dati:     |
+//| costa nulla ed evita la cosa peggiore che possa capitare qui,     |
+//| cioe' scrivere 2,5 milioni di barre con un calendario rotto.      |
+//| Dati sbagliati che SEMBRANO giusti sono peggio di nessun dato.    |
+//| Ritorna il numero di controlli falliti (0 = sano).                |
+//+------------------------------------------------------------------+
+int ControlloRapidoDst()
+  {
+   int rotti = 0;
+   for(int y = 2010; y <= 2030; y++)
+     {
+      datetime uIni, uFin;
+      ConfiniUsa(y, uIni, uFin);
+      //  un'ora PRIMA dell'entrata USA: calendari d'accordo.
+      //  un'ora DOPO: sfasati (l'Europa entra tre settimane dopo).
+      if(AggiustamentoDst((datetime)((long)uIni - 3600)) !=  0) rotti++;
+      if(AggiustamentoDst((datetime)((long)uIni + 3600)) != -1) rotti++;
+      //  un'ora PRIMA dell'uscita USA: ancora sfasati (l'Europa e' gia'
+      //  uscita). All'istante dell'uscita: di nuovo d'accordo.
+      if(AggiustamentoDst((datetime)((long)uFin - 3600)) != -1) rotti++;
+      if(AggiustamentoDst(uFin)                          !=  0) rotti++;
+      //  gennaio e luglio: sempre d'accordo, in qualunque anno
+      if(AggiustamentoDst(CostruisciData(y, 1, 15, 12))  !=  0) rotti++;
+      if(AggiustamentoDst(CostruisciData(y, 7, 15, 12))  !=  0) rotti++;
+     }
+   return rotti;
+  }
+
 void Verifica(string nome, datetime quando, int attesoTotale, int shiftBase)
   {
    int ottenuto = shiftBase + AggiustamentoDst(quando);
@@ -395,24 +425,9 @@ bool EseguiAutotest()
    VerificaInt("andata e ritorno su 8 istanti (rotti)", rotti, 0);
 
    Print("--- H. REGOLA GENERALE su 21 anni (2010-2030), generata dal codice ---");
-   Print("     per ogni anno: 4 confini + 2 controlli di mezza stagione");
-   int annoRotti = 0;
-   for(int y = 2010; y <= 2030; y++)
-     {
-      datetime uIni, uFin, eIni, eFin;
-      ConfiniUsa(y, uIni, uFin);
-      ConfiniEu(y, eIni, eFin);
-      //  un'ora PRIMA dell'entrata USA: allineati. Un'ora DOPO: sfasati.
-      if(AggiustamentoDst((datetime)((long)uIni - 3600)) != 0)  annoRotti++;
-      if(AggiustamentoDst((datetime)((long)uIni + 3600)) != -1) annoRotti++;
-      //  un'ora PRIMA dell'uscita USA: sfasati. All'istante: allineati.
-      if(AggiustamentoDst((datetime)((long)uFin - 3600)) != -1) annoRotti++;
-      if(AggiustamentoDst(uFin) != 0)                           annoRotti++;
-      //  gennaio e luglio: sempre allineati
-      if(AggiustamentoDst(CostruisciData(y, 1, 15, 12)) != 0)   annoRotti++;
-      if(AggiustamentoDst(CostruisciData(y, 7, 15, 12)) != 0)   annoRotti++;
-     }
-   VerificaInt("controlli 2010-2030 falliti (su 126)", annoRotti, 0);
+   Print("     per ogni anno: 4 confini + 2 controlli di mezza stagione.");
+   Print("     E' LA STESSA guardia che gira anche nell'import vero.");
+   VerificaInt("controlli 2010-2030 falliti (su 126)", ControlloRapidoDst(), 0);
 
    Print("--- I. NESSUN +1: campionamento giornaliero 2010-2030 ---");
    //  coi calendari attuali l'aggiustamento puo' valere solo 0 o -1.
@@ -928,6 +943,21 @@ void OnStart()
    Print("=== Su questi dati NON si ottimizza NULLA.                ===");
    PrintFormat("=== Conversione DST New York -> Europa: %s ===", (InpShiftDstAware ? "ATTIVA" : "DISATTIVATA"));
    Print("==============================================================");
+
+   //--- 0. GUARDIA: la conversione si autoverifica PRIMA di toccare i dati
+   if(InpShiftDstAware)
+     {
+      int rotti = ControlloRapidoDst();
+      if(rotti > 0)
+        {
+         PrintFormat("*** ERRORE: la conversione DST fallisce %d controlli su 126. "
+                     "IMPORT ANNULLATO, nessun dato scritto. ***", rotti);
+         Print("*** Rilancia con InpAutoTest=true per vedere DOVE si rompe. ***");
+         Comment("IMPORT ANNULLATO: conversione DST rotta");
+         return;
+        }
+      Print("Guardia DST: 126 controlli su 2010-2030 superati, la conversione e' sana.");
+     }
 
    if(!SymbolSelect(src, true))
      { PrintFormat("ERRORE: il simbolo sorgente %s non esiste su questo broker.", src); return; }

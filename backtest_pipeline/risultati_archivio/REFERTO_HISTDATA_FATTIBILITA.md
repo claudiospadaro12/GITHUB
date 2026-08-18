@@ -661,6 +661,11 @@ la media, non necessariamente quei due picchi.
 7. Controllo che lo shift variabile non abbia rotto l'ordine cronologico (in
    teoria non puo': i cambi d'ora cadono di sabato notte/domenica mattina a
    mercati chiusi. Ma "in teoria" non e' una verifica).
+7-bis. **GUARDIA ANCHE NELL'IMPORT VERO**: i 126 controlli generati su
+   2010-2030 girano **prima di toccare i dati**, non solo in autotest. Se
+   falliscono, l'import si **annulla** senza scrivere niente. Costa nulla ed
+   evita la cosa peggiore possibile qui: 2,5 milioni di barre scritte con un
+   calendario rotto, cioe' dati sbagliati che *sembrano* giusti.
 8. Referto su **file nuovo** `ABTG_ImportEsterno_referto_v2.csv`: la v2 ha
    colonne in piu' e accodarle al CSV v1 lo storterebbe.
 
