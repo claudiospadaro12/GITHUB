@@ -161,6 +161,22 @@ Nella `BREAKOUT_CORSO_SPEC.md` §3.2 il "140" era **una singola occorrenza in
 > e' definitivamente caduto.** ⚠️ Restano **una sola fonte umana** (stessa
 > relatrice), ma il dubbio era di trascrizione, e quello e' chiuso.
 
+> 🔒 **18/08 sera — CADE ANCHE L'ULTIMA RISERVA: la "sola fonte umana" NON
+> VALE PIU'.** Il **modulo base** (capitolo indicatori, coach **Leonardo
+> Fasciano**) detta lo stesso valore, ed e' **la prima fonte indipendente**:
+>
+> `[TRASCRITTO chiaro, lez. 13 modulo base "WILLIAM PERCENT RANGE, CCI E RSI"]`
+> > _"inseriamo il Williams Percent Range. In questo caso **ti consiglio di
+> > settarlo a 140 periodi, quindi dove troverai la voce Period modifica e
+> > scrivi 140**, che sara' **funzionale per la strategia che imparerai nel corso
+> > del Master**. ... **140 periodi e' sicuramente un valore molto alto per questo
+> > tipo di indicatore**"_
+>
+> ✅ **Cinque occorrenze, DUE fonti umane indipendenti (Negro + Fasciano), e in
+> questa il valore e' un'istruzione di digitazione accompagnata dal commento
+> sull'anomalia del numero.** Il 140 e' acquisito.
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.2.
+
 ### 3.2 🔴 SUPERTREND — IL BUCO E' LO STESSO, MA ORA SAPPIAMO DOV'E' LA RISPOSTA
 
 Il corso lo usa in **ogni** lezione e **non ne detta mai i parametri**. Ma qui
@@ -181,6 +197,34 @@ E il modulo Breakout (lez. 35) diceva: _"Abbiamo salvato il nostro setup di base
 > ➡️ **I parametri del SuperTrend stanno nel modulo di Leonardo, prima della
 > lezione 26.** Non e' piu' "un modulo precedente non identificato": ha un
 > nome e una collocazione. **E' la richiesta n.1 per Claudio.**
+
+> 🔴🔴 **18/08 sera — LA CATENA E' STATA PERCORSA FINO IN FONDO, E TERMINA A
+> VUOTO. La frase qui sopra ("sappiamo dov'e' la risposta") NON REGGE PIU'.**
+>
+> **Il modulo di Leonardo e' stato trovato e letto:** e' il **capitolo indicatori
+> del modulo base "Piattaforma", lezioni 8-14**.
+> `[T]` lez. 8 modulo base: _"**Sono Leonardo Fasciano**, coach in area trading in
+> Alfio Bardolla Training Group e in questo capitolo ... **Ogni strategia
+> utilizzera' determinati indicatori**"_
+>
+> **E li' dentro il SuperTrend viene applicato COI DEFAULT, senza che un solo
+> parametro venga pronunciato:**
+> `[TRASCRITTO chiaro, lez. 10 modulo base "COS'E' IL SUPERTRAND"]`
+> > _"L'indicatore super trend ha degli input, cioe' ha dei **parametri
+> > modificabili**, che anche in questo caso, ti ricordo, sono **parametri che
+> > andrai a settare sulla base della strategia che andrai ad applicare**.
+> > **Facciamo ok senza fare nessuna variazione**"_
+>
+> ⛔ **Il buco n.1 non e' un buco di COPERTURA: e' un buco del CORSO.** Il modulo
+> rimanda alla strategia, la strategia rimanda al modulo: **rimando circolare,
+> mai chiuso in nessun punto.** Non esiste una lezione da chiedere.
+>
+> 🥇 **UNICA STRADA RIMASTA, ed e' tre click:** il SuperTrend e' un **`.ex4`
+> allegato alla lezione 10** (`[T]` _"troverai sotto questo video in un formato
+> scaricabile ... Il formato .ex4"_) e il coach lo applica premendo OK: **i
+> default di quel file SONO i parametri del corso.** Scaricarlo, trascinarlo su
+> un grafico, fotografare la finestra input.
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.1.
 
 ### 3.3 Soglie del Williams — verificate su valori numerici letti a schermo
 
@@ -745,7 +789,7 @@ i 21 valori chiudono tutti al centesimo di pip: nessuna correzione da fare.**
 
 | # | buco | peso |
 |---|---|---|
-| 1 | **Parametri SuperTrend** (ATR + moltiplicatore) | 🔴 **BLOCCANTE** — sono nel modulo di **Leonardo** (§3.2) |
+| 1 | **Parametri SuperTrend** (ATR + moltiplicatore) | 🔴 **BLOCCANTE** — ~~sono nel modulo di **Leonardo** (§3.2)~~ 🆕 **18/08 sera: il modulo di Leonardo e' stato letto e NON LI CONTIENE** (lez. 10 del modulo base: _"Facciamo ok senza fare nessuna variazione"_). **Non e' un buco di copertura, e' un buco del corso** (§3.2). Unica strada: i **default del `.ex4` allegato alla lezione** |
 | 2 | **Aggancio seme-volume / capitale** (fattore 2,29) | 🔴 **grave** — decide se il rischio vero e' 1,76% o 4,03% |
 | 3 | **Win rate del backtest** | 🔴 **grave** — senza, §8 non e' decidibile |
 | 4 | N. operazioni, date, broker, spread del backtest | 🔴 ×4 |
@@ -756,7 +800,7 @@ i 21 valori chiudono tutti al centesimo di pip: nessuna correzione da fare.**
 | 9 | Break-even / gestione in corsa | 🟢 **assenza vera**: non esiste alcun BE in questa strategia (a differenza del Breakout) — non e' un buco, e' una scelta |
 | 10 | Scadenza dei pendenti non riempiti | 🟠 solo "finche' il segnale e' valido" |
 | 11 | Anno degli esempi | 🟡 impedisce la riverifica |
-| 12 | Passo di volume / lotto minimo del broker del corso | 🟡 si assume 0,01 |
+| 12 | Passo di volume / lotto minimo del broker del corso | 🟡 si assume 0,01 — 🆕 **il broker del corso e' IDENTIFICATO**: `[T]` lez. 2 modulo base _"il nome del broker che noi utilizziamo e' **Black Ridge**"_, sito **`bcmmarkets.com`**, conto demo da **10.000 euro**. **E' il NOSTRO broker** (`50503392 — BCMMarkets-Server — BCM Markets Ltd`): il passo di volume si legge dal nostro terminale, non si assume piu' |
 
 ---
 
