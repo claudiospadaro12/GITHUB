@@ -265,8 +265,12 @@ Claudio: "per il SuperTrend dovrebbe essere con parametri classici".
   (1) il rischio 1% complessivo vs per-coppia (spiega i DD, non il PF),
   (2) la divergenza d'ingresso (vincolo 20 candele / candela di rottura),
   (3) i numeri del corso che non reggono.
-- Conferma definitiva: la trascrizione del modulo SuperTrend, o il pannello
-  dell'indicatore sul video. Fino ad allora resta [RIFERITO].
+- CHIUSO (18/08 sera): Claudio ha verificato — "non parla del settaggio del
+  supertrend". Il corso NON specifica i parametri. DECISIONE DI CLAUDIO:
+  si tengono gli STANDARD (ATR 10 / moltiplicatore 3.0), come assunzione
+  dichiarata. L'ipotesi C del referto e' definitivamente chiusa: non
+  esiste un parametro del corso da cui divergere, e il nostro backtest
+  usava l'unico default ragionevole.
 
 ### 4.2 ⚠️ Ambiguita' n.1 — 15 o 20 candele?
 
