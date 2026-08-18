@@ -788,3 +788,43 @@ preset o in una proposta.** L'unico uso e' saperlo riconoscere.
 numero che regga il metro di casa: porta la conferma che **le regole prop
 vanno costruite fuori dal corso**, punto gia' scritto sopra e ora esteso dal
 singolo modulo al framework intero.
+
+---
+
+## 🔗 AGGIUNTA 18/08 SERA — i moduli **FIBO H4** e **MEDIA 200** del corso
+
+**Referto completo:** `ANALISI_CORSO_FIBOH4_MEDIA200_2026-08-18.md`
+**Specifiche:** `../prove/FIBOH4_CORSO_SPEC.md` · `../prove/MEDIA200_CORSO_SPEC.md`
+_(8 trascrizioni, lezioni 18-25, 74.256 caratteri. Qui solo cio' che tocca le
+prop: il resto sta nel referto, non lo duplico.)_
+
+### Cosa cambia per la conformita' prop
+
+1. 🟢 **Il FIBO H4 e' il primo modulo del corso con un FILTRO NOTIZIE
+   OBBLIGATORIO.** Con fonti (Forex Factory / Investing), esclusione **per
+   valuta** e deroga a **>=100 pip**: _"prima del rilascio di ogni dato
+   [macro]economico ... **gli ordini vanno tolti. Noi non scommettiamo sul
+   mercato**"_. Copre la voce su cui il Breakout era scoperto
+   (`METRO_PROP.md` §7). 🔴 **E il nostro `ABTG_FiboH4_Multi` lo tiene SPENTO**
+   (`InpUseNewsFilter=false`, e `=0` pinnato nel file prova).
+2. 🟢 **Il FIBO H4 vieta overnight e weekend** (cancellazione pendenti alle
+   18:30-19:00, _"mai e qua dico mai aperto durante il weekend"_) →
+   `METRO_PROP.md` §3 non e' un problema per questa strategia.
+3. 🔴 **La MEDIA 200 e' l'opposto**: news, overnight e weekend **non sono mai
+   nominati in 5 lezioni**. **Lo stesso corso e' incoerente con se stesso.**
+4. 🚨 **IL KILLER, ed e' lo stesso identico del Breakout JPY: nessun tetto
+   sull'esposizione aggregata.** Entrambi i moduli fanno _"un giro su tutte le
+   valute"_ e piazzano ordini su ognuna che stia nella distanza giusta. Con il
+   rischio per operazione **ricostruito a ~1,6%** (mai dichiarato: §9 della spec
+   Media 200), sei cross col dollaro alla stessa distanza fanno
+   **~10% a rischio in un verso**, contro un daily loss del 5%
+   (`METRO_PROP.md` §2, nostra peggior giornata **misurata** −2,06%).
+   **La parola "correlazione" non compare in 74.256 caratteri.**
+5. 🔴 **La percentuale di rischio non e' MAI pronunciata in 8 lezioni.**
+   ⚠️ **E non e' lecito trasportare l'1% del modulo Breakout**: relatore
+   diverso, modulo diverso. Per qualunque nostra misura vale lo **0,65% di casa**.
+6. 🟢 **Setaccio §4: ZERO bandiere rosse su entrambi i moduli.** Niente
+   martingala, griglia, recovery, hedge; **stop loss sempre presente** e
+   ancorato all'ordine piu' grande. Gli ingressi a due ordini a prezzi
+   peggiorativi **non sono martingala**: size pre-impegnata, stop unico oltre
+   entrambi, perdita massima nota in partenza.
