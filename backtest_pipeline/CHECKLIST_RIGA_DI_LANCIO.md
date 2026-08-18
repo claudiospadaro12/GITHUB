@@ -321,3 +321,62 @@ tutto verde.
 verifica che il gemello chiamato non abbia una guardia di idempotenza che la
 annulla.** O si inoltra il `-Rifai`, o la riga cancella prima i file di quella
 variante e lo DICE.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 (notte) — trovate verificando `dukascopy_m1.py`
+
+## 16. ☠️ LA CACHE DI RIPRESA CHE SI AVVELENA DA SOLA
+
+_Difetto vero, gia' committato in `dukascopy_m1.py` (7ca2629, righe 165-194),
+trovato PRIMA dell'invio della riga. Riprodotto: file troncato in cache ->
+`LZMAError` -> ora saltata **a ogni rilancio, per sempre**._
+
+Il punto 15 dice che una guardia di idempotenza puo' annullare un rilancio.
+Questo e' il caso peggiore della famiglia: una **cache di ripresa** — quella
+che rende interrompibile una corsa da due notti — scritta **senza atomicita'
+e senza verifica**. Se la corsa muore a meta' di una `write` (Ctrl+C, riavvio,
+disco pieno) resta sul disco un file **troncato**. Al rilancio la cache dice
+"ce l'ho gia'", lo rilegge, la decodifica esplode, quel pezzo viene saltato —
+e non si recuperera' **mai piu'**, perche' nessun rilancio lo riscarica. Il
+buco resta silenzioso e il codice d'uscita resta 0.
+
+Stessa trappola con la risposta **200 che non e' il dato** (pagina d'errore
+del CDN, risposta troncata): finisce in cache come se fosse buona.
+
+Tre pezzi, sempre tutti e tre, su qualunque cache "riprendi da dove eri":
+```python
+if non_decodificabile(dati_dalla_cache): os.remove(file)   # 1: la cache si BUTTA, non si salta
+if not decodificabile(dati_scaricati):   non_scrivere()    # 2: in cache ci va solo roba valida
+open(tmp,"wb").write(...); os.replace(tmp, definitivo)     # 3: scrittura ATOMICA
+```
+**Corollario per la riga in chat**: "puoi interrompere e riprendere" e'
+una promessa che va **provata**, non dichiarata. Se la si scrive in un
+referto, prima si simula l'interruzione.
+
+## 17. 🐍 L'INTERPRETE DATO PER PRESENTE (e lo stub del Microsoft Store)
+
+_Il referto Dukascopy scriveva "Python c'e' gia': `run_all.ps1` lo invoca".
+`run_all.ps1` (righe 116-121) fa l'ESATTO contrario: `Get-Command` con
+`-ErrorAction SilentlyContinue` e il ramo "Python non trovato: uso gli .ini
+gia' presenti (nessun problema)". Cioe' il gemello lo tratta da **opzionale**:
+non e' una prova di presenza, e' una prova che qualcuno aveva gia' il dubbio._
+
+E' la famiglia della `@DAQUANDO` inventata, applicata agli strumenti: **la
+presenza di un interprete/eseguibile e' MISURATA o DICHIARATA MANCANTE, mai
+dedotta dal fatto che uno script lo nomina.**
+
+E su Windows non basta `Get-Command python`: esiste l'**alias di esecuzione
+del Microsoft Store** in `...\AppData\Local\Microsoft\WindowsApps\python.exe`,
+che **non e' Python** — apre la pagina dello Store e torna subito. La riga
+sembra partita e non ha fatto niente.
+
+```powershell
+$py=(Get-Command python.exe -EA SilentlyContinue | ? { $_.Source -notlike "*\WindowsApps\*" } | select -First 1).Source
+if(-not $py){ $py=(Get-Command py.exe -EA SilentlyContinue | select -First 1).Source }
+if(-not $py){ throw "PYTHON ASSENTE: installalo da python.org con 'Add python.exe to PATH'" }
+$global:LASTEXITCODE=0; & $py -c "import sys; sys.exit(0 if sys.version_info>=(3,8) else 1)"
+if($LASTEXITCODE -ne 0){ throw "PYTHON TROPPO VECCHIO O NON FUNZIONANTE: $py" }
+```
+Vale per ogni dipendenza esterna che la riga assume: si verifica **prima**,
+con un throw, non si scopre a corsa avviata.
