@@ -423,7 +423,7 @@ finora**: rischio e rendimento **simmetrici a 2 ATR (R:R ~1:1)**.
 
 | # | attrito | gravita' |
 |---|---|---|
-| 1 | 🔴 **Nessun tetto sulle posizioni simultanee**, su tutte le valute, senza una parola sulla **correlazione**. Sei cross col dollaro alla stessa distanza = **~10% a rischio in un verso** (§9). Contro un daily loss del 5% (`METRO_PROP.md` §2, peggior giornata nostra misurata **−2,06%**) e' una violazione a portata di **una mattina** | 🔴🔴 **il killer** |
+| 1 | 🔴 **Nessun tetto sulle posizioni simultanee**, su tutte le valute, senza una parola sulla **correlazione**. Sei cross col dollaro alla stessa distanza = **~10% a rischio in un verso** (§9). Contro un daily loss del 5% (`METRO_PROP.md` §2, peggior giornata nostra misurata **−2,06%**) e' una violazione a portata di **una mattina**. 🆕 **18/08 sera — non e' un buco di QUESTO modulo, e' un buco del CORSO INTERO: nelle 41 lezioni dei due moduli base la parola "correlazione" NON COMPARE MAI**, ne' fra valute ne' fra posizioni ne' come rischio. **Il corso, dai fondamentali alle strategie, non insegna mai a contare il rischio aggregato** | 🔴🔴 **il killer** |
 | 2 | 🔴 **Nessun filtro notizie, mai nominato in 5 lezioni.** Il modulo **gemello** Fibo H4 lo rende obbligatorio: **lo stesso corso e' incoerente con se stesso** (`METRO_PROP.md` §7). 🆕 **18/08 sera — E ORA SAPPIAMO CHE NON E' UNA DIMENTICANZA, E' UNA DOTTRINA:** `[T]` modulo base an.tec. lez. 3 _"**noi dimentichiamo completamente le notizie macroeconomiche** ... **Anzi, a volte non conoscere niente dell'analisi delle notizie macroeconomiche e' meglio perche' puo' confondere**"_. Il silenzio di questo modulo e' **coerente col corso**; e' il Fibo H4 a essere l'eccezione | 🔴 **e strutturale** |
 | 3 | 🟠 **Overnight e weekend mai affrontati.** Su H4/D1 con target su EMA14 le posizioni durano **giorni** per costruzione. Il Fibo H4 vieta il weekend a voce alta; qui **silenzio** (`METRO_PROP.md` §3) | 🟠 |
 | 4 | 🟠 **Umano nel ciclo per progetto**: trailing manuale, controllo _"ogni ora"_ dal cellulare, spostamento ordini _"se arriva con forza"_. Su un conto prop gestito da EA **queste regole vanno tolte o quantificate** | 🟠 |
@@ -444,8 +444,15 @@ finora**: rischio e rendimento **simmetrici a 2 ATR (R:R ~1:1)**.
    e' 1).
 5. **Split della size**: 50/50 di rischio (attuale) vs ~35/65 (corso) a sweep.
 6. **Distanze degli ordini**: ATR-relative (nostre) vs pip assoluti (corso).
-7. **Fuso**: 08:00 IT = 07:00 BCM `[INFERITO]`; **e l'allineamento delle candele
-   H4 dipende dal broker** → da dichiarare.
+7. ⚠️ **RISCRITTA 18/08 sera.** **Fuso**: 08:00 IT = 07:00 BCM `[INFERITO]`.
+   ~~**e l'allineamento delle candele H4 dipende dal broker** → da dichiarare.~~
+   ✅ **L'allineamento H4 NON e' piu' un'incognita: il corso e noi siamo sullo
+   STESSO BROKER** (Black Ridge / `bcmmarkets.com` = `BCMMarkets-Server`, §15.1).
+   Le barre H4 del relatore e le nostre **hanno lo stesso taglio** — si verifica
+   su un grafico, non si dichiara.
+   ⚠️ **Resta da misurare uno scarto di UN'ORA** fra il "GMT" dettato dal corso
+   e l'"IT−1" registrato nel repo (§15.1): **quello si', va ancora dichiarato**,
+   ed e' un'assunzione su un'ora, non su un broker sconosciuto.
 8. **Break-in/break-out (lez. 25)**: EA nuovo, non una variante di
    `ABTG_EMA200` — il segno del trade e' opposto.
 
