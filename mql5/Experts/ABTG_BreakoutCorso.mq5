@@ -472,6 +472,14 @@ bool CalcolaSegnale(double W, double stDir, int &dir, double &chiusura,
 void Apri(int dir, double chiusura, double sl, double tp, double R)
   {
    if(dir == 0 || R <= 0.0) return;
+
+   // Guardia: una sola posizione per volta. Serve davvero, perche' Apri()
+   // viene chiamata subito dopo Chiudi() sul segnale contrario: se quella
+   // chiusura fosse fallita, su un conto HEDGING (il nostro) resterebbero
+   // aperte due posizioni opposte.
+   if(SelezionaPosizione())
+     { if(InpLog) Print("[BRK] posizione gia' aperta: niente ingresso."); return; }
+
    bool isSell = (dir < 0);
 
    //--- filtro spread
