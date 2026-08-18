@@ -1,0 +1,13 @@
+REFERTO DI RACCOLTA - R83 DUELLO DEGLI INGRESSI
+data: 2026-08-18 21:59
+riferimento (commit/branch): 2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b
+macchina: DESKTOP-H4D7CAJ   utente: Master
+deposito: 10000   modello: 4
+EA in gara: ABTG_Apertura_3Ingressi   EA di controprova: ABTG_DAX_Apertura_EU
+celle girate: N0
+CSV attesi: 2   mancanti: 0
+serie per-trade raccolte: 2 (solo finestra OOS)
+CANARINI DA VERIFICARE PRIMA DI LEGGERE IL DUELLO: N0 = cella A di R84; D1 = cella V.
+
+La riga 'data:' qui sopra deve essere di ADESSO. Se e' vecchia, stai
+guardando una raccolta precedente e non i file di questa corsa.

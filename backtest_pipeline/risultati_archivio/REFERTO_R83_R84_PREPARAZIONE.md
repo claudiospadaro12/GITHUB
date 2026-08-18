@@ -654,3 +654,13 @@ Giri a vuoto R84 e R83 usciti 0. Anteprime verificate in chat: ore server
   noto sulla 770201: la domanda del round (i filtri salvano lo scheletro?)
   resta alle celle B-I. Campioni sopra n=150 in entrambe le finestre.
 - CSV in r84_csv/.
+
+## PASSO 4 — CANARINO DI EQUIVALENZA R83 PROMOSSO (18/08, 21:59)
+
+N0 (EA nuovo, modalita' 0) vs cella A di R84 (EA vivo):
+- Totali IDENTICI a ogni decimale (IS 686,35/1,25367/156; OOS -795,03/0,87315/291).
+- Per-trade: TUTTI i 291 trade OOS identici (orario al secondo, volume,
+  prezzo, profitto) al netto del solo magic. Verificato con diff.
+- Il fork del core Nasdaq e' un clone fedele: il duello e' ad armi pari.
+  Le modalita' 1 e 2 si potranno leggere come EFFETTO DELL'INGRESSO, unica
+  variabile. CSV in r83_csv/.
