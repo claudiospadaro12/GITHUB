@@ -473,3 +473,134 @@ le formule di prezzi, TP, SL e livello di trailing) — **richiesta n.2 per
 Claudio**.
 
 ---
+
+## 📄 Lezione 7 — `7. ESEMPIO OPERATIVO E BACKTEST DELLA NOTIZIA 1.txt` 🔴
+
+| | |
+|---|---|
+| **OGGETTO** | il backtest dell'ECB, 2009-2024 |
+
+**NUMERI DI PERFORMANCE — tutti `[dichiarato, NON verificato]`:**
+
+| voce | valore | nota |
+|---|---|---|
+| periodo | **01/01/2009 → 2024**, _"15 anni e mezzo"_ | — |
+| pips | _"quasi 3000"_ / _"piu' di 3000"_ (dice entrambi) | `[T-dubbio]` |
+| conto simulato | 1.000 € → **~4.700 €**, _"oltre il 340%"_ | 4.700/1.000 = **+370%**: le due cifre non coincidono |
+| **drawdown massimo** | **15%** | l'unico DD numerico di tutto il modulo |
+| rendimento medio | _"10-12% all'anno"_ per l'ECB; _"circa 20%"_ per la strategia intera | — |
+| impegno | _"20 minuti all'anno"_ | — |
+| **N (numero operazioni)** | 🔴 **MAI DICHIARATO** | si ricava solo da "8/anno" |
+
+**🧮 ARITMETICA (dettaglio in §2.3):** N implicito **124** → **24,2 pips per
+operazione** → **win rate necessario 65,6%**, mai pronunciato. E la percentuale
+dichiarata (+370%) **e' piu' BASSA** di quella che i suoi stessi pips
+produrrebbero al 3% capitalizzato (**≈ +480%**).
+
+**🔴 IL PROBLEMA DI FONDO, CON LE SUE PAROLE:**
+> `[T]` _"questa e' una strategia che spiego da piu' di dieci anni, quindi negli
+> ultimi dieci anni sono i **risultati realmente ottenuti**"_
+
+Una dichiarazione di operativita' reale **senza estratto conto, senza broker,
+senza date, senza N**. E per la parte 2009-2013, **lo strumento insegnato non
+puo' produrla** (lez. 3 e 6: MT4 arriva a 2-3 mesi).
+
+**CONTRADDIZIONE:** _"l'ultima, che e' la prossima che ci sara', il **6 maggio
+2024**"_ `[T-dubbio]` — **il nostro CSV non ha nessuna ECB in maggio 2024**.
+
+**A SCHERMO E NON NEL PARLATO:** 🥇 **il file di backtest** (colonna A date,
+colonna B pips, colonna C progressivo) e **l'equity line** — **richiesta n.3**.
+
+**COSA NE COPIAMO:** 🔴 **NIENTE come numero.** ✅ **Come metodo si', una cosa:**
+_"il grande vantaggio di una strategia meccanica e' che tu puoi perfettamente
+sapere come sarebbero andate le cose"_ `[T]` — e' vero, ed e' **il motivo per
+cui possiamo verificarlo noi**.
+
+---
+
+## 📄 Lezione 8 — `8. NOTIZIA 2 US FOMC PRESS CONFERENCE.txt`
+
+| parametro | valore | etichetta |
+|---|---|---|
+| notizia | **FOMC Press Conference** | `[T]` |
+| strumento | **EUR/USD** | `[T]` |
+| timeframe | **M5** | `[T]` |
+| orario | **20:30 IT** (ora legale) / **19:30 IT** (ora solare) | 🔴 `[T]` **la regola generale e' SBAGLIATA**: vedi §2.1 — nel nostro CSV **11 eventi invernali su 17 sono alle 20:30 IT**, non alle 19:30 |
+| candele | **quella della notizia + la successiva** (20:30 e 20:35) | `[T]` — 🔴 **opposto all'ECB, e il motivo non viene mai dato** |
+| istante d'azione | **20:40** = notizia **+10 min** | `[T]` |
+| BUY / SELL | **+3 / −2 pip** | `[T]` |
+| TP / SL | **50 / 25** | `[T]` |
+| **scadenza pendenti** | **notizia + 75 minuti** | `[T] chiaro` |
+| trailing | ❌ **nessuno** | `[T]` (lez. 9: _"qua non devi fare niente"_) |
+
+⚠️ **Il relatore si copre sul fuso** `[T]`: _"il sito, se tu verifichi che ti dia
+l'ora italiana, ti da' l'ora italiana precisa"_. **Per un umano il problema non
+esiste. Per un EA con l'ora scritta a mano, esiste eccome** → e' la ragione
+della riscrittura proposta nella spec §5.2.
+
+---
+
+## 📄 Lezione 9 — `9. ESEMPIO OPERATIVO E BACKTEST DELLA US FOMC PRESS CONFERENCE.txt`
+
+**ESEMPIO — FOMC del 20/03/2024 su EUR/USD** (verificato: **9 numeri su 9
+tornano**, spec §7-T2): high 1,08892 → buy 1,08922 / TP 1,09422 / SL 1,08672;
+low 1,08656 → sell 1,08636 / SL 1,08886 / TP 1,08136; valore pip 9,21 € →
+**volume 0,65** ✅. Orario **19:30 IT** ✅ **confermato dal nostro CSV**.
+
+**IL DETTAGLIO CHE DEMOLISCE UNA NOSTRA IMPOSTAZIONE:**
+> `[T]` _"l'ordine sarebbe stato eseguito intorno alle 19.45, **sarebbe rimasto
+> aperto tutta la notte** e la mattina intorno alle 8 l'ordine sarebbe chiuso in
+> profitto"_
+
+🔴 **Il nostro EA ha `InpCloseAtExpiry=true`: avrebbe chiuso quella posizione
+alle 21:45 e il trade-vetrina della lezione non sarebbe mai esistito.**
+E ha una conseguenza prop diretta: **overnight** → incompatibile con **E8
+Signature** (tutto chiuso alle 23:00 server).
+
+**NUMERI DI PERFORMANCE — `[dichiarato, NON verificato]`:**
+- backtest **dal 2011** (_"la conferenza stampa del 2009 ancora non c'era"_ `[T]`
+  ✅ vero), _"ultimi 14 anni"_.
+- _"piu' di **1500 pips**"_, _"profitto complessivo **oltre il 200%**"_.
+- DD: 🔴 **nessun numero** — solo _"calo percentuale massimo veramente
+  bassissimo"_ e _"e' molto raro che avvengano anche solo due perdite
+  consecutivamente"_.
+- **N: 🔴 mai dichiarato.** Implicito 112; se le conferenze FOMC erano 4/anno
+  fino al 2018 `[ancora esterna]`, il vero N e' **~74**.
+- 🧮 **1500 pips al 3% capitalizzato darebbero ≈ +140%, non "oltre il 200%"** —
+  **scarto nella direzione opposta a quello dell'ECB** (§2.3-c).
+
+**ALTRI `[T]`:** _"sono operazioni che non arrivano a durare neanche 24 ore"_ ·
+_"in un minuto, un minuto e mezzo avrai fatto"_ · la regola del venerdi 22:50
+_"praticamente improbabilissimo, non impossibile"_.
+
+---
+
+## 📄 Lezione 10 — `10. BACKTEST POSTNEWS.txt`
+
+| voce | valore | etichetta |
+|---|---|---|
+| operativita' totale | **16 operazioni/anno** (8+8) | `[T]` |
+| impegno | _"un'ora all'anno"_, _"5 minuti al mese"_ | `[T]` |
+| **profitto complessivo 2009→2024** | **+1000%** (_"avresti decuplicato il conto"_) | `[dichiarato]` → **= 16,5% composto**, non 20% |
+| media annua | _"supera il 20% all'anno"_ | media **aritmetica** |
+| anni negativi | **uno solo, −2% (il 2009)** | `[dichiarato]` |
+| anno "particolare" | il **2021**, _"anno macroeconomico molto particolare dopo la pandemia"_ | `[T]` |
+| rischio simulato | **3% a operazione** | `[T]` |
+| **DD della combinata** | 🔴 **MAI DICHIARATO** | — |
+| **N** | 🔴 **MAI DICHIARATO** | — |
+| provenienza dei dati | _"dal 1° gennaio 2009 al 2013 e' **backtest**, poi **dal 2013 e' applicazione concreta sul mercato**"_ | `[T]` — **e' la frase piu' importante del file** |
+
+🔴 **E qui c'e' anche il lapsus più rivelatore del modulo** `[T-dubbio]`:
+_"con **un'ora di lavoro al giorno** ottenere più di un 20% medio di profitto
+all'anno"_ — due righe dopo aver detto _"non al giorno, **all'anno**"_.
+Errore di parlato, ma dice quanto il numero conti piu' della precisione.
+
+**🎙️ IL DATO PIU' UTILE DELLA LEZIONE NON E' UN NUMERO — E' L'ULTIMA RIGA:**
+> `[T]` _"ti rimando al prossimo capitolo in cui **ritroverai Leonardo
+> Fasciano** che ti … spieghera' … la strategia Easy Trend"_
+
+→ 🟢 **Il relatore della Post News NON e' Leonardo Fasciano** (che infatti si
+presenta nella lez. 11 dell'EasyTrend), e _"ritroverai"_ dice che **Fasciano era
+gia' comparso** (moduli base). Vedi §4.
+
+---
