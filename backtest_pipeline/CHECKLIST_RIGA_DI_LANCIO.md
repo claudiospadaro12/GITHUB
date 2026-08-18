@@ -273,3 +273,51 @@ controlla `-ne 0`.
 Corollario che vale sempre: **ogni referto di raccolta porta dentro una riga
 `data:`**, e la riga in chat dice a Claudio che quella data deve essere di
 ADESSO.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 (notte) — trovate verificando `lancia_r81.ps1`
+
+## 14. 🟢 IL GIRO A VUOTO CHE ESCE 0 ANCHE SE UN PEZZO E' FALLITO
+
+_Difetto vero, gia' committato in `lancia_r81.ps1` (f2f9030, righe 171-177 e
+204-223), trovato PRIMA dell'invio della riga._
+
+Il punto 13 copre lo script che fa `exit 1` mentre la coda tira dritto. Questo
+e' **il rovescio, ed e' peggio perche' non si vede**: uno script che lancia N
+sotto-lavori, ne registra i falliti in una lista (`$falliti`), **non la
+consulta mai** e chiude il ramo `-SoloControllo` con `exit 0` secco. La riga in
+chat ha il suo bravo `if($LASTEXITCODE -ne 0){ throw ... }` — **e non scatta
+mai**. Il guard e' decorativo, e Claudio manda avanti la corsa vera da due ore
+credendo che il controllo sia passato.
+
+Due controlli, insieme:
+1. **Il codice d'uscita del giro a vuoto deve dipendere dai sotto-lavori**, non
+   dal fatto di essere arrivato in fondo:
+   `if($falliti.Count -gt 0 -or $senzaAnteprima.Count -gt 0){ exit 1 }`.
+2. **Se non lo fa, la riga se lo verifica da sola** — contando gli ARTEFATTI
+   che il giro a vuoto avrebbe dovuto produrre (le anteprime `.ini`, un file
+   per sotto-lavoro): `if($a.Count -ne 6){ throw '...' }`.
+
+**E gli artefatti INTERMEDI vanno ripuliti PRIMA, come gli script scaricati**
+(punto 8) e come i referti (punto 13). Le anteprime `anteprima_*.ini` restano
+sul disco fra un giro e l'altro: se stavolta la variante C non ne produce
+nessuna, il riepilogo stampa **quella del giro precedente** e Claudio confronta
+coi criteri dei numeri vecchi, in buona fede. E' il referto stantio del 17/08
+travestito da anteprima. Nella riga: `Remove-Item "...\anteprima_r81*.ini"
+-ErrorAction SilentlyContinue` prima di lanciare.
+
+## 15. 🔁 IL RILANCIO MIRATO CHE NON RILANCIA NIENTE
+
+Stesso script, stessa sera. `walkforward_generico.ps1` (riga 580) **salta i CSV
+gia' presenti** se non gli si passa `-Rifai` — ed e' giusto cosi', e' quello che
+permette di riprendere una corsa interrotta. Ma il driver del round
+(`lancia_r81.ps1`) **non ha `-Rifai` e non lo inoltra**: la riga documentata
+"se serve rifare UNA variante: `-Solo D`" **non rifa' un bel niente** su una
+variante gia' fatta. Gira per dieci secondi, rifa' solo la raccolta e stampa
+tutto verde.
+
+**Regola: prima di scrivere in un referto una riga di "rilancio mirato", si
+verifica che il gemello chiamato non abbia una guardia di idempotenza che la
+annulla.** O si inoltra il `-Rifai`, o la riga cancella prima i file di quella
+variante e lo DICE.
