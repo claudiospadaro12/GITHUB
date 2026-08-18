@@ -454,26 +454,60 @@ PASSO 0, ed e' nella riga.
 **UNA MACCHINA, UN LAVORO: c'e' un solo MT5.** HistData/Dukascopy e i round
 **non possono** girare insieme.
 
+L'ordine e' **esattamente** quello dei PASSI 0-7 del par. 5, che sono numerati
+apposta. In breve:
+
 1. **PASSO 0** (MT5 chiuso, 30-180 min). Apre e chiude MT5 da solo.
-2. **Compilazione + autotest dell'EA nuovo** (5-10 min): e' il gesto piu'
+2. **PASSO 1a compilazione** dell'EA nuovo (MT5 chiuso, 5-10 min) + **PASSO 1b
+   autotest** nel tester (MT5 aperto, 5 min, poi si richiude). E' il gesto piu'
    economico che puo' fermare tutto il resto. **Se non compila, si riscrive
    qui e si ricomincia da 1** senza aver bruciato ore.
-3. **Giri a vuoto** di R84 e R83 (2-4 min in tutto).
-4. **Canarino R84 cella A** → da qui esce la stima vera.
-5. **Canarino R83 N0** → e **subito il confronto con la cella A**. Se i numeri
-   non coincidono, **si ferma tutto**: e' il momento piu' informativo di
-   entrambi i round e costa un'ora.
+   ⚠️ **Nessun driver compila l'EA in anticipo**: `walkforward_generico.ps1` lo
+   copia in `MQL5\Experts` e lo compila **solo quando parte una corsa vera**
+   (riga 567), cioe' troppo tardi. Per questo il PASSO 1a compila da se'.
+3. **PASSO 2**, giri a vuoto di R84 e R83 (2-4 min in tutto).
+4. **PASSO 3**, canarino R84 cella A → da qui esce la stima vera.
+5. **PASSO 4**, canarino R83 N0 → e **subito il confronto con la cella A**. Se
+   i numeri non coincidono, **si ferma tutto**: e' il momento piu' informativo
+   di entrambi i round e costa un'ora. Poi **PASSO 5** (D1 contro V).
 6. **HistData** (se e' la finestra buona: e' lungo e non usa il tester in
    modo esclusivo solo se non tocca MT5 — se lo tocca, va **prima** o
    **dopo**, mai in mezzo a un round).
-7. **R84 completo** (3-9 ore, di notte).
-8. **R83 completo** (2-7 ore, la notte dopo).
+7. **PASSO 6**, R84 completo (di notte).
+8. **PASSO 7**, R83 completo (la notte dopo).
+
+🧊 **E UNA REGOLA DI TRAFFICO NUOVA, per tutta la durata:** dal PASSO 0 alla
+fine del PASSO 7 **non si pusha niente su `lavoro`**, soprattutto in
+`mql5/Experts/`. Il driver pinna i `.ps1` e i file prova all'hash, ma **gli EA
+li riscarica da `lavoro` HEAD** (`walkforward_generico.ps1`, riga 78): un push
+a meta' round cambia il motore fra una cella e l'altra, e i canarini di
+equivalenza smettono di misurare qualunque cosa. Il PASSO 1a verifica che
+`lavoro` e il pin coincidano; da li' in poi e' disciplina.
 
 **Perche' R84 prima di R83:** R84 chiude un **debito gia' aperto** e la sua
 cella A e' il **metro** del canarino di R83. Girare R83 per primo vuol dire
 avere il duello senza il suo controllo.
 
-## 8. ✅ AUTOVERIFICA SUI 20 PUNTI DELLA CHECKLIST
+## 8. ✅ AUTOVERIFICA — **rifatta dal verificatore sui 22 punti** (18/08 notte)
+
+> 🔴 **L'autoverifica della prima stesura si fermava a 20 punti e su tre di
+> quelli si dava ragione da sola.** Corretta qui sotto: le righe **VECCHIE**
+> non rispettavano 7, 8, 13, 19.2, 20, 21, 22 (e il punto 6 solo a meta').
+> Le righe **NUOVE** del par. 5 li rispettano tutti; **quello che resta
+> scoperto e' scritto, non nascosto**:
+>
+> - **punto 6 (pin) resta parziale per gli EA**: nessuna riga puo' pinnarli,
+>   perche' li scarica `walkforward_generico.ps1` da `lavoro` HEAD. Mitigato
+>   dal confronto byte a byte del PASSO 1a + dal congelamento del branch;
+>   **la correzione vera** e' un `-Rif` che il driver inoltri a
+>   `walkforward_generico.ps1`, ed e' una riga di lavoro a se'.
+> - **punto 19 (timeout)**: `-TimeoutMin 180` copre la stima 30-180, ma dentro
+>   `scarica_storico.ps1` resta la rete dei **15 minuti di silenzio** (riga
+>   302) che, proprio durante il download dei TICK, puo' scattare su una corsa
+>   sana: allo scadere **ammazza MT5 e non esce 1**. Per questo il PASSO 0
+>   controlla le due righe `TICK` invece del solo codice d'uscita.
+> - **punto 20**: le sei righe `[3ING][AUTOTEST]` **escono solo eseguendo**.
+>   PASSO 1a installa e compila, PASSO 1b le fa uscire nel tester.
 
 | # | punto | come e' stato rispettato |
 |---|---|---|
@@ -483,21 +517,24 @@ avere il duello senza il suo controllo.
 | 4 | il SHA contiene la correzione | verificato con `git log -1 -- <file>` su tutti e sette i pezzi |
 | 5 | giro a vuoto se c'e' `-Prova` | previsto e obbligatorio in entrambe le righe |
 | 5b | cultura invariante | nessun numero dei CSV convertito; le uniche date parsate usano `ParseExact` + `InvariantCulture` |
-| 6 | cache di raw ~5 min | pin all'**hash**, non al branch, + marcatore `Select-String` |
-| 7 | MT5 chiuso | guardia `Get-Process terminal64` in entrambi i driver + detto nella riga |
-| 8 | l'`irm` che fallisce | i tre pezzi (Remove-Item / `-ErrorAction Stop` / marcatore) in ogni riga |
+| 6 | cache di raw ~5 min | pin all'**hash** + marcatore `Select-String` su **ogni** `.ps1` e sul `.mq5`. **Gli EA restano non pinnabili**: vedi il riquadro qui sopra |
+| 7 | MT5 chiuso | guardia `Get-Process terminal64` nei due driver **e in ogni blocco del par. 5** (nella bozza vecchia non c'era) + detto in chiaro |
+| 8 | l'`irm` che fallisce | i tre pezzi (Remove-Item / `-EA Stop` / marcatore) in **ogni** blocco, e ogni blocco e' **un solo comando** (punto 21) |
 | 9 | sicurezza del gemello | i driver nuovi hanno **tutto** quello che ha `lancia_r82` (guardia MT5, pin, marcatori, pulizia anteprime, raccolta, zip, referto con `data:`) **piu'** il PASSO 0 |
 | 10 | `Stop` + cicli di file | le copie sono in `try/catch`, il referto si scrive comunque |
 | 11 | whitelist vs blacklist | non si sposta nessun file di Claudio |
 | 12 | backup senza guardia | nessuno script qui sovrascrive backup |
-| 13 | `exit 1` e coda che tira dritto | `$global:LASTEXITCODE=0` **prima**, controllo `-ne 0` **dopo** |
+| 13 | `exit 1` e coda che tira dritto | `$global:LASTEXITCODE=0` **prima**, controllo `-ne 0` **dopo**, su **tutti** i passi (nella bozza vecchia mancava sul PASSO 0 e su tre corse su cinque) |
 | 14 | giro a vuoto che esce 0 lo stesso | l'uscita dipende da `$falliti` **e** dalle anteprime prodotte |
 | 15 | rilancio mirato che non rilancia | `-Rifai` **inoltrato** al driver e spiegato nel messaggio finale |
 | 16 | cache di ripresa avvelenata | nessuna cache di ripresa in questi script |
 | 17 | interprete dato per presente | nessuna dipendenza esterna oltre PowerShell e MT5 (quest'ultimo verificato) |
 | 18 | profondita' misurata sul TF sbagliato | **e' il PASSO 0**: si legge la riga `TICK`, e il driver **si ferma** se i tick partono dopo la finestra |
-| 19 | timeout piu' corto della stima | `-TimeoutMin 180` sul PASSO 0; per i round non esiste timeout e il perche' e' scritto |
-| 20 | collaudo che con quel tasto non esce | l'autotest si legge **eseguendo** un test singolo, e c'e' scritto chi installa l'EA e quando |
+| 19 | timeout piu' corto della stima | `-TimeoutMin 180` sul PASSO 0 (stima 30-180); per i round non esiste timeout e il perche' e' scritto. **19.2**: il PASSO 0 non si fida del codice d'uscita e conta le due righe `TICK` |
+| 20 | collaudo che con quel tasto non esce | **PASSO 1a** installa e compila (nessun driver lo fa prima di una corsa vera), **PASSO 1b** fa uscire le righe eseguendo un test singolo |
+| 21 | blocco multi-riga incollato | ogni passo del par. 5 e' **un solo `& { ... }`**. La bozza vecchia erano 4 blocchi di righe indipendenti: era il difetto di HistData, rifatto |
+| 22 | istruzioni sul passo dopo senza artefatti | ogni passo finisce con un **stop dichiarato** e nomina lo zip che deve esistere; i canarini non incollano piu' la corsa completa di seguito |
+| 23 | artefatto di INPUT stantio | il PASSO 0 **cancella prima** `Desktop\storico_bcm\ABTG_StoricoScaricato.csv` (i driver lo riaccettano senza guardarne la data: difetto aperto, vedi par. 9) |
 
 ## 9. 🧾 COSA RESTA APERTO (dichiarato, non nascosto)
 
@@ -522,7 +559,23 @@ avere il duello senza il suo controllo.
    `InpUseNewsFilter=true` mentre in campo era spento. Per questo la cella A
    di R84 e' dichiarata come *"configurazione di riferimento del round"* e
    **non** come *"la sedia viva"*.
-6. **Nessuno dei due round promuove niente.** Il forward passa dal processo
+6. **Il PASSO 0 dei due driver accetta un referto storico di QUALUNQUE data.**
+   `lancia_r84.ps1` riga 196 e `lancia_r83.ps1` riga 189 fanno `Test-Path` su
+   `Desktop\storico_bcm\ABTG_StoricoScaricato.csv` e lo leggono: se la sonda e'
+   fallita, il file **della settimana scorsa** e' ancora li' e il controllo
+   sulla profondita' dei tick passa in silenzio su numeri vecchi. Nelle righe
+   del par. 5 e' tappato (il PASSO 0 cancella il file prima di rifarlo), ma la
+   correzione vera e' nel driver — **due righe**, da fare quando si ri-pinna:
+   ```powershell
+   $eta = (New-TimeSpan -Start (Get-Item -LiteralPath $CsvStorico).LastWriteTime -End (Get-Date)).TotalHours
+   if($eta -gt 48){ Muori ("il referto storico ha " + [int]$eta + " ore: rifai il PASSO 0 (scarica_storico.ps1) prima di girare.") }
+   ```
+7. **Gli EA non sono pinnabili dal driver** (`walkforward_generico.ps1` riga
+   78 scarica da `lavoro` HEAD e ignora `-Rif`; se il download fallisce usa in
+   silenzio la copia in `src_prove\`). Oggi si tappa col confronto del PASSO 1a
+   e col congelamento del branch. La correzione vera: `-Rif` inoltrato al
+   driver generico, con `-EA Stop` al posto del ripiego silenzioso.
+8. **Nessuno dei due round promuove niente.** Il forward passa dal processo
    completo: prova di regime, walk-forward, contratto (DD e frequenza),
    firma di Claudio. E per R83, **al massimo una modalita' per mercato**.
 
