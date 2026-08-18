@@ -625,3 +625,71 @@ rende il backtest **una testimonianza, non una misura**.
    (= +3h45) o 18:00? **Non e' dicibile dalla trascrizione.**
 
 ---
+
+## 9. 🆚 CONFRONTO COL NOSTRO `ABTG_PostNews.mq5` (458 righe, in flotta dal 26/07)
+
+> 🚨 **Questo modulo e' l'unico dei sei in cui l'EA ESISTEVA PRIMA della
+> trascrizione.** Scritto il 26/07/2026 da una sessione precedente, gira in
+> forward su EURUSD ed EURJPY (`FLOTTA_ATTIVA.md`, magic 771201/771202), e la
+> sua intestazione attribuisce la strategia a **"Christian Bertacchi"** —
+> **attribuzione che in repo non ha nessun documento a sostegno** (§12).
+
+### 9.1 Riga per riga: corso ↔ EA ↔ fonte live
+
+| parametro | 📘 corso | 🎤 live "De Marco" 29/07 *(sintesi in repo, trascrizione grezza ASSENTE)* | 🤖 `ABTG_PostNews` | esito |
+|---|---|---|---|---|
+| range 2 candele M5 | ✅ | ✅ | ✅ `iHigh/iLow[1],[2]` | 🟢 **converge** |
+| BUY offset | **+3 pip** | +3 | **3.0** | 🟢 converge |
+| SELL offset | **−2 pip** (2 volte) | **−3** | **3.0** | 🟠 **l'EA segue il live, non il corso** |
+| TP / SL | **50 / 25** | 50 / 25 | **50 / 25** | 🟢 converge |
+| size su SL 50 (doppio stop) | ✅ | n.d. | ✅ `InpRiskRefSLpips=50` | 🟢 |
+| rischio | **3%** | n.d. | **3.0** | 🟢 (ma §6.2) |
+| **OCO** | 🔴 **NO, esplicito** | n.d. | 🔴 **`true`** | 🔴 **OPPOSTO** |
+| **chiusura posizione a scadenza** | 🔴 **NO, esplicito ×2** | ✅ _"tenere fino alle 21:45"_ | 🔴 **`true`** | 🔴 **OPPOSTO al corso** |
+| trailing +25 → SL 15 | solo ECB, **opzionale** | BE dopo ~20 pip | ✅ ECB on / FOMC off | 🟢 fedele |
+| chiusura venerdi 22:50 IT | ✅ | n.d. | ✅ 21:50 server | 🟢 |
+| strumenti | EURJPY / EURUSD | EURUSD (+USDJPY) | EURJPY / EURUSD | 🟢 |
+| **tradare l'ECB** | ✅ meta' del modulo | ❌ _"non la trado"_ | preset ECB attivo | 🟠 **le fonti si smentiscono** |
+| orario d'azione | **relativo alla notizia** | relativo | 🔴 **fisso a orologio** | 🔴 **divergenza strutturale** (§5.1) |
+
+### 9.2 🚨 LA SCOPERTA CHE VALE PIU' DI TUTTA LA TABELLA
+
+**Il verdetto _"PostNews: nessun edge nemmeno in screening"_ (weekend del 07/08,
+`REFERTO_WEEKEND_FASE0.md` §2 e `CLASSIFICA_WEEKEND.md`) NON E' UN VERDETTO:
+i quattro file di risultato contengono ZERO TRADE.**
+
+```
+backtest_pipeline/risultati_prove/ABTG_PostNews/ABTG_PostNews_EURUSD_IS_ohlc.csv
+Pass,Profit,Expected Payoff,Profit Factor,...,Trades,InpMagic,...
+0,0.00,0.00000,0.00000,...,0,771201,...
+1,0.00,0.00000,0.00000,...,0,771202,...
+```
+
+**Tutte e quattro le finestre (EURUSD/EURJPY × IS/OOS): `Profit 0.00`,
+`Trades 0`.**
+
+🔎 **Causa certa e banale:** `InpRestrictToNews=true` + il file eventi
+`mql5/Files/abtg_news.csv` contiene **17 righe, tutte del 2026-2027** (e
+`data/abtg_news.csv` e' **vuoto, 0 byte**). Nel periodo di backtest **non
+esisteva un solo evento** → nessun ordine piazzato → il test ha misurato **il
+nulla**, e il nulla e' finito in classifica come "niente edge".
+
+> 🟢 **Conseguenza operativa, la piu' azionabile della serata:**
+> **la Post News non e' mai stata misurata.** Il verdetto negativo va
+> **ritirato** (non ribaltato: ritirato, perche' non esiste), e il round va
+> rifatto **con il calendario vero** — che adesso sappiamo di avere (§4.3, 70
+> eventi) e che l'EA sa gia' leggere.
+
+### 9.3 Le tre modifiche minime perche' l'EA sia FEDELE al corso
+
+_(proposte, non eseguite — nessun file EA e' stato toccato)_
+
+1. `InpUseOCO = false` → il corso finanzia esplicitamente il doppio stop (§3.4).
+2. `InpCloseAtExpiry = false` → il corso tiene la posizione oltre la scadenza
+   (§3.5); l'esempio FOMC incassa **la mattina dopo**.
+3. **orario d'azione derivato dall'evento** invece che fisso (§5.2).
+
+E i tre diventano **le tre gambe di uno sweep**, perche' su ognuno **le due
+fonti umane si contraddicono**: e' il caso in cui si misura invece di scegliere.
+
+---
