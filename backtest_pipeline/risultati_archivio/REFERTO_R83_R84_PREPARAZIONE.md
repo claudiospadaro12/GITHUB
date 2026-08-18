@@ -636,3 +636,9 @@ via screenshot in chat:
   oltre` -> `CLOSECONFIRM BUY: candela chiusa a 29296.50 oltre 29153.50 ->
   entrato a mercato` + breakeven vivo (SL 29297 -> 29319.30) + reset per-giorno.
   Il motore nuovo funziona da capo a fondo nel tester.
+
+## PASSO 2 — ESEGUITO E PROMOSSO (18/08, 21:48)
+
+Giri a vuoto R84 e R83 usciti 0. Anteprime verificate in chat: ore server
+8:00/14:30, Model=4 (tick reali), finestra 2024.09.26-2025.06.09, magic
+776xxx/777xxx senza collisioni con le sedie vive.
