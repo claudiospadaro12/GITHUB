@@ -193,3 +193,110 @@ numero**. Combinata: **mai dichiarato**. 🔴 E il 15% al rischio del corso
 **sfonda il muro totale del 10% di ogni prop censita**.
 
 ---
+
+## 2.4 🔬 CONFRONTO COL REPO — cosa gia' facciamo, cosa no
+
+### (a) L'EA esiste da tre settimane e diverge dal corso su 3 punti
+
+`mql5/Experts/ABTG_PostNews.mq5` (458 righe, magic 771201/771202, in
+`FLOTTA_ATTIVA.md` su EURJPY/EURUSD M5). **Tabella completa in
+`POSTNEWS_CORSO_SPEC.md` §9.1.** I tre punti che contano:
+
+| | corso | nostro EA | commento |
+|---|---|---|---|
+| **OCO** | 🔴 **NO**, e spiega perche' (la size e' calcolata proprio per finanziare il doppio stop) | `InpUseOCO=true` | l'EA **dimezza il rischio ma cambia strategia** |
+| **chiusura della posizione a scadenza** | 🔴 **NO**, esplicito 2 volte | `InpCloseAtExpiry=true` | con questa regola **l'esempio-principe della lez. 9 (TP incassato la mattina dopo) non sarebbe mai esistito** |
+| **orario d'azione** | relativo alla notizia | **fisso a orologio** | si rompe a luglio 2022 (ECB), a marzo/novembre (FOMC) e all'ora legale |
+
+### (b) 🆚 Le nostre sedie "news-adjacent": sovrapposizione o buco vero?
+
+La domanda posta: le nostre **Aperture DAX/Nasdaq** sono "news-adjacent"
+(l'apertura E' un evento schedulato). C'e' sovrapposizione?
+
+**Meccanicamente e' la STESSA MACCHINA.** Confronto sui sorgenti:
+
+| | `ABTG_DAX/Nasdaq_Apertura` | **Post News** |
+|---|---|---|
+| innesco | orario schedulato (apertura) | orario schedulato (conferenza) |
+| range | primi N minuti (`InpRangeMinutes`) | prime 2 candele M5 (**10 minuti**) |
+| ingresso | rottura del range con pendenti | rottura del range con pendenti |
+| stop | dal range / ATR | **fisso 25 pip** |
+| target | in R (`InpTP1_R`) | **fisso 50 pip = 2R** |
+
+> 🎯 **Verdetto: e' lo stesso ARCHETIPO (breakout di un range post-evento
+> schedulato) applicato a un altro orologio e a un altro mercato.**
+>
+> - ❌ **Non e' un buco di portafoglio "di logica"**: la tesi (l'evento
+>   comprime, poi il prezzo espande e prosegue) e' identica a quella delle
+>   aperture. E su quel fronte **abbiamo gia' misure, e non tutte belle**:
+>   `ORB@NASUSD` e `ORB_Fibo@NASUSD` sono fra i "nessun edge nemmeno in
+>   screening" del weekend 07/08.
+> - ✅ **E' un buco vero di CALENDARIO e di MERCATO**: 16 eventi l'anno, su
+>   **cambi**, in orari (15:00 e 20:40 italiane) in cui **nessuna nostra sedia
+>   apre posizioni**. La correlazione con le aperture indici e' **strutturalmente
+>   bassa** (giorni diversi, strumenti diversi, sessioni diverse).
+> - 🥇 **La vera novita' non e' la strategia: e' l'INNESCO.** Un motore di
+>   ingresso su **evento macro schedulato** oggi in flotta **non esiste**
+>   (`MAPPA_MOTORI_EA.md` cita `ABTG_PostNews` come unico "eventi macro", ed e'
+>   proprio quello mai misurato). **Il pezzo riutilizzabile e' il lettore di
+>   calendario**, che serve a tutta la flotta anche solo per STARE FUORI dalle
+>   news (conformita' FundingPips/E8).
+
+### (c) Cosa dice il metro di casa sul rischio
+
+| | corso | casa | fattore |
+|---|---:|---:|---:|
+| per ORDINE | 1,50% | **0,65%** (A1) | **2,3x** |
+| per EVENTO (doppio stop) | **3,00%** | 1,30% | **2,3x** |
+| quota del cap C1 (3,25%) consumata da UN evento | **92%** | 40% | — |
+
+🔧 **Riscalatura proposta:** `InpRiskPercent = 1,30` (con
+`InpRiskRefSLpips=50`) → **0,65% per ordine**. Il DD dichiarato del 15%
+scenderebbe proporzionalmente a **~6,5%**: sotto il muro prop, sopra la soglia
+del fastidio.
+
+---
+
+## 2.5 🏛️ ATTRITI PROP — qui e' il cuore, non il contorno
+
+**Regole dalle schede di `CONFIG_PROP_2026-08-18.md` §2A-2F**
+(dichiarazioni raccolte, **nessuna confermata dal supporto**: regola D3).
+
+L'ordine e' **piazzato** a notizia **+15 min** (ECB) / **+10 min** (FOMC) e puo'
+scattare in qualunque istante successivo → il confronto giusto e' fra la
+finestra di divieto e **+10 minuti**.
+
+| prop | regola news | ECB | FOMC |
+|---|---|---|---|
+| **FTMO 2-Step Standard** | ±2 min aprire/chiudere | ✅ **eseguibile** | ✅ **eseguibile** |
+| **FTMO Swing** | nessuna restrizione | ✅ **libera** | ✅ **libera** |
+| **FTMO 1-Step** | ±2 min | ✅ news ok, 🔴 **daily 3%**: un doppio stop al 3% del corso = **breccia secca in un giorno** | idem |
+| **The5ers High Stakes** | ±2 min per eseguire; _"i news trader scelgano Hyper Growth"_ | 🟠 **tecnicamente si, di categoria no** | 🟠 idem |
+| **FundingPips** | ❌ **±10 min: aperta, chiusa O TENUTA** = hard breach | 🟠 5 min di margine | 🔴 **l'azione cade ESATTAMENTE sul bordo dei 10 minuti** |
+| **E8 Markets** | ❌ ±5 min | ✅ | ✅ |
+| **E8 Signature** | 🔴 tutto chiuso alle **23:00 server** | 🟠 ok (scadenza 18:15 IT) | 🔴 **incompatibile**: la lez. 9 **tiene la posizione tutta la notte** |
+| **Alpha Capital** | ✅ permesse; ≥50% profitti da trade >2 min | ✅ **libera** | ✅ **libera** |
+
+### 🔴 I due killer che NON dipendono dalla finestra news
+Nascono dalla frequenza — **16 operazioni all'anno**:
+1. **GIORNI MINIMI**: FTMO **4 giorni** di trading, The5ers **3 giorni
+   profittevoli** (≥0,5%). A **1,3 eventi al mese**, servono **mesi** solo per
+   sbloccare il requisito.
+2. **CONSISTENZA**: FTMO **50% best-day**, E8 ~35-40%, FundedNext 40%. Con 2-3
+   operazioni in una fase di challenge, **un singolo TP e' >50% del profitto**.
+
+> 🎯 **Verdetto prop:** ✅ **eseguibile** su FTMO (Standard e Swing), E8 Markets,
+> Alpha Capital · 🔴 **di fatto vietata su FundingPips** · 🔴 **impossibile DA
+> SOLA** su qualunque prop. **La sua unica collocazione sensata e' da
+> satellite** — che e' esattamente come il corso la vende `[T]`: _"perfetta
+> anche da aggiungere a qualsiasi altra strategia"_.
+
+### ✅ Setaccio bandiere rosse: **PULITO**
+Martingala ❌ · griglia ❌ · recovery ❌ · hedging ❌ · assenza di stop ❌ ·
+trucchi anti-rilevamento ❌. **Zero bandiere rosse in 9 lezioni: il modulo piu'
+pulito dei sei.** Unica riserva di metodo: l'asserzione `[T]` che sulle
+conferenze stampa _"lo stop loss a quel prezzo verra' eseguito"_ con certezza —
+**lo slippage esiste anche li'**: e' un'affermazione commerciale su un rischio
+reale, da misurare a tick.
+
+---
