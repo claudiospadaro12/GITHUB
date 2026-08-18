@@ -118,6 +118,25 @@ o si scrive un contratto (misura nuova) o si dichiara formalmente lo stato._
 | ABTG_EasyTrend | AUDJPY | 772423 | 1,0 | **4,29%** (TP 1,0 L+S · PF 1,37) — osservazione, come sopra | **~3,9** (54 tr) | OOS ~14 mesi | R48 · R49 | ✅ [TROVATO] |
 | ABTG_EasyTrend | CHFJPY | 772421 | 1,0 | **6,27%** (TP 1,5 L+S · PF 1,25) — osservazione, come sopra | **~3,8** (53 tr) | OOS ~14 mesi | R48 · R49 | ✅ [TROVATO] |
 
+> 🔎 **Nota del 18/08 sera — incrocio col CORSO (referto:
+> `backtest_pipeline/caccia_strategie/ANALISI_CORSO_EASYTREND_2026-08-18.md`,
+> spec: `backtest_pipeline/prove/EASYTREND_CORSO_SPEC.md`).** Tre cose che il
+> contratto qui sopra non dice e che servono a leggerlo:
+> 1. **Universo FUORI FONTE.** Il corso (Leonardo Fasciano, lez. 13 e 17)
+>    dichiara **EURUSD, EURGBP, EURCAD**. Le tre sedie sono CHFJPY / GBPUSD /
+>    AUDJPY: **intersezione zero**. EURGBP e' stata **bocciata** in R48 e rossa
+>    in tutte e 8 le celle di R53; EURUSD e' **nona** allo scan 48. L'imbuto ha
+>    fatto il suo mestiere, ma il forward di queste sedie **non conferma e non
+>    smentisce il corso**.
+> 2. **TP 1,5 = deviazione MISURATA, non refuso.** Il corso insegna **RR 1:1**;
+>    CHFJPY e GBPUSD girano a **1,5** perche' lo scan 48 ha trovato che _"il TP
+>    1,5 batte il RR 1:1 della fonte quasi ovunque"_. Il default del codice e'
+>    1,0 (fedele): a cambiare la regola sono i **preset** (`deploy_vivaio_ez.ps1`).
+> 3. **Win rate implicito** — con RR fisso e due sole uscite (nessun BE, nessun
+>    trailing) vale `WR = PF/(PF+TP_R)`: **GBPUSD 49,8% · AUDJPY 57,8% ·
+>    CHFJPY 45,5%**, contro il **70% dichiarato dal corso**. E' la sveglia piu'
+>    rapida su queste sedie: con RR 1:1 il pareggio lordo sta al 50%.
+
 ### 🎌 L'esterna — GapContinuation (R65/R66, tick reali 100k, rischio 1%)
 
 | EA | Simbolo | Magic | Rischio | DD promesso | Op/mese | Finestra | Fonte | Etichetta |
