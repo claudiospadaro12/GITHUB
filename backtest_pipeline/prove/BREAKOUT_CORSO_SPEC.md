@@ -260,7 +260,16 @@ aver sentito "15 candele" — vero, ed e' documentato qui sotto: il "15"
 esiste, ma la stessa relatrice lo corregge in diretta contando fino a 20,
 e il PDF scrive 20. Verdetto invariato: 20, col conflitto agli atti.
 Dato nuovo per gli atti: la relatrice del corso e' **Manuela Negro**
-(nome riferito da Claudio)._
+(nome riferito da Claudio).
+Secondo dettaglio riferito da Claudio dallo stesso ri-ascolto: il conteggio
+delle candele e' "COMPRESA, se vogliamo, la CANDELA DI ROTTURA" — e "lo dice
+sempre lei". [RIFERITO da Claudio sulla fonte primaria, 18/08]
+IMPLICAZIONE PER L'EA (da decidere in implementazione, non ovvia): se la
+candela che rompe conta come una delle 20, la finestra del rettangolo e'
+19 candele chiuse + la corrente (shift 0/1 diverso da Highest(20) su sole
+candele chiuse). E' esattamente la classe di dettagli da una candela che
+cambia i segnali di un EA: va fissato nel file prova come input o assunzione
+dichiarata, e se possibile ri-verificato sul video con un esempio contato._
 
 La lez. 36 dice **entrambe le cose in 5 righe**:
 - riga 5: _"dobbiamo selezionare un rettangolo che deve contenere **15 candele**"_
