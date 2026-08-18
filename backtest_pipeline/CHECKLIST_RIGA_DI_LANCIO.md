@@ -196,3 +196,30 @@ anche a corsa interrotta. Stessa famiglia: il file di log scritto in una
 cartella creata solo dentro il ramo "ho spostato qualcosa" esplode il giorno
 in cui non si sposta niente — la cartella del log si crea **prima** di
 scriverci.
+
+## 11. 🏷️ UNA WHITELIST DI NOMI NON PUO' MANGIARSI LA BLACKLIST DEL GEMELLO
+
+_Aggiunto il 18/08/2026 (sera), trovato verificando `sistema_cartelle.ps1`
+**prima** dell'invio: il difetto era gia' committato, non e' ipotetico._
+
+`riordina_desktop.ps1` (14/08) dichiara a chiare lettere, righe 15-16:
+_"le cartelle gia' tematiche di Claudio (EASYTREND, INDICATORI, PIANO DI
+TRADING, ...): sono gia' ordine, **non si spostano**"_ — ed e' implementata
+come "nome non riconosciuto = resta fermo". Quattro giorni dopo
+`sistema_cartelle.ps1` mette **quegli stessi nomi** (`EASYTREND`,
+`INDICATORI`, `PIANO DI TRADI*`, `FILE WORD*`, `ALTA VELOCIT*`, `BREAKOUT`,
+`PROCE*`) nella lista delle **riconosciute**, cioe' da spostare. Una
+decisione presa e scritta viene ribaltata in silenzio da uno script nuovo
+che nessuno ha riletto accanto al vecchio.
+
+Due controlli, da fare insieme, su ogni script che decide PER NOME:
+1. **La whitelist del nuovo si confronta riga per riga con le ESCLUSIONI
+   dichiarate (anche solo nei commenti) dagli script gemelli precedenti.**
+   Se un nome sta in una lista "mai toccare" del passato e nella lista
+   "sposta" del presente: o e' un cambio di idea **dichiarato in chat e
+   confermato da Claudio**, o e' un difetto.
+2. **La cartella di destinazione deve dire la verita' sul contenuto.**
+   `PIANO DI TRADING` dentro una cartella che si chiama `cartelle_test` e'
+   una bugia archiviata: fra un mese non la ritrova nessuno, perche' la
+   cerchera' fra i documenti. Famiglie diverse -> destinazioni diverse,
+   oppure si lasciano ferme.
