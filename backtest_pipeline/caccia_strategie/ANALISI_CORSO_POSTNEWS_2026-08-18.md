@@ -300,3 +300,176 @@ conferenze stampa _"lo stop loss a quel prezzo verra' eseguito"_ con certezza �
 reale, da misurare a tick.
 
 ---
+
+# PARTE 3 — 📋 LE SCHEDE, LEZIONE PER LEZIONE
+
+## 📄 Lezione 2 — `2. LA POST NEWS.txt`
+
+| | |
+|---|---|
+| **OGGETTO** | inquadramento: strategia **meccanica** vs discrezionale |
+| **RELATORE** | non nominato `[?]` — parla di _"questo **quinto capitolo**"_ e di _"in questo master **abbiamo deciso**"_ |
+
+**PARAMETRI CON VALORE:** nessuno.
+
+**MECCANISMI / DEFINIZIONI:**
+- `[T]` _"Il concetto di una strategia meccanica … e' quello di **non dover mai
+  prendere una decisione** … l'unica decisione da prendere e' applico questa
+  strategia o non l'applico"_
+- `[T]` _"la strategia meccanica ti dice **precisamente quando** fare
+  l'operazione, **su quale tasso di cambio**, **se devi comprare o vendere** e
+  **come gestire** l'operazione"_ → **e' la definizione, in bocca alla fonte,
+  dei 4 requisiti che un EA deve soddisfare. Il modulo li rispetta tutti e 4.**
+- `[T]` _"sara' totalmente inutile passare del tempo ad analizzare i grafici
+  durante il giorno"_.
+
+**COSA NE COPIAMO:** la definizione operativa di "meccanica" come **check-list
+di accettazione** per tutti i moduli del corso. 🟢
+
+---
+
+## 📄 Lezione 3 — `3. CALENDARIO MACROECONOMICO.txt`
+
+| | |
+|---|---|
+| **OGGETTO** | Forex Factory: filtro, fuso, cartellina gialla |
+
+**PARAMETRI CON VALORE:**
+- **Fonte del calendario: Forex Factory** `[T]`, sezione `calendar`.
+- **Filtro: solo impatto ROSSO** `[T]` (_"dove c'e' expected impact lasciamo
+  soltanto quelle rosse … il resto possiamo lasciarlo tranquillamente tutto
+  flaggato"_) → **impatto alto, nessun filtro di valuta.** ✅ combacia col
+  nostro `InpNewsMinImpact=3`.
+- **Fuso: ORA ITALIANA** `[T]`, e come si verifica: _"l'ora che tu vedi qui deve
+  coincidere con l'ora che tu vedi qua in basso a destra sul tuo computer"_.
+  🥇 **E' la prima volta in sei moduli che il fuso viene DICHIARATO E
+  VERIFICATO.**
+- Usa **gli stessi acronimi di MT4** per le valute `[T]`.
+
+**IL BUCO CHE SI APRE QUI (e che si richiude contro il backtest):**
+> `[T]` _"noi possiamo impostare una data passata sulla piattaforma MetaTrader
+> 4. **Non e' da questo punto di vista la piattaforma piu' efficace** … **senza
+> andare troppo indietro nel passato**"_
+
+Tenuto insieme alla lez. 6 (_"indietro di **2-3 mesi**"_), e' la prova che
+**lo strumento insegnato non arriva ai dati del backtest della lez. 7**.
+
+**A SCHERMO E NON NEL PARLATO:** la finestra `filter` compilata (non sappiamo se
+filtra anche per valuta); la `history` di una notizia.
+
+**COSA NE COPIAMO:** ✅ **il filtro "solo impatto alto" e il fuso dichiarato**.
+🔴 **NON copiamo** l'idea che il passato si guardi su MT4.
+
+---
+
+## 📄 Lezione 4 — `4. LA STRATEGIA POSTNEWS.txt`
+
+| | |
+|---|---|
+| **OGGETTO** | la tesi: perche' le conferenze stampa e non i dati numerici |
+
+**LA TESI, TESTUALE:**
+- `[T]` _"di notizie macroeconomiche ne esistono di due tipi. Il rilascio di
+  **un dato numerico** e situazioni in cui invece **una persona parla**"_.
+- Sui **dati numerici** (CPI, GDP, disoccupazione, tassi): _"nel secondo in cui
+  esce quel dato il mercato reagisce in modo violentissimo … **se anche imposti
+  uno stop loss, non puoi essere sicuro che quella sara' la tua perdita
+  massima. Il tuo stop loss puo' essere saltato**"_ → **non si tradano**.
+- Sulle **conferenze stampa**: _"una persona che si siede, saluta i giornalisti,
+  comincia a parlare lentamente, c'e' una reazione del prezzo **molto meno
+  esplosiva, ma molto piu' dosata nel tempo**"_ → _"andando a cavalcare quei
+  **trend a breve e medio periodo** che quasi sempre si formano"_.
+
+🔴 **BANDIERA GIALLA (metodo, non rischio):** `[T]` _"mettendo uno stop loss ne
+avremo la **certezza** che a quel prezzo sara' eseguito"_. **Non e' vero in
+senso stretto.** E' l'unica affermazione del modulo che vende come certezza un
+rischio reale (slippage). **Da misurare a tick, non da credere.**
+
+**COSA NE COPIAMO:** la tesi **come ipotesi falsificabile** — ed e' esattamente
+il test **P2 (placebo)** della spec §10: stessa meccanica sui giorni **senza**
+notizia. Se rende uguale, **la notizia e' decorazione**.
+
+---
+
+## 📄 Lezione 5 — `5. NOTIZIA 1 ECB PRESS CONFERENCE SPIEGAZIONE.txt` 🥇
+
+**La lezione piu' densa del modulo: qui ci sono TUTTI i parametri dell'ECB.**
+
+| parametro | valore | citazione / etichetta |
+|---|---|---|
+| notizia | **ECB Press Conference** | `[T]` |
+| frequenza | **8/anno**, ~ogni 6 settimane, **giovedi** | `[T]` _"ogni sei giovedi, quindi otto volte l'anno"_ |
+| orario | **14:45 ora italiana** | `[T] chiaro` |
+| storico orario | **14:30 fino a meta' 2022** | `[T]` _"per piu' di un decennio era alle 14.30 … da circa un anno e mezzo e' alle 14.45"_ → ✅ **verificato sul nostro CSV** (§2.1) |
+| relazione col tasso | comincia **30 min dopo** l'annuncio del tasso | `[T]` — ✅ coerente con 13:45→14:30 e 14:15→14:45 |
+| strumento | **EUR/JPY, sempre** | `[T]` ripetuto 3 volte |
+| timeframe | **M5** per tutte le notizie | `[T]` |
+| candele di riferimento | **le DUE DOPO** quella della notizia (14:50, 14:55) | `[T]` _"dovrai **ignorare** la candela della notizia"_ |
+| istante d'azione | **15:00** | `[T]` |
+| livelli | max e min fra le due, **ombre incluse** | `[T]` _"ovviamente considerando anche le ombre"_ |
+| BUY STOP | **high + 3 pip** | `[T] chiaro` |
+| SELL STOP | **low − 2 pip** | `[T] chiaro` |
+| motivo dell'asimmetria | **lo spread** | `[T]` _"sia l'ordine di acquisto che quello di vendita vengono eseguiti 2 pips sopra e sotto, ma perche' il buy venga eseguito 2 pips sopra, a causa dello spread devo metterlo 3"_ |
+| TP / SL | **50 / 25** su ciascuno | `[T] chiaro` |
+| scadenza pendenti | **18:15** dello stesso giorno | `[T] chiaro` |
+| scadenza posizione | ❌ **nessuna** | `[T]` esplicito |
+
+**MECCANISMI:**
+- **Ordini pendenti bidirezionali** (buy stop sopra, sell stop sotto) con
+  scadenza → l'unico modulo del corso che usa la **scadenza** come meccanismo.
+- **Nessuna decisione umana fra il piazzamento e l'esito** `[T]`: _"la fara' una
+  persona che sta facendo la prima operazione della sua vita e la fara' [una
+  persona] che sta facendo trading da 20 anni"_.
+
+**BANDIERE ROSSE:** nessuna.
+
+**COSA NE COPIAMO:** 🟢 **tutto: e' una specifica completa.** Vedi
+`POSTNEWS_CORSO_SPEC.md` §2.
+
+---
+
+## 📄 Lezione 6 — `6. ECB PRESS CONFERENCE INSERIMENTO DEGLI ORDINI.txt` 🥇
+
+**La lezione piu' lunga (22 KB) e quella con i tre chiarimenti che cambiano
+l'implementazione.**
+
+**ESEMPIO OPERATIVO — ECB del 07/03/2024 su EUR/JPY** (verificato: **8 numeri
+su 8 tornano**, spec §7-T1): high 160,780 → buy 160,810 / SL 160,560 / TP
+161,310; low 160,607 → sell 160,587 / SL 160,837 / TP 160,087; saldo 9.935 €,
+rischio 3%, valore pip 5,90 € → **volume 1,01** ✅.
+
+**I TRE CHIARIMENTI CHE VALGONO PIU' DELL'ESEMPIO:**
+
+1. 🔴 **NIENTE OCO, ed e' esplicito.** `[T]` _"io prima non ti ho detto che c'e'
+   la regola per cui se uno dei due ordini viene eseguito tu vai a cancellare
+   l'altro. **No** … esiste lo scenario ed **e' successo piu' di una volta** per
+   cui vengano eseguiti **entrambi** gli ordini"_.
+2. 💰 **La size si calcola su 50 pip proprio per finanziare il doppio stop.**
+   `[T]` _"il 3% e' quello che noi perderemo **se entrambi gli ordini vengono
+   eseguiti ed entrambi si chiudono in stop loss** … sull'ordine singolo il
+   massimo che potrai perdere e' **l'1,5%**"_. **E' il ragionamento di rischio
+   piu' corretto letto in sei moduli.**
+3. ⏰ **Il fuso della piattaforma, dichiarato:** `[T]` _"siamo in ora legale,
+   quindi sappiamo che la piattaforma e' **due ore indietro** rispetto all'ora
+   italiana … se fossimo stati in ora solare, per esempio a gennaio, quando
+   questa piattaforma e' **solo un'ora indietro**"_.
+   → `[I]` **il broker del corso lavora su UTC/GMT+0 tutto l'anno** (Italia −2
+   d'estate, −1 d'inverno). **Non e' il nostro** (BCM = ora italiana −1).
+   ⚠️ **Nessun orario del corso va copiato in ora server senza riconvertirlo.**
+
+**ALTRI PARAMETRI:**
+- **Rischio suggerito: 3% a operazione** `[T]` (_"questo e' quello che
+  suggeriamo noi"_) — ma anche _"in ultimo sara' una scelta tua"_.
+- **Trailing (SOLO ECB, opzionale):** a **+25 pip** di profitto, SL da −25 a
+  **−15** `[T]`. **Timing dichiarato a occhio** → unico pezzo non meccanico.
+- **Chiusura del venerdi: 22:50 ora italiana** `[T]`, _"e' successo forse una
+  volta in 15 anni"_ `[dichiarato]`.
+- Consiglio operativo: **piazzare prima i due pendenti col solo prezzo**, poi
+  aggiungere SL/TP/scadenza `[T]` — irrilevante per un EA, rilevante per capire
+  che **la strategia e' pensata per essere veloce, non precisa**.
+
+**A SCHERMO E NON NEL PARLATO:** 🥇 **il file EXCEL della strategia** (contiene
+le formule di prezzi, TP, SL e livello di trailing) — **richiesta n.2 per
+Claudio**.
+
+---
