@@ -264,8 +264,11 @@ finestra con spostamenti · 8. allarme banda di prezzo.
 > Windows può risolvere allo stub del Microsoft Store, e soprattutto: **erano
 > righe SEPARATE**, e un blocco multi-riga incollato in console non è un
 > programma — se la prima muore, la seconda parte lo stesso.
-> Sotto ci sono le righe **CORRETTE**. Valgono a partire dal marcatore
-> **`HD-M1-v2`** (lo script v1 ha 16 difetti, vedi verbale del verificatore).
+> Sotto ci sono le righe **CORRETTE**. Marcatore **`HD-M1-v3`**
+> (v1 = 16 difetti; v2 = corretti; **v3 = bande di prezzo 2026, vedi §12**).
+> ⚠️ Il marcatore è cambiato apposta: una riga vecchia che cerca `HD-M1-v2`
+> ora **muore con `throw`** invece di rilanciare in silenzio lo script sbagliato
+> (nel file v3 la stringa `HD-M1-v2` **non esiste più**: verificato).
 
 **Come si incollano:** ogni passo è **UN SOLO blocco `& { ... }`**, graffe
 comprese. Si incolla tutto insieme: così un `throw` a metà **ferma davvero**
@@ -287,7 +290,7 @@ quello che viene dopo.
   Remove-Item (Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1.zip') -Force -EA SilentlyContinue
   Remove-Item "$env:USERPROFILE\histdata_m1\referto_histdata_*.txt" -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v2' -Quiet)){ throw "SCRIPT VECCHIO (cache GitHub ~5 min): aspetta 5 minuti e rilancia" }
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v3' -Quiet)){ throw "SCRIPT VECCHIO (cache GitHub ~5 min): aspetta 5 minuti e rilancia" }
   Set-Location $env:USERPROFILE
   $global:LASTEXITCODE=0; & $py $p --autotest
   if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
@@ -314,7 +317,7 @@ MISURATO qui, non ipotizzato.
   Remove-Item $p -Force -EA SilentlyContinue
   Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v2' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v3' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
   Set-Location $env:USERPROFILE
   $global:LASTEXITCODE=0; & $py $p --validazione
   if($LASTEXITCODE -ne 0){ throw "VALIDAZIONE FALLITA: leggi il referto, NON si passa al passo 3" }
@@ -342,7 +345,7 @@ ipotizza: si copia dal referto del passo 1.
   Remove-Item $p -Force -EA SilentlyContinue
   Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v2' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v3' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
   Set-Location $env:USERPROFILE
   $global:LASTEXITCODE=0; & $py $p --scarica --converti --simboli grxeur,nsxusd,jpxjpy,spxusd --da 2019 --a $anno
   if($LASTEXITCODE -ne 0){ throw "CORSA FALLITA o INCOMPLETA: leggi il referto (sezione FALLITI) e usa la strada manuale per quei periodi" }
@@ -451,3 +454,41 @@ GRXEUR 2025 scaricato (4 MB, 335.844 barre M1, 0 scartate, 0 OHLC incoerenti,
 Terzo feed (grafico BCM nativo, min/max D30EUR 16/06/2025) resta da
 consegnare per il gate a tre — ma il gate duro (import + shift +5 +
 cancello ZERO) sta comunque nel passo 4.
+
+---
+
+## 12. 🟠 PASSO 3 — FERMATO DAL GATE (18/08, 20:59) → **HD-M1-v3**
+
+**Il gate ha funzionato: `ESITO: FALLITO`, uscita ≠ 0, la riga si è fermata da
+sola.** Ed è la prova che il difetto n.4 corretto in v2 (uscita legata ai
+sotto-lavori) serviva davvero: in v1 questa stessa corsa sarebbe uscita **0**,
+con tre allarmi seppelliti in fondo al referto e i CSV mandati in `MQL5\Files`.
+
+**Ma la colpa non era dei dati: erano le COSTANTI a essere stantie.**
+
+| simbolo | prezzo massimo misurato | tetto v2 | tetto v3 |
+|---|---|---|---|
+| `jpxjpy` NIKKEI | **66.253** | 60.000 ❌ | **100.000** |
+| `nsxusd` NASDAQ | **29.514** | 30.000 (sfiorato) ❌ | **45.000** |
+| `spxusd` S&P 500 | **7.702** | 8.000 (sfiorato) ❌ | **12.000** |
+| `grxeur` DAX | oltre 30.000 | 30.000 ❌ | **45.000** |
+
+`SPXUSD_M1.csv` era comunque già scritto: **2.481.265 barre**.
+
+⚠️ **Perché allargare NON è "cambiare il criterio dopo aver visto i numeri":**
+la banda è un controllo di **ORDINE DI GRANDEZZA** — becca l'indice letto come
+un cambio (fattore 1.000+) o l'unità sbagliata — **non è un giudizio di
+merito**. Anche col tetto nuovo il rapporto banda resta 6-16×, cioè continua a
+urlare per un fattore 1.000. E i prezzi sono confermati da un **terzo feed
+indipendente** (§11: confronto con Dukascopy esatto al centesimo, 1294 barre,
+min 23400.56 / max 23715.65).
+
+**Delta v2 → v3 (commit `70cf754`) [VERIFICATO riga per riga dal verificatore]:**
+solo `VERSIONE`, le 4 bande e il commento che le spiega — **17 righe, nessun
+altro cambiamento**. ASCII 0 byte >127, parse OK, autotest 8/8 uscita 0, e la
+cache regge: uno ZIP già valido torna **`CACHE`** (0 riscaricati), quindi il
+rilancio **non ribussa a HistData** — ricostruisce solo i CSV dagli ZIP che
+sono già sul disco.
+
+> ▶️ **Si rilancia il blocco del PASSO 3 del §7, identico**, con l'unica
+> differenza del marcatore `HD-M1-v3`.
