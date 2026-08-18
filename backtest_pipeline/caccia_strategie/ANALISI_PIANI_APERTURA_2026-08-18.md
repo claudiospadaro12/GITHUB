@@ -99,3 +99,111 @@ file: qui la candela pre-apertura non è mai nominata. Vengono dalla live del
 (analisi 03/08: canale pre-apertura 15:25-15:30, pendenti a +7/+10 punti).
 **Su questi 4 piani i Live5m non vanno giudicati: sono figli di un'altra
 fonte della stessa scuola.**
+
+---
+
+## 2. 🏦 ATTRITI PROP — i piani di apertura contro le regole censite
+
+_Regole prop dalla raccolta `CONFIG_PROP_2026-08-18.md` (§2A-2G, fonti citate
+lì). Le finestre news valgono per le news AD ALTO IMPATTO del calendario._
+
+### 2.1 Prima la buona notizia: l'apertura NON è una "news"
+I divieti prop censiti si agganciano al **calendario macro** (high impact),
+non all'apertura dei mercati in sé. **Tradare le 09:00/15:30 è permesso su
+tutte e sei le prop censite.** [VERIFICATO su CONFIG_PROP §2A-2F]
+
+### 2.2 Ma le aperture VIVONO in mezzo alle news — la mappa degli scontri
+
+| momento (IT) | cosa esce | chi è a mercato | attrito |
+|---|---|---|---|
+| 08:00 | dati tedeschi (Destatis) | nessuno (DAX apre 09:00) | ✅ 60' di margine |
+| 09:30-10:00 | PMI / IFO Germania-EU | trade DAX vivo (flat 18:30 IT) | 🔴 **FundingPips: vietato TENERE ±10'** su news EUR alto impatto → hard breach; E8/FTMO/The5ers: vietato solo eseguire (±5/±2') → il TRAILING che chiude in finestra è un'esecuzione ⚠️ |
+| 14:15 / 14:45 | BCE (giorni ECB) | trade DAX vivo | 🔴 idem |
+| 14:30 | CPI / NFP / retail USA | nessuno all'apertura USA (15:30) | ✅ 60' di margine — MA il trade DAX è vivo → attrito su FundingPips per news USD? solo se il simbolo è "interessato" [INCERTO: D30EUR vs news USD — da chiedere al supporto, `report/DOMANDE_SUPPORTO_PROP.md`] |
+| 15:45-16:00 | PMI USA / ISM / Michigan | trade Nasdaq/Dow vivo da 15-30' | 🔴 **la finestra più pericolosa**: parziale/trailing/BE che esegue fra 15:50 e 16:10 = violazione su FundingPips (±10' anche TENUTA) ed E8 (±5' esecuzione) |
+| 20:00 | FOMC (8 volte/anno) | Nasdaq 770201 vivo (flat 22:45 IT); Dow/DAX già flat (18:30) | 🔴 tenuta e trailing in piena conferenza |
+
+### 2.3 Il rischio per trade: il 2% del piano NON passa
+- Piano: max 2% per operazione [NAS SLIDE 14] (e il PDF arriva a dire 1-3%
+  [PAG 27]).
+- Con TRE sedie di apertura nello stesso giorno a 2%: worst-day teorico 6% →
+  **sopra il muro giornaliero di TUTTE le prop censite** (4-5%) e doppio
+  della pausa Guardian (4,0).
+- Alla taglia di casa (0,65%): 3 stop = 1,95%, dentro il cap firmato 3,25%.
+  ✅ **la conversione è già fatta e firmata** (`report/FIRME_2026-08-18.md`).
+
+### 2.4 Il paradosso più bello: il piano è GIÀ prop-compliant — ma noi lo
+teniamo spento
+La routine dei piani — *"prima di ogni rilascio di un dato a 3 tori, vado a
+togliere tutto"* [AM SLIDE 2] — è PIÙ SEVERA delle regole FundingPips (±10')
+ed E8 (±5'). **Se il filtro news implementato (`InpUseNewsFilter` +
+`InpNewsFlatten`) fosse acceso con finestra ≥10 minuti, le sedie di apertura
+sarebbero compliant BY DESIGN su tutte e sei le prop.** In campo è spento
+(fedeltà #12). Due avvertenze tecniche già agli atti (CONFIG_PROP §1):
+`CalendarValueHistory` non funziona nel tester → il filtro live non è
+backtestabile (i nostri numeri restano "ottimisti sulle news" per
+costruzione), e il CSV manuale va mantenuto.
+
+### 2.5 Verdetto prop, per piano
+
+| piano | su prop | perché |
+|---|---|---|
+| **Nasdaq / America (breakout apertura USA)** | 🟠 **ESEGUIBILE CON CONDIZIONI** | orario ok, intraday ok (flat prima delle 23:00 E8), niente weekend. CONDIZIONI: rischio ≤0,65%, filtro news ACCESO (≥10'), attenzione alle 16:00 IT. Su FTMO **Swing**: eseguibile pieno (zero restrizioni news) |
+| **Gap Fill USA (PDF)** | 🟠 **ESEGUIBILE CON CONDIZIONI** | come sopra; RR e TP definiti aiutano il metro; in casa è già la famiglia GapFill (5 sedie con contratto) |
+| **Europeo (DAX)** | 🔴 **LIMITATO** | non per gli orari (ok ovunque) ma perché il piano NON è meccanizzabile al livello d'ingresso (61%, zero SL/size): quello che si può portare in prop è il NOSTRO ORB 770101 (che è un'altra strategia) o un futuro EA livelli+ST×3 con assunzioni pesanti. Attrito tenuta su PMI/BCE per FundingPips |
+| **Breakout notturno (PDF)** | 🔴 **VIETATO su E8 Signature** (chiusura forzata 23:00-00:15 server ammazza il box notturno — stessa riga che uccide MaxMinNotte/Nightly, CONFIG_PROP §2E); 🟠 altrove | |
+
+### 2.6 E su conto reale MT5?
+✅ **ESEGUIBILI senza vincoli normativi** (nessuna finestra news, nessun cap
+imposto). I nodi sono nostri e già misurati:
+1. **Slippage sugli ordini stop all'apertura** — misurato in walk-forward
+   (fase C): è il costo che ha affossato il breakout a stop sul Nasdaq.
+2. **Spread d'apertura** sui primi minuti.
+3. **L'edge**: i verdetti di casa dicono che lo scheletro nudo regge solo su
+   Dow (contratto R16 4,22%) e DAX nella configurazione misurata (R16/R46);
+   il Nasdaq 770201 gira SENZA CONTRATTO con due verdetti negativi. Il piano
+   COMPLETO (coi filtri) non è mai stato misurato fino in fondo (§1.2).
+
+---
+
+## 3. 🏁 VERDETTO FINALE E COSA FARNE
+
+**1. Meccanizzabilità: 75%** (62/83 decisioni censite, con 12 assunzioni
+dichiarate — spec §8). Ordine di meccanizzabilità: **Nasdaq 93% > America 76%
+≈ PDF 76% > Europeo 61%**. Il gap fill del PDF è la singola strategia più
+chiusa (89%).
+
+**2. Fedeltà: 17/20 nel codice, 9/20 in campo.** Nessuna divergenza
+clandestina: tutte dichiarate o misurate. Il debito vero non è di fedeltà ma
+di MISURA: **l'ablazione dei filtri (il piano come lo prescrive il piano) non
+è mai stata completata** — i run DAX `-Doc` da rifare, l'ablazione Nasdaq mai
+girata, il run US buono fermo a 72 trade (sotto n=150 dell'Emendamento).
+
+**3. Prop: eseguibili con condizioni** — rischio ≤0,65% (il 2% del piano
+sfonda i muri giornalieri in 2-3 stop), filtro news da ACCENDERE (la routine
+del piano stesso lo prescrive e ci renderebbe compliant by design), finestra
+16:00 IT da governare, FTMO Swing come corsia larga. Breakout notturno morto
+su E8 Signature. Conto reale: nessun vincolo, il nemico è lo slippage
+d'apertura già misurato.
+
+**4. I tre numeri marci trovati stasera** (mai segnalati prima, spec §6):
+la chiusura che cambia da 14.800 a 15.000 nell'unico esempio completo del PDF
+[PAG 25]; la formula di position sizing SENZA il valore-punto [PAG 28] (chi
+la replica alla lettera quintuplica il rischio); la riga LSE della tabella
+orari incoerente [PAG 9].
+
+### 📋 La coda di test che questa analisi lascia (in ordine di valore)
+1. **Ablazione filtri Nasdaq** (`ablazione_nasdaq.ps1`, già pronta): un
+   filtro alla volta sui livelli H1 — chiude il debito del 02/08 e decide se
+   "il metodo del corso" ha edge o no. Finché non gira, il verdetto sul
+   metodo resta APERTO.
+2. **Rifare i run DAX `-Doc`** con SL ATR corretto (già corretto nello
+   script, mai rilanciato a referto).
+3. **Size divisa 50/50** (livello + EMA14): unica regola dei pptx mai
+   implementata (A4). Modifica di codice, da fare SOLO se 1-2 mostrano edge.
+4. **Gap Fill Nasdaq/indici USA secondo il PDF** (gap-fill USA con RR 1,5):
+   la famiglia GapFill di casa è su cambi + Dow/Nikkei; la variante
+   sull'apertura USA del PDF (conferma M5) non è mai stata girata così.
+
+_NON toccati: sorgenti EA e forward — la missione era di analisi. Compilato
+il 18/08/2026 sera, commit a pezzi per l'onda 529._
