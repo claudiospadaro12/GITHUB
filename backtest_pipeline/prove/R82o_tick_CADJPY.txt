@@ -1,0 +1,63 @@
+# =====================================================================
+#  R82 / TORNEO JPY - GIRO 2 (VERDETTO, TICK REALI) - CADJPY
+#  ABTG_BreakoutCorso v1.00 - strategia BREAKOUT del corso (Manuela Negro)
+#
+#  Si lancia con:
+#    -Prova prove\R82o_tick_CADJPY.txt -Etichetta r82o -Modello 4
+#
+#  SI LANCIA SOLO SUI CROSS SOPRAVVISSUTI AL GIRO 1.
+#  Girarlo su tutti e sette e' spreco di macchina, non piu' rigore.
+# =====================================================================
+#
+#  LA FINESTRA, E IL VINCOLO CHE LA DECIDE
+#    @DAQUANDO 2024.07.05: a BCM I TICK REALI PARTONO DA LI'. Misurato,
+#    non ipotizzato (R58, R72, R76, R78). "O la finestra lunga o il
+#    riempimento vero, mai tutti e due" - e' la tensione dichiarata del
+#    progetto, non un difetto di questo round.
+#
+#  COSA MISURA E COSA NO
+#    MISURA: se l'edge visto in OHLC sopravvive a spread, slippage e
+#            riempimento veri.
+#    NON MISURA: la robustezza di regime. Dentro questa finestra non c'e'
+#            ne' il crollo 2020 ne' l'orso 2022. Va scritto ACCANTO al
+#            numero, ogni volta.
+#
+#  La cella e' identica al giro 1 riga per riga: cambiano SOLO la
+#  finestra, il modello e il magic. I due file sono fatti per essere
+#  diffati (diff R82f_scr_CADJPY.txt R82o_tick_CADJPY.txt).
+# =====================================================================
+@SIMBOLO  CADJPY
+@PERIODO  M15
+@DAQUANDO 2024.07.05
+
+# --- LA CELLA, CONGELATA: nessun parametro della strategia si spazzola.
+#     Sono i default del sorgente, riscritti qui in chiaro perche' un file
+#     prova deve dire da solo COSA ha misurato (par.4 dei criteri).
+InpWilliamsPeriod=140||140||0||140||N
+InpSuperTrendATR=10||10||0||10||N
+InpSuperTrendMult=3.0||3.0||0||3.0||N
+InpCandeleRettangolo=20||20||0||20||N
+InpIncludiCandelaRottura=0||0||0||0||N
+InpAttesaCandeleZona=1||1||0||1||N
+InpCandeleAttesa=0||0||0||0||N
+InpAnnullaSottoMediana=1||1||0||1||N
+InpStopBufferPip=1.0||1.0||0||1.0||N
+InpTargetR=3.0||3.0||0||3.0||N
+InpMinRR=2.0||2.0||0||2.0||N
+InpBreakEven1R=1||1||0||1||N
+InpChiudiSuSegnaleContrario=1||1||0||1||N
+InpApriSuSegnaleContrario=1||1||0||1||N
+InpChiudiSuWilliamsOpposto=0||0||0||0||N
+InpUnaOperazionePerZona=0||0||0||0||N
+
+# --- rischio: pinnato esplicitamente, non lasciato al caso ---
+InpRischioMode=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpCrossFamiglia=7||7||0||7||N
+
+# --- igiene: log spento nelle corse lunghe, autotest acceso (4 righe) ---
+InpLog=0||0||0||0||N
+InpAutoTest=1||1||0||1||N
+
+# --- l'unico asse spazzolato: due passate gemelle di controllo ---
+InpMagic=779260||779260||1||779261||Y

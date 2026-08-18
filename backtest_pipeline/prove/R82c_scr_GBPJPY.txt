@@ -1,0 +1,83 @@
+# =====================================================================
+#  R82 / TORNEO JPY - GIRO 1 (SCREENING) - GBPJPY
+#  ABTG_BreakoutCorso v1.00 - strategia BREAKOUT del corso (Manuela Negro),
+#  implementazione fedele alla spec: prove/BREAKOUT_CORSO_SPEC.md
+#
+#  Si lancia con:
+#    -Prova prove\R82c_scr_GBPJPY.txt -Etichetta r82c -Modello 1
+# =====================================================================
+#
+#  LA DOMANDA DEL ROUND (criteri completi: prove/TORNEO_JPY_CRITERI.md,
+#  congelati PRIMA di qualunque numero):
+#    "Esiste UN cross (al massimo uno) su cui questo motore, implementato
+#     fedelmente, ha edge?"
+#  E la regola di portafoglio, firmata prima: dalla famiglia JPY entra al
+#  massimo UNA sedia, mai il paniere - qualunque cosa dicano gli altri sei.
+#
+#  COS'E' QUESTO FILE
+#    Il GBPJPY nel GIRO 1: storico lungo, modello OHLC M1.
+#    Serve a CONTARE le operazioni e a vedere il segno su piu' regimi.
+#    NON promuove e NON boccia da solo: "l'OHLC promuove ipotesi, non
+#    candidati" (regola di casa dell'08/08). Il verdetto e' il GIRO 2,
+#    a tick reali (file R82l_tick_GBPJPY.txt).
+#
+#  LA FINESTRA, E PERCHE' E' QUESTA
+#    @DAQUANDO 2007.02.12 e' la prima data del simbolo PIU' GIOVANE dei
+#    sette (CADJPY e NZDJPY, misurate dalla sonda ABTG_InfoBroker del
+#    17/08). In un TORNEO la finestra dev'essere IDENTICA per tutti,
+#    altrimenti si confrontano epoche diverse invece che motori.
+#    Prima data misurata di GBPJPY sul BROKER: 1993.04.18 (stato: da
+#    scaricare parziale -> sul server c'e', sul disco va scaricato).
+#    Se il passo 0 (scarica_storico.ps1) dice che GBPJPY non arriva al
+#    2007, IL ROUND SI FERMA e la finestra si ridichiara: non si gira
+#    su mezza finestra vuota.
+#
+#  IL VINCOLO CHE IL VECCHIO EA NON AVEVA
+#    InpAttesaCandeleZona=1: devono essere trascorse 20 candele
+#    dall'ingresso del Williams in zona prima che un segnale sia
+#    ammissibile (spec par.4.5). Il vecchio BREAKOUT_EA_JPY.mq5 non lo
+#    aveva: apriva su rettangoli fatti di candele precedenti la fase da
+#    misurare. E' la divergenza piu' seria trovata dall'analisi.
+#
+#  PERCHE' IL MAGIC E' SPAZZOLATO SU DUE VALORI
+#    Il driver pretende almeno un asse (walkforward_generico.ps1 riga
+#    372) e il magic e' l'unico inerte sul risultato: due passate che
+#    DEVONO uscire identiche al centesimo. Se differiscono, qualcosa e'
+#    rotto e il round non si legge. Magic mai usati prima = niente cache
+#    del tester e file per-trade separati.
+# =====================================================================
+@SIMBOLO  GBPJPY
+@PERIODO  M15
+@DAQUANDO 2007.02.12
+
+# --- LA CELLA, CONGELATA: nessun parametro della strategia si spazzola.
+#     Sono i default del sorgente, riscritti qui in chiaro perche' un file
+#     prova deve dire da solo COSA ha misurato (par.4 dei criteri).
+InpWilliamsPeriod=140||140||0||140||N
+InpSuperTrendATR=10||10||0||10||N
+InpSuperTrendMult=3.0||3.0||0||3.0||N
+InpCandeleRettangolo=20||20||0||20||N
+InpIncludiCandelaRottura=0||0||0||0||N
+InpAttesaCandeleZona=1||1||0||1||N
+InpCandeleAttesa=0||0||0||0||N
+InpAnnullaSottoMediana=1||1||0||1||N
+InpStopBufferPip=1.0||1.0||0||1.0||N
+InpTargetR=3.0||3.0||0||3.0||N
+InpMinRR=2.0||2.0||0||2.0||N
+InpBreakEven1R=1||1||0||1||N
+InpChiudiSuSegnaleContrario=1||1||0||1||N
+InpApriSuSegnaleContrario=1||1||0||1||N
+InpChiudiSuWilliamsOpposto=0||0||0||0||N
+InpUnaOperazionePerZona=0||0||0||0||N
+
+# --- rischio: pinnato esplicitamente, non lasciato al caso ---
+InpRischioMode=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpCrossFamiglia=7||7||0||7||N
+
+# --- igiene: log spento nelle corse lunghe, autotest acceso (4 righe) ---
+InpLog=0||0||0||0||N
+InpAutoTest=1||1||0||1||N
+
+# --- l'unico asse spazzolato: due passate gemelle di controllo ---
+InpMagic=779130||779130||1||779131||Y
