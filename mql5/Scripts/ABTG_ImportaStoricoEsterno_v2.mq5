@@ -858,8 +858,9 @@ bool ScriviBarre(string dst, const MqlRates &r[], int n)
 //+------------------------------------------------------------------+
 void ScriviReferto(string dst, string src, int nBarre, int scartate,
                    datetime prima, datetime ultima,
-                   const EsitoConfronto &dstAware, const EsitoConfronto &fisso,
+                   const EsitoConfronto &usata, const EsitoConfronto &fisso,
                    int barreBase, int barreMeno1, int barrePiu1,
+                   int scanFisso, int scanDst,
                    int guasti, string verdetto)
   {
    int fh = FileOpen(REFERTO, FILE_READ|FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_SHARE_READ, ",");
@@ -873,25 +874,26 @@ void ScriviReferto(string dst, string src, int nBarre, int scartate,
                     "BarreH1_USATA","CoperturaPct_USATA",
                     "DiffMediaPct_DENTRO_finestre","DiffMediaPct_FUORI_finestre",
                     "BiasMedianoPct","DiffMediaPct_NETTA_dal_bias",
-                    "ShiftFissoMigliore","DiffMediaPct_FISSO","DiffMediaPunti_FISSO",
+                    "ScanMigliore_FISSO","ScanMigliore_DST",
+                    "DiffMediaPct_FISSO","DiffMediaPunti_FISSO",
                     "ProprietaGuaste","Verdetto");
    FileSeek(fh, 0, SEEK_END);
    FileWrite(fh, VERSIONE, dst, src, InpFileCsv, (string)InpFormato, (string)nBarre, (string)scartate,
              TimeToString(prima, TIME_DATE|TIME_MINUTES),
              TimeToString(ultima, TIME_DATE|TIME_MINUTES),
-             StringFormat("%+d", dstAware.shift), (InpShiftDstAware ? "SI" : "NO"),
+             StringFormat("%+d", usata.shift), (InpShiftDstAware ? "SI" : "NO"),
              (string)barreBase, (string)barreMeno1, (string)barrePiu1,
-             StringFormat("%.4f", dstAware.diffMediaPct),
-             StringFormat("%.1f", dstAware.diffMediaPti),
-             StringFormat("%.1f", dstAware.diffMaxPti),
-             (dstAware.quandoMax > 0 ? TimeToString(dstAware.quandoMax, TIME_DATE|TIME_MINUTES) : "-"),
-             (string)dstAware.barre,
-             StringFormat("%.1f", dstAware.coperturaPct),
-             StringFormat("%.4f", dstAware.pctDentro),
-             StringFormat("%.4f", dstAware.pctFuori),
-             StringFormat("%+.4f", dstAware.biasMedianoPct),
-             StringFormat("%.4f", dstAware.nettaPct),
-             StringFormat("%+d", fisso.shift),
+             StringFormat("%.4f", usata.diffMediaPct),
+             StringFormat("%.1f", usata.diffMediaPti),
+             StringFormat("%.1f", usata.diffMaxPti),
+             (usata.quandoMax > 0 ? TimeToString(usata.quandoMax, TIME_DATE|TIME_MINUTES) : "-"),
+             (string)usata.barre,
+             StringFormat("%.1f", usata.coperturaPct),
+             StringFormat("%.4f", usata.pctDentro),
+             StringFormat("%.4f", usata.pctFuori),
+             StringFormat("%+.4f", usata.biasMedianoPct),
+             StringFormat("%.4f", usata.nettaPct),
+             StringFormat("%+d", scanFisso), StringFormat("%+d", scanDst),
              StringFormat("%.4f", fisso.diffMediaPct),
              StringFormat("%.1f", fisso.diffMediaPti),
              (string)guasti, verdetto);
@@ -973,6 +975,10 @@ void OnStart()
    AzzeraEsito(eFisso, InpShiftOre, false);
 
    int shiftBase = InpShiftOre;
+   //  il minimo trovato da ciascuna delle due scansioni: vanno nel referto,
+   //  perche' "la base resta +5 in ENTRAMBE" e' uno dei controlli del gate
+   //  (se il DST-aware sceglie una base diversa, il file non e' ora di NY)
+   int migliorFisso = 0, migliorDst = 0;
 
    if(got <= 0)
       Print("ATTENZIONE: nessuno storico H1 nativo su " + src + ": impossibile calibrare "
@@ -1016,9 +1022,9 @@ void OnStart()
 
             Print("--- CALIBRAZIONE FUSO ORARIO (trappola 'fuso e DST') ---");
             int barreFisso = 0, barreDst = 0;
-            int migliorFisso = ScansionaShift(impClose, impDelta, impBase, impSpan, natClose, natBase, natSpan,
-                                              point, -InpShiftMax, InpShiftMax, false, barreFisso);
-            int migliorDst   = migliorFisso;
+            migliorFisso = ScansionaShift(impClose, impDelta, impBase, impSpan, natClose, natBase, natSpan,
+                                          point, -InpShiftMax, InpShiftMax, false, barreFisso);
+            migliorDst   = migliorFisso;
             if(InpShiftDstAware)
                migliorDst = ScansionaShift(impClose, impDelta, impBase, impSpan, natClose, natBase, natSpan,
                                            point, -InpShiftMax, InpShiftMax, true, barreDst);
@@ -1150,6 +1156,11 @@ void OnStart()
                TimeToString(prima, TIME_DATE|TIME_MINUTES), TimeToString(ultima, TIME_DATE|TIME_MINUTES));
    PrintFormat("   shift base .......... %+d ore (%s), DST-aware %s",
                shiftBase, (InpAutoShift ? "automatico" : "manuale"), (InpShiftDstAware ? "SI" : "NO"));
+   PrintFormat("   minimo delle scansioni: FISSO %+d | DST-aware %+d  (devono coincidere:",
+               migliorFisso, migliorDst);
+   Print("                         se no, il file non e' ora locale di New York)");
+   PrintFormat("   barre per shift ..... %+d: %d | %+d: %d | %+d: %d",
+               shiftBase, barreBase, shiftBase - 1, barreMeno1, shiftBase + 1, barrePiu1);
    if(usata.valido)
      {
       Print("   --- LE DUE MISURE, UNA ACCANTO ALL'ALTRA ---");
@@ -1185,8 +1196,9 @@ void OnStart()
    PrintFormat("   VERDETTO ............ %s", verdetto);
    Print("   (il verdetto si giudica sulla misura USATA: DST-aware se attivo)");
 
-   ScriviReferto(dst, src, n, scartate, prima, ultima, eDst, eFisso,
-                 barreBase, barreMeno1, barrePiu1, guasti, verdetto);
+   ScriviReferto(dst, src, n, scartate, prima, ultima, usata, eFisso,
+                 barreBase, barreMeno1, barrePiu1,
+                 migliorFisso, migliorDst, guasti, verdetto);
 
    Print("Per testare: nel tester scegli il simbolo " + dst + " e usa il modello");
    Print("'OHLC su M1' (walkforward_generico -Modello 1) oppure 'ogni tick' generato");
