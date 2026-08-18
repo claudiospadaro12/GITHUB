@@ -150,3 +150,81 @@ sta nel pptx AMERICA [AM SLIDE 2] e il "breakout" del DAX sta nel PDF
 CARATTERIZZAZIONE del mercato, non una spec). Il nostro `ABTG_DAX_Apertura_EU`
 è quindi un ORB **costruito su un'indicazione generica del PDF**, non sul
 piano Europeo. Confronto completo nella consegna gemella.
+
+---
+
+## 3. 🇺🇸 PIANO DI TRADING AMERICA (12 slide) — la size divisa
+
+### 3.1 Censimento delle 17 decisioni operative
+
+| # | decisione | valore | fonte | etichetta |
+|---|---|---|---|---|
+| 1 | Routine news | ForexFactory / Investing; *"le notizie a 3 tori … sono quelle che impattano maggiormente. Se abbiamo operazioni in macchina o pendenti, prima di ogni rilascio di un dato a 3 tori, vado a togliere tutto."* | [SLIDE 2] | 🟠 regola netta, ma **quanti minuti prima** non è detto |
+| 2 | Orari | EU 09:00 IT · USA 15:30 IT (**fuso dichiarato**) | [SLIDE 2] | 🟢 |
+| 3 | Finestra operativa | *"Sfruttiamo la volatilità nei **primi 15 minuti**"* | [SLIDE 2] | 🟢 |
+| 4 | Strumenti | US30USD, NASUSD (*"più volatile in assoluto"*), SPXUSD (guida), D30EUR (per correlazione) | [SLIDE 3] | 🟢 |
+| 5a | Multipivot Qqin | proprietario, mai definito | [SLIDE 4] | 🔴 **BUCO** |
+| 5b | Supertrend ×3 | multiplier 3.5 / 3.0 / 2.5 — periodo ATR mai detto | [SLIDE 4] | 🟠 assunzione: 10 |
+| 5c | Medie | EMA **200 / 100 / 89 / 14**, *"applicata al **close**"* (detto per ognuna) | [SLIDE 4] | 🟢 il parametro meglio dettato del pptx |
+| 6 | Timeframe | D1 tendenza · H4 spaccato · **H1 operativo** · M15 gestione; *"più i time frame sono alti, più i livelli sono stabili"* | [SLIDE 6] | 🟢 |
+| 7 | Correlazione (come regola d'ingresso) | *"l'spxusd è l'indice di riferimento americano che traina gli altri"* — nessuna condizione operativa | [SLIDE 8-9] | 🔴 **BUCO** |
+| 8 | Trigger | *"Tradando la rottura dei massimi o dei minimi, scendo di time frame. Non entriamo subito a mercato"* — QUALI massimi (TF, struttura) qui non è detto | [SLIDE 10] | 🟠 assunzione: i livelli H1 del piano gemello Nasdaq |
+| 9 | **Size divisa** | *"divido la size: sui massimi dove potrebbe andare a prendere la forza per ripartire e sulla **media a 14 periodi**, per entrare ad un prezzo migliore"* — proporzione MAI detta | [SLIDE 10] | 🟠 assunzione dichiarata: 50/50 |
+| 10 | Stop | *"Lo stop, lo metto **sotto ai minimi**"* (caso long; lo short è simmetrico [INFERITO]) | [SLIDE 10] | 🟠 quali minimi: assunzione = minimi della struttura rotta |
+| 11 | Correlazione (in gestione) | *"Verifico la correlazione con l'spxusd per capire se lasciar correre l'operazione o ridurre"* | [SLIDE 10] | 🔴 **BUCO** (discrezionale puro) |
+| 12 | Gestione attiva | *"Mi sposto lo stop per rischiare meno. Chiudo **metà posizione** e porto lo **stop in pari**"* — il QUANDO non è quantificato | [SLIDE 11] | 🟠 assunzione: al primo obiettivo (come piano Nasdaq) |
+| 13 | Trailing | *"scendo di time frame in **M1**, dove seguirò con lo stop adeguandolo alla **base della candela precedente**"* | [SLIDE 11] | 🟢 |
+| 14 | Stop profit | *"Seguirò la posizione con lo stop profit lasciandola correre … sarà il mercato a decidere quando chiudere"* | [SLIDE 12] | 🟢 (= il trailing della riga 13, coerente) |
+| 15 | **Rischio %** | **MAI DICHIARATO in questo pptx** (il 2% sta solo nel Nasdaq) | — | 🔴 **BUCO** |
+
+**Conteggio: 🟢 7 · 🟠 6 · 🔴 4 → 13/17 = 76%.**
+
+### 3.2 Nota di merito
+La **size divisa in due ingressi** (metà sul livello di rottura, metà in
+pullback sulla EMA14) è la caratteristica DISTINTIVA di questo piano — ed è
+l'unica regola dei 3 pptx **mai implementata né testata** in casa (audit 02/08,
+punto #20, dichiarato "bassa priorità"). Meccanizzabile con 2 assunzioni
+(proporzione 50/50; secondo ordine = limit sulla EMA14 H1 con scadenza).
+
+---
+
+## 4. 🎯 PIANO NASDAQ (15 slide) — quasi un EA già scritto: 93%
+
+### 4.1 La tesi
+> *"L'indice Nasdaq si presta alla strategia della rottura dei minimi e dei
+> massimi in apertura, grazie alla sua direzionalità."* [SLIDE 9]
+> [dichiarato, NON verificato — e il nostro walk-forward del 05/08 sul
+> Nasdaq ha trovato 19/20 celle OOS NEGATIVE: la direzionalità all'apertura,
+> sui NOSTRI tick, non paga il breakout a stop]
+
+### 4.2 Censimento delle 14 decisioni operative
+
+| # | decisione | valore | fonte | etichetta |
+|---|---|---|---|---|
+| 1 | Routine news 3 tori | identica al piano America (*"vado a togliere tutto"*) | [SLIDE 3] | 🟠 finestra in minuti non detta |
+| 2 | Strumenti | US30USD, NASUSD, SPXUSD, D30EUR | [SLIDE 4] | 🟢 |
+| 3 | Multipivot %Custom | proprietario — MA il piano stesso dà il surrogato: numeri tondi (§4.3) | [SLIDE 5] | 🟠 |
+| 4 | Timeframe | D1 / H4 / **H1 operativo** / M15 gestione | [SLIDE 6] | 🟢 |
+| 5 | **Ingresso** | *"Si posizionano ordini nel time frame **H1**. **SELL STOP** sotto i minimi precedenti, per ingresso short. **BUY STOP** sopra i massimi precedenti, per ingresso long"* | [SLIDE 10] | 🟢 **la regola d'ingresso più netta di tutti e 4 i documenti** (assunzione: "precedenti" = candela H1 precedente) |
+| 6 | Quando piazzarli | mai detto esplicitamente (contesto = apertura 15:30) | [SLIDE 1-2, 8] | 🟠 assunzione: all'apertura USA |
+| 7 | **Stop** | *"PORTO LO STOP SUI MASSIMI PRECEDENTI"* (eseguito lo short; simmetrico = estremo opposto della candela) | [SLIDE 11] | 🟢 |
+| 8 | **OCO** | *"CANCELLO L'ORDINE CHE NON È STATO ESEGUITO"* | [SLIDE 11] | 🟢 |
+| 9 | Take profit | *"LO STABILISCO IN DIVENIRE **DIMEZZANDO** SUI LIVELLI IMPORTANTI CHE INCONTRA"* | [SLIDE 11] | 🟠 "livelli importanti" → risolto dal piano stesso con §4.3 |
+| 10 | Breakeven | *"LO STOP LO PORTO IN PARI, OVVERO SUL LIVELLO D'INGRESSO"* | [SLIDE 11] | 🟢 (sequenza dopo il dimezzo [INFERITO dall'ordine delle frasi]) |
+| 11 | 1° obiettivo | *"in concomitanza: **Numero tondo** + % custom (preso dall'algoritmo del multipivot)"* — es. *"(17000-38000)"* [SLIDE 15] | [SLIDE 12] | 🟠 numero tondo meccanico; la "concomitanza" col %Custom non replicabile |
+| 12 | Se non c'è setup | *"Verifico se in preapertura non è stato invalidato il setup. Se non ho il setup, **cambio strumento**"* — l'invalidazione NON è definita | [SLIDE 13] | 🔴 **BUCO** |
+| 13 | **Money management** | *"STABILISCO LA % DI PERDITA DEL MASSIMO DEL **2%**"* | [SLIDE 14] | 🟢 l'unica % di rischio dei tre pptx |
+| 14 | Direzione | *"TREND IS YOUR FRIEND, CERCO SEMPRE DI ANDARE A FAVORE DI TREND"* | [SLIDE 14] | 🟠 trend non definito qui (assunzione: EMA/ST dei TF alti) |
+
+**Conteggio: 🟢 7 · 🟠 6 · 🔴 1 → 13/14 = 93%. Il piano più meccanizzabile
+dei quattro documenti** — ed è infatti quello che `ABTG_Nasdaq_Apertura_US`
+implementa quasi alla lettera (consegna gemella).
+
+### 4.3 Il surrogato del %Custom, dichiarato dal piano stesso
+> *"Un altro effetto è il **numero tondo (17000-38000)**, dove gli operatori
+> intervengono per emotività psicologica; i prezzi risentono di questo
+> livello, che diventa quindi **un livello obiettivo**"* [SLIDE 15]
+
+→ La griglia dei numeri tondi è il proxy DICHIARATO dei livelli obiettivo:
+`InpUseRoundLevels`/`InpRoundStep` nel nostro core è fedele alla fonte, non un
+ripiego nostro.
