@@ -141,71 +141,290 @@ dell'avversaria e il giro 2 e' inutile.
 > nessun nome di parametro inventato). **Il primo gesto sul PC e' compilare**:
 > se non compila, tutto il resto di R83 non esiste.
 
-## 5. 📋 LE RIGHE DI LANCIO — **BOZZE**, da far passare dal verificatore
+## 5. 📋 LE RIGHE DI LANCIO
 
-Tutte con i tre pezzi obbligatori (`Remove-Item` / `irm -ErrorAction Stop` /
-marcatore) e la guardia `$LASTEXITCODE -ne 0` (punti 8 e 13 della checklist).
+> 🔴 **BOZZA BOCCIATA DAL VERIFICATORE (18/08 notte, FAIL).** Le quattro righe
+> della prima stesura avevano **9 difetti**, tutti nella CONSEGNA (i due driver
+> e i 16 file prova sono risultati puliti: 0 byte non-ASCII, tutti i nomi dei
+> parametri esistono davvero nei tre EA, un solo asse `Y`, ore in ora server).
+> I difetti erano: **blocchi multi-riga** (punto 21: un `throw` alla riga 5 non
+> ferma la riga 6, che parte lo stesso); **PASSO 0 senza `$LASTEXITCODE`**
+> (punto 13) e **senza controllo dell'artefatto** (punto 19.2: il timeout e i
+> "15 minuti di silenzio" di `scarica_storico.ps1` ammazzano MT5 a meta' e
+> **escono 0**); **il referto storico vecchio sul Desktop non veniva
+> cancellato**, e il PASSO 0 dei driver lo riaccetta senza guardare la data;
+> **il canarino annullato** (5.2 e 5.3 incollavano canarino e corsa completa di
+> fila: la corsa da nove celle partiva da sola un'ora dopo, senza che nessuno
+> avesse letto il canarino); **nessuna riga compilava l'EA nuovo**, mentre il
+> par. 7 lo mette come passo 2 (punto 20: il gesto chiesto non produce
+> l'output); **MT5 chiuso non era detto nelle righe** (punto 7); **il pin non
+> copre gli EA** (vedi qui sotto).
 
-### 5.0 PASSO 0 — la profondita' dei TICK (viene PRIMA di tutto)
+> ⚠️ **IL PIN `2458b33` NON COPRE GLI EA, ed e' il pezzo che conta di piu'.**
+> `walkforward_generico.ps1` (riga 78-79, `$EABranch="lavoro"`) **riscarica il
+> `.mq5` dal branch `lavoro` HEAD ignorando `-Rif`**, e se il download fallisce
+> **usa in silenzio la copia locale** in `src_prove\`. Conseguenze: (1) un push
+> su `lavoro` **durante** i round cambia l'EA fra una cella e l'altra e i
+> canarini non vogliono piu' dire niente; (2) la cache di `raw` puo' servire
+> una versione vecchia. Due contromisure, ed entrambe sono nelle righe:
+> il **PASSO 1 confronta byte a byte** i tre EA su `lavoro` con quelli del pin
+> e si ferma se differiscono; e **dall'inizio del PASSO 0 alla fine di R83 non
+> si pusha NIENTE su `lavoro`** (soprattutto in `mql5/Experts/`).
+
+**Come si incollano:** ogni passo e' **UN SOLO blocco `& { ... }`**, graffe
+comprese, si incolla **tutto insieme**. Cosi' un `throw` a meta' ferma davvero
+quello che viene dopo. **Fra un passo e l'altro ci si ferma e si legge.**
+**MT5 deve essere CHIUSO** in tutti i passi tranne l'autotest del PASSO 1b (e i
+blocchi lo verificano da soli).
+
+### PASSO 0 — la profondita' dei TICK (viene PRIMA di tutto, 30-180 min [STIMA])
 ```powershell
-$h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
-$p="$env:USERPROFILE\scarica_storico.ps1"
-Remove-Item $p -ErrorAction SilentlyContinue
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scarica_storico.ps1" -OutFile $p -ErrorAction Stop
-if(-not (Select-String -Path $p -SimpleMatch -Pattern 'scarica lo STORICO dal broker e dice' -Quiet)){ throw 'SCRIPT VECCHIO' }
-$global:LASTEXITCODE=0
-& $p -Simboli "NASUSD,D30EUR" -Da 2024.01.01 -TimeoutMin 180 -Auto
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, poi rilancia (con -Auto lo script si rifiuta di partire)" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $p="$env:USERPROFILE\scarica_storico.ps1"
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  $csv=Join-Path $dsk 'storico_bcm\ABTG_StoricoScaricato.csv'
+  Remove-Item $p -Force -EA SilentlyContinue
+  Remove-Item $csv -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scarica_storico.ps1" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'fermo da 15 minuti' -Quiet)){ throw "SCRIPT VECCHIO (cache GitHub ~5 min): aspetta 5 minuti e rilancia" }
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $p -Simboli "NASUSD,D30EUR" -Da 2024.01.01 -TimeoutMin 180 -Auto
+  if($LASTEXITCODE -ne 0){ throw "PASSO 0 FALLITO (codice $LASTEXITCODE): non si va oltre" }
+  if(-not (Test-Path -LiteralPath $csv)){ throw "PASSO 0 MONCO: il referto non e' arrivato sul Desktop. RILANCIA." }
+  $t=@(@(Import-Csv -LiteralPath $csv) | Where-Object { $_.Timeframe -eq 'TICK' })
+  $t | Format-Table Simbolo,Timeframe,Barre,PrimaDataLocale,Verdetto -AutoSize
+  foreach($s in @('NASUSD','D30EUR')){
+    $x=@($t | Where-Object { $_.Simbolo -eq $s })
+    if($x.Count -eq 0){ throw "PASSO 0 MONCO: manca la riga $s,TICK - MT5 e' stato ammazzato a meta' (timeout 180 min o 15 minuti di silenzio). RILANCIA." }
+    $d=($x[0].PrimaDataLocale + '').Trim()
+    if($d -eq '' -or $d -eq '-'){ throw "PASSO 0: $s NON HA TICK REALI. I due round girano a -Modello 1 -SaltaPassoZero e OGNI numero porta scritto 'OHLC, non tick'." }
+  }
+  Write-Host "PASSO 0 OK: leggi le due righe TICK qui sopra, colonna PrimaDataLocale." -ForegroundColor Green
+  Write-Host "(sulle righe TICK la colonna PrimaDataServer vale SEMPRE '-': non e' quella)" -ForegroundColor Green
+  Write-Host "Se una delle due date e' DOPO il 2024.09.26: FERMATI, la finestra dei file prova va riscritta." -ForegroundColor Yellow
+  Write-Host "Da mandare in chat: Desktop\storico_bcm.zip" -ForegroundColor Cyan
+}
 ```
-**Cosa leggere nel referto** (`Desktop\storico_bcm\ABTG_StoricoScaricato.csv`):
-le righe **`NASUSD,TICK`** e **`D30EUR,TICK`**, colonna **`PrimaDataLocale`**.
-**Non** le righe `M1`. Se quella data e' **dopo** il 2024.09.26, la finestra
-dei file prova va riscritta prima di girare qualunque cosa.
-`-TimeoutMin 180` non e' decorativo: il default e' 90 minuti e allo scadere lo
-script **ammazza MT5 e esce 0** (difetto n.19).
+🛑 **Stop obbligatorio.** `-TimeoutMin 180` non e' decorativo (il default e' 90
+e la stima e' 30-180: difetto n.19) — ma **un timeout non esce 1**: per questo
+il blocco controlla le due righe `TICK` a mano.
 
-### 5.1 R84 — giro a vuoto (non apre MT5)
+### PASSO 1a — COMPILAZIONE dell'EA nuovo + congelamento degli EA (5-10 min)
 ```powershell
-$h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
-$p="$env:USERPROFILE\lancia_r84.ps1"
-Remove-Item $p -ErrorAction SilentlyContinue
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r84.ps1" -OutFile $p -ErrorAction Stop
-if(-not (Select-String -Path $p -SimpleMatch -Pattern 'ROUND 84 - ABLAZIONE DEI FILTRI' -Quiet)){ throw 'SCRIPT VECCHIO' }
-$global:LASTEXITCODE=0
-& $p -Rif $h -SoloControllo
-if($LASTEXITCODE -ne 0){ throw 'R84 GIRO A VUOTO FALLITO: guarda le righe rosse sopra' }
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo (questo passo scrive in MetaQuotes\Terminal\...\MQL5\Experts)" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB"
+  foreach($e in @('ABTG_Apertura_3Ingressi','ABTG_Nasdaq_Apertura_US','ABTG_DAX_Apertura_EU')){
+    $a=(irm "$b/lavoro/mql5/Experts/$e.mq5" -EA Stop)
+    $c=(irm "$b/$h/mql5/Experts/$e.mq5" -EA Stop)
+    if($a -ne $c){ throw "L'EA $e su 'lavoro' NON e' quello del pin: qualcuno ha pushato. FERMATI e riallinea." }
+    Write-Host ("    congelato e uguale al pin: " + $e) -ForegroundColor Green
+  }
+  $t=@(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter terminal64.exe -EA SilentlyContinue | Where-Object { $_.DirectoryName -like "*BCM Markets*" })
+  if($t.Count -eq 0){ throw "terminale BCM non trovato" }
+  $inst=$t[0].DirectoryName
+  $df=@(Get-ChildItem (Join-Path $env:APPDATA "MetaQuotes\Terminal") -Directory -EA SilentlyContinue | Where-Object { $o=Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $inst) })
+  if($df.Count -eq 0){ throw "cartella dati MT5 non trovata (origin.txt)" }
+  $exp=Join-Path $df[0].FullName "MQL5\Experts"
+  New-Item -ItemType Directory -Force -Path $exp | Out-Null
+  $mq=Join-Path $exp "ABTG_Apertura_3Ingressi.mq5"
+  $ex5=[IO.Path]::ChangeExtension($mq,'.ex5')
+  $log=[IO.Path]::ChangeExtension($mq,'.log')
+  Remove-Item $mq,$ex5,$log -Force -EA SilentlyContinue
+  irm "$b/$h/mql5/Experts/ABTG_Apertura_3Ingressi.mq5" -OutFile $mq -EA Stop
+  if(-not (Select-String -Path $mq -SimpleMatch -Pattern 'AutoTest3Ingressi' -Quiet)){ throw "SORGENTE VECCHIO O TRONCO" }
+  & (Join-Path $inst "metaeditor64.exe") "/compile:$mq" "/log" | Out-Null
+  $fine=(Get-Date).AddMinutes(2)
+  while((-not (Test-Path $ex5)) -and ((Get-Date) -lt $fine)){ Start-Sleep -Seconds 2 }
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  $rac=Join-Path $dsk 'R83_COMPILAZIONE'
+  Remove-Item $rac -Recurse -Force -EA SilentlyContinue
+  New-Item -ItemType Directory -Force -Path $rac | Out-Null
+  if(Test-Path $log){ Copy-Item $log $rac -Force }
+  @(("data: " + (Get-Date -Format 'yyyy-MM-dd HH:mm')), ("pin : " + $h), ("ex5 : " + (Test-Path $ex5))) | Set-Content (Join-Path $rac 'REFERTO_COMPILAZIONE.txt') -Encoding ASCII
+  Compress-Archive -Path (Join-Path $rac '*') -DestinationPath (Join-Path $dsk 'R83_COMPILAZIONE.zip') -Force
+  if(-not (Test-Path $ex5)){ throw "COMPILAZIONE FALLITA: gli errori sono nel .log copiato in Desktop\R83_COMPILAZIONE. R83 SI FERMA QUI." }
+  Write-Host "COMPILATO: $ex5" -ForegroundColor Green
+  Write-Host "Ora il PASSO 1b (a mano, in MT5). Da mandare in chat: Desktop\R83_COMPILAZIONE.zip" -ForegroundColor Cyan
+}
 ```
+🛑 **Stop obbligatorio.** E' il gesto piu' economico che puo' fermare tutto il
+resto: **se non compila, R83 non esiste** e si e' perso un minuto, non una
+notte. Il `.ex5` vecchio viene **cancellato prima**, cosi' "c'e' il file" non
+puo' spacciarsi per "ha compilato".
 
-### 5.2 R84 — canarino (la sola cella A) e poi tutte e nove
+### PASSO 1b — l'autotest `[3ING][AUTOTEST]` (a mano, MT5 APERTO, 5 min)
+Non e' una riga di PowerShell: quelle righe le stampa `OnInit`, e **F7 compila
+e basta, non esegue niente** (difetto n.20). Adesso pero' l'EA e' gia'
+installato e compilato dal PASSO 1a, quindi:
+1. **apri MT5**, Visualizza > Strategy Tester;
+2. Expert **ABTG_Apertura_3Ingressi**, simbolo **NASUSD**, periodo **M15**,
+   **Test singolo** (NON "Ottimizzazione"), qualche giorno qualsiasi;
+3. nei parametri: **`InpEntryMode = 2`** (cosi' si vede anche la riga del
+   motore CLOSECONFIRM) e **`InpAutoTest = true`** (e' gia' il default);
+   il magic di default e' **777010**, che e' permesso — non metterne uno
+   `770xxx`, l'EA si rifiuta di partire apposta;
+4. **scheda Journal**: copia in chat le righe che iniziano con `[3ING][AUTOTEST]`.
+   Deve esserci **`SEI SU SEI`**.
+5. **richiudi MT5** prima del passo dopo.
+
+⚠️ **Mai attaccare l'EA a un grafico**: sul PC di backtest il terminale e'
+collegato al conto vivo 50503392.
+
+### PASSO 2 — i due giri a vuoto (non aprono MT5, 2-4 min)
 ```powershell
-& $p -Rif $h -Solo A          # canarino: una cella sola
-& $p -Rif $h                  # le nove celle
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline"
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  $p="$env:USERPROFILE\lancia_r84.ps1"; $q="$env:USERPROFILE\lancia_r83.ps1"
+  Remove-Item $p,$q -Force -EA SilentlyContinue
+  irm "$b/lancia_r84.ps1" -OutFile $p -EA Stop
+  irm "$b/lancia_r83.ps1" -OutFile $q -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'ROUND 84 - ABLAZIONE DEI FILTRI' -Quiet)){ throw "lancia_r84.ps1 VECCHIO O TRONCO" }
+  if(-not (Select-String -Path $q -SimpleMatch -Pattern 'ROUND 83 - DUELLO DEGLI INGRESSI' -Quiet)){ throw "lancia_r83.ps1 VECCHIO O TRONCO" }
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $p -Rif $h -SoloControllo
+  if($LASTEXITCODE -ne 0){ throw "R84 GIRO A VUOTO FALLITO: guarda le righe rosse sopra" }
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $q -Rif $h -SoloControllo
+  if($LASTEXITCODE -ne 0){ throw "R83 GIRO A VUOTO FALLITO: guarda le righe rosse sopra" }
+  $rac=Join-Path $dsk 'R83_R84_GIRI_A_VUOTO'
+  Remove-Item $rac -Recurse -Force -EA SilentlyContinue
+  New-Item -ItemType Directory -Force -Path $rac | Out-Null
+  Get-ChildItem "$env:USERPROFILE\r84","$env:USERPROFILE\r83" -Filter "anteprima_*.ini" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName $rac -Force }
+  ("data: " + (Get-Date -Format 'yyyy-MM-dd HH:mm')) | Set-Content (Join-Path $rac 'REFERTO_GIRI_A_VUOTO.txt') -Encoding ASCII
+  Compress-Archive -Path (Join-Path $rac '*') -DestinationPath (Join-Path $dsk 'R83_R84_GIRI_A_VUOTO.zip') -Force
+  Write-Host "GIRI A VUOTO OK. Da mandare in chat: Desktop\R83_R84_GIRI_A_VUOTO.zip" -ForegroundColor Cyan
+}
 ```
-(stesso `$p` e `$h` della 5.1, nella stessa finestra di PowerShell)
+🛑 **Stop obbligatorio**: si legge in console `celle per finestra : 2` (le due
+passate gemelle) e `parametri in [TesterInputs]`. Se non torna, ci si ferma qui
+— costa un minuto, non due ore.
 
-### 5.3 R83 — giro a vuoto, canarini, duello
+### PASSO 3 — canarino R84, la SOLA cella A (20-60 min [STIMA])
 ```powershell
-$h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
-$q="$env:USERPROFILE\lancia_r83.ps1"
-Remove-Item $q -ErrorAction SilentlyContinue
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r83.ps1" -OutFile $q -ErrorAction Stop
-if(-not (Select-String -Path $q -SimpleMatch -Pattern 'ROUND 83 - DUELLO DEGLI INGRESSI' -Quiet)){ throw 'SCRIPT VECCHIO' }
-$global:LASTEXITCODE=0
-& $q -Rif $h -SoloControllo
-if($LASTEXITCODE -ne 0){ throw 'R83 GIRO A VUOTO FALLITO' }
-& $q -Rif $h -Solo "N0"        # canarino (a): deve coincidere con R84 cella A
-& $q -Rif $h -Solo "D1,V"      # canarino (b): D1 e V devono coincidere
-& $q -Rif $h                   # le sette celle
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $p="$env:USERPROFILE\lancia_r84.ps1"
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  Remove-Item $p -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r84.ps1" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'ROUND 84 - ABLAZIONE DEI FILTRI' -Quiet)){ throw "SCRIPT VECCHIO O TRONCO" }
+  $inizio=Get-Date
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $p -Rif $h -Solo A
+  if($LASTEXITCODE -ne 0){ throw "CANARINO R84 FALLITO (codice $LASTEXITCODE): NON si lancia la notte" }
+  Write-Host ("DURATA VERA DI UNA CELLA: " + [int]((Get-Date)-$inizio).TotalMinutes + " minuti -> le nove celle sono ~" + [int](9*((Get-Date)-$inizio).TotalMinutes/60) + " ore") -ForegroundColor Cyan
+  Select-String -Path (Join-Path $dsk 'R84_ABLAZIONE_NASDAQ\REFERTO_RACCOLTA_R84.txt') -Pattern '^data:' | ForEach-Object { $_.Line }
+  Write-Host "Quella riga 'data:' deve essere di ADESSO. Da mandare in chat: Desktop\R84_ABLAZIONE_NASDAQ.zip" -ForegroundColor Cyan
+}
 ```
+🛑 **Stop obbligatorio**: qui nasce **la stima vera** (quella della tabella del
+par. 6 e' [STIMA NON MISURATA]) e i numeri della **cella A**, che sono il metro
+del canarino di R83.
 
-### 5.4 L'autotest dell'EA nuovo — NON e' una riga di PowerShell
-Le righe `[3ING][AUTOTEST]` le stampa `OnInit`: **F7 compila e basta, non
-esegue niente** (difetto n.20). Si leggono cosi':
-1. il **driver** copia l'EA in `MQL5\Experts` e lo compila (succede da solo al
-   primo `-Solo N0`);
-2. poi, **nel tester**, un **test singolo** (non un'ottimizzazione) su NASUSD
-   M15, qualche giorno, e nella scheda Journal ci sono le sei righe.
-   **Mai attaccare l'EA a un grafico**: sul PC di backtest il terminale e'
-   collegato al conto vivo.
+### PASSO 4 — canarino R83, la sola N0 (20-60 min [STIMA])
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $q="$env:USERPROFILE\lancia_r83.ps1"
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  Remove-Item $q -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r83.ps1" -OutFile $q -EA Stop
+  if(-not (Select-String -Path $q -SimpleMatch -Pattern 'ROUND 83 - DUELLO DEGLI INGRESSI' -Quiet)){ throw "SCRIPT VECCHIO O TRONCO" }
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $q -Rif $h -Solo "N0"
+  if($LASTEXITCODE -ne 0){ throw "CANARINO R83 (a) FALLITO (codice $LASTEXITCODE)" }
+  Select-String -Path (Join-Path $dsk 'R83_DUELLO_INGRESSI\REFERTO_RACCOLTA_R83.txt') -Pattern '^data:' | ForEach-Object { $_.Line }
+  Write-Host "Da mandare in chat: Desktop\R83_DUELLO_INGRESSI.zip" -ForegroundColor Cyan
+}
+```
+🛑 **Stop obbligatorio, ed e' il momento piu' informativo dei due round:**
+i numeri di **N0** devono coincidere con quelli della **cella A** del PASSO 3
+(Profit, PF, DD, trades). **Se non coincidono si ferma tutto e si cerca il bug
+nel codice**, non si spiega a posteriori.
+
+### PASSO 5 — canarino R83 (b): D1 contro V (40-90 min [STIMA])
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $q="$env:USERPROFILE\lancia_r83.ps1"
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  Remove-Item $q -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r83.ps1" -OutFile $q -EA Stop
+  if(-not (Select-String -Path $q -SimpleMatch -Pattern 'ROUND 83 - DUELLO DEGLI INGRESSI' -Quiet)){ throw "SCRIPT VECCHIO O TRONCO" }
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $q -Rif $h -Solo "D1,V"
+  if($LASTEXITCODE -ne 0){ throw "CANARINO R83 (b) FALLITO (codice $LASTEXITCODE)" }
+  Select-String -Path (Join-Path $dsk 'R83_DUELLO_INGRESSI\REFERTO_RACCOLTA_R83.txt') -Pattern '^data:' | ForEach-Object { $_.Line }
+  Write-Host "Da mandare in chat: Desktop\R83_DUELLO_INGRESSI.zip" -ForegroundColor Cyan
+}
+```
+🛑 **Stop obbligatorio:** **D1** (EA nuovo) e **V** (EA vivo del DAX) devono
+coincidere. Se no, il duello sul DAX non si legge.
+
+### PASSO 6 — R84 completo, di NOTTE (9 celle; la durata la sa il PASSO 3)
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $p="$env:USERPROFILE\lancia_r84.ps1"
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  Remove-Item $p -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r84.ps1" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'ROUND 84 - ABLAZIONE DEI FILTRI' -Quiet)){ throw "SCRIPT VECCHIO O TRONCO" }
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $p -Rif $h
+  if($LASTEXITCODE -ne 0){ throw "R84 INCOMPLETO (codice $LASTEXITCODE): la tabella dice quali CSV mancano. Si rilancia la STESSA riga: le celle gia' fatte non si rifanno." }
+  Select-String -Path (Join-Path $dsk 'R84_ABLAZIONE_NASDAQ\REFERTO_RACCOLTA_R84.txt') -Pattern '^data:' | ForEach-Object { $_.Line }
+  Write-Host "R84 COMPLETO. Da mandare in chat: Desktop\R84_ABLAZIONE_NASDAQ.zip" -ForegroundColor Cyan
+}
+```
+La cella A **non si rifa'** (l'ha gia' fatta il PASSO 3): il driver salta i CSV
+gia' presenti, ed e' voluto. Per rifarla davvero servirebbe `-Rifai`.
+
+### PASSO 7 — R83 completo, la NOTTE DOPO (le 4 celle che mancano)
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
+  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $q="$env:USERPROFILE\lancia_r83.ps1"
+  $dsk=[Environment]::GetFolderPath('Desktop')
+  Remove-Item $q -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r83.ps1" -OutFile $q -EA Stop
+  if(-not (Select-String -Path $q -SimpleMatch -Pattern 'ROUND 83 - DUELLO DEGLI INGRESSI' -Quiet)){ throw "SCRIPT VECCHIO O TRONCO" }
+  $global:LASTEXITCODE=0
+  & powershell -ExecutionPolicy Bypass -File $q -Rif $h
+  if($LASTEXITCODE -ne 0){ throw "R83 INCOMPLETO (codice $LASTEXITCODE): la tabella dice quali CSV mancano. Si rilancia la STESSA riga." }
+  Select-String -Path (Join-Path $dsk 'R83_DUELLO_INGRESSI\REFERTO_RACCOLTA_R83.txt') -Pattern '^data:' | ForEach-Object { $_.Line }
+  Write-Host "R83 COMPLETO. Da mandare in chat: Desktop\R83_DUELLO_INGRESSI.zip" -ForegroundColor Cyan
+}
+```
+N0, D1 e V sono gia' fatte dai PASSI 4-5 e vengono saltate: restano **N1, N2,
+D0, D2**.
+
+### E se i TICK non ci sono (lo dice il PASSO 0)
+Si aggiunge **`-Modello 1 -SaltaPassoZero`** a tutte le righe dei PASSI 3-7, i
+CSV escono col suffisso `_ohlc` (non sovrascrivono niente) e **ogni numero
+porta scritto "OHLC, non tick"** — su un duello di INGRESSI l'OHLC e'
+particolarmente bugiardo, perche' il riempimento e' proprio la cosa che
+distingue uno STOP da un LIMIT.
 
 ## 6. ⏱️ LE STIME — dichiarate come STIME, e non sono misurate
 
