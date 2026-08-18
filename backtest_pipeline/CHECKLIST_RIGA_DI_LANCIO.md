@@ -535,6 +535,33 @@ Due pezzi, insieme:
    if($eta -gt 48){ Muori ("questo referto ha " + [int]$eta + " ore: rifai la misura prima di girare.") }
    ```
 
+### 23-bis. 📼 E IL LOG DI IERI CHE FA DA SEGNALE DI FINE (pagato il 18/08, ore 21:17)
+
+_Stessa famiglia, scoperto DENTRO un guardiano scritto apposta contro il
+difetto n.8 delle euristiche del silenzio. `scarica_storico.ps1` fotografa la
+lunghezza dei log PRIMA di partire e poi rilegge "solo il nuovo" —_
+
+```powershell
+if ($da -gt 0 -and $da -lt $fs.Length) { [void]$fs.Seek($da, ...) }   # SBAGLIATO
+```
+
+_ma quando un file **non e' cresciuto** la condizione e' falsa, il `Seek` non
+viene fatto e il file viene letto **DA CAPO**: il `=== FINITO` della corsa di
+**ieri sera** e' stato preso per quello di adesso, MT5 e' stato ammazzato **15
+secondi** dopo il lancio e il CSV e' rimasto a **0 byte**. Il PASSO 0 e' finito
+"riuscito"._
+
+> **Un "ho gia' visto il segnale di fine" va cercato SOLO nei byte scritti dopo
+> l'inizio della corsa.** File non cresciuto = niente da leggere, si salta:
+> ```powershell
+> if ($da -ge $fs.Length) { $fs.Close(); continue }
+> if ($da -gt 0) { [void]$fs.Seek($da, [System.IO.SeekOrigin]::Begin) }
+> ```
+> E il caso opposto va conservato: un log **creato dopo** la fotografia ha
+> `$da = 0` e si legge **tutto**, altrimenti si perde il FINITO vero.
+> Corollario: la contromisura a un difetto (il marcatore di fine contro il
+> silenzio) **puo' avere il suo difetto**. Si prova con log finti, prima.
+
 ## 24. 📌 IL PIN CHE NON COPRE IL PEZZO PIU' IMPORTANTE (perche' lo scarica il gemello)
 
 _Difetto vero, gia' committato in `walkforward_generico.ps1` (riga 78-79 e

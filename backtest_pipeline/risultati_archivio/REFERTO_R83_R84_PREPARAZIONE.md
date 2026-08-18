@@ -178,18 +178,31 @@ quello che viene dopo. **Fra un passo e l'altro ci si ferma e si legge.**
 blocchi lo verificano da soli).
 
 ### PASSO 0 — la profondita' dei TICK (viene PRIMA di tutto, 30-180 min [STIMA])
+
+> 🔴 **QUESTA RIGA E' STATA GIRATA IL 18/08 ALLE 21:17 ED E' FALLITA — ed e' il
+> blocco stesso ad averlo detto.** Il `throw` sulla riga `TICK` mancante ha
+> fermato tutto invece di far partire i round su un CSV da 0 byte. Causa,
+> trovata e riprodotta: `Coda-Log-Storico` in `scarica_storico.ps1`, quando un
+> log **non era cresciuto** (quello di IERI), saltava il `Seek` e lo
+> **rileggeva da capo** — il `=== FINITO` delle 23:54 del 17/08 e' stato preso
+> per quello di oggi, MT5 ammazzato **15 secondi** dopo l'avvio col download
+> appena partito. Curato in `a4369f1` (`$da -ge $fs.Length -> continue`), e
+> **questa riga ora punta a quell'hash**. Tutti gli altri passi restano a
+> `2458b33`: `git diff 2458b33..a4369f1` sui driver, sui 16 file prova e sui
+> `.mq5` e' **vuoto**, sono gli stessi byte.
+
 ```powershell
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, poi rilancia (con -Auto lo script si rifiuta di partire)" }
-  $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
+  $h="a4369f18d7fd93b954ed657c0ebcf602feb5bdfa"
   $p="$env:USERPROFILE\scarica_storico.ps1"
   $dsk=[Environment]::GetFolderPath('Desktop')
   $csv=Join-Path $dsk 'storico_bcm\ABTG_StoricoScaricato.csv'
   Remove-Item $p -Force -EA SilentlyContinue
   Remove-Item $csv -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scarica_storico.ps1" -OutFile $p -EA Stop
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'fermo da 15 minuti' -Quiet)){ throw "SCRIPT VECCHIO (cache GitHub ~5 min): aspetta 5 minuti e rilancia" }
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'file non cresciuto = NIENTE da leggere' -Quiet)){ throw "SCRIPT VECCHIO (senza la cura del 18/08): aspetta 5 minuti e rilancia" }
   $global:LASTEXITCODE=0
   & powershell -ExecutionPolicy Bypass -File $p -Simboli "NASUSD,D30EUR" -Da 2024.01.01 -TimeoutMin 180 -Auto
   if($LASTEXITCODE -ne 0){ throw "PASSO 0 FALLITO (codice $LASTEXITCODE): non si va oltre" }
