@@ -1,5 +1,25 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## 🧪 18/08 — **R81 "PROCESSO ALLE USCITE" E' PRONTO DA LANCIARE** (PC di backtest, MT5 chiuso)
+>
+> Nato dal trade vero di oggi (`MAXMIN DAX SHORT` **+324,48** sul 100k: il
+> trailing ha incassato prima di un rimbalzo che avrebbe riportato il prezzo
+> sopra l'ingresso). **Sei varianti di USCITA a INGRESSI IDENTICI** sulla sedia
+> 770411 — A viva · B correre puro · C solo breakeven · D trail 3,5 ·
+> E trail 1,0 · F TP secco 2R. Tick reali, 100k, 24 passate, stima 1-3 ore.
+>
+> - criteri congelati PRIMA dei numeri: `backtest_pipeline/prove/R81_USCITE_CRITERI.md`
+> - riga di lancio (giro a vuoto + corsa vera), file attesi e checklist eseguita:
+>   `backtest_pipeline/risultati_archivio/REFERTO_R81_PREPARAZIONE.md` §9
+> - driver: `backtest_pipeline/lancia_r81.ps1` · commit pinnato **`f2f9030`**
+>
+> 🔒 **Nessuna modifica all'EA e nessuna modifica al forward.** I magic
+> 7781xx sono nuovi. Se una variante vince, fa la trafila della candidata.
+> 🚨 Limite dichiarato: **~20 chiusure per finestra** (le posizioni sono circa
+> la meta') → **il round PROPONE, non promuove**. E la lettura per regime su
+> D30EUR **non esiste**: lo storico BCM parte dal 2024.09.26, le quattro
+> finestre di casa sono tutte precedenti.
+
 > ## 🧨 AGGIORNAMENTO 17/08 — il difetto "pip" e' una FAMIGLIA, non un caso
 >
 > Trovato dal vivo sulle due gambe SuperWave aperte oggi sul Dow:
