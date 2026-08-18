@@ -1,0 +1,31 @@
+Bentornato. In questo video vediamo come funziona la prima figura triangolare, ovvero il triangolo simmetrico. Ti mostro subito uno schema del triangolo simmetrico. 
+
+Il triangolo simmetrico è formato da due trend line che si stringono verso destra, in questo modo. In pratica le trend line vengono create da un prezzo che si muove sbattendo su e giù su queste trend line, in questo modo, su, giù, su, giù, su, e così via. Come vedi, quello che io ho creato è di fatto una specie di trend orizzontale. 
+
+Ricordati che ogni linea che io disegno, questa specie di serpentello, è un insieme di candele che io ho semplicemente schematizzato in questo modo. Come vedi, è come se ci fosse una congestione laterale, una specie di schiacciamento del prezzo verso destra. Continua a comprimersi, aumentare la sua pressione, la sua forza, fino a che ad un certo punto esplode. 
+
+Ora, la cosa importante da sapere è che il triangolo simmetrico ha, prima di tutto, due trend line in diagonale, quindi due moduli diagonali, che sono una, la trend line di resistenza sopra, che scende da sinistra verso destra, e sotto, una trend line di supporto dinamico, che sale da sinistra verso destra. Ora, le due trend line devono essere il più possibile simmetriche rispetto a un'ipotetica linea orizzontale, cioè, se noi ipotizziamo di avere un'asse orizzontale qui invisibile, che è quello che ho tratteggiato, le due linee devono essere speculari rispetto a questa linea orizzontale. Non dico di misurarle col goniometro, ma devono essere abbastanza simmetriche, ovviamente senza una precisione millimetrica. 
+
+È solo una questione, diciamo, grossolana per far capire che, effettivamente, le due linee sono piuttosto simili. Per farvi capire che cosa non va bene, questo non va bene. Cioè, non ci deve essere una linea sopra che è molto discendente e una linea sotto che invece è piatta piatta. 
+
+Questo non va bene. Devono avere due inclinazioni abbastanza simili. Non perfettamente simili, questo non è importante, ma abbastanza simili sì. 
+
+Quindi, una volta che c'è una similitudine tra le inclinazioni delle due linee, per cui sono abbastanza simmetriche rispetto all'asse orizzontale, il triangolo si dice simmetrico. Per avere un triangolo simmetrico di qualità, perché il problema è che questa figura viene vista anche dove non dovrebbe molte volte, diciamo che la cosa che distingue un triangolo simmetrico di qualità da uno di bassa qualità è il fatto che magari una delle due linee, almeno una delle due, sbatta tre volte contro un top o un bottom. Per esempio, nell'esempio che vi ti ho mostrato, ci sono tre massimi sopra e due sotto, no? Quindi, il fatto che io ho tre massimi, non due, rende la linea molto più forte sopra. 
+
+Infatti è molto più difficile unire tre punti che due. Unire due punti è facilissimo, basta unire due punti a caso e otterrò sempre una linea. Unire tre punti non è facile, perché non è sempre ovvio trovare tre punti allineati in diagonale. 
+
+Quindi, se tu riesci a unire tre punti, questo ti dà un grande senso di sicurezza. Diciamo che, quindi, il triangolo che ha due punti sopra e due punti sotto è un triangolo molto più per esperti, cioè che riescono con l'intuizione, dovuta all'esperienza, a capire discrezionalmente se è un buon triangolo oppure no. Il triangolo, invece, per chi inizia, secondo me, ha sempre senso che abbia tre punti, perché il tre punti ti dà grande sicurezza. 
+
+Non pretendo che i tre punti siano allineati perfettamente, magari quello centrale può anche essere leggermente sbavato. Basta che la sbavatura sia piccola, a molto occhio, senza bisogno di andare a vedere la misurazione con la percentuale o con la frazione, però rispetto, diciamo, all'altezza del triangolo, cioè che sia una piccola sbavatura. Se quello sopra sbava un pochino, non è un dramma. 
+
+L'importante è che non sbavi tanto rispetto a quanto è grande il triangolo, è una cosa che si può vedere molto discrezionalmente. Quindi sì, una delle due linee ha tre punti, rende il triangolo veramente di qualità. Una volta che si è formato il triangolo, il triangolo è una figura simmetrica, perché può rompere sia sopra che sotto. 
+
+Andiamo, quindi, a tracciare una linea sotto sull'ultimo minimo, una linea sopra sull'ultimo massimo, e così facendo ho ottenuto, appunto, un supporto, una resistenza molto precisi. Quando poi il prezzo va a rompere una delle due linee, ecco che scatta la figura. Se rompe sopra, come nell'esempio che ho appena fatto, mettiamo lo stop loss sull'ultimo minimo, cioè sulla linea sotto, in poche parole, e il take profit lo proiettiamo verso l'alto, come abbiamo fatto nelle vecchie figure. 
+
+Quindi chiamiamo questa H, la proiettiamo verso l'alto in questo modo, così, e quindi questo qua è il mio take profit. Come vedi, appunto, c'è molta coerenza con quello che abbiamo fatto nelle vecchie figure. Stessa cosa vale se rompe sotto, cioè se rompe sotto, semplicemente proietti la distanza tra le due linee rosse in basso invece che in alto. 
+
+Questa figura vale sia sopra che sotto, è come un rettangolo, quindi può rompere in modo, diciamo, identico in tutte e due le parti e può, quindi, andare sia l'onche e short, indipendentemente dal trend da cui proviene. Non importa che venga da un trend rialzista o ribassista, può rompere in tutte e due le direzioni. È importante, quindi, quando facciamo il triangolo, tracciare le due linee rosse, a partire dall'ultimo massimo su cui si appoggia la trend line, quindi questo, e l'ultimo minimo su cui si appoggia la trend line, quindi quello. 
+
+Perché queste due linee rosse fanno un po' da riferimento per sapere quando entrare e quando uscire. Ci sono alcuni che dicono che è importante che il triangolo non rompa proprio il fondo al triangolo quando si stanno per unire le linee diagonali, ma questa cosa delle linee rosse permette un po' di scavalcare il problema, cioè, quando tu tracci queste due linee rosse, basta, non guardi più il triangolo, poi, semplicemente guardi le linee rosse e appena viene rotta la linea verso l'alto, copri, se invece viene rotta la linea verso il basso, shorti. Questo è tutto quello che devi sapere sul triangolo simmetrico.
+
+Nel prossimo video vedremo un esempio specifico di triangolo simmetrico sul grafico. Grazie.

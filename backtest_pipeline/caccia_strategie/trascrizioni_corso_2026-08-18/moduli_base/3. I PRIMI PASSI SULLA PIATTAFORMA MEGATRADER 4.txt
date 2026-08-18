@@ -1,0 +1,27 @@
+Ciao e bentornato. In questo video cercheremo di muovere i primi passi sulla piattaforma MetaTrader 4, così da prepararla per utilizzarla poi per comprendere i concetti fondamentali, perché mi farebbe molto piacere che la teoria non restasse fine a se stessa, ma tu la vedessi nel contesto dello strumento che poi utilizzerai per operare. Come detto, il primo impatto della piattaforma è questo.
+
+La cosa importante che devi capire è che qua sopra c'è una sorta di menu che ti servirà per agire sostanzialmente sui grafici e per agire sulla piattaforma in generale e sul tuo conto. Poi c'è qui la sezione vista del mercato, questa sezione qua in alto a sinistra, dove tra l'altro vedi l'orario della piattaforma. La cosa importante, poi questa cosa ritornerà quando introdurremo la prima strategia.
+
+Questa è una piattaforma che, scaricata dal broker BlackRidge, non dà l'ora italiana, cioè è settata sostanzialmente sul GMT. Cosa vuol dire? Tu dovrai semplicemente, e non può essere modificata questo orario, così resta, semplicemente tu dovrai tenere a mente che lui ti mostra un orario diverso da quello italiano. Questa cosa, ripeto, impatterà in un modo che ti verrà spiegato quando si tratterà di applicare le strategie.
+
+Ricorda semplicemente che l'orario che vedrai in alto a sinistra, qui su vista del mercato, quando in Italia sia minora legale, quindi da fine marzo a fine ottobre, qui la piattaforma sarà due ore indietro rispetto all'ora italiana. Quando invece in Italia sia minora solare, quindi da fine ottobre a fine marzo, la piattaforma risulterà un'ora indietro rispetto all'ora italiana. Questa cosa è semplicemente una cosa di cui tener conto, ma non avrà nessun impatto nella nostra operatività in nessun modo. 
+
+Semplicemente lo sappiamo e ne prendiamo atto. Una cosa che ti suggerisco di fare, qua nella sezione vista del mercato, è, andando in un punto qualsiasi qua di questo elenco, di fare tasto destro e poi mostra tutto. Così facendo, lui vedrà che succederà che questa barra di scorrimento si rimpicciolisce, perché aumenta il numero degli strumenti che tu puoi vedere in questo elenco, che saranno poi quelli su cui potrai operare. 
+
+Quindi qua su, menu principale, e cercheremo poi di capire che cosa ci serve. Vista del mercato, dove c'è l'orario e l'elenco degli strumenti, qua abbiamo invece la sezione dei grafici. Ovviamente queste sono normalissime finestre Windows, quindi quello che puoi fare è cliccare per esempio su una qualsiasi e metterla a tutta pagina. 
+
+Molto semplicemente, qua sotto. Quindi poi capiremo come muoverci sui grafici, come personalizzarli e soprattutto come leggerli. Adesso mi interessa che il setting della piattaforma sia a posto e tu comprenda i luoghi della piattaforma. 
+
+Quindi mentalmente ricorda, qua in alto, menu per agire sulla piattaforma e sul nostro conto. Qua a sinistra, vista del mercato, l'elenco degli strumenti, è come se fosse il menu del mercato, e qua abbiamo il grafico, dove possiamo vedere quello che accade. Ricorda che qua sotto tu hai i tab dei grafici già aperti. 
+
+Il punto di partenza, cliccando su questo tasto qui, vedi? Vedi il multigrafico, cliccando su questo tasto. Poi noi quello che abbiamo, quindi, vedi questi quattro grafici già aperti di default della piattaforma. Noi ne mettiamo uno a tutta pagina, ma restano qua sotto i tab dei quattro grafici già aperti. 
+
+Per aprire un nuovo grafico, i passaggi sono due. Naturalmente lo strumento lo devi cercare qui. Se tu vuoi aprire un nuovo grafico, puoi o cercarlo qui, e naturalmente gli strumenti su cui lavorare ti verranno suggeriti nel contesto delle strategie.
+
+Però sappi che per aprire un nuovo grafico devi semplicemente o lo prendi da qui, e col tasto sinistro premuto lo trascini sul grafico, e lui te lo sovrappone a quello già esistente, quindi non aggiunge un nuovo tab, oppure cerchi lo strumento, fai tasto destro, finestra grafico, e lui ti aggiunge, vedi un quinto tab, e ti apre un nuovo grafico. Quindi o lavori sui grafici già aperti, e se uno non ti serve più, sovrapponi quello che ti interessa vedere, oppure apri un nuovo grafico con tasto destro, finestra grafico. Qua sotto, diciamo che c'è la parte più importante della piattaforma, è quella che si chiama terminale. 
+
+Perché? Qua puoi vedere, nella sezione posizioni aperte, quanti soldi hai sul conto, e se ci sono ordini aperti a mercato. Nella sezione invece storico, qui, tu vedrai tutto l'elenco delle operazioni che hai fatto su questa piattaforma. Quindi nella sezione terminale, posizioni aperte, quanti soldi ho sul conto, e se ho delle posizioni aperte, storico, operazioni, vado a vedere invece il passato, quello che ho fatto in passato su questa piattaforma.
+
+La cosa più importante è questo tasto, nuovo ordine, questo tasto. Nel prossimo video cercheremo di capire che cosa significano i due tasti che vedi in evidenza, in primo piano, in questa finestra, e cioè comprare e vendere. Perché di base questo è un corso di forex, ma immagino che per te non sia così intuitivo il fatto che noi possiamo, in questa piattaforma, comprare e vendere. 
+
+Quindi prima di capire come lavorare sui grafici, come fare per inserire degli ordini, è bene capire a monte il fatto che gli ordini possono avere una doppia natura, acquisto o vendita. Nel prossimo video cercheremo di capire perché.

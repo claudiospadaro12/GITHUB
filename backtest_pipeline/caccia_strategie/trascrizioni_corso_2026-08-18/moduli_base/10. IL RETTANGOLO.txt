@@ -1,0 +1,17 @@
+Bentornato. In questo video vi spiegherò la figura del rettangolo. È molto importante distinguere il rettangolo dallo strumento di disegno rettangolo che abbiamo usato invece nel video precedente.
+
+Quello che abbiamo fatto prima era uno strumento di disegno che ci serviva per replicare l'altezza della figura sopra, ma non è da confondere con il rettangolo inteso come figure di analisi tecnica che è quella che invece spieghiamo adesso. Il rettangolo è una specie di figura che va a fondere due figure insieme. È la fusione di un doppio minimo e di un doppio massimo.
+
+In pratica consiste nell'individuare una cosa di questo tipo. La presenza di un doppio massimo e di un doppio minimo alternati, quindi massimo, minimo, massimo, minimo, oppure precisamente top, bottom, top, bottom. Può essere anche bottom, top, bottom, top, non è importante con cosa si inizia.
+
+L'importante è che ci siano due bottom e due top alternati. Questo, diciamo, è il rettangolo perfetto. Facendo in questo modo, infatti, si forma una trendline statica sotto, formata appunto dai due bottom, e una trendline statica sopra, formata dai due top.
+
+Creando queste due trendline vedete che si forma una specie di canale orizzontale che noi chiamiamo generalmente rettangolo. Il rettangolo, quindi, è una figura orizzontale per definizione, perché è come l'incanalarsi della forza del trend in una struttura orizzontale che poi tenderà a esplodere o verso l'alto o verso il basso. La differenza è che mentre il doppio minimo deve per forza andare long e il doppio massimo deve per forza andare short, il rettangolo può essere sia long che short in modo assolutamente indifferente.
+
+Infatti, se rompe verso l'alto in questo modo, andrò a mettere lo stop loss qui e poi a proiettare questa altezza della figura qui sopra e a mettere il take profit qui. Viceversa, se il rettangolo rompe verso il basso, semplicemente metterò lo stop loss qui e proietterò la figura qui sotto, andando quindi a mettere il take profit qui sotto. Quindi, se la figura rompe verso l'alto, allora vado long, se la figura rompe verso il basso, vado short.
+
+Si dice che è una figura simmetrica perché può essere sfruttata in entrambe le direzioni e non importa da che trend proviene, cioè il rettangolo può, quindi, invertire il trend precedente, che nell'esempio che vedete è rialzista, oppure può proseguire il trend precedente, chiamandola quindi figura di continuazione. Quindi è, diciamo, molto versatile da questo punto di vista. Il rettangolo deve avere due punti sotto, due punti sopra, due bottom sotto, due massimi, due top sopra.
+
+Se ne ha tre o quattro, meglio ancora, cioè se va a sbattere ancora più volte contro la linea orizzontale, è ancora meglio. Anche qui vige la regola che vi ho spiegato prima, cioè se i due minimi sono magari un po' disallineati, per cui uno è più basso dell'altro, misurate la sbavatura, come vi ho spiegato nei video precedenti, e sopra vale la stessa cosa. Se entrambe, diciamo, le parti della figura, quindi sia il doppio minimo che il doppio massimo, sono adeguati e hanno la sbavatura contenuta, appunto, all'interno di un ventesimo dell'altezza del rettangolo, si dice che il rettangolo, appunto, è ben fatto e quindi, oggettivamente, è una figura che ha buone probabilità di successo.
+
+Quindi, in questo caso, abbiamo spiegato come funziona il rettangolo. Nel prossimo video vedremo, invece, un esempio specifico sul grafico. Grazie.

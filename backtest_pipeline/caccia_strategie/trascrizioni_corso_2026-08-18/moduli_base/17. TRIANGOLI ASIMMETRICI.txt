@@ -1,0 +1,25 @@
+Bentornato. Ora ti presenterò un'altra figura, simile al triangolo simmetrico, che si chiama triangolo asimmetrico. Vediamo subito uno schema di questa figura. 
+
+Il triangolo asimmetrico, a differenza del simmetrico, è formato da una linea diagonale e da una linea orizzontale. Quindi, in questo modo, c'è una linea orizzontale, così, anzi, facciamola un po' meglio in questo modo, e una linea diagonale in questo modo. Quindi due trend lines, una statica e una dinamica. 
+
+È una forma ibrida tra le due, diciamo, tipologie che abbiamo visto. E come funziona? Il prezzo va a sbattere sopra e sotto su queste linee, in questo modo. Meglio ancora se sulla linea diagonale sbatte tre volte. 
+
+In questo modo si forma il cosiddetto triangolo asimmetrico, che assomiglia vagamente al triangolo rettangolo. In questo caso abbiamo un supporto statico e una resistenza dinamica. Potrebbe anche essere al contrario la figura, essere così. 
+
+Quindi avere, diciamo, la linea orizzontale e la linea diagonale sotto che parte in questo modo, e fare così, su, giù, su, giù, in questo modo. In questo ultimo caso, invece, si chiama triangolo asimmetrico ascendente, mentre il primo, quello sotto, si chiama triangolo asimmetrico discendente. Il fatto che sia ascendente o discendente dipende da dove si trova la linea orizzontale. 
+
+Se la linea orizzontale si trova sopra, allora si dice ascendente. Se la linea orizzontale si trova sotto, si dice discendente. Perché è importante la linea orizzontale? Per tradizione si considera quella la linea da rompere, perché il triangolo asimmetrico è come se fosse una figura che va a concentrare l'energia addosso alla linea orizzontale, fino a un certo punto va a rompere, diciamo, il coperchio e a esplodere fuori. 
+
+Quindi, nel triangolo, diciamo, asimmetrico discendente, vediamo che il trend va a concentrarsi sulla linea orizzontale, fino a un certo punto rompe sotto la linea orizzontale, allora lì bisogna shortare. Si mette lo stop loss sull'ultimo massimo che è qui, si prende la distanza con la linea orizzontale, che praticamente è già anche la trigger line, la chiamiamo h, la proiettiamo sotto e questo è il nostro obiettivo, il nostro take profit, che mettiamo qua sotto, così. In questo modo il prezzo dovrebbe arrivare, ovviamente, al take profit. 
+
+Se invece il prezzo torna su e va in stop loss, allora abbiamo appunto preso la perdita. Una cosa importante è mettere lo stop loss dall'ultimo massimo su cui si appoggia la trend line. Ovviamente molti trader sono un po' più aggressivi, mettono magari lo stop loss non sull'ultimo massimo della trend line, ma magari un po' più in basso, un po' più, diciamo, magari sul massimo della cannella d'entrata, come vi dicevo prima, ma torna al discorso precedente, cioè è comunque più importante mantenere una certa prudenza e tenere lo stop loss un po' più lontano per avventare le probabilità di successo e quindi rendersi anche più psicologicamente tranquilli nell'operatività. 
+
+Anche qua il take profit che ti ho messo è molto prudente, ci sono dei trader che magari proiettano l'intera base del triangolo, questa qui, ok? Però sinceramente è un po' troppo alta rispetto a quella che ho detto io. Questa che ho detto io è più prudente, è più probabile da raggiungere, è più facile, quindi è assolutamente ragionevole. Quando facciamo invece il triangolo ascendente, anche qui aspettiamo che rompa la linea sopra e quando rompe la linea sopra appunto presumiamo che il prezzo salga verso il take profit.
+
+Anche qua mettiamo lo stop loss sull'ultimo minimo e proiettiamo la distanza appunto tra le due linee rosse verso l'alto, in questo modo. È molto importante che il triangolo rompa la linea orizzontale. Se invece, prima di rompere la linea orizzontale, rompe quella diagonale, quindi si pente e torna su e rompe quella diagonale, non va bene. 
+
+In questo caso la figura viene annullata. Quindi non entriamo nella figura e la abbandoniamo, la buttiamo via. Un'altra cosa importante è il discorso della linea diagonale. 
+
+Io amo i triangoli asimmetrici con tre punti. Se hanno due punti non è che non vanno bene, ma hanno una probabilità di successo inferiore. Quindi soprattutto all'inizio, che magari si è un po' più insicuri, cercare i tre punti sulla linea diagonale riduce di tanto le figure che troviamo, ma quelle che troviamo le rende molto più stabili e sicure, perché avendo più punti sulla linea diagonale andrà a rafforzare pesantemente questa linea diagonale e renderla quindi molto più valida e solida. 
+
+Quindi diciamo all'inizio sarebbe opportuno cercare magari dei triangoli che abbiano tre punti sulla linea diagonale. Nel prossimo video vediamo un esempio specifico sul grafico di triangolo asimmetrico. Grazie.

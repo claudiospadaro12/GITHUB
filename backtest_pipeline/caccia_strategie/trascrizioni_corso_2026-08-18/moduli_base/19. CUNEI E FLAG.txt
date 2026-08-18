@@ -1,0 +1,33 @@
+Bentornato. In questo video vediamo una figura triangolare molto importante che si chiama cuneo. In inglese viene chiamata anche wedge, scritto W-E-D-G-E.
+
+Il cuneo è una figura molto importante perché è una figura di continuazione, ovvero una figura che rappresenta la continuazione di un trend precedente. Ad esempio, diciamo che ci sia un trend in ascesa e poi un ritracciamento e una prosecuzione del trend. In questo caso abbiamo un trend principale, un ritracciamento che è una momentanea pausa che si oppone al trend principale per cui va in discesa, e poi una prosecuzione lungo il trend principale.
+
+Stessa cosa vale per il trend discendente, possiamo avere una discesa, una pausa e poi una prosecuzione in basso. In questo caso abbiamo appunto il trend principale, una pausa e poi il recupero verso il basso. Il cuneo va a descrivere proprio il ritracciamento, quindi questa parte qui, che è la parte di ritracciamento, cioè di pausa rispetto al trend principale.
+
+Quindi per come è strutturato il cuneo va a contrapporsi al trend principale, creando quindi una struttura, diciamo, di recupero intermedia che può essere molto utile per individuare la prosecuzione di un trend e quindi riuscire a entrare in un trend già cominciato. Vediamo adesso come funziona un cuneo in modo più preciso. Ipotizziamo che ci sia un trend principale e poi che succeda questa cosa, che si formino due linee, entrambe decrescenti, che convergono verso destra, cioè che si stanno stringendo verso destra.
+
+E immaginiamo che il prezzo rimbalzi su e giunto su queste linee, almeno due volte sotto e due volte sopra, altrimenti come fai a unire due linee diagonali? Però meglio se almeno una delle due linee, non importa se quella sopra o quella sotto, viene colpita tre volte. In questo modo la chiarezza è molto maggiore, perché, come ho detto anche negli esempi precedenti, una linea diagonale di tre punti è molto migliore di una linea diagonale di due punti, perché è molto più sicura e ti rende anche psicologicamente più a tuo agio. Quindi selezioniamo sempre, se possibile, linee diagonali di tre punti.
+
+Non dico che sia sopra o che sia sotto, basta uno dei due. Una volta che questo avviene, tracciamo quindi una linea orizzontale dall'ultimo massimo e dall'ultimo minimo, per identificare i livelli, diciamo, importanti su cui entrare. Quindi tracciamo dall'ultimo massimo una linea orizzontale verso destra, dall'ultimo minimo una linea orizzontale verso destra, in questo modo.
+
+Se il cuneo rompe sotto la linea orizzontale rossa, potrebbe anche andare ancora bene. L'importante è che non rompa la linea nera. Cioè, cosa succederebbe? Che il minimo andrebbe semplicemente messo più in basso.
+
+Ma se rompe addirittura la linea nera in questo modo, chiaramente il cuneo viene spezzato, viene distrutto, per cui non possiamo più, diciamo, tradarla, o dobbiamo comunque ridisegnarla. Se invece, diciamo, non esce dalla linea che abbiamo fatto e rompe la linea superiore, allora sì che va bene, perché questa è una figura di continuazione, quindi noi dobbiamo accettare solo le rotture coerenti con il trend principale da cui siamo provenuti. Quindi, in questo caso, visto che il trend principale era realtista, dobbiamo aspettare che rompa verso l'alto la linea rossa.
+
+In questo caso compriamo la rottura della linea rossa e mettiamo lo stop loss qua sulla linea rossa inferiore. Proiettiamo l'altezza, che è la distanza tra queste linee rosse, in questo modo verso l'alto, come al solito. Disegniamo la linea rossa del take profit, che è qua.
+
+Quindi, anche in questo caso, appunto, proiettiamo più o meno uno a uno il take profit e lo stop loss. Ovviamente ci sono delle persone che dicono che magari deve essere ancora più alta la distanza al take profit, ma questo, come sempre, è un caso piuttosto prudente. Per quanto riguarda invece il flag, questo qua era il cuneo, per quanto riguarda invece il flag, è praticamente identico, è una variante del cuneo, che però ha, diciamo, le linee diagonali che invece di essere così convergenti verso destra, cioè che se schiacciano vanno a unirsi, sono parallele, più o meno così.
+
+In questo caso è praticamente uguale a prima, solo che le linee sono parallele. Questo si chiama flag, bandiera. Io lo considero un sottocaso del cuneo, il sottocaso in cui le linee vanno a essere parallele.
+
+Se invece sono divergenti non va bene, cioè se addirittura la linea sotto o sopra fa così, quindi diverge, questo non è accettabile, cioè devono essere o parallele o convergenti. Non è che non ci sia anche il caso della divergenza, che ho appena disegnato in rosso e cancellato, però è una figura, diciamo, che nella mia esperienza non ho trattato tanto e che non considero così buona come questa. È molto più interessante fare il cuneo, il flag, cioè le linee convergenti, perché visto che il trend sta schiacciandosi o comunque mantenendo la sua forza uguale, questo è un segno che sta rallentando per poi ricominciare a esplodere.
+
+Se invece lo fai divergente vuol dire che sta accelerando ma non sai se sta andando nella direzione che desideri. Diventa più imprevedibile, insomma. Quindi molto meglio il cuneo e il flag, non figure in cui le linee divergono, ma solo in cui o convergono verso destra, il cuneo, oppure sono parallele come il flag.
+
+Anche qua vale tutto il discorso di prima, quindi tracciamo la linea rossa sull'ultimo minimo, la linea rossa sull'ultimo massimo, aspettiamo la rottura verso rigorosamente l'alto, in questo caso perché abbiamo un trend di provenienza che va verso l'alto, e mettiamo lo stop loss sotto e la proiezione sopra del take profit. Quindi, come al solito, proiettiamo l'altezza in questo modo. Quindi il flag è praticamente identico al cuneo.
+
+La stessa cosa vale per le figure ribassiste. Avremo un trend ribassista, un ritracciamento formato da due linee parallele o convergenti verso l'alto, quindi che si oppongono al trend di provenienza, appunto una serie di masse minimi che sbattono contro queste due linee, e poi la prosecuzione verso il basso della figura. In questo caso, però, appunto, visto che il trend di provenienza è ribassista, questo sarà un flag ribassista.
+
+È importante quindi stare ben attenti al trend da cui si proviene. Se rompe invece verso l'alto il canale, allora la figura viene annullata. Quindi è importante capire che queste sono figure di continuazione che devono proseguire il trend da cui provengono.
+
+Nel prossimo video vedremo un esempio specifico di cuneo e un esempio specifico di flag. Grazie.

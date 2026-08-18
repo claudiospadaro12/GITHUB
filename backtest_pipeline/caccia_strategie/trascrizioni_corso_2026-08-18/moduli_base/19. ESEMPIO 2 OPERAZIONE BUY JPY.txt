@@ -1,0 +1,19 @@
+Ciao e benvenuti in questo nuovo video dove andremo a fare un esempio di calcolo di stop loss e di take profit, questa volta però sul cross, sul tasso di cambio che comprende e prevede anche il JPY, ovvero lo Yen giapponese. Andiamo insieme sul grafico per calcolarlo insieme. Eccoci sul grafico euro JPY sul 3 frame a 4 ore. 
+
+Ipotizziamo di voler entrare su una posizione rialzista su questo cross e quindi di voler comprare il tasso di cambio euro JPY. Anche in questo caso ipotizziamo di mettere uno stop loss di 20 pips e un take profit di 40. Ovviamente sarà poi la strategia che andrai a mettere in campo a determinare l'esatto valore in pips di stop loss e di take profit. 
+
+Quindi in questo caso, essendo puramente didattico, continuiamo con questo esempio e partendo dal valore di tasso di cambio attuale, quindi 165.90, lo leggiamo qui a destra, andiamo a sottrarre 20 pips, ipotizzando uno scenario di perdita, quindi lo stop loss e andiamo ad aggiungere 40 pips ipotizzando uno scenario di chiusura in profitto. Quindi avremo che, da questo punto attuale, se il prezzo dovesse scendere noi chiuderemo l'operazione in perdita, se il prezzo dovesse invece salire chiuderemo l'operazione in profitto. Andiamo a calcolarlo sul file di Excel. 
+
+Ipotizzando quindi un ingresso al valore identificato sul grafico di 165,90, sappiamo che, essendo una posizione rialzista, noi avremo uno stop loss sotto di un certo numero di pips. In questo caso abbiamo deciso 20 pips. Ti ricordo che sul tasso di cambio, che sui tassi di cambio che comprendono il JPY, quindi il yen giapponese, ci troveremo sempre a calcolare l'unità di pips come la seconda cifra dopo la virgola. 
+
+In questo caso, essendo 90, avremo che 0 sarà l'unità e 9 saranno le decine. Quindi se io voglio aggiungere o sottrarre, devo sempre fare riferimento alla seconda cifra dopo la virgola come un pip o la prima cifra dopo la virgola come le decine. Ovviamente la prima unità saranno le centinaia e via così.
+
+Quindi ipotizziamo di voler sottrarre 20 pips da questo valore, molto semplice. Utilizziamo Excel, facciamo uguale, selezioniamo il primo valore e facciamo meno 0,20, quindi 20 pips, due cifre dopo la virgola, 0,20. Facciamo invio e questo sarà il valore di stop loss e invece deve avere un take profit al di sopra del valore d'ingresso di 40 pips. 
+
+Quindi avrò che rispetto al valore d'ingresso salgo di 40 pips. Quindi selezioniamo, facciamo sempre uguale, selezioniamo la prima cella, facciamo più 0,40, ovvero 40 pips. Facciamo invio ed ecco che abbiamo il valore di stop loss e il valore di take profit. 
+
+Andiamo a calare nel grafico questi valori, mi va a dotare da vedere graficamente come appariranno e ovviamente se abbiamo fatto tutto correttamente. Eccoci nuovamente sul grafico EuroGPY e apriamo un ordine di acquisto inserendo i valori che abbiamo appena calcolato. Quindi lo stop loss che è 20 pips sotto il nostro valore, quindi sarà 1, 165,7 e il take profit invece sarà 166,30. 
+
+Facciamo buy, quindi acquistiamo ed ecco che sul grafico sono apparse queste righe. Quindi avremo che la riga nera sarà l'ordine di acquisto al valore tasso di cambio attuale, cioè a mercato. Qua sotto avremo lo stop loss, quindi sarà 20 pips più in basso rispetto al valore d'ingresso e qua sopra avremo il take profit, quindi la chiusura in profitto rispetto al valore attuale. 
+
+A questo punto l'operazione si chiuderà secondo due possibili esiti, ovvero il prezzo salirà così come ci aspettiamo magari dalla nostra strategia e chiuderemo l'operazione in profitto di 40 pips, oppure invece il scenario inverso scenderà di 20 pips e chiuderemo l'operazione in stop loss. Ci vediamo nel prossimo video dove vedremo l'operazione di vendita e come calcolare stop loss e take profit con questi ordini.

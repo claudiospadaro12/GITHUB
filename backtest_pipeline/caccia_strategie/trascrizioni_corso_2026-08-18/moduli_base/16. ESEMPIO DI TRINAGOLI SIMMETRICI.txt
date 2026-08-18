@@ -1,0 +1,37 @@
+Bentornato. In questo video vediamo un esempio specifico di triangolo simmetrico sul grafico. Ti ho preparato un grafico vecchio, dal 2017, ma comunque sempre attuale, su CADJPY, quindi il Canadian Dollar contro lo Yen giapponese.
+
+Ti mostro adesso un triangolo simmetrico. Sinceramente, guardandolo così, non vedresti un triangolo facilmente, ma ti guiderò io nel capire come vedere un triangolo. Allora, il triangolo è difficile da vedere subito.
+
+Però, prima, bisogna cercare il modulo, ovvero la linea diagonale. Meglio, ovviamente, se è di tre punti, perché la linea diagonale di due punti la puoi trovare in milioni di modi, così, così. Puoi fare veramente tantissime combinazioni.
+
+Non è assolutamente una cosa, diciamo, facile da capire. Bisognerebbe, appunto, per trovare due linee da due punti di un triangolo, avere una certa intuizione e una certa esperienza, appunto. Invece, è molto più semplice cercare direttamente una linea di tre punti.
+
+Questo è un buon consiglio per chi non ha ancora l'occhio. Perché la linea da tre punti ti permette di vedere, magari meglio, quando, appunto, c'è un triangolo simmetrico in preparazione. Per esempio, io noto che questo top, questo top e questo top potrebbero essere più o meno allineati.
+
+Allora io provo a unirli. E effettivamente, con la linea, mi sembrano quasi perfettamente allineati. Vedi? Top, top, top. 
+
+Non importa se, addirittura, quattro. C'è anche questo. Quindi uno, due, tre, quattro.
+
+Questo non tanto perché è un po' più sotto, però gli altri tre sicuramente sì. Questo rende la linea bella forte. Ora, dall'altra parte, questo è il modulo, diciamo, di base.
+
+Adesso vediamo se c'è anche il resto della figura. Sotto proviamo a unire le linee. E effettivamente, qua, ho una linea che è formata da tre punti.
+
+In questo modo. Non è il massimo, diciamo, della perfezione in termini di rapporto tra le inclinazioni delle due linee rosse. Non sono perfettamente simmetriche a livello di coniometro.
+
+Però più o meno sì, nel senso che l'inclinazione è simile. Non è che la linea sopra sia molto in discesa tipo verticale e quella sotto orizzontale. Più o meno ci siamo.
+
+Inoltre, questa qui, è vero, ha un po' di sbovatura, però è comunque piccola rispetto alla grandezza della figura. Quindi, diciamo, è un'approssimazione assolutamente rispettabile. Quando tracci le linee è meglio che le fai finire sempre più o meno sullo stesso giorno, come ho fatto io. 
+
+Così. Invece l'inizio della figura può essere chiaramente diverso, perché se uno è un massimo e l'altro è il minimo, devono per forza essere uno a fianco all'altro e non uno sotto l'altro. Chiaro che non possono essere tali per cui la linea sotto parte da in fondo e la linea sinistra parte da qua.
+
+Cioè, la linea sotto deve partire almeno dalla metà del triangolo indietro. Se parte da qua, facciamo un esempio, che magari il triangolo è fatto così, non va bene, perché il pezzo sotto non è per niente coerente con quello sopra. Cioè la parte alta sarebbe lunga magari x giorni, la parte bassa molto meno, non va bene.
+
+La parte bassa e la parte alta devono più o meno essere simili in termini di lunghezza temporale. Quindi questa qua, se questa qua è la lunghezza, diciamo, della mia linea rossa, e la metà è qua, deve partire da prima della metà, ecco, giusto per capirci. Così va bene, perché questa distanza tra il punto di partenza della linea rossa sopra e quella sotto è poco o meno della metà rispetto appunto alla lunghezza della figura.
+
+Detto questo, vi sembra appunto un buon triangolo. Una volta fatto questo, potremmo fare due linee, a partire dall'ultimo massimo, che è questo qua, verso destra, dall'ultimo minimo, che è questo qua, verso destra. Chiaramente questa figura è già finita, ma quando non l'abbiamo vista, magari eravamo qua in mezzo, per cui non ne aveva ancora rotto sopra, era ancora in formazione, aveva appena rimbalzato, eravamo qua, l'avevamo notata, o qua o qua, e stavamo aspettando che, dopo aver tracciato la linea rossa, rompesse o sopra o sotto, non sapevamo ancora con sicurezza se avrebbe rotto sopra o sotto, quindi bisogna vedere appunto di aspettare, e appena rompe, sappiamo dove andare.
+
+In questo caso ha rotto sopra, quindi in questo caso ha chiuso probabilmente già con questa candelina qua, sopra, proprio di qualche pip, sopra il massimo della candela, si può vedere poi con il valore preciso, e bisogna quindi comprare, come sempre, a mercato, o a mezzanotte, un minuto, o al mattino dopo, chiaramente prima lo fate meglio è, perché se lo fate a mezzanotte, un minuto, sapete che l'entrata è precisa, se l'entrata è al mattino dopo, magari è passato già un po' di tempo durante la notte, magari si è già mosso, però non è un dramma. Una volta che si è entrato, devi andare in long, comprare, mettere lo stop loss qui sotto, dall'altra parte, e proiettare, con il classico nostro rettangolo come strumento, questa distanza tra le due linee orizzontali, doppio clic verso l'alto, e questo è il tuo take profit, quindi molto molto, diciamo, semplice, stop loss qui, take profit qui, rapporto quasi di 1 a 1, ottimo. Alcuni addirittura vanno a proiettare questa cosa, la base del triangolo, in questo modo, però sinceramente è un po' troppo, è molto più prudente proiettare soltanto, diciamo, la distanza tra le due linee orizzontali che abbiamo tracciato come riferimento per lo stop loss e il punto d'entrata.
+
+Quindi una volta che rompe sopra, metti lo stop loss qui, se avesse rotto sotto, avresti shortato e messo lo stop loss qui. Quindi questo è un ottimo esempio di triangolo simmetrico. Nel prossimo video vedremo invece un triangolo asimmetrico.
+
+Grazie.
