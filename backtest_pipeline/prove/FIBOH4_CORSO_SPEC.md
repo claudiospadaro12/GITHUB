@@ -93,6 +93,51 @@ un uso lasco del vocabolario — ma un implementatore distratto sbaglia il segno
 > **la stessa inferenza**. Resta **un'inferenza**, non un dato: uno screenshot
 > dell'orologio della piattaforma la chiude in 5 secondi.
 
+### 2.1-bis 🆕 18/08 sera — **IL FUSO DELLA PIATTAFORMA E' DETTATO**, e apre un A/B da 2 ore
+
+Il modulo base **dice esattamente quello che qui mancava**, e in piu' dice **chi
+e' il broker**.
+
+`[TRASCRITTO chiaro, lez. 3 modulo base "I PRIMI PASSI SULLA PIATTAFORMA MT4"]`
+> _"Questa e' una piattaforma che, scaricata dal broker **BlackRidge**, **non da'
+> l'ora italiana, cioe' e' settata sostanzialmente sul GMT** ... **e non puo'
+> essere modificata questo orario, cosi' resta** ... quando in Italia [c'e']
+> l'ora legale, quindi **da fine marzo a fine ottobre, qui la piattaforma sara'
+> DUE ORE INDIETRO rispetto all'ora italiana**. Quando invece in Italia [c'e']
+> l'ora solare, quindi **da fine ottobre a fine marzo, la piattaforma risultera'
+> UN'ORA INDIETRO**"_
+
+`[TRASCRITTO chiaro, lez. 2 modulo base]`
+> _"il nome del broker che noi utilizziamo e' **Black Ridge**, il nome della
+> piattaforma su cui operiamo e' **MetaTrader 4** ... dovrai semplicemente
+> scrivere **bcmmarkets.com**"_
+
+> 🔥 **`bcmmarkets.com` E' IL NOSTRO BROKER** (conto demo del progetto:
+> `50503392 — BCMMarkets-Server — BCM Markets Ltd`,
+> `report/CENSIMENTO_ORDINI_PC.md` r.194). **Il corso e noi operiamo sullo
+> stesso broker.** Conseguenza diretta per questo modulo, che e' **H4**:
+> **l'allineamento delle candele del corso e il nostro sono lo stesso**, e non
+> e' piu' un'assunzione da dichiarare — **e' verificabile su un grafico.**
+
+> ⚠️ **MA LO SCARTO DI UN'ORA VA MISURATO, NON ASSUNTO.** Il corso dice **GMT
+> fisso** (agosto: IT−2 = UTC+0); il repo dice **BCM = IT−1 = UTC+1** in agosto
+> (`CLAUDE.md`, `HANDOFF.md` r.496, `PIANO_PROP` r.170). **Non tornano.** Tre
+> letture, e solo una misura decide: (a) `BlackRidge-Demo 1` ≠
+> `BCMMarkets-Server`; (b) il video e' vecchio e il server e' cambiato;
+> (c) uno dei due enunciati e' impreciso.
+> ➡️ **Screenshot con l'orologio di Windows e la "Vista del mercato" di MT4/MT5
+> nella stessa foto** (metodo di casa, `CLAUDE.md` §"Ora dei LOG"). 5 secondi.
+
+> 📐 **L'A/B che questo apre, e vale DUE ORE.**
+> **Se** gli orari del modulo fossero in **ora piattaforma** invece che in ora da
+> parete italiana: cancellazione pendenti **18:45 piattaforma = 20:45 IT =
+> 19:45 BCM**, contro il **17:45 BCM** cablato oggi in `ABTG_FiboH4_Multi.mq5`.
+> 🚫 **NESSUNA MODIFICA PROPOSTA:** l'inferenza attuale ("e' la routine personale
+> del relatore, che dice _mi alzo alle 7_") resta **altrettanto plausibile**.
+> **E' un A/B da misurare** — ma ora ha **due candidati con un numero ciascuno**,
+> non uno solo con un punto interrogativo.
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.5.
+
 ### 2.2 Overnight — regola con scappatoia
 - Regola: _"non vanno portati over night, quindi non vanno partiti al giorno
   dopo"_ `[TRASCRITTO]`
@@ -229,13 +274,48 @@ N barre, **da mettere a sweep A/B (on/off) come primo esperimento**.
 ### 4.3 Le esclusioni
 | esclusione | citazione | etichetta |
 |---|---|---|
-| Fase laterale | _"non la prendo mai in considerazione quando sono in una fase laterale"_ | 🔴 **senza definizione** |
+| Fase laterale | _"non la prendo mai in considerazione quando sono in una fase laterale"_ | ✅ **18/08 sera: LA DEFINIZIONE C'E', nel modulo base** → §4.1-bis |
 | Spike su dato macro | _"questo non lo prendo in considerazione uno spike su un dato"_ | 🔴 **senza soglia** |
 | Candele molto ampie | _"non si prendono in considerazione i candele che hanno avuto **movimenti importanti** perche' ... vanno ad alterare la configurazione del setup ... **mai!**"_ | 🔴 **senza soglia** — enfatica ma non numerica |
 
 ⚠️ **La terza e' l'unica delle tre che il nostro EA ha gia' tradotto in numero**
 (`InpMaxEngulfAtr = 3.0`: scarta pattern con range > 3 ATR). **Il numero 3,0 e'
 NOSTRO, non del corso.**
+
+### 4.1-bis ✅ 18/08 sera — **"FASE LATERALE" HA UNA DEFINIZIONE, ed e' meccanizzabile**
+
+Il modulo base la detta in forma chiusa, per esclusione:
+
+`[TRASCRITTO chiaro, lez. 4 modulo base an.tec. "BOTTOM, TOP E TRENDLINE"]`
+> _"Un trend e' una successione di **top e di bottom**. Se io ho dei top e dei
+> bottom che mano a mano continuano a salire, ho un trend rialzista ... Se ho dei
+> top e dei bottom che continuano a scendere ... trend ribassista. Se invece ho
+> dei top e dei bottom che fanno qualcosa di diverso, per esempio i top che
+> salgono e i bottom che scendono ... allora ho un **trend laterale** ...
+> **Il trend e' rialzista quando i top e i bottom salgono, ribassista quando i
+> top e i bottom scendono e laterale quando avviene, invece, QUALUNQUE ALTRO
+> CASO.**"_
+
+E il "top"/"bottom" e' definito nella stessa lezione come **swing con 2 (meglio
+3) candele per lato**: _"formato da **due, meglio ancora tre**, candele rialziste
+che poi hanno **due, meglio ancora tre**, candele ribassiste successive"_.
+
+> ✅ **Traduzione diretta, senza inventare niente:**
+> ```
+> swing := pivot con N barre per lato   (N = 2 o 3, dettato)
+> rialzista  := HH  AND  HL
+> ribassista := LH  AND  LL
+> LATERALE   := tutto il resto            <- il filtro che mancava
+> ```
+> ⚠️ **Resta NOSTRA una sola scelta: quanti swing guardare indietro.** Quello il
+> corso non lo dice. **Ma il filtro non e' piu' "senza definizione": ora ha una
+> forma, e la forma e' del corso.**
+>
+> 🎯 **Va nell'elenco §14 come assunzione n.1 RISCRITTA:** non piu' _"il corso non
+> lo definisce, proposta: A/B on/off su un filtro misurabile (EMA/ATR o
+> pendenza)"_ — **il corso lo definisce, e lo definisce sugli swing.** Un filtro
+> a EMA/ATR sarebbe **una nostra invenzione al posto di una regola esistente**.
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.8.
 
 ### 4.4 ⚠️ Gli ancoraggi — un'ambiguita' che sposta i livelli
 > _"non posso tracciare da questo massimo a questo minimo, perche' il minimo che
@@ -497,9 +577,9 @@ sono a schermo. Gli unici invarianti verificabili:
 |---|---|---|---|
 | 1 | 🔴 **Le SLIDE del modulo** — citate 4 volte (_"sono tutti i valori che sono raffigurati **nella slide** che ti ho fatto vedere"_, _"torniamo alle slide"_) e **mai lette** | Sono **la meta' scritta** della fonte. Nel modulo Breakout le slide hanno chiuso 6 ambiguita' su 10 | **chiederle a Claudio** |
 | 2 | 🔴 **Screenshot del Fibo tracciato con la linea "100" visibile** | Chiude in 5 secondi la **divergenza 2** (target: minimo del pattern o estremo opposto?) — §3.3 | screenshot lez. 19 o 20 |
-| 3 | 🔴 **Il fuso della piattaforma** (orologio in basso a destra) | 18:30-19:00 in che ora? §2.1 | screenshot qualsiasi |
-| 4 | 🟠 **Le "lezioni e capitoli precedenti" sullo stop loss** | Il modulo **rimanda** e non e' autosufficiente (§6) | trascrizione dei capitoli precedenti |
-| 5 | 🟠 **Quale % di rischio** insegna questo relatore | Mai detta in 3 lezioni (§9) | capitoli precedenti / slide |
+| 3 | ✅ ~~**Il fuso della piattaforma**~~ | **RISPOSTO 18/08 sera: MT4 di Black Ridge/BCM, settata su GMT** (§2.1-bis). ⚠️ Resta da misurare lo **scarto di 1 ora** col nostro server, e resta aperto **se gli orari del modulo siano in ora piattaforma o da parete** | screenshot **orologio Windows + Vista del mercato nella stessa foto** |
+| 4 | ✅ ~~**Le "lezioni e capitoli precedenti" sullo stop loss**~~ | **RISPOSTO: l'indirizzo e' il capitolo 3 del modulo base (lez. 15-21), CE L'ABBIAMO — e non contiene nessun numero.** Insegna solo il meccanismo (SL sotto/sopra l'ingresso) e la convenzione di calcolo (`ingresso ∓ N pip`, cifra del punto invariata). `[T]` lez. 17: _"la quantita' di pips ... **sara' sempre dettata dalla strategia**"_. **Il rimando non porta a nessun valore** | — |
+| 5 | 🟠 **Quale % di rischio** insegna questo relatore | Mai detta in 3 lezioni (§9). 🆕 **L'INDIRIZZO ORA E' NOTO:** il modulo base rimanda 4 volte a un **capitolo MONEY MANAGEMENT** dedicato (`[T]` lez. 18: _"non andiamo ancora ad inserire il volume perche' sara' argomento di un altro capitolo ... riguardera' il money management"_). **E' l'unico posto dove quella % puo' stare** | 🥈 **trascrizione del MODULO MONEY MANAGEMENT** |
 | 6 | 🟠 Il pannello Fibo con le 4 descrizioni | Conferma diretta della **banda** (§3.2) | screenshot lez. 18 |
 | 7 | 🟠 Prezzi e date degli esempi (AUDCAD, AUDCHF, EURJPY) | Senza, **zero test-case numerici** | screenshot |
 
@@ -510,8 +590,13 @@ sono a schermo. Gli unici invarianti verificabili:
 Se si rifa' un round su questa strategia, **queste sono NOSTRE e vanno scritte
 nel file prova PRIMA dei numeri**:
 
-1. **Filtro "fine di un trend"** — il corso non lo definisce. Proposta: A/B
-   on/off su un filtro misurabile (EMA/ATR o pendenza). §4.1
+1. ⚠️ **RISCRITTA 18/08 sera.** ~~**Filtro "fine di un trend"** — il corso non lo
+   definisce. Proposta: A/B on/off su un filtro misurabile (EMA/ATR o
+   pendenza).~~ **IL CORSO LO DEFINISCE** (§4.1-bis): trend = successione di
+   **top e bottom** (swing a 2-3 barre per lato); **laterale = qualunque caso
+   diverso da HH+HL o LH+LL**. **Un filtro EMA/ATR sarebbe una nostra invenzione
+   al posto di una regola esistente.** Resta nostra **una sola** scelta: quanti
+   swing guardare indietro. §4.1
 2. **Entry zone = BANDA [1,78-1,88] o [2,78-2,88]**, 2 ordini sui bordi. §3.2
 3. **Scelta della zona**: la 2ª e' preferita; si usa la 1ª solo se il prezzo e'
    >= 50 pip da essa. §5
