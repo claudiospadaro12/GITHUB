@@ -1,6 +1,14 @@
 # 📐 BREAKOUT — SPECIFICA RICOSTRUITA DAL CORSO DI CLAUDIO (lezioni 34-40)
 
-> **Fonte unica:** le 7 trascrizioni in
+> 🆕 **AGGIORNAMENTO 18/08 ore ~15:15 — SONO ARRIVATE LE SLIDE DEL PDF.**
+> 14 screenshot della lezione 40 in
+> `trascrizioni_corso_2026-08-18/slide_lezione40/` = **10 slide uniche**
+> (4 sono doppioni con timestamp diverso). **La meta' scritta del corso.**
+> Etichetta nuova: **`[SLIDE n]`** = letto testualmente da una slide, la fonte
+> piu' forte che abbiamo (e' il documento, non il parlato).
+> **Riepilogo di cosa hanno chiuso: §0.**
+
+> **Fonte:** le 7 trascrizioni + le 10 slide in
 > `backtest_pipeline/caccia_strategie/trascrizioni_corso_2026-08-18/`.
 > **Nient'altro.** Nessuna integrazione da memoria, nessuna lettura del codice
 > usata per "completare" il corso: dove il corso tace, qui c'e' scritto **BUCO**.
@@ -16,6 +24,84 @@
 > e sono in **contraddizione frontale** col nostro backtest di paniere
 > (vedi §9). La spec serve a stabilire *se un EA puo' essere fedele*, non a
 > promuovere la strategia.
+
+---
+
+## 0. 🆕 COSA HANNO CHIUSO LE SLIDE (aggiornamento 18/08 ~15:15)
+
+### 0.1 Le 10 slide uniche
+
+| # | titolo slide | file screenshot | peso |
+|---|---|---|---|
+| S1 | **Descrizione** | `151240` | contesto |
+| S2 | **Insidie** | `151302` (dup `151336`) | contesto |
+| S3 | **Cross da tradare** | `151343` | 🟢 universo |
+| S4 | **Identificazione area di congestione** | `151406` | 🔥 rettangolo |
+| S5 | **Il segnale di ingresso operazione sell** | `151429` | 🔥 segnale SELL |
+| S6 | **Il segnale di ingresso operazione buy** | `151442` | 🔥 segnale BUY |
+| S7 | **Livelli di ingresso, stop e target** | `151456` (dup `151515`) | 🔥 livelli |
+| S8 | **Validita' del segnale** | `151527` (dup `151537`) | 🔥 uscite |
+| S9 | **Gestione dell'operazione** | `151549` (dup `151600`) | 🔥 break-even |
+| S10 | **Money management** | `151619` | 🔥 rischio |
+
+### 0.2 🎯 I TRE NODI PRIORITARI — l'esito
+
+| nodo | esito | dettaglio |
+|---|---|---|
+| **(a) Williams 140 o 14?** | 🔴 **NON CHIUSO** | **Nessuna slide scrive il periodo.** Le slide dicono solo _"dell'indicatore William's"_. Il "140" resta appeso all'unica frase della lez. 35. |
+| **(b) Parametri SuperTrend** | 🔴 **NON CHIUSO — e ora sappiamo perche'** | Le slide nominano _"supertrend rosso"_ / _"supertrend verde"_ e **non danno mai ATR ne' moltiplicatore**. ⚠️ **Il PDF riepilogativo NON contiene i parametri degli indicatori**: non e' un ritaglio mancante, e' che il documento non li tratta. **La risposta puo' venire SOLO dal modulo precedente.** |
+| **(c) Vincolo delle 20 candele** | 🟡 **CHIUSO A META'** | S4 scrive: _"Esso deve contenere 20 candele"_ + _"si costruisce a partire dal primo ingresso del William's"_ (S5/S6). **Ne segue che 20 candele DEVONO essere trascorse** (non puoi contenerne 20 a partire dall'ingresso se ne sono passate 5). Ma **nessuna slide scrive l'attesa come regola esplicita** → resta un'implicazione, non una citazione. |
+
+### 0.3 ✅ Cosa le slide hanno CHIUSO davvero (6 ambiguita' su 10)
+
+| ambiguita' | prima | ora |
+|---|---|---|
+| **1. 15 vs 20 candele** | risolta per argomento | ✅ **CHIUSA DALLA FONTE** — S4: _"deve contenere 20 candele"_ |
+| **2. "almeno" vs "al massimo" 20** | risolta per argomento | ✅ **CHIUSA** — S4: _"deve contenere 20 candele"_ + _"aggiornato ad ogni chiusura di candela"_ = **finestra mobile di 20** |
+| **4. banda SELL "0/−50" vs "−20/−50"** | risolta per argomento | ✅ **CHIUSA DALLA FONTE** — S5 scrive **_"William's compreso tra -20 e -50"_**. Il _"tra 0 e meno 50"_ del parlato e' **definitivamente un errore verbale** |
+| **5. "ancora dentro" vs "uscito"** | risolta per argomento | ✅ **CHIUSA** — S5/S6 danno solo la banda numerica, senza la frase contraddittoria |
+| **6. trailing stop vs BE** | risolta per argomento | ✅ **CHIUSA** — S9 scrive **solo** lo stop in pari, **la parola "trailing" non compare in nessuna slide** → il trailing e' un espediente del video, **non fa parte della strategia** |
+| **10. XAU dentro o fuori** | incerta + codice storpiato | ✅ **CHIUSA** — S3: _"Anche il gold **XAU/USD** risponde bene ma richiede capitali di partenza piu' elevati"_. Ticker confermato, esclusione per capitale confermata |
+
+### 0.4 🆕 Cosa le slide AGGIUNGONO (regole nuove, non presenti nel parlato)
+
+1. **`[SLIDE S4]` Cadenza di aggiornamento esplicita:**
+   > _"Il rettangolo dovra' essere **aggiornato ad ogni chiusura di candela**"_
+
+   Il parlato diceva solo _"si aggiorna man mano"_. Ora e' una **regola con una
+   cadenza**: ricalcolo a ogni barra chiusa. **Direttamente implementabile.**
+
+2. **`[SLIDE S8]` Le tre uscite come REGOLA, non come facolta':**
+   > _"L'operazione **si chiudera'** in caso di: Stop loss / Take profit /
+   > **Segnale direzionale contrario**"_
+
+   Nel parlato era _"**possiamo** chiudere"_ (facolta'). La slide usa
+   l'indicativo futuro: **e' un obbligo.** → La chiusura su segnale contrario
+   **non e' un flag A/B: e' la strategia.**
+
+3. **`[SLIDE S10]` ⚠️ La parola nuova che cambia il rischio di portafoglio:**
+   > _"si consiglia per le prime 20 operazioni di tenere un **rischio
+   > COMPLESSIVO dell'1%** e valutare successivamente i parametri di drawdown
+   > prima di aumentare tale percentuale"_
+
+   **Il parlato ha SEMPRE detto _"rischio 1% per l'operazione"_** (lez. 35, 37).
+   **La slide scrive _"complessivo"_.** Vedi §8.1: **non e' un dettaglio, e' il
+   fattore 7.**
+
+### 0.5 🔥 IL REPERTO PIU' IMPORTANTE: cosa NON c'e' nel PDF
+
+**La regola discrezionale del §7.4 — _"il Williams arriva all'estremo opposto
+prima del target"_ — NON COMPARE IN NESSUNA SLIDE.**
+
+Nel video (lez. 38) occupa un blocco lungo, con tre comportamenti alternativi e
+un _"io personalmente mi preoccupo"_. Nella **checklist ufficiale** della stessa
+autrice, **non esiste**: la slide S8 elenca **tre e sole tre** uscite (SL, TP,
+segnale contrario).
+
+> ⚖️ **Conseguenza operativa netta:** quella non e' una regola della strategia,
+> e' un **commento personale a braccio**. Un EA che NON la implementa **non e'
+> infedele: e' piu' fedele al documento.** Questo **elimina l'unica vera
+> discrezionalita'** della spec.
 
 ---
 
