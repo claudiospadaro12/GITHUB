@@ -451,3 +451,46 @@ installa e **quando**.
 terminale e' collegato al conto vivo (`walkforward_generico.ps1` righe 592-600,
 il DAX partito davvero il 14/08). Il collaudo si fa nel **tester**, in test
 singolo.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 (notte) — trovate verificando `histdata_m1.py`
+
+## 21. 📋 IL BLOCCO MULTI-RIGA INCOLLATO NON E' UN PROGRAMMA
+
+_Difetto vero, gia' committato nella bozza del par. 7 di
+`REFERTO_HISTDATA_FATTIBILITA.md` (f3b5eb9), trovato PRIMA dell'invio._
+
+Tre righe una sotto l'altra dentro un blocco ```powershell **non sono uno
+script**: incollate in console sono **tre comandi indipendenti**. Il punto 8
+copre l'`irm` seguito da `;` (stessa riga), il punto 13 copre l'`exit 1` non
+guardato — **questo copre il caso in cui la guardia c'e' e non serve a
+niente**, perche' un `throw` alla riga 1 termina solo la riga 1: la riga 2
+parte lo stesso, un istante dopo, sulla copia vecchia o sul nulla.
+
+Nella bozza HistData: `irm` (riga 1), `python --autotest` (riga 2),
+`python --esplora` (riga 3). Con l'`irm` a 404 partivano lo stesso le altre
+due; con l'autotest rosso partiva lo stesso l'esplorazione.
+
+> **Regola: una riga di lancio a piu' passi si consegna come UN SOLO comando.**
+> O one-liner con `;` (dove un `throw` non catturato ferma davvero il resto
+> della riga), o — meglio, perche' resta leggibile — tutto dentro
+> `& { ... }`, graffe comprese, **e la chat dice "incolla il blocco INTERO"**.
+
+## 22. 🧭 IL REFERTO CHE ISTRUISCE SUL PASSO DOPO ANCHE QUANDO NON C'E' NIENTE
+
+_Difetto vero e **riprodotto** (`histdata_m1.py` v1, righe 943-959): lanciata
+`--esplora` con il canale di rete morto, lo script ha correttamente scritto
+"CONTROLLO POSITIVO FALLITO, non si misura niente" **e subito sotto** ha
+stampato "PROSSIMO PASSO: copiare il/i CSV in `MQL5\Files`, lanciare
+`ABTG_ImportaStoricoEsterno`...". Nessun CSV esisteva. Uscita: **0**._
+
+E' il fratello del referto stantio: non un file vecchio, ma **istruzioni vere
+per un artefatto che non e' mai nato**. Chi legge il fondo del referto (cioe'
+tutti: e' li' che si guarda cosa fare adesso) parte col passo successivo su
+dati inesistenti.
+
+> **La coda "prossimo passo" di un referto si stampa SOLO SE gli artefatti che
+> quel passo consuma esistono davvero** (`if csv_prodotti:`), e il referto
+> chiude con una riga `ESITO: OK` / `ESITO: FALLITO -- <n> problemi` che dice
+> la stessa cosa del codice d'uscita. Le due cose non possono divergere.
