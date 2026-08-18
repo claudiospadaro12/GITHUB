@@ -1,0 +1,56 @@
+# =====================================================================
+#  R81 / VARIANTE F - TP SECCO A 2R
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato - D30EUR
+#  Si lancia con: -Prova prove\R81f_uscita_F_tp2r.txt -Etichetta r81f
+#                 -Deposito 100000 -Modello 4
+# =====================================================================
+#
+#  DOMANDA DEL ROUND (criteri completi: prove/R81_USCITE_CRITERI.md)
+#    A PARITA' DI INGRESSI, la gestione attuale della sedia viva estrae
+#    piu' valore delle alternative?
+#
+#  COS'E' QUESTA VARIANTE
+#    Il piu' stupido dei piani: si entra, si mette lo stop, si mette il
+#    TP a 2R e non si tocca piu' niente. Uscite possibili: TP 2R, stop
+#    iniziale (2,5 x ATR), flat delle 17:30 server. E' il pavimento
+#    contro cui misurare qualunque gestione: una gestione che non batte
+#    il "non fare niente" non e' una gestione, e' un'abitudine.
+#
+#  ATTENZIONE - IL NODO, dichiarato: si usa InpTPfinal_R=2.0
+#    La ricetta ovvia (InpTP1_R=2.0 con InpTP1Pct=100) NON e'
+#    realizzabile: il blocco della prima parziale pretende
+#    InpTP1Pct < 100 (riga 295), quindi a 100 il blocco e' SPENTO e il
+#    TP a 2R non esisterebbe affatto - si misurerebbe un "lascia
+#    correre" travestito, cioe' la variante B una seconda volta.
+#    Si usa invece il TP sull'ORDINE, piazzato alla creazione del
+#    pendente (righe 249-251, lato short):
+#        double dist = sl - sellPx;                    // = 1R esatta
+#        double tp   = NormalizePrice(sellPx - dist*InpTPfinal_R);
+#    Con InpTPfinal_R=2.0 il TP e' a 2R esatti dal prezzo del pendente.
+#    E' il TP secco VERO, ed e' piu' pulito della ricetta originale.
+#
+#  CONTROLLO DI COERENZA CHE VALE PER TUTTO IL ROUND
+#    F non parzializza mai, quindi il suo numero di "trades" nel CSV E'
+#    il numero di POSIZIONI. Deve coincidere con quello di B. Se non
+#    coincide, gli ingressi NON sono identici e il round e' invalido.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- BLOCCO USCITE (le uniche righe che cambiano fra le sei varianti) ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=0||0||0||0||N
+InpBreakeven=0||0||0||0||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=0||0||0||0||N
+InpUseEMA200Target=0||0||0||0||N
+InpTPfinal_R=2.0||2.0||0||2.0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- rischio: pinnato esplicitamente, non lasciato al caso ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- l'unico asse spazzolato: due passate gemelle di controllo ---
+InpMagic=778160||778160||1||778161||Y

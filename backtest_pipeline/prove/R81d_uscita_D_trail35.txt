@@ -1,0 +1,47 @@
+# =====================================================================
+#  R81 / VARIANTE D - GESTIONE VIVA CON TRAILING PIU' LARGO (3,5 ATR)
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato - D30EUR
+#  Si lancia con: -Prova prove\R81d_uscita_D_trail35.txt -Etichetta r81d
+#                 -Deposito 100000 -Modello 4
+# =====================================================================
+#
+#  DOMANDA DEL ROUND (criteri completi: prove/R81_USCITE_CRITERI.md)
+#    A PARITA' DI INGRESSI, la gestione attuale della sedia viva estrae
+#    piu' valore delle alternative?
+#
+#  COS'E' QUESTA VARIANTE
+#    Identica alla sedia viva (A) TRANNE il respiro del trailing:
+#    3,5 x ATR invece di 2,0. UNA VARIABILE SOLA.
+#
+#  PERCHE' PROPRIO QUESTA
+#    E' la risposta diretta all'aneddoto che ha aperto il round: il
+#    18/08 il trailing ha incassato prima di un rimbalzo che avrebbe
+#    riportato il prezzo sopra l'ingresso. Stesso impianto, respiro piu'
+#    largo: se il problema e' il trailing corto, qui si vede.
+#
+#  COSA NON E'
+#    Non e' una taratura: 3,5 e 1,0 (variante E) sono i DUE lati del 2,0
+#    vivo, dichiarati prima. Se ne uscisse una classifica a picco - il
+#    3,5 vince, l'1,0 e il 2,0 no - si guarda l'ALTOPIANO, mai il picco,
+#    e con ~20 operazioni per finestra un picco non e' un altopiano.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- BLOCCO USCITE (le uniche righe che cambiano fra le sei varianti) ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=1||1||0||1||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailAtrMult=3.5||3.5||0||3.5||N
+
+# --- rischio: pinnato esplicitamente, non lasciato al caso ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- l'unico asse spazzolato: due passate gemelle di controllo ---
+InpMagic=778140||778140||1||778141||Y

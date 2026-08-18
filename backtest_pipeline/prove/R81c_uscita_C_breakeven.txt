@@ -1,0 +1,59 @@
+# =====================================================================
+#  R81 / VARIANTE C - SOLO BREAKEVEN, POI CORRERE
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato - D30EUR
+#  Si lancia con: -Prova prove\R81c_uscita_C_breakeven.txt -Etichetta r81c
+#                 -Deposito 100000 -Modello 4
+# =====================================================================
+#
+#  DOMANDA DEL ROUND (criteri completi: prove/R81_USCITE_CRITERI.md)
+#    A PARITA' DI INGRESSI, la gestione attuale della sedia viva estrae
+#    piu' valore delle alternative?
+#
+#  COS'E' QUESTA VARIANTE
+#    Si mette lo stop in pari a 1R e poi si lascia correre: niente
+#    seconda parziale, niente EMA200, niente trailing. Serve a separare
+#    DUE cose che nella sedia viva viaggiano insieme: la PROTEZIONE
+#    (breakeven) e l'INCASSO (parziale + trailing).
+#
+#  ATTENZIONE - IL NODO, dichiarato: InpTP1Pct = 1, NON 0
+#    Nel codice lo stop in pari sta DENTRO il blocco della prima
+#    parziale, chiuso da (riga 295):
+#        if(!gPart1 && InpTP1_R>0 && InpTP1Pct>0 && InpTP1Pct<100 && risk>0)
+#    Con InpTP1Pct=0 quel blocco non gira mai: niente parziale E NIENTE
+#    BREAKEVEN. Quindi il "breakeven puro" NON e' realizzabile con gli
+#    input esistenti, e in questo round NON si tocca il codice.
+#    Si realizza con una PARZIALE SIMBOLICA DELL'1%:
+#      - il breakeven NON dipende dalla riuscita della parziale
+#        (correzione 07/08, righe 302-314): scatta comunque;
+#      - l'1% del lotto contamina la misura dell'1%, e la contamina a
+#        FAVORE di C. Se C perde lo stesso contro A, il verdetto regge
+#        a maggior ragione;
+#      - InpTP2Pct=0 e' OBBLIGATORIO qui: se la parziale dell'1% va a
+#        segno, gPart1 diventa true e sbloccherebbe la seconda parziale
+#        (riga 321).
+#    Come si legge cos'e' successo davvero: nel file per-trade, 2
+#    chiusure per posizione = parziale avvenuta; 1 sola chiusura =
+#    breakeven puro (NormVol ha arrotondato l'1% a zero). Al deposito
+#    100k il lotto e' ben sopra il minimo, quindi ci si aspetta il primo
+#    caso.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- BLOCCO USCITE (le uniche righe che cambiano fra le sei varianti) ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=1||1||0||1||N
+InpBreakeven=1||1||0||1||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=0||0||0||0||N
+InpUseEMA200Target=0||0||0||0||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- rischio: pinnato esplicitamente, non lasciato al caso ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- l'unico asse spazzolato: due passate gemelle di controllo ---
+InpMagic=778130||778130||1||778131||Y

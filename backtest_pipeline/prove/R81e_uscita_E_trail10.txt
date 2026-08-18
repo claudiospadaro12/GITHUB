@@ -1,0 +1,49 @@
+# =====================================================================
+#  R81 / VARIANTE E - GESTIONE VIVA CON TRAILING PIU' STRETTO (1,0 ATR)
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato - D30EUR
+#  Si lancia con: -Prova prove\R81e_uscita_E_trail10.txt -Etichetta r81e
+#                 -Deposito 100000 -Modello 4
+# =====================================================================
+#
+#  DOMANDA DEL ROUND (criteri completi: prove/R81_USCITE_CRITERI.md)
+#    A PARITA' DI INGRESSI, la gestione attuale della sedia viva estrae
+#    piu' valore delle alternative?
+#
+#  COS'E' QUESTA VARIANTE
+#    Identica alla sedia viva (A) TRANNE il respiro del trailing:
+#    1,0 x ATR invece di 2,0. UNA VARIABILE SOLA.
+#
+#  PERCHE' SERVE ANCHE IL LATO "SBAGLIATO"
+#    L'aneddoto del 18/08 spinge tutti verso il trailing largo. Proprio
+#    per questo va misurato anche lo stretto: se 1,0 andasse MEGLIO di
+#    2,0, vorrebbe dire che su questo motore il valore sta nell'incassare
+#    presto, e l'aneddoto ci avrebbe portati dalla parte sbagliata.
+#    Senza questo lato, il round confermerebbe solo cio' che gia'
+#    pensavamo - che e' il modo piu' comodo di sbagliare.
+#
+#  ATTESA DICHIARATA PRIMA (per non spostare l'asticella dopo)
+#    Con lo stop-in-pari gia' attivo a 1R, un trailing a 1 ATR dovrebbe
+#    chiudere quasi tutto poco sopra il pari: meno profitto, DD piu'
+#    basso, molte uscite a zero. Se cosi' NON fosse, e' il risultato
+#    piu' interessante del round e va indagato, non nascosto.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- BLOCCO USCITE (le uniche righe che cambiano fra le sei varianti) ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=1||1||0||1||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailAtrMult=1.0||1.0||0||1.0||N
+
+# --- rischio: pinnato esplicitamente, non lasciato al caso ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- l'unico asse spazzolato: due passate gemelle di controllo ---
+InpMagic=778150||778150||1||778151||Y

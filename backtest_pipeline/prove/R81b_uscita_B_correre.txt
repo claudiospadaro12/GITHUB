@@ -1,0 +1,53 @@
+# =====================================================================
+#  R81 / VARIANTE B - LASCIAR CORRERE PURO
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato - D30EUR
+#  Si lancia con: -Prova prove\R81b_uscita_B_correre.txt -Etichetta r81b
+#                 -Deposito 100000 -Modello 4
+# =====================================================================
+#
+#  DOMANDA DEL ROUND (criteri completi: prove/R81_USCITE_CRITERI.md)
+#    A PARITA' DI INGRESSI, la gestione attuale della sedia viva estrae
+#    piu' valore delle alternative?
+#
+#  COS'E' QUESTA VARIANTE
+#    Nessuna gestione: niente parziali, niente stop in pari, niente
+#    EMA200, niente trailing. Si esce SOLO per stop iniziale (2,5 x ATR),
+#    TP di sicurezza a 4R sull'ordine, o flat delle 17:30 server.
+#    E' l'estremo opposto della sedia viva: il metro di quanto la
+#    gestione tolga o aggiunga.
+#
+#  DUE COSE CHE IL CODICE FA DA SOLO, dichiarate
+#    1. Con InpTP1Pct=0 il blocco della prima parziale non viene MAI
+#       eseguito (riga 295: ...InpTP1Pct>0 && InpTP1Pct<100...), quindi
+#       il breakeven e' spento per costruzione anche senza toccarlo.
+#       InpBreakeven=0 e' scritto lo stesso, per chiarezza.
+#    2. La seconda parziale e' gia' irraggiungibile perche' pretende
+#       gPart1==true (riga 321). InpTP2Pct=0 lo rende esplicito.
+#    Gli input segnati "inerte" restano al valore della sedia viva: cosi'
+#    i sei file si confrontano riga per riga e cambia solo cio' che deve.
+#
+#  CONTROLLO DI COERENZA CHE VALE PER TUTTO IL ROUND
+#    B non parzializza mai, quindi il suo numero di "trades" nel CSV E'
+#    il numero di POSIZIONI. Deve coincidere con quello di F. Se non
+#    coincide, gli ingressi NON sono identici e il round e' invalido.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- BLOCCO USCITE (le uniche righe che cambiano fra le sei varianti) ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=0||0||0||0||N
+InpBreakeven=0||0||0||0||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=0||0||0||0||N
+InpUseEMA200Target=0||0||0||0||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- rischio: pinnato esplicitamente, non lasciato al caso ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- l'unico asse spazzolato: due passate gemelle di controllo ---
+InpMagic=778120||778120||1||778121||Y
