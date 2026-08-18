@@ -828,3 +828,63 @@ prop: il resto sta nel referto, non lo duplico.)_
    ancorato all'ordine piu' grande. Gli ingressi a due ordini a prezzi
    peggiorativi **non sono martingala**: size pre-impegnata, stop unico oltre
    entrambi, perdita massima nota in partenza.
+
+---
+
+## 📚 RIMANDO 18/08 SERA — i due **MODULI BASE** del corso (41 lezioni)
+
+**Referto completo: `ANALISI_MODULI_BASE_2026-08-18.md`.** Qui solo il rimando e
+i tre punti che toccano questo dossier — **il resto non si duplica, si legge la'**.
+
+Letti integralmente i due moduli fondamentali (21 lez. **Piattaforma** +
+20 lez. **Analisi tecnica**, ~35.000 parole) a caccia di risposte alle domande
+aperte dei cinque processi. **Su 61 domande censite: 14 chiuse, 9 parziali,
+38 senza risposta.**
+
+**I tre punti che riguardano la prop e questo dossier:**
+
+1. 🏛️ **IL CORSO NON CONTIENE UN SOLO STRUMENTO DI RISCHIO DI PORTAFOGLIO — ed
+   e' strutturale, non una lacuna di un modulo.** Cercati in 41 lezioni e
+   **assenti**: correlazione (**la parola non compare MAI**), cap di perdita
+   giornaliera, tetto di posizioni simultanee, gap/slippage/weekend.
+   ➡️ **Rafforza il punto 4 del blocco Fibo/Media200 qui sopra**: quel silenzio
+   non e' dei due moduli gemelli, e' del corso dalla prima lezione all'ultima.
+   **Tutto cio' che nel nostro impianto e' Guardian, cap C1, filtro news e cap
+   giornaliero e' NOSTRO al 100%**, e va scritto accanto a qualunque numero di
+   qualunque backtest "del corso".
+
+2. 🚩 **IL FILTRO NEWS NON E' SOLO ASSENTE: E' SCONSIGLIATO.**
+   `[TRASCRITTO chiaro, an.tec. lez. 3]` _"In pratica **noi dimentichiamo
+   completamente le notizie macroeconomiche** ... **Anzi, a volte non conoscere
+   niente dell'analisi delle notizie macroeconomiche e' meglio perche' puo'
+   confondere**"_.
+   ➡️ **E' una dottrina dichiarata, non una dimenticanza.** Spiega perche'
+   Breakout, EasyTrend, Mediazione e Media200 non hanno filtro news, e perche'
+   l'esempio-principe del Breakout entra **su un rilascio macro**: per questo
+   corso e' coerente. **Contro `METRO_PROP.md` §7** (FTMO Standard ±2 min anche
+   su SL/TP, FundingPips ±10 anche solo *tenendo*), qualunque strategia del
+   corso portata su una prop **deve** montare un filtro che il corso non solo
+   non fornisce, ma sconsiglia. ⚠️ E il corso e' incoerente con se stesso: il
+   modulo **Fibo H4 lo rende obbligatorio**.
+
+3. 🕐 **IL BROKER DEL CORSO E' IL NOSTRO — e il fuso e' dettato.**
+   `[T]` lez. 2: _"il nome del broker che noi utilizziamo e' **Black Ridge** ...
+   dovrai semplicemente scrivere **bcmmarkets.com**"_ · `[T]` lez. 3: la
+   piattaforma _"**e' settata sostanzialmente sul GMT**"_, **IT−2 d'estate**,
+   **IT−1 d'inverno**, non modificabile.
+   ➡️ `bcmmarkets.com` = il nostro `50503392 — BCMMarkets-Server`.
+   ⚠️ **Ma il corso dice GMT (agosto = UTC+0) e il repo dice BCM = IT−1 =
+   UTC+1** (`PIANO_PROP` r.170, `HANDOFF` r.496): **c'e' un'ora di scarto, e
+   va MISURATA**, non assunta — su questo dossier gli orari di reset delle prop
+   sono gia' tradotti in ora server BCM (§2H), e un'ora sbagliata li sposta
+   tutti. 🥈 **Screenshot con l'orologio di Windows e la "Vista del mercato" di
+   MT4/MT5 nella stessa foto.**
+
+> 🥇 **E la richiesta n.1 che il referto lascia sul tavolo, perche' costa tre
+> click e sblocca DUE strategie:** il SuperTrend del corso e' un **`.ex4`
+> allegato alla lezione 10**, e il coach lo applica **premendo OK senza toccare
+> nulla** (_"Facciamo ok senza fare nessuna variazione"_). **I default di quel
+> file SONO i parametri del corso.** Scaricarlo, trascinarlo su un grafico,
+> fotografare la finestra input. **La catena Breakout → Mediazione → Leonardo
+> e' stata percorsa fino in fondo e termina a vuoto: quel file e' l'unica
+> fonte rimasta.**
