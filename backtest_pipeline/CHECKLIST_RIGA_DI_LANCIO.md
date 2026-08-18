@@ -1,4 +1,4 @@
-# ✅ PRIMA DI MANDARE UNA RIGA DI LANCIO — quattro controlli, sempre
+# ✅ PRIMA DI MANDARE UNA RIGA DI LANCIO — la lista, eseguita
 
 _Scritto il 15/08/2026 dopo che Claudio ha detto "stai facendo troppi
 errori". Aveva ragione: sette righe di lancio sbagliate in una sera, e il
@@ -405,6 +405,13 @@ sembra fatto, e non c'e'.
 > chat dice a Claudio **quale RIGA del referto leggere**, non solo quale file:
 > "la riga `M1` di tutti e sette, colonna `PrimaDataServer`".
 
+⚠️ **Precisazione misurata il 18/08 (notte), leggendo `ABTG_HistoryDownloader.mq5`
+riga 229-232: sulle righe `TICK` la colonna `PrimaDataServer` vale SEMPRE `-`**
+(per i tick il downloader non chiede `SERIES_SERVER_FIRSTDATE`, che e' una cosa
+delle barre). Quindi: **barre -> `PrimaDataServer`; TICK -> `PrimaDataLocale`.**
+Chi applicasse "leggi PrimaDataServer" alla riga TICK leggerebbe un trattino e
+concluderebbe che i tick non ci sono. A modello 4 la riga che conta e' `TICK`.
+
 Corollario di traffico: prima di bruciare le ore della griglia intera, si gira
 **un solo simbolo** (`-Solo`) come canarino. Costa mezz'ora e misura sul serio
 compilazione, profondita' vera, CSV prodotti e passate gemelle.
@@ -494,3 +501,65 @@ dati inesistenti.
 > quel passo consuma esistono davvero** (`if csv_prodotti:`), e il referto
 > chiude con una riga `ESITO: OK` / `ESITO: FALLITO -- <n> problemi` che dice
 > la stessa cosa del codice d'uscita. Le due cose non possono divergere.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 (notte) — trovate verificando `lancia_r84.ps1` e `lancia_r83.ps1`
+
+## 23. 🥫 L'ARTEFATTO DI INPUT SCADUTO: il passo dopo lo mangia senza guardare la data
+
+_Difetto vero, gia' committato in `lancia_r84.ps1` (riga 196) e `lancia_r83.ps1`
+(riga 189), trovato PRIMA dell'invio della riga._
+
+I punti 13 e 14 coprono gli artefatti che uno script **produce** (referto,
+anteprime). Questo copre quelli che **consuma**, prodotti da un passo
+precedente, magari ieri. Il PASSO 0 dei due driver fa:
+
+```powershell
+if (-not (Test-Path -LiteralPath $CsvStorico)) { Muori "il referto non c'e'..." }
+```
+
+`Test-Path` e basta. Se la sonda dello storico e' fallita, o e' stata uccisa dal
+timeout, sul Desktop resta il referto **della settimana prima**: il controllo
+sulla profondita' dei tick lo legge, lo trova coerente e **passa in silenzio**.
+Il round parte su una misura vecchia — ed e' il referto stantio del 17/08,
+stavolta in ingresso invece che in uscita.
+
+Due pezzi, insieme:
+1. **La riga che PRODUCE l'artefatto lo cancella prima di rifarlo**
+   (`Remove-Item $csv -Force -EA SilentlyContinue`), cosi' una corsa fallita non
+   lascia in piedi il file vecchio.
+2. **Lo script che lo CONSUMA ne guarda l'ETA', non solo l'esistenza:**
+   ```powershell
+   $eta = (New-TimeSpan -Start (Get-Item -LiteralPath $f).LastWriteTime -End (Get-Date)).TotalHours
+   if($eta -gt 48){ Muori ("questo referto ha " + [int]$eta + " ore: rifai la misura prima di girare.") }
+   ```
+
+## 24. 📌 IL PIN CHE NON COPRE IL PEZZO PIU' IMPORTANTE (perche' lo scarica il gemello)
+
+_Difetto vero, gia' committato in `walkforward_generico.ps1` (riga 78-79 e
+129-136), trovato PRIMA dell'invio della riga di R83/R84._
+
+Il punto 6 dice "dopo un push fresco la riga punta all'HASH". Ma la riga pinna
+solo quello che scarica **lei**. Qui il driver di round pinna i `.ps1` e i file
+prova all'hash, poi chiama `walkforward_generico.ps1`, che ha dentro:
+
+```powershell
+$EABranch="lavoro"
+... Invoke-WebRequest -Uri "$RawBase/mql5/Experts/$Expert.mq5" -OutFile $srcFile
+catch{ ... Write-Host "(download fallito: uso la copia locale gia' scaricata)" }
+```
+
+cioe' **riscarica l'EA da `lavoro` HEAD ignorando `-Rif`**, e se il download va
+male **ripiega in silenzio sulla copia locale**. Su un round che dura due notti
+questo vuol dire: un push a meta' corsa cambia il motore **fra una cella e
+l'altra**, e un confronto fra celle (o un canarino di equivalenza) non misura
+piu' niente. La riga sembra pinnata e l'artefatto che conta di piu' non lo e'.
+
+> **Prima di scrivere "riga pinnata a `<sha>`", si elenca cosa scarica il
+> GEMELLO chiamato, e da dove.** Se scarica da HEAD: (1) la riga confronta byte
+> a byte HEAD contro il pin e si ferma se differiscono
+> (`if((irm "$b/lavoro/$f") -ne (irm "$b/$sha/$f")){ throw }`), (2) la chat
+> dichiara il **congelamento del branch** per tutta la durata del round, e
+> (3) il fix vero (inoltrare `-Rif`, togliere il ripiego silenzioso) va in coda
+> come lavoro a se', dichiarato nel referto.
