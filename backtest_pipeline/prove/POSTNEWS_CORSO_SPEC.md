@@ -776,3 +776,136 @@ un rischio reale, e va trattata come **da misurare** (il tester a tick reali lo
 dira').
 
 ---
+
+## 12. ✅ IL CONTEGGIO DELLA MECCANIZZABILITA' (da cui viene il 77%)
+
+| # | decisione | stato |
+|---|---|---|
+| D1 | quale notizia n.1 → ECB Press Conference | 🟢 `[T]` |
+| D2 | quale notizia n.2 → FOMC Press Conference | 🟢 `[T]` |
+| D3 | strumento ECB → EUR/JPY | 🟢 `[T]` |
+| D4 | strumento FOMC → EUR/USD | 🟢 `[T]` |
+| D5 | timeframe → M5 | 🟢 `[T]` |
+| D6 | candele ECB → le 2 DOPO la notizia | 🟢 `[T]` |
+| D7 | candele FOMC → notizia + successiva | 🟢 `[T]` |
+| D8 | livelli → max/min con ombre | 🟢 `[T]` |
+| D9 | istante d'azione → +15 / +10 min | 🟢 `[T]` |
+| D10 | tipo ordini → buy stop / sell stop | 🟢 `[T]` |
+| D11 | offset buy → +3 pip | 🟢 `[T]` |
+| D12 | offset sell → −2 pip | 🟢 `[T]` |
+| D13 | TP → 50 pip | 🟢 `[T]` |
+| D14 | SL → 25 pip | 🟢 `[T]` |
+| D15 | OCO → NO | 🟢 `[T]` esplicito |
+| D16 | scadenza pendenti ECB → 18:15 IT | 🟡 valore certo, **regola incerta** (fisso o +3h30?) |
+| D17 | scadenza pendenti FOMC → +75 min | 🟢 `[T]` |
+| D18 | scadenza posizione → nessuna | 🟢 `[T]` esplicito |
+| D19 | chiusura venerdi → 22:50 IT | 🟢 `[T]` |
+| D20 | trailing ECB → +25 → SL −15 | 🟡 **dichiarato opzionale e a occhio** |
+| D21 | trailing FOMC → nessuno | 🟢 `[T]` |
+| D22 | rischio → 3% per evento | 🟡 _"ti suggerisco"_, e _"sara' una scelta tua"_ |
+| D23 | formula del volume | 🟡 usata, ma **la lezione che la insegna non e' nel corpus** |
+| D24 | fuso di tutti gli orari → ora italiana | 🟢 `[T]` ripetuto 6 volte |
+| D25 | notizia rinviata/annullata | 🔴 non trattato |
+| D26 | filtro spread/slippage | 🔴 non trattato (sostituito da un'asserzione) |
+
+**20 🟢 su 26 = 77% secco. Con le 4 🟡 dichiarate: 92%.**
+Restano 2 🔴, entrambi risolvibili in codice con una scelta nostra dichiarata.
+
+---
+
+## 13. 🖼️ COSA ERA A SCHERMO E NON NEL PARLATO — le domande per Claudio
+
+> La trascrizione e' **solo audio**: dove il relatore dice _"vedi qua"_ senza
+> leggere i numeri, quel pannello **non lo conosciamo**.
+
+| # | cosa manca | dove (lezione) | perche' serve |
+|---|---|---|---|
+| **1** 🥇 | **La LEZIONE 1 del modulo** (la cartella parte dalla n. 2) | — | e' quasi certamente la presentazione del coach: **e' li' che c'e' il NOME del relatore** (§14) |
+| **2** 🥇 | **Il file EXCEL della strategia** (_"che potrai scaricare dai materiali del corso"_ `[T]` lez. 6) | 6, 9 | contiene **le formule esatte** di prezzi, TP, SL e livello di trailing: chiuderebbe D16 e D20 |
+| **3** 🥇 | **I TRE file di backtest** (colonna A date, colonna B pips, colonna C progressivo) | 7, 9, 10 | contengono **N, le date e la lista operazione per operazione**: e' l'unica cosa che trasformerebbe il §8 da testimonianza a misura |
+| **4** | **La tabella dei rendimenti anno per anno** mostrata in lez. 10 | 10 | l'unico posto dove si vede il **2009 a −2%** e gli altri 14 anni |
+| **5** | Il **calcolatore di pip Dukascopy** e la lezione di money management | 6, 9 | la formula del volume e' **usata** ma insegnata in un capitolo che non abbiamo |
+| **6** | Screenshot del **grafico EUR/JPY 07/03/2024** e **EUR/USD 20/03/2024** M5 | 6, 9 | ci permetterebbero di **riprodurre T1 e T2 sui NOSTRI dati BCM** e misurare la differenza di feed |
+| **7** | La **finestra del filtro di Forex Factory** impostata dal relatore | 3 | per sapere se filtra anche per valuta oltre che per impatto |
+
+---
+
+## 14. 🎙️ IL RELATORE — cosa e' dimostrato e cosa no
+
+**Dimostrato dal testo:**
+- 🟢 **NON e' Leonardo Fasciano.** `[T]` lez. 10, ultima riga: _"ti rimando al
+  prossimo capitolo in cui **ritroverai Leonardo Fasciano**"_ — e "ritroverai"
+  dice anche che Fasciano era gia' comparso prima (nei moduli base).
+- 🟢 **E' il coach della PRIMA strategia del master** (capitolo 5) e **insegna
+  questi parametri dal 2013** `[T]` (_"dal 2013 che spiego questi parametri"_).
+- 🟢 Parla a nome dell'organizzazione: _"questo e' quello che **suggeriamo
+  noi**"_, _"in questo master **abbiamo deciso** di partire da una strategia
+  totalmente meccanica"_ → posizione di indirizzo, non di solo docente.
+- 🔴 **Il nome non viene MAI pronunciato in 9 lezioni**, e **non c'e' un solo
+  marcatore di genere** utilizzabile (a differenza del Breakout, _"io sono
+  entrata"_, e del Fibo H4, _"sono impegnato"_).
+
+**Non dimostrato:**
+- 🟠 L'intestazione del nostro `ABTG_PostNews.mq5` dice **"Christian
+  Bertacchi"**. I parametri coincidono **al dettaglio piu' fino** (18:15,
+  trailing solo ECB, size su 50 pip): chi scrisse l'EA aveva **materiale dello
+  stesso autore**. Ma **in tutto il repo non esiste un documento che leghi
+  Bertacchi alla Post News** — nei 5 PDF Point Break le parole "post news",
+  "press conference", "ECB" e "FOMC" **non compaiono mai** (verificato con
+  ricerca testuale). **Attribuzione [INCERTO], da non propagare come fatto.**
+
+➡️ **La domanda n.1 per Claudio resta la LEZIONE 1 del modulo.**
+
+---
+
+## 15. 🧵 IL FILO ROSSO DEI SEI MODULI — questo lo rompe, e mostra la regola vera
+
+`ANALISI_POINTBREAK_2026-08-18.md` §4.4 aveva chiuso cosi': _"la scuola insegna
+con precisione DOVE entrare e DOVE mettere lo stop, e lascia sistematicamente
+indeterminato il parametro che decide se il metodo guadagna — in tutti i moduli
+quel parametro e' **la gestione dell'uscita**"_.
+
+**Nella Post News l'uscita e' DETERMINATA**: TP 50, SL 25, scadenza dei
+pendenti, nessuna scadenza della posizione, chiusura del venerdi. Tutto
+dettato, tutto numerico, tutto verificato negli esempi (§7).
+
+> 🎯 **Ma l'indeterminatezza non e' sparita: si e' SPOSTATA.**
+>
+> | modulo | il numero che manca |
+> |---|---|
+> | Mediazione · Breakout · Fibo H4 · Media 200 · Point Break | **l'uscita** (parzializzazione, media, discrezionalita') |
+> | **POST NEWS** | 🔴 **la PROVA: N mai detto, DD combinato mai detto, lista trade mai mostrata, e lo strumento insegnato non arriva ai dati del backtest** |
+>
+> **La regola vera, aggiornata a sei moduli:** *la scuola lascia indeterminato
+> cio' che deciderebbe se il metodo guadagna — dove l'uscita e' discrezionale e'
+> l'uscita, dove l'uscita e' meccanica e' la verifica.* **Non e' mai
+> l'ingresso.**
+>
+> E c'e' il dettaglio che chiude il cerchio: **l'unico pezzo discrezionale di
+> tutto il modulo e' il trailing** `[T]` (_"se riesci bene, se non riesci non
+> muore nessuno"_) — cioe' **ancora una volta l'uscita**.
+
+---
+
+## 16. 🔗 LA COSA CHE SOLO QUESTO MODULO HA: i dati sono gia' in casa
+
+**Degli SEI moduli analizzati, la Post News e' l'unico la cui condizione
+d'ingresso e' un DATO che possediamo gia' in formato macchina.**
+
+- Il Breakout ha bisogno del SuperTrend (parametri ignoti).
+- Il Fibo H4 ha bisogno di un pattern engulfing (definizione ambigua).
+- La Media 200 ha bisogno di un "arrivo sulla media" (filtro mai dettato).
+- 🥇 **La Post News ha bisogno di UNA DATA E UN'ORA. E le abbiamo: 70 eventi
+  ECB/FOMC gia' nel repo**, piu' 250 altre conferenze stampa di banche centrali
+  (§4.3, §10-P1), piu' `NewsFilter.mqh` in biblioteca e il caricatore CSV gia'
+  scritto dentro `ABTG_PostNews.mq5`.
+
+> **Traduzione: e' l'unico dei sei moduli che si puo' backtestare FEDELMENTE
+> questa settimana, senza chiedere niente a nessuno.** Quello che manca non e'
+> un dato: e' un round.
+
+---
+
+_Fine specifica. Scritta il 18/08/2026 sera. Nessun EA modificato, nessun round
+lanciato, nessun forward toccato._
+
