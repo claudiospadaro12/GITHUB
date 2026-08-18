@@ -451,8 +451,21 @@ E la banda dichiarata (`0 / −50`) non coincide con quella della lez. 38
 **Esempio numerico dettato** `[T]` lez. 37, USDJPY:
 massimo congestione `155,95` → SL `155,96` (1 pip sopra) · chiusura segnale
 `155,57` → R = **40 pip** → TP = `155,57 − 1,20` = **`154,37`** (120 pip).
-✅ **Aritmetica verificata, i tre numeri chiudono.** Utile come test-case di
-regressione per un EA. (Nella stessa lezione dice anche _"ci sono 41 pip di
+
+> 🔴 **CORREZIONE DEL 18/08 sera (R82, in fase di implementazione dell'EA).**
+> ~~"Aritmetica verificata, i tre numeri chiudono."~~ **NON chiudono.**
+> `155,96 − 155,57 = **0,39**`, cioe' **39 pip, non 40**. La relatrice
+> **arrotonda R a 40** e da li' calcola il target (`3 × 0,40 = 1,20`
+> → 154,37). Chi aveva verificato ha controllato **solo la seconda
+> sottrazione** (155,57 − 1,20 = 154,37, che e' esatta), non la prima —
+> ed e' proprio la prima a produrre l'1,20.
+> **Conseguenza per l'EA:** `ABTG_BreakoutCorso` usa il valore **esatto**
+> (39 pip → TP **154,40**, 3 pip sotto il 154,37 del corso) e stampa il
+> confronto in `OnInit` (`InpAutoTest`). Il test-case resta utile come
+> regressione **sullo STOP** (155,96, che coincide al centesimo); sul
+> target misura una **discrepanza del corso**, non dell'EA.
+
+Utile come test-case di regressione per un EA. (Nella stessa lezione dice anche _"ci sono 41 pip di
 distanza"_ riferito al **suo** prezzo di ingresso reale, diverso dai 40 teorici:
 non e' un errore, e' la distinzione entrata reale/entrata teorica.)
 
