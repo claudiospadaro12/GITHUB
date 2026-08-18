@@ -1,0 +1,7 @@
+Ciao e benvenuti in questo nuovo capitolo del Tuo Master. Sono Leonardo Fasciano, trader e coach in area trading in Alfio Bardola Trading Group. In questo capitolo andremo a vedere una nuova strategia che si chiama EasyTrend e un nuovo strumento che si chiama TradingView.
+
+TradingView è una piattaforma di analisi dei grafici, è una piattaforma che ci permette di andare a studiare i grafici alla ricerca di pattern, alla ricerca di particolari momenti di mercato dove possiamo potenzialmente trarne dei profitti. Troverai qui sotto al video un link. Questo link ti permetterà di accedere a TradingView ed effettuare il tuo primo accesso e iscrizione per tutte le fasi successive.
+
+È importante differenziare TradingView come strumento di studio rispetto alla MetaTrader 4, che invece è il nostro strumento di messa a mercato dell'operazione. Quindi avremo due momenti. Il momento in cui andremo a cercare il nostro pattern, andremo a cercare la nostra opportunità di ingresso e la fase in cui invece andremo a metterla a mercato, che sarà ovviamente su MetaTrader 4, così come hai già imparato nei capitoli precedenti.
+
+Bene, ci vediamo nel prossimo video, dove andremo a vedere il primo settaggio su TradingView.
