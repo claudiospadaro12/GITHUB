@@ -604,3 +604,115 @@ presenta nella lez. 11 dell'EasyTrend), e _"ritroverai"_ dice che **Fasciano era
 gia' comparso** (moduli base). Vedi §4.
 
 ---
+
+# PARTE 4 — 🎙️ IL RELATORE, IL FILO ROSSO, LE DOMANDE
+
+## 4.1 Chi parla: il QUARTO relatore, e non ha un nome
+
+**Dimostrato dal testo:**
+- 🟢 **NON e' Leonardo Fasciano** `[T]` (lez. 10, ultima riga).
+- 🟢 E' il coach della **prima strategia del master** (capitolo 5) e **insegna
+  questi parametri dal 2013** `[T]`.
+- 🟢 Parla per l'organizzazione: _"quello che **suggeriamo noi**"_, _"in questo
+  master **abbiamo deciso**"_.
+- 🔴 **Il nome non e' mai pronunciato in 9 lezioni**, e **non c'e' un solo
+  marcatore di genere** (a differenza del Breakout, _"io sono entrat**a**"_, e
+  del Fibo H4, _"sono impegnat**o**"_): **non posso nemmeno dire se e' uomo o
+  donna.** Non lo deduco dallo stile: non sarebbe una prova.
+
+**Non dimostrato — e va detto perche' e' gia' scritto in un nostro file:**
+- 🟠 L'intestazione di `mql5/Experts/ABTG_PostNews.mq5` recita **"Strategia
+  POST-NEWS totalmente MECCANICA (Christian Bertacchi)"**. I parametri
+  coincidono **fino al dettaglio piu' fino** (18:15, trailing solo ECB, size su
+  50 pip): chi scrisse quell'EA il 26/07 **aveva materiale dello stesso
+  autore**. **Ma in tutto il repo non esiste un documento che leghi Bertacchi
+  alla Post News**: nei 5 PDF Point Break le parole "post news", "press
+  conference", "ECB" e "FOMC" **non compaiono mai** (verificato con estrazione
+  testuale). **Attribuzione `[INCERTO]`: non la propago come fatto.**
+
+📌 **Roster dei relatori del corso, aggiornato:** Manuela Negro (Mediazione,
+Breakout) · Leonardo Fasciano (EasyTrend, indicatori base) · Francesco Baroni
+(opzioni/cripto, modulo base) · **Paolo** `[I]` (Fibo H4, Media 200) · **questo
+qui: senza nome**.
+
+🥇 **LA DOMANDA N.1 PER CLAUDIO: manca la LEZIONE 1 del modulo.** La cartella
+parte dalla n. 2, la numerazione del corso e' continua (postnews 2-10, easytrend
+11-17, fibo 18-20, media200 21-25, mediazione 26-33, breakout 34-40) → **esiste
+una lezione 1, e nei moduli base l'analoga si chiama "CHI E' IL TUO COACH"**.
+**E' quasi certamente li' che c'e' il nome.**
+
+## 4.2 🧵 IL FILO ROSSO — questo modulo lo rompe, e cosi' rivela la regola vera
+
+`ANALISI_POINTBREAK_2026-08-18.md` §4.4 aveva concluso: _"la scuola insegna con
+precisione DOVE entrare e DOVE mettere lo stop, e lascia sistematicamente
+indeterminato il parametro che decide se il metodo guadagna — e in tutti i
+moduli quel parametro e' **la gestione dell'uscita**"_.
+
+**Nella Post News l'uscita e' DETERMINATA:** TP 50, SL 25, scadenza dei
+pendenti, nessuna scadenza della posizione, chiusura del venerdi. Tutto
+numerico, tutto verificato negli esempi.
+
+| modulo | relatore | il numero che manca |
+|---|---|---|
+| Mediazione | Manuela Negro | win rate richiesto 60-77%, mai dichiarato |
+| Breakout | Manuela Negro | la correlazione fra i 7 cross JPY, mai nominata |
+| Fibo H4 / Media 200 | Paolo `[I]` | il filtro d'arrivo e la % di rischio, mai dettati |
+| Point Break | Christian Bertacchi | win rate 49-77%, mai dichiarato |
+| **POST NEWS** | **senza nome** | 🔴 **la PROVA: N mai detto, DD combinato mai detto, lista trade mai mostrata — e lo strumento insegnato non arriva ai dati del backtest** |
+
+> 🎯 **LA REGOLA VERA, a sei moduli:** *la scuola lascia indeterminato cio' che
+> deciderebbe se il metodo guadagna. Dove l'uscita e' discrezionale, e'
+> l'uscita. Dove l'uscita e' meccanica, e' la VERIFICA. **Non e' mai
+> l'ingresso.***
+>
+> E il dettaglio che chiude il cerchio: **l'unico pezzo discrezionale di tutto
+> il modulo e' il trailing** `[T]` (_"se riesci bene, se non riesci non muore
+> nessuno"_) — cioe' **ancora una volta l'uscita**.
+>
+> **Conseguenza operativa invariata:** quando ricostruiamo una strategia del
+> corso, **il pezzo che tocca a noi misurare non e' l'ingresso**. Qui, per la
+> prima volta, non e' l'uscita: **e' la prova che funzioni.** E per la prima
+> volta **possiamo produrla noi** (§1.3).
+
+## 4.3 ❓ LE DOMANDE PER CLAUDIO (in ordine di valore)
+
+| # | richiesta | dove | cosa sblocca |
+|---|---|---|---|
+| **1** 🥇 | **La LEZIONE 1 del modulo** (la cartella parte dalla 2) | — | **il nome del relatore** |
+| **2** 🥇 | **Il file EXCEL della strategia** (_"lo potrai scaricare dai materiali del corso"_ `[T]` lez. 6) | lez. 6, 9 | le **formule esatte** di prezzo/TP/SL/trailing → chiude 2 delle 4 incertezze |
+| **3** 🥇 | **I TRE file di backtest** (date · pips · progressivo) | lez. 7, 9, 10 | **N, le date e la lista operazione per operazione**: e' l'unica cosa che trasforma il §2.3 da testimonianza a misura |
+| **4** | Screenshot della **tabella dei rendimenti anno per anno** | lez. 10 | l'unico posto dove si vedono i 15 anni separati |
+| **5** | Screenshot dei grafici **EUR/JPY 07/03/2024** e **EUR/USD 20/03/2024** M5 | lez. 6, 9 | riprodurre T1/T2 **sui nostri dati BCM** e misurare la differenza di feed |
+| **6** | La lezione di **money management** con la formula del volume e il pip calculator | citata, mai vista | oggi la formula la conosciamo solo perche' viene **usata** |
+| **7** | La **trascrizione grezza del live "De Marco" 29/07** | `docs/live_emiliano/` | oggi abbiamo **solo la sintesi**: le 3 divergenze col corso non sono verificabili riga per riga |
+
+---
+
+# PARTE 5 — 🗑️ GLI SCARTI
+
+**Nessuna trascrizione e' stata scartata: tutte e 9 contengono materiale
+estraibile.** E' il primo modulo dei sei senza lezioni a vuoto.
+
+Le due lezioni con meno sostanza, e perche' restano:
+- **Lez. 2** (nessun parametro): vale per la **definizione operativa di
+  "strategia meccanica"** in 4 punti, che uso come check-list.
+- **Lez. 3** (nessun parametro di strategia): vale per **il fuso dichiarato** e
+  per la frase su MT4 che, tre lezioni dopo, **smonta il backtest**.
+
+**Cio' che ho scartato DENTRO le lezioni:** ~15% del parlato e' didattica di
+piattaforma (come far ricomparire il "terminale" o la "vista del mercato" da
+`Visualizza`, come leggere OHLC posizionando il cursore sulla chiusura di una
+candela). Utile a un principiante, **inutile a un EA**: non e' stato estratto.
+
+---
+
+## ✅ COSA CONSEGNO, IN UNA RIGA
+
+**Una strategia meccanica al 77%, con l'aritmetica degli esempi esatta, zero
+bandiere rosse, i dati d'ingresso gia' in casa — e un backtest che non regge
+all'esame. Il nostro EA che la implementa e' stato bocciato con quattro
+backtest da ZERO TRADE: quel verdetto va ritirato e il round va rifatto.**
+
+_Referto scritto il 18/08/2026 sera. Nessun EA modificato, nessun round
+lanciato, nessun forward toccato. Le decisioni sono di Claudio._
+
