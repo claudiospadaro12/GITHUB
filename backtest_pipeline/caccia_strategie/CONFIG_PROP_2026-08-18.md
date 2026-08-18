@@ -696,3 +696,32 @@ Il dossier della **raccolta mirata di `.set`** sta in un file separato:
    news "non e' backtestabile". La FUNZIONE non risponde nel tester, ma il
    calendario **si esporta in CSV** in `Common/Files` e da li' si legge: due CSV
    pubblici (2021→2025, 37.799 righe) sono gia' in `biblioteca/schede/`.
+
+---
+
+## 🎓 RIMANDO — analisi del CORSO di Claudio, modulo BREAKOUT (18/08, sera)
+
+Missione separata dello stesso giorno: le trascrizioni delle **lezioni 34-40**
+del corso di Claudio (modulo Breakout) sono state analizzate riga per riga.
+**Non e' materiale di terzi: e' la TESI dietro alla sedia `BREAKOUT_EA_JPY_v3`**
+che gira sul conto piccolo **senza contratto**.
+
+**I due referti (non duplico qui i contenuti):**
+- 📄 **Analisi + schede per lezione:**
+  `backtest_pipeline/caccia_strategie/ANALISI_CORSO_BREAKOUT_2026-08-18.md`
+- 📐 **Specifica implementabile per developer MQL5:**
+  `backtest_pipeline/prove/BREAKOUT_CORSO_SPEC.md`
+
+**Cosa tocca QUESTO dossier (solo i punti prop):**
+1. ⚠️ **La strategia del corso non ha filtro news** — e il suo esempio-principe
+   (lez. 37) **entra su un rilascio macro**. Attrito diretto con `METRO_PROP.md`
+   §7 (news trading limitato da diverse prop).
+2. ⚠️ **Nessun cap di perdita giornaliera.** L'unico tetto del corso e' il
+   **20% di drawdown complessivo** — misura di portafoglio personale, non
+   regola prop.
+3. ⚠️ **Rischio simultaneo fino al 7%**: il corso opera **7 cross JPY** all'1%
+   ciascuno e **non menziona mai la correlazione**. Contro un daily loss del 5%
+   e' una violazione a portata di una singola giornata di yen.
+
+→ Se una configurazione prop dovesse mai ospitare questa strategia, i tre buchi
+sopra sono **da colmare fuori dal corso**: il corso non li tratta.
