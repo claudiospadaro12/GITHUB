@@ -181,12 +181,13 @@ datetime CostruisciData(int anno, int mese, int giorno, int ora)
    return StringToTime(StringFormat("%04d.%02d.%02d %02d:00:00", anno, mese, giorno, ora));
   }
 
+int g_giorniMese[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+
 int GiorniMese(int anno, int mese)
   {
-   static int g[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
-   if(mese == 2 && ((anno % 4 == 0 && anno % 100 != 0) || anno % 400 == 0)) return 29;
    if(mese < 1 || mese > 12) return 30;
-   return g[mese - 1];
+   if(mese == 2 && ((anno % 4 == 0 && anno % 100 != 0) || anno % 400 == 0)) return 29;
+   return g_giorniMese[mese - 1];
   }
 
 //--- giorno del mese della N-esima domenica (N=1 -> la prima)
