@@ -1,12 +1,12 @@
 REFERTO DI RACCOLTA - R82 TORNEO JPY (Breakout del corso)
-data: 2026-08-18 17:30
+data: 2026-08-18 18:05
 giro: 1   GIRO 1 - SCREENING (OHLC M1, 2007.02.12 ->)
 riferimento (commit/branch): d63ca2d000034cafbc5ba855f313a07675761629
 macchina: DESKTOP-H4D7CAJ   utente: Master
 deposito: 10000   modello: 1   EA: ABTG_BreakoutCorso
-cross girati: USDJPY
-CSV attesi: 2   mancanti: 0
-serie per-trade raccolte: 2 (solo finestra OOS)
+cross girati: USDJPY EURJPY GBPJPY AUDJPY CHFJPY CADJPY NZDJPY
+CSV attesi: 14   mancanti: 0
+serie per-trade raccolte: 14 (solo finestra OOS)
 
 La riga 'data:' qui sopra deve essere di ADESSO. Se e' vecchia, stai
 guardando una raccolta precedente e non i file di questa corsa.
