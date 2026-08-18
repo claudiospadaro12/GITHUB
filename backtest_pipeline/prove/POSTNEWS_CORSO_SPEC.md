@@ -342,3 +342,123 @@ Per un EA con l'ora scritta a mano, esiste eccome.** → §5.
    merito, non sul rischio (Emendamento B).
 
 ---
+
+## 5. 🔧 COME SI IMPLEMENTA DAVVERO — l'ora si legge, non si scrive
+
+### 5.1 Il difetto strutturale dell'implementazione attuale
+
+`ABTG_PostNews.mq5` decide **a un orario fisso** (`InpActionHour/Min`) e usa il
+calendario **solo per sapere se oggi c'e' la notizia** (commento nel sorgente:
+_"Match sul giorno, non sull'ora … Il QUANDO operare e' dato da
+InpActionHour/Min"_).
+
+Su una serie storica questo si rompe **tre volte**:
+
+| quando | cosa succede all'orario fisso |
+|---|---|
+| **luglio 2022** | l'ECB passa da 14:30 a 14:45 IT → l'azione fissa alle 15:00 legge **le candele +15/+20** invece di +5/+10 |
+| **marzo / novembre** | il FOMC passa fra 19:30 e 20:30 IT → **un'ora di errore, 12 candele fuori** |
+| **ora legale** | se il delta BCM-Italia non e' costante, tutto slitta di 60 minuti |
+
+### 5.2 La forma corretta (proposta, NON eseguita)
+
+```
+1. all'avvio: carica gli eventi (titolo contiene "ECB Press Conference" /
+   "FOMC Press Conference", impatto >= 3)
+2. converti l'ora dell'evento in ORA SERVER:
+      t_server = t_csv + OFFSET_CSV_SERVER          (input, default 0)
+   e VERIFICALO invece di fidarti: per gli ultimi 3 eventi controlla che la
+   candela M5 dell'evento sia la piu' AMPIA della giornata. Se non lo e',
+   l'offset e' sbagliato -> LOG ROSSO e nessun ordine.
+3. istante d'azione   = t_server + InpActionOffsetMin   (ECB 15, FOMC 10)
+4. range              = le DUE candele M5 chiuse prima dell'istante d'azione
+5. scadenza pendenti  = t_server + InpExpiryOffsetMin   (ECB 210, FOMC 75)
+```
+
+✅ **Con questa forma spariscono tutti e tre gli errori sopra**, l'EA diventa
+indipendente dall'ora legale e **il backtest storico diventa possibile senza
+toccare i preset anno per anno**.
+
+🧪 **Il controllo di sanita' del punto 2 e' gratis e vale oro**: e' lo stesso
+tipo di controllo che ci ha salvato sul fuso del DAX. Un EA che non sa
+dimostrare di aver trovato la candela giusta **non deve piazzare ordini**.
+
+### 5.3 Il pip, il prezzo, e i due decimali diversi
+
+`[T]` lez. 8: _"prima ragionavamo su euro-yen che ha solo tre cifre decimali,
+qui lavoreremo invece su euro-dollaro che ha 5 cifre decimali"_.
+
+- EUR/JPY 3 decimali → **1 pip = 0,010**
+- EUR/USD 5 decimali → **1 pip = 0,00010**
+- ✅ `PipSize()` del nostro EA (`_Point*10` per digits 3/5) e' **corretto** e
+  riproduce entrambi gli esempi al centesimo (§7).
+
+### 5.4 🎯 L'asimmetria +3 / −2 e' una CORREZIONE DELLO SPREAD, non un capriccio
+
+`[T]` lez. 5: _"Piu' 3 e meno 2, semplicemente **per lo spread**, la differenza
+tra bid e ask. In realta' sia l'ordine di acquisto che l'ordine di vendita
+vengono eseguiti 2 pips sopra e sotto, ma perche' l'ordine di acquisto venga
+eseguito 2 pips sopra, **a causa dello spread devo metterlo 3 pips**"_.
+
+**Il ragionamento e' tecnicamente giusto:** un BUY STOP scatta sull'**ASK**, un
+SELL STOP sul **BID**. Il livello vero che il relatore vuole e' **+2 pip di BID
+in entrambe le direzioni**, e il +3 e' un +2 **con 1 pip di spread assunto**.
+
+🔧 **Conseguenza per noi:** l'offset del buy **non e' 3**, e'
+`2 pip + spread_corrente`. Su EUR/JPY BCM lo spread non e' garantito 1 pip →
+l'implementazione fedele e':
+
+```
+buyPrice  = hi + 2 pip + spread_corrente     (invece di hi + 3 pip fisso)
+sellPrice = lo - 2 pip
+```
+
+⚠️ **E questo spiega la divergenza con la nostra fonte live** (§9.1: il preset
+usa −3 sul sell): con un'assunzione di spread diversa cambia il numero. **Il
+parametro giusto da spazzolare non e' "2 o 3": e' `offset_base` (1-4 pip) con
+lo spread aggiunto solo al lato buy.**
+
+---
+
+## 6. 🚨 RISCHIO — dove il modulo esce dal metro di casa
+
+### 6.1 Cosa dice il corso
+
+`[T]` lez. 6: _"per questa strategia **ti suggerisco un profilo di rischio del
+3% a operazione**, questo e' quello che suggeriamo noi, ovviamente se vuoi avere
+un approccio piu' aggressivo alzerai quel rischio"_.
+
+- 3% = **budget dell'evento** (doppio stop), 1,5% = singolo ordine `[T]`.
+- Formula del volume `[T]`: `lotti = (saldo x rischio%) / (SL_riferimento x valore_pip)`
+  con **SL_riferimento = 50 pip sempre**, valore pip dal calcolatore Dukascopy.
+- ⚠️ La lezione che insegna quella formula **non e' nel nostro corpus** (sta in
+  un capitolo precedente che non abbiamo): qui e' solo **usata**.
+
+### 6.2 Il confronto col metro di casa — e non e' vicino
+
+| | corso | casa (A1) | fattore |
+|---|---:|---:|---:|
+| rischio per ORDINE | **1,50%** | **0,65%** | **2,3x** |
+| rischio per EVENTO (doppio stop) | **3,00%** | 1,30% | **2,3x** |
+| quota del cap C1 (3,25% aperto) consumata da UN evento | **92%** | 40% | — |
+| drawdown massimo dichiarato (solo ECB) | **15%** `[dichiarato]` | muro prop 10% | 🔴 **sfonda** |
+
+🔴 **Al 3% del corso, UN SOLO evento consuma il 92% del cap di rischio aperto
+firmato il 18/08.** E il drawdown che il relatore stesso dichiara (15%) **e' piu'
+grande del muro totale di ogni prop censita** (10%).
+
+✅ **Riscalatura di casa (proposta):** `InpRiskPercent = 1,30` con
+`InpRiskRefSLpips = 50` → **0,65% per ordine**, 1,30% per evento nel caso
+peggiore. **Con questa taratura il DD dichiarato del 15% si riduce
+proporzionalmente a ~6,5%** — sotto il muro, sopra il fastidio.
+
+### 6.3 Nessun cap giornaliero, nessuna correlazione — ma qui quasi non serve
+
+- ❌ Il modulo non nomina mai un limite di perdita giornaliera.
+- ✅ **Ma le due notizie non cadono MAI lo stesso giorno** (ECB giovedi, FOMC
+  mercoledi; nel nostro CSV 2021-2025 **zero collisioni di data**) → il rischio
+  aggregato di strategia e' per costruzione **un solo evento alla volta**.
+  E' l'unica strategia dei sei moduli che **non ha il problema
+  dell'esposizione simultanea**.
+
+---
