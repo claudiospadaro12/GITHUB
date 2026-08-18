@@ -223,3 +223,53 @@ Due controlli, da fare insieme, su ogni script che decide PER NOME:
    una bugia archiviata: fra un mese non la ritrova nessuno, perche' la
    cerchera' fra i documenti. Famiglie diverse -> destinazioni diverse,
    oppure si lasciano ferme.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 (notte) — trovate verificando `installa_guardian.ps1`
+
+## 12. 💾 IL BACKUP SENZA GUARDIA SI AUTO-DISTRUGGE AL SECONDO LANCIO
+
+_Difetto vero, gia' committato in `installa_guardian.ps1` (a81632d, riga 58),
+trovato PRIMA dell'invio della riga._
+
+```powershell
+if(Test-Path -LiteralPath $dest){ Copy-Item -LiteralPath $dest ($dest + ".prima_v110") -Force }
+```
+
+Primo lancio: `.prima_v110` = il file ORIGINALE, rollback perfetto.
+**Secondo lancio** (e Claudio rilancia spesso: "non ero sicuro, rifaccio"):
+`$dest` ormai contiene gia' la versione nuova, e `-Force` ci scrive sopra il
+backup. Il rollback e' morto in silenzio, senza un errore rosso.
+
+**Regola: un backup si scrive SOLO SE NON ESISTE GIA'.**
+```powershell
+$bak = $dest + ".prima_v110"
+if((Test-Path -LiteralPath $dest) -and -not (Test-Path -LiteralPath $bak)){ Copy-Item -LiteralPath $dest $bak -Force }
+```
+Se serve davvero uno storico, il backup si data (`.prima_v110_20260818_2312`),
+non si sovrascrive mai.
+
+## 13. 🚦 SE LO SCRIPT CHIAMATO FA `exit 1`, LA CODA DELLA RIGA TIRA DRITTO
+
+Estensione del punto 8 dal lato dell'USCITA. Il punto 8 copre l'`irm` che
+fallisce; questo copre lo script che **parte, si accorge di un problema e si
+ferma da solo**: `& $p; <riga di raccolta>` esegue la raccolta lo stesso e
+scrive sul Desktop un referto che sembra buono ed e' la FOTO DEI FILE VECCHI.
+E' esattamente il referto stantio del 17/08, ma prodotto da noi.
+
+```powershell
+$global:LASTEXITCODE = 0                      # 1: azzero PRIMA, o resta sporco dal comando precedente
+& $p -Ref $h                                  # 2: lo script
+if($LASTEXITCODE -ne 0){ throw "FALLITO: ..." }  # 3: -ne 0, NON -eq 0
+```
+
+⚠️ **`if($LASTEXITCODE -eq 0)` non basta**: uno script che finisce bene
+**senza** istruzione `exit` NON tocca `$LASTEXITCODE`, che in una console
+appena aperta vale `$null` — e `$null -eq 0` e' `$false`, quindi la raccolta
+verrebbe saltata proprio quando e' andato tutto bene. Si azzera prima e si
+controlla `-ne 0`.
+
+Corollario che vale sempre: **ogni referto di raccolta porta dentro una riga
+`data:`**, e la riga in chat dice a Claudio che quella data deve essere di
+ADESSO.
