@@ -462,3 +462,166 @@ proporzionalmente a ~6,5%** — sotto il muro, sopra il fastidio.
   dell'esposizione simultanea**.
 
 ---
+
+## 7. 🧪 TEST-CASE NUMERICI — i due esempi, verificati uno per uno
+
+> **Questi due casi vanno usati come test di accettazione dell'EA: se
+> l'implementazione non riproduce questi numeri esatti, e' sbagliata.**
+
+### T1 — ECB, giovedi 07/03/2024, EUR/JPY `[T]` lez. 6
+
+| voce | valore dettato | verifica aritmetica |
+|---|---|---|
+| high delle 2 candele | **160,780** | — |
+| low delle 2 candele | **160,607** | — |
+| BUY STOP (high +3 pip) | **160,810** | ✅ 160,780 + 0,030 |
+| SL del buy (−25) | **160,560** | ✅ −0,250 |
+| TP del buy (+50) | **161,310** | ✅ +0,500 |
+| SELL STOP (low −2 pip) | **160,587** | ✅ 160,607 − 0,020 |
+| SL del sell (+25) | **160,837** | ✅ +0,250 |
+| TP del sell (−50) | **160,087** | ✅ −0,500 |
+| saldo | **9.935 €** | — |
+| rischio 3% su 50 pip, valore pip **5,90 €** | **volume 1,01** | ✅ 9935 × 0,03 / (50 × 5,90) = **1,0103** |
+| scadenza | 18:15 IT = **16:15 sulla sua piattaforma** | ✅ coerente con "piattaforma 2h indietro in ora legale" |
+| esito raccontato | sell mai eseguito e cancellato; **buy eseguito, TP +50 pip** | `[dichiarato]` |
+
+**8 numeri su 8 tornano.** Compreso il lotto.
+
+### T2 — FOMC, mercoledi 20/03/2024, EUR/USD `[T]` lez. 9
+
+| voce | valore dettato | verifica |
+|---|---|---|
+| high | **1,08892** | — |
+| low | **1,08656** | — |
+| BUY STOP (+3 pip) | **1,08922** | ✅ +0,00030 |
+| TP buy / SL buy | **1,09422** / **1,08672** | ✅ +50 / −25 |
+| SELL STOP (−2 pip) | **1,08636** | ✅ −0,00020 |
+| SL sell / TP sell | **1,08886** / **1,08136** | ✅ +25 / −50 |
+| valore pip EUR/USD | **9,21 €** | — |
+| volume | **0,65** | ✅ implica saldo ≈ 9.976 € al 3% su 50 pip |
+| scadenza | 19:30 IT + 75 min = 20:45 IT = **19:45 piattaforma** | ✅ |
+| esito raccontato | buy a TP **la mattina dopo alle ~8** | `[dichiarato]` |
+
+**9 numeri su 9 tornano.**
+
+> 🟢 **Questo e' il punto di forza reale del modulo, e va detto con la stessa
+> forza con cui si dicono i difetti: l'aritmetica operativa e' esatta.** Negli
+> altri cinque moduli i conti degli esempi si rompevano. Qui no.
+> **Cio' che non torna non e' il calcolo: e' la PROVA** (§8).
+
+### T3 — Casi limite che il corso NON copre (da decidere in fase di codice)
+
+| caso | frequenza attesa | il corso | proposta |
+|---|---|---|---|
+| prezzo gia' oltre il livello all'istante d'azione | **quasi zero** — all'apertura della candela d'azione il prezzo e' per costruzione dentro il range delle due candele precedenti | non lo tratta | piazza comunque; se il broker rifiuta, salta la gamba e **loggala** |
+| notizia rinviata/annullata | rara | citata solo per il 2009 `[T]` (_"le date venivano modificate all'ultimo"_) | nessun evento nel CSV → **nessun ordine** |
+| candela M5 mancante (dati bucati) | rara | non lo tratta | **salta l'evento**, non "usa la precedente" |
+| doppia esecuzione (buy poi sell) | _"raro ma e' successo"_ `[T]` | **ammessa e finanziata** (§3.3) | tenerla: e' la ragione della size su 50 pip |
+| spread anomalo al momento del piazzamento | frequente in conferenza stampa | ❌ **non trattato** | guardia `InpMaxSpread` **attiva** (oggi e' 0 = spenta) |
+
+---
+
+## 8. 🔬 IL BACKTEST DEL CORSO — audit numero per numero
+
+### 8.1 Cosa viene dichiarato
+
+| serie | periodo | pips | risultato in % | DD | N |
+|---|---|---:|---:|---:|---:|
+| **ECB** (lez. 7) | 01/01/2009 → 2024 ("15 anni e mezzo") | _"quasi 3000"_ | 1.000 € → **~4.700 €**, _"oltre il 340%"_ | **15%** | ❌ **mai** |
+| **FOMC** (lez. 9) | 2011 → 2024 ("14 anni") | _"piu' di 1500"_ | _"oltre il 200%"_ | _"bassissimo"_ (nessun numero) | ❌ **mai** |
+| **combinata** (lez. 10) | 2009 → 2024 | — | **+1000%**, media _"oltre il 20%/anno"_, un solo anno negativo (**−2%**) | ❌ **mai** | ❌ **mai** |
+
+Tutti `[dichiarato, NON verificato]`. Rischio simulato: 3% per operazione.
+
+### 8.2 🧮 L'aritmetica: cosa regge e cosa no
+
+**(a) Il win rate implicito e' altissimo.** Con soli esiti +50 / −25:
+`media = 75p − 25`. Dai suoi numeri:
+
+| serie | pips/operazione implicito | **win rate necessario** |
+|---|---:|---:|
+| ECB (3000 pips / 124 op. implicite) | **24,2** | **65,6%** |
+| FOMC (1500 / 112 op. implicite) | **13,4** | **51,2%** |
+
+🔴 **Un 65% di operazioni vincenti con rapporto 1:2 e' un numero
+straordinario** — e non e' mai pronunciato. **Il numero che decide se la
+strategia guadagna non viene mai detto: e' lo stesso identico difetto degli
+altri cinque moduli**, solo spostato dall'uscita alla prova.
+
+**(b) N e' inventato dal contesto, e probabilmente sbagliato.** Il relatore
+lascia intendere 8 operazioni/anno **fin dal 2009** per l'ECB e **fin dal 2011**
+per il FOMC. `[ANCORA ESTERNA — conoscenza generale, NON dalla trascrizione, da
+verificare]`: le conferenze BCE erano **mensili fino al 2014** (≈12/anno) e le
+conferenze FOMC erano **4/anno fino al 2018**. Se e' cosi', il conteggio vero e'
+**~147 ECB** (non 124) e **~74 FOMC** (non 112) → i pips per operazione, e
+quindi il win rate, **cambiano in entrambe le direzioni**. **Senza N e senza la
+lista dei trade, nessuno di questi numeri e' controllabile.**
+
+**(c) I due file non sono prodotti con la stessa macchina.** Applicando la sua
+stessa taratura (3% su 50 pip = 0,06% di equity per pip, capitalizzato):
+
+| serie | % attesa dai pips dichiarati | % dichiarata | scarto |
+|---|---:|---:|---|
+| ECB | ≈ **+480%** | +340/370% | dichiara **MENO** del dovuto |
+| FOMC | ≈ **+140%** | oltre +200% | dichiara **PIU'** del dovuto |
+| combinata | ≈ **+1.290%** | +1.000% | meno |
+
+🔴 **Due file dello stesso autore, sulla stessa strategia, con due
+comportamenti opposti rispetto alla stessa formula.** Non e' la prova di un
+imbroglio: e' la prova che **il metodo di calcolo non e' dichiarato** e quindi
+**nessuna delle tre percentuali e' riproducibile**.
+
+**(d) "+1000% con media del 20% annuo" non e' contraddittorio ma va letto
+bene:** 11x in 15,5 anni = **16,5% composto**. Il "20%" e' la **media
+aritmetica degli anni**, che e' sempre >= quella composta. Il numero da
+ricordare e' **16,5%**, non 20%.
+
+**(e) "Un solo anno negativo su 15" e' statisticamente COERENTE** col win rate
+che lui implica (con 16 operazioni/anno al 60% di successo, la probabilita' che
+un anno chiuda in rosso e' ~2%, cioe' ~0,3 anni su 15). **Coerente non vuol dire
+vero: vuol dire che non si contraddice.**
+
+### 8.3 🔴 IL COLPO GROSSO: lo strumento insegnato NON PUO' produrre quel backtest
+
+Due frasi dello stesso relatore, a tre lezioni di distanza:
+
+> `[T]` lez. 3: _"noi possiamo impostare una data passata sulla piattaforma
+> MetaTrader 4. **Non e' da questo punto di vista la piattaforma piu' efficace**
+> per andare ad analizzare il passato … **senza andare troppo indietro nel
+> passato**"_
+>
+> `[T]` lez. 6: _"noi possiamo andare indietro di **2-3 mesi** sulla
+> piattaforma? Si, certamente"_
+
+E la strategia ha bisogno di **massimo e minimo di due candele da 5 minuti**.
+
+🔴 **Lo strumento che insegna arriva a 2-3 mesi di storico M5. Il backtest che
+mostra parte dal 1° gennaio 2009.** La serie di pips 2009-2013 **non puo'**
+essere stata prodotta con la procedura mostrata nel corso. Il relatore dichiara
+`[T]` che _"dal 2013 e' applicazione concreta sul mercato"_ — cioe' **operativita'
+reale**, che pero' arriva senza estratto conto, senza broker, senza date dei
+singoli trade.
+
+⚖️ **Cosa NON sto dicendo:** che i numeri siano falsi. Sto dicendo che
+**l'origine del dato piu' vecchio e' incompatibile con lo strumento insegnato**,
+e che questo, sommato all'assenza di N, di DD combinato e di lista operazioni,
+rende il backtest **una testimonianza, non una misura**.
+
+### 8.4 Le contraddizioni interne minori
+
+1. `[T-dubbio]` lez. 7: _"l'ultima [operazione] che e' la prossima che ci sara',
+   il **6 maggio 2024**"_ — ma la lez. 5 dice che la prossima ECB e' il **6
+   giugno 2024**, e **il nostro CSV non ha nessuna ECB Press Conference in maggio
+   2024** (2024.04.11 → 2024.06.06). **Il dato di casa arbitra: e' "6 giugno".**
+   Errore di parlato o di trascrizione.
+2. `[T-dubbio]` lez. 6: _"soprattutto **Mario**, le prime volte che ci lavori"_ —
+   parola priva di senso nel contesto: quasi certamente un artefatto dello
+   speech-to-text.
+3. **Scadenze asimmetriche mai spiegate**: ECB **+3h30**, FOMC **+75 minuti**.
+   Nessuna riga giustifica il fattore ~3. → **parametro da spazzolare**, non
+   costante di natura.
+4. `[?]` **La scadenza ECB e' un ORARIO FISSO (18:15) o un DELTA (+3h30)?** Fino
+   a meta' 2022 la notizia era alle 14:30: la scadenza era 18:15 lo stesso
+   (= +3h45) o 18:00? **Non e' dicibile dalla trascrizione.**
+
+---
