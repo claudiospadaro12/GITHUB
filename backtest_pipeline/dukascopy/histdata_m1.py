@@ -1,8 +1,19 @@
 # =====================================================================
 #  histdata_m1.py  --  LA STRADA HISTDATA per lo storico M1 degli INDICI
 #  ---------------------------------------------------------------------
-#  VERSIONE: HD-M1-v1        (marcatore: la riga di lancio lo stampa
+#  VERSIONE: HD-M1-v2        (marcatore: la riga di lancio lo stampa
 #                             PRIMA di fare qualunque altra cosa)
+#
+#  v2 (18/08 sera, verifica del verificatore-stringhe -- 16 difetti):
+#    cache ZIP verificata e scrittura atomica (.parziale + replace),
+#    zip corrotto CANCELLATO invece che lasciato a bucare per sempre,
+#    CSV/referto atomici con encoding dichiarato, exit code legato ai
+#    problemi reali (esplorazione fallita, zero barre, zip rotti,
+#    ALLARME banda, EST FISSO, falliti di rete), mese in corso escluso
+#    (NOTOKEN sull'anno corrente = assente, non fallito), autotest che
+#    ritorna il conteggio vero, Desktop dal registro di Windows,
+#    referto con ora nel nome e nella cartella degli ZIP, PROSSIMO
+#    PASSO stampato solo se i CSV esistono davvero.
 #
 #  PERCHE' ESISTE (18/08/2026)
 #    Lo storico BCM degli indici parte dal 26/09/2024: niente 2020
@@ -101,7 +112,7 @@ import urllib.request
 import zipfile
 from datetime import datetime, timedelta
 
-VERSIONE = "HD-M1-v1"
+VERSIONE = "HD-M1-v2"
 
 BASE_PAGINA = ("https://www.histdata.com/download-free-forex-historical-data/"
                "?/ascii/1-minute-bar-quotes/")
@@ -236,11 +247,31 @@ def nome_zip(pair, anno, mese=None):
     return "DAT_ASCII_%s_M1_%d%02d.zip" % (pair.upper(), anno, mese)
 
 
+def _zip_valido(percorso):
+    """Un file in cache o appena scaricato e' buono SOLO se si apre,
+    supera il test CRC e contiene almeno un CSV. Lezione del gemello
+    dukascopy_m1.py (punto 16 della checklist): la cache non verificata
+    diventa un buco permanente che nessun rilancio ripara."""
+    try:
+        with zipfile.ZipFile(percorso) as z:
+            if z.testzip() is not None:
+                return False
+            return any(n.lower().endswith(".csv") for n in z.namelist())
+    except Exception:
+        return False
+
+
 def scarica_zip(pair, anno, mese, cartella, pausa_ms, contatori):
     dest = os.path.join(cartella, nome_zip(pair, anno, mese))
-    if os.path.exists(dest) and os.path.getsize(dest) > 1000:
-        contatori["cache"] += 1
-        return ("CACHE", dest, "")
+    if os.path.exists(dest):
+        if os.path.getsize(dest) > 1000 and _zip_valido(dest):
+            contatori["cache"] += 1
+            return ("CACHE", dest, "")
+        # rotto o troncato: si CANCELLA, cosi' il rilancio lo riscarica
+        try:
+            os.remove(dest)
+        except OSError:
+            return ("NO", "", "cache corrotta e non cancellabile: " + dest)
     pagina = url_pagina(pair, anno, mese)
     esito, html = richiesta(pagina, timeout=90, pausa_ms=pausa_ms)
     if esito != "OK":
@@ -266,8 +297,13 @@ def scarica_zip(pair, anno, mese, cartella, pausa_ms, contatori):
         return ("NO", "", "risposta non ZIP (%d byte)" % len(corpo))
     if len(corpo) < 20000:
         return ("NO", "", "ZIP troppo piccolo (%d byte)" % len(corpo))
-    with open(dest, "wb") as f:
+    tmp = dest + ".parziale"
+    with open(tmp, "wb") as f:
         f.write(corpo)
+    if not _zip_valido(tmp):
+        os.remove(tmp)
+        return ("NO", "", "risposta non decodificabile come ZIP")
+    os.replace(tmp, dest)
     contatori["scaricati"] += 1
     contatori["byte"] += len(corpo)
     return ("OK", dest, "")
@@ -363,9 +399,17 @@ def ingerisci_zip(cartella, filtro_pair, contatori):
                             d[k] = val
                     log("  %s -> %s: %d barre (nuove %d)" %
                         (nz, pair, len(parziali), len(d) - prima))
-        except zipfile.BadZipFile:
-            log("  %s: ZIP ILLEGGIBILE (riscaricalo)" % nz)
+        except Exception as e:
+            # non solo BadZipFile: un membro corrotto solleva zlib.error
+            # o RuntimeError a meta' lettura. Qualunque cosa sia, il file
+            # si CANCELLA: lasciarlo li' significa rifallire per sempre.
+            log("  %s: ZIP ILLEGGIBILE (%s) -- lo CANCELLO, riscaricalo" %
+                (nz, type(e).__name__))
             contatori["zip_rotti"] += 1
+            try:
+                os.remove(percorso)
+            except OSError:
+                log("  %s: e non riesco nemmeno a cancellarlo" % nz)
     return per_simbolo
 
 
@@ -544,23 +588,43 @@ def confronto_finestra(barre, da_txt, a_txt):
 #  da solo (riga "tick_volume = (v>0 ? v : 1)"): qui si lascia com'e'.
 # ---------------------------------------------------------------------
 def scrivi_csv(percorso, barre, sposta_ore=0):
-    with open(percorso, "w", newline="") as f:
+    # atomico: mai lasciare un CSV troncato che poi finisce in MQL5\Files
+    # come storico monco silenzioso. encoding esplicito: senza, Windows
+    # usa cp1252 e un carattere non mappabile fa esplodere la scrittura.
+    tmp = percorso + ".parziale"
+    with open(tmp, "w", newline="", encoding="ascii", errors="replace") as f:
         f.write("Time,Open,High,Low,Close,Volume\n")
         for k in sorted(barre.keys()):
             o, h, l, c, v = barre[k][0:5]
             t = k + timedelta(hours=sposta_ore) if sposta_ore else k
             f.write("%s,%s,%s,%s,%s,%s\n" %
                     (t.strftime("%Y.%m.%d %H:%M"), o, h, l, c, v))
+    os.replace(tmp, percorso)
 
 
 # ---------------------------------------------------------------------
 #  RACCOLTA SUL DESKTOP (regola delle righe di lancio, punto 2)
 # ---------------------------------------------------------------------
 def trova_desktop():
+    # la verita' sta nel registro (Shell Folders\Desktop): quando OneDrive
+    # ridirige la cartella lascia un guscio vuoto in ~/Desktop, e
+    # l'euristica vecchia raccoglieva li' -- referto invisibile a Claudio.
+    try:
+        import winreg
+        chiave = winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
+        valore, _ = winreg.QueryValueEx(chiave, "Desktop")
+        winreg.CloseKey(chiave)
+        valore = os.path.expandvars(valore)
+        if os.path.isdir(valore):
+            return valore
+    except Exception:
+        pass
     casa = os.path.expanduser("~")
-    for c in (os.path.join(casa, "Desktop"),
-              os.path.join(casa, "OneDrive", "Desktop"),
-              os.path.join(casa, "OneDrive - Personale", "Desktop")):
+    for c in (os.path.join(casa, "OneDrive", "Desktop"),
+              os.path.join(casa, "OneDrive - Personale", "Desktop"),
+              os.path.join(casa, "Desktop")):
         if os.path.isdir(c):
             return c
     return None
@@ -702,7 +766,7 @@ def autotest():
     log("AUTOTEST: %d/8 passati." % ok)
     log("NOTA ONESTA: qui non c'e' NIENTE di rete. Che HistData risponda,")
     log("e quali anni abbia davvero, lo dice --esplora sul PC di Claudio.")
-    return 0
+    return 0 if ok == 8 else 1
 
 
 # ---------------------------------------------------------------------
@@ -751,7 +815,9 @@ def esplora(pairs, da_anno, a_anno, pausa_ms):
             else:
                 mesi_ok = []
                 mesi_no = []
-                for mese in range(1, oggi.month + 1):
+                # il mese IN CORSO non e' ancora pubblicato: chiederlo
+                # produce un NOTOKEN garantito che sporca la misura
+                for mese in range(1, oggi.month):
                     esito, html = richiesta(url_pagina(pair, anno, mese),
                                             timeout=90, pausa_ms=pausa_ms)
                     if esito == "OK" and estrai_token(html):
@@ -780,7 +846,7 @@ def elenco_manuale(pairs, da_anno, a_anno, cartella):
             if anno < oggi.year:
                 righe.append("    " + url_pagina(pair, anno))
             else:
-                for mese in range(1, oggi.month + 1):
+                for mese in range(1, oggi.month):
                     righe.append("    " + url_pagina(pair, anno, mese))
     righe.append("")
     righe.append("Poi: python histdata_m1.py --converti --cartella \"%s\"" % cartella)
@@ -854,10 +920,13 @@ def corri(argv):
             log(r)
         return 0
 
+    problemi = []
+
     if args.esplora:
         righe, ok = esplora(pairs, args.da, args.a, args.pausa_ms)
         stampa += righe
         if not ok:
+            problemi.append("esplorazione fallita (controllo positivo KO)")
             stampa.append("")
             stampa += elenco_manuale(pairs, args.da, args.a, cartella)
 
@@ -876,31 +945,40 @@ def corri(argv):
             stampa += elenco_manuale(pairs, args.da, args.a, cartella)
             for r in stampa:
                 log(r)
-            scrivi_referto(stampa)
+            scrivi_referto(stampa, cartella)
             return 1
         log("CONTROLLO POSITIVO: OK")
         stampa.append("CONTROLLO POSITIVO (eurusd 2019, token trovato): OK")
 
         oggi = datetime.now()
         falliti = []
+        assenti = []
         for pair in pairs:
             log("--- scarico %s ---" % pair)
             for anno in range(args.da, args.a + 1):
                 periodi = ([(anno, None)] if anno < oggi.year
-                           else [(anno, m) for m in range(1, oggi.month + 1)])
+                           else [(anno, m) for m in range(1, oggi.month)])
                 for (a_, m_) in periodi:
                     esito, dest, nota = scarica_zip(pair, a_, m_, cartella,
                                                     args.pausa_ms, contatori)
                     etichetta = "%s %d%s" % (pair, a_, ("/%02d" % m_) if m_ else "")
                     if esito in ("OK", "CACHE"):
                         log("  %s: %s" % (etichetta, esito))
+                    elif esito == "NOTOKEN":
+                        # non pubblicato = ASSENTE (informativo), non un
+                        # guasto: altrimenti il gate scatta sempre a torto
+                        log("  %s: assente (nessun token: non pubblicato)" % etichetta)
+                        assenti.append(etichetta)
                     else:
                         log("  %s: %s (%s)" % (etichetta, esito, nota))
                         falliti.append((pair, a_, m_, esito + " " + nota))
-        stampa.append("scaricati %d ZIP (%.1f MB), %d gia' in cache, %d falliti" % (
+        stampa.append("scaricati %d ZIP (%.1f MB), %d gia' in cache, %d assenti, %d falliti" % (
             contatori["scaricati"], contatori["byte"] / 1048576.0,
-            contatori["cache"], len(falliti)))
+            contatori["cache"], len(assenti), len(falliti)))
+        if assenti:
+            stampa.append("ASSENTI (non pubblicati, informativo): " + ", ".join(assenti))
         if falliti:
+            problemi.append("%d download falliti" % len(falliti))
             stampa.append("FALLITI (di questi si fa la strada manuale):")
             for f in falliti:
                 stampa.append("  %s %d%s  %s" % (f[0], f[1],
@@ -915,17 +993,28 @@ def corri(argv):
         dati = ingerisci_zip(cartella, set(pairs), contatori)
         if not dati:
             stampa.append("NESSUNO ZIP UTILE nella cartella. Niente da convertire.")
+            problemi.append("nessuno ZIP utile in cartella")
         for pair in pairs:
             barre = dati.get(pair)
             if not barre:
                 stampa.append("")
                 stampa.append("%s: nessuna barra (zip mancante?)." % pair)
+                problemi.append("%s: zero barre" % pair)
                 continue
             sym, lo, hi, che = STRUMENTI[pair]
             stampa.append("")
-            stampa += referto_barre(sym, pair, barre, (lo, hi))
+            righe_barre = referto_barre(sym, pair, barre, (lo, hi))
+            stampa += righe_barre
+            if any("ALLARME" in r for r in righe_barre):
+                problemi.append("%s: ALLARME banda di prezzo" % pair)
             stampa.append("")
-            stampa += misura_fuso(barre)
+            righe_fuso = misura_fuso(barre)
+            stampa += righe_fuso
+            # match sul VERDETTO, non su "EST FISSO" nudo: la legenda
+            # della misura contiene quelle parole in OGNI corsa
+            if any("VERDETTO FUSO: EST FISSO" in r for r in righe_fuso):
+                problemi.append("%s: VERDETTO FUSO EST FISSO (convenzione "
+                                "diversa dagli 8 import promossi)" % pair)
             if args.confronto_da and args.confronto_a:
                 stampa.append("")
                 stampa += confronto_finestra(barre, args.confronto_da, args.confronto_a)
@@ -939,31 +1028,51 @@ def corri(argv):
         stampa.append("righe scartate %d | OHLC incoerenti %d | duplicate %d | zip rotti %d" %
                       (contatori["scartate"], contatori["ohlc_incoerenti"],
                        contatori["duplicate"], contatori["zip_rotti"]))
+        if contatori["zip_rotti"] > 0:
+            problemi.append("%d zip rotti (cancellati: rilanciare per riscaricarli)"
+                            % contatori["zip_rotti"])
+
+    # il PROSSIMO PASSO si stampa SOLO se i CSV esistono davvero (punto 22
+    # della checklist: mai istruire sul passo dopo senza gli artefatti)
+    if csv_prodotti:
+        stampa.append("")
+        stampa.append("PROSSIMO PASSO (ultimo miglio, IDENTICO alla strada Dukascopy):")
+        stampa.append("  1. copiare il/i CSV in MQL5\\Files del terminale BCM DI BACKTEST")
+        stampa.append("  2. lanciare ABTG_ImportaStoricoEsterno con InpFormato=1,")
+        stampa.append("     InpSimboloSorgente=<simbolo BCM>, InpSimboloNuovo=<simbolo>_EXT,")
+        stampa.append("     InpAutoShift=true, InpShiftMax=6")
+        stampa.append("  3. lo shift calibrato DEVE uscire +5 (come gli 8 forex del 15/08).")
+        stampa.append("     Un altro numero = fermarsi e capire, NON importare.")
+        stampa.append("  4. cancello ZERO: diff media > 0,05% o copertura < 80% -> non si usa.")
+        stampa.append("  5. chiusura PULITA di MT5 (lezione 14/08).")
 
     stampa.append("")
-    stampa.append("PROSSIMO PASSO (ultimo miglio, IDENTICO alla strada Dukascopy):")
-    stampa.append("  1. copiare il/i CSV in MQL5\\Files del terminale BCM DI BACKTEST")
-    stampa.append("  2. lanciare ABTG_ImportaStoricoEsterno con InpFormato=1,")
-    stampa.append("     InpSimboloSorgente=<simbolo BCM>, InpSimboloNuovo=<simbolo>_EXT,")
-    stampa.append("     InpAutoShift=true, InpShiftMax=6")
-    stampa.append("  3. lo shift calibrato DEVE uscire +5 (come gli 8 forex del 15/08).")
-    stampa.append("     Un altro numero = fermarsi e capire, NON importare.")
-    stampa.append("  4. cancello ZERO: diff media > 0,05% o copertura < 80% -> non si usa.")
-    stampa.append("  5. chiusura PULITA di MT5 (lezione 14/08).")
+    if problemi:
+        stampa.append("ESITO: FALLITO -- %d problemi:" % len(problemi))
+        for p in problemi:
+            stampa.append("  - " + p)
+    else:
+        stampa.append("ESITO: OK")
 
     for r in stampa:
         log(r)
-    percorso_referto = scrivi_referto(stampa)
+    percorso_referto = scrivi_referto(stampa, cartella)
     raccogli_desktop([percorso_referto] + csv_prodotti[:4],
                      "histdata_m1", "histdata_m1.zip")
-    return 0
+    return 1 if problemi else 0
 
 
-def scrivi_referto(righe):
-    nome = "referto_histdata_%s.txt" % datetime.now().strftime("%Y-%m-%d")
-    percorso = os.path.join(os.getcwd(), nome)
-    with open(percorso, "w") as f:
+def scrivi_referto(righe, cartella=None):
+    # nome con l'ORA: due corse lo stesso giorno non si mascherano a
+    # vicenda, e un referto stantio non puo' piu' sembrare fresco.
+    # cartella degli ZIP, non os.getcwd(): la corsa parte da dove capita.
+    nome = "referto_histdata_%s.txt" % datetime.now().strftime("%Y-%m-%d_%H%M")
+    base = cartella if cartella else os.getcwd()
+    percorso = os.path.join(base, nome)
+    tmp = percorso + ".parziale"
+    with open(tmp, "w", encoding="ascii", errors="replace") as f:
         f.write("\n".join(righe) + "\n")
+    os.replace(tmp, percorso)
     log("")
     log("REFERTO: " + percorso)
     return percorso
