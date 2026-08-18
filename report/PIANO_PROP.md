@@ -166,6 +166,7 @@ falla aritmetica piu' grossa del piano.
 | D2 | **Filtro news di PROTEZIONE** (finestre larghe, es. NFP 100 min prima) | **non accenderla** senza decisione esplicita: cambia l'edge e non si puo' misurare | 🥉 Gold Phantom (NFP 100/60 con chiusura dell'aperto) | e' una modifica di strategia travestita da protezione; "lo fanno tutti" non e' una fonte. 2ª notte: il campione delle finestre va **da 5 a 100 minuti** (Range Breakout 5 · TIP 30/15 · guida 772732 30/30 · NewsFilter.mqh 60/60 · Gold Phantom 100/60): **nessuna convergenza, nessun numero da copiare** — la cautela del piano e' confermata dai numeri. Nota: col metodo CSV di D1 anche QUESTA diventa misurabile, se un giorno la si vuole giudicare | 🔓 APERTO — 🎬 trascrizioni: niente anche qui |
 | D3 | **Auto-GMT** (orari di sessione in UTC + offset rilevato, invece che cablati in ora server BCM) | helper `ABTG_TimeZone.mqh`, `InpAutoGMT=false` di default | 🥉 Gold Phantom (`AutoGMT=true`, offset 2/3) · 🥉 2ª notte, mezza gamba: TIP dichiara le sessioni **in GMT** e Range Breakout ha `TimeOffset` per correggere da UTC+2 — **due modi diversi, ma l'offset e' sempre un INPUT, mai cablato** (noi lo cabliamo) · 🥇 `METRO_PROP` §11: Pepperstone e' UTC+0, un'ora dietro BCM; il giorno della challenge il server e' quello della prop | 🔴🔴 la proposta **piu' pericolosa** (P9): tocca `InpSessionHour`, dove il progetto ha gia' sbagliato (regola: DAX=8, se 9 → cestinare). Un bug qui rende spazzatura ogni backtest. Non urgente oggi; lo diventa il giorno dell'acquisto | 🔓 APERTO — da fare SOLO con round di verifica dedicato |
 | D4 | **Compatibilita' overnight delle sedie notturne** | vincolo di scelta prop, non parametro: `MaxMinNotte` (box 23:00-04:59 srv), `Nightly` (22:00-04:59), variante oro (22:00-06:00) devono essere AMMESSE | 🥇 `METRO_PROP` §3 · 🥈 E8 Signature chiude tutto alle 23:00 server → **tre sedie senza setup, non "da adattare"** | nessuno: e' un filtro sulla scelta in area F | 🔓 APERTO (si chiude con F1 + risposta scritta) |
+| D5 | **Filtro news del FiboH4** (nuova, v10 — dall'analisi del corso) | il modulo FiboH4 e' **il piu' prop-compatibile del corso intero**: filtro news **OBBLIGATORIO** (Forex Factory/Investing, esclusione per valuta, deroga a ≥100 pip), overnight vietato (cancella alle 18:30-19), weekend **"mai e qua dico mai"**. 🔎 E la scoperta di casa: **il nostro `ABTG_FiboH4_Multi` il filtro CE L'HA GIA', a CSV, ed e' SPENTO** (`InpUseNewsFilter=false`, legge `abtg_news.csv`, impatto/minuti configurabili) — cioe' il meccanismo CSV di D1 esiste gia' in un nostro EA, coi 2 calendari 2021-2025 gia' in biblioteca | 🥉 `ANALISI_CORSO_FIBOH4_MEDIA200_2026-08-18.md` §1.7 · 🥇 sorgente `ABTG_FiboH4_Multi.mq5` (righe 75-80) | lo stesso corso e' incoerente: il modulo gemello Media200 il filtro **non lo nomina mai** in 5 lezioni. E accendere un filtro cambia l'edge: passa dall'imbuto (ora misurabile, D1), non da un interruttore | 🔓 APERTO — accensione legata a D1/F1; il costo di sviluppo e' ~zero perche' il codice c'e' |
 
 ⏰ **Orari, sempre anche in ora server BCM** (agosto: BCM = italiana − 1 = UTC+1):
 reset FTMO 00:00 CE(S)T = **23:00 BCM** · FundedNext / FundingPips / Alpha
@@ -227,14 +228,15 @@ era gia' un **fantasma** (viveva solo in `Profiles\Charts\Default\
 chart02.chr`, fermo al 20/07: non girava da un mese — non c'era nulla da
 spegnere; il `.chr` residuo verra' rinominato per pulire i censimenti).
 **E' stata la PRIMA APPLICAZIONE della C3, dalla firma alla verifica in
-una giornata.** Porta di rientro JPY: pista APERTA — l'analisi del corso
-BREAKOUT e' arrivata (`ANALISI_CORSO_BREAKOUT_2026-08-18.md` +
-`prove/BREAKOUT_CORSO_SPEC.md`): spec **meccanizzabile al 71%** (24/34
-regole certe), **contraddizione frontale** corso vs nostro backtest
-(**+133% contro −20.853 €** sullo stesso perimetro — uno dei due e'
-sbagliato), **2 divergenze di implementazione** trovate nel codice v1 (la
-n.1: manca il vincolo delle 20 candele dall'ingresso in zona). Se la spec
-regge l'imbuto, la sedia rientra con contratto vero.
+una giornata.** Porta di rientro JPY — 🔴 **v10, R82 CHIUDE LA STRADA DELLA
+TARATURA**: il torneo sui 7 cross JPY con l'implementazione FEDELE del corso
+(criteri congelati prima, autotest del test-case PASSATO, vincolo 20 candele
+incluso) fa **ZERO vincitori** — OOS negativo su tutti e sette, EURJPY unico
+positivo IS 2007-2014 poi spento (profilo di edge mangiato dal mercato). Il
++133% della lez. 39 non si riproduce da nessuna parte: **il rientro JPY ora
+richiede una tesi NUOVA, non una taratura**. La regola di portafoglio "max
+UNA sedia dalla famiglia JPY" resta in vigore (R82) — **oggi senza
+candidati** (fonti: `REFERTO_ROUND82_TORNEO_JPY.md`, `REFERTO_R82_CANARINO.md`).
 
 Restano in lista:
 
