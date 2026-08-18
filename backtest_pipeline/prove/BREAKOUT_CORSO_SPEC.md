@@ -255,6 +255,13 @@ qualunque valore si usi e' *nostro*, non del corso.
 
 ### 4.2 ⚠️ Ambiguita' n.1 — 15 o 20 candele?
 
+_Aggiornamento 18/08 sera: Claudio, ri-ascoltando il video 36, conferma di
+aver sentito "15 candele" — vero, ed e' documentato qui sotto: il "15"
+esiste, ma la stessa relatrice lo corregge in diretta contando fino a 20,
+e il PDF scrive 20. Verdetto invariato: 20, col conflitto agli atti.
+Dato nuovo per gli atti: la relatrice del corso e' **Manuela Negro**
+(nome riferito da Claudio)._
+
 La lez. 36 dice **entrambe le cose in 5 righe**:
 - riga 5: _"dobbiamo selezionare un rettangolo che deve contenere **15 candele**"_
 - riga 9: _"Questo canale deve contenere almeno **15 candele**"_
