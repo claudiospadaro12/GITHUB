@@ -7,15 +7,40 @@
 ;  InpStartBalance=100000 -> replica ESATTA FTMO 100k:
 ;    limite giornaliero 5.000, pavimento totale 90.000, target +10.000.
 ;    (Apri un demo NUOVO da 100.000 sullo stesso server BCM.)
+; ----------------------------------------------------------------
+;  FIRME 18/08/2026 (report/FIRME_2026-08-18.md) - GRADINO A:
+;    - emergenza giornaliera 4.9 invece di 5.0 (un decimo PRIMA del muro)
+;    - emergenza totale     9.9 invece di 10.0 (idem, muro 10%)
+;    - InpDailyResetHour=23 -> vedi nota sotto
+;  E GRADINO B/C (nuovi, non chiudono nulla: scrivono solo le
+;  GlobalVariable che gli EA leggeranno con ABTG_PausaGuardian.mqh):
+;    - InpDailyPausePct=4.0   pausa morbida nuovi ingressi
+;    - InpMaxOpenRiskPct=3.25 cap C1 sul rischio aperto simultaneo
 ; ================================================================
 InpStartBalance=100000
-InpDailyLossPct=5.0
-InpTotalDDPct=10.0
+InpDailyLossPct=4.9
+InpTotalDDPct=9.9
 InpDDMode=0
-InpDailyResetHour=0
+; --- [INCERTO] ORA DI RESET GIORNALIERO -------------------------
+; 23 = ora SERVER BCM, che in questo periodo e' 1 ora INDIETRO
+; sull'ora italiana: 23:00 BCM = 00:00 CET, l'orario a cui FTMO
+; dichiara di azzerare il contatore giornaliero.
+; RESTA [INCERTO] finche' il supporto FTMO non conferma PER ISCRITTO
+; il fuso di riferimento (CET/CE(S)T o ora del loro server).
+; SU UN SERVER DIVERSO DA BCM QUESTO NUMERO VA RICALCOLATO:
+;   InpDailyResetHour = ora_server corrispondente a 00:00 del fuso FTMO.
+; Se il fuso si sposta (ora legale/solare) il valore cambia.
+InpDailyResetHour=23
 InpAction=0
 InpCloseAllMagics=true
 InpShowPanel=true
 InpMagic=779001
 InpComment=GUARDIAN FTMO 2STEP
 InpVerbose=true
+; --- GRADINO B: pausa morbida (blocca i NUOVI ingressi, non chiude) ---
+InpDailyPausePct=4.0
+; --- GRADINO C: cap C1 sul rischio aperto simultaneo -------------
+; 3.25% = 5 stop pieni vivi da 0,65% (misura M2: max reale 5,85%).
+InpMaxOpenRiskPct=3.25
+InpRiskMode=0
+InpWarnNoSL=true
