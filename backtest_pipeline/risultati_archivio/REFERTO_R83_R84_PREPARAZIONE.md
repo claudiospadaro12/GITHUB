@@ -685,3 +685,20 @@ porta l'OOS sopra PF 1; EMA peggiora il nudo; i filtri comprimono il DD
 tagliando trade. Il debito M16 e' CHIUSO: il metodo del corso sul Nasdaq
 apertura, misurato a tick reali, non regge — cella I sotto n=150, le
 altre no. Referto completo del round da scrivere a valle di R83.
+
+## PASSO 7 — R83 COMPLETO (18/08, 22:30) — IL RETEST VINCE SUL DAX, NIENTE SALVA IL NASDAQ
+
+14 CSV / 0 mancanti, n=156-325 ovunque (Emendamento ok). CSV in r83_csv/.
+OOS (Profit/PF/n/DD%):
+- DAX:  D0 stop +251/1,04/325/13,3 | D1 retest +999/1,19/311/10,6 (=V, VINCE)
+  | D2 conferma -83/0,98/322/8,7
+- NASDAQ: N0 stop -795/0,87/291/17,1 | N1 retest -2411/0,62/303/29,1
+  | N2 conferma -92/0,98/313/6,2
+LETTURE (criteri congelati): (1) sul DAX il duello INCORONA la config viva
+(retest) - la divergenza #15 dell'audit ora e' MISURATA a favore del campo;
+(2) sul Nasdaq nessuna modalita' e' positiva: con R84 il verdetto e'
+unanime, l'apertura US non ha edge a prescindere da ingresso e filtri;
+(3) la stessa regola cambia segno tra mercati (retest: oro sul DAX,
+massacro sul Nasdaq). Nessuna promozione: il round propone, non promuove.
+FINE SEQUENZA NOTTURNA: regola di traffico chiusa, la flotta puo' pushare.
+Referti ufficiali R84/R83 e giro architetto v12: domattina.
