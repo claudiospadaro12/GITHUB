@@ -596,3 +596,25 @@ avere il duello senza il suo controllo.
 
 _Preparato il 18/08/2026 sera. Commit a pezzi per l'onda di 529: se manca un
 pezzo, il git dice esattamente dove ci si era fermati._
+
+---
+
+## PASSO 0 — ESEGUITO E PROMOSSO (18/08, ~21:30, secondo lancio con la cura a4369f1)
+
+Archivio: `risultati_archivio/passo0_tick_indici_2026-08-18.csv`. La misura che
+non esisteva in casa ora esiste:
+
+| simbolo | TICK | PrimaDataLocale | verdetto |
+|---|---|---|---|
+| NASUSD | **164.636.788** | **2024.09.26** | TICK REALI PARZIALI (dal limite server) |
+| D30EUR | **34.322.761** | **2024.09.26** | TICK REALI PARZIALI (dal limite server) |
+
+- Le date TICK coincidono ESATTAMENTE col limite noto dello storico BCM
+  (@DAQUANDO 2024.09.26): **le finestre dei file prova R83/R84 sono VALIDE**,
+  niente da riscrivere.
+- Tutte le righe barre partono anch'esse dal 2024.09.26 ("IL BROKER NON HA
+  PIU' STORICO" = il server non ha nulla di piu' vecchio: gia' noto, ora
+  rimisurato anche per gli indici).
+- I round girano a TICK REALI sul perimetro previsto. Il primo lancio delle
+  21:17 (fallito per il falso FINITO del guardiano) e' agli atti sopra;
+  la cura ha retto al primo colpo.
