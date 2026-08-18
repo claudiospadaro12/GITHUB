@@ -618,3 +618,9 @@ non esisteva in casa ora esiste:
 - I round girano a TICK REALI sul perimetro previsto. Il primo lancio delle
   21:17 (fallito per il falso FINITO del guardiano) e' agli atti sopra;
   la cura ha retto al primo colpo.
+
+## PASSO 1a — ESEGUITO E PROMOSSO (18/08, 21:32)
+
+Congelamento verificato (3 EA su lavoro = pin, byte a byte, via doppio irm).
+Compilazione ABTG_Apertura_3Ingressi.mq5: **0 errors, 0 warnings, 1689 ms**.
+ex5: True. Archivio: `r83_compilazione_2026-08-18.txt`.
