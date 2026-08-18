@@ -319,3 +319,81 @@ TP/trailing pronti, *"**nessuna notizia in uscita imminente** (es. Forex
 Factory)"*, spazio e volatilità sufficienti.
 > *"se anche solo un punto è 'NO'… forse è meglio aspettare"* [PAG 29] — il
 > piano stesso dichiara i filtri come CONDIZIONI, non come opzioni.
+
+---
+
+## 6. 🧮 I NUMERI DICHIARATI — aritmetica controllata, uno per uno
+
+Tutti i numeri sono **[dichiarati dal documento, NON verificati sul mercato]**.
+Qui controllo solo che i CONTI tornino (la scuola ha precedenti: 39-vs-40,
+liste riscalate, 75-80% diviso male).
+
+| # | numero dichiarato | fonte | verifica | esito |
+|---|---|---|---|---|
+| 1 | Esempio Gap Fill: *"il Nasdaq ha chiuso a **14.800**"* … poi *"Gap individuato: da **15.000 (chiusura)** a 15.150"* | [PAG 25] | 15.150 − 14.800 = **350**, non 150. Con chiusura 15.000 il gap di 150 torna | 🔴 **CONTRADDIZIONE INTERNA: la chiusura cambia da 14.800 a 15.000 nella stessa pagina.** Tutti i calcoli a valle usano 15.000 |
+| 2 | Gap 150 punti (15.000→15.150) | [PAG 25] | 15.150 − 15.000 = 150 | ✅ |
+| 3 | *"rischio di 40 punti"* (SL 15.170, ingresso 15.130) | [PAG 25] | 15.170 − 15.130 = 40 | ✅ |
+| 4 | *"potenziale guadagno di 130"* (15.130 → 15.000) | [PAG 25] | 15.130 − 15.000 = 130 | ✅ |
+| 5 | *"ottimo rapporto rischio/rendimento"* | [PAG 25] | 130/40 = **3,25** ≥ 1,5 minimo | ✅ coerente |
+| 6 | Position sizing: formula *"**Rischio (€) / Stop Loss (in punti) = Quantità**"* | [PAG 28] | 🔴 **dimensionalmente SBAGLIATA: manca il valore per punto.** La formula giusta è Rischio / (SL punti × valore punto) | 🔴 formula errata |
+| 7 | Esempio sizing: 10.000 € · 2% = 200 € · SL 40 punti · 5 €/punto → *"200 / 5 = 40 punti ⇒ **1 contratto**"* | [PAG 28] | 200 / (40×5) = **1** ✅ il risultato finale torna, ma il passaggio *"200/5 = 40 punti"* etichetta 40 come "punti" quando è la capienza in punti — chi replica la FORMULA scritta (200/40 = 5 contratti) **quintuplica il rischio** | 🟠 esempio giusto, formula pericolosa |
+| 8 | 2% di 10.000 = 200 € · 1-3% = 100-300 € | [PAG 28] | ✅ | ✅ |
+| 9 | Trailing valute: *"**150 punti** corrispondono a 1 pip e mezzo"* | [EU SLIDE 20] | su 5 decimali 1 pip = 10 punti → 150 punti = 15 pip? NO: su BCM il "punto" MT5 = 0,00001 → 150 punti = 1,5 pip | ✅ (convenzione punto MT5 a 5 decimali) |
+| 10 | Trailing indici: *"**410 punti** corrispondono a 4 punti indice"* | [EU SLIDE 20] | su BCM (Digits=2) 1 punto indice = 100 punti → 410 punti = **4,1** punti indice | 🟠 arrotondato (4,1 ≠ 4); il default 410 nel nostro core è FEDELE alla cifra |
+| 11 | Orari UTC: NYSE 13:30-20:00, Tokyo 00:00-06:00 (pausa 02:30-03:30) | [PAG 9] | 9:30-16:00 ET = 13:30-20:00 UTC (DST) ✅ · 9:00-15:00 JST = 0:00-6:00 UTC ✅ | ✅ |
+| 12 | LSE pre-market *"05:05-07:00 (local)"* vs *"04:05-06:50 (UTC)"* | [PAG 9] | offset inizio = 1h00, offset fine = 0h10: **incoerente** | 🔴 riga sciatta |
+| 13 | Broker esempio *"CET-2 = UTC-1"* (Tokyo 00:00 UTC → 23:00 server) | [PAG 10] | internamente coerente, ma NON è BCM (IT−1) | 🟠 vedi §1 |
+| 14 | Numeri tondi *"(17000-38000)"* | [NAS SLIDE 15] | ordini di grandezza Nasdaq/Dow 2024 | ✅ plausibili [dichiarati] |
+| 15 | Soluzioni questionario: 1-B · 2-C · 3-C · 4-B · 5-B · 6-C | [PAG 40] | riscontrate una per una contro il testo delle domande [PAG 38-39] | ✅ coerenti col contenuto |
+
+**Bilancio: 15 controlli · 9 ✅ · 3 🟠 · 3 🔴.** I tre rossi sono la chiusura
+che cambia valore (14.800→15.000), la formula di sizing senza valore-punto e
+la riga LSE. Nessuno dei tre è un dettaglio: il primo è l'UNICO esempio
+numerico completo del PDF, il secondo è la formula che decide la size.
+
+---
+
+## 7. ⚔️ LE CONTRADDIZIONI — interne e fra le fonti
+
+| # | dove | contraddizione | conseguenza |
+|---|---|---|---|
+| 1 | **NAS SLIDE 10 vs PDF PAG 17** | Nasdaq: **ordini STOP** (riempiti DURANTE la rottura) · PDF: *"Entra subito **dopo la chiusura** della candela di breakout, **non durante**"* | 🔴 **la contraddizione madre.** Due ingressi diversi = due strategie diverse. Il nostro campo segue la slide (STOP); il motore DELAYED (PDF) esiste dal 02/08 e il suo test con filtri è rimasto INCOMPIUTO (`CACCIA_MOTORE_APERTURE.md`) |
+| 2 | dentro il PDF | rischio **1-3%** [PAG 27-28] vs **max 2%** [PAG 24] vs **≤2-3%** [PAG 30] vs pptx Nasdaq **2%** [NAS SLIDE 14] | 🟠 il 2% è il valore modale, ma "1-3%" autorizza il 50% di rischio in più |
+| 3 | dentro il PDF | *"Il Nasdaq e Dow Jones sono più volatilità [volatili]"* [PAG 8] vs Dow *"struttura più regolare"* [PAG 12] vs Dow *"correlazione più ordinata"* [PAG 21] | 🟠 caratterizzazioni non conciliate (e refuso "più volatilità") |
+| 4 | PDF vs pptx Europeo | PDF: DAX *"ideale per strategie di **breakout**"* [PAG 8] · piano Europeo: NESSUN breakout, livelli pre-tracciati + ST×3 | 🟠 il PDF caratterizza, il piano prescrive — chi implementa "il breakout del DAX" sta seguendo la caratterizzazione, non la spec |
+| 5 | SL fra fonti | NAS SLIDE 11: stop **sull'estremo opposto** della candela H1 · PDF PAG 14: stop **vicino al breakout** (ATR / 5-10 punti) | 🔴 sul Nasdaq la differenza è enorme (una candela H1 d'apertura può essere 100+ punti). L'audit 02/08 l'ha pagata cara (run DAX -Doc da buttare) |
+| 6 | fra i moduli del corso | il ToolKit ORB America (analisi 03/08, `CACCIA_MOTORE_APERTURE.md`) prescrive range 30 min, ingresso a chiusura, stop MAI spostato — l'opposto della gestione parziale+BE+trailing di QUESTI piani | 🟠 autori/moduli diversi, grammatiche diverse (pattern già visto su Breakout vs EasyTrend) |
+
+---
+
+## 8. 📋 LE ASSUNZIONI NECESSARIE PER IL PORTING (dichiarate, numerate)
+
+Per trasformare i piani in EA servono queste assunzioni — OGNI backtest che le
+usa deve citarle:
+
+| # | assunzione | copre il buco | stato in casa |
+|---|---|---|---|
+| A1 | "massimi/minimi precedenti" (Nasdaq) = **candela H1 precedente** l'apertura | NAS §4.2 riga 5 | già nel core (`RANGE_MODE=2`, `LEVEL_TF=H1`) |
+| A2 | Supertrend: **periodo ATR 10** | EU/AM/NAS | già nel core (`InpStAtrPeriod=10`) |
+| A3 | news 3 tori: finestra **±30 min** (nessun valore nei piani) | AM/NAS routine | `InpNewsBeforeMin/AfterMin` — da dichiarare nei test |
+| A4 | size divisa: **50/50**, secondo ordine limit su EMA14 H1 | AM §3.2 | ❌ non implementato |
+| A5 | parziale = **50%** ("dimezzando" lo dice solo il Nasdaq) | PDF §5.1/5.4 | già nel core (`InpTP1_ClosePct=50`) |
+| A6 | volumi di conferma: **media 20 barre, soglia +50%** | PDF §5.1-5.2 | già nel core (parametri nostri, non del piano) |
+| A7 | ATR di conferma: **ATR(14) ultima barra ≥ media ATR 20 barre** | PDF §5.1 | implementato 02/08 (parametri nostri) |
+| A8 | "candela ampia e decisa": **corpo ≥ X% del range** — X da scegliere | PDF §5.2 riga 3 | ❌ mai formalizzato (il filtro-corpo è nella lista 03/08) |
+| A9 | Larry Williams domenicale = la definizione dei materiali Larry di casa | EU §2.2 riga 9 | `ABTG_PunteLarry` esiste (altra famiglia) |
+| A10 | Bollinger M15: **20 periodi, 2 dev. std** | EU §2.2 riga 18 | ❌ nessun EA Bollinger-apertura |
+| A11 | trailing "base candela precedente" su **M1** | AM §3.1 riga 13 | già nel core (`TRAIL_MODE=1`) |
+| A12 | numeri tondi: passo **100** (Nasdaq/Dow) | NAS §4.3 | già nel core (`InpRoundStep=100`) |
+
+**Fuori portata anche CON assunzioni:** Multipivot/%Custom e "QQ Opposing"
+(proprietari), la correlazione "a sentimento" (nessuna condizione), il "se non
+ho livelli" europeo (procedura visiva), l'invalidazione del setup Nasdaq
+(mai definita).
+
+---
+
+_Compilato il 18/08/2026 sera (missione piani di apertura). Spec chiusa PRIMA
+di riaprire i sorgenti per il confronto di fedeltà (consegna gemella). Ogni
+cifra ha la sua slide/pagina; se una citazione e questa tabella divergono,
+comanda il documento originale._
