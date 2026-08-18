@@ -888,3 +888,72 @@ aperte dei cinque processi. **Su 61 domande censite: 14 chiuse, 9 parziali,
 > fotografare la finestra input. **La catena Breakout → Mediazione → Leonardo
 > e' stata percorsa fino in fondo e termina a vuoto: quel file e' l'unica
 > fonte rimasta.**
+
+---
+
+## 📰 AGGIUNTA 18/08 SERA — il modulo **STRATEGIA POST NEWS** (lezioni 2-10)
+
+**Referto completo:** `ANALISI_CORSO_POSTNEWS_2026-08-18.md`
+**Specifica:** `../prove/POSTNEWS_CORSO_SPEC.md`
+_(9 trascrizioni, ~78.500 caratteri. Qui SOLO cio' che tocca le prop: il resto
+sta nel referto, non lo duplico.)_
+
+⚠️ **Questo e' il sesto modulo, ed e' il primo in cui la voce "news" del metro
+prop non e' un contorno: e' la strategia stessa.** Entra a mercato **su una
+conferenza stampa di banca centrale**, cioe' esattamente nella finestra che
+meta' delle prop censite regola o vieta.
+
+### 1. 🕐 Il numero che decide tutto: **+15 min (ECB) / +10 min (FOMC)**
+
+Gli ordini vengono **piazzati** a notizia+15 (ECB, azione alle 15:00 IT) e
+notizia+10 (FOMC, azione alle 20:40 IT) `[T]`, e possono scattare in qualunque
+istante successivo. Il confronto con le finestre di divieto:
+
+| prop (scheda §2) | finestra dichiarata | ECB (+15) | FOMC (+10) |
+|---|---|---|---|
+| **FTMO 2-Step Standard** | ±2 min aprire/chiudere | ✅ eseguibile | ✅ eseguibile |
+| **FTMO Swing** | nessuna restrizione | ✅ libera | ✅ libera |
+| **FTMO 1-Step** | ±2 min | ✅ news ok — 🔴 **ma daily 3%**: al rischio del corso (3%/evento) **un doppio stop e' una breccia secca** | idem |
+| **The5ers High Stakes** | ±2 min per eseguire; _"i news trader scelgano Hyper Growth"_ | 🟠 lecita nei minuti, **di categoria no** | 🟠 idem |
+| **FundingPips** | ❌ **±10 min: aperta, chiusa O TENUTA** = hard breach | 🟠 5 min di margine, zero tolleranza | 🔴 **l'azione cade ESATTAMENTE sul bordo dei 10 minuti** |
+| **E8 Markets** | ❌ ±5 min aprire E chiudere | ✅ | ✅ |
+| **E8 Signature** | 🔴 tutto chiuso alle **23:00 ora server** | 🟠 ok (scadenza 18:15 IT) | 🔴 **incompatibile: la strategia tiene la posizione TUTTA LA NOTTE** (esempio della lez. 9: TP incassato alle 8 del mattino dopo) |
+| **Alpha Capital** | ✅ news permesse; ≥50% profitti da trade >2 min | ✅ libera | ✅ libera |
+
+### 2. 🔴 I due killer che NON dipendono dalla finestra news
+Nascono dalla **frequenza: 16 operazioni all'anno**, e valgono anche dove le
+news sono libere:
+1. **GIORNI MINIMI** — FTMO **4 giorni** di trading, The5ers **3 giorni
+   profittevoli** (≥0,5% ciascuno): a **1,3 eventi al mese** servono mesi solo
+   per sbloccare il requisito.
+2. **CONSISTENZA** — FTMO **50% best-day**, E8 ~35-40%, FundedNext 40%: con 2-3
+   operazioni in una fase, **un singolo TP e' >50% del profitto totale**.
+
+➡️ **Verdetto:** ✅ eseguibile su **FTMO (Standard e Swing), E8 Markets, Alpha
+Capital** · 🔴 **di fatto vietata su FundingPips** · 🔴 **impossibile DA SOLA su
+qualunque prop**. **Unica collocazione sensata: satellite di un portafoglio piu'
+denso** — che e' anche come il corso la presenta.
+
+### 3. 🚨 Rischio: 3% per evento, e sfonda due nostri paletti
+- corso: **1,50% per ordine / 3,00% per evento** (doppio stop) `[T]` = **2,3x**
+  il nostro A1 (0,65%), e **un solo evento consuma il 92% del cap C1 (3,25%)**;
+- **DD dichiarato 15%** (solo ECB) → **sopra il muro totale del 10%** di ogni
+  prop censita;
+- 🔧 **riscalatura di casa:** `InpRiskPercent=1,30` con `InpRiskRefSLpips=50` →
+  **0,65% per ordine**, DD atteso ~6,5%.
+
+### 4. ✅ Le due buone notizie, per una volta
+- **ZERO bandiere rosse** in 9 lezioni: niente martingala/griglia/recovery/
+  hedge, **stop sempre presente**, perdita massima nota in partenza. **E' il
+  modulo piu' pulito dei sei.**
+- **Nessun problema di esposizione simultanea**: ECB e FOMC **non cadono mai lo
+  stesso giorno** (verificato: 70 eventi = 70 date distinte nel nostro
+  calendario). E' l'unico modulo del corso **senza** il buco della correlazione.
+
+### 5. 🚨 E una nota che riguarda la CLASSIFICA, non il corso
+Il verdetto _"`PostNews@EURUSD/EURJPY`: nessun edge nemmeno in screening"_
+(`CLASSIFICA_WEEKEND.md`, `risultati_archivio/REFERTO_WEEKEND_FASE0.md` §2)
+poggia su **quattro backtest con `Trades = 0`**: il file eventi dato all'EA
+conteneva solo date **2026-2027**. **Quel verdetto va RITIRATO** (non
+ribaltato): la strategia non e' mai stata misurata. Dettaglio e prova in
+`ANALISI_CORSO_POSTNEWS_2026-08-18.md` §1.2.
