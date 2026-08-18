@@ -91,3 +91,62 @@ mestiere a occhio.
 > giusta: *"Verifica sempre sul tuo grafico se l'apertura corrisponde davvero
 > alle 09:00 CET"* — ed è la nostra regola di casa. La colonna "server" del
 > PDF va IGNORATA, la verifica sul grafico no.
+
+---
+
+## 2. 🇪🇺 PIANO DI TRADING EUROPEO (26 slide) — il più discrezionale
+
+### 2.1 La tesi, come la dichiara il piano
+> *"L'apertura dei mercati Europei viene tradata alle ore 9:00 del mattino
+> mettendo a confronto gli indici di riferimento: D30EUR … in correlazione con
+> il 225JPY … e con l'SPXUSD … Il 225JPY, influenza l'SPXUSD che influenza a
+> sua volta il D30EUR."* [SLIDE 2]
+
+⚠️ La catena di influenza è **affermata, mai misurata** nel documento —
+motivazione narrativa, non evidenza (stesso pattern del modulo Media200).
+
+### 2.2 Censimento delle 23 decisioni operative
+
+| # | decisione | valore | fonte | etichetta |
+|---|---|---|---|---|
+| 1 | Orario operativo | 09:00 IT (= 08:00 server BCM) | [SLIDE 2] | 🟢 |
+| 2 | Strumenti | D30EUR + monitor 225JPY, SPXUSD (+2 valute nel grafico) | [SLIDE 2, 7, 18] | 🟢 lista |
+| 3 | **Regola di correlazione** | *"vanno valutati entrambi … per capire la condizione di mercato"* — MAI una condizione operativa (soglia, direzione concorde, ecc.) | [SLIDE 2, 14, 18] | 🔴 **BUCO** |
+| 4 | Multipivot Qqin (classic b, Fibonacci, %Custom) | indicatore **proprietario**, mai definito | [SLIDE 4] | 🔴 **BUCO** |
+| 5 | Supertrend ×3 | multiplier **2.5 / 3.0 / 3.5** — il periodo ATR NON è mai detto | [SLIDE 4] | 🟠 assunzione: periodo 10 (default comune; il nostro core usa 10) |
+| 6 | Medie | EMA **89 / 100 / 200 / 14** (esponenziali; "applicata al close" sta nel gemello America [AM SLIDE 4]) | [SLIDE 4] | 🟢 |
+| 7 | "QQ Opposing" su TF inferiori | mai spiegato, presumibilmente proprietario | [SLIDE 4] | 🔴 **BUCO** |
+| 8 | Timeframe | ogni strumento su **M15, H1, H4**; Daily con canali di regressione **PTE** | [SLIDE 7] | 🟢 |
+| 9 | Routine domenicale | livelli con la **"tecnica di Larry Williams"** su D1/W1/MN (colori: MN azzurro, W1 arancione, D1 verde) — la tecnica NON è definita nelle slide | [SLIDE 9] | 🟠 in casa la tecnica c'è (`ABTG_PunteLarry`, dai materiali Larry): assunzione dichiarata di usare QUELLA definizione |
+| 10 | Lettura rottura massimi MN→W1 | *"Breakin Breakout PTE, dove la candela apre totalmente sopra o totalmente sotto per seguirne la direzione"* + max/min candela W1 precedente | [SLIDE 10] | 🟠 definizione c'è (open fuori dal range della candela precedente), procedura multi-TF discrezionale |
+| 11 | "Se non ho livelli" | scendo di TF / cerco dove il mercato si è fermato più volte / Fibonacci per i ritracciamenti | [SLIDE 11] | 🔴 **BUCO** (tutto a occhio: quante volte "più volte"? quale ritracciamento?) |
+| 12 | Sui massimi assoluti | solo operazioni **a favore di trend**, su "livelli chiave" | [SLIDE 14] | 🟠 direzione definibile (ST/EMA), "livelli chiave" no |
+| 13 | Struttura dei mercati | *"cambia quando apre totalmente sotto ai massimi precedenti"* → trading range | [SLIDE 15] | 🟢 come definizione |
+| 14 | Ordini pendenti | *"sui livelli … a favore di trend"* — quali livelli, quanti ordini, che size: non detto | [SLIDE 19] | 🔴 **BUCO** |
+| 15 | Take profit | *"in divenire, seguiamo l'operazione a time frame più bassi"* | [SLIDE 19] | 🔴 **BUCO** |
+| 16 | Invalidazione | *"quando il prezzo rompe i minimi precedenti"* + cambio Supertrend su TF inferiori | [SLIDE 20] | 🟠 (quali "minimi precedenti": assunzione = ultimo swing sul TF operativo) |
+| 17 | **Trailing stop** | *"Sulle valute **150 punti** corrispondono a 1 pip e mezzo. Sugli indici **410 punti** corrispondono a 4 punti indice."* | [SLIDE 20] | 🟢 **le uniche cifre di gestione del piano** (verifica aritmetica in §6) |
+| 18 | Bollinger M15 | ordine fuori banda; *"la mediana interna … è un obiettivo di prezzo"* — parametri banda MAI detti | [SLIDE 21] | 🟠 assunzione: 20/2 standard |
+| 19 | Ingresso TREND | *"Super Trend, quando cambiano **tutti e tre**, posso entrare a mercato"* + medie per la ripartenza | [SLIDE 23] | 🟢 condizione netta (i tre ST concordi) |
+| 20 | Ingresso RITRACCIAMENTO | Fibonacci / Bollinger / livelli % del Multipivot | [SLIDE 24] | 🔴 **BUCO** (menu senza regola di scelta, %Custom proprietario) |
+| 21 | Conferma post-apertura | ore 10:00 IT: *"se l'ultimo livello di Super Trend ha mantenuto la conformazione e la candela che apre, apre all'interno, il livello è forte"* | [SLIDE 25] | 🟠 ("ultimo livello", "all'interno": ricostruibile con un'assunzione) |
+| 22 | **Stop loss iniziale** | **MAI DEFINITO in 26 slide** | — | 🔴 **BUCO CAPITALE** |
+| 23 | **Size / rischio %** | **MAI DICHIARATO in 26 slide** | — | 🔴 **BUCO CAPITALE** |
+
+**Conteggio: 🟢 7 · 🟠 7 · 🔴 9 → 14/23 = 61%.**
+
+### 2.3 Le note di mercato (informative, non regole)
+- D30EUR *"risente dei livelli tecnici"*; U30USD *"può violare leggermente i
+  livelli tecnici ma li risente e li ritesta"*; SPXUSD *"risente dei livelli
+  tecnici"* [SLIDE 17] — [dichiarato, NON verificato].
+- Rottura massimi Monthly → *"normale … una candela di volatilità"* [SLIDE 10].
+
+### 2.4 🔴 Il punto che il 02/08 aveva già visto e che il censimento CONFERMA
+**Il piano Europeo NON descrive un ORB.** Nessuna slide parla di range dei
+primi 15 minuti sul DAX: l'impianto è livelli pre-tracciati (domenica, Larry
+Williams) + Supertrend ×3 + ordini pendenti sui livelli. Il "primi 15 minuti"
+sta nel pptx AMERICA [AM SLIDE 2] e il "breakout" del DAX sta nel PDF
+([PAG 8]: *"ideale per strategie di breakout e pre-apertura"* — una
+CARATTERIZZAZIONE del mercato, non una spec). Il nostro `ABTG_DAX_Apertura_EU`
+è quindi un ORB **costruito su un'indicazione generica del PDF**, non sul
+piano Europeo. Confronto completo nella consegna gemella.
