@@ -1,0 +1,35 @@
+Pensi che per applicare questa strategia sia necessario conoscere come funzioni l'economia o avere nozioni a livello economico-finanziario? Il calendario macroeconomico vedrai un semplicissimo sito che noi prenderemo come spunto solo per capire che giorno e a che ora. Non c'è nient'altro da aggiungere. Quindi andiamo a vedere come è fatto il calendario macroeconomico che ti suggerirò di utilizzare e come lo imposteremo.
+
+Dal nostro motore di ricerca noi andiamo su Forex Factory. Forex Factory è un sito che offre molti servizi, molte applicazioni per chi fa trading, una delle quali, quella che a noi interesserà, è il calendario. Quindi clicchiamo qua in alto al centro su calendar e abbiamo il nostro calendario macroeconomico.
+
+Allora, cerchiamo di capire un po' come funziona questa pagina. In partenza il calendario lo visualizzerai senza tutti questi filtri che ho impostato, cioè lo visualizzerai così, con un sacco di notizie, tantissime. Come vedi il sito funziona in questo modo.
+
+Qua in alto a sinistra hai il calendario del mese corrente e lui ti evidenzia qui in orizzontale la settimana che vedi poi qua divisa in verticale giorno per giorno. Naturalmente se vuoi tu su questo mini calendario puoi per esempio evidenziare un giorno in particolare. Per esempio questo giorno ci clicco e lui mi farà vedere qua solo quel giorno oppure la settimana.
+
+Per esempio quella attuale cliccando qui mi evidenzia tutta la settimana. Posso poi qua, qui, andare indietro di un mese, andare indietro di un anno, andare avanti di un mese. Quindi qui posso muovermi temporalmente e lui qua mi evidenzia quello che mi fa vedere qua in verticale.
+
+Una prima cosa che ti suggerisco di fare per rendere la fruizione del calendario un po' più efficace ed efficiente è di andare qua in alto a destra dove c'è filter. Quindi inseriamo un filtro qua, cioè togliamo il flag dalle notizie che lui non reputa importanti. In sostanza teniamo soltanto le notizie rosse che sono quelle a più alto impatto atteso.
+
+Quindi dove c'è expected impact lasciamo soltanto quelle rosse. Il resto possiamo lasciarlo tranquillamente tutto flaggato e andiamo su apply filter. Così facendo vedi che il numero di notizie presenti è diminuito drasticamente perché di fatto ora ci sta mostrando soltanto quelle più importanti.
+
+Altra cosa, il calendario ha qui l'orario, questo. Naturalmente l'orario lo puoi modificare. La cosa importante che devi verificare è che qua ci sia l'ora italiana, cioè l'ora che tu vedi qui deve coincidere con l'ora che tu vedi qua in basso a destra sul tuo computer naturalmente.
+
+Cioè qua deve mostrarti l'ora italiana o comunque l'ora della nazione in cui sei. Ovviamente cliccando sull'orario tu puoi andare a sistemare il GMT del calendario. Altra cosa importante, reinseriamo il nostro filtro che nel frattempo tornando indietro ci ha tolto.
+
+Quindi facciamo save settings. Ok. Cosa importante, come vedi lui divide anche i giorni.
+
+In questo caso ci ha evidenziato questa settimana, quindi poi qua a livello di colore distingue i giorni della settimana. Quello che ci mostra è giorno della settimana, ora in cui è previsto il rilascio delle notizie. Ovviamente ora italiana, perché se qua tu hai verificato che vedi l'ora attuale italiana, qua vedi l'ora italiana di rilascio delle notizie.
+
+Il paese interessato, cioè la valuta interessata, naturalmente lui qua usa lo stesso acronimo che trovi sulla piattaforma MetaTrader 4. Quindi CAD starà per Canadian Dollar, USED per United States Dollar e così via. JPY per Japanese Yen. Naturalmente il colore, solo quelle rosse, perché abbiamo impostato il filtro rosso.
+
+La notizia e naturalmente come detto non dovrai comprendere che notizie sono, ma ti suggerirò io fra poco quali sono le notizie che ti interesseranno. E poi c'è questa cartellina gialla che è particolarmente interessante, perché cliccando sulla cartellina gialla noi possiamo vedere che cosa. In primis history, tutte le ultime volte in cui è stata rilasciata questa notizia.
+
+E vedrai che trattandosi di strategia meccanica, il concetto di andare a verificare quello che sarebbe successo negli anni passati, se tu l'avessi applicata, sarà particolarmente importante. Naturalmente cliccando qui su more, noi possiamo vedere molte più date passate. Vedi quante informazioni ci dà questo calendario.
+
+E non solo su history vediamo il passato, ma qua, next release, vediamo la prossima volta in cui sarà rilasciata la notizia. Quindi noi per ciascuna notizia noi sappiamo la prossima volta che verrà rilasciata e tutte le ultime volte in cui è stata rilasciata. Quindi abbiamo la possibilità sostanzialmente di andare a vedere se e che tipo di impatto ha avuto quella notizia sul grafico.
+
+Perché noi possiamo impostare una data passata sulla piattaforma MetaTrader 4. Non è da questo punto di vista la piattaforma più efficace per andare ad analizzare il passato. Ma diciamo che in un lasso di tempo ragionevole, cioè senza andare troppo indietro nel passato, riusciamo a tornare indietro per vedere quello che è successo un determinato giorno, una determinata ora. Possiamo andare a vedere quella notizia che impatto ha avuto.
+
+Abbiamo poi, andando a chiudere la cartellina gialla, queste ultime tre colonne dove possiamo vedere actual qui, che è il dato effettivo quando esce, forecast è la previsione, previous è l'ultimo dato che è stato rilasciato. Quindi ci dà tutta una serie di informazioni che a noi serviranno, sostanzialmente a noi servirà soltanto il giorno e l'ora. Il tipo di notizia che uscirà non ci interessa e poi naturalmente per fare un minimo di pianificazione andremo a vedere quando saranno quelle successive.
+
+Nel prossimo video cercheremo di capire come strutturalmente un tasso di cambio reagisce al rilascio di una notizia e perché noi dal punto di vista della strategia post news andremo a concentrarci solo su notizie di un certo tipo escludendone altre. Quindi cercheremo di capire insieme che cosa accade a un tasso di cambio nell'istante in cui certe notizie vengono rilasciate e cosa invece accade quando altre notizie vengono rilasciate perché alcune per forza le dovremo escludere e ci dovremo necessariamente quindi concentrare sulle altre. Ti rimando quindi al prossimo video.
