@@ -1,0 +1,70 @@
+﻿=== CENSIMENTO DEL RISCHIO DICHIARATO (dai .chr) ===
+data: 2026.08.18 09:41
+
+sedie trovate: 55
+
+EA                                   simbolo  magic    rischio  commento
+--------------------------------------------------------------------------------------------
+ABTG_BreakingBand                    GBPUSD   772161      1.0  BB GBPUSD
+ABTG_BreakingBand                    EURUSD   772162      1.0  BB EURUSD
+ABTG_BreakingBand                    AUDUSD   772163      1.0  BB AUDUSD
+ABTG_CostToCost                      XAGUSD   772363      1.0  COST XAGUSD
+ABTG_CostToCost                      GBPCAD   772362      1.0  COST GBPCAD
+ABTG_CostToCost                      EURJPY   772361      1.0  COST EURJPY
+ABTG_DAX_Apertura_EU                 D30EUR   770101        1  
+ABTG_Dow_Apertura_US                 U30USD   770202      1.0  
+ABTG_EasyTrend                       CHFJPY   772421      1.0  EZ CHFJPY
+ABTG_EasyTrend                       GBPUSD   772422      1.0  EZ GBPUSD
+ABTG_EasyTrend                       AUDJPY   772423      1.0  EZ AUDJPY
+ABTG_EMA200                          U30USD   771531      1.0  EMA200 DOW
+ABTG_EMA200_Ottimizzato              XAUUSD   971501      1.0  EMA200 OTT
+ABTG_GapFill                         GBPUSD   772231      1.0  GAP GBPUSD
+ABTG_GapFill                         AUDUSD   772233      1.0  GAP AUDUSD
+ABTG_GapFill                         EURUSD   772232      1.0  GAP EURUSD
+ABTG_GapFill                         U30USD   772234      1.0  GAP DOW
+ABTG_GapFill                         225JPY   772235      1.0  GAP NIKKEI
+ABTG_MaxMinNotte                     XAUUSD   770402      1.0  MAXMIN ORO
+ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR   770411      1.0  MAXMIN DAX SHORT
+ABTG_ORB_Ottimizzato                 U30USD   770611      1.0  ORB OTT
+ABTG_PTE                             USDJPY   771323      1.0  PTE USDJPY
+ABTG_PTE                             U30USD   771321      1.0  PTE DOW
+ABTG_PunteLarry                      GBPJPY   772344      1.0  LARRY GBPJPY
+ABTG_PunteLarry                      XAUUSD   772343      1.0  LARRY ORO
+ABTG_PunteLarry                      EURCAD   772346      1.0  LARRY EURCAD
+ABTG_PunteLarry                      GBPUSD   772345      1.0  LARRY GBPUSD
+ABTG_PunteLarry                      EURAUD   772342      1.0  LARRY EURAUD
+ABTG_PunteLarry                      U30USD   772341      1.0  LARRY DOW
+ABTG_SupertrendReversal              225JPY   770924      1.0  STREV FW Nik
+ABTG_SupertrendReversal_Ottimizzato  XAUUSD   970901        1  STREV OTT
+ABTG_SuperWave                       GBPUSD   770532      1.0  SW GBPUSD H2
+ABTG_SuperWave                       U30USD   770531      1.0  SW DOW H2
+ABTG_SuperWave_DOW_H1_Ottimizzato    U30USD   770511      1.0  SUPERWAVE DOW H1
+ABTG_SupRev_DAX_H4_Ottimizzato       D30EUR   970912      1.0  STREV DAX H4
+ABTG_SupRev_NAS_H1_Ottimizzato       NASUSD   970913      1.0  STREV NAS H1
+ABTG_DAX_Apertura_EU                 D30EUR   770101     0.65  
+ABTG_DAX_Apertura_EU                 D30EUR   770101     0.65  
+ABTG_Dow_Apertura_US                 U30USD   770202     0.65  
+ABTG_Dow_Apertura_US                 U30USD   770202     0.65  
+ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR   770411     0.65  MAXMIN DAX SHORT
+ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR   770411     0.65  MAXMIN DAX SHORT
+ABTG_SupertrendReversal              225JPY   770901     0.65  STREV
+ABTG_SupertrendReversal              225JPY   770901     0.65  STREV
+ABTG_PTE                             GBPUSD   771332      0.5  PTE GBPUSD B25
+ABTG_PTE                             GBPUSD   771322      0.5  PTE GBPUSD
+Gold_Ichimoku_TK_ATR_EA              XAUUSD   250604      0.5  
+ABTG_ORB_Ottimizzato                 U30USD   770611      0.3  ORB OTT
+ABTG_ORB_Ottimizzato                 U30USD   770611      0.3  ORB OTT
+ABTG_GapContinuation                 225JPY               n/d  GAPCONT   <- nessun input di rischio trovato
+ABTG_Guardian                        AUDCAD   779001      n/d  GUARDIAN FTMO 2STEP   <- nessun input di rischio trovato
+ABTG_Guardian                        AUDCAD   779001      n/d  GUARDIAN FTMO 2STEP   <- nessun input di rischio trovato
+ABTG_TradeExporter                   EURUSD               n/d     <- nessun input di rischio trovato
+ABTG_TradeExporter                   NZDCAD               n/d     <- nessun input di rischio trovato
+BREAKOUT_EA_JPY_v3                   USDJPY               n/d     <- nessun input di rischio trovato
+
+=== TOTALE RISCHIO DICHIARATO ===
+  somma dei rischi di tutte le sedie: 43,30% del conto
+  (non e' il rischio simultaneo: e' quanto si rischierebbe se aprissero tutte insieme)
+
+Nessuna sedia dichiara piu' dell'1%.
+Allora le perdite da -2% del conto NON vengono dal rischio impostato:
+vengono dallo STOP SALTATO (gap/slippage in apertura). Si guarda li'.
