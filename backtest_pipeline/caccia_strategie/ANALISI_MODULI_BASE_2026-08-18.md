@@ -29,6 +29,87 @@ FiboH4 · Media200 · PointBreak).
 
 ---
 
+## 0-bis. 🎯 LE TRE RISPOSTE CHE CLAUDIO ASPETTA — secche, in testa
+
+### ① IL RETTANGOLO: 15 o 20 candele? → ❌ **QUI NON C'È, E NON POTEVA ESSERCI**
+
+**La lezione didattica NON scioglie il nodo, perché parla di un OGGETTO
+DIVERSO** — e il corso stesso avverte, nella sua prima riga:
+
+`[TRASCRITTO chiaro, lez. 10 an.tec. "IL RETTANGOLO"]`
+> _"È molto importante **distinguere il rettangolo dallo strumento di disegno
+> rettangolo** ... Il rettangolo è una specie di figura che va a fondere due
+> figure insieme. **È la fusione di un doppio minimo e di un doppio massimo**"_
+
+| | rettangolo **analisi tecnica** (lez. 10-11) | rettangolo **Breakout** (lez. 36-40) |
+|---|---|---|
+| cos'è | una **FIGURA a 4 punti**: top-bottom-top-bottom | una **FINESTRA MOBILE di N candele** |
+| definito da | i **top e i bottom** (swing) | il **conteggio delle candele** |
+| candele | ⛔ **mai contate, in due lezioni intere** | 15? 20? ← la domanda |
+
+> ⛔ **VERDETTO: le ambiguità "15 o 20", "la candela di rottura conta",
+> "almeno/al massimo" restano APERTE. Questa fonte non le tocca.**
+> In due lezioni sul rettangolo-figura **non compare mai un conteggio di
+> candele**: né 15, né 20, né altro.
+> ⚠️ **E va detto a chi implementa: è tentante "spiegare" il 15-vs-20 col
+> rettangolo-figura. NON SI PUÒ.** Sono due concetti distinti dello stesso
+> corso, e confonderli produrrebbe un EA che cerca doppi massimi dove il
+> Breakout conta candele. **Dettaglio in §3.1.**
+>
+> ✅ **UNA COSA PERÒ SI CHIUDE, ed è il terzo pezzo della domanda: WICK O
+> CORPO.** `[T]` lez. 5 modulo base: _"nelle strategie noi prenderemo anche
+> molto come riferimento **le ombre delle candele giapponesi, cioè il massimo e
+> il minimo**"_ → **WICK**, convenzione generale dichiarata, coach diverso.
+> Conferma la regola R5 del Breakout (§2.4).
+
+### ② GLI ESEMPI BUY/SELL JPY (lez. 18-21): che strategia usano? → ❌ **NESSUNA**
+
+**Non confermano i livelli del Breakout perché non applicano nessuna strategia.**
+Il corso lo dichiara **tre volte**:
+`[T]` lez. 19: _"**essendo puramente didattico**, continuiamo con questo
+esempio"_ · _"**sarà poi la strategia che andrai a mettere in campo a determinare
+l'esatto valore in pips**"_ · `[T]` lez. 21: _"la quantità di pips da aggiungere
+o da sottrarre **sarà sempre dettata dalla strategia**"_
+
+> ⛔ **I 20 pip di SL e 40 di TP sono numeri inventati per l'esercizio.** Il
+> rapporto **1:2** NON è una regola del corso e **non va usato per arbitrare**
+> fra l'1:3 del Breakout e l'1:1 di EasyTrend.
+>
+> ✅ **MA LE QUATTRO LEZIONI NON SONO SPRECATE — danno due cose che servono:**
+> 1. **la convenzione di calcolo**: `SL = ingresso ∓ N pip` **esatto**, con la
+>    cifra del punto **riportata invariata** (_"Il 7 lo riportiamo esattamente
+>    così com'è perché rappresenta i punti"_) → **nessun arrotondamento esiste
+>    nel corso**, quindi il **39→40** della lez. 37 Breakout è un **errore
+>    individuale**, non una convenzione: **la scelta dell'EA (39 esatto) è
+>    confermata** (§2.6);
+> 2. **due dei quattro test-case sul pip JPY** (§2.3), aritmetica verificata al
+>    centesimo su tutti e quattro.
+
+### ③ IL FUSO DELLA PIATTAFORMA DEL CORSO → ✅ **DETTATO, e il broker è IL NOSTRO**
+
+`[TRASCRITTO chiaro, lez. 3 piatt.]`
+> _"Questa è una piattaforma che, scaricata dal broker **BlackRidge**, **non dà
+> l'ora italiana, cioè è settata sostanzialmente sul GMT** ... **e non può essere
+> modificata questo orario** ... da fine marzo a fine ottobre **la piattaforma
+> sarà DUE ORE INDIETRO rispetto all'ora italiana**; ... da fine ottobre a fine
+> marzo ... **UN'ORA INDIETRO**"_
+
+`[TRASCRITTO chiaro, lez. 2 piatt.]` _"il nome del broker che noi utilizziamo è
+**Black Ridge** ... dovrai semplicemente scrivere **bcmmarkets.com**"_
+
+> 🔥 **`bcmmarkets.com` È IL NOSTRO BROKER** — conto demo del progetto
+> `50503392 — BCMMarkets-Server — BCM Markets Ltd`. **Il corso e noi operiamo
+> sullo stesso broker**: su H4 le barre del relatore e le nostre **hanno lo
+> stesso taglio** (chiude un'assunzione della spec Media200).
+>
+> ⚠️ **E RESTA UNO SCARTO DI UN'ORA DA MISURARE:** il corso dice **GMT** (agosto
+> = IT−2 = UTC+0), il repo dice **BCM = IT−1 = UTC+1**. **Non tornano.**
+> ➡️ **Screenshot con l'orologio di Windows e la "Vista del mercato" di MT4/MT5
+> nella stessa foto.** 5 secondi, e chiude il buco del fuso di **3 spec su 5**.
+> **Dettaglio e implicazioni in §2.5.**
+
+---
+
 ## 1. 📋 TABELLA MASTER — domanda aperta → esito
 
 Legenda: ✅ chiusa · 🟡 parziale · ❌ non trovata · 🚫 fuori portata di un modulo
