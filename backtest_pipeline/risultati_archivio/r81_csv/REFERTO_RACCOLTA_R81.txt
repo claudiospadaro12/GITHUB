@@ -1,0 +1,11 @@
+REFERTO DI RACCOLTA - R81 PROCESSO ALLE USCITE (MaxMin DAX Short)
+data: 2026-08-18 14:17
+riferimento (commit/branch): f2f9030
+macchina: DESKTOP-H4D7CAJ   utente: Master
+deposito: 100000   modello: tick reali (4)   simbolo: D30EUR
+varianti girate: A B C D E F
+CSV attesi: 12   mancanti: 0
+serie per-trade raccolte: 12 (solo finestra OOS)
+
+La riga 'data:' qui sopra deve essere di ADESSO. Se e' vecchia, stai
+guardando una raccolta precedente e non i file di questa corsa.
