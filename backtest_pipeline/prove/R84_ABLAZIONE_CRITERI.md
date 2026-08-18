@@ -64,6 +64,15 @@ n a 12 non e' un filtro migliore: e' un filtro non misurabile).
 > (D30EUR, U30USD, NASUSD, SPXUSD, 225JPY)"*. Il **2024.09.26** che gira in
 > 110 file prova e' la profondita' delle **BARRE**, non dei tick.
 
+Per essere precisi su cosa e' misurato e cosa no:
+- **BARRE degli indici: MISURATE.** Sonda del 17/08
+  (`risultati_archivio/REFERTO_SONDA_STORICO_17-08.md` §3): `NASUSD` e gli
+  altri indici partono dal **2024.09.26**, verdetto **`COMPLETO`** — non
+  manca sul disco, il broker non ce l'ha piu' indietro.
+- **TICK degli indici: NON misurati.** Nel repo l'unica riga `TICK` che
+  esiste e' quella di `GBPUSD` (probe del 15/08). Per gli indici quella riga
+  non e' mai stata prodotta.
+
 E' il difetto n.18 della checklist (*profondita' misurata su un TF, corsa
 girata su un altro*). Quindi:
 

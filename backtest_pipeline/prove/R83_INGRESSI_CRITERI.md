@@ -88,8 +88,11 @@ duello non isolerebbe piu' l'ingresso.
 > reali degli INDICI** a BCM **non e' mai stata misurata** (il referto del
 > 15/08 misura GBPUSD: tick dal 2024.07.05, e dice *"da misurare allo stesso
 > modo: i tick degli INDICI"*). Il 2024.09.26 e' la profondita' delle
-> **BARRE**. Si misura prima, si legge la riga `TICK`, e se i tick partono
-> dopo, **la finestra si riscrive**. E' il difetto n.18 della checklist.
+> **BARRE** — quelle si', misurate: sonda del 17/08, indici dal **2024.09.26**
+> con verdetto **`COMPLETO`** (il broker non ne ha di piu'). Dei **tick** degli
+> indici, invece, nel repo non esiste **nessuna** riga `TICK`: l'unica misurata
+> e' quella di GBPUSD. Si misura prima, si legge la riga `TICK`, e se i tick
+> partono dopo, **la finestra si riscrive**. E' il difetto n.18 della checklist.
 
 **Regime contenuto:** toro USA 2024-2025 + correzione 2025 sul Nasdaq; DAX
 2024-2026. **Un regime e mezzo, niente 2020, niente 2022.** Va scritto
