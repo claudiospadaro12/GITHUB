@@ -1,7 +1,7 @@
 # =====================================================================
 #  histdata_m1.py  --  LA STRADA HISTDATA per lo storico M1 degli INDICI
 #  ---------------------------------------------------------------------
-#  VERSIONE: HD-M1-v2        (marcatore: la riga di lancio lo stampa
+#  VERSIONE: HD-M1-v3        (marcatore: la riga di lancio lo stampa
 #                             PRIMA di fare qualunque altra cosa)
 #
 #  v2 (18/08 sera, verifica del verificatore-stringhe -- 16 difetti):
@@ -112,7 +112,7 @@ import urllib.request
 import zipfile
 from datetime import datetime, timedelta
 
-VERSIONE = "HD-M1-v2"
+VERSIONE = "HD-M1-v3"
 
 BASE_PAGINA = ("https://www.histdata.com/download-free-forex-historical-data/"
                "?/ascii/1-minute-bar-quotes/")
@@ -128,10 +128,15 @@ PAUSA_MS_DEFAULT = 1500            # HistData e' un sito, non un datafeed:
 # La banda serve SOLO al controllo di sanita' (ordine di grandezza),
 # non a scegliere divisori: le quote HistData sono gia' decimali.
 STRUMENTI = {
-    "grxeur": ("D30EUR", 4000.0, 30000.0, "DAX 30/40 in EUR"),
-    "nsxusd": ("NASUSD", 1500.0, 30000.0, "NASDAQ 100 in USD"),
-    "jpxjpy": ("225JPY", 6000.0, 60000.0, "NIKKEI 225 in JPY"),
-    "spxusd": ("SPXUSD", 600.0, 8000.0, "S&P 500 in USD"),
+    # Le bande servono a beccare ERRORI DI UNITA' (un indice letto come un
+    # cambio: fattore 1000+), NON i tori. v3 (18/08 sera): i tetti v2 erano
+    # tarati sui prezzi vecchi e la corsa vera li ha sfondati al rialzo
+    # (Nikkei 66.253 a schermo contro tetto 60.000; Nasdaq 29.514 contro
+    # 30.000; SPX 7.702 contro 8.000): tre ALLARMI su prezzi GIUSTI.
+    "grxeur": ("D30EUR", 4000.0, 45000.0, "DAX 30/40 in EUR"),
+    "nsxusd": ("NASUSD", 1500.0, 45000.0, "NASDAQ 100 in USD"),
+    "jpxjpy": ("225JPY", 6000.0, 100000.0, "NIKKEI 225 in JPY"),
+    "spxusd": ("SPXUSD", 600.0, 12000.0, "S&P 500 in USD"),
     "auxaud": ("200AUD", 2500.0, 12000.0, "ASX 200 in AUD"),
     "etxeur": ("ETXEUR", 1500.0, 7000.0, "EUROSTOXX 50 in EUR (nome BCM DA VERIFICARE)"),
     "ukxgbp": ("UKXGBP", 3000.0, 12000.0, "FTSE 100 in GBP (nome BCM DA VERIFICARE)"),
