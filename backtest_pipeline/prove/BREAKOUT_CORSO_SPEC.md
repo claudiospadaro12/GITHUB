@@ -48,7 +48,7 @@
 
 | nodo | esito | dettaglio |
 |---|---|---|
-| **(a) Williams 140 o 14?** | 🔴 **NON CHIUSO** | **Nessuna slide scrive il periodo.** Le slide dicono solo _"dell'indicatore William's"_. Il "140" resta appeso all'unica frase della lez. 35. |
+| **(a) Williams 140 o 14?** | ✅ **CHIUSO: 140** | Nessuna slide lo scrive, ma **Claudio ha ri-ascoltato il video il 18/08 e conferma: 140 periodi** [CONFERMA DIRETTA sulla fonte primaria]. Il "140" della lez. 35 era giusto, non un errore di trascrizione. |
 | **(b) Parametri SuperTrend** | 🔴 **NON CHIUSO — e ora sappiamo perche'** | Le slide nominano _"supertrend rosso"_ / _"supertrend verde"_ e **non danno mai ATR ne' moltiplicatore**. ⚠️ **Il PDF riepilogativo NON contiene i parametri degli indicatori**: non e' un ritaglio mancante, e' che il documento non li tratta. **La risposta puo' venire SOLO dal modulo precedente.** |
 | **(c) Vincolo delle 20 candele** | 🟡 **CHIUSO A META'** | S4 scrive: _"Esso deve contenere 20 candele"_ + _"si costruisce a partire dal primo ingresso del William's"_ (S5/S6). **Ne segue che 20 candele DEVONO essere trascorse** (non puoi contenerne 20 a partire dall'ingresso se ne sono passate 5). Ma **nessuna slide scrive l'attesa come regola esplicita** → resta un'implicazione, non una citazione. |
 
@@ -210,7 +210,7 @@ l'ipercomprato **e'** [−20, 0]; simmetricamente l'ipervenduto e' [−100, −8
 `[I]` **da due lezioni diverse + simmetria**, ed e' l'unica lettura che rende
 coerenti entrambe le frasi.
 
-### 3.2 🔴 Williams a 140 periodi — il numero da verificare
+### 3.2 ✅ Williams a 140 periodi — CHIUSO il 18/08: Claudio ha ri-ascoltato il video e conferma 140
 
 - Occorre **una sola volta**, in una sola lezione, senza mai essere ripetuto:
   **nessuna convergenza interna**.
