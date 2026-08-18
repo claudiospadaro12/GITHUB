@@ -1,0 +1,135 @@
+# =====================================================================
+#  R84 / ABLAZIONE DEI FILTRI DEL CORSO - NASDAQ APERTURA US
+#  CELLA E - TREND con EMA 14/200 su H1
+#  EA: ABTG_Nasdaq_Apertura_US (quello VIVO, nessuna riga di codice tocca)
+#
+#  Si lancia con:
+#    -Prova prove\R84e_ema_NASUSD.txt -Etichetta r84e -Modello 4
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI: prove\R84_ABLAZIONE_CRITERI.md
+#  LA DOMANDA DEL ROUND: "i filtri del corso aggiungono o tolgono,
+#  misurato, un filtro alla volta, a parita' di tutto il resto?"
+# ---------------------------------------------------------------------
+#  QUESTA CELLA
+#    Regola #16 [PAG 29]: si opera solo a favore del trend confermato su TF
+#    superiore. Qui la versione EMA, sul TF H1 dei livelli del piano.
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E IL SUO LIMITE DICHIARATO
+#    @DAQUANDO 2024.09.26 e' la profondita' delle BARRE degli indici a BCM.
+#    La profondita' dei TICK REALI degli indici NON E' MAI STATA MISURATA
+#    (il referto del 15/08 misura GBPUSD: tick dal 2024.07.05, e dice
+#    'da misurare allo stesso modo: i tick degli INDICI'). PASSO 0 dei
+#    criteri: si misura, si legge la riga TICK, e se parte dopo QUESTA
+#    DATA VA RISCRITTA. E' il difetto n.18 della checklist.
+#
+#    Dentro questa finestra c'e' UN REGIME E MEZZO (toro USA 2024-25 +
+#    correzione 2025): niente 2020, niente 2022. Va scritto accanto a
+#    ogni numero. R84 confronta filtri, NON dichiara robustezza.
+#
+#  IL CAMPIONE: 21 mesi con un ciclo al giorno non arrivano ai 150 trade
+#  che l'EMENDAMENTO chiede per un IS. Qui non si SCEGLIE nessuna cella,
+#  si CONFRONTA: lo split IS/OOS serve solo come prova di coerenza dei
+#  segni. Sotto 30 operazioni il giudizio di merito e' SOSPESO (R59).
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- SESSIONE (ORE DEL SERVER BCM: 14:30 = 15:30 italiane) ---
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=21
+InpCloseMin=45
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: breakout a stop sulla candela H1 precedente (piano Nasdaq) ---
+InpEntryMode=0
+InpRangeMode=2
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+
+# --- I FILTRI: e' QUI che le celle si distinguono. Le righe che seguono
+#     sono la cella A (tutto spento); ogni altra cella riscrive UNA riga.
+# <<< CELLA E: QUESTA e' la riga che cambia rispetto alla cella A
+InpUseEmaFilter=1
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpUseNewsFilter=0
+InpUseVolRegime=0
+InpUseSRFilter=0
+
+# --- RISCHIO E GESTIONE: identici in tutte e nove le celle.
+#     Il rischio e' pinnato a 1,00%: NON e' la taglia di campo (0,25%),
+#     e' un valore comune che rende i profitti confrontabili fra celle.
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpBEatR=0
+InpUseTrailing=1
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=1
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+# --- USCITE A NUMERI TONDI: SPENTE. Sono una regola di USCITA, non un
+#     filtro d'ingresso: mescolarle qui renderebbe illeggibile il round
+#     (criteri par.6). Nel preset della sedia erano accese.
+InpUseRoundLevels=0
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+
+# --- SLIPPAGE E FLOOR: spenti. Il breakout a stop e' quindi misurato
+#     nella sua versione PIU' FAVOREVOLE (i tick reali portano lo spread,
+#     non il riempimento oltre il livello). Vale per tutte le celle, quindi
+#     non falsa il confronto FRA i filtri: falserebbe solo un confronto
+#     con altri motori. Scritto perche' non si dimentichi.
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=1
+
+# --- IGIENE: log spento nelle corse lunghe.
+InpMaxSpread=0
+InpVerbose=0
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE. Se non lo sono, c'e' di mezzo la cache del
+#     tester o una griglia che MT5 si ricorda: il numero non si legge.
+InpMagic=776050||776050||1||776051||Y
