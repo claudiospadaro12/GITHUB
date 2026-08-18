@@ -24,6 +24,17 @@ strategia montata per un developer. Non duplico: linko.
 
 # PARTE 1 — 🔥 LA SINTESI, PRIMA DI TUTTO
 
+> 🆕 **AGGIORNATO 18/08 ~15:15 — SONO ARRIVATE LE SLIDE DEL PDF (lez. 40).**
+> 14 screenshot = **10 slide uniche**. Hanno **chiuso 6 ambiguita' su 10** e
+> alzato la meccanizzabilita' **dal 71% all'87%**. **Ma NON hanno chiuso i due
+> nodi bloccanti** (periodo Williams, parametri SuperTrend), perche' **il PDF
+> non tratta i parametri degli indicatori**.
+> ➡️ **Dettaglio completo nella PARTE 2-BIS.** Le due novita' che cambiano il
+> giudizio: la **regola discrezionale NON esiste nel PDF** (§2b.5, cade
+> l'obiezione "nessun EA puo' replicare il corso") e la **contraddizione 1% per
+> operazione / 1% complessivo** (§2b.6, e' un fattore 7 sul rischio).
+> **I conteggi nel §1.1 qui sotto sono quelli originali, pre-slide.**
+
 ## 1.1 Il verdetto in tre righe
 
 1. **La strategia e' meccanizzabile al 71%** (24 regole certe su 34 decisioni
@@ -218,13 +229,23 @@ esatte · slippage. **Sei buchi su una lezione che esiste per dare numeri.**
 
 ## 1.9 ❓ LE DOMANDE PER CLAUDIO (in ordine di quanto sbloccano)
 
-1. 🔴 **Il PDF della lezione 40.** E' nell'area personale del corso ed e'
-   l'unico documento che puo' chiudere i buchi (SuperTrend, soglie, cap
-   posizioni). **Richiesta n.1.**
+> 🆕 **Aggiornate dopo le slide.** ✅ La n.1 (il PDF) **e' stata evasa**: ha
+> chiuso 6 ambiguita', **non i due nodi bloccanti**. La nuova n.1 e' il
+> **modulo precedente**, e si e' aggiunta una domanda **piu' urgente di tutte**
+> (la n.0 qui sotto).
+
+0. 🔴🔴 **NUOVA E PRIORITARIA — "1% per operazione" o "1% COMPLESSIVO"?**
+   Il parlato dice per operazione, **la slide S10 scrive "complessivo"**
+   (§2b.6). **E' un fattore 7 sul rischio di portafoglio** e tocca direttamente
+   l'interpretazione del nostro `−20.853 €`. **Va sciolta prima di qualunque
+   nuova misura.**
+1. ✅ ~~Il PDF della lezione 40~~ — **RICEVUTO**, 10 slide, 6 ambiguita' chiuse.
 2. 🔴 **La trascrizione (o gli screenshot) del MODULO PRECEDENTE**, quello che
    imposta Williams+SuperTrend — citato in lez. 35 come _"Lo abbiamo fatto nel
-   modulo precedente"_. **Senza i parametri del SuperTrend la strategia non e'
-   riproducibile**, e i nostri `ATR 10 / 3.0` restano una nostra invenzione.
+   modulo precedente"_. 🆕 **Ora e' la richiesta n.1 fra i documenti**, perche'
+   le slide hanno **dimostrato** che il PDF del modulo Breakout **non contiene i
+   parametri degli indicatori**: non esiste altra fonte. Senza, i nostri
+   `ATR 10 / 3.0` e il `Williams 140` restano **scelte nostre**.
 3. 🟠 **Screenshot del pannello del Williams: 140 o 14?** (§1.7)
 4. 🟠 **Dov'e' il sorgente di `BREAKOUT_EA_JPY_v3`?** Non e' nel repo: non
    sappiamo con certezza cosa gira sul conto piccolo.
@@ -704,6 +725,129 @@ SuperTrend** → **Domanda 1 per Claudio.**
 **COSA NE COPIAMO:** ✅ **Praticamente tutta la checklist.** E' la spina dorsale
 di `BREAKOUT_CORSO_SPEC.md`. ⚠️ **Con una correzione dichiarata**: banda SELL
 [−50,−20] dalla lez. 38, **non** "0/−50".
+
+---
+
+# PARTE 2-BIS — 🖼️ LE SLIDE DELLA LEZIONE 40 (aggiornamento 18/08 ~15:15)
+
+> Claudio ha mandato **14 screenshot** del PDF riepilogativo →
+> `trascrizioni_corso_2026-08-18/slide_lezione40/`. Sono **10 slide uniche**
+> (4 doppioni con timestamp diverso). **E' la meta' SCRITTA del corso**, quella
+> che le trascrizioni non potevano vedere: la fonte piu' forte che abbiamo,
+> perche' e' il **documento**, non il parlato.
+>
+> Etichetta: **`[SLIDE Sn]`**.
+
+## 2b.1 Le 10 slide
+
+| # | titolo | screenshot | cosa porta |
+|---|---|---|---|
+| S1 | Descrizione | `151240` | definizione: _"movimenti direzionali successivi ad una fase di compressione di volatilita'"_ |
+| S2 | Insidie | `151302` + `151336` | le 3 difficolta': false rotture · R:R adeguato · strumenti adatti |
+| S3 | **Cross da tradare** | `151343` | 🟢 i 7 cross + **XAU/USD** |
+| S4 | **Identificazione area di congestione** | `151406` | 🔥 **20 candele + aggiornamento ad ogni chiusura** |
+| S5 | **Segnale ingresso SELL** | `151429` | 🔥 **William's tra −20 e −50** |
+| S6 | **Segnale ingresso BUY** | `151442` | 🔥 **William's tra −80 e −50** |
+| S7 | **Livelli ingresso/stop/target** | `151456` + `151515` | 🔥 stop 1 pip · target ×3 · R:R 1:3 |
+| S8 | **Validita' del segnale** | `151527` + `151537` | 🔥 **le tre uscite obbligatorie** |
+| S9 | **Gestione dell'operazione** | `151549` + `151600` | 🔥 **stop in pari dai parametri della strategia** |
+| S10 | **Money management** | `151619` | 🔥 **"rischio COMPLESSIVO dell'1%"** |
+
+## 2b.2 🎯 I tre nodi prioritari: 1 chiuso a meta', 2 NON chiusi
+
+| nodo | esito |
+|---|---|
+| **(a) Williams 140 o 14?** | 🔴 **NON CHIUSO.** Nessuna slide scrive il periodo: dicono solo _"dell'indicatore William's"_. Il dubbio **sopravvive** intatto. |
+| **(b) Parametri SuperTrend** | 🔴 **NON CHIUSO — ma ora sappiamo PERCHE'.** Le slide dicono _"supertrend rosso"_ / _"verde"_ e **mai** ATR o moltiplicatore. ⚠️ **Il PDF non tratta i parametri degli indicatori**: non e' uno screenshot mancante, e' che il documento non se ne occupa. **Solo il modulo precedente puo' chiuderlo.** |
+| **(c) Vincolo 20 candele** | 🟡 **CHIUSO A META'.** S4: _"Esso deve contenere 20 candele"_; S5/S6: _"si costruisce a partire dal primo ingresso del William's nell'area"_. **Ne segue** che 20 candele devono essere trascorse. Ma **nessuna slide lo scrive come attesa esplicita** → implicazione forte, non citazione. **La divergenza n.1 del codice resta molto probabile, non certa.** |
+
+## 2b.3 ✅ Sei ambiguita' su dieci: CHIUSE DALLA FONTE
+
+| ambiguita' | prima | ora |
+|---|---|---|
+| **15 vs 20 candele** | risolta per argomento | ✅ `[S4]` _"deve contenere **20 candele**"_ |
+| **"almeno" vs "al massimo" 20** | risolta per argomento | ✅ `[S4]` _"aggiornato ad ogni chiusura di candela"_ = **finestra mobile di 20** |
+| **banda SELL "0/−50" vs "−20/−50"** | risolta per argomento | ✅ `[S5]` **_"William's compreso tra -20 e -50"_** → il _"tra 0 e meno 50"_ del parlato era **un errore verbale**, ora e' dimostrato |
+| **"ancora dentro" vs "uscito"** | risolta per argomento | ✅ `[S5]`/`[S6]` danno solo la banda numerica, senza la frase contraddittoria |
+| **trailing vs break-even** | risolta per argomento | ✅ `[S9]` scrive **solo** lo stop in pari. **La parola "trailing" non compare in NESSUNA slide** → e' un espediente del video, non strategia |
+| **XAU dentro o fuori** | incerta, ticker storpiato | ✅ `[S3]` _"Anche il gold **XAU/USD** risponde bene ma richiede capitali di partenza piu' elevati"_ |
+
+## 2b.4 🆕 Tre cose che le slide AGGIUNGONO
+
+1. **`[S4]` Cadenza esplicita:** _"Il rettangolo dovra' essere **aggiornato ad
+   ogni chiusura di candela**"_. Il parlato diceva solo "man mano". Ora e' una
+   regola implementabile alla lettera.
+
+2. **`[S8]` Le uscite diventano OBBLIGO:** _"L'operazione **si chiudera'** in
+   caso di: Stop loss / Take profit / **Segnale direzionale contrario**"_.
+   Nel parlato era _"**possiamo** chiudere"_. La slide usa l'indicativo.
+   → 🔴 **Impatto sul codice:** nell'EA la chiusura su segnale contrario e' un
+   **flag A/B** (`CloseOnOppositeSignal`). Secondo il PDF **non e' opzionale**.
+   E il nostro dossier annotava che _"disattivare le chiusure anticipate
+   aiutava"_ — cioe' **il test che aiutava era il test INFEDELE**.
+
+3. **`[S10]` La parola che cambia tutto:** _"si consiglia per le prime 20
+   operazioni di tenere un **rischio COMPLESSIVO dell'1%**"_.
+
+## 2b.5 🔥 IL REPERTO PIU' IMPORTANTE: cosa NON c'e' nel PDF
+
+**La regola discrezionale — _"il Williams arriva all'estremo opposto prima del
+target"_, con i suoi tre comportamenti alternativi e l'_"io personalmente mi
+preoccupo"_ — NON COMPARE IN NESSUNA SLIDE.**
+
+Nella checklist ufficiale della stessa autrice, la slide S8 elenca **tre e sole
+tre** uscite. Quel blocco della lez. 38 e' un **commento a braccio**, non una
+regola.
+
+> ⚖️ **Conseguenza:** un EA che NON la implementa **non e' infedele: e' piu'
+> fedele al documento**. **Cade l'unica vera discrezionalita' della strategia**,
+> e con essa l'obiezione "nessun EA puo' replicare il corso".
+
+## 2b.6 🚨 LA NUOVA CONTRADDIZIONE: 1% per operazione o 1% complessivo?
+
+| fonte | cosa dice |
+|---|---|
+| lez. 35 (parlato) | _"iniziamo a inserire il rischio **1% per l'operazione**"_ |
+| lez. 37 (parlato) | _"un per cento come **rischio per operazione**"_ |
+| **`[S10]` (scritto)** | _"tenere un **rischio COMPLESSIVO dell'1%**"_ |
+
+La stessa autrice usa "complessivo" nel senso di *aggregato su tutto* anche
+altrove (_"drawdown **complessivo** con tutte le strategie"_, lez. 39/40).
+
+> 🔴 **Perche' e' il punto piu' pesante emerso oggi:** e' un **fattore 7** sul
+> rischio di portafoglio. Con "per operazione" su 7 cross correlati si arriva al
+> **7% a rischio su un'unica direzione dello yen**; con "complessivo",
+> all'**1%**.
+>
+> **E tocca direttamente il nostro −20.853 €:** e' plausibile che il backtest di
+> paniere abbia girato in modalita' "1% per cross", cioe' con **7 volte** il
+> rischio che il PDF consiglia. Non spiegherebbe un PF < 1 (il PF non dipende
+> dalla size), **ma spiegherebbe benissimo i drawdown del 30-48% per coppia** e
+> il confronto impietoso col _"quasi 4%"_ dichiarato.
+>
+> 🎯 **E' diventata la prima domanda da porre**, prima ancora del SuperTrend.
+
+## 2b.7 📋 Conteggio aggiornato
+
+| | prima delle slide | dopo le slide |
+|---|---|---|
+| Regole certe | 24 | **26** |
+| Ambiguita' | 10 | **4** |
+| Buchi | 13 | **11** |
+| Regole discrezionali | 1 | **0** |
+| **Meccanizzabilita'** | **71%** | **87%** |
+
+## 2b.8 🕳️ Cosa resta FUORI (e da chi puo' arrivare)
+
+| manca | ancora fuori? | da dove puo' venire |
+|---|---|---|
+| **Parametri SuperTrend** | 🔴 **SI — bloccante** | **Solo dal modulo precedente.** Il PDF Breakout non li tratta: dimostrato |
+| **Periodo Williams (140?)** | 🔴 **SI** | Modulo precedente o screenshot del pannello indicatore |
+| **Trascrizione modulo SuperTrend** | 🔴 **SI, resta fuori** | Claudio |
+| **Sorgente `BREAKOUT_EA_JPY_v3`** | 🔴 **SI, resta fuori** | Non e' nel repo: nessuna slide poteva chiuderlo |
+| **Foglio di calcolo lez. 39** (N operazioni, win rate, broker, date) | 🔴 **SI** | Fra le 14 slide **non ce n'e' nessuna della lezione 39**: i numeri di performance restano senza documento |
+| Attesa 20 candele | 🟡 implicata, non scritta | Domanda a Claudio |
+| 1% per operazione o complessivo | 🔴 **contraddizione nuova** | Domanda a Claudio |
 
 ---
 
