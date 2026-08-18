@@ -550,3 +550,218 @@ referti dal Journal (screenshot in chat):
   sfasate; se <0,05% -> cura chirurgica (shift che segue il calendario DST
   o esclusione dichiarata). R81-bis NON parte finche' il cancello non passa.
 - Righe scartate 0 su tutti e tre; periodo 2019.01.01 -> 2026.07.31.
+
+---
+
+## 14-bis. LA CURA: `ABTG_ImportaStoricoEsterno_v2` (scritto la notte 18->19/08, DA COLLAUDARE)
+
+**Stato: CODICE SCRITTO, NON COMPILATO, NON PROVATO SUI DATI.** In questo
+ambiente non c'e' MetaEditor: nessuno ha ancora compilato una riga. Tutto
+quello che segue e' *coerenza logica* + controlli fatti su un modello
+indipendente del calendario; la prova sono l'autotest e il re-import sul PC.
+File: `mql5/Scripts/ABTG_ImportaStoricoEsterno_v2.mq5` (marcatore `IMP-EXT-v2`).
+**La v1 NON e' stata toccata**: e' la catena con cui sono stati promossi gli
+8 forex del 15/08 e deve restare riproducibile.
+
+### 14-bis.1 IL DIFETTO, RIDOTTO A UN CONTO CHE SI VERIFICA A MANO
+
+Due calendari, non uno:
+
+| | entra in ora legale | esce |
+|---|---|---|
+| **USA** (timestamp HistData) | **2a domenica di marzo**, 02:00 locale | **1a domenica di novembre**, 02:00 locale |
+| **Europa** (server BCM) | **ultima domenica di marzo**, 01:00 UTC | **ultima domenica di ottobre**, 01:00 UTC |
+
+Gli USA entrano **prima** ed escono **dopo**. Quindi:
+
+```
+shift(t) = shiftBase + (Europa in ora legale ? 1 : 0) - (USA in ora legale ? 1 : 0)
+
+NY solare + EU solare  -> +5   (inverno pieno)
+NY legale + EU legale  -> +5   (estate piena)
+NY legale + EU solare  -> +4   <- LE FINESTRE SFASATE
+NY solare + EU legale  -> +6   <- NON ACCADE MAI coi calendari attuali
+```
+
+> **CORREZIONE A UNA MIA FRASE DI IERI**: nella consegna si diceva "+4 o +6 a
+> seconda del verso". **Il verso e' UNO SOLO: +4.** Il +6 richiederebbe
+> l'Europa in ora legale con gli USA in ora solare, e non succede mai perche'
+> la finestra americana **contiene** quella europea da entrambi i lati. Il
+> codice lo gestisce lo stesso (se un giorno l'UE abolisse il cambio ora, la
+> formula continuerebbe a dare il numero giusto senza riscrivere niente).
+
+**Quanto pesa** (calcolato, non stimato): la finestra di ottobre/novembre dura
+sempre **173 ore**; quella di marzo **330 o 498 ore** a seconda di dove cade la
+seconda domenica. Totale **503-671 ore l'anno = 5,7%-7,7%**. Nella finestra
+2019-2026: 671 h negli anni 2019, 2020, 2024, 2025, 2026 e 503 h nel
+2021-2023. Media 2010-2030: **6,57% dei giorni**.
+
+### 14-bis.2 PERCHE' I FOREX PASSAVANO E GLI INDICI NO (la domanda posta)
+
+**FATTO**: stessa identica catena, stesso script, stesso +5, stessi due
+calendari. **Quindi si': anche gli 8 forex del 15/08 hanno lo stesso difetto.**
+Non e' una cosa che riguarda solo gli indici.
+
+**INFERENZA (forte, aritmetica dichiarata)** sul perche' li' non si vedeva.
+L'errore vale *(quota di barre sbagliate)* x *(quanto si muove lo strumento in
+un'ora, in % del prezzo)*:
+
+| | quota barre sfasate | movimento tipico in 1 ora | contributo atteso |
+|---|---|---|---|
+| forex maggiori | ~7% | ~0,05% del prezzo | **~0,004%** |
+| indici azionari | ~7% | ~0,2-0,3% del prezzo | **~0,015-0,020%** |
+
+Il forex misurato sta a **0,005-0,011%**: cioe' il difetto DST da solo basta
+quasi a spiegare tutto il residuo dei forex — sono puliti *nonostante*
+l'errore, non perche' non ce l'abbiano. Gli indici stanno a **0,061-0,101%**:
+il DST ne spiega **un quarto scarso**. C'e' dell'altro.
+
+**Il secondo sospettato, che il fuso NON cura**: sul forex i due feed guardano
+lo *stesso oggetto* (EURUSD spot e' EURUSD spot). Sugli indici no: HistData
+quota l'indice, un broker MT5 quota tipicamente un **CFD sul future**, e fra i
+due c'e' il **basis** (costo del denaro meno dividendi) piu' i salti di
+rollover. E' uno scalino **sempre dallo stesso lato**, che nessuno shift
+orario tocca. Per questo la v2 misura il **bias mediano della differenza
+firmata**: bias ~0 = stesso strumento, residuo da orari/rumore; bias grande e
+di segno costante = **strumenti diversi**, da DICHIARARE, non da limare.
+
+**Terzo indiziato, gia' visto**: gli orari di sessione del feed (la malattia
+del GRXEUR). Prova a favore: la copertura degli indici e' **97,0%** contro
+**99,2-99,6%** dei forex — 3 ore su 100 dell'importato non trovano una barra
+nativa. E soprattutto **due diff max su tre cadono FUORI dalle finestre
+sfasate**: NASUSD il **20/11/2025** (finestra chiusa il 2/11) e 225JPY il
+**09/01/2026**. Solo SPXUSD (23/03/2026) e' in finestra. La cura DST spostera'
+la media, non necessariamente quei due picchi.
+
+> **NESSUNA RE-IMPORTAZIONE DEI FOREX E' DECISA QUI.** Gli 8 forex restano
+> promossi come sono: il loro numero e' sotto il cancello *anche* col difetto
+> dentro, e il difetto puo' solo averlo peggiorato, mai migliorato. Se e
+> quando si rifanno con la v2, il numero puo' solo scendere. Decide Claudio.
+
+### 14-bis.3 COSA FA LA v2 (una cosa per volta, tutte dietro un input)
+
+1. **`InpShiftDstAware` (default true)** — ogni barra riceve lo shift del suo
+   istante. Le domeniche di cambio ora sono **calcolate dal codice**
+   (`DomenicaEnnesima` / `UltimaDomenica`), non tabellate: **niente tabella
+   scritta a mano che sbaglia in silenzio il primo anno che manca**. Vale
+   2000-2040, ben oltre HistData.
+2. **Due misure, non una**: il referto stampa la diff **DST-aware** (su cui si
+   giudica il cancello) e la diff a **shift fisso** (metodo v1) come
+   controprova, calcolate dalla *stessa* funzione per non poter divergere.
+3. **Spaccatura DENTRO/FUORI le finestre sfasate**, in entrambe le modalita':
+   e' la misura chiesta al par. 14 ("ricalcolo diff ESCLUDENDO le settimane
+   sfasate").
+4. **Diagnosi del residuo**: bias mediano firmato + diff media al netto del
+   bias (vedi 14-bis.2).
+5. **Elenco delle finestre TROVATE NEI DATI** con data inizio/fine, shift
+   ricevuto e **numero di barre** dentro ciascuna, piu' il totale barre per
+   shift. Sono i dati a dirlo, non una tabella.
+6. **`InpAutoTest` (default false)** — modo collaudo: verifica e **esce senza
+   importare**.
+7. Controllo che lo shift variabile non abbia rotto l'ordine cronologico (in
+   teoria non puo': i cambi d'ora cadono di sabato notte/domenica mattina a
+   mercati chiusi. Ma "in teoria" non e' una verifica).
+8. Referto su **file nuovo** `ABTG_ImportEsterno_referto_v2.csv`: la v2 ha
+   colonne in piu' e accodarle al CSV v1 lo storterebbe.
+
+**Cosa NON cambia**: regola d'uso congelata (`_EXT` = SOLO prova di regime a
+parametri congelati) in testa allo script, clonazione e verifica delle
+proprieta', soglia del cancello (0,05%), avviso su spread/commissioni.
+
+### 14-bis.4 COME SI COLLAUDA (due passi, in quest'ordine)
+
+**PASSO A — AUTOTEST (nessun dato toccato).** Compilare la v2, trascinarla su
+un grafico qualsiasi con **`InpAutoTest = true`**. Deve uscire nel Journal:
+
+- **`=== AUTOTEST: N controlli, 0 ROTTI ===`** e `ESITO: OK`;
+- le 14 domeniche di cambio ora (2010, 2024, 2025, 2026, 2030) tutte `OK`;
+- i 24 casi ai 4 confini (prima/dopo il cambio USA e EU, andata e ritorno)
+  tutti `OK`: le date "dentro finestra" devono dare **+4**, quelle fuori **+5**;
+- `controlli 2010-2030 falliti (su 126) = 0`;
+- `giorni con aggiustamento +1 (atteso 0) = 0`;
+- la riga informativa `giorni sfasati ... = ~6,5%` (atteso 5,7%-7,7%).
+
+**Se anche un solo controllo esce `ROTTO`: fermarsi, non importare.** Un
+calendario rotto e' peggio di nessun import, perche' produce dati che *sembrano*
+giusti. Le 38 attese scritte a mano nel codice sono gia' state ricontrollate
+contro un modello indipendente del calendario (0 incoerenze) — ma quello ha
+verificato **l'aritmetica**, non la **compilazione MQL5**: e' esattamente cio'
+che l'autotest deve chiudere.
+
+**PASSO B — RE-IMPORT dei tre indici** (`InpAutoTest=false`, resto identico al
+passo 4: `InpFormato=1`, `InpAutoShift=true`, `InpShiftMax=6`). I `.set` gia'
+scritti dal `importa_storico_esterno.ps1` **restano validi**: i due input nuovi
+non ci sono dentro e MT5 usa i default (DST-aware acceso, autotest spento).
+
+### 14-bis.5 COSA DEVE USCIRE PERCHE' IL CANCELLO PASSI
+
+Il cancello e' **diff media DST-aware <= 0,05%**. Ma il verdetto va letto
+insieme agli altri tre numeri nuovi, altrimenti si promuove per fortuna:
+
+| numero | cosa deve fare | cosa significa se non lo fa |
+|---|---|---|
+| **shift base** | restare **+5** in entrambe le scansioni | se il DST-aware sceglie una base diversa dal fisso: il file **non** e' ora locale di NY, fermarsi |
+| **diff DST-aware** | **scendere** rispetto alla fissa | se non scende, il difetto non era il calendario |
+| **dentro vs fuori** | avvicinarsi fra loro col DST-aware | se il "dentro" resta molto peggio, la conversione non ha morso |
+| **bias mediano** | vicino a 0 | grande e di segno costante = **strumenti diversi** (cash vs future): il fuso non c'entra e non si cura |
+
+**PREVISIONE DICHIARATA PRIMA DELLA MISURA** (cosi' non ci si racconta storie
+dopo). Togliendo dalla diff attuale il contributo DST stimato al 14-bis.2:
+
+| simbolo | diff v1 | diff DST-aware attesa | cancello 0,05% |
+|---|---|---|---|
+| SPXUSD | 0,0608% | ~0,045% | **forse SI, al pelo** |
+| NASUSD | 0,0756% | ~0,061% | **probabilmente NO** |
+| 225JPY | 0,1010% | ~0,088% | **probabilmente NO** |
+
+> **La cura DST e' NECESSARIA ma probabilmente NON SUFFICIENTE.** Detto prima e
+> non dopo. Se esce cosi', **il cancello ha fatto il suo mestiere** e la strada
+> non e' aggiungere altre pezze finche' il numero non scende (sarebbe la stessa
+> pesca che qui e' vietata sui parametri): e' **misurare il bias mediano** e, se
+> conferma il cash-vs-future, dire che questi feed non sono confrontabili a
+> quel livello di precisione e **decidere se 0,05% e' il cancello giusto per
+> gli INDICI o solo per il forex**. Quella e' una decisione di Claudio, con i
+> numeri sul tavolo — non una modifica del criterio dopo aver visto i numeri
+> fatta di nascosto.
+
+### 14-bis.6 BOZZE DI RIGHE DI LANCIO — **BOZZA-DA-VERIFICARE**
+
+**NON dettarle a Claudio cosi' come sono.** Le scrive/verifica la sessione
+principale domattina (regola di casa: `irm` davanti + riga di raccolta finale,
+`backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`). Qui c'e' solo la sostanza da
+verificare:
+
+- **BOZZA-DA-VERIFICARE (A)** — portare la v2 in `MQL5\Scripts` del terminale
+  di backtest e compilarla. Da verificare: il percorso esatto del terminale, se
+  si usa `metaeditor64.exe /compile`, e che il `.ex5` finisca nella cartella
+  giusta. `importa_storico_esterno.ps1` **oggi scarica e compila la v1**
+  (nome hardcodato in 5 punti, righe ~383-483): o si adatta il `.ps1` con un
+  interruttore di versione, oppure per questo giro si fa **a mano**
+  (trascinamento sullo script), che e' la strada gia' usata al passo 4.
+- **BOZZA-DA-VERIFICARE (B)** — giro di autotest: trascinare la v2 su un
+  grafico qualsiasi con `InpAutoTest=true`, salvare il Journal.
+- **BOZZA-DA-VERIFICARE (C)** — re-import dei tre: `NASUSD/225JPY/SPXUSD` con
+  `InpFormato=1`, `InpAutoShift=true`, `InpShiftMax=6`, `InpShiftDstAware=true`.
+- **BOZZA-DA-VERIFICARE (D)** — raccolta: copiare
+  `MQL5\Files\ABTG_ImportEsterno_referto_v2.csv` + il Journal sul Desktop e
+  fare lo zip da mandare (obbligatoria dalla regola di casa, e **il CSV v2 e'
+  un file nuovo**: la prima riga scritta crea l'intestazione).
+
+### 14-bis.7 LIMITI DICHIARATI DELLA v2
+
+- **Non compilata.** Rischio residuo: errori di sintassi MQL5. Non tocca EA ne'
+  la v1, quindi un fallimento di compilazione non rompe niente in produzione.
+- **Ora doppia della prima domenica di novembre**: fra le 01:00 e le 01:59
+  locali di New York l'orario esiste due volte. Convenzione scelta e scritta
+  nel codice: sotto le 02:00 vale ancora l'ora legale. Riguarda al massimo 60
+  barre l'anno, di domenica mattina a mercati chiusi, dove il nativo BCM non
+  ha barre da confrontare. Dichiarato, non nascosto.
+- **Assunzione sul server BCM**: che segua il calendario **europeo**. Non e'
+  arbitraria — e' l'unica ipotesi compatibile con i +5 misurati sia d'estate
+  sia d'inverno su 8 forex per 7 anni (se il server fosse a offset fisso, uno
+  shift unico sbaglierebbe mezzo anno e la diff non sarebbe 0,006%). Resta
+  un'inferenza: se salta, salta con lei tutto il par. 4.
+- **Non cura**: basis cash-vs-future, orari di sessione del feed, spread e
+  commissioni storiche. Nessuna di queste e' un problema di fuso.
+- **D30EUR resta bocciato** (par. 13): righe marce + sessione ballerina. La v2
+  non c'entra e non lo riabilita.
