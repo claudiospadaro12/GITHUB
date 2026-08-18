@@ -835,6 +835,37 @@ Tre analisi, tre relatori diversi, **stessa scuola**, **stesso difetto struttura
 > METODI DI GESTIONE, **nella stessa cartella**, descrive **tre metodi che
 > funzionano solo togliendo lo stop**. **Non è ambiguità: è contraddizione.**
 
+### 🧵 AGGIORNAMENTO 18/08 sera — il SESTO modulo rompe il filo, e rivela la regola vera
+
+Analizzata la **STRATEGIA POST NEWS** (lezioni 2-10, referto
+`ANALISI_CORSO_POSTNEWS_2026-08-18.md`, spec `../prove/POSTNEWS_CORSO_SPEC.md`).
+**Lì l'uscita NON è indeterminata:** TP 50 pip, SL 25 pip, scadenza dei pendenti
+(ECB 18:15 IT / FOMC news+75min), nessuna scadenza della posizione, chiusura del
+venerdì alle 22:50 IT. **Tutto dettato, tutto numerico — e i due esempi
+operativi tornano al centesimo: 17 numeri su 17, lotti compresi.**
+
+| modulo | relatore | il numero che manca |
+|---|---|---|
+| Mediazione | Manuela Negro | win rate 60-77%, mai dichiarato |
+| Breakout | Manuela Negro | la correlazione fra i 7 cross JPY, mai nominata |
+| Fibo H4 / Media 200 | Paolo `[I]` | filtro d'arrivo e % di rischio, mai dettati |
+| Point Break | Christian Bertacchi | win rate 49-77%, mai dichiarato |
+| **POST NEWS** | **mai nominato** (NON è Fasciano `[T]`) | 🔴 **la PROVA: N mai detto, DD combinato mai detto, lista trade mai mostrata — e lo strumento insegnato (MT4, _"2-3 mesi"_ di storico) non può produrre il backtest dal 2009 che mostra** |
+
+> 🎯 **La regola, riscritta a sei moduli:** *la scuola lascia indeterminato ciò
+> che deciderebbe se il metodo guadagna. **Dove l'uscita è discrezionale, è
+> l'uscita. Dove l'uscita è meccanica, è la VERIFICA.** Non è mai l'ingresso.*
+>
+> Il dettaglio che chiude il cerchio: nella Post News **l'unico pezzo
+> discrezionale del modulo è il trailing** `[T]` (_"se riesci bene, se non
+> riesci non muore nessuno"_) — cioè **ancora una volta l'uscita**.
+>
+> 🟢 **Ma la differenza operativa è enorme:** per la prima volta il pezzo
+> mancante **possiamo produrlo noi**. Gli ingressi della Post News sono **date e
+> ore**, e date e ore **sono già in casa** (70 eventi ECB/FOMC nel calendario di
+> biblioteca). È l'unico dei sei moduli backtestabile fedelmente **senza
+> chiedere niente a nessuno**.
+
 ## 4.5 🟢 COSA COPIAMO DAVVERO — due componenti, non una strategia
 
 **Point Break come strategia NON entra nell'imbuto**, e il motivo è dichiarato
