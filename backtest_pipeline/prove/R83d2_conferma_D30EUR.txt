@@ -1,0 +1,135 @@
+# =====================================================================
+#  R83 / DUELLO INGRESSI - D30EUR - MODALITA' 2: MARKET alla CHIUSURA di una candela oltre il livello
+#  EA: ABTG_Apertura_3Ingressi
+#
+#  Si lancia con:
+#    -Prova prove\R83d2_conferma_D30EUR.txt -Etichetta r83d2 -Modello 4
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI: prove\R83_INGRESSI_CRITERI.md
+#  LA DOMANDA: "a parita' ASSOLUTA di livello, orario, stop, gestione e
+#  uscite, quale STILE D'INGRESSO regge meglio su QUESTO mercato?"
+#  Nasce da FIRMA 6 (report\FIRME_2026-08-18.md).
+# ---------------------------------------------------------------------
+#  QUESTA CELLA
+#    CODICE NUOVO. Stessa regola della n2, sul range di apertura del DAX.
+#    Qui il livello e' il massimo/minimo dei primi 35 minuti: la prima
+#    candela M15 che chiude oltre quel livello fa scattare l'ingresso.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE, DICHIARATI
+#    @DAQUANDO 2024.09.26 e' la profondita' delle BARRE degli indici a
+#    BCM. La profondita' dei TICK REALI degli indici NON E' MAI STATA
+#    MISURATA: PASSO 0 dei criteri, si misura e si legge la riga TICK.
+#    Se i tick partono dopo, QUESTA DATA VA RISCRITTA (difetto n.18).
+#
+#    Regime contenuto: uno e mezzo. Niente 2020, niente 2022. R83 misura
+#    RIEMPIMENTO e STILE D'INGRESSO, mai la robustezza di regime.
+#
+#  IL CONFRONTO E' PER MERCATO. Una modalita' puo' vincere sul Nasdaq e
+#  perdere sul DAX: e' un risultato, non una contraddizione (lezione PTE).
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- SESSIONE (ORE DEL SERVER BCM, mai l'ora italiana) ---
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: E' L'UNICA COSA CHE CAMBIA FRA LE CELLE DELLO STESSO MERCATO ---
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+# --- FILTRI: TUTTI SPENTI. I filtri sono la domanda di R84, non di R83.
+#     Accenderne uno qui renderebbe illeggibili tutti e due i round.
+InpUseEmaFilter=0
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpUseNewsFilter=0
+
+# --- RISCHIO E GESTIONE: IDENTICI in tutte e sette le celle del round.
+#     Se cambiasse anche solo il trailing, il duello non isolerebbe piu'
+#     l'ingresso: misurerebbe due cose insieme.
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpBEatR=0
+InpUseTrailing=1
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+InpUseRoundLevels=0
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+
+# --- SLIPPAGE: ZERO, e va DICHIARATO. Lo slippage nel motore peggiora
+#     SOLO gli ordini STOP (righe 930 e 955 del sorgente vivo): il limit
+#     del retest e il market della conferma non lo pagano. Con 0 la
+#     modalita' 0 e' AVVANTAGGIATA. Criteri par.7: se vince la 0, serve
+#     il giro 2 con un valore MISURATO, altrimenti la vittoria ha
+#     l'asterisco.
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=1
+
+InpMaxSpread=0
+InpVerbose=0
+
+# --- LE LEVE R30, SPENTE (esistono nel motore forkato, non c'entrano qui)
+InpUseVolRegime=0
+InpUseSRFilter=0
+
+# --- AUTOTEST ACCESO: stampa le righe [3ING][AUTOTEST] nel log del
+#     tester. Sei controlli sulla modalita' 2, che e' codice nuovo.
+InpAutoTest=1
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE: se non lo sono c'e' di mezzo la cache del
+#     tester o una griglia ricordata da MT5, e il numero non si legge.
+InpMagic=777130||777130||1||777131||Y
