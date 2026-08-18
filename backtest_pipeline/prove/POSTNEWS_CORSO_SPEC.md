@@ -240,3 +240,105 @@ ha raggiunti**, puoi andare ad accorciare lo stop loss … da 25 a **15**"_.
 - ✅ Il nostro EA lo implementa correttamente (SL a `open − 15 pip`, non a BE).
 
 ---
+
+## 4. 🕐 GLI ORARI — e il primo modulo che possiamo VERIFICARE con dati di casa
+
+> 🥇 **La scoperta operativa di questa analisi: il calendario di casa contiene
+> ESATTAMENTE questi due eventi, con l'orario, e quindi possiamo controllare
+> quello che il relatore dice invece di crederci.**
+>
+> `caccia_strategie/biblioteca/dati/CALENDARIO_news-2021-2024_UTC+2_*.csv` +
+> `CALENDARIO_news-2022-2025_UTC+2_*.csv` — 37.799 righe, titoli
+> **`ECB Press Conference`** e **`FOMC Press Conference`**, impatto **3**.
+
+### 4.1 ✅ DUE affermazioni del relatore VERIFICATE sui nostri dati
+
+**(a) Lo spostamento dell'ECB da 14:30 a 14:45 a meta' 2022** `[T]` lez. 5:
+_"questa notizia fino circa alla meta' del 2022 era sempre rilasciata alle
+14.30, per piu' di un decennio … adesso e' alle 14.45"_.
+
+Le righe del nostro CSV (ora del server del calendario):
+
+```
+2022.06.09 15:30   ECB Press Conference     <-- vecchio orario
+2022.07.21 15:45   ECB Press Conference     <-- SALTO, e non torna piu' indietro
+2022.09.08 15:45   ECB Press Conference
+```
+
+✅ **Il salto c'e', ed e' esattamente dove lo mette lui.** Prima volta in sei
+moduli che un'affermazione del corso viene confermata da una fonte
+indipendente in casa nostra.
+
+**(b) L'esempio FOMC del 20/03/2024 "alle 19:30 ora italiana"** `[T]` lez. 9.
+Il nostro CSV ha `2024.03.20 20:30` (ora calendario = UTC+2 a marzo) = **18:30
+UTC = 19:30 in Italia**. ✅ **Combacia al minuto.**
+
+### 4.2 🔴 UNA affermazione del relatore FALSIFICATA dai nostri dati
+
+`[T]` lez. 8: _"quando in Italia siamo in ora legale, quindi da **aprile a
+settembre e' alle 20.30**, mentre invece **da ottobre a marzo e' alle 19.30**"_.
+
+**E' sbagliato.** Il FOMC parla alle **14:30 di New York**: l'ora italiana
+cambia **solo nelle 2 finestre in cui USA ed Europa non hanno ancora cambiato
+l'ora insieme** (meta' marzo e fine ottobre/inizio novembre). Nei mesi di
+dicembre, gennaio e febbraio — che sono "ottobre-marzo" — la conferenza e' alle
+**20:30 italiane**, non alle 19:30.
+
+**Contati sul nostro CSV (2021-2025), eventi FOMC fra novembre e marzo:**
+
+| ora italiana reale | eventi | quali |
+|---|---:|---|
+| **19:30** (disallineamento) | **6** | 2021.03.17 · 2021.11.03 · 2022.03.16 · 2022.11.02 · 2023.03.22 · 2023.11.01 · 2024.03.20 · 2025.03.19 *(8 contando tutto il periodo)* |
+| **20:30** (entrambi in ora solare) | **11** | tutti i dicembre / gennaio / febbraio + i novembre "tardi" (2024.11.07) |
+
+🔴 **Un EA che applicasse la regola detta a voce sbaglierebbe l'orario su 11
+eventi invernali su 17 (65%)** — e sbagliare l'orario qui non significa
+"entrare male": significa **prendere le candele sbagliate**, cioe' misurare il
+range di un momento qualunque.
+
+⚖️ **A discolpa del relatore:** si copre subito dopo `[T]` — _"comunque ripeto,
+il sito se tu verifichi che ti dia l'ora italiana, ti da' l'ora italiana precisa
+del rilascio"_. **Per un umano davanti a Forex Factory il problema non esiste.
+Per un EA con l'ora scritta a mano, esiste eccome.** → §5.
+
+### 4.3 📅 Quanti eventi abbiamo davvero in casa (e il muro dei 150 trade)
+
+| serie | eventi unici nel CSV | copertura |
+|---|---:|---|
+| ECB Press Conference | **35** | 2021.01.21 → 2025.06.05 |
+| FOMC Press Conference | **35** | 2021.01.27 → 2025.06.18 |
+| **TOTALE** | **70** | ~4,5 anni |
+
+⚠️ **Due buchi di dato da sapere prima di lanciare:**
+1. **Il 2025 e' incompleto**: gli ultimi eventi sono di giugno 2025 benche' il
+   file arrivi a dicembre 2025. Anche **dicembre 2024 manca** in entrambe le
+   serie. → **anni pieni utilizzabili: 2021-2024 = 62 eventi.**
+2. **Il fuso del CSV non e' fisso**: si comporta da **UTC+2 d'inverno / UTC+3
+   d'estate** (classico orario server MetaQuotes) fino a marzo 2025, poi le
+   righe cambiano convenzione (2025.04.17 ECB alle 14:45 invece che 15:45). Il
+   nome del file dice "UTC+2" e **il nome del file mente**. → l'offset va
+   **calibrato e verificato**, non assunto (§5.2).
+
+🚨 **E qui arriva il vincolo che decide tutto:**
+
+> **62-70 eventi producono al massimo ~70-100 operazioni. La regola di casa
+> (Emendamento della Finestra, punto A) chiede >=150 operazioni SOLO per l'IS,
+> piu' altre 150 per l'OOS.**
+>
+> **Con il calendario che abbiamo in casa, la Post News NON e' misurabile
+> secondo il metro di casa.** Non e' un'opinione: e' un conteggio.
+
+**Le tre uscite possibili, in ordine di costo:**
+1. 🥇 **Allargare la famiglia** (§10, test P1): il CSV contiene **altre 5 banche
+   centrali con conferenza stampa** — BoJ (58 righe), BoC (41), RBNZ (34), SNB
+   (26), piu' NBS cinese (81). Testare il **meccanismo** su tutte porta il
+   campione a **oltre 250 eventi** e risponde alla domanda vera: _il post-news
+   funziona, o funzionano solo ECB e FOMC (= sovradattamento a 70 date)?_
+2. 🥈 **Allungare all'indietro**: servono le date ECB/FOMC dal 2009. Sono
+   pubbliche e deterministiche, ma **non le abbiamo** e **non me le invento**:
+   e' una richiesta di dato, non un'inferenza.
+3. 🥉 **Rinunciare all'IS/OOS** e giudicare con la **PROVA DI REGIME**
+   (Emendamento C): 4 finestre, 15-20 eventi ciascuna. Sospende il giudizio sul
+   merito, non sul rischio (Emendamento B).
+
+---
