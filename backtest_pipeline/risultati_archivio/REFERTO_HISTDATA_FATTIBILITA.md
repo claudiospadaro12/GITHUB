@@ -429,3 +429,25 @@ Prossimo: passo 2 (validazione giorno campione a tre feed), poi passo 3.
 NOTA: la finestra 2019-2026 e' quella della corsa; il primo mese dichiarato da
 fonte terza resta 2010-11 — l'estensione indietro (2010-2018) si puo' chiedere
 con una seconda corsa `--da 2010 --a 2018` quando serve (stessa strada, stessi gate).
+
+## 11. ✅ PASSO 2 ESEGUITO (18/08, 20:51) — VALIDAZIONE PROMOSSA
+
+Referto archiviato: `referto_histdata_2026-08-18_2051.txt` (`ESITO: OK`).
+GRXEUR 2025 scaricato (4 MB, 335.844 barre M1, 0 scartate, 0 OHLC incoerenti,
+0 zip rotti, 56 duplicate innocue).
+
+**Le tre misure chieste, tutte buone:**
+1. **FUSO: il feed SEGUE il DST** (apertura modale 00:00 in TUTTI i 12 mesi,
+   inverno = estate, differenza +0 min) -> ora locale di New York, shift
+   unico +5 atteso all'import. La convenzione degli 8 forex promossi regge
+   anche sugli indici.
+2. **CONFRONTO A DUE FEED, ESATTO AL CENTESIMO**: finestra campione
+   2025.06.15 20:00 -> 16 19:59 a spostamento +0h = **1294 barre,
+   min 23400.56, max 23715.65** — IDENTICO al metro Dukascopy
+   (1294 barre, stessi estremi). Due fonti indipendenti, stessa giornata.
+3. Banda prezzo OK, 206 buchi intragiornalieri >60 min (nottate sottili,
+   attese), 1 giorno feriale vuoto = Venerdi' Santo 2025 (festa di borsa).
+
+Terzo feed (grafico BCM nativo, min/max D30EUR 16/06/2025) resta da
+consegnare per il gate a tre — ma il gate duro (import + shift +5 +
+cancello ZERO) sta comunque nel passo 4.

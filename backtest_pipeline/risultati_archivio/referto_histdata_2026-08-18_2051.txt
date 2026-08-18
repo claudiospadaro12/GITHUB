@@ -1,0 +1,62 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v2
+comando : --validazione
+data: 2026-08-18 20:51 (ora del PC)
+cartella ZIP: C:\Users\Master\histdata_m1
+
+CONTROLLO POSITIVO (eurusd 2019, token trovato): OK
+scaricati 1 ZIP (4.0 MB), 0 gia' in cache, 0 assenti, 0 falliti
+
+D30EUR (grxeur): 335844 barre M1, dal 2025.01.01 18:02 al 2025.12.31 15:57
+  prezzo minimo 18809.67700  massimo 24773.29900
+  ordine di grandezza dentro la banda attesa 4000.0-30000.0: OK
+  2025: 335844 barre
+  buchi intragiornalieri > 60 min: 206  (peggiore: 144 min dopo 2025.01.20 07:22)
+  giorni feriali SENZA nessuna barra: 1  (primi: 2025-04-18)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2025-01  apertura modale 00:00  (su 21 giorni)
+  2025-02  apertura modale 00:00  (su 20 giorni)
+  2025-03  apertura modale 00:00  (su 18 giorni)
+  2025-04  apertura modale 00:00  (su 20 giorni)
+  2025-05  apertura modale 00:00  (su 22 giorni)
+  2025-06  apertura modale 00:00  (su 21 giorni)
+  2025-07  apertura modale 00:00  (su 23 giorni)
+  2025-08  apertura modale 00:00  (su 20 giorni)
+  2025-09  apertura modale 00:00  (su 20 giorni)
+  2025-10  apertura modale 00:00  (su 22 giorni)
+  2025-11  apertura modale 00:00  (su 20 giorni)
+  2025-12  apertura modale 00:00  (su 22 giorni)
+  INVERNO 00:00   ESTATE 00:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 18:03 (su 21 settimane)
+
+CONFRONTO su finestra 2025.06.15 20:00 -> 2025.06.16 19:59 (timestamp del file HistData)
+  spostamento +0h: 1294 barre, minimo 23400.56, massimo 23715.65
+  spostamento -1h: 1294 barre, minimo 23396.27, massimo 23715.65
+  spostamento +1h: 1296 barre, minimo 23400.56, massimo 23715.65
+  metro Dukascopy gia' agli atti (D30EUR, referto 18/08):
+    2025.06.15 20:00 -> 2025.06.16 19:59 = 1294 barre, min 23400.56, max 23715.65
+  terzo feed: il grafico D30EUR NATIVO di BCM sullo stesso giorno.
+
+CSV scritto: C:\Users\Master\histdata_m1\D30EUR_M1.csv  (335844 barre, shift applicato +0 h)
+
+righe scartate 0 | OHLC incoerenti 0 | duplicate 56 | zip rotti 0
+
+PROSSIMO PASSO (ultimo miglio, IDENTICO alla strada Dukascopy):
+  1. copiare il/i CSV in MQL5\Files del terminale BCM DI BACKTEST
+  2. lanciare ABTG_ImportaStoricoEsterno con InpFormato=1,
+     InpSimboloSorgente=<simbolo BCM>, InpSimboloNuovo=<simbolo>_EXT,
+     InpAutoShift=true, InpShiftMax=6
+  3. lo shift calibrato DEVE uscire +5 (come gli 8 forex del 15/08).
+     Un altro numero = fermarsi e capire, NON importare.
+  4. cancello ZERO: diff media > 0,05% o copertura < 80% -> non si usa.
+  5. chiusura PULITA di MT5 (lezione 14/08).
+
+ESITO: OK
