@@ -22,6 +22,26 @@ strategia montata per un developer. Non duplico: linko.
 
 ---
 
+> 🆕🆕 **AGGIORNAMENTO 18/08 sera — E' STATO ANALIZZATO IL MODULO PRECEDENTE
+> (MEDIAZIONE, lezioni 26-33), E CHIUDE TRE NODI DI QUESTO REFERTO.**
+> **Referto:** `ANALISI_CORSO_MEDIAZIONE_2026-08-18.md` §1.8 ·
+> **spec:** `backtest_pipeline/prove/MEDIAZIONE_CORSO_SPEC.md`
+> **Non duplico qui: linko.** In sintesi di una riga per nodo:
+>
+> | nodo di questo referto | esito dal modulo Mediazione |
+> |---|---|
+> | **§1.7 — Williams 140 o 14?** | ✅ **CHIUSO: 140.** Altre **TRE** occorrenze (lez. 26 ×2, 27, 33), **PDF incluso**, con motivazione (_"non e' casuale, e' stato studiato"_). Il sospetto storpiatura e' morto. |
+> | **§1.9 punto 2 — dov'e' il modulo che imposta il SuperTrend?** | 🟡 **LOCALIZZATO: e' il modulo di LEONARDO**, prima della lezione 26 (`[T]` lez. 26: _"il setup che voi avete gia' ... costruito insieme a **Leonardo**"_). Catena: Breakout → Mediazione → Leonardo. **I parametri restano un buco, ma ora si sa a chi chiederli.** |
+> | **§1.5(a) — "gli scenari 1%/3% sono UNA lista ri-scalata"** (era `[I]`, dedotto per aritmetica) | ✅ **CONFERMATO DALLA FONTE.** Lez. 32 della Mediazione descrive il metodo: _"moltiplicando per 2 o per 3 quelli che sono i profitti e le perdite maturate"_. **L'inferenza si promuove a citazione.** |
+>
+> ➕ **Bonus:** le soglie Williams **−20 / −80 / −50**, qui inferite (§1.3), nel
+> modulo Mediazione sono confermate da **valori letti ad alta voce** (−78,46 ·
+> −22,93 · −49).
+> ➕ **Coerenza:** la lez. 39 attribuiva alla mediazione _"27-30%"_; la lez. 32
+> della Mediazione dice **30%** ✅ — ⚠️ ma e' **la stessa autrice: una fonte.**
+
+---
+
 # PARTE 1 — 🔥 LA SINTESI, PRIMA DI TUTTO
 
 > 🆕 **AGGIORNATO 18/08 ~15:15 — SONO ARRIVATE LE SLIDE DEL PDF (lez. 40).**

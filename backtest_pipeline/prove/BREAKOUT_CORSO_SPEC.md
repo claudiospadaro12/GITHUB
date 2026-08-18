@@ -223,6 +223,22 @@ coerenti entrambe le frasi.
 - **Verdetto:** `[TRASCRITTO chiaro nel testo, ma SINGOLA FONTE]` — da
   confermare sul PDF/piattaforma prima di considerarlo acquisito.
 
+### 3.2-bis 🆕 18/08 sera — IL MODULO MEDIAZIONE CONFERMA IL 140 (fonte nuova)
+
+Le lezioni **26-33** (modulo Mediazione, stessa relatrice, **modulo
+precedente**) ripetono il valore **altre TRE volte**, PDF riepilogativo incluso:
+- lez. 26: _"ricorda che **deve essere settato a 140 periodi**. Questo setup non
+  e' casuale, e' stato studiato"_ (+ una seconda occorrenza nella stessa lezione)
+- lez. 27: _"il Williams Percent Range **a 140 periodi**"_
+- lez. 33 (PDF): _"Ricordiamo l'indicatore e' **settato a 140 periodi**"_
+
+> ✅ **Il "fonte singola" del §3.2 non vale piu': quattro occorrenze su due
+> moduli.** Dettaglio in `caccia_strategie/ANALISI_CORSO_MEDIAZIONE_2026-08-18.md`
+> §1.8 · spec: `prove/MEDIAZIONE_CORSO_SPEC.md` §3.1.
+> ➕ Lo stesso modulo conferma le soglie **−20 / −80 / −50** con **valori letti
+> ad alta voce** (−78,46 · −22,93 · −49): il §3.1 qui sopra smette di essere
+> pura inferenza.
+
 ### 3.3 🔴 SuperTrend — il buco BLOCCANTE
 
 Il corso lo usa in ogni lezione ma **non ne detta mai i parametri**. Lez. 35 lo
@@ -234,6 +250,16 @@ precedente"_.
 gradi di liberta' (periodo ATR + moltiplicatore) che decidono quanti segnali
 esistono. **Senza questi due numeri la strategia non e' riproducibile**, e
 qualunque valore si usi e' *nostro*, non del corso.
+
+> 🆕 **18/08 sera — IL MODULO E' STATO IDENTIFICATO: e' quello di LEONARDO.**
+> Il modulo Mediazione (26-33) e' il "modulo precedente" a cui la lez. 35
+> rimanda, e **anche lui non detta i parametri**: rimanda a sua volta indietro.
+> `[T]` Mediazione lez. 26: _"Ecco il setup che voi avete gia' sicuramente
+> costruito **insieme a Leonardo** in precedenza"_ · `[T]` lez. 27: _"indicatori
+> che hai **installato nei video precedenti**"_.
+> **Catena `[I]`: Breakout (34-40) → Mediazione (26-33) → modulo di LEONARDO
+> (lezioni < 26).** Il buco resta, **ma ora ha un indirizzo.**
+> ➡️ Vedi `caccia_strategie/ANALISI_CORSO_MEDIAZIONE_2026-08-18.md` §1.12 n.1.
 
 ---
 
