@@ -26,7 +26,7 @@ solo la macchina, con i criteri congelati PRIMA._
 | driver R84 | `backtest_pipeline/lancia_r84.ps1` |
 | driver R83 | `backtest_pipeline/lancia_r83.ps1` |
 
-**SHA da pinnare: `886472a75d70e2c515e267432dceb1dae483726b`** — contiene
+**SHA da pinnare: `2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b`** — contiene
 tutti e sette i pezzi (verificato file per file con `git log -1 -- <file>`,
 punto 4 della checklist). `walkforward_generico.ps1` e' fermo a `51922fa`
 (14/08), quindi piu' vecchio: il pin va bene.
@@ -148,7 +148,7 @@ marcatore) e la guardia `$LASTEXITCODE -ne 0` (punti 8 e 13 della checklist).
 
 ### 5.0 PASSO 0 — la profondita' dei TICK (viene PRIMA di tutto)
 ```powershell
-$h="886472a75d70e2c515e267432dceb1dae483726b"
+$h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
 $p="$env:USERPROFILE\scarica_storico.ps1"
 Remove-Item $p -ErrorAction SilentlyContinue
 irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scarica_storico.ps1" -OutFile $p -ErrorAction Stop
@@ -165,7 +165,7 @@ script **ammazza MT5 e esce 0** (difetto n.19).
 
 ### 5.1 R84 — giro a vuoto (non apre MT5)
 ```powershell
-$h="886472a75d70e2c515e267432dceb1dae483726b"
+$h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
 $p="$env:USERPROFILE\lancia_r84.ps1"
 Remove-Item $p -ErrorAction SilentlyContinue
 irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r84.ps1" -OutFile $p -ErrorAction Stop
@@ -184,7 +184,7 @@ if($LASTEXITCODE -ne 0){ throw 'R84 GIRO A VUOTO FALLITO: guarda le righe rosse 
 
 ### 5.3 R83 — giro a vuoto, canarini, duello
 ```powershell
-$h="886472a75d70e2c515e267432dceb1dae483726b"
+$h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
 $q="$env:USERPROFILE\lancia_r83.ps1"
 Remove-Item $q -ErrorAction SilentlyContinue
 irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r83.ps1" -OutFile $q -ErrorAction Stop
