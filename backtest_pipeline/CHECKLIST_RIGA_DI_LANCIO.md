@@ -380,3 +380,74 @@ if($LASTEXITCODE -ne 0){ throw "PYTHON TROPPO VECCHIO O NON FUNZIONANTE: $py" }
 ```
 Vale per ogni dipendenza esterna che la riga assume: si verifica **prima**,
 con un throw, non si scopre a corsa avviata.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/08/2026 (notte) — trovate verificando il TORNEO JPY (R82)
+
+## 18. 📐 LA PROFONDITA' DELLO STORICO MISURATA SU UN TF, LA CORSA GIRATA SU UN ALTRO
+
+_Difetto vero, gia' committato in `prove/TORNEO_JPY_CRITERI.md` (d63ca2d, §3.4) e
+nei 7 file prova `R82a..g`, trovato PRIMA dell'invio della riga._
+
+La finestra del round e' `@DAQUANDO 2007.02.12`, e la data e' **misurata** — la
+sonda del 17/08 la dichiara `PrimaDataTF H1`. Ma il giro 1 gira a **modello 1
+(OHLC su M1)**, e il tester di MT5 costruisce **sempre** le sue barre dal **M1**:
+la profondita' che morde e' quella dell'**M1**, che **non e' mai stata misurata**.
+Nei broker la profondita' M1 e' regolarmente molto piu' corta di quella H1.
+
+E' la famiglia della `@DAQUANDO` inventata (punto 11), col trucco che stavolta
+**il numero e' misurato davvero** — solo su un'altra grandezza. Il controllo
+sembra fatto, e non c'e'.
+
+> **La data d'inizio si misura sul TIMEFRAME CHE IL TESTER USA DAVVERO**
+> (M1 per i modelli 0/1/2), non sul TF su cui e' comoda la sonda. E la riga in
+> chat dice a Claudio **quale RIGA del referto leggere**, non solo quale file:
+> "la riga `M1` di tutti e sette, colonna `PrimaDataServer`".
+
+Corollario di traffico: prima di bruciare le ore della griglia intera, si gira
+**un solo simbolo** (`-Solo`) come canarino. Costa mezz'ora e misura sul serio
+compilazione, profondita' vera, CSV prodotti e passate gemelle.
+
+## 19. ⏳ IL TIMEOUT DI DEFAULT PIU' CORTO DELLA DURATA CHE IL REFERTO STESSO STIMA
+
+_Difetto vero: il referto del torneo stima il passo 0 in **1-3 ore** e la riga
+chiamava `scarica_storico.ps1` **senza `-TimeoutMin`**, cioe' col default di
+**90 minuti** (riga 47)._
+
+Allo scadere del timeout lo script **non e' un errore**: esce dal ciclo, trova
+`$visto = $true`, **ammazza MT5 con `Stop-Process -Force` a meta' scaricamento**,
+stampa il referto di quello che c'e' e **finisce con codice 0**. La riga in chat
+sembra riuscita, il `.zip` sul Desktop e' pieno, e lo storico e' monco: e' il
+referto stantio del 17/08 rifatto in casa, stavolta con l'aggravante che il
+processo e' stato ucciso mentre scriveva le cache dello storico.
+
+Due controlli, insieme:
+1. **La durata stimata nel referto e il `-TimeoutMin` (o equivalente) dello
+   script chiamato si confrontano NUMERO CONTRO NUMERO.** Se la stima e' 1-3
+   ore, il timeout non puo' essere 90 minuti: la riga lo passa esplicito.
+2. **Un timeout non puo' uscire 0.** Se lo script chiamato non lo distingue da
+   una fine regolare, lo si dice nella riga e si controlla l'artefatto (qui: la
+   colonna `Verdetto` di tutte le righe del referto, non la sola presenza del
+   file).
+
+## 20. 🧾 IL COLLAUDO CHIESTO A CLAUDIO CHE CON QUEL TASTO NON PUO' USCIRE
+
+_Il referto del torneo chiedeva: "**F7** su `ABTG_BreakoutCorso.mq5` e copia qui
+le tre righe `[BRK][AUTOTEST]`". Quelle righe le stampa `OnInit`
+(`ABTG_BreakoutCorso.mq5` riga 199, `if(InpAutoTest) TestCasoDelCorso();`):
+**F7 compila e basta, non esegue niente**. E il `.mq5` non e' nemmeno dentro
+`MQL5\Experts` finche' non ci gira il driver, che ce lo copia lui (riga 567 di
+`walkforward_generico.ps1`) — quindi in MetaEditor non c'e' proprio niente da
+premere._
+
+**Quando la riga chiede a Claudio un OUTPUT, si verifica dove nasce quell'output
+e se il gesto richiesto lo produce davvero.** Print in `OnInit` = serve
+un'ESECUZIONE (test singolo nello Strategy Tester), non una compilazione. E se
+l'artefatto non e' ancora installato sulla macchina, si dice **chi** ce lo
+installa e **quando**.
+
+⚠️ E mai "attacca l'EA a un grafico" per farlo stampare: sul PC di backtest il
+terminale e' collegato al conto vivo (`walkforward_generico.ps1` righe 592-600,
+il DAX partito davvero il 14/08). Il collaudo si fa nel **tester**, in test
+singolo.
