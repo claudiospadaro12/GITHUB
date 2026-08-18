@@ -1,0 +1,29 @@
+Bene, ben ritrovato. In questo video imposteremo il nostro setup operativo. Ti farò vedere tutti gli strumenti di cui avrai bisogno prima di impostare una prima operazione con la strategia di mediazione.
+
+Passiamo subito alla nostra piattaforma e vediamo di cosa abbiamo bisogno per iniziare a intanto valutare un nostro primo segnale. Bene, hai già sul monitor alcuni indicatori che hai installato nei video precedenti. A noi servirà soltanto il Supertrend e il Williams Percent Range a 140 periodi.
+
+Ti consiglio di settare un setup adatto alla strategia di mediazione. Puoi eliminare gli indicatori che hai sulla tua piattaforma e salvare un profilo. Io ho preferito un fondo bianco per un discorso di facilità di lettura, ma è solo un aspetto estremamente personale.
+
+Se ti piace questo setup, puoi cliccare con il tasto destro del mouse e andare a impostare le proprietà del tuo schermo. Questo è il setup che io ho scelto. Naturalmente lo sfondo, in questo caso, l'ho scelto bianco e tutti i colori sono adeguati allo sfondo che ho scelto.
+
+Puoi anche, eventualmente, valutare uno sfondo nero e quindi andare su colori un pochettino più chiari che mettono in evidenza meglio le caratteristiche delle candele. Una volta individuato il setup che per te è più comodo, andiamo a salvare il nostro formato. Formato, salva formato, lo possiamo chiamare, io l'ho chiamato in questo modo, Williams più Supertrend perché questi due sono gli indicatori che noi utilizzeremo nella strategia.
+
+Salviamo, in questo caso per me è già esistente, ma naturalmente per te non è così. Andiamo a inserire le coppie valutarie che possono essere utilizzate per la strategia. Ti ricordo che la strategia è stata settata per due coppie in particolare, l'euro-dollaro che in questo momento ho già sulla piattaforma e poi dobbiamo inserire ancora la sterlina-dollaro, quindi la andiamo a selezionare nella lista degli strumenti a nostra disposizione, tasto destro del mouse e apriamo una nuova finestra di grafico.
+
+La stessa cosa faremo per un'altra coppia che è l'euro-sterlina. Eccola qua, euro-sterlina, finestra di grafico, ecco qua. Questi tre sono gli strumenti che a noi servono.
+
+Possiamo chiudere la vista del mercato per avere una visualizzazione più ampia. Come vedete le valute che sono state aggiunte in questo momento non hanno gli indicatori di base che a noi servono. Li richiamiamo, quindi ci posizioniamo su sterlina-dollaro, andiamo nella parte bianca dello schermo, tasto destro del mouse e ricarichiamo il formato che abbiamo salvato in precedenza.
+
+Carica formato, lo selezioniamo tra quelli presenti, l'avevamo chiamato Williams e Supertrend. Selezioniamo il formato che a noi interessa e clicchiamo su apri. Eccolo qua, ci ritroviamo a questo punto agli indicatori che avevamo settato in precedenza.
+
+Facciamo la stessa operazione anche su euro-sterlina. Tasto destro del mouse, formato, carica formato, Williams e Supertrend. Bene, a questo punto abbiamo le tre coppie valutarie che noi utilizzeremo nella strategia con tutti gli indicatori necessari per implementarla.
+
+Possiamo salvare questo profilo in modo tale da andare a utilizzarlo ogni volta che avete bisogno di, appunto, implementare le prime operazioni con la strategia di mediazione. Possiamo andare nella parte file, profili, salva profilo, lo chiamiamo mediazione. Ok, naturalmente io ce l'avevo già, salvate, perfetto.
+
+Ogni volta che dovete aprire un nuovo profilo potete richiamarlo da qui, file, profilo. Ad esempio, se adesso apro un profilo diverso, vedete qui troviamo, per esempio, British Pound, oppure profilo, mediazione e ci ritroviamo il setup che abbiamo selezionato in precedenza. Per la strategia abbiamo ancora bisogno di altri strumenti.
+
+In particolare, utilizzeremo il foglio Excel che vi spiegherò nei video successivi. Dovreste avere nella vostra area personale questo file che è stato costruito per, appunto, tutte e tre le coppie valutarie che noi seguiremo nella strategia. E in più abbiamo ancora bisogno di accedere al sito di Cashbackforex all'interno del quale possiamo, appunto, utilizzare il modulo appropriato per il calcolo del volume.
+
+Lo faremo insieme nel video, appunto, dedicato alla gestione del rischio. Bene, per questo video è tutto. Abbiamo il materiale necessario per iniziare a lavorare.
+
+Ci vedremo nel prossimo per implementare una prima operazione, un primo segnale con la strategia di mediazione. Grazie.
