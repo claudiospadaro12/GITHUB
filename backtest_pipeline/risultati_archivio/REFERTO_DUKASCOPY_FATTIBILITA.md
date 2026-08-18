@@ -220,3 +220,17 @@ l'ultimo miglio (sezione 6).
   dentro lo script.
 
 **Nessun parametro degli EA in forward cambia per questo referto.**
+
+---
+
+## ESITO DELLA CORSA PIENA (18/08 sera) — INTERROTTA, STRADA CAMBIATA
+
+La corsa DEUIDXEUR 2019->oggi dal PC di backtest e' stata strozzata dal
+server: 25/2389 giorni in 1h43m (596 ore, 7,4 MB, 4 errori consumati),
+con 503/reset/timeout/DNS continui = proiezione ~7 giorni di crawl.
+Interrotta da Claudio con Ctrl+C alle ~17:00; la cache v2 (a prova di
+interruzione) conserva i 25 giorni per la controprova incrociata.
+DECISIONE: si passa alla strada HistData (M1 mensili dirette, stessa
+convenzione oraria dei nostri import _EXT) — fattibilita' in corso.
+Dukascopy resta riserva e fonte di controprova sul giorno campione
+16/06/2025 (min 23400.56 / max 23715.65, gia' validato).
