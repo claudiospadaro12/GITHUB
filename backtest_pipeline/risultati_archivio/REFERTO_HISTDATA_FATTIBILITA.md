@@ -524,3 +524,29 @@ HistData (giorni con prezzi impossibili + mappa sessioni) e eventuale
 bonifica DICHIARATA; (b) Dukascopy DAX (crawl lento, come il Dow);
 (c) nativo BCM dal 2024-09. Il passo 4 dei tre promossi resta in coda
 DOPO i round notturni (unico MT5).
+
+## 14. PASSO 4 ESEGUITO (18/08, 22:43-22:48) — TRE IMPORT CREATI, TRE IN FRIGO (cancello ZERO)
+
+Import con ABTG_ImportaStoricoEsterno (InpFormato=1, AutoShift, ShiftMax 6),
+referti dal Journal (screenshot in chat):
+
+| simbolo | shift | copertura | barre M1 | diff media H1 | diff max | cancello <=0,05% |
+|---|---|---|---|---|---|---|
+| NASUSD_EXT | +5 | 97,0% | 2.546.517 | 0,0756% | 60.221,8 pt il 2025.11.20 16:00 | NO |
+| 225JPY_EXT | +5 | 97,0% | 2.357.431 | 0,1010% | 1.526,5 pt il 2026.01.09 14:00 | NO |
+| SPXUSD_EXT | +5 | 97,0% | 2.481.265 | 0,0608% | 13.419,9 pt il 2026.03.23 11:00 | NO |
+
+- Shift +5 confermato TRE su TRE (minimo netto della scansione +/-6):
+  la convenzione ora-locale-NY regge anche sugli indici.
+- Diff media 0,06-0,10% contro lo 0,005-0,011% degli 8 forex: sopra il
+  cancello congelato -> i tre _EXT esistono ma NON si usano nei round.
+- Ipotesi principale (nota del referto dello script + evidenza): le
+  settimane in cui DST USA e DST Europa non coincidono (marzo e
+  ottobre/novembre) rendono il +5 fisso sbagliato di un'ora; la diff max
+  SPXUSD cade il 23/03/2026 in piena finestra sfasata. Il 225JPY ha anche
+  un possibile secondo effetto (diff max 09/01, fuori finestra: orari di
+  sessione del feed, come gia' visto sul GRXEUR).
+- LAVORO PER LA FLOTTA (19/08): ricalcolo diff ESCLUDENDO le settimane
+  sfasate; se <0,05% -> cura chirurgica (shift che segue il calendario DST
+  o esclusione dichiarata). R81-bis NON parte finche' il cancello non passa.
+- Righe scartate 0 su tutti e tre; periodo 2019.01.01 -> 2026.07.31.
