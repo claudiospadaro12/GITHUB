@@ -25,8 +25,11 @@
 //|                                                                   |
 //|  IL DIFETTO, IN UNA RIGA: i timestamp HistData sono ORA LOCALE DI |
 //|  NEW YORK (calendario DST USA), il server BCM segue il calendario |
-//|  DST EUROPEO. I due calendari NON coincidono per ~7,7% dell'anno  |
-//|  e in quelle settimane uno shift COSTANTE sbaglia di un'ora.      |
+//|  DST EUROPEO. I due calendari NON coincidono per 503-671 ore      |
+//|  l'anno (5,7%-7,7%: la finestra di marzo dura 14 o 21 giorni a    |
+//|  seconda di dove cade la seconda domenica; quella di fine ottobre |
+//|  dura sempre 7 giorni) e in quelle settimane uno shift COSTANTE   |
+//|  sbaglia di un'ora.                                               |
 //|                                                                   |
 //|  IL CONTO (verificabile a mano):                                  |
 //|    USA: seconda domenica di marzo 02:00 -> prima domenica di      |
@@ -275,7 +278,7 @@ bool EuInDst(datetime tUtc)
 //+------------------------------------------------------------------+
 //| AGGIUSTAMENTO DST: quante ore vanno AGGIUNTE allo shift base per |
 //| un timestamp scritto in ora locale di New York.                  |
-//|   0  = i due calendari sono d'accordo (92,3% dell'anno)          |
+//|   0  = i due calendari sono d'accordo (93% dell'anno e passa)    |
 //|  -1  = USA gia'/ancora in ora legale, Europa no (le finestre)    |
 //|  +1  = il contrario: coi calendari attuali non accade            |
 //+------------------------------------------------------------------+
@@ -427,7 +430,8 @@ bool EseguiAutotest()
    VerificaInt("giorni con aggiustamento +1 (atteso 0)", piuUno, 0);
    PrintFormat("   giorni sfasati (mezzogiorno NY): %d su %d = %.2f%% del calendario",
                giorniSfasati, giorniVisti, 100.0 * giorniSfasati / MathMax(giorniVisti, 1));
-   Print("   atteso ~7-8%: 2-3 settimane a marzo + 1 settimana a fine ottobre.");
+   Print("   atteso 6-7% sulla media 2010-2030 (5,7%-7,7% a seconda dell'anno):");
+   Print("   2 o 3 settimane a marzo + 1 settimana fra fine ottobre e inizio novembre.");
 
    PrintFormat("=== AUTOTEST: %d controlli, %d ROTTI ===", g_testFatti, g_testRotti);
    if(g_testRotti == 0) Print("=== ESITO: OK - la conversione DST fa quello che dice. ===");
