@@ -207,6 +207,9 @@ processo completo (regimi, walk-forward, canarino, firma di Claudio).
 - **`InpUseRoundLevels`** — e' una regola di **USCITA** (primo obiettivo),
   non un filtro d'ingresso. Mescolarla qui contaminerebbe la lettura.
   Era acceso nel preset del Nasdaq: merita un round suo. → **coda**.
+- **Filtro VWAP (`InpUseVwapFilter`)** — viene dalle live di Emiliano, non da
+  questi quattro documenti: fuori tema per un round che misura *il metodo del
+  corso*. Pinnato spento in tutte e nove le celle. → **coda**.
 - **Leve R30 (`InpUseVolRegime`, `InpUseSRFilter`)** — non vengono dal corso
   (vengono dai parametri di un EA esterno). Fuori tema. → **coda**.
 - **Size divisa 50/50** [AM SLIDE 10] — unica regola dei pptx **mai
