@@ -424,7 +424,7 @@ finora**: rischio e rendimento **simmetrici a 2 ATR (R:R ~1:1)**.
 | # | attrito | gravita' |
 |---|---|---|
 | 1 | 🔴 **Nessun tetto sulle posizioni simultanee**, su tutte le valute, senza una parola sulla **correlazione**. Sei cross col dollaro alla stessa distanza = **~10% a rischio in un verso** (§9). Contro un daily loss del 5% (`METRO_PROP.md` §2, peggior giornata nostra misurata **−2,06%**) e' una violazione a portata di **una mattina** | 🔴🔴 **il killer** |
-| 2 | 🔴 **Nessun filtro notizie, mai nominato in 5 lezioni.** Il modulo **gemello** Fibo H4 lo rende obbligatorio: **lo stesso corso e' incoerente con se stesso** (`METRO_PROP.md` §7) | 🔴 |
+| 2 | 🔴 **Nessun filtro notizie, mai nominato in 5 lezioni.** Il modulo **gemello** Fibo H4 lo rende obbligatorio: **lo stesso corso e' incoerente con se stesso** (`METRO_PROP.md` §7). 🆕 **18/08 sera — E ORA SAPPIAMO CHE NON E' UNA DIMENTICANZA, E' UNA DOTTRINA:** `[T]` modulo base an.tec. lez. 3 _"**noi dimentichiamo completamente le notizie macroeconomiche** ... **Anzi, a volte non conoscere niente dell'analisi delle notizie macroeconomiche e' meglio perche' puo' confondere**"_. Il silenzio di questo modulo e' **coerente col corso**; e' il Fibo H4 a essere l'eccezione | 🔴 **e strutturale** |
 | 3 | 🟠 **Overnight e weekend mai affrontati.** Su H4/D1 con target su EMA14 le posizioni durano **giorni** per costruzione. Il Fibo H4 vieta il weekend a voce alta; qui **silenzio** (`METRO_PROP.md` §3) | 🟠 |
 | 4 | 🟠 **Umano nel ciclo per progetto**: trailing manuale, controllo _"ogni ora"_ dal cellulare, spostamento ordini _"se arriva con forza"_. Su un conto prop gestito da EA **queste regole vanno tolte o quantificate** | 🟠 |
 | 5 | 🟢 **Niente martingala, niente griglia, niente hedge, niente mediare in perdita. Stop loss SEMPRE presente e ancorato all'ordine piu' grande.** | 🟢 **impianto pulito** |
@@ -462,8 +462,47 @@ segnale della lez. 21 (§4.2, contraddice le lez. 22-24).
 |---|---|---|
 | 1 | 🔴 **Le SLIDE** (_"ritorniamo alle slide"_ ×6, mai lette) | Nel Breakout hanno chiuso 6 ambiguita' su 10 |
 | 2 | 🔴 **Un esempio grafico di "spike" e di "candela piena"** (minuti in cui li indica in lez. 23/24) | E' **l'unico filtro d'ingresso** del corso e serve per calibrare X e Y (§6) |
-| 3 | 🔴 **La % di rischio** insegnata da questo relatore | Mai detta in 5 lezioni (§9) |
-| 4 | 🟠 **Il fuso della piattaforma** (orologio MT4) | Su H4 sposta l'allineamento delle candele (§3) |
-| 5 | 🟠 Il pannello Moving Average (conferma EMA/close) e quello ATR | Il parlato e' gia' chiaro: serve solo come conferma |
+| 3 | 🔴 **La % di rischio** insegnata da questo relatore | Mai detta in 5 lezioni (§9). 🆕 **18/08 sera: l'INDIRIZZO e' noto** — il modulo base rimanda 4 volte a un **capitolo MONEY MANAGEMENT** dedicato al volume e alla traduzione pip→euro (`[T]` lez. 18 base: _"non andiamo ancora ad inserire il volume perche' **sara' argomento di un altro capitolo** ... riguardera' **il money management**"_). 🥈 **Chiedere quella trascrizione** |
+| 4 | ✅ ~~🟠 **Il fuso della piattaforma** (orologio MT4)~~ | **RISPOSTO 18/08 sera → §15.1.** E la risposta vale doppio proprio **su H4** |
+| 5 | 🟡 Il pannello Moving Average (conferma EMA/close) e quello ATR | 🆕 **parzialmente confermato dal modulo base**: `[T]` lez. 9 _"inseriamo la media mobile semplice, **applicata alla chiusura della candela**"_ (→ `applied price = Close` e' la convenzione mostrata) e _"la cosa che utilizzerai principalmente ... saranno la media mobile **semplice o esponenziale**"_. `[T]` lez. 11: **ATR lasciato a 14 periodi** (default), letto in pip. ⚠️ **Il 200 e la scelta EMA-vs-SMA restano della strategia**, il modulo base non li tocca |
 | 6 | 🟠 Prezzi/date degli esempi AUDCHF ed EURJPY | Per estendere il test-case oltre AUDCAD |
 | 7 | 🟠 **Esiste un backtest di questa strategia nel corso?** | In 5 lezioni **zero numeri**: se un documento esiste, e' altrove |
+
+### 15.1 ✅ 18/08 sera — **IL FUSO E' DETTATO, E IL BROKER DEL CORSO E' IL NOSTRO**
+
+Era la domanda n.4, ed era **la piu' pesante su H4** perche' il fuso del broker
+non sposta solo gli orari: **sposta l'allineamento delle candele** (§3).
+
+`[TRASCRITTO chiaro, lez. 3 modulo base "I PRIMI PASSI SULLA PIATTAFORMA MT4"]`
+> _"Questa e' una piattaforma che, scaricata dal broker **BlackRidge**, **non da'
+> l'ora italiana, cioe' e' settata sostanzialmente sul GMT** ... **e non puo'
+> essere modificata questo orario, cosi' resta** ... da fine marzo a fine ottobre
+> ... **DUE ORE INDIETRO rispetto all'ora italiana** ... da fine ottobre a fine
+> marzo ... **UN'ORA INDIETRO**"_
+
+`[TRASCRITTO chiaro, lez. 2 modulo base]`
+> _"il nome del broker che noi utilizziamo e' **Black Ridge** ... dovrai
+> semplicemente scrivere **bcmmarkets.com** ... andiamo su blackridge, questo,
+> **demo, demo 1**, questo e' il server"_
+
+> 🔥 **`bcmmarkets.com` E' IL NOSTRO BROKER.** Conto demo del progetto:
+> `50503392 — BCMMarkets-Server — BCM Markets Ltd`
+> (`report/CENSIMENTO_ORDINI_PC.md` r.194).
+>
+> ✅ **Conseguenza diretta sull'assunzione n.7 del §14** (_"l'allineamento delle
+> candele H4 dipende dal broker → da dichiarare"_): **NON e' piu' da dichiarare
+> come ignoto.** Corso e noi siamo **sullo stesso broker**: le barre H4 del
+> relatore e le nostre **hanno lo stesso taglio**. Si verifica su un grafico,
+> non si assume.
+
+> ⚠️ **MA UNO SCARTO DI UN'ORA RESTA APERTO, E VA MISURATO.** Il corso dice
+> **GMT fisso** (agosto: IT−2 = UTC+0); il repo dice **BCM = IT−1 = UTC+1** in
+> agosto (`CLAUDE.md`, `HANDOFF.md` r.496, `PIANO_PROP` r.170). **Non tornano.**
+> Tre letture, e solo una misura decide: (a) `BlackRidge-Demo 1` ≠
+> `BCMMarkets-Server`; (b) il video e' vecchio e il server e' cambiato;
+> (c) uno dei due enunciati e' impreciso.
+> ➡️ **Screenshot con l'orologio di Windows e la "Vista del mercato" di MT4/MT5
+> nella stessa foto** (metodo di casa, `CLAUDE.md` §"Ora dei LOG"). 5 secondi.
+> ⚠️ **Finche' non e' misurato, l'assunzione n.7 resta scritta nel file prova** —
+> ma ora e' **un'assunzione su un'ora**, non su un broker sconosciuto.
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.5.
