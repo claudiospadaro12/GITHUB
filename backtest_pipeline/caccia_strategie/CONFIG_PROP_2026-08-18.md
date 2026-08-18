@@ -725,3 +725,26 @@ che gira sul conto piccolo **senza contratto**.
 
 → Se una configurazione prop dovesse mai ospitare questa strategia, i tre buchi
 sopra sono **da colmare fuori dal corso**: il corso non li tratta.
+
+### 🆕 Rettifica del punto 3 (18/08 ~15:15, dopo le slide del PDF)
+
+Le **10 slide** della lezione 40 obbligano a **correggere il punto 3 qui
+sopra**. La slide "Money management" scrive:
+
+> _"si consiglia per le prime 20 operazioni di tenere un **rischio COMPLESSIVO
+> dell'1%**"_
+
+Il **parlato** dice invece sempre _"rischio 1% **per l'operazione**"_ (lez. 35,
+37). **Documento e video si contraddicono**, e la differenza e' un **fattore 7**:
+
+- lettura "per operazione" → fino al **7%** a rischio su un'unica direzione
+  dello yen (quanto scritto sopra al punto 3);
+- lettura "complessivo" → **1%**, e l'attrito con il daily loss del 5%
+  **sparisce**.
+
+⚖️ **Quindi il punto 3 NON e' piu' un'obiezione accertata: e' una domanda
+aperta.** La lettura scritta (piu' forte) e' quella conservativa. Restano
+invece **intatti** i punti 1 (nessun filtro news) e 2 (nessun cap giornaliero):
+**nessuna slide li smentisce**, e nessuna slide li tratta.
+
+Dettaglio in `ANALISI_CORSO_BREAKOUT_2026-08-18.md` §2b.6.
