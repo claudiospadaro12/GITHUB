@@ -590,3 +590,41 @@ piu' niente. La riga sembra pinnata e l'artefatto che conta di piu' non lo e'.
 > dichiara il **congelamento del branch** per tutta la durata del round, e
 > (3) il fix vero (inoltrare `-Rif`, togliere il ripiego silenzioso) va in coda
 > come lavoro a se', dichiarato nel referto.
+
+---
+
+## 🆕 AGGIUNTA DEL 19/08/2026 — trovata verificando il collaudo di `_ImportaStoricoEsterno_v2`
+
+## 25. 🎚️ IL PRESET VECCHIO NON SPEGNE L'INPUT NUOVO (e MT5 si ricorda l'ultimo)
+
+_Difetto vero, trovato PRIMA dell'invio: i tre `.set` scritti il 18/08
+(`MQL5\Presets\abtg_import_*.set`) contengono 8 input; la v2 dello script ne ha
+**due in piu'** (`InpShiftDstAware`, `InpAutoTest`)._
+
+Il punto 5 ha gia' il difetto gemello sul **tester** (_"un pin `Nome=35`
+imposta il valore ma NON spegne il flag che MT5 ricorda dall'ultima griglia"_).
+Questo e' lo stesso meccanismo nella **finestra dei parametri di uno script o
+EA**: un input che il `.set` **non nomina** non torna al suo default quando
+carichi il preset — resta **l'ultimo valore usato a mano**, che MT5 conserva.
+
+Sequenza che sarebbe successa domattina: giro di autotest con
+`InpAutoTest = true` (a mano), poi `Carica > abtg_import_NASUSD.set` per
+l'import vero. Il preset non nomina `InpAutoTest`, quindi resta **true**: lo
+script stampa *"MODO AUTOTEST: NON viene importato nulla"* ed **esce**. Tre
+import "riusciti" che non hanno importato niente, e un referto che non si
+aggiorna — cioe' i numeri di ieri riletti come quelli di oggi (punto 23).
+
+> **Quando uno script/EA guadagna un input NUOVO, i preset vecchi vanno
+> RISCRITTI, non riusati "tanto il default e' giusto".** Il default vale al
+> primo avvio, non dopo che qualcuno ha toccato quel campo. La riga di lancio
+> lo fa da sola, e in modo idempotente (togli le righe di quell'input, poi
+> riaggiungile):
+> ```powershell
+> $righe = @(Get-Content -LiteralPath $set | Where-Object { $_ -notmatch '^(InpAutoTest|InpShiftDstAware)=' })
+> $righe += "InpShiftDstAware=true"; $righe += "InpAutoTest=false"
+> Set-Content -LiteralPath $set -Value $righe -Encoding ASCII
+> ```
+> Corollario dello stesso giro: **`Print()` di uno script MQL5 finisce nella
+> scheda "Esperti" e in `MQL5\Logs\<data>.log`, NON nel Journal** (che sta in
+> `logs\`). Chiedere "copiami il Journal" e' chiedere il file sbagliato: e' il
+> punto 20 visto dal lato del POSTO, non del gesto.
