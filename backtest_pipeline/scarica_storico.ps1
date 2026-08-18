@@ -252,6 +252,13 @@ if (Test-Path $logDirW) {
   }
 }
 function Coda-Log-Storico {
+  # Legge SOLO cio' che i log hanno scritto DOPO la fotografia $lenPrima.
+  # DIFETTO PAGATO (18/08 sera, PASSO 0 di R84): la prima versione, quando
+  # un file NON era cresciuto (il log di IERI), saltava il Seek per la
+  # condizione "$da -lt Length" e lo RILEGGEVA DA CAPO: il "=== FINITO"
+  # della corsa di ieri sera e' stato preso per quello di oggi, MT5 e'
+  # stato ammazzato dopo 15 secondi col download appena partito, CSV da
+  # 0 byte. Regola: file non cresciuto = NIENTE da leggere, si salta.
   if (-not (Test-Path $logDirW)) { return "" }
   $tutto = ""
   foreach ($f in (Get-ChildItem $logDirW -Filter "*.log" -ErrorAction SilentlyContinue)) {
@@ -260,7 +267,8 @@ function Coda-Log-Storico {
     if ($da % 2 -ne 0) { $da = $da - 1 }
     try {
       $fs = New-Object System.IO.FileStream($f.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-      if ($da -gt 0 -and $da -lt $fs.Length) { [void]$fs.Seek($da, [System.IO.SeekOrigin]::Begin) }
+      if ($da -ge $fs.Length) { $fs.Close(); continue }
+      if ($da -gt 0) { [void]$fs.Seek($da, [System.IO.SeekOrigin]::Begin) }
       $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::Unicode, $false)
       $tutto = $tutto + $sr.ReadToEnd(); $sr.Close(); $fs.Close()
     } catch { }
