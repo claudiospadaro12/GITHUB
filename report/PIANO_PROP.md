@@ -84,9 +84,9 @@ del rischio ora **dipende dal TIPO di muro**: statico → 0,65% regge; trailing
 | # | parametro | valore PROPOSTO | fonti (rango) | conflitti | stato |
 |---|---|---|---|---|---|
 | A1 | **Rischio per trade a taglia prop** | **0,65%** | 🥇 MC R16 + 27 serie (`METRO_PROP` §1-bis: p99 12,47% a 1% → ~8,1% a 0,65% vs muro 10%); decisione in `DEPLOY_GUARDIANO_100K.md` | 🥉 blog MQL5 (E0) suggerisce 0,25-0,4%; 🥉 PROPstyle ragiona per rischio TOTALE ≤1%; 4° script CrewAI (18/08): 0,5% per trade contro muro 5% ("10 perdite per sfondare"); 4° trascrizioni: Petko "1% per trade, regola semplice" [dichiarato]. Le voci esterne stanno sopra e sotto il nostro 0,65 — 2ª notte, distribuzione aggiornata: 0,5 (Prop Firm Pass) · 0,5 (TIP preset; 0,75 di listino) · **0,65 (noi)** · 1,0 (Ultimate EA) · 2,4 ⚠️ (Range Breakout ExtraLow): **siamo nel corpo della distribuzione**. 🥇 **M1 (v4) precisa il perimetro**: su DD **statico** il p99 esatto e' **8,51%** (< 10: il congelamento REGGE, la vecchia stima ~8,1 era lievemente ottimista); col **TRAILING NON regge** (p99 12,05%, sfonda il muro 10 nel 4,6% dei percorsi — non "meno dell'1%"): li' valgono le taglie di F3 (0,50/0,40). ⚠️ E vale per UNA sedia: il problema e' la SOMMA (C1) | 🧊 **CONGELATO (09/08/2026, decisione di Claudio, verbale in `DEPLOY_GUARDIANO_100K.md`: "Rischio per trade: 0,65% (non 1%!)") — da leggersi, dopo M1: 0,65% SU DD STATICO** |
-| A2 | Rischio sedie **giovani** (<30 trade OOS-forward) | **0,3%** (mezzo peso) | 🥇 stessa decisione del 09/08 (ORB a 0,3% nel dry-run: "+41k dei +73,8k sono suoi: mezzo peso finche' non ha 30 trade") | nessuno | 📋 PROPOSTO — applicato di fatto sul dry-run; da congelare come **regola generale**, non caso singolo |
+| A2 | Rischio sedie **giovani** (<30 trade OOS-forward) | **0,3%** (mezzo peso) | 🥇 stessa decisione del 09/08 (ORB a 0,3% nel dry-run: "+41k dei +73,8k sono suoi: mezzo peso finche' non ha 30 trade") | nessuno | 🧊 **CONGELATO (18/08/2026, verbale FIRME, FIRMA 4: "ogni sedia con meno di 30 trade in forward gira a 0,3%" — era la prassi del dry-run, da oggi regola scritta per tutte)** |
 | A3 | Taglia in **fase 2** della challenge | in dubbio: ridurre (meta'/−20%) **oppure non toccare il rischio e abbassare solo il target** | 4° blog MQL5 E0-bis ("fase 2: lotto ridotto della meta'") **CONTRO** 🥉 Ultimate EA, coi file alla mano [VERIFICATO]: `riskPercentage` **1,0 / 1,0 / 1,0** su Phase 1 / Phase 2 / Funded — cambia SOLO il target (**8 → 5 → 2**) | 🔴 **PEGGIORATO v3 (ed e' un bene saperlo): da "1 fonte a favore" a 1 CONTRO 1** — e la fonte contraria e' piu' forte (un file di configurazione, non una frase) | 🔓 APERTO — 🎬 trascrizioni: niente. Si chiude con un round nostro o col peso delle fonti future |
-| A4 | Rischio massimo per sedia sul **conto piccolo** (forward) | **1,0%** (nessuna sedia sopra) | 🥇 `REFERTO_CENSIMENTO_RISCHIO.md`: tre sedie al 2% trovate 17/08, corrette a 1% (controprova 00:01 del 18/08 PASSATA, zero righe rosse); le sei peggiori perdite (−2,00…−2,19%) erano esattamente le sedie al 2% | il 100k a 0,65% conferma per contrasto: la sua peggior perdita e' **−0,65%**, il rischio di casa esatto | 📋 PROPOSTO — in vigore di fatto dal 18/08 00:01; da congelare come regola scritta ("mai sopra 1% sul piccolo") |
+| A4 | Rischio massimo per sedia sul **conto piccolo** (forward) | **1,0%** (nessuna sedia sopra) | 🥇 `REFERTO_CENSIMENTO_RISCHIO.md`: tre sedie al 2% trovate 17/08, corrette a 1% (controprova 00:01 del 18/08 PASSATA, zero righe rosse); le sei peggiori perdite (−2,00…−2,19%) erano esattamente le sedie al 2% | il 100k a 0,65% conferma per contrasto: la sua peggior perdita e' **−0,65%**, il rischio di casa esatto | 🧊 **CONGELATO (18/08/2026, verbale FIRME, FIRMA 4: "nessuna sedia sopra l'1%, mai" — il censimento periodico e' la verifica, una riga rossa e' una VIOLAZIONE, non una curiosita')** |
 
 > 📌 Nota su A1 — **la condizione di riapertura si e' AVVERATA (v4)**: al v1
 > era scritto _"la riga si riapre da sola il giorno in cui esiste la MC col
@@ -218,31 +218,29 @@ offset dei loro server non verificato. Tutta la riga e' [LETTO-VIA-SEARCH].
 `FIRME_2026-08-18.md`). La lista si accorcia e cambia natura: da "decidere i
 numeri" ad "attuare e chiudere i dettagli"._
 
-1. **A2/A4 — congelare per iscritto** le due regole di taglia gia' in vigore
-   di fatto (0,3% giovani, tetto 1% sul piccolo): 30 secondi, zero rischio.
-2. **E1 — la data di invio** delle domande al supporto (fine agosto, a
+1. **E1 — la data di invio** delle domande al supporto (fine agosto, a
    forward pulito maturo?) — prima aggiungendo al file D3 la domanda
    **breakeven-lock** (M1) e la conferma del fuso di reset (B3).
-3. **F6 — il candidato al cancello**: la due diligence 1-bis (gratis) e' il
-   prossimo gradino; il noleggio $59 si decide DOPO (come da verbale: "in
-   attesa della due diligence sul vendor").
+2. **F6 — il candidato al cancello**: due diligence 1-bis **in corso adesso**;
+   il noleggio $59 si decide DOPO il suo esito (come da verbale).
+
+_(A2/A4: firmate in giornata — FIRMA 4. Non resta altro in lista.)_
 
 ---
 
 ## 📊 IL CONTO DEL GIRO
 
-**34 parametri censiti: 9 congelati · 12 proposti · 12 aperti · 1 chiuso per
+**34 parametri censiti: 11 congelati · 10 proposti · 12 aperti · 1 chiuso per
 misura (C5).**
 Congelati: i 3 storici — A1 (0,65% su DD statico, 09/08) · F4 (challenge solo
-dopo forward maturo, 13/08) · F5 (cancello acquisti EA, 18/08 notte) — **piu'
-le 6 righe firmate il 18/08 mattina** ("firma tutte e 3", verbale
-`FIRME_2026-08-18.md`): **B1** (pausa 4,0 + emergenza 4,9) · **B2** (9,9) ·
-**B3** (reset 23, fuso [INCERTO] fino a conferma scritta) · **C1** (cap 3,25%
-sugli SL vivi) · **C2** (congelata con C1: la frase firmata E' il suo
-contenuto) · **C3** (tre corsie + porta di rientro; morde quando esiste M11).
-Cambio in direzione opposta: **B6 PROPOSTA→APERTA** (la firma ha scelto 4,0,
-il 2,5 resta idea di riserva). Delle 12 aperte, 2 si chiudono con misure di
-casa a costo basso (E3, E4).
+dopo forward maturo, 13/08) · F5 (cancello acquisti EA, 18/08 notte) — piu'
+le **8 righe firmate il 18/08** (verbale `FIRME_2026-08-18.md`): **B1**
+(pausa 4,0 + emergenza 4,9) · **B2** (9,9) · **B3** (reset 23, fuso [INCERTO]
+fino a conferma scritta) · **C1** (cap 3,25% sugli SL vivi) · **C2** (con C1)
+· **C3** (tre corsie + porta di rientro; morde quando esiste M11) · **A2**
+(giovani a 0,3%, FIRMA 4) · **A4** (mai sopra 1% sul piccolo, FIRMA 4).
+Delle 12 aperte, 2 si chiudono con misure di casa a costo basso (E3, E4).
+In cima alla lista decisioni restano solo **E1 e F6**.
 
 ---
 
@@ -256,3 +254,4 @@ casa a costo basso (E3, E4).
 | 18/08/2026 ~02:15 | **v3** | incorporata la **2ª notte del cacciatore** (`CONFIG_PROP_RACCOLTA_SET_2026-08-18.md`: 50 `.set` nuovi da 11 fonti, 75 file in biblioteca) + `CANCELLO_ACQUISTI_EA.md`. **Correzione d'evidenza su B1/B2**: la "convergenza tre vendor" sul 4/9 era a DUE (Gold Phantom = Gold Reaper = Profalgo/WSC); il principio "mai sul muro" sale a 5+ fonti, il valore del buffer diverge (1,0 / 0,5 / 0,1 pt) → **B1 riscritta a DUE livelli** (pausa 4,0 + emergenza 4,9, modello Prop Firm Pass), B2 a 9,9. **D1 APERTO→PROPOSTO**: il "non backtestabile" cade — calendario esportabile in CSV ([VERIFICATO] dal manuale Range Breakout), 2 CSV 2021-2025 (37.799 righe, UTC+2: su BCM −1h) e `NewsFilter.mqh` (283 righe, zero DLL) gia' in biblioteca. **B6**: il canale di blocco esiste in natura (TIP: GlobalVariable + battito + `SiblingStaleSec=30` + `BlockIfSiblingHalted`). **B8 nuova** (ex buco n.8: zone Bullion + scala Range Breakout, soglie Bullion [INCERTO]). **C4** da 1 a 3 fonti (regola: rischio ≈ budget ÷ sedie); **C1** +2 gambe ma resta APERTO (1% / 1,5% / 3% divergenti → M2). **A3 peggiora onestamente**: Ultimate EA coi file veri NON tocca il rischio fra fasi (1,0/1,0/1,0, target 8→5→2) → 1 contro 1. **A1 confermato per contorno** (0,5 · 0,5 · 0,65 · 1,0 · 2,4). **E3**: consistency misurabile DENTRO l'EA (Best Day 50%, min days 4, start date). **E7 nuova** (igiene: 3 recovery su 8 famiglie, anti-pattern cap in valuta, protezioni mai toccate dai profili). **F5 CONGELATA** (cancello acquisti EA, decisione di Claudio 18/08) e **F6 nuova**: primo candidato `Range Breakout Daytrader` — scheda costi e criteri demo riferiti in chat ma NON ancora depositati → M10. B3: nessuna gamba nuova (0 `.set` su 50 con ora di reset). → **34 parametri (3C · 16P · 15A)** | seconda caccia consegnata (commit `a1e8b51`/`4815ed8`/`2cd983f`) |
 | 18/08/2026 mattina | **v4** | incorporate le misure **M1 e M2** (i due buchi a costo zero: ESEGUITI, criteri congelati prima dei numeri). **C5 CHIUSA-MISURATA**: trailing EOD p99 **12,05%** a 0,65 / 9,27 a 0,50 / 7,41 a 0,40 (statico esatto 8,51); breakeven-lock: sfondamento 4,6%→0,2%. **F3 da divieto a NUMERI**: 1-Step muro 10 solo ≤0,50%, muro 8 solo ≤0,40%, muro 6 mai; +1 punto di margine se il trailing e' su equity; la domanda breakeven-lock entra in E1/D3. **A1 perimetrato, non revocato**: statico 8,51<10 regge (la stima ~8,1 corretta ovunque), col trailing NON regge — congelamento da leggersi "su DD statico". **C1 APERTA→PROPOSTA**: il 5,2% temuto E' SUCCESSO (03/08: 9 pos/8 sedie = 5,85%, p99 giorn. 5,67%) → cap `InpMaxOpenRiskPct=3,25%` (5 SL vivi), morde 5 gg/15 di agosto (l'accumulo swing), p50 2,60 non lo sente. **C2 assorbita da C1** (il vincolo giusto e' sugli SL VIVI, non sulle sedie accese). **C4 declassata a riserva** (il problema misurato e' il picco, non la somma astratta). **C3 aggiornata: IN FIRMA con Claudio adesso** — versione tre corsie (rischio subito per sedia / merito a 20 op per famiglia con spegnimento della sedia colpevole / tagliando 6 mesi), resta APERTA fino alla sua parola. **Nota nuova in area C sui gemelli orig+OTT** (stesso segnale stesso secondo = posizione doppia su una prop; un gemello per famiglia alla squadra prop). M1/M2 chiuse in COSA MANCA. Firma piu' urgente: **da C3 (gia' in corso) a C1**. → **34 parametri (3C · 18P · 12A · 1 chiuso)** | M1+M2 eseguite (commit `8da31c5`, `18d98cb`) |
 | 18/08/2026 mattina | **v5** | ✍️ **LE FIRME** (parola esatta di Claudio: "firma tutte e 3", verbale `report/FIRME_2026-08-18.md`, commit `45c4f42`): **CONGELATE B1** (pausa morbida 4,0 + emergenza 4,9; attuazione a gradini: emergenza+reset subito, pausa dopo lo sviluppo, collaudo sul 100k), **B2** (9,9), **B3** (reset 23 con caveat fuso [INCERTO]), **C1** (cap 3,25% = 5 SL vivi; enforcement in sviluppo — mql5-ea-developer — si testa sul 100k), **C2** (con C1: la frase firmata "il vincolo conta gli SL VIVI, non le sedie accese" e' il suo contenuto), **C3** (tre corsie + porta di rientro, modificata dalle due obiezioni di Claudio: merito per FAMIGLIA a 20 op con spegnimento della sedia colpevole; prerequisito = censimento dei contratti → **M11 nuova, assegnata e in corso**). **B6 declassata PROPOSTA→APERTA** (la firma ha scelto la soglia 4,0: il 2,5 resta idea di riserva, si riapre solo con una misura). NON firmate, restano in lista: E1 e F6 (F6 in attesa della due diligence 1-bis, come da verbale). Regola di ripensamento annotata: ogni firma si riapre solo con una misura nuova, per iscritto, mai a caldo. → **34 parametri (9C · 12P · 12A · 1 chiuso)** | le tre firme di Claudio (commit `45c4f42`) |
+| 18/08/2026 in giornata | **v6** | ✍️ **FIRMA 4** (Claudio in chat: "firmo a1 e a4" — letto come A2+A4 perche' A1 era gia' congelato dal 09/08, lettura confermata a lui in chat; verbale aggiornato): **CONGELATE A2** (sedie giovani <30 trade forward a 0,3%, mezzo peso — da prassi del dry-run a regola scritta per tutte) e **A4** (nessuna sedia sopra l'1% sul conto piccolo, mai — il censimento periodico e' la verifica, una riga rossa = violazione). In cima alla lista decisioni restano solo **E1** (data invio + domanda breakeven-lock nel file D3) e **F6** (dopo la due diligence 1-bis, in corso). → **34 parametri (11C · 10P · 12A · 1 chiuso)** | FIRMA 4 nel verbale (sezione aggiunta in giornata) |
