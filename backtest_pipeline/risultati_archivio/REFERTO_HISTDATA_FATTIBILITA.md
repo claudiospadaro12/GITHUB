@@ -408,3 +408,24 @@ di MT5**.
   Stoxx/FTSE/CAC · se il file dell'anno in corso esiste per gli indici.
 
 **Nessun parametro degli EA in forward cambia per questo referto.**
+
+---
+
+## 10. ✅ PASSO 1 ESEGUITO SUL PC (18/08, 20:40) — CANALE APERTO, COPERTURA PIENA
+
+Referto archiviato: `referto_histdata_2026-08-18_2042.txt` (versione HD-M1-v2,
+`ESITO: OK`). Controllo positivo eurusd 2019: OK. Copertura MISURATA:
+
+| simbolo | annuali 2019-2025 | mensili 2026 |
+|---|---|---|
+| grxeur (D30EUR) | TOKEN 7/7 | 1-7 con token |
+| nsxusd (NASUSD) | TOKEN 7/7 | 1-7 con token |
+| jpxjpy (225JPY) | TOKEN 7/7 | 1-7 con token |
+| spxusd (SPXUSD) | TOKEN 7/7 | 1-7 con token |
+
+**Zero VUOTA, zero 404, zero falliti.** Il canale automatico funziona dal PC
+(al contrario di Dukascopy, misurato strozzato). `<ANNO>` per il passo 3 = **2026**.
+Prossimo: passo 2 (validazione giorno campione a tre feed), poi passo 3.
+NOTA: la finestra 2019-2026 e' quella della corsa; il primo mese dichiarato da
+fonte terza resta 2010-11 — l'estensione indietro (2010-2018) si puo' chiedere
+con una seconda corsa `--da 2010 --a 2018` quando serve (stessa strada, stessi gate).

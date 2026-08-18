@@ -220,8 +220,8 @@ il blocco controlla le due righe `TICK` a mano.
   $h="2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b"
   $b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB"
   foreach($e in @('ABTG_Apertura_3Ingressi','ABTG_Nasdaq_Apertura_US','ABTG_DAX_Apertura_EU')){
-    $a=(irm "$b/lavoro/mql5/Experts/$e.mq5" -EA Stop)
-    $c=(irm "$b/$h/mql5/Experts/$e.mq5" -EA Stop)
+    $a=[string](irm "$b/lavoro/mql5/Experts/$e.mq5" -EA Stop)
+    $c=[string](irm "$b/$h/mql5/Experts/$e.mq5" -EA Stop)
     if($a -ne $c){ throw "L'EA $e su 'lavoro' NON e' quello del pin: qualcuno ha pushato. FERMATI e riallinea." }
     Write-Host ("    congelato e uguale al pin: " + $e) -ForegroundColor Green
   }

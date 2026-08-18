@@ -1,0 +1,52 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v2
+comando : --esplora --simboli grxeur,nsxusd,jpxjpy,spxusd --da 2019 --a 2026
+data: 2026-08-18 20:40 (ora del PC)
+cartella ZIP: C:\Users\Master\histdata_m1
+
+ESPLORAZIONE COPERTURA (pagina risponde? c'e' il token?)
+  legenda: TOKEN = file scaricabile | VUOTA = pagina senza
+           token (anno non pubblicato) | 404 = non esiste
+CONTROLLO POSITIVO: OK (eurusd 2019, token presente, 31541 byte di pagina)
+
+grxeur -> D30EUR  (primo mese dichiarato da fonte terza: 201011)
+  2019  annuale: TOKEN
+  2020  annuale: TOKEN
+  2021  annuale: TOKEN
+  2022  annuale: TOKEN
+  2023  annuale: TOKEN
+  2024  annuale: TOKEN
+  2025  annuale: TOKEN
+  2026  mensili con token: 1,2,3,4,5,6,7 | senza: -
+
+nsxusd -> NASUSD  (primo mese dichiarato da fonte terza: 201011)
+  2019  annuale: TOKEN
+  2020  annuale: TOKEN
+  2021  annuale: TOKEN
+  2022  annuale: TOKEN
+  2023  annuale: TOKEN
+  2024  annuale: TOKEN
+  2025  annuale: TOKEN
+  2026  mensili con token: 1,2,3,4,5,6,7 | senza: -
+
+jpxjpy -> 225JPY  (primo mese dichiarato da fonte terza: 201011)
+  2019  annuale: TOKEN
+  2020  annuale: TOKEN
+  2021  annuale: TOKEN
+  2022  annuale: TOKEN
+  2023  annuale: TOKEN
+  2024  annuale: TOKEN
+  2025  annuale: TOKEN
+  2026  mensili con token: 1,2,3,4,5,6,7 | senza: -
+
+spxusd -> SPXUSD  (primo mese dichiarato da fonte terza: 201011)
+  2019  annuale: TOKEN
+  2020  annuale: TOKEN
+  2021  annuale: TOKEN
+  2022  annuale: TOKEN
+  2023  annuale: TOKEN
+  2024  annuale: TOKEN
+  2025  annuale: TOKEN
+  2026  mensili con token: 1,2,3,4,5,6,7 | senza: -
+
+ESITO: OK
