@@ -253,6 +253,21 @@ qualunque valore si usi e' *nostro*, non del corso.
 **Implementazione diretta:** `rectHigh = Highest(High, 20)`,
 `rectLow = Lowest(Low, 20)`, su candele **chiuse**.
 
+### 4.1-bis 🔔 SuperTrend: "parametri classici" (aggiornamento 18/08 sera)
+
+Claudio: "per il SuperTrend dovrebbe essere con parametri classici".
+[RIFERITO da Claudio a memoria, NON ancora verificato sul video del modulo]
+- Il "classico" del SuperTrend nella quasi totalita' delle piattaforme
+  (TradingView default incluso) e' **ATR 10 / moltiplicatore 3.0** — che e'
+  ESATTAMENTE cio' che il nostro EA usava (ATRPeriod=10, ATRMultiplier=3.0).
+- SE confermato sul video: l'ipotesi C del referto (parametri SuperTrend
+  diversi) CADE, e il buco +133% vs -20.853 resta spiegabile solo da:
+  (1) il rischio 1% complessivo vs per-coppia (spiega i DD, non il PF),
+  (2) la divergenza d'ingresso (vincolo 20 candele / candela di rottura),
+  (3) i numeri del corso che non reggono.
+- Conferma definitiva: la trascrizione del modulo SuperTrend, o il pannello
+  dell'indicatore sul video. Fino ad allora resta [RIFERITO].
+
 ### 4.2 ⚠️ Ambiguita' n.1 — 15 o 20 candele?
 
 _Aggiornamento 18/08 sera: Claudio, ri-ascoltando il video 36, conferma di
