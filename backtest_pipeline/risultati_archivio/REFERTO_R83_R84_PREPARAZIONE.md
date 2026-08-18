@@ -672,3 +672,16 @@ IS 282,12/1,07810/197 | OOS 999,42/1,18776/311, e TUTTI i 311 trade OOS
 identici al netto del magic (diff). Due core diversi, stessi trade: il
 duello e' ad armi pari anche sul DAX. Nota: la config della sedia viva
 su questa finestra e' OOS-positiva (+999, PF 1,19, DD 10,6% a rischio 1%).
+
+## PASSO 6 — R84 COMPLETO (18/08, 22:24) — NOVE SU NOVE NEGATIVE IN OOS
+
+18 CSV / 0 mancanti, gemelli deterministici, CSV in r84_csv/.
+OOS (PF/n/DD%): A nudo 0,87/291/17,1 | B volumi 0,95/92/4,6 | C atr
+0,97/180/6,7 | D vol-or-atr 0,92/201/6,9 | E ema 0,68/202/15,7 |
+F supertrend 0,82/217/10,8 | G st3 0,74/169/13,0 | H corr 0,86/211/10,1 |
+I completo 0,79/69/8,9. IS positive su A/C/D/E/H/I (1,25-1,54).
+LETTURA (criteri congelati in R84_ABLAZIONE_CRITERI.md): nessun filtro
+porta l'OOS sopra PF 1; EMA peggiora il nudo; i filtri comprimono il DD
+tagliando trade. Il debito M16 e' CHIUSO: il metodo del corso sul Nasdaq
+apertura, misurato a tick reali, non regge — cella I sotto n=150, le
+altre no. Referto completo del round da scrivere a valle di R83.
