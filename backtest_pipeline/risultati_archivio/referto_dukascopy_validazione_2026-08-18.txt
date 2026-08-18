@@ -1,0 +1,12 @@
+=== DUKASCOPY -> M1: referto ===
+versione: DUKA-M1-v2
+comando : --validazione
+ESITO   : OK
+data: 2026-08-18 14:51 (ora del PC)  =  2026-08-18 12:51 UTC
+fuso timestamp: ora di New York (convenzione HistData, shift atteso +5)
+
+D30EUR: 1294 barre M1, dal 2025.06.15 20:00 al 2025.06.16 19:59 (fuso: ora di New York (convenzione HistData))
+  prezzo minimo 23400.56  massimo 23715.65
+  2025: 1294 barre
+  buchi intragiornalieri > 60 min: 1  (peggiore: 110 min dopo 2025.06.16 16:14)
+  scaricate 24 ore (0.3 MB .bi5), 0 dalla cache, 0 assenti (404), 0 errori
