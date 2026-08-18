@@ -50,5 +50,15 @@ numeri, il corso ha i racconti.
 - Slide "Piano Corso -> Bollinger -> Strategia Bande" + indicatore
   StdDev di Paolo (per Breaking Band)
 - Video/slide Easy Trend (12/14/15/16) e breakout JPY
-- Materiale "punte di Larry" · slide Point Break di Christian
+- Materiale "punte di Larry" · ~~slide Point Break di Christian~~
+  ✅ **ARRIVATE E ANALIZZATE il 18/08 sera** →
+  `backtest_pipeline/caccia_strategie/ANALISI_POINTBREAK_2026-08-18.md`
+  (6 documenti: piano di trading, correlazioni, gestione operazioni negative,
+  esercizi impulsività, deck di lancio ABTG, 2 PPTX gold/petrolio).
+  **Il censimento aveva ragione su entrambi i punti previsti**: "BB 37/1.4"
+  confermato testualmente, e i pattern sono davvero "a occhio" (9 figure, zero
+  definizioni numeriche) → **Point Break NON è testabile come strategia**.
+  In compenso ne escono **due componenti misurabili che non abbiamo**:
+  pavimento di volatilità sullo SL `max(swing±10-15pip, ADR(50)+10-15pip)` e
+  filtro "EMA200 distante ≥100 pip dall'ingresso".
 - Regole della Breaking Band di Leonardo (dal gruppo)
