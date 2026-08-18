@@ -182,3 +182,30 @@ scan "1,5 batte 1:1" vale in media, non simbolo per simbolo.
 (`prove/R48a-d_ez_*.txt`), detector pinnato, si spazzolano solo TP e lati.
 I 5 simboli restanti dello scan (CADJPY, USDCHF, XAUUSD, USDJPY, EURUSD)
 restano in coda al tick: non servono per il verdetto della famiglia.
+
+---
+
+## 🔗 AGGIORNAMENTO 18/08/2026 — LA SPEC DEL CORSO E LA VERIFICA DI FEDELTA'
+
+Le stesse 7 trascrizioni sono state **rilette riga per riga** col protocollo
+usato per il Breakout (spec chiusa PRIMA di aprire il codice). Due file nuovi,
+che **non sostituiscono questa tesi**: la completano e la mettono alla prova.
+
+- 📐 **`backtest_pipeline/prove/EASYTREND_CORSO_SPEC.md`** — cosa INSEGNA il
+  corso, regola per regola, con citazione: **21 certe / 6 ambigue / 12 buchi**
+  → meccanizzabilita' **78%** (93% con le ambiguita' risolte per argomento).
+- 🔬 **`backtest_pipeline/caccia_strategie/ANALISI_CORSO_EASYTREND_2026-08-18.md`**
+  — fedelta' di `ABTG_EasyTrend.mq5`: **17/20**, con la riga di codice per ogni
+  divergenza, piu' l'incrocio coi 3 contratti delle sedie vive.
+
+**Cosa la rilettura AGGIUNGE a questa tesi (non ripetuto qui, sta nei due file):**
+1. il relatore e' **Leonardo Fasciano**, e Breakout ha un'**altra autrice**:
+   i due moduli si contraddicono su ordini pendenti e filtro orario → **non
+   esiste un "default del corso"** con cui riempire i buchi;
+2. i numeri della lez. 17 sono **internamente coerenti** (70% WR + 140 op + 2%
+   composto = +205% ≈ il +198% dichiarato: sono UN numero, non quattro) —
+   **tranne** il "75-80%/anno", che composto fa **+54,8%**;
+3. l'esempio short della lez. 16 **calcola la size su 15 pip con uno stop da
+   16**: rischio reale **2,13%**, non 2%;
+4. il **win rate implicito** dei nostri tre contratti e' **45,5-57,8%** contro
+   il 70% dichiarato — ed e' il motivo per cui in campo il TP e' 1,5 e non 1:1.
