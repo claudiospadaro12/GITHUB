@@ -173,3 +173,19 @@ entrambi — c'e' il commento di avviso in tutti e due i file.
    misura M2. Se si passa a 1, va rimisurata la soglia.
 5. **Censimento dei contratti** (prerequisito della FIRMA 2): non c'entra col
    Guardian, ma senza quello la C3 resta inchiostro.
+
+---
+
+## DEPLOYMENT (18/08, in giornata)
+
+- Installazione sul VPS con `installa_guardian.ps1` (hash `4bf741b`), riga
+  verificata dal verificatore-stringhe (FAIL con correzioni applicate:
+  referto sul Desktop, guardia sull'exit code, backup con guardia).
+- **Trovati DUE Guardian su due grafici del 100k** — rimosso il doppione,
+  lasciato UNO col preset nuovo (limite 4,9%). Regola nata sul campo:
+  **UN Guardian per conto, sempre** (le GlobalVariable sono per-conto:
+  due istanze si sovrascrivono a vicenda, e in emergenza chiuderebbero
+  le stesse posizioni in doppio).
+- In attesa di conferma visiva che giri la v1.10 (righe "Pausa morbida"
+  e "Rischio aperto/cap" sul pannello = codice nuovo compilato, non solo
+  preset nuovo su codice vecchio).
