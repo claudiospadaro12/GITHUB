@@ -235,6 +235,37 @@ precedente**) ripetono il valore **altre TRE volte**, PDF riepilogativo incluso:
 > ✅ **Il "fonte singola" del §3.2 non vale piu': quattro occorrenze su due
 > moduli.** Dettaglio in `caccia_strategie/ANALISI_CORSO_MEDIAZIONE_2026-08-18.md`
 > §1.8 · spec: `prove/MEDIAZIONE_CORSO_SPEC.md` §3.1.
+
+### 3.2-ter 🔒 18/08 sera — IL MODULO BASE CHIUDE IL NODO: **QUINTA occorrenza, e la PRIMA da un coach DIVERSO**
+
+⚠️ **Le quattro occorrenze del §3.2-bis sono tutte della STESSA relatrice
+(Manuela Negro): come convergenza valgono UNA fonte, non quattro.** Questa e'
+la prima indipendente — **Leonardo Fasciano**, capitolo indicatori del modulo
+base, cioe' proprio il "modulo precedente" a cui la lez. 35 rimanda (§3.3).
+
+`[TRASCRITTO chiaro, lez. 13 modulo base "WILLIAM PERCENT RANGE, CCI E RSI",
+integrale]`
+> _"Insert, Indicator, andiamo su Oscillatori e inseriamo il Williams Percent
+> Range. In questo caso **ti consiglio di settarlo a 140 periodi, quindi dove
+> troverai la voce Period modifica e scrivi 140**, che sara' **funzionale per la
+> strategia che imparerai nel corso del Master**. ... **140 periodi e' sicuramente
+> un valore molto alto per questo tipo di indicatore**, pero', come ti dicevo
+> all'inizio, ogni indicatore ha il suo particolare settaggio sulla base della
+> strategia che andrai ad analizzare."_
+
+> ✅ **QUESTA CITAZIONE UCCIDE L'IPOTESI "storpiatura speech-to-text 14→140" in
+> TRE modi indipendenti dentro la stessa frase:**
+> 1. e' **un'istruzione di digitazione** (_"scrivi 140"_), non un numero letto
+>    di sfuggita;
+> 2. il relatore **commenta il valore come anomalo** (_"un valore molto alto per
+>    questo tipo di indicatore"_) — uno speech-to-text che sbaglia un numero non
+>    produce anche un commento coerente sull'anomalia di quel numero;
+> 3. **dichiara lo scopo**: _"funzionale per la strategia che imparerai nel
+>    corso del Master"_.
+>
+> 🔴 **Il buco n.2 dell'elenco §11 ("periodo del Williams: nessuna slide lo
+> scrive, il 140 resta appeso a una sola frase") E' CHIUSO.**
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.2.
 > ➕ Lo stesso modulo conferma le soglie **−20 / −80 / −50** con **valori letti
 > ad alta voce** (−78,46 · −22,93 · −49): il §3.1 qui sopra smette di essere
 > pura inferenza.
@@ -261,6 +292,32 @@ qualunque valore si usi e' *nostro*, non del corso.
 > (lezioni < 26).** Il buco resta, **ma ora ha un indirizzo.**
 > ➡️ Vedi `caccia_strategie/ANALISI_CORSO_MEDIAZIONE_2026-08-18.md` §1.12 n.1.
 
+> 🔴🔴 **18/08 sera — LA CATENA E' STATA PERCORSA FINO IN FONDO. TERMINA A VUOTO.**
+>
+> **Il modulo di Leonardo E' STATO TROVATO ed E' STATO LETTO:** e' il **capitolo
+> indicatori del modulo base "Piattaforma", lezioni 8-14**.
+> `[T]` lez. 8 modulo base: _"**Sono Leonardo Fasciano**, coach in area trading in
+> Alfio Bardolla Training Group e in questo capitolo andremo insieme a
+> comprendere come il prezzo si muove nei grafici ... **Ogni strategia utilizzera'
+> determinati indicatori**"_ · `[T]` lez. 7: _"nel prossimo capitolo conoscerai un
+> nuovo coach che si chiama **Leonardo Fasciano** ... che poi saranno funzionali
+> per l'applicazione delle strategie"_.
+>
+> **E in quel capitolo il SuperTrend viene applicato COI DEFAULT, senza che un
+> solo parametro venga pronunciato** (citazione integrale in §4.1-bis).
+>
+> ⛔ **CONSEGUENZA: il buco n.1 NON E' UN BUCO DI COPERTURA — E' UN BUCO DEL
+> CORSO.** Non esiste una lezione mancante da chiedere: **non c'e' nessun punto
+> del corso in cui quei due numeri vengano detti.** L'unica strada rimasta e' il
+> file `.ex4` allegato alla lezione (§4.1-bis, richiesta n.1).
+>
+> ⚠️ **Correzione di scala all'inferenza qui sopra:** _"modulo di Leonardo
+> (lezioni < 26)"_ puntava alla cosa giusta con la **numerazione sbagliata**. I
+> moduli base hanno una numerazione **propria** (1-21 e 1-20) che non si allaccia
+> alla serie 12-40 delle strategie: il modulo di Leonardo **sta a monte**, non
+> dentro quella serie.
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.1 e §6.
+
 ---
 
 ## 4. 📦 IL RETTANGOLO DI CONGESTIONE
@@ -273,7 +330,7 @@ qualunque valore si usi e' *nostro*, non del corso.
 | R2 | Ampiezza: **20 candele M15** | `[T]` lez. 40: _"Il rettangolo deve contenere 20 candele, 20 candele sul time frame a 15 minuti"_ |
 | R3 | Ancoraggio iniziale: **la candela in cui il Williams entra in zona** | `[T]` lez. 40: _"iniziamo a costruirlo proprio dal primo ingresso del Williams nell'area di scarico"_ |
 | R4 | Il rettangolo **trasla** in avanti abbracciando sempre le ultime 20 candele | `[T]` lez. 38: _"man mano che si sposta in avanti viene avanzato il nostro canale, fino a che non contiene sempre ... queste famose 20 candele"_ |
-| R5 | Livelli = **massimo assoluto** e **minimo assoluto** delle 20 candele (estremi di wick, non di corpo) | `[T]` lez. 36: _"questo e' il livello piu' basso toccato dalle candele e questo e' il livello piu' alto toccato dalle candele"_ |
+| R5 | Livelli = **massimo assoluto** e **minimo assoluto** delle 20 candele (estremi di wick, non di corpo) | `[T]` lez. 36: _"questo e' il livello piu' basso toccato dalle candele e questo e' il livello piu' alto toccato dalle candele"_ · 🆕 **confermato dalla convenzione generale del corso** `[T]` lez. 5 modulo base: _"nelle strategie noi prenderemo anche molto come riferimento **le ombre delle candele giapponesi, cioe' il massimo e il minimo**, perche' saranno dei riferimenti importanti"_ — **fonte indipendente, coach diverso** |
 | R6 | I livelli si **riaggiornano** ad ogni traslazione | `[T]` lez. 40 |
 
 **Implementazione diretta:** `rectHigh = Highest(High, 20)`,
@@ -297,6 +354,41 @@ Claudio: "per il SuperTrend dovrebbe essere con parametri classici".
   dichiarata. L'ipotesi C del referto e' definitivamente chiusa: non
   esiste un parametro del corso da cui divergere, e il nostro backtest
   usava l'unico default ragionevole.
+
+> 🔒 **SIGILLO DEL 18/08 sera — LA FONTE PRIMARIA CONFERMA, PAROLA PER PAROLA.**
+> Non e' piu' un "riferito a memoria": il **modulo base** e' stato trascritto e
+> letto, e la lezione che installa il SuperTrend dice esattamente questo.
+>
+> `[TRASCRITTO chiaro, lez. 10 modulo base "COS'E' IL SUPERTRAND", integrale]`
+> > _"L'indicatore super trend ha degli input, cioe' ha dei **parametri
+> > modificabili**, che anche in questo caso, ti ricordo, sono **parametri che
+> > andrai a settare sulla base della strategia che andrai ad applicare**.
+> > **Facciamo ok senza fare nessuna variazione**, quindi semplicemente
+> > applicando l'indicatore, e quello che vedremo, eccolo qui, sara' una linea
+> > verde o una linea rossa"_
+>
+> ✅ **L'ipotesi C e' CHIUSA dalla fonte, non piu' per decisione.** Il modulo
+> che doveva dettare i parametri **dichiara di non dettarli** e rimanda alla
+> strategia; la strategia rimanda al modulo. **Rimando circolare, mai chiuso
+> in nessun punto del corso.**
+>
+> 🥇 **MA C'E' UNA VIA D'USCITA NUOVA, ED E' A COSTO ZERO.**
+> `[TRASCRITTO chiaro, stessa lezione]`
+> > _"ti faro' vedere come inserire l'indicatore super trend ... questo
+> > indicatore che ti ricordo **troverai sotto questo video in un formato
+> > scaricabile** ... Una volta che avrai scaricato questo piccolo file che si
+> > chiama super trend ... **Il formato .ex4** ... andiamo nella cartella mql4
+> > ... nella sezione indicatori"_
+>
+> **Il SuperTrend del corso e' un `.ex4` SPECIFICO, allegato alla lezione, e il
+> coach lo applica premendo OK senza toccare nulla: i DEFAULT DI QUEL FILE
+> *SONO* i parametri del corso.**
+> ➡️ **RICHIESTA N.1 A CLAUDIO:** scaricare `super trend.ex4` dall'area corso
+> (sotto la lez. 10 del modulo Piattaforma), trascinarlo su un grafico e
+> **fotografare la finestra input**. Tre click. Se sono ATR 10 / mult 3,0
+> l'assunzione diventa un **dato**; se sono altro, **ogni backtest Breakout
+> va rifatto**.
+> ➡️ Dettaglio: `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.1.
 
 ### 4.2 ⚠️ Ambiguita' n.1 — 15 o 20 candele?
 
@@ -491,15 +583,62 @@ massimo congestione `155,95` → SL `155,96` (1 pip sopra) · chiusura segnale
 > regressione **sullo STOP** (155,96, che coincide al centesimo); sul
 > target misura una **discrepanza del corso**, non dell'EA.
 
+> ✅ **18/08 sera — IL MODULO BASE DA' RAGIONE ALL'EA: nel corso NON esiste
+> nessuna convenzione di arrotondamento.**
+> Le lez. 18-21 del modulo base sono **quattro esempi numerici completi** col
+> foglio Excel, e la convenzione e' dettata due volte:
+> `[T]` lez. 18: _"prendiamo il valore di ingresso iniziale ... facciamo **meno
+> 0,0020, quindi sono 20 pips** ... **Il 7 lo riportiamo esattamente cosi' com'e'
+> perche' rappresenta i punti, non ci interessano**"_ ·
+> `[T]` lez. 21: _"**la terza cifra dopo la virgola e' il punto e quindi ti
+> consiglio di ignorarla** ... **lasciamolo pure cosi' com'e'**"_
+>
+> | lez. | cross | ingresso | SL (∓20 pip) | TP (±40 pip) | ✓ |
+> |---|---|---|---|---|---|
+> | 18 | EURUSD buy | 1,07857 | 1,07657 | 1,08257 | ✅ |
+> | 19 | EURJPY buy | 165,90 | 165,70 | 166,30 | ✅ |
+> | 20 | EURUSD sell | 1,07816 | 1,08016 | 1,07416 | ✅ |
+> | 21 | EURJPY sell | 165,92 | 166,12 | 165,52 | ✅ |
+>
+> **`SL = ingresso ∓ N pip` ESATTO, con la cifra del punto riportata invariata.
+> Nessun arrotondamento, in nessuno dei quattro esempi.** E comunque **39 pip e'
+> gia' un valore intero**: non c'e' nemmeno una questione di sub-pip da
+> arrotondare. **Il 40 della lez. 37 e' un errore aritmetico individuale della
+> relatrice, non una convenzione del corso.**
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.6.
+
 Utile come test-case di regressione per un EA. (Nella stessa lezione dice anche _"ci sono 41 pip di
 distanza"_ riferito al **suo** prezzo di ingresso reale, diverso dai 40 teorici:
 non e' un errore, e' la distinzione entrata reale/entrata teorica.)
 
-### 6.3 Il **pip** su JPY `[BUCO]`
+### 6.3 Il **pip** su JPY ✅ **CHIUSO il 18/08 sera dal modulo base**
 
-Mai definito. Dall'esempio (155,95 → 155,96 = "1 pip") si ricava `1 pip = 0,01`
-su USDJPY. `[I]` da aritmetica dell'esempio. Ovvio per un umano, **non** per un
-EA su broker a 3 decimali: va imposto esplicitamente.
+~~Mai definito.~~ Dall'esempio (155,95 → 155,96 = "1 pip") si ricava
+`1 pip = 0,01` su USDJPY. `[I]` da aritmetica dell'esempio.
+
+> ✅ **NON E' PIU' UN'INFERENZA: il modulo base lo DETTA, e lo detta QUATTRO
+> VOLTE.** Il buco n.10 dell'elenco §11 e' chiuso.
+>
+> `[TRASCRITTO chiaro, lez. 6 modulo base "IL PIP ED IL PUNTO"]`
+> > _"in tutti i tassi di cambio in cui non c'e' lo yen, **il punto e' la quinta,
+> > ... la quarta e' il pip** ... Nei tassi di cambio invece in cui e' presente lo
+> > yen ... **qui abbiamo solo tre cifre decimali** ... quella scritta in piccolino
+> > e' il punto, questa invece e' il pip ... **l'ultima e' il punto, la penultima
+> > e' il pip** ... ricordati che **dieci punti equivalgono a un pip**"_
+>
+> E la **convenzione di linguaggio di tutto il corso**, dettata nella stessa
+> lezione: _"**io e gli altri coach ci riferiremo al grafico parlando di pip**,
+> ma ripeto, **la piattaforma ragiona in punti**"_.
+>
+> **Le altre tre conferme:** lez. 11 (ATR su AUDJPY: _"soltanto le prime due
+> cifre dopo la virgola ... **0,16, ovvero 16 pips**"_) · lez. 19 (esempio BUY
+> EURJPY: 165,90 −20 pip = 165,70 ✅ · +40 pip = 166,30 ✅) · lez. 21 (esempio
+> SELL EURJPY: 165,92 +20 = 166,12 ✅ · −40 = 165,52 ✅).
+>
+> **PER L'EA, senza ambiguita': 1 pip su JPY = 0,010 = 10 punti su broker a 3
+> decimali.** Lo "1 pip oltre il rettangolo" della regola dello stop = **10
+> punti**.
+> ➡️ `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md` §2.3.
 
 ### 6.4 Ingressi ritardati — la soglia 1:2 `[T]` lez. 37 e 40
 
@@ -874,12 +1013,24 @@ Restano:
 🚫 **Non piu' in elenco:** la gestione "Williams all'estremo opposto" (§7.4).
 **Non e' nel PDF** → non e' una regola della strategia (§0.5).
 
-### 🕳️ 11 BUCHI (erano 13)
-1. 🔴 **Parametri SuperTrend (ATR + moltiplicatore) — BLOCCANTE.**
-   🆕 **E ora sappiamo che il PDF NON li contiene:** possono venire solo dal
-   modulo precedente.
-2. 🔴 **Periodo del Williams %R** — nessuna slide lo scrive: il "140" resta
-   appeso a una sola frase del parlato (§3.2).
+### 🕳️ 9 BUCHI (erano 13, poi 11)
+
+> 🆕 **AGGIORNAMENTO 18/08 sera dopo i MODULI BASE (41 lezioni lette):**
+> **−2 buchi** (n.2 Williams e n.10 pip JPY: **chiusi dalla fonte**), e il n.1
+> **cambia natura**: non e' piu' "manca un modulo", e' **"il corso non lo dice,
+> in nessun punto"**. Referto:
+> `caccia_strategie/ANALISI_MODULI_BASE_2026-08-18.md`.
+
+1. 🔴 **Parametri SuperTrend (ATR + moltiplicatore) — BLOCCANTE, e ora sappiamo
+   PERCHE'.** ~~Possono venire solo dal modulo precedente.~~
+   **Il modulo precedente e' stato trovato e letto (lez. 8-14 del modulo base,
+   Leonardo Fasciano) e ANCHE LI' il SuperTrend si applica coi default**
+   (§3.3, §4.1-bis). **Non e' un buco di copertura: e' un buco del corso.**
+   ➡️ Unica strada rimasta: **i default del file `super trend.ex4` allegato alla
+   lezione 10** — tre click, §4.1-bis.
+2. ✅ ~~**Periodo del Williams %R**~~ — **CHIUSO** (§3.2-ter): lez. 13 del modulo
+   base, coach diverso, forma imperativa (_"scrivi 140"_) e commento
+   sull'anomalia del valore. **Cinque occorrenze, due fonti indipendenti.**
 3. Massimo di posizioni contemporanee sui 7 cross *(parzialmente illuminato da
    "rischio complessivo 1%", ma non risolto)*
 4. Correlazione fra i 7 cross JPY: **mai menzionata, nemmeno nelle slide**
@@ -888,9 +1039,23 @@ Restano:
 7. Cap di perdita giornaliera
 8. Cosa fare se arriva un nuovo segnale con posizione gia' aperta sullo stesso cross
 9. Scadenza del setup se il Williams esce dalla zona senza rottura
-10. Definizione di pip su JPY
+10. ✅ ~~Definizione di pip su JPY~~ — **CHIUSO** (§6.3): **1 pip = 0,010 =
+    10 punti**, dettato quattro volte nel modulo base
 11. Gap/slippage oltre lo stop + N. operazioni, win rate, broker, date del
     backtest dichiarato *(la lez. 39 non ha slide fra quelle ricevute)*
+
+> 🔎 **E i buchi 3-9 sono stati CERCATI in 41 lezioni di moduli base e NON
+> CI SONO — il che li promuove da "non trovati" a "assenti per struttura".**
+> In tutto il corpus base **la parola "correlazione" non compare mai**, non
+> esiste un cap giornaliero, non esiste un tetto di posizioni simultanee, e il
+> **filtro news non e' solo assente: e' SCONSIGLIATO** (`[T]` an.tec. lez. 3:
+> _"noi dimentichiamo completamente le notizie macroeconomiche ... a volte non
+> conoscere niente ... e' meglio perche' puo' confondere"_). Lo spread e'
+> spiegato e **dichiarato ininfluente** (`[T]` lez. 16: _"sara' assolutamente
+> ininfluente"_).
+> 🏛️ **Traduzione per la prop: tutto cio' che nel nostro impianto e' Guardian,
+> cap C1, filtro news e cap giornaliero e' NOSTRO al 100%, e va scritto accanto
+> a qualunque numero di qualunque backtest "del corso".**
 
 ✅ **Chiusi dalle slide:** il PDF non e' piu' un buco (ce l'abbiamo) · le soglie
 operative del Williams sono ora **scritte** (−20/−50 e −80/−50).
