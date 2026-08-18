@@ -256,35 +256,116 @@ finestra con spostamenti · 8. allarme banda di prezzo.
 
 ---
 
-## 7. ▶️ LE RIGHE DI LANCIO (bozza — passano dal verificatore)
+## 7. ▶️ LE RIGHE DI LANCIO
 
-**Passo 1 — autotest + esplorazione della copertura (2 minuti, poche richieste):**
-```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile "$env:USERPROFILE\histdata_m1.py"
-python "$env:USERPROFILE\histdata_m1.py" --autotest
-python "$env:USERPROFILE\histdata_m1.py" --esplora --simboli grxeur,nsxusd,jpxjpy,spxusd --da 2019 --a 2026
-```
-👉 **Questa riga risponde alla domanda che nessuna fonte sa: fin dove arrivano
-davvero gli indici.** Il referto e lo zip finiscono sul Desktop da soli.
+> 🔴 **BOZZA BOCCIATA DAL VERIFICATORE (18/08, FAIL).** Le tre righe della prima
+> stesura avevano 9 difetti — fra cui **nessun gate** (`irm` senza `-EA Stop`,
+> `python` senza `$LASTEXITCODE`), **nessun TLS12**, **`python` secco** che su
+> Windows può risolvere allo stub del Microsoft Store, e soprattutto: **erano
+> righe SEPARATE**, e un blocco multi-riga incollato in console non è un
+> programma — se la prima muore, la seconda parte lo stesso.
+> Sotto ci sono le righe **CORRETTE**. Valgono a partire dal marcatore
+> **`HD-M1-v2`** (lo script v1 ha 16 difetti, vedi verbale del verificatore).
 
-**Passo 2 — validazione sul giorno campione (il confronto a tre feed):**
-```powershell
-irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile "$env:USERPROFILE\histdata_m1.py"
-python "$env:USERPROFILE\histdata_m1.py" --validazione
-```
-Attesi nel referto: `min 23400.56 / max 23715.65` su una delle tre finestre
-(quella a spostamento 0, se il fuso è quello che pensiamo) e il **VERDETTO
-FUSO: il feed SEGUE il DST**.
+**Come si incollano:** ogni passo è **UN SOLO blocco `& { ... }`**, graffe
+comprese. Si incolla tutto insieme: così un `throw` a metà **ferma davvero**
+quello che viene dopo.
 
-**Passo 3 — solo DOPO la promozione del passo 2 (la corsa vera, minuti non giorni):**
+### Passo 1 — autotest + esplorazione della copertura (~2 min) → **POI CI SI FERMA**
 ```powershell
-python "$env:USERPROFILE\histdata_m1.py" --scarica --converti --simboli grxeur,nsxusd,jpxjpy,spxusd --da 2019 --a 2026
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  $py=(Get-Command python.exe -EA SilentlyContinue | Where-Object { $_.Source -notlike "*\WindowsApps\*" } | Select-Object -First 1).Source
+  if(-not $py){ $py=(Get-Command py.exe -EA SilentlyContinue | Select-Object -First 1).Source }
+  if(-not $py){ throw "PYTHON ASSENTE: installalo da python.org con 'Add python.exe to PATH'" }
+  $global:LASTEXITCODE=0; & $py -c "import sys; sys.exit(0 if sys.version_info>=(3,8) else 1)"
+  if($LASTEXITCODE -ne 0){ throw "PYTHON NON FUNZIONANTE: $py" }
+  $p="$env:USERPROFILE\histdata_m1.py"
+  $dsk=Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1'
+  Remove-Item $p -Recurse -Force -EA SilentlyContinue
+  Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
+  Remove-Item (Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1.zip') -Force -EA SilentlyContinue
+  Remove-Item "$env:USERPROFILE\histdata_m1\referto_histdata_*.txt" -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v2' -Quiet)){ throw "SCRIPT VECCHIO (cache GitHub ~5 min): aspetta 5 minuti e rilancia" }
+  Set-Location $env:USERPROFILE
+  $global:LASTEXITCODE=0; & $py $p --autotest
+  if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
+  $global:LASTEXITCODE=0; & $py $p --esplora --simboli grxeur,nsxusd,jpxjpy,spxusd --da 2019 --a 2026
+  if($LASTEXITCODE -ne 0){ throw "ESPLORAZIONE FALLITA: canale HistData nullo da questo PC -> STRADA MANUALE (i link stanno nel referto)" }
+  Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+  Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:' | ForEach-Object { $_.Line }
+  Write-Host "PASSO 1 OK -- manda il referto in chat e FERMATI QUI."
+}
 ```
-Se il POST automatico non passa, **la stessa riga stampa i link da aprire nel
-browser**; si salvano gli ZIP in `%USERPROFILE%\histdata_m1` e poi:
+👉 **Risponde alla domanda che nessuna fonte sa: fin dove arrivano davvero gli
+indici.** 🛑 **Stop obbligatorio**: il passo 3 ha bisogno dell'anno finale
+MISURATO qui, non ipotizzato.
+
+### Passo 2 — validazione sul giorno campione (confronto a tre feed)
 ```powershell
-python "$env:USERPROFILE\histdata_m1.py" --converti --simboli grxeur,nsxusd,jpxjpy,spxusd
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  $py=(Get-Command python.exe -EA SilentlyContinue | Where-Object { $_.Source -notlike "*\WindowsApps\*" } | Select-Object -First 1).Source
+  if(-not $py){ $py=(Get-Command py.exe -EA SilentlyContinue | Select-Object -First 1).Source }
+  if(-not $py){ throw "PYTHON ASSENTE" }
+  $p="$env:USERPROFILE\histdata_m1.py"
+  $dsk=Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1'
+  Remove-Item $p -Force -EA SilentlyContinue
+  Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v2' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
+  Set-Location $env:USERPROFILE
+  $global:LASTEXITCODE=0; & $py $p --validazione
+  if($LASTEXITCODE -ne 0){ throw "VALIDAZIONE FALLITA: leggi il referto, NON si passa al passo 3" }
+  Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+  Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|VERDETTO FUSO|spostamento' | ForEach-Object { $_.Line }
+}
 ```
+Attesi nel referto: `min 23400.56 / max 23715.65` su **una** delle tre finestre
+(spostamento `0` se il fuso è quello che pensiamo) e **VERDETTO FUSO: il feed
+SEGUE il DST**. Se esce `EST FISSO` → **ci si ferma** (e adesso lo script esce
+anche con codice ≠ 0, non solo scrivendolo nel referto).
+
+### Passo 3 — la corsa vera (minuti, non giorni), solo DOPO il passo 2
+⚠️ `<ANNO>` = **l'ultimo anno che il passo 1 ha visto con `TOKEN`**. Non si
+ipotizza: si copia dal referto del passo 1.
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  $anno=<ANNO>
+  $py=(Get-Command python.exe -EA SilentlyContinue | Where-Object { $_.Source -notlike "*\WindowsApps\*" } | Select-Object -First 1).Source
+  if(-not $py){ $py=(Get-Command py.exe -EA SilentlyContinue | Select-Object -First 1).Source }
+  if(-not $py){ throw "PYTHON ASSENTE" }
+  $p="$env:USERPROFILE\histdata_m1.py"
+  $dsk=Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1'
+  Remove-Item $p -Force -EA SilentlyContinue
+  Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v2' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
+  Set-Location $env:USERPROFILE
+  $global:LASTEXITCODE=0; & $py $p --scarica --converti --simboli grxeur,nsxusd,jpxjpy,spxusd --da 2019 --a $anno
+  if($LASTEXITCODE -ne 0){ throw "CORSA FALLITA o INCOMPLETA: leggi il referto (sezione FALLITI) e usa la strada manuale per quei periodi" }
+  Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+  Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|ESITO:|CSV scritto|ALLARME|VERDETTO FUSO' | ForEach-Object { $_.Line }
+}
+```
+Se il POST automatico non passa, **lo stesso referto stampa i link da aprire nel
+browser**: si salvano gli ZIP in `%USERPROFILE%\histdata_m1` (il nome non conta)
+e si rilancia lo stesso blocco togliendo `--scarica`.
+
+### 📨 Istruzioni d'accompagnamento (da dire a Claudio, sempre)
+- **Cosa mandare in chat:** il file `histdata_m1.zip` sul Desktop, **oppure** le
+  righe che la console ha stampato in fondo (`data:`, `ESITO:`, `CSV scritto`).
+- **Quale data leggere:** la riga `data:` del referto **deve essere di ADESSO**
+  (ora del PC, non del server). Se è vecchia, il blocco è morto prima e stai
+  guardando la foto di ieri.
+- **Cosa NON cancellare:** la cartella della cache **Dukascopy** con i 25 giorni
+  già scaricati — è il **secondo feed** del confronto del §5. E non si cancellano
+  gli ZIP di `%USERPROFILE%\histdata_m1`: sono la cache che rende ripetibile la
+  corsa senza ribussare a HistData.
+- **MT5:** questi tre passi **non lo toccano** (nessuna scrittura in
+  `MetaQuotes\Terminal`). MT5 entra in gioco solo al passo 4.
 
 **Passo 4 — l'ultimo miglio, IDENTICO alla strada Dukascopy** (§6 del referto
 Dukascopy): CSV in `MQL5\Files`, `ABTG_ImportaStoricoEsterno` con
