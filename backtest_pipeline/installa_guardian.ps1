@@ -48,6 +48,7 @@ $dirs = Get-ChildItem $root -Directory -ErrorAction SilentlyContinue |
 if(-not $dirs){ Write-Host "Nessuna cartella dati MT5 trovata." -ForegroundColor Red; exit 1 }
 
 $copiati = 0
+$falliti = 0
 foreach($d in $dirs){
   Write-Host ""
   Write-Host ("=== " + $d.Name) -ForegroundColor Cyan
@@ -55,14 +56,23 @@ foreach($d in $dirs){
     $destDir = Join-Path $d.FullName $f.Sotto
     if(-not (Test-Path -LiteralPath $destDir)){ New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
     $dest = Join-Path $destDir $f.Nome
-    if(Test-Path -LiteralPath $dest){ Copy-Item -LiteralPath $dest ($dest + ".prima_v110") -Force }
-    Copy-Item -LiteralPath (Join-Path $tmp $f.Nome) $dest -Force
-    Write-Host ("  installato: " + $f.Sotto + "\" + $f.Nome) -ForegroundColor Green
-    $copiati++
+    try{
+      # backup SOLO la prima volta: al secondo lancio il .prima_v110
+      # conterrebbe gia' la v1.10 e il rollback morirebbe in silenzio
+      $bak = $dest + ".prima_v110"
+      if((Test-Path -LiteralPath $dest) -and -not (Test-Path -LiteralPath $bak)){ Copy-Item -LiteralPath $dest $bak -Force }
+      Copy-Item -LiteralPath (Join-Path $tmp $f.Nome) $dest -Force
+      Write-Host ("  installato: " + $f.Sotto + "\" + $f.Nome) -ForegroundColor Green
+      $copiati++
+    } catch {
+      Write-Host ("  FALLITO: " + $f.Sotto + "\" + $f.Nome + " -> " + $_.Exception.Message) -ForegroundColor Red
+      $falliti++
+    }
   }
 }
 
 Write-Host ""
 Write-Host ("File installati: " + $copiati + " (backup .prima_v110 accanto agli originali)") -ForegroundColor White
+if($falliti -gt 0){ Write-Host ("File FALLITI: " + $falliti) -ForegroundColor Red; exit 1 }
 Write-Host "ADESSO: apri MetaEditor (F4 da MT5), apri ABTG_Guardian.mq5 e premi F7." -ForegroundColor Yellow
 Write-Host "Se la compilazione da' errori, manda in chat la riga esatta dell'errore." -ForegroundColor Yellow
