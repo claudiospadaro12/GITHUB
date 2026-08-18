@@ -8,7 +8,7 @@ corsa e la riga di lancio proposta._
 **Ordine di Claudio, parola esatta:** _"fai fare agli agenti le analisi per avere
 magari solo 1 vincitore tra tutti i cross jpy"_.
 
-**Commit di riferimento: `2478ec5d04238c694bddc1ffba8abb430f7b4fc5`** (branch `lavoro`).
+**Commit di riferimento: `d63ca2d000034cafbc5ba855f313a07675761629`** (branch `lavoro`).
 
 ---
 
@@ -179,14 +179,14 @@ rotto). **Curve-fitting: zero per costruzione.**
 🛑 **Queste righe NON vanno ancora mandate a Claudio.** Passano prima dal
 controllo stringhe (`backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`).
 
-**Hash a cui sono pinnate:** `2478ec5d04238c694bddc1ffba8abb430f7b4fc5`
+**Hash a cui sono pinnate:** `d63ca2d000034cafbc5ba855f313a07675761629`
 **SHA256 di `lancia_r82.ps1`:** `f8b8d583a7a893e5bda01a7b96dbcb94d71168f7fd5c06a282e3b1884b7ca6d1`
-**SHA256 di `ABTG_BreakoutCorso.mq5`:** `a5b84d4a4d4b1be9547c0ce8cd0566fc42df0d89a4b3db93158f841c46e9d392`
+**SHA256 di `ABTG_BreakoutCorso.mq5`:** `8ab269c048e9965c55c2f23dbed4f0798955fdd0d5d4f7c957f6a2a832ffeac3`
 
 ### PASSO 0 — lo storico (PRIMA di tutto, MT5 chiuso)
 
 ```powershell
-$s="$env:USERPROFILE\scarica_storico.ps1"; Remove-Item $s -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/2478ec5d04238c694bddc1ffba8abb430f7b4fc5/backtest_pipeline/scarica_storico.ps1" -OutFile $s -EA Stop; powershell -ExecutionPolicy Bypass -File $s -Simboli "USDJPY,EURJPY,GBPJPY,AUDJPY,CHFJPY,CADJPY,NZDJPY" -Da 2007.01.01 -SenzaTick -Auto
+$s="$env:USERPROFILE\scarica_storico.ps1"; Remove-Item $s -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d63ca2d000034cafbc5ba855f313a07675761629/backtest_pipeline/scarica_storico.ps1" -OutFile $s -EA Stop; powershell -ExecutionPolicy Bypass -File $s -Simboli "USDJPY,EURJPY,GBPJPY,AUDJPY,CHFJPY,CADJPY,NZDJPY" -Da 2007.01.01 -SenzaTick -Auto
 ```
 
 **Si LEGGE il suo referto prima di andare avanti.** Se anche **un solo** cross
@@ -196,7 +196,7 @@ mezza finestra vuota ha gia' rovinato un round sugli indici.
 ### PASSO 1 — il giro a vuoto (un minuto, non apre MT5)
 
 ```powershell
-$p="$env:USERPROFILE\lancia_r82.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/2478ec5d04238c694bddc1ffba8abb430f7b4fc5/backtest_pipeline/lancia_r82.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R82 TORNEO JPY' -Quiet)){throw 'SCRIPT VECCHIO'}; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif 2478ec5d04238c694bddc1ffba8abb430f7b4fc5 -Giro 1 -SoloControllo; if($LASTEXITCODE -ne 0){throw 'GIRO A VUOTO FALLITO'}
+$p="$env:USERPROFILE\lancia_r82.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d63ca2d000034cafbc5ba855f313a07675761629/backtest_pipeline/lancia_r82.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R82 TORNEO JPY' -Quiet)){throw 'SCRIPT VECCHIO'}; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif d63ca2d000034cafbc5ba855f313a07675761629 -Giro 1 -SoloControllo; if($LASTEXITCODE -ne 0){throw 'GIRO A VUOTO FALLITO'}
 ```
 
 Si legge riga per riga la cella stampata e la si confronta con la tabella del
@@ -205,7 +205,7 @@ Si legge riga per riga la cella stampata e la si confronta con la tabella del
 ### PASSO 2 — il giro 1 (screening), MT5 CHIUSO
 
 ```powershell
-$p="$env:USERPROFILE\lancia_r82.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/2478ec5d04238c694bddc1ffba8abb430f7b4fc5/backtest_pipeline/lancia_r82.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R82 TORNEO JPY' -Quiet)){throw 'SCRIPT VECCHIO'}; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif 2478ec5d04238c694bddc1ffba8abb430f7b4fc5 -Giro 1; if($LASTEXITCODE -ne 0){throw 'CORSA INCOMPLETA: leggi quali CSV mancano'}
+$p="$env:USERPROFILE\lancia_r82.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d63ca2d000034cafbc5ba855f313a07675761629/backtest_pipeline/lancia_r82.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R82 TORNEO JPY' -Quiet)){throw 'SCRIPT VECCHIO'}; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif d63ca2d000034cafbc5ba855f313a07675761629 -Giro 1; if($LASTEXITCODE -ne 0){throw 'CORSA INCOMPLETA: leggi quali CSV mancano'}
 ```
 
 Raccolta, zip e referto li fa lo script: **Desktop → `R82_TORNEO_JPY_giro1\` +
@@ -215,7 +215,7 @@ con una riga **`data:` che deve essere di ADESSO**.
 ### PASSO 3 — il giro 2, SOLO sui sopravvissuti (esempio con un cross)
 
 ```powershell
-$p="$env:USERPROFILE\lancia_r82.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/2478ec5d04238c694bddc1ffba8abb430f7b4fc5/backtest_pipeline/lancia_r82.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R82 TORNEO JPY' -Quiet)){throw 'SCRIPT VECCHIO'}; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif 2478ec5d04238c694bddc1ffba8abb430f7b4fc5 -Giro 2 -Solo "USDJPY"; if($LASTEXITCODE -ne 0){throw 'CORSA INCOMPLETA'}
+$p="$env:USERPROFILE\lancia_r82.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d63ca2d000034cafbc5ba855f313a07675761629/backtest_pipeline/lancia_r82.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R82 TORNEO JPY' -Quiet)){throw 'SCRIPT VECCHIO'}; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif d63ca2d000034cafbc5ba855f313a07675761629 -Giro 2 -Solo "USDJPY"; if($LASTEXITCODE -ne 0){throw 'CORSA INCOMPLETA'}
 ```
 
 Nel giro 2 `-Solo` e' **obbligatorio**: lo script si rifiuta di girare sette
@@ -228,7 +228,7 @@ cross a tick reali.
 | 1 | **ho aperto lo script a cui punta** | ✅ scritto e riletto |
 | 2 | difetti gemelli (`fermoDa`, raccolta Desktop) | ✅ nessuna euristica del silenzio; raccolta Desktop + zip presenti |
 | 3 | **il file dei parametri e' quello giusto?** | ✅ la riga **VERIFICA una cella congelata**, non cerca: 14 file prova con una sola cella, zero griglie |
-| 4 | il SHA contiene la correzione annunciata | ✅ tutti i file sono **dentro** `2478ec5` |
+| 4 | il SHA contiene la correzione annunciata | ✅ tutti i file sono **dentro** `d63ca2d` |
 | 5 | giro a vuoto obbligatorio | ✅ passo 1 |
 | 6 | cache di raw ~5 minuti | ✅ pinnato all'**hash**, non al branch, + marcatore |
 | 8 | `irm` che fallisce e la riga tira dritto | ✅ `Remove-Item` + `-EA Stop` + `Select-String` sul marcatore |
