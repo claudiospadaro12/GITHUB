@@ -702,3 +702,17 @@ unanime, l'apertura US non ha edge a prescindere da ingresso e filtri;
 massacro sul Nasdaq). Nessuna promozione: il round propone, non promuove.
 FINE SEQUENZA NOTTURNA: regola di traffico chiusa, la flotta puo' pushare.
 Referti ufficiali R84/R83 e giro architetto v12: domattina.
+
+## REFERTI UFFICIALI SCRITTI (19/08 mattina)
+
+- `REFERTO_ROUND84_ABLAZIONE.md` — tabella 9 celle IS+OOS+totale, lettura
+  coi 4 cancelli congelati, debito M16 chiuso. NOTA rispetto alla lettura
+  rapida del PASSO 6: applicando i cancelli alla lettera, la cella D
+  (volumi OR ATR) li passa tutti e quattro — come RIDUTTORE DI PERDITA
+  (OOS resta negativa, PF 0,92), mai come edge. Dichiarato per esteso nel
+  referto, nessuna sedia si accende.
+- `REFERTO_ROUND83_INGRESSI.md` — canarini riverificati al decimale (N0=A,
+  D1=V, per-trade identici al netto del magic), duello per mercato,
+  autopsia per-trade del retest Nasdaq (stop pieni da 1R contro vincite da
+  0,2R, 11 mesi su 13 negativi, niente code), scoperta trasversale.
+  Nessuna promozione.
