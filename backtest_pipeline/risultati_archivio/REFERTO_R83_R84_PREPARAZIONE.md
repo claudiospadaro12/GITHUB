@@ -624,3 +624,15 @@ non esisteva in casa ora esiste:
 Congelamento verificato (3 EA su lavoro = pin, byte a byte, via doppio irm).
 Compilazione ABTG_Apertura_3Ingressi.mq5: **0 errors, 0 warnings, 1689 ms**.
 ex5: True. Archivio: `r83_compilazione_2026-08-18.txt`.
+
+## PASSO 1b — ESEGUITO E PROMOSSO (18/08, 21:40-21:45)
+
+Test singolo NASUSD M15 (2026.05.30-06.30, visualizzatore). Journal agli atti
+via screenshot in chat:
+- `[3ING][AUTOTEST] InpEntryMode=2 -> motore CLOSECONFIRM (market) | magic 777010`
+- sei controlli su `DirezioneDaChiusura`: tutti come atteso
+- `esito modalita' 2: SEI SU SEI, la regola ragiona come la firma.`
+- In campo nel test: `CLOSECONFIRM armato ... Attendo una candela che CHIUDA
+  oltre` -> `CLOSECONFIRM BUY: candela chiusa a 29296.50 oltre 29153.50 ->
+  entrato a mercato` + breakeven vivo (SL 29297 -> 29319.30) + reset per-giorno.
+  Il motore nuovo funziona da capo a fondo nel tester.
