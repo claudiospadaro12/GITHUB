@@ -189,3 +189,9 @@ entrambi — c'e' il commento di avviso in tutti e due i file.
 - In attesa di conferma visiva che giri la v1.10 (righe "Pausa morbida"
   e "Rischio aperto/cap" sul pannello = codice nuovo compilato, non solo
   preset nuovo su codice vecchio).
+- CONFERMA VISIVA (18/08 08:38, screenshot): v1.10 VIVA sul 100k, conto
+  50504263 (chiude anche M6 del piano). Pannello: limite 4.9% / totale
+  9.9% / Pausa morbida (4.0%) libera / Rischio aperto 0.00% cap 3.25% ok.
+  Equity 99.173,14, nessuna posizione aperta, stato operativo.
+  Prossimo passo: una giornata di Journal, poi la decisione sulla
+  migrazione degli EA all'include (leggere le bandiere).
