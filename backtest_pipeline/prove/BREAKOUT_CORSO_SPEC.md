@@ -557,18 +557,38 @@ criterio di scelta:
 | Tetto di drawdown | **20%** complessivo su **tutte** le strategie insieme | `[T]` lez. 40 e 39 |
 | Ordini contemporanei | _"dovete fare un unico ordine per volta"_ | `[T]` lez. 37 — ⚠️ vedi §8.1 |
 
-### 8.1 ⚠️ Il "un unico ordine per volta" e' ambiguo e pesa `[?]`
+### 8.1 ⚠️ "Un unico ordine per volta" + "rischio COMPLESSIVO dell'1%" `[?]`
 
-Detto in lez. 37 nel contesto di **un solo cross** (USDJPY, dove lui aveva due
-posizioni aperte a scopo dimostrativo). **Non e' dichiarato** se valga:
-- (a) una posizione per **cross** → fino a **7 posizioni** e **7% di rischio**
-  simultaneo su un'unica scommessa sullo yen; oppure
-- (b) una posizione per **portafoglio** → 1% massimo sempre.
+> 🆕 **AGGIORNATO DALLE SLIDE — e la lettura si e' ROVESCIATA.**
 
-Il corso prepara i grafici di **tutte e 7** le coppie per cercare setup
-simultanei (lez. 36), il che rende (a) la lettura piu' probabile `[I]` — ma
-**non lo dice**. **E' il buco piu' costoso della spec**: cambia il rischio di
-portafoglio di 7 volte. Vedi §9.3 e §11.
+Detto in lez. 37 nel contesto di **un solo cross** (USDJPY, dove aveva due
+posizioni aperte a scopo dimostrativo). Le due letture possibili:
+- **(a)** una posizione per **cross** → fino a **7 posizioni** e **7% di
+  rischio** simultaneo su un'unica scommessa sullo yen;
+- **(b)** una posizione per **portafoglio** → **1% massimo sempre**.
+
+**Prima delle slide** propendevo per (a): il corso prepara i grafici di tutte e
+7 le coppie per cercare setup simultanei (lez. 36).
+
+**La slide S10 ribalta l'indizio principale:**
+> `[SLIDE S10]` _"si consiglia per le prime 20 operazioni di tenere un **rischio
+> complessivo dell'1%**"_
+
+Il parlato dice sempre _"rischio 1% **per l'operazione**"_ (lez. 35, 37); la
+slide scrive **_"complessivo"_**. E la stessa autrice usa "complessivo" nel
+senso di *aggregato su tutto* anche altrove (lez. 39/40: _"drawdown
+**complessivo** con tutte le strategie ... non dovrebbe superare il 20%"_).
+
+> ⚖️ **Verdetto aggiornato: l'ago si sposta su (b), ma la contraddizione
+> parlato/slide e' REALE e resta APERTA.** `[?]`
+>
+> **Perche' pesa piu' di ogni altra cosa in questa spec:** e' un **fattore 7**
+> sul rischio di portafoglio. Con (a) la strategia mette a rischio il 7% su
+> un'unica direzione dello yen; con (b) l'1%. **Nessun backtest di paniere e'
+> interpretabile senza aver deciso questo punto** — ed e' plausibile che il
+> nostro `−20.853 €` sia stato prodotto in modalita' (a).
+>
+> 🎯 **Domanda diretta per Claudio** (§13 punto 7).
 
 ### 8.2 Il sizing dell'esempio non torna con un conto piccolo `[I]`
 
@@ -738,7 +758,16 @@ parametri NOSTRI**, e un backtest negativo puo' dipendere da loro.
 
 ## 11. 🧾 RIEPILOGO PER IL DEVELOPER: certo / ambiguo / buco
 
-### ✅ 24 REGOLE CERTE (implementabili senza inventare)
+> 🆕 **CONTEGGIO AGGIORNATO DOPO LE SLIDE (18/08 ~15:15).**
+> Era: **24 certe / 10 ambigue / 13 buchi → 71%**.
+> Ora: **26 certe / 4 ambigue / 11 buchi → 87%**.
+> Cosa e' cambiato: **+2 regole certe** (cadenza di aggiornamento del
+> rettangolo, triade delle uscite resa obbligatoria), **−6 ambiguita'**
+> (chiuse dalla fonte scritta, §0.3), **−2 buchi** (il PDF non e' piu' un buco
+> perche' ce l'abbiamo; le soglie del Williams sono ora scritte),
+> **−1 regola discrezionale** (§0.5: non e' nel PDF, quindi non e' strategia).
+
+### ✅ 26 REGOLE CERTE (implementabili senza inventare)
 M15 · 7 cross JPY · Williams %R periodo 140 · zone OB≥−20 / OS≤−80 · rettangolo
 di 20 candele · estremi assoluti high/low · rettangolo mobile · candela di
 segnale esclusa · OB⇒solo SELL / OS⇒solo BUY · rottura con **chiusura** oltre il
@@ -748,47 +777,69 @@ irrilevante · ingresso teorico = chiusura del segnale · SL a 1 pip oltre il
 rettangolo · R = |chiusura segnale − SL| · TP = 3R dalla chiusura del segnale ·
 BE a +1R misurato dal segnale · BE posto sulla **chiusura del segnale** ·
 nessun trailing dopo il BE · rischio 1% · R:R minimo 1:2 per ingressi ritardati ·
-ordini a mercato.
+ordini a mercato · 🆕 **rettangolo ricalcolato a ogni chiusura di candela**
+`[SLIDE S4]` · 🆕 **chiusura obbligatoria su SL / TP / segnale contrario**
+`[SLIDE S8]`.
 
-### ⚠️ 10 AMBIGUITA' (8 risolte con argomento, 2 aperte)
-1. 15 vs 20 candele → **risolta: 20**
-2. "almeno 20" vs "al massimo 20" → **risolta: esattamente 20, finestra mobile**
-3. candela di rottura dentro/fuori → **risolta: fuori** (necessita' logica)
-4. banda Williams sell "0/−50" vs "−20/−50" → **risolta: −50/−20**
-5. "ancora in ipercomprato" vs "uscito dall'ipercomprato" → **risolta: uscito**
-6. trailing 400 punti vs BE sulla chiusura del segnale → **risolta: BE, niente trailing**
-7. **APERTA** — obbligo delle 20 candele dall'ingresso in zona: affermato in
-   lez. 36, apparentemente disatteso in un esempio di lez. 38
-8. **APERTA** — "un unico ordine per volta": per cross o per portafoglio? (§8.1)
-9. direzione del fuso della piattaforma → irrilevante (nessun filtro orario)
-10. XAUUSD dentro o fuori → **risolta: fuori** per capitale, non per tecnica
+### ⚠️ 4 AMBIGUITA' RESIDUE (erano 10)
 
-### 🕳️ 13 BUCHI (il corso non li tratta)
-1. 🔴 **Parametri SuperTrend (ATR + moltiplicatore) — BLOCCANTE**
-2. Soglie OB/OS mai pronunciate come numeri (inferite)
-3. Massimo di posizioni contemporanee sui 7 cross
-4. Correlazione fra i 7 cross JPY: **mai menzionata**
+✅ **Chiuse dalle slide:** 15vs20 · "almeno/al massimo" · banda SELL 0/−50 ·
+"ancora dentro/uscito" · trailing vs BE · XAU dentro/fuori → dettaglio in §0.3.
+
+Restano:
+1. **candela di rottura dentro/fuori** → risolta per **necessita' logica**
+   (fuori), ma **nessuna slide lo scrive**: resta una nostra deduzione.
+2. 🔴 **APERTA — obbligo delle 20 candele dall'ingresso in zona** (§4.5):
+   implicata dalle slide, mai scritta come regola; e un esempio della lez. 38
+   sembra disattenderla.
+3. 🔴 **APERTA E PESANTE — "rischio 1% per operazione" (parlato) vs "rischio
+   COMPLESSIVO dell'1%" (slide S10)** (§8.1): **e' un fattore 7** sul rischio di
+   portafoglio.
+4. direzione del fuso della piattaforma → **irrilevante** (nessun filtro orario).
+
+🚫 **Non piu' in elenco:** la gestione "Williams all'estremo opposto" (§7.4).
+**Non e' nel PDF** → non e' una regola della strategia (§0.5).
+
+### 🕳️ 11 BUCHI (erano 13)
+1. 🔴 **Parametri SuperTrend (ATR + moltiplicatore) — BLOCCANTE.**
+   🆕 **E ora sappiamo che il PDF NON li contiene:** possono venire solo dal
+   modulo precedente.
+2. 🔴 **Periodo del Williams %R** — nessuna slide lo scrive: il "140" resta
+   appeso a una sola frase del parlato (§3.2).
+3. Massimo di posizioni contemporanee sui 7 cross *(parzialmente illuminato da
+   "rischio complessivo 1%", ma non risolto)*
+4. Correlazione fra i 7 cross JPY: **mai menzionata, nemmeno nelle slide**
 5. Filtro spread
 6. Filtro news (**anzi**: l'esempio della lez. 37 entra su una notizia macro)
 7. Cap di perdita giornaliera
 8. Cosa fare se arriva un nuovo segnale con posizione gia' aperta sullo stesso cross
 9. Scadenza del setup se il Williams esce dalla zona senza rottura
 10. Definizione di pip su JPY
-11. Gap/slippage oltre lo stop
-12. N. operazioni, win rate, broker, date del backtest dichiarato
-13. Il PDF riepilogativo: **non e' nel corpus**, esiste solo il parlato che lo commenta
+11. Gap/slippage oltre lo stop + N. operazioni, win rate, broker, date del
+    backtest dichiarato *(la lez. 39 non ha slide fra quelle ricevute)*
 
-### 📐 GRADO DI MECCANIZZABILITA'
-Decisioni che un EA deve prendere per operare = 24 certe + 10 ambigue/discrezionali
-= **34**. → **24/34 ≈ 71%** deciso dal corso senza interpretazione.
-Le 6 ambiguita' risolte portano il **coperto** a 30/34 ≈ **88%**, ma **con nostre
-interpretazioni dichiarate**. Restano fuori: 2 ambiguita' aperte, 1 regola
-puramente discrezionale (§7.4), 1 buco bloccante (SuperTrend).
+✅ **Chiusi dalle slide:** il PDF non e' piu' un buco (ce l'abbiamo) · le soglie
+operative del Williams sono ora **scritte** (−20/−50 e −80/−50).
 
-> **Traduzione secca:** la strategia **e' meccanizzabile**, e l'EA esistente lo
-> dimostra. Ma **nessun EA puo' essere "il corso"**: due parametri
-> (SuperTrend), una regola di gestione (§7.4) e il cap di portafoglio (§8.1)
-> sono **scelte nostre**, e vanno dichiarate accanto a qualunque risultato.
+### 📐 GRADO DI MECCANIZZABILITA' — **87%** (era 71%)
+Decisioni che un EA deve prendere per operare = **26 certe + 4 ambigue = 30**.
+→ **26/30 ≈ 87%** deciso dal corso **senza alcuna interpretazione nostra**.
+
+Aggiungendo le 2 ambiguita' che considero risolte con argomento solido
+(candela di rottura esclusa; fuso irrilevante), il **coperto** sale a
+**28/30 ≈ 93%**.
+
+**Restano fuori solo 2 cose, ed entrambe sono DOMANDE, non scelte tecniche:**
+- l'attesa delle 20 candele (§4.5) — cambia **quanti** segnali esistono;
+- il rischio 1% per operazione **o** complessivo (§8.1) — cambia il rischio di
+  portafoglio **di 7 volte**.
+
+> **Traduzione secca, aggiornata:** la strategia **e' meccanizzabile quasi
+> integralmente**, e le slide hanno **eliminato la discrezionalita'** che
+> temevo (§0.5). **Ma resta un buco bloccante che il PDF non chiude**: i
+> parametri del SuperTrend. Finche' quelli sono nostri, **qualunque backtest
+> misura la NOSTRA versione**, non quella del corso — e va detto accanto al
+> numero.
 
 ---
 
@@ -814,12 +865,17 @@ punti di attrito con `report/METRO_PROP.md`:
 
 ## 13. ❓ DOMANDE APERTE PER CLAUDIO
 
-1. 🔴 **Il PDF della lezione 40**: e' l'unico documento che puo' chiudere i
-   buchi (SuperTrend, soglie, cap posizioni). Sta nell'area personale del corso.
-   **E' la richiesta n.1.**
-2. 🔴 **Il modulo precedente** (quello che imposta Williams+SuperTrend, citato
-   in lez. 35 come _"Lo abbiamo fatto nel modulo precedente"_): serve la
-   trascrizione o uno screenshot del pannello parametri del SuperTrend.
+> 🆕 **Aggiornate dopo le slide.** ✅ **La domanda n.1 (il PDF) e' STATA
+> EVASA** — e ha chiuso 6 ambiguita' su 10. **Ma non ha chiuso i due buchi
+> bloccanti**, perche' il PDF non tratta i parametri degli indicatori.
+
+1. ✅ ~~Il PDF della lezione 40~~ — **RICEVUTO 18/08 ~15:15**, 10 slide.
+2. 🔴 **IL MODULO PRECEDENTE — ora e' la richiesta n.1.** E' quello che imposta
+   Williams+SuperTrend (lez. 35: _"Lo abbiamo fatto nel modulo precedente"_).
+   **Le slide hanno dimostrato che il PDF del modulo Breakout NON contiene i
+   parametri degli indicatori**, quindi non esiste altra fonte: serve la
+   trascrizione di quel modulo **o** uno screenshot dei due pannelli
+   (SuperTrend: ATR + moltiplicatore · Williams: periodo).
 3. 🟠 **Williams: 140 o 14?** Screenshot del pannello dell'indicatore. Se fosse
    14, tutta la frequenza dei segnali cambia e il backtest negativo va rifatto.
 4. 🟠 **Il sorgente di `BREAKOUT_EA_JPY_v3`**: non e' nel repo. Cosa gira
