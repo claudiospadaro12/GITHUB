@@ -228,3 +228,94 @@ implementa quasi alla lettera (consegna gemella).
 → La griglia dei numeri tondi è il proxy DICHIARATO dei livelli obiettivo:
 `InpUseRoundLevels`/`InpRoundStep` nel nostro core è fedele alla fonte, non un
 ripiego nostro.
+
+---
+
+## 5. 📕 IL PDF ABTG (41 pagine) — 4 strategie, censite una per una
+
+Struttura del PDF: Parte I concetti [PAG 3-12] · Parte II strategie EU
+[PAG 13-19] · Parte III strategie USA [PAG 20-22] · Parte IV Gap Fill
+[PAG 23-25] · Parte V rischio e checklist [PAG 26-30] · Parte VI esempio
+multi-timeframe [PAG 31-35] · takeaway e questionario [PAG 36-41].
+
+### 5.1 STRATEGIA BREAKOUT NOTTURNO [PAG 14] — 4/7 = 57%
+
+| # | decisione | valore | etichetta |
+|---|---|---|---|
+| 1 | Livelli | **max/min della sessione asiatica** (*"tracciare i confini del campo da gioco"*) | 🟢 (la finestra oraria della notte si ricava dalla tabella [PAG 9]: Tokyo 00:00-06:00 UTC; il box esatto resta un'assunzione — in casa: MaxMinNotte 23:00-04:59) |
+| 2 | Conferma | *"Entra solo se la rottura è supportata da aumento di **volumi** o da una volatilità coerente (**ATR > media**)"* | 🟠 parametri (periodo ATR, media di confronto, % volumi) MAI detti |
+| 3 | *"Evita falsi segnali nelle prime candele"* | quante candele? quale TF? | 🔴 **BUCO** |
+| 4 | Stop loss | *"sempre vicino al punto di breakout utilizzando: **ATR** · **5-10 punti** sotto/sopra la linea di breakout · Sotto il minimi della candela precedente"* | 🟠 TRE opzioni alternative, tutte quantificabili — la scelta va dichiarata |
+| 5 | Take profit | *"basato su: resistenze/supporti, Fibonacci, EMA o pivot point"* | 🔴 **BUCO** (menu di 4 senza regola di scelta) |
+| 6 | Breakeven | *"Porta lo stop in pari **appena possibile**"* | 🔴 **BUCO** (mai quantificato) |
+| 7 | Parziale | *"Parzializza se il prezzo raggiunge un primo target intermedio"* | 🟠 (quota e target non detti; assunzione: 50% come i pptx) |
+
+### 5.2 STRATEGIA BREAKOUT CLASSICO (apertura) [PAG 17] — 5/8 = 63%
+
+| # | decisione | valore | etichetta |
+|---|---|---|---|
+| 1 | Livelli | S/R da **sessione precedente (D1, W1, MN)**; *"se siamo sui massimi e non ci sono livelli si scende di time frame"*; anche pivot point o **max/min giorno precedente** | 🟠 menu con un'opzione meccanica chiara (max/min giorno prec.) |
+| 2 | Gap di apertura | *"Un gap up/down può rafforzare la direzione … Gap grandi segnalano pressione forte che verranno ricoperti (spesso in giornata)"* | 🔴 lettura senza soglie |
+| 3 | Candela di rottura | *"deve essere **ampia, decisa, senza ombre ambigue**"* | 🔴 **BUCO** (mai quantificata — è il filtro che decide tutto) |
+| 4 | Volumi | *"superiori alla media delle ultime candele"* | 🟠 quante candele? (in casa: 20 barre, +50% — assunzione già dichiarata nel codice) |
+| 5 | Filtri aggiuntivi | *"Puoi aggiungere filtri come ATR o VWAP"* | 🟠 opzionali |
+| 6 | **INGRESSO** | *"**Entra subito dopo la chiusura della candela di breakout, non durante.**"* | 🟢 **la regola più netta del PDF — ed è l'OPPOSTO degli ordini stop del piano Nasdaq (§7)** |
+| 7 | Stop | *"sotto/sopra il breakout **con buffer**"* | 🟠 buffer non dato qui (il notturno dà 5-10 punti) |
+| 8 | Take profit | *"su target tecnici precedenti o usa un trailing stop"* | 🔴 **BUCO** |
+
+### 5.3 STRATEGIA GAP FILL [PAG 24-25] — 8/9 = 89%, la più chiusa del PDF
+
+| # | decisione | valore | etichetta |
+|---|---|---|---|
+| 1 | Definizione | gap = apertura lontana dalla chiusura del giorno precedente; fill = ritorno alla chiusura | 🟢 |
+| 2 | Soglia | *"Gap significativo tra chiusura e apertura?"* [PAG 30] | 🟠 soglia mai data (in casa: `InpGapMinPoints`) |
+| 3 | Conferme | *"price action contraria + volumi crescenti"*; nell'esempio: 2ª candela M5 rossa con volumi, pattern engulfing | 🟠 pattern indicati ma non formalizzati |
+| 4 | Ingresso | in direzione del fill al break del livello di conferma (esempio: short al break di 15.130) | 🟢 esempio numerico completo |
+| 5 | Stop | *"sopra il massimo dell'apertura"* (esempio: 15.170) | 🟢 |
+| 6 | TP primario | *"la chiusura del giorno precedente"* (esempio: 15.000) | 🟢 |
+| 7 | TP secondario | *"zona di congestione o supporto/resistenza successivo"* | 🔴 discrezionale |
+| 8 | RR minimo | *"imposta un RR minimo di **1:1.5**"* | 🟢 |
+| 9 | Rischio | *"rischia max il **2%** del capitale"* | 🟢 |
+
+> *"Gap ≠ certezza: Non tutti i gap si chiudono"* [PAG 24] — l'avvertenza è
+> del PDF stesso. ✅ In casa: `ABTG_GapFill` (famiglia promossa R36/R37, 5
+> sedie) implementa questa strategia sui cambi/indici — è già la nostra.
+
+### 5.4 GESTIONE E MONEY MANAGEMENT [PAG 18, 27-28] — 1/5 certe
+
+| # | decisione | valore | etichetta |
+|---|---|---|---|
+| 1 | Due fasi | Fase 1: *"chiudi **una parte**"* (quanta? non detto) · Fase 2: trailing | 🟠 |
+| 2 | SL dinamico | *"Stop Loss tecnico sotto/sopra livelli chiave"* + mai spostarlo a sfavore | 🟠 |
+| 3 | **Rischio per operazione** | *"**1-3%** del capitale"* [PAG 27] · *"Massimo **1-3%**"* con esempio 10.000 € → 100-300 € [PAG 28] · *"max il **2%**"* [PAG 24] · *"≤ **2-3%**"* [PAG 30] | 🟠 **tre versioni nello stesso PDF** (§7) |
+| 4 | Position sizing | formula ed esempio [PAG 28] | 🟠 **formula scritta male, esempio giusto** (§6) |
+| 5 | Parzializzazione | *"Chiudi parte al primo target → sposta stop a breakeven → lascia correre con trailing"* | 🟢 la sequenza è netta (le quantità no) |
+
+### 5.5 PRE-APERTURA ed ESEMPIO MULTI-TIMEFRAME [PAG 15-16, 19, 32-35] — contesto, non spec
+La pre-apertura (08:00-09:00 IT) è dichiarata **fase di osservazione**:
+*"Serve osservazione, non azione impulsiva"* [PAG 15] — con analisi D1→H4/H1→M15
+e strumenti EMA 200/100/89/14, Supertrend, ATR, volumi/Market Profile [PAG 16].
+L'esempio operativo [PAG 33] è però una MINI-SPEC di un giorno:
+- **Pre-apertura:** ordine a mercato long su M15 · 1° target EMA200 M15
+  (parziale + stop in pari) · 2° target EMA14 · SL *"sotto il minimo di
+  giornata **+ 5 pip**"*.
+- **Apertura 09:00:** buy limit sul Supertrend 2.5 H1 · 1° target EMA14 H1 ·
+  2° target Supertrend 2.5 H4 · SL *"poco sotto Supertrend 3.5 in H1, con
+  buffer di sicurezza (**+3 pip**)"*.
+
+⚠️ Due avvertenze: (a) è UN esempio, la **direzione** viene dall'analisi
+discrezionale del contesto, non da una regola; (b) *"pip"* su un INDICE è
+un'unità sciatta [INCERTO: 5 pip = 5 punti indice? 0,5?] — sul DAX la
+differenza è 10×.
+
+### 5.6 CHECKLIST OPERATIVE [PAG 29-30] — il "manifesto dei filtri"
+Pre-apertura (08:30): indici correlati analizzati? trend confermato su D1/H4?
+confluenza EMA/ST/S-R? setup confermato su H1 e M15? ordini limite piazzati?
+Apertura (09:00/15:30): livelli identificati? breakout confermato da **volumi
+e price action**? **ATR conferma volatilità adeguata**? candela di rottura
+**chiusa** oltre il livello? · Gap fill: gap significativo? in direzione del
+trend? movimento verso il fill confermato? · Rischio: ≤2-3%, SL posizionato,
+TP/trailing pronti, *"**nessuna notizia in uscita imminente** (es. Forex
+Factory)"*, spazio e volatilità sufficienti.
+> *"se anche solo un punto è 'NO'… forse è meglio aspettare"* [PAG 29] — il
+> piano stesso dichiara i filtri come CONDIZIONI, non come opzioni.
