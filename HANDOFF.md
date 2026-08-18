@@ -7,6 +7,39 @@
 
 ---
 
+## 🧾 AGGIORNAMENTO NOTTE 18->19/08 (agente in background) — HISTDATA: scritta la cura DST, da collaudare
+
+Il passo 4 dell'import HistData e' **fermo al cancello ZERO** (par. 14 di
+`backtest_pipeline/risultati_archivio/REFERTO_HISTDATA_FATTIBILITA.md`): i tre
+indici `_EXT` hanno diff media H1 **0,061-0,101%** contro il **<=0,05%**
+richiesto, con shift +5 confermato 3 volte su 3. Diagnosi: **HistData scrive in
+ora locale di New York (calendario DST USA), il server BCM segue il DST
+europeo**, e per **503-671 ore l'anno** i due calendari non coincidono -> uno
+shift costante sbaglia di un'ora.
+
+- **Deliverable**: `mql5/Scripts/ABTG_ImportaStoricoEsterno_v2.mq5`
+  (`IMP-EXT-v2`). Shift che segue **entrambi** i calendari, domeniche di cambio
+  ora **calcolate** (vale 2000-2040), referto con **le due misure affiancate**
+  (DST-aware + shift fisso come controprova), spaccatura della diff **dentro e
+  fuori** le finestre sfasate, diagnosi del residuo (bias mediano), autotest
+  integrato. **La v1 non e' stata toccata.**
+- **NON COMPILATO, NON PROVATO** (niente MetaEditor in cloud). Collaudo in due
+  passi nel par. **14-bis**: prima `InpAutoTest=true` (deve dare `0 ROTTI`),
+  poi il re-import dei tre indici.
+- **Previsione dichiarata prima della misura**: la cura DST e' **necessaria ma
+  probabilmente non sufficiente** (SPXUSD forse passa al pelo, NASUSD e 225JPY
+  probabilmente no): il resto sembra **basis indice-cash contro CFD-su-future**,
+  che col fuso non c'entra. Se e' cosi', **non si aggiungono pezze**: si porta
+  il numero a Claudio e si decide se 0,05% e' il cancello giusto per gli indici.
+- **Sugli 8 forex del 15/08**: hanno **lo stesso difetto**, ma sotto soglia
+  (un'ora di forex vale ~0,05% del prezzo, un'ora di indice ~0,2-0,3%).
+  **Nessuna re-importazione decisa**: il loro numero puo' solo migliorare.
+- Le **righe di lancio sono solo BOZZA-DA-VERIFICARE** (par. 14-bis.6): le
+  scrive la sessione principale. Attenzione: `importa_storico_esterno.ps1`
+  oggi scarica e compila **la v1**.
+
+---
+
 ## 🧾 AGGIORNAMENTO 18/08 (agente in background) — DUKASCOPY: la pipeline e' pronta, tocca al PC
 
 Missione "storico indici Dukascopy" chiusa lato cloud
