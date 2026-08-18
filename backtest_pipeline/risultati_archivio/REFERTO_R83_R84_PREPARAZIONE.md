@@ -664,3 +664,11 @@ N0 (EA nuovo, modalita' 0) vs cella A di R84 (EA vivo):
 - Il fork del core Nasdaq e' un clone fedele: il duello e' ad armi pari.
   Le modalita' 1 e 2 si potranno leggere come EFFETTO DELL'INGRESSO, unica
   variabile. CSV in r83_csv/.
+
+## PASSO 5 — CANARINO DAX (D1 vs V) PROMOSSO (18/08, 22:08)
+
+D1 (EA nuovo, retest) = V (sedia viva 770101, core DAX) a ogni decimale:
+IS 282,12/1,07810/197 | OOS 999,42/1,18776/311, e TUTTI i 311 trade OOS
+identici al netto del magic (diff). Due core diversi, stessi trade: il
+duello e' ad armi pari anche sul DAX. Nota: la config della sedia viva
+su questa finestra e' OOS-positiva (+999, PF 1,19, DD 10,6% a rischio 1%).
