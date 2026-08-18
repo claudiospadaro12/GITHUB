@@ -1,0 +1,494 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v3
+comando : --scarica --converti --simboli grxeur,nsxusd,jpxjpy,spxusd --da 2019 --a 2026
+data: 2026-08-18 21:07 (ora del PC)
+cartella ZIP: C:\Users\Master\histdata_m1
+
+CONTROLLO POSITIVO (eurusd 2019, token trovato): OK
+scaricati 0 ZIP (0.0 MB), 56 gia' in cache, 0 assenti, 0 falliti
+
+D30EUR (grxeur): 2005145 barre M1, dal 2019.01.01 18:03 al 2026.07.31 15:58
+  prezzo minimo 2906.94900  massimo 25903.89900
+  ALLARME: prezzi FUORI dalla banda attesa 4000.0-45000.0. Simbolo sbagliato o unita' diverse: NON IMPORTARE.
+  2019: 325977 barre
+  2020: 259840 barre
+  2021: 187516 barre
+  2022: 205728 barre
+  2023: 159626 barre
+  2024: 332439 barre
+  2025: 335844 barre
+  2026: 198175 barre
+  buchi intragiornalieri > 60 min: 1297  (peggiore: 301 min dopo 2020.02.17 12:59)
+  giorni feriali SENZA nessuna barra: 15  (primi: 2019-04-19, 2020-04-10, 2020-12-25, 2021-01-01, 2021-04-02)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2019-01  apertura modale 00:00  (su 18 giorni)
+  2019-02  apertura modale 00:00  (su 17 giorni)
+  2019-03  apertura modale 00:00  (su 20 giorni)
+  2019-04  apertura modale 00:00  (su 18 giorni)
+  2019-05  apertura modale 00:00  (su 22 giorni)
+  2019-06  apertura modale 00:00  (su 15 giorni)
+  2019-07  apertura modale 00:00  (su 20 giorni)
+  2019-08  apertura modale 00:00  (su 20 giorni)
+  2019-09  apertura modale 00:00  (su 21 giorni)
+  2019-10  apertura modale 00:00  (su 22 giorni)
+  2019-11  apertura modale 00:00  (su 19 giorni)
+  2019-12  apertura modale 00:00  (su 18 giorni)
+  2020-01  apertura modale 00:00  (su 22 giorni)
+  2020-02  apertura modale 00:00  (su 20 giorni)
+  2020-03  apertura modale 00:00  (su 22 giorni)
+  2020-04  apertura modale 00:00  (su 21 giorni)
+  2020-05  apertura modale 00:00  (su 21 giorni)
+  2020-06  apertura modale 02:00  (su 12 giorni)
+  2020-07  apertura modale 02:00  (su 22 giorni)
+  2020-08  apertura modale 02:00  (su 21 giorni)
+  2020-09  apertura modale 02:00  (su 22 giorni)
+  2020-10  apertura modale 02:00  (su 22 giorni)
+  2020-11  apertura modale 02:00  (su 21 giorni)
+  2020-12  apertura modale 02:00  (su 21 giorni)
+  2021-01  apertura modale 02:00  (su 20 giorni)
+  2021-02  apertura modale 02:00  (su 20 giorni)
+  2021-03  apertura modale 02:00  (su 23 giorni)
+  2021-04  apertura modale 02:00  (su 21 giorni)
+  2021-05  apertura modale 02:00  (su 20 giorni)
+  2021-06  apertura modale 02:00  (su 21 giorni)
+  2021-07  apertura modale 02:00  (su 22 giorni)
+  2021-08  apertura modale 02:00  (su 22 giorni)
+  2021-09  apertura modale 02:00  (su 22 giorni)
+  2021-10  apertura modale 02:00  (su 21 giorni)
+  2021-11  apertura modale 02:00  (su 22 giorni)
+  2021-12  apertura modale 02:00  (su 22 giorni)
+  2022-01  apertura modale 02:00  (su 21 giorni)
+  2022-02  apertura modale 02:00  (su 19 giorni)
+  2022-03  apertura modale 02:00  (su 23 giorni)
+  2022-04  apertura modale 02:00  (su 20 giorni)
+  2022-05  apertura modale 02:00  (su 22 giorni)
+  2022-06  apertura modale 02:00  (su 22 giorni)
+  2022-07  apertura modale 02:00  (su 21 giorni)
+  2022-08  apertura modale 02:00  (su 23 giorni)
+  2022-09  apertura modale 02:00  (su 22 giorni)
+  2022-10  apertura modale 02:00  (su 21 giorni)
+  2022-11  apertura modale 02:00  (su 19 giorni)
+  2022-12  apertura modale 02:00  (su 20 giorni)
+  2023-01  apertura modale 02:00  (su 21 giorni)
+  2023-02  apertura modale 02:00  (su 19 giorni)
+  2023-03  apertura modale 02:00  (su 23 giorni)
+  2023-04  apertura modale 02:00  (su 17 giorni)
+  2023-05  apertura modale 02:00  (su 20 giorni)
+  2023-06  apertura modale 02:00  (su 20 giorni)
+  2023-07  apertura modale 02:00  (su 19 giorni)
+  2023-08  apertura modale 02:00  (su 22 giorni)
+  2023-09  apertura modale 02:00  (su 20 giorni)
+  2023-10  apertura modale 02:00  (su 21 giorni)
+  2023-11  apertura modale 02:00  (su 20 giorni)
+  2023-12  apertura modale 00:00  (su 18 giorni)
+  2024-01  apertura modale 00:00  (su 22 giorni)
+  2024-02  apertura modale 00:00  (su 21 giorni)
+  2024-03  apertura modale 00:00  (su 20 giorni)
+  2024-04  apertura modale 00:00  (su 20 giorni)
+  2024-05  apertura modale 00:00  (su 18 giorni)
+  2024-06  apertura modale 00:00  (su 15 giorni)
+  2024-07  apertura modale 00:00  (su 22 giorni)
+  2024-08  apertura modale 00:00  (su 21 giorni)
+  2024-09  apertura modale 00:00  (su 20 giorni)
+  2024-10  apertura modale 00:00  (su 23 giorni)
+  2024-11  apertura modale 00:00  (su 21 giorni)
+  2024-12  apertura modale 00:00  (su 21 giorni)
+  2025-01  apertura modale 00:00  (su 21 giorni)
+  2025-02  apertura modale 00:00  (su 20 giorni)
+  2025-03  apertura modale 00:00  (su 18 giorni)
+  2025-04  apertura modale 00:00  (su 20 giorni)
+  2025-05  apertura modale 00:00  (su 22 giorni)
+  2025-06  apertura modale 00:00  (su 21 giorni)
+  2025-07  apertura modale 00:00  (su 23 giorni)
+  2025-08  apertura modale 00:00  (su 20 giorni)
+  2025-09  apertura modale 00:00  (su 20 giorni)
+  2025-10  apertura modale 00:00  (su 22 giorni)
+  2025-11  apertura modale 00:00  (su 20 giorni)
+  2025-12  apertura modale 00:00  (su 22 giorni)
+  2026-01  apertura modale 00:00  (su 21 giorni)
+  2026-02  apertura modale 00:00  (su 18 giorni)
+  2026-03  apertura modale 00:00  (su 22 giorni)
+  2026-04  apertura modale 00:00  (su 21 giorni)
+  2026-05  apertura modale 00:00  (su 21 giorni)
+  2026-06  apertura modale 00:00  (su 22 giorni)
+  2026-07  apertura modale 00:00  (su 23 giorni)
+  INVERNO 00:00   ESTATE 02:00   differenza +120 min
+  VERDETTO FUSO: INCERTO (differenza anomala). Guardare i mesi.
+  apertura di SETTIMANA modale 02:00 (su 181 settimane)
+
+CSV scritto: C:\Users\Master\histdata_m1\D30EUR_M1.csv  (2005145 barre, shift applicato +0 h)
+
+NASUSD (nsxusd): 2546517 barre M1, dal 2019.01.01 18:00 al 2026.07.31 16:13
+  prezzo minimo 6124.87000  massimo 30759.92500
+  ordine di grandezza dentro la banda attesa 1500.0-45000.0: OK
+  2019: 341335 barre
+  2020: 339962 barre
+  2021: 342946 barre
+  2022: 342711 barre
+  2023: 299289 barre
+  2024: 340926 barre
+  2025: 340493 barre
+  2026: 198855 barre
+  buchi intragiornalieri > 60 min: 2095  (peggiore: 512 min dopo 2025.01.09 09:28)
+  giorni feriali SENZA nessuna barra: 10  (primi: 2019-04-19, 2020-04-10, 2020-12-25, 2021-01-01, 2021-12-24)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2019-01  apertura modale 00:00  (su 22 giorni)
+  2019-02  apertura modale 00:00  (su 20 giorni)
+  2019-03  apertura modale 00:00  (su 21 giorni)
+  2019-04  apertura modale 00:00  (su 21 giorni)
+  2019-05  apertura modale 00:00  (su 22 giorni)
+  2019-06  apertura modale 00:00  (su 20 giorni)
+  2019-07  apertura modale 00:00  (su 23 giorni)
+  2019-08  apertura modale 00:00  (su 22 giorni)
+  2019-09  apertura modale 00:00  (su 21 giorni)
+  2019-10  apertura modale 00:00  (su 23 giorni)
+  2019-11  apertura modale 00:00  (su 21 giorni)
+  2019-12  apertura modale 00:00  (su 21 giorni)
+  2020-01  apertura modale 00:00  (su 22 giorni)
+  2020-02  apertura modale 00:00  (su 20 giorni)
+  2020-03  apertura modale 00:00  (su 19 giorni)
+  2020-04  apertura modale 00:00  (su 21 giorni)
+  2020-05  apertura modale 00:00  (su 21 giorni)
+  2020-06  apertura modale 00:00  (su 22 giorni)
+  2020-07  apertura modale 00:00  (su 23 giorni)
+  2020-08  apertura modale 00:00  (su 21 giorni)
+  2020-09  apertura modale 00:00  (su 22 giorni)
+  2020-10  apertura modale 00:00  (su 22 giorni)
+  2020-11  apertura modale 00:00  (su 20 giorni)
+  2020-12  apertura modale 00:00  (su 22 giorni)
+  2021-01  apertura modale 00:00  (su 20 giorni)
+  2021-02  apertura modale 00:00  (su 20 giorni)
+  2021-03  apertura modale 00:00  (su 23 giorni)
+  2021-04  apertura modale 00:00  (su 22 giorni)
+  2021-05  apertura modale 00:00  (su 20 giorni)
+  2021-06  apertura modale 00:00  (su 22 giorni)
+  2021-07  apertura modale 00:00  (su 22 giorni)
+  2021-08  apertura modale 00:00  (su 22 giorni)
+  2021-09  apertura modale 00:00  (su 22 giorni)
+  2021-10  apertura modale 00:00  (su 21 giorni)
+  2021-11  apertura modale 00:00  (su 22 giorni)
+  2021-12  apertura modale 00:00  (su 22 giorni)
+  2022-01  apertura modale 00:00  (su 21 giorni)
+  2022-02  apertura modale 00:00  (su 20 giorni)
+  2022-03  apertura modale 00:00  (su 23 giorni)
+  2022-04  apertura modale 00:00  (su 20 giorni)
+  2022-05  apertura modale 00:00  (su 22 giorni)
+  2022-06  apertura modale 00:00  (su 22 giorni)
+  2022-07  apertura modale 00:00  (su 21 giorni)
+  2022-08  apertura modale 00:00  (su 23 giorni)
+  2022-09  apertura modale 00:00  (su 22 giorni)
+  2022-10  apertura modale 00:00  (su 21 giorni)
+  2022-11  apertura modale 00:00  (su 22 giorni)
+  2022-12  apertura modale 00:00  (su 21 giorni)
+  2023-01  apertura modale 00:00  (su 21 giorni)
+  2023-02  apertura modale 00:00  (su 20 giorni)
+  2023-03  apertura modale 00:00  (su 23 giorni)
+  2023-04  apertura modale 00:00  (su 19 giorni)
+  2023-05  apertura modale 00:00  (su 23 giorni)
+  2023-06  apertura modale 00:00  (su 22 giorni)
+  2023-07  apertura modale 00:00  (su 20 giorni)
+  2023-08  apertura modale 00:00  (su 23 giorni)
+  2023-09  apertura modale 00:00  (su 21 giorni)
+  2023-10  apertura modale 00:00  (su 22 giorni)
+  2023-11  apertura modale 00:00  (su 22 giorni)
+  2023-12  apertura modale 00:00  (su 20 giorni)
+  2024-01  apertura modale 00:00  (su 22 giorni)
+  2024-02  apertura modale 00:00  (su 21 giorni)
+  2024-03  apertura modale 00:00  (su 20 giorni)
+  2024-04  apertura modale 00:00  (su 22 giorni)
+  2024-05  apertura modale 00:00  (su 23 giorni)
+  2024-06  apertura modale 00:00  (su 20 giorni)
+  2024-07  apertura modale 00:00  (su 23 giorni)
+  2024-08  apertura modale 00:00  (su 22 giorni)
+  2024-09  apertura modale 00:00  (su 21 giorni)
+  2024-10  apertura modale 00:00  (su 23 giorni)
+  2024-11  apertura modale 00:00  (su 21 giorni)
+  2024-12  apertura modale 00:00  (su 21 giorni)
+  2025-01  apertura modale 00:00  (su 22 giorni)
+  2025-02  apertura modale 00:00  (su 20 giorni)
+  2025-03  apertura modale 00:00  (su 21 giorni)
+  2025-04  apertura modale 00:00  (su 21 giorni)
+  2025-05  apertura modale 00:00  (su 22 giorni)
+  2025-06  apertura modale 00:00  (su 21 giorni)
+  2025-07  apertura modale 00:00  (su 23 giorni)
+  2025-08  apertura modale 00:00  (su 21 giorni)
+  2025-09  apertura modale 00:00  (su 22 giorni)
+  2025-10  apertura modale 00:00  (su 23 giorni)
+  2025-11  apertura modale 00:00  (su 19 giorni)
+  2025-12  apertura modale 00:00  (su 22 giorni)
+  2026-01  apertura modale 00:00  (su 21 giorni)
+  2026-02  apertura modale 00:00  (su 20 giorni)
+  2026-03  apertura modale 00:00  (su 22 giorni)
+  2026-04  apertura modale 00:00  (su 21 giorni)
+  2026-05  apertura modale 00:00  (su 21 giorni)
+  2026-06  apertura modale 00:00  (su 22 giorni)
+  2026-07  apertura modale 00:00  (su 23 giorni)
+  INVERNO 00:00   ESTATE 00:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 18:00 (su 306 settimane)
+
+CSV scritto: C:\Users\Master\histdata_m1\NASUSD_M1.csv  (2546517 barre, shift applicato +0 h)
+
+225JPY (jpxjpy): 2357431 barre M1, dal 2019.01.01 18:01 al 2026.07.31 16:13
+  prezzo minimo 16019.32000  massimo 73515.46800
+  ordine di grandezza dentro la banda attesa 6000.0-100000.0: OK
+  2019: 261901 barre
+  2020: 305865 barre
+  2021: 318141 barre
+  2022: 325967 barre
+  2023: 278565 barre
+  2024: 333456 barre
+  2025: 335938 barre
+  2026: 197598 barre
+  buchi intragiornalieri > 60 min: 2092  (peggiore: 512 min dopo 2025.01.09 09:28)
+  giorni feriali SENZA nessuna barra: 10  (primi: 2019-04-19, 2020-04-10, 2020-12-25, 2021-01-01, 2021-12-24)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2019-01  apertura modale 00:00  (su 21 giorni)
+  2019-02  apertura modale 00:00  (su 17 giorni)
+  2019-03  apertura modale 00:00  (su 21 giorni)
+  2019-04  apertura modale 00:00  (su 15 giorni)
+  2019-05  apertura modale 00:00  (su 17 giorni)
+  2019-06  apertura modale 00:00  (su 15 giorni)
+  2019-07  apertura modale 00:00  (su 14 giorni)
+  2019-08  apertura modale 00:00  (su 20 giorni)
+  2019-09  apertura modale 00:00  (su 17 giorni)
+  2019-10  apertura modale 00:00  (su 19 giorni)
+  2019-11  apertura modale 00:00  (su 18 giorni)
+  2019-12  apertura modale 00:00  (su 15 giorni)
+  2020-01  apertura modale 00:00  (su 19 giorni)
+  2020-02  apertura modale 00:00  (su 20 giorni)
+  2020-03  apertura modale 00:00  (su 22 giorni)
+  2020-04  apertura modale 00:00  (su 21 giorni)
+  2020-05  apertura modale 00:00  (su 19 giorni)
+  2020-06  apertura modale 00:00  (su 21 giorni)
+  2020-07  apertura modale 00:00  (su 22 giorni)
+  2020-08  apertura modale 00:00  (su 21 giorni)
+  2020-09  apertura modale 00:00  (su 19 giorni)
+  2020-10  apertura modale 00:00  (su 20 giorni)
+  2020-11  apertura modale 00:00  (su 20 giorni)
+  2020-12  apertura modale 00:00  (su 22 giorni)
+  2021-01  apertura modale 00:00  (su 20 giorni)
+  2021-02  apertura modale 00:00  (su 20 giorni)
+  2021-03  apertura modale 00:00  (su 23 giorni)
+  2021-04  apertura modale 00:00  (su 21 giorni)
+  2021-05  apertura modale 00:00  (su 18 giorni)
+  2021-06  apertura modale 00:00  (su 21 giorni)
+  2021-07  apertura modale 00:00  (su 20 giorni)
+  2021-08  apertura modale 00:00  (su 21 giorni)
+  2021-09  apertura modale 00:00  (su 22 giorni)
+  2021-10  apertura modale 00:00  (su 21 giorni)
+  2021-11  apertura modale 00:00  (su 22 giorni)
+  2021-12  apertura modale 00:00  (su 22 giorni)
+  2022-01  apertura modale 00:00  (su 21 giorni)
+  2022-02  apertura modale 00:00  (su 19 giorni)
+  2022-03  apertura modale 00:00  (su 23 giorni)
+  2022-04  apertura modale 00:00  (su 20 giorni)
+  2022-05  apertura modale 00:00  (su 22 giorni)
+  2022-06  apertura modale 00:00  (su 22 giorni)
+  2022-07  apertura modale 00:00  (su 21 giorni)
+  2022-08  apertura modale 00:00  (su 23 giorni)
+  2022-09  apertura modale 00:00  (su 21 giorni)
+  2022-10  apertura modale 00:00  (su 19 giorni)
+  2022-11  apertura modale 00:00  (su 20 giorni)
+  2022-12  apertura modale 00:00  (su 19 giorni)
+  2023-01  apertura modale 00:00  (su 19 giorni)
+  2023-02  apertura modale 00:00  (su 17 giorni)
+  2023-03  apertura modale 00:00  (su 23 giorni)
+  2023-04  apertura modale 00:00  (su 17 giorni)
+  2023-05  apertura modale 00:00  (su 22 giorni)
+  2023-06  apertura modale 00:00  (su 22 giorni)
+  2023-07  apertura modale 00:00  (su 20 giorni)
+  2023-08  apertura modale 00:00  (su 23 giorni)
+  2023-09  apertura modale 00:00  (su 21 giorni)
+  2023-10  apertura modale 00:00  (su 22 giorni)
+  2023-11  apertura modale 00:00  (su 22 giorni)
+  2023-12  apertura modale 00:00  (su 20 giorni)
+  2024-01  apertura modale 00:00  (su 22 giorni)
+  2024-02  apertura modale 00:00  (su 20 giorni)
+  2024-03  apertura modale 00:00  (su 20 giorni)
+  2024-04  apertura modale 00:00  (su 22 giorni)
+  2024-05  apertura modale 00:00  (su 23 giorni)
+  2024-06  apertura modale 00:00  (su 20 giorni)
+  2024-07  apertura modale 00:00  (su 23 giorni)
+  2024-08  apertura modale 00:00  (su 22 giorni)
+  2024-09  apertura modale 00:00  (su 20 giorni)
+  2024-10  apertura modale 00:00  (su 23 giorni)
+  2024-11  apertura modale 00:00  (su 21 giorni)
+  2024-12  apertura modale 00:00  (su 21 giorni)
+  2025-01  apertura modale 00:00  (su 22 giorni)
+  2025-02  apertura modale 00:00  (su 20 giorni)
+  2025-03  apertura modale 00:00  (su 21 giorni)
+  2025-04  apertura modale 00:00  (su 21 giorni)
+  2025-05  apertura modale 00:00  (su 22 giorni)
+  2025-06  apertura modale 00:00  (su 21 giorni)
+  2025-07  apertura modale 00:00  (su 23 giorni)
+  2025-08  apertura modale 00:00  (su 21 giorni)
+  2025-09  apertura modale 00:00  (su 22 giorni)
+  2025-10  apertura modale 00:00  (su 23 giorni)
+  2025-11  apertura modale 00:00  (su 19 giorni)
+  2025-12  apertura modale 00:00  (su 22 giorni)
+  2026-01  apertura modale 00:00  (su 21 giorni)
+  2026-02  apertura modale 00:00  (su 20 giorni)
+  2026-03  apertura modale 00:00  (su 22 giorni)
+  2026-04  apertura modale 00:00  (su 21 giorni)
+  2026-05  apertura modale 00:00  (su 21 giorni)
+  2026-06  apertura modale 00:00  (su 22 giorni)
+  2026-07  apertura modale 00:00  (su 23 giorni)
+  INVERNO 00:00   ESTATE 00:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 18:00 (su 243 settimane)
+
+CSV scritto: C:\Users\Master\histdata_m1\225JPY_M1.csv  (2357431 barre, shift applicato +0 h)
+
+SPXUSD (spxusd): 2481265 barre M1, dal 2019.01.01 18:00 al 2026.07.31 16:13
+  prezzo minimo 2184.23700  massimo 7620.04800
+  ordine di grandezza dentro la banda attesa 600.0-12000.0: OK
+  2019: 308298 barre
+  2020: 334202 barre
+  2021: 333528 barre
+  2022: 341611 barre
+  2023: 291380 barre
+  2024: 334338 barre
+  2025: 339076 barre
+  2026: 198832 barre
+  buchi intragiornalieri > 60 min: 2087  (peggiore: 512 min dopo 2025.01.09 09:28)
+  giorni feriali SENZA nessuna barra: 10  (primi: 2019-04-19, 2020-04-10, 2020-12-25, 2021-01-01, 2021-12-24)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2019-01  apertura modale 00:00  (su 20 giorni)
+  2019-02  apertura modale 00:00  (su 16 giorni)
+  2019-03  apertura modale 00:00  (su 21 giorni)
+  2019-04  apertura modale 00:00  (su 16 giorni)
+  2019-05  apertura modale 00:00  (su 19 giorni)
+  2019-06  apertura modale 00:00  (su 16 giorni)
+  2019-07  apertura modale 00:00  (su 15 giorni)
+  2019-08  apertura modale 00:00  (su 19 giorni)
+  2019-09  apertura modale 00:00  (su 18 giorni)
+  2019-10  apertura modale 00:00  (su 16 giorni)
+  2019-11  apertura modale 00:00  (su 19 giorni)
+  2019-12  apertura modale 00:00  (su 13 giorni)
+  2020-01  apertura modale 00:00  (su 18 giorni)
+  2020-02  apertura modale 00:00  (su 20 giorni)
+  2020-03  apertura modale 00:00  (su 19 giorni)
+  2020-04  apertura modale 00:00  (su 21 giorni)
+  2020-05  apertura modale 00:00  (su 21 giorni)
+  2020-06  apertura modale 00:00  (su 22 giorni)
+  2020-07  apertura modale 00:00  (su 22 giorni)
+  2020-08  apertura modale 00:00  (su 21 giorni)
+  2020-09  apertura modale 00:00  (su 22 giorni)
+  2020-10  apertura modale 00:00  (su 22 giorni)
+  2020-11  apertura modale 00:00  (su 20 giorni)
+  2020-12  apertura modale 00:00  (su 22 giorni)
+  2021-01  apertura modale 00:00  (su 20 giorni)
+  2021-02  apertura modale 00:00  (su 20 giorni)
+  2021-03  apertura modale 00:00  (su 23 giorni)
+  2021-04  apertura modale 00:00  (su 19 giorni)
+  2021-05  apertura modale 00:00  (su 18 giorni)
+  2021-06  apertura modale 00:00  (su 20 giorni)
+  2021-07  apertura modale 00:00  (su 21 giorni)
+  2021-08  apertura modale 00:00  (su 21 giorni)
+  2021-09  apertura modale 00:00  (su 21 giorni)
+  2021-10  apertura modale 00:00  (su 21 giorni)
+  2021-11  apertura modale 00:00  (su 22 giorni)
+  2021-12  apertura modale 00:00  (su 21 giorni)
+  2022-01  apertura modale 00:00  (su 21 giorni)
+  2022-02  apertura modale 00:00  (su 19 giorni)
+  2022-03  apertura modale 00:00  (su 23 giorni)
+  2022-04  apertura modale 00:00  (su 20 giorni)
+  2022-05  apertura modale 00:00  (su 22 giorni)
+  2022-06  apertura modale 00:00  (su 22 giorni)
+  2022-07  apertura modale 00:00  (su 21 giorni)
+  2022-08  apertura modale 00:00  (su 23 giorni)
+  2022-09  apertura modale 00:00  (su 22 giorni)
+  2022-10  apertura modale 00:00  (su 21 giorni)
+  2022-11  apertura modale 00:00  (su 22 giorni)
+  2022-12  apertura modale 00:00  (su 21 giorni)
+  2023-01  apertura modale 00:00  (su 21 giorni)
+  2023-02  apertura modale 00:00  (su 19 giorni)
+  2023-03  apertura modale 00:00  (su 22 giorni)
+  2023-04  apertura modale 00:00  (su 17 giorni)
+  2023-05  apertura modale 00:00  (su 23 giorni)
+  2023-06  apertura modale 00:00  (su 18 giorni)
+  2023-07  apertura modale 00:00  (su 19 giorni)
+  2023-08  apertura modale 00:00  (su 23 giorni)
+  2023-09  apertura modale 00:00  (su 20 giorni)
+  2023-10  apertura modale 00:00  (su 20 giorni)
+  2023-11  apertura modale 00:00  (su 22 giorni)
+  2023-12  apertura modale 00:00  (su 20 giorni)
+  2024-01  apertura modale 00:00  (su 21 giorni)
+  2024-02  apertura modale 00:00  (su 21 giorni)
+  2024-03  apertura modale 00:00  (su 20 giorni)
+  2024-04  apertura modale 00:00  (su 21 giorni)
+  2024-05  apertura modale 00:00  (su 21 giorni)
+  2024-06  apertura modale 00:00  (su 16 giorni)
+  2024-07  apertura modale 00:00  (su 20 giorni)
+  2024-08  apertura modale 00:00  (su 22 giorni)
+  2024-09  apertura modale 00:00  (su 21 giorni)
+  2024-10  apertura modale 00:00  (su 23 giorni)
+  2024-11  apertura modale 00:00  (su 21 giorni)
+  2024-12  apertura modale 00:00  (su 21 giorni)
+  2025-01  apertura modale 00:00  (su 22 giorni)
+  2025-02  apertura modale 00:00  (su 20 giorni)
+  2025-03  apertura modale 00:00  (su 21 giorni)
+  2025-04  apertura modale 00:00  (su 21 giorni)
+  2025-05  apertura modale 00:00  (su 22 giorni)
+  2025-06  apertura modale 00:00  (su 21 giorni)
+  2025-07  apertura modale 00:00  (su 23 giorni)
+  2025-08  apertura modale 00:00  (su 21 giorni)
+  2025-09  apertura modale 00:00  (su 20 giorni)
+  2025-10  apertura modale 00:00  (su 23 giorni)
+  2025-11  apertura modale 00:00  (su 19 giorni)
+  2025-12  apertura modale 00:00  (su 22 giorni)
+  2026-01  apertura modale 00:00  (su 21 giorni)
+  2026-02  apertura modale 00:00  (su 20 giorni)
+  2026-03  apertura modale 00:00  (su 22 giorni)
+  2026-04  apertura modale 00:00  (su 21 giorni)
+  2026-05  apertura modale 00:00  (su 21 giorni)
+  2026-06  apertura modale 00:00  (su 22 giorni)
+  2026-07  apertura modale 00:00  (su 23 giorni)
+  INVERNO 00:00   ESTATE 00:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 18:00 (su 342 settimane)
+
+CSV scritto: C:\Users\Master\histdata_m1\SPXUSD_M1.csv  (2481265 barre, shift applicato +0 h)
+
+righe scartate 0 | OHLC incoerenti 0 | duplicate 1767 | zip rotti 0
+
+PROSSIMO PASSO (ultimo miglio, IDENTICO alla strada Dukascopy):
+  1. copiare il/i CSV in MQL5\Files del terminale BCM DI BACKTEST
+  2. lanciare ABTG_ImportaStoricoEsterno con InpFormato=1,
+     InpSimboloSorgente=<simbolo BCM>, InpSimboloNuovo=<simbolo>_EXT,
+     InpAutoShift=true, InpShiftMax=6
+  3. lo shift calibrato DEVE uscire +5 (come gli 8 forex del 15/08).
+     Un altro numero = fermarsi e capire, NON importare.
+  4. cancello ZERO: diff media > 0,05% o copertura < 80% -> non si usa.
+  5. chiusura PULITA di MT5 (lezione 14/08).
+
+ESITO: FALLITO -- 1 problemi:
+  - grxeur: ALLARME banda di prezzo

@@ -492,3 +492,35 @@ sono già sul disco.
 
 > ▶️ **Si rilancia il blocco del PASSO 3 del §7, identico**, con l'unica
 > differenza del marcatore `HD-M1-v3`.
+
+## 13. ⚖️ PASSO 3 COMPLETO (18/08, 21:07) — TRE PROMOSSI, D30EUR BOCCIATO DAL CANCELLO (per davvero)
+
+Referto archiviato: `referto_histdata_2026-08-18_2107_corsa_completa.txt`
+(HD-M1-v3, 56 zip in cache, 0 falliti, 0 scartate, 0 zip rotti).
+
+**PROMOSSI (pronti per il passo 4, import come _EXT):**
+| simbolo | barre 2019-2026/07 | banda | fuso |
+|---|---|---|---|
+| NASUSD | 2.546.517 | OK (6.124-30.760) | SEGUE il DST, 91/91 mesi apertura 00:00 |
+| 225JPY | 2.357.431 | OK (16.019-73.515) | SEGUE il DST, 91/91 |
+| SPXUSD | 2.481.265 | OK (2.184-7.620) | SEGUE il DST, 91/91 |
+
+**BOCCIATO: D30EUR (grxeur) — e stavolta il cancello ha ragione.**
+1. **Prezzo minimo 2.906,949**: un DAX sotto 8.000 non esiste nel 2019-2026
+   (minimo Covid ~8.255). Righe marce DENTRO i file HistData GRXEUR,
+   in anni da individuare (il 2025, gia' validato al par. 11, era pulito:
+   min 18.809).
+2. **Sessione ballerina**: apertura modale 00:00 fino a 2020-05, POI 02:00
+   da 2020-06 a 2023-11, POI di nuovo 00:00. Non e' DST (le altre tre serie
+   sono 00:00 fisse): il feed GRXEUR ha CAMBIATO orari di copertura per 3,5
+   anni (conteggi annui coerenti: 187-205k barre contro 330k). VERDETTO
+   FUSO: INCERTO — onesto.
+3. Conseguenza: **NON importare D30EUR da HistData** finche' una diagnosi
+   non dica DOVE stanno le righe marce e cosa copre davvero la sessione
+   2020-2023. NASUSD/225JPY/SPXUSD non hanno nessuno dei due problemi.
+
+Strade per il DAX lungo, in ordine: (a) diagnosi chirurgica del CSV
+HistData (giorni con prezzi impossibili + mappa sessioni) e eventuale
+bonifica DICHIARATA; (b) Dukascopy DAX (crawl lento, come il Dow);
+(c) nativo BCM dal 2024-09. Il passo 4 dei tre promossi resta in coda
+DOPO i round notturni (unico MT5).
