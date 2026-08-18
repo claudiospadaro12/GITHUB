@@ -642,3 +642,15 @@ via screenshot in chat:
 Giri a vuoto R84 e R83 usciti 0. Anteprime verificate in chat: ore server
 8:00/14:30, Model=4 (tick reali), finestra 2024.09.26-2025.06.09, magic
 776xxx/777xxx senza collisioni con le sedie vive.
+
+## PASSO 3 — CANARINO R84 PROMOSSO (18/08, 21:55)
+
+- Meccanica: 2 CSV attesi / 0 mancanti, per-trade raccolti, data: fresca.
+- DETERMINISMO: magic gemelli 776010/776011 identici al centesimo.
+- DURATA VERA: ~6-7 min a cella (21:48 -> 21:55) -> 9 celle ~1 ora.
+  Le stime [STIMA NON MISURATA] sono sostituite dalla misura.
+- Numeri cella A (scheletro nudo): IS +686,35 PF 1,254 n=156 DD 6,14% |
+  OOS -795,03 PF 0,873 n=291 DD 17,07%. Conferma a tick reali del verdetto
+  noto sulla 770201: la domanda del round (i filtri salvano lo scheletro?)
+  resta alle celle B-I. Campioni sopra n=150 in entrambe le finestre.
+- CSV in r84_csv/.

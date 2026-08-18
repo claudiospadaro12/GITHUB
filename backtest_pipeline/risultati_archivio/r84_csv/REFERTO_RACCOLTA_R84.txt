@@ -1,0 +1,11 @@
+REFERTO DI RACCOLTA - R84 ABLAZIONE FILTRI (Nasdaq apertura US)
+data: 2026-08-18 21:55
+riferimento (commit/branch): 2458b33415f6120c3bee0cd7f0ba9b9ab26d4d1b
+macchina: DESKTOP-H4D7CAJ   utente: Master
+deposito: 10000   modello: 4   EA: ABTG_Nasdaq_Apertura_US   simbolo: NASUSD
+celle girate: A
+CSV attesi: 2   mancanti: 0
+serie per-trade raccolte: 2 (solo finestra OOS)
+
+La riga 'data:' qui sopra deve essere di ADESSO. Se e' vecchia, stai
+guardando una raccolta precedente e non i file di questa corsa.
