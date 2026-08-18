@@ -1,0 +1,15 @@
+Bentornato, sei pronto per implementare questa strategia di breakout? Passiamo subito sul grafico e andiamo a studiare gli indicatori che ci serviranno per fare lo studio appunto delle operazioni. Andiamo sulla nostra piattaforma MT4, iniziamo intanto a studiare gli indicatori che ci serviranno. Utilizzeremo il Supertrend ancora una volta e il nostro Williams, sempre settato a 140 periodi. 
+
+Attenzione, la strategia di breakout è estremamente performante per alcune coppie in particolare, in modo specifico per le coppie con lo Yen. Pertanto setteremo un profilo che conterrà tutte le coppie sulle quali noi possiamo appunto implementare questa tecnica. Partiamo dall'inizio, allora. 
+
+Abbiamo salvato il nostro setup di base con l'indicatore Williams e con il nostro Supertrend. Lo abbiamo fatto nel modulo precedente e lo abbiamo chiamato Williams e Supertrend. Allora, apriamo adesso i nostri grafici partendo dal dollaro Yen che ho qui sullo schermo e poi inseriamo tutte le altre coppie con lo Yen. 
+
+Euro Yen, finestra di grafico, Franco Yen, CAD Yen, vediamo se lo troviamo, eccolo qua, GBP Yen, NZD Yen e Audi Yen. Allora, dollaro, euro Yen, sterlina Yen, Franco Yen, CAD Yen, NZD Yen e Audi Yen. Ok, sono 7. Bene, per ogni coppia apriamo il setup, il formato che contiene gli indicatori che abbiamo studiato.
+
+L'abbiamo chiamato Williams e Supertrend e lo facciamo per tutte le coppie. Williams e Supertrend, eccolo qua, tasto destro del mouse, formato Williams, facciamo anche per la sterlina Williams. Ecco qua, apriamo l'ultimo formato Williams.
+
+Ok, abbiamo così selezionato tutte le coppie sulle quali andremo a lavorare. Salviamo questo profilo, profilo, salva profilo, lo chiamiamo breakout. Ecco qui. 
+
+In questo modo, ogni volta che arriverai sul grafico e dovrai tradare e selezionare un segnale con la strategia di breakout, potrai selezionare questo profilo tra quelli salvati, breakout, eccolo qua, oppure mediazione, qualora dovessi andare sulla mediazione. Bene, altro elemento di cui abbiamo bisogno è, intanto, ritornare sul sito per il calcolatore della posizione, andare ovviamente a selezionare eventualmente i cross che dobbiamo tradare, questo lo faremo, adesso magari selezioniamo il dollaro Yen o Audi Yen, impostiamo intanto il nostro conto, il valore del conto, la valuta appunto del nostro conto, iniziamo a inserire il rischio 1% per l'operazione e poi andremo a calcolare l'eventuale quantità di pip che ci serve. Questi sono gli unici due strumenti che ci occorrono per poter, intanto, implementare questo tipo di operazione.
+
+Bene, abbiamo preparato questo nostro piano di lavoro, ci vediamo nel prossimo video per iniziare a trovare il nostro primo segnale. A presto.

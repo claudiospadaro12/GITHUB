@@ -1,0 +1,59 @@
+Bene, ben ritrovato. Andiamo subito a inserire il nostro segnale di ingresso sulla strategia di breakout. Ci posizioniamo sulla nostra piattaforma MT4, in modo particolare andiamo a lavorare sul cross dollaro yen. 
+
+Allora, risolviamo un primo problema. Come individuare una fase laterale che possa, in qualche modo, anticipare lo sviluppo di un movimento di breakout? Anche nel nostro caso lavoreremo con il nostro Williams che si deve posizionare, si deve trovare o nell'area di ipercomprato o nell'area di ipervenduto. In questo caso vediamo che per la coppia dollaro yen il nostro Williams è in area di ipercomprato, quindi l'unica direzione che potremo seguire per le nostre operazioni sarà un sell, quindi dovremmo andare in vendita.
+
+Dobbiamo, prima di tutto, individuare la formazione di una fase laterale che, mentre il nostro Williams si trova, infatti, in area di ipercomprato, dobbiamo selezionare un rettangolo che deve contenere 15 candele. Tenete presente che questo rettangolo sarà aggiornato. Man mano che si svilupperanno dei nuovi movimenti, il rettangolo traslerà in avanti e quindi ci definirà dei nuovi livelli di massimo e di minimo, fino ad arrivare al punto di segnale. 
+
+Il punto di segnale è dato dal superamento, intanto dal super trend che deve passare rosso, è il Williams che deve uscire dall'area di ipercomprato. Per esempio, in questa situazione attuale ci troviamo che un punto di rottura, quindi un punto intanto di segnale di ingresso sell, è stato dato con questa candela. Adesso vediamo se riusciamo a riprendere il nostro segnale di ingresso.
+
+Da questo momento, infatti, possiamo racchiudere con le 15 candele precedenti all'interno di un rettangolo, in modo tale da andare a visualizzare un canale laterale. Allora, passiamo da qui. Questo canale deve contenere almeno 15 candele, compresa anche la candela di rottura, se vogliamo.
+
+Andiamo a calcolare, ecco qui, un canale di 15 candele. Consideriamo 1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 19 e 20. Ok, questo è il rettangolo laterale che si è formato nelle 20 candele che precedono la candela di rottura del movimento.
+
+All'interno di questo rettangolo dobbiamo andare a selezionare i punti di minimo, quindi il minimo assoluto segnato dalle candele, e il massimo assoluto. Facciamo in nero per non confonderlo con lo stop. Ok, allora, coloriamolo in nero.
+
+Eccolo qua. Questo è il livello più basso toccato dalle candele e questo è il livello più alto toccato dalle candele in questa congestione laterale che deve abbracciare almeno 20 candele. Questa congestione sarà aggiornata periodicamente, in quanto le candele, sviluppando un movimento, potrebbero mantenersi ulteriormente nella fase laterale o creare un'ulteriore compressione di volatilità.
+
+Quindi sarà importante andare a selezionare, andare a restringere il rettangolo, in modo tale da avere questi livelli di massimo e di minimo, che sono i nostri livelli di riferimento per la nostra operazione. L'operazione scatterà nel momento in cui, intanto, il canale sarà rotto, in questo caso a ribasso, perché ci troviamo con un Williams che si trova in area di ipercomprato. Le rotture a rialzo non saranno valutate in questo contesto, viceversa in caso ovviamente di situazione in cui il Williams si troverà in area di ipervenduto.
+
+Quale sarà il segnale di ingresso? Il segnale di ingresso è dato dalla rottura del canale con chiusura di candela, quindi la candela di breakout dovrebbe avere una chiusura inferiore rispetto al livello di minimo segnato all'interno della fase laterale. Dobbiamo avere un super trend rosso e un Williams che esce dall'area di ipervenduto. In questo caso, visto che ci sono stati dei dati nel pomeriggio, in realtà il segnale è stato dato da questa candela qui, la candela delle 14.30 in realtà, la piattaforma indietro di due ore rispetto alle ore al nostro orario effettivo.
+
+Quindi questo livello è il livello di ingresso della nostra posizione. Andremo a studiare come poi sviluppare il segnale. La cosa interessante da seguire è vedere la formazione di questo canale laterale.
+
+Ci concentreremo in questo video su questo aspetto, la parte dell'inserimento dell'ordine e della valutazione del segnale la facciamo nel capitolo successivo. Vediamo come costruire questi canali laterali su tutti i grafici delle valute che noi abbiamo a disposizione. Il canale deve essere realizzato nel momento in cui il Williams entra o in ipercomprato o in ipervenduto.
+
+Vedete, in questo caso siamo su Euro-Yen, ancora non è stato realizzato, il Williams non è entrato nell'area di ipercomprato, pertanto non potrà essere tracciato un nuovo canale. Il canale sarà elaborato nel momento in cui avremo questo ingresso dell'indicatore e a quel punto si inizierà a contare il nostro canale, nel senso che dovremo andare da quella candela in avanti per almeno 20 candele seguenti. Quindi prima di quel tempo noi non riusciremo ad avere nessun setup di breakout.
+
+Guardiamo gli altri grafici per vedere la situazione. Ecco qua, Franco-Yen invece è già entrato in area di ipercomprato, quindi si può tracciare il canale a partire da questo momento qui. Vediamo come si dovrà aggiornare il canale stesso.
+
+Partiamo da questa candela. Allora, vediamo qua la candela di inizio del movimento che è questa qua. Riportiamo il canale indietro a partire da quella candela compresa e iniziamo a conteggiare i nostri 20 candele.
+
+Allora, ecco qua, le 20 candele arriverebbero qui, ok? A quel punto sono state tracciate delle nuove candele, quindi questa fase laterale deve essere aggiornata. Dobbiamo inserire 6 candele ancora e quindi chiudere, uscire di altre 6 candele perché il nostro rettangolo dovrà contenere 20 candele. Vediamo partendo da qui quante candele abbiamo inserito.
+
+6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19 e 20. Ecco, questa è la ventesima candela. Raccogliendo queste 20 candele, attualmente abbiamo due livelli che sono il livello di massimo assoluto, che è il massimo ottenuto da questa candela, e il livello di minimo assoluto, che è quello invece realizzato da questa candela verde qui.
+
+Naturalmente valuteremo solo il breakout a ribasso perché il nostro Williams si trova in area di percomprato. Per il setup d'ingresso abbiamo bisogno della rottura di questo livello di minimo attualmente, che deve avvenire con chiusura di candela, rottura di super trend, quindi super trend che deve passare in rosso, e Williams che deve uscire dall'area di ipercomprato. Se nel frattempo non si dovesse verificare un breakout ma i prezzi dovessero continuare a salire, dovremmo aggiornare ulteriormente il nostro canale, racchiudendo sempre le ultime 20 candele e valutando i livelli di massimo e di minimo del nuovo rettangolo.
+
+Potete così preparare il vostro studio, i vostri grafici quotidianamente e aggiornarli fino a che non si verifica la situazione di breakout. Andiamo a vedere cosa succede su CAD Yen in questo momento. Vedete, CAD Yen non è ancora entrato in area di percomprato, quindi non possiamo iniziare a calcolare nessun rettangolo attualmente.
+
+Non ci sono operazioni di breakout intanto da valutare. Perché no? Non ci potrebbero essere delle fasi laterali? Sì, sicuramente, ma non sarebbero talmente forti e esplosive da determinare un movimento adatto a raggiungere i nostri obiettivi di target. E questo perché? Perché il Williams non è in ipercomprato.
+
+Se il Williams non è in ipercomprato vuol dire che non ho la forza adeguata per poter realizzare un movimento a scendere. Quindi eviteremo in questo momento di tracciare dei canali su questo cross, fino a che non sarà entrato il Williams nell'area di percomprato. Vediamo GBP Yen. 
+
+GBP Yen è nella stessa situazione, anche qui vedete c'è una fase laterale, ma non è adatta al setup di breakout che a noi serve. NZD Yen, invece, è entrato in area di percomprato. Iniziamo a valutare il comportamento dei prezzi intorno a quest'area.
+
+Come vedete si osserva che c'è comunque una tendenza, però non importa. Iniziamo a costruire il canale, tanto sarà il canale a darci i setup di ingresso. Partiamo dal primo, dalla prima entrata. 
+
+La prima entrata è partita qui. Tracciamo un canale di 20 candele, 20 arriviamo qui, ok. Vedete, una volta individuato il canale i prezzi si sono spostati, vedete, hanno continuato a salire.
+
+Quindi vuol dire che ci hanno dato dei nuovi livelli. Inizieremo a studiare questi nuovi livelli, andando avanti di 20 candele ancora, fino a che non arriviamo nella candela attuale. Ecco qui. 
+
+Abbiamo un ulteriore rettangolo. Controlliamo che contenga le 20 candele, ok, questa è la ventesima, e a questo punto lo aggiorniamo con i livelli di minimo e i livelli di massimo che sono stati toccati. Tracciamo le nostre linee orizzontali. 
+
+Valuteremo solo il nostro breakout al ribasso, quindi se dovesse rompere il mercato, dovesse rompere questo livello di minimo entreremo al ribasso. Nel caso dovesse rompere al rialzo invece rimaniamo fuori dall'operazione fino a che non si verificherà l'effettivo setup. Controlliamo l'ultimo grafico, Audien. 
+
+Anche Audien si trova in area di percomprato. Possiamo vedere che ancora non ha fatto nessuna rottura e quindi a questo punto partiamo da livello attuale e andiamo a calcolare il nostro rettangolo. Deve contenere 20 candele, lo allarghiamo a sufficienza, ecco si ferma qui, quindi controlliamo che contenga le nostre 20 candele, lo contiene qui, possiamo usare anche questo strumento che vi farà vedere il numero di candele.
+
+Vedete il primo numero 20, 4, 5, 5, 20 sono le candele che sono contenute tra la candela di inizio e la candela di fine del rettangolo. Quindi abbiamo 20 candele, all'interno di queste 20 candele abbiamo i livelli di minimo assoluto e i livelli di massimo assoluto. Abbiamo preparato a questo punto per tutte le nostre coppie valutarie il setup di entrata, qui ancora ci manca perché deve ancora entrare, qui l'abbiamo calcolato, questo non è ancora entrato, non è entrato, questo l'abbiamo valutato e questo anche.
+
+Abbiamo preparato il lavoro per tutte le coppie valutarie che andremo a studiare. Adesso attendiamo il nostro livello di ingresso, lo studieremo nel prossimo video, video all'interno del quale inseriremo delle operazioni in macchina, considereremo un setup già verificato e poi tutte le situazioni intanto in corso. Ti aspetto al prossimo appuntamento.
