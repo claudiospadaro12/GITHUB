@@ -76,8 +76,10 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 
 BASE = "https://datafeed.dukascopy.com/datafeed"
+VERSIONE = "DUKA-M1-v2"            # marcatore: la riga di lancio lo cerca PRIMA di eseguire
 RECORD = struct.Struct(">IIIff")   # ms-offset, p1, p2, vol1, vol2 (big-endian)
 ATTESE_RETRY = [2, 5, 15, 30]      # secondi, come sonda_dukascopy.ps1
+MAX_ERR_CONSEC = 20                # 15/08: quando Dukascopy bandisce risponde 503 a TUTTO
 
 # Controllo positivo: URL che la sonda del 15/08 ha VISTO rispondere
 # (giro3: EURUSD 2025 OK 24043 byte, ora 15 UTC del 16 giugno).
@@ -162,6 +164,21 @@ def url_ora(sym, dt_utc):
         BASE, sym, dt_utc.year, dt_utc.month - 1, dt_utc.day, dt_utc.hour)
 
 
+def decodificabile(dati):
+    """Un .bi5 valido si apre. Serve a NON mettere in cache spazzatura (pagina
+    d'errore servita con 200, risposta troncata) e a scoprire una cache
+    AVVELENATA da un Ctrl+C preso a meta' scrittura: senza questo controllo
+    quell'ora e' persa per sempre, perche' ogni rilancio la rilegge dalla
+    cache, fallisce la decodifica e tira dritto."""
+    if not dati:
+        return True
+    try:
+        decodifica_bi5(dati)
+        return True
+    except Exception:
+        return False
+
+
 def scarica_ora_con_cache(sym, dt_utc, cartella_raw, pausa_ms, contatori):
     """Torna i byte .bi5 dell'ora (b'' se assente/vuota), usando la cache."""
     d = os.path.join(cartella_raw, sym, "%04d" % dt_utc.year,
@@ -169,27 +186,45 @@ def scarica_ora_con_cache(sym, dt_utc, cartella_raw, pausa_ms, contatori):
     f_ok = os.path.join(d, "%02dh_ticks.bi5" % dt_utc.hour)
     f_no = f_ok + ".assente"
     if os.path.exists(f_ok):
-        contatori["cache"] += 1
         with open(f_ok, "rb") as fh:
-            return fh.read()
+            dati = fh.read()
+        if decodificabile(dati):
+            contatori["cache"] += 1
+            return dati
+        log("      cache illeggibile (%d byte): la butto e riscarico -> %s"
+            % (len(dati), f_ok))
+        os.remove(f_ok)
     if os.path.exists(f_no):
         contatori["cache"] += 1
         return b""
     esito, dati = scarica_url(url_ora(sym, dt_utc), pausa_ms)
     if esito == "OK":
+        if not decodificabile(dati):
+            contatori["errori"] += 1
+            contatori["consecutivi"] += 1
+            contatori["ultimo_errore"] = ("risposta di %d byte non decodificabile su %s"
+                                          % (len(dati), url_ora(sym, dt_utc)))
+            return b""
         os.makedirs(d, exist_ok=True)
-        with open(f_ok, "wb") as fh:
+        tmp = f_ok + ".tmp"
+        with open(tmp, "wb") as fh:
             fh.write(dati)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, f_ok)          # ATOMICA: o c'e' tutto o non c'e' niente
         contatori["scaricate"] += 1
         contatori["byte"] += len(dati)
+        contatori["consecutivi"] = 0
         return dati
     if esito == "ASSENTE":
         os.makedirs(d, exist_ok=True)
         with open(f_no, "wb"):
             pass
         contatori["assenti"] += 1
+        contatori["consecutivi"] = 0
         return b""
     contatori["errori"] += 1
+    contatori["consecutivi"] += 1
     contatori["ultimo_errore"] = "%s su %s" % (esito, url_ora(sym, dt_utc))
     return b""
 
@@ -314,9 +349,22 @@ def referto_barre(sym_bcm, barre, fuso):
 # ---------------------------------------------------------------------
 #  RACCOLTA SUL DESKTOP (regola delle righe di lancio, punto 2)
 # ---------------------------------------------------------------------
+def trova_desktop():
+    """Il Desktop VERO: con OneDrive attivo ~/Desktop puo' non esistere piu'."""
+    casa = os.path.expanduser("~")
+    for c in (os.path.join(casa, "Desktop"),
+              os.path.join(casa, "OneDrive", "Desktop"),
+              os.path.join(casa, "OneDrive - Personale", "Desktop")):
+        if os.path.isdir(c):
+            return c
+    return None
+
+
 def raccogli_desktop(file_da_copiare, nome_zip):
-    desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-    base = desktop if os.path.isdir(desktop) else os.getcwd()
+    desktop = trova_desktop()
+    base = desktop if desktop else os.getcwd()
+    if not desktop:
+        log("ATTENZIONE: nessun Desktop trovato, raccolgo nella cartella corrente.")
     dest = os.path.join(base, "dukascopy_m1")
     os.makedirs(dest, exist_ok=True)
     import shutil
@@ -478,15 +526,18 @@ def corri(argv):
 
     righe_referto = []
     file_prodotti = []
+    falliti = []
+    incompleti = []
     for sym in simboli:
         if sym not in STRUMENTI:
             log("SALTO %s: strumento non in tabella (aggiungi banda plausibile)." % sym)
+            falliti.append(sym)
             continue
         bcm, banda_min, banda_max = STRUMENTI[sym]
         log("")
         log("--- %s -> %s ---" % (sym, bcm))
         contatori = {"scaricate": 0, "assenti": 0, "errori": 0, "cache": 0,
-                     "byte": 0, "ultimo_errore": ""}
+                     "byte": 0, "ultimo_errore": "", "consecutivi": 0}
         barre = {}
         ordine_deciso = None
         divisore_deciso = args.divisore if args.divisore > 0 else None
@@ -494,11 +545,20 @@ def corri(argv):
         t0 = time.time()
         n_giorni = sum(1 for _ in giorni(da, a))
         fatti = 0
+        stop_totale = False
         for giorno in giorni(da, a):
             ticks_del_giorno = []
             for h in range(24):
                 ora = giorno.replace(hour=h)
                 dati = scarica_ora_con_cache(sym, ora, raw, args.pausa_ms, contatori)
+                if contatori["consecutivi"] >= MAX_ERR_CONSEC:
+                    log("STOP: %d errori DI FILA. Ultimo: %s"
+                        % (contatori["consecutivi"], contatori["ultimo_errore"]))
+                    log("     Il 15/08 Dukascopy ha risposto 503 a TUTTO: e' un ban")
+                    log("     temporaneo, non un buco di storico. Aspetta e rilancia la")
+                    log("     STESSA riga: la cache riparte da dove era.")
+                    stop_totale = True
+                    break
                 if not dati:
                     continue
                 try:
@@ -509,6 +569,9 @@ def corri(argv):
                     contatori["errori"] += 1
                     continue
                 ticks_del_giorno.append((ora, ticks))
+            if stop_totale:
+                falliti.append(sym)
+                break
             # misure una tantum sul primo giorno con dati
             if ticks_del_giorno and ordine_deciso is None:
                 tutti = [t for _, tt in ticks_del_giorno for t in tt]
@@ -516,6 +579,7 @@ def corri(argv):
                 if ordine_deciso is None:
                     log("ORDINE CAMPI NON DECIDIBILE (coerenza %.1f%%). MI FERMO su %s."
                         % (quota * 100, sym))
+                    falliti.append(sym)
                     break
                 log("   ordine campi misurato: %s (coerenza %.1f%% su %d tick)"
                     % (ordine_deciso, quota * 100, len(tutti)))
@@ -523,8 +587,11 @@ def corri(argv):
                     campione_prezzi = [t[1] for t in tutti]
                     divisore_deciso, med = misura_divisore(campione_prezzi, banda_min, banda_max)
                     if divisore_deciso is None:
-                        log("DIVISORE AMBIGUO (candidati in banda: %s). Rilancia con --divisore. MI FERMO su %s."
-                            % (med, sym))
+                        log("DIVISORE NON DECIDIBILE (%s). Rilancia con --divisore. MI FERMO su %s."
+                            % (("NESSUN 10^k mette la mediana nella banda %g-%g: "
+                                "formato diverso dall'atteso" % (banda_min, banda_max))
+                               if not med else "piu' candidati in banda: %s" % (med,), sym))
+                        falliti.append(sym)
                         break
                     log("   divisore misurato: %d (mediana %.2f, banda %g-%g)"
                         % (divisore_deciso, med, banda_min, banda_max))
@@ -550,21 +617,38 @@ def corri(argv):
             righe.append("  ULTIMO ERRORE: " + contatori["ultimo_errore"])
             righe.append("  (con errori > 0 la copertura NON e' garantita: rilancia,")
             righe.append("   la cache evita di riscaricare quello che c'e' gia')")
+        if not barre and sym not in falliti:
+            falliti.append(sym)
+        if contatori["errori"] > 0 and sym not in falliti and sym not in incompleti:
+            incompleti.append(sym)
         for r in righe:
             log(r)
         righe_referto.extend(righe + [""])
 
     # --- referto + raccolta Desktop --------------------------------
+    esito = ("FALLITO: " + ", ".join(falliti)) if falliti else (
+            ("COMPLETO MA CON BUCHI (rilancia): " + ", ".join(incompleti)) if incompleti else "OK")
     ref_path = os.path.join(out, "referto_dukascopy_m1.txt")
     with open(ref_path, "w") as f:
         f.write("=== DUKASCOPY -> M1: referto ===\n")
-        f.write("generato: %s UTC\n" % datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"))
+        f.write("versione: %s\n" % VERSIONE)
+        f.write("comando : %s\n" % " ".join(argv))
+        f.write("ESITO   : %s\n" % esito)
+        f.write("data: %s (ora del PC)  =  %s UTC\n" % (
+            datetime.now().strftime("%Y-%m-%d %H:%M"),
+            datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")))
         f.write("fuso timestamp: %s\n\n" % ("ora di New York (convenzione HistData, shift atteso +5)"
                                             if args.fuso == "ny" else "UTC"))
         f.write("\n".join(righe_referto))
     file_prodotti.append(ref_path)
     raccogli_desktop(file_prodotti, "dukascopy_m1.zip")
     log("")
+    log("ESITO: " + esito)
+    if falliti:
+        return 1
+    if incompleti:
+        log("Rilancia la STESSA riga: la cache non riscarica quello che c'e' gia'.")
+        return 3
     log("PROSSIMO PASSO: i CSV vanno in MQL5\\Files del terminale BCM di backtest,")
     log("poi ABTG_ImportaStoricoEsterno con InpFormato=1 (procedura nel referto")
     log("REFERTO_DUKASCOPY_FATTIBILITA.md, sezione 'ultimo miglio').")
@@ -572,4 +656,11 @@ def corri(argv):
 
 
 if __name__ == "__main__":
-    sys.exit(corri(sys.argv[1:]))
+    try:
+        sys.exit(corri(sys.argv[1:]))
+    except KeyboardInterrupt:
+        log("")
+        log("INTERROTTA A MANO. La cache su disco resta valida (scritture atomiche):")
+        log("rilancia la STESSA riga e riparte da dove era. Il CSV si scrive solo a")
+        log("fine simbolo, quindi ora NON c'e': e' normale.")
+        sys.exit(130)
