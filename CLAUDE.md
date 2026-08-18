@@ -76,6 +76,21 @@ girano gia' su 21 mesi** (`@DAQUANDO 2024.09.26`), e il 2010 e' stato usato UNA
 volta sola. Con questa regola il round R69 sul Dow (27 trade IS, 46 OOS, **un
 solo regime**) e' **non misurabile anche per il MERITO**, non solo per il rischio.
 
+## 🪑 CRITERIO DI USCITA DELLE SEDIE (congelato da Claudio il 18/08, "firma tutte e 3")
+Tre corsie — verbale completo in `report/FIRME_2026-08-18.md`:
+- **RISCHIO (per sedia, sempre, a qualunque n):** DD forward > DD promesso
+  dal backtest della cella promossa -> revisione IMMEDIATA.
+- **MERITO (per famiglia, a 20 operazioni):** famiglia a 20+ op totali in
+  perdita -> revisione di tutte le sedie; **si spegne la SEDIA colpevole**,
+  la gemella positiva resta (lezione PTE: GBPUSD ok, USDJPY no).
+- **TAGLIANDO (6 mesi):** famiglia sotto 20 op e in perdita -> revisione di
+  Claudio. Frequenza molto sotto il promesso -> revisione.
+- Porta di rientro: una sedia spenta rientra se una misura nuova le rida'
+  una ragione. Prerequisito: il CENSIMENTO DEI CONTRATTI (DD e frequenza
+  promessi, sedia per sedia).
+Firmati lo stesso giorno: **cap rischio aperto 3,25%** (C1, = 5 SL vivi da
+0,65%) e **pacchetto Guardian** (pausa 4,0 / emergenza 4,9 e 9,9 / reset 23).
+
 ## FUSO ORARIO BCM (regola fissa)
 **Il server BCM è 1 ORA INDIETRO rispetto all'ora italiana** (in questo periodo dell'anno).
 - Ora italiana − 1 = ora server BCM.
