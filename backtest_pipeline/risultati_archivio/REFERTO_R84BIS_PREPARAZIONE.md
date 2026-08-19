@@ -261,8 +261,8 @@ al nullo e' **concentrato nella stessa meta' di finestra**, non distribuito.
 > ricontrollare con `CHECKLIST_RIGA_DI_LANCIO.md` alla mano prima di uscire.
 > Punti gia' eseguiti: **1** (script letto, e' scritto da qui), **3** (il file
 > prova VERIFICA, non CERCA: nessuna griglia, un asse solo = i magic gemelli),
-> **4** (pin `ef71fc6`: i commit dei file pinnati sono **`8695289`**,
-> **`20dc731`**, **`ef71fc6`** — tutti **dentro** il pin), **5** (giro a vuoto
+> **4** (pin `2ecd2ef`: i commit dei file pinnati sono **`8695289`**,
+> **`20dc731`**, **`2ecd2ef`** - tutti **dentro** il pin), **5** (giro a vuoto
 > obbligatorio, e' il PASSO 2). Punto **2** (difetti gemelli) e punto **18/19**
 > (profondita' e timeout) **da rieseguire alla consegna.**
 
@@ -274,7 +274,7 @@ mandare queste righe va dichiarato cosa deve essere finito. **MT5 va CHIUSO.**
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo" }
-  $h="ef71fc6cf07bd36271dcab11a9d8c27d3f9ded14"
+  $h="2ecd2ef9c048e04d697c36cd2f81abc49665d406"
   $p="$env:USERPROFILE\scarica_storico.ps1"
   $dsk=[Environment]::GetFolderPath('Desktop')
   $csv=Join-Path $dsk 'storico_bcm\ABTG_StoricoScaricato.csv'
@@ -301,7 +301,7 @@ mandare queste righe va dichiarato cosa deve essere finito. **MT5 va CHIUSO.**
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo" }
-  $h="ef71fc6cf07bd36271dcab11a9d8c27d3f9ded14"
+  $h="2ecd2ef9c048e04d697c36cd2f81abc49665d406"
   $b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline"
   $dsk=[Environment]::GetFolderPath('Desktop')
   $p="$env:USERPROFILE\lancia_r84bis.ps1"
@@ -330,7 +330,7 @@ la riga `Spread=` presente dove deve esserci e **assente** dove deve mancare.
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
-  $h="ef71fc6cf07bd36271dcab11a9d8c27d3f9ded14"
+  $h="2ecd2ef9c048e04d697c36cd2f81abc49665d406"
   $p="$env:USERPROFILE\lancia_r84bis.ps1"
   Remove-Item $p -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r84bis.ps1" -OutFile $p -EA Stop
@@ -347,7 +347,7 @@ la scala §2C **non e' eseguibile cosi'**, si dichiara, e i passi 5 si saltano.
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
-  $h="ef71fc6cf07bd36271dcab11a9d8c27d3f9ded14"
+  $h="2ecd2ef9c048e04d697c36cd2f81abc49665d406"
   $p="$env:USERPROFILE\lancia_r84bis.ps1"
   Remove-Item $p -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r84bis.ps1" -OutFile $p -EA Stop
@@ -363,7 +363,7 @@ script esce **1**. Non si spiega a posteriori: si cerca la divergenza.
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
-  $h="ef71fc6cf07bd36271dcab11a9d8c27d3f9ded14"
+  $h="2ecd2ef9c048e04d697c36cd2f81abc49665d406"
   $p="$env:USERPROFILE\lancia_r84bis.ps1"
   Remove-Item $p -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/lancia_r84bis.ps1" -OutFile $p -EA Stop
@@ -427,8 +427,8 @@ giudizio sul **MERITO**, mai sul **RISCHIO**._ Un DD accaduto vale a qualunque n
 ## 8. 📎 TRACCIABILITA'
 
 - Criteri congelati: `prove/R84BIS_VALIDAZIONE_D_CRITERI.md` — commit **`9f94e74`**
-- File prova nuovi: commit **`20dc731`** · driver: commit **`ef71fc6`**
+- File prova nuovi: commit **`20dc731`** · driver: commit **`2ecd2ef` (correzione della cultura compresa)**
 - `walkforward_generico.ps1` con `-Spread` (additivo, default = comportamento di
   sempre): commit **`8695289`**
-- Pin consigliato per le righe di lancio: **`ef71fc6cf07bd36271dcab11a9d8c27d3f9ded14`**
+- Pin consigliato per le righe di lancio: **`2ecd2ef9c048e04d697c36cd2f81abc49665d406`**
 - Referto finale, a numeri tornati: `REFERTO_COLLAUDO_R84BIS_D.md`
