@@ -1,0 +1,166 @@
+# =====================================================================
+#  R84BIS / CELLA T3 - LA GAMBA VOLUMI SULLA SEDIA VIVA DEL DAX (retest)
+#  EA: ABTG_DAX_Apertura_EU (quello VIVO: nessuna riga di codice toccata)
+#
+#  Si lancia con:
+#    -Prova prove\R84BIS_T3_volumi_D30EUR.txt -Etichetta r84bt3 -Modello 4
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#    prove\R84BIS_VALIDAZIONE_D_CRITERI.md
+#  LA DOMANDA DEL ROUND: "la cella D di R84 (volumi OPPURE ATR) contiene
+#  INFORMAZIONE VERA, o e' FORTUNA DELLA FINESTRA?"
+#
+#  QUESTO ROUND NON TOCCA NESSUN EA E NESSUNA SEDIA. Non puo' produrre
+#  una sedia nuova: al massimo UNA RIGA DI PIANO (criteri par.6).
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' UNA COPIA ESATTA DELLA SUA BASELINE.
+#  Cambiano SOLO le righe elencate qui sotto e il magic. E' la regola di
+#  casa dopo l'errore InpTP1_ATRmult=0 contro 0.5, pagato due volte.
+# ---------------------------------------------------------------------
+#  QUESTA CELLA - E IL SUO LIMITE, SCRITTO NEL NOME
+#    E' la trasferibilita' sulla configurazione CHE E' DAVVERO VIVA
+#    (sedia 770101, InpEntryMode=RETEST, incoronata dalla misura in R83).
+#
+#    ATTENZIONE, VALE COME UN RISULTATO: sul ramo RETEST il motore
+#    chiama VolumeOK() NUDA (righe 1477 e 1510 del sorgente vivo), NON
+#    ConfirmOK(). Quindi qui InpUseAtrFilter e InpConfirmMode sarebbero
+#    INERTI: accenderli darebbe l'illusione di una "cella D sul DAX"
+#    misurando in realta' la sola gamba volumi. Per questo restano
+#    SPENTI e questa cella si chiama "volumi", non "D".
+#    La cella D piena sul retest richiederebbe CODICE NUOVO in un EA
+#    vivo: dichiarata e SCARTATA (criteri par.7).
+#
+#    BASELINE: cella V di R83 (stesso file prova, filtri spenti), che e'
+#    la sedia viva e in R83 e' risultata identica al centesimo alla
+#    cella D1 del fork. MISURATA a tick reali:
+#      IS  +282,12 / PF 1,07810 / 197 op / DD 7,0257%
+#      OOS +999,42 / PF 1,18776 / 311 op / DD 10,5984%
+#    Profitto totale +1.281,54 - PF tot 1,143 - n tot 508.
+#    La baseline si RIGIRA come cella T2 (canarino C2).
+#
+#    NOTA PRETESA IN ANTICIPO: R84 ha gia' misurato la gamba volumi DA
+#    SOLA sul Nasdaq (cella B) e l'ha BOCCIATA (PF tot 0,917, campione
+#    447 -> 154). Se qui aiutasse il DAX, la stessa gamba avrebbe segno
+#    opposto sui due mercati: e' un RISULTATO, non una contraddizione
+#    (lezione PTE, gia' agli atti).
+#
+#  RIGHE CAMBIATE RISPETTO ALLA BASELINE R83v_vivo_D30EUR.txt: UNA
+#    InpUseVolumeFilter 0 -> 1
+#  piu' il magic. Nient'altro: ATR e ConfirmMode restano a 0.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE, DICHIARATI
+#    @DAQUANDO 2024.09.26, gia' PROMOSSO dal PASSO 0 di R83/R84: i tick
+#    reali di D30EUR e NASUSD a BCM partono da quella data (misurata,
+#    non ipotizzata). Finestra fino al 2026.06.30, split IS 40/OOS 60.
+#
+#    Regime contenuto: UNO E MEZZO (toro USA 2024-25 + correzione 2025).
+#    Niente 2020, niente 2022. Nessun numero di qui e' "robusto", e il
+#    referto lo scrive accanto a ogni riga.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- SESSIONE (ORE DEL SERVER BCM, mai l'ora italiana) ---
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: E' L'UNICA COSA CHE CAMBIA FRA LE CELLE DELLO STESSO MERCATO ---
+# ATTENZIONE: sull'EA VIVO l'enum ha SEI modalita' e RETEST vale 2.
+# Sull'EA nuovo le modalita' sono TRE e il retest vale 1. Stesso
+# motore, numero diverso: e' la trappola piu' facile di questo round.
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+# --- FILTRI: TUTTI SPENTI. I filtri sono la domanda di R84, non di R83.
+#     Accenderne uno qui renderebbe illeggibili tutti e due i round.
+InpUseEmaFilter=0
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpUseVolumeFilter=1
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpUseNewsFilter=0
+
+# --- RISCHIO E GESTIONE: IDENTICI in tutte e sette le celle del round.
+#     Se cambiasse anche solo il trailing, il duello non isolerebbe piu'
+#     l'ingresso: misurerebbe due cose insieme.
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpBEatR=0
+InpUseTrailing=1
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+InpUseRoundLevels=0
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+
+# --- SLIPPAGE: ZERO, e va DICHIARATO. Lo slippage nel motore peggiora
+#     SOLO gli ordini STOP (righe 930 e 955 del sorgente vivo): il limit
+#     del retest e il market della conferma non lo pagano. Con 0 la
+#     modalita' 0 e' AVVANTAGGIATA. Criteri par.7: se vince la 0, serve
+#     il giro 2 con un valore MISURATO, altrimenti la vittoria ha
+#     l'asterisco.
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=1
+
+InpMaxSpread=0
+InpVerbose=0
+
+# --- SOLO NELLA CELLA V (EA VIVO DEL DAX): il reverse di R51, SPENTO
+#     com'e' in campo. L'EA nuovo non ha questo parametro: e' la
+#     divergenza dichiarata fra i due motori, ed e' proprio quello che
+#     questa cella serve a verificare.
+InpAllowReverse=0
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE: se non lo sono c'e' di mezzo la cache del
+#     tester o una griglia ricordata da MT5, e il numero non si legge.
+InpMagic=776140||776140||1||776141||Y

@@ -1,0 +1,162 @@
+# =====================================================================
+#  R84BIS / ROBUSTEZZA DELLA CELLA D - NASDAQ APERTURA US
+#  VICINO: conferma volumi PIU' SEVERA (+75% invece di +50% sulla media)
+#  EA: ABTG_Nasdaq_Apertura_US (quello VIVO, nessuna riga toccata)
+#
+#  Si lancia con:
+#    -Prova prove\R84BIS_B2_volmult175_NASUSD.txt -Etichetta r84bb2 -Modello 4
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#    prove\R84BIS_VALIDAZIONE_D_CRITERI.md
+#  LA DOMANDA DEL ROUND: "la cella D di R84 (volumi OPPURE ATR) contiene
+#  INFORMAZIONE VERA, o e' FORTUNA DELLA FINESTRA?"
+#
+#  QUESTO ROUND NON TOCCA NESSUN EA E NESSUNA SEDIA. Non puo' produrre
+#  una sedia nuova: al massimo UNA RIGA DI PIANO (criteri par.6).
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' UNA COPIA ESATTA DELLA SUA BASELINE.
+#  Cambiano SOLO le righe elencate qui sotto e il magic. E' la regola di
+#  casa dopo l'errore InpTP1_ATRmult=0 contro 0.5, pagato due volte.
+# ---------------------------------------------------------------------
+#  A COSA SERVE QUESTA CELLA
+#    Se il vantaggio della cella D vive SOLO sul valore esatto del
+#    moltiplicatore, non e' informazione: e' rumore di taratura.
+#    Si guardano i VICINI STRETTI, un moltiplicatore alla volta.
+#
+#  NON E' UNA GRIGLIA E NON E' UNA SELEZIONE.
+#    Il CENTRO resta 1.5 / 1.0 qualunque cosa facciano i vicini
+#    (criteri par.1.3): se un vicino andasse meglio del centro si
+#    scrive "superficie inclinata", e NON si sposta niente. Regola di
+#    casa: centro dell'altopiano, MAI il picco.
+#    Le finestre InpVolAvgBars=20 e InpAtrFilterBars=20 restano PINNATE:
+#    muovere anche quelle sarebbe una griglia, e qui sono vietate.
+#
+#  BASELINE = cella D di R84 (prove\R84d_volatr_NASUSD.txt), misurata a
+#  tick reali sulla stessa finestra:
+#      IS  +858,34 / PF 1,51444 / 110 op / DD 3,0193%
+#      OOS -287,19 / PF 0,92450 / 201 op / DD 6,9188%
+#    Profitto totale +571,15 - PF tot 1,104 - n tot 311.
+#    Soglia del cancello R: PF totale sopra 1,088 (= cella A + 0,10).
+#
+#  E IL FATTO SCOMODO RESTA IN TESTA: in OOS la cella D e' ANCORA
+#  NEGATIVA. D riduce la perdita, non crea un guadagno. Nessun vicino,
+#  per quanto buono, puo' cambiare questo.
+#
+#  RIGHE CAMBIATE RISPETTO ALLA BASELINE R84d_volatr_NASUSD.txt: UNA
+#    InpVolMult 1.5 -> 1.75
+#  piu' il magic. Nient'altro: gli altri tre parametri del filtro
+#  restano ESATTAMENTE quelli della cella D.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE, DICHIARATI
+#    @DAQUANDO 2024.09.26, gia' PROMOSSO dal PASSO 0 di R83/R84: i tick
+#    reali di D30EUR e NASUSD a BCM partono da quella data (misurata,
+#    non ipotizzata). Finestra fino al 2026.06.30, split IS 40/OOS 60.
+#
+#    Regime contenuto: UNO E MEZZO (toro USA 2024-25 + correzione 2025).
+#    Niente 2020, niente 2022. Nessun numero di qui e' "robusto", e il
+#    referto lo scrive accanto a ogni riga.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- SESSIONE (ORE DEL SERVER BCM: 14:30 = 15:30 italiane) ---
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=21
+InpCloseMin=45
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: breakout a stop sulla candela H1 precedente (piano Nasdaq) ---
+InpEntryMode=0
+InpRangeMode=2
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+
+# --- I FILTRI: e' QUI che le celle si distinguono. Le righe che seguono
+#     sono la cella A (tutto spento); ogni altra cella riscrive UNA riga.
+InpUseEmaFilter=0
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+# <<< CELLA D: QUESTA e' la riga che cambia rispetto alla cella A
+InpUseVolumeFilter=1
+InpVolMult=1.75
+InpVolAvgBars=20
+# <<< CELLA D: QUESTA e' la riga che cambia rispetto alla cella A
+InpUseAtrFilter=1
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+# <<< CELLA D: QUESTA e' la riga che cambia rispetto alla cella A
+InpConfirmMode=0
+InpUseNewsFilter=0
+InpUseVolRegime=0
+InpUseSRFilter=0
+
+# --- RISCHIO E GESTIONE: identici in tutte e nove le celle.
+#     Il rischio e' pinnato a 1,00%: NON e' la taglia di campo (0,25%),
+#     e' un valore comune che rende i profitti confrontabili fra celle.
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpBEatR=0
+InpUseTrailing=1
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=1
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+# --- USCITE A NUMERI TONDI: SPENTE. Sono una regola di USCITA, non un
+#     filtro d'ingresso: mescolarle qui renderebbe illeggibile il round
+#     (criteri par.6). Nel preset della sedia erano accese.
+InpUseRoundLevels=0
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+
+# --- SLIPPAGE E FLOOR: spenti. Il breakout a stop e' quindi misurato
+#     nella sua versione PIU' FAVOREVOLE (i tick reali portano lo spread,
+#     non il riempimento oltre il livello). Vale per tutte le celle, quindi
+#     non falsa il confronto FRA i filtri: falserebbe solo un confronto
+#     con altri motori. Scritto perche' non si dimentichi.
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=1
+
+# --- IGIENE: log spento nelle corse lunghe.
+InpMaxSpread=0
+InpVerbose=0
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE. Se non lo sono, c'e' di mezzo la cache del
+#     tester o una griglia che MT5 si ricorda: il numero non si legge.
+InpMagic=776160||776160||1||776161||Y

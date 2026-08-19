@@ -1,0 +1,163 @@
+# =====================================================================
+#  R84BIS / CELLA T1 - LA CELLA D DI R84 PORTATA SUL DAX (base POSITIVA)
+#  EA: ABTG_Apertura_3Ingressi (il fork di R83, nessuna riga toccata)
+#
+#  Si lancia con:
+#    -Prova prove\R84BIS_T1_volatr_D30EUR.txt -Etichetta r84bt1 -Modello 4
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#    prove\R84BIS_VALIDAZIONE_D_CRITERI.md
+#  LA DOMANDA DEL ROUND: "la cella D di R84 (volumi OPPURE ATR) contiene
+#  INFORMAZIONE VERA, o e' FORTUNA DELLA FINESTRA?"
+#
+#  QUESTO ROUND NON TOCCA NESSUN EA E NESSUNA SEDIA. Non puo' produrre
+#  una sedia nuova: al massimo UNA RIGA DI PIANO (criteri par.6).
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' UNA COPIA ESATTA DELLA SUA BASELINE.
+#  Cambiano SOLO le righe elencate qui sotto e il magic. E' la regola di
+#  casa dopo l'errore InpTP1_ATRmult=0 contro 0.5, pagato due volte.
+# ---------------------------------------------------------------------
+#  QUESTA CELLA - ED E' LA PROVA PIU' INFORMATIVA DEL ROUND
+#    Su una base PERDENTE (il Nasdaq nudo) un filtro che toglie trade
+#    riduce la perdita quasi per costruzione: meno biglietti, meno
+#    perdita. Su una base POSITIVA quell'alibi non c'e'. Se il filtro
+#    togliesse trade a caso, taglierebbe profitto e drawdown NELLA
+#    STESSA PROPORZIONE; un riduttore con informazione taglia molto
+#    drawdown e poco profitto.
+#
+#    BASELINE: cella D0 di R83 (stesso file prova, filtri spenti),
+#    MISURATA a tick reali sulla stessa finestra:
+#      IS  +203,66 / PF 1,04668 / 220 op / DD 7,9333%
+#      OOS +251,22 / PF 1,04089 / 325 op / DD 13,2624%
+#    Profitto totale +454,88 - PF tot 1,043 - n tot 545.
+#    La baseline si RIGIRA come cella T0 (canarino C1): deve tornare al
+#    centesimo, altrimenti questa gamba non si legge.
+#
+#    PERCHE' IL BREAKOUT E NON IL RETEST: ConfirmOK() - la funzione che
+#    fa volumi OR ATR - e' chiamata SOLO da TryPlaceBreakout (e da fade,
+#    delayed, gapfill). Il ramo RETEST chiama VolumeOK() NUDA. Quindi la
+#    cella D piena esiste solo in breakout. Sul retest si misura la sola
+#    gamba volumi, ed e' la cella T3. Verificato nel sorgente PRIMA di
+#    lanciare, criteri par.2.
+#
+#  RIGHE CAMBIATE RISPETTO ALLA BASELINE R83d0_stop_D30EUR.txt: TRE
+#    InpUseVolumeFilter 0 -> 1
+#    InpUseAtrFilter    0 -> 1
+#    InpConfirmMode     0 -> 0 (gia' OR: riscritta per non lasciarla implicita)
+#  piu' il magic. Nient'altro.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE, DICHIARATI
+#    @DAQUANDO 2024.09.26, gia' PROMOSSO dal PASSO 0 di R83/R84: i tick
+#    reali di D30EUR e NASUSD a BCM partono da quella data (misurata,
+#    non ipotizzata). Finestra fino al 2026.06.30, split IS 40/OOS 60.
+#
+#    Regime contenuto: UNO E MEZZO (toro USA 2024-25 + correzione 2025).
+#    Niente 2020, niente 2022. Nessun numero di qui e' "robusto", e il
+#    referto lo scrive accanto a ogni riga.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- SESSIONE (ORE DEL SERVER BCM, mai l'ora italiana) ---
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: E' L'UNICA COSA CHE CAMBIA FRA LE CELLE DELLO STESSO MERCATO ---
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+# --- FILTRI: TUTTI SPENTI. I filtri sono la domanda di R84, non di R83.
+#     Accenderne uno qui renderebbe illeggibili tutti e due i round.
+InpUseEmaFilter=0
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpUseVolumeFilter=1
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=1
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpUseNewsFilter=0
+
+# --- RISCHIO E GESTIONE: IDENTICI in tutte e sette le celle del round.
+#     Se cambiasse anche solo il trailing, il duello non isolerebbe piu'
+#     l'ingresso: misurerebbe due cose insieme.
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpBEatR=0
+InpUseTrailing=1
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+InpUseRoundLevels=0
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+
+# --- SLIPPAGE: ZERO, e va DICHIARATO. Lo slippage nel motore peggiora
+#     SOLO gli ordini STOP (righe 930 e 955 del sorgente vivo): il limit
+#     del retest e il market della conferma non lo pagano. Con 0 la
+#     modalita' 0 e' AVVANTAGGIATA. Criteri par.7: se vince la 0, serve
+#     il giro 2 con un valore MISURATO, altrimenti la vittoria ha
+#     l'asterisco.
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=1
+
+InpMaxSpread=0
+InpVerbose=0
+
+# --- LE LEVE R30, SPENTE (esistono nel motore forkato, non c'entrano qui)
+InpUseVolRegime=0
+InpUseSRFilter=0
+
+# --- AUTOTEST ACCESO: stampa le righe [3ING][AUTOTEST] nel log del
+#     tester. Sei controlli sulla modalita' 2, che e' codice nuovo.
+InpAutoTest=1
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE: se non lo sono c'e' di mezzo la cache del
+#     tester o una griglia ricordata da MT5, e il numero non si legge.
+InpMagic=776120||776120||1||776121||Y
