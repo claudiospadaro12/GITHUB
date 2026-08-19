@@ -26,6 +26,19 @@
 #property strict
 
 #include <Trade/Trade.mqh>
+#include <ABTG_PausaGuardian.mqh>
+//--- GUARDIAN DEL CONTO -- firme B1 (pausa morbida giornaliera) e C1
+//    (cap sul rischio aperto simultaneo) del 18/08/2026.
+//    Verbale: report/FIRME_2026-08-18.md
+//    true  = prima di APRIRE chiede il via libera al guardiano del conto.
+//    false = comportamento identico a prima della migrazione.
+//    ATTENZIONE, il default true NON cambia niente da solo: se il
+//    Guardian non gira su questo conto -- e nel Strategy Tester, dove le
+//    sue GlobalVariable non esistono -- la guardia lascia passare tutto
+//    (fail-open totale). I backtest restano confrontabili con i vecchi.
+//    Non tocca MAI le posizioni gia' aperte, i parziali, i trailing e le
+//    uscite: blocca soltanto l'APERTURA di nuovo rischio.
+input bool InpUsaGuardian = true;  // Guardian: rispetta pausa giornaliera (B1) e cap rischio aperto (C1)
 CTrade gTrade;
 
 //==================================================================
@@ -419,6 +432,8 @@ void Enter(bool isLong)
    double lot = LotByRisk(risk);
    if(lot<=0) { Log("lotto nullo, salto."); return; }
 
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_GoldenCross")) return;
    gPartialDone=false;
    if(InpEntryMode==GC_MARKET)
      {

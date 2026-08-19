@@ -23,6 +23,19 @@
 #property strict
 
 #include <Trade/Trade.mqh>
+#include <ABTG_PausaGuardian.mqh>
+//--- GUARDIAN DEL CONTO -- firme B1 (pausa morbida giornaliera) e C1
+//    (cap sul rischio aperto simultaneo) del 18/08/2026.
+//    Verbale: report/FIRME_2026-08-18.md
+//    true  = prima di APRIRE chiede il via libera al guardiano del conto.
+//    false = comportamento identico a prima della migrazione.
+//    ATTENZIONE, il default true NON cambia niente da solo: se il
+//    Guardian non gira su questo conto -- e nel Strategy Tester, dove le
+//    sue GlobalVariable non esistono -- la guardia lascia passare tutto
+//    (fail-open totale). I backtest restano confrontabili con i vecchi.
+//    Non tocca MAI le posizioni gia' aperte, i parziali, i trailing e le
+//    uscite: blocca soltanto l'APERTURA di nuovo rischio.
+input bool InpUsaGuardian = true;  // Guardian: rispetta pausa giornaliera (B1) e cap rischio aperto (C1)
 CTrade gTrade;
 
 enum ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1, ORB_SL_FIXED=2 };
@@ -209,6 +222,8 @@ bool TryPlace()
    double atr=AtrVal();
    datetime exp=TimeCurrent()+InpPendingExpiryMin*60;
 
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_ORB")) return(false);
    if(InpAllowLong)
      {
       double sl=SLforLong(buyPx,sellPx,atr);
@@ -330,6 +345,8 @@ bool TryCloseConfirmEntry()
    double lot=LotByRisk(dist);
    if(lot<=0){ Log("lotto 0: niente trade."); return(false); }
 
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_ORB")) return(false);
    bool ok=(dir>0) ? gTrade.Buy (lot,_Symbol,0.0,sl,tp,InpComment+" BUY CC")
                    : gTrade.Sell(lot,_Symbol,0.0,sl,tp,InpComment+" SELL CC");
    if(ok) Log(StringFormat("%s a mercato su chiusura confermata @ %.5f SL %.5f TP %.5f lot %.2f",
