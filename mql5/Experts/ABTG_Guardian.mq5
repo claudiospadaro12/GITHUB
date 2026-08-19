@@ -30,9 +30,21 @@
 //|  Tutto-in-uno: compila con F7. Usa solo Trade.mqh (standard MT5). |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.10"
+#property version   "1.11"
 #property strict
 #include <Trade/Trade.mqh>
+//  v1.11 -- 19/08/2026. Il calcolo del cap e la scrittura delle bandiere
+//  c'erano gia' in v1.10 e NON sono stati toccati: il conto si comporta
+//  esattamente come ieri. Aggiunte due sole cose, entrambe di sola lettura:
+//   1) la VERIFICA DEL FILO in OnInit -- il guardiano costruisce i nomi
+//      delle GlobalVariable qui, gli EA li costruiscono nell'include:
+//      due posti diversi. Se un giorno divergono, il canale muore in
+//      SILENZIO (il guardiano scrive, nessuno legge, nessun errore).
+//      Ora il guardiano confronta i propri nomi con quelli dell'include
+//      e, se non coincidono, urla nel giornale.
+//   2) l'AUTOTEST del nucleo di decisione (input InpAutotest, default
+//      spento), cosi' il collaudo non dipende da un altro programma.
+#include <ABTG_PausaGuardian.mqh>
 
 //--- SALDO / REGOLE PROP -------------------------------------------
 input double InpStartBalance   = 0;      // Saldo iniziale challenge (0 = cattura in automatico al primo avvio). Es. 109000
@@ -55,6 +67,7 @@ input bool   InpShowPanel      = true;   // mostra pannello di stato sul grafico
 input long   InpMagic          = 779001; // magic del guardiano (per i suoi log)
 input string InpComment        = "GUARDIAN"; // commento
 input bool   InpVerbose        = true;   // log dettagliato nel giornale
+input bool   InpAutotest       = false;  // AUTOTEST: all'avvio esegue i casi del canale (pausa/cap/battito) e scrive l'esito nel giornale. Non tocca il conto
 
 //--- nomi GlobalVariable (persistono nel terminale) ----------------
 string GV_START, GV_PEAK, GV_DAYKEY, GV_DAYSTART, GV_BLOCKDAY, GV_FAILED;
@@ -186,6 +199,43 @@ void SetPausa(const datetime fino,const string motivo)
   }
 
 //+------------------------------------------------------------------+
+//| v1.11 -- VERIFICA DEL FILO.                                       |
+//| Il guardiano SCRIVE su nomi costruiti qui sopra; gli EA LEGGONO   |
+//| da nomi costruiti dentro ABTG_PausaGuardian.mqh. Sono due posti   |
+//| diversi: se divergono (un refuso, una radice cambiata a meta'),   |
+//| il canale si spegne senza che nessuno se ne accorga -- il         |
+//| guardiano continua a scrivere e gli EA continuano ad aprire.      |
+//| Qui li si confronta una volta all'avvio. Non cambia niente:       |
+//| scrive e basta. Ritorna il numero di nomi che NON coincidono.     |
+//+------------------------------------------------------------------+
+int VerificaFilo()
+  {
+   int diff=0;
+   string coppie[5][2];   // [i][0]=radice per l'include . [i][1]=nome usato qui
+   coppie[0][0]="ABTG_PAUSA_GIORNO";      coppie[0][1]=GV_PAUSA;
+   coppie[1][0]="ABTG_PAUSA_FINO";        coppie[1][1]=GV_PAUSAFINO;
+   coppie[2][0]="ABTG_CAP_RISCHIO";       coppie[2][1]=GV_CAP;
+   coppie[3][0]="ABTG_RISCHIO_APERTO";    coppie[3][1]=GV_RISKPCT;
+   coppie[4][0]="ABTG_GUARDIAN_BATTITO";  coppie[4][1]=GV_BATTITO;
+
+   for(int i=0;i<5;i++)
+     {
+      string atteso=ABTG_GVNome(coppie[i][0]);     // come lo costruisce l'include
+      if(atteso!=coppie[i][1])
+        {
+         diff++;
+         PrintFormat("[GUARDIAN] *** FILO ROTTO *** il guardiano scrive su '%s' ma gli EA leggono '%s'. "
+                     "Il canale NON funziona: allineare ABTG_Guardian.mq5 e ABTG_PausaGuardian.mqh.",
+                     coppie[i][1],atteso);
+        }
+     }
+   if(diff==0)
+      PrintFormat("[GUARDIAN] filo verificato: 5 GlobalVariable su 5 con lo stesso nome fra guardiano e include (conto %I64d).",
+                  AccountInfoInteger(ACCOUNT_LOGIN));
+   return(diff);
+  }
+
+//+------------------------------------------------------------------+
 int OnInit()
   {
    long acc=AccountInfoInteger(ACCOUNT_LOGIN);
@@ -201,6 +251,10 @@ int OnInit()
    GV_CAP      =StringFormat("ABTG_CAP_RISCHIO_%I64d",acc);
    GV_RISKPCT  =StringFormat("ABTG_RISCHIO_APERTO_%I64d",acc);
    GV_BATTITO  =StringFormat("ABTG_GUARDIAN_BATTITO_%I64d",acc);
+
+   //--- v1.11: il filo verso gli EA e' integro? (solo lettura e log)
+   VerificaFilo();
+   if(InpAutotest) ABTG_AutotestGuardia();
 
    double bal=AccountInfoDouble(ACCOUNT_BALANCE);
    double eq =AccountInfoDouble(ACCOUNT_EQUITY);
