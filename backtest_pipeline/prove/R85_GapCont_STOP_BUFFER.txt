@@ -1,0 +1,145 @@
+# =====================================================================
+#  R85 - ABTG_GapContinuation @ 225JPY M1
+#  UN CUSCINETTO SOPRA IL MASSIMO DELL'OPENING RANGE PAGA, O NO?
+#  Scritto il 19/08/2026, PRIMA di qualunque numero di questo round.
+# =====================================================================
+#
+# IL FATTO CHE FA NASCERE IL ROUND (dal vivo, non ipotizzato)
+#   Primo trade in assoluto della sedia 774101 (deploy 16/08):
+#     GAPCONT S  225JPY  sell 2,00  @ 65.497  ->  stop 65.976  in 29 min
+#     -51,90 EUR, e alle 07:09 il prezzo era gia' SOTTO l'ingresso
+#     (65.476,5), col minimo notturno a 65.151,5.
+#   La tesi era giusta. Il trade e' morto prima.
+#
+# DOVE STA LO STOP, LETTO NEL SORGENTE (ABTG_GapContinuation.mq5:1011)
+#   double stop = MathMax(g_range_high + buffer, tick.ask + broker_stop_distance);
+#   double buffer = InpStopBufferPoints * point;      // default 0.0
+#   g_range_high = massimo delle barre M1 dei primi InpOpeningRangeMinutes
+#
+#   Con la cella viva (R66: OR = 15) il range era 01:00-01:15 ora server e
+#   l'ingresso e' arrivato alle 01:15:24: VENTIQUATTRO SECONDI dopo la
+#   chiusura del range. Lo stop stava sul massimo del range appena uscito,
+#   a 479 punti, SENZA UN PUNTO DI MARGINE.
+#
+# ✅ NIENTE TRAPPOLA DI UNITA' QUI - MISURATO, non supposto
+#   Sonda ABTG_InfoBroker del 17/08 (risultati_archivio/sonda_storico_17-08):
+#     225JPY : digits = 0 , point = 1.00     -> 1 punto MT5 = 1 punto indice
+#     D30EUR / U30USD / NASUSD : digits = 2 , point = 0.01
+#   Quindi InpStopBufferPoints su 225JPY e' GIA' in punti indice: non c'e'
+#   il difetto "pip" che ha colpito PTE (R69/R74) e SuperWave (R75).
+#
+#   🔴 MA C'E' UN ERRORE DA CORREGGERE NEL FILE DI R65/R66, e va detto qui
+#      perche' cambia una diagnosi: quel file scrive
+#        "servirebbe uno stop di 800 punti = 80 punti indice"
+#      Con point = 1 sono 800 PUNTI INDICE, non 80. Il filtro spread
+#      dinamico e' DIECI VOLTE piu' esigente di come e' scritto li'.
+#      👉 E infatti il trade di stanotte, con stop 479 punti, e' passato
+#         SOLO perche' lo spread in quel momento era <= 47,9 punti
+#         (10% di 479). Gli 80 punti del dossier erano misurati A MERCATO
+#         CHIUSO. [INFERITO dalla condizione del filtro, non letto nel log]
+#
+# IPOTESI DA SMONTARE
+#   "Uno stop appoggiato esattamente sul massimo dell'opening range muore
+#    per rumore piu' spesso di quanto il margine costi."
+#   L'ipotesi NULLA e' che il cuscinetto non paghi: allarga lo stop, quindi
+#   riduce i lotti a rischio % costante, quindi ogni vincita vale meno. Se
+#   il guadagno in sopravvivenza non compensa la size persa, la risposta e'
+#   "si lascia 0" - ed e' una risposta buona quanto l'altra.
+#
+# ⚠️ TRE ACCOPPIAMENTI DA DICHIARARE PRIMA DI LEGGERE I NUMERI
+#   1. Il buffer allarga R -> a rischio % costante i LOTTI SCENDONO.
+#      Non e' un effetto collaterale: e' meta' del prezzo del cuscinetto.
+#   2. Il target e' in R (InpFinalTargetR = 3,0), quindi il RAPPORTO R:R
+#      NON cambia. 🟢 Qui NON si ripete il caso PTE di R67, dove il buffer
+#      era una manopola sul target travestita da stop.
+#   3. 🔴 IL BUFFER E' ANCHE UN ALLENTA-FILTRO. Il filtro spread dinamico
+#      chiede spread <= 10% dello stop: allargando lo stop, PASSANO PIU'
+#      TRADE. Se il conteggio sale con il buffer, la causa e' QUESTA, non
+#      un edge. Va letto per primo, prima del profitto.
+#
+# LO SWEEP: 7 celle, un asse solo
+#   InpStopBufferPoints = 0 / 20 / 40 / 60 / 80 / 100 / 120  (punti indice)
+#   La cella 0 E' IL CONTROLLO: e' esattamente la configurazione viva di
+#   R66, quella che ha preso lo stop stanotte.
+#   Il fondo scala: il range di stanotte valeva ~479 punti, quindi 120 e'
+#   il 25% del range. Piu' in la' non e' piu' un cuscinetto, e' un altro
+#   stop.
+#
+# CRITERI DI ACCETTAZIONE (congelati QUI, prima dei numeri)
+#   0. 🎯 CRITERIO ZERO: QUANTI TRADE, e SOLO DOPO quanto profitto.
+#      Se il numero di trade cambia molto lungo l'asse, il round sta
+#      misurando il FILTRO SPREAD e non lo stop: si dichiara e si rilegge.
+#      Sotto 15 trade nella finestra non c'e' verdetto sul merito.
+#   1. La cella scelta deve essere positiva in ENTRAMBE le finestre.
+#   2. Deve battere la cella 0 (il controllo) in ENTRAMBE le finestre.
+#   3. ALTOPIANO, MAI IL PICCO: si prende il CENTRO, e le due celle vicine
+#      devono restare positive OOS. Su tredici Spearman IS->OOS, DODICI
+#      sono negativi: la cella migliore in campione e' peggio del caso.
+#   4. DD OOS non peggiore del controllo di piu' di 1 punto %.
+#   5. Il contratto della sedia (CONTRATTI_SEDIE.md) promette DD 11,59% e
+#      peggior giornata -1,10%: nessuna cella che sfondi quei due numeri
+#      puo' essere proposta, nemmeno se guadagna di piu'.
+#   Se il segno IS->OOS si ribalta: NIENTE CAMBIA IN FORWARD. Il round
+#   avra' comunque misurato che il cuscinetto e' rumore.
+#
+# 🔴 SCREENING, NON VERDETTO
+#   Modello 1 (OHLC M1). Il verdetto sta SOLO ai tick reali (R57: cambiando
+#   solo il modello il segno dell'orso si e' ribaltato). Qui si guarda se
+#   l'asse GIRA; se gira, la cella centrale va a tick reali in un round a
+#   parte.
+#
+# 🛑 E NIENTE SI TOCCA IN FORWARD IN OGNI CASO: la sedia ha UN trade su 15.
+#
+# LO STORICO
+#   225JPY M1 su BCM parte dal 2024.09.26 (misurato con ABTG_HistoryDownloader
+#   il 16/08, SERIES_SERVER_FIRSTDATE, stessa data dell'orario).
+#   ⚠️ Prima di lanciare: lo storico LOCALE dev'essere pieno. Se il
+#      verdetto del downloader e' ancora "MANCA STORICO LOCALE", il tester
+#      misurerebbe tre mesi credendo di misurarne ventuno, IN SILENZIO.
+# =====================================================================
+@SIMBOLO  225JPY
+@PERIODO  M1
+@DAQUANDO 2024.09.26
+
+# --- L'UNICO ASSE SPAZZOLATO ---
+InpStopBufferPoints=0.0||0||20||120||Y
+
+# --- LA CELLA VIVA DI R66, INCHIODATA (gap 1,00 / OR 15 / TP_R 3,0) ---
+InpMinimumBuyGapPercent=1.00||1.00||0||1.00||N
+InpMinimumSellGapPercent=1.00||1.00||0||1.00||N
+InpOpeningRangeMinutes=15||15||0||15||N
+InpFinalTargetR=3.0||3.0||0||3.0||N
+
+# --- IL FUSO: MANUALE, in ORA SERVER BCM. Tokyo 09:00 JST = 01:00 server ---
+# Il default del sorgente e' AUTO (JST->Darwinex): su BCM aprirebbe alle
+# 03:00, DUE ORE TARDI. Queste righe non sono cosmetiche.
+InpSessionTimeMode=1||1||0||1||N
+InpSessionOpenHour=1||1||0||1||N
+InpSessionOpenMinute=0||0||0||0||N
+InpSessionCloseHour=7||7||0||7||N
+InpSessionCloseMinute=30||30||0||30||N
+
+# --- ASIMMETRIA SPENTA, i due lati allo stesso rischio ---
+InpReduceRiskOnSmallSellGap=0||0||0||0||N
+InpBuyRiskPercent=1.0||1.0||0||1.0||N
+InpSellRiskPercent=1.0||1.0||0||1.0||N
+InpSellFullRiskFromGapPct=1.25||1.25||0||1.25||N
+InpSmallSellRiskPercent=0.25||0.25||0||0.25||N
+
+# --- congelati ---
+InpEnableBuyGaps=1||1||0||1||N
+InpEnableSellGaps=1||1||0||1||N
+InpMaxEntryMinutesFromOpen=90||90||0||90||N
+InpExitMinutesBeforeClose=5||5||0||5||N
+InpPartialClosePercent=40.0||40.0||0||40.0||N
+InpPartialTargetR=1.0||1.0||0||1.0||N
+InpMoveStopToBreakEven=1||1||0||1||N
+InpMaxSpreadPoints=0.0||0.0||0||0.0||N
+InpMaxSpreadToStopPercent=10.0||10.0||0||10.0||N
+InpFixedLots=0.0||0.0||0||0.0||N
+InpMaxLots=0.0||0.0||0||0.0||N
+InpUseRealVolumeIfAvailable=1||1||0||1||N
+InpMagicNumber=774101||774101||0||774101||N
+InpMaxSlippagePoints=30||30||0||30||N
+InpShowStatusOnChart=0||0||0||0||N
+InpPrintDailyDiagnostics=0||0||0||0||N

@@ -1,4 +1,15 @@
 # =====================================================================
+# 🔴 CORREZIONE 19/08/2026 - UN NUMERO DI QUESTO FILE E' SBAGLIATO DI 10x
+#   Piu' sotto (limite b) c'e' scritto:
+#     "servirebbe uno stop di 800 punti = 80 punti indice"
+#   La seconda meta' e' FALSA. La sonda ABTG_InfoBroker del 17/08 ha
+#   MISURATO che su 225JPY digits = 0 e point = 1.00, quindi
+#   **1 punto MT5 = 1 punto indice**: 800 punti sono 800 PUNTI INDICE.
+#   Il filtro spread dinamico e' DIECI VOLTE piu' esigente di come e'
+#   descritto qui. Il resto del file resta valido.
+#   (Trovato preparando R85, che spazzola InpStopBufferPoints.)
+# =====================================================================
+# =====================================================================
 #  PROVA: ABTG_GapContinuation  --  il gap del Nikkei CONTINUA, invece
 #                                   di chiudersi?
 #  Nato dal punto 3 della coda -> caccia_strategie/CACCIA_2026-08-16_C_NIKKEI_GAP.md
