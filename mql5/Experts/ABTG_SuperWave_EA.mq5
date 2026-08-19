@@ -18,6 +18,19 @@
 #property version   "1.00"
 #property strict
 #include <Trade/Trade.mqh>
+#include <ABTG_PausaGuardian.mqh>
+//--- GUARDIAN DEL CONTO -- firme B1 (pausa morbida giornaliera) e C1
+//    (cap sul rischio aperto simultaneo) del 18/08/2026.
+//    Verbale: report/FIRME_2026-08-18.md
+//    true  = prima di APRIRE chiede il via libera al guardiano del conto.
+//    false = comportamento identico a prima della migrazione.
+//    ATTENZIONE, il default true NON cambia niente da solo: se il
+//    Guardian non gira su questo conto -- e nel Strategy Tester, dove le
+//    sue GlobalVariable non esistono -- la guardia lascia passare tutto
+//    (fail-open totale). I backtest restano confrontabili con i vecchi.
+//    Non tocca MAI le posizioni gia' aperte, i parziali, i trailing e le
+//    uscite: blocca soltanto l'APERTURA di nuovo rischio.
+input bool InpUsaGuardian = true;  // Guardian: rispetta pausa giornaliera (B1) e cap rischio aperto (C1)
 
 input group "=== Strategia ==="
 input ENUM_TIMEFRAMES InpDirTF    = PERIOD_H4;  // Timeframe DIREZIONE (trend)
@@ -232,6 +245,8 @@ void TryEnter()
    double L1=NormLots(tot*InpSize1/100.0), L2=NormLots(tot*InpSize2/100.0), L3=NormLots(tot*InpSize3/100.0);
    if(L1<=0 && L2<=0 && L3<=0) return;
 
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_SuperWave_EA")) return;
    gEntry=entry; gDir=dir; gBEdone=false; gT1=0;gT2=0;gT3=0;
    double sl=NormalizeDouble(stop,_Digits);
    if(L1>0){ if(dir>0?gTrade.Buy(L1,_Symbol,0,sl,NormalizeDouble(tp1,_Digits),InpComment+" 1"):gTrade.Sell(L1,_Symbol,0,sl,NormalizeDouble(tp1,_Digits),InpComment+" 1")) gT1=gTrade.ResultOrder(); }

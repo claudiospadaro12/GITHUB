@@ -48,6 +48,19 @@
 #property description "Breakout MULTI-SIMBOLO: Williams %R (140) + SuperTrend | M15 | Paniere YEN | v2.4"
 
 #include <Trade/Trade.mqh>
+#include <ABTG_PausaGuardian.mqh>
+//--- GUARDIAN DEL CONTO -- firme B1 (pausa morbida giornaliera) e C1
+//    (cap sul rischio aperto simultaneo) del 18/08/2026.
+//    Verbale: report/FIRME_2026-08-18.md
+//    true  = prima di APRIRE chiede il via libera al guardiano del conto.
+//    false = comportamento identico a prima della migrazione.
+//    ATTENZIONE, il default true NON cambia niente da solo: se il
+//    Guardian non gira su questo conto -- e nel Strategy Tester, dove le
+//    sue GlobalVariable non esistono -- la guardia lascia passare tutto
+//    (fail-open totale). I backtest restano confrontabili con i vecchi.
+//    Non tocca MAI le posizioni gia' aperte, i parziali, i trailing e le
+//    uscite: blocca soltanto l'APERTURA di nuovo rischio.
+input bool InpUsaGuardian = true;  // Guardian: rispetta pausa giornaliera (B1) e cap rischio aperto (C1)
 
 //=== INPUT MULTI-SIMBOLO ===
 input string InpSymbols = "USDJPY,EURJPY,GBPJPY,CHFJPY,CADJPY,NZDJPY,AUDJPY"; // Paniere simboli (virgola)
@@ -435,6 +448,8 @@ void TryOpen(SymState &st, bool isSell, double W)
     trade.SetExpertMagicNumber(st.magic);
     trade.SetTypeFilling(GetBrokerFilling(sym));
 
+    //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+    if(!ABTG_GuardiaIngresso(InpUsaGuardian,"BREAKOUT_EA_JPY_Multi")) return;
     bool sent = isSell ? trade.Sell(lots, sym, 0, sl, tp, EAComment)
                        : trade.Buy (lots, sym, 0, sl, tp, EAComment);
 
