@@ -1,5 +1,14 @@
 # 🖥️ FLOTTA ATTIVA SUL VPS — mappa dai 52 screenshot (02/08/2026)
 
+> **AGGIORNAMENTO 19/08/2026 — RINOMINA EZ -> EASYTREND (decisione di Claudio).**
+> I commenti delle tre sedie `ABTG_EasyTrend` sono cambiati (magic INTOCCATI):
+> `EZ CHFJPY` -> **`EASYTREND CHFJPY`** (772421) · `EZ GBPUSD` -> **`EASYTREND
+> GBPUSD`** (772422) · `EZ AUDJPY` -> **`EASYTREND AUDJPY`** (772423).
+> Verificato col censimento delle 15:34 (56 sedie / 43,30%, invariato).
+> Nota per le pagelle: il commento nuovo vale per gli ordini FUTURI — le
+> posizioni aperte prima del cambio portano ancora la firma `EZ`, quindi per
+> qualche giorno le due firme convivono nella stessa famiglia (772421-23).
+
 _Fonte: `EXPERT_CARICATI_SU_VPS.zip` (52 grafici). Nome EA letto in alto a destra di ogni grafico._
 _Legenda stato: ✅ validato tick reali · 🟡 nativo/da verificare · ❌ scartato (backtest) · ☠️ "morto" (tenuto per osservazione) · ⚙️ utility._
 
