@@ -1,5 +1,102 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # ✍️ DOMATTINA 20/08 — COSA FIRMARE, E IN CHE ORDINE
+>
+> ## 🔴 PRIMA LE FIRME. POI SI APRONO GLI ZIP SIGILLATI. Mai il contrario.
+>
+> Stanotte tre round hanno girato **senza criteri firmati**. I CSV sono stati
+> prodotti ma stanno in una **cartella sigillata sul Desktop** con dentro un
+> `LEGGIMI_PRIMA` che vieta di guardarli. Le bozze dei criteri sono state
+> scritte **a numeri mai visti** (dichiarazione di cieco in testa a ogni file,
+> con data e ora: 19/08 ore ~23:20 italiane = ~22:20 server BCM).
+> **Regola di casa: i criteri si cambiano PRIMA dei numeri, non dopo.**
+> Se un numero uscito suggerisse un criterio migliore, quel criterio vale
+> **dal round dopo**.
+>
+> ### L'ORDINE, uno per uno
+>
+> | # | cosa | file da leggere | quando si apre lo zip |
+> |---|---|---|---|
+> | **1** | ☕ **Caffe'.** Poi si legge, non si sbircia. | — | — |
+> | **2** | ✍️ **Firmare R86** (ABTG_CrossEma, ablazione EMA 9/21 · DAX H1 + ORO H1) | `backtest_pipeline/risultati_archivio/R86_CRITERI.md` | **dopo** la firma |
+> | **3** | ✍️ **Firmare R87** (GoldenCross v2.00: impatto dei 3 fix + griglia) — **e' il piu' delicato: tocca 4 SEDIE VIVE** | `backtest_pipeline/risultati_archivio/R87_CRITERI.md` | **dopo** la firma |
+> | **4** | ✍️ **Firmare R89** (LiquiditySweep, GBPUSD M15 · sweep+reclaim su livello H4) | `backtest_pipeline/risultati_archivio/R89_CRITERI.md` | **dopo** la firma |
+> | **5** | 📂 **Solo adesso**: si apre la cartella sigillata e si leggono i CSV, **nell'ordine dei criteri** (canarino → rischio → merito). | i tre file qui sopra, riletti | ✅ |
+>
+> ⚠️ **R88 e' gia' firmato** ("FIRMO R88", 19/08 ~18:05):
+> `risultati_archivio/R88_CRITERI.md`. Non va rifirmato.
+>
+> ### Le tre soglie principali di ogni round, per la firma rapida
+>
+> **R86 — ablazione CrossEma** (i quattro cancelli sono quelli gia' congelati in
+> R84, non sono nuovi):
+> 1. 🐤 **Canarino**: se l'IS della cella NUDA esce **sotto 150 operazioni** →
+>    **merito SOSPESO**, si legge il rischio. Per ogni cella filtrata, sotto
+>    **30 operazioni totali** → "non misurabile", mai "peggiora".
+> 2. 🟢 **"la gamba AGGIUNGE"** solo con **tutti e quattro**: n≥30 · segno
+>    coerente fra IS e OOS · **PF campione intero ≥ PF(nuda) + 0,10** · **DD non
+>    peggiore di 1,0 punto percentuale**.
+> 3. 🔴 **Muro del rischio, a qualunque n**: **DD > 15,0%** o **peggior giornata
+>    peggio di −7,5%** → bocciata per rischio, qualunque sia il PF. *(E' il muro
+>    prop 10%/5% di METRO_PROP scalato dal rischio pinnato 1% alla taglia di
+>    campo 0,65%: 10 ÷ 1,538 = 15,4 → 15,0. Etichettato [INFERITO].)*
+>
+> **R87 — GoldenCross v2.00** (⚠️ 4 sedie vive: XAUUSD 970301, USDCHF 770331,
+> USDCAD 770332, NZDUSD 770333):
+> 1. 🔬 **Sovrapposizione dei trade V1 vs v2.00** (chiave: ora d'ingresso +
+>    direzione): **≥90%** = cambiamento cosmetico, contratto invariato · **<70%
+>    o Δn>25%** = **"e' un'altra sedia"** → contratto da riscrivere e storia
+>    forward azzerata per il criterio del 18/08.
+> 2. ⚖️ **"i fix hanno MIGLIORATO"** = PF(v2.00) ≥ PF(V1) **+0,10 in entrambe le
+>    finestre** e DD non peggiore di 1,0 pp. **"PEGGIORATO"** = PF ≤ PF(V1)
+>    **−0,10** in almeno una finestra, o DD peggiore di >1,0 pp.
+>    🔴 **In OGNI caso i fix RESTANO: un bug non si tiene perche' era
+>    fortunato.** Se peggiora, la reazione ammessa e' **spegnere la sedia**, MAI
+>    rimettere la v1.00 (§5.2 ③ del file: leggerlo, e' il punto delicato).
+> 3. 🕸️ **Griglia R87b**: **selezione SOSPESA** (IS stimato **15-40** sul forex
+>    H4, 40-120 sull'oro: tutti sotto 150). Si risponde solo *"esiste un
+>    altopiano?"* = cella con **TUTTE** le vicine dentro **20% di PF e 1,5 pp di
+>    DD** e **PF OOS ≥ 1,10**. **Nessun preset esce da R87.**
+>
+> **R89 — LiquiditySweep Londra** (candidato nuovo, mai girato):
+> 1. 🐤 **Canarino di frequenza, si legge PRIMA del conto economico** (riga
+>    `[LIQSWEEP][CONTEGGIO]`): **n trade IS < 30** o **livelli creati IS < 30**
+>    → **round NON MISURABILE**, e la conclusione e' che `SwingBars=21` su H4 e'
+>    troppo raro — **non** che manca l'edge. Fra 30 e 150 → merito sospeso.
+> 2. 🧭 **Cella A (nuda) PASSA** solo con tutte e cinque: **PF OOS ≥ 1,20**
+>    *(1,10 di casa +0,10 perche' riaprire un capitolo chiuso 48/48 costa piu'
+>    che confermarlo)* · **PF IS > 1,00** con segno coerente · **DD OOS ≤ 15,0%**
+>    · **peggior giornata ≥ −7,5%** · **n totale ≥ 60**.
+> 3. 🕰️ **Cella B (finestra Londra)**: si tiene **solo se migliora l'INSIEME**
+>    delle 9 passate — **mediana PF OOS ≥ PF(A) + 0,10** *e* **almeno 6 su 9**
+>    sopra A *e* un altopiano vero. **Una sola ora che sporge = "l'orario non e'
+>    il motore".** E **B non si legge se A e' bocciata sul RISCHIO o se il
+>    canarino e' sotto 30.**
+>
+> ### 📌 Le due DECISIONI che servono a Claudio (non solo firme)
+>
+> - **R87, il "prima" da misurare** — proposta dell'architetto: usare
+>   `mql5/Experts/ABTG_GoldenCross_V1.mq5` (v1.00 gia' congelata sul branch) per
+>   **tutti e quattro** i simboli. **Verificato stanotte con `git show 8ad73f2`
+>   + diff**: la `_Ottimizzato` v1.00 era il motore base v1.00 **meno** due gambe
+>   opzionali (`InpUseBBExpand`, `InpHAAutoCount`) — quindi con quei due input
+>   pinnati a 0 la V1 base copre anche l'oro. Servono **4 file prova gemelli**
+>   `R87a_impatto_fix_*_V1.txt` (dettaglio in §3.2 di `R87_CRITERI.md`, magic
+>   vergini proposti 7787{5,6,7,8}0/1). **Senza il "prima", R87a e' solo la
+>   fotografia del DOPO e la frase "i fix hanno migliorato/peggiorato NON si
+>   puo' scrivere.**
+> - **PASSO 0 sui TICK, mai misurato per D30EUR, XAUUSD e i cambi H4.** Se i
+>   tick partono dopo il `@DAQUANDO` dei file prova, **quei numeri non si
+>   leggono** e i round si rilanciano (difetto n.18 della checklist). L'unica
+>   riga `TICK` mai prodotta nel repo e' quella di GBPUSD (2024.07.05).
+>
+> ### ⚠️ Un controllo che vale per tutti e tre
+> `walkforward_generico.ps1` ha `$EABranch="lavoro"` **scritto fisso**: gira
+> sempre l'EA sulla **punta** del branch, non quello del `-Rif`. **Va dichiarato
+> nel referto quale commit era sulla punta all'ora della corsa.** (Il BLOCCO 4
+> del collaudo Guardian risulta chiuso VERDE la sera del 19/08, commit
+> `8907a8f` — da confrontare con l'orario di raccolta dei CSV.)
+
 > ## 🔬 ANOMALIA DA AUTOPSIA (19/08 pomeriggio): i gemelli ORB divergono nella GESTIONE
 > Trade del 19/08 ore 14:56 server, U30USD, stesso ingresso AL SECONDO
 > (53600.5, SL 53506.5) su piccolo (0.6 lot, 1%) e 100k (3.7 lot, 0.3%):
