@@ -171,6 +171,17 @@ dell'avversaria e il giro 2 e' inutile.
 > e si ferma se differiscono; e **dall'inizio del PASSO 0 alla fine di R83 non
 > si pusha NIENTE su `lavoro`** (soprattutto in `mql5/Experts/`).
 
+> 🔴 **AVVISO DEL 19/08, PRIMA DI LANCIARE QUALUNQUE PASSO.** La **migrazione
+> Guardian** (decisione n.1 del PIANO_PROP) ha modificato su `lavoro`
+> **`ABTG_Nasdaq_Apertura_US`** (cella A di R84 e metro del canarino di R83) e
+> **`ABTG_DAX_Apertura_EU`** (cella V di R83): il congelamento del branco e'
+> stato rotto e **il PASSO 1a qui sotto ora fallisce apposta**. Non e' un bug
+> della riga: e' la guardia che funziona. Prima si porta a casa il **criterio 4**
+> della migrazione (`REFERTO_MIGRAZIONE_GUARDIAN_PREPARAZIONE.md`, FASE 2:
+> backtest identico al centesimo prima/dopo). Se passa, si **ri-pinna R83/R84
+> all'hash nuovo** dicendolo nel referto; se non passa, R83/R84 non partono
+> comunque, perche' misurerebbero un motore cambiato.
+
 **Come si incollano:** ogni passo e' **UN SOLO blocco `& { ... }`**, graffe
 comprese, si incolla **tutto insieme**. Cosi' un `throw` a meta' ferma davvero
 quello che viene dopo. **Fra un passo e l'altro ci si ferma e si legge.**

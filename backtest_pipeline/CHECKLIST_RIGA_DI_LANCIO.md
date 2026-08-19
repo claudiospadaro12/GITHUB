@@ -631,6 +631,44 @@ aggiorna — cioe' i numeri di ieri riletti come quelli di oggi (punto 23).
 
 ---
 
+## 🆕 AGGIUNTA DEL 19/08/2026 — trovata verificando il collaudo della migrazione Guardian
+
+## 26. ☢️ IL COLLAUDO CHE PUO' FARE DANNO MENTRE MISURA
+
+_Difetto vero, gia' scritto in un referto (`REFERTO_MIGRAZIONE_GUARDIAN_PREPARAZIONE.md`,
+FASE 1: "sul Guardian mettere `InpAutotest=true`, avviarlo su un grafico
+qualsiasi, leggere la scheda Esperti"). Trovato PRIMA dell'invio._
+
+Il punto 20 chiede: **l'output che sto chiedendo, quel gesto lo produce?** Qui
+la risposta era si'. La domanda che mancava e' l'altra meta':
+
+> **oltre a stampare, quella cosa COSA FA?**
+
+`ABTG_Guardian` con i suoi default e' **armato**: `InpAction = 0`
+(CHIUDI+BLOCCA) e `InpCloseAllMagics = true`. E `OnInit` **non si ferma dopo
+l'autotest**: prosegue, scrive le GlobalVariable, arma `EventSetTimer(1)` e
+chiama subito `OnTimer()`. Sul PC di backtest il terminale e' collegato al
+**conto vivo**, lo stesso su cui opera la flotta del VPS: se in quel momento la
+giornata fosse oltre il limite, `FlattenAll()` **chiuderebbe tutte le posizioni
+del conto** — per leggere tre righe di autotest.
+
+Non e' teorico: e' lo stesso terminale che il 14/08 ha piazzato un ordine vero
+partendo da un backtest (punto 20, nota finale).
+
+Tre domande, prima di far girare qualcosa **per leggerne l'output**:
+1. **Cosa tocca oltre allo schermo?** posizioni, ordini, file di MT5,
+   GlobalVariable, preset. Se tocca il conto: si **disarma** prima (qui:
+   `InpAction=1`, soglie a 0) o si va nel **tester**.
+2. **L'autotest e' un ramo che ESCE, o solo un pezzo di strada?** Se `OnInit`
+   continua dopo, il collaudo non e' isolato: `return(INIT_SUCCEEDED)` subito
+   dopo i `Print` sarebbe la forma giusta, e va chiesta.
+3. **Su quale CONTO e su quale ISTANZA gira?** Un terminale "di prova" collegato
+   al conto vivo non e' di prova. E dove ci sono due istanze (qui `-V3` per il
+   100k), la riga sceglie quella giusta **per nome** e si rifiuta se non la
+   riconosce — mai `Select-Object -First 1` su tutti i `terminal64.exe`.
+
+---
+
 ## 🆕 AGGIUNTA DEL 19/08/2026 — trovata verificando le bozze del par. 16 (HistData v4)
 
 ## 26. 🗜️ DUE CHIAMATE NELLO STESSO BLOCCO, UNA SOLA RACCOLTA: la seconda cancella la prima

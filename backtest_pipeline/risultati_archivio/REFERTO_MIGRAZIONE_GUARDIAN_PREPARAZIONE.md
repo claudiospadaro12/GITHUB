@@ -273,6 +273,26 @@ stati toccati**. Aggiunte due cose di **sola lettura**:
    **e' fuori dal canale**. Da verificare nel censimento dei `.chr`.
 5. **Niente di tutto questo e' stato compilato.** Vedi la nota di ambiente in
    testa.
+6. 🔴 **LA MIGRAZIONE INVESTE R83 E R84, ed e' da coordinare oggi stesso**
+   _(trovato dal verificatore il 19/08)_. Fra i 48 migrati ci sono
+   **`ABTG_Nasdaq_Apertura_US`** (la cella A di R84, che e' anche il **metro
+   del canarino di R83**) e **`ABTG_DAX_Apertura_EU`** (la cella **V** di R83).
+   `walkforward_generico.ps1` scarica gli EA da **`lavoro` HEAD**, quindi
+   **qualunque corsa di R83/R84 lanciata da adesso gira sugli EA MIGRATI**.
+   Conseguenze pratiche, tutte e tre:
+   - il **PASSO 1a** di `REFERTO_R83_R84_PREPARAZIONE.md` confronta byte a byte
+     gli EA su `lavoro` col pin `2458b33`: **adesso quel confronto FALLISCE**
+     (e ha fatto il suo mestiere). Non e' un errore della riga: e' il
+     congelamento del branch che e' stato rotto da questa migrazione;
+   - la strada pulita e' **in quest'ordine**: prima il **criterio 4** qui
+     (FASE 2). Se passa, gli EA migrati sono dimostrati identici nel tester e
+     R83/R84 possono ri-pinnare all'hash nuovo **dicendolo nel referto**;
+     se non passa, R83/R84 restano fermi comunque, perche' misurerebbero un
+     motore cambiato;
+   - **R83 ha anche un'asimmetria nuova**: `ABTG_Apertura_3Ingressi` (le celle
+     N0-N2, D0-D2) **non e' stato migrato**, mentre la cella **V** (EA vivo del
+     DAX) **si'**. Il canarino (b) D1 vs V confronterebbe un EA senza guardia
+     con uno con la guardia: regge **solo** se il criterio 4 e' passato.
 
 ---
 
