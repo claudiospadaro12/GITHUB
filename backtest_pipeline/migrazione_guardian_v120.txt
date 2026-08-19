@@ -1,0 +1,54 @@
+# MIGRAZIONE GUARDIAN v1.20 -- i 49 file .mq5 da ricompilare (48 EA + il Guardian).
+# Generato meccanicamente da: git diff --name-only 2458b33..HEAD -- mql5/Experts
+# Serve alla FASE 0 del collaudo (REFERTO_MIGRAZIONE_GUARDIAN_PREPARAZIONE.md):
+# la riga scarica QUESTA lista dal pin e pretende 49 .ex5 su 49.
+# L'include ABTG_PausaGuardian.mqh NON e' in lista: si copia in MQL5\Include, non si compila.
+ABTG_BreakingBand.mq5
+ABTG_CostToCost.mq5
+ABTG_DAX_Apertura_EU.mq5
+ABTG_DAX_Apertura_EU_Ottimizzato.mq5
+ABTG_DAX_Live5m.mq5
+ABTG_DAX_Live5m_v2.mq5
+ABTG_Dow_Apertura_US.mq5
+ABTG_EMA200.mq5
+ABTG_EMA200_Ottimizzato.mq5
+ABTG_EasyTrend.mq5
+ABTG_GapContinuation.mq5
+ABTG_GapFill.mq5
+ABTG_GoldenCross.mq5
+ABTG_GoldenCross_Ottimizzato.mq5
+ABTG_Guardian.mq5
+ABTG_HARSI.mq5
+ABTG_MaxMinNotte.mq5
+ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5
+ABTG_Nasdaq_Apertura_US.mq5
+ABTG_Nasdaq_Apertura_US_Ottimizzato.mq5
+ABTG_Nasdaq_Live5m.mq5
+ABTG_Nightly.mq5
+ABTG_Nightly_Ottimizzato.mq5
+ABTG_ORB.mq5
+ABTG_ORB_Fibo.mq5
+ABTG_ORB_Ottimizzato.mq5
+ABTG_PTE.mq5
+ABTG_PTE_Ottimizzato.mq5
+ABTG_PostNews.mq5
+ABTG_PunteLarry.mq5
+ABTG_SupRev_CAC_H4_Ottimizzato.mq5
+ABTG_SupRev_DAX_H1_Ottimizzato.mq5
+ABTG_SupRev_DAX_H4_Ottimizzato.mq5
+ABTG_SupRev_DOW_H1_Ottimizzato.mq5
+ABTG_SupRev_DOW_H4_Ottimizzato.mq5
+ABTG_SupRev_NAS_H1_Ottimizzato.mq5
+ABTG_SuperWave.mq5
+ABTG_SuperWave_DAX_H4_Ottimizzato.mq5
+ABTG_SuperWave_DOW_H1_Ottimizzato.mq5
+ABTG_SuperWave_EA.mq5
+ABTG_SupertrendInvert.mq5
+ABTG_SupertrendReversal.mq5
+ABTG_SupertrendReversal_Multi.mq5
+ABTG_SupertrendReversal_Multi_Ottimizzato.mq5
+ABTG_SupertrendReversal_Ottimizzato.mq5
+ABTG_WOL.mq5
+BREAKOUT_EA_JPY.mq5
+BREAKOUT_EA_JPY_Multi.mq5
+Gold_Ichimoku_TK_ATR_EA.mq5
