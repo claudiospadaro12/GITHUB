@@ -801,3 +801,30 @@ Tre conferme che valgono per il collaudo:
 Confermato anche che **ABTG_Look e ABTG_LivelliChiave sono installati e
 compilati sull'istanza -V3** (visibili nel Navigatore, indicatori disegnati
 sul grafico AUDNZD: EMA 9/21/50/200, Bollinger, MAX IERI / OPEN OGGI / MIN IERI).
+
+### ✅ BLOCCO 4 ESEGUITO — 19/08/2026 ore 23:10 (VPS, istanza -V3, conto 100k)
+
+**Esito: 6 su 6 aggiornati, 0 falliti.** Log di compilazione letti uno per uno
+in sessione: **"Result: 0 errors, 0 warnings"** su tutti e sei.
+
+| EA aggiornato sul 100k | compilazione |
+|---|---|
+| ABTG_DAX_Apertura_EU | 0 errori, 0 warning |
+| ABTG_Dow_Apertura_US | 0 errori, 0 warning |
+| ABTG_MaxMinNotte_DAX_Short_Ottimizzato | 0 errori, 0 warning |
+| ABTG_ORB_Ottimizzato | 0 errori, 0 warning |
+| ABTG_SupertrendReversal | 0 errori, 0 warning |
+| ABTG_Guardian | 0 errori, 0 warning |
+
+Sono **esattamente** gli EA che sul 100k c'erano gia' (il blocco per disegno
+non installa nulla di nuovo). Backup `.mq5.prima_migrazione` creato accanto a
+ogni file. Referto agli atti: `guardian_REFERTO_BLOCCO4_100K_2026-08-19.txt`.
+
+**Stato del collaudo: FASI 0, 1, 2 e BLOCCO 4 tutti VERDI.** Il 100k gira ora
+su EA migrati compilati oggi, dimostrati identici al centesimo alla versione
+pre-migrazione (criterio 4).
+
+Restano le prove di campo, da fare con calma e MAI insieme:
+- **FASE 3** (la pausa che morde, B1) e **FASE 4** (il cap che rifiuta, C1):
+  si fanno a mano dalla finestra del Guardian, una alla volta.
+- **FASE 5**: il conto piccolo. La decide Claudio, dopo l'osservazione.
