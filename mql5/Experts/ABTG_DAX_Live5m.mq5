@@ -66,6 +66,19 @@
 //|     Strategy Tester prima di usare denaro reale.                 |
 //+------------------------------------------------------------------+
 #include <Trade/Trade.mqh>
+#include <ABTG_PausaGuardian.mqh>
+//--- GUARDIAN DEL CONTO -- firme B1 (pausa morbida giornaliera) e C1
+//    (cap sul rischio aperto simultaneo) del 18/08/2026.
+//    Verbale: report/FIRME_2026-08-18.md
+//    true  = prima di APRIRE chiede il via libera al guardiano del conto.
+//    false = comportamento identico a prima della migrazione.
+//    ATTENZIONE, il default true NON cambia niente da solo: se il
+//    Guardian non gira su questo conto -- e nel Strategy Tester, dove le
+//    sue GlobalVariable non esistono -- la guardia lascia passare tutto
+//    (fail-open totale). I backtest restano confrontabili con i vecchi.
+//    Non tocca MAI le posizioni gia' aperte, i parziali, i trailing e le
+//    uscite: blocca soltanto l'APERTURA di nuovo rischio.
+input bool InpUsaGuardian = true;  // Guardian: rispetta pausa giornaliera (B1) e cap rischio aperto (C1)
 
 //==================================================================
 //  DEFAULT (sovrascrivibili con #define nel file .mq5 dell'EA)
@@ -638,6 +651,8 @@ bool TryPlaceBreakout()
    datetime expiry = TimeCurrent() + InpPendingExpiryMin*60;
 
    //--- BUY STOP
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_DAX_Live5m")) return(false);
    if(InpAllowLong && longOK)
      {
       double sl = (InpSLMode == ABTG_SL_RANGE) ? sellPx : buyPx - AtrValue()*InpAtrSlMult;
@@ -703,6 +718,8 @@ bool TryPlaceGapFill()
    bool longOK  = (bias == 0 || bias == +1);
    bool shortOK = (bias == 0 || bias == -1);
 
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_DAX_Live5m")) return(false);
    if(gap > 0 && InpAllowShort && shortOK)
      {
       // GAP UP -> mi aspetto il ritorno giu': SELL STOP al break sotto il minimo iniziale,
