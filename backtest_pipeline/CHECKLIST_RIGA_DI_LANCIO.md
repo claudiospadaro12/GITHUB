@@ -782,3 +782,53 @@ $len=(Get-Item -LiteralPath $tmp).Length
 $v=Get-Item -LiteralPath $dst -EA Stop
 if($v.PSIsContainer -or $v.Length -ne $len){ throw "copia NON verificata" }
 ```
+
+---
+
+## 🆕 AGGIUNTA DEL 19/08/2026 — trovata verificando la diagnosi "dove stanno le copie"
+
+## 28. 🔭 IL CONTEGGIO CHE DEVE SPIEGARE UN ALTRO CONTEGGIO SI FA SULLO STESSO PERIMETRO
+
+_Difetto vero, trovato PRIMA dell'invio. `censimento_rischio.ps1` (riga 27) legge
+**solo** `%APPDATA%\MetaQuotes\Terminal` e ha dato 55,30% invece di 43,30%. La
+riga diagnostica scritta per spiegare quello scarto scandiva **APPDATA PIU'
+`C:\Program Files*`**, e mescolava le due fonti in un elenco unico._
+
+I punti 18 e 23 coprono la misura fatta sulla grandezza sbagliata e l'artefatto
+di ingresso scaduto. Questo copre il caso in cui **lo strumento che deve
+spiegare un numero non guarda lo stesso mondo che quel numero ha guardato**.
+Le copie trovate in Program Files non erano MAI entrate nel 55,30%: elencate
+senza etichetta avrebbero portato ad accusare della duplicazione dei file che
+nel totale sbagliato non c'erano, e lo scarto non sarebbe tornato lo stesso.
+
+> **Uno strumento diagnostico dichiara il suo PERIMETRO e lo confronta, riga per
+> riga, con quello dello strumento che deve spiegare.** Se e' piu' largo (e va
+> bene che lo sia: si scopre di piu') ogni risultato porta un'etichetta
+> `[DENTRO]` / `[FUORI]`, e i totali si fanno **solo sul perimetro originale**.
+> E la riga stampa l'aritmetica per esteso — `somma copie` / `somma sedie
+> uniche` / `differenza` — perche' e' la differenza che si stava cercando, non
+> l'elenco.
+
+### 28-bis. 🤫 `-ErrorAction SilentlyContinue` DENTRO UN CICLO CHE CONTA = totale corto e sicuro di se'
+
+Il punto 10 dice che `$ErrorActionPreference="Stop"` in un ciclo su file fa una
+corsa monca. **Il rovescio costa di piu' quando il risultato E' un conteggio**:
+
+```powershell
+$t=Get-Content -LiteralPath $c.FullName -Raw -Encoding Unicode -EA SilentlyContinue
+if(-not $t){ continue }        # file sparito dal totale, e nessuno lo sapra' mai
+```
+
+Riprodotto su un albero finto: un `.chr` illeggibile e' uscito dal referto senza
+una riga di traccia, e in fondo c'era scritto `totale file trovati: 6` — un
+numero preciso, tondo e **sbagliato**. Con MT5 **aperto** non e' ipotetico: e'
+il lock del 14/08 gia' pagato in `elenco_ea_attaccati.ps1`, che infatti legge
+con `[IO.FileShare]::ReadWrite` (righe 77-85) e **decide l'encoding dal BOM**
+(righe 88-101) invece di imporne uno.
+
+> **In un ciclo che produce un conteggio, ogni `continue` silenzioso va contato
+> e ELENCATO nel referto**, e l'esito finale lo dice: `ESITO: PARZIALE -- n file
+> non letti`. Un totale senza il numero degli scarti non e' un totale, e'
+> un'opinione. Corollario gemello: `-Encoding Unicode` imposto a mano su file
+> che potrebbero non esserlo trasforma un errore di lettura in **zero risultati
+> silenziosi** — l'encoding si sceglie dal BOM, mai per decreto.
