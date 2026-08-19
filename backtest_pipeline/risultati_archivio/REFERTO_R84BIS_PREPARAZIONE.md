@@ -257,6 +257,37 @@ al nullo e' **concentrato nella stessa meta' di finestra**, non distribuito.
 
 ## 5. 🚦 LE RIGHE DI LANCIO — **BOZZA-DA-VERIFICARE, NON MANDATE**
 
+> 🔴 **AVVISO DEL 19/08 — LA COLLISIONE CON LA MIGRAZIONE GUARDIAN, e va letta
+> PRIMA di qualunque passo.** Una sessione parallela ha migrato su `lavoro`
+> **due dei tre EA di questo round** [VERIFICATO sul log: commit `d83c196`,
+> "famiglia Apertura"]:
+>
+> | EA | usato da | cambiato dopo il pin di R84 (`2458b33`)? |
+> |---|---|---|
+> | `ABTG_Nasdaq_Apertura_US` | S3A S0A S0D B1-B4 S1A-S3D W1 W2 | 🔴 **SI** (`d83c196`) |
+> | `ABTG_DAX_Apertura_EU` | T2 T3 | 🔴 **SI** (`d83c196`) |
+> | `ABTG_Apertura_3Ingressi` | T0 T1 | ✅ no (fermo a `fe1cdb5`, 18/08) |
+>
+> ⚠️ **E il pin NON protegge da questo:** `walkforward_generico.ps1` scarica
+> l'EA da `$EABranch="lavoro"` **scritto fisso nel sorgente** (riga 78), non
+> dal `-Rif`. Qualunque cosa si pinni, **l'EA che gira e' quello di `lavoro`
+> adesso.**
+>
+> **Conseguenza sui canarini, dichiarata prima e non dopo:** se **C3**
+> (Nasdaq A e D) o **C2** (DAX retest) falliscono, la prima ipotesi **non e'**
+> un errore di R84-bis: e' che la migrazione abbia **cambiato il
+> comportamento**. Sono le stesse due gambe su cui la migrazione ha aperto il
+> suo **criterio 4** (*backtest identico al centesimo prima/dopo*,
+> `REFERTO_MIGRAZIONE_GUARDIAN_PREPARAZIONE.md`).
+>
+> 🤝 **Da qui nasce una proposta di coordinamento, che NON decido io:** i
+> canarini C2 e C3 di R84-bis **sono gia'** una prova di criterio 4 per quei
+> due EA (stessa configurazione, stessa finestra, numeri attesi scritti nel
+> driver). O si aspetta che la migrazione chiuda il criterio 4 e **poi** si
+> ri-pinna R84-bis, **oppure** si girano prima C2/C3 e il loro esito vale per
+> tutti e due i lavori. **Sceglie l'architetto, non il collaudatore** — ma
+> **non si lancia il passo 3 senza aver deciso quale delle due.**
+
 > 🛑 **Queste righe NON sono state mandate a Claudio.** Sono bozze da
 > ricontrollare con `CHECKLIST_RIGA_DI_LANCIO.md` alla mano prima di uscire.
 > Punti gia' eseguiti: **1** (script letto, e' scritto da qui), **3** (il file
