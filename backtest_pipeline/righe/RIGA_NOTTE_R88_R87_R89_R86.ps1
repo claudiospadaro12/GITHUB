@@ -207,6 +207,15 @@ New-Item -ItemType Directory -Force -Path $Work,$Prove,$Logs | Out-Null
 $Driver = Join-Path $Work "walkforward_generico.ps1"
 Scarica ("$RawPin/backtest_pipeline/walkforward_generico.ps1") $Driver 'RigaSpread'
 Dico "walkforward_generico.ps1 scaricato al pin" "Green"
+# --- CURA DEFINITIVA (20/08): il driver aveva $EABranch="lavoro" scritto fisso e
+#     scaricava gli EA dalla PUNTA del branch. Qui lo si PINNA al commit: da ora
+#     il driver scarica gli EA dallo STESSO commit dei file prova. Deterministico.
+$dTxt = Get-Content -LiteralPath $Driver -Raw
+$dNew = $dTxt -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
+if($dNew -eq $dTxt){ throw "non sono riuscito a pinnare EABranch nel driver: riga non trovata" }
+Set-Content -LiteralPath $Driver -Value $dNew -Encoding ASCII
+if(-not (Select-String -LiteralPath $Driver -SimpleMatch -Pattern ('$EABranch="' + $Pin + '"') -Quiet)){ throw "pin di EABranch non verificato nel driver" }
+Dico ("driver PINNATO: scarichera' gli EA dal commit " + $Pin.Substring(0,7) + " (non piu' da HEAD)") "Green"
 
 $Storico = Join-Path $Work "scarica_storico.ps1"
 try{ Scarica ("$RawPin/backtest_pipeline/scarica_storico.ps1") $Storico 'REFERTO STORICO' }
@@ -241,6 +250,10 @@ foreach($m in $Motori){
   $aHead = $aHead.TrimStart([char]0xFEFF)
   $aPin  = (Get-Content -LiteralPath $dst -Raw).TrimStart([char]0xFEFF)
   if(($aHead -replace "`r","") -ne ($aPin -replace "`r","")){
+    [void]$Problemi.Add("AVVISO (non bloccante): " + $m + ".mq5 su HEAD differisce dal pin - il driver e' PINNATO, quindi girera' comunque la versione del pin.")
+    Dico ("AVVISO: " + $m + " su HEAD differisce dal pin. Il driver e' pinnato: si prosegue con la versione del pin.") "Yellow"
+  }
+  if($false){
     throw ("BRANCH NON CONGELATO: " + $m + ".mq5 su 'lavoro' HEAD e' DIVERSO dal pin " + $Pin + ".`n" +
            "    walkforward_generico.ps1 scarica sempre da HEAD: la notte girerebbe un motore diverso da quello pinnato.`n" +
            "    O si ripristina il branch, o si ri-pinna la riga all'HEAD nuovo.")
