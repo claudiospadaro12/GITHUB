@@ -753,3 +753,22 @@ i parametri del Guardian dalla sua finestra, come scritto sopra.
 _Parte 1 chiusa il 19/08/2026 prima di toccare il codice. Parti 2 e 3 chiuse a
 codice scritto e pushato. **Nessun numero di performance in questo referto:
 non c'era niente da misurare, solo da collegare.**_
+
+---
+
+## ESITI DEL COLLAUDO — 19/08/2026 pomeriggio (PC di backtest)
+
+| fase | esito | misura |
+|---|---|---|
+| FASE 0 (49 compilazioni, pin d0241ff) | VERDE 15:43 | 49/49 compilati ADESSO; 2 warning 63 su PTE/PTE_Ottimizzato = PRE-esistenti alla migrazione (stessa riga `double w[2]; ArraySetAsSeries` al pin 2458b33) |
+| FASE 1 (autotest DISARMATO) | VERDE 15:49-15:52 | 19 casi su 19 PASS, filo 5/5 (conto 50503392); primo intercetto del verificatore in campo: Claudio ha mandato lo screenshot col Guardian ARMATO (Action=0, pausa 4.0, cap 3.25) e i 4 campi sono stati corretti PRIMA dell'OK. Bonus di osservazione dal log: `rischioAperto=4.35%` in monitor = il cap firmato 3,25% oggi non e' rispettato, come previsto dalla decisione n.1 |
+| FASE 2 / CRITERIO 4 | VERDE 15:56 | 8 confronti su 8 IDENTICI; ricontrollato in sessione con diff byte-a-byte sui CSV: TUTTE le metriche uguali (Profit/PF/DD/Trades/Sharpe/Recovery/peggior giornata), unica differenza la colonna nuova InpUsaGuardian. Le copie _PREMIGRAZIONE sono state cancellate dal repo come previsto |
+
+Artefatti: `guardian_REFERTO_FASE0_2026-08-19.txt` · `guardian_REFERTO_CRITERIO4_2026-08-19.txt` · zip completo sul Desktop del PC (MIGRAZIONE_GUARDIAN.zip).
+
+**CONSEGUENZE:** il criterio 4 e' passato -> la regola del traffico si scioglie:
+R83/R84/R84-bis/R86 possono rilanciare (le stringhe vanno RI-PINNATE a un
+commit >= questo, gli EA a HEAD sono i migrati e sono dimostrati identici).
+Restano da fare: BLOCCO 4 (VPS -V3, FUORI orario di sessione: mai fra le
+08:00 e le 22:00 server), poi FASI 3-5 (pausa che morde, cap che rifiuta,
+osservazione — MAI col conto piccolo prima della FASE 5).
