@@ -1,0 +1,57 @@
+=== Range ORB (ORARI SERVER, come l'indicatore) ====
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+=== Ingresso (EntryPoints x K, come l'indicatore) ====
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=false
+=== Stop, target, gestione ====
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+=== Ricetta ToolKit ABTG / live (tutto OPT-IN) ====
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+=== Rischio ====
+InpRiskPercent=1.0
+=== Filtro notizie (CSV in MQL5/Files) ====
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+=== Generali ====
+InpComment=ORB OTT
+InpMagic=770611
+InpMaxSpread=0
+InpVerbose=true
