@@ -772,3 +772,32 @@ commit >= questo, gli EA a HEAD sono i migrati e sono dimostrati identici).
 Restano da fare: BLOCCO 4 (VPS -V3, FUORI orario di sessione: mai fra le
 08:00 e le 22:00 server), poi FASI 3-5 (pausa che morde, cap che rifiuta,
 osservazione — MAI col conto piccolo prima della FASE 5).
+
+### 📸 FOTO "PRIMA" DEL BLOCCO 4 — pannello Guardian sul 100k, 19/08 ore 23:06 IT
+
+Letto dallo screenshot del terminale -V3 (istanza 100k, conto 50504263),
+Guardian su AUDNZD H1, PRIMA della migrazione:
+
+```
+Stato: OK - operativo          Saldo iniziale: 100000.00
+Equity: 99380.25   Balance: 99380.25
+GIORNO   inizio 99497.62   perdita oggi 117.37 (0.12% / limite 4.9%)
+TOTALE   picco equity 100323.58   drawdown 619.75 (0.62% / limite 9.9%)
+Azione: CHIUDI+BLOCCA
+NUOVI INGRESSI  pausa morbida (4.0%): libera
+                rischio aperto 0.00% / cap 3.25% -> ok
+```
+
+Tre conferme che valgono per il collaudo:
+1. **Le soglie firmate sono in campo**: 4.9 / 9.9 / pausa 4.0 / cap 3.25.
+2. **UN SOLO Guardian sul conto** (regola B9): nel Navigatore del 100k gli EA
+   attaccati sono 7 — DAX_Apertura_EU M5, Dow_Apertura_US M5,
+   MaxMinNotte_DAX_Short_Ott, SupertrendReversal 225JPY H2, ORB_Ottimizzato
+   U30USD M5, TradeExporter EURUSD H1, Guardian AUDNZD H1.
+3. **Rischio aperto 0,00%**: a quest'ora il 100k non ha NESSUNA posizione
+   aperta -> il riavvio del BLOCCO 4 non perde nessuno stato di posizione.
+   E' la condizione migliore possibile per farlo.
+
+Confermato anche che **ABTG_Look e ABTG_LivelliChiave sono installati e
+compilati sull'istanza -V3** (visibili nel Navigatore, indicatori disegnati
+sul grafico AUDNZD: EMA 9/21/50/200, Bollinger, MAX IERI / OPEN OGGI / MIN IERI).
