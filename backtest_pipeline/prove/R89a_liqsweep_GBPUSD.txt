@@ -1,0 +1,205 @@
+# =====================================================================
+#  R89 / SWEEP + RECLAIM SU LIVELLO STRUTTURALE - GBPUSD M15
+#  CELLA A - IL MOTORE NUDO: nessun orario, nessuna sessione.
+#  EA: ABTG_LiquiditySweep (NUOVO, mai girato: e' un CANDIDATO, non una
+#      sedia). Motore ripreso da "Liquidity Sweep H4 - M15" di
+#      OsmarSandovalEspinosa, MQL5 Code Base 68951 (attribuzione dovuta).
+#  Dossier che lo ha promosso:
+#      caccia_strategie\CACCIA_LONDRA_MECCANISMI_2026-08-19.md
+#
+#  Si lancia con:
+#    -Prova prove\R89a_liqsweep_GBPUSD.txt -Etichetta r89agbp -Modello 4
+#
+#  QUESTO FILE E' UNA BOZZA. NON SI LANCIA COSI' COM'E'.
+#  Tre cose vanno fatte prima, e sono elencate qui sotto come TODO
+#  espliciti. Chi lancia senza averle chiuse produce numeri che non si
+#  possono leggere.
+# ---------------------------------------------------------------------
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI.
+#  >>> TODO ARCHITETTO n.1: i criteri di questo round NON SONO ANCORA
+#      SCRITTI. Vanno congelati e FIRMATI in
+#      prove\R89_CRITERI.md PRIMA di lanciare (regola di casa: i criteri
+#      si cambiano prima dei numeri, non dopo). Senza quel file i
+#      risultati di R89 non si leggono.
+#      Dentro devono starci almeno:
+#        - cosa vuol dire PASS per una cella (PF, DD, n minimo);
+#        - la regola di selezione: CENTRO DELL'ALTOPIANO, MAI IL PICCO
+#          (12 Spearman IS->OOS negative su 13: il picco IS non regge);
+#        - la valvola R59: se l'IS sta sotto 150 operazioni, il round
+#          misura il RISCHIO e SOSPENDE il giudizio sul MERITO;
+#        - cosa si fa se il gradino A boccia: il dossier e' esplicito,
+#          la conclusione NON sara' "cerchiamo un altro EA di Londra".
+#
+#  LA DOMANDA DEL ROUND (dal dossier, testuale):
+#    "Il RIENTRO dopo lo sweep -- cioe' la famiglia RETEST che R42
+#     indica come l'unica che ha sempre pagato -- ha un edge su un
+#     livello costruito in GIORNI, dopo che lo stesso rientro
+#     sull'estremo del box di 15 minuti e' stato bocciato 48 celle
+#     su 48?"
+#
+#  QUESTO ROUND NON PUO' PRODURRE UNA SEDIA. Al massimo produce il
+#  permesso di fare un walk-forward vero. Nessun forward, nessun VPS,
+#  finche' non passa un round a TICK REALI (e poi il demo).
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO.
+#    2. QUESTO ROUND NON HA PRECEDENZA su niente di gia' in coda. E'
+#       un CANDIDATO nuovo: passa dopo i lavori sulle sedie vive.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro' (il 10/08 una copia
+#       vecchia di uno script ha rifatto la griglia sbagliata), e la
+#       riga di raccolta finale (cartella sul Desktop +
+#       Compress-Archive) con l'elenco dei file attesi in console.
+#    4. Vale anche sul VPS: ogni risultato destinato a Claudio arriva
+#       SEMPRE anche sul Desktop del VPS.
+# ---------------------------------------------------------------------
+#  QUESTA CELLA
+#    Il motore nudo: swing H4 a 21 barre per lato, sweep + reclaim su
+#    chiusura M15, livello consumato dopo l'uso. NESSUN ORARIO.
+#    E' la BASELINE del round, e sta prima del gradino B per un motivo
+#    misurato: se misurassi gia' filtrato per Londra e andasse male,
+#    non saprei se e' morto il MOTORE o l'ORARIO -- ed e' l'errore che
+#    il par. 5B del dossier ci ha fatto pagare 5 volte su 5
+#    (R20 ADX, R12, R26, R45, R54: filtro appiccicato a un motore gia'
+#    tarato, 0 successi).
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E IL SUO LIMITE DICHIARATO
+#    >>> TODO PASSO 0 n.2 (obbligatorio, prima del lancio): misurare la
+#        profondita' dei TICK REALI di GBPUSD a BCM con
+#        scarica_storico.ps1. Il referto del 15/08 dice tick dal
+#        2024.07.05 per GBPUSD: se e' ancora vero, la riga @DAQUANDO
+#        qui sotto e' SBAGLIATA e va riscritta. Sugli indici il driver
+#        diceva 2024.01.01 e i dati partivano dal 26/09/2024: e' il
+#        difetto n.18 della checklist, e si e' gia' ripetuto.
+#    @DAQUANDO qui sotto e' un SEGNAPOSTO prudente, non una misura.
+#
+#  L'EMENDAMENTO DELLA FINESTRA, applicato per davvero
+#    L'unita' di misura e' l'OPERAZIONE, non l'anno: l'IS vuole >=150
+#    operazioni e deve lasciare un OOS di almeno altre 150.
+#    QUI LA FREQUENZA GIOCA CONTRO, ed e' scritto nel dossier:
+#    "con Range=21 su H4 i livelli sono pochi, quindi il campione
+#     potrebbe non arrivare ai 150 trade IS richiesti".
+#    >>> CANARINO: l'EA stampa SEMPRE, anche con InpVerbose=0, la riga
+#        [LIQSWEEP][CONTEGGIO] con livelli creati / consumati /
+#        invalidati / segnali scartati. QUELLA RIGA SI LEGGE PER PRIMA,
+#        prima del conto economico. Se i trade IS stanno sotto 150 il
+#        round NON si legge per il MERITO (valvola R59: si legge solo
+#        per il RISCHIO) e la finestra va allargata indietro -- oppure
+#        InpSwingBars va abbassato, ma quello e' un ALTRO round.
+#    Split IS/OOS: 40/60, come in R83/R84-bis.
+#
+#  IL REGIME CONTENUTO -- va scritto accanto a OGNI numero
+#    >>> TODO n.3: dichiararlo appena la finestra e' fissata dal PASSO 0.
+#        Con @DAQUANDO 2024.07.05 il regime e' UNO SOLO E MEZZO.
+#        R89 confronta il motore con e senza sessione: NON dichiara
+#        robustezza, e la prova di regime (toro/orso/laterale/crollo)
+#        resta un round a parte.
+#
+#  IL LIMITE CHE VA DETTO ANCHE SE NON PIACE
+#    Questo e' un motore CONTROTENDENZA su livello: e' il tipo che
+#    incassa una SERIE DI STOP in un trend forte. La peggior giornata
+#    va MISURATA (la colonna "Peggior Giornata %" del CSV c'e' apposta),
+#    non stimata. Il criterio di uscita delle sedie (18/08) giudica il
+#    RISCHIO sempre, a qualunque n.
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' IDENTICO A QUELLO DELLA CELLA B DELLO
+#  STESSO SIMBOLO. Cambiano SOLO le righe della finestra di sessione e
+#  il magic. E' la regola di casa dopo l'errore InpTP1_ATRmult=0 contro
+#  0.5, pagato due volte.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  M15
+@DAQUANDO 2024.07.05
+
+# --- MOTORE: il livello e il grilletto, e nient'altro.
+#     InpTF_Struttura = 16388 e' PERIOD_H4 (valore numerico dell'enum:
+#     nei file prova gli enum si scrivono col numero, non col nome).
+#     >>> VERIFICARE il numero prima del lancio: se lo script passa il
+#         nome dell'enum, si scrive PERIOD_H4.
+InpTF_Struttura=16388
+InpSwingBars=21
+InpAllowLong=1
+InpAllowShort=1
+InpMaxLivelli=200
+
+# --- LA FINESTRA DI SESSIONE: SPENTA. E' QUI che questa cella si
+#     distingue dalla B, ed e' l'UNICA differenza fra le due.
+#     Con InpUseSessionWindow=0 le quattro righe dell'orario sono
+#     INERTI: restano scritte lo stesso, cosi' i due file si
+#     confrontano riga per riga.
+InpUseSessionWindow=0
+InpSessStartHour=8
+InpSessStartMin=0
+InpSessEndHour=12
+InpSessEndMin=0
+
+# --- STOP, TARGET, GESTIONE: IDENTICI nelle due celle.
+#     SL STRUTTURALE (modo 0): lo stop va oltre l'ESTREMO DELLO SWEEP
+#     piu' 0,5 ATR di respiro. E' il modo coerente con la tesi del
+#     motore. InpSLatr resta scritto ma e' INERTE con SLMode=0.
+#     >>> TODO: il modo 1 (ATR puro) e' un ALTRO round, non una cella
+#         di questo. L'ATR e' quello di M15: 1,5 x ATR(M15) e' uno stop
+#         PICCOLO rispetto allo sweep di un livello H4, quindi i due
+#         modi NON sono gemelli e non si confrontano a cuor leggero.
+InpAtrPeriod=14
+InpSLMode=0
+InpSLBufferAtr=0.5
+InpSLatr=1.5
+InpTP_RR=2.0
+
+# --- PARZIALE SPENTO, BREAKEVEN ACCESO. Va detto, perche' e' una
+#     SCELTA DI GESTIONE dentro una cella chiamata "nuda":
+#     InpTP1Pct=0 spegne il parziale, ma InpBreakeven=1 porta comunque
+#     lo stop in pari a 1 R (lezione PTE del 04/08: il breakeven non
+#     dipende dalla riuscita del parziale, e qui nemmeno dal parziale).
+#     >>> TODO: l'ABLAZIONE del breakeven (InpBreakeven=0) e' una cella
+#         di un round successivo, non di questo. Se la si vuole qui,
+#         va aggiunta come cella C e dichiarata nei criteri PRIMA.
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailing=0
+InpTrailATR=1.5
+
+# --- OPERATIVA: nessun tetto. I tetti sono filtri travestiti.
+InpMaxTradesPerDay=0
+
+# --- RISCHIO: pinnato a 1,00%. NON e' una taglia di campo: e' un
+#     valore comune che rende i profitti confrontabili fra le celle e
+#     con gli altri round. La taglia di campo e' 0,65%.
+InpRiskPercent=1.0
+
+# --- NOTIZIE: spente. Sono un filtro, e i filtri sono la domanda del
+#     round: accenderne uno fuori dalla sua cella lo renderebbe
+#     illeggibile. (E servirebbe un CSV in MQL5\Files.)
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con quelli degli altri EA. Sta qui
+#     scritto apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log e autotest SPENTI nelle corse lunghe.
+#     L'autotest si legge una volta sola, in un test SINGOLO, prima del
+#     round: in una griglia riempirebbe il giornale a ogni passata.
+#     La riga [LIQSWEEP][CONTEGGIO] esce lo stesso: non passa da
+#     InpVerbose, ed e' il canarino.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+InpComment=LIQSWEEP
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE. Se non lo sono c'e' di mezzo la cache del
+#     tester o una griglia che MT5 si ricorda: il numero non si legge.
+#     Formato: default||start||step||stop||Y
+#
+#     MAGIC VERGINI 772603/772604, NON il 772600 di default dell'EA:
+#     il 772600 resta riservato all'eventuale sedia, e 772601/772602
+#     sono gia' stati bruciati come magic vergini in R54 (Dow). Un
+#     magic gia' visto puo' far incrociare al tester deal che non
+#     c'entrano: verificato in R54, si scrive per non rifarlo.
+InpMagic=772603||772603||1||772604||Y

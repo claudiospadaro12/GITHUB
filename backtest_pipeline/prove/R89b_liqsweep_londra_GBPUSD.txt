@@ -1,0 +1,168 @@
+# =====================================================================
+#  R89 / SWEEP + RECLAIM SU LIVELLO STRUTTURALE - GBPUSD M15
+#  CELLA B - LA FINESTRA DI LONDRA ACCESA, con l'ASSE ORARIO SPAZZOLATO
+#  EA: ABTG_LiquiditySweep (NUOVO, mai girato: e' un CANDIDATO, non una
+#      sedia). Motore ripreso da "Liquidity Sweep H4 - M15" di
+#      OsmarSandovalEspinosa, MQL5 Code Base 68951 (attribuzione dovuta).
+#
+#  Si lancia con:
+#    -Prova prove\R89b_liqsweep_londra_GBPUSD.txt -Etichetta r89bgbp -Modello 4
+#
+#  QUESTO FILE E' UNA BOZZA. NON SI LANCIA COSI' COM'E'.
+#  E NON SI LANCIA PRIMA DELLA CELLA A: senza la baseline nuda questa
+#  cella non e' interpretabile. Se B va male e A non e' stata misurata,
+#  non si sa se e' morto il MOTORE o l'ORARIO -- ed e' esattamente
+#  l'errore che il par. 5B del dossier ha gia' misurato 0 su 5.
+# ---------------------------------------------------------------------
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI.
+#  >>> TODO ARCHITETTO n.1: prove\R89_CRITERI.md NON ESISTE ANCORA.
+#      Va scritto e FIRMATO prima del lancio. Per QUESTA cella deve
+#      dire in piu' una cosa sola, ma decisiva:
+#        "la finestra si tiene SOLO se migliora l'INSIEME delle
+#         passate rispetto alla cella A, non la passata migliore".
+#      Una finestra che aggiusta un'ora e ne rovina tre e' curve
+#      fitting sull'orologio, ed e' il modo piu' facile di pescare.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO.
+#    2. QUESTA CELLA STA IN CODA ALLA CELLA A. Non e' burocrazia: e' la
+#       condizione perche' il numero significhi qualcosa.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi in console.
+#    4. Vale anche sul VPS: ogni risultato destinato a Claudio arriva
+#       SEMPRE anche sul Desktop del VPS.
+# ---------------------------------------------------------------------
+#  ATTENZIONE, IL PUNTO PIU' DELICATO DI TUTTO IL ROUND:
+#
+#  L'ORA DI LONDRA IN ORA SERVER, NEI NOSTRI FILE, HA TRE VALORI DIVERSI
+#     REGISTRO_TEST.md (Londra_ORB)   -> "range 06-07 server"
+#     REFERTO_ROUND45_LONDRA.md       -> "range 07:00 -> 07:15/07:30 server"
+#     regola di casa (server BCM = ora IT - 1) -> apertura 08:00 server
+#  TRE POSTI, TRE NUMERI. NON NE INVENTIAMO UNO.
+#
+#  >>> TODO n.2, PRIMA DEL LANCIO: guardare l'OROLOGIO DEL SERVER e
+#      fissare il numero vero. E' un controllo di 30 secondi.
+#      Promemoria dell'errore del 06/08: le schede Esperti e Giornale
+#      di MT5 stampano in ORA LOCALE del PC, il grafico e TimeCurrent()
+#      in ORA SERVER. Chi confronta le due cose annuncia ritardi che non
+#      esistono -- e' successo, ed e' costato una diagnosi sbagliata.
+#
+#  Finche' quel numero non e' fissato, la griglia qui sotto SPAZZOLA
+#  l'asse: 6 / 7 / 8 server. Non e' pesca, e' la risposta onesta a
+#  un'ambiguita' documentata -- ma va DICHIARATA come tale nel referto,
+#  e il criterio di selezione resta CENTRO DELL'ALTOPIANO, MAI IL PICCO.
+#  Se l'altopiano non c'e' (una sola ora sporge, le altre no), la
+#  lettura corretta e' "l'orario non e' il motore", non "ho trovato
+#  l'ora giusta".
+# ---------------------------------------------------------------------
+#  COSA MISURA DAVVERO QUESTA CELLA -- e cosa NON misura
+#    MISURA: il motore sweep+reclaim su livelli H4, ristretto a una
+#    fascia oraria. La finestra qui e' ancora un FILTRO applicato al
+#    motore.
+#    NON MISURA: il gradino B "pieno" descritto nel dossier, dove il
+#    tempo diventa COSTITUTIVO -- livello = estremo del range notturno
+#    asiatico, grilletto = rientro dentro la finestra di Londra. Quello
+#    e' un MOTORE DIVERSO e un EA diverso.
+#    >>> TODO n.3: se e solo se questa cella dice qualcosa, il gradino B
+#        pieno si scrive come EA a parte. Scriverlo adesso vorrebbe dire
+#        costruire prima di aver misurato.
+# ---------------------------------------------------------------------
+#  LA FINESTRA STORICA E IL CANARINO
+#    >>> TODO PASSO 0 n.4: come nella cella A, la profondita' dei TICK
+#        REALI di GBPUSD a BCM va MISURATA con scarica_storico.ps1.
+#        @DAQUANDO qui sotto e' un SEGNAPOSTO, non una misura, e deve
+#        essere IDENTICO a quello della cella A o le due non si
+#        confrontano.
+#    >>> CANARINO, e qui morde il doppio: la finestra oraria TAGLIA i
+#        segnali. Il motore nudo gia' rischia di non arrivare a 150
+#        operazioni IS (dossier: "con Range=21 su H4 i livelli sono
+#        pochi"); ristretto a 4 ore al giorno puo' scendere a un terzo.
+#        La riga [LIQSWEEP][CONTEGGIO] (stampata SEMPRE, anche con
+#        InpVerbose=0) va letta PRIMA del conto economico. Sotto 150
+#        operazioni IS vale la valvola R59: si misura il RISCHIO, si
+#        SOSPENDE il giudizio sul MERITO.
+#    Split IS/OOS: 40/60, come nella cella A.
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' IDENTICO A QUELLO DELLA CELLA A DELLO
+#  STESSO SIMBOLO. Cambiano SOLO le righe della finestra di sessione e
+#  il magic.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  M15
+@DAQUANDO 2024.07.05
+
+# --- MOTORE: identico alla cella A. Non si tocca NIENTE qui, o le due
+#     celle misurerebbero due cose insieme.
+InpTF_Struttura=16388
+InpSwingBars=21
+InpAllowLong=1
+InpAllowShort=1
+InpMaxLivelli=200
+
+# --- LA FINESTRA DI SESSIONE: ACCESA. E' l'UNICA differenza dalla A.
+#     La finestra e' [inizio, fine): la barra M15 che APRE all'ora di
+#     fine e' gia' FUORI. Con 8:00-12:00 l'ultima barra utile e' quella
+#     che apre alle 11:45. L'ora e' quella del SERVER, sempre.
+InpUseSessionWindow=1
+InpSessStartMin=0
+InpSessEndMin=0
+
+# --- LA GRIGLIA: 3 (dove comincia Londra) x 3 (quanto dura) = 9 passate.
+#     Formato: default||start||step||stop||Y
+#
+#     ASSE 1 -- L'ORA DI INIZIO. E' l'ambiguita' documentata sopra:
+#     6 = REGISTRO_TEST, 7 = R45, 8 = regola del fuso IT-1.
+#     Le tre risposte che i nostri file danno alla stessa domanda.
+InpSessStartHour=8||6||1||8||Y
+#
+#     ASSE 2 -- LA DURATA. 10 = 2-4 ore, 12 = 4-6 ore, 14 = 6-8 ore.
+#     Sta qui perche' senza di lui l'asse 1 sarebbe illeggibile: una
+#     finestra che comincia un'ora prima ma finisce alla stessa ora e'
+#     anche una finestra piu' LUNGA, e non si saprebbe quale delle due
+#     cose ha mosso il numero.
+InpSessEndHour=12||10||2||14||Y
+
+# --- STOP, TARGET, GESTIONE: IDENTICI alla cella A. Se cambiasse anche
+#     solo il trailing, il confronto A-vs-B non isolerebbe piu' la
+#     finestra: misurerebbe due cose insieme.
+InpAtrPeriod=14
+InpSLMode=0
+InpSLBufferAtr=0.5
+InpSLatr=1.5
+InpTP_RR=2.0
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailing=0
+InpTrailATR=1.5
+
+# --- OPERATIVA: nessun tetto.
+InpMaxTradesPerDay=0
+
+# --- RISCHIO: pinnato a 1,00%, come nella cella A.
+InpRiskPercent=1.0
+
+# --- NOTIZIE: spente.
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo, INERTE nel tester (fail-open).
+InpUsaGuardian=1
+
+# --- IGIENE: log e autotest spenti. La riga [LIQSWEEP][CONTEGGIO] esce
+#     lo stesso: non passa da InpVerbose, ed e' il canarino.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+InpComment=LIQSWEEP
+
+# --- MAGIC pinnato: qui l'asse di controllo gemello non ci sta
+#     (raddoppierebbe le passate a 18 per finestra). Il controllo
+#     gemello lo fa la cella A. Magic DIVERSO da quello della cella A
+#     (che usa 772603/772604), cosi' i due CSV dei trade non si
+#     mescolano. Il 772600 di default dell'EA resta riservato
+#     all'eventuale sedia; 772601/772602 sono gia' bruciati in R54.
+InpMagic=772605
