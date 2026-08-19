@@ -18,11 +18,13 @@ SuperTrend del corso (lezione 10, allegato .ex4 MAI ancora scaricato)._
 - I corpi EX5 sono cifrati: i DEFAULT degli input non si leggono dal file.
   Si leggono dalla finestra di MT5 (trascinare sul grafico -> screenshot ->
   Annulla; sono indicatori, non aprono ordini).
-- Provenienza CHIARITA da Claudio (19/08, in chat): **"LI HA PASSATI
-  LAVORENTI"** — i file arrivano direttamente da Paolo Lavorenti, quindi
-  passaggio personale, non download. Il ruolo esatto di Lavorenti
-  nell'ambiente ABTG resta [DA CHIARIRE] (coach? sviluppatore? corsista
-  avanzato?) — pesa sul rango della fonte.
+- Provenienza CHIARITA E COMPLETA (Claudio, 19/08 in chat): i file li ha
+  passati **Paolo Lavorenti**, che e' **uno dei DUE COACH di Claudio alla
+  Trading Diary, insieme a Emiliano Monza**. Rango della fonte: MASSIMO
+  per il contesto didattico — strumento consegnato dal coach all'allievo.
+  NOTA D'INTELLIGENCE: "Emiliano" delle live sulle aperture (17/07, da cui
+  vengono i Live5m) = **Emiliano Monza** — il coach delle aperture ora ha
+  nome e cognome.
 
 ## Da fare
 1. ~~Screenshot dei default~~ -> ✅ FATTO (19/08, 09:54, screenshot in chat,
