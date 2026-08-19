@@ -1,8 +1,34 @@
 # =====================================================================
 #  histdata_m1.py  --  LA STRADA HISTDATA per lo storico M1 degli INDICI
 #  ---------------------------------------------------------------------
-#  VERSIONE: HD-M1-v3        (marcatore: la riga di lancio lo stampa
+#  VERSIONE: HD-M1-v4        (marcatore: la riga di lancio lo stampa
 #                             PRIMA di fare qualunque altra cosa)
+#
+#  v4 (19/08, missione dati): tre modi OFFLINE nuovi, per la diagnosi
+#    chiesta dal par. 15-16 del REFERTO_HISTDATA_FATTIBILITA.md:
+#      --estrai "AAAA.MM.GG HH:MM" --ore N
+#          stampa le barre M1 intorno a quell'istante (riepilogo per
+#          ora, buchi fra barre consecutive, salto prezzo massimo,
+#          barre M1 una per una vicino al centro). ATTENZIONE: l'ora
+#          va data COME E' SCRITTA NEL CSV, cioe' ora locale di New
+#          York per i CSV HistData (NON ora server: server = NY+5,
+#          oppure NY+4 dentro le finestre DST sfasate di marzo e
+#          ottobre/novembre).
+#      --diagnosi
+#          scandisce le barre di un simbolo e stampa: i GIORNI con
+#          prezzi fuori dalla banda attesa (per anno e per giorno,
+#          con i valori), la mappa mese-per-mese dell'ora di apertura
+#          (riusa misura_fuso) e i conteggi per anno. Trovare barre
+#          marce QUI e' il mestiere della diagnosi, NON un errore:
+#          l'exit code e' 0 se la scansione e' riuscita.
+#      --vol-oraria
+#          misura il range orario medio in % del prezzo (per anno e
+#          totale, solo ore con almeno 30 barre M1): serve al metro
+#          relativo del cancello (par. 16 del referto), per sostituire
+#          le volatilita' [INFERITO] con numeri misurati.
+#    I tre modi leggono <SIMBOLO>_M1.csv nella cartella (default
+#    ~/histdata_m1); se il CSV non c'e', --diagnosi e --vol-oraria
+#    ripiegano sugli ZIP presenti. Nessuna rete.
 #
 #  v2 (18/08 sera, verifica del verificatore-stringhe -- 16 difetti):
 #    cache ZIP verificata e scrittura atomica (.parziale + replace),
@@ -14,6 +40,7 @@
 #    ritorna il conteggio vero, Desktop dal registro di Windows,
 #    referto con ora nel nome e nella cartella degli ZIP, PROSSIMO
 #    PASSO stampato solo se i CSV esistono davvero.
+#  v3 (18/08 notte): bande di prezzo aggiornate ai massimi 2026.
 #
 #  PERCHE' ESISTE (18/08/2026)
 #    Lo storico BCM degli indici parte dal 26/09/2024: niente 2020
@@ -112,7 +139,7 @@ import urllib.request
 import zipfile
 from datetime import datetime, timedelta
 
-VERSIONE = "HD-M1-v3"
+VERSIONE = "HD-M1-v4"
 
 BASE_PAGINA = ("https://www.histdata.com/download-free-forex-historical-data/"
                "?/ascii/1-minute-bar-quotes/")
@@ -585,6 +612,302 @@ def confronto_finestra(barre, da_txt, a_txt):
 
 
 # ---------------------------------------------------------------------
+#  ANALISI OFFLINE (v4) -- estrazione, diagnosi, volatilita' oraria.
+#  Leggono i CSV gia' prodotti (Formato 1) o, in mancanza, gli ZIP.
+#  Nessuna rete. L'ora e' SEMPRE quella scritta nel file.
+# ---------------------------------------------------------------------
+def leggi_csv_formato1(percorso, da=None, a=None):
+    """Legge un CSV Formato 1 (Time,Open,High,Low,Close,Volume) e torna
+    lo stesso dizionario di leggi_righe_histdata. Se da/a sono dati,
+    tiene SOLO le barre nella finestra (lettura veloce: filtro sul
+    prefisso data della riga, niente strptime fuori finestra)."""
+    barre = {}
+    giorni_ok = None
+    if da is not None and a is not None:
+        giorni_ok = set()
+        g = da.date()
+        while g <= a.date():
+            giorni_ok.add(g.strftime("%Y.%m.%d"))
+            g = g + timedelta(days=1)
+    with open(percorso, "r", encoding="ascii", errors="replace") as f:
+        for riga in f:
+            riga = riga.strip()
+            if len(riga) < 16 or riga[0] == "T":
+                continue
+            if giorni_ok is not None and riga[0:10] not in giorni_ok:
+                continue
+            campi = riga.split(",")
+            if len(campi) < 5:
+                continue
+            s = campi[0]
+            try:
+                t = datetime(int(s[0:4]), int(s[5:7]), int(s[8:10]),
+                             int(s[11:13]), int(s[14:16]))
+            except ValueError:
+                continue
+            if da is not None and t < da:
+                continue
+            if a is not None and t > a:
+                continue
+            o, h, l, c = campi[1], campi[2], campi[3], campi[4]
+            v = campi[5] if len(campi) > 5 else "0"
+            try:
+                fo, fh, fl, fc = float(o), float(h), float(l), float(c)
+            except ValueError:
+                continue
+            if t not in barre:
+                barre[t] = (o, h, l, c, v, fo, fh, fl, fc)
+    return barre
+
+
+def estrai_finestra(barre, centro, ore):
+    """Le barre M1 intorno a un istante: riepilogo per ORA (n, OHLC,
+    range in punti e in %), i buchi fra barre consecutive col salto di
+    prezzo, il salto massimo close->open, e le barre M1 una per una da
+    -30 a +60 minuti dal centro. Torna (righe, trovato_qualcosa)."""
+    righe = []
+    da = centro - timedelta(hours=ore)
+    a = centro + timedelta(hours=ore)
+    sel = sorted(k for k in barre if da <= k <= a)
+    righe.append("ESTRAZIONE intorno a %s (+/- %d ore, ora COME SCRITTA nel file)" %
+                 (centro.strftime("%Y.%m.%d %H:%M"), ore))
+    righe.append("  (per i CSV HistData l'ora e' quella locale di NEW YORK:")
+    righe.append("   ora server BCM = NY+5, oppure NY+4 dentro le finestre DST")
+    righe.append("   sfasate di marzo e ottobre/novembre.)")
+    if not sel:
+        righe.append("  NESSUNA BARRA nella finestra %s -> %s." %
+                     (da.strftime("%Y.%m.%d %H:%M"), a.strftime("%Y.%m.%d %H:%M")))
+        return righe, False
+    per_ora = {}
+    for k in sel:
+        per_ora.setdefault(k.replace(minute=0), []).append(k)
+    righe.append("  riepilogo per ORA:")
+    righe.append("    ora               n   open        min         max         close       range (pt e %)")
+    for h in sorted(per_ora.keys()):
+        ks = per_ora[h]
+        lo = min(barre[k][7] for k in ks)
+        hi = max(barre[k][6] for k in ks)
+        op = barre[ks[0]][5]
+        cl = barre[ks[-1]][8]
+        med = (hi + lo) / 2.0
+        pct = (hi - lo) / med * 100.0 if med > 0 else 0.0
+        righe.append("    %s  %2d  %-10.2f  %-10.2f  %-10.2f  %-10.2f  %.2f (%.3f%%)" %
+                     (h.strftime("%Y.%m.%d %H:%M"), len(ks), op, lo, hi, cl,
+                      hi - lo, pct))
+    buchi = []
+    salto_max = (0.0, None, None)
+    for x, y in zip(sel, sel[1:]):
+        dmin = (y - x).total_seconds() / 60.0
+        salto = abs(barre[y][5] - barre[x][8])
+        if salto > salto_max[0]:
+            salto_max = (salto, x, y)
+        if dmin > 1:
+            buchi.append("    BUCO %4d min: %s -> %s  (salto prezzo close->open %.2f)" %
+                         (int(dmin), x.strftime("%Y.%m.%d %H:%M"),
+                          y.strftime("%Y.%m.%d %H:%M"),
+                          barre[y][5] - barre[x][8]))
+    righe.append("  buchi > 1 min fra barre consecutive: %d" % len(buchi))
+    righe += buchi[:30]
+    if len(buchi) > 30:
+        righe.append("    (... e altri %d)" % (len(buchi) - 30))
+    if salto_max[1] is not None:
+        righe.append("  salto massimo close->open fra barre consecutive: %.2f (%s -> %s)" %
+                     (salto_max[0], salto_max[1].strftime("%Y.%m.%d %H:%M"),
+                      salto_max[2].strftime("%Y.%m.%d %H:%M")))
+    vicine = [k for k in sel
+              if centro - timedelta(minutes=30) <= k <= centro + timedelta(minutes=60)]
+    righe.append("  barre M1 da -30 a +60 minuti dal centro (%d):" % len(vicine))
+    for k in vicine:
+        o, h, l, c, v = barre[k][0:5]
+        righe.append("    %s  O=%s  H=%s  L=%s  C=%s  V=%s" %
+                     (k.strftime("%Y.%m.%d %H:%M"), o, h, l, c, v))
+    return righe, True
+
+
+def diagnosi_fuori_banda(sym, pair, barre, banda):
+    """I giorni con prezzi fuori dalla banda attesa: quali anni, quante
+    barre, che valori. Trovarne e' il MESTIERE della diagnosi (par. 13
+    del referto: min 2.906 su GRXEUR), non un errore di questo modo."""
+    lo, hi = banda
+    righe = []
+    righe.append("DIAGNOSI FUORI BANDA -- %s (%s), banda attesa %.1f-%.1f" %
+                 (sym, pair, lo, hi))
+    per_giorno = {}
+    for k, val in barre.items():
+        fl, fh = val[7], val[6]
+        if fl < lo or fh > hi:
+            g = k.date()
+            e = per_giorno.get(g)
+            if e is None:
+                per_giorno[g] = [1, fl, fh]
+            else:
+                e[0] += 1
+                e[1] = min(e[1], fl)
+                e[2] = max(e[2], fh)
+    if not per_giorno:
+        righe.append("  nessuna barra fuori banda su %d barre." % len(barre))
+        return righe, 0
+    tot = sum(e[0] for e in per_giorno.values())
+    righe.append("  barre fuori banda: %d, in %d giorni." % (tot, len(per_giorno)))
+    per_anno = {}
+    for g, (n, mn, mx) in per_giorno.items():
+        a = per_anno.get(g.year)
+        if a is None:
+            per_anno[g.year] = [1, n, mn, mx]
+        else:
+            a[0] += 1
+            a[1] += n
+            a[2] = min(a[2], mn)
+            a[3] = max(a[3], mx)
+    righe.append("  per ANNO (giorni colpiti, barre, minimo e massimo visti):")
+    for anno in sorted(per_anno.keys()):
+        gg, nn, mn, mx = per_anno[anno]
+        righe.append("    %d: %3d giorni, %6d barre, min %.3f, max %.3f" %
+                     (anno, gg, nn, mn, mx))
+    righe.append("  i GIORNI peggiori (max 40, ordinati per barre fuori banda):")
+    ordinati = sorted(per_giorno.keys(), key=lambda g: -per_giorno[g][0])
+    for g in sorted(ordinati[:40]):
+        n, mn, mx = per_giorno[g]
+        righe.append("    %s  %5d barre  min %.3f  max %.3f" % (g, n, mn, mx))
+    if len(per_giorno) > 40:
+        righe.append("    (... e altri %d giorni)" % (len(per_giorno) - 40))
+    return righe, tot
+
+
+def vol_oraria(sym, barre, minimo_barre=30):
+    """Range orario medio in % del prezzo, per anno e totale. Conta solo
+    le ore con almeno `minimo_barre` barre M1 (le nottate sottili con 2
+    barre non sono 'un'ora di mercato' e annacquerebbero la media).
+    Serve al metro relativo del cancello (par. 16 del referto)."""
+    righe = []
+    per_ora = {}
+    for k, val in barre.items():
+        h = (k.year, k.month, k.day, k.hour)
+        e = per_ora.get(h)
+        if e is None:
+            per_ora[h] = [val[7], val[6], 1]
+        else:
+            if val[7] < e[0]:
+                e[0] = val[7]
+            if val[6] > e[1]:
+                e[1] = val[6]
+            e[2] += 1
+    per_anno = {}
+    tot = []
+    scartate_sottili = 0
+    for h, (lo, hi, n) in per_ora.items():
+        if n < minimo_barre:
+            scartate_sottili += 1
+            continue
+        med = (hi + lo) / 2.0
+        if med <= 0:
+            continue
+        pct = (hi - lo) / med * 100.0
+        per_anno.setdefault(h[0], []).append(pct)
+        tot.append(pct)
+    righe.append("VOLATILITA' ORARIA -- %s: range H1 medio in %% del prezzo" % sym)
+    righe.append("  (solo ore con >= %d barre M1: ore piene %d, sottili scartate %d)" %
+                 (minimo_barre, len(tot), scartate_sottili))
+    if not tot:
+        righe.append("  nessuna ora piena: non misurabile.")
+        return righe, None
+    for anno in sorted(per_anno.keys()):
+        v = per_anno[anno]
+        righe.append("    %d: media %.4f%%  (su %d ore)" %
+                     (anno, sum(v) / len(v), len(v)))
+    media = sum(tot) / len(tot)
+    ordinate = sorted(tot)
+    mediana = ordinate[len(ordinate) // 2]
+    righe.append("  TOTALE: media %.4f%%  mediana %.4f%%  (su %d ore)" %
+                 (media, mediana, len(tot)))
+    return righe, media
+
+
+def carica_barre_offline(pair, cartella, contatori):
+    """Per i modi offline: prima il CSV gia' prodotto (<SIMBOLO>_M1.csv),
+    altrimenti gli ZIP nella cartella. Torna (barre, descrizione fonte)."""
+    sym = STRUMENTI[pair][0]
+    percorso = os.path.join(cartella, "%s_M1.csv" % sym)
+    if os.path.exists(percorso):
+        return leggi_csv_formato1(percorso), "CSV " + percorso
+    dati = ingerisci_zip(cartella, {pair}, contatori)
+    return dati.get(pair, {}), "ZIP in " + cartella
+
+
+def analisi_offline(args, pairs, cartella, stampa):
+    """Il flusso dei modi offline v4 (--estrai / --diagnosi /
+    --vol-oraria): niente rete, exit 0 se OGNI simbolo chiesto e' stato
+    analizzato (le barre marce TROVATE dalla diagnosi non sono un
+    problema: sono il risultato). Referto e raccolta come sempre."""
+    problemi = []
+    contatori = {"scartate": 0, "duplicate": 0, "ohlc_incoerenti": 0,
+                 "zip_rotti": 0}
+    centro = None
+    if args.estrai:
+        try:
+            centro = datetime.strptime(args.estrai, "%Y.%m.%d %H:%M")
+        except ValueError:
+            log("--estrai: data non valida (attesa \"AAAA.MM.GG HH:MM\"): %s"
+                % args.estrai)
+            return 2
+    for pair in pairs:
+        sym, lo, hi, che = STRUMENTI[pair]
+        stampa.append("")
+        stampa.append("================ %s (%s) ================" % (sym, pair))
+        if args.estrai and not (args.diagnosi or args.vol_oraria):
+            # solo estrazione: si legge SOLO la finestra (veloce)
+            percorso = os.path.join(cartella, "%s_M1.csv" % sym)
+            if os.path.exists(percorso):
+                margine = timedelta(hours=args.ore + 1)
+                barre = leggi_csv_formato1(percorso, centro - margine,
+                                           centro + margine)
+                fonte = "CSV " + percorso
+            else:
+                barre, fonte = carica_barre_offline(pair, cartella, contatori)
+        else:
+            barre, fonte = carica_barre_offline(pair, cartella, contatori)
+        stampa.append("fonte: %s" % fonte)
+        if not barre:
+            stampa.append("NESSUNA BARRA: manca %s_M1.csv e non ci sono ZIP utili." % sym)
+            problemi.append("%s: nessuna barra da analizzare" % sym)
+            continue
+        if args.estrai:
+            righe, trovato = estrai_finestra(barre, centro, args.ore)
+            stampa += righe
+            if not trovato:
+                problemi.append("%s: nessuna barra nella finestra chiesta" % sym)
+        if args.diagnosi:
+            righe, _fuori = diagnosi_fuori_banda(sym, pair, barre, (lo, hi))
+            stampa += righe
+            stampa.append("")
+            stampa.append("MAPPA MESE-PER-MESE DELL'ORA DI APERTURA (riuso di misura_fuso):")
+            stampa += misura_fuso(barre)
+            stampa.append("")
+            stampa += referto_barre(sym, pair, barre, (lo, hi))
+        if args.vol_oraria:
+            stampa.append("")
+            righe, media = vol_oraria(sym, barre)
+            stampa += righe
+            if media is None:
+                problemi.append("%s: volatilita' oraria non misurabile" % sym)
+    stampa.append("")
+    if problemi:
+        stampa.append("ESITO: FALLITO -- %d problemi:" % len(problemi))
+        for p in problemi:
+            stampa.append("  - " + p)
+    else:
+        stampa.append("ESITO: OK")
+        if args.diagnosi:
+            stampa.append("(le barre fuori banda TROVATE sono il risultato della")
+            stampa.append(" diagnosi, non un guasto di questa corsa)")
+    for r in stampa:
+        log(r)
+    percorso_referto = scrivi_referto(stampa, cartella)
+    raccogli_desktop([percorso_referto], "histdata_m1", "histdata_m1.zip")
+    return 1 if problemi else 0
+
+
+# ---------------------------------------------------------------------
 #  SCRITTURA DEL CSV -- Formato 1 di ABTG_ImportaStoricoEsterno
 #  "Time,Open,High,Low,Close,Volume" con data "YYYY.MM.DD HH:MM".
 #  I prezzi passano COME SONO NEL FILE SORGENTE (stringhe): nessun
@@ -767,11 +1090,68 @@ def autotest():
     log("8. allarme banda di prezzo (unita' sbagliate): OK")
     ok += 1
 
+    # 9. --estrai su una serie con un BUCO di 30 min e un salto di prezzo:
+    #    deve contare le barre giuste per ora, trovare il buco e il salto
+    ser = {}
+    base = datetime(2026, 3, 23, 10, 0)
+    for m in range(0, 120):
+        if 45 <= m < 75:            # buco 10:45 -> 11:15 (mancano 30 barre)
+            continue
+        prezzo = 100.0 + (50.0 if m >= 75 else 0.0)   # salto dopo il buco
+        s = "%.2f" % prezzo
+        ser[base + timedelta(minutes=m)] = (s, s, s, s, "0",
+                                            prezzo, prezzo, prezzo, prezzo)
+    r5, trovato = estrai_finestra(ser, datetime(2026, 3, 23, 11, 0), 1)
+    assert trovato, r5
+    assert any("buchi > 1 min fra barre consecutive: 1" in x for x in r5), r5
+    assert any("BUCO   31 min" in x for x in r5), [x for x in r5 if "BUCO" in x]
+    assert any("salto massimo close->open" in x and "50.00" in x for x in r5), r5
+    r5b, trovato_b = estrai_finestra(ser, datetime(2020, 1, 1, 0, 0), 1)
+    assert not trovato_b and any("NESSUNA BARRA" in x for x in r5b), r5b
+    log("9. --estrai: conta per ora, trova il buco (31 min) e il salto 50.00: OK")
+    ok += 1
+
+    # 10. --diagnosi fuori banda: 2 giorni marci su 3 devono uscire con
+    #     anno, conteggio barre e valori; il giorno sano no
+    ser2 = {}
+    for giorno, prezzo in ((1, 12000.0), (2, 2906.949), (3, 2950.0)):
+        for m in range(0, 90):
+            p = "%.3f" % prezzo
+            ser2[datetime(2021, 6, giorno, 9, 0) + timedelta(minutes=m)] = (
+                p, p, p, p, "0", prezzo, prezzo, prezzo, prezzo)
+    r6, fuori = diagnosi_fuori_banda("D30EUR", "grxeur", ser2, (4000.0, 45000.0))
+    assert fuori == 180, fuori
+    assert any("2021:" in x and "180 barre" in x and "2906.949" in x for x in r6), r6
+    assert any("2021-06-02" in x for x in r6), r6
+    assert not any("2021-06-01 " in x for x in r6), r6
+    r6b, fuori_b = diagnosi_fuori_banda("D30EUR", "grxeur",
+                                        {k: v for k, v in ser2.items()
+                                         if v[5] > 4000}, (4000.0, 45000.0))
+    assert fuori_b == 0 and any("nessuna barra fuori banda" in x for x in r6b), r6b
+    log("10. --diagnosi: 180 barre marce in 2 giorni, min 2906.949 stampato: OK")
+    ok += 1
+
+    # 11. --vol-oraria: un'ora piena con range noto (100 -> 102 su mid 101
+    #     = 1.9802%) e un'ora sottile (2 barre) che va SCARTATA
+    ser3 = {}
+    for m in range(0, 60):
+        lo_, hi_ = (100.0, 102.0) if m == 30 else (100.5, 101.5)
+        ser3[datetime(2022, 5, 2, 14, 0) + timedelta(minutes=m)] = (
+            "1", "%.1f" % hi_, "%.1f" % lo_, "1", "0", 1.0, hi_, lo_, 1.0)
+    for m in range(0, 2):
+        ser3[datetime(2022, 5, 2, 3, 0) + timedelta(minutes=m)] = (
+            "1", "500", "1", "1", "0", 1.0, 500.0, 1.0, 1.0)
+    r7, media = vol_oraria("PROVA", ser3)
+    assert media is not None and abs(media - 1.9802) < 0.001, (media, r7)
+    assert any("sottili scartate 1" in x for x in r7), r7
+    log("11. --vol-oraria: range 2/101 = 1.9802 pct e ora sottile scartata: OK")
+    ok += 1
+
     log("")
-    log("AUTOTEST: %d/8 passati." % ok)
+    log("AUTOTEST: %d/11 passati." % ok)
     log("NOTA ONESTA: qui non c'e' NIENTE di rete. Che HistData risponda,")
     log("e quali anni abbia davvero, lo dice --esplora sul PC di Claudio.")
-    return 0 if ok == 8 else 1
+    return 0 if ok == 11 else 1
 
 
 # ---------------------------------------------------------------------
@@ -879,6 +1259,18 @@ def corri(argv):
                          "ABTG_ImportaStoricoEsterno (atteso +5).")
     ap.add_argument("--confronto-da", default="")
     ap.add_argument("--confronto-a", default="")
+    ap.add_argument("--estrai", default="",
+                    help="istante \"AAAA.MM.GG HH:MM\" NELL'ORA DEL FILE "
+                         "(= ora locale di New York per i CSV HistData): "
+                         "stampa le barre M1 intorno, coi buchi e i salti")
+    ap.add_argument("--ore", type=int, default=2,
+                    help="semiampiezza della finestra di --estrai, in ore")
+    ap.add_argument("--diagnosi", action="store_true",
+                    help="giorni con prezzi fuori banda + mappa mese-per-mese "
+                         "dell'ora di apertura (la malattia GRXEUR, par. 13)")
+    ap.add_argument("--vol-oraria", action="store_true", dest="vol_oraria",
+                    help="range orario medio in %% del prezzo, per anno "
+                         "(serve al metro relativo del cancello, par. 16)")
     ap.add_argument("--validazione", action="store_true",
                     help="scorciatoia: GRXEUR 2025 + confronto sul giorno "
                          "campione gia' misurato da Dukascopy")
@@ -924,6 +1316,10 @@ def corri(argv):
         for r in stampa:
             log(r)
         return 0
+
+    if args.estrai or args.diagnosi or args.vol_oraria:
+        # modi OFFLINE v4: niente rete, niente scarica/converti
+        return analisi_offline(args, pairs, cartella, stampa)
 
     problemi = []
 
