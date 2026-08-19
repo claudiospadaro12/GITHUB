@@ -25,8 +25,17 @@ SuperTrend del corso (lezione 10, allegato .ex4 MAI ancora scaricato)._
   avanzato?) — pesa sul rango della fonte.
 
 ## Da fare
-1. Screenshot dei default di PLSUPERTREND_3_LIVELLI_V09 (se 2,5/3,0/3,5:
-   conferma pratica dei parametri del piano Europeo).
+1. ~~Screenshot dei default~~ -> ✅ FATTO (19/08, 09:54, screenshot in chat,
+   finestra "PL-SUPERTREND 3_LIVELLI V09 2.4"): **ATR Period 10, Multiplier
+   2,5 / 3,0 / 3,5** — COMBACIANO AL DECIMALE con la slide 23 del piano
+   Europeo (ST x3 concordi). Piu': Show L1/L2/L3, Up Lime / Down Red,
+   refresh automatico, LICENZA con scadenza 2026.12.31 (strumento
+   distribuito con licenza, non un freeware qualsiasi).
+   CONSEGUENZE: (a) la decisione di Claudio "SuperTrend standard 10/3,0"
+   per il Breakout e' CORROBORATA dall'attrezzo dell'ambiente del corso
+   (3,0 e' il livello CENTRALE); (b) la specifica strumentale del piano
+   Europeo (ST x3) e' completa e in casa. M15b formale (l'allegato .ex4
+   della lezione 10) resta aperta solo per la lettera.
 2. ~~Cartella d'origine~~ -> CHIARITA: passati da Paolo Lavorenti.
    Resta da chiedere il SUO ruolo in ABTG (decide il rango della fonte).
 3. M15b vera: scaricare l'allegato .ex4 della lezione 10.
