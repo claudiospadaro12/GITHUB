@@ -1,0 +1,152 @@
+# =====================================================================
+#  R86 / ABLAZIONE DEL MOTORE A INCROCIO EMA 9/21 - DAX H1
+#  CELLA A - NUDA: il motore da solo (baseline del round)
+#  EA: ABTG_CrossEma (NUOVO, mai girato: e' un CANDIDATO, non una sedia)
+#
+#  Si lancia con:
+#    -Prova prove\R86a_nudo_D30EUR.txt -Etichetta r86adax -Modello 4
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI.
+#  >>> TODO ARCHITETTO: i criteri di questo round NON SONO ANCORA
+#      SCRITTI. Vanno congelati in prove\R86_ABLAZIONE_CRITERI.md
+#      PRIMA di lanciare (regola di casa: i criteri si cambiano prima
+#      dei numeri, non dopo). Senza quel file, i risultati di R86 non
+#      si leggono.
+#
+#  LA DOMANDA DEL ROUND: "l'incrocio EMA 9/21 su barra chiusa ha un
+#  edge misurabile da solo, e le tre gambe opzionali (volumi / EMA di
+#  trend / uscita sull'incrocio opposto) aggiungono o tolgono, misurate
+#  UNA ALLA VOLTA a parita' di tutto il resto?"
+#
+#  QUESTO ROUND NON PUO' PRODURRE UNA SEDIA. Al massimo produce il
+#  permesso di fare un walk-forward vero. Nessun forward, nessun VPS,
+#  finche' non passa un round a TICK REALI (e poi il demo).
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO.
+#    2. QUESTO ROUND STA IN CODA AL COLLAUDO GUARDIAN (criterio 4:
+#       backtest identico al centesimo prima/dopo la migrazione).
+#       Motivo tecnico, non burocratico: walkforward_generico.ps1
+#       scarica l'EA da $EABranch="lavoro" SCRITTO FISSO nel sorgente,
+#       non dal -Rif. Qualunque cosa si pinni, gira l'EA di 'lavoro'
+#       ADESSO. Finche' il criterio 4 non e' chiuso, un risultato
+#       strano qui non si sa se e' del motore o della migrazione.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi.
+# ---------------------------------------------------------------------
+#  QUESTA CELLA
+#    L'incrocio EMA 9/21 su barra chiusa, SENZA nessuna gamba.
+#    E' la BASELINE: ogni altra cella si legge SOLO come differenza da
+#    questa. Da sola non promuove niente -- un motore a incroci nudo
+#    sovra-trada per costruzione, e la lezione dell'oro dice che il
+#    sovra-trading e' quello che uccide. Se la cella A esce a PF molto
+#    sotto 1 con centinaia di operazioni, NON e' una sorpresa: e' il
+#    METRO su cui si misurano le gambe.
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E IL SUO LIMITE DICHIARATO
+#    >>> TODO PASSO 0 (obbligatorio, prima del lancio): misurare la
+#        profondita' dei TICK REALI di D30EUR a BCM. Per l'ORO non e'
+#        MAI STATA MISURATA (il referto del 15/08 misura GBPUSD: tick
+#        dal 2024.07.05; per gli INDICI il PASSO 0 di R83/R84 ha
+#        promosso 2024.09.26, che pero' e' la profondita' delle BARRE).
+#        Se i tick partono DOPO la data qui sotto, QUESTA RIGA VA
+#        RISCRITTA e il round si rilancia. E' il difetto n.18 della
+#        checklist.
+#    @DAQUANDO qui sotto e' un SEGNAPOSTO prudente, non una misura.
+#
+#  L'EMENDAMENTO DELLA FINESTRA, applicato per davvero
+#    L'unita' di misura e' l'OPERAZIONE, non l'anno: l'IS vuole >=150
+#    operazioni e deve lasciare un OOS di almeno altre 150.
+#    QUI LA FREQUENZA GIOCA A FAVORE: un motore a incroci EMA 9/21 su
+#    H1 spara molto piu' di un motore da apertura (che fa 1 ciclo al
+#    giorno). [STIMA, da verificare al giro a vuoto] ~10-20 incroci
+#    grezzi al mese: 21 mesi dovrebbero bastare per 150+150.
+#    >>> CANARINO: il conteggio operazioni della CELLA NUDA e' la
+#        misura che decide se la finestra regge. Se l'IS della cella
+#        nuda esce sotto 150 operazioni, il round NON si legge per il
+#        MERITO (si legge solo per il RISCHIO, regola B) e la finestra
+#        va allargata indietro.
+#    Split IS/OOS: 40/60, come in R83/R84-bis.
+#
+#  IL REGIME CONTENUTO -- va scritto accanto a OGNI numero
+#    >>> TODO: dichiararlo appena la finestra e' fissata dal PASSO 0.
+#        Con @DAQUANDO 2024.09.26 il regime e' UNO E MEZZO
+#        (toro europeo 2024-25 + correzione 2025). Niente 2020, niente 2022, niente 2013.
+#        R86 confronta gambe, NON dichiara robustezza.
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' IDENTICO IN TUTTE E QUATTRO LE CELLE DELLO
+#  STESSO SIMBOLO. Cambiano SOLO le righe elencate sopra e il magic.
+#  E' la regola di casa dopo l'errore InpTP1_ATRmult=0 contro 0.5,
+#  pagato due volte.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- MOTORE: l'incrocio, e nient'altro. Su barra CHIUSA, mai intrabar.
+InpEmaFast=9
+InpEmaSlow=21
+InpAllowLong=1
+InpAllowShort=1
+
+# --- I FILTRI: e' QUI che le celle si distinguono. Le righe che seguono
+#     sono la cella A (tutto spento); ogni altra cella riscrive UNA riga.
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseEma200Filter=0
+InpEmaTrendPeriod=200
+InpUseOppositeExit=0
+InpReverseOnOppositeExit=1
+
+# --- STOP, TARGET, GESTIONE: IDENTICI in tutte e quattro le celle.
+#     Se cambiasse anche solo il trailing, l'ablazione non isolerebbe
+#     piu' la gamba: misurerebbe due cose insieme.
+#     PARZIALE E TRAILING SPENTI di proposito: la cella nuda dev'essere
+#     SL e TP e basta. La gestione e' la domanda di un ALTRO round.
+InpAtrPeriod=14
+InpSLatr=1.5
+InpTP_RR=2.0
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEma=0
+
+# --- OPERATIVA: nessun tetto, nessun orario, nessun venerdi'.
+#     Tetti e orari sono filtri travestiti: qui devono stare spenti.
+InpMaxTradesPerDay=0
+InpUseHourFilter=0
+InpHourStart=8
+InpHourEnd=20
+InpFridayClose=0
+InpFridayCloseHour=20
+
+# --- RISCHIO: pinnato a 1,00%. NON e' una taglia di campo: e' un
+#     valore comune che rende i profitti confrontabili fra le celle.
+InpRiskPercent=1.0
+
+# --- NOTIZIE: spente. Sono un filtro, e i filtri sono la domanda del
+#     round: accenderne uno fuori dalla sua cella lo renderebbe illeggibile.
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con quelli degli altri EA. Sta qui
+#     scritto apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log e autotest SPENTI nelle corse lunghe.
+#     L'autotest si legge una volta sola, in un test SINGOLO, prima del
+#     round: in una griglia riempirebbe il giornale a ogni passata.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE. Se non lo sono c'e' di mezzo la cache del
+#     tester o una griglia che MT5 si ricorda: il numero non si legge.
+InpMagic=776220||776220||1||776221||Y
