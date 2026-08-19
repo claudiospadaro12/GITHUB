@@ -951,3 +951,34 @@ gia' cosa si fa: si misura il **bias**, non si aggiungono pezze.
   commissioni storiche. Nessuna di queste e' un problema di fuso.
 - **D30EUR resta bocciato** (par. 13): righe marce + sessione ballerina. La v2
   non c'entra e non lo riabilita.
+
+## 15. COLLAUDO v2 ESEGUITO (19/08, 09:04-09:35) — CANCELLO ANCORA CHIUSO, MA IL COLPEVOLE HA UN'ORA E UN NOME DA TROVARE
+
+Sequenza A-E completata (autotest 41/41 sul PC, 3 re-import DST-aware,
+raccolta). CSV agli atti: `import_ext_v2_referto_2026-08-19.csv`.
+
+| simbolo | DST-aware | fisso | dentro finestre | fuori | bias mediano | cancello <=0,05 |
+|---|---|---|---|---|---|---|
+| NASUSD_EXT | 0,0815% | 0,0756% | 0,2673% | 0,0662% | +0,0013% | NO |
+| 225JPY_EXT | 0,1097% | 0,1010% | 0,3741% | 0,0871% | +0,0062% | NO |
+| SPXUSD_EXT | 0,0655% | 0,0608% | 0,2167% | 0,0527% | +0,0075% | NO |
+
+LETTURE:
+1. La cura DST NON risolve (peggiora del 7,7-8,6%): la previsione
+   pre-registrata del 14-bis si e' avverata. Dentro le finestre resta
+   molto peggio che fuori con ENTRAMBI i metodi.
+2. 🔴 LA PISTA PRINCIPALE E' UN EVENTO: la diff massima cade il
+   **2026.03.23 alle 11:00 su TUTTI E TRE i simboli** (72.856 / 1.965 /
+   18.615 punti). Un'ora sola cosi' anomala, dentro finestre da ~850
+   barre, puo' gonfiare da sola la media del "dentro" e mascherare
+   l'effetto vero del calendario. PRIMA si isola l'evento, POI si
+   rigiudicano le finestre.
+3. Bias mediano ~0 su tutti e tre: stesso strumento, niente basis
+   cash-vs-future rilevante. Il residuo fuori-finestre (0,053-0,087%)
+   resta comunque sopra il cancello: da confrontare col rapporto
+   diff/volatilita' oraria dei forex promossi (0,005-0,011% su strumenti
+   5-10 volte meno volatili) — se il rapporto coincide, il metro del
+   cancello (assoluto, tarato sui forex) va discusso CON una misura e la
+   firma di Claudio, mai ammorbidito a occhio.
+4. Shift base +5 confermato in ENTRAMBE le scansioni su tutti e tre.
+   I tre _EXT restano IN FRIGO.
