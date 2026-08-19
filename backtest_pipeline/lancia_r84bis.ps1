@@ -98,72 +98,72 @@ if (Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) {
 $celle = @(
   # --- passo 1: il canarino dello spread forzato -------------------
   @{ K="S3A"; P=1; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84a_base_NASUSD.txt";
-     Tag="r84bs3a"; Mag=@("776010","776011"); Spr=400; Fis=0.40; Att="";
+     Tag="r84bs3a"; Mag=@("776010","776011"); Spr=400; Fis="0.40"; Att="";
      Cosa="CANARINO C4: cella A con spread FORZATO a 400 pt (4,0 punti indice)" }
 
   # --- passo 2: il canarino di riproducibilita' --------------------
   @{ K="S0A"; P=2; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84a_base_NASUSD.txt";
-     Tag="r84bs0a"; Mag=@("776010","776011"); Spr=0; Fis=0.40;
+     Tag="r84bs0a"; Mag=@("776010","776011"); Spr=0; Fis="0.40";
      Att="686.35|1.25367|156|-795.03|0.87315|291";
      Cosa="CANARINO C3: cella A con Spread=0 scritto (deve riprodurre R84)" }
   @{ K="S0D"; P=2; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84d_volatr_NASUSD.txt";
-     Tag="r84bs0d"; Mag=@("776040","776041"); Spr=0; Fis=0.40;
+     Tag="r84bs0d"; Mag=@("776040","776041"); Spr=0; Fis="0.40";
      Att="858.34|1.51444|110|-287.19|0.92450|201";
      Cosa="CANARINO C3: cella D con Spread=0 scritto (deve riprodurre R84)" }
 
   # --- passo 3: TRASFERIBILITA' - la prova chiave -------------------
   @{ K="T0"; P=3; EA="ABTG_Apertura_3Ingressi"; Sym="D30EUR"; File="R83d0_stop_D30EUR.txt";
-     Tag="r84bt0"; Mag=@("777110","777111"); Spr=-1; Fis=0.40;
+     Tag="r84bt0"; Mag=@("777110","777111"); Spr=-1; Fis="0.40";
      Att="203.66|1.04668|220|251.22|1.04089|325";
      Cosa="CANARINO C1: DAX breakout NUDO (baseline positiva di T1)" }
   @{ K="T1"; P=3; EA="ABTG_Apertura_3Ingressi"; Sym="D30EUR"; File="R84BIS_T1_volatr_D30EUR.txt";
-     Tag="r84bt1"; Mag=@("776120","776121"); Spr=-1; Fis=0.40; Att="";
+     Tag="r84bt1"; Mag=@("776120","776121"); Spr=-1; Fis="0.40"; Att="";
      Cosa="DAX breakout + CELLA D PIENA (volumi OR ATR) - la prova piu' informativa" }
   @{ K="T2"; P=3; EA="ABTG_DAX_Apertura_EU"; Sym="D30EUR"; File="R83v_vivo_D30EUR.txt";
-     Tag="r84bt2"; Mag=@("777190","777191"); Spr=-1; Fis=0.40;
+     Tag="r84bt2"; Mag=@("777190","777191"); Spr=-1; Fis="0.40";
      Att="282.12|1.07810|197|999.42|1.18776|311";
      Cosa="CANARINO C2: DAX retest NUDO = la sedia viva 770101 (baseline di T3)" }
   @{ K="T3"; P=3; EA="ABTG_DAX_Apertura_EU"; Sym="D30EUR"; File="R84BIS_T3_volumi_D30EUR.txt";
-     Tag="r84bt3"; Mag=@("776140","776141"); Spr=-1; Fis=0.40; Att="";
+     Tag="r84bt3"; Mag=@("776140","776141"); Spr=-1; Fis="0.40"; Att="";
      Cosa="DAX retest + SOLA GAMBA VOLUMI (sul retest ATR e ConfirmMode sono INERTI)" }
 
   # --- passo 4: ROBUSTEZZA dei parametri ---------------------------
   @{ K="B1"; P=4; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84BIS_B1_volmult125_NASUSD.txt";
-     Tag="r84bb1"; Mag=@("776150","776151"); Spr=-1; Fis=0.40; Att="";
+     Tag="r84bb1"; Mag=@("776150","776151"); Spr=-1; Fis="0.40"; Att="";
      Cosa="vicino: InpVolMult 1,5 -> 1,25 (volumi piu' permissivi)" }
   @{ K="B2"; P=4; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84BIS_B2_volmult175_NASUSD.txt";
-     Tag="r84bb2"; Mag=@("776160","776161"); Spr=-1; Fis=0.40; Att="";
+     Tag="r84bb2"; Mag=@("776160","776161"); Spr=-1; Fis="0.40"; Att="";
      Cosa="vicino: InpVolMult 1,5 -> 1,75 (volumi piu' severi)" }
   @{ K="B3"; P=4; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84BIS_B3_atrmult090_NASUSD.txt";
-     Tag="r84bb3"; Mag=@("776170","776171"); Spr=-1; Fis=0.40; Att="";
+     Tag="r84bb3"; Mag=@("776170","776171"); Spr=-1; Fis="0.40"; Att="";
      Cosa="vicino: InpAtrFilterMult 1,0 -> 0,9 (ATR piu' permissivo)" }
   @{ K="B4"; P=4; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84BIS_B4_atrmult110_NASUSD.txt";
-     Tag="r84bb4"; Mag=@("776180","776181"); Spr=-1; Fis=0.40; Att="";
+     Tag="r84bb4"; Mag=@("776180","776181"); Spr=-1; Fis="0.40"; Att="";
      Cosa="vicino: InpAtrFilterMult 1,0 -> 1,1 (ATR piu' severo)" }
 
   # --- passo 5: SCALA DI SPREAD (A@400 e' gia' il canarino S3A) -----
   @{ K="S1A"; P=5; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84a_base_NASUSD.txt";
-     Tag="r84bs1a"; Mag=@("776010","776011"); Spr=100; Fis=0.40; Att="";
+     Tag="r84bs1a"; Mag=@("776010","776011"); Spr=100; Fis="0.40"; Att="";
      Cosa="scala spread: cella A a 100 pt (1,0 punto indice)" }
   @{ K="S2A"; P=5; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84a_base_NASUSD.txt";
-     Tag="r84bs2a"; Mag=@("776010","776011"); Spr=200; Fis=0.40; Att="";
+     Tag="r84bs2a"; Mag=@("776010","776011"); Spr=200; Fis="0.40"; Att="";
      Cosa="scala spread: cella A a 200 pt (2,0 punti indice)" }
   @{ K="S1D"; P=5; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84d_volatr_NASUSD.txt";
-     Tag="r84bs1d"; Mag=@("776040","776041"); Spr=100; Fis=0.40; Att="";
+     Tag="r84bs1d"; Mag=@("776040","776041"); Spr=100; Fis="0.40"; Att="";
      Cosa="scala spread: cella D a 100 pt (1,0 punto indice)" }
   @{ K="S2D"; P=5; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84d_volatr_NASUSD.txt";
-     Tag="r84bs2d"; Mag=@("776040","776041"); Spr=200; Fis=0.40; Att="";
+     Tag="r84bs2d"; Mag=@("776040","776041"); Spr=200; Fis="0.40"; Att="";
      Cosa="scala spread: cella D a 200 pt (2,0 punti indice)" }
   @{ K="S3D"; P=5; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84d_volatr_NASUSD.txt";
-     Tag="r84bs3d"; Mag=@("776040","776041"); Spr=400; Fis=0.40; Att="";
+     Tag="r84bs3d"; Mag=@("776040","776041"); Spr=400; Fis="0.40"; Att="";
      Cosa="scala spread: cella D a 400 pt (4,0 punti indice)" }
 
   # --- passo 6: SPLIT alternativo ----------------------------------
   @{ K="W1"; P=6; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84a_base_NASUSD.txt";
-     Tag="r84bw1"; Mag=@("776010","776011"); Spr=-1; Fis=0.55; Att="";
+     Tag="r84bw1"; Mag=@("776010","776011"); Spr=-1; Fis="0.55"; Att="";
      Cosa="split 55/45: cella A (il totale NON cambia, cambia la decomposizione)" }
   @{ K="W2"; P=6; EA="ABTG_Nasdaq_Apertura_US"; Sym="NASUSD"; File="R84d_volatr_NASUSD.txt";
-     Tag="r84bw2"; Mag=@("776040","776041"); Spr=-1; Fis=0.55; Att="";
+     Tag="r84bw2"; Mag=@("776040","776041"); Spr=-1; Fis="0.55"; Att="";
      Cosa="split 55/45: cella D (regge la coerenza fra le meta' al nuovo confine?)" }
 )
 
@@ -341,7 +341,7 @@ foreach ($c in $celle) {
            "-Prova",("prove\" + $c.File),
            "-Modello","$Modello",
            "-Deposito","$Deposito",
-           "-FrazioneIS",("" + $c.Fis),
+           "-FrazioneIS",$c.Fis,
            "-Etichetta",$c.Tag)
   if ($c.Spr -ge 0)   { $arg += @("-Spread", ("" + $c.Spr)) }
   if ($SoloControllo) { $arg += "-SoloControllo" }
