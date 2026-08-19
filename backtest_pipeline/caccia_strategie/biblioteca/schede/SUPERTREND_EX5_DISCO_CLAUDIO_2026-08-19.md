@@ -40,4 +40,13 @@ SuperTrend del corso (lezione 10, allegato .ex4 MAI ancora scaricato)._
    della lezione 10) resta aperta solo per la lettera.
 2. ~~Cartella d'origine~~ -> CHIARITA: passati da Paolo Lavorenti.
    Resta da chiedere il SUO ruolo in ABTG (decide il rango della fonte).
-3. M15b vera: scaricare l'allegato .ex4 della lezione 10.
+3. ~~M15b vera: scaricare l'allegato .ex4 della lezione 10~~ ->
+   **SOSPESA E CHIUSA CON RISERVA (19/08)**: Claudio non ha attualmente
+   accesso ai file del corso. La misura resta chiusa per CORROBORAZIONE
+   AL RANGO COACH (strumento di Lavorenti: ATR 10, mult 2,5/3,0/3,5,
+   combacianti al decimale con la slide 23). Se e quando l'accesso
+   tornera', il .ex4 della lezione 10 chiudera' anche la lettera.
+   NOTA: restano sospese per lo stesso motivo TUTTE le richieste di
+   materiale del corso ancora aperte (pannelli lez. 12 EasyTrend, Excel
+   Mediazione, fogli lez. 32-33, slides FiboH4/Media200, lezione 1
+   PostNews col nome del relatore).
