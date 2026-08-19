@@ -1,5 +1,27 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## ⚠️ AGGIORNAMENTO 19/08 (verificatore, durante il recupero template): gli 11 preset `recupero2/` NON nominano `InpUsaGuardian`
+>
+> Trovato dal verificatore col punto 25 della checklist (scritto ieri sera,
+> ripagato stamattina): `InpUsaGuardian` e' nato OGGI (commit `5fc0bc3`,
+> migrazione Guardian pezzo 6), i preset `recupero2/` vengono dai `.chr`
+> delle 10:24 — cioe' da PRIMA che l'input esistesse. Un preset che non
+> nomina un input non lo riporta al default: lascia l'ultimo valore usato.
+>
+> - **Oggi rischio pratico nullo**: i `.ex5` sul VPS piccolo sono
+>   pre-migrazione (FASE 0 del collaudo non ancora eseguita), l'input non
+>   esiste ancora sui grafici.
+> - **Da fare DURANTE il collaudo Guardian (insieme alla FASE 2/BLOCCO 4)**:
+>   rigenerare gli 11 preset `recupero2/` aggiungendo `InpUsaGuardian=true`
+>   (valore firmato 18/08) e, per l'ORB, `InpSlippagePts=0.0`. Il preset
+>   dell'ORB 770611 e' gia' stato installato con la riscrittura in riga
+>   (blocco corretto dal verificatore, 19/08).
+> - **Tre input richiedono una DECISIONE, non basta il default**:
+>   `InpAllowReverse` (DAX Apertura 770101), `InpPendingAtr` +
+>   `InpSLBufferAtr` (SuperWave DOW H1 770511) — anche questi assenti dai
+>   `.chr` perche' piu' giovani dei grafici.
+
+
 > ⚠️ **NOTA DI COORDINAMENTO FRA SESSIONI (19/08 mattina):** R81 e' stato
 > **GIA' ESEGUITO il 18/08 pomeriggio** dalla sessione della flotta agenti:
 > esiti in `risultati_archivio/REFERTO_ROUND81_USCITE.md` (variante C "solo
