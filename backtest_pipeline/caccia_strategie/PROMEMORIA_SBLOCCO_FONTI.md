@@ -101,3 +101,12 @@ quantconnect.com
 > elenco di domini.** Il setaccio funziona (su 22 file letti nel sorgente,
 > 1 promosso e 12 scartati con motivo). Serve solo dargli piu' roba da
 > setacciare, senza passare da Claudio ogni volta.
+
+## AGGIORNAMENTO 19/08/2026 sera (misurato dalla caccia Londra)
+- **MQL5.com: SBLOCCATO (HTTP 200)** — e soprattutto
+  `https://www.mql5.com/en/code/download/<id>` restituisce lo ZIP col
+  sorgente `.mq5`: **gli agenti possono leggere i sorgenti del Code Base da
+  soli**, senza download manuale di Claudio. Controllo positivo su id 68951.
+- Restano bloccati (dichiarati, non ipotizzati): SSRN 403, TradingView
+  pagine script 404, GitHub 403 (web+API), Forex Factory 403, Quantpedia,
+  RePEc egress-blocked.
