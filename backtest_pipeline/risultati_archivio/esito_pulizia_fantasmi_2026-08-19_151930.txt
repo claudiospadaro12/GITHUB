@@ -1,0 +1,29 @@
+﻿=== PULIZIA DEI 12 .chr FANTASMA (chart41..chart52, profilo ORO) ===
+data: 2026-08-19 15:19:30   macchina: VMI3047753
+cartella: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Profiles\Charts\ORO
+limite: si cancella SOLO cio' che e' stato scritto PRIMA del 2026-08-19 12:30 (i grafici vivi sono delle 13:08)
+MT5 APERTO (2 terminal64): non si scrive dentro il profilo vivo, si cancellano solo file ORFANI. La protezione e' il timestamp qui sopra.
+.chr nella cartella: 52   di cui salvati DOPO il limite (grafici vivi): 40
+
+CANCELLATI: 12 su 12
+   chart41.chr   magic 770402   ABTG_MaxMinNotte   (7096 byte salvati nel backup)
+   chart42.chr   magic 770101   ABTG_DAX_Apertura_EU   (8988 byte salvati nel backup)
+   chart43.chr   magic 770202   ABTG_Dow_Apertura_US   (9004 byte salvati nel backup)
+   chart44.chr   magic 770411   ABTG_MaxMinNotte_DAX_Short_Ottimizzato   (7146 byte salvati nel backup)
+   chart45.chr   magic 771531   ABTG_EMA200   (6690 byte salvati nel backup)
+   chart46.chr   magic 971501   ABTG_EMA200_Ottimizzato   (6794 byte salvati nel backup)
+   chart47.chr   magic 770924   ABTG_SupertrendReversal   (6804 byte salvati nel backup)
+   chart48.chr   magic 970901   ABTG_SupertrendReversal_Ottimizzato   (6804 byte salvati nel backup)
+   chart49.chr   magic 770511   ABTG_SuperWave_DOW_H1_Ottimizzato   (6764 byte salvati nel backup)
+   chart50.chr   magic 970912   ABTG_SupRev_DAX_H4_Ottimizzato   (6726 byte salvati nel backup)
+   chart51.chr   magic 970913   ABTG_SupRev_NAS_H1_Ottimizzato   (6742 byte salvati nel backup)
+   chart52.chr   magic 770611   ABTG_ORB_Ottimizzato   (7070 byte salvati nel backup)
+GIA' ASSENTI (niente da fare): 0   
+SALTATI: 0
+in ORO restano 40 file .chr (prima erano 52)
+
+ESITO: OK -- i 12 fantasma non ci sono piu'.
+
+ADESSO rilancia il CENSIMENTO. Il referto e' sempre Desktop\censimento_rischio.txt, nome FISSO che viene SOVRASCRITTO:
+aprilo e leggi la SECONDA riga, 'data: ...': deve dire 2026.08.19 e l'ora di ADESSO, altrimenti stai guardando quello vecchio.
+Atteso: 'sedie trovate: 56' e 'somma dei rischi di tutte le sedie: 43,30% del conto'.

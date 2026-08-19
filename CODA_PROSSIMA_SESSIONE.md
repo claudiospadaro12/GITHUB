@@ -1,5 +1,13 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> **Nota tecnica dal verificatore (19/08, non bloccante):**
+> `censimento_rischio.ps1` riga 43 legge i `.chr` con `Get-Content -Raw`
+> SENZA FileShare e con `$ErrorActionPreference="Stop"` — con MT5 aperto un
+> file bloccato fa morire TUTTO il censimento. Da portare alla lettura
+> condivisa del gemello `elenco_ea_attaccati.ps1` (righe 77-102: FileShare
+> ReadWrite + BOM/conteggio zeri). Modifica da fare a freddo e da far
+> verificare, non in mezzo a un'operazione.
+
 > ## ⚠️ AGGIORNAMENTO 19/08 (verificatore, durante il recupero template): gli 11 preset `recupero2/` NON nominano `InpUsaGuardian`
 >
 > Trovato dal verificatore col punto 25 della checklist (scritto ieri sera,

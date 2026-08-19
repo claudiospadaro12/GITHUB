@@ -61,3 +61,29 @@ sedia recuperata per via indiretta.
   sulla macchina sbagliata).
 
 Censimento finale agli atti: `../backtest_pipeline/risultati_archivio/censimento_rischio_2026-08-19_1153.txt`
+
+## CODA DELL'INCIDENTE (pomeriggio): i 12 FILE FANTASMA
+
+Alle 13:09, dopo che Claudio aveva chiuso i grafici vuoti (pulizia) e salvato
+il profilo, il censimento e' salito a **55,30% (68 righe)**: le 12 sedie
+recuperate risultavano contate DUE volte.
+
+**Diagnosi (misurata con la stringa dove_stanno_le_copie, 15:02):** dopo la
+chiusura di 12 finestre, al Salva profilo MT5 ha compattato la numerazione
+scrivendo i grafici vivi in chart29-40 **senza cancellare i vecchi file
+chart41-52** rimasti dal salvataggio delle 11:53. La prova che erano orfani e
+non grafici doppi aperti: il salvataggio delle 13:08 non li aveva riscritti
+(timestamp fermo alle 11:53). Nessun rischio di ordini doppi.
+
+**Cura (15:19):** stringa spazza-fantasmi verificata — ogni file controllato
+(timestamp assoluto < 19/08 12:30 + magic atteso), copiato nel backup byte a
+byte, poi cancellato. **12/12 cancellati, 0 saltati.** Censimento delle 15:24:
+**56 sedie / 43,30%** — identico al riferimento. Backup agli atti sul Desktop
+del VPS (`fantasmi_2026-08-19_151930.zip`) e referto in
+`../backtest_pipeline/risultati_archivio/esito_pulizia_fantasmi_2026-08-19_151930.txt`.
+
+**Lezione nuova:** quando si CHIUDONO grafici e poi si salva il profilo, MT5
+puo' lasciare file `chartNN.chr` orfani in coda alla numerazione — il
+censimento li conta come sedie. Dopo ogni chiusura di grafici: rifare il
+censimento e, se il totale sale invece di scendere, cercare gli orfani con il
+confronto dei timestamp (vivi = riscritti all'ultimo salvataggio).
