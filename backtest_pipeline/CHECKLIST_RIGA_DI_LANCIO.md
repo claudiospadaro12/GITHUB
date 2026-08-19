@@ -832,3 +832,54 @@ con `[IO.FileShare]::ReadWrite` (righe 77-85) e **decide l'encoding dal BOM**
 > un'opinione. Corollario gemello: `-Encoding Unicode` imposto a mano su file
 > che potrebbero non esserlo trasforma un errore di lettura in **zero risultati
 > silenziosi** — l'encoding si sceglie dal BOM, mai per decreto.
+
+---
+
+## 🆕 AGGIUNTA DEL 19/08/2026 — trovata verificando la pulizia dei 12 `.chr` fantasma
+
+## 29. 🕛 LA GUARDIA COSTRUITA SU "OGGI" SI SPEGNE DA SOLA A MEZZANOTTE
+
+_Difetto vero, trovato PRIMA dell'invio di una riga **distruttiva** (cancellare
+12 `.chr` orfani nel profilo ORO mentre MT5 e' aperto). L'unica cosa che
+separava i 12 file morti dai 12 grafici VIVI era il timestamp:_
+
+```powershell
+$limite=(Get-Date).Date.AddHours(12).AddMinutes(30)   # SBAGLIATO
+if($it.LastWriteTime -ge $limite){ salta }            # i vivi sono delle 13:08
+```
+
+La riga e' culture-safe (nessun parse di data da stringa: giusto). Ma
+`(Get-Date).Date` **e' una cosa diversa a ogni giorno che passa**: rilanciata
+dopo mezzanotte — e Claudio rilancia di notte, il 17/08 e il 18/08 i giri a
+vuoto sono tutti dopo le 23 — il limite diventa **le 12:30 di DOMANI**, i file
+vivi delle 13:08 di oggi ci finiscono **sotto**, e la protezione **non protegge
+piu' niente**. Riprodotto: `13:08 di oggi -ge 12:30 di domani` = `False`.
+Nessun errore, nessun rosso: la guardia c'e', ha smesso di funzionare.
+
+> **Una soglia temporale che divide "cosa e' vivo" da "cosa e' morto" si ancora
+> all'ISTANTE MISURATO, non a "oggi".** Si scrive assoluta, col costruttore a
+> interi (culture-free, nessuna stringa da interpretare):
+> ```powershell
+> $limite=New-Object DateTime 2026,8,19,12,30,0
+> ```
+> Cosi' la riga vale domani, fra una settimana e al secondo rilancio: e' la
+> stessa fotografia che l'ha giustificata. **Se un numero della riga viene da
+> una misura, nella riga ci va la MISURA, non un modo di ricalcolarla.**
+
+### 29-bis. 🧊 E LA FOTOGRAFIA SU CUI SI BASA UNA CANCELLAZIONE VA RICONTROLLATA A RUNTIME
+
+Stessa riga. La premessa era: _"i vivi sono chart29-40, riscritti alle 13:08;
+i fantasma sono chart41-52, fermi alle 11:53"_. Se fra la diagnosi e il lancio
+MT5 riordina o risalva il profilo, quella premessa **puo' non essere piu' vera**
+e i nomi non vogliono piu' dire niente. Prima di cancellare, la riga verifica
+che il mondo sia ancora quello misurato — e se non lo e', **si ferma**:
+
+```powershell
+$vivi=@($tutti | Where-Object { $_.LastWriteTime -ge $limite })
+if($vivi.Count -eq 0){ Rec "STOP: nessun grafico salvato dopo il limite: la fotografia non e' piu' vera." Red; return }
+```
+
+Corollario, per le righe distruttive: il backup si scrive con i **byte gia'
+letti** dall'handle condiviso (`[IO.File]::WriteAllBytes`), non con `Copy-Item`
+— con MT5 aperto la lettura condivisa riesce dove la copia puo' fallire — e si
+verifica sulla **lunghezza**, non con `Test-Path` (punto 27-ter).
