@@ -234,8 +234,12 @@ foreach($m in $Motori){
   }
   # checklist 24: il driver riscarica l'EA da 'lavoro' HEAD ignorando il pin.
   # Se HEAD e pin differiscono, il motore cambierebbe fra una cella e l'altra.
-  $aHead = (Invoke-WebRequest -Uri ("$RawHead/mql5/Experts/" + $m + ".mq5") -UseBasicParsing -ErrorAction Stop).Content
-  $aPin  = Get-Content -LiteralPath $dst -Raw
+  $rHead = (Invoke-WebRequest -Uri ("$RawHead/mql5/Experts/" + $m + ".mq5") -UseBasicParsing -ErrorAction Stop).Content
+  # PS 5.1: se il Content-Type non e' testuale, .Content e' un byte[] e il confronto
+  # con la stringa su disco sarebbe SEMPRE diverso (falso STOP misurato il 19/08 23:35).
+  if($rHead -is [byte[]]){ $aHead = [Text.Encoding]::UTF8.GetString($rHead) } else { $aHead = [string]$rHead }
+  $aHead = $aHead.TrimStart([char]0xFEFF)
+  $aPin  = (Get-Content -LiteralPath $dst -Raw).TrimStart([char]0xFEFF)
   if(($aHead -replace "`r","") -ne ($aPin -replace "`r","")){
     throw ("BRANCH NON CONGELATO: " + $m + ".mq5 su 'lavoro' HEAD e' DIVERSO dal pin " + $Pin + ".`n" +
            "    walkforward_generico.ps1 scarica sempre da HEAD: la notte girerebbe un motore diverso da quello pinnato.`n" +
