@@ -269,6 +269,16 @@ Restano in lista:
    stima **~4,84% di rischio aperto a fine serata** (la serata-tipo p95 di
    M2). Proposta: alzarla in cima alla lista SVILUPPO (un EA per volta,
    regola di casa), prima di qualunque altra novita'.
+   ✅ **19/08 — CODICE SCRITTO, DA COLLAUDARE.** Referto:
+   `backtest_pipeline/risultati_archivio/REFERTO_MIGRAZIONE_GUARDIAN_PREPARAZIONE.md`.
+   **48 EA vivi, 74 punti di ingresso** collegati alle bandiere; include
+   `ABTG_PausaGuardian.mqh` **v1.20** (nucleo puro + autotest a 19 casi),
+   Guardian **v1.11** (verifica del filo; il cap c'era gia' e non e' stato
+   toccato). Default `InpUsaGuardian=true` ma con **fail-open totale**: senza
+   Guardian sul conto — e nel tester — il comportamento e' identico a oggi.
+   🛑 **Nulla di questo e' compilato ne' in campo**: restano da spuntare i **9
+   criteri congelati** del referto, sul **dry-run 100k** e mai prima sul conto
+   piccolo. La messa in campo la decide Claudio.
 2. **Il caso D di R84**: aprire o no il round di **validazione vera**
    (regimi + walk-forward) della conferma volumi-OR-ATR — passa i 4 cancelli
    congelati come **riduttore di perdita su base perdente** (mai edge).
