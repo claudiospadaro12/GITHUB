@@ -1,12 +1,12 @@
-# ⚖️ R88 — CRITERI CONGELATI **PRIMA** DEI NUMERI (bozza da firmare)
+# ⚖️ R88 — CRITERI CONGELATI **PRIMA** DEI NUMERI — ✍️ FIRMATI
 
-> ## ✍️ QUESTA E' UNA BOZZA. VA FIRMATA DA CLAUDIO PRIMA DEL LANCIO.
-> Finche' non c'e' la firma, **le righe di R88 non si mandano**. E' la regola
-> di casa scritta anche in testa a `prove/R87b_griglia_XAUUSD.txt`: *i criteri
-> si cambiano prima dei numeri, non dopo*. Se un numero uscito suggerisse un
-> criterio migliore, **quel criterio vale dal round dopo**.
->
-> Firma: `______________________`  data: `____________`
+> ## ✅ FIRMATO DA CLAUDIO IN CHAT: **"FIRMO R88"** — 19/08/2026, ore ~18:05.
+> Firma raccolta A NUMERI MAI VISTI (nessuna passata girata), dopo la
+> presentazione in chat dei 4 cancelli numerici e del canarino sul muro dei
+> tick (26/09/2024, n max 119 OOS -> selezione per MERITO sospesa, si legge
+> per il RISCHIO). Regola confermata: *i criteri si cambiano prima dei
+> numeri, non dopo* — se un numero uscito suggerisse un criterio migliore,
+> quel criterio vale dal round dopo.
 
 _Scritto il 19/08/2026, a numeri di R88 **mai visti** (nessuna passata girata)._
 
