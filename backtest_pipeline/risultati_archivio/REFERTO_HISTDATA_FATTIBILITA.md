@@ -982,3 +982,280 @@ LETTURE:
    firma di Claudio, mai ammorbidito a occhio.
 4. Shift base +5 confermato in ENTRAMBE le scansioni su tutti e tre.
    I tre _EXT restano IN FRIGO.
+
+---
+
+## 16. 🔎 MISSIONE DATI (19/08) — l'evento del 23/03, il metro del cancello, la diagnosi GRXEUR
+
+_Strumento nuovo: `histdata_m1.py` e' passato a **`HD-M1-v4`** (autotest
+**11/11 in cloud**, ASCII puro 0 byte >127; la stringa `v3` non esiste piu'
+nel file: una riga vecchia che la cerca muore con `throw`, regola di casa).
+Tre modi OFFLINE nuovi: `--estrai "AAAA.MM.GG HH:MM" --ore N` (barre M1
+intorno a un istante: riepilogo per ora, buchi fra barre consecutive col
+salto di prezzo, barre una per una da -30 a +60 min), `--diagnosi` (giorni
+con prezzi fuori banda per anno e per giorno + mappa mese-per-mese dell'ora
+di apertura, riusa `misura_fuso`) e `--vol-oraria` (range H1 medio in % del
+prezzo, per anno). Leggono i `*_M1.csv` gia' sul PC (o gli ZIP): zero rete.
+**Qui in cloud non c'e' UN byte dei dati veri: tutte le righe operative di
+questo paragrafo sono BOZZA-DA-VERIFICARE e i numeri attesi sono derivati
+dai referti agli atti, con l'etichetta giusta accanto.**_
+
+### 16.1 L'EVENTO DEL 2026.03.23 11:00 — le ipotesi, scritte PRIMA di guardare
+
+**I fatti gia' agli atti** (`import_ext_v2_referto_2026-08-19.csv`): la diff
+massima H1 cade in quell'ora ESATTA su **tutti e tre** i simboli — 72.856,4
+pt NASUSD, 1.964,5 pt 225JPY, 18.615,1 pt SPXUSD. Stesso istante su tre
+serie = la causa sta in UNO dei due feed o nell'allineamento, non in tre
+incidenti separati.
+
+**CHE ORA E' DAVVERO, verificato — e la consegna va corretta.**
+L'ipotesi di lavoro diceva "11:00 NY (=16:00 server?)". **No:**
+- **[VERIFICATO nel sorgente]** `ABTG_ImportaStoricoEsterno_v2.mq5`, funzione
+  `MisuraDiff`: `qmax = tnat` dove `tnat = impBase + k*3600 + (shift)*3600`,
+  cioe' il timestamp **GIA' SPOSTATO nel fuso del nativo**. `QuandoDiffMax`
+  e' **ORA SERVER**, non ora NY.
+- **[VERIFICATO col calendario]** 23/03/2026 e' **LUNEDI'** (giorno normale:
+  nessuna festivita' USA/EU/JP il 23 marzo; il Venerdi' Santo 2026 e' il 3/04).
+  DST USA 2026: entra l'**8 marzo** (2a domenica). DST Europa: entra il
+  **29 marzo** (ultima domenica). Quindi il 23/03 e' **DENTRO la finestra
+  sfasata di marzo** (8-29/03): shift giusto +4, fisso +5 sbagliato di 1h.
+- Conversione (server = calendario europeo, UTC+0 in quel periodo perche'
+  l'EU e' ancora in ora solare): **11:00 server = 11:00 UTC = 12:00 ora
+  italiana = 07:00 New York (EDT)**. La barra HistData coinvolta e' quella
+  delle **07:00 NY** (allineamento DST-aware +4) o delle **06:00 NY**
+  (fisso +5). Non e' un'ora "di sistema": non e' l'apertura cash USA
+  (09:30 NY = 13:30 server quel giorno), non e' l'apertura europea.
+
+**QUANTO E' GROSSO, derivato dai numeri agli atti.** Il prezzo medio delle
+barre confrontate esce dal rapporto fra diff in punti e diff in % (algebra
+del CSV v2: `prezzo = 100 x DiffMediaPunti / DiffMediaPct`, ed e' il prezzo
+medio del nativo **sul solo periodo confrontato, 2024-09 -> 2026-07**,
+perche' il nativo BCM parte dal 26/09/2024 — anche questo verificato nel
+sorgente: il confronto esiste solo dove il nativo ha barre):
+
+| simbolo | prezzo medio confrontato [DERIVATO] | diff max 23/03 11:00 | **in % del prezzo** |
+|---|---|---|---|
+| NASUSD | 2.373.865 pt (~23.739 USD) | 72.856,4 pt | **~3,1%** |
+| 225JPY | 47.220 pt (~47.220 JPY) | 1.964,5 pt | **~4,2%** |
+| SPXUSD | 646.260 pt (~6.463 USD) | 18.615,1 pt | **~2,9%** |
+
+Un'ora sbagliata di allineamento in mercato calmo vale ~0,2-0,3% su un
+indice: qui siamo a **3-4%, cioe' 40-50 volte la diff media**. E un fatto in
+piu': su SPXUSD quell'ora peggiora passando dal fisso al DST-aware
+(13.419,9 -> 18.615,1 pt, +39%) — proprio nell'unica finestra dove il
+DST-aware dovrebbe curare.
+
+**LE IPOTESI, in ordine, scritte prima dell'estrazione:**
+1. **Buco di feed riempito male (o barre mancanti) da UNA parte sola**
+   intorno alle 06:00-07:00 NY di quel lunedi': dove un feed ha barre e
+   l'altro no (o le ha spostate), il confronto mette di fronte ore diverse.
+   E' l'ipotesi principale: coerente col picco simultaneo sui tre simboli
+   e col peggioramento sotto DST-aware.
+2. **Movimento reale violento in quell'ora** (12:00 in Italia): un 3-4%
+   orario su Nasdaq+Nikkei+S&P insieme e' un evento macro globale. Se e'
+   cosi', il nativo BCM deve mostrarlo uguale, e la diff nasce solo dal
+   disallineamento di un'ora durante il movimento.
+3. **Orari di sessione del feed** (la malattia GRXEUR) proprio in quella
+   settimana a cavallo del DST: non festivita' (verificata: e' un lunedi'
+   qualunque), ma copertura oraria diversa fra i due feed.
+
+#### ▶️ BOZZA-DA-VERIFICARE — estrazione dai 3 CSV (PC di Claudio, ~2 min)
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  $py=(Get-Command python.exe -EA SilentlyContinue | Where-Object { $_.Source -notlike "*\WindowsApps\*" } | Select-Object -First 1).Source
+  if(-not $py){ $py=(Get-Command py.exe -EA SilentlyContinue | Select-Object -First 1).Source }
+  if(-not $py){ throw "PYTHON ASSENTE" }
+  $p="$env:USERPROFILE\histdata_m1.py"
+  $dsk=Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1'
+  Remove-Item $p -Force -EA SilentlyContinue
+  Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
+  Remove-Item (Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1.zip') -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v4' -Quiet)){ throw "SCRIPT VECCHIO (cache GitHub ~5 min): aspetta 5 minuti e rilancia" }
+  Set-Location $env:USERPROFILE
+  $global:LASTEXITCODE=0; & $py $p --autotest
+  if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
+  $global:LASTEXITCODE=0; & $py $p --estrai "2026.03.23 06:00" --ore 3 --simboli nsxusd,jpxjpy,spxusd
+  if($LASTEXITCODE -ne 0){ throw "ESTRAZIONE FALLITA: leggi il referto. Una finestra VUOTA e' gia' una risposta (buco di feed): mandala lo stesso." }
+  Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+  Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|ESITO|buchi > 1 min|BUCO|salto massimo' | ForEach-Object { $_.Line }
+  Write-Host "PRONTO: manda Desktop\histdata_m1.zip in chat." -ForegroundColor Cyan
+}
+```
+⚠️ Il centro e' **06:00 (ora NY, come scritta nel CSV)** apposta: con
+`--ore 3` la finestra copre 03:00-09:00 NY = **08:00-14:00 server**, e le
+barre stampate una per una (da -30 a +60 min dal centro) coprono ESATTAMENTE
+le due candidate 06:00 e 07:00 NY (= 11:00 server con +5 e con +4).
+
+**E la stessa ora sui grafici MT5 (a mano, ~3 min, nessuno script):**
+1. aprire i grafici **H1** di `NASUSD`, `225JPY`, `SPXUSD` (nativi) e di
+   `NASUSD_EXT`, `225JPY_EXT`, `SPXUSD_EXT` — tutti e sei in ora server;
+2. andare al **23/03/2026** e annotare **O/H/L/C delle barre 10:00, 11:00 e
+   12:00** (finestra dati: Ctrl+D) per ciascuno dei sei grafici;
+3. lettura: **nativo che si muove del 3-4% anche lui** -> ipotesi 2 (evento
+   vero, la diff e' solo disallineamento durante il botto); **nativo piatto
+   e _EXT che salta (o viceversa)** -> ipotesi 1/3 (barre marce o spostate
+   in un feed solo); **buco di barre da una parte** -> ipotesi 1, colpevole
+   identificato.
+
+### 16.2 IL METRO DEL CANCELLO — la misura chiesta dal par. 15, punto 3
+
+**L'ipotesi da misurare**: il residuo fuori-finestre e' rumore di
+allineamento **proporzionale alla volatilita' oraria** dello strumento. Se
+e' vero, il rapporto `diff / volatilita' oraria` deve essere simile fra
+forex promossi e indici bocciati.
+
+**Le diff, agli atti [VERIFICATO nei referti]:** forex = diff media totale
+(v1, +5): EURUSD/GBPUSD 0,0041-0,0052% (`REFERTO_ROUND50_REGIME.md`),
+USDJPY 0,0054 / EURJPY 0,0063 / GBPCAD 0,0072 / CHFJPY 0,0080 / AUDJPY
+0,0090 / XAUUSD 0,0110 (`REFERTO_IMPORT_6_SIMBOLI.md`). Indici = diff
+**FUORI finestre** dal CSV v2 (SPXUSD 0,0527 / NASUSD 0,0662 / 225JPY
+0,0871) — che e' il numero giusto per il confronto: **l'evento del 23/03
+cade DENTRO la finestra di marzo e quindi NON inquina il "fuori"**.
+_(Onesta': le diff forex sono sull'intero periodo, non spaccate
+dentro/fuori — ma le finestre sono ~6,6% delle barre, quindi il loro
+"fuori" sarebbe al piu' qualche percento piu' basso.)_
+
+**Le volatilita' orarie — quello che il repo HA e quello che manca:**
+- **[MISURATO in casa]** Studio aperture FASE A (tick reali BCM, ~440-447
+  giorni, `studio_apertura/Studio_*.csv`, colonna `ampiezza_pt`): range dei
+  **primi 15 minuti di seduta**, media NASUSD 8.523 pt, SPXUSD 1.553 pt.
+  Normalizzato sui prezzi medi derivati sopra (stesso periodo 2024-2026):
+  **NASUSD 0,36%, SPXUSD 0,24%** nei 15' di apertura.
+- **[INFERITO]** il range H1 medio dell'INTERA giornata e' sotto quello dei
+  15' di apertura (l'apertura e' la fetta piu' volatile): banda usata
+  NASUSD 0,20-0,36%, SPXUSD 0,14-0,24%, 225JPY 0,25-0,35% (nessuno Studio
+  sul Nikkei), forex maggiori 0,04-0,08% (il 14-bis.2 usava ~0,05%),
+  XAUUSD 0,15-0,25%. **Nel repo NON c'e' una misura vera del range H1
+  medio: per questo la v4 ha `--vol-oraria`** (riga sotto).
+
+**LA TABELLA DEI RAPPORTI (diff / vol oraria), con le bande dichiarate:**
+
+| strumento | diff | vol oraria | **rapporto** | etichetta vol |
+|---|---|---|---|---|
+| EURUSD | 0,0041% | 0,04-0,08% | **0,05-0,10** | [INFERITO] |
+| USDJPY | 0,0054% | 0,04-0,08% | 0,07-0,14 | [INFERITO] |
+| AUDJPY (peggior forex non-oro) | 0,0090% | 0,04-0,08% | 0,11-0,23 | [INFERITO] |
+| XAUUSD | 0,0110% | 0,15-0,25% | **0,04-0,07** | [INFERITO] |
+| SPXUSD (fuori finestre) | 0,0527% | 0,14-0,24% | **0,22-0,38** | 15' [MISURATO], H1 [INFERITO] |
+| NASUSD (fuori finestre) | 0,0662% | 0,20-0,36% | **0,18-0,33** | 15' [MISURATO], H1 [INFERITO] |
+| 225JPY (fuori finestre) | 0,0871% | 0,25-0,35% | 0,25-0,35 | [INFERITO] |
+
+**LETTURA ONESTA:** il fattore **6-16x** del metro assoluto **crolla a
+~1,5-2,5x** in relativo, e il controllo piu' bello e' l'ORO: lo strumento
+piu' volatile fra i promossi ha il rapporto **piu' basso** di tutti
+(0,04-0,07) — esattamente quello che l'ipotesi prevede. **Quindi: la
+volatilita' spiega il GROSSO del divario, ma non tutto.** I tre indici
+restano sopra l'intera banda forex anche in relativo, e i sospetti per il
+residuo hanno gia' un nome (copertura 97,0 contro 99,6%, orari di sessione
+del feed).
+
+> 🖋️ **PROPOSTA FORMALE — DECISIONE PER CLAUDIO, non un cambio fatto.**
+> Metro relativo per gli import esterni: **diff media fuori-finestre <=
+> 0,20 x range orario medio H1** dello stesso simbolo nativo sullo stesso
+> periodo. X=0,20 e' il tetto arrotondato del peggior promosso (AUDJPY
+> 0,11-0,23); il cancello assoluto 0,05% resta com'e' per il forex.
+> **Dichiarato prima della misura: con le stime attuali i tre indici NON
+> passerebbero comunque** (0,18-0,38 contro 0,20) — la proposta non e' un
+> condono, e' un metro che boccia "di poco" invece che "di 6-16 volte".
+> **Prerequisito di firma:** sostituire le volatilita' [INFERITO] con la
+> misura vera di `--vol-oraria` (bozza sotto) e ricalcolare la tabella.
+> Se anche coi numeri misurati i rapporti indici restano fuori banda
+> forex, **il metro assoluto resta e i tre _EXT restano in frigo**.
+
+#### ▶️ BOZZA-DA-VERIFICARE — la misura vera delle volatilita' (PC, ~3 min)
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  $py=(Get-Command python.exe -EA SilentlyContinue | Where-Object { $_.Source -notlike "*\WindowsApps\*" } | Select-Object -First 1).Source
+  if(-not $py){ $py=(Get-Command py.exe -EA SilentlyContinue | Select-Object -First 1).Source }
+  if(-not $py){ throw "PYTHON ASSENTE" }
+  $p="$env:USERPROFILE\histdata_m1.py"
+  $dsk=Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1'
+  Remove-Item $p -Force -EA SilentlyContinue
+  Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
+  Remove-Item (Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1.zip') -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v4' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
+  Set-Location $env:USERPROFILE
+  $global:LASTEXITCODE=0; & $py $p --autotest
+  if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
+  $global:LASTEXITCODE=0; & $py $p --vol-oraria --simboli nsxusd,jpxjpy,spxusd
+  if($LASTEXITCODE -ne 0){ throw "VOL ORARIA INDICI FALLITA: leggi il referto" }
+  $global:LASTEXITCODE=0; & $py $p --vol-oraria --simboli eurusd --cartella "$env:USERPROFILE\abtg_storico_esterno"
+  if($LASTEXITCODE -ne 0){ Write-Host "EURUSD non misurato: EURUSD_M1.csv non sta in abtg_storico_esterno (la cartella del 15/08) -- dimmi dove sta e sistemo la riga" -ForegroundColor Yellow }
+  Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+  Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|ESITO|TOTALE: media' | ForEach-Object { $_.Line }
+  Write-Host "PRONTO: manda Desktop\histdata_m1.zip in chat." -ForegroundColor Cyan
+}
+```
+_(La vol misurata qui e' sul feed HistData — per il metro serve anche il
+nativo BCM, ma sul periodo comune i due feed hanno per definizione range
+simili: la HistData basta per la prima ricalcolata. `abtg_storico_esterno`
+e' la cartella di lavoro di `importa_storico_esterno.ps1` [DA VERIFICARE
+SUL PC che i CSV del 15/08 ci siano ancora]. Vale anche il limite di
+sempre: e' il PC di backtest, DESKTOP-H4D7CAJ, non il VPS.)_
+
+### 16.3 LA DIAGNOSI D30EUR — dove stanno le righe marce, e cosa copre la sessione 02:00
+
+Il par. 13 ha bocciato `grxeur` per due malattie: **min 2.906,949**
+(impossibile: minimo Covid ~8.255) e **sessione ballerina** (apertura
+modale 02:00 da 2020-06 a 2023-11, 00:00 prima e dopo). `--diagnosi` adesso
+risponde alle due domande esatte: **QUALI anni/giorni** hanno le barre
+fuori banda (per anno e per giorno, coi valori), e la **mappa mese-per-mese
+completa** dell'ora di apertura (riusa `misura_fuso`, quindi e' la stessa
+misura del par. 13, stavolta stampata intera). Trovare barre marce e' il
+risultato della diagnosi, non un errore: l'ESITO resta OK se la scansione
+riesce.
+
+#### ▶️ BOZZA-DA-VERIFICARE — diagnosi GRXEUR (PC, ~2 min)
+```powershell
+& {
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  $py=(Get-Command python.exe -EA SilentlyContinue | Where-Object { $_.Source -notlike "*\WindowsApps\*" } | Select-Object -First 1).Source
+  if(-not $py){ $py=(Get-Command py.exe -EA SilentlyContinue | Select-Object -First 1).Source }
+  if(-not $py){ throw "PYTHON ASSENTE" }
+  $p="$env:USERPROFILE\histdata_m1.py"
+  $dsk=Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1'
+  Remove-Item $p -Force -EA SilentlyContinue
+  Remove-Item $dsk -Recurse -Force -EA SilentlyContinue
+  Remove-Item (Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_m1.zip') -Force -EA SilentlyContinue
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/histdata_m1.py" -OutFile $p -EA Stop
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern 'HD-M1-v4' -Quiet)){ throw "SCRIPT VECCHIO: aspetta 5 minuti e rilancia" }
+  Set-Location $env:USERPROFILE
+  $global:LASTEXITCODE=0; & $py $p --autotest
+  if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
+  $global:LASTEXITCODE=0; & $py $p --diagnosi --simboli grxeur
+  if($LASTEXITCODE -ne 0){ throw "DIAGNOSI FALLITA: manca D30EUR_M1.csv e non ci sono ZIP grxeur in histdata_m1" }
+  Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+  Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|ESITO|barre fuori banda|per ANNO|VERDETTO FUSO' | ForEach-Object { $_.Line }
+  Write-Host "PRONTO: manda Desktop\histdata_m1.zip in chat (dentro c'e' la mappa mese-per-mese completa)." -ForegroundColor Cyan
+}
+```
+**Cosa deve uscire perche' la diagnosi sia utile:** (a) gli anni delle barre
+sotto 4.000 col conteggio e i valori (il 2025 era pulito, min 18.809 —
+par. 11 — quindi il marcio sta altrove, atteso 2019-2024); (b) i confini
+esatti del cambio sessione (l'ultimo mese a 00:00 prima del 2020-06 e il
+primo dopo il 2023-11). Con quei due numeri si decide la strada del DAX
+lungo: bonifica DICHIARATA dei giorni marci, oppure Dukascopy, oppure
+nativo dal 2024-09 — **decisione di Claudio, non di questo referto**.
+
+### 16.4 Etichette del paragrafo, una riga ciascuna
+- **[VERIFICATO]** `QuandoDiffMax` = ora server (sorgente v2, `MisuraDiff`) ·
+  23/03/2026 = lunedi', dentro la finestra sfasata 8-29/03, nessuna
+  festivita' · autotest v4 11/11 in cloud, ASCII 0 byte >127 ·
+  media `ampiezza_pt` Studio: NASUSD 8.523 / SPXUSD 1.553 pt su 447/444 giorni.
+- **[DERIVATO dagli atti]** prezzi medi confrontati (23.739 / 47.220 /
+  6.463) e le tre diff max in %: ~3,1 / ~4,2 / ~2,9%.
+- **[INFERITO]** tutte le volatilita' H1 della tabella 16.2 (bande
+  dichiarate) · che il server BCM segua il calendario europeo (stessa
+  assunzione del 14-bis, con la stessa base: +5 stabile su 8 forex x 7 anni).
+- **[DA VERIFICARE SUL PC]** i tre `*_M1.csv` ancora in
+  `%USERPROFILE%\histdata_m1` · `EURUSD_M1.csv` in `abtg_storico_esterno` ·
+  tutto il contenuto delle tre bozze (il verificatore e' la sessione
+  principale).
+
+**Nessun parametro degli EA in forward cambia per questo paragrafo. La v1 e
+la v2 dell'importatore MQL5 non sono state toccate. Il cancello resta 0,05%
+finche' Claudio non firma diversamente.**
