@@ -65,6 +65,19 @@ param(
   [int]$Modello      = 4,            # 4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai verdetti
   [int]$Deposito     = 10000,        # deposito del tester. 100000 = taglia prop: serve dove il lotto minimo schiaccia il rischio
   [string]$Etichetta = "",           # suffisso nei nomi dei CSV: un round nuovo NON sovrascrive il precedente
+  [int]$Spread       = -1,           # 19/08/2026 (R84-bis, stress spread). -1 = NON scrive la riga
+                                     #   Spread nell'.ini = comportamento identico a sempre.
+                                     #    0 = spread CORRENTE, scritto esplicito (toglie lo stato
+                                     #        nascosto: fino a oggi nessun .ini di questa casa
+                                     #        dichiarava lo spread usato, e nessuno lo sapeva).
+                                     #    N = spread FISSO di N punti (stress).
+                                     #   ATTENZIONE, NON MISURATO: a Modello 4 (tick reali) MT5
+                                     #   prende bid/ask dai tick e non e' detto che onori questa
+                                     #   riga. Prima di leggere una scala di stress serve il
+                                     #   canarino: stesso EA con uno spread ASSURDO deve dare
+                                     #   numeri DIVERSI. Se sono identici, la riga e' ignorata e
+                                     #   la scala a tick reali NON E' ESEGUIBILE (va dichiarato,
+                                     #   non interpretato come "robusto allo spread").
   [string]$Prova     = "",           # file prova alternativo (default: prove\<EA>.txt)
   [string]$BrokerPattern = "BCM",    # SU QUALE TERMINALE girare. "BCM" = come sempre.
                                      #   Altro valore (es. "Pepperstone") = secondo
@@ -463,6 +476,27 @@ Write-Host "    fermati: sugli indici diceva 2024.01.01 e partiva dal 26/09/2024
 
 $InputsTxt=($Finali) -join "`n"
 
+# --- la riga Spread dell'.ini (R84-bis). Con -1 la riga NON esiste: e'
+#     esattamente quello che facevano tutti i round fino al 18/08.
+$RigaSpread = ""
+if($Spread -ge 0){
+  $RigaSpread = "Spread=$Spread"
+  $comeSpread = if($Spread -eq 0){ "spread CORRENTE, dichiarato" } else { "spread FISSO $Spread punti (STRESS)" }
+  Write-Host ""
+  Write-Host "    Spread=$Spread  ->  $comeSpread" -ForegroundColor Yellow
+  if($Modello -eq 4 -and $Spread -gt 0){
+    Write-Host "    ATTENZIONE: a tick reali non e' MISURATO che MT5 onori questa riga." -ForegroundColor Yellow
+    Write-Host "    Senza il canarino (stesso EA, spread assurdo, numeri DIVERSI) questa" -ForegroundColor Yellow
+    Write-Host "    scala non si legge: identico alla base vorrebbe dire riga IGNORATA," -ForegroundColor Yellow
+    Write-Host "    non 'robusto allo spread'." -ForegroundColor Yellow
+  }
+} else {
+  Write-Host ""
+  Write-Host "    (nessuna riga Spread nell'.ini: MT5 usa il valore che ha in memoria." -ForegroundColor DarkYellow
+  Write-Host "     E' il comportamento di sempre, ma e' STATO NASCOSTO: per metterlo agli" -ForegroundColor DarkYellow
+  Write-Host "     atti passa -Spread 0.)" -ForegroundColor DarkYellow
+}
+
 # =====================================================================
 #  6. -SoloControllo: si ferma qui e fa vedere cosa lancerebbe
 # =====================================================================
@@ -478,6 +512,7 @@ Expert=$Expert.ex5
 Symbol=$Simbolo
 Period=$Periodo
 Model=4
+$RigaSpread
 Optimization=1
 OptimizationCriterion=6
 FromDate=$($WF[0].Da)
@@ -608,6 +643,7 @@ Expert=$Expert.ex5
 Symbol=$Simbolo
 Period=$Periodo
 Model=$Modello
+$RigaSpread
 Optimization=1
 OptimizationCriterion=6
 FromDate=$($w.Da)
