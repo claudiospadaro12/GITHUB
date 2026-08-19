@@ -1,5 +1,6 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+<<<<<<< Updated upstream
 > ## 🎌 AGGIORNAMENTO 19/08 mattina — dove `GapContinuation` calcola lo stop (letto nel sorgente)
 >
 > Primo trade in assoluto della sedia **774101** (deploy 16/08): `GAPCONT S`
@@ -42,6 +43,19 @@
 > 🛑 **Niente si tocca in forward: e' UN trade su 15.**
 
 > ## 🧪 18/08 — **R81 "PROCESSO ALLE USCITE" E' PRONTO DA LANCIARE** (PC di backtest, MT5 chiuso)
+=======
+> ⚠️ **NOTA DI COORDINAMENTO FRA SESSIONI (19/08 mattina):** R81 e' stato
+> **GIA' ESEGUITO il 18/08 pomeriggio** dall'altra sessione (quella della
+> flotta agenti): esiti in `risultati_archivio/REFERTO_ROUND81_USCITE.md`
+> (variante C "solo BE poi correre" batte la sedia viva in entrambe le
+> finestre, ~10-14 posizioni: PROPONE, non promuove — pista M13, R81-bis
+> su dati lunghi quando i dati _EXT passeranno il cancello). **NON
+> rilanciarlo.** Sempre il 18/08 sera: R84 (ablazione filtri Nasdaq, 9/9
+> OOS negative) e R83 (duello ingressi: retest incoronato sul DAX) —
+> referti `REFERTO_ROUND84_ABLAZIONE.md` / `REFERTO_ROUND83_INGRESSI.md`.
+
+> ## 🧪 18/08 — ~~**R81 "PROCESSO ALLE USCITE" E' PRONTO DA LANCIARE**~~ ✅ **ESEGUITO 18/08 (vedi nota sopra)**
+>>>>>>> Stashed changes
 >
 > Nato dal trade vero di oggi (`MAXMIN DAX SHORT` **+324,48** sul 100k: il
 > trailing ha incassato prima di un rimbalzo che avrebbe riportato il prezzo
