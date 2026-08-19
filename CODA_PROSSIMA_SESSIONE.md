@@ -1,5 +1,22 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## 🔬 ANOMALIA DA AUTOPSIA (19/08 pomeriggio): i gemelli ORB divergono nella GESTIONE
+> Trade del 19/08 ore 14:56 server, U30USD, stesso ingresso AL SECONDO
+> (53600.5, SL 53506.5) su piccolo (0.6 lot, 1%) e 100k (3.7 lot, 0.3%):
+> - **100k**: trailing EMA9 ha alzato lo stop a 53563.5 -> colpito 15:15,
+>   chiuso -117,37 (-0,39R).
+> - **piccolo**: stop MAI mosso (log Esperti muto con Verbose=true),
+>   posizione sopravvissuta al ritracciamento.
+> Input identici (verificati da screenshot). Ipotesi principale: **.ex5 di
+> BUILD diverse** fra le due istanze — probabile che il piccolo sia
+> pre-correzione "trailing/BE agganciato al parziale" (lezione PTE 04/08)
+> e con TP1Pct=0 il trailing non parta mai.
+> DA FARE: stringa (verificata) che confronta data/size/hash di
+> ABTG_ORB_Ottimizzato.ex5 nelle due cartelle dati; il BLOCCO 4 rimette
+> comunque il 100k su build certificata di oggi; il piccolo si allinea in
+> FASE 5. Conteggio famiglia ORB 770611 aggiornato: 3 trade chiusi, 0/3
+> (criterio congelato: revisione a 15).
+
 > **Nota tecnica dal verificatore (19/08, non bloccante):**
 > `censimento_rischio.ps1` riga 43 legge i `.chr` con `Get-Content -Raw`
 > SENZA FileShare e con `$ErrorActionPreference="Stop"` — con MT5 aperto un
