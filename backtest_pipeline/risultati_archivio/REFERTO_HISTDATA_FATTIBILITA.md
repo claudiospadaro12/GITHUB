@@ -1077,12 +1077,23 @@ DST-aware dovrebbe curare.
   $global:LASTEXITCODE=0; & $py $p --autotest
   if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
   $global:LASTEXITCODE=0; & $py $p --estrai "2026.03.23 06:00" --ore 3 --simboli nsxusd,jpxjpy,spxusd
-  if($LASTEXITCODE -ne 0){ throw "ESTRAZIONE FALLITA: leggi il referto. Una finestra VUOTA e' gia' una risposta (buco di feed): mandala lo stesso." }
+  $rc=$LASTEXITCODE
+  $ref=Get-ChildItem "$dsk\referto_histdata_*.txt" -EA SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
+  if(-not $ref){ throw "ESTRAZIONE NON PARTITA: nessun referto sul Desktop" }
+  if((New-TimeSpan -Start $ref.LastWriteTime -End (Get-Date)).TotalMinutes -gt 10){ throw "REFERTO STANTIO: e' di prima, la corsa non ha scritto niente" }
+  if($rc -ne 0){ Write-Host "ESITO FALLITO (rc=$rc): probabile FINESTRA VUOTA = buco di feed. E' GIA' UNA RISPOSTA (ipotesi 1): manda il referto lo stesso." -ForegroundColor Yellow }
   Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
   Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|ESITO|buchi > 1 min|BUCO|salto massimo' | ForEach-Object { $_.Line }
   Write-Host "PRONTO: manda Desktop\histdata_m1.zip in chat." -ForegroundColor Cyan
 }
 ```
+⚠️ **Perche' qui NON c'e' `throw` sull'exit code** (e nelle altre due bozze si):
+una **finestra vuota e' l'ipotesi 1 confermata**, cioe' il risultato che
+cerchiamo — ma lo script la conta come `problemi` e esce **1**. Con un `throw`
+secco la riga moriva **dopo** aver scritto il referto e **prima** di dire a
+Claudio di mandarlo: schermo rosso, nessuna istruzione, e la risposta buona
+lasciata sul disco. Il gate resta, ma e' sull'**ARTEFATTO** (esiste? e' di
+adesso?), come vuole il punto 14 pezzo 2.
 ⚠️ Il centro e' **06:00 (ora NY, come scritta nel CSV)** apposta: con
 `--ore 3` la finestra copre 03:00-09:00 NY = **08:00-14:00 server**, e le
 barre stampate una per una (da -30 a +60 min dal centro) coprono ESATTAMENTE
@@ -1181,15 +1192,39 @@ del feed).
   Set-Location $env:USERPROFILE
   $global:LASTEXITCODE=0; & $py $p --autotest
   if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
+  $stag="$env:USERPROFILE\histdata_raccolta"
+  Remove-Item $stag -Recurse -Force -EA SilentlyContinue
+  New-Item -ItemType Directory -Path $stag | Out-Null
+  $zipf=Join-Path ([Environment]::GetFolderPath('Desktop')) 'histdata_vol.zip'
+  Remove-Item $zipf -Force -EA SilentlyContinue
   $global:LASTEXITCODE=0; & $py $p --vol-oraria --simboli nsxusd,jpxjpy,spxusd
   if($LASTEXITCODE -ne 0){ throw "VOL ORARIA INDICI FALLITA: leggi il referto" }
+  $r1=Get-ChildItem "$dsk\referto_histdata_*.txt" | Sort-Object LastWriteTime | Select-Object -Last 1
+  Copy-Item $r1.FullName "$stag\vol_INDICI.txt" -Force
   $global:LASTEXITCODE=0; & $py $p --vol-oraria --simboli eurusd --cartella "$env:USERPROFILE\abtg_storico_esterno"
   if($LASTEXITCODE -ne 0){ Write-Host "EURUSD non misurato: EURUSD_M1.csv non sta in abtg_storico_esterno (la cartella del 15/08) -- dimmi dove sta e sistemo la riga" -ForegroundColor Yellow }
-  Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
-  Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|ESITO|TOTALE: media' | ForEach-Object { $_.Line }
-  Write-Host "PRONTO: manda Desktop\histdata_m1.zip in chat." -ForegroundColor Cyan
+  else { $r2=Get-ChildItem "$dsk\referto_histdata_*.txt" | Sort-Object LastWriteTime | Select-Object -Last 1; Copy-Item $r2.FullName "$stag\vol_EURUSD.txt" -Force }
+  Compress-Archive -Path "$stag\*" -DestinationPath $zipf -Force
+  Get-ChildItem $stag | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+  Select-String -Path "$stag\*.txt" -Pattern '^data:|ESITO|TOTALE: media' | ForEach-Object { $_.Filename + " | " + $_.Line }
+  Write-Host "PRONTO: manda Desktop\histdata_vol.zip in chat (dentro DEVONO esserci vol_INDICI.txt e, se misurato, vol_EURUSD.txt)." -ForegroundColor Cyan
 }
 ```
+🔴 **Questa bozza era la piu' rotta delle tre, e il difetto e' RIPRODOTTO.**
+La versione precedente lanciava `--vol-oraria` **due volte** e si affidava alla
+raccolta dello script. Ma `raccogli_desktop` apre lo zip in modo `"w"`
+(**tronca**) e il referto ha il nome al **minuto**: la seconda chiamata
+sovrascriveva la prima **nella cartella, sul Desktop e dentro lo zip**.
+Eseguito qui:
+```
+1a chiamata (indici)  -> zip contiene: referto_..._0757.txt   [la misura buona]
+2a chiamata (eurusd)  -> zip contiene: referto_..._0757.txt   [MA e' quello di EURUSD]
+   contenuto: "NESSUNA BARRA: manca EURUSD_M1.csv"  ESITO: FALLITO
+```
+Claudio avrebbe mandato uno zip con **un solo referto, quello fallito**, e la
+misura che sblocca il metro sarebbe sparita in silenzio. Correzione: ogni
+chiamata mette **subito** il suo referto in una cartella di sosta con un nome
+**proprio**, e lo zip si fa in fondo da PowerShell (`Compress-Archive`).
 _(La vol misurata qui e' sul feed HistData — per il metro serve anche il
 nativo BCM, ma sul periodo comune i due feed hanno per definizione range
 simili: la HistData basta per la prima ricalcolata. `abtg_storico_esterno`
@@ -1228,6 +1263,9 @@ riesce.
   if($LASTEXITCODE -ne 0){ throw "AUTOTEST FALLITO: NON si va oltre" }
   $global:LASTEXITCODE=0; & $py $p --diagnosi --simboli grxeur
   if($LASTEXITCODE -ne 0){ throw "DIAGNOSI FALLITA: manca D30EUR_M1.csv e non ci sono ZIP grxeur in histdata_m1" }
+  $ref=Get-ChildItem "$dsk\referto_histdata_*.txt" -EA SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
+  if(-not $ref){ throw "NESSUN REFERTO: la diagnosi non ha scritto niente" }
+  if((New-TimeSpan -Start $ref.LastWriteTime -End (Get-Date)).TotalMinutes -gt 10){ throw "REFERTO STANTIO: e' di prima" }
   Get-ChildItem $dsk | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
   Select-String -Path "$dsk\referto_histdata_*.txt" -Pattern '^data:|ESITO|barre fuori banda|per ANNO|VERDETTO FUSO' | ForEach-Object { $_.Line }
   Write-Host "PRONTO: manda Desktop\histdata_m1.zip in chat (dentro c'e' la mappa mese-per-mese completa)." -ForegroundColor Cyan
@@ -1240,6 +1278,50 @@ esatti del cambio sessione (l'ultimo mese a 00:00 prima del 2020-06 e il
 primo dopo il 2023-11). Con quei due numeri si decide la strada del DAX
 lungo: bonifica DICHIARATA dei giorni marci, oppure Dukascopy, oppure
 nativo dal 2024-09 — **decisione di Claudio, non di questo referto**.
+
+### 16.3-bis VERIFICA DELLE TRE BOZZE (verificatore-stringhe, 19/08) - FAIL -> corrette sopra
+
+**Eseguito davvero** su un CSV sintetico da **157 MB / 3.006.660 barre**
+(stesso ordine di grandezza dei file veri), con un buco costruito apposta
+nell'ora dell'evento:
+
+| modo | tempo misurato | esito |
+|---|---|---|
+| `--estrai` (3 simboli) | **0,8 s per simbolo** | il percorso veloce funziona: legge SOLO la finestra |
+| `--vol-oraria` | **24,3 s per simbolo** | parse completo di 3M righe |
+| `--diagnosi` | **24,7 s per simbolo** | parse completo + scansione fuori banda |
+
+➡️ **Punto 19 (durata vs timeout): nessun problema.** Non c'e' timeout implicito
+(Python non ne ha, `&` di PowerShell aspetta), e le stime "~2 min / ~3 min"
+scritte nelle bozze sono giuste: 16.1 ~3 s, 16.2 ~100 s, 16.3 ~25 s.
+
+➡️ **Punto 14 (`--diagnosi` che TROVA marcio):** verificato, esce **0** con
+`ESITO: OK`. E' coerente: il codice d'uscita dice se **la scansione e'
+riuscita**, non se i dati sono belli. Le barre fuori banda sono il prodotto.
+
+➡️ **`--estrai` sul buco:** trovato e stampato
+`BUCO 61 min: 2026.03.23 05:59 -> 2026.03.23 07:00`, uscita 0. Il buco NON
+viene inghiottito.
+
+**I due difetti trovati e corretti nelle bozze** (nessuno richiede di toccare lo
+script, che resta `HD-M1-v4`):
+1. 🔴 **16.2 — la seconda chiamata cancellava la prima** (riprodotto: vedi il
+   riquadro nella bozza). Nome del referto al minuto + zip aperto in `"w"`.
+2. 🟠 **16.1 — il `throw` uccideva la risposta buona**: finestra vuota = exit 1,
+   e il messaggio stesso diceva "mandala lo stesso" mentre la riga moriva prima
+   di dirlo a Claudio. Ora il gate e' sull'artefatto (esiste + eta' < 10 min).
+
+**Passati senza rilievi:** marcatore `HD-M1-v4` (la stringa `v3` non esiste piu'
+nel file: la riga vecchia muore con `throw`) [punto 6] - `Remove-Item` + `-EA
+Stop` + `Select-String` tutti e tre presenti [punto 8] - `$LASTEXITCODE`
+azzerato prima e controllato `-ne 0` [punto 13] - blocchi `& { }` unici
+[punto 21] - referti vecchi cancellati **prima** in tutte e tre [punto 23] -
+`python` senza stub WindowsApps [punto 17] - TLS12 [regola di casa] - ASCII 0
+byte >127, autotest **11/11 uscita 0** [eseguiti qui].
+
+**L'ora dell'evento e' giusta:** centro `06:00` NY con `--ore 3` copre
+03:00-09:00 NY = 08:00-14:00 server, e le barre stampate da -30 a +60 min
+coprono **06:00 e 07:00 NY**, cioe' le 11:00 server sia con shift +5 sia con +4.
 
 ### 16.4 Etichette del paragrafo, una riga ciascuna
 - **[VERIFICATO]** `QuandoDiffMax` = ora server (sorgente v2, `MisuraDiff`) ·
