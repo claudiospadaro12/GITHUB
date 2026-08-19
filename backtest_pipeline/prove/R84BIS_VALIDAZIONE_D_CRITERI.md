@@ -420,9 +420,9 @@ giudizio sul **MERITO**, mai sul **RISCHIO**.* Un DD accaduto vale a qualunque n
 | **2** | **canarino C3** — `A` e `D` con `Spread=0` scritto | 2 | ~14 min | se non riproduce R84 → **tutto si ferma** |
 | **3** | **trasferibilita'** T0 T1 T2 T3 (§4A) | 4 | ~28 min | T0/T2 sono C1/C2: se non tornano, la gamba si ferma |
 | **4** | **robustezza** B1..B4 (§4B) | 4 | ~28 min | — |
-| **5** | **scala spread** A e D a 100/200/400 (§4C) | 6 | ~42 min | solo se C4 e' passato |
+| **5** | **scala spread** — restano `A@100 A@200 D@100 D@200 D@400` (`A@400` e' gia' girata al passo 1) | 5 | ~35 min | solo se C4 e' passato |
 | **6** | **split alternativo** A e D al 55/45 (§4D) | 2 | ~14 min | ultimo, e' il piu' debole |
-| | **TOTALE MASSIMO** | **19** | **~2h15** | |
+| | **TOTALE MASSIMO** | **18** | **~2h06** | |
 
 **Se il tempo macchina e' poco, l'ordine di rinuncia e': 6, poi 5, poi 4.**
 Il passo **3 (trasferibilita') non si salta mai**: e' la prova che risponde
