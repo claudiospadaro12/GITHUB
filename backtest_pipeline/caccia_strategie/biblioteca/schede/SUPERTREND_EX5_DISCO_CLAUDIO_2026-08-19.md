@@ -18,12 +18,15 @@ SuperTrend del corso (lezione 10, allegato .ex4 MAI ancora scaricato)._
 - I corpi EX5 sono cifrati: i DEFAULT degli input non si leggono dal file.
   Si leggono dalla finestra di MT5 (trascinare sul grafico -> screenshot ->
   Annulla; sono indicatori, non aprono ordini).
-- Provenienza dal disco [DA CHIARIRE]: cartella d'origine chiesta a Claudio.
-  Paolo Lavorenti / SM Solution suonano come ambiente ABTG [INFERITO dal
-  contesto, NON verificato].
+- Provenienza CHIARITA da Claudio (19/08, in chat): **"LI HA PASSATI
+  LAVORENTI"** — i file arrivano direttamente da Paolo Lavorenti, quindi
+  passaggio personale, non download. Il ruolo esatto di Lavorenti
+  nell'ambiente ABTG resta [DA CHIARIRE] (coach? sviluppatore? corsista
+  avanzato?) — pesa sul rango della fonte.
 
 ## Da fare
 1. Screenshot dei default di PLSUPERTREND_3_LIVELLI_V09 (se 2,5/3,0/3,5:
    conferma pratica dei parametri del piano Europeo).
-2. Cartella d'origine dei 4 file.
+2. ~~Cartella d'origine~~ -> CHIARITA: passati da Paolo Lavorenti.
+   Resta da chiedere il SUO ruolo in ABTG (decide il rango della fonte).
 3. M15b vera: scaricare l'allegato .ex4 della lezione 10.
