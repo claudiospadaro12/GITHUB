@@ -1,5 +1,46 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> ## 🎌 AGGIORNAMENTO 19/08 mattina — dove `GapContinuation` calcola lo stop (letto nel sorgente)
+>
+> Primo trade in assoluto della sedia **774101** (deploy 16/08): `GAPCONT S`
+> su 225JPY, **−51,90 in 29 minuti**, stop preso. Claudio ha chiesto di
+> guardare il sorgente. **Lo stop NON e' un ATR.**
+>
+> ```cpp
+> // ABTG_GapContinuation.mq5:1011 (ramo SELL)
+> double stop = MathMax(g_range_high + buffer, tick.ask + broker_stop_distance);
+> double buffer = InpStopBufferPoints * point;   // InpStopBufferPoints = 0.0
+> // g_range_high = massimo delle barre M1 dei primi InpOpeningRangeMinutes = 10 min (:571-577)
+> ```
+>
+> ### Tre conseguenze, in ordine di peso
+> 1. 🔴 **Buffer ZERO.** Lo stop e' appoggiato **esattamente** sul massimo dei
+>    primi 10 minuti. E su 225JPY BCM lo **spread e' ~80 punti** (scritto nel
+>    codice stesso, riga 215): basta che il bid sfiori quel massimo perche'
+>    l'ask lo superi. **Unico difetto meccanico della lista.**
+> 2. ⚖️ **L'R non e' scelto: e' quanto sono stati larghi 10 minuti.** Nessun
+>    ATR, nessuna normalizzazione. Ieri R = **479 punti** e **2,00 lotti**, la
+>    posizione piu' grossa della flotta. Il rischio in % e' rispettato
+>    (−51,90 ≈ 1%), ma la distanza dello stop e' un sottoprodotto, non una scelta.
+> 3. ⏳ **Lo stop invecchia, l'ingresso no.** `InpMaxEntryMinutesFromOpen = 90`
+>    ma lo stop resta ancorato ai primi 10. Ieri l'ingresso e' arrivato a
+>    +15 min → **non e' il colpevole di stanotte**, ma lo diventa sui tardivi.
+>
+> ### ⚠️ E il FUSO, trovato cercando (vale piu' dello stop)
+> `InpSessionTimeMode = SESSION_JST_DARWINEX_AUTO` **di default**. In AUTO:
+> `9*60 - 9*60 + offset*60` con offset **3** ad agosto → apertura sessione
+> alle **03:00 ora server**. Ma su BCM (server = ora italiana − 1) Tokyo apre
+> alle **01:00**: in AUTO l'EA aprirebbe la finestra con **DUE ORE di ritardo**.
+> 🟢 Ieri ha aperto giusto (ingresso 01:15:24 = +15 min dall'apertura vera),
+> quindi sul grafico vivo **deve** essere `SESSION_MANUAL_SERVER` con
+> `InpSessionOpenHour = 1`. **[INFERITO] dall'orario, NON letto dal preset.**
+> La verifica e' una riga: `config_in_uso.ps1` sul VPS.
+>
+> ### 🧪 Il round che ne esce (zero righe di codice)
+> **Sweep di `InpStopBufferPoints`** su 225JPY: l'input esiste gia'. Domanda
+> secca: **un cuscinetto sopra il massimo dell'opening range paga o no?**
+> 🛑 **Niente si tocca in forward: e' UN trade su 15.**
+
 > ## 🧪 18/08 — **R81 "PROCESSO ALLE USCITE" E' PRONTO DA LANCIARE** (PC di backtest, MT5 chiuso)
 >
 > Nato dal trade vero di oggi (`MAXMIN DAX SHORT` **+324,48** sul 100k: il
