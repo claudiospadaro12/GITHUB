@@ -91,6 +91,18 @@ Tre corsie — verbale completo in `report/FIRME_2026-08-18.md`:
 Firmati lo stesso giorno: **cap rischio aperto 3,25%** (C1, = 5 SL vivi da
 0,65%) e **pacchetto Guardian** (pausa 4,0 / emergenza 4,9 e 9,9 / reset 23).
 
+## 🔁 REGOLA DELLA SECONDA CACCIA (richiesta di Claudio, 19/08)
+**Quando un round dichiara un motore SENZA EDGE, gli agenti partono DA SOLI
+a cercare soluzioni sul web** (Code Base, TradingView, GitHub, paper, forum)
+— senza aspettare che Claudio lo chieda. MA con la clausola che salva il
+conto: si cercano **MECCANISMI alternativi sulla stessa inefficienza**
+(fade, liquidity sweep, regime diverso, gestione diversa), MAI "parametri
+diversi dello stesso motore morto". Motivo misurato: su un motore 0/48
+un'altra griglia trova solo picchi di rumore (curve fitting) — la cella
+"verde per caso" e' quella che brucia la challenge. Ogni candidato passa
+la lista dei caduti (REGISTRO_TEST.md) prima di entrare nell'imbuto.
+Prima applicazione: caccia Londra del 19/08 (dopo il verdetto R45 0/48).
+
 ## FUSO ORARIO BCM (regola fissa)
 **Il server BCM è 1 ORA INDIETRO rispetto all'ora italiana** (in questo periodo dell'anno).
 - Ora italiana − 1 = ora server BCM.
