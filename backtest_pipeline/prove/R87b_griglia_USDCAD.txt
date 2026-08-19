@@ -1,0 +1,234 @@
+# =====================================================================
+#  R87 / LA CORREZIONE VERIFICATA DEL GOLDEN CROSS - USDCAD H4
+#  CELLA B - GRIGLIA: la caccia ai parametri sul motore corretto
+#  EA: ABTG_GoldenCross   (sedia viva in campo: magic 770332)
+#
+#  Si lancia con:
+#    -Expert ABTG_GoldenCross -Prova prove\R87b_griglia_USDCAD.txt -Etichetta r87bcad -Modello 4
+#  (prima SEMPRE con -SoloControllo: dieci secondi, e ti dice quante
+#   celle sono, cioe' quante ore di macchina.)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI.
+#      I criteri di R87 NON SONO ANCORA SCRITTI. Vanno congelati in
+#      prove\R87_CRITERI.md PRIMA di lanciare (regola di casa: i
+#      criteri si cambiano prima dei numeri, non dopo). Senza quel
+#      file, i risultati di R87 non si leggono.
+#
+#  DA DOVE NASCE IL ROUND
+#    Verifica di fedelta' del 19/08 contro il PDF Masterclass:
+#      backtest_pipeline\caccia_strategie\biblioteca\schede\
+#      VERIFICA_FEDELTA_GOLDENCROSS_PDF_2026-08-19.md
+#    Tre difetti MECCANICI corretti nel motore v2.00 (non tre opzioni:
+#    tre bug), piu' due interruttori di fedelta' opt-in:
+#      FIX 1  la finestra dell'incrocio guardava UNA barra sola
+#      FIX 2  mancava "Prezzo > EMA9", e il filtro di distanza era
+#             sempre vero quando il prezzo stava SOTTO la EMA9
+#      FIX 3  i parziali in profitto azzeravano il contatore delle
+#             perdite consecutive (stop del cap.14 disinnescato)
+#      NUOVI  InpMaxDistEma21ATR (0=spento) e InpRequireAdxRising
+#             (false=spento): default = comportamento attuale.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO. Due lavori insieme non si sommano: si
+#       rovinano a vicenda.
+#    2. QUESTO ROUND STA IN CODA AL BLOCCO 4 DEL COLLAUDO GUARDIAN, e
+#       si lancia solo DOPO il RI-PIN a un commit nuovo. Motivo
+#       tecnico, non burocratico: walkforward_generico.ps1 scarica
+#       l'EA da $EABranch="lavoro" SCRITTO FISSO nel sorgente. Gira
+#       sempre l'EA di 'lavoro' ADESSO: finche' il BLOCCO 4 non e'
+#       chiuso, un numero strano qui non si sa se e' del motore
+#       corretto o della migrazione.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi da verificare in console.
+# ---------------------------------------------------------------------
+#  QUESTA CELLA (b) -- LA CACCIA AI PARAMETRI
+#    Griglia sul motore CORRETTO v2.00. La domanda: "adesso che la
+#    meccanica e' quella del PDF, quali parametri regge?".
+#    Sei assi, 144 passate per finestra (288 in tutto fra IS e OOS).
+#
+#    GLI ASSI, E PERCHE' QUESTI VALORI (da manuale, non pescati):
+#      InpMaxDistATR      0.5 / 1.0 / 1.5
+#          0,5 e' il "preferibile" del cap.9; 1,5 e' il valore in campo,
+#          che l'audit segnala come 3 volte piu' largo del PDF. In mezzo
+#          l'1,0. Adesso che il FIX 2 misura la distanza in MODULO,
+#          questo asse vuol dire davvero qualcosa: prima, sotto la
+#          EMA9, era sempre vero.
+#      InpAdxMin          20 / 25
+#          la scala del cap.5: >20 valutabile, >25 preferibile. Non si
+#          spazzolano 18-19-21-22: si pescherebbe.
+#      InpHACount         2 / 3
+#          3 e' il PDF, 2 e' la "regola Lavorenti" per i TF alti. E'
+#          l'unico asse che NON viene dal PDF: sta qui perche' su H1/H4
+#          la terza candela costa una barra intera di ritardo.
+#      InpCrossLookback   3 / 5 / 7
+#          quanto puo' essere VECCHIO l'incrocio. Su H4 sono 12/20/28
+#          ore. NOTA: la griglia del formato e' ARITMETICA (start, step,
+#          stop), quindi 3-5-7 e non 3-5-8; su H4 la differenza fra 7 e
+#          8 e' quattro ore, e non vale un asse in piu'.
+#      InpMaxDistEma21ATR 0 / 1.0
+#          l'interruttore nuovo: 0 = spento, 1.0 = la regola del
+#          "tardivo" del cap.9 esattamente come la scrive il PDF.
+#      InpRequireAdxRising 0 / 1
+#          l'altro interruttore nuovo: ADX crescente barra su barra.
+#
+#    >>> 144 passate. Il conto e' 3 x 2 x 2 x 3 x 2 x 2 = 144, sotto il
+#        tetto di ~150 per simbolo che ci siamo dati. Se qualcuno
+#        aggiunge un asse, il tetto salta: si toglie prima qualcos'altro.
+#
+#  COME SI LEGGE (regola di casa, non trattabile):
+#    CENTRO DELL'ALTOPIANO, MAI IL PICCO. Una cella che sporge da sola
+#    e' rumore: in R70 il confronto si e' ribaltato quando e' stato
+#    rifatto con la regola giusta. E la regola di selezione va
+#    dichiarata INSIEME al numero, altrimenti il numero non vuol dire
+#    niente.
+#    E con l'IS sotto le 150 operazioni (vedi canarino sopra) la
+#    selezione della cella E' SOSPESA: questa griglia serve a vedere SE
+#    esiste un altopiano, non a scegliere il preset.
+# ---------------------------------------------------------------------
+#  IL CANARINO DELL'EMENDAMENTO, DETTO PRIMA DEI NUMERI
+#    >>> SU H4 IL CANARINO RISCHIA DI NON PASSARE, E VA MESSO IN CONTO
+#        ADESSO. L'Emendamento della Finestra (regola A) chiede >=150
+#        OPERAZIONI in campione e altrettante fuori. Qui:
+#          - finestra a tick reali: 2024.07.05 -> 2026.06.30, cioe' ~24 mesi
+#          - su H4 sono ~3.000 barre in tutto
+#          - il GoldenCross vestito (EMA50 + incrocio + 3 HA + ADX + DI)
+#            e' un motore da poche decine di operazioni l'anno
+#        [STIMA, non misura] IS 40% = ~10 mesi = plausibilmente 15-40
+#        operazioni. SOTTO 150, molto sotto.
+#    >>> COSA SIGNIFICA, in concreto (regola B):
+#          - il MERITO non si legge: nessuna promozione, nessuna
+#            selezione di cella, nessun cambio di preset da questo round
+#          - il RISCHIO si legge lo stesso: un drawdown accaduto e' un
+#            fatto anche con pochi trade
+#          - il confronto v1-vs-v2 (cella A) resta leggibile come
+#            DIREZIONE dell'effetto (piu' trade? meno? quali?), non come
+#            misura di redditivita'
+#    >>> TODO OBBLIGATORIO A RISULTATI USCITI: scrivere il CONTEGGIO
+#        OPERAZIONI IS e OOS accanto a ogni numero. Se qualcuno legge un
+#        profit factor senza aver scritto n, il numero non vale.
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E IL SUO LIMITE DICHIARATO
+#    >>> TODO PASSO 0 (obbligatorio, prima del lancio): misurare la
+#        profondita' dei TICK REALI di USDCAD a BCM.
+#        Cosa sappiamo davvero: il referto del 15/08 misura GBPUSD
+#        (tick dal 2024.07.05) e la sonda del 17/08 dice che quella e'
+#        la profondita' TICK del broker, non delle barre. Per USDCAD
+#        NON E' MAI STATA MISURATA.
+#        Si misura con:
+#          scarica_storico.ps1 -Simboli "USDCAD" -SoloReferto
+#        Se i tick partono DOPO la data qui sotto, QUESTA RIGA VA
+#        RISCRITTA e il round si rilancia. E' il difetto n.18 della
+#        checklist: mezza finestra che non esiste.
+#    @DAQUANDO qui sotto e' PRUDENTE, non misurato.
+#
+#  IL REGIME CONTENUTO -- va scritto accanto a OGNI numero
+#    Con 2024.07.05 il regime e' UNO SOLO (2024-2026). Niente 2020,
+#    niente 2022, niente 2013. R87 misura L'EFFETTO DI UNA CORREZIONE,
+#    non la robustezza di regime: quella e' un altro round (regola C,
+#    le quattro finestre toro/orso/laterale/crollo).
+#    Split IS/OOS: 40/60, il default dello script (-FrazioneIS 0.40).
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' IDENTICO NELLE DUE CELLE DELLO STESSO
+#  SIMBOLO (a e b). Cambiano SOLO le righe spazzolate in fondo e il
+#  magic. E' la regola di casa dopo l'errore InpTP1_ATRmult=0 contro
+#  0.5, pagato due volte.
+# =====================================================================
+@SIMBOLO  USDCAD
+@PERIODO  H4
+@DAQUANDO 2024.07.05
+
+# --- TIMEFRAME E MEDIE: 9/21/50, le tre fonti coincidono (PDF,
+#     Dashboard V03, sorgente di casa). Non si toccano.
+InpTimeframe=16388
+InpEmaFast=9
+InpEmaMid=21
+InpEmaSlow=50
+InpEmaSlopeBars=3
+InpRequireAlignment=1
+
+# --- HEIKEN ASHI (momentum): la fase 4 del PDF.
+#     InpHAAutoCount SPENTO: sceglierebbe lui il numero di candele
+#     in base al TF e sporcherebbe l'asse InpHACount della cella b.
+InpHAAutoCount=0
+InpHAWickRatio=0.30
+InpHABodyFactor=0.60
+
+# --- BANDE DI BOLLINGER: SPENTE. Sono un filtro, e un filtro acceso
+#     fuori dalla sua cella rende illeggibile tutto il round.
+InpUseBBExpand=0
+
+# --- ADX / DI (forza): la fase 5 del PDF.
+InpAdxPeriod=14
+InpAdxRising=1
+InpRequireDI=1
+
+# --- INGRESSO: a mercato sulla conferma, come in campo.
+InpEntryMode=0
+InpPullbackRef=0
+InpPendingExpiryBars=3
+InpAllowLong=1
+InpAllowShort=1
+InpMinRR=1.0
+
+# --- STOP, TARGET, GESTIONE: IDENTICI nelle due celle e uguali alla
+#     sedia viva. Se cambiasse anche solo il trailing, il round non
+#     isolerebbe piu' i fix: misurerebbe due cose insieme.
+InpSLMode=0
+InpSwingLookback=10
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLBufferPts=0
+InpTP_R=2.5
+InpPartialR=1.0
+InpPartialPct=50
+InpBreakeven=1
+InpTrailMode=0
+InpTrailAtrMult=2.0
+InpExitOnCross=1
+InpExitOnHAflip=0
+
+# --- MONEY MANAGEMENT: il perimetro del cap.14 che vive NELL'EA.
+#     Rischio pinnato a 1,00%: non e' una taglia di campo, e' un
+#     valore comune che rende confrontabili le celle fra loro.
+#     InpStopAfterLosses=2 E' IL PEZZO CORRETTO DAL FIX 3: lasciarlo
+#     acceso e' il punto, spegnerlo cancellerebbe meta' del round.
+InpRiskPercent=1.0
+InpMaxTradesPerDay=2
+InpStopAfterLosses=2
+
+# --- NOTIZIE: spente (servono un CSV in MQL5\Files e non c'entrano)
+InpUseNewsFilter=0
+
+# --- VENERDI': spento, come in campo.
+InpFridayClose=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con quelli degli altri EA. Sta
+#     scritto qui apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log spento nelle corse lunghe. Questo EA NON ha un
+#     input InpAutoTest (non e' una dimenticanza del file prova: nel
+#     sorgente non c'e'). >>> TODO: se il round promuove qualcosa,
+#     l'autotest va aggiunto all'EA prima del forward.
+InpMaxSpread=0
+InpVerbose=0
+
+# --- LA GRIGLIA: 3 x 2 x 2 x 3 x 2 x 2 = 144 passate per finestra.
+#     Formato: default||start||step||stop||Y
+InpMaxDistATR=1.5||0.5||0.5||1.5||Y
+InpAdxMin=20.0||20.0||5.0||25.0||Y
+InpHACount=3||2||1||3||Y
+InpCrossLookback=8||3||2||7||Y
+InpMaxDistEma21ATR=0||0||1.0||1.0||Y
+InpRequireAdxRising=0||0||1||1||Y
+
+# --- MAGIC pinnato: qui l'asse di controllo non ci sta (raddoppierebbe
+#     le passate a 288 per finestra). Il controllo gemello lo fa la
+#     cella a.
+InpMagic=778725

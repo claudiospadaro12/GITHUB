@@ -10,8 +10,8 @@
 //|                                                                  |
 //|  SEQUENZA (long; short speculare):                              |
 //|   1) CONTESTO   prezzo sopra EMA50 (EMA50 non ribassista)       |
-//|   2) TRIGGER    EMA9 ha incrociato EMA21 (di recente)           |
-//|   3) ALLINEAM.  EMA9 > EMA21 > EMA50 inclinate su               |
+//|   2) TRIGGER    EMA9 ha incrociato EMA21 DENTRO le ultime N barre|
+//|   3) ALLINEAM.  Prezzo > EMA9 > EMA21 > EMA50 inclinate su      |
 //|   4) MOMENTUM   3 Heiken Ashi rialziste, senza ombra contraria  |
 //|   5) FORZA      ADX > 20 (meglio 25), crescente, DI+ > DI-      |
 //|   6) TRADEAB.   prezzo non troppo distante, R:R accettabile     |
@@ -19,10 +19,55 @@
 //|  con parziale + stop in pari + trailing (EMA21 o ATR).          |
 //|  Money mgmt: rischio %, max 2 trade/giorno, stop dopo 2 perdite.|
 //|                                                                  |
-//|  ⚠️ Nessun EA garantisce profitti. TESTA SU DEMO.                |
+//|  ATTENZIONE: nessun EA garantisce profitti. TESTA SU DEMO.      |
+//+------------------------------------------------------------------+
+//|  CHANGELOG                                                       |
+//|                                                                  |
+//|  2.00 -- 19/08/2026 -- CORREZIONE VERIFICATA contro il PDF       |
+//|      Masterclass "GOLDEN CROSS HA". Fonte dei difetti:           |
+//|      backtest_pipeline\caccia_strategie\biblioteca\schede\       |
+//|      VERIFICA_FEDELTA_GOLDENCROSS_PDF_2026-08-19.md              |
+//|                                                                  |
+//|      TRE FIX MECCANICI (cambiano l'insieme dei trade: e' il      |
+//|      punto del round R87, non un effetto collaterale).           |
+//|                                                                  |
+//|      FIX 1 (audit 1.4-1) FINESTRA DELL'INCROCIO. Prima si        |
+//|        guardava UNA barra sola: "EMA9 sopra ORA e sotto ESATTA-  |
+//|        MENTE InpCrossLookback barre fa". Sbagliato nei due sensi:|
+//|        passavano incroci vecchi di 8 barre, e si PERDEVA un      |
+//|        incrocio fresco di 3 barre se 8 barre fa la EMA9 era gia' |
+//|        sopra. Ora si cerca l'EVENTO di incrocio dentro tutta la  |
+//|        finestra (CrossInWindow).                                 |
+//|                                                                  |
+//|      FIX 2 (audit 1.4-2) PREZZO > EMA9 + DISTANZA IN VALORE      |
+//|        ASSOLUTO. La fase 3 del PDF chiede "Prezzo > EMA9 > EMA21 |
+//|        > EMA50" e il prezzo non c'era. Peggio: il filtro di      |
+//|        distanza faceva (close1 - ema9) <= X*ATR, che con il      |
+//|        prezzo SOTTO la EMA9 e' sempre vero -> un long in rientro |
+//|        passava come "vicino alla media". Ora il prezzo dev'essere|
+//|        dalla parte giusta e la distanza si misura in modulo.     |
+//|                                                                  |
+//|      FIX 3 (audit 1.4-4) PERDITE CONSECUTIVE PER TRADE COMPLETO. |
+//|        Il contatore leggeva ogni DEAL_ENTRY_OUT: la chiusura     |
+//|        parziale a +1R e' un deal in PROFITTO e AZZERAVA il       |
+//|        contatore, cosi' "parziale in utile poi stop" valeva 0    |
+//|        perdite e lo stop del cap.14 non scattava quasi mai. Ora  |
+//|        i deal si raggruppano per DEAL_POSITION_ID e conta il     |
+//|        NETTO della posizione chiusa.                             |
+//|                                                                  |
+//|      DUE INTERRUTTORI NUOVI, OPT-IN (default = comportamento     |
+//|      attuale, servono a MISURARE, non a cambiare in silenzio):   |
+//|        InpMaxDistEma21ATR = 0     (regola del "tardivo", cap.9)  |
+//|        InpRequireAdxRising= false (ADX crescente barra su barra) |
+//|                                                                  |
+//|      NON toccati di proposito: tetto trade/giorno di FAMIGLIA e  |
+//|      stop giornaliero -2R/-3R. Vanno nel Guardian, che vede      |
+//|      tutto il conto; qui sarebbero una regola in cinque copie.   |
+//|                                                                  |
+//|  1.00 -- versione in campo fino al 19/08/2026 (magic 770331/2/3).|
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "2.00"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -79,10 +124,21 @@ input int    InpAdxPeriod = 14;                   // Periodo ADX
 input double InpAdxMin     = 20.0;                // ADX minimo (meglio 25)
 input bool   InpAdxRising  = true;                // Richiedi ADX crescente o stabile
 input bool   InpRequireDI  = true;                // Richiedi DI+ > DI- (long) / DI- > DI+ (short)
+//--- 19/08/2026: conferma di forza PIU' STRETTA di InpAdxRising, che confronta
+//    la barra 1 con la barra 3 (pendenza su tre barre). Questa guarda la barra
+//    1 contro la barra 2, cioe' l'ultimo passo: l'ADX non deve gia' aver
+//    girato. Default false = niente cambia; si accende nel round per misurarla.
+input bool   InpRequireAdxRising = false;         // ADX crescente/stabile barra su barra (tolleranza 0.5)
 
 input group "=== Filtri di tradeability ==="
 input double InpMaxDistATR = 1.5;                 // Prezzo entro X*ATR dalla EMA9 (non troppo esteso)
 input double InpMinRR      = 1.0;                 // Rapporto rischio/rendimento minimo
+//--- 19/08/2026: la regola del "TARDIVO" del cap.9 del PDF. Il documento dice
+//    ingresso preferibile entro 0,5 ATR dalla EMA9, ACCETTABILE entro 1 ATR
+//    dalla EMA21, e OLTRE 1 ATR dalla EMA21 il movimento e' gia' andato: si
+//    aspetta il pullback. La distanza dalla EMA21 non era mai stata misurata.
+//    0 = spento (comportamento attuale). Valore da manuale: 1.0.
+input double InpMaxDistEma21ATR = 0;              // >0 = niente ingresso oltre X*ATR dalla EMA21 (0 = spento)
 
 input group "=== Ingresso ==="
 input ENUM_GC_ENTRY InpEntryMode = GC_MARKET;     // A mercato sulla conferma, o LIMIT su pullback
@@ -131,6 +187,11 @@ input bool   InpVerbose   = true;                 // Messaggi nel log
 //==================================================================
 //  STATO
 //==================================================================
+//--- Tolleranza dell'ADX "crescente o stabile" (InpRequireAdxRising).
+//    NON e' un input di proposito: e' un margine di rumore dell'indicatore,
+//    non una leva da spazzolare. Mezzo punto di ADX non e' un'inversione.
+#define GC_ADX_TOL 0.5
+
 int      hEmaF=INVALID_HANDLE, hEmaM=INVALID_HANDLE, hEmaS=INVALID_HANDLE;
 int      hAdx=INVALID_HANDLE,  hAtr=INVALID_HANDLE, hBB=INVALID_HANDLE;
 datetime gLastBar=0;
@@ -328,6 +389,38 @@ int HAColor()
   }
 
 //+------------------------------------------------------------------+
+//| FIX 1 (v2.00) -- L'INCROCIO E' AVVENUTO DENTRO LA FINESTRA?      |
+//|                                                                  |
+//| Gli array arrivano da CopyBuffer con ArraySetAsSeries(true) e     |
+//| partono dalla barra 1: ef[0] e' l'ULTIMA BARRA CHIUSA, ef[k] la   |
+//| barra k+1. Si cerca l'EVENTO di incrocio: una barra k in cui la   |
+//| veloce era sotto (long) e alla barra successiva k-1 e' sopra.     |
+//|                                                                  |
+//| PRIMA (v1.00, riga 364 del sorgente vecchio):                     |
+//|    crossPast = (ef[lookback] <= em[lookback])                     |
+//| cioe' "la EMA9 era sotto ESATTAMENTE lookback barre fa". Passava  |
+//| un incrocio vecchio di 8 barre (su H4 sono 32 ore) e SCARTAVA un  |
+//| incrocio fresco di 3 barre se 8 barre fa la veloce era gia' sopra:|
+//| il segnale piu' pulito era proprio quello che si perdeva.         |
+//|                                                                  |
+//| Ritorna anche l'ETA' dell'incrocio in barre (eta=k), che e'       |
+//| l'informazione che il PDF chiama "di recente".                    |
+//+------------------------------------------------------------------+
+bool CrossInWindow(bool isLong, const double &ef[], const double &em[], int look, int &eta)
+  {
+   eta = -1;
+   if(look < 1) return(false);
+   int maxk = MathMin(look, ArraySize(ef)-1);
+   maxk = MathMin(maxk, ArraySize(em)-1);
+   for(int k=1; k<=maxk; k++)
+     {
+      if(isLong)  { if(ef[k]<=em[k] && ef[k-1]>em[k-1]) { eta=k; return(true); } }
+      else        { if(ef[k]>=em[k] && ef[k-1]<em[k-1]) { eta=k; return(true); } }
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
 //| Segnale d'ingresso: +1 long, -1 short, 0 niente (barra chiusa=1) |
 //+------------------------------------------------------------------+
 int Signal()
@@ -350,9 +443,13 @@ int Signal()
    // forza ADX comune
    bool adxOK   = (adx[0] >= InpAdxMin);
    bool adxRise = (!InpAdxRising) || (adx[0] >= adx[2]);
+   // opt-in (v2.00): ADX crescente o stabile anche barra su barra (1 contro 2)
+   bool adxStep = (!InpRequireAdxRising) || (adx[0] >= adx[1] - GC_ADX_TOL);
 
    // volatilita' in espansione (opt-in): vale per entrambe le direzioni
    if(!BBExpanding()) return(0);
+
+   int eta=0;   // eta' dell'incrocio in barre (diagnostica, vedi CrossInWindow)
 
    //====================== LONG =======================
    {
@@ -361,11 +458,18 @@ int Signal()
       bool slopeFast = (ef[0] >= ef[InpEmaSlopeBars]) && (em[0] >= em[InpEmaSlopeBars]);
       bool ordered   = (!InpRequireAlignment) || (ema9>ema21 && ema21>ema50);
       bool crossNow  = (ef[0] > em[0]);
-      bool crossPast = (ef[InpCrossLookback] <= em[InpCrossLookback]); // era sotto entro la finestra
+      // FIX 1: l'incrocio dev'essere AVVENUTO dentro la finestra, non "esattamente allora"
+      bool crossWin  = CrossInWindow(true, ef, em, InpCrossLookback, eta);
       bool diOK      = (!InpRequireDI) || (dip[0] > dim[0]);
-      bool dist      = (close1 - ema9) <= InpMaxDistATR*atr[0];
-      if(context && slope50 && slopeFast && ordered && crossNow && crossPast &&
-         adxOK && adxRise && diOK && dist && HAConfirms(true))
+      // FIX 2: fase 3 del PDF -> il prezzo dev'essere SOPRA la EMA9...
+      bool aboveFast = (close1 > ema9);
+      // ...e la distanza si misura in MODULO (prima, con close1 sotto la EMA9,
+      // la differenza era negativa e il filtro passava sempre)
+      bool dist      = MathAbs(close1 - ema9) <= InpMaxDistATR*atr[0];
+      // opt-in (v2.00): la regola del "tardivo" del cap.9, misurata sulla EMA21
+      bool distMid   = (InpMaxDistEma21ATR<=0) || (MathAbs(close1 - ema21) <= InpMaxDistEma21ATR*atr[0]);
+      if(context && slope50 && slopeFast && ordered && crossNow && crossWin &&
+         adxOK && adxRise && adxStep && diOK && aboveFast && dist && distMid && HAConfirms(true))
          return(+1);
    }
    //====================== SHORT ======================
@@ -375,11 +479,13 @@ int Signal()
       bool slopeFast = (ef[0] <= ef[InpEmaSlopeBars]) && (em[0] <= em[InpEmaSlopeBars]);
       bool ordered   = (!InpRequireAlignment) || (ema9<ema21 && ema21<ema50);
       bool crossNow  = (ef[0] < em[0]);
-      bool crossPast = (ef[InpCrossLookback] >= em[InpCrossLookback]);
+      bool crossWin  = CrossInWindow(false, ef, em, InpCrossLookback, eta);
       bool diOK      = (!InpRequireDI) || (dim[0] > dip[0]);
-      bool dist      = (ema9 - close1) <= InpMaxDistATR*atr[0];
-      if(context && slope50 && slopeFast && ordered && crossNow && crossPast &&
-         adxOK && adxRise && diOK && dist && HAConfirms(false))
+      bool belowFast = (close1 < ema9);                                   // speculare del FIX 2
+      bool dist      = MathAbs(ema9 - close1) <= InpMaxDistATR*atr[0];
+      bool distMid   = (InpMaxDistEma21ATR<=0) || (MathAbs(ema21 - close1) <= InpMaxDistEma21ATR*atr[0]);
+      if(context && slope50 && slopeFast && ordered && crossNow && crossWin &&
+         adxOK && adxRise && adxStep && diOK && belowFast && dist && distMid && HAConfirms(false))
          return(-1);
    }
    return(0);
@@ -644,6 +750,26 @@ bool HasPending()
 
 //+------------------------------------------------------------------+
 //| Trade aperti e perdite consecutive di OGGI (per i limiti giornal.)|
+//|                                                                  |
+//| FIX 3 (v2.00) -- IL CONTATORE RAGIONA PER TRADE COMPLETO.        |
+//|                                                                  |
+//| PRIMA: il contatore leggeva OGNI DEAL_ENTRY_OUT preso da solo. Ma|
+//| la chiusura parziale a +1R E' un DEAL_ENTRY_OUT, ed e' in         |
+//| PROFITTO: azzerava il contatore. La sequenza tipica di un trade   |
+//| che va a pareggio dopo il parziale era "+parziale -> azzera ->    |
+//| chiusura negativa -> 1", quindi due trade perdenti di fila non    |
+//| facevano mai 2: facevano 1 e 1. Lo STOP OPERATIVO del cap.14 era  |
+//| scritto nel codice e disinnescato nei fatti.                      |
+//|                                                                  |
+//| ORA: i deal si raggruppano per DEAL_POSITION_ID; un trade e' in   |
+//| perdita se il NETTO della posizione (profit + swap + commissione  |
+//| di TUTTI i suoi deal, ingresso compreso: la commissione spesso    |
+//| sta sul deal d'ingresso) e' negativo. Contano solo le posizioni   |
+//| gia' CHIUSE: una posizione ancora viva dopo il parziale non e'    |
+//| un esito, e' un trade in corso.                                   |
+//|                                                                  |
+//| Nota: 'trades' (il tetto di 2 al giorno) NON cambia, continua a   |
+//| contare gli ingressi. E' il perimetro della regola I5 del PDF.    |
 //+------------------------------------------------------------------+
 void TodayStats(int &trades,int &consecLosses)
   {
@@ -652,6 +778,17 @@ void TodayStats(int &trades,int &consecLosses)
    datetime dayStart=StructToTime(d);
    if(!HistorySelect(dayStart,TimeCurrent())) return;
    int total=HistoryDealsTotal();
+   //  LIMITE DICHIARATO: la finestra e' la giornata, come prima. Di una
+   //  posizione APERTA IERI e chiusa oggi si vede solo la parte di oggi
+   //  (manca l'eventuale commissione d'ingresso). Il SEGNO del netto quasi
+   //  sempre non cambia, ma sta scritto qui e non nella testa di nessuno.
+
+   ulong    pid[];     // id posizione
+   double   pnet[];    // netto della posizione (tutti i suoi deal di oggi)
+   double   pvOut[];   // volume uscito: se e' 0 la posizione non ha ancora chiuso niente
+   datetime plast[];   // ora dell'ultimo deal: e' l'ordine con cui si contano le perdite
+   int np=0;
+
    for(int i=0;i<total;i++)
      {
       ulong tk=HistoryDealGetTicket(i);
@@ -660,11 +797,44 @@ void TodayStats(int &trades,int &consecLosses)
       if(HistoryDealGetString(tk,DEAL_SYMBOL)!=_Symbol) continue;
       long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
       if(entry==DEAL_ENTRY_IN) trades++;                         // n. ingressi = trade del giorno
-      if(entry==DEAL_ENTRY_OUT)
+      if(entry!=DEAL_ENTRY_IN && entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_OUT_BY) continue;
+
+      ulong    pos = (ulong)HistoryDealGetInteger(tk,DEAL_POSITION_ID);
+      if(pos==0) continue;
+      double   p   = HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
+      double   v   = HistoryDealGetDouble(tk,DEAL_VOLUME);
+      datetime tt  = (datetime)HistoryDealGetInteger(tk,DEAL_TIME);
+
+      int idx=-1;
+      for(int j=0;j<np;j++) if(pid[j]==pos){ idx=j; break; }
+      if(idx<0)
         {
-         double p=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
-         if(p<0) consecLosses++; else consecLosses=0;
+         idx=np; np++;
+         ArrayResize(pid,np); ArrayResize(pnet,np); ArrayResize(pvOut,np); ArrayResize(plast,np);
+         pid[idx]=pos; pnet[idx]=0; pvOut[idx]=0; plast[idx]=0;
         }
+      pnet[idx]+=p;
+      if(entry!=DEAL_ENTRY_IN) pvOut[idx]+=v;
+      if(tt>plast[idx]) plast[idx]=tt;
+     }
+
+   //--- in ordine di CHIUSURA (ultimo deal). np e' un pugno di elementi:
+   //    l'ordinamento a bolla qui costa niente ed e' leggibile.
+   for(int a=0;a<np-1;a++)
+      for(int b=a+1;b<np;b++)
+         if(plast[b]<plast[a])
+           {
+            datetime tt=plast[a]; plast[a]=plast[b]; plast[b]=tt;
+            ulong    ii=pid[a];   pid[a]=pid[b];     pid[b]=ii;
+            double   nn=pnet[a];  pnet[a]=pnet[b];   pnet[b]=nn;
+            double   vv=pvOut[a]; pvOut[a]=pvOut[b]; pvOut[b]=vv;
+           }
+
+   for(int j=0;j<np;j++)
+     {
+      if(pvOut[j]<=0) continue;                      // nessuna uscita: trade appena aperto
+      if(PositionSelectByTicket(pid[j])) continue;   // ancora viva (parziale fatto, il resto corre)
+      if(pnet[j]<0) consecLosses++; else consecLosses=0;
      }
   }
 
