@@ -1,5 +1,51 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # 🔴 PRIMISSIMA COSA DEL 20/08: LA NOTTE NON E' PARTITA
+>
+> La riga notturna si e' fermata **tre volte** al gate del pin, con tre pin
+> diversi (9a6d6bc, 869ed00, df3af40), sempre con:
+> `BRANCH NON CONGELATO: ABTG_ORB_Ottimizzato.mq5 su 'lavoro' HEAD e' DIVERSO dal pin`.
+> Nessun round e' girato. Zip prodotti ma vuoti di CSV.
+>
+> **FATTO MISURATO dalla sessione (non ipotesi):** i due file NON sono diversi.
+> Scaricati da qui con curl, `lavoro` HEAD e il pin danno **39.456 byte
+> entrambi, identici byte a byte** (`cmp` senza differenze), ASCII puro, nessun
+> BOM, nessun CRLF, `InpSLBufferPts` presente 5 volte in entrambi.
+> Quindi **il gate da' un falso positivo**: il problema e' nel CONFRONTO o in
+> cosa riceve la macchina di Claudio, non nel repo.
+>
+> Tentativo gia' fatto e FALLITO (19/08 23:37, commit df3af40): conversione
+> esplicita del contenuto scaricato da byte[] a stringa + TrimStart del BOM.
+> Il gate si e' fermato lo stesso. **Quindi l'ipotesi byte[] e' esclusa.**
+>
+> ### La diagnosi da fare PRIMA di toccare altro (10 secondi, PC di backtest)
+> ```powershell
+> & { $u='https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/mql5/Experts/ABTG_ORB_Ottimizzato.mq5'
+>   $r=Invoke-WebRequest -Uri $u -UseBasicParsing
+>   Write-Host ("tipo Content : " + $r.Content.GetType().FullName)
+>   $t = if($r.Content -is [byte[]]){ [Text.Encoding]::UTF8.GetString($r.Content) } else { [string]$r.Content }
+>   Write-Host ("lunghezza    : " + $t.Length)
+>   Write-Host ("InpSLBufferPts presente: " + ($t -match 'InpSLBufferPts'))
+>   Write-Host ("primi 40 char: " + $t.Substring(0,40)) }
+> ```
+> - Se **InpSLBufferPts = False** -> la macchina riceve una copia VECCHIA:
+>   e' la cache dell'edge CDN. Cura: aggiungere `?nocache=<random>` all'URL
+>   oppure header `Cache-Control: no-cache` nel gate, e ri-lanciare.
+> - Se **True** ma il gate si ferma lo stesso -> il difetto e' nel confronto
+>   dentro lo script (riga ~237-245 di
+>   `backtest_pipeline/righe/RIGA_NOTTE_R88_R87_R89_R86.ps1`): stampare le
+>   lunghezze delle due stringhe e il primo carattere che differisce, invece
+>   di confrontare alla cieca.
+>
+> ⚠️ **NON disattivare il gate**: la sua ragione e' vera (il driver
+> `walkforward_generico.ps1` scarica sempre da HEAD, checklist punto 24).
+> Va fatto funzionare, non spento.
+>
+> ✅ Cio' che INVECE e' pronto e non va rifatto: i 23 file prova, i 3 criteri
+> in bozza (R86/R87/R89), R88 firmato, i 6 EA in repo, il collaudo Guardian
+> completo (fasi 0-1-2 + BLOCCO 4 verdi).
+
+
 > # ✍️ DOMATTINA 20/08 — COSA FIRMARE, E IN CHE ORDINE
 >
 > ## 🔴 PRIMA LE FIRME. POI SI APRONO GLI ZIP SIGILLATI. Mai il contrario.
