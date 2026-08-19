@@ -828,3 +828,39 @@ Restano le prove di campo, da fare con calma e MAI insieme:
 - **FASE 3** (la pausa che morde, B1) e **FASE 4** (il cap che rifiuta, C1):
   si fanno a mano dalla finestra del Guardian, una alla volta.
 - **FASE 5**: il conto piccolo. La decide Claudio, dopo l'osservazione.
+
+### 🔍 VERIFICA FINALE DOPO IL RIAVVIO — scheda Esperti del 100k, 19/08 ore 23:10:18
+
+Tutte e cinque le sedie + Guardian + TradeExporter ripartiti nello stesso
+secondo. Righe lette dallo screenshot (fonte: scheda Esperti, istanza -V3):
+
+```
+[GUARDIAN] filo verificato: 5 GlobalVariable su 5 con lo stesso nome fra
+           guardiano e include (conto 50504263).                    <-- IL CANCELLO
+[GUARDIAN] avviato. Saldo iniziale=100000.00 DailyLoss=4.9% DD=9.9% (statico)
+           Azione=CHIUDI+BLOCCA
+[GUARDIAN] pausa morbida=4.00%  cap rischio aperto=3.25% (modo ingresso)
+           reset giorno=23:00 server
+[GUARDIAN] eq=99380.25 dayLoss=0.12% totDD=0.62% rischioAperto=0.00%
+           stato=OK pausa=off cap=off
+[DAX Apertura EU] avviato su D30EUR. Apertura server 08:00, range 35 min, flat 17:30.
+           CONFIG: motore=ABTG_RETEST | buffer=500 pt | offset retest=200 pt |
+           SOLO LONG | rischio=0.65% | TP=3.0R | parziale=50% | BE=si
+[Dow Apertura US] avviato su U30USD. Apertura server 14:30, range 35 min, flat 17:30.
+           CONFIG: motore=ABTG_RETEST | buffer=1000 pt | offset retest=400 pt |
+           SOLO LONG | rischio=0.65% | TP=3.0R | parziale=50% | BE=si | trail=ABTG...
+[ORB_OTT] avviato su U30USD. Range server 14:30-14:45, ingresso 10.0 x K(1.0), fine 21:00.
+[STReversal] avviato su 225JPY PERIOD_H2. Supertrend(10,3.5). 1 pip=1.00000
+[MaxMinNotte] avviato su D30EUR. Box server 23:00-04:59, piazzo 07:59, flat 17:30.
+[TradeExporter] esportati 8 trade chiusi in Common\Files\ABTG_Trades_100k.csv
+```
+
+**MIGRAZIONE GUARDIAN: COMPLETATA E VERIFICATA IN CAMPO.**
+Il filo fra guardiano e include e' vivo sul conto 100k (5 GlobalVariable su 5),
+le soglie firmate il 18/08 sono quelle in uso (4,9 / 9,9 / pausa 4,0 / cap
+3,25), il reset giornaliero e' alle **23:00 server** come da FIRMA 1, e le
+cinque sedie girano al rischio da referto (0,65% le aperture).
+
+Cosa NON e' ancora dimostrato, dichiarato: che la pausa **morda** davvero
+(FASE 3) e che il cap **rifiuti** davvero un ingresso (FASE 4). Sono prove di
+campo da fare a mano, una alla volta, e non sono state fatte.
