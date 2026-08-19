@@ -628,3 +628,59 @@ aggiorna — cioe' i numeri di ieri riletti come quelli di oggi (punto 23).
 > scheda "Esperti" e in `MQL5\Logs\<data>.log`, NON nel Journal** (che sta in
 > `logs\`). Chiedere "copiami il Journal" e' chiedere il file sbagliato: e' il
 > punto 20 visto dal lato del POSTO, non del gesto.
+
+---
+
+## 🆕 AGGIUNTA DEL 19/08/2026 — trovata verificando le bozze del par. 16 (HistData v4)
+
+## 26. 🗜️ DUE CHIAMATE NELLO STESSO BLOCCO, UNA SOLA RACCOLTA: la seconda cancella la prima
+
+_Difetto vero e **RIPRODOTTO** (bozza 16.2 del referto HistData, gia' committata).
+Lo script raccoglie da solo sul Desktop, e va benissimo — finche' lo si chiama
+UNA volta. La bozza lo chiamava **due** volte nello stesso blocco (indici, poi
+EURUSD in un'altra cartella)._
+
+Due meccanismi che si sommano, ed e' il secondo che uccide:
+1. il referto ha il nome al **minuto** (`referto_..._0757.txt`): due corse
+   ravvicinate producono lo **stesso nome** e la seconda sovrascrive;
+2. la raccolta apre lo zip in modo `"w"`, che **tronca**: lo zip finale
+   contiene **solo** i file dell'ultima chiamata.
+
+Eseguito: la prima chiamata (la misura buona) e' sparita da cartella **e** zip,
+e al suo posto e' rimasto il referto della seconda, che era pure **fallita**
+(`NESSUNA BARRA ... ESITO: FALLITO`). La riga diceva "manda lo zip in chat":
+Claudio avrebbe mandato in buona fede **la foto del fallimento al posto della
+misura**. E' il referto stantio del 17/08 con un meccanismo nuovo — non un file
+vecchio, ma un file **giusto sovrascritto da uno sbagliato** nello stesso minuto.
+
+> **Se un blocco chiama lo stesso strumento piu' di una volta, la raccolta non
+> puo' restare quella automatica dello strumento.** Dopo OGNI chiamata si mette
+> l'artefatto in una cartella di sosta con un **nome proprio**, e lo zip si fa
+> in fondo, una volta sola:
+> ```powershell
+> $r=Get-ChildItem "$dsk\referto_*.txt" | Sort-Object LastWriteTime | Select-Object -Last 1
+> Copy-Item $r.FullName "$stag\vol_INDICI.txt" -Force      # <- nome PROPRIO, subito
+> ...
+> Compress-Archive -Path "$stag\*" -DestinationPath $zip -Force
+> ```
+> E la riga in chat dice **quali file devono esserci dentro**, per nome: se ne
+> manca uno si vede prima di mandarlo, non dopo.
+
+### 26-bis. 🟢 E IL GATE CHE UCCIDE IL RISULTATO BUONO
+
+Stessa verifica, bozza 16.1. `--estrai` su una finestra **vuota** esce **1** —
+ma la finestra vuota **era l'ipotesi che stavamo cercando di confermare** (buco
+di feed). Il `throw` scattava **dopo** che il referto era gia' scritto e
+**prima** della riga che dice a Claudio di mandarlo: schermo rosso, nessuna
+istruzione, risposta buona abbandonata sul disco. Il messaggio del `throw`
+diceva perfino "mandala lo stesso" — a una riga che era gia' morta.
+
+> **Prima di mettere `throw` su `$LASTEXITCODE`, si stabilisce se quel codice
+> ≠ 0 significa "la corsa e' andata male" o "la corsa e' riuscita e la risposta
+> non ti piace".** Nel secondo caso il gate va sull'**ARTEFATTO** (esiste? e'
+> di adesso?), e l'esito si stampa in giallo senza fermare la raccolta:
+> ```powershell
+> if(-not $ref){ throw "NON PARTITA: nessun referto" }
+> if((New-TimeSpan -Start $ref.LastWriteTime -End (Get-Date)).TotalMinutes -gt 10){ throw "REFERTO STANTIO" }
+> if($rc -ne 0){ Write-Host "ESITO FALLITO: e' gia' una risposta, manda il referto" -ForegroundColor Yellow }
+> ```
