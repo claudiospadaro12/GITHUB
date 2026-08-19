@@ -1,0 +1,50 @@
+=== Supertrend e timeframe ====
+InpTF=16388
+InpStMult=3.0
+InpStAtrPeriod=9
+=== Pattern rimbalzo ====
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+=== Confluenza tecnica (richiesta dal documento) ====
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+=== Ingresso frazionato ====
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+=== Stop / target ====
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+=== Rischio ====
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+=== Filtro orari (ORA SERVER; opzionale) ====
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+=== Filtro notizie (CSV in MQL5/Files) ====
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+=== Generali ====
+InpComment=STREV DAX H4
+InpMagic=970912
+InpMaxSpread=0
+InpVerbose=true

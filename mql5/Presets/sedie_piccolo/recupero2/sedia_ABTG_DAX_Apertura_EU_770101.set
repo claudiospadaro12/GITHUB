@@ -1,0 +1,94 @@
+=== Sessione (ORARIO DEL SERVER/BROKER!) ====
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+=== Ingresso ====
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+=== Retest (InpEntryMode=RETEST, leva Emiliano) ====
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+=== Entrata ritardata/confermata (InpEntryMode=DELAYED) ====
+InpDelayMinutes=30
+InpDelayDirMode=0
+=== Gap Fill (opzionale, tipico USA) ====
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+=== Filtro di trend (opzionale) ====
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+=== Filtro di correlazione (opzionale) ====
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+=== Filtro VWAP (live Emiliano, opt-in) ====
+InpUseVwapFilter=false
+InpVwapTF=15
+=== Rischio e gestione ====
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+=== Obiettivi a numeri tondi (approx. Multipivot/%Custom) ====
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+=== Filtro notizie (file CSV in MQL5/Files) ====
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+=== Slippage & floor SL (consiglio amico) ====
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+=== Filtro VOLUMI (regola Emiliano: rottura valida solo con vol=
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+=== Generali ====
+InpMagic=770101
+InpMaxSpread=0
+InpVerbose=true

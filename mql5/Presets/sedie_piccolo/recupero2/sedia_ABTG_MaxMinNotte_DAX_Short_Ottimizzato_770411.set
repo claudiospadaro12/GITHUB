@@ -1,0 +1,60 @@
+=== Box notturno (ORA SERVER!) ====
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0.0
+InpMaxBoxPts=0.0
+=== Piazzamento e chiusura (ORA SERVER) ====
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+=== Ingresso ====
+InpBufferPoints=1000.0
+InpAllowLong=false
+InpAllowShort=true
+=== Stop loss ====
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000.0
+=== Target e gestione ====
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP2_R=3.0
+InpTP2Pct=50.0
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+=== Filtro correlazione (opzionale) ====
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+=== Rischio ====
+InpRiskPercent=1.0
+=== Filtro notizie (CSV in MQL5/Files) ====
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+=== Generali ====
+InpComment=MAXMIN DAX SHORT
+InpMagic=770411
+InpMaxSpread=0
+InpVerbose=true
