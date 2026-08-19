@@ -722,3 +722,63 @@ diceva perfino "mandala lo stesso" — a una riga che era gia' morta.
 > if((New-TimeSpan -Start $ref.LastWriteTime -End (Get-Date)).TotalMinutes -gt 10){ throw "REFERTO STANTIO" }
 > if($rc -ne 0){ Write-Host "ESITO FALLITO: e' gia' una risposta, manda il referto" -ForegroundColor Yellow }
 > ```
+
+---
+
+## 🆕 AGGIUNTA DEL 19/08/2026 — trovata verificando l'installazione di `ABTG_LivelliChiave`
+
+## 27. 🔨 INSTALLO IN **N** POSTI, COMPILO IN **UNO**: il sorgente c'e' ovunque, l'indicatore da nessuna parte
+
+_Difetto vero, trovato PRIMA dell'invio. La riga copiava `ABTG_LivelliChiave.mq5`
+in **tutte** le cartelle dati MT5 del VPS (APPDATA + Program Files, quelle con
+`MQL5\Experts`) e chiudeva con una sola frase: "Ora MetaEditor (F4 da MT5) ->
+apri il file da Indicators -> F7"._
+
+Il punto 20 chiede: **il gesto che sto chiedendo produce l'output?** Qui la
+risposta e' si'... **in un posto solo**. `F7` compila il `.mq5` **dove sta**, e
+scrive l'`.ex5` accanto al sorgente: cioe' nella cartella dati del **terminale
+da cui e' stato aperto MetaEditor**. Negli altri N-1 terminali resta il sorgente
+**non compilato**, e il Navigatore di MT5 elenca gli **`.ex5`**, non i `.mq5`.
+
+Sul VPS ci sono piu' istanze (il punto 26 lo dice gia': `-V3` per il 100k).
+Sequenza che sarebbe successa: la riga stampa tre percorsi in verde, Claudio
+compila dal terminale A, apre il grafico sul terminale B e **non trova
+l'indicatore nel Navigatore**. Riga tornata indietro, non per un bug, ma perche'
+la riga ha promesso "INSTALLATO IN: 3" a proposito di un artefatto che a quel
+punto esisteva in 1.
+
+> **Se la riga installa in piu' posti, deve dire quante volte va fatto il gesto
+> che rende l'artefatto USABILE** — e distinguere in chiaro **cosa e' copiato**
+> (il sorgente, N volte) da **cosa e' compilato/attivo** (l'`.ex5`, una volta per
+> terminale). Vale per ogni coppia sorgente/binario: `.mq5`->`.ex5`, preset,
+> template.
+
+### 27-bis. 🌳 E L'ALBERO DI METAEDITOR NON SI ACCORGE DEI FILE NUOVI
+
+Stesso giro. Se MetaEditor era **gia' aperto** quando la riga ha copiato il file,
+il suo Navigatore mostra l'albero **fotografato all'apertura**: il file nuovo non
+c'e', e "aprilo da Indicators" diventa un giro a vuoto con Claudio che cerca una
+cosa che sul disco c'e' gia'. La riga lo dice da sola: **se MetaEditor era
+aperto, chiudilo e riaprilo** (o tasto destro sulla cartella -> Aggiorna).
+
+### 27-ter. 🧪 E LA GUARDIA DI COPIA CHE GUARDA IL NOME, NON IL CONTENUTO
+
+Trovato **eseguendolo**, nello stesso giro. La riga verificava la copia cosi':
+
+```powershell
+Copy-Item -LiteralPath $tmp -Destination $dst -Force -EA Stop
+if(-not (Test-Path -LiteralPath $dst)){ throw "copiato ma non trovato" }
+```
+
+Riprodotto: se in `$dst` esiste una **cartella** con lo stesso nome del file,
+`Copy-Item` ci mette il file **dentro** e `Test-Path` trova la **cartella** ->
+la riga stampa `INSTALLATO IN` e **non ha installato niente**. E' il guardiano
+decorativo del punto 14, applicato alla copia. Una verifica di copia si fa sul
+**contenuto**, non sull'esistenza di un nome:
+
+```powershell
+$len=(Get-Item -LiteralPath $tmp).Length
+...
+$v=Get-Item -LiteralPath $dst -EA Stop
+if($v.PSIsContainer -or $v.Length -ne $len){ throw "copia NON verificata" }
+```
