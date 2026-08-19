@@ -1,0 +1,201 @@
+# =====================================================================
+#  R88c / LA GEOMETRIA DEL RANGE E LA FINE GIORNATA       U30USD M5
+#  SORELLA 2 di 3 -- OR 5' 14:25->14:30 = PRE-apertura (indicatore V15)
+#  EA: ABTG_ORB_Ottimizzato v1.02  (sedia viva in campo: magic 770611)
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R88c2_pre_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r88c2 -Modello 4
+#  (prima SEMPRE con -SoloControllo.)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI.
+#      backtest_pipeline\risultati_archivio\R88_CRITERI.md -- BOZZA,
+#      **va FIRMATA da Claudio PRIMA del lancio**.
+#
+#  >>> E QUESTA CELLA NON PROMUOVE MAI, QUALUNQUE NUMERO FACCIA. <<<
+#      Sta scritto nei criteri (paragrafo 6.3): R88c e' DIAGNOSTICA.
+#      Risponde a "perche' funziona", non a "cosa mettiamo in campo".
+#      Se qui uscisse un numero bellissimo, e' materiale per un round
+#      dedicato con la sua tesi, non una promozione.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO. Due lavori insieme non si sommano: si
+#       rovinano a vicenda.
+#    2. QUESTO ROUND STA IN CODA AL BLOCCO 4 DEL COLLAUDO GUARDIAN, e
+#       si lancia solo DOPO il RI-PIN a un commit nuovo:
+#       walkforward_generico.ps1 scarica l'EA da $EABranch="lavoro"
+#       SCRITTO FISSO nel sorgente, quindi gira sempre l'EA di 'lavoro'
+#       ADESSO. Senza ri-pin non si sa quale .ex5 ha prodotto i numeri.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi da verificare in console.
+# ---------------------------------------------------------------------
+#  TRE FILE SORELLE, E IL MOTIVO TECNICO (non e' pigrizia)
+#    La geometria dell'OR si muove su TRE input insieme
+#    (InpRangeStartMin, InpRangeEndHour, InpRangeEndMin) e la griglia
+#    del formato e' ARITMETICA per singolo input: un prodotto
+#    cartesiano genererebbe combinazioni INVALIDE (per esempio fine
+#    14:00 con inizio 14:30, che nel sorgente fa tStart-=86400, cioe'
+#    un range lungo un giorno intero). Quindi la cella si lancia come
+#    TRE file, uno per geometria:
+#      R88c_geometria_U30USD.txt   14:30 -> 14:45  (la cella VIVA)
+#      R88c2_pre_U30USD.txt        14:25 -> 14:30  (5' PRE-apertura:
+#                                  l'indicatore V15 e il default del
+#                                  nostro sorgente)
+#      R88c3_or30_U30USD.txt       14:30 -> 15:00  (30' DOPO: la regola
+#                                  scritta in ENTRAMBI i PDF del corso)
+#    >>> Le tre sorelle differiscono SOLO per le 4 righe della
+#        geometria. Tutto il resto e' identico byte per byte: si
+#        controlla con un diff PRIMA di lanciare. E' la regola di casa
+#        dopo l'errore InpTP1_ATRmult=0 contro 0.5, pagato due volte.
+# ---------------------------------------------------------------------
+#  DA DOVE NASCE QUESTA CELLA (scelta PRIMA di guardare i numeri)
+#    Dossier agli atti: SPEC_ORB_CORSO_VS_R15_2026-08-19.md, commit
+#    ac37053, celle 3 e 4 della sezione C.
+#    IL FATTO CHE LA RENDE NECESSARIA: "il corso" non e' una cosa sola.
+#    Le tre fonti si contraddicono sulla regola piu' importante:
+#      * ToolKit 2.1/6.2 e Webinar sl.5/13: OR = 30 MINUTI DOPO
+#        l'apertura (15:30-16:00 IT = 14:30-15:00 SERVER), e "non fate
+#        nulla in quella mezz'ora: serve solo per osservare".
+#      * ORB_Indicator_V15 v1.14: InpTime1=14:25:00, InpTime2=14:29:59
+#        = 5 MINUTI PRIMA dell'apertura. E' anche il DEFAULT del nostro
+#        sorgente (InpRangeStartMin=25 / EndMin=30).
+#      * la nostra cella viva: 15 minuti DOPO (14:30->14:45).
+#    Non sono mai state confrontate FRA LORO su U30USD a tick reali con
+#    la gestione R15 addosso. R7a/R7b lo hanno fatto su NASUSD e su un
+#    EA SENZA gestione ("la geometria post-apertura ferma l'emorragia
+#    ma non crea un edge"): non e' lo stesso esperimento.
+#
+#    E LA FINE GIORNATA non e' MAI stata misurata da nessuna parte, su
+#    nessun simbolo: tutte e 8 le prove Dow in archivio hanno
+#    InpEndHour=21. L'indicatore V15 dice 22:59; i due PDF non dicono
+#    niente (e' un [BUCO] del corso). Due ore in piu' danno al runner
+#    col trailing EMA9 piu' corsa, ma espongono alla chiusura USA: e'
+#    un asse che tocca DIRETTAMENTE la peggior giornata, cioe' il muro
+#    giornaliero del 5% che butta fuori dalle prop.
+#
+#    ATTENZIONE, DETTO PRIMA: il range PRE-apertura di 5 minuti porta
+#    con se' uno stop STRUTTURALMENTE piu' stretto (SL = 50% di un
+#    range piccolo). Per R55 e' la direzione SBAGLIATA sul rischio. Si
+#    gira lo stesso, perche' e' il DEFAULT del nostro sorgente e sapere
+#    che e' peggio ha valore -- ma se esce bene sul profitto, va letto
+#    guardando il DD, non il profitto.
+# ---------------------------------------------------------------------
+#  L'ASSE DI QUESTO FILE: LA FINE GIORNATA
+#    InpEndHour 21/22 x InpEndMin 0/59 = 4 valori:
+#       21:00 (la cella VIVA) | 21:59 | 22:00 | 22:59 (l'indicatore)
+#    NOTA ONESTA: i valori che interessano sono DUE (21:00 e 22:59).
+#    Escono quattro perche' la griglia e' aritmetica su due input
+#    separati e non si puo' accoppiarli. I due in mezzo NON sono
+#    riempitivo: sono risoluzione gratis sullo stesso asse, e servono
+#    proprio a distinguere un effetto graduale da un salto.
+#  >>> 4 PASSATE PER FINESTRA = 8 in tutto PER FILE.
+#      Le tre sorelle insieme: 12 per finestra, 24 passate a tick reali.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE, DETTI PRIMA
+#    @DAQUANDO 2024.09.26 = MURO DEI TICK di BCM su U30USD, MISURATO
+#    (REFERTO_SONDA_STORICO_17-08.md: U30USD 2024.09.26, COMPLETO).
+#    Con -FrazioneIS 0.40 e -Fino 2026.06.30 (default):
+#       IS  2024.09.26 -> 2025.06.09      OOS 2025.06.10 -> 2026.06.30
+#    Le stesse finestre di R15/R16/R54b/R55 e di R69 sul Dow.
+#    CANARINO (Emendamento regola A, >=150 operazioni): IS n=71 e OOS
+#    n=119 nella cella viva, ENTRAMBE SOTTO 150, e la finestra non si
+#    allarga indietro (muro dei tick). >>> SELEZIONE PER IL MERITO
+#    SOSPESA. Qui, in piu', la cella non promuove per costruzione.
+#    >>> TODO OBBLIGATORIO A RISULTATI USCITI: il CONTEGGIO OPERAZIONI
+#        IS e OOS va scritto accanto a OGNI numero.
+#    IL REGIME CONTENUTO: UNO SOLO (Dow 2024-2026, prevalentemente
+#    rialzista). Va scritto accanto a ogni tabella.
+#
+#  COME SI LEGGE: CENTRO DELL'ALTOPIANO, MAI IL PICCO. E la regola di
+#  selezione va dichiarata INSIEME al numero.
+#
+#  RIGA DI SANITA' (solo in questo file, la sorella della cella viva):
+#    la passata 14:30->14:45 con fine 21:00 DEVE riprodurre l'OOS gia'
+#    noto a deposito 100k: +41.057,00 | PF 1,6742 | DD 9,7623% | n=119
+#    (R54b 14/08 e R55 slip 0 15/08). Se non lo fa, si ferma tutto.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- >>> LE UNICHE 4 RIGHE CHE CAMBIANO FRA LE TRE SORELLE <<<
+#     OR 5 MINUTI PRE-APERTURA, 14:25->14:30 SERVER (= 15:25->15:30
+#     IT). E' l'ORB_Indicator_V15 v1.14 (InpTime1/InpTime2 misurati da
+#     Claudio sugli screenshot) ED E' IL DEFAULT DEL NOSTRO SORGENTE.
+#     Mai misurato sul Dow: esiste solo su NASUSD (R7a).
+InpRangeStartHour=14
+InpRangeStartMin=25
+InpRangeEndHour=14
+InpRangeEndMin=30
+
+# --- FINE GIORNATA: E' L'ASSE, sta in fondo nella griglia.
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+# --- INGRESSO: pendenti STOP a 10 x K, come in campo.
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+# --- STOP E TARGET: PINNATI alla cella promossa R15 (SL 50% del
+#     range, TP 1,5x l'ampiezza). Sono l'asse di R88a, non di qui.
+InpSLMode=3
+InpSLBufferPts=0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP_R=1.0
+
+# --- GESTIONE R15 PINNATA: trailing EMA9 acceso, NIENTE parziale.
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+# --- FILTRI PINNATI: EMA200 acceso (cuore della cella R15), EMA 9/21
+#     e volume spenti (sono l'asse di R88b), tetto range 0,8%.
+#     NOTA: il tetto 0,8% e' in % del PREZZO, non del range, quindi
+#     resta confrontabile fra geometrie diverse -- ma un OR di 30'
+#     e' piu' ampio di uno di 15' e quindi lo tocchera' piu' spesso.
+#     Va tenuto a mente leggendo il numero di trade, non e' un bug.
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+
+# --- RISCHIO: 1,00% pinnato (valore comune di confronto, non la
+#     taglia di campo, che e' 0,3%).
+InpRiskPercent=1.0
+
+# --- SLIPPAGE: 0, come tutti i round tranne R55.
+InpSlippagePts=0
+
+# --- NOTIZIE: spente.
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo, INERTE nel tester.
+InpUsaGuardian=1
+
+# --- IGIENE
+InpMaxSpread=0
+InpVerbose=0
+
+# --- LA GRIGLIA: 2 x 2 = 4 passate per finestra.
+#     21:00 (viva) / 21:59 / 22:00 / 22:59 (indicatore V15).
+#     Formato: default||start||step||stop||Y
+InpEndHour=21||21||1||22||Y
+InpEndMin=0||0||59||59||Y
+
+# --- MAGIC pinnato.
+InpMagic=770611

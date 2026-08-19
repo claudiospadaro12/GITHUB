@@ -1,0 +1,206 @@
+# =====================================================================
+#  R88b / LA RICETTA DEL CORSO SUL DOW                    U30USD M5
+#  EA: ABTG_ORB_Ottimizzato v1.02  (sedia viva in campo: magic 770611)
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R88b_ricettacorso_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r88b -Modello 4
+#  (prima SEMPRE con -SoloControllo.)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI.
+#      backtest_pipeline\risultati_archivio\R88_CRITERI.md -- BOZZA,
+#      **va FIRMATA da Claudio PRIMA del lancio**.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO. Due lavori insieme non si sommano: si
+#       rovinano a vicenda.
+#    2. QUESTO ROUND STA IN CODA AL BLOCCO 4 DEL COLLAUDO GUARDIAN, e
+#       si lancia solo DOPO il RI-PIN a un commit nuovo:
+#       walkforward_generico.ps1 scarica l'EA da $EABranch="lavoro"
+#       SCRITTO FISSO nel sorgente, quindi gira sempre l'EA di 'lavoro'
+#       ADESSO. Senza ri-pin non si sa quale .ex5 ha prodotto i numeri.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi da verificare in console.
+# ---------------------------------------------------------------------
+#  DA DOVE NASCE QUESTA CELLA (scelta PRIMA di guardare i numeri)
+#    Dossier agli atti: SPEC_ORB_CORSO_VS_R15_2026-08-19.md, commit
+#    ac37053, sezione C "Cella 2 - LA RICETTA COMPLETA DEL CORSO SUL
+#    DOW". I tre ingredienti che il corso pretende e che sul Dow non
+#    sono MAI stati accesi (verificato con grep su tutte le 8 prove
+#    Dow in archivio: tutte con InpUseCloseConfirm=0):
+#      * CHIUSURA CONFERMATA. Il ToolKit 4.1/4.2: "non basta che il
+#        prezzo tocchi il livello, la candela deve chiudersi al di
+#        sopra", e entrare prima della chiusura e' "l'errore comune
+#        n.1". Noi facciamo l'opposto (pendenti STOP al tocco).
+#      * VOLUME della rottura >= 1,5x la media a 20 (webinar sl.7/11:
+#        "+50-100% rispetto alla media precedente").
+#      * EMA 9 / EMA 21, la "REGOLA D'ORO" del ToolKit 3.2/3.3: long
+#        solo se EMA9 > EMA21 E prezzo sopra ENTRAMBE.
+#    PERCHE' PUO' VALERE: R8 ha misurato questa ricetta su NASUSD e il
+#    filtro volume "migliora tutti e quattro i confronti, uniformemente,
+#    in entrambe le finestre". Ma su NASUSD non c'era edge da
+#    amplificare (PF OOS 1,02-1,03 = pareggio). Sul Dow l'edge c'e'
+#    (PF OOS 1,657) e l'ingrediente non e' mai stato provato li'.
+#    PERCHE' PUO' NON VALERE, DETTO PRIMA: nel progetto il filtro
+#    AGGIUNTO DOPO a un motore gia' tarato ha 0 successi su 5 (R20 ADX,
+#    R12, R26, R45, R54). Questa cella parte con quel precedente
+#    contro, ed e' giusto che si sappia prima.
+# ---------------------------------------------------------------------
+#  >>> LETTURA DEL SORGENTE, DA SAPERE PRIMA DI LEGGERE LA TABELLA <<<
+#    Nel codice v1.02 i filtri EMA 9/21 e VOLUME sono chiamati SOLO da
+#    TryCloseConfirmEntry (righe 457 e 459). La funzione TryPlace, che
+#    e' quella dei pendenti STOP, chiama solo Ema200SideOK.
+#
+#    CONSEGUENZA MECCANICA: con InpUseCloseConfirm=0 gli input
+#    InpUseEmaFilter e InpUseVolumeFilter NON FANNO NIENTE.
+#
+#    Quindi delle 8 passate:
+#      - le 4 con CloseConfirm=0 sono LA STESSA IDENTICA CELLA (la
+#        base). Devono uscire uguali AL CENTESIMO fra loro e uguali
+#        alla cella base di R88a: e' un controllo d'igiene GRATIS. Se
+#        divergono, c'e' un effetto che non abbiamo capito.
+#      - le 4 con CloseConfirm=1 sono le vere celle nuove: base
+#        close-confirm, +volume, +EMA9/21, +entrambi.
+#    Cioe' 5 celle DISTINTE su 8 passate. E la ricetta del corso NON e'
+#    separabile dalla chiusura confermata senza toccare il codice: se
+#    servisse misurare volume/EMA 9-21 anche sui pendenti, e' un
+#    cambio di sorgente e quindi UN ALTRO ROUND. Sta scritto qui
+#    perche' non lo si scopra leggendo una tabella con 4 righe uguali.
+# ---------------------------------------------------------------------
+#  IL RISCHIO DEL CAMPIONE, DICHIARATO PRIMA (non dopo)
+#    La chiusura confermata entra PIU' TARDI e salta i giorni deboli:
+#    RIDUCE il numero di trade per costruzione. Oggi l'OOS ha n=119.
+#    >>> Se una cella close-confirm scende sotto n OOS = 60, per i
+#        criteri (cancello C) NON E' LEGGIBILE nemmeno per il rischio:
+#        il DD di 40 trade non e' un DD, e' un aneddoto.
+#    Bonus di segno opposto, e va detto: entrare A MERCATO su chiusura
+#    confermata invece che con un pendente STOP cambia il profilo di
+#    slippage, che e' il punto debole marcato da R55. Se una cella
+#    close-confirm regge, quel vantaggio va misurato (R55-bis), non
+#    dichiarato.
+#
+#    Il corpo di InpMinBodyPct=50 resta al suo valore di sorgente: e'
+#    la nostra quantificazione del "corpo ampio" del ToolKit, agisce
+#    solo in close-confirm, e NON e' un asse di questo round (un asse
+#    in piu' = un'altra domanda).
+# ---------------------------------------------------------------------
+#  GLI ASSI
+#    InpUseCloseConfirm  0 / 1   (pendenti STOP  vs  chiusura M5)
+#    InpUseVolumeFilter  0 / 1   (volume rottura >= 1,5x media 20)
+#    InpUseEmaFilter     0 / 1   (EMA 9/21 allineate + prezzo fuori)
+#  >>> 2 x 2 x 2 = 8 PASSATE PER FINESTRA = 16 in tutto.
+#
+#  I PERIODI DELLE MEDIE DEL CORSO sono pinnati ai valori giusti:
+#    InpEmaFast=9 e InpEmaSlow=21 -- sono gli stessi due input che
+#    servono al trailing (EMA9), quindi NON si toccano: cambiarli
+#    sposterebbe anche la gestione e il round misurerebbe due cose.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE, DETTI PRIMA
+#    @DAQUANDO 2024.09.26 = MURO DEI TICK di BCM su U30USD, MISURATO
+#    (REFERTO_SONDA_STORICO_17-08.md: U30USD 2024.09.26, COMPLETO).
+#    Con -FrazioneIS 0.40 e -Fino 2026.06.30 (default):
+#       IS  2024.09.26 -> 2025.06.09      OOS 2025.06.10 -> 2026.06.30
+#    Le stesse finestre di R15/R16/R54b/R55 e di R69 sul Dow.
+#    CANARINO (Emendamento regola A, >=150 operazioni): IS n=71 e OOS
+#    n=119 nella cella viva. ENTRAMBE SOTTO 150, e qui la
+#    close-confirm le abbassera' ancora. >>> SELEZIONE PER IL MERITO
+#    SOSPESA: si legge per il RISCHIO e come diagnosi. R88 PROPONE,
+#    non promuove.
+#    >>> TODO OBBLIGATORIO A RISULTATI USCITI: il CONTEGGIO OPERAZIONI
+#        IS e OOS va scritto accanto a OGNI numero.
+#    IL REGIME CONTENUTO: UNO SOLO (Dow 2024-2026, prevalentemente
+#    rialzista). Va scritto accanto a ogni tabella.
+#
+#  COME SI LEGGE: CENTRO DELL'ALTOPIANO, MAI IL PICCO. E la regola di
+#  selezione va dichiarata INSIEME al numero.
+# ---------------------------------------------------------------------
+#  IL CORPO PINNATO E' IDENTICO A R88a. Cambiano SOLO le righe
+#  spazzolate in fondo (qui lo stop e il TP sono PINNATI alla cella
+#  promossa R15, perche' non sono la domanda di questa cella).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- GEOMETRIA DEL RANGE: la cella viva, OR 15' 14:30->14:45 SERVER.
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+
+# --- FINE GIORNATA: 21:00 server, come la sedia viva.
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+# --- INGRESSO: distanza e lato come in campo. InpUseCloseConfirm E'
+#     L'ASSE, sta in fondo.
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+InpMinBodyPct=50
+
+# --- STOP E TARGET: PINNATI alla cella promossa R15 (SL 50% del
+#     range, TP 1,5x l'ampiezza). Sono l'asse di R88a, non di qui: se
+#     si muovessero anche loro, il round non isolerebbe piu' la
+#     ricetta del corso.
+InpSLMode=3
+InpSLBufferPts=0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP_R=1.0
+
+# --- GESTIONE R15 PINNATA: trailing EMA9 acceso, NIENTE parziale.
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+# --- FILTRI NON IN ESAME: EMA200 acceso (cuore della cella R15),
+#     tetto range 0,8%.
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpVolMult=1.5
+InpVolAvgBars=20
+
+# --- RISCHIO: 1,00% pinnato (valore comune di confronto, non la
+#     taglia di campo, che e' 0,3%).
+InpRiskPercent=1.0
+
+# --- SLIPPAGE: 0, come tutti i round tranne R55.
+InpSlippagePts=0
+
+# --- NOTIZIE: spente. Il corso le pretende ("no trade se rosse entro
+#     2 ore") ma servono un CSV in MQL5\Files mai usato: e' la Cella 6
+#     del dossier, bassa priorita', un altro round.
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo, INERTE nel tester (le sue
+#     GlobalVariable non esistono): numeri confrontabili coi round
+#     precedenti.
+InpUsaGuardian=1
+
+# --- IGIENE
+InpMaxSpread=0
+InpVerbose=0
+
+# --- LA GRIGLIA: 2 x 2 x 2 = 8 passate per finestra.
+#     Formato: default||start||step||stop||Y
+InpUseCloseConfirm=0||0||1||1||Y
+InpUseVolumeFilter=0||0||1||1||Y
+InpUseEmaFilter=0||0||1||1||Y
+
+# --- MAGIC pinnato.
+InpMagic=770611

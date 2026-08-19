@@ -1,0 +1,261 @@
+# =====================================================================
+#  R88a / LO STOP LARGO - LA CELLA REGINA DEL ROUND       U30USD M5
+#  EA: ABTG_ORB_Ottimizzato v1.02  (sedia viva in campo: magic 770611)
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R88a_stoplargo_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r88a -Modello 4
+#  (prima SEMPRE con -SoloControllo: dieci secondi, e ti dice quante
+#   celle sono, cioe' quante ore di macchina.)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI.
+#      Stanno in  backtest_pipeline\risultati_archivio\R88_CRITERI.md
+#      ed e' una BOZZA: **va FIRMATA da Claudio PRIMA del lancio**.
+#      Senza quella firma i numeri di R88 non si leggono.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO. Due lavori insieme non si sommano: si
+#       rovinano a vicenda.
+#    2. QUESTO ROUND STA IN CODA AL BLOCCO 4 DEL COLLAUDO GUARDIAN, e
+#       si lancia solo DOPO il RI-PIN a un commit nuovo. Motivo
+#       tecnico, non burocratico: walkforward_generico.ps1 scarica
+#       l'EA da $EABranch="lavoro" SCRITTO FISSO nel sorgente. Gira
+#       sempre l'EA di 'lavoro' ADESSO: se il ri-pin non e' stato
+#       fatto, un numero strano qui non si sa se e' del buffer nuovo o
+#       di un .ex5 vecchio.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi da verificare in console.
+# ---------------------------------------------------------------------
+#  DA DOVE NASCE QUESTA CELLA (scelta PRIMA di guardare i numeri)
+#    Dossier agli atti: caccia_strategie\biblioteca\schede\
+#      SPEC_ORB_CORSO_VS_R15_2026-08-19.md   -- commit ac37053
+#    Sezione C, "Cella 1 - LO STOP LARGO DEL CORSO", con tre fatti
+#    convergenti gia' misurati:
+#      * R55: l'ORB "non muore di PF, muore di DRAWDOWN". Sfonda il 10%
+#        con 1,5 punti indice di slippage, sensibilita' 11 volte quella
+#        del PTE, e la CAUSA e' nominata: lo stop al 50% del range e'
+#        strettissimo (lotto = rischio / distanza_stop).
+#      * report\ORB_100K_CRITERI.md punto D (congelato il 15/08):
+#        "la via coerente con R55 non e' abbassare ancora il peso: e'
+#        ALLARGARE LO STOP... ma e' un cambio di parametro, e richiede
+#        il suo round". QUESTO E' QUEL ROUND.
+#      * R15 punto 3: OPPRANGE + trailing + EMA200 faceva OOS +1.807,
+#        PF 1,68, DD 4,1% -- meno di META' del DD della cella promossa
+#        (9,92%) a PF equivalente. Scartata perche' "li' l'IS e' rosso o
+#        piatto". Il cancello A3 dei criteri la ri-giudica con la
+#        regola giusta, e il no (se e' no) stavolta e' scritto prima.
+#
+#  IPOTESI FALSIFICABILE, SCRITTA PRIMA
+#    TRAGUARDO (cancello A di R88_CRITERI.md): almeno una cella con
+#      DD OOS <= 7,00% E PF OOS >= 1,40 E IS positivo (PF IS >= 1,10)
+#      E n OOS >= 95 / n IS >= 57.
+#    FALSIFICAZIONE: se ogni cella con lo stop piu' largo paga in PF
+#      piu' di quanto guadagna in DD, la tesi di R55 NON si traduce in
+#      un parametro, si scrive a referto e la sedia resta com'e'.
+# ---------------------------------------------------------------------
+#  L'INPUT NUOVO -- E LA CONVERSIONE DELLE UNITA', DICHIARATA
+#    InpSLBufferPts (ABTG_ORB_Ottimizzato v1.02, 19/08/2026) allontana
+#    lo stop di N PUNTI MT5 oltre il livello calcolato, e agisce SOLO
+#    nei modi OPPRANGE (0) e HALFRANGE (3) -- cioe' esattamente i due
+#    modi spazzolati qui. Default 0 = comportamento IDENTICO a v1.01.
+#
+#    >>> 100 PUNTI MT5 = 1 PUNTO INDICE su U30USD a BCM. <<<
+#    MISURATO, non assunto: REFERTO_ROUND55_SLIPPAGE.md ("200 punti =
+#    2 punti indice sul Dow", "150 punti, cioe' 1,5 punti indice") e
+#    prove\R55b_slippage_ORB.txt riga 25 ("Su U30USD 100 punti = 1
+#    punto indice").
+#    ATTENZIONE: la missione R88 diceva "1 punto indice = 10 point
+#    MT5". E' SBAGLIATO di un fattore dieci. Con 50/100 punti MT5 si
+#    misurerebbero mezzo punto e un punto indice: sotto lo spread,
+#    cioe' niente. Percio' i valori qui sono 0 / 500 / 1000 punti MT5
+#    = 0 / 5 / 10 PUNTI INDICE, che sono ESATTAMENTE i "5-10 punti"
+#    dello stop del ToolKit ABTG (paragrafo 5.1).
+# ---------------------------------------------------------------------
+#  GLI ASSI, E PERCHE' QUESTI VALORI (da manuale, non pescati)
+#    InpSLMode        0 / 1 / 2 / 3   <-- LEGGI LA TRAPPOLA QUI SOTTO
+#        3 = HALFRANGE, 50% del range: la cella VIVA, il riferimento.
+#        0 = OPPRANGE, estremo opposto del range: la regola del corso
+#            (ToolKit 5.1) e la cella che R15 aveva visto a DD 4,1%.
+#        1 = ATR (1,5 x ATR14) e 2 = FIXED (1000 punti = 10 punti
+#            indice): NON li avevo chiesti, ma arrivano lo stesso.
+#
+#    >>> LA TRAPPOLA DELL'ENUM, DETTA PRIMA (non e' un errore: e' come
+#        funziona MT5, ed e' scritto in walkforward_generico.ps1)
+#        "ENUM: MT5 IGNORA LO STEP e spazzola i MEMBRI fra start e
+#        stop". InpSLMode e' un ENUM_ORB_SL con quattro membri
+#        (OPPRANGE=0, ATR=1, FIXED=2, HALFRANGE=3): scrivendo start 0 e
+#        stop 3 escono TUTTI E QUATTRO, non i due che volevo. Non si
+#        puo' chiedere "solo 0 e 3": 1 e 2 stanno in mezzo.
+#        DECISIONE: si tengono. Sono altre due geometrie di stop, e
+#        rispondono alla STESSA domanda del round (stop piu' largo =
+#        meno DD?). R15 punto 3 aveva gia' visto ATR+trailing+EMA200
+#        fare OOS +3.221, PF 1,49, DD 8,4%: e' un dato pertinente, non
+#        rumore. Se fossero stati due assi ESTRANEI li avrei spostati
+#        in un altro file.
+#        >>> Il -SoloControllo DEVE stampare 48 celle per finestra. Se
+#            ne stampa 24, il file e' stato letto male: fermarsi.
+#
+#    InpSLBufferPts   0 / 500 / 1000  (= 0 / 5 / 10 punti indice)
+#        0 e' il controllo (deve riprodurre la cella viva AL
+#        CENTESIMO); 5 e 10 sono i due estremi della regola scritta
+#        nel ToolKit. Non si spazzola 300-400-600-700: si pescherebbe.
+#    InpTPMode        1 / 0
+#        1 = TP in multipli del RANGE (la nostra unita', R13/R15/R44).
+#        0 = TP in R sullo STOP (l'unita' del corso, mai messa contro
+#            la nostra sulla cella gestita). Col TP in R il target si
+#            sposta DA SOLO quando lo stop si allarga: e' il motivo
+#            per cui questo asse sta qui e non in un round separato.
+#    InpTP_R          1.5 / 2.0
+#        1,5 = "target minimo" del ToolKit (5.2); 2,0 = "target ideale"
+#        del ToolKit e "minimo" del webinar (slide 12). I due numeri
+#        del corso, nessun terzo valore inventato.
+#
+#  >>> 4 x 3 x 2 x 2 = 48 PASSATE PER FINESTRA = 96 a tick reali in
+#      tutto. Sotto il tetto di ~150 per finestra che ci siamo dati.
+#
+#  DUE CONTROLLI GEMELLI GRATIS, DA VERIFICARE A RISULTATI USCITI
+#    (1) Con InpTPMode=1 l'input InpTP_R e' INERTE (lo legge solo
+#        ManageTP1, che esce subito perche' InpTP1Pct=0). Quindi meta'
+#        delle passate a TP_RANGE sono COPPIE che devono uscire
+#        IDENTICHE AL CENTESIMO.
+#    (2) Nei modi ATR (1) e FIXED (2) l'input InpSLBufferPts NON
+#        agisce (vedi SLforLong/SLforShort in v1.02): le tre passate
+#        buffer 0/500/1000 di quei due modi devono uscire IDENTICHE
+#        fra loro.
+#    Se una di queste uguaglianze si rompe, c'e' un effetto che non
+#    abbiamo capito: il round si ferma PRIMA di leggere il resto.
+#    In tutto: 24 celle DISTINTE su 48 passate. La ridondanza costa
+#    macchina e in cambio da' due canarini che non costano niente.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE, DETTI PRIMA
+#    @DAQUANDO 2024.09.26 non e' prudenza: e' il MURO DEI TICK di BCM
+#    su U30USD, MISURATO dalla sonda del 17/08
+#    (REFERTO_SONDA_STORICO_17-08.md: U30USD 2024.09.26, COMPLETO).
+#    Con -FrazioneIS 0.40 e -Fino 2026.06.30 (default):
+#       IS  2024.09.26 -> 2025.06.09
+#       OOS 2025.06.10 -> 2026.06.30
+#    Le stesse finestre di R15/R16/R54b/R55 e di R69 sul Dow.
+#
+#    CANARINO DELL'EMENDAMENTO (regola A, >=150 operazioni): R15 ha
+#    misurato IS n=71 e OOS n=119. SONO ENTRAMBE SOTTO 150, e non si
+#    puo' rimediare: la finestra non si allarga indietro (muro dei
+#    tick) e spostare lo split lascerebbe un OOS di ~40.
+#    >>> QUINDI LA SELEZIONE PER IL MERITO E' SOSPESA. R88 si legge per
+#        il RISCHIO (regola B: il drawdown e' un fatto accaduto) e come
+#        diagnosi. Da qui esce una PROPOSTA, mai una promozione.
+#    >>> TODO OBBLIGATORIO A RISULTATI USCITI: il CONTEGGIO OPERAZIONI
+#        IS e OOS va scritto accanto a OGNI numero.
+#
+#    IL REGIME CONTENUTO: UNO SOLO (Dow 2024-2026, prevalentemente
+#    rialzista; R14 aveva gia' refertato "vento di regime long"). Va
+#    scritto accanto a ogni tabella.
+# ---------------------------------------------------------------------
+#  COME SI LEGGE (regola di casa, non trattabile)
+#    CENTRO DELL'ALTOPIANO, MAI IL PICCO. Una cella che sporge da sola
+#    e' rumore: in R70 il confronto si e' ribaltato quando e' stato
+#    rifatto con la regola giusta. La regola di selezione va dichiarata
+#    INSIEME al numero, altrimenti il numero non vuol dire niente.
+#
+#  RIGA DI SANITA' (si controlla PRIMA di ogni altra cosa)
+#    La cella InpSLMode=3 + InpSLBufferPts=0 + InpTPMode=1 DEVE
+#    riprodurre l'OOS gia' noto della cella viva a deposito 100k:
+#       +41.057,00 | PF 1,6742 | DD 9,7623% | n=119
+#       (R54b 14/08 e R55 slip 0 15/08, identici al centesimo)
+#    Se non lo riproduce, InpSLBufferPts NON e' un no-op: si ferma
+#    tutto e si cerca il perche'.
+# ---------------------------------------------------------------------
+#  IL CORPO PINNATO E' IDENTICO NELLE TRE CELLE DI R88 (a, b, c).
+#  Cambiano SOLO le righe spazzolate in fondo. E' la regola di casa
+#  dopo l'errore InpTP1_ATRmult=0 contro 0.5, pagato due volte.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- GEOMETRIA DEL RANGE: la cella viva, OR 15' 14:30->14:45 SERVER
+#     (= 15:30->15:45 IT). Qui NON e' l'asse in esame: pinnata.
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+
+# --- FINE GIORNATA: 21:00 server, come la sedia viva. Non e' l'asse
+#     in esame in questa cella (lo e' in R88c): pinnata.
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+# --- INGRESSO: pendenti STOP a 10 x K oltre il livello, come in campo.
+#     La chiusura confermata del corso e' l'asse di R88b, non di qui.
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+# --- GESTIONE R15 PINNATA: trailing EMA9 acceso, NIENTE parziale,
+#     niente uscita su chiusura EMA. Se cambiasse anche solo il
+#     trailing, il round non isolerebbe piu' lo stop: misurerebbe due
+#     cose insieme.
+InpExecTF=5
+InpTPRangeMult=1.5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+# --- FILTRI: EMA200 acceso (e' il cuore della cella R15), EMA 9/21 e
+#     volume spenti (sono l'asse di R88b), tetto range 0,8%.
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+
+# --- RISCHIO: 1,00% pinnato. NON e' la taglia di campo (in campo la
+#     sedia gira a 0,3%, mezzo peso, per il doppio asterisco di R15):
+#     e' il valore comune che rende le celle confrontabili fra loro e
+#     coi round precedenti.
+InpRiskPercent=1.0
+
+# --- SLIPPAGE: 0, come tutti i round tranne R55. Se una cella passa i
+#     cancelli, il suo R55-bis e' un round a parte (i criteri 6.4 lo
+#     chiedono esplicitamente: la pendenza cambia col lotto).
+InpSlippagePts=0
+
+# --- NOTIZIE: spente (servono un CSV in MQL5\Files e non c'entrano).
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con quelli dei round precedenti.
+#     Sta scritto qui apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log spento nelle corse lunghe, spread non filtrato.
+InpMaxSpread=0
+InpVerbose=0
+
+# --- LA GRIGLIA: 4 x 3 x 2 x 2 = 48 passate per finestra.
+#     Formato: default||start||step||stop||Y
+#     ATTENZIONE su InpSLMode: e' un ENUM, MT5 IGNORA lo step e
+#     spazzola tutti i membri fra start e stop -> 0,1,2,3 (quattro),
+#     non due. E' voluto e dichiarato in testa al file.
+InpSLMode=3||0||3||3||Y
+InpSLBufferPts=0||0||500||1000||Y
+InpTPMode=1||0||1||1||Y
+InpTP_R=1.5||1.5||0.5||2.0||Y
+
+# --- MAGIC pinnato: qui l'asse di controllo gemello non ci sta
+#     (raddoppierebbe a 48 per finestra). Il controllo lo fanno le 12
+#     coppie InpTP_R inerti descritte sopra, che sono gratis.
+InpMagic=770611

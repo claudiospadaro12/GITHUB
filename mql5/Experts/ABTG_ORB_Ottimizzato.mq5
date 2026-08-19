@@ -24,8 +24,20 @@
 //|                                                                  |
 //|  ⚠️ Orari in ORA SERVER. Nessun EA garantisce profitti. DEMO.   |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//|  CHANGELOG                                                       |
+//|  v1.02 (19/08/2026, preparazione R88) - UN SOLO input nuovo:     |
+//|        InpSLBufferPts (default 0 = comportamento IDENTICO a      |
+//|        v1.01). Allontana lo stop di N punti oltre il livello     |
+//|        calcolato nei modi OPPRANGE e HALFRANGE. Nasce da R55     |
+//|        ("l'ORB non muore di PF, muore di drawdown - e la causa   |
+//|        e' lo stop stretto") e dalla regola 5-10 punti del        |
+//|        ToolKit ABTG. Vedi il blocco commentato sull'input.       |
+//|  v1.01 - InpSlippagePts (R55), export per-trade, fix             |
+//|        InpOneTradePerDay.                                        |
+//+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -82,6 +94,40 @@ input bool   InpUseTrailEMA  = true;   // Trailing dello stop sull'EMA veloce
 input int    InpEmaFast      = 9;
 input int    InpEmaSlow      = 21;
 input bool   InpExitOnEmaClose = true; // Esci se una candela chiude oltre l'EMA9 opposta
+
+//--- BUFFER SULLO STOP (19/08/2026, v1.02 - opt-in, default 0)
+//  PERCHE'. R55 ha misurato che questa sedia "non muore di PF, muore di
+//  DRAWDOWN": sfonda il cancello del 10% con 1,5 punti indice di
+//  slippage, con una sensibilita' 11 volte quella del PTE. Il referto
+//  nomina anche la causa: lo stop e' STRETTISSIMO (50% del range) e il
+//  lotto si calcola come rischio/distanza_stop -> stop stretto = piu'
+//  lotti = ogni punto costa di piu'. La via indicata da
+//  report/ORB_100K_CRITERI.md punto D e' ALLARGARE LO STOP, non
+//  abbassare ancora il peso. Il ToolKit ABTG, dal canto suo, mette lo
+//  stop "5-10 punti oltre l'estremo opposto del range": lo stesso
+//  buffer, scritto dal corso.
+//
+//  COSA FA. Nei modi OPPRANGE (estremo opposto) e HALFRANGE (50% del
+//  range) allontana lo stop di N punti oltre il livello calcolato:
+//  long  -> sl = livello - N*_Point
+//  short -> sl = livello + N*_Point
+//  Non tocca i modi ATR e FIXED, che hanno gia' la loro distanza.
+//
+//  UNITA'. PUNTI MT5, come InpSlippagePts e InpSLFixedPts. Su U30USD a
+//  BCM 100 punti = 1 punto indice (misurato in R55): i "5-10 punti" del
+//  ToolKit sono quindi 500-1000 qui dentro.
+//
+//  DIFFERENZA VOLUTA RISPETTO A ABTG_ORB_Fibo.mq5. La' il buffer e'
+//  MathMax(InpSLBufferPts, SYMBOL_TRADE_STOPS_LEVEL): comodo, ma con
+//  default 0 il comportamento NON sarebbe identico a prima su un broker
+//  con stops level > 0. Qui il default 0 deve essere un no-op esatto,
+//  perche' il round R88 confronta con/senza a parita' di tutto il
+//  resto. Il rispetto dello stops level resta dov'era (EntryDistance).
+//
+//  EFFETTO ATTESO (da verificare col tester, non dichiarato come fatto):
+//  meno lotti a parita' di rischio %, quindi DD piu' basso e meno
+//  fragilita' allo slippage; in cambio piu' stop presi per intero.
+input double InpSLBufferPts  = 0;      // Buffer extra sullo stop in PUNTI (0 = come v1.01). Solo modi OPPRANGE/HALFRANGE
 
 input group "=== Ricetta ToolKit ABTG / live (tutto OPT-IN, default = comportamento attuale) ==="
 input bool   InpUseCloseConfirm  = false;  // Entra alla CHIUSURA di una candela oltre il livello, invece che con pendenti STOP
@@ -456,21 +502,26 @@ double EntryDistance()
    return(MathMax(d,minD));
   }
 
+//--- v1.02: buffer sullo stop in punti. Con InpSLBufferPts=0 vale 0 e
+//    tutto resta identico a v1.01 (no-op esatto, voluto: vedi il blocco
+//    commentato sull'input).
+double SLBuffer(){ return(InpSLBufferPts>0 ? InpSLBufferPts*_Point : 0.0); }
+
 double SLforLong(double entry,double oppEntry,double atr)
   {
    double sl;
-   if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeLow;
+   if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeLow-SLBuffer();
    else if(InpSLMode==ORB_SL_FIXED) sl=entry-InpSLFixedPts*_Point;
-   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry-0.5*(gRangeHigh-gRangeLow);
+   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry-0.5*(gRangeHigh-gRangeLow)-SLBuffer();
    else sl=entry-atr*InpAtrSLmult;
    return(NormalizePrice(sl));
   }
 double SLforShort(double entry,double oppEntry,double atr)
   {
    double sl;
-   if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeHigh;
+   if(InpSLMode==ORB_SL_OPPRANGE) sl=gRangeHigh+SLBuffer();
    else if(InpSLMode==ORB_SL_FIXED) sl=entry+InpSLFixedPts*_Point;
-   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry+0.5*(gRangeHigh-gRangeLow);
+   else if(InpSLMode==ORB_SL_HALFRANGE) sl=entry+0.5*(gRangeHigh-gRangeLow)+SLBuffer();
    else sl=entry+atr*InpAtrSLmult;
    return(NormalizePrice(sl));
   }
