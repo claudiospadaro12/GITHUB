@@ -41,16 +41,31 @@
 #    il calibratore deve trovare +5 anche su questi file. Se trova un
 #    altro numero, fermarsi e capire. Con --fuso utc escono in UTC.
 #
-#  USO (PC di backtest; serve python 3.8+, gia' usato da run_all.ps1)
-#    Riga di lancio completa (regola delle righe di lancio):
-#      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/dukascopy/dukascopy_m1.py" -OutFile "$env:USERPROFILE\dukascopy_m1.py"
-#      python "$env:USERPROFILE\dukascopy_m1.py" --validazione
+#  USO (PC di backtest; serve python 3.8+)
+#    ATTENZIONE, non si incollano righe sciolte: due comandi uno sotto
+#    l'altro sono DUE comandi indipendenti, e il secondo parte anche se
+#    il primo e' morto (checklist punto 21). La riga di lancio vera e'
+#    UN SOLO blocco "& { ... }" che (1) trova python.exe vero -- non lo
+#    stub del Microsoft Store -- (2) riscarica QUESTO file pinnato
+#    all'hash del commit, (3) verifica il marcatore VERSIONE qui sotto,
+#    (4) controlla il codice d'uscita di OGNI passo.
+#    Il presente file NON e' un interprete di se stesso: python 3.8+ e'
+#    una dipendenza MISURATA dalla riga, mai data per presente
+#    (run_all.ps1 lo tratta da OPZIONALE: non e' una prova di presenza).
 #    La raccolta sul Desktop (cartella dukascopy_m1 + zip) la fa lo
-#    script da solo a fine corsa.
+#    script da solo a fine corsa. Se lo stesso blocco lo chiama PIU' DI
+#    UNA VOLTA, il referto ha sempre lo stesso nome e la seconda corsa
+#    sovrascrive la prima: e' la riga che deve mettere ogni referto in
+#    una cartella di sosta con un nome PROPRIO (checklist punto 26).
 #
 #  MODI
 #    --autotest            round-trip sintetico del decoder, senza rete
-#    --validazione         UN giorno di DAX (2025-06-16) + controlli
+#                          (dal 20/08 include l'audit delle BANDE)
+#    --validazione         UN giorno di DAX (2025-06-16) + controlli.
+#                          IGNORA --simboli: e' cablato su DEUIDXEUR.
+#                          Per un giorno solo di un ALTRO simbolo si usa
+#                          la corsa normale con --da/--a sullo stesso
+#                          giorno (fa gli stessi controlli).
 #    (niente)              missione piena: 4 indici, 2019-01-01 -> oggi
 #    --simboli DEUIDXEUR   solo questi (nomi Dukascopy, virgole)
 #    --da/--a YYYY-MM-DD   finestra date
@@ -61,6 +76,16 @@
 #  RIPRESA
 #    Ogni ora scaricata resta in cache su disco (anche i 404, come file
 #    vuoti .assente). Rilanciare NON riscarica: riparte da dove era.
+#    LIMITE NOTO (20/08/2026): il CSV si scrive solo a FINE SIMBOLO, e
+#    non esiste un modo di ricostruirlo dalla sola cache. Una corsa
+#    lunga interrotta a meta' lascia la cache piena e ZERO CSV.
+#
+#  VELOCITA' MISURATA (18/08/2026, PC di backtest, non una stima)
+#    Corsa DEUIDXEUR 2019->oggi: 25 giorni su 2389 in 1h43m (596 ore,
+#    7,4 MB) con 503/reset/timeout continui = ~4 minuti PER GIORNO di
+#    storico, proiezione ~7 GIORNI di crawl per un simbolo. Prima di
+#    lanciare una finestra lunga si rifa' questa misura: se il ritmo e'
+#    quello, la strada non e' percorribile cosi' com'e'.
 # =====================================================================
 
 import argparse
@@ -76,7 +101,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 
 BASE = "https://datafeed.dukascopy.com/datafeed"
-VERSIONE = "DUKA-M1-v2"            # marcatore: la riga di lancio lo cerca PRIMA di eseguire
+VERSIONE = "DUKA-M1-v3"            # marcatore: la riga di lancio lo cerca PRIMA di eseguire
 RECORD = struct.Struct(">IIIff")   # ms-offset, p1, p2, vol1, vol2 (big-endian)
 ATTESE_RETRY = [2, 5, 15, 30]      # secondi, come sonda_dukascopy.ps1
 MAX_ERR_CONSEC = 20                # 15/08: quando Dukascopy bandisce risponde 503 a TUTTO
@@ -89,12 +114,25 @@ CONTROLLO_URL = BASE + "/EURUSD/2025/05/16/15h_ticks.bi5"
 # nome Dukascopy -> (nome simbolo BCM, banda plausibile del prezzo)
 # Le bande coprono il minimo e il massimo storici 2012-2026 con margine:
 # servono SOLO a scegliere il divisore 10^k, non a giudicare i dati.
+#
+# REGOLA DELLA BANDA (misurata il 20/08/2026, difetto RIPRODOTTO)
+#   Il rapporto max/min deve essere < 10, e il tetto deve stare SOPRA il
+#   prezzo di oggi con margine. Motivo: se il prezzo SFONDA il tetto,
+#   l'unico 10^k che resta in banda e' quello che divide per DIECI VOLTE
+#   TROPPO -- e lo script non se ne accorge, perche' il candidato e'
+#   UNICO. Con la vecchia banda Dow 6000-60000 (rapporto ESATTAMENTE 10)
+#   una mediana 60.100 usciva "divisore 1000 -> 6010.00": CSV con il Dow
+#   a 6.010 punti, referto ESITO OK, codice d'uscita 0.
+#   La finestra (tetto , 10*pavimento) e' l'unica zona in cui uno
+#   sfondamento si ferma PULITO: con rapporto >= 10 quella finestra e'
+#   VUOTA. Il divisore scelto finisce anche nel referto: si controlla a
+#   occhio l'ordine di grandezza, sempre.
 STRUMENTI = {
-    "DEUIDXEUR":    ("D30EUR", 4000.0, 30000.0),    # DAX
-    "USA30IDXUSD":  ("U30USD", 6000.0, 60000.0),    # Dow
-    "USATECHIDXUSD": ("NASUSD", 1500.0, 30000.0),   # Nasdaq 100
-    "JPNIDXJPY":    ("225JPY", 6000.0, 60000.0),    # Nikkei
-    "USA500IDXUSD": ("S500USD", 600.0, 8000.0),     # S&P (BCM: verificare nome)
+    "DEUIDXEUR":    ("D30EUR", 4000.0, 36000.0),    # DAX  (misurato 23.715 il 16/06/2025)
+    "USA30IDXUSD":  ("U30USD", 8000.0, 70000.0),    # Dow  (~53.400 il 20/08/2026; 2012: ~12.000)
+    "USATECHIDXUSD": ("NASUSD", 1500.0, 30000.0),   # Nasdaq 100  <-- BANDA DA RIFARE (rapporto 20)
+    "JPNIDXJPY":    ("225JPY", 8000.0, 70000.0),    # Nikkei (2013: ~10.500)
+    "USA500IDXUSD": ("S500USD", 600.0, 8000.0),     # S&P    <-- BANDA DA RIFARE (rapporto 13,3)
     "EURUSD":       ("EURUSD", 0.8, 1.8),           # controllo di schema
 }
 SIMBOLI_MISSIONE = ["DEUIDXEUR", "USA30IDXUSD", "USATECHIDXUSD", "JPNIDXJPY"]
@@ -272,10 +310,21 @@ def misura_divisore(prezzi_interi, banda_min, banda_max):
     for k in range(0, 6):
         div = 10 ** k
         if banda_min <= med / div <= banda_max:
-            buoni.append(div)
+            buoni.append((div, med / div))
     if len(buoni) == 1:
-        return (buoni[0], med / buoni[0])
+        return (buoni[0][0], buoni[0][1])
+    # in caso di dubbio si torna la LISTA dei candidati con la mediana
+    # GIA' scalata: chi legge deve poter scegliere a occhio in 5 secondi.
     return (None, buoni)
+
+
+def banda_sospetta(banda_min, banda_max):
+    """Torna una frase se la banda non si ferma pulita su uno sfondamento."""
+    if banda_max >= 10 * banda_min:
+        return ("rapporto %.1f >= 10: uno sfondamento del tetto NON si ferma, "
+                "rientra in banda una decade sotto (divisore 10x sbagliato, "
+                "accettato in silenzio)" % (banda_max / banda_min))
+    return ""
 
 
 # ---------------------------------------------------------------------
@@ -300,15 +349,27 @@ def ticks_in_m1(barre, ticks, ora_utc, divisore, ordine, fuso):
             b[4] += 1
 
 
+def scrivi_atomico(percorso, testo):
+    """Un file di uscita o c'e' TUTTO o non c'e': un CSV/referto troncato da
+    un Ctrl+C e' un artefatto che il passo dopo mangia senza accorgersene."""
+    tmp = percorso + ".tmp"
+    with open(tmp, "w", newline="") as f:
+        f.write(testo)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, percorso)
+
+
 def scrivi_csv(percorso, barre, decimali):
     fmt = "%%.%df" % decimali
-    with open(percorso, "w", newline="") as f:
-        f.write("Time,Open,High,Low,Close,Volume\n")
-        for chiave in sorted(barre.keys()):
-            o, h, l, c, v = barre[chiave]
-            f.write("%s,%s,%s,%s,%s,%d\n" % (
-                chiave.strftime("%Y.%m.%d %H:%M"),
-                fmt % o, fmt % h, fmt % l, fmt % c, v))
+    buf = io.StringIO()
+    buf.write("Time,Open,High,Low,Close,Volume\n")
+    for chiave in sorted(barre.keys()):
+        o, h, l, c, v = barre[chiave]
+        buf.write("%s,%s,%s,%s,%s,%d\n" % (
+            chiave.strftime("%Y.%m.%d %H:%M"),
+            fmt % o, fmt % h, fmt % l, fmt % c, v))
+    scrivi_atomico(percorso, buf.getvalue())
 
 
 def referto_barre(sym_bcm, barre, fuso):
@@ -445,6 +506,36 @@ def autotest():
     assert righe[1].startswith("2025.06.16 15:00,18122.45,"), "riga dati: " + righe[1]
     assert righe[1].split(",")[5] == "2", "volume tick"
     log("6. riga CSV nel Formato 1 atteso da ABTG_ImportaStoricoEsterno: OK")
+
+    # 7. LA BANDA CHE SFONDA IN SILENZIO (difetto riprodotto il 20/08/2026)
+    #    Vecchia banda Dow 6000-60000, rapporto ESATTAMENTE 10: una mediana
+    #    60.100 (Dow a +13% da oggi) trovava UN SOLO candidato -- quello
+    #    sbagliato di 10 volte -- e usciva ESITO OK.
+    div_v, med_v = misura_divisore([6010000], 6000.0, 60000.0)
+    assert div_v == 1000 and abs(med_v - 6010.0) < 1e-9, "riproduzione del difetto"
+    div_n, med_n = misura_divisore([6010000], *STRUMENTI["USA30IDXUSD"][1:])
+    assert div_n == 100 and abs(med_n - 60100.0) < 1e-9, "banda Dow nuova: mediana 60.100"
+    div_o, cand_o = misura_divisore([7500000], *STRUMENTI["USA30IDXUSD"][1:])
+    assert div_o is None and cand_o == [], "banda Dow nuova: sopra il tetto si ferma PULITO"
+    log("7. banda che sfonda in silenzio: riprodotta sulla vecchia (6010.00) e")
+    log("   chiusa sulla nuova (60100.00; sopra 70.000 si ferma pulito): OK")
+
+    # 8. audit di TUTTE le bande: quelle col rapporto >= 10 non si fermano
+    #    pulite. Non e' un errore bloccante (il round in corso non le usa),
+    #    ma non puo' restare invisibile.
+    sospette = []
+    for nome in sorted(STRUMENTI):
+        bcm, lo, hi = STRUMENTI[nome]
+        motivo = banda_sospetta(lo, hi)
+        if motivo:
+            sospette.append("   ATTENZIONE %s (%s) banda %g-%g: %s" % (nome, bcm, lo, hi, motivo))
+    if sospette:
+        log("8. audit bande: %d DA RIFARE prima di usarle (misurare il prezzo di oggi):"
+            % len(sospette))
+        for r in sospette:
+            log(r)
+    else:
+        log("8. audit bande: tutte con rapporto < 10: OK")
     log("")
     log("AUTOTEST: TUTTO OK.")
     return 0
@@ -501,7 +592,12 @@ def corri(argv):
             log("   FALLITO (%s). Se il metro non funziona, non si misura niente." % esito)
             log("   Aspetta qualche minuto e rilancia (o --salta-controllo per forzare).")
             return 1
-        ticks = decodifica_bi5(dati)
+        try:
+            ticks = decodifica_bi5(dati)
+        except Exception as e:
+            log("   RISPOSTA DI %d BYTE NON DECODIFICABILE (%s)." % (len(dati), e))
+            log("   Non e' un .bi5: probabile pagina d'errore del CDN. MI FERMO.")
+            return 1
         ordine, quota = misura_ordine_campi(ticks)
         div, med = misura_divisore([t[1] for t in ticks], 0.8, 1.8)
         log("   OK: %d byte, %d tick. Ordine campi: %s (%.1f%%). EURUSD mediana %s con divisore %s."
@@ -587,10 +683,17 @@ def corri(argv):
                     campione_prezzi = [t[1] for t in tutti]
                     divisore_deciso, med = misura_divisore(campione_prezzi, banda_min, banda_max)
                     if divisore_deciso is None:
+                        if not med:
+                            perche = ("NESSUN 10^k mette la mediana (%d) nella banda %g-%g: "
+                                      "o il formato e' diverso dall'atteso, o la BANDA E' "
+                                      "STANTIA (il prezzo di oggi ha sfondato il tetto)"
+                                      % (sorted(campione_prezzi)[len(campione_prezzi) // 2],
+                                         banda_min, banda_max))
+                        else:
+                            perche = ("piu' candidati in banda: " +
+                                      "  ".join("divisore %d -> %.2f" % (d, m) for d, m in med))
                         log("DIVISORE NON DECIDIBILE (%s). Rilancia con --divisore. MI FERMO su %s."
-                            % (("NESSUN 10^k mette la mediana nella banda %g-%g: "
-                                "formato diverso dall'atteso" % (banda_min, banda_max))
-                               if not med else "piu' candidati in banda: %s" % (med,), sym))
+                            % (perche, sym))
                         falliti.append(sym)
                         break
                     log("   divisore misurato: %d (mediana %.2f, banda %g-%g)"
@@ -610,6 +713,8 @@ def corri(argv):
             scrivi_csv(csv_path, barre, decimali)
             file_prodotti.append(csv_path)
         righe = referto_barre(bcm, barre, args.fuso)
+        righe.append("  divisore usato %s, ordine campi %s  <-- CONTROLLA L'ORDINE DI GRANDEZZA"
+                     % (divisore_deciso, ordine_deciso))
         righe.append("  scaricate %d ore (%.1f MB .bi5), %d dalla cache, %d assenti (404), %d errori"
                      % (contatori["scaricate"], contatori["byte"] / 1e6,
                         contatori["cache"], contatori["assenti"], contatori["errori"]))
@@ -629,17 +734,18 @@ def corri(argv):
     esito = ("FALLITO: " + ", ".join(falliti)) if falliti else (
             ("COMPLETO MA CON BUCHI (rilancia): " + ", ".join(incompleti)) if incompleti else "OK")
     ref_path = os.path.join(out, "referto_dukascopy_m1.txt")
-    with open(ref_path, "w") as f:
-        f.write("=== DUKASCOPY -> M1: referto ===\n")
-        f.write("versione: %s\n" % VERSIONE)
-        f.write("comando : %s\n" % " ".join(argv))
-        f.write("ESITO   : %s\n" % esito)
-        f.write("data: %s (ora del PC)  =  %s UTC\n" % (
-            datetime.now().strftime("%Y-%m-%d %H:%M"),
-            datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")))
-        f.write("fuso timestamp: %s\n\n" % ("ora di New York (convenzione HistData, shift atteso +5)"
+    testa = io.StringIO()
+    testa.write("=== DUKASCOPY -> M1: referto ===\n")
+    testa.write("versione: %s\n" % VERSIONE)
+    testa.write("comando : %s\n" % " ".join(argv))
+    testa.write("ESITO   : %s\n" % esito)
+    testa.write("data: %s (ora del PC)  =  %s UTC\n" % (
+        datetime.now().strftime("%Y-%m-%d %H:%M"),
+        datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")))
+    testa.write("fuso timestamp: %s\n\n" % ("ora di New York (convenzione HistData, shift atteso +5)"
                                             if args.fuso == "ny" else "UTC"))
-        f.write("\n".join(righe_referto))
+    testa.write("\n".join(righe_referto))
+    scrivi_atomico(ref_path, testa.getvalue())
     file_prodotti.append(ref_path)
     raccogli_desktop(file_prodotti, "dukascopy_m1.zip")
     log("")

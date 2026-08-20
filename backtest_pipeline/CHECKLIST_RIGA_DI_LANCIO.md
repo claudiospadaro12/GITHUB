@@ -1007,3 +1007,50 @@ il pericolo era stato visto, e sul simbolo guida no.
 > `_Symbol` e' un simbolo da misurare. E se il codice degrada a "neutro" quando
 > il dato manca, la cella non e' "non misurabile": e' **non eseguita**, e va
 > distinta.
+
+---
+
+## 🆕 AGGIUNTA DEL 20/08/2026 — trovata verificando i primi due passi di `dukascopy_m1.py`
+
+## 32. 📏 LA BANDA DI PLAUSIBILITA' COL RAPPORTO ≥ 10: lo sfondamento non si ferma, RIENTRA
+
+_Difetto vero, gia' committato in `dukascopy_m1.py` (cd72df1, riga 94:
+`"USA30IDXUSD": ("U30USD", 6000.0, 60000.0)`) e **RIPRODOTTO** prima
+dell'invio della riga. Ora e' un caso dell'autotest (n.7)._
+
+Il punto 23 copre l'artefatto di INPUT scaduto. Questo copre il **numero
+scritto in tabella che scade**: una "banda plausibile" serviva a scegliere il
+divisore 10^k del prezzo (il `.bi5` di Dukascopy contiene interi). Il gemello
+`histdata_m1.py` aveva gia' pagato le **bande stantie** — i prezzi 2026 che
+sfondavano i tetti scritti nel 2024 — e li' lo sfondamento faceva **fermare**
+lo script. **Qui no**, e la differenza e' tutta in un rapporto:
+
+```
+banda 6000-60000  ->  60000 / 6000 = ESATTAMENTE 10
+mediana 60.100 (Dow a +13% da oggi):
+   /1    = 60100  fuori banda
+   /10   =  6010  DENTRO  <-- unico candidato: accettato
+   /100  =   601  fuori banda
+```
+
+Un solo candidato = nessun dubbio = **nessun fermo**. Lo script scrive un CSV
+col Dow a **6.010 punti invece di 53.400/60.100**, il referto dice `ESITO: OK`
+e il codice d'uscita e' **0**. Il passo dopo (import in MT5, prova di regime)
+gira su prezzi divisi per dieci: gli ATR, gli stop e i target sono tutti
+plausibili fra loro, quindi **niente sembra rotto**.
+
+La zona in cui uno sfondamento si ferma pulito e' **(tetto , 10 x pavimento)**:
+- rapporto **< 10** -> quella finestra esiste (con 8000-70000: 70.000-80.000);
+- rapporto **= 10** -> finestra **VUOTA**: sfondi e rientri, in silenzio;
+- rapporto **> 10** -> c'e' pure una zona di **ambiguita'** (due candidati:
+  fermo pulito, va bene) **e** sopra il tetto si rientra lo stesso in silenzio.
+
+> **Regole, per ogni tabella di bande/soglie plausibili:**
+> 1. **rapporto max/min < 10**, e il tetto sopra il prezzo di OGGI con margine
+>    dichiarato (`# Dow ~53.400 il 20/08/2026`): la banda porta la sua data;
+> 2. **il valore scelto dall'euristica finisce nell'ARTEFATTO**, non solo a
+>    schermo (qui: `divisore usato 100` nel referto), cosi' l'errore di un
+>    fattore 10 e' leggibile da chi apre il file;
+> 3. **l'audit della tabella e' un caso dell'autotest**, che elenca le bande
+>    ancora da rifare invece di lasciarle invisibili (qui restano `NASUSD` e
+>    `S500USD`: rapporto 20 e 13,3, da ribasare su un prezzo MISURATO).
