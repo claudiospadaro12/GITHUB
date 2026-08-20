@@ -1,0 +1,32 @@
+STATO DELLA NOTTE R88 + R87 + R89 + R86
+data: 2026-08-20 01:58:38   (questa data deve essere di ADESSO)
+avvio: 2026-08-19 23:42:37   pin: c7714a8255b0224b62cd75b65386b9d5883f7ed1
+
+ROUND FILE                           INIZIO     FINE      MIN       ATT    IS/OOS ESITO
+R88   R88a_stoplargo_U30USD.txt      23:43:05   23:51:06  8.0       48     48/48  OK
+R88   R88b_ricettacorso_U30USD.txt   23:51:06   23:53:14  2.1       8      8/8    OK
+R88   R88c_geometria_U30USD.txt      23:53:14   23:54:34  1.3       4      4/4    OK
+R88   R88c2_pre_U30USD.txt           23:54:34   23:55:47  1.2       4      4/4    OK
+R88   R88c3_or30_U30USD.txt          23:55:47   23:56:55  1.1       4      4/4    OK
+R87a  R87a_impatto_fix_USDCHF.txt    23:56:55   23:57:50  0.9       2      2/2    OK
+R87a  R87a_impatto_fix_USDCAD.txt    23:57:50   23:58:58  1.1       2      2/2    OK
+R87a  R87a_impatto_fix_NZDUSD.txt    23:58:58   23:59:55  1.0       2      2/2    OK
+R87a  R87a_impatto_fix_XAUUSD.txt    23:59:55   00:01:38  1.7       2      2/2    OK
+R87a  R87aV1_impatto_fix_USDCHF.txt  00:01:38   00:02:34  0.9       2      2/2    OK
+R87a  R87aV1_impatto_fix_USDCAD.txt  00:02:34   00:03:41  1.1       2      2/2    OK
+R87a  R87aV1_impatto_fix_NZDUSD.txt  00:03:41   00:04:39  1.0       2      2/2    OK
+R87a  R87aV1_impatto_fix_XAUUSD.txt  00:04:39   00:06:07  1.5       2      2/2    OK
+R89   R89a_liqsweep_GBPUSD.txt       00:06:07   00:07:20  1.2       2      2/2    OK
+R89   R89b_liqsweep_londra_GBPUSD.txt 00:07:20   00:11:26  4.1       9      9/9    OK
+R86   R86a_nudo_XAUUSD.txt           00:11:27   00:13:38  2.2       2      2/2    OK
+R86   R86b_volumi_XAUUSD.txt         00:13:38   00:15:15  1.6       2      2/2    OK
+R86   R86c_ema200_XAUUSD.txt         00:15:15   00:16:57  1.7       2      2/2    OK
+R86   R86d_opposta_XAUUSD.txt        00:16:57   00:18:52  1.9       2      2/2    OK
+R86   R86a_nudo_D30EUR.txt           00:18:52   00:19:25  0.6       2      2/2    OK
+R86   R86b_volumi_D30EUR.txt         00:19:25   00:19:56  0.5       2      2/2    OK
+R86   R86c_ema200_D30EUR.txt         00:19:56   00:20:27  0.5       2      2/2    OK
+R86   R86d_opposta_D30EUR.txt        00:20:27   00:20:59  0.5       2      2/2    OK
+R87b  R87b_griglia_USDCHF.txt        00:20:59   00:34:58  14.0      144    144/144 OK
+R87b  R87b_griglia_USDCAD.txt        00:34:58   01:00:33  25.6      144    144/144 OK
+R87b  R87b_griglia_NZDUSD.txt        01:00:33   01:14:23  13.8      144    144/144 OK
+R87b  R87b_griglia_XAUUSD.txt        01:14:23   01:58:37  44.2      144    144/144 OK

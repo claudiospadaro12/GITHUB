@@ -1,0 +1,68 @@
+REFERTO DELLA NOTTE  --  R88 (firmato) + R87 + R89 + R86 (SIGILLATI)
+data: 2026-08-20 01:58:38   (questa data deve essere di ADESSO)
+avvio: 2026-08-19 23:42:37
+durata: 2.3 ore
+pin: c7714a8255b0224b62cd75b65386b9d5883f7ed1
+terminale: C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+
+--- LAVORI ---
+ROUND FILE                           EA                     ETICH     ATT    IS     OOS      ESITO
+R88   R88a_stoplargo_U30USD.txt      ABTG_ORB_Ottimizzato   r88a      48     48     48       OK [8.0 min]
+R88   R88b_ricettacorso_U30USD.txt   ABTG_ORB_Ottimizzato   r88b      8      8      8        OK [2.1 min]
+R88   R88c_geometria_U30USD.txt      ABTG_ORB_Ottimizzato   r88c      4      4      4        OK [1.3 min]
+R88   R88c2_pre_U30USD.txt           ABTG_ORB_Ottimizzato   r88c2     4      4      4        OK [1.2 min]
+R88   R88c3_or30_U30USD.txt          ABTG_ORB_Ottimizzato   r88c3     4      4      4        OK [1.1 min]
+R87a  R87a_impatto_fix_USDCHF.txt    ABTG_GoldenCross       r87achf   2      2      2        OK [0.9 min]
+R87a  R87a_impatto_fix_USDCAD.txt    ABTG_GoldenCross       r87acad   2      2      2        OK [1.1 min]
+R87a  R87a_impatto_fix_NZDUSD.txt    ABTG_GoldenCross       r87anzd   2      2      2        OK [1.0 min]
+R87a  R87a_impatto_fix_XAUUSD.txt    ABTG_GoldenCross_Ottimizzato r87aoro   2      2      2        OK [1.7 min]
+R87a  R87aV1_impatto_fix_USDCHF.txt  ABTG_GoldenCross_V1    r87achfv1 2      2      2        OK [0.9 min]
+R87a  R87aV1_impatto_fix_USDCAD.txt  ABTG_GoldenCross_V1    r87acadv1 2      2      2        OK [1.1 min]
+R87a  R87aV1_impatto_fix_NZDUSD.txt  ABTG_GoldenCross_V1    r87anzdv1 2      2      2        OK [1.0 min]
+R87a  R87aV1_impatto_fix_XAUUSD.txt  ABTG_GoldenCross_V1    r87aorov1 2      2      2        OK [1.5 min]
+R89   R89a_liqsweep_GBPUSD.txt       ABTG_LiquiditySweep    r89agbp   2      2      2        OK [1.2 min]
+R89   R89b_liqsweep_londra_GBPUSD.txt ABTG_LiquiditySweep    r89bgbp   9      9      9        OK [4.1 min]
+R86   R86a_nudo_XAUUSD.txt           ABTG_CrossEma          r86aoro   2      2      2        OK [2.2 min]
+R86   R86b_volumi_XAUUSD.txt         ABTG_CrossEma          r86boro   2      2      2        OK [1.6 min]
+R86   R86c_ema200_XAUUSD.txt         ABTG_CrossEma          r86coro   2      2      2        OK [1.7 min]
+R86   R86d_opposta_XAUUSD.txt        ABTG_CrossEma          r86doro   2      2      2        OK [1.9 min]
+R86   R86a_nudo_D30EUR.txt           ABTG_CrossEma          r86adax   2      2      2        OK [0.6 min]
+R86   R86b_volumi_D30EUR.txt         ABTG_CrossEma          r86bdax   2      2      2        OK [0.5 min]
+R86   R86c_ema200_D30EUR.txt         ABTG_CrossEma          r86cdax   2      2      2        OK [0.5 min]
+R86   R86d_opposta_D30EUR.txt        ABTG_CrossEma          r86ddax   2      2      2        OK [0.5 min]
+R87b  R87b_griglia_USDCHF.txt        ABTG_GoldenCross       r87bchf   144    144    144      OK [14.0 min]
+R87b  R87b_griglia_USDCAD.txt        ABTG_GoldenCross       r87bcad   144    144    144      OK [25.6 min]
+R87b  R87b_griglia_NZDUSD.txt        ABTG_GoldenCross       r87bnzd   144    144    144      OK [13.8 min]
+R87b  R87b_griglia_XAUUSD.txt        ABTG_GoldenCross_Ottimizzato r87boro   144    144    144      OK [44.2 min]
+
+ATT = celle attese PER FINESTRA. IS/OOS = righe vere nel CSV (-1 = CSV assente).
+
+--- FINESTRE E PROFONDITA' DEI TICK (PASSO 0) ---
+  R86   D30EUR  2024.09.26   tick dal 2024.09.26             ok
+  R86   XAUUSD  2024.09.26   tick dal NON MISURATO           NON MISURATO
+  R87a  NZDUSD  2024.07.05   tick dal NON MISURATO           NON MISURATO
+  R87a  USDCAD  2024.07.05   tick dal NON MISURATO           NON MISURATO
+  R87a  USDCHF  2024.07.05   tick dal NON MISURATO           NON MISURATO
+  R87a  XAUUSD  2024.09.26   tick dal NON MISURATO           NON MISURATO
+  R87b  NZDUSD  2024.07.05   tick dal NON MISURATO           NON MISURATO
+  R87b  USDCAD  2024.07.05   tick dal NON MISURATO           NON MISURATO
+  R87b  USDCHF  2024.07.05   tick dal NON MISURATO           NON MISURATO
+  R87b  XAUUSD  2024.09.26   tick dal NON MISURATO           NON MISURATO
+  R88   U30USD  2024.09.26   tick dal NON MISURATO           NON MISURATO
+  R89   GBPUSD  2024.07.05   tick dal NON MISURATO           NON MISURATO
+
+--- NOTE E DERIVAZIONI DICHIARATE ---
+  - R87aV1_USDCHF: tolte le righe InpMaxDistEma21ATR, InpRequireAdxRising (assenti nella v1.00)
+  - R87aV1_USDCAD: tolte le righe InpMaxDistEma21ATR, InpRequireAdxRising (assenti nella v1.00)
+  - R87aV1_NZDUSD: tolte le righe InpMaxDistEma21ATR, InpRequireAdxRising (assenti nella v1.00)
+  - R87aV1_XAUUSD: tolte le righe InpMaxDistEma21ATR, InpRequireAdxRising (assenti nella v1.00)
+  - R87a XAUUSD: il 'dopo' e' ABTG_GoldenCross_Ottimizzato, il 'prima' e' ABTG_GoldenCross_V1 (copia della v1.00 di ABTG_GoldenCross): CONFRONTO NON ALLA PARI, da leggere come direzione, non come misura.
+  - referto storico: 2026-08-18 21:29  (eta' 26 ore)
+  - ritmo misurato su R88a: 0.08 min/passata; proiezione residua ~1.8 ore
+  - SANITA' R88a: coincide ai 4 decimali (Profit 2 decimali). Riferimento riprodotto.
+
+--- PROBLEMI ---
+  - AVVISO (non bloccante): ABTG_ORB_Ottimizzato.mq5 su HEAD differisce dal pin - il driver e' PINNATO, quindi girera' comunque la versione del pin.
+  - AVVISO (non bloccante): ABTG_GoldenCross_V1.mq5 su HEAD differisce dal pin - il driver e' PINNATO, quindi girera' comunque la versione del pin.
+
+ESITO: OK -- tutti i lavori in coda hanno prodotto le righe attese.
