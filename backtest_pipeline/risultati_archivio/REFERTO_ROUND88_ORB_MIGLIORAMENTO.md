@@ -59,6 +59,50 @@ sample e' quella col rischio peggiore.
 🚫 **FIXED bocciato secco**: profitto piu' alto di tutti (73k) ma **DD 17,9%**,
 quasi doppio del muro. Il criterio di bocciatura secca (DD > 9,7623%) scatta.
 
+
+## 2-bis. 🔴 IL DATO CHE COMPLETA IL QUADRO: il DD in ENTRAMBE le finestre
+
+Guardato dopo (il PF IS da solo non basta a giudicare il rischio):
+
+| cella | IS: PF | **IS: DD** | IS: profit | OOS: PF | **OOS: DD** | OOS: profit |
+|---|---:|---:|---:|---:|---:|---:|
+| **OPPRANGE buf 500, TP in R 1,5** | 1,063 | **4,78%** | **+1.190** | 1,8385 | **3,84%** | +23.003 |
+| OPPRANGE buf 500, TP in R 2,0 | 1,087 | 4,26% | +1.685 | 1,8375 | 5,58% | +23.458 |
+| OPPRANGE buf 0, TP in R 2,0 | 1,046 | 5,02% | +945 | 1,8163 | 5,87% | +24.136 |
+| **HALFRANGE (SEDIA VIVA)** | 1,250 | **7,89%** | +9.509 | 1,6742 | **9,76%** | +41.057 |
+| FIXED | 1,483 | 16,74% | +30.177 | 1,7801 | 17,90% | +73.377 |
+
+**Lo stop largo ha un drawdown minore in TUTTE E DUE le finestre** (4,78 contro
+7,89 nel vecchio; 3,84 contro 9,76 nel recente) **e profitto positivo in
+entrambe**. Non e' un colpo di fortuna su una finestra: e' coerente su due
+periodi indipendenti.
+
+### ⚠️ La tensione fra il criterio firmato e l'Emendamento — dichiarata, non nascosta
+Il cancello 3 firmato dice *"PF IS >= 1,10"*, cioe' giudica il **MERITO** sulla
+finestra **vecchia**. L'Emendamento della finestra (regola B, congelato il
+16/08) dice l'opposto: **il vecchio giudica il RISCHIO, il recente giudica il
+MERITO**. Applicando la regola B:
+- **RISCHIO** (finestra vecchia): DD IS **4,78% contro 7,89%** -> vince lo stop largo.
+- **MERITO** (finestra recente): PF OOS **1,84 contro 1,67** -> vince lo stop largo.
+
+**R88 non promuove lo stesso**, perche' i criteri firmati valgono per il round
+in cui sono stati firmati e non si riscrivono dopo aver visto i numeri. La
+regola di casa e' esplicita: *un criterio migliore vale dal round DOPO*.
+Quello che segue e' quindi una **proposta per il round dopo**, non una
+promozione mascherata.
+
+### 📐 Il conto che interessa a una prop
+Su un conto da 100.000, nel periodo OOS:
+
+| | profitto | DD massimo | quanto budget di rischio consuma per arrivare a +10% |
+|---|---:|---:|---|
+| sedia viva | +41,1% | **9,76%** | tocca quasi il muro del 10% |
+| stop largo (buf 500 / TP R 1,5) | +23,0% | **3,84%** | poco piu' di un terzo del muro |
+
+La sedia viva guadagna di piu' **ma passa il round sfiorando il muro**; lo stop
+largo arriva al target di una challenge consumando **un terzo** del budget di
+drawdown. Per una prop e' la metrica che decide.
+
 ## 3. 🚫 LA RICETTA DEL CORSO: BOCCIATA, e senza appello
 
 | CloseConfirm | Volumi | EMA 9/21 | PF IS | PF OOS | DD OOS | n OOS |
