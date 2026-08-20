@@ -1,0 +1,165 @@
+# =====================================================================
+#  R90c / PROVA DI REGIME - FINESTRA  L A T E R A L E    U30USD_EXT M5
+#  EA: ABTG_ORB_Ottimizzato v1.02   (sedia viva in campo: magic 770611)
+#
+#  DUE CELLE CONGELATE, ZERO GRIGLIA. Driver: prova_regime.ps1
+#  Criteri: risultati_archivio\R90_CRITERI.md  -- E' UNA BOZZA:
+#  **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri di
+#  R90 non si guardano.
+#
+#  >>> LA FINESTRA DI QUESTO FILE <<<
+#    @FINESTRA  LATERALE
+#    @DA        2015.01.01
+#    @A         2015.12.31
+#    Perche': e' l'anno in cui il Dow apre e chiude quasi allo stesso
+#    punto oscillando dentro una banda, con il flash crash di agosto
+#    2015 dentro. E' il regime che fa WHIPSAW SULL'EMA200, cioe' il
+#    nemico naturale di questa cella (il filtro EMA200 e' acceso).
+#
+#    >>> QUESTA FINESTRA E' NUOVA E SOSTITUISCE IL 2019 DI R50. Va
+#        detto, perche' e' l'unico punto in cui mi sono staccato dalla
+#        macchina gia' costruita: sul FOREX il 2019 era laterale, sul
+#        DOW il 2019 fa +22%, cioe' e' un TORO. Riusare quella data
+#        qui vorrebbe dire etichettare male un regime e rispondere a
+#        un'altra domanda. Le altre tre finestre restano identiche a
+#        R50/R56/R59 (PROVA_REGIME_CRITERI.md paragrafo 3).
+#        L'etichetta "laterale" e' comunque [DICHIARATA], non ancora
+#        verificata sul nostro feed: il rendimento vero del 2015 va
+#        scritto a referto accanto ai numeri.
+#
+#    >>> ATTENZIONE, P5 DEI CRITERI: prova_regime.ps1 ha le finestre
+#        SCRITTE FISSE nel sorgente (riga ~70) e le gira TUTTE per ogni
+#        file celle. Le righe @FINESTRA/@DA/@A qui sopra il driver NON
+#        LE LEGGE ANCORA. Prima del lancio serve un parametro finestra
+#        (o un driver dedicato). Se si lancia com'e', il driver gira
+#        il suo LATERALE 2019 AL POSTO del 2015 chiesto qui -- e sul
+#        Dow il 2019 NON e' laterale: numeri giusti, domanda sbagliata.
+#        E' il modo in cui un round si rovina in silenzio.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO. Due lavori insieme non si sommano: si
+#       rovinano a vicenda.
+#    2. QUESTO ROUND NON PARTE finche' non sono verdi i prerequisiti
+#       P0-P5 dei criteri (paragrafo 3.4): profondita' tick di U30USD
+#       misurata, dati Dukascopy scaricati e importati in U30USD_EXT,
+#       shift +5, cancello zero, canarino di riproduzione, driver.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi da verificare in console.
+#       LA RIGA DI LANCIO NON STA IN QUESTO FILE: la scrive un altro
+#       agente DOPO la misura dei tick.
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO -- E LA CONSEGUENZA, DETTA PRIMA
+#    DATO:     barre M1 OHLC importate da Dukascopy (USA30IDXUSD, dati
+#              dal 2012) nel simbolo custom U30USD_EXT.
+#    MODELLO:  1 (OHLC M1). NON sono tick reali, e non possono esserlo:
+#              BCM ha U30USD dal 2024.09.26 con stato COMPLETO, cioe'
+#              il broker non ha altro (sonda del 17/08).
+#
+#    >>> QUINDI I NUMERI DI QUESTO FILE VALGONO SOLO PER IL RISCHIO
+#        (drawdown). MAI PER IL MERITO (PF, profitto). <<<
+#        Su un breakout intraday su M5 il modello OHLC non conosce la
+#        sequenza dentro il minuto: stop e target nella stessa barra li
+#        ordina il tester, non il mercato. Il DD misurato cosi' e'
+#        plausibilmente OTTIMISTA [INFERITO]. Due conseguenze:
+#          - un DD gia' brutto su OHLC e' doppiamente brutto;
+#          - il confronto vale solo RELATIVO, cella contro cella dentro
+#            lo stesso feed e la stessa finestra. MAI "OHLC 2015 contro
+#            tick 2026" (regola gia' congelata in
+#            PROVA_REGIME_CRITERI.md paragrafo 2).
+# ---------------------------------------------------------------------
+#  IL CONTEGGIO OPERAZIONI -- ATTESO, E COSA SUCCEDE SE NON C'E'
+#    Frequenza misurata della cella in R88: 71 trade / ~175 giorni di
+#    borsa (IS) e 119 / ~267 (OOS) = ~0,42 trade per giorno di borsa.
+#    LATERALE 2015: ~252 giorni di borsa -> n ATTESO 60 - 110.
+#    Soppressore atteso: l'EMA200 in whipsaw taglia qualche giorno, ma
+#    non quanto in un orso.
+#
+#    LA REGOLA, DECISA PRIMA (valvola R59):
+#      n >= 30  -> finestra MISURABILE: il confronto sul DD vale, e puo'
+#                  far PASSARE o far CADERE lo stop largo.
+#      n <  30  -> NON MISURABILE per il confronto: il numero si scrive,
+#                  il verdetto no. NON puo' far passare lo stop largo.
+#      n =   0  -> finestra SCOPERTA: quel regime non e' stato provato.
+#      ASIMMETRIA: a QUALUNQUE n, un DD oltre il muro assoluto (20%)
+#      BOCCIA lo stesso. Un drawdown e' un fatto accaduto, non una
+#      stima. Si sospende "quanto e' bravo", mai "quanto puo' farmi
+#      male".
+#
+#    >>> IL CONTEGGIO OPERAZIONI (colonna Trades del CSV) VA SCRITTO
+#        ACCANTO A OGNI NUMERO, senza eccezioni. Un numero senza n non
+#        entra nel referto.
+#    >>> E VA SCRITTO ANCHE IL RENDIMENTO VERO DEL DOW IN QUESTA
+#        FINESTRA, letto dai dati che si usano: l'etichetta "TORO" e'
+#        DICHIARATA, non ancora verificata su questo feed.
+# ---------------------------------------------------------------------
+#  I CANARINI, DA LEGGERE PRIMA DEI NUMERI VERI
+#    (1) n(LARGO) DEVE essere UGUALE a n(VIVA). Misurato in R88: 71 e
+#        71 in IS, 119 e 119 in OOS. Le due celle differiscono solo su
+#        stop, target e quindi lotto -- cioe' sulle USCITE; gli
+#        ingressi (pendenti STOP a 10 punti oltre il livello, un solo
+#        trade al giorno) sono identici. Se i due n differiscono,
+#        qualcosa ha toccato gli INGRESSI: ci si ferma e si capisce
+#        prima di leggere altro.
+#    (2) LE DUE RIGHE GEMELLE DEL MAGIC devono uscire identiche al
+#        centesimo (il driver spazza InpMagic su due valori apposta:
+#        32/32 in R50, 70/70 in R59). Se divergono, il CSV non si legge.
+#    (3) CANARINO DI RIPRODUZIONE (P4 dei criteri, si fa PRIMA di tutte
+#        e quattro le finestre): stesse due celle sulla finestra di
+#        sovrapposizione 2024.09.26 -> 2026.06.30, dove abbiamo SIA i
+#        tick BCM SIA le barre Dukascopy. Deve uscire DD(largo) <
+#        DD(viva) E PF(largo) > PF(viva), cioe' lo stesso VERSO del
+#        fatto misurato a tick da R88. Se il verso si inverte, il
+#        modello OHLC non sa rispondere a questa domanda e le quattro
+#        finestre NON SI LEGGONO.
+# ---------------------------------------------------------------------
+#  DA DOVE NASCONO LE DUE CELLE (e l'onesta' va detta al contrario)
+#    NON escono da un'esplorazione nuova: escono da R88, cioe' da
+#    numeri GIA' VISTI (REFERTO_ROUND88_ORB_MIGLIORAMENTO.md, CSV in
+#    risultati_archivio\r88_csv\, commit 72e94b1):
+#      SEDIA VIVA  SLMode=3 buf 0 TP range 1,5:
+#         IS  PF 1,250  DD 7,8885%  +9.509,39  n=71
+#         OOS PF 1,6742 DD 9,7623%  +41.057,00 n=119
+#      STOP LARGO  SLMode=0 buf 500 TP in R 1,5:
+#         IS  PF 1,063  DD 4,7839%  +1.190,21  n=71
+#         OOS PF 1,8385 DD 3,8395%  +23.003,35 n=119
+#    Quindi R90 NON e' una scoperta: e' una PROVA DI FALSIFICAZIONE di
+#    un fatto trovato in UN SOLO REGIME.
+#    LA DOMANDA: lo stop largo tiene il drawdown basso in TUTTI i
+#    regimi, o solo nel toro 2024-2026?
+#    LA FALSIFICAZIONE: se in anche UNA sola finestra misurabile lo
+#    stop largo fa un DD PEGGIORE della sedia viva (oltre la tolleranza
+#    di 0,10 punti percentuali), la tesi cade e R90 non propone niente.
+#
+#    >>> PER QUESTO LA GRIGLIA E' VIETATA. Due celle, parametri
+#        CONGELATI, zero ottimizzazione. Spazzolare un asse qui
+#        vorrebbe dire cercare la cella bella dentro i dati vecchi:
+#        curve fitting con piu' anni.
+# ---------------------------------------------------------------------
+#  LE UNITA', MISURATE E NON ASSUNTE
+#    100 PUNTI MT5 = 1 PUNTO INDICE su U30USD (REFERTO_ROUND55_SLIPPAGE
+#    e prove\R55b_slippage_ORB.txt riga 25). Quindi InpSLBufferPts=500
+#    sono 5 PUNTI INDICE, che sono i "5-10 punti" del ToolKit ABTG 5.1.
+#  GLI ORARI SONO IN ORA SERVER BCM (= ora italiana - 1)
+#    range 14:30-14:45 server = 15:30-15:45 italiane (apertura di Wall
+#    Street, 09:30 New York); fine giornata 21:00 server = 22:00 IT.
+#  IL RISCHIO E' 1,00% E NON E' LA TAGLIA DI CAMPO (0,3%): e' il valore
+#    comune che rende le celle confrontabili con R15/R54b/R55/R88. Il
+#    riporto del DD alla taglia di campo e' una proporzione [INFERITO],
+#    non una misura.
+# ---------------------------------------------------------------------
+#  FORMATO DELLE RIGHE (quello che prova_regime.ps1 sa leggere):
+#    etichetta | EA | simbolo | periodo grafico | input;input;...
+#  Il driver aggiunge da solo il suffisso _EXT al simbolo e lo sweep
+#  gemello di InpMagic: per questo InpMagic NON va scritto qui.
+#  Il corpo pinnato e' IDENTICO nelle due celle e nei quattro file di
+#  R90 (a, b, c, d). Cambiano SOLO i quattro input della geometria
+#  dello stop e la finestra. Verificare con un diff prima di lanciare.
+# =====================================================================
+
+ORB_VIVA  | ABTG_ORB_Ottimizzato | U30USD | M5 | InpSLMode=3;InpSLBufferPts=0;InpTPMode=1;InpTPRangeMult=1.5;InpTP_R=1.5;InpRangeStartHour=14;InpRangeStartMin=30;InpRangeEndHour=14;InpRangeEndMin=45;InpEndHour=21;InpEndMin=0;InpCloseAtEnd=1;InpOneTradePerDay=1;InpPendingExpiryMin=600;InpUseCloseConfirm=0;InpEntryPoints=10;InpK=1.0;InpAllowLong=1;InpAllowShort=0;InpExecTF=5;InpTP1Pct=0;InpBreakeven=1;InpUseTrailEMA=1;InpEmaFast=9;InpEmaSlow=21;InpExitOnEmaClose=0;InpUseEmaFilter=0;InpUseEma200Filter=1;InpEma200Period=200;InpMinRangePct=0;InpMaxRangePct=0.8;InpUseVolumeFilter=0;InpRiskPercent=1.0;InpSlippagePts=0;InpUseNewsFilter=0;InpUsaGuardian=1;InpMaxSpread=0;InpVerbose=0
+
+ORB_LARGO | ABTG_ORB_Ottimizzato | U30USD | M5 | InpSLMode=0;InpSLBufferPts=500;InpTPMode=0;InpTPRangeMult=1.5;InpTP_R=1.5;InpRangeStartHour=14;InpRangeStartMin=30;InpRangeEndHour=14;InpRangeEndMin=45;InpEndHour=21;InpEndMin=0;InpCloseAtEnd=1;InpOneTradePerDay=1;InpPendingExpiryMin=600;InpUseCloseConfirm=0;InpEntryPoints=10;InpK=1.0;InpAllowLong=1;InpAllowShort=0;InpExecTF=5;InpTP1Pct=0;InpBreakeven=1;InpUseTrailEMA=1;InpEmaFast=9;InpEmaSlow=21;InpExitOnEmaClose=0;InpUseEmaFilter=0;InpUseEma200Filter=1;InpEma200Period=200;InpMinRangePct=0;InpMaxRangePct=0.8;InpUseVolumeFilter=0;InpRiskPercent=1.0;InpSlippagePts=0;InpUseNewsFilter=0;InpUsaGuardian=1;InpMaxSpread=0;InpVerbose=0

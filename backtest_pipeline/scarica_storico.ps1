@@ -280,6 +280,8 @@ $scaduto = (Get-Date).AddMinutes($TimeoutMin)
 $ultimaLen  = -1
 $fermoDa    = 0
 $visto      = $false
+$finito     = $false
+$faseTick   = $false
 while ((Get-Date) -lt $scaduto) {
   Start-Sleep -Seconds 15
 
@@ -297,15 +299,27 @@ while ((Get-Date) -lt $scaduto) {
   if ($coda -match "=== FINITO") {
     Write-Host "  lo script ha stampato la sua riga di chiusura: ha finito." -ForegroundColor Green
     $visto = $true
+    $finito = $true
     break
   }
   if ($coda -match "ABTG_HistoryDownloader") { $visto = $true }
+
+  # --- FASE TICK: il CSV NON CRESCE PER ORE ---------------------------
+  #  DIFETTO PAGATO (classe 30 della checklist, 20/08): la riga TICK del
+  #  CSV la scrive ABTG_HistoryDownloader.mq5 (righe 219-232) SOLO quando
+  #  DownloadTicks ha finito. Fra "TICK : scarico..." e "=== FINITO" il
+  #  file resta della STESSA lunghezza anche per ore: il guardiano dei 15
+  #  minuti qui sotto ammazzerebbe MT5 in mezzo allo scaricamento dei
+  #  tick, e il referto uscirebbe SENZA la riga TICK, con codice 0.
+  #  Durante la fase tick l'unico limite ammesso e' -TimeoutMin.
+  if ($coda -match "TICK : scarico") { $faseTick = $true }
 
   if (-not (Test-Path $CsvOut)) { continue }
   $visto = $true
   $len = 0
   try { $len = (Get-Item $CsvOut -ErrorAction Stop).Length } catch { continue }
   if ($len -eq $ultimaLen) {
+    if ($faseTick) { continue }   # vedi sopra: qui il silenzio e' NORMALE
     $fermoDa += 15
     if ($fermoDa -ge 900) {               # 15 minuti, non 1
       Write-Host "  fermo da 15 minuti senza riga di chiusura: mi fermo qui." -ForegroundColor Yellow
@@ -366,3 +380,15 @@ try {
 Write-Host ""
 Write-Host "La colonna che serve e' PrimaDataServer: e' la data VERA da cui" -ForegroundColor Cyan
 Write-Host "parte lo storico, quella da passare a -DaQuando." -ForegroundColor Cyan
+Write-Host "(sulle righe TICK PrimaDataServer vale sempre '-': li' si legge PrimaDataLocale)" -ForegroundColor Cyan
+
+# --- UN TIMEOUT NON PUO' USCIRE 0 (checklist punto 19.2) -------------
+#  Se "=== FINITO" non e' mai arrivato, MT5 e' stato fermato a meta':
+#  il referto qui sopra e' PARZIALE. Si esce 2 DOPO la raccolta, cosi'
+#  l'artefatto c'e' lo stesso e chi chiama decide (checklist 26-bis).
+if (-not $finito) {
+  Write-Host ""
+  Write-Host "ATTENZIONE: la riga di chiusura '=== FINITO' non e' mai arrivata." -ForegroundColor Red
+  Write-Host "MT5 e' stato fermato dal timeout: IL REFERTO E' PARZIALE." -ForegroundColor Red
+  exit 2
+}
