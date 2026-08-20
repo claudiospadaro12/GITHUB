@@ -926,3 +926,84 @@ fortuna, non per progetto.**
 > Corollario: **la fine anticipata di un guardiano non puo' uscire 0** (punto
 > 19.2), e chi chiama controlla comunque **la riga che quella fase doveva
 > produrre** (`U30USD,TICK`), mai il solo codice d'uscita.
+
+---
+
+## 🆕 AGGIUNTA DEL 20/08/2026 — trovata verificando le due righe di R84 (ablazione filtri Nasdaq)
+
+## 31. 🪞 L'ANTEPRIMA CHE NON RISPECCHIA I PARAMETRI CHE LE HAI PASSATO
+
+_Difetto vero, gia' committato in `walkforward_generico.ps1` (riga 514 contro
+riga 645), trovato PRIMA dell'invio della riga del giro a vuoto di R84._
+
+Il punto 5 dice: *"si legge la stampa di `-SoloControllo` e si confronta col
+file prova"*. Il punto 14 dice che il giro a vuoto puo' uscire 0 anche se un
+pezzo e' fallito. Questo e' il terzo modo di rompere un giro a vuoto, ed e' il
+piu' subdolo perche' **l'anteprima esce, e' fresca, ed e' sbagliata**: il ramo
+di prova scrive un valore **HARDCODED** al posto del parametro ricevuto.
+
+```powershell
+# riga 514, ramo -SoloControllo
+Model=4
+# riga 645, corsa VERA
+Model=$Modello
+```
+
+`-Modello 1` in giro a vuoto stampa comunque `Model=4`. Su R84 non e'
+ipotetico: i criteri (`prove/R84_ABLAZIONE_CRITERI.md` §3.1) prevedono
+**esplicitamente** di scendere a modello 1 se i tick degli indici non ci sono —
+cioe' esattamente il caso in cui l'anteprima mentirebbe, e l'illusione OHLC in
+questa casa ha gia' revocato una promozione (SupRev DOW H4, FIRMA 5).
+
+Stessa riga, secondo sintomo: **il parametro che DISTINGUE i sotto-giri e' morto
+nel ramo di prova**. `-Etichetta` e' usata solo a riga 608, *dopo* l'`exit 0` di
+riga 538, e il nome dell'anteprima (riga 504) e'
+`anteprima_<EA>_<Simbolo><Broker>.ini` — **senza etichetta**. Nove celle sullo
+stesso EA e sullo stesso simbolo scrivono **nove volte lo stesso file**: alla
+fine ne resta **UNA**, quella dell'ultima cella, e non c'e' niente che lo dica.
+E' il punto 26 (due chiamate, una sola raccolta) visto dal lato del *dry-run*.
+
+> **Prima di fidarsi di un `-SoloControllo`/`-Prova`/`--dry-run`, si apre il
+> RAMO DI PROVA e si verifica, parametro per parametro, che scriva le VARIABILI
+> e non delle costanti** — e che il nome dell'artefatto contenga **il
+> discriminante** dei sotto-giri. Due contromisure, dal lato della riga, senza
+> toccare lo script:
+> ```powershell
+> Remove-Item $anteprima -Force -EA SilentlyContinue   # PRIMA di ogni sotto-giro
+> ...
+> Move-Item $anteprima (Join-Path $sosta "R84$c.ini") -Force   # nome PROPRIO, SUBITO
+> if($n -ne 9){ throw "ANTEPRIME $n invece di 9" }
+> ```
+> E il fix allo script (`Model=$Modello`, etichetta nel nome dell'anteprima) va
+> in coda come lavoro a se', dichiarato nel referto.
+
+### 31-bis. 🫥 IL FILTRO CHE, SE GLI MANCA IL DATO, DIVENTA NEUTRO IN SILENZIO
+
+_Stesso giro. Le celle **H** e **I** di R84 accendono `InpUseCorrelation` su
+`InpCorrSymbol="SPXUSD"`, ma il PASSO 0 dei criteri (§3.1) misura la profondita'
+di **`NASUSD` e basta**._
+
+`ABTG_Nasdaq_Apertura_US.mq5`, `SymbolTrendDir()` righe 1620-1635:
+
+```mql5
+if(hf == INVALID_HANDLE || hs == INVALID_HANDLE) return(0);
+...
+if(CopyBuffer(hf,0,1,1,f) == 1 && CopyBuffer(hs,0,1,1,s) == 1) dir = ...
+```
+e al chiamante: `int c = SymbolTrendDir(...); if(c != 0) bias = CombineBias(bias, c);`
+
+Storico del simbolo guida assente o troppo corto -> `0` -> **il filtro non filtra
+niente** e la cella esce **identica alla baseline**. Il round scriverebbe *"la
+correlazione e' neutra"* misurando invece **un filtro che non ha mai girato**.
+E' lo stesso ragionamento con cui gli stessi criteri (§6) escludono apposta il
+filtro news (*"un CSV che non copre il periodo produce una cella identica alla
+baseline e sembrerebbe filtro neutro: sarebbe un numero falso"*) — solo che li'
+il pericolo era stato visto, e sul simbolo guida no.
+
+> **Ogni SIMBOLO SECONDARIO che un EA legge (correlazione, hedge, indice guida)
+> e' un ingresso storico esattamente come il simbolo testato: entra nel PASSO 0,
+> con la sua riga misurata.** Grep secco sul `.mq5` prima di ogni round:
+> `Symbol\s*=|CopyRates\(\s*\w+\s*,|iMA\(\s*sym` — ogni chiamata che NON usa
+> `_Symbol` e' un simbolo da misurare. E se il codice degrada a "neutro" quando
+> il dato manca, la cella non e' "non misurabile": e' **non eseguita**, e va
+> distinta.
