@@ -883,3 +883,46 @@ Corollario, per le righe distruttive: il backup si scrive con i **byte gia'
 letti** dall'handle condiviso (`[IO.File]::WriteAllBytes`), non con `Copy-Item`
 — con MT5 aperto la lettura condivisa riesce dove la copia puo' fallire — e si
 verifica sulla **lunghezza**, non con `Test-Path` (punto 27-ter).
+
+---
+
+## 🆕 AGGIUNTA DEL 20/08/2026 — trovata verificando la misura dei TICK di U30USD
+
+## 30. ⏸️ IL GUARDIANO DI PROGRESSO CHE GUARDA UN FILE CHE, NELLA FASE PIU' LUNGA, NON CRESCE PER COSTRUZIONE
+
+_Difetto vero, gia' committato in `scarica_storico.ps1` (righe 296-314) e
+dichiarato come "residuo" in `REFERTO_R83_R84_PREPARAZIONE.md` (par. 529)
+senza mai essere curato. Trovato PRIMA dell'invio della riga che doveva
+misurare la profondita' dei tick reali di U30USD._
+
+Il punto 8 dice che **il silenzio non e' fine corsa**, e la cura fu una rete:
+"CSV fermo da 15 minuti -> mi fermo". Ma quella rete guarda **la lunghezza del
+CSV**, e la riga `TICK` di quel CSV la scrive `ABTG_HistoryDownloader.mq5`
+(righe 219-232) **solo QUANDO `DownloadTicks` ha finito**: fra
+`TICK : scarico...` e `=== FINITO` possono passare **ore** in cui il file, per
+costruzione, **non cresce di un byte**. Su una corsa perfettamente SANA la
+guardia scatta, `Stop-Process -Force` ammazza MT5 **in mezzo allo scaricamento
+dei tick** (mentre scrive le cache `bases\...\ticks\`), il referto esce **senza
+la riga TICK** e lo script **finisce 0**. E' il punto 19 (il timeout che esce 0)
+con l'aggravante che qui **non e' nemmeno il timeout dichiarato**: `-TimeoutMin`
+puo' valere 240 e la corsa muore a 15 minuti.
+
+Il 18/08 la misura NASUSD/D30EUR e' passata solo perche' i tick erano gia' in
+cache e tutto il PASSO 0 e' durato ~12 minuti: **la guardia non e' scattata per
+fortuna, non per progetto.**
+
+> **Un guardiano di progresso deve osservare un segnale che la fase LENTA
+> produce davvero.** Prima di scriverlo (o di fidarsene) si va a vedere, nel
+> codice di CHI SCRIVE, **quando** quel file viene scritto: se e' scritto solo
+> alla fine, non e' un indicatore di progresso, e' un indicatore di FINE.
+> Due forme accettabili:
+> ```powershell
+> if ($coda -match "TICK : scarico") { $faseTick = $true }   # 1: fase dichiarata dal log...
+> if ($len -eq $ultimaLen) { if ($faseTick) { continue }     #    ...e li' il silenzio e' NORMALE
+> ```
+> oppure si misura **l'artefatto che cresce davvero** (la cartella
+> `bases\<server>\ticks\<simbolo>`). Se non esiste nessun segnale, la fase si
+> dichiara e l'unico limite ammesso e' `-TimeoutMin`.
+> Corollario: **la fine anticipata di un guardiano non puo' uscire 0** (punto
+> 19.2), e chi chiama controlla comunque **la riga che quella fase doveva
+> produrre** (`U30USD,TICK`), mai il solo codice d'uscita.
