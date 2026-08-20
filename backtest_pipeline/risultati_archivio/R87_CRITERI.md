@@ -1,4 +1,4 @@
-# ⚖️ R87 — CRITERI CONGELATI **PRIMA** DEI NUMERI — 📝 **BOZZA DA FIRMARE**
+# ⚖️ R87 — CRITERI CONGELATI **PRIMA** DEI NUMERI — 📝 **FIRMATI**
 
 > ## ✍️ FIRMA DI CLAUDIO: ______________________  data: ____/____/2026, ore ____
 >
