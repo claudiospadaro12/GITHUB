@@ -100,6 +100,32 @@
 //+------------------------------------------------------------------+
 //|  CHANGELOG                                                        |
 //|                                                                   |
+//|  1.03 - CANCELLO DI RR MINIMO (InpMinRR, opt-in, default 0 =      |
+//|    comportamento 1.02 invariato). NASCE DA UN FATTO DEL FORWARD:  |
+//|    20/08/2026, sedia "BB GBPUSD INV S" (magic 772161), short a    |
+//|    1.36246 chiuso in TAKE PROFIT a 1.36221 = +2,5 pip, con lo     |
+//|    stop a 1.36610 = 36,4 pip di rischio. RR 1 : 0,069.            |
+//|    CAUSA STRUTTURALE (letta nel codice, non ipotizzata): lo SL    |
+//|    nasce in ATR (3 x ATR fissi, regola della guida) mentre il TP  |
+//|    nasce dalla GEOMETRIA DELLE BANDE (mediana; banda opposta in   |
+//|    TPMode 1), e nella fase post-bulge le bande si stanno          |
+//|    RESTRINGENDO per costruzione. Le due misure non sono legate:   |
+//|    se all'ingresso il prezzo e' gia' quasi sull'obiettivo, il TP  |
+//|    nasce a due passi e lo stop resta a tre ATR. I due controlli   |
+//|    che c'erano (tpOk e il minimo del broker) verificano solo che  |
+//|    l'obiettivo non sia gia' superato, non che PAGHI il rischio.   |
+//|    InpMinTPatATR esisteva ma era ed e' 0 = spento.                |
+//|    Il cancello vale per ENTRAMBI i pattern (CONT e INV): il TP e' |
+//|    la stessa mediana per tutti e due e l'asimmetria e'            |
+//|    strutturale, non del solo INV. AVVERTENZA DICHIARATA: un       |
+//|    filtro di RR NON e' automaticamente un miglioramento - puo'    |
+//|    tagliare vincenti facili e PEGGIORARE l'aspettativa. Si misura |
+//|    in R91 (criteri congelati PRIMA dei numeri), non si assume.    |
+//|    Nuovo contatore di funnel cO_failRR + RR loggato a ogni        |
+//|    ingresso (con InpMinRR=0 il log da' la DISTRIBUZIONE del RR    |
+//|    senza cambiare un solo trade).                                 |
+//|                                                                   |
+//|                                                                   |
 //|  1.01 - AUTOPSIA DELLA CASCATA DI RILEVAMENTO.                    |
 //|    Il primo scan OHLC (48 simboli x H1/H4 x 3 modi pattern, ~21   |
 //|    mesi) ha prodotto mediana 0 trade per cella e 153/288 celle a  |
@@ -161,7 +187,7 @@
 //|        da OnTester (PrintFunnel). Nessun impatto sul CSV.         |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.02"
+#property version   "1.03"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -245,6 +271,7 @@ input int    InpTPRefreshBars  = 1;     // Aggiornamento del TP sulla mediana og
 input double InpBEatATR        = 1.0;   // GUIDA (opzionale): a +N x ATR riduci il rischio. 0 = spento
 input int    InpBEMode         = 0;     // 0 = SL a META' rischio; 1 = SL a PARI (breakeven)
 input double InpMinTPatATR     = 0.0;   // SCELTA NOSTRA: distanza minima del TP in ATR. 0 = solo il minimo del broker
+input double InpMinRR          = 0.0;   // [1.03] SCELTA NOSTRA: rapporto rischio/rendimento MINIMO all'ingresso, |tp-entry| / |entry-sl|. 0 = SPENTO (comportamento 1.02). Vale per CONT e INV
 
 input group "=== Congestione iniziale (CS / CDA - peso 25% della checklist) ==="
 input bool   InpUseCongestionFilter = false; // default SPENTO: la guida valida il bulge anche senza congestione
@@ -336,6 +363,7 @@ long cE_contNarrow=0, cE_contStd=0, cE_contShadow=0, cE_contRange=0, cE_contRev=
 long cE_invSlope=0, cE_invNarrow=0, cE_invStd=0, cE_invReinf=0, cE_invShadow=0,
      cE_invRange=0, cE_invRev=0, cE_invSolid=0, cE_invBlocked=0;
 long cO_cont=0, cO_inv=0, cO_failTP=0, cO_failSL=0, cO_failLot=0, cO_failSend=0;
+long cO_failRR=0;   // [1.03] ingressi rifiutati dal cancello di RR minimo (InpMinRR)
 
 //--- stato per posizione (SL iniziale: serve alla riduzione del rischio, che
 //    deve essere IDEMPOTENTE e non trasformarsi in un trailing barra per barra;
@@ -1081,6 +1109,26 @@ void Enter(bool isLong,int pattern,double solid)
       if(!bandaOk){ cO_failTP++; Log("banda opposta troppo vicina/gia' superata: nessun ingresso (variante TPMode 1)."); return; }
      }
 
+   //--- [1.03] CANCELLO DI RR MINIMO (opt-in, InpMinRR=0 -> nessun effetto).
+   //    PERCHE' serve: lo SL e' 3 x ATR (volatilita' del bulge, regola fissa
+   //    della guida), il TP e' GEOMETRIA DI BANDE (mediana; banda opposta in
+   //    TPMode 1) che nella fase post-bulge si sta restringendo. Le due misure
+   //    non sono legate fra loro: se all'ingresso il prezzo e' gia' quasi
+   //    sull'obiettivo, il TP nasce a due passi e lo stop resta a tre ATR
+   //    (forward 20/08/2026: +2,5 pip contro 36,4 di rischio, RR 1:0,069).
+   //    Si misura sul TP che va DAVVERO sull'ordine: con InpTPMode=1 quello
+   //    e' la banda opposta (runner), non la mediana del parziale.
+   //    Vale per ENTRAMBI i pattern: l'asimmetria e' strutturale, non del
+   //    solo INV. NON si assume che aiuti: puo' tagliare vincenti facili.
+   double rr = (risk>0.0) ? MathAbs(tp-entry)/risk : 0.0;
+   if(InpMinRR>0.0 && rr<InpMinRR)
+     {
+      cO_failRR++;
+      Log(StringFormat("RR %.3f sotto il minimo richiesto %.2f (obiettivo %s, rischio %s): nessun ingresso.",
+          rr,InpMinRR,DoubleToString(MathAbs(tp-entry),_Digits),DoubleToString(risk,_Digits)));
+      return;
+     }
+
    double lot=LotByRisk(risk);
    if(lot<=0.0){ cO_failLot++; Log("lotto nullo: nessun ingresso."); return; }
 
@@ -1095,11 +1143,11 @@ void Enter(bool isLong,int pattern,double solid)
    gTradesToday++;
    ulong tk=gTrade.ResultOrder();
    PosRegisterBySearch(sl);
-   Log(StringFormat("%s %s @ %s SL %s TP(%s) %s lot %.2f solidita' %.1f%% (ordine %s)",
+   Log(StringFormat("%s %s @ %s SL %s TP(%s) %s RR %.3f lot %.2f solidita' %.1f%% (ordine %s)",
        (pattern==PAT_CONT?"CONTINUAZIONE":"INVERSIONE"),(isLong?"LONG":"SHORT"),
        DoubleToString(entry,_Digits),DoubleToString(sl,_Digits),
        (InpTPMode==1?"banda opposta, parziale sulla mediana":"mediana"),
-       DoubleToString(tp,_Digits),lot,solid,IntegerToString((long)tk)));
+       DoubleToString(tp,_Digits),rr,lot,solid,IntegerToString((long)tk)));
   }
 
 //==================================================================
@@ -1530,10 +1578,10 @@ void PrintFunnel()
                "rigonfioRetest=%d ombre=%d range=%d candelaRigetto=%d solidita=%d bloccati=%d  ==> OK=%d",
                (int)cE_invSlope,(int)cE_invNarrow,(int)cE_invStd,(int)cE_invReinf,(int)cE_invShadow,
                (int)cE_invRange,(int)cE_invRev,(int)cE_invSolid,(int)cE_invBlocked,(int)cO_inv);
-   PrintFormat("[BB-FUNNEL] ORDINI  segnali=%d | scartati in Enter: tp=%d sl=%d lotto=%d invioFallito=%d | "
-               "trade eseguiti=%d",
-               (int)(cO_cont+cO_inv),(int)cO_failTP,(int)cO_failSL,(int)cO_failLot,(int)cO_failSend,
-               (int)TesterStatistics(STAT_TRADES));
+   PrintFormat("[BB-FUNNEL] ORDINI  segnali=%d | scartati in Enter: tp=%d sl=%d rr=%d lotto=%d invioFallito=%d | "
+               "trade eseguiti=%d  (InpMinRR=%.2f)",
+               (int)(cO_cont+cO_inv),(int)cO_failTP,(int)cO_failSL,(int)cO_failRR,(int)cO_failLot,(int)cO_failSend,
+               (int)TesterStatistics(STAT_TRADES),InpMinRR);
   }
 
 double OnTester()

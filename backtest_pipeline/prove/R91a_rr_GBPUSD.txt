@@ -1,0 +1,110 @@
+# =====================================================================
+#  R91a / IL CANCELLO DI RR MINIMO SUL BREAKING BAND   GBPUSD H1
+#  EA: ABTG_BreakingBand v1.03   (sedia viva in campo: magic 772161)
+#  Driver: walkforward_generico.ps1     Etichetta: r91
+#
+#  ASSE UNICO: InpMinRR = 0 / 0.5 / 1.0 / 1.5   -> 4 celle x 2 finestre
+#  Tutto il resto PINNATO alla cella promossa in R33 e misurata in R34.
+#
+#  Criteri: risultati_archivio\R91_CRITERI.md -- E' UNA BOZZA:
+#  **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri di
+#  R91 non si guardano.
+#
+#  >>> QUESTA CELLA E' patt. 2 = CONT + INV INSIEME (combinato).
+#      Su GBPUSD NON si puo' dire QUALE pattern il filtro ha tagliato.
+#      L'effetto PURO si legge sulle sorelle: R91b (EURUSD = solo CONT)
+#      e R91c (AUDUSD = solo INV). Sta scritto nei criteri, par. 2.1.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO. Due lavori insieme non si sommano: si
+#       rovinano a vicenda.
+#    2. LA CODA HA UNA PRECEDENZA, ed e' scritta in
+#       CODA_PROSSIMA_SESSIONE.md: prima la misura della profondita'
+#       tick di U30USD, poi R90 (che quella misura la aspetta), poi
+#       R91. R91 non ha prerequisiti di dati -- ha un prerequisito di
+#       MACCHINA (una sola) e uno di FIRMA.
+#    3. R91 NON PARTE finche' non sono verdi:
+#         (a) la FIRMA dei criteri;
+#         (b) la COMPILAZIONE della v1.03 in MetaEditor, 0 errori
+#             0 warning (l'input InpMinRR non e' mai stato compilato);
+#         (c) il gate del pin sul branch 'lavoro' (attenzione: il gate
+#             ha dato falsi positivi il 19-20/08, vedi la coda).
+#    4. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi da verificare in console.
+#       LA RIGA DI LANCIO NON STA IN QUESTO FILE.
+#    5. LA RACCOLTA DEVE PORTARE VIA ANCHE IL LOG DEL TESTER della
+#       cella InpMinRR=0, non solo i CSV: la v1.03 scrive il RR di
+#       OGNI ingresso ("... RR 0.069 lot ...") e quella e' la
+#       distribuzione che oggi non abbiamo (criteri, par. 5).
+#       I log del tester sono in ORA LOCALE del PC, il grafico e' in
+#       ORA SERVER: non confrontare le due cose.
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO -- E LA CONSEGUENZA, DETTA PRIMA
+#    DATO:     TICK REALI del broker BCM, forex GBPUSD H1.
+#    MODELLO:  "Ogni tick basato su tick reali" (come R33 e R34).
+#    DEPOSITO: 100.000  (-Deposito 100000). NON e' un dettaglio: e'
+#              l'unico modo di riprodurre R34 al centesimo. A 10.000 i
+#              numeri sono quelli di R33 e la riga di sanita' NON torna.
+#
+#    >>> Il dato NON e' il limite di questo round: qui i tick sono
+#        veri e il merito SAREBBE leggibile. Il limite e' il CAMPIONE
+#        (26 trade OOS): vedi sotto. <<<
+# ---------------------------------------------------------------------
+#  IL CONTEGGIO OPERAZIONI -- ATTESO, E COSA SUCCEDE SE NON C'E'
+#    BASE MISURATA in R34 (deposito 100k, tick reali):
+#      IS  2024.09.26 -> 2025.06.09 : +2.667,18 | PF 2,72613 | DD 1,6960 | n=13
+#      OOS 2025.06.10 -> 2026.06.30 : +3.160,10 | PF 1,73020 | DD 3,4801 | n=26
+#      EP/trade OOS = 121,54231.  Frequenza = 2,05 trade/mese.
+#
+#    ATTESO nelle celle con InpMinRR > 0: n MINORE O UGUALE alla base,
+#    MAI maggiore. Un n piu' alto = il filtro non e' un filtro, e il
+#    round si ferma (vuol dire che si e' toccato altro).
+#
+#    LA REGOLA, DECISA PRIMA (valvola R59 + canarino di frequenza):
+#      n OOS >= 18  -> taglio <= 30%: cella PROPONIBILE (se passa i cancelli).
+#      n OOS <  18  -> canarino: la famiglia sfora il tagliando dei 6 mesi.
+#      n OOS <  13  -> taglio > 50%: BOCCIATA SECCA, qualunque numero faccia.
+#      n < 30 (cioe' SEMPRE, gia' alla base) -> il MERITO e' SOSPESO in
+#      tutto R91: esce una PROPOSTA motivata, mai una promozione.
+#      ASIMMETRIA: a QUALUNQUE n il DRAWDOWN si legge lo stesso. Un
+#      drawdown e' un fatto accaduto, non una stima.
+#
+#    >>> IL CONTEGGIO OPERAZIONI (colonna Trades del CSV) VA SCRITTO
+#        ACCANTO A OGNI NUMERO, senza eccezioni. Un numero senza n non
+#        entra nel referto.
+#    >>> E VA SCRITTA ACCANTO LA MISURA DEL ROUND:
+#        aspettativa dei trade TAGLIATI = (Profit_base - Profit_cella)
+#                                         / (n_base - n_cella).
+#        Se viene >= 0 il filtro ha tagliato VINCENTI: bocciato, e non
+#        importa quanto e' bello il resto della riga.
+# ---------------------------------------------------------------------
+#  IL CANARINO DA LEGGERE PRIMA DEI NUMERI VERI
+#    La cella InpMinRR=0 DEVE riprodurre le due righe base qui sopra AL
+#    CENTESIMO. E' la prova che l'input nuovo e' un vero no-op. Se non
+#    torna, la v1.03 ha cambiato qualcosa che non doveva cambiare: si
+#    cerca il perche' PRIMA di leggere qualunque altra riga.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND ESISTE (e la sua onesta')
+#    Forward 20/08/2026, sedia BB GBPUSD INV S (magic 772161): short a
+#    1.36246 chiuso in TAKE PROFIT a 1.36221 = +2,5 pip, con lo stop a
+#    1.36610 = 36,4 pip. RR 1:0,069. Il trade e' VINCENTE: il round non
+#    nasce da una perdita, nasce da un'ASIMMETRIA letta nel sorgente
+#    (SL in ATR, TP in geometria di bande: due misure non legate).
+#    E NON si assume che il filtro migliori: il TP vicino e' anche il
+#    TP FACILE, e tagliarlo puo' PEGGIORARE l'aspettativa. Si misura.
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=2
+InpTPMode=0
+InpRiskPercent=1.0
+InpBulgeWidthMult=1.35
+InpBulgeNetMoveATR=1.0
+
+InpMinRR=0||0||0.5||1.5||Y

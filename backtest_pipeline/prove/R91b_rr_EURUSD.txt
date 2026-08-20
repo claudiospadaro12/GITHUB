@@ -1,0 +1,98 @@
+# =====================================================================
+#  R91b / IL CANCELLO DI RR MINIMO SUL BREAKING BAND   EURUSD H1
+#  EA: ABTG_BreakingBand v1.03   (sedia viva in campo: magic 772162)
+#  Driver: walkforward_generico.ps1     Etichetta: r91
+#
+#  ASSE UNICO: InpMinRR = 0 / 0.5 / 1.0 / 1.5   -> 4 celle x 2 finestre
+#  Tutto il resto PINNATO alla cella promossa in R33 e misurata in R34.
+#
+#  Criteri: risultati_archivio\R91_CRITERI.md -- E' UNA BOZZA:
+#  **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri di
+#  R91 non si guardano.
+#
+#  >>> QUESTA E' LA CELLA CHE MISURA IL PATTERN "CONTINUAZIONE" PURO.
+#      InpPatternMode=0 = solo CONT: qui l'effetto del filtro RR sulla
+#      continuazione si legge SENZA MESCOLANZE. La sorella R91c
+#      (AUDUSD, solo INV) fa lo stesso per l'inversione. R91a (GBPUSD)
+#      e' combinato e NON e' separabile. Criteri, par. 2.1.
+#      Il filtro e' stato messo su ENTRAMBI i pattern perche' il TP
+#      (mediana) e lo SL (3 x ATR) nascono nella STESSA funzione
+#      Enter(), che non guarda il pattern: l'asimmetria e' di Enter(),
+#      non dell'inversione.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima di mandare la riga va dichiarato cosa deve essere finito,
+#       e MT5 va CHIUSO. Due lavori insieme non si sommano.
+#    2. PRECEDENZA IN CODA (CODA_PROSSIMA_SESSIONE.md): prima la misura
+#       tick di U30USD, poi R90, poi R91.
+#    3. R91 NON PARTE senza: (a) FIRMA dei criteri; (b) compilazione
+#       della v1.03 con 0 errori 0 warning; (c) gate del pin verde.
+#    4. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova da 'lavoro' + la riga di raccolta finale
+#       (Desktop + Compress-Archive). NON sta in questo file.
+#    5. RACCOGLIERE ANCHE IL LOG DEL TESTER della cella InpMinRR=0: la
+#       v1.03 scrive il RR di ogni ingresso e quella distribuzione oggi
+#       non ce l'abbiamo (criteri, par. 5). Log = ORA LOCALE del PC.
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO -- E LA CONSEGUENZA, DETTA PRIMA
+#    DATO:     TICK REALI del broker BCM, forex EURUSD H1.
+#    MODELLO:  "Ogni tick basato su tick reali" (come R33 e R34).
+#    DEPOSITO: 100.000  (-Deposito 100000): obbligatorio per riprodurre
+#              R34 al centesimo. A 10.000 escono i numeri di R33.
+#
+#    >>> Il limite di questo round NON e' il dato (i tick sono veri):
+#        e' il CAMPIONE. 13 trade OOS, 4 in IS. <<<
+# ---------------------------------------------------------------------
+#  IL CONTEGGIO OPERAZIONI -- ATTESO, E COSA SUCCEDE SE NON C'E'
+#    BASE MISURATA in R34 (deposito 100k, tick reali):
+#      IS  2024.09.26 -> 2025.06.09 : +1.457,02 | PF 53,79058 | DD 0,7797 | n=4
+#      OOS 2025.06.10 -> 2026.06.30 : +2.069,82 | PF 3,86266 | DD 1,2722 | n=13
+#      EP/trade OOS = 159,21692.  Frequenza = 1,02 trade/mese.
+#
+#    >>> L'IS DI QUESTA SEDIA HA n=4: NON E' UNA FINESTRA, E' UN
+#        ANEDDOTO. Si scrive, non si giudica. (Lo diceva gia' R33:
+#        "nota di fragilita': IS con soli 4 trade".)
+#
+#    ATTESO nelle celle con InpMinRR > 0: n MINORE O UGUALE alla base,
+#    MAI maggiore. Un n piu' alto = si e' toccato altro: round fermo.
+#
+#    LA REGOLA, DECISA PRIMA (valvola R59 + canarino di frequenza):
+#      n OOS >= 9  -> taglio <= 30%: cella PROPONIBILE (se passa i cancelli).
+#      n OOS <  9  -> canarino: la famiglia sfora il tagliando dei 6 mesi.
+#      n OOS <= 6  -> taglio >= 50%: BOCCIATA SECCA.
+#      n < 30 (sempre) -> MERITO SOSPESO in tutto R91.
+#      ASIMMETRIA: a QUALUNQUE n il DRAWDOWN si legge lo stesso.
+#
+#    >>> IL CONTEGGIO OPERAZIONI VA SCRITTO ACCANTO A OGNI NUMERO.
+#    >>> E ACCANTO VA SCRITTA LA MISURA DEL ROUND:
+#        aspettativa dei trade TAGLIATI = (Profit_base - Profit_cella)
+#                                         / (n_base - n_cella).
+#        >= 0 significa che il filtro ha tagliato VINCENTI: bocciato.
+#        ATTENZIONE al campione: con n=13, UN SOLO trade tagliato
+#        muove l'aspettativa dell'8%. Un taglio da 1-2 trade NON e' un
+#        effetto: e' un aneddoto in tabella.
+# ---------------------------------------------------------------------
+#  IL CANARINO DA LEGGERE PRIMA DEI NUMERI VERI
+#    La cella InpMinRR=0 DEVE riprodurre le due righe base qui sopra AL
+#    CENTESIMO: e' la prova che l'input nuovo e' un vero no-op. Se non
+#    torna, si cerca il perche' PRIMA di leggere qualunque altra riga.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND ESISTE (e la sua onesta')
+#    Forward 20/08/2026, sedia BB GBPUSD INV S: TP a +2,5 pip contro
+#    36,4 pip di stop (RR 1:0,069) -- trade VINCENTE. Il round non
+#    nasce da una perdita ma da un'ASIMMETRIA nel sorgente: SL in ATR,
+#    TP in geometria di bande. NON si assume che il filtro migliori:
+#    il TP vicino e' anche il TP FACILE. Si misura.
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=0
+InpTPMode=0
+InpRiskPercent=1.0
+InpBulgeWidthMult=1.35
+InpBulgeNetMoveATR=1.0
+
+InpMinRR=0||0||0.5||1.5||Y

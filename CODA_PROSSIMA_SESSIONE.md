@@ -1,5 +1,96 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # 🆕 20/08 — **R91 E' PRONTO IN BOZZA** — il cancello di RR minimo sul Breaking Band
+>
+> ## 🚦 POSTO IN CODA: **TERZO**. Prima (1) la misura tick U30USD, poi (2) R90, poi (3) R91.
+> R91 **non ha prerequisiti di dati** (i tick forex ci sono, sono gli stessi di
+> R33/R34): ha un prerequisito di **macchina** (il PC di backtest ha un solo
+> MT5) e uno di **firma**.
+>
+> **IL FATTO CHE ORIGINA IL ROUND (misurato oggi sul forward, conto 50503392):**
+> sedia **`BB GBPUSD INV S`** (magic 772161) aperta 20/08 09:00 short a
+> **1.36246**, chiusa 19:13 al **TAKE PROFIT 1.36221** = **+2,69 netto**, con lo
+> stop a **1.36610**. **Guadagno 2,5 pip contro 36,4 pip di rischio: RR
+> 1 : 0,069.** Il trade e' **VINCENTE**: il round nasce da un'**asimmetria letta
+> nel sorgente**, non da una perdita.
+>
+> **La causa, nel codice (v1.02):** lo **SL e' 3 x ATR fissi** (`InpSL_ATRmult`,
+> riga 241) mentre il **TP e' geometria di bande** (`tp=(InpTPMode==1)?
+> bandaRunner:mediana;`, riga ~1068) — e nella fase post-bulge **le bande si
+> stanno restringendo per costruzione**. Le due misure non sono legate: se
+> all'ingresso il prezzo e' gia' quasi sulla mediana, **il TP nasce a due passi e
+> lo stop resta a tre ATR**. I controlli che c'erano (`tpOk`, minimo del broker)
+> verificano solo che l'obiettivo **non sia gia' superato**; `InpMinTPatATR`
+> esiste ma vale **0 = spento**, e misurerebbe una distanza, non un rapporto.
+>
+> **Pronti e pushati:**
+> - **EA `ABTG_BreakingBand` v1.03** — **un solo input nuovo, opt-in**:
+>   `InpMinRR` (default **0 = comportamento 1.02 INVARIATO**). Nuovo contatore
+>   `cO_failRR` nella riga `[BB-FUNNEL] ORDINI`, e **il RR viene loggato a ogni
+>   ingresso anche con InpMinRR=0** (regalo diagnostico: da' la distribuzione
+>   del RR senza cambiare un solo trade). ⚠️ **MAI COMPILATO**: serve F7.
+> - `backtest_pipeline/risultati_archivio/R91_CRITERI.md` — **BOZZA DA FIRMARE**,
+>   scritta a numeri di R91 mai visti (quelli di R33/R34 si', e sta scritto).
+> - i 3 file prova, **asse unico `InpMinRR` = 0 / 0.5 / 1.0 / 1.5**, tutto il
+>   resto pinnato alla cella in campo: `prove/R91a_rr_GBPUSD.txt` (patt. 2,
+>   combinato) · `R91b_rr_EURUSD.txt` (patt. 0 = **solo CONT**) ·
+>   `R91c_rr_AUDUSD.txt` (patt. 1 = **solo INV**). **24 passate a tick reali**,
+>   deposito **100.000**, finestre identiche a R33/R34
+>   (IS 2024.09.26→2025.06.09 · OOS 2025.06.10→2026.06.30).
+>
+> **Il filtro vale per ENTRAMBI i pattern** (CONT e INV) perche' TP e SL nascono
+> nella **stessa `Enter()`**, che non guarda il pattern. E si misurano lo stesso
+> separatamente **gratis**: EURUSD e' solo CONT, AUDUSD e' solo INV.
+>
+> ### ⚠️ LA COSA DA DIRE PRIMA DI TUTTO: **UN FILTRO DI RR NON E' AUTOMATICAMENTE
+> ### UN MIGLIORAMENTO.**
+> Il TP **vicino** e' anche il TP **FACILE**: tagliarlo toglie tante piccole
+> vincite e lascia in piedi i trade con obiettivo lontano, che hanno piu' tempo
+> per andare in stop. **Puo' peggiorare l'aspettativa alzando il PF.** Per questo
+> i cancelli sono scritti sull'**aspettativa per trade** e sul **netto**, **mai**
+> sul win rate.
+>
+> ### Le tre soglie principali, per la firma rapida
+> 1. 🥇 **LA MISURA DEL ROUND — l'aspettativa dei trade TAGLIATI**, calcolata per
+>    differenza: `(Profit_base - Profit_cella) / (n_base - n_cella)`. **Se viene
+>    >= 0 il filtro ha tagliato VINCENTI: bocciato**, e non importa quanto e'
+>    bella la riga. Serve **negativa**, e coerente su **almeno 2 simboli su 3**.
+> 2. 💰 **IL COSTO MASSIMO**: netto OOS **>= 90%** della base
+>    (>= 2.844,09 / 1.862,84 / 1.656,60), **PF >= PF base** (1,73020 / 3,86266 /
+>    2,74743), **DD <= DD base + 0,30 punti**, e aspettativa per trade **>= +20%**
+>    (sotto, su 11-26 trade, non e' distinguibile dal rumore).
+> 3. 🐤 **IL CANARINO DELLA FREQUENZA — il vincolo piu' stretto del round**: le
+>    sedie fanno **2,05 / 1,02 / 0,87 trade al mese** (famiglia 3,94, cioe' 20
+>    operazioni in ~5,1 mesi: dentro il tagliando **per un soffio**). **Taglio
+>    > 30% = canarino** (si sfora il tagliando dei 6 mesi, n OOS < 18 / 9 / 8);
+>    **taglio > 50% = VETO** (n OOS < 13 / 6 / 5). Comprare "qualita'" pagando in
+>    **cecita'** e' un cattivo affare: una sedia che non si puo' misurare non si
+>    puo' nemmeno licenziare.
+>
+> 🔴 **E il MERITO e' SOSPESO in tutto R91** (valvola R59): il campione base e'
+> **11-26 trade per cella**, sotto 30. Da R91 esce **una proposta motivata, mai
+> una promozione automatica**. Il **RISCHIO** si legge lo stesso.
+>
+> ### ⛔ R91 NON SI LANCIA FINCHE' NON SONO VERDI TRE COSE
+> **(a)** la **FIRMA** dei criteri; **(b)** la **compilazione della v1.03** in
+> MetaEditor (0 errori 0 warning: `InpMinRR` non e' mai stato compilato);
+> **(c)** il **gate del pin** su `lavoro` — quello che ha dato falsi positivi il
+> 19-20/08 (vedi il blocco rosso qui sotto): va **riparato, non spento**.
+> ⚠️ **La riga di lancio NON e' stata scritta.** E la raccolta dovra' portare via
+> **anche il log del tester** della cella `InpMinRR=0`, non solo i CSV.
+>
+> ### 📌 TODO gia' agli atti (§8 dei criteri)
+> - **Discrepanza** fra referto R34 / `CONTRATTI_SEDIE.md` (GBPUSD **+3.345, DD
+>   1,9%**) e il CSV `r34` (**+3.160,10, Equity DD 3,4801%**): due strumenti
+>   diversi [INFERITO]. **R91 usa il CSV**; il DD promesso del contratto e' il
+>   metro del **forward**, non del tester. Da chiarire.
+> - **I `.set` del vivaio BB non sono in repo**: il pin viene dai file prova
+>   R34a/b/c + i default della v1.02. **Verifica sul VPS** prima del lancio.
+> - **Ricompilare la v1.03 = `.ex5` nuovo per TUTTE E TRE le sedie vive**:
+>   trafila screenshot + verifica `.chr`, e conferma che i **preset vecchi si
+>   caricano ancora** (`InpMinRR` e' in coda al suo gruppo → default 0).
+
+
 > # 🆕 20/08 mattina — **R90 E' PRONTO IN BOZZA** (la prova di regime dello stop largo ORB)
 >
 > Scelto da Claudio stamattina dopo R88: **"facciamo C e poi A"** — prima la
