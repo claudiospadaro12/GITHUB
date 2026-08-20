@@ -1,5 +1,70 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # 🆕 20/08 mattina — **R90 E' PRONTO IN BOZZA** (la prova di regime dello stop largo ORB)
+>
+> Scelto da Claudio stamattina dopo R88: **"facciamo C e poi A"** — prima la
+> **regola C** (la prova di regime batte la storia contigua), poi la finestra.
+>
+> **La domanda del round:** *lo stop largo tiene il drawdown basso in TUTTI i
+> regimi, o solo nel toro 2024-2026?* (in R88 lo stop largo ha fatto **DD 4,78%
+> contro 7,89% in IS e 3,84% contro 9,76% in OOS**, con **lo stesso identico
+> numero di trade**: 71 e 119 in entrambe le celle — verificato nei CSV.)
+>
+> **Pronti e pushati:**
+> - `backtest_pipeline/risultati_archivio/R90_CRITERI.md` — **BOZZA DA FIRMARE**,
+>   scritta a numeri di R90 mai visti (quelli di R88 si', e sta scritto in testa).
+> - i 4 file prova, **2 sole celle ciascuno** (sedia viva vs stop largo, tutto il
+>   resto pinnato identico, **zero griglia**):
+>   `prove/R90a_toro_U30USD.txt` · `R90b_orso_U30USD.txt` ·
+>   `R90c_laterale_U30USD.txt` · `R90d_crollo_U30USD.txt`.
+>
+> **Le quattro finestre** (tre riusate dalla macchina R50/R56/R59, una nuova):
+> 🐂 TORO **2021.01.01→2021.12.31** · 🐻 ORSO **2022.01.01→2022.10.31** ·
+> ↔️ LATERALE **2015.01.01→2015.12.31** *(NUOVA: il 2019 di R50 sul Dow e' un
+> toro +22%, non un laterale)* · 💥 CROLLO **2020.02.01→2020.04.30**
+> *(riserva gia' decisa: CROLLO_ANNO 2020 intero se esce sotto 30 trade)*.
+>
+> **Le tre soglie che contano, per la firma rapida:**
+> 1. 🥇 **C1 — il cancello centrale**: **DD(stop largo) ≤ DD(sedia viva) + 0,10
+>    punti percentuali in TUTTE E QUATTRO le finestre**, non nella media. *Un
+>    vantaggio che sparisce in un regime non e' un vantaggio.*
+> 2. 🔴 **C2 — muro assoluto, a QUALUNQUE n**: **DD > 20,00%** in una qualunque
+>    finestra = bocciatura secca. (+ **C3 allarme prop**: DD > 10,00% si scrive
+>    in prima pagina e va nel `PIANO_PROP.md`.)
+> 3. 🏅 **Il MERITO si giudica SOLO sulla finestra recente** (PF ≥ 1,40 e
+>    PF(largo) ≥ PF(viva): **gia' verdi da R88**, 1,8385 vs 1,6742).
+>    ⚖️ **Correzione dichiarata, valida da questo round e non retroattiva: il
+>    cancello "PF IS ≥ 1,10" NON si applica** — giudicava il MERITO sulla
+>    finestra VECCHIA, cioe' l'opposto della regola B. E' quello che ha bloccato
+>    R88, e R88 resta non promosso lo stesso.
+>
+> ### ⛔ R90 NON SI LANCIA FINCHE' NON ARRIVANO DUE COSE
+> **(a) la misura della profondita' tick di U30USD**, che e' gia' in coda qui
+> sotto (§4, `scarica_storico.ps1 -Simboli "D30EUR,U30USD" -Timeframes "M1,H1"
+> -Da 2015.01.01 -Auto`). Se — contro le attese — i tick andassero piu' indietro
+> del 26/09/2024, **i criteri si riscrivono**.
+> **(b) la FIRMA dei criteri** da parte di Claudio.
+>
+> 🔴 **E c'e' un terzo blocco, misurato e scomodo: i DATI NON CI SONO ANCORA.**
+> BCM ha U30USD dal **26/09/2024** con stato **`COMPLETO`** = *il broker non ce
+> l'ha*, ne' tick ne' barre. Gli 8 simboli `_EXT` sono **tutti forex e oro**.
+> Quindi le quattro finestre girano su **`U30USD_EXT` da Dukascopy
+> (`USA30IDXUSD`, dati dal 2012), barre M1 OHLC, Modello 1** — e la conseguenza
+> e' scritta prima: **quei numeri valgono SOLO per il RISCHIO, mai per il
+> merito**. Prerequisiti in fila (tutti nel §3.4 dei criteri):
+> `dukascopy_m1.py --autotest` e `--validazione` → import con **shift +5** →
+> **cancello zero** (diff ≤ 0,05%, copertura ≥ 80%) → **canarino di
+> riproduzione** (sulla sovrapposizione 2024-2026 il feed OHLC deve ritrovare lo
+> **stesso verso** del fatto tick di R88, altrimenti non si legge niente) →
+> **P5: `prova_regime.ps1` ha le finestre scritte fisse e non contiene il 2015**,
+> serve un parametro finestra o un driver dedicato.
+>
+> ⚠️ **La riga di lancio NON e' stata scritta**: la fa un altro agente **dopo**
+> la misura dei tick. E R90 **propone**: anche se passa tutto, la messa in campo
+> e' una decisione separata, e la via di casa e' la **sedia gemella in parallelo
+> con magic nuovo** (proposto **770612**, da verificare libero), **mai** la
+> sostituzione della 770611.
+
 > # 🔴 PRIMISSIMA COSA DEL 20/08: LA NOTTE NON E' PARTITA
 >
 > La riga notturna si e' fermata **tre volte** al gate del pin, con tre pin
@@ -576,6 +641,9 @@ tre cose, tutte gia' scritte in `SETACCIO_MANUALE.md`:
 - **DD OOS originale di `COST_EURJPY`** — e' **l'unico numero** che separa
   quella cella da una promozione di rango (criterio A di R59).
 - **Indici a tick reali su BCM**: `-Simboli "D30EUR,U30USD" -Timeframes "M1,H1" -Da 2015.01.01 -Auto`
+  → 🔗 **e' il prerequisito P0 di R90** (vedi il blocco in cima): se i tick di
+  U30USD andassero piu' indietro del 26/09/2024, le quattro finestre di regime
+  si rifanno a tick e non su barre Dukascopy.
 - **Storico Pepperstone degli indici**, a mercato aperto.
 - ~~**Blocco LZMA** per i `.bi5` di Dukascopy~~ → **FATTO il 18/08**: pipeline
   Python pronta in `backtest_pipeline/dukascopy/dukascopy_m1.py` (autotest
