@@ -1,10 +1,10 @@
-# ⚖️ R91 — CRITERI CONGELATI **PRIMA** DEI NUMERI — ✍️ **BOZZA DA FIRMARE**
+# ⚖️ R91 — CRITERI CONGELATI **PRIMA** DEI NUMERI — ✍️ **FIRMATI**
 
-> ## ✍️ FIRMA DI CLAUDIO: ______________________  (data/ora: ______________)
+> ## ✅ FIRMATO DA CLAUDIO IN CHAT: **"firmo R91"** — 20/08/2026, sera.
 >
-> **Finche' questa riga e' vuota, i numeri di R91 non si guardano.**
-> Senza firma il round non parte e i CSV, se per qualunque motivo esistessero
-> gia', restano sigillati.
+> Firma raccolta **a numeri di R91 mai visti** (nessuna passata girata,
+> l'input `InpMinRR` scritto oggi e mai compilato), dopo la presentazione in
+> chat dei tre cancelli e del canarino della frequenza.
 
 _Scritto il **20/08/2026**, a numeri di R91 **MAI VISTI**: nessuna passata di
 R91 e' stata girata, il file prova non e' stato lanciato, l'input nuovo

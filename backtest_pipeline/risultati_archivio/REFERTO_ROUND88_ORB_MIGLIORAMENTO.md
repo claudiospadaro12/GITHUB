@@ -164,3 +164,38 @@ in piu'). Non e' una leva.
 4. Il difetto strutturale trovato nel sorgente (volumi/EMA attivi solo col
    close-confirm) va corretto **se e quando** quel ramo servira' davvero:
    oggi non serve.
+
+---
+
+## 7. ✅ LA MISURA CHE MANCAVA — profondita' dei tick di U30USD (20/08, ore 19:53)
+
+Fatta con `scarica_storico.ps1` pinnato a `e2865cd` (la versione con la cura
+della fase tick), `-Da 2022.01.01`, codice di uscita **0**, referto e CSV agli
+atti in `misura_tick/`.
+
+```
+I TICK REALI DI U30USD PARTONO DAL 2024.09.26   (67.618.571 tick)
+U30USD M1   650.255 barre   dal 2024.09.26  -> IL BROKER NON HA PIU' STORICO
+U30USD M5   130.126 barre   dal 2024.09.26  -> IL BROKER NON HA PIU' STORICO
+U30USD TICK 67.618.571      dal 2024.09.26  -> TICK REALI PARZIALI
+```
+
+**Il muro e' confermato e ORA E' MISURATO**: 26/09/2024, identico per tick e
+per barre. Prima di oggi quel numero veniva da una sonda del 17/08 che aveva
+misurato le **barre H1** — un'altra grandezza. Adesso e' un fatto.
+
+### Le tre conseguenze, senza sconti
+1. **La finestra IS di R88 NON si puo' allungare su BCM.** I 71 trade restano
+   71: i 150 dell'Emendamento (regola A) sono **irraggiungibili con i tick
+   reali del broker**. La sospensione del giudizio di MERITO su R88 e' quindi
+   **definitiva**, non un problema di finestra scelta male.
+2. **La strada per giudicare lo stop largo e' una sola: dati esterni** —
+   cioe' R90 sulle quattro finestre di regime con le barre OHLC Dukascopy.
+   La scelta "C poi A" di Claudio si e' rivelata l'ordine giusto: C ha chiuso
+   la porta di BCM, A e' l'unica rimasta.
+3. 🔴 **E qui c'e' un nodo da dichiarare subito**: i tre simboli importati come
+   `_EXT` il 18/08 sono **NASUSD, 225JPY, SPXUSD** — **U30USD_EXT NON ESISTE**.
+   R90 gira su `U30USD_EXT`: **prima di R90 va importato il Dow da Dukascopy**,
+   e quell'import deve passare il cancello zero (diff <= 0,05%) che i primi tre
+   NON hanno passato (0,0608-0,1010%) e per cui sono ancora in frigo.
+   **R90 non e' lanciabile finche' questo non e' risolto.**

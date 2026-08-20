@@ -1,0 +1,12 @@
+MISURA DELLA PROFONDITA' DEI TICK REALI -- U30USD @ BCM
+data: 2026-08-20 19:53:55   (corsa partita alle 2026-08-20 19:51:10)
+script: scarica_storico.ps1 pinnato a e2865cdf6f47da1cc5a609cb8ce5d70b28faa9e9
+riga: -Simboli U30USD -Da 2022.01.01 -Timeframes M1,M5 -TimeoutMin 240 -Auto
+codice di uscita: 0
+
+I TICK REALI DI U30USD PARTONO DAL 2024.09.26   (67618571 tick, verdetto: TICK REALI PARZIALI)
+MURO DELLE BARRE M1, colonna PrimaDataServer: 2024.09.26
+
+U30USD M1 barre=650255 locale=2024.09.26 server=2024.09.26 -> IL BROKER NON HA PIU' STORICO
+U30USD M5 barre=130126 locale=2024.09.26 server=2024.09.26 -> IL BROKER NON HA PIU' STORICO
+U30USD TICK barre=67618571 locale=2024.09.26 server=- -> TICK REALI PARZIALI
