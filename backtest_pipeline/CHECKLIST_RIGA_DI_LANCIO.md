@@ -1416,6 +1416,11 @@ leggerlo ha dovuto lanciare una **passata singola** con `Optimization=0`
 
 ## 🆕 AGGIUNTE DEL 21/08/2026 — trovate verificando la riga R95 (LiquiditySweep sui cross JPY)
 
+_(Nota di tracciabilita': questi due punti sono stati scritti dalla verifica di
+R95 ma sono finiti dentro il commit `4af9625` di un'altra sessione, che ha usato
+`git add -A` mentre erano ancora nel working tree. E' esattamente il rischio che
+si corre lavorando in parallelo: **si committano solo i file propri**.)_
+
 ## 40. 🚧 IL GATE CHE NON PUO' MORDERE — tre modi, tutti e tre nella STESSA riga
 
 _Difetti veri, gia' committati in `backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1`
