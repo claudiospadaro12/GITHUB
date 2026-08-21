@@ -112,21 +112,100 @@ pochi minuti se la macchina produce i CSV, invece di scoprirlo dopo ore.
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
   $h="bdaf3601be53e2d21d38ba22cce239821be0d735"
+  $b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h"
   $d="$env:USERPROFILE\r92"
   New-Item -ItemType Directory -Force -Path $d | Out-Null
   $p=Join-Path $d "scan_market.ps1"
   Remove-Item $p -Force -EA SilentlyContinue
-  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scan_market.ps1" -OutFile $p -EA Stop
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern "MARCATORE_SCAN_BULGE_R92_v1" -Quiet)){ throw "scan_market.ps1 VECCHIO: il BULGE non c'e' dentro" }
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet)){ throw "scan_market.ps1 ha il rischio SBAGLIATO (non 0,80%): NON lanciare" }
+  irm "$b/backtest_pipeline/scan_market.ps1" -OutFile $p -EA Stop
+  if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern "MARCATORE_SCAN_BULGE_R92_v1" -Quiet)){ throw "scan_market.ps1 VECCHIO: il BULGE non c'e' dentro" }
+  if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet)){ throw "scan_market.ps1 ha il rischio SBAGLIATO (non 0,80%): NON lanciare" }
+  $e1=Join-Path $d "_ea_pin.mq5"; $e2=Join-Path $d "_ea_head.mq5"
+  Remove-Item $e1,$e2 -Force -EA SilentlyContinue
+  irm "$b/mql5/Experts/ABTG_Bulge.mq5" -OutFile $e1 -EA Stop
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/mql5/Experts/ABTG_Bulge.mq5" -OutFile $e2 -EA Stop
+  if((Get-FileHash $e1).Hash -ne (Get-FileHash $e2).Hash){ throw "ABTG_Bulge.mq5 su 'lavoro' NON e' piu' quello del pin: lo scan scarica SEMPRE da lavoro, quindi i numeri non sarebbero di questo pin. Fermati e dimmelo" }
+  $inc=Join-Path $d "ABTG_PausaGuardian.mqh"
+  Remove-Item $inc -Force -EA SilentlyContinue
+  irm "$b/mql5/Include/ABTG_PausaGuardian.mqh" -OutFile $inc -EA Stop
+  if(-not (Select-String -LiteralPath $inc -SimpleMatch -Pattern "ABTG_AutotestGuardia" -Quiet)){ throw "l'include del pin non ha ABTG_AutotestGuardia: download andato male" }
+  $len=(Get-Item -LiteralPath $inc).Length
+  $nInc=0
+  foreach($t in @(Get-ChildItem (Join-Path $env:APPDATA "MetaQuotes\Terminal") -Directory -EA SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName "MQL5\Experts") })){
+    $dd=Join-Path $t.FullName "MQL5\Include"
+    New-Item -ItemType Directory -Force -Path $dd | Out-Null
+    $dst=Join-Path $dd "ABTG_PausaGuardian.mqh"
+    if(-not (Select-String -LiteralPath $dst -SimpleMatch -Pattern "ABTG_AutotestGuardia" -Quiet -EA SilentlyContinue)){
+      Copy-Item -LiteralPath $inc -Destination $dst -Force
+      $v=Get-Item -LiteralPath $dst -EA Stop
+      if($v.PSIsContainer -or $v.Length -ne $len){ throw ("copia dell'include NON verificata in " + $dd) }
+      Write-Host ("   installato ABTG_PausaGuardian.mqh in " + $dd) -ForegroundColor Yellow
+    }
+    $nInc++
+  }
+  if($nInc -eq 0){ throw "nessuna cartella dati MT5 trovata sotto APPDATA: la compilazione fallirebbe" }
+  $res=Join-Path $d "risultati_scan_ABTG_Bulge"
+  $com=Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+  Remove-Item (Join-Path $res "scan_ABTG_Bulge_GBPUSD_*.csv") -Force -EA SilentlyContinue
+  Remove-Item (Join-Path $d "ini_scan\scan_ABTG_Bulge_GBPUSD_*.ini") -Force -EA SilentlyContinue
+  Remove-Item (Join-Path $com "abtg_trades_ABTG_Bulge_GBPUSD_*.csv") -Force -EA SilentlyContinue
+  if(@(Get-ChildItem $res -Filter "scan_ABTG_Bulge_GBPUSD_*.csv" -EA SilentlyContinue).Count -gt 0){ throw "non riesco a cancellare i CSV vecchi di GBPUSD (aperti in Excel?): chiudili e rilancia" }
+  $vecchi=@(Get-ChildItem $res -Filter "scan_ABTG_Bulge_*.csv" -EA SilentlyContinue)
+  if($vecchi.Count -gt 0){ throw ("ci sono gia' " + $vecchi.Count + " CSV di ALTRI simboli in " + $res + ": sono di una corsa precedente a questo pin e il PASSO 4 li SALTEREBBE (numeri a rischio 1,0% dentro il referto). Se il PASSO 4 non l'hai ancora fatto, cancella quella cartella e rilancia; se invece l'hai gia' fatto, FERMATI e dimmelo") }
+  $t0=Get-Date
+  $global:LASTEXITCODE=0
   & powershell -ExecutionPolicy Bypass -File $p -Robot ABTG_Bulge -SoloSimbolo GBPUSD
+  $rc=$LASTEXITCODE
+  $dsk=[Environment]::GetFolderPath("Desktop")
+  $rac=Join-Path $dsk "R92_PASSO3_BANCO"
+  Remove-Item $rac -Recurse -Force -EA SilentlyContinue
+  New-Item -ItemType Directory -Force -Path $rac | Out-Null
+  Get-ChildItem $res -Filter "scan_ABTG_Bulge_GBPUSD_*.csv" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName $rac -Force }
+  Get-ChildItem (Join-Path $d "ini_scan") -Filter "scan_ABTG_Bulge_GBPUSD_*.ini" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName $rac -Force }
+  $pt=@(Get-ChildItem $com -Filter "abtg_trades_ABTG_Bulge_GBPUSD_*.csv" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 })
+  $pt | ForEach-Object { Copy-Item $_.FullName $rac -Force }
+  $problemi=@()
+  if($rc -ne 0){ $problemi+=("scan_market.ps1 e' uscito con codice " + $rc) }
+  foreach($f in @("scan_ABTG_Bulge_GBPUSD_nuda.csv","scan_ABTG_Bulge_GBPUSD_gestita.csv")){
+    $fp=Join-Path $res $f
+    if(-not (Test-Path -LiteralPath $fp)){ $problemi+=("MANCA " + $f); continue }
+    if((Get-Item -LiteralPath $fp).LastWriteTime -lt $t0){ $problemi+=($f + ": e' un file VECCHIO, non l'ha scritto questa corsa"); continue }
+    $righe=@(Get-Content -LiteralPath $fp)
+    if(($righe.Count-1) -ne 2){ $problemi+=($f + ": " + ($righe.Count-1) + " righe di dati invece di 2") }
+    if($righe.Count -lt 1 -or $righe[0] -notmatch "Use_Purple_PineReaction"){ $problemi+=($f + ": manca la colonna Use_Purple_PineReaction") }
+  }
+  if($pt.Count -ne 4){ $problemi+=("per-trade in Common\Files: " + $pt.Count + " file invece di 4") }
+  $ref=@()
+  $ref+=("data: " + (Get-Date -Format 'yyyy-MM-dd HH:mm'))
+  $ref+=("pin:  " + $h)
+  $ref+=("PASSO 3 -- prova del banco, GBPUSD, 4 passate (2 gestioni x 2 varianti del VIOLA)")
+  $ref+=("codice di uscita scan_market.ps1: " + $rc + "   (atteso 0)")
+  $ref+=("CSV di scan: " + @(Get-ChildItem $rac -Filter "scan_ABTG_Bulge_GBPUSD_*.csv").Count + "   (attesi 2)")
+  $ref+=("per-trade:   " + $pt.Count + "   (attesi 4)")
+  if($problemi.Count -eq 0){ $ref+="ESITO: OK" } else { $ref+=("ESITO: FALLITO -- " + $problemi.Count + " problemi"); foreach($x in $problemi){ $ref+=("  - " + $x) } }
+  $ref | Set-Content (Join-Path $rac "REFERTO_R92_PASSO3.txt") -Encoding ASCII
+  $zip=Join-Path $dsk "R92_PASSO3_BANCO.zip"
+  Remove-Item $zip -Force -EA SilentlyContinue
+  Compress-Archive -Path (Join-Path $rac "*") -DestinationPath $zip -Force
+  Write-Host ""
+  Write-Host "=====================================================================" -ForegroundColor White
+  Write-Host ("   " + (Join-Path $rac "REFERTO_R92_PASSO3.txt") + "   <- leggi QUESTO, riga 'data:'") -ForegroundColor White
+  Write-Host "   dentro devono esserci, per nome:" -ForegroundColor White
+  Write-Host "     scan_ABTG_Bulge_GBPUSD_nuda.csv      (2 righe di dati)" -ForegroundColor White
+  Write-Host "     scan_ABTG_Bulge_GBPUSD_gestita.csv   (2 righe di dati)" -ForegroundColor White
+  Write-Host "     scan_ABTG_Bulge_GBPUSD_nuda.ini / _gestita.ini" -ForegroundColor White
+  Write-Host "     4 file abtg_trades_ABTG_Bulge_GBPUSD_*.csv" -ForegroundColor White
+  Write-Host ("   " + $zip + "   <- questo si manda in chat") -ForegroundColor White
+  Write-Host "=====================================================================" -ForegroundColor White
+  if($problemi.Count -gt 0){ Write-Host ("ESITO: FALLITO -- " + ($problemi -join " | ")) -ForegroundColor Red; throw "PASSO 3 NON passato: NON lanciare il PASSO 4, manda lo zip" }
+  Write-Host "ESITO: OK -- il banco produce i CSV. Si puo' andare al PASSO 4." -ForegroundColor Green
 }
 ```
-**Cosa si legge:** in `%USERPROFILE%\r92\risultati_scan_ABTG_Bulge\` devono
-esserci **2 file** — `scan_ABTG_Bulge_GBPUSD_nuda.csv` e
-`scan_ABTG_Bulge_GBPUSD_gestita.csv` — **con 2 righe di dati ciascuno**
-(`Use_Purple_PineReaction` 0 e 1). Se un file ha 0 righe, **fermati**: le altre
-21 corse darebbero lo stesso niente.
+**Cosa si legge, e lo scrive la riga da sola:** l'ultima riga in verde `ESITO: OK`.
+Se e' rossa, **non si va al PASSO 4**: si manda `Desktop\R92_PASSO3_BANCO.zip`.
+Dentro `REFERTO_R92_PASSO3.txt` la **riga `data:` deve essere di ADESSO** (ora
+del PC, non ora server). Il numero di trade di GBPUSD **non si legge**: questo
+e' un banco, non una misura.
 
 ---
 
