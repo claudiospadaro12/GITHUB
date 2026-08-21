@@ -1,5 +1,50 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # 🆕 21/08 — **R92 (BULGE) E' PRONTO IN BOZZA** — il banco largo sui 22 cross del basket
+>
+> ## 🚦 POSTO IN CODA: **dietro la misura tick U30USD e R90** (R91 e' gia' stato letto il 21/08: cancello RR bocciato).
+> Ma ha **un prerequisito suo, che si puo' fare in qualsiasi momento e costa
+> minuti**: il **PASSO 0**, cioe' misurare la profondita' dati dei 22 cross
+> (`scarica_storico.ps1 -Simboli "..." -SoloReferto`). Senza quella misura i
+> numeri di R92 sono **provvisori**: l'unica profondita' forex agli atti e'
+> **GBPUSD, tick dal 2024.07.05**.
+>
+> **COSA C'E' DI NUOVO, gia' su `lavoro`:**
+> - 🆕 **`mql5\Experts\ABTG_Bulge.mq5` v5.00** — il motore **di Claudio**
+>   (BULGE_MASTER v4.00, che **resta intatto** come originale) migrato agli
+>   standard di casa: **Guardian** sul percorso di apertura, `InpMagic`
+>   **772700**, `InpComment` "BULGE", **rischio 1%** (era 0,50; Claudio girava
+>   a 3,00), `OnTester` + OptFrame + per-trade, `InpAutoTest`, `InpVerbose`,
+>   ASCII puro. **La logica dei segnali NON e' stata toccata.**
+> - 🆕 **`prove\R92_scan_BULGE.txt`** — il verbale della cella (default di
+>   Claudio: BLU+VIOLA, ARANCIO spento) e le due strade di lancio.
+> - 🆕 **`scan_market.ps1 -Robot ABTG_Bulge`** — lo scan largo: **22 simboli
+>   x 2 passate gemelle = 44**, OHLC, finestra **2022.01.01-2026.06.30** =
+>   la stessa del backtest di Claudio.
+> - 🆕 **`risultati_archivio\R92_CRITERI.md`** — **BOZZA DA FIRMARE**. Le tre
+>   soglie: **n >= 30 · PF >= 1,30 · win rate >= 65%** (+ profitto > 0).
+>
+> ### 🐤 IL CANARINO DA LEGGERE PER PRIMO (sta nel codice, non nel mercato)
+> Il segnale **BLU** pretende un corpo di candela sulla **barra 0**, ma l'EA
+> guarda **al primo tick** della barra, quando `close == open`. Sul simbolo
+> **del grafico** — cioe' come gira ogni test pulito su MT5 — **il BLU rischia
+> di non scattare mai**. L'EA lo dice da solo a fine passata:
+> `[BULGE-CONTA] ... BLU=x VIOLA=y ...`. **Se BLU=0 ovunque, il round sta
+> misurando il solo VIOLA e ci si ferma li'.** [INFERITO dal codice, da
+> misurare — scritto in cima ad `ABTG_Bulge.mq5`, punto [DA DECIDERE] (a).]
+>
+> ### ⚠️ E UN NUMERO CHE TOCCA IL RISCHIO, DETTO SUBITO
+> `Risk_Percent` 1% x `Max_Trades` 4 = **fino al 4% di rischio aperto**, cioe'
+> **sopra il cap C1 (3,25%)**. In campo il Guardian bloccherebbe il quarto
+> ingresso; **nel tester e' inerte**. Se il BULGE arrivasse al campo, o scende
+> il rischio o scendono i trade contemporanei: **decisione di Claudio**.
+>
+> **⛔ R92 NON SI LANCIA** finche' non sono verdi: (a) la **firma** dei criteri,
+> (b) la **compilazione** di `ABTG_Bulge.mq5` in MetaEditor (0 errori 0
+> warning: non e' mai stato compilato), (c) **una passata singola** con
+> `InpAutoTest=1` per leggere le righe `[BULGE][AUTOTEST]`, (d) il **passo 0**.
+
+
 > # 🆕 20/08 — **R91 E' PRONTO IN BOZZA** — il cancello di RR minimo sul Breaking Band
 >
 > ## 🚦 POSTO IN CODA: **TERZO**. Prima (1) la misura tick U30USD, poi (2) R90, poi (3) R91.

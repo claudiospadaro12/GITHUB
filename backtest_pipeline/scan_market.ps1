@@ -8,6 +8,17 @@
 #    ABTG_SupertrendReversal (H4) · ABTG_EMA200 (H4) · ABTG_GoldenCross (H1)
 #    ABTG_SuperWave (H4) · ABTG_SupertrendInvert (H1) · ABTG_PTE (H4)
 #    ABTG_WOL (D1) · ABTG_FiboH4_Multi (H4)
+#    ABTG_Bulge (H1, i 22 cross del basket -- vedi la nota qui sotto)
+#
+#  NOTA ABTG_Bulge (R92-scan, 21/08/2026): questo EA e' MULTI-SIMBOLO
+#  (input Symbols_List). Nel tester si prova UN CROSS ALLA VOLTA, con
+#  Symbols_List pinnato al simbolo della passata: MT5 modella male i
+#  simboli diversi da quello del grafico (docs\Guida_Test_BULGE.md).
+#  Per questo il suo blocco usa il segnaposto __SYM__, che il ciclo
+#  sostituisce simbolo per simbolo. Il blocco porta anche la SUA lista
+#  di simboli (i 22 del basket, non i 48 del market) e la SUA finestra.
+#  -Tf non ha effetto sul BULGE: il timeframe e' PERIOD_H1 scritto nel
+#  sorgente, non un input.
 #  Opzionale -Tf M5/M15/M30/H1/H4/D1: forza il timeframe (es. confronto H1 vs H4).
 #    I risultati vanno in risultati_scan_<EA>_<Tf> (non si sovrascrivono).
 #
@@ -50,6 +61,14 @@ $Symbols=@(
 # --- GRIGLIA per EA (OHLC, Model 1) -----------------------------------
 # $Period = timeframe del Tester per questo EA (default H1; HARSI e' scalping -> M5)
 $Period="H1"
+# Finestra e modo di ottimizzazione: DEFAULT identici a sempre (nessuno
+# scan gia' fatto cambia di una virgola). Un EA puo' sovrascriverli nel
+# suo blocco quando ha una ragione, e la ragione va scritta li'.
+$FromDate="2024.01.01"
+$ToDate="2026.06.30"
+$OptMode=2          # 2 = genetica (default storico). 1 = completa: si usa
+                    #     quando le celle sono pochissime e la genetica non
+                    #     ha niente da ottimizzare.
 if($EA -eq "ABTG_MaxMinNotte"){
   $Inputs=@"
 InpSLMode=1||1||0||1||N
@@ -233,7 +252,85 @@ InpTP_R=1.0||1.0||0.5||1.5||Y
 InpAllowLong=1||0||1||1||Y
 InpAllowShort=1||0||1||1||Y
 "@
-} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill, CostToCost, EasyTrend" -ForegroundColor Red; exit 1 }
+} elseif($EA -eq "ABTG_Bulge"){
+  # =============================================================
+  #  R92-SCAN -- BULGE (motore di Claudio, EA ABTG_Bulge v5.00).
+  #  UNA CELLA PER SIMBOLO, pinnata ai DEFAULT DI CLAUDIO (BLU +
+  #  VIOLA accesi, ARANCIO spento) ma al NOSTRO rischio 1%.
+  #  Il verbale completo della cella, con i criteri e i canarini:
+  #      prove\R92_scan_BULGE.txt
+  #  Se cambi una riga qui, cambiala anche li'. Diff prima di lanciare.
+  #
+  #  L'UNICO ASSE E' IL MAGIC GEMELLO (772700/772701): non e' una
+  #  griglia, e' un CONTROLLO. Le due passate devono uscire IDENTICHE
+  #  al centesimo (precedente: R51). Serve anche a non avere uno
+  #  sweep degenere, che darebbe CSV vuoti. 22 x 2 = 44 passate.
+  #
+  #  FINESTRA 2022.01.01 -> 2026.06.30 = la finestra del backtest di
+  #  Claudio (2022.01.01-2026.03.30): serve a mettere i nostri numeri
+  #  ACCANTO ai suoi senza dover spiegare una differenza di periodo.
+  #  >>> TODO PASSO 0: la profondita' dati di questi 22 cross a BCM
+  #      NON E' MISURATA (l'unica misura forex agli atti e' GBPUSD,
+  #      tick dal 2024.07.05). Finche' non e' misurata, i numeri di
+  #      questo scan sono PROVVISORI: un cross i cui dati partono dopo
+  #      il 2022 ha girato su mezza finestra e il suo conteggio
+  #      operazioni non e' confrontabile con gli altri.
+  #        .\scarica_storico.ps1 -Simboli "..." -SoloReferto
+  # =============================================================
+  $Period="H1"
+  $FromDate="2022.01.01"
+  $ToDate="2026.06.30"
+  $OptMode=1
+  # I 22 CROSS DEL BASKET (input Symbols_List dell'EA), non i 48 del market.
+  $Symbols=@(
+    "EURUSD","GBPUSD","AUDUSD","NZDUSD","USDCAD","USDCHF","USDJPY",
+    "EURGBP","EURNZD","GBPJPY","GBPAUD","GBPCAD","GBPNZD",
+    "AUDJPY","AUDCAD","AUDNZD","NZDJPY","NZDCAD","NZDCHF",
+    "CADJPY","CADCHF","CHFJPY"
+  )
+  $Inputs=@"
+BB_Period=20||20||0||20||N
+BB_Deviation=2.0||2.0||0||2.0||N
+ATR_Period=14||14||0||14||N
+SL_ATR_Mult=3.0||3.0||0||3.0||N
+BB_Width_Len=50||50||0||50||N
+Bulge_Multi=1.1||1.1||0||1.1||N
+Lookback_Bars=20||20||0||20||N
+Use_Orange=0||0||0||0||N
+Use_Blue=1||1||0||1||N
+Use_Purple=1||1||0||1||N
+Use_ATR_Filter=1||1||0||1||N
+ATR_MA_Len=20||20||0||20||N
+ATR_Max_Mult=1.8||1.8||0||1.8||N
+ATR_Min_Mult=0.5||0.5||0||0.5||N
+Use_ADX_Filter=1||1||0||1||N
+ADX_Period=14||14||0||14||N
+ADX_Threshold=30.0||30.0||0||30.0||N
+ADX_Apply_On_Blue=1||1||0||1||N
+ADX_Apply_On_Purple=0||0||0||0||N
+ADX_Apply_On_Orange=0||0||0||0||N
+Use_News_Filter=0||0||0||0||N
+Enable_Partial_Close=0||0||0||0||N
+Partial_Close_Pct=0.5||0.5||0||0.5||N
+Partial_Close_R=1.0||1.0||0||1.0||N
+Use_Kill_Switch=1||1||0||1||N
+Max_SL_PerDay=4||4||0||4||N
+Max_Consecutive_SL=3||3||0||3||N
+Max_Daily_Loss_Pct=2.0||2.0||0||2.0||N
+Risk_Mode=0||0||0||0||N
+Risk_Percent=1.0||1.0||0||1.0||N
+Total_Risk_Percent=2.0||2.0||0||2.0||N
+Max_Trades=4||4||0||4||N
+Manage_Manual_Orders=0||0||0||0||N
+Manual_SL_ATR_Mult=3.0||3.0||0||3.0||N
+Symbols_List=__SYM__
+InpComment=BULGE
+InpUsaGuardian=1||1||0||1||N
+InpVerbose=0||0||0||0||N
+InpAutoTest=0||0||0||0||N
+InpMagic=772700||772700||1||772701||Y
+"@
+} else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill, CostToCost, EasyTrend, Bulge" -ForegroundColor Red; exit 1 }
 
 # --- -Tf opzionale: forza il timeframe del test e dell'EA, e separa i risultati ---
 $EAtag=$EA
@@ -278,6 +375,10 @@ foreach($sym in $Symbols){
   $done=Join-Path $Results "scan_${EAtag}_$sym.csv"
   if(Test-Path $done){Write-Host ("   [{0}/{1}] {2}: gia' fatto, salto" -f $n,$Symbols.Count,$sym) -ForegroundColor DarkGray; continue}
   $iniPath=Join-Path $Work "ini_scan\scan_${EA}_$sym.ini"
+  # EA multi-simbolo (BULGE): Symbols_List va pinnato al simbolo di QUESTA
+  # passata. Per tutti gli altri EA il segnaposto non c'e' e questa riga
+  # non fa niente.
+  $InputsSym=$Inputs.Replace("__SYM__",$sym)
   @"
 [Experts]
 AllowLiveTrading=false
@@ -288,10 +389,10 @@ Expert=$EA.ex5
 Symbol=$sym
 Period=$Period
 Model=1
-Optimization=2
+Optimization=$OptMode
 OptimizationCriterion=6
-FromDate=2024.01.01
-ToDate=2026.06.30
+FromDate=$FromDate
+ToDate=$ToDate
 ForwardMode=0
 Deposit=10000
 Currency=EUR
@@ -302,7 +403,7 @@ ShutdownTerminal=1
 Report=OptReport_scan_${EAtag}_$sym
 
 [TesterInputs]
-$Inputs
+$InputsSym
 "@ | Set-Content -Path $iniPath -Encoding ASCII
   $csv=Join-Path $MqlFiles "OptResults_${EA}_$sym.csv"; if(Test-Path $csv){Remove-Item $csv -Force}
   Write-Host ("   [{0}/{1}] {2} (OHLC)..." -f $n,$Symbols.Count,$sym) -ForegroundColor Cyan

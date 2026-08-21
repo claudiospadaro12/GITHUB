@@ -1,0 +1,258 @@
+# =====================================================================
+#  R92-SCAN / IL BANCO LARGO DEL BULGE -- 22 CROSS, UNA CELLA PER
+#  SIMBOLO.   EA: ABTG_Bulge v5.00   (motore di Claudio, migrato)
+#  Etichetta: r92scan
+#
+#  >>> QUESTO FILE E' IL VERBALE DELLA CELLA. Non decide niente: dice
+#      esattamente COSA e' pinnato e COSA no, cosi' chiunque, anche fra
+#      un anno, puo' rifare la stessa corsa senza interpretare.
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#      risultati_archivio\R92_CRITERI.md  --  E' UNA BOZZA:
+#      **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri
+#      di R92 non si guardano. (Regola di casa: i criteri si cambiano
+#      prima dei numeri, non dopo.)
+# ---------------------------------------------------------------------
+#  LA DOMANDA DELLO SCAN, IN UNA RIGA
+#      "Su QUALI dei 22 cross del basket questo motore ha un segnale,
+#       e con quale PROFILO (win rate, rapporto vincita/perdita,
+#       frequenza)?"
+#  E la domanda che NON si fa: "quale simbolo promuoviamo". Nessuna.
+#  >>> LO SCAN NON PROMUOVE NIENTE. Seleziona chi va al round vero.
+# ---------------------------------------------------------------------
+#  COME SI LANCIA -- DUE STRADE, E SONO DIVERSE
+#
+#  (A) LO SCAN LARGO, tutti e 22 i simboli in una corsa (OHLC M1):
+#        .\scan_market.ps1 -Robot ABTG_Bulge
+#      Lo script conosce la lista dei 22 cross, la finestra e la cella:
+#      il blocco `elseif($EA -eq "ABTG_Bulge")` dentro scan_market.ps1
+#      e' la COPIA ESECUTIVA di questo file. Se qualcuno cambia una
+#      riga qui, la deve cambiare anche li'. >>> PRIMA DI LANCIARE:
+#      diff fra i due elenchi. E' la regola pagata due volte con
+#      InpTP1_ATRmult (0 contro 0.5).
+#      Nella sua copia lo script tiene il segnaposto __SYM__ e lo
+#      sostituisce da solo, simbolo per simbolo, in Symbols_List.
+#
+#  (B) IL ROUND PROFONDO, un simbolo alla volta a TICK REALI, con
+#      IS/OOS (solo sui simboli che lo scan seleziona):
+#        .\walkforward_generico.ps1 -Expert ABTG_Bulge `
+#           -Prova prove\R92_scan_BULGE.txt -Etichetta r92 -Modello 4 `
+#           -SoloControllo
+#      In questo caso vanno cambiate A MANO **DUE righe e due sole**:
+#        @SIMBOLO <cross>      e      Symbols_List=<cross>
+#      Devono dire lo STESSO cross. Se non coincidono, l'EA opera su un
+#      simbolo e il tester ne modella un altro: il numero non vuol dire
+#      niente, e NESSUNO SE NE ACCORGE guardando il CSV.
+#      >>> Controllo di sanita' della strada (B), da fare sempre: nel
+#      log del tester la riga "[BULGE] Init OK | Simboli: 1". Se il
+#      simbolo scritto in Symbols_List non esiste a BCM, l'EA NON si
+#      ferma: stampa "[BULGE] Simbolo non trovato" e la passata esce a
+#      ZERO trade -- che nel CSV sembra "il motore non entra mai".
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       MT5 va CHIUSO prima. Due lavori insieme non si sommano: si
+#       rovinano a vicenda.
+#    2. R92 NON PARTE finche' non sono verdi:
+#         (a) la FIRMA dei criteri (R92_CRITERI.md);
+#         (b) la COMPILAZIONE di ABTG_Bulge.mq5 in MetaEditor,
+#             0 errori 0 warning (questo file non e' mai stato
+#             compilato da nessuno: e' nato oggi);
+#         (c) UNA passata singola di prova con InpAutoTest=1 e
+#             InpVerbose=1, per leggere le righe [BULGE][AUTOTEST]
+#             (18 casi del nucleo Guardian + 5 sul tag segnale) e la
+#             riga [BULGE-CONTA]. Nello scan quei due input sono
+#             SPENTI: 44 passate con il log acceso allagano il giornale.
+#         (d) il PASSO 0 qui sotto.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi. LA RIGA DI LANCIO NON STA IN QUESTO FILE.
+# ---------------------------------------------------------------------
+#  >>> PASSO 0, OBBLIGATORIO E NON FATTO: LA PROFONDITA' DEI DATI
+#      DI QUESTI 22 CROSS A BCM **NON E' MISURATA**.
+#
+#      Cosa sappiamo davvero, agli atti:
+#        - REFERTO del 15/08: i TICK REALI di **GBPUSD** partono dal
+#          **2024.07.05**. E' l'UNICA misura forex che abbiamo.
+#        - REFERTO_SONDA_STORICO_17-08.md: sulle BARRE il forex e'
+#          profondissimo (GBPUSD 1993, EURUSD e USDJPY 1971) ma il
+#          numero letto era 100.000 barre = il tetto "Max barre nel
+#          grafico" di MT5, non il limite del broker. E se quel tetto
+#          valga anche per lo Strategy Tester e' dichiarato [INCERTO].
+#        - Degli altri 21 cross non e' misurato NIENTE, ne' tick ne'
+#          barre M1.
+#
+#      Si misura cosi', PRIMA di lanciare, e costa minuti:
+#        .\scarica_storico.ps1 -Simboli "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY" -SoloReferto
+#
+#      CONSEGUENZA, ACCETTATA IN ANTICIPO: finche' quella misura non
+#      c'e', **i numeri di R92-scan sono PROVVISORI**. Se per un cross
+#      i dati partono dopo l'inizio della finestra, quel cross ha
+#      girato su mezza finestra e il suo conteggio operazioni NON e'
+#      confrontabile con gli altri. E' il difetto n.18 della checklist
+#      (mezza finestra che non esiste), gia' pagato sugli indici.
+#      @DAQUANDO qui sotto e' quindi **[TODO -- DA MISURARE]**.
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO -- E LA CONSEGUENZA, DETTA PRIMA
+#    SCAN (A):  OHLC M1, Modello 1. E' **SCREENING, MAI UN VERDETTO**:
+#               regola di casa scritta in scan_market.ps1 e ripetuta
+#               in ogni referto di scan da R33 in poi.
+#    ROUND (B): tick reali, Modello 4. Li' si legge il rischio.
+#    Il backtest di Claudio girava a **40% di qualita' storico**: NON
+#    e' ne' l'uno ne' l'altro, ed e' il motivo per cui questo scan
+#    esiste (vedi R92_CRITERI.md, l'aspettativa dichiarata PRIMA).
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E PERCHE' PROPRIO QUESTA
+#    2022.01.01 -> 2026.06.30 = **la finestra del backtest di Claudio**
+#    (lui: 2022.01.01 - 2026.03.30). Non e' un capriccio: e' l'unico
+#    modo di mettere i nostri numeri ACCANTO ai suoi senza dover
+#    spiegare una differenza di periodo. La finestra vive dentro
+#    scan_market.ps1 ($FromDate/$ToDate del blocco ABTG_Bulge).
+#    IL REGIME CONTENUTO, da scrivere accanto a OGNI numero: dollaro
+#    forte 2022 + disinflazione 2023-24 + 2025-26. Niente 2008,
+#    niente 2015, niente 2020. R92-scan misura DOVE c'e' segnale in
+#    QUESTO regime, non la robustezza di regime (regola C
+#    dell'Emendamento: quella sono le quattro finestre, altro round).
+# ---------------------------------------------------------------------
+#  IL CONTEGGIO OPERAZIONI -- L'ASPETTATIVA, DETTA PRIMA
+#    Dal backtest di Claudio: 268 trade / 4,25 anni / 6 simboli =
+#    **~10,5 trade per simbolo per anno** [MISURATO sul suo xlsx,
+#    DIVISO da noi: e' una media, i simboli non sono uguali].
+#    Su 4,5 anni fanno **~47 trade per simbolo attesi**.
+#    >>> Sotto i 20 trade il simbolo NON E' LEGGIBILE nemmeno come
+#        direzione: si scrive "campione insufficiente" e si passa
+#        oltre. Le soglie stanno in R92_CRITERI.md par. 4.
+#    >>> E IL CONTEGGIO VA SCRITTO ACCANTO A OGNI NUMERO. Un numero
+#        senza n non entra nel referto.
+# ---------------------------------------------------------------------
+#  IL CANARINO DA LEGGERE PRIMA DEI NUMERI VERI: **IL BLU**
+#    Sta scritto in cima ad ABTG_Bulge.mq5, punto [DA DECIDERE] (a):
+#    la conferma BLU pretende un corpo di candela sulla barra 0, ma
+#    CheckSignal gira al PRIMO tick della barra, quando close == open.
+#    Sul simbolo DEL GRAFICO -- cioe' esattamente come giriamo qui --
+#    il BLU rischia di non scattare MAI.
+#    L'EA stampa a fine passata la riga:
+#        [BULGE-CONTA] ... aperture=N -> BLU=x VIOLA=y ARANCIO=z ...
+#    >>> SE BLU=0 SU TUTTI I SIMBOLI, il round NON sta misurando la
+#        strategia di Claudio: sta misurando il solo VIOLA. Si scrive
+#        a referto e si ferma li'. Non e' un difetto del mercato ne'
+#        dell'EA: e' il banco di prova.
+#    (Nota: la riga [BULGE-CONTA] si legge nel LOG del tester, che e'
+#     in ORA LOCALE del PC; il grafico e' in ORA SERVER. Non
+#     confrontare le due cose.)
+# ---------------------------------------------------------------------
+#  UN NUMERO CHE VA DETTO SUBITO, PERCHE' TOCCA IL RISCHIO
+#    Risk_Percent=1.0 con Max_Trades=4 fa fino al **4% di rischio
+#    aperto insieme**, cioe' SOPRA il cap C1 firmato il 18/08
+#    (**3,25%**). In campo il Guardian bloccherebbe il quarto
+#    ingresso; nel tester il Guardian e' inerte, quindi il 4% ci
+#    puo' essere davvero. Se il BULGE arrivasse al campo, o
+#    Risk_Percent scende, o Max_Trades scende: **e' una decisione di
+#    Claudio**, e va presa PRIMA del deploy, non dopo.
+# =====================================================================
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+# TODO PASSO 0: data NON misurata. 2024.07.05 e' l'unica profondita'
+# TICK forex agli atti (GBPUSD, referto 15/08) e vale SOLO per GBPUSD.
+# Per lo scan (A) la finestra la decide scan_market.ps1 (2022.01.01):
+# questa riga serve alla strada (B), il round profondo a tick reali.
+@DAQUANDO 2024.07.05
+
+# --- BOLLINGER: il cuore del motore. NON SI TOCCANO.
+BB_Period=20
+BB_Deviation=2.0
+
+# --- ATR / BULGE: SL = ATR x 3. E' il disegno dichiarato dal coach
+#     ("ATR x 3 e' difficile che venga toccato, e' fatto apposta") e
+#     confermato da R91. Non e' un parametro da spazzolare in uno scan.
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+Bulge_Multi=1.1
+Lookback_Bars=20
+
+# --- SEGNALI: i default di Claudio. ARANCIO SPENTO -- lo ha spento lui
+#     perche' piu' rischioso, tenendo la conferma. Lo scan NON discute
+#     questa scelta: la misura com'e'.
+Use_Orange=0
+Use_Blue=1
+Use_Purple=1
+
+# --- FILTRO ATR: acceso, come in origine.
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+
+# --- FILTRO ADX anti-bandriding (dalla v3): acceso sul BLU, spento su
+#     VIOLA e ARANCIO. Sono i default di Claudio.
+Use_ADX_Filter=1
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+
+# --- FILTRO NEWS ORARIO: SPENTO (default). Un filtro acceso fuori
+#     dalla sua cella rende illeggibile tutto il round.
+Use_News_Filter=0
+
+# --- PARZIALE + BREAK-EVEN: SPENTO (default). Lezione dell'oro gia'
+#     agli atti: parziale precoce + BE immediato tappano i vincenti
+#     mentre lo stop prende perdite piene. Qui e' spento e basta:
+#     accenderlo e' un ALTRO round.
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+
+# --- KILL SWITCH: acceso, come in origine. E' parte del motore di
+#     Claudio, non un accessorio: spegnerlo cambierebbe i numeri.
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+
+# --- RISCHIO: 1,00% per trade. NON e' la taglia di campo: e' il valore
+#     comune di casa, quello che rende confrontabili le celle fra loro
+#     e i simboli fra loro. Claudio girava a 3,00% (fuori dai nostri
+#     cap): i PROFITTI non sono quindi confrontabili con i suoi, il
+#     PROFIT FACTOR e il WIN RATE si'.
+Risk_Mode=0
+Risk_Percent=1.0
+Total_Risk_Percent=2.0
+Max_Trades=4
+
+# --- ORDINI MANUALI: spento. Nel tester non esistono, ma un input
+#     lasciato al caso e' uno stato nascosto.
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+
+# --- IL SIMBOLO. NELLO SCAN (A) lo script sostituisce __SIMBOLO__ da
+#     solo. NELLA STRADA (B) lo si scrive a mano, UGUALE a @SIMBOLO.
+#     Perche' un simbolo alla volta e non il basket: MT5 modella male i
+#     simboli diversi da quello del grafico (docs\Guida_Test_BULGE.md).
+#     Il basket da un grafico solo, nel tester, non e' una misura.
+Symbols_List=GBPUSD
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con quelli degli altri EA. Sta
+#     scritto qui apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log spento nelle corse lunghe (vedi punto 2c del
+#     traffico: l'autotest si legge UNA volta, in una passata singola).
+InpVerbose=0
+InpAutoTest=0
+
+# --- L'UNICO ASSE: IL MAGIC GEMELLO. Non e' una griglia, e' un
+#     CONTROLLO. Due passate identiche in tutto tranne il magic:
+#     DEVONO uscire uguali al centesimo. Se non lo sono, il banco non
+#     e' deterministico e nessun altro numero di questo round vale.
+#     Precedente agli atti: R51, sweep gemello 772701/772702, "tutte e
+#     quattro le coppie identiche". Costa il doppio delle passate ed e'
+#     l'unico modo di avere una cella sola SENZA sweep degenere (la
+#     trappola n.1 di walkforward_generico: 4 CSV vuoti dopo una notte).
+#     TOTALE: 22 simboli x 2 = 44 passate.
+InpMagic=772700||772700||1||772701||Y
