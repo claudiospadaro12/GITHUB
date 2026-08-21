@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R95_v2
+#  MARCATORE_RIGA_R95_v3
 #  RIGA_R95_LIQSWEEP_JPY.ps1  --  R95: sweep + reclaim su EURJPY M15
 # ---------------------------------------------------------------------
 #  >>> NON SI MANDA A CLAUDIO FINCHE' R95_CRITERI.md NON E' FIRMATO. <<<
@@ -59,7 +59,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R95.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (dieci secondi, nessun MT5 aperto, nessuna passata):
@@ -338,11 +338,26 @@ if($SoloControllo){
   #     La cache invece fa ripescare a MT5 passate gia' calcolate di griglie
   #     vecchie, che e' il difetto che walkforward_generico segnala alle
   #     righe 690-694 ("un pass non rieseguito NON scrive i per-trade").
+  #  >>> CON -LiteralPath IL * NON E' UN WILDCARD. <<<
+  #  La prima stesura faceva Remove-Item -LiteralPath (Join-Path $cache "*"):
+  #  quel "*" e' il NOME LETTERALE di un file che su Windows non puo'
+  #  esistere, Remove-Item non trovava niente, -EA SilentlyContinue mangiava
+  #  l'errore e il Dico stampava IN VERDE i file che c'erano PRIMA. Il fix
+  #  era INERTE e la console diceva di si'. (checklist 46)
+  #  Nel resto dello script -LiteralPath <cartella> -Filter "*.csv" e'
+  #  corretto: li' il wildcard sta nel -Filter, non nel percorso.
+  #  E NON SI CREDE ALL'INTENZIONE: si conta PRIMA e DOPO.
   $cache = Join-Path $DataFolder "Tester\cache"
   if(Test-Path -LiteralPath $cache){
-    $nc = @(Get-ChildItem -LiteralPath $cache -File -ErrorAction SilentlyContinue).Count
-    Remove-Item -LiteralPath (Join-Path $cache "*") -Recurse -Force -ErrorAction SilentlyContinue
-    Dico ("Tester\cache svuotata (" + $nc + " file). bases\<server>\ticks NON toccata.") "Green"
+    $nc = @(Get-ChildItem -LiteralPath $cache -Force -Recurse -File -ErrorAction SilentlyContinue).Count
+    Get-ChildItem -LiteralPath $cache -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    $nr = @(Get-ChildItem -LiteralPath $cache -Force -Recurse -File -ErrorAction SilentlyContinue).Count
+    if($nr -gt 0){
+      [void]$Problemi.Add("Tester\cache NON svuotata: " + $nr + " file su " + $nc + " sono rimasti. MT5 puo' ripescare passate gia' calcolate e NON scrivere i per-trade (punto 38).")
+      Dico ("Tester\cache: " + $nc + " file prima, " + $nr + " RIMASTI. NON e' stata svuotata.") "Red"
+    } else {
+      Dico ("Tester\cache svuotata: " + $nc + " file prima, " + $nr + " dopo. bases\<server>\ticks NON toccata.") "Green"
+    }
   } else { Dico "Tester\cache non esiste: niente da svuotare." "Gray" }
 }
 
@@ -403,10 +418,34 @@ if(-not $SoloControllo -and -not $SaltaPasso0){
     if($LASTEXITCODE -ne 0){ [void]$Problemi.Add("PASSO 0-A: scarica_storico.ps1 e' uscito con codice " + $LASTEXITCODE + ". Lo storico potrebbe essere incompleto.") }
     $csvSt = Join-Path $DataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
     if(Test-Path -LiteralPath $csvSt){
+      #  LE COLONNE VERE le scrive ABTG_HistoryDownloader.mq5 riga 140:
+      #    Simbolo,Timeframe,Barre,PrimaDataLocale,PrimaDataServer,Verdetto
+      #  La prima stesura leggeva $r.Stato, che NON ESISTE: PowerShell
+      #  risponde $null IN SILENZIO e la nota usciva troncata, perdendo
+      #  proprio "IL BROKER NON HA PIU' STORICO" - l'unica ragione per cui
+      #  il PASSO 0-A esiste. (checklist 46-bis)
+      #  E servono ENTRAMBE le date: PrimaDataLocale e' cio' che c'e' GIA'
+      #  sul disco, PrimaDataServer e' cio' che il BROKER ha davvero.
+      $vistoSym = $false
       foreach($r in (Import-Csv -LiteralPath $csvSt)){
         if(("" + $r.Simbolo).Trim().ToUpper() -ne $Sym.ToUpper()){ continue }
-        [void]$Note.Add("PASSO 0-A: " + $r.Simbolo + " " + $r.Timeframe + " prima data " + $r.PrimaDataLocale + " -> " + $r.Stato)
+        $vistoSym = $true
+        $verd = ("" + $r.Verdetto).Trim()
+        [void]$Note.Add("PASSO 0-A: " + $r.Simbolo + " " + $r.Timeframe +
+                        " | barre " + $r.Barre +
+                        " | disco " + $r.PrimaDataLocale +
+                        " | broker " + $r.PrimaDataServer +
+                        " -> " + $(if($verd -ne ""){ $verd } else { "VERDETTO VUOTO" }))
+        if($verd -eq ""){
+          [void]$Problemi.Add("PASSO 0-A: colonna 'Verdetto' VUOTA per " + $r.Simbolo + " " + $r.Timeframe +
+                              ". Il formato del referto storico e' cambiato: NON e' stato letto, e non e' un via libera.")
+        }
+        elseif($verd -match "(?i)non ha piu' storico|non ha piu storico"){
+          [void]$Problemi.Add("PASSO 0-A: il BROKER NON HA PIU' STORICO su " + $r.Simbolo + " " + $r.Timeframe +
+                              " (" + $verd + "). Inutile insistere: la finestra si SPOSTA, non si scarica.")
+        }
       }
+      if(-not $vistoSym){ [void]$Problemi.Add("PASSO 0-A: nessuna riga per " + $Sym + " nel referto storico.") }
     } else { [void]$Note.Add("PASSO 0-A: ABTG_StoricoScaricato.csv non trovato, referto storico NON letto.") }
   }catch{
     $Storico.Esito = "NON ESEGUITO (" + $_.Exception.Message + ")"
@@ -790,6 +829,13 @@ try{
   [void]$R.Add("  1. il PASSO 0 qui sopra. Se e' rosso, i numeri sotto NON esistono.")
   [void]$R.Add("  2. il CANARINO: colonne 'Livelli Creati/Consumati/Invalidati' e")
   [void]$R.Add("     'Segnali Scartati' nei CSV, e la colonna Trades. PRIMA del PF.")
+  [void]$R.Add("  2-bis. LA COLONNA 'Livelli Buttati', e si guarda per PRIMA fra le")
+  [void]$R.Add("     colonne del canarino: se e' > 0, il tetto InpMaxLivelli ha")
+  [void]$R.Add("     buttato livelli VIVI - e butta i piu' VECCHI, cioe' i piu'")
+  [void]$R.Add("     AMPI. Regola congelata (criteri par. 3.4): quella cella e'")
+  [void]$R.Add("     misurata con la STRUTTURA AMPUTATA, si DICHIARA e NON SI")
+  [void]$R.Add("     LEGGE SUL MERITO. Se sono le celle dense, il verdetto sulla")
+  [void]$R.Add("     meta' bassa della scala NON C'E'.")
   [void]$R.Add("  3. solo dopo, il conto economico, e con la regola di selezione")
   [void]$R.Add("     dichiarata accanto: CENTRO DELL'ALTOPIANO, MAI IL PICCO.")
   [void]$R.Add("  4. OGNI numero porta scritto 'OHLC, non tick'. R95 NON produce sedie.")

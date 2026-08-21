@@ -1,6 +1,6 @@
 # =====================================================================
 #  R95e / LA SCALA DI DENSITA' DEL LIVELLO - EURJPY M15 - struttura H4
-#  EA: ABTG_LiquiditySweep  (v1.10)
+#  EA: ABTG_LiquiditySweep  (v1.11)
 #  Criteri: risultati_archivio\R95_CRITERI.md  (BOZZA, DA FIRMARE)
 #  Dossier: caccia_strategie\CACCIA_JPY_MECCANISMI_2026-08-21.md
 #  Bozza di partenza: prove\JPY_LIQSWEEP_BOZZA.txt (i suoi 5 TODO sono
@@ -185,11 +185,12 @@ InpUsaGuardian=1
 
 # --- IGIENE: log e autotest SPENTI nella griglia. L'autotest si legge
 #     UNA volta sola, nella passata singola del PASSO 0.
-#     >>> E il CANARINO ora NON dipende piu' dal log: dalla v1.10 i
-#         quattro conteggi (Livelli Creati / Consumati / Invalidati /
-#         Segnali Scartati) sono COLONNE del CSV. In OTTIMIZZAZIONE MT5
-#         NON esegue le Print degli agent: la riga [LIQSWEEP][CONTEGGIO]
-#         sarebbe sparita proprio nelle passate che servono a misurarla.
+#     >>> E il CANARINO ora NON dipende piu' dal log: dalla v1.11 i
+#         CINQUE conteggi (Livelli Creati / Consumati / Invalidati /
+#         Buttati, piu' Segnali Scartati) sono COLONNE del CSV. In
+#         OTTIMIZZAZIONE MT5 NON esegue le Print degli agent: la riga
+#         [LIQSWEEP][CONTEGGIO] sarebbe sparita proprio nelle passate
+#         che servono a misurarla.
 InpMaxSpread=0
 InpVerbose=0
 InpAutoTest=0

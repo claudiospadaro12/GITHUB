@@ -212,8 +212,8 @@ dilution, aggiunge rischio dati, e non aggiunge una domanda.
 
 La riga `[LIQSWEEP][CONTEGGIO]` sta in `OnDeinit`. **In OTTIMIZZAZIONE MT5 non
 esegue le `Print` degli agent**: il canarino sarebbe sparito proprio nelle 30
-passate che servono a misurarlo. Nella **v1.10** dell'EA i quattro conteggi sono
-**quattro COLONNE del CSV** (`stats[10..13]` nel frame):
+passate che servono a misurarlo. Nella **v1.11** dell'EA i cinque conteggi sono
+**cinque COLONNE del CSV** (`stats[10..14]` nel frame):
 
 `Livelli Creati` · `Livelli Consumati` · `Livelli Invalidati` · `Segnali Scartati` · **`Livelli Buttati`** (v1.11)
 
@@ -468,3 +468,26 @@ operazioni, TAGLIANDO a 6 mesi.
 
 > ⚠️ **Finché queste sette righe non sono firmate, questo file resta una BOZZA
 > e la riga di lancio non si manda.**
+
+---
+
+## 9. 📨 LE SETTE FIRME IN FORMATO CHAT — una riga l'una, si risponde con una parola
+
+_Da incollare a Claudio così com'è. Lui può rispondere **`firmo tutte`**, oppure
+**`firmo 1,2,4,5,6,7 — la 3 no`**, oppure cambiare un numero. Le caselle qui
+sotto le riempio io dopo la sua risposta, con la data._
+
+| # | firmato? | la domanda, in una riga |
+|---|:--:|---|
+| **F1** | ☐ | **Finestra `2015.07.01 → 2026.06.30`, split 40/60** (IS 4,40 anni, OOS 6,60). Scelta perché il rischio sta in *entrambe* le metà (IS: crollo cinese 2015, Brexit, feb-2018, flash crash gen-2019 — OOS: COVID, carry mania 2022-24, unwind ago-2024). **Subordinata al PASSO 0**: se i dati non arrivano lì, il round si ferma e la finestra si riscrive. |
+| **F2** | ☐ | **30 passate, EURJPY e basta** (15 celle × IS/OOS). Niente torneo a sette: sarebbe curve fitting, e comunque dalla famiglia JPY entra **una sedia sola**. |
+| **F2-bis** | ☐ | **Tetto livelli a 2.000**, e la regola: se la colonna `Livelli Buttati` è > 0, quella cella ha girato con la struttura amputata → **si dichiara e non si legge sul merito**. |
+| **F3** | ☐ | **Rischio delle passate 1,00%** (la taglia di campo resta 0,65%). Serve solo a rendere i profitti confrontabili con R82/R86/R89. **È un'assunzione mia, non una tua firma di money management.** |
+| **F4** | ☐ | **I cinque cancelli**: PF OOS ≥ **1,20** · PF IS > **1,00** · DD OOS ≤ **15,0%** · Peggior Giornata ≥ **−7,5%** · n IS ≥ **150**. |
+| **F5** | ☐ | **Bocciatura secca sul RISCHIO a qualunque `n`**: DD o Peggior Giornata oltre soglia = bocciata, anche col PF bello. Il giudizio di rischio **non si sospende mai**. |
+| **F6** | ☐ | **Selezione: centro dell'altopiano sulla scala delle ore, MAI il picco.** Una cella che sporge da sola si scrive *"picco isolato, non proposto"* — anche se è la più bella della tabella. |
+| **F7** | ☐ | **R95 NON produce sedie, e non può proporne.** Gira a OHLC M1 (i tick BCM partono dal 2024.07.05): il massimo che può ottenere è il **permesso** di un giro a tick reali sulla coda 2024-2026. |
+
+> 🔕 **E una cosa che NON ti sto chiedendo di firmare:** che il round dia un
+> risultato. L'esito più probabile, scritto qui prima dei numeri, è **zero celle
+> promosse** — e sarebbe un verdetto valido, non un fallimento.
