@@ -190,19 +190,25 @@ input bool   InpFridayClose = true;
 input int    InpFridayCloseHour = 21;
 input int    InpFridayCloseMin  = 50;
 
-input group "=== Filtro notizie (CSV in MQL5/Files) ==="
+input group "=== Filtro notizie (CSV) ==="
 input bool   InpUseNewsFilter = false;
 input string InpNewsFile      = "abtg_news.csv";
+input bool   InpNewsCommon    = true;   // true = cerca in Common\Files (l'UNICA strada che regge nel tester multi-agente)
 input int    InpNewsMinImpact = 3;
 input int    InpNewsBeforeMin  = 60;
 input int    InpNewsAfterMin   = 30;
-input int    InpNewsShiftMinutes = 0;
+input int    InpNewsShiftMinutes = 0;   // minuti da SOMMARE agli orari del CSV per portarli in ORA SERVER
+input bool   InpNewsPerCurrency  = false; // false = blackout globale (come prima). true = solo se la valuta tocca il simbolo
+input bool   InpNewsCancelPendings = false; // regola del corso: prima del dato gli ordini si TOLGONO
+input double InpNewsDerogaPips     = 100.0; // deroga del corso: se il pendente e' a >= tot pip, resta
 
 input group "=== Generali ==="
 input string InpComment   = "FIBOH4";
 input long   InpMagic     = 771602;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
+input bool   InpUsaGuardian = true;  // Guardian: pausa giornaliera (B1) e cap rischio aperto (C1). Inerte nel tester
+input bool   InpAutoTest    = true;  // stampa [FIBOH4][AUTOTEST] in avvio. Si legge ESEGUENDO, non compilando
 
 //==================================================================
 //  STATO (per-simbolo)
@@ -213,6 +219,20 @@ datetime gLastBar[];
 int      gN=0;
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
+
+//--- stato del filtro notizie: serve al CANARINO, non alla strategia.
+bool     gNewsSorted   = true;   // array ordinato per tempo -> ricerca binaria
+int      gNewsScartate = 0;      // righe illeggibili: si CONTANO, non spariscono
+int      gNewsSottoSoglia = 0;   // righe scartate perche' impatto < soglia
+string   gNewsDove     = "(mai aperto)";
+long     gNewsBlocchi  = 0;      // quante volte il filtro ha davvero fermato una barra
+long     gNewsBarreViste = 0;    // quante volte e' stato interrogato
+long     gNewsPendCancellati = 0;
+
+//--- metrica di famiglia: la peggior giornata in % (quella che conta per una prop)
+double   gWorstDayPct  = 0.0;    // numero NEGATIVO
+double   gEqInizioGiorno = 0.0;
+int      gGiornoCorrente = -1;
 
 void Log(string m){ if(InpVerbose) Print("[FiboH4Multi] ", m); }
 
@@ -244,7 +264,9 @@ int OnInit()
      }
    gTrade.SetTypeFillingBySymbol(gSym[0]);
    if(InpUseNewsFilter) LoadNews();
+   gEqInizioGiorno=AccountInfoDouble(ACCOUNT_EQUITY);
    Log(StringFormat("avviato su %d simboli, %s. EZ %.2f/%.2f, SL %.3f.",gN,EnumToString(InpTF),InpEZ1ratio,InpEZ2ratio,InpSLratio));
+   if(InpAutoTest) AutoTestFiboH4();
    return(INIT_SUCCEEDED);
   }
 
@@ -256,11 +278,13 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+   AggiornaPeggiorGiornata();
    for(int i=0;i<gN;i++)
      {
       string sym=gSym[i];
       ManageAll(sym);
       CutoffCheck(sym);
+      NewsCancelCheck(sym);
       FridayCloseCheck(sym);
 
       datetime t=iTime(sym,InpTF,0);
@@ -341,7 +365,10 @@ void OnNewBar(string sym,int atrHandle)
   {
    if(HasPosition(sym) || HasPending(sym)) return;
    if(CountTotalPositions() >= InpMaxTotalPositions) return;
-   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())) return;
+   // v1.10: unica riga cambiata nel blocco dei segnali. Il simbolo
+   // serve all'esclusione PER VALUTA (InpNewsPerCurrency). Con quel
+   // input a false la decisione e' identica a quella della v1.00.
+   if(InpUseNewsFilter && InNewsBlackout(sym,TimeCurrent())) return;
    if(!SpreadOK(sym)) return;
 
    double atr=AtrVal(atrHandle); if(atr<=0) return;
@@ -386,6 +413,9 @@ void PlaceLimit(string sym,bool isLong,double px,double sl,double tp,double risk
    if(lot<=0){ Log("lotto nullo "+sym+" "+tag); return; }
    datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
    string cm=InpComment+(isLong?" L ":" S ")+tag;
+   // v1.10 -- GUARDIAN sul percorso di APERTURA, mai sulle chiusure.
+   // Nel tester il canale non esiste: fail-open, numeri invariati.
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_FiboH4_Multi")) return;
    gTrade.SetTypeFillingBySymbol(sym);
    bool ok=isLong?gTrade.BuyLimit(lot,px,sym,sl,tp,ORDER_TIME_SPECIFIED,exp,cm)
                  :gTrade.SellLimit(lot,px,sym,sl,tp,ORDER_TIME_SPECIFIED,exp,cm);
