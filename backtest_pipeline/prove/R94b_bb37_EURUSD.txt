@@ -1,0 +1,74 @@
+# =====================================================================
+#  R94b / LA CELLA BOLLINGER (37 - 1.4) SUL BREAKING BAND   EURUSD H1
+#  EA: ABTG_BreakingBand v1.03
+#  Driver: walkforward_generico.ps1     Etichetta: r94
+#
+#  >>> QUESTA CELLA E' patt. 0 = SOLO CONTINUAZIONE.
+#      Serve a leggere l'effetto PURO della geometria delle bande su
+#      UN pattern: su GBPUSD (R94a) i due pattern sono mescolati e non
+#      si puo' dire quale dei due ha reagito.
+#
+#  ASSE DOPPIO (fattoriale 2x2): InpBBPeriod 20/37 x InpBBDev 1.4/2.0
+#  -> 4 celle x 2 finestre. La cella 20 / 2.0 e' la BASE ATTUALE.
+#  Tutto il resto PINNATO alla cella promossa in R33 e misurata in R34.
+#
+#  Criteri: risultati_archivio\R94_CRITERI.md -- E' UNA BOZZA:
+#  **va FIRMATA da Claudio PRIMA del lancio.**
+# ---------------------------------------------------------------------
+#  DA DOVE VIENE IL 37 - 1.4 (e il suo limite, detto prima)
+#    PIANO DI TRADING del POINT BREAK, slide 3 + grafico slide 4.
+#    E' un parametro dichiarato due volte dalla fonte -- ma nato su un
+#    ALTRO motore (mean-reversion fuori dalle bande, D1/H12). Qui si
+#    trapianta un PARAMETRO senza la sua TESI: per questo la domanda
+#    del round non e' "quanto rende" ma "cambia la FREQUENZA".
+#    (BREAKING_BAND_TESI.md: il corso di casa dice BB 37/3 sugli indici
+#    e BB 20/2 sulle valute -> il periodo 37 non e' estraneo alla
+#    famiglia, la deviazione 1.4 si'. Il 2x2 separa le due cose.)
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO
+#    DATO:     TICK REALI del broker BCM, forex EURUSD H1.
+#    MODELLO:  "Ogni tick basato su tick reali" (come R33, R34, R91).
+#    DEPOSITO: 100.000 (-Deposito 100000): serve a riprodurre R34.
+#    RISCHIO:  1,0%, uguale a R34 -- altrimenti il canarino non torna.
+# ---------------------------------------------------------------------
+#  IL CANARINO
+#    BASE MISURATA in R34 (deposito 100k, tick reali, BB 20/2.0):
+#      IS  2024.09.26 -> 2025.06.09 : +1.457,02 | PF 53,79058 | DD 0,7797 | n=4
+#      OOS 2025.06.10 -> 2026.06.30 : +2.069,82 | PF  3,86266 | DD 1,2722 | n=13
+#      EP/trade OOS = 159,21692.  Frequenza = 1,02 trade/mese.
+#    La cella 20 / 2.0 DEVE riprodurle AL CENTESIMO.
+#
+#    >>> E VA RIPETUTO QUI, PIU' FORTE CHE ALTROVE: l'IS di questa
+#        sedia ha n=4. NON E' UNA FINESTRA, E' UN ANEDDOTO. Il PF
+#        53,79 non e' un risultato, e' un artefatto di 4 operazioni.
+#        Si scrive, non si giudica. Su questo simbolo il round puo'
+#        dire UNA cosa sola: se il conteggio operazioni sale.
+# ---------------------------------------------------------------------
+#  IL CONTEGGIO OPERAZIONI -- E' LA MISURA DEL ROUND
+#    Soglie decise PRIMA, scalate sulla base di questa sedia (n OOS 13):
+#      n OOS >= 30  -> campione finalmente leggibile: PROPOSTA motivata.
+#      n OOS 14-29  -> aumento non decisivo: si scrive e si archivia.
+#      n OOS <= 13  -> nessuna frequenza aggiunta: ARCHIVIATA SECCA,
+#                      il profitto non si guarda.
+#    ASIMMETRIA: a qualunque n il DRAWDOWN si legge lo stesso.
+# ---------------------------------------------------------------------
+#  COSA NON SI TOCCA
+#    InpStdPeriod 20 e InpStdSmaPeriod 50 restano fermi: il filtro di
+#    deviazione standard NON segue il periodo delle bande.
+#    Le sedie vive in campo non si toccano: R94 gira nel tester.
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=0
+InpTPMode=0
+InpRiskPercent=1.0
+InpBulgeWidthMult=1.35
+InpBulgeNetMoveATR=1.0
+InpMinRR=0
+InpStdPeriod=20
+InpStdSmaPeriod=50
+
+InpBBPeriod=20||20||17||37||Y
+InpBBDev=2.0||1.4||0.6||2.0||Y
