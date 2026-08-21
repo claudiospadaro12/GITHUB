@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R96_v1
+#  MARCATORE_RIGA_R96_v2
 #  RIGA_R96_APERTURA_USA.ps1  --  R96: l'apertura americana COSTRUISCE
 #  il segnale (medie 9/21 di sessione) su U30USD e NASUSD, M5
 # ---------------------------------------------------------------------
@@ -50,8 +50,7 @@
 #             sessioni=0 -> L'ANCORA NON HA TROVATO NIENTE, cioe' la
 #             cella non e' brutta: NON E' GIRATA. E' FATALE.
 #             ZERO log letti -> "NON LETTO", ed e' FATALE lo stesso.
-#         G5  [XEMAAP][AUTOTEST] esito motore -> CINQUE BLOCCHI SU
-#             CINQUE. Si legge QUI, in una esecuzione vera nel tester,
+#         G5  [XEMAAP][AUTOTEST] esito motore -> SEI BLOCCHI SU SEI. Si legge QUI, in una esecuzione vera nel tester,
 #             non chiedendo a Claudio di premere un tasto che non
 #             produce quell'output (checklist 20).
 #       Se uno di questi e' rosso, LA CORSA NON PARTE.
@@ -76,7 +75,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R96.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R96_APERTURA_USA.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R96_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R96_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (dieci secondi, nessuna passata, nessun MT5 che opera):
@@ -154,7 +153,7 @@ $Comune    = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
 $Sosta     = Join-Path $Work "sosta"
 $Passo0    = @{ Fatto=$false; PrimaData=""; UltimaData=""; N=0; Giorni=0.0;
                 Gemelli="NON MISURATO"; Conteggio="NON LETTO"; Autotest="NON LETTO";
-                Sessioni=-1; Incroci=-1; Ingressi=-1; Minuti=0.0; LogLetti=0 }
+                Sessioni=-1; Incroci=-1; Ingressi=-1; Seme=-1; Minuti=0.0; LogLetti=0 }
 $Storico   = @{ Eseguito=$false; Esito="NON ESEGUITO" }
 $Problemi = New-Object System.Collections.ArrayList
 $Note     = New-Object System.Collections.ArrayList
@@ -850,11 +849,26 @@ $inputs
             $Fatale = "PASSO 0 / G4: il canarino dice ancora=0, ma il gate deve girare sul MOTORE (ancora=1). L'ini non ha fatto quello che credevo."
           }
           if($Passo0.Sessioni -eq 0 -and $Fatale -eq ""){
-            $Fatale = "PASSO 0 / G4: SESSIONI VISTE = 0. L'ancora delle 14:30 SERVER non ha trovato nessuna barra su U30USD. " +
+            $Fatale = "PASSO 0 / G4: SESSIONI VISTE = 0. L'ancora delle 14:30 SERVER non ha trovato nessuna barra su " + $SymGate + ". " +
                       "La cella NON E' GIRATA -- non e' brutta, e' ASSENTE. Si va a vedere l'orario (server BCM = ora italiana - 1) prima di leggere qualunque numero."
           }
         } else {
           [void]$Problemi.Add("PASSO 0 / G4: riga del canarino trovata ma non interpretabile: '" + $rigaConta + "'. I tre contatori NON sono stati letti.")
+        }
+        # --- G4-bis: L'ARTEFATTO DEL SEME (checklist 52). Match SEPARATO, e
+        #     non un quinto gruppo della regex qui sopra: cosi' se un domani
+        #     il campo sparisse o cambiasse nome, il gate G4 principale
+        #     continuerebbe a mordere invece di uscire "non interpretabile".
+        $mse = [regex]::Match($rigaConta,'seme=(\d+)')
+        if($mse.Success){
+          $Passo0.Seme = [int]$mse.Groups[1].Value
+          $veri = $Passo0.Incroci - $Passo0.Seme
+          [void]$Note.Add("PASSO 0, ARTEFATTO DEL SEME: " + $Passo0.Seme + " incroci su " + $Passo0.Incroci +
+                          " sono quelli GARANTITI della seconda barra, dove la direzione e' sign(c1-c0) e i periodi 9/21 NON contano. " +
+                          "Gli incroci in cui i periodi hanno deciso qualcosa sono " + $veri + ". " +
+                          "Se questo numero e' vicino a zero, R96 misura il MOMENTUM DELLE PRIME BARRE dopo la campanella e NON l'incrocio 9/21.")
+        } else {
+          [void]$Problemi.Add("PASSO 0 / G4-bis: la riga del canarino non porta il campo 'seme='. L'EA compilato non e' quello del pin: senza quel numero il cancello della distinzione (criteri par. 4.2) NON si puo' leggere.")
         }
       }
       # --- G5: l'autotest del motore. Si legge QUI, in un'esecuzione vera nel
@@ -881,6 +895,10 @@ $inputs
     Write-Host ("    sessioni viste ..... " + $Passo0.Sessioni + "   (0 = LA CELLA NON E' GIRATA)") -ForegroundColor White
     Write-Host ("    incroci in finestra  " + $Passo0.Incroci) -ForegroundColor White
     Write-Host ("    ingressi aperti .... " + $Passo0.Ingressi) -ForegroundColor White
+    Write-Host ("    di cui DAL SEME .... " + $Passo0.Seme + "   (incroci garantiti della barra 2: li' 9/21 NON contano)") -ForegroundColor Yellow
+    if($Passo0.Seme -ge 0 -and $Passo0.Incroci -ge 0){
+      Write-Host ("    incroci VERI ....... " + ($Passo0.Incroci - $Passo0.Seme) + "   <- e' su QUESTO che si legge il cancello della distinzione") -ForegroundColor Yellow
+    }
     if($Passo0.Sessioni -gt 0){
       $perSess = [math]::Round($Passo0.Incroci / $Passo0.Sessioni,2)
       Write-Host ("    incroci per sessione " + $perSess.ToString("0.00",$INV)) -ForegroundColor White
@@ -889,10 +907,22 @@ $inputs
       #  IL CANARINO DELL'EMENDAMENTO, detto qui e non a fine round: se la
       #  passata intera (IS+OOS) non arriva a 300 operazioni, le due meta' non
       #  potranno mai fare 150 ciascuna, e il MERITO e' SOSPESO in partenza.
+      #
+      #  >>> VA NELLE NOTE, NON NEI PROBLEMI. <<<  (checklist punto 44)
+      #  Un campione sottile e' un RISULTATO del round (valvola R59: il
+      #  campione sottile sospende il MERITO, mai il RISCHIO), NON un guasto
+      #  della corsa. Nella prima stesura stava in $Problemi, e $Problemi
+      #  alimenta l'ESITO: sarebbero uscite 16 passate perfettamente riuscite
+      #  con "ESITO: PARZIALE -- NON e' un round completo" e uscita 1. E' la
+      #  stessa classe di difetto pagata su R95-D1 (MANCA STORICO LOCALE su
+      #  M1, benigno, che chiudeva PARZIALE una corsa sana): una spia che
+      #  grida dove deve solo dichiarare.
       if($Passo0.N -lt 300){
-        [void]$Problemi.Add("EMENDAMENTO DELLA FINESTRA: la passata intera ha " + $Passo0.N + " operazioni (< 300). " +
-                            "Le due meta' non possono fare 150 ciascuna: il MERITO e' SOSPESO in partenza (valvola R59), e il round si legge per il RISCHIO. " +
-                            "NON e' un motivo per fermare la corsa -- e' un motivo per non promettere un verdetto di merito.")
+        [void]$Note.Add("EMENDAMENTO DELLA FINESTRA: la passata intera ha " + $Passo0.N + " operazioni (< 300). " +
+                        "Le due meta' non possono fare 150 ciascuna: il MERITO e' SOSPESO in partenza (valvola R59), e il round si legge per il RISCHIO. " +
+                        "NON e' un guasto della corsa: e' un RISULTATO, ed e' il motivo per cui il referto non promettera' un verdetto di merito.")
+        Write-Host ("    >>> n < 300: MERITO SOSPESO in partenza (valvola R59). La corsa va avanti:") -ForegroundColor Yellow
+        Write-Host  "        e' un risultato del round, non un guasto." -ForegroundColor Yellow
       }
     }
     Write-Host ("    gemelli ............ " + $Passo0.Gemelli) -ForegroundColor White
@@ -1097,6 +1127,10 @@ try{
   [void]$R.Add("      >>> 0 = LA CELLA NON E' GIRATA. Non e' brutta: e' ASSENTE.")
   [void]$R.Add("  incroci in finestra  " + $Passo0.Incroci)
   [void]$R.Add("  ingressi aperti .... " + $Passo0.Ingressi)
+  [void]$R.Add("  di cui DAL SEME .... " + $Passo0.Seme)
+  [void]$R.Add("      >>> incroci GARANTITI della seconda barra: li' la direzione e'")
+  [void]$R.Add("      sign(c1-c0) e i periodi 9/21 NON contano (checklist 52).")
+  [void]$R.Add("  incroci VERI ....... " + $(if($Passo0.Seme -ge 0 -and $Passo0.Incroci -ge 0){ "" + ($Passo0.Incroci - $Passo0.Seme) } else { "NON LETTI" }))
   [void]$R.Add("  canarino ........... " + $Passo0.Conteggio)
   [void]$R.Add("  autotest ........... " + $Passo0.Autotest)
   [void]$R.Add("  gemelli ............ " + $Passo0.Gemelli + "   (log del tester letti: " + $Passo0.LogLetti + ")")
@@ -1113,11 +1147,24 @@ try{
   [void]$R.Add("  1. il PASSO 0 qui sopra. Se e' rosso, i numeri sotto NON esistono.")
   [void]$R.Add("  2. la colonna 'Sessioni Viste' di OGNI cella, PRIMA di qualunque PF:")
   [void]$R.Add("     0 = quella cella non e' girata. Poi 'Ingressi Aperti' e 'Trades'.")
+  [void]$R.Add("  2-bis. LA COLONNA 'Incroci Seme', e si guarda PRIMA del cancello 3.")
+  [void]$R.Add("     Alla SECONDA barra di sessione l'incrocio e' GARANTITO e la sua")
+  [void]$R.Add("     direzione e' sign(c1-c0): la STESSA con 9/21, con 5/13 o con 8/21.")
+  [void]$R.Add("     Quindi gli incroci in cui i periodi hanno deciso qualcosa sono")
+  [void]$R.Add("     ('Incroci Sessione' - 'Incroci Seme'). Se quella differenza e'")
+  [void]$R.Add("     vicina a zero, R96 ha misurato il MOMENTUM DELLE PRIME BARRE DOPO")
+  [void]$R.Add("     LA CAMPANELLA e NON l'incrocio 9/21 -- e va scritto con quelle")
+  [void]$R.Add("     parole. R96 NON PUO' CONCLUDERE NIENTE SUI PERIODI 9/21.")
+  [void]$R.Add("     (checklist punto 52)")
   [void]$R.Add("  3. IL CANCELLO DELLA DISTINZIONE (criteri par. 4.2), e viene PRIMA del")
   [void]$R.Add("     conto economico: se la cella A e la cella B, sullo stesso simbolo,")
-  [void]$R.Add("     hanno n entro il +/-10% E 'Incroci Sessione' entro il +/-10%,")
-  [void]$R.Add("     L'ANCORA E' COSMETICA e R96 risponde NO alla propria domanda,")
-  [void]$R.Add("     qualunque sia il profitto.")
+  [void]$R.Add("     hanno n entro il +/-10% E ('Incroci Sessione' - 'Incroci Seme')")
+  [void]$R.Add("     entro il +/-10% degli incroci della cella B, L'ANCORA E' COSMETICA")
+  [void]$R.Add("     e R96 risponde NO alla propria domanda, qualunque sia il profitto.")
+  [void]$R.Add("     >>> IL TOTALE 'Incroci Sessione' NON SI USA in questo confronto:")
+  [void]$R.Add("     in cella A ha un PAVIMENTO STRUTTURALE (un incrocio garantito per")
+  [void]$R.Add("     sessione) che in cella B non esiste, quindi il gate uscirebbe")
+  [void]$R.Add("     SEMPRE 'non cosmetica' a prescindere dai numeri.")
   [void]$R.Add("  4. LA CELLA B NON E' PROMUOVIBILE. MAI. NEMMENO SE VINCE. E' lo schema")
   [void]$R.Add("     'filtro orario appiccicato' (0 successi su 5) ed e' nel round come")
   [void]$R.Add("     strumento di misura, non come candidato.")

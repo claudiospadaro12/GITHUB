@@ -1037,6 +1037,19 @@ l'incrocio e' un segnale forte soprattutto quando apre il mercato americano"_.
   quindi non c'e' nessun segnale preesistente da filtrare. **Nessun livello,
   nessun range, nessuna rottura** — le due porte chiuse dalle 96 celle
   restano chiuse.
+- 🔴 **E il limite trovato alla PRIMA VERIFICA, che sta nel titolo del round**
+  (**checklist punto 52**, scritto apposta il 21/08): con
+  `InpMinBarreSessione=2` il segnale **dominante** e' l'incrocio garantito
+  della **seconda barra**, dove le due medie partono dallo stesso seme e la
+  direzione vale **`sign(c1-c0)`** — **identica con 9/21, 5/13 o 8/21**.
+  Quindi **R96 misura il MOMENTUM DELLE PRIME BARRE dopo la campanella, NON
+  l'incrocio 9/21**, e **non puo' concludere niente sui periodi**. L'artefatto
+  **si conta** (colonna `Incroci Seme`), il cancello della distinzione si legge
+  sugli **INCROCI VERI** (`Incroci Sessione − Incroci Seme`), e la clausola che
+  autorizzava a *"chiudere il capitolo 9/21"* e' stata **cancellata dai
+  criteri**: chiuderebbe una strada che nessuno ha percorso. Il round che
+  aprirebbe davvero quella domanda e' quello che **spazzola
+  `InpMinBarreSessione`** (2 / 4 / 6).
 - 🔬 **Il round ha il suo controllo dentro:** la cella B accende le medie
   CONTINUE nella stessa finestra oraria, cioe' **lo schema vietato**, per
   misurare quanto della cella A viene dall'ancora e quanto dal solo orologio.

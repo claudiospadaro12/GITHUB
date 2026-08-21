@@ -53,7 +53,11 @@
 //  3 | il SEGNALE: incrocio delle medie DI        | SegnaleSessione()
 //    | SESSIONE su barra CHIUSA, mai intrabar     | + CrossDirezione()
 //  4 | serve un minimo di barre di sessione,      | InpMinBarreSessione
-//    | altrimenti si legge l'artefatto del seme   | (2 = primo confronto possibile)
+//    | altrimenti si legge l'artefatto del seme   | (2 = primo confronto possibile,
+//    |   ma a 2 l'artefatto SI LEGGE ANCORA:      |  e a 2 il segnale dominante
+//    |   vedi il blocco in fondo a questa testa)  |  NON dipende da 9/21)
+//  4b| l'artefatto del seme si CONTA, non si      | gIncrociSeme
+//    | nasconde: colonna "Incroci Seme"           | stats[14]
 //  5 | gli INGRESSI vivono solo dentro la         | InpSessioneMinuti
 //    | finestra aperta dall'ancora                | DentroFinestra_Calc()
 //  6 | la posizione MUORE con la sessione che     | InpChiudiAFineSessione
@@ -81,15 +85,41 @@
 //   - Il TF operativo e' il Period del tester (PERIOD_CURRENT), come in
 //     ABTG_CrossEma: lo fissa @PERIODO nel file prova.
 //
+//  >>> E LA COSA PIU' IMPORTANTE, PERCHE' RIGUARDA IL NOME STESSO: <<<
+//  QUESTO EA NON MISURA L'EFFETTO DEI PERIODI 9 E 21, e va saputo prima di
+//  leggere qualunque numero. Con InpMinBarreSessione=2 (il default) il
+//  segnale DOMINANTE di ogni sessione e' l'incrocio della SECONDA barra, e
+//  li' l'algebra del seme dice questo:
+//      fPrev = sPrev = c0        <-- le due medie COINCIDONO (e' il seme)
+//      fNow  = c0 + af*(c1-c0)   af = 2/(9+1)  = 0,2000
+//      sNow  = c0 + as*(c1-c0)   as = 2/(21+1) = 0,0909
+//  e siccome CrossDirezione chiede fPrev<=sPrev, che li' e' vero PER
+//  COSTRUZIONE, la direzione e' semplicemente sign(c1-c0): la STESSA con
+//  9/21, con 5/13 o con 8/21, perche' l'unica cosa che conta e' af > as.
+//  L'autotest lo DIMOSTRA (blocco 4-bis, confronto 9/21 contro 5/13) e il
+//  motore lo CONTA (colonna "Incroci Seme"): gli incroci in cui i periodi
+//  hanno davvero deciso qualcosa sono (Incroci Sessione - Incroci Seme).
+//  Cosa misura davvero questo EA, detto con le parole giuste: il MOMENTUM
+//  DELLE PRIME BARRE DOPO LA CAMPANELLA, con la coda degli incroci
+//  successivi. Un referto che concludesse "l'incrocio 9/21 non funziona"
+//  chiuderebbe una strada che nessuno ha percorso. Checklist punto 52.
+//
 //  GLI ORARI SONO IN ORA SERVER. SEMPRE. Il server BCM sta UN'ORA INDIETRO
 //  rispetto all'ora italiana: Dow/Nasdaq 15:30 IT = 14:30 SERVER, DAX
 //  09:00 IT = 08:00 SERVER. Un orario italiano scritto qui dentro misura
 //  un'altra strategia.
 //
-//  ATTENZIONE, il DAX non e' il bersaglio di questo EA con i default:
-//  il DAX alle 14:30 server e' aperto da sei ore e mezza, quindi li'
-//  l'ancora non "nasce" con la campanella. Per il DAX si mette
-//  InpOpenHour=8 / InpOpenMin=0, ed e' un ALTRO round.
+//  ATTENZIONE, il DAX non e' il bersaglio di questo EA con i default, e il
+//  motivo VERO e' questo (non "manca il seme": il seme lo piantiamo noi, e
+//  su un CFD che quota quasi 24 ore lo si potrebbe piantare a qualunque ora
+//  -- sarebbe una scelta algebrica nostra, non un fatto dello strumento).
+//  Il motivo vero e' che l'ancora ha senso SOLO se in quell'istante arriva
+//  un EVENTO DI VOLATILITA' REALE: alle 14:30 server apre il mercato cash
+//  americano, e quello e' l'evento. Sul DAX l'evento equivalente e'
+//  l'apertura cash europea, alle 08:00 server. Riseminare sul DAX alle
+//  14:30 non sarebbe impossibile: sarebbe una risemina senza un evento che
+//  la giustifichi. Per il DAX si mette InpOpenHour=8 / InpOpenMin=0, ed e'
+//  un ALTRO round.
 //
 //  NON COMPILATO NE' BACKTESTATO da chi lo ha scritto: questo ambiente non
 //  ha MetaEditor. Si compila prima di qualunque corsa.
@@ -208,6 +238,23 @@ bool     gIngressoFattoOggi = false;
 long     gSessioniViste   = 0;
 long     gIncrociVisti    = 0;
 long     gIngressiAperti  = 0;
+//--- E IL CANARINO PIU' SCOMODO, quello che conta l'ARTEFATTO DEL SEME.
+//    ALLA SECONDA BARRA DI SESSIONE L'INCROCIO E' GARANTITO, e la sua
+//    direzione NON dipende da 9 e 21. L'algebra, per esteso:
+//      fPrev = sPrev = c0            <-- il seme: le due medie COINCIDONO
+//      fNow  = c0 + af*(c1-c0)       af = 2/(9+1)  = 0,2000
+//      sNow  = c0 + as*(c1-c0)       as = 2/(21+1) = 0,0909
+//    e CrossDirezione usa fPrev<=sPrev, che li' e' VERO PER COSTRUZIONE:
+//      c1 > c0 -> +1 LONG sempre  |  c1 < c0 -> -1 SHORT sempre
+//    Cioe' la direzione e' sign(c1-c0), IDENTICA con 9/21, con 5/13 o con
+//    8/21: l'unica cosa che conta e' af > as. Con InpMinBarreSessione=2
+//    (il default) quello e' il trade DOMINANTE di ogni sessione, e misura
+//    il momentum delle prime due barre dopo la campanella, NON l'incrocio.
+//    NON si nasconde e NON si "corregge" dentro l'EA (sarebbe un pezzo di
+//    strategia deciso di nascosto): SI CONTA, e il conteggio viaggia in una
+//    COLONNA, cosi' il referto puo' dire QUANTI trade vengono dal seme
+//    invece di dichiararlo a parole. Checklist punto 52.
+long     gIncrociSeme     = 0;
 
 //--- METRICHE DA PROP. L'Equity DD dice se il conto sopravvive; una prop
 //    invece ti chiude per il LIMITE GIORNALIERO, che e' un'altra cosa.
@@ -503,7 +550,17 @@ void OnNewBar()
       if(contabile){ gSessioniViste++; gUltimaSessioneContata=inizio; }
      }
 
-   if(grezzo!=0 && inFinestra) gIncrociVisti++;
+   if(grezzo!=0 && inFinestra)
+     {
+      gIncrociVisti++;
+      //--- e SEPARATAMENTE l'artefatto del seme (checklist 52): alla seconda
+      //    barra di sessione l'incrocio e' garantito e la sua direzione non
+      //    dipende dai periodi 9 e 21. Solo la DIFFERENZA
+      //    (gIncrociVisti - gIncrociSeme) e' un incrocio in cui 9/21 hanno
+      //    davvero deciso qualcosa: e' su quella che il cancello della
+      //    distinzione va letto, non sul totale.
+      if(InpAncoraSessione && nBarre==2) gIncrociSeme++;
+     }
 
    //--- 1. USCITA sull'incrocio opposto (opt-in). PRIMA dell'ingresso.
    if(InpUseOppositeExit && grezzo!=0) ChiudiSeOpposto(grezzo);
@@ -824,6 +881,32 @@ void AutoTestApertura()
                (int)okUna,uf,us,cSeme);
    if(!(!okUna && okF && okS && uf>us && cSeme==1)) falliti++;
 
+   //--- 4-bis. LA CONSEGUENZA DEL BLOCCO 4, e va detta invece che lasciata
+   //    implicita (checklist punto 52). Il blocco qui sopra dimostra che alla
+   //    SECONDA barra di sessione l'incrocio e' GARANTITO. Questo blocco
+   //    dimostra la seconda meta', che e' quella scomoda: la DIREZIONE di
+   //    quell'incrocio NON dipende dai periodi. Si rifa' lo stesso calcolo
+   //    con 5/13 al posto di 9/21 e si pretende lo STESSO segnale.
+   //    E' il controllo pratico che la checklist prescrive: "si prende il
+   //    parametro del titolo, gli si danno due valori molto diversi e si
+   //    chiede: il segnale della prima occorrenza cambia?".
+   double pf2=0,uf2=0,ps2=0,us2=0;
+   EmaSessione_Calc(due,2, 5,pf2,uf2);      // veloce 5  invece di 9
+   EmaSessione_Calc(due,2,13,ps2,us2);      // lenta  13 invece di 21
+   int cSeme513 = CrossDirezione(pf2,ps2,uf2,us2,true,true);
+   //    e la stessa cosa al ribasso, per non provarlo su un lato solo
+   double giu[2]; giu[0]=100.0; giu[1]=90.0;
+   double pg1=0,ug1=0,pg2=0,ug2=0;
+   EmaSessione_Calc(giu,2, 9,pg1,ug1);
+   EmaSessione_Calc(giu,2,21,pg2,ug2);
+   int cSemeGiu = CrossDirezione(pg1,pg2,ug1,ug2,true,true);
+   PrintFormat("[XEMAAP][AUTOTEST] seme, i periodi NON contano: 9/21=%d | 5/13=%d (atteso lo STESSO) | al ribasso 9/21=%d (atteso -1)",
+               cSeme,cSeme513,cSemeGiu);
+   Print("[XEMAAP][AUTOTEST] >>> CONSEGUENZA DICHIARATA: alla barra 2 la direzione e' sign(c1-c0), ",
+         "identica con qualunque coppia di periodi. Quel trade e' un ARTEFATTO DEL SEME, ",
+         "viene contato a parte (colonna 'Incroci Seme') e NON e' una misura dell'incrocio 9/21.");
+   if(!(cSeme513==cSeme && cSemeGiu==-1)) falliti++;
+
    //--- 5. LA SESSIONE A CAVALLO DELLA MEZZANOTTE e' RIFIUTATA in OnInit:
    //    qui si verifica solo l'aritmetica che la rifiuta.
    bool mz1 = (MinutiDelGiorno_Calc(14,30)+180 <= 1440);   // 1050: ammessa
@@ -832,7 +915,7 @@ void AutoTestApertura()
    if(!(mz1 && !mz2)) falliti++;
 
    Print("[XEMAAP][AUTOTEST] esito motore: ", (falliti==0
-         ? "CINQUE BLOCCHI SU CINQUE, la regola ragiona come la firma."
+         ? "SEI BLOCCHI SU SEI, la regola ragiona come la firma."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
 
    if(!InpAncoraSessione)
@@ -953,12 +1036,17 @@ double OnTester()
    //    ottimizzazione. Li' questa riga e' l'unico modo di leggere se l'ancora
    //    ha trovato le sessioni. Le due strade non si sostituiscono: servono
    //    tutte e due, e ognuna copre la modalita' in cui l'altra e' muta.
-   PrintFormat("[XEMAAP][CONTEGGIO] sessioni=%I64d incroci=%I64d ingressi=%I64d ancora=%d apertura=%02d:%02d durata=%d",
+   //    ATTENZIONE: L'ORDINE DEI CAMPI E' UN CONTRATTO, non una comodita' di lettura:
+   //    il gate G4 di RIGA_R96_APERTURA_USA.ps1 cerca
+   //      sessioni=(\d+)\s+incroci=(\d+)\s+ingressi=(\d+)\s+ancora=(\d+)
+   //    Il campo NUOVO (seme) va IN CODA. Spostarlo in mezzo romperebbe la
+   //    regex e il gate uscirebbe "non interpretabile" su una corsa sana.
+   PrintFormat("[XEMAAP][CONTEGGIO] sessioni=%I64d incroci=%I64d ingressi=%I64d ancora=%d apertura=%02d:%02d durata=%d seme=%I64d",
                gSessioniViste, gIncrociVisti, gIngressiAperti, (int)InpAncoraSessione,
-               InpOpenHour, InpOpenMin, InpSessioneMinuti);
+               InpOpenHour, InpOpenMin, InpSessioneMinuti, gIncrociSeme);
 
    ExportTrades();
-   double stats[14];
+   double stats[15];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -975,6 +1063,12 @@ double OnTester()
    stats[11] = (double)gIncrociVisti;                   // incroci grezzi dentro la finestra
    stats[12] = (double)gIngressiAperti;                 // quanti sono diventati un trade
    stats[13] = (InpAncoraSessione ? 1.0 : 0.0);         // il MODO, scritto dentro il dato
+   //--- L'ARTEFATTO DEL SEME, contato invece che dichiarato (checklist 52).
+   //    Gli incroci in cui 9 e 21 hanno DAVVERO deciso qualcosa sono
+   //    (Incroci Sessione - Incroci Seme). Se quella differenza e' vicina a
+   //    zero, il round ha misurato il momentum delle prime due barre dopo la
+   //    campanella e NON l'incrocio 9/21: e va scritto con quelle parole.
+   stats[14] = (double)gIncrociSeme;
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -997,14 +1091,17 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Sessioni Viste,Incroci Sessione,Ingressi Aperti,Ancora Sessione";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Sessioni Viste,Incroci Sessione,Ingressi Aperti,Ancora Sessione,Incroci Seme";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f",
+      //  HEADER E RIGA SI TOCCANO INSIEME, o le colonne scalano di posto e
+      //  il referto legge "Ingressi Aperti" dove sta "Ancora Sessione".
+      //  Colonne: Pass + 15 valori = 16 campi, in testa e in riga.
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
-                                data[7], data[8], data[9], data[10], data[11], data[12], data[13]);
+                                data[7], data[8], data[9], data[10], data[11], data[12], data[13], data[14]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;

@@ -48,22 +48,52 @@ contro H1), motore diverso, criteri diversi. **Si confrontano solo le
 CONCLUSIONI**, e in una sola forma ammessa:
 
 > *"R86 ha misurato che l'incrocio continuo non ha edge su DAX e oro. R96
-> misura se l'incrocio ANCORATO ALL'APERTURA ne ha uno sugli indici USA. Se
-> anche R96 dice di no, il capitolo 'incrocio 9/21' si chiude in questa casa."*
+> misura se un motore ANCORATO ALL'APERTURA ne ha uno sugli indici USA."*
 
 **Mai** *"R96 fa PF 1,3 contro lo 0,95 di R86, quindi l'ora funziona"*: sarebbe
 un confronto fra due mercati diversi su due timeframe diversi, cioè niente.
+
+**E mai** *"se anche R96 dice di no, il capitolo incrocio 9/21 si chiude"* —
+questa frase c'era nella prima stesura, in due punti, ed è **stata tolta da
+entrambi**: R96 **non muove i periodi 9 e 21** (§1 e §4.2), quindi non può
+chiudere nessun capitolo che li riguardi. L'unica cosa che R96 può chiudere è
+**il proprio motore**.
 
 ---
 
 ## 1. 🎯 LA DOMANDA DEL ROUND — **una sola**
 
-> **"L'incrocio delle medie 9/21 RI-SEMINATE all'apertura americana
-> (14:30 server = 15:30 IT) ha un edge misurabile sugli indici USA — e quello
+> **"Il momento della sessione misurato da medie RI-SEMINATE all'apertura
+> americana (14:30 server = 15:30 IT) ha un edge sugli indici USA — e quello
 > che eventualmente si vede viene dall'ANCORA o solo dall'OROLOGIO?"**
 
 La seconda metà della domanda **non è un di più: è il round**. Senza di essa
 R96 non saprebbe distinguere sé stesso dalla cosa che ha il divieto sopra.
+
+### 🔴 PERCHÉ LA DOMANDA NON DICE PIÙ "l'incrocio 9/21"
+
+_La prima stesura la intitolava così, ed era **una promessa che il round non
+può mantenere**. Corretta alla prima verifica — **checklist punto 52**._
+
+Con `InpMinBarreSessione=2` il segnale **dominante** di ogni sessione è
+l'incrocio della **seconda barra**, e lì l'algebra del seme dà una direzione
+pari a **`sign(c1 − c0)`**: la stessa con 9/21, con 5/13 o con 8/21, perché
+l'unica cosa che conta è `af > as`. **I periodi non muovono quel segnale.**
+
+Quindi:
+
+- ✅ R96 misura **il momentum delle prime barre dopo la campanella**, più la
+  coda degli incroci successivi. È un motore legittimo e mai misurato in casa.
+- ⛔ R96 **non misura l'effetto dei periodi 9 e 21**, e **nessuna sua
+  conclusione può riguardarli** (vedi §6-bis, dove una clausola che lo faceva
+  è stata cancellata).
+- 📏 L'artefatto **si conta**: colonna **`Incroci Seme`** nel CSV e campo
+  `seme=` nella riga `[XEMAAP][CONTEGGIO]`. Gli **INCROCI VERI** —
+  `Incroci Sessione − Incroci Seme` — sono quelli in cui i periodi hanno
+  deciso qualcosa, ed è **su quelli** che si legge il cancello del §4.2.
+
+> Il nome di un round è una promessa su cosa verrà misurato. Meglio un titolo
+> più modesto e vero che uno che chiude una strada mai percorsa.
 
 ### Le due celle, e perché sono due
 
@@ -108,11 +138,25 @@ separate o il round non misura niente:**
 | chi apre davvero | DAX (D30EUR), FTSE, CAC | Dow (U30USD), Nasdaq (NASUSD), S&P |
 | il DAX alle 14:30 server | — | **è aperto da 6 ore e mezza**: la campanella è passata da un pezzo |
 
-> ⚓ **L'ancora di R96 richiede che il mercato APRA in quell'istante.** Sul DAX
-> alle 14:30 server non c'è nessun seme da piantare: ci sono già ~78 barre M5
-> di sessione alle spalle. Metterci l'ancora lì significherebbe **ri-seminare a
-> caso a metà giornata**, che non è la tesi di Claudio: è un'altra cosa, e
-> peggiore.
+> ⚓ **L'ancora ha senso solo dove, in quell'istante, arriva un EVENTO DI
+> VOLATILITÀ REALE.** Alle 14:30 server apre il mercato **cash** americano, e
+> *quello* è l'evento che giustifica di buttare via la storia precedente e
+> ripartire da un seme.
+>
+> 🔧 **E qui va corretta una motivazione più debole che questo file conteneva
+> nella prima stesura**, perché era imprecisa e le imprecisioni si propagano:
+> diceva *"sul DAX alle 14:30 non c'è nessun seme da piantare"*. **Non è vero
+> in quei termini**: il seme lo piantiamo **noi**, è una scelta algebrica
+> nostra, e su un CFD che quota quasi 24 ore lo si potrebbe piantare a
+> qualunque ora del giorno. Tecnicamente **si può** ri-seminare il DAX alle
+> 14:30.
+>
+> **Il motivo vero per cui non si fa è un altro, ed è più forte:** sarebbe una
+> **risemina senza un evento che la giustifichi**. Sul DAX alle 14:30 non
+> comincia niente — il mercato è aperto da 6 ore e mezza e sta reagendo
+> all'apertura di *un altro* mercato. L'evento equivalente, per il DAX, è
+> l'apertura cash europea delle **08:00 server**. Una risemina scelta senza un
+> evento sotto è **un parametro pescato**, non un motore.
 
 **Quindi R96 gira su U30USD e NASUSD, M5.** La versione DAX esiste ed è a un
 input di distanza (`InpOpenHour=8`, `InpOpenMin=0`), **ma è un altro round**:
@@ -244,8 +288,7 @@ girato. Quindi la sanità si fa in quattro pezzi, tutti obbligatori:
 
 1. **AUTOTEST letto UNA VOLTA, in un test SINGOLO, PRIMA del round**
    (`InpAutoTest=1` fuori dalla griglia; nei file prova è pinnato a 0 apposta).
-   La riga `[XEMAAP][AUTOTEST] esito motore:` deve dire **CINQUE BLOCCHI SU
-   CINQUE**. ⚠️ Si legge **eseguendo**, non compilando: quelle `Print` stanno
+   La riga `[XEMAAP][AUTOTEST] esito motore:` deve dire **SEI BLOCCHI SU SEI**. ⚠️ Si legge **eseguendo**, non compilando: quelle `Print` stanno
    in `OnInit` (checklist punto 20). E **mai** attaccando l'EA a un grafico del
    PC di backtest: quel terminale è sul conto vivo (punto 26).
 2. **Gemelli identici**: ogni file prova spazzola solo la coppia di magic
@@ -278,13 +321,48 @@ Tutti e quattro, non tre su quattro:
 qui vale più del PF perché **è la domanda**:
 
 > **Se la cella A e la cella B, sullo stesso simbolo, hanno `n` entro il ±10%
-> E `Incroci Sessione` entro il ±10%, l'ancora è COSMETICA**: sta producendo
+> E gli INCROCI VERI entro il ±10%, l'ancora è COSMETICA**: sta producendo
 > (quasi) gli stessi segnali delle medie continue, e R96 risponde **NO** alla
 > propria domanda, qualunque sia il profitto.
 >
 > In quel caso si scrive, con queste parole: **"l'ancora non ha costruito un
 > segnale diverso: ha ridisegnato lo stesso"** — e il capitolo si chiude, senza
 > proporre niente.
+
+### 🔴 E QUI VA LETTA UNA CORREZIONE, perché la prima stesura di questo cancello **non poteva mordere**
+
+_Trovata alla prima verifica di R96, ed è la **checklist punto 52**._
+
+La prima stesura confrontava **`Incroci Sessione`** (il totale). **Quel confronto
+sarebbe uscito SEMPRE "non cosmetica", a prescindere dai numeri**, per una
+ragione algebrica e non statistica:
+
+```
+alla SECONDA barra di sessione (n = InpMinBarreSessione = 2):
+  fPrev = sPrev = c0            <-- il SEME: le due medie COINCIDONO
+  fNow  = c0 + 0,2000*(c1-c0)   af = 2/(9+1)
+  sNow  = c0 + 0,0909*(c1-c0)   as = 2/(21+1)
+CrossDirezione chiede fPrev<=sPrev, che qui e' VERO PER COSTRUZIONE:
+  c1 > c0  ->  +1 LONG   (sempre)
+  c1 < c0  ->  -1 SHORT  (sempre)
+```
+
+Cioè: **in cella A ogni sessione produce un incrocio garantito**, quindi
+`Incroci Sessione >= Sessioni Viste` è un **pavimento strutturale** che in
+cella B **non esiste**. Confrontare i totali significava confrontare una cosa
+con un pavimento e un'altra senza: il gate sarebbe stato **decorativo**.
+
+> ✅ **La forma corretta, congelata:**
+> **INCROCI VERI = `Incroci Sessione` − `Incroci Seme`**, e il ±10% si misura
+> **su quelli**. La colonna `Incroci Seme` esiste apposta nel CSV (e il campo
+> `seme=` nella riga `[XEMAAP][CONTEGGIO]` per la passata singola del PASSO 0):
+> l'artefatto **si conta, non si nasconde e non si "corregge" dentro l'EA**.
+>
+> ⚠️ **E se `INCROCI VERI` è vicino a zero, il cancello nemmeno si applica**:
+> vuol dire che R96 ha misurato **il momentum delle prime barre dopo la
+> campanella**, che è un motore legittimo e interessante — ma **non è
+> l'incrocio 9/21**, e il referto deve dirlo con quelle parole prima di ogni
+> altra riga.
 
 📌 **La misura fine, se i conteggi divergono ma non abbastanza:** le serie
 per-trade escono in `Common\Files\abtg_trades_ABTG_CrossEmaApertura_<sym>_<magic>.csv`
@@ -371,15 +449,32 @@ La regola si trasporta così — identico a come ha fatto `R86_CRITERI.md` §3:
    misurerà il forward);
    (e) **forward demo**, mai live da un backtest.
 
-### 6-bis. 🔁 LA CLAUSOLA DELLA SECONDA CACCIA — dichiarata PRIMA
+### 6-bis. 🔁 LA CLAUSOLA DELLA SECONDA CACCIA — **riscritta**, e con una cosa in MENO
 
-Se **la cella A esce senza edge su entrambi i simboli**, allora — e va scritto
-adesso, non dopo — **il capitolo "incrocio EMA 9/21" si chiude in questa casa**:
-R86 lo ha misurato continuo su due mercati, R96 lo ha misurato ancorato
-all'apertura su altri due. **Un R96-bis con altre medie (8/21, 9/20, 5/13) è
-esattamente "parametri diversi dello stesso motore morto", ed è vietato.**
-Quello che resta autorizzato è un **meccanismo diverso** sulla stessa
-inefficienza (la prima ora americana), o niente.
+> 🗑️ **QUI C'ERA UNA CLAUSOLA CHE È STATA CANCELLATA, e va detto invece di
+> farla sparire.** La prima stesura autorizzava, in anticipo, a *"chiudere il
+> capitolo incrocio EMA 9/21 in questa casa"* se la cella A fosse uscita senza
+> edge. **Era sbagliato**, e il motivo è quello del §4.2: con
+> `InpMinBarreSessione=2` il segnale dominante di ogni sessione è l'artefatto
+> del seme, la cui direzione è `sign(c1-c0)` — **identica con 9/21, 5/13 o
+> 8/21**. R96 **non muove i periodi**, quindi **non può concludere niente su di
+> loro**. Chiudere quel capitolo con i numeri di R96 sarebbe stato **chiudere
+> una strada che nessuno ha percorso**, che è peggio di un referto sbagliato.
+
+Quello che la clausola dice **adesso**:
+
+- Se **la cella A esce senza edge su entrambi i simboli**, quello che si chiude
+  è **il motore di R96** — *"il momentum delle prime barre dopo l'apertura USA,
+  gestito così"* — e nient'altro.
+- **Resta vietato** un R96-bis che riprovi **lo stesso motore** con un'altra
+  durata di finestra o un altro `InpSLatr`: sarebbe *"parametri diversi dello
+  stesso motore morto"*.
+- **Resta APERTA** la domanda sui periodi 9/21 dentro una sessione ancorata,
+  perché R96 non la tocca. Il round che la aprirebbe davvero è quello che
+  **spazzola `InpMinBarreSessione`** (2 / 4 / 6): solo alzandolo il segnale
+  smette di essere l'artefatto del seme e comincia a dipendere dalle due medie.
+- **Resta autorizzato**, come sempre, un **meccanismo diverso** sulla stessa
+  inefficienza (la prima ora americana).
 
 ---
 
@@ -389,8 +484,9 @@ Un piano che sembra completo ma ha buchi nascosti è peggio di un piano corto.
 
 | ❌ non misurabile in R96 | perché | dove va |
 |---|---|---|
-| **L'apertura EUROPEA (il DAX di stamattina)** | l'ancora è pinnata a 14:30 server; sul DAX la campanella è alle 08:00 | **round successivo**, un input di distanza |
-| **`InpMinBarreSessione`** (pinnato a **2**) | 2 è il **primo confronto matematicamente possibile** (alla prima barra le due medie coincidono per costruzione). Alzarlo cambia **classe di evento**: non più la spinta d'apertura ma il primo ribaltamento della deriva | round successivo, **solo se A sopravvive** |
+| 🔴 **L'EFFETTO DEI PERIODI 9 E 21** — ed è la riga più importante della tabella | con `InpMinBarreSessione=2` il segnale **dominante** di ogni sessione è l'incrocio garantito della barra 2, e lì la direzione è `sign(c1-c0)`: **la stessa con 9/21, 5/13 o 8/21**, perché conta solo `af > as`. **R96 misura il momentum delle prime barre dopo la campanella, non l'incrocio.** Il referto deve dirlo prima di ogni numero, e la colonna `Incroci Seme` dice **quanti** trade vengono da lì | il round che spazzola **`InpMinBarreSessione`** (2 / 4 / 6): è l'unico posto dove i periodi mordono |
+| **L'apertura EUROPEA (il DAX di stamattina)** | l'ancora è pinnata a 14:30 server; sul DAX l'evento di volatilità equivalente è alle 08:00 server | **round successivo**, un input di distanza |
+| **`InpMinBarreSessione`** (pinnato a **2**) | 2 è il **primo confronto matematicamente possibile** (alla prima barra le due medie coincidono per costruzione). Alzarlo cambia **classe di evento**: non più la spinta d'apertura ma il primo ribaltamento della deriva — **ed è anche l'unica manopola che fa entrare 9 e 21 nel segnale** | round successivo, **solo se A sopravvive** |
 | **La durata della finestra** (pinnata a **180 min**) | 3 ore coprono la prima ora e mezza "calda" più il seguito; non è ottimizzata, è scelta | coda |
 | **`InpSoloPrimoIngresso`, uscita opposta, parziale, breakeven** | pinnati e spenti in tutte e quattro le celle | altro round: **la gestione è la domanda di un altro giro** |
 | **Le COMBINAZIONI** (ancora + qualunque filtro) | non esiste una cella multi-gamba | round successivo, solo se la cella singola regge |
@@ -433,6 +529,16 @@ imparato qualcosa; se le confermano, nessuno può dire *"l'avevo detto dopo"*.
    spazzolate**: 9 e 21 li ha dettati Claudio, 2 è il minimo matematico, 180 è
    dichiarato. **Se un giorno qualcuno spazzolasse quei numeri per far tornare
    il PF, questo round andrebbe buttato insieme a quelli.**
+5. 🔴 **E l'aspettativa più scomoda di tutte, che nasce dalla verifica invece
+   che dall'entusiasmo: mi aspetto che `Incroci Seme` sia una FRAZIONE ALTA di
+   `Incroci Sessione`.** Se lo è — ed è quello che l'algebra suggerisce — allora
+   il motore che R96 sta misurando **non è quello che il nome del round
+   prometteva**: è il momentum delle prime barre dopo la campanella. **Questo
+   non lo rende meno interessante** (nessun round di casa lo ha mai misurato, e
+   `CODA_PROSSIMA_SESSIONE.md` lo elenca fra le direzioni aperte come *opening
+   drive*), **ma cambia cosa si può scrivere alla fine.** Dichiararlo adesso è
+   l'unico modo perché il referto non lo scopra dopo e non ci si costruisca
+   sopra una conclusione che i numeri non reggono.
 
 ---
 
@@ -441,13 +547,15 @@ imparato qualcosa; se le confermano, nessuno può dire *"l'avevo detto dopo"*.
 - [ ] **PASSO 0-A** dichiarato: età del referto storico, riga `Verdetto` dei due simboli, e la **formula** con cui è calcolata (§3.0).
 - [ ] Il **commit sulla punta di `lavoro` all'ora della corsa**, dichiarato.
 - [ ] Il **MODO** dell'artefatto (giro a vuoto / corsa vera) nel **nome del file**, **dentro** il referto e nella riga di **ESITO** (checklist punto 50).
-- [ ] **AUTOTEST** letto e dichiarato: *cinque blocchi su cinque*.
+- [ ] **AUTOTEST** letto e dichiarato: *sei blocchi su sei* (il sesto e la riga CONSEGUENZA DICHIARATA sono il controllo del punto 52: i periodi 9/21 non muovono il segnale della barra 2).
 - [ ] **Gemelli identici**, 4 coppie su 4, dichiarato.
 - [ ] **Cache del tester**: file contati **prima e dopo** (punto 46).
 - [ ] **`Sessioni Viste` di ogni cella**, per prima: distingue *non eseguita* da *brutta*.
 - [ ] **`n` IS e `n` OOS accanto a OGNI numero**, senza eccezioni.
 - [ ] Il **regime** dichiarato accanto a ogni tabella (§3.3).
-- [ ] Il **CANCELLO DELLA DISTINZIONE** (§4.2) applicato e scritto, prima del PF.
+- [ ] La colonna **`Incroci Seme`** e gli **INCROCI VERI** (`Incroci Sessione` − `Incroci Seme`) scritti **prima** del cancello §4.2 e prima di qualunque PF: se gli incroci veri sono vicini a zero, il referto **dichiara che R96 ha misurato il momentum delle prime barre e NON l'incrocio 9/21** (punto 52).
+- [ ] Il **CANCELLO DELLA DISTINZIONE** (§4.2) applicato **sugli INCROCI VERI, mai sul totale**, e scritto prima del PF.
+- [ ] **Nessuna riga del referto conclude qualcosa sui periodi 9 e 21.** R96 non li muove.
 - [ ] Il **verdetto per simbolo**, mai un pooling silenzioso (§5 punto 3).
 - [ ] La frase su **`ABTG_ORB`**: correlazione dichiarata o misurata, mai taciuta.
 - [ ] Le celle bocciate scritte **per nome, col cancello che le ha bocciate**.

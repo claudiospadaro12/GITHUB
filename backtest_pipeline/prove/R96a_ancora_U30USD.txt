@@ -14,10 +14,32 @@
 #      prima dei numeri, non dopo.
 # ---------------------------------------------------------------------
 #  LA DOMANDA DEL ROUND (una sola):
-#    "L'incrocio delle medie 9/21 RI-SEMINATE all'apertura americana
-#     (14:30 SERVER = 15:30 IT) ha un edge misurabile sugli indici USA
+#    "Il momento della sessione misurato da medie RI-SEMINATE all'apertura
+#     americana (14:30 SERVER = 15:30 IT) ha un edge sugli indici USA
 #     -- e quello che eventualmente si vede viene dall'ANCORA o solo
 #     dall'OROLOGIO?"
+#
+#  >>> PERCHE' LA DOMANDA NON DICE "l'incrocio 9/21" <<<
+#  Perche' sarebbe una promessa che il round NON PUO' MANTENERE, e la
+#  correzione e' arrivata alla prima verifica (checklist punto 52).
+#  Con InpMinBarreSessione=2 il segnale DOMINANTE di ogni sessione e'
+#  l'incrocio della SECONDA barra, e li' l'algebra del seme dice:
+#      fPrev = sPrev = c0          <-- il seme: le due medie COINCIDONO
+#      fNow  = c0 + 0,2000*(c1-c0)     af = 2/(9+1)
+#      sNow  = c0 + 0,0909*(c1-c0)     as = 2/(21+1)
+#  e CrossDirezione chiede fPrev<=sPrev, VERO PER COSTRUZIONE. Quindi la
+#  direzione e' sign(c1-c0): LA STESSA con 9/21, con 5/13 o con 8/21,
+#  perche' conta solo af > as. I PERIODI NON MUOVONO QUEL SEGNALE.
+#    -> R96 misura il MOMENTUM DELLE PRIME BARRE dopo la campanella.
+#    -> R96 NON misura l'effetto di 9 e 21, e NESSUNA sua conclusione
+#       puo' riguardarli.
+#    -> l'artefatto SI CONTA: colonna "Incroci Seme" nel CSV e campo
+#       seme= nella riga [XEMAAP][CONTEGGIO]. Gli INCROCI VERI sono
+#       (Incroci Sessione - Incroci Seme), ed e' su QUELLI che si legge
+#       il cancello della distinzione. Sul TOTALE non si legge: in cella
+#       A c'e' un pavimento strutturale (un incrocio garantito per
+#       sessione) che in cella B non esiste, e il gate uscirebbe SEMPRE
+#       "non cosmetica" a prescindere dai numeri.
 #
 #  R96 NON E' UNA VARIANTE DI R86. Non si confronta NESSUN numero con
 #  R86: motore diverso (medie DI SESSIONE contro medie CONTINUE),
@@ -122,7 +144,10 @@ InpChiudiAFineSessione=1
 #     InpMinBarreSessione=2 e' il PRIMO CONFRONTO MATEMATICAMENTE
 #     POSSIBILE (alla prima barra le due medie coincidono per
 #     costruzione, valgono entrambe il seme). Alzarlo cambia CLASSE di
-#     evento, non taratura: e' la domanda di un altro round.
+#     evento, non taratura: e' la domanda di un altro round -- ED E'
+#     ANCHE L'UNICA MANOPOLA CHE FA ENTRARE 9 E 21 NEL SEGNALE. A 2 NON
+#     ENTRANO: vedi il blocco "PERCHE' LA DOMANDA NON DICE l'incrocio
+#     9/21" in testa a questo file.
 InpEmaFast=9
 InpEmaSlow=21
 InpMinBarreSessione=2
