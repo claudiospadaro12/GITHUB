@@ -720,11 +720,13 @@ zip va mandato lo stesso.
 
 ### 4️⃣ BLOCCO 5 — cosa deve esserci nello zip, per nome
 
-`Desktop\R93_FIBOH4.zip` deve contenere **69 file**:
-- **68 CSV** `ABTG_FiboH4_<Multi|Corso>_<SYM>_<IS|OOS>_ohlc_<tag>.csv`
-  (tag: `r93a`..`r93f` per la gamba A, `r93g`..`r93j` per la B — **28 file per
-  la gamba A**, 8 nomi... no: **12 CSV gamba A** (6 file x IS/OOS) e **16 CSV
-  gamba B** (8 file x IS/OOS) = **28 CSV**, ognuno con dentro le sue celle);
+`Desktop\R93_FIBOH4.zip` deve contenere:
+- **28 CSV** `ABTG_FiboH4_<Multi|Corso>_<SYM>_<IS|OOS>_ohlc_<tag>.csv`
+  — **12 della gamba A** (6 file prova x IS/OOS, tag `r93a`..`r93f`) e
+  **16 della gamba B** (8 file prova x IS/OOS, tag `r93g`..`r93j`).
+  ⚠️ **28 CSV, 68 passate:** ogni CSV contiene **le celle del suo asse**, una
+  riga per cella. Chi conta i FILE aspettandosi 68 crede che manchi meta'
+  round. `REFERTO_R93.txt` elenca i 28 nomi attesi, uno per uno;
 - le serie **per-trade** `pertrade_*.csv` da `Common\Files`;
 - **`REFERTO_R93.txt`** — e la sua riga `data:` **deve essere di ADESSO**;
 - **`R93_CRITERI.md`**, cosi' i numeri viaggiano coi criteri che li giudicano.

@@ -1,5 +1,53 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # 🧪 21/08 — **R93 (FIBO H4) E' PRONTO MA NON FIRMATO** — 68 passate, due gambe
+>
+> ## 🚦 POSTO IN CODA: **dietro R92.** Una macchina, un lavoro.
+>
+> ## 📄 CRITERI DA FIRMARE: `backtest_pipeline/risultati_archivio/R93_CRITERI.md`
+> ## 🧾 RIGA DI LANCIO: par. 14 dello stesso file, **5 blocchi pinnati a `d78af56`**
+>
+> ### Le due gambe, e si giudicano SEPARATE
+> - **🅰️ GAMBA A** — *"il filtro news cambia l'edge del nostro EA, e in che verso?"*
+>   `ABTG_FiboH4_Multi` **v1.10**, geometria intoccata. 6 file prova, **24 passate**.
+> - **🅱️ GAMBA B** — *"la geometria del CORSO opera, e con che profilo?"*
+>   `ABTG_FiboH4_Corso.mq5` **NUOVO, MAI COMPILATO**, magic 771640.
+>   8 file prova su GBPUSD e USDJPY, **44 passate**.
+>   Nasce dalla decisione di Claudio del 21/08: **"1,2,3 si guardano"**.
+>
+> ### 🔴 LE DUE COSE CHE POTEVANO FAR FALLIRE IL ROUND, e sono chiuse
+> 1. **Il calendario news non parlava la lingua dell'EA**: i due CSV di
+>    biblioteca hanno le colonne 2 e 3 **SCAMBIATE** — l'impatto veniva letto
+>    da `"United States"`, valeva 0, e **il filtro non bloccava mai niente**
+>    restando **neutro in silenzio**. Chiuso da `converti_calendario_news.py`
+>    (2.971 eventi ad alto impatto, **2021.01.04 → 2025.12.19**, 0 scarti).
+> 2. **Il CSV non arrivava agli agenti del tester** (ogni agente ha la sua
+>    sandbox `MQL5\Files`, e il driver non copia niente). Chiuso leggendo da
+>    `Common\Files` + ripiego dichiarato + **canarino "FILTRO ACCESO MA CIECO"**.
+>    **Atteso 8-12% di barre bloccate**, calcolato PRIMA sul calendario vero.
+>    **Una cella news con `bloccate=0` si BUTTA.**
+>
+> ### 📅 E LA FINESTRA — il vincolo che stringe tutto
+> `2021.01.04 → 2025.12.19` (la copertura del calendario). **Modello 1, OHLC:**
+> a BCM i tick di GBPUSD partono dal **2024.07.05**, quindi a tick quella
+> finestra **non esiste**. ➡️ **R93 e' SCREENING e NON PROMUOVE NIENTE.**
+> Frequenza misurata: **~30 operazioni/anno/simbolo**. Gamba A (basket di 3)
+> arriva a ~200 IS / ~290 OOS → **il campione c'e'**. Gamba B (un simbolo)
+> fa ~150 op **in tutto** → **merito SOSPESO**, si legge solo il rischio.
+>
+> ### 🔴 4 RICHIESTE A CLAUDIO, in cima ai criteri
+> slide dei due moduli · screenshot del Fibo **col livello 100 visibile**
+> (chiude il fattore x2,1) · screenshot del **pannello Fibo** (chiude il x10) ·
+> il **fuso** della piattaforma. Senza le prime due, il referto dovra' dire
+> *"misurata la NOSTRA ricostruzione"*, non *"la strategia del corso"*.
+>
+> ### ⚠️ E IL PRECEDENTE, che va citato: c'e' un **0/8** in archivio
+> Coda fascia B 10-11/08. **Ma quel banco era rotto** (`InpSymbols=` vuoto:
+> MT5 lo ignora, otto passate = otto copie dello stesso basket, 7 CSV su 8
+> identici al centesimo). Corretto `scan_market.ps1` e scritto
+> `controlla_prova.py`, che quel difetto lo trova prima di aprire MT5.
+>
+
 > # ✍️ 21/08 — **R92 (BULGE) E' FIRMATO E PRONTO A PARTIRE** — 88 passate sui 22 cross
 >
 > ## 🚦 POSTO IN CODA: **dietro la misura tick U30USD e R90** (R91 e' gia' stato letto il 21/08: cancello RR bocciato).

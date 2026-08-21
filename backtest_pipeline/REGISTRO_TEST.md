@@ -41,6 +41,34 @@ _Nota: in OHLC i Live5m davano numeri finti enormi (+129k DAX, +30k Nasdaq). In 
 
 ---
 
+---
+
+## 2-bis) FIBO H4 — il "0/8" e' UN NUMERO SOLO, CONTATO OTTO VOLTE (trovato il 21/08/2026)
+
+| # | EA | Sym | Risultato in archivio | Verdetto |
+|---|---|---|---|---|
+| F1 | FiboH4_Multi | 8 coppie forex+oro H4 | **0/8 promossi** (coda fascia B, 10-11/08) | 🔴 bocciato allora, e **il numero resta** |
+
+🔴 **MA il banco era rotto, ed e' misurato.** `ABTG_FiboH4_Multi` e'
+**multi-simbolo**: opera su `InpSymbols`, non sul simbolo del grafico. Il file
+prova scriveva `InpSymbols=` **vuoto** con sopra la nota *"il pin sotto e'
+OBBLIGATORIO"* — e **MT5 ignora un pin di stringa vuoto**, usando il default
+compilato. Nei 16 CSV in archivio la colonna `InpSymbols` dice
+`GBPUSD;USDJPY;EURUSD` in **tutte** le passate, e **7 file su 8 danno lo stesso
+numero al centesimo** (IS da −384,56 a −394,13 / OOS da +116,17 a +118,68).
+➡️ Quel "0/8" e' **una configurazione bocciata, contata otto volte**.
+
+🔵 **E non ha mai giudicato la strategia del corso.** Le tre divergenze di
+geometria (18/08): distanza ordini **~x10**, target **x2,1**, stop **~x4**.
+➡️ **R93** (bozza `risultati_archivio/R93_CRITERI.md`, decisione di Claudio del
+21/08 *"1,2,3 si guardano"*) rimisura in due gambe: **A** il filtro news sul
+nostro EA, **B** la geometria del corso con `ABTG_FiboH4_Corso.mq5` (nuovo).
+
+🛠️ **Corretto per non ripeterlo:** `scan_market.ps1` (blocco FiboH4) ora usa il
+segnaposto `__SYM__`; e c'e' `backtest_pipeline/controlla_prova.py`, che il pin
+vuoto lo trova **prima** di svegliare MT5.
+
+
 ## 3) ORB e altri breakout indici (screen OHLC + direzione L/S)
 
 | # | EA | Sym | Miglior config | Risultato | Verdetto |
