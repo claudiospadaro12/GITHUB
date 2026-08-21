@@ -2046,3 +2046,70 @@ canarino) **vale per meta'**.
 > `-Rifai` nessuno dei due stati deve accendersi (si rifa' tutto). Se la
 > matrice non e' stata **eseguita**, la spia non e' stata verificata: e' stata
 > letta.
+
+---
+
+## 🆕 AGGIUNTA DEL 21/08/2026 — trovata alla **QUARTA** verifica della riga R95
+
+_Contesto, e vale come dato del round: R95 ha prodotto **12** difetti al primo
+giro, **2** al secondo (nati dentro le correzioni), **2** al terzo (uno nato in
+una correzione, uno residuo), e al quarto **1 residuo + 2 nuovi**. Quattro giri
+su quattro con almeno un difetto che vive **dentro una correzione o accanto ad
+essa**. La v4 chiude davvero D1 e D2 (referto scritto nella corsa fermata:
+**riprodotto** con un `throw` finto alla prima riga del `try`; `-Da $DaQuando`
+che arriva a `InpDataInizio`). Il difetto nuovo qui sotto e' **riprodotto**, non
+dedotto._
+
+## 49. 🪞 IL REFERTO DEL **GIRO A VUOTO** INDISTINGUIBILE DA QUELLO DELLA CORSA VERA
+
+_Difetto vero, `backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1` righe 821-822
+e 891-901 (commit `9199e75`), **RIPRODOTTO** con `pwsh`: lanciato in
+`-SoloControllo`, il referto chiude con_
+
+```
+ESITO: OK -- tutti i file hanno prodotto le righe attese, nessun problema in elenco.
+```
+
+_avendo prodotto **zero passate** e con la tabella dei lavori a `IS -1 / OOS -1`
+su tutte e cinque le righe. Uscita **0**._
+
+Il punto 14 copre il giro a vuoto che **esce 0 anche se un pezzo e' fallito**.
+Questo copre il caso in cui il giro a vuoto e' andato **benissimo** — e proprio
+per questo produce un artefatto che **mente sul round**:
+
+| cosa | corsa vera | giro a vuoto | uguali? |
+|---|---|---|---|
+| cartella sul Desktop | `R95_LIQSWEEP_JPY_<stamp>` | `R95_LIQSWEEP_JPY_<stamp>` | **si'** |
+| zip | `R95_LIQSWEEP_JPY_<stamp>.zip` | idem | **si'** |
+| referto dentro | `REFERTO_R95.txt` | `REFERTO_R95.txt` | **si'** |
+| riga `data:` | di adesso | di adesso | **si'** |
+| ultima riga | `ESITO: OK` | `ESITO: OK` | **si'** |
+
+La riga `data:` — la contromisura del punto 13 contro il referto stantio —
+**non protegge**, perche' il referto del giro a vuoto e' fresco davvero. E il
+giro a vuoto non e' un caso di scuola: e' **la riga stessa** a prescriverlo
+(punto 5 di questa checklist), quindi succede **prima di ogni corsa**, cioe' il
+file sbagliato sul Desktop c'e' sempre e ha lo stesso nome di quello giusto.
+
+> **Un artefatto prodotto in una MODALITA' diversa porta la modalita' nel NOME,
+> dentro il referto, e nella riga di ESITO.** Tutti e tre, perche' si guardano
+> in tre momenti diversi (il Desktop, l'apertura del file, il fondo del file):
+> ```powershell
+> $Modo = "CORSA VERA"
+> if($SoloControllo){ $Modo = "GIRO A VUOTO (-SoloControllo)" }
+> elseif($SaltaPasso0){ $Modo = "CORSA VERA CON PASSO 0 SALTATO" }
+> $Tag  = if($SoloControllo){ "CONTROLLO_" } else { "" }
+> $Cart = Join-Path $Dsk ("R95_..._" + $Tag + $Stamp)      # 1: il NOME
+> [void]$R.Add("modo: " + $Modo)                            # 2: DENTRO
+> if($SoloControllo){                                       # 3: l'ESITO
+>   [void]$R.Add("ESITO: GIRO A VUOTO COMPLETATO -- N anteprime .ini. NESSUNA passata, NESSUN CSV, NESSUN numero di round.")
+> }
+> ```
+> ⚠️ **La frase dell'ESITO non puo' essere generica.** Qui diceva *"tutti i file
+> hanno prodotto le righe attese"*: e' vera per il codice (nessun file era
+> `-ne "OK"`) e falsa per il mondo (nessun file ha prodotto niente). **Una frase
+> di esito che resta vera solo perche' il perimetro e' vuoto va riscritta.**
+> Regola gemella: **ogni switch che cambia cosa la corsa MISURA** (`-SoloControllo`,
+> `-SaltaPasso0`, `-Rifai`, `-Solo`) **si scrive nel referto**, anche quando non
+> genera nessun problema. `-SaltaPasso0` qui era coperto solo perche' aggiungeva
+> un `$Problemi`: coprire per effetto collaterale non e' coprire.
