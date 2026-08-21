@@ -627,10 +627,17 @@ PASSO 0, ma ha tre prerequisiti duri:
 - [ ] **Le 4 richieste R1-R4 in cima**, con accanto quale numero resta assunzione.
 - [ ] I **canarini** del par. 5 letti **per primi**, prima di ogni tabella.
 - [ ] Il **conteggio operazioni accanto a OGNI numero**, e per la gamba B anche
-      `pattern visti / scartati / setup piazzati`.
+      le colonne `Setup Piazzati` / `Pattern Visti` / `Scartati Laterale` /
+      `Scartati Distanza` / `Scartati Ampiezza`.
+      ⚠️ **`-1` non e' `0`**: `-1` = la passata non ha prodotto il canarino;
+      `0` = ha girato e non ha piazzato/bloccato niente. Due verdetti opposti.
 - [ ] Il **regime** dichiarato accanto a ogni tabella (2021 / 2022 / 2023-24 / 2025).
-- [ ] **La percentuale di barre bloccate** di ogni cella news, confrontata con
+- [ ] **La percentuale di barre bloccate** di ogni cella news, presa dalle
+      **colonne** `News Bloccate` / `News Interrogazioni` del CSV (par. 5.1-bis,
+      **non** dalla `Print`: nel round nessuno la vede) e confrontata con
       l'atteso **8-12%** del par. 5.2.
+- [ ] **Il canarino del pin `InpSymbols`**, letto nella colonna dei CSV, coi
+      **tre** esiti possibili.
 - [ ] **L'aspettativa dei trade TAGLIATI** (par. 6.1) per ogni cella news, col
       segno in chiaro.
 - [ ] Le due gambe **giudicate separatamente**, con scritto in chiaro che
@@ -687,7 +694,7 @@ comandi indipendenti, e un `throw` alla riga 1 **non ferma la riga 2**
 > 1. 🧊 **BRANCH CONGELATO**: **nessun push su `lavoro` mentre R93 gira.**
 >    Un push a meta' corsa cambierebbe l'EA **fra una cella e l'altra**, e il
 >    confronto fra celle non misurerebbe piu' niente.
-> 2. 🏷️ **MARCATORE DI VERSIONE** in ogni blocco (`R93-LANCIO-v1`, `R93 -- FIBO
+> 2. 🏷️ **MARCATORE DI VERSIONE** in ogni blocco (`R93-LANCIO-v2`, `R93 -- FIBO
 >    H4 ALL'IMBUTO`): copre insieme la **cache di raw** (che tiene ~5 minuti) e
 >    il download andato a male, che e' quello che il pin doveva coprire.
 > 3. 🔧 Il fix vero — inoltrare `-Rif` e togliere il ripiego silenzioso da
@@ -725,77 +732,160 @@ comandi indipendenti, e un `throw` alla riga 1 **non ferma la riga 2**
 ### 1️⃣ BLOCCO 2 — installare i due EA e il Guardian, POI COMPILARE A MANO
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r93.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO: la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK. Adesso i tre gesti a mano del blocco 3. ===" -ForegroundColor Green }
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r93.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v2' -Quiet)){ throw 'SCRIPT VECCHIO (serve la v2, corretta dopo la bocciatura del verificatore): la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK. Adesso i tre gesti a mano del blocco 3. ===" -ForegroundColor Green }
 ```
 
-Il giro a vuoto **non apre MT5**: scarica tutto, installa
-`ABTG_PausaGuardian.mqh`, mette il calendario in `Common\Files`, fa il PASSO 0
-e stampa le 14 anteprime `.ini`. **Si legge quello che stampa**, in particolare:
-- `InpSymbols` = **`USDJPY;EURUSD;GBPUSD`** (ordine diverso dal default: e' il
-  canarino del pin, par. 11). Se dice `GBPUSD;USDJPY;EURUSD` **ci si ferma li'**.
-- `FromDate` / `ToDate` dentro `2021.01.04 → 2025.12.19`.
+> 🚦 **TRAFFICO: MT5 CHIUSO.** Il blocco **non apre** il terminale, ma
+> **compila** con `metaeditor64.exe`: con MT5 aperto l'`.ex5` puo' essere in uso.
+
+Il giro a vuoto fa **cinque cose**, e le fa **tutte anche in `-SoloControllo`**:
+1. scarica script, file prova, calendario, l'`.mqh` **e i due `.mq5`**;
+2. installa `ABTG_PausaGuardian.mqh` in `MQL5\Include` — verificato sul
+   marcatore **`ABTG_AutotestGuardia`** (non su `ABTG_GuardiaIngresso`, che c'e'
+   anche nelle versioni vecchie e farebbe passare un include stantio);
+3. **installa e COMPILA i due EA**, cancellando prima l'`.ex5` vecchio — che
+   altrimenti farebbe passare il gate su una compilazione fallita oggi;
+4. mette il calendario in `Common\Files` **e** nella sandbox del terminale;
+5. fa il PASSO 0 e stampa le 14 anteprime `.ini`, una per cella, con nome proprio.
+
+> ### ✅ **F7 NON SERVE PIU', ed era un errore vero**
+> Nella v1 il blocco 3 mandava Claudio a premere F7 su file che sulla macchina
+> **non c'erano**: `walkforward_generico.ps1` esce a **riga 538** dentro il ramo
+> `-SoloControllo`, mentre copia e compila stanno alle **righe 601-603**, cioe'
+> dopo; e `lancia_r93.ps1` **non scaricava nessun `.mq5`**.
+> Adesso compila il driver, e **una compilazione fallita muore qui, in tre
+> minuti**, invece che al blocco 4 dopo due ore di macchina.
+> `ABTG_FiboH4_Corso.mq5` **non e' mai stato compilato da nessuno**: se qualcosa
+> non compila e' l'esito piu' probabile, ed e' proprio quello che questo passo
+> serve a scoprire adesso.
+
+**Si legge quello che stampa**, in particolare:
+- `ok compilato ABTG_FiboH4_Corso.ex5 (... byte)` e lo stesso per il Multi;
+- `FromDate` / `ToDate` dentro `2021.01.04 → 2025.12.19`;
 - le celle news con `InpNewsFile=abtg_news_2021_2025_UTC.csv` e `InpNewsCommon=1`.
 
-### 2️⃣ BLOCCO 3 — I TRE GESTI A MANO (non sono automatizzabili, e vanno fatti)
+> ### 🪞 E QUELLO CHE **NON** SI CONTROLLA QUI: il canarino del pin `InpSymbols`
+> Nell'anteprima `.ini` dira' `USDJPY;EURUSD;GBPUSD` **sempre**, anche il giorno
+> in cui MT5 lo ignora — perche' **l'anteprima la scrive il nostro script**
+> copiando il file prova, non MT5. Leggerlo li' sarebbe un guardiano decorativo,
+> ed e' **esattamente il difetto che ha prodotto il vecchio 0/8**: passerebbe una
+> seconda volta (checklist 34-bis).
+> **Si legge nella colonna `InpSymbols` dei CSV, a corsa finita** — lo fa da solo
+> il driver, e lo scrive nel referto con **TRE** esiti, non due:
+>
+> | valore nella colonna | verdetto |
+> |---|---|
+> | `USDJPY;EURUSD;GBPUSD` | ✅ **pin ARRIVATO** |
+> | `GBPUSD;USDJPY;EURUSD` | 🔴 **pin IGNORATO**: e' il default compilato |
+> | **`USDJPY`** da solo | 🔴 **il `;` TRONCATO dal parser dell'`.ini`**: basket da **1** cross invece di 3, con `n` a un terzo e nessuno che se ne accorge |
+>
+> Se e' rotto, **i numeri della gamba A non si leggono** e lo script esce 1.
 
-1. **MetaEditor → F7 su `ABTG_FiboH4_Corso.mq5`** e su `ABTG_FiboH4_Multi.mq5`.
-   **0 errori, 0 warning.** `ABTG_FiboH4_Corso.mq5` **non e' MAI stato
-   compilato** e chi lo ha scritto **non ha MetaEditor**: qualche errore di
-   battitura e' plausibile, e va corretto prima, non a corsa avviata.
-   ⚠️ Se MetaEditor era gia' aperto, **chiudilo e riaprilo**: il suo Navigatore
-   mostra l'albero fotografato all'apertura e i file nuovi non ci sono
-   (difetto n.27-bis).
-2. **Strategy Tester → UN TEST SINGOLO** di `ABTG_FiboH4_Corso` su GBPUSD H4,
-   un mese qualsiasi, `InpAutoTest = true`. **F7 compila e basta: l'autotest si
-   legge ESEGUENDO** (difetto n.20). Nella scheda *Esperti* devono uscire
-   `0 casi falliti` e questa riga:
+### 2️⃣ BLOCCO 3 — I DUE TEST SINGOLI A MANO (la compilazione l'ha gia' fatta il blocco 2)
+
+> 🚦 **TRAFFICO: qui MT5 SI APRE** (Strategy Tester, test singolo). Al termine
+> **richiudilo** prima del blocco 4, che pretende il terminale chiuso.
+> 🚫 **MAI attaccare l'EA a un grafico** per leggere queste righe: sul PC di
+> backtest il terminale e' collegato al **conto vivo**, e il 14/08 e' partito un
+> ordine vero proprio cosi'.
+
+Perche' due test **singoli** e non la griglia: **in ottimizzazione MT5 non fa
+vedere le `Print` degli agent** (checklist 34). Nel round quei numeri li leggiamo
+dalle **colonne del CSV** (par. 5.1-bis); qui li leggiamo dalla scheda *Esperti*,
+che nel test singolo funziona — ed e' l'unico modo di vederli **prima** di
+spendere due ore di macchina.
+
+1. **Test singolo di `ABTG_FiboH4_Corso`** su **GBPUSD H4**, un mese qualsiasi,
+   `InpAutoTest = true`. Nella scheda *Esperti* devono uscire **`0 casi
+   falliti`** e questa riga, che e' la prova che la geometria del corso e'
+   quella dichiarata:
    ```
    [FIBOCORSO][AUTOTEST] geometria su pattern 100-110 (range 10): target100=100.00 | EZ1 [98.20 - 99.20] | EZ2 [88.20 - 89.20] | banda=1.00
    ```
-   🚫 **MAI attaccare l'EA a un grafico** per leggere quelle righe: sul PC di
-   backtest il terminale e' collegato al **conto vivo**, e il 14/08 e' partito
-   un ordine vero proprio cosi'.
-3. **Un test singolo di `ABTG_FiboH4_Multi` con `InpUseNewsFilter=true`** e
-   `InpNewsFile=abtg_news_2021_2025_UTC.csv`, su un mese del 2022. Nella scheda
-   *Esperti* deve uscire:
+   (banda = `0,10 x range` = 1,00 su range 10 ✅ · target 100 = **la base** ✅)
+
+2. **Test singolo di `ABTG_FiboH4_Multi`** con `InpUseNewsFilter=true` e
+   `InpNewsFile=abtg_news_2021_2025_UTC.csv`, su un mese del 2022. Deve uscire:
    ```
    [FIBOH4][NEWS] letto da Common\Files | eventi utili 2971 (impatto >= 3) | ...
    [FIBOH4][NEWS] primo evento 2021.01.04 ... | ultimo evento 2025.12.19 ...
    ```
    🔴 Se dice **`FILTRO ACCESO MA CIECO`**, oppure `eventi utili 0`, **si passa
-   al PIANO B (par. 8) e non si lancia il round**: sarebbe una notte di
-   macchina per misurare un filtro spento.
-   ⚠️ **In OTTIMIZZAZIONE MT5 non stampa le `Print` degli agenti**: questa prova
-   si fa in **test singolo**, non nella griglia.
+   al PIANO B (par. 8) e NON si lancia il round**: sarebbe una notte di macchina
+   per misurare un filtro spento.
 
 ### 3️⃣ BLOCCO 4 — IL ROUND (68 passate)
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia il BLOCCO 2 per primo' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $z="$([Environment]::GetFolderPath('Desktop'))\R93_FIBOH4.zip"; if(-not (Test-Path $z)){ throw 'LO ZIP NON C E: la corsa non e arrivata alla raccolta' }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ("ZIP STANTIO: ha " + [int]$eta + " minuti, non e di adesso") }; if($rc -ne 0){ Write-Host "ESITO PARZIALE: mandalo lo stesso, ma di' QUALE pezzo manca (lo scrive REFERTO_R93.txt)" -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia il BLOCCO 2 per primo' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v2' -Quiet)){ throw 'SCRIPT VECCHIO: serve la v2' }; if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw 'MT5 E APERTO: chiudilo (il blocco 3 lo ha aperto)' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $z="$([Environment]::GetFolderPath('Desktop'))\R93_FIBOH4.zip"; if(-not (Test-Path $z)){ throw 'LO ZIP NON C E: la corsa non e arrivata alla raccolta' }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ("ZIP STANTIO: ha " + [int]$eta + " minuti, non e di adesso") }; if($rc -ne 0){ Write-Host "ESITO PARZIALE o CANARINO ROTTO: mandalo lo stesso, ma di QUALE pezzo manca (lo scrive REFERTO_R93_*.txt)" -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
 ```
 
+> 🚦 **TRAFFICO: MT5 CHIUSO** — e il blocco lo verifica da solo, perche' il
+> blocco 3 lo ha appena aperto. Con MT5 aperto **escono 0 CSV**.
+
 **Durata stimata:** 68 passate OHLC M1 su ~5 anni di H4. **[STIMA, non
-misurata]** 1-3 minuti a passata → **1-3 ore**. Si puo' spezzare:
-`-Gamba A` (24 passate) e `-Gamba B` (44 passate) in due sere.
+misurata]** 1-3 minuti a passata → **1-3 ore**.
+
+### 🗂️ Spezzare in due sere: si puo', e la raccolta lo regge
+
+`-Gamba A` (24 passate) una sera, `-Gamba B` (44) l'altra.
+**La raccolta e' CUMULATIVA** (corretta il 21/08, checklist 35): la cartella
+`Desktop\R93_FIBOH4` ha una **sotto-cartella per gamba** (`A\`, `B\`) e ogni
+serata ripulisce **solo la propria**, poi lo zip si rifa' su tutto.
+Nella v1 non era cosi': la seconda serata faceva `Remove-Item -Recurse` sulla
+cartella intera, il referto diceva `MANCANTI: nessuno` (perche' conta solo le
+celle di quel giro) e si sarebbe mandato **mezzo round** credendolo intero.
+- ✅ **Prima di mandare lo zip: dentro devono esserci `A\` E `B\`.** Lo
+  script stampa quanti CSV ci sono in ognuna.
+- 📄 Ogni serata lascia il **suo** referto (`REFERTO_R93_A.txt`,
+  `REFERTO_R93_B.txt`): si leggono **tutti e due**.
+
+### 🔁 Se serve RIFARE una cella gia' girata: `-Rifai`
+
+`walkforward_generico.ps1` (riga ~616) **salta i CSV gia' presenti** — ed e'
+giusto, permette di riprendere una corsa interrotta. Ma vuol dire che
+**rilanciare senza `-Rifai` non rifa' niente**: gira dieci secondi, rifa' solo
+la raccolta e stampa tutto verde (difetto n.15).
+```powershell
+& powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -Solo "A1" -Rifai
+```
+Chiavi valide per `-Solo`: **`A0 A1 A2 A3 A4 A5`** (gamba A) e
+**`BG1 BG2 BH1 BH2 BI1 BI2 BJ1 BJ2`** (gamba B).
+
 Il `throw` sullo zip guarda **l'artefatto e la sua eta'**, non solo il codice
-d'uscita (difetto n.26-bis): un esito parziale **e' gia' una risposta**, e lo
-zip va mandato lo stesso.
+d'uscita (difetto n.26-bis): un esito parziale — e anche un **canarino rotto** —
+**e' gia' una risposta**, e lo zip va mandato lo stesso.
 
 ### 4️⃣ BLOCCO 5 — cosa deve esserci nello zip, per nome
 
-`Desktop\R93_FIBOH4.zip` deve contenere:
-- **28 CSV** `ABTG_FiboH4_<Multi|Corso>_<SYM>_<IS|OOS>_ohlc_<tag>.csv`
-  — **12 della gamba A** (6 file prova x IS/OOS, tag `r93a`..`r93f`) e
-  **16 della gamba B** (8 file prova x IS/OOS, tag `r93g`..`r93j`).
-  ⚠️ **28 CSV, 68 passate:** ogni CSV contiene **le celle del suo asse**, una
-  riga per cella. Chi conta i FILE aspettandosi 68 crede che manchi meta'
-  round. `REFERTO_R93.txt` elenca i 28 nomi attesi, uno per uno;
-- le serie **per-trade** `pertrade_*.csv` da `Common\Files`;
-- **`REFERTO_R93.txt`** — e la sua riga `data:` **deve essere di ADESSO**;
-- **`R93_CRITERI.md`**, cosi' i numeri viaggiano coi criteri che li giudicano.
+`Desktop\R93_FIBOH4.zip`, **due sotto-cartelle** e i documenti in cima:
 
-Se manca qualcosa, `REFERTO_R93.txt` lo elenca sotto **`MANCANTI`**: si legge
-quello **prima** di aprire i CSV.
+```
+R93_FIBOH4\
+  A\   12 CSV  ABTG_FiboH4_Multi_GBPUSD_<IS|OOS>_ohlc_r93a..r93f.csv   + pertrade_*
+  B\   16 CSV  ABTG_FiboH4_Corso_<GBPUSD|USDJPY>_<IS|OOS>_ohlc_r93g..r93j.csv + pertrade_*
+  REFERTO_R93_A.txt   (e/o _B.txt, uno per serata)
+  R93_CRITERI.md
+```
+
+- ⚠️ **28 CSV, 68 passate.** Ogni CSV contiene **le celle del suo asse**, una
+  riga per cella. Chi conta i FILE aspettandosi 68 crede che manchi mezzo
+  round. Il referto elenca i nomi attesi **uno per uno**.
+- ✅ **Se il round e' stato spezzato in due sere, dentro devono esserci
+  ENTRAMBE le cartelle `A\` e `B\`** e **due** referti. Lo script stampa
+  quanti CSV ci sono in ognuna proprio per questo.
+- 📄 La riga `data:` di ogni referto **deve essere di ADESSO** (per la serata
+  che l'ha prodotto).
+- 📄 **`R93_CRITERI.md`** viaggia con i numeri: i criteri e i numeri non si
+  separano mai.
+
+**Nel referto si leggono per primi**, e prima di qualunque profitto:
+1. il **canarino del pin** (colonna `InpSymbols` dei CSV, tre esiti);
+2. le colonne **`News Eventi` / `News Bloccate` / `News Interrogazioni`** (gamba A);
+3. la colonna **`Setup Piazzati`** (gamba B, soglia S1-B);
+4. la sezione **`MANCANTI`**.
+
+Se manca qualcosa il referto lo elenca: si legge quello **prima** di aprire i CSV.
 
 
 

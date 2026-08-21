@@ -140,9 +140,33 @@
 //         di trend, la deroga "usa EZ2 se sei addosso a EZ1". Sono
 //         le divergenze 1-6 dal corso: cambiarle e' un EA NUOVO, e
 //         quella e' una decisione di Claudio, non una manutenzione.
+//  v1.20  21/08/2026 -- IL CANARINO ESCE DAI DATI, NON DA UNA PRINT.
+//         Bocciatura del verificatore di R93 (checklist punto 34).
+//         PrintContaNews() vive in una Print, e walkforward_generico.ps1
+//         scrive SEMPRE Optimization=1: tutte le 68 passate del round
+//         girano sugli AGENT, e le Print di un agente non le vede
+//         nessuno (finiscono nei log per-agente, che nessuno raccoglie e
+//         che nello zip non ci sono). La regola non trattabile del round
+//         -- "cella news ON con bloccate=0 si BUTTA" -- NON SAREBBE
+//         STATA APPLICABILE.
+//         Tre COLONNE nuove nel CSV di ottimizzazione, portate
+//         dall'array di FrameAdd (che attraversa il confine agente ->
+//         terminale) e scritte da OnTesterDeinit (che gira sul
+//         terminale):
+//           stats[10] News Bloccate       (0 = filtro NON eseguito)
+//           stats[11] News Interrogazioni (il denominatore)
+//           stats[12] News Eventi         (0 = file assente o letto male)
+//         Header e riga toccati INSIEME (14 colonne contro 14
+//         specificatori), guardia ArraySize -> -1 e non 0: "canarino
+//         assente" e "canarino a zero" sono due verdetti OPPOSTI.
+//         Le Print restano dove sono: servono nel test singolo a mano.
+//         LOGICA DEL SEGNALE NON TOCCATA, e non e' una promessa:
+//         diff_blocco_segnale.py da' BullEngulf/BearEngulf/TryPlace
+//         diff 0; PlaceLimit e OnNewBar restano a 1, le due righe gia'
+//         dichiarate nella v1.10.
 //==================================================================
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.10"
+#property version   "1.20"
 #property strict
 
 #include <Trade/Trade.mqh>

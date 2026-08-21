@@ -157,8 +157,26 @@
 //  MetaEditor (0 errori 0 warning) PRIMA di qualunque corsa, e
 //  l'autotest si legge ESEGUENDO un test SINGOLO nel tester.
 //+------------------------------------------------------------------+
+//  CHANGELOG
+//  v1.00  21/08/2026 -- prima stesura (mai compilata da nessuno).
+//  v1.10  21/08/2026 -- IL CANARINO ESCE DAI DATI, NON DA UNA PRINT.
+//         Bocciatura del verificatore di R93 (checklist punto 34): le 44
+//         passate della gamba B girano in OTTIMIZZAZIONE, e le Print
+//         degli agent non le vede nessuno. Senza queste colonne la
+//         soglia S1-B dei criteri ("setup piazzati > 0") NON SAREBBE
+//         VERIFICABILE, e una passata a zero operazioni si leggerebbe
+//         come "la strategia perde" invece che "la strategia non ha mai
+//         operato" -- che sono due verdetti opposti.
+//         Cinque COLONNE nuove nel CSV (stats[10..14]):
+//           Setup Piazzati <- LA SOGLIA | Pattern Visti
+//           Scartati Laterale / Distanza / Ampiezza <- QUALE cancello
+//           ha mangiato tutto.
+//         Header e riga toccati INSIEME (16 contro 16), guardia
+//         ArraySize -> -1 e non 0.
+//         Le Print restano: servono nel test singolo a mano.
+//+------------------------------------------------------------------+
 #property copyright "ABTG - Fibo H4 del corso (spec 18/08/2026)"
-#property version   "1.00"
+#property version   "1.10"
 #property description "Fibo H4 fedele al corso | banda 1,78-1,88 e 2,78-2,88 | target livello 100 | stop a sweep"
 #property strict
 
