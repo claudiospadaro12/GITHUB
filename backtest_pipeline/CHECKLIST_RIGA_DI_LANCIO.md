@@ -1054,3 +1054,76 @@ La zona in cui uno sfondamento si ferma pulito e' **(tetto , 10 x pavimento)**:
 > 3. **l'audit della tabella e' un caso dell'autotest**, che elenca le bande
 >    ancora da rifare invece di lasciarle invisibili (qui restano `NASUSD` e
 >    `S500USD`: rapporto 20 e 13,3, da ribasare su un prezzo MISURATO).
+
+---
+
+## 🆕 AGGIUNTA DEL 21/08/2026 — trovata verificando la riga R92-SCAN BULGE
+
+## 33. 👯‍♂️ DUE ARTEFATTI DESCRIVONO LA STESSA CELLA, NE GIRA UNO SOLO — e il giro a vuoto controlla l'ALTRO
+
+_Difetto vero, gia' committato (pin `fe430a5`), trovato PRIMA dell'invio della
+riga. `prove\R92_scan_BULGE.txt` dice `Risk_Percent=0.8`; il blocco
+`elseif($EA -eq "ABTG_Bulge")` di `scan_market.ps1` (riga 382) dice
+`Risk_Percent=1.0||1.0||0||1.0||N`. **Gira il secondo.** Il primo, `0,8`, e'
+il numero **FIRMATO** da Claudio il 21/08 ("c,firmo 0,8,misura entrambe") ed
+e' quello che fa reggere il cap C1 (0,80 x `Max_Trades` 4 = 3,20% <= 3,25%)._
+
+Il punto 3 chiede "il file dei parametri e' quello GIUSTO?". Il punto 31
+chiede che l'anteprima rispecchi i parametri. **Questo e' il terzo caso, ed e'
+il piu' insidioso: i due file esistono ENTRAMBI, sono ENTRAMBI giusti nella
+forma, e il giro a vuoto valida QUELLO CHE NON GIRA.** Il `-SoloControllo` del
+PASSO 1 esce verde su `prove\R92_scan_BULGE.txt` — un file che nella strada
+(A) non viene aperto da nessuno.
+
+E non era cosmetico: `Max_Daily_Loss_Pct=2.0` con rischio **1,0%** salta il
+kill switch dopo **2** stop, con **0,8%** dopo **3**. Cambiano gli ingressi,
+cambia `n` — e `n >= 30` e' la **prima soglia firmata** del round. La riga
+avrebbe misurato un motore diverso da quello firmato, con l'aggravante che
+tutti e tre i documenti (criteri, file prova, riga di lancio) dicevano 0,8.
+
+> **Quando la stessa cella e' scritta in DUE posti (verbale + copia esecutiva),
+> la riga di lancio non si fida del commento "se cambi qui cambia anche li'":
+> fa il DIFF, nome per nome e valore per valore, e si ferma se non coincidono.**
+> Se il diff non si puo' fare a mano, lo fa la riga sulla copia scaricata,
+> **prima di lanciare**, e il gate e' sullo STATO FINALE (non sul replace):
+> ```powershell
+> $t = Get-Content -LiteralPath $p -Raw
+> $t = $t -replace '(?m)^Risk_Percent=1\.0\|\|1\.0\|\|0\|\|1\.0\|\|N\s*$','Risk_Percent=0.8||0.8||0||0.8||N'
+> Set-Content -LiteralPath $p -Value $t -Encoding ASCII
+> if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'Risk_Percent=0.8||0.8||0||0.8||N' -Quiet)){ throw 'RISCHIO NON FIRMATO' }
+> ```
+> Cosi' il gate regge anche **dopo** che qualcuno ha corretto il sorgente e
+> ri-pinnato la riga: un gate scritto come "il replace ha trovato qualcosa"
+> esplode il giorno in cui non c'e' piu' niente da sostituire.
+>
+> Corollario di traffico: **il giro a vuoto deve girare sullo STESSO artefatto
+> della corsa vera.** Se il driver del round ha la griglia scritta dentro di
+> se', un `-SoloControllo` su un file prova esterno **non e' il giro a vuoto di
+> quel round**: e' il giro a vuoto di un altro round. Va detto in chat, o non
+> va messo.
+
+### 33-bis. 🧱 L'`#include` DELL'EA NUOVO: nessuno lo installa, e il compilatore lo scopre a corsa avviata
+
+_Stessa verifica. `ABTG_Bulge.mq5` (riga 177) fa `#include <ABTG_PausaGuardian.mqh>`
+e chiama `ABTG_AutotestGuardia()`, che **esiste solo dalla v1.20 dell'include**
+(commit `ad593c9`, 19/08). `scan_market.ps1` (riga 415) e `walkforward_generico.ps1`
+(riga 142) scaricano **solo il `.mq5`**: l'include non lo installa NESSUNO dei
+due. Sul PC di backtest lo mette li' `installa_guardian.ps1`, che e' un altro
+lavoro, di un'altra sera._
+
+Il punto 17 dice che una dipendenza esterna si **MISURA**, mai si deduce. Il
+punto 27 copre la coppia sorgente/binario. Questo e' il pezzo che mancava: **le
+dipendenze INTERNE di un sorgente** (`#include`, `#import`, indicatori
+custom chiamati per nome). Se manca, o se e' vecchia di una versione, il
+sintomo non e' "il file non c'e'": e' `'ABTG_AutotestGuardia' - undeclared
+identifier` **dentro il driver**, che stampa `ERRORE compilazione` ed esce 1 —
+e se la riga non guarda il codice d'uscita (punto 13) la raccolta parte lo
+stesso su zero CSV.
+
+> **Prima di una riga che compila un EA MAI COMPILATO su quella macchina: grep
+> degli `#include` non di sistema nel `.mq5`, e la riga li INSTALLA lei, dal
+> pin, verificando la LUNGHEZZA (punto 27-ter) e un MARCATORE della versione
+> giusta** (qui: `ABTG_AutotestGuardia` dentro il `.mqh`). E si compila da
+> riga di comando (`metaeditor64.exe /compile:<file> /log`), non chiedendo a
+> Claudio di premere F7 su un file che sulla sua macchina non c'e' ancora
+> (punto 20).
