@@ -1022,6 +1022,39 @@ numeri che gia' abbiamo — perche' cambiano DOVE cercare._
 |---|---|
 | **retest · gap continuation · opening drive · first pullback · reversal** | breakout · opening range · ORB · range fade · session |
 
+### ⚓ 21/08 — **R96 occupa la casella `opening drive`**, ed e' in BOZZA
+
+Nato da un'osservazione di Claudio dopo un alert TradingView: _"quando c'e'
+l'incrocio e' un segnale forte soprattutto quando apre il mercato americano"_.
+
+- 🚫 **Quello che NON e':** `ABTG_CrossEma` (bocciato in R86) acceso solo
+  dalle 14:30. Sarebbe **filtro orario su motore gia' tarato = 0 successi su
+  5** (R20 · R12 · R26 · R45 · R54), e R12 sta gia' due righe piu' su in
+  questa stessa pagina con **48 celle negative su 48**.
+- ⚓ **Quello che e':** `mql5/Experts/ABTG_CrossEmaApertura.mq5` (nuovo, magic
+  **779600**, mai girato). Le medie 9/21 sono **RI-SEMINATE all'apertura** e
+  misurano SOLO lo spostamento dalla campanella: alle 03:00 **non esistono**,
+  quindi non c'e' nessun segnale preesistente da filtrare. **Nessun livello,
+  nessun range, nessuna rottura** — le due porte chiuse dalle 96 celle
+  restano chiuse.
+- 🔬 **Il round ha il suo controllo dentro:** la cella B accende le medie
+  CONTINUE nella stessa finestra oraria, cioe' **lo schema vietato**, per
+  misurare quanto della cella A viene dall'ancora e quanto dal solo orologio.
+  **La cella B non e' promuovibile in nessun caso.**
+- 🎯 **Simboli: U30USD e NASUSD M5** — non il DAX. L'alert era sul DAX ma
+  l'apertura del DAX e' quella EUROPEA (08:00 server): li' alle 14:30 non
+  c'e' nessun seme da piantare. La versione DAX e' a un input di distanza
+  (`InpOpenHour=8`) ed e' un ALTRO round.
+- ⚠️ **Il conflitto dichiarato prima dei numeri:** su U30USD M5 all'apertura
+  USA c'e' **gia' una sedia viva** (`ABTG_ORB`, magic 770601, R88: PF 1,6742
+  · DD 9,76% · 119 trade) che ha **gia' dentro le EMA 9/21**. Anche se la
+  cella A vincesse, prima di qualunque sedia serve la misura di
+  **sovrapposizione**. Su NASUSD invece il buco c'e' davvero (apertura USA
+  morta, test A4 PF 0,91).
+- 📄 Criteri **BOZZA, non firmati**: `risultati_archivio/R96_CRITERI.md` ·
+  file prova `prove/R96{a,b}_*_{U30USD,NASUSD}.txt` · riga di lancio
+  `righe/RIGA_R96_APERTURA_USA.ps1`. **Finche' la firma e' vuota, non parte.**
+
 ---
 
 ## 6. 🐢 SUL FONDO (non urgenti, ma agli atti)
