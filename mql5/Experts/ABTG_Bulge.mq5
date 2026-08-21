@@ -1664,6 +1664,52 @@ string OptFrame_FileName()
    return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
   }
 
+//------------------------------------------------------------------//
+//  v5.11 - LE TRE PEZZE AL CSV DELL'OTTIMIZZAZIONE.                 //
+//  Difetto trovato in R92 (44 CSV su 44): header 60 colonne, righe  //
+//  65. La causa NON era un frame fantasma: e' che il VALORE di un   //
+//  input puo' contenere VIRGOLE, e finiva grezzo dentro un file     //
+//  separato da virgole. `News_Block_Hours="7,9,11,12,15,22"` porta  //
+//  5 virgole -> 5 campi in piu' PER RIGA, mentre l'header (che usa  //
+//  i NOMI, senza virgole) restava di 60. Da li' in poi ogni colonna //
+//  aveva il nome sbagliato sopra il valore giusto.                  //
+//  Nota: `Symbols_List` col basket intero ne porta altre 21 - lo    //
+//  scan la sovrascrive con un simbolo solo, ma non e' garantito.    //
+//------------------------------------------------------------------//
+
+//--- (1) un campo CSV che contiene virgole/apici/a-capo va fra virgolette
+//    (RFC4180). Cosi' pandas (analyze_optimization.py) e Import-Csv lo
+//    rileggono come UN campo solo, virgole comprese, senza perdere il dato.
+string OptFrame_CsvField(const string v)
+  {
+   if(StringFind(v, ",")  < 0 && StringFind(v, "\"") < 0 &&
+      StringFind(v, "\n") < 0 && StringFind(v, "\r") < 0)
+      return(v);
+   string t = v;
+   StringReplace(t, "\"", "\"\"");
+   return("\"" + t + "\"");
+  }
+
+//--- (2) "nome=valore" si spezza al PRIMO '=', non con StringSplit.
+//    StringSplit==2 SCARTAVA in silenzio ogni input il cui valore
+//    contenesse un '=' (3 pezzi invece di 2): colonna sparita, senza
+//    un avviso. Qui il valore puo' contenere tutti gli '=' che vuole.
+bool OptFrame_SplitKV(const string s, string &k, string &v)
+  {
+   int p = StringFind(s, "=");
+   if(p <= 0) return(false);
+   k = StringSubstr(s, 0, p);
+   v = StringSubstr(s, p + 1);
+   return(true);
+  }
+
+int OptFrame_IndexOf(const string &arr[], const string k)
+  {
+   int n = ArraySize(arr);
+   for(int i = 0; i < n; i++) if(arr[i] == k) return(i);
+   return(-1);
+  }
+
 //--- per-trade: serve al DD di PORTAFOGLIO (ROTTA_PROP punto 4).
 //    Con un basket la colonna 'symbol' non e' decorativa: dice su quale
 //    cross e' finito ogni deal anche quando il grafico e' un altro.
@@ -1805,28 +1851,68 @@ void OnTesterDeinit()
    int h = FileOpen(fname, FILE_WRITE | FILE_CSV | FILE_ANSI, ",");
    if(h == INVALID_HANDLE)
      { PrintFormat("OptFrame: impossibile creare %s (err %d)", fname, GetLastError()); return; }
-   FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
+
    ulong pass; string name; long id; double value; double data[];
-   bool header_scritto = false; int righe = 0;
+   string params[]; uint pcount = 0;
+   string k = "", v = "";
+
+   //--- (3) l'header NON si prende piu' dalla PRIMA passata iterata.
+   //    Prima si fidava di quella: se il flusso dei frame avesse contenuto
+   //    un frame di un altro run/altra EA (OPTFRAME_NAME/ID sono le stesse
+   //    costanti in ~60 file di casa), lo schema di UNA passata avrebbe
+   //    deciso le colonne di TUTTE. Ora si fa un primo giro a vuoto e si
+   //    tiene l'UNIONE dei nomi visti in QUALSIASI passata: nessun frame
+   //    puo' piu' "vincere" da solo la scelta delle colonne, e ogni riga
+   //    viene poi riallineata per NOME, non per posizione.
+   string cols[]; ArrayResize(cols, 0);
+   //    FrameFirst() riporta il puntatore all'inizio MA azzera il filtro:
+   //    quindi il filtro si rimette DOPO, non prima.
+   FrameFirst(); FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
    while(FrameNext(pass, name, id, value, data))
      {
-      string params[]; uint pcount = 0;
-      FrameInputs(pass, params, pcount);
-      if(!header_scritto)
+      if(ArraySize(data) < 10) continue;   // frame di uno schema diverso: si salta
+      pcount = 0; FrameInputs(pass, params, pcount);
+      for(uint i = 0; i < pcount; i++)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
-         for(uint i = 0; i < pcount; i++)
-           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
-         FileWrite(h, head); header_scritto = true;
+         if(!OptFrame_SplitKV(params[i], k, v)) continue;
+         if(OptFrame_IndexOf(cols, k) >= 0)    continue;
+         int n = ArraySize(cols); ArrayResize(cols, n + 1); cols[n] = k;
+        }
+     }
+   int ncol = ArraySize(cols);
+
+   string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
+   for(int i = 0; i < ncol; i++) head += "," + OptFrame_CsvField(cols[i]);
+   FileWrite(h, head);
+
+   //--- secondo giro: le righe, una colonna per nome dell'unione.
+   //    Le prime 11 restano lo StringFormat fisso di sempre (erano gia'
+   //    corrette anche col difetto: il verdetto di R92 su n/PF/DD e' salvo).
+   int righe = 0, scartati = 0;
+   string vals[]; ArrayResize(vals, ncol);
+   FrameFirst(); FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
+   while(FrameNext(pass, name, id, value, data))
+     {
+      if(ArraySize(data) < 10) { scartati++; continue; }
+      for(int i = 0; i < ncol; i++) vals[i] = "";
+      pcount = 0; FrameInputs(pass, params, pcount);
+      for(uint i = 0; i < pcount; i++)
+        {
+         if(!OptFrame_SplitKV(params[i], k, v)) continue;
+         int c = OptFrame_IndexOf(cols, k);
+         if(c >= 0) vals[c] = v;
         }
       string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
                                 data[7], data[8], data[9]);
-      for(uint i = 0; i < pcount; i++)
-        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
+      for(int i = 0; i < ncol; i++) row += "," + OptFrame_CsvField(vals[i]);
       FileWrite(h, row); righe++;
      }
    FileClose(h);
-   PrintFormat("OptFrame: scritte %d passate in MQL5\\Files\\%s", righe, fname);
+   PrintFormat("OptFrame: scritte %d passate (%d colonne: 11 fisse + %d input) in MQL5\\Files\\%s",
+               righe, 11 + ncol, ncol, fname);
+   if(scartati > 0)
+      PrintFormat("OptFrame: ATTENZIONE, %d frame SCARTATI (meno di 10 statistiche): "
+                  "schema diverso, probabile residuo di un altro run/altra EA.", scartati);
   }
 //================== fine OPTFRAME inlined ==========================//
