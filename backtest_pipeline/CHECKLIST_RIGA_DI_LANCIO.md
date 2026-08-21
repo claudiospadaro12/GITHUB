@@ -1411,3 +1411,160 @@ leggerlo ha dovuto lanciare una **passata singola** con `Optimization=0`
 >    del terminale. Si scandiscono tutte e tre le radici, e **il conteggio dei
 >    log raccolti finisce nel referto** (`log degli agent raccolti: 0`), cosi'
 >    lo zero si legge invece di essere dedotto.
+
+---
+
+## 🆕 AGGIUNTE DEL 21/08/2026 — trovate verificando la riga R95 (LiquiditySweep sui cross JPY)
+
+## 40. 🚧 IL GATE CHE NON PUO' MORDERE — tre modi, tutti e tre nella STESSA riga
+
+_Difetti veri, gia' committati in `backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1`
+(commit `da9e764`), trovati PRIMA dell'invio. R95 vive o muore sul suo PASSO 0:
+quattro condizioni di stop dichiarate, di cui **due non potevano scattare mai** e
+**una non poteva passare mai**._
+
+Il punto 14 dice che un guardiano puo' essere **decorativo**. Questo dice **come**
+diventa decorativo, e sono tre meccanismi diversi che si riconoscono a grep.
+
+### 40. 📐 `(?m)^...$` SU TESTO UNITO CON `\r\n`: in .NET quel `$` NON matcha
+
+E' il piu' velenoso perche' sembra la cosa piu' innocua del mondo:
+
+```powershell
+$inputs = ($out -join "`r`n")
+if($inputs -notmatch '(?m)^InpSwingBars=4$'){ throw "InpSwingBars non e' stato pinnato a 4" }
+```
+
+In .NET, in modalita' multilinea, **`$` matcha la posizione PRIMA di `\n`** — e se
+davanti al `\n` c'e' un `\r`, quella posizione non e' raggiungibile dopo aver
+consumato `4`. Il match **fallisce sempre**, il `throw` scatta **sempre**, e il
+messaggio d'errore accusa una cosa che e' perfettamente a posto: il pin c'era.
+Riprodotto sui tre gate del PASSO 0 di R95 (`InpSwingBars`, `InpTF_Struttura`,
+`InpMagic`): **il PASSO 0 non sarebbe partito mai**, e la diagnosi in console
+avrebbe mandato a cercare il difetto nel file prova, che era sano.
+
+E il rovescio e' peggio, perche' e' **silenzioso**: la stessa regex usata al
+positivo (`if($t -match '(?m)^Pinnato=1$'){ ok }`) fa uscire il controllo
+**verde-per-assenza** su un testo LF e **rosso** su un testo CRLF — cioe' il
+verdetto dipende da chi ha scritto il file, non da cosa c'e' scritto.
+
+> **Ogni `$` dentro una regex multilinea si scrive `\r?$`. Sempre, anche quando
+> "tanto il file e' LF".** Il testo non e' quasi mai quello che si crede:
+> `Get-Content` toglie i terminatori, `-join "`r`n"` li rimette, `-Raw` conserva
+> quelli del disco, e `raw.githubusercontent.com` serve il blob **com'e'**.
+> Grep secco prima di mandare: `\(\?m\)\^[^']*\$'` — ogni occorrenza senza `\r?`
+> davanti al `$` e' una riga da rifare.
+> _(Nella stessa riga R95 la forma giusta c'era gia', due schermate sopra:
+> `-replace '(?m)^\[Experts\]\r?$'`. Chi l'ha scritta lo sapeva. **Sapere non
+> basta: si fa il grep.**)_
+
+### 40-bis. 🔢 IL NUMERO ATTESO DEL GATE SCRITTO A MEMORIA, NON CONTATO SULL'ARTEFATTO
+
+Stessa riga, passo 1d. Il gate confronta i 5 file prova fra loro — idea giusta,
+e' il punto 33 applicato bene — ma con una costante presa a occhio:
+
+```powershell
+if($base.Count -ne 31){ throw ("il file prova base ha " + $base.Count + " righe vive, ne attendevo 31") }
+$div = 0; for($i=0;$i -lt 31;$i++){ ... }
+```
+
+Contate: **32** (3 direttive `@` + 29 parametri), in tutti e cinque. La riga
+muore al passo 1d, **prima di compilare, prima del PASSO 0, prima di qualunque
+cosa** — un giro a vuoto in piu' per un numero che nessuno aveva contato. E il
+ciclo a `31` non avrebbe nemmeno confrontato l'ultima riga: quella con `InpMagic`.
+
+E' la famiglia della `@DAQUANDO` inventata (punto 11) applicata alla **soglia del
+gate**: il gate misura, ma il numero contro cui misura e' **dichiarato**.
+
+> **La costante di un gate o si MISURA sull'artefatto vero e si scrive con la
+> data della misura accanto, o si ricava a runtime dal primo artefatto** (`$base.Count`)
+> **e allora il gate diventa "tutti uguali fra loro", che e' la domanda vera.**
+> Un `for` che scorre un indice fisso su una collezione di lunghezza variabile
+> non e' un confronto: e' un confronto parziale che tace su cosa ha saltato.
+
+### 40-ter. 🕳️ `[void]` SUL `TryParse`: il gate piu' importante del round passa in silenzio
+
+Stessa riga, gate G2 — quello sulla **copertura dei dati**, l'unico che secondo i
+criteri puo' fermare il round:
+
+```powershell
+$d1 = [datetime]::MinValue
+[void][datetime]::TryParse($Passo0.PrimaData.Replace(".","-"),$INV,...,[ref]$d1)
+if($d1 -gt $limite){ $Fatale = "i dati NON coprono la finestra" }
+```
+
+`TryParse` **non lancia**: e' fatto apposta. Se la data non si parsa (formato
+cambiato, riga vuota, CSV mangiato dall'ANSI, separatore diverso) `$d1` resta
+`MinValue`, `MinValue -gt 2016.01.01` e' `$false`, **e il gate passa**. Il round
+parte, e la cosa che il gate doveva impedire — misurare una finestra che non
+esiste — succede lo stesso, con in piu' un referto che dice che il gate e'
+passato.
+
+> **`TryParse` esiste per farsi guardare il ritorno. `[void]` davanti a un
+> `TryParse` e' sempre un difetto**, e su un gate e' il difetto che rende
+> inutile tutto il resto:
+> ```powershell
+> if(-not [datetime]::TryParse($s,$INV,[Globalization.DateTimeStyles]::None,[ref]$d1)){
+>   $Fatale = "PASSO 0 / G2: non riesco a leggere la data '" + $s + "'. Il gate sulla copertura NON e' stato eseguito."
+> }
+> ```
+> Regola generale: **"non ho potuto misurare" e "ho misurato e va bene" devono
+> essere due esiti DIVERSI.** Ogni volta che collassano nello stesso ramo, il
+> gate e' decorativo. Vale per `TryParse`, per un `catch{ continue }`, per una
+> cartella di log vuota (punto 34-ter) e per un `Test-Path` su un artefatto mai
+> nato (punto 22).
+
+## 41. 🏷️ IL GATE E LA CORSA CHE CONDIVIDONO IL MAGIC: la corsa cancella la prova del gate
+
+_Difetto vero, stessa riga, stesso commit — e con il **precedente gia' scritto
+negli stessi criteri** che la riga esegue. `R95_CRITERI.md` §1.2 riporta di R82:
+"i per-trade della IS sono stati sovrascritti da quelli della OOS (**il nome del
+file contiene il magic, non la finestra**)". Sei righe dopo, gli stessi criteri
+assegnano al PASSO 0 il magic **779500** — che e' anche il magic dei **5 file
+prova della griglia**._
+
+Il punto 26 copre due chiamate nello stesso blocco, il 35 due serate. Questo
+copre **il gate e la corsa che gate protegge**, ed e' peggio dei due perche' la
+prova che sparisce e' proprio quella che autorizzava la corsa.
+
+`ABTG_LiquiditySweep.mq5` chiama `ExportTrades()` da `OnTester()`, cioe' **a ogni
+passata**, ottimizzazione compresa, e il nome e'
+`Common\Files\abtg_trades_<EA>_<Simbolo>_<magic>.csv`. Sequenza reale:
+
+1. PASSO 0, passata singola magic 779500 -> il per-trade del gate esiste, si legge, il gate passa;
+2. la catena parte: **30 passate, stesso magic, su piu' agent in parallelo**, tutte sullo stesso file;
+3. la raccolta a fine corsa copia `abtg_trades_..._779500.csv` sul Desktop chiamandolo **`passo0_pertrade_779500.csv`**.
+
+Nello zip che Claudio manda c'e' un file col nome del gate e dentro **l'ultima
+passata di ottimizzazione che e' riuscita a scriverlo**. Nessun errore, nessun
+rosso: e' il referto stantio del 17/08 con il nome giusto sopra.
+
+> **Due pezzi, insieme:**
+> 1. **l'artefatto di un gate si mette in SOSTA con un nome proprio SUBITO dopo
+>    averlo prodotto** (punto 26), **prima** dei controlli e non alla fine — cosi'
+>    esiste anche quando il gate esce rosso ed e' proprio il caso in cui serve:
+>    ```powershell
+>    Copy-Item -LiteralPath $pt -Destination (Join-Path $Sosta ("passo0_pertrade_"+$m+".csv")) -Force
+>    ```
+> 2. **la fase di controllo e la fase di misura non condividono il magic.** Il
+>    magic e' il **discriminante nel nome dell'artefatto** (punto 31): se due fasi
+>    lo condividono, l'artefatto non distingue piu' le fasi. Un magic vergine in
+>    piu' costa zero. E il ritorno e' doppio: e' anche il canarino con cui
+>    `walkforward_generico.ps1` (righe 690-694) distingue **una cella rigirata da
+>    una ripescata dalla cache** (punto 38) — canarino che, col magic condiviso,
+>    trova il file gia' li' dal PASSO 0 e risponde sempre "e' girata".
+
+### 41-bis. 🧯 E LA RACCOLTA "CHE SI FA SEMPRE" CHE NON PUO' GIRARE: variabili nate dentro il `try`
+
+Stessa riga. La raccolta e' fuori dal `try`, come vuole il punto 10 — ma usa
+`$Comune`, che viene assegnata **dentro** il `try`, a meta' strada. Su qualunque
+errore precedente (e il 40-bis e' esattamente uno di quelli) `Join-Path $Comune ...`
+esplode dentro il `try` della raccolta, si stampa `!! raccolta incompleta` e
+**il REFERTO non viene scritto affatto**: proprio nella corsa fallita, che e'
+l'unica in cui il referto serve a capire perche'.
+
+> **Tutto cio' che la raccolta usa si dichiara PRIMA del `try` che puo' fallire**
+> (percorsi, cartelle di sosta, contenitori), oppure la raccolta lo guarda
+> (`if($Comune){...}`). Prova secca da fare a tavolino, senza eseguire niente:
+> **si mette un `throw` finto alla prima riga del `try` e si legge quali
+> variabili la raccolta trova a `$null`.**
