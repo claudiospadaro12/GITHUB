@@ -2301,3 +2301,52 @@ posto in cui la bugia si vede.
 ⚠️ **Corollario di lettura**: "il pin e' corretto" e "i numeri sono di questo
 pin" sono **due affermazioni diverse**. La prima si dimostra con `git`, la
 seconda solo con la **data** dell'artefatto.
+
+### 53-bis. ⏱️ E QUANDO LA RIPRESA E' **VOLUTA**, LA FRESCHEZZA NON PUO' FARE DA GATE
+
+_Limite della regola 3 qui sopra, misurato subito dopo, verificando il **PASSO 4**
+di R92 (le 88 passate) — cioe' applicando il punto 53 al passo LUNGO invece che
+al banco._
+
+La regola 3 dice "`$t0=Get-Date` prima di lanciare, ogni artefatto atteso deve
+avere `LastWriteTime -ge $t0`". Regge sul passo **corto**, dove tutto e' rifatto.
+Sul passo **lungo** e' **falsa due volte**:
+1. **GBPUSD e' gia' stato fatto al PASSO 3**: i suoi 2 CSV, 2 `.ini` e 4
+   per-trade sono piu' vecchi di `$t0` **ed e' giusto cosi'** — la ripresa e' il
+   motivo per cui il banco esiste. Un gate sulla freschezza li boccerebbe tutti;
+2. **una corsa da ore si interrompe** (riavvio, MT5 toccato per sbaglio): al
+   rilancio la ripresa di `scan_market.ps1` salta i simboli gia' fatti, che
+   restano legittimamente vecchi.
+
+> **Se la ripresa e' voluta, il discriminante non e' la DATA: e' il CONTENUTO
+> dell'artefatto CARTACEO.** Qui l'`.ini` gemello di ogni CSV e' l'unico posto in
+> cui il rischio e' scritto (lo dice il punto 53 stesso), quindi la coppia
+> CSV -> `.ini` diventa la prova:
+> ```powershell
+> foreach($f in @(Get-ChildItem $res -Filter "scan_*.csv")){
+>   $ip = Join-Path $ind ($f.BaseName + ".ini")     # <- stesso BaseName: CSV e ini si accoppiano per nome
+>   if(Select-String -LiteralPath $ip -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet -EA SilentlyContinue){ $ripresi+=$f.Name } else { $stantii+=$f.Name }
+> }
+> if($stantii.Count -gt 0){ <stampa il comando di pulizia>; throw "CSV di un pin DIVERSO" }
+> ```
+> `.ini` mancante = classificato **stantio** (`Select-String` su un file che non
+> c'e' con `-EA SilentlyContinue` restituisce `$false`: verificato, non dedotto).
+> E la freschezza non si butta via, si **degrada a numero nel referto**: "CSV
+> gia' presenti (ripresa): N / scritti da questa corsa: M". Un conteggio che
+> Claudio legge, non un gate che boccia.
+
+⚠️ **E gli artefatti SENZA gemello cartaceo vanno trattati a parte.** I per-trade
+`abtg_trades_<EA>_<SIM>_<magic>_viola<EA|PINE>.csv` hanno nomi **deterministici**
+(nessuna data dentro): un avanzo si sovrascrive **solo se quel simbolo rigira**.
+Se il simbolo non produce CSV (storico assente) l'avanzo **sopravvive e viene
+contato** negli 88. Regola: si cancellano prima i per-trade **ORFANI** — quelli
+di un simbolo che **non ha nessun CSV** — e la cancellazione si verifica (punto
+46). Gli altri si tengono: sono la ripresa.
+
+⚠️ **Corollario sul conteggio atteso**: se un numero atteso e' scritto a mano
+(`per-trade: attesi 88`) e la corsa ne produce meno **per una ragione vera** (un
+simbolo senza storico), il gate va legato all'**invariante**, non alla costante:
+`attesi = 2 x nCsv`. Il "88 col pieno" resta stampato accanto, come promemoria.
+Un CSV mancante e' una **RISPOSTA** (simbolo senza storico), non un guasto: va in
+una lista a parte e **non** fa `ESITO: FALLITO`, o il referto trasforma un dato
+in un allarme.

@@ -209,61 +209,169 @@ e' un banco, non una misura.
 
 ---
 
-## PASSO 4 — LE 88 PASSATE + RACCOLTA (MT5 CHIUSO, lungo)
+## PASSO 4 — LE 88 PASSATE + RACCOLTA (MT5 CHIUSO, lungo: ore)
 
-GBPUSD viene **saltato** (gia' fatto al PASSO 3: e' la ripresa, non un errore).
+GBPUSD viene **saltato** (gia' fatto al PASSO 3: e' la **ripresa voluta**, non un
+errore). Le passate che restano davvero da fare sono **84**, e la riga te lo
+stampa prima di partire.
+
+Le guardie sono le stesse del PASSO 3, adattate alla corsa lunga:
+- **l'EA non e' pinnato** (`scan_market.ps1` lo scarica da `lavoro`): la riga
+  confronta byte a byte `lavoro` contro il pin e si ferma se differiscono;
+- **artefatti del pin sbagliato** (checklist punto 53): ogni CSV gia' presente
+  deve avere il suo `.ini` gemello con `Risk_Percent=0.8` — **GBPUSD compreso**.
+  Se un CSV non ce l'ha, e' di una corsa a 1,0%: la ripresa lo salterebbe e
+  finirebbe nel referto come se fosse di questo round -> **la riga si ferma e
+  stampa il comando di pulizia**, non cancella ore di lavoro di sua iniziativa;
+- **per-trade orfani**: `abtg_trades_ABTG_Bulge_*.csv` di simboli **senza** CSV
+  sono avanzi (i nomi sono deterministici, non hanno data): vengono rimossi
+  **e la rimozione si verifica**, altrimenti gonfiano il conteggio degli 88;
+- **gate su `$LASTEXITCODE`**: `scan_market.ps1` esce **1** se MT5 e' aperto, se
+  la compilazione fallisce, se c'e' un parametro doppio. La raccolta si fa
+  **lo stesso** (ore di corsa non si buttano), ma finisce in `ESITO: FALLITO`.
 
 ```powershell
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
   $h="bdaf3601be53e2d21d38ba22cce239821be0d735"
+  $b="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h"
   $d="$env:USERPROFILE\r92"
+  New-Item -ItemType Directory -Force -Path $d | Out-Null
   $p=Join-Path $d "scan_market.ps1"
   Remove-Item $p -Force -EA SilentlyContinue
-  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scan_market.ps1" -OutFile $p -EA Stop
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern "MARCATORE_SCAN_BULGE_R92_v1" -Quiet)){ throw "scan_market.ps1 VECCHIO: il BULGE non c'e' dentro" }
-  if(-not (Select-String -Path $p -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet)){ throw "scan_market.ps1 ha il rischio SBAGLIATO (non 0,80%): NON lanciare" }
+  irm "$b/backtest_pipeline/scan_market.ps1" -OutFile $p -EA Stop
+  if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern "MARCATORE_SCAN_BULGE_R92_v1" -Quiet)){ throw "scan_market.ps1 VECCHIO: il BULGE non c'e' dentro" }
+  if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet)){ throw "scan_market.ps1 ha il rischio SBAGLIATO (non 0,80%): NON lanciare" }
+  $e1=Join-Path $d "_ea_pin.mq5"; $e2=Join-Path $d "_ea_head.mq5"
+  Remove-Item $e1,$e2 -Force -EA SilentlyContinue
+  irm "$b/mql5/Experts/ABTG_Bulge.mq5" -OutFile $e1 -EA Stop
+  irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/mql5/Experts/ABTG_Bulge.mq5" -OutFile $e2 -EA Stop
+  if((Get-FileHash $e1).Hash -ne (Get-FileHash $e2).Hash){ throw "ABTG_Bulge.mq5 su 'lavoro' NON e' piu' quello del pin: lo scan scarica SEMPRE da lavoro, quindi le 88 passate non sarebbero di questo pin. Fermati e dimmelo" }
+  $inc=Join-Path $d "ABTG_PausaGuardian.mqh"
+  Remove-Item $inc -Force -EA SilentlyContinue
+  irm "$b/mql5/Include/ABTG_PausaGuardian.mqh" -OutFile $inc -EA Stop
+  if(-not (Select-String -LiteralPath $inc -SimpleMatch -Pattern "ABTG_AutotestGuardia" -Quiet)){ throw "l'include del pin non ha ABTG_AutotestGuardia: download andato male" }
+  $len=(Get-Item -LiteralPath $inc).Length
+  $nInc=0
+  foreach($t in @(Get-ChildItem (Join-Path $env:APPDATA "MetaQuotes\Terminal") -Directory -EA SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName "MQL5\Experts") })){
+    $dd=Join-Path $t.FullName "MQL5\Include"
+    New-Item -ItemType Directory -Force -Path $dd | Out-Null
+    $dst=Join-Path $dd "ABTG_PausaGuardian.mqh"
+    if(-not (Select-String -LiteralPath $dst -SimpleMatch -Pattern "ABTG_AutotestGuardia" -Quiet -EA SilentlyContinue)){
+      Copy-Item -LiteralPath $inc -Destination $dst -Force
+      $v=Get-Item -LiteralPath $dst -EA Stop
+      if($v.PSIsContainer -or $v.Length -ne $len){ throw ("copia dell'include NON verificata in " + $dd) }
+      Write-Host ("   installato ABTG_PausaGuardian.mqh in " + $dd) -ForegroundColor Yellow
+    }
+    $nInc++
+  }
+  if($nInc -eq 0){ throw "nessuna cartella dati MT5 trovata sotto APPDATA: la compilazione fallirebbe" }
+  $SYM=@("EURUSD","GBPUSD","AUDUSD","NZDUSD","USDCAD","USDCHF","USDJPY","EURGBP","EURNZD","GBPJPY","GBPAUD","GBPCAD","GBPNZD","AUDJPY","AUDCAD","AUDNZD","NZDJPY","NZDCAD","NZDCHF","CADJPY","CADCHF","CHFJPY")
+  $res=Join-Path $d "risultati_scan_ABTG_Bulge"
+  $ind=Join-Path $d "ini_scan"
+  $com=Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+  $ripresi=@(); $stantii=@()
+  foreach($f in @(Get-ChildItem $res -Filter "scan_ABTG_Bulge_*.csv" -EA SilentlyContinue)){
+    $ip=Join-Path $ind ($f.BaseName + ".ini")
+    if(Select-String -LiteralPath $ip -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet -EA SilentlyContinue){ $ripresi+=$f.Name } else { $stantii+=$f.Name }
+  }
+  if($stantii.Count -gt 0){
+    Write-Host ("CSV senza .ini gemello a 0,80%: " + ($stantii -join ", ")) -ForegroundColor Red
+    Write-Host "Comando di pulizia (poi rifai PASSO 3 e PASSO 4):" -ForegroundColor Yellow
+    Write-Host '  Remove-Item "$env:USERPROFILE\r92\risultati_scan_ABTG_Bulge","$env:USERPROFILE\r92\ini_scan" -Recurse -Force; Remove-Item "$env:APPDATA\MetaQuotes\Terminal\Common\Files\abtg_trades_ABTG_Bulge_*.csv" -Force' -ForegroundColor Yellow
+    throw "ci sono CSV prodotti da un pin DIVERSO (rischio 1,0%): la ripresa di scan_market li SALTEREBBE e finirebbero nel referto come numeri di questo round. NON lancio."
+  }
+  $orf=@()
+  foreach($f in @(Get-ChildItem $com -Filter "abtg_trades_ABTG_Bulge_*.csv" -EA SilentlyContinue)){
+    $s=""
+    foreach($x in $SYM){ if($f.Name -like ("abtg_trades_ABTG_Bulge_" + $x + "_*")){ $s=$x } }
+    $ok=$false
+    if($s -ne ""){ $ok=(Test-Path -LiteralPath (Join-Path $res ("scan_ABTG_Bulge_" + $s + "_nuda.csv"))) -or (Test-Path -LiteralPath (Join-Path $res ("scan_ABTG_Bulge_" + $s + "_gestita.csv"))) }
+    if(-not $ok){ $orf+=$f }
+  }
+  if($orf.Count -gt 0){
+    $orf | ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force -EA SilentlyContinue }
+    $rim=@($orf | Where-Object { Test-Path -LiteralPath $_.FullName })
+    if($rim.Count -gt 0){ throw ("non riesco a cancellare " + $rim.Count + " per-trade ORFANI in " + $com + " (aperti in Excel?): chiudili e rilancia") }
+    Write-Host ("   ripuliti " + $orf.Count + " per-trade orfani (simboli senza CSV: avanzi di una corsa vecchia)") -ForegroundColor Yellow
+  }
+  Write-Host ("   ripresa: " + $ripresi.Count + " CSV su 44 gia' fatti e verificati a 0,80% -> restano " + (44-$ripresi.Count) + " corse = " + ((44-$ripresi.Count)*2) + " passate") -ForegroundColor Cyan
+  Write-Host "   sono ORE: non aprire MT5 finche' non compare il riquadro finale." -ForegroundColor Yellow
+  $t0=Get-Date
+  $global:LASTEXITCODE=0
   & powershell -ExecutionPolicy Bypass -File $p -Robot ABTG_Bulge
+  $rc=$LASTEXITCODE
   $dsk=[Environment]::GetFolderPath("Desktop")
   $rac=Join-Path $dsk "R92_SCAN_BULGE"
   Remove-Item $rac -Recurse -Force -EA SilentlyContinue
   New-Item -ItemType Directory -Force -Path (Join-Path $rac "csv"),(Join-Path $rac "ini"),(Join-Path $rac "pertrade") | Out-Null
-  Get-ChildItem (Join-Path $d "risultati_scan_ABTG_Bulge") -Filter "*.csv" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName (Join-Path $rac "csv") -Force }
-  Get-ChildItem (Join-Path $d "ini_scan") -Filter "scan_ABTG_Bulge_*.ini" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName (Join-Path $rac "ini") -Force }
-  $com=Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+  Get-ChildItem $res -Filter "scan_ABTG_Bulge_*.csv" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName (Join-Path $rac "csv") -Force }
+  Get-ChildItem $ind -Filter "scan_ABTG_Bulge_*.ini" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName (Join-Path $rac "ini") -Force }
   Get-ChildItem $com -Filter "abtg_trades_ABTG_Bulge_*.csv" -EA SilentlyContinue | ForEach-Object { Copy-Item $_.FullName (Join-Path $rac "pertrade") -Force }
+  $problemi=@(); $mancanti=@(); $righe=0
+  if($rc -ne 0){ $problemi+=("scan_market.ps1 e' uscito con codice " + $rc + " (atteso 0): si e' fermato da solo, guarda la console") }
+  foreach($s in $SYM){
+    foreach($g in @("nuda","gestita")){
+      $nome="scan_ABTG_Bulge_" + $s + "_" + $g
+      $fp=Join-Path $res ($nome + ".csv")
+      if(-not (Test-Path -LiteralPath $fp)){ $mancanti+=($s + " " + $g); continue }
+      $r=@(Get-Content -LiteralPath $fp)
+      if($r.Count -gt 0){ $righe+=($r.Count-1) }
+      if(($r.Count-1) -ne 2){ $problemi+=($nome + ".csv: " + ($r.Count-1) + " righe di dati invece di 2") }
+      if($r.Count -lt 1 -or $r[0] -notmatch "Use_Purple_PineReaction"){ $problemi+=($nome + ".csv: manca la colonna Use_Purple_PineReaction") }
+      if(-not (Select-String -LiteralPath (Join-Path $ind ($nome + ".ini")) -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet -EA SilentlyContinue)){ $problemi+=($nome + ".ini: NON dice Risk_Percent=0.8 -- quel CSV non e' di questo round") }
+    }
+  }
   $nCsv=@(Get-ChildItem (Join-Path $rac "csv") -Filter "*.csv").Count
   $nIni=@(Get-ChildItem (Join-Path $rac "ini") -Filter "*.ini").Count
   $nPt =@(Get-ChildItem (Join-Path $rac "pertrade") -Filter "*.csv").Count
-  $righe=0
-  Get-ChildItem (Join-Path $rac "csv") -Filter "*.csv" | ForEach-Object { $righe += (@(Get-Content $_.FullName).Count - 1) }
+  $nNuovi=@(Get-ChildItem $res -Filter "scan_ABTG_Bulge_*.csv" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 }).Count
+  if($nPt -ne (2*$nCsv)){ $problemi+=("per-trade: " + $nPt + " file invece di " + (2*$nCsv) + " (2 per CSV)") }
+  if($nIni -ne $nCsv){ $problemi+=("ini: " + $nIni + " invece di " + $nCsv + " (uno per CSV)") }
   $ref=@()
   $ref+=("data: " + (Get-Date -Format 'yyyy-MM-dd HH:mm'))
   $ref+=("pin:  " + $h)
+  $ref+=("R92-SCAN BULGE -- 22 simboli x 2 gestioni x 2 varianti del VIOLA = 88 passate")
+  $ref+=("codice di uscita scan_market.ps1: " + $rc + "   (atteso 0)")
   $ref+=("CSV di scan: " + $nCsv + "   (attesi 44 = 22 simboli x 2 gestioni)")
+  $ref+=("   gia' presenti prima del lancio (ripresa, ini a 0,80%): " + $ripresi.Count)
+  $ref+=("   scritti da QUESTA corsa: " + $nNuovi)
   $ref+=("righe di dati totali: " + $righe + "   (attese 88 = 44 x 2 varianti del VIOLA)")
   $ref+=("ini generati: " + $nIni + "   (attesi 44)")
-  $ref+=("per-trade: " + $nPt + "   (attesi 88, uno per passata)")
+  $ref+=("per-trade: " + $nPt + "   (attesi " + (2*$nCsv) + " = 2 per CSV; 88 col pieno)")
+  if($mancanti.Count -gt 0){
+    $ref+=("SIMBOLI SENZA CSV: " + $mancanti.Count + " -- e' una RISPOSTA, non un guasto (storico assente o nome diverso a BCM), non un simbolo senza segnale")
+    foreach($x in $mancanti){ $ref+=("  - " + $x) }
+  }
+  if($problemi.Count -eq 0){ $ref+="ESITO: OK" } else { $ref+=("ESITO: FALLITO -- " + $problemi.Count + " problemi"); foreach($x in $problemi){ $ref+=("  - " + $x) } }
   $ref | Set-Content (Join-Path $rac "REFERTO_R92_SCAN.txt") -Encoding ASCII
   $zip=Join-Path $dsk "R92_SCAN_BULGE.zip"
   Remove-Item $zip -Force -EA SilentlyContinue
   Compress-Archive -Path (Join-Path $rac "*") -DestinationPath $zip -Force
   Write-Host ""
   Write-Host "=====================================================================" -ForegroundColor White
-  Write-Host "  FINITO. Da verificare, uno per uno:" -ForegroundColor White
-  Write-Host ("   " + (Join-Path $rac "REFERTO_R92_SCAN.txt") + "   <- leggi QUESTO per primo") -ForegroundColor White
-  Write-Host ("   CSV di scan: " + $nCsv + " (attesi 44)  righe dati: " + $righe + " (attese 88)") -ForegroundColor White
+  Write-Host ("   " + (Join-Path $rac "REFERTO_R92_SCAN.txt") + "   <- leggi QUESTO, riga 'data:'") -ForegroundColor White
+  Write-Host ("   CSV di scan: " + $nCsv + " (attesi 44)   righe dati: " + $righe + " (attese 88)") -ForegroundColor White
   Write-Host ("   ini: " + $nIni + " (attesi 44)   per-trade: " + $nPt + " (attesi 88)") -ForegroundColor White
   Write-Host ("   " + $zip + "   <- questo si manda in chat") -ForegroundColor White
   Write-Host "=====================================================================" -ForegroundColor White
+  if($mancanti.Count -gt 0){ Write-Host ("SIMBOLI SENZA CSV (" + $mancanti.Count + "): " + ($mancanti -join ", ") + "   <- risposta, non guasto") -ForegroundColor Yellow }
+  if($problemi.Count -gt 0){ Write-Host ("ESITO: FALLITO -- " + ($problemi -join " | ")) -ForegroundColor Red; Write-Host "Manda lo zip lo stesso: i file ci sono, il referto dice cosa non torna." -ForegroundColor Yellow }
+  else { Write-Host "ESITO: OK" -ForegroundColor Green }
 }
 ```
 
 **I numeri attesi, scritti prima:** 44 CSV · 88 righe di dati · 44 ini · 88
-per-trade. Se un numero non torna, **si dice quale** invece di leggere i
-risultati: un CSV mancante e' un simbolo senza storico, non un simbolo senza
-segnale.
+per-trade. Se un numero non torna, **la riga dice quale**, per nome, invece di
+lasciarlo leggere a occhio: un CSV mancante e' un **simbolo senza storico**, non
+un simbolo senza segnale — per questo i mancanti stanno in una lista a parte e
+**non** fanno `ESITO: FALLITO`.
+
+**Cosa si legge:** l'ultima riga (`ESITO: OK` verde / `FALLITO` rossa) e, dentro
+`REFERTO_R92_SCAN.txt`, la **riga `data:`, che deve essere di ADESSO** (ora del
+PC, non ora server). Se e' vecchia, e' il referto di un'altra corsa: non si
+legge. Poi si manda `Desktop\R92_SCAN_BULGE.zip`.
 
 ---
 
