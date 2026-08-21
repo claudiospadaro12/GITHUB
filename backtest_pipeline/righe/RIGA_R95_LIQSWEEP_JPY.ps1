@@ -442,7 +442,13 @@ if(-not $SoloControllo -and -not $SaltaPasso0){
       Tee-Object -FilePath (Join-Path $Logs "passo0a_storico.txt") | Out-Host
     $Storico.Eseguito = $true
     $Storico.Esito = "eseguito, uscita " + $LASTEXITCODE
-    if($LASTEXITCODE -ne 0){ [void]$Problemi.Add("PASSO 0-A: scarica_storico.ps1 e' uscito con codice " + $LASTEXITCODE + ". Lo storico potrebbe essere incompleto.") }
+    if($LASTEXITCODE -ne 0){
+      #  uscita 2 = TIMEOUT: MT5 fermato a meta', referto PARZIALE ma ESISTE
+      #  (scarica_storico.ps1, ultime righe). Non e' la stessa cosa di un 1.
+      $che = if($LASTEXITCODE -eq 2){ "TIMEOUT dei 45 minuti: MT5 fermato a meta', il referto storico e' PARZIALE (ma c'e', e lo leggo lo stesso qui sotto)" }
+             else { "errore" }
+      [void]$Problemi.Add("PASSO 0-A: scarica_storico.ps1 e' uscito con codice " + $LASTEXITCODE + " -> " + $che + ". Lo scarico NON e' completo: il gate 0-C resta la misura che decide.")
+    }
     $csvSt = Join-Path $DataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
     if(Test-Path -LiteralPath $csvSt){
       #  LE COLONNE VERE le scrive ABTG_HistoryDownloader.mq5 riga 140:
@@ -842,7 +848,8 @@ try{
   [void]$R.Add("criteri: risultati_archivio\R95_CRITERI.md")
   [void]$R.Add("")
   [void]$R.Add("--- PASSO 0 (IL GATE) ---")
-  [void]$R.Add("  0-A storico ........ " + $Storico.Esito)
+  [void]$R.Add("  0-A storico ........ " + $Storico.Esito + "   (chiesto dal " + $DaQuando + ", cioe' la finestra dichiarata:")
+  [void]$R.Add("                       il verdetto del downloader si calcola CONTRO questa data, non contro una data-catchall)")
   [void]$R.Add("  eseguito ........... " + $Passo0.Fatto)
   [void]$R.Add("  operazioni ......... " + $Passo0.N)
   [void]$R.Add("  prima operazione ... " + $Passo0.PrimaData + "   (limite dei criteri: 2016.01.01)")
@@ -907,9 +914,19 @@ try{
 Write-Host ""
 Write-Host "=====================================================================" -ForegroundColor White
 Write-Host "  FINITO. File da verificare, uno per uno:" -ForegroundColor White
-Write-Host ("   " + $Cart) -ForegroundColor White
-Write-Host ("   " + $Zip + "   <- e' questo che mi mandi") -ForegroundColor White
-Write-Host ("   " + $Referto + "   <- la riga 'data:' deve essere di ADESSO") -ForegroundColor White
+#  >>> NON SI ANNUNCIA UN ARTEFATTO CHE NON ESISTE. <<<
+#  E' il punto 22 (istruzioni per un artefatto mai nato) applicato alla riga
+#  finale: quando un gate ferma il round la cartella puo' restare VUOTA e
+#  Compress-Archive su una cartella vuota fallisce. Stampare comunque il
+#  percorso dello zip manda Claudio a cercare un file che non c'e'.
+#  Si guarda, e si dice quale dei tre manca.
+function Riga3($path,$coda){
+  if(Test-Path -LiteralPath $path){ Write-Host ("   " + $path + "   " + $coda) -ForegroundColor White }
+  else                            { Write-Host ("   " + $path + "   <<< NON ESISTE") -ForegroundColor Red }
+}
+Riga3 $Cart    ""
+Riga3 $Zip     "<- e' questo che mi mandi"
+Riga3 $Referto "<- la riga 'data:' deve essere di ADESSO"
 Write-Host "=====================================================================" -ForegroundColor White
 Write-Host "  ATTESI:  10 CSV (5 file x IS/OOS), 3 righe l'uno, 30 passate," -ForegroundColor White
 Write-Host "           piu' 2 per-trade del PASSO 0." -ForegroundColor White
