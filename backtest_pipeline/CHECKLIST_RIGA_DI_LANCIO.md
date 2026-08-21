@@ -1892,3 +1892,104 @@ fidarsi nemmeno dello **schema** di un artefatto che scrive qualcun altro.
 > Regola gemella del punto 34-bis (_il canarino letto dalla parte che lo scrive_):
 > qui il canarino e' letto dalla parte giusta, ma **con la chiave sbagliata**, e
 > il risultato e' lo stesso — una stringa vuota che passa per una misura.
+
+---
+
+## 🆕 AGGIUNTE DEL 21/08/2026 — trovate alla **TERZA** verifica della riga R95
+
+_Contesto, e va detto prima dei due punti perche' e' il punto vero: la v3 di
+R95 chiude davvero N1, N2, N3 e N4 (cache contata prima E dopo, `Verdetto` letto
+col nome giusto, `Livelli Buttati` nel referto, v1.11 ovunque, 32 righe vive e
+diff 2 misurati sull'artefatto). **E per la TERZA volta di fila esce un difetto
+che vive DENTRO una correzione**: la prima volta erano 12 difetti nuovi, la
+seconda 2 nati nelle correzioni, la terza uno nato in una correzione (47) e uno
+sopravvissuto a una correzione dichiarata chiusa (48). Non e' sfortuna: e' che
+**una correzione si verifica come codice nuovo, e non si verifica solo nel punto
+in cui e' stata scritta.**_
+
+## 47. 🔔 LA SPIA TARATA SU UN PARAMETRO CHE LA RIGA STESSA PASSA: non puo' che essere rossa
+
+_Difetto vero, `backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1` righe 410 e
+443 (commit `0eac2cf`), trovato PRIMA dell'invio. E' la correzione del punto
+46-bis (leggere la colonna `Verdetto` invece della colonna `Stato`, che non
+esiste): la CHIAVE e' stata corretta, il SIGNIFICATO no._
+
+```powershell
+& powershell.exe ... -File $ScStorico -Simboli $Sym -Da "1995.01.01" ...
+...
+elseif($verd -match "(?i)non ha piu' storico"){ [void]$Problemi.Add("il BROKER NON HA PIU' STORICO ...") }
+```
+
+Quel `Verdetto` non e' un giudizio assoluto sullo storico: `ABTG_HistoryDownloader.mq5`
+(riga 199) lo calcola **contro il parametro che gli abbiamo passato noi**:
+
+```mql5
+else if(srvFirst > from + 86400)   verdetto = "IL BROKER NON HA PIU' STORICO";
+```
+
+con `from = StringToTime(InpDataInizio)` = **1995.01.01**, che e' proprio la data
+che la riga passa per dire *"dammi tutto quello che hai"*. Nessun broker ha
+EURJPY dal 1995: **il verdetto e' "IL BROKER NON HA PIU' STORICO" per
+costruzione, su M1 e su M15, a ogni corsa, anche quando lo storico copre la
+finestra con anni di margine.**
+
+Conseguenza misurata leggendo il resto della riga: due `$Problemi` garantiti →
+`ESITO: PARZIALE -- 0 file su 5 non sono OK, e 2 problemi in elenco. NON e' un
+round completo`, **uscita 1**, e un blocco rosso che dice a Claudio *"la finestra
+si SPOSTA, non si scarica"* su una finestra sana. Il difetto e' peggiore di un
+gate che tace: **e' un gate che grida sempre**, e dopo due corse nessuno lo
+guarda piu' — che e' il modo in cui muoiono anche i gate buoni intorno.
+
+Nella v2 la stessa informazione finiva in una **Nota** ed era innocua. La
+correzione l'ha promossa a **Problema** senza ricalcolare cosa significasse.
+
+> 🥇 **Un valore letto dall'artefatto di un gemello si interpreta leggendo la
+> FORMULA che lo produce, non il suo NOME.** `Verdetto`, `Stato`, `OK`, `COMPLETO`
+> sono etichette relative a un ingresso: si va a vedere **contro cosa** sono
+> calcolate.
+> 🥈 **Se l'ingresso lo passa la riga stessa, la spia va tarata sullo stesso
+> numero della domanda vera.** Qui: o si passa `-Da $DaQuando` (e allora
+> `COMPLETO` vuol dire davvero "copre la finestra"), o si smette di leggere
+> `Verdetto` e si confronta `PrimaDataServer` con `$DaQuando`.
+> 🥉 **E i valori possibili si enumerano TUTTI** (qui erano cinque: `NESSUN DATO`,
+> `server non risponde`, `MANCA STORICO LOCALE`, `IL BROKER NON HA PIU' STORICO`,
+> `COMPLETO`): la riga ne trattava **due**, e gli altri tre — tutti brutti —
+> cadevano nel ramo silenzioso del "va bene". E' il 40-ter di nuovo.
+> **Regola pratica: si scrive la guardia al positivo** (`if($verd -ne "COMPLETO")`),
+> cosi' un valore nuovo non puo' passare per buono.
+
+## 48. 🧬 LE VARIABILI SONO USCITE DAL `try`, LA **FUNZIONE** NO
+
+_Difetto vero, stessa riga, `function CsvDi` alla riga **694** — dentro il `try`
+che va da 189 a 772 — usata alla riga **790**, dentro la raccolta che sta
+**fuori**. **Riprodotto**, non dedotto (`pwsh`, throw finto prima della
+definizione): `!! raccolta incompleta: The term 'CsvDi' is not recognized...`_
+
+E' il **punto 41-bis dichiarato chiuso e riaperto un centimetro piu' in la'**.
+Li' la regola era: *"tutto cio' che la raccolta usa nasce PRIMA del `try` che puo'
+fallire"*, e in v2 sono state spostate fuori `$Comune`, `$Sosta`, `$Risultati`.
+**Nessuno ha pensato che anche una FUNZIONE e' una cosa che la raccolta usa** —
+e in PowerShell una `function` **non e' dichiarativa: e' un'istruzione che
+definisce il nome quando il flusso ci passa sopra.** Se il flusso non ci arriva,
+il nome non esiste, e con `$ErrorActionPreference="Stop"` la chiamata e' un
+errore TERMINANTE.
+
+Perche' e' bloccante e non cosmetico: il `throw` che salta la definizione e'
+**esattamente il caso normale di questa riga** — i quattro gate del PASSO 0
+(`G1` per-trade vuoto, `G2` dati che non coprono, `G3` gemelli divergenti,
+`G4` tetto che morde o zero log letti) sono `throw` **prima** della sezione 5.
+Cioe': **il referto non viene scritto proprio nelle corse in cui il gate ferma il
+round**, che sono le uniche in cui il referto serve a capire perche'. Sul Desktop
+resta una cartella `R95_..._<stamp>` **vuota**, nessuno zip, e la console
+stampa comunque il percorso dello zip inesistente.
+
+> **La prova del 41-bis si rifa' cosi', e stavolta anche sui NOMI:** si mette un
+> `throw` finto alla prima riga del `try` e si guarda cosa la raccolta trova a
+> `$null` **o non trova affatto**. Grep secco:
+> ```
+> awk '/^try\{/{t=NR} /^function /{if(t)print NR": "$0}' <script>
+> ```
+> Ogni `function` definita dentro il `try` e chiamata fuori e' una riga da
+> spostare. **Le funzioni di servizio stanno in cima, sopra il `try`, sempre** —
+> accanto a `Dico`, `Titolo` e `Scarica`, dove le altre stavano gia' e dove
+> questa non e' stata messa solo perche' e' nata piu' tardi.
