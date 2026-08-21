@@ -56,11 +56,20 @@
 #              misura la FREQUENZA contro la base gia' misurata della
 #              famiglia, che gira all'1,0%; cambiare rischio renderebbe
 #              il confronto non comparabile. Verificato nel sorgente che
-#              il rischio NON cambia il conteggio operazioni: il Guardian
-#              e' fail-open nel tester, non c'e' nessun kill switch di
-#              perdita giornaliera (l'equity a riga 463-469 e' SOLO
-#              metrica per OnTester) e l'unico scarto legato al lotto
-#              (riga 1133, lot<=0) e' contato dal funnel [BB-FUNNEL].
+#              il rischio NON PUO' cambiare il conteggio operazioni, e la
+#              catena si chiude NEL CODICE, non nei log: LotByRisk (riga
+#              1427) termina con MathMax(mn, MathMin(mx, lot)), cioe' il
+#              lotto e' AGGANCIATO AL MINIMO DEL BROKER -- InpRiskPercent
+#              non puo' azzerarlo. Il ramo lot<=0 (riga 1133) puo' venire
+#              solo da lossPerLot<=0 (guasto dei dati di simbolo) o da
+#              slDist<=0, gia' escluso alla riga 1100. In piu': Guardian
+#              fail-open nel tester e nessun kill switch di perdita
+#              giornaliera (l'equity delle righe 463-469 e' SOLO metrica
+#              per OnTester). Dimostrato nel sorgente, non dedotto dai log
+#              -- che in ottimizzazione non sarebbero nemmeno leggibili.
+#              Residuo dichiarato: la guardia di riga 1137 esce SENZA
+#              incrementare nessun contatore. Nel tester e' inerte, ma se
+#              non lo fosse quell'uscita sarebbe MUTA.
 #              Claudio puo' ribaltarla con una parola: in quel caso la
 #              base R34 va RIMISURATA insieme alla cella.
 # ---------------------------------------------------------------------

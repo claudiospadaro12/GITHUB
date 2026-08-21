@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R95_v1
+#  MARCATORE_RIGA_R95_v2
 #  RIGA_R95_LIQSWEEP_JPY.ps1  --  R95: sweep + reclaim su EURJPY M15
 # ---------------------------------------------------------------------
 #  >>> NON SI MANDA A CLAUDIO FINCHE' R95_CRITERI.md NON E' FIRMATO. <<<
@@ -41,10 +41,10 @@
 #  <PIN> = il commit che contiene QUESTO file: e' l'hash dato in chat.
 #
 #  & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-#      if(Get-Process terminal64 -EA SilentlyContinue){ throw 'MT5 APERTO: chiudilo e rilancia.' };
+#      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R95.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (dieci secondi, nessun MT5 aperto, nessuna passata):
@@ -53,7 +53,9 @@
 #  girano nella corsa vera. Non c'e' un secondo artefatto (checklist 33).
 # =====================================================================
 param(
-  [string]$Pin       = "lavoro",
+  # -Pin NON ha default: un default silenzioso ("lavoro") farebbe girare la
+  #  punta del branch spacciandola per un commit congelato. Meglio morire.
+  [string]$Pin       = "",
   [double]$OreMax    = 12.0,       # oltre questo NON si iniziano nuovi file
   [switch]$Rifai,
   [switch]$SoloControllo,
@@ -83,10 +85,30 @@ $Fino     = "2026.06.30"
 $Modello  = 1                 # OHLC M1: i tick BCM partono dal 2024.07.05
 $Deposito = 10000
 $CelleAttese = 3              # per file, per finestra
-$MagicA   = 779500
-$MagicB   = 779501
+$MagicA   = 779500      # PASSO 0, passata A
+$MagicB   = 779501      # PASSO 0, passata B (gemella di controllo)
+$MagicGrid= 779502      # LA GRIGLIA. Magic SUO, e non e' un vezzo: ExportTrades()
+                        #  gira in OnTester() a ogni passata e il nome del file
+                        #  per-trade contiene il MAGIC, non la finestra. Col magic
+                        #  condiviso le 30 passate cancellerebbero il per-trade su
+                        #  cui il gate del PASSO 0 ha dato il via libera (e' il
+                        #  difetto che i criteri par. 1.2 rimproverano a R82).
+#--- RIGHE VIVE ATTESE nei file prova. MISURATA il 21/08/2026 su tutti e
+#    cinque: 3 direttive @ + 29 parametri = 32. NON scritta a memoria.
+#    (La prima stesura diceva 31: la riga muoriva al passo 1d prima di
+#     compilare, e il ciclo saltava proprio la riga InpMagic.)
+$RigheAttese = 32
 
+#--- TUTTO CIO' CHE LA RACCOLTA USA NASCE QUI, PRIMA DEL try (checklist 41-bis).
+#    Nella prima stesura $Comune nasceva DENTRO il try: su un errore precedente
+#    la raccolta esplodeva su Join-Path $null e il REFERTO NON VENIVA SCRITTO
+#    AFFATTO - proprio nella corsa fallita, che e' l'unica in cui serve.
 $Risultati = Join-Path $Work "risultati_prove"
+$Comune    = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+$Sosta     = Join-Path $Work "sosta"
+$Passo0    = @{ Fatto=$false; PrimaData=""; UltimaData=""; N=0; Anni=0.0;
+                Gemelli="NON MISURATO"; Tetto="NON MISURATO"; Minuti=0.0; LogLetti=0 }
+$Storico   = @{ Eseguito=$false; Esito="NON ESEGUITO" }
 $Problemi = New-Object System.Collections.ArrayList
 $Note     = New-Object System.Collections.ArrayList
 $Fatale   = ""
@@ -142,15 +164,28 @@ Write-Host "    QUANTO CI METTE: NON LO SO, ed e' un dato che manca." -Foregroun
 Write-Host "    Nessuna corsa di questo EA su 11 anni e' mai stata fatta." -ForegroundColor Yellow
 Write-Host "    Il PASSO 0 MISURA una passata intera e stampa la stima x30." -ForegroundColor Yellow
 
+if($Pin -eq ""){
+  Write-Host ""
+  Write-Host "!!! MANCA -Pin. Questa riga gira SOLO su un commit congelato." -ForegroundColor Red
+  Write-Host "    Rilancia col blocco intero, che passa -Pin <hash>." -ForegroundColor Yellow
+  exit 1
+}
+
 try{
 
 # =====================================================================
-#  0. MT5 CHIUSO. Prima di qualunque altra cosa (checklist 7).
+#  0. MT5 E METAEDITOR CHIUSI. Prima di qualunque altra cosa (checklist 7).
+#     MetaEditor e' SINGLE-INSTANCE: se ne gira gia' una copia, il nostro
+#     metaeditor64.exe /compile torna SUBITO senza aver compilato, e la
+#     fase 3 dichiarerebbe "COMPILAZIONE FALLITA" su un sorgente sano.
 # =====================================================================
-if(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue){
+$vivi = @(Get-Process -Name "terminal64","metaeditor64" -ErrorAction SilentlyContinue)
+if($vivi.Count -gt 0){
   Write-Host ""
-  Write-Host "!!! MT5 E' APERTO. Non parto: il tester non gira e uscirebbero ZERO CSV." -ForegroundColor Red
-  Write-Host "    Chiudi MetaTrader (tutte le istanze) e rilancia la stessa riga." -ForegroundColor Yellow
+  Write-Host ("!!! APERTO: " + (($vivi | ForEach-Object { $_.ProcessName } | Sort-Object -Unique) -join ", ")) -ForegroundColor Red
+  Write-Host "    Non parto: col terminale aperto il tester non gira (zero CSV), e con" -ForegroundColor Red
+  Write-Host "    MetaEditor aperto la compilazione torna subito senza compilare." -ForegroundColor Red
+  Write-Host "    Chiudi MetaTrader E MetaEditor (tutte le istanze) e rilancia." -ForegroundColor Yellow
   exit 1
 }
 
@@ -198,15 +233,24 @@ function RigheVive($p){
   return @(Get-Content -LiteralPath $p | Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' })
 }
 $base = RigheVive (Join-Path $Prove $Lavori[0].Prova)
-if($base.Count -ne 31){ throw ("il file prova base ha " + $base.Count + " righe vive, ne attendevo 31: artefatto cambiato, mi fermo.") }
+if($base.Count -ne $RigheAttese){ throw ("il file prova base ha " + $base.Count + " righe vive, ne attendevo " + $RigheAttese + ": artefatto cambiato, mi fermo.") }
 foreach($l in $Lavori){
   if($l.Et -eq "r95a"){ continue }
   $altre = RigheVive (Join-Path $Prove $l.Prova)
-  if($altre.Count -ne 31){ throw ($l.Prova + " ha " + $altre.Count + " righe vive invece di 31") }
-  $div = 0; for($i=0;$i -lt 31;$i++){ if($base[$i] -ne $altre[$i]){ $div++ } }
+  if($altre.Count -ne $RigheAttese){ throw ($l.Prova + " ha " + $altre.Count + " righe vive invece di " + $RigheAttese) }
+  $div = 0; for($i=0;$i -lt $RigheAttese;$i++){ if($base[$i] -ne $altre[$i]){ $div++ } }
   if($div -ne 2){ throw ($l.Prova + " differisce dal modello in " + $div + " righe invece di 2 (attese: InpTF_Struttura e InpComment)") }
 }
-Dico "diff dei 5 file prova: 2 righe su 31 ciascuno, come atteso" "Green"
+Dico ("diff dei 5 file prova: 2 righe su " + $RigheAttese + " ciascuno, come atteso") "Green"
+
+# --- 1d-bis. IL MAGIC DELLA GRIGLIA, letto NELL'ARTEFATTO CHE GIRA.
+#     Non basta averlo scritto nei file: si legge (checklist 34-bis).
+foreach($l in $Lavori){
+  $mg = [regex]::Match((Get-Content -LiteralPath (Join-Path $Prove $l.Prova) -Raw),'(?m)^InpMagic=(\d+)\r?$')
+  if(-not $mg.Success){ throw ($l.Prova + ": non trovo InpMagic") }
+  if([int]$mg.Groups[1].Value -ne $MagicGrid){ throw ($l.Prova + ": InpMagic e' " + $mg.Groups[1].Value + " ma la griglia deve girare su " + $MagicGrid + " (779500/779501 sono del PASSO 0)") }
+}
+Dico ("magic della griglia verificato nei 5 file: " + $MagicGrid + " (PASSO 0: " + $MagicA + "/" + $MagicB + ")") "Green"
 
 # --- 1e. IL @DAQUANDO E' SCRITTO IN DUE POSTI: nel file prova e in questo
 #     driver. Il driver NON si fida del commento "se cambi qui cambia
@@ -221,8 +265,11 @@ foreach($l in $Lavori){
 Dico ("@DAQUANDO e @SIMBOLO coincidono in tutti e 5 i file (" + $DaQuando + " / " + $Sym + ")") "Green"
 
 # --- 1f. IL SORGENTE
-Scarica ("$RawPin/mql5/Experts/" + $Ea + ".mq5") (Join-Path $SrcDir ($Ea + ".mq5")) 'Livelli Creati'
-Dico ($Ea + ".mq5 scaricato al pin (marcatore v1.10: colonna 'Livelli Creati')") "Green"
+#  Il marcatore e' 'Livelli Buttati', che esiste SOLO dalla v1.11: con
+#  'Livelli Creati' (v1.10) il pin non distinguerebbe le due versioni, e
+#  la colonna su cui poggia il criterio par. 3.4 potrebbe non esserci.
+Scarica ("$RawPin/mql5/Experts/" + $Ea + ".mq5") (Join-Path $SrcDir ($Ea + ".mq5")) 'Livelli Buttati'
+Dico ($Ea + ".mq5 scaricato al pin (marcatore v1.11: colonna 'Livelli Buttati')") "Green"
 
 # =====================================================================
 #  2. TERMINALE E CARTELLA DATI (per NOME, mai il primo che capita)

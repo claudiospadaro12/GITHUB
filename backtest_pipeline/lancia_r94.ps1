@@ -130,6 +130,9 @@ if ($Solo -ne "") {
 
 $passateAttese = $celle.Count * 2 * 2   # 2 celle di deviazione x 2 finestre
 Write-Host ("  file prova in coda: " + $celle.Count + "  ->  celle " + ($celle.Count * 2) + "  ->  passate " + $passateAttese) -ForegroundColor White
+Write-Host "  SE LA CORSA SI INTERROMPE: si rimanda lo STESSO comando. Le celle gia'" -ForegroundColor DarkGray
+Write-Host "  fatte vengono saltate (il driver le riconosce dal CSV). -Rifai serve SOLO" -ForegroundColor DarkGray
+Write-Host "  se hai cambiato un file prova o l'EA, e in quel caso rifa' tutto." -ForegroundColor DarkGray
 
 $desk = Trova-Desktop
 
@@ -147,10 +150,13 @@ $file["R94_CRITERI.md"]           = "$Raw/backtest_pipeline/risultati_archivio/R
 foreach ($c in $celle) { $file["prove\" + $c.File] = "$Raw/backtest_pipeline/prove/" + $c.File }
 
 foreach ($k in $file.Keys) {
-  $dest = Join-Path $Cartella $k
-  Remove-Item -LiteralPath $dest -Force -ErrorAction SilentlyContinue
+  # NB: si chiama $destFile e non $dest apposta -- $dest e' la cartella di
+  # raccolta sul Desktop (sezione 4). Due variabili con lo stesso nome in
+  # due sezioni diverse funzionano finche' nessuno sposta una sezione.
+  $destFile = Join-Path $Cartella $k
+  Remove-Item -LiteralPath $destFile -Force -ErrorAction SilentlyContinue
   try {
-    Invoke-WebRequest -Uri $file[$k] -OutFile $dest -UseBasicParsing -ErrorAction Stop
+    Invoke-WebRequest -Uri $file[$k] -OutFile $destFile -UseBasicParsing -ErrorAction Stop
     Write-Host ("    ok  " + $k) -ForegroundColor Green
   } catch {
     Muori ("non sono riuscito a scaricare " + $k + " da " + $Rif + "`n    " + $_.Exception.Message)
@@ -396,6 +402,7 @@ $nomeCartella = "R94_BREAKINGBAND_BB37"
 $dest = Join-Path $desk $nomeCartella
 $zip  = Join-Path $desk ($nomeCartella + ".zip")
 foreach ($vecchio in @($zip, $dest)) {
+  if ($SoloControllo) { break }   # il giro a vuoto NON distrugge i risultati di una corsa precedente
   if (Test-Path -LiteralPath $vecchio) {
     try { Remove-Item -LiteralPath $vecchio -Recurse -Force -ErrorAction Stop } catch {}
     if (Test-Path -LiteralPath $vecchio) {
@@ -581,9 +588,9 @@ if ($SoloControllo) {
 #  8. RACCOLTA SUL DESKTOP + ZIP (regola delle righe di lancio, punto 2)
 # =====================================================================
 Titolo "8) raccolta sul Desktop"
-$nomeCartella = "R94_BREAKINGBAND_BB37"
-$dest = Join-Path $desk $nomeCartella
-if (Test-Path $dest) { Remove-Item $dest -Recurse -Force -ErrorAction SilentlyContinue }
+# $nomeCartella, $dest e $zip sono gia' stati definiti E RIPULITI nella
+# sezione 4: se una Muori scatta prima di qui, sul Desktop non resta un
+# artefatto vecchio che al prossimo giro passa per nuovo.
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 
 $suff = if ($Modello -eq 4) { "" } else { "_ohlc" }
@@ -611,30 +618,35 @@ if (Test-Path $rp) {
 }
 Copy-Item -LiteralPath (Join-Path $Cartella "R94_CRITERI.md") -Destination $dest -Force -ErrorAction SilentlyContinue
 
-# --- I LOG DEGLI AGENT DEL TESTER.
-#     In OTTIMIZZAZIONE MT5 non stampa le Print degli agent nella scheda
-#     Esperti: finiscono nei log degli agent. Li' c'e' il funnel
-#     [BB-FUNNEL], che per un round sulla FREQUENZA e' il numero che
-#     spiega il numero: dice se i setup sono DIMINUITI o se sono stati
-#     SCARTATI ALLA PORTA (tp / sl / rr / lotto).
-#     Raccolta a BEST EFFORT: se non ci sono, il round vive lo stesso
-#     (il cancello si legge dalla colonna Trades del CSV), ma va detto.
+# --- I LOG DEGLI AGENT DEL TESTER (punto 34-ter).
+#     ATTENZIONE, E' SCRITTO PRIMA DI GUARDARE: IN QUESTO ROUND IL FUNNEL
+#     [BB-FUNNEL] NON C'E'. PrintFunnel() gira dentro OnTester(), cioe'
+#     SULL'AGENTE, e walkforward_generico.ps1 scrive SEMPRE
+#     Optimization=1: in ottimizzazione quelle Print non finiscono da
+#     nessuna parte di leggibile. R91, per leggere le righe [BB], dovette
+#     fare una PASSATA SINGOLA dedicata con Optimization=0.
+#     Quindi qui NON si promette il funnel: si raccoglie quello che c'e'
+#     (tre radici, non due -- gli agent locali stanno sotto
+#     %APPDATA%\MetaQuotes\Tester, non sotto la cartella dati) e SI
+#     DICHIARA IL NUMERO, cosi' lo zero si legge invece di dedurlo.
+#     Il cancello del round NON dipende da questo: si legge dalla colonna
+#     Trades del CSV, che e' un dato e non uno schermo.
 $logDest = Join-Path $dest "log_agent"
 New-Item -ItemType Directory -Force -Path $logDest | Out-Null
 $nLog = 0
-foreach ($radice in @((Join-Path $DataFolder "Tester"), (Join-Path $instDir "Tester"))) {
-  if (-not (Test-Path $radice)) { continue }
-  Get-ChildItem -Path $radice -Recurse -Filter "*.log" -ErrorAction SilentlyContinue |
-    Where-Object { $_.LastWriteTime -ge $segnaTempo } | ForEach-Object {
+foreach ($radice in @((Join-Path $DataFolder "Tester"), (Join-Path $instDir "Tester"), (Join-Path $env:APPDATA "MetaQuotes\Tester"))) {
+  if (-not (Test-Path -LiteralPath $radice)) { continue }
+  Get-ChildItem -LiteralPath $radice -Recurse -Filter "*.log" -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -ge $segnaTempo -and $_.Length -gt 0 -and $_.Length -lt 60MB } | ForEach-Object {
       $etichetta = ($_.Directory.Parent.Name + "_" + $_.Directory.Name + "_" + $_.Name)
       try { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $logDest $etichetta) -Force; $nLog++ } catch {}
     }
 }
-Write-Host ("    log degli agent raccolti: " + $nLog) -ForegroundColor $(if ($nLog -eq 0) { "Yellow" } else { "Green" })
-if ($nLog -eq 0) {
-  Write-Host "    (nessun log: il funnel [BB-FUNNEL] non sara' leggibile. Il cancello" -ForegroundColor Yellow
-  Write-Host "     della frequenza si legge lo stesso dalla colonna Trades del CSV.)" -ForegroundColor Yellow
-}
+Write-Host ("    log degli agent raccolti: " + $nLog) -ForegroundColor DarkGray
+Write-Host "    (il funnel [BB-FUNNEL] NON e' atteso in questo round: gira in OnTester" -ForegroundColor DarkGray
+Write-Host "     e le passate sono in ottimizzazione. Il cancello si legge dalla colonna" -ForegroundColor DarkGray
+Write-Host "     Trades del CSV. Portare i contatori in una COLONNA via FrameAdd resta" -ForegroundColor DarkGray
+Write-Host "     un lavoro a se': l'EA NON si tocca a branch congelato.)" -ForegroundColor DarkGray
 
 # il referto porta dentro la sua DATA: quella deve essere di ADESSO
 $ref = Join-Path $dest "REFERTO_R94.txt"
@@ -645,7 +657,10 @@ $rr += ("macchina: " + $env:COMPUTERNAME + "   riferimento: " + $Rif)
 $rr += ("finestra: " + $DaQuando + " -> " + $Fino + "   modello: " + $Modello + " (4 = tick reali)")
 $rr += ("deposito: " + $Deposito + "   rischio: 1,0% (ASSUNZIONE dichiarata da Claude, NON firmata)")
 $rr += ("file prova: " + $celle.Count + "   celle: " + ($celle.Count * 2) + "   passate attese: " + $passateAttese)
-$rr += ("log degli agent raccolti: " + $nLog)
+$rr += ("log degli agent raccolti: " + $nLog + "   (zero e' l'esito ATTESO: vedi sotto)")
+if ($ripescate.Count -gt 0) {
+  $rr += ("CELLE SENZA PER-TRADE FRESCO (sospette di RIPESCAGGIO dalla cache): " + ($ripescate -join " "))
+} else { $rr += "PER-TRADE FRESCHI: tutte le celle hanno scritto la loro serie (nessun ripescaggio)." }
 $rr += ""
 $rr += "FILE ATTESI (" + $attesi.Count + " CSV, ognuno con 2 righe = le 2 celle di deviazione):"
 foreach ($a in $attesi) { $rr += ("  " + $a) }
@@ -656,26 +671,51 @@ if ($mancanti.Count -gt 0) {
 } else { $rr += "MANCANTI: nessuno." }
 if ($falliti.Count -gt 0) { $rr += ("CELLE USCITE IN ERRORE: " + ($falliti -join " ")) }
 $rr += ""
+$rr += "DOVE SI GUARDA -- nomi e POSIZIONI delle colonne che decidono (dal CSV di R91):"
+$rr += "  col. 2 = Profit | col. 7 = Equity DD % | col. 8 = Trades"
+$rr += "  col. 15 = InpBBPeriod | col. 16 = InpBBDev"
+$rr += "  ATTENZIONE AL FORMATO: MT5 tronca gli zeri. La deviazione 2.0 e' scritta"
+$rr += "  '2', non '2.0' (la 1.4 resta '1.4'). Chi cerca '2.0' non lo trova e crede"
+$rr += "  che sia rotto. Il periodo si legge NELLA COLONNA DEL CSV, non nell'anteprima:"
+$rr += "  l'anteprima la scrive questo script e direbbe 37 comunque (punto 34-bis)."
+$rr += ""
 $rr += "COSA SI LEGGE PER PRIMO, E NON E' IL PROFITTO (criteri par. 3 e 4):"
 $rr += "  1. IL CANARINO. Nei tre CSV _r94a20 / _r94b20 / _r94c20 la riga con"
-$rr += "     InpBBDev=2.0 deve riprodurre R34 AL CENTESIMO:"
+$rr += "     InpBBDev=2 (col. 16) e InpBBPeriod=20 (col. 15) deve riprodurre R34"
+$rr += "     AL CENTESIMO:"
 $rr += "       GBPUSD  IS +2.667,18 PF 2,72613 DD 1,6960 n=13 | OOS +3.160,10 PF 1,73020 DD 3,4801 n=26"
 $rr += "       EURUSD  IS +1.457,02 PF 53,79058 DD 0,7797 n=4 | OOS +2.069,82 PF 3,86266 DD 1,2722 n=13"
 $rr += "       AUDUSD  IS +1.291,32 PF 47,99127 DD 0,6753 n=5 | OOS +1.840,67 PF 2,74743 DD 1,2695 n=11"
 $rr += "     Se non torna, IL ROUND SI FERMA QUI e si cerca il perche'."
-$rr += "  2. LA COLONNA Trades. E' il cancello del round:"
+$rr += "     NB: la cache del tester e' stata svuotata prima della corsa, quindi"
+$rr += "     queste tre celle sono state RIGIRATE e non ripescate (punto 38)."
+$rr += "  2. LA COLONNA Trades (col. 8). E' il cancello del round:"
 $rr += "       GBPUSD  n OOS >= 60 verde | 27-59 giallo | <= 26 archiviata secca"
 $rr += "       EURUSD  n OOS >= 30 verde | 14-29 giallo | <= 13 archiviata secca"
 $rr += "       AUDUSD  n OOS >= 30 verde | 12-29 giallo | <= 11 archiviata secca"
 $rr += "     REGOLA D'INSIEME: deve salire su ALMENO 2 SIMBOLI SU 3."
-$rr += "  3. IL DRAWDOWN, che si legge SEMPRE, a qualunque n: cancello DD > 8%."
+$rr += "  3. IL DRAWDOWN (Equity DD %, col. 7), che si legge SEMPRE, a qualunque n:"
+$rr += "     cancello DD > 8%."
 $rr += "  4. L'aspettativa dei trade AGGIUNTI ="
 $rr += "     (Profit_cella - Profit_base) / (n_cella - n_base). Se e' negativa,"
 $rr += "     la frequenza e' stata comprata con perdenti: peggioramento anche se n sale."
-$rr += "  5. Il funnel [BB-FUNNEL] nei log_agent, se ci sono: dice se i setup sono"
-$rr += "     diminuiti o se sono stati scartati alla porta (tp/sl/rr/lotto)."
-$rr += "     Il contatore 'lotto' e' anche la verifica dell'assunzione sul rischio:"
-$rr += "     se e' 0, il rischio non ha tolto nemmeno un'operazione."
+$rr += ""
+$rr += "IL FUNNEL [BB-FUNNEL] NON C'E', ED E' DETTO PRIMA DI GUARDARE:"
+$rr += "  PrintFunnel() gira in OnTester (sull'agente) e le passate sono in"
+$rr += "  ottimizzazione (Optimization=1 sempre): quelle Print non sono leggibili."
+$rr += "  Per averle servirebbe una passata singola dedicata, come fece R91."
+$rr += "  Portare i contatori in una COLONNA (FrameAdd) resta un lavoro a se':"
+$rr += "  a branch congelato l'EA NON si tocca."
+$rr += ""
+$rr += "L'ASSUNZIONE SUL RISCHIO (1,0%), DIMOSTRATA NEL SORGENTE E NON DEDOTTA DAI LOG:"
+$rr += "  LotByRisk (riga 1427) chiude con MathMax(mn, MathMin(mx, lot)): il lotto e'"
+$rr += "  AGGANCIATO AL MINIMO DEL BROKER, quindi InpRiskPercent NON PUO' AZZERARLO."
+$rr += "  Il ramo lot<=0 (riga 1133) puo' scattare solo se lossPerLot<=0 (guasto dei"
+$rr += "  dati di simbolo) o se slDist<=0, gia' escluso alla riga 1100. La catena e'"
+$rr += "  chiusa nel codice: il rischio non toglie nemmeno un'operazione."
+$rr += "  Residuo dichiarato: la guardia di riga 1137 (ABTG_GuardiaIngresso) esce"
+$rr += "  SENZA incrementare nessun contatore. Nel tester e' inerte (fail-open), ma"
+$rr += "  se un giorno non lo fosse, l'uscita sarebbe MUTA."
 $rr += ""
 $rr += "E QUELLO CHE NON SI POTRA' DIRE, IN NESSUN CASO:"
 $rr += "  - niente sul MERITO: con n OOS 11/13/26 e' SOSPESO per dichiarazione."
@@ -689,8 +729,7 @@ Write-Host ("    mancanti    : " + $mancanti.Count) -ForegroundColor $(if ($manc
 foreach ($m in $mancanti) { Write-Host ("      manca: " + $m) -ForegroundColor Red }
 Write-Host ("    cartella    : " + $dest) -ForegroundColor White
 
-$zip = Join-Path $desk ($nomeCartella + ".zip")
-if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
+# $zip e' gia' stato cancellato nella sezione 4, prima della corsa.
 try {
   Compress-Archive -Path (Join-Path $dest "*") -DestinationPath $zip -Force
   Write-Host ""
@@ -702,6 +741,11 @@ try {
 }
 
 Write-Host ""
+if ($ripescate.Count -gt 0) {
+  Write-Host ("    ATTENZIONE: celle senza per-trade fresco: " + ($ripescate -join " ")) -ForegroundColor Yellow
+  Write-Host "    Un pass ripescato dalla cache non scrive i per-trade: quelle celle" -ForegroundColor Yellow
+  Write-Host "    potrebbero NON essere state eseguite. Va detto in chat." -ForegroundColor Yellow
+}
 if ($falliti.Count -gt 0 -or $mancanti.Count -gt 0) {
   Write-Host ("=== R94 FINITO PARZIALE: " + $falliti.Count + " celle in errore, " + $mancanti.Count + " file mancanti ===") -ForegroundColor Red
   Write-Host "    Manda lo zip lo stesso: un risultato parziale e' gia' una risposta," -ForegroundColor Yellow
