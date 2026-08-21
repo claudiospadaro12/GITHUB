@@ -69,6 +69,11 @@ $ToDate="2026.06.30"
 $OptMode=2          # 2 = genetica (default storico). 1 = completa: si usa
                     #     quando le celle sono pochissime e la genetica non
                     #     ha niente da ottimizzare.
+# VARIANTI (21/08/2026, R92): un EA puo' chiedere PIU' CORSE per simbolo,
+# ognuna con qualche input in piu' e una ETICHETTA che finisce nel nome del
+# CSV. Default = UNA sola corsa senza etichetta = comportamento identico a
+# sempre per tutti gli EA che c'erano prima.
+$Varianti=@( @{ tag=""; extra="" } )
 if($EA -eq "ABTG_MaxMinNotte"){
   $Inputs=@"
 InpSLMode=1||1||0||1||N
@@ -261,10 +266,28 @@ InpAllowShort=1||0||1||1||Y
   #      prove\R92_scan_BULGE.txt
   #  Se cambi una riga qui, cambiala anche li'. Diff prima di lanciare.
   #
-  #  L'UNICO ASSE E' IL MAGIC GEMELLO (772700/772701): non e' una
-  #  griglia, e' un CONTROLLO. Le due passate devono uscire IDENTICHE
-  #  al centesimo (precedente: R51). Serve anche a non avere uno
-  #  sweep degenere, che darebbe CSV vuoti. 22 x 2 = 44 passate.
+  #  L'UNICO ASSE DELL'OTTIMIZZATORE E' LA VARIANTE DEL VIOLA
+  #  (Use_Purple_PineReaction 0/1): 0 = VIOLA-EA, la condizione
+  #  "candela non impulsiva" che c'e' nel codice; 1 = VIOLA-PINE,
+  #  la candela di reazione verde/rossa del Pine originale di Claudio.
+  #  Firma del 21/08: "misura entrambe". Due celle per corsa.
+  #
+  #  IL CONTO: 22 simboli x 2 gestioni (2 corse) x 2 varianti del
+  #  VIOLA (2 celle) = 88 passate.
+  #
+  #  COME SI RICONOSCE UNA PASSATA NEL CSV -- tre etichette ridondanti,
+  #  perche' una sola si perde sempre:
+  #    1. il NOME del file:  scan_ABTG_Bulge_<SIMBOLO>_<nuda|gestita>.csv
+  #    2. la colonna InpMagic:  772700 = nuda,  772710 = gestita
+  #    3. la colonna Use_Purple_PineReaction:  0 = VIOLA-EA, 1 = PINE
+  #  (le colonne ci sono perche' OnTesterDeinit scrive gli input di
+  #   ogni passata accanto ai numeri: e' il nostro OptFrame di sempre.)
+  #
+  #  IL CONTROLLO GEMELLO (determinismo del banco) NON sta qui dentro:
+  #  costerebbe altre 88 passate. Si fa UNA volta sola, su UN simbolo,
+  #  come 89a passata facoltativa, rilanciando la stessa cella col
+  #  magic 772701 e confrontando riga per riga. E' scritto in
+  #  prove\R92_scan_BULGE.txt.
   #
   #  FINESTRA 2022.01.01 -> 2026.06.30 = la finestra del backtest di
   #  Claudio (2022.01.01-2026.03.30): serve a mettere i nostri numeri
@@ -281,6 +304,26 @@ InpAllowShort=1||0||1||1||Y
   $FromDate="2022.01.01"
   $ToDate="2026.06.30"
   $OptMode=1
+  # LE DUE GESTIONI (firma di Claudio del 21/08, "c" = misurale entrambe).
+  # Non sono un asse dell'ottimizzatore: sono DUE CORSE separate per
+  # simbolo, cosi' ogni CSV porta la gestione scritta nel NOME e nel MAGIC.
+  #   nuda    = come BULGE_MASTER: SL 3xATR + TP mediana, nient'altro
+  #   gestita = + break-even 1R e trailing a gradini di R, cioe' la
+  #             gestione che Claudio usava A MANO col suo Manager MT4
+  $extraNuda=@"
+Enable_BE_1R=0||0||0||0||N
+Enable_Trailing_R=0||0||0||0||N
+InpMagic=772700||772700||0||772700||N
+"@
+  $extraGestita=@"
+Enable_BE_1R=1||1||0||1||N
+Enable_Trailing_R=1||1||0||1||N
+InpMagic=772710||772710||0||772710||N
+"@
+  $Varianti=@(
+    @{ tag="nuda";    extra=$extraNuda },
+    @{ tag="gestita"; extra=$extraGestita }
+  )
   # I 22 CROSS DEL BASKET (input Symbols_List dell'EA), non i 48 del market.
   $Symbols=@(
     "EURUSD","GBPUSD","AUDUSD","NZDUSD","USDCAD","USDCHF","USDJPY",
@@ -328,7 +371,12 @@ InpComment=BULGE
 InpUsaGuardian=1||1||0||1||N
 InpVerbose=0||0||0||0||N
 InpAutoTest=0||0||0||0||N
-InpMagic=772700||772700||1||772701||Y
+BE_At_R=1.0||1.0||0||1.0||N
+BE_Offset_Points=2||2||0||2||N
+Trail_Start_R=1.5||1.5||0||1.5||N
+Trail_Step_R=0.25||0.25||0||0.25||N
+Trail_MinMove_Points=10||10||0||10||N
+Use_Purple_PineReaction=0||0||1||1||Y
 "@
 } else { Write-Host "EA non gestito: MaxMinNotte, Nightly, HARSI, SupertrendReversal, EMA200, GoldenCross, SuperWave, SupertrendInvert, PTE, WOL, FiboH4_Multi, BreakingBand, GapFill, CostToCost, EasyTrend, Bulge" -ForegroundColor Red; exit 1 }
 
@@ -346,7 +394,7 @@ if($Tf){
 }
 
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
-Write-Host "=== SCAN MARKET: $EA su $($Symbols.Count) simboli (OHLC) ===" -ForegroundColor Cyan
+Write-Host "=== SCAN MARKET: $EA su $($Symbols.Count) simboli x $($Varianti.Count) variante/i (OHLC), finestra $FromDate - $ToDate ===" -ForegroundColor Cyan
 New-Item -ItemType Directory -Force -Path (Join-Path $Work "src_v2"),(Join-Path $Work "ini_scan") | Out-Null
 try{Invoke-WebRequest -Uri "$RawBase/mql5/Experts/$EA.mq5" -OutFile (Join-Path $Work "src_v2\$EA.mq5") -UseBasicParsing; Write-Host "   OK src_v2\$EA.mq5" -ForegroundColor Green}
 catch{Write-Host "   ERRORE download $EA" -ForegroundColor Red; exit 1}
@@ -370,15 +418,26 @@ Copy-Item (Join-Path $Work "src_v2\$EA.mq5") -Destination $MqlExperts -Force
 if(-not (Test-Path (Join-Path $MqlExperts "$EA.ex5"))){Write-Host "ERRORE compilazione $EA" -ForegroundColor Red; exit 1}
 Write-Host "   compilato $EA.ex5" -ForegroundColor Green
 $n=0
+$Totale=$Symbols.Count * $Varianti.Count
 foreach($sym in $Symbols){
+ foreach($v in $Varianti){
   $n++
-  $done=Join-Path $Results "scan_${EAtag}_$sym.csv"
-  if(Test-Path $done){Write-Host ("   [{0}/{1}] {2}: gia' fatto, salto" -f $n,$Symbols.Count,$sym) -ForegroundColor DarkGray; continue}
-  $iniPath=Join-Path $Work "ini_scan\scan_${EA}_$sym.ini"
+  $suff = ""
+  if($v.tag -ne ""){ $suff = "_" + $v.tag }
+  $done=Join-Path $Results "scan_${EAtag}_${sym}${suff}.csv"
+  if(Test-Path $done){Write-Host ("   [{0}/{1}] {2}{3}: gia' fatto, salto" -f $n,$Totale,$sym,$suff) -ForegroundColor DarkGray; continue}
+  $iniPath=Join-Path $Work "ini_scan\scan_${EA}_${sym}${suff}.ini"
   # EA multi-simbolo (BULGE): Symbols_List va pinnato al simbolo di QUESTA
-  # passata. Per tutti gli altri EA il segnaposto non c'e' e questa riga
-  # non fa niente.
-  $InputsSym=$Inputs.Replace("__SYM__",$sym)
+  # passata; la variante aggiunge le sue righe in fondo.
+  # ATTENZIONE, trappola gia' pagata: un PARAMETRO DOPPIO in
+  # [TesterInputs] fa fare a MT5 ZERO passate, in silenzio. Quindi le
+  # righe della variante non devono MAI ripetere un parametro gia'
+  # presente nel blocco base: il controllo qui sotto ferma lo scan se
+  # succede, invece di lasciarti una notte di CSV vuoti.
+  $InputsSym=($Inputs + $v.extra).Replace("__SYM__",$sym)
+  $nomi=@(); foreach($riga in ($InputsSym -split "`r?`n")){ if($riga.Trim() -ne ""){ $nomi += ($riga -split "=")[0].Trim() } }
+  $doppi=@($nomi | Group-Object | Where-Object { $_.Count -gt 1 })
+  if($doppi.Count -gt 0){ Write-Host ("!!! PARAMETRO DOPPIO in [TesterInputs]: " + ($doppi.Name -join ", ") + " -> MT5 farebbe ZERO passate. Corretto il blocco dell'EA e rilancia.") -ForegroundColor Red; exit 1 }
   @"
 [Experts]
 AllowLiveTrading=false
@@ -400,16 +459,20 @@ Leverage=100
 ExecutionMode=0
 ReplaceReport=1
 ShutdownTerminal=1
-Report=OptReport_scan_${EAtag}_$sym
+Report=OptReport_scan_${EAtag}_${sym}${suff}
 
 [TesterInputs]
 $InputsSym
 "@ | Set-Content -Path $iniPath -Encoding ASCII
+  # il nome del CSV che scrive l'EA e' fisso (OptResults_<EA>_<Symbol>.csv):
+  # si copia subito col suffisso della variante, cosi' le due gestioni non
+  # si sovrascrivono mai.
   $csv=Join-Path $MqlFiles "OptResults_${EA}_$sym.csv"; if(Test-Path $csv){Remove-Item $csv -Force}
-  Write-Host ("   [{0}/{1}] {2} (OHLC)..." -f $n,$Symbols.Count,$sym) -ForegroundColor Cyan
+  Write-Host ("   [{0}/{1}] {2}{3} (OHLC)..." -f $n,$Totale,$sym,$suff) -ForegroundColor Cyan
   (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$iniPath`"" -PassThru).WaitForExit()
-  if(Test-Path $csv){Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force; Write-Host ("        OK -> scan_${EAtag}_$sym.csv") -ForegroundColor Green}
+  if(Test-Path $csv){Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force; Write-Host ("        OK -> scan_${EAtag}_${sym}${suff}.csv") -ForegroundColor Green}
   else{Write-Host ("        (no CSV: {0} senza storico/nome diverso? salto)" -f $sym) -ForegroundColor Yellow}
+ }
 }
 Write-Host "`n=== FINITO === risultati in $Results" -ForegroundColor Cyan
 Write-Host "Zippa la cartella risultati_scan_$EAtag e caricamela (o mandami i CSV): classifico gli strumenti per PF." -ForegroundColor White
