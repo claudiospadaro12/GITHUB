@@ -1300,3 +1300,114 @@ riga per volta, e la riga che si perde e' sempre quella specifica.
 > ```
 > Corollario: se il bersaglio e' scritto in due posti, vale il punto 33 — si fa
 > il **diff**, non ci si fida del fatto che "tanto la macchina e' quella".
+
+---
+
+## 🆕 AGGIUNTE DEL 21/08/2026 — trovate verificando la riga R94 (Bollinger 37/1.4 sul BreakingBand)
+
+## 38. 🧊 IL CANARINO SERVITO DALLA **CACHE DEL TESTER**: non e' un controllo dei dati
+
+_Difetto vero, trovato PRIMA dell'invio della riga R94, e **misurato sui file**:
+la cella di canarino di R94 (`GBPUSD`, `InpBBPeriod=20`, `InpBBDev=2.0`,
+`InpMinRR=0`, magic 772101, finestra 2024.09.26-2026.06.30, deposito 100k,
+tick reali) e' **la stessa identica passata** che R91 ha gia' calcolato il
+21/08: `risultati_archivio/r91_csv/ABTG_BreakingBand_GBPUSD_OOS_r91a.csv`,
+`Pass 0` -> `Profit 3160.10 | PF 1.73020 | Equity DD 3.4801 | Trades 26`.
+E il sorgente dell'EA non e' cambiato dal 20/08 (`e528527`)._
+
+Il punto 23 copre l'artefatto di INPUT scaduto e il punto 26 la raccolta che si
+sovrascrive. Questo copre il caso in cui **e' MT5 a servire il risultato vecchio**:
+`walkforward_generico.ps1` lo documenta gia' da solo (righe 684-694)
+
+> _"E' la CACHE del tester: MT5 ripesca pass gia' calcolati (anche di griglie
+> vecchie) e NON riesegue le celle chieste se le ha in cache."_
+
+Una riga di lancio che scrive **"il canarino e' anche il controllo dei dati: se
+i tick fossero cambiati, corti o mancanti, quelle righe non tornerebbero"** sta
+promettendo una cosa che la cache annulla: **una passata ripescata non legge un
+tick.** Il canarino tornerebbe **identico anche con lo storico sparito** — e le
+celle NUOVE (in cache non ci sono) girerebbero sui dati veri. Il round
+confronterebbe **due misure fatte su due mondi diversi**, che e' esattamente il
+contrario di quello per cui il canarino esiste.
+
+> **Se il canarino di un round e' una passata GIA' GIRATA (stessi input, stesso
+> simbolo, stessa finestra, stesso binario), non e' un canarino finche' non si
+> svuota `<cartella dati>\Tester\cache`.** Si fa a MT5 chiuso, e si dice in
+> chat che quella cella **rigira** invece di essere ripescata:
+> ```powershell
+> $cacheT = Join-Path $DataFolder "Tester\cache"
+> if(Test-Path $cacheT){ Remove-Item (Join-Path $cacheT "*") -Recurse -Force }
+> ```
+> ⚠️ **Solo `Tester\cache`. MAI `bases\<server>\ticks\`**, che e' la cache dello
+> STORICO: cancellarla vuol dire riscaricare i tick e trasformare un round da
+> due ore in una notte.
+> Corollario gia' scritto nel driver: **un pass non rieseguito non scrive
+> nemmeno i file per-trade** — se i `abtg_trades_*` non compaiono freschi, la
+> cella e' stata ripescata.
+
+## 39. 🩺 IL `-SoloControllo` DEL DRIVER GENERICO **NON COMPILA** — vale per TUTTI i round
+
+_Difetto vero, gia' committato in `walkforward_generico.ps1`, misurato riga per
+riga: il ramo `if($SoloControllo){` apre alla **riga 503** e chiude con
+`exit 0` alla **riga 538**; la compilazione (`metaeditor64.exe /compile:`) sta
+alla **riga 603**, cioe' **65 righe dopo l'uscita**._
+
+Il punto 5 dice "se la riga usa `-Prova`: prima un giro a vuoto", il punto 14 che
+il giro a vuoto puo' uscire 0 con un pezzo fallito, il punto 31 che l'anteprima
+puo' mentire. **Questo e' il quarto modo, ed e' il piu' silenzioso: il giro a
+vuoto non tocca il compilatore.** Quindi un `#include` mancante o vecchio di una
+versione (punto 33-bis), un identificatore non dichiarato, un errore di sintassi
+nel `.mq5` appena scritto **non si vedono nel giro a vuoto** e saltano fuori
+**a corsa avviata**, come `ERRORE compilazione` — con la raccolta che parte su
+zero CSV se la riga non guarda il codice d'uscita (punto 13).
+
+> **Il giro a vuoto di un round che tocca un EA deve COMPILARE.** Finche' il
+> driver generico non lo fa, lo fa il driver di round, da riga di comando
+> (`metaeditor64.exe /compile:<file> /log`), **anche in `-SoloControllo`**, e:
+> 1. **cancella il `.ex5` PRIMA** (punto 27: un binario di ieri fa passare il
+>    gate su una compilazione fallita oggi);
+> 2. **aspetta l'ARTEFATTO, non il processo.** MetaEditor e' **single-instance**:
+>    se ne gira gia' una copia, il processo appena lanciato **torna subito** e
+>    la compilazione avviene nell'altra istanza. Un controllo fatto sul ritorno
+>    del processo fallisce su una compilazione perfettamente sana:
+>    ```powershell
+>    Remove-Item -LiteralPath $ex5 -Force -EA SilentlyContinue
+>    $t0=Get-Date; & $MetaEditor ("/compile:"+$src) "/log" | Out-Null
+>    while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+>    if(-not (Test-Path -LiteralPath $ex5)){ <stampa il .log> ; Muori "compilazione FALLITA" }
+>    ```
+> 3. e la riga in chat dice di chiudere **anche MetaEditor**, non solo MT5.
+>
+> Il fix vero (far compilare il driver generico anche in `-SoloControllo`) resta
+> in coda come lavoro a se', **dichiarato nel referto** — non a memoria.
+
+## 34-ter. 📢 I LOG DEGLI AGENT: la radice sbagliata, e il fatto che in ottimizzazione **non c'e' niente da raccogliere**
+
+_Difetto vero, trovato PRIMA dell'invio della riga R94. `lancia_r94.ps1`
+raccoglieva i log del tester da **due** radici — `<cartella dati>\Tester` e
+`<installazione>\Tester` — e **non** da `%APPDATA%\MetaQuotes\Tester`, dove
+stanno gli agent locali (`Agent-127.0.0.1-30xx\logs`). La terza radice non e'
+un'ipotesi: la usa il **gemello della stessa famiglia**,
+`righe/RIGA_NOTTE2_DUKA_R91.ps1` riga 859, scritto due giorni prima. E' il
+punto 9 (la riscrittura che perde la sicurezza del gemello) applicato ai log._
+
+Ma la cosa che conta di piu' e' la seconda meta', ed e' il punto 34 preso sul
+serio: **in ottimizzazione le `Print` degli agent non vengono eseguite.** Il
+`PrintFunnel()` di `ABTG_BreakingBand` gira dentro `OnTester()`, cioe'
+**sull'agente**, e `walkforward_generico.ps1` scrive **sempre**
+`Optimization=1`. Quindi il funnel **non esiste**, in nessuna radice: R91 per
+leggerlo ha dovuto lanciare una **passata singola** con `Optimization=0`
+(`RIGA_NOTTE2_DUKA_R91.ps1` righe 848-856), e infatti l'aveva capito.
+
+> **Una raccolta "best effort" di un artefatto che non puo' nascere non e' best
+> effort: e' il punto 22 (istruzioni per un artefatto mai nato) con una cartella
+> vuota a fare da alibi.** Prima di scriverla nella riga, due domande:
+> 1. **quel `Print` gira in ottimizzazione?** Se no: o si mette il contatore in
+>    una **colonna** (`FrameAdd` -> `OnTesterDeinit`, come R93), oppure si
+>    aggiunge una **passata singola** dedicata, oppure **si dichiara che quel
+>    numero il round non ce l'ha**. Le tre strade sono legittime; fingere che
+>    ci sia non lo e'.
+> 2. **la radice e' quella giusta?** Gli agent NON stanno sotto la cartella dati
+>    del terminale. Si scandiscono tutte e tre le radici, e **il conteggio dei
+>    log raccolti finisce nel referto** (`log degli agent raccolti: 0`), cosi'
+>    lo zero si legge invece di essere dedotto.
