@@ -42,8 +42,23 @@ esistono misure NEGATIVE agli atti.
 
 | EA | Simbolo | Magic | Rischio | DD promesso | Op/mese | Finestra | Fonte | Etichetta |
 |---|---|---|---:|---|---|---|---|---|
-| ABTG_Nasdaq_Apertura_US | NASUSD | 770201 | 0,25 | **NESSUNO** — mai promossa. Anzi: tick reali 31/07 **PF 0,82 · DD 17% · SCARTATO**; walk-forward 05/08: **19/20 celle OOS negative** | n/d | — | `PROMEMORIA_APERTURE.md` (31/07) · `Walkforward_Aperture/REFERTO_WALKFORWARD.md` §Verdetti | 🔴 **[SENZA CONTRATTO]** |
+| ABTG_Nasdaq_Apertura_US ⛔ **SPENTA dal 18/08 09:41** (vedi nota sotto la tabella) | NASUSD | 770201 | 0,25 | **NESSUNO** — mai promossa. Anzi: tick reali 31/07 **PF 0,82 · DD 17% · SCARTATO**; walk-forward 05/08: **19/20 celle OOS negative** | n/d | — | `PROMEMORIA_APERTURE.md` (31/07) · `Walkforward_Aperture/REFERTO_WALKFORWARD.md` §Verdetti | 🔴 **[SENZA CONTRATTO]** |
 | BREAKOUT_EA_JPY_v3 | USDJPY | n/d | n/d | **NESSUNO** — famiglia **SCARTATA** pre-progetto (paniere 7 cross JPY 2022-24: **−20.853 €, PF 0,67-0,95 su TUTTE, DD 30-48%**); della v3 non esiste alcun referto | n/d | — | `docs/Portafoglio_Strategie.md` §Breakout JPY | 🔴 **[SENZA CONTRATTO]** |
+
+> ### ⚠️ CORREZIONE DEL 21/08/2026 — questa tabella e' invecchiata in nove ore
+>
+> **`ABTG_Nasdaq_Apertura_US` NON e' piu' accesa, e non lo era gia' quando
+> questo file e' stato pubblicato.** Questo censimento e' costruito sulla foto
+> dei `.chr` delle **18/08 00:01**; nella foto delle **18/08 09:41** — la
+> verifica della FIRMA 5, *"SPEGNILE TUTTE E TRE"* — la riga **non c'e' piu'**,
+> e resta assente in tutte e tre le misure del 19/08 (11:53, 15:24, 15:34).
+>
+> **`BREAKOUT_EA_JPY_v3`, al contrario, e' presente in TUTTI e sette i
+> censimenti**, ultimo compreso: NON e' mai stata spenta, malgrado
+> `STATO_QUATTRO_STRATEGIE_2026-08-21.md` la dia per spenta.
+>
+> Decisione di Claudio del 21/08 (**"A, SU JPY, B SU NASDAQ"**) e verbale
+> completo: `report/FIRMA_2026-08-21_DUE_SEDIE.md`.
 
 _Entrambe risultano tenute "per osservazione" (decisione Claudio 01/08 di far
 girare tutta la flotta), ma la C3 su di loro non ha alcun metro: qualunque DD
