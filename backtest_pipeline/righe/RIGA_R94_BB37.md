@@ -201,11 +201,15 @@ e' ancora aperto. ⚠️ **Solo `Tester\cache`. MAI `bases\<server>\ticks`**, ch
 lo **storico**: cancellarlo trasformerebbe un round di ore in una notte.
 
 > 🔎 **DUE SPIE da guardare, e sono gratis:**
-> - **se una cella di canarino torna in pochi secondi**, e' stata ripescata lo
->   stesso: si dice, non si legge come conferma;
+> - **se una cella di canarino torna in pochi secondi SENZA essere stata
+>   dichiarata `CELLA GIA' FATTA`**, e' stata ripescata lo stesso: si dice, non
+>   si legge come conferma. *(Una cella **saltata** torna anch'essa in un
+>   attimo, ma lo script lo stampa a schermo e lo scrive nel referto: sono due
+>   cose diverse e vanno tenute separate.)*
 > - **un pass ripescato non scrive i per-trade.** Lo script li ripulisce
 >   **prima di ogni cella** e verifica che ricompaiano **freschi**: se non
->   compaiono, lo scrive nel referto (`CELLE SENZA PER-TRADE FRESCO`).
+>   compaiono **e la cella non era saltata**, lo scrive nel referto
+>   (`CELLE SENZA PER-TRADE FRESCO`).
 >   Nella v1 li ripuliva una volta sola all'inizio — e siccome l'EA li chiama
 >   `abtg_trades_<EA>_<Simbolo>_<Magic>.csv` (riga 1521), **P20 e P37 dello
 >   stesso simbolo scrivono lo stesso file**: se P37 non l'avesse riscritto, si
@@ -333,6 +337,10 @@ R34 va **rimisurata insieme alla cella**, e questa riga va rifatta.
 | ASCII puro nel `.ps1` | conteggio byte > 127 | ✅ **0** |
 | uso di variabili prima dell'assegnazione | scansione delle 15 variabili di stato | ✅ nessuno (e la collisione `$dest` fra due sezioni e' stata sciolta) |
 | il canarino e' in cache? | letto il CSV di R91 | ✅ **si', ed e' per questo che la cache si svuota** |
+| la cella **saltata** e' distinguibile dalla **ripescata**? | letto `walkforward_generico.ps1:615` + logica **eseguita** su albero finto | ✅ 2 CSV → saltata · 0 CSV → no · **1 CSV su 2 → no** (il caso parziale non fa scattare la spia) |
+| suffisso dei nomi CSV | letto `walkforward_generico.ps1:107` | ✅ `$SuffBroker` **vuoto su BCM**: i nomi cercati sono quelli veri |
+| gate dello zip su `$t0` | **eseguito** nei due versi | ✅ zip vecchio muore · zip scritto dopo `$t0` passa |
+| finestra IS dell'anteprima | ricalcolata con la `FrazioneIS` del driver | ✅ 642 giorni, 40% = 256 → **2025.06.09**, che e' l'IS di R34 |
 | colonne e formato | letto il CSV di R91 | ✅ `Trades` col. 8, `Equity DD %` col. 7, `InpBBDev` col. 16 e vale **`2`**, non `2.0` |
 | catena del rischio | letto il sorgente | ✅ chiusa alla riga 1427 |
 | radici dei log | confrontate col gemello R91 | ✅ tre, non due |

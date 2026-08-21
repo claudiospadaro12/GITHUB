@@ -404,3 +404,113 @@ Lo script prende lo **SHA256 del sorgente** dopo la compilazione e lo
 
 ⚠️ **Quello che resta non verificato:** la riga **non e' mai stata eseguita su
 Windows**. Il parser conferma la sintassi, non il comportamento.
+
+---
+
+# 🧪 TERZA VERIFICA — 21/08/2026: secondo FAIL, **1 bloccante nuovo + 5**
+
+_Sempre a numeri **mai visti**, e ancora una volta **il disegno non cambia**:
+6 file prova, 12 celle, 24 passate, soglie e canarino intatti._
+
+Il verificatore ha prima **ricontrollato le correzioni precedenti senza fidarsi**
+e le ha confermate tutte (cache, terza radice, catena del rischio coi numeri di
+riga esatti, pin nel CSV, Desktop, compilazione, TLS, per-trade nel ciclo), ha
+riestratto **i sei numeri del canarino dai CSV di R91** — tutti e sei coincidono
+con riga, referto e file prova — e ha verificato che le **firme** siano
+byte-identiche. Poi ha trovato questo.
+
+## 🚨 N1 (BLOCCANTE) — la spia dei per-trade **accusava le celle SANE**
+
+`$ptPresi -eq 0` ha **DUE** cause, non una:
+1. la cella e' stata **ripescata** dalla cache (quello che la spia voleva dire);
+2. 🔴 la cella era **GIA' FATTA** e il driver l'ha **saltata**
+   (`walkforward_generico.ps1:615`: `if((Test-Path $done) -and -not $Rifai){ ... continue }`).
+   Una cella saltata **non apre MT5** e quindi **non riscrive i per-trade**:
+   per la spia e' indistinguibile da una ripescata.
+
+**E la riga di lancio consiglia esattamente quel percorso**: *"se la corsa si
+interrompe, rimanda lo stesso BLOCCO 2, le celle gia' fatte vengono saltate"*.
+Su **24 passate a tick reali** un'interruzione e' probabile — e al rilancio il
+referto avrebbe scritto *"CELLE SENZA PER-TRADE FRESCO (sospette di
+RIPESCAGGIO)"* su **A20, B20, C20**, cioe' **le tre celle di CANARINO**: il
+controllo per cui il round esiste. Claudio avrebbe fermato il round **in buona
+fede**, su un allarme falso.
+
+✅ **Corretto:** `$saltata` calcolata guardando se i due CSV esistono gia', voce
+separata nel referto — **`CELLE SALTATE (CSV gia' presente, NON rigirate in
+questo giro)`** — che dice che quei numeri vengono da un giro **precedente**, e
+che se e' una cella di canarino **il suo controllo vale per QUEL giro** (la
+cache si svuota a ogni giro). Per rifarla davvero: `-Solo <cella> -Rifai`.
+
+> 📏 **Punto 44 della checklist:** *ogni spia costruita sull'**assenza** di un
+> artefatto deve enumerare **tutte** le strade per cui quell'artefatto puo'
+> mancare, e va provata sul percorso che il documento **consiglia**, non solo su
+> quello dritto.*
+
+## 🧹 R1 e R2 — residui di correzioni che avevo dichiarato chiuse
+
+| dove | cosa diceva ancora |
+|---|---|
+| `lancia_r94.ps1:37` (intestazione) | *"porta via anche i LOG DEGLI AGENT ... li' c'e' il funnel [BB-FUNNEL]"* — mentre le righe 622-633 **dello stesso file** dicono il contrario |
+| `R94_CRITERI.md:306` (tabella, **e questo file viaggia nello zip**) | *"Unico residuo: `lot<=0` (riga 1133), **contato dal funnel**"* — e alla riga 355 lo stesso file spiega che quella frase era sbagliata |
+
+Il secondo e' il piu' grave dei due: **il documento conteneva l'errore e la sua
+smentita, non riconciliati** — e la tabella si legge per prima.
+
+> 📏 **Punto 45 della checklist:** *chiudere un difetto non e' correggere il
+> punto dov'e' stato segnalato: e' un `grep` del **concetto** su tutti gli
+> artefatti del round, intestazioni e tabelle comprese. La stringa che nomina il
+> difetto deve comparire **solo dove si spiega che e' stato corretto**.*
+
+✅ Applicato, e **anche ai concetti cambiati in questo giro**: il commento del
+driver che citava ancora *"il gate dei 15 minuti"* (che dopo N2 non esiste piu')
+e la spia *"se torna in pochi secondi"* (che ora deve escludere le celle
+**saltate**) sono stati riscritti insieme al resto.
+
+## ⏱️ N2 — la decisione sul `-SoloControllo` era giusta, il buco era a monte
+
+Un dry-run che rade uno zip non ancora inviato sarebbe una **lettura
+distruttiva**: la guardia resta. Ma la cancellazione sta **dopo quattro sezioni
+che possono `Muori`**: corsa OK alle 10:00, rilancio alle 10:05 con MetaEditor
+aperto, morte in compilazione → **lo zip delle 10:00 aveva 5 minuti e passava il
+gate dei 15**.
+✅ Ora il gate non guarda piu' un'eta': **lo zip deve essere piu' recente
+dell'ora in cui il BLOCCO 2 e' partito** (`$t0`). Provato in laboratorio nei due
+versi: zip vecchio → muore; zip scritto dopo `$t0` → passa.
+
+## m1 e m2
+- ✅ **guardia su `metaeditor64` aperto** (ce l'aveva il gemello R95: punto 9,
+  sicurezza del gemello);
+- ✅ **perimetro della pulizia del Desktop = perimetro del riempimento**: con
+  `-Solo` la raccolta riempie solo le celle scelte, quindi radere `$dest`
+  lascerebbe 2 CSV su 12 con un referto che dice *"MANCANTI: nessuno"*
+  (punto 35-bis). Lo zip invece si rifa' sempre. Chiuso insieme a N1, che cita
+  `-Solo` come strada di riparazione.
+
+## E nella riga
+- ✅ marcatore a **`R94-LANCIO-v3`** (senza il bump la cache di raw avrebbe
+  potuto servire la v2 facendo passare il gate);
+- ✅ il punto 5 delle anteprime era **un atteso che non poteva verificarsi**:
+  `walkforward_generico.ps1:517-518` scrive **solo la gamba IS** (`$WF[0]`),
+  quindi l'atteso giusto e' `FromDate 2024.09.26` / `ToDate 2025.06.09`, non
+  `2026.06.30`. **Stesso difetto appena chiuso su R93.** Verificato ricalcolando
+  la finestra con la stessa `FrazioneIS` del driver: 642 giorni, 40% = 256,
+  stacco al **2025.06.09** — che e' esattamente l'IS di R34.
+
+## Cosa e' stato verificato, giro 3
+| controllo | esito |
+|---|---|
+| patch del verificatore | ✅ applicata (`patch -p0`, nessun fuzz) **e riletta riga per riga** |
+| `controlla_prova.py` | ✅ 6 file, 12 celle, 24 passate, 0 problemi |
+| `lint_ps1.py` | ✅ 0 problemi |
+| parser PowerShell (driver + **i due one-liner**) | ✅ 0 errori |
+| ASCII puro (7 file) | ✅ 0 byte > 127 |
+| `walkforward_generico.ps1:615` (la cella saltata) | ✅ **letto**: `if((Test-Path $done) -and -not $Rifai){ ... continue }` |
+| suffisso del CSV | ✅ `$SuffBroker` e' **vuoto su BCM** (riga 107): i nomi che `$giaFatte` cerca sono quelli veri |
+| logica `$saltata` | ✅ **eseguita** su albero finto: 2 CSV → saltata; 0 CSV → no; **1 CSV su 2 → no** (il caso parziale non fa scattare la spia) |
+| gate dello zip su `$t0` | ✅ **eseguito** nei due versi: vecchio muore, nuovo passa |
+| finestra IS dell'anteprima | ✅ **ricalcolata**: 2024.09.26 → 2025.06.09 |
+| prova di fumo del driver | ✅ **ripetuta** dopo la patch: scarica, passa i marcatori, supera il gate 33, si ferma su *"terminale BCM non trovato"* |
+
+⚠️ **Quello che resta non verificato:** la riga **non e' mai stata eseguita su
+Windows**. Il parser conferma la sintassi, non il comportamento.

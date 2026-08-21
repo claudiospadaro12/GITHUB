@@ -409,8 +409,11 @@ if (-not $SoloControllo) {
 
 # --- LO ZIP E LA CARTELLA DI RACCOLTA VECCHI, VIA ADESSO (non alla fine):
 #     una Muori anticipata non arriverebbe mai alla sezione 8, e al secondo
-#     lancio ravvicinato lo zip di ieri passerebbe il gate dei 15 minuti
-#     della riga travestito da risultato di adesso.
+#     lancio ravvicinato lo zip della corsa precedente resterebbe li'
+#     travestito da risultato di adesso. (La riga di lancio ha la sua
+#     guardia gemella: lo zip deve essere piu' recente dell'ORA IN CUI IL
+#     BLOCCO E' PARTITO -- non "di meno di N minuti", che su un rilancio
+#     ravvicinato lasciava passare lo zip di venti minuti prima.)
 $nomeCartella = "R94_BREAKINGBAND_BB37"
 $dest = Join-Path $desk $nomeCartella
 $zip  = Join-Path $desk ($nomeCartella + ".zip")
