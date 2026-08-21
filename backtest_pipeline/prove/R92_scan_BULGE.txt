@@ -1,17 +1,23 @@
 # =====================================================================
-#  R92-SCAN / IL BANCO LARGO DEL BULGE -- 22 CROSS, UNA CELLA PER
-#  SIMBOLO.   EA: ABTG_Bulge v5.00   (motore di Claudio, migrato)
+#  R92-SCAN / IL BANCO LARGO DEL BULGE -- 22 CROSS, 88 PASSATE
+#  EA: ABTG_Bulge v5.10   (motore di Claudio, migrato)
 #  Etichetta: r92scan
+#
+#  >>> CRITERI **FIRMATI** DA CLAUDIO IL 21/08/2026, a numeri mai visti:
+#      "c,firmo 0,8,misura entrambe"
+#      -> 22 simboli x 2 GESTIONI x 2 VARIANTI DEL VIOLA = **88 passate**
+#      -> rischio **0,80%** (0,80 x Max_Trades 4 = 3,20% <= cap C1 3,25%)
+#      Soglie congelate: S1 n>=30 | S2 PF>=1,30 | S3 win rate>=65% e
+#      profitto>0. NON si toccano.
 #
 #  >>> QUESTO FILE E' IL VERBALE DELLA CELLA. Non decide niente: dice
 #      esattamente COSA e' pinnato e COSA no, cosi' chiunque, anche fra
 #      un anno, puo' rifare la stessa corsa senza interpretare.
 #
 #  I CRITERI SI LEGGONO PRIMA DEI NUMERI:
-#      risultati_archivio\R92_CRITERI.md  --  E' UNA BOZZA:
-#      **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri
-#      di R92 non si guardano. (Regola di casa: i criteri si cambiano
-#      prima dei numeri, non dopo.)
+#      risultati_archivio\R92_CRITERI.md -- **FIRMATO il 21/08/2026**,
+#      con la firma raccolta a numeri mai visti. Li' dentro c'e' anche
+#      cosa NON si puo' dire di questi numeri.
 # ---------------------------------------------------------------------
 #  LA DOMANDA DELLO SCAN, IN UNA RIGA
 #      "Su QUALI dei 22 cross del basket questo motore ha un segnale,
@@ -22,7 +28,7 @@
 # ---------------------------------------------------------------------
 #  COME SI LANCIA -- DUE STRADE, E SONO DIVERSE
 #
-#  (A) LO SCAN LARGO, tutti e 22 i simboli in una corsa (OHLC M1):
+#  (A) LO SCAN LARGO, tutti e 22 i simboli (OHLC M1), 88 passate:
 #        .\scan_market.ps1 -Robot ABTG_Bulge
 #      Lo script conosce la lista dei 22 cross, la finestra e la cella:
 #      il blocco `elseif($EA -eq "ABTG_Bulge")` dentro scan_market.ps1
@@ -120,6 +126,16 @@
 #    **~10,5 trade per simbolo per anno** [MISURATO sul suo xlsx,
 #    DIVISO da noi: e' una media, i simboli non sono uguali].
 #    Su 4,5 anni fanno **~47 trade per simbolo attesi**.
+#    ATTENZIONE: l'atteso vale per la CELLA BASE (nuda + VIOLA-EA). Le
+#    altre tre celle cambiano il conteggio per costruzione: il VIOLA-PINE
+#    e' PIU' SELETTIVO (pretende la candela di reazione) e ne taglia,
+#    la gestione (b) non cambia gli INGRESSI ma cambia le USCITE.
+#    >>> Se il VIOLA-PINE facesse PIU' trade del VIOLA-EA, non e' il
+#        mercato: e' un errore, e il round si ferma.
+#    >>> Se la gestione GESTITA facesse un numero di trade DIVERSO dalla
+#        nuda a parita' di VIOLA... e' possibile e non e' un errore (il
+#        trailing chiude prima e libera il posto sotto Max_Trades), ma
+#        va scritto a referto, non lasciato interpretare.
 #    >>> Sotto i 20 trade il simbolo NON E' LEGGIBILE nemmeno come
 #        direzione: si scrive "campione insufficiente" e si passa
 #        oltre. Le soglie stanno in R92_CRITERI.md par. 4.
@@ -142,14 +158,15 @@
 #     in ORA LOCALE del PC; il grafico e' in ORA SERVER. Non
 #     confrontare le due cose.)
 # ---------------------------------------------------------------------
-#  UN NUMERO CHE VA DETTO SUBITO, PERCHE' TOCCA IL RISCHIO
-#    Risk_Percent=1.0 con Max_Trades=4 fa fino al **4% di rischio
-#    aperto insieme**, cioe' SOPRA il cap C1 firmato il 18/08
-#    (**3,25%**). In campo il Guardian bloccherebbe il quarto
-#    ingresso; nel tester il Guardian e' inerte, quindi il 4% ci
-#    puo' essere davvero. Se il BULGE arrivasse al campo, o
-#    Risk_Percent scende, o Max_Trades scende: **e' una decisione di
-#    Claudio**, e va presa PRIMA del deploy, non dopo.
+#  IL NUMERO CHE TOCCA IL RISCHIO -- GIA' SISTEMATO DALLA FIRMA
+#    Nella bozza il rischio era 1,00%: 1,00 x Max_Trades 4 = **4,00%**
+#    di rischio aperto insieme, cioe' SOPRA il cap C1 del 18/08
+#    (**3,25%**). Claudio ha firmato **0,80%**:
+#        0,80 x 4 = **3,20% <= 3,25%. Il cap regge.**
+#    Resta detto, perche' vale lo stesso: nel tester il Guardian e'
+#    INERTE (le sue GlobalVariable non esistono), quindi qui il 3,20%
+#    ci puo' essere davvero; in campo sarebbe il Guardian a fermare
+#    l'ingresso che sfonda il cap.
 # =====================================================================
 @SIMBOLO  GBPUSD
 @PERIODO  H1
@@ -213,13 +230,16 @@ Max_SL_PerDay=4
 Max_Consecutive_SL=3
 Max_Daily_Loss_Pct=2.0
 
-# --- RISCHIO: 1,00% per trade. NON e' la taglia di campo: e' il valore
-#     comune di casa, quello che rende confrontabili le celle fra loro
-#     e i simboli fra loro. Claudio girava a 3,00% (fuori dai nostri
-#     cap): i PROFITTI non sono quindi confrontabili con i suoi, il
-#     PROFIT FACTOR e il WIN RATE si'.
+# --- RISCHIO: 0,80% per trade (FIRMA DI CLAUDIO, 21/08: "0,8").
+#     Non e' un gusto: e' il numero che fa REGGERE IL CAP.
+#       0,80 x Max_Trades 4 = 3,20% di rischio aperto insieme
+#       cap C1 firmato il 18/08                        = 3,25%
+#     Con l'1,00% della bozza erano 4,00%: sopra il cap.
+#     Claudio girava a 3,00% (fuori dai nostri cap): i PROFITTI e i DD
+#     IN DENARO non sono confrontabili ne' con lui ne' con la bozza;
+#     PROFIT FACTOR, WIN RATE e n si'.
 Risk_Mode=0
-Risk_Percent=1.0
+Risk_Percent=0.8
 Total_Risk_Percent=2.0
 Max_Trades=4
 
@@ -246,13 +266,75 @@ InpUsaGuardian=1
 InpVerbose=0
 InpAutoTest=0
 
-# --- L'UNICO ASSE: IL MAGIC GEMELLO. Non e' una griglia, e' un
-#     CONTROLLO. Due passate identiche in tutto tranne il magic:
-#     DEVONO uscire uguali al centesimo. Se non lo sono, il banco non
-#     e' deterministico e nessun altro numero di questo round vale.
-#     Precedente agli atti: R51, sweep gemello 772701/772702, "tutte e
-#     quattro le coppie identiche". Costa il doppio delle passate ed e'
-#     l'unico modo di avere una cella sola SENZA sweep degenere (la
-#     trappola n.1 di walkforward_generico: 4 CSV vuoti dopo una notte).
-#     TOTALE: 22 simboli x 2 = 44 passate.
-InpMagic=772700||772700||1||772701||Y
+# --- GESTIONE (b): BE 1R + TRAILING A GRADINI DI R (Manager MQ4 di
+#     Claudio, portato in MT5 nella v5.10). QUI SOTTO E' LA GESTIONE
+#     **NUDA**: i due interruttori spenti = SL 3xATR + TP mediana e
+#     nient'altro, cioe' BULGE_MASTER bit per bit.
+#     Nello scan (A) questi due valori NON si toccano a mano: e' lo
+#     script che genera DUE corse per simbolo, nuda e gestita.
+#     Nel round profondo (B) si cambiano qui, uno alla volta.
+#     I parametri della gestione restano quelli del Manager: BE a 1,0R
+#     con 2 punti di offset, trailing da 1,5R a gradini di 0,25R.
+Enable_BE_1R=0
+Enable_Trailing_R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+
+# --- IL MAGIC. Nello scan lo mette lo script ed E' L'ETICHETTA DELLA
+#     GESTIONE: 772700 = nuda, 772710 = gestita. Cosi' la gestione sta
+#     scritta in una COLONNA del CSV, non solo nel nome del file.
+#     772701 resta riservato al CONTROLLO GEMELLO (vedi sotto).
+InpMagic=772700
+
+# --- L'UNICO ASSE DELL'OTTIMIZZATORE: LE DUE VERSIONI DEL VIOLA.
+#     E' la divergenza MISURATA fra il Pine originale di Claudio e
+#     l'EA (TRIANGOLAZIONE_BULGE_PINE_2026-08-21.md, punto 3):
+#       0 = VIOLA-EA    ultima condizione |close0-open0| <= 1,5 x ATR
+#           (candela NON impulsiva: apre un long anche su candela ROSSA)
+#       1 = VIOLA-PINE  ultima condizione close0 > open0 nel long,
+#           close0 < open0 nello short (candela di reazione, come il Pine)
+#     Firma di Claudio: "misura entrambe". Nessuna delle due e' la
+#     correzione dell'altra finche' il numero non parla.
+#     E' anche l'asse che tiene l'ottimizzazione NON degenere (la
+#     trappola n.1: sweep vuoto = CSV vuoti dopo una notte).
+Use_Purple_PineReaction=0||0||1||1||Y
+
+# =====================================================================
+#  IL DISEGNO DELLE 88 PASSATE, E COME SI RICONOSCONO NEL CSV
+# ---------------------------------------------------------------------
+#    22 simboli x 2 gestioni x 2 varianti del VIOLA = 88
+#
+#    Le due GESTIONI non sono un asse dell'ottimizzatore: sono DUE
+#    CORSE separate per simbolo (due .ini). Cosi' la gestione finisce
+#    nel NOME del file, e non si puo' confondere leggendo in fretta.
+#
+#    TRE ETICHETTE RIDONDANTI, perche' una sola si perde sempre:
+#      1. nome del CSV   scan_ABTG_Bulge_<SIMBOLO>_<nuda|gestita>.csv
+#      2. colonna InpMagic                 772700 nuda / 772710 gestita
+#      3. colonna Use_Purple_PineReaction  0 = VIOLA-EA / 1 = VIOLA-PINE
+#    (le colonne degli input le scrive OnTesterDeinit accanto ai numeri:
+#     e' l'OptFrame di sempre.)
+#
+#    LE QUATTRO CELLE DI OGNI SIMBOLO, per nome:
+#      <SYM>_nuda    Use_Purple_PineReaction=0   -> NUDA + VIOLA-EA
+#      <SYM>_nuda    Use_Purple_PineReaction=1   -> NUDA + VIOLA-PINE
+#      <SYM>_gestita Use_Purple_PineReaction=0   -> BE+TRAIL + VIOLA-EA
+#      <SYM>_gestita Use_Purple_PineReaction=1   -> BE+TRAIL + VIOLA-PINE
+#
+#    >>> LA CELLA BASE, quella che deve riprodurre BULGE_MASTER, e'
+#        <SYM>_nuda con Use_Purple_PineReaction=0. Se un giorno si
+#        rifara' il confronto con l'originale, si confronta QUELLA.
+# ---------------------------------------------------------------------
+#  IL CONTROLLO GEMELLO (determinismo del banco) -- 89a PASSATA,
+#  FACOLTATIVA, UNA SOLA VOLTA
+#    Nella bozza l'asse di controllo era il magic gemello (precedente
+#    R51: "tutte e quattro le coppie identiche"). Con le 88 passate
+#    firmate quell'asse costerebbe altre 88 corse: si fa UNA volta, su
+#    UN simbolo, rilanciando la stessa cella col magic **772701** e
+#    confrontando riga per riga col 772700. Se le due righe non
+#    coincidono al centesimo, il banco non e' deterministico e NESSUN
+#    numero di R92 vale.
+# =====================================================================

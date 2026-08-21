@@ -31,10 +31,15 @@
 #  NB: ogni simbolo deve avere lo storico scaricato. Quelli senza dati
 #  (o con nome diverso sul tuo BCM) danno 0 trade e vengono saltati.
 #  SL ad ATR (agnostico). Rischio 1%.
+#  MARCATORE_SCAN_BULGE_R92_v1  -- la riga di lancio pretende questa
+#  stringa nel file scaricato: se manca, la copia e' vecchia e lo scan
+#  del BULGE non c'e' dentro (il 10/08 una copia vecchia di uno script
+#  ha rifatto la griglia sbagliata: da li' la regola).
 # =====================================================================
 param(
   [Parameter(Mandatory=$true)][string]$Robot,   # ABTG_MaxMinNotte | ABTG_Nightly | ABTG_HARSI | ...
   [string]$Tf="",                                # opzionale: M5/M15/M30/H1/H4/D1 -> forza il timeframe
+  [string]$SoloSimbolo="",                       # opzionale: gira UN simbolo solo (prova del banco prima delle corse lunghe)
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
 $ErrorActionPreference="Stop"
@@ -393,6 +398,15 @@ if($Tf){
   Write-Host ("   -Tf $Tf -> Period $Period, risultati in risultati_scan_$EAtag") -ForegroundColor Yellow
 }
 
+# -SoloSimbolo: la prova del banco. Gira UN simbolo solo, con tutte le
+# varianti, per vedere in pochi minuti se la macchina produce i CSV --
+# invece di scoprirlo dopo ore. NON e' un round: e' un controllo.
+if($SoloSimbolo -ne ""){
+  if($Symbols -notcontains $SoloSimbolo){ Write-Host ("!!! -SoloSimbolo " + $SoloSimbolo + " non e' nella lista di questo EA.") -ForegroundColor Red; exit 1 }
+  $Symbols=@($SoloSimbolo)
+  Write-Host ("   -SoloSimbolo: gira solo " + $SoloSimbolo + " (prova del banco, non e' il round)") -ForegroundColor Yellow
+}
+
 $Work= if($PSScriptRoot){$PSScriptRoot}else{(Get-Location).Path}; Set-Location $Work
 Write-Host "=== SCAN MARKET: $EA su $($Symbols.Count) simboli x $($Varianti.Count) variante/i (OHLC), finestra $FromDate - $ToDate ===" -ForegroundColor Cyan
 New-Item -ItemType Directory -Force -Path (Join-Path $Work "src_v2"),(Join-Path $Work "ini_scan") | Out-Null
@@ -434,7 +448,10 @@ foreach($sym in $Symbols){
   # righe della variante non devono MAI ripetere un parametro gia'
   # presente nel blocco base: il controllo qui sotto ferma lo scan se
   # succede, invece di lasciarti una notte di CSV vuoti.
-  $InputsSym=($Inputs + $v.extra).Replace("__SYM__",$sym)
+  # il "`n" NON e' decorativo: un here-string PowerShell NON finisce con
+  # l'a-capo, quindi senza di lui l'ultima riga del blocco base e la prima
+  # della variante finirebbero ATTACCATE sulla stessa riga dell'.ini.
+  $InputsSym=($Inputs + "`n" + $v.extra).Replace("__SYM__",$sym)
   $nomi=@(); foreach($riga in ($InputsSym -split "`r?`n")){ if($riga.Trim() -ne ""){ $nomi += ($riga -split "=")[0].Trim() } }
   $doppi=@($nomi | Group-Object | Where-Object { $_.Count -gt 1 })
   if($doppi.Count -gt 0){ Write-Host ("!!! PARAMETRO DOPPIO in [TesterInputs]: " + ($doppi.Name -join ", ") + " -> MT5 farebbe ZERO passate. Corretto il blocco dell'EA e rilancia.") -ForegroundColor Red; exit 1 }

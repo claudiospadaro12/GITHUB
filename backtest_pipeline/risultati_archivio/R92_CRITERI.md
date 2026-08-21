@@ -1,18 +1,38 @@
 # ⚖️ R92-SCAN — CRITERI **FIRMATI** DA CLAUDIO IL 21/08/2026, PRIMA DEI NUMERI
 
-> ## ✋ NON FIRMATO. Questa e' una BOZZA.
-> **Finche' Claudio non scrive "FIRMO R92", i numeri di R92 non si guardano.**
+> ## ✍️ FIRMATO: **"c,firmo 0,8,misura entrambe"** — 21/08/2026.
+> La firma integrale, con le clausole, sta **in fondo a questo file** (sezione
+> "FIRMA DI CLAUDIO"): quella e' l'originale, questo corpo e' solo allineato.
 > Regola di casa, non trattabile: *i criteri si cambiano prima dei numeri, non
 > dopo.* Se un numero uscito suggerisse un criterio migliore, quel criterio
 > vale **dal round dopo**.
 >
-> _Scritto il 21/08/2026, a numeri di R92 **mai visti**: nessuna passata
-> girata, l'EA `ABTG_Bulge.mq5` non e' mai stato compilato da nessuno._
+> _Scritto e firmato il 21/08/2026, a numeri di R92 **mai visti**: nessuna
+> passata girata, l'EA `ABTG_Bulge.mq5` non e' mai stato compilato da nessuno._
+>
+> **Le tre soglie S1/S2/S3 (par. 3) NON sono state toccate dalla firma e non si
+> toccano.** Il corpo e' stato allineato il 21/08 **solo** su: rischio
+> 0,80% (era 1,00), disegno del round 88 passate (era 44), canarino 2.2.
+> Ogni riga cambiata e' elencata nel commit che l'ha cambiata.
 
-**Banco:** `ABTG_Bulge` v5.00 (motore di **Claudio**, migrato agli standard di
-casa — `mql5\Experts\ABTG_Bulge.mq5`) · H1 · **22 cross del basket** ·
-**una cella per simbolo** · file prova `prove\R92_scan_BULGE.txt` · driver
+**Banco:** `ABTG_Bulge` **v5.10** (motore di **Claudio**, migrato agli standard
+di casa — `mql5\Experts\ABTG_Bulge.mq5`) · H1 · **22 cross del basket** ·
+**4 celle per simbolo = 88 passate** (2 gestioni × 2 varianti del VIOLA) ·
+rischio **0,80%** · file prova `prove\R92_scan_BULGE.txt` · driver
 `scan_market.ps1 -Robot ABTG_Bulge`.
+
+**Le 4 celle di ogni simbolo, per nome** (etichette nel CSV: nome file,
+colonna `InpMagic`, colonna `Use_Purple_PineReaction`):
+
+| cella | gestione | VIOLA | magic | file |
+|---|---|---|---:|---|
+| **base** | nuda (SL 3xATR + TP mediana) | EA `\|c0-o0\| <= 1,5×ATR` | 772700 | `scan_ABTG_Bulge_<SYM>_nuda.csv` |
+| | nuda | PINE `c0>o0` / `c0<o0` | 772700 | idem, riga con `Use_Purple_PineReaction=1` |
+| | gestita (BE 1R + trailing R) | EA | 772710 | `scan_ABTG_Bulge_<SYM>_gestita.csv` |
+| | gestita | PINE | 772710 | idem, riga con `Use_Purple_PineReaction=1` |
+
+> La **cella base** è quella che riproduce `BULGE_MASTER.mq5`: è lì che si
+> guarda se un giorno si vuole il confronto con l'originale di Claudio.
 
 ---
 
@@ -53,7 +73,7 @@ sul suo xlsx** e messo agli atti in cima ad `ABTG_Bulge.mq5`.
 | **rapporto perdita/vincita** | **2,47x** | Expected Payoff + PF lo vincolano |
 | **profit factor** | **1,599** | `Profit Factor` |
 | **trade** | **268** in 4,25 anni su 6 simboli = **~10,5 per simbolo per anno** | `Trades` |
-| **DD bilancio / equity** | **10,17% / 10,35%** (a rischio **3%**) | `Equity DD %` (qui a rischio 1%) |
+| **DD bilancio / equity** | **10,17% / 10,35%** (a rischio **3%**) | `Equity DD %` (qui a rischio **0,80%**) |
 
 > ### 🔬 **IL PROFILO E' LA VERA IPOTESI DA FALSIFICARE, PIU' DEL PROFITTO.**
 > Questo motore **dichiara** una forma precisa: vince quasi sempre poco, perde
@@ -75,9 +95,10 @@ sul suo xlsx** e messo agli atti in cima ad `ABTG_Bulge.mq5`.
 
 | voce | Claudio | R92-scan | confrontabile? |
 |---|---|---|---|
-| rischio | **3,00%** | **1,00%** | ❌ profitti e DD in denaro. ✅ PF, win rate, n |
+| rischio | **3,00%** | **0,80%** (firma) | ❌ profitti e DD in denaro. ✅ PF, win rate, n |
 | dati | 40% qualita', tick misti | **OHLC M1** (Modello 1) | ❌ entrambi approssimano, in modi diversi |
 | simboli | basket di 6 da UN grafico | **1 per passata** | ❌ il basket condivide `Max_Trades`: la concorrenza fra simboli sparisce |
+| gestione | **BE 1R + trailing R** (a mano, col suo Manager MT4) | **misurate tutte e due** (nuda e gestita) | ✅ è il punto: il confronto lo fa il round |
 | periodo | 2022.01.01-2026.03.30 | **2022.01.01-2026.06.30** | ✅ pinnato apposta |
 | IS/OOS | **nessuno** | **nessuno nello scan** (arriva nel round profondo) | — |
 
@@ -107,14 +128,25 @@ L'EA stampa a fine passata:
 comportino diversamente e' una deduzione, non una misura. Il conteggio e' il
 modo per chiuderla.]
 
-### 2.2 👯 IL MAGIC GEMELLO (determinismo del banco)
+### 2.2 👯 IL DETERMINISMO DEL BANCO (89ª passata, facoltativa)
 
-Unico asse dello scan: `InpMagic` 772700 / 772701. Due passate **identiche in
-tutto tranne il magic**: **devono uscire uguali al centesimo** (precedente:
-R51, *"tutte e quattro le coppie identiche"*).
-**Se le due righe di uno stesso simbolo differiscono, il banco non e'
-deterministico e NESSUN altro numero di R92 vale.** Si cerca il perche' prima
-di leggere qualunque altra riga.
+_Allineato il 21/08 dopo la firma: nella bozza il controllo era l'**asse magic
+gemello** (precedente R51, *"tutte e quattro le coppie identiche"*). Con le 88
+passate firmate quell'asse costerebbe **altre 88 corse**, e l'asse
+dell'ottimizzatore ora serve alle due versioni del VIOLA._
+
+Il controllo si fa **una volta sola, su un simbolo solo**: si rilancia la
+**cella base** (`<SYM>_nuda`, `Use_Purple_PineReaction=0`) col magic **772701**
+invece di 772700 e si confrontano le righe.
+**Se non coincidono al centesimo, il banco non e' deterministico e NESSUN altro
+numero di R92 vale.** Si cerca il perche' prima di leggere qualunque altra riga.
+
+E c'è un secondo controllo, **gratis, dentro le 88**:
+> il **VIOLA-PINE** è più selettivo del **VIOLA-EA** (pretende la candela di
+> reazione, l'altro accetta anche quella rossa). Quindi, a parità di tutto il
+> resto, **`n(PINE) <= n(EA)` deve valere su ogni simbolo.** Se su un simbolo il
+> PINE facesse **più** trade dell'EA, non è il mercato: è un errore, e il round
+> si ferma.
 
 ### 2.3 📅 IL PASSO 0 NON FATTO (la finestra che potrebbe non esistere)
 
@@ -219,21 +251,26 @@ sono** (vedi passo 0): e' la prima cosa da chiedersi se R92 seleziona qualcuno.
 
 ## 6. 🛡️ IL RISCHIO, DETTO PRIMA CHE ARRIVINO I NUMERI
 
-1. **1,00% x `Max_Trades`=4 = fino al 4% di rischio aperto insieme**, cioe'
-   **sopra il cap C1 firmato il 18/08 (3,25%)**. In campo il **Guardian**
-   bloccherebbe il quarto ingresso (la guardia e' sul percorso di apertura);
-   nel tester il Guardian e' **inerte** (fail-open: le sue GlobalVariable non
-   esistono), quindi **nei numeri di R92 il 4% ci puo' essere davvero**.
-   👉 Se il BULGE arrivasse mai al campo, **o scende `Risk_Percent`, o scende
-   `Max_Trades`**: e' una **decisione di Claudio**, da prendere prima del
-   deploy. Qui e' solo dichiarata.
-2. **`Risk_Percent` 1,00 e' un ALZAMENTO rispetto a `BULGE_MASTER.mq5`**, che
-   aveva 0,50 (Claudio girava a 3,00). E' il valore comune di casa, quello che
-   rende confrontabili i simboli fra loro. Non e' una taglia di campo.
-3. **Il kill switch resta acceso** (4 SL/giorno, 3 consecutivi, −2%/giorno):
+1. **IL CAP REGGE, ED E' LA FIRMA CHE L'HA FATTO REGGERE.**
+   La bozza aveva 1,00% × `Max_Trades`=4 = **4,00%** di rischio aperto insieme,
+   cioe' **sopra il cap C1 firmato il 18/08 (3,25%)**. Claudio ha firmato
+   **0,80%**: **0,80 × 4 = 3,20% ≤ 3,25%.**
+   Resta detto lo stesso, perche' vale: nel tester il **Guardian e' inerte**
+   (fail-open, le sue GlobalVariable non esistono), quindi **nei numeri di R92
+   il 3,20% ci puo' essere davvero**; in campo sarebbe il Guardian a fermare
+   l'ingresso che sfonda il cap (la guardia e' sul percorso di apertura).
+2. **`Risk_Percent` 0,80 non e' confrontabile in denaro con nessuno**: ne' con
+   lo 0,50 di `BULGE_MASTER.mq5`, ne' con il 3,00 del backtest di Claudio, ne'
+   con l'1,00 della bozza. **PF, win rate e n si'.**
+3. **La gestione (b) NON alza il rischio**: BE e trailing muovono lo stop
+   **solo a favore** (mai indietro), non aumentano il lotto e non aprono niente.
+   Semmai lo abbassano — di quanto, e a che prezzo in euro, e' esattamente la
+   domanda del round. E lo stop **iniziale** resta `ATR × 3` in tutte e 88 le
+   passate: il disegno del coach non si tocca.
+4. **Il kill switch resta acceso** (4 SL/giorno, 3 consecutivi, −2%/giorno):
    e' parte del motore di Claudio, non un accessorio. Spegnerlo cambierebbe i
    numeri e la domanda.
-4. **Nessuna sedia viva viene toccata mentre R92 gira.** R92 non ha niente in
+5. **Nessuna sedia viva viene toccata mentre R92 gira.** R92 non ha niente in
    campo: e' un motore nuovo per la flotta.
 
 ---
@@ -245,6 +282,14 @@ sono** (vedi passo 0): e' la prima cosa da chiedersi se R92 seleziona qualcuno.
 - [ ] Il **regime** dichiarato accanto a ogni tabella.
 - [ ] La **regola di selezione** (famiglia, non picco) dichiarata **insieme**
       alla lista dei promossi al round profondo.
+- [ ] **Il confronto delle due GESTIONI**, simbolo per simbolo, e la risposta
+      alla domanda della firma: **quanto vale il break-even in euro?** (e su
+      quanti simboli cambia il segno, non solo il numero).
+- [ ] **Il confronto delle due versioni del VIOLA**, con il controllo gratis
+      `n(PINE) <= n(EA)` verificato su **ogni** simbolo.
+- [ ] Le soglie S1/S2/S3 applicate **alla cella base** per la selezione, e le
+      altre tre celle lette come **confronto**, non come candidate parallele
+      (altrimenti si sceglie il meglio di quattro = si pesca).
 - [ ] I simboli bocciati **scritti per nome**, con la soglia che li ha bocciati.
 - [ ] Il **confronto di PROFILO** con il backtest di Claudio (win rate e
       rapporto perdita/vincita), con la conclusione esplicita su **cosa dice
