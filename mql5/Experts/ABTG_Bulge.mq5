@@ -56,7 +56,8 @@
 //             verificato nel repo. 772701/772702 compaiono solo come
 //             ASSE di sweep in R51, nessuna sedia viva).
 //             EA_Comment  -> InpComment (default "BULGE").
-//          3. Risk_Percent: default 1.00 (era 0.50 in BULGE_MASTER;
+//          3. Risk_Percent: default 1.00 [SUPERATO dalla v5.10, che lo
+//             porta a 0.80 -- vedi il punto 8] (era 0.50 in BULGE_MASTER;
 //             il backtest di Claudio girava a 3,00). E' un ALZAMENTO
 //             rispetto al file di partenza e va detto: 1% e' il valore
 //             comune di casa che rende confrontabili le celle fra loro,
@@ -75,6 +76,54 @@
 //             prima): spegne le stampe informative nelle corse lunghe.
 //             Gli ERRORI si stampano sempre.
 //          7. ASCII puro (niente accenti, niente trattini lunghi).
+//  v5.10  21/08/2026 -- DOPO LA FIRMA DI R92 ("c,firmo 0,8,misura
+//         entrambe", `risultati_archivio\R92_CRITERI.md`) e dopo la
+//         TRIANGOLAZIONE col Pine e col Manager MQ4 originali di
+//         Claudio, salvati integrali oggi in `docs\breaking_band\`
+//         (`risultati_archivio\TRIANGOLAZIONE_BULGE_PINE_2026-08-21.md`).
+//         **Il segnale non e' stato scelto: sono state rese misurabili
+//         DUE versioni di UNA condizione, e due gestioni.**
+//          8. RISCHIO 0,80% (era 1,00 nella v5.00). Non e' un gusto:
+//             0,80 x Max_Trades 4 = 3,20% di rischio aperto, SOTTO il
+//             cap C1 di 3,25% firmato il 18/08. Con 1,00 erano 4,00%.
+//          9. VIOLA, DUE VERSIONI -- input `Use_Purple_PineReaction`
+//             (default **false** = comportamento attuale, invariato):
+//               false VIOLA-EA   |close0-open0| <= 1,5 x ATR
+//               true  VIOLA-PINE close0 > open0 (long) / < (short)
+//             La differenza e' MISURATA, non supposta: il Pine di
+//             Claudio chiede la candela di reazione VERDE, l'EA l'ha
+//             sostituita con "candela non impulsiva" e cosi' apre long
+//             anche su candele ROSSE. E' il segnale piu' usato.
+//             >>> NESSUNA DELLE DUE E' LA CORREZIONE DELL'ALTRA: sono
+//                 due ipotesi, e R92 le misura tutte e due. Chi vince
+//                 lo dicono i numeri, non la memoria.
+//             Dentro `CheckSignal` cambiano DUE RIGHE e basta: la
+//             condizione vive in `PurpleReactionOk()`, fuori.
+//         10. GESTIONE (b) -- PORTING del Trade Manager MT4 di Claudio
+//             (`EA_BOLL_BULGE_Manager_PRO_MULTI_TF.mq4`): break-even a
+//             1R (+2 punti) e trailing a gradini di R (start 1,5R,
+//             passo 0,25R). Sette input nuovi, **tutti spenti di
+//             default**: `Enable_BE_1R`, `BE_At_R`, `BE_Offset_Points`,
+//             `Enable_Trailing_R`, `Trail_Start_R`, `Trail_Step_R`,
+//             `Trail_MinMove_Points`. A default spenti il file si
+//             comporta come BULGE_MASTER bit per bit.
+//             Perche' esiste: quando Claudio operava A MANO i trade
+//             erano protetti da BE+trailing; l'EA gira NUDO. Sono due
+//             gestioni diverse sullo stesso motore, e la firma dice di
+//             misurarle tutte e due ("quanto vale il break-even in
+//             euro, invece di opinarlo").
+//         11. CORREZIONE DEL DIFETTO EREDITATO DAL MANAGER (dichiarata
+//             nella firma): nel MQ4 `InitialRiskPoints()` legge lo SL
+//             **CORRENTE**, quindi appena il BE porta lo stop a pari il
+//             denominatore va a ~0 e i multipli R esplodono -> il
+//             trailing scatta a caso. Qui il rischio si misura sullo
+//             **SL INIZIALE per ticket** (array in RAM + GlobalVariable
+//             che sopravvive al riavvio, piu' riaggancio in OnInit
+//             delle posizioni gia' vive). E' una correzione della
+//             GESTIONE, non del segnale.
+//         12. Autotest allargato: le due versioni del VIOLA e la scala
+//             del trailing (`TrailLockR`, aritmetica pura: r=1,40 ->
+//             fermo, 1,50 -> +0,50R, 2,00 -> +1,00R, 2,60 -> +1,50R).
 //
 //  [DA DECIDERE] -- COSE VISTE LEGGENDO IL CODICE, **NON** CORRETTE.
 //  La logica e' di Claudio: la modifica e' una sua decisione, non una
@@ -111,7 +160,7 @@
 //+------------------------------------------------------------------+
 #property strict
 #property copyright "Claudio -- BULGE (motore di Claudio, migrato agli standard di casa)"
-#property version   "5.00"
+#property version   "5.10"
 
 #include <Trade\Trade.mqh>
 //--- firme B1/C1 del 18/08: la guardia del conto, lato EA.
@@ -237,6 +286,34 @@ input bool   Manage_Manual_Orders = false; // Gestisci posizioni magic=0
 input double Manual_SL_ATR_Mult   = 3.0;   // SL manuale = ATR x questo valore
 
 //==================================================================
+// INPUT -- GESTIONE (b): BREAK-EVEN A 1R + TRAILING A GRADINI DI R
+// v5.10 -- PORTING del Trade Manager MT4 di Claudio
+//   docs\breaking_band\EA_BOLL_BULGE_Manager_PRO_MULTI_TF.mq4
+//   (DoBreakEvenIfNeeded / DoTrailingRIfNeeded, righe 295-370)
+// E' la gestione che Claudio usava A MANO su MT4 mentre l'EA MT5 gira
+// NUDO (SL 3xATR + TP sulla mediana, nient'altro). Sono due gestioni
+// diverse sullo stesso motore, e la firma del 21/08 dice di misurarle
+// tutte e due: "sapere quanto vale il break-even in euro, invece di
+// opinarlo".
+// >>> TUTTI I DEFAULT SONO SPENTI: con questi valori il comportamento
+//     dell'EA e' identico BIT PER BIT a BULGE_MASTER. Non e' cortesia:
+//     e' l'unico modo di sapere quale delle due gestioni ha mosso i
+//     numeri.
+// >>> NON tocca il TP (che resta la mediana dinamica di UpdateAllTP) e
+//     NON c'entra niente col break-even che vive dentro
+//     DoPartialCloseIfNeeded (quello e' legato a Enable_Partial_Close,
+//     e' un'altra cosa e resta spento). I due non si intrecciano mai.
+//==================================================================
+input group "=== Gestione (b): BE 1R + trailing R (Manager MQ4) ==="
+input bool   Enable_BE_1R          = false; // Break-even a R (SPENTO = gestione nuda)
+input double BE_At_R               = 1.0;   // A quanti R portare a pari
+input int    BE_Offset_Points      = 2;     // Punti oltre il pari (Manager: 2)
+input bool   Enable_Trailing_R     = false; // Trailing a gradini di R (SPENTO = gestione nuda)
+input double Trail_Start_R         = 1.5;   // Da quanti R parte il trailing
+input double Trail_Step_R          = 0.25;  // Ampiezza del gradino, in R
+input int    Trail_MinMove_Points  = 10;    // Movimento minimo per mandare la modifica
+
+//==================================================================
 // INPUT -- IDENTITA' / SIMBOLI
 //==================================================================
 input group "=== Identita' / Simboli ==="
@@ -276,6 +353,21 @@ int      g_hADX[];     // handle iADX per simbolo
 bool     g_kill_active      = false; // EA fermo per il resto del giorno?
 string   g_kill_reason      = "";    // Motivo dello stop
 datetime g_kill_today_start = 0;     // Inizio giornata corrente (server time)
+
+//--- v5.10 SL INIZIALE PER TICKET (serve SOLO alla gestione (b)).
+//    E' LA CORREZIONE DEL DIFETTO EREDITATO dal Manager MQ4: li'
+//    InitialRiskPoints() legge lo SL **CORRENTE**, quindi appena il
+//    break-even sposta lo stop sul prezzo d'ingresso il denominatore
+//    va a ~0 e i multipli R esplodono (il trailing scatta a caso).
+//    Qui il rischio iniziale si misura UNA VOLTA, alla prima volta che
+//    si vede il ticket, e non cambia piu'.
+//    Doppia memoria, come gia' fa il parziale in questo stesso file:
+//      - array in RAM (veloce, e' quello che si legge a ogni tick)
+//      - GlobalVariable (sopravvive a un riavvio del terminale: senza,
+//        dopo un restart si rileggerebbe lo SL gia' spostato = il
+//        difetto di prima, per un'altra strada)
+ulong    g_r0Ticket[];
+double   g_r0Dist[];
 
 //--- v5.00 METRICHE DA PROP (schema di famiglia): l'Equity DD dice se
 //    il conto sopravvive; una prop invece ti chiude per il LIMITE
@@ -395,6 +487,12 @@ int OnInit()
          " | ADX: ", adx_msg,
          " | Kill: ", kill_msg);
 
+   //--- v5.10: riaggancio delle posizioni gia' vive, per misurare il
+   //    rischio iniziale anche dopo un riavvio (gestione (b)).
+   ArrayResize(g_r0Ticket, 0);
+   ArrayResize(g_r0Dist,   0);
+   R0RegisterExisting();
+
    //--- v5.00: autotest puro (nessun ordine, nessuna lettura di conto).
    //    Le righe si leggono ESEGUENDO l'EA, non compilandolo.
    if(InpAutoTest) AutoTestBulge();
@@ -436,6 +534,42 @@ void AutoTestBulge()
    if(!(t1 && t2 && t3 && t4 && t5))
       Print("[BULGE][AUTOTEST] ATTENZIONE: il tag segnale DIVERGE. Con questo InpComment ",
             "le notifiche e il referto di chiusura non sanno piu' dire quale segnale ha aperto.");
+
+   //--- v5.10 VIOLA: le due versioni dell'ultima condizione.
+   //    ATR finto 0,0010; candela rossa di 2 pip; candela verde di 2 pip.
+   bool vEA_rossa  = PurpleReactionOk(true,  1.10020, 1.10000, 0.0010); // EA: passa (non impulsiva)
+   bool vEA_verde  = PurpleReactionOk(true,  1.10000, 1.10020, 0.0010); // EA: passa
+   bool vEA_impuls = PurpleReactionOk(true,  1.10000, 1.10200, 0.0010); // EA: 200 pip > 1,5xATR -> NO
+   PrintFormat("[BULGE][AUTOTEST] VIOLA (Use_Purple_PineReaction=%s): rossa=%s verde=%s impulsiva=%s",
+               (Use_Purple_PineReaction ? "true PINE" : "false EA"),
+               (vEA_rossa?"passa":"scarta"), (vEA_verde?"passa":"scarta"), (vEA_impuls?"passa":"scarta"));
+   if(!Use_Purple_PineReaction)
+      Print("[BULGE][AUTOTEST] atteso col default: rossa=passa verde=passa impulsiva=scarta ",
+            ((vEA_rossa && vEA_verde && !vEA_impuls) ? "PASS" : "*** FAIL ***"));
+   else
+      Print("[BULGE][AUTOTEST] atteso col Pine: rossa=scarta verde=passa impulsiva=passa ",
+            ((!vEA_rossa && vEA_verde && vEA_impuls) ? "PASS" : "*** FAIL ***"));
+
+   //--- v5.10 GESTIONE (b): la scala del trailing, aritmetica pura.
+   if(Enable_BE_1R || Enable_Trailing_R)
+   {
+      PrintFormat("[BULGE][AUTOTEST] gestione (b) ACCESA: BE=%s a %.2fR (+%d punti) | trailing=%s start %.2fR passo %.2fR",
+                  (Enable_BE_1R?"SI":"no"), BE_At_R, BE_Offset_Points,
+                  (Enable_Trailing_R?"SI":"no"), Trail_Start_R, Trail_Step_R);
+      PrintFormat("[BULGE][AUTOTEST] scala trailing: r=1.40 -> %.2f | r=1.50 -> %.2f | r=2.00 -> %.2f | r=2.60 -> %.2f   (-1 = trailing fermo)",
+                  TrailLockR(1.40), TrailLockR(1.50), TrailLockR(2.00), TrailLockR(2.60));
+      if(MathAbs(Trail_Start_R - 1.5) < 1e-9 && MathAbs(Trail_Step_R - 0.25) < 1e-9)
+      {
+         bool s1 = (TrailLockR(1.40) < 0.0);
+         bool s2 = (MathAbs(TrailLockR(1.50) - 0.50) < 1e-9);
+         bool s3 = (MathAbs(TrailLockR(2.00) - 1.00) < 1e-9);
+         bool s4 = (MathAbs(TrailLockR(2.60) - 1.50) < 1e-9);
+         Print("[BULGE][AUTOTEST] scala attesa (-1 / 0.50 / 1.00 / 1.50): ",
+               ((s1 && s2 && s3 && s4) ? "PASS" : "*** FAIL ***"));
+      }
+   }
+   else
+      Print("[BULGE][AUTOTEST] gestione (b) SPENTA: SL 3xATR fisso + TP mediana. E' la gestione NUDA, identica a BULGE_MASTER.");
 
    int fallitiGuardia = ABTG_AutotestGuardia();
    if(fallitiGuardia > 0)
@@ -500,6 +634,7 @@ void OnTick()
    // --- Gestione posizioni gia' aperte (continua anche con kill attivo) ---
    if(Enable_Partial_Close) DoPartialCloseIfNeeded();
    if(Manage_Manual_Orders) ManageManualOrders();
+   ManageBeAndTrailing();   // v5.10 gestione (b): inerte se i due input sono spenti
    UpdateAllTP();
 }
 
@@ -1282,6 +1417,177 @@ int SymbolIndex(string sym)
    for(int i = 0; i < g_symbolCount; i++)
       if(g_symbols[i] == sym) return i;
    return -1;
+}
+
+//==================================================================
+// v5.10 -- GESTIONE (b): BE a 1R + TRAILING A GRADINI DI R
+// Traduzione MT4 -> MT5 del Manager di Claudio. Le differenze di
+// traduzione, tutte dichiarate:
+//   1. il rischio si misura sullo SL INIZIALE (vedi sopra), non su
+//      quello corrente: e' la correzione del difetto ereditato;
+//   2. una sola PositionModify per tick e per posizione (il MQ4 ne
+//      poteva mandare due: una del BE e una del trailing). Il livello
+//      scelto e' lo STESSO -- quando il trailing e' attivo (r >= 1,5)
+//      il suo target e' sempre oltre il pari, quindi vince lui;
+//   3. STOPS_LEVEL del simbolo rispettato prima di mandare la
+//      modifica, come fa gia' il resto del file;
+//   4. il TP non si tocca MAI: resta quello che UpdateAllTP tiene
+//      sulla mediana.
+//==================================================================
+//-- Il GRADINO del trailing, isolato e PURO: nessuna lettura di conto,
+//   nessun ordine. Sta qui fuori perche' e' l'unico pezzo di aritmetica
+//   della gestione (b) che si puo' collaudare a tavolino (autotest).
+//   Ritorna gli R da bloccare, oppure -1 se il trailing non e' attivo.
+double TrailLockR(double r)
+{
+   if(Trail_Step_R <= 0.0) return -1.0;
+   if(r < Trail_Start_R)   return -1.0;
+   double steps = MathFloor((r - Trail_Start_R) / Trail_Step_R);
+   if(steps < 0) steps = 0;
+   double lockR = (Trail_Start_R + steps * Trail_Step_R) - 1.0;
+   if(lockR < 0) lockR = 0;
+   return lockR;
+}
+
+string R0Key(ulong ticket)
+{
+   return "BULGE_R0_" + IntegerToString(InpMagic) + "_" + IntegerToString((long)ticket);
+}
+
+//-- Distanza di rischio INIZIALE del ticket (prezzo, non punti).
+//   La prima volta che si vede la posizione la misura e la memorizza.
+double R0Dist(ulong ticket, double entry, double slNow)
+{
+   for(int j = 0; j < ArraySize(g_r0Ticket); j++)
+      if(g_r0Ticket[j] == ticket) return g_r0Dist[j];
+
+   double d = 0.0;
+   string key = R0Key(ticket);
+   if(GlobalVariableCheck(key)) d = GlobalVariableGet(key);   // riavvio: la memoria vera e' questa
+   else
+   {
+      d = MathAbs(entry - slNow);
+      if(d > 0.0) GlobalVariableSet(key, d);
+   }
+   if(d <= 0.0) return 0.0;
+
+   int n = ArraySize(g_r0Ticket);
+   ArrayResize(g_r0Ticket, n + 1);
+   ArrayResize(g_r0Dist,   n + 1);
+   g_r0Ticket[n] = ticket;
+   g_r0Dist[n]   = d;
+   return d;
+}
+
+//-- Riaggancio delle posizioni gia' vive (riavvio dell'EA / del terminale)
+void R0RegisterExisting()
+{
+   if(!Enable_BE_1R && !Enable_Trailing_R) return;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket <= 0) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
+      double sl = PositionGetDouble(POSITION_SL);
+      if(sl <= 0) continue;
+      R0Dist(ticket, PositionGetDouble(POSITION_PRICE_OPEN), sl);
+   }
+}
+
+//-- Pulizia: la posizione e' chiusa, via il ticket dalla RAM e la sua GV
+void R0Cleanup()
+{
+   for(int j = ArraySize(g_r0Ticket) - 1; j >= 0; j--)
+   {
+      if(PositionSelectByTicket(g_r0Ticket[j])) continue;
+      string key = R0Key(g_r0Ticket[j]);
+      if(GlobalVariableCheck(key)) GlobalVariableDel(key);
+      int last = ArraySize(g_r0Ticket) - 1;
+      g_r0Ticket[j] = g_r0Ticket[last];
+      g_r0Dist[j]   = g_r0Dist[last];
+      ArrayResize(g_r0Ticket, last);
+      ArrayResize(g_r0Dist,   last);
+   }
+}
+
+void ManageBeAndTrailing()
+{
+   if(!Enable_BE_1R && !Enable_Trailing_R) return;   // gestione NUDA: qui non succede niente
+
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket <= 0) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
+
+      string sym    = PositionGetString(POSITION_SYMBOL);
+      int    type   = (int)PositionGetInteger(POSITION_TYPE);
+      double entry  = PositionGetDouble(POSITION_PRICE_OPEN);
+      double slNow  = PositionGetDouble(POSITION_SL);
+      double curTP  = PositionGetDouble(POSITION_TP);
+      int    digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+      double point  = SymbolInfoDouble(sym, SYMBOL_POINT);
+      if(slNow <= 0 || point <= 0) continue;
+
+      double risk = R0Dist(ticket, entry, slNow);   // SL INIZIALE, non corrente
+      if(risk <= 0) continue;
+
+      double bid = SymbolInfoDouble(sym, SYMBOL_BID);
+      double ask = SymbolInfoDouble(sym, SYMBOL_ASK);
+      double curPrice   = (type == POSITION_TYPE_BUY) ? bid : ask;
+      double profitDist = (type == POSITION_TYPE_BUY) ? (curPrice - entry) : (entry - curPrice);
+      double r = profitDist / risk;
+
+      double newSL = slNow;
+
+      //--- BREAK-EVEN (Manager: DoBreakEvenIfNeeded) ---
+      if(Enable_BE_1R && r >= BE_At_R)
+      {
+         double target = (type == POSITION_TYPE_BUY)
+                         ? entry + BE_Offset_Points * point
+                         : entry - BE_Offset_Points * point;
+         if(type == POSITION_TYPE_BUY) { if(target > newSL) newSL = target; }
+         else                          { if(target < newSL) newSL = target; }
+      }
+
+      //--- TRAILING A GRADINI DI R (Manager: DoTrailingRIfNeeded) ---
+      //    steps = quanti gradini interi oltre lo start; il livello
+      //    bloccato e' (start + steps*passo) - 1R, mai sotto zero.
+      //    A r=1,5 con passo 0,25 -> lockR = 0,5 -> SL a +0,5R.
+      double lockR = Enable_Trailing_R ? TrailLockR(r) : -1.0;
+      if(lockR >= 0.0)
+      {
+         double target = (type == POSITION_TYPE_BUY)
+                         ? entry + lockR * risk
+                         : entry - lockR * risk;
+
+         // il "movimento minimo" del Manager: non si manda una modifica
+         // per due punti, si intasa e basta
+         if(type == POSITION_TYPE_BUY)
+           { if(target > newSL + Trail_MinMove_Points * point) newSL = target; }
+         else
+           { if(target < newSL - Trail_MinMove_Points * point) newSL = target; }
+      }
+
+      if(MathAbs(newSL - slNow) <= 0.0) continue;
+      newSL = NormalizeDouble(newSL, digits);
+
+      //--- STOPS_LEVEL e regola "lo stop non arretra MAI"
+      double minDist = (double)SymbolInfoInteger(sym, SYMBOL_TRADE_STOPS_LEVEL) * point;
+      bool valido = (type == POSITION_TYPE_BUY)
+                    ? ((bid - newSL) > minDist && newSL > slNow)
+                    : ((newSL - ask) > minDist && newSL < slNow);
+      if(!valido) continue;
+
+      if(trade.PositionModify(ticket, newSL, curTP))   // il TP non si tocca
+      {
+         if(InpVerbose) Print("[BULGE] GESTIONE(b) | ", sym, " | R=", DoubleToString(r, 2),
+                              " | SL ", DoubleToString(slNow, digits),
+                              " -> ", DoubleToString(newSL, digits));
+      }
+   }
+
+   R0Cleanup();
 }
 
 //==================================================================
