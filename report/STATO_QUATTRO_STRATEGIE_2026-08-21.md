@@ -71,6 +71,14 @@ Con setaccio letto riga per riga:
 > giornaliero = bomba). **Se mai andasse all'imbuto, il metro va scritto PRIMA dei
 > numeri** — regola di casa"* · responsabile: *architetto-prop + **Claudio** (congelamento)*.
 
+> 🆕 **AGGIORNAMENTO 21/08 (architetto-prop):** M14 e' **chiusa a meta'** — la voce
+> esiste: `report/METRO_PROP.md` **§13 GRIGLIA / MARTINGALA** (bozza da firmare,
+> commit `0a787ca`). Resta il **congelamento di Claudio** e resta aperta la meta'
+> "quali prop la ammettono **per iscritto**" (nel repo c'e' solo una voce di 4°
+> rango). I due verdetti in conflitto sono ora **riconciliati e pronti per la
+> firma** in `report/NODO_MEDIAZIONE_2026-08-21.md` (vertono su **due oggetti
+> diversi**; opzioni **A = ARCHIVIA · B = IMBUTO · C = FREQUENZA**).
+
 Blocchi secondari: il fattore 2,29, la base del volume (`[BUCO] parziale`, l'unico anello
 che non chiude), gli orari/sessioni (`[BUCO] vero`), i parametri SuperTrend mai dettati
 (M15b: il file `super trend.ex4` della lezione 10, chiesto a Claudio).
