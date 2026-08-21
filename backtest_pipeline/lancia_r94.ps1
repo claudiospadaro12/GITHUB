@@ -44,7 +44,10 @@
 #  il branch CONGELATO (nessun push su lavoro mentre R94 gira) piu' i
 #  marcatori di versione. Un SHA pinnerebbe gli script e NON il motore.
 #
-#  MARCATORE VERSIONE: R94-LANCIO-v1
+#  MARCATORE VERSIONE: R94-LANCIO-v2
+#  (v2 = correzioni della verifica del 21/08: cache del tester svuotata,
+#   compilazione che aspetta l'artefatto, tre radici per i log, per-trade
+#   ripuliti dentro il ciclo, sorgente confrontato per hash a ogni cella)
 # =====================================================================
 param(
   [string]$Rif      = "lavoro",
@@ -288,9 +291,25 @@ New-Item -ItemType Directory -Force -Path $MqlExperts | Out-Null
 $dstEA = Join-Path $MqlExperts ($EA + ".mq5")
 $ex5   = Join-Path $MqlExperts ($EA + ".ex5")
 Copy-Item -LiteralPath $srcEA -Destination $dstEA -Force
-$primaEx5 = if (Test-Path -LiteralPath $ex5) { (Get-Item -LiteralPath $ex5).LastWriteTime } else { [datetime]::MinValue }
+# 1) il .ex5 VECCHIO si cancella PRIMA (punto 27): un binario di ieri fa
+#    passare il gate su una compilazione fallita oggi.
+Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+if (Test-Path -LiteralPath $ex5) {
+  Muori ("non riesco a cancellare " + $ex5 + "." + "`n" +
+         "    Di solito vuol dire che MT5 o MetaEditor sono ancora aperti.")
+}
 Remove-Item -LiteralPath (Join-Path $MqlExperts ($EA + ".log")) -Force -ErrorAction SilentlyContinue
+
+# 2) si aspetta l'ARTEFATTO, NON il ritorno del processo (punto 39).
+#    MetaEditor e' SINGLE-INSTANCE: se ne gira gia' una copia, il processo
+#    appena lanciato TORNA SUBITO e la compilazione avviene nell'altra
+#    istanza. Un controllo fatto sul ritorno del processo fallirebbe su una
+#    compilazione perfettamente sana.
+$t0 = Get-Date
 & $MetaEditor ("/compile:" + $dstEA) "/log" | Out-Null
+while ((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)) {
+  Start-Sleep -Seconds 2
+}
 if (-not (Test-Path -LiteralPath $ex5)) {
   $logC = Join-Path $MqlExperts ($EA + ".log")
   if (Test-Path -LiteralPath $logC) {
@@ -298,16 +317,22 @@ if (-not (Test-Path -LiteralPath $ex5)) {
     Write-Host "    --- log di compilazione ---" -ForegroundColor Red
     Get-Content -LiteralPath $logC -ErrorAction SilentlyContinue | Select-Object -Last 30 | ForEach-Object { Write-Host ("      " + $_) -ForegroundColor Red }
   }
-  Muori ("compilazione FALLITA per " + $EA + ": nessun .ex5 prodotto." + "`n" +
-         "    Se dice 'undeclared identifier' e' l'include: guarda il passo 3.")
+  Muori ("compilazione FALLITA per " + $EA + ": nessun .ex5 dopo 180 secondi." + "`n" +
+         "    Se il log dice 'undeclared identifier' e' l'include: guarda il passo 3." + "`n" +
+         "    Se MetaEditor era gia' aperto, chiudilo e rilancia.")
 }
 $dopoEx5 = (Get-Item -LiteralPath $ex5).LastWriteTime
-if ($dopoEx5 -le $primaEx5) {
-  Muori ("il .ex5 non e' stato riscritto (data " + $dopoEx5.ToString("yyyy-MM-dd HH:mm:ss") + ")." + "`n" +
-         "    Girerebbe un BINARIO VECCHIO con un sorgente nuovo: e' la coppia" + "`n" +
-         "    sorgente/binario del punto 27 della checklist. Non si prosegue.")
-}
-Write-Host ("    ok  " + $EA + ".ex5 ricompilato adesso (" + $dopoEx5.ToString("yyyy-MM-dd HH:mm:ss") + ")") -ForegroundColor Green
+$secondi = [int](New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds
+Write-Host ("    ok  " + $EA + ".ex5 prodotto adesso (" + $dopoEx5.ToString("yyyy-MM-dd HH:mm:ss") + ", " + $secondi + "s)") -ForegroundColor Green
+
+# 3) IL CONGELAMENTO DEL BRANCH, MISURATO INVECE CHE DICHIARATO.
+#    "nessun push su lavoro mentre gira" e' un post-it: qui diventa
+#    un'impronta. Dopo OGNI cella si riconfronta con la copia che
+#    walkforward_generico.ps1 si e' riscaricato da lavoro HEAD.
+$ImprontaEA = (Get-FileHash -LiteralPath $srcEA -Algorithm SHA256).Hash
+Write-Host ("    impronta del sorgente: " + $ImprontaEA.Substring(0,16) + "...") -ForegroundColor DarkGray
+Write-Host "    (verra' riconfrontata dopo ogni cella: se cambia, qualcuno ha pushato" -ForegroundColor DarkGray
+Write-Host "     a meta' corsa e il confronto FRA CELLE e' morto)" -ForegroundColor DarkGray
 
 # =====================================================================
 #  4. GLI ARTEFATTI VECCHI (difetto 14): un file di ieri letto come di
@@ -327,28 +352,95 @@ if ((-not $SoloControllo) -and (Test-Path $Common)) {
   }
   Write-Host ("    ripulite " + $puliti + " serie per-trade di corse precedenti") -ForegroundColor DarkYellow
 }
+
+# --- LA CACHE DEL TESTER (punto 38 della checklist). E' IL PEZZO PIU'
+#     IMPORTANTE DI QUESTA SEZIONE, e nasce da un fatto misurato:
+#     la cella di canarino di R94 (GBPUSD, BBPeriod 20, BBDev 2.0,
+#     MinRR 0, magic 772101, stessa finestra, stesso deposito, stesso
+#     modello) E' GIA' STATA CALCOLATA il 21/08 da R91 -- sta in
+#     risultati_archivio\r91_csv\ABTG_BreakingBand_GBPUSD_OOS_r91a.csv,
+#     Pass 0: Profit 3160.10 | PF 1.73020 | DD 3.4801 | Trades 26.
+#     E il sorgente dell'EA non si muove dal 20/08.
+#     Senza svuotare la cache, MT5 RIPESCA quel pass invece di eseguirlo:
+#     il canarino tornerebbe al centesimo ANCHE CON LO STORICO SPARITO,
+#     mentre le celle P37 (in cache non ci sono) girerebbero sui dati
+#     veri. Due misure su due mondi diversi: l'esatto contrario di cio'
+#     per cui il canarino esiste.
+#     ATTENZIONE: SOLO Tester\cache. MAI bases\<server>\ticks, che e'
+#     lo STORICO: cancellarlo trasforma un round di ore in una notte.
+if (-not $SoloControllo) {
+  $tolti = 0
+  foreach ($radiceC in @((Join-Path $DataFolder "Tester\cache"), (Join-Path $instDir "Tester\cache"))) {
+    if (-not (Test-Path -LiteralPath $radiceC)) { continue }
+    $prima = @(Get-ChildItem -LiteralPath $radiceC -Recurse -File -ErrorAction SilentlyContinue).Count
+    try { Remove-Item -Path (Join-Path $radiceC "*") -Recurse -Force -ErrorAction Stop } catch {}
+    $dopo = @(Get-ChildItem -LiteralPath $radiceC -Recurse -File -ErrorAction SilentlyContinue).Count
+    $tolti += ($prima - $dopo)
+    if ($dopo -gt 0) {
+      Muori ("non riesco a svuotare " + $radiceC + " (restano " + $dopo + " file)." + "`n" +
+             "    Di solito vuol dire che MT5 e' ANCORA APERTO." + "`n" +
+             "    Senza cache vuota il canarino verrebbe RIPESCATO invece che rigirato," + "`n" +
+             "    e non misurerebbe piu' niente (punto 38 della checklist).")
+    }
+  }
+  Write-Host ("    cache del tester svuotata: " + $tolti + " file tolti") -ForegroundColor DarkYellow
+  Write-Host "    (le tre celle di canarino RIGIRANO: se una torna in pochi secondi," -ForegroundColor DarkYellow
+  Write-Host "     e' un ripescaggio e va detto invece di essere letto come conferma)" -ForegroundColor DarkYellow
+}
+
+# --- LO ZIP E LA CARTELLA DI RACCOLTA VECCHI, VIA ADESSO (non alla fine):
+#     una Muori anticipata non arriverebbe mai alla sezione 8, e al secondo
+#     lancio ravvicinato lo zip di ieri passerebbe il gate dei 15 minuti
+#     della riga travestito da risultato di adesso.
+$nomeCartella = "R94_BREAKINGBAND_BB37"
+$dest = Join-Path $desk $nomeCartella
+$zip  = Join-Path $desk ($nomeCartella + ".zip")
+foreach ($vecchio in @($zip, $dest)) {
+  if (Test-Path -LiteralPath $vecchio) {
+    try { Remove-Item -LiteralPath $vecchio -Recurse -Force -ErrorAction Stop } catch {}
+    if (Test-Path -LiteralPath $vecchio) {
+      Muori ("non riesco a cancellare " + $vecchio + "." + "`n" +
+             "    Chiudi chi lo tiene aperto (Esplora risorse, uno zip aperto) e rilancia:" + "`n" +
+             "    se resta li', a fine corsa nessuno sa se lo zip e' di adesso o di ieri.")
+    }
+    Write-Host ("    tolto artefatto vecchio: " + $vecchio) -ForegroundColor DarkYellow
+  }
+}
+
 $segnaTempo = Get-Date
 Write-Host ("    segnatempo di inizio corsa: " + $segnaTempo.ToString("yyyy-MM-dd HH:mm:ss")) -ForegroundColor DarkGray
 Write-Host "    (serve alla raccolta dei log: si prendono solo quelli scritti DOPO)" -ForegroundColor DarkGray
 
 # =====================================================================
-#  5. IL DATO: il canarino E' anche il controllo dei dati
+#  5. IL DATO: cosa il canarino controlla davvero, e cosa no
 # =====================================================================
 Titolo "5) i dati (e perche' qui non c'e' un passo 0 di scaricamento)"
 Write-Host "    R94 gira sugli STESSI tick di R33, R34 e R91 (stessa finestra, stessi" -ForegroundColor DarkGray
 Write-Host "    tre cross). R91 e' girato il 21/08 su questi dati: che ci siano non e'" -ForegroundColor DarkGray
 Write-Host "    una deduzione, e' un fatto." -ForegroundColor DarkGray
-Write-Host "    E c'e' di meglio: LE TRE CELLE DI CANARINO SONO IL CONTROLLO DEI DATI." -ForegroundColor White
-Write-Host "    Se i tick fossero cambiati, corti o mancanti, la cella 20/2.0 NON" -ForegroundColor White
-Write-Host "    riprodurrebbe R34 al centesimo. Il controllo e' dentro il round." -ForegroundColor White
+Write-Host ""
+Write-Host "    IL CANARINO CONTROLLA I DATI **SOLO PERCHE' LA CACHE E' STATA SVUOTATA**." -ForegroundColor White
+Write-Host "    Detto per esteso, perche' la versione corta di questa frase era SBAGLIATA" -ForegroundColor White
+Write-Host "    ed e' stata corretta dalla verifica del 21/08:" -ForegroundColor White
+Write-Host "      - la cella di canarino e' una passata GIA' CALCOLATA da R91 (stessi" -ForegroundColor Gray
+Write-Host "        input, stesso simbolo, stessa finestra, stesso binario);" -ForegroundColor Gray
+Write-Host "      - con la cache piena MT5 l'avrebbe RIPESCATA, e una passata ripescata" -ForegroundColor Gray
+Write-Host "        NON LEGGE UN TICK: sarebbe tornata al centesimo anche con lo storico" -ForegroundColor Gray
+Write-Host "        sparito, mentre le celle P37 avrebbero girato sui dati veri;" -ForegroundColor Gray
+Write-Host "      - la sezione 4 ha svuotato Tester\cache, quindi le tre celle di" -ForegroundColor Gray
+Write-Host "        canarino RIGIRANO davvero, e il controllo torna a valere." -ForegroundColor Gray
+Write-Host "    SPIA: se una cella di canarino torna in pochi secondi, e' stata ripescata" -ForegroundColor Yellow
+Write-Host "    lo stesso. Si dice, non si legge come conferma." -ForegroundColor Yellow
 
 # =====================================================================
 #  6. LE CORSE
 # =====================================================================
 $falliti = @()
+$ripescate = @()
 $i = 0
 foreach ($c in $celle) {
   $i++
+  $tCella = Get-Date
   Titolo ("6." + $i + ") CELLA " + $c.K + " - " + $c.Cosa)
   Write-Host ("      EA " + $EA + " | " + $c.Sym + " | patt " + $c.Patt + " | periodo " + $c.Per + " | prova " + $c.File) -ForegroundColor DarkGray
   if ($c.Base) {
@@ -361,6 +453,20 @@ foreach ($c in $celle) {
   # UNA sola, quella dell'ultima cella, e nessuno lo direbbe.
   $ant = Join-Path $Cartella ("anteprima_" + $EA + "_" + $c.Sym + ".ini")
   Remove-Item -LiteralPath $ant -Force -ErrorAction SilentlyContinue
+
+  # LE SERIE PER-TRADE VANNO VIA QUI, PRIMA DI OGNI CELLA -- non una volta
+  # sola all'inizio. L'EA le chiama abtg_trades_<EA>_<Simbolo>_<Magic>.csv
+  # (riga 1521): P20 e P37 dello STESSO simbolo hanno lo stesso nome e lo
+  # stesso magic, quindi SCRIVONO LO STESSO FILE. Se la cella P37 non lo
+  # riscrivesse, qui sotto verrebbe copiato il file di P20 con l'etichetta
+  # di P37, e nessuno se ne accorgerebbe.
+  # E c'e' un regalo: un pass RIPESCATO dalla cache non scrive per-trade.
+  # Se dopo la cella il file non c'e', la cella non e' girata.
+  if ((-not $SoloControllo) -and (Test-Path $Common)) {
+    Get-ChildItem -Path $Common -Filter ("abtg_trades_" + $EA + "_" + $c.Sym + "_*.csv") -ErrorAction SilentlyContinue | ForEach-Object {
+      try { Remove-Item -LiteralPath $_.FullName -Force } catch {}
+    }
+  }
 
   $arg = @("-ExecutionPolicy","Bypass","-File",$wf,$EA,
            "-Simbolo",$c.Sym,
@@ -387,14 +493,42 @@ foreach ($c in $celle) {
   }
   if ($SoloControllo) { continue }
 
-  # la serie per-trade, subito, con un nome PROPRIO (difetto 26)
+  # la serie per-trade, subito, con un nome PROPRIO (difetto 26).
+  # Si prendono SOLO quelle del simbolo di questa cella e SOLO se scritte
+  # dopo che la cella e' partita: cosi' l'etichetta sul file dice il vero.
   $Risultati = Join-Path $Cartella ("risultati_prove\" + $EA)
+  $ptPresi = 0
   if (Test-Path $Common) {
-    Get-ChildItem -Path $Common -Filter ("abtg_trades_" + $EA + "_*.csv") -ErrorAction SilentlyContinue | ForEach-Object {
-      New-Item -ItemType Directory -Force -Path $Risultati | Out-Null
-      try {
-        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $Risultati ("pertrade_" + $c.Tag + "_" + $_.Name)) -Force
-      } catch {}
+    Get-ChildItem -Path $Common -Filter ("abtg_trades_" + $EA + "_" + $c.Sym + "_*.csv") -ErrorAction SilentlyContinue |
+      Where-Object { $_.LastWriteTime -ge $tCella } | ForEach-Object {
+        New-Item -ItemType Directory -Force -Path $Risultati | Out-Null
+        try {
+          Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $Risultati ("pertrade_" + $c.Tag + "_" + $_.Name)) -Force
+          $ptPresi++
+        } catch {}
+      }
+  }
+  if ($ptPresi -eq 0) {
+    Write-Host ("    NESSUN per-trade fresco per " + $c.K + ": la cella potrebbe essere stata") -ForegroundColor Yellow
+    Write-Host "    RIPESCATA dalla cache invece che eseguita (punto 38). Va detto nel referto." -ForegroundColor Yellow
+    $ripescate += $c.K
+  }
+
+  # IL CONGELAMENTO DEL BRANCH, MISURATO: walkforward_generico.ps1 si e'
+  # appena riscaricato l'EA da 'lavoro' HEAD in src_prove\<EA>.mq5. Se
+  # l'impronta e' cambiata, qualcuno ha pushato mentre il round girava e
+  # le celle NON sono piu' confrontabili fra loro.
+  $srcRis = Join-Path $Cartella ("src_prove\" + $EA + ".mq5")
+  if (Test-Path -LiteralPath $srcRis) {
+    $h = (Get-FileHash -LiteralPath $srcRis -Algorithm SHA256).Hash
+    if ($h -ne $ImprontaEA) {
+      Muori ("IL SORGENTE E' CAMBIATO A META' CORSA (dopo la cella " + $c.K + ")." + "`n" +
+             "    atteso : " + $ImprontaEA + "`n" +
+             "    trovato: " + $h + "`n" +
+             "    Qualcuno ha pushato su 'lavoro' mentre R94 girava: il driver riscarica" + "`n" +
+             "    l'EA a OGNI cella, quindi le celle gia' fatte e quelle che restano" + "`n" +
+             "    girerebbero su DUE MOTORI DIVERSI. Il confronto fra celle e' morto:" + "`n" +
+             "    si butta tutto e si rilancia a branch fermo.")
     }
   }
 }
