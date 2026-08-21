@@ -54,7 +54,11 @@
 #  parse senza InvariantCulture leggerebbe "2.0" come VENTI). L'unica
 #  conversione e' sulle DATE del passo 0, e usa ParseExact.
 #
-#  MARCATORE VERSIONE: R93-LANCIO-v1
+#  MARCATORE VERSIONE: R93-LANCIO-v2
+#  (v2 = dopo la bocciatura del verificatore del 21/08: i canarini escono
+#   dai DATI e non da una Print, i due EA vengono compilati QUI invece che
+#   a mano con F7, il canarino del pin si legge nei CSV e non nell'anteprima,
+#   i per-trade non si mescolano piu' fra le celle e la raccolta e' CUMULATIVA.)
 # =====================================================================
 param(
   [string]$Rif      = "lavoro",                            # commit SHA (o branch)
@@ -62,7 +66,7 @@ param(
   [int]$Deposito    = 10000,
   [int]$Modello     = 1,                                   # 1 = OHLC M1 (SCREENING). 4 = tick: qui NON e' possibile
   [string]$Gamba    = "",                                  # "A" oppure "B" (vuoto = tutte e due)
-  [string]$Solo     = "",                                  # es. "A0,B-STOP-GBPUSD"
+  [string]$Solo     = "",                                  # chiavi valide: A0..A5, BG1 BG2 BH1 BH2 BI1 BI2 BJ1 BJ2
   [switch]$Rifai,
   [switch]$SoloControllo,
   [switch]$SaltaPassoZero
@@ -264,9 +268,27 @@ if ($Rif -ne "lavoro") {
     }
   }
 } else {
+  # -Rif lavoro: non c'e' niente da confrontare con un pin, ma si prende
+  # la FOTOGRAFIA D'INIZIO CORSA dei due .mq5 (hash del contenuto). A fine
+  # corsa la si rifa': se e' cambiata, qualcuno ha pushato mentre giravamo
+  # e il motore e' cambiato FRA UNA CELLA E L'ALTRA. Meglio saperlo che
+  # fidarsi di una raccomandazione scritta in un referto.
   Write-Host "    -Rif lavoro: il branch va CONGELATO per tutta la durata del round." -ForegroundColor Yellow
   Write-Host "    (il driver riscarica l'EA da 'lavoro' HEAD a ogni cella: un push a meta'" -ForegroundColor Yellow
   Write-Host "     corsa cambierebbe il motore fra una cella e l'altra)" -ForegroundColor Yellow
+  $script:FotoEA = @{}
+  foreach ($ea in @($celle | ForEach-Object { $_.EA } | Select-Object -Unique)) {
+    try {
+      $txt = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/mql5/Experts/$ea.mq5" -UseBasicParsing -ErrorAction Stop).Content
+      $md5 = [System.BitConverter]::ToString(
+               (New-Object System.Security.Cryptography.MD5CryptoServiceProvider).ComputeHash(
+                 [System.Text.Encoding]::UTF8.GetBytes($txt))).Replace("-","")
+      $script:FotoEA[$ea] = $md5
+      Write-Host ("      foto d'inizio  " + $ea + "  " + $md5.Substring(0,12)) -ForegroundColor DarkGray
+    } catch {
+      Write-Host ("      (non ho potuto fotografare " + $ea + ": " + $_.Exception.Message + ")") -ForegroundColor Yellow
+    }
+  }
 }
 
 # --- le anteprime del giro precedente vanno via PRIMA (difetto n.14):
@@ -508,6 +530,13 @@ foreach ($c in $celle) {
   $ant = Join-Path $Cartella ("anteprima_" + $c.EA + "_" + $c.Sym + ".ini")
   Remove-Item -LiteralPath $ant -Force -ErrorAction SilentlyContinue
 
+  # L'ISTANTE DI INIZIO DELLA CELLA. Serve alla raccolta dei per-trade qui
+  # sotto: senza, il glob ripesca i file che le celle PRECEDENTI hanno
+  # lasciato in Common\Files e li ribattezza col tag di QUESTA. Un file con
+  # dentro r93g/USDJPY uscirebbe etichettato r93h/GBPUSD, e nessuno lo
+  # saprebbe. Si prende PRIMA di lanciare, mai dopo.
+  $tCella = Get-Date
+
   $arg = @("-ExecutionPolicy","Bypass","-File",$wf,$c.EA,
            "-Prova",("prove\" + $c.File),
            "-Modello","$Modello",
@@ -533,14 +562,20 @@ foreach ($c in $celle) {
   }
   if ($SoloControllo) { continue }
 
-  # la serie per-trade, subito, con un nome PROPRIO (difetto n.26)
+  # la serie per-trade, subito, con un nome PROPRIO (difetto n.26) e SOLO
+  # quella prodotta da QUESTA cella: filtro sul simbolo E sull'orario.
   $Risultati = Join-Path $Cartella ("risultati_prove\" + $c.EA)
   if (Test-Path $Common) {
-    Get-ChildItem -Path $Common -Filter ("abtg_trades_" + $c.EA + "_*.csv") -ErrorAction SilentlyContinue | ForEach-Object {
+    $freschi = @(Get-ChildItem -Path $Common -Filter ("abtg_trades_" + $c.EA + "_" + $c.Sym + "_*.csv") -ErrorAction SilentlyContinue |
+                 Where-Object { $_.LastWriteTime -ge $tCella })
+    foreach ($f in $freschi) {
       New-Item -ItemType Directory -Force -Path $Risultati | Out-Null
       try {
-        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $Risultati ("pertrade_" + $c.Tag + "_" + $c.Sym + "_" + $_.Name)) -Force
+        Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Risultati ("pertrade_" + $c.Tag + "_" + $c.Sym + "_" + $f.Name)) -Force
       } catch {}
+    }
+    if ($freschi.Count -eq 0) {
+      Write-Host "    (nessun per-trade NUOVO da questa cella: normale se il pass era in cache)" -ForegroundColor DarkGray
     }
   }
 }
@@ -568,12 +603,16 @@ if ($SoloControllo) {
   Write-Host ""
   Write-Host ("  Le anteprime hanno un nome PROPRIO per cella e stanno in: " + $sosta) -ForegroundColor DarkGray
   Write-Host "  DA CONTROLLARE A OCCHIO, e sono trenta secondi:" -ForegroundColor Yellow
-  Write-Host "   1) gamba A: InpSymbols deve dire USDJPY;EURUSD;GBPUSD (ordine DIVERSO dal" -ForegroundColor Yellow
-  Write-Host "      default compilato). Se dice GBPUSD;USDJPY;EURUSD il pin NON e' arrivato" -ForegroundColor Yellow
-  Write-Host "      e la gamba A non si legge: e' il difetto che ha prodotto il vecchio 0/8." -ForegroundColor Yellow
-  Write-Host "   2) FromDate/ToDate devono dire 2021.01.04 e 2025.12.19 (spezzati in IS/OOS)." -ForegroundColor Yellow
-  Write-Host "   3) le celle news devono avere InpNewsFile=abtg_news_2021_2025_UTC.csv" -ForegroundColor Yellow
+  Write-Host "   1) FromDate/ToDate devono dire 2021.01.04 e 2025.12.19 (spezzati in IS/OOS)." -ForegroundColor Yellow
+  Write-Host "   2) le celle news devono avere InpNewsFile=abtg_news_2021_2025_UTC.csv" -ForegroundColor Yellow
   Write-Host "      e InpNewsCommon=1." -ForegroundColor Yellow
+  Write-Host ""
+  Write-Host "  E QUELLO CHE **NON** SI CONTROLLA QUI: il canarino del pin InpSymbols." -ForegroundColor Yellow
+  Write-Host "  Nell'anteprima .ini dira' USDJPY;EURUSD;GBPUSD SEMPRE, anche il giorno in" -ForegroundColor Yellow
+  Write-Host "  cui MT5 lo ignora: l'anteprima la scrive QUESTO script copiando il file" -ForegroundColor Yellow
+  Write-Host "  prova, non MT5. Leggerlo qui sarebbe un guardiano decorativo, ed e' il" -ForegroundColor Yellow
+  Write-Host "  difetto che ha prodotto il vecchio 0/8: passerebbe una SECONDA volta." -ForegroundColor Yellow
+  Write-Host "  Si legge nella colonna InpSymbols dei CSV, a corsa FINITA (par. 6 sotto)." -ForegroundColor Yellow
   Write-Host "  ATTENZIONE: la riga 'Model=' dell'anteprima e' SCRITTA FISSA a 4 dal driver" -ForegroundColor Yellow
   Write-Host ("  (difetto n.31): il modello VERO di questo giro e' " + $Modello + ".") -ForegroundColor Yellow
   Write-Host ""
@@ -586,78 +625,198 @@ if ($SoloControllo) {
 }
 
 # =====================================================================
-#  7. RACCOLTA SUL DESKTOP + ZIP (regola delle righe di lancio, punto 2)
+#  6-bis. LA FOTOGRAFIA D'INIZIO CORSA, RIFATTA
+#  Il "branch congelato" e' una raccomandazione: questo la MISURA. Se un
+#  .mq5 e' cambiato mentre giravamo, le celle di prima e quelle di dopo
+#  hanno usato DUE MOTORI DIVERSI e il confronto fra celle non vale.
 # =====================================================================
-Titolo "5) raccolta sul Desktop"
+if ($script:FotoEA -and $script:FotoEA.Count -gt 0) {
+  $cambiati = @()
+  foreach ($ea in $script:FotoEA.Keys) {
+    try {
+      $txt = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/mql5/Experts/$ea.mq5" -UseBasicParsing -ErrorAction Stop).Content
+      $md5 = [System.BitConverter]::ToString(
+               (New-Object System.Security.Cryptography.MD5CryptoServiceProvider).ComputeHash(
+                 [System.Text.Encoding]::UTF8.GetBytes($txt))).Replace("-","")
+      if ($md5 -ne $script:FotoEA[$ea]) { $cambiati += $ea }
+    } catch {}
+  }
+  if ($cambiati.Count -gt 0) {
+    Write-Host ""
+    Write-Host ("!!! IL BRANCH NON E' STATO CONGELATO: " + ($cambiati -join ", ") + " e' cambiato durante la corsa.") -ForegroundColor Red
+    Write-Host "    Le celle girate prima e dopo il push hanno usato DUE MOTORI DIVERSI:" -ForegroundColor Red
+    Write-Host "    il confronto fra celle NON VALE. Va scritto nel referto e si rilancia." -ForegroundColor Red
+    $falliti += "BRANCH-NON-CONGELATO"
+  } else {
+    Write-Host ""
+    Write-Host "    branch congelato: i due .mq5 sono gli stessi dell'inizio corsa." -ForegroundColor Green
+  }
+}
+
+# =====================================================================
+#  7. RACCOLTA SUL DESKTOP + ZIP (regola delle righe di lancio, punto 2)
+#
+#  E' CUMULATIVA, non distruttiva (difetto n.35). Il par. 14 dei criteri
+#  dice che il round si puo' spezzare in due sere (-Gamba A, poi -Gamba B):
+#  con una raccolta che fa Remove-Item -Recurse sulla cartella, la seconda
+#  sera raderebbe al suolo la prima, il referto direbbe "MANCANTI: nessuno"
+#  perche' conta solo le celle di QUESTO giro, e Claudio manderebbe in
+#  buona fede meta' round credendo di mandarlo intero.
+#  Quindi: una cartella di sosta PER GAMBA, si ripulisce solo la propria,
+#  e lo zip si fa in fondo su tutto quello che c'e'.
+# =====================================================================
+Titolo "5) raccolta sul Desktop (cumulativa: una sotto-cartella per gamba)"
 $nomeCartella = "R93_FIBOH4"
 $dest = Join-Path $desk $nomeCartella
-if (Test-Path $dest) { Remove-Item $dest -Recurse -Force -ErrorAction SilentlyContinue }
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
+
+$gambeGirate = @($celle | ForEach-Object { $_.G } | Select-Object -Unique)
+foreach ($g in $gambeGirate) {
+  $dg = Join-Path $dest $g
+  if (Test-Path $dg) { Remove-Item $dg -Recurse -Force -ErrorAction SilentlyContinue }
+  New-Item -ItemType Directory -Force -Path $dg | Out-Null
+}
 
 $suff = if ($Modello -eq 4) { "" } else { "_ohlc" }
 $attesi = @()
 $mancanti = @()
+$csvRaccolti = @()
 foreach ($c in $celle) {
+  $dg = Join-Path $dest $c.G
   foreach ($w in @("IS","OOS")) {
     $nome = $c.EA + "_" + $c.Sym + "_" + $w + $suff + "_" + $c.Tag + ".csv"
-    $attesi += $nome
+    $attesi += ($c.G + "\" + $nome)
     $src = Join-Path $Cartella ("risultati_prove\" + $c.EA + "\" + $nome)
     if (Test-Path -LiteralPath $src) {
-      Copy-Item -LiteralPath $src -Destination (Join-Path $dest $nome) -Force
+      Copy-Item -LiteralPath $src -Destination (Join-Path $dg $nome) -Force
+      $csvRaccolti += @{ G = $c.G; K = $c.K; Path = (Join-Path $dg $nome); Nome = $nome }
     } else {
-      $mancanti += $nome
+      $mancanti += ($c.G + "\" + $nome)
     }
   }
 }
-# le serie per-trade e i criteri viaggiano insieme ai numeri
-foreach ($ea in @($celle | ForEach-Object { $_.EA } | Select-Object -Unique)) {
-  $rp = Join-Path $Cartella ("risultati_prove\" + $ea)
+# le serie per-trade, dentro la cartella della loro gamba
+foreach ($c in $celle) {
+  $rp = Join-Path $Cartella ("risultati_prove\" + $c.EA)
   if (Test-Path $rp) {
-    Get-ChildItem -Path $rp -Filter "pertrade_*.csv" -ErrorAction SilentlyContinue | ForEach-Object {
-      try { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $dest $_.Name) -Force } catch {}
+    Get-ChildItem -Path $rp -Filter ("pertrade_" + $c.Tag + "_" + $c.Sym + "_*.csv") -ErrorAction SilentlyContinue | ForEach-Object {
+      try { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path (Join-Path $dest $c.G) $_.Name) -Force } catch {}
     }
   }
 }
 Copy-Item -LiteralPath (Join-Path $Cartella "R93_CRITERI.md") -Destination $dest -Force -ErrorAction SilentlyContinue
 
+# =====================================================================
+#  7-bis. IL CANARINO DEL PIN, LETTO NELL'ARTEFATTO CHE LO RICEVE
+#  (difetto n.34-bis). NON nell'anteprima .ini, che la scrive questo
+#  script copiando il file prova e direbbe la cosa giusta SEMPRE, anche
+#  il giorno in cui MT5 ignora il pin: era esattamente il difetto che ha
+#  prodotto il vecchio 0/8, e passerebbe una seconda volta.
+#  Si legge la colonna InpSymbols dei CSV, che la scrive MT5.
+#  TRE esiti, non due -- il terzo e' il ';' troncato dal parser dell'.ini,
+#  cioe' un basket da UN cross invece di tre, con n a un terzo.
+# =====================================================================
+$pinEsito = @()
+$pinRotto = $false
+foreach ($r in @($csvRaccolti | Where-Object { $_.G -eq "A" })) {
+  $val = "(colonna assente)"
+  try {
+    $righeCsvA = @(Import-Csv -LiteralPath $r.Path)
+    if ($righeCsvA.Count -gt 0 -and (@($righeCsvA[0].PSObject.Properties.Name) -contains "InpSymbols")) {
+      $val = ("" + $righeCsvA[0].InpSymbols).Trim()
+    }
+  } catch { $val = "(CSV illeggibile)" }
+
+  if ($val -eq "USDJPY;EURUSD;GBPUSD") {
+    $pinEsito += ("  OK        " + $r.Nome + "  ->  " + $val + "   (pin ARRIVATO)")
+  } elseif ($val -eq "GBPUSD;USDJPY;EURUSD") {
+    $pinEsito += ("  ROTTO     " + $r.Nome + "  ->  " + $val + "   (pin IGNORATO: e' il DEFAULT compilato)")
+    $pinRotto = $true
+  } elseif ($val -eq "USDJPY") {
+    $pinEsito += ("  ROTTO     " + $r.Nome + "  ->  " + $val + "   (il ';' TRONCATO dall'.ini: basket da 1 cross invece di 3)")
+    $pinRotto = $true
+  } else {
+    $pinEsito += ("  SOSPETTO  " + $r.Nome + "  ->  " + $val)
+    $pinRotto = $true
+  }
+}
+
 # il referto porta dentro la sua DATA: quella deve essere di ADESSO
-$ref = Join-Path $dest "REFERTO_R93.txt"
+$ref = Join-Path $dest ("REFERTO_R93_" + ($gambeGirate -join "") + ".txt")
 $rr = @()
 $rr += "R93 - FIBO H4 ALL'IMBUTO"
 $rr += ("data: " + (Get-Date -Format "yyyy-MM-dd HH:mm") + "   <-- questa data deve essere di ADESSO")
-$rr += ("macchina: " + $env:COMPUTERNAME + "   riferimento: " + $Rif)
+$rr += ("macchina: " + $env:COMPUTERNAME + "   riferimento: " + $Rif + "   (branch CONGELATO per tutta la corsa)")
 $rr += ("finestra: " + $DaQuando + " -> " + $Fino + "   modello: " + $Modello + " (1 = OHLC M1, SCREENING)")
+$rr += ("gambe girate in QUESTO giro: " + ($gambeGirate -join ", "))
 $rr += ("celle in coda: " + $celle.Count + "   passate attese: " + $passateAttese)
 $rr += ("calendario news: " + $NewsCsv + " (" + $righeCsv + " righe) in Common\Files e in MQL5\Files")
 $rr += ""
-$rr += "FILE ATTESI (" + $attesi.Count + "):"
+$rr += ("FILE ATTESI DA QUESTO GIRO (" + $attesi.Count + "):")
 foreach ($a in $attesi) { $rr += ("  " + $a) }
 $rr += ""
 if ($mancanti.Count -gt 0) {
   $rr += ("MANCANTI (" + $mancanti.Count + "):")
   foreach ($m in $mancanti) { $rr += ("  " + $m) }
-} else { $rr += "MANCANTI: nessuno." }
+} else { $rr += "MANCANTI (di questo giro): nessuno." }
 if ($falliti.Count -gt 0) { $rr += ("CELLE USCITE IN ERRORE: " + ($falliti -join " ")) }
 $rr += ""
-$rr += "COSA SI LEGGE PER PRIMO (criteri par. 5), e non e' il profitto:"
-$rr += "  1. il magic gemello di A0: le due righe devono essere IDENTICHE al centesimo."
-$rr += "  2. colonna InpSymbols della gamba A: deve dire USDJPY;EURUSD;GBPUSD."
-$rr += "  3. [FIBOH4][NEWS-CONTA] delle celle news: bloccate fra 8% e 12%."
-$rr += "     bloccate=0 -> la cella si BUTTA (il filtro non e' stato eseguito)."
-$rr += "  4. [FIBOCORSO-CONTA] della gamba B: SETUP PIAZZATI > 0."
-$rr += "     Se 0, la passata non dice che la strategia perde: dice che non ha operato."
+$rr += "ATTENZIONE, LA RACCOLTA E' CUMULATIVA: 'MANCANTI: nessuno' vale SOLO per le"
+$rr += "gambe girate stasera. Se il round e' stato spezzato, la cartella contiene"
+$rr += "anche la gamba dell'altra sera e il suo referto sta accanto a questo."
+$rr += "Prima di mandare lo zip: dentro devono esserci le sottocartelle A E B."
+$rr += ""
+$rr += "CANARINO DEL PIN InpSymbols (letto nella colonna dei CSV, che la scrive MT5,"
+$rr += "NON nell'anteprima .ini, che la scriviamo noi):"
+if ($pinEsito.Count -eq 0) { $rr += "  (nessun CSV di gamba A in questo giro)" }
+foreach ($e in $pinEsito) { $rr += $e }
+if ($pinRotto) {
+  $rr += "  >>> IL PIN E' ROTTO: I NUMERI DELLA GAMBA A NON SI LEGGONO."
+  $rr += "      E' il difetto che ha prodotto il vecchio 0/8 (otto copie dello stesso"
+  $rr += "      basket). Si ripiega su un simbolo per passata e si RIFA' l'aritmetica"
+  $rr += "      del campione (criteri par. 4.2). Non si interpreta."
+}
+$rr += ""
+$rr += "COSA SI LEGGE PER PRIMO (criteri par. 5), e non e' il profitto."
+$rr += "TUTTO DAI DATI: le 68 passate girano in OTTIMIZZAZIONE e le Print degli"
+$rr += "agent non le vede nessuno (checklist 34). Queste sono COLONNE del CSV:"
+$rr += "  1. il canarino del pin qui sopra."
+$rr += "  2. il magic gemello di A0: le due righe IDENTICHE al centesimo."
+$rr += "  3. gamba A, celle news: colonne 'News Eventi' / 'News Bloccate' /"
+$rr += "     'News Interrogazioni'."
+$rr += "       News Eventi = 0        -> il file NON e' arrivato: cella da BUTTARE."
+$rr += "       News Bloccate = 0      -> il filtro non ha filtrato: cella da BUTTARE."
+$rr += "       Bloccate/Interrogazioni fra 8% e 12% -> il filtro ha girato: si legge."
+$rr += "       colonna = -1           -> passata SENZA canarino (EA vecchio)."
+$rr += "  4. gamba B: colonna 'Setup Piazzati' (SOGLIA S1-B)."
+$rr += "       0 -> la passata NON dice che la strategia perde: dice che non ha mai"
+$rr += "            operato. Le colonne 'Scartati Laterale/Distanza/Ampiezza' dicono"
+$rr += "            QUALE cancello ha mangiato tutto."
 $rr += ""
 $rr += "E QUELLO CHE NON SI POTRA' DIRE (criteri par. 10):"
 $rr += "  - niente sul merito a TICK REALI (a BCM i tick partono dal 2024.07.05)."
 $rr += "  - niente sul 2026 (il calendario news finisce il 2025.12.19)."
+$rr += "  - niente sulla fedelta' al corso finche' mancano le richieste R2 e R3."
 $rr += "  - niente promozioni, in nessun caso."
 $rr | Set-Content -LiteralPath $ref -Encoding ASCII
 
 Write-Host ""
-Write-Host ("    file attesi : " + $attesi.Count) -ForegroundColor White
-Write-Host ("    mancanti    : " + $mancanti.Count) -ForegroundColor $(if ($mancanti.Count -gt 0) { "Red" } else { "Green" })
+Write-Host ("    file attesi da questo giro : " + $attesi.Count) -ForegroundColor White
+Write-Host ("    mancanti                   : " + $mancanti.Count) -ForegroundColor $(if ($mancanti.Count -gt 0) { "Red" } else { "Green" })
 foreach ($m in $mancanti) { Write-Host ("      manca: " + $m) -ForegroundColor Red }
-Write-Host ("    cartella    : " + $dest) -ForegroundColor White
+Write-Host ""
+Write-Host "    CANARINO DEL PIN InpSymbols (letto nei CSV, non nell'anteprima):" -ForegroundColor White
+if ($pinEsito.Count -eq 0) { Write-Host "      (nessun CSV di gamba A in questo giro)" -ForegroundColor DarkGray }
+foreach ($e in $pinEsito) { Write-Host ("    " + $e) -ForegroundColor $(if ($e -like "*  OK  *") { "Green" } else { "Red" }) }
+Write-Host ""
+Write-Host ("    cartella (CUMULATIVA): " + $dest) -ForegroundColor White
+foreach ($g in @("A","B")) {
+  $dg = Join-Path $dest $g
+  $n = 0
+  if (Test-Path $dg) { $n = @(Get-ChildItem -Path $dg -Filter "*.csv" -ErrorAction SilentlyContinue).Count }
+  $col = if ($n -gt 0) { "Green" } else { "Yellow" }
+  Write-Host ("      gamba " + $g + ": " + $n + " CSV") -ForegroundColor $col
+}
 
 $zip = Join-Path $desk ($nomeCartella + ".zip")
 if (Test-Path $zip) { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
@@ -665,6 +824,8 @@ try {
   Compress-Archive -Path (Join-Path $dest "*") -DestinationPath $zip -Force
   Write-Host ""
   Write-Host ("    ZIP PRONTO DA MANDARE:  " + $zip) -ForegroundColor Cyan
+  Write-Host "    (contiene TUTTO quello che sta nella cartella, comprese le gambe" -ForegroundColor DarkGray
+  Write-Host "     girate in serate precedenti: la raccolta e' cumulativa)" -ForegroundColor DarkGray
 } catch {
   Write-Host ""
   Write-Host ("!!! lo zip NON e' stato creato: " + $_.Exception.Message) -ForegroundColor Red
@@ -672,6 +833,11 @@ try {
 }
 
 Write-Host ""
+if ($pinRotto) {
+  Write-Host "=== R93: IL CANARINO DEL PIN E' ROTTO. I numeri della gamba A NON si leggono. ===" -ForegroundColor Red
+  Write-Host "    Manda lo zip lo stesso: il canarino rotto E' GIA' UNA RISPOSTA." -ForegroundColor Yellow
+  exit 1
+}
 if ($falliti.Count -gt 0 -or $mancanti.Count -gt 0) {
   Write-Host ("=== R93 FINITO PARZIALE: " + $falliti.Count + " celle in errore, " + $mancanti.Count + " file mancanti ===") -ForegroundColor Red
   Write-Host "    Manda lo zip lo stesso: un risultato parziale e' gia' una risposta," -ForegroundColor Yellow

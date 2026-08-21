@@ -270,6 +270,40 @@ ausiliario**: lo abbiamo verificato riga per riga.
 > *"il filtro e' neutro"*: e' una passata in cui il filtro **non e' stato
 > eseguito**. Si cerca il file e si rilancia.
 
+### 5.1-bis 📢 E IL CANARINO VIAGGIA COI **DATI**, non con lo schermo
+
+**Corretto il 21/08 dopo la bocciatura del verificatore (checklist punto 34).**
+Nella prima stesura quella regola **non era applicabile**, e non per una
+svista di forma: `walkforward_generico.ps1` scrive **sempre** `Optimization=1`
+(riga 645), quindi **tutte e 68** le passate di R93 girano sugli **AGENTI** —
+e le `Print` di un agente **non le vede nessuno** (finiscono nei log
+per-agente, che nessuno script raccoglie e che nello zip non ci sono).
+Il canarino esisteva **solo in una `Print`**: sarebbe stato illeggibile
+proprio nelle passate che doveva sorvegliare.
+
+✅ Adesso i numeri sono **COLONNE del CSV**, portate dall'array di `FrameAdd`
+(che attraversa il confine agente → terminale) e scritte da `OnTesterDeinit`,
+che gira **sul terminale**:
+
+| gamba A — `ABTG_FiboH4_Multi` | cosa dice |
+|---|---|
+| **`News Eventi`** | 0 = **il file non e' arrivato** o e' letto male → cella da BUTTARE |
+| **`News Bloccate`** | 0 = **il filtro non ha filtrato** → cella da BUTTARE |
+| **`News Interrogazioni`** | il denominatore: `Bloccate / Interrogazioni` fra **8% e 12%** → il filtro ha girato |
+
+| gamba B — `ABTG_FiboH4_Corso` | cosa dice |
+|---|---|
+| **`Setup Piazzati`** | **e' la soglia S1-B.** 0 = non ha mai operato |
+| `Pattern Visti` · `Scartati Laterale` · `Scartati Distanza` · `Scartati Ampiezza` | **quale cancello** ha mangiato tutto |
+
+> ⚠️ **`-1` in una di queste colonne non e' zero.** `-1` vuol dire *"questa
+> passata non ha prodotto il canarino"* (EA vecchio, frame corto); `0` vuol
+> dire *"ha girato e non ha bloccato / non ha piazzato niente"*. **Sono due
+> verdetti opposti e non possono avere lo stesso numero.**
+>
+> Le `Print` **restano dove sono**: servono nel **test singolo a mano** del
+> blocco 3, dove la scheda Esperti si legge davvero.
+
 ### 5.2 📏 L'ATTESO DEL FILTRO, CALCOLATO PRIMA (e' la soglia S2-A)
 
 Calcolato **sul calendario vero**, contando quante aperture di barra H4
@@ -305,7 +339,9 @@ vale.** Si cerca il perche' prima di leggere qualunque altra riga.
 
 ### 5.4 🧊 IL CANARINO DELLA GAMBA B: "ha operato?"
 
-`ABTG_FiboH4_Corso` stampa a fine passata:
+Si legge nella colonna **`Setup Piazzati`** del CSV (par. 5.1-bis), **non**
+nella `Print` — che nel round non la vede nessuno. La `Print` resta e dice la
+stessa cosa nel test singolo:
 ```
 [FIBOCORSO-CONTA] <SYM> | pattern visti=N -> scartati: ampiezza=A laterale=L distanza=D | SETUP PIAZZATI=P
 ```
@@ -468,9 +504,14 @@ questo, e **non si improvvisa a corsa avviata**:
    apposta, cosi' nessuno lo cerca nei log.
 4. **Nessuna sedia viva viene toccata.** Il FiboH4 **non e' in campo**:
    verificato in `FLOTTA_ATTIVA.md`, `report/CONTRATTI_SEDIE.md` e nel
-   censimento — e sta perfino in `$KillSempre` della pulizia VPS. Magic
-   **771602** (gamba A) e **771640** (gamba B, blocco libero verificato nel
-   repo il 21/08): nessuna collisione.
+   censimento — e sta perfino in `$KillSempre` della pulizia VPS.
+   **I magic in gioco sono TRE gruppi, e vanno letti insieme al par. 11:**
+   - **771602** = il default compilato di `ABTG_FiboH4_Multi` (gamba A);
+   - **771640** = il default compilato di `ABTG_FiboH4_Corso` (gamba B);
+   - **771650 / 771651** = i **due magic gemelli** che `R93a` spazzola come
+     asse: servono al canarino di determinismo (par. 5.3), **non** sono
+     sedie. Verificati liberi nel repo il 21/08.
+   Nessuna collisione con niente di vivo, in nessuno dei tre gruppi.
 
 ---
 
