@@ -842,9 +842,72 @@ string OptFrame_FileName()
    return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
   }
 
+//--- per-trade: serve al DD di PORTAFOGLIO (ROTTA_PROP punto 4).
+//    Con un basket la colonna 'symbol' non e' decorativa: dice su quale
+//    cross e' finito ogni deal anche quando il grafico e' un altro.
+void ExportTrades()
+  {
+   if(!HistorySelect(0,TimeCurrent())) return;
+   string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"+IntegerToString((long)InpMagic)+".csv";
+   int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
+   if(h==INVALID_HANDLE) return;
+   FileWrite(h,"close_time","symbol","magic","position_id","deal_type","volume","price","net_profit","comment");
+   int n=HistoryDealsTotal();
+   for(int i=0;i<n;i++)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk==0) continue;
+      long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
+      if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_OUT_BY) continue;
+      double net=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
+      FileWrite(h,
+                TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                HistoryDealGetString(tk,DEAL_SYMBOL),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_MAGIC)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_POSITION_ID)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_TYPE)),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_VOLUME),2),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_PRICE),_Digits),
+                DoubleToString(net,2),
+                HistoryDealGetString(tk,DEAL_COMMENT));
+     }
+   FileClose(h);
+  }
+
+//==================================================================
+//  IL CONTATORE DEL FILTRO NOTIZIE (solo Print a fine passata).
+//  E' IL CANARINO DI R93, e va letto PRIMA di qualunque profitto:
+//  dice se il filtro ha FILTRATO oppure se e' stato solo acceso.
+//  Atteso, calcolato PRIMA sul calendario 2021-2025 convertito
+//  (converti_calendario_news.py, impatto High, finestra -60/+30):
+//  fra l'8% e il 12% delle aperture di barra H4 bloccate.
+//  bloccate = 0  ->  il filtro NON HA GIRATO. La passata non e' una
+//                    misura del filtro: e' la baseline con un'etichetta
+//                    diversa. Si butta e si cerca il file.
+//  bloccate = 100% -> il file e' letto male (colonne scambiate al
+//                    contrario, shift assurdo). Si butta lo stesso.
+//==================================================================
+void PrintContaNews()
+  {
+   if(!InpUseNewsFilter)
+     { Print("[FIBOH4][NEWS] filtro SPENTO in questa passata (baseline)."); return; }
+   double pct = (gNewsBarreViste>0) ? 100.0*(double)gNewsBlocchi/(double)gNewsBarreViste : 0.0;
+   PrintFormat("[FIBOH4][NEWS-CONTA] eventi in memoria=%d | interrogazioni=%I64d | "
+               "bloccate=%I64d (%.2f%%) | pendenti cancellati=%I64d | letto da %s",
+               gNewsCount,gNewsBarreViste,gNewsBlocchi,pct,gNewsPendCancellati,gNewsDove);
+   if(gNewsBlocchi==0)
+      Print("[FIBOH4][NEWS-CONTA] CANARINO ROSSO: il filtro e' ACCESO e non ha ",
+            "bloccato NIENTE. Atteso 8-12%. Questa passata NON misura il filtro.");
+   if(pct>50.0)
+      Print("[FIBOH4][NEWS-CONTA] CANARINO ROSSO: bloccato piu' del 50% delle ",
+            "interrogazioni. Atteso 8-12%. File letto male o shift sbagliato.");
+  }
+
 double OnTester()
   {
-   double stats[7];
+   PrintContaNews();
+   ExportTrades();
+   double stats[10];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -852,6 +915,10 @@ double OnTester()
    stats[4] = TesterStatistics(STAT_SHARPE_RATIO);
    stats[5] = TesterStatistics(STAT_EQUITY_DDREL_PERCENT);
    stats[6] = TesterStatistics(STAT_TRADES);
+   //--- le tre colonne che servono per rispondere "va bene per una prop?"
+   stats[7] = gWorstDayPct;                             // Peggior Giornata % (negativo)
+   stats[8] = TesterStatistics(STAT_MAX_CONLOSSES);     // Perdite Consecutive Max
+   stats[9] = TesterStatistics(STAT_CONLOSSMAX);        // Serie Perdente Peggiore (denaro)
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -874,13 +941,14 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f",
-                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
+                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
+                                (ArraySize(data)>7?data[7]:0.0), (ArraySize(data)>8?data[8]:0.0), (ArraySize(data)>9?data[9]:0.0));
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
