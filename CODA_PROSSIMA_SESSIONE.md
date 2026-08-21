@@ -735,6 +735,33 @@
 > **SHORT simmetrico** (14 celle vive quasi tutte long-only).
 
 
+> # 🧩 21/08 — **POINT BREAK, LE TRE COMPONENTI: 1 archiviata, 1 pronta, 1 da sbloccare**
+> Referto: `backtest_pipeline/risultati_archivio/POINTBREAK_TRE_COMPONENTI_2026-08-21.md`
+> **Posto in coda: DIETRO R92.** Niente qui e' urgente e niente tocca il forward.
+>
+> - 🥈 **P-PB2 (filtro EMA200 >=100 pip): ARCHIVIATA, round non necessario.**
+>   La "contraddizione" col nostro `ABTG_EMA200` **non esiste**: il corso stesso
+>   prescrive *sia* "vicino 50-70 pip" (Paolo, modulo Media 200 = il nostro EA)
+>   *sia* "lontano >=100 pip" (Christian, Point Break), perche' sono **due
+>   strategie diverse**. E la sedia 12 e' **U30USD su H1** (indice, EMA200 = 200
+>   ORE), il corso e' **forex su D1/H12** (EMA200 = 200 GIORNI): due linee
+>   diverse, non due letture della stessa. **Serve solo la presa d'atto** + se
+>   vuoi la correzione delle due righe imprecise agli atti (richiesta 3 del
+>   referto). 🔒 Non ho toccato quei file.
+> - 🥇 **P-PB1 (pavimento ADR sullo stop): bloccata, ma il blocco e' ora
+>   MISURABILE.** Scritto `mql5\Scripts\ABTG_SondaADR.mq5` (**mai compilato**):
+>   uno script che confronta 7 definizioni ragionevoli dell'ADR(50) e prova a
+>   **riprodurre le due letture stampate sulle slide** (AUDUSD 57.02 · GBPUSD
+>   83.73). Se ci riesce, **la domanda a Christian non serve piu'**. Costa ~10
+>   minuti di MT5, non apre posizioni, non tocca nessuna sedia.
+> - 🥉 **P-PB3 (Bollinger 37/1.4): pronta come R94** — 3 file prova
+>   (`prove\R94a/b/c_bb37_*.txt`) + criteri **BOZZA NON FIRMATA**
+>   (`risultati_archivio\R94_CRITERI.md`). 24 passate. ⚠️ **La domanda NON e'
+>   "quanto rende"**: con n OOS 11-26 il merito e' sospeso per dichiarazione —
+>   e' una **sonda di FREQUENZA**. Da firmare o **archiviare** (esito gia'
+>   previsto dentro i criteri), e serve la scelta del rischio **1,0% vs 0,80%**.
+
+
 _Scritta il 16/08/2026 su sua richiesta: **"metti tutto in coda, quando arrivo
 a casa davanti al pc facciamo tutto"**. Ordine pensato: prima le cose che
 sbloccano le altre._
