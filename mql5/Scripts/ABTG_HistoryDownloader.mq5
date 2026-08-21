@@ -21,6 +21,7 @@ input bool   InpListaSoloNomi = false;     // true = stampa solo l'elenco dei si
 input bool   InpTuttiBroker   = false;     // true = usa TUTTI i simboli del broker (non solo Market Watch)
 input int    InpTimeoutSec    = 60;        // secondi max di attesa download per simbolo/TF
 input bool   InpScaricaTick   = true;      // scarica anche i TICK REALI (per backtest a tick reali)
+input int    InpTolleranzaGG  = 4;         // giorni di scarto ammessi fra la data CHIESTA e la prima barra vera (weekend/festivi)
 
 //+------------------------------------------------------------------+
 //| Scarica i tick reali a blocchi di 30 giorni (evita array enormi) |
@@ -161,12 +162,45 @@ void OnStart()
          //  in background. Sugli indici non si notava (il broker si ferma
          //  comunque al 2024.09.26), sui cambi e sull'oro invece il referto
          //  diceva "manca storico" subito dopo averlo scaricato.
-         //  Ora si insiste finche' il locale non raggiunge il bersaglio, dove
-         //  il bersaglio e' la data richiesta oppure - se il broker non ha
-         //  tanto storico - la sua prima data disponibile.
-         datetime bersaglio = from;
+         //  Ora si insiste finche' il locale non raggiunge il fondo, dove il
+         //  fondo e' la data richiesta oppure - se il broker non ha tanto
+         //  storico - la sua prima data disponibile (le due uscite (a) e (b)
+         //  qui sotto).
+         //
+         //  BUG 21/08/2026 - IL MURO DEI 120 SECONDI SU OGNI TIMEFRAME.
+         //  Sintomo: EURUSD, ogni TF esattamente ~2 minuti, anche il D1 che
+         //  ha quattromila barre in croce. Non e' il volume di dati: e'
+         //  maxtries = InpTimeoutSec*4 = 480 giri x Sleep(250) = 120,000 s
+         //  ESATTI, cioe' il ciclo che non esce MAI e brucia il timeout pieno.
+         //  Perche' non usciva: l'uscita era "first <= bersaglio + 86400", e
+         //  su BCM i cambi maggiori dichiarano SERIES_SERVER_FIRSTDATE =
+         //  1971.01.03 (misurato, coerente con la sonda del 17/08 e con
+         //  R82a/R92: e' il valore che il BROKER dichiara, non un errore
+         //  nostro). 1971 e' PIU' VECCHIO della data chiesta, quindi il
+         //  bersaglio restava "from" e l'uscita chiedeva una barra aperta
+         //  entro UN GIORNO da from. Ma tutte le date d'inizio che usiamo
+         //  cadono di weekend o di festivo (2022.01.01 sabato, 2023.01.01
+         //  domenica, 2021.01.01 Capodanno): sul forex li' NON ESISTONO
+         //  BARRE, la prima vera arriva 2-3 giorni dopo e la condizione non
+         //  poteva diventare vera nemmeno a download finito.
+         //  Costo misurato: 7 TF x 120 s = 14 min a simbolo, x22 simboli =
+         //  oltre 5 ore di attesa a vuoto, con -TimeoutMin 90 che ammazza
+         //  MT5 al sesto simbolo.
+         //
+         //  Le due uscite ora sono separate, e NON cambiano nessun verdetto:
+         //   (a) il locale ha raggiunto la prima data DEL BROKER (tolleranza
+         //       1 giorno, la STESSA del verdetto piu' sotto): e' il caso
+         //       degli indici (server 2024.09.26) e li' si comporta come
+         //       prima, riga per riga;
+         //   (b) il locale ha raggiunto la data CHIESTA entro InpTolleranzaGG
+         //       giorni: assorbe il buco del fine settimana. Vale solo quando
+         //       il server dichiara PIU' storico di quanto abbiamo chiesto
+         //       (i cambi), dove (a) non puo' scattare per costruzione.
+         //  Piu' indietro di from CopyRates non guarda: se il locale e' li',
+         //  non c'e' altro da scaricare per la finestra che ci interessa.
+         long tolleranza = (long)InpTolleranzaGG * 86400;
+         if(tolleranza < 86400) tolleranza = 86400;
          datetime srv0 = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
-         if(srv0 > 0 && srv0 > bersaglio) bersaglio = srv0;
 
          while(!IsStopped() && tries < maxtries)
            {
@@ -174,15 +208,13 @@ void OnStart()
             if(got > 0)
               {
                first = r[0].time;
-               if(first <= bersaglio + 86400) break;          // arrivato in fondo
+               if(srv0 > 0 && first <= srv0 + 86400) break;   // (a) arrivato in fondo AL BROKER
+               if((long)first <= (long)from + tolleranza) break; // (b) arrivato alla data CHIESTA
               }
             Sleep(250);
             tries++;
             if(srv0 <= 0)   // il server puo' rispondere qualche giro dopo
-              {
                srv0 = (datetime)SeriesInfoInteger(sym, tf, SERIES_SERVER_FIRSTDATE);
-               if(srv0 > 0 && srv0 > bersaglio) bersaglio = srv0;
-              }
            }
          string tfn = StringSubstr(EnumToString(tf), 7); // "PERIOD_H4" -> "H4"
 

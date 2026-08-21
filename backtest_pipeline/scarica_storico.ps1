@@ -175,7 +175,14 @@ InpListaSoloNomi=false
 InpTuttiBroker=false
 InpTimeoutSec=120
 InpScaricaTick=$tick
+InpTolleranzaGG=4
 "@ | Set-Content -Path $SetFile -Encoding ASCII
+# InpTolleranzaGG (21/08/2026): giorni di scarto fra la data CHIESTA e la prima
+# barra vera. Serve perche' TUTTE le nostre date d'inizio cadono di weekend o
+# di festivo (2022.01.01 sabato, 2023.01.01 domenica, 2021.01.01 Capodanno) e
+# sul forex li' non esistono barre: con la vecchia tolleranza di 1 giorno il
+# ciclo del downloader non usciva MAI e bruciava 120 s pieni su OGNI timeframe,
+# D1 compreso. Vedi il commento lungo in ABTG_HistoryDownloader.mq5.
 Write-Host "  preset:    MQL5\Presets\abtg_storico.set" -ForegroundColor Green
 
 # ---------------------------------------------------------------------
