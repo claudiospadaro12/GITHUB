@@ -224,7 +224,24 @@ if (Test-Path $CsvOut) { Remove-Item $CsvOut -Force }   # cosi' so che il refert
 
 $primoSym = ($Simboli -split ",")[0].Trim()
 $Ini = Join-Path $env:TEMP "abtg_storico.ini"
+# --- 21/08/2026 - [Experts] AllowLiveTrading=false: NON e' cosmetica, ed e'
+#  la stessa riga che walkforward_generico.ps1 porta con dodici righe di
+#  commento sopra. Il motivo e' identico e vale ANCHE qui:
+#  /config NON apre un tester. Apre IL TERMINALE, che carica l'ultimo
+#  profilo con i suoi grafici e gli EA attaccati sopra. Sul PC di backtest
+#  quel terminale e' collegato al conto VIVO 50503392: senza questa riga,
+#  scaricare lo storico RIARMA di fatto gli EA su grafico, che piazzano
+#  ordini veri. E' successo il 14/08 (un DAX Apertura partito in breakout
+#  da un grafico M3 di prova).
+#  Qui morde di piu' che altrove, perche' questo script gira per PRIMO:
+#  e' il PASSO 0 dei round, cioe' il gesto piu' innocuo della serata.
+#  Il download dello storico non ne risente: lo fa uno Script, che non
+#  passa dal permesso di trading dal vivo.
 @"
+[Experts]
+AllowLiveTrading=false
+AllowDllImport=false
+
 [Charts]
 MaxBars=2000000000
 
