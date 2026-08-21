@@ -113,17 +113,29 @@ InpSwingBars=8||4||4||12||Y
 InpAllowLong=1
 InpAllowShort=1
 # 200 (il default) basta a 21 barre su H4. A 4 barre su M30 i livelli
-# vivi sono molti di piu': al tetto si butta il PIU' VECCHIO, quindi un
-# tetto stretto sarebbe un FILTRO TRAVESTITO che morde SOLO le celle
-# dense - cioe' proprio quelle che il round vuole misurare. Alzato a
-# 500 e pinnato uguale in tutti e cinque i file, cosi' non discrimina
-# nessuna cella. Non di piu' perche' ScansionaLivelli percorre TUTTI i
-# livelli vivi a ogni barra M15: il tetto e' anche il costo macchina.
-# >>> COME SI SA SE IL TETTO HA MORSO: il PASSO 0 gira la cella PIU'
-#     DENSA (M30 / 4 barre) con InpVerbose=1, e la riga "tetto livelli
-#     raggiunto" nel log e' la prova. Se compare, il round si ferma e il
-#     tetto si rialza PRIMA, non dopo aver letto i numeri.
-InpMaxLivelli=500
+# vivi sono molti di piu', e la crescita e' MONOTONA: un livello sparisce
+# solo se uno sweep lo consuma o una chiusura oltre lo invalida, quindi in
+# un trend lungo di un lato gli swing dell'altro lato non vengono MAI ne'
+# toccati ne' rotti. Al tetto si butta il PIU' VECCHIO, cioe' il livello
+# piu' AMPIO: un tetto stretto e' un FILTRO TRAVESTITO che morde SOLO le
+# celle dense - proprio quelle che il round vuole misurare.
+# >>> IL CONTO, FATTO E NON STIMATO: i criteri prevedono 2.773 livelli/anno
+#     a M30x4, cioe' ~1.390 per lato. Con 500 il tetto si riempirebbe in
+#     ~4 MESI di trend di un lato - ed EURJPY dal marzo 2020 (~115) al
+#     luglio 2024 (~175) e' quattro anni quasi in linea retta. L'unwind del
+#     carry di agosto 2024, che i criteri par. 2.2 nominano come LO stress
+#     test della OOS, avrebbe trovato i livelli piu' ampi GIA' BUTTATI: i
+#     reclaim da misurare non esisterebbero per costruzione.
+#     Alzato a 2000 (4x il costo, morso spostato a ~17 mesi) e pinnato
+#     uguale in tutti e cinque i file, cosi' non discrimina nessuna cella.
+#     Non di piu' perche' ScansionaLivelli percorre TUTTI i livelli vivi a
+#     ogni barra M15 (~275.000 barre su 11 anni): il tetto e' anche il
+#     costo macchina.
+# >>> COME SI SA SE IL TETTO HA MORSO: NON dal log. Dalla v1.11 dell'EA
+#     esiste la colonna CSV "Livelli Buttati", una per passata. Se e' > 0
+#     quella cella ha girato con la STRUTTURA AMPUTATA: si dichiara e non
+#     si legge sul merito (criteri par. 3.4).
+InpMaxLivelli=2000
 
 # --- FINESTRA DI SESSIONE: SPENTA, e non e' una dimenticanza.
 #     Filtro appiccicato a motore gia' tarato: 0 successi su 5
@@ -183,8 +195,17 @@ InpVerbose=0
 InpAutoTest=0
 InpComment=LIQSWJPYM30
 
-# --- MAGIC: 779500, VERGINE (verificato a grep su tutto il repo il
-#     21/08: 7795xx non compare da nessuna parte). NON il 772610 della
-#     bozza, che risulta GIA' PRESO. Un magic gia' visto fa incrociare
-#     al tester deal che non c'entrano (misurato in R54).
-InpMagic=779500
+# --- MAGIC DELLA GRIGLIA: 779502, VERGINE (verificato a grep su tutto il
+#     repo il 21/08). NON il 772610 della bozza, che risulta GIA' PRESO.
+#     >>> E NON 779500/779501, che sono del PASSO 0, ED E' IL PUNTO. <<<
+#     ExportTrades() gira in OnTester() a OGNI passata e scrive
+#     Common\Files\abtg_trades_<EA>_<Simbolo>_<magic>.csv: col magic
+#     condiviso le 30 passate della griglia sovrascriverebbero il
+#     per-trade su cui il gate del PASSO 0 ha dato il via libera - ed e'
+#     ESATTAMENTE il difetto che i criteri par. 1.2 rimproverano a R82
+#     ("il nome del file contiene il magic, non la finestra").
+#     In piu' e' il canarino con cui walkforward_generico.ps1 (righe
+#     690-694) distingue una cella RIGIRATA da una RIPESCATA DALLA CACHE:
+#     col magic condiviso quel file c'e' gia' dal PASSO 0 e risponde
+#     sempre "e' girata".
+InpMagic=779502

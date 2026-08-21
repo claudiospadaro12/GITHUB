@@ -99,7 +99,7 @@
 //                                                                    |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati - motore da OsmarSandovalEspinosa (MQL5 Code Base 68951)"
-#property version   "1.10"
+#property version   "1.11"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -256,6 +256,16 @@ int    gDayEqStamp     = -1;
 //    invalidati. Serve a rispondere alla domanda "arriva a 150 trade?"
 //    PRIMA di leggere il conto economico.
 long gLivCreati = 0, gLivConsumati = 0, gLivInvalidati = 0, gSegnaliScartati = 0;
+//--- 21/08/2026 (v1.11) - I LIVELLI BUTTATI DAL TETTO.
+//    Un livello sparisce solo se uno sweep lo consuma o una chiusura oltre lo
+//    invalida: in un trend lungo di un lato gli swing dell'altro lato non
+//    vengono MAI ne' toccati ne' rotti, e l'array cresce in modo MONOTONO.
+//    Quando il tetto InpMaxLivelli morde si butta il PIU' VECCHIO, cioe' il
+//    livello piu' AMPIO - proprio quello su cui il reclaim varrebbe di piu'.
+//    Senza questo contatore non esiste NESSUN artefatto che lo dica:
+//    gLivCreati viene incrementato lo stesso, quindi la colonna "Livelli
+//    Creati" non distingue un livello vivo da uno buttato.
+long gLivButtati = 0;
 
 //--- calendario notizie (caricato da CSV in OnInit se il filtro e' acceso).
 //    Sta QUI, in cima, e non accanto alle sue funzioni: cosi' nessuna
@@ -374,6 +384,7 @@ void LivelloAggiungi(SLivello &arr[],const double prezzo,const datetime nato)
      {
       LivelloRimuovi(arr,0);
       n=ArraySize(arr);
+      gLivButtati++;                 // v1.11: il canarino viaggia coi DATI
       Log("tetto livelli raggiunto: buttato il piu' vecchio (nessun overflow).");
      }
 
@@ -463,8 +474,8 @@ void OnDeinit(const int reason)
    //    numeri lo dicono PRIMA di guardare il conto economico, e sono una
    //    riga per passata: non allagano niente.
    PrintFormat("[LIQSWEEP][CONTEGGIO] livelli creati %I64d | consumati da uno sweep %I64d | "
-               "invalidati da una rottura %I64d | segnali scartati dai filtri %I64d",
-               gLivCreati, gLivConsumati, gLivInvalidati, gSegnaliScartati);
+               "invalidati da una rottura %I64d | BUTTATI DAL TETTO %I64d | segnali scartati dai filtri %I64d",
+               gLivCreati, gLivConsumati, gLivInvalidati, gLivButtati, gSegnaliScartati);
   }
 
 //+------------------------------------------------------------------+
@@ -1090,7 +1101,7 @@ double OnTester()
    //    degli agent: il canarino sparisce proprio nel round che serve a
    //    misurarlo. Quindi i quattro conteggi diventano quattro COLONNE del
    //    CSV. Nessuna riga di segnale e' toccata: qui si legge soltanto.
-   double stats[14];
+   double stats[15];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1110,6 +1121,10 @@ double OnTester()
    stats[11] = (double)gLivConsumati;                   // Livelli Consumati
    stats[12] = (double)gLivInvalidati;                  // Livelli Invalidati
    stats[13] = (double)gSegnaliScartati;                // Segnali Scartati
+   //--- v1.11: se questo e' > 0 la cella ha girato con la STRUTTURA AMPUTATA
+   //    (il tetto ha buttato livelli vivi). Va dichiarato e non si legge sul
+   //    merito: e' il canarino del punto 34, coi DATI e non con una Print.
+   stats[14] = (double)gLivButtati;                     // Livelli Buttati
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1132,7 +1147,7 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Livelli Creati,Livelli Consumati,Livelli Invalidati,Segnali Scartati";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Livelli Creati,Livelli Consumati,Livelli Invalidati,Segnali Scartati,Livelli Buttati";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
@@ -1144,10 +1159,12 @@ void OnTesterDeinit()
       string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
                                 data[7], data[8], data[9]);
-      if(ArraySize(data) >= 14)
-         row += StringFormat(",%.0f,%.0f,%.0f,%.0f", data[10], data[11], data[12], data[13]);
+      if(ArraySize(data) >= 15)
+         row += StringFormat(",%.0f,%.0f,%.0f,%.0f,%.0f", data[10], data[11], data[12], data[13], data[14]);
+      else if(ArraySize(data) >= 14)
+         row += StringFormat(",%.0f,%.0f,%.0f,%.0f,", data[10], data[11], data[12], data[13]);
       else
-         row += ",,,,";
+         row += ",,,,,";
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
