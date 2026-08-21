@@ -9,15 +9,32 @@
 > dichiarazione**. R94 chiede una cosa sola: **la frequenza sale?**
 > **Se non sale, il profitto non si guarda nemmeno.**
 
-> ### 🔁 VERSIONE **v2** — questa riga e' stata **bocciata in verifica il 21/08 (13 difetti)** e rifatta.
-> Il disegno del round non e' cambiato: 6 file prova, 12 celle, 24 passate.
-> Sono cambiate le **guardie**. Le tre correzioni che valgono piu' di tutte:
+> ### 🔁 VERSIONE **v3** — due verifiche, due bocciature, tutte e due utili.
+> **Il disegno del round non e' mai cambiato**: 6 file prova, 12 celle, 24
+> passate, stesse soglie, stesso canarino. Sono cambiate solo le **guardie**.
+>
+> **Dalla prima verifica (13 difetti) — le tre che valgono di piu':**
 > 1. 🧊 **la cache del tester viene svuotata**, altrimenti il canarino veniva
 >    **ripescato** invece che eseguito (§ il canarino, sotto);
 > 2. 📢 **il funnel `[BB-FUNNEL]` NON e' disponibile in questo round**, e ora e'
 >    scritto invece che promesso;
 > 3. 🔒 **il congelamento del branch e' diventato una misura** (impronta SHA256
 >    del sorgente, riconfrontata dopo ogni cella) invece di un post-it.
+>
+> **Dalla seconda (1 bloccante + 5) — quella che avrebbe fermato il round:**
+> 4. 🚨 **la spia dei per-trade accusava di RIPESCAGGIO le celle SANE.**
+>    `$ptPresi -eq 0` ha **due** cause, non una: oltre al ripescaggio c'e' la
+>    **cella gia' fatta**, che il driver salta (`walkforward_generico.ps1:615`) e
+>    che quindi **non riscrive i per-trade**. E la ripresa e' proprio quello che
+>    questa riga **consiglia**: alla prima interruzione il referto avrebbe
+>    scritto *"sospette di ripescaggio"* su **A20/B20/C20**, cioe' sulle tre
+>    celle di **canarino**. Ora `SALTATA` e `NON GIRATA` sono due voci diverse;
+> 5. ⏱️ **il gate dello zip e' ancorato all'ora di partenza del blocco**, non a
+>    una finestra di 15 minuti: uno zip di venti minuti prima non passa piu';
+> 6. 🧹 piu' guardia su **MetaEditor aperto**, perimetro della pulizia del
+>    Desktop allineato a quello del riempimento con `-Solo`, e i **residui del
+>    funnel** tolti da intestazioni e tabelle (non basta correggere dove il
+>    difetto e' stato segnalato: va tolto **ovunque sia scritto**).
 
 ⚠️ **PC DI BACKTEST. Chiudi MT5 *E MetaEditor*.** Mai sul VPS.
 ⚠️ **UNA MACCHINA, UN LAVORO:** R92 e R93 devono essere **finiti**.
@@ -32,9 +49,9 @@ download fallisce **ripiega in silenzio sulla copia locale** (difetto 24).
 Un SHA in testa alla riga pinnerebbe **gli script e non il motore**: sarebbe una
 sicurezza finta.
 
-Al suo posto **tre** cose, e la terza e' nuova della v2:
+Al suo posto **tre** cose, e la terza e' quella che conta:
 1. 🧊 **BRANCH CONGELATO: nessun push su `lavoro` mentre R94 gira.**
-2. 🏷️ **MARCATORI DI VERSIONE**: `R94-LANCIO-v2` nello script,
+2. 🏷️ **MARCATORI DI VERSIONE**: `R94-LANCIO-v3` nello script,
    `R94 -- BOLLINGER 37/1.4 SUL BREAKING BAND` in ogni file prova. Coprono la
    **cache di raw** (~5 minuti) e il download andato a male.
 3. 🔒 **L'IMPRONTA.** Un congelamento *dichiarato* e' un post-it, e R94 e' tutto
@@ -53,7 +70,7 @@ Al suo posto **tre** cose, e la terza e' nuova della v2:
 > Non tocca il Desktop, non cancella risultati di corse precedenti.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r94.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v2' -Quiet)){ throw 'SCRIPT VECCHIO O v1: la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK: si puo' mandare il BLOCCO 2 ===" -ForegroundColor Green }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r94.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v3' -Quiet)){ throw 'SCRIPT VECCHIO (v1 o v2): la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK: si puo' mandare il BLOCCO 2 ===" -ForegroundColor Green }
 ```
 
 **Il giro a vuoto fa quattro cose che il driver generico NON fa:**
@@ -89,7 +106,7 @@ Al suo posto **tre** cose, e la terza e' nuova della v2:
 | 2 | `InpBBDev` **unico** parametro con la sintassi start/step/stop | non e' piu' "una variabile alla volta" |
 | 3 | `InpPatternMode` = **2** GBPUSD · **0** EURUSD · **1** AUDUSD | pattern sbagliato = un'altra sedia |
 | 4 | `InpRiskPercent` = **1.0** | vedi la nota sul rischio |
-| 5 | `FromDate`/`ToDate` in **2024.09.26 → 2026.06.30**, stacco al **2025.06.09/10** | finestra diversa da R34 = canarino impossibile |
+| 5 | `FromDate` = **2024.09.26** e `ToDate` = **2025.06.09** | ⚠️ **l'anteprima porta SOLO la gamba IS** (`walkforward_generico.ps1:517-518` scrive `$WF[0]`): se cerchi `2026.06.30` **non lo trovi, ed e' giusto cosi'**. Una data diversa da queste due = finestra diversa da R34 = canarino impossibile |
 | 6 | `Deposit` = **100000** | a 10.000 **il canarino non torna** |
 
 ⚠️ **Ma l'anteprima non e' la prova del pin** (punto 34-bis, pagato ieri su R93):
@@ -107,7 +124,7 @@ Al suo posto **tre** cose, e la terza e' nuova della v2:
 > Desktop** all'inizio, e alla fine **riscrive lo zip**.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; if(-not (Test-Path $p)){ throw 'manda prima il BLOCCO 1' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v2' -Quiet)){ throw 'SCRIPT VECCHIO O v1' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $desk=@([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop')) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1; if(-not $desk){ $desk=$env:USERPROFILE }; $z=Join-Path $desk 'R94_BREAKINGBAND_BB37.zip'; if(-not (Test-Path $z)){ throw ('LO ZIP NON C E in ' + $desk + ': la corsa non e arrivata alla raccolta') }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ('ZIP STANTIO: ha ' + [int]$eta + ' minuti, non e di adesso') }; if($rc -ne 0){ Write-Host 'ESITO PARZIALE: mandalo lo stesso, ma di QUALE pezzo manca (lo scrive REFERTO_R94.txt)' -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; if(-not (Test-Path $p)){ throw 'manda prima il BLOCCO 1' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v3' -Quiet)){ throw 'SCRIPT VECCHIO (v1 o v2)' }; $t0=Get-Date; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $desk=@([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop')) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1; if(-not $desk){ $desk=$env:USERPROFILE }; $z=Join-Path $desk 'R94_BREAKINGBAND_BB37.zip'; if(-not (Test-Path $z)){ throw ('LO ZIP NON C E in ' + $desk + ': la corsa non e arrivata alla raccolta') }; if((Get-Item $z).LastWriteTime -lt $t0){ throw ('ZIP STANTIO: e stato scritto alle ' + (Get-Item $z).LastWriteTime.ToString('HH:mm:ss') + ', PRIMA che questo blocco partisse (' + $t0.ToString('HH:mm:ss') + '): e di una corsa precedente') }; if($rc -ne 0){ Write-Host 'ESITO PARZIALE: mandalo lo stesso, ma di QUALE pezzo manca (lo scrive REFERTO_R94.txt)' -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
 ```
 
 > 🖥️ **Il Desktop e' calcolato con gli STESSI quattro candidati del driver**
@@ -116,11 +133,28 @@ Al suo posto **tre** cose, e la terza e' nuova della v2:
 > un PC con OneDrive attivo la riga avrebbe cercato lo zip **dove non era** e
 > avrebbe dichiarato fallita una corsa riuscita.
 
-### 🔁 SE LA CORSA SI INTERROMPE
+### 🔁 SE LA CORSA SI INTERROMPE — e come si legge la ripresa
 **Si rimanda lo stesso BLOCCO 2.** Le celle gia' fatte vengono **saltate** (il
-driver le riconosce dal CSV gia' presente): la ripresa qui e' sana e va usata.
+driver le riconosce dal CSV gia' presente, `walkforward_generico.ps1:615`): la
+ripresa qui e' sana e va usata.
 **`-Rifai` serve SOLO** se hai cambiato un file prova o l'EA — e in quel caso
 rifa' tutto da capo.
+
+> ⚠️ **Ma una cella saltata NON riapre MT5 e quindi NON riscrive i per-trade.**
+> Nella v2 questo faceva scattare la spia del ripescaggio **su celle sane** —
+> e siccome A20/B20/C20 sono le tre celle di **canarino**, il referto avrebbe
+> accusato proprio il controllo per cui il round esiste. Ora il referto ha
+> **due voci distinte**:
+>
+> | voce nel referto | vuol dire |
+> |---|---|
+> | `CELLE SALTATE (CSV gia' presente, NON rigirate in questo giro)` | 🟢 **normale in una ripresa.** I numeri di quelle celle vengono da un **giro precedente** |
+> | `CELLE SENZA PER-TRADE FRESCO (sospette di RIPESCAGGIO dalla cache)` | 🔴 **da guardare.** La cella doveva girare e non ha lasciato traccia |
+>
+> 📌 **E c'e' una conseguenza sul canarino, scritta perche' non sfugga:** la
+> cache viene svuotata **all'inizio di ogni giro**. Se una cella di canarino
+> risulta **SALTATA**, il suo controllo vale **per il giro in cui e' girata**,
+> non per questo. Per rifarla davvero: **`-Solo A20 -Rifai`**.
 
 ### ⏱️ Quanto dura
 **Non lo so, e non lo invento.** Sono **24 passate a tick reali** su H1 forex,

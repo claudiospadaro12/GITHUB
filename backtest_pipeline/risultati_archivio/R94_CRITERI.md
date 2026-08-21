@@ -303,7 +303,7 @@ non si perda.
 | ASCII puro nel `.ps1` | conteggio byte > 127 | ✅ 0 |
 | estrazione `#include` | eseguita sul sorgente vero | ✅ trova `ABTG_PausaGuardian.mqh`, salta `Trade/Trade.mqh` |
 | difetto 33 (secondo artefatto) | eseguito su `walkforward_generico.ps1` | ✅ 0 occorrenze dell'EA nel driver |
-| il rischio cambia `n`? | lettura del sorgente | ✅ no: Guardian fail-open nel tester, nessun kill switch giornaliero, `InpMaxPositions` conta posizioni. Unico residuo: `lot<=0` (riga 1133), **contato dal funnel** |
+| il rischio cambia `n`? | lettura del sorgente | ✅ **no, e la catena si chiude nel CODICE**: `LotByRisk` **riga 1427** termina con `MathMax(mn,MathMin(mx,lot))`, cioe' il lotto e' **agganciato al MINIMO DEL BROKER** e `InpRiskPercent` non puo' azzerarlo. In piu': Guardian fail-open nel tester, nessun kill switch giornaliero, `InpMaxPositions` conta posizioni. **Residuo:** la guardia di **riga 1137** esce **senza incrementare nessun contatore** (inerte nel tester, ma sarebbe un'uscita muta) |
 
 ⚠️ **Quello che NON e' verificato:** la riga **non e' mai stata eseguita su
 Windows**. Il parser conferma la sintassi, non il comportamento. Per questo il
