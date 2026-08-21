@@ -1,6 +1,17 @@
 # RIGA DI LANCIO — R92-SCAN BULGE (88 passate)
 
-**Pin: `fe430a54381ef09c0c992bcc2b09008ac4d42e3f`** (branch `lavoro`, 21/08/2026).
+**Pin PASSO 0/1: `fe430a54381ef09c0c992bcc2b09008ac4d42e3f`** (branch `lavoro`, 21/08/2026) —
+gia' eseguiti e passati, non si ritoccano.
+
+**Pin PASSO 3/4: `bdaf3601be53e2d21d38ba22cce239821be0d735`** (branch `lavoro`,
+21/08/2026, dopo `b58e05a`) — **CORRETTO il 21/08 pomeriggio**: il pin vecchio
+di `scan_market.ps1` per il BULGE girava a `Risk_Percent=1.0` mentre la firma
+(R92_CRITERI.md) dice **0,80%**. Bug BLOCCANTE trovato PRIMA del lancio (stessa
+classe dell'incidente PASSO 0 di stamattina: un pin vecchio che non porta
+l'ultima correzione). Verificato: nessun'altra modifica a `scan_market.ps1` fra
+i due commit oltre al rischio, e il file prova (`prove/R92_scan_BULGE.txt`) e'
+identico nei due pin.
+
 Criteri **FIRMATI**: `backtest_pipeline/risultati_archivio/R92_CRITERI.md`.
 
 ## Cosa deve essere finito PRIMA (una macchina, un lavoro)
@@ -100,13 +111,14 @@ pochi minuti se la macchina produce i CSV, invece di scoprirlo dopo ore.
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
-  $h="fe430a54381ef09c0c992bcc2b09008ac4d42e3f"
+  $h="bdaf3601be53e2d21d38ba22cce239821be0d735"
   $d="$env:USERPROFILE\r92"
   New-Item -ItemType Directory -Force -Path $d | Out-Null
   $p=Join-Path $d "scan_market.ps1"
   Remove-Item $p -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scan_market.ps1" -OutFile $p -EA Stop
   if(-not (Select-String -Path $p -SimpleMatch -Pattern "MARCATORE_SCAN_BULGE_R92_v1" -Quiet)){ throw "scan_market.ps1 VECCHIO: il BULGE non c'e' dentro" }
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet)){ throw "scan_market.ps1 ha il rischio SBAGLIATO (non 0,80%): NON lanciare" }
   & powershell -ExecutionPolicy Bypass -File $p -Robot ABTG_Bulge -SoloSimbolo GBPUSD
 }
 ```
@@ -126,12 +138,13 @@ GBPUSD viene **saltato** (gia' fatto al PASSO 3: e' la ripresa, non un errore).
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw "MT5 E' APERTO: chiudilo, altrimenti escono 0 CSV" }
-  $h="fe430a54381ef09c0c992bcc2b09008ac4d42e3f"
+  $h="bdaf3601be53e2d21d38ba22cce239821be0d735"
   $d="$env:USERPROFILE\r92"
   $p=Join-Path $d "scan_market.ps1"
   Remove-Item $p -Force -EA SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/backtest_pipeline/scan_market.ps1" -OutFile $p -EA Stop
   if(-not (Select-String -Path $p -SimpleMatch -Pattern "MARCATORE_SCAN_BULGE_R92_v1" -Quiet)){ throw "scan_market.ps1 VECCHIO: il BULGE non c'e' dentro" }
+  if(-not (Select-String -Path $p -SimpleMatch -Pattern "Risk_Percent=0.8||0.8||0||0.8||N" -Quiet)){ throw "scan_market.ps1 ha il rischio SBAGLIATO (non 0,80%): NON lanciare" }
   & powershell -ExecutionPolicy Bypass -File $p -Robot ABTG_Bulge
   $dsk=[Environment]::GetFolderPath("Desktop")
   $rac=Join-Path $dsk "R92_SCAN_BULGE"
