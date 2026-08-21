@@ -35,10 +35,12 @@
 #    6. lancia le 6 celle, una alla volta, controllando LASTEXITCODE
 #    7. raccoglie sul Desktop, porta via a best effort anche i LOG DEGLI
 #       AGENT del tester (TRE radici) e fa lo zip. ATTENZIONE: il funnel
-#       [BB-FUNNEL] NON E' ATTESO in questo round -- PrintFunnel() gira
-#       in OnTester (sull'agente) e le passate sono in ottimizzazione:
-#       quelle Print non sono leggibili. Il numero dei log finisce nel
-#       referto (punto 34-ter); il cancello si legge dalla colonna Trades.
+#       [BB-FUNNEL] NON E' USABILE in questo round -- PrintFunnel() gira
+#       in OnTester (sull'agente) e le passate sono in ottimizzazione.
+#       Il limite non e' che le Print siano illeggibili (finiscono nei log
+#       degli agent, che qui si raccolgono): e' che NON SONO ATTRIBUIBILI
+#       A UNA CELLA. Il numero dei log finisce comunque nel referto
+#       (punto 34-ter); il cancello si legge dalla colonna Trades.
 #
 #  IL PIN NON COPRE L'EA (difetto 24): walkforward_generico.ps1 ha
 #  EABranch="lavoro" SCRITTO FISSO alla riga 91 e riscarica il .mq5 da
@@ -47,7 +49,7 @@
 #  il branch CONGELATO (nessun push su lavoro mentre R94 gira) piu' i
 #  marcatori di versione. Un SHA pinnerebbe gli script e NON il motore.
 #
-#  MARCATORE VERSIONE: R94-LANCIO-v4
+#  MARCATORE VERSIONE: R94-LANCIO-v5
 #  (v2 = cache del tester svuotata, compilazione che aspetta l'artefatto,
 #   tre radici per i log, per-trade ripuliti dentro il ciclo, sorgente
 #   confrontato per hash a ogni cella.
@@ -61,7 +63,14 @@
 #   CONTANO invece di dedurle da Test-Path (un CSV con la sola
 #   intestazione passava per buono e alla ripresa non veniva mai piu'
 #   rifatto); i per-trade producibili sono 6 e non 12, perche' InpMagic
-#   non e' nei file prova)
+#   non e' nei file prova.
+#   v5 = quarta verifica: la spia dei tre rami era stata scritta nel
+#   REFERTO ma NON nel testo a schermo, che portava ancora l'affermazione
+#   universale "le tre celle di canarino RIGIRANO" e la spia a due rami --
+#   cioe' lo script che ha generato il punto 49 violava il punto 49
+#   regola 3, e proprio sul percorso di ripresa; piu' il modo/switch del
+#   giro dichiarati nel referto (punto 50) e la ragione vera per cui il
+#   funnel non si legge: non "illeggibile", ma NON ATTRIBUIBILE a una cella)
 # =====================================================================
 param(
   [string]$Rif      = "lavoro",
@@ -413,8 +422,13 @@ if (-not $SoloControllo) {
     }
   }
   Write-Host ("    cache del tester svuotata: " + $tolti + " file tolti") -ForegroundColor DarkYellow
-  Write-Host "    (le tre celle di canarino RIGIRANO: se una torna in pochi secondi," -ForegroundColor DarkYellow
-  Write-Host "     e' un ripescaggio e va detto invece di essere letto come conferma)" -ForegroundColor DarkYellow
+  Write-Host "    Le celle che GIRANO in questo giro ripartono quindi da cache vuota." -ForegroundColor DarkYellow
+  Write-Host "    ATTENZIONE, i rami sono TRE e non due (punto 49):" -ForegroundColor DarkYellow
+  Write-Host "      OK          la cella gira e ci mette il suo tempo;" -ForegroundColor DarkYellow
+  Write-Host "      NORMALE     lo script la dichiara GIA' FATTA o A META': torna subito," -ForegroundColor DarkYellow
+  Write-Host "                  ed e' la RIPRESA, non un ripescaggio;" -ForegroundColor DarkYellow
+  Write-Host "      ALLARME     torna in pochi secondi SENZA essere stata dichiarata:" -ForegroundColor DarkYellow
+  Write-Host "                  quello e' un ripescaggio, e va detto." -ForegroundColor DarkYellow
 }
 
 # --- LO ZIP E LA CARTELLA DI RACCOLTA VECCHI, VIA ADESSO (non alla fine):
@@ -466,10 +480,19 @@ Write-Host "        input, stesso simbolo, stessa finestra, stesso binario);" -F
 Write-Host "      - con la cache piena MT5 l'avrebbe RIPESCATA, e una passata ripescata" -ForegroundColor Gray
 Write-Host "        NON LEGGE UN TICK: sarebbe tornata al centesimo anche con lo storico" -ForegroundColor Gray
 Write-Host "        sparito, mentre le celle P37 avrebbero girato sui dati veri;" -ForegroundColor Gray
-Write-Host "      - la sezione 4 ha svuotato Tester\cache, quindi le tre celle di" -ForegroundColor Gray
-Write-Host "        canarino RIGIRANO davvero, e il controllo torna a valere." -ForegroundColor Gray
-Write-Host "    SPIA: se una cella di canarino torna in pochi secondi, e' stata ripescata" -ForegroundColor Yellow
-Write-Host "    lo stesso. Si dice, non si legge come conferma." -ForegroundColor Yellow
+Write-Host "      - la sezione 4 ha svuotato Tester\cache, quindi le celle CHE GIRANO" -ForegroundColor Gray
+Write-Host "        in questo giro ripartono da cache vuota e il controllo torna a valere." -ForegroundColor Gray
+Write-Host ""
+Write-Host "    MA NON PER TUTTE, E VA LETTO PRIMA (punto 49): il driver salta per" -ForegroundColor Yellow
+Write-Host "    FINESTRA, non per cella. Su una RIPRESA -- che questa riga consiglia --" -ForegroundColor Yellow
+Write-Host "    una cella di canarino puo' risultare GIA' FATTA o A META', e allora il" -ForegroundColor Yellow
+Write-Host "    suo controllo vale per il giro in cui e' girata, non per questo." -ForegroundColor Yellow
+Write-Host "    LA SPIA HA TRE RAMI:" -ForegroundColor Yellow
+Write-Host "      OK        la cella gira e ci mette il suo tempo;" -ForegroundColor Yellow
+Write-Host "      NORMALE   lo script la dichiara GIA' FATTA o A META' e torna subito;" -ForegroundColor Yellow
+Write-Host "      ALLARME   torna in pochi secondi SENZA essere stata dichiarata." -ForegroundColor Yellow
+Write-Host "    La garanzia si legge PER DIFFERENZA, nel referto: sono state rigirate" -ForegroundColor Yellow
+Write-Host "    adesso le celle di canarino NON elencate come SALTATE o A META'." -ForegroundColor Yellow
 
 # =====================================================================
 #  6. LE CORSE
@@ -714,13 +737,17 @@ Copy-Item -LiteralPath (Join-Path $Cartella "R94_CRITERI.md") -Destination $dest
 #     ATTENZIONE, E' SCRITTO PRIMA DI GUARDARE: IN QUESTO ROUND IL FUNNEL
 #     [BB-FUNNEL] NON C'E'. PrintFunnel() gira dentro OnTester(), cioe'
 #     SULL'AGENTE, e walkforward_generico.ps1 scrive SEMPRE
-#     Optimization=1: in ottimizzazione quelle Print non finiscono da
-#     nessuna parte di leggibile. R91, per leggere le righe [BB], dovette
-#     fare una PASSATA SINGOLA dedicata con Optimization=0.
+#     Optimization=1. E il limite NON e' che quelle Print siano
+#     illeggibili -- finiscono proprio in questi log, e $nLog puo'
+#     benissimo essere > 0. Il limite e' che NON SONO ATTRIBUIBILI A UNA
+#     CELLA: piu' agent scrivono nello stesso posto e le righe non
+#     portano l'etichetta della passata. R91, per leggere le righe [BB]
+#     e sapere DI CHI erano, dovette fare una PASSATA SINGOLA dedicata
+#     con Optimization=0.
 #     Quindi qui NON si promette il funnel: si raccoglie quello che c'e'
 #     (tre radici, non due -- gli agent locali stanno sotto
 #     %APPDATA%\MetaQuotes\Tester, non sotto la cartella dati) e SI
-#     DICHIARA IL NUMERO, cosi' lo zero si legge invece di dedurlo.
+#     DICHIARA IL NUMERO, qualunque sia -- non si promette che sia zero.
 #     Il cancello del round NON dipende da questo: si legge dalla colonna
 #     Trades del CSV, che e' un dato e non uno schermo.
 $logDest = Join-Path $dest "log_agent"
@@ -735,10 +762,13 @@ foreach ($radice in @((Join-Path $DataFolder "Tester"), (Join-Path $instDir "Tes
     }
 }
 Write-Host ("    log degli agent raccolti: " + $nLog) -ForegroundColor DarkGray
-Write-Host "    (il funnel [BB-FUNNEL] NON e' atteso in questo round: gira in OnTester" -ForegroundColor DarkGray
-Write-Host "     e le passate sono in ottimizzazione. Il cancello si legge dalla colonna" -ForegroundColor DarkGray
-Write-Host "     Trades del CSV. Portare i contatori in una COLONNA via FrameAdd resta" -ForegroundColor DarkGray
-Write-Host "     un lavoro a se': l'EA NON si tocca a branch congelato.)" -ForegroundColor DarkGray
+Write-Host "    Il funnel [BB-FUNNEL] NON si usa in questo round, e il motivo non e'" -ForegroundColor DarkGray
+Write-Host "    che sia illeggibile: PrintFunnel gira in OnTester, cioe' sull'AGENTE," -ForegroundColor DarkGray
+Write-Host "    e le sue righe finiscono in questi log senza l'etichetta della cella." -ForegroundColor DarkGray
+Write-Host "    In ottimizzazione parallela NON sono attribuibili a una passata." -ForegroundColor DarkGray
+Write-Host "    Il cancello si legge dalla colonna Trades del CSV. Portare i contatori" -ForegroundColor DarkGray
+Write-Host "    in una COLONNA via FrameAdd resta un lavoro a se': l'EA NON si tocca" -ForegroundColor DarkGray
+Write-Host "    a branch congelato." -ForegroundColor DarkGray
 
 # il referto porta dentro la sua DATA: quella deve essere di ADESSO
 $ref = Join-Path $dest "REFERTO_R94.txt"
@@ -749,7 +779,24 @@ $rr += ("macchina: " + $env:COMPUTERNAME + "   riferimento: " + $Rif)
 $rr += ("finestra: " + $DaQuando + " -> " + $Fino + "   modello: " + $Modello + " (4 = tick reali)")
 $rr += ("deposito: " + $Deposito + "   rischio: 1,0% (ASSUNZIONE dichiarata da Claude, NON firmata)")
 $rr += ("file prova: " + $celle.Count + "   celle: " + ($celle.Count * 2) + "   passate attese: " + $passateAttese)
-$rr += ("log degli agent raccolti: " + $nLog + "   (zero e' l'esito ATTESO: vedi sotto)")
+# GLI SWITCH DI QUESTO GIRO, DICHIARATI (punto 50). Un referto che non dice
+# con quali interruttori e' stato prodotto si legge come se fossero i default.
+$swDetti = @()
+if ($Solo -ne "")   { $swDetti += ("-Solo '" + $Solo + "'") }
+if ($Rifai)         { $swDetti += "-Rifai" }
+if ($SoloControllo) { $swDetti += "-SoloControllo" }
+if ($Rif -ne "lavoro") { $swDetti += ("-Rif " + $Rif) }
+if ($swDetti.Count -eq 0) { $rr += "switch di questo giro: NESSUNO (corsa piena, tutte le celle)" }
+else { $rr += ("switch di questo giro: " + ($swDetti -join " ")) }
+if ($Solo -ne "") {
+  $rr += "  ATTENZIONE, -Solo E' ATTIVO: la cartella di raccolta NON e' stata"
+  $rr += "  svuotata (il perimetro della pulizia e' quello del riempimento, punto"
+  $rr += "  35-bis), quindi qui dentro possono convivere file di QUESTO giro e file"
+  $rr += "  di giri PRECEDENTI, e niente li distingue a occhio."
+  $rr += "  >>> SONO DI ADESSO SOLO I FILE ELENCATI QUI SOTTO IN 'FILE ATTESI'."
+  $rr += "  Tutti gli altri CSV presenti nello zip vengono da una corsa precedente."
+}
+$rr += ("log degli agent raccolti: " + $nLog + "   (qualunque sia il numero, vedi sotto perche' NON si usa)")
 if ($ripescate.Count -gt 0) {
   $rr += ("CELLE SENZA PER-TRADE FRESCO (sospette di RIPESCAGGIO dalla cache): " + ($ripescate -join " "))
 } else { $rr += "PER-TRADE FRESCHI: nessuna cella girata e' rimasta senza la sua serie (nessun ripescaggio)." }
@@ -830,7 +877,12 @@ $rr += "     la frequenza e' stata comprata con perdenti: peggioramento anche se
 $rr += ""
 $rr += "IL FUNNEL [BB-FUNNEL] NON C'E', ED E' DETTO PRIMA DI GUARDARE:"
 $rr += "  PrintFunnel() gira in OnTester (sull'agente) e le passate sono in"
-$rr += "  ottimizzazione (Optimization=1 sempre): quelle Print non sono leggibili."
+$rr += "  ottimizzazione (Optimization=1 sempre). Il limite NON e' che siano"
+$rr += "  illeggibili -- finiscono nei log degli AGENT, che questo script raccoglie"
+$rr += "  (terza radice) e che possono benissimo essere piu' di zero. Il limite e'"
+$rr += "  che NON SONO ATTRIBUIBILI A UNA CELLA: piu' agent scrivono nello stesso"
+$rr += "  posto, le righe non portano l'etichetta della cella, e in ottimizzazione"
+$rr += "  parallela non c'e' modo di dire quale passata le ha prodotte."
 $rr += "  Per averle servirebbe una passata singola dedicata, come fece R91."
 $rr += "  Portare i contatori in una COLONNA (FrameAdd) resta un lavoro a se':"
 $rr += "  a branch congelato l'EA NON si tocca."
