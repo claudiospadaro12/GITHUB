@@ -440,6 +440,7 @@ Dico ("COMPILATO " + $Ea) "Green"
 if(-not $SoloControllo -and -not $SaltaPasso0){
   Titolo "4-A. PASSO 0-A - LO STORICO DI EURJPY (M1 + M15) DAL BROKER"
   $ScStorico = Join-Path $Work "scarica_storico.ps1"
+  $t0A = Get-Date        # concetto D2: serve a distinguere un referto NUOVO da uno di ieri
   try{
     Scarica ("$RawPin/backtest_pipeline/scarica_storico.ps1") $ScStorico 'REFERTO STORICO'
     #  >>> E ANCHE QUESTO GEMELLO VA PINNATO (difetto 24, seconda occorrenza). <<<
@@ -475,8 +476,19 @@ if(-not $SoloControllo -and -not $SaltaPasso0){
              else { "errore" }
       [void]$Problemi.Add("PASSO 0-A: scarica_storico.ps1 e' uscito con codice " + $LASTEXITCODE + " -> " + $che + ". Lo scarico NON e' completo: il gate 0-C resta la misura che decide.")
     }
+    #  >>> E ANCHE QUI SI GUARDA LA DATA (stesso concetto del D2). <<<
+    #  scarica_storico.ps1 cancella il CSV prima di partire, ma se muore PRIMA
+    #  (terminale non trovato, exit 1 a riga 67, scarico del .ps1 fallito) il
+    #  referto di IERI resta li' e verrebbe letto come il verdetto di ADESSO -
+    #  cioe' il PASSO 0-A risponderebbe con la misura sbagliata.
     $csvSt = Join-Path $DataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
-    if(Test-Path -LiteralPath $csvSt){
+    if((Test-Path -LiteralPath $csvSt) -and ((Get-Item -LiteralPath $csvSt).LastWriteTime -lt $t0A)){
+      [void]$Problemi.Add("PASSO 0-A: il referto storico e' del " +
+                          (Get-Item -LiteralPath $csvSt).LastWriteTime.ToString("yyyy-MM-dd HH:mm",$INV) +
+                          ", PRIMA dell'avvio di questo passo: e' STANTIO e NON descrive questa corsa. Non lo leggo.")
+      $csvSt = ""
+    }
+    if($csvSt -ne "" -and (Test-Path -LiteralPath $csvSt)){
       #  LE COLONNE VERE le scrive ABTG_HistoryDownloader.mq5 riga 140:
       #    Simbolo,Timeframe,Barre,PrimaDataLocale,PrimaDataServer,Verdetto
       #  La prima stesura leggeva $r.Stato, che NON ESISTE: PowerShell
@@ -644,7 +656,14 @@ $inputs
     Dico ("per-trade del PASSO 0 messi in sosta in " + $Sosta) "Green"
 
     # --- G1: il per-trade esiste ed e' popolato
+    #  Il per-trade dev'essere di ADESSO. La pulizia della sezione 2 lo rende
+    #  vero per costruzione, ma un gate non poggia su "per costruzione": misura.
     if(-not (Test-Path -LiteralPath $ptA)){ $Fatale = "PASSO 0 / G1: nessun per-trade prodotto. Storico assente su $Sym, oppure l'EA non ha aperto niente." }
+    elseif((Get-Item -LiteralPath $ptA).LastWriteTime -lt $tPasso0){
+      $Fatale = "PASSO 0 / G1: il per-trade e' PIU' VECCHIO dell'avvio delle passate gemelle (" +
+                (Get-Item -LiteralPath $ptA).LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV) +
+                "): l'EA non l'ha riscritto, e questo NON e' il gate di questa corsa."
+    }
     if($Fatale -eq ""){
       $righeA = @(Get-Content -LiteralPath $ptA)
       $Passo0.N = $righeA.Count - 1
