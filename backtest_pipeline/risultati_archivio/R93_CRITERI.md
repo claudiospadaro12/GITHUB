@@ -756,3 +756,56 @@ zip va mandato lo stesso.
 Se manca qualcosa, `REFERTO_R93.txt` lo elenca sotto **`MANCANTI`**: si legge
 quello **prima** di aprire i CSV.
 
+
+
+---
+
+# ✍️ FIRMA DI CLAUDIO — R93 FIBOH4, 21/08/2026, **PRIMA DEI NUMERI**
+
+> **"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"**
+> — Claudio, 21/08/2026, in chat.
+
+Dichiarazione di cecita': al momento della firma **nessun numero di questi round
+e' stato prodotto, letto o guardato**. Nessuno dei due EA nuovi e' mai stato
+compilato. Le soglie NON sono state toccate dalla firma.
+
+
+## Soglie congelate, come scritte sopra e non toccate
+
+**GAMBA A — il filtro news sul nostro `ABTG_FiboH4_Multi`**
+- **S1-A** n >= 150 in IS **e** in OOS
+- **S2-A** taglio delle operazioni **fra 5% e 20%** (atteso misurato **8-12%**; fuori
+  banda la cella si butta: sotto il 5% il filtro non ha letto il file, sopra il 20%
+  ha letto la cosa sbagliata)
+- **S3-A** il filtro e' **UTILE** solo se l'aspettativa delle operazioni TAGLIATE e'
+  **< 0 in entrambe le finestre**. La soglia **non e' un profit factor**, e'
+  `(Profit_base - Profit_cella) / (n_base - n_cella)`: se **>= 0**, il filtro ha
+  tagliato **vincenti** — ed e' esattamente cosi' che R91 ha bocciato il cancello RR.
+
+**GAMBA B — la geometria vera del corso (`ABTG_FiboH4_Corso`)**
+- **S1-B** setup piazzati > 0 **e** n >= 30 per simbolo e per finestra
+- **S2-B** PF >= 1,30 in **entrambe** le finestre e su **entrambi** i simboli
+  (la famiglia, mai il simbolo solo)
+- **S3-B** profitto netto > 0 in entrambe
+
+**Regola di selezione, dichiarata come DIVERSA dal solito:** sull'asse dello stop
+**non esiste un altopiano** — sono quattro ricette qualitative, non una griglia.
+**R93 non sceglie un metodo di stop**: dice solo se almeno uno regge. Sceglierlo qui
+sarebbe pescare il picco, che e' precisamente quello che il 4,236 gia' e'.
+
+## Cosa e' accettato PRIMA, e non si potra' rinfacciare dopo
+1. **R93 e' OHLC e non puo' essere altro** (a BCM i tick di GBPUSD partono dal
+   2024.07.05): e' **screening**, **nessuna promozione**, qualunque numero esca.
+2. **La finestra finisce il 2025.12.19**, non il 2026.06.30: e' il limite del
+   calendario news. Oltre, il filtro sarebbe **cieco** — l'errore M17 al contrario.
+3. **In gamba B il MERITO e' sospeso per aritmetica** (~30 op/anno/simbolo: per
+   150 IS + 150 OOS servirebbero ~10 anni). **Il RISCHIO si legge lo stesso**
+   (valvola R59, regola B dell'Emendamento).
+4. **La gamba A da sola non salva niente**, ed e' scritto prima: un filtro che toglie
+   l'8-12% delle occasioni non ribalta un motore con R:R strutturale 0,80. La gamba A
+   risponde a un'ALTRA domanda — **quanto costa la conformita' prop** — e va letta cosi'.
+5. **Senza le richieste R2 e R3** (screenshot del Fibo col livello 100 e del pannello),
+   il referto dovra' dire *"misurata la NOSTRA ricostruzione"*, **non** *"la strategia
+   del corso"*.
+
+**Dimensione:** 14 file prova, 34 celle, **68 passate**.

@@ -198,3 +198,38 @@ Da riempire con la parola esatta di Claudio, la data, e la scelta esplicita
 sul **rischio** (§2.1). Se la decisione e' **"non serve, archivia"**, va scritta
 qui lo stesso: un round non lanciato con la ragione scritta vale piu' di un
 round lanciato per non lasciare la casella vuota.
+
+
+---
+
+# ✍️ FIRMA DI CLAUDIO — R94 BOLLINGER 37/1.4, 21/08/2026, **PRIMA DEI NUMERI**
+
+> **"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"**
+> — Claudio, 21/08/2026, in chat.
+
+La parola **"r94 lancia"** firma i criteri e autorizza la corsa.
+
+Dichiarazione di cecita': al momento della firma **nessun numero di questi round
+e' stato prodotto, letto o guardato**. Nessuno dei due EA nuovi e' mai stato
+compilato. Le soglie NON sono state toccate dalla firma.
+
+
+## La domanda, che NON e' "quanto rende"
+La famiglia BreakingBand gira su **n OOS di 11 / 13 / 26**: con quei campioni il
+**merito e' sospeso per dichiarazione**. R94 chiede una cosa sola:
+**la frequenza sale?** (deviazione 1.4 = bande piu' strette = piu' tocchi).
+
+> **Se la frequenza non sale, il profitto non si guarda nemmeno.** Congelato qui.
+
+Fattoriale **2x2**, 24 passate, per separare il **periodo** (che una fonte in casa ce
+l'ha: BB 37/3 sugli indici) dalla **deviazione** (che non ce l'ha: viene dal corso).
+
+## Assunzione dichiarata da Claude, NON firmata da Claudio: il rischio
+Claudio ha firmato "lancia" **senza pronunciarsi sul rischio**, che era la richiesta
+n.4 dell'agente (1,0% "canarino valido" contro 0,80% della firma R92).
+**Assunzione presa: si resta all'1,0%**, e il motivo e' che R94 misura la
+**FREQUENZA** contro la **base gia' misurata della famiglia**, che gira all'1,0%:
+cambiare rischio renderebbe il confronto con la base **non comparabile**, e la
+frequenza e' la grandezza che il rischio non tocca.
+⚠️ **Claudio puo' ribaltare questa assunzione con una parola**, e in quel caso la
+base va rimisurata insieme alla cella.

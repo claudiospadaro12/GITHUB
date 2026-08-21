@@ -629,3 +629,34 @@ tardi per rifiutarli.
 - **non tocca il forward**, nessun preset, nessun input;
 - **non dichiara ammessa nessuna prop**: finche' non c'e' la risposta scritta,
   vale la regola D3.
+
+
+---
+
+# ✍️ FIRMA — §13 GRIGLIA / MARTINGALA **CONGELATA** (21/08/2026)
+
+> **"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"**
+> — Claudio, 21/08/2026, in chat.
+
+La parola **"metro"** congela la voce **§13** del METRO_PROP: i cinque test binari
+**T1-T5**, l'unita' di misura **PACCHETTO** (regola G2), le **sei misure della coda**
+(G3) e il **flottante contro il muro giornaliero** (G4).
+
+Dichiarazione di cecita': al momento della firma **nessun numero di questi round
+e' stato prodotto, letto o guardato**. Nessuno dei due EA nuovi e' mai stato
+compilato. Le soglie NON sono state toccate dalla firma.
+
+Da qui in avanti **nessuna griglia entra nell'imbuto senza passare da §13**, e la
+regola di casa e' rispettata alla lettera: **il metro e' stato scritto PRIMA dei
+numeri**, anzi prima ancora che esistesse un EA da misurare.
+
+**M14 passa da "da scrivere" a CONGELATA.**
+
+## Due buchi che la firma NON chiude (restano aperti e vanno lavorati)
+1. **Il Guardian non vede i PENDENTI**: `OpenRiskPct()` (`ABTG_Guardian.mq5:159`)
+   cicla su `PositionsTotal()`, quindi una scala di ordini depositata in blocco ha
+   un rischio impegnato che il **cap C1 = 3,25%** non conta finche' non e' tardi.
+   Riguarda il campo di oggi, non solo la Mediazione (il FiboH4 vive di pendenti).
+2. **`gWorstDayPct` si azzera a mezzanotte BCM, FTMO resetta alle 23:00 server**:
+   la nostra giornata e la loro sono **sfasate di un'ora**, e misuriamo un muro
+   diverso da quello che ci giudicherebbe.

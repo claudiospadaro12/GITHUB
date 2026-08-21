@@ -249,3 +249,36 @@ torna qui con un numero e si sceglie fra A e B **sui fatti**.
 | data | parola esatta di Claudio | cosa attiva |
 |---|---|---|
 | _(in attesa)_ | | |
+
+
+---
+
+# ✍️ FIRMA — **OPZIONE C: "FREQUENZA"** (21/08/2026)
+
+> **"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"**
+> — Claudio, 21/08/2026, in chat.
+
+La parola **"frequenza"** sceglie l'**opzione C**: si costruisce **solo un contatore
+di segnali**. Niente ordini, niente sizing, niente forward, nessun EA operativo.
+
+**La domanda, sola:** *la Mediazione del corso produce almeno 150 PACCHETTI in-sample?*
+
+Dichiarazione di cecita': al momento della firma **nessun numero di questi round
+e' stato prodotto, letto o guardato**. Nessuno dei due EA nuovi e' mai stato
+compilato. Le soglie NON sono state toccate dalla firma.
+
+
+## Cosa vale questa firma
+- Si conta il **PACCHETTO**, mai il ticket (§13 G2 del METRO_PROP, congelato oggi):
+  contare i ticket gonfierebbe il campione fino a **x3,9** e farebbe passare il muro
+  dei 150 a un motore che non lo merita.
+- **Se sotto i 150 pacchetti IS: il nodo si chiude da solo, con un numero.** Non
+  serve scrivere nessun EA e non serve nessun'altra decisione.
+- **Se sopra: il nodo NON e' sciolto** — restano da risolvere il fattore 2,29 e il
+  cancello di taglia (un pacchetto = 4,03% = **81% del muro giornaliero**; due
+  pacchetti simultanei = **6,32% = oltre il muro in un solo evento**).
+
+## Cosa questa firma NON dice
+- **Non** riabilita la pratica di Emiliano: quella fallisce T1 e T3 con T4 = si',
+  ed e' **scarto a vista** per §13. Il "MAI" del 12/08 **resta in vigore su quella**.
+- **Non** promuove niente e **non** apre un round di merito.
