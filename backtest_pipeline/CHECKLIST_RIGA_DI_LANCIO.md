@@ -2180,3 +2180,65 @@ lancia una riga di round dentro la sua catena.
 > gemello che apre MT5, la riga risponde anche per quello che il gemello fa
 > **oltre** a stampare (punto 26). "Non tocca nessuna sedia viva" e' una
 > promessa che si verifica **negli script chiamati**, non solo nel proprio.
+
+---
+
+## 🆕 AGGIUNTA DEL 21/08/2026 — trovata alla prima verifica della riga R96 (incrocio EMA di sessione all'apertura USA)
+
+## 52. 🏷️ IL PARAMETRO CHE DA' IL NOME AL ROUND E CHE UN ARTEFATTO DI INIZIALIZZAZIONE RENDE **INERTE**
+
+_Difetto vero, `mql5/Experts/ABTG_CrossEmaApertura.mq5` + `R96_CRITERI.md`.
+Trovato leggendo il CODICE del motore invece della sua descrizione, come chiede
+il punto 1. Non l'ha visto nessun gate: la riga di lancio e' sana._
+
+R96 si intitola **"l'incrocio delle medie 9/21 ri-seminate all'apertura"**, e
+l'ancora **e' davvero costitutiva** (le medie sono ricalcolate da un seme, non
+sono le continue lette in una finestra oraria: il mandato e' rispettato). Ma
+basta fare l'algebra del seme per vedere che **9 e 21 non entrano nel segnale
+dominante**:
+
+```mql5
+// EmaSessione_Calc: e = chiusure[0]; poi e = c[i]*a + e*(1-a)
+// alla SECONDA barra di sessione (n=2, cioe' InpMinBarreSessione):
+//   fPrev = sPrev = c0          <-- il seme: le due medie COINCIDONO
+//   fNow  = c0 + af*(c1-c0)     af = 2/(9+1)  = 0,2
+//   sNow  = c0 + as*(c1-c0)     as = 2/(21+1) = 0,0909
+// CrossDirezione usa fPrev<=sPrev, che qui e' VERO PER COSTRUZIONE:
+//   c1 > c0  ->  fNow > sNow  ->  +1 LONG      (sempre)
+//   c1 < c0  ->  fNow < sNow  ->  -1 SHORT     (sempre)
+```
+
+Cioe': **ogni sessione genera un incrocio GARANTITO alla seconda barra**, e la
+sua direzione e' `sign(c1 - c0)` — **identica con 9/21, con 5/13 o con 8/21**,
+perche' `af > as` e' l'unica cosa che conta. Con `CountPositions()>0` che blocca
+i doppioni e la posizione che muore a fine finestra, quel trade e' **il trade
+dominante di ogni sessione**. R96 misura il **momentum delle prime due barre M5
+dopo la campanella**, non l'incrocio 9/21.
+
+**Due conseguenze, e la seconda e' la piu' cara:**
+
+1. Il **cancello proprio del round** (`R96_CRITERI.md` par. 4.2: *"se A e B hanno
+   `Incroci Sessione` entro il ±10% l'ancora e' COSMETICA"*) **non puo' mordere**:
+   in cella A il conteggio ha un pavimento strutturale (`Incroci >= Sessioni`)
+   che in cella B non esiste. E' il **punto 40 visto dal lato dell'EA** invece
+   che da quello della regex: li' il gate non mordeva per un `$` senza `\r?`, qui
+   non morde per un'identita' algebrica del motore.
+2. `R96_CRITERI.md` par. 6-bis autorizza **IN ANTICIPO** a *"chiudere il capitolo
+   incrocio EMA 9/21 in questa casa"* se R96 esce senza edge. Sarebbe **chiudere
+   un capitolo che il round non ha aperto**: nessun numero di R96 dice niente su
+   9/21, perche' 9 e 21 non hanno mosso il segnale dominante.
+
+> ✅ **REGOLA.** **Prima di scrivere i criteri, si fa l'algebra del parametro che
+> da' il nome al round su un caso limite dell'EA (la prima barra, il seme, il
+> primo tick, l'array vuoto): se in quel caso il parametro non cambia l'esito, il
+> round NON puo' intitolarsi a lui.** Il nome del round e' una promessa su cosa
+> verra' misurato, e un referto che conclude su un parametro inerte e' peggio di
+> un referto sbagliato: **chiude una strada che nessuno ha percorso**.
+> 🧪 **Il controllo pratico**: si prende il parametro del titolo, gli si dà due
+> valori molto diversi (9/21 e 5/13) e si chiede *"il segnale della prima
+> occorrenza cambia?"*. Se la risposta e' no, o si sposta il gate dove il
+> parametro morde (qui: `InpMinBarreSessione`, che pero' i criteri stessi pinnano
+> e vietano di spazzolare), o **si cambia il titolo e la conclusione ammessa**.
+> 📏 **E la contromisura minima e' una COLONNA, non una frase** (punto 34):
+> l'artefatto inerte si conta, cosi' il referto dice *quanti* trade vengono dal
+> seme invece di dichiararlo a parole.
