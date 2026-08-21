@@ -2125,3 +2125,58 @@ file sbagliato sul Desktop c'e' sempre e ha lo stesso nome di quello giusto.
 > sessioni si incrociano sullo stesso file: si controlla `git diff --cached
 > --name-only` prima di ogni commit, e il numero si prende **rileggendo il file
 > appena prima di scrivere**, non da quello che si ricorda.
+
+---
+
+## 🆕 AGGIUNTA DEL 21/08/2026 — trovata alla **QUINTA** verifica della riga R95
+
+## 51. 🔫 L'`.ini` PASSATO A `terminal64 /config` SENZA `[Experts] AllowLiveTrading=false`: aprire MT5 per MISURARE riarma la flotta
+
+_Difetto vero, `backtest_pipeline/scarica_storico.ps1`, l'`.ini` di `-Auto`
+(sezione "4b. modalita' AUTOMATICA"). Trovato PRIMA dell'invio, verificando il
+PASSO 0-A della riga R95 — che quello script lo chiama._
+
+L'`.ini` con cui `scarica_storico.ps1` avvia il terminale ha **due sezioni**:
+
+```ini
+[Charts]
+MaxBars=2000000000
+
+[StartUp]
+Script=ABTG_HistoryDownloader
+ScriptParameters=abtg_storico.set
+```
+
+Manca `[Experts] AllowLiveTrading=false`. E `/config` **non apre un tester: apre
+il TERMINALE**, che carica l'ultimo profilo con i suoi grafici e gli EA
+attaccati sopra. Sul PC di backtest quel terminale e' collegato al conto
+50503392: e' esattamente il meccanismo che il **14/08** ha fatto partire un DAX
+Apertura in breakout da un grafico M3 di prova, e per cui
+`walkforward_generico.ps1` porta quelle due righe con dodici righe di commento
+sopra (riga 627). Qui lo script apre il terminale **per leggere una colonna di
+un CSV**, e lo tiene aperto per minuti mentre scarica lo storico.
+
+**La misura che rende il punto non opinabile** — un `grep` su tutta la
+pipeline, 28 script che scrivono un `.ini` per il terminale:
+
+```
+grep -n "AllowLiveTrading" backtest_pipeline/*.ps1 backtest_pipeline/righe/*.ps1
+```
+
+**27 ce l'hanno. Uno no**, ed e' proprio quello che la riga R95 chiama al
+PASSO 0-A. Il difetto e' vecchio quanto lo script (15/08); e' diventato vivo
+oggi, perche' fino a ieri `scarica_storico.ps1` si lanciava a mano e adesso lo
+lancia una riga di round dentro la sua catena.
+
+> ✅ **REGOLA.** **Ogni `.ini` che finisce in `terminal64.exe /config:` porta
+> `[Experts] AllowLiveTrading=false` + `AllowDllImport=false`, anche quando
+> l'`.ini` non parla di tester** — `[StartUp] Script=`, `[Charts]`, un `.ini`
+> di sola configurazione: se apre il terminale, riarma il profilo.
+> 🧪 **E il controllo si fa a grep sul PERIMETRO INTERO, non sullo script che
+> si sta guardando**: il difetto gemello non vive dove e' stato corretto, vive
+> dove nessuno ha guardato. Qui la contromisura del 14/08 era stata messa in
+> **27 file su 28** — un tasso di copertura che *sembra* chiusura e non lo e'.
+> ⚠️ **Corollario per le righe di lancio**: quando una riga chiama uno script
+> gemello che apre MT5, la riga risponde anche per quello che il gemello fa
+> **oltre** a stampare (punto 26). "Non tocca nessuna sedia viva" e' una
+> promessa che si verifica **negli script chiamati**, non solo nel proprio.
