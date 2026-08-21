@@ -9,7 +9,7 @@
 > dichiarazione**. R94 chiede una cosa sola: **la frequenza sale?**
 > **Se non sale, il profitto non si guarda nemmeno.**
 
-> ### 🔁 VERSIONE **v4** — tre verifiche, tre bocciature. **Tutte e tre utili.**
+> ### 🔁 VERSIONE **v5** — quattro verifiche, quattro bocciature. **Tutte utili.**
 > **Il disegno del round non e' mai cambiato**: 6 file prova, 12 celle, 24
 > passate, stesse soglie, stesso canarino. Sono cambiate solo le **guardie**.
 >
@@ -54,6 +54,24 @@
 >    5 era giusto nella riga e **sbagliato nello script** (che e' il testo che si
 >    legge a schermo), e il punto 2 chiedeva di cercare una sintassi che hanno
 >    **tutte** le ~78 righe.
+>
+> **Dalla quarta (1 bloccante + 2) — nessuna classe nuova, tutte istanze di
+> punti gia' in checklist applicati a meta':**
+> 11. 🚨 **la spia a tre rami era stata scritta nel REFERTO e non a SCHERMO.**
+>    Il testo che Claudio legge mentre la corsa gira portava ancora
+>    l'affermazione universale *"le tre celle di canarino RIGIRANO"* e la spia a
+>    **due** rami: sul percorso di ripresa A20/B20/C20 tornano in due secondi e
+>    **lo schermo avrebbe detto che erano state ripescate**. E' il difetto della
+>    v2 risorto, sulle celle di canarino.
+>    🪞 *Da guardare in faccia: e' lo script che ha **generato** il punto 49 a
+>    violare il punto 49, regola 3.*
+> 12. 🧾 **gli switch del giro non erano dichiarati nel referto** (punto 50), e
+>    con `-Solo` la riga affermava l'opposto di quello che succede: la cartella
+>    **non** viene svuotata, quindi convivono file freschi e file di giri
+>    precedenti;
+> 13. 📢 **il motivo per cui il funnel non si usa era sbagliato**: non *"le Print
+>    non sono leggibili"* (lo sono, e i log saranno **> 0**), ma **non sono
+>    attribuibili a una cella**.
 
 ⚠️ **PC DI BACKTEST. Chiudi MT5 *E MetaEditor*.** Mai sul VPS.
 ⚠️ **UNA MACCHINA, UN LAVORO:** R92 e R93 devono essere **finiti**.
@@ -70,7 +88,7 @@ sicurezza finta.
 
 Al suo posto **tre** cose, e la terza e' quella che conta:
 1. 🧊 **BRANCH CONGELATO: nessun push su `lavoro` mentre R94 gira.**
-2. 🏷️ **MARCATORI DI VERSIONE**: `R94-LANCIO-v4` nello script,
+2. 🏷️ **MARCATORI DI VERSIONE**: `R94-LANCIO-v5` nello script,
    `R94 -- BOLLINGER 37/1.4 SUL BREAKING BAND` in ogni file prova. Coprono la
    **cache di raw** (~5 minuti) e il download andato a male.
 3. 🔒 **L'IMPRONTA.** Un congelamento *dichiarato* e' un post-it, e R94 e' tutto
@@ -94,7 +112,7 @@ Al suo posto **tre** cose, e la terza e' quella che conta:
 > perche' e' lo stesso terminale che opera in forward.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r94.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v4' -Quiet)){ throw 'SCRIPT VECCHIO (v1/v2/v3): la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK: si puo' mandare il BLOCCO 2 ===" -ForegroundColor Green }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r94.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v5' -Quiet)){ throw 'SCRIPT VECCHIO (v1..v4): la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK: si puo' mandare il BLOCCO 2 ===" -ForegroundColor Green }
 ```
 
 **Il giro a vuoto fa quattro cose che il driver generico NON fa:**
@@ -148,7 +166,7 @@ Al suo posto **tre** cose, e la terza e' quella che conta:
 > Desktop** all'inizio, e alla fine **riscrive lo zip**.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; if(-not (Test-Path $p)){ throw 'manda prima il BLOCCO 1' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v4' -Quiet)){ throw 'SCRIPT VECCHIO (v1/v2/v3)' }; $t0=Get-Date; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $desk=@([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop')) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1; if(-not $desk){ $desk=$env:USERPROFILE }; $z=Join-Path $desk 'R94_BREAKINGBAND_BB37.zip'; if(-not (Test-Path $z)){ throw ('LO ZIP NON C E in ' + $desk + ': la corsa non e arrivata alla raccolta') }; if((Get-Item $z).LastWriteTime -lt $t0){ throw ('ZIP STANTIO: e stato scritto alle ' + (Get-Item $z).LastWriteTime.ToString('HH:mm:ss') + ', PRIMA che questo blocco partisse (' + $t0.ToString('HH:mm:ss') + '): e di una corsa precedente') }; if($rc -ne 0){ Write-Host 'ESITO PARZIALE: mandalo lo stesso, ma di QUALE pezzo manca (lo scrive REFERTO_R94.txt)' -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; if(-not (Test-Path $p)){ throw 'manda prima il BLOCCO 1' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v5' -Quiet)){ throw 'SCRIPT VECCHIO (v1..v4)' }; $t0=Get-Date; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $desk=@([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop')) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1; if(-not $desk){ $desk=$env:USERPROFILE }; $z=Join-Path $desk 'R94_BREAKINGBAND_BB37.zip'; if(-not (Test-Path $z)){ throw ('LO ZIP NON C E in ' + $desk + ': la corsa non e arrivata alla raccolta') }; if((Get-Item $z).LastWriteTime -lt $t0){ throw ('ZIP STANTIO: e stato scritto alle ' + (Get-Item $z).LastWriteTime.ToString('HH:mm:ss') + ', PRIMA che questo blocco partisse (' + $t0.ToString('HH:mm:ss') + '): e di una corsa precedente') }; if($rc -ne 0){ Write-Host 'ESITO PARZIALE: mandalo lo stesso, ma di QUALE pezzo manca (lo scrive REFERTO_R94.txt)' -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
 ```
 
 > 📌 **Il BLOCCO 2 non riscarica lo script, ed e' voluto:** riusa la copia che il
@@ -193,11 +211,19 @@ rifa' tutto da capo.
 > 🔧 **La riga pronta per rifare davvero una cella** (esempio sul canarino di
 > GBPUSD; vale per `A20 A37 B20 B37 C20 C37`):
 > ```powershell
-> & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v4' -Quiet)){ throw 'SCRIPT VECCHIO' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -Solo A20 -Rifai; if($LASTEXITCODE -ne 0){ throw "RIPARAZIONE FALLITA ($LASTEXITCODE)" } }
+> & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p="$env:USERPROFILE\lancia_r94.ps1"; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R94-LANCIO-v5' -Quiet)){ throw 'SCRIPT VECCHIO' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -Solo A20 -Rifai; if($LASTEXITCODE -ne 0){ throw "RIPARAZIONE FALLITA ($LASTEXITCODE)" } }
 > ```
+> ⚠️ **E qui c'e' una cosa da sapere, perche' la v4 la diceva al contrario.**
 > Con `-Solo` la pulizia del Desktop **non rade** la cartella di raccolta (il
-> perimetro della pulizia e' quello del riempimento, punto 35-bis): lo zip viene
-> rifatto, ma dentro ci sara' **solo** la cella riparata. Va detto in chat.
+> perimetro della pulizia e' quello del riempimento, punto 35-bis). Quindi lo
+> zip viene rifatto, **ma dentro NON c'e' solo la cella riparata**: se prima
+> c'era stata una corsa piena, ci saranno **12 CSV — 2 freschi e 10 del giro
+> precedente** — e **niente li distingue a occhio**, mentre il referto scrivera'
+> `RIGHE DI RISULTATO: 4 su 4` e `MANCANTI: nessuno` (che per quel giro sono
+> corretti: parlano solo della cella chiesta).
+> ✅ Per questo il referto ora dichiara **gli switch del giro** (punto 50) e,
+> quando `-Solo` e' attivo, aggiunge: **"sono di adesso solo i file elencati in
+> FILE ATTESI"**. Va detto in chat insieme allo zip.
 
 ### ⏱️ Quanto dura
 **Non lo so, e non lo invento.** Sono **24 passate a tick reali** su H1 forex,
@@ -240,10 +266,11 @@ finestra ~21 mesi. Si misura sulla **prima cella** (lo script stampa
 > **li conta**.
 
 > 📢 **La voce "log degli agent" NON e' in questa tabella, ed e' un fatto voluto**
-> (punto 34-ter). Vedi la sezione sul funnel, sotto: **in questo round non c'e'
-> niente da leggere li'**. Lo script li raccoglie lo stesso a best effort e
-> **scrive il numero nel referto** (`log degli agent raccolti: 0`), cosi' lo zero
-> si legge invece di dedurlo.
+> (punto 34-ter). Lo script li raccoglie lo stesso a best effort e **scrive il
+> numero nel referto**, *qualunque sia* — **non si promette che sia zero**, anzi
+> con ogni probabilita' sara' **maggiore di zero**. Il motivo per cui non
+> entrano fra gli artefatti attesi sta nella sezione sul funnel, sotto, e **non
+> e' che siano illeggibili**.
 
 ---
 
@@ -269,12 +296,19 @@ chiuso**, e **muore** se non ci riesce — perche' non riuscirci vuol dire che M
 e' ancora aperto. ⚠️ **Solo `Tester\cache`. MAI `bases\<server>\ticks`**, che e'
 lo **storico**: cancellarlo trasformerebbe un round di ore in una notte.
 
-> 🔎 **DUE SPIE da guardare, e sono gratis:**
-> - **se una cella di canarino torna in pochi secondi SENZA essere stata
->   dichiarata `CELLA GIA' FATTA`**, e' stata ripescata lo stesso: si dice, non
->   si legge come conferma. *(Una cella **saltata** torna anch'essa in un
->   attimo, ma lo script lo stampa a schermo e lo scrive nel referto: sono due
->   cose diverse e vanno tenute separate.)*
+> 🔎 **LA SPIA DEL TEMPO HA TRE RAMI, NON DUE** (punto 49). Guardare la durata
+> di una cella e' gratis, ma va letta insieme a **cio' che lo script ha
+> dichiarato per quella cella**:
+>
+> | quanto ci mette | lo script l'ha dichiarata... | come si legge |
+> |---|---|---|
+> | il suo tempo | — | 🟢 **OK**: gira a cache vuota |
+> | pochi secondi | `CELLA GIA' FATTA` o `CELLA A META'` | 🟡 **NORMALE**: e' la **ripresa**, non un ripescaggio |
+> | pochi secondi | **niente** | 🔴 **ALLARME**: e' un ripescaggio, e va detto |
+>
+> ⚠️ **Nella v4 questa spia aveva due rami e il ramo di mezzo mancava** — e
+> siccome sul percorso di ripresa A20/B20/C20 tornano in due secondi, lo schermo
+> avrebbe detto a Claudio che **le tre celle di canarino erano state ripescate**.
 > - **un pass ripescato non scrive i per-trade.** Lo script li ripulisce
 >   **prima di ogni cella** e verifica che ricompaiano **freschi**: se non
 >   compaiono **e la cella non era saltata**, lo scrive nel referto
@@ -327,16 +361,22 @@ frequenza e' stata comprata con perdenti — **peggioramento anche se n sale**.
 
 ---
 
-## 📢 IL FUNNEL `[BB-FUNNEL]` NON C'E' — detto prima di guardare
+## 📢 IL FUNNEL `[BB-FUNNEL]` NON SI USA — detto prima di guardare, e col motivo GIUSTO
 
 Nella v1 questa riga prometteva il funnel. **Era una promessa che non poteva
 essere mantenuta**, per due motivi indipendenti:
 
 1. `PrintFunnel()` gira dentro **`OnTester()`**, cioe' **sull'agente**, e
-   `walkforward_generico.ps1` scrive **sempre `Optimization=1`**: in
-   ottimizzazione quelle `Print` non finiscono da nessuna parte di leggibile.
-   **R91, per leggere le righe `[BB]`, dovette fare una passata singola
-   dedicata** con `Optimization=0`;
+   `walkforward_generico.ps1` scrive **sempre `Optimization=1`**.
+   ⚠️ **E qui la v2-v4 dicevano il motivo sbagliato** (*"quelle Print non sono
+   leggibili"*): **sono leggibilissime**, finiscono proprio nei log degli agent
+   — cioe' **nella terza radice che questo script raccoglie**, e il conteggio
+   sara' quasi certamente **> 0**. Il limite vero e' un altro:
+   🔴 **NON SONO ATTRIBUIBILI A UNA CELLA.** Piu' agent scrivono nello stesso
+   posto, le righe **non portano l'etichetta della passata**, e in ottimizzazione
+   parallela non c'e' modo di dire quale cella le ha prodotte.
+   **R91, per leggere le righe `[BB]` e sapere DI CHI erano, dovette fare una
+   passata singola dedicata** con `Optimization=0`;
 2. la v1 cercava i log in **due** radici, e gli agent locali stanno nella
    **terza** (`%APPDATA%\MetaQuotes\Tester\<id>\Agent-127.0.0.1-30xx\logs`). Il
    gemello della stessa famiglia (`righe/RIGA_NOTTE2_DUKA_R91.ps1`, riga 859)
@@ -415,6 +455,8 @@ R34 va **rimisurata insieme alla cella**, e questa riga va rifatta.
 | conteggio righe dei CSV | **eseguito** su file veri | ✅ sola intestazione → **0 righe, marcato VUOTO** · 2 passate → 2 |
 | quante serie per-trade sono possibili | letto `ABTG_BreakingBand.mq5:1521` + i 6 file prova | ✅ `InpMagic` **assente dai file prova** → default 772101 su tutte e 24 le passate → **max 6 raccolte**, non 12 |
 | le tre righe di chat | parser vero su tutte e **tre** (blocco 1, blocco 2, riparazione) | ✅ 0 errori |
+| la spia dei tre rami e' **a schermo**, non solo nel referto | rilettura dei due blocchi di `Write-Host` | ✅ corretta in **tutti e due** (sez. 4 e sez. 5) |
+| gli switch del giro finiscono nel referto | `grep 'rr +='` sul driver | ✅ riga `switch di questo giro:` + avvertenza dedicata quando `-Solo` e' attivo |
 | colonne e formato | letto il CSV di R91 | ✅ `Trades` col. 8, `Equity DD %` col. 7, `InpBBDev` col. 16 e vale **`2`**, non `2.0` |
 | catena del rischio | letto il sorgente | ✅ chiusa alla riga 1427 |
 | radici dei log | confrontate col gemello R91 | ✅ tre, non due |

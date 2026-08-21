@@ -339,14 +339,22 @@ due mondi diversi.**
 **un pass ripescato non scrive i per-trade** — che ora si ripuliscono **prima di
 ogni cella** e si verificano freschi dopo.
 
+> ⚠️ **Corretto alla QUINTA verifica:** la prima di quelle due spie ha **tre**
+> rami, non due. Una cella dichiarata `GIA' FATTA` o `A META'` torna in pochi
+> secondi **ed e' normale** — e' la ripresa. L'allarme e' solo la cella che torna
+> subito **senza essere stata dichiarata**. Vedi la nota della quinta verifica.
+
 ## 🥈 2. Il funnel `[BB-FUNNEL]` **non esiste in questo round** (punto 34-ter)
 
 `PrintFunnel()` gira in `OnTester()` (sull'**agente**) e le passate sono in
-**ottimizzazione** (`Optimization=1` sempre): quelle `Print` non sono leggibili.
+**ottimizzazione** (`Optimization=1` sempre).
+_(⚠️ **corretto alla quinta verifica**: dire *"non sono leggibili"* e' **falso** —
+finiscono nei log degli agent, che questo script raccoglie, e saranno quasi
+certamente **> 0**. Il limite vero e' che **non sono attribuibili a una cella**.)_
 R91, per leggerle, dovette fare una **passata singola** dedicata.
 ✅ La riga **smette di prometterlo**. Il cancello si legge dalla colonna
 **`Trades`** del CSV, che e' un dato e non uno schermo. Il conteggio dei log
-finisce nel referto, cosi' lo **zero si legge** invece di dedurlo.
+finisce nel referto **qualunque sia** (non si promette che sia zero).
 📌 **Portare i contatori in una colonna (`FrameAdd`) resta un lavoro a se':** a
 branch congelato **l'EA non si tocca**.
 
@@ -607,7 +615,10 @@ l'intenzione**.)*
   del terminale collegato al conto VIVO**. E' voluto (e' il modo in cui si chiude
   il 33-bis), ma va saputo;
 - **m-c** `-Solo <cella> -Rifai` era consigliato **senza la riga pronta**: ora c'e',
-  con la nota che con `-Solo` lo zip conterra' **solo** la cella riparata;
+  con la nota su `-Solo`. _(⚠️ **corretto alla quinta verifica**: quella nota
+  diceva che lo zip conterra' **solo** la cella riparata, ed e' **il contrario**
+  — la cartella NON viene svuotata, quindi convivono file nuovi e vecchi. Vedi
+  la nota della quinta verifica.)_;
 - **m-d** un titolo diceva ancora *"Cosa fa la v2"* su uno script v3.
 
 ## Cosa e' stato verificato, giro 4
@@ -634,3 +645,101 @@ Quattro dei cinque difetti sono **istanze di punti gia' scritti** (44, 45, 46,
 34-bis, D10) **applicati male**. L'unico davvero nuovo e' il **punto 49**:
 > **il driver salta per FINESTRA, non per cella: ogni spia costruita sulla CELLA
 > deve dichiarare anche lo stato A META'.**
+
+---
+
+# 🧪 QUINTA VERIFICA — 21/08/2026: quarto FAIL, **1 bloccante + 2 minori, e ZERO classi nuove**
+
+_Numeri ancora **mai visti**. Il disegno non e' cambiato in nessuno dei quattro
+giri: 6 file prova, 12 celle, 24 passate, soglie e canarino intatti._
+
+Il verificatore ha misurato **piu' di quanto la quarta nota dichiarasse**:
+matrice `giaFatte × -Rifai × -SoloControllo` **rieseguita IN CONTESTO** (param
+reali, `[switch]` veri, `$Modello` variato, albero vero) · conteggio righe
+provato **anche sui casi che io non avevo provato** (file da 0 byte, header
+senza newline finale: entrambi → VUOTO) · **identita' completa degli input** del
+canarino su 3 simboli × 2 finestre, zero divergenze · rassegna dei **24 punti di
+stop** (nessuno scatta su una corsa perfetta) · **firma byte-identica** a
+`5ccca24` e soglie invariate su tutti e 6 i commit.
+
+> 🎯 **Il dato che conta piu' dei tre difetti: nessuno era di CLASSE NUOVA.**
+> Sono tutte istanze di punti **gia' scritti** (49, 50, 34-ter) **applicati a
+> meta'**. La checklist non e' cresciuta, ed e' giusto cosi': *cresce solo su
+> classi davvero nuove*.
+
+## 🚨 D-1 (BLOCCANTE) — la spia a tre rami era nel REFERTO e **non a schermo**
+
+Il punto 49 lo avevo chiuso **dove si scrive il verbale** e non **dove Claudio
+guarda**. Il testo a schermo portava ancora:
+- *"le tre celle di canarino RIGIRANO: se una torna in pochi secondi, e' un
+  ripescaggio"* (sez. 4);
+- *"la sezione 4 ha svuotato Tester\cache, quindi le tre celle di canarino
+  RIGIRANO davvero"* + la spia a **due** rami (sez. 5).
+
+Mentre la riga del referto era gia' quella giusta, **per differenza**.
+**Perche' e' bloccante:** sul percorso di **ripresa — quello che la riga stessa
+consiglia** — A20/B20/C20 sono SALTATE, tornano in due secondi, e **lo schermo
+dice a Claudio che sono state ripescate**. E' il difetto della v2 risorto,
+**esattamente sulle tre celle di canarino**.
+
+> 🪞 **E va guardato in faccia: e' lo script che ha GENERATO il punto 49 a
+> violare il punto 49, regola 3.** Chiudere nel referto e non a schermo e' il
+> punto 45 in miniatura.
+
+✅ Riscritti **entrambi** i blocchi con i tre rami espliciti:
+**OK** (gira e ci mette il suo tempo) · **NORMALE** (dichiarata `GIA' FATTA` o
+`A META'`, torna subito) · **ALLARME** (torna in pochi secondi **senza essere
+stata dichiarata**). Stessa tabella nella riga di lancio.
+
+## 🧾 D-2 (minore) — gli switch non erano dichiarati, e su `-Solo` la riga diceva l'opposto
+
+Riga e criteri affermavano: *"con `-Solo` ... dentro ci sara' **solo** la cella
+riparata"*. **Le due meta' si contraddicevano**: `lancia_r94.ps1:435` **non**
+svuota `$dest` con `-Solo` (ed e' giusto, punto 35-bis), quindi dopo una corsa
+piena lo zip conterrebbe **12 CSV: 2 freschi e 10 del giro precedente**, senza
+niente che li distingua — con il referto che scrive `RIGHE DI RISULTATO: 4 su 4`
+e `MANCANTI: nessuno` (corretti per quel giro, ma leggibili come se fossero
+tutto).
+✅ E il corollario del **punto 50** alla lettera: `grep 'rr +='` mostrava che
+**nessuno switch era dichiarato**. Ora il referto scrive
+`switch di questo giro: ...` e, con `-Solo`, aggiunge:
+**"sono di adesso solo i file elencati in FILE ATTESI"**.
+
+## 📢 D-3 (minore) — il motivo giusto per cui il funnel non si usa
+
+Dicevo *"in ottimizzazione quelle Print non sono leggibili"* e dichiaravo
+*"zero e' l'esito ATTESO"*. **Falso**: `PrintFunnel()` gira in `OnTester()`,
+cioe' sull'agente, e le sue `Print` finiscono in
+`%APPDATA%\MetaQuotes\Tester\Agent-...\logs\*.log` — **esattamente la terza
+radice che lo script scansiona**. `$nLog` sara' con ogni probabilita' **> 0**.
+
+Il limite vero **non e'** la leggibilita': e' che **non sono attribuibili a una
+cella** (piu' agent, stesso posto, nessuna etichetta di passata).
+✅ Corretta la **dichiarazione** in tutti e quattro i posti in cui era scritta
+(intestazione dello script, commento della sezione log, messaggio a schermo,
+referto) e nella riga di lancio.
+⚠️ **Dichiarato come lo dichiara il verificatore: D-3 non e' dimostrato, e'
+DEDOTTO dal sorgente** — nessuno ha MT5 qui per contare i log. E' stata corretta
+solo la parte sicura, cioe' l'affermazione.
+
+## Cosa e' stato verificato, giro 5
+| controllo | esito |
+|---|---|
+| `controlla_prova.py` | ✅ 6 file, 12 celle, 24 passate, 0 problemi |
+| `lint_ps1.py` | ✅ 0 problemi |
+| parser PowerShell: driver + tutte e tre le righe di chat | ✅ 0 errori |
+| ASCII puro (7 file) | ✅ 0 byte > 127 |
+| use-before-assignment (incl. `$swDetti`) | ✅ 0 problemi |
+| **giro completo del concetto su TUTTI gli artefatti** | ✅ script, testo a schermo, referto, riga, criteri, file prova — per i tre concetti (spia a tre rami · `-Solo` · funnel) |
+| prova di fumo del driver | ✅ ripetuta |
+
+⚠️ **Quello che resta non verificato:** la riga **non e' mai stata eseguita su
+Windows**, e la prova di fumo **non raggiunge** il codice delle sezioni 6 e 8.
+
+## 📌 La lezione di questo giro, e non e' tecnica
+Zero classi nuove vuol dire che **il metodo copre gia' questi casi**: il
+problema non e' piu' *sapere cosa cercare*, e' **applicarlo a tutti gli
+artefatti**. Da qui in avanti, quando si chiude un difetto, il giro e'
+obbligatorio e completo — **script · testo a schermo · referto · riga di lancio
+· criteri · file prova** — e per ognuno la domanda e' una sola:
+> **"qui questa cosa e' ancora affermata nella forma vecchia?"**
