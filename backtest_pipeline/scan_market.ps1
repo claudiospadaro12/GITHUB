@@ -277,7 +277,8 @@ InpAllowShort=1||0||1||1||Y
   # =============================================================
   #  R92-SCAN -- BULGE (motore di Claudio, EA ABTG_Bulge v5.00).
   #  UNA CELLA PER SIMBOLO, pinnata ai DEFAULT DI CLAUDIO (BLU +
-  #  VIOLA accesi, ARANCIO spento) ma al NOSTRO rischio 1%.
+  #  VIOLA accesi, ARANCIO spento) al rischio FIRMATO 0,80% (0,80 x Max_Trades 4
+  #  = 3,20% <= cap C1 3,25%, firma di Claudio del 21/08).
   #  Il verbale completo della cella, con i criteri e i canarini:
   #      prove\R92_scan_BULGE.txt
   #  Se cambi una riga qui, cambiala anche li'. Diff prima di lanciare.
@@ -379,7 +380,7 @@ Max_SL_PerDay=4||4||0||4||N
 Max_Consecutive_SL=3||3||0||3||N
 Max_Daily_Loss_Pct=2.0||2.0||0||2.0||N
 Risk_Mode=0||0||0||0||N
-Risk_Percent=1.0||1.0||0||1.0||N
+Risk_Percent=0.8||0.8||0||0.8||N
 Total_Risk_Percent=2.0||2.0||0||2.0||N
 Max_Trades=4||4||0||4||N
 Manage_Manual_Orders=0||0||0||0||N
