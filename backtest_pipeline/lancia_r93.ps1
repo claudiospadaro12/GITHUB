@@ -207,6 +207,14 @@ $file["R93_CRITERI.md"]           = "$Raw/backtest_pipeline/risultati_archivio/R
 $file[$NewsCsv]                   = "$Raw/mql5/Files/$NewsCsv"
 $file["ABTG_PausaGuardian.mqh"]   = "$Raw/mql5/Include/ABTG_PausaGuardian.mqh"
 foreach ($c in $celle) { $file["prove\" + $c.File] = "$Raw/backtest_pipeline/prove/" + $c.File }
+# --- I DUE .mq5. Li scarica QUESTO script, non walkforward_generico:
+#     il suo ramo -SoloControllo esce a riga 538, mentre copia e compila
+#     stanno alle righe 601-603, cioe' DOPO. Senza queste due righe, dopo
+#     il giro a vuoto sulla macchina non c'e' nessun sorgente da compilare
+#     e "premi F7" sarebbe un giro a vuoto su un file che non esiste.
+foreach ($e in @($celle | ForEach-Object { $_.EA } | Select-Object -Unique)) {
+  $file[($e + ".mq5")] = "$Raw/mql5/Experts/$e.mq5"
+}
 
 foreach ($k in $file.Keys) {
   $dest = Join-Path $Cartella $k
@@ -299,10 +307,55 @@ $lenMqh = (Get-Item -LiteralPath $srcMqh).Length
 Copy-Item -LiteralPath $srcMqh -Destination $dstMqh -Force -ErrorAction Stop
 $v = Get-Item -LiteralPath $dstMqh -ErrorAction Stop
 if ($v.PSIsContainer -or $v.Length -ne $lenMqh) { Muori "ABTG_PausaGuardian.mqh: copia NON verificata." }
-if (-not (Select-String -Path $dstMqh -SimpleMatch -Pattern "ABTG_GuardiaIngresso" -Quiet)) {
-  Muori "ABTG_PausaGuardian.mqh installato ma non contiene ABTG_GuardiaIngresso."
+# Il marcatore NON puo' essere ABTG_GuardiaIngresso: c'e' anche nelle
+# versioni VECCHIE del .mqh, quindi un include stantio passerebbe il gate.
+# Entrambi gli EA chiamano ABTG_AutotestGuardia(), che e' della v1.20: se
+# manca QUELLA, la compilazione fallirebbe piu' avanti con un errore che non
+# dice niente. Meglio morire qui, dicendo cosa manca.
+if (-not (Select-String -Path $dstMqh -SimpleMatch -Pattern "ABTG_AutotestGuardia" -Quiet)) {
+  Muori ("ABTG_PausaGuardian.mqh installato ma NON contiene ABTG_AutotestGuardia():" + "`n" +
+         "    e' una versione VECCHIA dell'include. I due EA di R93 la chiamano" + "`n" +
+         "    nell'autotest e senza di lei NON COMPILANO. Aggiorna il .mqh (v1.20+).")
 }
 Write-Host ("    ok  MQL5\Include\ABTG_PausaGuardian.mqh (" + $lenMqh + " byte)") -ForegroundColor Green
+
+# =====================================================================
+#  1-ter. I DUE EA: INSTALLATI E COMPILATI QUI, NON A MANO CON F7
+#  Vale SIA in -SoloControllo SIA nella corsa vera, ed e' il punto: una
+#  compilazione fallita muore adesso, in tre minuti, invece che al blocco
+#  4 dopo due ore di macchina. Prima si toglie l'.ex5 VECCHIO: senza,
+#  un binario di ieri fa passare il gate su una compilazione fallita oggi
+#  (e' il difetto n.23, l'artefatto scaduto, applicato al compilato).
+# =====================================================================
+$MqlExp = Join-Path $DataFolder "MQL5\Experts"
+New-Item -ItemType Directory -Force -Path $MqlExp | Out-Null
+$MetaEditor = Join-Path $instDir "metaeditor64.exe"
+if (-not (Test-Path -LiteralPath $MetaEditor)) { Muori ("metaeditor64.exe non trovato in " + $instDir) }
+
+foreach ($ea in @($celle | ForEach-Object { $_.EA } | Select-Object -Unique)) {
+  $srcEa = Join-Path $Cartella ($ea + ".mq5")
+  $dstEa = Join-Path $MqlExp   ($ea + ".mq5")
+  $exEa  = Join-Path $MqlExp   ($ea + ".ex5")
+  $lenEa = (Get-Item -LiteralPath $srcEa).Length
+
+  Remove-Item -LiteralPath $exEa -Force -ErrorAction SilentlyContinue
+  Copy-Item -LiteralPath $srcEa -Destination $dstEa -Force -ErrorAction Stop
+  $vEa = Get-Item -LiteralPath $dstEa -ErrorAction Stop
+  # la copia si verifica sul CONTENUTO, non con Test-Path: se in $dstEa ci
+  # fosse una cartella con lo stesso nome, Copy-Item ci metterebbe il file
+  # DENTRO e Test-Path direbbe di si' (difetto n.27-ter).
+  if ($vEa.PSIsContainer -or $vEa.Length -ne $lenEa) { Muori ($ea + ".mq5: copia NON verificata.") }
+
+  & $MetaEditor ("/compile:" + $dstEa) "/log" | Out-Null
+  if (-not (Test-Path -LiteralPath $exEa)) {
+    Muori ($ea + ".mq5 NON COMPILA." + "`n" +
+           "    Apri MetaEditor su " + $dstEa + " e guarda gli errori." + "`n" +
+           "    (ABTG_FiboH4_Corso.mq5 non e' MAI stato compilato da nessuno: se" + "`n" +
+           "     e' lui, e' l'esito piu' probabile ed e' proprio quello che questo" + "`n" +
+           "     passo serve a scoprire adesso invece che fra due ore.)")
+  }
+  Write-Host ("    ok  compilato " + $ea + ".ex5 (" + (Get-Item -LiteralPath $exEa).Length + " byte)") -ForegroundColor Green
+}
 
 # =====================================================================
 #  2. IL CALENDARIO NEWS, MESSO DOVE IL TESTER LO TROVA DAVVERO

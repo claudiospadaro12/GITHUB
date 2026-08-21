@@ -163,7 +163,7 @@ if($src -notmatch 'double\s+OnTester\s*\('){
 # =====================================================================
 #  2. #define, enum, input: letti dal codice, non dichiarati a mano
 # =====================================================================
-#  ⚠️ vince la PRIMA definizione di un #define, non l'ultima: quelle in
+#  ATTENZIONE: vince la PRIMA definizione di un #define, non l'ultima: quelle in
 #  fondo stanno dentro un #ifndef e sono il ripiego generico. Prendendo
 #  l'ultima, il 07/08 nove EA d'apertura risultavano con lo stesso magic
 #  e usciva un falso allarme.

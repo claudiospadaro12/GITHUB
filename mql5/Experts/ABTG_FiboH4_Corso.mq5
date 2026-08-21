@@ -1140,7 +1140,15 @@ double OnTester()
   {
    PrintConta();
    ExportTrades();
-   double stats[10];
+   //--- 21/08 (difetto 34 della checklist): i CANARINI viaggiano coi DATI.
+   //    In OTTIMIZZAZIONE MT5 non fa vedere le Print degli AGENT, e
+   //    walkforward_generico.ps1 scrive SEMPRE Optimization=1: tutte le 44
+   //    passate della gamba B girano cosi'. Senza queste colonne la soglia
+   //    S1-B dei criteri ("setup piazzati > 0") NON SAREBBE VERIFICABILE, e
+   //    una passata a zero operazioni si leggerebbe come "la strategia
+   //    perde" invece che "la strategia non ha mai operato".
+   //    Le Print restano dove sono: servono nel test singolo a mano.
+   double stats[15];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1151,6 +1159,15 @@ double OnTester()
    stats[7] = gWorstDayPct;                           // Peggior Giornata % (negativo)
    stats[8] = TesterStatistics(STAT_MAX_CONLOSSES);   // Perdite Consecutive Max
    stats[9] = TesterStatistics(STAT_CONLOSSMAX);      // Serie Perdente Peggiore (denaro)
+   //--- i cinque numeri che dicono se il banco ha MISURATO qualcosa.
+   //    Si leggono PRIMA di ogni profitto (criteri par. 5.4): se i setup
+   //    piazzati sono 0, le altre quattro colonne dicono QUALE cancello ha
+   //    mangiato tutto, invece di lasciarlo indovinare.
+   stats[10] = (double)gSetupPiazzati;      // Setup Piazzati     <- SOGLIA S1-B
+   stats[11] = (double)gPatternVisti;       // Pattern Visti
+   stats[12] = (double)gScartatiLaterale;   // Scartati Laterale  (filtro di trend)
+   stats[13] = (double)gScartatiDistanza;   // Scartati Distanza  (i 50 pip minimi)
+   stats[14] = (double)gScartatiAmpiezza;   // Scartati Ampiezza  (InpMaxEngulfAtr)
    double criterion = stats[3];                       // Recovery Factor
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1173,16 +1190,26 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
+         //--- HEADER E RIGA SI TOCCANO INSIEME, o le colonne scalano di posto.
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Setup Piazzati,Pattern Visti,Scartati Laterale,Scartati Distanza,Scartati Ampiezza";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
+      //--- la guardia su ArraySize non e' cosmetica: -1 dice "questa passata
+      //    NON ha prodotto il canarino" ed e' diverso da 0, che dice "il
+      //    banco ha girato e non ha piazzato niente". Sono due verdetti
+      //    opposti e non possono avere lo stesso numero.
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
                                 (ArraySize(data) > 7 ? data[7] : 0.0),
                                 (ArraySize(data) > 8 ? data[8] : 0.0),
-                                (ArraySize(data) > 9 ? data[9] : 0.0));
+                                (ArraySize(data) > 9 ? data[9] : 0.0),
+                                (ArraySize(data) > 10 ? data[10] : -1.0),
+                                (ArraySize(data) > 11 ? data[11] : -1.0),
+                                (ArraySize(data) > 12 ? data[12] : -1.0),
+                                (ArraySize(data) > 13 ? data[13] : -1.0),
+                                (ArraySize(data) > 14 ? data[14] : -1.0));
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;

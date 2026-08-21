@@ -44,7 +44,7 @@
 //     NON nel suo numero: il numero resta 0/8 e resta valido su
 //     QUESTO codice.
 //
-//  3. 🔴 DIFETTO DI BANCO TROVATO IL 21/08/2026, e riguarda proprio
+//  3. >>> DIFETTO DI BANCO TROVATO IL 21/08/2026, e riguarda proprio
 //     quel 0/8. Questo EA e' MULTI-SIMBOLO: opera sui simboli di
 //     InpSymbols, NON sul simbolo del grafico. Nello scan del 16/08
 //     (backtest_pipeline\risultati_prove\ABTG_FiboH4_Multi\*.csv)
@@ -916,7 +916,16 @@ double OnTester()
   {
    PrintContaNews();
    ExportTrades();
-   double stats[10];
+   //--- 21/08 (difetto 34 della checklist): i CANARINI viaggiano coi DATI.
+   //    In OTTIMIZZAZIONE MT5 non fa vedere le Print degli AGENT: finiscono
+   //    nei log per-agente, che nessuno raccoglie e che nello zip non ci
+   //    sono. E walkforward_generico.ps1 scrive SEMPRE Optimization=1, cioe'
+   //    TUTTE le 68 passate di R93 girano cosi'. Il canarino non trattabile
+   //    del round ("cella news ON con bloccate=0 si BUTTA") sarebbe stato
+   //    illeggibile. FrameAdd attraversa il confine agente -> terminale e
+   //    OnTesterDeinit, che gira SUL TERMINALE, lo scrive come COLONNA.
+   //    Le Print restano dove sono: servono nel test singolo a mano.
+   double stats[13];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -928,6 +937,11 @@ double OnTester()
    stats[7] = gWorstDayPct;                             // Peggior Giornata % (negativo)
    stats[8] = TesterStatistics(STAT_MAX_CONLOSSES);     // Perdite Consecutive Max
    stats[9] = TesterStatistics(STAT_CONLOSSMAX);        // Serie Perdente Peggiore (denaro)
+   //--- e le tre che rendono LEGGIBILE il canarino del filtro news anche
+   //    quando la passata gira su un agente muto.
+   stats[10] = (double)gNewsBlocchi;      // News Bloccate       (0 = filtro NON eseguito)
+   stats[11] = (double)gNewsBarreViste;   // News Interrogazioni (il denominatore)
+   stats[12] = (double)gNewsCount;        // News Eventi         (0 = file assente o letto male)
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -950,14 +964,21 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
+         //--- HEADER E RIGA SI TOCCANO INSIEME, o le colonne scalano di posto.
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,News Bloccate,News Interrogazioni,News Eventi";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
+      //--- la guardia su ArraySize non e' cosmetica: -1 dice "questa passata
+      //    NON ha prodotto il canarino" ed e' diverso da 0, che dice "il
+      //    filtro ha girato e non ha bloccato niente". Con 0 le due cose si
+      //    confonderebbero, ed e' esattamente la confusione che il canarino
+      //    doveva togliere.
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
-                                (ArraySize(data)>7?data[7]:0.0), (ArraySize(data)>8?data[8]:0.0), (ArraySize(data)>9?data[9]:0.0));
+                                (ArraySize(data)>7?data[7]:0.0), (ArraySize(data)>8?data[8]:0.0), (ArraySize(data)>9?data[9]:0.0),
+                                (ArraySize(data)>10?data[10]:-1.0), (ArraySize(data)>11?data[11]:-1.0), (ArraySize(data)>12?data[12]:-1.0));
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
