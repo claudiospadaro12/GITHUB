@@ -1,0 +1,161 @@
+# =====================================================================
+#  R93 -- FIBO H4 ALL'IMBUTO   |   GAMBA A -- il filtro news sul NOSTRO EA
+#  LA REGOLA DEL CORSO: prima del dato gli ordini si TOLGONO
+#  EA: ABTG_FiboH4_Multi v1.10 (geometria INTOCCATA)
+#
+#  CRITERI: risultati_archivio\R93_CRITERI.md  -- E' UNA BOZZA:
+#  **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri di
+#  R93 non si guardano. Regola di casa: i criteri si cambiano prima dei
+#  numeri, non dopo.
+#
+#  L'ASSE UNICO DI QUESTO FILE: InpNewsCancelPendings 0 / 1 (con deroga a >= 100 pip di distanza)
+#  Tutto il resto e' PINNATO e IDENTICO a quello degli altri file della
+#  stessa gamba. E' la regola di casa dopo l'errore InpTP1_ATRmult=0
+#  contro 0.5, pagato due volte: se cambiasse anche solo un'altra riga,
+#  il round misurerebbe due cose insieme.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5, e
+#       va CHIUSO. Prima di R93 deve essere finito R92.
+#    2. R93 NON PARTE finche' non sono verdi:
+#         (a) la FIRMA dei criteri (le tre righe del par. 13);
+#         (b) la COMPILAZIONE in MetaEditor, 0 errori 0 warning
+#             (ABTG_FiboH4_Corso.mq5 non e' MAI stato compilato, e chi
+#              lo ha scritto non ha MetaEditor);
+#         (c) il PASSO 0 sulle barre M1 (criteri par. 4.5);
+#         (d) l'AUTOTEST letto in TEST SINGOLO nel tester -- F7 compila
+#             e basta, quelle righe da MetaEditor non escono.
+#    3. LA RIGA DI LANCIO NON STA IN QUESTO FILE: sta in
+#       backtest_pipeline\lancia_r93.ps1 e nel messaggio in chat, con
+#       l'irm che riscarica tutto dal branch 'lavoro' e la raccolta
+#       finale sul Desktop.
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO -- E LA CONSEGUENZA, DETTA PRIMA
+#    DATO:     OHLC su M1 (Modello 1). NON tick reali.
+#    PERCHE':  a BCM i tick di GBPUSD partono dal 2024.07.05 (misurato
+#              il 15/08). La finestra 2021-2025 a tick NON ESISTE.
+#    QUINDI:   R93 e' SCREENING. In questa casa "l'OHLC e' solo
+#              screening, i verdetti solo a tick" -- R57: cambiato SOLO
+#              il modello del tester, il segno si e' RIBALTATO e fino al
+#              49% delle operazioni e' sparito.
+#              >>> R93 NON PROMUOVE NIENTE. <<<
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E PERCHE' FINISCE NEL 2025
+#    @DAQUANDO 2021.01.04 e fine 2025.12.19 = l'intervallo COPERTO DAL
+#    CALENDARIO NEWS convertito (2.971 eventi ad alto impatto, 0 righe
+#    scartate). Fuori da li' il filtro news e' CIECO e la cella
+#    tornerebbe identica alla baseline: sarebbe il "misurato il nulla"
+#    di M17 sul PostNews, al contrario.
+#    >>> La data di FINE si passa al driver con -Fino 2025.12.19.
+#        Non e' un default: va scritta nella riga di lancio.
+#    REGIMI CONTENUTI (da scrivere accanto a ogni numero): 2021
+#    reflazione post-covid | 2022 dollaro forte e inflazione |
+#    2023-24 disinflazione | 2025.
+#    ATTENZIONE: la data qui sotto vale solo se le barre M1 di BCM
+#    arrivano fin li'. Lo dice il PASSO 0, non questo file.
+# ---------------------------------------------------------------------
+@SIMBOLO  GBPUSD
+@PERIODO  H4
+@DAQUANDO 2021.01.04
+
+# --- IL BASKET. NON PUO' ESSERE VUOTO, ED E' UNA LEZIONE PAGATA.
+#     Questo EA e' MULTI-SIMBOLO: opera su InpSymbols, non sul simbolo
+#     del grafico. Il file prova della fascia B scriveva "InpSymbols="
+#     (vuoto) con sopra la nota "il pin sotto e' OBBLIGATORIO": MT5
+#     IGNORA un pin di stringa vuoto e usa il default compilato. Cosi'
+#     otto passate intitolate a otto mercati hanno misurato OTTO VOLTE
+#     LO STESSO BASKET (7 file su 8 con lo stesso numero al centesimo).
+#     >>> E l'ORDINE qui sotto e' DIVERSO dal default compilato
+#         ("GBPUSD;USDJPY;EURUSD") APPOSTA: e' il CANARINO DEL PIN.
+#         Nel CSV la colonna InpSymbols deve dire USDJPY;EURUSD;GBPUSD.
+#         Se dice GBPUSD;USDJPY;EURUSD il pin NON e' arrivato e i numeri
+#         di R93 gamba A non si leggono.
+InpSymbols=USDJPY;EURUSD;GBPUSD
+
+# --- TETTO POSIZIONI = 3, uno per cross. Nella fascia B era 1, e con 1
+#     i tre cross si tolgono il posto a vicenda: l'ordine della lista
+#     cambierebbe i risultati e il canarino qui sopra sarebbe inutile.
+#     Con 3 i cross sono indipendenti. Rischio aperto massimo
+#     3 x 1,00% = 3,00%, SOTTO il cap C1 di 3,25% firmato il 18/08.
+InpMaxTotalPositions=3
+
+# --- IL MOTORE: identico alla fascia B. NON si tocca la geometria:
+#     e' l'altra ipotesi del round (la gamba B) e serve da paragone.
+InpTF=16388
+InpEngulfLookback=8
+InpAllowTwoCandle=1
+InpMinEngulfBodyPct=25.0
+InpAllowLong=1
+InpAllowShort=1
+InpEZ1ratio=1.88
+InpEZ2ratio=2.88
+InpSLratio=4.236
+InpUseEZ2=1
+InpMinDistPips=50.0
+InpAtrPeriod=14
+InpMaxEngulfAtr=3.0
+InpPendingExpiryBars=6
+
+# --- GESTIONE: identica in tutte le celle.
+InpSLbufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpUseTrailing=1
+InpTrailAtrMult=2.0
+InpFirstFraction=0.3333
+
+# --- RISCHIO 1,00%: e' quello della fascia B. NON si tocca, altrimenti
+#     i numeri di R93 non si confrontano con quelli di allora.
+InpRiskPercent=1.0
+
+# --- I CANCELLI PROP: accesi come i default dell'EA. Chi li MISURA
+#     sono i file R93e (overnight) e R93f (weekend), non questo.
+InpUseCutoff=1
+InpCutoffHour=17
+InpCutoffMin=45
+InpFridayClose=1
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+
+# --- IL FILTRO NOTIZIE. Il file e' quello CONVERTITO (le colonne dei
+#     calendari di biblioteca sono SCAMBIATE: dati come sono, l'impatto
+#     verrebbe letto da "United States", varrebbe 0, e il filtro non
+#     bloccherebbe MAI niente restando NEUTRO IN SILENZIO).
+#     Il CSV e' in UTC: l'ora del server la fa InpNewsShiftMinutes.
+#     +60 = ipotesi del repo (BCM = UTC+1). Il file R93c misura anche 0
+#     (ipotesi del corso, BCM = GMT). Vedi richiesta R4 nei criteri.
+InpUseNewsFilter=1
+InpNewsFile=abtg_news_2021_2025_UTC.csv
+InpNewsCommon=1
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=60
+InpNewsPerCurrency=1
+InpNewsDerogaPips=100.0
+
+# --- GUARDIAN acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono: guardia INERTE (fail-open totale), numeri
+#     confrontabili con quelli degli altri EA. Scritto qui apposta,
+#     cosi' nessuno lo va a cercare nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: in una griglia l'autotest riempirebbe il giornale a ogni
+#     passata. Si legge UNA volta sola, in test singolo, prima del round.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+
+
+# --- L'ASSE. Sono DUE COSE DIVERSE e vanno misurate separate:
+#       il filtro d'ingresso impedisce di PIAZZARE ordini nuovi;
+#       questo toglie quelli GIA' PIAZZATI ("prima del rilascio di ogni
+#       dato macroeconomico gli ordini vanno tolti. Noi non
+#       scommettiamo sul mercato", lez. 18).
+#     La deroga e' dettata dal corso: se il pendente e' a >= 100 pip di
+#     distanza resta (InpNewsDerogaPips=100 nel corpo, non e' un asse).
+#     ATTESO: n in calo rispetto a R93b cella per-valuta. Se n non
+#     cambia affatto, o i pendenti cancellati sono 0, la cella si BUTTA.
+InpNewsCancelPendings=0||0||1||1||Y
+# =====================================================================

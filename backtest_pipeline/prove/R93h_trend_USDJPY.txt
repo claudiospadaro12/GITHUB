@@ -1,0 +1,174 @@
+# =====================================================================
+#  R93 -- FIBO H4 ALL'IMBUTO   |   GAMBA B -- la geometria del CORSO
+#  LA PRECONDIZIONE: quanto pesa "solo alla fine di un trend"
+#  EA: ABTG_FiboH4_Corso v1.00 (MAI COMPILATO)
+#
+#  CRITERI: risultati_archivio\R93_CRITERI.md  -- E' UNA BOZZA:
+#  **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri di
+#  R93 non si guardano. Regola di casa: i criteri si cambiano prima dei
+#  numeri, non dopo.
+#
+#  L'ASSE UNICO DI QUESTO FILE: InpUseTrendFilter 0 / 1
+#  Tutto il resto e' PINNATO e IDENTICO a quello degli altri file della
+#  stessa gamba. E' la regola di casa dopo l'errore InpTP1_ATRmult=0
+#  contro 0.5, pagato due volte: se cambiasse anche solo un'altra riga,
+#  il round misurerebbe due cose insieme.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5, e
+#       va CHIUSO. Prima di R93 deve essere finito R92.
+#    2. R93 NON PARTE finche' non sono verdi:
+#         (a) la FIRMA dei criteri (le tre righe del par. 13);
+#         (b) la COMPILAZIONE in MetaEditor, 0 errori 0 warning
+#             (ABTG_FiboH4_Corso.mq5 non e' MAI stato compilato, e chi
+#              lo ha scritto non ha MetaEditor);
+#         (c) il PASSO 0 sulle barre M1 (criteri par. 4.5);
+#         (d) l'AUTOTEST letto in TEST SINGOLO nel tester -- F7 compila
+#             e basta, quelle righe da MetaEditor non escono.
+#    3. LA RIGA DI LANCIO NON STA IN QUESTO FILE: sta in
+#       backtest_pipeline\lancia_r93.ps1 e nel messaggio in chat, con
+#       l'irm che riscarica tutto dal branch 'lavoro' e la raccolta
+#       finale sul Desktop.
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO -- E LA CONSEGUENZA, DETTA PRIMA
+#    DATO:     OHLC su M1 (Modello 1). NON tick reali.
+#    PERCHE':  a BCM i tick di GBPUSD partono dal 2024.07.05 (misurato
+#              il 15/08). La finestra 2021-2025 a tick NON ESISTE.
+#    QUINDI:   R93 e' SCREENING. In questa casa "l'OHLC e' solo
+#              screening, i verdetti solo a tick" -- R57: cambiato SOLO
+#              il modello del tester, il segno si e' RIBALTATO e fino al
+#              49% delle operazioni e' sparito.
+#              >>> R93 NON PROMUOVE NIENTE. <<<
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E PERCHE' FINISCE NEL 2025
+#    @DAQUANDO 2021.01.04 e fine 2025.12.19 = l'intervallo COPERTO DAL
+#    CALENDARIO NEWS convertito (2.971 eventi ad alto impatto, 0 righe
+#    scartate). Fuori da li' il filtro news e' CIECO e la cella
+#    tornerebbe identica alla baseline: sarebbe il "misurato il nulla"
+#    di M17 sul PostNews, al contrario.
+#    >>> La data di FINE si passa al driver con -Fino 2025.12.19.
+#        Non e' un default: va scritta nella riga di lancio.
+#    REGIMI CONTENUTI (da scrivere accanto a ogni numero): 2021
+#    reflazione post-covid | 2022 dollaro forte e inflazione |
+#    2023-24 disinflazione | 2025.
+#    ATTENZIONE: la data qui sotto vale solo se le barre M1 di BCM
+#    arrivano fin li'. Lo dice il PASSO 0, non questo file.
+# ---------------------------------------------------------------------
+@SIMBOLO  USDJPY
+@PERIODO  H4
+@DAQUANDO 2021.01.04
+
+# --- UN SIMBOLO PER PASSATA. Questo EA opera SOLO sul simbolo del
+#     grafico: non ha, di proposito, la lista multi-simbolo che ha reso
+#     illeggibile il round della fascia B.
+#     I due cross sono quelli che il corso NOMINA: "i cross che hanno
+#     statisticamente i maggiori segnali sono Gbpsd e Usd yen"
+#     (FIBOH4_CORSO_SPEC.md par. 2). Il "statisticamente" del corso non
+#     ha un solo dato dietro: qui e' una SCELTA DI UNIVERSO dichiarata,
+#     non una prova.
+InpTF=16388
+InpMaxPositions=1
+
+# --- LA PRECONDIZIONE DEL CORSO: solo alla FINE DI UN TREND, mai in
+#     laterale. La definizione NON e' inventata da noi: viene dal modulo
+#     base ("un trend e' una successione di top e di bottom ... laterale
+#     in QUALUNQUE ALTRO CASO"), con lo swing a "due, meglio ancora tre"
+#     candele per lato. NOSTRA e' una sola scelta: quante coppie di
+#     swing confrontare (assunzione A3).
+InpSwingBars=3
+InpSwingCoppie=2
+InpTrendLookback=150
+
+# --- IL PATTERN: engulfing TOTALE, ombre comprese, 1 candela o la
+#     somma di 2 (massimo due). Lookback 10 = centro di "8-10" / "8, 10,
+#     12" (assunzione A8). InpMaxEngulfAtr 3,0 e' un numero NOSTRO: il
+#     corso dice "mai le candele con movimenti importanti" e non da'
+#     nessuna soglia (assunzione A4).
+InpEngulfLookback=10
+InpAllowTwoCandle=1
+InpMinEngulfBodyPct=25.0
+InpMaxEngulfAtr=3.0
+InpAtrPeriod=14
+InpAncoraggio=0
+InpAllowLong=1
+InpAllowShort=1
+
+# --- I QUATTRO LIVELLI DETTATI, e il target al livello 100.
+#     La banda 1,78-1,88 e' larga 0,10 x range: e' l'assunzione A1, e la
+#     chiude la richiesta R3 (screenshot del pannello Fibo).
+#     Il 100 come BASE del pattern e' l'assunzione A2, e la chiude la
+#     richiesta R2 (screenshot del Fibo con la linea 100 visibile).
+InpEZ1near=1.78
+InpEZ1far=1.88
+InpEZ2near=2.78
+InpEZ2far=2.88
+InpFibo4236=4.236
+InpTargetLevel=1.00
+
+# --- PIAZZAMENTO: 2 ordini sui due bordi della zona, 1/3 e 2/3,
+#     distanza minima prezzo-zona 50 pip ("almeno 50-60", ripetuto 4
+#     volte). La zona preferita e' la SECONDA.
+InpZona=0
+InpMinDistPips=50.0
+InpFrazionePrimo=0.3333
+InpPendingExpiryBars=6
+
+# --- LO STOP: il corso ne da' SETTE senza dire quale usare, e cambiano
+#     il rischio di un fattore ~4. QUESTO E' IL BUCO CHE DECIDE IL P&L,
+#     e per questo e' un ASSE, non un default nascosto. Il file R93g lo
+#     spazzola; qui e' pinnato al metodo 4 (R:R 1:1), l'unico che il
+#     relatore usa DAVVERO nel suo esempio pratico.
+InpSLMode=0
+InpSLatr=1.0
+InpSLbufferPips=3.0
+
+# --- GESTIONE: 50% + stop in pari al PRIMO obiettivo (la prima entry
+#     zone), chiusura totale al 100. La lez.19 dice "dimezzo al 100" e
+#     la lez.20 "il primo obiettivo e' la prima entry zone": risolta a
+#     favore della 20 (assunzione A6), perche' dimezzare sul target
+#     finale non lascia niente da far correre.
+InpParzialePct=50.0
+InpBreakeven=1
+
+# --- I CANCELLI PROP DEL CORSO, accesi: sono parte della strategia, non
+#     un accessorio ("gli ordini non eseguiti entro le 18.30-19 vanno
+#     cancellati"; "mai e qua dico mai aperto durante il weekend").
+#     Le ORE sono ORA SERVER e valgono a meno di UN'ORA finche' non
+#     arriva la richiesta R4 sul fuso.
+InpUseCutoff=1
+InpCutoffHour=17
+InpCutoffMin=45
+InpFridayClose=1
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+
+# --- FILTRO NOTIZIE SPENTO in tutta la gamba B, di proposito.
+#     Il corso lo rende obbligatorio, ma la gamba B misura la
+#     GEOMETRIA: accendere un filtro qui misurerebbe due cose insieme.
+#     Il filtro e' la domanda della gamba A. Si accendera' -- misurato,
+#     non per fede -- solo se la geometria sopravvive.
+InpUseNewsFilter=0
+
+# --- RISCHIO 0,65%: e' lo 0,65% DI CASA (firma del 18/08), NON l'1%
+#     preso in prestito dal modulo Breakout. Il corso la percentuale
+#     non la pronuncia MAI in 3 lezioni (assunzione A7). Con 2 ordini la
+#     frazione si SPARTISCE (1/3 + 2/3), non si somma: rischio aperto
+#     massimo 0,65%.
+InpRiskPercent=0.65
+
+InpUsaGuardian=1
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+
+
+# --- L'ASSE. Il corso la dichiara PRECONDIZIONE ASSOLUTA ("se siamo
+#     in una fase laterale scartiamo a priori"), e ABTG_FiboH4_Multi
+#     NON CE L'HA: opera esattamente nelle condizioni in cui il corso
+#     dice di NON operare (divergenza 4 della spec).
+#     ATTESO: acceso = MOLTE meno operazioni. Se il conteggio
+#     [FIBOCORSO-CONTA] mostra scartatiLaterale enorme e SETUP
+#     PIAZZATI=0, la cella non dice "la strategia perde": dice che non
+#     ha mai operato, e va letta cosi' (criteri par. 5.4).
+InpUseTrendFilter=0||0||1||1||Y
+# =====================================================================
