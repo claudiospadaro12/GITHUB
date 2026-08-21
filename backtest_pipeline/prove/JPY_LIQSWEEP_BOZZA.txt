@@ -1,0 +1,196 @@
+# =====================================================================
+#  BOZZA / SWEEP + RECLAIM SUI CROSS JPY - EURJPY M15
+#  EA: ABTG_LiquiditySweep (CANDIDATO, mai promosso; girato una volta
+#      sola in R89 su GBPUSD, dove NON e' stato bocciato ma dichiarato
+#      NON MISURABILE: n IS = 14 contro un canarino di 30).
+#      Motore ripreso da "Liquidity Sweep H4 - M15" di
+#      OsmarSandovalEspinosa, MQL5 Code Base 68951 (attribuzione dovuta,
+#      gia' nell'header del .mq5).
+#  Dossier che propone questo round:
+#      caccia_strategie\CACCIA_JPY_MECCANISMI_2026-08-21.md
+#
+#  >>> QUESTO FILE E' UNA BOZZA. NON SI LANCIA COSI' COM'E'. <<<
+#  Il cacciatore non firma i criteri e non apre i round. Sotto ci sono
+#  i TODO obbligatori: chi lancia senza averli chiusi produce numeri
+#  che non si possono leggere.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND ESISTE (Regola della Seconda Caccia, 19/08)
+#    R82 ha chiuso il BREAKOUT DEL CORSO sui cross JPY: ZERO vincitori
+#    su sette, PF OOS fra 0,769 e 0,980, con campioni da 264 a 2.138
+#    operazioni per finestra. Il motore che INSEGUE la rottura e' morto.
+#    La regola pretende un MECCANISMO diverso sulla stessa inefficienza,
+#    non altri parametri. Questo e' il meccanismo OPPOSTO: si aspetta che
+#    il prezzo RIENTRI dentro il livello e si entra CONTRO la rottura.
+#
+#  LA DOMANDA DEL ROUND
+#    "Sui cross JPY - dove R82 ha contato da 264 a 2.138 rotture per
+#     finestra e ha dimostrato che INSEGUIRLE non paga su nessuno dei
+#     sette - il RIENTRO dopo lo sweep ha un edge, una volta che il
+#     livello e' costruito abbastanza fitto da produrre un campione
+#     leggibile?"
+#
+#  QUESTO ROUND NON PUO' PRODURRE UNA SEDIA. Al massimo produce il
+#  permesso di fare un walk-forward vero, poi i tick reali, poi il demo.
+#  E il vincolo di portafoglio resta firmato: dalla famiglia JPY entra
+#  al massimo UNA sedia, mai il paniere.
+# ---------------------------------------------------------------------
+#  >>> TODO ARCHITETTO n.1 - I CRITERI NON SONO SCRITTI.
+#      Vanno congelati e FIRMATI in un file di criteri PRIMA del lancio
+#      (i criteri si cambiano prima dei numeri, non dopo). Dentro:
+#        - cosa vuol dire PASS per una cella (PF, DD, n minimo);
+#        - la regola di selezione: CENTRO DELL'ALTOPIANO, MAI IL PICCO
+#          (12 Spearman IS->OOS negative su 13, l'ultima ai tick reali);
+#        - la valvola R59: sotto 150 operazioni IS il round misura il
+#          RISCHIO e SOSPENDE il giudizio sul MERITO;
+#        - il muro del rischio: DD > 15,0% = bocciatura secca a
+#          qualunque n (criterio usato in R86);
+#        - cosa si conclude se boccia: NON "proviamo un altro cross".
+#
+#  >>> TODO PASSO 0 n.2 - LA FINESTRA VA MISURATA, NON EREDITATA.
+#      @DAQUANDO qui sotto e' 2007.02.12: NON e' inventata, e' la data
+#      usata da tutto il torneo R82 (prima data del simbolo piu' giovane
+#      dei sette, CADJPY/NZDJPY, misurata dalla sonda ABTG_InfoBroker
+#      del 17/08). La prima data misurata di EURJPY sul broker e'
+#      1993.04.26, ma lo storico sul DISCO va scaricato.
+#      -> girare scarica_storico.ps1 e VERIFICARE che le barre M15 di
+#         EURJPY coprano davvero la finestra. Sugli indici il driver
+#         diceva 2024.01.01 e i dati partivano dal 26/09/2024: meta'
+#         finestra IS non esisteva. E' il difetto n.18 della checklist.
+#      -> se manca, il round si FERMA e la finestra si ridichiara.
+#
+#  >>> TODO n.3 - IL REGIME CONTENUTO va scritto accanto a OGNI numero.
+#      2007-2026 su EURJPY contiene almeno: crollo 2008, Abenomics
+#      2013-2015, laterale 2016-2019, crollo 2020, carry 2022-2024.
+#      La prova di regime vera (toro/orso/laterale/crollo, macchina di
+#      R50-R56-R59) resta un round A PARTE.
+#
+#  >>> TODO n.4 - PERCHE' EURJPY E NON UN ALTRO.
+#      Scelto per due motivi scritti prima: (a) e' l'unico cross dove
+#      R82 ha visto un segno di vita (IS 2007-2014 PF 1,112), quindi e'
+#      il posto dove l'inefficienza ha piu' probabilita' di esistere
+#      DAVVERO; (b) campione grande (895 IS / 2.068 OOS col motore del
+#      corso). NON e' un torneo: un torneo a sette lo vieta la regola
+#      della UNA sedia per famiglia, e costerebbe sette volte tanto per
+#      rispondere alla stessa domanda.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO - SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       Prima della riga va dichiarato cosa deve essere finito, e MT5
+#       va CHIUSO.
+#    2. QUESTO ROUND NON HA PRECEDENZA su niente. E' un candidato:
+#       passa dopo i lavori sulle sedie vive.
+#    3. La riga di lancio definitiva porta SEMPRE l'irm che riscarica
+#       script e file prova dal branch 'lavoro', e la riga di raccolta
+#       finale (cartella sul Desktop + Compress-Archive) con l'elenco
+#       dei file attesi in console.
+#    4. Vale anche sul VPS: ogni risultato per Claudio arriva SEMPRE
+#       anche sul Desktop del VPS.
+# ---------------------------------------------------------------------
+#  IL CANARINO SI LEGGE PRIMA DEL CONTO ECONOMICO
+#    L'EA stampa SEMPRE, anche con InpVerbose=0, la riga
+#    [LIQSWEEP][CONTEGGIO] con livelli creati / consumati / invalidati /
+#    segnali scartati. QUELLA RIGA SI LEGGE PER PRIMA. E' il difetto
+#    che ha ucciso R89: 21 barre H4 per lato producevano 14 trade IS.
+#    Qui l'asse spazzolato E' esattamente quello, ed e' il motivo del
+#    round.
+# ---------------------------------------------------------------------
+#  IL LIMITE CHE VA DETTO ANCHE SE NON PIACE
+#    Questo e' un motore CONTROTENDENZA su livello, su una famiglia -
+#    i cross JPY - che ha i trend piu' violenti del forex per una
+#    ragione economica documentata (yen come valuta di funding del
+#    carry: Quantpedia FX Carry Trade dichiara max drawdown -32% per la
+#    strategia che ci sta dall'altra parte). E' il tipo di motore che
+#    incassa una SERIE DI STOP quando il carry parte.
+#    -> la PEGGIOR GIORNATA si MISURA (colonna "Peggior Giornata %" del
+#       CSV), non si stima. Riferimento nostro: R51 = -2,06%.
+#    -> il muro prop giornaliero e' -5% su 100k, e butta fuori anche col
+#       DD totale intatto.
+# =====================================================================
+@SIMBOLO  EURJPY
+@PERIODO  M15
+@DAQUANDO 2007.02.12
+
+# --- MOTORE: il livello e il grilletto, e nient'altro.
+#     InpTF_Struttura = 16385 e' PERIOD_H1 (valore numerico dell'enum).
+#     >>> VERIFICARE il numero prima del lancio: se lo script passa il
+#         nome dell'enum, si scrive PERIOD_H1.
+#     H1 e non H4 e' LA MODIFICA DEL ROUND, e viene per iscritto da R89:
+#     "servono swing piu' corti (o un TF di struttura piu' basso)".
+InpTF_Struttura=16385
+
+# --- L'UNICO ASSE VERO DEL ROUND: quanto e' fitto il livello.
+#     Sweep STRETTO e a numeri dispari: tre valori, non trenta.
+#     Piu' basso = piu' livelli = piu' campione, ma livelli piu' deboli.
+#     La cella si sceglie al CENTRO dell'altopiano, MAI al picco.
+InpSwingBars=8||6||2||10||Y
+
+InpAllowLong=1
+InpAllowShort=1
+InpMaxLivelli=200
+
+# --- FINESTRA DI SESSIONE: SPENTA, e non e' una dimenticanza.
+#     Se misurassi gia' filtrato per orario e andasse male, non saprei
+#     se e' morto il MOTORE o l'ORARIO - ed e' l'errore che il progetto
+#     ha pagato 5 volte su 5 (R20 ADX, R12, R26, R45, R54: filtro
+#     appiccicato a motore gia' tarato, ZERO successi).
+#     La sessione e' un ROUND SUCCESSIVO, non una cella di questo.
+InpUseSessionWindow=0
+InpSessStartHour=8
+InpSessStartMin=0
+InpSessEndHour=12
+InpSessEndMin=0
+
+# --- STOP, TARGET, GESTIONE
+#     SL STRUTTURALE (modo 0): oltre l'ESTREMO DELLO SWEEP piu' 0,5 ATR
+#     di respiro. E' il modo coerente con la tesi del motore.
+#     InpSLatr resta scritto ma e' INERTE con SLMode=0.
+InpAtrPeriod=14
+InpSLMode=0
+InpSLBufferAtr=0.5
+InpSLatr=1.5
+InpTP_RR=2.0
+
+# --- PARZIALE SPENTO, BREAKEVEN ACCESO. E' una SCELTA di gestione ed e'
+#     dichiarata: InpTP1Pct=0 spegne il parziale, InpBreakeven=1 porta
+#     comunque lo stop in pari a 1 R (lezione PTE del 04/08).
+#     L'ablazione del breakeven e' un ALTRO round.
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailing=0
+InpTrailATR=1.5
+
+# --- OPERATIVA: nessun tetto. I tetti sono filtri travestiti, e in un
+#     round che misura la FREQUENZA sarebbero autolesionisti.
+InpMaxTradesPerDay=0
+
+# --- RISCHIO: pinnato a 1,00%. NON e' la taglia di campo (0,65%): e' il
+#     valore comune che rende i profitti confrontabili con gli altri
+#     round.
+InpRiskPercent=1.0
+
+# --- NOTIZIE: spente. Sono un filtro, e i filtri non entrano nel round
+#     che misura il motore. (E servirebbe un CSV in MQL5\Files.)
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open) e i numeri
+#     restano confrontabili. Sta scritto apposta, cosi' nessuno lo cerca
+#     nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log e autotest SPENTI nelle corse lunghe. L'autotest si
+#     legge UNA volta, in una passata singola, prima del round.
+#     La riga [LIQSWEEP][CONTEGGIO] esce lo stesso: e' il canarino.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+InpComment=LIQSWJPY
+
+# --- MAGIC: >>> TODO n.5 - VERGINE, DA ASSEGNARE.
+#     772600 e' riservato all'eventuale sedia; 772601/772602 bruciati in
+#     R54; 772603/772604 bruciati in R89. Un magic gia' visto puo' far
+#     incrociare al tester deal che non c'entrano (verificato in R54).
+#     Serve un valore mai usato nel repo, verificato con grep prima del
+#     lancio. Qui NON lo invento.
+InpMagic=772610
