@@ -121,6 +121,14 @@
 //             che sopravvive al riavvio, piu' riaggancio in OnInit
 //             delle posizioni gia' vive). E' una correzione della
 //             GESTIONE, non del segnale.
+//         12-bis. PER-TRADE piu' ricco (telemetria, NON trading): il
+//             CSV `abtg_trades_*` ora ha la colonna **signal**
+//             (BLU/VIOLA/ARANCIO, ripescata dal commento del deal di
+//             APERTURA) e il nome del file porta la variante del VIOLA.
+//             Serve a rendere MISURABILE il canarino del BLU dai file
+//             del round, senza rifare passate a mano: in ottimizzazione
+//             MT5 non esegue le Print degli agent, quindi la riga
+//             [BULGE-CONTA] nei log delle 88 passate NON c'e'.
 //         12. Autotest allargato: le due versioni del VIOLA e la scala
 //             del trailing (`TrailLockR`, aritmetica pura: r=1,40 ->
 //             fermo, 1,50 -> +0,50R, 2,00 -> +1,00R, 2,60 -> +1,50R).
@@ -1659,14 +1667,48 @@ string OptFrame_FileName()
 //--- per-trade: serve al DD di PORTAFOGLIO (ROTTA_PROP punto 4).
 //    Con un basket la colonna 'symbol' non e' decorativa: dice su quale
 //    cross e' finito ogni deal anche quando il grafico e' un altro.
+//
+//    v5.10, DUE AGGIUNTE che non toccano il trading ma cambiano cosa si
+//    puo' MISURARE dopo:
+//     (a) colonna 'signal' = BLU / VIOLA / ARANCIO. Il tag sta nel
+//         commento del deal di APERTURA, non in quello di chiusura (che
+//         il broker riscrive in "sl"/"tp"): quindi si fa un primo giro
+//         per raccogliere i commenti d'ingresso per position_id, e poi
+//         il giro vero. NON si usa HistorySelectByPosition dentro il
+//         ciclo: azzererebbe la selezione della history e il ciclo
+//         esterno perderebbe i deal. Trappola nota di MT5.
+//         >>> E' cosi' che il canarino del BLU diventa MISURABILE dai
+//             file del round, senza dover rifare una passata a mano.
+//     (b) il nome del file porta anche la VARIANTE DEL VIOLA, altrimenti
+//         la seconda cella di ogni corsa sovrascrive la prima e meta'
+//         del round sparisce.
 void ExportTrades()
   {
    if(!HistorySelect(0,TimeCurrent())) return;
-   string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"+IntegerToString((long)InpMagic)+".csv";
+   string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"
+             +IntegerToString((long)InpMagic)+"_viola"
+             +(Use_Purple_PineReaction?"PINE":"EA")+".csv";
    int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
    if(h==INVALID_HANDLE) return;
-   FileWrite(h,"close_time","symbol","magic","position_id","deal_type","volume","price","net_profit","comment");
+   FileWrite(h,"close_time","symbol","magic","position_id","deal_type","volume","price","net_profit","signal","entry_comment","exit_comment");
+
    int n=HistoryDealsTotal();
+
+   //--- giro 1: i commenti dei deal di APERTURA, per position_id
+   long   posId[];  string posCom[];
+   int    np=0;
+   ArrayResize(posId,n); ArrayResize(posCom,n);
+   for(int i=0;i<n;i++)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk==0) continue;
+      if(HistoryDealGetInteger(tk,DEAL_ENTRY)!=DEAL_ENTRY_IN) continue;
+      posId[np] =HistoryDealGetInteger(tk,DEAL_POSITION_ID);
+      posCom[np]=HistoryDealGetString(tk,DEAL_COMMENT);
+      np++;
+     }
+
+   //--- giro 2: i deal di CHIUSURA, con il tag ripescato dall'apertura
    for(int i=0;i<n;i++)
      {
       ulong tk=HistoryDealGetTicket(i);
@@ -1674,15 +1716,22 @@ void ExportTrades()
       long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
       if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_OUT_BY) continue;
       double net=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
+
+      long   pid=HistoryDealGetInteger(tk,DEAL_POSITION_ID);
+      string comIn="";
+      for(int k=0;k<np;k++) if(posId[k]==pid){ comIn=posCom[k]; break; }
+
       FileWrite(h,
                 TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
                 HistoryDealGetString(tk,DEAL_SYMBOL),
                 IntegerToString(HistoryDealGetInteger(tk,DEAL_MAGIC)),
-                IntegerToString(HistoryDealGetInteger(tk,DEAL_POSITION_ID)),
+                IntegerToString(pid),
                 IntegerToString(HistoryDealGetInteger(tk,DEAL_TYPE)),
                 DoubleToString(HistoryDealGetDouble(tk,DEAL_VOLUME),2),
                 DoubleToString(HistoryDealGetDouble(tk,DEAL_PRICE),_Digits),
                 DoubleToString(net,2),
+                ExtractSignalTag(comIn,false),
+                comIn,
                 HistoryDealGetString(tk,DEAL_COMMENT));
      }
    FileClose(h);

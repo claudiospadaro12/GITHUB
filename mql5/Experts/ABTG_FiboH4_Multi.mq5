@@ -17,11 +17,130 @@
 //|  storico H4 disponibile. Valori Fibo proprietari 1.88/2.88,     |
 //|  SL 4.236, come nella versione singola. DEMO. Nessuna garanzia. |
 //+------------------------------------------------------------------+
+//
+//==================================================================
+//  QUELLO CHE VA DETTO PRIMA DI GUARDARE UN NUMERO DI QUESTO EA
+//------------------------------------------------------------------
+//  1. QUESTO EA NON IMPLEMENTA LA STRATEGIA DEL CORSO.
+//     Implementa una strategia diversa che porta lo stesso nome.
+//     Misurato il 18/08/2026 leggendo le lezioni 18-20
+//     (backtest_pipeline\prove\FIBOH4_CORSO_SPEC.md par. 3.2, 3.3, 10
+//      e caccia_strategie\ANALISI_CORSO_FIBOH4_MEDIA200_2026-08-18.md
+//      par. 1.2). Le tre divergenze, coi fattori:
+//        distanza dei 2 ordini  noi 1,0 x range  corso 0,10 x range  ~x10
+//        target                 noi estremo opp. corso livello 100    x2,1
+//        stop                   noi 4,236 fisso  corso 1 dei 7 metodi ~x4
+//     Aritmetica gia' fatta: la gamba EZ1 ha R:R strutturale 0,80,
+//     cioe' le serve win rate > 56% SOLO PER PAREGGIARE, prima di
+//     spread e commissioni.
+//
+//  2. C'E' UN 0/8 IN ARCHIVIO, ed e' su QUESTA geometria.
+//     Coda fascia B del 10-11/08/2026:
+//     risultati_archivio\REFERTO_CODA_FASCIA_B.md riga 30 --
+//     "ABTG_FiboH4_Multi -- 0/8 promossi. Zero promozioni su 8 coppie
+//      forex+oro H4. Mai piu' senza una tesi nuova."
+//     Il 18/08 quel verdetto e' stato RITIRATO DI FATTO nella sua
+//     PORTATA (bocciava la nostra geometria, non quella insegnata),
+//     NON nel suo numero: il numero resta 0/8 e resta valido su
+//     QUESTO codice.
+//
+//  3. 🔴 DIFETTO DI BANCO TROVATO IL 21/08/2026, e riguarda proprio
+//     quel 0/8. Questo EA e' MULTI-SIMBOLO: opera sui simboli di
+//     InpSymbols, NON sul simbolo del grafico. Nello scan del 16/08
+//     (backtest_pipeline\risultati_prove\ABTG_FiboH4_Multi\*.csv)
+//     la colonna InpSymbols vale "GBPUSD;USDJPY;EURUSD" in TUTTE le
+//     passate, comprese quelle intitolate AUDUSD, CADJPY, GBPJPY,
+//     USDCHF: il blocco FiboH4 di scan_market.ps1 non pinna
+//     InpSymbols per simbolo (il blocco Bulge lo fa, col segnaposto
+//     __SYM__). I numeri lo confermano: 7 file su 8 danno lo STESSO
+//     risultato (IS da -384,56 a -394,13 / OOS da +116,17 a +118,68).
+//     >>> Cioe' quello scan ha misurato OTTO VOLTE LO STESSO BASKET
+//         DI TRE CROSS, non otto mercati. Il "0/8" e' in realta'
+//         "una configurazione bocciata, contata otto volte".
+//     Chi rifa' un round su questo EA DEVE pinnare InpSymbols.
+//
+//  4. Il filtro notizie c'era gia' ed era SPENTO. Il corso lo rende
+//     OBBLIGATORIO (FIBOH4_CORSO_SPEC.md par. 8). E' la riga D5 di
+//     report\PIANO_PROP.md. R93 lo MISURA: non lo accende per fede.
+//==================================================================
+//  CHANGELOG
+//  v1.00  EA originale (piano FiboH4). Logica dei segnali INTOCCATA
+//         da qui in avanti.
+//  v1.10  21/08/2026 -- MIGRAZIONE AGLI STANDARD DI CASA + il filtro
+//         notizie reso USABILE NEL TESTER. Il blocco dei segnali
+//         (BullEngulf, BearEngulf, TryPlace, PlaceLimit) e' rimasto
+//         IDENTICO CARATTERE PER CARATTERE: verificato a macchina con
+//         diff normalizzato = 0 righe. In OnNewBar cambia UNA riga
+//         sola, la chiamata al filtro notizie, che ora riceve il
+//         simbolo (serviva per l'esclusione per valuta).
+//         Cosa e' cambiato, tutto qui:
+//          1. GUARDIAN (firme B1/C1 del 18/08): #include
+//             <ABTG_PausaGuardian.mqh> + InpUsaGuardian (default
+//             true) + ABTG_GuardiaIngresso() chiamata sul percorso di
+//             APERTURA (dentro PlaceLimit, subito prima dell'ordine),
+//             MAI sulle chiusure/cancellazioni. Nel tester le sue
+//             GlobalVariable non esistono -> fail-open totale -> i
+//             numeri restano confrontabili con quelli di prima.
+//             >>> DIPENDENZA: il .mqh dev'essere in MQL5\Include.
+//                 walkforward_generico.ps1 scarica SOLO il .mq5:
+//                 lo installa lancia_r93.ps1 (o installa_guardian.ps1).
+//          2. OnTester standard di famiglia: ExportTrades (per-trade,
+//             DD di portafoglio) + gWorstDayPct (peggior giornata %)
+//             + le 3 colonne che servono a una prop.
+//          3. InpAutoTest (default true): stampa [FIBOH4][AUTOTEST]
+//             in avvio. Si legge ESEGUENDO (test singolo nel tester),
+//             non compilando: F7 compila e basta. Nessun ordine.
+//          4. FILTRO NOTIZIE -- quattro correzioni di MECCANISMO, non
+//             di strategia. Coi default il comportamento e' identico
+//             a prima (InpUseNewsFilter resta false).
+//             (a) FILE_COMMON (InpNewsCommon, default true): nel
+//                 tester ogni agente ha la SUA sandbox MQL5\Files e
+//                 il file NON ci arriva -> FileOpen falliva -> il
+//                 filtro si spegneva DA SOLO, in silenzio. Common\
+//                 Files e' condiviso dagli agenti locali (in casa e'
+//                 gia' la strada di ExportTrades). Se non lo trova
+//                 in Common ripiega sulla sandbox e LO DICE.
+//             (b) CANARINO OBBLIGATORIO: se il filtro e' acceso e il
+//                 file non si legge, o si legge e produce ZERO
+//                 eventi utili, l'EA STAMPA IN CHIARO
+//                 "[FIBOH4][NEWS] FILTRO ACCESO MA CIECO". E' il
+//                 difetto 31-bis della checklist: un filtro senza
+//                 dato diventa neutro e la cella esce identica alla
+//                 baseline -> si scriverebbe "il filtro e' neutro"
+//                 misurando un filtro che non e' mai girato.
+//             (c) ESCLUSIONE PER VALUTA (InpNewsPerCurrency, default
+//                 false = comportamento di prima). Prima gNewsCcy
+//                 veniva CARICATO E MAI USATO: il blackout era
+//                 GLOBALE, una notizia sullo yen fermava anche
+//                 EURUSD. Il corso chiede l'esclusione per valuta
+//                 ("come numeratore o denominatore").
+//             (d) VELOCITA': gli eventi sotto InpNewsMinImpact non
+//                 entrano piu' in memoria, l'array si alloca a
+//                 blocchi e la ricerca e' BINARIA su array ordinato
+//                 (con verifica dell'ordinamento e ripiego lineare
+//                 dichiarato). Con 22.503 righe di calendario la
+//                 scansione lineare a ogni barra x 3 simboli x 28
+//                 passate non era proponibile.
+//          5. NUOVO, SPENTO DI DEFAULT: InpNewsCancelPendings +
+//             InpNewsDerogaPips (100). E' la regola del corso "prima
+//             del dato gli ordini vanno tolti", con la deroga a >=100
+//             pip di distanza. Default false = niente cambia.
+//          6. ASCII puro.
+//         COSA NON E' STATO TOCCATO, di proposito: la geometria
+//         (1,88 / 2,88 / 4,236), il target, la mancanza di un filtro
+//         di trend, la deroga "usa EZ2 se sei addosso a EZ1". Sono
+//         le divergenze 1-6 dal corso: cambiarle e' un EA NUOVO, e
+//         quella e' una decisione di Claudio, non una manutenzione.
+//==================================================================
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade/Trade.mqh>
+//--- firme B1/C1 del 18/08: la guardia del conto, lato EA.
+//    Fail-open a tre livelli: input spento / canale inesistente /
+//    battito vecchio. Nel tester e' inerte.
+#include <ABTG_PausaGuardian.mqh>
 CTrade gTrade;
 
 //==================================================================
