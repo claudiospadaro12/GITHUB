@@ -1,7 +1,7 @@
 # =====================================================================
 #  R93 -- FIBO H4 ALL'IMBUTO   |   GAMBA A -- il filtro news sul NOSTRO EA
 #  IL CANCELLO WEEKEND: "mai e qua dico mai aperto nel weekend"
-#  EA: ABTG_FiboH4_Multi v1.10 (geometria INTOCCATA)
+#  EA: ABTG_FiboH4_Multi v1.20 (geometria INTOCCATA)
 #
 #  CRITERI: risultati_archivio\R93_CRITERI.md  -- E' UNA BOZZA:
 #  **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri di

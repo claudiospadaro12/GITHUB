@@ -8,7 +8,7 @@
 >
 > _Scritto il 21/08/2026, a numeri di R93 **mai visti**: nessuna passata girata,
 > `ABTG_FiboH4_Corso.mq5` **non e' mai stato compilato da nessuno**, e
-> `ABTG_FiboH4_Multi.mq5` v1.10 nemmeno._
+> `ABTG_FiboH4_Multi.mq5` v1.20 nemmeno._
 
 **Origine:** riga **D5** di `report/PIANO_PROP.md` + decisione di Claudio del
 21/08/2026 in chat, testuale: **"1,2,3 si guardano"** — dove il punto 1 era
@@ -42,11 +42,11 @@ va scritto in ogni referto che uscira' da R93.
 R93 ha **due gambe**. Una puo' passare e l'altra no. **Non si sommano mai.**
 
 ### 🅰️ GAMBA A — *"il filtro news cambia l'edge del NOSTRO EA, e in che verso?"*
-Banco: **`ABTG_FiboH4_Multi` v1.10**, geometria **intoccata**.
+Banco: **`ABTG_FiboH4_Multi` v1.20**, geometria **intoccata**.
 La domanda che **non** si fa: *"quanto rende il FiboH4"*. Nessuna.
 
 ### 🅱️ GAMBA B — *"la geometria del CORSO opera, e con che profilo?"*
-Banco: **`ABTG_FiboH4_Corso` v1.00**, EA **nuovo**, mai compilato.
+Banco: **`ABTG_FiboH4_Corso` v1.10**, EA **nuovo**, mai compilato.
 La domanda che **non** si fa: *"la geometria del corso e' migliore della
 nostra"*. **Sono due ipotesi diverse, non una la correzione dell'altra.** Puo'
 benissimo perdere anche lei.
@@ -366,9 +366,26 @@ ordine vero da un backtest).
 Da `[FIBOCORSO][AUTOTEST]` devono uscire **0 casi falliti** e questa riga, che
 e' la prova che la geometria del corso e' quella dichiarata:
 ```
-geometria su pattern 100-110 (range 10): target100=100.00 | EZ1 [98.20 - 99.20] | EZ2 [88.20 - 89.20] | banda=1.00
+geometria su pattern 100-110 (range 10): target100=100.00 | EZ1 [91.20 - 92.20] | EZ2 [81.20 - 82.20] | banda=1.00
 ```
-(banda = `0,10 x range` = 1,00 su range 10 ✅ · target 100 = **la base** ✅)
+Derivazione, perche' un atteso da confrontare **carattere per carattere** deve
+venire dalla **stessa formula dell'EA** (`LivelloFibo`: `alto - k x (alto-basso)`)
+e non da un calcolo a parte:
+
+| livello | k | conto | valore |
+|---|---:|---|---:|
+| target 100 | 1,00 | `110 - 1,00 x 10` | **100,00** = la **base** del pattern ✅ |
+| EZ1 far | **1,88** | `110 - 1,88 x 10` | **91,20** |
+| EZ1 near | **1,78** | `110 - 1,78 x 10` | **92,20** |
+| EZ2 far | **2,88** | `110 - 2,88 x 10` | **81,20** |
+| EZ2 near | **2,78** | `110 - 2,78 x 10` | **82,20** |
+| banda | — | `92,20 - 91,20` | **1,00** = `0,10 x range` ✅ |
+
+⚠️ **Correzione del 21/08:** qui c'erano `98.20 / 99.20 / 88.20 / 89.20`, che
+vengono da `k = 1,08 / 1,18 / 2,08 / 2,18` — valori che **nell'EA non
+esistono**. Con quelli, l'**unico gesto che certifica la geometria della gamba
+B** avrebbe fatto fermare il round per un falso allarme, oppure avrebbe
+insegnato che gli attesi sono "circa" — e allora non serviva piu' a niente.
 
 ---
 
@@ -583,7 +600,7 @@ distinguerebbero**.
 Con `InpMaxTotalPositions = 3` l'ordine della lista **non cambia i risultati**,
 quindi il canarino e' gratis.
 
-### 🅰️ GAMBA A — `ABTG_FiboH4_Multi` v1.10 · basket `GBPUSD;USDJPY;EURUSD`
+### 🅰️ GAMBA A — `ABTG_FiboH4_Multi` **v1.20** · basket `GBPUSD;USDJPY;EURUSD`
 
 | file prova | l'asse (Y) | celle | cosa risponde |
 |---|---|---:|---|
@@ -596,7 +613,7 @@ quindi il canarino e' gratis.
 
 **12 celle x 2 finestre = 24 passate.**
 
-### 🅱️ GAMBA B — `ABTG_FiboH4_Corso` v1.00 · **GBPUSD** e **USDJPY** (i due cross che il corso nomina)
+### 🅱️ GAMBA B — `ABTG_FiboH4_Corso` **v1.10** · **GBPUSD** e **USDJPY** (i due cross che il corso nomina)
 
 | file prova | l'asse (Y) | celle | cosa risponde |
 |---|---|---:|---|
@@ -694,7 +711,7 @@ comandi indipendenti, e un `throw` alla riga 1 **non ferma la riga 2**
 > 1. 🧊 **BRANCH CONGELATO**: **nessun push su `lavoro` mentre R93 gira.**
 >    Un push a meta' corsa cambierebbe l'EA **fra una cella e l'altra**, e il
 >    confronto fra celle non misurerebbe piu' niente.
-> 2. 🏷️ **MARCATORE DI VERSIONE** in ogni blocco (`R93-LANCIO-v2`, `R93 -- FIBO
+> 2. 🏷️ **MARCATORE DI VERSIONE** in ogni blocco (`R93-LANCIO-v3`, `R93 -- FIBO
 >    H4 ALL'IMBUTO`): copre insieme la **cache di raw** (che tiene ~5 minuti) e
 >    il download andato a male, che e' quello che il pin doveva coprire.
 > 3. 🔧 Il fix vero — inoltrare `-Rif` e togliere il ripiego silenzioso da
@@ -732,7 +749,7 @@ comandi indipendenti, e un `throw` alla riga 1 **non ferma la riga 2**
 ### 1️⃣ BLOCCO 2 — installare i due EA e il Guardian, POI COMPILARE A MANO
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r93.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v2' -Quiet)){ throw 'SCRIPT VECCHIO (serve la v2, corretta dopo la bocciatura del verificatore): la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK. Adesso i tre gesti a mano del blocco 3. ===" -ForegroundColor Green }
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r93.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v3' -Quiet)){ throw 'SCRIPT VECCHIO (serve la v3): la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK. Adesso i DUE test singoli del blocco 3. ===" -ForegroundColor Green }
 ```
 
 > 🚦 **TRAFFICO: MT5 CHIUSO.** Il blocco **non apre** il terminale, ma
@@ -761,7 +778,15 @@ Il giro a vuoto fa **cinque cose**, e le fa **tutte anche in `-SoloControllo`**:
 
 **Si legge quello che stampa**, in particolare:
 - `ok compilato ABTG_FiboH4_Corso.ex5 (... byte)` e lo stesso per il Multi;
-- `FromDate` / `ToDate` dentro `2021.01.04 → 2025.12.19`;
+- `FromDate=2021.01.04` e **`ToDate=2022.12.29`**.
+  ⚠️ **Non cercare `2025.12.19` nell'anteprima: NON C'E', e non e' un errore.**
+  `walkforward_generico.ps1` (righe 526-527) scrive nell'anteprima **solo la
+  finestra IS**: tutte e 14 diranno `ToDate=2022.12.29`. La OOS
+  (`2022.12.30 → 2025.12.19`) la costruisce il driver a runtime, con
+  `FrazioneIS 0,40` su 1.810 giorni. Lo script stampa da solo **le due
+  finestre** in cima, calcolate con la stessa formula.
+  (Cercare la data sbagliata sarebbe il secondo falso allarme della serata:
+  stessa famiglia dell'atteso della geometria.)
 - le celle news con `InpNewsFile=abtg_news_2021_2025_UTC.csv` e `InpNewsCommon=1`.
 
 > ### 🪞 E QUELLO CHE **NON** SI CONTROLLA QUI: il canarino del pin `InpSymbols`
@@ -800,9 +825,26 @@ spendere due ore di macchina.
    falliti`** e questa riga, che e' la prova che la geometria del corso e'
    quella dichiarata:
    ```
-   [FIBOCORSO][AUTOTEST] geometria su pattern 100-110 (range 10): target100=100.00 | EZ1 [98.20 - 99.20] | EZ2 [88.20 - 89.20] | banda=1.00
+   [FIBOCORSO][AUTOTEST] geometria su pattern 100-110 (range 10): target100=100.00 | EZ1 [91.20 - 92.20] | EZ2 [81.20 - 82.20] | banda=1.00
    ```
-   (banda = `0,10 x range` = 1,00 su range 10 ✅ · target 100 = **la base** ✅)
+   Derivazione, perche' un atteso da confrontare **carattere per carattere** deve
+venire dalla **stessa formula dell'EA** (`LivelloFibo`: `alto - k x (alto-basso)`)
+e non da un calcolo a parte:
+
+| livello | k | conto | valore |
+|---|---:|---|---:|
+| target 100 | 1,00 | `110 - 1,00 x 10` | **100,00** = la **base** del pattern ✅ |
+| EZ1 far | **1,88** | `110 - 1,88 x 10` | **91,20** |
+| EZ1 near | **1,78** | `110 - 1,78 x 10` | **92,20** |
+| EZ2 far | **2,88** | `110 - 2,88 x 10` | **81,20** |
+| EZ2 near | **2,78** | `110 - 2,78 x 10` | **82,20** |
+| banda | — | `92,20 - 91,20` | **1,00** = `0,10 x range` ✅ |
+
+⚠️ **Correzione del 21/08:** qui c'erano `98.20 / 99.20 / 88.20 / 89.20`, che
+vengono da `k = 1,08 / 1,18 / 2,08 / 2,18` — valori che **nell'EA non
+esistono**. Con quelli, l'**unico gesto che certifica la geometria della gamba
+B** avrebbe fatto fermare il round per un falso allarme, oppure avrebbe
+insegnato che gli attesi sono "circa" — e allora non serviva piu' a niente.
 
 2. **Test singolo di `ABTG_FiboH4_Multi`** con `InpUseNewsFilter=true` e
    `InpNewsFile=abtg_news_2021_2025_UTC.csv`, su un mese del 2022. Deve uscire:
@@ -817,7 +859,7 @@ spendere due ore di macchina.
 ### 3️⃣ BLOCCO 4 — IL ROUND (68 passate)
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia il BLOCCO 2 per primo' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v2' -Quiet)){ throw 'SCRIPT VECCHIO: serve la v2' }; if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw 'MT5 E APERTO: chiudilo (il blocco 3 lo ha aperto)' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $z="$([Environment]::GetFolderPath('Desktop'))\R93_FIBOH4.zip"; if(-not (Test-Path $z)){ throw 'LO ZIP NON C E: la corsa non e arrivata alla raccolta' }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ("ZIP STANTIO: ha " + [int]$eta + " minuti, non e di adesso") }; if($rc -ne 0){ Write-Host "ESITO PARZIALE o CANARINO ROTTO: mandalo lo stesso, ma di QUALE pezzo manca (lo scrive REFERTO_R93_*.txt)" -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia il BLOCCO 2 per primo' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v3' -Quiet)){ throw 'SCRIPT VECCHIO: serve la v3' }; if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw 'MT5 E APERTO: chiudilo (il blocco 3 lo ha aperto)' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $z="$([Environment]::GetFolderPath('Desktop'))\R93_FIBOH4.zip"; if(-not (Test-Path $z)){ throw 'LO ZIP NON C E: la corsa non e arrivata alla raccolta' }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ("ZIP STANTIO: ha " + [int]$eta + " minuti, non e di adesso") }; if($rc -ne 0){ Write-Host "ESITO PARZIALE o CANARINO ROTTO: mandalo lo stesso, ma di QUALE pezzo manca (lo scrive REFERTO_R93_*.txt)" -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
 ```
 
 > 🚦 **TRAFFICO: MT5 CHIUSO** — e il blocco lo verifica da solo, perche' il
@@ -840,17 +882,35 @@ celle di quel giro) e si sarebbe mandato **mezzo round** credendolo intero.
 - 📄 Ogni serata lascia il **suo** referto (`REFERTO_R93_A.txt`,
   `REFERTO_R93_B.txt`): si leggono **tutti e due**.
 
-### 🔁 Se serve RIFARE una cella gia' girata: `-Rifai`
+### 🔁 Se serve RIFARE una cella gia' girata: `-Solo` **+ `-Rifai`**
 
 `walkforward_generico.ps1` (riga ~616) **salta i CSV gia' presenti** — ed e'
 giusto, permette di riprendere una corsa interrotta. Ma vuol dire che
 **rilanciare senza `-Rifai` non rifa' niente**: gira dieci secondi, rifa' solo
 la raccolta e stampa tutto verde (difetto n.15).
+
+> ⚠️ **La riga di riparazione e' AUTONOMA e si rifa' `$p` da sola.**
+> `$p` e' nata dentro il `& { ... }` del blocco 2, e `&` su uno scriptblock apre
+> uno **scope figlio** che muore col blocco: incollata da sola, `-File`
+> riceverebbe il vuoto e PowerShell si mangerebbe `-Rif` come nome dello
+> script — errore oscuro, con la colpa due blocchi prima (checklist punto 42).
+
 ```powershell
-& powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -Solo "A1" -Rifai
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia prima il BLOCCO 2: lancia_r93.ps1 non c e' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v3' -Quiet)){ throw 'SCRIPT VECCHIO: serve la v3' }; if(Get-Process -Name terminal64 -EA SilentlyContinue){ throw 'MT5 E APERTO: chiudilo' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -Solo "A1" -Rifai; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO PARZIALE: leggi REFERTO_R93_*_rifatte.txt' -ForegroundColor Yellow } }
 ```
+
 Chiavi valide per `-Solo`: **`A0 A1 A2 A3 A4 A5`** (gamba A) e
 **`BG1 BG2 BH1 BH2 BI1 BI2 BJ1 BJ2`** (gamba B).
+
+✅ **Con `-Solo` la raccolta NON ripulisce niente** (corretto il 21/08): le celle
+rifatte si sovrascrivono una per una e il resto della gamba **resta dov'e'**.
+Nella versione precedente `Desktop\R93_FIBOH4\A\` veniva **rasa al suolo** e ci
+rientravano **2 CSV su 12**, con lo zip rifatto su quel che restava e il referto
+che scriveva `MANCANTI: nessuno` — cioe' il difetto n.35 spostato da `-Gamba` a
+`-Solo`, ed era proprio il caso che questa stessa pagina consigliava.
+✅ E il referto di una corsa mirata si chiama **`REFERTO_R93_<gambe>_rifatte.txt`**,
+cosi' **non seppellisce** quello della corsa piena (che elenca 12 file attesi,
+non 2).
 
 Il `throw` sullo zip guarda **l'artefatto e la sua eta'**, non solo il codice
 d'uscita (difetto n.26-bis): un esito parziale — e anche un **canarino rotto** —
@@ -864,7 +924,11 @@ d'uscita (difetto n.26-bis): un esito parziale — e anche un **canarino rotto**
 R93_FIBOH4\
   A\   12 CSV  ABTG_FiboH4_Multi_GBPUSD_<IS|OOS>_ohlc_r93a..r93f.csv   + pertrade_*
   B\   16 CSV  ABTG_FiboH4_Corso_<GBPUSD|USDJPY>_<IS|OOS>_ohlc_r93g..r93j.csv + pertrade_*
-  REFERTO_R93_A.txt   (e/o _B.txt, uno per serata)
+  REFERTO_R93_<gambe>.txt        uno per SERATA, non per gamba:
+                                 _A / _B se il round e' spezzato in due sere,
+                                 _AB se le due gambe girano nella stessa notte
+  REFERTO_R93_<gambe>_rifatte.txt  solo se hai usato -Solo (non seppellisce
+                                 il referto pieno: elenca 2 file attesi, non 12)
   R93_CRITERI.md
 ```
 
@@ -875,7 +939,11 @@ R93_FIBOH4\
   ENTRAMBE le cartelle `A\` e `B\`** e **due** referti. Lo script stampa
   quanti CSV ci sono in ognuna proprio per questo.
 - 📄 La riga `data:` di ogni referto **deve essere di ADESSO** (per la serata
-  che l'ha prodotto).
+  che l'ha prodotto). Se ce ne sono piu' d'uno, **si leggono tutti**: ognuno
+  parla solo delle celle del suo giro, e lo dice.
+- 🔢 Lo script stampa `gamba A: N CSV di risultato (attesi 12) + M per-trade`:
+  i due conteggi sono **separati apposta**. Sommandoli non tornerebbe con
+  nessun atteso.
 - 📄 **`R93_CRITERI.md`** viaggia con i numeri: i criteri e i numeri non si
   separano mai.
 

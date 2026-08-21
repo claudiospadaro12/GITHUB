@@ -6,11 +6,11 @@
 #  vanno LETTE E FIRMATE PRIMA dei numeri:
 #
 #    GAMBA A  "il filtro news cambia l'edge del NOSTRO EA, e in che verso?"
-#             banco ABTG_FiboH4_Multi v1.10, geometria INTOCCATA
+#             banco ABTG_FiboH4_Multi v1.20, geometria INTOCCATA
 #             6 file prova x 2 celle x 2 finestre = 24 passate
 #
 #    GAMBA B  "la geometria del CORSO opera, e con che profilo?"
-#             banco ABTG_FiboH4_Corso v1.00, EA NUOVO, MAI COMPILATO
+#             banco ABTG_FiboH4_Corso v1.10, EA NUOVO, MAI COMPILATO
 #             4 file prova x 2 simboli, 11 celle x 2 finestre = 44 passate
 #
 #  Totale 68 passate. UNA puo' passare e l'altra no: si giudicano SEPARATE.
@@ -54,11 +54,17 @@
 #  parse senza InvariantCulture leggerebbe "2.0" come VENTI). L'unica
 #  conversione e' sulle DATE del passo 0, e usa ParseExact.
 #
-#  MARCATORE VERSIONE: R93-LANCIO-v2
-#  (v2 = dopo la bocciatura del verificatore del 21/08: i canarini escono
-#   dai DATI e non da una Print, i due EA vengono compilati QUI invece che
-#   a mano con F7, il canarino del pin si legge nei CSV e non nell'anteprima,
-#   i per-trade non si mescolano piu' fra le celle e la raccolta e' CUMULATIVA.)
+#  MARCATORE VERSIONE: R93-LANCIO-v3
+#  (v2 = dopo la prima bocciatura del verificatore: i canarini escono dai
+#   DATI e non da una Print, i due EA vengono compilati QUI invece che a
+#   mano con F7, il canarino del pin si legge nei CSV e non nell'anteprima,
+#   i per-trade non si mescolano piu' fra le celle, raccolta CUMULATIVA.
+#   v3 = dopo la SECONDA: la raccolta era cumulativa per -Gamba ma ancora
+#   DISTRUTTIVA per -Solo, cioe' proprio nel caso che i criteri
+#   consigliano per rifare una cella. Piu' il referto mirato che non
+#   seppellisce quello pieno e il conteggio dei CSV separato dai
+#   per-trade. IL MARCATORE E' CAMBIATO APPOSTA: con la v2 la cache di
+#   raw servirebbe uno script SENZA il fix e il gate direbbe verde.)
 # =====================================================================
 param(
   [string]$Rif      = "lavoro",                            # commit SHA (o branch)
@@ -96,6 +102,16 @@ Write-Host ("MACCHINA: " + $env:COMPUTERNAME + "   utente: " + $env:USERNAME) -F
 Write-Host ("riferimento: " + $Rif) -ForegroundColor DarkGray
 Write-Host ("data       : " + (Get-Date -Format "yyyy-MM-dd HH:mm")) -ForegroundColor DarkGray
 Write-Host ("finestra   : " + $DaQuando + " -> " + $Fino + "  (la copertura del calendario news)") -ForegroundColor DarkGray
+# La fine della finestra IS, calcolata con la STESSA formula del driver
+# (walkforward_generico.ps1: $Meta = Inizio + floor(giorni * FrazioneIS)),
+# perche' e' quella che finira' scritta nelle anteprime .ini. Un atteso
+# calcolato con un'altra formula manda Claudio a cercare un numero che non
+# uscira' mai: e' il difetto 40-quater.
+$FrazIS = 0.40
+$dtIni  = [datetime]::ParseExact($DaQuando, "yyyy.MM.dd", [System.Globalization.CultureInfo]::InvariantCulture)
+$dtFin  = [datetime]::ParseExact($Fino,     "yyyy.MM.dd", [System.Globalization.CultureInfo]::InvariantCulture)
+$fineIS = $dtIni.AddDays([math]::Floor(($dtFin - $dtIni).TotalDays * $FrazIS)).ToString("yyyy.MM.dd")
+Write-Host ("             IS " + $DaQuando + " -> " + $fineIS + "   OOS " + $dtIni.AddDays([math]::Floor(($dtFin - $dtIni).TotalDays * $FrazIS) + 1).ToString("yyyy.MM.dd") + " -> " + $Fino) -ForegroundColor DarkGray
 
 if (Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) {
   Muori ("MetaTrader e' APERTO. Chiudilo prima di lanciare, altrimenti escono 0 CSV." + "`n" +
@@ -603,7 +619,11 @@ if ($SoloControllo) {
   Write-Host ""
   Write-Host ("  Le anteprime hanno un nome PROPRIO per cella e stanno in: " + $sosta) -ForegroundColor DarkGray
   Write-Host "  DA CONTROLLARE A OCCHIO, e sono trenta secondi:" -ForegroundColor Yellow
-  Write-Host "   1) FromDate/ToDate devono dire 2021.01.04 e 2025.12.19 (spezzati in IS/OOS)." -ForegroundColor Yellow
+  Write-Host ("   1) FromDate deve dire " + $DaQuando + " e ToDate " + $fineIS + ".") -ForegroundColor Yellow
+  Write-Host ("      ATTENZIONE, e' un FALSO ALLARME facile: walkforward_generico.ps1") -ForegroundColor Yellow
+  Write-Host ("      (righe 526-527) scrive nell'anteprima SOLO LA FINESTRA IS. La data") -ForegroundColor Yellow
+  Write-Host ("      " + $Fino + " NON compare in nessuna delle 14 anteprime, e va bene cosi':") -ForegroundColor Yellow
+  Write-Host ("      la OOS la costruisce il driver a runtime (" + $DaQuando + " -> " + $Fino + ", split " + $FrazIS + ").") -ForegroundColor Yellow
   Write-Host "   2) le celle news devono avere InpNewsFile=abtg_news_2021_2025_UTC.csv" -ForegroundColor Yellow
   Write-Host "      e InpNewsCommon=1." -ForegroundColor Yellow
   Write-Host ""
@@ -673,8 +693,21 @@ New-Item -ItemType Directory -Force -Path $dest | Out-Null
 $gambeGirate = @($celle | ForEach-Object { $_.G } | Select-Object -Unique)
 foreach ($g in $gambeGirate) {
   $dg = Join-Path $dest $g
-  if (Test-Path $dg) { Remove-Item $dg -Recurse -Force -ErrorAction SilentlyContinue }
+  # LA PULIZIA E IL RIEMPIMENTO DEVONO AVERE LO STESSO PERIMETRO.
+  # Qui la pulizia ragiona per GAMBA e il riempimento (sotto) per CELLA:
+  # finche' si lancia -Gamba A i due coincidono e non si vede niente. Ma il
+  # par. 14 dei criteri consiglia proprio "-Solo A1 -Rifai" per rifare UNA
+  # cella: li' $celle ha 1 elemento, questa riga raderebbe al suolo A\ e ci
+  # rientrerebbero 2 CSV su 12, lo zip si rifarebbe su quel che resta e il
+  # referto scriverebbe MANCANTI: nessuno.
+  # E' il difetto n.35 spostato da -Gamba a -Solo. Quindi: si ripulisce
+  # SOLO a gamba intera, cioe' quando -Solo non e' stato usato.
+  if ($Solo -eq "" -and (Test-Path $dg)) { Remove-Item $dg -Recurse -Force -ErrorAction SilentlyContinue }
   New-Item -ItemType Directory -Force -Path $dg | Out-Null
+}
+if ($Solo -ne "") {
+  Write-Host ("    -Solo attivo: la cartella di raccolta NON viene ripulita, le celle") -ForegroundColor Yellow
+  Write-Host ("    rifatte si sovrascrivono una per una e il resto resta dov'e'.") -ForegroundColor Yellow
 }
 
 $suff = if ($Modello -eq 4) { "" } else { "_ohlc" }
@@ -742,7 +775,12 @@ foreach ($r in @($csvRaccolti | Where-Object { $_.G -eq "A" })) {
 }
 
 # il referto porta dentro la sua DATA: quella deve essere di ADESSO
-$ref = Join-Path $dest ("REFERTO_R93_" + ($gambeGirate -join "") + ".txt")
+# Il referto di una corsa MIRATA (-Solo) non deve sovrascrivere quello della
+# corsa PIENA: il primo elenca 2 file attesi, il secondo 12, e chi apre lo zip
+# leggerebbe "MANCANTI: nessuno" riferito a due celle credendolo riferito a
+# tutte. Nomi diversi, cosi' convivono e si vede subito quale e' quale.
+$sufRef = if ($Solo -ne "") { "_rifatte" } else { "" }
+$ref = Join-Path $dest ("REFERTO_R93_" + ($gambeGirate -join "") + $sufRef + ".txt")
 $rr = @()
 $rr += "R93 - FIBO H4 ALL'IMBUTO"
 $rr += ("data: " + (Get-Date -Format "yyyy-MM-dd HH:mm") + "   <-- questa data deve essere di ADESSO")
@@ -810,12 +848,21 @@ if ($pinEsito.Count -eq 0) { Write-Host "      (nessun CSV di gamba A in questo 
 foreach ($e in $pinEsito) { Write-Host ("    " + $e) -ForegroundColor $(if ($e -like "*  OK  *") { "Green" } else { "Red" }) }
 Write-Host ""
 Write-Host ("    cartella (CUMULATIVA): " + $dest) -ForegroundColor White
+# I due conteggi vanno TENUTI SEPARATI: il blocco 5 dei criteri dice "12 CSV in
+# A, 16 in B", e quel numero e' dei CSV DI RISULTATO. Contare insieme i
+# pertrade_* dava un totale che non poteva tornare con nessun atteso, cioe' un
+# numero preciso e inutilizzabile.
 foreach ($g in @("A","B")) {
   $dg = Join-Path $dest $g
-  $n = 0
-  if (Test-Path $dg) { $n = @(Get-ChildItem -Path $dg -Filter "*.csv" -ErrorAction SilentlyContinue).Count }
-  $col = if ($n -gt 0) { "Green" } else { "Yellow" }
-  Write-Host ("      gamba " + $g + ": " + $n + " CSV") -ForegroundColor $col
+  $nRis = 0; $nPer = 0
+  if (Test-Path $dg) {
+    $tutti = @(Get-ChildItem -Path $dg -Filter "*.csv" -ErrorAction SilentlyContinue)
+    $nPer = @($tutti | Where-Object { $_.Name -like "pertrade_*" }).Count
+    $nRis = $tutti.Count - $nPer
+  }
+  $atteso = if ($g -eq "A") { 12 } else { 16 }
+  $col = if ($nRis -eq $atteso) { "Green" } elseif ($nRis -gt 0) { "Yellow" } else { "DarkGray" }
+  Write-Host ("      gamba " + $g + ": " + $nRis + " CSV di risultato (attesi " + $atteso + " a round intero) + " + $nPer + " per-trade") -ForegroundColor $col
 }
 
 $zip = Join-Path $desk ($nomeCartella + ".zip")

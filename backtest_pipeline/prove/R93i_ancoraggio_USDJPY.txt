@@ -1,7 +1,7 @@
 # =====================================================================
 #  R93 -- FIBO H4 ALL'IMBUTO   |   GAMBA B -- la geometria del CORSO
 #  L'AMBIGUITA' DEL RANGE: quale estremo ancora il Fibonacci
-#  EA: ABTG_FiboH4_Corso v1.00 (MAI COMPILATO)
+#  EA: ABTG_FiboH4_Corso v1.10 (MAI COMPILATO)
 #
 #  CRITERI: risultati_archivio\R93_CRITERI.md  -- E' UNA BOZZA:
 #  **va FIRMATA da Claudio PRIMA del lancio.** Senza firma i numeri di
