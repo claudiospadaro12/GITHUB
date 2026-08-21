@@ -1217,3 +1217,86 @@ meta' round credendo di mandarlo intero.
 > e lo zip si fa in fondo, o l'istruzione diventa **"manda lo zip DOPO OGNI
 > gamba, il secondo sovrascrive il primo"**. Non si lascia scegliere a chi
 > incolla.
+
+---
+
+## 🆕 AGGIUNTE DEL 21/08/2026 — trovate verificando la RIGA SONDA MEDIAZIONE
+
+## 36. 📉 IL TETTO "MAX BARRE NEL GRAFICO": il broker ha la storia, il TERMINALE si rifiuta di darla
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_SONDA_MEDIAZIONE.md`
+(commit `3cf171f`, PASSO 2 tabella riga 2), trovato PRIMA dell'invio. Il canarino
+c'era **nel referto** (`SONDA_MEDIAZIONE_FREQUENZA_2026-08-21.md` riga 181) e
+**non nella riga**, cioe' nell'unico dei due documenti che Claudio esegue._
+
+Il punto 18 copre la profondita' **misurata sul TF sbagliato**. Questo copre il
+caso in cui la profondita' e' giusta ovunque — sul server, nel `.hcc` locale, nel
+referto del PASSO 0 — e a troncarla e' **Strumenti > Opzioni > Grafici > "Max
+barre nel grafico"**. `CopyRates`/`CopyBuffer` **non superano quel tetto**: non
+danno errore, non riempiono un log, **restituiscono meno barre e basta**. Uno
+`Script`/EA che chiede 300.000 barre H1 ne riceve 65.000 e misura undici anni al
+posto di sedici, con un numero perfettamente coerente con se stesso.
+
+La riga della Sonda aveva un gate — e non mordeva:
+
+```
+atteso  "barre lette intorno a 90.000"        <- ed erano ~103.000 (16,6 anni x ~6.200/anno)
+allarme "sotto ~20.000 = manca lo storico"    <- un quinto dell'atteso
+```
+
+Con il tetto a 65.000 il conteggio perde **un terzo** della finestra e il gate
+**esce verde**: fra la soglia d'allarme e il valore vero c'e' un fattore 5 di
+terra di nessuno. E' la banda di plausibilita' del punto 32 col rapporto
+sbagliato, applicata alle barre.
+
+> **Tre pezzi, insieme, su ogni riga che legge storico da un grafico (non dal tester):**
+> 1. **la riga lo dice PRIMA**: _"Strumenti > Opzioni > Grafici > Max barre nel
+>    grafico = Illimitato"_, e che quel tetto **tronca in silenzio**;
+> 2. **il numero atteso si calcola, non si arrotonda a occhio**: H1 forex =
+>    ~6.200 barre/anno (120/settimana), quindi dal 2010 a oggi ~103.000. La
+>    soglia d'allarme sta **vicino** all'atteso (90.000), non a un quinto;
+> 3. **il tetto ha una firma riconoscibile e va cercata a macchina: `barre_lette`
+>    IDENTICO su tutti i simboli.** Il broker non da' mai lo stesso numero tondo
+>    a tre cross diversi; il tetto si'. E il gate vero non e' sulle barre ma
+>    sulla **data d'inizio della finestra EFFETTIVA** scritta nell'artefatto.
+>
+> ⚖️ E si distingue: **finestra corta perche' il TETTO** = difetto, si rilancia.
+> **Finestra corta perche' il BROKER non ha altro** = e' la risposta, si dichiara
+> nel referto e non ferma niente (punto 26-bis).
+
+## 37. 🎯 DUE PASSI DELLA STESSA RIGA CHE CERCANO LO STESSO TERMINALE CON DUE SELETTORI DIVERSI
+
+_Difetto vero, stessa riga, stesso commit. Il PASSO 0 chiama `scarica_storico.ps1`,
+che sceglie il terminale cosi' (riga 65):_
+
+```powershell
+$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"   # e SOLO se fallisce: "*BCM Markets*"
+```
+
+_I PASSI 1 e 3, riscritti a mano dentro la riga, usano il **ripiego** come
+selettore **principale**: `-like "*BCM Markets*" -and -notlike "*-V3*"`._
+
+Il punto 28 dice che uno strumento diagnostico deve guardare **lo stesso
+perimetro** dello strumento che spiega. Questo e' la stessa legge dentro una
+**catena di passi**: il PASSO 0 scarica 100.000 barre nella cartella dati del
+terminale **A**, il PASSO 1 compila nel terminale **B**, il PASSO 2 gira su B e
+il PASSO 3 legge i CSV di B. Su una macchina con **una sola** installazione i due
+selettori coincidono e non si vede niente; il giorno che ne compare una seconda
+(ed e' gia' successo: il `-V3` del 100k esiste apposta) la sonda misura uno
+storico che non e' mai stato scaricato. `Get-ChildItem -Recurse` per giunta non
+promette **nessun ordine**: il "primo" puo' cambiare fra un giro e l'altro.
+
+Non e' l'errore di chi ha scritto il selettore: e' l'errore di averlo
+**riscritto**. Un selettore copiato a mano da uno script gemello degrada di una
+riga per volta, e la riga che si perde e' sempre quella specifica.
+
+> **Se piu' passi della stessa riga devono colpire lo stesso bersaglio (terminale,
+> cartella dati, istanza, conto), il selettore si copia IDENTICO dallo script
+> gemello che gia' lo risolve — fallback compreso — e OGNI passo STAMPA il
+> bersaglio che ha scelto**, cosi' la divergenza si legge in console invece di
+> essere dedotta da un conteggio sbagliato:
+> ```powershell
+> Write-Host ("terminale scelto: " + $t.DirectoryName + "   (DEVE essere lo stesso del passo precedente)")
+> ```
+> Corollario: se il bersaglio e' scritto in due posti, vale il punto 33 — si fa
+> il **diff**, non ci si fida del fatto che "tanto la macchina e' quella".
