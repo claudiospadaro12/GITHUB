@@ -303,7 +303,9 @@ InpAllowShort=1||0||1||1||Y
   #      questo scan sono PROVVISORI: un cross i cui dati partono dopo
   #      il 2022 ha girato su mezza finestra e il suo conteggio
   #      operazioni non e' confrontabile con gli altri.
-  #        .\scarica_storico.ps1 -Simboli "..." -SoloReferto
+  #      Si misura con (MT5 CHIUSO; -SoloReferto NON misura, rilegge):
+  #        .\scarica_storico.ps1 -Auto -SenzaTick -Da 2022.01.01 -Simboli "..."
+  #      -SenzaTick perche' qui si gira in OHLC M1: contano le BARRE.
   # =============================================================
   $Period="H1"
   $FromDate="2022.01.01"

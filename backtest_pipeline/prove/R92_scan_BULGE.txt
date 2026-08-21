@@ -89,8 +89,17 @@
 #        - Degli altri 21 cross non e' misurato NIENTE, ne' tick ne'
 #          barre M1.
 #
-#      Si misura cosi', PRIMA di lanciare, e costa minuti:
-#        .\scarica_storico.ps1 -Simboli "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY" -SoloReferto
+#      SI MISURA COSI', PRIMA DI LANCIARE. Attenzione: -SoloReferto
+#      RILEGGE l'ultimo referto, NON misura niente di nuovo. Per
+#      misurare davvero ci vuole -Auto, e MT5 CHIUSO:
+#        .\scarica_storico.ps1 -Auto -SenzaTick -Da 2022.01.01 -Simboli "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY"
+#      -SenzaTick e' quello che serve QUI: lo scan gira in OHLC M1,
+#      quindi la profondita' che conta sono le BARRE M1, e senza i
+#      tick la misura costa minuti invece di ore.
+#      LA PROFONDITA' DEI TICK e' un'ALTRA misura, piu' lenta (stessa
+#      riga senza -SenzaTick): si fa DOPO, e SOLO sui simboli che lo
+#      scan seleziona, perche' serve al round profondo, non a questo.
+#      Il referto esce da solo sul Desktop: storico_bcm.zip
 #
 #      CONSEGUENZA, ACCETTATA IN ANTICIPO: finche' quella misura non
 #      c'e', **i numeri di R92-scan sono PROVVISORI**. Se per un cross

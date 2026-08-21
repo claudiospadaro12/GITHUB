@@ -157,8 +157,18 @@ E c'è un secondo controllo, **gratis, dentro le 88**:
 > grafico" di MT5**, e se valga anche per lo Strategy Tester e' dichiarato
 > **[INCERTO]** dal referto stesso.
 
-Si misura prima, e costa minuti:
-`.\scarica_storico.ps1 -Simboli "EURUSD,GBPUSD,..." -SoloReferto`
+Si misura prima. ⚠️ `-SoloReferto` **rilegge** l'ultimo referto e non misura
+niente: per misurare davvero ci vuole `-Auto`, con **MT5 chiuso**.
+
+```
+.\scarica_storico.ps1 -Auto -SenzaTick -Da 2022.01.01 -Simboli "EURUSD,GBPUSD,...(i 22)"
+```
+
+`-SenzaTick` è quello che serve **a questo round**: lo scan gira in **OHLC M1**,
+quindi la profondità che conta sono le **barre M1** e la misura costa minuti
+invece di ore. La profondità dei **tick** è un'altra misura (stessa riga senza
+`-SenzaTick`), si fa **dopo** e **solo sui simboli selezionati**, perché serve al
+round profondo. Il referto esce da solo sul Desktop (`storico_bcm.zip`).
 
 **Conseguenza accettata in anticipo:** finche' quella misura non c'e', **i
 numeri di R92-scan sono PROVVISORI**. Un cross i cui dati partono dopo il
