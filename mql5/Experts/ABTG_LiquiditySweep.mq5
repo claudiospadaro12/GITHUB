@@ -99,7 +99,7 @@
 //                                                                    |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati - motore da OsmarSandovalEspinosa (MQL5 Code Base 68951)"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -1084,7 +1084,13 @@ void ExportTrades()
 double OnTester()
   {
    ExportTrades();
-   double stats[10];
+   //--- 21/08/2026 - IL CANARINO ESCE DAI DATI, NON DA UNA Print.
+   //    La riga [LIQSWEEP][CONTEGGIO] di OnDeinit resta e va benissimo in
+   //    una passata SINGOLA, ma in OTTIMIZZAZIONE MT5 NON esegue le Print
+   //    degli agent: il canarino sparisce proprio nel round che serve a
+   //    misurarlo. Quindi i quattro conteggi diventano quattro COLONNE del
+   //    CSV. Nessuna riga di segnale e' toccata: qui si legge soltanto.
+   double stats[14];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1096,6 +1102,14 @@ double OnTester()
    stats[7] = gWorstDayPct;                             // Peggior Giornata % (negativo)
    stats[8] = TesterStatistics(STAT_MAX_CONLOSSES);     // Perdite Consecutive Max
    stats[9] = TesterStatistics(STAT_CONLOSSMAX);        // Serie Perdente Peggiore (denaro)
+   //--- IL CANARINO DI FREQUENZA, per passata. Si legge PRIMA del conto
+   //    economico. Livelli tanti + consumati pochi = problema di GRILLETTO;
+   //    livelli pochi = problema di DEFINIZIONE DELLO SWING. Due diagnosi
+   //    diverse, e il CSV le distingue gratis.
+   stats[10] = (double)gLivCreati;                      // Livelli Creati
+   stats[11] = (double)gLivConsumati;                   // Livelli Consumati
+   stats[12] = (double)gLivInvalidati;                  // Livelli Invalidati
+   stats[13] = (double)gSegnaliScartati;                // Segnali Scartati
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1118,14 +1132,22 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Livelli Creati,Livelli Consumati,Livelli Invalidati,Segnali Scartati";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
+      //--- ArraySize(data) e' il numero di elementi che l'EA ha davvero
+      //    messo nel frame. Si guarda invece di darlo per scontato: un CSV
+      //    vecchio (10 colonne) e uno nuovo (14) devono poter convivere
+      //    senza che questa riga vada a leggere fuori array.
       string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
                                 data[7], data[8], data[9]);
+      if(ArraySize(data) >= 14)
+         row += StringFormat(",%.0f,%.0f,%.0f,%.0f", data[10], data[11], data[12], data[13]);
+      else
+         row += ",,,,";
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
