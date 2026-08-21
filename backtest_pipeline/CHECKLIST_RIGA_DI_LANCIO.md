@@ -2060,7 +2060,7 @@ essa**. La v4 chiude davvero D1 e D2 (referto scritto nella corsa fermata:
 che arriva a `InpDataInizio`). Il difetto nuovo qui sotto e' **riprodotto**, non
 dedotto._
 
-## 49. 🪞 IL REFERTO DEL **GIRO A VUOTO** INDISTINGUIBILE DA QUELLO DELLA CORSA VERA
+## 50. 🪞 IL REFERTO DEL **GIRO A VUOTO** INDISTINGUIBILE DA QUELLO DELLA CORSA VERA
 
 _Difetto vero, `backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1` righe 821-822
 e 891-901 (commit `9199e75`), **RIPRODOTTO** con `pwsh`: lanciato in
@@ -2113,3 +2113,15 @@ file sbagliato sul Desktop c'e' sempre e ha lo stesso nome di quello giusto.
 > `-SaltaPasso0`, `-Rifai`, `-Solo`) **si scrive nel referto**, anche quando non
 > genera nessun problema. `-SaltaPasso0` qui era coperto solo perche' aggiungeva
 > un `$Problemi`: coprire per effetto collaterale non e' coprire.
+
+
+---
+
+> 📌 **NOTA DI TRACCIABILITA' (21/08/2026).** Il punto **50** era stato scritto
+> come "49" da una sessione parallela mentre un'altra occupava lo stesso numero
+> (la spia della cella A META'). Rinumerato dalla sessione principale, contenuto
+> intatto. **In una checklist che si cita per numero, due punti con lo stesso
+> numero sono peggio di un punto mancante** — ed e' la terza volta oggi che due
+> sessioni si incrociano sullo stesso file: si controlla `git diff --cached
+> --name-only` prima di ogni commit, e il numero si prende **rileggendo il file
+> appena prima di scrivere**, non da quello che si ricorda.
