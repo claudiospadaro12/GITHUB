@@ -1,5 +1,44 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
+> # 🇯🇵 21/08 — **R95 (SWEEP + RECLAIM JPY) E' PREPARATO, CRITERI IN BOZZA** — 30 passate
+>
+> ## 🚦 POSTO IN CODA: **ultimo.** Dietro R92, R93, R94. Una macchina, un lavoro.
+> ## 📄 CRITERI **DA FIRMARE**: `backtest_pipeline/risultati_archivio/R95_CRITERI.md` (§8: sette righe F1-F7)
+> ## 🧾 RIGA DI LANCIO: `backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1` (blocco in testa al file, `<PIN>` da sostituire)
+>
+> ### La domanda
+> **"Sui cross JPY, dove R82 ha dimostrato che INSEGUIRE la rottura non paga su
+> nessuno dei sette, il RIENTRO dopo lo sweep ha un edge — una volta che il
+> livello e' abbastanza fitto da produrre 150 operazioni IS?"**
+> Meccanismo **OPPOSTO** a quello morto (grilletto, direzione e stop invertiti,
+> EA diverso): e' la porta di rientro **C3**, tesi nuova e non taratura.
+>
+> ### 🔴 IL PUNTO CHE PUO' BLOCCARE TUTTO: il PASSO 0
+> La finestra **NON e' verificata**, e non lo era nemmeno in R82:
+> `REFERTO_RACCOLTA_R82_giro1.txt` dice **"serie per-trade raccolte: 14 (solo
+> finestra OOS)"** — la copertura della sua IS 2007-2014 non e' mai stata letta
+> su una data, solo su un conteggio. In piu' la sonda del 17/08 lascia aperto
+> un `[INCERTO]` mai chiuso: **il tetto di 100.000 barre**, che su M15 vale
+> **4,0 anni**. Percio' la riga di lancio **misura prima e parte dopo**: due
+> passate singole gemelle, e quattro condizioni per proseguire.
+>
+> ### Cosa e' pronto
+> - 🆕 **EA `ABTG_LiquiditySweep` v1.10** — il canarino esce dal **CSV**, non da
+>   una `Print` (in ottimizzazione MT5 non esegue le Print degli agent).
+>   `diff_blocco_segnale.py`: **0 blocchi diversi su 8**.
+> - 🆕 **5 file prova** `R95a..e` — la **scala di densita'** del livello:
+>   15 celle da **2 a 48 ore** di accumulo, **un solo simbolo (EURJPY M15)**.
+> - 🆕 **`R95_CRITERI.md`** — BOZZA. Dentro anche **§5.4 "cosa NON si potra' dire"**.
+> - 🆕 **la riga di lancio**, con dentro i difetti 24, 33 e 33-bis gia' chiusi.
+>
+> ### I tre limiti dichiarati PRIMA
+> 1. **OHLC M1, non tick** (i tick BCM partono dal 2024.07.05): **R95 NON PUO'
+>    PRODURRE UNA SEDIA**, al massimo il permesso di un giro a tick reali.
+> 2. **Un solo simbolo**, e comunque **dalla famiglia JPY entra AL MASSIMO UNA
+>    SEDIA** (regola gia' firmata prima di R82).
+> 3. **Motore controtendenza sui cross piu' trendisti del forex**: la
+>    **Peggior Giornata %** puo' bocciarlo anche con un PF buono. Si misura.
+
 > # 🧪 21/08 — **R93 (FIBO H4) E' PRONTO MA NON FIRMATO** — 68 passate, due gambe
 >
 > ## 🚦 POSTO IN CODA: **dietro R92.** Una macchina, un lavoro.

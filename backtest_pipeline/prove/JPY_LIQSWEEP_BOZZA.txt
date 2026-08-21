@@ -1,4 +1,27 @@
 # =====================================================================
+#  >>> SUPERATA IL 21/08/2026. NON E' PIU' QUESTO IL FILE DA LANCIARE. <<<
+#
+#  I cinque TODO qui sotto sono CHIUSI, e altrove:
+#    n.1 CRITERI ....... risultati_archivio\R95_CRITERI.md (BOZZA da firmare)
+#    n.2 PASSO 0 ....... e' diventato un GATE ESEGUIBILE dentro
+#                        righe\RIGA_R95_LIQSWEEP_JPY.ps1 (due passate
+#                        singole gemelle prima della corsa). E la finestra
+#                        NON e' piu' 2007.02.12: vedi R95_CRITERI.md par. 1-2
+#    n.3 REGIME ........ dichiarato in R95_CRITERI.md par. 2.2, per ENTRAMBE
+#                        le meta' della finestra
+#    n.4 PERCHE' EURJPY  R95_CRITERI.md (motivi scritti prima dei numeri)
+#    n.5 MAGIC ......... 772610 della bozza risulta GIA' PRESO (grep sul
+#                        repo). Assegnati 779500 / 779501, vergini
+#
+#  E la griglia e' cambiata: non piu' un file con due assi (bocciato da
+#  controlla_prova.py, "un file prova misura UNA variabile alla volta"),
+#  ma CINQUE file - prove\R95a..e_liqsweep_*.txt - che insieme fanno una
+#  scala di densita' da 2 a 48 ore di accumulo per lato.
+#
+#  Questo file resta agli atti come il verbale della CACCIA, non come una
+#  prova lanciabile.
+# =====================================================================
+# =====================================================================
 #  BOZZA / SWEEP + RECLAIM SUI CROSS JPY - EURJPY M15
 #  EA: ABTG_LiquiditySweep (CANDIDATO, mai promosso; girato una volta
 #      sola in R89 su GBPUSD, dove NON e' stato bocciato ma dichiarato
