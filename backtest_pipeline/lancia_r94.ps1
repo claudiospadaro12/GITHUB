@@ -47,14 +47,21 @@
 #  il branch CONGELATO (nessun push su lavoro mentre R94 gira) piu' i
 #  marcatori di versione. Un SHA pinnerebbe gli script e NON il motore.
 #
-#  MARCATORE VERSIONE: R94-LANCIO-v3
+#  MARCATORE VERSIONE: R94-LANCIO-v4
 #  (v2 = cache del tester svuotata, compilazione che aspetta l'artefatto,
 #   tre radici per i log, per-trade ripuliti dentro il ciclo, sorgente
 #   confrontato per hash a ogni cella.
 #   v3 = seconda verifica del 21/08: la spia dei per-trade distingue
 #   SALTATA da NON GIRATA (la ripresa non e' un ripescaggio), guardia su
 #   metaeditor64, pulizia del Desktop con lo stesso perimetro del
-#   riempimento anche con -Solo, residui del funnel tolti dai commenti)
+#   riempimento anche con -Solo, residui del funnel tolti dai commenti.
+#   v4 = terza verifica: il driver salta per FINESTRA e non per cella,
+#   quindi esiste lo stato A META' (una gamba gia' fatta, l'altra da
+#   fare) che la v3 non dichiarava da nessuna parte; le righe dei CSV si
+#   CONTANO invece di dedurle da Test-Path (un CSV con la sola
+#   intestazione passava per buono e alla ripresa non veniva mai piu'
+#   rifatto); i per-trade producibili sono 6 e non 12, perche' InpMagic
+#   non e' nei file prova)
 # =====================================================================
 param(
   [string]$Rif      = "lavoro",
@@ -143,9 +150,12 @@ if ($Solo -ne "") {
 
 $passateAttese = $celle.Count * 2 * 2   # 2 celle di deviazione x 2 finestre
 Write-Host ("  file prova in coda: " + $celle.Count + "  ->  celle " + ($celle.Count * 2) + "  ->  passate " + $passateAttese) -ForegroundColor White
-Write-Host "  SE LA CORSA SI INTERROMPE: si rimanda lo STESSO comando. Le celle gia'" -ForegroundColor DarkGray
+Write-Host "  SE LA CORSA SI INTERROMPE: si rimanda lo STESSO comando. Le finestre gia'" -ForegroundColor DarkGray
 Write-Host "  fatte vengono saltate (il driver le riconosce dal CSV). -Rifai serve SOLO" -ForegroundColor DarkGray
 Write-Host "  se hai cambiato un file prova o l'EA, e in quel caso rifa' tutto." -ForegroundColor DarkGray
+Write-Host "  ATTENZIONE: il driver salta per FINESTRA, non per cella. Una cella puo'" -ForegroundColor DarkGray
+Write-Host "  restare A META' (IS di un giro, OOS di un altro): lo script lo dichiara" -ForegroundColor DarkGray
+Write-Host "  a schermo e nel referto, e per rifarla tutta si usa -Solo <cella> -Rifai." -ForegroundColor DarkGray
 
 $desk = Trova-Desktop
 
@@ -467,6 +477,7 @@ Write-Host "    lo stesso. Si dice, non si legge come conferma." -ForegroundColo
 $falliti = @()
 $ripescate = @()
 $saltate = @()
+$parziali = @()
 $i = 0
 foreach ($c in $celle) {
   $i++
@@ -510,10 +521,25 @@ foreach ($c in $celle) {
     $nCsv = $EA + "_" + $c.Sym + "_" + $w + $suffCsv + "_" + $c.Tag + ".csv"
     if (Test-Path -LiteralPath (Join-Path $Cartella ("risultati_prove\" + $EA + "\" + $nCsv))) { $giaFatte++ }
   }
-  $saltata = (($giaFatte -eq 2) -and (-not $Rifai) -and (-not $SoloControllo))
+  $vive    = ((-not $Rifai) -and (-not $SoloControllo))
+  $saltata = (($giaFatte -eq 2) -and $vive)
+  $parziale = (($giaFatte -eq 1) -and $vive)
   if ($saltata) {
     Write-Host "      CELLA GIA' FATTA: il driver la salta e NON riscrivera' i per-trade." -ForegroundColor DarkGray
     Write-Host "      NON e' un ripescaggio: i suoi numeri vengono da un giro PRECEDENTE." -ForegroundColor DarkGray
+  }
+  # LO STATO A META'. Il driver salta per FINESTRA, non per cella
+  # (walkforward_generico.ps1:612-616, foreach($w in $WF)): se la corsa e'
+  # stata interrotta durante l'OOS, l'IS e' rimasto sul disco e al rilancio
+  # NON viene rigirato -- mentre l'OOS si'. La cella non e' ne' saltata ne'
+  # ripescata, e senza questa voce il referto direbbe che e' stata tutta
+  # rigirata a cache vuota: falso per meta', e proprio sul canarino.
+  if ($parziale) {
+    $parziali += $c.K
+    Write-Host "      CELLA A META': una delle due finestre e' GIA' sul disco e NON verra'" -ForegroundColor Yellow
+    Write-Host "      rigirata; l'altra si'. I due numeri vengono da DUE GIRI DIVERSI, e la" -ForegroundColor Yellow
+    Write-Host "      cache era stata svuotata nel giro di PRIMA per la gamba gia' fatta." -ForegroundColor Yellow
+    Write-Host ("      Per rifarla tutta: -Solo " + $c.K + " -Rifai") -ForegroundColor Yellow
   }
 
   $arg = @("-ExecutionPolicy","Bypass","-File",$wf,$EA,
@@ -610,13 +636,19 @@ if ($SoloControllo) {
   Write-Host "   1) InpBBPeriod: 20 nelle celle A20/B20/C20, 37 nelle A37/B37/C37." -ForegroundColor Yellow
   Write-Host "      Se una P37 dice 20, il pin non e' arrivato e il round misura" -ForegroundColor Yellow
   Write-Host "      DUE VOLTE la stessa cosa senza dirlo." -ForegroundColor Yellow
-  Write-Host "   2) InpBBDev deve essere l'UNICO parametro con la sintassi di" -ForegroundColor Yellow
-  Write-Host "      ottimizzazione (start/step/stop). Se ce ne sono due, il round" -ForegroundColor Yellow
-  Write-Host "      non e' piu' 'una variabile alla volta'." -ForegroundColor Yellow
+  Write-Host "   2) InpBBDev deve essere l'UNICA riga che finisce con ||Y." -ForegroundColor Yellow
+  Write-Host "      ATTENZIONE a come si guarda: il driver scrive TUTTI gli input" -ForegroundColor Yellow
+  Write-Host "      numerici come Nome=v||v||0||v||N (righe 399 e 409-411), quindi la" -ForegroundColor Yellow
+  Write-Host "      sintassi start/step/stop ce l'hanno TUTTE le ~78 righe: cercare" -ForegroundColor Yellow
+  Write-Host "      quella non discrimina niente. Il discriminante e' il FLAG FINALE:" -ForegroundColor Yellow
+  Write-Host "      ||Y = spazzolato, ||N = pinnato. Se le righe con ||Y sono due, il" -ForegroundColor Yellow
+  Write-Host "      round non e' piu' 'una variabile alla volta'." -ForegroundColor Yellow
   Write-Host "   3) InpPatternMode: 2 su GBPUSD, 0 su EURUSD, 1 su AUDUSD." -ForegroundColor Yellow
   Write-Host "   4) InpRiskPercent = 1.0 (assunzione dichiarata, non firmata)." -ForegroundColor Yellow
-  Write-Host "   5) FromDate/ToDate dentro 2024.09.26 -> 2026.06.30, spezzati in IS/OOS" -ForegroundColor Yellow
-  Write-Host "      con lo stacco al 2025.06.09/10 (identico a R34)." -ForegroundColor Yellow
+  Write-Host "   5) FromDate = 2024.09.26 e ToDate = 2025.06.09, e basta." -ForegroundColor Yellow
+  Write-Host '      L anteprima porta SOLO la gamba IS: il driver scrive $WF[0]' -ForegroundColor Yellow
+  Write-Host "      (righe 517-518). Se cerchi 2026.06.30 NON lo trovi, ed e' giusto" -ForegroundColor Yellow
+  Write-Host "      cosi'. Una data diversa da quelle due = finestra diversa da R34." -ForegroundColor Yellow
   Write-Host "   6) Deposit = 100000. A 10.000 il canarino NON torna." -ForegroundColor Yellow
   Write-Host "  ATTENZIONE: la riga 'Model=' dell'anteprima e' SCRITTA FISSA a 4 dal" -ForegroundColor Yellow
   Write-Host ("  driver (difetto 31): il modello VERO di questo giro e' " + $Modello + ".") -ForegroundColor Yellow
@@ -641,12 +673,27 @@ New-Item -ItemType Directory -Force -Path $dest | Out-Null
 $suff = if ($Modello -eq 4) { "" } else { "_ohlc" }
 $attesi = @()
 $mancanti = @()
+$vuoti = @()
+$righeTot = 0
+# SI CONTANO LE RIGHE, non si guarda solo se il file c'e'. Motivo misurato:
+# walkforward_generico.ps1 (righe 678-682) copia il CSV ANCHE se ha la sola
+# intestazione -- avvisa in rosso e prosegue con exit 0. Una raccolta che
+# guarda solo Test-Path scriverebbe "MANCANTI: nessuno" su una cella che non
+# ha prodotto NIENTE. E c'e' il seguito peggiore: al rilancio quel CSV vuoto
+# fa scattare $giaFatte++ e la cella non verrebbe MAI PIU' rifatta.
 foreach ($c in $celle) {
   foreach ($w in @("IS","OOS")) {
     $nome = $EA + "_" + $c.Sym + "_" + $w + $suff + "_" + $c.Tag + ".csv"
     $attesi += $nome
     $src = Join-Path $Cartella ("risultati_prove\" + $EA + "\" + $nome)
     if (Test-Path -LiteralPath $src) {
+      $nr = 0
+      try { $nr = [math]::Max(0, (@(Get-Content -LiteralPath $src)).Count - 1) } catch { $nr = 0 }
+      $righeTot += $nr
+      if ($nr -eq 0) {
+        $vuoti += $nome
+        Write-Host ("    VUOTO: " + $nome + " ha la sola intestazione, ZERO passate.") -ForegroundColor Red
+      }
       Copy-Item -LiteralPath $src -Destination (Join-Path $dest $nome) -Force
     } else {
       $mancanti += $nome
@@ -705,7 +752,14 @@ $rr += ("file prova: " + $celle.Count + "   celle: " + ($celle.Count * 2) + "   
 $rr += ("log degli agent raccolti: " + $nLog + "   (zero e' l'esito ATTESO: vedi sotto)")
 if ($ripescate.Count -gt 0) {
   $rr += ("CELLE SENZA PER-TRADE FRESCO (sospette di RIPESCAGGIO dalla cache): " + ($ripescate -join " "))
-} else { $rr += "PER-TRADE FRESCHI: tutte le celle GIRATE hanno scritto la loro serie (nessun ripescaggio)." }
+} else { $rr += "PER-TRADE FRESCHI: nessuna cella girata e' rimasta senza la sua serie (nessun ripescaggio)." }
+if ($parziali.Count -gt 0) {
+  $rr += ("CELLE A META' (una finestra gia' sul disco, l'altra rigirata adesso): " + ($parziali -join " "))
+  $rr += "  Il driver salta per FINESTRA, non per cella. Di queste celle UNA DELLE DUE"
+  $rr += "  RIGHE viene da un giro precedente: la cache era stata svuotata ALLORA."
+  $rr += "  Se e' una cella di CANARINO, meta' del suo controllo vale per quel giro."
+  $rr += "  Per rifarla tutta: -Solo <cella> -Rifai."
+}
 if ($saltate.Count -gt 0) {
   $rr += ("CELLE SALTATE (CSV gia' presente, NON rigirate in questo giro): " + ($saltate -join " "))
   $rr += "  E' la RIPRESA, ed e' legittima: i loro numeri vengono da una corsa"
@@ -713,6 +767,26 @@ if ($saltate.Count -gt 0) {
   $rr += "  se una di queste e' una cella di CANARINO, il suo controllo vale per QUEL"
   $rr += "  giro. Per rifarla davvero: -Solo <cella> -Rifai."
 }
+$rr += ("RIGHE DI RISULTATO: " + $righeTot + " su " + ($attesi.Count * 2) + " attese (2 per CSV = le 2 celle di deviazione)")
+if ($vuoti.Count -gt 0) {
+  $rr += ("CSV VUOTI (sola intestazione, ZERO passate): " + ($vuoti -join " "))
+  $rr += "  Il driver li copia lo stesso e esce 0 (righe 678-682): senza questo"
+  $rr += "  conteggio sarebbero passati per buoni. E ATTENZIONE alla ripresa: un"
+  $rr += "  CSV vuoto sul disco fa saltare la cella al rilancio. Vanno CANCELLATI"
+  $rr += "  a mano, oppure la cella si rifa' con -Solo <cella> -Rifai."
+}
+$rr += ""
+$rr += ("SERIE PER-TRADE: al massimo " + $celle.Count + ", non " + ($celle.Count * 2) + ".")
+$rr += "  L'EA compone il nome come abtg_trades_<EA>_<Simbolo>_<Magic>.csv (riga"
+$rr += "  1521) e InpMagic NON e' nei file prova: e' il default 772101 per tutte"
+$rr += "  e 24 le passate. Quindi le 4 passate di uno stesso file prova (IS/OOS x"
+$rr += "  dev 1.4/2.0) scrivono LO STESSO FILE, e in Common\\Files ne esistono al"
+$rr += "  massimo 3 (uno per simbolo). Qui ne arriva uno per CELLA perche' la"
+$rr += "  cartella viene ripulita prima di ogni cella e il file viene messo al"
+$rr += "  sicuro subito dopo, con l'etichetta della cella."
+$rr += "  >>> Il superstite serve a dire CHE la cella ha girato, NON a leggere le"
+$rr += "  operazioni del canarino: quale delle 4 passate abbia scritto per ultima"
+$rr += "  non e' deterministico in ottimizzazione parallela."
 $rr += ""
 $rr += "FILE ATTESI (" + $attesi.Count + " CSV, ognuno con 2 righe = le 2 celle di deviazione):"
 foreach ($a in $attesi) { $rr += ("  " + $a) }
@@ -740,7 +814,9 @@ $rr += "       EURUSD  IS +1.457,02 PF 53,79058 DD 0,7797 n=4 | OOS +2.069,82 PF
 $rr += "       AUDUSD  IS +1.291,32 PF 47,99127 DD 0,6753 n=5 | OOS +1.840,67 PF 2,74743 DD 1,2695 n=11"
 $rr += "     Se non torna, IL ROUND SI FERMA QUI e si cerca il perche'."
 $rr += "     NB: la cache del tester e' stata svuotata prima della corsa, quindi"
-$rr += "     queste tre celle sono state RIGIRATE e non ripescate (punto 38)."
+$rr += "     le celle di canarino NON elencate qui sopra come SALTATE o A META'"
+$rr += "     sono state RIGIRATE adesso, a cache vuota (punto 38). Le altre no:"
+$rr += "     per quelle il controllo vale per il giro in cui sono girate."
 $rr += "  2. LA COLONNA Trades (col. 8). E' il cancello del round:"
 $rr += "       GBPUSD  n OOS >= 60 verde | 27-59 giallo | <= 26 archiviata secca"
 $rr += "       EURUSD  n OOS >= 30 verde | 14-29 giallo | <= 13 archiviata secca"
@@ -778,6 +854,8 @@ $rr | Set-Content -LiteralPath $ref -Encoding ASCII
 Write-Host ""
 Write-Host ("    file attesi : " + $attesi.Count) -ForegroundColor White
 Write-Host ("    mancanti    : " + $mancanti.Count) -ForegroundColor $(if ($mancanti.Count -gt 0) { "Red" } else { "Green" })
+Write-Host ("    CSV vuoti   : " + $vuoti.Count) -ForegroundColor $(if ($vuoti.Count -gt 0) { "Red" } else { "Green" })
+Write-Host ("    righe di risultato: " + $righeTot + " su " + ($attesi.Count * 2)) -ForegroundColor $(if ($righeTot -lt ($attesi.Count * 2)) { "Yellow" } else { "Green" })
 foreach ($m in $mancanti) { Write-Host ("      manca: " + $m) -ForegroundColor Red }
 Write-Host ("    cartella    : " + $dest) -ForegroundColor White
 
@@ -796,13 +874,16 @@ Write-Host ""
 if ($saltate.Count -gt 0) {
   Write-Host ("    celle SALTATE (gia' fatte, numeri di un giro precedente): " + ($saltate -join " ")) -ForegroundColor DarkGray
 }
+if ($parziali.Count -gt 0) {
+  Write-Host ("    celle A META' (una finestra da un giro precedente): " + ($parziali -join " ")) -ForegroundColor Yellow
+}
 if ($ripescate.Count -gt 0) {
   Write-Host ("    ATTENZIONE: celle senza per-trade fresco: " + ($ripescate -join " ")) -ForegroundColor Yellow
   Write-Host "    Un pass ripescato dalla cache non scrive i per-trade: quelle celle" -ForegroundColor Yellow
   Write-Host "    potrebbero NON essere state eseguite. Va detto in chat." -ForegroundColor Yellow
 }
-if ($falliti.Count -gt 0 -or $mancanti.Count -gt 0) {
-  Write-Host ("=== R94 FINITO PARZIALE: " + $falliti.Count + " celle in errore, " + $mancanti.Count + " file mancanti ===") -ForegroundColor Red
+if ($falliti.Count -gt 0 -or $mancanti.Count -gt 0 -or $vuoti.Count -gt 0) {
+  Write-Host ("=== R94 FINITO PARZIALE: " + $falliti.Count + " celle in errore, " + $mancanti.Count + " file mancanti, " + $vuoti.Count + " CSV vuoti ===") -ForegroundColor Red
   Write-Host "    Manda lo zip lo stesso: un risultato parziale e' gia' una risposta," -ForegroundColor Yellow
   Write-Host "    ma va detto QUALE pezzo manca prima di leggere gli altri." -ForegroundColor Yellow
   exit 1
