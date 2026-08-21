@@ -67,12 +67,21 @@
 //  v1.00  EA originale (piano FiboH4). Logica dei segnali INTOCCATA
 //         da qui in avanti.
 //  v1.10  21/08/2026 -- MIGRAZIONE AGLI STANDARD DI CASA + il filtro
-//         notizie reso USABILE NEL TESTER. Il blocco dei segnali
-//         (BullEngulf, BearEngulf, TryPlace, PlaceLimit) e' rimasto
-//         IDENTICO CARATTERE PER CARATTERE: verificato a macchina con
-//         diff normalizzato = 0 righe. In OnNewBar cambia UNA riga
-//         sola, la chiamata al filtro notizie, che ora riceve il
-//         simbolo (serviva per l'esclusione per valuta).
+//         notizie reso USABILE NEL TESTER.
+//         VERIFICA A MACCHINA, rifacibile e non a memoria:
+//           python3 backtest_pipeline\diff_blocco_segnale.py \
+//             mql5\Experts\ABTG_FiboH4_Multi.mq5 --auto \
+//             "bool BullEngulf(" "bool BearEngulf(" "void TryPlace(" \
+//             "void PlaceLimit(" "void OnNewBar("
+//         Esito del 21/08/2026, v1.00 (3af47ed) contro v1.10:
+//           BullEngulf  diff 0   IDENTICO
+//           BearEngulf  diff 0   IDENTICO
+//           TryPlace    diff 0   IDENTICO   <- la GEOMETRIA e' intatta
+//           PlaceLimit  diff 1   +1 riga: la guardia del Guardian
+//           OnNewBar    diff 1   +1 riga: il filtro news riceve il simbolo
+//         Le DUE righe cambiate sono queste due e nessun'altra, e sono
+//         dichiarate qui sotto ai punti 1 e 4(c). Le tre funzioni che
+//         decidono DOVE va l'ordine non sono state toccate.
 //         Cosa e' cambiato, tutto qui:
 //          1. GUARDIAN (firme B1/C1 del 18/08): #include
 //             <ABTG_PausaGuardian.mqh> + InpUsaGuardian (default
