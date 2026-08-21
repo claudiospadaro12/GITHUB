@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R95_v3
+#  MARCATORE_RIGA_R95_v4
 #  RIGA_R95_LIQSWEEP_JPY.ps1  --  R95: sweep + reclaim su EURJPY M15
 # ---------------------------------------------------------------------
 #  >>> NON SI MANDA A CLAUDIO FINCHE' R95_CRITERI.md NON E' FIRMATO. <<<
@@ -59,7 +59,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R95.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (dieci secondi, nessun MT5 aperto, nessuna passata):
@@ -143,6 +143,25 @@ function Scarica($url,$dest,$marcatore){
 
 function L($f,$et,$tf){
   return [pscustomobject]@{ Prova=$f; Et=$et; Tf=$tf; Esito="NON ESEGUITO"; IS=-1; OOS=-1; Min=0.0 }
+}
+
+#  >>> CsvDi STA QUI, SOPRA IL try, E NON E' UN CAPRICCIO DI STILE. <<<
+#  In PowerShell una `function` NON e' dichiarativa: e' un'ISTRUZIONE. Se il
+#  flusso non ci passa sopra, il nome NON ESISTE - e con
+#  $ErrorActionPreference="Stop" la chiamata e' TERMINANTE.
+#  Nella v2/v3 stava dentro il try, alla sezione 5. Ma il throw che salta la
+#  sezione 5 e' IL CASO NORMALE di questa riga: tutti e quattro i gate del
+#  PASSO 0 (G1, G2, G3, G4 compreso Tetto="NON LETTO") lanciano PRIMA, e cosi'
+#  il passo 1d, l'1e, la compilazione e la ricerca del terminale. Risultato
+#  riprodotto: "raccolta incompleta: The term 'CsvDi' is not recognized",
+#  cartella VUOTA sul Desktop, NESSUN REFERTO - proprio nella corsa fermata,
+#  che e' l'unica in cui il referto serve a capire perche'.
+#  E' il 41-bis: in v2 era stato chiuso per le VARIABILI ($Comune, $Sosta,
+#  $Risultati) e lasciato aperto per una FUNZIONE, un centimetro piu' in la'.
+#  CHI LA RIPORTA DENTRO IL try RIAPRE IL DIFETTO.
+#  $Risultati, $Ea e $Sym nascono sopra (righe 99-119): sono gia' disponibili.
+function CsvDi($l,$tag){
+  return (Join-Path $Risultati ($Ea + "\" + $Ea + "_" + $Sym + "_" + $tag + "_ohlc_" + $l.Et + ".csv"))
 }
 $Lavori = @(
   (L "R95a_liqsweep_m30_EURJPY.txt" "r95a" "M30"),
@@ -411,7 +430,15 @@ if(-not $SoloControllo -and -not $SaltaPasso0){
   try{
     Scarica ("$RawPin/backtest_pipeline/scarica_storico.ps1") $ScStorico 'REFERTO STORICO'
     $global:LASTEXITCODE = 0
-    & powershell.exe -ExecutionPolicy Bypass -File $ScStorico -Simboli $Sym -Da "1995.01.01" -Timeframes "M1,M15" -SenzaTick -Auto -TimeoutMin 45 2>&1 |
+    #  >>> -Da $DaQuando, MAI una data-catchall. <<<
+    #  ABTG_HistoryDownloader.mq5 riga 199 calcola il verdetto CONTRO questo
+    #  parametro:  else if(srvFirst > from + 86400) -> "IL BROKER NON HA PIU'
+    #  STORICO",  con from = InpDataInizio. Con "1995.01.01" nessun broker ha
+    #  EURJPY da li', quindi quel verdetto usciva PER COSTRUZIONE su M1 e su
+    #  M15, a ogni corsa: due $Problemi garantiti, ESITO PARZIALE e uscita 1
+    #  su una finestra perfettamente sana. La domanda giusta non e' "il broker
+    #  ha il 1995?" ma "il broker copre la finestra CHE CHIEDO?".
+    & powershell.exe -ExecutionPolicy Bypass -File $ScStorico -Simboli $Sym -Da $DaQuando -Timeframes "M1,M15" -SenzaTick -Auto -TimeoutMin 45 2>&1 |
       Tee-Object -FilePath (Join-Path $Logs "passo0a_storico.txt") | Out-Host
     $Storico.Eseguito = $true
     $Storico.Esito = "eseguito, uscita " + $LASTEXITCODE
@@ -436,13 +463,21 @@ if(-not $SoloControllo -and -not $SaltaPasso0){
                         " | disco " + $r.PrimaDataLocale +
                         " | broker " + $r.PrimaDataServer +
                         " -> " + $(if($verd -ne ""){ $verd } else { "VERDETTO VUOTO" }))
-        if($verd -eq ""){
-          [void]$Problemi.Add("PASSO 0-A: colonna 'Verdetto' VUOTA per " + $r.Simbolo + " " + $r.Timeframe +
-                              ". Il formato del referto storico e' cambiato: NON e' stato letto, e non e' un via libera.")
-        }
-        elseif($verd -match "(?i)non ha piu' storico|non ha piu storico"){
-          [void]$Problemi.Add("PASSO 0-A: il BROKER NON HA PIU' STORICO su " + $r.Simbolo + " " + $r.Timeframe +
-                              " (" + $verd + "). Inutile insistere: la finestra si SPOSTA, non si scarica.")
+        #  >>> LA GUARDIA SI SCRIVE AL POSITIVO. <<<
+        #  I verdetti possibili sono CINQUE (ABTG_HistoryDownloader righe
+        #  195-200): NESSUN DATO, server non risponde, MANCA STORICO LOCALE,
+        #  IL BROKER NON HA PIU' STORICO, COMPLETO. La v3 ne trattava DUE e
+        #  gli altri tre - tutti brutti - cadevano nel ramo silenzioso del
+        #  "va bene". Scritta cosi', l'UNICO valore che passa e' COMPLETO:
+        #  un verdetto NUOVO, o vuoto, non puo' passare per buono. (40-ter)
+        if($verd -ne "COMPLETO"){
+          $che = if($verd -eq ""){ "VUOTO (formato del referto cambiato: NON e' stato letto)" } else { "'" + $verd + "'" }
+          [void]$Problemi.Add("PASSO 0-A: verdetto NON 'COMPLETO' su " + $r.Simbolo + " " + $r.Timeframe +
+                              " -> " + $che + " | barre " + $r.Barre +
+                              " | disco " + $r.PrimaDataLocale + " | broker " + $r.PrimaDataServer +
+                              " | chiesto dal " + $DaQuando +
+                              ".  Se dice che il BROKER NON HA PIU' STORICO: inutile insistere, la finestra si SPOSTA. " +
+                              "Se dice MANCA STORICO LOCALE: si rilancia lo scarico. Comunque il gate 0-C decide.")
         }
       }
       if(-not $vistoSym){ [void]$Problemi.Add("PASSO 0-A: nessuna riga per " + $Sym + " nel referto storico.") }
@@ -691,9 +726,7 @@ $inputs
 #  5. LA CATENA. Uno alla volta. Mai in parallelo.
 # =====================================================================
 Titolo ("5. LA CATENA - " + $Lavori.Count + " file, uno alla volta")
-function CsvDi($l,$tag){
-  return (Join-Path $Risultati ($Ea + "\" + $Ea + "_" + $Sym + "_" + $tag + "_ohlc_" + $l.Et + ".csv"))
-}
+#  (CsvDi e' definita SOPRA IL try, riga ~145: vedi il commento li'.)
 $idx = 0
 foreach($l in $Lavori){
   $idx++
