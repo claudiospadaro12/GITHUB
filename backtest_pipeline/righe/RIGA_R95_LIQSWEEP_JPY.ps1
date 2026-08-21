@@ -17,19 +17,34 @@
 #         ABTG_AutotestGuardia(), che esiste solo dalla v1.20)
 #       - aggiunge [Charts] MaxBars all'ini del tester, con gate sullo
 #         STATO FINALE e non sul replace (checklist 33)
-#       - DIFF dei 5 file prova: devono differire in 2 righe su 31
+#       - DIFF dei 5 file prova: 2 righe diverse su 32 (32 e' MISURATA
+#         il 21/08 sull'artefatto vero, non scritta a memoria)
 #    2. FASE COMPILA: metaeditor64 /compile, .ex5 SCRITTO ADESSO
-#    3. PASSO 0 - E' UN GATE, NON UN CONTORNO. Due passate SINGOLE
-#       gemelle sulla cella PIU' DENSA, derivate DAL FILE PROVA che
-#       gira davvero (checklist 33: un solo artefatto). Si legge:
-#         - la PRIMA DATA del per-trade -> i dati coprono la finestra?
-#         - i gemelli sono identici?     -> il banco e' pulito?
-#         - "tetto livelli raggiunto"?   -> InpMaxLivelli falsa le celle dense?
+#    3. PASSO 0-A: scarica lo storico M1+M15 di EURJPY dal broker
+#       (-TimeoutMin esplicito). Se non gira si DICHIARA, non si finge.
+#    4. PASSO 0-C - E' UN GATE, NON UN CONTORNO. Due passate SINGOLE
+#       gemelle sulla cella PIU' DENSA, con magic PROPRI (779500/779501,
+#       diversi da quello della griglia), derivate DAL FILE PROVA che
+#       gira davvero (checklist 33: un solo artefatto), e messe in
+#       SOSTA con nome proprio SUBITO, prima dei controlli (checklist
+#       41: l'artefatto del gate deve esistere anche quando il gate e'
+#       rosso). Si legge:
+#         - G1 il per-trade esiste ed e' popolato?
+#         - G2 la PRIMA DATA -> i dati coprono la finestra? (TryParse
+#              guardato: "non ho potuto misurare" e "va bene" sono due
+#              esiti DIVERSI)
+#         - G3 i gemelli sono identici?  -> il banco e' pulito?
+#         - G4 "tetto livelli raggiunto" nei log delle TRE radici, e
+#              se i log letti sono ZERO l'esito e' NON LETTO, che e'
+#              FATALE: un gate che non legge niente non e' verde
 #         - la FREQUENZA vera            -> contro la previsione dei criteri
 #       Se uno di questi e' rosso, LA CORSA NON PARTE.
-#    4. la catena dei 5 file, UNO ALLA VOLTA (una macchina, un lavoro)
-#    5. raccolta SEMPRE: cartella sul Desktop + zip, coi numeri attesi
-#       dichiarati PRIMA
+#    5. la catena dei 5 file, UNO ALLA VOLTA (una macchina, un lavoro)
+#    6. raccolta SEMPRE: cartella sul Desktop + zip, coi numeri attesi
+#       dichiarati PRIMA. Tutto cio' che la raccolta usa nasce PRIMA del
+#       try che puo' fallire, o il referto non nasce proprio nella corsa
+#       fallita (checklist 41-bis). E l'ESITO guarda anche i PROBLEMI:
+#       "OK con problemi in elenco" non esiste.
 #
 #  QUELLO CHE NON FA, dichiarato:
 #    - non giudica nessun numero: produce i CSV e li conta
@@ -228,7 +243,7 @@ foreach($l in $Lavori){ Scarica ("$RawPin/backtest_pipeline/prove/" + $l.Prova) 
 Dico "5 file prova scaricati al pin" "Green"
 
 # --- 1d. IL DIFF DEI 5 FILE PROVA (checklist 33). Sono generati dallo
-#     stesso modello: devono differire in 2 righe su 31.
+#     stesso modello: devono differire in 2 righe su $RigheAttese (=32).
 function RigheVive($p){
   return @(Get-Content -LiteralPath $p | Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' })
 }
@@ -291,8 +306,7 @@ $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue |
 if(-not $DataFolder){ throw "cartella dati MT5 non trovata (origin.txt non punta a nessuna cartella)." }
 $MqlExperts = Join-Path $DataFolder "MQL5\Experts"
 $MqlInclude = Join-Path $DataFolder "MQL5\Include"
-$Comune     = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
-New-Item -ItemType Directory -Force -Path $MqlExperts,$MqlInclude | Out-Null
+New-Item -ItemType Directory -Force -Path $MqlExperts,$MqlInclude,$Sosta | Out-Null
 Dico ("terminale : " + $Terminal)
 Dico ("dati      : " + $DataFolder)
 
@@ -308,11 +322,29 @@ Dico ("include installato: ABTG_PausaGuardian.mqh (" + $lung + " byte, marcatore
 
 # --- 2b. PULIZIA DEI PER-TRADE VECCHI, PRIMA. Un per-trade rimasto li'
 #     da un'altra corsa farebbe leggere il PASSO 0 su dati di ieri.
-$vecchi = @(Get-ChildItem -LiteralPath $Comune -Filter ("abtg_trades_" + $Ea + "_" + $Sym + "_*.csv") -ErrorAction SilentlyContinue)
-foreach($v in $vecchi){ Remove-Item -LiteralPath $v.FullName -Force -ErrorAction SilentlyContinue }
-Dico ("per-trade vecchi rimossi: " + $vecchi.Count) "Green"
-$OptOld = Join-Path $DataFolder ("MQL5\Files\OptResults_" + $Ea + "_" + $Sym + ".csv")
-Remove-Item -LiteralPath $OptOld -Force -ErrorAction SilentlyContinue
+#     >>> SOLO se si corre davvero: un giro a vuoto che cancella gli
+#         artefatti di una corsa vera fatta ieri e' un danno, non un controllo.
+if($SoloControllo){
+  $quanti = @(Get-ChildItem -LiteralPath $Comune -Filter ("abtg_trades_" + $Ea + "_" + $Sym + "_*.csv") -ErrorAction SilentlyContinue).Count
+  Dico ("SoloControllo: NON cancello niente (per-trade presenti adesso: " + $quanti + ")") "Yellow"
+} else {
+  $vecchi = @(Get-ChildItem -LiteralPath $Comune -Filter ("abtg_trades_" + $Ea + "_" + $Sym + "_*.csv") -ErrorAction SilentlyContinue)
+  foreach($v in $vecchi){ Remove-Item -LiteralPath $v.FullName -Force -ErrorAction SilentlyContinue }
+  Dico ("per-trade vecchi rimossi: " + $vecchi.Count) "Green"
+  $OptOld = Join-Path $DataFolder ("MQL5\Files\OptResults_" + $Ea + "_" + $Sym + ".csv")
+  Remove-Item -LiteralPath $OptOld -Force -ErrorAction SilentlyContinue
+  # --- la CACHE del tester, e SOLO quella. MAI bases\<server>\ticks: li'
+  #     dentro c'e' lo storico scaricato, e ributtarlo giu' e' una nottata.
+  #     La cache invece fa ripescare a MT5 passate gia' calcolate di griglie
+  #     vecchie, che e' il difetto che walkforward_generico segnala alle
+  #     righe 690-694 ("un pass non rieseguito NON scrive i per-trade").
+  $cache = Join-Path $DataFolder "Tester\cache"
+  if(Test-Path -LiteralPath $cache){
+    $nc = @(Get-ChildItem -LiteralPath $cache -File -ErrorAction SilentlyContinue).Count
+    Remove-Item -LiteralPath (Join-Path $cache "*") -Recurse -Force -ErrorAction SilentlyContinue
+    Dico ("Tester\cache svuotata (" + $nc + " file). bases\<server>\ticks NON toccata.") "Green"
+  } else { Dico "Tester\cache non esiste: niente da svuotare." "Gray" }
+}
 
 # =====================================================================
 #  3. FASE COMPILA. .ex5 SCRITTO ADESSO.
@@ -325,6 +357,16 @@ $t0  = Get-Date
 Copy-Item -LiteralPath (Join-Path $SrcDir ($Ea + ".mq5")) -Destination $mq5 -Force
 Remove-Item -LiteralPath $ex5,$log -Force -ErrorAction SilentlyContinue
 & $MetaEditor "/compile:$mq5" "/log" | Out-Null
+# --- ASPETTA L'ARTEFATTO. metaeditor64 puo' tornare prima di aver finito di
+#     scrivere .ex5/.log (ed e' single-instance: la guardia sta al passo 0).
+#     Senza questa attesa si dichiara "COMPILAZIONE FALLITA" su un sorgente sano.
+$scad = (Get-Date).AddMinutes(5)
+while((Get-Date) -lt $scad){
+  if((Test-Path -LiteralPath $ex5) -and (Test-Path -LiteralPath $log)){
+    if((Get-Item -LiteralPath $ex5).LastWriteTime -ge $t0){ break }
+  }
+  Start-Sleep -Seconds 2
+}
 $errori = -1
 if(Test-Path -LiteralPath $log){
   $testo = ""
@@ -344,7 +386,37 @@ Dico ("COMPILATO " + $Ea) "Green"
 #  4. PASSO 0 -- IL GATE. Due passate SINGOLE gemelle, cella PIU' DENSA
 #     (M30 / 4 barre), derivate DAL FILE PROVA che gira davvero.
 # =====================================================================
-$Passo0 = @{ Fatto=$false; PrimaData=""; UltimaData=""; N=0; Anni=0.0; Gemelli="NON MISURATO"; Tetto="NON MISURATO"; Minuti=0.0 }
+# --- PASSO 0-A: LO STORICO. I criteri par. 1.3 dicono "e' dentro la riga di
+#     lancio, non e' un compito a casa": eccolo. -TimeoutMin esplicito perche'
+#     il default dello script e' 90 minuti e su M1 di 11 anni li userebbe.
+#     Se non gira, NON si finge: si scrive "NON ESEGUITO" nel referto.
+if(-not $SoloControllo -and -not $SaltaPasso0){
+  Titolo "4-A. PASSO 0-A - LO STORICO DI EURJPY (M1 + M15) DAL BROKER"
+  $ScStorico = Join-Path $Work "scarica_storico.ps1"
+  try{
+    Scarica ("$RawPin/backtest_pipeline/scarica_storico.ps1") $ScStorico 'REFERTO STORICO'
+    $global:LASTEXITCODE = 0
+    & powershell.exe -ExecutionPolicy Bypass -File $ScStorico -Simboli $Sym -Da "1995.01.01" -Timeframes "M1,M15" -SenzaTick -Auto -TimeoutMin 45 2>&1 |
+      Tee-Object -FilePath (Join-Path $Logs "passo0a_storico.txt") | Out-Host
+    $Storico.Eseguito = $true
+    $Storico.Esito = "eseguito, uscita " + $LASTEXITCODE
+    if($LASTEXITCODE -ne 0){ [void]$Problemi.Add("PASSO 0-A: scarica_storico.ps1 e' uscito con codice " + $LASTEXITCODE + ". Lo storico potrebbe essere incompleto.") }
+    $csvSt = Join-Path $DataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
+    if(Test-Path -LiteralPath $csvSt){
+      foreach($r in (Import-Csv -LiteralPath $csvSt)){
+        if(("" + $r.Simbolo).Trim().ToUpper() -ne $Sym.ToUpper()){ continue }
+        [void]$Note.Add("PASSO 0-A: " + $r.Simbolo + " " + $r.Timeframe + " prima data " + $r.PrimaDataLocale + " -> " + $r.Stato)
+      }
+    } else { [void]$Note.Add("PASSO 0-A: ABTG_StoricoScaricato.csv non trovato, referto storico NON letto.") }
+  }catch{
+    $Storico.Esito = "NON ESEGUITO (" + $_.Exception.Message + ")"
+    [void]$Problemi.Add("PASSO 0-A NON ESEGUITO: " + $_.Exception.Message + ". Lo storico NON e' stato scaricato: il gate 0-C resta l'unica misura.")
+  }
+  Dico ("PASSO 0-A: " + $Storico.Esito) "Gray"
+} else {
+  $Storico.Esito = "SALTATO (SoloControllo o SaltaPasso0)"
+}
+
 if($SaltaPasso0){
   [void]$Problemi.Add("PASSO 0 SALTATO SU RICHIESTA: la copertura dei dati NON e' verificata in questa corsa.")
   Write-Host "    !! PASSO 0 SALTATO. Il referto lo scrive in rosso." -ForegroundColor Red
@@ -369,10 +441,17 @@ if($SaltaPasso0){
     }
     $inputs = ($out -join "`r`n")
     # --- gate sullo STATO FINALE (checklist 33): niente sweep residui
+    #  >>> OGNI $ DI UNA REGEX MULTILINEA SI SCRIVE \r?$ <<<
+    #  $inputs e' unito con "`r`n": in .NET il $ multilinea matcha la posizione
+    #  PRIMA di \n, e con un \r davanti quella posizione non e' raggiungibile.
+    #  Senza \r? questi tre -notmatch sono SEMPRE veri: il throw scattava
+    #  sempre, il PASSO 0 non sarebbe partito mai, e il messaggio mandava a
+    #  cercare il difetto nel file prova, che era sano. (checklist 40)
     if($inputs -match '\|\|'){ throw "PASSO 0: nell'ini e' rimasto uno sweep '||'. Sarebbe un'ottimizzazione, non una passata singola." }
-    if($inputs -notmatch '(?m)^InpSwingBars=4$'){ throw "PASSO 0: InpSwingBars non e' stato pinnato a 4" }
-    if($inputs -notmatch '(?m)^InpTF_Struttura=30$'){ throw "PASSO 0: InpTF_Struttura non e' stato pinnato a 30 (M30)" }
-    if($inputs -notmatch ('(?m)^InpMagic=' + $magic + '$')){ throw ("PASSO 0: InpMagic non e' stato pinnato a " + $magic) }
+    if($inputs -notmatch '(?m)^InpSwingBars=4\r?$'){ throw "PASSO 0: InpSwingBars non e' stato pinnato a 4" }
+    if($inputs -notmatch '(?m)^InpTF_Struttura=30\r?$'){ throw "PASSO 0: InpTF_Struttura non e' stato pinnato a 30 (M30)" }
+    if($inputs -notmatch ('(?m)^InpMagic=' + $magic + '\r?$')){ throw ("PASSO 0: InpMagic non e' stato pinnato a " + $magic) }
+    if($inputs -match ('(?m)^InpMagic=' + $MagicGrid + '\r?$')){ throw "PASSO 0: sta girando col magic della GRIGLIA. Le due fasi non condividono il magic." }
     $testo = @"
 [Charts]
 MaxBars=2000000000
@@ -412,6 +491,9 @@ $inputs
   if($SoloControllo){
     Dico "SoloControllo: l'ini del PASSO 0 e' scritto e verificato, MT5 NON viene aperto." "Yellow"
   } else {
+    #  $tPasso0 marca l'inizio: G4 leggera' SOLO i log scritti dopo di qui,
+    #  altrimenti un log di ieri risponderebbe per la corsa di oggi.
+    $tPasso0 = Get-Date
     foreach($pp in @(@($iniA,$MagicA),@($iniB,$MagicB))){
       $tp = Get-Date
       Dico ("PASSO 0: passata singola magic " + $pp[1] + " su tutta la finestra...") "Cyan"
@@ -420,8 +502,19 @@ $inputs
       Dico ("  ... " + $Passo0.Minuti.ToString("0.0",$INV) + " minuti") "Gray"
     }
 
-    $ptA = Join-Path $Comune ("abtg_trades_" + $Ea + "_" + $Sym + "_" + $MagicA + ".csv")
-    $ptB = Join-Path $Comune ("abtg_trades_" + $Ea + "_" + $Sym + "_" + $MagicB + ".csv")
+    # --- SOSTA CON NOME PROPRIO, SUBITO, PRIMA DEI GATE (checklist 41).
+    #     L'artefatto di un gate si mette al sicuro appena prodotto: cosi'
+    #     esiste anche quando il gate esce ROSSO, che e' proprio il caso in
+    #     cui serve. E la raccolta legge da qui, non da Common\Files.
+    foreach($m in @($MagicA,$MagicB)){
+      $src = Join-Path $Comune ("abtg_trades_" + $Ea + "_" + $Sym + "_" + $m + ".csv")
+      if(Test-Path -LiteralPath $src){
+        Copy-Item -LiteralPath $src -Destination (Join-Path $Sosta ("passo0_pertrade_" + $m + ".csv")) -Force
+      }
+    }
+    $ptA = Join-Path $Sosta ("passo0_pertrade_" + $MagicA + ".csv")
+    $ptB = Join-Path $Sosta ("passo0_pertrade_" + $MagicB + ".csv")
+    Dico ("per-trade del PASSO 0 messi in sosta in " + $Sosta) "Green"
 
     # --- G1: il per-trade esiste ed e' popolato
     if(-not (Test-Path -LiteralPath $ptA)){ $Fatale = "PASSO 0 / G1: nessun per-trade prodotto. Storico assente su $Sym, oppure l'EA non ha aperto niente." }
@@ -434,14 +527,24 @@ $inputs
     if($Fatale -eq ""){
       $Passo0.PrimaData  = (($righeA[1] -split ';')[0]).Trim()
       $Passo0.UltimaData = (($righeA[$righeA.Count-1] -split ';')[0]).Trim()
+      #  >>> IL RITORNO DI TryParse SI GUARDA. <<<
+      #  TryParse non lancia: e' fatto apposta. Con [void] davanti, una data
+      #  illeggibile lasciava $d1 a MinValue, MinValue -gt 2016 e' $false e
+      #  IL GATE PASSAVA - cioe' "non ho potuto misurare" e "ho misurato e va
+      #  bene" finivano nello stesso ramo. (checklist 40-ter)
       $d1 = [datetime]::MinValue; $d2 = [datetime]::MinValue
-      [void][datetime]::TryParse($Passo0.PrimaData.Replace(".","-"),$INV,[Globalization.DateTimeStyles]::None,[ref]$d1)
-      [void][datetime]::TryParse($Passo0.UltimaData.Replace(".","-"),$INV,[Globalization.DateTimeStyles]::None,[ref]$d2)
-      $limite = [datetime]::ParseExact("2016.01.01","yyyy.MM.dd",$INV)
-      $Passo0.Anni = [math]::Round(($d2-$d1).TotalDays/365.25,2)
-      if($d1 -gt $limite){
-        $Fatale = "PASSO 0 / G2: la prima operazione e' del " + $Passo0.PrimaData + ", oltre il limite 2016.01.01. " +
-                  "I dati NON coprono la finestra dichiarata (" + $DaQuando + "): la finestra si ridichiara e il PASSO 0 si rifa'."
+      $ok1 = [datetime]::TryParse($Passo0.PrimaData.Replace(".","-"),$INV,[Globalization.DateTimeStyles]::None,[ref]$d1)
+      $ok2 = [datetime]::TryParse($Passo0.UltimaData.Replace(".","-"),$INV,[Globalization.DateTimeStyles]::None,[ref]$d2)
+      if(-not $ok1 -or -not $ok2){
+        $Fatale = "PASSO 0 / G2: non riesco a leggere le date del per-trade (prima='" + $Passo0.PrimaData +
+                  "', ultima='" + $Passo0.UltimaData + "'). IL GATE SULLA COPERTURA NON E' STATO ESEGUITO: non e' un via libera."
+      } else {
+        $limite = [datetime]::ParseExact("2016.01.01","yyyy.MM.dd",$INV)
+        $Passo0.Anni = [math]::Round(($d2-$d1).TotalDays/365.25,2)
+        if($d1 -gt $limite){
+          $Fatale = "PASSO 0 / G2: la prima operazione e' del " + $Passo0.PrimaData + ", oltre il limite 2016.01.01. " +
+                    "I dati NON coprono la finestra dichiarata (" + $DaQuando + "): la finestra si ridichiara e il PASSO 0 si rifa'."
+        }
       }
     }
     # --- G3: i gemelli devono essere identici
@@ -462,21 +565,57 @@ $inputs
       }
     }
     # --- G4: il tetto dei livelli ha morso?
-    $logDir = Join-Path $DataFolder "Tester\logs"
-    $ultimo = @(Get-ChildItem -LiteralPath $logDir -Filter "*.log" -ErrorAction SilentlyContinue |
-                Sort-Object LastWriteTime -Descending | Select-Object -First 3)
-    $tetto = $false; $conteggio = ""
-    foreach($lg in $ultimo){
-      try{ $tx = Get-Content -LiteralPath $lg.FullName -Raw -ErrorAction Stop }catch{ continue }
-      if($tx -match 'tetto livelli raggiunto'){ $tetto = $true }
-      $mc = [regex]::Match($tx,'\[LIQSWEEP\]\[CONTEGGIO\][^\r\n]*')
-      if($mc.Success){ $conteggio = $mc.Value }
+    #  LE RADICI DEI LOG SONO TRE, non una (checklist 34-ter). Le Print del
+    #  tester finiscono nei log degli AGENT, che NON stanno sotto la cartella
+    #  dati del terminale: la terza radice e' %APPDATA%\MetaQuotes\Tester.
+    #  Con la sola Tester\logs $tetto restava SEMPRE $false e il referto
+    #  scriveva "non ha morso": una delle quattro condizioni di stop non
+    #  esisteva. E non c'e' alternativa via CSV, perche' gLivCreati viene
+    #  incrementato anche quando il livello viene poi buttato.
+    $radici = @(
+      (Join-Path $DataFolder "Tester"),
+      (Join-Path $InstDir    "Tester"),
+      (Join-Path $env:APPDATA "MetaQuotes\Tester")
+    )
+    $tetto = $false; $conteggio = ""; $letti = 0
+    foreach($rad in $radici){
+      if(-not (Test-Path -LiteralPath $rad)){ continue }
+      $files = @(Get-ChildItem -LiteralPath $rad -Filter "*.log" -Recurse -File -ErrorAction SilentlyContinue |
+                 Where-Object { $_.LastWriteTime -ge $tPasso0 })
+      foreach($lg in $files){
+        $tx = ""
+        try{
+          #  ENCODING SCELTO DAL BOM, mai per decreto: i log MT5 sono UTF-16LE
+          #  con BOM, ma non sempre. Un -Encoding fisso legge byte a caso e la
+          #  ricerca esce verde per assenza.
+          $by = [IO.File]::ReadAllBytes($lg.FullName)
+          if($by.Length -ge 2 -and $by[0] -eq 0xFF -and $by[1] -eq 0xFE){ $tx = [Text.Encoding]::Unicode.GetString($by) }
+          elseif($by.Length -ge 3 -and $by[0] -eq 0xEF -and $by[1] -eq 0xBB -and $by[2] -eq 0xBF){ $tx = [Text.Encoding]::UTF8.GetString($by) }
+          else{ $tx = [Text.Encoding]::Default.GetString($by) }
+        }catch{ continue }
+        $letti++
+        if($tx -match 'tetto livelli raggiunto'){ $tetto = $true }
+        $mc = [regex]::Match($tx,'\[LIQSWEEP\]\[CONTEGGIO\][^\r\n]*')
+        if($mc.Success){ $conteggio = $mc.Value }
+      }
     }
-    $Passo0.Tetto = if($tetto){ "HA MORSO" } else { "non ha morso" }
+    $Passo0.LogLetti = $letti
     if($conteggio -ne ""){ [void]$Note.Add("PASSO 0, riga del canarino nel log: " + $conteggio) }
-    if($tetto -and $Fatale -eq ""){
-      $Fatale = "PASSO 0 / G4: 'tetto livelli raggiunto' nel log. InpMaxLivelli=500 morde, e falserebbe SOLO le celle dense. Si rialza il tetto PRIMA di leggere qualunque numero."
+    if($letti -eq 0){
+      #  UN GATE CHE NON LEGGE NIENTE NON E' UN GATE VERDE.
+      $Passo0.Tetto = "NON LETTO"
+      if($Fatale -eq ""){
+        $Fatale = "PASSO 0 / G4: ZERO log del tester letti nelle tre radici dopo l'avvio delle passate. " +
+                  "Il gate sul tetto dei livelli NON E' STATO ESEGUITO: non e' un via libera."
+      }
+    } else {
+      $Passo0.Tetto = if($tetto){ "HA MORSO" } else { "non ha morso" }
+      if($tetto -and $Fatale -eq ""){
+        $Fatale = "PASSO 0 / G4: 'tetto livelli raggiunto' nei log. InpMaxLivelli=2000 morde gia' sulla cella densa: " +
+                  "si rialza il tetto PRIMA di leggere qualunque numero (e la colonna 'Livelli Buttati' dira' di quanto)."
+      }
     }
+    Dico ("log del tester letti: " + $letti + " (tre radici, solo file scritti dopo l'avvio)") "Gray"
     $Passo0.Fatto = $true
 
     Write-Host ""
@@ -492,7 +631,12 @@ $inputs
     }
     Write-Host ("    gemelli ............ " + $Passo0.Gemelli) -ForegroundColor White
     Write-Host ("    tetto livelli ...... " + $Passo0.Tetto) -ForegroundColor White
-    Write-Host ("    durata 1 passata ... " + $Passo0.Minuti.ToString("0.0",$INV) + " min  -> STIMA 30 passate: " + ([math]::Round($Passo0.Minuti*30/60,1)).ToString("0.0",$INV) + " ore") -ForegroundColor Yellow
+    Write-Host ("    durata 1 passata ... " + $Passo0.Minuti.ToString("0.0",$INV) + " min su TUTTA la finestra") -ForegroundColor Yellow
+    Write-Host ("    tetto teorico x30 .. " + ([math]::Round($Passo0.Minuti*30/60,1)).ToString("0.0",$INV) + " ore -- E' UN TETTO PER ECCESSO, NON UNA PREVISIONE:") -ForegroundColor Yellow
+    Write-Host "                         le 30 passate coprono meta' finestra l'una (IS o OOS)" -ForegroundColor Yellow
+    Write-Host "                         e MT5 le distribuisce sugli agent in PARALLELO." -ForegroundColor Yellow
+    Write-Host ("    -OreMax e' " + $OreMax.ToString("0.0",$INV) + " h: e' un TETTO sull'INIZIO di nuovi file,") -ForegroundColor Yellow
+    Write-Host "                         non una stima e non un'interruzione." -ForegroundColor Yellow
 
     if($Fatale -ne ""){ throw $Fatale }
     Dico "PASSO 0 SUPERATO: si parte." "Green"
@@ -520,12 +664,16 @@ foreach($l in $Lavori){
   Write-Host ("  [" + $idx + "/" + $Lavori.Count + "]  " + $l.Prova + "   (struttura " + $l.Tf + ", 6 passate)") -ForegroundColor Cyan
   Write-Host "------------------------------------------------------------------" -ForegroundColor Cyan
   $tl = Get-Date
+  #  -Terminal e -DataFolder passati ESPLICITI (checklist 37): il driver
+  #  altrimenti ri-cerca il terminale per conto suo, e potrebbe trovarne uno
+  #  diverso da quello su cui abbiamo compilato e girato il PASSO 0.
   $arg = @("-ExecutionPolicy","Bypass","-File",$Driver,
            "-Expert",$Ea,"-Prova",(Join-Path $Prove $l.Prova),
            "-Simbolo",$Sym,"-Periodo",$Periodo,
            "-DaQuando",$DaQuando,"-Fino",$Fino,
            "-Etichetta",$l.Et,"-Modello",("" + $Modello),
-           "-Deposito",("" + $Deposito))
+           "-Deposito",("" + $Deposito),
+           "-Terminal",$Terminal,"-MetaEditor",$MetaEditor,"-DataFolder",$DataFolder)
   if($Rifai){ $arg += "-Rifai" }
   if($SoloControllo){ $arg += "-SoloControllo" }
   $global:LASTEXITCODE = 0
@@ -550,7 +698,31 @@ foreach($l in $Lavori){
       [void]$Problemi.Add($l.Prova + ": " + $l.Esito + ". Cache del tester, oppure l'enum non ha spazzolato: il file NON si legge.")
     }
   } else { $l.Esito = "SOLO CONTROLLO" }
+  # --- D11: l'ANTEPRIMA del giro a vuoto. Il driver la scrive sempre con lo
+  #     stesso nome (anteprima_<EA>_<Simbolo>.ini, senza etichetta): le 5
+  #     chiamate si sovrascrivono e ne resterebbe UNA sola. Qui viene messa
+  #     in sosta col nome del file prova, e alla fine si CONTA che siano 5.
+  if($SoloControllo){
+    $ant = Join-Path $Work ("anteprima_" + $Ea + "_" + $Sym + ".ini")
+    if(Test-Path -LiteralPath $ant){
+      Copy-Item -LiteralPath $ant -Destination (Join-Path $Sosta ("anteprima_" + $l.Et + ".ini")) -Force
+      Remove-Item -LiteralPath $ant -Force -ErrorAction SilentlyContinue
+    } else { [void]$Problemi.Add("giro a vuoto: nessuna anteprima .ini per " + $l.Prova) }
+  }
   Write-Host ("    esito: " + $l.Esito + "   [" + $l.Min.ToString("0.0",$INV) + " min]") -ForegroundColor Gray
+}
+
+if($SoloControllo){
+  $nAnt = @(Get-ChildItem -LiteralPath $Sosta -Filter "anteprima_r95*.ini" -ErrorAction SilentlyContinue).Count
+  if($nAnt -ne 5){ [void]$Problemi.Add("giro a vuoto: " + $nAnt + " anteprime .ini invece di 5.") }
+  Write-Host ""
+  Write-Host ("    anteprime .ini in sosta: " + $nAnt + " su 5   -> " + $Sosta) -ForegroundColor White
+  Write-Host "    >>> ATTENZIONE LEGGENDO L'ANTEPRIMA: la riga 'Model=4' e' una" -ForegroundColor Yellow
+  Write-Host "        COSTANTE del driver (walkforward_generico.ps1 riga 514) e in" -ForegroundColor Yellow
+  Write-Host "        anteprima MENTE. La corsa vera gira a Model=1 (OHLC M1)," -ForegroundColor Yellow
+  Write-Host "        perche' -Modello 1 lo scrive solo nell'ini della corsa." -ForegroundColor Yellow
+  Write-Host "        Cio' che nell'anteprima si legge davvero: FromDate/ToDate," -ForegroundColor Yellow
+  Write-Host "        [TesterInputs], e il numero delle celle." -ForegroundColor Yellow
 }
 
 }catch{
@@ -576,9 +748,13 @@ try{
       }
     }
   }
-  foreach($m in @($MagicA,$MagicB)){
-    $pt = Join-Path $Comune ("abtg_trades_" + $Ea + "_" + $Sym + "_" + $m + ".csv")
-    if(Test-Path -LiteralPath $pt){ Copy-Item -LiteralPath $pt -Destination (Join-Path $Cart ("passo0_pertrade_" + $m + ".csv")) -Force }
+  #  DALLA SOSTA, non da Common\Files: li' dentro il file col magic della
+  #  griglia e' stato riscritto 30 volte, e col magic condiviso ci saremmo
+  #  portati sul Desktop l'ultima passata di ottimizzazione col nome del gate.
+  if($Sosta -and (Test-Path -LiteralPath $Sosta)){
+    foreach($f in @(Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue)){
+      Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Cart $f.Name) -Force
+    }
   }
 
   $R = New-Object System.Collections.ArrayList
@@ -589,12 +765,15 @@ try{
   [void]$R.Add("criteri: risultati_archivio\R95_CRITERI.md")
   [void]$R.Add("")
   [void]$R.Add("--- PASSO 0 (IL GATE) ---")
+  [void]$R.Add("  0-A storico ........ " + $Storico.Esito)
   [void]$R.Add("  eseguito ........... " + $Passo0.Fatto)
   [void]$R.Add("  operazioni ......... " + $Passo0.N)
   [void]$R.Add("  prima operazione ... " + $Passo0.PrimaData + "   (limite dei criteri: 2016.01.01)")
   [void]$R.Add("  ultima operazione .. " + $Passo0.UltimaData)
   [void]$R.Add("  gemelli ............ " + $Passo0.Gemelli)
-  [void]$R.Add("  tetto livelli ...... " + $Passo0.Tetto)
+  [void]$R.Add("  tetto livelli ...... " + $Passo0.Tetto + "   (log del tester letti: " + $Passo0.LogLetti + ")")
+  [void]$R.Add("     NOTA: 'NON LETTO' NON e' 'non ha morso'. Un gate che non legge")
+  [void]$R.Add("     niente non e' un gate verde, ed e' un esito FATALE.")
   [void]$R.Add("")
   [void]$R.Add("--- LAVORI ---   (attese: 3 righe per CSV, 10 CSV, 30 passate)")
   [void]$R.Add(("{0,-32} {1,-6} {2,-5} {3,-5} {4,-8} {5}" -f "FILE","TF","IS","OOS","MIN","ESITO"))
@@ -620,9 +799,14 @@ try{
   [void]$R.Add("")
   if($Fatale -ne ""){ [void]$R.Add("ESITO: FERMATO -- " + $Fatale) }
   else{
+    #  L'esito guarda ANCHE $Problemi: con -SaltaPasso0 il referto elencava
+    #  "la copertura dei dati NON e' verificata" e chiudeva con ESITO: OK,
+    #  uscita 0. Un problema in elenco non e' un round completo.
     $ko = @($Lavori | Where-Object { $_.Esito -ne "OK" -and $_.Esito -ne "SOLO CONTROLLO" })
-    if($ko.Count -gt 0){ [void]$R.Add("ESITO: PARZIALE -- " + $ko.Count + " file su " + $Lavori.Count + " non sono OK. NON e' un round completo.") }
-    else{ [void]$R.Add("ESITO: OK -- tutti i file hanno prodotto le righe attese.") }
+    if($ko.Count -gt 0 -or $Problemi.Count -gt 0){
+      [void]$R.Add("ESITO: PARZIALE -- " + $ko.Count + " file su " + $Lavori.Count + " non sono OK, e " + $Problemi.Count + " problemi in elenco. NON e' un round completo.")
+    }
+    else{ [void]$R.Add("ESITO: OK -- tutti i file hanno prodotto le righe attese, nessun problema in elenco.") }
   }
   Set-Content -LiteralPath $Referto -Value $R -Encoding ASCII
 
@@ -657,5 +841,7 @@ if($Problemi.Count -gt 0){
 Write-Host ""
 if($Fatale -ne ""){ Write-Host ("ESITO: FERMATO -- " + $Fatale) -ForegroundColor Red; exit 1 }
 $ko = @($Lavori | Where-Object { $_.Esito -ne "OK" -and $_.Esito -ne "SOLO CONTROLLO" })
-if($ko.Count -gt 0){ Write-Host ("ESITO: PARZIALE (" + $ko.Count + " file non OK)") -ForegroundColor Yellow; exit 1 }
+if($ko.Count -gt 0 -or $Problemi.Count -gt 0){
+  Write-Host ("ESITO: PARZIALE (" + $ko.Count + " file non OK, " + $Problemi.Count + " problemi)") -ForegroundColor Yellow; exit 1
+}
 Write-Host "ESITO: OK" -ForegroundColor Green

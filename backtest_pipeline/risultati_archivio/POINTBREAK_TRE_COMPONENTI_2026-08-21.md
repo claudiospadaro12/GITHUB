@@ -383,12 +383,19 @@ attribuibile.
 | `backtest_pipeline/lancia_r94.ps1` | driver del round (marcatore `R94-LANCIO-v1`) |
 | `backtest_pipeline/righe/RIGA_R94_BB37.md` | la **riga di lancio**, due blocchi |
 
-> 🔁 **Aggiornamento del 21/08, dopo la firma:** il disegno e' passato da 3 file
-> con due assi a **6 file con un asse ciascuno**, perche' `controlla_prova.py` ha
-> bocciato i due assi (*"un file prova misura UNA variabile alla volta"*).
-> **Le celle misurate sono le stesse: 12 celle, 24 passate, stesso 2×2, stesse
-> soglie.** E' cambiata la forma dell'artefatto, non la misura — il dettaglio sta
-> nella nota tecnica in fondo a `R94_CRITERI.md`.
+> 🔁 **Due correzioni del 21/08, entrambe dopo la firma e prima dei numeri.**
+> **(a)** il disegno e' passato da 3 file con due assi a **6 file con un asse
+> ciascuno** (`controlla_prova.py`: *"un file prova misura UNA variabile alla
+> volta"*). **(b)** la riga di lancio e' stata **bocciata in verifica con 13
+> difetti** e rifatta in **v2**. In nessuno dei due casi sono cambiate le celle:
+> **12 celle, 24 passate, stesso 2×2, stesse soglie, stesso canarino.**
+>
+> 🧊 **Il difetto che valeva piu' di tutti:** il canarino di R94 e' la **stessa
+> passata gia' calcolata da R91** il 21/08 — MT5 l'avrebbe **ripescata dalla
+> cache**, e una passata ripescata **non legge un tick**: sarebbe tornata al
+> centesimo **anche con lo storico sparito**, mentre le celle nuove giravano sui
+> dati veri. Ora la cache si svuota prima della corsa.
+> Il verbale completo sta nelle due note in fondo a `R94_CRITERI.md`.
 
 **24 passate in tutto.** Ogni file porta: canarino (la cella 20/2.0 **deve**
 riprodurre R34 al centesimo), soglie di frequenza per simbolo decise prima,

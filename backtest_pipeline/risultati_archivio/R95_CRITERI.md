@@ -10,13 +10,13 @@ Nessuna occorrenza di "R95" nel repo prima di oggi._
 
 | voce | valore |
 |---|---|
-| **EA** | `mql5/Experts/ABTG_LiquiditySweep.mq5` **v1.10** |
+| **EA** | `mql5/Experts/ABTG_LiquiditySweep.mq5` **v1.11** |
 | **simbolo / TF** | **EURJPY · M15** |
 | **file prova** | `prove/R95a..e_liqsweep_{m30,h1,h2,h3,h4}_EURJPY.txt` |
 | **dimensione** | **15 celle × 2 finestre = 30 passate**, un solo simbolo |
 | **modello** | **1 = OHLC M1** — obbligato (§2.3) |
 | **rischio** | **1,00% pinnato** — assunzione di Claude, non una firma |
-| **magic** | **779500** (griglia) / **779501** (gemello del PASSO 0) — vergini |
+| **magic** | **779502** (griglia) · **779500 / 779501** (gemelli del PASSO 0) — tutti vergini, e **separati apposta**: `ExportTrades()` gira a ogni passata e il nome del per-trade contiene il **magic, non la finestra** (§1.2) |
 
 ---
 
@@ -128,17 +128,25 @@ stato: `COMPLETO` / `MANCA STORICO LOCALE` / `IL BROKER NON HA PIÙ STORICO`.
 riga **non è misurato**. Per questo esiste il PASSO 0-C, che non si fida.
 
 **PASSO 0-C · si MISURA sul per-trade, ed è il gate vero.** Due passate
-**singole gemelle** (magic **779500** e **779501**), cella **più densa** della
-scala (**M30 / 4 barre**), `InpVerbose=1`, finestra **intera** 2015.07.01 →
-2026.06.30. Poi si legge `Common\Files\abtg_trades_..._7795xx.csv`:
+**singole gemelle** (magic **779500** e **779501** — **non** il 779502 della
+griglia), cella **più densa** della scala (**M30 / 4 barre**), `InpVerbose=1`,
+finestra **intera** 2015.07.01 → 2026.06.30. Il per-trade va **in sosta con nome
+proprio subito dopo le passate, prima dei controlli**: l'artefatto di un gate
+deve esistere **anche quando il gate esce rosso**, che è il caso in cui serve.
 
-| esito | conseguenza **congelata** |
-|---|---|
-| per-trade assente o < 2 righe | 🔴 **ROUND FERMO.** Non si lancia niente |
-| **prima data > 2016.01.01** | 🔴 **ROUND FERMO.** I dati non coprono la finestra: si ridichiara la finestra e si rifà il PASSO 0 |
-| i due gemelli **non** identici | 🔴 **ROUND FERMO** — banco sporco (checklist punto 5) |
-| log con `tetto livelli raggiunto` | 🔴 **ROUND FERMO** — `InpMaxLivelli=500` morde e falserebbe **solo** le celle dense |
-| tutto ok | 🟢 si parte, e la **frequenza misurata** della cella densa va scritta nel referto **accanto alla previsione di §3** |
+| # | esito | conseguenza **congelata** |
+|---|---|---|
+| **G1** | per-trade assente o < 2 righe | 🔴 **ROUND FERMO.** Non si lancia niente |
+| **G2** | **prima data > 2016.01.01** | 🔴 **ROUND FERMO.** I dati non coprono la finestra: si ridichiara e si rifà il PASSO 0 |
+| **G2** | la data **non si legge** | 🔴 **ROUND FERMO** — *"non ho potuto misurare"* **non è** *"ho misurato e va bene"* |
+| **G3** | i due gemelli **non** identici | 🔴 **ROUND FERMO** — banco sporco (checklist punto 5) |
+| **G4** | `tetto livelli raggiunto` nei log | 🔴 **ROUND FERMO** — il tetto morde già sulla cella densa (§3.1-bis) |
+| **G4** | **zero log del tester letti** | 🔴 **ROUND FERMO** — *un gate che non legge niente non è un gate verde*. Il conteggio dei log letti va **nel referto** |
+| — | tutto ok | 🟢 si parte, e la **frequenza misurata** della cella densa va scritta nel referto **accanto alla previsione di §3.2** |
+
+> ⚠️ **I log del tester stanno in TRE radici**, e quella degli **agent** non è
+> sotto la cartella dati del terminale (`%APPDATA%\MetaQuotes\Tester\...`).
+> Con una radice sola G4 sarebbe **verde per costruzione**.
 
 > 💰 **Costa 2 passate su 30 e può salvare la notte intera.** È la lezione di
 > R82 pagata in anticipo invece che a posteriori.
@@ -207,12 +215,34 @@ esegue le `Print` degli agent**: il canarino sarebbe sparito proprio nelle 30
 passate che servono a misurarlo. Nella **v1.10** dell'EA i quattro conteggi sono
 **quattro COLONNE del CSV** (`stats[10..13]` nel frame):
 
-`Livelli Creati` · `Livelli Consumati` · `Livelli Invalidati` · `Segnali Scartati`
+`Livelli Creati` · `Livelli Consumati` · `Livelli Invalidati` · `Segnali Scartati` · **`Livelli Buttati`** (v1.11)
 
-**La logica del segnale non è stata toccata, e non è una promessa:**
-`diff_blocco_segnale.py` su 8 blocchi (`AggiornaSwing`, `ScansionaLivelli`,
-`Enter`, `SweepAlto_Calc`, `SweepBasso_Calc`, `EstremoConfermato_Calc`,
-`OnTick`, `OnDeinit`) → **0 diversi su 8**. **[MISURATO]**
+**La logica del segnale non è stata toccata, e il diff è dichiarato per intero:**
+`diff_blocco_segnale.py` su 8 blocchi → **7 a diff 0** (`AggiornaSwing`,
+`ScansionaLivelli`, `Enter`, `SweepAlto_Calc`, `SweepBasso_Calc`,
+`EstremoConfermato_Calc`, `OnTick`) e **`LivelloAggiungi` a diff 1**, che è la
+riga `gLivButtati++` e nient'altro. **[MISURATO]**
+
+### 3.1-bis 🧱 `Livelli Buttati`: perché esiste, ed è il canarino più importante
+
+Un livello sparisce **solo** se uno sweep lo consuma o una chiusura oltre lo
+invalida. **In un trend lungo di un lato, gli swing dell'altro lato non vengono
+mai né toccati né rotti**: l'array cresce in modo **monotono**. Quando
+`InpMaxLivelli` morde, si butta **il più vecchio — cioè il più ampio**, proprio
+quello su cui il reclaim varrebbe di più.
+
+Il conto, fatto e non stimato: a `M30×4` §3.2 prevede **2.773 livelli/anno**
+(~1.390 per lato). Con un tetto di **500** si riempirebbe in **~4 mesi** di
+trend — e **EURJPY dal marzo 2020 (~115) al luglio 2024 (~175) è quattro anni
+quasi in linea retta**. L'**unwind del carry di agosto 2024**, che §2.2 nomina
+come *lo* stress test della OOS, avrebbe trovato i livelli più ampi **già
+buttati**: i reclaim che il round vuole misurare **non esisterebbero per
+costruzione** nelle celle dense.
+
+**Tetto portato a 2.000** (4× il costo di `ScansionaLivelli`, morso spostato a
+~17 mesi) — ma il tetto non basta: **serve l'artefatto che dice se ha morso**, e
+`Livelli Creati` **non lo dice** (viene incrementato anche per un livello poi
+buttato). Da qui la colonna nuova.
 
 ### 3.2 📐 L'ASPETTATIVA DI FREQUENZA, dichiarata **PRIMA** — e falsificabile
 
@@ -275,6 +305,7 @@ che morde è **la IS**: servono **≥ 34 trade/anno**.
 | **30 ≤ n IS < 150** | 🟠 **MERITO SOSPESO** (valvola R59). Si legge **solo il RISCHIO**, e si scrive nel referto invece di far finta di niente |
 | **n IS < 30** *oppure* **Livelli Creati IS < 30** | 🔴 **cella NON MISURABILE**, e la conclusione **non è sull'edge** |
 | **meno di 5 celle su 15 con n IS ≥ 150** | 🔴 **il ROUND è non misurabile**: la scala non ha prodotto il campione, e la domanda resta aperta |
+| **`Livelli Buttati` > 0** (qualunque cella) | 🔴 **quella cella è misurata con la STRUTTURA AMPUTATA**: il tetto ha buttato livelli vivi, e i più ampi. **Si dichiara e NON si legge sul merito.** Se sono le celle dense, il verdetto sulla metà bassa della scala **non c'è** |
 
 **E i due conteggi si leggono insieme, perché distinguono due diagnosi diverse
 gratis:** livelli **tanti** e consumati **pochi** → è il **GRILLETTO** che non
@@ -401,10 +432,14 @@ operazioni, TAGLIANDO a 6 mesi.
 
 ## 7. ✅ LA CHECKLIST DEL REFERTO — cosa deve esserci, o il referto non è chiuso
 
-- [ ] **PASSO 0 per primo**: prima data del per-trade, gemelli, tetto livelli,
-      e il **verdetto scritto per esteso** (§1.3).
-- [ ] **Il canarino PRIMA del conto economico**: le 4 colonne nuove, cella per
-      cella, col verdetto di §3.4.
+- [ ] **PASSO 0 per primo**: esito dello scarico storico (0-A), prima data del
+      per-trade, gemelli, tetto livelli, **numero di log del tester letti**, e il
+      **verdetto scritto per esteso** (§1.3). *"NON LETTO" non è "non ha morso".*
+- [ ] **Il canarino PRIMA del conto economico**: le **5** colonne nuove
+      (`Livelli Creati/Consumati/Invalidati/Buttati`, `Segnali Scartati`), cella
+      per cella, col verdetto di §3.4.
+- [ ] **`Livelli Buttati` cella per cella**, e la dichiarazione esplicita per
+      ogni cella con valore > 0 (§3.1-bis).
 - [ ] **La frequenza MISURATA contro la previsione di §3.2**, e di quanto ho
       sbagliato. Se la previsione era rotta, si dice.
 - [ ] **La scala ordinata per ORE**, non per PF.
@@ -424,6 +459,7 @@ operazioni, TAGLIANDO a 6 mesi.
 |---|---|---|
 | **F1** | la **finestra** | `2015.07.01 → 2026.06.30`, split 40/60, **subordinata al PASSO 0** |
 | **F2** | la **dimensione** | 15 celle × 2 finestre = **30 passate**, **EURJPY solo** |
+| **F2-bis** | il **tetto dei livelli** | `InpMaxLivelli` = **2.000**, con `Livelli Buttati > 0` = cella non leggibile sul merito (§3.1-bis) |
 | **F3** | il **rischio delle passate** | **1,00%** (assunzione di Claude; la taglia di campo resta 0,65%) |
 | **F4** | i **cancelli A1-A5** | PF OOS ≥ 1,20 · PF IS > 1,00 · DD OOS ≤ 15,0% · Peggior Giornata ≥ −7,5% · n IS ≥ 150 |
 | **F5** | la **bocciatura secca** | §5.2, **rischio mai sospeso** |

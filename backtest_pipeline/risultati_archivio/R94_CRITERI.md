@@ -1,16 +1,19 @@
-# ⚖️ R94 — CRITERI **BOZZA**, NON FIRMATI — la cella Bollinger (37 · 1.4) sul Breaking Band
+# ⚖️ R94 — CRITERI ✍️ **FIRMATI** — la cella Bollinger (37 · 1.4) sul Breaking Band
 
-> ## ✋ QUESTO FILE NON E' FIRMATO.
-> Scritto il **21/08/2026** da un agente, a numeri di R94 **mai visti** (nessuna
-> passata girata). **Senza la firma di Claudio, R94 non parte e i numeri non si
-> guardano.** Regola di casa, non trattabile: *i criteri si congelano prima dei
-> numeri, non dopo.*
+> ## ✅ FIRMATO DA CLAUDIO IN CHAT: **"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"** — 21/08/2026.
+> La firma integrale sta **in fondo a questo file** (sezione *"FIRMA DI CLAUDIO
+> — R94 BOLLINGER 37/1.4"*): quella e' l'originale.
+> Raccolta **a numeri di R94 mai visti**: nessuna passata girata. Regola di casa,
+> non trattabile: *i criteri si congelano prima dei numeri, non dopo.*
+> **Le soglie NON sono state toccate dalla firma e non si toccano.**
 >
-> ⚠️ **E la prima decisione da prendere non e' "firmo / non firmo" ma
-> "questo round serve?"** — l'agente che l'ha scritto dichiara che
-> **"archiviata" e' un esito legittimo e possibile gia' adesso**, e i motivi
-> stanno nel §0.2. La proposta e' presentata *perche' sia decidibile*, non
-> perche' vada lanciata.
+> ⚠️ **Una cosa NON e' firmata, ed e' scritta perche' si veda:** il **rischio
+> all'1,0%** e' un'**assunzione dichiarata da Claude** (§2.1), non una parola di
+> Claudio. Ribaltabile con una parola: in quel caso la base R34 va rimisurata.
+>
+> 📎 Il corpo qui sotto e' stato scritto **prima** della firma, quando l'esito
+> "archiviata" era ancora sul tavolo (§0.2): si legge come il verbale di come ci
+> si e' arrivati, non come una proposta ancora aperta.
 
 **Numero del round:** R94. R93 e' gia' **prenotato** dal
 `caccia_strategie/DOSSIER_NEWS_FILTER_2026-08-21.md` per il filtro news del
@@ -192,14 +195,17 @@ doveva muoversi: **il round si ferma e si cerca il perche'**, non si prosegue.
 
 ---
 
-## 6. ✍️ FIRMA DI CLAUDIO
+## 6. ✍️ FIRMA DI CLAUDIO — ✅ **RACCOLTA**
 
-_(vuota — questo file e' una BOZZA)_
+**La firma non e' qui: e' in fondo al file**, nella sezione *"FIRMA DI CLAUDIO —
+R94 BOLLINGER 37/1.4, 21/08/2026, PRIMA DEI NUMERI"*. Quella e' l'originale,
+questa e' solo l'indicazione di dove sta.
 
-Da riempire con la parola esatta di Claudio, la data, e la scelta esplicita
-sul **rischio** (§2.1). Se la decisione e' **"non serve, archivia"**, va scritta
-qui lo stesso: un round non lanciato con la ragione scritta vale piu' di un
-round lanciato per non lasciare la casella vuota.
+> **"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"** — 21/08/2026.
+
+⚠️ **Quello che la firma NON copre**: il **rischio**. Claudio ha firmato "lancia"
+senza pronunciarsi, e l'1,0% resta un'**assunzione dichiarata da Claude** (§2.1),
+non una sua decisione.
 
 
 ---
@@ -302,3 +308,99 @@ non si perda.
 ⚠️ **Quello che NON e' verificato:** la riga **non e' mai stata eseguita su
 Windows**. Il parser conferma la sintassi, non il comportamento. Per questo il
 **BLOCCO 1 (giro a vuoto) va mandato per primo**.
+
+---
+
+# 🧪 SECONDA VERIFICA — 21/08/2026: la riga di lancio e' stata **BOCCIATA (13 difetti)** e rifatta
+
+_Sempre a numeri di R94 **mai visti**. **Il disegno del round non e' cambiato**:
+6 file prova, 12 celle, 24 passate, stesse soglie, stesso canarino. Sono
+cambiate le **guardie** della riga. Le tre che valgono piu' di tutte:_
+
+## 🥇 1. Il canarino poteva essere servito dalla **CACHE DEL TESTER** (punto 38)
+
+La riga v1 scriveva: *"il canarino e' anche il controllo dei dati: se i tick
+fossero cambiati o mancanti, quelle righe non tornerebbero"*. **Era falso**, ed
+e' stato dimostrato sui file:
+
+> La cella di canarino di R94 (GBPUSD, `InpBBPeriod=20`, `InpBBDev=2.0`,
+> `InpMinRR=0`, magic 772101, stessa finestra, stesso deposito, stesso modello)
+> **e' la stessa identica passata gia' calcolata da R91 il 21/08**:
+> `r91_csv/ABTG_BreakingBand_GBPUSD_OOS_r91a.csv`, `Pass 0` →
+> `Profit 3160.10 | PF 1.73020 | DD 3.4801 | Trades 26`.
+
+Con la cache piena MT5 l'avrebbe **ripescata**, e **una passata ripescata non
+legge un tick**: il canarino sarebbe tornato al centesimo **anche con lo storico
+sparito**, mentre le celle P37 avrebbero girato sui dati veri. **Due misure su
+due mondi diversi.**
+✅ `lancia_r94.ps1` ora **svuota `Tester\cache`** prima della corsa (mai
+`bases\<server>\ticks`, che e' lo storico) e **muore** se non ci riesce.
+✅ E aggiunge due spie: **una cella che torna in pochi secondi** e' sospetta, e
+**un pass ripescato non scrive i per-trade** — che ora si ripuliscono **prima di
+ogni cella** e si verificano freschi dopo.
+
+## 🥈 2. Il funnel `[BB-FUNNEL]` **non esiste in questo round** (punto 34-ter)
+
+`PrintFunnel()` gira in `OnTester()` (sull'**agente**) e le passate sono in
+**ottimizzazione** (`Optimization=1` sempre): quelle `Print` non sono leggibili.
+R91, per leggerle, dovette fare una **passata singola** dedicata.
+✅ La riga **smette di prometterlo**. Il cancello si legge dalla colonna
+**`Trades`** del CSV, che e' un dato e non uno schermo. Il conteggio dei log
+finisce nel referto, cosi' lo **zero si legge** invece di dedurlo.
+📌 **Portare i contatori in una colonna (`FrameAdd`) resta un lavoro a se':** a
+branch congelato **l'EA non si tocca**.
+
+## 🥉 3. La catena del rischio si chiude **meglio** di come era scritta
+
+Era: *"l'unico scarto legato al lotto e' contato dal funnel"* — che dopo il
+punto 2 sarebbe stato un rimando **a un artefatto inesistente**.
+**La prova vera sta nel codice:**
+
+> `LotByRisk`, **riga 1427**: `return(MathMax(mn,MathMin(mx,lot)));`
+> **il lotto e' agganciato al MINIMO DEL BROKER: `InpRiskPercent` non puo'
+> azzerarlo.**
+
+Quindi `lot<=0` (riga 1133) puo' venire solo da `lossPerLot<=0` (guasto dei dati
+di simbolo) o da `slDist<=0`, **gia' escluso alla riga 1100**.
+✅ **L'assunzione sull'1,0% e' confermata, e ora e' DIMOSTRATA nel sorgente
+invece che dedotta dai log.**
+⚠️ **Residuo dichiarato**, che prima non stava scritto da nessuna parte: la
+guardia di **riga 1137** esce **senza incrementare nessun contatore**. Nel tester
+e' inerte, ma se non lo fosse **quell'uscita sarebbe muta**.
+
+## Gli altri dieci, in breve
+| # | difetto | correzione |
+|---|---|---|
+| D4 | il pin letto nell'**anteprima**, che la scrive il nostro script | si legge nella **colonna del CSV** (`InpBBPeriod` col. 15, `InpBBDev` col. 16). E il formato reale e' **`2`**, non `2.0`: MT5 tronca gli zeri |
+| D5 | lo zip vecchio cancellato **alla fine** | cancellato **all'inizio** (sez. 4): una `Muori` anticipata non arrivava mai in fondo, e lo zip di ieri passava il gate dei 15 minuti |
+| D6 | Desktop calcolato in **due modi diversi** fra riga e driver | stessi 4 candidati in tutti e due (con OneDrive la riga cercava lo zip dove non era) |
+| D7 | le 6 anteprime dichiarate nel blocco **sbagliato** | spostate nel BLOCCO 1: nella corsa vera lo zip ne conterrebbe **0** per costruzione |
+| D8 | `.ex5` non cancellato prima; attesa sul **processo** | `.ex5` cancellato prima, e si aspetta l'**artefatto** (180 s): MetaEditor e' single-instance e il processo torna subito |
+| D9 | `irm` senza **TLS 1.2** | aggiunto in tutti i blocchi, come nei gemelli |
+| D10 | per-trade ripuliti una volta sola: **P20 e P37 scrivono lo stesso file** | ripuliti **dentro il ciclo**, prima di ogni cella, e verificati freschi dopo |
+| D11 | questo file diceva **"BOZZA, NON FIRMATI"** con la firma 20 righe sotto | intestazione e §6 corrette. **Le soglie non sono state toccate** |
+| D12 | la **ripresa** era un vantaggio buttato | scritto che si rimanda lo stesso blocco (le celle fatte si saltano) e che `-Rifai` serve solo se cambia un file prova o l'EA |
+| D13 | numero di riga sbagliato (`exit 0` e' alla **538**, non 503) | corretto, e aggiunte **posizioni delle colonne** e **traffico dichiarato blocco per blocco** |
+
+## 🔒 E il PIN: la motivazione regge, ma "branch congelato" da solo no
+Un SHA sarebbe una **bugia** (`walkforward_generico.ps1` riga 91 ha
+`$EABranch="lavoro"` fisso e ignora `-Rif`). ✅ Ma il congelamento **dichiarato**
+e' un post-it, e R94 e' tutto un confronto **fra celle**: ora e' una **misura**.
+Lo script prende lo **SHA256 del sorgente** dopo la compilazione e lo
+**riconfronta dopo ogni cella** con `src_prove\<EA>.mq5`; se cambia, **muore**.
+
+## Cosa e' stato verificato, giro 2
+| controllo | esito |
+|---|---|
+| `controlla_prova.py` | ✅ 6 file, 12 celle, 24 passate, 0 problemi |
+| `lint_ps1.py` | ✅ 0 problemi |
+| sintassi del driver **e delle due righe di chat** (parser vero) | ✅ 0 errori |
+| ASCII puro (`.ps1` e 6 file prova) | ✅ 0 byte > 127 |
+| uso di variabili prima dell'assegnazione | ✅ nessuno; sciolta la collisione `$dest` fra due sezioni |
+| logica del Desktop | ✅ **eseguita**: sceglie `OneDrive\Desktop` quando e' l'unico, e ripiega su `%USERPROFILE%` |
+| estrazione degli `#include` | ✅ **eseguita** sul sorgente vero: trova `ABTG_PausaGuardian.mqh`, salta `Trade/Trade.mqh` |
+| gate del difetto 33 | ✅ **eseguito** sul driver vero: 0 occorrenze |
+| **prova di fumo del driver** | ✅ **eseguito davvero** fino al primo passo Windows-only: scarica i 6 file prova, passa i marcatori, supera il gate 33 e si ferma su *"terminale BCM non trovato"* |
+
+⚠️ **Quello che resta non verificato:** la riga **non e' mai stata eseguita su
+Windows**. Il parser conferma la sintassi, non il comportamento.

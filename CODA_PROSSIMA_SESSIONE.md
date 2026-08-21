@@ -23,9 +23,20 @@
 > passate singole gemelle, e quattro condizioni per proseguire.
 >
 > ### Cosa e' pronto
-> - 🆕 **EA `ABTG_LiquiditySweep` v1.10** — il canarino esce dal **CSV**, non da
->   una `Print` (in ottimizzazione MT5 non esegue le Print degli agent).
->   `diff_blocco_segnale.py`: **0 blocchi diversi su 8**.
+> - 🆕 **EA `ABTG_LiquiditySweep` v1.11** — il canarino esce dal **CSV**, non da
+>   una `Print` (in ottimizzazione MT5 non esegue le Print degli agent), e
+>   include la colonna **`Livelli Buttati`**: senza, il tetto dei livelli
+>   avrebbe amputato la struttura nelle celle dense **senza nessun artefatto
+>   che lo dicesse**. `diff_blocco_segnale.py`: 7 blocchi su 8 a diff 0,
+>   `LivelloAggiungi` a diff 1 (la riga `gLivButtati++`, dichiarata).
+> - 🔧 **Riga di lancio RIFATTA dopo il FAIL del verificatore (21/08).** Erano
+>   tre difetti indipendenti sulla stessa catena: il gate contava **31** righe
+>   dove ce ne sono **32** (moriva prima di compilare), i tre gate dell'ini
+>   usavano `(?m)^...$` su testo CRLF (**il PASSO 0 non sarebbe partito mai**),
+>   e G4 leggeva **una** radice di log invece di **tre** (**verde per
+>   costruzione**). Più `TryParse` con `[void]`, magic condiviso fra gate e
+>   corsa, `$Comune` nato dentro il `try`, ed `ESITO: OK` con problemi in
+>   elenco. Tutti chiusi.
 > - 🆕 **5 file prova** `R95a..e` — la **scala di densita'** del livello:
 >   15 celle da **2 a 48 ore** di accumulo, **un solo simbolo (EURJPY M15)**.
 > - 🆕 **`R95_CRITERI.md`** — BOZZA. Dentro anche **§5.4 "cosa NON si potra' dire"**.
@@ -854,10 +865,24 @@
 >   💰 Il **rischio 1,0%** non e' firmato: e' un'**assunzione dichiarata**,
 >   verificata nel sorgente come non influente sul conteggio operazioni.
 >   🔧 **Trovato scrivendo la riga, e vale per TUTTI i round:**
->   `walkforward_generico.ps1 -SoloControllo` **non compila** (esce alla riga
->   503, la compilazione sta alla 603) -> un `#include` mancante salta fuori
->   solo a corsa avviata. `lancia_r94.ps1` compila da solo anche nel giro a
->   vuoto; il **fix del driver resta in coda come lavoro a se'**.
+>   `walkforward_generico.ps1 -SoloControllo` **non compila** (il ramo esce con
+>   `exit 0` alla riga **538**, la compilazione sta alla **603**) -> un
+>   `#include` mancante salta fuori solo a corsa avviata. `lancia_r94.ps1`
+>   compila da solo anche nel giro a vuoto, aspettando l'**artefatto** e non il
+>   processo (MetaEditor e' single-instance); il **fix del driver resta in coda
+>   come lavoro a se'**.
+>   🔁 **v2 dopo la verifica (bocciata con 13 difetti, tutti veri).** Il
+>   disegno non e' cambiato; sono cambiate le guardie. Le tre grosse:
+>   🧊 **la cache del tester ora si svuota** — il canarino di R94 e' la
+>   STESSA passata gia' calcolata da R91 (`r91_csv/..._OOS_r91a.csv`, Pass 0:
+>   3160.10 / PF 1.73020 / 26 trade), quindi MT5 l'avrebbe **ripescata**: sarebbe
+>   tornata al centesimo **anche con lo storico sparito**;
+>   📢 **il funnel `[BB-FUNNEL]` NON esiste in ottimizzazione** e la riga
+>   smette di prometterlo (il cancello si legge dalla colonna `Trades`);
+>   🔒 **il congelamento del branch e' diventato una misura** (SHA256 del
+>   sorgente riconfrontato dopo ogni cella).
+>   📌 In coda come lavori a se': portare i contatori del funnel in una
+>   **colonna** (`FrameAdd`) e far compilare il driver generico in `-SoloControllo`.
 
 
 _Scritta il 16/08/2026 su sua richiesta: **"metti tutto in coda, quando arrivo
