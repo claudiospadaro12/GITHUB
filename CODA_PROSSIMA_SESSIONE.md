@@ -42,6 +42,18 @@
 > - 🆕 **`R95_CRITERI.md`** — BOZZA. Dentro anche **§5.4 "cosa NON si potra' dire"**.
 > - 🆕 **la riga di lancio**, con dentro i difetti 24, 33 e 33-bis gia' chiusi.
 >
+> ### ⚠️ NOTA DI TRACCIABILITA' (21/08) — un incidente da branch condiviso
+> Il commit **`b5689c1`**, intitolato a R95, contiene anche **tre file di
+> un'altra sessione** (`RIGA_R94_BB37.md`, `R94_CRITERI.md`,
+> `POINTBREAK_TRE_COMPONENTI_2026-08-21.md`): erano **gia' nell'indice**,
+> messi li' da quella sessione, e il `git commit` li ha portati via con se'
+> anche se il `git add` elencava solo i file di R95. **Niente e' andato perso**
+> (il working tree e' pulito e coincide con HEAD), ma **l'attribuzione e'
+> sbagliata**: chi cerca la storia di R94 la trova sotto un messaggio di R95.
+> E' l'immagine speculare di quanto scritto nella checklist per il commit
+> `4af9625`. **Su un branch condiviso non basta evitare `git add -A`: prima di
+> committare si guarda `git diff --cached --name-only`.**
+>
 > ### I tre limiti dichiarati PRIMA
 > 1. **OHLC M1, non tick** (i tick BCM partono dal 2024.07.05): **R95 NON PUO'
 >    PRODURRE UNA SEDIA**, al massimo il permesso di un giro a tick reali.

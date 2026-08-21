@@ -452,6 +452,11 @@ if($SaltaPasso0){
     if($inputs -notmatch '(?m)^InpTF_Struttura=30\r?$'){ throw "PASSO 0: InpTF_Struttura non e' stato pinnato a 30 (M30)" }
     if($inputs -notmatch ('(?m)^InpMagic=' + $magic + '\r?$')){ throw ("PASSO 0: InpMagic non e' stato pinnato a " + $magic) }
     if($inputs -match ('(?m)^InpMagic=' + $MagicGrid + '\r?$')){ throw "PASSO 0: sta girando col magic della GRIGLIA. Le due fasi non condividono il magic." }
+    #  E il CONTEGGIO: la derivazione dal file prova deve produrre ESATTAMENTE
+    #  i 29 parametri ($RigheAttese meno le 3 direttive @). Uno in meno vuol
+    #  dire che una riga si e' persa nel filtro, uno in piu' che ne ha aggiunte.
+    $nPar = @($out).Count
+    if($nPar -ne ($RigheAttese - 3)){ throw ("PASSO 0: l'ini derivato ha " + $nPar + " parametri invece di " + ($RigheAttese - 3) + ".") }
     $testo = @"
 [Charts]
 MaxBars=2000000000
@@ -485,8 +490,8 @@ $inputs
 
   $iniA = Join-Path $Work "passo0_a.ini"; IniPasso0 $MagicA $iniA
   $iniB = Join-Path $Work "passo0_b.ini"; IniPasso0 $MagicB $iniB
-  Write-Host "    anteprima [TesterInputs] della passata A:" -ForegroundColor DarkGray
-  Get-Content -LiteralPath $iniA | Select-Object -Last 32 | ForEach-Object { Write-Host ("      " + $_) -ForegroundColor DarkGray }
+  Write-Host ("    anteprima [TesterInputs] della passata A (" + ($RigheAttese - 3) + " parametri attesi):") -ForegroundColor DarkGray
+  Get-Content -LiteralPath $iniA | Select-Object -Last ($RigheAttese - 2) | ForEach-Object { Write-Host ("      " + $_) -ForegroundColor DarkGray }
 
   if($SoloControllo){
     Dico "SoloControllo: l'ini del PASSO 0 e' scritto e verificato, MT5 NON viene aperto." "Yellow"
