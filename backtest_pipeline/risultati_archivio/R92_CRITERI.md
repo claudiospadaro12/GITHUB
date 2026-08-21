@@ -1,4 +1,4 @@
-# ⚖️ R92-SCAN — CRITERI **BOZZA**, DA FIRMARE PRIMA DEI NUMERI
+# ⚖️ R92-SCAN — CRITERI **FIRMATI** DA CLAUDIO IL 21/08/2026, PRIMA DEI NUMERI
 
 > ## ✋ NON FIRMATO. Questa e' una BOZZA.
 > **Finche' Claudio non scrive "FIRMO R92", i numeri di R92 non si guardano.**
@@ -265,3 +265,63 @@ FIRMO R92          Claudio, data ____________
 
 Finche' questa riga e' vuota, R92 **non si lancia** e i suoi numeri **non si
 leggono**.
+
+
+---
+
+# ✍️ FIRMA DI CLAUDIO — 21/08/2026, **PRIMA** DI QUALSIASI NUMERO
+
+Testuale, come detto in chat:
+
+> **"c,firmo 0,8,misura entrambe"**
+
+Dichiarazione di cecita': **nessun risultato di R92 e' stato prodotto, letto o
+guardato** al momento della firma. L'EA `ABTG_Bulge.mq5` non e' mai stato
+compilato ne' backtestato. Le tre soglie S1/S2/S3 restano quelle scritte sopra,
+**non toccate dalla firma**.
+
+## Cosa ha firmato, punto per punto
+
+**1) "c" — SI MISURANO ENTRAMBE LE GESTIONI.**
+Il round confronta la gestione NUDA dell'EA (SL 3xATR + TP mediana mobile,
+nient'altro) contro la gestione VERA di Claudio (quella del suo Manager MQ4:
+**break-even a 1R + trailing a gradini di R**, start 1,5R passo 0,25R), che in
+MT5 **non esiste e va portata**. Il segnale resta **intoccato** in entrambe.
+Scopo dichiarato prima: sapere **quanto vale il break-even in euro**, invece di
+opinarlo. Vale identico per tutta la famiglia BreakingBand.
+Nel porting si **corregge** il difetto ereditato del Manager
+(`InitialRiskPoints()` usa lo SL CORRENTE: dopo il BE il denominatore va a ~0 e
+i multipli R esplodono) memorizzando lo **SL INIZIALE per ticket**, come gli ABTG.
+La correzione riguarda la GESTIONE, non il segnale.
+
+**2) "firmo" — S1 / S2 / S3 CONGELATE.**
+- **S1 campione:** n >= 30 trade
+- **S2 profit factor:** PF >= 1,30
+- **S3 profilo:** win rate >= 65% **e** profitto netto > 0
+Piu' regola zero (lo scan non promuove niente), bocciatura secca, zona grigia,
+"la famiglia mai il simbolo solo", tetto 6 simboli al round profondo.
+
+**3) "0,8" — RISCHIO SCESO A 0,80%.**
+Sostituisce l'1,00% della bozza. Motivo, dichiarato prima: 1,00% x `Max_Trades`=4
+= **4% aperto**, sopra il cap C1 firmato il 18/08 (**3,25%**).
+Con 0,80%: **0,80 x 4 = 3,20% <= 3,25%. Il cap regge.**
+Nota per la lettura: e' un rischio **diverso** sia dal 3% del backtest di
+Claudio sia dall'1% della bozza -> profitti e DD **in denaro** non sono
+confrontabili con nessuno dei due; **PF, win rate e n** si'.
+
+**4) "misura entrambe" — LE DUE VERSIONI DEL VIOLA.**
+La divergenza trovata oggi nella triangolazione col Pine:
+- **VIOLA-PINE:** ultima condizione `close > open` (candela di reazione **verde**)
+- **VIOLA-EA:** ultima condizione `|close-open| <= 1,5 x ATR` (candela **non impulsiva**)
+Si misurano **tutte e due**, non si sceglie a memoria. Nessuna delle due e' "la
+correzione" dell'altra finche' il numero non parla.
+
+## Dimensione del round che ne esce
+**22 simboli x 2 gestioni x 2 varianti del VIOLA = 88 passate.**
+
+## Cosa resta aperto DOPO la firma (non lo tocca)
+- **PASSO 0**: profondita' dati dei 22 cross a BCM mai misurata -> finche' manca,
+  i numeri sono **provvisori** (canarino 2.3).
+- **Canarino BLU**: se `BLU=0` su tutti i simboli, il round misura solo il VIOLA
+  e lo si dichiara nel referto.
+- I **4 [DA DECIDERE]** nel codice restano decisioni di Claudio, non corretti.
