@@ -35,10 +35,20 @@ import sys
 
 
 def blocco(testo: str, firma: str) -> str | None:
-    """Il corpo della funzione che comincia con `firma`, graffe bilanciate."""
-    i = testo.find(firma)
-    if i < 0:
+    """Il corpo della funzione che comincia con `firma`, graffe bilanciate.
+
+    La firma si cerca SOLO A INIZIO RIGA. Sembra un dettaglio e non lo e':
+    il 21/08 questo strumento ha dato "5 blocchi diversi su 5" su un file in
+    cui ne erano cambiati due, perche' la stringa "bool BullEngulf(" compare
+    anche NEL COMMENTO in testa al sorgente (l'esempio d'uso di questo stesso
+    script). Cercava il commento e confrontava intestazioni.
+    E' il difetto di casa "il guardiano che misura la cosa sbagliata": un
+    numero preciso, tondo e falso.
+    """
+    m = re.search(r"^[ \t]*" + re.escape(firma), testo, flags=re.M)
+    if not m:
         return None
+    i = m.start()
     j = testo.find("{", i)
     if j < 0:
         return None
