@@ -1659,3 +1659,49 @@ serve piu' a niente.
 > **Ogni numero atteso stampato in una riga di lancio si RICALCOLA con la
 > formula dell'EA e i suoi default veri, prima di scriverlo** — e se la formula
 > e' in tre righe di codice, si esegue quella, non si va a memoria.
+
+---
+
+## 🆕 AGGIUNTA DEL 21/08/2026 — trovata alla **TERZA** verifica di R93 (verdetto PASS)
+
+### 43. 📍 LA CITAZIONE DI RIGA CHE DRIFTA DOPO LA CORREZIONE — la mappa che non segue il territorio
+
+**Contesto.** In questa casa i criteri non dicono *"lo script ripiega sulla copia
+locale"*: dicono *"`walkforward_generico.ps1` ha `$EABranch="lavoro"` scritto
+fisso (**riga 78**)"*. E' il metodo che ci ha salvati: **si cita la riga, e il
+verificatore va a leggerla.** Il punto 1 di questa checklist e' esattamente
+quello.
+
+**Il difetto.** Quando lo script citato viene modificato (o cresce sopra la riga
+citata), **la citazione non si sposta con lui**. La FRASE resta vera, il NUMERO
+diventa falso. Misurato su R93 v3, tre casi in un documento solo:
+
+| il documento dice | dove sta davvero | la frase e' |
+|---|---|---|
+| `$EABranch="lavoro"` a **riga 78** | riga **91** (la 78 e' un commento sullo spread) | ✅ vera |
+| l'anteprima scrive solo la finestra IS, **righe 526-527** | righe **518-519** (le 526-527 sono `ShutdownTerminal` e `Report=`) | ✅ vera |
+| copia e compila alle **righe 601-603** | righe **602-603** | ✅ vera |
+
+**Perche' costa, anche quando la frase e' giusta.** Il verificatore che apre la
+riga 78 e ci trova un commento sullo spread ha due strade, ed **entrambe sono un
+giro a vuoto**:
+1. **cerca a mano** il codice vero altrove — tempo speso a rifare una mappa che
+   qualcuno aveva gia' fatto;
+2. **conclude che la citazione e' inventata** e boccia una riga sana. E questo e'
+   il caso peggiore: **un FAIL falso costa a Claudio esattamente quanto un PASS
+   falso**, perche' rimanda un round che era pronto. La cache di raw e l'MT5
+   aperto non sono gli unici modi di bruciare una serata: **anche il
+   verificatore che sbaglia ne brucia una.**
+
+Ed e' la stessa famiglia del **40-bis/40-quater**: un numero scritto a memoria
+invece che misurato sull'artefatto. Li' era l'atteso di un gate e l'atteso di un
+occhio umano; qui e' l'indirizzo della prova.
+
+> ✅ **REGOLA.** Ogni numero di riga citato in un documento di round si
+> **riverifica sull'artefatto nel commit che si sta per lanciare**, non su quello
+> in cui era stato scritto. Un `grep -n` per ogni citazione, prima del push:
+> costa dieci secondi e vale la mappa.
+> 🥈 **Se il numero non lo si vuole mantenere, si cita il MARCATORE invece della
+> riga** (`cerca $EABranch=` , `cerca "Model=4"`): il marcatore si sposta da solo
+> col codice, il numero no. **Una citazione che non si puo' mantenere e' meglio
+> scritta come pattern da cercare che come indirizzo fisso.**
