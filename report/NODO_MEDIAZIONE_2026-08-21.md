@@ -282,3 +282,33 @@ compilato. Le soglie NON sono state toccate dalla firma.
 - **Non** riabilita la pratica di Emiliano: quella fallisce T1 e T3 con T4 = si',
   ed e' **scarto a vista** per §13. Il "MAI" del 12/08 **resta in vigore su quella**.
 - **Non** promuove niente e **non** apre un round di merito.
+
+---
+
+## 🛠️ ESECUZIONE DELLA FIRMA — lo strumento consegnato (21/08, mql5-ea-developer)
+
+Chiude la richiesta **N4** della §4 (_"il contatore di segnali"_) **come STRUMENTO**.
+Il **numero** non c'e' ancora: lo produce Claudio sul suo PC.
+
+| voce | dove |
+|---|---|
+| 📦 lo strumento | `mql5/Scripts/ABTG_SondaMediazione.mq5` — **SCRIPT**, commit `13db8c9` |
+| 📄 referto (assunzioni numerate + cosa il numero NON dira') | `backtest_pipeline/risultati_archivio/SONDA_MEDIAZIONE_FREQUENZA_2026-08-21.md` |
+| 🚀 riga di lancio | `backtest_pipeline/righe/RIGA_SONDA_MEDIAZIONE.md` |
+
+- 🛑 **Non e' un EA e non puo' diventarlo per sbaglio:** niente `OnTick`, niente
+  `CTrade`, **nessuna chiamata di trading** e **nessun `#include`** (i due grep
+  sono nel referto e sono usciti **vuoti** sul commit pinnato).
+- 📦 **Conta PACCHETTI, mai ticket** (G2). Definizione usata: **un pacchetto = un
+  segnale valido che ha messo ordini**; i segnali che cadono mentre il cross e'
+  gia' occupato sono **contati a parte e stampati**, non nascosti e non sommati.
+- 📊 Stampa anche l'**istogramma dei livelli 1..6** e la **% di pacchetti pieni**,
+  con l'allarme automatico **`CODA SOTTO-CAMPIONATA`** sotto il **5%** (G3.1), e
+  la misura **G3.6** (pieno e poi TP). Sono **due misure della coda su sei**, prese
+  gratis: le altre quattro pretendono un P&L, che qui **non esiste**.
+- 🔴 **Resta appeso ad A1:** il SuperTrend (**ATR 10 / mult 3,0**) e' **nostro**, il
+  corso non lo detta mai. Se il conteggio uscisse **vicino** ai 150, la risposta
+  onesta non e' "passa"/"non passa" ma **"il numero dipende da un parametro che il
+  corso non ha"** — e **M15b (`super trend.ex4` della lez. 10) diventa bloccante**.
+- ⛔ **Non e' stato scritto l'EA operativo della Mediazione**: Claudio non l'ha
+  firmato. Nessun sizing, nessun lotto, nessun forward, niente toccato in campo.

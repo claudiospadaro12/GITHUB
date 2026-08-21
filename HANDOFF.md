@@ -7,6 +7,33 @@
 
 ---
 
+## 📏 AGGIORNAMENTO 21/08 (mql5-ea-developer) — SONDA MEDIAZIONE: lo strumento c'e', il numero no
+
+Claudio ha firmato il 21/08 (**"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"**)
+l'**opzione C** del nodo Mediazione: **solo un contatore di segnali**, nessun ordine,
+nessun sizing, nessun forward, **nessun EA operativo**.
+
+- 📦 **Consegnato:** `mql5/Scripts/ABTG_SondaMediazione.mq5` (**SCRIPT**, non EA: niente
+  `OnTick`, niente `CTrade`, **nessun `#include`** — i due grep escono vuoti).
+- 📐 **Conta PACCHETTI, mai ticket** (regola G2 congelata oggi): un pacchetto = **un
+  segnale valido che ha messo ordini**, qualunque sia il numero di livelli riempiti
+  (1..6). I livelli finiscono nell'**istogramma**, non nel conteggio.
+- 🎯 **La domanda unica:** **>= 150 pacchetti in-sample?** Se **no**, il nodo si chiude
+  da solo con un numero e **non serve scrivere nessun EA**.
+- 🚀 **Riga di lancio pronta:** `backtest_pipeline/righe/RIGA_SONDA_MEDIAZIONE.md`
+  (pin `13db8c9`) — PASSO 0 storico H1 dei 3 cross (MT5 chiuso), PASSO 1 installa+compila
+  da riga di comando, PASSO 2 trascina lo script su un grafico, PASSO 3 raccolta con
+  **ricontrollo del numero dal CSV** e zip sul Desktop.
+- 📄 **Referto (cosa conta, come, 10 assunzioni numerate, cosa il numero NON dira'):**
+  `backtest_pipeline/risultati_archivio/SONDA_MEDIAZIONE_FREQUENZA_2026-08-21.md`.
+- 🔴 **Assunzione A1, dichiarata inventata da noi:** SuperTrend **ATR 10 / mult 3,0** —
+  il corso non lo detta MAI e il `super trend.ex4` della lez. 10 non ce l'abbiamo (M15b).
+  Se il conteggio finisse **vicino** a 150, quella richiesta diventa **bloccante**.
+- ⛔ **Non compilato, non eseguito, zero numeri prodotti.** Il "MAI" del 12/08 sulla
+  pratica di Emiliano **resta in vigore**: qui si misura un altro oggetto (lez. 26-33).
+
+---
+
 ## 🧾 AGGIORNAMENTO NOTTE 18->19/08 (agente in background) — HISTDATA: scritta la cura DST, da collaudare
 
 Il passo 4 dell'import HistData e' **fermo al cancello ZERO** (par. 14 di
