@@ -2242,3 +2242,62 @@ dopo la campanella**, non l'incrocio 9/21.
 > 📏 **E la contromisura minima e' una COLONNA, non una frase** (punto 34):
 > l'artefatto inerte si conta, cosi' il referto dice *quanti* trade vengono dal
 > seme invece di dichiararlo a parole.
+
+---
+
+## 🆕 AGGIUNTA DEL 21/08/2026 — trovata verificando il PASSO 3 di R92 (dopo il ri-pin)
+
+## 53. 🧟 IL RI-PIN NON RIPULISCE GLI ARTEFATTI DEL PIN SBAGLIATO (e la ripresa idempotente li fa passare per nuovi)
+
+_Difetto vero, trovato PRIMA dell'invio, nella riga **corretta** del PASSO 3 di
+R92 — cioe' nella riga scritta APPOSTA per riparare il difetto n.33
+(`Risk_Percent=1.0` nella copia esecutiva) dopo il ri-pin a `bdaf360`._
+
+La giornata del 21/08 ha pagato **due volte la stessa classe**: la mattina un
+PASSO 0 pinnato a uno `scarica_storico.ps1` **senza** `AllowLiveTrading=false`;
+il pomeriggio un PASSO 3/4 pinnato a uno `scan_market.ps1` che girava a rischio
+**1,0%** contro lo **0,80% firmato**. In tutti e due i casi la riparazione e'
+stata la stessa: **commit di fix + nuovo pin + guardia `Select-String` sul
+marcatore**. Ed e' li' che si nasconde il terzo giro:
+
+> **La guardia di versione guarda lo SCRIPT. I NUMERI sbagliati sono
+> nell'ARTEFATTO, e l'artefatto e' rimasto sul disco.**
+
+`scan_market.ps1` (riga 456) ha la ripresa, ed e' giusto che ce l'abbia:
+```powershell
+if(Test-Path $done){ Write-Host "gia' fatto, salto" -ForegroundColor DarkGray; continue }
+```
+Se in `%USERPROFILE%\r92\risultati_scan_ABTG_Bulge\` ci sono i CSV prodotti dal
+pin **vecchio**, la riga nuova: scarica lo script giusto, **supera tutte e due le
+guardie sul rischio**, stampa due righe grigie, **non lancia nemmeno una
+passata** e lascia in piedi i numeri a 1,0%. Il controllo scritto nel documento
+("devono esserci 2 file con 2 righe di dati ciascuno") **esce VERDE**. Il difetto
+appena corretto rientra dalla finestra travestito da corsa riuscita.
+
+Aggravante misurata: l'`.ini` viene scritto **dopo** il `Test-Path` (righe
+457-497), quindi su un simbolo saltato resta l'`.ini` **vecchio** — e l'`.ini` e'
+l'**unica prova cartacea** del rischio che finisce nello zip della raccolta. Il
+referto direbbe `Risk_Percent=1.0` accanto a un CSV vecchio, e sarebbe l'unico
+posto in cui la bugia si vede.
+
+> **Regole, da applicare INSIEME ogni volta che si ri-pinna una riga dopo un fix
+> che cambia i NUMERI (non la forma):**
+> 1. **Si elencano gli ARTEFATTI che il pin sbagliato puo' aver gia' prodotto**
+>    (CSV, `.ini`, per-trade, referti, cache) e la riga nuova **li cancella o si
+>    ferma**. Un fix di rischio/soglia/finestra invalida i file, non solo lo
+>    script.
+> 2. **La cancellazione si VERIFICA** (punto 46: un file aperto in Excel non si
+>    cancella e nessuno se ne accorge): dopo il `Remove-Item` con wildcard si
+>    ricontano i file e si `throw` se ce n'e' ancora.
+> 3. **Il gate finale sta sulla FRESCHEZZA, non sulla presenza**: `$t0=Get-Date`
+>    prima di lanciare, e ogni artefatto atteso deve avere
+>    `LastWriteTime -ge $t0`. E' l'unico controllo che regge anche quando la
+>    cancellazione fallisce in silenzio.
+> 4. **Quello che la riga NON puo' cancellare da sola lo DENUNCIA**: se restano
+>    artefatti di ALTRI simboli/celle prodotti dal pin vecchio, il passo corto
+>    (il banco) si ferma e lo dice, invece di lasciarli entrare nel passo lungo.
+>    Mai una cancellazione a sorpresa di una corsa da ore: si chiede.
+
+⚠️ **Corollario di lettura**: "il pin e' corretto" e "i numeri sono di questo
+pin" sono **due affermazioni diverse**. La prima si dimostra con `git`, la
+seconda solo con la **data** dell'artefatto.
