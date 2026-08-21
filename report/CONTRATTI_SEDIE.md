@@ -97,6 +97,18 @@ o si scrive un contratto (misura nuova) o si dichiara formalmente lo stato._
 
 | EA | Simbolo | Magic | Rischio | DD promesso | Op/mese | Finestra | Fonte | Etichetta |
 |---|---|---|---:|---|---|---|---|---|
+
+> ### 🗣️ NOTA DI DISEGNO — famiglia BREAKING BAND (dichiarata da Claudio il 21/08, fonte: coach Leonardo)
+> **"ATR x 3 e' veramente difficile che venga toccato: e' stato fatto apposta cosi'."**
+> Lo stop largo e' una scelta del metodo: il motore guadagna dalla **frequenza**
+> di piccole vincite sulla mediana, non dalla loro taglia. Confermato per via
+> indipendente da **R91** (il filtro di RR minimo tagliava i trade migliori:
+> +193 / +184 / +66 di aspettativa a trade -> bocciato su tutti e tre i simboli).
+> 📌 **Conseguenza per il forward**: per questa famiglia la metrica da sorvegliare
+> **non e' il win rate** (sara' sempre alto per costruzione) ma le **perdite
+> consecutive** e la **peggior giornata** — il rischio sta nella coda.
+
+
 | ABTG_BreakingBand | GBPUSD | 772161 | 1,0 | **1,9%** (100k R34; WF R33: 3,4% · PF 1,75) | **~2,0** (26 tr / 13 mesi) | OOS 2025.06→2026.06 | `REFERTO_ROUND33_BREAKINGBAND_WF.md` · `REFERTO_ROUND34_BB_PORTAFOGLIO.md` | ✅ [TROVATO] |
 | ABTG_BreakingBand | EURUSD | 772162 | 1,0 | **1,2%** (solo CONT · PF 3,87 — nota: IS con 4 trade) | **~1,0** (13 tr) | OOS 2025.06→2026.06 | R33 · R34 | ✅ [TROVATO] |
 | ABTG_BreakingBand | AUDUSD | 772163 | 1,0 | **1,2%** (solo INV · PF 2,76) | **~0,8** (11 tr) | OOS 2025.06→2026.06 | R33 · R34 | ✅ [TROVATO] |

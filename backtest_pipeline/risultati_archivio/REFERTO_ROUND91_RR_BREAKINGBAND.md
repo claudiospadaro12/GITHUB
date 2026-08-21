@@ -69,3 +69,34 @@ trend-following significa chiedergli di essere un altro motore.
   R91 ha usato la configurazione dei file prova R33/R34. Il verdetto (il filtro
   taglia vincenti) e' cosi' netto su tutti e tre i simboli che un piccolo
   scarto di preset non lo ribalta — ma la verifica sul VPS resta da fare.
+
+---
+
+## 5. 🗣️ LA CONFERMA DALLA FONTE (Claudio, 21/08 — [DICHIARATO dal coach])
+
+> **"Leonardo ci diceva che ATR x 3 e' veramente difficile che venga toccato:
+> e' stato fatto apposta cosi'."**
+
+**La fonte del metodo dichiara che lo stop largo e' una SCELTA DI DISEGNO, non
+una svista.** Il Breaking Band e' costruito per:
+- **stop lontano** (3 x ATR) -> raramente colpito;
+- **target vicino** (la mediana delle bande) -> raggiunto spesso;
+- **profitto dalla FREQUENZA delle piccole vincite**, non dalla loro taglia.
+
+### Perche' questo e' la conferma piu' forte possibile di R91
+Il filtro `InpMinRR` nasceva dall'ipotesi che **RR 1:0,069 fosse un difetto**.
+La misura, fatta **senza sapere della dichiarazione**, ha risposto che il
+filtro tagliava i trade **migliori** (+193 / +184 / +66 di aspettativa a trade).
+La fonte, per una strada del tutto indipendente, dice **la stessa cosa**:
+quel RR e' il motore, non il suo errore.
+**Due prove indipendenti che convergono** — misura e dichiarazione — su un
+punto in cui l'intuizione (la mia) era sbagliata.
+
+### La conseguenza che va tenuta d'occhio (non e' un allarme, e' un promemoria)
+Un motore con **win rate alto e perdite rare** concentra il rischio nella
+**coda**: quando lo stop viene toccato, e' un evento raro e grosso. I DD
+misurati restano bassissimi (**1,27% / 1,18% / 0,92-3,48%** nelle celle base),
+quindi oggi il profilo regge. Ma la metrica da sorvegliare in forward per
+questa famiglia **non e' il win rate** (sara' sempre alto): sono le
+**perdite consecutive** e la **peggior giornata**. Da mettere accanto ai
+contratti delle tre sedie al prossimo giro sui contratti.
