@@ -154,6 +154,21 @@ input bool   Use_Orange = false;   // Arancio -- IN-BULGE meta' bulge
 input bool   Use_Blue   = true;    // Blu     -- IN-BULGE 2a candela
 input bool   Use_Purple = true;    // Viola   -- POST-BULGE
 
+//--- v5.10 (FIRMA DI CLAUDIO 21/08, "misura entrambe"): LE DUE VERSIONI
+//    DELL'ULTIMA CONDIZIONE DEL VIOLA. La divergenza e' MISURATA nella
+//    triangolazione col Pine originale di Claudio
+//    (risultati_archivio\TRIANGOLAZIONE_BULGE_PINE_2026-08-21.md):
+//      false = VIOLA-EA   |close0-open0| <= 1,5 x ATR  (candela NON
+//              impulsiva: apre anche su candela ROSSA in un long)
+//      true  = VIOLA-PINE close0 > open0 nel long, close0 < open0 nel
+//              short (candela di reazione VERDE / ROSSA, come il Pine)
+//    >>> NESSUNA DELLE DUE E' "LA CORREZIONE" DELL'ALTRA. Sono due
+//        ipotesi, e si misurano tutte e due (R92: 2 varianti x 22
+//        simboli x 2 gestioni = 88 passate).
+//    DEFAULT false = comportamento IDENTICO a BULGE_MASTER: nessun
+//    cambio silenzioso, mai.
+input bool   Use_Purple_PineReaction = false; // Viola: true = ultima condizione del PINE (candela verde/rossa)
+
 //==================================================================
 // INPUT -- FILTRO ATR
 //==================================================================
@@ -203,11 +218,14 @@ input double Max_Daily_Loss_Pct  = 2.0;    // Stop se perdita giornaliera >= % b
 //==================================================================
 input group "=== Gestione rischio ==="
 input ENUM_RISK_MODE Risk_Mode    = RISK_PER_TRADE; // Modalita' rischio
-//--- v5.00: 1.00 e' il rischio comune di casa (rende confrontabili le
-//    celle fra loro), NON una taglia di campo. BULGE_MASTER aveva 0,50
-//    e il backtest di Claudio girava a 3,00: qui il default SALE
-//    rispetto al file di partenza, ed e' detto apposta.
-input double Risk_Percent          = 1.0;   // [RISK_PER_TRADE] Rischio % per trade
+//--- v5.10 (FIRMA DI CLAUDIO 21/08, "0,8"): 0,80% NON e' un numero
+//    scelto per gusto, e' il numero che fa REGGERE IL CAP.
+//    0,80 x Max_Trades 4 = 3,20% di rischio aperto insieme, sotto il
+//    cap C1 firmato il 18/08 (3,25%). Con l'1,00% della bozza erano
+//    4,00%: sopra il cap. BULGE_MASTER aveva 0,50 e il backtest di
+//    Claudio girava a 3,00 -> i profitti e i DD IN DENARO non sono
+//    confrontabili con nessuno dei due; PF, win rate e n si'.
+input double Risk_Percent          = 0.8;   // [RISK_PER_TRADE] Rischio % per trade
 input double Total_Risk_Percent   = 2.0;   // [RISK_TOTAL_CAP] Rischio totale % (/ Max_Trades)
 input int    Max_Trades            = 4;      // Max trade contemporanei
 
@@ -918,6 +936,21 @@ void OpenOrder(string sym, bool isLong, double atr, double bbBasis, string comme
 }
 
 //==================================================================
+// v5.10 -- L'UNICA CONDIZIONE DEL VIOLA CHE HA DUE VERSIONI.
+// Sta QUI FUORI apposta: cosi' dentro CheckSignal cambiano due righe
+// e non una virgola di piu', e il confronto riga-per-riga con
+// BULGE_MASTER.mq5 resta leggibile (verifica a macchina nel referto).
+// Col default (Use_Purple_PineReaction=false) questa funzione ritorna
+// ESATTAMENTE il vecchio candleNotImpulsive, per tutti e due i lati.
+//==================================================================
+bool PurpleReactionOk(bool isLong, double open0, double close0, double atr1)
+{
+   if(Use_Purple_PineReaction)
+      return isLong ? (close0 > open0) : (close0 < open0);   // VIOLA-PINE
+   return (MathAbs(close0 - open0) <= atr1 * 1.5);           // VIOLA-EA (default)
+}
+
+//==================================================================
 // LOGICA PRINCIPALE -- tutti e 3 i segnali (INVARIATA)
 // NB: identica a v3_PARALLEL_KILL. Cambia SOLO la sorgente dati
 //     (handle in cache via GetBB/GetATR per symIdx).
@@ -1064,19 +1097,22 @@ void CheckSignal(int symIdx)
    //----------------------------------------------------------------
    if(Use_Purple)
    {
-      bool candleNotImpulsive = MathAbs(closes[0] - opens[0]) <= atr1 * 1.5;
+      // v5.10: LE UNICHE RIGHE CAMBIATE DENTRO CheckSignal. Col default
+      // valgono il vecchio candleNotImpulsive, identico per i due lati.
+      bool reactionLong0  = PurpleReactionOk(true,  opens[0], closes[0], atr1);
+      bool reactionShort0 = PurpleReactionOk(false, opens[0], closes[0], atr1);
 
       bool postBulgeLong =
            barsSinceImpDown >= 1 && barsSinceImpDown <= Lookback_Bars * 2 &&
            midAfterImpDown && !oppAfterImpDown &&
            lows[0] <= bbLower0 && lowerFlat &&
-           candleNotImpulsive;
+           reactionLong0;
 
       bool postBulgeShort =
            barsSinceImpUp >= 1 && barsSinceImpUp <= Lookback_Bars * 2 &&
            midAfterImpUp && !oppAfterImpUp &&
            highs[0] >= bbUpper0 && upperFlat &&
-           candleNotImpulsive;
+           reactionShort0;
 
       if(postBulgeLong  && AdxFilterOk(symIdx, sym, "VIOLA"))
          OpenOrder(sym, true,  atr1, bbBasis0, InpComment + "_VIOLA_L");
