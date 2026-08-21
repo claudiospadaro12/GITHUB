@@ -33,9 +33,12 @@
 #       "undeclared identifier" a corsa avviata
 #    5. pulisce le serie per-trade e le anteprime VECCHIE (difetto 14)
 #    6. lancia le 6 celle, una alla volta, controllando LASTEXITCODE
-#    7. raccoglie sul Desktop, porta via anche i LOG DEGLI AGENT del
-#       tester (li' c'e' il funnel [BB-FUNNEL], che dice se i setup
-#       sono diminuiti o se sono stati scartati alla porta) e fa lo zip
+#    7. raccoglie sul Desktop, porta via a best effort anche i LOG DEGLI
+#       AGENT del tester (TRE radici) e fa lo zip. ATTENZIONE: il funnel
+#       [BB-FUNNEL] NON E' ATTESO in questo round -- PrintFunnel() gira
+#       in OnTester (sull'agente) e le passate sono in ottimizzazione:
+#       quelle Print non sono leggibili. Il numero dei log finisce nel
+#       referto (punto 34-ter); il cancello si legge dalla colonna Trades.
 #
 #  IL PIN NON COPRE L'EA (difetto 24): walkforward_generico.ps1 ha
 #  EABranch="lavoro" SCRITTO FISSO alla riga 91 e riscarica il .mq5 da
@@ -44,10 +47,14 @@
 #  il branch CONGELATO (nessun push su lavoro mentre R94 gira) piu' i
 #  marcatori di versione. Un SHA pinnerebbe gli script e NON il motore.
 #
-#  MARCATORE VERSIONE: R94-LANCIO-v2
-#  (v2 = correzioni della verifica del 21/08: cache del tester svuotata,
-#   compilazione che aspetta l'artefatto, tre radici per i log, per-trade
-#   ripuliti dentro il ciclo, sorgente confrontato per hash a ogni cella)
+#  MARCATORE VERSIONE: R94-LANCIO-v3
+#  (v2 = cache del tester svuotata, compilazione che aspetta l'artefatto,
+#   tre radici per i log, per-trade ripuliti dentro il ciclo, sorgente
+#   confrontato per hash a ogni cella.
+#   v3 = seconda verifica del 21/08: la spia dei per-trade distingue
+#   SALTATA da NON GIRATA (la ripresa non e' un ripescaggio), guardia su
+#   metaeditor64, pulizia del Desktop con lo stesso perimetro del
+#   riempimento anche con -Solo, residui del funnel tolti dai commenti)
 # =====================================================================
 param(
   [string]$Rif      = "lavoro",
@@ -93,6 +100,12 @@ if (Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) {
   Muori ("MetaTrader e' APERTO. Chiudilo prima di lanciare, altrimenti escono 0 CSV." + "`n" +
          "    (e se sul PC sta girando un altro lavoro - R92, R93, Dukascopy -" + "`n" +
          "     aspetta che finisca: c'e' un solo MT5)")
+}
+
+if (Get-Process -Name "metaeditor64" -ErrorAction SilentlyContinue) {
+  Muori ("MetaEditor e' APERTO. Chiudilo prima di lanciare." + "`n" +
+         "    E' SINGLE-INSTANCE: con una copia gia' aperta la compilazione da riga" + "`n" +
+         "    di comando finisce nell'altra istanza e non e' governabile (punto 39).")
 }
 
 if ($Modello -ne 4) {
@@ -401,7 +414,13 @@ if (-not $SoloControllo) {
 $nomeCartella = "R94_BREAKINGBAND_BB37"
 $dest = Join-Path $desk $nomeCartella
 $zip  = Join-Path $desk ($nomeCartella + ".zip")
-foreach ($vecchio in @($zip, $dest)) {
+#     E il PERIMETRO della pulizia deve essere quello del RIEMPIMENTO
+#     (punto 35-bis): con -Solo la raccolta riempie SOLO le celle scelte,
+#     quindi radere $dest lascerebbe 2 CSV su 12 con un referto che dice
+#     "MANCANTI: nessuno". Lo zip invece si rifa' sempre.
+$daTogliere = @($zip)
+if ($Solo -eq "") { $daTogliere += $dest }
+foreach ($vecchio in $daTogliere) {
   if ($SoloControllo) { break }   # il giro a vuoto NON distrugge i risultati di una corsa precedente
   if (Test-Path -LiteralPath $vecchio) {
     try { Remove-Item -LiteralPath $vecchio -Recurse -Force -ErrorAction Stop } catch {}
@@ -444,6 +463,7 @@ Write-Host "    lo stesso. Si dice, non si legge come conferma." -ForegroundColo
 # =====================================================================
 $falliti = @()
 $ripescate = @()
+$saltate = @()
 $i = 0
 foreach ($c in $celle) {
   $i++
@@ -473,6 +493,24 @@ foreach ($c in $celle) {
     Get-ChildItem -Path $Common -Filter ("abtg_trades_" + $EA + "_" + $c.Sym + "_*.csv") -ErrorAction SilentlyContinue | ForEach-Object {
       try { Remove-Item -LiteralPath $_.FullName -Force } catch {}
     }
+  }
+
+  # SALTATA o GIRATA? walkforward_generico.ps1 (riga 615) salta la finestra
+  # il cui CSV esiste gia'. Una cella SALTATA non apre MT5 e quindi NON
+  # riscrive i per-trade: senza questa distinzione la RIPRESA -- che questa
+  # stessa riga di lancio consiglia -- accuserebbe di RIPESCAGGIO celle
+  # sanissime, e proprio sul controllo piu' importante del round.
+  $suffCsv = ""
+  if ($Modello -ne 4) { $suffCsv = "_ohlc" }
+  $giaFatte = 0
+  foreach ($w in @("IS","OOS")) {
+    $nCsv = $EA + "_" + $c.Sym + "_" + $w + $suffCsv + "_" + $c.Tag + ".csv"
+    if (Test-Path -LiteralPath (Join-Path $Cartella ("risultati_prove\" + $EA + "\" + $nCsv))) { $giaFatte++ }
+  }
+  $saltata = (($giaFatte -eq 2) -and (-not $Rifai) -and (-not $SoloControllo))
+  if ($saltata) {
+    Write-Host "      CELLA GIA' FATTA: il driver la salta e NON riscrivera' i per-trade." -ForegroundColor DarkGray
+    Write-Host "      NON e' un ripescaggio: i suoi numeri vengono da un giro PRECEDENTE." -ForegroundColor DarkGray
   }
 
   $arg = @("-ExecutionPolicy","Bypass","-File",$wf,$EA,
@@ -516,9 +554,13 @@ foreach ($c in $celle) {
       }
   }
   if ($ptPresi -eq 0) {
-    Write-Host ("    NESSUN per-trade fresco per " + $c.K + ": la cella potrebbe essere stata") -ForegroundColor Yellow
-    Write-Host "    RIPESCATA dalla cache invece che eseguita (punto 38). Va detto nel referto." -ForegroundColor Yellow
-    $ripescate += $c.K
+    if ($saltata) {
+      $saltate += $c.K
+    } else {
+      Write-Host ("    NESSUN per-trade fresco per " + $c.K + ": la cella potrebbe essere stata") -ForegroundColor Yellow
+      Write-Host "    RIPESCATA dalla cache invece che eseguita (punto 38). Va detto nel referto." -ForegroundColor Yellow
+      $ripescate += $c.K
+    }
   }
 
   # IL CONGELAMENTO DEL BRANCH, MISURATO: walkforward_generico.ps1 si e'
@@ -660,7 +702,14 @@ $rr += ("file prova: " + $celle.Count + "   celle: " + ($celle.Count * 2) + "   
 $rr += ("log degli agent raccolti: " + $nLog + "   (zero e' l'esito ATTESO: vedi sotto)")
 if ($ripescate.Count -gt 0) {
   $rr += ("CELLE SENZA PER-TRADE FRESCO (sospette di RIPESCAGGIO dalla cache): " + ($ripescate -join " "))
-} else { $rr += "PER-TRADE FRESCHI: tutte le celle hanno scritto la loro serie (nessun ripescaggio)." }
+} else { $rr += "PER-TRADE FRESCHI: tutte le celle GIRATE hanno scritto la loro serie (nessun ripescaggio)." }
+if ($saltate.Count -gt 0) {
+  $rr += ("CELLE SALTATE (CSV gia' presente, NON rigirate in questo giro): " + ($saltate -join " "))
+  $rr += "  E' la RIPRESA, ed e' legittima: i loro numeri vengono da una corsa"
+  $rr += "  precedente. Ma la cache del tester era stata svuotata ALLORA, non adesso:"
+  $rr += "  se una di queste e' una cella di CANARINO, il suo controllo vale per QUEL"
+  $rr += "  giro. Per rifarla davvero: -Solo <cella> -Rifai."
+}
 $rr += ""
 $rr += "FILE ATTESI (" + $attesi.Count + " CSV, ognuno con 2 righe = le 2 celle di deviazione):"
 foreach ($a in $attesi) { $rr += ("  " + $a) }
@@ -741,6 +790,9 @@ try {
 }
 
 Write-Host ""
+if ($saltate.Count -gt 0) {
+  Write-Host ("    celle SALTATE (gia' fatte, numeri di un giro precedente): " + ($saltate -join " ")) -ForegroundColor DarkGray
+}
 if ($ripescate.Count -gt 0) {
   Write-Host ("    ATTENZIONE: celle senza per-trade fresco: " + ($ripescate -join " ")) -ForegroundColor Yellow
   Write-Host "    Un pass ripescato dalla cache non scrive i per-trade: quelle celle" -ForegroundColor Yellow
