@@ -51,3 +51,41 @@ Verifica tentata sul suo `BULGE_MULTI_SIGNAL_CLAUDIO_3.xlsx`: il foglio **non co
 la colonna dei commenti** (zero stringhe nel worksheet), quindi da li' non si decide.
 Si decide con **una passata singola** che stampa `[BULGE-CONTA] BLU=x VIOLA=y ARANCIO=z`
 (contatore gia' scritto nell'EA nuovo). Se BLU=0, il round misura solo il VIOLA.
+
+---
+
+# PARTE 2 — LA GESTIONE: Manager MQ4 di Claudio vs BULGE_MASTER
+**21/08/2026** — sorgente integrale salvato oggi in
+`docs/breaking_band/EA_BOLL_BULGE_Manager_PRO_MULTI_TF.mq4` (anche di questo
+il 12/08 avevo tenuto solo le note: regola #1 violata, ora sanata).
+
+Il Manager NON apre ordini: e' la GESTIONE che Claudio usava a mano su MT4.
+Confronto voce per voce con quella dell'EA MT5.
+
+| voce            | Manager MQ4 (a mano)              | BULGE_MASTER.mq5 (default)          | esito |
+|-----------------|-----------------------------------|-------------------------------------|-------|
+| SL              | ATR x 3 se manca                  | ATR x 3 all'apertura (`SL_ATR_Mult=3`) | = |
+| TP              | mediana BB, **barra 0**           | mediana BB, **barra 1** (`GetBB(...,1)`) | ~ EA piu' conservativo (barra chiusa, non ridipinge) |
+| TP dinamico     | riaggiornato a ogni barra nuova   | `UpdateAllTP()` a ogni barra nuova (riga 312) | = |
+| soglia min TP   | 10 punti                          | 5 punti                             | ~ |
+| **Break-even**  | **SI, a 1R** (+2 punti offset)    | **dentro `DoPartialCloseIfNeeded()`, gated da `Enable_Partial_Close=false`** -> **SPENTO** | **DIVERSO** |
+| **Trailing R**  | **SI** (start 1.5R, passo 0.25R)  | **NON ESISTE** (0 occorrenze di "trail" nel file) | **DIVERSO** |
+| kill switch     | assente                           | SI (4 SL/giorno, 3 consecutivi, -2%/giorno) | EA in piu' |
+
+## COSA SIGNIFICA (e perche' conta per R92)
+Quando Claudio operava a mano, i trade erano protetti da **break-even a 1R** e
+**trailing a gradini di R**. Il BULGE_MASTER, coi default con cui sta per essere
+misurato, gira **nudo**: SL 3xATR fisso + TP sulla mediana mobile, nient'altro.
+Sono due gestioni diverse sullo stesso motore.
+=> **[DA DECIDERE di Claudio]** il round R92 misura:
+   (a) la gestione NUDA dell'EA (default attuali), oppure
+   (b) la gestione del Manager (BE 1R + trailing), che va prima SCRITTA in MT5?
+La (b) NON esiste ancora nel codice MT5: il trailing va portato. Non e' una
+modifica al segnale (che resta intoccato), e' un'aggiunta alla gestione.
+
+## Difetto ereditato, segnalato e NON corretto
+`InitialRiskPoints()` del Manager calcola il rischio sullo **SL CORRENTE**:
+dopo il break-even il denominatore va a ~0 e i multipli R esplodono, quindi il
+trailing scatta a caso. Se si porta la gestione (b) in MT5, va memorizzato lo
+**SL INIZIALE per ticket**, come fanno gli ABTG. Questo difetto NON e' nel
+BULGE_MASTER (che il trailing non ce l'ha proprio).
