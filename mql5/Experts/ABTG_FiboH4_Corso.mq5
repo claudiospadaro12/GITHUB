@@ -40,7 +40,7 @@
 //  una correzione. Puo' benissimo perdere anche lei.
 //
 //  ---------------------------------------------------------------------
-//  🔴 LE 4 RICHIESTE A CLAUDIO CHE RESTANO APERTE
+//  >>> LE 4 RICHIESTE A CLAUDIO CHE RESTANO APERTE
 //  (finche' non arrivano, i numeri accanto restano ASSUNZIONI NOSTRE)
 //  ---------------------------------------------------------------------
 //  R1. LE SLIDE dei moduli FiboH4 e Media200. Citate 10 volte nelle

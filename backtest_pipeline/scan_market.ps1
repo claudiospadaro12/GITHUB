@@ -180,8 +180,19 @@ InpTP_RR=2.0||2.0||1.5||3.0||Y
 "@
 } elseif($EA -eq "ABTG_FiboH4_Multi"){
   # FiboH4: laddering su ritracciamenti Fibonacci. TF H4. Ottimizza direzione + 1o target (R).
+  #
+  # 21/08/2026 -- CORRETTO UN DIFETTO CHE HA GIA' PRODOTTO UN VERDETTO FALSO.
+  # Questo EA e' MULTI-SIMBOLO: opera su InpSymbols, NON sul simbolo del
+  # grafico. Fino a oggi questo blocco NON pinnava InpSymbols, quindi tutte
+  # le passate giravano sul default "GBPUSD;USDJPY;EURUSD" qualunque fosse
+  # il simbolo del titolo. Nello scan del 16/08 (risultati_prove\ABTG_FiboH4_Multi)
+  # sette file su otto danno lo STESSO numero (IS -384,56..-394,13 /
+  # OOS +116,17..+118,68): erano OTTO COPIE DELLO STESSO BASKET, non otto
+  # mercati. Il "0/8 promossi" della fascia B nasce da li'.
+  # Adesso c'e' il segnaposto __SYM__, come nel blocco del BULGE.
   $Period="H4"
   $Inputs=@"
+InpSymbols=__SYM__
 InpTF=16388||16388||0||16388||N
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpAllowLong=0||0||1||1||Y
