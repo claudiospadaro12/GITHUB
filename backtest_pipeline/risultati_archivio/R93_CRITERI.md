@@ -629,23 +629,37 @@ leggono**.
 
 ## 14. 🚀 LA RIGA DI LANCIO — cinque blocchi, in quest'ordine
 
-**Pinnata a `d78af56`.** Ogni blocco e' **UN SOLO comando**: si incolla
-**intero, graffe comprese**. Tre righe una sotto l'altra dentro un blocco non
-sono un programma — sono tre comandi indipendenti, e un `throw` alla riga 1
-**non ferma la riga 2** (difetto n.21 della checklist).
+Ogni blocco e' **UN SOLO comando**: si incolla **intero, graffe comprese**.
+Tre righe una sotto l'altra dentro un blocco non sono un programma — sono tre
+comandi indipendenti, e un `throw` alla riga 1 **non ferma la riga 2**
+(difetto n.21 della checklist).
+
+> ### 🧊 QUESTE RIGHE USANO `lavoro`, NON UN SHA — e il motivo e' misurato
+> La regola di casa dice *"dopo un push fresco la riga punta all'HASH"*. Qui
+> **un pin darebbe una falsa sicurezza sul pezzo che conta di piu'**:
+> `walkforward_generico.ps1` ha `$EABranch="lavoro"` **scritto fisso** (riga 78)
+> e **riscarica i due `.mq5` da `lavoro` HEAD ignorando qualunque `-Rif`**; se
+> il download fallisce **ripiega in silenzio sulla copia locale**
+> (difetto n.24). Un SHA in testa alla riga pinnerebbe gli script e **non**
+> il motore.
+> Quindi, invece del pin, **due cose che valgono davvero**:
+> 1. 🧊 **BRANCH CONGELATO**: **nessun push su `lavoro` mentre R93 gira.**
+>    Un push a meta' corsa cambierebbe l'EA **fra una cella e l'altra**, e il
+>    confronto fra celle non misurerebbe piu' niente.
+> 2. 🏷️ **MARCATORE DI VERSIONE** in ogni blocco (`R93-LANCIO-v1`, `R93 -- FIBO
+>    H4 ALL'IMBUTO`): copre insieme la **cache di raw** (che tiene ~5 minuti) e
+>    il download andato a male, che e' quello che il pin doveva coprire.
+> 3. 🔧 Il fix vero — inoltrare `-Rif` e togliere il ripiego silenzioso da
+>    `walkforward_generico.ps1` — resta **in coda come lavoro a se'**, e sta
+>    scritto qui perche' non si perda.
 
 > ⚠️ **PC DI BACKTEST, MT5 CHIUSO. Mai sul VPS.**
 > ⚠️ **UNA MACCHINA, UN LAVORO: R92 dev'essere FINITO.**
-> ⚠️ **CONGELAMENTO DEL BRANCH:** `walkforward_generico.ps1` riscarica l'EA da
-> `lavoro` **HEAD** ignorando il pin (difetto n.24). Lo script se ne accorge e
-> **si ferma** se HEAD e il pin divergono. Quindi: **nessun push su `lavoro`
-> mentre R93 gira.** Se qualcuno pusha, o si riallinea il pin, o si rilancia
-> con `-Rif lavoro` **dichiarandolo**.
 
 ### 🅾️ BLOCCO 1 — PASSO 0: le barre M1 (MT5 chiuso, 10-40 minuti)
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\scarica_storico.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d78af56/backtest_pipeline/scarica_storico.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'scarica_storico.ps1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO' }; Remove-Item "$([Environment]::GetFolderPath('Desktop'))\storico_bcm\ABTG_StoricoScaricato.csv" -Force -EA SilentlyContinue; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Auto -SenzaTick -Da 2021.01.01 -Simboli "GBPUSD,USDJPY,EURUSD" -TimeoutMin 240; if($LASTEXITCODE -ne 0){ throw "PASSO 0 FALLITO ($LASTEXITCODE)" }; $c="$([Environment]::GetFolderPath('Desktop'))\storico_bcm\ABTG_StoricoScaricato.csv"; if(-not (Test-Path $c)){ throw 'IL REFERTO NON E STATO PRODOTTO' }; Write-Host "`n=== RIGHE M1 (e' quello che il modello 1 usa davvero) ==="; Import-Csv $c | Where-Object { $_.Timeframe -eq 'M1' } | Format-Table Simbolo,Timeframe,Barre,PrimaDataLocale,PrimaDataServer,Verdetto -AutoSize }
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\scarica_storico.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/scarica_storico.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern '[switch] $SenzaTick' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: manca il parametro -SenzaTick' }; Remove-Item "$([Environment]::GetFolderPath('Desktop'))\storico_bcm\ABTG_StoricoScaricato.csv" -Force -EA SilentlyContinue; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Auto -SenzaTick -Da 2021.01.01 -Simboli "GBPUSD,USDJPY,EURUSD" -TimeoutMin 240; if($LASTEXITCODE -ne 0){ throw "PASSO 0 FALLITO ($LASTEXITCODE)" }; $c="$([Environment]::GetFolderPath('Desktop'))\storico_bcm\ABTG_StoricoScaricato.csv"; if(-not (Test-Path $c)){ throw 'IL REFERTO NON E STATO PRODOTTO' }; Write-Host "`n=== RIGHE M1 (e' quello che il modello 1 usa davvero) ==="; Import-Csv $c | Where-Object { $_.Timeframe -eq 'M1' } | Format-Table Simbolo,Timeframe,Barre,PrimaDataLocale,PrimaDataServer,Verdetto -AutoSize }
 ```
 
 **Cosa deve uscire:** tre righe `M1`, una per cross.
@@ -655,14 +669,22 @@ sono un programma — sono tre comandi indipendenti, e un `throw` alla riga 1
 - `Verdetto` diverso da `COMPLETO` → il broker ce l'ha ma il **disco** no:
   si rilancia il blocco finche' dice COMPLETO, altrimenti la prima passata
   esce con pochissime operazioni e nessuno sa perche'.
-- **Niente `-SenzaTick`? Non serve:** R93 e' a modello 1. Ed e' anche cio' che
-  evita il difetto n.30 (il guardiano di progresso che ammazza MT5 durante lo
-  scaricamento dei tick, quando il CSV per costruzione non cresce).
+- **`-SenzaTick` non e' un risparmio, e' una protezione.** R93 gira a modello 1
+  e i tick non gli servono; **e togliendo la fase tick si toglie di mezzo il
+  difetto n.30**, cioe' il guardiano di progresso di `scarica_storico.ps1` che
+  su una corsa **sana** ammazza MT5 a meta' scaricamento dei tick, perche' in
+  quella fase il CSV per costruzione **non cresce di un byte**.
+  Il marcatore del blocco cerca proprio `[switch] $SenzaTick`: se lo script
+  scaricato non ha quel parametro, la riga muore prima di fare danni.
+- **`-TimeoutMin 240`, non il default.** Il default e' **90 minuti** e allo
+  scadere **non e' un errore**: lo script ammazza MT5, stampa quello che c'e' e
+  **finisce con codice 0** (difetto n.19). La stima qui e' 10-40 minuti, ma il
+  margine si scrive nella riga, non si spera.
 
 ### 1️⃣ BLOCCO 2 — installare i due EA e il Guardian, POI COMPILARE A MANO
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d78af56/backtest_pipeline/lancia_r93.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO: la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif d78af56 -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK. Adesso i tre gesti a mano del blocco 3. ===" -ForegroundColor Green }
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/lancia_r93.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO: la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK. Adesso i tre gesti a mano del blocco 3. ===" -ForegroundColor Green }
 ```
 
 Il giro a vuoto **non apre MT5**: scarica tutto, installa
@@ -708,7 +730,7 @@ e stampa le 14 anteprime `.ini`. **Si legge quello che stampa**, in particolare:
 ### 3️⃣ BLOCCO 4 — IL ROUND (68 passate)
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia il BLOCCO 2 per primo' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif d78af56; $rc=$LASTEXITCODE; $z="$([Environment]::GetFolderPath('Desktop'))\R93_FIBOH4.zip"; if(-not (Test-Path $z)){ throw 'LO ZIP NON C E: la corsa non e arrivata alla raccolta' }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ("ZIP STANTIO: ha " + [int]$eta + " minuti, non e di adesso") }; if($rc -ne 0){ Write-Host "ESITO PARZIALE: mandalo lo stesso, ma di' QUALE pezzo manca (lo scrive REFERTO_R93.txt)" -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia il BLOCCO 2 per primo' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif lavoro; $rc=$LASTEXITCODE; $z="$([Environment]::GetFolderPath('Desktop'))\R93_FIBOH4.zip"; if(-not (Test-Path $z)){ throw 'LO ZIP NON C E: la corsa non e arrivata alla raccolta' }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ("ZIP STANTIO: ha " + [int]$eta + " minuti, non e di adesso") }; if($rc -ne 0){ Write-Host "ESITO PARZIALE: mandalo lo stesso, ma di' QUALE pezzo manca (lo scrive REFERTO_R93.txt)" -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
 ```
 
 **Durata stimata:** 68 passate OHLC M1 su ~5 anni di H4. **[STIMA, non
