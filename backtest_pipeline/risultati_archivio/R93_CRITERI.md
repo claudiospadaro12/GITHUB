@@ -441,9 +441,20 @@ questo, e **non si improvvisa a corsa avviata**:
 ## 9. 🛡️ IL RISCHIO, DETTO PRIMA CHE ARRIVINO I NUMERI
 
 1. **Gamba A: `InpRiskPercent = 1,0%`** (il valore gia' nel file prova della
-   fascia B). **Non si tocca**, altrimenti i numeri di R93 non si confrontano
-   col 0/8 di allora. Col tetto `InpMaxTotalPositions = 1` il rischio aperto
-   massimo e' **1,0%**, **sotto il cap C1 di 3,25%**.
+   fascia B). **Non si tocca**: e' il valore comune di casa che rende le celle
+   confrontabili fra loro.
+   ⚠️ **Ma il TETTO cambia, e va detto: `InpMaxTotalPositions` passa da 1 a 3.**
+   Nella fascia B era 1, e con 1 i tre cross **si tolgono il posto a vicenda**:
+   l'ordine della lista deciderebbe chi opera, e il canarino del pin
+   (par. 11) sarebbe inutile perche' cambierebbe anche i risultati. Con 3 i
+   cross sono **indipendenti**, che e' la condizione giusta per misurare un
+   filtro.
+   👉 **Conseguenza sul rischio, dichiarata: 3 x 1,00% = 3,00% di rischio
+   aperto massimo. Sotto il cap C1 di 3,25% firmato il 18/08.**
+   👉 **Conseguenza sui numeri, dichiarata: la baseline `R93a` NON e'
+   confrontabile in denaro con le righe della fascia B.** Non e' un problema:
+   quelle righe erano gia' otto copie della stessa passata (par. 2.1), e R93
+   porta il suo metro.
 2. **Gamba B: `InpRiskPercent = 0,65%`** — lo **0,65% DI CASA** (firma del
    18/08), **NON l'1% preso in prestito dal modulo Breakout**: il corso la
    percentuale **non la pronuncia mai in 3 lezioni**. Con 2 ordini la frazione
@@ -499,6 +510,38 @@ Tutto il resto e' pinnato in forma completa `v||v||0||v||N`.
 40/60, **Modello 1 (OHLC M1)**, deposito 10.000, `InpSymbols` pinnato **NON
 vuoto**.
 
+### ✅ I 14 file prova sono gia' stati VERIFICATI A MACCHINA (non a memoria)
+
+```
+python3 backtest_pipeline/controlla_prova.py "backtest_pipeline/prove/R93*.txt"
+```
+Esito del 21/08/2026: **14 file, 34 celle, 68 passate, 0 problemi.**
+Lo strumento controlla quello che controlla il driver (nome sconosciuto,
+parametro doppio, sweep degenere) **piu' una cosa che il driver NON controlla**:
+il **pin di stringa vuoto**, cioe' esattamente il difetto che ha prodotto il
+"0/8" (par. 2.1). Passato sul file prova della fascia B, lo trova ancora oggi:
+
+```
+ABTG_FiboH4_Multi.txt   !! 3 PROBLEMI
+   - PIN VUOTO (MT5 lo IGNORA e usa il default compilato): InpSymbols=
+   - 2 assi Y: un file prova misura UNA variabile alla volta
+   - manca @DAQUANDO: la finestra va dichiarata nel file, non ricordata
+```
+
+### 🐤 IL CANARINO DEL PIN, dentro i dati e non nei log
+
+`InpSymbols` e' pinnato a **`USDJPY;EURUSD;GBPUSD`**: **stesso basket, ordine
+DIVERSO dal default compilato** (`GBPUSD;USDJPY;EURUSD`). Serve a distinguere
+"pin arrivato" da "pin ignorato", che col default identico **non si
+distinguerebbero**.
+- colonna `InpSymbols` del CSV = `USDJPY;EURUSD;GBPUSD` → ✅ il pin e' arrivato;
+- colonna `InpSymbols` del CSV = `GBPUSD;USDJPY;EURUSD` → 🔴 **il pin NON e'
+  arrivato** (il `;` non sopravvive all'`.ini`): **i numeri della gamba A non si
+  leggono**, e si ripiega su un simbolo per passata rifacendo l'aritmetica del
+  campione (par. 4.2).
+Con `InpMaxTotalPositions = 3` l'ordine della lista **non cambia i risultati**,
+quindi il canarino e' gratis.
+
 ### 🅰️ GAMBA A — `ABTG_FiboH4_Multi` v1.10 · basket `GBPUSD;USDJPY;EURUSD`
 
 | file prova | l'asse (Y) | celle | cosa risponde |
@@ -516,10 +559,13 @@ vuoto**.
 
 | file prova | l'asse (Y) | celle | cosa risponde |
 |---|---|---:|---|
-| `R93g_stop.txt` | `InpSLMode` (4 metodi) | 4 | **il buco che decide il P&L**: il corso ne da' 7 senza sceglierne uno |
-| `R93h_trend.txt` | `InpUseTrendFilter` 0/1 | 2 | quanto pesa la **precondizione "fine di un trend"** |
-| `R93i_ancoraggio.txt` | `InpAncoraggio` 0/1 | 2 | l'ambiguita' del par. 4.4 (*"il minimo successivo"*) |
-| `R93j_zona.txt` | `InpZona` (3) | 3 | solo EZ2 (il corso) vs solo EZ1 vs fallback |
+| `R93g_stop_<SYM>.txt` | `InpSLMode` (4 metodi) | 4 | **il buco che decide il P&L**: il corso ne da' 7 senza sceglierne uno |
+| `R93h_trend_<SYM>.txt` | `InpUseTrendFilter` 0/1 | 2 | quanto pesa la **precondizione "fine di un trend"** |
+| `R93i_ancoraggio_<SYM>.txt` | `InpAncoraggio` 0/1 | 2 | l'ambiguita' del par. 4.4 (*"il minimo successivo"*) |
+| `R93j_zona_<SYM>.txt` | `InpZona` (3) | 3 | solo EZ2 (il corso) vs solo EZ1 vs fallback |
+
+(un file per simbolo: `_GBPUSD` e `_USDJPY`. Il simbolo sta nel `@SIMBOLO` del
+file, non in un parametro della riga: cosi' non si puo' sbagliare accoppiamento.)
 
 **11 celle x 2 simboli x 2 finestre = 44 passate.**
 
