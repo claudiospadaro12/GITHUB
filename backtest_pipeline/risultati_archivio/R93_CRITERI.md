@@ -624,3 +624,111 @@ E le tre domande su cui serve una riga di risposta, anche solo un "ok":
 
 Finche' queste righe sono vuote, R93 **non si lancia** e i suoi numeri **non si
 leggono**.
+
+---
+
+## 14. 🚀 LA RIGA DI LANCIO — cinque blocchi, in quest'ordine
+
+**Pinnata a `d78af56`.** Ogni blocco e' **UN SOLO comando**: si incolla
+**intero, graffe comprese**. Tre righe una sotto l'altra dentro un blocco non
+sono un programma — sono tre comandi indipendenti, e un `throw` alla riga 1
+**non ferma la riga 2** (difetto n.21 della checklist).
+
+> ⚠️ **PC DI BACKTEST, MT5 CHIUSO. Mai sul VPS.**
+> ⚠️ **UNA MACCHINA, UN LAVORO: R92 dev'essere FINITO.**
+> ⚠️ **CONGELAMENTO DEL BRANCH:** `walkforward_generico.ps1` riscarica l'EA da
+> `lavoro` **HEAD** ignorando il pin (difetto n.24). Lo script se ne accorge e
+> **si ferma** se HEAD e il pin divergono. Quindi: **nessun push su `lavoro`
+> mentre R93 gira.** Se qualcuno pusha, o si riallinea il pin, o si rilancia
+> con `-Rif lavoro` **dichiarandolo**.
+
+### 🅾️ BLOCCO 1 — PASSO 0: le barre M1 (MT5 chiuso, 10-40 minuti)
+
+```powershell
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\scarica_storico.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d78af56/backtest_pipeline/scarica_storico.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'scarica_storico.ps1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO' }; Remove-Item "$([Environment]::GetFolderPath('Desktop'))\storico_bcm\ABTG_StoricoScaricato.csv" -Force -EA SilentlyContinue; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Auto -SenzaTick -Da 2021.01.01 -Simboli "GBPUSD,USDJPY,EURUSD" -TimeoutMin 240; if($LASTEXITCODE -ne 0){ throw "PASSO 0 FALLITO ($LASTEXITCODE)" }; $c="$([Environment]::GetFolderPath('Desktop'))\storico_bcm\ABTG_StoricoScaricato.csv"; if(-not (Test-Path $c)){ throw 'IL REFERTO NON E STATO PRODOTTO' }; Write-Host "`n=== RIGHE M1 (e' quello che il modello 1 usa davvero) ==="; Import-Csv $c | Where-Object { $_.Timeframe -eq 'M1' } | Format-Table Simbolo,Timeframe,Barre,PrimaDataLocale,PrimaDataServer,Verdetto -AutoSize }
+```
+
+**Cosa deve uscire:** tre righe `M1`, una per cross.
+- `PrimaDataServer` **<= 2021.01.04** su tutte e tre → si prosegue.
+- Se una parte dopo → **la finestra si sposta**, e si rifa' l'aritmetica del
+  campione (par. 4.2). **Non si interpreta.**
+- `Verdetto` diverso da `COMPLETO` → il broker ce l'ha ma il **disco** no:
+  si rilancia il blocco finche' dice COMPLETO, altrimenti la prima passata
+  esce con pochissime operazioni e nessuno sa perche'.
+- **Niente `-SenzaTick`? Non serve:** R93 e' a modello 1. Ed e' anche cio' che
+  evita il difetto n.30 (il guardiano di progresso che ammazza MT5 durante lo
+  scaricamento dei tick, quando il CSV per costruzione non cresce).
+
+### 1️⃣ BLOCCO 2 — installare i due EA e il Guardian, POI COMPILARE A MANO
+
+```powershell
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/d78af56/backtest_pipeline/lancia_r93.ps1" -OutFile $p -EA Stop; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO: la cache di raw tiene ~5 minuti, riprova fra poco' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif d78af56 -SoloControllo; if($LASTEXITCODE -ne 0){ throw "GIRO A VUOTO FALLITO ($LASTEXITCODE): NON si lancia il round" }; Write-Host "`n=== GIRO A VUOTO OK. Adesso i tre gesti a mano del blocco 3. ===" -ForegroundColor Green }
+```
+
+Il giro a vuoto **non apre MT5**: scarica tutto, installa
+`ABTG_PausaGuardian.mqh`, mette il calendario in `Common\Files`, fa il PASSO 0
+e stampa le 14 anteprime `.ini`. **Si legge quello che stampa**, in particolare:
+- `InpSymbols` = **`USDJPY;EURUSD;GBPUSD`** (ordine diverso dal default: e' il
+  canarino del pin, par. 11). Se dice `GBPUSD;USDJPY;EURUSD` **ci si ferma li'**.
+- `FromDate` / `ToDate` dentro `2021.01.04 → 2025.12.19`.
+- le celle news con `InpNewsFile=abtg_news_2021_2025_UTC.csv` e `InpNewsCommon=1`.
+
+### 2️⃣ BLOCCO 3 — I TRE GESTI A MANO (non sono automatizzabili, e vanno fatti)
+
+1. **MetaEditor → F7 su `ABTG_FiboH4_Corso.mq5`** e su `ABTG_FiboH4_Multi.mq5`.
+   **0 errori, 0 warning.** `ABTG_FiboH4_Corso.mq5` **non e' MAI stato
+   compilato** e chi lo ha scritto **non ha MetaEditor**: qualche errore di
+   battitura e' plausibile, e va corretto prima, non a corsa avviata.
+   ⚠️ Se MetaEditor era gia' aperto, **chiudilo e riaprilo**: il suo Navigatore
+   mostra l'albero fotografato all'apertura e i file nuovi non ci sono
+   (difetto n.27-bis).
+2. **Strategy Tester → UN TEST SINGOLO** di `ABTG_FiboH4_Corso` su GBPUSD H4,
+   un mese qualsiasi, `InpAutoTest = true`. **F7 compila e basta: l'autotest si
+   legge ESEGUENDO** (difetto n.20). Nella scheda *Esperti* devono uscire
+   `0 casi falliti` e questa riga:
+   ```
+   [FIBOCORSO][AUTOTEST] geometria su pattern 100-110 (range 10): target100=100.00 | EZ1 [98.20 - 99.20] | EZ2 [88.20 - 89.20] | banda=1.00
+   ```
+   🚫 **MAI attaccare l'EA a un grafico** per leggere quelle righe: sul PC di
+   backtest il terminale e' collegato al **conto vivo**, e il 14/08 e' partito
+   un ordine vero proprio cosi'.
+3. **Un test singolo di `ABTG_FiboH4_Multi` con `InpUseNewsFilter=true`** e
+   `InpNewsFile=abtg_news_2021_2025_UTC.csv`, su un mese del 2022. Nella scheda
+   *Esperti* deve uscire:
+   ```
+   [FIBOH4][NEWS] letto da Common\Files | eventi utili 2971 (impatto >= 3) | ...
+   [FIBOH4][NEWS] primo evento 2021.01.04 ... | ultimo evento 2025.12.19 ...
+   ```
+   🔴 Se dice **`FILTRO ACCESO MA CIECO`**, oppure `eventi utili 0`, **si passa
+   al PIANO B (par. 8) e non si lancia il round**: sarebbe una notte di
+   macchina per misurare un filtro spento.
+   ⚠️ **In OTTIMIZZAZIONE MT5 non stampa le `Print` degli agenti**: questa prova
+   si fa in **test singolo**, non nella griglia.
+
+### 3️⃣ BLOCCO 4 — IL ROUND (68 passate)
+
+```powershell
+& { $ErrorActionPreference='Stop'; $p="$env:USERPROFILE\lancia_r93.ps1"; if(-not (Test-Path $p)){ throw 'lancia il BLOCCO 2 per primo' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'R93-LANCIO-v1' -Quiet)){ throw 'SCRIPT VECCHIO' }; $global:LASTEXITCODE=0; & powershell -ExecutionPolicy Bypass -File $p -Rif d78af56; $rc=$LASTEXITCODE; $z="$([Environment]::GetFolderPath('Desktop'))\R93_FIBOH4.zip"; if(-not (Test-Path $z)){ throw 'LO ZIP NON C E: la corsa non e arrivata alla raccolta' }; $eta=(New-TimeSpan -Start (Get-Item $z).LastWriteTime -End (Get-Date)).TotalMinutes; if($eta -gt 15){ throw ("ZIP STANTIO: ha " + [int]$eta + " minuti, non e di adesso") }; if($rc -ne 0){ Write-Host "ESITO PARZIALE: mandalo lo stesso, ma di' QUALE pezzo manca (lo scrive REFERTO_R93.txt)" -ForegroundColor Yellow }; Write-Host ("`nMANDA IN CHAT: " + $z) -ForegroundColor Cyan }
+```
+
+**Durata stimata:** 68 passate OHLC M1 su ~5 anni di H4. **[STIMA, non
+misurata]** 1-3 minuti a passata → **1-3 ore**. Si puo' spezzare:
+`-Gamba A` (24 passate) e `-Gamba B` (44 passate) in due sere.
+Il `throw` sullo zip guarda **l'artefatto e la sua eta'**, non solo il codice
+d'uscita (difetto n.26-bis): un esito parziale **e' gia' una risposta**, e lo
+zip va mandato lo stesso.
+
+### 4️⃣ BLOCCO 5 — cosa deve esserci nello zip, per nome
+
+`Desktop\R93_FIBOH4.zip` deve contenere **69 file**:
+- **68 CSV** `ABTG_FiboH4_<Multi|Corso>_<SYM>_<IS|OOS>_ohlc_<tag>.csv`
+  (tag: `r93a`..`r93f` per la gamba A, `r93g`..`r93j` per la B — **28 file per
+  la gamba A**, 8 nomi... no: **12 CSV gamba A** (6 file x IS/OOS) e **16 CSV
+  gamba B** (8 file x IS/OOS) = **28 CSV**, ognuno con dentro le sue celle);
+- le serie **per-trade** `pertrade_*.csv` da `Common\Files`;
+- **`REFERTO_R93.txt`** — e la sua riga `data:` **deve essere di ADESSO**;
+- **`R93_CRITERI.md`**, cosi' i numeri viaggiano coi criteri che li giudicano.
+
+Se manca qualcosa, `REFERTO_R93.txt` lo elenca sotto **`MANCANTI`**: si legge
+quello **prima** di aprire i CSV.
+
