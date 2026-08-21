@@ -1993,3 +1993,56 @@ stampa comunque il percorso dello zip inesistente.
 > spostare. **Le funzioni di servizio stanno in cima, sopra il `try`, sempre** —
 > accanto a `Dico`, `Titolo` e `Scarica`, dove le altre stavano gia' e dove
 > questa non e' stata messa solo perche' e' nata piu' tardi.
+
+---
+
+## 49. 🪞 IL DRIVER SALTA PER **FINESTRA**, NON PER CELLA: ogni spia costruita sulla CELLA deve dichiarare anche lo stato **A META'**
+
+_Difetto vero, trovato alla **terza** verifica della riga R94 — e nato **dentro
+la correzione** del punto 44, fatta il giorno prima. Il conteggio
+`$giaFatte` era misurato **per finestra** (IS, OOS) e poi **collassato in un
+booleano** (`-eq 2`): con `$giaFatte -eq 1` la cella non finiva ne' fra le
+`SALTATE` ne' fra le sospette, e il referto scriveva `PER-TRADE FRESCHI: tutte
+le celle GIRATE hanno scritto la loro serie` **mentre una delle due gambe non
+era stata rigirata affatto**._
+
+`walkforward_generico.ps1` salta **dentro** il ciclo delle finestre
+(righe 612-616):
+
+```powershell
+foreach($w in $WF){
+  $tag="$($Expert)_$($Simbolo)_$($w.Tag)$Suffisso"
+  $done=Join-Path $Results "$tag.csv"
+  if((Test-Path $done) -and -not $Rifai){ ... continue }
+```
+
+Quindi **l'unita' di ripresa e' la FINESTRA**, mentre l'unita' di cui parlano
+il file prova, la riga di lancio, il referto e le soglie e' la **CELLA**.
+Interrompere la corsa durante l'OOS lascia l'**IS** sul disco: al rilancio la
+cella ha **una gamba di ieri e una di oggi**, e tutto cio' che il round aveva
+preparato "per cella" (svuotamento della cache, spia dei per-trade, frase sul
+canarino) **vale per meta'**.
+
+> 🪞 **E il difetto e' l'immagine speculare di quello che correggeva:** il punto
+> 44 nasceva da una spia che **gridava dove doveva tacere**; la sua correzione ha
+> prodotto una spia che **tace dove deve dichiarare**. Quando si aggiunge un
+> ramo a una spia, i rami vanno **enumerati tutti e tre** — *ok*, *allarme*,
+> **e lo stato intermedio** — non due.
+
+**Regola.** In un round dove la ripresa e' consentita:
+1. **non collassare** un conteggio per finestra in un booleano: `0` / `parziale`
+   / `completo` sono **tre** stati, e il secondo va **dichiarato**, non ignorato;
+2. la spia stampa e scrive nel referto una **voce propria** per lo stato
+   intermedio (`CELLE A META'`), che dica **da quale giro viene ogni gamba**;
+3. le frasi di garanzia si scrivono **per differenza**, non per affermazione:
+   ❌ *"le tre celle di canarino sono state rigirate a cache vuota"*
+   ✅ *"le celle di canarino **non elencate come SALTATE o A META'** sono state
+   rigirate adesso, a cache vuota"*;
+4. e la riga offre la **riparazione pronta** (`-Solo <cella> -Rifai`), dicendo
+   cosa cambia nella raccolta quando la si usa.
+
+> 🧪 **Come si prova, e costa un minuto:** si costruisce un albero finto con
+> **0, 1 e 2** CSV della stessa cella e si esegue la logica dei rami. Con
+> `-Rifai` nessuno dei due stati deve accendersi (si rifa' tutto). Se la
+> matrice non e' stata **eseguita**, la spia non e' stata verificata: e' stata
+> letta.

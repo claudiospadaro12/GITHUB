@@ -514,3 +514,123 @@ versi: zip vecchio → muore; zip scritto dopo `$t0` → passa.
 
 ⚠️ **Quello che resta non verificato:** la riga **non e' mai stata eseguita su
 Windows**. Il parser conferma la sintassi, non il comportamento.
+
+---
+
+# 🧪 QUARTA VERIFICA — 21/08/2026: terzo FAIL, **5 difetti di cui 3 nati DENTRO una correzione**
+
+_Numeri ancora **mai visti**. Il disegno **non e' mai cambiato** in nessuno dei
+tre giri: 6 file prova, 12 celle, 24 passate, soglie e canarino intatti._
+
+Il verificatore ha di nuovo ricontrollato tutto con misure vere — firma e soglie
+**byte-identiche** (md5 `25d8e34b789b960d21ba297f27eb4eff` sul blocco delle
+soglie), i **sei numeri del canarino riestratti dai CSV veri di R91** e
+coincidenti tutti e sei, la finestra R34 ricalcolata (642 giorni, stacco
+**2025.06.09**), `$giaFatte` verificato **efficace** (il nome che costruisce e'
+byte-identico al `$tag` del driver) — e poi ha trovato questo.
+
+## 🚨 N-1 (BLOCCANTE) — **il driver salta per FINESTRA, non per cella**
+
+E' la **classe nuova** di questo giro, e nasce **dentro** la correzione N1 del
+giro precedente. `$giaFatte` viene misurato per **finestra** (IS, OOS) e poi
+**collassato in un booleano** (`-eq 2`). Con `$giaFatte -eq 1` la cella non
+finiva **ne' in `$saltate` ne' in `$ripescate`**, e il referto scriveva:
+
+> `PER-TRADE FRESCHI: tutte le celle GIRATE hanno scritto la loro serie (nessun ripescaggio).`
+
+**Ma una delle due gambe non era stata rigirata.** `walkforward_generico.ps1`
+salta dentro `foreach($w in $WF)` (righe 612-616): interrompere durante l'OOS
+lascia l'**IS** sul disco, e al rilancio quell'IS viene da un giro precedente —
+con la cache svuotata **allora**, non adesso. Su **A20/B20/C20** vuol dire
+leggere **meta' canarino** come "rigirato a cache vuota" quando non lo e', **e
+il referto lo affermava esplicitamente**.
+
+> 🪞 **E' l'immagine speculare di N1: la v2 gridava dove doveva tacere, la v3
+> taceva dove deve dichiarare.** Stesso percorso di ripresa che la riga
+> consiglia.
+
+✅ Aggiunto `$parziali`, con avviso a schermo **e** voce nel referto
+(`CELLE A META'`), e la frase sul canarino e' diventata: *"le celle di canarino
+**non elencate come SALTATE o A META'** sono state rigirate adesso, a cache
+vuota"*.
+🧪 Matrice `giaFatte × -Rifai` **eseguita**: `0`→niente, `1`→**parziale**,
+`2`→saltata, e con `-Rifai` nessuno dei due (giusto: si rifa' tutto).
+
+## 🔢 N-2 (BLOCCANTE LEGGERO) — "serie per-trade: 12" era **un numero che non puo' esistere**
+
+`ABTG_BreakingBand.mq5:1521` compone il nome come
+`abtg_trades_<EA>_<Simbolo>_<Magic>.csv`, e **`InpMagic` non e' in nessuno dei 6
+file prova**: resta il default **772101 per tutte e 24 le passate**. Quindi le
+**4 passate** di uno stesso file prova (IS/OOS × dev 1.4/2.0) scrivono **lo
+stesso identico file**, e in `Common\Files` ne esistono al massimo **3**.
+Il massimo raccoglibile e' **6** (uno per cella, grazie alla pulizia dentro il
+ciclo). Claudio ne avrebbe contate 6 su 12 dichiarate e letto **sei segnali
+falsi** — di nuovo sul canarino.
+✅ Corretto a **6** nella riga e nel referto, con la spiegazione del nome e
+l'avvertenza che **il superstite dice CHE la cella ha girato, non serve a
+leggere le operazioni**: quale delle 4 passate abbia scritto per ultima **non e'
+deterministico** in ottimizzazione parallela.
+*(Negli archivi r81/r82 i per-trade sono distinti perche' quei round
+spazzolavano il magic. Qui no: e' il D10 non chiuso dentro il file prova.)*
+
+## 📉 N-5 — le "24 righe" erano **dichiarate e mai misurate**, e un CSV vuoto e' per sempre
+
+`walkforward_generico.ps1:678-682`: un CSV con **la sola intestazione** viene
+avvisato in rosso **ma copiato lo stesso, con exit 0**. La raccolta guardava
+solo `Test-Path` → referto `MANCANTI: nessuno`, console verde. E al rilancio
+quel CSV a zero righe fa `$giaFatte++`: la cella **non verrebbe mai piu'
+rifatta**.
+✅ Ora le righe si **contano**: `$vuoti`, `RIGHE DI RISULTATO: N su 24` nel
+referto, l'esito finale li guarda, e il referto dice come si ripara.
+🧪 **Eseguito** su file veri: sola intestazione → 0 righe e marcato VUOTO; due
+passate → 2.
+*(Stessa famiglia del punto 46 pagato su R95: **si misura l'effetto, non
+l'intenzione**.)*
+
+## 🩹 N-3 e N-4 — due attesi corretti **dove erano segnalati**, non **dove erano scritti**
+
+| # | difetto | correzione |
+|---|---|---|
+| N-3 | il punto 5 era corretto nella **riga** e ancora sbagliato nello **script** (`lancia_r94.ps1:618-619`), cioe' **nel testo che Claudio legge a schermo mentre guarda le anteprime** | corretto li'. ⚠️ Con gli **apici singoli**, perche' `$WF[0]` fra doppi apici **si espande** — verificato eseguendo |
+| N-4 | il controllo n.2 chiedeva *"`InpBBDev` unico parametro con la sintassi start/step/stop"*: **falso**, il driver rende **ogni** input numerico come `Nome=v\|\|v\|\|0\|\|v\|\|N` (righe 399, 409-411), quindi ce l'hanno tutte le ~78 righe | il discriminante e' **il flag finale**: `\|\|Y` spazzolato, `\|\|N` pinnato. Corretto **in tutti e due** i posti |
+
+> 📏 **Il punto 45 applicato male.** Chiudere un difetto non e' correggerlo dove
+> e' stato **segnalato**: e' cercarlo dove e' **scritto**, in tutti gli
+> artefatti — script, riga, file prova, referto.
+
+## Minori
+- **m-a** il BLOCCO 2 non riscarica lo script: **e' difendibile** (gira lo stesso
+  file che ha superato il giro a vuoto; riscaricare significherebbe far girare un
+  file *diverso* da quello collaudato) **ma non era scritto**. Ora si';
+- **m-b** il traffico del BLOCCO 1 diceva "non tocca il Desktop" — vero — ma
+  taceva che **sovrascrive `MQL5\Experts` e `MQL5\Include` nella cartella dati
+  del terminale collegato al conto VIVO**. E' voluto (e' il modo in cui si chiude
+  il 33-bis), ma va saputo;
+- **m-c** `-Solo <cella> -Rifai` era consigliato **senza la riga pronta**: ora c'e',
+  con la nota che con `-Solo` lo zip conterra' **solo** la cella riparata;
+- **m-d** un titolo diceva ancora *"Cosa fa la v2"* su uno script v3.
+
+## Cosa e' stato verificato, giro 4
+| controllo | esito |
+|---|---|
+| `controlla_prova.py` | ✅ 6 file, 12 celle, 24 passate, 0 problemi |
+| `lint_ps1.py` | ✅ 0 problemi |
+| parser PowerShell: driver + **tutte e tre** le righe di chat | ✅ 0 errori |
+| ASCII puro (7 file) | ✅ 0 byte > 127 |
+| `walkforward_generico.ps1:612-616` (salto per finestra) | ✅ **letto**: `foreach($w in $WF){ ... if((Test-Path $done) -and -not $Rifai){ continue } }` |
+| `walkforward_generico.ps1:678-682` (CSV vuoto copiato) | ✅ **letto**: copia, avvisa in rosso, **exit 0** |
+| `walkforward_generico.ps1:399 / 409-411` (tutti gli input con `\|\|N`) | ✅ **letto** |
+| `InpMagic` nei file prova | ✅ **0 occorrenze** su 6 file → default 772101 |
+| matrice dello stato A META' | ✅ **eseguita** |
+| `$WF[0]` fra apici singoli | ✅ **eseguito**: non si espande |
+| conteggio righe dei CSV | ✅ **eseguito**: header-only → 0 e VUOTO; 2 passate → 2 |
+| prova di fumo del driver | ✅ **ripetuta** |
+
+⚠️ **Quello che resta non verificato:** la riga **non e' mai stata eseguita su
+Windows**. Il parser conferma la sintassi, non il comportamento.
+
+## 📌 La classe nuova, portata in checklist
+Quattro dei cinque difetti sono **istanze di punti gia' scritti** (44, 45, 46,
+34-bis, D10) **applicati male**. L'unico davvero nuovo e' il **punto 49**:
+> **il driver salta per FINESTRA, non per cella: ogni spia costruita sulla CELLA
+> deve dichiarare anche lo stato A META'.**
