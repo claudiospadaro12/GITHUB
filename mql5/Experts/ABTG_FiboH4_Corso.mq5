@@ -279,7 +279,6 @@ datetime gLastBar = 0;
 //--- geometria del setup vivo (serve al parziale sul PRIMO obiettivo)
 double   gTargetFinale = 0.0;   // livello 100
 double   gPrimoTarget  = 0.0;   // bordo lontano della PRIMA entry zone
-bool     gSetupLong    = false;
 
 //--- news
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
@@ -660,7 +659,6 @@ bool PiazzaSetup(bool isLong, double alto, double basso)
    // dice quale sia il primo obiettivo -> non c'e' parziale (dichiarato).
    gPrimoTarget  = usaEZ2 ? ez1f : 0.0;
    gTargetFinale = target;
-   gSetupLong    = isLong;
 
    double sl = CalcolaStop(isLong, alto, basso, bordoLontano, usaEZ2 ? ez1f : target);
    if(sl <= 0) return(false);
@@ -1117,10 +1115,10 @@ void ExportTrades()
 //==================================================================
 void PrintConta()
   {
-   PrintFormat("[FIBOCORSO-CONTA] %s | pattern visti=%I64d -> scartati: ampiezza=%I64d "
-               "laterale=%I64d distanza=%I64d | SETUP PIAZZATI=%I64d",
-               _Symbol, gPatternVisti, gScartatiAmpiezza, gScartatiLaterale,
-               gScartatiDistanza, gSetupPiazzati);
+   PrintFormat("[FIBOCORSO-CONTA] %s | pattern visti=%d -> scartati: ampiezza=%d "
+               "laterale=%d distanza=%d | SETUP PIAZZATI=%d",
+               _Symbol, (int)gPatternVisti, (int)gScartatiAmpiezza, (int)gScartatiLaterale,
+               (int)gScartatiDistanza, (int)gSetupPiazzati);
    if(gSetupPiazzati == 0)
       Print("[FIBOCORSO-CONTA] CANARINO ROSSO: ZERO setup piazzati. Questa passata ",
             "NON dice niente sulla strategia: dice che non ha mai operato. Si guarda ",
@@ -1128,9 +1126,9 @@ void PrintConta()
    if(InpUseNewsFilter)
      {
       double pct = (gNewsBarreViste > 0) ? 100.0 * (double)gNewsBlocchi / (double)gNewsBarreViste : 0.0;
-      PrintFormat("[FIBOCORSO][NEWS-CONTA] eventi=%d | interrogazioni=%I64d | bloccate=%I64d (%.2f%%) | "
-                  "pendenti cancellati=%I64d | letto da %s",
-                  gNewsCount, gNewsBarreViste, gNewsBlocchi, pct, gNewsPendCancellati, gNewsDove);
+      PrintFormat("[FIBOCORSO][NEWS-CONTA] eventi=%d | interrogazioni=%d | bloccate=%d (%.2f%%) | "
+                  "pendenti cancellati=%d | letto da %s",
+                  gNewsCount, (int)gNewsBarreViste, (int)gNewsBlocchi, pct, (int)gNewsPendCancellati, gNewsDove);
       if(gNewsBlocchi == 0)
          Print("[FIBOCORSO][NEWS-CONTA] CANARINO ROSSO: filtro ACCESO e ZERO blocchi. ",
                "Atteso 8-12%. Questa passata NON misura il filtro.");
