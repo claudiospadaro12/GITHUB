@@ -71,12 +71,43 @@ in nessuna finestra.
 del VIOLA). **Le 44 passate del PINE non hanno misurato niente**: hanno misurato
 un segnale che il banco non puo' produrre. Meta' round e' andata a vuoto.
 
-### 🔵 CANARINO 2 (dal collaudo PASSO 2B): **il BLU e' quasi muto — 6 aperture su 115.**
+### 🔵 CANARINO 2 (AGGRAVATO dopo lettura del codice): **nello scan il BLU e' 0 PER COSTRUZIONE, non "quasi muto".**
 
-Il conteggio `[BULGE-CONTA]` del collaudo sul basket intero: `aperture=115 ->
-BLU=6 ...`. Non e' zero (quindi §2.1 non fa scattare lo stop secco), **ma il
-95% di quello che R92 ha misurato NON e' il BLU**. Il round ha misurato,
-in pratica, il **solo VIOLA-EA**.
+Prima lettura (dal collaudo PASSO 2B sul basket): `aperture=115 -> BLU=6`, cioe'
+il 5%. **Ma quel 6 e' del BASKET, e nello SCAN non puo' esistere.** Riga 1227:
+
+```
+bool confirmLong  = (closes[0] > opens[0] && ...);
+```
+
+Nello scan **ogni passata gira su UN simbolo solo, che e' il simbolo del
+grafico**: `OnTick` scatta al primo tick della sua barra 0, dove
+`closes[0] == opens[0]`. Il BLU **non puo' scattare**. Il 6 del basket veniva
+dai simboli **NON** del grafico, dove la barra 0 puo' avere gia' un corpo
+perche' l'EA se ne accorge in ritardo (ed e' esattamente cio' che §2.1
+prevedeva come **[INFERITO]**: adesso e' **misurato**).
+
+`Use_Orange=0` nella cella firmata. Quindi, dei tre segnali:
+**ARANCIO spento per firma · BLU impossibile · PINE impossibile.**
+
+### 🟪 CANARINO 2-bis (NUOVO, il piu' pesante): **anche il VIOLA-EA gira con la sua condizione SVUOTATA.**
+
+Il VIOLA-EA e' l'altra faccia della stessa funzione (riga 1093):
+
+```
+return (MathAbs(close0 - open0) <= atr1 * 1.5);   // VIOLA-EA (default)
+```
+
+Al primo tick `close0 - open0 == 0`, e **`0 <= 1,5 x ATR` e' SEMPRE VERO**.
+
+> ### 🎯 Quindi: la stessa riga di codice rende il PINE **sempre falso** e l'EA **sempre vero**.
+> **Le 106 operazioni di R92 sono TUTTE VIOLA, e sono VIOLA con la
+> condizione "candela di reazione" DISATTIVATA.** Non e' il VIOLA del motore
+> di Claudio: e' una sua versione **piu' larga**, che dovrebbe fare **piu'**
+> trade dell'originale — e ne fa comunque 4,8 per simbolo.
+>
+> **Questo e' il numero che pesa davvero**: la frequenza non e' bassa
+> *nonostante* i filtri, e' bassa **con un filtro in meno**.
 
 ### 👯 CANARINO 3 (passato): **n(PINE) <= n(EA)** — 0 violazioni su 22.
 Formalmente rispettato, ma **vuoto**: e' rispettato perche' n(PINE)=0 ovunque.
@@ -131,15 +162,36 @@ domanda che i criteri avevano gia' aperto al punto **[DA DECIDERE] (a)**:
 **come si valuta un segnale che pretende la candela CHIUSA, se `CheckSignal`
 gira al primo tick della barra che si sta ancora formando?**
 
-Le vie possibili (**da decidere con Claudio, non decise qui**):
-1. valutare su **barra 1** (l'ultima CHIUSA) invece che sulla barra 0;
-2. far girare `CheckSignal` **all'ultimo tick** della barra;
-3. dichiarare che BLU e PINE si valutano **solo** sui simboli NON del grafico
-   (dove la barra 0 puo' avere gia' un corpo) — e allora il banco a un simbolo
-   per passata **non e' il banco giusto** per questo motore.
+Le vie possibili, con la **raccomandazione motivata** (decide Claudio):
+
+**1. ✅ RACCOMANDATA — spostare la conferma sulla BARRA 1 (l'ultima chiusa).**
+Tutto il resto di `CheckSignal` legge gia' la barra 1: `atr1`, le Bollinger
+`bbUpper1/bbLower1`, `isBulge1`, `bullReaction1`/`bearReaction1`, `origLong1`.
+**La lettura della barra 0 e' l'ECCEZIONE, non la regola** — e' l'unico pezzo
+fuori posto. Portando anche BLU e VIOLA sulla barra 1 il motore diventa
+coerente con se stesso, deterministico e senza look-ahead. Costo: il segnale
+originale slitta alla barra 2 e l'ingresso avviene **una barra dopo** — cambio
+di semantica **vero e dichiarato**, non nascosto.
+
+**2. ❌ SCONSIGLIATA — far girare `CheckSignal` all'ultimo tick della barra.**
+In MT5 **non esiste** il modo di sapere che un tick e' l'ultimo della barra:
+lo si scopre solo quando arriva il primo della successiva. Si puo' solo
+approssimare (es. "negli ultimi N secondi"), e un'approssimazione dentro la
+condizione d'ingresso e' proprio il genere di cosa che nel backtest funziona e
+in forward no.
+
+**3. ❌ SCONSIGLIATA — dichiarare che BLU/PINE valgono solo sui simboli NON del grafico.**
+Renderebbe il segnale dipendente da **quale grafico** ha l'EA sotto, cioe' da
+un dettaglio di installazione. Il 6 su 115 del basket nasce da un **ritardo di
+accorgimento**, non da una regola: e' rumore d'implementazione promosso a
+strategia. E soprattutto: il banco a un simbolo per passata — il modo in cui si
+misura qualunque cosa in questo progetto — diventerebbe inutilizzabile.
 
 Finche' quella domanda non ha una risposta, **rilanciare R92 misurerebbe di
-nuovo la stessa cosa**.
+nuovo la stessa cosa**. E la correzione **non e' cosmetica**: cambia quali
+segnali esistono, quindi il round che ne esce e' un **round nuovo**, con
+criteri da firmare prima dei numeri (le soglie S1/S2/S3 possono essere
+riusate: non sono state toccate dai numeri di R92).
 
 ---
 
