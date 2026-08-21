@@ -1573,3 +1573,89 @@ l'unica in cui il referto serve a capire perche'.
 > (`if($Comune){...}`). Prova secca da fare a tavolino, senza eseguire niente:
 > **si mette un `throw` finto alla prima riga del `try` e si legge quali
 > variabili la raccolta trova a `$null`.**
+
+---
+
+## 🆕 AGGIUNTE DEL 21/08/2026 — trovate RI-verificando la riga R93 dopo le correzioni
+
+### 35-bis. 🎯 LA RACCOLTA RESA CUMULATIVA PER `-Gamba`, RIMASTA DISTRUTTIVA PER `-Solo`
+
+_Difetto vero, in `lancia_r93.ps1` v2 (righe 673-697), trovato nel giro di
+ri-verifica: il punto 35 era stato chiuso **per la strada che lo aveva prodotto**
+(`-Gamba A` una sera, `-Gamba B` l'altra) e lasciato aperto **per l'altra strada
+che lo stesso documento consiglia**._
+
+```powershell
+$gambeGirate = @($celle | ForEach-Object { $_.G } | Select-Object -Unique)
+foreach ($g in $gambeGirate) {
+  $dg = Join-Path $dest $g
+  if (Test-Path $dg) { Remove-Item $dg -Recurse -Force }   # ripulisce la GAMBA INTERA
+  ...
+}
+foreach ($c in $celle) { ... copia SOLO le celle di $celle ... }   # e ne rimette UNA
+```
+
+La pulizia ragiona per **gamba**, il riempimento ragiona per **cella**. Finche' si
+lancia una gamba intera i due perimetri coincidono e non si vede niente. Ma il
+par. 14 dello stesso documento consiglia `-Solo "A1" -Rifai` per rifare una cella:
+li' `$celle` ha **un** elemento, la cartella `A\` viene **rasa al suolo** e ci
+rientrano **2 CSV su 12**. Lo zip si rifa' su quello che resta, il referto scrive
+`MANCANTI (di questo giro): nessuno` — perche' conta solo la cella di QUESTO giro —
+e la frase di guardia messa apposta nel referto (*"vale solo per le GAMBE girate
+stasera"*) non copre il caso, perche' parla di gambe e il buco e' fra le celle.
+
+> **Quando si ripara una raccolta distruttiva, il perimetro della PULIZIA deve
+> essere lo stesso perimetro del RIEMPIMENTO.** Regola pratica: si ripulisce solo
+> se si sta rifacendo l'insieme intero (`if ($Solo -eq "") { Remove-Item ... }`),
+> altrimenti si sovrascrive e basta. E la verifica non si fa sul flag che ha
+> generato il difetto: **si fa su TUTTI i flag che il documento consiglia** —
+> `-Gamba`, `-Solo`, `-Rifai`, il rilancio a mano.
+
+### 42. 🫥 LA RIGA DI RIPARAZIONE CHE RIUSA UNA VARIABILE DEL BLOCCO PRECEDENTE
+
+_Difetto vero, par. 14 di `R93_CRITERI.md`, sezione "Se serve RIFARE una cella"._
+
+```powershell
+& powershell -ExecutionPolicy Bypass -File $p -Rif lavoro -Solo "A1" -Rifai
+```
+
+`$p` era stato assegnato **dentro** il `& { ... }` del blocco 2. `&` su uno
+scriptblock apre uno **scope figlio**: quando il blocco finisce, `$p` non esiste
+piu'. Incollata da sola, questa riga passa a `-File` una stringa vuota e
+PowerShell si mangia l'argomento dopo (`-Rif`) come se fosse il nome dello script:
+errore oscuro, e Claudio non ha modo di capire che il colpevole e' una variabile
+evaporata due blocchi fa.
+
+> **Ogni riga destinata a Claudio si legge come se fosse l'UNICA cosa incollata
+> in una finestra appena aperta.** Nessuna variabile viaggia fra un blocco e
+> l'altro: o si riscrive il percorso per esteso
+> (`"$env:USERPROFILE\lancia_r93.ps1"`), o la riga ha il suo `& { ... }` completo
+> di `irm`, marcatore e guardia MT5. Il punto 21 dice che tre righe in un blocco
+> non sono un programma; questo dice che **cinque blocchi in una chat non sono
+> una sessione**.
+
+### 40-quater. 👁️ L'ATTESO DA CONFRONTARE A OCCHIO, CALCOLATO CON UNA FORMULA CHE NON E' QUELLA DELL'EA
+
+_Difetto vero, `R93_CRITERI.md` par. 5.5 e par. 14 blocco 3 (in DUE punti)._
+
+Il blocco 3 manda Claudio a leggere nel test singolo una riga di autotest e a
+confrontarla **carattere per carattere** con questa, stampata nei criteri:
+
+```
+geometria su pattern 100-110 (range 10): target100=100.00 | EZ1 [98.20 - 99.20] | EZ2 [88.20 - 89.20] | banda=1.00
+```
+
+L'EA pero' ha `InpEZ1near/far = 1,78/1,88` e `InpEZ2near/far = 2,78/2,88`, e
+`LivelloFibo()` fa `alto - k*(alto-basso)`: su 100-110 stampera'
+`EZ1 [91.20 - 92.20] | EZ2 [81.20 - 82.20]`. I numeri del documento vengono da
+`k = 1,08/1,18/2,08/2,18`, che nell'EA **non esistono**. Esito: o Claudio ferma il
+round per un falso allarme sull'unico gesto che certifica la geometria della gamba
+B, o impara che gli attesi del documento sono "circa" — e allora il gesto non
+serve piu' a niente.
+
+> E' il **40-bis applicato all'occhio umano invece che a un `if`**: un `throw`
+> sbagliato almeno esplode, un atteso sbagliato stampato in chat **erode la
+> fiducia nei controlli**, che e' peggio.
+> **Ogni numero atteso stampato in una riga di lancio si RICALCOLA con la
+> formula dell'EA e i suoi default veri, prima di scriverlo** — e se la formula
+> e' in tre righe di codice, si esegue quella, non si va a memoria.
