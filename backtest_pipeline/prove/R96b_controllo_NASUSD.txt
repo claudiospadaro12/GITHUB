@@ -1,0 +1,185 @@
+# =====================================================================
+#  R96 / L'APERTURA AMERICANA COSTRUISCE IL SEGNALE - NASUSD M5
+#  CELLA B - CONTROLLO NEGATIVO: ancora SPENTA
+#  EA: ABTG_CrossEmaApertura (NUOVO, mai girato: e' un CANDIDATO, non
+#      una sedia). ABTG_CrossEma NON e' stato toccato.
+#
+#  Si lancia con:
+#    -Prova prove\R96b_controllo_NASUSD.txt -Etichetta r96bnas -Modello 4
+#
+#  I CRITERI SI LEGGONO PRIMA DEI NUMERI, e stanno in
+#      risultati_archivio\R96_CRITERI.md
+#  >>> STATO: **BOZZA, NON FIRMATA**. Finche' quella firma e' vuota
+#      questo file NON si lancia. Regola di casa: i criteri si cambiano
+#      prima dei numeri, non dopo.
+# ---------------------------------------------------------------------
+#  LA DOMANDA DEL ROUND (una sola):
+#    "L'incrocio delle medie 9/21 RI-SEMINATE all'apertura americana
+#     (14:30 SERVER = 15:30 IT) ha un edge misurabile sugli indici USA
+#     -- e quello che eventualmente si vede viene dall'ANCORA o solo
+#     dall'OROLOGIO?"
+#
+#  R96 NON E' UNA VARIANTE DI R86. Non si confronta NESSUN numero con
+#  R86: motore diverso (medie DI SESSIONE contro medie CONTINUE),
+#  simboli diversi (indici USA contro DAX e oro), TF diverso (M5 contro
+#  H1), criteri diversi. Si confrontano solo le CONCLUSIONI.
+#
+#  Perche' non e' "CrossEma + filtro orario", che sarebbe VIETATO
+#  (schema misurato 0 successi su 5: R20/R12/R26/R45/R54):
+#  con l'ancora accesa le due medie NASCONO all'apertura e misurano
+#  solo lo spostamento dalla campanella. Alle 03:00 non esistono. Non
+#  c'e' nessun segnale preesistente da filtrare: l'apertura lo COSTRUISCE.
+#
+#  QUESTO ROUND NON PUO' PRODURRE UNA SEDIA. Al massimo produce il
+#  permesso di fare un walk-forward vero. Nessun forward, nessun VPS.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       MT5 e MetaEditor vanno CHIUSI prima della riga.
+#    2. IL BRANCH 'lavoro' E' CONGELATO per tutta la durata di R96:
+#       walkforward_generico.ps1 scarica l'EA da $EABranch="lavoro"
+#       scritto fisso nel sorgente, NON dal -Rif. Un push a meta' corsa
+#       cambierebbe il motore fra una cella e l'altra.
+#    3. La riga di lancio porta SEMPRE l'irm che riscarica script e file
+#       prova dal pin, e la riga di raccolta finale (cartella sul
+#       Desktop + Compress-Archive) con l'elenco dei file attesi.
+# ---------------------------------------------------------------------
+#  QUESTA CELLA
+#    CONTROLLO NEGATIVO. L'ancora SPENTA: medie 9/21 CONTINUE, dentro
+#    la stessa identica finestra oraria. E' ESATTAMENTE lo schema
+#    'motore gia' bocciato + filtro orario appiccicato', che in questa
+#    casa fa 0 successi su 5 (R20/R12/R26/R45/R54).
+#    >>> QUESTA CELLA NON E' PROMUOVIBILE. MAI. NEMMENO SE VINCE. <<<
+#    Sta nel round come STRUMENTO DI MISURA, come un termometro non e'
+#    la febbre: serve a sapere quanto della cella A viene dall'ancora e
+#    quanto dal solo orologio. Se B batte A, R96 conclude che il motore
+#    dell'ancora non regge -- e quello e' un risultato NEGATIVO per R96,
+#    non una sedia per B.
+# ---------------------------------------------------------------------
+#  LA FINESTRA, E IL SUO LIMITE DICHIARATO
+#    @DAQUANDO 2024.09.26 NON e' un segnaposto: e' MISURATO.
+#      U30USD  67.618.571 tick dal 2024.09.26
+#              (REFERTO_ROUND88_ORB_MIGLIORAMENTO.md par.7, misura del 20/08)
+#      NASUSD 164.636.788 tick dal 2024.09.26
+#              (REFERTO_R83_R84_PREPARAZIONE.md riga 620)
+#    Il verdetto "TICK REALI PARZIALI" di quelle righe NON vuol dire
+#    "tick bucati": il downloader lo calcola contro la data che gli
+#    passiamo noi (tfirst > from + 86400). Per una finestra che PARTE
+#    dal 2024.09.26 la copertura e' piena.
+#    E' anche il MURO DEL BROKER: prima di quella data BCM non ha questi
+#    simboli ne' a tick ne' a barre. La finestra non si puo' allargare.
+#
+#  L'EMENDAMENTO DELLA FINESTRA, applicato per davvero
+#    L'unita' di misura e' l'OPERAZIONE, non l'anno: l'IS vuole >=150
+#    operazioni e deve lasciare un OOS di almeno altre 150.
+#    [STIMA, MAI MISURATA] finestra di 3 ore su M5 = 36 barre di
+#    sessione; 1-3 segnali per sessione; ~440 sessioni nella finestra
+#    -> ~450-1.100 operazioni totali. Con lo split 40/60 dovrebbero
+#    restare 180-440 IS e 270-660 OOS.
+#    >>> CANARINI IN COLONNA (non in una Print: in ottimizzazione le
+#        Print degli agent non le legge nessuno - checklist punto 34).
+#        Il CSV di R96 ha quattro colonne in piu':
+#          Sessioni Viste | Incroci Sessione | Ingressi Aperti | Ancora Sessione
+#        - "Sessioni Viste" = 0  ->  LA CELLA NON HA GIRATO. Non e'
+#          brutta: e' ASSENTE. L'ora dell'ancora non ha trovato barre.
+#        - "Ingressi Aperti" = 0 con sessioni > 0 -> merito non
+#          misurabile, la conclusione e' sulla frequenza.
+#        - "Ancora Sessione" dice il MODO dentro il dato: 1 = cella A,
+#          0 = cella B di controllo.
+#    Split IS/OOS: 40/60, come R83/R84-bis/R86. Non si cambia lo split
+#    per far tornare un numero.
+#
+#  IL REGIME CONTENUTO -- va scritto accanto a OGNI numero
+#    2024.09.26 -> 2026.06.30 = UN REGIME E MEZZO: toro americano
+#    2024-25 piu' la correzione 2025. Niente 2020, niente 2022, niente
+#    2008. R96 misura un motore DENTRO un regime, NON dichiara
+#    robustezza (regola C dell'Emendamento: altro round).
+# ---------------------------------------------------------------------
+#  IL CORPO DI QUESTO FILE E' IDENTICO IN TUTTE E QUATTRO LE CELLE.
+#  Cambiano SOLO due righe: InpAncoraSessione e InpMagic. E' la regola
+#  di casa dopo l'errore InpTP1_ATRmult=0 contro 0.5, pagato due volte.
+#  Righe vive attese: 29 (3 direttive @ + 26 parametri), in tutti e
+#  quattro i file. Il diff prima del lancio le confronta una per una.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- L'ANCORA: e' il MOTORE del round, non un filtro.
+#     1 = le due medie sono RI-SEMINATE all'apertura e vivono solo
+#         dentro la sessione (cella A: il motore di R96).
+#     0 = medie CONTINUE nella stessa finestra oraria, cioe' lo schema
+#         vietato (cella B: CONTROLLO NEGATIVO, NON promuovibile).
+#     E' L'UNICA RIGA DI LOGICA CHE DISTINGUE LE DUE CELLE.
+InpAncoraSessione=0
+
+# --- L'APERTURA, IN ORA SERVER. Il server BCM sta UN'ORA INDIETRO
+#     rispetto all'ora italiana: Dow/Nasdaq 15:30 IT = 14:30 SERVER.
+#     Se in un CSV di risultati questa colonna dicesse 15, il file e'
+#     da cestinare: sarebbe l'ora italiana, cioe' un'altra strategia.
+InpOpenHour=14
+InpOpenMin=30
+InpSessioneMinuti=180
+InpChiudiAFineSessione=1
+
+# --- LE MEDIE: 9 e 21, la ricetta dettata da Claudio. NON spazzolate.
+#     InpMinBarreSessione=2 e' il PRIMO CONFRONTO MATEMATICAMENTE
+#     POSSIBILE (alla prima barra le due medie coincidono per
+#     costruzione, valgono entrambe il seme). Alzarlo cambia CLASSE di
+#     evento, non taratura: e' la domanda di un altro round.
+InpEmaFast=9
+InpEmaSlow=21
+InpMinBarreSessione=2
+InpSoloPrimoIngresso=0
+
+# --- DIREZIONE: tutte e due. Il round misura il motore, non un lato.
+InpAllowLong=1
+InpAllowShort=1
+
+# --- STOP, TARGET, GESTIONE: IDENTICI in tutte e quattro le celle.
+#     Se cambiasse anche solo il breakeven, il confronto A/B non
+#     isolerebbe piu' l'ancora: misurerebbe due cose insieme.
+#     PARZIALE E USCITA OPPOSTA SPENTI di proposito: la cella dev'essere
+#     SL e TP e basta. La gestione e' la domanda di un ALTRO round.
+InpAtrPeriod=14
+InpSLatr=1.5
+InpTP_RR=2.0
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseOppositeExit=0
+
+# --- OPERATIVA: nessun tetto giornaliero. Un tetto e' un filtro
+#     travestito e qui deve stare spento; la frequenza si MISURA prima
+#     (colonna "Ingressi Aperti"), poi semmai si decide.
+InpMaxTradesPerDay=0
+
+# --- RISCHIO: pinnato a 1,00%. NON e' la taglia di campo (0,65%): e'
+#     un valore comune che rende le celle confrontabili fra loro.
+#     Il deposito del tester e' 100.000 (come R88 su U30USD M5) e lo
+#     passa la riga di lancio con -Deposito, non questo file.
+InpRiskPercent=1.0
+
+# --- NOTIZIE: spente. Un CSV che non copre il periodo produrrebbe una
+#     cella identica alla baseline e sembrerebbe "filtro neutro":
+#     sarebbe un numero falso.
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con quelli degli altri EA. Sta qui
+#     scritto apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log e autotest SPENTI nelle corse lunghe.
+#     L'autotest si legge UNA volta sola, in un test SINGOLO, prima del
+#     round: in una griglia riempirebbe il giornale a ogni passata.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate gemelle di controllo.
+#     Devono uscire IDENTICHE al centesimo. Se non lo sono c'e' di mezzo
+#     la cache del tester o una griglia che MT5 si ricorda: il numero
+#     non si legge e il round si ferma.
+InpMagic=779640||779640||1||779641||Y
