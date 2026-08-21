@@ -1,8 +1,27 @@
 # 🗂️ CODA — cosa si fa appena Claudio e' davanti al PC
 
-> # 🆕 21/08 — **R92 (BULGE) E' PRONTO IN BOZZA** — il banco largo sui 22 cross del basket
+> # ✍️ 21/08 — **R92 (BULGE) E' FIRMATO E PRONTO A PARTIRE** — 88 passate sui 22 cross
 >
 > ## 🚦 POSTO IN CODA: **dietro la misura tick U30USD e R90** (R91 e' gia' stato letto il 21/08: cancello RR bocciato).
+>
+> ## 🧾 RIGA DI LANCIO PRONTA: `backtest_pipeline/righe/RIGA_R92_SCAN_BULGE.md`
+> Cinque passi, pinnati a **`fe430a5`**: (0) la misura dello storico che manca,
+> (1) giro a vuoto da 10 secondi, (2) **compilazione + UNA passata singola a
+> mano** — obbligatoria, perche' in ottimizzazione MT5 non stampa le Print
+> degli agent e il canarino BLU si legge solo li', (3) prova del banco su
+> GBPUSD (4 passate), (4) le **88 passate** con raccolta e numeri attesi
+> dichiarati prima: 44 CSV, 88 righe, 44 ini, 88 per-trade.
+>
+> ### ✍️ COSA HA FIRMATO CLAUDIO: **"c,firmo 0,8,misura entrambe"**
+> - **"c"** = si misurano **ENTRAMBE LE GESTIONI**: quella NUDA dell'EA e
+>   quella VERA di Claudio (break-even 1R + trailing a gradini di R), che in
+>   MT5 **non esisteva** ed e' stata portata dal suo Manager MT4.
+>   Scopo: **sapere quanto vale il break-even in euro, invece di opinarlo.**
+> - **"0,8"** = rischio **0,80%**: 0,80 x 4 trade = **3,20% <= cap C1 3,25%**.
+> - **"misura entrambe"** = le **due versioni del VIOLA**, quella dell'EA
+>   (candela non impulsiva) e quella del **Pine originale** (candela di
+>   reazione verde/rossa). La divergenza e' misurata, non supposta.
+> - Soglie **congelate**: S1 n>=30 | S2 PF>=1,30 | S3 win rate>=65% e utile>0.
 > Ma ha **un prerequisito suo, che si puo' fare in qualsiasi momento e costa
 > minuti**: il **PASSO 0**, cioe' misurare la profondita' dati dei 22 cross
 > (`scarica_storico.ps1 -Simboli "..." -SoloReferto`). Senza quella misura i
@@ -10,19 +29,26 @@
 > **GBPUSD, tick dal 2024.07.05**.
 >
 > **COSA C'E' DI NUOVO, gia' su `lavoro`:**
-> - 🆕 **`mql5\Experts\ABTG_Bulge.mq5` v5.00** — il motore **di Claudio**
+> - 🆕 **`mql5\Experts\ABTG_Bulge.mq5` v5.10** (era v5.00) — il motore **di Claudio**
 >   (BULGE_MASTER v4.00, che **resta intatto** come originale) migrato agli
 >   standard di casa: **Guardian** sul percorso di apertura, `InpMagic`
->   **772700**, `InpComment` "BULGE", **rischio 1%** (era 0,50; Claudio girava
->   a 3,00), `OnTester` + OptFrame + per-trade, `InpAutoTest`, `InpVerbose`,
->   ASCII puro. **La logica dei segnali NON e' stata toccata.**
+>   **772700**, `InpComment` "BULGE", **rischio 0,80%**, `OnTester` + OptFrame
+>   + per-trade **con la colonna `signal`**, `InpAutoTest`, `InpVerbose`,
+>   ASCII puro. Piu' la **variante VIOLA** e la **gestione (b)** (7 input,
+>   tutti spenti di default). **La logica dei segnali NON e' stata scelta da
+>   noi: e' stata resa misurabile.** Verifica a macchina, rifatta dopo ogni
+>   modifica: diff di `CheckSignal` contro `BULGE_MASTER.mq5` **fuori dal
+>   blocco VIOLA = ZERO righe**.
 > - 🆕 **`prove\R92_scan_BULGE.txt`** — il verbale della cella (default di
 >   Claudio: BLU+VIOLA, ARANCIO spento) e le due strade di lancio.
 > - 🆕 **`scan_market.ps1 -Robot ABTG_Bulge`** — lo scan largo: **22 simboli
->   x 2 passate gemelle = 44**, OHLC, finestra **2022.01.01-2026.06.30** =
->   la stessa del backtest di Claudio.
-> - 🆕 **`risultati_archivio\R92_CRITERI.md`** — **BOZZA DA FIRMARE**. Le tre
->   soglie: **n >= 30 · PF >= 1,30 · win rate >= 65%** (+ profitto > 0).
+>   x 2 gestioni x 2 varianti del VIOLA = 88 passate**, OHLC, finestra
+>   **2022.01.01-2026.06.30** = la stessa del backtest di Claudio.
+>   Ogni passata e' riconoscibile in **tre** modi: nome del CSV
+>   (`_nuda`/`_gestita`), colonna `InpMagic` (772700/772710), colonna
+>   `Use_Purple_PineReaction` (0=EA / 1=PINE).
+> - 🆕 **`risultati_archivio\R92_CRITERI.md`** — **FIRMATO**. Le tre soglie:
+>   **n >= 30 · PF >= 1,30 · win rate >= 65%** (+ profitto > 0).
 >
 > ### 🐤 IL CANARINO DA LEGGERE PER PRIMO (sta nel codice, non nel mercato)
 > Il segnale **BLU** pretende un corpo di candela sulla **barra 0**, ma l'EA
@@ -33,16 +59,20 @@
 > misurando il solo VIOLA e ci si ferma li'.** [INFERITO dal codice, da
 > misurare — scritto in cima ad `ABTG_Bulge.mq5`, punto [DA DECIDERE] (a).]
 >
-> ### ⚠️ E UN NUMERO CHE TOCCA IL RISCHIO, DETTO SUBITO
-> `Risk_Percent` 1% x `Max_Trades` 4 = **fino al 4% di rischio aperto**, cioe'
-> **sopra il cap C1 (3,25%)**. In campo il Guardian bloccherebbe il quarto
-> ingresso; **nel tester e' inerte**. Se il BULGE arrivasse al campo, o scende
-> il rischio o scendono i trade contemporanei: **decisione di Claudio**.
+> ### ⚠️ IL NUMERO CHE TOCCAVA IL RISCHIO: **SISTEMATO DALLA FIRMA**
+> Con l'1% della bozza erano **4,00%** di rischio aperto, **sopra il cap C1**.
+> Con lo **0,80%** firmato: **3,20% <= 3,25%, il cap regge.** Resta detto che
+> nel tester il Guardian e' **inerte**, quindi quel 3,20% ci puo' essere
+> davvero. E la gestione (b) **non alza il rischio**: muove lo stop solo a
+> favore, non tocca il lotto.
 >
-> **⛔ R92 NON SI LANCIA** finche' non sono verdi: (a) la **firma** dei criteri,
-> (b) la **compilazione** di `ABTG_Bulge.mq5` in MetaEditor (0 errori 0
-> warning: non e' mai stato compilato), (c) **una passata singola** con
-> `InpAutoTest=1` per leggere le righe `[BULGE][AUTOTEST]`, (d) il **passo 0**.
+> **⛔ COSA MANCA ANCORA** (la firma c'e', il resto no): (a) la
+> **compilazione** di `ABTG_Bulge.mq5` in MetaEditor — 0 errori 0 warning,
+> **non e' mai stato compilato da nessuno**; (b) la **passata singola** con
+> `InpAutoTest=1` (passo 2 della riga); (c) il **PASSO 0**, la misura dello
+> storico dei 22 cross, che si fa con
+> `scarica_storico.ps1 -Auto -SenzaTick` — ⚠️ **`-SoloReferto` RILEGGE e non
+> misura niente**: era scritto sbagliato ed e' stato corretto oggi.
 
 
 > # 🆕 20/08 — **R91 E' PRONTO IN BOZZA** — il cancello di RR minimo sul Breaking Band

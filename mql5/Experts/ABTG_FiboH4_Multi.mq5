@@ -598,13 +598,48 @@ void CancelPendings(string sym)
   }
 
 //==================================================================
-//  FILTRO NOTIZIE (CSV in MQL5/Files)
+//  FILTRO NOTIZIE  -- v1.10
+//  FORMATO ATTESO del CSV, separatore ';' :
+//      Data Ora ; Impatto ; Valuta ; Titolo
+//      2021.01.07 13:30;High;USD;Nonfarm Payrolls
+//  ATTENZIONE: i due CALENDARI in biblioteca hanno le colonne 2 e 3
+//  SCAMBIATE (data;PAESE;impatto;evento). Dati cosi' come sono,
+//  ImpactToInt legge "United States", torna 0, e con soglia 3 il
+//  filtro NON BLOCCA MAI NIENTE: non fallisce, diventa NEUTRO IN
+//  SILENZIO. Si convertono prima, con
+//  backtest_pipeline\converti_calendario_news.py.
 //==================================================================
 void LoadNews()
   {
-   gNewsCount=0; ArrayResize(gNewsTime,0); ArrayResize(gNewsImpact,0); ArrayResize(gNewsCcy,0);
-   int h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI,';');
-   if(h==INVALID_HANDLE){ Log("file news non trovato: filtro di fatto spento."); return; }
+   gNewsCount=0; gNewsScartate=0; gNewsSottoSoglia=0; gNewsSorted=true;
+   ArrayResize(gNewsTime,0); ArrayResize(gNewsImpact,0); ArrayResize(gNewsCcy,0);
+
+   // (a) NEL TESTER OGNI AGENTE HA LA SUA SANDBOX MQL5\Files, e il
+   //     file non ci arriva: Common\Files invece e' condiviso (in casa
+   //     e' gia' la strada di ExportTrades). Si prova prima Common, poi
+   //     la sandbox, e si DICE quale delle due ha risposto.
+   int h=INVALID_HANDLE;
+   if(InpNewsCommon)
+     {
+      h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
+      if(h!=INVALID_HANDLE) gNewsDove="Common\\Files";
+     }
+   if(h==INVALID_HANDLE)
+     {
+      h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI,';');
+      if(h!=INVALID_HANDLE) gNewsDove="MQL5\\Files (sandbox)";
+     }
+   if(h==INVALID_HANDLE)
+     {
+      gNewsDove="(non trovato)";
+      Print("[FIBOH4][NEWS] FILTRO ACCESO MA CIECO: '",InpNewsFile,
+            "' non trovato ne' in Common\\Files ne' nella sandbox. ",
+            "Il filtro NON filtrera' niente e la passata sara' IDENTICA ",
+            "alla baseline: NON leggerla come 'il filtro e' neutro'.");
+      return;
+     }
+
+   datetime ultimo=0;
    while(!FileIsEnding(h))
      {
       string sTime=FileReadString(h);
@@ -613,15 +648,42 @@ void LoadNews()
       string sCcy=FileIsLineEnding(h)?"":FileReadString(h);
       while(!FileIsLineEnding(h)&&!FileIsEnding(h)) FileReadString(h);
       datetime t=StringToTime(sTime);
-      if(t<=0) continue;
+      if(t<=0){ gNewsScartate++; continue; }   // intestazione compresa
       t+=InpNewsShiftMinutes*60;
       int imp=ImpactToInt(sImp);
+      // (d) sotto soglia NON entra in memoria: con 22.503 righe di
+      //     calendario la differenza fra tenerle e buttarle e' ore.
+      if(imp<InpNewsMinImpact){ gNewsSottoSoglia++; continue; }
+      if(t<ultimo) gNewsSorted=false;
+      ultimo=t;
       int n=gNewsCount;
-      ArrayResize(gNewsTime,n+1); ArrayResize(gNewsImpact,n+1); ArrayResize(gNewsCcy,n+1);
+      // riserva a blocchi: senza, ArrayResize rialloca a ogni riga.
+      ArrayResize(gNewsTime,n+1,4096); ArrayResize(gNewsImpact,n+1,4096); ArrayResize(gNewsCcy,n+1,4096);
+      StringTrimLeft(sCcy); StringTrimRight(sCcy); StringToUpper(sCcy);
       gNewsTime[n]=t; gNewsImpact[n]=imp; gNewsCcy[n]=sCcy; gNewsCount=n+1;
      }
    FileClose(h);
-   Log(StringFormat("news caricate: %d.",gNewsCount));
+
+   PrintFormat("[FIBOH4][NEWS] letto da %s | eventi utili %d (impatto >= %d) | "
+               "sotto soglia %d | righe scartate %d | ordinato %s | shift %d min | per valuta %s",
+               gNewsDove,gNewsCount,InpNewsMinImpact,gNewsSottoSoglia,gNewsScartate,
+               (gNewsSorted?"si":"NO (ricerca lineare)"),InpNewsShiftMinutes,
+               (InpNewsPerCurrency?"si":"no (blackout globale)"));
+   if(gNewsCount>0)
+      PrintFormat("[FIBOH4][NEWS] primo evento %s | ultimo evento %s  <-- se la finestra "
+                  "del test esce da questo intervallo, li' il filtro e' CIECO.",
+                  TimeToString(gNewsTime[0],TIME_DATE|TIME_MINUTES),
+                  TimeToString(gNewsTime[gNewsCount-1],TIME_DATE|TIME_MINUTES));
+
+   // (b) IL CANARINO. Un filtro acceso che non ha dati NON e' un
+   //     filtro neutro: e' un filtro non eseguito. Va detto forte.
+   if(gNewsCount==0)
+      Print("[FIBOH4][NEWS] FILTRO ACCESO MA CIECO: ZERO eventi utili. ",
+            "Cause tipiche: colonne del calendario scambiate (data;PAESE;impatto), ",
+            "oppure soglia InpNewsMinImpact troppo alta. La passata uscira' ",
+            "IDENTICA alla baseline e NON e' una misura del filtro.");
+   if(gNewsScartate>1)
+      PrintFormat("[FIBOH4][NEWS] ATTENZIONE: %d righe non convertite in data. ",gNewsScartate);
   }
 
 int ImpactToInt(string s)
@@ -633,17 +695,137 @@ int ImpactToInt(string s)
    return(0);
   }
 
-bool InNewsBlackout(datetime now)
+//--- la valuta della notizia tocca questo simbolo? (base o quotata)
+bool NewsToccaSimbolo(string sym,string ccy)
+  {
+   if(StringLen(ccy)==0) return(true);       // valuta ignota: prudenza, blocca
+   string b=SymbolInfoString(sym,SYMBOL_CURRENCY_BASE);
+   string p=SymbolInfoString(sym,SYMBOL_CURRENCY_PROFIT);
+   StringToUpper(b); StringToUpper(p);
+   return(ccy==b || ccy==p);
+  }
+
+//--- primo indice con gNewsTime >= t (array ORDINATO). -1 se nessuno.
+int NewsLowerBound(datetime t)
+  {
+   int lo=0, hi=gNewsCount;
+   while(lo<hi){ int mid=(lo+hi)/2; if(gNewsTime[mid]<t) lo=mid+1; else hi=mid; }
+   return(lo);
+  }
+
+bool InNewsBlackout(string sym,datetime now)
   {
    if(!InpUseNewsFilter||gNewsCount==0) return(false);
+   gNewsBarreViste++;
+   datetime lo=now-InpNewsAfterMin*60;      // evento >= lo  -> now <= evento+After
+   datetime hi=now+InpNewsBeforeMin*60;     // evento <= hi  -> now >= evento-Before
+   if(gNewsSorted)
+     {
+      for(int i=NewsLowerBound(lo); i<gNewsCount && gNewsTime[i]<=hi; i++)
+        {
+         if(InpNewsPerCurrency && !NewsToccaSimbolo(sym,gNewsCcy[i])) continue;
+         gNewsBlocchi++;
+         return(true);
+        }
+      return(false);
+     }
    for(int i=0;i<gNewsCount;i++)
      {
-      if(gNewsImpact[i]<InpNewsMinImpact) continue;
-      if(now>=gNewsTime[i]-InpNewsBeforeMin*60 && now<=gNewsTime[i]+InpNewsAfterMin*60) return(true);
+      if(gNewsTime[i]<lo || gNewsTime[i]>hi) continue;
+      if(InpNewsPerCurrency && !NewsToccaSimbolo(sym,gNewsCcy[i])) continue;
+      gNewsBlocchi++;
+      return(true);
      }
    return(false);
   }
+
+//==================================================================
+//  v1.10, SPENTO DI DEFAULT -- la regola del corso:
+//  "prima del rilascio di ogni dato macroeconomico gli ordini vanno
+//   TOLTI. Noi non scommettiamo sul mercato." (lez. 18)
+//  con la deroga dettata: se il prezzo e' distante >= 100 pip dal
+//  livello, si possono lasciare.
+//  NB: il filtro dell'ingresso (sopra) impedisce di PIAZZARE; questo
+//  toglie quelli GIA' PIAZZATI. Sono due cose diverse e vanno
+//  misurate separatamente.
+//==================================================================
+void NewsCancelCheck(string sym)
+  {
+   if(!InpUseNewsFilter || !InpNewsCancelPendings) return;
+   if(gNewsCount==0) return;
+   if(!HasPending(sym)) return;
+   if(!InNewsBlackout(sym,TimeCurrent())) return;
+
+   double pip=PipSize(sym);
+   double bid=SymbolInfoDouble(sym,SYMBOL_BID);
+   double ask=SymbolInfoDouble(sym,SYMBOL_ASK);
+   for(int i=OrdersTotal()-1;i>=0;i--)
+     {
+      ulong t=OrderGetTicket(i);
+      if(t==0) continue;
+      if(OrderGetString(ORDER_SYMBOL)!=sym || OrderGetInteger(ORDER_MAGIC)!=InpMagic) continue;
+      double px=OrderGetDouble(ORDER_PRICE_OPEN);
+      long tp=OrderGetInteger(ORDER_TYPE);
+      double rif=(tp==ORDER_TYPE_BUY_LIMIT||tp==ORDER_TYPE_BUY_STOP)?ask:bid;
+      double distPips=MathAbs(rif-px)/pip;
+      if(InpNewsDerogaPips>0 && distPips>=InpNewsDerogaPips) continue;  // deroga del corso
+      if(gTrade.OrderDelete(t)) gNewsPendCancellati++;
+     }
+  }
 //+------------------------------------------------------------------+
+
+//==================================================================
+//  v1.10 -- METRICA DI FAMIGLIA: la PEGGIOR GIORNATA in %.
+//  E' la misura che una prop guarda per prima (daily loss), e nel
+//  report standard di MT5 non c'e'.
+//==================================================================
+void AggiornaPeggiorGiornata()
+  {
+   MqlDateTime d; TimeToStruct(TimeCurrent(),d);
+   double eq=AccountInfoDouble(ACCOUNT_EQUITY);
+   if(d.day_of_year!=gGiornoCorrente)
+     { gGiornoCorrente=d.day_of_year; gEqInizioGiorno=eq; return; }
+   if(gEqInizioGiorno<=0) { gEqInizioGiorno=eq; return; }
+   double pct=(eq-gEqInizioGiorno)/gEqInizioGiorno*100.0;
+   if(pct<gWorstDayPct) gWorstDayPct=pct;
+  }
+
+//==================================================================
+//  v1.10 -- AUTOTEST (puro): niente ordini, niente file, niente
+//  GlobalVariable. Si legge ESEGUENDO un test SINGOLO nel tester.
+//  F7 compila e basta: da MetaEditor queste righe non escono.
+//==================================================================
+void AutoTestFiboH4()
+  {
+   int falliti=0;
+   //--- 1. ImpactToInt: i due formati che circolano in casa
+   if(ImpactToInt("High")!=3){ falliti++; Print("[FIBOH4][AUTOTEST] FALLITO: ImpactToInt(High)!=3"); }
+   if(ImpactToInt("3")!=3)   { falliti++; Print("[FIBOH4][AUTOTEST] FALLITO: ImpactToInt(3)!=3"); }
+   if(ImpactToInt("Medium")!=2){ falliti++; Print("[FIBOH4][AUTOTEST] FALLITO: ImpactToInt(Medium)!=2"); }
+   //--- 2. il caso che uccide il round: colonne del calendario SCAMBIATE.
+   //    "United States" nella colonna dell'impatto deve dare 0, cioe'
+   //    sotto qualunque soglia: e' il motivo per cui il file va CONVERTITO.
+   if(ImpactToInt("United States")!=0)
+     { falliti++; Print("[FIBOH4][AUTOTEST] FALLITO: un paese non deve valere un impatto"); }
+   PrintFormat("[FIBOH4][AUTOTEST] magic %d | commento \"%s\" | rischio %.2f%% | simboli \"%s\"",
+               (int)InpMagic,InpComment,InpRiskPercent,InpSymbols);
+   PrintFormat("[FIBOH4][AUTOTEST] news: uso=%s file=\"%s\" common=%s soglia=%d finestra -%d/+%d min shift=%d perValuta=%s cancellaPendenti=%s deroga=%.0f pip",
+               (InpUseNewsFilter?"SI":"no"),InpNewsFile,(InpNewsCommon?"si":"no"),
+               InpNewsMinImpact,InpNewsBeforeMin,InpNewsAfterMin,InpNewsShiftMinutes,
+               (InpNewsPerCurrency?"si":"no"),(InpNewsCancelPendings?"si":"no"),InpNewsDerogaPips);
+   PrintFormat("[FIBOH4][AUTOTEST] cancelli: cutoff=%s %02d:%02d server | venerdi=%s %02d:%02d server",
+               (InpUseCutoff?"SI":"no"),InpCutoffHour,InpCutoffMin,
+               (InpFridayClose?"SI":"no"),InpFridayCloseHour,InpFridayCloseMin);
+   //--- 3. il nucleo del Guardian (18 casi puri, dall'include)
+   int fg=ABTG_AutotestGuardia();
+   if(fg>0){ falliti+=fg; PrintFormat("[FIBOH4][AUTOTEST] Guardian: %d casi falliti -- NON mettere in campo.",fg); }
+   //--- 4. il promemoria che non deve sparire dal giornale
+   Print("[FIBOH4][AUTOTEST] PROMEMORIA: questo EA e' MULTI-SIMBOLO. ",
+         "Opera su InpSymbols, NON sul simbolo del grafico. Un round che ",
+         "non pinna InpSymbols misura sempre lo stesso basket (difetto ",
+         "trovato il 21/08 nello scan del 16/08).");
+   PrintFormat("[FIBOH4][AUTOTEST] %d casi falliti in tutto.",falliti);
+  }
 
 //==================================================================//
 //  OPTFRAME (inlined, self-contained) - export automatico dei      //
