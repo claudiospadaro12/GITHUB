@@ -402,8 +402,8 @@ della famiglia, che gira all'1,0%: cambiare rischio renderebbe il confronto
 **non comparabile**.
 
 🔬 **E che il rischio non tocchi il conteggio operazioni e' DIMOSTRATO NEL
-SORGENTE**, non dedotto dai log — il che e' una fortuna, visto che in
-ottimizzazione i log non si leggono:
+SORGENTE**, non dedotto dai log — che in ottimizzazione **non sono
+attribuibili a una cella** (vedi la sezione sul funnel):
 
 > `LotByRisk`, **riga 1427**: `return(MathMax(mn,MathMin(mx,lot)));`
 > **Il lotto e' agganciato al MINIMO DEL BROKER: `InpRiskPercent` non puo'

@@ -67,7 +67,7 @@
 #              fail-open nel tester e nessun kill switch di perdita
 #              giornaliera (l'equity delle righe 463-469 e' SOLO metrica
 #              per OnTester). Dimostrato nel sorgente, non dedotto dai log
-#              -- che in ottimizzazione non sarebbero nemmeno leggibili.
+#              -- che in ottimizzazione non sono ATTRIBUIBILI a una cella.
 #              Residuo dichiarato: la guardia di riga 1137 esce SENZA
 #              incrementare nessun contatore. Nel tester e' inerte, ma se
 #              non lo fosse quell'uscita sarebbe MUTA.
