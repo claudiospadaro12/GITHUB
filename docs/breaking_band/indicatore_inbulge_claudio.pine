@@ -1,9 +1,164 @@
-// Indicatore TradingView di CLAUDIO (postato 12/08 sera, salvato da Claude)
-// "IN-BULGE + POST-BULGE [Claudio]" — sua implementazione dei 2 pattern
-// Note di lettura (Claude): bulge = width >= 1.1 x SMA50(width) [rolling,
-// non congelata]; impulso LEGGERO (tocco banda + corpo >= 0.2 ATR);
-// banda piatta = |delta 6 barre| <= 0.6 ATR; segnale = candela di
-// REAZIONE (rejection). POST-BULGE fedele alla guida; IN-BULGE entra
-// in fade sulla banda DELL'IMPULSO (la guida entra sul retest della
-// banda OPPOSTA): da chiarire con Claudio quale versione intende.
-// (sorgente integrale come postato in chat — vedi conversazione 12/08)
+// ============================================================================
+// SORGENTE INTEGRALE - indicatore TradingView di CLAUDIO
+// "IN-BULGE + POST-BULGE [Claudio]"
+// Postato in chat il 12/08 sera, RIPOSTATO E SALVATO il 21/08/2026.
+// (il 12/08 avevo salvato solo le mie note di lettura: sorgente perso,
+//  violazione della regola #1. Questa e' la copia buona, integrale.)
+// Serve come FONTE DI VERITA' per la triangolazione di fedelta'
+// Pine <-> ABTG_Bulge.mq5 / BULGE_MASTER.mq5 <-> guida di Leonardo.
+// ============================================================================
+
+//@version=5
+indicator("IN-BULGE + POST-BULGE [Claudio]", overlay=true, max_labels_count=500)
+
+// ============================================================
+// INPUT
+// ============================================================
+bbLen        = input.int(20,    "BB Period",               group="Bollinger")
+bbDev        = input.float(2.0, "BB Deviation", step=0.1,  group="Bollinger")
+atrLen       = input.int(14,    "ATR Length",              group="ATR")
+bbWidthLen   = input.int(50,    "Lookback BB Width",       group="Bulge")
+bulgeMulti   = input.float(1.1, "Bulge minimo x media", step=0.05, group="Bulge")
+lookbackBars = input.int(20,    "Finestra impulso (bar)",  group="Bulge")
+
+// ============================================================
+// CALCOLI BASE
+// ============================================================
+basis     = ta.sma(close, bbLen)
+dev       = bbDev * ta.stdev(close, bbLen)
+upper     = basis + dev
+lower     = basis - dev
+atr       = ta.atr(atrLen)
+bbWidth   = upper - lower
+bbWidthMA = ta.sma(bbWidth, bbWidthLen)
+isBulge   = bbWidth >= bbWidthMA * bulgeMulti
+
+// ============================================================
+// IMPULSO
+// ============================================================
+impulseUp   = high >= upper and close > open  and math.abs(close - open) >= atr * 0.2
+impulseDown = low  <= lower and close < open  and math.abs(close - open) >= atr * 0.2
+
+barsSinceImpUp   = ta.barssince(impulseUp)
+barsSinceImpDown = ta.barssince(impulseDown)
+
+// ============================================================
+// MEDIANA TOCCATA DOPO IMPULSO
+// ============================================================
+touchedMid        = high >= basis and low <= basis
+barsSinceMidTouch = ta.barssince(touchedMid)
+
+midAfterImpUp   = barsSinceMidTouch < barsSinceImpUp
+midAfterImpDown = barsSinceMidTouch < barsSinceImpDown
+
+// ============================================================
+// BANDA OPPOSTA TOCCATA DOPO IMPULSO
+// ============================================================
+barsSinceUpperTouch = ta.barssince(high >= upper)
+barsSinceLowerTouch = ta.barssince(low  <= lower)
+
+oppAfterImpUp   = barsSinceLowerTouch < barsSinceImpUp
+oppAfterImpDown = barsSinceUpperTouch < barsSinceImpDown
+
+// ============================================================
+// BANDA PIATTA
+// ============================================================
+upperFlat = math.abs(upper - upper[6]) <= atr * 0.6
+lowerFlat = math.abs(lower - lower[6]) <= atr * 0.6
+
+// ============================================================
+// CANDELA DI SEGNALE
+// ============================================================
+bullReaction = close > open and low <= lower
+bearReaction = close < open and high >= upper
+
+// ============================================================
+// IN-BULGE LONG
+// ============================================================
+inBulgeLong =
+     isBulge and
+     barsSinceImpDown >= 1 and
+     barsSinceImpDown <= lookbackBars and
+     not midAfterImpDown and
+     not oppAfterImpDown and
+     bullReaction
+
+// ============================================================
+// IN-BULGE SHORT
+// ============================================================
+inBulgeShort =
+     isBulge and
+     barsSinceImpUp >= 1 and
+     barsSinceImpUp <= lookbackBars and
+     not midAfterImpUp and
+     not oppAfterImpUp and
+     bearReaction
+
+// ============================================================
+// POST-BULGE LONG
+// ============================================================
+postBulgeLong =
+     barsSinceImpDown >= 1 and
+     barsSinceImpDown <= lookbackBars * 2 and
+     midAfterImpDown and
+     not oppAfterImpDown and
+     low <= lower and
+     lowerFlat and
+     close > open
+
+// ============================================================
+// POST-BULGE SHORT
+// ============================================================
+postBulgeShort =
+     barsSinceImpUp >= 1 and
+     barsSinceImpUp <= lookbackBars * 2 and
+     midAfterImpUp and
+     not oppAfterImpUp and
+     high >= upper and
+     upperFlat and
+     close < open
+
+// ============================================================
+// SEGNALI FINALI
+// ============================================================
+longSignal  = inBulgeLong  or postBulgeLong
+shortSignal = inBulgeShort or postBulgeShort
+
+// ============================================================
+// PLOT BANDE
+// ============================================================
+plot(basis, "BB Basis", color=color.blue, linewidth=2)
+uPlot = plot(upper, "BB Upper", color=color.red)
+lPlot = plot(lower, "BB Lower", color=color.teal)
+fill(uPlot, lPlot, color=color.new(color.gray, 92))
+
+// ============================================================
+// LABEL
+// ============================================================
+if longSignal
+    label.new(
+         x         = bar_index,
+         y         = low - atr * 0.8,
+         text      = inBulgeLong ? "LONG\nIN-BULGE" : "LONG\nPOST-BULGE",
+         style     = label.style_label_up,
+         color     = color.green,
+         textcolor = color.white,
+         size      = size.normal)
+
+if shortSignal
+    label.new(
+         x         = bar_index,
+         y         = high + atr * 0.8,
+         text      = inBulgeShort ? "SHORT\nIN-BULGE" : "SHORT\nPOST-BULGE",
+         style     = label.style_label_down,
+         color     = color.red,
+         textcolor = color.white,
+         size      = size.normal)
+
+// ============================================================
+// ALERT
+// ============================================================
+alertcondition(inBulgeLong,    title="LONG IN-BULGE",    message="LONG IN-BULGE [Claudio]")
+alertcondition(inBulgeShort,   title="SHORT IN-BULGE",   message="SHORT IN-BULGE [Claudio]")
+alertcondition(postBulgeLong,  title="LONG POST-BULGE",  message="LONG POST-BULGE [Claudio]")
+alertcondition(postBulgeShort, title="SHORT POST-BULGE", message="SHORT POST-BULGE [Claudio]")
