@@ -1127,3 +1127,93 @@ stesso su zero CSV.
 > riga di comando (`metaeditor64.exe /compile:<file> /log`), non chiedendo a
 > Claudio di premere F7 su un file che sulla sua macchina non c'e' ancora
 > (punto 20).
+
+---
+
+## 🆕 AGGIUNTA DEL 21/08/2026 — trovata verificando la riga R93 (FiboH4 a due gambe)
+
+## 34. 📢 IL CANARINO CHE VIVE SOLO IN UNA `Print`: in OTTIMIZZAZIONE non lo legge NESSUNO
+
+_Difetto vero, gia' committato in `ABTG_FiboH4_Multi.mq5` (`PrintContaNews()`,
+righe 900-914) e in `ABTG_FiboH4_Corso.mq5` (`PrintConta()`, righe 1116-1136),
+trovato PRIMA dell'invio della riga di R93._
+
+Il punto 20 chiede: *"il gesto che sto chiedendo produce quell'output?"*. Questo
+e' la stessa domanda applicata alla **MODALITA'**: `walkforward_generico.ps1`
+scrive **sempre** `Optimization=1` nell'`.ini` (riga 645), quindi **tutte** le
+passate di un round girano sugli **AGENTI**. Le `Print` di un agente **non
+compaiono nella scheda Esperti del terminale**: finiscono nei log per-agente
+(`Tester\Agent-127.0.0.1-30xx\logs\`), che nessuno script raccoglie e che nello
+zip non ci sono.
+
+In R93 quei due `Print` erano i canarini **non trattabili** del round:
+`bloccate=N (X%)` (se e' 0 il filtro news non e' stato eseguito e la cella si
+butta) e `SETUP PIAZZATI=P` (se e' 0 la gamba B non ha misurato niente, non
+"perde"). Con 68 passate tutte in ottimizzazione, **nessuno dei due sarebbe
+stato leggibile** — e la gamba A, se il calendario non fosse arrivato agli
+agenti, sarebbe uscita **identica alla baseline**: due misure della stessa cosa,
+senza un artefatto che lo dica. E il `REFERTO_R93.txt` istruiva a leggerli
+(punto 22: istruzioni vere per un artefatto mai nato).
+
+> **Un canarino deve viaggiare coi DATI, non con lo schermo.** In MQL5 la strada
+> esiste ed e' gia' in casa: i contatori si mettono nell'array di `FrameAdd`,
+> che attraversa il confine agente -> terminale, e `OnTesterDeinit` (che gira
+> **sul terminale**) li scrive come COLONNE del CSV di ottimizzazione:
+> ```mql5
+> double stats[13];                       // era 10
+> stats[10] = (double)gNewsBlocchi;       // + header "News Bloccate"
+> stats[11] = (double)gNewsBarreViste;    // + header "News Interrogazioni"
+> stats[12] = (double)gNewsCount;         // + header "News Eventi"
+> ```
+> **Header e riga si toccano INSIEME**, o le colonne scalano di posto.
+> Regola di lettura: prima di scrivere in un referto *"leggi la riga X nella
+> scheda Esperti"*, si stabilisce **in che modalita' gira quella passata**.
+> Test singolo -> la `Print` si vede. Ottimizzazione -> **si vede solo cio' che
+> sta in una colonna**.
+
+### 34-bis. 🪞 E IL CANARINO LETTO DALLA PARTE CHE LO SCRIVE, non da quella che lo riceve
+
+_Stessa verifica. Il canarino del pin di stringa (`InpSymbols` pinnato con
+l'ordine `USDJPY;EURUSD;GBPUSD`, diverso dal default compilato) era giusto e
+misurato. Ma sia la riga in chat sia il driver (`lancia_r93.ps1`, righe 522-525)
+dicevano di controllarlo **nell'anteprima `.ini` del giro a vuoto**._
+
+L'anteprima **la scrive il nostro script**, copiando il file prova: li' dentro
+`InpSymbols` dira' **sempre** `USDJPY;EURUSD;GBPUSD`, anche il giorno in cui MT5
+lo ignora. E' il guardiano decorativo del punto 14 applicato a un canarino: il
+controllo esce verde per costruzione, e il difetto che ha prodotto il vecchio
+"0/8" passerebbe **una seconda volta**.
+
+> **Un canarino si legge SEMPRE nell'artefatto prodotto da CHI DOVEVA
+> RICEVERE il dato** — qui la colonna `InpSymbols` del CSV di MT5 — mai
+> nell'artefatto scritto da chi lo manda. E si elencano **tutti** gli esiti
+> possibili, non due: qui il terzo era `InpSymbols = USDJPY` **da solo**,
+> cioe' il `;` troncato dal parser dell'`.ini` — un basket da 1 cross invece di
+> 3, con `n` a un terzo e nessuno che se ne accorge.
+
+## 35. 🗂️ L'ISTRUZIONE DI SPEZZARE LA CORSA CONTRO LA RACCOLTA CHE SI AZZERA
+
+_Difetto vero, gia' committato in `lancia_r93.ps1` (righe 495-498) e scritto
+come consiglio nel par. 14 dei criteri: *"Si puo' spezzare: `-Gamba A` (24
+passate) e `-Gamba B` (44 passate) in due sere"*._
+
+Il punto 26 copre due chiamate **nello stesso blocco**. Questo copre due
+chiamate **in due sere**, ed e' peggio perche' in mezzo si dorme:
+
+```powershell
+if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }   # la sera dopo cancella la sera prima
+...
+Compress-Archive -Path (Join-Path $dest "*") -DestinationPath $zip -Force
+```
+
+La seconda serata **rade al suolo** la cartella di raccolta e riscrive lo zip:
+dentro ci finisce **solo la gamba B**, il referto dice `MANCANTI: nessuno`
+(perche' conta solo le celle di QUESTO giro) e Claudio manda in buona fede
+meta' round credendo di mandarlo intero.
+
+> **Prima di scrivere in un referto "si puo' spezzare in due sere", si apre la
+> RACCOLTA e si guarda se e' cumulativa o distruttiva.** Se e' distruttiva:
+> o la cartella di sosta si tiene per gamba (`R93_FIBOH4\A\`, `R93_FIBOH4\B\`)
+> e lo zip si fa in fondo, o l'istruzione diventa **"manda lo zip DOPO OGNI
+> gamba, il secondo sovrascrive il primo"**. Non si lascia scegliere a chi
+> incolla.
