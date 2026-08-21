@@ -1,0 +1,190 @@
+# =====================================================================
+#  R95a / LA SCALA DI DENSITA' DEL LIVELLO - EURJPY M15 - struttura M30
+#  EA: ABTG_LiquiditySweep  (v1.10)
+#  Criteri: risultati_archivio\R95_CRITERI.md  (BOZZA, DA FIRMARE)
+#  Dossier: caccia_strategie\CACCIA_JPY_MECCANISMI_2026-08-21.md
+#  Bozza di partenza: prove\JPY_LIQSWEEP_BOZZA.txt (i suoi 5 TODO sono
+#                     chiusi qui e nei criteri)
+#
+#  >>> NON SI LANCIA FINCHE' R95_CRITERI.md NON E' FIRMATO DA CLAUDIO. <<<
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' UNO DEI CINQUE GRADINI DELLA STESSA SCALA
+#      R95a = M30   R95b = H1   R95c = H2   R95d = H3   R95e = H4
+#  I cinque file sono generati dallo STESSO modello e devono differire
+#  SOLO per: InpTF_Struttura, InpComment e le righe di intestazione.
+#  La riga di lancio lo VERIFICA a diff prima di partire (checklist 33:
+#  due artefatti che descrivono la stessa cella e ne gira uno solo).
+#
+#  UN FILE = UN ASSE SPAZZOLATO. Qui l'asse e' InpSwingBars (3 valori).
+#  Il TF di struttura NON e' spazzolato dentro il file: e' il file.
+# ---------------------------------------------------------------------
+#  LA DOMANDA DEL ROUND
+#    "Sui cross JPY - dove R82 ha contato da 264 a 2.138 rotture per
+#     finestra e ha dimostrato che INSEGUIRLE non paga su nessuno dei
+#     sette - il RIENTRO dopo lo sweep ha un edge, una volta che il
+#     livello e' costruito abbastanza fitto da produrre 150 operazioni
+#     in campione?"
+#
+#  PERCHE' NON E' "LO STESSO MOTORE CON ALTRI PARAMETRI" (porta C3)
+#    Il motore morto e' ABTG_BreakoutCorso (R82): un ALTRO EA, che
+#    INSEGUE la rottura, con lo stop appena oltre il bordo del
+#    rettangolo. Questo e' ABTG_LiquiditySweep: entra CONTRO la rottura
+#    dopo il rientro, con lo stop oltre l'ESTREMO DELLO SWEEP, cioe'
+#    dalla parte OPPOSTA. Grilletto opposto, direzione opposta, stop
+#    opposto, sorgente diverso. E' una TESI NUOVA, non una taratura.
+#
+#  E NON E' NEMMENO "R89 con altri parametri"
+#    R89 girava a 21 barre H4 per lato = 84 ORE di accumulo per lato.
+#    Questa scala sta fra 2 e 48 ore: il punto di R89 non e' nemmeno
+#    dentro la griglia. E il PF 0,23 di R89 NON e' una misura del
+#    motore: n IS = 14 e' rumore. Nei criteri sta scritto che quel
+#    numero non si puo' citare.
+# ---------------------------------------------------------------------
+#  L'ASSE VERO E' UNO SOLO: LE ORE DI ACCUMULO DEL LIVELLO
+#    ore_per_lato = InpSwingBars x ore(TF di struttura).
+#    I cinque file insieme fanno una SCALA di 15 celle su 9 gradini:
+#
+#      ore/lato : 2   4   6   8   12  16  24  36  48
+#      celle    : 1   2   1   2   2   2   2   1   1
+#
+#    In QUESTO file i tre gradini sono: 2 / 4 / 6 ore per lato.
+#
+#    CINQUE GRADINI SONO DESCRITTI DA DUE CELLE DI FILE DIVERSI
+#    (4h = M30x8 e H1x4; 8h = H1x8 e H2x4; 12h = H1x12 e H3x4;
+#     16h = H2x8 e H4x4; 24h = H2x12 e H3x8).
+#    E' un CONTROLLO GRATUITO: se le due meta' di una coppia danno
+#    numeri lontani, la lettura "conta l'accumulo in ore" e' sbagliata
+#    e il round va riletto. Non costa una passata in piu'.
+#
+#  QUANTE CELLE, E PERCHE' NON DI PIU'
+#    3 celle per file x 5 file x 2 finestre = 30 passate, UN SOLO
+#    simbolo. Sette simboli sarebbero curve fitting per costruzione, e
+#    li vieta la regola gia' firmata: dalla famiglia JPY entra AL
+#    MASSIMO UNA SEDIA, mai il paniere. Confronto: R87b da solo faceva
+#    1.152 passate.
+# ---------------------------------------------------------------------
+#  L'ASPETTATIVA, SCRITTA PRIMA DEI NUMERI (e falsificabile)
+#    1. Il FONDO della scala (2-6 ore) sovra-tradera' e perdera': e' il
+#       fosso di R82 (segnale grezzo, migliaia di operazioni, segno
+#       negativo unanime). Se NON succede si cerca l'errore, non si
+#       festeggia.
+#    2. La CIMA della scala (36-48 ore) sara' sotto campione: e' il
+#       difetto di R89, attenuato ma non sparito.
+#    3. Se un edge esiste, sta in MEZZO (8-24 ore). E' una previsione,
+#       non un risultato.
+#    4. Il motore e' CONTROTENDENZA su la famiglia con i trend piu'
+#       violenti del forex: la Peggior Giornata % puo' bocciarlo anche
+#       con un PF buono. Si misura, non si stima.
+# ---------------------------------------------------------------------
+#  MODELLO: OHLC M1 (Modello 1), e non e' una scelta: e' un vincolo.
+#    I tick reali di BCM partono dal 2024.07.05: su una finestra che
+#    parte dal 2015 NON esistono. Per regola di casa l'OHLC non da'
+#    verdetti di PROMOZIONE. Questo round infatti NON PUO' PRODURRE UNA
+#    SEDIA: al massimo produce il permesso di un giro a tick reali sulla
+#    coda recente, poi un walk-forward vero, poi il demo.
+#    OGNI numero di questo round porta scritto "OHLC, non tick".
+# ---------------------------------------------------------------------
+#  PASSO 0 - LA FINESTRA SI MISURA, NON SI EREDITA.
+#    La riga di lancio esegue PRIMA due passate singole gemelle
+#    (magic 779500 / 779501) sulla cella PIU' DENSA della scala
+#    (M30 / 4 barre), su tutta la finestra, e legge la PRIMA DATA del
+#    per-trade. Se i dati non arrivano al @DAQUANDO, la corsa si ferma
+#    li' invece di bruciare la notte.
+#    Motivo misurato: il referto di raccolta di R82 dice "serie
+#    per-trade raccolte: 14 (SOLO FINESTRA OOS)" - quindi la copertura
+#    della sua IS 2007-2014 non e' MAI stata verificata su una data,
+#    solo su un conteggio.
+# =====================================================================
+@SIMBOLO  EURJPY
+@PERIODO  M15
+@DAQUANDO 2015.07.01
+
+# --- IL TF DI STRUTTURA: PINNATO. E' l'identita' di questo file.
+#     30=M30  16385=H1  16386=H2  16387=H3  16388=H4
+#     >>> VERIFICARE nell'anteprima .ini che passi il NUMERO e non il
+#         nome dell'enum: se passasse il nome, la passata girerebbe su
+#         un altro TF e tutto il file misurerebbe un'altra cosa.
+InpTF_Struttura=30
+
+# --- L'UNICO ASSE SPAZZOLATO: le barre di conferma per lato.
+#     Formato: default||start||step||stop||Y  ->  4, 8, 12 (tre celle)
+InpSwingBars=8||4||4||12||Y
+
+InpAllowLong=1
+InpAllowShort=1
+# 200 (il default) basta a 21 barre su H4. A 4 barre su M30 i livelli
+# vivi sono molti di piu': al tetto si butta il PIU' VECCHIO, quindi un
+# tetto stretto sarebbe un FILTRO TRAVESTITO che morde SOLO le celle
+# dense - cioe' proprio quelle che il round vuole misurare. Alzato a
+# 500 e pinnato uguale in tutti e cinque i file, cosi' non discrimina
+# nessuna cella. Non di piu' perche' ScansionaLivelli percorre TUTTI i
+# livelli vivi a ogni barra M15: il tetto e' anche il costo macchina.
+# >>> COME SI SA SE IL TETTO HA MORSO: il PASSO 0 gira la cella PIU'
+#     DENSA (M30 / 4 barre) con InpVerbose=1, e la riga "tetto livelli
+#     raggiunto" nel log e' la prova. Se compare, il round si ferma e il
+#     tetto si rialza PRIMA, non dopo aver letto i numeri.
+InpMaxLivelli=500
+
+# --- FINESTRA DI SESSIONE: SPENTA, e non e' una dimenticanza.
+#     Filtro appiccicato a motore gia' tarato: 0 successi su 5
+#     (R20 ADX, R12, R26, R45, R54). La sessione e' un ROUND SUCCESSIVO,
+#     non una cella di questo.
+InpUseSessionWindow=0
+InpSessStartHour=8
+InpSessStartMin=0
+InpSessEndHour=12
+InpSessEndMin=0
+
+# --- STOP, TARGET, GESTIONE: identici in tutte e 15 le celle.
+#     SL STRUTTURALE (modo 0): oltre l'estremo dello sweep + 0,5 ATR di
+#     respiro. E' il modo coerente con la tesi del motore.
+#     InpSLatr resta scritto ma e' INERTE con SLMode=0.
+InpAtrPeriod=14
+InpSLMode=0
+InpSLBufferAtr=0.5
+InpSLatr=1.5
+InpTP_RR=2.0
+
+# --- PARZIALE SPENTO, BREAKEVEN ACCESO: e' una SCELTA di gestione, ed
+#     e' dichiarata. L'ablazione del breakeven e' un ALTRO round.
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailing=0
+InpTrailATR=1.5
+
+# --- OPERATIVA: nessun tetto giornaliero. In un round che misura la
+#     FREQUENZA un tetto sarebbe autolesionista.
+InpMaxTradesPerDay=0
+
+# --- RISCHIO: pinnato a 1,00%. NON e' la taglia di campo (0,65%): e' il
+#     valore comune di R82/R86/R89, che rende confrontabili i profitti
+#     fra i round. E' un'ASSUNZIONE di Claude, non una firma di Claudio.
+InpRiskPercent=1.0
+
+# --- NOTIZIE: spente. Sono un filtro (e servirebbe un CSV in MQL5\Files).
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono: la guardia e' INERTE (fail-open totale) e i numeri
+#     restano confrontabili con gli altri round. Scritto apposta, cosi'
+#     nessuno lo va a cercare nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log e autotest SPENTI nella griglia. L'autotest si legge
+#     UNA volta sola, nella passata singola del PASSO 0.
+#     >>> E il CANARINO ora NON dipende piu' dal log: dalla v1.10 i
+#         quattro conteggi (Livelli Creati / Consumati / Invalidati /
+#         Segnali Scartati) sono COLONNE del CSV. In OTTIMIZZAZIONE MT5
+#         NON esegue le Print degli agent: la riga [LIQSWEEP][CONTEGGIO]
+#         sarebbe sparita proprio nelle passate che servono a misurarla.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=0
+InpComment=LIQSWJPYM30
+
+# --- MAGIC: 779500, VERGINE (verificato a grep su tutto il repo il
+#     21/08: 7795xx non compare da nessuna parte). NON il 772610 della
+#     bozza, che risulta GIA' PRESO. Un magic gia' visto fa incrociare
+#     al tester deal che non c'entrano (misurato in R54).
+InpMagic=779500
