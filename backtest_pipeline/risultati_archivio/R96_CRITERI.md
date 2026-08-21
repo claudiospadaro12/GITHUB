@@ -1,6 +1,13 @@
-# ⚖️ R96 — CRITERI — 🟡 **BOZZA, NON FIRMATA**
+# ⚖️ R96 — CRITERI — ✅ **FIRMATI DA CLAUDIO IL 21/08/2026, PRIMA DEI NUMERI**
 
-> ## ✍️ FIRMA DI CLAUDIO: ______________________  data: ____/____/2026, ore ____
+> ## ✍️ FIRMA DI CLAUDIO — 21/08/2026, in chat: **"FIRMO TUTTE"**
+>
+> Dichiarazione di cecità: nessun risultato di R96 è stato prodotto, letto o
+> guardato al momento della firma. L'EA `ABTG_CrossEmaApertura.mq5` non è mai
+> stato compilato né fatto girare. Le soglie di questo file **non sono state
+> toccate dalla firma**: restano quelle scritte sopra, comprese le due appena
+> completate (§4.2 "frazione alta" ≥ 0,50 · "vicino a zero" < 30) e
+> l'etichetta [DICHIARATO] sul paragrafo anti-DAX (§2).
 >
 > **Finché questa riga è vuota, R96 NON SI LANCIA.** Regola di casa, non
 > negoziabile: *i criteri si cambiano PRIMA dei numeri, non dopo*. Se un numero
@@ -142,6 +149,12 @@ separate o il round non misura niente:**
 > VOLATILITÀ REALE.** Alle 14:30 server apre il mercato **cash** americano, e
 > *quello* è l'evento che giustifica di buttare via la storia precedente e
 > ripartire da un seme.
+>
+> **[DICHIARATO], non [MISURATO]**: che alle 14:30 server "sul DAX non
+> cominci niente" è un'affermazione di buon senso (il DAX è già aperto da ore),
+> non un numero verificato in casa — nessun round ha misurato la volatilità
+> del DAX in quella fascia. Non tocca R96 (il DAX non gira in questo round),
+> ma la motivazione va letta con questa etichetta finché qualcuno non la misura.
 >
 > 🔧 **E qui va corretta una motivazione più debole che questo file conteneva
 > nella prima stesura**, perché era imprecisa e le imprecisioni si propagano:
@@ -363,6 +376,12 @@ con un pavimento e un'altra senza: il gate sarebbe stato **decorativo**.
 > campanella**, che è un motore legittimo e interessante — ma **non è
 > l'incrocio 9/21**, e il referto deve dirlo con quelle parole prima di ogni
 > altra riga.
+>
+> **I due numeri, congelati con la firma del 21/08 (chiudono l'annotazione
+> cosmetica lasciata aperta dal secondo giro di verifica):**
+> - **"FRAZIONE ALTA" (§8 punto 5) = `Incroci Seme` / `Sessioni Viste` ≥ 0,50.**
+> - **"VICINO A ZERO" (qui sopra) = `INCROCI VERI` < 30** (stessa soglia di
+>   casa del §3.2 punto 4: sotto, il campione non è nemmeno leggibile).
 
 📌 **La misura fine, se i conteggi divergono ma non abbastanza:** le serie
 per-trade escono in `Common\Files\abtg_trades_ABTG_CrossEmaApertura_<sym>_<magic>.csv`
