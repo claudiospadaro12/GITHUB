@@ -945,6 +945,18 @@ void ExportTrades()
 //  header e StringFormat si toccano INSIEME, o le colonne scalano di posto.
 double OnTester()
   {
+   //--- IL CANARINO ANCHE A SCHERMO, e serve davvero.
+   //    In OTTIMIZZAZIONE questa riga gira sull'AGENTE e non la legge nessuno
+   //    (checklist punto 34): per quello i numeri stanno ANCHE nelle colonne.
+   //    Ma in una PASSATA SINGOLA -- che e' il gate del PASSO 0 -- le colonne
+   //    NON esistono, perche' OnTesterDeinit (che scrive il CSV) gira solo in
+   //    ottimizzazione. Li' questa riga e' l'unico modo di leggere se l'ancora
+   //    ha trovato le sessioni. Le due strade non si sostituiscono: servono
+   //    tutte e due, e ognuna copre la modalita' in cui l'altra e' muta.
+   PrintFormat("[XEMAAP][CONTEGGIO] sessioni=%I64d incroci=%I64d ingressi=%I64d ancora=%d apertura=%02d:%02d durata=%d",
+               gSessioniViste, gIncrociVisti, gIngressiAperti, (int)InpAncoraSessione,
+               InpOpenHour, InpOpenMin, InpSessioneMinuti);
+
    ExportTrades();
    double stats[14];
    stats[0] = TesterStatistics(STAT_PROFIT);
