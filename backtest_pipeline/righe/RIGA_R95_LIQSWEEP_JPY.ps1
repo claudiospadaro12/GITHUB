@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R95_v4
+#  MARCATORE_RIGA_R95_v5
 #  RIGA_R95_LIQSWEEP_JPY.ps1  --  R95: sweep + reclaim su EURJPY M15
 # ---------------------------------------------------------------------
 #  >>> NON SI MANDA A CLAUDIO FINCHE' R95_CRITERI.md NON E' FIRMATO. <<<
@@ -59,7 +59,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R95.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v5' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (dieci secondi, nessun MT5 aperto, nessuna passata):
@@ -127,6 +127,10 @@ $Storico   = @{ Eseguito=$false; Esito="NON ESEGUITO" }
 $Problemi = New-Object System.Collections.ArrayList
 $Note     = New-Object System.Collections.ArrayList
 $Fatale   = ""
+#  $nAnt NASCE QUI, non dentro il try: la sezione 6 la stampa nel referto e il
+#  try puo' saltarne l'assegnazione a meta'. E' il 41-bis alla TERZA occasione
+#  (v2: le variabili, v4: una funzione, qui: un contatore). -1 = non misurato.
+$nAnt     = -1
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico($t,$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
@@ -159,7 +163,7 @@ function L($f,$et,$tf){
 #  E' il 41-bis: in v2 era stato chiuso per le VARIABILI ($Comune, $Sosta,
 #  $Risultati) e lasciato aperto per una FUNZIONE, un centimetro piu' in la'.
 #  CHI LA RIPORTA DENTRO IL try RIAPRE IL DIFETTO.
-#  $Risultati, $Ea e $Sym nascono sopra (righe 99-119): sono gia' disponibili.
+#  $Ea (riga 95), $Sym (96) e $Risultati (121) nascono sopra: gia' disponibili.
 function CsvDi($l,$tag){
   return (Join-Path $Risultati ($Ea + "\" + $Ea + "_" + $Sym + "_" + $tag + "_ohlc_" + $l.Et + ".csv"))
 }
@@ -220,6 +224,13 @@ if($vivi.Count -gt 0){
   Write-Host "    Non parto: col terminale aperto il tester non gira (zero CSV), e con" -ForegroundColor Red
   Write-Host "    MetaEditor aperto la compilazione torna subito senza compilare." -ForegroundColor Red
   Write-Host "    Chiudi MetaTrader E MetaEditor (tutte le istanze) e rilancia." -ForegroundColor Yellow
+  #  DICHIARATO AD ALTA VOCE, perche' D2 era esattamente questo: questo exit 1
+  #  sta DENTRO il try e quindi SALTA LA RACCOLTA - niente cartella, niente
+  #  referto, niente zip. Qui e' accettabile ed e' una scelta: siamo a due
+  #  secondi dal lancio, non e' stato prodotto NIENTE, e non c'e' niente da
+  #  raccogliere. Il messaggio a schermo E' il referto di questo caso.
+  #  Non vale per nessun altro punto di uscita: tutti gli altri passano dal
+  #  throw e quindi dalla raccolta.
   exit 1
 }
 
@@ -421,17 +432,32 @@ Dico ("COMPILATO " + $Ea) "Green"
 #     (M30 / 4 barre), derivate DAL FILE PROVA che gira davvero.
 # =====================================================================
 # --- PASSO 0-A: LO STORICO. I criteri par. 1.3 dicono "e' dentro la riga di
-#     lancio, non e' un compito a casa": eccolo. -TimeoutMin esplicito perche'
-#     il default dello script e' 90 minuti e su M1 di 11 anni li userebbe.
+#     lancio, non e' un compito a casa": eccolo. -TimeoutMin messo ESPLICITO
+#     per non ereditare il default (90): NON perche' li userebbe - con
+#     -SenzaTick il downloader si auto-limita a ~120 s per TF, cioe' ~4 minuti
+#     in tutto. 45 e' un tetto largo e sicuro, non una stima.
 #     Se non gira, NON si finge: si scrive "NON ESEGUITO" nel referto.
 if(-not $SoloControllo -and -not $SaltaPasso0){
   Titolo "4-A. PASSO 0-A - LO STORICO DI EURJPY (M1 + M15) DAL BROKER"
   $ScStorico = Join-Path $Work "scarica_storico.ps1"
   try{
     Scarica ("$RawPin/backtest_pipeline/scarica_storico.ps1") $ScStorico 'REFERTO STORICO'
+    #  >>> E ANCHE QUESTO GEMELLO VA PINNATO (difetto 24, seconda occorrenza). <<<
+    #  scarica_storico.ps1 ha $EABranch="lavoro" scritto FISSO (riga 55) e da
+    #  li' scarica ABTG_HistoryDownloader.mq5 dalla PUNTA del branch (riga 146).
+    #  Cioe': la FORMULA CHE CALCOLA IL VERDETTO - quella che il fix D1 ha
+    #  appena riletto riga per riga - arriverebbe NON PINNATA, mentre un'altra
+    #  sessione lavora sul repo. Il fallback locale non esiste sul PC di
+    #  backtest. Stesso trattamento del driver, e gate sullo STATO FINALE.
+    $stTxt = Get-Content -LiteralPath $ScStorico -Raw
+    $stNew = $stTxt -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
+    if($stNew -eq $stTxt){ throw "non sono riuscito a pinnare EABranch in scarica_storico.ps1: riga non trovata" }
+    Set-Content -LiteralPath $ScStorico -Value $stNew -Encoding ASCII
+    if(-not (Select-String -LiteralPath $ScStorico -SimpleMatch -Pattern ('$EABranch="' + $Pin + '"') -Quiet)){ throw "pin di EABranch NON verificato in scarica_storico.ps1" }
+    Dico ("scarica_storico.ps1 PINNATO: scarichera' ABTG_HistoryDownloader dal commit " + $Pin.Substring(0,[math]::Min(7,$Pin.Length))) "Green"
     $global:LASTEXITCODE = 0
     #  >>> -Da $DaQuando, MAI una data-catchall. <<<
-    #  ABTG_HistoryDownloader.mq5 riga 199 calcola il verdetto CONTRO questo
+    #  ABTG_HistoryDownloader.mq5 riga 200 calcola il verdetto CONTRO questo
     #  parametro:  else if(srvFirst > from + 86400) -> "IL BROKER NON HA PIU'
     #  STORICO",  con from = InpDataInizio. Con "1995.01.01" nessun broker ha
     #  EURJPY da li', quindi quel verdetto usciva PER COSTRUZIONE su M1 e su
@@ -471,7 +497,7 @@ if(-not $SoloControllo -and -not $SaltaPasso0){
                         " -> " + $(if($verd -ne ""){ $verd } else { "VERDETTO VUOTO" }))
         #  >>> LA GUARDIA SI SCRIVE AL POSITIVO. <<<
         #  I verdetti possibili sono CINQUE (ABTG_HistoryDownloader righe
-        #  195-200): NESSUN DATO, server non risponde, MANCA STORICO LOCALE,
+        #  197-201): NESSUN DATO, server non risponde, MANCA STORICO LOCALE,
         #  IL BROKER NON HA PIU' STORICO, COMPLETO. La v3 ne trattava DUE e
         #  gli altri tre - tutti brutti - cadevano nel ramo silenzioso del
         #  "va bene". Scritta cosi', l'UNICO valore che passa e' COMPLETO:
@@ -482,8 +508,11 @@ if(-not $SoloControllo -and -not $SaltaPasso0){
                               " -> " + $che + " | barre " + $r.Barre +
                               " | disco " + $r.PrimaDataLocale + " | broker " + $r.PrimaDataServer +
                               " | chiesto dal " + $DaQuando +
-                              ".  Se dice che il BROKER NON HA PIU' STORICO: inutile insistere, la finestra si SPOSTA. " +
-                              "Se dice MANCA STORICO LOCALE: si rilancia lo scarico. Comunque il gate 0-C decide.")
+                              ".  COME SI LEGGE: 'IL BROKER NON HA PIU' STORICO' = inutile insistere, la finestra si SPOSTA. " +
+                              "'MANCA STORICO LOCALE: rilancia' = e' SOLO da scaricare, e su M1 e' un esito REALISTICO ANCHE SU UNA CORSA SANA " +
+                              "(il downloader insiste 120 s per TF, e 11 anni di M1 EURJPY sono ~4,1 milioni di barre: in due minuti non scendono). " +
+                              "In quel caso il round E' GIRATO LO STESSO e il tester si scarica il resto da solo: NON e' 'NON HA PIU' STORICO'. " +
+                              "Comunque il gate 0-C e' la misura che decide.")
         }
       }
       if(-not $vistoSym){ [void]$Problemi.Add("PASSO 0-A: nessuna riga per " + $Sym + " nel referto storico.") }
@@ -796,7 +825,7 @@ foreach($l in $Lavori){
 }
 
 if($SoloControllo){
-  $nAnt = @(Get-ChildItem -LiteralPath $Sosta -Filter "anteprima_r95*.ini" -ErrorAction SilentlyContinue).Count
+  $nAnt = @(Get-ChildItem -LiteralPath $Sosta -Filter "anteprima_r95*.ini" -ErrorAction SilentlyContinue).Count   # dichiarata a -1 sopra il try
   if($nAnt -ne 5){ [void]$Problemi.Add("giro a vuoto: " + $nAnt + " anteprime .ini invece di 5.") }
   Write-Host ""
   Write-Host ("    anteprime .ini in sosta: " + $nAnt + " su 5   -> " + $Sosta) -ForegroundColor White
@@ -818,8 +847,16 @@ if($SoloControllo){
 #  6. RACCOLTA. Si fa SEMPRE, anche a esito parziale o fermato.
 # =====================================================================
 Titolo "6. RACCOLTA SUL DESKTOP"
-$Cart = Join-Path $Dsk ("R95_LIQSWEEP_JPY_" + $Stamp)
-$Zip  = Join-Path $Dsk ("R95_LIQSWEEP_JPY_" + $Stamp + ".zip")
+#  >>> OGNI ARTEFATTO DICE IN QUALE MODO E' STATO PRODOTTO. <<<
+#  Riprodotto eseguendo: in -SoloControllo uscivano cartella, zip e referto
+#  con la riga 'data:' FRESCA ed ESITO: OK, uscita 0 - IDENTICI a una corsa
+#  vera, con ZERO passate. La contromisura del punto 13 (la data di adesso)
+#  NON protegge, perche' quel referto e' nuovo davvero. E il giro a vuoto lo
+#  PRESCRIVE il punto 5: quel file sul Desktop c'e' prima di OGNI corsa.
+#  Il modo va nel NOME, non solo dentro al file. (checklist 50)
+$Modo = if($SoloControllo){ "CONTROLLO" } elseif($SaltaPasso0){ "SENZAPASSO0" } else { "CORSA" }
+$Cart = Join-Path $Dsk ("R95_LIQSWEEP_JPY_" + $Modo + "_" + $Stamp)
+$Zip  = Join-Path $Dsk ("R95_LIQSWEEP_JPY_" + $Modo + "_" + $Stamp + ".zip")
 $Referto = Join-Path $Cart "REFERTO_R95.txt"
 try{
   New-Item -ItemType Directory -Force -Path $Cart | Out-Null
@@ -842,7 +879,10 @@ try{
 
   $R = New-Object System.Collections.ArrayList
   [void]$R.Add("REFERTO R95 - SWEEP + RECLAIM su EURJPY M15  (OHLC M1, NON tick)")
+  [void]$R.Add("modo: " + $Modo + $(if($SoloControllo){ "   <<< GIRO A VUOTO: NESSUNA passata, NESSUN CSV, NESSUN numero di round qui dentro" } else { "" }))
   [void]$R.Add("data: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (questa data deve essere di ADESSO)")
+  [void]$R.Add("     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.")
+  [void]$R.Add("     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.")
   [void]$R.Add("avvio: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   durata: " + ((New-TimeSpan -Start $Avvio -End (Get-Date)).TotalHours).ToString("0.0",$INV) + " ore")
   [void]$R.Add("pin: " + $Pin)
   [void]$R.Add("criteri: risultati_archivio\R95_CRITERI.md")
@@ -889,6 +929,11 @@ try{
   foreach($p in $Problemi){ [void]$R.Add("  - " + $p) }
   [void]$R.Add("")
   if($Fatale -ne ""){ [void]$R.Add("ESITO: FERMATO -- " + $Fatale) }
+  elseif($SoloControllo){
+    [void]$R.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN")
+    [void]$R.Add("       numero di round in questo file. Anteprime .ini prodotte: " + $nAnt + " su 5.")
+    [void]$R.Add("       QUESTO ZIP NON E' IL ROUND: non va mandato come risultato.")
+  }
   else{
     #  L'esito guarda ANCHE $Problemi: con -SaltaPasso0 il referto elencava
     #  "la copertura dei dati NON e' verificata" e chiudeva con ESITO: OK,
@@ -928,8 +973,15 @@ Riga3 $Cart    ""
 Riga3 $Zip     "<- e' questo che mi mandi"
 Riga3 $Referto "<- la riga 'data:' deve essere di ADESSO"
 Write-Host "=====================================================================" -ForegroundColor White
-Write-Host "  ATTESI:  10 CSV (5 file x IS/OOS), 3 righe l'uno, 30 passate," -ForegroundColor White
-Write-Host "           piu' 2 per-trade del PASSO 0." -ForegroundColor White
+if($SoloControllo){
+  Write-Host ("  MODO: " + $Modo + " -- GIRO A VUOTO. NESSUNA passata, NESSUN CSV, NESSUN") -ForegroundColor Yellow
+  Write-Host "        numero di round. Anteprime .ini attese: 5." -ForegroundColor Yellow
+  Write-Host "        QUESTO ZIP NON E' IL ROUND e non va mandato come risultato." -ForegroundColor Yellow
+} else {
+  Write-Host ("  MODO: " + $Modo) -ForegroundColor White
+  Write-Host "  ATTESI:  10 CSV (5 file x IS/OOS), 3 righe l'uno, 30 passate," -ForegroundColor White
+  Write-Host "           piu' 2 per-trade del PASSO 0." -ForegroundColor White
+}
 foreach($l in $Lavori){
   $c = "Green"; if($l.Esito -ne "OK" -and $l.Esito -ne "SOLO CONTROLLO"){ $c = "Yellow" }
   Write-Host ("   " + $l.Prova.PadRight(32) + " " + $l.Esito) -ForegroundColor $c

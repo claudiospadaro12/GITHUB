@@ -119,9 +119,43 @@ violento. **Non si eredita una finestra su questa base.**
 
 ### 1.3 ✅ COME SI CHIUDE — ed è dentro la riga di lancio, non è un compito a casa
 
-**PASSO 0-A · si scarica.** `scarica_storico.ps1 -Simboli "EURJPY" -Da
-1995.01.01 -Timeframes "M1,M15" -SenzaTick -Auto`, poi si legge la colonna di
-stato: `COMPLETO` / `MANCA STORICO LOCALE` / `IL BROKER NON HA PIÙ STORICO`.
+**PASSO 0-A · si scarica.**
+
+```
+scarica_storico.ps1 -Simboli "EURJPY" -Da 2015.07.01 -Timeframes "M1,M15" -SenzaTick -Auto -TimeoutMin 45
+```
+
+> ### 🔑 **`-Da` NON è un "dammi tutto quello che hai": è il METRO con cui il verdetto viene calcolato.**
+> `ABTG_HistoryDownloader.mq5` riga 200 scrive
+> `else if(srvFirst > from + 86400) verdetto = "IL BROKER NON HA PIU' STORICO"`,
+> con `from = StringToTime(InpDataInizio)` — cioè **esattamente il valore di
+> `-Da`**. Passando una data-catchall tipo `1995.01.01`, quel verdetto esce
+> **per costruzione su ogni TF a ogni corsa**, e manda a spostare una finestra
+> che va benissimo. **`-Da` è la finestra dichiarata, e nient'altro.**
+
+Poi si legge la colonna **`Verdetto`** — **si chiama così**: l'intestazione la
+scrive `ABTG_HistoryDownloader.mq5` **riga 140**
+(`Simbolo, Timeframe, Barre, PrimaDataLocale, PrimaDataServer, Verdetto`).
+Chiedere `Stato` restituisce `$null` **in silenzio**.
+
+**I valori possibili sono CINQUE** (righe 197-201), non tre — e la guardia si
+scrive **al positivo**, `if(Verdetto -ne "COMPLETO")`, così un valore nuovo o
+vuoto **non può passare per buono**:
+
+| `Verdetto` | cosa vuol dire | cosa si fa |
+|---|---|---|
+| `COMPLETO` | i dati coprono la finestra chiesta | 🟢 l'unico che passa |
+| `MANCA STORICO LOCALE: rilancia` | c'è sul server, **non sul nostro disco** | 🟠 **su M1 è realistico anche su una corsa sana**: il downloader insiste 120 s per TF e 11 anni di M1 EURJPY sono ~4,1 M barre. **Il round gira lo stesso** — il tester si scarica il resto da solo. **NON è "non ha più storico"** |
+| `IL BROKER NON HA PIU' STORICO` | il server non arriva a `-Da` | 🔴 inutile insistere: **la finestra si SPOSTA**, non si scarica |
+| `server non risponde` | `srvFirst <= 0` | 🔴 non si sa niente: **non è un via libera** |
+| `NESSUN DATO` | zero barre | 🔴 idem |
+| *(vuoto o valore nuovo)* | formato del referto cambiato | 🔴 **non è stato letto**, e non è un via libera |
+
+Si leggono **entrambe** le date: `PrimaDataLocale` è ciò che c'è **già sul
+disco**, `PrimaDataServer` è ciò che il **broker** ha davvero.
+
+⚠️ **Nessuno di questi verdetti decide il round**: decide il **PASSO 0-C**.
+0-A serve a sapere *perché*, se 0-C esce rosso.
 
 **PASSO 0-B · si alza il tetto.** L'`.ini` del tester porta
 `[Charts] MaxBars=2000000000`. ⚠️ **[INFERITO]**: che il tester onori quella
