@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R95_v6
+#  MARCATORE_RIGA_R95_v7
 #  RIGA_R95_LIQSWEEP_JPY.ps1  --  R95: sweep + reclaim su EURJPY M15
 # ---------------------------------------------------------------------
 #  >>> NON SI MANDA A CLAUDIO FINCHE' R95_CRITERI.md NON E' FIRMATO. <<<
@@ -59,7 +59,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R95.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v6' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R95_v7' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (dieci secondi, nessun MT5 aperto, nessuna passata):
@@ -995,9 +995,25 @@ try{
   [void]$R.Add("")
   if($Fatale -ne ""){ [void]$R.Add("ESITO: FERMATO -- " + $Fatale) }
   elseif($SoloControllo){
-    [void]$R.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN")
-    [void]$R.Add("       numero di round in questo file. Anteprime .ini prodotte: " + $nAnt + " su 5.")
-    [void]$R.Add("       QUESTO ZIP NON E' IL ROUND: non va mandato come risultato.")
+    #  ANCHE QUI L'ESITO GUARDA $Problemi (punto 22). Il giro precedente aveva
+    #  allineato la CONSOLE al referto, cioe' la meta' che non viaggia: in un
+    #  giro a vuoto con problemi lo schermo diceva "CON PROBLEMI" e QUESTO FILE
+    #  "COMPLETATO". E in -SoloControllo i problemi ci sono per DISEGNO: le
+    #  anteprime mancanti (il gate proprio del giro a vuoto) o il driver uscito
+    #  male. Con un problema in elenco si leggeva "COMPLETATO" due righe sopra
+    #  il numero che lo smentiva. Il giro a vuoto e' cio' che autorizza le ore
+    #  vere: qui un COMPLETATO falso vale una notte di macchina.
+    if($Problemi.Count -gt 0){
+      [void]$R.Add("ESITO: GIRO A VUOTO CON PROBLEMI -- " + $Problemi.Count + " problemi nell'elenco qui sopra.")
+      [void]$R.Add("       NESSUNA passata, NESSUN CSV. Anteprime .ini prodotte: " + $nAnt + " su 5.")
+      [void]$R.Add("       IL CONTROLLO NON E' PASSATO: la corsa vera NON si lancia finche'")
+      [void]$R.Add("       l'elenco dei PROBLEMI non e' vuoto.")
+    }
+    else{
+      [void]$R.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN")
+      [void]$R.Add("       numero di round in questo file. Anteprime .ini prodotte: " + $nAnt + " su 5.")
+      [void]$R.Add("       QUESTO ZIP NON E' IL ROUND: non va mandato come risultato.")
+    }
   }
   else{
     #  L'esito guarda ANCHE $Problemi: con -SaltaPasso0 il referto elencava
