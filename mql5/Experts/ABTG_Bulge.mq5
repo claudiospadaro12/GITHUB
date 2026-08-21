@@ -11,9 +11,12 @@
 //|  suo posto come originale: qui non si tocca la sua logica.        |
 //|                                                                   |
 //|  LA STRATEGIA (INVARIATA, riga per riga):                         |
-//|    ARANCIO  IN-BULGE meta' bulge      (decisa su barra 1)         |
-//|    BLU      IN-BULGE 2a candela       (conferma su barra 0)       |
-//|    VIOLA    POST-BULGE                (su barra 0)                |
+//|    ARANCIO  IN-BULGE meta' bulge      (decisa su barra B+1)       |
+//|    BLU      IN-BULGE 2a candela       (conferma su barra B)       |
+//|    VIOLA    POST-BULGE                (su barra B)                |
+//|    B = Signal_Bar_Offset (v5.20, default 1 = barre CHIUSE).       |
+//|    Fino alla v5.10 era 0 fisso, cioe' la barra IN FORMAZIONE:     |
+//|    e' il difetto misurato da R92, vedi il punto 13 sotto.         |
 //|    SL = ATR x N (default 3)  |  TP = mediana BB, aggiornata       |
 //|    a ogni tick (UpdateAllTP).                                     |
 //|  Difesa del disegno, dichiarata dal coach e confermata in R91:    |
@@ -133,11 +136,71 @@
 //             del trailing (`TrailLockR`, aritmetica pura: r=1,40 ->
 //             fermo, 1,50 -> +0,50R, 2,00 -> +1,00R, 2,60 -> +1,50R).
 //
+//  v5.20  21/08/2026 -- DECISIONE DI CLAUDIO ("VAI CON BARRA 1"),
+//         cioe' la via 1 -- RACCOMANDATA -- del referto R92
+//         (`backtest_pipeline\risultati_archivio\R92_REFERTO.md`).
+//         UN SOLO input nuovo: `Signal_Bar_Offset` (default 1).
+//         13. IL DIFETTO CORRETTO, COI NUMERI CHE LO HANNO MISURATO.
+//             R92 non ha bocciato il BULGE per il profitto: si e'
+//             fermato sul CAMPIONE (S1 n>=30: **0 simboli su 22**, il
+//             massimo assoluto GBPUSD n=11) e nel farlo ha scoperto
+//             PERCHE'. `CheckSignal` gira UNA VOLTA per barra, al
+//             PRIMO TICK (guardia `g_lastBarTime` in `OnTick`): al
+//             primo tick della barra 0 vale **close == open**. Da qui,
+//             tre fatti MISURATI, non inferiti:
+//               - **VIOLA-PINE: 0 trade su 44 celle su 44.** Non "piu'
+//                 selettivo": morto. `close0 > open0` e' sempre falso.
+//               - **BLU: 0 per costruzione** sul simbolo del grafico,
+//                 cioe' su TUTTO lo scan (una passata = un simbolo).
+//                 Il 6 su 115 visto sul basket veniva dai simboli NON
+//                 del grafico, dove la barra 0 ha gia' un corpo perche'
+//                 l'EA se ne accorge in ritardo: rumore
+//                 d'implementazione, non una regola.
+//               - **VIOLA-EA: acceso ma con la condizione SVUOTATA.**
+//                 `|0| <= 1,5 x ATR` e' sempre vero. Le 106 operazioni
+//                 di R92 sono TUTTE VIOLA **con un filtro in meno** --
+//                 ed erano comunque **4,8 per simbolo su 4,5 anni**
+//                 (~1,07 l'anno contro i ~10,5 dichiarati). E' il
+//                 numero che pesa: la frequenza non era bassa
+//                 *nonostante* i filtri, era bassa **con uno in meno**.
+//             LA CORREZIONE: tutta la lettura di `CheckSignal` scorre
+//             avanti di B barre (conferma su B, segnale base su B+1,
+//             impulso da k=B+1, banda piatta su B+7). Il resto della
+//             funzione leggeva GIA' la barra 1: la barra 0 era
+//             l'ECCEZIONE, ed e' quella che e' stata tolta.
+//             NON e' cosmetica: **cambia quali segnali esistono**,
+//             quindi il round che ne esce e' un ROUND NUOVO, con
+//             criteri da firmare PRIMA dei numeri. E il costo si
+//             dichiara: l'ingresso avviene UNA BARRA DOPO.
+//             `Signal_Bar_Offset = 0` riproduce la v5.10 in modo
+//             ESATTO (stessi indici, stesso `barsNeeded`, stessi
+//             bound): serve a poter rifare R92, non a operare.
+//             14. `PurpleReactionOk` spaccata in due: la condizione
+//             vive in `PurpleReactionCore(..., bool usePine)`, la
+//             firma vecchia resta come guscio. Serve SOLO all'autotest
+//             (provare entrambe le varianti nella stessa passata).
+//             Nessun cambio di comportamento.
+//             15. AUTOTEST: tre asserzioni nuove che provano a
+//             macchina che il difetto e' morto -- (A) il PINE
+//             distingue verde/rossa, (B) l'EA scarta la candela
+//             impulsiva, (C) con `close==open` il PINE e' sempre falso
+//             e l'EA sempre vero, cioe' il difetto di R92 riprodotto
+//             apposta e dichiarato come comportamento di offset 0.
+//             Piu' la stampa della MAPPA DELLE BARRE in avvio: senza
+//             quella, un numero di questo EA non si sa a quale motore
+//             appartiene.
+//
 //  [DA DECIDERE] -- COSE VISTE LEGGENDO IL CODICE, **NON** CORRETTE.
 //  La logica e' di Claudio: la modifica e' una sua decisione, non una
 //  nostra. Sono scritte qui perche' chi legge un numero di R92 sappia
 //  cosa c'era sotto.
-//   (a) IL BLU E' CIECO SUL SIMBOLO DEL GRAFICO. [INFERITO dal codice,
+//   (a) [MISURATO da R92 il 21/08 -- e CORRETTO nella v5.20 con
+//       Signal_Bar_Offset=1. Il testo resta qui sotto com'era scritto
+//       PRIMA della misura: e' la traccia di cosa era inferito e cosa
+//       poi si e' visto. R92 ha trovato che il difetto colpiva DUE
+//       segnali, non uno: anche il VIOLA-PINE (0 trade su 44 celle su
+//       44) e, alla rovescia, il VIOLA-EA (filtro sempre vero).]
+//       IL BLU E' CIECO SUL SIMBOLO DEL GRAFICO. [INFERITO dal codice,
 //       DA MISURARE] CheckSignal gira UNA VOLTA per barra, al primo
 //       tick della nuova candela H1 (guardia g_lastBarTime). La
 //       conferma BLU pretende closes[0] > opens[0] su barra 0: al
@@ -168,7 +231,7 @@
 //+------------------------------------------------------------------+
 #property strict
 #property copyright "Claudio -- BULGE (motore di Claudio, migrato agli standard di casa)"
-#property version   "5.10"
+#property version   "5.20"
 
 #include <Trade\Trade.mqh>
 //--- firme B1/C1 del 18/08: la guardia del conto, lato EA.
@@ -225,6 +288,68 @@ input bool   Use_Purple = true;    // Viola   -- POST-BULGE
 //    DEFAULT false = comportamento IDENTICO a BULGE_MASTER: nessun
 //    cambio silenzioso, mai.
 input bool   Use_Purple_PineReaction = false; // Viola: true = ultima condizione del PINE (candela verde/rossa)
+
+//==================================================================
+// v5.20 -- SIGNAL_BAR_OFFSET: TUTTO SU BARRE CHIUSE
+// (decisione di Claudio del 21/08, in chat: "VAI CON BARRA 1", cioe'
+//  la via 1 -- RACCOMANDATA -- del referto R92)
+//
+//  PERCHE'. R92 ha MISURATO, non supposto, che il motore girava con
+//  due segnali su tre spenti da un difetto di indicizzazione:
+//    - VIOLA-PINE:  0 trade su 44 celle su 44;
+//    - BLU:         0 per costruzione sul simbolo del grafico;
+//    - VIOLA-EA:    acceso ma con la sua condizione SVUOTATA, cioe'
+//                   piu' largo dell'originale -- e con un filtro in
+//                   MENO faceva comunque 4,8 trade per simbolo su
+//                   4,5 anni (~1,07 l'anno contro i ~10,5 dichiarati).
+//  La causa e' una riga sola, in due facce: CheckSignal gira UNA VOLTA
+//  per barra, al PRIMO TICK (guardia g_lastBarTime in OnTick), e al
+//  primo tick della barra 0 vale close == open. Quindi
+//    close0 > open0            -> SEMPRE FALSO   (PINE e BLU: morti)
+//    |close0-open0| <= 1,5xATR -> SEMPRE VERO    (EA: filtro svuotato)
+//  Il resto di CheckSignal legge gia' la barra 1 (atr1, BB, isBulge1,
+//  reazione, origLong1, ricerca impulso da k=1): la lettura della
+//  barra 0 era l'ECCEZIONE, non la regola.
+//
+//  COSA FA. Detto B = Signal_Bar_Offset, sposta TUTTA la lettura in
+//  avanti di B barre:
+//    barra di CONFERMA (BLU) / POST-BULGE (VIOLA) : indice B
+//    barra del SEGNALE BASE (origLong/origShort,
+//      isBulge, candela di reazione, ATR e BB)    : indice B+1
+//    ricerca dell'ultimo impulso                   : parte da k = B+1
+//    banda piatta (6 barre prima del segnale)      : indice B+7
+//  Con B=1 la barra di conferma e' l'ULTIMA CHIUSA e il segnale base
+//  la penultima: nessun dato di una candela in formazione entra piu'
+//  in una decisione. NESSUN LOOK-AHEAD: si leggono solo barre gia'
+//  chiuse e si esegue al primo tick della barra 0, che e' il primo
+//  istante in cui quei dati esistono.
+//
+//  SEMANTICA DICHIARATA (non nascosta): Lookback_Bars continua a
+//  contare le barre RISPETTO ALLA BARRA DEL SEGNALE, non rispetto
+//  all'indice assoluto. barsSinceImp* resta un INDICE di array (serve
+//  a leggere highs[]/lows[] dell'impulso); il confronto con
+//  Lookback_Bars usa la distanza RELATIVA (barsSinceImp* - B). Cosi'
+//  la finestra dell'impulso e' la stessa di prima, solo traslata.
+//
+//  COSTO, DETTO CHIARO: l'ingresso avviene UNA BARRA DOPO rispetto
+//  alla v5.10. E' un cambio di semantica VERO, ed e' il motivo per cui
+//  il round che ne esce e' un ROUND NUOVO, con criteri da firmare
+//  prima dei numeri (R92_REFERTO.md, sezione "cosa significa").
+//
+//  DEFAULT 1 = la correzione accesa. Con 0 il file ricade ESATTAMENTE
+//  nel comportamento della v5.10 (no-op esatto: B=0 riduce ogni indice
+//  e ogni bound alla forma di prima, barsNeeded compreso): serve a
+//  poter RIPRODURRE R92 se un giorno servisse, non a usarlo.
+//
+//  EFFETTO ATTESO (da verificare col tester, NON dichiarato come
+//  fatto): il BLU e il VIOLA-PINE tornano a poter scattare -> piu'
+//  operazioni, quindi campione finalmente leggibile; il VIOLA-EA
+//  diventa piu' SELETTIVO (la condizione torna a filtrare) -> meno
+//  operazioni VIOLA di R92. Le due cose vanno in direzioni opposte:
+//  il conteggio per segnale ([BULGE-CONTA] / colonna signal del
+//  per-trade) e' l'unica misura che le separa.
+//==================================================================
+input int    Signal_Bar_Offset = 1;  // 0 = comportamento R92 (rotto, per riprodurlo) | 1 = tutto su barre chiuse
 
 //==================================================================
 // INPUT -- FILTRO ATR
@@ -352,6 +477,12 @@ string   g_symbols[];
 int      g_symbolCount = 0;
 datetime g_lastBarTime[];
 
+//--- v5.20: Signal_Bar_Offset gia' validato (un input non si puo'
+//    scrivere). Un valore negativo o assurdo qui dentro diventerebbe
+//    un indice negativo = ArrayOutOfRange silenzioso, quindi si
+//    limita UNA VOLTA in OnInit e si usa sempre questa copia.
+int      g_sigOff = 1;
+
 // --- CACHE HANDLE INDICATORE (uno per simbolo) ---
 int      g_hBands[];   // handle iBands per simbolo
 int      g_hATR[];     // handle iATR per simbolo
@@ -433,6 +564,19 @@ int OnInit()
    trade.SetExpertMagicNumber(InpMagic);
    trade.SetDeviationInPoints(10);
 
+   //--- v5.20: l'offset delle barre si valida QUI, una volta sola.
+   //    Fuori dall'intervallo [0..5] non c'e' nessun uso sensato: 0 e'
+   //    il comportamento rotto di R92 (tenuto solo per riprodurlo), 1
+   //    e' la correzione firmata; oltre si sposterebbe il segnale cosi'
+   //    indietro da non essere piu' lo stesso motore. Un valore
+   //    negativo darebbe indici negativi = ArrayOutOfRange muto.
+   g_sigOff = Signal_Bar_Offset;
+   if(g_sigOff < 0) g_sigOff = 0;
+   if(g_sigOff > 5) g_sigOff = 5;
+   if(g_sigOff != Signal_Bar_Offset)
+      PrintFormat("[BULGE] ATTENZIONE: Signal_Bar_Offset=%d fuori intervallo [0..5], limitato a %d",
+                  Signal_Bar_Offset, g_sigOff);
+
    // Parse simboli
    g_symbolCount = StringSplit(Symbols_List, ',', g_symbols);
    if(g_symbolCount <= 0)
@@ -493,7 +637,12 @@ int OnInit()
          " | Rischio: ", risk_msg,
          " | Max trade: ", Max_Trades,
          " | ADX: ", adx_msg,
-         " | Kill: ", kill_msg);
+         " | Kill: ", kill_msg,
+         //--- v5.20: l'offset va SEMPRE nel giornale, perche' senza di
+         //    esso un numero di questo EA non si sa a quale motore
+         //    appartiene (0 = R92 rotto, 1 = barre chiuse).
+         " | Signal_Bar_Offset: ", g_sigOff,
+         (g_sigOff == 0 ? " (R92 -- BLU e VIOLA-PINE MUTI, VIOLA-EA senza filtro)" : " (conferma su barra chiusa)"));
 
    //--- v5.10: riaggancio delle posizioni gia' vive, per misurare il
    //    rischio iniziale anche dopo un riavvio (gestione (b)).
@@ -557,6 +706,70 @@ void AutoTestBulge()
    else
       Print("[BULGE][AUTOTEST] atteso col Pine: rossa=scarta verde=passa impulsiva=passa ",
             ((!vEA_rossa && vEA_verde && vEA_impuls) ? "PASS" : "*** FAIL ***"));
+
+   //================================================================
+   //--- v5.20 -- LA PROVA CHE IL DIFETTO DI R92 E' MORTO.
+   //    Non e' una stampa di cortesia: R92 ha misurato 0 trade su 44
+   //    celle su 44 col VIOLA-PINE, e 106 operazioni VIOLA-EA con la
+   //    condizione svuotata. Le tre asserzioni qui sotto provano A
+   //    MACCHINA, senza mercato, che:
+   //      A) su barre CHIUSE il PINE DISTINGUE verde e rossa;
+   //      B) su barre CHIUSE l'EA SCARTA davvero la candela impulsiva;
+   //      C) con close == open (cioe' Signal_Bar_Offset=0, il primo
+   //         tick della barra in formazione) il PINE e' sempre falso e
+   //         l'EA sempre vero -- il difetto, RIPRODOTTO APPOSTA.
+   //    Sono aritmetica pura su candele sintetiche: valgono uguale nel
+   //    tester, sul demo e sul reale. ATR finto = 0,0010 (10 pip),
+   //    soglia EA = 1,5 x ATR = 0,0015 (15 pip).
+   //================================================================
+   PrintFormat("[BULGE][AUTOTEST] mappa barre: Signal_Bar_Offset=%d -> conferma su barra %d, segnale base su barra %d, impulso da k=%d, banda piatta su barra %d, barsNeeded=%d",
+               g_sigOff, g_sigOff, g_sigOff + 1, g_sigOff + 1, g_sigOff + 7,
+               Lookback_Bars * 2 + 10 + g_sigOff);
+
+   //--- A) PINE su barra CHIUSA: verde -> long si', short no; rossa -> il contrario.
+   bool pVerdeL = PurpleReactionCore(true,  1.10000, 1.10020, 0.0010, true);  // atteso true
+   bool pVerdeS = PurpleReactionCore(false, 1.10000, 1.10020, 0.0010, true);  // atteso false
+   bool pRossaL = PurpleReactionCore(true,  1.10020, 1.10000, 0.0010, true);  // atteso false
+   bool pRossaS = PurpleReactionCore(false, 1.10020, 1.10000, 0.0010, true);  // atteso true
+   bool aPine   = (pVerdeL && !pVerdeS && !pRossaL && pRossaS);
+   PrintFormat("[BULGE][AUTOTEST] A) PINE su barra chiusa: verde(long=%s short=%s) rossa(long=%s short=%s) -> atteso true/false/false/true: %s",
+               (pVerdeL?"true":"false"), (pVerdeS?"true":"false"),
+               (pRossaL?"true":"false"), (pRossaS?"true":"false"),
+               (aPine ? "PASS" : "*** FAIL ***"));
+
+   //--- B) EA su barra CHIUSA: il filtro deve poter SCARTARE qualcosa.
+   //    corpo 20 pip <= 15 pip? no -> deve scartare. corpo 5 pip -> passa.
+   bool eImpuls = PurpleReactionCore(true,  1.10000, 1.10200, 0.0010, false); // corpo 200 pip -> atteso false
+   bool eLargo  = PurpleReactionCore(true,  1.10000, 1.10020, 0.0010, false); // corpo 20 pip  -> atteso false
+   bool ePicco  = PurpleReactionCore(true,  1.10000, 1.10005, 0.0010, false); // corpo 5 pip   -> atteso true
+   bool aEA     = (!eImpuls && !eLargo && ePicco);
+   PrintFormat("[BULGE][AUTOTEST] B) EA su barra chiusa: corpo200pip=%s corpo20pip=%s corpo5pip=%s -> atteso scarta/scarta/passa: %s",
+               (eImpuls?"passa":"scarta"), (eLargo?"passa":"scarta"), (ePicco?"passa":"scarta"),
+               (aEA ? "PASS" : "*** FAIL ***"));
+
+   //--- C) IL DIFETTO DI R92, RIPRODOTTO APPOSTA (close == open).
+   bool r92PineL = PurpleReactionCore(true,  1.10000, 1.10000, 0.0010, true);  // atteso false
+   bool r92PineS = PurpleReactionCore(false, 1.10000, 1.10000, 0.0010, true);  // atteso false
+   bool r92EaL   = PurpleReactionCore(true,  1.10000, 1.10000, 0.0010, false); // atteso true
+   bool r92EaS   = PurpleReactionCore(false, 1.10000, 1.10000, 0.0010, false); // atteso true
+   bool aR92     = (!r92PineL && !r92PineS && r92EaL && r92EaS);
+   PrintFormat("[BULGE][AUTOTEST] C) difetto R92 riprodotto apposta (close==open, primo tick della barra 0): PINE long=%s short=%s (sempre FALSO = 0 trade su 44 celle su 44) | EA long=%s short=%s (sempre VERO = filtro svuotato): %s",
+               (r92PineL?"true":"false"), (r92PineS?"true":"false"),
+               (r92EaL?"true":"false"),   (r92EaS?"true":"false"),
+               (aR92 ? "PASS (riprodotto)" : "*** FAIL ***"));
+   Print("[BULGE][AUTOTEST] C) NB: quel comportamento e' quello di Signal_Bar_Offset=0, NON un guasto di oggi. ",
+         "E' tenuto vivo solo per poter riprodurre R92 -- non e' una configurazione da usare.");
+
+   //--- Verdetto d'insieme + coerenza con l'offset configurato.
+   if(!(aPine && aEA && aR92))
+      Print("[BULGE][AUTOTEST] *** FAIL *** la condizione del VIOLA non si comporta come atteso: NON mettere in campo.");
+   else if(g_sigOff >= 1)
+      Print("[BULGE][AUTOTEST] VERDETTO: PASS. Signal_Bar_Offset=", g_sigOff,
+            " -> conferma e post-bulge leggono una barra CHIUSA: BLU e VIOLA-PINE possono scattare, ",
+            "il filtro del VIOLA-EA torna a filtrare. Nessuna barra in formazione entra in una decisione (niente look-ahead).");
+   else
+      Print("[BULGE][AUTOTEST] VERDETTO: le tre prove passano, MA Signal_Bar_Offset=0 -> stai girando col motore di R92: ",
+            "BLU e VIOLA-PINE MUTI, VIOLA-EA senza filtro. I numeri che escono NON sono confrontabili con quelli a offset 1.");
 
    //--- v5.10 GESTIONE (b): la scala del trailing, aritmetica pura.
    if(Enable_BE_1R || Enable_Trailing_R)
@@ -627,7 +840,12 @@ void OnTick()
    {
       string sym = g_symbols[i];
 
-      // Solo alla nuova candela H1 (segnali su barra chiusa, no look-ahead)
+      // Solo alla nuova candela H1: UNA valutazione per barra, al PRIMO
+      // tick. v5.20 -- e' proprio questa guardia che rendeva velenosa la
+      // lettura della barra 0 (al primo tick close == open): adesso
+      // CheckSignal legge da Signal_Bar_Offset in poi, cioe' solo barre
+      // gia' CHIUSE col default 1. Niente look-ahead: si decide nel
+      // primo istante in cui quei dati esistono.
       datetime barTime = iTime(sym, PERIOD_H1, 0);
       if(barTime == g_lastBarTime[i]) continue;
       g_lastBarTime[i] = barTime;
@@ -1086,44 +1304,111 @@ void OpenOrder(string sym, bool isLong, double atr, double bbBasis, string comme
 // Col default (Use_Purple_PineReaction=false) questa funzione ritorna
 // ESATTAMENTE il vecchio candleNotImpulsive, per tutti e due i lati.
 //==================================================================
+//
+// v5.20 -- SPACCATA IN DUE, SENZA CAMBIARE NIENTE DI LOGICO.
+// La condizione vera vive in PurpleReactionCore(), che prende la
+// variante come PARAMETRO invece di leggerla dall'input globale.
+// Motivo: l'autotest deve poter provare TUTTE E DUE le versioni nella
+// stessa passata (altrimenti provi solo quella configurata, e il
+// difetto di R92 -- PINE sempre falso / EA sempre vero -- non lo
+// dimostri a macchina). La firma di PurpleReactionOk NON cambia:
+// i chiamanti dentro CheckSignal restano identici.
+// Le due barre passate sono ora quelle della barra di conferma
+// (indice Signal_Bar_Offset) e l'ATR e' quello della barra del
+// segnale base (indice Signal_Bar_Offset+1): vedi CheckSignal.
+//
+bool PurpleReactionCore(bool isLong, double openB, double closeB, double atrSig, bool usePine)
+{
+   if(usePine)
+      return isLong ? (closeB > openB) : (closeB < openB);   // VIOLA-PINE
+   return (MathAbs(closeB - openB) <= atrSig * 1.5);         // VIOLA-EA (default)
+}
+
 bool PurpleReactionOk(bool isLong, double open0, double close0, double atr1)
 {
-   if(Use_Purple_PineReaction)
-      return isLong ? (close0 > open0) : (close0 < open0);   // VIOLA-PINE
-   return (MathAbs(close0 - open0) <= atr1 * 1.5);           // VIOLA-EA (default)
+   return PurpleReactionCore(isLong, open0, close0, atr1, Use_Purple_PineReaction);
 }
 
 //==================================================================
-// LOGICA PRINCIPALE -- tutti e 3 i segnali (INVARIATA)
-// NB: identica a v3_PARALLEL_KILL. Cambia SOLO la sorgente dati
-//     (handle in cache via GetBB/GetATR per symIdx).
+// LOGICA PRINCIPALE -- tutti e 3 i segnali
+//
+// v5.20 -- L'UNICA COSA CAMBIATA E' L'INDICE DELLE BARRE.
+// Nessuna condizione e' stata aggiunta, tolta o riscritta: sono le
+// stesse identiche disuguaglianze della v5.10, lette B barre piu'
+// indietro (B = g_sigOff = Signal_Bar_Offset validato).
+//
+//   iCnf = B      barra di CONFERMA (BLU) e di POST-BULGE (VIOLA)
+//   iSig = B + 1  barra del SEGNALE BASE (origLong/origShort,
+//                 isBulge, candela di reazione, ATR e BB del segnale)
+//
+// Con B=0 ogni indice qui sotto torna esattamente a quello della
+// v5.10 (iCnf=0, iSig=1, ricerca impulso da k=1, banda piatta su
+// bbLSeries[7], barsNeeded = Lookback_Bars*2+10): il no-op e' esatto.
+// Con B=1 -- il default firmato -- la barra di conferma e' l'ULTIMA
+// CHIUSA, quindi close != open e' possibile: e' esattamente il difetto
+// che R92 ha misurato (PINE sempre falso, EA sempre vero) a morire.
+//
+// NIENTE LOOK-AHEAD, e si vede da qui: con B>=1 tutti gli indici letti
+// sono >= 1, cioe' barre gia' chiuse, e CheckSignal viene chiamata al
+// PRIMO tick della barra 0 (guardia g_lastBarTime in OnTick). Il primo
+// istante in cui questi dati esistono e' anche quello in cui si opera.
+//
+// NB: sorgente dati invariata (handle in cache via GetBB/GetATR).
 //==================================================================
 void CheckSignal(int symIdx)
 {
    string sym = g_symbols[symIdx];
-   int barsNeeded = Lookback_Bars * 2 + 10;
+
+   //--- v5.20: i due indici, calcolati una volta sola.
+   int iCnf = g_sigOff;       // barra di conferma / post-bulge
+   int iSig = g_sigOff + 1;   // barra del segnale base
+
+   //--- v5.20: barsNeeded cresce di B, altrimenti spostando la finestra
+   //    in avanti si accorcerebbe la PORTATA RELATIVA della ricerca
+   //    dell'impulso (il VIOLA guarda fino a Lookback_Bars*2 barre
+   //    indietro dal segnale). Con B=0 il valore e' quello di prima.
+   //    Serve anche a coprire l'indice iSig+6 della banda piatta.
+   int barsNeeded = Lookback_Bars * 2 + 10 + g_sigOff;
 
    double highs[], lows[], opens[], closes[];
    if(!GetBars(sym, barsNeeded, highs, lows, opens, closes)) return;
 
+   //--- v5.20, SCELTA DICHIARATA (era ambigua, e va detto invece di
+   //    nasconderla): i FILTRI DI CONTESTO -- AtrOk (ATR di barra 1 vs
+   //    la sua media), GetBBWidthMA (larghezza media delle bande) e
+   //    AdxFilterOk (ADX di barra 1) -- **NON** sono stati traslati:
+   //    continuano a leggere dalla barra 1, cioe' il dato CHIUSO piu'
+   //    fresco al momento della decisione.
+   //    PERCHE': (1) leggevano gia' barre chiuse, quindi non erano
+   //    parte del difetto di R92 e non introducono look-ahead nemmeno
+   //    adesso; (2) sono misure di REGIME, non geometria del segnale:
+   //    la cosa sensata e' guardarle il piu' vicino possibile
+   //    all'istante in cui si apre, non una barra indietro.
+   //    CONSEGUENZA da sapere leggendo i numeri: con B=1 questi filtri
+   //    valutano la barra SUCCESSIVA a quella del segnale base. Se un
+   //    round volesse allinearli al segnale, e' una modifica separata,
+   //    con il suo confronto: non e' stata fatta qui.
    if(!AtrOk(symIdx)) return;
 
-   // ATR e BB sulla barra 1 (chiusa)
-   double atr1 = GetATR(symIdx, 1);
-   if(atr1 <= 0) return;
+   //--- ATR e BB della barra del SEGNALE BASE (chiusa)
+   double atrSig = GetATR(symIdx, iSig);
+   if(atrSig <= 0) return;
 
-   double bbUpper1, bbLower1, bbBasis1;
-   if(!GetBB(symIdx, 1, bbUpper1, bbLower1, bbBasis1)) return;
+   double bbUpperSig, bbLowerSig, bbBasisSig;
+   if(!GetBB(symIdx, iSig, bbUpperSig, bbLowerSig, bbBasisSig)) return;
 
-   // BB Width corrente e MA
-   double bbWidth1  = bbUpper1 - bbLower1;
-   double bbWidthMA = GetBBWidthMA(symIdx);
+   // BB Width del segnale e MA
+   double bbWidthSig = bbUpperSig - bbLowerSig;
+   double bbWidthMA  = GetBBWidthMA(symIdx);
    if(bbWidthMA <= 0) return;
-   bool isBulge1 = (bbWidth1 >= bbWidthMA * Bulge_Multi);
+   bool isBulgeSig = (bbWidthSig >= bbWidthMA * Bulge_Multi);
 
-   // BB sulla barra 0 (corrente) per il TP iniziale
-   double bbUpper0, bbLower0, bbBasis0;
-   if(!GetBB(symIdx, 0, bbUpper0, bbLower0, bbBasis0)) return;
+   //--- BB della barra di CONFERMA (con B=1 e' l'ultima chiusa; con
+   //    B=0 e' la barra in formazione = il difetto di R92).
+   //    E' anche la mediana usata come TP iniziale: la piu' recente
+   //    disponibile fra i dati chiusi.
+   double bbUpperCnf, bbLowerCnf, bbBasisCnf;
+   if(!GetBB(symIdx, iCnf, bbUpperCnf, bbLowerCnf, bbBasisCnf)) return;
 
    // Pre-carica le serie ATR e BB per il loop impulso (un solo CopyBuffer)
    double atrSeries[];
@@ -1133,11 +1418,17 @@ void CheckSignal(int symIdx)
 
    //----------------------------------------------------------------
    // TROVA ULTIMO IMPULSO
+   // v5.20: la ricerca parte da iSig (= B+1), cioe' dalla barra del
+   // segnale, non piu' da 1. barsSinceImp* resta un INDICE ASSOLUTO
+   // di array (serve a leggere highs[]/lows[] dell'impulso); la
+   // distanza da confrontare con Lookback_Bars e' quella RELATIVA al
+   // segnale, calcolata sotto (relImp*). Dichiarato apposta: la
+   // finestra dell'impulso e' la stessa di prima, solo traslata.
    //----------------------------------------------------------------
    int barsSinceImpDown = -1;
    int barsSinceImpUp   = -1;
 
-   for(int k = 1; k < barsNeeded - 1; k++)
+   for(int k = iSig; k < barsNeeded - 1; k++)
    {
       double atrK = atrSeries[k];
       double bbUK = bbUSeries[k], bbLK = bbLSeries[k];
@@ -1150,24 +1441,33 @@ void CheckSignal(int symIdx)
       if(barsSinceImpDown >= 0 && barsSinceImpUp >= 0) break;
    }
 
+   //--- v5.20: distanza dell'impulso RISPETTO ALLA BARRA DEL SEGNALE.
+   //    1 = l'impulso E' la barra del segnale (come nella v5.10, dove
+   //    barsSinceImp*=1 significava proprio quello). Con B=0
+   //    relImp* == barsSinceImp*: no-op esatto.
+   int relImpDown = (barsSinceImpDown < 0) ? -1 : (barsSinceImpDown - g_sigOff);
+   int relImpUp   = (barsSinceImpUp   < 0) ? -1 : (barsSinceImpUp   - g_sigOff);
+
    //----------------------------------------------------------------
    // MEDIANA E BANDA OPPOSTA TOCCATE DOPO IMPULSO
+   // v5.20: la scansione parte da iSig, non da 1 -- le barre fra la
+   // conferma e il segnale non fanno parte del "dopo l'impulso".
    //----------------------------------------------------------------
    bool midAfterImpDown = false, midAfterImpUp = false;
    bool oppAfterImpDown = false, oppAfterImpUp = false;
 
-   if(barsSinceImpDown > 0)
+   if(barsSinceImpDown > g_sigOff)   // == "> 0" quando B = 0
    {
-      for(int k = 1; k < barsSinceImpDown; k++)
+      for(int k = iSig; k < barsSinceImpDown; k++)
       {
          double bbUK = bbUSeries[k], bbLK = bbLSeries[k], bbBK = bbBSeries[k];
          if(highs[k] >= bbBK && lows[k] <= bbBK) { midAfterImpDown = true; }
          if(highs[k] >= bbUK)                     { oppAfterImpDown = true; }
       }
    }
-   if(barsSinceImpUp > 0)
+   if(barsSinceImpUp > g_sigOff)
    {
-      for(int k = 1; k < barsSinceImpUp; k++)
+      for(int k = iSig; k < barsSinceImpUp; k++)
       {
          double bbUK = bbUSeries[k], bbLK = bbLSeries[k], bbBK = bbBSeries[k];
          if(highs[k] >= bbBK && lows[k] <= bbBK) { midAfterImpUp = true; }
@@ -1177,90 +1477,106 @@ void CheckSignal(int symIdx)
 
    //----------------------------------------------------------------
    // BANDA PIATTA (per POST-BULGE)
+   // v5.20: sempre 6 barre PRIMA della barra del segnale -> iSig+6,
+   // cioe' g_sigOff+7 (con B=0 e' il vecchio indice 7).
    //----------------------------------------------------------------
    bool lowerFlat = false, upperFlat = false;
    {
-      double bbU6 = bbUSeries[7], bbL6 = bbLSeries[7];
-      lowerFlat = MathAbs(bbLower1 - bbL6) <= atr1 * 0.6;
-      upperFlat = MathAbs(bbUpper1 - bbU6) <= atr1 * 0.6;
+      int idxFlat = iSig + 6;   // = g_sigOff + 7
+      double bbU6 = bbUSeries[idxFlat], bbL6 = bbLSeries[idxFlat];
+      lowerFlat = MathAbs(bbLowerSig - bbL6) <= atrSig * 0.6;
+      upperFlat = MathAbs(bbUpperSig - bbU6) <= atrSig * 0.6;
    }
 
    //----------------------------------------------------------------
-   // CANDELA DI REAZIONE SU BARRA 1
+   // CANDELA DI REAZIONE SULLA BARRA DEL SEGNALE (iSig)
    //----------------------------------------------------------------
-   bool bullReaction1 = (closes[1] > opens[1] && lows[1]  <= bbLower1);
-   bool bearReaction1 = (closes[1] < opens[1] && highs[1] >= bbUpper1);
+   bool bullReactionSig = (closes[iSig] > opens[iSig] && lows[iSig]  <= bbLowerSig);
+   bool bearReactionSig = (closes[iSig] < opens[iSig] && highs[iSig] >= bbUpperSig);
 
    //----------------------------------------------------------------
-   // SEGNALE ORIGINALE SU BARRA 1 (base per arancio e blu)
+   // SEGNALE ORIGINALE SULLA BARRA iSig (base per arancio e blu)
    //----------------------------------------------------------------
-   bool origLong1 = isBulge1 &&
-        barsSinceImpDown >= 1 && barsSinceImpDown <= Lookback_Bars &&
-        !midAfterImpDown && !oppAfterImpDown && bullReaction1;
+   bool origLongSig = isBulgeSig &&
+        relImpDown >= 1 && relImpDown <= Lookback_Bars &&
+        !midAfterImpDown && !oppAfterImpDown && bullReactionSig;
 
-   bool origShort1 = isBulge1 &&
-        barsSinceImpUp >= 1 && barsSinceImpUp <= Lookback_Bars &&
-        !midAfterImpUp && !oppAfterImpUp && bearReaction1;
+   bool origShortSig = isBulgeSig &&
+        relImpUp >= 1 && relImpUp <= Lookback_Bars &&
+        !midAfterImpUp && !oppAfterImpUp && bearReactionSig;
 
    //----------------------------------------------------------------
-   // ARANCIO -- META' BULGE (su barra 1)
+   // ARANCIO -- META' BULGE (sulla barra del segnale)
    //----------------------------------------------------------------
    if(Use_Orange)
    {
-      if(origLong1 && barsSinceImpDown > 0)
+      if(origLongSig && barsSinceImpDown > g_sigOff)   // == "> 0" quando B = 0
       {
          double impMid = (highs[barsSinceImpDown] + lows[barsSinceImpDown]) / 2.0;
-         if(closes[1] >= impMid && AdxFilterOk(symIdx, sym, "ARANCIO"))
-            OpenOrder(sym, true, atr1, bbBasis1, InpComment + "_ARANCIO_L");
+         if(closes[iSig] >= impMid && AdxFilterOk(symIdx, sym, "ARANCIO"))
+            OpenOrder(sym, true, atrSig, bbBasisSig, InpComment + "_ARANCIO_L");
       }
-      if(origShort1 && barsSinceImpUp > 0)
+      if(origShortSig && barsSinceImpUp > g_sigOff)
       {
          double impMid = (highs[barsSinceImpUp] + lows[barsSinceImpUp]) / 2.0;
-         if(closes[1] <= impMid && AdxFilterOk(symIdx, sym, "ARANCIO"))
-            OpenOrder(sym, false, atr1, bbBasis1, InpComment + "_ARANCIO_S");
+         if(closes[iSig] <= impMid && AdxFilterOk(symIdx, sym, "ARANCIO"))
+            OpenOrder(sym, false, atrSig, bbBasisSig, InpComment + "_ARANCIO_S");
       }
    }
 
    //----------------------------------------------------------------
-   // BLU -- 2A CANDELA (conferma su barra 0)
+   // BLU -- 2A CANDELA (conferma sulla barra iCnf)
+   // v5.20: QUI viveva meta' del difetto di R92. Con B=0 la conferma
+   // pretende closes[0] > opens[0] su una barra appena aperta, dove
+   // close == open: FALSO SEMPRE, quindi il BLU non poteva scattare
+   // (0 per costruzione sul simbolo del grafico, cioe' su tutto lo
+   // scan a un simbolo per passata). Con B=1 la barra e' chiusa.
+   // L'ultimo termine confronta con il MINIMO/MASSIMO della barra del
+   // SEGNALE (iSig), non della conferma: era lows[1]/highs[1] quando
+   // la conferma era 0, e resta la stessa relazione.
    //----------------------------------------------------------------
    if(Use_Blue)
    {
-      bool confirmLong  = (closes[0] > opens[0] && !(lows[0]  <= bbLower0) && closes[0] > lows[1]);
-      bool confirmShort = (closes[0] < opens[0] && !(highs[0] >= bbUpper0) && closes[0] < highs[1]);
+      bool confirmLong  = (closes[iCnf] > opens[iCnf] && !(lows[iCnf]  <= bbLowerCnf) && closes[iCnf] > lows[iSig]);
+      bool confirmShort = (closes[iCnf] < opens[iCnf] && !(highs[iCnf] >= bbUpperCnf) && closes[iCnf] < highs[iSig]);
 
-      if(origLong1  && confirmLong  && AdxFilterOk(symIdx, sym, "BLU"))
-         OpenOrder(sym, true,  atr1, bbBasis0, InpComment + "_BLU_L");
-      if(origShort1 && confirmShort && AdxFilterOk(symIdx, sym, "BLU"))
-         OpenOrder(sym, false, atr1, bbBasis0, InpComment + "_BLU_S");
+      if(origLongSig  && confirmLong  && AdxFilterOk(symIdx, sym, "BLU"))
+         OpenOrder(sym, true,  atrSig, bbBasisCnf, InpComment + "_BLU_L");
+      if(origShortSig && confirmShort && AdxFilterOk(symIdx, sym, "BLU"))
+         OpenOrder(sym, false, atrSig, bbBasisCnf, InpComment + "_BLU_S");
    }
 
    //----------------------------------------------------------------
-   // VIOLA -- POST-BULGE (su barra 0)
+   // VIOLA -- POST-BULGE (sulla barra iCnf)
+   // v5.20: e QUI viveva l'altra meta'. Con B=0 la stessa riga rendeva
+   // il PINE sempre FALSO (0 trade su 44 celle su 44) e l'EA sempre
+   // VERO (|0| <= 1,5xATR): le 106 operazioni di R92 sono tutte VIOLA
+   // con la condizione "candela di reazione" DISATTIVATA.
    //----------------------------------------------------------------
    if(Use_Purple)
    {
-      // v5.10: LE UNICHE RIGHE CAMBIATE DENTRO CheckSignal. Col default
-      // valgono il vecchio candleNotImpulsive, identico per i due lati.
-      bool reactionLong0  = PurpleReactionOk(true,  opens[0], closes[0], atr1);
-      bool reactionShort0 = PurpleReactionOk(false, opens[0], closes[0], atr1);
+      // v5.10: le due versioni della condizione (vedi PurpleReactionOk).
+      // v5.20: le legge sulla barra di conferma iCnf, con l'ATR della
+      //        barra del segnale (iSig) come metro.
+      bool reactionLongCnf  = PurpleReactionOk(true,  opens[iCnf], closes[iCnf], atrSig);
+      bool reactionShortCnf = PurpleReactionOk(false, opens[iCnf], closes[iCnf], atrSig);
 
       bool postBulgeLong =
-           barsSinceImpDown >= 1 && barsSinceImpDown <= Lookback_Bars * 2 &&
+           relImpDown >= 1 && relImpDown <= Lookback_Bars * 2 &&
            midAfterImpDown && !oppAfterImpDown &&
-           lows[0] <= bbLower0 && lowerFlat &&
-           reactionLong0;
+           lows[iCnf] <= bbLowerCnf && lowerFlat &&
+           reactionLongCnf;
 
       bool postBulgeShort =
-           barsSinceImpUp >= 1 && barsSinceImpUp <= Lookback_Bars * 2 &&
+           relImpUp >= 1 && relImpUp <= Lookback_Bars * 2 &&
            midAfterImpUp && !oppAfterImpUp &&
-           highs[0] >= bbUpper0 && upperFlat &&
-           reactionShort0;
+           highs[iCnf] >= bbUpperCnf && upperFlat &&
+           reactionShortCnf;
 
       if(postBulgeLong  && AdxFilterOk(symIdx, sym, "VIOLA"))
-         OpenOrder(sym, true,  atr1, bbBasis0, InpComment + "_VIOLA_L");
+         OpenOrder(sym, true,  atrSig, bbBasisCnf, InpComment + "_VIOLA_L");
       if(postBulgeShort && AdxFilterOk(symIdx, sym, "VIOLA"))
-         OpenOrder(sym, false, atr1, bbBasis0, InpComment + "_VIOLA_S");
+         OpenOrder(sym, false, atrSig, bbBasisCnf, InpComment + "_VIOLA_S");
    }
 }
 
