@@ -1705,3 +1705,190 @@ occhio umano; qui e' l'indirizzo della prova.
 > riga** (`cerca $EABranch=` , `cerca "Model=4"`): il marcatore si sposta da solo
 > col codice, il numero no. **Una citazione che non si puo' mantenere e' meglio
 > scritta come pattern da cercare che come indirizzo fisso.**
+
+---
+
+## 🆕 AGGIUNTE DEL 21/08/2026 — trovate RI-verificando la riga R95 dopo le 12 correzioni
+
+_Contesto: la v2 della riga R95 chiudeva davvero tutti e dodici i difetti della
+prima verifica (contati: 32 righe vive nei 5 file prova, `\r?` davanti a ogni `$`
+multilinea, tre radici di log con "zero letti = FATALE", magic 779502 vergine,
+sosta prima dei gate, header e `StringFormat` dell'EA a 16 colonne su tutti e tre
+i rami). **I due difetti nuovi stanno DENTRO due delle correzioni**: una non fa
+niente, l'altra legge un campo che non esiste. E' la lezione del 23-bis
+generalizzata — **la contromisura ha il suo difetto, e va verificata come se
+fosse codice nuovo, perche' lo e'.**_
+
+## 43. 🧯 `-LiteralPath` SU UN PERCORSO CHE CONTIENE UN WILDCARD: non cancella niente, e dice che ha cancellato
+
+_Difetto vero, `backtest_pipeline/righe/RIGA_R95_LIQSWEEP_JPY.ps1` riga 344
+(commit `88eb08f`), trovato PRIMA dell'invio. E' la correzione del punto 38
+(svuotare `Tester\cache`) **resa inerte dalla riga dopo**._
+
+```powershell
+$nc = @(Get-ChildItem -LiteralPath $cache -File -EA SilentlyContinue).Count
+Remove-Item -LiteralPath (Join-Path $cache "*") -Recurse -Force -EA SilentlyContinue
+Dico ("Tester\cache svuotata (" + $nc + " file).") "Green"      # <-- MENTE
+```
+
+`-LiteralPath` vuol dire **"il valore e' usato esattamente com'e' scritto,
+nessun carattere e' interpretato come wildcard"**. Quindi `...\cache\*` non e' "il
+contenuto di cache": e' un file **che si chiama `*`**, che su Windows non puo'
+esistere. `Remove-Item` non trova niente, `-EA SilentlyContinue` mangia l'errore,
+e il `Dico` subito sotto stampa **in verde** il numero di file che c'erano
+**prima** — cioe' proprio il numero che fa sembrare riuscita la cancellazione che
+non e' avvenuta.
+
+Il veleno e' che nasce **per riflesso**: il resto dello script usa `-LiteralPath`
+ovunque, ed e' giusto (`-LiteralPath <cartella> -Filter "*.csv"` e' corretto: il
+wildcard sta nel `-Filter`, non nel percorso). L'unico punto in cui il wildcard
+sta **nel percorso** e' quello in cui `-LiteralPath` lo uccide. Lo snippet del
+punto 38 in questa stessa checklist e' scritto giusto (`Remove-Item (Join-Path
+$cacheT "*") -Recurse -Force`, posizionale = `-Path`): la correzione e' stata
+copiata **e migliorata a mano**, e la "migliorata" e' il difetto.
+
+Conseguenza misurata su R95: alla **prima** corsa non cambia niente (magic
+vergine, celle mai girate), ma a **ogni rilancio** le 30 passate sono identiche e
+MT5 le **ripesca dalla cache** senza scrivere i per-trade — con i CSV a 3 righe,
+`ESITO: OK`, e il canarino anti-cache del driver (righe 690-694) spento. E' il
+punto 38 che si riapre da solo dopo essere stato dichiarato chiuso.
+
+> 🥇 **Grep secco prima di mandare: `LiteralPath[^|)]*\*`.** Ogni occorrenza in
+> cui l'asterisco sta **dentro il percorso** e non dentro un `-Filter` e' una
+> riga da rifare.
+> 🥈 **E la cancellazione si VERIFICA, non si annuncia**: si conta prima, si
+> conta **dopo**, e si stampano tutti e due i numeri. Un `Remove-Item` con
+> `-EA SilentlyContinue` non ha nessun modo di dirti che non ha fatto niente.
+> ```powershell
+> $nc = @(Get-ChildItem -LiteralPath $cache -Recurse -File -EA SilentlyContinue).Count
+> Get-ChildItem -LiteralPath $cache -Force -EA SilentlyContinue | Remove-Item -Recurse -Force -EA SilentlyContinue
+> $nr = @(Get-ChildItem -LiteralPath $cache -Recurse -File -EA SilentlyContinue).Count
+> if($nr -gt 0){ [void]$Problemi.Add("cache NON svuotata: " + $nr + " file su " + $nc + " rimasti") }
+> Dico ("Tester\cache: " + $nc + " prima, " + $nr + " dopo.")
+> ```
+> ⚠️ Il perimetro resta comunque **solo** `Tester\cache`: `Get-ChildItem` su
+> quella cartella non puo' raggiungere `bases\<server>\ticks` in nessun caso.
+> Corollario generale: **una guardia che cancella si misura sull'EFFETTO
+> (quanto e' rimasto), mai sull'INTENZIONE (quanti ce n'erano).**
+
+### 43-bis. 🕳️ LA COLONNA LETTA CON UN NOME CHE NEL CSV NON C'E': PowerShell risponde `$null` e tira dritto
+
+_Stessa riga, riga 408, ed e' **la correzione del D9** (leggere il referto dello
+storico invece di fingere di averlo letto):_
+
+```powershell
+[void]$Note.Add("PASSO 0-A: " + $r.Simbolo + " " + $r.Timeframe + " prima data " + $r.PrimaDataLocale + " -> " + $r.Stato)
+```
+
+`ABTG_StoricoScaricato.csv` lo scrive `mql5/Scripts/ABTG_HistoryDownloader.mq5`
+riga 140, e le sue colonne sono
+`Simbolo,Timeframe,Barre,PrimaDataLocale,PrimaDataServer,**Verdetto**`.
+**`Stato` non esiste.** Senza `Set-StrictMode`, una proprieta' inesistente su un
+oggetto di `Import-Csv` vale `$null` **in silenzio**: la nota esce come
+`PASSO 0-A: EURJPY M1 prima data 2015.01.05 -> ` e finisce cosi', nel referto,
+con l'aria di essere completa. Il campo perso e' esattamente quello che dice
+**"IL BROKER NON HA PIU' STORICO"**, cioe' l'unica ragione per cui il PASSO 0-A
+esiste. In piu' la colonna citata e' quella sbagliata: `scarica_storico.ps1`
+chiude stampando _"la colonna che serve e' **PrimaDataServer**"_, e
+`PrimaDataLocale` e' solo quello che c'e' gia' sul disco.
+
+E' il 40-ter ("non ho potuto misurare" e "ho misurato e va bene" nello stesso
+ramo) applicato al **contratto con l'artefatto di un gemello**: il punto 33 dice
+di non fidarsi di due artefatti che descrivono la stessa cosa, questo dice di non
+fidarsi nemmeno dello **schema** di un artefatto che scrive qualcun altro.
+
+> **I nomi delle colonne di un CSV altrui si LEGGONO nel codice che lo SCRIVE**
+> (`FileWrite(fh,"Simbolo","Timeframe",...)`), non si ricordano — e la lettura
+> porta la sua guardia, cosi' un cambio di schema si legge invece di sparire:
+> ```powershell
+> if(("" + $r.Verdetto) -eq ""){ [void]$Problemi.Add("referto storico senza colonna Verdetto: formato cambiato, NON letto.") }
+> ```
+> Regola gemella del punto 34-bis (_il canarino letto dalla parte che lo scrive_):
+> qui il canarino e' letto dalla parte giusta, ma **con la chiave sbagliata**, e
+> il risultato e' lo stesso — una stringa vuota che passa per una misura.
+
+---
+
+## 🆕 AGGIUNTE DEL 21/08/2026 — trovate RI-verificando la riga R94 dopo le correzioni
+
+### 44. 🚨 LA SPIA CHE NON DISTINGUE "SALTATA" DA "NON GIRATA": il falso allarme sul percorso di RIPRESA che il documento stesso consiglia
+
+_Difetto vero, `lancia_r94.ps1` v2 righe 472-522, trovato nel giro di
+ri-verifica. E' il **rovescio** del punto 38: li' il problema era una spia che
+**mancava**, qui e' la stessa spia che **suona quando non deve**._
+
+Il punto 38 ha messo la spia giusta — *"un pass ripescato dalla cache non scrive
+i per-trade"* — e il driver la implementa cosi':
+
+```powershell
+if ($ptPresi -eq 0) {
+  Write-Host "    RIPESCATA dalla cache invece che eseguita (punto 38)..."
+  $ripescate += $c.K            # -> finisce nel referto che legge Claudio
+}
+```
+
+Ma **"nessun per-trade fresco" ha DUE cause, non una**, e la seconda e' sana:
+`walkforward_generico.ps1` alla riga 615 **salta** la finestra il cui CSV esiste
+gia' (`"$tag gia' fatto, salto"`). Una cella saltata **non apre MT5** e quindi
+**non riscrive i per-trade** — esattamente come una ripescata.
+
+E la riga di lancio **consiglia proprio quel percorso**: *"SE LA CORSA SI
+INTERROMPE: si rimanda lo stesso BLOCCO 2. Le celle gia' fatte vengono saltate:
+la ripresa qui e' sana e va usata."* Esito: alla prima interruzione — su 24
+passate a tick reali, cioe' ore di macchina — il referto avrebbe scritto
+`CELLE SENZA PER-TRADE FRESCO (sospette di RIPESCAGGIO dalla cache): A20 A37 B20`
+su celle **perfettamente sane**, e proprio sul **canarino**, che e' il controllo
+per cui il round esiste. Claudio avrebbe fermato tutto in buona fede.
+
+> **Ogni spia costruita sull'ASSENZA di un artefatto deve enumerare TUTTE le
+> strade per cui quell'artefatto puo' mancare, e chiamarle con nomi diversi.**
+> Qui: si guarda **prima** se i CSV della cella ci sono gia' (= il driver la
+> saltera'), e allora l'esito e' `CELLE SALTATE`, non `sospette di ripescaggio`.
+> ```powershell
+> $saltata = (($giaFatte -eq 2) -and (-not $Rifai) -and (-not $SoloControllo))
+> if ($ptPresi -eq 0) { if ($saltata) { $saltate += $c.K } else { $ripescate += $c.K } }
+> ```
+> E la distinzione **non e' solo cosmetica: aggiunge un'informazione che serve**.
+> Una cella saltata ha i numeri di un giro precedente, in cui la cache era stata
+> svuotata **allora** e non adesso: se e' una cella di canarino, va scritto che
+> il suo controllo vale **per quel giro**.
+>
+> 🧪 **La verifica si fa sul percorso che il documento CONSIGLIA**, non solo su
+> quello dritto: e' lo stesso principio del 35-bis (`-Gamba` sistemato, `-Solo`
+> no). Se la riga dice "se si interrompe, rimanda lo stesso blocco", allora la
+> ripresa **e' un caso d'uso normale** e i controlli si leggono in quello stato.
+
+### 45. 🧟 IL RESIDUO DELLA CORREZIONE DICHIARATA CHIUSA — e' un problema di METODO, non di contenuto
+
+_Difetto vero, trovato nella stessa ri-verifica di R94, in DUE posti diversi
+dopo che il difetto era stato dichiarato chiuso al 100%._
+
+Il difetto D2 di R94 era: *"la riga promette il funnel `[BB-FUNNEL]`, che in
+ottimizzazione non puo' esistere"* (punto 34-ter). La correzione e' stata fatta
+bene **dove il difetto era stato citato** — la sezione del funnel, il referto,
+la stampa a schermo — e **sopravvissuta in due posti che nessuno ha rigrepato**:
+
+| dove | cosa diceva ancora | perche' conta |
+|---|---|---|
+| `lancia_r94.ps1` riga 37, **intestazione** | *"porta via i LOG DEGLI AGENT (li' c'e' il funnel [BB-FUNNEL]...)"* | e' il **riassunto di cosa fa lo script**: il primo posto che legge la sessione dopo |
+| `R94_CRITERI.md` riga 306, **tabella "cosa e' stato verificato"** | *"Unico residuo: `lot<=0` (riga 1133), **contato dal funnel**"* | quel file **viaggia nello zip**: manda Claudio a cercare un artefatto che non esiste |
+
+Nello stesso file, venti righe piu' sotto, c'era gia' scritto che quella frase
+era sbagliata (*"Era: 'l'unico scarto e' contato dal funnel' — un rimando a un
+artefatto inesistente"*). **Il documento conteneva l'errore e la sua smentita,
+non riconciliati.**
+
+> **Chiudere un difetto non e' correggere il punto in cui e' stato segnalato: e'
+> un `grep` del CONCETTO su TUTTI gli artefatti del round**, commenti e
+> intestazioni compresi.
+> ```
+> grep -rn 'BB-FUNNEL\|funnel' <driver> <riga> <criteri> <file prova>
+> ```
+> Regola pratica, e vale come criterio di accettazione di una correzione:
+> **la stringa che nominava il difetto deve comparire SOLO dove si spiega che e'
+> stato corretto.** Se compare ancora in un posto che *afferma* la cosa vecchia,
+> il difetto **non e' chiuso**, e' stato **spostato**.
+> ⚠️ Corollario sui verbali: quando un documento tiene insieme il testo vecchio
+> e la nota di correzione, **si riconcilia il testo vecchio**, non si aggiunge
+> solo la nota in fondo — perche' le tabelle si leggono per prime e le note in
+> fondo per ultime.
