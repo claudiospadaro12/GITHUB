@@ -18,8 +18,9 @@ FiboH4 — quindi il primo libero e' il 94.
 
 **Banco:** `ABTG_BreakingBand` **v1.03** · H1 · 3 simboli · **4 celle per
 simbolo × 2 finestre = 24 passate** · tick reali BCM · deposito 100k · rischio
-1,0% · file prova `prove\R94a_bb37_GBPUSD.txt`, `R94b_bb37_EURUSD.txt`,
-`R94c_bb37_AUDUSD.txt` · driver `walkforward_generico.ps1`.
+1,0% · **6 file prova** `prove\R94{a,b,c}_bb_{GBPUSD,EURUSD,AUDUSD}_p{20,37}.txt`
+· driver `walkforward_generico.ps1`, lanciato da **`lancia_r94.ps1`** · riga di
+lancio: **`backtest_pipeline/righe/RIGA_R94_BB37.md`**.
 
 ---
 
@@ -114,6 +115,7 @@ casa (`BREAKING_BAND_TESI.md`: BB 37/3 sugli **indici**), la deviazione 1.4 no.
 | Rischio | **1,0%** — vedi §2.1 |
 | Celle | `InpBBPeriod` ∈ {20, 37} × `InpBBDev` ∈ {1.4, 2.0} |
 | Simboli/pattern | GBPUSD patt.2 (CONT+INV) · EURUSD patt.0 (CONT) · AUDUSD patt.1 (INV) |
+| Artefatti | **6 file prova**: per ogni simbolo un gemello **P20** e un gemello **P37**. Dentro un file si muove **una variabile sola** (la deviazione); fra i due file se ne muove **un'altra sola** (il periodo) |
 | Fermi | `InpStdPeriod=20`, `InpStdSmaPeriod=50`, `InpMinRR=0`, `InpTPMode=0`, `InpBulgeWidthMult=1.35`, `InpBulgeNetMoveATR=1.0`, `InpRetestBufferATR=0.15` |
 
 ### 2.1 ⚠️ UNA DECISIONE CHE E' DI CLAUDIO, NON DELL'AGENTE — il rischio
@@ -233,3 +235,70 @@ cambiare rischio renderebbe il confronto con la base **non comparabile**, e la
 frequenza e' la grandezza che il rischio non tocca.
 ⚠️ **Claudio puo' ribaltare questa assunzione con una parola**, e in quel caso la
 base va rimisurata insieme alla cella.
+
+---
+
+# 🔧 NOTA TECNICA POST-FIRMA — 21/08/2026, scritta a numeri ANCORA MAI VISTI
+
+**Cosa e' cambiato dopo la firma, e perche' NON tocca la firma.**
+
+Al momento della firma il disegno era **3 file prova con DUE assi ciascuno**
+(`InpBBPeriod` × `InpBBDev`). Passandolo da `backtest_pipeline/controlla_prova.py`
+il controllo lo ha **bocciato**, e aveva ragione:
+
+```
+- 2 assi Y: un file prova misura UNA variabile alla volta (InpBBPeriod, InpBBDev)
+```
+
+Riscritto in **6 file prova con UN asse ciascuno**: per ogni simbolo un gemello
+**P20** (periodo pinnato a 20) e un gemello **P37** (periodo pinnato a 37),
+entrambi con l'unico asse `InpBBDev` = 1.4 / 2.0.
+
+> ✅ **Le celle misurate sono le STESSE, una per una**, e il conto torna
+> identico a quello firmato: **12 celle, 24 passate**, stesso fattoriale 2×2,
+> stesse soglie, stesso rischio, stessa finestra.
+> 🔄 **E' cambiata solo la forma degli artefatti**, non il contenuto della
+> misura. Le soglie **non sono state toccate**, il canarino nemmeno.
+> ⚠️ **Se Claudio ritiene che anche la forma facesse parte di cio' che ha
+> firmato, lo dica: si rifa' prima di lanciare, non dopo.**
+
+Verifica successiva, dopo la riscrittura:
+```
+file: 6 | celle totali: 12 | passate (celle x 2 finestre): 24 | problemi: 0
+ESITO: OK
+```
+
+## 🔎 Il buco chiuso mentre si scriveva la riga di lancio
+
+Scrivendo `lancia_r94.ps1` e' saltato fuori un difetto **del giro a vuoto**, che
+vale per **tutti** i round di questa casa e non solo per R94:
+
+> 🔴 **`walkforward_generico.ps1 -SoloControllo` NON COMPILA.**
+> Esce alla **riga 503**; la compilazione sta alla **riga 603**.
+> Quindi un `#include` mancante o di versione sbagliata **non si vede nel giro a
+> vuoto** e salta fuori **a corsa avviata**, come `undeclared identifier` dentro
+> il driver — esattamente il difetto **33-bis** della checklist, che era stato
+> scritto guardando un altro sintomo.
+
+`lancia_r94.ps1` lo chiude per conto suo: **compila lui**, da riga di comando,
+**anche in `-SoloControllo`**, e verifica che il `.ex5` sia stato **riscritto
+adesso** (coppia sorgente/binario, punto 27). Costa dieci secondi.
+📌 **Il fix vero** — far compilare il driver anche in `-SoloControllo`, o
+almeno dirlo — **resta in coda come lavoro a se'**, e sta scritto qui perche'
+non si perda.
+
+## 🧪 Cosa e' stato verificato prima di consegnare
+
+| controllo | strumento | esito |
+|---|---|---|
+| file prova | `controlla_prova.py` | ✅ 6 file, 12 celle, 24 passate, 0 problemi |
+| driver PowerShell | `lint_ps1.py` | ✅ 0 problemi |
+| sintassi PowerShell | parser vero (`Parser::ParseFile`) | ✅ 0 errori |
+| ASCII puro nel `.ps1` | conteggio byte > 127 | ✅ 0 |
+| estrazione `#include` | eseguita sul sorgente vero | ✅ trova `ABTG_PausaGuardian.mqh`, salta `Trade/Trade.mqh` |
+| difetto 33 (secondo artefatto) | eseguito su `walkforward_generico.ps1` | ✅ 0 occorrenze dell'EA nel driver |
+| il rischio cambia `n`? | lettura del sorgente | ✅ no: Guardian fail-open nel tester, nessun kill switch giornaliero, `InpMaxPositions` conta posizioni. Unico residuo: `lot<=0` (riga 1133), **contato dal funnel** |
+
+⚠️ **Quello che NON e' verificato:** la riga **non e' mai stata eseguita su
+Windows**. Il parser conferma la sintassi, non il comportamento. Per questo il
+**BLOCCO 1 (giro a vuoto) va mandato per primo**.

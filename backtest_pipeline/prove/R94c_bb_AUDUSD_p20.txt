@@ -1,0 +1,135 @@
+# =====================================================================
+#  R94 -- BOLLINGER 37/1.4 SUL BREAKING BAND
+#  R94c-P20 / GEOMETRIA DELLE BANDE   AUDUSD H1   periodo FISSO 20
+#  EA: ABTG_BreakingBand v1.03        Etichetta: r94c20
+#  Driver: walkforward_generico.ps1   Lanciato da: lancia_r94.ps1
+#
+#  ASSE UNICO: InpBBDev = 1.4 / 2.0     (2 celle x 2 finestre = 4 passate)
+#  InpBBPeriod e' PINNATO a 20 in questo file. Il periodo cambia
+#  cambiando FILE (P20 <-> P37): cosi' dentro un file si muove UNA
+#  variabile sola, e fra i due file se ne muove un'altra sola.
+#  I quattro file di questo simbolo formano il fattoriale 2x2:
+#      P20 dev 2.0 = BASE ATTUALE (canarino)   P20 dev 1.4 = solo deviazione
+#      P37 dev 2.0 = solo periodo              P37 dev 1.4 = LA CELLA DEL CORSO
+#
+#  Criteri: risultati_archivio\R94_CRITERI.md -- FIRMATI da Claudio il
+#  21/08/2026 ("metro,frequenza, firmo r93, r94 lancia, e prepara jpy"),
+#  a numeri MAI VISTI. Le soglie non sono state toccate dalla firma.
+# ---------------------------------------------------------------------
+#  QUESTO SIMBOLO -- patt. 1 = solo INVERSIONE
+#    E' LA SORELLA CHE CONTA DI PIU'. L'INVERSIONE entra sul RETEST
+#    DELLA BANDA dell'impulso: e' il pattern su cui la larghezza delle
+#    bande agisce in modo piu' diretto. Se la deviazione 1.4 non muove
+#    il conteggio NEMMENO qui, non lo muovera' da nessuna parte.
+#    (IS con n=5: aneddoto, non finestra. Il PF 47,99 e' cinque operazioni.)
+# ---------------------------------------------------------------------
+#  DA DOVE VIENE IL 37 - 1.4, E IL SUO LIMITE, DETTO PRIMA
+#    PIANO DI TRADING del POINT BREAK (Christian Bertacchi), slide 3:
+#    "Bande di Bollinger: Periodo 37 Deviazione 1.4", confermato dal
+#    grafico di slide 4. Dichiarato DUE VOLTE dalla fonte, non dedotto.
+#    MA nasce su un ALTRO motore (mean-reversion che entra FUORI dalle
+#    bande, su D1/H12) e la sua tesi non e' la tesi del Breaking Band.
+#    >>> QUI SI TRAPIANTA UN PARAMETRO SENZA LA SUA TESI. Per questo la
+#        domanda del round NON e' "quanto rende": vedi sotto.
+#    Nota di famiglia (BREAKING_BAND_TESI.md righe 15 e 41): il corso
+#    Bollinger di casa dice BB(37, dev 3) sugli INDICI e BB(20, dev 2)
+#    sulle VALUTE. Il periodo 37 non e' estraneo alla famiglia; la
+#    deviazione 1.4 SI'. Il 2x2 serve a separare le due cose.
+# ---------------------------------------------------------------------
+#  LA DOMANDA DEL ROUND -- NON E' "QUANTO RENDE"
+#    La famiglia gira su n OOS di 11 / 13 / 26: sotto la soglia dei 150
+#    dell'Emendamento della Finestra e sotto il 30 che R91 stesso ha
+#    dichiarato ("il MERITO e' SOSPESO"). Nessuna cella di R94 puo'
+#    essere promossa, qualunque numero faccia.
+#    LA DOMANDA E': la geometria 37/1.4 CAMBIA LA FREQUENZA?
+#    Bande piu' strette (dev 1.4) = piu' tocchi = piu' setup. Se il
+#    conteggio sale, la famiglia guadagna un campione LEGGIBILE, che
+#    oggi non ha. Se non sale, la cella e' inutile e si archivia
+#    SENZA NEMMENO APRIRE LA COLONNA PROFIT. Congelato nella firma.
+# ---------------------------------------------------------------------
+#  IL TIPO DI DATO
+#    DATO:     TICK REALI del broker BCM, forex AUDUSD H1.
+#    MODELLO:  "Ogni tick basato su tick reali" (come R33, R34, R91).
+#    DEPOSITO: 100.000 (-Deposito 100000). NON e' un dettaglio: e'
+#              l'unico modo di riprodurre R34 al centesimo.
+#    RISCHIO:  1,0%. ATTENZIONE, e' un'ASSUNZIONE DICHIARATA DA CLAUDE,
+#              NON una firma di Claudio: lui ha firmato "lancia" senza
+#              pronunciarsi sul rischio. Motivo dell'assunzione: R94
+#              misura la FREQUENZA contro la base gia' misurata della
+#              famiglia, che gira all'1,0%; cambiare rischio renderebbe
+#              il confronto non comparabile. Verificato nel sorgente che
+#              il rischio NON cambia il conteggio operazioni: il Guardian
+#              e' fail-open nel tester, non c'e' nessun kill switch di
+#              perdita giornaliera (l'equity a riga 463-469 e' SOLO
+#              metrica per OnTester) e l'unico scarto legato al lotto
+#              (riga 1133, lot<=0) e' contato dal funnel [BB-FUNNEL].
+#              Claudio puo' ribaltarla con una parola: in quel caso la
+#              base R34 va RIMISURATA insieme alla cella.
+# ---------------------------------------------------------------------
+#  IL CANARINO -- SI LEGGE PRIMA DI TUTTO IL RESTO, ED E' IN QUESTO FILE
+#    BASE MISURATA in R34 (deposito 100k, tick reali, BB 20 / 2.0):
+#      IS  2024.09.26 -> 2025.06.09 : +1.291,32 | PF 47,99127 | DD 0,6753 | n=5
+#      OOS 2025.06.10 -> 2026.06.30 : +1.840,67 | PF  2,74743 | DD 1,2695 | n=11
+#      EP/trade OOS = 167,33364.  Frequenza = 0,87 trade/mese.
+#    La cella InpBBDev=2.0 di QUESTO file DEVE riprodurre le due righe
+#    qui sopra AL CENTESIMO. Se non torna, si e' mosso qualcosa che non
+#    doveva muoversi: IL ROUND SI FERMA LI', e si cerca il perche'
+#    PRIMA di leggere qualunque altro numero -- comprese le celle P37,
+#    che senza canarino valido non hanno un termine di paragone.
+# ---------------------------------------------------------------------
+#  IL CONTEGGIO OPERAZIONI -- E' LA MISURA DEL ROUND, NON UN CONTORNO
+#    >>> La colonna Trades del CSV va scritta accanto a OGNI numero.
+#    Soglie decise PRIMA (criteri par. 3), base di questa sedia n OOS 11:
+#      n OOS >= 30  -> campione leggibile: si apre la discussione
+#                     (una PROPOSTA motivata, mai una promozione).
+#      n OOS 12-29  -> aumento non decisivo: si scrive e si archivia.
+#      n OOS <= 11  -> nessuna frequenza aggiunta: ARCHIVIATA SECCA,
+#                     e il profitto non si guarda nemmeno.
+#    REGOLA D'INSIEME: la cella deve salire su ALMENO 2 SIMBOLI SU 3.
+#    Un solo simbolo che sale mentre gli altri due scendono e' rumore.
+#    ASIMMETRIA DI CASA: a QUALUNQUE n il DRAWDOWN si legge lo stesso.
+#    Un drawdown e' un fatto accaduto, non una stima. Cancello: DD > 8%.
+#    E la misura che va scritta accanto a ogni riga:
+#      aspettativa dei trade AGGIUNTI =
+#        (Profit_cella - Profit_base) / (n_cella - n_base)
+#      Se e' NEGATIVA, la frequenza e' stata comprata con operazioni
+#      perdenti: e' un peggioramento ANCHE SE n sale.
+# ---------------------------------------------------------------------
+#  COSA NON SI TOCCA
+#    InpStdPeriod 20 e InpStdSmaPeriod 50 restano fermi: il filtro di
+#    deviazione standard NON segue il periodo delle bande. Muoverlo
+#    vorrebbe dire cambiare due cose insieme e non poter piu' dire chi
+#    ha spostato i numeri.
+#    InpRetestBufferATR resta 0.15: e' il buffer del limit sul retest, e
+#    con bande piu' strette la tentazione di ritoccarlo e' forte. NON si
+#    ritocca: sarebbe una seconda variabile nello stesso round.
+#    E LE SEDIE VIVE IN CAMPO NON SI TOCCANO (magic 772161 e sorelle):
+#    R94 gira nel tester, su copia, con i magic del driver.
+# =====================================================================
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+InpTF=16385
+InpPatternMode=1
+InpTPMode=0
+InpRiskPercent=1.0
+InpBulgeWidthMult=1.35
+InpBulgeNetMoveATR=1.0
+InpMinRR=0
+InpStdPeriod=20
+InpStdSmaPeriod=50
+InpRetestBufferATR=0.15
+
+# --- GUARDIAN acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono: guardia INERTE (fail-open totale), numeri
+#     confrontabili con la base R34. Scritto qui apposta, cosi'
+#     nessuno lo va a cercare nei log.
+InpUsaGuardian=1
+
+# --- IL PERIODO DELLE BANDE: PINNATO, non e' l'asse di questo file.
+InpBBPeriod=20
+
+# --- L'ASSE, UNO SOLO: la deviazione. 1.4 = il numero del corso,
+#     2.0 = quello della guida ufficiale che gira in campo oggi.
+InpBBDev=2.0||1.4||0.6||2.0||Y
+# =====================================================================

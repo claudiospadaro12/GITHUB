@@ -802,12 +802,23 @@
 >   **riprodurre le due letture stampate sulle slide** (AUDUSD 57.02 · GBPUSD
 >   83.73). Se ci riesce, **la domanda a Christian non serve piu'**. Costa ~10
 >   minuti di MT5, non apre posizioni, non tocca nessuna sedia.
-> - 🥉 **P-PB3 (Bollinger 37/1.4): pronta come R94** — 3 file prova
->   (`prove\R94a/b/c_bb37_*.txt`) + criteri **BOZZA NON FIRMATA**
->   (`risultati_archivio\R94_CRITERI.md`). 24 passate. ⚠️ **La domanda NON e'
->   "quanto rende"**: con n OOS 11-26 il merito e' sospeso per dichiarazione —
->   e' una **sonda di FREQUENZA**. Da firmare o **archiviare** (esito gia'
->   previsto dentro i criteri), e serve la scelta del rischio **1,0% vs 0,80%**.
+> - 🥉 **P-PB3 (Bollinger 37/1.4): ✅ FIRMATA — e' R94, PRONTO AL LANCIO.**
+>   Firma di Claudio del 21/08 (*"r94 lancia"*), a numeri mai visti.
+>   🚀 **Riga di lancio: `backtest_pipeline/righe/RIGA_R94_BB37.md`** (due
+>   blocchi: giro a vuoto, poi la corsa). Driver `lancia_r94.ps1`
+>   (marcatore `R94-LANCIO-v1`), **6 file prova**, 12 celle, **24 passate**,
+>   tick reali, deposito 100k. 🚦 **Posto in coda: dietro R92 e R93** (una
+>   macchina, un lavoro), e **branch `lavoro` CONGELATO** mentre gira.
+>   ⚠️ **La domanda NON e' "quanto rende"**: con n OOS 11/13/26 il merito e'
+>   sospeso per dichiarazione — e' una **sonda di FREQUENZA**. Se non sale, il
+>   profitto non si guarda nemmeno.
+>   💰 Il **rischio 1,0%** non e' firmato: e' un'**assunzione dichiarata**,
+>   verificata nel sorgente come non influente sul conteggio operazioni.
+>   🔧 **Trovato scrivendo la riga, e vale per TUTTI i round:**
+>   `walkforward_generico.ps1 -SoloControllo` **non compila** (esce alla riga
+>   503, la compilazione sta alla 603) -> un `#include` mancante salta fuori
+>   solo a corsa avviata. `lancia_r94.ps1` compila da solo anche nel giro a
+>   vuoto; il **fix del driver resta in coda come lavoro a se'**.
 
 
 _Scritta il 16/08/2026 su sua richiesta: **"metti tutto in coda, quando arrivo

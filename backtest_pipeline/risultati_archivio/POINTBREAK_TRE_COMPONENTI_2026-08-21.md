@@ -20,7 +20,7 @@ punto 3 erano le tre proposte superstiti del Point Break.
 |---|---|---|---|
 | 🥇 | **P-PB1** — pavimento di volatilita' sullo stop | 🟡 **BLOCCATA, ma il blocco e' ORA MISURABILE** — lo strumento e' scritto e pronto | 10 minuti di MT5 sul PC di backtest (`ABTG_SondaADR`), poi la risposta arriva dai numeri. La domanda a Claudio resta, ma **potrebbe non servire piu'** |
 | 🥈 | **P-PB2** — il filtro "EMA200 lontana ≥100 pip" | 🔴 **ARCHIVIATA** — la contraddizione **non esiste**: e' un artefatto di due letture su motori, mercati e timeframe diversi. **Il round non serve** | niente. Serve solo la presa d'atto di Claudio + la correzione agli atti (richiesta 3) |
-| 🥉 | **P-PB3** — Bollinger (37 · 1.4) come cella | 🟢 **MISURABILE ORA** (file prova scritti) — ma **solo come sonda di FREQUENZA**: il merito e' sospeso dal campione | firma o archiviazione di Claudio, e la scelta del rischio (1,0% vs 0,80%) |
+| 🥉 | **P-PB3** — Bollinger (37 · 1.4) come cella | ✅ **FIRMATA (21/08) E PRONTA AL LANCIO** come **R94** — resta una sonda di **FREQUENZA**: il merito e' sospeso dal campione | niente: riga di lancio pronta in `righe/RIGA_R94_BB37.md`. Il rischio 1,0% e' un'**assunzione dichiarata**, non una firma |
 
 ---
 
@@ -46,11 +46,12 @@ punto 3 erano le tre proposte superstiti del Point Break.
 > 🔒 **Non ho toccato nessuno dei due**: correggere un'analisi gia' agli atti e'
 > una decisione tua, non mia.
 
-> **4. ✍️ [P-PB3 · firma o cestino] R94 si lancia o si archivia?**
-> Criteri in **BOZZA** in `risultati_archivio/R94_CRITERI.md`. Se si lancia,
-> serve anche la scelta sul **rischio: 1,0%** (canarino valido) **o 0,80%**
-> (coerente con la firma di R92, ma la base va rimisurata). **"Archivia" e' una
-> risposta legittima e l'ho scritta come esito possibile dentro i criteri.**
+> **4. ✅ [P-PB3] FATTA — Claudio ha firmato il 21/08: _"r94 lancia"_.**
+> Criteri firmati, 6 file prova, driver e **riga di lancio pronti**
+> (`righe/RIGA_R94_BB37.md`, due blocchi: giro a vuoto e corsa).
+> ⚠️ **Resta una cosa sola da sapere, non da fare:** il **rischio 1,0%** non e'
+> stato firmato — e' un'**assunzione dichiarata** e verificata nel sorgente
+> (non cambia il conteggio operazioni). Ribaltabile con una parola.
 
 > **5. 🕐 [contorno, non blocca] Il nome del server MT5 di Christian.**
 > Serve alla taratura della richiesta 2 (broker diverso = numeri diversi) **e**
@@ -375,10 +376,19 @@ attribuibile.
 
 | file | cosa contiene |
 |---|---|
-| `backtest_pipeline/prove/R94a_bb37_GBPUSD.txt` | patt. 2 (CONT+INV) — 4 celle × 2 finestre |
-| `backtest_pipeline/prove/R94b_bb37_EURUSD.txt` | patt. 0 (solo CONT) — effetto puro su un pattern |
-| `backtest_pipeline/prove/R94c_bb37_AUDUSD.txt` | patt. 1 (solo INV) — **la sorella che conta di piu'**: l'inversione entra sul retest della banda |
-| `backtest_pipeline/risultati_archivio/R94_CRITERI.md` | criteri **BOZZA, NON FIRMATI** |
+| `backtest_pipeline/prove/R94a_bb_GBPUSD_p20.txt` + `_p37.txt` | patt. 2 (CONT+INV) — il **p20** porta il canarino |
+| `backtest_pipeline/prove/R94b_bb_EURUSD_p20.txt` + `_p37.txt` | patt. 0 (solo CONT) — effetto puro su un pattern |
+| `backtest_pipeline/prove/R94c_bb_AUDUSD_p20.txt` + `_p37.txt` | patt. 1 (solo INV) — **la sorella che conta di piu'**: l'inversione entra sul retest della banda |
+| `backtest_pipeline/risultati_archivio/R94_CRITERI.md` | criteri — ✅ **FIRMATI da Claudio il 21/08** |
+| `backtest_pipeline/lancia_r94.ps1` | driver del round (marcatore `R94-LANCIO-v1`) |
+| `backtest_pipeline/righe/RIGA_R94_BB37.md` | la **riga di lancio**, due blocchi |
+
+> 🔁 **Aggiornamento del 21/08, dopo la firma:** il disegno e' passato da 3 file
+> con due assi a **6 file con un asse ciascuno**, perche' `controlla_prova.py` ha
+> bocciato i due assi (*"un file prova misura UNA variabile alla volta"*).
+> **Le celle misurate sono le stesse: 12 celle, 24 passate, stesso 2×2, stesse
+> soglie.** E' cambiata la forma dell'artefatto, non la misura — il dettaglio sta
+> nella nota tecnica in fondo a `R94_CRITERI.md`.
 
 **24 passate in tutto.** Ogni file porta: canarino (la cella 20/2.0 **deve**
 riprodurre R34 al centesimo), soglie di frequenza per simbolo decise prima,
@@ -391,8 +401,14 @@ e **le sedie vive in campo**).
 nessun altro file nel repo usa R94.
 
 ## 3.5 📌 STATO
-🟢 **MISURABILE ORA**, come **sonda di frequenza**. Il merito resta sospeso per
-dichiarazione. **La firma — o l'archiviazione — e' di Claudio** (richiesta 4).
+✅ **FIRMATA E PRONTA AL LANCIO.** Claudio ha firmato il 21/08:
+*"metro,frequenza, firmo r93, **r94 lancia**, e prepara jpy"* — a numeri mai visti.
+Resta una **sonda di frequenza**: il merito e' sospeso per dichiarazione, e
+**se la frequenza non sale il profitto non si guarda nemmeno**.
+⚠️ Il **rischio (1,0%)** non e' stato firmato: e' un'**assunzione dichiarata**,
+verificata nel sorgente come **non influente sul conteggio operazioni**
+(Guardian fail-open nel tester, nessun kill switch giornaliero). Claudio puo'
+ribaltarla con una parola; in quel caso la base R34 va rimisurata.
 
 ---
 
