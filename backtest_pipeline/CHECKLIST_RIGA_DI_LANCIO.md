@@ -2392,3 +2392,53 @@ fallimento non e' neutro. Due cose che nessun altro punto dice:
 > - stampa in chiaro `versione PRIMA -> versione DOPO` per ogni istanza, e in
 >   caso di errore le ultime righe del log di MetaEditor (`/log:<file>`, che
 >   nessuno leggeva) dentro lo zip della raccolta.
+
+---
+
+## 🆕 AGGIUNTA DEL 22/08/2026 — trovata verificando `verifica_autotest_guardian.ps1`
+
+## 55. 🎯 IL GATE RIPARATO SUL FALSO POSITIVO CHE PERDE IL VERO POSITIVO
+
+_Difetto vero, gia' committato in `backtest_pipeline/verifica_autotest_guardian.ps1`
+(`2c435ca`, riga 214), trovato PRIMA che Claudio rilanciasse. Ed e' nato **da una
+correzione giusta**: e' questo che lo rende una classe a se'._
+
+Prima stesura (`be30db5`): `$_ -match "FAIL"`. Falso allarme misurato sul referto
+del 22/08 — **12 "FAIL" tutti falsi**, perche' `-match` e' case-insensitive e i
+NOMI dei casi contengono `fail-open` / `FAIL-OPEN`
+(`ABTG_PausaGuardian.mqh`: _"cap timbrato 300 s fa (Guardian morto) -> libero,
+FAIL-OPEN"_). Correzione, mezz'ora dopo:
+
+```powershell
+$fallite = @($righeAutotest | Where-Object { $_.TrimEnd() -cmatch 'FAIL$' })
+```
+
+**Quel `FAIL$` non matcha MAI.** Il verdetto lo stampa `ABTG_AutotestCaso()`
+(righe 716-717) come `(ok ? "PASS" : "*** FAIL ***")`: una riga fallita
+**finisce con `***`**, non con `FAIL`. Il gate e' passato da "sempre rosso a
+sproposito" a **"non puo' piu' essere rosso"** — cioe' dal punto 47 al punto 14
+in una riga sola, e il secondo stato e' molto peggiore: `exit 0`, zip verde sul
+Desktop, e l'autotest del freno P1 poteva fallire tutti e 26 i casi senza che
+nessuno lo vedesse. Su un freno del RISCHIO.
+
+Il meccanismo generale: **si stringe un gate guardando l'esempio che sbagliava
+(il falso positivo) e non l'esempio che deve prendere (il vero positivo)** — che
+in quel momento non c'era sotto gli occhi, proprio perche' era tutto verde.
+
+> ✅ **REGOLA. Quando si restringe un gate, lo si riprova su ENTRAMBI i campioni,
+> e il campione POSITIVO si prende dal SORGENTE che lo produce, non dalla
+> memoria.** Qui bastava aprire il `PrintFormat` che scrive la riga.
+> ```powershell
+> $fallite = @($righe | Where-Object { $_ -cmatch '\*\*\*\s*FAIL\s*\*\*\*' })
+> ```
+> 🧪 **E ogni gate "conta i cattivi" porta accanto il suo CONTROLLO POSITIVO che
+> conta i buoni**, altrimenti "0 falliti" e "0 righe capite" sono indistinguibili:
+> ```powershell
+> $passate = @($righe | Where-Object { $_.TrimEnd() -cmatch 'PASS$' })
+> if($passate.Count -eq 0){ throw "non ho riconosciuto NESSUN verdetto: il parser e' cieco, non l'autotest verde" }
+> ```
+> ⚠️ **Corollario di traffico**: una correzione pushata mentre la riga precedente
+> e' gia' in mano a Claudio cambia lo script sotto ai piedi di chi lo sta
+> verificando (qui: `be30db5` -> `2c435ca` a verifica in corso). E' l'ennesima
+> ragione del punto 6: **la riga si pinna all'HASH**, e l'hash si rilegge dopo
+> ogni push, non prima.
