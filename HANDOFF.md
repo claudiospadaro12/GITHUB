@@ -7,6 +7,37 @@
 
 ---
 
+## 🚀 AGGIORNAMENTO 22/08 notte — **R98 È PRONTO AL LANCIO** (criteri firmati ➜ riga eseguibile)
+
+- ✍️ **Criteri FIRMATI**: `backtest_pipeline/risultati_archivio/R98_CRITERI.md`
+  — **opzione A**: **PF OOS ≥ 1,20** + **cancello zero S0 sullo spread**.
+- 📦 **Consegnato stanotte**, pin **`81d1314`**:
+  - **8 file prova** in `backtest_pipeline/prove/`: `R98rif_nuda` (il paper
+    letterale) + `R98a` (overnight off) + `R98b` (secondo segnale) + `R98c`
+    (soglia 0,10%) + `R98d` (SL 3×ATR) + `R98e` (slippage 100 pt) **+ 2
+    PASSATE DIAGNOSTICHE sui lati** (`R98diagNoLong`, `R98diagNoShort`), che
+    **NON sono celle** e non entrano in nessun cancello (malattia R52);
+  - **driver** `backtest_pipeline/righe/RIGA_R98_MOMENTUM_NASUSD.ps1`
+    (marcatore `MARCATORE_RIGA_R98_v1`), meccanica del gemello R97 v2;
+  - **documento da mandare** `backtest_pipeline/righe/RIGA_R98_DA_MANDARE.md`
+    con le due righe (giro a vuoto + corsa vera) pinnate.
+- 🧲 **Magic**: `772800/01` (nuda, = il magic dell'EA), poi `772820…772881`;
+  **PASSO 0 su `772890/91`**, fuori dalla griglia (checklist 41).
+- 🔴 **Il gate FATALE è l'autotest** (45 casi × 2 passate, zero `*** FAIL ***`,
+  parser col controllo positivo). 🐤 **Il canarino NON blocca**: n IS/n OOS si
+  misurano al PASSO 0 e, sotto 100 in IS, il **merito è sospeso** e si legge il
+  **rischio** (regola B).
+- ⚠️ **S0 è a metà per costruzione**: lo script misura il **risultato medio per
+  operazione in punti indice** e stampa *"S0 superato se lo spread della fascia
+  ≤ X punti indice"*; **lo spread NON è misurabile da PowerShell** e il referto
+  scrive **S0 = DA MISURARE A MANO** con tre metodi. **Non è stato inventato
+  nessun numero.**
+- ⏭️ **Prossimo passo**: giro dal **verificatore**, poi le due righe a Claudio.
+  🚫 **Nessun backtest è stato eseguito qui: non esistono MT5 né Strategy
+  Tester in questo ambiente.**
+
+---
+
 ## 🥇 AGGIORNAMENTO 22/08 (mql5-ea-developer) — NASDAQ, SECONDA CACCIA: scritto l'EA A1 "Market Intraday Momentum"
 
 **Perche' esiste:** R97 ha bocciato l'ORB su NASUSD **0/4**
