@@ -1,0 +1,125 @@
+# =====================================================================
+#  R98c / LA SOGLIA 0,10%: si opera solo se |r1| e' abbastanza grande
+#  EA: ABTG_IntradayMomentum v1.00  (A1 "Market Intraday Momentum")
+#
+#  Si lancia con:
+#    -Expert ABTG_IntradayMomentum -Prova prove\R98c_soglia010_NASUSD.txt
+#    -Simbolo NASUSD -Deposito 100000 -Etichetta r98c -Modello 4
+#  (la riga di lancio che fa tutto da sola e'
+#   backtest_pipeline\righe\RIGA_R98_MOMENTUM_NASUSD.ps1)
+#
+#  >>> CRITERI FIRMATI il 22/08/2026 (opzione A: PF OOS >= 1,20 +
+#      cancello zero S0 sullo spread):
+#      backtest_pipeline\risultati_archivio\R98_CRITERI.md
+#      L'IPOTESI, i CRITERI DI ACCETTAZIONE e la FINESTRA stanno per
+#      esteso in prove\R98rif_nuda_NASUSD.txt, che e' la cella di
+#      riferimento: qui NON si ripetono, cosi' non possono divergere.
+# ---------------------------------------------------------------------
+#  R98c / LA SOGLIA 0,10%: si opera solo se |r1| e' abbastanza grande
+#
+#  L'UNICA RIGA CHE CAMBIA rispetto a R98-rif:
+#      InpMinAbsR1Pct  0 -> 0.10
+#
+#  PERCHE' (criteri par. 4, riga R98c): il paper opera SEMPRE, il segno
+#  basta. La soglia e' un filtro NOSTRO e va misurata come tale. E' il
+#  SOLO asse del round che puo' muovere il CANCELLO ZERO nella
+#  direzione giusta: meno operazioni, lordo per operazione piu' alto.
+#
+#  Il valore 0,10% NON e' pescato da una griglia: e' un ordine di
+#  grandezza (un decimo di punto percentuale su un indice a ~20.000
+#  punti sono ~20 punti indice di movimento nella prima mezz'ora).
+#  Due punti sull'asse -- 0 e 0,10 -- bastano a dire la DIREZIONE.
+#  Se servisse tararla, sarebbe un altro round con altri criteri.
+# ---------------------------------------------------------------------
+#  IL CORPO E' IDENTICO A R98-rif riga per riga: la riga di lancio fa il
+#  DIFF A COPPIE e si ferma se differiscono su qualcosa che non sia la
+#  riga dell'esperimento piu' InpMagic.
+#
+#  ORARI: TUTTI IN ORA SERVER (server BCM = ora italiana - 1).
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- LA CAMPANELLA D'APERTURA: la finestra del segnale, 14:30 + 30 min
+#     ORA SERVER. InpSignalMinutes=30 e' il paper: NON si spazzola
+#     (criteri par. 4.2).
+InpSignalStartHour=14
+InpSignalStartMin=30
+InpSignalMinutes=30
+
+# --- LA CAMPANELLA DI CHIUSURA: ingresso 20:30 server, uscita 21:00
+#     meno il margine di sicurezza. Anche questi sono la campanella,
+#     non parametri (par. 4.2).
+InpEntryHour=20
+InpEntryMin=30
+InpEntryWindowMin=5
+InpExitHour=21
+InpExitMin=0
+InpExitSafetyMin=1
+
+# --- >>> IL PREDITTORE. Qui vivono gli assi delle celle a, b, c.
+#     R98-rif: overnight ACCESO (paper), soglia ZERO (paper), un solo
+#     segnale (paper).
+InpUseOvernightInR1=1
+InpMaxGiorniIndietro=5
+InpMinAbsR1Pct=0.10
+InpUseSecondSignal=0
+
+# --- I LATI. Accesi tutti e due: le due passate DIAGNOSTICHE del par.
+#     4.1 li spengono uno per volta, e NON sono celle. Malattia R52: un
+#     lato non si spegne MAI guardando i risultati.
+InpAllowLong=1
+InpAllowShort=1
+
+# --- >>> IL GUARDRAIL, che NON fa parte del paper. Qui vive l'asse
+#     della cella d. Lo stop e' largo apposta: un guardrail contro la
+#     mezz'ora catastrofica, non un livello tecnico. Serve anche a
+#     dimensionare il lotto (senza distanza non c'e' sizing).
+#     InpAtrTF=30 e' PERIOD_M30 (tabella degli enum di
+#     walkforward_generico.ps1: PERIOD_M30=30).
+InpUseStopLoss=1
+InpAtrTF=30
+InpAtrPeriod=14
+InpSLatr=2.0
+
+# --- RISCHIO: 1,00% pinnato, per restare confrontabili con l'archivio
+#     (R88, R97). NON e' una taglia di campo: qui non si mette in campo
+#     niente.
+InpRiskPercent=1.0
+
+# --- >>> SLIPPAGE (R55). Qui vive l'asse della cella e. 0 = pulito.
+#     100 punti MT5 = 1 punto indice (conversione MISURATA in R97).
+InpSlippagePts=0
+
+# --- NOTIZIE: spente (servono un CSV in MQL5\Files e non c'entrano).
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con gli altri round. Sta scritto qui
+#     apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: spread non filtrato, log SPENTO nelle corse lunghe.
+#     (checklist 34: in una griglia le Print non le legge nessuno. Il
+#      PASSO 0 accende InpVerbose=1 nella SUA passata singola, ed e' li'
+#      che si leggono i prezzi d'ingresso per il cancello zero S0.)
+#     InpAutoTest resta ACCESO: le righe [A1][AUTOTEST] le stampa
+#     PrintFormat, NON Log(), quindi escono anche con InpVerbose=0.
+InpMaxSpread=0
+InpVerbose=0
+InpAutoTest=1
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate GEMELLE di controllo.
+#     Devono uscire IDENTICHE al centesimo. Se non lo sono c'e' di mezzo
+#     la cache del tester o una griglia che MT5 si ricorda: il numero
+#     non si legge e il round si ferma.
+#     Magic 772800/772801: e' il magic DELL'EA (par. 0 dei criteri).
+#     Il blocco 7728xx e' libero da sedie vive; 772801 e 772811 compaiono
+#     in due file prova di R55 (ABTG_PTE e ABTG_ORB), ma i per-trade si
+#     chiamano abtg_trades_<EA>_<SIMBOLO>_<magic>.csv: EA diverso e
+#     simbolo diverso = file diverso, nessuna sovrascrittura.
+#     MAI 770201 (Nasdaq apertura, spenta), MAI 770611 (ORB Dow VIVO),
+#     MAI 7797xx (appena usati da R97).
+InpMagic=772840||772840||1||772841||Y
