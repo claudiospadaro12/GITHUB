@@ -1,5 +1,9 @@
 # =====================================================================
-#  MARCATORE_RIGA_R97_v1
+#  MARCATORE_RIGA_R97_v2
+#  (v2, 22/08/2026, dopo il verificatore: sosta svuotata a ogni giro,
+#   seconda misura della conversione tirata fuori dal ramo in cui era
+#   irraggiungibile, etichetta "CONVERSIONE MISURATA" che non mente piu',
+#   e il referto dichiara che i per-trade delle celle coprono SOLO l'OOS.)
 #  RIGA_R97_ORB_NASUSD.ps1  --  R97: lo stop all'estremo opposto del
 #  range (famiglia vincitrice di R88 sul Dow) TRASFERITO su NASUSD, M5
 # ---------------------------------------------------------------------
@@ -98,7 +102,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (dieci secondi, nessuna passata, nessun MT5 che opera):
@@ -514,6 +518,25 @@ if(-not $DataFolder){ throw "cartella dati MT5 non trovata (origin.txt non punta
 $MqlExperts = Join-Path $DataFolder "MQL5\Experts"
 $MqlInclude = Join-Path $DataFolder "MQL5\Include"
 New-Item -ItemType Directory -Force -Path $MqlExperts,$MqlInclude,$Sosta | Out-Null
+# --- 2-bis. LA SOSTA SI SVUOTA A OGNI GIRO (checklist 53 e 50).
+#     Il documento PRESCRIVE il giro a vuoto PRIMA della corsa vera. Il giro
+#     a vuoto lascia in sosta anteprima_r97*.ini; la corsa vera NON le
+#     riproduce e la raccolta copia in blocco tutta la sosta nello zip:
+#     dentro il risultato del round finirebbero quattro .ini CHE NON HANNO
+#     GIRATO (finestra IS, Model=4 costante), indistinguibili da quelli veri.
+#     E' l'artefatto di ieri che passa per quello di oggi, sull'unico zip che
+#     Claudio guarda. Qui non si perde niente: la sosta e' una copia di
+#     lavoro, l'archivio e' la cartella datata sul Desktop, che non si
+#     sovrascrive mai (checklist 12).
+$nSosta = @(Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue).Count
+if($nSosta -gt 0){
+  Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+  $nSostaDopo = @(Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue).Count
+  if($nSostaDopo -gt 0){
+    [void]$Problemi.Add("sosta: " + $nSostaDopo + " file su " + $nSosta + " di un giro PRECEDENTE non sono stati cancellati. Possono finire nello zip di questo round spacciandosi per artefatti di adesso: controllare le date dentro lo zip prima di leggerlo.")
+  }
+  Dico ("sosta svuotata: " + $nSosta + " file di un giro precedente rimossi (rimasti: " + $nSostaDopo + ")") "Green"
+}
 #  OGNI PASSO STAMPA IL BERSAGLIO CHE HA SCELTO (checklist 37).
 Dico ("terminale : " + $Terminal)
 Dico ("dati      : " + $DataFolder + "   (DEVE restare lo stesso in tutti i passi)")
@@ -924,29 +947,44 @@ $inputs
                           " danno una distanza diversa dagli altri (probabile STOPS_LEVEL su quel giorno). Non cambiano il fattore, ma sono agli atti.")
         }
       }
-      # --- SECONDA MISURA, MECCANISMO DIVERSO: i decimali della colonna
-      #     price del per-trade, che il sorgente scrive con
-      #     DoubleToString(price,_Digits) -> digits, e 1/_Point = 10^digits.
-      if(Test-Path -LiteralPath $ptA){
-        $righeP = @(Get-Content -LiteralPath $ptA)
-        $dg = -1
-        for($i=1;$i -lt $righeP.Count;$i++){
-          $col = ($righeP[$i] -split ';')
-          if($col.Count -lt 8){ continue }
-          $pz = ("" + $col[6]).Trim()
-          if($pz -match '^\d+\.(\d+)$'){ $dg = $Matches[1].Length; break }
+    }
+    # --- SECONDA MISURA, MECCANISMO DIVERSO: i decimali della colonna
+    #     price del per-trade, che il sorgente scrive con
+    #     DoubleToString(price,_Digits) -> digits, e 1/_Point = 10^digits.
+    #  >>> STA FUORI DAI TRE RAMI DI SOPRA, E NON PER ELEGANZA. Prima era
+    #      annidata nel ramo "la misura 1 e' riuscita", cioe' era irraggiungibile
+    #      PROPRIO NEL CASO IN CUI SERVE: se gli ordini sono stati piazzati ma il
+    #      log non e' stato letto (encoding, log in una quarta radice, InpVerbose
+    #      non arrivato), il per-trade c'e' lo stesso e il numero si legge
+    #      GRATIS da li'. Senza questa lettura il rilancio sarebbe alla cieca:
+    #      un altro giro di macchina per sapere una cosa gia' sul disco.
+    #  >>> NON APRE IL GATE: $Fatale resta com'e'. La firma chiede DUE misure
+    #      che concordano, e una sola non e' un via libera (checklist 55).
+    if(Test-Path -LiteralPath $ptA){
+      $righeP = @(Get-Content -LiteralPath $ptA)
+      $dg = -1
+      for($i=1;$i -lt $righeP.Count;$i++){
+        $col = ($righeP[$i] -split ';')
+        if($col.Count -lt 8){ continue }
+        $pz = ("" + $col[6]).Trim()
+        if($pz -match '^\d+\.(\d+)$'){ $dg = $Matches[1].Length; break }
+      }
+      if($dg -ge 0){
+        $Passo0.Digits = $dg
+        $Passo0.FattoreDaDigits = [math]::Pow(10,$dg)
+        if($Passo0.Fattore -gt 0 -and $Passo0.FattoreDaDigits -ne $Passo0.Fattore -and $Fatale -eq ""){
+          $Fatale = "PASSO 0 / CONVERSIONE: le DUE misure indipendenti non dicono la stessa cosa. Dagli ordini FIXED esce " +
+                    $Passo0.Fattore + ", dai decimali del per-trade (digits=" + $dg + ") esce " + $Passo0.FattoreDaDigits +
+                    ". Finche' non si capisce quale delle due mente, non si misura niente."
         }
-        if($dg -ge 0){
-          $Passo0.Digits = $dg
-          $Passo0.FattoreDaDigits = [math]::Pow(10,$dg)
-          if($Passo0.Fattore -gt 0 -and $Passo0.FattoreDaDigits -ne $Passo0.Fattore -and $Fatale -eq ""){
-            $Fatale = "PASSO 0 / CONVERSIONE: le DUE misure indipendenti non dicono la stessa cosa. Dagli ordini FIXED esce " +
-                      $Passo0.Fattore + ", dai decimali del per-trade (digits=" + $dg + ") esce " + $Passo0.FattoreDaDigits +
-                      ". Finche' non si capisce quale delle due mente, non si misura niente."
-          }
-        } else {
-          [void]$Problemi.Add("PASSO 0 / CONVERSIONE: non sono riuscito a leggere i decimali della colonna price nel per-trade: la seconda misura (di controllo) NON e' stata fatta. Resta la prima, che e' il gate.")
+        if($Passo0.Fattore -le 0){
+          [void]$Note.Add("PASSO 0 / CONVERSIONE: la misura 1 (dal log) NON c'e', ma i decimali del per-trade dicono digits=" + $dg +
+                          " -> fattore " + $Passo0.FattoreDaDigits + ". QUESTO NON E' UN VIA LIBERA (la firma chiede DUE misure che" +
+                          " concordano, qui ce n'e' una sola e il round resta fermo), ma dice se vale la pena rilanciare: se questo" +
+                          " numero e' " + $FattoreAtteso + ", allora gli ordini sono stati piazzati e il guasto e' SOLO nella lettura del log.")
         }
+      } else {
+        [void]$Problemi.Add("PASSO 0 / CONVERSIONE: non sono riuscito a leggere i decimali della colonna price nel per-trade: la seconda misura (di controllo) NON e' stata fatta. Resta la prima, che e' il gate.")
       }
     }
     # --- E ADESSO IL CONFRONTO CON QUELLO CHE I FILE PROVA ASSUMONO.
@@ -1265,6 +1303,15 @@ try{
     [void]$R.Add(("  {0,-6} SLMode={1}  Buffer={2} pt  TPMode={3}  TP_R={4}  magic {5}/{6}  {7}" -f $l.Et,$l.SLMode,$l.Buf,$l.TPMode,$l.TPR,$l.Magic,($l.Magic+1),$(if($l.Firmata){ "" } else { "<<< NON FIRMATA" })))
   }
   [void]$R.Add("")
+  [void]$R.Add("--- I PER-TRADE DELLE CELLE (abtg_trades_..._7797xx.csv): COSA COPRONO ---")
+  [void]$R.Add("  L'EA li riscrive a OGNI passata sullo stesso nome (magic), e le due")
+  [void]$R.Add("  finestre girano IN ORDINE: prima IS, poi OOS. Quelli nello zip")
+  [void]$R.Add("  contengono quindi SOLO LA FINESTRA OOS: l'OOS ha sovrascritto l'IS.")
+  [void]$R.Add("  NON sono la serie completa del round e NON si usano cosi' per un DD")
+  [void]$R.Add("  di portafoglio. I numeri di round si leggono nei CSV IS/OOS.")
+  [void]$R.Add("  (I due del PASSO 0, passo0_pertrade_7797 00/01, coprono invece TUTTA la")
+  [void]$R.Add("   finestra: erano passate singole su 2024.09.26 -> " + $Fino + ".)")
+  [void]$R.Add("")
   [void]$R.Add("--- COME SI LEGGE (e in che ordine) ---")
   [void]$R.Add("  1. la CONVERSIONE qui sopra. Se non e' misurata, nessun numero sul")
   [void]$R.Add("     buffer vuol dire niente (criteri par. 3, coperto dalla firma).")
@@ -1344,7 +1391,16 @@ Riga3 $Cart    ""
 Riga3 $Zip     "<- e' questo che mi mandi"
 Riga3 $Referto "<- la riga 'data:' deve essere di ADESSO, la riga 'modo:' dice se e' il round o un giro a vuoto"
 Write-Host "=====================================================================" -ForegroundColor White
-Write-Host ("  CONVERSIONE MISURATA: " + $Passo0.Conversione) -ForegroundColor Yellow
+#  >>> L'ETICHETTA NON PUO' DIRE "MISURATA" QUANDO NON LO E' (checklist 47 e 50).
+#      Nel giro a vuoto e con -SaltaPasso0 questa riga stampava
+#      "CONVERSIONE MISURATA: NON MISURATA": la riga del gate FIRMATO che si
+#      contraddice da sola, sull'ultima schermata, che e' quella che si legge.
+if($Passo0.Fattore -gt 0){
+  Write-Host ("  CONVERSIONE MISURATA: " + $Passo0.Conversione) -ForegroundColor Yellow
+} else {
+  Write-Host ("  CONVERSIONE: " + $Passo0.Conversione + "   <<< il gate FIRMATO non ha un numero:") -ForegroundColor Red
+  Write-Host  "                nessuna riga sul buffer si legge (criteri par. 3)." -ForegroundColor Red
+}
 if($SoloControllo){
   Write-Host ("  MODO: " + $Modo + " -- GIRO A VUOTO. NESSUNA passata, NESSUN CSV, NESSUN") -ForegroundColor Yellow
   Write-Host ("        numero di round. Anteprime .ini attese: " + $Lavori.Count + ".") -ForegroundColor Yellow
