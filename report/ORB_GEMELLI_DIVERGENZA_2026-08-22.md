@@ -53,19 +53,84 @@ Quindi resta in piedi, ed e' ora l'ipotesi principale, quella aperta il
 precedente all'introduzione del trailing o con un difetto nella rilevazione
 di `newBar`), oppure un fattore ambientale specifico di quel terminale.
 
-## Prossimo passo, l'unico rimasto per chiudere il caso
-1. **Confrontare data/ora di compilazione e dimensione in byte** del file
-   `ABTG_ORB_Ottimizzato.ex5` nella cartella `MQL5\Experts` dei DUE terminali
-   (piccolo vs 100k). Se sono diversi, e' la causa.
-2. Se sono IDENTICI, il sospetto si sposta sul terminale/VPS: verificare se
-   quell'istanza gira su una macchina diversa (VPS vs PC), e se il broker su
-   quel conto accetta le modifiche di SL nello stesso modo (permessi,
-   `TradeAllowed`, ecc — da leggere nel Giornale/Esperti attorno all'ora
-   della nuova barra M5, cercando eventuali errori di `PositionModify`
-   silenziati).
-3. **Verificare `InpTP1Pct` anche sul conto 100k**, per sapere se il
-   difetto del breakeven-morto e' condiviso o e' un'altra differenza fra
-   le due istanze.
+## 22/08 (poco dopo) — tre versioni diverse dello stesso EA (ma NON e' la causa del trailing)
+
+Claudio manda il sorgente vero da entrambi i conti (prima quello sbagliato,
+`ABTG_ORB.mq5` il "corso" — scartato, e' un altro file, vedi sopra; poi
+quello giusto dal **100k**, poi quello giusto dal **piccolo**).
+
+| dove | `#property version` |
+|---|---|
+| **conto piccolo** (sorgente `.mq5` ricevuto, confermato = screenshot) | **1.00** |
+| **conto 100k** (sorgente `.mq5` ricevuto) | **1.01** |
+| **repo `lavoro` (HEAD)** | **1.02** |
+
+**Tre versioni diverse, in tre posti diversi, stesso magic 770611.** Questo
+e' un fatto misurato e resta un problema da sanare. **MA: confrontando
+riga per riga i due sorgenti veri (v1.00 piccolo vs v1.01 100k), la
+funzione `ManageRunner()` — quella che fa il trailing sull'EMA9, l'esatto
+comportamento che diverge fra i due conti — e' IDENTICA carattere per
+carattere nelle due versioni.** Stesse guardie, stessa chiamata a
+`PositionModify`, stessa logica di uscita su chiusura sotto/sopra l'EMA9.
+
+**Quindi la deriva di versione NON spiega il trailing mancato.** Il primo
+messaggio mandato a Claudio ("la causa e' proprio questa, la deriva di
+versione") era prematuro — corretto qui: la funzione che conta per
+QUESTO bug non e' cambiata fra le due versioni. Il sospetto sul trailing
+resta aperto e ambientale/da isolare altrove (non ancora confrontate:
+`TryPlace`, `SLforLong`/`SLforShort`, `ComputeRange`, `LotByRisk`,
+`NormalizePrice`, gestione di `newBar`).
+
+Quello che invece E' vero, confermato dal confronto diretto dei due
+sorgenti, e **significativo di per se'** (indipendente dal mistero del
+trailing):
+
+- **Il conto piccolo (v1.00) non ha NESSUNA integrazione col Guardian**:
+  niente `#include <ABTG_PausaGuardian.mqh>`, niente `InpUsaGuardian`,
+  nessuna chiamata a `ABTG_GuardiaIngresso()` in `TryPlace()` ne' in
+  `TryCloseConfirmEntry()`. Il conto 100k (v1.01) ce l'ha, prima di ogni
+  piazzamento ordine. **Vuol dire che l'ORB OTT sul conto piccolo oggi
+  apre posizioni senza NESSUNA delle protezioni B1 (pausa)/C1 (cap
+  rischio) che il resto della flotta ha.** Rischio reale, non teorico.
+- Il piccolo (v1.00) non ha nemmeno il gruppo `InpSlippagePts` e le
+  correzioni di modellazione slippage R55 presenti in `TryPlace()`/
+  `TryCloseConfirmEntry()` del v1.01.
+- Il fix dichiarato nel changelog per `InpOneTradePerDay` (pendente
+  fantasma che riapre in giornata) **risulta presente anche nel v1.00**
+  a un primo confronto — quindi quella riga di changelog letta in
+  precedenza andava probabilmente attribuita a un altro EA (verificare
+  ancora, non e' la priorita' ora). Non dare per buono senza un secondo
+  controllo puntuale.
+
+### 3. `InpTP1Pct` sul 100k
+Il sorgente v1.01 dichiara il DEFAULT `InpTP1Pct = 50` — ma questo e' il
+valore di default nel codice, non necessariamente il valore CONFIGURATO
+sul grafico live (serve lo screenshot del pannello input del 100k per
+saperlo con certezza, come fatto per il piccolo). Resta aperto.
+
+## ✅ SOLUZIONE (decisa, non ancora eseguita) — resta valida, per un motivo diverso
+**Ricompilare `ABTG_ORB_Ottimizzato.mq5` da `lavoro` (v1.02) su ENTRAMBI i
+terminali**, cosi' girano lo stesso identico codice. `InpSLBufferPts` a
+default 0 e' un no-op esatto (dichiarato nel suo stesso changelog): il
+comportamento firmato non cambia. Il motivo per farlo ORA non e' piu'
+"risolve il trailing" (non e' provato che lo faccia): e' **dare al conto
+piccolo la protezione Guardian che oggi non ha**, ed eliminare la deriva
+di versione in generale.
+**Quando**: MT5 chiuso o comunque senza una posizione ORB aperta (dopo le
+22:59 server o prima delle 14:25 server del giorno dopo).
+
+## 🔍 Il mistero del trailing resta APERTO
+Non isolato a livello di codice (le uniche due versioni vere confrontate
+finora hanno `ManageRunner()` identica). Prossimi passi possibili:
+1. Diff riga per riga delle altre funzioni (`TryPlace`, `SLforLong`/
+   `SLforShort`, `ComputeRange`, `LotByRisk`, rilevazione `newBar`) fra
+   v1.00 e v1.01 — non ancora fatto.
+2. Ipotesi ambientale/terminale (es. l'handle dell'indicatore EMA non si
+   carica per qualche motivo su quel terminale, `CopyBuffer` fallisce in
+   silenzio e la funzione ritorna prima del `PositionModify` senza che
+   nessuno se ne accorga: vedi anche la correzione di igiene sotto).
+3. Dopo la ricompilazione a v1.02 su entrambi: se il trailing NON riparte
+   sul piccolo, e' la prova che la causa e' ambientale, non di codice.
 
 ## Correzione di igiene proposta, indipendente dalla causa
 `ManageRunner()` oggi non stampa NULLA quando muove lo stop (ne' quando NON
