@@ -1,7 +1,8 @@
 # 🚀 R97 — LA RIGA DA MANDARE (ORB stop-largo su NASUSD)
 
-_Scritta il 22/08/2026. **NON è ancora passata dal verificatore**: prima del
-verdetto di verifica questa riga non va a Claudio._
+_Scritta il 22/08/2026. **Passata dal verificatore il 22/08/2026 — verdetto
+FAIL, 4 difetti corretti nel driver (`85874e5`) e 4 nel documento; questa è la
+versione CORRETTA.** Vedi in fondo: "Cosa ha cambiato il verificatore"._
 
 Criteri: `backtest_pipeline/risultati_archivio/R97_CRITERI.md` — **FIRMATI il
 21/08/2026** ("FIRMIAMO R97, POI ANALIZZIAMO QUESTI EA BENE"), a numeri mai
@@ -9,7 +10,7 @@ visti. Questa riga **non cambia i criteri**: li traduce in file eseguibili.
 
 ---
 
-## 📌 IL PIN — `822a34a10510da45ed3064a8feb37ec850991f90`
+## 📌 IL PIN — `85874e5a5562448e1681b0fe5895906df4574a33`
 
 È il commit che contiene **questo** driver e i file prova (checklist 4: se il
 commit del file fosse più nuovo del SHA scritto qui, il SHA sarebbe una bugia).
@@ -49,14 +50,21 @@ occorrenze di `[Experts]`, quante ne pretende il gate su `MaxBars`),
 
 ---
 
-## 1️⃣ PRIMA il giro a vuoto (dieci secondi, nessuna passata)
+## 1️⃣ PRIMA il giro a vuoto (~1 minuto, nessuna passata di test)
+
+> ⚠️ **Non sono "dieci secondi" e non è a costo zero sul terminale**: il giro a
+> vuoto scarica 9 file, **installa `ABTG_PausaGuardian.mqh`**, **ricompila
+> `ABTG_ORB_Ottimizzato.ex5`** con MetaEditor (con backup datato di `.mq5` e
+> `.ex5`) e poi chiama quattro volte il driver generico. Quello che **non** fa è
+> aprire MT5 per testare: **zero passate, zero CSV, cache del tester NON
+> svuotata, nessun per-trade cancellato.**
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='822a34a10510da45ed3064a8feb37ec850991f90'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='85874e5a5562448e1681b0fe5895906df4574a33'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; if($LASTEXITCODE -ne 0){ Write-Host 'CONTROLLO NON PASSATO: leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
@@ -74,9 +82,9 @@ occorrenze di `[Experts]`, quante ne pretende il gate su `MaxBars`),
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='822a34a10510da45ed3064a8feb37ec850991f90'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='85874e5a5562448e1681b0fe5895906df4574a33'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
@@ -138,7 +146,7 @@ Dentro lo zip, corsa completa:
 | `..._r97c.csv` IS/OOS | 2 | idem |
 | `passo0_pertrade_779700.csv` / `..._779701.csv` | 2 | i gemelli del gate: devono essere identici |
 | `passo0_a.ini` / `passo0_b.ini` | 2 | la prova cartacea di cosa ha girato nel gate |
-| `abtg_trades_ABTG_ORB_Ottimizzato_NASUSD_7797xx.csv` | fino a 8 | i per-trade delle celle |
+| `abtg_trades_ABTG_ORB_Ottimizzato_NASUSD_7797xx.csv` | fino a 8 | i per-trade delle celle — ⚠️ **coprono SOLO la finestra OOS**: l'EA riscrive lo stesso nome a ogni passata e le finestre girano IS *poi* OOS, quindi l'OOS ha sovrascritto l'IS. **Non sono la serie completa del round** e non si usano così per un DD di portafoglio. Il referto lo dichiara |
 | `compile_r97.log` | 0 o 1 | c'è se MetaEditor ha scritto un log |
 
 **Totale CSV di round attesi: 8** (4 file × IS/OOS), **2 righe ciascuno**,
@@ -179,7 +187,7 @@ celle del par. 4, i cancelli del par. 5, il gate del par. 3, R97d **esclusa**.
 
 | scelta | valore | perché |
 |---|---|---|
-| **Model** | **4 = tick reali** | i criteri non lo scrivono a chiare lettere (il par. 0 dice *"scan OHLC quando possibile, tick reali per il verdetto"*), ma R97 confronta **numero contro numero con R88**, che è a tick reali, e sono solo 16 passate. Uno scan OHLC non sarebbe confrontabile. **[DA CONFERMARE CON CLAUDIO se preferisce prima uno scan OHLC]** — cambiare significa cambiare `-Modello` e rifare tutto: meglio deciderlo ora. |
+| **Model** | **4 = tick reali** | i criteri non lo scrivono a chiare lettere (il par. 0 dice *"scan OHLC quando possibile, tick reali per il verdetto"*), ma R97 confronta **numero contro numero con R88**, che è a tick reali, e sono solo 16 passate. Uno scan OHLC non sarebbe confrontabile. **[DA CONFERMARE CON CLAUDIO PRIMA DEL LANCIO: vuole prima uno scan OHLC?]** |
 | corpo delle celle | identico a `R88a_stoplargo_U30USD.txt`, solo `@SIMBOLO` cambiato | è la condizione perché R97 misuri **trasferibilità del meccanismo** e non un'altra strategia. Include `InpAllowShort=0` e il filtro EMA200: **ereditati dalla sedia viva del Dow, non assi di questo round.** |
 | una griglia di 2 celle per file (magic gemelli) | `InpMagic=7797x0..7797x1` | il driver generico **rifiuta** un file prova senza almeno un asse `Y` (sarebbe un backtest singolo). L'asse gemello costa il doppio delle passate e in cambio dà il canarino del banco pulito, come in R96. |
 | `InpSLFixedPts=1000` pinnato in tutti i file | inerte in OPPRANGE/HALFRANGE | serve al **gate della conversione**, che lo legge **dall'artefatto che gira** invece che da una costante nello script. |
@@ -189,8 +197,61 @@ celle del par. 4, i cancelli del par. 5, il gate del par. 3, R97d **esclusa**.
 | `-ConD` | **spento** | R97d non è firmata. Se acceso, il referto e la console lo scrivono in rosso. |
 | `-SaltaPasso0` | esiste, sconsigliato | serve solo a riprendere una coda già gatata. Se usato, il referto dichiara che **la conversione non è stata misurata in quella corsa** e che quei numeri sui buffer non si leggono da soli. |
 
+> 🛑 **`Model=4` NON è un parametro della riga: è una COSTANTE dello script**
+> (`RIGA_R97_ORB_NASUSD.ps1`, `$Modello = 4`). **Non provare a passare
+> `-Modello 1`: quel parametro non esiste e la riga si ferma con un errore di
+> binding.** E non è una svista da riparare al volo: a Model diverso da 4 il
+> driver generico aggiunge il suffisso `_ohlc` ai nomi dei CSV, che la raccolta
+> di R97 **non** cerca — uscirebbe un round intero raccolto a vuoto. Se Claudio
+> vuole prima uno scan OHLC, si cambia la costante, si **ricommitta**, si
+> **ri-pinna** e si **rifà il giro dal verificatore**. È lo stesso principio del
+> PASSO 0: *questa riga non riscrive da sola una scelta dichiarata.*
+
+> ⚠️ **Una cosa che i criteri chiamano per nome e questo round NON misura: le
+> PARZIALI.** Il §0 dei criteri nasce dall'idea *"stop largo + TP a più R **con
+> parziali**"*, ma il corpo delle celle è quello di R88, che ha
+> **`InpTP1Pct=0`** — cioè **nessuna chiusura parziale**. Non è una cella
+> inventata né una cella persa (il §4 firmato non nomina `InpTP1Pct`), ma va
+> detto: **R97 misura lo stop largo e il TP in R, non le parziali.** Le parziali
+> restano un asse da aprire in un round successivo.
+
 **Nessun dettaglio è stato inventato**: dove i criteri tacevano (Model) la scelta
 è dichiarata qui sopra con la sua ragione e marcata da confermare.
+
+---
+
+## 🔍 COSA HA CAMBIATO IL VERIFICATORE (22/08/2026) — pin `822a34a` ➜ `85874e5`
+
+Verdetto **FAIL** sulla prima stesura. Confermato buono, invece: il pin (driver
+e file prova al commit sono **identici a HEAD**, verificato anche scaricando
+davvero i 9 file dalla `raw.githubusercontent` al pin), i magic `7797xx`
+(**nessuno** compare in `CONTRATTI_SEDIE.md` / `FLOTTA_ATTIVA.md`, né fra loro),
+il corpo delle celle (**è R88a con gli assi congelati**, verificato a diff), le
+4 celle firmate + R97d dietro `-ConD` spento, l'ora **14:30–14:45 SERVER**, la
+pulizia per magic senza wildcard, ASCII puro, cultura invariante.
+
+I quattro difetti corretti nel driver (`85874e5`):
+
+1. **La `sosta` non veniva mai svuotata.** Il documento prescrive il giro a
+   vuoto *prima* della corsa vera; il giro a vuoto lascia in sosta quattro
+   `anteprima_r97*.ini` che la corsa vera **non riproduce**, e la raccolta copia
+   in blocco tutta la sosta nello zip. **Nello zip del round finivano quattro
+   `.ini` che non avevano girato**, indistinguibili da quelli veri. Ora la sosta
+   si svuota a ogni giro, contata prima e dopo.
+2. **La seconda misura della conversione era irraggiungibile proprio quando
+   serve**: stava annidata nel ramo *"la misura dal log è riuscita"*. Se gli
+   ordini venivano piazzati ma il log non veniva letto, il numero era già sul
+   disco (i decimali del per-trade) e non lo leggeva nessuno → rilancio alla
+   cieca, **un altro giro di macchina**. Ora sta fuori dai rami. **Non apre il
+   gate** (una misura sola non è la firma), ma dice se il guasto è solo il log.
+3. **Etichetta che mente**: l'ultima schermata stampava sempre `CONVERSIONE
+   MISURATA: ...`, e nel giro a vuoto usciva `CONVERSIONE MISURATA: NON
+   MISURATA`.
+4. **I per-trade delle celle coprono solo l'OOS** e il referto non lo diceva.
+
+E nel documento: il pin, il marcatore `_v2`, il falso `-Modello` (non esiste), i
+"dieci secondi" del giro a vuoto (che invece **ricompila l'EA**), le parziali che
+i criteri nominano e il round non misura.
 
 ---
 

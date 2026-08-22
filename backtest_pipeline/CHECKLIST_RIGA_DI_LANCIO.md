@@ -2442,3 +2442,98 @@ in quel momento non c'era sotto gli occhi, proprio perche' era tutto verde.
 > verificando (qui: `be30db5` -> `2c435ca` a verifica in corso). E' l'ennesima
 > ragione del punto 6: **la riga si pinna all'HASH**, e l'hash si rilegge dopo
 > ogni push, non prima.
+
+---
+
+## 🆕 AGGIUNTE DEL 22/08/2026 — trovate verificando la riga R97 (ORB stop-largo su NASUSD)
+
+## 56. 🚚 LA CARTELLA DI SOSTA CONDIVISA FRA GIRO A VUOTO E CORSA VERA: il documento prescrive il travaso, poi la raccolta lo mette nello zip del round
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1`
+(`822a34a`), trovato PRIMA dell'invio a Claudio. Corretto in `85874e5`._
+
+Il punto 41 dice: **l'artefatto di un gate si mette in sosta appena prodotto**,
+cosi' esiste anche quando il gate esce rosso. Giusto, e R97 lo faceva. Il punto
+41 pero' non dice **quando la sosta si SVUOTA**, e li' si e' aperto il buco.
+
+La riga R97 usa una sola cartella `$Work\sosta` per tutto: gli `.ini` del PASSO
+0, i per-trade del gate, il log del compilatore e — **solo nel giro a vuoto** —
+le quattro `anteprima_r97*.ini`. La raccolta finale copia **in blocco tutto il
+contenuto della sosta** nella cartella sul Desktop e nello zip.
+
+Il documento della riga **prescrive** (giustamente) di fare **prima il giro a
+vuoto e poi la corsa vera**. Quindi:
+
+1. il giro a vuoto lascia in sosta 4 `anteprima_r97*.ini`;
+2. la corsa vera **non le riproduce** (le anteprime le scrive solo
+   `-SoloControllo`), quindi **non le sovrascrive**;
+3. la raccolta della corsa vera le copia nello zip del round.
+
+Risultato: **dentro lo zip del round finiscono quattro `.ini` che non hanno
+girato**, con la finestra IS e `Model=4` scritto come costante — mescolati agli
+`.ini` veri, con lo stesso prefisso, e indistinguibili senza guardare l'ora del
+file. E' il referto stantio del 17/08, ma nascosto **dentro** l'unico zip che
+Claudio guarda, e prodotto **dalla procedura corretta**, non da un errore
+dell'operatore.
+
+E' una classe a se' rispetto ai punti vicini: non e' il punto 50 (li' mente **il
+referto**, qui il referto e' onesto e mentono gli **allegati**), non e' il punto
+53 (li' e' il ri-pin, qui sono due MODI diversi dello stesso pin), non e' il
+punto 31 (li' l'anteprima si sovrascriveva da sola, qui il problema e' che
+**sopravvive**).
+
+> ✅ **REGOLA. Ogni cartella di lavoro condivisa fra due MODI della stessa riga
+> (giro a vuoto / corsa vera / ripresa) si SVUOTA all'inizio di ogni giro, e il
+> conteggio si fa prima e dopo.** Non si perde niente: la sosta e' una copia di
+> lavoro, l'archivio e' la cartella datata sul Desktop, che non si sovrascrive
+> mai (punto 12).
+> ```powershell
+> $nSosta = @(Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue).Count
+> if($nSosta -gt 0){
+>   Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+>   $nDopo = @(Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue).Count
+>   if($nDopo -gt 0){ [void]$Problemi.Add("sosta: $nDopo file di un giro PRECEDENTE non cancellati: possono finire nello zip spacciandosi per artefatti di adesso.") }
+> }
+> ```
+> 🧪 **E la prova che serve al verificatore**: prendere l'elenco dei file che la
+> raccolta copia e chiedersi, per ognuno, **quale MODO lo produce**. Un file che
+> nasce solo in un modo e viene raccolto in tutti e' un file che mente.
+
+### 56-bis. 🪆 LA SECONDA MISURA ANNIDATA NEL RAMO IN CUI LA PRIMA E' RIUSCITA: irraggiungibile proprio quando serve
+
+_Stesso file, stesso commit, stessa correzione._
+
+Il gate firmato di R97 chiede **due misure indipendenti** della conversione
+punti-MT5/punto-indice: (1) la distanza dello stop letta dal log del tester,
+(2) i decimali della colonna `price` del per-trade. La struttura era:
+
+```powershell
+if($letti -eq 0){ $Fatale = "zero log" }
+elseif($fattori.Count -eq 0){ $Fatale = "nessuna riga capita" }
+else{
+    ... misura 1 ...
+    if(Test-Path $ptA){ ... misura 2, il CONTROLLO ... }   # <-- QUI DENTRO
+}
+```
+
+La misura di controllo **stava dentro il ramo "la misura 1 e' riuscita"**. Nei
+due rami di fallimento — che sono esattamente i casi in cui il round si ferma —
+**non veniva nemmeno tentata**, benche' il per-trade fosse gia' sul disco, in
+sosta, e la risposta si leggesse in tre righe di codice a costo zero.
+
+Il costo misurato di quel `{ }` : il referto della corsa fermata stampa
+`digits = -1 -> fattore 0`, e il rilancio parte **alla cieca**, senza sapere se
+il guasto e' "l'EA non ha piazzato ordini" (round da ripensare) o "il log non e'
+stato letto" (rilancio identico con un'opzione diversa). **Un altro giro di
+macchina per sapere una cosa che era gia' sul disco.**
+
+Attenzione a non correggerlo dalla parte sbagliata: la misura di controllo
+tirata fuori **non deve aprire il gate**. La firma chiede **due misure che
+concordano**; una sola resta un `$Fatale`. Cambia il REFERTO, non il verdetto.
+
+> ✅ **REGOLA. Una misura RIDONDANTE si esegue SEMPRE, fuori dai rami della
+> misura primaria, e serve a DIAGNOSTICARE il fallimento, non a sostituirlo.**
+> Se il codice la salta quando la primaria fallisce, non e' una ridondanza: e'
+> una decorazione del caso felice.
+> 🧭 **Come si trova**: per ogni "controllo incrociato" chiedersi *"in quale ramo
+> vive, e quel ramo e' raggiungibile quando il controllo servirebbe?"*.
