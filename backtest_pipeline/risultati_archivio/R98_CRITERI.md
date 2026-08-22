@@ -1,11 +1,16 @@
-# 📝 R98 — MARKET INTRADAY MOMENTUM SU NASUSD — 🟡 **BOZZA NON FIRMATA**
+# 📝 R98 — MARKET INTRADAY MOMENTUM SU NASUSD — ✅ **FIRMATI il 22/08/2026**
 
-> # 🛑 QUESTA E' UNA BOZZA. NON E' FIRMATA. NON SI LANCIA NIENTE.
-> Scritta il **22/08/2026**, a numeri di R98 **mai visti** (l'EA e' appena
-> nato, non e' mai stato compilato ne' fatto girare). I criteri li firma
-> **Claudio**, e li firma **PRIMA dei numeri, mai dopo** — regola di casa.
-> Finche' manca la firma, ogni riga qui sotto e' una **proposta**, e le
-> caselle dichiarate `[DA DECIDERE]` sono buchi veri, non retorica.
+> ## ✍️ FIRMA (22/08/2026, sera, in chat)
+> La decisione aperta del §5.1 e' stata posta a Claudio come *"per firmare i
+> criteri R98 manca UNA decisione: quale cancello PF OOS firmiamo?"* e la
+> risposta e': **"PF 1,20 + cancello spread"** — cioe' **opzione A**.
+> Con quella risposta i criteri sono FIRMATI nella forma della bozza
+> presentata (finestra §2, cancello zero §3.2, sei celle §4, bocciature
+> §5.2), con S2 = PF OOS >= 1,20 e il cancello zero S0 a fare il lavoro
+> pesante. Firmati **a numeri di R98 mai visti**, come da regola di casa.
+> Nota di percorso: l'autotest dell'EA e' gia' stato ESEGUITO e verificato
+> verde sul PC di Claudio la sera stessa (0 errori di compilazione, 0 FAIL,
+> zip `verifica_a1_20260822_230424`) — il gate §3.3 e' quindi gia' passato.
 
 **Oggetto**: `mql5/Experts/ABTG_IntradayMomentum.mq5` v1.00, magic **772800**.
 **Da dove nasce**: `report/SWEEP_MECCANISMI_LIBERI_2026-08-22.md` §A1
@@ -166,7 +171,7 @@ assi, non stiamo piu' misurando il paper: stiamo pescando.**
 | # | cancello | soglia proposta |
 |---|---|---|
 | **S1** | DD OOS | **<= 7,00%** (identico a R88/R97) |
-| **S2** | PF OOS | **>= 1,20** ⚠️ **[DA DECIDERE — vedi §5.1]** |
+| **S2** | PF OOS | **>= 1,20** ✅ **FIRMATO (opzione A, §5.1)** |
 | **S3** | IS | profitto > 0 **e** PF IS >= 1,10 (identico a R97) |
 | **S4** | campione | n OOS >= 150 **e** n IS >= 150 (Emendamento regola A) — piu' severo di R97 (95/57) **perche' qui il campione c'e'** |
 | **S0** | **cancello zero spread** (§3.2) | lordo medio/operazione >= **3x** lo spread medio della fascia |
@@ -185,14 +190,14 @@ e' strutturale, non un'opinione:
 Chiedere 1,40 a un motore a payoff simmetrico e' come chiedere a un maratoneta
 il tempo sui 100 metri: **non e' severita', e' un'unita' di misura sbagliata**.
 
-> ### 🖊️ **[DA DECIDERE DA CLAUDIO, PRIMA DEI NUMERI]**
-> - **opzione A (proposta)**: **PF OOS >= 1,20**, motivato dalla forma del
+> ### 🖊️ **DECISO DA CLAUDIO, 22/08 sera, PRIMA dei numeri: OPZIONE A.**
+> - ✅ **opzione A (FIRMATA)**: **PF OOS >= 1,20**, motivato dalla forma del
 >   payoff, con il **cancello zero sullo spread (S0)** che fa il lavoro pesante;
-> - **opzione B**: **PF OOS >= 1,40**, identico a R97, massima confrontabilita',
->   consapevoli che potrebbe bocciare un edge vero.
+> - ❌ opzione B (scartata): PF OOS >= 1,40, identico a R97 — rischiava di
+>   bocciare un edge vero per la sola forma del payoff.
 >
-> **Qualunque sia la scelta, si scrive PRIMA.** Cambiarla dopo aver visto un
-> numero e' esattamente cio' che la regola di casa vieta.
+> Scelta scritta PRIMA di qualunque numero di R98, come da regola di casa.
+> Da qui in avanti NON si cambia.
 
 ### 5.2 🔴 Bocciatura secca (proposta)
 - **profitto netto <= 0 in OOS**;
@@ -255,20 +260,20 @@ InpAutoTest=1||1||0||1||N
 
 ---
 
-## ✍️ FIRMA — 🟥 **MANCANTE**
+## ✍️ FIRMA — ✅ **APPOSTA il 22/08/2026 sera** (verbale in testa al file)
 
 ```
-[ ] §2   la finestra IS/OOS e il canarino
-[ ] §3.2 il CANCELLO ZERO sullo spread (3x) e come si misura
-[ ] §4   le sei celle + le due passate diagnostiche sui lati
-[ ] §5.1 PF OOS: opzione A (1,20) oppure opzione B (1,40)  <-- LA DECISIONE
-[ ] §5.2 le tre bocciature secche
+[x] §2   la finestra IS/OOS e il canarino
+[x] §3.2 il CANCELLO ZERO sullo spread (3x)
+[x] §4   le sei celle + le due passate diagnostiche sui lati
+[x] §5.1 PF OOS: OPZIONE A (1,20)  <-- LA DECISIONE, presa prima dei numeri
+[x] §5.2 le tre bocciature secche
 ```
 
-**Prossimo passo, in ordine**: (1) **F7** su `ABTG_IntradayMomentum.mq5` e
-lettura delle righe `[A1][AUTOTEST]`; (2) firma di questi criteri con la
-decisione del §5.1; (3) `-SoloControllo` per il canarino; (4) solo dopo, la
-prima passata.
+**Stato del percorso**: (1) F7 + autotest ✅ FATTO il 22/08 alle 23:04
+(0 errori, 0 FAIL); (2) firma ✅ FATTA; (3) prossimo: `-SoloControllo` per
+confermare il canarino (n IS ~180 e' [INFERITO], va misurato); (4) solo dopo,
+la corsa vera.
 
 **E la riga finale, quella onesta**: un backtest verde non e' una promessa.
 Broker singolo, un regime solo, costi modellati al primo ordine, e un motore
