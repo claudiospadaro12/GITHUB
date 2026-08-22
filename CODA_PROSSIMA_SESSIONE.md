@@ -1077,6 +1077,24 @@ l'incrocio e' un segnale forte soprattutto quando apre il mercato americano"_.
 - **staccare il PC dal conto live 50503392**
 - misurare il **DST su BCM** — scadenza **25/10/2026**
 - `SW_GBPUSD` TORO non riproduce R50 → **[INCERTO]**, aperto
+- **CENSIMENTO FREQUENZA DELLA FLOTTA** (richiesta di Claudio, 22/08): far
+  analizzare a un agente (o piu') l'intera flotta in campo (censimento
+  ordini + statement dei due conti) per trovare **due classi di sedie**:
+  (a) EA/sedie che **non hanno ancora generato NEMMENO UN trade** da quando
+  sono accese — per queste manca perfino il dato per applicare le corsie
+  MERITO/TAGLIANDO della C3 (`FIRME_2026-08-18.md`), quindi vanno segnalate
+  come un buco A PARTE, non confuse con "in perdita"; (b) sedie con
+  **frequenza fuori scala** rispetto al loro contratto (`CONTRATTI_SEDIE.md`,
+  colonna "Op/mese promesse") — sia **troppo sotto** (rischio finestra bucata
+  o motore morto, vedi canarino 2.3 di R92) sia **troppo sopra** (il
+  contratto non descrive piu' quella sedia, o un difetto la fa rientrare
+  piu' spesso del previsto). Fonte dei dati: `report/CENSIMENTO_ORDINI.md`,
+  `backtest_pipeline/censimento_ordini.ps1`, gli statement in
+  `data/statements/` (ora letti PER CONTO separatamente, vedi fix del 22/08
+  su `run_weekly_report.py`) e `CONTRATTI_SEDIE.md` per il confronto contro
+  la promessa. Output atteso: una tabella con ogni sedia viva, trade fatti
+  a oggi, frequenza attesa dal contratto, e uno scarto evidenziato dove la
+  frequenza reale si allontana troppo (sopra o sotto) da quella promessa.
 
 ---
 
