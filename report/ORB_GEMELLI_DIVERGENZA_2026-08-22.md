@@ -157,3 +157,16 @@ sola prova indiretta e' il prezzo di chiusura, come si sta facendo ora.
 Aggiungere un `Log()` alla modifica riuscita/fallita di `PositionModify` in
 `ManageRunner()` renderebbe la PROSSIMA occorrenza diagnosticabile in un
 minuto invece che con un confronto a mano fra due conti.
+
+## ✅ CHIUSURA GIORNATA 22/08 — checklist finale, tutta verde
+- v1.02 compilata `0 errors, 0 warnings` su ENTRAMBE le istanze (log reale).
+- Pannello input riletto da Claudio su ENTRAMBI i conti: titolo 1.02,
+  `InpUsaGuardian=true` presente e acceso.
+- **Algo Trading VERDE su entrambi i terminali** (verificato da Claudio dopo
+  il riavvio — controllo necessario perche' i test da riga di comando
+  passano `AllowLiveTrading=false` e MT5 a volte se lo ricorda).
+- Bonus della giornata: autotest del Guardian P1 (freno perdite consecutive,
+  `ABTG_PausaGuardian.mqh` v1.30) ESEGUITO e verificato — 45 casi su 45
+  PASS (19 vecchi + 26 nuovi), referto in zip `verifica_autotest_20260822`.
+- Da osservare lunedi': primo trade ORB OTT sul piccolo -> trailla o no
+  (punto 3 sopra). Tutto pronto per l'apertura.
