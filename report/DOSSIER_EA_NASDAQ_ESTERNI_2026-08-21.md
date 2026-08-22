@@ -71,10 +71,12 @@ Impulse Trail ON, Flip Reversal ON, and Recovery Ladder OFF"* — combacia riga
 per riga col nostro file. **Non stiamo leggendo un preset di terze mani: e'
 il preset di rilascio dell'autore.**
 
-❓ **Domanda per Claudio**: in fondo alla tab commenti c'e' scritto *"Only
-users who purchased or rented the product can leave comments"*. Il file si
-scarica, ma il thread e' area clienti. **Abbiamo gia' comprato questo EA?**
-Se si', il gradino 3 del cancello (demo nel tester) e' gia' finanziato.
+✅ **Risposto da Claudio (22/08)**: *"Artemis l'ho copiato dallo store di
+MQ5"* — nessun acquisto, il file era scaricabile pubblicamente dalla pagina
+(non serve aver comprato per leggere/scaricare il preset di rilascio postato
+nei commenti). Il gradino 3 del cancello (demo nel tester) **NON e'**
+finanziato: se si vuole andare oltre il `.set`, va scaricata la demo gratuita
+a parte, zero soldi impegnati finora.
 
 ### 2.1 🔴 CORREZIONE DI FATTO: Artemis NON punta a 1:1 — punta a 3,5R
 `R97_CRITERI.md` §4.1 scrive: *"sia Diego che Artemis puntano a un TP vicino
