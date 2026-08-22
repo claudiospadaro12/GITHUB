@@ -1,4 +1,4 @@
-# ⚖️ R97 — L'ORB A STOP LARGO, SUL NASDAQ — 🟡 BOZZA, NON FIRMATA
+# ⚖️ R97 — L'ORB A STOP LARGO, SUL NASDAQ — ✅ FIRMATO DA CLAUDIO IL 21/08/2026
 
 _Scritto il 21/08/2026, a numeri di R97 **mai visti** (nessuna passata girata).
 Nasce dalla strada **(b)** firmata da Claudio lo stesso giorno su
@@ -161,9 +161,35 @@ non applicato a se stesso.
 
 ---
 
-## ✍️ FIRMA DI CLAUDIO — DA RACCOGLIERE PRIMA DEL PASSO 0
+## ✍️ FIRMA DI CLAUDIO — 21/08/2026
 
-> Manca ancora la firma esplicita su: (a) le 4 celle §4 + eventuale R97d,
-> (b) i cancelli §5 riusati identici da R88, (c) il gate del PASSO 0 sulla
-> conversione punti NASUSD (§3), (d) l'applicazione dell'Emendamento regola B
-> fin dall'inizio (§5, ultimo blocco).
+> ## ✅ FIRMATO IN CHAT: **"FIRMIAMO R97, POI ANALIZZIAMO QUESTI EA BENE"** — 21/08/2026.
+> Firma raccolta **a numeri di R97 mai visti** (nessuna passata girata).
+> Regola confermata: *i criteri si cambiano prima dei numeri, non dopo* — se
+> un numero uscito suggerisse un criterio migliore, quel criterio vale **dal
+> round dopo**.
+
+Coperto dalla firma, punto per punto:
+
+- **(a) Le 4 celle del §4** — `R97-rif` (HALFRANGE, riferimento live),
+  `R97a`/`R97b`/`R97c` (famiglia OPPRANGE, trasferita identica da R88).
+  **`R97d`** (la cella ispirata da Diego/Artemis, TP 1:1) **resta ESCLUSA per
+  ora**: era segnata `[DICHIARATO, NON ANCORA DECISO]` e la firma di oggi non
+  la nomina — entra solo con un'approvazione a parte, quando "analizziamo
+  questi EA bene" avra' chiarito se l'idea del TP 1:1 merita davvero una
+  quinta cella o va rivista alla luce di quell'analisi.
+- **(b) I cancelli §5**, riusati identici da R88 (S1-S4 + bocciatura secca).
+- **(c) Il gate del PASSO 0** (§3): la conversione punti-MT5/punto-indice su
+  NASUSD si misura **prima** di lanciare una sola passata. Nessuna passata
+  parte senza quel numero agli atti.
+- **(d) L'Emendamento regola B fin dall'inizio** (§5, ultimo blocco): se il
+  canarino di finestra scatta (probabile, vedi §2.1), il RISCHIO decide, il
+  PF IS resta lettura di contesto — applicato da subito, non dopo aver visto
+  i numeri come in R88.
+
+**Prossimo passo, per ordine esplicito di Claudio**: PRIMA il PASSO 0 (gate
+§3) quando si vorra' lanciare R97, ma **SUBITO ORA** l'analisi approfondita
+dei tre file esterni (Diego, Artemis, Master Nasdaq FTMO) — vedi i tre
+referti dedicati. Quell'analisi puo' ancora cambiare `R97d` o aggiungere
+un R97-bis: **cambia il round successivo, non questo**, per la stessa regola
+della firma.
