@@ -29,10 +29,12 @@ def _s(t) -> str:
     return t.encode("latin-1", "replace").decode("latin-1")
 
 
-def build_weekly_pdf(path: str, *, period: str, st, bias: dict | None,
+def build_weekly_pdf(path: str, *, period: str, stats_by_account: dict, bias: dict | None,
                      generated: datetime, stale_warning: str = "") -> str | None:
     """Scrive il PDF in `path`. Ritorna il path, o None se fpdf2 manca.
-    `st` = Stats dei trade (puo' essere None). `bias` = risultato verify.verify."""
+    `stats_by_account` = {etichetta conto: Stats}, un blocco per conto
+    (22/08/2026: prima era un solo `st`, e un secondo conto spariva senza
+    nessun avviso -- vedi run_weekly_report.py). `bias` = risultato verify.verify."""
     try:
         from fpdf import FPDF
     except Exception:
@@ -89,13 +91,11 @@ def build_weekly_pdf(path: str, *, period: str, st, bias: dict | None,
 
     # ---- 1. Trade ----
     H2("1. Andamento dei trade")
-    if st and st.trades:
-        col = GREEN if st.net_total >= 0 else RED
-        P(f"Netto settimana: {_eur(st.net_total)} EUR   -   {len(st.trades)} trade   -   "
-          f"win rate {st.win_rate*100:.0f}%   -   profit factor {st.profit_factor:.2f}   -   "
-          f"aspettativa {_eur(st.expectancy)}/trade", col, 10, "B")
-        P(f"(statement: {st.total_in_file} trade nel file, copertura {st.first_open} -> {st.last_close})", GREY, 8)
-        pdf.ln(1)
+    if stats_by_account:
+        if len(stats_by_account) > 1:
+            tot = sum(s.net_total for s in stats_by_account.values() if s.trades)
+            P(f"Netto totale, tutti i conti: {_eur(tot)} EUR", GREEN if tot >= 0 else RED, 11, "B")
+            pdf.ln(1)
 
         def block(title, d):
             P(title, NAVY, 10, "B")
@@ -106,9 +106,22 @@ def build_weekly_pdf(path: str, *, period: str, st, bias: dict | None,
             table(["Voce", "Win", "Netto EUR"], rows, [epw*0.55, epw*0.20, epw*0.25], ["L", "C", "R"])
             pdf.ln(1)
 
-        block("Per categoria", st.by_class)
-        block("Per simbolo", st.by_symbol)
-        block("Per strategia / EA", st.by_strategy)
+        for label, st in stats_by_account.items():
+            P(f"Conto: {label}", NAVY, 11, "B")
+            if not st.trades:
+                P("Statement senza trade nel periodo.", GREY, 10)
+                pdf.ln(1)
+                continue
+            col = GREEN if st.net_total >= 0 else RED
+            P(f"Netto settimana: {_eur(st.net_total)} EUR   -   {len(st.trades)} trade   -   "
+              f"win rate {st.win_rate*100:.0f}%   -   profit factor {st.profit_factor:.2f}   -   "
+              f"aspettativa {_eur(st.expectancy)}/trade", col, 10, "B")
+            P(f"(statement: {st.total_in_file} trade nel file, copertura {st.first_open} -> {st.last_close})", GREY, 8)
+            pdf.ln(1)
+
+            block("Per categoria", st.by_class)
+            block("Per simbolo", st.by_symbol)
+            block("Per strategia / EA", st.by_strategy)
     else:
         P("Nessuno statement con trade nel periodo.", GREY, 10)
 

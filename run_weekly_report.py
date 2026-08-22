@@ -8,9 +8,22 @@ Flusso:
   4. compone il report HTML e lo invia via email (o lo salva in DRY_RUN)
 
 Variabili d'ambiente:
-  STATEMENT_FILE=/percorso/report_storico.xlsx   (opzionale)
+  STATEMENT_FILE=/percorso/report_storico.xlsx   (opzionale, forza UN file)
   DRY_RUN=1   -> non invia, salva weekly_output.html
   DAYS=7      -> ampiezza della finestra (default 7 giorni)
+
+22/08/2026 -- PIU' CONTI, non solo il "vincitore". La selezione vecchia
+prendeva UN file da data/statements/, quello con la chiusura piu' recente:
+bene finche' c'era un conto solo, ma con due conti (piccolo 50503392 e
+100k 50504263) i loro export si aggiornano nella STESSA finestra e la
+scelta finiva per essere un'arbitrarieta' di pochi secondi -- il 21/08 i due
+file erano stati committati allo STESSO minuto e l'ultima chiusura del
+conto piccolo (14:55:02) ha battuto quella del 100k (14:54:24) per 38
+secondi: il report e' uscito SOLO col conto piccolo, il 100k e' sparito
+senza nessun avviso. Ora si raggruppa per CONTO (_account_label) e dentro
+ogni gruppo si tiene lo stesso criterio di prima (il file piu' aggiornato
+vince): niente si perde, e un file piu' vecchio dello stesso conto non
+sovrascrive quello buono.
 """
 
 from __future__ import annotations
@@ -35,15 +48,25 @@ def _eur(x: float) -> str:
     return f"{x:+,.2f}".replace(",", "§").replace(".", ",").replace("§", ".")
 
 
-def _trade_section(st) -> str:
-    if st is None:
+def _account_label(path: str) -> str:
+    """Un file -> un conto. Euristica sul NOME FILE (non c'e' altro modo:
+    i CSV/xlsx non portano il numero di conto in un campo). Se domani entra
+    un TERZO conto, questa funzione va estesa esplicitamente: di default
+    tutto cio' che non riconosce finisce nel conto piccolo, per compatibilita'
+    con l'unico conto che c'era prima del 22/08."""
+    name = os.path.basename(path).lower()
+    if "100k" in name or "50504263" in name:
+        return "100k (dry-run 50504263)"
+    return "piccolo (50503392)"
+
+
+def _trade_section(stats_by_account: dict) -> str:
+    if not stats_by_account:
         return ("<p style='color:#666'>Nessuno statement fornito questa settimana "
                 "(imposta <code>STATEMENT_FILE</code> o carica l'export dello storico). "
                 "L'analisi dei trade comparirà qui.</p>")
-    if not st.trades:
-        return "<p style='color:#666'>Statement senza trade nel periodo.</p>"
 
-    def rows(d, label):
+    def rows(d):
         out = ""
         for k, b in sorted(d.items(), key=lambda x: -x[1]["net"]):
             col = "#1f7a3d" if b["net"] >= 0 else "#b02418"
@@ -57,28 +80,42 @@ def _trade_section(st) -> str:
         k = max(d, key=lambda x: d[x]["net"])
         return (k, d[k]["net"])
 
-    tc, tcv = top(st.by_class)
-    ts, tsv = top(st.by_symbol)
-    te, tev = top(st.by_strategy)
+    out = ""
+    if len(stats_by_account) > 1:
+        tot = sum(st.net_total for st in stats_by_account.values() if st.trades)
+        col = "#1f7a3d" if tot >= 0 else "#b02418"
+        out += (f"<p><b>Netto totale, tutti i conti:</b> "
+                f"<span style='color:{col};font-size:18px'>{_eur(tot)} EUR</span></p>")
 
-    col = "#1f7a3d" if st.net_total >= 0 else "#b02418"
-    return f"""
-    <p><b>Netto settimana:</b> <span style='color:{col};font-size:18px'>{_eur(st.net_total)} EUR</span>
-       &nbsp;·&nbsp; {len(st.trades)} trade &nbsp;·&nbsp; win rate {st.win_rate*100:.0f}%
-       &nbsp;·&nbsp; profit factor {st.profit_factor:.2f}
-       &nbsp;·&nbsp; aspettativa {_eur(st.expectancy)}/trade</p>
-    <p style='color:#999;font-size:12px'>Statement: {st.total_in_file} trade nel file · copertura {st.first_open} → {st.last_close}</p>
-    <div style='background:#eef6ee;border-left:4px solid #1f7a3d;padding:8px 12px;margin:10px 0'>
-      <b>🏆 Più profittevoli:</b> &nbsp; categoria <b>{tc}</b> ({_eur(tcv)}) &nbsp;·&nbsp;
-      simbolo <b>{ts}</b> ({_eur(tsv)}) &nbsp;·&nbsp; EA <b>{te}</b> ({_eur(tev)})
-    </div>
-    <h3>Per categoria (Indici / Valute / Cross / Metalli)</h3>
-    <table>{rows(st.by_class,'')}</table>
-    <h3>Per simbolo</h3>
-    <table>{rows(st.by_symbol,'')}</table>
-    <h3>Per strategia / EA (i tuoi EA)</h3>
-    <table>{rows(st.by_strategy,'')}</table>
-    """
+    for label, st in stats_by_account.items():
+        out += f"<h3 style='margin-top:22px'>Conto: {label}</h3>"
+        if not st.trades:
+            out += "<p style='color:#666'>Statement senza trade nel periodo.</p>"
+            continue
+
+        tc, tcv = top(st.by_class)
+        ts, tsv = top(st.by_symbol)
+        te, tev = top(st.by_strategy)
+
+        col = "#1f7a3d" if st.net_total >= 0 else "#b02418"
+        out += f"""
+        <p><b>Netto settimana:</b> <span style='color:{col};font-size:18px'>{_eur(st.net_total)} EUR</span>
+           &nbsp;·&nbsp; {len(st.trades)} trade &nbsp;·&nbsp; win rate {st.win_rate*100:.0f}%
+           &nbsp;·&nbsp; profit factor {st.profit_factor:.2f}
+           &nbsp;·&nbsp; aspettativa {_eur(st.expectancy)}/trade</p>
+        <p style='color:#999;font-size:12px'>Statement: {st.total_in_file} trade nel file · copertura {st.first_open} → {st.last_close}</p>
+        <div style='background:#eef6ee;border-left:4px solid #1f7a3d;padding:8px 12px;margin:10px 0'>
+          <b>🏆 Più profittevoli:</b> &nbsp; categoria <b>{tc}</b> ({_eur(tcv)}) &nbsp;·&nbsp;
+          simbolo <b>{ts}</b> ({_eur(tsv)}) &nbsp;·&nbsp; EA <b>{te}</b> ({_eur(tev)})
+        </div>
+        <h4>Per categoria (Indici / Valute / Cross / Metalli)</h4>
+        <table>{rows(st.by_class)}</table>
+        <h4>Per simbolo</h4>
+        <table>{rows(st.by_symbol)}</table>
+        <h4>Per strategia / EA (i tuoi EA)</h4>
+        <table>{rows(st.by_strategy)}</table>
+        """
+    return out
 
 
 def _bias_section(snaps: list[dict], res: dict | None) -> str:
@@ -124,14 +161,14 @@ def _stale_banner(msg: str) -> str:
             f"padding:10px 12px;margin:10px 0;border-radius:4px;font-weight:bold'>{msg}</div>")
 
 
-def build_html(now: datetime, snaps: list[dict], st, res: dict | None,
+def build_html(now: datetime, snaps: list[dict], stats_by_account: dict, res: dict | None,
                week_start: datetime, stale_warning: str = "") -> str:
     period = f"{week_start.strftime('%d/%m')} (lun) – {now.strftime('%d/%m/%Y')}"
     return f"""<!doctype html><html><head><meta charset='utf-8'>
 <style>
  body{{font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;max-width:720px;margin:auto;padding:12px}}
  h1{{color:#1f4e79}} h2{{color:#1f4e79;border-bottom:2px solid #eee;padding-bottom:4px;margin-top:26px}}
- h3{{color:#444;margin:14px 0 6px}}
+ h3{{color:#183a5c;margin:14px 0 6px}} h4{{color:#444;margin:12px 0 4px}}
  table{{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}}
  td,th{{border-bottom:1px solid #eee;padding:6px 8px;text-align:left}}
  th{{background:#1f4e79;color:#fff}}
@@ -140,7 +177,7 @@ def build_html(now: datetime, snaps: list[dict], st, res: dict | None,
  <p style='color:#666'>Analisi dei trade e verifica del bias di mercato.</p>
  {_stale_banner(stale_warning)}
  <h2>1. Andamento dei trade</h2>
- {_trade_section(st)}
+ {_trade_section(stats_by_account)}
  <h2>2. Il bias era corretto?</h2>
  {_bias_section(snaps, res)}
  <hr style='margin-top:28px'>
@@ -157,13 +194,15 @@ def main() -> int:
     snaps = snapshot.load_range(week_start, now)
 
     # --- statement + parse UNA volta (per HTML, PDF e controllo freschezza) ---
-    # Selezione DETERMINISTICA: fra tutti gli .xlsx vince quello che copre piu'
-    # avanti nel tempo (ultimo trade piu' recente). Su GitHub Actions le date-file
-    # dopo il checkout sono tutte uguali, quindi NON si puo' usare l'mtime: cosi'
-    # puoi caricare un export nuovo senza cancellare il vecchio e vince il completo.
+    # Selezione DETERMINISTICA per CONTO: fra i file dello stesso conto vince
+    # quello che copre piu' avanti nel tempo (ultimo trade piu' recente). Su
+    # GitHub Actions le date-file dopo il checkout sono tutte uguali, quindi
+    # NON si puo' usare l'mtime: cosi' puoi caricare un export nuovo senza
+    # cancellare il vecchio e vince il completo -- MA per conto, non in
+    # assoluto (22/08/2026: prima vinceva UN file su tutti i conti insieme,
+    # e il 100k spariva ogni volta che il conto piccolo chiudeva un trade
+    # anche solo qualche secondo dopo di lui).
     since = week_start.strftime("%Y.%m.%d")
-    st = None
-    statement_path = ""
     env_file = os.getenv("STATEMENT_FILE", "")
     candidates = []
     if env_file:
@@ -173,8 +212,11 @@ def main() -> int:
         sdir = Path("data/statements")
         candidates = ([str(p) for p in sdir.glob("*.xlsx")]
                       + [str(p) for p in sdir.glob("*.csv")]) if sdir.exists() else []
+
+    stats_by_account: dict = {}
+    paths_by_account: dict = {}
     if statement:
-        best_key = None
+        best_key_by_account: dict = {}
         for path in candidates:
             if not os.path.exists(path):
                 continue
@@ -183,13 +225,16 @@ def main() -> int:
             except Exception as exc:
                 print(f"[warn] statement '{os.path.basename(path)}' non leggibile: {exc}")
                 continue
+            label = "manuale (STATEMENT_FILE)" if env_file else _account_label(path)
             # chiave = ultima chiusura (copertura); a parita', piu' trade nel file
             key = (cand.last_close, cand.total_in_file)
-            if best_key is None or key > best_key:
-                st, statement_path, best_key = cand, path, key
-        if len(candidates) > 1 and statement_path:
-            print(f"[info] scelto lo statement piu' aggiornato: {os.path.basename(statement_path)} "
-                  f"(copre fino a {st.last_close})")
+            if label not in best_key_by_account or key > best_key_by_account[label]:
+                stats_by_account[label] = cand
+                paths_by_account[label] = path
+                best_key_by_account[label] = key
+        for label, path in paths_by_account.items():
+            print(f"[info] conto '{label}': scelto {os.path.basename(path)} "
+                  f"(copre fino a {stats_by_account[label].last_close})")
 
     # --- guardia anti-statement-vecchio: copre fino a venerdi'? ---
     # 15/08/2026: da dove sta girando questo report. La pagella del 15/08 e'
@@ -202,27 +247,36 @@ def main() -> int:
     _sha    = (os.getenv("GITHUB_SHA", "") or "")[:7]
     _prov   = f" [report generato dal branch '{_branch}'" + (f", commit {_sha}" if _sha else "") + "]" if _branch else ""
 
-    stale_warning = ""
     friday = week_start + timedelta(days=4)
     expected = min(now, friday)
-    if st is not None and st.last_close and st.last_close < expected.strftime("%Y.%m.%d"):
-        lc = st.last_close.replace(".", "/")
-        stale_warning = (f"⚠️ Lo statement arriva solo al {lc}, ma la settimana va fino al "
-                         f"{expected:%d/%m}. Mancano dei trade: esporta da MT5 un nuovo storico "
-                         f"COMPLETO e ripubblicalo, poi rilancia il report." + _prov +
-                         " Se il branch qui sopra non e' 'lavoro', il problema NON e' lo "
-                         "statement: il report sta leggendo un repo vecchio.")
-        print(f"[warn] statement STALE: ultimo trade {st.last_close}, atteso >= {expected:%Y.%m.%d}")
-    elif st is None:
-        stale_warning = ("⚠️ Nessuno statement disponibile: l'analisi dei trade è vuota. "
-                         "Pubblica l'export dello storico MT5 in data/statements/." + _prov)
+    stale_msgs = []
+    for label, cst in stats_by_account.items():
+        if cst.last_close and cst.last_close < expected.strftime("%Y.%m.%d"):
+            lc = cst.last_close.replace(".", "/")
+            stale_msgs.append(f"⚠️ Conto {label}: lo statement arriva solo al {lc}, ma la "
+                              f"settimana va fino al {expected:%d/%m}. Mancano dei trade: esporta "
+                              f"da MT5 un nuovo storico COMPLETO per QUESTO conto e ripubblicalo.")
+            print(f"[warn] statement STALE per '{label}': ultimo trade {cst.last_close}, "
+                  f"atteso >= {expected:%Y.%m.%d}")
+    if not stats_by_account:
+        stale_msgs.append("⚠️ Nessuno statement disponibile: l'analisi dei trade è vuota. "
+                          "Pubblica l'export dello storico MT5 in data/statements/.")
+    stale_warning = " ".join(stale_msgs)
+    if stale_warning:
+        stale_warning += _prov
+        if len(stats_by_account) and any(
+                cst.last_close and cst.last_close < expected.strftime("%Y.%m.%d")
+                for cst in stats_by_account.values()):
+            stale_warning += (" Se il branch qui sopra non e' 'lavoro', il problema NON e' lo "
+                              "statement: il report sta leggendo un repo vecchio.")
 
     res = verify.verify(snaps) if snaps else None
 
     print(f"[info] Report settimanale (da lun {week_start:%d/%m}): {len(snaps)} snapshot, "
-          f"statement={'sì' if st else 'no'}"
-          + (f", {len(st.trades)} trade, copertura->{st.last_close}" if st else ""))
-    html = build_html(now, snaps, st, res, week_start, stale_warning)
+          f"conti={len(stats_by_account)} "
+          + ", ".join(f"{label}: {len(cst.trades)} trade->{cst.last_close}"
+                       for label, cst in stats_by_account.items()))
+    html = build_html(now, snaps, stats_by_account, res, week_start, stale_warning)
     subject = f"📊 Report Settimanale — settimana del {now.day} {_MESI[now.month-1]}"
 
     # --- PDF allegato ---
@@ -230,7 +284,8 @@ def main() -> int:
     try:
         from agent import pdf as pdfgen
         period = f"{week_start.strftime('%d/%m')} (lun) – {now.strftime('%d/%m/%Y')}"
-        out = pdfgen.build_weekly_pdf("weekly_report.pdf", period=period, st=st, bias=res,
+        out = pdfgen.build_weekly_pdf("weekly_report.pdf", period=period,
+                                      stats_by_account=stats_by_account, bias=res,
                                       generated=now, stale_warning=stale_warning)
         if out:
             pdf_path = out
