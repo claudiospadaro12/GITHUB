@@ -9,7 +9,7 @@ visti. Questa riga **non cambia i criteri**: li traduce in file eseguibili.
 
 ---
 
-## 📌 IL PIN — `2c101e2e80174105006170a639d04b3b9d659633`
+## 📌 IL PIN — `822a34a10510da45ed3064a8feb37ec850991f90`
 
 È il commit che contiene **questo** driver e i file prova (checklist 4: se il
 commit del file fosse più nuovo del SHA scritto qui, il SHA sarebbe una bugia).
@@ -54,7 +54,7 @@ occorrenze di `[Experts]`, quante ne pretende il gate su `MaxBars`),
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='2c101e2e80174105006170a639d04b3b9d659633'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='822a34a10510da45ed3064a8feb37ec850991f90'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; if($LASTEXITCODE -ne 0){ Write-Host 'CONTROLLO NON PASSATO: leggi il REFERTO' -ForegroundColor Yellow } }
@@ -74,7 +74,7 @@ occorrenze di `[Experts]`, quante ne pretende il gate su `MaxBars`),
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='2c101e2e80174105006170a639d04b3b9d659633'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='822a34a10510da45ed3064a8feb37ec850991f90'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' -ForegroundColor Yellow } }
@@ -110,6 +110,15 @@ Le due devono dire lo **stesso** numero.
   si rigenerano i file prova, si ri-pinna e si rifà un giro dal verificatore.
 - Anche quando il gate ferma tutto, **la raccolta si fa lo stesso**: lo zip
   contiene il numero misurato, i due per-trade del gate e i due `.ini`.
+
+⚠️ **Se la sonda dicesse "NESSUNA riga `[ORB_OTT] ... STOP @ ... SL ...`"**: le
+cause sono tre e il referto le elenca. Una è tecnica e ha già la sua uscita —
+la sonda gira in modo **FIXED**, cioè con lo stop **più stretto** di tutto il
+round e quindi il **lotto più grande**, e gli ordini possono essere rifiutati
+per margine. In quel caso si rilancia con **`-RischioSonda 0.10`**: abbassa il
+rischio **solo nella sonda** (il lotto non entra nella geometria misurata) e
+**non tocca le celle firmate**, che girano sempre all'1,00% del file prova. Il
+referto lo scrive fra gli switch.
 
 ---
 
