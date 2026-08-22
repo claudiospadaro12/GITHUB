@@ -7,6 +7,39 @@
 
 ---
 
+## 🥇 AGGIORNAMENTO 22/08 (mql5-ea-developer) — NASDAQ, SECONDA CACCIA: scritto l'EA A1 "Market Intraday Momentum"
+
+**Perche' esiste:** R97 ha bocciato l'ORB su NASUSD **0/4**
+(`backtest_pipeline/risultati_archivio/R97_REFERTO.md`) e la lettura e' precisa —
+le 4 celle avevano **gli stessi INGRESSI** e perdevano tutte in OOS, quindi il
+problema non e' la geometria delle uscite. **Regola della seconda caccia (19/08):
+meccanismo DIVERSO sulla stessa inefficienza.**
+
+- 📦 **Consegnato:** `mql5/Experts/ABTG_IntradayMomentum.mq5` **v1.00**, magic
+  **772800** (blocco 7728xx libero, verificato su tutto il repo; mai 770201, mai
+  770611, mai 7797xx di R97).
+- 🧭 **Il motore, tre righe:** r1 = rendimento della **prima mezz'ora** di cassa
+  (**14:30-15:00 ORA SERVER**) → alle **20:30 server** si apre **nel verso di r1**
+  → si chiude entro le **21:00 server**, sempre. **Zero overnight per
+  costruzione**, un solo trade al giorno, 30 minuti di esposizione.
+  Fonte: **Gao/Han/Li/Zhou**, scheda `report/SWEEP_MECCANISMI_LIBERI_2026-08-22.md`
+  §A1 (9/10). **I numeri del paper sono [DICHIARATI, NON MISURATI DA NOI].**
+- 🎯 **Scorrelazione ORARIA vera:** alle 20:30 server **non abbiamo nessuno** (le
+  nostre aperture sparano alle 08:00 e alle 14:30).
+- 🧪 **AUTOTEST: 45 casi** sul **nucleo puro** (le stesse funzioni che aprono gli
+  ordini), stampe `[A1][AUTOTEST]` con atteso/ottenuto e `*** FAIL ***`.
+- ⛔ **NON compilato, NON eseguito, zero numeri prodotti** (qui non esistono
+  MetaEditor ne' tester). La logica pura e' stata verificata **trasponendola in
+  C++** — 44 casi verdi — che **non e' una compilazione MQL5**. Primo passo di
+  Claudio: **F7**, poi leggere l'autotest.
+- 📄 **Criteri del round:** `backtest_pipeline/risultati_archivio/R98_CRITERI_BOZZA.md`
+  — 🟡 **BOZZA NON FIRMATA**. Dentro c'e' **una decisione che aspetta Claudio**:
+  PF OOS **1,40** (come R97, confrontabile) oppure **1,20** (questo motore non ha
+  TP, il payoff e' simmetrico: 1,40 puo' essere l'unita' di misura sbagliata).
+  **Si sceglie PRIMA dei numeri.**
+
+---
+
 ## 📏 AGGIORNAMENTO 21/08 (mql5-ea-developer) — SONDA MEDIAZIONE: lo strumento c'e', il numero no
 
 Claudio ha firmato il 21/08 (**"metro,frequenza, firmo r93, r94 lancia, e prepara jpy"**)
