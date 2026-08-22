@@ -55,6 +55,10 @@
 #       decimali della colonna price del per-trade, che il sorgente
 #       scrive con DoubleToString(...,_Digits) -> 10^digits.
 #       Le due misure devono dire lo STESSO numero.
+#       Se la sonda non piazza ordini (lo stop FIXED e' il piu' stretto del
+#       round, quindi il LOTTO piu' grande: puo' essere rifiutato per
+#       margine) c'e' -RischioSonda, che abbassa il rischio SOLO nella
+#       sonda -- il lotto non entra nella geometria che il gate misura.
 #       >>> SE IL FATTORE NON E' MISURABILE, LA CORSA NON PARTE.
 #       >>> SE IL FATTORE NON E' 100, LA CORSA NON PARTE LO STESSO: i
 #           file prova scrivono InpSLBufferPts=500 perche' su U30USD
@@ -110,6 +114,13 @@ param(
   [switch]$Rifai,
   [switch]$SoloControllo,
   [switch]$ConD,                   # aggiunge la cella R97d, NON FIRMATA
+  [double]$RischioSonda = 0,       # SOLO per la sonda del PASSO 0. 0 = lascia
+                                   #   quello del file prova (1,00%). Serve se
+                                   #   la sonda non piazza ordini: con lo stop
+                                   #   stretto del modo FIXED il lotto e' il
+                                   #   piu' grande di tutto il round e puo'
+                                   #   essere rifiutato per margine. NON tocca
+                                   #   le celle firmate, e il referto lo scrive.
   [switch]$SaltaPasso0             # SOLO per rilanciare una coda gia' gatata.
                                    #   Se lo usi, il referto lo scrive in rosso
                                    #   E il fattore di conversione NON c'e'.
@@ -725,6 +736,13 @@ if($SaltaPasso0){
         "InpVerbose"  { [void]$out.Add("InpVerbose=1") }    # serve il log: e' li' che si legge la conversione
         "InpSLMode"   { [void]$out.Add("InpSLMode=2") }     # 2 = FIXED: sl = entry - InpSLFixedPts*_Point
         "InpMagic"    { [void]$out.Add("InpMagic=" + $magic) }
+        "InpRiskPercent" {
+            #  di norma resta quello del file prova. Si abbassa SOLO se
+            #  chiesto a mano, e non cambia di una virgola la GEOMETRIA che
+            #  il gate misura (la distanza dello stop non dipende dal lotto).
+            if($RischioSonda -gt 0){ [void]$out.Add("InpRiskPercent=" + $RischioSonda.ToString("0.####",$INV)) }
+            else                   { [void]$out.Add($r) }
+          }
         default       { [void]$out.Add($r) }
       }
     }
@@ -862,7 +880,10 @@ $inputs
     elseif($fattori.Count -eq 0){
       #  CONTROLLO POSITIVO (checklist 55): "0 righe cattive" e "0 righe
       #  capite" non possono finire nello stesso ramo.
-      $Fatale = "PASSO 0 / CONVERSIONE: " + $letti + " log letti ma NESSUNA riga '[ORB_OTT] ... STOP @ ... SL ...'. O l'EA non ha piazzato nemmeno un ordine in 21 mesi (e allora il motore e' MUTO su NASUSD, non brutto), o InpVerbose non e' arrivato acceso. In tutti e due i casi NON e' un via libera."
+      $Fatale = "PASSO 0 / CONVERSIONE: " + $letti + " log letti ma NESSUNA riga '[ORB_OTT] ... STOP @ ... SL ...'. Le cause possibili sono TRE e vanno distinte prima di rilanciare: " +
+                "(1) l'EA non ha piazzato nemmeno un ordine in 21 mesi -> il motore e' MUTO su " + $Sym + ", non brutto (guarda i log del tester nello zip); " +
+                "(2) gli ordini sono stati RIFIUTATI per margine: la sonda gira in modo FIXED, che e' lo stop piu' STRETTO del round e quindi il LOTTO PIU' GRANDE -> rilancia con -RischioSonda 0.10, che abbassa il rischio SOLO nella sonda e non tocca le celle firmate; " +
+                "(3) InpVerbose non e' arrivato acceso. In tutti e tre i casi NON e' un via libera."
     }
     else{
       $medD = Mediana $distanze
@@ -1194,6 +1215,7 @@ try{
   if($SoloControllo){ $sw += "-SoloControllo (nessuna passata)" }
   if($SaltaPasso0)  { $sw += "-SaltaPasso0 (CONVERSIONE NON MISURATA: la firma chiede il contrario)" }
   if($ConD)         { $sw += "-ConD (gira anche R97d, CHE NON E' FIRMATA)" }
+  if($RischioSonda -gt 0){ $sw += "-RischioSonda " + $RischioSonda.ToString("0.####",$INV) + " (SOLO la sonda del PASSO 0: le celle firmate girano col rischio del file prova)" }
   if($Rifai)        { $sw += "-Rifai (i CSV precedenti sono stati rifatti)" }
   if($sw.Count -eq 0){ $sw += "nessuno (corsa piena, PASSO 0 eseguito, ripresa dei CSV gia' presenti ATTIVA)" }
   [void]$R.Add("switch di questo giro: " + ($sw -join " | "))
