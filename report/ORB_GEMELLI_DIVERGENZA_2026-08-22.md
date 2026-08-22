@@ -108,29 +108,47 @@ valore di default nel codice, non necessariamente il valore CONFIGURATO
 sul grafico live (serve lo screenshot del pannello input del 100k per
 saperlo con certezza, come fatto per il piccolo). Resta aperto.
 
-## ✅ SOLUZIONE (decisa, non ancora eseguita) — resta valida, per un motivo diverso
-**Ricompilare `ABTG_ORB_Ottimizzato.mq5` da `lavoro` (v1.02) su ENTRAMBI i
-terminali**, cosi' girano lo stesso identico codice. `InpSLBufferPts` a
-default 0 e' un no-op esatto (dichiarato nel suo stesso changelog): il
-comportamento firmato non cambia. Il motivo per farlo ORA non e' piu'
-"risolve il trailing" (non e' provato che lo faccia): e' **dare al conto
-piccolo la protezione Guardian che oggi non ha**, ed eliminare la deriva
-di versione in generale.
-**Quando**: MT5 chiuso o comunque senza una posizione ORB aperta (dopo le
-22:59 server o prima delle 14:25 server del giorno dopo).
+## ✅ SOLUZIONE — ESEGUITA il 22/08 sera
+**Ricompilato `ABTG_ORB_Ottimizzato.mq5` da `lavoro` (v1.02) su ENTRAMBI i
+terminali**, con script dedicato `backtest_pipeline/aggiorna_verifica_orb.ps1`
+(installa anche `ABTG_PausaGuardian.mqh`, che il piccolo non aveva mai avuto).
+Due bug dello script scoperti e corretti IN CORSA prima del successo finale:
+1. il piccolo falliva a compilare perche' lo script v1 non installava
+   l'include Guardian (solo l'EA) — corretto scaricando anche il `.mqh`;
+2. dopo quel fix, ENTRAMBE le istanze fallivano compilazione con
+   `metaeditor64.exe` che tornava `rc=0` senza fare nulla: causa
+   `Start-Process -ArgumentList` con virgolette pre-assemblate a mano,
+   che si rompe sui path con spazi ("Program Files..."). Corretto tornando
+   all'invocazione diretta (`& $MetaEditor ...`), gia' provata funzionante.
 
-## 🔍 Il mistero del trailing resta APERTO
+**Verificato dal log reale di compilazione (22/08, 15:10 ora VPS)**:
+entrambe le istanze — `0 errors, 0 warnings`, versione confermata 1.02 su
+entrambe, `ABTG_PausaGuardian.mqh` incluso su entrambe.
+
+**Verificato da Claudio dopo il riavvio dei terminali**: pannello input
+ricontrollato su ENTRAMBI i conti (confermato "sono diversi, ho controllato
+io") — su entrambi compare `Guardian: rispetta pausa giornaliera (B1) e cap
+rischio aperto = true`, titolo `1.02`. **Il conto piccolo ha ora la
+protezione Guardian che non aveva mai avuto.** Deriva di versione eliminata
+su entrambi i terminali.
+
+## 🔍 Il mistero del trailing resta APERTO — ora si osserva sul v1.02 identico
 Non isolato a livello di codice (le uniche due versioni vere confrontate
-finora hanno `ManageRunner()` identica). Prossimi passi possibili:
+avevano `ManageRunner()` identica). Con entrambi i conti ora sullo stesso
+v1.02, il test e' pulito: se il piccolo continua a non trailare, si esclude
+del tutto la deriva di versione e resta o codice non ancora confrontato
+o causa ambientale/di terminale. Prossimi passi:
 1. Diff riga per riga delle altre funzioni (`TryPlace`, `SLforLong`/
-   `SLforShort`, `ComputeRange`, `LotByRisk`, rilevazione `newBar`) fra
-   v1.00 e v1.01 — non ancora fatto.
+   `SLforShort`, `ComputeRange`, `LotByRisk`, rilevazione `newBar`) —
+   non piu' rilevante fra versioni diverse (ora sono lo stesso file), ma
+   utile se emerge un comportamento diverso a codice identico.
 2. Ipotesi ambientale/terminale (es. l'handle dell'indicatore EMA non si
    carica per qualche motivo su quel terminale, `CopyBuffer` fallisce in
    silenzio e la funzione ritorna prima del `PositionModify` senza che
    nessuno se ne accorga: vedi anche la correzione di igiene sotto).
-3. Dopo la ricompilazione a v1.02 su entrambi: se il trailing NON riparte
-   sul piccolo, e' la prova che la causa e' ambientale, non di codice.
+3. **Prossimo trade ORB OTT sul piccolo dopo il 22/08 sera: osservare se
+   trailla.** Stesso codice su entrambi ora — qualunque differenza residua
+   e' la prova che serviva.
 
 ## Correzione di igiene proposta, indipendente dalla causa
 `ManageRunner()` oggi non stampa NULLA quando muove lo stop (ne' quando NON
