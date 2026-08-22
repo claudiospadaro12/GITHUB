@@ -2350,3 +2350,45 @@ simbolo senza storico), il gate va legato all'**invariante**, non alla costante:
 Un CSV mancante e' una **RISPOSTA** (simbolo senza storico), non un guasto: va in
 una lista a parte e **non** fa `ESITO: FALLITO`, o il referto trasforma un dato
 in un allarme.
+
+---
+
+## 🆕 AGGIUNTA DEL 22/08/2026 — trovata verificando `aggiorna_verifica_orb.ps1` (gemelli ORB)
+
+## 54. 🧟‍♂️ LA COMPILAZIONE FALLITA IN PRODUZIONE NON E' UN NO-OP: lascia il `.ex5` VECCHIO che OPERA, sotto un `.mq5` NUOVO che MENTE
+
+_Difetto vero, gia' committato in `aggiorna_verifica_orb.ps1` (0c0261f, righe
+76-90), trovato PRIMA dell'invio della riga. Lo script scarica il `.mq5` v1.02
+sopra il v1.00 del conto piccolo e compila — ma non installa
+`ABTG_PausaGuardian.mqh` (punto 33-bis, gia' scritto il 21/08 e ripetuto qui)._
+
+Il punto 33-bis copre l'`#include` mancante **nel tester**, dove il costo e' una
+corsa persa. Questo e' lo stesso difetto **su un terminale LIVE**, e li' il
+fallimento non e' neutro. Due cose che nessun altro punto dice:
+
+1. **Il vecchio binario resta OPERATIVO.** Compilazione fallita = nessun `.ex5`
+   nuovo, quindi al riavvio MT5 ricarica **il `.ex5` di prima** e il conto
+   continua a operare con la versione vecchia — qui la v1.00 **senza nessuna
+   integrazione Guardian**, cioe' senza pausa giornaliera e senza cap rischio.
+   Un referto che stampa `compilazione: ERRORE` in rosso e' **corretto e
+   insufficiente**: deve dire *quale versione sta girando ADESSO su quel conto*.
+2. **Il sorgente nuovo accanto al binario vecchio avvelena la diagnosi
+   successiva.** L'indagine del 22/08 ha stabilito cosa girava sui due conti
+   **leggendo il `.mq5`** nella cartella dati. Se una compilazione fallita lascia
+   li' il `.mq5` v1.02 sopra un `.ex5` v1.00, la prossima indagine legge v1.02 e
+   conclude "sono allineati": il metodo di misura viene distrutto dalla riga che
+   doveva sistemare le cose. E' il referto stantio del 17/08, con la vittima che
+   e' lo **strumento di diagnosi**.
+
+> **Una riga che ricompila un EA su un terminale che opera:**
+> - installa **tutte** le dipendenze `#include` non di sistema (punto 33-bis),
+>   dal pin, verificate per LUNGHEZZA e MARCATORE;
+> - fa il **backup datato** di `.mq5` **e** di `.ex5` prima di toccarli (punto
+>   12) — il `.ex5` vecchio e' l'unica prova di cosa stava girando davvero;
+> - decide "compilato" confrontando il `LastWriteTime` del `.ex5` **prima e
+>   dopo** (non "esiste" e non "e' recente": il file c'era gia');
+> - se la compilazione FALLISCE, **rimette a posto il `.mq5` dal backup** e lo
+>   dice: sorgente e binario devono restare la stessa versione, sempre;
+> - stampa in chiaro `versione PRIMA -> versione DOPO` per ogni istanza, e in
+>   caso di errore le ultime righe del log di MetaEditor (`/log:<file>`, che
+>   nessuno leggeva) dentro lo zip della raccolta.
