@@ -2,6 +2,7 @@
 #  verifica_autotest_guardian.ps1 -- verifica AUTOMATICA dell'autotest
 #  di ABTG_PausaGuardian.mqh (freno P1 v1.30) senza toccare a mano
 #  MetaEditor o lo Strategy Tester.
+#  MARCATORE-VERSIONE-SCRIPT: FAIL_TRIPLA_STELLA_v2
 #
 #  PERCHE' ESISTE (22/08/2026): Claudio ha girato l'autotest a mano e
 #  gli e' uscito "v1.20" invece di "v1.30" -- l'.ex5 di ABTG_CrossEma
@@ -11,6 +12,20 @@
 #  ricompila SEMPRE, lancia un test non-visuale veloce (Model=1, pochi
 #  giorni, AllowLiveTrading=false) solo per far scattare OnInit(), e
 #  legge da solo il log del tester cercando le righe [AUTOTEST].
+#
+#  CORREZIONE v2 (22/08/2026, dopo controllo di sicurezza dedicato):
+#  il verdetto vero che scrive ABTG_AutotestCaso() e' "*** FAIL ***",
+#  non "FAIL" a fine riga -- il gate v1 non avrebbe MAI intercettato
+#  un fallimento vero (l'ha solo trovato nei nomi tipo "fail-open",
+#  che sono PARTE del nome del caso e finiscono comunque in PASS).
+#  Aggiunto anche un controllo POSITIVO (0 PASS trovati = parser
+#  cieco, non "tutto ok"), l'isolamento del log per LUNGHEZZA prima/
+#  dopo (non piu' per posizione dell'ultimo blocco: un rilancio senza
+#  esecuzione vera avrebbe fatto leggere il blocco vecchio come
+#  fresco), backup/ripristino del binario se la compilazione fallisce,
+#  pulizia della cache del tester, e uccisione mirata del SOLO
+#  processo lanciato da questo script (mai uno spazzolone su tutti i
+#  terminal64 -- ce ne puo' essere un altro aperto, es. il -V3/100k).
 #
 #  PRETENDE MT5 CHIUSO (compila E lancia un terminale).
 #
@@ -80,8 +95,15 @@ $verIncM = [regex]::Match($incTesto, 'ABTG_PausaGuardian\s+v([0-9.]+)\s*--\s*nuc
 $verInc = if ($verIncM.Success) { $verIncM.Groups[1].Value } else { "?" }
 Write-Host ("Sorgente scaricato: ABTG_PausaGuardian.mqh dichiara v" + $verInc) -ForegroundColor Gray
 if ($verInc -ne "1.30") {
-  Write-Host ("ATTENZIONE: il sorgente scaricato NON e' v1.30 (e' v" + $verInc + "). Puo' essere cache del CDN: aspetta un minuto e rilancia.") -ForegroundColor Yellow
+  Write-Host ("SCARICATA LA VERSIONE SBAGLIATA: v" + $verInc + " invece di v1.30 (cache del CDN? aspetta un minuto e rilancia). NON proseguo.") -ForegroundColor Red
+  exit 1
 }
+
+# --- backup DATATO del binario/sorgente prima di toccarli (checklist 12+54)
+$bakEa  = $destEa + ".prima_" + $stamp
+$bakEx5 = $ex5    + ".prima_" + $stamp
+if (Test-Path -LiteralPath $destEa) { Copy-Item -LiteralPath $destEa -Destination $bakEa -Force }
+if (Test-Path -LiteralPath $ex5)    { Copy-Item -LiteralPath $ex5    -Destination $bakEx5 -Force }
 
 # --- compilo SEMPRE (invocazione diretta, non Start-Process: vedi ORB) --
 Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
@@ -92,16 +114,39 @@ $rcCompile = $LASTEXITCODE
 if (-not (Test-Path -LiteralPath $ex5)) {
   Write-Host ("COMPILAZIONE FALLITA (rc=" + $rcCompile + "). Ultime righe del log:") -ForegroundColor Red
   Get-Content -LiteralPath $logCompile -ErrorAction SilentlyContinue | Select-Object -Last 20 | ForEach-Object { Write-Host ("  " + $_) -ForegroundColor Red }
+  if (Test-Path -LiteralPath $bakEa) {
+    Copy-Item -LiteralPath $bakEa -Destination $destEa -Force
+    Write-Host "Sorgente RIPRISTINATO dal backup (resta allineato al binario vecchio, se c'era)." -ForegroundColor Yellow
+  }
   exit 1
 }
 Write-Host "Compilazione OK." -ForegroundColor Green
 
-# --- pulisco i vecchi log del tester per questa cartella dati, cosi'
-#     dopo prendo SOLO quello nuovo senza ambiguita' --------------------
-$testerRoot = Join-Path $env:APPDATA ("MetaQuotes\Tester\" + (Split-Path -Leaf $DataFolder))
-$primaFile = @()
-if (Test-Path $testerRoot) {
-  $primaFile = @(Get-ChildItem $testerRoot -Recurse -Filter "*.log" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
+# --- fotografo la LUNGHEZZA di ogni log gia' esistente: dopo il test
+#     leggo SOLO i byte scritti dopo, cosi' non serve indovinare quale
+#     file e' "nuovo" ne' affidarmi a un'ancora di testo nell'ultimo
+#     blocco (un rilancio senza esecuzione vera farebbe rileggere il
+#     blocco vecchio come fresco) ------------------------------------
+$TesterRadici = @(
+  (Join-Path $DataFolder "Tester"),
+  (Join-Path $instDir "Tester"),
+  (Join-Path $env:APPDATA "MetaQuotes\Tester")
+)
+$primaLen = @{}
+foreach ($rad in $TesterRadici) {
+  if (-not (Test-Path -LiteralPath $rad)) { continue }
+  foreach ($f in @(Get-ChildItem -LiteralPath $rad -Recurse -Filter "*.log" -File -ErrorAction SilentlyContinue)) {
+    $primaLen[$f.FullName] = $f.Length
+  }
+}
+
+# --- pulisco la cache del tester per questa cartella dati: senza,
+#     una passata con stessi input/simbolo/periodo puo' essere
+#     RIPESCATA dalla cache e non esegue OnInit -> zero righe stampate
+#     (checklist 38). MAI toccare bases\<server>\ticks. -----------------
+$cacheDir = Join-Path $DataFolder "Tester\cache"
+if (Test-Path -LiteralPath $cacheDir) {
+  Remove-Item -LiteralPath (Join-Path $cacheDir "*") -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 # --- costruisco l'ini per un test non-visuale VELOCE, solo per OnInit --
@@ -135,90 +180,100 @@ InpAutoTest=true||true||0||true||N
 "@ | Set-Content -Path $ini -Encoding ASCII
 
 Write-Host "Lancio il test (rapido, solo per far scattare OnInit)..." -ForegroundColor Cyan
-(Start-Process -FilePath $Terminal -ArgumentList "/config:`"$ini`"" -PassThru).WaitForExit()
-for ($w = 0; $w -lt 30; $w++) {
-  if (-not (Get-Process -Name terminal64 -ErrorAction SilentlyContinue)) { break }
-  Start-Sleep -Seconds 2
+$proc = Start-Process -FilePath $Terminal -ArgumentList "/config:`"$ini`"" -PassThru
+$uscitoDaSolo = $proc.WaitForExit(600000)
+if (-not $uscitoDaSolo) {
+  Write-Host "Il terminale non e' uscito da solo in 10 minuti (dialogo bloccato in avvio?). Lo chiudo IO, solo questo PID." -ForegroundColor Yellow
+  try { $proc.Kill() } catch { }
+} else {
+  # ShutdownTerminal=1 di solito chiude da solo; se resta un residuo dello
+  # STESSO pid (raro) lo aspetto un altro po' prima di forzare
+  for ($w = 0; $w -lt 10; $w++) {
+    $ancoraVivo = Get-Process -Id $proc.Id -ErrorAction SilentlyContinue
+    if (-not $ancoraVivo) { break }
+    Start-Sleep -Seconds 2
+  }
+  $ancoraVivo = Get-Process -Id $proc.Id -ErrorAction SilentlyContinue
+  if ($ancoraVivo) { try { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue } catch { } }
 }
-Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 2
 
-# --- trovo il log NUOVO (quello che non c'era prima) -------------------
-function Leggi-Testo($path) {
+# --- leggo SOLO i byte scritti dopo la fotografia (offset pari, UTF-16) -
+function Leggi-TestoNuovo($path, $da) {
   try {
     $fs = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
-    $b  = New-Object byte[] $fs.Length
-    [void]$fs.Read($b, 0, $b.Length)
-    $fs.Close()
   } catch { return "" }
+  $len = $fs.Length
+  if ($da % 2 -ne 0) { $da = $da - 1 }
+  if ($da -lt 0) { $da = 0 }
+  if ($da -ge $len) { $fs.Close(); return "" }
+  if ($da -gt 0) { [void]$fs.Seek($da, [IO.SeekOrigin]::Begin) }
+  $n = [int]($len - $da)
+  $b = New-Object byte[] $n
+  $letti = 0
+  while ($letti -lt $n) {
+    $q = $fs.Read($b, $letti, $n - $letti)
+    if ($q -le 0) { break }
+    $letti += $q
+  }
+  $fs.Close()
   if ($b.Count -lt 4) { return "" }
-  $utf16 = ($b[0] -eq 0xFF -and $b[1] -eq 0xFE)
+  $utf16 = ($da -eq 0 -and $b[0] -eq 0xFF -and $b[1] -eq 0xFE)
   if (-not $utf16) {
-    $zeri = 0; $n = [math]::Min(400, $b.Count)
-    for ($i = 1; $i -lt $n; $i += 2) { if ($b[$i] -eq 0) { $zeri++ } }
-    $utf16 = ($zeri -gt ($n/4))
+    $zeri = 0; $n2 = [math]::Min(400, $b.Count)
+    for ($i = 1; $i -lt $n2; $i += 2) { if ($b[$i] -eq 0) { $zeri++ } }
+    $utf16 = ($zeri -gt ($n2/4))
   }
   if ($utf16) { return [Text.Encoding]::Unicode.GetString($b) }
   return [Text.Encoding]::UTF8.GetString($b)
 }
 
-$dopoFile = @()
-if (Test-Path $testerRoot) {
-  $dopoFile = @(Get-ChildItem $testerRoot -Recurse -Filter "*.log" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
-}
-$nuovi = @($dopoFile | Where-Object { $primaFile -notcontains $_ })
-if ($nuovi.Count -eq 0) {
-  # fallback: il log piu' recente di tutti, se non troviamo un "nuovo" netto
-  $tutti = @(Get-ChildItem $testerRoot -Recurse -Filter "*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending)
-  if ($tutti.Count -gt 0) { $nuovi = @($tutti[0].FullName) }
-}
-
-$righeGrezze = New-Object System.Collections.ArrayList
-foreach ($f in $nuovi) {
-  $testo = Leggi-Testo $f
-  if (-not $testo) { continue }
-  foreach ($r in ($testo -split "`r?`n")) {
-    if ($r -match "\[AUTOTEST\]") { [void]$righeGrezze.Add($r.Trim()) }
-  }
-}
-
-# il log del tester e' per-giorno e si accumula: se lo stesso file gia'
-# esisteva (log riusato fra piu' lanci), qui dentro ci sono ANCHE le
-# esecuzioni precedenti. Tengo SOLO l'ultimo run: parte dalla ultima
-# riga "[CROSSEMA][AUTOTEST] EMA ..." (e' la prima stampata a ogni OnInit).
 $righeAutotest = New-Object System.Collections.ArrayList
-$ultimoInizio = -1
-for ($i = 0; $i -lt $righeGrezze.Count; $i++) {
-  if ($righeGrezze[$i] -match '\[CROSSEMA\]\[AUTOTEST\] EMA ') { $ultimoInizio = $i }
-}
-if ($ultimoInizio -ge 0) {
-  for ($i = $ultimoInizio; $i -lt $righeGrezze.Count; $i++) { [void]$righeAutotest.Add($righeGrezze[$i]) }
-} else {
-  foreach ($r in $righeGrezze) { [void]$righeAutotest.Add($r) }
+$logLetti = 0
+foreach ($rad in $TesterRadici) {
+  if (-not (Test-Path -LiteralPath $rad)) { continue }
+  foreach ($f in @(Get-ChildItem -LiteralPath $rad -Recurse -Filter "*.log" -File -ErrorAction SilentlyContinue)) {
+    $da = 0
+    if ($primaLen.ContainsKey($f.FullName)) { $da = $primaLen[$f.FullName] }
+    if ($f.Length -le $da) { continue }
+    $logLetti++
+    $testo = Leggi-TestoNuovo $f.FullName $da
+    if (-not $testo) { continue }
+    foreach ($r in ($testo -split "`r?`n")) {
+      if ($r -match "\[AUTOTEST\]") { [void]$righeAutotest.Add($r.Trim()) }
+    }
+  }
 }
 
 Write-Host ""
 if ($righeAutotest.Count -eq 0) {
   Write-Host "NESSUNA RIGA [AUTOTEST] TROVATA." -ForegroundColor Red
-  Write-Host ("Log controllati: " + $nuovi.Count + " sotto " + $testerRoot) -ForegroundColor Yellow
-  Write-Host "Possibili cause: InpAutoTest non passato correttamente, o il test non ha avuto storico per EURUSD nel periodo." -ForegroundColor Yellow
+  Write-Host ("Log cresciuti trovati: " + $logLetti) -ForegroundColor Yellow
+  Write-Host "Possibili cause: InpAutoTest non passato correttamente, storico EURUSD assente nel periodo, o il terminale non e' proprio partito." -ForegroundColor Yellow
 } else {
   Write-Host ("Trovate " + $righeAutotest.Count + " righe [AUTOTEST]:") -ForegroundColor Green
   foreach ($r in $righeAutotest) { Write-Host ("  " + $r) }
 }
 
-# il verdetto vero e' l'ultima parola della riga ("...  PASS" o "...  FAIL").
-# un match generico su "FAIL" prende anche descrizioni come "fail-open"
-# che sono PARTE DEL NOME del caso (e finiscono comunque in PASS) - visto
-# il 22/08 sul referto di Claudio: 12 "FAIL" tutti falsi allarmi cosi'.
-$fallite = @($righeAutotest | Where-Object { $_.TrimEnd() -cmatch 'FAIL$' })
+# il verdetto vero che scrive ABTG_AutotestCaso() e' "*** FAIL ***" (non
+# "FAIL" a fine riga): un match generico su "FAIL" prende anche
+# descrizioni come "fail-open" che sono PARTE DEL NOME del caso (e
+# finiscono comunque in PASS) - il bug esatto trovato il 22/08: 12 "FAIL"
+# tutti falsi allarmi cosi', e il pattern vecchio non avrebbe MAI
+# intercettato un fallimento vero.
+$fallite = @($righeAutotest | Where-Object { $_ -cmatch '\*\*\*\s*FAIL\s*\*\*\*' })
+$passate = @($righeAutotest | Where-Object { $_.TrimEnd() -cmatch 'PASS$' })
 $haV130  = @($righeAutotest | Where-Object { $_ -match "v1\.30" }).Count -gt 0
 $haP1    = @($righeAutotest | Where-Object { $_ -match "FRENO P1" }).Count -gt 0
 
 Write-Host ""
+Write-Host ("casi PASS trovati            : " + $passate.Count) -ForegroundColor (@{$true="Green";$false="Red"}[$passate.Count -gt 0])
 Write-Host ("versione v1.30 vista nel log : " + $haV130) -ForegroundColor (@{$true="Green";$false="Red"}[$haV130])
 Write-Host ("blocco FRENO P1 visto        : " + $haP1)   -ForegroundColor (@{$true="Green";$false="Red"}[$haP1])
-Write-Host ("righe con FAIL               : " + $fallite.Count) -ForegroundColor (@{$true="Red";$false="Green"}[$fallite.Count -gt 0])
+Write-Host ("righe *** FAIL ***           : " + $fallite.Count) -ForegroundColor (@{$true="Red";$false="Green"}[$fallite.Count -gt 0])
+if ($passate.Count -eq 0 -and $righeAutotest.Count -gt 0) {
+  Write-Host "PARSER CIECO: righe [AUTOTEST] trovate ma nessun verdetto PASS riconosciuto - non fidarti di questo esito." -ForegroundColor Red
+}
 
 # --- raccolta sul Desktop + zip (regola delle righe di lancio) --------
 function Trova-Desktop {
@@ -235,9 +290,10 @@ try {
   $out = New-Object System.Collections.ArrayList
   [void]$out.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss", $INV))
   [void]$out.Add("versione .mqh scaricata: " + $verInc)
+  [void]$out.Add("casi PASS trovati: " + $passate.Count)
   [void]$out.Add("v1.30 vista nel log: " + $haV130)
   [void]$out.Add("blocco FRENO P1 visto: " + $haP1)
-  [void]$out.Add("righe con FAIL: " + $fallite.Count)
+  [void]$out.Add("righe *** FAIL ***: " + $fallite.Count)
   [void]$out.Add("")
   foreach ($r in $righeAutotest) { [void]$out.Add($r) }
   $out | Set-Content -Path (Join-Path $cart "autotest.txt") -Encoding ASCII
@@ -250,5 +306,5 @@ try {
   Write-Host "Mandami direttamente l'output qui sopra." -ForegroundColor Yellow
 }
 
-if ($righeAutotest.Count -eq 0 -or $fallite.Count -gt 0 -or -not $haV130) { exit 1 }
+if ($righeAutotest.Count -eq 0 -or $passate.Count -eq 0 -or $fallite.Count -gt 0 -or -not $haV130 -or -not $haP1) { exit 1 }
 exit 0
