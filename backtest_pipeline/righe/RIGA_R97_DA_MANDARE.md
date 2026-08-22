@@ -9,6 +9,26 @@ visti. Questa riga **non cambia i criteri**: li traduce in file eseguibili.
 
 ---
 
+## 📌 IL PIN — `2c101e2e80174105006170a639d04b3b9d659633`
+
+È il commit che contiene **questo** driver e i file prova (checklist 4: se il
+commit del file fosse più nuovo del SHA scritto qui, il SHA sarebbe una bugia).
+Il driver **ri-pinna da solo** anche i due gemelli che scarica l'EA per conto
+proprio (`walkforward_generico.ps1` e `scarica_storico.ps1` hanno
+`$EABranch = "lavoro"` scritto fisso e riscaricherebbero il `.mq5` dalla
+**punta** del branch — difetto 24), e **verifica lo stato finale** invece di
+fidarsi del replace.
+
+Verificato a tavolino, su questo commit, che i marcatori che il driver pretende
+esistano davvero: `RigaSpread` in `walkforward_generico.ps1` (e **due**
+occorrenze di `[Experts]`, quante ne pretende il gate su `MaxBars`),
+`REFERTO STORICO` e `AllowLiveTrading=false` in `scarica_storico.ps1`,
+`ABTG_GuardiaIngresso` in `ABTG_PausaGuardian.mqh` (53.840 byte),
+`InpSLBufferPts` e `#property version "1.02"` in `ABTG_ORB_Ottimizzato.mq5`,
+`43` righe vive in tutti e cinque i file prova.
+
+---
+
 ## ⛔ PRIMA DI LANCIARE — traffico e prerequisiti
 
 - **UNA MACCHINA, UN LAVORO.** Il PC di backtest ha **un solo MT5**: prima di
@@ -34,7 +54,7 @@ visti. Questa riga **non cambia i criteri**: li traduce in file eseguibili.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='2c101e2e80174105006170a639d04b3b9d659633'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; if($LASTEXITCODE -ne 0){ Write-Host 'CONTROLLO NON PASSATO: leggi il REFERTO' -ForegroundColor Yellow } }
@@ -54,7 +74,7 @@ visti. Questa riga **non cambia i criteri**: li traduce in file eseguibili.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='2c101e2e80174105006170a639d04b3b9d659633'; $p="$env:USERPROFILE\RIGA_R97.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R97_ORB_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R97_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' -ForegroundColor Yellow } }
