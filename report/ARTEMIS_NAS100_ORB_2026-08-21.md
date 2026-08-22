@@ -13,6 +13,35 @@ poco fa (`INDICATORE_DIEGO_NASDAQ_2026-08-21.md`). Quello era un
 magic proprio (`26060701`), con gestione del rischio, filtri, recovery e
 pannello grafico. **Chiedo conferma a Claudio se sono collegati** (stesso
 autore/community?) o due cose scoperte separatamente — cambia come trattarli
+
+---
+
+## 0. ✅ PROVENIENZA VERIFICATA (21/08 notte, dopo la risposta di Claudio: *"L'HO TROVATO SULLO STORE DI MT5, SARA' DI UN UTENTE"*)
+
+Cercato sullo Store MQL5: **e' un prodotto reale, in vendita**.
+
+| | |
+|---|---|
+| Nome | **Artemis NAS100 Orb Edge EA** |
+| Autore | **Nathan James Gilks** |
+| Prezzo | **59 USD** |
+| Recensioni | **5 stelle, ma su 1 SOLA recensione** — campione nullo |
+| Pubblicato | 04/06/2026 · versione attuale **1.30** aggiornata **16/08/2026** (5 giorni fa) |
+| Fonte | [mql5.com/it/market/product/179855](https://www.mql5.com/it/market/product/179855) (pagina MT4; il nostro `.set` e' esplicitamente "M5-MT5", stesso autore/prodotto in build MT5) |
+
+**Due cose confermate DALL'AUTORE STESSO, che corroborano la lettura fatta a mano dal `.set`:**
+
+1. *"No Martingale system explicitly used in default configuration. Recovery
+   Ladder included as optional advanced module but **disabled** in release
+   settings."* → **conferma esatta** di quanto scritto al punto 2: il modulo
+   c'e', e' spento di default, l'autore stesso lo dichiara opzionale/avanzato.
+2. *"Confirm New York opening time matches **your broker's** chart
+   timezone."* → l'autore **stesso** avverte che l'ora va confermata per
+   ogni broker. Non e' un difetto nascosto: e' un passo di setup dichiarato,
+   che pero' **nessuno ha ancora eseguito su BCM** (vedi punto 3).
+
+📌 **Il rating (5 stelle) non vale come misura**: una recensione sola non e'
+un campione, e' aneddoto. Non cambia il giudizio.
 nel round.
 
 ---
