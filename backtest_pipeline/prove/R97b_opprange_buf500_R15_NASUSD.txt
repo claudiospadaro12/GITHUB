@@ -1,0 +1,162 @@
+# =====================================================================
+#  R97b / LA CELLA REGINA DI R88, TRASFERITA           NASUSD M5
+#  EA: ABTG_ORB_Ottimizzato v1.02  (sedia viva sul Dow: magic 770611)
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R97b_opprange_buf500_R15_NASUSD.txt
+#    -Simbolo NASUSD -Deposito 100000 -Etichetta r97b -Modello 4
+#  (la riga di lancio che fa tutto da sola e'
+#   backtest_pipeline\righe\RIGA_R97_ORB_NASUSD.ps1: non si lancia a mano)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI. Stanno in
+#      backtest_pipeline\risultati_archivio\R97_CRITERI.md e sono
+#      **FIRMATI da Claudio il 21/08/2026**, a numeri mai visti.
+# ---------------------------------------------------------------------
+#  IL TRAFFICO -- SI LEGGE PRIMA DI LANCIARE
+#    1. UNA MACCHINA, UN LAVORO: il PC di backtest ha UN SOLO MT5.
+#       MT5 e MetaEditor vanno CHIUSI prima di lanciare.
+#    2. IL PASSO 0 E' UN GATE FIRMATO (criteri par. 3): prima di
+#       QUALUNQUE passata si misura quanti PUNTI MT5 valgono 1 punto
+#       indice su NASUSD. Lo fa da sola la riga di lancio, e se non e'
+#       misurabile LA CORSA NON PARTE.
+#    3. La riga di lancio porta SEMPRE l'irm dal branch 'lavoro' pinnato
+#       all'hash, e la raccolta finale (Desktop + zip) con l'elenco dei
+#       file attesi.
+# ---------------------------------------------------------------------
+#  COSA E' QUESTA CELLA (criteri par. 4, riga "R97b", la piu' attesa)
+#    InpSLMode = 0 OPPRANGE, InpSLBufferPts = 500 PUNTI MT5,
+#    TP in R sullo stop x 1,5.
+#    In R88, su U30USD, e' la cella col miglior compromesso DD/PF
+#    (3,84% DD, PF 1,84 OOS). La domanda di R97 e' UNA SOLA: quel
+#    compromesso esiste anche sul Nasdaq?
+#
+#  >>> I 500 PUNTI NON SONO UN NUMERO, SONO UNA CONVERSIONE <<<
+#    Su U30USD 100 punti MT5 = 1 punto indice (MISURATO: R55b riga 25
+#    e REFERTO_ROUND55_SLIPPAGE.md), quindi 500 punti = 5 PUNTI
+#    INDICE, cioe' lo stop "5-10 punti" del ToolKit ABTG (par. 5.1).
+#    R88 ha dovuto CORREGGERE una premessa sbagliata ("1 punto indice
+#    = 10 point MT5": era 100, un fattore DIECI).
+#    Su NASUSD quel numero NON era agli atti in forma misurata, e il
+#    PASSO 0 dei criteri (par. 3) lo MISURA prima di ogni passata:
+#    se non esce 100, questo 500 NON vale 5 punti indice e il file
+#    va rigenerato. La riga di lancio si ferma da sola in quel caso:
+#    non corregge niente per conto suo.
+# ---------------------------------------------------------------------
+#  IL CORPO E' IDENTICO NELLE 4 CELLE DI R97 (rif, a, b, c): cambiano
+#  SOLO InpSLMode, InpSLBufferPts, InpTPMode, InpTP_R e InpMagic. La
+#  riga di lancio fa il DIFF A COPPIE e si ferma se differiscono su
+#  qualcos'altro. Il corpo viene da prove\R88a_stoplargo_U30USD.txt
+#  (la cella regina di R88 sul Dow) col solo @SIMBOLO cambiato: e' la
+#  condizione perche' R97 misuri la TRASFERIBILITA' del meccanismo e
+#  non un'altra strategia.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE (criteri par. 2)
+#    @DAQUANDO 2024.09.26 = MURO DEI TICK di BCM su NASUSD, MISURATO
+#    (REFERTO_R83_R84_PREPARAZIONE.md riga 620: 164.636.788 tick).
+#    Con -FrazioneIS 0.40 e -Fino 2026.06.30:
+#       IS  2024.09.26 -> 2025.06.09      OOS 2025.06.10 -> 2026.06.30
+#    Le stesse finestre di R88 sul Dow: e' l'unico modo di confrontare
+#    i due mercati alla pari.
+#    CANARINO DICHIARATO PRIMA (criteri par. 2.1): campione IS sotto
+#    ~100 operazioni -> MERITO SOSPESO (Emendamento regola A), si legge
+#    il RISCHIO (regola B) e la diagnosi di trasferibilita'.
+#    REGIME CONTENUTO: UNO SOLO (indici USA 2024-2026, prevalentemente
+#    rialzista). Va scritto accanto a ogni tabella.
+#
+#  COME SI LEGGE: sono 4 celle scelte PRIMA, non una griglia da cui
+#  pescare. Da R97 esce al massimo una PROPOSTA di round di deploy, MAI
+#  una sedia accesa (criteri par. 6).
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- GEOMETRIA DEL RANGE: OR 15' 14:30->14:45 SERVER (= 15:30->15:45
+#     IT). ORA SERVER, sempre: server BCM = ora italiana - 1. Un 15 qui
+#     dentro sarebbe l'ora italiana, cioe' un'altra strategia.
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+
+# --- FINE GIORNATA: 21:00 server, come la sedia viva sul Dow.
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+# --- INGRESSO: pendenti STOP a 10 x K oltre il livello, come in campo.
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+# --- >>> LE RIGHE DELL'ESPERIMENTO (le uniche che cambiano fra le celle)
+#     R97b: OPPRANGE, buffer 500 punti MT5 (= 5 punti indice SE il
+#     PASSO 0 misura 100 punti/punto indice), TP = 1,5 R sullo stop.
+InpSLMode=0
+InpSLBufferPts=500
+InpTPMode=0
+InpTP_R=1.5
+# --- InpTPRangeMult qui e' INERTE (con InpTPMode=0 il target e'
+#     dist_stop x InpTP_R): sta scritto lo stesso perche' il corpo
+#     delle celle deve restare confrontabile riga per riga.
+# --- InpSLFixedPts e' inerte in HALFRANGE/OPPRANGE: e' pinnato al suo
+#     default perche' il PASSO 0 (gate della conversione) lo usa per
+#     misurare quanti punti MT5 vale un punto indice, e lo deve leggere
+#     DALL'ARTEFATTO che gira, non da una costante nello script.
+InpSLFixedPts=1000
+InpTPRangeMult=1.5
+
+# --- GESTIONE R15 PINNATA: trailing EMA9 acceso, NIENTE parziale,
+#     niente uscita su chiusura EMA. Se cambiasse anche solo il
+#     trailing, il round non isolerebbe piu' la geometria dello stop.
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+# --- FILTRI: EMA200 acceso (cuore della cella R15), EMA 9/21 e volume
+#     spenti, tetto range 0,8% del prezzo.
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+
+# --- RISCHIO: 1,00% pinnato. NON e' la taglia di campo (la sedia viva
+#     gira a 0,3%): e' il valore comune che rende le celle confrontabili
+#     fra loro e con R88.
+InpRiskPercent=1.0
+
+# --- SLIPPAGE: 0, come tutti i round tranne R55.
+InpSlippagePts=0
+
+# --- NOTIZIE: spente (servono un CSV in MQL5\Files e non c'entrano).
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili con quelli di R88. Sta scritto qui
+#     apposta, cosi' nessuno lo cerca nei log.
+InpUsaGuardian=1
+
+# --- IGIENE: log spento nelle corse lunghe, spread non filtrato.
+#     (Il PASSO 0 accende InpVerbose=1 nella SUA passata singola: in una
+#      griglia le Print non le legge nessuno -- checklist punto 34.)
+InpMaxSpread=0
+InpVerbose=0
+
+# --- L'UNICO ASSE SPAZZOLATO: due passate GEMELLE di controllo.
+#     Devono uscire IDENTICHE al centesimo. Se non lo sono c'e' di mezzo
+#     la cache del tester o una griglia che MT5 si ricorda: il numero
+#     non si legge e il round si ferma.
+#     Magic del blocco 7797xx, VERGINI: mai 770611 (ORB Dow VIVO),
+#     mai 770601, mai 770201.
+InpMagic=779730||779730||1||779731||Y
