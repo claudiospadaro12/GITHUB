@@ -173,13 +173,28 @@ if ($nuovi.Count -eq 0) {
   if ($tutti.Count -gt 0) { $nuovi = @($tutti[0].FullName) }
 }
 
-$righeAutotest = New-Object System.Collections.ArrayList
+$righeGrezze = New-Object System.Collections.ArrayList
 foreach ($f in $nuovi) {
   $testo = Leggi-Testo $f
   if (-not $testo) { continue }
   foreach ($r in ($testo -split "`r?`n")) {
-    if ($r -match "\[AUTOTEST\]") { [void]$righeAutotest.Add($r.Trim()) }
+    if ($r -match "\[AUTOTEST\]") { [void]$righeGrezze.Add($r.Trim()) }
   }
+}
+
+# il log del tester e' per-giorno e si accumula: se lo stesso file gia'
+# esisteva (log riusato fra piu' lanci), qui dentro ci sono ANCHE le
+# esecuzioni precedenti. Tengo SOLO l'ultimo run: parte dalla ultima
+# riga "[CROSSEMA][AUTOTEST] EMA ..." (e' la prima stampata a ogni OnInit).
+$righeAutotest = New-Object System.Collections.ArrayList
+$ultimoInizio = -1
+for ($i = 0; $i -lt $righeGrezze.Count; $i++) {
+  if ($righeGrezze[$i] -match '\[CROSSEMA\]\[AUTOTEST\] EMA ') { $ultimoInizio = $i }
+}
+if ($ultimoInizio -ge 0) {
+  for ($i = $ultimoInizio; $i -lt $righeGrezze.Count; $i++) { [void]$righeAutotest.Add($righeGrezze[$i]) }
+} else {
+  foreach ($r in $righeGrezze) { [void]$righeAutotest.Add($r) }
 }
 
 Write-Host ""
@@ -192,7 +207,11 @@ if ($righeAutotest.Count -eq 0) {
   foreach ($r in $righeAutotest) { Write-Host ("  " + $r) }
 }
 
-$fallite = @($righeAutotest | Where-Object { $_ -match "FAIL" })
+# il verdetto vero e' l'ultima parola della riga ("...  PASS" o "...  FAIL").
+# un match generico su "FAIL" prende anche descrizioni come "fail-open"
+# che sono PARTE DEL NOME del caso (e finiscono comunque in PASS) - visto
+# il 22/08 sul referto di Claudio: 12 "FAIL" tutti falsi allarmi cosi'.
+$fallite = @($righeAutotest | Where-Object { $_.TrimEnd() -cmatch 'FAIL$' })
 $haV130  = @($righeAutotest | Where-Object { $_ -match "v1\.30" }).Count -gt 0
 $haP1    = @($righeAutotest | Where-Object { $_ -match "FRENO P1" }).Count -gt 0
 
