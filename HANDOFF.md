@@ -28,10 +28,13 @@ meccanismo DIVERSO sulla stessa inefficienza.**
   nostre aperture sparano alle 08:00 e alle 14:30).
 - 🧪 **AUTOTEST: 45 casi** sul **nucleo puro** (le stesse funzioni che aprono gli
   ordini), stampe `[A1][AUTOTEST]` con atteso/ottenuto e `*** FAIL ***`.
-- ⛔ **NON compilato, NON eseguito, zero numeri prodotti** (qui non esistono
-  MetaEditor ne' tester). La logica pura e' stata verificata **trasponendola in
-  C++** — 44 casi verdi — che **non e' una compilazione MQL5**. Primo passo di
-  Claudio: **F7**, poi leggere l'autotest.
+- ✅ **COMPILATO ED ESEGUITO sul PC di Claudio la sera stessa (22/08, 23:04)**
+  con la riga automatica `backtest_pipeline/verifica_autotest_a1.ps1`:
+  compilazione **0 errori**, autotest **0 FAIL** (nucleo A1 + suite Guardian
+  "TUTTI I CASI PASSATI"), referto in zip `verifica_a1_20260822_230424`.
+  Il motore e' pronto per il round appena i criteri sono firmati.
+  (Storia: prima della verifica la logica era stata provata solo trasposta
+  in C++ — 44 casi verdi — che non era una compilazione MQL5.)
 - 📄 **Criteri del round:** `backtest_pipeline/risultati_archivio/R98_CRITERI_BOZZA.md`
   — 🟡 **BOZZA NON FIRMATA**. Dentro c'e' **una decisione che aspetta Claudio**:
   PF OOS **1,40** (come R97, confrontabile) oppure **1,20** (questo motore non ha
