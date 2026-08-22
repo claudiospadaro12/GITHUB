@@ -166,8 +166,15 @@ foreach ($ist in $istanze) {
   $logFile = [System.IO.Path]::ChangeExtension($dest, ".log")
   Remove-Item -LiteralPath $logFile -Force -ErrorAction SilentlyContinue
 
-  $proc = Start-Process -FilePath $MetaEditor -ArgumentList "`"/compile:$dest`"","`"/log:$logFile`"" -Wait -PassThru -NoNewWindow
-  $rc = $proc.ExitCode
+  # NB: invocazione DIRETTA (& $MetaEditor arg1 arg2), non Start-Process con
+  # -ArgumentList a stringa unica: coi path pieni di spazi ("Program Files")
+  # una stringa preassemblata va ricomposta male da Start-Process e
+  # metaeditor64.exe torna con rc=0 senza compilare nulla (visto il 22/08,
+  # fallito su ENTRAMBE le istanze in silenzio). L'invocazione diretta lascia
+  # che sia PowerShell a quotare ogni argomento: e' il metodo gia' verificato
+  # funzionante in aggiorna_ea.ps1.
+  & $MetaEditor "/compile:$dest" "/log:$logFile" | Out-Null
+  $rc = $LASTEXITCODE
 
   $ex5Dopo = $null
   if (Test-Path -LiteralPath $ex5) { $ex5Dopo = (Get-Item -LiteralPath $ex5).LastWriteTime }
