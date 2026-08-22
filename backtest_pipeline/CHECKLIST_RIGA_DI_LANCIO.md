@@ -2537,3 +2537,65 @@ concordano**; una sola resta un `$Fatale`. Cambia il REFERTO, non il verdetto.
 > una decorazione del caso felice.
 > 🧭 **Come si trova**: per ogni "controllo incrociato" chiedersi *"in quale ramo
 > vive, e quel ramo e' raggiungibile quando il controllo servirebbe?"*.
+
+---
+
+## 🆕 AGGIUNTA DEL 22/08/2026 (notte) — trovata verificando la riga R98 (A1 Intraday Momentum su NASUSD)
+
+## 57. ✍️ IL CRITERIO **FIRMATO** CHE ASSEGNA UNA MISURA A UNO STRUMENTO CHE NON PUO' PRODURLA
+
+_Difetto vero, gia' committato in
+`backtest_pipeline/risultati_archivio/R98_CRITERI.md` (`5e19162`, par. 2.1 e la
+riga "Stato del percorso" in fondo), trovato PRIMA dell'invio della riga._
+
+Il punto 20 copre **il gesto chiesto a Claudio che non produce l'output**
+(_"F7 compila e basta"_). Questo e' lo stesso meccanismo un piano piu' su, ed e'
+peggio da maneggiare: **e' il DOCUMENTO FIRMATO a prescrivere lo strumento
+sbagliato**, e un documento firmato non si corregge dopo — i criteri si cambiano
+**prima** dei numeri, mai dopo.
+
+R98, par. 2.1, sul canarino (n IS atteso ~180, **[INFERITO]**):
+
+> _"E' un'inferenza, non una misura. **Va confermata con `-SoloControllo`** prima
+> di leggere un solo risultato."_
+
+**`-SoloControllo` non apre MT5.** Non esiste nessuna passata, nessun per-trade,
+nessun `n`: puo' confermare gli **ARTEFATTI** (file prova, finestre, celle,
+magic, `.ini`), **mai i NUMERI**. Il criterio, letto alla lettera, chiede a un
+giro a vuoto una cosa che il giro a vuoto non puo' avere. Le due uscite
+sbagliate, ed e' facile prenderle entrambe in buona fede:
+
+- ❌ **fingere di eseguirlo**: si lancia `-SoloControllo`, esce verde, si scrive
+  "canarino confermato" e si e' confermato **il nulla** (e' il gate decorativo
+  del punto 14, con la firma sotto);
+- ❌ **correggere il criterio**: si riapre un documento firmato **dopo** averlo
+  firmato, che e' esattamente cio' che la regola di casa vieta.
+
+> ✅ **REGOLA. Si DICHIARA una TRADUZIONE, e la si scrive in tre posti.**
+> Non si tocca il criterio firmato e non si finge di eseguirlo: si dice
+> **(1) perche' lo strumento prescritto non puo' farlo**, **(2) dove la misura
+> viene fatta davvero**, **(3) che l'INTENTO e' conservato**. E la traduzione va
+> ripetuta **nel driver, nel referto e nel documento della riga** — nel referto
+> soprattutto, perche' e' l'unico dei tre che Claudio ha davanti quando legge i
+> numeri.
+>
+> In R98 la traduzione buona era gia' li' e regge: il canarino lo misura il
+> **PASSO 0** della corsa vera, contando le operazioni **per data** sul per-trade
+> della passata singola — cioe' **prima** delle 32 passate della griglia e
+> **prima** che si legga un solo risultato, che e' letteralmente cio' che il par.
+> 2.1 chiede (_"prima di leggere un solo risultato"_). E **non blocca**, perche'
+> il criterio stesso dice che sotto ~100 si applica l'Emendamento **regola B**
+> (merito sospeso, rischio giudicato lo stesso).
+>
+> 🧭 **Come si verifica che una traduzione sia ONESTA — tre domande, tutte e tre:**
+> 1. **conserva l'INTENTO?** (qui: "misurato prima di leggere i numeri" -> si')
+> 2. **conserva il MOMENTO?** Una misura spostata *dopo* la decisione che doveva
+>    informare non e' una traduzione, e' una rinuncia.
+> 3. **conserva il COSTO?** Se la traduzione fa spendere le ore di macchina che
+>    il criterio voleva risparmiare, va detto in chat **quante**.
+>
+> ⚠️ **E il giro a vuoto deve dirlo DA SOLO.** Il suo referto non puo' limitarsi
+> a tacere sul numero mancante: deve scrivere che il canarino **NON e' stato
+> misurato** e **dove** si misura, o al primo verde qualcuno lo scambiera' per la
+> conferma del par. 2.1. In R98 la riga c'e' (`$Note` del ramo `-SoloControllo`),
+> ed e' quella che rende la traduzione verificabile invece che dichiarata.

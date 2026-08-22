@@ -1,7 +1,45 @@
 # 🚀 R98 — LA RIGA DA MANDARE (Market Intraday Momentum su NASUSD)
 
-_Scritta il 22/08/2026 notte. **Non è ancora passata dal verificatore**: prima
-il giro dal verificatore, poi Claudio._
+_Scritta il 22/08/2026 notte._
+
+> ## ✅ VERDETTO DEL VERIFICATORE — **PASS** (22/08/2026 notte)
+> Le due stringhe qui sotto sono quelle **approvate**, pronte da incollare.
+> Pin **confermato onesto**: `git diff 81d1314..HEAD` sul driver e su
+> `backtest_pipeline/prove/` è **vuoto**, e HEAD (`7f10920`) ha toccato solo
+> `HANDOFF.md` e questo documento. `git log -1` sul driver dà `81d1314`: il
+> SHA non è più vecchio del file (checklist 4).
+>
+> **Cosa è stato eseguito davvero** (non solo letto): parse reale con
+> PowerShell 7.4.6 di `RIGA_R98_MOMENTUM_NASUSD.ps1`, `walkforward_generico.ps1`,
+> `scarica_storico.ps1` **e delle due versioni PATCHATE** (pin di `$EABranch` +
+> iniezione `[Charts] MaxBars`) → **0 errori**, `MaxBars` scritto **2 volte**,
+> nessun costrutto PS7-only (niente ternari, niente `&&`/`||`, niente `??`).
+> Parse anche delle **due one-liner**: 0 errori, **0 caratteri non-ASCII**.
+> Parser del round riprovati **con cultura `it-IT` attiva** su artefatti finti
+> (log MT5, per-trade, anteprima `.ini`): righe d'ingresso, `*** FAIL ***` /
+> `PASS$`, `FromDate/ToDate`, assi `Y`, `28.37` letto **28,37 e non 2837**.
+>
+> **Parser contro sorgente (checklist 55), carattere per carattere**: i 45 casi
+> sono stati **ricontati nel `.mq5`** (4+11+5+8+5+12 = 45 ✔); le colonne
+> `0/4/6/7` del per-trade corrispondono a `close_time / deal_type / price /
+> net_profit` di `ExportTrades()` ✔; la riga d'ingresso corrisponde al
+> `Log(StringFormat("%s a mercato @ %.2f lot %.2f SL %.2f (dist %.2f ..."))` di
+> `TentaIngresso()` ✔; `DEAL_TYPE` 1=SELL chiude un LONG, 0=BUY chiude uno
+> SHORT ✔.
+>
+> **Magic**: nessun `7728xx` in `FLOTTA_ATTIVA.md`, `report/CONTRATTI_SEDIE.md`,
+> nei `.set` e in `flotta_attesa.csv`. Gli unici incroci sono `772801/802`
+> (R55a, **ABTG_PTE su U30USD**) e `772811/812` (R55b, **ABTG_ORB_Ottimizzato su
+> U30USD**): per-trade con **nome diverso** (`abtg_trades_<EA>_<SIM>_<magic>`),
+> nessuna sovrascrittura. La decina `772810` è saltata, ed è giusto.
+>
+> **Il bug di R97 v2 NON è rientrato**: la sosta si svuota a ogni giro
+> (righe 593-601 del driver), col conteggio prima/dopo (checklist 56).
+>
+> **Unica differenza rispetto alla bozza del preparatore**: il messaggio finale
+> delle due righe (rosso e più esplicito sul giro a vuoto). **Non cambia una
+> virgola di ciò che esegue**: stesso script, stesso pin, stessi switch — quindi
+> **il pin resta `81d1314`**.
 
 Criteri: `backtest_pipeline/risultati_archivio/R98_CRITERI.md` — **FIRMATI il
 22/08/2026 sera** ("PF 1,20 + cancello spread" = **opzione A** del §5.1), a
@@ -72,7 +110,8 @@ driver pretende esistano:
     $pin='81d1314d11d008c069f079a008494f0e1c2cf62b'; $p="$env:USERPROFILE\RIGA_R98.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R98_MOMENTUM_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R98_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; if($LASTEXITCODE -ne 0){ Write-Host 'CONTROLLO NON PASSATO: leggi il REFERTO' -ForegroundColor Yellow } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
+    if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
 
 **Cosa deve dire** (altrimenti la corsa vera non parte):
@@ -100,12 +139,35 @@ driver pretende esistano:
     $pin='81d1314d11d008c069f079a008494f0e1c2cf62b'; $p="$env:USERPROFILE\RIGA_R98.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R98_MOMENTUM_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R98_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' -ForegroundColor Yellow } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin;
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
 Si incolla **il blocco INTERO**, è un comando solo (checklist 21): tre righe
 staccate sarebbero tre comandi indipendenti e un `throw` alla prima non
 fermerebbe le altre.
+
+> ⚠️ **Perché qui il messaggio è GIALLO e nel giro a vuoto è ROSSO.** Nella
+> corsa vera `exit 1` può voler dire *"la corsa è riuscita e la risposta non ti
+> piace"* (round parziale, gate rosso, S0 negativo): gli artefatti **esistono**
+> e vanno mandati lo stesso — un `throw` qui butterebbe via una risposta buona
+> (checklist 26-bis). Nel **giro a vuoto** `exit 1` vuol dire una cosa sola:
+> **non si lancia niente**. Per questo è rosso.
+
+### 📅 LE DUE RIGHE CHE CLAUDIO DEVE LEGGERE NEL REFERTO, PRIMA DI MANDARE LO ZIP
+
+Aprire `REFERTO_R98.txt` e guardare **due righe in testa**, in quest'ordine:
+
+1. **`modo:`** — dice `CORSA` (il round), `CONTROLLO` (giro a vuoto: **non è il
+   round, non si manda come risultato**) o `SENZAPASSO0`;
+2. **`data:`** — **deve essere di ADESSO** (giorno e ora di quando ha finito).
+   Se è di ieri o di stanotte, è un referto **stantio** di un giro precedente:
+   si guarda il **nome della cartella** sul Desktop, che porta la data e l'ora,
+   e si rifà. Il 17/08 un referto vecchio è stato rimandato **due volte** in
+   buona fede: questa è la riga che lo impedisce.
+
+⚠️ **La data fresca da sola NON basta**: anche il giro a vuoto scrive una data
+di adesso. È la coppia `modo:` + `data:` che dice la verità.
 
 ---
 
@@ -301,6 +363,66 @@ lasciano aperte:**
 **Nessun dettaglio è stato inventato**: dove i criteri tacevano (Model) o
 dicevano `[DA DECIDERE]` (magic del PASSO 0, metodo dello spread) la scelta è
 dichiarata qui sopra con la sua ragione.
+
+---
+
+## 🔎 I RILIEVI DEL VERIFICATORE — **non bloccanti**, ma vanno nel referto del round
+
+Nessuno di questi ferma la riga. Tutti e cinque **degradano in sicurezza** (nel
+caso peggiore producono un PROBLEMA o un numero mancante, mai un verde falso).
+Si scrivono qui perché il referto R98 li dichiari invece di scoprirli dopo.
+
+1. 🎯 **S0 è misurabile SOLO sulla cella NUDA, e le altre cinque restano senza.**
+   La metà misurabile del cancello zero nasce dalle righe `[A1] ... a mercato @`
+   del log, che esistono solo con `InpVerbose=1`, cioè **solo nel PASSO 0**.
+   Nella griglia `InpVerbose=0` e i per-trade delle celle **coprono solo l'OOS**:
+   per R98a…e i punti indice per operazione **non sono ricavabili**. È fedele ai
+   criteri (§3.2 prescrive la **passata singola della cella nuda**), ma va detto
+   forte, perché §4 chiama **R98c** *"l'unico asse che può muovere il cancello
+   zero"*: **se il round arriva a dipendere da S0 su R98c, serve un secondo
+   PASSO 0 su quella cella** — un'altra passata singola con `InpVerbose=1` — e
+   quel giro torna dal verificatore. **Non si estrapola dalla nuda.**
+2. 🔢 **I 45 casi dell'autotest sono una COSTANTE, non un conteggio
+   sull'artefatto** (`$CasiAutotestAttesi = 45`). Il `.mq5` è già scaricato al
+   pin e in memoria (`$txtSrc`): contare lì le chiamate `A1_Caso`/`A1_CasoInt`/
+   `A1_CasoDbl` renderebbe il gate auto-tarante (checklist 40-bis). Oggi, se il
+   sorgente cambiasse numero di casi, il gate uscirebbe **"PASSATO CON RISERVA"**
+   + PROBLEMA — quindi **non è un verde falso**, ma è un allarme che dice la cosa
+   sbagliata. *Ricontati a mano dal verificatore su questo pin: 4+11+5+8+5+12 =
+   **45**, giusto.*
+3. 🧮 **L'`.ini` del PASSO 0 scrive 27 input, quello della griglia 34.** I 7 che
+   mancano nel PASSO 0 (`InpNewsFile`, `InpNewsMinImpact`, `InpNewsBeforeMin`,
+   `InpNewsAfterMin`, `InpNewsShiftMinutes`, `InpNewsCurrencies`, `InpComment`)
+   restano al valore che MT5 **ricorda** (checklist 25), non al default
+   compilato. Sono tutti **inerti** qui — il filtro notizie è spento
+   (`InpUseNewsFilter=0`) e `InpComment` tocca solo il commento dell'ordine —
+   quindi la cella del PASSO 0 e la cella `r98rif` della griglia restano la
+   stessa cella. Ma è un'asimmetria, e va scritta.
+4. 🩺 **Canarino e S0 NON vengono calcolati se un gate precedente è rosso**
+   (vivono dentro `if($Fatale -eq "" ...)`). È la famiglia della checklist
+   56-bis: il per-trade è già in sosta, e `n IS`/`n OOS` costerebbero tre righe
+   anche a round fermato. Attenuante vera: `N`, `prima operazione`, `ultima
+   operazione` e `gemelli` **sono già calcolati e stampati prima**, quindi la
+   diagnosi del fallimento c'è lo stesso. Da sistemare quando si tocca il file,
+   non adesso.
+5. 📏 **Il prezzo d'ingresso letto nel log è l'ask/bid letto PRIMA dell'invio**
+   (`double entry=(isLong?ask:bid);`), non `ResultPrice()` del deal. Nel tester
+   di MT5 a esecuzione a mercato i due coincidono, quindi la misura è esatta —
+   ma è **[APPROSSIMATO per costruzione]** e il referto lo dica.
+
+> ✅ **E le tre cose su cui il verificatore ha insistito, con esito:**
+> **(a)** la traduzione del canarino dal `-SoloControllo` al PASSO 0 è
+> **ONESTA**: `-SoloControllo` non apre MT5, quindi *nessun* `n` può esistere
+> lì; il PASSO 0 lo misura **prima** delle 32 passate della griglia e **prima**
+> che si legga un solo risultato, che è esattamente quello che §2.1 chiede. E
+> non blocca, come vuole la regola B. **(b)** Nessun numero di spread è
+> inventato: il referto stampa **sempre** `S0 = DA MISURARE A MANO` — anche
+> quando la metà misurabile riesce — e l'algebra `lordo = netto + spread` →
+> `netto >= 2 x spread` è **corretta** (si entra all'ask, si esce al bid: il
+> risultato misurato è netto dello spread **intero**). **(c)** Il gate autotest
+> accetta i **multipli** di 45 e porta il controllo positivo sui `PASS`: con i
+> log doppi del tester uscirebbe `x4` e finirebbe in **NOTE**, non in un verde
+> muto.
 
 ---
 
