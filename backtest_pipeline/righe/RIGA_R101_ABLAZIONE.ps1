@@ -311,7 +311,7 @@ $VIVA = @{
            @("InpTrailTF","5"),@("InpTrailStartR","0"),@("InpBEatR","0"),
            @("InpMinStopPts","500"),@("InpSkipIfTight","0"),
            @("InpOneTradePerDay","1"),@("InpCloseHour","17"),@("InpCloseMin","30"),
-           @("InpRiskPercent","1.0"),@("InpSlippagePts","0")),
+           @("InpRiskPercent","1.0"),@("InpSlippagePts","0"))
  "DAX" = @(@("InpSessionHour","8"),@("InpSessionMin","0"),@("InpRangeMinutes","35"),
            @("InpEntryMode","2"),@("InpRangeMode","0"),@("InpBufferPoints","500"),
            @("InpRetestOffsetPts","200"),@("InpAllowLong","1"),@("InpAllowShort","0"),

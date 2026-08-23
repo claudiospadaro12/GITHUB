@@ -96,7 +96,7 @@ gli input**, compresi i **sotto-parametri dei filtri spenti** (`InpVolMult`,
 interruttore è a 0.
 
 👉 Conseguenza: il diff fra un gradino e la cella viva è **letteralmente di UNA
-riga**. Verificato meccanicamente il 23/08 su tutti e 16 i gradini, più il
+riga**. Verificato meccanicamente il 23/08 su tutti e 18 i gradini, più il
 controllo che **ogni nome esista nel sorgente** (trappola n° 3 del driver
 generico: un nome che l'EA non ha viene ignorato **in silenzio** da MT5, e la
 fase risponde a una domanda diversa da quella che credevi di fare).
@@ -214,7 +214,7 @@ questa conversione confronta due cose diverse.
 
 ---
 
-## 3. 🪜 LE DUE SCALE — 8 gradini + il metro, per EA
+## 3. 🪜 LE DUE SCALE — 9 gradini + il metro, per EA
 
 **20 file in tutto** (9 gradini + il metro, per EA), già scritti e verificati
 in `backtest_pipeline/prove/`.
@@ -353,10 +353,10 @@ round alla pari. Verificate contro `R86_CRITERI.md`, `R87_CRITERI.md`,
 
 | controllo | condizione |
 |---|---|
-| **gemelli** | le 2 righe di ogni CSV (magic `n` e `n+1`) **identiche al centesimo**, in tutti e 36 i CSV |
+| **gemelli** | le 2 righe di ogni CSV (magic `n` e `n+1`) **identiche al centesimo**, in tutti e 40 i CSV |
 | **riproduzione del metro — Dow** | `R101_DOW_00_viva` OOS deve dare **PF 1,270 · DD 4,394% · n 130** |
 | **riproduzione del metro — DAX** | `R101_DAX_00_viva` OOS deve dare **PF 1,40 · DD 7,23%** |
-| **righe** | 2 righe per CSV (le due gemelle), 36 CSV, 72 passate |
+| **righe** | 2 righe per CSV (le due gemelle), **40 CSV, 80 passate** (20 celle: era 36/72 prima che la decisione 4 aggiungesse il 9° gradino) |
 
 > ✍️ **La tolleranza sulla riproduzione è FIRMATA** — decisione 1 del § 10,
 > firmata con la proposta: **±0,01 su PF, ±0,10 punti % su DD, n ESATTO**. Il n esatto non è
