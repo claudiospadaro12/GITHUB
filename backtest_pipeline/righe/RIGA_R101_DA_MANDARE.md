@@ -1,6 +1,6 @@
 # 📮 R101 — LE DUE RIGHE DA MANDARE A CLAUDIO
 
-**Pin:** `bdd77e93fc1a8db8e5e9d5e9d1fd2a4364b481e1`  _(era `f91e320`: ripinnato dopo la firma e il 9° gradino)_
+**Pin:** `e4c1afac63f0d094e7895d5f0626a183c43f0566`  _(era `bdd77e9`: ripinnato dal verificatore dopo il FIX della virgola finale in `$VIVA` — con `bdd77e9` lo script **non parsava**)_
 **Marcatore di versione:** `MARCATORE_RIGA_R101_v1`
 **Driver:** `backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1`
 **Criteri:** `backtest_pipeline/risultati_archivio/R101_CRITERI.md` — ✍️ **FIRMATI**
@@ -36,21 +36,30 @@
 |---|---|---|
 | **1** | **Ho aperto lo script.** L'ho scritto io, e l'ho comunque riletto | ✅ |
 | **2** | **Difetti gemelli.** Cercati `fermoDa -ge`, `-eq $null` col null a destra, `$` multilinea senza `\r?`, `Desktop` nella raccolta | ✅ trovati **6** `-eq/-ne $null` con l'array a sinistra e **corretti** (trappola PS: `@(1,2) -eq $null` è un confronto elemento per elemento) |
-| **3** | **Il file dei parametri è quello giusto?** Questa riga **VERIFICA**, non cerca: 18 file prova, ognuno con **un solo asse Y** (`InpMagic`, le due gemelle). Nessuna griglia | ✅ |
+| **3** | **Il file dei parametri è quello giusto?** Questa riga **VERIFICA**, non cerca: 20 file prova, ognuno con **un solo asse Y** (`InpMagic`, le due gemelle). Nessuna griglia | ✅ |
 | **4** | **Il SHA contiene la correzione?** `git log -1 -- <file>` su tutti e 8 i file scaricati dal driver: driver, criteri, 20 prova, `walkforward_generico.ps1`, i 2 `.mq5`, l'include | ✅ **tutti antenati del pin** |
 | **+** | **ASCII puro** nel `.ps1` (regola di casa 4, PS 5.1 legge i `.ps1` come ANSI) | ✅ **0 byte > 127** |
 | **+** | **Marcatori pretesi dal driver** esistono davvero: `RigaSpread`, `$EABranch="lavoro"`, 2× `[Experts]`, `ABTG_GuardiaIngresso` (82.941 byte), `#property version "1.01"` ×2, `ABTG_DEF_MAGIC 770202/770101` | ✅ |
 | **+** | **Bilanciamento** graffe/tonde/quadre e stringhe non chiuse | ✅ 0/0/0 |
-| **+** | **Diff a stella** sui 18 file prova: 1 riga di differenza (2 sulla sola `04_corso_or`, dichiarata) e **ogni nome esiste nel sorgente** | ✅ |
+| **+** | **Diff a stella** sui 20 file prova: 1 riga di differenza (2 su `04_corso_or`, **4 sui due `09_corso_pieno`** — dichiarate) + `InpMagic`, e **ogni nome esiste nel sorgente** | ✅ **rifatto meccanicamente dal verificatore** |
 
-> 🔴 **Quello che NON ho potuto verificare, e va detto:** in questo ambiente
-> **non c'è PowerShell**, quindi il `.ps1` **non è mai stato eseguito né
-> parsato da un interprete vero**. Il controllo di bilanciamento è un
-> tokenizer scritto per l'occasione, non `powershell -Command`.
-> 👉 **Per questo la riga 1 è il GIRO A VUOTO**, e va mandata per prima:
-> costa pochi minuti, non apre MT5, non produce nessun numero — ed è
-> **esattamente** il modo di scoprire un errore di sintassi senza bruciare
-> ore di tick reali.
+> ✅ **PARSE VERO FATTO, e ha trovato un errore FATALE.** Il preparatore aveva
+> dichiarato che in questo ambiente non c'era PowerShell e che il `.ps1` non era
+> mai stato parsato da un interprete vero. Il verificatore ha **installato
+> pwsh 7.4.6** e ha lanciato
+> `[System.Management.Automation.Language.Parser]::ParseFile`:
+> **2 errori di parse**, righe 306 e 315 — una **virgola a fine riga** dentro
+> l'hashtable `$VIVA` continuava l'espressione e faceva leggere `"DAX" = @(...)`
+> come un'assegnazione a una stringa letterale.
+> **Su PS 5.1 il `.ps1` sarebbe morto prima di eseguire una sola riga.**
+> Corretto nel pin `e4c1afa`; riparsato: **0 errori**.
+>
+> Verificato inoltre **ESEGUENDO** i gate veri sui 20 file prova (con il
+> download stubbato sul repo locale) e il parser del CSV **sotto cultura
+> it-IT**: `1.27013` letto `1,27013` e non `127013`, colonne ignote → `null`,
+> una riga sola → `NON VALIDO`.
+> 👉 **La riga 1 resta il GIRO A VUOTO e va mandata per prima**: qui non si può
+> provare né MT5, né il tester, né i percorsi Windows.
 
 ---
 
@@ -79,7 +88,7 @@ scritta nei criteri. **Non apre il tester, non produce nessun numero.**
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='bdd77e93fc1a8db8e5e9d5e9d1fd2a4364b481e1'; $p="$env:USERPROFILE\RIGA_R101.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='e4c1afac63f0d094e7895d5f0626a183c43f0566'; $p="$env:USERPROFILE\RIGA_R101.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R101_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
@@ -96,7 +105,7 @@ il suo referto, alla riga `modo:`.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='bdd77e93fc1a8db8e5e9d5e9d1fd2a4364b481e1'; $p="$env:USERPROFILE\RIGA_R101.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='e4c1afac63f0d094e7895d5f0626a183c43f0566'; $p="$env:USERPROFILE\RIGA_R101.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R101_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
@@ -106,7 +115,7 @@ il suo referto, alla riga `modo:`.
 
 Il driver scarica `R101_CRITERI.md` **al pin** e cerca la stringa del lucchetto.
 Con la firma del 23/08 quella stringa è stata tolta da **tutte e sei** le
-posizioni in cui compariva: **verificato sul file AL PIN `bdd77e9` → 0
+posizioni in cui compariva: **verificato sul file AL PIN `e4c1afa` → 0
 occorrenze**, quindi **il gate si apre da solo**.
 
 `-CriteriFirmati` resta nel codice come **scialuppa**: se qualcuno riscrivesse
