@@ -13,7 +13,7 @@ R99 SULLE ALTRE SEDIE ORO"_ — è la firma dell'estensione**, verbalizzata al
 ## 📌 IL PIN
 
 ```
-15633239ec74fc8ea71d874e676e70e4120b8403
+9fbe18dec0e0fcd0441a99571f376c5b07d72fdb
 ```
 
 È il commit che contiene **il driver, i 12 file prova e i criteri**. Le righe
@@ -63,7 +63,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='15633239ec74fc8ea71d874e676e70e4120b8403'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9fbe18dec0e0fcd0441a99571f376c5b07d72fdb'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R100_ORO_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R100_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -114,7 +114,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='15633239ec74fc8ea71d874e676e70e4120b8403'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9fbe18dec0e0fcd0441a99571f376c5b07d72fdb'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R100_ORO_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R100_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
