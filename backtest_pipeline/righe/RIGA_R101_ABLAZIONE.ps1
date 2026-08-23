@@ -8,17 +8,29 @@
 #  PERIMETRO FIRMATO: risultati_archivio\R101_FIRMA_ABLAZIONE.md
 #    (Claudio 23/08/2026: "SI AD ENTRAMBE, FIRMO L'ABLAZIONE SU DOW E DAX")
 #
-#  >>> ATTENZIONE, E' SCRITTO NEL CODICE E MORDE: i criteri di DETTAGLIO
-#      sono [DA FIRMARE]. Finche' R101_CRITERI.md porta la riga
-#      "[DA FIRMARE]" nel titolo, questa riga PARTE SOLO in -SoloControllo
-#      (giro a vuoto). Per la corsa vera serve -CriteriFirmati, che e'
-#      un interruttore che deve premere CLAUDIO, non io.
-#      Motivo: il round tocca DUE SEDIE CHE STANNO SUI SOLDI, e la regola
-#      di casa e' che i criteri si congelano PRIMA dei numeri. Un driver
-#      che parte lo stesso rende la regola un ornamento.
+#  >>> CRITERI FIRMATI da Claudio il 23/08/2026: "FIRMO TUTTE E 6 CON LE
+#      PROPOSTE, POI FACCIO I 2 CONTROLLI". Le sei decisioni del par. 10
+#      sono chiuse con le proposte, a numeri non visti.
+#      Da quel momento R101_CRITERI.md NON porta piu' la stringa del
+#      lucchetto, quindi IL GATE DI QUESTO DRIVER SI APRE DA SOLO e
+#      -CriteriFirmati NON SERVE PIU'. Resta nel codice come scialuppa:
+#      se qualcuno riscrivesse quella stringa nel file dei criteri (anche
+#      dentro una frase storica) il gate si richiuderebbe, e -CriteriFirmati
+#      permette di superarlo DICHIARANDOLO nel referto.
+#      Il gate non si toglie: il round tocca DUE SEDIE CHE STANNO SUI
+#      SOLDI, e la regola di casa e' che i criteri si congelano PRIMA dei
+#      numeri. Un driver che parte comunque rende la regola un ornamento.
+#
+#  >>> E UNA COSA CHE IL DRIVER NON PUO' CONTROLLARE, DETTA QUI: Claudio
+#      ha firmato "POI FACCIO I 2 CONTROLLI". Sono le due verifiche sul
+#      grafico del par. 10.1 dei criteri (Dow: InpMinStopPts 500,
+#      InpSkipIfTight false, range min/max 0 - DAX: InpAllowShort 0).
+#      IL LANCIO ASPETTA QUELLE. Se una non torna, la cella viva scritta
+#      nei file prova NON e' la sedia viva e i 20 file vanno corretti
+#      PRIMA. Nessuno script puo' leggere un grafico: lo fa Claudio.
 #
 #  DA DOVE NASCE, dichiarato: e' RIGA_R98_MOMENTUM_NASUSD.ps1
-#  (MARCATORE_RIGA_R98_v1) adattata a DUE EA e DICIOTTO file prova. Il
+#  (MARCATORE_RIGA_R98_v1) adattata a DUE EA e VENTI file prova. Il
 #  punto 9 della checklist dice che una riscrittura non puo' perdere le
 #  funzioni di sicurezza del gemello: sono state riportate TUTTE, una per
 #  una -- guardia MT5/MetaEditor chiusi, -Pin senza default, pin di
@@ -80,7 +92,7 @@
 #  COSA FA, in ordine, e DA SOLA:
 #    0. si rifiuta di partire se MT5 O MetaEditor sono aperti
 #    0-bis. si rifiuta di CORRERE se i criteri non sono firmati
-#    1. scarica AL PIN: walkforward_generico.ps1, i 18 file prova, i DUE
+#    1. scarica AL PIN: walkforward_generico.ps1, i 20 file prova, i DUE
 #       sorgenti .mq5 e l'include ABTG_PausaGuardian.mqh
 #       - GATE DI VERSIONE sui .mq5 (marcatori presi DAL SORGENTE)
 #       - GATE DELLA STELLA: ogni cella deve differire dalla sua 00_viva
@@ -122,8 +134,8 @@
 #    - non ammazza un lavoro in corso allo scadere di -OreMax: smette
 #      solo di iniziarne di nuovi (checklist 19)
 #
-#  QUANTO CI METTE: [STIMA], non una previsione. 18 file x 2 finestre x
-#  2 celle gemelle = 72 passate a tick reali su meta' finestra l'una.
+#  QUANTO CI METTE: [STIMA], non una previsione. 20 file x 2 finestre x
+#  2 celle gemelle = 80 passate a tick reali su meta' finestra l'una.
 #  Il PASSO 0 MISURA la prima cella e stampa il tetto teorico. -OreMax e'
 #  12 (tetto sull'INIZIO di nuovi file), con margine largo apposta.
 #
@@ -241,7 +253,7 @@ $FAMIGLIE = @(
 )
 
 # =====================================================================
-#  LE DICIOTTO CELLE. 'Diff' = gli input che DEVONO differire dalla
+#  LE VENTI CELLE. 'Diff' = gli input che DEVONO differire dalla
 #  00_viva della stessa famiglia, e NESSUN ALTRO. E' il gate della
 #  STELLA: contare "1 riga diversa" non basterebbe, perche' UNA riga
 #  SBAGLIATA darebbe lo stesso conteggio e il round misurerebbe
@@ -275,6 +287,14 @@ foreach($f in @(@("DOW",773300),@("DAX",773200))){
   $CELLE += (C $fam "06_correlazione" ("R101_" + $fam + "_06_correlazione.txt") "+ CORRELAZIONE SPXUSD  [corso]"             ($b+60) @("InpUseCorrelation")                        @{"InpUseCorrelation"="1"}                              $false)
   $CELLE += (C $fam "07_vwap"         ("R101_" + $fam + "_07_vwap.txt")         "+ VWAP di sessione M15  [Emiliano, NON corso]" ($b+70) @("InpUseVwapFilter")                      @{"InpUseVwapFilter"="1"}                               $false)
   $CELLE += (C $fam "08_tondi"        ("R101_" + $fam + "_08_tondi.txt")        "+ NUMERI TONDI come 1o obiettivo  [corso]"  ($b+80) @("InpUseRoundLevels")                        @{"InpUseRoundLevels"="1"}                              $false)
+  #  --- IL GRADINO 9: decisione 4 dei criteri, FIRMATA SI' il 23/08.
+  #      E' L'UNICA CELLA CUMULATIVA DEL ROUND, ed e' dichiarato: muove
+  #      QUATTRO interruttori, non uno. Non attribuisce niente a nessun
+  #      filtro (quello lo fanno 02/03/05/06): risponde a "e tutti
+  #      insieme?", che e' la CHECKLIST del corso [PDF PAG 29-30] e il
+  #      debito del 18/08. Si legge SOLO accanto ai gradini singoli.
+  #      InpConfirmMode resta 0 = OR, come nel gradino 04 e come nel PDF.
+  $CELLE += (C $fam "09_corso_pieno"   ("R101_" + $fam + "_09_corso_pieno.txt")  "+ IL CORSO PIENO: volumi+ATR+ST3+correlazione INSIEME  [corso, CUMULATIVA]" ($b+90) @("InpUseVolumeFilter","InpUseAtrFilter","InpUseSupertrend3","InpUseCorrelation") @{"InpUseVolumeFilter"="1";"InpUseAtrFilter"="1";"InpUseSupertrend3"="1";"InpUseCorrelation"="1";"InpConfirmMode"="0"} $false)
 }
 
 #--- LA GEOMETRIA VIVA, PRETESA RIGA PER RIGA IN OGNI FILE della famiglia.
@@ -594,7 +614,7 @@ Scarica ("$RawPin/backtest_pipeline/walkforward_generico.ps1") $Driver 'RigaSpre
 # --- 1a. IL PIN DEL MOTORE. walkforward_generico.ps1 ha $EABranch="lavoro"
 #     scritto FISSO e riscarica il .mq5 dalla PUNTA del branch: senza
 #     questa riscrittura un pin pinnerebbe gli script e NON il motore. Su
-#     un round che confronta 18 file fra loro, un push a meta' corsa
+#     un round che confronta 20 file fra loro, un push a meta' corsa
 #     cambierebbe il motore fra un file e l'altro e il confronto non
 #     misurerebbe piu' niente.
 $dTxt = Get-Content -LiteralPath $Driver -Raw
@@ -1202,13 +1222,24 @@ try{
   [void]$R.Add("  * G3 in particolare NON e' meccanizzabile qui: e' il confronto fra le DUE")
   [void]$R.Add("    tabelle (lo stesso filtro deve andare nella stessa direzione sui due")
   [void]$R.Add("    indici). Ed e' il cancello che in R46 fermo' un candidato che faceva +31%.")
+  [void]$R.Add("  * IL GRADINO 09 'CORSO PIENO' E' CUMULATIVO, NON UN'ABLAZIONE. Muove QUATTRO")
+  [void]$R.Add("    interruttori insieme e NON attribuisce niente a nessun filtro: si legge SOLO")
+  [void]$R.Add("    accanto ai gradini 02/03/05/06. E' la CHECKLIST del corso [PDF PAG 29-30],")
+  [void]$R.Add("    cioe' il debito del 18/08, ed e' la decisione 4 firmata il 23/08.")
+  [void]$R.Add("    >>> ATTESO, SCRITTO PRIMA DEI NUMERI: il n CROLLA. Quattro filtri che devono")
+  [void]$R.Add("        passare tutti, sopra un motore da ~130 operazioni OOS sul Dow: e'")
+  [void]$R.Add("        PROBABILE che finisca sotto la soglia G1 di 30, cioe' NON MISURABILE.")
+  [void]$R.Add("        E 'NON MISURABILE' QUI E' GIA' UNA RISPOSTA, non un fallimento: vuol")
+  [void]$R.Add("        dire che il metodo del corso, applicato alla lettera sulla nostra")
+  [void]$R.Add("        geometria, NON PRODUCE UN CAMPIONE su cui si possa giudicare.")
+  [void]$R.Add("        NON si abbassa nessuna soglia per far 'funzionare' questa cella.")
   [void]$R.Add("  * IL GRADINO 01 E' ASIMMETRICO: sul Dow TOGLIE l'EMA, sul DAX la METTE.")
   [void]$R.Add("    G3 NON si applica a quel gradino, e i due numeri si leggono separati.")
   [void]$R.Add("  * NON PROMUOVE NIENTE (G5). Le due sedie stanno sul conto 100k: un cambio")
   [void]$R.Add("    al forward e' una firma successiva, con il suo referto.")
   [void]$R.Add("  * NON misura lo spread, non misura il regime, non fa walk-forward nuovo.")
   [void]$R.Add("  * LA FINESTRA E' UN SOLO REGIME (21 mesi di indici che salgono) e questo OOS")
-  [void]$R.Add("    e' gia' stato guardato molte volte: con 16 confronti sulla stessa finestra")
+  [void]$R.Add("    e' gia' stato guardato molte volte: con 18 confronti sulla stessa finestra")
   [void]$R.Add("    QUALCUNO ESCE VERDE PER CASO. E' scritto nei criteri par. 4.1, ed e' il")
   [void]$R.Add("    motivo per cui esiste G3.")
   [void]$R.Add("")

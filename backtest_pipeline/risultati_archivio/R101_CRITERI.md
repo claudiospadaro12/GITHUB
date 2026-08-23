@@ -1,16 +1,38 @@
-# 🔬 R101 — L'ABLAZIONE DEI FILTRI SU DOW E DAX — **BOZZA DEI CRITERI, [DA FIRMARE]**
+# ✍️ R101 — L'ABLAZIONE DEI FILTRI SU DOW E DAX — **CRITERI FIRMATI**
 
-> **Il PERIMETRO è già firmato** (`R101_FIRMA_ABLAZIONE.md`, Claudio 23/08/2026:
-> *"SI AD ENTRAMBE, FIRMO L'ABLAZIONE SU DOW E DAX"*, dentro la sua richiesta
-> *"VOGLIO MIGLIORARE GLI EA SUL CONTO DA 100K SU APERTURA DOW ED APERTURA DAX.
-> DOBBIAMO FARCELA"*).
+> ## 🖊️ VERBALE DELLA FIRMA — 23/08/2026
 >
-> **I criteri di dettaglio NO.** Questo documento è la bozza che torna da
-> Claudio. **Finché non è firmato, nessuna passata parte** — e i 18 file prova
-> già scritti in `backtest_pipeline/prove/R101_*.txt` non devono girare.
+> **Claudio, in chat:** *"FIRMO TUTTE E 6 CON LE PROPOSTE, POI FACCIO I 2
+> CONTROLLI"*.
 >
-> 🔴 **Le decisioni che restano a lui sono al § 10.** Sono **sei**, e due
-> cambiano la forma del round.
+> Le sei decisioni del § 10 sono **firmate CON LE PROPOSTE**, cioè con i valori
+> che erano scritti nella colonna "proposta" della bozza — **a numeri non
+> visti**, che è la condizione che le rende valide.
+>
+> | # | decisione | scelta firmata |
+> |---|---|---|
+> | 1 | tolleranza di riproduzione del metro (G0) | **±0,01 PF · ±0,10 punti % DD · n ESATTO** |
+> | 2 | cancello di merito | **PF OOS più alto E DD OOS non peggiore** |
+> | 3 | merito sul Dow (n OOS 130 < 150) | **SOSPESO** |
+> | 4 | 9° gradino "IL CORSO PIENO" | **SÌ** — volumi + ATR + Supertrend×3 + correlazione accesi insieme |
+> | 5 | filtro news | **FUORI** da questo round |
+> | 6 | mediazione 1:2 | **in coda di sviluppo** con la spec del § 8.1 |
+>
+> ### ⏳ MA IL LANCIO ASPETTA ANCORA DUE COSE, E SONO SUE
+> Claudio ha detto *"POI FACCIO I 2 CONTROLLI"*: sono le due verifiche sul
+> grafico del § 10.1 (Dow `InpMinStopPts`/`SkipIfTight`/range min-max; DAX
+> `InpAllowShort`). **Finché non tornano, la corsa vera non parte** — se uno
+> dei due non torna, la cella viva dei file prova **non è la sedia viva** e i
+> file vanno corretti PRIMA, non dopo.
+>
+> ### 🔧 NOTA DI MANUTENZIONE — non è un dettaglio
+> Il driver si sblocca leggendo QUESTO file: se ci trova ancora la stringa del
+> lucchetto (`DA` + `FIRMARE` fra parentesi quadre) **si rifiuta di fare la
+> corsa vera**, ovunque essa compaia — anche dentro una frase storica.
+> 👉 **In questo file quella stringa non si riscrive mai più.** Se serve
+> parlarne, si scrive come qui: a pezzi, o senza parentesi.
+
+---
 
 ---
 
@@ -194,7 +216,8 @@ questa conversione confronta due cose diverse.
 
 ## 3. 🪜 LE DUE SCALE — 8 gradini + il metro, per EA
 
-**18 file in tutto**, già scritti e verificati in `backtest_pipeline/prove/`.
+**20 file in tutto** (9 gradini + il metro, per EA), già scritti e verificati
+in `backtest_pipeline/prove/`.
 
 | # | file (`R101_DOW_…` / `R101_DAX_…`) | cosa muove | Dow | DAX | origine |
 |---|---|---|---|---|---|
@@ -207,6 +230,7 @@ questa conversione confronta due cose diverse.
 | **06** | `06_correlazione` | `InpUseCorrelation` (SPXUSD) | 0 → 1 | 0 → 1 | **corso** [AM 9, EU 17, PDF 21] |
 | **07** | `07_vwap` | `InpUseVwapFilter` | 0 → 1 | 0 → 1 | live Emiliano, **non del corso** |
 | **08** | `08_tondi` | `InpUseRoundLevels` | 0 → 1 | 0 → 1 | **corso** [NAS 12/15] |
+| **09** | `09_corso_pieno` | `InpUseVolumeFilter` **+** `InpUseAtrFilter` **+** `InpUseSupertrend3` **+** `InpUseCorrelation` | tutti 0 → 1 | idem | **corso, la CHECKLIST** [PDF 29-30] |
 
 ### 3.1 Il gradino 01 è l'unico **asimmetrico**, ed è il più importante dei due
 
@@ -249,10 +273,41 @@ sarebbe una griglia, cioè esattamente quello che il perimetro firmato vieta
   [PAG 14]. `InpConfirmMode` resta **0 = OR**: basta una delle due.
   **Non è un'ablazione pura e non si legge da sola**: si legge solo accanto a
   02 e 03.
-- **`08_tondi`** — è la **più invasiva delle otto**: cambia il primo obiettivo,
+- **`08_tondi`** — è la **più invasiva degli otto singoli**: cambia il primo obiettivo,
   quindi sposta anche **la parziale e il breakeven**, che scattano lì. Un
   risultato di questa cella non è *"il filtro dei numeri tondi"*: è *"un'altra
   gestione"*. Va letto sapendolo.
+
+### 3.4 ✍️ Il gradino **09 · IL CORSO PIENO** — decisione 4, firmata SÌ
+
+> **È l'unica cella CUMULATIVA del round, ed è dichiarato.** Non attribuisce
+> niente a nessun filtro — quello lo fanno i gradini 02/03/05/06. **Si legge
+> solo accanto a loro.**
+
+Esiste per chiudere **il debito del 18/08**, che i gradini singoli da soli non
+chiudono. Il corso non prescrive filtri *uno per volta*: prescrive una
+**checklist**, e la regola d'oro è *"se anche solo un punto è NO… forse è
+meglio aspettare"* [PDF PAG 29-30]. Questa cella è quella checklist: **il
+metodo del corso come lo prescrive il corso**, contro lo scheletro nudo che
+gira oggi.
+
+- Quattro interruttori accesi insieme: volumi, ATR, Supertrend×3, correlazione.
+- **Le soglie sono IDENTICHE a quelle dei gradini singoli** (§ 3.2) — e sono
+  **NOSTRE**. Se cambiassero qui, questa cella non sarebbe più la loro somma.
+- `InpConfirmMode` resta **0 = OR** fra volumi e ATR, come nel gradino 04 e
+  come nel PDF. L'AND è un'altra domanda, e non è del corso.
+
+> 🔴 **COSA ASPETTARSI, SCRITTO PRIMA DEI NUMERI: il n CROLLA.** Quattro filtri
+> che devono passare tutti, sopra un motore che fa ~130 operazioni OOS sul Dow:
+> è **probabile** che si finisca sotto la soglia G1 di 30, cioè *"NON
+> MISURABILE"*.
+>
+> **E qui "non misurabile" è GIÀ UNA RISPOSTA, non un fallimento**: vorrebbe
+> dire che il metodo del corso, applicato alla lettera sulla nostra geometria,
+> **non produce un campione su cui si possa giudicare**. Che è esattamente ciò
+> che il debito del 18/08 chiedeva di sapere.
+>
+> ⛔ **E non si abbassa nessuna soglia per far "funzionare" questa cella.**
 
 ---
 
@@ -284,7 +339,7 @@ round alla pari. Verificate contro `R86_CRITERI.md`, `R87_CRITERI.md`,
    `R54_LATO_MAI_MISURATO_TESI.md` § 5). Un filtro di trend direzionale, dentro
    una salita, ha un vantaggio **che non è dell'idea: è del periodo**.
 2. 🔴 **QUESTO OOS È GIÀ STATO GUARDATO MOLTE VOLTE** (R16, R35, R46, R51, R54,
-   R88…). R101 lo guarda **altre 16 volte** (8 gradini × 2 EA). Con 16
+   R88…). R101 lo guarda **altre 18 volte** (9 gradini × 2 EA). Con 18
    confronti sulla stessa finestra, **qualcuno esce verde per caso**. Il
    cancello **G3** del § 5 esiste apposta.
 3. 🟠 **IL CAMPIONE È SOTTILE SUL DOW** (n OOS = 130, n IS = 74, contro i 150
@@ -292,7 +347,7 @@ round alla pari. Verificate contro `R86_CRITERI.md`, `R87_CRITERI.md`,
 
 ---
 
-## 5. 🚧 I CANCELLI — **proposti**, [DA FIRMARE]
+## 5. 🚧 I CANCELLI — ✍️ **FIRMATI** (23/08, decisioni 1-3 e 5)
 
 ### G0 · IGIENE — 🔴 **FATALE**, si legge prima di tutto
 
@@ -303,8 +358,8 @@ round alla pari. Verificate contro `R86_CRITERI.md`, `R87_CRITERI.md`,
 | **riproduzione del metro — DAX** | `R101_DAX_00_viva` OOS deve dare **PF 1,40 · DD 7,23%** |
 | **righe** | 2 righe per CSV (le due gemelle), 36 CSV, 72 passate |
 
-> 🟠 **La tolleranza sulla riproduzione è [DA FIRMARE]** — decisione 1 del § 10.
-> Proposta: **±0,01 su PF, ±0,10 punti % su DD, n ESATTO**. Il n esatto non è
+> ✍️ **La tolleranza sulla riproduzione è FIRMATA** — decisione 1 del § 10,
+> firmata con la proposta: **±0,01 su PF, ±0,10 punti % su DD, n ESATTO**. Il n esatto non è
 > pignoleria: R54 ha riprodotto R15 con *"stesso identico numero di trade"* e
 > PF a due centesimi, quindi sappiamo che questa macchina ci arriva.
 > **Se il metro non si riproduce, il round NON SI LEGGE**: si cerca il difetto
@@ -326,7 +381,7 @@ Un gradino diventa **CANDIDATO** solo se, contro la cella viva **dello stesso EA
 È lo **standard di portafoglio** già usato in R46 criterio 2(a)(b) e R54
 criterio 4: *"guadagnare di più peggiorando il DD **non basta**"*.
 
-> 🟠 **[DA FIRMARE], decisione 2:** R46 chiedeva **+10% di profitto OOS**, non
+> ✍️ **FIRMATO (decisione 2): vale il PF.** R46 chiedeva **+10% di profitto OOS**, non
 > "PF più alto". Qui propongo **PF** perché su un'ablazione che *toglie trade* il
 > profitto assoluto scende quasi sempre per costruzione — un filtro che alza la
 > qualità e dimezza il numero fallirebbe un cancello sul profitto pur essendo
@@ -350,7 +405,7 @@ perché un indice fa un bel numero.**
 due direzioni **non sono confrontabili** e G3 **non si applica**. Si leggono
 come due misure separate, e va scritto nel referto.
 
-### G4 · CAMPIONE (Emendamento regola A) — 🟠 **e qui serve la firma**
+### G4 · CAMPIONE (Emendamento regola A) — ✍️ **FIRMATO**
 
 L'Emendamento chiede **≥ 150 operazioni**. Sul Dow la cella viva ne ha **130
 OOS e 74 IS**, e ogni filtro le riduce.
@@ -365,7 +420,8 @@ Proposta:
   **indizi**, non verdetti — e serve a G3 come **conferma di direzione**, non
   come promotore.
 
-> 🟠 **[DA FIRMARE], decisione 3.** L'alternativa onesta è abbassare la soglia a
+> ✍️ **FIRMATO (decisione 3): il MERITO sul Dow è SOSPESO.** L'alternativa
+> scartata era abbassare la soglia a
 > **100** dichiarandolo, come già fatto in R88 (*"n IS = 71, molto sotto 150 →
 > giudizio di MERITO sospeso"*). **Non la propongo io**: cambiare una soglia
 > dell'Emendamento perché scomoda è il modo classico di rovinarsi un metodo.
@@ -425,7 +481,8 @@ il buco nei dati. **Un filtro mezzo acceso è peggio di un filtro spento: è un
 numero che sembra una misura.**
 
 **Conseguenza:** il filtro news va nella lista **"richiede preparazione"** (§ 8,
-voce 5), non nella scala. 🟠 **[DA FIRMARE], decisione 5.**
+voce 5), non nella scala. ✍️ **FIRMATO (decisione 5): il filtro news resta
+FUORI da questo round.**
 
 ---
 
@@ -494,10 +551,10 @@ e va scritto nel referto che il 1R di ciclo è **nostro**, non del corso.
 
 | | |
 |---|---|
-| file | **18** (9 Dow + 9 DAX) |
-| CSV attesi | **36** (IS + OOS per file) |
+| file | **20** (10 Dow + 10 DAX) |
+| CSV attesi | **40** (IS + OOS per file) |
 | righe per CSV | **2** (le due gemelle) |
-| passate | **72** |
+| passate | **80** |
 | driver | `backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1` (`MARCATORE_RIGA_R101_v1`) |
 | macchina | **PC di backtest**, MT5 **e** MetaEditor **CHIUSI**. Una macchina, un lavoro |
 | durata | **[STIMA]**, non una previsione. Il PASSO 0 misura una passata intera e stampa il tetto teorico. `-OreMax 12` è un tetto sull'**inizio** di nuovi file, non un'interruzione |
@@ -510,21 +567,31 @@ accorge dalla **data del file** e lo marca `SALTATO DAL DRIVER` fra i
 
 ---
 
-## 10. ✍️ LE DECISIONI CHE RESTANO A CLAUDIO — **la firma**
+## 10. ✍️ LE SEI DECISIONI — **FIRMATE il 23/08/2026**
 
-> Il perimetro è firmato. Queste sei no. **Le prime due cambiano la forma del
-> round**, le altre quattro cambiano come si legge.
+> **Claudio:** *"FIRMO TUTTE E 6 CON LE PROPOSTE, POI FACCIO I 2 CONTROLLI"*.
+> Tutte e sei firmate **con la proposta**, e **a numeri non visti** — che è la
+> condizione che le rende valide. Da qui in poi **non si toccano**: i criteri
+> si cambiano prima dei numeri, non dopo.
 
-| # | decisione | proposta | se dici no |
+| # | decisione | ✍️ SCELTA FIRMATA | cosa comporta |
 |---|---|---|---|
-| **1** | 🔴 **Tolleranza di riproduzione del metro (G0)** | ±0,01 PF · ±0,10 punti % DD · **n ESATTO** | più larga = si rischia di leggere un round con un motore diverso da quello vivo |
-| **2** | 🔴 **Il cancello di merito è PF OOS o profitto OOS +10%?** | **PF** (§ 5, G2): un'ablazione toglie trade, il profitto assoluto scende per costruzione | col +10% di R46 quasi nessun gradino passa — più severo, più confrontabile con R46 |
-| **3** | 🟠 **Il MERITO sul Dow: sospeso (n 130 < 150) o soglia a 100?** | **SOSPESO**, come R88. Il Dow dà **indizi** e serve a G3 | abbassare la soglia perché scomoda è il modo classico di rovinarsi un metodo. **Non lo propongo io** |
-| **4** | 🟠 **Si aggiunge il 9° gradino "IL CORSO PIENO"?** (volumi + ATR + ST×3 + correlazione **tutti accesi insieme**) | **[DA DECIDERE]**. È la cella che **chiude davvero il debito del 18/08**: è *"il metodo come lo prescrive il corso"* contro *"lo scheletro nudo"*. ⚠️ Costo atteso: **n crolla**, probabilmente sotto G1 → *"non misurabile"* — **che però è già una risposta**, e verbalizzabile | senza, R101 misura i filtri **uno per uno** ma non risponde a *"e tutti insieme?"* |
-| **5** | 🟠 **Il filtro NEWS: fuori (§ 7) o prima si preparano i dati?** | **fuori adesso**, dentro il prossimo round dopo aver costruito il CSV unico 2024.09→2026.06 | tenerlo dentro oggi = misurare il buco nei dati, non il filtro |
-| **6** | 🟢 **La MEDIAZIONE 1:2 va in coda di sviluppo con la spec del § 8.1?** | **sì** — l'input non esiste, e il tuo vincolo *"ciclo = 1R"* è già scritto come **il** requisito di sizing (ed è la cosa che disinnesca la bandiera B1 del corso) | se la vuoi prima di R101, R101 slitta: è codice nuovo, e va al banco da solo |
+| **1** | Tolleranza di riproduzione del metro (G0) | ✅ **±0,01 PF · ±0,10 punti % DD · n ESATTO** | se il metro esce fuori tolleranza, **la famiglia si ferma** e i suoi gradini non vengono nemmeno lanciati |
+| **2** | Il cancello di merito | ✅ **PF OOS più alto E DD OOS non peggiore** | più permissivo del "+10% di profitto" di R46, **ed è dichiarato**: su un'ablazione che toglie trade il profitto assoluto scende per costruzione |
+| **3** | Il MERITO sul Dow (n OOS 130 < 150) | ✅ **SOSPESO** | il Dow produce **indizi**, non verdetti. Serve a **G3** come conferma di direzione, non come promotore. La soglia dell'Emendamento **non è stata abbassata** |
+| **4** | Il 9° gradino "IL CORSO PIENO" | ✅ **SÌ** — volumi + ATR + Supertrend×3 + correlazione accesi insieme, **alle stesse soglie NOSTRE dei gradini singoli** | è la cella che **chiude il debito del 18/08**. ⚠️ Atteso: **n in crollo**, probabilmente sotto G1 → *"non misurabile"* — **che è già una risposta**. Vedi § 3.4 |
+| **5** | Il filtro NEWS | ✅ **FUORI da questo round** | i CSV coprono metà finestra (§ 7): misurarlo oggi misurerebbe il buco nei dati. Rientra dopo che è stato costruito il calendario unico 2024.09→2026.06 |
+| **6** | La MEDIAZIONE 1:2 | ✅ **in coda di sviluppo**, con la spec del § 8.1 | l'input **non esiste** nei sorgenti (verificato). Il vincolo *"ciclo = 1R"* è scritto lì come **il** requisito di sizing — ed è ciò che disinnesca la bandiera B1 del corso |
 
-### 10.1 🟠 E due cose da **CONFERMARE SUL GRAFICO**, non da firmare
+### 10.0 🔴 CIÒ CHE ANCORA MANCA AL LANCIO — e non è una firma
+
+Claudio ha detto *"POI FACCIO I 2 CONTROLLI"*. **Sono i due del § 10.1, e il
+lancio aspetta quelli**: non sono opinioni da firmare, sono **due fatti da
+leggere sul grafico**. Se uno dei due non torna, la cella viva scritta nei file
+prova **non è la sedia viva**, e i 20 file vanno corretti **prima** di lanciare
+— non dopo aver visto i numeri.
+
+### 10.1 🔴 LE DUE VERIFICHE SUL GRAFICO — **bloccanti per il lancio**
 
 Sono contrassegnate **[DA CONFERMARE]** nel § 2 perché vengono dai default del
 sorgente e **non** da un artefatto di deploy. Cinque minuti sul VPS, con MT5

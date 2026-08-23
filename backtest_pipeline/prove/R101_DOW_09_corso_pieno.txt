@@ -1,0 +1,146 @@
+# =====================================================================
+#  R101 09_corso_pieno  --  IL CORSO PIENO: TUTTI I FILTRI DEL CORSO
+#  ACCESI INSIEME
+#  ABTG_Dow_Apertura_US  su  U30USD  M5, TICK REALI
+# ---------------------------------------------------------------------
+#  CRITERI: backtest_pipeline\risultati_archivio\R101_CRITERI.md
+#  >>> FIRMATI da Claudio il 23/08/2026 ("FIRMO TUTTE E 6 CON LE
+#      PROPOSTE"). Questo gradino E' LA DECISIONE 4, e Claudio ha
+#      risposto SI'.
+#
+#  PERCHE' ESISTE, ed e' il gradino che CHIUDE UN DEBITO.
+#    Il debito del 18/08, citato testualmente in
+#    caccia_strategie\ANALISI_APERTURE_4DOC_2026-08-23.md par. 7.4:
+#      "Le nostre sedie hanno i filtri SPENTI -> di fatto operiamo lo
+#       SCHELETRO NUDO, non il metodo del corso."
+#    Gli otto gradini singoli misurano UN filtro per volta. Nessuno di
+#    loro risponde alla domanda vera del corso, che e' una checklist:
+#      "se anche solo un punto e' NO... forse e' meglio aspettare"
+#      [PDF PAG 29-30].
+#    QUESTA cella e' quella domanda: il metodo del corso COME LO
+#    PRESCRIVE IL CORSO, contro lo scheletro nudo che gira oggi.
+#
+#  COSA CAMBIA RISPETTO ALLA CELLA VIVA (quattro interruttori):
+#    InpUseVolumeFilter     0  ->  1   [SI ACCENDE]
+#    InpUseAtrFilter        0  ->  1   [SI ACCENDE]
+#    InpUseSupertrend3      0  ->  1   [SI ACCENDE]
+#    InpUseCorrelation      0  ->  1   [SI ACCENDE]
+#
+#  >>> QUESTA NON E' UN'ABLAZIONE, ED E' DICHIARATO. E' una cella
+#      CUMULATIVA, l'unica del round. Non attribuisce niente a nessun
+#      filtro: quello lo fanno i gradini 02/03/05/06. Serve a rispondere
+#      a "e tutti insieme?", e si legge SOLO accanto a loro.
+#
+#  >>> LE SOGLIE SONO LE STESSE DEI GRADINI SINGOLI, E SONO NOSTRE.
+#      InpVolMult 1,5 - InpVolAvgBars 20 - InpAtrFilterMult 1,0 -
+#      InpAtrFilterBars 20 - InpStAtrPeriod 10 - InpStMultiplier 2,5 -
+#      InpCorrEmaFast 14 / InpCorrEmaSlow 100 su H1.
+#      Il corso NON DA' NESSUNA DI QUESTE SOGLIE (bandiera B3 di
+#      ANALISI_APERTURE_4DOC): sono i default del sorgente, cioe' NOSTRI,
+#      e vanno dichiarati NOSTRI ogni volta che si legge il risultato.
+#      Sono identiche a quelle dei gradini singoli apposta: se cambiassero
+#      qui, questa cella non sarebbe piu' la loro somma.
+#
+#  >>> InpConfirmMode RESTA 0 = OR, come nel gradino 04 e come nel PDF
+#      ("supportata da aumento di volumi O da una volatilita' coerente"
+#      [PAG 14]). NON e' l'AND: l'AND e' un'altra domanda, e non e' del
+#      corso.
+#
+#  >>> COSA ASPETTARSI, SCRITTO PRIMA DEI NUMERI (criteri par. 10, dec. 4):
+#      IL n CROLLA. Quattro filtri in AND fra loro (ognuno deve passare)
+#      sopra un motore che fa ~130 operazioni OOS sul Dow: e' molto
+#      probabile che si finisca sotto la soglia G1 di 30, cioe'
+#      "NON MISURABILE".
+#      >>> E "NON MISURABILE" QUI E' GIA' UNA RISPOSTA, non un
+#          fallimento: vorrebbe dire che il metodo del corso, applicato
+#          alla lettera sulla nostra geometria, NON PRODUCE UN CAMPIONE
+#          SU CUI SI POSSA GIUDICARE. Che e' esattamente cio' che il
+#          debito del 18/08 chiedeva di sapere.
+#      NON si abbassa nessuna soglia per far "funzionare" questa cella.
+#
+#  MAGIC VERGINI 773390/773391: coppia successiva del blocco gia' usato da
+#  R101 (7733xx per il Dow, 7732xx per il DAX), VERIFICATA libera. Il
+#  magic vivo di questa sedia e' 770202 e NON compare in nessun file di
+#  R101.
+#  Lo sweep gemello e' il CONTROLLO D'IGIENE: le due righe di ogni CSV
+#  devono uscire IDENTICHE AL CENTESIMO. Ed e' anche l'unico asse con
+#  flag Y, come pretende la checklist punto 5.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=400||400||0||400||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=1||1||0||1||N
+InpUseCorrelation=1||1||0||1||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=1||1||0||1||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=773390||773390||1||773391||Y
