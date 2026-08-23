@@ -69,7 +69,7 @@ o si scrive un contratto (misura nuova) o si dichiara formalmente lo stato._
 
 | EA | Simbolo | Magic | Rischio | DD promesso | Op/mese | Finestra | Fonte | Etichetta |
 |---|---|---|---:|---|---|---|---|---|
-| ABTG_SupertrendReversal_Ottimizzato | XAUUSD | 970901 | 1,0 | **PF 2,74 real-tick c'è, il DD NO**: a referto solo "basso", mai quantificato | n/d nella promozione | 2024.01→2026.06 nominale, real-tick 26/07 | `backtest_pipeline/CLASSIFICA_PF.md` riga 17 · `REGISTRO_TEST.md` §5 | 🟡 **[PARZIALE]** — manca il numero del DD |
+| ABTG_SupertrendReversal_Ottimizzato | XAUUSD | 970901 | 1,0 | **DD 9,0%** (R99: massimo equity su 22 anni 2004→2026, OHLC M1 = LIMITE INFERIORE, 657 op, gemelli identici) · **peggior giornata attesa ~0,7%** [APPROSSIMATO, chiusure realizzate] · nessuna finestra di regime concentra il rischio (max 2,69% nel TORO 2021) · 2008: 1,79% · 2013: 0,44% · ⚠️ a rischio 2% i numeri RADDOPPIANO (~18% = fuori muro prop) | ~2,5 (657 op / 264 mesi, misurata R99) | **2004.06.11→2026.06.30 (22 anni, R99)** | `risultati_archivio/R99_REFERTO.md` · zip `R99_ORO_22ANNI_CORSA_20260823_1333` | 🟢 **[PIENO da R99]** — riempito il 23/08/2026 su firma di Claudio ("FIRMO, RIEMPI IL CONTRATTO CON QUEI NUMERI"). Caveat: 39/42 input della cella = default del sorgente [DA CONFERMARE col .chr del grafico vivo] |
 | Gold_Ichimoku_TK_ATR_EA | XAUUSD | 250604 | 0,5 | Verifica MT5: **PF 1,31 · DD 4,38% a rischio 0,3%** (a 0,5% ≈ 7,3%) · 217 trade. ⚠️ Ma la validazione vale "su broker a spread stretto" (Tickmill PF 1,54): **su BCM lo stesso test dava PF 1,01 / DD 28%** — e la sedia gira su BCM | ~7,2 (217 tr / 30 mesi) | 2024.01→2026.06 (tick 78%) | `docs/Portafoglio_Strategie.md` §Gold Ichimoku | 🟡 **[PARZIALE]** — numeri pre-imbuto, broker sbagliato, mai passata dai round |
 
 ## 🟢 CONTRATTO PIENO (40)
@@ -182,10 +182,13 @@ SENZA CONTRATTO.**
   USDJPY (famiglia scartata nel 2026 pre-progetto, nessun referto della v3,
   nemmeno l'input di rischio leggibile). **Per la C3 sono fuori metro: niente
   DD promesso = la corsia RISCHIO non può scattare.**
-- 🟡 **Le 2 parziali**: `SupertrendReversal_Ottimizzato` XAUUSD 970901 (PF
-  c'è, il DD a referto è solo "basso") e `Gold_Ichimoku` XAUUSD 250604
+- 🟡 **La parziale rimasta (1)**: `Gold_Ichimoku` XAUUSD 250604
   (numeri pre-imbuto, validati su ALTRO broker, su BCM il test storico era
   PF 1,01/DD 28%).
+  _(`SupertrendReversal_Ottimizzato` XAUUSD 970901 e' stata RIEMPITA il
+  23/08/2026 coi numeri di R99 — 22 anni, DD 9,0% a rischio 1% — su firma
+  di Claudio: la riga sta nella tabella dei parziali per storia, ma
+  l'etichetta ora e' PIENO da R99.)_
 - ✅ **Le 40 piene** hanno DD promesso E frequenza promessa, col riferimento
   esatto. Dentro le 40 restano dichiarate le situazioni particolari:
   - `SupRev_DOW_H4_Ottimizzato` 970914: contratto scritto ma **promozione
