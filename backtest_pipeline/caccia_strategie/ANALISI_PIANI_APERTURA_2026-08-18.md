@@ -207,3 +207,31 @@ orari incoerente [PAG 9].
 
 _NON toccati: sorgenti EA e forward — la missione era di analisi. Compilato
 il 18/08/2026 sera, commit a pezzi per l'onda 529._
+
+---
+
+## 🔁 AGGIORNAMENTO 23/08/2026 — seconda lettura degli stessi 4 file
+
+Claudio ha ricaricato i 4 documenti: **MD5 identici** a quelli di
+`corso_documenti_2026-08-18/`. La rilettura è in
+**[`ANALISI_APERTURE_4DOC_2026-08-23.md`](ANALISI_APERTURE_4DOC_2026-08-23.md)**
+— non duplico, linko. Cosa cambia per QUESTO dossier:
+
+- 🖥️ **Le immagini delle slide non erano mai state aperte** (18/08 = testo-only).
+  Aperte il 23/08: **9 misure nuove** dagli screenshot MT5 (tutti `.bcm`).
+- 🔴 **L'assunzione A4 della spec è FALSA**: la size divisa del piano America è
+  **10 + 20 lotti (1:2)**, non 50/50 — leggibile dalle etichette d'ordine
+  [AM SLIDE 10]. Con stop unico è **mediazione**: rischio ≈2,5R venduto come 1R.
+- ⏰ **Il fuso non è più assunto, è MISURATO**: server BCM = IT − 1, letto
+  sull'orologio dei grafici del corso [PAG 34-35], su data invernale. Corollario:
+  `SESSION_HOUR` 8 (DAX) e 14:30 (Dow) sono giusti **tutto l'anno**.
+  🚩 E la tabella dei fusi [PAG 10] **contraddice gli screenshot dello stesso PDF**
+  di un'ora piena.
+- ⚖️ **§2.5 di questo dossier va letto con i verdetti arrivati dopo**: il piano
+  **Nasdaq** (qui valutato "93% meccanizzabile, quasi un EA già scritto") prescrive
+  il motore **bocciato a campione pieno da R97 (0/4) e R98 (0/6)**. Il capitolo
+  NASUSD è chiuso: nessuna riapertura.
+- ⭐ Invece **R88 dà ragione al corso** sullo stop all'estremo opposto
+  [NAS SLIDE 11]: DD 9,76% → 3,84%, PF 1,674 → 1,84 sul Dow.
+- ❗ **Il debito del §1.2 (ablazione dei filtri) resta APERTO** ed è ora una domanda
+  per Claudio: rifarla su Dow/DAX o dichiararla estinta.
