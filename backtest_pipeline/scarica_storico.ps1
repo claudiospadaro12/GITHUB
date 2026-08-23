@@ -315,16 +315,23 @@ $fermoDa    = 0
 #  si tocca MAI in scrittura (regola di casa).
 function Battito-Basi {
   $tot = [long]0
-  foreach($sub in @("history","ticks")){
-    try {
-      $d = Join-Path $DataFolder "bases"
-      if(Test-Path $d){
-        $m = Get-ChildItem -Path (Join-Path $d "*\$sub") -Recurse -File -ErrorAction SilentlyContinue |
+  #  MISURATO il 24/08: '-File' insieme a un -Path CON WILDCARD torna ZERO
+  #  (l'attributo viene applicato agli elementi risolti dal wildcard, che
+  #  sono le CARTELLE history/ticks). Niente wildcard dentro -Path: si
+  #  enumerano i server e si scende con -LiteralPath, che e' univoco.
+  $d = Join-Path $DataFolder "bases"
+  if(-not (Test-Path -LiteralPath $d)){ return $tot }
+  try {
+    foreach($srv in @(Get-ChildItem -LiteralPath $d -Directory -ErrorAction SilentlyContinue)){
+      foreach($sub in @("history","ticks")){
+        $p = Join-Path $srv.FullName $sub
+        if(-not (Test-Path -LiteralPath $p)){ continue }
+        $m = Get-ChildItem -LiteralPath $p -Recurse -File -ErrorAction SilentlyContinue |
              Measure-Object -Property Length -Sum
         if($m -and $m.Sum){ $tot += [long]$m.Sum }
       }
-    } catch { }
-  }
+    }
+  } catch { }
   return $tot
 }
 $visto      = $false
