@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R99_v1
+#  MARCATORE_RIGA_R99_v2
 #  RIGA_R99_ORO_RISCHIO.ps1  --  R99: la misura del RISCHIO delle sedie
 #  oro su 22 anni di storico XAUUSD (2004.06.11 -> 2026.06.30)
 # ---------------------------------------------------------------------
@@ -105,7 +105,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R99.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R99_ORO_RISCHIO.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (un minuto, nessuna passata, nessun MT5 che opera):
@@ -248,6 +248,10 @@ $Passo0 = @{ Fatto=$false; Minuti=0.0; MinutiOpt=0.0; LogLetti=0;
 
 $Contratto = @{ Riga="NON TROVATA"; DD=-1.0; Stato="NON LETTO"; Fonte="report/CONTRATTI_SEDIE.md" }
 $Storico   = @{ Eseguito=$false; Esito="NON ESEGUITO" }
+#  la diagnostica del lettore di deal: nasce QUI, prima del try, cosi' la
+#  raccolta la trova anche quando la corsa si ferma (checklist 41-bis).
+$script:DealIntestazioni = @()
+$script:DealColonne      = "NON LETTE"
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico($t,$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
@@ -297,7 +301,11 @@ function Fmt2($v){
 }
 function NumInv($s){
   $v = 0.0
-  $t = ("" + $s).Replace([string][char]160,"").Replace(" ","").Replace("&nbsp;","").Trim()
+  #  MISURATO sul report vero (passo0_report_singola.htm della corsa del
+  #  23/08): MT5 scrive le migliaia con lo SPAZIO -> "9 005.54". Si tolgono
+  #  tutti gli spazi, compresi quelli tipografici che l'HTML puo' portarsi
+  #  dietro (nbsp 160, narrow-nbsp 8239, thin space 8201).
+  $t = ("" + $s).Replace([string][char]160,"").Replace([string][char]8239,"").Replace([string][char]8201,"").Replace(" ","").Replace("&nbsp;","").Trim()
   if($t -eq ""){ return $null }
   if([double]::TryParse($t,[Globalization.NumberStyles]::Float,$INV,[ref]$v)){ return $v }
   return $null
@@ -393,37 +401,94 @@ function LeggiDeal($path){
   #      somma di SALDI, sempre positiva, e la peggior giornata usciva
   #      0,00% con la data VUOTA -- un VERDE FALSO stampato al posto di
   #      'NON MISURATA', su uno dei tre numeri FIRMATI e contro un muro prop
-  #      del 5%. I criteri par. 5.2 dicono l'opposto: "un numero inventato
-  #      dentro un verdetto firmato sarebbe peggio di un numero mancante".
-  #  >>> E l'intestazione e' LOCALIZZATA: il terminale puo' essere in italiano.
-  $iProf = -1; $iSald = -1
+  #      del 5%.
+  #
+  #  >>> E IL 23/08, NELLA CORSA VERA, QUESTO GATE HA SBAGLIATO LO STESSO --
+  #      dall'altra parte. Il criterio B e' uscito NON MISURATA ed e' stato
+  #      recuperato A MANO dal report nello zip. LA CAUSA, misurata sul file
+  #      (passo0_report_singola.htm, UTF-16, terminale in ITALIANO):
+  #      l'intestazione della tabella dei deal e'
+  #        Ora | Affare | Simbolo | Tipo | Direzione | Volume | Prezzo |
+  #        Ordine | Commissioni | Swap | Profitto | Bilancio | Commento
+  #      "Profitto" c'era ed e' stato trovato. IL SALDO NO: MT5 in italiano
+  #      la chiama **BILANCIO**, e in questa lista di sinonimi c'era solo
+  #      'balance'/'saldo'. Con $iSald = -1 la funzione tornava VUOTA e chi
+  #      chiama scriveva 'NON MISURATA' -- il comportamento onesto, su una
+  #      tabella perfettamente leggibile. UNA PAROLA MANCANTE.
+  #      Corretto qui: sinonimi COMPLETI, e presi dall'intestazione VERA.
+  #
+  #  >>> E UN SECONDO DIFETTO, che il primo teneva nascosto: la somma
+  #      giornaliera usava il solo PROFITTO. Nella tabella dei deal MT5
+  #      scrive COMMISSIONI e SWAP in colonne SEPARATE: il netto di giornata
+  #      e' Profitto + Commissioni + Swap. Col solo profitto la peggior
+  #      giornata usciva LORDA, cioe' MIGLIORE del vero -- e in un round di
+  #      RISCHIO l'errore nella direzione comoda e' il peggiore. Le due
+  #      colonne si leggono qui e si sommano da chi chiama.
+  $iOra = -1; $iDir = -1; $iProf = -1; $iSald = -1; $iComm = -1; $iSwap = -1
+  $viste = New-Object System.Collections.ArrayList
   foreach($celle in $righe){
     if($celle.Count -lt 8){ continue }
-    $p = -1; $s = -1
+    $o = -1; $dz = -1; $p = -1; $s = -1; $c = -1; $w = -1
     for($i=0; $i -lt $celle.Count; $i++){
       $h = ("" + $celle[$i]).ToLower().Trim()
-      if($h -eq "profit" -or $h -eq "profitto"){ $p = $i }
-      if($h -eq "balance" -or $h -eq "saldo"){ $s = $i }
+      if($h -eq "time" -or $h -eq "ora" -or $h -eq "orario"){ $o = $i }
+      if($h -eq "direction" -or $h -eq "direzione"){ $dz = $i }
+      if($h -eq "profit" -or $h -eq "profitto" -or $h -eq "utile"){ $p = $i }
+      #  <<< 'bilancio' E' LA PAROLA CHE MANCAVA IL 23/08 >>>
+      if($h -eq "balance" -or $h -eq "saldo" -or $h -eq "bilancio"){ $s = $i }
+      if($h -eq "commission" -or $h -eq "commissione" -or $h -eq "commissioni"){ $c = $i }
+      if($h -eq "swap"){ $w = $i }
     }
-    if($p -ge 0 -and $s -ge 0){ $iProf = $p; $iSald = $s; break }
+    if($p -ge 0 -or $s -ge 0){ [void]$viste.Add(($celle -join " | ")) }
+    if($p -ge 0 -and $s -ge 0){ $iOra=$o; $iDir=$dz; $iProf=$p; $iSald=$s; $iComm=$c; $iSwap=$w; break }
   }
   #  CONTROLLO POSITIVO (checklist 55): senza intestazione riconosciuta NON si
   #  tira a indovinare la posizione. Si torna VUOTO, e chi chiama scrive
   #  'NON MISURATA' -- che e' la risposta onesta.
+  #  >>> MA ADESSO SI DICE ANCHE CHE COSA SI E' VISTO: il 23/08 il referto
+  #      diceva solo "non ho riconosciuto nessuna riga", e per capire quale
+  #      parola mancasse e' servito aprire lo zip a mano. Le intestazioni
+  #      candidate finiscono in $script:DealIntestazioni e il chiamante le
+  #      stampa nel referto (checklist 47: una spia deve dire DOVE guardare).
+  $script:DealIntestazioni = @($viste | Select-Object -First 6)
   if($iProf -lt 0 -or $iSald -lt 0){ return @() }
+  if($iOra -lt 0){ $iOra = 0 }        # misurato: 'Ora' e' la prima colonna
+  $script:DealColonne = ("Ora=" + $iOra + " Direzione=" + $iDir + " Profitto=" + $iProf +
+                         " Bilancio=" + $iSald + " Commissioni=" + $iComm + " Swap=" + $iSwap)
   #  --- 3. le righe dei deal, lette PER INDICE DI COLONNA
+  $maxi = @($iOra,$iDir,$iProf,$iSald,$iComm,$iSwap | Measure-Object -Maximum).Maximum
   foreach($celle in $righe){
-    if($celle.Count -le [math]::Max($iProf,$iSald)){ continue }
-    if($celle[0] -notmatch '^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}:\d{2}$'){ continue }
+    if($celle.Count -le $maxi){ continue }
+    #  MISURATO: la colonna Ora e' 'YYYY.MM.DD HH:MM:SS'
+    if($celle[$iOra] -notmatch '^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}:\d{2}$'){ continue }
+    #  la direzione si legge NELLA SUA COLONNA, non scandendo tutte le celle:
+    #  un 'in' dentro la colonna COMMENTO farebbe passare per deal una riga
+    #  qualsiasi. MISURATO: i valori sono 'in'/'out' MINUSCOLI e NON
+    #  localizzati, anche col terminale in italiano.
     $dir = ""
-    foreach($c in $celle){
-      $lc = ("" + $c).ToLower()
-      if($lc -eq "in" -or $lc -eq "out" -or $lc -eq "in/out"){ $dir = $lc }
+    if($iDir -ge 0){ $dir = ("" + $celle[$iDir]).ToLower().Trim() }
+    else {
+      foreach($c in $celle){
+        $lc = ("" + $c).ToLower().Trim()
+        if($lc -eq "in" -or $lc -eq "out" -or $lc -eq "in/out"){ $dir = $lc }
+      }
     }
-    if($dir -eq ""){ continue }                    # non e' la tabella dei DEAL
+    if($dir -ne "in" -and $dir -ne "out" -and $dir -ne "in/out"){ continue }
     $d = [datetime]::MinValue
-    if(-not [datetime]::TryParseExact($celle[0],"yyyy.MM.dd HH:mm:ss",$INV,[Globalization.DateTimeStyles]::None,[ref]$d)){ continue }
-    [void]$out.Add([pscustomobject]@{ Q=$d; Dir=$dir; Profit=(NumInv $celle[$iProf]); Saldo=(NumInv $celle[$iSald]) })
+    if(-not [datetime]::TryParseExact($celle[$iOra],"yyyy.MM.dd HH:mm:ss",$INV,[Globalization.DateTimeStyles]::None,[ref]$d)){ continue }
+    $pr = (NumInv $celle[$iProf])
+    $cm = $null; if($iComm -ge 0){ $cm = (NumInv $celle[$iComm]) }
+    $sw = $null; if($iSwap -ge 0){ $sw = (NumInv $celle[$iSwap]) }
+    #  IL NETTO: Profitto + Commissioni + Swap. E' il calcolo fatto a mano il
+    #  23/08 per recuperare il criterio B, replicato qui.
+    $netto = $null
+    if($pr -ne $null){
+      $netto = [double]$pr
+      if($cm -ne $null){ $netto = $netto + [double]$cm }
+      if($sw -ne $null){ $netto = $netto + [double]$sw }
+    }
+    [void]$out.Add([pscustomobject]@{ Q=$d; Dir=$dir; Profit=$pr; Comm=$cm; Swap=$sw;
+                                      Netto=$netto; Saldo=(NumInv $celle[$iSald]) })
   }
   return @($out)
 }
@@ -1109,8 +1174,15 @@ else{
     Copy-Item -LiteralPath $repFile -Destination (Join-Path $Sosta "passo0_report_singola.htm") -Force -ErrorAction SilentlyContinue
     $deal = @(LeggiDeal $repFile)
     if($deal.Count -eq 0){
-      [void]$Problemi.Add("CRITERIO B: il report della passata singola esiste (" + $repFile + ") ma NON ci ho riconosciuto nessuna riga di DEAL (data in prima colonna + colonna direzione in/out). La PEGGIOR GIORNATA resta NON MISURATA: nessun numero inventato. Il report e' nello zip: si guarda a mano.")
+      #  >>> E SI DICE CHE COSA SI E' VISTO. Il 23/08 questo messaggio diceva
+      #      solo "non ho riconosciuto niente", e la causa (MT5 italiano
+      #      scrive BILANCIO, non SALDO) e' costata l'apertura dello zip a
+      #      mano. Ora le intestazioni candidate sono nel referto.
+      $diag = "nessuna intestazione candidata trovata"
+      if($script:DealIntestazioni.Count -gt 0){ $diag = "intestazioni candidate viste nel report: [ " + ($script:DealIntestazioni -join " ]  [ ") + " ]" }
+      [void]$Problemi.Add("CRITERIO B: il report della passata singola esiste (" + $repFile + ") ma NON ci ho riconosciuto nessuna riga di DEAL (colonna Ora con data + colonna Direzione in/out + colonne Profitto e Bilancio). La PEGGIOR GIORNATA resta NON MISURATA: nessun numero inventato. Il report e' nello zip: si guarda a mano. DIAGNOSTICA -> " + $diag)
     } else {
+      [void]$Note.Add("CRITERIO B: tabella dei deal riconosciuta, colonne " + $script:DealColonne + " (indici a base 0). Il netto di giornata e' Profitto+Commissioni+Swap.")
       $Passo0.PrimaDataReport  = $deal[0].Q.ToString("yyyy.MM.dd",$INV)
       $Passo0.UltimaDataReport = $deal[$deal.Count-1].Q.ToString("yyyy.MM.dd",$INV)
       $Passo0.NReport = @($deal | Where-Object { $_.Dir -eq "out" -or $_.Dir -eq "in/out" }).Count
@@ -1124,9 +1196,9 @@ else{
       #  zero ovunque e la peggior giornata uscirebbe "0,00%" -- cioe' un
       #  VERDE FALSO. Zero profitti letti e zero giornate perdenti devono
       #  essere DISTINGUIBILI.
-      $conProfitto = @($deal | Where-Object { $_.Profit -ne $null }).Count
+      $conProfitto = @($deal | Where-Object { $_.Netto -ne $null }).Count
       if($conProfitto -eq 0){
-        [void]$Problemi.Add("CRITERIO B: nel report ho riconosciuto " + $deal.Count + " deal ma NESSUNO ha un profitto leggibile nella colonna trovata. La PEGGIOR GIORNATA resta NON MISURATA: nessun numero inventato. Il report e' nello zip, si guarda a mano.")
+        [void]$Problemi.Add("CRITERIO B: nel report ho riconosciuto " + $deal.Count + " deal ma NESSUNO ha un profitto leggibile nella colonna trovata (" + $script:DealColonne + "). La PEGGIOR GIORNATA resta NON MISURATA: nessun numero inventato. Il report e' nello zip, si guarda a mano.")
       } else {
       $perGiorno = @{}
       $saldoFine = @{}
@@ -1134,11 +1206,22 @@ else{
       foreach($d in $deal){
         $g = $d.Q.ToString("yyyy.MM.dd",$INV)
         if(-not $perGiorno.ContainsKey($g)){ $perGiorno[$g] = 0.0; [void]$ordine.Add($g) }
-        if($d.Profit -ne $null){ $perGiorno[$g] = $perGiorno[$g] + [double]$d.Profit }
-        if($d.Saldo  -ne $null){ $saldoFine[$g] = [double]$d.Saldo }
+        #  IL NETTO, non il profitto lordo: Profitto+Commissioni+Swap
+        #  (correzione del 23/08 sera, vedi LeggiDeal).
+        if($d.Netto -ne $null){ $perGiorno[$g] = $perGiorno[$g] + [double]$d.Netto }
+        if($d.Saldo -ne $null){ $saldoFine[$g] = [double]$d.Saldo }
+      }
+      #  IL SALDO DI INIZIO DELLA PRIMISSIMA GIORNATA: si RICAVA dal primo
+      #  deal (Bilancio dopo il deal meno il netto del deal) invece di dare
+      #  per scontato il deposito nominale. Se non si ricava, resta il
+      #  deposito -- ed e' dichiarato.
+      $saldoIniziale = [double]$Deposito
+      if($deal.Count -gt 0 -and $deal[0].Saldo -ne $null -and $deal[0].Netto -ne $null){
+        $saldoIniziale = [double]$deal[0].Saldo - [double]$deal[0].Netto
+        if($saldoIniziale -le 0){ $saldoIniziale = [double]$Deposito }
       }
       $Passo0.GiorniOperativi = $ordine.Count
-      $saldoPrec = [double]$Deposito
+      $saldoPrec = $saldoIniziale
       #  >>> NIENTE PAVIMENTO A ZERO. Partendo da $peggio = 0.0 una storia
       #      senza giornate perdenti stampa "0,00%" con la DATA VUOTA, che si
       #      legge come una misura ed e' invece un "non ho trovato niente".

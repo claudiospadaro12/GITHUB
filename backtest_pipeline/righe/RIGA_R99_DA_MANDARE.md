@@ -105,7 +105,7 @@ di R98.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='46276278f7d293b954e355e5c09d432b96c5af50'; $p="$env:USERPROFILE\RIGA_R99.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R99_ORO_RISCHIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -132,7 +132,7 @@ di R98.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='46276278f7d293b954e355e5c09d432b96c5af50'; $p="$env:USERPROFILE\RIGA_R99.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R99_ORO_RISCHIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
