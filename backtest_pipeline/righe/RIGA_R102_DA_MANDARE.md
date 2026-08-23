@@ -265,8 +265,18 @@ più** o il **GATE 4** dice che i primi quindici anni hanno **zero operazioni**,
 si rilancia **senza cambiare il pin**:
 
 ```powershell
-    ... & $p -Pin $pin -SoloSedia 'C02,C06,C15' -PavimentoData 1999.01.04 ;
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='7aa83fd7548e94379e3eeb6bdabdb9c8a8d02093'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia 'C02,C06,C15' -PavimentoData '1999.01.04';
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
+
+_(Blocco INTERO, verificato dal verificatore nella ribenedizione del 23/08:
+parse 0 errori, ASCII puro. Prima era un frammento `... & $p ...` che non
+parsava — convenzione di casa, ma meglio averlo pronto.)_
 
 Il referto scrive in testa che il pavimento è stato applicato, e le righe di
 quelle sedie **non vanno confrontate** con quelle del giro precedente.
