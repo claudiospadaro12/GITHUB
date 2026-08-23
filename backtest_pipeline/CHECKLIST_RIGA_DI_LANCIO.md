@@ -2999,3 +2999,33 @@ destinazione.
    la prova non e' "l'ho eseguito e va": e' stampare
    `$x.GetType().Name` nel punto incriminato. Il tipo e' il fatto;
    l'esito del confronto su Linux non trasferisce a Windows.
+
+## 65. L'ELENCO SENZA APICI NELLA RIGA DI CHAT: la virgola fa un ARRAY, e l'array diventa "a b c" (trovato PRIMA dell'invio, verificando R102 il 23/08)
+
+_Riprodotto sul codice vero del driver: `& $p -SoloSedia C01,C02,C03` ->
+`exit 1`, il blocco non parte._
+
+In *argument mode* la virgola e' l'operatore di array: `-P a,b,c` passa
+`@('a','b','c')`. Se il parametro e' `[string]`, il binder converte l'array
+unendo con **`$OFS` (default: spazio)** -> `"a b c"`. Chi splitta su `,`
+trova **un token solo**. Identico su PS 5.1 e 7: e' binding, non cultura,
+non OS.
+
+Aggravante di famiglia: se l'`exit 1` scatta **prima del `try`**, non nasce
+nessuno zip, e la coda della riga che dice "lo zip esiste lo stesso:
+mandalo" rimanda Claudio sullo zip del **blocco precedente**. E il giro a
+vuoto non lo vede, perche' non passa quel parametro.
+
+**Due pezzi.**
+1. Nella riga: **ogni elenco va fra apici** — `-SoloSedia 'C01,C02,C03'`.
+2. Nello script: chi riceve un elenco splitta su `'[,\s]+'`, non su `','`,
+   cosi' tutte e due le forme funzionano.
+
+**E la regola generale**: un parametro che il giro a vuoto **non passa**
+non e' stato provato da nessuno. Se la corsa vera ha uno switch in piu',
+si prova quello switch — anche solo mandando in secco il ramo di selezione.
+
+E' il terzo membro della famiglia "PowerShell converte da solo e nessuno
+se ne accorge" (62: la lista-di-uno che si srotola; 64: il negativo
+posizionale che diventa stringa) — e l'unico che colpisce **la riga di
+chat** invece dello script.

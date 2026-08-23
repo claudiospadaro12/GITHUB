@@ -650,7 +650,10 @@ Dico ("cartella : " + $Work)
 # =====================================================================
 $Lavoro = @($SEDIE)
 if($SoloSedia -ne ""){
-  $ids = @($SoloSedia -split ',' | ForEach-Object { $_.Trim().ToUpper() } | Where-Object { $_ -ne "" })
+  #  [,\s]+ e non ',' (CHECKLIST 65): senza apici nella riga di chat,
+  #  PowerShell passa un ARRAY che il binder unisce con $OFS (spazio)
+  #  -> "C01 C02 C03". Accetto tutte e due le forme.
+  $ids = @($SoloSedia -split '[,\s]+' | ForEach-Object { $_.Trim().ToUpper() } | Where-Object { $_ -ne "" })
   $ignoti = @($ids | Where-Object { $u = $_; -not (@($SEDIE | Where-Object { $_.Id -eq $u }).Count) })
   if($ignoti.Count -gt 0){
     Write-Host ("!!! -SoloSedia: id sconosciuti [" + ($ignoti -join ", ") + "]. Id validi: " + (($SEDIE | ForEach-Object { $_.Id }) -join ", ")) -ForegroundColor Red
@@ -1703,7 +1706,11 @@ $Zip  = Join-Path $Dsk ("R102_CLASSIFICA_LUNGA_" + $Modo + "_" + $Stamp + ".zip"
 $Referto = Join-Path $Cart "REFERTO_R102.txt"
 try{
   New-Item -ItemType Directory -Force -Path $Cart | Out-Null
-  foreach($f in @(Get-ChildItem -LiteralPath $Risultati -Filter "R102_*.csv" -File -ErrorAction SilentlyContinue)){
+  #  Solo i CSV delle sedie di QUESTO blocco: $Risultati non viene svuotata
+  #  fra un blocco e l'altro, e senza filtro lo zip del blocco N
+  #  conterrebbe i CSV dei blocchi precedenti senza etichetta.
+  $idBlocco = '^R102_(' + (($Lavoro | ForEach-Object { [regex]::Escape($_.Id) }) -join '|') + ')_'
+  foreach($f in @(Get-ChildItem -LiteralPath $Risultati -Filter "R102_*.csv" -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match $idBlocco })){
     Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Cart $f.Name) -Force
   }
   if(Test-Path -LiteralPath $Sosta){
