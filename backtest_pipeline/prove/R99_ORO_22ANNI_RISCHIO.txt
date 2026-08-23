@@ -71,5 +71,89 @@
 # (ABTG_SupertrendReversal_Ottimizzato, XAUUSD H4, magic 770901 — il
 #  contratto e' in report/CONTRATTI_SEDIE.md)
 # Nessuno sweep: questa e' UNA cella, misurata su una finestra nuova.
+#
+# ---------------------------------------------------------------------
+#  COMPLETAMENTO DEL 23/08/2026 (dopo la firma). Le righe di criterio
+#  qui sopra NON sono state toccate: sotto ci sono solo i VALORI della
+#  cella, che il file non aveva ancora.
+#
+#  >>> IL MAGIC. La riga di commento qui sopra dice "magic 770901":
+#      quel numero e' LA COLLISIONE misurata il 22/08
+#      (report/CENSIMENTO_FREQUENZA_FLOTTA_2026-08-22.md par. 5).
+#      770901 e' assegnato in CONTRATTI_SEDIE.md alla sedia
+#      SupertrendReversal "Nikkei H2" su 225JPY, e in FLOTTA_ATTIVA.md
+#      a QUESTA sedia su XAUUSD; lo statement dice che ha davvero fatto
+#      trade su XAUUSD fino al 31/07. Il contratto di QUESTA sedia porta
+#      invece 970901 (= il default del sorgente).
+#      NEL ROUND NON SI USA NESSUNO DEI DUE: si usa una coppia VERGINE
+#      del blocco 7799xx (779910/779911 e le coppie per finestra), cosi'
+#      nessun artefatto di R99 puo' essere confuso con una sedia viva.
+#      Il magic NON tocca il comportamento: e' solo l'etichetta degli
+#      ordini e l'asse gemello di controllo.
+#
+#  >>> L'UNICO ASSE Y E' InpMagic, e NON e' uno sweep di strategia:
+#      e' la COPPIA GEMELLA di controllo (due passate identiche che
+#      devono dare lo stesso numero al centesimo, gate 3 del PASSO 0).
+#      Nessun parametro di strategia viene spazzolato: la cella e' UNA.
+#
+#  >>> DA DOVE VENGONO I VALORI, riga per riga:
+#      - 40 su 42 sono i DEFAULT DEL SORGENTE
+#        mql5/Experts/ABTG_SupertrendReversal_Ottimizzato.mq5 al pin
+#        (e' li' che stanno i valori "OTT XAUUSD H4": StMult 2.5,
+#        StAtrPeriod 7, TP_RR 2.5, scritti nei commenti del sorgente).
+#      - InpRiskPercent = 1.0 lo impone il CRITERIO A del round ("al
+#        rischio 1%"). Il sorgente ha 2.0; la sedia viva e' stata
+#        MISURATA a 1 nel censimento .chr del 18/08 00:01
+#        (censimento_rischio_2026-08-18_0001.txt riga 38): il pin del
+#        criterio COINCIDE con la sedia com'e' accesa oggi.
+#      - InpMagic e' la coppia vergine di cui sopra.
+#      [DA CONFERMARE] Del grafico vivo il censimento .chr misura solo
+#      magic (970901), rischio (1) e commento (STREV OTT): tutti e tre
+#      coincidono. Gli altri 39 input NON sono elencati in nessun
+#      censimento e sono presi dal sorgente: se sul VPS qualcuno ha
+#      toccato un input a mano, questo file misura il sorgente e non la
+#      sedia. Il lato (InpAllowLong/InpAllowShort) e' gia' dichiarato
+#      [INCERTO] in prove/R52_CENSIMENTO_LATI.md per questa sedia.
+# ---------------------------------------------------------------------
+InpUsaGuardian=true||true||0||true||N
 InpTF=16388||16388||0||16388||N
+InpStMult=2.5||2.5||0||2.5||N
+InpStAtrPeriod=7||7||0||7||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseConfluence=true||true||0||true||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20||20||0||20||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+InpSLBufferPips=3||3||0||3||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=2.5||2.5||0||2.5||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
 InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=STREV OTT
+InpMagic=779910||779910||1||779911||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
