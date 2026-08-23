@@ -228,3 +228,34 @@ conversione confronta due cose diverse.
 
 _Scritto il 23/08/2026. **Nessuna riga mandata, nessuna passata lanciata,
 nessun sorgente EA toccato, nessuna modifica al forward.**_
+
+---
+
+# 3️⃣ RIGA 3 — LA RIPRESA `SOLODAX` (23/08 notte, dopo il falso rosso G0 — checklist 64)
+
+**Contesto**: la corsa vera del 23/08 ha completato il DOW ma ha fermato il
+DAX a un falso rosso del gate G0 (sentinella `-1` letto come stringa,
+confronto NLS: checklist 64). Driver corretto al pin
+`3c39326e7ae9bfa02e19c11c9c5062e414044907`. Questa riga rigira il metro DAX
+e i 9 gradini: 40 passate / 20 CSV. **APPROVATA DAL VERIFICATORE** (FAIL
+sulla proposta iniziale, corretta con: `-Rifai` obbligatorio — senza, il
+driver salta il metro gia' su disco ed esce 1 per costruzione; pulizia dei
+file prova DOW residui; marcatore del fix in aggiunta al marcatore v1, che
+non distingue le versioni).
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='3c39326e7ae9bfa02e19c11c9c5062e414044907'; $p="$env:USERPROFILE\RIGA_R101.ps1"; Remove-Item $p -EA SilentlyContinue;
+    Remove-Item "$env:USERPROFILE\abtg_r101\prove\R101_DOW_*.txt" -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R101_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern '[double]$pf,[double]$dd,[int]$n' -Quiet)){ throw 'SCRIPT SENZA IL FIX DELLA CHECKLIST 64' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloEa DAX -Rifai; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
+```
+
+**Cosa deve tornare**: `Desktop\R101_ABLAZIONE_SOLODAX_<AAAAMMGG_HHMM>.zip`
+con dentro 20 CSV DAX + `REFERTO_R101.txt` (riga `data:` di ADESSO, riga
+`modo:` = `SOLODAX`). La meta' DOW resta nello zip `_CORSA_20260823_2159` e
+NON viene rifatta. Nota cosmetica nota: in testa la console stampa il
+canarino del Dow (testo fisso), non un numero di questa corsa.

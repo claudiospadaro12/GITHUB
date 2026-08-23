@@ -140,9 +140,16 @@ INDIZI, come firmato (G4).
 
 ## 6. La ripresa (in mano a Claudio)
 
-Driver corretto (cast numerici sul gate, checklist 64), nuovo pin, riga
-`-SoloEa DAX` verificata dal verificatore. Il metro DAX rigira (2 CSV,
-è il denominatore) e poi i 9 gradini: 20 passate. Al ritorno del zip:
+Driver corretto (cast numerici sul gate, checklist 64), pin `3c39326`,
+riga `-SoloEa DAX -Rifai` approvata dal verificatore (FAIL sulla mia
+proposta, tre correzioni: `-Rifai` perché senza, il driver SALTEREBBE il
+metro DAX già su disco e uscirebbe `exit 1` per costruzione — punto 15/47;
+pulizia dei `R101_DOW_*.txt` residui che finirebbero nello zip SOLODAX —
+punto 56 sulla cartella gemella; secondo marcatore sulla firma tipizzata
+`[double]$pf,[double]$dd,[int]$n`, perché `MARCATORE_RIGA_R101_v1` non
+distingue la versione col fix — punto 6/8). Il metro DAX rigira (è il
+denominatore) e poi i 9 gradini: 10 celle × 2 finestre × 2 gemelle =
+**40 passate / 20 CSV**. Al ritorno del zip (`R101_ABLAZIONE_SOLODAX_*`):
 tabella DAX nel par. 3, G3 gradino per gradino (tranne il gradino 01,
 asimmetrico per firma: si legge come due misure separate), e il referto
 passa da PARZIALE a CHIUSO.
