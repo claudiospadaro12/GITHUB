@@ -3,12 +3,20 @@
 _Scritta il 23/08/2026, dopo la firma di Claudio (**"FIRMO R99, PARTIAMO CON
 L'ORO"**)._
 
-> ## ⏳ STATO — **PREPARATA, NON ANCORA VERIFICATA**
-> Questo documento è la **bozza del preparatore**. Prima di Claudio deve
-> passare dal **verificatore**, e in fondo (§🔎) c'è l'elenco esatto di **cosa
-> non ho potuto eseguire io**, con in testa la cosa più importante:
-> **in questo ambiente non esiste PowerShell, quindi il `.ps1` NON è stato
-> parsato.** Su R98 quel parse fu fatto davvero, e trovò roba. Qui va rifatto.
+> ## ✅ STATO — **VERIFICATA il 23/08/2026, con UNA CORREZIONE APPLICATA**
+> Il verificatore ha installato **PowerShell 7.4.6** e ha fatto il parse reale
+> del driver (`Parser::ParseFile` → **0 errori**), più i parser del round
+> riprovati **a cultura `it-IT` attiva**.
+> 🔴 **Trovato e RIPRODOTTO un difetto che sarebbe arrivato a Claudio come
+> verde pieno**: `LeggiDeal` leggeva profitto e saldo **contando le celle dalla
+> fine**, e la tabella dei deal di MT5 ha in coda una colonna
+> `Comment`/`Commento` (questo EA ci scrive `STREV OTT`). Misurato sui due
+> campioni: **con** la colonna il **CRITERIO B** usciva `0,00%` con la data
+> **vuota**; **senza**, la stessa storia dava `-3,52%`. Uno dei **tre numeri
+> firmati**, contro il muro prop del **5%**.
+> **Corretto** (colonne trovate per **intestazione**, etichette IT+EN;
+> intestazione irriconoscibile → `NON MISURATA`; niente pavimento a `0.0` sul
+> minimo) e **ripinnato**. Nuova classe in checklist: **punto 58**.
 
 Criteri: `backtest_pipeline/risultati_archivio/R99_CRITERI.md` — **FIRMATI il
 23/08/2026**, a numeri mai visti. Questa riga **non cambia i criteri**: li
@@ -16,14 +24,21 @@ traduce in file eseguibili, e ogni traduzione è dichiarata (§🧾).
 
 ---
 
-## 📌 IL PIN — `9ce568c4e1c30be8aed4d321df095470054ae14a`
+## 📌 IL PIN — `46276278f7d293b954e355e5c09d432b96c5af50`
 
-È il commit che contiene **questo** driver, **il file prova completato** e i
-criteri firmati (checklist 4: se il commit di un file pinnato fosse **più
+⚠️ **Ripinnato dal verificatore il 23/08**: il pin precedente
+(`9ce568c…`) conteneva il difetto del `LeggiDeal` (§STATO). **Non si usa più.**
+
+È il commit che contiene **questo** driver corretto, **il file prova completato**
+e i criteri firmati (checklist 4: se il commit di un file pinnato fosse **più
 nuovo** del SHA scritto qui, il SHA sarebbe una bugia).
 
-Verificato con `git log --oneline -1 -- <file>` su **ognuno** dei file che la
-riga scarica: tutti ≤ il pin.
+Verificato con `git log -1 --format=%H -- <file>` + `git merge-base
+--is-ancestor` su **ognuno** dei sei file che la riga scarica: tutti ≤ il pin.
+E il contenuto servito da `raw.githubusercontent.com` **a quel SHA** è stato
+riscaricato e confrontato byte a byte col locale: **identico** (108.456 byte),
+contiene la correzione e il marcatore. Cache CDN esclusa **per misura**, non
+per attesa (checklist 6).
 
 | file scaricato dalla riga | marcatore preteso dal driver | esito della verifica |
 |---|---|---|
@@ -88,7 +103,7 @@ di R98.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='9ce568c4e1c30be8aed4d321df095470054ae14a'; $p="$env:USERPROFILE\RIGA_R99.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='46276278f7d293b954e355e5c09d432b96c5af50'; $p="$env:USERPROFILE\RIGA_R99.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R99_ORO_RISCHIO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -115,7 +130,7 @@ di R98.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='9ce568c4e1c30be8aed4d321df095470054ae14a'; $p="$env:USERPROFILE\RIGA_R99.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='46276278f7d293b954e355e5c09d432b96c5af50'; $p="$env:USERPROFILE\RIGA_R99.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R99_ORO_RISCHIO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R99_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -314,15 +329,23 @@ convenzione di `CONTRATTI_SEDIE.md`.
 Nessuno di questi è un difetto noto: sono **buchi di verifica dichiarati**.
 Vanno chiusi **prima** che la riga arrivi a Claudio.
 
-1. 🔴 **IL `.ps1` NON È STATO PARSATO.** In questo ambiente **non esiste
-   PowerShell** (`pwsh`/`powershell` assenti). Su R98 il parse reale trovò roba,
-   e infatti **qui, rileggendo a mano, ho già trovato e corretto cinque
-   `{2,>8}`** — un'**alignment non valida** in .NET (`,>` non esiste): a runtime
-   avrebbe fatto esplodere **la scrittura del referto**, cioè proprio l'unico
-   artefatto che Claudio legge. Se ne è sfuggita un'altra, la trova solo un
-   parse vero. **Da eseguire**: parse del driver **e** delle due one-liner, e i
-   parser del round (log, deal `.htm`, `OptResults`) riprovati **con cultura
-   `it-IT` attiva**.
+1. ✅ **CHIUSO — IL `.ps1` È STATO PARSATO.** Il verificatore ha installato
+   **PowerShell 7.4.6** e ha eseguito
+   `[System.Management.Automation.Language.Parser]::ParseFile` sul driver:
+   **0 errori di sintassi** (13.481 token), rifatto **dopo** la correzione.
+   Controlli statici passati: **ASCII puro** (`grep -P '[^\x00-\x7F]'` = 0),
+   **nessun formato .NET invalido** (le sei `-f` usano solo allineamenti validi
+   `{n,-10}` / `{n,8}`), **nessun `TryParse`/`::Parse`/`ToString` senza
+   `InvariantCulture`**. I parser del round sono stati **eseguiti a cultura
+   `it-IT` attiva** (dove `(2.5).ToString()` dà `2,5`): `NumInv` legge
+   `2.7400` → `2,74` e **rifiuta** `2,74`; `DataSimulata` scarta la data coi
+   millesimi e prende quella simulata; `Fmt2` dà `n/d` sui negativi. I gate del
+   file prova e **le due fabbriche di `.ini`** sono stati fatti girare
+   sull'artefatto vero **con CRLF**: 45 righe vive, 42 parametri, 38 valori di
+   cella tutti trovati (le `\r?` reggono), unico asse `Y` = `InpMagic`,
+   **8 `.ini` su 8** coi magic `779910…779971`.
+   🔴 **E il parse non ha trovato il difetto: l'ha trovato la prova.** Vedi
+   §STATO — `LeggiDeal` leggeva le colonne per posizione. **Corretto.**
 2. 🟡 **IL REPORT `.htm` È [INFERITO], NON MISURATO.** Che MT5 scriva la tabella
    dei **deal** in un report generato via `/config` con `Report=` +
    `ReplaceReport=1`, e **dove** lo scriva, **non l'ho verificato su questa
@@ -333,6 +356,12 @@ Vanno chiusi **prima** che la riga arrivi a Claudio.
    **Conseguenza da mettere in conto**: se salta, il round torna con **A e C
    misurati e B mancante**, e il gate 1 resta in piedi grazie alla misura sul
    log. **Non è un motivo per non lanciare**, è un motivo per non stupirsi.
+   ✅ **Rinforzato dal verificatore**: il "non inventa nessun numero" adesso è
+   **vero anche quando il report c'è ma è fatto diversamente**. Provato su
+   quattro layout finti — senza colonna commento, **con** colonna commento,
+   **intestazione italiana**, intestazione irriconoscibile: `-3,52%` nei primi
+   tre, **`NON MISURATA`** nel quarto. Prima della correzione i casi 2 e 3
+   davano **`0,00%`**.
 3. 🟡 **La durata è una [STIMA] pura**: nessuno in casa ha mai girato 22 anni di
    OHLC M1 su questo simbolo. Il PASSO 0 **misura** la prima passata e stampa la
    proiezione: se la singola dovesse metterci più di un'ora, conviene fermarsi e
