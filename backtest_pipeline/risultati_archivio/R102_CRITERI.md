@@ -1,4 +1,4 @@
-# 📝 R102 — **LA CLASSIFICA LUNGA** — 🖊️ **BOZZA PER LA FIRMA DI CLAUDIO**
+# 📝 R102 — **LA CLASSIFICA LUNGA** — ✅ **FIRMATO DA CLAUDIO IL 23/08/2026**
 
 > ## 🗣️ LA DOMANDA CHE HA FATTO NASCERE IL ROUND (Claudio, 23/08 sera, in chat)
 >
@@ -7,8 +7,39 @@
 > stesso?"_**
 >
 > ⚠️ **QUESTO DOCUMENTO È SCRITTO A NUMERI DI R102 MAI VISTI.** I criteri si
-> cambiano **PRIMA** dei numeri, mai dopo. Finché non c'è la firma, la riga non
-> si manda.
+> cambiano **PRIMA** dei numeri, mai dopo. ✅ **E così è stato: la firma è
+> arrivata il 23/08/2026 sera, con i numeri del round ancora tutti da fare.**
+
+---
+
+## 🖊️ VERBALE DI FIRMA — **23/08/2026, sera, in chat**
+
+> ### 🗣️ **PAROLE ESATTE DI CLAUDIO: _"FIRMO CON PROPOSTE"_**
+
+**Che cosa vuol dire, senza interpretazioni**: tutte e **sei** le decisioni del
+§9 si risolvono **con la proposta del preparatore scritta accanto a ognuna**.
+Le alternative **non vengono cancellate** — restano scritte e marcate
+**NON SCELTA**, così fra un mese si legge cosa è stato scartato e perché.
+
+| # | decisione | **RISOLUZIONE FIRMATA (= la proposta)** | cambia cosa gira? |
+|---|---|---|---|
+| **1** | finestra **COMUNE** | ✅ **A) `2009.01.01 → 2026.06.30`, con `CostToCost XAGUSD` (C13) DENTRO la classifica** | **no**: è già ciò che il driver e i 20 file prova dicono |
+| **2** | **pavimento** sulle serie ricostruite | ✅ **A) PRIMA CORSA SENZA PAVIMENTO**, si guarda il **GATE 4** e si decide dopo | **no**: `-PavimentoData` ha già default **vuoto** |
+| **3** | **perimetro** | ✅ **20 sedie, lanciate a BLOCCHI, Breaking Band per primo** | no |
+| **4** | **la coda** | ✅ **sì: R102 parte DOPO la chiusura di R101** — una macchina, un lavoro | no |
+| **5** | i **2 contratti PTE GBPUSD** alla taglia viva | ✅ **sì, ed è una FIRMA A PARTE**: R102 gira lo stesso, col `2x` dichiarato **NON CALCOLABILE** su C04 e C05 | no |
+| **6** | `BREAKOUT_EA_JPY_v3` | ✅ **dichiarare formalmente lo stato** (senza sorgente non è misurabile) | no |
+
+> ### 🟢 **CONSEGUENZA OPERATIVA, ED È LA COSA IMPORTANTE**
+> **Le proposte 1 e 2 erano già quelle implementate** nel driver e nei 20 file
+> prova (COMUNE `2009.01.01`, `-PavimentoData` vuoto). La firma **conferma lo
+> stato**, non lo cambia: **nessuna data e nessuna finestra è stata riscritta**
+> negli artefatti. Verificato file per file, e detto qui perché "non ho cambiato
+> niente" è un risultato che va **dimostrato**, non sottinteso.
+
+⚠️ **Che cosa la firma NON autorizza**: il round **non parte** finché R101 non ha
+chiuso e mandato il suo zip (decisione 4). E il **pin** delle righe di lancio va
+**rifatto sul commit che contiene questa firma**.
 
 **Oggetto**: le celle **VIVE** della flotta **NON-oro** e **NON-indice** —
 forex e argento — misurate sulla **finestra più lunga che il broker permette,
@@ -244,15 +275,23 @@ ha avuto quindici anni in più per accumulare.
 **Perché il 2009 e non il 2008**: il simbolo più corto della lista è **XAGUSD
 (2008.11.07, MISURATO)**, ed è lui a legare tutti gli altri.
 
-> ### 🖊️ **DECISIONE 1 CHE RESTA A CLAUDIO**
+> ### ✅ **DECISIONE 1 — FIRMATA IL 23/08/2026 ("FIRMO CON PROPOSTE")**
 > **Togliendo `CostToCost XAGUSD` (C13)** dal round, il vincolo diventa
 > `GBPCAD 2007.08.21` e la finestra comune potrebbe scendere a
 > **`2008.01.01 → 2026.06.30`** — cioè **prendersi dentro tutta la crisi del
 > 2008**, che è la finestra di stress più interessante che abbiamo.
-> - **A)** teniamo XAGUSD e la comune parte dal **2009** _(proposta del
->   preparatore: una sedia viva non si esclude da una classifica per comodità)_;
-> - **B)** togliamo XAGUSD dalla classifica comune (**resta** nella tabella con
->   la sua finestra lunga) e la comune parte dal **2008**.
+> - ✅ **A) SCELTA — teniamo XAGUSD e la comune parte dal `2009.01.01`**
+>   _(era la proposta del preparatore: una sedia viva non si esclude da una
+>   classifica per comodità)_;
+> - ❌ **B) NON SCELTA** — togliere XAGUSD dalla classifica comune (**restava**
+>   nella tabella con la sua finestra lunga) e far partire la comune dal 2008.
+>
+> 🔧 **Effetto sugli artefatti: NESSUNO.** `$FINESTRE` nel driver e l'intestazione
+> dei 20 file prova dicevano già `2009.01.01 → 2026.06.30`, e C13 era già dentro
+> la lista delle 20 sedie. **Verificato, non ricordato.**
+> 📌 E la crisi 2008 **non si perde**: resta la finestra **CRISI2008
+> `2008.07.01 → 2008.12.31`**, che è **DIAGNOSTICA e non un criterio** (§3.7),
+> `NON APPLICABILE` proprio su XAGUSD.
 
 ### 3.3 ⚖️ Le taglie diverse, e come si leggono
 
@@ -328,16 +367,26 @@ indipendenti per non fidarsi delle date più vecchie:
 > Così la classifica non può più contenere la frase *"trent'anni di storico"* su
 > una sedia che ha operato in venti.
 
-> ### 🖊️ **DECISIONE 2 CHE RESTA A CLAUDIO**
+> ### ✅ **DECISIONE 2 — FIRMATA IL 23/08/2026 ("FIRMO CON PROPOSTE")**
 > Il driver ha lo switch **`-PavimentoData`** (default **vuoto = nessun
 > pavimento**). Se la prima corsa mostra che le serie ricostruite fanno perdere
 > ore o producono operazioni finte, **si rilancia con
 > `-PavimentoData 1999.01.04` senza cambiare il pin**, e il referto lo dichiara
 > in testa.
-> - **A)** prima corsa **senza pavimento**, si guarda il GATE 4 e si decide dopo
->   _(proposta del preparatore: prima si misura, poi si taglia)_;
-> - **B)** pavimento **`1999.01.04`** da subito su tutto — meno ore di macchina,
->   ma è una scelta fatta **prima** di aver visto il dato.
+> - ✅ **A) SCELTA — prima corsa SENZA pavimento: il GATE 4 si guarda, POI si
+>   taglia** _(era la proposta del preparatore: prima si misura, poi si taglia)_;
+> - ❌ **B) NON SCELTA** — pavimento `1999.01.04` da subito su tutto: meno ore di
+>   macchina, ma sarebbe una scelta fatta **prima** di aver visto il dato.
+>
+> 🔧 **Effetto sugli artefatti: NESSUNO.** `-PavimentoData` ha **già** default
+> vuoto e i file prova portano l'`@DAQUANDO` della **sonda del 17/08 così com'è**:
+> nessuna data è stata riscritta. **L'ORDINE È QUESTO, ed è la firma**: il
+> pavimento è una **seconda corsa** che si decide **DOPO** aver letto il GATE 4,
+> mai un default nascosto nel codice.
+> 🚦 **E quando si applicherà** (se il GATE 4 lo mostrerà necessario): rilancio
+> con `-PavimentoData 1999.01.04` **sulle sole sedie interessate** (C02, C06,
+> C15), **senza cambiare il pin**, e le loro righe **non si confrontano** con
+> quelle del giro precedente perché la finestra è un'altra.
 
 ### 3.7 📅 Le finestre, per intero
 
@@ -545,8 +594,8 @@ fatte.** `-Rifai` rifà tutto.
 | assenza del sorgente `BREAKOUT_EA_JPY_v3` | ricerca in `mql5/Experts/` | ✅ MISURATA (0 file) |
 | `ABTG_SuperWave` senza `Peggior Giornata %` | header dell'OPTFRAME nel sorgente | ✅ MISURATA |
 | le 4 finestre di regime | `prova_regime.ps1` righe 69-75 (R50/R56/R59) | ✅ AGLI ATTI |
-| la finestra COMUNE 2009 | legata da XAGUSD 2008.11.07 | 🟡 **DECISIONE 1, §3.2** |
-| il pavimento sulle serie ricostruite | euro dal 1999.01.04 (fatto storico), yen sganciato dal 1973 | 🟡 **DECISIONE 2, §3.6** |
+| la finestra COMUNE 2009 | legata da XAGUSD 2008.11.07 | ✅ **DECISIONE 1 FIRMATA 23/08: opzione A, XAGUSD dentro** (§3.2) |
+| il pavimento sulle serie ricostruite | euro dal 1999.01.04 (fatto storico), yen sganciato dal 1973 | ✅ **DECISIONE 2 FIRMATA 23/08: opzione A, nessun pavimento alla prima corsa** (§3.6) |
 | verginità dei 300 magic `79xxxx` | ricerca **magic per magic** su tutto il repo | ✅ MISURATA (0 occorrenze) |
 | la stima 6-16 ore | conto in anni-sedia contro R100 | 🔴 **[STIMA], la parte meno affidabile** |
 
@@ -582,22 +631,40 @@ copre gli artefatti; i numeri li può dare solo la corsa.**
 
 ---
 
-## 9. 🖊️ LE DECISIONI CHE RESTANO A CLAUDIO — **la firma**
+## 9. ✅ LE SEI DECISIONI — **RISOLTE TUTTE CON LA PROPOSTA, 23/08/2026**
 
-| # | decisione | proposta del preparatore |
-|---|---|---|
-| **1** | **Finestra COMUNE**: `2009` con XAGUSD dentro, oppure `2008` togliendo XAGUSD dalla classifica (§3.2) | **A) 2009 con XAGUSD dentro** |
-| **2** | **Pavimento** sulle serie ricostruite (EUR pre-1999, USDJPY pre-1993): subito o dopo aver visto il GATE 4 (§3.6) | **A) prima corsa senza pavimento, si guarda e si decide** |
-| **3** | **Perimetro**: 20 sedie o solo Breaking Band (le 3 della domanda) | **20 sedie, ma lanciate a BLOCCHI, Breaking Band per primo** (§5.3) |
-| **4** | **La coda**: R102 dopo R101, confermato? (§5.1) | **sì — una macchina, un lavoro** |
-| **5** | I **due contratti PTE GBPUSD** riscritti alla taglia viva (0,5%), così il `2x` diventa calcolabile (§4.3) | **sì, ed è una firma a parte** — R102 può girare lo stesso, con il `2x` NON CALCOLABILE dichiarato |
-| **6** | `BREAKOUT_EA_JPY_v3`: si scrive un contratto o si **dichiara formalmente lo stato**? (§2.4) — è aperta dal 18/08 | **dichiarare lo stato**: senza sorgente non è misurabile, e una sedia viva senza metro non dovrebbe restare accesa |
+🗣️ **Claudio, in chat: _"FIRMO CON PROPOSTE"_.** Quindi la colonna
+**RISOLUZIONE** ripete la proposta, e **le alternative restano scritte** dove
+erano (§3.2, §3.6) marcate **NON SCELTA**.
+
+| # | decisione | proposta del preparatore | ✅ **RISOLUZIONE FIRMATA** |
+|---|---|---|---|
+| **1** | **Finestra COMUNE**: `2009` con XAGUSD dentro, oppure `2008` togliendo XAGUSD dalla classifica (§3.2) | **A) 2009 con XAGUSD dentro** | ✅ **A — COMUNE `2009.01.01 → 2026.06.30`, C13 XAGUSD IN CLASSIFICA.** Già negli artefatti: nessuna data riscritta |
+| **2** | **Pavimento** sulle serie ricostruite (EUR pre-1999, USDJPY pre-1993): subito o dopo aver visto il GATE 4 (§3.6) | **A) prima corsa senza pavimento, si guarda e si decide** | ✅ **A — PRIMA CORSA SENZA PAVIMENTO.** `-PavimentoData` resta **vuoto**; il taglio è una **seconda corsa** dopo il GATE 4, sulle sole sedie interessate |
+| **3** | **Perimetro**: 20 sedie o solo Breaking Band (le 3 della domanda) | **20 sedie, ma lanciate a BLOCCHI, Breaking Band per primo** (§5.3) | ✅ **20 sedie a BLOCCHI, BLOCCO 1 = `C01,C02,C03`.** ⚠️ *un blocco NON è il round*: vanno mandati **tutti** gli zip |
+| **4** | **La coda**: R102 dopo R101, confermato? (§5.1) | **sì — una macchina, un lavoro** | ✅ **SÌ — R102 NON PARTE finché R101 non ha chiuso e mandato il suo zip.** È il cancello che resta chiuso anche dopo questa firma |
+| **5** | I **due contratti PTE GBPUSD** riscritti alla taglia viva (0,5%), così il `2x` diventa calcolabile (§4.3) | **sì, ed è una firma a parte** — R102 può girare lo stesso, con il `2x` NON CALCOLABILE dichiarato | ✅ **SÌ, ma è una FIRMA A PARTE su `CONTRATTI_SEDIE.md`**: qui non si riscrive nessun contratto. R102 gira e stampa **`2x NON CALCOLABILE`** su C04 e C05 — 🔴 **e resta un RILIEVO APERTO**, non un via libera |
+| **6** | `BREAKOUT_EA_JPY_v3`: si scrive un contratto o si **dichiara formalmente lo stato**? (§2.4) — è aperta dal 18/08 | **dichiarare lo stato**: senza sorgente non è misurabile, e una sedia viva senza metro non dovrebbe restare accesa | ✅ **DICHIARARE LO STATO**: sorgente inesistente ⇒ **NON MISURABILE**, e va scritto nel referto e portato a Claudio. 🔴 **Il rilievo del 18/08 resta aperto**: una sedia viva senza metro non dovrebbe restare accesa |
+
+🟡 **Quello che questa firma NON risolve, e va tenuto in vista**: il rilievo
+**5** (i due contratti PTE GBPUSD alla taglia viva) e il rilievo **6**
+(`BREAKOUT_EA_JPY_v3`) **si chiudono con due firme separate**, non con questa.
 
 ---
 
 ## ✍️ FIRMA
 
-> **BOZZA. Non firmata.** Finché questa riga non è sostituita dalle parole di
-> Claudio in chat, `RIGA_R102_CLASSIFICA_LUNGA.ps1` **non si manda** — e il
-> `-SoloControllo` **non è** l'eccezione: anche lui scarica artefatti al pin e
-> installa un include sul terminale che ha in mano il conto vero.
+> ### ✅ **FIRMATO DA CLAUDIO — 23/08/2026, sera, in chat.**
+> **Parole esatte: _"FIRMO CON PROPOSTE"_** ⇒ tutte e sei le decisioni del §9
+> risolte **con la proposta del preparatore**, verbale in testa al documento.
+>
+> 🚦 **E la firma NON è il via libera al lancio.** Restano, in quest'ordine:
+> 1. **la CODA (decisione 4)**: R101 deve finire e mandare il suo zip;
+> 2. **il PIN**: `RIGA_R102_DA_MANDARE.md` va ripinnata **sul commit che
+>    contiene questa firma** — nel documento c'è scritto `PIN_DA_AGGIORNARE`
+>    finché il commit non esiste;
+> 3. **il verificatore**, come sempre, prima che le righe arrivino a Claudio.
+>
+> ⚠️ E resta vero che **`-SoloControllo` non è l'eccezione**: anche il giro a
+> vuoto scarica artefatti al pin e installa un include sul terminale che ha in
+> mano il conto vero.
