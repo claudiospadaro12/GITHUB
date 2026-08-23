@@ -62,6 +62,14 @@
 #    3. PASSO 0-A: BARRE M1+H4 di XAUUSD dal 2004.06.11, -SenzaTick.
 #       >>> NIENTE TICK. Il round e' a modello OHLC M1 (criteri par. 4):
 #           i tick su 22 anni NON ESISTONO e non si scaricano.
+#       >>> E IL M1 QUASI CERTAMENTE NON SARA' "COMPLETO", ed e' ATTESO:
+#           scarica_storico.ps1 scrive InpTimeoutSec=120 nel preset, cioe'
+#           due minuti per timeframe, e 22 anni di M1 non ci stanno. Per
+#           questo il verdetto non-COMPLETO sulla riga M1 finisce nelle
+#           NOTE e non nei PROBLEMI (checklist 47): una spia che non puo'
+#           che essere rossa non la legge piu' nessuno. Il tester completa
+#           da solo mentre gira, e la misura che DECIDE resta la data
+#           della prima operazione.
 #    4. PASSO 0-B: UNA passata SINGOLA (magic 779912, InpVerbose=true)
 #       su TUTTA la finestra -> log (prima operazione) e report .htm
 #       (peggior giornata + seconda misura della prima operazione).
@@ -944,9 +952,24 @@ if(-not $SoloControllo -and -not $SaltaPasso0 -and -not $SenzaStorico){
         elseif($verd -ne "COMPLETO"){
           $che = "'" + $verd + "'"
           if($verd -eq ""){ $che = "VUOTO (formato del referto cambiato: NON e' stato letto)" }
-          [void]$Problemi.Add("PASSO 0-A: verdetto NON 'COMPLETO' su " + $sy + " " + $r.Timeframe + " -> " + $che +
-                              " | barre " + $r.Barre + " | broker " + $r.PrimaDataServer + " | chiesto dal " + $DaQuando +
-                              ".  Il gate sulla PRIMA OPERAZIONE e' la misura che decide.")
+          $testo = "PASSO 0-A: verdetto NON 'COMPLETO' su " + $sy + " " + $r.Timeframe + " -> " + $che +
+                   " | barre " + $r.Barre + " | broker " + $r.PrimaDataServer + " | chiesto dal " + $DaQuando +
+                   ".  Il gate sulla PRIMA OPERAZIONE e' la misura che decide."
+          #  >>> SUL M1 QUESTO E' ATTESO, E VA NELLE NOTE, NON NEI PROBLEMI
+          #      (checklist 47, il lato del rumore: una spia che non PUO' che
+          #      essere rossa non la legge piu' nessuno).
+          #      MISURATO nel gemello: scarica_storico.ps1 scrive nel preset
+          #      InpTimeoutSec=120, cioe' DUE MINUTI per timeframe. Ventidue
+          #      anni di barre M1 su XAUUSD non ci stanno, e non e' un guasto
+          #      di questo round: e' un tetto dello strumento condiviso. Il
+          #      tester poi si scarica da solo quello che gli manca mentre
+          #      gira -- ed e' anche il motivo per cui la PRIMA passata dura
+          #      molto piu' delle altre.
+          if(("" + $r.Timeframe).Trim().ToUpper() -eq "M1"){
+            [void]$Note.Add($testo + "  ATTESO: scarica_storico.ps1 da' 120 secondi per timeframe (InpTimeoutSec=120 nel preset) e 22 anni di M1 non ci stanno. NON e' un guasto del round: il tester completa da solo, e la misura che decide resta la prima operazione.")
+          } else {
+            [void]$Problemi.Add($testo)
+          }
         }
       }
       if(-not $vistoSym){ [void]$Problemi.Add("PASSO 0-A: nessuna riga per " + $Sym + " nel referto storico.") }
