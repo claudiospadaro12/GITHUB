@@ -78,12 +78,18 @@ minuscolo — se il tagliando dei 6 mesi (firma 18/08) non la giustifica,
 
 ## Le tre righe da firmare (una per sedia — si puo' firmare in blocco o singolarmente)
 ```
-[ ] S01 EMA200_Ott:  demo 1,0% -> 0,25% + contratto DD 11,5% | prop: NO
-                     (in alternativa: SPEGNERE — decisione di merito)
-[ ] S02 MaxMinNotte: demo 1,0% -> 0,5%  + contratto DD 10,0% | prop: solo <= 0,5%
-[ ] S03 PunteLarry:  demo 1,0% -> 0,3%  + contratto DD 9,0%  | prop: solo <= 0,3%
-                     (in alternativa: SPEGNERE al tagliando — decisione di merito)
+[x] S01 EMA200_Ott:  demo 1,0% -> 0,25% + contratto DD 11,5% | prop: NO
+[x] S02 MaxMinNotte: demo 1,0% -> 0,5%  + contratto DD 10,0% | prop: solo <= 0,5%
+[x] S03 PunteLarry:  demo 1,0% -> 0,3%  + contratto DD 9,0%  | prop: solo <= 0,3%
 ```
+
+## ✍️ FIRMATE TUTTE E TRE da Claudio il 23/08/2026, in chat:
+"FIRMO TUTTE E TRE, S01 RIDUCI A 0,25%" — dopo aver visto i numeri del
+forward reale (MaxMinNotte: 2 trade, netto -2,60; PunteLarry: 1 trade,
++144,89 — entrambe lontanissime dalle 20 operazioni del giudizio di
+merito). Contratti riscritti in CONTRATTI_SEDIE.md con fonte R100.
+La porta di rientro resta quella del tagliando: a 20+ operazioni col
+merito misurato, la taglia si puo' rialzare con firma nuova.
 
 ## E le due note di flotta che escono da questa revisione
 1. **La famiglia Supertrend e' la spina dorsale giusta dell'oro**: base
