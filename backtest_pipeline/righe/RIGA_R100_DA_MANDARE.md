@@ -46,9 +46,10 @@ commit congelato.
   qui sono **12**, e le barre M1 si scaricano **una volta sola** all'inizio
   (stesso simbolo per tutte). `-OreMax` è **20** ed è un tetto sull'**inizio**
   di nuovi lavori, non un'interruzione.
-- **Le sedie si fanno UNA ALLA VOLTA** e la **ripresa è attiva**: se la corsa
-  si interrompe, si rilancia la stessa riga e i CSV già presenti vengono
-  **saltati e dichiarati** (con la data del file nel referto).
+- **Le sedie si fanno UNA ALLA VOLTA.** ⚠️ **E la ripresa NON è quella che
+  sembra — leggere il §🔁 in fondo prima di rilanciare**: un rilancio liscio
+  **rifà il PASSO 0 di tutte le sedie** (≈90% del lavoro) e salta solo le sei
+  finestre che hanno già il CSV.
 
 ---
 
@@ -78,6 +79,12 @@ commit congelato.
 - per **ognuna** delle 12 sedie, tre righe verdi:
   - `file prova: NN righe vive (NN parametri + 3 direttive), rischio X%, asse Y = InpMagic 78SS10/78SS11`
   - `<EA>.mq5 al pin, version V (magic sorgente NNNNNN, include Guardian, OPTFRAME e Log d'ingresso presenti)`
+    👉 su **S02** e **S03** quel numero è il magic **del sorgente** (`770401`
+    e `772301`), **non** il magic vivo, e la riga aggiunge in coda
+    `[magic VIVO della sedia: 770402 / 772343, diverso: secondo grafico dello
+    stesso EA]`. **Se leggessi `770402` o `772343` sotto l'etichetta «magic
+    sorgente», la riga sarebbe da fermare**: vorrebbe dire che gira una
+    versione vecchia del driver.
   - `DD promesso ESTRATTO: …` **oppure** `DD promesso: RIGA NON TROVATA → il confronto 2x sarà NON CALCOLABILE`
 - **le righe vive attese, sedia per sedia** (se una non torna, l'artefatto è
   cambiato e la riga si ferma da sola):
@@ -132,12 +139,43 @@ fermerebbe le altre.
 > `throw` qui butterebbe via una risposta buona (checklist 26-bis). Nel **giro
 > a vuoto** `exit 1` vuol dire una cosa sola: **non si lancia niente.**
 
-### 🔁 Se la corsa si interrompe
+### 🔁 Se la corsa si interrompe — ⚠️ **la ripresa NON salta le sedie fatte**
 
-Si **rilancia la stessa identica riga**: le sedie e le finestre già fatte
-vengono **saltate e dichiarate**. Per rifare tutto da capo si aggiunge
-`-Rifai`; per una sedia sola, `-SoloSedia S03` (e il referto lo scrive: **una
-sedia sola NON è il round**).
+_Rilievo del verificatore, 23/08, prima dell'invio: la stesura precedente di
+questo paragrafo diceva «le sedie e le finestre già fatte vengono saltate».
+**È falso, e costa ore.** Nel driver non esiste nessun salto per sedia._
+
+Che cosa succede davvero a rilanciare **la stessa riga**:
+
+| pezzo | rilancio liscio | quanto pesa |
+|---|---|---|
+| **PASSO 0** — passata SINGOLA + 2 GEMELLE, tutte su **22 anni** | **SI RIFÀ, per ogni sedia** | ~66 anni-sedia = **~90%** |
+| le **6 finestre** di regime/diagnostica col CSV già presente | saltate e dichiarate (1 PROBLEMA per ognuna, con la data del file) | ~7,8 anni-sedia = **~10%** |
+
+Ed è **voluto**, non un bug: la **peggior giornata** (criterio B) si legge dal
+report `.htm`, che sta nella **sosta** — e la sosta **si svuota a ogni giro**
+(checklist 56). Una sedia «saltata» tornerebbe **senza criterio B**.
+
+👉 **LA RIPRESA CHE COSTA POCO, ed è questa:**
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R100_ORO_FLOTTA.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R100_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia S07;
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+```
+
+Si cambia **solo `S07`**, una sedia alla volta, prendendo dalla **tabella
+madre** del referto dell'ultimo giro quelle il cui `VERDETTO` non è stato
+prodotto. ⚠️ **Ogni `-SoloSedia` scrive una cartella e uno zip suoi sul
+Desktop, e il referto lo dichiara**: _«una sedia sola NON è il round»_ — vanno
+mandati tutti, non solo l'ultimo.
+
+`-Rifai` rifà **tutto**, finestre comprese: si usa quando si vuole un round
+intero con tutti i file della **stessa** data, non per riprendere.
 
 ---
 

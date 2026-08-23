@@ -48,10 +48,21 @@
 #  ------------------------------------------------------------------
 #
 #  ------------------------------------------------------------------
-#  LA COSA CHE COMANDA IL DISEGNO: NESSUNO DI QUESTI EA ESPORTA IL
-#  PER-TRADE. L'unico FileWrite e' quello di OnTesterDeinit (blocco
-#  OPTFRAME), che scrive OptResults_<EA>_<Simbolo>.csv e SOLO in
-#  ottimizzazione. Quindi i numeri si leggono da TRE artefatti diversi,
+#  LA COSA CHE COMANDA IL DISEGNO: NESSUNO DI QUESTI EA ESPORTA UN
+#  PER-TRADE CHE QUESTO DRIVER POSSA LEGGERE. L'unico FileWrite in
+#  MQL5\Files e' quello di OnTesterDeinit (blocco OPTFRAME), che scrive
+#  OptResults_<EA>_<Simbolo>.csv e SOLO in ottimizzazione.
+#  >>> CORREZIONE MISURATA (verifica del 23/08, prima dell'invio): la
+#      frase "nessuno esporta il per-trade" era FALSA su CINQUE sedie su
+#      dodici. ABTG_MaxMinNotte, ABTG_PunteLarry, ABTG_SupertrendReversal,
+#      ABTG_EMA200 e ABTG_PTE hanno ExportTrades(), chiamata da OnTester()
+#      a OGNI passata, che scrive abtg_trades_<EA>_<Simbolo>_<magic>.csv
+#      -- ma con FILE_COMMON, cioe' nella cartella COMUNE di MetaQuotes,
+#      NON in MQL5\Files di questo terminale, e con ';' come separatore.
+#      Il disegno di R100 NON lo usa (e il codice lo segnala come NOTA,
+#      vedi il gate 'abtg_trades_'): resta pero' uno strumento migliore
+#      gia' sul disco per il prossimo round su quelle cinque sedie.
+#  Quindi i numeri si leggono da TRE artefatti diversi,
 #  e ognuno e' dichiarato (criteri R99 par. 5.2, estesi):
 #    - OptResults (ottimizzazione a 2 celle gemelle) -> n, DD, PF,
 #      profitto, e i GEMELLI IDENTICI AL CENTESIMO
@@ -87,10 +98,28 @@
 #       MADRE (sedia | rischio | DD promesso | DD misurato | 2x? |
 #       peggior giornata | verdetto corsia RISCHIO).
 #
-#  RIPRESA ATTIVA: una sedia con tutti i CSV gia' presenti viene
-#  SALTATA e DICHIARATA (e la data del file finisce nel referto: un CSV
-#  di ieri non e' un risultato di oggi). -Rifai li rifa'.
-#  -SoloSedia S03 fa una sedia sola.
+#  RIPRESA -- E QUI VA DETTO ESATTAMENTE COSA FA, PERCHE' LA PRIMA
+#  STESURA DI QUESTO COMMENTO PROMETTEVA UNA COSA CHE IL CODICE NON FA
+#  (rilievo del verificatore, 23/08, prima dell'invio):
+#    - LE SEI FINESTRE di regime/diagnostica con il CSV gia' sul disco
+#      vengono SALTATE e DICHIARATE, con la data del file nel referto e
+#      un PROBLEMA per ognuna (un CSV di ieri non e' un risultato di
+#      oggi). -Rifai le rifa'.
+#    - LA SEDIA **NON** VIENE SALTATA. Non esiste nessun salto per
+#      sedia: il PASSO 0-B (passata SINGOLA su 22 anni) e il PASSO 0-C
+#      (due GEMELLE su 22 anni) si RIFANNO SEMPRE, per ogni sedia, a
+#      ogni lancio. E' voluto: la peggior giornata (criterio B) si legge
+#      dal report .htm, che sta nella SOSTA e la sosta si svuota a ogni
+#      giro -- una sedia "saltata" perderebbe il criterio B.
+#    - COSTO, misurato sulla durata simulata: le tre passate su 22 anni
+#      valgono ~66 anni-sedia, le sei finestre ~7,8. Cioe' un rilancio
+#      liscio RIFA' circa il 90% del lavoro e ne salta il 10%.
+#  >>> QUINDI, DOPO UN'INTERRUZIONE, LA RIPRESA CHE COSTA POCO E' UNA
+#      SOLA: -SoloSedia <id> sulle sedie NON ancora fatte, una per una
+#      (l'elenco delle fatte e' nella TABELLA MADRE del referto
+#      dell'ultimo giro). Il rilancio liscio e' legittimo e onesto, ma
+#      ricomincia quasi da capo: va scelto sapendolo.
+#  -Rifai rifa' tutto, finestre comprese.
 #
 #  QUELLO CHE NON FA, dichiarato:
 #    - non promuove e non boccia niente per MERITO (Emendamento regola
@@ -833,7 +862,7 @@ foreach($sd in $Lavoro){
   $trascorse = (New-TimeSpan -Start $Avvio -End (Get-Date)).TotalHours
   if($trascorse -ge $OreMax -and -not $SoloControllo){
     $sd.Esito = "NON INIZIATA (tetto ore raggiunto)"
-    [void]$Problemi.Add("TEMPO SCADUTO prima di " + $sd.Id + " " + $sd.Ea + ": il round NON e' completo. Rilancia: la ripresa salta le sedie gia' fatte.")
+    [void]$Problemi.Add("TEMPO SCADUTO prima di " + $sd.Id + " " + $sd.Ea + ": il round NON e' completo. COME SI RIPRENDE, e non e' 'rilancia la stessa riga': un rilancio liscio RIFA' il PASSO 0 (3 passate su 22 anni) di TUTTE le sedie, cioe' circa il 90% del lavoro, e salta solo le sei finestre gia' fatte. La ripresa che costa poco e' -SoloSedia " + $sd.Id + " (e poi le successive, una per una).")
     continue
   }
   $tSedia = Get-Date
@@ -913,7 +942,16 @@ foreach($sd in $Lavoro){
     if($txtSrc -match 'abtg_trades_'){
       [void]$Note.Add($sd.Id + ": IL SORGENTE ORA ESPORTA UN PER-TRADE ('abtg_trades_'): il disegno di R100 e' costruito sul fatto che NON lo faccia. La corsa prosegue e i numeri restano validi, ma il prossimo round su questo EA puo' usare uno strumento migliore.")
     }
-    Dico ($sd.Ea + ".mq5 al pin, version " + $mv.Groups[1].Value + " (magic sorgente " + $sd.MagicVivo + ", include Guardian, OPTFRAME e Log d'ingresso presenti)") "Green"
+    #  >>> QUI SI STAMPA IL MAGIC DEL **SORGENTE**, ed e' il numero che il
+    #      gate ha appena verificato. La prima stesura stampava MagicVivo
+    #      sotto l'etichetta "magic sorgente": su S02 e S03 (le uniche due
+    #      dove i due numeri differiscono) la riga a schermo avrebbe detto
+    #      770402 / 772343 dove il sorgente dichiara 770401 / 772301 --
+    #      cioe' avrebbe contraddetto a video la correzione stessa, e
+    #      proprio sulla riga che il documento dice a Claudio di leggere.
+    $codaMg = ""
+    if($sd.MagicSrc -ne $sd.MagicVivo){ $codaMg = " [magic VIVO della sedia: " + $sd.MagicVivo + ", diverso: secondo grafico dello stesso EA]" }
+    Dico ($sd.Ea + ".mq5 al pin, version " + $mv.Groups[1].Value + " (magic sorgente " + $sd.MagicSrc + $codaMg + ", include Guardian, OPTFRAME e Log d'ingresso presenti)") "Green"
 
     # -----------------------------------------------------------------
     #  3c. IL DD PROMESSO DI QUESTA SEDIA, dall'artefatto
@@ -1570,6 +1608,13 @@ try{
     [void]$R.Add("     ->  " + $sd.PeggiorGiornata)
     [void]$R.Add("     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday; percentuale")
     [void]$R.Add("     sul saldo a inizio giornata; netto = Profitto+Commissioni+Swap.")
+    [void]$R.Add("     [APPROSSIMATO n.2, dichiarato]: MT5 lascia la colonna Profitto VUOTA")
+    [void]$R.Add("     sulle righe di APERTURA ('in'), quindi quelle righe non entrano nella")
+    [void]$R.Add("     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il")
+    [void]$R.Add("     simbolo ne ha una. L'errore va nella direzione COMODA (giornata")
+    [void]$R.Add("     migliore del vero) ed e' limitato alle commissioni d'apertura: se")
+    [void]$R.Add("     la colonna Commissioni del report e' tutta 0,00 l'errore e' ZERO.")
+    [void]$R.Add("     Si controlla nello zip, nel file " + $sd.Id + "_report_singola.htm.")
     if($sd.PeggiorGiornataEA -ne "n/d"){
       [void]$R.Add("     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): " + $sd.PeggiorGiornataEA)
       [void]$R.Add("        Le due misure vengono da strumenti diversi: se divergono molto,")
@@ -1690,6 +1735,17 @@ try{
   [void]$R.Add("  leggere i .chr dei grafici, input per input.")
   [void]$R.Add("  GRUPPO 2: TUTTO e' default del sorgente, rischio compreso. Vedi sopra.")
   [void]$R.Add("")
+  [void]$R.Add("--- SE QUESTO ROUND E' PARZIALE: COME SI RIPRENDE (e quanto costa) ---")
+  [void]$R.Add("  Un rilancio LISCIO della stessa riga NON salta le sedie gia' fatte:")
+  [void]$R.Add("  salta solo le SEI FINESTRE che hanno gia' il CSV (e lo dichiara con la")
+  [void]$R.Add("  data del file, una riga di PROBLEMA per ognuna). Il PASSO 0 -- passata")
+  [void]$R.Add("  SINGOLA + due GEMELLE, tutte e tre su 22 anni -- si RIFA' per OGNI")
+  [void]$R.Add("  sedia. Misurato sulla durata simulata: PASSO 0 = ~66 anni-sedia, le sei")
+  [void]$R.Add("  finestre = ~7,8. Cioe' il rilancio liscio RIFA' circa il 90% del lavoro.")
+  [void]$R.Add("  >>> LA RIPRESA CHE COSTA POCO: -SoloSedia <id> sulle sedie che qui sopra")
+  [void]$R.Add("      NON sono 'OK', una per una. L'elenco e' la colonna VERDETTO della")
+  [void]$R.Add("      tabella madre. -Rifai rifa' tutto, finestre comprese.")
+  [void]$R.Add("")
   [void]$R.Add("--- PASSO 0-A (le barre, una volta per tutte le sedie) ---")
   [void]$R.Add("  " + $Storico.Esito + "   (chieste dal " + $DaQuando + ", TF M1,H1,H2,H4,D1)")
   [void]$R.Add("  NIENTE TICK: il round e' OHLC M1 per criterio. Le barre M1 servono davvero:")
@@ -1787,3 +1843,13 @@ if($ko.Count -gt 0 -or $Problemi.Count -gt 0){
   Write-Host ("ESITO: PARZIALE (" + $ko.Count + " sedie non OK, " + $Problemi.Count + " problemi)") -ForegroundColor Yellow; exit 1
 }
 Write-Host "ESITO: OK" -ForegroundColor Green
+#  >>> L'exit 0 NON e' decorativo (rilievo del verificatore, 23/08).
+#      Senza, uno script che finisce bene non tocca $LASTEXITCODE, che
+#      resta quello dell'ULTIMO comando NATIVO eseguito: qui
+#      `& $MetaEditor /compile` dell'ultima sedia, il cui rc questo
+#      driver NON usa come esito (il verdetto e' il LastWriteTime del
+#      .ex5) e che puo' benissimo essere != 0 a compilazione riuscita.
+#      La coda della riga in chat avrebbe stampato "ESITO: PARZIALE O
+#      FERMO" su un round andato bene: un rosso falso su una corsa da
+#      ore e' il modo piu' rapido per far rilanciare tutto a vuoto.
+exit 0
