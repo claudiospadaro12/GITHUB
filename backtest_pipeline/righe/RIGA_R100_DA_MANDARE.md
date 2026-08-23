@@ -13,7 +13,7 @@ R99 SULLE ALTRE SEDIE ORO"_ — è la firma dell'estensione**, verbalizzata al
 ## 📌 IL PIN
 
 ```
-9fbe18dec0e0fcd0441a99571f376c5b07d72fdb
+adbc27ccd57d90ff19ca4c69319ce2b948a27406
 ```
 
 È il commit che contiene **il driver, i 12 file prova e i criteri**. Le righe
@@ -64,7 +64,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='9fbe18dec0e0fcd0441a99571f376c5b07d72fdb'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='adbc27ccd57d90ff19ca4c69319ce2b948a27406'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R100_ORO_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R100_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -121,7 +121,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='9fbe18dec0e0fcd0441a99571f376c5b07d72fdb'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='adbc27ccd57d90ff19ca4c69319ce2b948a27406'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R100_ORO_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R100_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -161,7 +161,7 @@ report `.htm`, che sta nella **sosta** — e la sosta **si svuota a ogni giro**
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='adbc27ccd57d90ff19ca4c69319ce2b948a27406'; $p="$env:USERPROFILE\RIGA_R100.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R100_ORO_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R100_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia S07;

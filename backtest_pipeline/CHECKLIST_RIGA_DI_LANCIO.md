@@ -2655,3 +2655,64 @@ giornata perdente" e "la peggior giornata vale 0,00%" erano indistinguibili.**
 > senza la colonna in coda, e si guarda se il numero cambia. Se cambia, la
 > lettura e' posizionale e va rifatta. Trenta secondi, e qui separavano un
 > `-3,52%` da uno `0,00%` firmato.
+
+---
+
+## 🆕 AGGIUNTA DEL 23/08/2026 — trovata verificando la riga R100 (tutta la flotta oro su 22 anni)
+
+## 59. 🔁 LA RIPRESA DICHIARATA CHE RIPRENDE SOLO LA PARTE ECONOMICA (e il documento promette che salta il resto)
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_R100_ORO_FLOTTA.ps1`
+(`9fbe18d`, intestazione righe 90-93 e messaggio del tetto ore) e ripetuto in
+`RIGA_R100_DA_MANDARE.md`. Trovato PRIMA dell'invio della riga. Corretto in
+`adbc27c`._
+
+Il punto 15 copre il **rilancio mirato che non rilancia niente**: la guardia di
+idempotenza del gemello annulla il `-Solo D`. Questo e' **il rovescio, ed e'
+peggio perche' costa ore invece di secondi**: la guardia di idempotenza c'e' e
+funziona — ma copre **una frazione minuscola del lavoro**, mentre il commento
+in testa allo script e il documento della riga promettono che salta **l'unita'
+grossa**.
+
+R100 scriveva, in tre posti:
+
+> _"RIPRESA ATTIVA: una sedia con tutti i CSV gia' presenti viene SALTATA e
+> DICHIARATA"_ · _"Rilancia: la ripresa salta le sedie gia' fatte"_ ·
+> _"le sedie e le finestre gia' fatte vengono saltate e dichiarate"_
+
+**Nel codice non esisteva nessun salto per sedia.** Il `Test-Path` di ripresa
+stava **solo** dentro il ciclo delle sei finestre di regime. Il PASSO 0 — una
+passata SINGOLA piu' due GEMELLE, **tutte e tre su 22 anni** — veniva rifatto
+**per ogni sedia, a ogni lancio**.
+
+**Il conto, e va fatto cosi': in DURATA SIMULATA, non in numero di passate.**
+Per sedia: PASSO 0 = 3 x 22 anni = **66 anni-sedia**; le sei finestre
+(10 mesi, 3 mesi, 12, 12, 6, 4, per due gemelle) = **7,8 anni-sedia**.
+👉 **Il rilancio "che riprende" rifaceva il ~90% del lavoro e ne saltava il
+~10%** — su un round stimato **2-6 ore**, con Claudio convinto di ripartire da
+dove si era interrotto.
+
+E la ragione per cui il salto per sedia **non si puo' semplicemente
+aggiungere** e' la parte che rende questo punto una classe a se': il criterio B
+(peggior giornata) si legge dal **report `.htm`**, che vive nella **sosta**, e
+la sosta **si svuota a ogni giro** (punto 56). Una sedia "saltata" tornerebbe
+**senza uno dei tre numeri firmati**. Cioe' le due contromisure — ripresa e
+sosta pulita — **si contraddicono**, e il documento nascondeva la
+contraddizione dichiarando una capacita' che non c'era.
+
+> ✅ **REGOLA, tre pezzi.**
+> 1. **"La ripresa e' attiva" non e' una frase: e' una TABELLA.** Per ogni
+>    pezzo di lavoro si scrive **si rifa' / si salta**, e accanto **quanto
+>    pesa** — in durata simulata, in passate, in minuti. Se il documento non
+>    puo' riempire quella tabella, la ripresa non e' stata verificata.
+> 2. **Il peso si misura sull'UNITA' CHE COSTA**, non sul conteggio degli
+>    artefatti. "5 CSV su 7 gia' presenti" non vuol dire niente se i 2 mancanti
+>    sono 22 anni e i 5 presenti sono tre mesi ciascuno.
+> 3. **Se la ripresa vera non c'e', il documento dice quella che c'e'** — qui
+>    `-SoloSedia <id>`, una sedia alla volta — e **avverte che ogni giro
+>    produce uno zip suo, da mandare tutti**. Una ripresa dichiarata e assente
+>    e' peggio di nessuna ripresa: senza, si sa di dover ricominciare.
+>
+> 🧭 **Come si trova, in trenta secondi**: si cerca la guardia di idempotenza
+> (`Test-Path ... -and -not $Rifai`) e si guarda **in quale ciclo vive**. Se
+> vive nel ciclo interno e la promessa parla del ciclo esterno, il difetto c'e'.
