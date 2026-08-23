@@ -302,7 +302,31 @@ function Coda-Log-Storico {
 
 $scaduto = (Get-Date).AddMinutes($TimeoutMin)
 $ultimaLen  = -1
+$ultimaBasi = -1
 $fermoDa    = 0
+
+# --- IL PROGRESSO VERO E' NELLA CARTELLA bases (imparato il 23/08/2026) ---
+#  Il CSV lo scrive ABTG_HistoryDownloader ALLA FINE di ogni blocco: sul
+#  primo simbolo con 30+ anni di M1 (AUDUSD dal 1993) MT5 scarica barre
+#  per PIU' di 15 minuti con il CSV fermo a 0 byte, e il guardiano qui
+#  sotto lo ammazzava a meta' scarico ("0 byte scritti" -> morto = FALSO).
+#  Ma mentre scarica, MT5 fa crescere i file di storico in bases\:
+#  QUELLO e' il battito. Qui si LEGGONO solo le dimensioni: bases\ non
+#  si tocca MAI in scrittura (regola di casa).
+function Battito-Basi {
+  $tot = [long]0
+  foreach($sub in @("history","ticks")){
+    try {
+      $d = Join-Path $DataFolder "bases"
+      if(Test-Path $d){
+        $m = Get-ChildItem -Path (Join-Path $d "*\$sub") -Recurse -File -ErrorAction SilentlyContinue |
+             Measure-Object -Property Length -Sum
+        if($m -and $m.Sum){ $tot += [long]$m.Sum }
+      }
+    } catch { }
+  }
+  return $tot
+}
 $visto      = $false
 $finito     = $false
 $faseTick   = $false
@@ -338,22 +362,31 @@ while ((Get-Date) -lt $scaduto) {
   #  Durante la fase tick l'unico limite ammesso e' -TimeoutMin.
   if ($coda -match "TICK : scarico") { $faseTick = $true }
 
-  if (-not (Test-Path $CsvOut)) { continue }
-  $visto = $true
   $len = 0
-  try { $len = (Get-Item $CsvOut -ErrorAction Stop).Length } catch { continue }
-  if ($len -eq $ultimaLen) {
+  if (Test-Path $CsvOut) {
+    $visto = $true
+    try { $len = (Get-Item $CsvOut -ErrorAction Stop).Length } catch { $len = 0 }
+  }
+  $basi = Battito-Basi
+
+  if ($len -ne $ultimaLen -or $basi -ne $ultimaBasi) {
+    # --- QUALCOSA CRESCE: CSV o storico in bases\. E' vivo. -----------
+    $fermoDa = 0
+    if ($basi -ne $ultimaBasi -and $ultimaBasi -ge 0) {
+      Write-Host ("  ... CSV {0} byte, storico bases {1:N0} MB (IN CRESCITA: sta scaricando)" -f $len, ($basi/1MB)) -ForegroundColor DarkGray
+    } else {
+      Write-Host ("  ... CSV {0} byte, storico bases {1:N0} MB" -f $len, ($basi/1MB)) -ForegroundColor DarkGray
+    }
+    $ultimaLen = $len
+    $ultimaBasi = $basi
+  } else {
     if ($faseTick) { continue }   # vedi sopra: qui il silenzio e' NORMALE
     $fermoDa += 15
-    if ($fermoDa -ge 900) {               # 15 minuti, non 1
-      Write-Host "  fermo da 15 minuti senza riga di chiusura: mi fermo qui." -ForegroundColor Yellow
+    if ($fermoDa -ge 900) {               # 15 minuti SENZA che nulla cresca (ne' CSV ne' bases)
+      Write-Host "  fermo da 15 minuti senza riga di chiusura E senza crescita dello storico: mi fermo qui." -ForegroundColor Yellow
       Write-Host "  ATTENZIONE: il referto potrebbe essere INCOMPLETO." -ForegroundColor Yellow
       break
     }
-  } else {
-    $fermoDa = 0
-    $ultimaLen = $len
-    Write-Host ("  ... {0} byte scritti" -f $len) -ForegroundColor DarkGray
   }
 }
 $ErrorActionPreference = "Stop"
