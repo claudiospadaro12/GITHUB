@@ -627,3 +627,20 @@ _Bozza compilata il 23/08/2026 · file prova già scritti e verificati
 (`prove/R101_*.txt`) · driver `righe/RIGA_R101_ABLAZIONE.ps1` ·
 **nessuna passata lanciata, nessun sorgente EA toccato, nessuna modifica al
 forward.**_
+
+---
+
+## ✅ PAR. 10.1 CHIUSO — I DUE CONTROLLI SUL GRAFICO SONO FATTI (23/08, sera)
+
+Screenshot dei pannelli VIVI del conto 100k, letti riga per riga:
+- **DOW (U30USD, 770202, v1.01)**: `InpMinStopPts` **500** ✓ · `InpSkipIfTight`
+  **false** ✓ · `InpMinRangePts`/`InpMaxRangePts` **0/0** ✓. E la geometria
+  combacia con la cella congelata: RETEST con LIMIT, durata range 35,
+  buffer 1000, offset 400, solo long.
+- **DAX (D30EUR, 770101, v1.01)**: `InpAllowShort` **false** ✓ (solo long,
+  come dagli artefatti). Geometria: RETEST, durata 35, buffer 500, offset
+  200, tutti i filtri SPENTI (EMA/ST/ST×3/correlazione/VWAP/volumi/ATR),
+  parziale 50 + BE + trailing base candela M5/410 — coerente con la cella
+  viva congelata.
+
+**La cella viva dei 20 file prova E' la sedia viva. Via libera alla corsa.**
