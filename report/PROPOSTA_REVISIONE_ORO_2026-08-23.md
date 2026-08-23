@@ -104,3 +104,18 @@ Le taglie si cambiano sul VPS nel pannello input delle sedie (InpRiskPercent),
 fuori orario di operativita' di ciascuna; i contratti si riscrivono in
 CONTRATTI_SEDIE.md con fonte R100. Preparo la checklist operativa esatta
 (sedia per sedia, con orari sicuri) alla firma.
+
+## ✅ ESEGUITA E VERIFICATA (23/08, 15:49)
+Censimento dai .chr dopo il salvataggio del profilo
+(`risultati_archivio/censimento_rischio_2026-08-23_1549.txt`):
+- 971501 EMA200 OTT -> **0.25** ✅
+- 770402 MAXMIN ORO -> **0.5** ✅
+- 772343 LARRY ORO  -> **0.3** ✅
+- 970901 STREV OTT  -> 1.0 ✅ (non toccata, giusto cosi')
+Somma del rischio dichiarato della flotta: 43,00% -> **42,05%**.
+
+⚠️ ANOMALIA APERTA nello stesso censimento: `ORB_Ottimizzato U30USD 770611`
+compare **DUE volte a 1.0** piu' una a 0.3 (alle 15:46 era una sola a 1.0).
+Possibile grafico ORB DUPLICATO comparso col salvataggio del profilo —
+classe di rischio del 29/07 (stesso segnale eseguito due volte, -235,84).
+DA VERIFICARE PRIMA DELL'APERTURA DI LUNEDI' (14:25 server).
