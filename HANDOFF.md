@@ -7,6 +7,60 @@
 
 ---
 
+## 🏅 AGGIORNAMENTO 23/08 sera — **R100 È PRONTO AL LANCIO**: TUTTA la flotta ORO su 22 anni
+
+- ✍️ **Ordinato da Claudio in chat**: *"FAI PARTIRE R99 SULLE ALTRE SEDIE ORO"*
+  — **quell'ordine è la firma dell'estensione**, verbalizzata al §0 di
+  `backtest_pipeline/risultati_archivio/R100_CRITERI.md`. I criteri sono quelli
+  **firmati di R99**, estesi **INVARIATI** sedia per sedia. Era già previsto:
+  lo scrive il referto R99 (*"è un round nuovo… ma ora la macchina esiste"*).
+- 📦 **Consegnato, pin `9fbe18d`**:
+  - **12 file prova** `prove/R100_<ea>_<magic>.txt`, **generati dai sorgenti**
+    (`prove/R100_GENERA_PROVE.py` agli atti): EA diversi hanno input diversi;
+  - driver `righe/RIGA_R100_ORO_FLOTTA.ps1` (`MARCATORE_RIGA_R100_v1`);
+  - `righe/RIGA_R100_DA_MANDARE.md` con le **due righe** pinnate.
+- 🪑 **IL CENSIMENTO, e la tensione MISURATA fra le fonti**: `FLOTTA_ATTIVA.md`
+  (02/08) dice **12 grafici** sull'oro; il `.chr` più recente (**19/08 15:34**)
+  ne censisce **5**; il censimento frequenza del 22/08 misura **ZERO trade** su
+  quelle della squadra storica. Traduzione dichiarata, **due gruppi**:
+  - 🟢 **GRUPPO 1 (3)** — rischio vivo **MISURATO**: `EMA200_Ottimizzato`
+    971501 (DD promesso **4,4%**), `MaxMinNotte` 770402 (**5,3%**),
+    `PunteLarry` 772343 (**3,5%**). ✅ **Qui il confronto `2x` è FINALMENTE
+    calcolabile**: sono numeri, non aggettivi;
+  - 🟡 **GRUPPO 2 (9)** — rischio vivo **non censito**: misurate a **1,00%
+    dichiarato come taglia di riferimento**, il numero è un **DD-per-1%** e il
+    verdetto resta **NON MISURABILE**. ⚠️ **Non è un via libera: è il rilievo.**
+    **Prerequisito agli atti: serve un censimento `.chr` nuovo del VPS.**
+  - ⛔ **NON MISURABILE (1)** — `Gold_Ichimoku` 250604: **non ha l'OPTFRAME**
+    (misurato: 0 occorrenze di `OptResults` nel sorgente) → nessun DD. È
+    **l'ultima sedia a contratto PARZIALE** della flotta.
+  - 🧊 `SupertrendReversal_Ottimizzato` 970901 **si salta**: è R99, già fatta.
+- 🔴 **NOVE SEDIE ORO SENZA NESSUN DD PROMESSO**: è lo stesso rilievo che era il
+  vero risultato di R99, **moltiplicato per nove**.
+- 🐛 **CORRETTO IL BUG DEL CRITERIO B DI R99** (anche in `RIGA_R99`, marcatore
+  → **`v2`**, commit separato): il parser cercava `saldo`/`balance`, ma MT5 in
+  italiano scrive **`Bilancio`** → tornava vuoto e il criterio B usciva
+  **NON MISURATA** su una tabella leggibilissima. **Una parola mancante.** E un
+  secondo difetto nascosto dal primo: la somma usava il solo `Profitto`, non
+  **`Profitto+Commissioni+Swap`** — la peggior giornata usciva **migliore del
+  vero**, cioè l'errore nella direzione comoda.
+- 🧲 **Magic VERGINI `78xxxx`** (verificato: **zero occorrenze in tutto il
+  repo**), schema `78SSNN`. Vietati e controllati **tutti** i magic vivi
+  dell'oro, i `7799xx` di R99 e la collisione `770901`.
+- 🎁 **Il prodotto finale è LA TABELLA MADRE** del referto: sedia · rischio ·
+  DD promesso · DD 22 anni · `2x?` · peggior giornata · verdetto corsia
+  RISCHIO. **È la fotografia del rischio di tutta la concentrazione oro.**
+- 🔴 **Quello che R100 NON dirà**, e va ricordato leggendo la tabella: **il DD
+  di PORTAFOGLIO dell'oro**. Dodici sedie sullo stesso simbolo non fanno la
+  somma dei loro DD né il massimo: dipende dalla **sovrapposizione**. È **un
+  round diverso**, ed è la **domanda successiva ovvia**.
+- ⏭️ **Prossimo passo**: giro dal **verificatore** (in testa: **i `.ps1` non
+  sono stati parsati**, qui non c'è PowerShell — sono stati controllati a mano
+  per bilanciamento graffe/parentesi e here-string), poi le due righe a
+  Claudio. 🚫 **Nessun backtest è stato eseguito qui.**
+
+---
+
 ## 🥇 AGGIORNAMENTO 23/08 — **R99 È PRONTO AL LANCIO**: l'ORO su 22 anni, la misura del RISCHIO
 
 - ✍️ **FIRMATO da Claudio in chat**: *"FIRMO R99, PARTIAMO CON L'ORO"*.
