@@ -219,9 +219,9 @@ $MagicVietati = @(970901,770901,970301,971001,971501,771501,770801,771301,
 #        confronto fra le due misure del gate 1: su una sedia PENDENTE
 #        "log piu' vecchio del report" non e' un difetto, e' il mestiere.
 # =====================================================================
-function S($id,$ea,$ver,$tf,$magicVivo,$risk,$commento,$base,$par,$vive,$grp,$markSrc,$markLog,$tipoLog){
+function S($id,$ea,$ver,$tf,$magicVivo,$magicSrc,$risk,$commento,$base,$par,$vive,$grp,$markSrc,$markLog,$tipoLog){
   return [pscustomobject]@{
-    Id=$id; Ea=$ea; Ver=$ver; Tf=$tf; MagicVivo=$magicVivo; Risk=$risk;
+    Id=$id; Ea=$ea; Ver=$ver; Tf=$tf; MagicVivo=$magicVivo; MagicSrc=$magicSrc; Risk=$risk;
     Commento=$commento; Base=$base; Par=$par; Vive=$vive; Gruppo=$grp;
     MarkSrc=$markSrc; MarkLog=$markLog; TipoLog=$tipoLog;
     # --- i risultati, riempiti durante la corsa
@@ -238,20 +238,38 @@ function S($id,$ea,$ver,$tf,$magicVivo,$risk,$commento,$base,$par,$vive,$grp,$ma
   }
 }
 
+#  >>> ATTENZIONE ALLA COLONNA 'magicSrc', ED E' UN DIFETTO TROVATO
+#      VERIFICANDO LA TABELLA CONTRO I SORGENTI PRIMA DI LANCIARE.
+#      Il gate di versione controlla che il sorgente dichiari il magic
+#      giusto. Ma su DUE sedie il magic VIVO **non e'** il default del
+#      sorgente, e non e' un errore: e' il segno che quella sedia e' un
+#      SECONDO grafico dello stesso EA.
+#        S02 ABTG_MaxMinNotte : sorgente 770401 (= MAXMIN EURUSD), vivo 770402
+#            -- e report/VIVAIO_ORO_DEPLOY.md lo scrive a caratteri cubitali:
+#            "MAI 770401 (e' del MAXMIN EURUSD!)"
+#        S03 ABTG_PunteLarry  : sorgente 772301, vivo 772343 (LARRY ORO,
+#            una delle sei sedie del vivaio R38/R39)
+#      Col magic VIVO nel gate, quelle due sedie sarebbero morte al
+#      controllo su un sorgente sano. Il gate usa 'magicSrc'; 'magicVivo'
+#      resta l'identita' della sedia (nome del file prova, riga del
+#      contratto, referto). E DOVE I DUE DIFFERISCONO il referto lo dice:
+#      e' anche il motivo per cui quelle due celle NON possono essere i
+#      default del sorgente, e infatti sono MISURATE su un artefatto di
+#      deploy.
 $SEDIE = @(
-  #   id     EA                                          ver    TF   magic  risk  commento            base   par vive g  markSrc                                    markLog                                         tipoLog
-  (S "S01" "ABTG_EMA200_Ottimizzato"                   "1.00" "H4" "971501" "1.0" "EMA200 OTT"        780100  43  46 1 '%s LIMIT %s @ %s SL %s TP %s lot %.2f'     '\[EMA200\]\s+(BUY|SELL)\s+LIMIT'               "PENDENTE"),
-  (S "S02" "ABTG_MaxMinNotte"                          "1.10" "H2" "770402" "1.0" "MAXMIN ORO"        780200  52  55 1 'BUY STOP @ %.2f SL %.2f TP %.2f lot %.2f'  '\[MaxMinNotte\]\s+(BUY|SELL)\s+STOP\s+@'       "PENDENTE"),
-  (S "S03" "ABTG_PunteLarry"                           "1.00" "H1" "772343" "1.0" "LARRY ORO"         780300  20  23 1 'PENDENTE %s %s @ %s'                       '\[LARRY\]\s+PENDENTE\s'                        "PENDENTE"),
-  (S "S04" "ABTG_SupertrendReversal_Multi_Ottimizzato" "1.00" "H4" "971001" "1.0" "STREV MULTI OTT"   780400  42  45 2 '%s mercato %.2f lot'                       '\[STReversal\]\s+(LONG|SHORT)\s+mercato'       "MERCATO"),
-  (S "S05" "ABTG_GoldenCross_Ottimizzato"              "2.00" "H1" "970301" "1.0" "GOLDENCROSS OTT"   780500  53  56 2 '%s a mercato @ %.2f SL %.2f TP %.2f lot'   '\[GoldenCross\]\s+(LONG|SHORT)\s+a mercato @'  "MERCATO"),
-  (S "S06" "ABTG_SupertrendReversal"                   "1.00" "H4" "770901" "1.0" "STREV"             780600  44  47 2 '%s mercato %.2f lot'                       '\[STReversal\]\s+(LONG|SHORT)\s+mercato'       "MERCATO"),
-  (S "S07" "ABTG_SupertrendReversal_Multi"             "1.00" "H4" "771001" "1.0" "STREV MULTI"       780700  42  45 2 '%s mercato %.2f lot'                       '\[STReversal\]\s+(LONG|SHORT)\s+mercato'       "MERCATO"),
-  (S "S08" "ABTG_EMA200"                               "1.00" "H4" "771501" "1.0" "EMA200"            780800  43  46 2 '%s LIMIT %s @ %s SL %s TP %s lot %.2f'     '\[EMA200\]\s+(BUY|SELL)\s+LIMIT'               "PENDENTE"),
-  (S "S09" "ABTG_GoldenCross"                          "2.00" "H1" "770301" "1.0" "GOLDENCROSS"       780900  59  62 2 '%s a mercato @ %.2f SL %.2f TP %.2f lot'   '\[GoldenCross\]\s+(LONG|SHORT)\s+a mercato @'  "MERCATO"),
-  (S "S10" "ABTG_SupertrendInvert"                     "1.00" "H1" "770801" "1.0" "STINVERT"          781000  46  49 2 '%s @ %s SL %s lot %.2f'                    '\[STInvert\]\s+(LONG|SHORT)\s+@'               "MERCATO"),
-  (S "S11" "ABTG_PTE"                                  "1.01" "H4" "771301" "1.0" "PTE"               781100  44  47 2 '%s @ %s SL %s TP %s lot %.2f'              '\[PTE\]\s+(LONG|SHORT)\s+@'                    "MERCATO"),
-  (S "S12" "ABTG_WOL"                                  "1.00" "D1" "771401" "1.0" "WOL"               781200  40  43 2 '%s @ %s SL %s TP %s lot %.2f'              '\[WOL\]\s+(LONG|SHORT)\s+@'                    "MERCATO")
+  #   id     EA                                          ver    TF   magicVivo magicSrc risk  commento          base   par vive g  markSrc                                    markLog                                         tipoLog
+  (S "S01" "ABTG_EMA200_Ottimizzato"                   "1.00" "H4" "971501" "971501" "1.0" "EMA200 OTT"        780100  43  46 1 '%s LIMIT %s @ %s SL %s TP %s lot %.2f'     '\[EMA200\]\s+(BUY|SELL)\s+LIMIT'               "PENDENTE"),
+  (S "S02" "ABTG_MaxMinNotte"                          "1.10" "H2" "770402" "770401" "1.0" "MAXMIN ORO"        780200  52  55 1 'BUY STOP @ %.2f SL %.2f TP %.2f lot %.2f'  '\[MaxMinNotte\]\s+(BUY|SELL)\s+STOP\s+@'       "PENDENTE"),
+  (S "S03" "ABTG_PunteLarry"                           "1.00" "H1" "772343" "772301" "1.0" "LARRY ORO"         780300  20  23 1 'PENDENTE %s %s @ %s'                       '\[LARRY\]\s+PENDENTE\s'                        "PENDENTE"),
+  (S "S04" "ABTG_SupertrendReversal_Multi_Ottimizzato" "1.00" "H4" "971001" "971001" "1.0" "STREV MULTI OTT"   780400  42  45 2 '%s mercato %.2f lot'                       '\[STReversal\]\s+(LONG|SHORT)\s+mercato'       "MERCATO"),
+  (S "S05" "ABTG_GoldenCross_Ottimizzato"              "2.00" "H1" "970301" "970301" "1.0" "GOLDENCROSS OTT"   780500  53  56 2 '%s a mercato @ %.2f SL %.2f TP %.2f lot'   '\[GoldenCross\]\s+(LONG|SHORT)\s+a mercato @'  "MERCATO"),
+  (S "S06" "ABTG_SupertrendReversal"                   "1.00" "H4" "770901" "770901" "1.0" "STREV"             780600  44  47 2 '%s mercato %.2f lot'                       '\[STReversal\]\s+(LONG|SHORT)\s+mercato'       "MERCATO"),
+  (S "S07" "ABTG_SupertrendReversal_Multi"             "1.00" "H4" "771001" "771001" "1.0" "STREV MULTI"       780700  42  45 2 '%s mercato %.2f lot'                       '\[STReversal\]\s+(LONG|SHORT)\s+mercato'       "MERCATO"),
+  (S "S08" "ABTG_EMA200"                               "1.00" "H4" "771501" "771501" "1.0" "EMA200"            780800  43  46 2 '%s LIMIT %s @ %s SL %s TP %s lot %.2f'     '\[EMA200\]\s+(BUY|SELL)\s+LIMIT'               "PENDENTE"),
+  (S "S09" "ABTG_GoldenCross"                          "2.00" "H1" "770301" "770301" "1.0" "GOLDENCROSS"       780900  59  62 2 '%s a mercato @ %.2f SL %.2f TP %.2f lot'   '\[GoldenCross\]\s+(LONG|SHORT)\s+a mercato @'  "MERCATO"),
+  (S "S10" "ABTG_SupertrendInvert"                     "1.00" "H1" "770801" "770801" "1.0" "STINVERT"          781000  46  49 2 '%s @ %s SL %s lot %.2f'                    '\[STInvert\]\s+(LONG|SHORT)\s+@'               "MERCATO"),
+  (S "S11" "ABTG_PTE"                                  "1.01" "H4" "771301" "771301" "1.0" "PTE"               781100  44  47 2 '%s @ %s SL %s TP %s lot %.2f'              '\[PTE\]\s+(LONG|SHORT)\s+@'                    "MERCATO"),
+  (S "S12" "ABTG_WOL"                                  "1.00" "D1" "771401" "771401" "1.0" "WOL"               781200  40  43 2 '%s @ %s SL %s TP %s lot %.2f'              '\[WOL\]\s+(LONG|SHORT)\s+@'                    "MERCATO")
 )
 
 # --- LE FINESTRE. Le quattro di regime sono AGLI ATTI: prova_regime.ps1
@@ -875,7 +893,14 @@ foreach($sd in $Lavoro){
     $mv = [regex]::Match($txtSrc,'#property\s+version\s+"([^"]+)"')
     if(-not $mv.Success){ throw ($sd.Ea + ".mq5 scaricato senza #property version: non e' il sorgente che credo.") }
     if($mv.Groups[1].Value -ne $sd.Ver){ throw ($sd.Ea + ".mq5 dichiara version '" + $mv.Groups[1].Value + "' invece di '" + $sd.Ver + "'. O la cache di raw.githubusercontent serve una copia vecchia, o il pin e' sbagliato.") }
-    if($txtSrc -notmatch ('InpMagic\s*=\s*' + $sd.MagicVivo)){ throw ($sd.Ea + ".mq5 non dichiara InpMagic = " + $sd.MagicVivo + ": non e' il motore di questa sedia.") }
+    #  >>> IL MAGIC DEL SORGENTE, non quello vivo (vedi la nota sulla
+    #      tabella $SEDIE): su S02 e S03 il magic vivo e' quello di un
+    #      SECONDO grafico dello stesso EA, e col magic vivo qui dentro
+    #      quelle due sedie morirebbero al gate su un sorgente sano.
+    if($txtSrc -notmatch ('InpMagic\s*=\s*' + $sd.MagicSrc)){ throw ($sd.Ea + ".mq5 non dichiara InpMagic = " + $sd.MagicSrc + " (il default del sorgente): non e' il motore che credo.") }
+    if($sd.MagicSrc -ne $sd.MagicVivo){
+      [void]$Note.Add($sd.Id + ": il magic VIVO (" + $sd.MagicVivo + ") NON e' il default del sorgente (" + $sd.MagicSrc + "). Non e' un errore: e' il segno che questa sedia e' un SECONDO grafico dello stesso EA, e quindi la sua cella NON PUO' essere quella dei default. Per questo la cella di R100 e' presa da un artefatto di DEPLOY (S02: report/VIVAIO_ORO_DEPLOY.md; S03: preset VIVAIO_LARRY_ORO di deploy_vivaio_larry.ps1) e non dal sorgente.")
+    }
     if($txtSrc -notmatch 'ABTG_PausaGuardian\.mqh'){ throw ($sd.Ea + ".mq5 non include ABTG_PausaGuardian.mqh: il sorgente non e' quello che credo.") }
     #  >>> L'OPTFRAME: e' il solo strumento del criterio A. Se sparisse,
     #      non ci sarebbe nessun DD da leggere (checklist 55).
@@ -1529,7 +1554,12 @@ try{
     [void]$R.Add("")
     [void]$R.Add("---------------------------------------------------------------------")
     [void]$R.Add($sd.Id + "  " + $sd.Ea + "   XAUUSD " + $sd.Tf + "   GRUPPO " + $sd.Gruppo)
-    [void]$R.Add("     magic vivo " + $sd.MagicVivo + " | rischio " + $sd.Risk + "% | commento '" + $sd.Commento + "' | version attesa " + $sd.Ver)
+    [void]$R.Add("     magic vivo " + $sd.MagicVivo + " | magic del sorgente " + $sd.MagicSrc + " | rischio " + $sd.Risk + "% | commento '" + $sd.Commento + "' | version attesa " + $sd.Ver)
+    if($sd.MagicSrc -ne $sd.MagicVivo){
+      [void]$R.Add("     >>> magic vivo DIVERSO dal default del sorgente: questa sedia e' un SECONDO")
+      [void]$R.Add("         grafico dello stesso EA, quindi la sua cella NON puo' essere quella dei")
+      [void]$R.Add("         default. La cella di R100 viene da un artefatto di DEPLOY, non dal sorgente.")
+    }
     [void]$R.Add("     magic della corsa: gemelle " + ($sd.Base+10) + "/" + ($sd.Base+11) + ", singola " + ($sd.Base+12) + " (blocco 78xxxx VERGINE)")
     [void]$R.Add("     esito: " + $sd.Esito + "   durata " + $sd.Minuti.ToString("0.0",$INV) + " min")
     [void]$R.Add("")

@@ -294,6 +294,29 @@ B esce **da due strumenti indipendenti**, e il referto **li stampa entrambi**.
 Non è un doppione: è **l'unico controllo incrociato che abbiamo sul metodo del
 criterio B**. Se divergono molto, è il metodo da guardare, non la sedia.
 
+### 3.6-bis 🔢 IL MAGIC DEL SORGENTE ≠ IL MAGIC VIVO, su due sedie
+
+_Difetto **trovato verificando la tabella contro i sorgenti prima di lanciare**,
+non dopo._
+
+Il gate di versione controlla che il `.mq5` scaricato dichiari il magic giusto —
+è il modo di dire "questo è il motore che credo". Ma su **due** sedie il magic
+**vivo** non è il default del sorgente, **e non è un errore**: è il segno che
+quella sedia è un **SECONDO grafico dello stesso EA**.
+
+| sedia | magic del sorgente | magic vivo | cosa vuol dire |
+|---|---|---|---|
+| **S02** `ABTG_MaxMinNotte` | `770401` | **`770402`** | `770401` è il **MAXMIN EURUSD**. `VIVAIO_ORO_DEPLOY.md` lo scrive in maiuscolo: _"MAI 770401 (è del MAXMIN EURUSD!)"_ |
+| **S03** `ABTG_PunteLarry` | `772301` | **`772343`** | è **LARRY ORO**, una delle sei sedie del vivaio R38/R39 |
+
+Col magic **vivo** dentro il gate, quelle due sedie **sarebbero morte al
+controllo su un sorgente perfettamente sano**. 👉 Il gate usa il **magic del
+sorgente**; il magic vivo resta **l'identità della sedia** (nome del file prova,
+riga del contratto, referto). **E dove i due differiscono il referto lo dice** —
+perché è anche **la ragione per cui quelle due celle non possono essere i
+default del sorgente**, ed è esattamente per questo che sono **MISURATE su un
+artefatto di deploy** (§2.2).
+
 ### 3.6 🏷️ I MAGIC
 
 Blocco **`78xxxx`**, **VERGINE**: verificato con una ricerca su tutto il repo
