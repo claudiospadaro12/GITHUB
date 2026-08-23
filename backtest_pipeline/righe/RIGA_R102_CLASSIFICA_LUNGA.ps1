@@ -122,7 +122,7 @@
 #
 #  QUANTO CI METTE: [STIMA] misurata in DURATA SIMULATA, che e' l'unita'
 #  che costa. Per sedia: PASSO 0 = 3 passate sulla finestra lunga
-#  (media ~24 anni) = ~72 anni-sedia; le sette finestre = COMUNE 17,5x2
+#  (media ~24 anni) = ~72 anni-sedia; le sei finestre = COMUNE 17,5x2
 #  + ORSO 0,83x2 + CROLLO 0,25x2 + TORO 1x2 + LATERALE 1x2 + 2008 0,5x2
 #  = ~42 anni-sedia. Totale ~114 per sedia, ~2.280 per venti sedie --
 #  contro gli ~886 di R100, che erano stimati 2-6 ore.

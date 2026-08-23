@@ -449,7 +449,7 @@ rubano la cache e i frame, e il risultato non si legge più.
 | pezzo | conto | anni-sedia |
 |---|---|---:|
 | PASSO 0 per sedia | 3 passate × finestra lunga (media ~24 anni) | **~72** |
-| le 7 finestre per sedia | COMUNE 17,5×2 + ORSO 0,83×2 + CROLLO 0,25×2 + TORO 1×2 + LATERALE 1×2 + 2008 0,5×2 | **~42** |
+| le 6 finestre per sedia | COMUNE 17,5×2 + ORSO 0,83×2 + CROLLO 0,25×2 + TORO 1×2 + LATERALE 1×2 + 2008 0,5×2 | **~42** |
 | **per sedia** | | **~114** |
 | **× 20 sedie** | | **~2.280** |
 
@@ -486,7 +486,7 @@ l'ultimo.
 | pezzo | rilancio liscio della stessa riga | quanto pesa |
 |---|---|---|
 | **PASSO 0** — singola + 2 gemelle sulla finestra lunga | **SI RIFÀ, per ogni sedia della lista** | ~72 anni-sedia = **~63%** |
-| le **7 finestre** col CSV già presente | saltate e dichiarate (1 PROBLEMA per ognuna, con la data del file) | ~42 anni-sedia = **~37%** |
+| le **6 finestre** col CSV già presente | saltate e dichiarate (1 PROBLEMA per ognuna, con la data del file) | ~42 anni-sedia = **~37%** |
 
 Ed è **voluto**: la peggior giornata e la spina dorsale si leggono dal report
 `.htm`, che sta nella **sosta**, e la sosta **si svuota a ogni giro**
