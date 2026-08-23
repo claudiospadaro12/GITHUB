@@ -1,0 +1,189 @@
+# =====================================================================
+#  R102 -- C03: ABTG_BreakingBand su AUDUSD H1
+#  LA CLASSIFICA LUNGA -- la finestra PIU' LUNGA che il broker permette
+#  su questo simbolo: 1993.04.26 -> 2026.06.30
+#  Criteri: backtest_pipeline\risultati_archivio\R102_CRITERI.md
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_BreakingBand.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : deploy_vivaio_bb.ps1 (preset VIVAIO_BB_AUDUSD)
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  LA DATA @DAQUANDO: MISURATA dalla sonda del 17/08 (PrimaDataTF su H1,
+#  215D85D7_ABTG_InfoBroker.csv). NON e' una scelta e non e' un ricordo.
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R102 par. 3):
+#    A. profitto / PF / DD / n sulla FINESTRA LUNGA -> [ROBUSTEZZA]
+#    B. gli stessi sulla FINESTRA COMUNE 2009.01.01 -> 2026.06.30, che
+#       e' l'UNICA colonna in cui le sedie sono confrontabili fra loro
+#    C. gli stessi dentro le QUATTRO finestre di regime di casa
+#    D. la PEGGIOR GIORNATA in % (muro prop giornaliero 5%) -> [RISCHIO]
+#    E. la spina dorsale ANNO PER ANNO (n e netto), che e' la risposta
+#       letterale alla domanda di Claudio del 23/08:
+#       "con 10 anni di storico avrebbe fatto lo stesso?"
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08): il VECCHIO giudica il RISCHIO, il
+#      RECENTE giudica il MERITO. Il profitto della finestra vecchia
+#      descrive la ROBUSTEZZA, non il merito della sedia.
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su vent'anni NON ESISTONO. Il DD che esce e' un LIMITE
+#  INFERIORE del rischio; il profitto che esce e' una STIMA DEL LORDO
+#  (spread corrente, nessuno slippage, riempimenti ideali) -- MAI
+#  un guadagno promesso.
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16385            CELLA VIVA (artefatto di deploy)
+#    InpBBPeriod            20               default sorgente
+#    InpBBDev               2.0              default sorgente
+#    InpStdPeriod           20               default sorgente
+#    InpStdSmaPeriod        50               default sorgente
+#    InpAtrPeriod           14               default sorgente
+#    InpPatternMode         1                CELLA VIVA (artefatto di deploy)
+#    InpBulgeWidthMult      1.35             CELLA VIVA (artefatto di deploy)
+#    InpBulgeRefBars        20               default sorgente
+#    InpBulgeMinBars        3                default sorgente
+#    InpBulgeMaxBars        20               default sorgente
+#    InpBulgeMinImpBars     1                default sorgente
+#    InpBulgeCandleMaxATR   0.0              default sorgente
+#    InpBulgeNetMoveATR     1.0              CELLA VIVA (artefatto di deploy)
+#    InpBulgeMedianDistPct  0.75             default sorgente
+#    InpBulgeEndMode        1                default sorgente
+#    InpBulgeDirMode        1                default sorgente
+#    InpImpulseATR          1.5              default sorgente
+#    InpRientroMaxATR       1.5              default sorgente
+#    InpInvViolentBars      3                default sorgente
+#    InpZigZagATR           1.5              default sorgente
+#    InpDeepSpikeATR        1.5              default sorgente
+#    InpPostATRRef          1                default sorgente
+#    InpBandRidingMaxBars   20               default sorgente
+#    InpPostBulgeMaxBars    30               default sorgente
+#    InpReinflateTolPct     1.05             default sorgente
+#    InpUseShadowFilter     false            default sorgente
+#    InpShadowBodyMult      1.5              default sorgente
+#    InpUseRangeReduction   false            default sorgente
+#    InpRangeReductionPct   30.0             default sorgente
+#    InpContNoImpulseBandReturn false            default sorgente
+#    InpNarrowBars          2                default sorgente
+#    InpStdDownMode         0                default sorgente
+#    InpFlatSlopeATR        0.05             default sorgente
+#    InpSlopeSource         0                default sorgente
+#    InpRetestBufferATR     0.15             default sorgente
+#    InpContRequireNarrow   true             default sorgente
+#    InpContRequireStdDown  true             default sorgente
+#    InpUseReversalCandle   false            default sorgente
+#    InpRevBodyMaxPct       33.0             default sorgente
+#    InpRevShadowMinPct     50.0             default sorgente
+#    InpMinSolidita         0.0              default sorgente
+#    InpSL_ATRmult          3.0              default sorgente
+#    InpTPMode              0                CELLA VIVA (artefatto di deploy)
+#    InpTP1Pct              50.0             default sorgente
+#    InpTPRefreshBars       1                default sorgente
+#    InpBEatATR             1.0              default sorgente
+#    InpBEMode              0                default sorgente
+#    InpMinTPatATR          0.0              default sorgente
+#    InpMinRR               0.0              default sorgente
+#    InpUseCongestionFilter false            default sorgente
+#    InpCongBars            15               default sorgente
+#    InpCongCSMin           4                default sorgente
+#    InpCongCDAStdBars      10               default sorgente
+#    InpCongWidthDropPct    15.0             default sorgente
+#    InpCongLateralATR      1.0              default sorgente
+#    InpRiskPercent         1.0              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpMaxPositions        1                default sorgente
+#    InpMaxTradesPerDay     0                default sorgente
+#    InpUseNewsFilter       false            default sorgente
+#    InpNewsFile            'abtg_news.csv'  default sorgente
+#    InpNewsMinImpact       3                default sorgente
+#    InpNewsBeforeMin       60               default sorgente
+#    InpNewsAfterMin        30               default sorgente
+#    InpNewsShiftMinutes    0                default sorgente
+#    InpNewsCurrencies      ''               default sorgente
+#    InpComment             'BB AUDUSD'      commento vivo (censimento .chr 23/08 15:49)
+#    InpMagic               790310/790311    coppia VERGINE 79xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                default sorgente
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+# =====================================================================
+
+@SIMBOLO  AUDUSD
+@PERIODO  H1
+@DAQUANDO 1993.04.26
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpStdPeriod=20||20||0||20||N
+InpStdSmaPeriod=50||50||0||50||N
+InpAtrPeriod=14||14||0||14||N
+InpPatternMode=1||1||0||1||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeRefBars=20||20||0||20||N
+InpBulgeMinBars=3||3||0||3||N
+InpBulgeMaxBars=20||20||0||20||N
+InpBulgeMinImpBars=1||1||0||1||N
+InpBulgeCandleMaxATR=0.0||0.0||0||0.0||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+InpBulgeMedianDistPct=0.75||0.75||0||0.75||N
+InpBulgeEndMode=1||1||0||1||N
+InpBulgeDirMode=1||1||0||1||N
+InpImpulseATR=1.5||1.5||0||1.5||N
+InpRientroMaxATR=1.5||1.5||0||1.5||N
+InpInvViolentBars=3||3||0||3||N
+InpZigZagATR=1.5||1.5||0||1.5||N
+InpDeepSpikeATR=1.5||1.5||0||1.5||N
+InpPostATRRef=1||1||0||1||N
+InpBandRidingMaxBars=20||20||0||20||N
+InpPostBulgeMaxBars=30||30||0||30||N
+InpReinflateTolPct=1.05||1.05||0||1.05||N
+InpUseShadowFilter=false||false||0||false||N
+InpShadowBodyMult=1.5||1.5||0||1.5||N
+InpUseRangeReduction=false||false||0||false||N
+InpRangeReductionPct=30.0||30.0||0||30.0||N
+InpContNoImpulseBandReturn=false||false||0||false||N
+InpNarrowBars=2||2||0||2||N
+InpStdDownMode=0||0||0||0||N
+InpFlatSlopeATR=0.05||0.05||0||0.05||N
+InpSlopeSource=0||0||0||0||N
+InpRetestBufferATR=0.15||0.15||0||0.15||N
+InpContRequireNarrow=true||true||0||true||N
+InpContRequireStdDown=true||true||0||true||N
+InpUseReversalCandle=false||false||0||false||N
+InpRevBodyMaxPct=33.0||33.0||0||33.0||N
+InpRevShadowMinPct=50.0||50.0||0||50.0||N
+InpMinSolidita=0.0||0.0||0||0.0||N
+InpSL_ATRmult=3.0||3.0||0||3.0||N
+InpTPMode=0||0||0||0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpTPRefreshBars=1||1||0||1||N
+InpBEatATR=1.0||1.0||0||1.0||N
+InpBEMode=0||0||0||0||N
+InpMinTPatATR=0.0||0.0||0||0.0||N
+InpMinRR=0.0||0.0||0||0.0||N
+InpUseCongestionFilter=false||false||0||false||N
+InpCongBars=15||15||0||15||N
+InpCongCSMin=4||4||0||4||N
+InpCongCDAStdBars=10||10||0||10||N
+InpCongWidthDropPct=15.0||15.0||0||15.0||N
+InpCongLateralATR=1.0||1.0||0||1.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=BB AUDUSD
+InpMagic=790310||790310||1||790311||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

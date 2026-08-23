@@ -1,0 +1,87 @@
+# =====================================================================
+#  R102 -- C17: ABTG_PunteLarry su EURAUD H1
+#  LA CLASSIFICA LUNGA -- la finestra PIU' LUNGA che il broker permette
+#  su questo simbolo: 2004.06.16 -> 2026.06.30
+#  Criteri: backtest_pipeline\risultati_archivio\R102_CRITERI.md
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_PunteLarry.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : deploy_vivaio_larry.ps1 (preset VIVAIO_LARRY_EURAUD)
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  LA DATA @DAQUANDO: MISURATA dalla sonda del 17/08 (PrimaDataTF su H1,
+#  215D85D7_ABTG_InfoBroker.csv). NON e' una scelta e non e' un ricordo.
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R102 par. 3):
+#    A. profitto / PF / DD / n sulla FINESTRA LUNGA -> [ROBUSTEZZA]
+#    B. gli stessi sulla FINESTRA COMUNE 2009.01.01 -> 2026.06.30, che
+#       e' l'UNICA colonna in cui le sedie sono confrontabili fra loro
+#    C. gli stessi dentro le QUATTRO finestre di regime di casa
+#    D. la PEGGIOR GIORNATA in % (muro prop giornaliero 5%) -> [RISCHIO]
+#    E. la spina dorsale ANNO PER ANNO (n e netto), che e' la risposta
+#       letterale alla domanda di Claudio del 23/08:
+#       "con 10 anni di storico avrebbe fatto lo stesso?"
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08): il VECCHIO giudica il RISCHIO, il
+#      RECENTE giudica il MERITO. Il profitto della finestra vecchia
+#      descrive la ROBUSTEZZA, non il merito della sedia.
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su vent'anni NON ESISTONO. Il DD che esce e' un LIMITE
+#  INFERIORE del rischio; il profitto che esce e' una STIMA DEL LORDO
+#  (spread corrente, nessuno slippage, riempimenti ideali) -- MAI
+#  un guadagno promesso.
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16385            CELLA VIVA (artefatto di deploy)
+#    InpPatternMode         1                CELLA VIVA (artefatto di deploy)
+#    InpExitMode            1                CELLA VIVA (artefatto di deploy)
+#    InpTP_R                1.5              CELLA VIVA (artefatto di deploy)
+#    InpSLMode              0                CELLA VIVA (artefatto di deploy)
+#    InpSLBufferATR         0.1              CELLA VIVA (artefatto di deploy)
+#    InpAtrSlMult           1.5              CELLA VIVA (artefatto di deploy)
+#    InpAtrPeriodD1         14               CELLA VIVA (artefatto di deploy)
+#    InpSizeMinATR          0.0              CELLA VIVA (artefatto di deploy)
+#    InpSizeMaxATR          0.0              CELLA VIVA (artefatto di deploy)
+#    InpMaxDaysHold         5                CELLA VIVA (artefatto di deploy)
+#    InpAllowLong           true             CELLA VIVA (artefatto di deploy)
+#    InpAllowShort          true             CELLA VIVA (artefatto di deploy)
+#    InpMaxSpreadPts        300              CELLA VIVA (artefatto di deploy)
+#    InpEntryWindowBars     3                CELLA VIVA (artefatto di deploy)
+#    InpRiskPercent         1.0              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpMagic               791710/791711    coppia VERGINE 79xxxx (asse Y, gemelle)
+#    InpComment             'LARRY EURAUD'   commento vivo (censimento .chr 23/08 15:49)
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+# =====================================================================
+
+@SIMBOLO  EURAUD
+@PERIODO  H1
+@DAQUANDO 2004.06.16
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpPatternMode=1||1||0||1||N
+InpExitMode=1||1||0||1||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpSLMode=0||0||0||0||N
+InpSLBufferATR=0.1||0.1||0||0.1||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodD1=14||14||0||14||N
+InpSizeMinATR=0.0||0.0||0||0.0||N
+InpSizeMaxATR=0.0||0.0||0||0.0||N
+InpMaxDaysHold=5||5||0||5||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMagic=791710||791710||1||791711||Y
+InpComment=LARRY EURAUD
+InpVerbose=true||true||0||true||N

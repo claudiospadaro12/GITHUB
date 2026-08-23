@@ -1,0 +1,81 @@
+# =====================================================================
+#  R102 -- C11: ABTG_CostToCost su EURJPY H4
+#  LA CLASSIFICA LUNGA -- la finestra PIU' LUNGA che il broker permette
+#  su questo simbolo: 1993.04.26 -> 2026.06.30
+#  Criteri: backtest_pipeline\risultati_archivio\R102_CRITERI.md
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_CostToCost.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : deploy_vivaio_cost.ps1 (preset VIVAIO_COST_EURJPY)
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  LA DATA @DAQUANDO: MISURATA dalla sonda del 17/08 (PrimaDataTF su H1,
+#  215D85D7_ABTG_InfoBroker.csv). NON e' una scelta e non e' un ricordo.
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R102 par. 3):
+#    A. profitto / PF / DD / n sulla FINESTRA LUNGA -> [ROBUSTEZZA]
+#    B. gli stessi sulla FINESTRA COMUNE 2009.01.01 -> 2026.06.30, che
+#       e' l'UNICA colonna in cui le sedie sono confrontabili fra loro
+#    C. gli stessi dentro le QUATTRO finestre di regime di casa
+#    D. la PEGGIOR GIORNATA in % (muro prop giornaliero 5%) -> [RISCHIO]
+#    E. la spina dorsale ANNO PER ANNO (n e netto), che e' la risposta
+#       letterale alla domanda di Claudio del 23/08:
+#       "con 10 anni di storico avrebbe fatto lo stesso?"
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08): il VECCHIO giudica il RISCHIO, il
+#      RECENTE giudica il MERITO. Il profitto della finestra vecchia
+#      descrive la ROBUSTEZZA, non il merito della sedia.
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su vent'anni NON ESISTONO. Il DD che esce e' un LIMITE
+#  INFERIORE del rischio; il profitto che esce e' una STIMA DEL LORDO
+#  (spread corrente, nessuno slippage, riempimenti ideali) -- MAI
+#  un guadagno promesso.
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16388            CELLA VIVA (artefatto di deploy)
+#    InpExitMode            2                CELLA VIVA (artefatto di deploy)
+#    InpTP_R                1.5              CELLA VIVA (artefatto di deploy)
+#    InpSLBufferATR         0.2              CELLA VIVA (artefatto di deploy)
+#    InpAtrPeriod           14               CELLA VIVA (artefatto di deploy)
+#    InpMinRangeATR         0.0              CELLA VIVA (artefatto di deploy)
+#    InpMaxBarsHold         100              CELLA VIVA (artefatto di deploy)
+#    InpWarmupBars          500              CELLA VIVA (artefatto di deploy)
+#    InpAllowLong           true             CELLA VIVA (artefatto di deploy)
+#    InpAllowShort          false            CELLA VIVA (artefatto di deploy)
+#    InpMaxSpreadPts        300              CELLA VIVA (artefatto di deploy)
+#    InpEntryWindowBars     3                CELLA VIVA (artefatto di deploy)
+#    InpRiskPercent         1.0              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpMagic               791110/791111    coppia VERGINE 79xxxx (asse Y, gemelle)
+#    InpComment             'COST EURJPY'    commento vivo (censimento .chr 23/08 15:49)
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+# =====================================================================
+
+@SIMBOLO  EURJPY
+@PERIODO  H4
+@DAQUANDO 1993.04.26
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16388||16388||0||16388||N
+InpExitMode=2||2||0||2||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpSLBufferATR=0.2||0.2||0||0.2||N
+InpAtrPeriod=14||14||0||14||N
+InpMinRangeATR=0.0||0.0||0||0.0||N
+InpMaxBarsHold=100||100||0||100||N
+InpWarmupBars=500||500||0||500||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMagic=791110||791110||1||791111||Y
+InpComment=COST EURJPY
+InpVerbose=true||true||0||true||N

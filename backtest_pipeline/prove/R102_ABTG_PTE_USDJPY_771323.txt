@@ -1,0 +1,135 @@
+# =====================================================================
+#  R102 -- C06: ABTG_PTE su USDJPY H1
+#  LA CLASSIFICA LUNGA -- la finestra PIU' LUNGA che il broker permette
+#  su questo simbolo: 1971.01.03 -> 2026.06.30
+#  Criteri: backtest_pipeline\risultati_archivio\R102_CRITERI.md
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_PTE.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : deploy_vivaio_r23.ps1 (preset VIVAIO_PTE_USDJPY)
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  LA DATA @DAQUANDO: MISURATA dalla sonda del 17/08 (PrimaDataTF su H1,
+#  215D85D7_ABTG_InfoBroker.csv). NON e' una scelta e non e' un ricordo.
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R102 par. 3):
+#    A. profitto / PF / DD / n sulla FINESTRA LUNGA -> [ROBUSTEZZA]
+#    B. gli stessi sulla FINESTRA COMUNE 2009.01.01 -> 2026.06.30, che
+#       e' l'UNICA colonna in cui le sedie sono confrontabili fra loro
+#    C. gli stessi dentro le QUATTRO finestre di regime di casa
+#    D. la PEGGIOR GIORNATA in % (muro prop giornaliero 5%) -> [RISCHIO]
+#    E. la spina dorsale ANNO PER ANNO (n e netto), che e' la risposta
+#       letterale alla domanda di Claudio del 23/08:
+#       "con 10 anni di storico avrebbe fatto lo stesso?"
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08): il VECCHIO giudica il RISCHIO, il
+#      RECENTE giudica il MERITO. Il profitto della finestra vecchia
+#      descrive la ROBUSTEZZA, non il merito della sedia.
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su vent'anni NON ESISTONO. Il DD che esce e' un LIMITE
+#  INFERIORE del rischio; il profitto che esce e' una STIMA DEL LORDO
+#  (spread corrente, nessuno slippage, riempimenti ideali) -- MAI
+#  un guadagno promesso.
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16385            CELLA VIVA (artefatto di deploy)
+#    InpTmaSlow             56               default sorgente
+#    InpAtrSlow             100              default sorgente
+#    InpMultSlow            2.0              default sorgente
+#    InpTmaFast             14               default sorgente
+#    InpAtrFast             30               default sorgente
+#    InpMultFast            2.0              default sorgente
+#    InpDojiBodyMaxPct      10.0             default sorgente
+#    InpUseHeikinAshi       true             default sorgente
+#    InpRequireOutSlow      false            default sorgente
+#    InpRequireColorFlip    true             default sorgente
+#    InpAllowLong           true             default sorgente
+#    InpAllowShort          true             default sorgente
+#    InpUseEma200Bias       false            default sorgente
+#    InpEma200Period        200              default sorgente
+#    InpEma14Period         14               default sorgente
+#    InpUseWPR              false            default sorgente
+#    InpWprPeriod           14               default sorgente
+#    InpWprOB               -20.0            default sorgente
+#    InpWprOS               -80.0            default sorgente
+#    InpAtrExitPeriod       14               default sorgente
+#    InpSLbufferPips        5.0              default sorgente
+#    InpSLfromDoji          false            default sorgente
+#    InpTP1_ATRmult         0.5              CELLA VIVA (artefatto di deploy)
+#    InpTP1Pct              50               default sorgente
+#    InpBreakeven           true             default sorgente
+#    InpTP2_ATRmult         2.0              default sorgente
+#    InpUseTrailing         true             default sorgente
+#    InpRiskPercent         1.0              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpMaxTradesPerDay     0                default sorgente
+#    InpMaxPositions        1                default sorgente
+#    InpUseNewsFilter       false            default sorgente
+#    InpNewsFile            'abtg_news.csv'  default sorgente
+#    InpNewsMinImpact       3                default sorgente
+#    InpNewsBeforeMin       60               default sorgente
+#    InpNewsAfterMin        30               default sorgente
+#    InpNewsShiftMinutes    0                default sorgente
+#    InpNewsCurrencies      ''               default sorgente
+#    InpComment             'PTE USDJPY'     commento vivo (censimento .chr 23/08 15:49)
+#    InpMagic               790610/790611    coppia VERGINE 79xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                default sorgente
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+#    InpSlippagePts         0                default sorgente
+# =====================================================================
+
+@SIMBOLO  USDJPY
+@PERIODO  H1
+@DAQUANDO 1971.01.03
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpTmaSlow=56||56||0||56||N
+InpAtrSlow=100||100||0||100||N
+InpMultSlow=2.0||2.0||0||2.0||N
+InpTmaFast=14||14||0||14||N
+InpAtrFast=30||30||0||30||N
+InpMultFast=2.0||2.0||0||2.0||N
+InpDojiBodyMaxPct=10.0||10.0||0||10.0||N
+InpUseHeikinAshi=true||true||0||true||N
+InpRequireOutSlow=false||false||0||false||N
+InpRequireColorFlip=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseEma200Bias=false||false||0||false||N
+InpEma200Period=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpUseWPR=false||false||0||false||N
+InpWprPeriod=14||14||0||14||N
+InpWprOB=-20.0||-20.0||0||-20.0||N
+InpWprOS=-80.0||-80.0||0||-80.0||N
+InpAtrExitPeriod=14||14||0||14||N
+InpSLbufferPips=5.0||5.0||0||5.0||N
+InpSLfromDoji=false||false||0||false||N
+InpTP1_ATRmult=0.5||0.5||0||0.5||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_ATRmult=2.0||2.0||0||2.0||N
+InpUseTrailing=true||true||0||true||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpMaxPositions=1||1||0||1||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=PTE USDJPY
+InpMagic=790610||790610||1||790611||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpSlippagePts=0||0||0||0||N
