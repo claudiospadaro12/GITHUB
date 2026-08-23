@@ -7,6 +7,57 @@
 
 ---
 
+## 🧭 AGGIORNAMENTO 23/08 notte — **R102 «LA CLASSIFICA LUNGA» È PRONTO, IN BOZZA E IN CODA**
+
+- 🗣️ **Nasce da una domanda di Claudio in chat (23/08 sera)**: *"una classifica
+  di guadagno su 100k con più anni… Breaking Band mi hai detto 133k ma con 10
+  anni di storico avrebbe fatto lo stesso?"*
+- 📦 **Consegnato, pin `fe86b4255d7f97d3dab0b2bde806d878590b97ee`**:
+  - **20 file prova** `prove/R102_<ea>_<simbolo>_<magic>.txt`, generati dai
+    sorgenti (`prove/R102_GENERA_PROVE.py` agli atti);
+  - driver `righe/RIGA_R102_CLASSIFICA_LUNGA.ps1` (`MARCATORE_RIGA_R102_v1`) —
+    è la macchina di **R100 generalizzata ai simboli diversi**;
+  - criteri **IN BOZZA** `risultati_archivio/R102_CRITERI.md`;
+  - `righe/RIGA_R102_DA_MANDARE.md` con le righe pinnate.
+- 🛑 **DUE CANCELLI, e sono nel documento**: **(1)** i criteri **NON sono
+  firmati** — ci sono **sei decisioni di Claudio**, e due cambiano cosa gira;
+  **(2)** **R102 gira DOPO R101** (una macchina, un lavoro).
+- 🪑 **PERIMETRO: 20 sedie forex/argento, 12 simboli.** Fuori gli **indici**
+  (misurato: tutti a `2024.09.26`, verdetto `COMPLETO` = **il broker non ce
+  l'ha**) e fuori l'**oro** (già fatto: R99 + R100, si cita).
+- 🟢 **E una cosa buona**: il censimento `.chr` **del 23/08 15:49** esiste, e
+  **tutte e venti** le sedie hanno il **rischio vivo MISURATO**. In R102 **non
+  esiste il GRUPPO 2 di R100** (le sedie a taglia di riferimento).
+- ⚖️ **La cornice è l'Emendamento regola B**: *il VECCHIO giudica il RISCHIO, il
+  RECENTE il MERITO*. **R102 non promuove e non boccia niente**: produce una
+  classifica di **[ROBUSTEZZA]** e una di **[RISCHIO]**, con l'etichetta
+  stampata su ogni colonna. L'unica decisione meccanica resta il **`2x`** sul DD
+  promesso.
+- 🏆 **La classifica è ordinata sulla FINESTRA COMUNE `2009→2026`**, non sulle
+  finestre lunghe: quelle hanno lunghezze diverse (GBPUSD 33 anni, XAGUSD 17,6)
+  e ordinare su quelle darebbe **una classifica della profondità dello storico**.
+- 🦴 **La risposta letterale alla domanda è la SPINA DORSALE ANNO PER ANNO**
+  (anno · n · netto · cumulato), letta dai deal del report `.htm`.
+- 🧨 **E un rilievo nuovo, misurato: il GATE 4 (DENSITÀ).** La sonda dà `EURUSD`
+  e `USDJPY` dal **1971**, ma con **~6.800 barre D1 = ~26 anni**. **Non sono 55
+  anni di storico: sono serie RADE e ricostruite** (l'euro esiste dal
+  1999.01.04). Il gate conta gli anni solari a **zero operazioni** e obbliga il
+  referto a dire gli anni **operati**, non quelli nominali.
+- ⏳ **[STIMA] 6-16 ore di tester** (~2.280 anni-sedia contro gli ~886 di R100)
+  **più** il collo di bottiglia vero: **lo scarico M1 di dodici simboli**, mai
+  misurato. 👉 **Per questo si lancia A BLOCCHI** (`-SoloSedia C01,C02,C03`), e
+  il **primo blocco è Breaking Band**.
+- ✅ **Verificato eseguendo, prima dell'invio** (checklist 63): parse con `pwsh`
+  **0 errori**; **20/20** file prova gatati; **7/7** marcatori di log provati sul
+  campione **positivo e negativo**; `LeggiDeal` su due report finti (con e senza
+  la colonna `Commento`); `DDPromesso` sul file vero → **18 estratti, 2 ambigui
+  attesi** (le PTE GBPUSD, contratti scritti a due taglie).
+- ⛔ **NON MISURABILE**: `BREAKOUT_EA_JPY_v3` USDJPY — **il sorgente non esiste
+  nel repo**, e nel `.chr` del 23/08 la riga c'è ancora senza rischio leggibile.
+  È il **rilievo del 18/08, ancora aperto**.
+
+---
+
 ## 🏅 AGGIORNAMENTO 23/08 sera — **R100 È PRONTO AL LANCIO**: TUTTA la flotta ORO su 22 anni
 
 - ✍️ **Ordinato da Claudio in chat**: *"FAI PARTIRE R99 SULLE ALTRE SEDIE ORO"*
