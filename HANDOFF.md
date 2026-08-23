@@ -7,7 +7,32 @@
 
 ---
 
-## 🧭 AGGIORNAMENTO 23/08 notte (tardi) — **R101: DOW LETTO, DAX FERMATO DA UN FALSO ROSSO (checklist 64) — RIPRESA IN MANO A CLAUDIO**
+## 🏁 AGGIORNAMENTO 23/08 notte (chiusura) — **R101 CHIUSO: UN SOLO CANDIDATO (02_volumi), CELLE VIVE CONFERMATE**
+
+- 📦 Zip SOLODAX arrivato (23:14, dopo la ripresa post-falso-rosso). **G0
+  riprodotto su ENTRAMBE le famiglie** (DAX: PF 1.397 vs 1.400 in tolleranza,
+  DD esatto; n entra agli atti: IS 175/OOS 270). Referto CHIUSO:
+  `risultati_archivio/R101_REFERTO.md`.
+- 🟢 **UNICO candidato sopravvissuto a G1+G2+G3: `02_volumi`** (VOLUMI ≥1,5×
+  media20, dal corso): coerente su DUE mercati e DUE finestre — Dow OOS PF
+  1,543/DD 2,83 (viva 1,270/4,39), DAX OOS PF 1,550/DD 4,63 (viva 1,397/7,23).
+  Prezzo: metà campione e profitto assoluto giù (−1.584€ Dow, −8.706€ DAX
+  OOS). Onestà scritte: campione filtrato sub-150, un solo regime, NON è
+  affiancabile (sottoinsieme dei trade → solo SOSTITUZIONE con firma).
+  **G5: niente promosso, forward intatto.** Prossimo passo se Claudio vuole:
+  prova di regime sul gemello volumi → firma di sostituzione.
+- ❌ G3 ha ucciso `06_correlazione` (Dow peggio / DAX meglio — lo scenario
+  R46); `05_supertrend3` e l'EMA sul DAX cadono per RIBALTONE IS/OOS
+  (coerente sui due mercati → dipendenza da regime, lezione R98 doppia);
+  `08_tondi` COSTA su entrambi; `03_atr` filtro NULLO al centesimo su
+  entrambi; `09_corso_pieno` NON MISURABILE (n 26 e 28 < 30, previsto per
+  iscritto). **01: la cella viva Dow esce CONFERMATA** (senza EMA H4 l'IS
+  perde −2.274€).
+- 🛠️ Il falso rosso della prima corsa = **checklist 64**; nella stessa serata
+  il verificatore ha preso la **65** su R102 prima dell'invio. R102: righe
+  DEFINITIVE al pin `7aa83fd`, PASS doppio, coda aperta ora che R101 è chiuso.
+
+## 🧭 (storico) 23/08 notte (tardi) — R101: DOW letto, DAX fermato dal falso rosso (checklist 64), ripresa consegnata
 
 - 📦 Zip della corsa arrivato (`R101_ABLAZIONE_CORSA_20260823_2159.zip`).
   **G0 DOW: RIPRODOTTO AL CENTESIMO** (PF 1.270 · DD 4.39 · n 130). Le 5 celle
