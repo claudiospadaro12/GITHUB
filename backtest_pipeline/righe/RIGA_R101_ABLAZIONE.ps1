@@ -228,7 +228,13 @@ $LimiteG2 = "2024.12.31"
 #      - Ora* : ORA SERVER. Server BCM = ora italiana - 1, e per gli
 #        indici e' MISURATO sugli orologi del corso (4DOC par. 2.2).
 # =====================================================================
-function F($id,$ea,$ver,$sym,$magicSrc,$righe,$oraH,$oraM,$pf,$dd,$n,$fonte){
+# >>> CHECKLIST 64: $n E' TIPIZZATO [int]. Senza il tipo, l'argomento
+#     posizionale -1 arriva come STRINGA "-1", e "stringa -gt 0" e' un
+#     confronto di STRINGHE culture-aware: su Windows PowerShell 5.1 (NLS)
+#     il trattino e' ignorabile, quindi "-1" -gt 0 e' VERO sul PC di
+#     backtest e FALSO sul pwsh/Linux del verificatore. E' il difetto che
+#     il 23/08 ha fermato la famiglia DAX al gate G0 con metro riprodotto.
+function F($id,$ea,$ver,$sym,$magicSrc,$righe,$oraH,$oraM,[double]$pf,[double]$dd,[int]$n,$fonte){
   return [pscustomobject]@{
     Id=$id; Ea=$ea; Ver=$ver; Sym=$sym; MagicSrc=$magicSrc; RigheVive=$righe;
     OraH=$oraH; OraM=$oraM; PfAtti=$pf; DdAtti=$dd; NAtti=$n; Fonte=$fonte;
@@ -1030,7 +1036,7 @@ foreach($c in $Ordinati){
         #      denominatore mancante.
         if([math]::Abs($c.PfOOS - $fam.PfAtti) -gt 0.01){ [void]$guai.Add("PF OOS " + (Fmt3 $c.PfOOS) + " contro " + $fam.PfAtti.ToString("0.000",$INV) + " agli atti") }
         if([math]::Abs($c.DdOOS - $fam.DdAtti) -gt 0.10){ [void]$guai.Add("DD OOS " + (Fmt2 $c.DdOOS) + "% contro " + $fam.DdAtti.ToString("0.00",$INV) + "% agli atti") }
-        if($fam.NAtti -gt 0 -and $c.NOOS -ne $fam.NAtti){ [void]$guai.Add("n OOS " + $c.NOOS + " contro " + $fam.NAtti + " agli atti") }
+        if([int]$fam.NAtti -gt 0 -and [int]$c.NOOS -ne [int]$fam.NAtti){ [void]$guai.Add("n OOS " + $c.NOOS + " contro " + $fam.NAtti + " agli atti") }
       }
       if($guai.Count -gt 0){
         $fam.Metro = "NON RIPRODOTTO -- " + ($guai -join " ; ")
@@ -1182,7 +1188,7 @@ try{
   [void]$R.Add("--- IL GATE G0: LA CELLA VIVA SI RIPRODUCE? (criteri par. 5) ---")
   foreach($fam in $FamLavoro){
     [void]$R.Add("  " + $fam.Id + " (" + $fam.Ea + " / " + $fam.Sym + ", magic vivo " + $fam.MagicSrc + ")")
-    [void]$R.Add("     atteso agli atti : PF " + $fam.PfAtti.ToString("0.000",$INV) + " | DD " + $fam.DdAtti.ToString("0.00",$INV) + "% | n " + $(if($fam.NAtti -gt 0){ "" + $fam.NAtti } else { "NON AGLI ATTI (gate sul n NON applicato)" }))
+    [void]$R.Add("     atteso agli atti : PF " + $fam.PfAtti.ToString("0.000",$INV) + " | DD " + $fam.DdAtti.ToString("0.00",$INV) + "% | n " + $(if([int]$fam.NAtti -gt 0){ "" + $fam.NAtti } else { "NON AGLI ATTI (gate sul n NON applicato)" }))
     [void]$R.Add("     misurato adesso  : PF " + (Fmt3 $fam.PfOOS) + " | DD " + (Fmt2 $fam.DdOOS) + "% | n " + $fam.NOOS)
     [void]$R.Add("     gemelli          : " + $fam.Gemelli)
     [void]$R.Add("     VERDETTO G0      : " + $fam.Metro)

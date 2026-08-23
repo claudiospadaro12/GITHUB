@@ -2958,3 +2958,44 @@ che questa checklist esiste per uccidere PRIMA dell'invio.
 > l'intestazione VERA dell'OPTFRAME: `1.27013` letto `1,27013` (non `127013`),
 > colonne ignote -> `null`, una riga sola -> `NON VALIDO`. Un parse pulito dice
 > solo che il file **si legge**; l'esecuzione dice che **fa quello che promette**.
+
+## 64. I NUMERI NEGATIVI POSIZIONALI SONO STRINGHE, E "STRINGA -gt 0" MENTE SOLO SU WINDOWS (pagato il 23/08, corsa R101)
+
+**Il fatto.** Nella corsa vera di R101 la famiglia DAX si e' fermata al gate
+G0 con verdetto `NON RIPRODOTTO -- n OOS 270 contro -1 agli atti` — ma il
+`-1` era il SENTINELLA "n non agli atti" e il gate sul n aveva la guardia
+`if($fam.NAtti -gt 0 -and ...)` scritta apposta per saltarlo. Il metro DAX
+aveva RIPRODOTTO PF e DD (1.397 vs 1.400 con tolleranza 0.01, DD 7.23
+esatto): nove gradini non sono partiti per un confronto che non doveva
+nemmeno esistere.
+
+**Le DUE cause, tutte e due necessarie:**
+1. **Un argomento posizionale `-1` a una funzione con parametri NON tipizzati
+   arriva come STRINGA `"-1"`, non come intero.** `F "DAX" ... 7.23 -1 "..."`
+   -> `$n` e' `[string]"-1"`. I positivi (`130`) arrivano interi; SOLO i
+   negativi diventano stringhe.
+2. **`"stringa" -gt 0` e' un confronto di STRINGHE culture-aware** (il RHS
+   viene convertito a stringa, non il LHS a numero). E su .NET il risultato
+   dipende dal SISTEMA: con NLS (Windows PowerShell 5.1, il PC di backtest)
+   il trattino e' un carattere IGNORABILE al peso primario, quindi
+   `"-1" -gt "0"` confronta `"1"` con `"0"` -> **VERO**. Con ICU
+   (pwsh/Linux, dove gira il verificatore) -> **FALSO**.
+
+**Perche' il verificatore non l'ha visto:** l'aveva eseguito davvero — su
+pwsh/Linux, dove il difetto NON si manifesta. E' la prima classe di difetto
+che passa un'esecuzione REALE del verificatore e cade solo sull'OS di
+destinazione.
+
+**Le regole:**
+1. **Ogni parametro numerico di funzione si TIPIZZA** (`[int]$n`,
+   `[double]$pf`): il tipo al parametro converte qualunque cosa arrivi.
+2. **Ogni confronto con un sentinella numerico si CASTA sul posto**
+   (`[int]$x -gt 0`), anche se "dovrebbe" essere gia' un numero.
+3. **Grep di partenza** sui driver:
+   `grep -nE '\$[A-Za-z.]+ -(gt|lt|ge|le|eq|ne) [0-9-]' file.ps1` — ogni
+   hit dove il LHS puo' venire da un argomento posizionale, da un CSV o da
+   una property non tipizzata e' un sospetto.
+4. **Per il verificatore:** quando un confronto ha un LHS di tipo incerto,
+   la prova non e' "l'ho eseguito e va": e' stampare
+   `$x.GetType().Name` nel punto incriminato. Il tipo e' il fatto;
+   l'esito del confronto su Linux non trasferisce a Windows.
