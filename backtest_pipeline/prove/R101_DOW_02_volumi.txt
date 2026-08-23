@@ -126,7 +126,7 @@ InpAtrFilterBars=20||20||0||20||N
 InpAtrFilterMult=1.0||1.0||0||1.0||N
 InpConfirmMode=0||0||0||0||N
 InpMaxSpread=0||0||0||0||N
-InpVerbose=0||0||0||0||N
+InpVerbose=1||1||0||1||N
 
 # --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
 InpMagic=773320||773320||1||773321||Y
