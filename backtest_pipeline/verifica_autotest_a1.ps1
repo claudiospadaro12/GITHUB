@@ -89,11 +89,11 @@ if (-not ($okVer -and $okMagic -and $okAtst)) {
   exit 1
 }
 $incTesto = Get-Content -LiteralPath $destInc -Raw
-if ($incTesto -notmatch 'ABTG_PausaGuardian\s+v1\.30') {
-  Write-Host "L'include scaricato NON e' la v1.30 attesa: mi fermo." -ForegroundColor Red
+if ($incTesto -notmatch 'ABTG_PausaGuardian\s+v1\.40') {
+  Write-Host "L'include scaricato NON e' la v1.40 attesa: mi fermo." -ForegroundColor Red
   exit 1
 }
-Write-Host "Sorgenti scaricati e controllati (EA v1.00 magic 772800, include v1.30)." -ForegroundColor Green
+Write-Host "Sorgenti scaricati e controllati (EA v1.00 magic 772800, include v1.40)." -ForegroundColor Green
 
 # --- compilo (invocazione DIRETTA, mai Start-Process: bug pagato 22/08)
 $logCompile = [System.IO.Path]::ChangeExtension($destEa, ".log")

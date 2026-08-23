@@ -1,7 +1,7 @@
 # =====================================================================
 #  verifica_autotest_guardian.ps1 -- verifica AUTOMATICA dell'autotest
-#  di ABTG_PausaGuardian.mqh (freno P1 v1.30) senza toccare a mano
-#  MetaEditor o lo Strategy Tester.
+#  di ABTG_PausaGuardian.mqh (freno P1 + stop S1, v1.40) senza toccare
+#  a mano MetaEditor o lo Strategy Tester.
 #  MARCATORE-VERSIONE-SCRIPT: FAIL_TRIPLA_STELLA_v2
 #
 #  PERCHE' ESISTE (22/08/2026): Claudio ha girato l'autotest a mano e
@@ -26,6 +26,14 @@
 #  pulizia della cache del tester, e uccisione mirata del SOLO
 #  processo lanciato da questo script (mai uno spazzolone su tutti i
 #  terminal64 -- ce ne puo' essere un altro aperto, es. il -V3/100k).
+#
+#  AGGIORNAMENTO 23/08/2026 (S1): l'include e' passato a v1.40 (stop a
+#  OBIETTIVO RAGGIUNTO). Qui sono cambiate tre cose e basta: il pin di
+#  versione (1.30 -> 1.40), un gate nuovo che pretende di vedere anche il
+#  blocco "STOP S1" nel log, e il numero di casi ATTESI stampato a video
+#  (75 per passata = 19 B1/C1 + 26 P1 + 30 S1). Il conteggio resta
+#  INFORMATIVO e non fa fallire il gate: il verdetto fatale e' sempre
+#  "*** FAIL ***" oppure zero righe lette.
 #
 #  PRETENDE MT5 CHIUSO (compila E lancia un terminale).
 #
@@ -94,8 +102,8 @@ $incTesto = Get-Content -LiteralPath $destInc -Raw
 $verIncM = [regex]::Match($incTesto, 'ABTG_PausaGuardian\s+v([0-9.]+)\s*--\s*nucleo puro')
 $verInc = if ($verIncM.Success) { $verIncM.Groups[1].Value } else { "?" }
 Write-Host ("Sorgente scaricato: ABTG_PausaGuardian.mqh dichiara v" + $verInc) -ForegroundColor Gray
-if ($verInc -ne "1.30") {
-  Write-Host ("SCARICATA LA VERSIONE SBAGLIATA: v" + $verInc + " invece di v1.30 (cache del CDN? aspetta un minuto e rilancia). NON proseguo.") -ForegroundColor Red
+if ($verInc -ne "1.40") {
+  Write-Host ("SCARICATA LA VERSIONE SBAGLIATA: v" + $verInc + " invece di v1.40 (cache del CDN? aspetta un minuto e rilancia). NON proseguo.") -ForegroundColor Red
   exit 1
 }
 
@@ -263,13 +271,16 @@ if ($righeAutotest.Count -eq 0) {
 # intercettato un fallimento vero.
 $fallite = @($righeAutotest | Where-Object { $_ -cmatch '\*\*\*\s*FAIL\s*\*\*\*' })
 $passate = @($righeAutotest | Where-Object { $_.TrimEnd() -cmatch 'PASS$' })
-$haV130  = @($righeAutotest | Where-Object { $_ -match "v1\.30" }).Count -gt 0
+$haV140  = @($righeAutotest | Where-Object { $_ -match "v1\.40" }).Count -gt 0
 $haP1    = @($righeAutotest | Where-Object { $_ -match "FRENO P1" }).Count -gt 0
+$haS1    = @($righeAutotest | Where-Object { $_ -match "STOP S1" }).Count -gt 0
 
 Write-Host ""
 Write-Host ("casi PASS trovati            : " + $passate.Count) -ForegroundColor (@{$true="Green";$false="Red"}[$passate.Count -gt 0])
-Write-Host ("versione v1.30 vista nel log : " + $haV130) -ForegroundColor (@{$true="Green";$false="Red"}[$haV130])
+Write-Host ("versione v1.40 vista nel log : " + $haV140) -ForegroundColor (@{$true="Green";$false="Red"}[$haV140])
 Write-Host ("blocco FRENO P1 visto        : " + $haP1)   -ForegroundColor (@{$true="Green";$false="Red"}[$haP1])
+Write-Host ("blocco STOP S1 visto         : " + $haS1)   -ForegroundColor (@{$true="Green";$false="Red"}[$haS1])
+Write-Host ("casi attesi nel sorgente     : 75 (19 B1/C1 + 26 P1 + 30 S1) per passata") -ForegroundColor Gray
 Write-Host ("righe *** FAIL ***           : " + $fallite.Count) -ForegroundColor (@{$true="Red";$false="Green"}[$fallite.Count -gt 0])
 if ($passate.Count -eq 0 -and $righeAutotest.Count -gt 0) {
   Write-Host "PARSER CIECO: righe [AUTOTEST] trovate ma nessun verdetto PASS riconosciuto - non fidarti di questo esito." -ForegroundColor Red
@@ -291,8 +302,10 @@ try {
   [void]$out.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss", $INV))
   [void]$out.Add("versione .mqh scaricata: " + $verInc)
   [void]$out.Add("casi PASS trovati: " + $passate.Count)
-  [void]$out.Add("v1.30 vista nel log: " + $haV130)
+  [void]$out.Add("v1.40 vista nel log: " + $haV140)
   [void]$out.Add("blocco FRENO P1 visto: " + $haP1)
+  [void]$out.Add("blocco STOP S1 visto: " + $haS1)
+  [void]$out.Add("casi attesi nel sorgente: 75 per passata (19 B1/C1 + 26 P1 + 30 S1)")
   [void]$out.Add("righe *** FAIL ***: " + $fallite.Count)
   [void]$out.Add("")
   foreach ($r in $righeAutotest) { [void]$out.Add($r) }
@@ -306,5 +319,5 @@ try {
   Write-Host "Mandami direttamente l'output qui sopra." -ForegroundColor Yellow
 }
 
-if ($righeAutotest.Count -eq 0 -or $passate.Count -eq 0 -or $fallite.Count -gt 0 -or -not $haV130 -or -not $haP1) { exit 1 }
+if ($righeAutotest.Count -eq 0 -or $passate.Count -eq 0 -or $fallite.Count -gt 0 -or -not $haV140 -or -not $haP1 -or -not $haS1) { exit 1 }
 exit 0
