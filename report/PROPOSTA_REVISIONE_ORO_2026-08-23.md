@@ -119,3 +119,11 @@ compare **DUE volte a 1.0** piu' una a 0.3 (alle 15:46 era una sola a 1.0).
 Possibile grafico ORB DUPLICATO comparso col salvataggio del profilo —
 classe di rischio del 29/07 (stesso segnale eseguito due volte, -235,84).
 DA VERIFICARE PRIMA DELL'APERTURA DI LUNEDI' (14:25 server).
+
+### Anomalia ORB: CHIUSA (23/08, sera)
+Verifica a vista di Claudio su ENTRAMBI i terminali (menu Finestra):
+**UN solo grafico ORB per terminale** — nessun duplicato vivo. La doppia
+riga a 1.0 nel censimento e' un artefatto dei .chr su disco (probabile
+residuo del riattacco del 22/08, file vecchio non ripulito), non un
+grafico attivo. Vigilanza residua: se lunedi' l'ORB piazzasse ordini
+doppi, si riapre qui — ma il controllo che conta (i grafici vivi) e' pulito.
