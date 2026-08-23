@@ -7,6 +7,39 @@
 
 ---
 
+## 🥇 AGGIORNAMENTO 23/08 — **R99 È PRONTO AL LANCIO**: l'ORO su 22 anni, la misura del RISCHIO
+
+- ✍️ **FIRMATO da Claudio in chat**: *"FIRMO R99, PARTIAMO CON L'ORO"*.
+  Criteri: `backtest_pipeline/risultati_archivio/R99_CRITERI.md` — promossi
+  **parola per parola** dall'header del file prova, a numeri mai visti.
+- 🎯 **La domanda**: la sedia `ABTG_SupertrendReversal_Ottimizzato` XAUUSD H4
+  ha un contratto firmato su **21 mesi**, e il broker sull'oro ha **22 anni**
+  (`2004.06.11`, MISURATO dalla sonda del 17/08). Il DD promesso non ha mai
+  visto né l'**ottobre 2008** né l'**aprile 2013**. **Emendamento regola B: il
+  VECCHIO giudica il RISCHIO** — nessuna promozione, nessuna bocciatura.
+- 📦 **Consegnato, pin `9ce568c`**:
+  - file prova **completato** `prove/R99_ORO_22ANNI_RISCHIO.txt` (45 righe
+    vive = 3 direttive + **42 input** della cella viva congelata);
+  - driver `righe/RIGA_R99_ORO_RISCHIO.ps1` (`MARCATORE_RIGA_R99_v1`);
+  - documento `righe/RIGA_R99_DA_MANDARE.md` con le **due righe** pinnate.
+- 🧲 **Magic VERGINI `7799xx`** (`779910/11` intera, `779912` singola,
+  `779920…779971` finestre): il magic vivo è `970901` e c'è la **collisione
+  `770901`** misurata il 22/08 — **nessuno dei due viene toccato**.
+- 🛠️ **Il fatto che comanda il disegno**: quell'EA **non esporta il
+  per-trade**. Quindi DD e `n` escono dall'**OptResults** di due passate
+  **gemelle**, la **prima operazione** da **due misure indipendenti** (log del
+  tester + report `.htm`) e la **peggior giornata** dai **deal del report**.
+- 🔴 **Il buco che si vedrà nel referto**: il **DD promesso NON È UN NUMERO**
+  (contratto 🟡 PARZIALE, *"a referto solo «basso», mai quantificato"*), quindi
+  il confronto **`2x` è NON CALCOLABILE** — e **non è un via libera**: è esso
+  stesso un rilievo della corsia RISCHIO. Il criterio firmato **non è stato
+  riaperto** (checklist 57: si dichiara la traduzione, in tre posti).
+- ⏭️ **Prossimo passo**: giro dal **verificatore** (in testa: **il `.ps1` non è
+  stato parsato**, qui non c'è PowerShell), poi le due righe a Claudio.
+  🚫 **Nessun backtest è stato eseguito qui.**
+
+---
+
 ## 🚀 AGGIORNAMENTO 22/08 notte — **R98 È PRONTO AL LANCIO** (criteri firmati ➜ riga eseguibile)
 
 - ✍️ **Criteri FIRMATI**: `backtest_pipeline/risultati_archivio/R98_CRITERI.md`
