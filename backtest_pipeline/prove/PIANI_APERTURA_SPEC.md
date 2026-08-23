@@ -169,7 +169,7 @@ piano Europeo. Confronto completo nella consegna gemella.
 | 6 | Timeframe | D1 tendenza · H4 spaccato · **H1 operativo** · M15 gestione; *"più i time frame sono alti, più i livelli sono stabili"* | [SLIDE 6] | 🟢 |
 | 7 | Correlazione (come regola d'ingresso) | *"l'spxusd è l'indice di riferimento americano che traina gli altri"* — nessuna condizione operativa | [SLIDE 8-9] | 🔴 **BUCO** |
 | 8 | Trigger | *"Tradando la rottura dei massimi o dei minimi, scendo di time frame. Non entriamo subito a mercato"* — QUALI massimi (TF, struttura) qui non è detto | [SLIDE 10] | 🟠 assunzione: i livelli H1 del piano gemello Nasdaq |
-| 9 | **Size divisa** | *"divido la size: sui massimi dove potrebbe andare a prendere la forza per ripartire e sulla **media a 14 periodi**, per entrare ad un prezzo migliore"* — proporzione MAI detta | [SLIDE 10] | 🟠 assunzione dichiarata: 50/50 |
+| 9 | **Size divisa** | *"divido la size: sui massimi dove potrebbe andare a prendere la forza per ripartire e sulla **media a 14 periodi**, per entrare ad un prezzo migliore"* — proporzione MAI detta nel testo, ma MISURATA dallo screenshot | [SLIDE 10] | ✅ MISURATA il 23/08 (analisi 4DOC, immagini): **1:2** (10 lotti a mercato + 20 lotti limit, ordini #61756700/#61756747). Correzione firmata da Claudio ("SI AD ENTRAMBE"). ⚠️ Bandiera B1: con stop unico il ciclo pesa ~2,5R |
 | 10 | Stop | *"Lo stop, lo metto **sotto ai minimi**"* (caso long; lo short è simmetrico [INFERITO]) | [SLIDE 10] | 🟠 quali minimi: assunzione = minimi della struttura rotta |
 | 11 | Correlazione (in gestione) | *"Verifico la correlazione con l'spxusd per capire se lasciar correre l'operazione o ridurre"* | [SLIDE 10] | 🔴 **BUCO** (discrezionale puro) |
 | 12 | Gestione attiva | *"Mi sposto lo stop per rischiare meno. Chiudo **metà posizione** e porto lo **stop in pari**"* — il QUANDO non è quantificato | [SLIDE 11] | 🟠 assunzione: al primo obiettivo (come piano Nasdaq) |
@@ -184,7 +184,7 @@ La **size divisa in due ingressi** (metà sul livello di rottura, metà in
 pullback sulla EMA14) è la caratteristica DISTINTIVA di questo piano — ed è
 l'unica regola dei 3 pptx **mai implementata né testata** in casa (audit 02/08,
 punto #20, dichiarato "bassa priorità"). Meccanizzabile con 2 assunzioni
-(proporzione 50/50; secondo ordine = limit sulla EMA14 H1 con scadenza).
+(proporzione **1:2** — misurata dallo screenshot [SLIDE 10], correzione del 23/08 firmata da Claudio; era assunta 50/50; secondo ordine = limit sulla EMA14 H1 con scadenza).
 
 ---
 
@@ -376,7 +376,7 @@ usa deve citarle:
 | A1 | "massimi/minimi precedenti" (Nasdaq) = **candela H1 precedente** l'apertura | NAS §4.2 riga 5 | già nel core (`RANGE_MODE=2`, `LEVEL_TF=H1`) |
 | A2 | Supertrend: **periodo ATR 10** | EU/AM/NAS | già nel core (`InpStAtrPeriod=10`) |
 | A3 | news 3 tori: finestra **±30 min** (nessun valore nei piani) | AM/NAS routine | `InpNewsBeforeMin/AfterMin` — da dichiarare nei test |
-| A4 | size divisa: **50/50**, secondo ordine limit su EMA14 H1 | AM §3.2 | ❌ non implementato |
+| A4 | size divisa: **1:2** (corretta il 23/08 da screenshot, era assunta 50/50), secondo ordine limit su EMA14 H1 | AM §3.2 + ANALISI_APERTURE_4DOC_2026-08-23 | ❌ non implementato |
 | A5 | parziale = **50%** ("dimezzando" lo dice solo il Nasdaq) | PDF §5.1/5.4 | già nel core (`InpTP1_ClosePct=50`) |
 | A6 | volumi di conferma: **media 20 barre, soglia +50%** | PDF §5.1-5.2 | già nel core (parametri nostri, non del piano) |
 | A7 | ATR di conferma: **ATR(14) ultima barra ≥ media ATR 20 barre** | PDF §5.1 | implementato 02/08 (parametri nostri) |
