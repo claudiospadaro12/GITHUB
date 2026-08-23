@@ -1,0 +1,143 @@
+# =====================================================================
+#  R100 -- S02: ABTG_MaxMinNotte su XAUUSD H2
+#  LA MISURA DEL RISCHIO DELLA FLOTTA ORO SU 22 ANNI (2004.06.11 -> 2026.06.30)
+#  Criteri: backtest_pipeline\risultati_archivio\R100_CRITERI.md
+#  -- estensione INVARIATA dei criteri FIRMATI di R99 il 23/08/2026,
+#     sedia per sedia, su ordine di Claudio del 23/08 ("FAI PARTIRE R99
+#     SULLE ALTRE SEDIE ORO").
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_MaxMinNotte.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  GRUPPO 1 -- SEDIA CENSITA: il rischio vivo e' MISURATO nel censimento .chr del
+#  19/08/2026 15:34 (risultati_archivio/censimento_rischio_2026-08-19_1534.txt).
+#  Il DD che esce e' alla taglia VIVA della sedia.
+#
+#  LA CELLA:
+#    InpUsaGuardian         true             default sorgente
+#    InpBoxStartHour        22               CELLA VIVA (artefatto di deploy)
+#    InpBoxStartMin         0                CELLA VIVA (artefatto di deploy)
+#    InpBoxEndHour          6                CELLA VIVA (artefatto di deploy)
+#    InpBoxEndMin           59               CELLA VIVA (artefatto di deploy)
+#    InpMinBoxPts           0                default sorgente
+#    InpMaxBoxPts           0                default sorgente
+#    InpPlaceHour           7                CELLA VIVA (artefatto di deploy)
+#    InpPlaceMin            0                CELLA VIVA (artefatto di deploy)
+#    InpEntryCutoffHour     9                CELLA VIVA (artefatto di deploy)
+#    InpEntryCutoffMin      30               CELLA VIVA (artefatto di deploy)
+#    InpCloseHour           17               default sorgente
+#    InpCloseMin            30               default sorgente
+#    InpCloseAtEnd          true             default sorgente
+#    InpOneTradePerDay      true             default sorgente
+#    InpPendingExpiryMin    90               default sorgente
+#    InpBufferPoints        250              CELLA VIVA (artefatto di deploy)
+#    InpAllowLong           true             default sorgente
+#    InpAllowShort          true             default sorgente
+#    InpSLMode              0                CELLA VIVA (artefatto di deploy)
+#    InpMgmtTF              16386            CELLA VIVA (artefatto di deploy)
+#    InpAtrPeriod           14               default sorgente
+#    InpAtrSLmult           1.5              default sorgente
+#    InpSLFixedPts          3000             default sorgente
+#    InpTP1_R               1.0              default sorgente
+#    InpTP1Pct              50               default sorgente
+#    InpBreakeven           true             default sorgente
+#    InpTP2_R               2.5              default sorgente
+#    InpTP2Pct              50               default sorgente
+#    InpUseEMA200Target     true             default sorgente
+#    InpEMA200Period        200              default sorgente
+#    InpTPfinal_R           4.0              default sorgente
+#    InpUseTrailing         true             default sorgente
+#    InpTrailAtrMult        2.0              default sorgente
+#    InpUseCorrelation      false            CELLA VIVA (artefatto di deploy)
+#    InpCorrSymbol          'SPXUSD'         default sorgente
+#    InpCorrTF              16385            default sorgente
+#    InpCorrEmaFast         14               default sorgente
+#    InpCorrEmaSlow         100              default sorgente
+#    InpRiskPercent         1.0              TAGLIA PINNATA dal criterio A
+#    InpUseNewsFilter       false            default sorgente
+#    InpNewsFile            'abtg_news.csv'  default sorgente
+#    InpNewsMinImpact       3                default sorgente
+#    InpNewsBeforeMin       30               default sorgente
+#    InpNewsAfterMin        30               default sorgente
+#    InpNewsShiftMinutes    0                default sorgente
+#    InpNewsCurrencies      ''               default sorgente
+#    InpNewsFlatten         true             default sorgente
+#    InpComment             'MAXMIN ORO'     commento della sedia viva
+#    InpMagic               780210/780211    coppia VERGINE 78xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                default sorgente
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+#
+#  I TRE NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R99 par. 3,
+#  estesi INVARIATI):
+#    A. DD massimo dell'equity su 2004.06.11 -> 2026.06.30 alla taglia
+#       di rischio dichiarata qui sotto
+#    B. la PEGGIOR GIORNATA in %  (il muro prop giornaliero e' 5%)
+#    C. il DD massimo dentro ciascuna delle QUATTRO finestre di regime
+#  E UNA SOLA DECISIONE MECCANICA: DD lungo > 2x il DD promesso in
+#  report/CONTRATTI_SEDIE.md -> REVISIONE (corsia RISCHIO, firma 18/08).
+#
+#  QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO
+#  (Emendamento regola B: il VECCHIO giudica il RISCHIO).
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su 22 anni NON ESISTONO. Il numero che esce e' un
+#  LIMITE INFERIORE del rischio, MAI UN PERMESSO.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H2
+@DAQUANDO 2004.06.11
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=22||22||0||22||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=6||6||0||6||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=9||9||0||9||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN ORO
+InpMagic=780210||780210||1||780211||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

@@ -1,0 +1,139 @@
+# =====================================================================
+#  R100 -- S10: ABTG_SupertrendInvert su XAUUSD H1
+#  LA MISURA DEL RISCHIO DELLA FLOTTA ORO SU 22 ANNI (2004.06.11 -> 2026.06.30)
+#  Criteri: backtest_pipeline\risultati_archivio\R100_CRITERI.md
+#  -- estensione INVARIATA dei criteri FIRMATI di R99 il 23/08/2026,
+#     sedia per sedia, su ordine di Claudio del 23/08 ("FAI PARTIRE R99
+#     SULLE ALTRE SEDIE ORO").
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_SupertrendInvert.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  GRUPPO 2 -- SEDIA NON CENSITA: e' dichiarata viva su XAUUSD in FLOTTA_ATTIVA.md
+#  (mappa dei 52 grafici del 02/08) ma NON compare in nessuno dei sette
+#  censimenti .chr del 17-19/08, e il censimento frequenza del 22/08 le
+#  misura ZERO trade nello statement 30/03->21/08.
+#  >>> IL SUO RISCHIO VIVO NON ESISTE COME MISURA. Qui e' pinnato a 1,00%
+#      come TAGLIA DI RIFERIMENTO DICHIARATA, non come taglia viva: il
+#      numero che esce e' un DD-per-1%, riscalabile linearmente
+#      [APPROSSIMATO, convenzione CONTRATTI_SEDIE par. COME LEGGERE I
+#      NUMERI punto 2] appena un censimento .chr misurera' il rischio
+#      vero. Il verdetto della corsia RISCHIO su questa sedia resta
+#      NON MISURABILE finche' quel censimento non esiste.
+#
+#  LA CELLA:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16385            default sorgente
+#    InpStMult              3.5              default sorgente
+#    InpStAtrPeriod         10               default sorgente
+#    InpRequireStrong       true             default sorgente
+#    InpEma50Period         50               default sorgente
+#    InpEma200Period        200              default sorgente
+#    InpAllowLong           true             default sorgente
+#    InpAllowShort          true             default sorgente
+#    InpUseADX              true             default sorgente
+#    InpAdxPeriod           14               default sorgente
+#    InpAdxMin              20.0             default sorgente
+#    InpAdxRising           true             default sorgente
+#    InpUseStoch            true             default sorgente
+#    InpStochK              14               default sorgente
+#    InpStochD              3                default sorgente
+#    InpStochSlow           3                default sorgente
+#    InpStochLongMin        40.0             default sorgente
+#    InpStochShortMax       60.0             default sorgente
+#    InpUseStochH4          false            default sorgente
+#    InpStochH4K            21               default sorgente
+#    InpUseExtensionFilter  true             default sorgente
+#    InpMaxExtAtr           2.0              default sorgente
+#    InpSLBufferPts         0                default sorgente
+#    InpTP1_ATRmult         1.0              default sorgente
+#    InpTP1Pct              50               default sorgente
+#    InpBreakeven           true             default sorgente
+#    InpExitOnOpposite      true             default sorgente
+#    InpTrailOnST           true             default sorgente
+#    InpRiskPercent         1.0              TAGLIA PINNATA dal criterio A
+#    InpMaxTradesPerDay     0                default sorgente
+#    InpMaxPositions        1                default sorgente
+#    InpUseTimeWindow       false            default sorgente
+#    InpStartHour           7                default sorgente
+#    InpEndHour             20               default sorgente
+#    InpUseNewsFilter       false            default sorgente
+#    InpNewsFile            'abtg_news.csv'  default sorgente
+#    InpNewsMinImpact       3                default sorgente
+#    InpNewsBeforeMin       30               default sorgente
+#    InpNewsAfterMin        30               default sorgente
+#    InpNewsShiftMinutes    0                default sorgente
+#    InpNewsCurrencies      ''               default sorgente
+#    InpComment             'STINVERT'       commento della sedia viva
+#    InpMagic               781010/781011    coppia VERGINE 78xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                default sorgente
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+#
+#  I TRE NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R99 par. 3,
+#  estesi INVARIATI):
+#    A. DD massimo dell'equity su 2004.06.11 -> 2026.06.30 alla taglia
+#       di rischio dichiarata qui sotto
+#    B. la PEGGIOR GIORNATA in %  (il muro prop giornaliero e' 5%)
+#    C. il DD massimo dentro ciascuna delle QUATTRO finestre di regime
+#  E UNA SOLA DECISIONE MECCANICA: DD lungo > 2x il DD promesso in
+#  report/CONTRATTI_SEDIE.md -> REVISIONE (corsia RISCHIO, firma 18/08).
+#
+#  QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO
+#  (Emendamento regola B: il VECCHIO giudica il RISCHIO).
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su 22 anni NON ESISTONO. Il numero che esce e' un
+#  LIMITE INFERIORE del rischio, MAI UN PERMESSO.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2004.06.11
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpStMult=3.5||3.5||0||3.5||N
+InpStAtrPeriod=10||10||0||10||N
+InpRequireStrong=true||true||0||true||N
+InpEma50Period=50||50||0||50||N
+InpEma200Period=200||200||0||200||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseADX=true||true||0||true||N
+InpAdxPeriod=14||14||0||14||N
+InpAdxMin=20.0||20.0||0||20.0||N
+InpAdxRising=true||true||0||true||N
+InpUseStoch=true||true||0||true||N
+InpStochK=14||14||0||14||N
+InpStochD=3||3||0||3||N
+InpStochSlow=3||3||0||3||N
+InpStochLongMin=40.0||40.0||0||40.0||N
+InpStochShortMax=60.0||60.0||0||60.0||N
+InpUseStochH4=false||false||0||false||N
+InpStochH4K=21||21||0||21||N
+InpUseExtensionFilter=true||true||0||true||N
+InpMaxExtAtr=2.0||2.0||0||2.0||N
+InpSLBufferPts=0||0||0||0||N
+InpTP1_ATRmult=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpExitOnOpposite=true||true||0||true||N
+InpTrailOnST=true||true||0||true||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpMaxPositions=1||1||0||1||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=7||7||0||7||N
+InpEndHour=20||20||0||20||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=STINVERT
+InpMagic=781010||781010||1||781011||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

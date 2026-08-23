@@ -1,0 +1,125 @@
+# =====================================================================
+#  R100 -- S01: ABTG_EMA200_Ottimizzato su XAUUSD H4
+#  LA MISURA DEL RISCHIO DELLA FLOTTA ORO SU 22 ANNI (2004.06.11 -> 2026.06.30)
+#  Criteri: backtest_pipeline\risultati_archivio\R100_CRITERI.md
+#  -- estensione INVARIATA dei criteri FIRMATI di R99 il 23/08/2026,
+#     sedia per sedia, su ordine di Claudio del 23/08 ("FAI PARTIRE R99
+#     SULLE ALTRE SEDIE ORO").
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_EMA200_Ottimizzato.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  GRUPPO 1 -- SEDIA CENSITA: il rischio vivo e' MISURATO nel censimento .chr del
+#  19/08/2026 15:34 (risultati_archivio/censimento_rischio_2026-08-19_1534.txt).
+#  Il DD che esce e' alla taglia VIVA della sedia.
+#
+#  LA CELLA:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16388            default sorgente
+#    InpEmaPeriod           200              default sorgente
+#    InpEma14Period         14               default sorgente
+#    InpAtrPeriod           14               default sorgente
+#    InpMinDistAtr          0.3              default sorgente
+#    InpMaxDistAtr          1.5              default sorgente
+#    InpUseEma14Bias        true             default sorgente
+#    InpAllowLong           true             default sorgente
+#    InpAllowShort          true             default sorgente
+#    InpUseAdrFilter        false            default sorgente
+#    InpAdrDays             50               default sorgente
+#    InpAdrDistMin          0.0              default sorgente
+#    InpAdrDistMax          0.8              default sorgente
+#    InpOrder1Atr           0.05             default sorgente
+#    InpOrder2Atr           0.60             default sorgente
+#    InpUseOrder2           true             default sorgente
+#    InpPendingExpiryBars   6                default sorgente
+#    InpSLatr               1.0              default sorgente
+#    InpMinRR               1.0              default sorgente
+#    InpTP_RR               2.0              default sorgente
+#    InpTP1_ATRmult         0.0              default sorgente
+#    InpTP1Pct              50               default sorgente
+#    InpBreakeven           true             default sorgente
+#    InpUseTrailing         true             default sorgente
+#    InpUseCutoff           false            default sorgente
+#    InpCutoffHour          19               default sorgente
+#    InpCutoffMin           0                default sorgente
+#    InpRiskPercent         1.0              TAGLIA PINNATA dal criterio A
+#    InpMaxTradesPerDay     0                default sorgente
+#    InpUseNewsFilter       false            default sorgente
+#    InpNewsFile            'abtg_news.csv'  default sorgente
+#    InpNewsMinImpact       3                default sorgente
+#    InpNewsBeforeMin       60               default sorgente
+#    InpNewsAfterMin        30               default sorgente
+#    InpNewsShiftMinutes    0                default sorgente
+#    InpNewsCurrencies      ''               default sorgente
+#    InpComment             'EMA200 OTT'     commento della sedia viva
+#    InpFridayClose         false            default sorgente
+#    InpFridayCloseHour     20               default sorgente
+#    InpMagic               780110/780111    coppia VERGINE 78xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                default sorgente
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+#
+#  I TRE NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R99 par. 3,
+#  estesi INVARIATI):
+#    A. DD massimo dell'equity su 2004.06.11 -> 2026.06.30 alla taglia
+#       di rischio dichiarata qui sotto
+#    B. la PEGGIOR GIORNATA in %  (il muro prop giornaliero e' 5%)
+#    C. il DD massimo dentro ciascuna delle QUATTRO finestre di regime
+#  E UNA SOLA DECISIONE MECCANICA: DD lungo > 2x il DD promesso in
+#  report/CONTRATTI_SEDIE.md -> REVISIONE (corsia RISCHIO, firma 18/08).
+#
+#  QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO
+#  (Emendamento regola B: il VECCHIO giudica il RISCHIO).
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su 22 anni NON ESISTONO. Il numero che esce e' un
+#  LIMITE INFERIORE del rischio, MAI UN PERMESSO.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2004.06.11
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.05||0.05||0||0.05||N
+InpOrder2Atr=0.60||0.60||0||0.60||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=EMA200 OTT
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMagic=780110||780110||1||780111||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

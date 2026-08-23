@@ -1,0 +1,79 @@
+# =====================================================================
+#  R100 -- S03: ABTG_PunteLarry su XAUUSD H1
+#  LA MISURA DEL RISCHIO DELLA FLOTTA ORO SU 22 ANNI (2004.06.11 -> 2026.06.30)
+#  Criteri: backtest_pipeline\risultati_archivio\R100_CRITERI.md
+#  -- estensione INVARIATA dei criteri FIRMATI di R99 il 23/08/2026,
+#     sedia per sedia, su ordine di Claudio del 23/08 ("FAI PARTIRE R99
+#     SULLE ALTRE SEDIE ORO").
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_PunteLarry.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  GRUPPO 1 -- SEDIA CENSITA: il rischio vivo e' MISURATO nel censimento .chr del
+#  19/08/2026 15:34 (risultati_archivio/censimento_rischio_2026-08-19_1534.txt).
+#  Il DD che esce e' alla taglia VIVA della sedia.
+#
+#  LA CELLA:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16385            CELLA VIVA (artefatto di deploy)
+#    InpPatternMode         0                CELLA VIVA (artefatto di deploy)
+#    InpExitMode            1                CELLA VIVA (artefatto di deploy)
+#    InpTP_R                1.5              CELLA VIVA (artefatto di deploy)
+#    InpSLMode              0                CELLA VIVA (artefatto di deploy)
+#    InpSLBufferATR         0.1              CELLA VIVA (artefatto di deploy)
+#    InpAtrSlMult           1.5              CELLA VIVA (artefatto di deploy)
+#    InpAtrPeriodD1         14               CELLA VIVA (artefatto di deploy)
+#    InpSizeMinATR          0.0              CELLA VIVA (artefatto di deploy)
+#    InpSizeMaxATR          0.0              CELLA VIVA (artefatto di deploy)
+#    InpMaxDaysHold         5                CELLA VIVA (artefatto di deploy)
+#    InpAllowLong           true             CELLA VIVA (artefatto di deploy)
+#    InpAllowShort          false            CELLA VIVA (artefatto di deploy)
+#    InpMaxSpreadPts        300              CELLA VIVA (artefatto di deploy)
+#    InpEntryWindowBars     3                CELLA VIVA (artefatto di deploy)
+#    InpRiskPercent         1.0              TAGLIA PINNATA dal criterio A
+#    InpMagic               780310/780311    coppia VERGINE 78xxxx (asse Y, gemelle)
+#    InpComment             'LARRY ORO'      commento della sedia viva
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+#
+#  I TRE NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R99 par. 3,
+#  estesi INVARIATI):
+#    A. DD massimo dell'equity su 2004.06.11 -> 2026.06.30 alla taglia
+#       di rischio dichiarata qui sotto
+#    B. la PEGGIOR GIORNATA in %  (il muro prop giornaliero e' 5%)
+#    C. il DD massimo dentro ciascuna delle QUATTRO finestre di regime
+#  E UNA SOLA DECISIONE MECCANICA: DD lungo > 2x il DD promesso in
+#  report/CONTRATTI_SEDIE.md -> REVISIONE (corsia RISCHIO, firma 18/08).
+#
+#  QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO
+#  (Emendamento regola B: il VECCHIO giudica il RISCHIO).
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su 22 anni NON ESISTONO. Il numero che esce e' un
+#  LIMITE INFERIORE del rischio, MAI UN PERMESSO.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2004.06.11
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpPatternMode=0||0||0||0||N
+InpExitMode=1||1||0||1||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpSLMode=0||0||0||0||N
+InpSLBufferATR=0.1||0.1||0||0.1||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodD1=14||14||0||14||N
+InpSizeMinATR=0.0||0.0||0||0.0||N
+InpSizeMaxATR=0.0||0.0||0||0.0||N
+InpMaxDaysHold=5||5||0||5||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMagic=780310||780310||1||780311||Y
+InpComment=LARRY ORO
+InpVerbose=true||true||0||true||N

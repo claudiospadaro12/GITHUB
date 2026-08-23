@@ -1,0 +1,165 @@
+# =====================================================================
+#  R100 -- S09: ABTG_GoldenCross su XAUUSD H1
+#  LA MISURA DEL RISCHIO DELLA FLOTTA ORO SU 22 ANNI (2004.06.11 -> 2026.06.30)
+#  Criteri: backtest_pipeline\risultati_archivio\R100_CRITERI.md
+#  -- estensione INVARIATA dei criteri FIRMATI di R99 il 23/08/2026,
+#     sedia per sedia, su ordine di Claudio del 23/08 ("FAI PARTIRE R99
+#     SULLE ALTRE SEDIE ORO").
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_GoldenCross.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  GRUPPO 2 -- SEDIA NON CENSITA: e' dichiarata viva su XAUUSD in FLOTTA_ATTIVA.md
+#  (mappa dei 52 grafici del 02/08) ma NON compare in nessuno dei sette
+#  censimenti .chr del 17-19/08, e il censimento frequenza del 22/08 le
+#  misura ZERO trade nello statement 30/03->21/08.
+#  >>> IL SUO RISCHIO VIVO NON ESISTE COME MISURA. Qui e' pinnato a 1,00%
+#      come TAGLIA DI RIFERIMENTO DICHIARATA, non come taglia viva: il
+#      numero che esce e' un DD-per-1%, riscalabile linearmente
+#      [APPROSSIMATO, convenzione CONTRATTI_SEDIE par. COME LEGGERE I
+#      NUMERI punto 2] appena un censimento .chr misurera' il rischio
+#      vero. Il verdetto della corsia RISCHIO su questa sedia resta
+#      NON MISURABILE finche' quel censimento non esiste.
+#
+#  LA CELLA:
+#    InpUsaGuardian         true             default sorgente
+#    InpTimeframe           16385            default sorgente
+#    InpEmaFast             9                default sorgente
+#    InpEmaMid              21               default sorgente
+#    InpEmaSlow             50               default sorgente
+#    InpEmaSlopeBars        3                default sorgente
+#    InpRequireAlignment    true             default sorgente
+#    InpCrossLookback       8                default sorgente
+#    InpHACount             3                default sorgente
+#    InpHAAutoCount         false            default sorgente
+#    InpHAWickRatio         0.30             default sorgente
+#    InpHABodyFactor        0.60             default sorgente
+#    InpUseBBExpand         false            default sorgente
+#    InpBBPeriod            20               default sorgente
+#    InpBBDev               2.0              default sorgente
+#    InpBBExpandBars        3                default sorgente
+#    InpBBExpandMult        1.05             default sorgente
+#    InpAdxPeriod           14               default sorgente
+#    InpAdxMin              20.0             default sorgente
+#    InpAdxRising           true             default sorgente
+#    InpRequireDI           true             default sorgente
+#    InpRequireAdxRising    false            default sorgente
+#    InpMaxDistATR          1.5              default sorgente
+#    InpMinRR               1.0              default sorgente
+#    InpMaxDistEma21ATR     0                default sorgente
+#    InpEntryMode           0                default sorgente
+#    InpPullbackRef         0                default sorgente
+#    InpPendingExpiryBars   3                default sorgente
+#    InpAllowLong           true             default sorgente
+#    InpAllowShort          true             default sorgente
+#    InpSLMode              0                default sorgente
+#    InpSwingLookback       10               default sorgente
+#    InpAtrPeriod           14               default sorgente
+#    InpAtrSLmult           1.5              default sorgente
+#    InpSLBufferPts         0                default sorgente
+#    InpTP_R                2.0              default sorgente
+#    InpPartialR            1.0              default sorgente
+#    InpPartialPct          50               default sorgente
+#    InpBreakeven           true             default sorgente
+#    InpTrailMode           0                default sorgente
+#    InpTrailAtrMult        2.0              default sorgente
+#    InpExitOnCross         true             default sorgente
+#    InpExitOnHAflip        false            default sorgente
+#    InpRiskPercent         1.0              TAGLIA PINNATA dal criterio A
+#    InpMaxTradesPerDay     2                default sorgente
+#    InpStopAfterLosses     2                default sorgente
+#    InpUseNewsFilter       false            default sorgente
+#    InpNewsFile            'abtg_news.csv'  default sorgente
+#    InpNewsMinImpact       3                default sorgente
+#    InpNewsBeforeMin       30               default sorgente
+#    InpNewsAfterMin        30               default sorgente
+#    InpNewsShiftMinutes    0                default sorgente
+#    InpNewsCurrencies      'USD'            default sorgente
+#    InpComment             'GOLDENCROSS'    commento della sedia viva
+#    InpFridayClose         false            default sorgente
+#    InpFridayCloseHour     20               default sorgente
+#    InpMagic               780910/780911    coppia VERGINE 78xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                default sorgente
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+#
+#  I TRE NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R99 par. 3,
+#  estesi INVARIATI):
+#    A. DD massimo dell'equity su 2004.06.11 -> 2026.06.30 alla taglia
+#       di rischio dichiarata qui sotto
+#    B. la PEGGIOR GIORNATA in %  (il muro prop giornaliero e' 5%)
+#    C. il DD massimo dentro ciascuna delle QUATTRO finestre di regime
+#  E UNA SOLA DECISIONE MECCANICA: DD lungo > 2x il DD promesso in
+#  report/CONTRATTI_SEDIE.md -> REVISIONE (corsia RISCHIO, firma 18/08).
+#
+#  QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO
+#  (Emendamento regola B: il VECCHIO giudica il RISCHIO).
+#  MODELLO OHLC M1 dichiarato: i tick reali di BCM partono dal
+#  2024.07.05, su 22 anni NON ESISTONO. Il numero che esce e' un
+#  LIMITE INFERIORE del rischio, MAI UN PERMESSO.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2004.06.11
+
+InpUsaGuardian=true||true||0||true||N
+InpTimeframe=16385||16385||0||16385||N
+InpEmaFast=9||9||0||9||N
+InpEmaMid=21||21||0||21||N
+InpEmaSlow=50||50||0||50||N
+InpEmaSlopeBars=3||3||0||3||N
+InpRequireAlignment=true||true||0||true||N
+InpCrossLookback=8||8||0||8||N
+InpHACount=3||3||0||3||N
+InpHAAutoCount=false||false||0||false||N
+InpHAWickRatio=0.30||0.30||0||0.30||N
+InpHABodyFactor=0.60||0.60||0||0.60||N
+InpUseBBExpand=false||false||0||false||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpBBExpandBars=3||3||0||3||N
+InpBBExpandMult=1.05||1.05||0||1.05||N
+InpAdxPeriod=14||14||0||14||N
+InpAdxMin=20.0||20.0||0||20.0||N
+InpAdxRising=true||true||0||true||N
+InpRequireDI=true||true||0||true||N
+InpRequireAdxRising=false||false||0||false||N
+InpMaxDistATR=1.5||1.5||0||1.5||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpMaxDistEma21ATR=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpPullbackRef=0||0||0||0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpSwingLookback=10||10||0||10||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLBufferPts=0||0||0||0||N
+InpTP_R=2.0||2.0||0||2.0||N
+InpPartialR=1.0||1.0||0||1.0||N
+InpPartialPct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTrailMode=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpExitOnCross=true||true||0||true||N
+InpExitOnHAflip=false||false||0||false||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=2||2||0||2||N
+InpStopAfterLosses=2||2||0||2||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=USD
+InpComment=GOLDENCROSS
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMagic=780910||780910||1||780911||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
