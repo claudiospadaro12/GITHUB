@@ -1,0 +1,118 @@
+﻿REFERTO R101 - ABLAZIONE DEI FILTRI SU DOW (U30USD) E DAX (D30EUR), M5, TICK REALI
+modo: SOLODAX
+switch di questo giro: -SoloEa DAX
+     Senza -Rifai il driver generico SALTA le finestre gia' presenti. I file saltati
+     sono marcati 'SALTATA DAL DRIVER' o 'A META'' e finiscono nei PROBLEMI, non in OK.
+stato dei criteri: FIRMATI (nessun [DA FIRMARE] nel file)
+data: 2026-08-23 23:18:11   (questa data deve essere di ADESSO)
+     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.
+     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.
+avvio: 2026-08-23 23:14:04   durata: 0.1 ore
+pin: 3c39326e7ae9bfa02e19c11c9c5062e414044907
+criteri: risultati_archivio\R101_CRITERI.md   perimetro: R101_FIRMA_ABLAZIONE.md
+finestra: 2024.09.26 -> 2026.06.30   split 40/60   modello 4 (tick reali)   deposito 100000
+     IS  2024.09.26 - 2025.06.09
+     OOS 2025.06.10 - 2026.06.30
+     (le stesse di R88, R97 e R98: e' l'unico modo di confrontare i round alla pari)
+spread: Spread=0 scritto NELL'INI = spread CORRENTE del feed BCM, dichiarato.
+     NON e' uno stress di spread e NON e' una misura dello spread.
+rischio: 1,00% nei file prova. IN CAMPO SUL 100K E' 0,65%.
+     >>> OGNI DD DI QUESTO REFERTO E' ALL'1%. Per confrontarlo col forward del
+     100k si MOLTIPLICA PER 0,65 (criteri par. 2.4). Chi salta la conversione
+     confronta due cose diverse.
+
+--- IL GATE G0: LA CELLA VIVA SI RIPRODUCE? (criteri par. 5) ---
+  DAX (ABTG_DAX_Apertura_EU / D30EUR, magic vivo 770101)
+     atteso agli atti : PF 1.400 | DD 7.23% | n NON AGLI ATTI (gate sul n NON applicato)
+     misurato adesso  : PF 1.397 | DD 7.23% | n 270
+     gemelli          : IDENTICI
+     VERDETTO G0      : RIPRODOTTO (PF 1.397, DD 7.23%, n 270)
+     fonte dei numeri : REFERTO_ROUND46_GESTIONE.md (riga A = LIVE). Il n per finestra NON e' agli atti: lo misura questa corsa
+     CANARINO         : n IS 175 / n OOS 270   (NON e' un gate - Emendamento regola B)
+  NOTA: 'NON MISURATO' NON e' 'va bene'. Un gate che non legge niente non e' un
+  gate verde. Se il metro non si riproduce, i gradini di QUELLA famiglia non
+  sono stati nemmeno lanciati -- e l'altra famiglia e' andata avanti.
+
+--- LA TABELLA MADRE ---   (attese: 2 righe per CSV, 20 CSV, 40 passate)
+  Tutti i numeri sono OOS. dPF e dDD sono il DELTA contro la cella viva della
+  stessa famiglia. PeggGio = 'Peggior Giornata %', letta nella sua colonna del CSV.
+  CELLA                      n     PF        DD%      dPF       dDD%     PeggGio%  ESITO
+  --- DAX ---
+  00_viva                    270   1.397     7.23     0.000     0.00     -1.08     SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)
+  01_ema                     149   1.502     5.15     +0.105    -2.08    -1.08     SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)
+  02_volumi                  96    1.550     4.63     +0.153    -2.60    -1.06     SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)
+  03_atr                     270   1.397     7.23     0.000     0.00     -1.08     SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)
+  04_corso_or                96    1.550     4.63     +0.153    -2.60    -1.06     SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)
+  05_supertrend3             95    1.553     4.60     +0.156    -2.64    -1.08     SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)
+  06_correlazione            171   1.536     5.49     +0.138    -1.74    -1.08     OK
+  07_vwap                    160   1.337     5.20     -0.061    -2.03    -1.08     OK
+  08_tondi                   251   1.307     7.04     -0.090    -0.20    -1.08     OK
+  09_corso_pieno             28    1.408     3.33     +0.011    -3.90    -1.06     OK
+
+--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---
+  DAX  00_viva                    magic 773200/773201   muove: (niente: e' il METRO)
+       LA CELLA VIVA -- il METRO, non un candidato
+  DAX  01_ema                     magic 773210/773211   muove: InpUseEmaFilter
+       + EMA 14/200 H1 (si METTE: sul DAX e' spento)
+  DAX  02_volumi                  magic 773220/773221   muove: InpUseVolumeFilter
+       + VOLUMI >= 1,5x media(20)  [corso]
+  DAX  03_atr                     magic 773230/773231   muove: InpUseAtrFilter
+       + ATR >= 1,0x media(20)  [corso]
+  DAX  04_corso_or                magic 773240/773241   muove: InpUseVolumeFilter + InpUseAtrFilter
+       + VOLUMI **O** ATR  [corso, COMBINATA]
+  DAX  05_supertrend3             magic 773250/773251   muove: InpUseSupertrend3
+       + TRE SUPERTREND concordi  [corso EU]
+  DAX  06_correlazione            magic 773260/773261   muove: InpUseCorrelation
+       + CORRELAZIONE SPXUSD  [corso]
+  DAX  07_vwap                    magic 773270/773271   muove: InpUseVwapFilter
+       + VWAP di sessione M15  [Emiliano, NON corso]
+  DAX  08_tondi                   magic 773280/773281   muove: InpUseRoundLevels
+       + NUMERI TONDI come 1o obiettivo  [corso]
+  DAX  09_corso_pieno             magic 773290/773291   muove: InpUseVolumeFilter + InpUseAtrFilter + InpUseSupertrend3 + InpUseCorrelation
+       + IL CORSO PIENO: volumi+ATR+ST3+correlazione INSIEME  [corso, CUMULATIVA]
+
+--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---
+  * NON APPLICA I CANCELLI. G1 (n>=30), G2 (PF su + DD non peggiore), G3
+    (coerenza cross-mercato) e G4 (campione) li applica il REFERTO DEL ROUND,
+    a mano, sopra questa tabella. Qui ci sono i numeri, non i verdetti.
+  * G3 in particolare NON e' meccanizzabile qui: e' il confronto fra le DUE
+    tabelle (lo stesso filtro deve andare nella stessa direzione sui due
+    indici). Ed e' il cancello che in R46 fermo' un candidato che faceva +31%.
+  * IL GRADINO 09 'CORSO PIENO' E' CUMULATIVO, NON UN'ABLAZIONE. Muove QUATTRO
+    interruttori insieme e NON attribuisce niente a nessun filtro: si legge SOLO
+    accanto ai gradini 02/03/05/06. E' la CHECKLIST del corso [PDF PAG 29-30],
+    cioe' il debito del 18/08, ed e' la decisione 4 firmata il 23/08.
+    >>> ATTESO, SCRITTO PRIMA DEI NUMERI: il n CROLLA. Quattro filtri che devono
+        passare tutti, sopra un motore da ~130 operazioni OOS sul Dow: e'
+        PROBABILE che finisca sotto la soglia G1 di 30, cioe' NON MISURABILE.
+        E 'NON MISURABILE' QUI E' GIA' UNA RISPOSTA, non un fallimento: vuol
+        dire che il metodo del corso, applicato alla lettera sulla nostra
+        geometria, NON PRODUCE UN CAMPIONE su cui si possa giudicare.
+        NON si abbassa nessuna soglia per far 'funzionare' questa cella.
+  * IL GRADINO 01 E' ASIMMETRICO: sul Dow TOGLIE l'EMA, sul DAX la METTE.
+    G3 NON si applica a quel gradino, e i due numeri si leggono separati.
+  * NON PROMUOVE NIENTE (G5). Le due sedie stanno sul conto 100k: un cambio
+    al forward e' una firma successiva, con il suo referto.
+  * NON misura lo spread, non misura il regime, non fa walk-forward nuovo.
+  * LA FINESTRA E' UN SOLO REGIME (21 mesi di indici che salgono) e questo OOS
+    e' gia' stato guardato molte volte: con 18 confronti sulla stessa finestra
+    QUALCUNO ESCE VERDE PER CASO. E' scritto nei criteri par. 4.1, ed e' il
+    motivo per cui esiste G3.
+
+--- NOTE (non sono guasti: sono risultati del round) ---
+  - R101_DAX_09_corso_pieno.txt: n OOS = 28, sotto la soglia G1 di 30. Il verdetto su questo gradino e' NON MISURABILE, NON 'non funziona' (criteri par. 5, G1).
+
+--- PROBLEMI ---   (6)
+  - R101_DAX_00_viva.txt: SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente). Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.
+  - R101_DAX_01_ema.txt: SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente). Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.
+  - R101_DAX_02_volumi.txt: SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente). Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.
+  - R101_DAX_03_atr.txt: SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente). Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.
+  - R101_DAX_04_corso_or.txt: SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente). Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.
+  - R101_DAX_05_supertrend3.txt: SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente). Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.
+
+--- COME SI RIPRENDE ---
+  una famiglia sola  : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa DAX
+  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella R101_DOW_03_atr.txt
+  >>> in tutti e due i casi il METRO della famiglia rigira: e' la cella 00_viva,
+      cioe' il denominatore. Costa 2 CSV, non una passata sprecata.
+  rifare cio' che c'e' gia' : aggiungi -Rifai
