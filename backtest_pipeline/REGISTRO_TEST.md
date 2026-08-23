@@ -375,6 +375,22 @@ _Sweep buffer x SL-ATR x filtro box x correlazione S&P. La correlazione e' la CH
 - **Complementare all'aperture LONG:** sul DAX ora copriamo entrambe le direzioni (aperture LONG + night-box SHORT), con setup e orari diversi.
 - Nota metodologica: la correlazione S&P NON salvava il breakout M5 (test Marco/Emiliano) ma QUI salva il night-box. Il filtro giusto dipende dalla strategia.
 
+### 🌙 23/08/26 — analisi del PDF di corso "Strategia NIGHTLY" (33 pag.)
+Referto completo (parametri, confronto regola-per-regola, verdetto):
+**`caccia_strategie/ANALISI_NIGHTLY_PDF_2026-08-23.md`**. Le tre righe che
+toccano questo registro — il resto sta nel referto, non si duplica:
+- ⚠️ **RETTIFICA al "Nightly 0/8"**: su **U30USD, D30EUR, XAUUSD** l'EA fa
+  **ZERO trade** perche' il filtro QB (`InpMaxNightVolPips=45`) e' confrontato
+  con `ATR(H1)/PipSize()`, e su indici/oro `PipSize()=_Point` → sempre ≥45.
+  **Su quei mercati il fade non e' stato bocciato: non e' stato misurato.**
+  Il verdetto negativo regge su EURUSD/GBPUSD/USDCHF (~160 trade a testa).
+- ✅ Il **BREAKOUT** del box (questa famiglia) e' confermato dal PDF e dalla
+  misura di casa (91,1% delle notti rompe un lato, `NOTTE_ORO.md`).
+- 🆕 Unica proposta uscita: **BREAKIN del box notturno** (falsa rottura →
+  reversal, PAG 26/28) sul motore `ABTG_LiquiditySweep`, che R89 aveva chiuso
+  per **carenza di livelli** (14 trade IS): il box notturno ne da' ~250/anno
+  per lato. Spec nel referto §7b; **nessun file prova ancora scritto**.
+
 ---
 
 ## EA SuperWave — cross EMA14x200 a favore del Supertrend (26.07.26, screen OHLC)
