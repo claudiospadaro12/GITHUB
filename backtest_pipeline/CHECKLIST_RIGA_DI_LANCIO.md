@@ -2867,3 +2867,94 @@ risponde `$null` e tira dritto): qui non risponde `$null`, risponde una cosa
 > 🧭 **Dove si annida**: ogni `$roba[0]`, `$roba.Count -eq 1`, `Select-Object
 > -First 1` su qualcosa che *"tanto ne trova sempre almeno due"*. Il caso a
 > UNO e' quello che gira in produzione tutti i giorni.
+
+---
+
+## 🆕 AGGIUNTA DEL 23/08/2026 — trovata verificando la riga R101 (ablazione dei filtri su Dow e DAX)
+
+## 63. 🧨 LA VIRGOLA A FINE RIGA DENTRO UN HASHTABLE: lo script non PARSA, e l'analisi statica non lo vede
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1`
+(`bdd77e9`, righe 306-324), trovato **e RIPRODOTTO** prima dell'invio della riga.
+Corretto in `e4c1afa`._
+
+```powershell
+$VIVA = @{
+ "DOW" = @(@("InpSessionHour","14"), ... ,@("InpSlippagePts","0")),   # <-- questa virgola
+ "DAX" = @(@("InpSessionHour","8"),  ... ,@("InpSlippagePts","0"))
+}
+```
+
+In PowerShell le voci di un hashtable letterale si separano con **una nuova riga
+o un `;`**. Una **virgola a fine riga CONTINUA l'espressione**: il separatore di
+riga viene mangiato, e il parser legge
+
+```
+"DOW" = @(...) , "DAX" = @(...)
+```
+
+cioe' un'**assegnazione a una stringa letterale**. Misurato con
+`[System.Management.Automation.Language.Parser]::ParseFile`:
+
+```
+2 errori -- righe 306 e 315
+"The assignment expression is not valid. The input to an assignment operator
+ must be an object that is able to accept assignments, such as a variable..."
+```
+
+Riprodotto in isolamento su sei righe: **con la virgola 2 errori, senza 0.**
+
+**Perche' e' una classe nuova e non "una svista".** E' un errore di **PARSE**,
+non di runtime: su PS 5.1 il `.ps1` sarebbe morto **prima di eseguire una sola
+riga**, quindi nessuna guardia interna dello script poteva intercettarlo — ne'
+il gate dei criteri, ne' il gate della stella, ne' la raccolta. E soprattutto:
+
+> ⚠️ **Nessun controllo per BILANCIAMENTO lo trova.** Le graffe, le tonde e le
+> quadre erano **0/0/0**, le stringhe tutte chiuse, l'ASCII puro: il documento
+> della riga certificava tutti e tre i controlli, ed erano tutti e tre **veri**.
+> Il file era **lessicalmente perfetto e sintatticamente rotto.** Un tokenizer
+> scritto per l'occasione non e' un parser.
+
+**E la seconda meta', che e' quella che costa**: il preparatore aveva
+**dichiarato** il buco (_"in questo ambiente non c'e' PowerShell, il `.ps1` non
+e' mai stato parsato da un interprete vero"_) e aveva concluso _"per questo la
+riga 1 e' il giro a vuoto"_. Dichiarare un buco **non e' chiuderlo**: il giro a
+vuoto sarebbe tornato indietro in dieci secondi con un errore rosso, ma il pin
+era gia' scritto nel documento, la riga gia' pronta da incollare, e il giro a
+vuoto sarebbe diventato **il terzo giro a vuoto della serie del 17/08** — quelli
+che questa checklist esiste per uccidere PRIMA dell'invio.
+
+> ✅ **REGOLA, tre pezzi.**
+> 1. **Il parse si FA, non si dichiara impossibile.** Se `pwsh` non c'e'
+>    nell'ambiente, si **installa** (tarball ufficiale, due minuti):
+>    ```bash
+>    curl -sSL -o /tmp/pwsh.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.4.6/powershell-7.4.6-linux-x64.tar.gz
+>    mkdir -p /opt/pwsh && tar -xzf /tmp/pwsh.tar.gz -C /opt/pwsh && chmod +x /opt/pwsh/pwsh
+>    ```
+>    ```powershell
+>    $e=$null; $t=$null
+>    [void][System.Management.Automation.Language.Parser]::ParseFile($f,[ref]$t,[ref]$e)
+>    if($e.Count){ $e | ForEach-Object { "riga $($_.Extent.StartLineNumber): $($_.Message)" }; throw 'NON PARSA' }
+>    ```
+>    E' la stessa regola del punto 17 (_"la presenza di un interprete e'
+>    MISURATA o DICHIARATA MANCANTE"_) applicata **al verificatore invece che
+>    allo script**: qui l'interprete mancante non fa fallire una corsa, fa
+>    **passare per buono** un file rotto.
+> 2. **Se il parse davvero non si puo' fare, la riga NON esce col pin scritto.**
+>    Si consegna dicendo _"parse non fatto: il primo giro a vuoto E' il parse"_,
+>    e il pin si scrive **dopo** che quel giro e' tornato verde.
+> 3. **Dove si annida**: ogni tabella dati scritta a mano e allineata a colonne
+>    — `@{...}`, `param(...)`, array di array multilinea. La virgola finale e'
+>    innocua in un **array** (`@(1,2,`) e **letale** in un **hashtable**, e le
+>    due cose si scrivono nella stessa riga. Grep di partenza:
+>    ```
+>    grep -nP '\),\s*$' <file>.ps1        # virgola a fine riga: e' dentro un @{ } ?
+>    ```
+>
+> 🧪 **E dopo il parse, si ESEGUE quello che si puo' eseguire.** Sullo stesso
+> R101 il verificatore ha girato i gate veri sui 20 file prova stubbando il
+> download (`Invoke-WebRequest` -> `Copy-Item` dal repo locale) e ha provato il
+> parser del CSV **sotto cultura it-IT** con un artefatto sintetico che aveva
+> l'intestazione VERA dell'OPTFRAME: `1.27013` letto `1,27013` (non `127013`),
+> colonne ignote -> `null`, una riga sola -> `NON VALIDO`. Un parse pulito dice
+> solo che il file **si legge**; l'esecuzione dice che **fa quello che promette**.
