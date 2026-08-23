@@ -1,0 +1,188 @@
+# 📮 R101 — LE DUE RIGHE DA MANDARE A CLAUDIO
+
+**Pin:** `f91e320a6360c235980818316bf72b4e2a3f9e00`
+**Marcatore di versione:** `MARCATORE_RIGA_R101_v1`
+**Driver:** `backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1`
+**Criteri:** `backtest_pipeline/risultati_archivio/R101_CRITERI.md` — 🔴 **[DA FIRMARE]**
+
+> ⚠️ **QUESTE RIGHE NON SONO ANCORA STATE MANDATE.** Passano prima dal
+> verificatore. E la **riga 2 non si manda affatto** finché Claudio non ha
+> risposto alle **sei decisioni** del § 10 dei criteri.
+
+---
+
+## ✅ Cosa è stato verificato PRIMA di scrivere queste righe (checklist 1-4)
+
+| # | controllo | esito |
+|---|---|---|
+| **1** | **Ho aperto lo script.** L'ho scritto io, e l'ho comunque riletto | ✅ |
+| **2** | **Difetti gemelli.** Cercati `fermoDa -ge`, `-eq $null` col null a destra, `$` multilinea senza `\r?`, `Desktop` nella raccolta | ✅ trovati **6** `-eq/-ne $null` con l'array a sinistra e **corretti** (trappola PS: `@(1,2) -eq $null` è un confronto elemento per elemento) |
+| **3** | **Il file dei parametri è quello giusto?** Questa riga **VERIFICA**, non cerca: 18 file prova, ognuno con **un solo asse Y** (`InpMagic`, le due gemelle). Nessuna griglia | ✅ |
+| **4** | **Il SHA contiene la correzione?** `git log -1 -- <file>` su tutti e 8 i file scaricati dal driver: driver, criteri, 18 prova, `walkforward_generico.ps1`, i 2 `.mq5`, l'include | ✅ **tutti antenati del pin** |
+| **+** | **ASCII puro** nel `.ps1` (regola di casa 4, PS 5.1 legge i `.ps1` come ANSI) | ✅ **0 byte > 127** |
+| **+** | **Marcatori pretesi dal driver** esistono davvero: `RigaSpread`, `$EABranch="lavoro"`, 2× `[Experts]`, `ABTG_GuardiaIngresso` (82.941 byte), `#property version "1.01"` ×2, `ABTG_DEF_MAGIC 770202/770101` | ✅ |
+| **+** | **Bilanciamento** graffe/tonde/quadre e stringhe non chiuse | ✅ 0/0/0 |
+| **+** | **Diff a stella** sui 18 file prova: 1 riga di differenza (2 sulla sola `04_corso_or`, dichiarata) e **ogni nome esiste nel sorgente** | ✅ |
+
+> 🔴 **Quello che NON ho potuto verificare, e va detto:** in questo ambiente
+> **non c'è PowerShell**, quindi il `.ps1` **non è mai stato eseguito né
+> parsato da un interprete vero**. Il controllo di bilanciamento è un
+> tokenizer scritto per l'occasione, non `powershell -Command`.
+> 👉 **Per questo la riga 1 è il GIRO A VUOTO**, e va mandata per prima:
+> costa pochi minuti, non apre MT5, non produce nessun numero — ed è
+> **esattamente** il modo di scoprire un errore di sintassi senza bruciare
+> ore di tick reali.
+
+---
+
+## ⚙️ REGOLE DI TRAFFICO — da dire in chat insieme alla riga
+
+- 🖥️ **PC DI BACKTEST**, non il VPS.
+- 🔒 **MetaTrader E MetaEditor CHIUSI.** Il driver si rifiuta di partire se li
+  trova aperti (MT5 aperto = zero CSV; MetaEditor è single-instance e la
+  compilazione tornerebbe subito senza compilare).
+- 🚦 **UNA MACCHINA, UN LAVORO.** Prima di lanciare la riga 2 deve essere
+  **finito** qualunque altro round che apre MT5.
+- ⏱️ **Durata riga 2: [STIMA], non una previsione.** 72 passate a tick reali
+  su mezza finestra l'una. Il driver misura la prima cella e stampa il tetto
+  teorico. `-OreMax 12` è un tetto sull'**inizio** di nuovi file, non
+  un'interruzione.
+
+---
+
+# 1️⃣ RIGA 1 — IL GIRO A VUOTO (si manda SUBITO, non serve nessuna firma)
+
+**Cosa fa:** scarica tutto al pin, verifica i 18 file prova uno per uno,
+**compila i due EA**, e scrive le 18 anteprime `.ini` che girerebbero —
+confrontando da solo la finestra IS che il driver generico calcola con quella
+scritta nei criteri. **Non apre il tester, non produce nessun numero.**
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='f91e320a6360c235980818316bf72b4e2a3f9e00'; $p="$env:USERPROFILE\RIGA_R101.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R101_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
+```
+
+**Sul Desktop esce:** `R101_ABLAZIONE_CONTROLLO_<data>.zip`
+🚫 **Questo zip NON è il round** e non va letto come risultato: lo dice anche
+il suo referto, alla riga `modo:`.
+
+---
+
+# 2️⃣ RIGA 2 — LA CORSA VERA (⛔ **solo DOPO la firma dei criteri**)
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='f91e320a6360c235980818316bf72b4e2a3f9e00'; $p="$env:USERPROFILE\RIGA_R101.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R101_ABLAZIONE.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R101_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
+```
+
+### 🛑 Il `-CriteriFirmati` è la firma, e senza non parte
+
+Il driver scarica `R101_CRITERI.md` al pin e guarda se porta ancora
+`[DA FIRMARE]`. Se sì **la corsa vera si ferma con `exit 2`** e stampa cosa
+fare. Non è burocrazia: **il round tocca due sedie che stanno sui soldi del
+conto 100k**, e la regola di casa è che i criteri si congelano PRIMA dei numeri.
+
+👉 `-CriteriFirmati` va messo **solo quando Claudio ha risposto alle sei
+decisioni**. E il referto lo scrive fra gli switch, così resta a verbale che la
+firma è stata data **in riga**.
+
+---
+
+# 3️⃣ LA RIGA DI RACCOLTA (regola di casa: sempre, a fine test)
+
+Il driver la cartella e lo zip li fa **da solo**. Questa riga serve a
+**verificare in console** che ci sia tutto e a ricreare lo zip se serve.
+
+```powershell
+& { $d="$env:USERPROFILE\Desktop"; $c=Get-ChildItem $d -Directory -Filter 'R101_ABLAZIONE_*' | Sort-Object LastWriteTime -Desc | Select-Object -First 1;
+    if(-not $c){ Write-Host 'NESSUNA CARTELLA R101 SUL DESKTOP' -ForegroundColor Red; return };
+    $z=Join-Path $d ($c.Name + '.zip'); if(Test-Path $z){ Remove-Item $z -Force }; Compress-Archive -Path (Join-Path $c.FullName '*') -DestinationPath $z -Force;
+    Write-Host ''; Write-Host ('CARTELLA : ' + $c.FullName) -ForegroundColor Cyan; Write-Host ('ZIP      : ' + $z + '   <- mandami QUESTO') -ForegroundColor Cyan;
+    $csv=@(Get-ChildItem $c.FullName -Filter '*.csv'); $prv=@(Get-ChildItem $c.FullName -Filter 'R101_*.txt'); $ini=@(Get-ChildItem $c.FullName -Filter 'anteprima_*.ini');
+    Write-Host ('  CSV dei risultati ... ' + $csv.Count + '   (attesi 36 nella CORSA, 0 nel giro a vuoto)');
+    Write-Host ('  file prova .......... ' + $prv.Count + '   (attesi 18)');
+    Write-Host ('  anteprime .ini ...... ' + $ini.Count + '   (attese 18 nel giro a vuoto, 0 nella corsa)');
+    Write-Host ('  REFERTO_R101.txt .... ' + $(if(Test-Path (Join-Path $c.FullName 'REFERTO_R101.txt')){'c/e'}else{'MANCA!'}));
+    Write-Host ''; Write-Host 'LE TRE RIGHE DA GUARDARE NEL REFERTO:' -ForegroundColor Yellow;
+    Get-Content (Join-Path $c.FullName 'REFERTO_R101.txt') -EA SilentlyContinue | Select-String -Pattern '^modo:|^data:|VERDETTO G0' | ForEach-Object { Write-Host ('   ' + $_.Line) -ForegroundColor Yellow } }
+```
+
+**Cosa deve tornare in console:**
+
+| | giro a vuoto (riga 1) | corsa vera (riga 2) |
+|---|---|---|
+| CSV dei risultati | **0** | **36** |
+| file prova | **18** | **18** |
+| anteprime `.ini` | **18** | **0** |
+| `REFERTO_R101.txt` | c'è | c'è |
+| riga `modo:` | `CONTROLLO` | `CORSA` |
+| riga `data:` | **di adesso** | **di adesso** |
+| `VERDETTO G0` | *non misurato* (giusto così) | **`RIPRODOTTO`** su tutte e due le famiglie |
+
+> 🔴 **Se `VERDETTO G0` non dice `RIPRODOTTO`, il round non si legge.** Vuol
+> dire che la cella viva del backtest non è la sedia che gira coi soldi, e
+> tutti i gradini sarebbero misurati sopra un motore diverso. Il driver in quel
+> caso **non lancia nemmeno i gradini** di quella famiglia — e l'altra va
+> avanti.
+
+---
+
+## 🔁 SE LA CORSA SI FERMA A METÀ — la ripresa
+
+Non serve rifare tutto. **Il METRO della famiglia rigira sempre** (è la cella
+`00_viva`, cioè il denominatore: costa 2 CSV, non una passata sprecata).
+
+```powershell
+# una famiglia sola
+... & $p -Pin $pin -CriteriFirmati -SoloEa DAX
+
+# una cella sola (il metro della sua famiglia rigira da solo)
+... & $p -Pin $pin -CriteriFirmati -SoloCella R101_DOW_03_atr.txt
+
+# rifare anche i CSV gia' presenti
+... & $p -Pin $pin -CriteriFirmati -Rifai
+```
+
+⚠️ **Senza `-Rifai` il driver generico SALTA la finestra il cui CSV esiste
+già.** Il driver di R101 se ne accorge **dalla data del file** e la marca
+`SALTATA DAL DRIVER` fra i **PROBLEMI**, non fra gli OK: *un CSV di ieri non è
+un risultato di oggi*, e se fra i due lanci fosse cambiato il pin metà round
+verrebbe da un altro motore.
+
+---
+
+## 📊 I NUMERI ATTESI, dichiarati PRIMA (corsa vera)
+
+| | |
+|---|---|
+| celle | **18** (9 Dow + 9 DAX) |
+| CSV | **36** (IS + OOS per cella) |
+| righe per CSV | **2** — le due gemelle, che devono uscire **identiche al centesimo** |
+| passate | **72** |
+| IS | 2024.09.26 → 2025.06.09 |
+| OOS | 2025.06.10 → 2026.06.30 |
+| modello | **4 = tick reali** · deposito 100.000 · rischio **1,00%** |
+
+🔵 **Il metro che il gate G0 deve riprodurre:**
+- **Dow** — OOS `PF 1,27013 · DD 4,3941% · n 130` (R54 riga *"solo LONG"*, che
+  riproduce R46 riga *"A = LIVE"*)
+- **DAX** — OOS `PF 1,40 · DD 7,23%` (R46 riga *"A = LIVE"*). 🟠 **Il `n` del
+  DAX non è agli atti**: `NAtti = -1` e **il gate sul n non si applica al DAX**.
+  Lo misura questa corsa, e va scritto nei criteri.
+
+🟠 **E ogni DD di questo round è all'1%.** Il forward del 100k gira a **0,65%**:
+per confrontarli si moltiplica per **0,65** (criteri § 2.4). Chi salta la
+conversione confronta due cose diverse.
+
+---
+
+_Scritto il 23/08/2026. **Nessuna riga mandata, nessuna passata lanciata,
+nessun sorgente EA toccato, nessuna modifica al forward.**_
