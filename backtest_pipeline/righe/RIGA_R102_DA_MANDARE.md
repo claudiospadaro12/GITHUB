@@ -42,11 +42,14 @@ la cache e i frame: il risultato **non si legge più**.
 ## 📌 IL PIN
 
 ```
-c1ff3b2a14e724682a25372925b2a1980daef519
+fe86b4255d7f97d3dab0b2bde806d878590b97ee
 ```
 
 È il commit che contiene **il driver, i 20 file prova, il generatore e i
-criteri**. Le righe lo passano a `-Pin` e **rifiutano di partire senza**: un
+criteri**. _(Era `c1ff3b2`: **ripinnato** dopo il fix del conteggio delle
+finestre — con `c1ff3b2` il driver girava lo stesso, ma i documenti dicevano
+`17 passate per sedia` dove lo schermo ne avrebbe stampate `15`, e un numero
+atteso che non torna ferma la corsa per niente.)_ Le righe lo passano a `-Pin` e **rifiutano di partire senza**: un
 default silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola
 per un commit congelato.
 
@@ -103,7 +106,7 @@ riscritta**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='c1ff3b2a14e724682a25372925b2a1980daef519'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='fe86b4255d7f97d3dab0b2bde806d878590b97ee'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -174,7 +177,7 @@ ore più lo scarico, e un'interruzione a metà costa il 63% del lavoro
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='c1ff3b2a14e724682a25372925b2a1980daef519'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='fe86b4255d7f97d3dab0b2bde806d878590b97ee'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia C01,C02,C03;
