@@ -7,6 +7,36 @@
 
 ---
 
+## 🧭 AGGIORNAMENTO 23/08 notte (tardi) — **R101: DOW LETTO, DAX FERMATO DA UN FALSO ROSSO (checklist 64) — RIPRESA IN MANO A CLAUDIO**
+
+- 📦 Zip della corsa arrivato (`R101_ABLAZIONE_CORSA_20260823_2159.zip`).
+  **G0 DOW: RIPRODOTTO AL CENTESIMO** (PF 1.270 · DD 4.39 · n 130). Le 5 celle
+  «SALTATA DAL DRIVER» (Dow 00–04, CSV del lancio precedente della stessa
+  serata, stesso pin) **adjudicate VALIDE** nel referto.
+- 🔴 **G0 DAX: falso rosso.** Metro riprodotto NEI FATTI (PF 1.397 vs 1.400,
+  tolleranza firmata ±0,01; DD 7.23 esatto; gemelli identici) ma il driver
+  l'ha bocciato confrontando n=270 col **sentinella `-1`**: argomento
+  posizionale negativo → **stringa** `"-1"`, e `"stringa" -gt 0` è VERO su
+  Windows PowerShell 5.1 (NLS: trattino ignorabile) e FALSO su pwsh/Linux del
+  verificatore. **Prima classe di difetto che passa un'esecuzione reale del
+  verificatore e cade solo sull'OS di destinazione** → `CHECKLIST 64`.
+- 🛠️ Driver corretto (`[int]$n` tipizzato + cast nei confronti), commit
+  `3c39326`. **I 9 gradini DAX vanno rigirati**: riga `-SoloEa DAX` dal
+  verificatore, poi a Claudio.
+- 📊 **Referto PARZIALE agli atti**: `risultati_archivio/R101_REFERTO.md`
+  (tabella madre IS+OOS completa dai CSV, costo in € e op tolte per filtro).
+  Letture Dow (INDIZI — G4 sospende il merito, n IS 74): **01_ema conferma la
+  cella viva** (senza EMA l'IS perde −2.274€); **03_atr = filtro NULLO**
+  (identico alla viva al centesimo: la soglia del corso non toglie UN trade);
+  **02_volumi candidato Dow-side** (PF 1,543 · DD 2,83, aspetta G3);
+  05_supertrend3 ribaltone IS/OOS (lezione R98); 06/08 COSTANO;
+  **09_corso_pieno n=26 → NON MISURABILE, come scritto prima dei numeri**.
+  Il DAX metro ha **n IS 175 ≥ 150**: sul DAX il merito si giudica.
+- ✍️ **R102 FIRMATO da Claudio** ("FIRMO CON PROPOSTE", 23/08 sera): tutte e
+  6 le decisioni risolte con le proposte. Registrazione + modifiche ai file
+  prova (finestra 2009, pavimento dopo GATE 4) in corso; ripin + verificatore
+  prima delle righe. **Resta in coda DOPO la chiusura di R101** (decisione 4).
+
 ## 🧭 AGGIORNAMENTO 23/08 notte — **R102 «LA CLASSIFICA LUNGA» È PRONTO, IN BOZZA E IN CODA**
 
 - 🗣️ **Nasce da una domanda di Claudio in chat (23/08 sera)**: *"una classifica
