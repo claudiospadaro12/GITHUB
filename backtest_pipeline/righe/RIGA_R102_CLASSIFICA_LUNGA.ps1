@@ -5,9 +5,17 @@
 #  sulla FINESTRA PIU' LUNGA che il broker permette, SIMBOLO PER SIMBOLO.
 # ---------------------------------------------------------------------
 #  CRITERI: backtest_pipeline\risultati_archivio\R102_CRITERI.md
-#  >>> BOZZA: al momento in cui questo file e' scritto i criteri NON
-#      sono ancora firmati. La riga NON si manda finche' Claudio non
-#      firma R102_CRITERI.md. I criteri si cambiano PRIMA dei numeri.
+#  >>> FIRMATI da Claudio il 23/08/2026 ("FIRMO CON PROPOSTE"): tutte e
+#      sei le decisioni risolte CON LA PROPOSTA. Le due che toccavano
+#      cosa gira erano gia' quelle implementate qui, e restano tali:
+#        DEC. 1 -> finestra COMUNE 2009.01.01 -> 2026.06.30, con
+#                  CostToCost XAGUSD (C13) DENTRO la classifica;
+#        DEC. 2 -> PRIMA CORSA SENZA PAVIMENTO: -PavimentoData resta
+#                  col default VUOTO. Il taglio delle serie ricostruite
+#                  e' una SECONDA corsa, che si decide DOPO aver letto
+#                  il GATE 4 (densita'), mai un default nascosto.
+#      La firma NON e' il via libera al lancio: resta la CODA dietro
+#      R101 (decisione 4) e il pin va rifatto sul commit della firma.
 #
 #  DA DOVE NASCE, dichiarato: e' RIGA_R100_ORO_FLOTTA.ps1 (pin adbc27c
 #  piu' le correzioni del verificatore fino a HEAD) GENERALIZZATA A

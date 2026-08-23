@@ -9,23 +9,30 @@ permette, simbolo per simbolo**. Modello **OHLC M1**, deposito **100.000**.
 
 ---
 
-## 🛑 DUE CANCELLI PRIMA DI TUTTO — **queste righe NON si mandano ancora**
+## 🛑 DUE CANCELLI PRIMA DI TUTTO — **il primo è CADUTO, il secondo è CHIUSO**
 
-### 1️⃣ 🖊️ **I CRITERI NON SONO FIRMATI.**
-`R102_CRITERI.md` è una **BOZZA**. Contiene **sei decisioni** che sono di
-Claudio (§9), e due cambiano cosa gira:
+### 1️⃣ ✅ **I CRITERI SONO FIRMATI — 23/08/2026, sera: _"FIRMO CON PROPOSTE"_**
+`R102_CRITERI.md` **non è più una bozza**. Le **sei decisioni** del suo §9 sono
+risolte **tutte con la proposta del preparatore** (verbale in testa ai criteri):
 
-| # | decisione | proposta |
-|---|---|---|
-| 1 | finestra **COMUNE**: `2009` (XAGUSD dentro) o `2008` (XAGUSD fuori dalla classifica) | **2009, XAGUSD dentro** |
-| 2 | **pavimento** sulle serie ricostruite (EUR pre-1999, USDJPY pre-1971/93): subito o dopo il GATE 4 | **dopo: prima si misura** |
-| 3 | **perimetro**: 20 sedie o solo Breaking Band | **20, ma a BLOCCHI, BB per primo** |
-| 4 | la **coda** dietro R101 | **sì** |
-| 5 | riscrivere alla taglia viva i **2 contratti PTE GBPUSD** (oggi `2x` non calcolabile) | **sì, firma a parte** |
-| 6 | `BREAKOUT_EA_JPY_v3`: contratto o **dichiarazione di stato**? (aperta dal 18/08) | **dichiarare lo stato** |
+| # | decisione | proposta | ✅ **RISOLUZIONE FIRMATA** |
+|---|---|---|---|
+| 1 | finestra **COMUNE**: `2009` (XAGUSD dentro) o `2008` (XAGUSD fuori dalla classifica) | **2009, XAGUSD dentro** | ✅ **2009.01.01 → 2026.06.30, XAGUSD (C13) DENTRO** |
+| 2 | **pavimento** sulle serie ricostruite (EUR pre-1999, USDJPY pre-1971/93): subito o dopo il GATE 4 | **dopo: prima si misura** | ✅ **prima corsa SENZA pavimento**; il taglio è una **seconda corsa** dopo il GATE 4 |
+| 3 | **perimetro**: 20 sedie o solo Breaking Band | **20, ma a BLOCCHI, BB per primo** | ✅ **20 a blocchi, BLOCCO 1 = `C01,C02,C03`** |
+| 4 | la **coda** dietro R101 | **sì** | ✅ **sì — ed è il cancello 2 qui sotto, ancora CHIUSO** |
+| 5 | riscrivere alla taglia viva i **2 contratti PTE GBPUSD** (oggi `2x` non calcolabile) | **sì, firma a parte** | ✅ **sì, FIRMA A PARTE**: R102 gira lo stesso, `2x NON CALCOLABILE` su C04/C05 |
+| 6 | `BREAKOUT_EA_JPY_v3`: contratto o **dichiarazione di stato**? (aperta dal 18/08) | **dichiarare lo stato** | ✅ **dichiarare lo stato** — rilievo **ancora aperto** |
 
-⚠️ **I criteri si cambiano PRIMA dei numeri.** Se la firma cambia la decisione 1
-o la 2, cambiano gli `.ini` e **il pin va rifatto**.
+> 🟢 **E LE DUE CHE CAMBIAVANO COSA GIRA NON HANNO CAMBIATO NIENTE.** Le proposte
+> 1 e 2 erano **già** quelle implementate: la COMUNE nel driver era già
+> `2009.01.01` e `-PavimentoData` aveva già default **vuoto**. **Verificato sui
+> 20 file prova, uno per uno**: `@DAQUANDO`, `@SIMBOLO`, `@PERIODO` e la finestra
+> COMUNE in intestazione **non sono stati toccati**. Gli `.ini` restano quelli
+> provati.
+
+🔴 **MA IL PIN VA RIFATTO LO STESSO**, perché il commit della firma cambia i
+documenti: vedi il blocco qui sotto, dove c'è scritto **`PIN_DA_AGGIORNARE`**.
 
 ### 2️⃣ 🚦 **LA CODA: R102 GIRA DOPO R101. Una macchina, un lavoro.**
 R101 (ablazione dei filtri su Dow e DAX) è pinnato a
@@ -39,19 +46,29 @@ la cache e i frame: il risultato **non si legge più**.
 
 ---
 
-## 📌 IL PIN
+## 📌 IL PIN — 🔴 **DA AGGIORNARE: `PIN_DA_AGGIORNARE`**
 
 ```
-fe86b4255d7f97d3dab0b2bde806d878590b97ee
+PIN_DA_AGGIORNARE
 ```
 
-È il commit che contiene **il driver, i 20 file prova, il generatore e i
-criteri**. _(Era `c1ff3b2`: **ripinnato** dopo il fix del conteggio delle
-finestre — con `c1ff3b2` il driver girava lo stesso, ma i documenti dicevano
-`17 passate per sedia` dove lo schermo ne avrebbe stampate `15`, e un numero
-atteso che non torna ferma la corsa per niente.)_ Le righe lo passano a `-Pin` e **rifiutano di partire senza**: un
-default silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola
-per un commit congelato.
+> ### 🛑 **QUESTE NON SONO ANCORA RIGHE DI LANCIO DEFINITIVE.**
+> Il pin vecchio era `fe86b4255d7f97d3dab0b2bde806d878590b97ee`, cioè il commit
+> **precedente alla firma**. Con la firma del 23/08 sono cambiati
+> `R102_CRITERI.md` (verbale + risoluzioni) e l'intestazione del driver: **il
+> pin va rifatto sul commit che contiene la firma**, e **`PIN_DA_AGGIORNARE` va
+> sostituito ovunque compaia in questo documento** — qui e dentro i due blocchi
+> PowerShell qui sotto. Finché c'è quel segnaposto, i blocchi **non si incollano
+> e non si mandano a Claudio**.
+
+Il pin è il commit che contiene **il driver, i 20 file prova, il generatore e i
+criteri**. _(Era `c1ff3b2`, poi `fe86b42`: **ripinnato** dopo il fix del
+conteggio delle finestre — con `c1ff3b2` il driver girava lo stesso, ma i
+documenti dicevano `17 passate per sedia` dove lo schermo ne avrebbe stampate
+`15`, e un numero atteso che non torna ferma la corsa per niente.)_ Le righe lo
+passano a `-Pin` e **rifiutano di partire senza**: un default silenzioso
+(`lavoro`) farebbe girare la punta del branch spacciandola per un commit
+congelato.
 
 ⚠️ **Il pin si rilegge DOPO ogni push, non prima** (checklist 6 e 55): se il
 verificatore corregge qualcosa, questo blocco va ripinnato **e questa riga
@@ -106,7 +123,7 @@ riscritta**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='fe86b4255d7f97d3dab0b2bde806d878590b97ee'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='PIN_DA_AGGIORNARE'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -168,6 +185,10 @@ riscritta**.
 
 ## 2️⃣ POI la corsa vera — **A BLOCCHI, e Breaking Band per primo**
 
+> 🛑 **NON ANCORA DEFINITIVE**: `$pin='PIN_DA_AGGIORNARE'`. Il blocco si manda
+> **solo** dopo che il pin è stato sostituito col commit della firma **e** dopo
+> che **R101 ha chiuso** (decisione 4: una macchina, un lavoro).
+
 🔴 **Non è un ripiego: è il modo previsto.** Venti sedie in un colpo sono 6-16
 ore più lo scarico, e un'interruzione a metà costa il 63% del lavoro
 (§ripresa). `-SoloSedia` accetta un **ELENCO**.
@@ -177,7 +198,7 @@ ore più lo scarico, e un'interruzione a metà costa il 63% del lavoro
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='fe86b4255d7f97d3dab0b2bde806d878590b97ee'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='PIN_DA_AGGIORNARE'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia C01,C02,C03;
@@ -228,7 +249,11 @@ cui `esito` nel referto non è `OK` (es. `-SoloSedia C07,C11`).
 `-Rifai` rifà **tutto**, finestre comprese: si usa quando si vuole un blocco
 intero con tutti i file della **stessa** data, non per riprendere.
 
-### 🧯 E se il 1971 fa disastri (EURUSD, USDJPY)
+### 🧯 E se il 1971 fa disastri (EURUSD, USDJPY) — **è la DECISIONE 2, firmata**
+
+✅ **La firma del 23/08 dice: prima si misura, poi si taglia.** Quindi la prima
+corsa va **senza `-PavimentoData`** (default vuoto), e il pavimento è **la
+seconda corsa**, decisa **dopo** aver letto il GATE 4 — non prima.
 
 Se il referto mostra che su `C02`, `C06` o `C15` la passata lunga **non finisce
 più** o il **GATE 4** dice che i primi quindici anni hanno **zero operazioni**,
