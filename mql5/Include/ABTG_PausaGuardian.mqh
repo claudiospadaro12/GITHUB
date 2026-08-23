@@ -937,15 +937,15 @@ bool ABTG_ObiettivoRaggiunto(const double saldo_riferimento,const double target_
                            : AccountInfoDouble(ACCOUNT_BALANCE));
    double soglia=ABTG_ObiettivoSoglia_Calc(saldo_riferimento,target_pct);
 
-   bool stop=ABTG_ObiettivoLatch_Calc(latch,saldo_riferimento,valore,target_pct);
+   bool fermo=ABTG_ObiettivoLatch_Calc(latch,saldo_riferimento,valore,target_pct);
 
    // primo scatto: si timbra (e si urla nel giornale una volta sola)
-   if(stop && !latch) ABTG_ObiettivoTimbra(valore,soglia,chi);
+   if(fermo && !latch) ABTG_ObiettivoTimbra(valore,soglia,chi);
 
    // ripetizioni: al massimo una riga ogni ABTG_LOG_OGNI_SEC
    static datetime ultimoLogS1=0;
    datetime ora=TimeCurrent();
-   if(stop && latch && (ora-ultimoLogS1)>=ABTG_LOG_OGNI_SEC)
+   if(fermo && latch && (ora-ultimoLogS1)>=ABTG_LOG_OGNI_SEC)
      {
       PrintFormat("[STOP S1] %s: ingresso rifiutato -- obiettivo raggiunto il %s "
                   "(misura allo scatto %.2f, soglia %.2f, %s ora %.2f). Reset solo a mano.",
@@ -954,7 +954,7 @@ bool ABTG_ObiettivoRaggiunto(const double saldo_riferimento,const double target_
                   (su_equity?"equity":"saldo"),valore);
       ultimoLogS1=ora;
      }
-   return(stop);
+   return(fermo);
   }
 
 //+------------------------------------------------------------------+
