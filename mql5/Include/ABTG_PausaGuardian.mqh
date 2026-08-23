@@ -24,10 +24,23 @@
 //|     if(!ABTG_GuardiaIngresso(InpUsaGuardian,"NOME_EA",false,       |
 //|                              InpStopDopoNPerdite,InpMagic)) return;|
 //|                                                                    |
+//|  STOP A OBIETTIVO RAGGIUNTO (S1, v1.40) -- OPZIONALE, spento:      |
+//|  la stessa riga con tre argomenti in piu' (target 0 = come oggi):  |
+//|                                                                    |
+//|     input double InpSaldoRiferimento = 0;  // 0 = spento (S1)      |
+//|     input double InpTargetPct        = 0;  // 0 = spento (S1)      |
+//|     ...                                                            |
+//|     if(!ABTG_GuardiaIngresso(InpUsaGuardian,"NOME_EA",false,       |
+//|                              InpStopDopoNPerdite,InpMagic,         |
+//|                              InpSaldoRiferimento,InpTargetPct))    |
+//|        return;                                                     |
+//|                                                                    |
 //|  Restano disponibili i mattoni singoli, se servono per un pannello:|
 //|     PausaGiornoAttiva() / CapRischioAttivo() / GuardianVivo()      |
 //|     RischioApertoPct() / ABTG_PuoAprire()                          |
 //|     ABTG_PerditeConsecutiveOggi() / ABTG_TroppePerditeConsecutive()|
+//|     ABTG_ObiettivoRaggiunto() / ABTG_ObiettivoLatchScattato()      |
+//|     ABTG_ObiettivoResetta() / ABTG_ObiettivoSoglia_Calc()          |
 //|                                                                    |
 //|  IMPORTANTE -- cosa NON fa:                                        |
 //|   - non chiude niente e non tocca le posizioni gia' aperte:        |
@@ -104,6 +117,56 @@
 //           firma Claudio (il dossier propone 3 = 3 x 0,65% = 1,95%, sotto
 //           il cap C1 del 3,25%; ma il valore ENTRA in vigore solo con la
 //           firma, qui e' solo un parametro).
+//  v1.40 -- 23/08/2026. STOP A OBIETTIVO RAGGIUNTO (proposta S1 del referto
+//           report/SWEEP_APPROFONDITO_EA_2026-08-22.md, par. 6 tabella madre
+//           riga S1 + par. 2 riga 8 della "tabella dei buchi" + par. 5.2).
+//           PERCHE': quel referto lo dice cosi', ed e' la lacuna piu' grave
+//           trovata nel confronto con 30 utility "prop" del campo:
+//             "e' l'unico buco della lista che puo' far fallire una
+//              challenge GIA' VINTA. Tutti gli altri 23 meccanismi difendono
+//              dal muro in basso; S1 e' l'unico che difende il traguardo.
+//              Il giorno in cui il conto tocca +10%, la challenge e' finita
+//              -- e oggi, nel nostro sistema, non esiste una sola riga di
+//              codice che lo sappia."
+//           I NUMERI, con la fonte (par. 5.2 dello stesso referto, due fonti
+//           INDIPENDENTI sullo stesso valore -- riportati come LETTI, non
+//           come regola di una prop che abbiamo verificato noi):
+//             +10,1% = equity a cui chiudere tutto e smettere, fase 1
+//                      (Code Base 49713 'PropFirmHelper': PASS_CRITERIA=110100
+//                       su 100k; Market 150962 'Prop Firm Protector EZ': 10,1%)
+//             +5,1%  = idem per la FASE 2 di verifica (Prop Firm Protector EZ)
+//           Il decimo di punto SOPRA il 10% e' lo stesso margine che il campo
+//           lascia in basso (4,5% contro muro 5%): si supera il traguardo di
+//           un'incollatura, non lo si sfiora.
+//           COSA HO SCRITTO QUI:
+//           - ABTG_ObiettivoSoglia_Calc() / ABTG_ObiettivoRaggiunto_Calc() /
+//             ABTG_ObiettivoLatch_Calc(): NUCLEO PURO, non leggono il conto,
+//             prendono riferimento/valore/target come argomenti;
+//           - il LATCH: una volta scattato, S1 resta scattato anche se il
+//             conto ridiscende. Lo stato sta in una GlobalVariable del
+//             terminale (stesso meccanismo di B1/C1) -> sopravvive al riavvio
+//             del VPS e vale per TUTTE le sedie del conto che hanno S1 acceso.
+//             Si sblocca SOLO A MANO: ABTG_ObiettivoResetta() o cancellando la
+//             GV ABTG_OBIETTIVO_RAGGIUNTO_<login> dal terminale;
+//           - ABTG_GuardiaIngresso() prende TRE argomenti nuovi IN CODA
+//             (saldo_riferimento=0, obiettivo_pct=0, su_equity=false): a
+//             target 0 il comportamento e' IDENTICO a prima e non viene
+//             letta ne' scritta nessuna GV -- e' il caso di autotest
+//             "target 0 -> mai, qualunque valore".
+//           SI MISURA SUL SALDO (BALANCE), non sull'equity: un profit target
+//           di challenge si porta a casa sul REALIZZATO, e il saldo non fa
+//           picchi che rientrano. Il referto stesso avvisa: "attenzione a non
+//           farlo scattare su un picco di equity intraday che poi rientra ->
+//           va valutato su equity con conferma, o su saldo". Qui NON c'e'
+//           nessuna conferma implementata, quindi si sceglie il saldo.
+//           L'equity resta disponibile come argomento in coda (opt-in) per
+//           chi la volesse, con il difetto dichiarato.
+//           LIMITE DICHIARATO: non sappiamo se la prop misuri il target sul
+//           saldo o sull'equity di fine giornata. Nei dossier del 21-22/08
+//           quel dato NON c'e' -- c'e' solo cosa fanno gli EA del campo.
+//           Resta una domanda per il supporto (report/DOMANDE_SUPPORTO_PROP).
+//           NESSUN EA e' stato modificato: l'accensione per sedia e il valore
+//           del target li firma Claudio (come per P1).
 //  ASCII puro: niente accenti e niente emoji nelle stringhe.
 #ifndef ABTG_PAUSAGUARDIAN_MQH
 #define ABTG_PAUSAGUARDIAN_MQH
@@ -121,6 +184,16 @@
 //    possono essere interrogati a ogni tick.
 #ifndef ABTG_LOG_OGNI_SEC
 #define ABTG_LOG_OGNI_SEC 300
+#endif
+
+//--- tolleranza in VALUTA sul confronto col traguardo (S1, v1.40).
+//    Un centesimo. Serve per un motivo aritmetico, non per generosita':
+//    100000 * (1 + 10.1/100) in virgola mobile binaria NON fa esattamente
+//    110100 (il 10,1% non e' rappresentabile), e senza tolleranza il caso
+//    "conto esattamente al traguardo" potrebbe NON far scattare S1.
+//    Un centesimo su 110.100 e' un errore da 0,00001%: dichiarato qui.
+#ifndef ABTG_EPS_VALUTA
+#define ABTG_EPS_VALUTA 0.01
 #endif
 
 //+------------------------------------------------------------------+
@@ -193,6 +266,8 @@ string ABTG_MotivoTesto(const int motivo)
    if(motivo==2) return("CAP RISCHIO APERTO raggiunto (firma C1)");
    if(motivo==3) return("Guardian non batte e questo EA lo pretende");
    if(motivo==4) return("PERDITE CONSECUTIVE OGGI su questa sedia (freno P1)");
+   if(motivo==5) return("OBIETTIVO DELLA CHALLENGE GIA' RAGGIUNTO (stop S1) -- "
+                        "si riapre SOLO A MANO");
    return("nessuno");
   }
 
@@ -369,6 +444,101 @@ bool ABTG_TroppePerditeConsecutive_Calc(const int perdite,const int soglia)
 
 //+------------------------------------------------------------------+
 //|                                                                   |
+//|   STOP A OBIETTIVO RAGGIUNTO (S1) -- NUCLEO PURO.                  |
+//|                                                                   |
+//|   IL PROBLEMA, con le parole del referto che l'ha trovato          |
+//|   (report/SWEEP_APPROFONDITO_EA_2026-08-22.md, par. 6):            |
+//|   "il giorno in cui il conto tocca +10%, la challenge e' finita -- |
+//|   e oggi, nel nostro sistema, non esiste una sola riga di codice   |
+//|   che lo sappia: gli EA continuerebbero a operare, e un solo       |
+//|   brutto pomeriggio riporterebbe l'equity sotto il target."        |
+//|                                                                    |
+//|   LA REGOLA, in una riga: raggiunto il traguardo, NON SI APRE PIU'.|
+//|                                                                    |
+//|   TRE COSE CHE S1 NON FA, e vanno lette prima di accenderlo:        |
+//|    1. NON CHIUDE NIENTE. Blocca l'APERTURA, non tocca le posizioni |
+//|       vive. Chiudere una posizione e' una decisione di rischio     |
+//|       (puo' realizzare una perdita, o buttare via un utile che sta |
+//|       correndo): quella resta di Claudio e, semmai, del Guardian   |
+//|       che gia' sa chiudere. Un meccanismo NUOVO non se la prende.  |
+//|       Il referto propone anche "chiudi tutto e cancella i          |
+//|       pendenti": e' un pezzo SEPARATO, lato Guardian, e non e' qui.|
+//|    2. NON SA DEI WEEKEND ne' delle giornate: non e' un contatore   |
+//|       giornaliero, e' un traguardo raggiunto una volta per sempre. |
+//|    3. NON SA cosa dice il regolamento della prop. Il numero (10,1) |
+//|       e il saldo di riferimento glieli passa chi lo accende.       |
+//+------------------------------------------------------------------+
+
+//--- IL TRAGUARDO IN VALUTA. 0 = spento o dati non validi.
+//    Utile anche solo per un pannello: "mancano X per finire".
+double ABTG_ObiettivoSoglia_Calc(const double saldo_riferimento,const double target_pct)
+  {
+   if(saldo_riferimento<=0.0) return(0.0);      // riferimento non dichiarato
+   if(target_pct<=0.0)        return(0.0);      // target spento / dito storto
+   return(saldo_riferimento+saldo_riferimento*target_pct/100.0);
+  }
+
+//+------------------------------------------------------------------+
+//| IL CONTO HA RAGGIUNTO IL TRAGUARDO? -- nucleo puro.               |
+//|                                                                    |
+//| saldo_riferimento = il capitale di partenza della challenge        |
+//|                     (es. 100000). 0 = S1 SPENTO.                   |
+//| valore_attuale    = saldo (scelta di casa) oppure equity, gia'     |
+//|                     letto dal chiamante. Qui e' solo un numero.    |
+//| target_pct        = il traguardo in percento (es. 10.1).           |
+//|                     0 o negativo = S1 SPENTO.                      |
+//|                                                                    |
+//| E' QUI che vive la garanzia di no-op, esattamente come per P1:     |
+//| a target 0 non esiste un saldo, per quanto grasso, che faccia      |
+//| scattare S1.                                                       |
+//+------------------------------------------------------------------+
+bool ABTG_ObiettivoRaggiunto_Calc(const double saldo_riferimento,
+                                  const double valore_attuale,
+                                  const double target_pct)
+  {
+   if(target_pct<=0.0)        return(false);    // spento: no-op assoluto
+   if(saldo_riferimento<=0.0) return(false);    // riferimento non dichiarato
+   if(valore_attuale<=0.0)    return(false);    // conto a zero: non e' un traguardo
+
+   double soglia=ABTG_ObiettivoSoglia_Calc(saldo_riferimento,target_pct);
+   if(soglia<=0.0)            return(false);
+
+   // ">=" con un centesimo di tolleranza: vedi ABTG_EPS_VALUTA.
+   return(valore_attuale>=soglia-ABTG_EPS_VALUTA);
+  }
+
+//+------------------------------------------------------------------+
+//| IL LATCH -- nucleo puro. "Scattato una volta, scattato per sempre"|
+//| (fino al reset a mano).                                           |
+//|                                                                    |
+//| PERCHE' il latch e' il cuore di S1 e non un dettaglio: senza, un   |
+//| conto che tocca +10,1% alle 15:00 e ridiscende a +9,8% alle 16:00  |
+//| tornerebbe a operare -- cioe' proprio lo scenario da cui S1 deve   |
+//| difendere ("restituire il giorno dopo tutto il guadagno").         |
+//|                                                                    |
+//| ORDINE DEI CONTROLLI, ognuno con la sua ragione:                   |
+//|  1. target<=0 -> false. S1 spento su QUESTA sedia = no-op totale,  |
+//|     anche se il latch e' acceso per il conto. E' il prezzo della   |
+//|     retrocompatibilita' assoluta: una sedia che non ha mai sentito |
+//|     parlare di S1 non deve cambiare comportamento. (Conseguenza    |
+//|     dichiarata: S1 e' per CONTO nella MEMORIA, per SEDIA           |
+//|     nell'EFFETTO. Chi vuole coprire tutto lo accende su tutto.)    |
+//|  2. gia_scattato -> true, SENZA guardare i numeri. Il traguardo e' |
+//|     un FATTO ACCADUTO, non una condizione da rivalutare.           |
+//|  3. altrimenti si misura.                                          |
+//+------------------------------------------------------------------+
+bool ABTG_ObiettivoLatch_Calc(const bool gia_scattato,
+                              const double saldo_riferimento,
+                              const double valore_attuale,
+                              const double target_pct)
+  {
+   if(target_pct<=0.0) return(false);           // 1. spento su questa sedia
+   if(gia_scattato)    return(true);            // 2. IL LATCH
+   return(ABTG_ObiettivoRaggiunto_Calc(saldo_riferimento,valore_attuale,target_pct)); // 3.
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                   |
 //|   LETTURA DELLE GlobalVariable -- l'unico punto che tocca il       |
 //|   terminale. Sopra c'e' il pensiero, qui c'e' il filo.             |
 //|                                                                   |
@@ -387,6 +557,23 @@ double ABTG_GVLeggi(const string radice)
    string n=ABTG_GVNome(radice);
    if(!GlobalVariableCheck(n)) return(0.0);
    return(GlobalVariableGet(n));
+  }
+
+//--- Scrittura (v1.40, la usa SOLO il latch S1: B1/C1 le scrive il
+//    Guardian, questo include le legge e basta). GlobalVariableSet crea
+//    la variabile se non c'e' e la fa persistere sul disco del terminale:
+//    e' cosi' che il latch sopravvive al riavvio del VPS.
+void ABTG_GVScrivi(const string radice,const double valore)
+  {
+   GlobalVariableSet(ABTG_GVNome(radice),valore);
+  }
+
+//--- Cancellazione (la usa SOLO il reset a mano di S1).
+bool ABTG_GVCancella(const string radice)
+  {
+   string n=ABTG_GVNome(radice);
+   if(!GlobalVariableCheck(n)) return(true);    // gia' assente: e' il risultato voluto
+   return(GlobalVariableDel(n));
   }
 
 //+------------------------------------------------------------------+
@@ -623,6 +810,155 @@ bool ABTG_TroppePerditeConsecutive(const long magic,const int soglia,
 
 //+------------------------------------------------------------------+
 //|                                                                   |
+//|   STOP S1 -- IL FILO: legge il conto, tiene il latch, spiega.      |
+//|                                                                   |
+//|   FAIL-OPEN o FAIL-CLOSED? La risposta e' DIVERSA da B1/C1, e va   |
+//|   detta chiaro perche' e' il punto in cui S1 rompe con lo schema.  |
+//|                                                                   |
+//|   B1 e C1 sono fail-open per costruzione: dipendono dal BATTITO di |
+//|   ABTG_Guardian.mq5, e un cane da guardia morto non deve fermare   |
+//|   la flotta per sempre. S1 NON dipende dal battito: il latch sta   |
+//|   in una GlobalVariable che scrive l'EA STESSO, e il traguardo si  |
+//|   ricalcola da due numeri che l'EA ha nei suoi input (riferimento  |
+//|   e target) piu' il saldo, che il terminale conosce sempre.        |
+//|   Quindi S1 FUNZIONA ANCHE A GUARDIAN MORTO, ed e' voluto: e' il   |
+//|   muro dalla parte del profitto, e bloccare un ingresso di troppo  |
+//|   non ha mai fatto perdere una challenge.                          |
+//|                                                                    |
+//|   E se la GV si perde (terminale reinstallato, profilo nuovo, GV   |
+//|   scaduta per inutilizzo -- MT5 cancella le GlobalVariable non     |
+//|   usate da 4 settimane)? Allora S1 RICALCOLA dal saldo:            |
+//|    - se il conto e' ancora sopra il traguardo -> riscatta subito,  |
+//|      da solo. Il latch e' una MEMORIA, la VERITA' e' il saldo;     |
+//|    - se il conto e' RIDISCESO sotto il traguardo -> S1 tornerebbe  |
+//|      a lasciar passare gli ordini. E' l'UNICO buco di S1, ed e'    |
+//|      dichiarato qui invece che scoperto dopo. Mitigazione pratica: |
+//|      la GV viene letta a ogni tentativo d'ingresso, e una GV letta |
+//|      non scade; e il giorno in cui il traguardo e' raggiunto la    |
+//|      cosa giusta da fare comunque e' che la challenge la chiuda    |
+//|      una persona, non un file.                                     |
+//|                                                                    |
+//|   NOTA sul Strategy Tester: le GlobalVariable esistono anche li',  |
+//|   separate da quelle del terminale. A target 0 (default) S1 non ne |
+//|   legge ne' scrive nessuna, quindi i backtest di ieri restano      |
+//|   confrontabili riga per riga con quelli di domani.                |
+//+------------------------------------------------------------------+
+
+//--- IL LATCH E' ACCESO? (informativo: per pannelli e per il Guardian)
+bool ABTG_ObiettivoLatchScattato()
+  {
+   return(ABTG_GVLeggi("ABTG_OBIETTIVO_RAGGIUNTO")>0.0);
+  }
+
+//--- QUANDO e' scattato (0 = mai).
+datetime ABTG_ObiettivoQuandoScattato()
+  {
+   return((datetime)ABTG_GVLeggi("ABTG_OBIETTIVO_RAGGIUNTO"));
+  }
+
+//--- Il valore misurato all'istante dello scatto (0 = mai scattato).
+double ABTG_ObiettivoValoreAlloScatto()
+  {
+   return(ABTG_GVLeggi("ABTG_OBIETTIVO_VALORE"));
+  }
+
+//+------------------------------------------------------------------+
+//| ACCENDE IL LATCH e lo scrive su disco. Idempotente: se e' gia'    |
+//| acceso non lo ritimbra (l'ora dello scatto e' l'ora del PRIMO     |
+//| scatto, e deve restare quella -- serve a raccontare alla prop     |
+//| quando abbiamo smesso).                                           |
+//+------------------------------------------------------------------+
+void ABTG_ObiettivoTimbra(const double valore,const double soglia,const string chi)
+  {
+   if(ABTG_ObiettivoLatchScattato()) return;    // gia' timbrato: non si sovrascrive
+
+   ABTG_GVScrivi("ABTG_OBIETTIVO_VALORE",valore);
+   ABTG_GVScrivi("ABTG_OBIETTIVO_SOGLIA",soglia);
+   ABTG_GVScrivi("ABTG_OBIETTIVO_RAGGIUNTO",(double)TimeCurrent());   // per ultima: e' la bandiera
+
+   PrintFormat("[STOP S1] %s: OBIETTIVO RAGGIUNTO. Misura=%.2f soglia=%.2f. "
+               "Da adesso NESSUN nuovo ingresso su questo conto per le sedie con S1 acceso. "
+               "Le posizioni gia' aperte NON vengono toccate. Si riapre SOLO A MANO "
+               "(ABTG_ObiettivoResetta oppure cancellando la GlobalVariable %s).",
+               chi,valore,soglia,ABTG_GVNome("ABTG_OBIETTIVO_RAGGIUNTO"));
+  }
+
+//+------------------------------------------------------------------+
+//| RESET A MANO -- l'unico modo di rimettere in moto la flotta.      |
+//|                                                                    |
+//| Si usa in due modi, e sono equivalenti:                            |
+//|  a) da uno script/EA:  ABTG_ObiettivoResetta("CLAUDIO");           |
+//|  b) a mano dal terminale: F3 (Strumenti > Variabili globali),      |
+//|     cancellare ABTG_OBIETTIVO_RAGGIUNTO_<login>.                   |
+//|                                                                    |
+//| ATTENZIONE, ed e' il motivo per cui non esiste un reset            |
+//| automatico: se il conto e' ANCORA sopra il traguardo, la prima     |
+//| sedia che prova ad aprire fara' riscattare S1 all'istante. Il      |
+//| reset serve dopo che una PERSONA ha deciso cosa fare della         |
+//| challenge (ritirare il profitto, passare alla fase 2, cambiare     |
+//| il saldo di riferimento), non per continuare a tradare.            |
+//+------------------------------------------------------------------+
+bool ABTG_ObiettivoResetta(const string chi="MANO")
+  {
+   bool era=ABTG_ObiettivoLatchScattato();
+   bool ok =ABTG_GVCancella("ABTG_OBIETTIVO_RAGGIUNTO");
+   ABTG_GVCancella("ABTG_OBIETTIVO_VALORE");
+   ABTG_GVCancella("ABTG_OBIETTIVO_SOGLIA");
+   PrintFormat("[STOP S1] %s: reset del latch (era %s, cancellazione %s). "
+               "Se il conto e' ancora sopra il traguardo, S1 riscattera' al primo ingresso.",
+               chi,(era?"ACCESO":"gia' spento"),(ok?"riuscita":"FALLITA"));
+   return(ok);
+  }
+
+//+------------------------------------------------------------------+
+//| LA DOMANDA CHE FA L'EA: "posso ancora aprire, o abbiamo finito?"  |
+//| true = OBIETTIVO RAGGIUNTO -> NON si apre piu'.                   |
+//|                                                                    |
+//| saldo_riferimento = capitale di partenza della challenge (0=off)  |
+//| target_pct        = traguardo in percento (0=off; il campo usa    |
+//|                     10,1 in fase 1 e 5,1 in fase 2 -- fonti nel   |
+//|                     changelog v1.40 in testa al file)             |
+//| chi               = nome della sedia, per il giornale             |
+//| su_equity         = false (default) -> misura sul SALDO.          |
+//|                     true -> misura sull'EQUITY: piu' pronto, ma   |
+//|                     puo' scattare su un picco intraday che poi    |
+//|                     rientra, E IL LATCH NON SI PENTE. Opt-in.     |
+//|                                                                    |
+//| A target 0 o riferimento 0 questa funzione esce PRIMA di toccare  |
+//| qualunque GlobalVariable e qualunque dato di conto: no-op vero.   |
+//+------------------------------------------------------------------+
+bool ABTG_ObiettivoRaggiunto(const double saldo_riferimento,const double target_pct,
+                             const string chi="EA",const bool su_equity=false)
+  {
+   if(target_pct<=0.0 || saldo_riferimento<=0.0) return(false);   // spento: nemmeno una lettura
+
+   bool   latch =ABTG_ObiettivoLatchScattato();
+   double valore=(su_equity? AccountInfoDouble(ACCOUNT_EQUITY)
+                           : AccountInfoDouble(ACCOUNT_BALANCE));
+   double soglia=ABTG_ObiettivoSoglia_Calc(saldo_riferimento,target_pct);
+
+   bool stop=ABTG_ObiettivoLatch_Calc(latch,saldo_riferimento,valore,target_pct);
+
+   // primo scatto: si timbra (e si urla nel giornale una volta sola)
+   if(stop && !latch) ABTG_ObiettivoTimbra(valore,soglia,chi);
+
+   // ripetizioni: al massimo una riga ogni ABTG_LOG_OGNI_SEC
+   static datetime ultimoLogS1=0;
+   datetime ora=TimeCurrent();
+   if(stop && latch && (ora-ultimoLogS1)>=ABTG_LOG_OGNI_SEC)
+     {
+      PrintFormat("[STOP S1] %s: ingresso rifiutato -- obiettivo raggiunto il %s "
+                  "(misura allo scatto %.2f, soglia %.2f, %s ora %.2f). Reset solo a mano.",
+                  chi,TimeToString(ABTG_ObiettivoQuandoScattato(),TIME_DATE|TIME_MINUTES),
+                  ABTG_ObiettivoValoreAlloScatto(),soglia,
+                  (su_equity?"equity":"saldo"),valore);
+      ultimoLogS1=ora;
+     }
+   return(stop);
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                   |
 //|   LA GUARDIA -- la riga unica da mettere negli EA.                 |
 //|                                                                   |
 //+------------------------------------------------------------------+
@@ -654,13 +990,34 @@ bool ABTG_TroppePerditeConsecutive(const long magic,const int soglia,
 //| potrebbe misurare in backtest). Resta pero' sotto l'interruttore    |
 //| 'attiva': chi lo vuole indipendente chiama direttamente             |
 //| ABTG_TroppePerditeConsecutive().                                    |
+//|                                                                     |
+//| ARGOMENTI NUOVI v1.40 (stop S1), tutti e tre IN CODA e a default    |
+//| neutro -- le chiamate della flotta (le ~40 di v1.20 e quelle a 5    |
+//| argomenti di v1.30) restano valide riga per riga:                   |
+//|   saldo_riferimento   = capitale di partenza della challenge        |
+//|                         (0 = SPENTO, e nessuna GV viene toccata);   |
+//|   obiettivo_pct       = traguardo in percento (0 = SPENTO);         |
+//|   obiettivo_su_equity = false = si misura sul SALDO (scelta di      |
+//|                         casa, motivata nel changelog in testa).     |
+//|                                                                     |
+//| S1 e' il PRIMO controllo, prima ancora del freno P1: e' l'unico     |
+//| motivo di stop DEFINITIVO. Gli altri quattro dicono "non adesso",   |
+//| S1 dice "abbiamo finito".                                           |
 //+------------------------------------------------------------------+
 bool ABTG_GuardiaIngresso(const bool attiva,const string chi="EA",
                           const bool pretendi_guardian=false,
                           const int soglia_perdite_consecutive=0,
-                          const long magic=0)
+                          const long magic=0,
+                          const double saldo_riferimento=0.0,
+                          const double obiettivo_pct=0.0,
+                          const bool obiettivo_su_equity=false)
   {
    if(!attiva) return(true);                    // 1. l'utente l'ha spenta
+
+   // 1-ante. STOP S1 (opt-in): a target 0 o riferimento 0 e' un no-op puro
+   if(obiettivo_pct>0.0 && saldo_riferimento>0.0 &&
+      ABTG_ObiettivoRaggiunto(saldo_riferimento,obiettivo_pct,chi,obiettivo_su_equity))
+      return(false);                            // motivo 5, gia' scritto nel giornale
 
    // 1-bis. freno P1 (opt-in): a soglia 0 questa riga e' un no-op puro
    if(soglia_perdite_consecutive>0 &&
@@ -922,13 +1279,120 @@ int ABTG_AutotestPerditeConsecutive()
    return(falliti);
   }
 
+//+------------------------------------------------------------------+
+//| AUTOTEST DELLO STOP S1 -- 30 casi, tutti a tavolino.              |
+//|                                                                    |
+//| Qui non serve nessuna cronologia finta: il nucleo di S1 prende tre |
+//| numeri e risponde. Quello che NON si prova a macchina e' il filo   |
+//| (lettura del saldo + scrittura della GlobalVariable), che va       |
+//| verificato UNA VOLTA a mano su demo. Procedura, sul conto DEMO:    |
+//|   1. su una sedia con S1 acceso, mettere un saldo_riferimento      |
+//|      FINTO piu' basso del saldo vero (es. riferimento = saldo/1,2) |
+//|      cosi' il traguardo risulta gia' superato;                     |
+//|   2. al primo tentativo d'ingresso il giornale deve scrivere       |
+//|      "[STOP S1] ... OBIETTIVO RAGGIUNTO" e l'ordine NON parte;     |
+//|   3. F3 nel terminale: deve esistere                               |
+//|      ABTG_OBIETTIVO_RAGGIUNTO_<login> con un timestamp;            |
+//|   4. riavviare il terminale: il blocco deve essere ANCORA li'      |
+//|      (e' la prova della persistenza, l'unica che conta davvero);   |
+//|   5. cancellare la GV (o chiamare ABTG_ObiettivoResetta) e         |
+//|      rimettere il riferimento vero: la sedia torna operativa.      |
+//+------------------------------------------------------------------+
+int ABTG_AutotestObiettivo()
+  {
+   int falliti=0;
+
+   //--- i due numeri del campo (fonti nel changelog v1.40 in testa al file)
+   const double RIF =100000.0;      // challenge 100k
+   const double T1  =10.1;          // fase 1: PropFirmHelper + Prop Firm Protector EZ
+   const double T2  =5.1;           // fase 2: Prop Firm Protector EZ
+
+   Print("[AUTOTEST] --- STOP S1: obiettivo raggiunto (latch, no-op, tolleranza) ---");
+
+   //--- A) IL TRAGUARDO IN VALUTA -----------------------------------
+   ABTG_AutotestCaso("soglia: 100000 + 10,1% -> 110100.00",
+                     (MathAbs(ABTG_ObiettivoSoglia_Calc(RIF,T1)-110100.0)<0.005),true,falliti);
+   ABTG_AutotestCaso("soglia con target 0 -> 0 (spento)",
+                     (MathAbs(ABTG_ObiettivoSoglia_Calc(RIF,0.0))<0.005),true,falliti);
+   ABTG_AutotestCaso("soglia con riferimento 0 -> 0 (spento)",
+                     (MathAbs(ABTG_ObiettivoSoglia_Calc(0.0,T1))<0.005),true,falliti);
+
+   //--- B) LA GARANZIA DI NO-OP (la stessa promessa fatta per P1) ----
+   //    Se un giorno uno di questi casi fallisce, qualcuno ha acceso S1
+   //    per sbaglio su tutta la flotta.
+   ABTG_AutotestCaso("target 0 con conto al doppio -> NON scatta (no-op)",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,200000.0,0.0),false,falliti);
+   ABTG_AutotestCaso("target negativo (dito storto) -> NON scatta",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,200000.0,-10.0),false,falliti);
+   ABTG_AutotestCaso("riferimento 0 -> NON scatta (no-op)",
+                     ABTG_ObiettivoRaggiunto_Calc(0.0,200000.0,T1),false,falliti);
+   ABTG_AutotestCaso("riferimento negativo (dito storto) -> NON scatta",
+                     ABTG_ObiettivoRaggiunto_Calc(-100000.0,200000.0,T1),false,falliti);
+   ABTG_AutotestCaso("valore 0 (conto vuoto) -> NON scatta",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,0.0,T1),false,falliti);
+   ABTG_AutotestCaso("valore negativo -> NON scatta",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,-5.0,T1),false,falliti);
+
+   //--- C) LA SOGLIA: sotto, esatto, sopra -------------------------
+   ABTG_AutotestCaso("target 10%: 109999 -> sotto, si opera",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,109999.0,10.0),false,falliti);
+   ABTG_AutotestCaso("target 10%: ESATTAMENTE 110000 -> SCATTA",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,110000.0,10.0),true,falliti);
+   ABTG_AutotestCaso("target 10%: 115000 -> SCATTA",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,115000.0,10.0),true,falliti);
+   ABTG_AutotestCaso("fase 1 (10,1%): ESATTAMENTE 110100 -> SCATTA",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,110100.0,T1),true,falliti);
+   ABTG_AutotestCaso("fase 1 (10,1%): 110099 -> NON scatta ancora",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,110099.0,T1),false,falliti);
+   ABTG_AutotestCaso("fase 2 (5,1%): ESATTAMENTE 105100 -> SCATTA",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,105100.0,T2),true,falliti);
+   ABTG_AutotestCaso("conto da 50000, target 10%: 55000 -> SCATTA",
+                     ABTG_ObiettivoRaggiunto_Calc(50000.0,55000.0,10.0),true,falliti);
+   ABTG_AutotestCaso("conto da 50000, target 10%: 54999 -> NON scatta",
+                     ABTG_ObiettivoRaggiunto_Calc(50000.0,54999.0,10.0),false,falliti);
+   //    la tolleranza di un centesimo: c'e', ed e' UN CENTESIMO, non di piu'
+   ABTG_AutotestCaso("mezzo centesimo sotto il traguardo -> SCATTA (tolleranza)",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,110099.995,T1),true,falliti);
+   ABTG_AutotestCaso("dieci centesimi sotto -> NON scatta (tolleranza stretta)",
+                     ABTG_ObiettivoRaggiunto_Calc(RIF,110099.90,T1),false,falliti);
+
+   //--- D) IL LATCH: e' qui che S1 vale davvero --------------------
+   ABTG_AutotestCaso("latch spento e conto sotto -> libero",
+                     ABTG_ObiettivoLatch_Calc(false,RIF,109000.0,T1),false,falliti);
+   ABTG_AutotestCaso("latch spento e conto sopra -> BLOCCA (primo scatto)",
+                     ABTG_ObiettivoLatch_Calc(false,RIF,110500.0,T1),true,falliti);
+   ABTG_AutotestCaso("latch ACCESO e conto RIDISCESO a 105000 -> RESTA BLOCCATO",
+                     ABTG_ObiettivoLatch_Calc(true,RIF,105000.0,T1),true,falliti);
+   ABTG_AutotestCaso("latch ACCESO e conto sotto il riferimento -> RESTA BLOCCATO",
+                     ABTG_ObiettivoLatch_Calc(true,RIF,98000.0,T1),true,falliti);
+   ABTG_AutotestCaso("latch ACCESO ma target 0 su questa sedia -> libero (no-op)",
+                     ABTG_ObiettivoLatch_Calc(true,RIF,105000.0,0.0),false,falliti);
+   ABTG_AutotestCaso("latch ACCESO con riferimento 0 (config storta) -> BLOCCA",
+                     ABTG_ObiettivoLatch_Calc(true,0.0,105000.0,T1),true,falliti);
+   ABTG_AutotestCaso("latch ACCESO con valore 0 (lettura fallita) -> BLOCCA",
+                     ABTG_ObiettivoLatch_Calc(true,RIF,0.0,T1),true,falliti);
+   //    il reset a mano si prova qui come "latch tornato spento"
+   ABTG_AutotestCaso("dopo il RESET, conto sceso a 105000 -> libero",
+                     ABTG_ObiettivoLatch_Calc(false,RIF,105000.0,T1),false,falliti);
+   ABTG_AutotestCaso("dopo il RESET ma conto ANCORA sopra -> riscatta subito",
+                     ABTG_ObiettivoLatch_Calc(false,RIF,111000.0,T1),true,falliti);
+
+   //--- E) IL MOTIVO NEL GIORNALE ----------------------------------
+   ABTG_AutotestCaso("motivo 5 = obiettivo raggiunto (testo dedicato)",
+                     (StringFind(ABTG_MotivoTesto(5),"OBIETTIVO")>=0),true,falliti);
+   ABTG_AutotestCaso("motivo 4 e' ancora il freno P1 (non spostato)",
+                     (StringFind(ABTG_MotivoTesto(4),"P1")>=0),true,falliti);
+
+   return(falliti);
+  }
+
 int ABTG_AutotestGuardia()
   {
    int falliti=0;
    datetime ORA=(datetime)1000000;        // "adesso" finto, comodo per i conti
    int TOL=120;                           // tolleranza battito dei test
 
-   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.30 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
+   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.40 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
                (long)ORA,TOL);
 
    //--- PAUSA (B1) -------------------------------------------------
@@ -981,6 +1445,12 @@ int ABTG_AutotestGuardia()
    //    gli EA che gia' chiamano ABTG_AutotestGuardia() lo ereditano senza
    //    essere toccati.
    falliti+=ABTG_AutotestPerditeConsecutive();
+
+   //--- STOP S1 (v1.40): stessa scelta del P1 -- l'autotest nuovo gira
+   //    dentro quello vecchio, cosi' ogni EA che gia' chiama
+   //    ABTG_AutotestGuardia() eredita i casi nuovi senza essere toccato.
+   //    Conteggio dei casi: 19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1) = 75.
+   falliti+=ABTG_AutotestObiettivo();
 
    if(falliti==0) Print("[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.");
    else           PrintFormat("[AUTOTEST] ABTG_PausaGuardian: %d CASI FALLITI -- NON mettere in campo.",falliti);
