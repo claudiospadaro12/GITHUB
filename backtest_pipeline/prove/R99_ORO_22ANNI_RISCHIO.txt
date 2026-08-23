@@ -1,0 +1,75 @@
+# =====================================================================
+#  R99 (proposta) — ORO SU 22 ANNI: LA MISURA DEL RISCHIO CHE NON ABBIAMO
+#  Scritto il 23/08/2026 dalla caccia SWEEP_MECCANISMI_2026-08-23.
+#  NON e' un round firmato: e' il file prova pronto per la firma.
+# =====================================================================
+#
+# IPOTESI (scritta PRIMA di qualunque numero)
+#   Le sedie vive sull'oro hanno un contratto di rischio firmato su una
+#   finestra corta: R17 (MaxMinNotte oro notte) su ~16 mesi, tutte le altre
+#   con @DAQUANDO 2024.09.26 (21 mesi). Quel 2024.09.26 e' il MURO DEI TICK
+#   DEGLI INDICI, copiato sull'oro per inerzia.
+#   La sonda del 17/08 (REFERTO_SONDA_STORICO_17-08.md, riga "XAUUSD |
+#   2004.06.11 | 22,1 anni") ha MISURATO che sull'oro il broker ha 22 anni.
+#   IPOTESI DA SMONTARE: che il drawdown promesso dalle celle vive dell'oro
+#   regga anche sui due eventi che nella nostra finestra NON esistono —
+#   il crollo dell'ottobre 2008 e il crollo dell'aprile 2013.
+#   (L'ampiezza esatta di quei due crolli NON la scrivo qui: non l'ho
+#    misurata sui nostri dati. La misura il round.)
+#   Se non regge, il DD promesso e' sottostimato e la taglia prop dell'oro
+#   va rivista PRIMA di accendere, non dopo.
+#
+# PERCHE' E' UNA MISURA DI RISCHIO E NON DI MERITO (Emendamento B, 16/08)
+#   "Il VECCHIO giudica il RISCHIO. Il RECENTE giudica il MERITO."
+#   Questo file NON chiede se l'oro guadagnava nel 2008. Chiede SOLO quanto
+#   avrebbe perso. Un drawdown e' un FATTO ACCADUTO e vale a qualunque n;
+#   il PF su una finestra di vent'anni fa NON viene usato per promuovere
+#   ne' per bocciare nessuna sedia.
+#
+# CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri)
+#   Questo round non promuove niente. Produce UN numero per cella:
+#     A. il DD massimo dell'equity su 2004.06.11 -> 2026.06.30 al rischio 1%
+#     B. la PEGGIOR GIORNATA in % (il muro prop giornaliero e' 5%)
+#     C. il DD massimo dentro ciascuna delle quattro finestre di regime
+#   E una sola decisione meccanica, dichiarata adesso:
+#     -> se il DD lungo di una cella supera il DOPPIO del DD promesso in
+#        CONTRATTI_SEDIE.md, quella sedia va in REVISIONE (corsia RISCHIO
+#        del criterio di uscita firmato il 18/08), senza altre discussioni.
+#     -> se non lo supera, il contratto resta e ora ha vent'anni sotto.
+#
+# CHE MODELLO (dichiarato, non nascosto)
+#   OHLC M1: i tick reali di BCM partono dal 2024.07.05, quindi su 22 anni
+#   NON ESISTONO. E' la tensione gia' scritta in R76: "o la finestra lunga
+#   o il riempimento vero, mai tutti e due".
+#   Vale perche' la domanda e' il DRAWDOWN di celle H1/H4 (non M5): R57 ha
+#   misurato che il modello ribalta il SEGNO sull'intraday, non che gonfia
+#   o sgonfia il DD di una cella swing. E il numero che esce e' comunque un
+#   LIMITE INFERIORE del rischio, mai un permesso.
+#
+# @SIMBOLO  XAUUSD
+# @PERIODO  H4
+# @DAQUANDO 2004.06.11
+#   ^^^ MISURATA, non ipotizzata: REFERTO_SONDA_STORICO_17-08.md sez. 2,
+#       CSV della sonda `ABTG_InfoBroker` con InpSondaStorico=true,
+#       59 simboli su 59 misurati, 0 date recuperate.
+#   ATTENZIONE AL TETTO: la stessa sonda ha misurato 100.000 barre H1 in
+#   locale sull'oro = il tetto "Max barre nel grafico" di MT5, NON il
+#   limite del broker. R76 ha gia' verificato che il tetto NON ferma lo
+#   Strategy Tester. Se il PASSO 0 misura una prima operazione DOPO il
+#   2006, il tetto ha morso lo stesso e la finestra si dichiara accorciata.
+#
+# PASSO 0 OBBLIGATORIO (prima di leggere qualunque numero)
+#   1. data della PRIMA operazione: deve cadere entro il 2005.12.31
+#   2. n totale operazioni: si scrive, non si commenta
+#   3. cella sonda e cella gemella IDENTICHE al centesimo
+#
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2004.06.11
+#
+# LA CELLA: quella VIVA, congelata. Vietato cambiarne uno solo.
+# (ABTG_SupertrendReversal_Ottimizzato, XAUUSD H4, magic 770901 — il
+#  contratto e' in report/CONTRATTI_SEDIE.md)
+# Nessuno sweep: questa e' UNA cella, misurata su una finestra nuova.
+InpTF=16388||16388||0||16388||N
+InpRiskPercent=1.0||1.0||0||1.0||N
