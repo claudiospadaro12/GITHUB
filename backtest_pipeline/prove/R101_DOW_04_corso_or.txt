@@ -1,0 +1,134 @@
+# =====================================================================
+#  R101 04_corso_or  --  + VOLUMI **O** ATR -- LA REGOLA LETTERALE DEL CORSO  [CELLA COMBINATA]
+#  ABTG_Dow_Apertura_US  su  U30USD  M5, TICK REALI
+# ---------------------------------------------------------------------
+#  CRITERI: backtest_pipeline\risultati_archivio\R101_CRITERI.md
+#  PERIMETRO FIRMATO: risultati_archivio\R101_FIRMA_ABLAZIONE.md
+#    ("SI AD ENTRAMBE, FIRMO L'ABLAZIONE SU DOW E DAX", Claudio 23/08/2026)
+#  >>> I CRITERI DI DETTAGLIO SONO [DA FIRMARE]. Finche' non lo sono,
+#      questo file non deve girare.
+#
+#  IL METODO: ABLAZIONE A STELLA, non a scala cumulativa.
+#    Ogni cella e' la CELLA VIVA con UN SOLO interruttore mosso. Tutti
+#    gli altri input sono pinnati IDENTICI in tutti e nove i file di
+#    questo EA, compresi i sotto-parametri dei filtri spenti (che
+#    restano INERTI finche' il loro interruttore e' a 0).
+#    Percio' il diff fra questo file e R101_DOW_00_viva.txt e'
+#    letteralmente di 2 riga(righe), e il driver lo VERIFICA
+#    prima di lanciare qualunque passata.
+#    Cosi' quello che si misura e' il filtro, non un pacchetto.
+#
+#  COSA CAMBIA QUI RISPETTO ALLA CELLA VIVA:
+#    InpUseVolumeFilter     0  ->  1   [SI ACCENDE]
+#    InpUseAtrFilter        0  ->  1   [SI ACCENDE]
+#
+#  PERCHE':
+#    E' l'unica cella che muove DUE interruttori, e il motivo e' scritto
+#    nel PDF: "supportata da aumento di volumi O da una volatilita'
+#    coerente" [PAG 14]. InpConfirmMode resta 0 = OR, cioe' BASTA UNA
+#    delle due conferme.
+#    NON E' UN'ABLAZIONE PURA e non si legge da sola: si legge solo
+#    accanto a 02 e 03. Se 02 e 03 costano entrambe e questa costa meno,
+#    l'OR sta funzionando come previsto; se costa piu' di entrambe,
+#    qualcosa non torna e il round si ferma li'.
+#
+#  MAGIC VERGINI 773340/773341: blocco 7732xx/7733xx, VERIFICATO libero in
+#  tutto il repo il 23/08/2026. Il magic vivo di questa sedia e' 770202
+#  e NON compare in nessun file di R101: il tester non deve poter
+#  incrociare i deal del forward.
+#  Lo sweep gemello sui due magic e' anche il CONTROLLO D'IGIENE: le due
+#  righe di ogni CSV devono uscire IDENTICHE AL CENTESIMO. Se non lo
+#  sono, il file non si legge.
+#  Ed e' anche l'unico asse con flag Y, come pretende la checklist
+#  punto 5: senza almeno un asse spazzolato il driver generico si
+#  rifiuta di partire e MT5 rispazzola la griglia vecchia.
+#
+#  LA CELLA VIVA, DA DOVE VIENE (fonte per fonte, in R101_CRITERI.md
+#  par. 2): deploy del 09/08 in report\PASSI_OPERATIVI.md, file prova
+#  R46b / R54a che l'hanno gia' riprodotta al centesimo, e
+#  report\CONTRATTI_SEDIE.md riga 770202.
+#  NUMERI AGLI ATTI DELLA CELLA VIVA (il metro del round):
+#    R54 (REFERTO_ROUND54_LATI_DOW.md par. 0-1), riga "solo LONG":
+#      OOS  +6.721,93 | PF 1,27013 | DD 4,3941% | n 130
+#      IS   +2.811,84 | PF 1,222   | DD 5,67%   | n  74
+#    R46 (REFERTO_ROUND46_GESTIONE.md, riga "A = LIVE"):
+#      OOS  +6.722 | PF 1,27 | DD 4,39%   -- stessa cella, stesso numero
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=400||400||0||400||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=1||1||0||1||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=0||0||0||0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=773340||773340||1||773341||Y
