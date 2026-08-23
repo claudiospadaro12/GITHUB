@@ -2599,3 +2599,59 @@ sbagliate, ed e' facile prenderle entrambe in buona fede:
 > misurato** e **dove** si misura, o al primo verde qualcuno lo scambiera' per la
 > conferma del par. 2.1. In R98 la riga c'e' (`$Note` del ramo `-SoloControllo`),
 > ed e' quella che rende la traduzione verificabile invece che dichiarata.
+
+---
+
+## 🆕 AGGIUNTA DEL 23/08/2026 — trovata verificando la riga R99 (oro su 22 anni, misura del RISCHIO)
+
+## 58. 🔢 LA COLONNA LETTA CONTANDO DALLA FINE: la colonna FACOLTATIVA in fondo sposta tutto, e quello che esce e' un NUMERO PLAUSIBILE
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_R99_ORO_RISCHIO.ps1`
+(`9ce568c`, funzione `LeggiDeal`), trovato **e RIPRODOTTO** prima dell'invio.
+Corretto leggendo l'INTESTAZIONE._
+
+Il punto 46-bis copre la colonna letta **per NOME** quando quel nome nel file non
+c'e': PowerShell risponde `$null` e tira dritto. Questo e' il caso **peggiore
+della stessa famiglia**, e va distinto proprio perche' il sintomo e' opposto:
+la colonna e' letta **per POSIZIONE dalla fine**, e quando la tabella ha una
+colonna facoltativa in coda **non esce `$null` — esce il valore della colonna
+ACCANTO**, che e' un numero perfettamente formato.
+
+R99 leggeva i deal del report `.htm` del tester cosi':
+
+```powershell
+$prof = NumInv $celle[$celle.Count-2]     # "il profitto e' il penultimo"
+$sald = NumInv $celle[$celle.Count-1]     # "il saldo e' l'ultimo"
+```
+
+La tabella dei deal di MT5 ha in fondo una colonna **`Comment`/`Commento`**
+(e questo EA ci scrive dentro `STREV OTT`). Con quella colonna presente:
+`$prof` prende il **SALDO** (~100.000) e `$sald` prende il **commento** (`$null`).
+La somma per giornata diventa una somma di **saldi**, sempre positiva; il minimo
+partiva da un pavimento `$peggio = 0.0` e non scendeva mai.
+
+**Misurato sui due campioni**: con la colonna commento la peggior giornata usciva
+**`0,00%` con la data VUOTA**; senza, la stessa storia dava **`-3,52%`**. Cioe'
+uno dei **tre numeri FIRMATI** del round, confrontato con un muro prop del **5%**,
+sarebbe arrivato a Claudio come **verde pieno** — mentre i criteri dello stesso
+round dicono, testualmente, _"un numero inventato dentro un verdetto firmato
+sarebbe peggio di un numero mancante"_.
+
+E il pavimento a zero e' la seconda meta' del difetto: **"non ho trovato nessuna
+giornata perdente" e "la peggior giornata vale 0,00%" erano indistinguibili.**
+
+> ✅ **REGOLA, tre pezzi.**
+> 1. **Una colonna si individua leggendo l'INTESTAZIONE, mai contando le celle**
+>    — e l'intestazione e' **LOCALIZZATA** (`Profit`/`Profitto`, `Balance`/`Saldo`:
+>    il terminale di casa puo' essere in italiano).
+> 2. **Se l'intestazione non si riconosce, si torna VUOTI**, e chi chiama scrive
+>    `NON MISURATA`. Non si indovina la posizione: e' il controllo positivo del
+>    punto 55 applicato alle colonne.
+> 3. **Nessun accumulatore di minimo parte da un pavimento** (`0.0`): si parte da
+>    `$null` e si prende il minimo VERO, cosi' "non trovato" e "trovato e vale
+>    zero" restano due cose diverse.
+>
+> 🧪 **Come si prova, e va provato**: si costruiscono **due** report finti, con e
+> senza la colonna in coda, e si guarda se il numero cambia. Se cambia, la
+> lettura e' posizionale e va rifatta. Trenta secondi, e qui separavano un
+> `-3,52%` da uno `0,00%` firmato.

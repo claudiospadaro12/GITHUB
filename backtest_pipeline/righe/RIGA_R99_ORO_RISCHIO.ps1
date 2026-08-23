@@ -373,6 +373,8 @@ function LeggiDeal($path){
     if($txt -notmatch '<t[dr]'){ $txt = [Text.Encoding]::Unicode.GetString($by) }
     if($txt -notmatch '<t[dr]'){ $txt = [Text.Encoding]::GetEncoding(1252).GetString($by) }
   }catch{ return @() }
+  #  --- 1. tutte le righe ridotte a celle, una volta sola
+  $righe = New-Object System.Collections.ArrayList
   foreach($tr in [regex]::Matches($txt,'(?s)<tr[^>]*>(.*?)</tr>')){
     $celle = New-Object System.Collections.ArrayList
     foreach($td in [regex]::Matches($tr.Groups[1].Value,'(?s)<t[dh][^>]*>(.*?)</t[dh]>')){
@@ -381,19 +383,47 @@ function LeggiDeal($path){
       $c = $c.Replace("&nbsp;"," ").Replace([string][char]160," ").Trim()
       [void]$celle.Add($c)
     }
+    [void]$righe.Add(@($celle))
+  }
+  #  --- 2. LE COLONNE SI TROVANO NELL'INTESTAZIONE, MAI PER POSIZIONE.
+  #  >>> DIFETTO MISURATO DAL VERIFICATORE IL 23/08, e riprodotto: la tabella
+  #      dei deal di MT5 ha una colonna 'Comment'/'Commento' IN FONDO. Contando
+  #      dalla fine (Count-2 / Count-1) si legge il SALDO al posto del PROFITTO
+  #      e il commento al posto del saldo: la somma giornaliera diventa una
+  #      somma di SALDI, sempre positiva, e la peggior giornata usciva
+  #      0,00% con la data VUOTA -- un VERDE FALSO stampato al posto di
+  #      'NON MISURATA', su uno dei tre numeri FIRMATI e contro un muro prop
+  #      del 5%. I criteri par. 5.2 dicono l'opposto: "un numero inventato
+  #      dentro un verdetto firmato sarebbe peggio di un numero mancante".
+  #  >>> E l'intestazione e' LOCALIZZATA: il terminale puo' essere in italiano.
+  $iProf = -1; $iSald = -1
+  foreach($celle in $righe){
     if($celle.Count -lt 8){ continue }
+    $p = -1; $s = -1
+    for($i=0; $i -lt $celle.Count; $i++){
+      $h = ("" + $celle[$i]).ToLower().Trim()
+      if($h -eq "profit" -or $h -eq "profitto"){ $p = $i }
+      if($h -eq "balance" -or $h -eq "saldo"){ $s = $i }
+    }
+    if($p -ge 0 -and $s -ge 0){ $iProf = $p; $iSald = $s; break }
+  }
+  #  CONTROLLO POSITIVO (checklist 55): senza intestazione riconosciuta NON si
+  #  tira a indovinare la posizione. Si torna VUOTO, e chi chiama scrive
+  #  'NON MISURATA' -- che e' la risposta onesta.
+  if($iProf -lt 0 -or $iSald -lt 0){ return @() }
+  #  --- 3. le righe dei deal, lette PER INDICE DI COLONNA
+  foreach($celle in $righe){
+    if($celle.Count -le [math]::Max($iProf,$iSald)){ continue }
     if($celle[0] -notmatch '^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}:\d{2}$'){ continue }
     $dir = ""
     foreach($c in $celle){
-      $lc = $c.ToLower()
+      $lc = ("" + $c).ToLower()
       if($lc -eq "in" -or $lc -eq "out" -or $lc -eq "in/out"){ $dir = $lc }
     }
     if($dir -eq ""){ continue }                    # non e' la tabella dei DEAL
-    $prof = NumInv $celle[$celle.Count-2]
-    $sald = NumInv $celle[$celle.Count-1]
     $d = [datetime]::MinValue
     if(-not [datetime]::TryParseExact($celle[0],"yyyy.MM.dd HH:mm:ss",$INV,[Globalization.DateTimeStyles]::None,[ref]$d)){ continue }
-    [void]$out.Add([pscustomobject]@{ Q=$d; Dir=$dir; Profit=$prof; Saldo=$sald })
+    [void]$out.Add([pscustomobject]@{ Q=$d; Dir=$dir; Profit=(NumInv $celle[$iProf]); Saldo=(NumInv $celle[$iSald]) })
   }
   return @($out)
 }
@@ -1089,6 +1119,15 @@ else{
       #  CHIUSURE REALIZZATE, non sull'equity intraday. E' la stessa
       #  approssimazione con cui e' stata misurata la peggior giornata di
       #  portafoglio in R51.
+      #  CONTROLLO POSITIVO sulla colonna del profitto (checklist 55): se
+      #  NESSUN deal ha un profitto leggibile, la somma per giorno sarebbe
+      #  zero ovunque e la peggior giornata uscirebbe "0,00%" -- cioe' un
+      #  VERDE FALSO. Zero profitti letti e zero giornate perdenti devono
+      #  essere DISTINGUIBILI.
+      $conProfitto = @($deal | Where-Object { $_.Profit -ne $null }).Count
+      if($conProfitto -eq 0){
+        [void]$Problemi.Add("CRITERIO B: nel report ho riconosciuto " + $deal.Count + " deal ma NESSUNO ha un profitto leggibile nella colonna trovata. La PEGGIOR GIORNATA resta NON MISURATA: nessun numero inventato. Il report e' nello zip, si guarda a mano.")
+      } else {
       $perGiorno = @{}
       $saldoFine = @{}
       $ordine = New-Object System.Collections.ArrayList
@@ -1100,17 +1139,29 @@ else{
       }
       $Passo0.GiorniOperativi = $ordine.Count
       $saldoPrec = [double]$Deposito
-      $peggio = 0.0; $peggioG = ""
+      #  >>> NIENTE PAVIMENTO A ZERO. Partendo da $peggio = 0.0 una storia
+      #      senza giornate perdenti stampa "0,00%" con la DATA VUOTA, che si
+      #      legge come una misura ed e' invece un "non ho trovato niente".
+      #      Si prende il MINIMO VERO, e se e' positivo si dice che il minimo
+      #      e' positivo: e' un'informazione, non un buco.
+      $peggio = $null; $peggioG = ""
       foreach($g in $ordine){
         $base = $saldoPrec
         if($base -le 0){ $base = [double]$Deposito }
         $pct = 100.0 * $perGiorno[$g] / $base
-        if($pct -lt $peggio){ $peggio = $pct; $peggioG = $g }
+        if($peggio -eq $null -or $pct -lt $peggio){ $peggio = $pct; $peggioG = $g }
         if($saldoFine.ContainsKey($g)){ $saldoPrec = $saldoFine[$g] }
       }
-      $Passo0.PeggiorGiornataPct  = [math]::Round($peggio,2)
-      $Passo0.PeggiorGiornataData = $peggioG
-      $Passo0.PeggiorGiornata = $Passo0.PeggiorGiornataPct.ToString("0.00",$INV) + "%  (il " + $peggioG + ", su " + $ordine.Count + " giornate operative)"
+      if($peggio -eq $null){
+        [void]$Problemi.Add("CRITERIO B: nessuna giornata operativa ricavata dai deal del report. La PEGGIOR GIORNATA resta NON MISURATA.")
+      } else {
+        $Passo0.PeggiorGiornataPct  = [math]::Round($peggio,2)
+        $Passo0.PeggiorGiornataData = $peggioG
+        $coda = ""
+        if($peggio -ge 0){ $coda = "   <<< NESSUNA giornata in perdita: questo e' il giorno MENO buono, non una perdita" }
+        $Passo0.PeggiorGiornata = $Passo0.PeggiorGiornataPct.ToString("0.00",$INV) + "%  (il " + $peggioG + ", su " + $ordine.Count + " giornate operative, " + $conProfitto + " deal con profitto letto)" + $coda
+      }
+      }
     }
   } else {
     [void]$Problemi.Add("CRITERIO B: NON ho trovato nessun report 'R99_singola*.htm' scritto dopo l'avvio della passata (cercato in " + $InstDir + ", " + $DataFolder + ", " + $Work + ", " + $MqlFiles + "). La PEGGIOR GIORNATA resta NON MISURATA e NON si inventa. COME AVERLA: aprire MT5, Strategy Tester, ricaricare passo0_singola.ini (e' nello zip) in test singolo, tasto destro sul risultato -> Report, e leggere la tabella dei Deal. In alternativa si aggiunge un export per-trade all'EA, ma quella e' una modifica a una SEDIA VIVA e vuole una firma.")
