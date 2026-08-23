@@ -2716,3 +2716,154 @@ contraddizione dichiarando una capacita' che non c'era.
 > 🧭 **Come si trova, in trenta secondi**: si cerca la guardia di idempotenza
 > (`Test-Path ... -and -not $Rifai`) e si guarda **in quale ciclo vive**. Se
 > vive nel ciclo interno e la promessa parla del ciclo esterno, il difetto c'e'.
+
+---
+
+## 🆕 AGGIUNTE DEL 23/08/2026 — trovate verificando `archivia_test_desktop.ps1`
+
+## 60. 🎭 IL PATTERN SCRITTO IN REGEX E CONFRONTATO CON `-like`: la whitelist sembra giusta e non prende NIENTE
+
+_Difetto vero, gia' committato in `backtest_pipeline/archivia_test_desktop.ps1`
+(`a4a6b75`, riga 51), trovato **e RIPRODOTTO** prima che la riga girasse._
+
+Il punto 46 copre `-LiteralPath` su un percorso che contiene un wildcard: un
+carattere speciale trattato come letterale. **Questo e' lo specchio**, ed e' piu'
+insidioso perche' il pattern e' *bello da leggere*:
+
+```powershell
+$Pattern = @( 'R[0-9]+_*', ... )          # "le cartelle R97_, R100_, ..."
+foreach ($pat in $Pattern) { if ($v.Name -like $pat) { ... } }
+```
+
+In `-like` **le parentesi quadre sono un set di UN carattere e il `+` e'
+LETTERALE**. Quindi `'R[0-9]+_*'` matcha `R5+_qualcosa` e **non matcha mai**
+`R97_...` ne' `R100_...`. Misurato:
+
+```
+R97_ORB_NASUSD_CORSA    -like 'R[0-9]+_*'  ->  False
+R100_ORO_FLOTTA.zip     -like 'R[0-9]+_*'  ->  False
+R5+_test                -like 'R[0-9]+_*'  ->  True
+```
+
+Il pattern PRINCIPALE della lista chiusa — quello delle cartelle di round, cioe'
+il 90% del lavoro — era **inerte**. Lo script sarebbe girato, avrebbe stampato
+tutto verde e archiviato **zero** cartelle di round: e' il gate decorativo del
+punto 14, spostato dal codice d'uscita al MOTORE DI CONFRONTO.
+
+E il difetto gemello, nello stesso file: la guardia anti-raddoppio del prefisso
+(`if ($v.Name -match '^\d{4}-\d{2}-\d{2}_\d{4}_')`) era **CODICE MORTO** — un
+nome gia' prefissato non supera nessun pattern della lista, quindi la guardia
+non poteva scattare mai. Una guardia irraggiungibile e una guardia che funziona
+si assomigliano molto, in lettura.
+
+> ✅ **REGOLA. Un pattern si prova sui NOMI VERI, non si rilegge.** Tre righe:
+> ```powershell
+> foreach($n in @('R97_ORB','R100_ORO.zip','ROBA_mia')){ "{0,-20} {1}" -f $n,($n -match $rx) }
+> ```
+> E si sceglie il motore prima di scrivere il pattern: **`-like` per i wildcard
+> di shell** (`*`, `?`), **`-match` con regex ancorata** (`'^R[0-9]+[_-]'`) per
+> tutto cio' che ha classi, quantificatori o alternative. I due linguaggi si
+> assomigliano abbastanza da ingannare, e `[0-9]` e' valido in ENTRAMBI con
+> significati diversi: e' li' che si scivola.
+> 🧪 **E ogni guardia va provata sull'esempio che dovrebbe FARLA SCATTARE**
+> (punto 55): se non si riesce a costruire quell'esempio, la guardia e' morta.
+
+## 61. ⏰ L'AUTOMATISMO A ORARIO FISSO ATTRAVERSA IL LAVORO DEGLI ALTRI (e la cartella "ferma" non lo e')
+
+_Stesso file, stesso commit. L'attivita' pianificata sposta le cartelle dal
+Desktop **ogni sera alle 23:30**._
+
+Un'attivita' pianificata non e' un comando: e' un comando che parte **quando
+capita**, cioe' anche in mezzo a tutto il resto. Due collisioni misurate, e
+nessuna delle due si vede leggendo lo script da solo:
+
+1. **Contro una corsa VIVA.** I round durano **2-6 ore** (R100) e scrivono la
+   loro cartella **sul Desktop mentre girano**. Alle 23:30 l'archiviatore
+   la sposta **sotto i piedi del driver**, che continua a scrivere su un
+   percorso che non esiste piu' o se ne ricrea uno a meta'. Il round non
+   fallisce in modo rumoroso: si **spezza in due cartelle**.
+2. **Contro un altro automatismo.** `scarica_pagella.ps1 -Installa` scrive
+   `Desktop\pagella_AAAA-MM-GG.txt` **alle 23:15**; la lista chiusa conteneva
+   `'pagella_*'`. Quindici minuti dopo la pagella spariva dal Desktop — e
+   `recupera_100k.ps1` (righe 44-46) la **cerca proprio li'**, quindi avrebbe
+   detto "NIENTE TROVATO" in perfetta buona fede. Due automatismi di casa, uno
+   che produce e uno che nasconde, **scritti a quattro giorni di distanza**.
+
+E la contromisura ovvia — *"non toccare cio' che e' stato scritto da poco"* —
+**non funziona se scritta nel modo ovvio**, ed e' la meta' che vale la pena
+ricordare:
+
+> ⚠️ **Il `LastWriteTime` di una CARTELLA non cambia quando si scrive dentro una
+> SOTTOCARTELLA.** Cambia solo quando si aggiunge/toglie un figlio DIRETTO.
+
+Verificato: cartella `round/` con `round/sub/csv.csv` appena scritto ->
+`LastWriteTime` della radice **1,2 secondi piu' vecchio** del contenuto. Una
+cartella di risultati in cui il driver sta versando CSV in `sub/` sembra
+**ferma da ore**. Quindi la guardia di freschezza la lascia passare, **e il
+prefisso data che le si mette davanti e' sbagliato** — cioe' salta proprio la
+promessa per cui lo script esiste ("l'ordine alfabetico e' quello cronologico").
+
+> ✅ **REGOLA, tre pezzi.**
+> 1. **Prima di installare un'attivita' pianificata si elencano gli ALTRI
+>    automatismi sulla stessa cartella e i loro ORARI**, e si dice chi produce e
+>    chi consuma. Un artefatto che un altro script CERCA per percorso fisso non
+>    entra in nessuna lista "sposta".
+> 2. **Chi sposta roba mentre puo' esserci una corsa viva salta cio' che e'
+>    fresco** (`-MinutiFermo`, default 30) e lo DICHIARA a schermo.
+> 3. **L'eta' di una cartella e' il MASSIMO RICORSIVO dei suoi figli**, mai il
+>    `LastWriteTime` della radice:
+>    ```powershell
+>    $t = $v.LastWriteTime
+>    if($v.PSIsContainer){ foreach($f in @(Get-ChildItem -LiteralPath $v.FullName -Recurse -Force -EA SilentlyContinue)){ if($f.LastWriteTime -gt $t){ $t = $f.LastWriteTime } } }
+>    ```
+
+### 61-bis. 🗑️ E IL LOG DI UN GIRO VUOTO CHE COPRE IL LOG DEL GIRO CHE AVEVA MOSSO
+
+Trovato **eseguendo** la correzione, non leggendola. Lo script e' rieseguibile e
+scrive un log CSV `Origine,Destinazione` per poter fare `-Annulla` (punto 9).
+Ma `-Annulla` prendeva **il log piu' RECENTE**, e il secondo lancio — quello che
+non trova piu' niente da spostare, cioe' il caso NORMALE — ne scriveva uno
+**vuoto**. Da quel momento `-Annulla` rispondeva `Rimessi a posto: 0` **per
+sempre**, con tutti i file ancora spostati e nessun errore. La rete di sicurezza
+si stacca da sola al primo rilancio innocuo.
+
+> ✅ **Un log di ANNULLAMENTO si scrive solo se c'e' qualcosa da annullare, e
+> chi lo rilegge cerca l'ultimo NON VUOTO.**
+> ```powershell
+> if($Righe.Count -gt 0){ $Righe | Export-Csv -LiteralPath $LogCsv -NoTypeInformation }
+> ...
+> $ultimo = Get-ChildItem $LogDir -Filter "archivio_*.csv" | Sort-Object LastWriteTime -Descending |
+>           Where-Object { @(Import-Csv -LiteralPath $_.FullName).Count -gt 0 } | Select-Object -First 1
+> ```
+> E' la famiglia del punto 12 (il backup che si auto-distrugge al secondo
+> lancio), col rilancio innocuo al posto di `-Force`.
+
+## 62. 🧵 LA FUNZIONE CHE TORNA UNA LISTA DI UNO: `$lista[0]` diventa un CARATTERE
+
+_Difetto vero introdotto **dalla correzione stessa** del punto 61 e trovato
+**eseguendola** (mai spedito). E' la ragione per cui una simulazione vale piu'
+di una rilettura._
+
+```powershell
+function Trova-Desktop { ...; return @($lista) }
+$Desktops = Trova-Desktop          # <-- SBAGLIATO
+$Principale = $Desktops[0]
+```
+
+PowerShell **srotola** una collezione di un solo elemento nell'elemento stesso:
+con UN solo Desktop — **il caso normale** — `$Desktops` e' una **stringa**, e
+`$Desktops[0]` non e' il percorso ma il suo **primo carattere**. Misurato:
+l'archivio veniva creato in **`C\ARCHIVIO_TEST`**, un percorso RELATIVO alla
+cartella corrente. E niente si accorge di niente: `$Desktops.Count` vale `1`
+lo stesso e il `foreach` gira una volta sola, correttamente.
+
+E' il cugino del punto 46-bis (la colonna letta con un nome che non c'e': PS
+risponde `$null` e tira dritto): qui non risponde `$null`, risponde una cosa
+**plausibile** — un carattere e' una stringa valida da dare a `Join-Path`.
+
+> ✅ **REGOLA. `@()` sulla RICEZIONE, non solo sul `return`.**
+> `$x = @(Funzione-Che-Torna-Lista)`. Il `@()` dentro la funzione non protegge
+> niente: lo srotolamento avviene **all'uscita**.
+> 🧭 **Dove si annida**: ogni `$roba[0]`, `$roba.Count -eq 1`, `Select-Object
+> -First 1` su qualcosa che *"tanto ne trova sempre almeno due"*. Il caso a
+> UNO e' quello che gira in produzione tutti i giorni.
