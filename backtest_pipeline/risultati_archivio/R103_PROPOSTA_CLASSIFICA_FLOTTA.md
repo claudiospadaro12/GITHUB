@@ -1,4 +1,14 @@
-# 🏆 R103 — LA CLASSIFICA DELLA FLOTTA (proposta, [DA FIRMARE])
+# 🏆 R103 — LA CLASSIFICA DELLA FLOTTA (✅ FIRMATA)
+
+**Firmata da Claudio il 24/08/2026, in chat: "FIRMO TUTTE E TRE, PARTIAMO"**
+— tutte e tre le decisioni proposte, SENZA modifiche:
+1. Finestra COMUNE **2020.01.01 -> 2026.06.30** (6,5 anni, col covid dentro).
+2. Le **15 sedie indici** girano su 21 mesi (2024.09.26 -> 2026.06.30), tabella SEPARATA ed etichettata.
+3. Classifica su **due colonne** (taglia viva + normalizzato 1%), ordinata sul normalizzato.
+
+**Stato**: la macchina di preparazione (criteri di dettaglio, 40 file prova,
+driver, righe di lancio) e' allo studio adesso. Nessuna passata parte finche'
+il verificatore non ha dato PASS.
 
 _Nasce da una correzione di rotta di Claudio, 24/08/2026:_
 > **"IO VOLEVO LA CLASSIFICA DI TUTTI I NOSTRI EA. DI TUTTI QUELLI TRA CONTO
