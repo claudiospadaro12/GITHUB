@@ -68,3 +68,13 @@ Si può firmare in blocco, per corsia, o riga per riga.
 Corsie C e D: NON firmate (C resta in coda come firma separata; D era
 presa d'atto). Contratti riscritti in CONTRATTI_SEDIE.md. Esecuzione:
 checklist operativa consegnata in chat; verifica col censimento .chr.
+
+## ESECUZIONE (24/08 sera, ~23:00)
+- CORSIA B (5 riduzioni): eseguite da Claudio sul VPS.
+- CORSIA A (4 spegnimenti): eseguiti. VERIFICA A VISTA sulla lista Experts
+  del piccolo (screenshot 23:09): le 4 sedie firmate sono FUORI, tutte le
+  vive al loro posto, zero vittime collaterali. Gold_Ichimoku assente dalla
+  lista del piccolo: da confermare che stia sul terminale del grande.
+- Posizione orfana XAGUSD buy 0.01 (772363): mercato metalli in pausa
+  serale, protetta da S/L 68.185 / T/P 69.998 sul server. Si chiude
+  domattina, poi Profili->Salva + censimento di verifica (promemoria armato).
