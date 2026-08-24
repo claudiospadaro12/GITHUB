@@ -80,3 +80,10 @@ un LIMITE INFERIORE e il profitto una STIMA DEL LORDO. Un solo regime sui
 4. R102 blocchi 3-6 (finestre lunghe) — bassa priorità.
 
 _Referti driver integrali agli atti. Corsa 25 sedie: 36 minuti._
+
+## 🔴 ERRATA (25/08, segnalazione di Claudio): F25 Gold_Ichimoku NON è in campo
+Rimossa dai grafici a giugno (ultimi trade veri: 9/06 e 19/06, entrambi
+persi); il .chr residuo su disco ha ingannato il censimento del 23/08
+(stessa classe della doppia riga ORB). La sua riga in classifica vale come
+misura di un CANDIDATO, non di una sedia viva. Squadra 21 mesi corretta:
++353.688, DD 8,8%. La flotta viva reale post-revisione è di 35 sedie.
