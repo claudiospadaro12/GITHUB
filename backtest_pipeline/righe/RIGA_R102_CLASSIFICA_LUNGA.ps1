@@ -2043,8 +2043,18 @@ try{
   }
   else{
     $ko2 = @($Lavoro | Where-Object { $_.Esito -ne "OK" })
-    if($ko2.Count -gt 0 -or $Problemi.Count -gt 0){
-      [void]$R.Add("ESITO: PARZIALE -- " + $ko2.Count + " sedie su " + $Lavoro.Count + " non sono OK, e " + $Problemi.Count + " problemi in elenco. NON e' un round completo.")
+    #  >>> DIFETTO DI LEGGIBILITA' PAGATO (blocco 1 di R102, 24/08): la frase
+    #      diceva "PARZIALE -- 0 sedie su 3 non sono OK", cioe' ANNUNCIAVA UN
+    #      GUASTO mentre diceva che tutto era a posto, e i 3 "problemi" erano
+    #      rilievi DICHIARATIVI (finestre accorciate = risultati del round).
+    #      Claudio ha letto giallo e ha pensato che la corsa fosse fallita.
+    #      Classe 47: la spia rossa decorativa. Adesso i due casi sono
+    #      DISTINTI, e la frase dice quale dei due e'.
+    if($ko2.Count -gt 0){
+      [void]$R.Add("ESITO: PARZIALE -- " + $ko2.Count + " sedie su " + $Lavoro.Count + " NON hanno prodotto i numeri (elenco qui sopra), piu' " + $Problemi.Count + " rilievi. NON e' un blocco completo.")
+    }
+    elseif($Problemi.Count -gt 0){
+      [void]$R.Add("ESITO: COMPLETO CON RILIEVI -- tutte e " + $Lavoro.Count + " le sedie hanno prodotto i numeri attesi. I " + $Problemi.Count + " rilievi in elenco sono RISULTATI del round (finestra accorciata, densita', contratto), non guasti: si leggono ACCANTO ai numeri, non invece dei numeri.")
     }
     else{ [void]$R.Add("ESITO: OK -- tutte le sedie hanno prodotto i numeri attesi, nessun problema in elenco.") }
   }
@@ -2117,8 +2127,15 @@ if($SoloControllo){
   Write-Host "ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN numero. QUESTO ZIP NON E' IL ROUND." -ForegroundColor Green
   exit 0
 }
-if($ko3.Count -gt 0 -or $Problemi.Count -gt 0){
-  Write-Host ("ESITO: PARZIALE (" + $ko3.Count + " sedie non OK, " + $Problemi.Count + " problemi)") -ForegroundColor Yellow; exit 1
+if($ko3.Count -gt 0){
+  Write-Host ("ESITO: PARZIALE (" + $ko3.Count + " sedie non OK, " + $Problemi.Count + " rilievi) -- lo zip esiste: mandalo") -ForegroundColor Yellow; exit 1
+}
+if($Problemi.Count -gt 0){
+  #  Tutte le sedie OK e solo rilievi dichiarativi: NON e' un fallimento, e
+  #  quindi NON esce 1. Un codice rosso su una corsa riuscita e' esattamente
+  #  la spia che nessuno guarda piu' la volta che diventa vera (classe 47).
+  Write-Host ("ESITO: COMPLETO CON RILIEVI (" + $Problemi.Count + " rilievi da leggere nel referto, nessuna sedia mancante)") -ForegroundColor Green
+  exit 0
 }
 Write-Host "ESITO: OK" -ForegroundColor Green
 #  >>> L'exit 0 NON e' decorativo (rilievo del verificatore su R100).
