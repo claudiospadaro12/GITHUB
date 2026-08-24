@@ -7,6 +7,37 @@
 
 ---
 
+## 🏆 AGGIORNAMENTO 24/08 pomeriggio — **R103 PRONTO E BENEDETTO: la classifica della FLOTTA (40 sedie, anni negativi inclusi)**
+
+- ✍️ Firmato da Claudio ("FIRMO TUTTE E TRE, PARTIAMO") + chiarimento mattina
+  (una riga per SEDIA, spina dorsale anno-per-anno OBBLIGATORIA, colonna anni
+  negativi/anni operati). Perimetro: 25 forex+metalli su 2020→2026 (6,5 anni,
+  covid dentro) + 15 indici su 21 mesi in tabella SEPARATA (trimestre per
+  trimestre — a ~1-2 op/mese il mese-per-mese sarebbe rumore).
+- 🏗️ Costruito (driver 2.284 righe, autotest 56 asserzioni) e **verificato DUE
+  volte**: FAIL con 3 difetti veri (PF 0.000 al posto di n/d in classifica;
+  n=-1 grezzo; -TickReali che mescolava OHLC e tick nello stesso zip) →
+  corretti → **PASS al pin `bb139de`**, marcatore `MARCATORE_RIGA_R103_v2`.
+  → **checklist 66** (sentinelle su TUTTE le colonne: si prova con una sedia
+  vuota e si LEGGE la riga) e **67** ("non devono nemmeno poter" = specifica
+  di guardia: si cerca l'if, e si provano le combinazioni di switch che il
+  DA_MANDARE non propone).
+- 🪑 38 sedie misurate + 2 dichiarate fuori (BREAKOUT_EA_JPY_v3 senza sorgente;
+  GapContinuation 225JPY rischio non leggibile). Gold_Ichimoku: solo singola,
+  DD equity NON MISURATO dichiarato. Magic 76xxxx (120, verificati vergini).
+- 📋 Righe in `righe/RIGA_R103_DA_MANDARE.md` (pin `bb139de` ovunque):
+  giro a vuoto → Blocco 1 = tutto il gruppo INDICI (`-SoloGruppo 'INDICI'`).
+  Decisione aperta non bloccante: `-TickReali` per gli indici (firmato OHLC;
+  lo switch esiste, con guardia che rifiuta di mescolare i modelli).
+- 🚦 **CODA SUL PC DI BACKTEST (un tester alla volta)**: 1) R102 Blocco 2
+  GapFill `'C14,C15,C16'` (pin `fd23d4a`, PASS — stessi 3 simboli del Blocco 1,
+  M1 già a disco); 2) R103 giro a vuoto + blocchi; 3) R104 misura MFE
+  MaxMinNotte DAX (pin `4be07ed`, PASS — nato dal trade #3221475 del 24/08:
+  +200 flottanti → +15,10, TP1 mai toccato, confermato dalla scheda AFFARI).
+- ⚠️ Nota serale: l'archiviatore delle 23:30 sposta anche le cartelle R1xx dal
+  Desktop in ARCHIVIO_TEST — se una corsa finisce di sera, lo zip puo' essere
+  li' e non sul Desktop.
+
 ## 📊 AGGIORNAMENTO 24/08 notte — **R102 BLOCCO 1 LETTO: LA CLASSIFICA PARLA, E DICE NO**
 
 - ✅ **LA MACCHINA FUNZIONA.** Corsa 00:05→00:24 (**19 minuti**), pin `393c68f`:
