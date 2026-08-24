@@ -1,0 +1,534 @@
+REFERTO R102 - LA CLASSIFICA LUNGA
+3 sedie forex/argento, finestra MASSIMA per simbolo -> 2026.06.30, modello OHLC M1, deposito 100000
+modo: CORSA
+switch di questo giro: -SoloSedia C14,C15,C16 (un BLOCCO di sedie: questo NON e' il round intero)
+data: 2026-08-24 12:48:38   (questa data deve essere di ADESSO)
+     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.
+     Lo distinguono la riga 'modo:' qui sopra e il NOME della cartella.
+avvio: 2026-08-24 12:37:01   durata: 0.2 ore
+pin: fd23d4ac36b9087504d976c9a0fe931003e774cf
+criteri: risultati_archivio\R102_CRITERI.md
+
+=====================================================================
+ COME SI LEGGE QUESTO REFERTO, E LA COSA DA CAPIRE PRIMA DEI NUMERI
+=====================================================================
+  EMENDAMENTO REGOLA B (16/08), ed e' il cuore del round:
+    'Il VECCHIO giudica il RISCHIO. Il RECENTE giudica il MERITO.'
+  Nato da un caso MISURATO: PTE USDJPY, IS 2010-2016 = ZERO celle
+  positive su 28, OOS recente = 25 su 28. Quella finestra bocciava
+  per un'epoca morta, non per un difetto del motore.
+  >>> QUINDI NESSUN NUMERO DI QUESTO REFERTO PROMUOVE O BOCCIA UNA
+      SEDIA PER MERITO. Un profitto grande su vent'anni NON e' un
+      permesso ad alzare il rischio, e un profitto piccolo NON e'
+      una bocciatura. Le due letture LEGITTIME sono:
+      [ROBUSTEZZA] l'edge esiste attraverso i regimi, o e' figlio
+                   del 2024-26? Lo dicono le finestre e la spina
+                   dorsale anno per anno.
+      [RISCHIO]    quanto avrebbe perso. Lo dicono il DD lungo, la
+                   peggior giornata e il 2x sul DD promesso.
+
+  E DUE LIMITI DEL BANCO, che valgono su OGNI riga:
+  1. MODELLO OHLC M1. I tick reali di BCM partono dal 2024.07.05:
+     su vent'anni NON ESISTONO. Il DD e la peggior giornata sono un
+     LIMITE INFERIORE del rischio (l'OHLC non vede i percorsi dentro
+     la barra).
+  2. IL PROFITTO E' UNA STIMA DEL LORDO, E GENEROSA: spread scritto
+     a 0 (= spread CORRENTE, non quello storico, che nel 1993 era
+     molte volte piu' largo), nessuno slippage, nessun requote,
+     riempimenti ideali. Su una strategia a molte operazioni la
+     differenza col vero e' GRANDE.
+     >>> UN NUMERO DI PROFITTO DI QUESTO ROUND NON E' UN GUADAGNO.
+
+=====================================================================
+ LA TABELLA MADRE - LA CLASSIFICA, ordinata sulla FINESTRA COMUNE
+=====================================================================
+  >>> ORDINATA SULLA COMUNE (2009.01.01 -> 2026.06.30) E NON SULLA LUNGA,
+      ed e' la cosa piu' importante di tutta la tabella: le finestre
+      lunghe hanno lunghezze DIVERSE (GBPUSD 33 anni, XAGUSD 17,6).
+      Una classifica costruita sui profitti delle finestre lunghe
+      sarebbe una CLASSIFICA DELLA PROFONDITA' DELLO STORICO, non
+      delle sedie. La COMUNE e' l'unica finestra che tutti i dodici
+      simboli hanno, ed e' l'unica colonna in cui la parola
+      'classifica' vuol dire qualcosa.
+
+POS  ID   EA                 SIMB    RISCH    PROF-COM  PF-COM   DD-COM   n-COM  PROF-LUNGA  DD-LUNGA n-LUNGA  PEGGGIOR  ROBUSTEZZA / NOTA
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1    C16  GapFill            AUDUSD  1.0%        +8321   2.915     1.87      20       +8763      1.87      25    -1.02%  1 finestre POSITIVE su 5 misurate (su 5 previste)
+2    C14  GapFill            GBPUSD  1.0%        +3764   1.771     4.03      18       +4543      4.02      21    -1.01%  2 finestre POSITIVE su 5 misurate (su 5 previste)
+3    C15  GapFill            EURUSD  1.0%        +3533   2.686     1.85      15       +5436      1.86      20    -1.01%  1 finestre POSITIVE su 5 misurate (su 5 previste)
+
+  PROF-COM  = [ROBUSTEZZA] profitto in EUR sulla finestra COMUNE, alla TAGLIA VIVA
+              della sedia (colonna RISCH). ATTENZIONE: due sedie a taglie diverse
+              NON sono confrontabili in euro. Le PTE GBPUSD girano a 0,5%: per
+              metterle sulla stessa riga delle altre il loro numero va RADDOPPIATO
+              [APPROSSIMATO lineare, convenzione CONTRATTI_SEDIE punto 2].
+  PROF-LUNGA= [ROBUSTEZZA] lo stesso sulla finestra piu' lunga che quel SIMBOLO ha.
+              NON confrontabile fra sedie: le finestre hanno lunghezze diverse.
+  DD-*      = [RISCHIO] drawdown massimo dell'equity, LIMITE INFERIORE (OHLC).
+  PEGGGIOR  = [RISCHIO] la peggior giornata sulle CHIUSURE REALIZZATE
+              [APPROSSIMATO], da confrontare col muro prop giornaliero del 5%.
+  ROBUSTEZZA= quante delle 5 finestre di misura (COMUNE + 4 di regime) chiudono
+              in profitto, SUL DENOMINATORE VERO delle finestre misurate.
+              E' un'ETICHETTA DESCRITTIVA, non un verdetto: nessuna sedia viene
+              promossa o bocciata da questo numero.
+
+=====================================================================
+ SEDIA PER SEDIA - i numeri, i gate, la spina dorsale, il contratto
+=====================================================================
+
+---------------------------------------------------------------------
+C14  ABTG_GapFill   GBPUSD H1
+     magic vivo 772231 | magic del sorgente 772201 | rischio VIVO 1.0% | commento 'GAP GBPUSD' | version attesa 1.00
+     >>> il magic vivo NON e' il default del sorgente, ed e' NORMALE su tutte
+         le sedie di questo round: sono grafici di VIVAIO, cioe' N copie dello
+         stesso EA. Per questo NESSUNA di queste celle e' fatta di default: ogni
+         cella viene da un artefatto di DEPLOY, nominato nel file prova.
+     finestra LUNGA dichiarata: 1993.05.11 -> 2026.06.30   (data della SONDA del 17/08)
+     magic della corsa: gemelle 791410/791411, singola 791412 (blocco 79xxxx VERGINE)
+     esito: OK   durata 2.7 min
+
+  [ROBUSTEZZA] I NUMERI DELLA FINESTRA LUNGA
+     profitto +4543 EUR   PF 1.765   n 21 operazioni
+     DD massimo equity 4.02 %  [RISCHIO, limite inferiore]
+     anni EFFETTIVAMENTE coperti (dalla prima operazione): 27.5
+
+  [ROBUSTEZZA] LE FINESTRE
+     FINESTRA   PERIODO                     PROFITTO       PF     DD %       n  ESITO
+     COMUNE     2009.01.01 - 2026.06.30        +3764    1.771     4.03      18  OK
+     ORSO       2022.01.01 - 2022.10.31            0        0     0.00       0  OK
+     CROLLO     2020.02.01 - 2020.04.30            0        0     0.00       0  OK
+     TORO       2021.01.01 - 2021.12.31            0        0     0.00       0  OK
+     LATERALE   2019.01.01 - 2019.12.31         +160   23.641     0.13       2  OK
+     CRISI2008  2008.07.01 - 2008.12.31            0        0     0.00       0  OK (DIAGNOSTICA, non un criterio)
+     ROBUSTEZZA: 2 finestre POSITIVE su 5 misurate (su 5 previste)
+     >>> ETICHETTA, NON VERDETTO. Se il profitto viene tutto da UNA finestra,
+         quello e' un fatto da sapere -- non e' una bocciatura, e nemmeno un
+         permesso. Emendamento regola B.
+
+  [ROBUSTEZZA] LA SPINA DORSALE ANNO PER ANNO
+     >>> E' la risposta letterale alla domanda di Claudio del 23/08:
+         'con 10 anni di storico avrebbe fatto lo stesso?'
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+Commissioni+
+     Swap), anno di calendario del deal. NON e' l'equity e NON e' il DD.
+     ANNO         n     NETTO EUR    CUMULATO EUR
+     1993         0             0               0   <<< NESSUNA OPERAZIONE
+     1994         0             0               0   <<< NESSUNA OPERAZIONE
+     1995         0             0               0   <<< NESSUNA OPERAZIONE
+     1996         0             0               0   <<< NESSUNA OPERAZIONE
+     1997         0             0               0   <<< NESSUNA OPERAZIONE
+     1998         0             0               0   <<< NESSUNA OPERAZIONE
+     1999         2           -33             -33
+     2000         1          +784            +751
+     2001         0             0            +751   <<< NESSUNA OPERAZIONE
+     2002         0             0            +751   <<< NESSUNA OPERAZIONE
+     2003         0             0            +751   <<< NESSUNA OPERAZIONE
+     2004         0             0            +751   <<< NESSUNA OPERAZIONE
+     2005         0             0            +751   <<< NESSUNA OPERAZIONE
+     2006         0             0            +751   <<< NESSUNA OPERAZIONE
+     2007         0             0            +751   <<< NESSUNA OPERAZIONE
+     2008         0             0            +751   <<< NESSUNA OPERAZIONE
+     2009         1          -807             -56
+     2010         1          +988            +932
+     2011         1         -1024             -92
+     2012         0             0             -92   <<< NESSUNA OPERAZIONE
+     2013         0             0             -92   <<< NESSUNA OPERAZIONE
+     2014         0             0             -92   <<< NESSUNA OPERAZIONE
+     2015         0             0             -92   <<< NESSUNA OPERAZIONE
+     2016         0             0             -92   <<< NESSUNA OPERAZIONE
+     2017         0             0             -92   <<< NESSUNA OPERAZIONE
+     2018         0             0             -92   <<< NESSUNA OPERAZIONE
+     2019         2          +160             +67
+     2020         1          -998            -931
+     2021         0             0            -931   <<< NESSUNA OPERAZIONE
+     2022         0             0            -931   <<< NESSUNA OPERAZIONE
+     2023         0             0            -931   <<< NESSUNA OPERAZIONE
+     2024         2           -37            -968
+     2025         2         +1253            +285
+     2026         8         +4259           +4543
+     >>> GATE 4 (DENSITA'): 24 anni su 34 NON hanno nessuna operazione.
+         La finestra NOMINALE e' 34 anni; quella EFFETTIVAMENTE OPERATA e' 10.
+         Ogni volta che si dice 'N anni di storico' su questa sedia, il numero
+         da dire e' il SECONDO. Una serie che il broker dichiara dal 1971 ma
+         che nei primi quindici anni non produce nessuna operazione non e'
+         cinquantacinque anni di storico.
+
+  [RISCHIO] LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.01%  (il 1999.03.01, su 38 giornate operative, 42 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday; percentuale
+     sul saldo a inizio giornata; netto = Profitto+Commissioni+Swap.
+     [APPROSSIMATO n.2, dichiarato]: MT5 lascia la colonna Profitto VUOTA
+     sulle righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il simbolo
+     ne ha una. L'errore va nella direzione COMODA (giornata migliore del
+     vero) ed e' limitato alle commissioni d'apertura: se la colonna
+     Commissioni del report e' tutta 0,00 l'errore e' ZERO. Si controlla
+     nello zip, nel file C14_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.14%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+        Le due misure vengono da strumenti diversi: se divergono molto,
+        e' il metodo che va guardato, non la sedia.
+
+  I GATE
+    1 prima operazione .. 1999.01.04   (dichiarata dal 1993.05.11)
+        misura 1, log del tester ... 1999.01.04   (marcatore \[GAP\]\s+GAP-FILL\s+(BUY|SELL)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 1999.01.04
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: ACCORCIATA (prima op. 1999.01.04, dichiarata dal 1993.05.11)
+        >>> CLASSIFICA: IN CLASSIFICA
+    2 n totale .......... 21   (controllo incrociato dal report: 21)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 10 anni operati su 34 nominali
+
+  [RISCHIO] IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin fd23d4ac36b9087504d976c9a0fe931003e774cf
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_GapFill | GBPUSD | 772231 | 1,0 | **2,4%** (PF 5,03; 100k: 1,0%) | **~0,6** (8 tr) | OOS ~13 mesi | R36 .. R37 | ... [TROVATO] |
+    DD promesso 2.40 %   -> soglia 2x = 4.80 %
+    VERDETTO CORSIA RISCHIO: OK (DD 4.02% <= 2x 2.40% = 4.80%)
+
+---------------------------------------------------------------------
+C15  ABTG_GapFill   EURUSD H1
+     magic vivo 772232 | magic del sorgente 772201 | rischio VIVO 1.0% | commento 'GAP EURUSD' | version attesa 1.00
+     >>> il magic vivo NON e' il default del sorgente, ed e' NORMALE su tutte
+         le sedie di questo round: sono grafici di VIVAIO, cioe' N copie dello
+         stesso EA. Per questo NESSUNA di queste celle e' fatta di default: ogni
+         cella viene da un artefatto di DEPLOY, nominato nel file prova.
+     finestra LUNGA dichiarata: 1971.01.03 -> 2026.06.30   (data della SONDA del 17/08)
+     magic della corsa: gemelle 791510/791511, singola 791512 (blocco 79xxxx VERGINE)
+     esito: OK   durata 2.0 min
+
+  [ROBUSTEZZA] I NUMERI DELLA FINESTRA LUNGA
+     profitto +5436 EUR   PF 3.509   n 20 operazioni
+     DD massimo equity 1.86 %  [RISCHIO, limite inferiore]
+     anni EFFETTIVAMENTE coperti (dalla prima operazione): 27.5
+
+  [ROBUSTEZZA] LE FINESTRE
+     FINESTRA   PERIODO                     PROFITTO       PF     DD %       n  ESITO
+     COMUNE     2009.01.01 - 2026.06.30        +3533    2.686     1.85      15  OK
+     ORSO       2022.01.01 - 2022.10.31            0        0     0.00       0  OK
+     CROLLO     2020.02.01 - 2020.04.30            0        0     0.00       0  OK
+     TORO       2021.01.01 - 2021.12.31            0        0     0.00       0  OK
+     LATERALE   2019.01.01 - 2019.12.31            0        0     0.00       0  OK
+     CRISI2008  2008.07.01 - 2008.12.31            0        0     0.00       0  OK (DIAGNOSTICA, non un criterio)
+     ROBUSTEZZA: 1 finestre POSITIVE su 5 misurate (su 5 previste)
+     >>> ETICHETTA, NON VERDETTO. Se il profitto viene tutto da UNA finestra,
+         quello e' un fatto da sapere -- non e' una bocciatura, e nemmeno un
+         permesso. Emendamento regola B.
+
+  [ROBUSTEZZA] LA SPINA DORSALE ANNO PER ANNO
+     >>> E' la risposta letterale alla domanda di Claudio del 23/08:
+         'con 10 anni di storico avrebbe fatto lo stesso?'
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+Commissioni+
+     Swap), anno di calendario del deal. NON e' l'equity e NON e' il DD.
+     ANNO         n     NETTO EUR    CUMULATO EUR
+     1971         0             0               0   <<< NESSUNA OPERAZIONE
+     1972         0             0               0   <<< NESSUNA OPERAZIONE
+     1973         0             0               0   <<< NESSUNA OPERAZIONE
+     1974         0             0               0   <<< NESSUNA OPERAZIONE
+     1975         0             0               0   <<< NESSUNA OPERAZIONE
+     1976         0             0               0   <<< NESSUNA OPERAZIONE
+     1977         0             0               0   <<< NESSUNA OPERAZIONE
+     1978         0             0               0   <<< NESSUNA OPERAZIONE
+     1979         0             0               0   <<< NESSUNA OPERAZIONE
+     1980         0             0               0   <<< NESSUNA OPERAZIONE
+     1981         0             0               0   <<< NESSUNA OPERAZIONE
+     1982         0             0               0   <<< NESSUNA OPERAZIONE
+     1983         0             0               0   <<< NESSUNA OPERAZIONE
+     1984         0             0               0   <<< NESSUNA OPERAZIONE
+     1985         0             0               0   <<< NESSUNA OPERAZIONE
+     1986         0             0               0   <<< NESSUNA OPERAZIONE
+     1987         0             0               0   <<< NESSUNA OPERAZIONE
+     1988         0             0               0   <<< NESSUNA OPERAZIONE
+     1989         0             0               0   <<< NESSUNA OPERAZIONE
+     1990         0             0               0   <<< NESSUNA OPERAZIONE
+     1991         0             0               0   <<< NESSUNA OPERAZIONE
+     1992         0             0               0   <<< NESSUNA OPERAZIONE
+     1993         0             0               0   <<< NESSUNA OPERAZIONE
+     1994         0             0               0   <<< NESSUNA OPERAZIONE
+     1995         0             0               0   <<< NESSUNA OPERAZIONE
+     1996         0             0               0   <<< NESSUNA OPERAZIONE
+     1997         0             0               0   <<< NESSUNA OPERAZIONE
+     1998         0             0               0   <<< NESSUNA OPERAZIONE
+     1999         4         +1357           +1357
+     2000         0             0           +1357   <<< NESSUNA OPERAZIONE
+     2001         0             0           +1357   <<< NESSUNA OPERAZIONE
+     2002         0             0           +1357   <<< NESSUNA OPERAZIONE
+     2003         0             0           +1357   <<< NESSUNA OPERAZIONE
+     2004         0             0           +1357   <<< NESSUNA OPERAZIONE
+     2005         0             0           +1357   <<< NESSUNA OPERAZIONE
+     2006         0             0           +1357   <<< NESSUNA OPERAZIONE
+     2007         1          +482           +1839
+     2008         0             0           +1839   <<< NESSUNA OPERAZIONE
+     2009         0             0           +1839   <<< NESSUNA OPERAZIONE
+     2010         1          +502           +2341
+     2011         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2012         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2013         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2014         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2015         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2016         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2017         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2018         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2019         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2020         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2021         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2022         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2023         0             0           +2341   <<< NESSUNA OPERAZIONE
+     2024         2          -517           +1824
+     2025         3         +1314           +3138
+     2026         9         +2298           +5436
+     >>> GATE 4 (DENSITA'): 50 anni su 56 NON hanno nessuna operazione.
+         La finestra NOMINALE e' 56 anni; quella EFFETTIVAMENTE OPERATA e' 6.
+         Ogni volta che si dice 'N anni di storico' su questa sedia, il numero
+         da dire e' il SECONDO. Una serie che il broker dichiara dal 1971 ma
+         che nei primi quindici anni non produce nessuna operazione non e'
+         cinquantacinque anni di storico.
+
+  [RISCHIO] LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.01%  (il 2026.01.25, su 37 giornate operative, 40 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday; percentuale
+     sul saldo a inizio giornata; netto = Profitto+Commissioni+Swap.
+     [APPROSSIMATO n.2, dichiarato]: MT5 lascia la colonna Profitto VUOTA
+     sulle righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il simbolo
+     ne ha una. L'errore va nella direzione COMODA (giornata migliore del
+     vero) ed e' limitato alle commissioni d'apertura: se la colonna
+     Commissioni del report e' tutta 0,00 l'errore e' ZERO. Si controlla
+     nello zip, nel file C15_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.01%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+        Le due misure vengono da strumenti diversi: se divergono molto,
+        e' il metodo che va guardato, non la sedia.
+
+  I GATE
+    1 prima operazione .. 1999.01.04   (dichiarata dal 1971.01.03)
+        misura 1, log del tester ... 1999.01.04   (marcatore \[GAP\]\s+GAP-FILL\s+(BUY|SELL)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 1999.01.04
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: ACCORCIATA (prima op. 1999.01.04, dichiarata dal 1971.01.03)
+        >>> CLASSIFICA: IN CLASSIFICA
+    2 n totale .......... 20   (controllo incrociato dal report: 20)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 6 anni operati su 56 nominali
+
+  [RISCHIO] IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin fd23d4ac36b9087504d976c9a0fe931003e774cf
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_GapFill | EURUSD | 772232 | 1,0 | **1,5%** (fill 50 .. PF 2,74; 100k: 1,0%) | **~0,7** (9 tr) | OOS ~13 mesi | R36 .. R37 | ... [TROVATO] |
+    DD promesso 1.50 %   -> soglia 2x = 3.00 %
+    VERDETTO CORSIA RISCHIO: OK (DD 1.86% <= 2x 1.50% = 3.00%)
+
+---------------------------------------------------------------------
+C16  ABTG_GapFill   AUDUSD H1
+     magic vivo 772233 | magic del sorgente 772201 | rischio VIVO 1.0% | commento 'GAP AUDUSD' | version attesa 1.00
+     >>> il magic vivo NON e' il default del sorgente, ed e' NORMALE su tutte
+         le sedie di questo round: sono grafici di VIVAIO, cioe' N copie dello
+         stesso EA. Per questo NESSUNA di queste celle e' fatta di default: ogni
+         cella viene da un artefatto di DEPLOY, nominato nel file prova.
+     finestra LUNGA dichiarata: 1993.04.26 -> 2026.06.30   (data della SONDA del 17/08)
+     magic della corsa: gemelle 791610/791611, singola 791612 (blocco 79xxxx VERGINE)
+     esito: OK   durata 2.7 min
+
+  [ROBUSTEZZA] I NUMERI DELLA FINESTRA LUNGA
+     profitto +8763 EUR   PF 2.369   n 25 operazioni
+     DD massimo equity 1.87 %  [RISCHIO, limite inferiore]
+     anni EFFETTIVAMENTE coperti (dalla prima operazione): 27.5
+
+  [ROBUSTEZZA] LE FINESTRE
+     FINESTRA   PERIODO                     PROFITTO       PF     DD %       n  ESITO
+     COMUNE     2009.01.01 - 2026.06.30        +8321    2.915     1.87      20  OK
+     ORSO       2022.01.01 - 2022.10.31            0        0     0.00       0  OK
+     CROLLO     2020.02.01 - 2020.04.30            0        0     0.00       0  OK
+     TORO       2021.01.01 - 2021.12.31            0        0     0.00       0  OK
+     LATERALE   2019.01.01 - 2019.12.31            0        0     0.00       0  OK
+     CRISI2008  2008.07.01 - 2008.12.31            0        0     0.00       0  OK (DIAGNOSTICA, non un criterio)
+     ROBUSTEZZA: 1 finestre POSITIVE su 5 misurate (su 5 previste)
+     >>> ETICHETTA, NON VERDETTO. Se il profitto viene tutto da UNA finestra,
+         quello e' un fatto da sapere -- non e' una bocciatura, e nemmeno un
+         permesso. Emendamento regola B.
+
+  [ROBUSTEZZA] LA SPINA DORSALE ANNO PER ANNO
+     >>> E' la risposta letterale alla domanda di Claudio del 23/08:
+         'con 10 anni di storico avrebbe fatto lo stesso?'
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+Commissioni+
+     Swap), anno di calendario del deal. NON e' l'equity e NON e' il DD.
+     ANNO         n     NETTO EUR    CUMULATO EUR
+     1993         0             0               0   <<< NESSUNA OPERAZIONE
+     1994         0             0               0   <<< NESSUNA OPERAZIONE
+     1995         0             0               0   <<< NESSUNA OPERAZIONE
+     1996         0             0               0   <<< NESSUNA OPERAZIONE
+     1997         0             0               0   <<< NESSUNA OPERAZIONE
+     1998         0             0               0   <<< NESSUNA OPERAZIONE
+     1999         3          +960            +960
+     2000         0             0            +960   <<< NESSUNA OPERAZIONE
+     2001         1         -1019             -60
+     2002         1          +462            +402
+     2003         0             0            +402   <<< NESSUNA OPERAZIONE
+     2004         0             0            +402   <<< NESSUNA OPERAZIONE
+     2005         0             0            +402   <<< NESSUNA OPERAZIONE
+     2006         0             0            +402   <<< NESSUNA OPERAZIONE
+     2007         0             0            +402   <<< NESSUNA OPERAZIONE
+     2008         0             0            +402   <<< NESSUNA OPERAZIONE
+     2009         0             0            +402   <<< NESSUNA OPERAZIONE
+     2010         1          +980           +1382
+     2011         0             0           +1382   <<< NESSUNA OPERAZIONE
+     2012         0             0           +1382   <<< NESSUNA OPERAZIONE
+     2013         0             0           +1382   <<< NESSUNA OPERAZIONE
+     2014         0             0           +1382   <<< NESSUNA OPERAZIONE
+     2015         0             0           +1382   <<< NESSUNA OPERAZIONE
+     2016         1         +1006           +2389
+     2017         1          +853           +3242
+     2018         0             0           +3242   <<< NESSUNA OPERAZIONE
+     2019         0             0           +3242   <<< NESSUNA OPERAZIONE
+     2020         0             0           +3242   <<< NESSUNA OPERAZIONE
+     2021         0             0           +3242   <<< NESSUNA OPERAZIONE
+     2022         0             0           +3242   <<< NESSUNA OPERAZIONE
+     2023         0             0           +3242   <<< NESSUNA OPERAZIONE
+     2024         3          +998           +4240
+     2025         3          +227           +4467
+     2026        11         +4296           +8763
+     >>> GATE 4 (DENSITA'): 25 anni su 34 NON hanno nessuna operazione.
+         La finestra NOMINALE e' 34 anni; quella EFFETTIVAMENTE OPERATA e' 9.
+         Ogni volta che si dice 'N anni di storico' su questa sedia, il numero
+         da dire e' il SECONDO. Una serie che il broker dichiara dal 1971 ma
+         che nei primi quindici anni non produce nessuna operazione non e'
+         cinquantacinque anni di storico.
+
+  [RISCHIO] LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.02%  (il 2026.01.27, su 41 giornate operative, 50 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday; percentuale
+     sul saldo a inizio giornata; netto = Profitto+Commissioni+Swap.
+     [APPROSSIMATO n.2, dichiarato]: MT5 lascia la colonna Profitto VUOTA
+     sulle righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il simbolo
+     ne ha una. L'errore va nella direzione COMODA (giornata migliore del
+     vero) ed e' limitato alle commissioni d'apertura: se la colonna
+     Commissioni del report e' tutta 0,00 l'errore e' ZERO. Si controlla
+     nello zip, nel file C16_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.50%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+        Le due misure vengono da strumenti diversi: se divergono molto,
+        e' il metodo che va guardato, non la sedia.
+
+  I GATE
+    1 prima operazione .. 1999.01.04   (dichiarata dal 1993.04.26)
+        misura 1, log del tester ... 1999.01.04   (marcatore \[GAP\]\s+GAP-FILL\s+(BUY|SELL)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 1999.01.04
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: ACCORCIATA (prima op. 1999.01.04, dichiarata dal 1993.04.26)
+        >>> CLASSIFICA: IN CLASSIFICA
+    2 n totale .......... 25   (controllo incrociato dal report: 25)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 9 anni operati su 34 nominali
+
+  [RISCHIO] IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin fd23d4ac36b9087504d976c9a0fe931003e774cf
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_GapFill | AUDUSD | 772233 | 1,0 | **1,9%** (WF R36 .. PF 2,89; 100k R37: 1,0%) | **~0,9** (12 tr) | OOS ~13 mesi | `REFERTO_ROUND36_GAPFILL_WF.md` .. `REFERTO_ROUND37_GAP_PORTAFOGLIO.md` | ... [TROVATO] |
+    DD promesso 1.90 %   -> soglia 2x = 3.80 %
+    VERDETTO CORSIA RISCHIO: OK (DD 1.87% <= 2x 1.90% = 3.80%)
+
+=====================================================================
+ LE SEDIE DICHIARATE E NON MISURABILI - e non e' un via libera
+=====================================================================
+  BREAKOUT_EA_JPY_v3   USDJPY   magic n/d   rischio n/d
+  >>> NON MISURABILE, e il motivo e' MISURATO: il sorgente NON ESISTE nel
+      repo (zero file 'BREAKOUT_EA_JPY_v3.mq5'; esistono BREAKOUT_EA_JPY.mq5
+      e BREAKOUT_EA_JPY_Multi.mq5, che sono ALTRI EA). Senza sorgente non
+      c'e' niente da compilare e niente da misurare.
+  >>> Nel censimento .chr del 23/08 15:49 la riga c'e' ancora, e NON ha
+      nemmeno un input di rischio leggibile. E' una delle DUE SEDIE SENZA
+      CONTRATTO del 18/08 (CONTRATTI_SEDIE.md), famiglia SCARTATA
+      pre-progetto (paniere 7 cross JPY 2022-24: -20.853 EUR, PF 0,67-0,95
+      su TUTTE, DD 30-48%).
+  >>> QUESTO E' IL RILIEVO, ed e' lo stesso del 18/08: una sedia viva senza
+      contratto, senza sorgente e senza rischio leggibile non ha NESSUN
+      metro, e la corsia RISCHIO della C3 su di lei NON PUO' SCATTARE.
+
+=====================================================================
+ IL PERIMETRO - CHI NON C'E' IN QUESTO ROUND, E PERCHE'
+=====================================================================
+  GLI INDICI (D30EUR, U30USD, NASUSD, SPXUSD, 225JPY, F40EUR, E35EUR,
+  E50EUR, 100GBP, 200AUD) e L'ENERGIA (UKOIL, USOIL): ESCLUSI.
+  Motivo MISURATO, non scelto: la sonda del 17/08 li da' tutti con prima
+  data 2024.09.26 e verdetto COMPLETO. 'COMPLETO' e' la parola che chiude
+  la questione: non manca sul disco, IL BROKER NON CE L'HA. Ventuno mesi
+  di storico non sono una finestra lunga, e nessuna riga puo' inventarli.
+  Per loro la strada e' l'import Dukascopy (macchina gia' collaudata in
+  R56), ed e' un round diverso.
+
+  L'ORO (XAUUSD): ESCLUSO perche' e' GIA' FATTO. R99 (SupertrendReversal
+  Ottimizzato 970901: DD 9,02% su 22 anni, peggior giornata -0,68%, n=657)
+  e R100 (le altre dodici sedie oro, stessa macchina, 2004.06.11 ->
+  2026.06.30). Si CITANO, non si rifanno.
+
+  E LE SEDIE SU INDICI DELLE STESSE FAMIGLIE di questo round (PTE DOW,
+  SuperWave DOW, GapFill DOW e NIKKEI, PunteLarry DOW): fuori per lo
+  stesso motivo degli indici. Vuol dire che di famiglie come GapFill e
+  PunteLarry R102 misura solo la META' forex.
+
+=====================================================================
+ COSA QUESTO ROUND **NON** PUO' DIRE
+=====================================================================
+  1. NESSUNA PROMOZIONE E NESSUNA BOCCIATURA DI MERITO. Emendamento
+     regola B. L'unica decisione e' il 2x sulla corsia RISCHIO.
+  2. NESSUN DRAWDOWN DI PORTAFOGLIO. Venti sedie non fanno un drawdown
+     pari alla somma dei loro ne' pari al massimo: dipende da QUANTO SI
+     SOVRAPPONGONO nel tempo, e questo round le misura UNA PER UNA.
+     Sette di queste sedie stanno sullo STESSO simbolo (GBPUSD): la
+     domanda del portafoglio, li', e' la domanda successiva ovvia, ed e'
+     un round diverso (macchina R16/R34/R37/R41).
+  3. NESSUN NUMERO A TICK REALI, nessuna misura di spread, nessuno
+     slippage. Vedi i due limiti del banco in testa.
+  4. NIENTE SULLA CELLA MIGLIORE. Ogni sedia gira su UNA cella sola,
+     quella VIVA. Questo round non ottimizza, non cerca e non propone
+     parametri: se una sedia esce male, la risposta NON e' 'proviamo
+     un'altra cella sulla finestra lunga' -- quello sarebbe pescare.
+
+--- PASSO 0-A (le barre, un simbolo alla volta) ---
+  AUDUSD dal 1993.04.26: eseguito, uscita 0
+      AUDUSD M1 | barre 9615669 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      AUDUSD H1 | barre 172972 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      AUDUSD H2 | barre 87488 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      AUDUSD H4 | barre 45915 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      AUDUSD D1 | barre 10086 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+  EURUSD dal 1971.01.03: eseguito, uscita 0
+      EURUSD M1 | barre 10015474 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      EURUSD H1 | barre 178742 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      EURUSD H2 | barre 93193 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      EURUSD H4 | barre 51605 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      EURUSD D1 | barre 15769 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+  GBPUSD dal 1993.05.11: eseguito, uscita 0
+      GBPUSD M1 | barre 9864631 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+      GBPUSD H1 | barre 172969 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+      GBPUSD H2 | barre 87483 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+      GBPUSD H4 | barre 45903 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+      GBPUSD D1 | barre 10076 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+  NIENTE TICK: il round e' OHLC M1 per criterio. Le barre M1 servono davvero:
+  il tester costruisce H1/H2/H4/D1 dalle M1, quindi la profondita' che MORDE
+  e' quella dell'M1.
+
+--- SE QUESTO ROUND E' PARZIALE: COME SI RIPRENDE (e quanto costa) ---
+  Un rilancio LISCIO della stessa riga NON salta le sedie gia' fatte:
+  salta solo le FINESTRE che hanno gia' il CSV (e lo dichiara con la data
+  del file, una riga di PROBLEMA per ognuna). Il PASSO 0 -- passata
+  SINGOLA + due GEMELLE, tutte e tre sulla finestra lunga -- si RIFA' per
+  OGNI sedia della lista. Misurato in durata simulata: PASSO 0 = ~72
+  anni-sedia, le finestre = ~42. Cioe' il rilancio liscio rifa' circa il
+  63% del lavoro.
+  >>> LA RIPRESA CHE COSTA POCO: -SoloSedia con l'ELENCO delle sedie che
+      qui sopra NON sono 'OK' (es. -SoloSedia C07,C11,C13). -Rifai rifa'
+      tutto, finestre comprese. Ogni giro scrive uno zip suo: vanno
+      mandati TUTTI, non solo l'ultimo.
+
+--- NOTE ---
+  - C14: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - C14 GATE 4 (DENSITA'): 24 anni solari su 34 dentro la finestra dichiarata NON hanno NESSUNA operazione (1993, 1994, 1995, 1996, 1997, 1998, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2021, 2022, 2023). La finestra NOMINALE e' 34 anni, quella EFFETTIVAMENTE OPERATA e' 10. Ogni volta che si dice 'N anni di storico' su questa sedia, il numero da dire e' il secondo.
+  - C15: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - C15 GATE 4 (DENSITA'): 50 anni solari su 56 dentro la finestra dichiarata NON hanno NESSUNA operazione (1971, 1972, 1973, 1974, 1975, 1976, 1977, 1978, 1979, 1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023). La finestra NOMINALE e' 56 anni, quella EFFETTIVAMENTE OPERATA e' 6. Ogni volta che si dice 'N anni di storico' su questa sedia, il numero da dire e' il secondo.
+  - C16: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - C16 GATE 4 (DENSITA'): 25 anni solari su 34 dentro la finestra dichiarata NON hanno NESSUNA operazione (1993, 1994, 1995, 1996, 1997, 1998, 2000, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011, 2012, 2013, 2014, 2015, 2018, 2019, 2020, 2021, 2022, 2023). La finestra NOMINALE e' 34 anni, quella EFFETTIVAMENTE OPERATA e' 9. Ogni volta che si dice 'N anni di storico' su questa sedia, il numero da dire e' il secondo.
+
+--- PROBLEMI ---
+  - C14 FINESTRA ACCORCIATA: la prima operazione e' del 1999.01.04, cioe' 68 mesi dopo l'inizio dichiarato (1993.05.11). O lo storico M1 non arriva davvero li', o il motore non aveva le condizioni per operare. La corsa PROSEGUE, ma questa riga va scritta ACCANTO A OGNI NUMERO di questa sedia: gli anni misurati sono 27.5, non quelli della finestra dichiarata.
+  - C15 FINESTRA ACCORCIATA: la prima operazione e' del 1999.01.04, cioe' 336 mesi dopo l'inizio dichiarato (1971.01.03). O lo storico M1 non arriva davvero li', o il motore non aveva le condizioni per operare. La corsa PROSEGUE, ma questa riga va scritta ACCANTO A OGNI NUMERO di questa sedia: gli anni misurati sono 27.5, non quelli della finestra dichiarata.
+  - C16 FINESTRA ACCORCIATA: la prima operazione e' del 1999.01.04, cioe' 68 mesi dopo l'inizio dichiarato (1993.04.26). O lo storico M1 non arriva davvero li', o il motore non aveva le condizioni per operare. La corsa PROSEGUE, ma questa riga va scritta ACCANTO A OGNI NUMERO di questa sedia: gli anni misurati sono 27.5, non quelli della finestra dichiarata.
+
+ESITO: COMPLETO CON RILIEVI -- tutte e 3 le sedie hanno prodotto i numeri attesi. I 3 rilievi in elenco sono RISULTATI del round (finestra accorciata, densita', contratto), non guasti: si leggono ACCANTO ai numeri, non invece dei numeri.
