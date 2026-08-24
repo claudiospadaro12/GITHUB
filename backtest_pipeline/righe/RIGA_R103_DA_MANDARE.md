@@ -6,7 +6,7 @@ loro gruppo**. Modello **OHLC M1**, deposito **100.000 EUR**.
 **Criteri**: `backtest_pipeline/risultati_archivio/R103_CRITERI.md`
 **Proposta FIRMATA**: `risultati_archivio/R103_PROPOSTA_CLASSIFICA_FLOTTA.md`
 **Driver**: `backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1`
-(marcatore `MARCATORE_RIGA_R103_v2`).
+(marcatore `MARCATORE_RIGA_R103_v3`).
 
 ---
 
@@ -30,10 +30,10 @@ periodi **operati**).
 
 ---
 
-## 📌 IL PIN — ⚠️ **`bb139dee60629be59734fe0a17c2f24b4ce95f90`**
+## 📌 IL PIN — ⚠️ **`7e2fb0de9487eb26350da3cbcf6f05673597e233`**
 
 ```
-bb139dee60629be59734fe0a17c2f24b4ce95f90
+7e2fb0de9487eb26350da3cbcf6f05673597e233
 ```
 
 > 🔴 **Le righe qui sotto NON si lanciano finché questo blocco non porta un hash
@@ -94,9 +94,9 @@ bb139dee60629be59734fe0a17c2f24b4ce95f90
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7e2fb0de9487eb26350da3cbcf6f05673597e233'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -194,9 +194,9 @@ per prima, e riempie **subito** la seconda tabella.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7e2fb0de9487eb26350da3cbcf6f05673597e233'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloGruppo 'INDICI';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -217,15 +217,34 @@ Si cambia **SOLO l'elenco dopo `-SoloSedia`** (e si toglie `-SoloGruppo`).
 | 8 | `'F21'` | `ABTG_SuperWave` | grafico H4, `InpTF` H2 |
 | 9 | `'F22,F23,F24,F25'` | **4 EA diversi** | 🟡 qui la regola "un sorgente per blocco" **non si può rispettare**: sono quattro sedie oro uniche. Vantaggio: **un solo simbolo** da scaricare (XAUUSD) |
 
+### 🌙 LA RIGA NOTTURNA — tutto il gruppo FOREX+METALLI in un colpo (25 sedie)
+
+Benedetta dal verificatore il 24/08 sera (insieme al fix checklist 44: le
+sedie MAI INIZIATE per tetto ore ora escono DISTINTE da quelle partite e
+rotte, con l'elenco di rilancio gia' pronto nel referto). `-OreMax` resta il
+default 12: budget stimato 3,5-6 ore, il tetto blocca solo l'INIZIO di
+lavori nuovi, e uno sforo si rilancia in trenta secondi con l'elenco che il
+referto stampa da solo.
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='7e2fb0de9487eb26350da3cbcf6f05673597e233'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloGruppo 'FOREX';
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+```
+
 **Oppure**, se Claudio preferisce lasciarla girare tutta la notte: **si toglie
 `-SoloSedia` e `-SoloGruppo`** e girano tutte e 40.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7e2fb0de9487eb26350da3cbcf6f05673597e233'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia 'F01,F02,F03';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -265,9 +284,9 @@ sola**, e **senza cambiare il pin**:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7e2fb0de9487eb26350da3cbcf6f05673597e233'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloGruppo 'INDICI' -TickReali;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
