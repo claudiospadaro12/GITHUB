@@ -1,0 +1,2181 @@
+REFERTO R103 - LA CLASSIFICA DELLA FLOTTA
+25 sedie su 40 (FOREX+METALLI 25, INDICI 0), deposito 100000 EUR
+  FOREX+METALLI : 2020.01.01 -> 2026.06.30   (6,5 anni, col crollo covid dentro)   modello 1
+  INDICI        : 2024.09.26 -> 2026.06.30   (21 mesi: IL BROKER NON HA ALTRO)     modello 1
+modo: CORSA
+switch di questo giro: -SoloGruppo FOREX (questo NON e' il round intero)
+data: 2026-08-24 19:58:45   (questa data deve essere di ADESSO)
+     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.
+     Lo distinguono la riga 'modo:' qui sopra e il NOME della cartella.
+avvio: 2026-08-24 19:22:30   durata: 0.6 ore
+pin: 7e2fb0de9487eb26350da3cbcf6f05673597e233
+criteri: risultati_archivio\R103_CRITERI.md   proposta FIRMATA: R103_PROPOSTA_CLASSIFICA_FLOTTA.md
+
+=====================================================================
+ COME SI LEGGE QUESTO REFERTO - e va letto PRIMA dei numeri
+=====================================================================
+  1. NESSUNA SEDIA VIENE PROMOSSA O BOCCIATA QUI DENTRO. Una
+     classifica e' un'informazione per decidere, non un verdetto
+     automatico. Le uscite restano quelle della C3 del 18/08, che
+     girano sul FORWARD, non su un backtest.
+
+  2. SI ORDINA SULLA COLONNA 'PROF-1%', NON SU 'PROF-VIVO'. E' la
+     DECISIONE 3 firmata: le sedie girano a taglie diverse (da 0,25%
+     a 1,0%), e confrontarle in euro 'come stanno' premia la TAGLIA,
+     non il MOTORE. PROF-1% = PROF-VIVO x (1 / rischio).
+     [APPROSSIMATO: riscalatura LINEARE, convenzione CONTRATTI_SEDIE
+     punto 2]. Sotto lo 0,5% di rischio la linearita' si rompe (il
+     lotto ha un minimo): su quelle righe il numero normalizzato e'
+     SOVRASTIMATO, e c'e' una nota apposta.
+
+  3. LE DUE TABELLE NON SI CONFRONTANO FRA LORO. 6,5 anni e 21 mesi
+     nella stessa classifica sarebbero la truffa peggiore del round.
+
+  4. IL BANCO, E I SUOI DUE LIMITI:
+     - MODELLO OHLC M1: il DD e la peggior giornata sono un LIMITE
+       INFERIORE del rischio (l'OHLC non vede i percorsi dentro la
+       barra);
+     - IL PROFITTO E' UNA STIMA DEL LORDO, E GENEROSA: spread
+       corrente, nessuno slippage, nessun requote, riempimenti
+       ideali. >>> NON E' UN GUADAGNO. La frase giusta e' 'su questo
+       banco avrebbe fatto X', mai 'avrebbe guadagnato X'.
+     >>> E SUGLI INDICI L'OHLC HA GIA' MENTITO, ed e' MISURATO: il
+         30/07 la revalidation a tick reali ha ribaltato
+         SupRev_DOW_H4 da PF 2,77 (OHLC) a PF 0,79 (tick reali).
+         La seconda tabella va letta sapendolo.
+
+  5. LA COLONNA 'NEG/OPER' e' la risposta letterale alla domanda di
+     Claudio del 24/08 ('vorrei capire se esistono anni negativi x
+     qualcuno'): periodi in perdita / periodi OPERATI. I periodi con
+     ZERO operazioni NON contano come negativi: si tolgono dal
+     denominatore e si elencano a parte. Il dettaglio periodo per
+     periodo sta sotto, sedia per sedia.
+       FOREX  -> ANNO per ANNO        INDICI -> TRIMESTRE per TRIMESTRE
+     Il trimestre sugli indici NON e' pigrizia: su 21 mesi e sedie
+     da 1-2 operazioni al mese, le caselle MENSILI conterrebbero 0 o
+     1 trade, e '12 mesi negativi su 21' si leggerebbe come una
+     condanna quando e' solo il segno di dodici singoli trade.
+     Il mese per mese si stampa lo stesso, marcato DIAGNOSTICA.
+
+  6. 'DD-PROM' e' il DD promesso dal contratto, ESTRATTO A RUNTIME da
+     CONTRATTI_SEDIE.md al pin. Dove esce 'n/d' il contratto NON DA'
+     un numero confrontabile (o e' scritto a due taglie, o non c'e'):
+     NON e' un via libera, e' un rilievo. E un DD sopra il promesso
+     qui e' un RILIEVO DA PORTARE A CLAUDIO, non una revisione
+     automatica: il promesso e' stato misurato su UN'ALTRA FINESTRA.
+
+=====================================================================
+ TABELLA 1 - FOREX + METALLI - 2020.01.01 -> 2026.06.30 (6,5 anni)
+ ordinata su PROF-1% (profitto NORMALIZZATO a rischio 1%)
+=====================================================================
+POS  ID   EA                                 SIMB    RISCH    PROF-VIVO     PROF-1%      PF  DD-VIVO    DD-1%   DD-PROM       n  PEGGGIOR  NEG/OPER  NOTA
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1    F25  Gold_Ichimoku_TK_ATR_EA            XAUUSD  0.5%        +75436     +150871   1.311      n/d      n/d       n/d     553    -1.07%       4/7  n=553  [SENZA OPTFRAME: numeri dai DEAL, DD equity NON MISURATO]
+2    F04  CostToCost                         EURJPY  1.0%        +94302      +94302   1.410    12.26    12.26      9.33     394    -1.57%       1/7  n=394
+3    F23  MaxMinNotte                        XAUUSD  0.5%        +24736      +49473   1.308     5.32    10.64       n/d     693    -0.50%       2/7  n=693
+4    F18  PunteLarry                         GBPJPY  1.0%        +17221      +17221   1.288     8.95     8.95      2.70     139    -1.61%       2/7  n=139
+5    F20  PunteLarry                         XAUUSD  0.3%         +4945      +16484   1.753     2.44     8.13       n/d      60    -0.38%       1/7  n=60
+6    F17  PunteLarry                         EURCAD  1.0%        +14779      +14779   1.338     6.96     6.96      4.80     154    -1.08%       1/7  n=154
+7    F22  EMA200_Ottimizzato                 XAUUSD  0.25%        +3109      +12438   1.203     1.95     7.80       n/d     610    -0.29%       3/7  n=610
+8    F07  EasyTrend                          CHFJPY  1.0%         +9598       +9598   1.066    21.80    21.80      6.27     265    -2.00%       4/7  n=265
+9    F08  EasyTrend                          GBPUSD  1.0%         +8537       +8537   1.059    15.77    15.77      4.58     254    -1.25%       3/7  n=254
+10   F02  BreakingBand                       EURUSD  1.0%         +8271       +8271   1.936     2.51     2.51      1.20      59    -1.02%       1/7  n=59
+11   F01  BreakingBand                       GBPUSD  1.0%         +5415       +5415   1.199     7.75     7.75      1.90     126    -1.02%       3/7  n=126
+12   F03  BreakingBand                       AUDUSD  1.0%         +5365       +5365   1.541     2.13     2.13      1.20      64    -1.02%       2/7  n=64
+13   F12  GapFill                            AUDUSD  1.0%         +5349       +5349   2.270     1.87     1.87      1.90      17    -1.02%       0/3  CAMPIONE SOTTILE (n=17 < 30)
+14   F24  SupertrendReversal_Ottimizzato     XAUUSD  1.0%         +4792       +4792   1.330     3.51     3.51       n/d     208    -0.51%       3/7  n=208
+15   F16  PunteLarry                         EURAUD  1.0%         +4695       +4695   1.053    17.12    17.12      3.70     216    -1.11%       3/7  n=216
+16   F10  GapFill                            GBPUSD  1.0%         +4472       +4472   2.459     2.50     2.50      2.40      13    -1.01%       2/4  CAMPIONE SOTTILE (n=13 < 30)
+17   F15  PTE                                USDJPY  1.0%         +3404       +3404   1.083    11.49    11.49      3.97     244    -1.29%       3/7  n=244
+18   F11  GapFill                            EURUSD  1.0%         +3024       +3024   2.452     1.85     1.85      1.50      14    -1.01%       1/3  CAMPIONE SOTTILE (n=14 < 30)
+19   F09  EasyTrend                          AUDJPY  1.0%         +1944       +1944   1.013    15.88    15.88      4.29     313    -2.08%       3/7  n=313
+20   F14  PTE                                GBPUSD  0.5%          +901       +1803   1.108     2.92     5.84       n/d     188    -0.51%       5/7  n=188
+21   F19  PunteLarry                         GBPUSD  1.0%         +1612       +1612   1.048     8.51     8.51      5.10     121    -1.02%       3/7  n=121
+22   F13  PTE                                GBPUSD  0.5%          -551       -1102   0.962     6.55    13.10       n/d     175    -0.53%       4/7  n=175
+23   F21  SuperWave                          GBPUSD  1.0%         -7501       -7501   0.785    13.41    13.41      1.04     358    -1.16%       5/7  n=358
+24   F06  CostToCost                         XAGUSD  1.0%        -11701      -11701   0.696    16.37    16.37      4.48      83    -1.38%       6/7  n=83
+25   F05  CostToCost                         GBPCAD  1.0%        -14978      -14978   0.924    41.52    41.52      6.18     382    -1.07%       4/7  n=382
+
+=====================================================================
+ SEDIA PER SEDIA - i numeri, la SPINA DORSALE, i gate, il contratto
+=====================================================================
+
+---------------------------------------------------------------------
+F01  ABTG_BreakingBand   GBPUSD H1   [FOREX]
+     magic vivo 772161 | magic del sorgente 772101 | rischio VIVO 1.0% | commento 'BB GBPUSD' | version attesa 1.03
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760020/760021, singola 760022 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +5415 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +5415 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.199
+     n operazioni ....................... 126   (n=126)
+     DD massimo equity alla taglia viva .. 7.75 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 7.75 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.5
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 126   netto +6184 EUR   PF 1.234   DD SUL SALDO CHIUSO 7.63 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            21         -1675           -1675   <<< NEGATIVO
+     2021            19         -3853           -5527   <<< NEGATIVO
+     2022            15         +2718           -2809
+     2023            18         +1194           -1615
+     2024            18         +3300           +1685
+     2025            22         +4670           +6355
+     2026            13          -941           +5415   <<< NEGATIVO
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.02%  (il 2021.06.02, su 135 giornate operative, 252 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F01_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.02%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.14   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.14   (marcatore \[BB\]\s+(CONTINUAZIONE|INVERSIONE)\s+(LONG|SHORT)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2020.01.14
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.01.14, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 126   (controllo incrociato dal report: 126)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=126   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_BreakingBand | GBPUSD | 772161 | 1,0 | **1,9%** (100k R34; WF R33: 3,4% .. PF 1,75) | **~2,0** (26 tr / 13 mesi) | OOS 2025.06...2026.06 | `REFERTO_ROUND33_BREAKINGBAND_WF.md` .. `REFERTO_ROUND34_BB_PORTAFOGLIO.md` | ... [TROVATO] |
+    DD promesso 1.90 %   contro il DD-1% misurato: 4.08x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F02  ABTG_BreakingBand   EURUSD H1   [FOREX]
+     magic vivo 772162 | magic del sorgente 772101 | rischio VIVO 1.0% | commento 'BB EURUSD' | version attesa 1.03
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760030/760031, singola 760032 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.5 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +8271 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +8271 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.936
+     n operazioni ....................... 59   (n=59)
+     DD massimo equity alla taglia viva .. 2.51 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 2.51 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 76.8
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 59   netto +8716 EUR   PF 2.038   DD SUL SALDO CHIUSO 2.41 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020             4          +188            +188
+     2021             9          -506            -317   <<< NEGATIVO
+     2022             7         +1058            +741
+     2023            12          +954           +1695
+     2024            12         +3878           +5572
+     2025             7         +1124           +6696
+     2026             8         +1575           +8271
+     >>> PERIODI NEGATIVI: 1 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.02%  (il 2023.12.20, su 64 giornate operative, 118 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F02_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.02%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.02.03   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.02.03   (marcatore \[BB\]\s+(CONTINUAZIONE|INVERSIONE)\s+(LONG|SHORT)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2020.02.03
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.02.03, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 59   (controllo incrociato dal report: 59)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=59   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_BreakingBand | EURUSD | 772162 | 1,0 | **1,2%** (solo CONT .. PF 3,87 ... nota: IS con 4 trade) | **~1,0** (13 tr) | OOS 2025.06...2026.06 | R33 .. R34 | ... [TROVATO] |
+    DD promesso 1.20 %   contro il DD-1% misurato: 2.09x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F03  ABTG_BreakingBand   AUDUSD H1   [FOREX]
+     magic vivo 772163 | magic del sorgente 772101 | rischio VIVO 1.0% | commento 'BB AUDUSD' | version attesa 1.03
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760040/760041, singola 760042 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.6 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +5365 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +5365 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.541
+     n operazioni ....................... 64   (n=64)
+     DD massimo equity alla taglia viva .. 2.13 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 2.13 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 76.8
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 64   netto +5631 EUR   PF 1.583   DD SUL SALDO CHIUSO 1.70 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020             9          -224            -224   <<< NEGATIVO
+     2021             9          +309             +85
+     2022            11         +1482           +1567
+     2023            13           -96           +1471   <<< NEGATIVO
+     2024             8          +962           +2433
+     2025             7         +1334           +3767
+     2026             7         +1598           +5365
+     >>> PERIODI NEGATIVI: 2 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.02%  (il 2022.01.24, su 75 giornate operative, 128 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F03_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.25%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.02.05   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.02.05   (marcatore \[BB\]\s+(CONTINUAZIONE|INVERSIONE)\s+(LONG|SHORT)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2020.02.05
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.02.05, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 64   (controllo incrociato dal report: 64)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=64   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_BreakingBand | AUDUSD | 772163 | 1,0 | **1,2%** (solo INV .. PF 2,76) | **~0,8** (11 tr) | OOS 2025.06...2026.06 | R33 .. R34 | ... [TROVATO] |
+    DD promesso 1.20 %   contro il DD-1% misurato: 1.78x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F04  ABTG_CostToCost   EURJPY H4   [FOREX]
+     magic vivo 772361 | magic del sorgente 772311 | rischio VIVO 1.0% | commento 'COST EURJPY' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760050/760051, singola 760052 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.6 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +94302 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +94302 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.410
+     n operazioni ....................... 394   (n=394)
+     DD massimo equity alla taglia viva .. 12.26 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 12.26 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.7
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 394   netto +97925 EUR   PF 1.432   DD SUL SALDO CHIUSO 8.44 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            66         +4991           +4991
+     2021            51         +1115           +6106
+     2022            59        +13036          +19142
+     2023            63        +17339          +36480
+     2024            67        +16642          +53123
+     2025            58        +45187          +98309
+     2026            30         -4007          +94302   <<< NEGATIVO
+     >>> PERIODI NEGATIVI: 1 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.57%  (il 2020.07.07, su 566 giornate operative, 788 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F04_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -8.01%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.08   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.08   (marcatore \[COST\]\s+(LONG|SHORT)\s+a mercato @, tipo MERCATO)
+        misura 2, report .htm ...... 2020.01.08
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.01.08, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 394   (controllo incrociato dal report: 394)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=394   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_CostToCost | EURJPY | 772361 | 1,0 | **9,33%** (flip di struttura, solo L .. PF 1,74 .. pegg. giornata ...3,97%) | **~4,7** (64 tr / 13,5 mesi) | OOS ~13,5 mesi | CSV `risultati_prove/ABTG_CostToCost/r40/` (OOS, cella L) .. `REFERTO_ROUND41_COST_PORTAFOGLIO.md` | ... [TROVATO] |
+    DD promesso 9.33 %   contro il DD-1% misurato: 1.31x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F05  ABTG_CostToCost   GBPCAD H4   [FOREX]
+     magic vivo 772362 | magic del sorgente 772311 | rischio VIVO 1.0% | commento 'COST GBPCAD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760060/760061, singola 760062 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... -14978 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... -14978 EUR   <<< e' la colonna della classifica
+     PF ................................. 0.924
+     n operazioni ....................... 382   (n=382)
+     DD massimo equity alla taglia viva .. 41.52 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 41.52 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.7
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 382   netto -12471 EUR   PF 0.936   DD SUL SALDO CHIUSO 41.11 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            62         +1486           +1486
+     2021            57        -10843           -9358   <<< NEGATIVO
+     2022            57        -13470          -22827   <<< NEGATIVO
+     2023            58         -8367          -31194   <<< NEGATIVO
+     2024            56          -302          -31496   <<< NEGATIVO
+     2025            63        +12896          -18600
+     2026            29         +3621          -14978
+     >>> PERIODI NEGATIVI: 4 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.07%  (il 2025.10.23, su 558 giornate operative, 764 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F05_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -2.26%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.07   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.07   (marcatore \[COST\]\s+(LONG|SHORT)\s+a mercato @, tipo MERCATO)
+        misura 2, report .htm ...... 2020.01.07
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.01.07, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 382   (controllo incrociato dal report: 382)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=382   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_CostToCost | GBPCAD | 772362 | 1,0 | **6,18%** (R-based 1,5R, solo L .. PF 1,44) | **~4,6** (62 tr) | OOS ~13,5 mesi | CSV r40 .. R41 | ... [TROVATO] |
+    DD promesso 6.18 %   contro il DD-1% misurato: 6.72x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F06  ABTG_CostToCost   XAGUSD H4   [FOREX]
+     magic vivo 772363 | magic del sorgente 772311 | rischio VIVO 1.0% | commento 'COST XAGUSD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760070/760071, singola 760072 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.6 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... -11701 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... -11701 EUR   <<< e' la colonna della classifica
+     PF ................................. 0.696
+     n operazioni ....................... 83   (n=83)
+     DD massimo equity alla taglia viva .. 16.37 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 16.37 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 71.3
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 83   netto -11657 EUR   PF 0.697   DD SUL SALDO CHIUSO 15.06 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            11         -1156           -1156   <<< NEGATIVO
+     2021             5         -2531           -3687   <<< NEGATIVO
+     2022             7         -5682           -9369   <<< NEGATIVO
+     2023             4         -2018          -11387   <<< NEGATIVO
+     2024            10         -1983          -13370   <<< NEGATIVO
+     2025            20         +3565           -9805
+     2026            26         -1895          -11701   <<< NEGATIVO
+     >>> PERIODI NEGATIVI: 6 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.38%  (il 2020.11.19, su 122 giornate operative, 166 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F06_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.51%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.07.22   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.07.22   (marcatore \[COST\]\s+(LONG|SHORT)\s+a mercato @, tipo MERCATO)
+        misura 2, report .htm ...... 2020.07.22
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: ACCORCIATA (prima op. 2020.07.22, finestra dichiarata dal 2020.01.01)
+    2 n totale .......... 83   (controllo incrociato dal report: 83)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=83   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_CostToCost | XAGUSD | 772363 | 1,0 | **4,48%** (cost puro, solo L .. PF 1,25) | **~3,0** (41 tr) | OOS ~13,5 mesi | CSV r40 .. R41 | ... [TROVATO] |
+    DD promesso 4.48 %   contro il DD-1% misurato: 3.65x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F07  ABTG_EasyTrend   CHFJPY H1   [FOREX]
+     magic vivo 772421 | magic del sorgente 772401 | rischio VIVO 1.0% | commento 'EASYTREND CHFJPY' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760080/760081, singola 760082 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +9598 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +9598 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.066
+     n operazioni ....................... 265   (n=265)
+     DD massimo equity alla taglia viva .. 21.80 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 21.80 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.9
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 265   netto +11063 EUR   PF 1.076   DD SUL SALDO CHIUSO 20.27 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            30         -3911           -3911   <<< NEGATIVO
+     2021            42         -8172          -12083   <<< NEGATIVO
+     2022            34          -347          -12430   <<< NEGATIVO
+     2023            53         +4764           -7666
+     2024            31         -1882           -9548   <<< NEGATIVO
+     2025            51        +14361           +4813
+     2026            24         +4785           +9598
+     >>> PERIODI NEGATIVI: 4 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -2.00%  (il 2023.01.23, su 435 giornate operative, 530 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F07_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -2.15%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.03   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.03   (marcatore \[EZ\]\s+(BUY|SELL|LONG|SHORT)\s+(LIMIT|a MERCATO)\s+@, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.03
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.03, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 265   (controllo incrociato dal report: 265)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=265   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_EasyTrend | CHFJPY | 772421 | 1,0 | **6,27%** (TP 1,5 L+S .. PF 1,25) ... osservazione, come sopra | **~3,8** (53 tr) | OOS ~14 mesi | R48 .. R49 | ... [TROVATO] |
+    DD promesso 6.27 %   contro il DD-1% misurato: 3.48x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F08  ABTG_EasyTrend   GBPUSD H1   [FOREX]
+     magic vivo 772422 | magic del sorgente 772401 | rischio VIVO 1.0% | commento 'EASYTREND GBPUSD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760090/760091, singola 760092 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +8537 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +8537 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.059
+     n operazioni ....................... 254   (n=254)
+     DD massimo equity alla taglia viva .. 15.77 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 15.77 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.5
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 254   netto +9866 EUR   PF 1.069   DD SUL SALDO CHIUSO 14.71 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            40         -3289           -3289   <<< NEGATIVO
+     2021            39         +2113           -1177
+     2022            44         -2603           -3779   <<< NEGATIVO
+     2023            46          +289           -3490
+     2024            23         -3693           -7182   <<< NEGATIVO
+     2025            43         +8061            +879
+     2026            19         +7658           +8537
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.25%  (il 2024.04.12, su 415 giornate operative, 508 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F08_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -2.17%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.13   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.13   (marcatore \[EZ\]\s+(BUY|SELL|LONG|SHORT)\s+(LIMIT|a MERCATO)\s+@, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.13
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.13, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 254   (controllo incrociato dal report: 254)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=254   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_EasyTrend | GBPUSD | 772422 | 1,0 | **4,58%** (TP 1,5 L+S .. PF 1,49) ... sedie 30-32 **in OSSERVAZIONE**: promosse R48, famiglia BOCCIATA in portafoglio (R49), porta 100k chiusa | **~2,9** (41 tr / 14 mesi) | OOS ~14 mesi (dal 2024.09.26, IS 8,5 mesi) | `REFERTO_ROUND48_EASYTREND_WF.md` .. bocciatura `REFERTO_ROUND49` | ... [TROVATO] |
+    DD promesso 4.58 %   contro il DD-1% misurato: 3.44x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F09  ABTG_EasyTrend   AUDJPY H1   [FOREX]
+     magic vivo 772423 | magic del sorgente 772401 | rischio VIVO 1.0% | commento 'EASYTREND AUDJPY' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760100/760101, singola 760102 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +1944 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +1944 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.013
+     n operazioni ....................... 313   (n=313)
+     DD massimo equity alla taglia viva .. 15.88 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 15.88 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.9
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 313   netto +3423 EUR   PF 1.023   DD SUL SALDO CHIUSO 15.14 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            42         -3563           -3563   <<< NEGATIVO
+     2021            49         +4656           +1093
+     2022            48          +215           +1308
+     2023            50         -3675           -2367   <<< NEGATIVO
+     2024            50         -4162           -6529   <<< NEGATIVO
+     2025            49         +4263           -2266
+     2026            25         +4210           +1944
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -2.08%  (il 2020.06.01, su 499 giornate operative, 626 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F09_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.89%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.03   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.03   (marcatore \[EZ\]\s+(BUY|SELL|LONG|SHORT)\s+(LIMIT|a MERCATO)\s+@, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.03
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.03, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 313   (controllo incrociato dal report: 313)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=313   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_EasyTrend | AUDJPY | 772423 | 1,0 | **4,29%** (TP 1,0 L+S .. PF 1,37) ... osservazione, come sopra | **~3,9** (54 tr) | OOS ~14 mesi | R48 .. R49 | ... [TROVATO] |
+    DD promesso 4.29 %   contro il DD-1% misurato: 3.70x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F10  ABTG_GapFill   GBPUSD H1   [FOREX]
+     magic vivo 772231 | magic del sorgente 772201 | rischio VIVO 1.0% | commento 'GAP GBPUSD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760110/760111, singola 760112 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +4472 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +4472 EUR   <<< e' la colonna della classifica
+     PF ................................. 2.459
+     n operazioni ....................... 13   (CAMPIONE SOTTILE (n=13 < 30))
+     DD massimo equity alla taglia viva .. 2.50 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 2.50 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 66.3
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 13   netto +4540 EUR   PF 2.515   DD SUL SALDO CHIUSO 2.01 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020             1          -998            -998   <<< NEGATIVO
+     2021             0             0            -998   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2022             0             0            -998   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2023             0             0            -998   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2024             2           -37           -1036   <<< NEGATIVO
+     2025             2         +1251            +216
+     2026             8         +4256           +4472
+     >>> PERIODI NEGATIVI: 2 su 4 OPERATI (su 7 nominali)
+     >>> 3 periodi SENZA NESSUNA OPERAZIONE: 2021, 2022, 2023
+         Non contano come negativi e NON stanno nel denominatore: un
+         periodo in cui la sedia non ha operato non e' un periodo in
+         perdita.
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.01%  (il 2024.11.04, su 25 giornate operative, 26 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F10_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.02%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.12.20   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.12.20   (marcatore \[GAP\]\s+GAP-FILL\s+(BUY|SELL)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2020.12.20
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: ACCORCIATA (prima op. 2020.12.20, finestra dichiarata dal 2020.01.01)
+    2 n totale .......... 13   (controllo incrociato dal report: 13)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 4 periodi operati su 7 nominali
+    5 campione .......... CAMPIONE SOTTILE (n=13 < 30)   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_GapFill | GBPUSD | 772231 | 1,0 | **2,4%** (PF 5,03; 100k: 1,0%) | **~0,6** (8 tr) | OOS ~13 mesi | R36 .. R37 | ... [TROVATO] |
+    DD promesso 2.40 %   contro il DD-1% misurato: 1.04x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F11  ABTG_GapFill   EURUSD H1   [FOREX]
+     magic vivo 772232 | magic del sorgente 772201 | rischio VIVO 1.0% | commento 'GAP EURUSD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760120/760121, singola 760122 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.5 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +3024 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +3024 EUR   <<< e' la colonna della classifica
+     PF ................................. 2.452
+     n operazioni ....................... 14   (CAMPIONE SOTTILE (n=14 < 30))
+     DD massimo equity alla taglia viva .. 1.85 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 1.85 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 19.8
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 14   netto +3106 EUR   PF 2.552   DD SUL SALDO CHIUSO 1.01 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2021             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2022             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2023             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2024             2          -507            -507   <<< NEGATIVO
+     2025             3         +1284            +777
+     2026             9         +2247           +3024
+     >>> PERIODI NEGATIVI: 1 su 3 OPERATI (su 7 nominali)
+     >>> 4 periodi SENZA NESSUNA OPERAZIONE: 2020, 2021, 2022, 2023
+         Non contano come negativi e NON stanno nel denominatore: un
+         periodo in cui la sedia non ha operato non e' un periodo in
+         perdita.
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.01%  (il 2026.01.25, su 26 giornate operative, 28 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F11_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.01%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2024.11.04   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2024.11.04   (marcatore \[GAP\]\s+GAP-FILL\s+(BUY|SELL)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2024.11.04
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: ACCORCIATA (prima op. 2024.11.04, finestra dichiarata dal 2020.01.01)
+    2 n totale .......... 14   (controllo incrociato dal report: 14)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 3 periodi operati su 7 nominali
+    5 campione .......... CAMPIONE SOTTILE (n=14 < 30)   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_GapFill | EURUSD | 772232 | 1,0 | **1,5%** (fill 50 .. PF 2,74; 100k: 1,0%) | **~0,7** (9 tr) | OOS ~13 mesi | R36 .. R37 | ... [TROVATO] |
+    DD promesso 1.50 %   contro il DD-1% misurato: 1.23x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F12  ABTG_GapFill   AUDUSD H1   [FOREX]
+     magic vivo 772233 | magic del sorgente 772201 | rischio VIVO 1.0% | commento 'GAP AUDUSD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760130/760131, singola 760132 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.6 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +5349 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +5349 EUR   <<< e' la colonna della classifica
+     PF ................................. 2.270
+     n operazioni ....................... 17   (CAMPIONE SOTTILE (n=17 < 30))
+     DD massimo equity alla taglia viva .. 1.87 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 1.87 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 19.8
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 17   netto +5431 EUR   PF 2.316   DD SUL SALDO CHIUSO 1.03 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2021             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2022             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2023             0             0               0   <<< NESSUNA OPERAZIONE (fuori dal denominatore)
+     2024             3          +966            +966
+     2025             3          +222           +1188
+     2026            11         +4161           +5349
+     >>> PERIODI NEGATIVI: 0 su 3 OPERATI (su 7 nominali)
+     >>> 4 periodi SENZA NESSUNA OPERAZIONE: 2020, 2021, 2022, 2023
+         Non contano come negativi e NON stanno nel denominatore: un
+         periodo in cui la sedia non ha operato non e' un periodo in
+         perdita.
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.02%  (il 2026.01.27, su 31 giornate operative, 34 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F12_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.50%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2024.11.04   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2024.11.04   (marcatore \[GAP\]\s+GAP-FILL\s+(BUY|SELL)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2024.11.04
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: ACCORCIATA (prima op. 2024.11.04, finestra dichiarata dal 2020.01.01)
+    2 n totale .......... 17   (controllo incrociato dal report: 17)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 3 periodi operati su 7 nominali
+    5 campione .......... CAMPIONE SOTTILE (n=17 < 30)   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_GapFill | AUDUSD | 772233 | 1,0 | **1,9%** (WF R36 .. PF 2,89; 100k R37: 1,0%) | **~0,9** (12 tr) | OOS ~13 mesi | `REFERTO_ROUND36_GAPFILL_WF.md` .. `REFERTO_ROUND37_GAP_PORTAFOGLIO.md` | ... [TROVATO] |
+    DD promesso 1.90 %   contro il DD-1% misurato: 0.98x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F13  ABTG_PTE   GBPUSD H1   [FOREX]
+     magic vivo 771322 | magic del sorgente 771301 | rischio VIVO 0.5% | commento 'PTE GBPUSD' | version attesa 1.01
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760140/760141, singola 760142 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (0.5%) ...... -551 EUR
+     PROFITTO NORMALIZZATO a 1% (x2.00) ..... -1102 EUR   <<< e' la colonna della classifica
+     PF ................................. 0.962
+     n operazioni ....................... 175   (n=175)
+     DD massimo equity alla taglia viva .. 6.55 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 13.10 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 76.1
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 175   netto -69 EUR   PF 0.995   DD SUL SALDO CHIUSO 6.11 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            25          +798            +798
+     2021            17          -453            +345   <<< NEGATIVO
+     2022            19         -2596           -2251   <<< NEGATIVO
+     2023            25         -1134           -3385   <<< NEGATIVO
+     2024            38         +1480           -1905
+     2025            26          -180           -2085   <<< NEGATIVO
+     2026            25         +1534            -551
+     >>> PERIODI NEGATIVI: 4 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -0.53%  (il 2024.06.27, su 139 giornate operative, 277 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F13_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -0.86%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.02.26   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.02.26   (marcatore \[PTE\]\s+(LONG|SHORT)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2020.02.26
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.02.26, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 175   (controllo incrociato dal report: 175)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=175   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO AMBIGUO (la cella contiene una riscalatura di taglia)
+    riga VERBATIM: | ABTG_PTE | GBPUSD | 771322 | 0,5 (dal 17/08) | **2,64%** ... a 0,5% ... 1,3%. ...... R78 (OHLC 13 anni): la stessa cella fa **...2.125 .. PF 0,972 .. DD 17,68%** ... contratto e finestra lunga non conciliabili, giudice = forward (duello) | **~3,9** (49 chiusure) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` .. ...... `REFERTO_ROUND78_SEDIA_VERA_FINESTRA_LUNGA.md` | ... [TROVATO] |
+    >>> CONFRONTO NON CALCOLABILE: il contratto di questa sedia non da'
+        un DD promesso numerico e confrontabile. IL CRITERIO NON E'
+        STATO TOCCATO: si dichiara che il denominatore non esiste.
+        E NON E' UN VIA LIBERA.
+
+---------------------------------------------------------------------
+F14  ABTG_PTE   GBPUSD H1   [FOREX]
+     magic vivo 771332 | magic del sorgente 771301 | rischio VIVO 0.5% | commento 'PTE GBPUSD B25' | version attesa 1.01
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760150/760151, singola 760152 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (0.5%) ...... +901 EUR
+     PROFITTO NORMALIZZATO a 1% (x2.00) ..... +1803 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.108
+     n operazioni ....................... 188   (n=188)
+     DD massimo equity alla taglia viva .. 2.92 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 5.84 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 76.1
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 188   netto +1177 EUR   PF 1.145   DD SUL SALDO CHIUSO 2.73 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            25           -30             -30   <<< NEGATIVO
+     2021            18          -293            -323   <<< NEGATIVO
+     2022            22          -967           -1290   <<< NEGATIVO
+     2023            27          -604           -1894   <<< NEGATIVO
+     2024            43         +1979             +85
+     2025            27          -384            -299   <<< NEGATIVO
+     2026            26         +1201            +901
+     >>> PERIODI NEGATIVI: 5 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -0.51%  (il 2023.09.07, su 145 giornate operative, 290 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F14_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -0.65%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.02.26   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.02.26   (marcatore \[PTE\]\s+(LONG|SHORT)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2020.02.26
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.02.26, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 188   (controllo incrociato dal report: 188)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=188   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO AMBIGUO (la cella contiene una riscalatura di taglia)
+    riga VERBATIM: | ABTG_PTE (candidata R78) | GBPUSD | 771332 | 0,5 | **9,87%** (PF 1,095, pegg. giornata ...1,35%) ... a 0,5% ... 4,9% | **~3** (477 tr / 158 mesi ... 36/anno) | **OOS 2013.04...2026.06, 13 anni, OHLC** (tick lungo impossibile su BCM) | `REFERTO_ROUND78_SEDIA_VERA_FINESTRA_LUNGA.md` ..2 .. duello in `FLOTTA_ATTIVA.md` | ... [TROVATO] |
+    >>> CONFRONTO NON CALCOLABILE: il contratto di questa sedia non da'
+        un DD promesso numerico e confrontabile. IL CRITERIO NON E'
+        STATO TOCCATO: si dichiara che il denominatore non esiste.
+        E NON E' UN VIA LIBERA.
+
+---------------------------------------------------------------------
+F15  ABTG_PTE   USDJPY H1   [FOREX]
+     magic vivo 771323 | magic del sorgente 771301 | rischio VIVO 1.0% | commento 'PTE USDJPY' | version attesa 1.01
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760160/760161, singola 760162 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +3404 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +3404 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.083
+     n operazioni ....................... 244   (n=244)
+     DD massimo equity alla taglia viva .. 11.49 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 11.49 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.5
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 244   netto +4807 EUR   PF 1.122   DD SUL SALDO CHIUSO 10.87 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            48          +601            +601
+     2021            22         -4688           -4087   <<< NEGATIVO
+     2022            37         -2190           -6277   <<< NEGATIVO
+     2023            45         +5895            -382
+     2024            41         +1657           +1275
+     2025            38          -135           +1139   <<< NEGATIVO
+     2026            13         +2265           +3404
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.29%  (il 2021.11.11, su 177 giornate operative, 385 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F15_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.22%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.13   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.13   (marcatore \[PTE\]\s+(LONG|SHORT)\s+@, tipo MERCATO)
+        misura 2, report .htm ...... 2020.01.13
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.01.13, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 244   (controllo incrociato dal report: 244)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=244   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_PTE | USDJPY | 771323 | 1,0 | **3,97%** ...... R77/R78 su 13 anni: **1 cella positiva su 14 (PF 1,011)** ... su finestra lunga il motore non ha edge su USDJPY | **~2,8** (35 chiusure) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` .. ...... `REFERTO_ROUND77/78` | ... [TROVATO] |
+    DD promesso 3.97 %   contro il DD-1% misurato: 2.89x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F16  ABTG_PunteLarry   EURAUD H1   [FOREX]
+     magic vivo 772342 | magic del sorgente 772301 | rischio VIVO 1.0% | commento 'LARRY EURAUD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760170/760171, singola 760172 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.6 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +4695 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +4695 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.053
+     n operazioni ....................... 216   (n=216)
+     DD massimo equity alla taglia viva .. 17.12 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 17.12 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.7
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 216   netto +5306 EUR   PF 1.060   DD SUL SALDO CHIUSO 17.10 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            38          +716            +716
+     2021            30         -4370           -3654   <<< NEGATIVO
+     2022            31         -1412           -5066   <<< NEGATIVO
+     2023            40         -6147          -11213   <<< NEGATIVO
+     2024            27         +6271           -4942
+     2025            34         +9199           +4257
+     2026            16          +438           +4695
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.11%  (il 2021.06.11, su 392 giornate operative, 432 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F16_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.34%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.07   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.07   (marcatore \[LARRY\]\s+PENDENTE\s, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.07
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.07, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 216   (controllo incrociato dal report: 216)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=216   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_PunteLarry | EURAUD | 772342 | 1,0 | **3,7%** (PF 1,74, L+S) | **~2,5** (33 tr) | OOS ~13 mesi | R38 .. R39 | ... [TROVATO] |
+    DD promesso 3.70 %   contro il DD-1% misurato: 4.63x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F17  ABTG_PunteLarry   EURCAD H1   [FOREX]
+     magic vivo 772346 | magic del sorgente 772301 | rischio VIVO 1.0% | commento 'LARRY EURCAD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760180/760181, singola 760182 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.6 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +14779 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +14779 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.338
+     n operazioni ....................... 154   (n=154)
+     DD massimo equity alla taglia viva .. 6.96 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 6.96 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.5
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 154   netto +15396 EUR   PF 1.357   DD SUL SALDO CHIUSO 5.47 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            30         +1536           +1536
+     2021            23         +3962           +5497
+     2022            29         +1099           +6596
+     2023            22         -1292           +5305   <<< NEGATIVO
+     2024            18         +9012          +14316
+     2025            23          +145          +14461
+     2026             9          +318          +14779
+     >>> PERIODI NEGATIVI: 1 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.08%  (il 2020.01.17, su 284 giornate operative, 308 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F17_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.02%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.14   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.14   (marcatore \[LARRY\]\s+PENDENTE\s, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.14
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.14, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 154   (controllo incrociato dal report: 154)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=154   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_PunteLarry | EURCAD | 772346 | 1,0 | **4,8%** (PF 1,25 ... "il pi.. tirato") | **~1,5** (19 tr) | OOS ~13 mesi | R38 .. R39 | ... [TROVATO] |
+    DD promesso 4.80 %   contro il DD-1% misurato: 1.45x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F18  ABTG_PunteLarry   GBPJPY H1   [FOREX]
+     magic vivo 772344 | magic del sorgente 772301 | rischio VIVO 1.0% | commento 'LARRY GBPJPY' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760190/760191, singola 760192 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +17221 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +17221 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.288
+     n operazioni ....................... 139   (n=139)
+     DD massimo equity alla taglia viva .. 8.95 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 8.95 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.9
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 139   netto +17665 EUR   PF 1.298   DD SUL SALDO CHIUSO 8.40 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            18         -1456           -1456   <<< NEGATIVO
+     2021            27          -222           -1678   <<< NEGATIVO
+     2022            17         +2378            +700
+     2023            16          +758           +1458
+     2024            22         +6870           +8329
+     2025            29         +4101          +12430
+     2026            10         +4791          +17221
+     >>> PERIODI NEGATIVI: 2 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.61%  (il 2024.09.30, su 235 giornate operative, 278 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F18_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.88%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.02   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.02   (marcatore \[LARRY\]\s+PENDENTE\s, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.06
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.02, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 139   (controllo incrociato dal report: 139)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=139   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_PunteLarry | GBPJPY | 772344 | 1,0 | **2,7%** (PF 2,00, solo L) | **~1,5** (20 tr) | OOS ~13 mesi | R38 .. R39 | ... [TROVATO] |
+    DD promesso 2.70 %   contro il DD-1% misurato: 3.31x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F19  ABTG_PunteLarry   GBPUSD H1   [FOREX]
+     magic vivo 772345 | magic del sorgente 772301 | rischio VIVO 1.0% | commento 'LARRY GBPUSD' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760200/760201, singola 760202 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +1612 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +1612 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.048
+     n operazioni ....................... 121   (n=121)
+     DD massimo equity alla taglia viva .. 8.51 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 8.51 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.9
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 121   netto +2004 EUR   PF 1.060   DD SUL SALDO CHIUSO 8.29 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            19         -6093           -6093   <<< NEGATIVO
+     2021            19         +2966           -3127
+     2022            14         +1232           -1894
+     2023            18          -343           -2237   <<< NEGATIVO
+     2024            20         -1404           -3642   <<< NEGATIVO
+     2025            19         +3267            -375
+     2026            12         +1987           +1612
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.02%  (il 2020.11.23, su 227 giornate operative, 242 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F19_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -1.02%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.02   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.02   (marcatore \[LARRY\]\s+PENDENTE\s, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.17
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.02, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 121   (controllo incrociato dal report: 121)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=121   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_PunteLarry | GBPUSD | 772345 | 1,0 | **5,1%** (PF 1,84, solo S) | **~1,9** (25 tr) | OOS ~13 mesi | R38 .. R39 | ... [TROVATO] |
+    DD promesso 5.10 %   contro il DD-1% misurato: 1.67x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F20  ABTG_PunteLarry   XAUUSD H1   [FOREX]
+     magic vivo 772343 | magic del sorgente 772301 | rischio VIVO 0.3% | commento 'LARRY ORO' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760210/760211, singola 760212 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.6 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (0.3%) ...... +4945 EUR
+     PROFITTO NORMALIZZATO a 1% (x3.33) ..... +16484 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.753
+     n operazioni ....................... 60   (n=60)
+     DD massimo equity alla taglia viva .. 2.44 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 8.13 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.7
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 60   netto +4961 EUR   PF 1.757   DD SUL SALDO CHIUSO 2.15 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020             8         +1548           +1548
+     2021            11         +1734           +3282
+     2022             7         -1328           +1954   <<< NEGATIVO
+     2023             9          +158           +2112
+     2024            10         +1150           +3263
+     2025             7         +1448           +4711
+     2026             8          +234           +4945
+     >>> PERIODI NEGATIVI: 1 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -0.38%  (il 2022.11.03, su 107 giornate operative, 120 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F20_report_singola.htm.
+     -> SECONDA MISURA INDIPENDENTE (dall'OPTFRAME dell'EA): -0.53%  (colonna 'Peggior Giornata %' dell'OPTFRAME di questo EA -- misura INDIPENDENTE da quella del report)
+
+  I GATE
+    1 prima operazione .. 2020.01.07   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.07   (marcatore \[LARRY\]\s+PENDENTE\s, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.07
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.07, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 60   (controllo incrociato dal report: 60)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=60   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO AMBIGUO (la cella contiene una riscalatura di taglia)
+    riga VERBATIM: | ABTG_PunteLarry | XAUUSD | 772343 | **0,3** (ridotta da 1,0 il 23/08, firma REVISIONE R100) | **9,0%** (R100: DD 22 anni 29,74% a rischio 1% -> 9,0% a 0,3% [APPROSSIMATO lineare]; limite inferiore OHLC; peggior giornata -3,9% a 1% -> ~-1,2%) | **~0,8** (misurata R100: ~10 op/anno; forward reale: 1 trade, +144,89) | **2004.06.11...2026.06.30 (22 anni, R100)** | `risultati_archivio/R100_REFERTO.md` .. storia: R38/R39 | .... [RISCRITTO da R100, firma 23/08] .. prop: solo <= 0,3% .. tagliando 6 mesi: se il merito non arriva, spegnere |
+    >>> CONFRONTO NON CALCOLABILE: il contratto di questa sedia non da'
+        un DD promesso numerico e confrontabile. IL CRITERIO NON E'
+        STATO TOCCATO: si dichiara che il denominatore non esiste.
+        E NON E' UN VIA LIBERA.
+
+---------------------------------------------------------------------
+F21  ABTG_SuperWave   GBPUSD H4   [FOREX]
+     magic vivo 770532 | magic del sorgente 770501 | rischio VIVO 1.0% | commento 'SW GBPUSD H2' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760220/760221, singola 760222 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 1.9 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... -7501 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... -7501 EUR   <<< e' la colonna della classifica
+     PF ................................. 0.785
+     n operazioni ....................... 358   (n=358)
+     DD massimo equity alla taglia viva .. 13.41 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 13.41 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.8
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 358   netto -7254 EUR   PF 0.791   DD SUL SALDO CHIUSO 13.14 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            69         -2964           -2964   <<< NEGATIVO
+     2021            56         -2931           -5894   <<< NEGATIVO
+     2022            60           -62           -5957   <<< NEGATIVO
+     2023            41         -2258           -8215   <<< NEGATIVO
+     2024            46         -3276          -11491   <<< NEGATIVO
+     2025            54         +2845           -8646
+     2026            32         +1144           -7501
+     >>> PERIODI NEGATIVI: 5 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.16%  (il 2021.09.09, su 315 giornate operative, 589 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F21_report_singola.htm.
+     -> nessuna seconda misura: l'OPTFRAME di questo EA non ha la
+        colonna 'Peggior Giornata %'.
+
+  I GATE
+    1 prima operazione .. 2020.01.06   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.06   (marcatore \[SuperWave\]\s+(LONG|SHORT)\s+mercato, tipo MERCATO)
+        misura 2, report .htm ...... 2020.01.06
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.01.06, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 358   (controllo incrociato dal report: 358)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=358   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO ESTRATTO
+    riga VERBATIM: | ABTG_SuperWave (H2) | GBPUSD | 770532 | 1,0 | **1,04%** | **~5 chiusure** (63) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` | ... [TROVATO] |
+    DD promesso 1.04 %   contro il DD-1% misurato: 12.89x
+    >>> E NON E' UN VERDETTO: il DD promesso e' stato misurato su
+        UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS). Sopra il
+        promesso qui e' un RILIEVO da portare a Claudio, non una
+        revisione automatica. La regola del 18/08 parla del FORWARD.
+
+---------------------------------------------------------------------
+F22  ABTG_EMA200_Ottimizzato   XAUUSD H4   [FOREX]
+     magic vivo 971501 | magic del sorgente 971501 | rischio VIVO 0.25% | commento 'EMA200 OTT' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760230/760231, singola 760232 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (0.25%) ...... +3109 EUR
+     PROFITTO NORMALIZZATO a 1% (x4.00) ..... +12438 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.203
+     n operazioni ....................... 610   (n=610)
+     DD massimo equity alla taglia viva .. 1.95 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 7.80 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 76.8
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 610   netto +3178 EUR   PF 1.208   DD SUL SALDO CHIUSO 1.72 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020           103          +483            +483
+     2021           135         +1243           +1726
+     2022            62          -304           +1422   <<< NEGATIVO
+     2023            56         -1023            +399   <<< NEGATIVO
+     2024           141         +2378           +2777
+     2025            81          -140           +2638   <<< NEGATIVO
+     2026            32          +472           +3109
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -0.29%  (il 2023.09.06, su 304 giornate operative, 971 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F22_report_singola.htm.
+     -> nessuna seconda misura: l'OPTFRAME di questo EA non ha la
+        colonna 'Peggior Giornata %'.
+
+  I GATE
+    1 prima operazione .. 2020.02.04   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.02.04   (marcatore \[EMA200\]\s+(BUY|SELL)\s+LIMIT, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.03.02
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.02.04, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 610   (controllo incrociato dal report: 610)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=610   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO AMBIGUO (la cella contiene una riscalatura di taglia)
+    riga VERBATIM: | ABTG_EMA200_Ottimizzato | XAUUSD | 971501 | **0,25** (ridotta da 1,0 il 23/08, firma REVISIONE R100) | **11,5%** (R100: DD 22 anni 45,91% a rischio 1% -> 11,5% a 0,25% [APPROSSIMATO lineare]; limite inferiore OHLC; sforo 10,4x sul vecchio promesso) | **~6,6** (199 tr / 30 mesi, dato vecchio) | **2004.06.11...2026.06.30 (22 anni, R100)** | `risultati_archivio/R100_REFERTO.md` .. zip `R100_ORO_FLOTTA_CORSA_20260823_1449` | .... [RISCRITTO da R100, firma 23/08] .. **prop: NO a nessuna taglia** |
+    >>> CONFRONTO NON CALCOLABILE: il contratto di questa sedia non da'
+        un DD promesso numerico e confrontabile. IL CRITERIO NON E'
+        STATO TOCCATO: si dichiara che il denominatore non esiste.
+        E NON E' UN VIA LIBERA.
+
+---------------------------------------------------------------------
+F23  ABTG_MaxMinNotte   XAUUSD H2   [FOREX]
+     magic vivo 770402 | magic del sorgente 770401 | rischio VIVO 0.5% | commento 'MAXMIN ORO' | version attesa 1.10
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760240/760241, singola 760242 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 0.8 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (0.5%) ...... +24736 EUR
+     PROFITTO NORMALIZZATO a 1% (x2.00) ..... +49473 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.308
+     n operazioni ....................... 693   (n=693)
+     DD massimo equity alla taglia viva .. 5.32 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 10.64 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.9
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 693   netto +25095 EUR   PF 1.314   DD SUL SALDO CHIUSO 4.89 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            89          +223            +223
+     2021           107          -274             -51   <<< NEGATIVO
+     2022           114         +6603           +6552
+     2023           104         -2703           +3849   <<< NEGATIVO
+     2024           124         +6867          +10716
+     2025           113         +6420          +17136
+     2026            42         +7601          +24736
+     >>> PERIODI NEGATIVI: 2 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -0.50%  (il 2020.06.25, su 511 giornate operative, 1204 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F23_report_singola.htm.
+     -> nessuna seconda misura: l'OPTFRAME di questo EA non ha la
+        colonna 'Peggior Giornata %'.
+
+  I GATE
+    1 prima operazione .. 2020.01.02   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.01.02   (marcatore \[MaxMinNotte\]\s+(BUY|SELL)\s+STOP\s+@, tipo PENDENTE)
+        misura 2, report .htm ...... 2020.01.03
+        fonte usata ................ log (primo ordine) e report (primo deal) coerenti - sedia PENDENTE
+        >>> FINESTRA: PIENA (prima op. 2020.01.02, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 693   (controllo incrociato dal report: 693)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=693   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO AMBIGUO (la cella contiene una riscalatura di taglia)
+    riga VERBATIM: | ABTG_MaxMinNotte (oro notte) | XAUUSD | 770402 | **0,5** (ridotta da 1,0 il 23/08, firma REVISIONE R100) | **10,0%** (R100: DD 22 anni 19,72% a rischio 1% -> 10,0% a 0,5% [APPROSSIMATO lineare]; limite inferiore OHLC; ATTENZIONE: TORO 2021 da solo 9,4% a 1%) | **~3,7 posizioni** (dato R17; forward reale finora: 2 trade) | **2004.06.11...2026.06.30 (22 anni, R100)** | `risultati_archivio/R100_REFERTO.md` .. zip `R100_ORO_FLOTTA_CORSA_20260823_1449` .. storia: R17 | .... [RISCRITTO da R100, firma 23/08] .. prop: solo <= 0,5% |
+    >>> CONFRONTO NON CALCOLABILE: il contratto di questa sedia non da'
+        un DD promesso numerico e confrontabile. IL CRITERIO NON E'
+        STATO TOCCATO: si dichiara che il denominatore non esiste.
+        E NON E' UN VIA LIBERA.
+
+---------------------------------------------------------------------
+F24  ABTG_SupertrendReversal_Ottimizzato   XAUUSD H4   [FOREX]
+     magic vivo 970901 | magic del sorgente 970901 | rischio VIVO 1.0% | commento 'STREV OTT' | version attesa 1.00
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760250/760251, singola 760252 (blocco 76xxxx VERGINE)
+     strumento: OPTFRAME
+     esito: OK   durata 1.7 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (1.0%) ...... +4792 EUR
+     PROFITTO NORMALIZZATO a 1% (x1.00) ..... +4792 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.330
+     n operazioni ....................... 208   (n=208)
+     DD massimo equity alla taglia viva .. 3.51 %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... 3.51 %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 76.8
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 208   netto +4871 EUR   PF 1.337   DD SUL SALDO CHIUSO 3.28 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            24          -572            -572   <<< NEGATIVO
+     2021            34         -2292           -2864   <<< NEGATIVO
+     2022            24          +767           -2096
+     2023            27          -200           -2296   <<< NEGATIVO
+     2024            38         +1624            -673
+     2025            48         +4807           +4134
+     2026            13          +658           +4792
+     >>> PERIODI NEGATIVI: 3 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -0.51%  (il 2023.06.06, su 216 giornate operative, 344 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F24_report_singola.htm.
+     -> nessuna seconda misura: l'OPTFRAME di questo EA non ha la
+        colonna 'Peggior Giornata %'.
+
+  I GATE
+    1 prima operazione .. 2020.02.03   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... 2020.02.03   (marcatore \[STReversal\]\s+(LONG|SHORT)\s+mercato, tipo MERCATO)
+        misura 2, report .htm ...... 2020.02.03
+        fonte usata ................ log e report CONCORDI
+        >>> FINESTRA: PIENA (prima op. 2020.02.03, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 208   (controllo incrociato dal report: 208)
+    3 gemelli ........... IDENTICI al centesimo
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=208   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO AMBIGUO (la cella contiene una riscalatura di taglia)
+    riga VERBATIM: | ABTG_SupertrendReversal_Ottimizzato | XAUUSD | 970901 | 1,0 | **DD 9,0%** (R99: massimo equity su 22 anni 2004...2026, OHLC M1 = LIMITE INFERIORE, 657 op, gemelli identici) .. **peggior giornata attesa ~0,7%** [APPROSSIMATO, chiusure realizzate] .. nessuna finestra di regime concentra il rischio (max 2,69% nel TORO 2021) .. 2008: 1,79% .. 2013: 0,44% .. ...... a rischio 2% i numeri RADDOPPIANO (~18% = fuori muro prop) | ~2,5 (657 op / 264 mesi, misurata R99) | **2004.06.11...2026.06.30 (22 anni, R99)** | `risultati_archivio/R99_REFERTO.md` .. zip `R99_ORO_22ANNI_CORSA_20260823_1333` | .... **[PIENO da R99]** ... riempito il 23/08/2026 su firma di Claudio ("FIRMO, RIEMPI IL CONTRATTO CON QUEI NUMERI"). Caveat: 39/42 input della cella = default del sorgente [DA CONFERMARE col .chr del grafico vivo] |
+    >>> CONFRONTO NON CALCOLABILE: il contratto di questa sedia non da'
+        un DD promesso numerico e confrontabile. IL CRITERIO NON E'
+        STATO TOCCATO: si dichiara che il denominatore non esiste.
+        E NON E' UN VIA LIBERA.
+
+---------------------------------------------------------------------
+F25  Gold_Ichimoku_TK_ATR_EA   XAUUSD H1   [FOREX]
+     magic vivo 250604 | magic del sorgente 250604 | rischio VIVO 0.5% | commento '' | version attesa 3.00
+     >>> questo EA NON HA l'input InpComment (MISURATO nel sorgente): il
+         gate sul commento su questa sedia NON ESISTE, e nel .chr il suo
+         commento e' infatti VUOTO.
+     finestra: 2020.01.01 -> 2026.06.30   modello: 1
+     magic della corsa: gemelle 760260/760261, singola 760262 (blocco 76xxxx VERGINE)
+     strumento: REPORT
+     esito: OK   durata 0.3 min
+
+  I NUMERI
+     PROFITTO alla TAGLIA VIVA (0.5%) ...... +75436 EUR
+     PROFITTO NORMALIZZATO a 1% (x2.00) ..... +150871 EUR   <<< e' la colonna della classifica
+     PF ................................. 1.311
+     n operazioni ....................... 553   (n=553)
+     DD massimo equity alla taglia viva .. n/d %   [RISCHIO, limite inferiore: OHLC]
+     DD massimo normalizzato a 1% ....... n/d %   [APPROSSIMATO lineare]
+     mesi EFFETTIVAMENTE operati (dalla prima operazione): 77.9
+     >>> ATTENZIONE: questa sedia NON HA L'OPTFRAME (MISURATO nel
+         sorgente: nessun OnTesterDeinit). Profitto, PF e n qui sopra
+         vengono dai DEAL del report, non dallo strumento delle altre
+         39 sedie; IL DD DELL'EQUITY NON ESISTE e non e' stato
+         inventato. Le due passate gemelle non sono girate, quindi il
+         GATE 3 su di lei NON ESISTE -- e un gate che non c'e' non e'
+         un gate verde.
+
+  LA SECONDA MISURA (dai DEAL del report, indipendente dall'OPTFRAME)
+     n 553   netto +75436 EUR   PF 1.311   DD SUL SALDO CHIUSO 20.87 %
+     >>> IL DD SUL SALDO NON E' IL DD DELL'EQUITY: ignora il flottante,
+         quindi e' un limite inferiore PIU' BASSO ANCORA. Non si mette
+         mai nella stessa colonna dell'altro.
+     >>> Se questi numeri divergono molto da quelli qui sopra, e' il
+         METODO che va guardato, non la sedia.
+
+  LA SPINA DORSALE ANNO PER ANNO   <<< IL REQUISITO DI CLAUDIO
+     [APPROSSIMATO]: netto delle CHIUSURE REALIZZATE (Profitto+
+     Commissioni+Swap), periodo della CHIUSURA. NON e' l'equity e NON
+     e' il DD. Una posizione aperta a dicembre e chiusa a gennaio conta
+     TUTTA nel periodo della chiusura.
+     PERIODO          n     NETTO EUR    CUMULATO EUR
+     2020            81        +44077          +44077
+     2021            87        -15504          +28573   <<< NEGATIVO
+     2022            79         -6549          +22025   <<< NEGATIVO
+     2023            85        +10727          +32751
+     2024            87         -3253          +29499   <<< NEGATIVO
+     2025            88        +45823          +75322
+     2026            46          -835          +74488   <<< NEGATIVO
+     >>> PERIODI NEGATIVI: 4 su 7 OPERATI (su 7 nominali)
+     >>> il 2026 e' PARZIALE: la finestra finisce il 2026.06.30.
+
+  LA PEGGIOR GIORNATA   (il muro prop giornaliero e' 5%)
+     ->  -1.07%  (il 2024.07.15, su 765 giornate operative, 1106 deal col netto letto)
+     [APPROSSIMATO]: chiusure REALIZZATE, non equity intraday;
+     percentuale sul saldo a inizio giornata.
+     [APPROSSIMATO n.2]: MT5 lascia la colonna Profitto VUOTA sulle
+     righe di APERTURA ('in'), quindi quelle righe non entrano nella
+     somma -- e con loro non entra la COMMISSIONE d'ingresso, se il
+     simbolo ne ha una. L'errore va nella direzione COMODA (giornata
+     migliore del vero). Si controlla nello zip, in F25_report_singola.htm.
+     -> nessuna seconda misura: l'OPTFRAME di questo EA non ha la
+        colonna 'Peggior Giornata %'.
+
+  I GATE
+    1 prima operazione .. 2020.01.02   (finestra dichiarata dal 2020.01.01)
+        misura 1, log del tester ... NON APPLICABILE (l'EA non logga gli ingressi)   (marcatore NESSUNO: questo EA non logga gli ingressi, tipo MERCATO)
+        misura 2, report .htm ...... 2020.01.02
+        fonte usata ................ SOLO il report (questo EA non logga gli ingressi: la misura 1 NON ESISTE)
+        >>> FINESTRA: PIENA (prima op. 2020.01.02, entro 6 mesi dall'inizio della finestra)
+    2 n totale .......... 553   (controllo incrociato dal report: 553)
+    3 gemelli ........... NON ESISTE (l'EA non ha OPTFRAME: le gemelle non hanno niente da scrivere)
+    4 densita' .......... 7 periodi operati su 7 nominali
+    5 campione .......... n=553   (soglia 30: sotto e' un'ETICHETTA, mai un'esclusione)
+
+  IL CONTRATTO DI QUESTA SEDIA, letto ADESSO dall'artefatto
+    fonte: report/CONTRATTI_SEDIE.md al pin 7e2fb0de9487eb26350da3cbcf6f05673597e233
+    stato: DD PROMESSO AMBIGUO (la cella contiene una riscalatura di taglia)
+    riga VERBATIM: | Gold_Ichimoku_TK_ATR_EA | XAUUSD | 250604 | 0,5 | Verifica MT5: **PF 1,31 .. DD 4,38% a rischio 0,3%** (a 0,5% ... 7,3%) .. 217 trade. ...... Ma la validazione vale "su broker a spread stretto" (Tickmill PF 1,54): **su BCM lo stesso test dava PF 1,01 / DD 28%** ... e la sedia gira su BCM | ~7,2 (217 tr / 30 mesi) | 2024.01...2026.06 (tick 78%) | `docs/Portafoglio_Strategie.md` ..Gold Ichimoku | .... **[PARZIALE]** ... numeri pre-imbuto, broker sbagliato, mai passata dai round |
+    >>> CONFRONTO NON CALCOLABILE: il contratto di questa sedia non da'
+        un DD promesso numerico e confrontabile. IL CRITERIO NON E'
+        STATO TOCCATO: si dichiara che il denominatore non esiste.
+        E NON E' UN VIA LIBERA.
+
+=====================================================================
+ LE SEDIE CHE NON SONO IN QUESTA CLASSIFICA - e non e' un via libera
+=====================================================================
+  BREAKOUT_EA_JPY_v3   USDJPY   magic n/d   rischio n/d
+  >>> NON MISURABILE, e il motivo e' MISURATO: il sorgente NON ESISTE nel
+      repo (zero file 'BREAKOUT_EA_JPY_v3.mq5'; esistono BREAKOUT_EA_JPY.mq5
+      e BREAKOUT_EA_JPY_Multi.mq5, che sono ALTRI EA). Senza sorgente non
+      c'e' niente da compilare e niente da misurare. Nel .chr del 23/08 la
+      riga c'e' ancora, e non ha nemmeno un input di rischio leggibile.
+      E' una delle DUE SEDIE SENZA CONTRATTO del 18/08, famiglia SCARTATA
+      pre-progetto. IL RILIEVO E' APERTO DAL 18/08.
+
+  ABTG_GapContinuation   225JPY   magic 774101   rischio n/d
+  >>> FUORI MISURA: nel censimento .chr del 23/08 NON ha nessun input di
+      rischio leggibile. Senza taglia viva non esiste ne' la colonna
+      PROF-VIVO ne' quella normalizzata. NON e' una sedia senza metro (un
+      contratto ce l'ha: DD promesso 11,59%): e' una sedia senza TAGLIA
+      MISURATA. Si chiude con un .chr che la legga.
+
+  ABTG_Guardian e ABTG_TradeExporter: utility, non tradano.
+  ABTG_Nasdaq_Apertura_US: SPENTA dal 18/08 09:41.
+
+=====================================================================
+ COSA QUESTO ROUND **NON** PUO' DIRE
+=====================================================================
+  1. NESSUNA PROMOZIONE E NESSUNA BOCCIATURA. Non c'e' nessun verdetto
+     meccanico in questo round: e' una MISURA. Le decisioni le prende
+     Claudio leggendo la tabella.
+  2. NESSUN DRAWDOWN DI PORTAFOGLIO. Quaranta sedie non fanno un DD
+     pari alla somma dei loro ne' pari al massimo: dipende da QUANTO SI
+     SOVRAPPONGONO nel tempo, e questo round le misura UNA PER UNA.
+     SETTE di queste sedie stanno su GBPUSD e OTTO su U30USD: la
+     domanda del portafoglio, li', e' la domanda successiva ovvia, ed e'
+     un round diverso (macchina R16/R34/R37/R41).
+  3. NESSUN NUMERO A TICK REALI sul gruppo FOREX (non esistono prima
+     del 2024.07.05), nessuna misura di spread, nessuno slippage.
+  4. NIENTE SULLA CELLA MIGLIORE. Ogni sedia gira su UNA cella sola,
+     quella VIVA. Se una sedia esce male, la risposta NON e' 'proviamo
+     un'altra cella' -- quello sarebbe pescare.
+  5. NIENTE SUL FORWARD. Un backtest non e' un forward, e le uscite
+     della C3 del 18/08 girano sul forward.
+
+--- PASSO 0-A (le barre, un simbolo alla volta) ---
+  AUDJPY dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      AUDJPY M1 | barre 2468703 | disco 2019.12.30 | broker 1993.05.16 -> MANCA STORICO LOCALE: rilancia
+      AUDJPY H1 | barre 41305 | disco 2002.03.01 | broker 1993.05.16 -> MANCA STORICO LOCALE: rilancia
+      AUDJPY H2 | barre 20700 | disco 2002.03.01 | broker 1993.05.16 -> MANCA STORICO LOCALE: rilancia
+      AUDJPY H4 | barre 10678 | disco 2002.03.01 | broker 1993.05.16 -> MANCA STORICO LOCALE: rilancia
+      AUDJPY D1 | barre 2061 | disco 2002.03.01 | broker 1993.05.16 -> MANCA STORICO LOCALE: rilancia
+  AUDUSD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      AUDUSD M1 | barre 2467343 | disco 2019.12.30 | broker 1993.04.26 -> MANCA STORICO LOCALE: rilancia
+      AUDUSD H1 | barre 41306 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      AUDUSD H2 | barre 20700 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      AUDUSD H4 | barre 10678 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      AUDUSD D1 | barre 2061 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+  CHFJPY dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      CHFJPY M1 | barre 2467465 | disco 2019.12.30 | broker 1992.02.18 -> MANCA STORICO LOCALE: rilancia
+      CHFJPY H1 | barre 41305 | disco 2002.03.06 | broker 1992.02.18 -> MANCA STORICO LOCALE: rilancia
+      CHFJPY H2 | barre 20699 | disco 2002.03.06 | broker 1992.02.18 -> MANCA STORICO LOCALE: rilancia
+      CHFJPY H4 | barre 10677 | disco 2002.03.06 | broker 1992.02.18 -> MANCA STORICO LOCALE: rilancia
+      CHFJPY D1 | barre 2061 | disco 2002.03.06 | broker 1992.02.18 -> MANCA STORICO LOCALE: rilancia
+  EURAUD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      EURAUD M1 | barre 2468905 | disco 2019.12.30 | broker 2004.06.16 -> MANCA STORICO LOCALE: rilancia
+      EURAUD H1 | barre 41306 | disco 2004.06.16 | broker 2004.06.16 -> COMPLETO
+      EURAUD H2 | barre 20700 | disco 2004.06.16 | broker 2004.06.16 -> COMPLETO
+      EURAUD H4 | barre 10678 | disco 2004.06.16 | broker 2004.06.16 -> COMPLETO
+      EURAUD D1 | barre 2061 | disco 2004.06.16 | broker 2004.06.16 -> COMPLETO
+  EURCAD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      EURCAD M1 | barre 2468900 | disco 2019.12.30 | broker 1999.08.01 -> MANCA STORICO LOCALE: rilancia
+      EURCAD H1 | barre 41306 | disco 2001.02.26 | broker 1999.08.01 -> MANCA STORICO LOCALE: rilancia
+      EURCAD H2 | barre 20700 | disco 2001.02.26 | broker 1999.08.01 -> MANCA STORICO LOCALE: rilancia
+      EURCAD H4 | barre 10678 | disco 2001.02.26 | broker 1999.08.01 -> MANCA STORICO LOCALE: rilancia
+      EURCAD D1 | barre 2061 | disco 2001.02.26 | broker 1999.08.01 -> MANCA STORICO LOCALE: rilancia
+  EURJPY dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      EURJPY M1 | barre 2469090 | disco 2019.12.30 | broker 1993.04.26 -> MANCA STORICO LOCALE: rilancia
+      EURJPY H1 | barre 41307 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      EURJPY H2 | barre 20700 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      EURJPY H4 | barre 10678 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+      EURJPY D1 | barre 2061 | disco 1993.04.26 | broker 1993.04.26 -> COMPLETO
+  EURUSD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      EURUSD M1 | barre 2468845 | disco 2019.12.30 | broker 1971.01.03 -> MANCA STORICO LOCALE: rilancia
+      EURUSD H1 | barre 41305 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      EURUSD H2 | barre 20699 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      EURUSD H4 | barre 10677 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      EURUSD D1 | barre 2061 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+  GBPCAD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      GBPCAD M1 | barre 2465395 | disco 2019.12.30 | broker 2007.08.21 -> MANCA STORICO LOCALE: rilancia
+      GBPCAD H1 | barre 41265 | disco 2017.06.05 | broker 2007.08.21 -> MANCA STORICO LOCALE: rilancia
+      GBPCAD H2 | barre 20680 | disco 2017.06.05 | broker 2007.08.21 -> MANCA STORICO LOCALE: rilancia
+      GBPCAD H4 | barre 10668 | disco 2017.06.05 | broker 2007.08.21 -> MANCA STORICO LOCALE: rilancia
+      GBPCAD D1 | barre 2060 | disco 2017.06.05 | broker 2007.08.21 -> MANCA STORICO LOCALE: rilancia
+  GBPJPY dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      GBPJPY M1 | barre 2468747 | disco 2019.12.30 | broker 1993.04.18 -> MANCA STORICO LOCALE: rilancia
+      GBPJPY H1 | barre 41304 | disco 2005.01.02 | broker 1993.04.18 -> MANCA STORICO LOCALE: rilancia
+      GBPJPY H2 | barre 20699 | disco 2005.01.02 | broker 1993.04.18 -> MANCA STORICO LOCALE: rilancia
+      GBPJPY H4 | barre 10677 | disco 2005.01.02 | broker 1993.04.18 -> MANCA STORICO LOCALE: rilancia
+      GBPJPY D1 | barre 2060 | disco 2005.01.02 | broker 1993.04.18 -> MANCA STORICO LOCALE: rilancia
+  GBPUSD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      GBPUSD M1 | barre 2468232 | disco 2019.12.30 | broker 1993.05.11 -> MANCA STORICO LOCALE: rilancia
+      GBPUSD H1 | barre 41306 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+      GBPUSD H2 | barre 20700 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+      GBPUSD H4 | barre 10678 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+      GBPUSD D1 | barre 2061 | disco 1993.05.11 | broker 1993.05.11 -> COMPLETO
+  USDJPY dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      USDJPY M1 | barre 2467601 | disco 2019.12.30 | broker 1971.01.03 -> MANCA STORICO LOCALE: rilancia
+      USDJPY H1 | barre 41306 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      USDJPY H2 | barre 20700 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      USDJPY H4 | barre 10678 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+      USDJPY D1 | barre 2061 | disco 1971.01.03 | broker 1971.01.03 -> COMPLETO
+  XAGUSD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      XAGUSD M1 | barre 2330976 | disco 2019.12.13 | broker 2008.11.07 -> MANCA STORICO LOCALE: rilancia
+      XAGUSD H1 | barre 39197 | disco 2019.05.21 | broker 2008.11.07 -> MANCA STORICO LOCALE: rilancia
+      XAGUSD H2 | barre 20481 | disco 2018.10.18 | broker 2008.11.07 -> MANCA STORICO LOCALE: rilancia
+      XAGUSD H4 | barre 10584 | disco 2018.07.20 | broker 2008.11.07 -> MANCA STORICO LOCALE: rilancia
+      XAGUSD D1 | barre 2019 | disco 2018.02.16 | broker 2008.11.07 -> MANCA STORICO LOCALE: rilancia
+  XAUUSD dal 2020.01.01 (TF M1,H1,H2,H4,D1): eseguito, uscita 0
+      XAUUSD M1 | barre 2333964 | disco 2019.12.30 | broker 2004.06.11 -> MANCA STORICO LOCALE: rilancia
+      XAUUSD H1 | barre 39156 | disco 2009.07.17 | broker 2004.06.11 -> MANCA STORICO LOCALE: rilancia
+      XAUUSD H2 | barre 20471 | disco 2004.06.11 | broker 2004.06.11 -> COMPLETO
+      XAUUSD H4 | barre 10578 | disco 2004.06.11 | broker 2004.06.11 -> COMPLETO
+      XAUUSD D1 | barre 2018 | disco 2004.06.11 | broker 2004.06.11 -> COMPLETO
+  NIENTE TICK nello scarico: il round e' OHLC M1 per criterio. Le barre M1
+  servono davvero: il tester costruisce gli altri TF dalle M1, quindi la
+  profondita' che MORDE e' quella dell'M1.
+
+--- SE QUESTO ROUND E' PARZIALE: COME SI RIPRENDE ---
+  Qui non c'e' niente da saltare: ogni sedia ha UNA finestra sola, e un
+  rilancio liscio la rifa' tutta. LA RIPRESA CHE COSTA POCO e'
+  -SoloSedia con l'ELENCO (FRA APICI) delle sedie il cui 'esito' qui
+  sopra NON e' 'OK', oppure -SoloGruppo per rifare un gruppo intero.
+  Ogni giro scrive uno zip suo: vanno mandati TUTTI, non solo l'ultimo.
+
+--- NOTE ---
+  - PASSO 0-A: AUDJPY M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: AUDJPY H1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: AUDJPY H2 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: AUDJPY H4 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: AUDJPY D1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: AUDUSD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: CHFJPY M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: CHFJPY H1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: CHFJPY H2 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: CHFJPY H4 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: CHFJPY D1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURAUD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURCAD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURCAD H1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURCAD H2 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURCAD H4 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURCAD D1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURJPY M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: EURUSD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPCAD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPCAD H1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPCAD H2 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPCAD H4 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPCAD D1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPJPY M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPJPY H1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPJPY H2 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPJPY H4 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPJPY D1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: GBPUSD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: USDJPY M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: XAGUSD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: XAGUSD H1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: XAGUSD H2 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: XAGUSD H4 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: XAGUSD D1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: XAUUSD M1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - PASSO 0-A: XAUUSD H1 -> 'MANCA STORICO LOCALE: rilancia' (BENIGNO: c'e' sul server, non ancora sul disco. Il tester si scarica il resto da solo -- ed e' anche il motivo per cui la PRIMA passata su questo simbolo puo' durare molto piu' delle altre.)
+  - F01: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F02: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F03: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F04: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F05: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F06: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F07: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F08: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F09: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F10: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F10 GATE DENSITA': 3 periodi su 7 dentro la finestra NON hanno NESSUNA operazione (2021, 2022, 2023). NON contano come negativi: si tolgono dal denominatore. La colonna dice quindi '2 su 4 operati', non 'su 7'.
+  - F11: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F11 GATE DENSITA': 4 periodi su 7 dentro la finestra NON hanno NESSUNA operazione (2020, 2021, 2022, 2023). NON contano come negativi: si tolgono dal denominatore. La colonna dice quindi '1 su 3 operati', non 'su 7'.
+  - F12: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F12 GATE DENSITA': 4 periodi su 7 dentro la finestra NON hanno NESSUNA operazione (2020, 2021, 2022, 2023). NON contano come negativi: si tolgono dal denominatore. La colonna dice quindi '0 su 3 operati', non 'su 7'.
+  - ABTG_PTE: compilazione con 1 warning (0 errori). Non fermano il round, ma vanno letti in compile_ABTG_PTE.log dello zip.
+  - F13: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F14: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F15: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F16: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F17: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F18: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F19: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F20: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F20: rischio vivo 0.3% (sotto lo 0,5%). A questa taglia il lotto calcolato puo' cadere SOTTO IL MINIMO del simbolo e venire arrotondato in su: li' il rapporto col rischio NON e' piu' lineare e il numero NORMALIZZATO a 1% e' SOVRASTIMATO. La colonna serve a ordinare i motori, non a promettere euro.
+  - F21: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F22: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F22: rischio vivo 0.25% (sotto lo 0,5%). A questa taglia il lotto calcolato puo' cadere SOTTO IL MINIMO del simbolo e venire arrotondato in su: li' il rapporto col rischio NON e' piu' lineare e il numero NORMALIZZATO a 1% e' SOVRASTIMATO. La colonna serve a ordinare i motori, non a promettere euro.
+  - F23: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F24: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F25: questo EA NON HA l'input InpComment (MISURATO nel sorgente), quindi il gate sul commento vivo su questa sedia NON ESISTE. Nel censimento .chr il suo commento e' infatti VUOTO.
+  - F25 Gold_Ichimoku_TK_ATR_EA: NESSUN OPTFRAME nel sorgente (MISURATO). Questa sedia gira SOLO la passata singola; profitto, PF, n e la spina dorsale escono dai DEAL del report .htm, e il DD dell'EQUITY resta NON MISURATO. Le due passate GEMELLE non girano, quindi il gate 3 su di lei NON ESISTE.
+  - F25 Gold_Ichimoku_TK_ATR_EA: nessuna riga di log d'ingresso nel sorgente (MISURATO). La misura 1 del GATE 1 su questa sedia NON ESISTE: la prima operazione si legge SOLO dal report.
+  - F25: tabella deal riconosciuta, colonne Ora=0 Direzione=4 Profitto=10 Bilancio=11 Commissioni=8 Swap=9 (indici a base 0). Netto = Profitto+Commissioni+Swap.
+  - F25: profitto, PF e n vengono dai DEAL del report (unica fonte possibile). Il DD dell'EQUITY resta NON MISURATO; al suo posto il referto stampa il DD SUL SALDO CHIUSO (20.87%), che e' un'altra cosa e un limite inferiore piu' basso ancora.
+
+--- PROBLEMI E RILIEVI ---
+  - F01: esisteva gia' un CSV del 2026-08-24 16:48. LO RIFACCIO LO STESSO (questa e' una finestra sola per sedia: saltarla vorrebbe dire leggere numeri di un'altra corsa).
+  - F01 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 7.75%, cioe' 4.08x il DD promesso dal contratto (1.90%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F02: esisteva gia' un CSV del 2026-08-24 16:48. LO RIFACCIO LO STESSO (questa e' una finestra sola per sedia: saltarla vorrebbe dire leggere numeri di un'altra corsa).
+  - F02 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 2.51%, cioe' 2.09x il DD promesso dal contratto (1.20%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F03: esisteva gia' un CSV del 2026-08-24 16:49. LO RIFACCIO LO STESSO (questa e' una finestra sola per sedia: saltarla vorrebbe dire leggere numeri di un'altra corsa).
+  - F03 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 2.13%, cioe' 1.78x il DD promesso dal contratto (1.20%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F04 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 12.26%, cioe' 1.31x il DD promesso dal contratto (9.33%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F05 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 41.52%, cioe' 6.72x il DD promesso dal contratto (6.18%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F06 FINESTRA ACCORCIATA: la prima operazione e' del 2020.07.22, cioe' 7 mesi dopo l'inizio della finestra (2020.01.01). O lo storico non arriva davvero li', o il motore non aveva le condizioni per operare. La corsa PROSEGUE, ma questa riga va scritta ACCANTO A OGNI NUMERO di questa sedia: i mesi misurati sono 71.3, non quelli della finestra dichiarata.
+  - F06 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 16.37%, cioe' 3.65x il DD promesso dal contratto (4.48%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F07 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 21.80%, cioe' 3.48x il DD promesso dal contratto (6.27%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F08 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 15.77%, cioe' 3.44x il DD promesso dal contratto (4.58%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F09 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 15.88%, cioe' 3.70x il DD promesso dal contratto (4.29%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F10 FINESTRA ACCORCIATA: la prima operazione e' del 2020.12.20, cioe' 12 mesi dopo l'inizio della finestra (2020.01.01). O lo storico non arriva davvero li', o il motore non aveva le condizioni per operare. La corsa PROSEGUE, ma questa riga va scritta ACCANTO A OGNI NUMERO di questa sedia: i mesi misurati sono 66.3, non quelli della finestra dichiarata.
+  - F10 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 2.50%, cioe' 1.04x il DD promesso dal contratto (2.40%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F11 FINESTRA ACCORCIATA: la prima operazione e' del 2024.11.04, cioe' 58 mesi dopo l'inizio della finestra (2020.01.01). O lo storico non arriva davvero li', o il motore non aveva le condizioni per operare. La corsa PROSEGUE, ma questa riga va scritta ACCANTO A OGNI NUMERO di questa sedia: i mesi misurati sono 19.8, non quelli della finestra dichiarata.
+  - F11 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 1.85%, cioe' 1.23x il DD promesso dal contratto (1.50%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F12 FINESTRA ACCORCIATA: la prima operazione e' del 2024.11.04, cioe' 58 mesi dopo l'inizio della finestra (2020.01.01). O lo storico non arriva davvero li', o il motore non aveva le condizioni per operare. La corsa PROSEGUE, ma questa riga va scritta ACCANTO A OGNI NUMERO di questa sedia: i mesi misurati sono 19.8, non quelli della finestra dichiarata.
+  - F15 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 11.49%, cioe' 2.89x il DD promesso dal contratto (3.97%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F16 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 17.12%, cioe' 4.63x il DD promesso dal contratto (3.70%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F17 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 6.96%, cioe' 1.45x il DD promesso dal contratto (4.80%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F18 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 8.95%, cioe' 3.31x il DD promesso dal contratto (2.70%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F19 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 8.51%, cioe' 1.67x il DD promesso dal contratto (5.10%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+  - F21 RILIEVO (NON e' una revisione automatica): il DD normalizzato a 1% e' 13.41%, cioe' 12.89x il DD promesso dal contratto (1.04%). ATTENZIONE: il promesso e' stato misurato su UN'ALTRA FINESTRA (spesso 12-13 mesi di OOS), quindi la differenza puo' essere tutta del cambio di finestra. Va portato a Claudio, non eseguito.
+
+ESITO: COMPLETO CON RILIEVI -- tutte e 25 le sedie hanno prodotto i numeri attesi. I 24 rilievi in elenco sono RISULTATI del round (finestra accorciata, densita', contratto, DD sopra il promesso), non guasti: si leggono ACCANTO ai numeri, non invece dei numeri.
