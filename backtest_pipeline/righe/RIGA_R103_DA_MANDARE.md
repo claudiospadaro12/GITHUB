@@ -30,10 +30,10 @@ periodi **operati**).
 
 ---
 
-## 📌 IL PIN — ⚠️ **`040f0cb4465a83b28849fe0408fc97a4b82f5d11`**
+## 📌 IL PIN — ⚠️ **`bb139dee60629be59734fe0a17c2f24b4ce95f90`**
 
 ```
-040f0cb4465a83b28849fe0408fc97a4b82f5d11
+bb139dee60629be59734fe0a17c2f24b4ce95f90
 ```
 
 > 🔴 **Le righe qui sotto NON si lanciano finché questo blocco non porta un hash
@@ -94,7 +94,7 @@ periodi **operati**).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -194,7 +194,7 @@ per prima, e riempie **subito** la seconda tabella.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloGruppo 'INDICI';
@@ -223,7 +223,7 @@ Si cambia **SOLO l'elenco dopo `-SoloSedia`** (e si toglie `-SoloGruppo`).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia 'F01,F02,F03';
@@ -265,7 +265,7 @@ sola**, e **senza cambiare il pin**:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='bb139dee60629be59734fe0a17c2f24b4ce95f90'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloGruppo 'INDICI' -TickReali;
