@@ -31,12 +31,9 @@ risolte **tutte con la proposta del preparatore** (verbale in testa ai criteri):
 > COMUNE in intestazione **non sono stati toccati**. Gli `.ini` restano quelli
 > provati.
 
-✅ **PIN ASSEGNATO il 23/08 notte: `7aa83fd`** (dopo il secondo passaggio del
-verificatore, che ha trovato e fatto correggere il difetto **checklist 65**:
-`-SoloSedia C01,C02,C03` senza apici passava UN token `"C01 C02 C03"` e il
-blocco usciva con `exit 1` senza zip. Fix nel driver: split su `[,\s]+`,
-entrambe le forme accettate; in più la raccolta ora filtra i CSV del SOLO
-blocco corrente. Gli elenchi nelle righe restano comunque **fra apici**.)
+✅ **PIN ASSEGNATO (aggiornato 24/08): `fd23d4a`** — la storia completa dei
+pin, coi motivi di ogni cambio, è nel blocco "IL PIN" qui sotto. Regola
+invariata: **gli elenchi nelle righe vanno fra apici** (checklist 65).
 
 ### 2️⃣ 🚦 **LA CODA: R102 GIRA DOPO R101. Una macchina, un lavoro.**
 R101 (ablazione dei filtri su Dow e DAX) è pinnato a
@@ -50,17 +47,20 @@ la cache e i frame: il risultato **non si legge più**.
 
 ---
 
-## 📌 IL PIN — ✅ **ASSEGNATO: `7aa83fd7548e94379e3eeb6bdabdb9c8a8d02093`**
+## 📌 IL PIN — ✅ **ASSEGNATO: `fd23d4ac36b9087504d976c9a0fe931003e774cf`**
 
 ```
-7aa83fd7548e94379e3eeb6bdabdb9c8a8d02093
+fd23d4ac36b9087504d976c9a0fe931003e774cf
 ```
 
-> ### ✅ Righe DEFINITIVE (verificatore passato DUE volte: 78d8f4f FAIL con
-> correzioni → fix committati → ripinnate a `7aa83fd`).
+> ### ✅ Righe DEFINITIVE (ogni pin nuovo e' passato dal verificatore).
 > Storia dei pin: `c1ff3b2` → `fe86b42` (fix conteggio finestre) →
-> `78d8f4f` (firma registrata, FAIL del verificatore per checklist 65) →
-> **`7aa83fd`** (fix `-SoloSedia` + filtro CSV per blocco + checklist 65).
+> `78d8f4f` (firma registrata, FAIL checklist 65) → `7aa83fd` (fix
+> `-SoloSedia` + filtro CSV per blocco) → `393c68f` (fix Battito-Basi
+> nello scarico storico) → **`fd23d4a`** (esiti onesti: PARZIALE solo con
+> sedie mancanti, COMPLETO CON RILIEVI verde + exit 0 quando i rilievi
+> sono dichiarativi — il falso rosso che il 24/08 ha fatto credere a
+> Claudio che il blocco 1 fosse fallito).
 > 🚦 **Resta il cancello della CODA: R102 parte solo DOPO la chiusura di
 > R101** (zip SOLODAX letto e referto chiuso).
 
@@ -126,7 +126,7 @@ riscritta**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='393c68f2d1ac5805b8c7cfc4c638fba8135d6247'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='fd23d4ac36b9087504d976c9a0fe931003e774cf'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -188,14 +188,14 @@ riscritta**.
 
 ## 2️⃣ POI la corsa vera — **A BLOCCHI, e Breaking Band per primo**
 
-> ✅ Pin assegnato (`7aa83fd`). 🚦 Il blocco si manda **solo dopo che R101 ha
+> ✅ Pin assegnato (`fd23d4a`). 🚦 Il blocco si manda **solo dopo che R101 ha
 > chiuso** (decisione 4: una macchina, un lavoro).
 
 🔴 **Non è un ripiego: è il modo previsto.** Venti sedie in un colpo sono 6-16
 ore più lo scarico, e un'interruzione a metà costa il 63% del lavoro
 (§ripresa). `-SoloSedia` accetta un **ELENCO**, e l'elenco va **FRA APICI**:
 `'C01,C02,C03'` — senza apici PowerShell lo spezza in array e lo reincolla con
-gli spazi (checklist 65; il driver al pin `7aa83fd` accetta entrambe le forme,
+gli spazi (checklist 65; il driver accetta entrambe le forme (dal pin `7aa83fd` in poi),
 ma gli apici restano la regola).
 
 ### 🥇 BLOCCO 1 — **BREAKING BAND** (è la domanda di Claudio)
@@ -203,7 +203,7 @@ ma gli apici restano la regola).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='393c68f2d1ac5805b8c7cfc4c638fba8135d6247'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='fd23d4ac36b9087504d976c9a0fe931003e774cf'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia 'C01,C02,C03';
@@ -267,7 +267,7 @@ si rilancia **senza cambiare il pin**:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='393c68f2d1ac5805b8c7cfc4c638fba8135d6247'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='fd23d4ac36b9087504d976c9a0fe931003e774cf'; $p="$env:USERPROFILE\RIGA_R102.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R102_CLASSIFICA_LUNGA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R102_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia 'C02,C06,C15' -PavimentoData '1999.01.04';
