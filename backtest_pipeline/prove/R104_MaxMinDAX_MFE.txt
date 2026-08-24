@@ -1,0 +1,130 @@
+# =====================================================================
+#  R104 -- MISURA MFE su ABTG_MaxMinNotte_DAX_Short_Ottimizzato_MFE
+#  D30EUR M15, TICK REALI (modello 4), 2024.09.26 -> 2026.08.24
+# ---------------------------------------------------------------------
+#  CRITERI: backtest_pipeline\risultati_archivio\R104_CRITERI_MFE_MAXMIN_DAX.md
+#  (autorizzati da Claudio in chat il 24/08/2026: "Si, misuriamo quanto
+#   succede". Misura a rischio bassissimo: una sedia sola, nessun cambio
+#   in forward, nessuna promozione possibile.)
+#
+#  LA DOMANDA: su quante operazioni il prezzo raggiunge un profitto
+#  flottante importante e POI torna indietro SENZA mai toccare il 1o
+#  target (1R)? E quanto, in media, viene restituito?
+#
+#  >>> QUESTO FILE NON CERCA NIENTE: VERIFICA (checklist punto 3).
+#      Non e' una griglia, non e' un walk-forward, non c'e' NESSUN asse
+#      da spazzolare. E' UNA passata sola, con i parametri VIVI esatti,
+#      il cui unico scopo e' far produrre all'EA di misura il CSV
+#      ABTG_MFE_MaxMinDAX.csv. Nessun numero di questo file puo'
+#      promuovere o bocciare qualcosa.
+#
+#  DA DOVE VIENE OGNI VALORE, e non e' scritto a memoria:
+#    mql5\Presets\sedie_piccolo\recupero2\
+#        sedia_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_770411.set
+#    cioe' il PRESET LIVE della sedia, riga per riga. L'unica riga
+#    diversa dal preset e' InpMagic (vedi sotto).
+#    InpUsaGuardian NON compare nel preset: e' scritto qui col default
+#    del sorgente (true) perche' un input che il preset non nomina NON
+#    torna al suo default -- resta l'ultimo valore usato a mano, che MT5
+#    ricorda (checklist punto 25). Nel tester il Guardian e' FAIL-OPEN
+#    TOTALE (le sue GlobalVariable non esistono li'): non cambia una
+#    virgola del backtest.
+#
+#  IL MAGIC: 750010. Il magic VIVO della sedia e' 770411 e NON compare
+#  in nessun file di R104. Il blocco 750xxx e' stato VERIFICATO libero
+#  in tutto il repo il 24/08/2026 (zero occorrenze). 750011 e' la
+#  gemella RISERVATA e in questo round NON GIRA -- e va detto perche':
+#    le due passate gemelle sono il controllo d'igiene di casa, ma qui
+#    girerebbero SULLO STESSO FILE COMUNE ABTG_MFE_MaxMinDAX.csv, e la
+#    seconda cancellerebbe la prima (o, in ottimizzazione, i due agenti
+#    ci scriverebbero sopra insieme). Il controllo d'igiene di questo
+#    round e' un ALTRO, ed e' altrettanto duro: il numero di righe del
+#    CSV MFE deve coincidere col numero di posizioni chiuse contate,
+#    indipendentemente, in abtg_trades_*.csv (che lo stesso EA scrive
+#    da OnTester leggendo lo storico dei deal). Due strumenti diversi
+#    sullo stesso fatto: se non tornano, il file non si legge.
+#
+#  IL MOTORE: ABTG_MaxMinNotte_DAX_Short_Ottimizzato_MFE.mq5 e' la
+#  COPIA DI SOLA MISURA del sorgente vivo. Differenze, tutte dichiarate
+#  in testa a quel file: (1) il default di InpMagic, (2) il blocco
+#  MARCATORE_MFE_R104_v1 che OSSERVA e scrive un CSV. Nessuna decisione
+#  di apertura/chiusura/parziale/breakeven/trailing e' stata toccata.
+#
+#  LA FINESTRA: 2024.09.26 -> 2026.08.24.
+#    2024.09.26 e' il muro del feed BCM sugli indici (sonda del 17/08,
+#    verdetto COMPLETO da quella data). La fine e' OGGI, per avere il
+#    campione piu' ampio possibile. I tick reali di BCM su questo
+#    simbolo partono dal 2024.07.05, quindi TUTTA la finestra ha tick
+#    veri. La data di fine sta nel DRIVER (RIGA_R104_MFE_MAXMIN_DAX.ps1,
+#    $Fino), qui c'e' solo @DAQUANDO: e' la convenzione di casa.
+#
+#  IL CANCELLO G1: n >= 30 operazioni. Sotto, la statistica di frequenza
+#  e' NON MISURABILE e il referto scrive NON MISURABILE al posto delle
+#  percentuali. Non e' un fallimento: e' una risposta.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- Box notturno (ORA SERVER) ---
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0.0||0.0||0||0.0||N
+InpMaxBoxPts=0.0||0.0||0||0.0||N
+# --- Piazzamento e chiusura (ORA SERVER) ---
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+# --- Ingresso ---
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+# --- Stop loss ---
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000.0||3000.0||0||3000.0||N
+# --- Target e gestione ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50.0||50.0||0||50.0||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+# --- Filtro correlazione ---
+InpUseCorrelation=true||true||0||true||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+# --- Rischio ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+# --- Filtro notizie ---
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpNewsFlatten=true||true||0||true||N
+# --- Generali ---
+InpComment=MAXMIN DAX SHORT
+InpMagic=750010||750010||0||750010||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
