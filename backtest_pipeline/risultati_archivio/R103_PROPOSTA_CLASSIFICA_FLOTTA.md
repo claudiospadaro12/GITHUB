@@ -111,3 +111,34 @@ pezzo torna col suo zip.
 ```
 Alla firma: criteri di dettaglio, 40 file prova, driver, righe dal
 verificatore. Nessuna passata parte prima.
+
+
+---
+
+## 📌 CHIARIMENTO DI CLAUDIO (24/08/2026 mattina, prima di uscire)
+
+> "Riprova tu, io sono via stamattina. Voglio avere una classifica aggiornata
+> x ogni Ea e x ogni simbolo di ogni Ea se L'EA prevede più di 1 simbolo. Così
+> stabiliamo i profitti di ognuno x fare una stima. Vedi tu se vuoi farlo anno
+> x anno x ognuno o se vuoi fare la somma di tutti ma vorrei capire se
+> esistono anni negativi x qualcuno. Bastano credo 5 anni o valuta tu."
+
+**Tre cose, agli atti, e diventano requisito vincolante del round:**
+
+1. **Unità di misura = SEDIA (EA + simbolo), non EA.** Coerente con quanto già
+   scritto: le 40 righe della classifica restano una per (EA, simbolo, magic)
+   — `ABTG_PunteLarry` ha 6 righe distinte (una per GBPUSD, EURAUD, GBPJPY,
+   EURCAD, U30USD, XAUUSD), non una riga sola.
+2. **LA SPINA DORSALE ANNO PER ANNO DIVENTA OBBLIGATORIA, per TUTTE e 40 le
+   sedie** (non più "se costa poco, tienila" come nella bozza iniziale):
+   Claudio vuole vedere **quali anni sono negativi, sedia per sedia**. Ogni
+   riga della classifica porta quindi, oltre al totale sui 6,5 anni: la
+   colonna **"anni negativi / anni totali"** e il dettaglio anno-per-anno nel
+   referto esteso.
+3. **La finestra 6,5 anni (2020-2026) resta quella firmata** — soddisfa il
+   "bastano 5 anni" e aggiunge il covid come test di stress gratuito.
+
+**Autorizzazione esplicita**: *"Riprova tu"* mentre è assente — si procede
+in autonomia sulle decisioni tecniche già firmate, senza attendere ulteriori
+firme per questo chiarimento (non cambia il perimetro né la finestra, solo
+rende obbligatoria una colonna già prevista come opzionale).
