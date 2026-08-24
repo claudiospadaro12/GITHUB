@@ -1,0 +1,163 @@
+# =====================================================================
+#  R103 -- F23: ABTG_MaxMinNotte su XAUUSD H2
+#  LA CLASSIFICA DELLA FLOTTA -- gruppo FOREX
+#  Finestra: 2020.01.01 -> 2026.06.30   (6,5 anni)
+#  Criteri: backtest_pipeline\risultati_archivio\R103_CRITERI.md
+#  Proposta FIRMATA da Claudio il 24/08/2026 ("FIRMO TUTTE E TRE,
+#  PARTIAMO") + chiarimento della stessa mattina: la SPINA DORSALE
+#  periodo per periodo e' OBBLIGATORIA per tutte e 40 le sedie.
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_MaxMinNotte.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : PRESET LIVE mql5/Presets/sedie_piccolo/sedia_MAXMIN_ORO_770402.set (stessa cella di R100 S02)
+#    il TF del GRAFICO  : R100 prova S02 (grafico H2); il preset pinna InpMgmtTF=16386
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  >>> IL TF DEL GRAFICO NON SI DERIVA DA InpTF, E VICEVERSA. E' la
+#      trappola pagata in R102: ABTG_SuperWave GBPUSD gira su un grafico
+#      H4 con InpTF = H2. Qui il TF del grafico ha una FONTE SUA,
+#      scritta qui sopra, sedia per sedia.
+#
+#  LA FINESTRA: 2020.01.01 -> 2026.06.30, ed e' quella del GRUPPO
+#  FOREX, non del simbolo (differenza dichiarata rispetto a R102, dove
+#  @DAQUANDO era la data di inizio storico del simbolo).
+
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R103 par. 4):
+#    A. PROFITTO ALLA TAGLIA VIVA (0.5%) -- quello che avrebbe fatto
+#       sul conto, su questo banco
+#    B. PROFITTO NORMALIZZATO A 1% = A x (1 / 0.5)
+#       [APPROSSIMATO lineare, convenzione CONTRATTI_SEDIE.md punto 2]
+#       >>> E' LA COLONNA SU CUI LA CLASSIFICA E' ORDINATA: confronta i
+#           MOTORI, non le taglie.
+#    C. PF, DD massimo, n operazioni, PEGGIOR GIORNATA
+#    D. LA SPINA DORSALE ANNO PER ANNO: anno | n operazioni | netto EUR | cumulato
+#       >>> e da li' la colonna ANNI NEGATIVI / ANNI OPERATI, che
+#           e' la domanda letterale di Claudio del 24/08:
+#           "vorrei capire se esistono anni negativi x qualcuno".
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08). Una classifica e' un'informazione
+#      per decidere, non un verdetto automatico.
+#  MODELLO OHLC M1 dichiarato: il DD che esce e' un LIMITE INFERIORE del
+#  rischio; il profitto e' una STIMA DEL LORDO (spread corrente, nessuno
+#  slippage, riempimenti ideali) -- MAI un guadagno.
+
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             cella viva (= al default del sorgente)
+#    InpBoxStartHour        23               cella viva (= al default del sorgente)
+#    InpBoxStartMin         0                cella viva (= al default del sorgente)
+#    InpBoxEndHour          4                cella viva (= al default del sorgente)
+#    InpBoxEndMin           59               cella viva (= al default del sorgente)
+#    InpMinBoxPts           0                cella viva (= al default del sorgente)
+#    InpMaxBoxPts           0                cella viva (= al default del sorgente)
+#    InpPlaceHour           7                cella viva (= al default del sorgente)
+#    InpPlaceMin            0                CELLA VIVA (artefatto della sedia)
+#    InpEntryCutoffHour     8                cella viva (= al default del sorgente)
+#    InpEntryCutoffMin      30               cella viva (= al default del sorgente)
+#    InpCloseHour           17               cella viva (= al default del sorgente)
+#    InpCloseMin            30               cella viva (= al default del sorgente)
+#    InpCloseAtEnd          true             cella viva (= al default del sorgente)
+#    InpOneTradePerDay      true             cella viva (= al default del sorgente)
+#    InpPendingExpiryMin    90               cella viva (= al default del sorgente)
+#    InpBufferPoints        250              CELLA VIVA (artefatto della sedia)
+#    InpAllowLong           true             cella viva (= al default del sorgente)
+#    InpAllowShort          true             cella viva (= al default del sorgente)
+#    InpSLMode              0                CELLA VIVA (artefatto della sedia)
+#    InpMgmtTF              16386            CELLA VIVA (artefatto della sedia)
+#    InpAtrPeriod           14               cella viva (= al default del sorgente)
+#    InpAtrSLmult           1.5              cella viva (= al default del sorgente)
+#    InpSLFixedPts          3000             cella viva (= al default del sorgente)
+#    InpTP1_R               1.0              cella viva (= al default del sorgente)
+#    InpTP1Pct              50               cella viva (= al default del sorgente)
+#    InpBreakeven           true             cella viva (= al default del sorgente)
+#    InpTP2_R               2.5              cella viva (= al default del sorgente)
+#    InpTP2Pct              50               cella viva (= al default del sorgente)
+#    InpUseEMA200Target     true             cella viva (= al default del sorgente)
+#    InpEMA200Period        200              cella viva (= al default del sorgente)
+#    InpTPfinal_R           4.0              cella viva (= al default del sorgente)
+#    InpUseTrailing         true             cella viva (= al default del sorgente)
+#    InpTrailAtrMult        2.0              cella viva (= al default del sorgente)
+#    InpUseCorrelation      false            cella viva (= al default del sorgente)
+#    InpCorrSymbol          'SPXUSD'         cella viva (= al default del sorgente)
+#    InpCorrTF              16385            cella viva (= al default del sorgente)
+#    InpCorrEmaFast         14               cella viva (= al default del sorgente)
+#    InpCorrEmaSlow         100              cella viva (= al default del sorgente)
+#    InpRiskPercent         0.5              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpUseNewsFilter       false            cella viva (= al default del sorgente)
+#    InpNewsFile            'abtg_news.csv'  cella viva (= al default del sorgente)
+#    InpNewsMinImpact       3                cella viva (= al default del sorgente)
+#    InpNewsBeforeMin       30               cella viva (= al default del sorgente)
+#    InpNewsAfterMin        30               cella viva (= al default del sorgente)
+#    InpNewsShiftMinutes    0                cella viva (= al default del sorgente)
+#    InpNewsCurrencies      ''               cella viva (= al default del sorgente)
+#    InpNewsFlatten         true             cella viva (= al default del sorgente)
+#    InpComment             'MAXMIN ORO'     commento vivo (censimento .chr 23/08 15:49)
+#    InpMagic               760240/760241    coppia VERGINE 76xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                cella viva (= al default del sorgente)
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H2
+@DAQUANDO 2020.01.01
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN ORO
+InpMagic=760240||760240||1||760241||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

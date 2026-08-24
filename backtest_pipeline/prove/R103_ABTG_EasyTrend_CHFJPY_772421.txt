@@ -1,0 +1,113 @@
+# =====================================================================
+#  R103 -- F07: ABTG_EasyTrend su CHFJPY H1
+#  LA CLASSIFICA DELLA FLOTTA -- gruppo FOREX
+#  Finestra: 2020.01.01 -> 2026.06.30   (6,5 anni)
+#  Criteri: backtest_pipeline\risultati_archivio\R103_CRITERI.md
+#  Proposta FIRMATA da Claudio il 24/08/2026 ("FIRMO TUTTE E TRE,
+#  PARTIAMO") + chiarimento della stessa mattina: la SPINA DORSALE
+#  periodo per periodo e' OBBLIGATORIA per tutte e 40 le sedie.
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_EasyTrend.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : deploy_vivaio_ez.ps1 (preset VIVAIO_EZ_CHFJPY, TP_R 1,5) + rinomina commento 19/08
+#    il TF del GRAFICO  : deploy_vivaio_ez.ps1 (grafico H1)
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  >>> IL TF DEL GRAFICO NON SI DERIVA DA InpTF, E VICEVERSA. E' la
+#      trappola pagata in R102: ABTG_SuperWave GBPUSD gira su un grafico
+#      H4 con InpTF = H2. Qui il TF del grafico ha una FONTE SUA,
+#      scritta qui sopra, sedia per sedia.
+#
+#  LA FINESTRA: 2020.01.01 -> 2026.06.30, ed e' quella del GRUPPO
+#  FOREX, non del simbolo (differenza dichiarata rispetto a R102, dove
+#  @DAQUANDO era la data di inizio storico del simbolo).
+
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R103 par. 4):
+#    A. PROFITTO ALLA TAGLIA VIVA (1.0%) -- quello che avrebbe fatto
+#       sul conto, su questo banco
+#    B. PROFITTO NORMALIZZATO A 1% = A x (1 / 1.0)
+#       [APPROSSIMATO lineare, convenzione CONTRATTI_SEDIE.md punto 2]
+#       >>> E' LA COLONNA SU CUI LA CLASSIFICA E' ORDINATA: confronta i
+#           MOTORI, non le taglie.
+#    C. PF, DD massimo, n operazioni, PEGGIOR GIORNATA
+#    D. LA SPINA DORSALE ANNO PER ANNO: anno | n operazioni | netto EUR | cumulato
+#       >>> e da li' la colonna ANNI NEGATIVI / ANNI OPERATI, che
+#           e' la domanda letterale di Claudio del 24/08:
+#           "vorrei capire se esistono anni negativi x qualcuno".
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08). Una classifica e' un'informazione
+#      per decidere, non un verdetto automatico.
+#  MODELLO OHLC M1 dichiarato: il DD che esce e' un LIMITE INFERIORE del
+#  rischio; il profitto e' una STIMA DEL LORDO (spread corrente, nessuno
+#  slippage, riempimenti ideali) -- MAI un guadagno.
+
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16385            cella viva (= al default del sorgente)
+#    InpLinRegLen           11               cella viva (= al default del sorgente)
+#    InpPlotMode            0                cella viva (= al default del sorgente)
+#    InpPlotLen             11               cella viva (= al default del sorgente)
+#    InpCciPeriod           20               cella viva (= al default del sorgente)
+#    InpPivotL              5                cella viva (= al default del sorgente)
+#    InpPivotR              3                CELLA VIVA (artefatto della sedia)
+#    InpPivotSource         0                CELLA VIVA (artefatto della sedia)
+#    InpMaxPivotDist        60               cella viva (= al default del sorgente)
+#    InpDivMaxBars          0                cella viva (= al default del sorgente)
+#    InpDivDieOnFail        false            cella viva (= al default del sorgente)
+#    InpHourStart           8                cella viva (= al default del sorgente)
+#    InpHourEnd             18               cella viva (= al default del sorgente)
+#    InpPrevBars            3                cella viva (= al default del sorgente)
+#    InpEntryWindowBars     3                cella viva (= al default del sorgente)
+#    InpMarketIfTooClose    true             cella viva (= al default del sorgente)
+#    InpSLBufferPts         30               cella viva (= al default del sorgente)
+#    InpTP_R                1.5              CELLA VIVA (artefatto della sedia)
+#    InpWarmupBars          500              cella viva (= al default del sorgente)
+#    InpAllowLong           true             cella viva (= al default del sorgente)
+#    InpAllowShort          true             cella viva (= al default del sorgente)
+#    InpMaxSpreadPts        30               CELLA VIVA (artefatto della sedia)
+#    InpRiskPercent         1.0              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpMagic               760080/760081    coppia VERGINE 76xxxx (asse Y, gemelle)
+#    InpComment             'EASYTREND CHFJPY' commento vivo (censimento .chr 23/08 15:49)
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+# =====================================================================
+
+@SIMBOLO  CHFJPY
+@PERIODO  H1
+@DAQUANDO 2020.01.01
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpLinRegLen=11||11||0||11||N
+InpPlotMode=0||0||0||0||N
+InpPlotLen=11||11||0||11||N
+InpCciPeriod=20||20||0||20||N
+InpPivotL=5||5||0||5||N
+InpPivotR=3||3||0||3||N
+InpPivotSource=0||0||0||0||N
+InpMaxPivotDist=60||60||0||60||N
+InpDivMaxBars=0||0||0||0||N
+InpDivDieOnFail=false||false||0||false||N
+InpHourStart=8||8||0||8||N
+InpHourEnd=18||18||0||18||N
+InpPrevBars=3||3||0||3||N
+InpEntryWindowBars=3||3||0||3||N
+InpMarketIfTooClose=true||true||0||true||N
+InpSLBufferPts=30||30||0||30||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpWarmupBars=500||500||0||500||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpMaxSpreadPts=30||30||0||30||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMagic=760080||760080||1||760081||Y
+InpComment=EASYTREND CHFJPY
+InpVerbose=true||true||0||true||N

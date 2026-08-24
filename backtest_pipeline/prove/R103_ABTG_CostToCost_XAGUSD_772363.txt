@@ -1,0 +1,93 @@
+# =====================================================================
+#  R103 -- F06: ABTG_CostToCost su XAGUSD H4
+#  LA CLASSIFICA DELLA FLOTTA -- gruppo FOREX
+#  Finestra: 2020.01.01 -> 2026.06.30   (6,5 anni)
+#  Criteri: backtest_pipeline\risultati_archivio\R103_CRITERI.md
+#  Proposta FIRMATA da Claudio il 24/08/2026 ("FIRMO TUTTE E TRE,
+#  PARTIAMO") + chiarimento della stessa mattina: la SPINA DORSALE
+#  periodo per periodo e' OBBLIGATORIA per tutte e 40 le sedie.
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_CostToCost.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : deploy_vivaio_cost.ps1 (preset VIVAIO_COST_XAGUSD, exit 0 = cost puro)
+#    il TF del GRAFICO  : deploy_vivaio_cost.ps1 (grafico H4)
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  >>> IL TF DEL GRAFICO NON SI DERIVA DA InpTF, E VICEVERSA. E' la
+#      trappola pagata in R102: ABTG_SuperWave GBPUSD gira su un grafico
+#      H4 con InpTF = H2. Qui il TF del grafico ha una FONTE SUA,
+#      scritta qui sopra, sedia per sedia.
+#
+#  LA FINESTRA: 2020.01.01 -> 2026.06.30, ed e' quella del GRUPPO
+#  FOREX, non del simbolo (differenza dichiarata rispetto a R102, dove
+#  @DAQUANDO era la data di inizio storico del simbolo).
+
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R103 par. 4):
+#    A. PROFITTO ALLA TAGLIA VIVA (1.0%) -- quello che avrebbe fatto
+#       sul conto, su questo banco
+#    B. PROFITTO NORMALIZZATO A 1% = A x (1 / 1.0)
+#       [APPROSSIMATO lineare, convenzione CONTRATTI_SEDIE.md punto 2]
+#       >>> E' LA COLONNA SU CUI LA CLASSIFICA E' ORDINATA: confronta i
+#           MOTORI, non le taglie.
+#    C. PF, DD massimo, n operazioni, PEGGIOR GIORNATA
+#    D. LA SPINA DORSALE ANNO PER ANNO: anno | n operazioni | netto EUR | cumulato
+#       >>> e da li' la colonna ANNI NEGATIVI / ANNI OPERATI, che
+#           e' la domanda letterale di Claudio del 24/08:
+#           "vorrei capire se esistono anni negativi x qualcuno".
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08). Una classifica e' un'informazione
+#      per decidere, non un verdetto automatico.
+#  MODELLO OHLC M1 dichiarato: il DD che esce e' un LIMITE INFERIORE del
+#  rischio; il profitto e' una STIMA DEL LORDO (spread corrente, nessuno
+#  slippage, riempimenti ideali) -- MAI un guadagno.
+
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16388            CELLA VIVA (artefatto della sedia)
+#    InpExitMode            0                cella viva (= al default del sorgente)
+#    InpTP_R                1.5              cella viva (= al default del sorgente)
+#    InpSLBufferATR         0.2              cella viva (= al default del sorgente)
+#    InpAtrPeriod           14               cella viva (= al default del sorgente)
+#    InpMinRangeATR         0.0              cella viva (= al default del sorgente)
+#    InpMaxBarsHold         100              cella viva (= al default del sorgente)
+#    InpWarmupBars          500              cella viva (= al default del sorgente)
+#    InpAllowLong           true             cella viva (= al default del sorgente)
+#    InpAllowShort          false            CELLA VIVA (artefatto della sedia)
+#    InpMaxSpreadPts        300              CELLA VIVA (artefatto della sedia)
+#    InpEntryWindowBars     3                cella viva (= al default del sorgente)
+#    InpRiskPercent         1.0              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpMagic               760070/760071    coppia VERGINE 76xxxx (asse Y, gemelle)
+#    InpComment             'COST XAGUSD'    commento vivo (censimento .chr 23/08 15:49)
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+# =====================================================================
+
+@SIMBOLO  XAGUSD
+@PERIODO  H4
+@DAQUANDO 2020.01.01
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16388||16388||0||16388||N
+InpExitMode=0||0||0||0||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpSLBufferATR=0.2||0.2||0||0.2||N
+InpAtrPeriod=14||14||0||14||N
+InpMinRangeATR=0.0||0.0||0||0.0||N
+InpMaxBarsHold=100||100||0||100||N
+InpWarmupBars=500||500||0||500||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMaxSpreadPts=300||300||0||300||N
+InpEntryWindowBars=3||3||0||3||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMagic=760070||760070||1||760071||Y
+InpComment=COST XAGUSD
+InpVerbose=true||true||0||true||N

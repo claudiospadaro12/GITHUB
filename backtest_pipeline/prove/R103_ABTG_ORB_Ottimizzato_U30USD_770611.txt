@@ -1,0 +1,169 @@
+# =====================================================================
+#  R103 -- I07: ABTG_ORB_Ottimizzato su U30USD M5
+#  LA CLASSIFICA DELLA FLOTTA -- gruppo INDICI
+#  Finestra: 2024.09.26 -> 2026.06.30   (21 mesi)
+#  Criteri: backtest_pipeline\risultati_archivio\R103_CRITERI.md
+#  Proposta FIRMATA da Claudio il 24/08/2026 ("FIRMO TUTTE E TRE,
+#  PARTIAMO") + chiarimento della stessa mattina: la SPINA DORSALE
+#  periodo per periodo e' OBBLIGATORIA per tutte e 40 le sedie.
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_ORB_Ottimizzato.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : PRESET LIVE .../recupero2/sedia_ABTG_ORB_Ottimizzato_770611.set
+#    il TF del GRAFICO  : report/DEPLOY_GUARDIANO_100K.md riga 153 (U30USD M5)
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  >>> IL TF DEL GRAFICO NON SI DERIVA DA InpTF, E VICEVERSA. E' la
+#      trappola pagata in R102: ABTG_SuperWave GBPUSD gira su un grafico
+#      H4 con InpTF = H2. Qui il TF del grafico ha una FONTE SUA,
+#      scritta qui sopra, sedia per sedia.
+#
+#  LA FINESTRA: 2024.09.26 -> 2026.06.30, ed e' quella del GRUPPO
+#  INDICI, non del simbolo (differenza dichiarata rispetto a R102, dove
+#  @DAQUANDO era la data di inizio storico del simbolo).
+#
+#  >>> 21 MESI, UN SOLO REGIME, NON CONFRONTABILE con le sedie a 6,5
+#      anni. Non e' una scelta: la sonda del 17/08 misura su tutti gli
+#      indici prima data 2024.09.26 con verdetto COMPLETO -- cioe' non
+#      manca sul disco, IL BROKER NON CE L'HA.
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R103 par. 4):
+#    A. PROFITTO ALLA TAGLIA VIVA (0.3%) -- quello che avrebbe fatto
+#       sul conto, su questo banco
+#    B. PROFITTO NORMALIZZATO A 1% = A x (1 / 0.3)
+#       [APPROSSIMATO lineare, convenzione CONTRATTI_SEDIE.md punto 2]
+#       >>> E' LA COLONNA SU CUI LA CLASSIFICA E' ORDINATA: confronta i
+#           MOTORI, non le taglie.
+#    C. PF, DD massimo, n operazioni, PEGGIOR GIORNATA
+#    D. LA SPINA DORSALE TRIMESTRE PER TRIMESTRE: trimestre | n operazioni | netto EUR | cumulato (+ il mese per mese, come DIAGNOSTICA)
+#       >>> e da li' la colonna TRIMESTRI NEGATIVI / TRIMESTRI OPERATI, che
+#           e' la domanda letterale di Claudio del 24/08:
+#           "vorrei capire se esistono anni negativi x qualcuno".
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08). Una classifica e' un'informazione
+#      per decidere, non un verdetto automatico.
+#  MODELLO OHLC M1 dichiarato: il DD che esce e' un LIMITE INFERIORE del
+#  rischio; il profitto e' una STIMA DEL LORDO (spread corrente, nessuno
+#  slippage, riempimenti ideali) -- MAI un guadagno.
+
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpRangeStartHour      14               cella viva (= al default del sorgente)
+#    InpRangeStartMin       30               CELLA VIVA (artefatto della sedia)
+#    InpRangeEndHour        14               cella viva (= al default del sorgente)
+#    InpRangeEndMin         45               CELLA VIVA (artefatto della sedia)
+#    InpEndHour             21               CELLA VIVA (artefatto della sedia)
+#    InpEndMin              0                CELLA VIVA (artefatto della sedia)
+#    InpCloseAtEnd          true             cella viva (= al default del sorgente)
+#    InpOneTradePerDay      true             cella viva (= al default del sorgente)
+#    InpPendingExpiryMin    600              cella viva (= al default del sorgente)
+#    InpEntryPoints         10.0             cella viva (= al default del sorgente)
+#    InpK                   1.0              cella viva (= al default del sorgente)
+#    InpAllowLong           true             cella viva (= al default del sorgente)
+#    InpAllowShort          false            CELLA VIVA (artefatto della sedia)
+#    InpSLMode              3                CELLA VIVA (artefatto della sedia)
+#    InpExecTF              5                cella viva (= al default del sorgente)
+#    InpAtrPeriod           14               cella viva (= al default del sorgente)
+#    InpAtrSLmult           1.5              cella viva (= al default del sorgente)
+#    InpSLFixedPts          1000.0           cella viva (= al default del sorgente)
+#    InpTP_R                1.0              CELLA VIVA (artefatto della sedia)
+#    InpTPMode              1                CELLA VIVA (artefatto della sedia)
+#    InpTPRangeMult         1.5              cella viva (= al default del sorgente)
+#    InpTP1Pct              0.0              CELLA VIVA (artefatto della sedia)
+#    InpBreakeven           true             cella viva (= al default del sorgente)
+#    InpUseTrailEMA         true             cella viva (= al default del sorgente)
+#    InpEmaFast             9                cella viva (= al default del sorgente)
+#    InpEmaSlow             21               cella viva (= al default del sorgente)
+#    InpExitOnEmaClose      false            CELLA VIVA (artefatto della sedia)
+#    InpSLBufferPts         0                default sorgente
+#    InpUseCloseConfirm     false            cella viva (= al default del sorgente)
+#    InpMinBodyPct          50.0             cella viva (= al default del sorgente)
+#    InpUseEmaFilter        false            cella viva (= al default del sorgente)
+#    InpUseEma200Filter     true             CELLA VIVA (artefatto della sedia)
+#    InpEma200Period        200              cella viva (= al default del sorgente)
+#    InpMinRangePct         0.0              cella viva (= al default del sorgente)
+#    InpMaxRangePct         0.8              CELLA VIVA (artefatto della sedia)
+#    InpUseVolumeFilter     false            cella viva (= al default del sorgente)
+#    InpVolMult             1.5              cella viva (= al default del sorgente)
+#    InpVolAvgBars          20               cella viva (= al default del sorgente)
+#    InpRiskPercent         0.3              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpUseNewsFilter       false            cella viva (= al default del sorgente)
+#    InpNewsFile            'abtg_news.csv'  cella viva (= al default del sorgente)
+#    InpNewsMinImpact       3                cella viva (= al default del sorgente)
+#    InpNewsBeforeMin       30               cella viva (= al default del sorgente)
+#    InpNewsAfterMin        30               cella viva (= al default del sorgente)
+#    InpNewsShiftMinutes    0                cella viva (= al default del sorgente)
+#    InpNewsCurrencies      'USD'            cella viva (= al default del sorgente)
+#    InpNewsFlatten         true             cella viva (= al default del sorgente)
+#    InpComment             'ORB OTT'        commento vivo (censimento .chr 23/08 15:49)
+#    InpMagic               760330/760331    coppia VERGINE 76xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                cella viva (= al default del sorgente)
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+#    InpSlippagePts         0                default sorgente
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=true||true||0||true||N
+InpRangeStartHour=14||14||0||14||N
+InpRangeStartMin=30||30||0||30||N
+InpRangeEndHour=14||14||0||14||N
+InpRangeEndMin=45||45||0||45||N
+InpEndHour=21||21||0||21||N
+InpEndMin=0||0||0||0||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=600||600||0||600||N
+InpEntryPoints=10.0||10.0||0||10.0||N
+InpK=1.0||1.0||0||1.0||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=3||3||0||3||N
+InpExecTF=5||5||0||5||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=1000.0||1000.0||0||1000.0||N
+InpTP_R=1.0||1.0||0||1.0||N
+InpTPMode=1||1||0||1||N
+InpTPRangeMult=1.5||1.5||0||1.5||N
+InpTP1Pct=0.0||0.0||0||0.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailEMA=true||true||0||true||N
+InpEmaFast=9||9||0||9||N
+InpEmaSlow=21||21||0||21||N
+InpExitOnEmaClose=false||false||0||false||N
+InpSLBufferPts=0||0||0||0||N
+InpUseCloseConfirm=false||false||0||false||N
+InpMinBodyPct=50.0||50.0||0||50.0||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseEma200Filter=true||true||0||true||N
+InpEma200Period=200||200||0||200||N
+InpMinRangePct=0.0||0.0||0||0.0||N
+InpMaxRangePct=0.8||0.8||0||0.8||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpRiskPercent=0.3||0.3||0||0.3||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=USD
+InpNewsFlatten=true||true||0||true||N
+InpComment=ORB OTT
+InpMagic=760330||760330||1||760331||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpSlippagePts=0||0||0||0||N

@@ -1,0 +1,147 @@
+# =====================================================================
+#  R103 -- I10: ABTG_SupRev_DAX_H4_Ottimizzato su D30EUR H4
+#  LA CLASSIFICA DELLA FLOTTA -- gruppo INDICI
+#  Finestra: 2024.09.26 -> 2026.06.30   (21 mesi)
+#  Criteri: backtest_pipeline\risultati_archivio\R103_CRITERI.md
+#  Proposta FIRMATA da Claudio il 24/08/2026 ("FIRMO TUTTE E TRE,
+#  PARTIAMO") + chiarimento della stessa mattina: la SPINA DORSALE
+#  periodo per periodo e' OBBLIGATORIA per tutte e 40 le sedie.
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ARTEFATTO CHE GIRA. I nomi degli input NON sono
+#  scritti a memoria: sono stati LETTI dal sorgente
+#  mql5/Experts/ABTG_SupRev_DAX_H4_Ottimizzato.mq5 e trascritti in ordine.
+#  Il driver li rilegge e li conta prima di lanciare.
+#
+#  LA CELLA VIVA -- fonte MISURATA:
+#    rischio e commento : censimento .chr del 23/08/2026 15:49
+#                         (censimento_rischio_2026-08-23_1549.txt)
+#    gli input di cella : PRESET LIVE .../recupero2/sedia_ABTG_SupRev_DAX_H4_Ottimizzato_970912.set
+#    il TF del GRAFICO  : preset InpTF=16388 + FLOTTA_ATTIVA.md riga D30EURH4
+#    tutto il resto     : default del sorgente al pin  [DA CONFERMARE]
+#
+#  >>> IL TF DEL GRAFICO NON SI DERIVA DA InpTF, E VICEVERSA. E' la
+#      trappola pagata in R102: ABTG_SuperWave GBPUSD gira su un grafico
+#      H4 con InpTF = H2. Qui il TF del grafico ha una FONTE SUA,
+#      scritta qui sopra, sedia per sedia.
+#
+#  LA FINESTRA: 2024.09.26 -> 2026.06.30, ed e' quella del GRUPPO
+#  INDICI, non del simbolo (differenza dichiarata rispetto a R102, dove
+#  @DAQUANDO era la data di inizio storico del simbolo).
+#
+#  >>> 21 MESI, UN SOLO REGIME, NON CONFRONTABILE con le sedie a 6,5
+#      anni. Non e' una scelta: la sonda del 17/08 misura su tutti gli
+#      indici prima data 2024.09.26 con verdetto COMPLETO -- cioe' non
+#      manca sul disco, IL BROKER NON CE L'HA.
+#
+#  I NUMERI CHE QUESTO FILE DEVE PRODURRE (criteri R103 par. 4):
+#    A. PROFITTO ALLA TAGLIA VIVA (1.0%) -- quello che avrebbe fatto
+#       sul conto, su questo banco
+#    B. PROFITTO NORMALIZZATO A 1% = A x (1 / 1.0)
+#       [APPROSSIMATO lineare, convenzione CONTRATTI_SEDIE.md punto 2]
+#       >>> E' LA COLONNA SU CUI LA CLASSIFICA E' ORDINATA: confronta i
+#           MOTORI, non le taglie.
+#    C. PF, DD massimo, n operazioni, PEGGIOR GIORNATA
+#    D. LA SPINA DORSALE TRIMESTRE PER TRIMESTRE: trimestre | n operazioni | netto EUR | cumulato (+ il mese per mese, come DIAGNOSTICA)
+#       >>> e da li' la colonna TRIMESTRI NEGATIVI / TRIMESTRI OPERATI, che
+#           e' la domanda letterale di Claudio del 24/08:
+#           "vorrei capire se esistono anni negativi x qualcuno".
+#
+#  >>> QUESTO ROUND NON PROMUOVE E NON BOCCIA NIENTE PER MERITO.
+#      Emendamento regola B (16/08). Una classifica e' un'informazione
+#      per decidere, non un verdetto automatico.
+#  MODELLO OHLC M1 dichiarato: il DD che esce e' un LIMITE INFERIORE del
+#  rischio; il profitto e' una STIMA DEL LORDO (spread corrente, nessuno
+#  slippage, riempimenti ideali) -- MAI un guadagno.
+
+#
+#  LA CELLA, campo per campo:
+#    InpUsaGuardian         true             default sorgente
+#    InpTF                  16388            cella viva (= al default del sorgente)
+#    InpStMult              3.0              cella viva (= al default del sorgente)
+#    InpStAtrPeriod         9                cella viva (= al default del sorgente)
+#    InpNearAtr             1.0              cella viva (= al default del sorgente)
+#    InpRequireConfirmBody  true             cella viva (= al default del sorgente)
+#    InpAllowLong           true             cella viva (= al default del sorgente)
+#    InpAllowShort          true             cella viva (= al default del sorgente)
+#    InpUseConfluence       true             cella viva (= al default del sorgente)
+#    InpEma1                14               cella viva (= al default del sorgente)
+#    InpEma2                89               cella viva (= al default del sorgente)
+#    InpEma3                100              cella viva (= al default del sorgente)
+#    InpEma4                200              cella viva (= al default del sorgente)
+#    InpConflAtr            1.5              cella viva (= al default del sorgente)
+#    InpFirstFraction       0.3333           cella viva (= al default del sorgente)
+#    InpUsePending          true             cella viva (= al default del sorgente)
+#    InpPendingPips         20.0             cella viva (= al default del sorgente)
+#    InpPendingExpiryBars   3                cella viva (= al default del sorgente)
+#    InpSLLookback          5                cella viva (= al default del sorgente)
+#    InpSLBufferPips        3.0              cella viva (= al default del sorgente)
+#    InpTP1_R               1.0              cella viva (= al default del sorgente)
+#    InpTP1Pct              50.0             cella viva (= al default del sorgente)
+#    InpBreakeven           true             cella viva (= al default del sorgente)
+#    InpTP_RR               3.0              cella viva (= al default del sorgente)
+#    InpTrailOnST           true             cella viva (= al default del sorgente)
+#    InpExitOnFlip          true             cella viva (= al default del sorgente)
+#    InpRiskPercent         1.0              TAGLIA VIVA (censimento .chr 23/08 15:49)
+#    InpMaxTradesPerDay     0                cella viva (= al default del sorgente)
+#    InpUseTimeWindow       false            cella viva (= al default del sorgente)
+#    InpStartHour           0                cella viva (= al default del sorgente)
+#    InpEndHour             24               cella viva (= al default del sorgente)
+#    InpUseNewsFilter       false            cella viva (= al default del sorgente)
+#    InpNewsFile            'abtg_news.csv'  cella viva (= al default del sorgente)
+#    InpNewsMinImpact       3                cella viva (= al default del sorgente)
+#    InpNewsBeforeMin       30               cella viva (= al default del sorgente)
+#    InpNewsAfterMin        30               cella viva (= al default del sorgente)
+#    InpNewsShiftMinutes    0                cella viva (= al default del sorgente)
+#    InpNewsCurrencies      ''               cella viva (= al default del sorgente)
+#    InpComment             'STREV DAX H4'   commento vivo (censimento .chr 23/08 15:49)
+#    InpMagic               760360/760361    coppia VERGINE 76xxxx (asse Y, gemelle)
+#    InpMaxSpread           0                cella viva (= al default del sorgente)
+#    InpVerbose             true             serve al gate 1 (log della passata singola)
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16388||16388||0||16388||N
+InpStMult=3.0||3.0||0||3.0||N
+InpStAtrPeriod=9||9||0||9||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseConfluence=true||true||0||true||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+InpSLBufferPips=3.0||3.0||0||3.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=3.0||3.0||0||3.0||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=STREV DAX H4
+InpMagic=760360||760360||1||760361||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
