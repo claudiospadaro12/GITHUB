@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R103_v2
+#  MARCATORE_RIGA_R103_v3
 #  RIGA_R103_CLASSIFICA_FLOTTA.ps1  --  R103: LA CLASSIFICA DELLA FLOTTA.
 #  TUTTE E 40 le sedie di trading dei due conti, ognuna sulla sua cella
 #  VIVA, misurate su una finestra RECENTE e COMUNE al loro gruppo.
@@ -116,7 +116,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (pochi minuti, nessuna passata, nessun MT5 che opera):
@@ -1800,7 +1800,17 @@ function RigaTab($sd,$pos){
   $prom = "n/d"; if([double]$sd.ContrDD -gt 0){ $prom = $sd.ContrDD.ToString("0.00",$INV) }
   $neg = "n/d"; if([int]$sd.PeriodiOperati -ge 0){ $neg = $sd.PeriodiNeg.ToString() + "/" + $sd.PeriodiOperati.ToString() }
   $nota = $sd.Campione
-  if($sd.Esito -like "FERMATA*"){ $nota = $sd.Esito }
+  #  >>> "SENZA NUMERI" HA PIU' DI UNA STRADA, E VANNO CHIAMATE CON NOMI
+  #      DIVERSI (checklist 44 -- rilievo del verificatore sulla riga
+  #      notturna a 25 sedie, 24/08). "MAI PARTITA perche' e' scaduto il
+  #      tetto ore" e "partita, girata, nessun numero letto" uscivano
+  #      tutte e due come "NON MISURATO" nella colonna NOTA: la stessa
+  #      parola per due fatti che chiedono reazioni OPPOSTE. La prima si
+  #      rilancia e basta; la seconda vuole che si capisca cosa si e'
+  #      rotto PRIMA di rilanciare. Su una corsa notturna a 25 sedie il
+  #      referto del mattino dopo e' pieno di righe cosi', ed e' proprio
+  #      li' che la distinzione serve.
+  if($sd.Esito -like "FERMATA*" -or $sd.Esito -like "NON INIZIATA*"){ $nota = $sd.Esito }
   elseif($sd.Strumento -ne "OPTFRAME"){ $nota = $nota + "  [SENZA OPTFRAME: numeri dai DEAL, DD equity NON MISURATO]" }
   return ($FmtRiga -f $pos,$sd.Id,$sd.Ea.Replace("ABTG_",""),$sd.Sym,($sd.Risk + "%"),
           (FmtEuro $sd.Profit $sd.Misurata),(FmtEuro $sd.ProfitNorm $sd.Misurata),(Fmt3 $sd.PF),
@@ -2175,6 +2185,20 @@ try{
     #      DISTINTI, e la frase dice quale dei due e'.
     if($ko2.Count -gt 0){
       [void]$R.Add("ESITO: PARZIALE -- " + $ko2.Count + " sedie su " + $Lavoro.Count + " NON hanno prodotto i numeri (elenco qui sopra), piu' " + $Problemi.Count + " rilievi. NON e' un blocco completo.")
+      #  E SI DICE SUBITO QUANTE NON SONO MAI PARTITE: su una corsa lunga
+      #  e' il caso PIU' PROBABILE, ed e' anche il piu' facile da
+      #  chiudere -- si rilancia e basta, non c'e' niente da capire.
+      #  L'elenco esce gia' pronto da incollare (fra apici, checklist 65).
+      $nonIniz = @($ko2 | Where-Object { $_.Esito -like "NON INIZIATA*" })
+      if($nonIniz.Count -gt 0){
+        [void]$R.Add("       di cui " + $nonIniz.Count + " MAI INIZIATE (tetto -OreMax " + $OreMax.ToString("0.0",$INV) + " ore raggiunto): NON e' un guasto,")
+        [void]$R.Add("       e' tempo finito. Quelle si rilanciano e basta, con questo elenco:")
+        [void]$R.Add("           -SoloSedia '" + ((@($nonIniz | ForEach-Object { $_.Id })) -join ",") + "'")
+        if($nonIniz.Count -lt $ko2.Count){
+          [void]$R.Add("       Le altre " + ($ko2.Count - $nonIniz.Count) + " sono PARTITE e non hanno prodotto numeri: quelle")
+          [void]$R.Add("       vanno CAPITE prima di rilanciarle (motivo nella colonna NOTA e nei PROBLEMI).")
+        }
+      }
     }
     elseif($Problemi.Count -gt 0){
       [void]$R.Add("ESITO: COMPLETO CON RILIEVI -- tutte e " + $Lavoro.Count + " le sedie hanno prodotto i numeri attesi. I " + $Problemi.Count + " rilievi in elenco sono RISULTATI del round (finestra accorciata, densita', contratto, DD sopra il promesso), non guasti: si leggono ACCANTO ai numeri, non invece dei numeri.")
@@ -2263,7 +2287,10 @@ if($SoloControllo){
   exit 0
 }
 if($ko3.Count -gt 0){
-  Write-Host ("ESITO: PARZIALE (" + $ko3.Count + " sedie non OK, " + $Problemi.Count + " rilievi) -- lo zip esiste: mandalo") -ForegroundColor Yellow; exit 1
+  $ni3 = @($ko3 | Where-Object { $_.Esito -like "NON INIZIATA*" })
+  $coda3 = ""
+  if($ni3.Count -gt 0){ $coda3 = "  [di cui " + $ni3.Count + " MAI INIZIATE per tetto ore: si rilanciano e basta, l'elenco pronto e' nel REFERTO]" }
+  Write-Host ("ESITO: PARZIALE (" + $ko3.Count + " sedie non OK, " + $Problemi.Count + " rilievi) -- lo zip esiste: mandalo" + $coda3) -ForegroundColor Yellow; exit 1
 }
 if($Problemi.Count -gt 0){
   #  Tutte le sedie OK e solo rilievi dichiarativi: NON e' un fallimento, e
