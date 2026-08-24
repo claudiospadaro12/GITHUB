@@ -295,7 +295,13 @@ DD-1%    =  DD-VIVO    ×  (1,00 / rischio_vivo)
 | gruppo | granularità **UFFICIALE** (è la colonna della classifica) | in più, nel referto |
 |---|---|---|
 | **FOREX + METALLI** (6,5 anni) | **ANNO SOLARE**: 2020, 2021, 2022, 2023, 2024, 2025, **2026 (parziale, → 30/06)** | — |
-| **INDICI** (21 mesi) | **TRIMESTRE**: 2024Q4 *(parziale, dal 26/09)*, 2025Q1…Q4, 2026Q1, 2026Q2 = **7 trimestri** | il **mese per mese**, marcato **[DIAGNOSTICA, non è il criterio]** |
+| **INDICI** (21 mesi) | **TRIMESTRE**: **2024Q3** *(soli 5 giorni: 26→30 settembre)*, 2024Q4, 2025Q1…Q4, 2026Q1, 2026Q2 = **8 trimestri** | il **mese per mese**, marcato **[DIAGNOSTICA, non è il criterio]** |
+
+> ⚠️ **Il primo trimestre è di CINQUE GIORNI** (la finestra parte il 26/09,
+> dentro il Q3), e quasi tutte le sedie ci usciranno con **zero operazioni**:
+> finirà quindi **fuori dal denominatore** per la regola qui sotto, non fra i
+> negativi. Verificato eseguendo: `ElencoPeriodi 2024.09.26 → 2026.06.30` dà
+> **8 trimestri** (2024Q3 … 2026Q2) e **22 mesi** (2024.09 … 2026.06).
 
 > ### 🎯 PERCHÉ IL TRIMESTRE E NON IL MESE, sugli indici — **è una scelta, e la dichiaro**
 > Su 21 mesi la scelta è fra 21 caselle mensili e 7 trimestrali. **Ho scelto il
@@ -348,14 +354,25 @@ di pescare la riga del Nikkei, stesso magic 770901). Tre esiti possibili, e
 | `DD PROMESSO AMBIGUO` | la cella contiene una **riscalatura di taglia** (*"9,92% — a 0,3% ≈ 3,0%"*) | la riga **verbatim** e `RAPPORTO NON CALCOLABILE` |
 | `RIGA NON TROVATA` | la sedia non ha contratto | **`DD PROMESSO NON AGLI ATTI`** |
 
-> 🟡 **ATTESO su R103, e dichiarato prima**: le sedie il cui contratto è scritto
-> **a due taglie** escono **AMBIGUE** — le due `PTE GBPUSD` (F13, F14, rilievo
-> aperto dal 23/08), e le sedie a rischio ridotto riscritte da R100
-> (`MaxMinNotte` oro, `PunteLarry` oro, `EMA200_Ott` oro) più `ORB` e
-> `SupertrendReversal` Nikkei 770901. **Un denominatore letto alla taglia
-> sbagliata è peggio di un denominatore mancante.**
-> `Gold_Ichimoku` (F25) ha un contratto **PARZIALE** e i suoi numeri sono di un
-> **altro broker**: il referto lo scrive sulla sua riga.
+> ### 🟢 ESEGUITO SUL FILE VERO, PRIMA DELLA CORSA: **31 ESTRATTI · 9 AMBIGUI · 0 NON AGLI ATTI**
+> Tutte e 40 le sedie **trovano la loro riga** in `CONTRATTI_SEDIE.md` (nessuna
+> sedia senza contratto fra le 40 — le due senza contratto del 18/08 sono
+> **fuori perimetro**, §1.2). I **9 AMBIGUI** sono:
+>
+> | sedia | perché la cella è ambigua |
+> |---|---|
+> | **F13, F14** `PTE GBPUSD` | *"2,64% — a 0,5% ≈ 1,3%"* — **rilievo aperto dal 23/08** |
+> | **F20** `PunteLarry` oro · **F22** `EMA200_Ott` oro · **F23** `MaxMinNotte` oro | riscritti da R100 **alla taglia ridotta** (*"…a rischio 1% → … a 0,3%"*) |
+> | **I07** `ORB_Ott` | *"9,92% … a 0,3% ≈ 3,0%"* |
+> | **I14** `SupertrendReversal` Nikkei 770901 | *"0,88% … a 0,65% ≈ 0,6%"* |
+> | **F25** `Gold_Ichimoku` | *"DD 4,38% a rischio 0,3% (a 0,5% ≈ 7,3%)"* — e per di più i numeri sono di **un altro broker** |
+> | **F24** `SupertrendReversal_Ott` oro | 🔵 **è un FALSO POSITIVO CONSERVATIVO, e lo dichiaro**: il numero (**9,0%**, da R99) è già **alla taglia viva 1%**; a far scattare il rifiuto è l'avvertenza *"⚠️ a rischio 2% i numeri RADDOPPIANO"* scritta nella stessa cella |
+>
+> 👉 **Su F24 NON ho allentato la funzione.** È la funzione **verificata** di
+> R100/R102, e renderla meno prudente in un round che non posso provare contro
+> MT5 va nella direzione sbagliata: il numero **9,0% resta leggibile** nella
+> riga **verbatim** che il referto stampa sotto la sedia. *Un denominatore
+> letto alla taglia sbagliata è peggio di un denominatore mancante.*
 
 ### 4.4 🚦 E il confronto col DD promesso **NON è un verdetto meccanico**
 
@@ -446,7 +463,7 @@ numero.
 
 ### 6.2 Si compila **una volta per EA**
 
-**17 EA distinti** per 40 sedie. Backup datato `.prima_r103_<stamp>` di `.mq5`
+**20 EA distinti** per 40 sedie. Backup datato `.prima_r103_<stamp>` di `.mq5`
 **e** `.ex5`, verdetto sul `LastWriteTime`, **ripristino del `.mq5` se
 fallisce** (checklist 54). Il terminale è quello collegato al conto vero: è la
 ragione per cui il backup non è facoltativo.
@@ -604,11 +621,21 @@ Checklist punto **63** (*"il parse si FA, non si dichiara impossibile"*):
 | i **40 file prova** sono generati **dai sorgenti veri** | `R103_GENERA_PROVE.py`, con controllo positivo su ogni campo della cella | ✅ **40/40** |
 | ogni default si riduce a numero/bool/stringa (macro ed enum risolti) | controllo nel generatore, che **si ferma** altrimenti | ✅ **40/40** |
 | le celle **I01/I02** contro il metro **R101** | confronto input per input | ✅ **coincidono** |
-| i **120 magic** `76xxxx` | `grep` su tutto il repo | ✅ **0 occorrenze** |
-| `LeggiDeal`, `DataSimulata`, `DDPromesso`, la **spina dorsale** annuale e trimestrale, le **due fabbriche di `.ini`** e i loro gate | banco di prova offline sui **file veri** e su report `.htm` sintetici | ✅ vedi il referto del verificatore |
+| i **120 magic** `76xxxx` | `grep` su tutto il repo, **magic per magic** | ✅ **0 occorrenze** |
+| i **gate veri** del driver sui 40 file prova (righe vive, parametri, direttive, rischio, commento, coppia gemella, magic vietati, un solo asse `Y`, nessun default non risolto) | banco di prova offline **sui file veri** | ✅ **40/40** |
+| le **due fabbriche di `.ini`** (SINGOLA + GEMELLE) e i loro gate | eseguite per tutte e 40 | ✅ **40/40** |
+| version, magic di sorgente, include Guardian, `OnTesterDeinit`, `MarkSrc` | letti nei **sorgenti veri** | ✅ **40/40** |
+| i **marcatori di log** (13 distinti), campione **POSITIVO** *e* **NEGATIVO** (checklist 55: riga di servizio dello stesso EA + riga di un ALTRO EA) | banco di prova | ✅ **39/39 presi, 0 falsi positivi** *(1 sedia non ha marcatore: F25 non logga gli ingressi)* |
+| `LeggiDeal` su report `.htm` sintetici, **con e senza** la colonna `Commento` in coda (checklist 58) | banco di prova | ✅ stesso risultato: netto **−900 / +1500**, saldo `100 600.00` con lo **spazio** letto |
+| `MisureDaiDeal` (n, netto, PF, DD sul saldo) | banco di prova | ✅ e su lista vuota torna **n = −1**, non 0 |
+| la **spina dorsale**: 7 anni, 8 trimestri, 22 mesi; anni **VUOTI** fuori dal denominatore | banco di prova | ✅ *"2 negativi su 4 operati"*, non *"su 7"* |
+| `DataSimulata` contro la trappola dei millesimi | riga con orologio reale 2026 + data tester 2020 | ✅ legge **2020** |
+| `DDPromesso` sul `CONTRATTI_SEDIE.md` **vero**, per tutte e 40 | banco di prova | ✅ **31 estratti, 9 ambigui, 0 mancanti** |
+| `-SoloSedia` con **virgole** e con **spazi** (checklist 65), `-SoloGruppo`, e la lista di **UNO** (checklist 62) | banco di prova | ✅ |
+| i numeri sotto **cultura it-IT** | banco forzato a `it-IT` | ✅ `1.27013` e `9 005.54` letti giusti; 🐛 **e ha trovato un difetto vero**: la colonna `PF` usciva **`1,3`** con la virgola. Corretto con `Fmt3` (formattazione **invariante esplicita**) |
 
 🟡 **CHE COSA NON È STATO VERIFICATO, e va detto**: tutto ciò che richiede
-**MT5** — la compilazione vera dei 17 EA, la durata reale, l'intestazione
+**MT5** — la compilazione vera dei 20 EA, la durata reale, l'intestazione
 italiana del report `.htm` del terminale di Claudio, il comportamento del
 tester sui simboli indice. **Il giro a vuoto (`-SoloControllo`) copre gli
 artefatti; i numeri li può dare solo la corsa.**
