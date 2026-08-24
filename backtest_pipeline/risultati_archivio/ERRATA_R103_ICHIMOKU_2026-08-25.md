@@ -9,10 +9,17 @@ Numeri corretti:
 - Squadra 21 mesi: +353.688 EUR, DD 8,8% (peggior giorno invariato -4,7%).
 - Stima al 31/12/26: banco pieno +54.700 / PRUDENTE +27.300 / cauto +13.700.
 - Nuovo n.1 della proiezione: EMA200 Dow. Flotta viva reale: 35 sedie.
-- Ichimoku declassata a CANDIDATO (misura R103 valida; DD non misurabile,
-  2/2 trade veri persi): eventuale rientro = misura DD + firma.
-- Rilievo strumento: censimento_rischio deve distinguere .chr su disco da
-  grafico VIVO (confronto con lista Experts) — correzione in coda.
+- Rilievo strumento n.1: censimento_rischio deve distinguere .chr su disco
+  da grafico VIVO (confronto con lista Experts) — correzione in coda.
 
-Le sezioni corrette per esteso sono nei commit locali in riallineamento
-(STIMA_31DIC26_2026-08-24.md e R103_REFERTO_FINALE.md).
+## AGGIORNAMENTO (stessa notte): il DD c'era nel report — ed è una BOCCIATURA
+Estratto dal blocco statistiche di F25_report_singola.htm (che il driver
+non leggeva — rilievo strumento n.2: leggere anche le statistiche, non
+solo i deal): **Equity Drawdown Massimo 21,52% ALLA TAGLIA 0,5%**
+(33.005 EUR su 6,5 anni). Normalizzato a 1% [APPROSSIMATO]: ~43%.
+Con 4/7 anni negativi, il −27k del biennio 2020-22 e 2/2 trade veri persi:
+**il candidato Ichimoku è BOCCIATO dalla corsia rischio** a qualunque
+taglia sensata (per stare nel muro 10% servirebbe ~0,23%). Il "n.1 della
+classifica" era un miraggio da DD cieco. Nessun ridispiegamento; la
+rimozione fatta da Claudio a giugno risulta, coi numeri, corretta.
+Eventuale futuro: solo un motore Ichimoku DIVERSO, dall'imbuto, da capo.
