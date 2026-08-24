@@ -62,3 +62,9 @@ verifica dopo — stessa procedura dell'oro del 23/08).
 [ ] CORSIA D: presa d'atto (Ichimoku: misura prima di ogni aumento)
 ```
 Si può firmare in blocco, per corsia, o riga per riga.
+
+## ✍️ FIRMATO da Claudio il 24/08/2026 sera, in chat: **"A+b"**
+= CORSIA A intera (4 spegnimenti) + CORSIA B intera (5 riduzioni).
+Corsie C e D: NON firmate (C resta in coda come firma separata; D era
+presa d'atto). Contratti riscritti in CONTRATTI_SEDIE.md. Esecuzione:
+checklist operativa consegnata in chat; verifica col censimento .chr.

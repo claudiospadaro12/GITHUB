@@ -91,10 +91,10 @@ o si scrive un contratto (misura nuova) o si dichiara formalmente lo stato._
 |---|---|---|---:|---|---|---|---|---|
 | ABTG_PTE | U30USD | 771321 | 1,0 | **2,18%** | **~3,2** (40 chiusure) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` tab. serie · deploy `report/VIVAIO_R23_DEPLOY.md` | ✅ [TROVATO] |
 | ABTG_PTE | GBPUSD | 771322 | 0,5 (dal 17/08) | **2,64%** — a 0,5% ≈ 1,3%. ⚠️ R78 (OHLC 13 anni): la stessa cella fa **−2.125 · PF 0,972 · DD 17,68%** — contratto e finestra lunga non conciliabili, giudice = forward (duello) | **~3,9** (49 chiusure) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` · ⚠️ `REFERTO_ROUND78_SEDIA_VERA_FINESTRA_LUNGA.md` | ✅ [TROVATO] |
-| ABTG_PTE | USDJPY | 771323 | 1,0 | **3,97%** ⚠️ R77/R78 su 13 anni: **1 cella positiva su 14 (PF 1,011)** — su finestra lunga il motore non ha edge su USDJPY | **~2,8** (35 chiusure) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` · ⚠️ `REFERTO_ROUND77/78` | ✅ [TROVATO] |
+| ABTG_PTE | USDJPY | 771323 | 🔴 **SPENTA 24/08** | **3,97%** ⚠️ R77/R78 su 13 anni: **1 cella positiva su 14 (PF 1,011)** — su finestra lunga il motore non ha edge su USDJPY | **~2,8** (35 chiusure) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` · ⚠️ `REFERTO_ROUND77/78` | ✅ [TROVATO] |
 | ABTG_PTE (candidata R78) | GBPUSD | 771332 | 0,5 | **9,87%** (PF 1,095, pegg. giornata −1,35%) — a 0,5% ≈ 4,9% | **~3** (477 tr / 158 mesi ≈ 36/anno) | **OOS 2013.04→2026.06, 13 anni, OHLC** (tick lungo impossibile su BCM) | `REFERTO_ROUND78_SEDIA_VERA_FINESTRA_LUNGA.md` §2 · duello in `FLOTTA_ATTIVA.md` | ✅ [TROVATO] |
 | ABTG_SuperWave (H2) | U30USD | 770531 | 1,0 | **2,96%** | ~7 chiusure ≈ **~4 posizioni** (88 chiusure/50 posizioni) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` | ✅ [TROVATO] |
-| ABTG_SuperWave (H2) | GBPUSD | 770532 | 1,0 | **1,04%** | **~5 chiusure** (63) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` | ✅ [TROVATO] |
+| ABTG_SuperWave (H2) | GBPUSD | 770532 | 🔴 **SPENTA 24/08** | **1,04%** | **~5 chiusure** (63) | OOS ~12,5 mesi | `REFERTO_ROUND23_PERTRADE.md` | ✅ [TROVATO] |
 
 ### 📈 EMA200 (sedia 12) e vecchi Ottimizzati del 26/07
 
@@ -133,17 +133,17 @@ o si scrive un contratto (misura nuova) o si dichiara formalmente lo stato._
 | ABTG_GapFill | U30USD | 772234 | 1,0 | **2,3%** (PF 1,30) — sedia 19 **in OSSERVAZIONE**: promossa R36 ma esclusa dal portafoglio (R37: cumulo del lunedì), porta 100k chiusa | **~1,5** (20 tr) | OOS ~13 mesi | R36 · esclusione in R37 · stato in `HANDOFF.md` | ✅ [TROVATO] |
 | ABTG_GapFill | 225JPY | 772235 | 1,0 | **4,3%** (PF 1,14 — il promosso più tirato; richeck R65: +811 · PF 1,144 · DD 4,36%) — sedia 20 in OSSERVAZIONE, come sopra | **~1,2** (15 tr) | OOS ~13 mesi | R36 · R37 · `REFERTO_ROUND65_GAPCONTINUATION.md` §GapFill | ✅ [TROVATO] |
 | ABTG_PunteLarry | U30USD | 772341 | 1,0 | **3,9%** (PF 1,78, L+S) | **~2,9** (38 tr) | OOS ~13 mesi | `REFERTO_ROUND38_PUNTE_LARRY.md` tab. WF · deploy R39 | ✅ [TROVATO] |
-| ABTG_PunteLarry | EURAUD | 772342 | 1,0 | **3,7%** (PF 1,74, L+S) | **~2,5** (33 tr) | OOS ~13 mesi | R38 · R39 | ✅ [TROVATO] |
+| ABTG_PunteLarry | EURAUD | 772342 | **0,5** | **8,6%** (R103 6,5a a 0,5%; era 3,7% (PF 1,74, L+S) | **~2,5** (33 tr) | OOS ~13 mesi | R38 · R39 | ✅ [TROVATO] |
 | ABTG_PunteLarry | XAUUSD | 772343 | **0,3** (ridotta da 1,0 il 23/08, firma REVISIONE R100) | **9,0%** (R100: DD 22 anni 29,74% a rischio 1% -> 9,0% a 0,3% [APPROSSIMATO lineare]; limite inferiore OHLC; peggior giornata -3,9% a 1% -> ~-1,2%) | **~0,8** (misurata R100: ~10 op/anno; forward reale: 1 trade, +144,89) | **2004.06.11→2026.06.30 (22 anni, R100)** | `risultati_archivio/R100_REFERTO.md` · storia: R38/R39 | 🟢 [RISCRITTO da R100, firma 23/08] · prop: solo <= 0,3% · tagliando 6 mesi: se il merito non arriva, spegnere |
 | ABTG_PunteLarry | GBPJPY | 772344 | 1,0 | **2,7%** (PF 2,00, solo L) | **~1,5** (20 tr) | OOS ~13 mesi | R38 · R39 | ✅ [TROVATO] |
 | ABTG_PunteLarry | GBPUSD | 772345 | 1,0 | **5,1%** (PF 1,84, solo S) | **~1,9** (25 tr) | OOS ~13 mesi | R38 · R39 | ✅ [TROVATO] |
 | ABTG_PunteLarry | EURCAD | 772346 | 1,0 | **4,8%** (PF 1,25 — "il più tirato") | **~1,5** (19 tr) | OOS ~13 mesi | R38 · R39 | ✅ [TROVATO] |
-| ABTG_CostToCost | EURJPY | 772361 | 1,0 | **9,33%** (flip di struttura, solo L · PF 1,74 · pegg. giornata −3,97%) | **~4,7** (64 tr / 13,5 mesi) | OOS ~13,5 mesi | CSV `risultati_prove/ABTG_CostToCost/r40/` (OOS, cella L) · `REFERTO_ROUND41_COST_PORTAFOGLIO.md` | ✅ [TROVATO] |
-| ABTG_CostToCost | GBPCAD | 772362 | 1,0 | **6,18%** (R-based 1,5R, solo L · PF 1,44) | **~4,6** (62 tr) | OOS ~13,5 mesi | CSV r40 · R41 | ✅ [TROVATO] |
-| ABTG_CostToCost | XAGUSD | 772363 | 1,0 | **4,48%** (cost puro, solo L · PF 1,25) | **~3,0** (41 tr) | OOS ~13,5 mesi | CSV r40 · R41 | ✅ [TROVATO] |
-| ABTG_EasyTrend | GBPUSD | 772422 | 1,0 | **4,58%** (TP 1,5 L+S · PF 1,49) — sedie 30-32 **in OSSERVAZIONE**: promosse R48, famiglia BOCCIATA in portafoglio (R49), porta 100k chiusa | **~2,9** (41 tr / 14 mesi) | OOS ~14 mesi (dal 2024.09.26, IS 8,5 mesi) | `REFERTO_ROUND48_EASYTREND_WF.md` · bocciatura `REFERTO_ROUND49` | ✅ [TROVATO] |
-| ABTG_EasyTrend | AUDJPY | 772423 | 1,0 | **4,29%** (TP 1,0 L+S · PF 1,37) — osservazione, come sopra | **~3,9** (54 tr) | OOS ~14 mesi | R48 · R49 | ✅ [TROVATO] |
-| ABTG_EasyTrend | CHFJPY | 772421 | 1,0 | **6,27%** (TP 1,5 L+S · PF 1,25) — osservazione, come sopra | **~3,8** (53 tr) | OOS ~14 mesi | R48 · R49 | ✅ [TROVATO] |
+| ABTG_CostToCost | EURJPY | 772361 | **0,65** | **8,0%** (R103 6,5a a 0,65%; era 9,33% (flip di struttura, solo L · PF 1,74 · pegg. giornata −3,97%) | **~4,7** (64 tr / 13,5 mesi) | OOS ~13,5 mesi | CSV `risultati_prove/ABTG_CostToCost/r40/` (OOS, cella L) · `REFERTO_ROUND41_COST_PORTAFOGLIO.md` | ✅ [TROVATO] |
+| ABTG_CostToCost | GBPCAD | 772362 | **0,25** | **10,4%** (R103 6,5a a 0,25% [APPROSSIMATO lineare]; era 6,18% (R-based 1,5R, solo L · PF 1,44) | **~4,6** (62 tr) | OOS ~13,5 mesi | CSV r40 · R41 | ✅ [TROVATO] |
+| ABTG_CostToCost | XAGUSD | 772363 | 🔴 **SPENTA 24/08** | **4,48%** (cost puro, solo L · PF 1,25) | **~3,0** (41 tr) | OOS ~13,5 mesi | CSV r40 · R41 | ✅ [TROVATO] |
+| ABTG_EasyTrend | GBPUSD | 772422 | **0,5** | **7,9%** (R103 6,5a a 0,5%; era 4,58% (TP 1,5 L+S · PF 1,49) — sedie 30-32 **in OSSERVAZIONE**: promosse R48, famiglia BOCCIATA in portafoglio (R49), porta 100k chiusa | **~2,9** (41 tr / 14 mesi) | OOS ~14 mesi (dal 2024.09.26, IS 8,5 mesi) | `REFERTO_ROUND48_EASYTREND_WF.md` · bocciatura `REFERTO_ROUND49` | ✅ [TROVATO] |
+| ABTG_EasyTrend | AUDJPY | 772423 | 🔴 **SPENTA 24/08** | **4,29%** (TP 1,0 L+S · PF 1,37) — osservazione, come sopra | **~3,9** (54 tr) | OOS ~14 mesi | R48 · R49 | ✅ [TROVATO] |
+| ABTG_EasyTrend | CHFJPY | 772421 | **0,3** | **6,5%** (R103 6,5a a 0,3%; era 6,27% (TP 1,5 L+S · PF 1,25) — osservazione, come sopra | **~3,8** (53 tr) | OOS ~14 mesi | R48 · R49 | ✅ [TROVATO] |
 
 > 🔎 **Nota del 18/08 sera — incrocio col CORSO (referto:
 > `backtest_pipeline/caccia_strategie/ANALISI_CORSO_EASYTREND_2026-08-18.md`,
@@ -210,3 +210,15 @@ SENZA CONTRATTO.**
 
 _Compilato il 18/08/2026 (M11). Nessun numero inventato: ogni cifra ha il suo
 file. Se un referto e questa tabella divergono, comanda il referto._
+
+
+## ✍️ REVISIONE FLOTTA 24/08/2026 — FIRMA "A+b" (Claudio, in chat)
+Corsie A+B di `PROPOSTA_REVISIONE_FLOTTA_2026-08-24.md`, fonte R103:
+- **SPENTE**: PTE USDJPY 771323 · SuperWave GBPUSD 770532 · CostToCost
+  XAGUSD 772363 · EasyTrend AUDJPY 772423. Porta di rientro: tagliando con
+  misura nuova.
+- **RIDOTTE** (contratti riscritti nelle righe sopra): CostToCost GBPCAD
+  0,25% · CostToCost EURJPY 0,65% · EasyTrend CHFJPY 0,3% · EasyTrend
+  GBPUSD 0,5% · PunteLarry EURAUD 0,5%.
+- Rischio dichiarato flotta atteso: 42,05% -> ~35,2%. Esecuzione sul VPS
+  con checklist dedicata + censimento di verifica.
