@@ -34,10 +34,10 @@ I criteri sono stati scritti **prima dei numeri** e l'autorizzazione è in chat
 
 ---
 
-## 📌 IL PIN — **`PIN_DA_ASSEGNARE`**
+## 📌 IL PIN — **`4be07ed3f2d80024032bbf2258f1abe58079db42`**
 
 ```
-PIN_DA_ASSEGNARE
+4be07ed3f2d80024032bbf2258f1abe58079db42
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima** (checklist 6 e 55). Il commit da
@@ -88,7 +88,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_ASSEGNARE'; $p="$env:USERPROFILE\RIGA_R104.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4be07ed3f2d80024032bbf2258f1abe58079db42'; $p="$env:USERPROFILE\RIGA_R104.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R104_MFE_MAXMIN_DAX.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R104_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -122,7 +122,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_ASSEGNARE'; $p="$env:USERPROFILE\RIGA_R104.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4be07ed3f2d80024032bbf2258f1abe58079db42'; $p="$env:USERPROFILE\RIGA_R104.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R104_MFE_MAXMIN_DAX.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R104_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
