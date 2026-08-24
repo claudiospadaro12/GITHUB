@@ -7,6 +7,46 @@
 
 ---
 
+## 📊 AGGIORNAMENTO 24/08 notte — **R102 BLOCCO 1 LETTO: LA CLASSIFICA PARLA, E DICE NO**
+
+- ✅ **LA MACCHINA FUNZIONA.** Corsa 00:05→00:24 (**19 minuti**), pin `393c68f`:
+  scarico M1 **COMPLETO** dei 3 simboli (9,6-10 **milioni** di barre ciascuno),
+  21 CSV, 3 sedie **OK**, gemelli identici al centesimo, magic `79xxxx` vergini.
+  Il fix `Battito-Basi` del guardiano (crescita di `bases\`) ha retto sul campo:
+  **lo scarico non è più il muro**.
+- 🔴 **LA RISPOSTA ALLA DOMANDA DI CLAUDIO ("Breaking Band 133k anche col lungo?")
+  è NO, e su GBPUSD cambia di SEGNO** (taglia viva 1,0% su 100k):
+
+  | sedia | COMUNE 2009→2026 | ~27 anni OPERATI | DD lungo | DD promesso |
+  |---|---:|---:|---:|---:|
+  | C03 AUDUSD | **+13.025** PF 1,491 | **+8.901** PF 1,207 | 8,97% | 1,20% (7,5x) |
+  | C01 GBPUSD | +5.838 PF 1,078 | 🔴 **−11.574** PF 0,897 | **23,43%** | 1,90% (**12,3x**) |
+  | C02 EURUSD | +2.347 PF 1,069 | +4.129 PF 1,075 | 8,24% | 1,20% (6,9x) |
+
+  Spina dorsale GBPUSD: **1999-2007 nove anni di erosione** (cumulato −17.623),
+  fondo **−20.744 nel 2021**, risalita solo 2022-2025 (+2.281/+1.000/+2.764/+3.912).
+  **L'edge vive nel PRESENTE.** Per Emendamento B questo NON boccia: dice che il
+  merito si giudica sul recente e che **il rischio è 7-12x il contratto** (stessa
+  dinamica dell'oro R99/R100). Peggior giornata invece tranquilla: −1,02/−1,05%,
+  e le DUE misure indipendenti (report `.htm` + OPTFRAME) coincidono al centesimo.
+  Tutte e tre → **REVISIONE corsia RISCHIO** (proposta a blocchi finiti, non su 3/20).
+- 🧨 **RILIEVO NUOVO CHE VALE IL ROUND: tutte e tre le sedie fanno la PRIMA
+  OPERAZIONE fra il 7 e il 18 GENNAIO 1999**, su simboli con M1 dichiarato
+  COMPLETO dal 1993 (GBPUSD/AUDUSD) e dal **1971** (EURUSD). Tre motori
+  indipendenti che tacciono per 6 anni (28 su EURUSD) e partono nella stessa
+  settimana **non è il motore: è il feed BCM**. Il GATE 4 lo cattura: nominali
+  34/56 anni → **operati 28**. 👉 **Da qui in avanti "storico lungo" su BCM = ~27
+  anni dal 1999**, non 33 né 55. Se anche gli altri 9 simboli iniziano nel 1999,
+  quello diventa il pavimento di casa (= decisione 2 firmata: prima si misura).
+- 🩹 **Difetto di leggibilità corretto** (classe 47, dentro il NOSTRO referto): il
+  driver scriveva `ESITO: PARZIALE -- 0 sedie su 3 non sono OK` + exit 1 su una
+  corsa riuscita, e Claudio ha creduto al fallimento. Ora: `PARZIALE` solo con
+  sedie mancanti (exit 1), **`COMPLETO CON RILIEVI` verde + exit 0** quando i
+  rilievi sono dichiarativi. Pin `fd23d4a`, dal verificatore.
+- ⏭️ **Coda**: Blocco 2 `'C14,C15,C16'` (GapFill forex) col pin nuovo. Le barre M1
+  dei 3 simboli fatti **restano a disco**: i blocchi che li riusano partono
+  avvantaggiati. Referto: `risultati_archivio/R102_REFERTO_BLOCCO1.md`.
+
 ## 🏁 AGGIORNAMENTO 23/08 notte (chiusura) — **R101 CHIUSO: UN SOLO CANDIDATO (02_volumi), CELLE VIVE CONFERMATE**
 
 - 📦 Zip SOLODAX arrivato (23:14, dopo la ripresa post-falso-rosso). **G0
