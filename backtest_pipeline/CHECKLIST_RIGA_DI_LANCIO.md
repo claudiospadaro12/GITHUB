@@ -3029,3 +3029,32 @@ E' il terzo membro della famiglia "PowerShell converte da solo e nessuno
 se ne accorge" (62: la lista-di-uno che si srotola; 64: il negativo
 posizionale che diventa stringa) — e l'unico che colpisce **la riga di
 chat** invece dello script.
+
+## 66. LA CONVENZIONE DI SENTINELLA APPLICATA A META' DELLE COLONNE (R103, 24/08 - il difetto stava a sei righe dal commento che lo vieta)
+
+Il driver dichiarava, in un commento esplicito: "un numero NON MISURATO si
+scrive n/d, non -1.00 ... nel referto sarebbe il peggior refuso possibile".
+E poi: DD partiva da -1.0 (-> n/d, giusto), PF da **0.0** (-> "0.000", un
+numero PLAUSIBILE che si legge "ha perso tutto"), e n veniva stampato
+GREZZO (-> "-1").
+
+**REGOLA**: una convenzione di sentinella si dichiara una volta e si
+verifica su TUTTE le colonne - e il modo di verificarla costa zero: **si fa
+girare il round su una sedia che NON produce numeri e si LEGGE la riga per
+intero**. Rileggere il codice non basta: qui l'autore aveva scritto la
+regola E il difetto nello stesso file. (Parente di 47 e 58, ma quelli
+parlano di LEGGERE un numero plausibile; questo di SCRIVERLO.)
+
+## 67. LA REGOLA SCRITTA DUE VOLTE NELLA PROSA E MAI IMPOSTA DAL CODICE (R103, 24/08 - -TickReali senza -SoloGruppo 'INDICI')
+
+Gli artefatti dicevano DUE volte, a lettere chiare, "un OHLC e un tick
+reale non devono nemmeno poter finire nella stessa tabella" - e il codice
+li lasciava finire nello stesso zip, sotto un nome che dichiarava tick
+reali per tutti.
+
+**REGOLA**: quando un criterio dice "non devono nemmeno poter", quella
+frase e' una SPECIFICA DI GUARDIA, non un avvertimento. Si cerca nel
+codice l'if che la fa rispettare: se non c'e', la regola non esiste. Il
+controllo da fare a ogni verifica: **elencare gli switch del driver e
+provare le combinazioni che il DA_MANDARE non propone** - sono quelle che
+nessuno ha mai eseguito.

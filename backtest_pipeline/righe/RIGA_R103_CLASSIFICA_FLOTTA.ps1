@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_R103_v1
+#  MARCATORE_RIGA_R103_v2
 #  RIGA_R103_CLASSIFICA_FLOTTA.ps1  --  R103: LA CLASSIFICA DELLA FLOTTA.
 #  TUTTE E 40 le sedie di trading dei due conti, ognuna sulla sua cella
 #  VIVA, misurate su una finestra RECENTE e COMUNE al loro gruppo.
@@ -116,7 +116,7 @@
 #      if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - leggi il REFERTO' } }
 #
 #  GIRO A VUOTO (pochi minuti, nessuna passata, nessun MT5 che opera):
@@ -250,7 +250,15 @@ function S([string]$id,[string]$ea,[string]$sym,[string]$tf,[string]$gruppo,
     MarkSrc=$markSrc; MarkLog=$markLog; TipoLog=$tipoLog; Strumento=$strumento;
     # --- i risultati, riempiti durante la corsa
     Esito="NON ESEGUITA"; Minuti=0.0;
-    DD=-1.0; N=-1; NReport=-1; Profit=0.0; PF=0.0; Misurata=$false;
+    #  >>> PF PARTE DA -1, NON DA 0 (rilievo del verificatore, 24/08).
+    #      Fmt3 scrive "n/d" solo sotto zero: con PF=0.0 una sedia SENZA
+    #      NUMERI usciva nella tabella con "PF 0.000", che non e' una
+    #      sentinella ma un NUMERO PLAUSIBILE -- e "profit factor zero"
+    #      si legge "ha perso tutto". E' la stessa classe del -1.00 in una
+    #      colonna di percentuali (checklist 47/58), scritta due commenti
+    #      piu' sotto e poi non applicata al PF. Un PF misurato che vale
+    #      davvero 0 (nessuna operazione vinta) resta "0.000".
+    DD=-1.0; N=-1; NReport=-1; Profit=0.0; PF=-1.0; Misurata=$false;
     ProfitNorm=0.0; DDNorm=-1.0; Molt=1.0;
     Gemelli="NON MISURATO";
     PrimaDataLog="NON MISURATA"; PrimaDataReport="NON MISURATA";
@@ -391,6 +399,14 @@ function Fmt3($v){
 function FmtEuro($v,[bool]$misurato){
   if(-not $misurato){ return "n/d" }
   return ([double]$v).ToString("+0;-0;0",$INV)
+}
+#  E LA STESSA REGOLA VALE PER IL n (rilievo del verificatore, 24/08): un
+#  "-1" nella colonna delle OPERAZIONI si legge come un numero esattamente
+#  come il -1.00 in una colonna di percentuali. n non misurato = "n/d".
+function FmtN($v){
+  if($v -eq $null){ return "n/d" }
+  if([int]$v -lt 0){ return "n/d" }
+  return ([int]$v).ToString($INV)
 }
 function NumInv($s){
   $v = 0.0
@@ -749,6 +765,29 @@ if($SoloSedia -ne ""){
 if($Lavoro.Count -eq 0){
   Write-Host "!!! la selezione (-SoloGruppo / -SoloSedia) non ha selezionato nessuna sedia." -ForegroundColor Red
   exit 1
+}
+#  --- -TickReali VALE SOLO PER IL GRUPPO INDICI, E ADESSO SI RIFIUTA
+#      (rilievo del verificatore, 24/08). Sul FOREX i tick reali NON
+#      ESISTONO prima del 2024.07.05, quindi -TickReali lascia quelle
+#      sedie in OHLC -- ma la cartella, lo zip e la riga "modo:" del
+#      referto si chiamano CORSA_TICKREALI lo stesso. Sarebbe uno zip
+#      etichettato tick reali con dentro venticinque righe OHLC, cioe'
+#      esattamente cio' che i criteri vietano a parole due volte: "un
+#      OHLC e un tick reale non devono nemmeno poter finire nella stessa
+#      tabella". Una regola scritta e non fatta rispettare dal codice non
+#      e' una regola.
+if($TickReali){
+  $fuoriIx = @($Lavoro | Where-Object { $_.Gruppo -ne "INDICI" })
+  if($fuoriIx.Count -gt 0){
+    Write-Host ""
+    Write-Host ("!!! -TickReali vale SOLO per il gruppo INDICI, ma la selezione contiene " + $fuoriIx.Count +
+                " sedie FOREX+METALLI [" + (($fuoriIx | ForEach-Object { $_.Id }) -join ", ") + "].") -ForegroundColor Red
+    Write-Host "    Quelle girerebbero in OHLC (sul forex i tick reali non esistono prima del" -ForegroundColor Red
+    Write-Host "    2024.07.05) dentro una cartella e uno zip chiamati CORSA_TICKREALI." -ForegroundColor Red
+    Write-Host "    Un OHLC e un tick reale non devono nemmeno poter finire nella stessa tabella." -ForegroundColor Red
+    Write-Host "    LA RIGA GIUSTA E':  -Pin <hash> -SoloGruppo 'INDICI' -TickReali" -ForegroundColor Yellow
+    exit 1
+  }
 }
 
 # --- IL MOLTIPLICATORE DI NORMALIZZAZIONE, sedia per sedia.
@@ -1677,7 +1716,7 @@ $inputs
         [void]$Problemi.Add($sd.Id + " GATE 2: n = 0 operazioni su tutta la finestra. Non c'e' niente da misurare: o lo storico non c'e', o la cella non opera su questo simbolo in questo periodo. NON e' un profitto zero, e' un profitto ASSENTE.")
       }
       Write-Host ("     prima op: log " + $sd.PrimaDataLog + " | report " + $sd.PrimaDataReport + " -> usata " + $sd.PrimaDataUsata) -ForegroundColor White
-      Write-Host ("     FINESTRA " + $sd.Finestra + " | n " + $sd.N + " | gemelli " + $sd.Gemelli) -ForegroundColor Yellow
+      Write-Host ("     FINESTRA " + $sd.Finestra + " | n " + (FmtN $sd.N) + " | gemelli " + $sd.Gemelli) -ForegroundColor Yellow
       if($sdFatale -ne ""){ throw $sdFatale }
     }
 
@@ -1765,7 +1804,7 @@ function RigaTab($sd,$pos){
   elseif($sd.Strumento -ne "OPTFRAME"){ $nota = $nota + "  [SENZA OPTFRAME: numeri dai DEAL, DD equity NON MISURATO]" }
   return ($FmtRiga -f $pos,$sd.Id,$sd.Ea.Replace("ABTG_",""),$sd.Sym,($sd.Risk + "%"),
           (FmtEuro $sd.Profit $sd.Misurata),(FmtEuro $sd.ProfitNorm $sd.Misurata),(Fmt3 $sd.PF),
-          (Fmt2 $sd.DD),(Fmt2 $sd.DDNorm),$prom,$sd.N,$pgg,$neg,$nota)
+          (Fmt2 $sd.DD),(Fmt2 $sd.DDNorm),$prom,(FmtN $sd.N),$pgg,$neg,$nota)
 }
 
 try{
@@ -2024,7 +2063,7 @@ try{
     [void]$R.Add("        misura 2, report .htm ...... " + $sd.PrimaDataReport)
     [void]$R.Add("        fonte usata ................ " + $sd.FonteData)
     [void]$R.Add("        >>> FINESTRA: " + $sd.Finestra)
-    [void]$R.Add("    2 n totale .......... " + $sd.N + "   (controllo incrociato dal report: " + $sd.NReport + ")")
+    [void]$R.Add("    2 n totale .......... " + (FmtN $sd.N) + "   (controllo incrociato dal report: " + (FmtN $sd.NReport) + ")")
     [void]$R.Add("    3 gemelli ........... " + $sd.Gemelli)
     [void]$R.Add("    4 densita' .......... " + $(if(@($sd.PerPeriodo).Count -eq 0){ "NON MISURATA" } else { $sd.PeriodiOperati.ToString() + " periodi operati su " + $sd.PeriodiTot + " nominali" }))
     [void]$R.Add("    5 campione .......... " + $sd.Campione + "   (soglia " + $NMinimo + ": sotto e' un'ETICHETTA, mai un'esclusione)")

@@ -6,7 +6,7 @@ loro gruppo**. Modello **OHLC M1**, deposito **100.000 EUR**.
 **Criteri**: `backtest_pipeline/risultati_archivio/R103_CRITERI.md`
 **Proposta FIRMATA**: `risultati_archivio/R103_PROPOSTA_CLASSIFICA_FLOTTA.md`
 **Driver**: `backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1`
-(marcatore `MARCATORE_RIGA_R103_v1`).
+(marcatore `MARCATORE_RIGA_R103_v2`).
 
 ---
 
@@ -96,7 +96,7 @@ periodi **operati**).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -196,7 +196,7 @@ per prima, e riempie **subito** la seconda tabella.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloGruppo 'INDICI';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -225,7 +225,7 @@ Si cambia **SOLO l'elenco dopo `-SoloSedia`** (e si toglie `-SoloGruppo`).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSedia 'F01,F02,F03';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -267,7 +267,7 @@ sola**, e **senza cambiare il pin**:
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='040f0cb4465a83b28849fe0408fc97a4b82f5d11'; $p="$env:USERPROFILE\RIGA_R103.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R103_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloGruppo 'INDICI' -TickReali;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
