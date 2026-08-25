@@ -78,3 +78,14 @@ checklist operativa consegnata in chat; verifica col censimento .chr.
 - Posizione orfana XAGUSD buy 0.01 (772363): mercato metalli in pausa
   serale, protetta da S/L 68.185 / T/P 69.998 sul server. Si chiude
   domattina, poi Profili->Salva + censimento di verifica (promemoria armato).
+
+## ✅ ESEGUITA E VERIFICATA (25/08, censimento VPS 07:31)
+Referto: `risultati_archivio/censimento_rischio_2026-08-25_0731.txt`.
+- Le 4 SPENTE (771323, 770532, 772363, 772423): **SPARITE tutte** dal censimento.
+- Le 5 RIDOTTE: 772362=0,25 ✓ · 772361=0,65 ✓ · 772421=0,3 ✓ · 772422=0,5 ✓ · 772342=0,5 ✓
+- Somma flotta dichiarata: **35,25%** (attesa ~35,2% — centrata).
+- Posizione orfana XAGUSD: chiusa dallo SL server alle 03:05 del 25/08 (−33,83).
+- Artefatti .chr NOTI e invariati dal 23/08 (righe doppie ORB/Aperture/MaxMinDAX,
+  Ichimoku fantasma, BREAKOUT_JPY): nessuna anomalia NUOVA. La pulizia dei file
+  residui e il fix dello strumento censimento restano in coda.
+La revisione "A+b" è CHIUSA. Porta di rientro per le spente: tagliando con misura.
