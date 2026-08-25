@@ -3135,3 +3135,108 @@ per una causa diversa.
 > `Sort-Object`, `-Unique`, `Group-Object`, `Get-ChildItem` (che ordina per
 > nome), le chiavi di un `@{}` (che in PowerShell **non** hanno ordine
 > garantito: serve `[ordered]@{}`).
+
+---
+
+## 71. IL `.ps1` SENZA `[CmdletBinding()]` NON RIFIUTA I PARAMETRI CHE NON CONOSCE: il refuso in un interruttore diventa LA CORSA VERA (R108, 25/08 - preso PRIMA dell'invio, e RIPRODOTTO)
+
+_Difetto vero, gia' committato in `RIGA_R108_BB_M15.ps1` (3d5a3a8) e, alla
+verifica, in **tutti e dodici** i driver di round del repo: `grep -c
+CmdletBinding` su `RIGA_R95` ... `RIGA_R108` dava **0 su 12**._
+
+Uno script con il solo blocco `param(...)` — cioe' la forma che usiamo
+sempre — **non fa binding stretto**: un parametro con un nome che non
+esiste non e' un errore, finisce in `$args` e lo script **prosegue in
+silenzio**. Riprodotto su uno script-sonda:
+
+```
+& ./sonda.ps1 -Pin 'X' -Riprendi
+   ->  Pin=X SoloControllo=False args=[-Riprendi]      # uscita 0
+```
+
+Nessun rosso, nessun avviso. Il punto 14 dice che una guardia puo' essere
+decorativa; questo e' peggio, perche' **non c'e' proprio nessuna guardia da
+guardare**: il refuso non viene MAI segnalato, ne' da PowerShell ne' dallo
+script.
+
+**Il costo se passa, misurato su R108.** La riga del giro a vuoto e'
+`& $p -Pin $pin -SoloControllo`. Con **una L sola** — `-SoloControlo` —
+`$SoloControllo` resta `$false` e quella non e' piu' l'anteprima da un
+minuto: e' **la corsa vera**, 18 passate a **tick reali** su 4 anni di M15,
+partita credendo di fare il controllo. Stessa famiglia: `-ScreenOhlcM1`
+invece di `-ScreenOhlcM15` (lo screen veloce diventa il round lungo),
+`-SoloSimbol 'GBPUSD'` (un simbolo diventa tutti e tre), `-CriteriFirmat`
+(che pero' fallisce in modo BUONO: exit 2). E' esattamente il rovescio del
+punto 65: li' l'elenco senza apici arrivava **storto**, qui il parametro
+non arriva **per niente**.
+
+E non e' un caso raro: i nomi degli interruttori sono lunghi, italiani e
+somiglianti fra loro (`-SoloControllo` / `-SoloCella` / `-SoloSimbolo`), e
+Claudio li ribatte a mano quando riprende una corsa.
+
+> ✅ **REGOLA**: ogni `.ps1` che si detta a Claudio si apre con
+> **`[CmdletBinding()]` sopra `param(`**. Costa una riga e trasforma ogni
+> nome di parametro sbagliato in un **errore di binding terminante**, prima
+> che lo script tocchi MT5:
+> ```powershell
+> [CmdletBinding()]
+> param([string]$Pin = "", [switch]$SoloControllo, ...)
+> ```
+> Verificato eseguendo, sullo stesso script: con `[CmdletBinding()]`
+> `-SoloControlo` da' *"A parameter cannot be found that matches parameter
+> name 'SoloControlo'"* e **muore**.
+> Prerequisito: lo script **non deve usare `$args`** (con `[CmdletBinding()]`
+> non e' piu' disponibile) — si controlla con un grep prima di aggiungerlo.
+> ⚠️ **E' un difetto di FAMIGLIA**: quando lo si corregge in un driver, si
+> fa il giro degli altri (punto 2). Il 25/08 e' stato corretto in R108;
+> gli altri undici restano esposti, ed e' dichiarato.
+
+---
+
+## 72. IL GATE DIFFERENZIALE NON PUO' VEDERE LA CORRUZIONE SIMMETRICA: si confronta col GEMELLO, mai con l'ANTENATO (R108, 25/08 - preso PRIMA dell'invio, e RIPRODOTTO)
+
+_Difetto vero, gia' committato in `RIGA_R108_BB_M15.ps1` (3d5a3a8), trovato
+facendo girare il driver su una copia CORROTTA del repo._
+
+Un round che misura **una variabile sola** costruisce due celle che devono
+differire su quella e su nient'altro, e ci mette sopra un gate: in R108 e'
+il **gate della stella** — _"la cella M15 differisce dalla sua cella metro
+esattamente su `InpTF` (+ `InpMagic`)"_. E' un gate ottimo, e nella verifica
+ha preso **16 corruzioni su 17**.
+
+Quella che non prende e' la **corruzione SIMMETRICA**: la stessa riga
+storta in **tutte e due** le celle. Riprodotto — `InpBBPeriod` portato da
+20 a 25 nel file metro **e** nel file M15 di GBPUSD:
+
+```
+stella: verde      valori: verdi      asse unico: verde      magic: verdi
+ESITO: GIRO A VUOTO COMPLETATO                                 uscita 0
+```
+
+**Ed e' ovvio a posteriori e invisibile a priori**: un diff fra A e B non
+puo' accorgersi di niente che sia uguale in A e in B. Restavano scoperti
+**64 dei 70 input** — tutti tranne i sei che qualche altro gate pinna per
+valore (`InpTF`, `InpPatternMode`, `InpMinRR`, `InpMinTPatATR`, `InpTPMode`,
+`InpMaxPositions`...).
+
+**Perche' non basta dire "tanto poi lo prende il gate a valle".** In R108 lo
+prendeva **G0**, che confronta i numeri della cella metro con quelli agli
+atti di R103 — ma **tre passate piu' tardi**, e col messaggio sbagliato:
+G0 dice _"il metro non si riproduce"_, cioe' **"il banco e' storto"**,
+quando il fatto vero e' **"il file e' storto"**. Su un round dove il metro
+esiste apposta per riprodurre un round precedente, quella diagnosi manda a
+cercare il guasto nella parte sana.
+
+> ✅ **REGOLA**: quando una cella e' dichiarata **COPIATA** da un artefatto
+> che gia' esiste in repo (la cella viva di un round precedente, un preset
+> congelato, un `.set`), il gate non puo' fermarsi al confronto **fra le
+> celle nuove**: si scarica **l'ANTENATO al pin** e si confronta la cella
+> con lui, dichiarando in una lista **i soli delta ammessi** (in R108:
+> `InpMagic`, `InpComment`, `InpNewsCurrencies`). Cosi' la frase _"il blocco
+> input e' copiato riga per riga da X"_, che oggi sta solo nel commento in
+> testa al file prova, diventa **un controllo**.
+> ⚠️ **Il confronto si fa PER NOME, non per posizione**: l'antenato puo'
+> avere una riga in piu' o in meno (in R108 ne ha una: `InpNewsCurrencies`),
+> e un confronto posizionale sfasa tutto il resto e accusa quaranta righe
+> sane — e' il punto 58 (la colonna contata dalla fine) applicato alle righe.
+> Provato: 8 corruzioni simmetriche su 8 fermate, e i file sani ripassano.
