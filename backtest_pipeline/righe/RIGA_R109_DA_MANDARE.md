@@ -150,7 +150,7 @@ taglio si fa dopo, **sui conteggi veri**.
 ## 📌 IL PIN — **il commit congelato su cui gira tutto**
 
 ```
-@@PIN@@
+cf6126d3c31d7deef1429813005fa724a3a5f659
 ```
 
 🔴 **IL PIN QUI SOPRA È ANCORA UN SEGNAPOSTO E VA SOSTITUITO PRIMA DI DETTARE
@@ -268,7 +268,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R109.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='cf6126d3c31d7deef1429813005fa724a3a5f659'; $p="$env:USERPROFILE\RIGA_R109.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R109_ATREXH.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R109_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -349,7 +349,7 @@ firma finisce **scritta nel referto**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R109.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='cf6126d3c31d7deef1429813005fa724a3a5f659'; $p="$env:USERPROFILE\RIGA_R109.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R109_ATREXH.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R109_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati; $rc=$LASTEXITCODE;
@@ -384,7 +384,7 @@ fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R109.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='cf6126d3c31d7deef1429813005fa724a3a5f659'; $p="$env:USERPROFILE\RIGA_R109.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R109_ATREXH.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R109_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloSimbolo 'U30USD'; $rc=$LASTEXITCODE;
