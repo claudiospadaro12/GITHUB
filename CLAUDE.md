@@ -103,6 +103,17 @@ un'altra griglia trova solo picchi di rumore (curve fitting) — la cella
 la lista dei caduti (REGISTRO_TEST.md) prima di entrare nell'imbuto.
 Prima applicazione: caccia Londra del 19/08 (dopo il verdetto R45 0/48).
 
+## ⚖️ REGOLA DEI DUE LATI + STORICO LUNGO SUGLI INDICI (richiesta di Claudio, 25/08)
+Su Nasdaq, DAX e Dow:
+1. **Ogni analisi misura SEMPRE tutti e due i lati (long E short)** — anche se
+   un lato e' gia' vivo in forward, si RITESTA (riproduzione o griglia), non si
+   da' per buono.
+2. **Piu' anni di storico possibile.** La profondita' reale dei dati BCM sugli
+   indici si MISURA (sonda), non si assume — come fatto per il forex (pavimento
+   gen-1999, R102). Vincolo noto: il tetto delle ~100.000 barre del tester
+   limita M15 a ~4 anni e M5 a ~1,3 anni per corsa — per finestre piu' lunghe
+   si sale di TF o si spezza la corsa in tranche, dichiarandolo.
+
 ## FUSO ORARIO BCM (regola fissa)
 **Il server BCM è 1 ORA INDIETRO rispetto all'ora italiana** (in questo periodo dell'anno).
 - Ora italiana − 1 = ora server BCM.

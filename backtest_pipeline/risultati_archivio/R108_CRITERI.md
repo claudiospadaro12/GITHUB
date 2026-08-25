@@ -1,4 +1,13 @@
-# ✍️ R108 — BREAKING BAND SU **M15** (GBPUSD · EURUSD · AUDUSD) — CRITERI **[DA FIRMARE]**
+# ✍️ R108 — BREAKING BAND SU **M15** (GBPUSD · EURUSD · AUDUSD) — CRITERI **FIRMATI**
+
+> 🖊️ **FIRMA: "FIRMO CON PROPOSTE" — Claudio, 25/08/2026.** Le sei decisioni
+> del § 10 valgono come proposte: **D1** metro G0 a OHLC come R103, **D2** la
+> profondità dei tick si MISURA PRIMA, **D3** finestre 2+2 anni, **D4** spread
+> 1,5 pip dichiarato `[SPREAD NON MISURATO]`, **D5** il simbolo che fallisce
+> S0/G0 si chiude da solo e gli altri proseguono, **D6** niente celle M5.
+> Firma a numeri non visti. La corsa vera si lancia con `-CriteriFirmati`
+> (il file al pin de7134e porta ancora `[DA FIRMARE]`: il flag è la
+> registrazione della firma, questo documento ne è il verbale).
 
 > 🔒 **Il titolo porta `[DA FIRMARE]` e non è decorazione.** Il driver
 > `righe/RIGA_R108_BB_M15.ps1` **scarica questo file al pin e ci cerca dentro
@@ -460,7 +469,10 @@ minimo — `InpMinTPatATR = 0.0` e `InpMinRR = 0.0`:
 
 ---
 
-## 10. ✍️ LE SEI DECISIONI — **[DA FIRMARE]**
+## 10. ✍️ LE SEI DECISIONI — **FIRMATE ("FIRMO CON PROPOSTE", 25/08/2026)**
+
+> La firma "CON PROPOSTE" vale **SÌ su tutte e sei le proposte**. Il testo
+> originale resta sotto per il verbale.
 
 | | decisione | ✅ PROPOSTA | ❌ alternativa scartata, e perché |
 |---|---|---|---|
