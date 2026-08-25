@@ -1,0 +1,249 @@
+# =====================================================================
+#  EA: ABTG_BreakingBand
+#
+#  R108 — BREAKING BAND su M15: il ramo che la fonte del motore dichiara
+#         operativo e che non abbiamo MAI misurato.
+#
+#  Lancio (uno per simbolo):
+#    ABTG_BreakingBand -Prova prove\R108_BB_M15_FOREX.txt
+#                      -Simbolo GBPUSD -Etichetta r108gbp
+#    ... idem EURUSD (r108eur) e AUDUSD (r108aud)
+#  => 3 passate. E' uno SCREENING, non un verdetto.
+#
+#  Nato da: caccia_strategie/CACCIA_M5M15_FOREX_ORO_2026-08-25.md (P1)
+#  Mandato di Claudio: "Dobbiamo avere piu' strategie su TF 5 min e 15 min.
+#  Ci servono per la challenge."
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+# 1. IPOTESI
+# ---------------------------------------------------------------------
+# Il motore Breaking Band (bulge -> rientro -> retest della banda
+# dell'impulso -> ingresso CONTRO l'impulso, TP sulla mediana, SL 3xATR)
+# NON e' legato al timeframe H1: e' legato alla FORMA della fase di
+# volatilita'. Se l'ipotesi regge, portandolo a M15 la frequenza sale di
+# circa 4 volte (4 barre M15 = 1 barra H1) e il segno del risultato resta.
+#
+# PERCHE' PROPRIO M15, e non e' una manopola scelta a caso:
+#   prove/BREAKING_BAND_TESI.md riga 17, sezione "I PARAMETRI (citazioni
+#   verificate)", dice testualmente:
+#       "- TF: dimostrata su tutti; operativita' M5/M15."
+#   e lo stesso file, riga 103, dice che i criteri di promozione congelati
+#   il 12/08 partivano da "screening OHLC multi-simbolo H1 (poi H4)".
+#   => H1 e' stata una SCELTA DI COMODITA' NOSTRA, non una misura.
+#   Verificato: R33, R102 e R103 hanno TUTTI InpTF=16385 (PERIOD_H1).
+#   Il ramo M5/M15 non e' stato bocciato: non e' stato misurato.
+#
+# IL MOTORE NON E' MORTO (e quindi questo NON e' "parametri diversi di un
+# motore morto", clausola della SECONDA CACCIA):
+#   R103_REFERTO_FINALE.md, righe 23-25, finestra 2020.01->2026.06, 1%:
+#       EURUSD  PF 1,94  DD 2,5%  n=59
+#       GBPUSD  PF 1,20  DD 7,8%  n=126
+#       AUDUSD  PF 1,54  DD 2,1%  n=64
+#
+# IL TERMINE DI PARAGONE NON VA RIGIRATO: e' R103 a H1, gia' misurato.
+# Questo round misura SOLO il ramo M15, sugli stessi tre simboli, con la
+# stessa identica cella (unico input diverso: InpTF e @PERIODO).
+#
+# ---------------------------------------------------------------------
+# 2. CRITERI DI ACCETTAZIONE — CONGELATI PRIMA DI VEDERE I NUMERI
+# ---------------------------------------------------------------------
+#
+# ## PASSO 0 — CANCELLO ZERO SUL COSTO. Si legge PRIMA di qualunque P/L.
+#    E' il cancello principale, non una formalita', perche' il TP di
+#    questo motore E' la mediana delle bande: scendendo di TF il take si
+#    accorcia, lo spread no.
+#
+#    S0a  TAKE MEDIO REALIZZATO, in pip, letto dalle serie per-trade
+#         (non dal riepilogo). CONDIZIONE FIRMATA:
+#              take medio >= 3 x lo spread tipico del simbolo.
+#         Se non passa -> IL ROUND SI CHIUDE QUI, per quel simbolo, e la
+#         pista "Breaking Band su M15" si chiude con un numero.
+#         NOTA: lo spread di riferimento e' quello MISURATO sul conto, non
+#         quello nominale. Se non e' disponibile, si dichiara il valore
+#         usato e si etichetta il verdetto [SPREAD NON MISURATO].
+#
+#    S0b  FREQUENZA. n totale per simbolo sulla finestra.
+#         Atteso [INFERITO, NON MISURATO]: ~78 op/anno su GBPUSD
+#         (126 op / 6,5 anni a H1 = ~19/anno, x4 barre = ~78/anno)
+#         -> ~310 in 4 anni -> ~155 per finestra IS/OOS.
+#         Se n per finestra < 150 -> l'Emendamento della Finestra sospende
+#         il giudizio sul MERITO. Il RISCHIO si legge lo stesso, a
+#         qualunque n (un drawdown e' un fatto accaduto).
+#         Se n < 20 per finestra -> bocciatura secca, non si legge altro.
+#
+#    S0c  DURATA MEDIA DEL TRADE, in barre M15.
+#         Non e' un cancello: e' una MISURA da mettere a referto.
+#         Motivo: arXiv 2605.04004 §6.2 misura che gli unici due segnali
+#         intraday sopravvissuti alla sua falsificazione "hold positions
+#         for 12-15 bars rather than 1-6". Se qui la durata media fosse
+#         1-3 barre, quel dato va scritto nel referto come segnale di
+#         allarme sulla robustezza, anche se i cancelli passassero.
+#
+# ## SOLO SE IL PASSO 0 E' VERDE — i cancelli di casa
+#    S1  positivo in ENTRAMBE le finestre (IS e OOS), per simbolo
+#    S2  PF OOS >= 1,10
+#    S3  DD OOS < 10% a rischio 1%
+#    S4  peggior giornata OOS: MISURATA e scritta a referto sempre,
+#        anche se favorevole (muro prop giornaliero: -5% su 100k)
+#
+# ## COSA QUESTO ROUND NON POTRA' DIRE — dichiarato ora
+#    - Se gira in OHLC M1: NON PUO' PRODURRE UNA SEDIA. Su M5/M15 l'OHLC
+#      inganna, ed e' misurato in casa (REGISTRO_TEST.md §2: "in OHLC i
+#      Live5m davano numeri finti enormi... In real tick: morti").
+#      Al massimo produce il PERMESSO di un giro a tick reali.
+#    - Non dira' niente su M5: vedi §3.
+#    - Non dira' niente sugli altri 19 cross del basket: tre simboli.
+#
+# ---------------------------------------------------------------------
+# 3. PERCHE' M15 E NON M5 — un vincolo MISURATO, non una preferenza
+# ---------------------------------------------------------------------
+# Il tetto MT5 delle 100.000 barre e' gia' a verbale in casa
+# (CODA_PROSSIMA_SESSIONE.md riga 21: "il tetto di 100.000 barre, che su
+# M15 vale 4,0 anni"). Controllo aritmetico:
+#     forex ~ 480 barre M15 a settimana -> 100.000 / 480 = 208 settimane
+#     = 4,0 anni.   Su M5: ~1.440 barre/settimana -> ~1,3 anni.
+# => Su M5 non entrano due finestre da 150 operazioni. M5 puo' girare
+#    SOLO come cella diagnostica, e il suo risultato va etichettato
+#    "non giudicabile sul merito" a prescindere dal segno.
+#
+# ---------------------------------------------------------------------
+# 4. LA FINESTRA
+# ---------------------------------------------------------------------
+# @DAQUANDO qui sotto NON e' una misura di inizio storico: e' DERIVATO
+# DAL TETTO DELLE 100.000 BARRE (4,0 anni indietro dalla fine finestra).
+# Il broker ha GBPUSD dal 1993 e EURUSD dal 1971 (REFERTO_SONDA_STORICO_
+# 17-08.md), quindi il limite NON e' il dato: e' il tester.
+# >>> IL PASSO 0 DEVE DICHIARARE LA DATA DELLA PRIMA OPERAZIONE VERA.
+#     Se la prima operazione cade sensibilmente dopo il 2022.07.01, la
+#     finestra reale e' piu' corta di quella nominale e va riscritta nel
+#     referto PRIMA di leggere i numeri. Non si assume: si legge.
+#
+# Divisione IS/OOS proposta (da confermare dopo il conteggio S0b):
+#     IS   2022.07.01 -> 2024.06.30   (2 anni)
+#     OOS  2024.07.01 -> 2026.06.30   (2 anni)
+# La divisione si dichiara nel referto insieme al REGIME che ciascuna
+# finestra contiene (Emendamento della Finestra, regola A).
+#
+# ---------------------------------------------------------------------
+# 5. LA CELLA — identica a quella viva di R103, TRANNE il timeframe
+# ---------------------------------------------------------------------
+# Ogni riga sotto e' pinnata (flag N): NESSUN input e' libero.
+# Non e' una griglia: e' un confronto a un solo asse (TF), contro un
+# termine di paragone gia' misurato. La regola di casa sulla selezione
+# ("centro dell'altopiano, mai il picco") qui non si applica perche' non
+# c'e' niente da selezionare - e per questo il round e' onesto.
+# =====================================================================
+
+@SIMBOLO  GBPUSD
+@PERIODO  M15
+@DAQUANDO 2022.07.01
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=15||15||0||15||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpStdPeriod=20||20||0||20||N
+InpStdSmaPeriod=50||50||0||50||N
+InpAtrPeriod=14||14||0||14||N
+InpPatternMode=2||2||0||2||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeRefBars=20||20||0||20||N
+InpBulgeMinBars=3||3||0||3||N
+InpBulgeMaxBars=20||20||0||20||N
+InpBulgeMinImpBars=1||1||0||1||N
+InpBulgeCandleMaxATR=0.0||0.0||0||0.0||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+InpBulgeMedianDistPct=0.75||0.75||0||0.75||N
+InpBulgeEndMode=1||1||0||1||N
+InpBulgeDirMode=1||1||0||1||N
+InpImpulseATR=1.5||1.5||0||1.5||N
+InpRientroMaxATR=1.5||1.5||0||1.5||N
+InpInvViolentBars=3||3||0||3||N
+InpZigZagATR=1.5||1.5||0||1.5||N
+InpDeepSpikeATR=1.5||1.5||0||1.5||N
+InpPostATRRef=1||1||0||1||N
+InpBandRidingMaxBars=20||20||0||20||N
+InpPostBulgeMaxBars=30||30||0||30||N
+InpReinflateTolPct=1.05||1.05||0||1.05||N
+InpUseShadowFilter=false||false||0||false||N
+InpShadowBodyMult=1.5||1.5||0||1.5||N
+InpUseRangeReduction=false||false||0||false||N
+InpRangeReductionPct=30.0||30.0||0||30.0||N
+InpContNoImpulseBandReturn=false||false||0||false||N
+InpNarrowBars=2||2||0||2||N
+InpStdDownMode=0||0||0||0||N
+InpFlatSlopeATR=0.05||0.05||0||0.05||N
+InpSlopeSource=0||0||0||0||N
+InpRetestBufferATR=0.15||0.15||0||0.15||N
+InpContRequireNarrow=true||true||0||true||N
+InpContRequireStdDown=true||true||0||true||N
+InpUseReversalCandle=false||false||0||false||N
+InpRevBodyMaxPct=33.0||33.0||0||33.0||N
+InpRevShadowMinPct=50.0||50.0||0||50.0||N
+InpMinSolidita=0.0||0.0||0||0.0||N
+InpSL_ATRmult=3.0||3.0||0||3.0||N
+InpTPMode=0||0||0||0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpTPRefreshBars=1||1||0||1||N
+InpBEatATR=1.0||1.0||0||1.0||N
+InpBEMode=0||0||0||0||N
+InpMinTPatATR=0.0||0.0||0||0.0||N
+InpMinRR=0.0||0.0||0||0.0||N
+InpUseCongestionFilter=false||false||0||false||N
+InpCongBars=15||15||0||15||N
+InpCongCSMin=4||4||0||4||N
+InpCongCDAStdBars=10||10||0||10||N
+InpCongWidthDropPct=15.0||15.0||0||15.0||N
+InpCongLateralATR=1.0||1.0||0||1.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=R108 BB M15
+InpMagic=760030||760030||1||760031||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# =====================================================================
+# NOTE DI LANCIO
+# =====================================================================
+# 1. InpMinTPatATR e InpMinRR restano a 0.0 (SPENTI) DI PROPOSITO.
+#    Sono le due valvole che imporrebbero un take minimo, ma accenderle
+#    dentro il round che MISURA il take vorrebbe dire misurare il filtro
+#    invece del motore. Prima si misura nudo (S0a), poi si decide.
+#    Se S0a fallisce, la variante "con valvola accesa" e' un round NUOVO,
+#    con criteri nuovi - non un salvataggio di questo.
+#
+# 2. InpMagic 760030/760031 e' l'asse Y: e' la coppia di GEMELLI (due
+#    passate identiche che DEVONO dare lo stesso numero al centesimo).
+#    Non e' una manopola: e' il collaudo del banco. Serie 76xxxx VERGINE,
+#    non collide con nessuna sedia viva.
+#    -> 2 celle x 2 finestre = 4 passate per simbolo, 12 in totale.
+#
+# 2-bis. La riga InpNewsCurrencies e' stata TOLTA di proposito: un pin di
+#    stringa VUOTO MT5 lo IGNORA e usa il default compilato (e' l'errore
+#    che ha reso il "FiboH4 0/8" un numero solo contato otto volte,
+#    REGISTRO_TEST.md §2-bis). Il default del sorgente viene pinnato dal
+#    driver da solo. controlla_prova.py verifica questa regola: ESITO OK.
+#
+# 3. Il TF del grafico (@PERIODO) e InpTF DEVONO coincidere qui, ed e'
+#    voluto: si vuole misurare il motore a M15, non un motore M15 letto
+#    da un grafico di altro TF. (Nota gia' scritta in R103: "IL TF DEL
+#    GRAFICO NON SI DERIVA DA InpTF, E VICEVERSA".)
+#
+# 4. Serve la RACCOLTA PER-TRADE, non solo il riepilogo: senza le serie
+#    per operazione non si calcolano ne' il take medio (S0a) ne' la
+#    peggior giornata (S4). Se la raccolta per-trade non e' disponibile,
+#    IL ROUND NON PARTE: produrrebbe numeri che non rispondono alla
+#    domanda.
+#
+# 5. Riga di lancio: passarla da backtest_pipeline/CHECKLIST_RIGA_DI_
+#    LANCIO.md prima di dettarla a Claudio (irm in testa + raccolta e
+#    zip sul Desktop a fine test, regola di casa).
+# =====================================================================
