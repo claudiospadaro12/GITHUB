@@ -10,12 +10,13 @@ serve **frequenza intraday** su **forex (GBPUSD/EURUSD in primis)** e **oro**.
 ## ⚡ IL RISULTATO IN UNA RIGA
 
 > **Su 1.597 titoli del Code Base ricrawlati (catalogo COMPLETO: pagina 41 = 0
-> elementi), 13 sorgenti `.mq5` scaricati e letti, 1 paper PDF letto per
-> intero nelle sezioni che contano, 6 query all'API arXiv, 82 slug Quantpedia
-> enumerati e 8 fonti passate al controllo positivo — arrivano al sorgente 13
-> oggetti, ne propongo TRE, e il primo non viene dal web: è un ramo MAI
-> MISURATO di una sedia VIVA, e a dirci di misurarlo è la tesi del corso che
-> abbiamo in repo da tredici giorni.**
+> elementi) + 203 strategie TradingView raccolte per tag, 19 sorgenti letti
+> riga per riga (13 `.mq5` + 6 Pine), 1 paper PDF letto nelle sezioni che
+> contano, 6 query all'API arXiv, 82 slug Quantpedia enumerati e 8 fonti
+> passate al controllo positivo — arrivano al sorgente 19 oggetti, ne propongo
+> TRE (+1 in coda), e il primo non viene dal web: è un ramo MAI MISURATO di
+> una sedia VIVA, e a dirci di misurarlo è la tesi del corso che abbiamo in
+> repo da tredici giorni.**
 >
 > 🔴 **La risposta scomoda, e va letta due volte: sul TF M5/M15 il web
 > gratuito non ha praticamente niente da darci, e non è pigrizia mia — è la
@@ -72,7 +73,7 @@ serve **frequenza intraday** su **forex (GBPUSD/EURUSD in primis)** e **oro**.
 | **MQL5 Code Base** | **200** | scheda `/en/code/68951`: titolo `Liquidity Sweep H4 - M15 (Swing Highs and Lows) / MQL5`, autore `OsmarSandovalEspinosa`, data **2026.03.23**, **`UserDownloads:2383`** (erano 512 il 19/08 — la pagina è viva, non una cache). `/en/code/download/<id>` restituisce lo **ZIP col `.mq5`** | 🟢 **PASSA IN PIENO** |
 | **arXiv API** (`export.arxiv.org`, https) | **200** | 6 query; `cat:q-fin.TR` rende titoli/date veri (es. *Short-horizon mean reversion in cryptocurrency markets*, 2026). PDF `2605.04004v2` scaricato (1.130.529 byte, 8 pagine) ed estratto (34.007 caratteri) | 🟢 **PASSA come canale** · 🔴 **STERILE sul mandato**: vedi §5 |
 | **Quantpedia** | **200** (dopo `-L` sul 308) | `/strategies` rende **82 slug veri** | 🟢 **PASSA** · 🔴 **STERILE: ZERO strategie intraday FX o oro** — vedi §5.2 |
-| **TradingView** | **200** | `/scripts/meanreversion/` rende **24 link `/script/`** (novità vs 22-23/08) e la scheda del singolo script rende titolo+autore (verificato su *Institutional VWAP Bands [JOAT]* di `officialjackofalltrades`). **Ma nel sorgente HTML: 0 occorrenze di `//@version`, `strategy(`, `indicator(`** | 🟡 **METADATI SÌ, PINE NO** → **non setacciabile** (§4: senza sorgente il setaccio non è applicabile) |
+| **TradingView** | **200** | 🔓 **RIAPERTA A CACCIA IN CORSO — vedi §1-bis.** Prima misura: la pagina script non contiene il Pine (0 occorrenze di `//@version`). **Poi ho applicato il canale trovato dalla sessione gemella e ho scaricato 6 sorgenti Pine completi**, con `scriptName`, `created` e `scriptAccess: open_no_auth` | 🟢 **PASSA, SORGENTE COMPRESO** |
 | **GitHub — `raw.githubusercontent.com`** | **200** | README di `abiodunaremu/openea` letto per intero (10.127 byte) | 🟢 **PASSA per la LETTURA** (se conosco già l'URL) |
 | **GitHub — `github.com` e `api.github.com`** | **403** | testati **quattro** endpoint diversi: `/search`, `/topics/mql5`, `/topics/expert-advisor`, e persino la pagina di un repo pubblico (`/abiodunaremu/openea`) → **tutti 403, corpo di 378 byte**. `gh` CLI assente | 🔴 **NULLA per la RICERCA** — quinta caccia di fila |
 | **Forex Factory** | **403** | `/forum/71-trading-systems` | 🔴 **NULLA** — quinta di fila |
@@ -102,7 +103,33 @@ Quantpedia, lettura raw di GitHub), **2 sono leggibili solo a metà**
   OR all:XAUUSD`, `abs:"mean reversion" AND abs:"exchange rate"`,
   `abs:"foreign exchange" AND abs:intraday AND abs:predictab`). **1 PDF
   scaricato e letto** (§5.1).
+- **TradingView:** **203 strategie uniche** raccolte dalle pagine tag
+  `meanreversion`, `gold`, `forex`, `bollingerbands`, `reversal` (2 pagine per
+  tag, filtro `?script_type=strategies`). **6 sorgenti Pine scaricati e letti
+  riga per riga** (§3.4).
 - **Quantpedia:** 82 slug enumerati e letti a titolo.
+
+### 1-bis. 🔓 IL CANALE PINE — non è farina del mio sacco, e va detto
+
+Il metodo **l'ha trovato la sessione gemella** che oggi batteva il lotto
+INDICI (`CACCIA_M5M15_INDICI_2026-08-25.md` §1-bis): io l'ho **applicato** al
+mio bersaglio e **verificato che funziona** anche qui. Tre passi, nessuna
+autenticazione:
+
+1. `https://www.tradingview.com/scripts/<tag>/?script_type=strategies`
+   (paginata con `/page-N/`) → nell'HTML ci sono **link + titoli**, sotto
+   `data-qa-id="ui-lib-card-link-title"`;
+2. la pagina del singolo script **non contiene il Pine**, ma contiene
+   l'identificatore **`PUB;<hash a 32 cifre esadecimali>`**;
+3. `https://pine-facade.tradingview.com/pine-facade/get/PUB;<hash>/last` →
+   **JSON col campo `source`: il Pine completo**, più `scriptName`,
+   `created` e `scriptAccess`.
+
+⚠️ **Nota mia, misurata oggi:** su **7 script provati, 6 hanno reso l'hash e
+uno no** (`9morbD5t-15-Minute-Gold-Trend-Following-Strategy`: nessun `PUB;` a
+32 cifre nell'HTML). **Il canale funziona, ma non è al 100%**: un titolo senza
+hash non è un candidato scartato, è un candidato **non letto**, e va
+dichiarato tale.
 
 📌 **Reperti di struttura del Code Base, da mettere a verbale** (utili al
 prossimo cacciatore quanto i candidati):
@@ -375,7 +402,138 @@ perdere in giorni diversi**. È un'ipotesi, e come tale va misurata.
 
 ---
 
-### 🥉 P3 — `London Session Signal B` (arXiv 2605.04004 §5.2): **una SPECIFICA, non un EA** — 🟡 IN CODA
+### 🥉 P3 — `DayFlow VWAP Relay — Majors` (TradingView, Pine letto): **un ROUTER DI REGIME, e stavolta le statistiche sono riproducibili**
+
+```
+NOME            DayFlow VWAP Relay — Majors   (shorttitle "DayFlow Relay")
+FONTE / URL     https://www.tradingview.com/script/muhhiXQs-DayFlow-VWAP-Relay-Forex-Majors-Strategy/
+                PINE SCARICATO E LETTO (6.593 byte di JSON, 135 righe di Pine)
+AUTORE / DATA   © exlux · `created` 2025-11-03T13:30:58Z · `scriptAccess`
+                **open_no_auth**  [VERIFICATO nel JSON del pine-facade]
+LICENZA         🟢 **Mozilla Public License 2.0**, dichiarata nella riga 1 del
+                sorgente. È l'unico candidato di tutta la caccia con una
+                licenza esplicita.
+RIGHE / INPUT   135 righe Pine · **12 input operativi** (+2 di sola grafica)
+                → 🟢 **sotto il nostro tetto di ~15**
+COSTO DI PORTING  🔴 **Pine → MQL5 NON è un porting, è una RISCRITTURA.**
+                  Stimate **6-10 ore** (EA d'agente + collaudo). È il prezzo
+                  vero di questo candidato, e non lo sconto.
+```
+
+#### ⚙️ MECCANICA — letta nel Pine, non nella descrizione
+
+**Il cuore non è un segnale: è un INTERRUTTORE.**
+```pine
+expansion = ta.stdev(resid, sig_len) / math.max(1e-10, ta.stdev(close, sig_len))
+balanced_day = expansion <  exp_gate      // 0.65
+trend_day    = expansion >= exp_gate
+```
+dove `resid = close − vwap_giornaliero`. Cioè: **quanto della volatilità del
+prezzo è "scostamento dal VWAP" e quanto è "movimento del VWAP stesso"**.
+
+- **Giornata BILANCIATA** (`expansion < 0,65`) → **si FADE**: long quando il
+  residuo scende sotto il **25° percentile** delle ultime 63 barre, short
+  sopra il **75°**.
+- **Giornata di TREND** (`expansion ≥ 0,65`) → **si segue la ROTTURA** della
+  banda VWAP, **ma solo se la pendenza del VWAP (linreg a 63) è concorde**.
+- **In entrambi i casi** serve la conferma di **micro-flusso**: si leggono le
+  barre M1 dentro la barra appena chiusa e si conta quante salgono e quante
+  scendono (`micro_flow`, righe 60-72); serve `|mf| > 0,20`.
+- **Geometria:** SL **1,2 × ATR(14)**, TP **1,8 × ATR(14)** → R:R **1,5**.
+  Sessione **07:00-17:00 UTC**. **Cooldown di 10 barre** dopo ogni chiusura.
+
+#### 🧭 TESI IN UNA RIGA
+> _"In una giornata in cui il prezzo oscilla ATTORNO al VWAP il flusso è
+> bilanciato e gli estremi si pagano tornando indietro; in una giornata in cui
+> è il VWAP stesso a muoversi, il flusso è a senso unico e gli estremi si
+> pagano andando avanti. La stessa distanza dal VWAP vuol dire due cose
+> opposte, e il rapporto fra le due deviazioni standard dice quale."_
+
+#### 🎯 PERCHÉ È IL CANDIDATO CHE MANCAVA — tre motivi, in ordine
+
+**1. È esattamente la specifica di P4, ma con statistiche RIPRODUCIBILI.**
+Il paper di falsificazione dice che sopravvive solo chi **classifica un
+regime**; il suo `London Signal B` lo fa con un **GMM che non possiamo
+replicare**. Qui la classificazione è **un rapporto fra due deviazioni
+standard e un percentile mobile**: si scrive in MQL5 in venti righe, senza
+addestrare niente. 🎯 **È il ponte fra la specifica e il codice.**
+
+**2. Il filtro NON è appiccicato: È il motore, ed è nella forma più forte che
+conosciamo.** Non decide *se* entrare: decide **DA CHE PARTE** entrare.
+Spegnere il regime non rende l'EA più permissivo — **lo rende senza
+direzione**. È la stessa forma di `ABTG_EMA200` Dow (R29, **30 celle su 30 a
+PASS pieno**), e l'opposto dei cinque filtri appiccicati che fanno **0/5**.
+
+**3. 💰 IL COSTO SI CALCOLA, e passa con margine.** TP = **1,8 × ATR(14)** su
+M15. Su GBPUSD l'ATR(M15) è dell'ordine di **8-12 pip** [INFERITO, da
+misurare] → **TP ≈ 15-22 pip contro ~1 pip di spread = 15-22×**. Il criterio
+del mandato chiede **≥3×**. 🟢 **È l'unico candidato della caccia in cui il
+cancello del costo si legge PRIMA di girare, perché la geometria è in ATR e
+non in una mediana che si accorcia col timeframe.**
+
+#### ✅ PERCHÉ NON È UN CADUTO — e dove invece si avvicina, dichiarato
+
+| caduto | confronto |
+|---|---|
+| **R42/R43 — fade degli estremi** | 🟢 R42 fadeva **l'estremo di un box di 15 minuti**, sempre, senza condizioni. Qui il fade **scatta solo nel regime bilanciato** e l'estremo è un **percentile del residuo dal VWAP** su 63 barre, non un massimo |
+| **R60 — `ABTG_MeanRevert`** | 🟢 quello compra il minimo di N barre **senza nessuna condizione di stato**. Qui senza `balanced_day` il ramo fade non esiste |
+| **capitolo BREAKOUT M5 / R45** | 🟡 **il ramo `trend_day` È un breakout**, e questo va detto. Ma (a) non è un breakout **di sessione** né di un box d'apertura: è la rottura di una banda VWAP con la pendenza concorde; (b) è **la metà** del motore. ➡️ **Conseguenza operativa: i due rami vanno misurati SEPARATI prima del combinato**, come abbiamo fatto per `InpPatternMode` del BreakingBand. Se il ramo breakout è il solito cadavere, si tiene il router col solo ramo fade e **si dichiara** |
+| **R101 gradino 07 — VWAP di sessione** | 🟡 **adiacenza vera, e la nomino.** R101 ha misurato il VWAP **come filtro direzionale appiccicato al motore Aperture** su indici, e l'ha bocciato. **Qui il VWAP non è un filtro: è l'ANCORA rispetto a cui si misura il residuo**, e il verso lo decide il rapporto di deviazioni. Uso diverso, mercato diverso. **Ma se qualcuno legge "VWAP" e diffida, ha ragione a chiedere il conto: il carico della prova sta su chi propone** |
+
+#### 🚨 I TRE LIMITI, dichiarati PRIMA dei numeri
+
+1. 🔴 **IL VOLUME.** `ta.vwap` è **pesato sul volume**, e su forex MT5 dà
+   **tick volume**, non contratti (`REGISTRO_TEST.md`, regole Paolo:
+   _"Volumi affidabili SOLO sugli indici, NON sulle valute"_). ➡️ **Il VWAP
+   che costruiremmo NON è il VWAP del paper: è un VWAP pesato sul numero di
+   variazioni di prezzo.** Va scritto nel referto, e **c'è una variante di
+   controllo gratuita**: la stessa macchina con ancora **TWAP** (media
+   temporale, nessun volume). Se il router regge anche col TWAP, il volume
+   non serviva; se muore, sappiamo che dipendeva da un dato inaffidabile.
+   **Questa è la cella di controllo del round, e va congelata prima.**
+2. 🟡 **Il micro-flusso legge le barre M1 dentro la barra M15.** L'autore ne è
+   consapevole (`int last = math.max(1, n - 1)  // exclude freshest element`)
+   e la strategia gira con **`process_orders_on_close=true`** e
+   **`calc_on_every_tick=false`** — cioè **niente ripittura da ricalcolo a
+   tick**, che è la trappola §4 di TradingView. In MQL5 diventa banale e
+   **senza alcun look-ahead**: si contano le 15 barre M1 della candela M15
+   appena chiusa. [INFERITO dalle righe 60-72 e dall'header `strategy(...)`]
+3. 🟡 **Il sizing è `default_qty_value=3` = 3% dell'equity in NOZIONALE**, non
+   rischio per operazione. È la solita **gestione da rifare**, ed è la parte
+   che sappiamo fare: **0,65% dell'equity calcolato sulla distanza dello
+   stop**, parziale 1R + breakeven + runner.
+
+```
+PUNTEGGIO
+  [2] semplicità — 12 input veri, sotto il tetto; 135 righe leggibili
+  [2] il filtro È il motore — il regime non filtra: ROUTA. Forma R29
+  [2] tesi di mercato scrivibile — sopra, ed è la migliore della giornata
+  [2] riempie un BUCO — forex majors M15 con un motore SIMMETRICO vero
+      (long e short dallo stesso codice) e una fascia oraria 07-17 UTC
+  [1] testabile senza riscritture — NO: Pine -> MQL5 è una riscrittura,
+      6-10 ore. È l'unico punto dove perde
+
+VERDETTO   🟢 PROVA (9/10), ma TERZO IN CODA per costo di sviluppo
+PERCHÉ     è l'unico oggetto trovato in cinque cacce che implementa la
+           specifica del paper di falsificazione (regime costitutivo +
+           orizzonte lungo) con statistiche che sappiamo riscrivere.
+```
+
+#### 🏛️ RIGA PROP
+🟢 **Il `cooldown = 10` barre è già un freno alla concentrazione
+giornaliera** — è raro che un EA gratuito ce l'abbia, ed è esattamente ciò
+che `METRO_PROP.md` chiede (muro giornaliero −5% su 100k). Su M15, 10 barre =
+**2,5 ore di silenzio dopo ogni chiusura** → al massimo ~4 operazioni nella
+finestra 07-17. 🟢 **Ed è un motore simmetrico**, cioè il buco più vecchio del
+portafoglio (`R52_CENSIMENTO_LATI.md`: 4 titolari su 5 girano su un lato solo).
+⚠️ **Il rovescio:** nel ramo `trend_day` prende posizioni **nella stessa
+direzione del mercato**, quindi nelle giornate di trend forte **è correlato
+alle nostre sedie long**. La scorrelazione va misurata sulle serie per-trade,
+non sperata.
+
+---
+
+### 4️⃣ P4 — `London Session Signal B` (arXiv 2605.04004 §5.2): **la SPECIFICA che P3 realizza** — 🟡 IN CODA
 
 ```
 NOME     "London Session Signal B (R0 to R2 Transition)"
@@ -407,6 +565,14 @@ dallo stesso documento che ha **bocciato quattordici famiglie di segnali**,
 compresa quella dell'autore stesso. E la forma è quella che il §5.1 indica
 come l'unica sopravvissuta: **M15 · regime costitutivo · 4 barre di tenuta ·
 una sessione**.
+
+🎯 **E il motivo per cui resta in tabella anche se non parte: P3 È QUESTA
+SPECIFICA, SCRITTA CON STATISTICHE CHE POSSIAMO RIPRODURRE.** Le due voci non
+competono — la prima dice *quale forma sopravvive*, la seconda è l'unico
+oggetto leggibile che quella forma ce l'ha. **Se P3 andasse bene, questa riga
+sarà la ragione per cui ci abbiamo creduto prima di misurare; se andasse male,
+sarà la prova che la forma da sola non basta.** In entrambi i casi vale
+tenerla scritta.
 
 🔴 **Perché NON parte adesso, e sono tre motivi indipendenti:**
 1. **Il classificatore è un GMM (Gaussian Mixture Model) e il paper NON dà né
@@ -461,6 +627,20 @@ VERDETTO    non si scrive un file prova finché qualcuno non porta una
 | S10 | **`Trend Momentum EA`** · **`QuickTrend Scalper`** · **`Probability Theory EA`** | Code Base 68512, 52105, 49770 — sorgenti letti | 🔴 Tre incroci di indicatori da manuale (EMA50/200+RSI+Stoch · RSI(6)+MA(2) · lotto 0,1 + `Risk = 2`). **Nessuna tesi di mercato scrivibile in una riga** → §5C. |
 | S11 | **`PriceChannel_Signal_v2 EA`** | [Code Base 39012](https://www.mql5.com/en/code/39012) | 🔴 **Donchian breakout con indicatore custom allegato** — famiglia chiusa, e in più dipende da un `.mq5` di indicatore da compilare a parte. |
 
+### 3.4 🆕 Scartati su **TRADINGVIEW** — cinque Pine letti riga per riga
+
+_Fonte riaperta a caccia in corso (§1-bis). **203 strategie raccolte, 7
+aperte, 6 Pine letti, 1 promosso (P3), 5 scartati.** Ecco i cinque._
+
+| # | script | autore / data | meccanismo | la riga che lo prova |
+|---|---|---|---|---|
+| S16 | **`Konigs \| Bollinger Band Mean Reversion (Session Filter)`** | [`4wUJnYSD`](https://www.tradingview.com/script/4wUJnYSD-Konigs-Bollinger-Band-Mean-Reversion-Session-Filter/) · created **2026-01-20** · 41 righe | long sotto la banda inferiore, short sopra la superiore, uscita sulla mediana, dentro una sessione | 🔴 **NESSUNO STOP LOSS. Nemmeno virtuale.** Le uniche uscite sono `strategy.close` sulla mediana: **una posizione contro un trend resta aperta all'infinito.** §4, prima riga della tabella. E il motore è **R60 senza nemmeno il regime**: il "coltello che cade" del `SETACCIO_MANUALE.md` |
+| S17 | **`VWAP Mean Reversion Strategy v6`** | [`9SEB7IHb`](https://www.tradingview.com/script/9SEB7IHb-VWAP-Mean-Reversion-Strategy-Range-Bound-Forex-RSI-Volume/) · created **2026-03-29** · 116 righe | fade a 2 deviazioni assolute pesate sul volume da una media mobile volume-ponderata a 60 barre, con RSI < 25 / > 65 | 🔴 **LO STOP NON STA FERMO.** `strategy.exit(..., stop = close * (1.0 - stopLossPct))` è dentro un `if strategy.position_size > 0` che gira **a ogni barra**: lo stop viene **ricalcolato sul `close` corrente**, quindi **insegue il prezzo anche mentre scende**. Non è un trailing: è uno stop che scappa. Più `default_qty_value = 10` (10% dell'equity in nozionale, nessun rischio per operazione). 🟢 **Un pezzo da rubare, però, e lo scrivo:** il filtro volume è **invertito** rispetto all'ovvio — `volCondition = not extremeVol` → **NON si fa il fade quando il volume è oltre 3× la media.** È una regola anti-spike da notizia, ed è sensata |
+| S18 | **`MACD Volume Strategy for XAUUSD (15m)`** | [`k2ynWI6q`](https://www.tradingview.com/script/k2ynWI6q-MACD-Volume-Strategy-for-XAUUSD-15m-PineIndicators/) · PineIndicators · created **2025-02-21** · 85 righe | incrocio MACD sullo zero + oscillatore di volume + confronto `volume` vs `volume[1]/2`, su oro M15 | 🔴 **TRE motivi.** (a) `qty = strategy.equity * leverage / close` → **il 100% dell'equity a ogni operazione**. (b) `t = 10100` — **un numero magico** usato come `profit=t*1.1, loss=t` in tick: la geometria dell'intero EA è una costante senza nome e senza tesi. (c) Il segnale short pretende `osc > 0` **esattamente come il long** (righe 36-38): o è un refuso o è una regola che non si sa spiegare. Più il volume su un CFD non regolamentato (§S13) |
+| S19 | **`Reverse Keltner Channel Strategy with ADX`** | [`Mbu0HmHZ`](https://www.tradingview.com/script/Mbu0HmHZ-Reverse-Keltner-Channel-Strategy/) · @fenyesk · created **2025-05-03** · 86 righe | il prezzo esce dal canale di Keltner e **rientra** → si entra, TP sulla banda opposta, SL a metà canale | 🔴 **LA TESI È UN INPUT.** `weakTrendOnly = input.bool(true, "Enter Only in Weak Trends")`: se `true` entra con ADX < 25, se `false` con ADX ≥ 25. **È l'ottimizzatore a decidere se la strategia è "mean reversion nel laterale" o "continuazione nel trend"** — identico al motivo per cui il 22/08 abbiamo scartato `003 - Weekly Day Reversal`. In più è **ADX appiccicato** (0/5 in casa) e `default_qty_value=100`. 🟢 **Osservazione tenuta agli atti:** la geometria "rientro nel canale, TP alla banda opposta" è la **cugina simmetrica di P2** (che compra l'uscita). Se P2 passasse, questa è la prima variante da provare — **come cella, non come EA** |
+| S20 | **`Swing trading strategy FOREX` (BB+RSI, 15min)** | [`9eBjGz5d`](https://www.tradingview.com/script/9eBjGz5d-Swing-forex-strategy-15min/) · created **2021-08-02** · 82 righe | incrocio RSI(6) + rottura della banda di Bollinger(200) | 🔴 **NESSUNA USCITA: le due righe `strategy.exit` sono COMMENTATE** (righe 78-79 del sorgente). La posizione si chiude solo quando arriva il segnale opposto. **Nessuno stop, nessun target, orizzonte indefinito.** §4 |
+| S21 | `15 Minute Gold Trend-Following Strategy` | [`9morbD5t`](https://www.tradingview.com/script/9morbD5t-15-Minute-Gold-Trend-Following-Strategy/) | — | ⬜ **NON VALUTATO, non scartato.** La pagina **non contiene l'identificatore `PUB;<hash>`** e il pine-facade non è raggiungibile senza. **Non ho letto una riga di Pine**, e per la regola §1 del mandato quindi **non esiste**. Era in pieno bersaglio (oro, 15 minuti): è il buco più fastidioso di questa caccia |
+
 ### 3.3 Le piste del mandato che ho dovuto **CHIUDERE**, e con quali prove
 
 | # | pista del mandato | verdetto | le prove |
@@ -476,7 +656,7 @@ VERDETTO    non si scrive un file prova finché qualcuno non porta una
 
 | non visto | conseguenza concreta su questo dossier |
 |---|---|
-| 🔴 **Tutto il Pine di TradingView** (metadati sì, sorgente no) | **24 script hanno un titolo e nessun corpo.** Per la pista 1 (mean reversion M15) e la 2 (sweep) TradingView è *la* fonte naturale, ed è la **quinta caccia** che ci restiamo fuori. Non è "non ho trovato": è **non ho potuto guardare** |
+| 🟢 **TradingView: RIAPERTA** (era il buco storico) | **Non è più un buco.** 203 strategie raccolte, 6 Pine letti, **1 promosso (P3)**. ⚠️ **Ma resta un buco parziale:** su 7 script provati **1 non ha reso l'hash `PUB;`** e non l'ho letto (S21, ed era oro a 15 minuti). E **197 delle 203 strategie raccolte NON le ho aperte**: ho letto le sette in bersaglio. **Il giacimento è appena stato scoperto, non esaurito** |
 | 🔴 **Ricerca GitHub (403 su `/search`, `/topics`, e persino sulla pagina di un repo pubblico)** | Canale chiuso. Leggo solo repo di cui conosco già l'URL: **zero repo nuovi in cinque cacce** |
 | 🔴 **Forex Factory (403, quinta di fila)** | Continuo a non sapere **come sono invecchiati** i sistemi M15 su GBPUSD e oro. È l'unica fonte che racconta cosa succede quando una strategia smette di funzionare |
 | 🔴 **SSRN (403, quinta di fila)** | Zero letteratura peer-review sul forex intraday |
@@ -559,19 +739,32 @@ costo**, e ha una risposta a due gradini che si legge nello stesso referto:
 |---|---|---|---|---:|---|---|
 | **P1** | **`ABTG_BreakingBand` su M15** (M5 diagnostico) | **in casa** | **forex intraday M15** — oggi la flotta forex fa 0,6-3,9 op/**mese** per sedia | **9/10** | 🟢 **PROVA SUBITO** | **niente codice.** File prova consegnato: `prove/R108_BB_M15_FOREX.txt` |
 | **P2** | **`KA-Gold Bot`** (Code Base 48251) | fuori, **sorgente letto** | **oro intraday M15**, con geometria **opposta** a `ABTG_EMA200` già in flotta | **9/10** | 🟢 **PROVA SUBITO, dietro il cancello zero** | (a) misurare lo **spread BCM sull'oro** col logger 74148; (b) 3-4 ore di rifinitura: rischio %, SL in ATR, parziale+BE+runner, fix riga 266 |
-| **P3** | **`London Session Signal B`** (arXiv 2605.04004 §5.2) | fuori, **paper letto** | M15 forex/indici, regime costitutivo, fascia 08:00-13:30 server | 9/10 *sull'idea* | 🟡 **IN CODA** | una classificazione di regime **riproducibile**. Senza, non si scrive niente |
-| S1-S11 | undici scarti da sorgente | — | — | — | 🔴 | motivo per riga, §3.1-3.2 |
+| **P3** | **`DayFlow VWAP Relay — Majors`** (TradingView, **Pine letto**) | fuori | **forex majors M15, motore SIMMETRICO, regime che ROUTA** (fade o breakout) | **9/10** | 🟢 **PROVA, terzo per costo** | **6-10 ore di riscrittura Pine→MQL5** + la cella di controllo TWAP (§P3, limite 1) |
+| **P4** | **`London Session Signal B`** (arXiv 2605.04004 §5.2) | fuori, **paper letto** | è **la specifica che P3 realizza** | 9/10 *sull'idea* | 🟡 **IN CODA** | una classificazione di regime **riproducibile** — che P3 porta già |
+| S1-S11 | undici scarti da sorgente `.mq5` | — | — | — | 🔴 | motivo per riga, §3.1-3.2 |
+| S16-S20 | **cinque scarti da sorgente Pine** (fonte riaperta oggi) | — | — | — | 🔴 | motivo per riga, §3.4 |
+| S21 | `15 Minute Gold Trend-Following Strategy` | — | era in pieno bersaglio | — | ⬜ **NON LETTO** | l'hash `PUB;` non c'è nella pagina. Se Claudio riesce ad aprirlo e a incollare il Pine, va dritto nel setaccio |
 | S12-S15 | **quattro piste del mandato, chiuse con le prove** | — | — | — | 🔴/🟡 | §3.3 — servono a non ricercarle il giro dopo |
 
 ---
 
 ## 8. 🧾 ONESTÀ FINALE — la riga che Claudio deve leggere due volte
 
-**Il web gratuito, sulla parola "M5/M15", è vuoto per noi. E stavolta non è
+**Il MQL5 Code Base, sulla parola "M5/M15", è vuoto per noi. E stavolta non è
 un'impressione: è la quarta aratura dello stesso campo, con i conteggi
 accanto.** 1.597 titoli, catalogo completo fino all'ultima pagina, 61 in tema,
-13 letti nel sorgente, **UNO promosso**. TradingView ha i titoli e non il
-codice. GitHub è chiuso. Forex Factory e SSRN sono mute da cinque cacce.
+13 letti nel sorgente, **UNO promosso**. GitHub è chiuso. Forex Factory e SSRN
+sono mute da cinque cacce.
+
+🔓 **L'eccezione, ed è arrivata a caccia in corso: TRADINGVIEW SI LEGGE.** Il
+canale l'ha trovato la sessione gemella, io l'ho applicato al mio bersaglio in
+un'ora: **203 strategie, 6 Pine letti, cinque scarti secchi e un promosso a
+9/10.** ⚠️ **Ma attenzione a non entusiasmarsi sul campione:** cinque Pine su
+sei erano **senza stop, con lo stop che scappa, col 100% dell'equity per
+operazione o con la tesi messa dentro un `input.bool`**. La qualità media di
+TradingView è **peggiore** di quella del Code Base, non migliore: quello che
+cambia è il **volume** del giacimento, non la sua purezza. **Il setaccio serve
+lì più che altrove.**
 
 **E c'è una ragione economica, non un caso: su M5 il costo mangia il segnale.**
 Lo dice il documento più adversariale che ho letto — soffitto lordo 1,05-1,50
@@ -595,14 +788,20 @@ ma sarebbe **una risposta**, e costa una passata.
 
 _Dossier compilato il 25/08/2026. Fonti aperte davvero: MQL5 Code Base
 (catalogo completo 1.597 titoli, **13 sorgenti `.mq5` scaricati, decodificati
-e letti**), arXiv (6 query API + **1 PDF letto**), Quantpedia (82 slug),
-GitHub in sola lettura raw (1 README). Fonti dichiarate NULLE o parziali:
-GitHub ricerca (403), Forex Factory (403), SSRN (403), TradingView (sorgente
-Pine non leggibile). **Nessun numero di performance dichiarato da un autore ha
-pesato su un punteggio.** Nessun EA nostro è stato toccato, nessun parametro
-in forward è stato modificato._
+e letti**), **TradingView (203 strategie raccolte, 6 Pine scaricati e letti
+via pine-facade)**, arXiv (6 query API + **1 PDF letto**), Quantpedia
+(82 slug), GitHub in sola lettura raw (1 README). Fonti dichiarate NULLE:
+GitHub ricerca (403), Forex Factory (403), SSRN (403). **Nessun numero di
+performance dichiarato da un autore ha pesato su un punteggio.** Nessun EA
+nostro è stato toccato, nessun parametro in forward è stato modificato._
 
-_Attribuzione, come da regola di casa: `KA-Gold Bot MT5` è di
-**Hung_tthanh@yahoo.com** (MQL5 Code Base, id 48251) — la citazione va
-ripetuta in testa a qualunque `.mq5` derivato. Il paper di falsificazione è di
-**Mesfin (2026)**, arXiv:2605.04004._
+_Attribuzione, come da regola di casa:_
+- _`KA-Gold Bot MT5` è di **Hung_tthanh@yahoo.com** (MQL5 Code Base, id 48251)_
+- _`DayFlow VWAP Relay — Majors` è di **© exlux** (TradingView `muhhiXQs`),
+  **Mozilla Public License 2.0** — la licenza va riportata, non solo l'autore_
+- _il paper di falsificazione è di **Mesfin (2026)**, arXiv:2605.04004_
+- _il canale di lettura del Pine (§1-bis) è stato trovato dalla sessione
+  gemella del 25/08 (`CACCIA_M5M15_INDICI_2026-08-25.md`): qui è stato
+  applicato e verificato, non scoperto._
+
+_La citazione dell'autore va ripetuta **in testa a qualunque `.mq5` derivato**._
