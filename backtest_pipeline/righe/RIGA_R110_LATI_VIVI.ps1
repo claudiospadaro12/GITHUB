@@ -1193,6 +1193,24 @@ foreach($c in $Ordinati){
   Write-Host ("           " + $fam.Sym + " " + $fam.Per + "   (il TF del GRAFICO: non tutte le famiglie girano sullo stesso)") -ForegroundColor Cyan
   Write-Host "------------------------------------------------------------------" -ForegroundColor Cyan
   $tl = Get-Date
+  #  >>> CHECKLIST 79: LA FINESTRA SI RICONTROLLA QUI, UN ISTANTE PRIMA DI
+  #      PASSARLA -- non basta averla dichiarata in testa.
+  #      Il 25/08, sul PC di Claudio, in R109 una variabile di comodo di un
+  #      gate ($a) ha DISTRUTTO la variabile della finestra ($A): in
+  #      PowerShell i nomi sono CASE-INSENSITIVE, il maiuscolo non esiste.
+  #      Il ToDate dell'.ini e' diventato un array di input unito dagli
+  #      spazi -- e il giro a vuoto usci' "ESITO: OK", codice 0, perche'
+  #      NESSUN gate guardava LE DATE. La finestra e' meta' di quello che
+  #      un backtest MISURA. Qui costa due confronti.
+  #      (Su questo file l'audit case-insensitive e' stato fatto -- vedi
+  #       la nota in fondo -- ma un gate che costa nulla si mette lo stesso:
+  #       il difetto di R109 non era nella funzione, era nel FLUSSO DELLE
+  #       VARIABILI, e domani questo script puo' crescere.)
+  if($DaQuando -ne "2024.09.26" -or $Fino -ne "2026.06.30"){
+    throw ("LA FINESTRA E' STATA SPORCATA prima di " + $c.Prova + ": DaQuando=[" + $DaQuando + "] Fino=[" + $Fino +
+           "] invece di [2024.09.26] e [2026.06.30]. NON lancio: MT5 non protesta per una data storta e produrrebbe numeri PLAUSIBILI su una finestra NON DICHIARATA (checklist 79).")
+  }
+  Write-Host ("           finestra: " + $DaQuando + " -> " + $Fino + "   (ricontrollata adesso, non solo dichiarata in testa)") -ForegroundColor Gray
   #  -Terminal e -DataFolder passati ESPLICITI (checklist 37): il driver
   #  generico altrimenti ri-cerca il terminale per conto suo, e potrebbe
   #  trovarne uno diverso da quello su cui abbiamo compilato.
@@ -1246,7 +1264,11 @@ foreach($c in $Ordinati){
     }
     elseif([int]$c.IS -eq $CelleAttese -and [int]$c.OOS -eq $CelleAttese){ $c.Esito = "OK" }
     else{
-      $c.Esito = "RIGHE SBAGLIATE (IS " + $c.IS + " / OOS " + $c.OOS + ", attese " + $CelleAttese + ")"
+      #  >>> ANCHE QUI LA SENTINELLA (checklist 66). Il -1 vuol dire "il CSV
+      #      non c'e'", e scritto crudo in una frase si legge "meno una riga",
+      #      che non vuol dire niente. La convenzione vale in TUTTE le
+      #      colonne E in tutte le FRASI: in R103 era applicata a meta'.
+      $c.Esito = "RIGHE SBAGLIATE (IS " + (FmtN $c.IS) + " / OOS " + (FmtN $c.OOS) + ", attese " + $CelleAttese + "; 'n/d' = il CSV non e' stato prodotto)"
       [void]$Problemi.Add($c.Prova + ": " + $c.Esito + ". Cache del tester, oppure lo sweep dei magic non ha spazzolato: il file NON si legge.")
     }
 
@@ -1431,10 +1453,10 @@ try{
     }
   }
 
-  $R = New-Object System.Collections.ArrayList
-  [void]$R.Add("REFERTO R110 - I LATI MAI MISURATI DEI MOTORI VIVI SUGLI INDICI")
-  [void]$R.Add("SupRev NAS H1 (NASUSD) - SupRev DAX H4 (D30EUR) - SuperWave DOW H1 (U30USD) - EMA200 Dow (U30USD)")
-  [void]$R.Add("modo: " + $Modo + $(if($SoloControllo){ "   <<< GIRO A VUOTO: NESSUNA passata, NESSUN CSV, NESSUN numero di round qui dentro" } else { "" }))
+  $RefTxt = New-Object System.Collections.ArrayList
+  [void]$RefTxt.Add("REFERTO R110 - I LATI MAI MISURATI DEI MOTORI VIVI SUGLI INDICI")
+  [void]$RefTxt.Add("SupRev NAS H1 (NASUSD) - SupRev DAX H4 (D30EUR) - SuperWave DOW H1 (U30USD) - EMA200 Dow (U30USD)")
+  [void]$RefTxt.Add("modo: " + $Modo + $(if($SoloControllo){ "   <<< GIRO A VUOTO: NESSUNA passata, NESSUN CSV, NESSUN numero di round qui dentro" } else { "" }))
   $sw = @()
   if($SoloControllo){ $sw += "-SoloControllo (nessuna passata)" }
   if($CriteriFirmati){ $sw += "-CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora [DA FIRMARE])" }
@@ -1442,92 +1464,92 @@ try{
   if($SoloCella -ne ""){ $sw += "-SoloCella " + $SoloCella + " (il 00_metro della sua famiglia e' girato lo stesso: e' il denominatore e porta il gate G0-C)" }
   if($Rifai){ $sw += "-Rifai (i CSV precedenti sono stati rifatti)" }
   if($sw.Count -eq 0){ $sw += "nessuno (corsa piena, ripresa dei CSV gia' presenti ATTIVA)" }
-  [void]$R.Add("switch di questo giro: " + ($sw -join " | "))
-  [void]$R.Add("     Senza -Rifai il driver generico SALTA le finestre gia' presenti. I file saltati")
-  [void]$R.Add("     sono marcati 'SALTATA DAL DRIVER' o 'A META'' e finiscono nei PROBLEMI, non in OK.")
-  [void]$R.Add("stato dei criteri: " + $Firma)
-  [void]$R.Add("data: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (questa data deve essere di ADESSO)")
-  [void]$R.Add("     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.")
-  [void]$R.Add("     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.")
-  [void]$R.Add("avvio: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   durata: " + ((New-TimeSpan -Start $Avvio -End (Get-Date)).TotalHours).ToString("0.0",$INV) + " ore")
-  [void]$R.Add("pin: " + $Pin)
-  [void]$R.Add("criteri: risultati_archivio\R110_CRITERI.md   perimetro: CENSIMENTO_LATI_SHORT_2026-08-25.md (tab. 1d, par. 5 punti 1-2)")
-  [void]$R.Add("finestra: " + $DaQuando + " -> " + $Fino + "   split 40/60   modello " + $Modello + " (tick reali)   deposito " + $Deposito)
-  [void]$R.Add("     IS  " + $IS_Da + " - " + $IS_A)
-  [void]$R.Add("     OOS " + $OOS_Da + " - " + $OOS_A)
-  [void]$R.Add("     (le stesse di R88, R97, R98, R101 e R107: e' l'unico modo di leggere R110 accanto a R107)")
-  [void]$R.Add("spread: Spread=" + $SpreadIni + " scritto NELL'INI = spread CORRENTE del feed BCM, dichiarato.")
-  [void]$R.Add("     NON e' uno stress di spread e NON e' una misura dello spread.")
-  [void]$R.Add("rischio: 1,00% nei file prova. IN CAMPO SUL 100K E' 0,65%.")
-  [void]$R.Add("     >>> OGNI DD DI QUESTO REFERTO E' ALL'1%. Per confrontarlo col forward del")
-  [void]$R.Add("     100k si MOLTIPLICA PER 0,65 (criteri par. 2.6). Chi salta la conversione")
-  [void]$R.Add("     confronta due cose diverse.")
-  [void]$R.Add("")
-  [void]$R.Add("--- CONVENZIONE DI SENTINELLA (checklist 66) ---")
-  [void]$R.Add("  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le")
-  [void]$R.Add("  colonne: profitto, PF, DD, n e peggior giornata. Un '0.000' su un PF sarebbe un")
-  [void]$R.Add("  numero PLAUSIBILE, e si leggerebbe 'ha perso tutto'.")
-  [void]$R.Add("")
-  [void]$R.Add("--- I GATE, E QUALE DI LORO PUO' MORDERE (criteri par. 5) ---")
-  [void]$R.Add("  G0-A  ANTENATO : ogni cella e' la copia riga per riga del file prova R103 di")
-  [void]$R.Add("                   quella sedia, salvo i delta DICHIARATI. Gira PRIMA di MT5.")
-  [void]$R.Add("  G0-B  NUMERICO : NON APPLICABILE su tutte e quattro le famiglie, e NON e'")
-  [void]$R.Add("                   'superato'. R103 e' l'unico posto coi numeri di queste sedie,")
-  [void]$R.Add("                   ma girava a MODELLO 1 (OHLC su M1) su UNA FINESTRA UNICA di")
-  [void]$R.Add("                   21 mesi; qui e' MODELLO 4 (tick reali) con lo split 40/60.")
-  [void]$R.Add("                   Due banchi, due finestre: non c'e' niente da riprodurre.")
-  [void]$R.Add("                   E che OHLC e tick reali NON diano lo stesso numero sugli")
-  [void]$R.Add("                   indici e' MISURATO: SupRev_DOW_H4 fece PF 2,77 in OHLC e")
-  [void]$R.Add("                   PF 0,79 a tick reali (revalidation 30/07, contratto REVOCATO).")
-  [void]$R.Add("  G0-C  GEMELLI  : le due righe del CSV identiche al centesimo. E' l'unico gate")
-  [void]$R.Add("                   NUMERICO del round: dimostra che il banco e' DETERMINISTICO,")
-  [void]$R.Add("                   non che e' giusto.")
+  [void]$RefTxt.Add("switch di questo giro: " + ($sw -join " | "))
+  [void]$RefTxt.Add("     Senza -Rifai il driver generico SALTA le finestre gia' presenti. I file saltati")
+  [void]$RefTxt.Add("     sono marcati 'SALTATA DAL DRIVER' o 'A META'' e finiscono nei PROBLEMI, non in OK.")
+  [void]$RefTxt.Add("stato dei criteri: " + $Firma)
+  [void]$RefTxt.Add("data: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (questa data deve essere di ADESSO)")
+  [void]$RefTxt.Add("     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.")
+  [void]$RefTxt.Add("     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.")
+  [void]$RefTxt.Add("avvio: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   durata: " + ((New-TimeSpan -Start $Avvio -End (Get-Date)).TotalHours).ToString("0.0",$INV) + " ore")
+  [void]$RefTxt.Add("pin: " + $Pin)
+  [void]$RefTxt.Add("criteri: risultati_archivio\R110_CRITERI.md   perimetro: CENSIMENTO_LATI_SHORT_2026-08-25.md (tab. 1d, par. 5 punti 1-2)")
+  [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "   split 40/60   modello " + $Modello + " (tick reali)   deposito " + $Deposito)
+  [void]$RefTxt.Add("     IS  " + $IS_Da + " - " + $IS_A)
+  [void]$RefTxt.Add("     OOS " + $OOS_Da + " - " + $OOS_A)
+  [void]$RefTxt.Add("     (le stesse di R88, R97, R98, R101 e R107: e' l'unico modo di leggere R110 accanto a R107)")
+  [void]$RefTxt.Add("spread: Spread=" + $SpreadIni + " scritto NELL'INI = spread CORRENTE del feed BCM, dichiarato.")
+  [void]$RefTxt.Add("     NON e' uno stress di spread e NON e' una misura dello spread.")
+  [void]$RefTxt.Add("rischio: 1,00% nei file prova. IN CAMPO SUL 100K E' 0,65%.")
+  [void]$RefTxt.Add("     >>> OGNI DD DI QUESTO REFERTO E' ALL'1%. Per confrontarlo col forward del")
+  [void]$RefTxt.Add("     100k si MOLTIPLICA PER 0,65 (criteri par. 2.6). Chi salta la conversione")
+  [void]$RefTxt.Add("     confronta due cose diverse.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- CONVENZIONE DI SENTINELLA (checklist 66) ---")
+  [void]$RefTxt.Add("  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le")
+  [void]$RefTxt.Add("  colonne: profitto, PF, DD, n e peggior giornata. Un '0.000' su un PF sarebbe un")
+  [void]$RefTxt.Add("  numero PLAUSIBILE, e si leggerebbe 'ha perso tutto'.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- I GATE, E QUALE DI LORO PUO' MORDERE (criteri par. 5) ---")
+  [void]$RefTxt.Add("  G0-A  ANTENATO : ogni cella e' la copia riga per riga del file prova R103 di")
+  [void]$RefTxt.Add("                   quella sedia, salvo i delta DICHIARATI. Gira PRIMA di MT5.")
+  [void]$RefTxt.Add("  G0-B  NUMERICO : NON APPLICABILE su tutte e quattro le famiglie, e NON e'")
+  [void]$RefTxt.Add("                   'superato'. R103 e' l'unico posto coi numeri di queste sedie,")
+  [void]$RefTxt.Add("                   ma girava a MODELLO 1 (OHLC su M1) su UNA FINESTRA UNICA di")
+  [void]$RefTxt.Add("                   21 mesi; qui e' MODELLO 4 (tick reali) con lo split 40/60.")
+  [void]$RefTxt.Add("                   Due banchi, due finestre: non c'e' niente da riprodurre.")
+  [void]$RefTxt.Add("                   E che OHLC e tick reali NON diano lo stesso numero sugli")
+  [void]$RefTxt.Add("                   indici e' MISURATO: SupRev_DOW_H4 fece PF 2,77 in OHLC e")
+  [void]$RefTxt.Add("                   PF 0,79 a tick reali (revalidation 30/07, contratto REVOCATO).")
+  [void]$RefTxt.Add("  G0-C  GEMELLI  : le due righe del CSV identiche al centesimo. E' l'unico gate")
+  [void]$RefTxt.Add("                   NUMERICO del round: dimostra che il banco e' DETERMINISTICO,")
+  [void]$RefTxt.Add("                   non che e' giusto.")
   foreach($fam in $FamLavoro){
-    [void]$R.Add("")
-    [void]$R.Add("  " + $fam.Id + " (" + $fam.Ea + " / " + $fam.Sym + " " + $fam.Per + ", sedia viva " + $fam.MagicVivo + ", sorgente " + $fam.MagicSrc + ")")
-    [void]$R.Add("     antenato         : prove\" + $fam.Antenato)
-    [void]$R.Add("     G0-A             : " + $fam.Antenati)
-    [void]$R.Add("     numero R103      : " + $fam.R103)
-    [void]$R.Add("                        ^^^ CONTESTO DICHIARATO, NON UN METRO (G0-B).")
-    [void]$R.Add("     metro misurato   : PF " + (Fmt3 $fam.PfOOS) + " | DD " + (Fmt2 $fam.DdOOS) + "% | n " + (FmtN $fam.NOOS) + "   (OOS, tick reali)")
-    [void]$R.Add("     gemelli (G0-C)   : " + $fam.Gemelli)
-    [void]$R.Add("     VERDETTO         : " + $fam.Metro)
-    [void]$R.Add("     CANARINO         : n IS " + (FmtN $fam.NIS) + " / n OOS " + (FmtN $fam.NOOS) + "   (NON e' un gate - Emendamento regola B)")
-    [void]$R.Add("     nota             : " + $fam.Nota)
+    [void]$RefTxt.Add("")
+    [void]$RefTxt.Add("  " + $fam.Id + " (" + $fam.Ea + " / " + $fam.Sym + " " + $fam.Per + ", sedia viva " + $fam.MagicVivo + ", sorgente " + $fam.MagicSrc + ")")
+    [void]$RefTxt.Add("     antenato         : prove\" + $fam.Antenato)
+    [void]$RefTxt.Add("     G0-A             : " + $fam.Antenati)
+    [void]$RefTxt.Add("     numero R103      : " + $fam.R103)
+    [void]$RefTxt.Add("                        ^^^ CONTESTO DICHIARATO, NON UN METRO (G0-B).")
+    [void]$RefTxt.Add("     metro misurato   : PF " + (Fmt3 $fam.PfOOS) + " | DD " + (Fmt2 $fam.DdOOS) + "% | n " + (FmtN $fam.NOOS) + "   (OOS, tick reali)")
+    [void]$RefTxt.Add("     gemelli (G0-C)   : " + $fam.Gemelli)
+    [void]$RefTxt.Add("     VERDETTO         : " + $fam.Metro)
+    [void]$RefTxt.Add("     CANARINO         : n IS " + (FmtN $fam.NIS) + " / n OOS " + (FmtN $fam.NOOS) + "   (NON e' un gate - Emendamento regola B)")
+    [void]$RefTxt.Add("     nota             : " + $fam.Nota)
   }
-  [void]$R.Add("")
-  [void]$R.Add("  NOTA: 'NON MISURATO' NON e' 'va bene', e 'NON APPLICABILE' NON e' 'superato'.")
-  [void]$R.Add("  Se i gemelli di una famiglia non sono identici, le sue celle dei lati non sono")
-  [void]$R.Add("  state nemmeno lanciate -- e le altre famiglie sono andate avanti (decisione D5).")
-  [void]$R.Add("")
-  [void]$R.Add("--- LA TABELLA MADRE ---   (attese: " + $CelleAttese + " righe per CSV, " + (2*$Lavori.Count) + " CSV, " + (4*$Lavori.Count) + " passate)")
-  [void]$R.Add("  IS e OOS accanto, perche' su un round sui LATI la differenza fra le due finestre")
-  [void]$R.Add("  E' il risultato (vedi LA SPINA DORSALE in fondo). dPF e dDD sono il DELTA OOS")
-  [void]$R.Add("  contro il 00_metro della stessa famiglia -- cioe' contro LA SEDIA, non contro")
-  [void]$R.Add("  l'altro lato.")
-  [void]$R.Add(("  {0,-7} {1,-9} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-7} {9,-6} {10,-8} {11,-7} {12,-8} {13}" -f `
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("  NOTA: 'NON MISURATO' NON e' 'va bene', e 'NON APPLICABILE' NON e' 'superato'.")
+  [void]$RefTxt.Add("  Se i gemelli di una famiglia non sono identici, le sue celle dei lati non sono")
+  [void]$RefTxt.Add("  state nemmeno lanciate -- e le altre famiglie sono andate avanti (decisione D5).")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA TABELLA MADRE ---   (attese: " + $CelleAttese + " righe per CSV, " + (2*$Lavori.Count) + " CSV, " + (4*$Lavori.Count) + " passate)")
+  [void]$RefTxt.Add("  IS e OOS accanto, perche' su un round sui LATI la differenza fra le due finestre")
+  [void]$RefTxt.Add("  E' il risultato (vedi LA SPINA DORSALE in fondo). dPF e dDD sono il DELTA OOS")
+  [void]$RefTxt.Add("  contro il 00_metro della stessa famiglia -- cioe' contro LA SEDIA, non contro")
+  [void]$RefTxt.Add("  l'altro lato.")
+  [void]$RefTxt.Add(("  {0,-7} {1,-9} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-7} {9,-6} {10,-8} {11,-7} {12,-8} {13}" -f `
                 "FAM","CELLA","ISprof","ISpf","ISdd","ISn","OOSprof","OOSpf","OOSdd","OOSn","dPF","dDD%","PeggGio%","ESITO"))
   foreach($fam in $FamLavoro){
     foreach($c in @($Ordinati | Where-Object { $_.Fam -eq $fam.Id })){
       $dpf = "n/d"; $ddd = "n/d"
       if([double]$c.PfOOS -ge 0 -and [double]$fam.PfOOS -ge 0){ $dpf = ([double]$c.PfOOS - [double]$fam.PfOOS).ToString("+0.000;-0.000;0.000",$INV) }
       if([double]$c.DdOOS -ge 0 -and [double]$fam.DdOOS -ge 0){ $ddd = ([double]$c.DdOOS - [double]$fam.DdOOS).ToString("+0.00;-0.00;0.00",$INV) }
-      [void]$R.Add(("  {0,-7} {1,-9} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-7} {9,-6} {10,-8} {11,-7} {12,-8} {13}" -f `
+      [void]$RefTxt.Add(("  {0,-7} {1,-9} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-7} {9,-6} {10,-8} {11,-7} {12,-8} {13}" -f `
                     $c.Fam,$c.Id,(FmtE $c.ProfIS),(Fmt3 $c.PfIS),(Fmt2 $c.DdIS),(FmtN $c.NIS),
                     (FmtE $c.ProfOOS),(Fmt3 $c.PfOOS),(Fmt2 $c.DdOOS),(FmtN $c.NOOS),
                     $dpf,$ddd,(FmtPg $c.PgOOS),$c.Esito))
     }
   }
-  [void]$R.Add("")
-  [void]$R.Add("--- LA SOMMA DEI LATI: PERCHE' NON TORNA, E NON E' UN DIFETTO ---")
-  [void]$R.Add("  MISURATO NEL SORGENTE, non dedotto: tutti e quattro i motori aprono la funzione")
-  [void]$R.Add("  di ingresso con 'se ho gia' una posizione (o un pendente) esco', e SOLO DOPO")
-  [void]$R.Add("  guardano il lato. Nel 00_metro un segnale short che arriva mentre e' aperta una")
-  [void]$R.Add("  posizione LONG viene buttato via; nella cella 02_short quello slot e' libero e")
-  [void]$R.Add("  quel segnale ENTRA.")
-  [void]$R.Add("  >>> n(01_long) + n(02_short) NON deve fare n(00_metro). Chi lo pretende sta")
-  [void]$R.Add("      leggendo il banco, non il motore. E il corollario che conta per il verdetto:")
-  [void]$R.Add("      IL LATO LONG DA SOLO NON E' LA SEDIA VIVA, e nemmeno il lato short.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA SOMMA DEI LATI: PERCHE' NON TORNA, E NON E' UN DIFETTO ---")
+  [void]$RefTxt.Add("  MISURATO NEL SORGENTE, non dedotto: tutti e quattro i motori aprono la funzione")
+  [void]$RefTxt.Add("  di ingresso con 'se ho gia' una posizione (o un pendente) esco', e SOLO DOPO")
+  [void]$RefTxt.Add("  guardano il lato. Nel 00_metro un segnale short che arriva mentre e' aperta una")
+  [void]$RefTxt.Add("  posizione LONG viene buttato via; nella cella 02_short quello slot e' libero e")
+  [void]$RefTxt.Add("  quel segnale ENTRA.")
+  [void]$RefTxt.Add("  >>> n(01_long) + n(02_short) NON deve fare n(00_metro). Chi lo pretende sta")
+  [void]$RefTxt.Add("      leggendo il banco, non il motore. E il corollario che conta per il verdetto:")
+  [void]$RefTxt.Add("      IL LATO LONG DA SOLO NON E' LA SEDIA VIVA, e nemmeno il lato short.")
   foreach($fam in $FamLavoro){
     $cm = @($Ordinati | Where-Object { $_.Fam -eq $fam.Id -and $_.Metro })
     $cl = @($Ordinati | Where-Object { $_.Fam -eq $fam.Id -and $_.Id -eq "01_long" })
@@ -1535,108 +1557,108 @@ try{
     $nm = $(if($cm.Count -eq 1){ FmtN $cm[0].NOOS } else { "n/d" })
     $nl = $(if($cl.Count -eq 1){ FmtN $cl[0].NOOS } else { "n/d" })
     $ns = $(if($cs.Count -eq 1){ FmtN $cs[0].NOOS } else { "n/d" })
-    [void]$R.Add(("  {0,-7} OOS:  metro n {1,-6} long n {2,-6} short n {3,-6}" -f $fam.Id,$nm,$nl,$ns))
+    [void]$RefTxt.Add(("  {0,-7} OOS:  metro n {1,-6} long n {2,-6} short n {3,-6}" -f $fam.Id,$nm,$nl,$ns))
   }
-  [void]$R.Add("")
-  [void]$R.Add("--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---")
   foreach($c in $Ordinati){
     $dd2 = $(if(@($c.Diff).Count -eq 0){ "(niente: e' la cella VIVA tale e quale)" } else { ($c.Diff -join " + ") })
     $lati = "InpAllowLong=" + $c.Val["InpAllowLong"] + " / InpAllowShort=" + $c.Val["InpAllowShort"]
-    [void]$R.Add(("  {0,-7} {1,-9} magic {2}/{3}   {4}   muove: {5}" -f $c.Fam,$c.Id,$c.Magic,($c.Magic+1),$lati,$dd2))
-    [void]$R.Add("       " + $c.Desc)
-    [void]$R.Add("       G0-A: " + $c.Antenato)
+    [void]$RefTxt.Add(("  {0,-7} {1,-9} magic {2}/{3}   {4}   muove: {5}" -f $c.Fam,$c.Id,$c.Magic,($c.Magic+1),$lati,$dd2))
+    [void]$RefTxt.Add("       " + $c.Desc)
+    [void]$RefTxt.Add("       G0-A: " + $c.Antenato)
   }
-  [void]$R.Add("")
-  [void]$R.Add("--- LA SPINA DORSALE: DOVE STANNO LE DISCESE (criteri par. 4.2) ---")
-  [void]$R.Add("  FATTO DI CALENDARIO: la discesa documentata dentro questa finestra e' la")
-  [void]$R.Add("  correzione di FEBBRAIO-APRILE 2025, e cade DENTRO L'IS (l'IS finisce il")
-  [void]$R.Add("  " + $IS_A + "). L'OOS e' quasi tutto salita.")
-  [void]$R.Add("  >>> COME SI LEGGE UNO SHORT VERDE IN IS E ROSSO IN OOS: la prima ipotesi NON e'")
-  [void]$R.Add("      'il lato e' rumore', e' che L'EDGE DELLO SHORT VIVA NELLE DISCESE e che l'IS")
-  [void]$R.Add("      ne contenga una mentre l'OOS quasi no.")
-  [void]$R.Add("  >>> E C'E' UN FATTO NUOVO CHE PUNTA LI', ED E' DI IERI: R107 ha misurato il NAS")
-  [void]$R.Add("      short a PF IS 3,220 e PF OOS 0,460 -- l'IS con la discesa dentro, l'OOS")
-  [void]$R.Add("      senza. E' il segnale piu' forte che l'archivio abbia su questa ipotesi.")
-  [void]$R.Add("  >>> [INFERITO], E RESTA [INFERITO]: questo round NON misura i sotto-periodi.")
-  [void]$R.Add("      Non sa quanto del profitto IS venga da febbraio-aprile, e NON sa se l'OOS")
-  [void]$R.Add("      contenga discese di ampiezza paragonabile. Non lo assuma nessuno.")
-  [void]$R.Add("      La misura vera e' un round di PROVA DI REGIME fatto apposta -- che oggi e'")
-  [void]$R.Add("      BLOCCATO dal frigo dei dati esterni sugli indici.")
-  [void]$R.Add("")
-  [void]$R.Add("--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---")
-  [void]$R.Add("  * NON APPLICA I CANCELLI. G1 (n>=30), G2 (PF OOS >= 1,10 E positivo in IS),")
-  [void]$R.Add("    G3 (coerenza cross-motore) e G4 (campione) li applica il REFERTO DEL ROUND,")
-  [void]$R.Add("    a mano, sopra questa tabella. Qui ci sono i numeri, non i verdetti.")
-  [void]$R.Add("  * G3 in particolare NON e' meccanizzabile qui: e' il confronto fra QUATTRO")
-  [void]$R.Add("    tabelle, su tre mercati e due logiche diverse. Ed e' il cancello che in R46")
-  [void]$R.Add("    fermo' un candidato che faceva +31%.")
-  [void]$R.Add("  * NON RIPRODUCE R103 e non pretende di farlo (G0-B). I numeri R103 in questo")
-  [void]$R.Add("    referto sono CONTESTO, e sono di un altro banco.")
-  [void]$R.Add("  * SE UN 01_long PASSA G2 E IL SUO 02_short E' ROSSO, la lettura NON e' 'lo short")
-  [void]$R.Add("    non serve': e' 'questa sedia POTREBBE essere long-only', che e' una PROPOSTA")
-  [void]$R.Add("    DI MODIFICA DI CONTRATTO -- cioe' un round successivo con la sua firma")
-  [void]$R.Add("    (regola R52: non si spegne un lato guardando i risultati).")
-  [void]$R.Add("  * NON PROMUOVE NIENTE (G5). Tutte e QUATTRO le sedie stanno sul conto 100k: un")
-  [void]$R.Add("    cambio al forward e' una firma successiva, con il suo referto.")
-  [void]$R.Add("  * NON misura lo spread, non misura i sotto-periodi, non fa la prova di regime.")
-  [void]$R.Add("  * NON ESTENDE NIENTE agli altri CINQUE motori simmetrici mai smontati del")
-  [void]$R.Add("    censimento (PTE Dow, PunteLarry, GapFill, SuperWave H2, SupRev Nikkei):")
-  [void]$R.Add("    restano NON MISURATI, e vanno detti tali.")
-  [void]$R.Add("  * LA FINESTRA E' UN SOLO REGIME (21 mesi di indici che salgono) e IL LATO SHORT")
-  [void]$R.Add("    PARTE SVANTAGGIATO PER REGIME. Un 'niente edge short' qui NON chiude la")
-  [void]$R.Add("    domanda per sempre: la chiude PER QUESTA EPOCA e per questi quattro motori.")
-  [void]$R.Add("")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA SPINA DORSALE: DOVE STANNO LE DISCESE (criteri par. 4.2) ---")
+  [void]$RefTxt.Add("  FATTO DI CALENDARIO: la discesa documentata dentro questa finestra e' la")
+  [void]$RefTxt.Add("  correzione di FEBBRAIO-APRILE 2025, e cade DENTRO L'IS (l'IS finisce il")
+  [void]$RefTxt.Add("  " + $IS_A + "). L'OOS e' quasi tutto salita.")
+  [void]$RefTxt.Add("  >>> COME SI LEGGE UNO SHORT VERDE IN IS E ROSSO IN OOS: la prima ipotesi NON e'")
+  [void]$RefTxt.Add("      'il lato e' rumore', e' che L'EDGE DELLO SHORT VIVA NELLE DISCESE e che l'IS")
+  [void]$RefTxt.Add("      ne contenga una mentre l'OOS quasi no.")
+  [void]$RefTxt.Add("  >>> E C'E' UN FATTO NUOVO CHE PUNTA LI', ED E' DI IERI: R107 ha misurato il NAS")
+  [void]$RefTxt.Add("      short a PF IS 3,220 e PF OOS 0,460 -- l'IS con la discesa dentro, l'OOS")
+  [void]$RefTxt.Add("      senza. E' il segnale piu' forte che l'archivio abbia su questa ipotesi.")
+  [void]$RefTxt.Add("  >>> [INFERITO], E RESTA [INFERITO]: questo round NON misura i sotto-periodi.")
+  [void]$RefTxt.Add("      Non sa quanto del profitto IS venga da febbraio-aprile, e NON sa se l'OOS")
+  [void]$RefTxt.Add("      contenga discese di ampiezza paragonabile. Non lo assuma nessuno.")
+  [void]$RefTxt.Add("      La misura vera e' un round di PROVA DI REGIME fatto apposta -- che oggi e'")
+  [void]$RefTxt.Add("      BLOCCATO dal frigo dei dati esterni sugli indici.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---")
+  [void]$RefTxt.Add("  * NON APPLICA I CANCELLI. G1 (n>=30), G2 (PF OOS >= 1,10 E positivo in IS),")
+  [void]$RefTxt.Add("    G3 (coerenza cross-motore) e G4 (campione) li applica il REFERTO DEL ROUND,")
+  [void]$RefTxt.Add("    a mano, sopra questa tabella. Qui ci sono i numeri, non i verdetti.")
+  [void]$RefTxt.Add("  * G3 in particolare NON e' meccanizzabile qui: e' il confronto fra QUATTRO")
+  [void]$RefTxt.Add("    tabelle, su tre mercati e due logiche diverse. Ed e' il cancello che in R46")
+  [void]$RefTxt.Add("    fermo' un candidato che faceva +31%.")
+  [void]$RefTxt.Add("  * NON RIPRODUCE R103 e non pretende di farlo (G0-B). I numeri R103 in questo")
+  [void]$RefTxt.Add("    referto sono CONTESTO, e sono di un altro banco.")
+  [void]$RefTxt.Add("  * SE UN 01_long PASSA G2 E IL SUO 02_short E' ROSSO, la lettura NON e' 'lo short")
+  [void]$RefTxt.Add("    non serve': e' 'questa sedia POTREBBE essere long-only', che e' una PROPOSTA")
+  [void]$RefTxt.Add("    DI MODIFICA DI CONTRATTO -- cioe' un round successivo con la sua firma")
+  [void]$RefTxt.Add("    (regola R52: non si spegne un lato guardando i risultati).")
+  [void]$RefTxt.Add("  * NON PROMUOVE NIENTE (G5). Tutte e QUATTRO le sedie stanno sul conto 100k: un")
+  [void]$RefTxt.Add("    cambio al forward e' una firma successiva, con il suo referto.")
+  [void]$RefTxt.Add("  * NON misura lo spread, non misura i sotto-periodi, non fa la prova di regime.")
+  [void]$RefTxt.Add("  * NON ESTENDE NIENTE agli altri CINQUE motori simmetrici mai smontati del")
+  [void]$RefTxt.Add("    censimento (PTE Dow, PunteLarry, GapFill, SuperWave H2, SupRev Nikkei):")
+  [void]$RefTxt.Add("    restano NON MISURATI, e vanno detti tali.")
+  [void]$RefTxt.Add("  * LA FINESTRA E' UN SOLO REGIME (21 mesi di indici che salgono) e IL LATO SHORT")
+  [void]$RefTxt.Add("    PARTE SVANTAGGIATO PER REGIME. Un 'niente edge short' qui NON chiude la")
+  [void]$RefTxt.Add("    domanda per sempre: la chiude PER QUESTA EPOCA e per questi quattro motori.")
+  [void]$RefTxt.Add("")
   if($Rilievi.Count -gt 0){
-    [void]$R.Add("--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (" + $Rilievi.Count + ")")
-    foreach($n in $Rilievi){ [void]$R.Add("  - " + $n) }
-    [void]$R.Add("")
+    [void]$RefTxt.Add("--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (" + $Rilievi.Count + ")")
+    foreach($n in $Rilievi){ [void]$RefTxt.Add("  - " + $n) }
+    [void]$RefTxt.Add("")
   }
-  [void]$R.Add("--- PROBLEMI (questi SI sono guasti) ---   (" + $Problemi.Count + ")")
-  if($Problemi.Count -eq 0){ [void]$R.Add("  nessuno.") }
-  foreach($p in $Problemi){ [void]$R.Add("  - " + $p) }
+  [void]$RefTxt.Add("--- PROBLEMI (questi SI sono guasti) ---   (" + $Problemi.Count + ")")
+  if($Problemi.Count -eq 0){ [void]$RefTxt.Add("  nessuno.") }
+  foreach($p in $Problemi){ [void]$RefTxt.Add("  - " + $p) }
   if($Fatale -ne ""){
-    [void]$R.Add("")
-    [void]$R.Add("--- FERMATO ---")
-    [void]$R.Add("  " + $Fatale)
+    [void]$RefTxt.Add("")
+    [void]$RefTxt.Add("--- FERMATO ---")
+    [void]$RefTxt.Add("  " + $Fatale)
   }
-  [void]$R.Add("")
+  [void]$RefTxt.Add("")
   # --- L'ESITO SCRITTO NEL REFERTO DICE LE STESSE PAROLE DELLO SCHERMO.
   #     E DISTINGUE 'PARZIALE' da 'COMPLETO CON RILIEVI'.
   $koR = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -ne "SOLO CONTROLLO" })
   if($Fatale -ne ""){
-    [void]$R.Add("ESITO: FERMATO -- " + $Fatale)
+    [void]$RefTxt.Add("ESITO: FERMATO -- " + $Fatale)
   }
   elseif($SoloControllo){
     if($koR.Count -gt 0 -or $Problemi.Count -gt 0){
-      [void]$R.Add("ESITO: GIRO A VUOTO CON PROBLEMI (" + $Problemi.Count + ") -- NESSUNA passata. NON lanciare la corsa vera prima di aver letto i PROBLEMI.")
+      [void]$RefTxt.Add("ESITO: GIRO A VUOTO CON PROBLEMI (" + $Problemi.Count + ") -- NESSUNA passata. NON lanciare la corsa vera prima di aver letto i PROBLEMI.")
     } else {
-      [void]$R.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN numero. QUESTO ZIP NON E' IL ROUND.")
+      [void]$RefTxt.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN numero. QUESTO ZIP NON E' IL ROUND.")
     }
   }
   elseif($koR.Count -gt 0){
-    [void]$R.Add("ESITO: PARZIALE -- " + $koR.Count + " celle su " + $Ordinati.Count + " NON hanno prodotto i numeri (elenco qui sopra), piu' " + $Problemi.Count + " problemi. NON e' un round completo.")
+    [void]$RefTxt.Add("ESITO: PARZIALE -- " + $koR.Count + " celle su " + $Ordinati.Count + " NON hanno prodotto i numeri (elenco qui sopra), piu' " + $Problemi.Count + " problemi. NON e' un round completo.")
   }
   elseif($Problemi.Count -gt 0){
-    [void]$R.Add("ESITO: COMPLETO CON PROBLEMI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi, ma ci sono " + $Problemi.Count + " problemi. I numeri ci sono: si leggono ACCANTO ai problemi, non invece dei problemi.")
+    [void]$RefTxt.Add("ESITO: COMPLETO CON PROBLEMI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi, ma ci sono " + $Problemi.Count + " problemi. I numeri ci sono: si leggono ACCANTO ai problemi, non invece dei problemi.")
   }
   elseif($Rilievi.Count -gt 0){
-    [void]$R.Add("ESITO: COMPLETO CON RILIEVI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi. I " + $Rilievi.Count + " rilievi sono RISULTATI del round (canarino, G1 non misurabile, G0-B non applicabile, somma dei lati), non guasti.")
+    [void]$RefTxt.Add("ESITO: COMPLETO CON RILIEVI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi. I " + $Rilievi.Count + " rilievi sono RISULTATI del round (canarino, G1 non misurabile, G0-B non applicabile, somma dei lati), non guasti.")
   }
   else{
-    [void]$R.Add("ESITO: OK -- tutte le celle hanno prodotto i numeri attesi, nessun problema e nessun rilievo in elenco.")
+    [void]$RefTxt.Add("ESITO: OK -- tutte le celle hanno prodotto i numeri attesi, nessun problema e nessun rilievo in elenco.")
   }
-  [void]$R.Add("")
-  [void]$R.Add("--- COME SI RIPRENDE ---")
-  [void]$R.Add('  una famiglia sola  : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa ''EMADOW''')
-  [void]$R.Add('  due famiglie       : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa ''SWDOW,EMADOW''   <-- FRA APICI (checklist 65)')
-  [void]$R.Add('  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella R110_EMADOW_02_short.txt')
-  [void]$R.Add("  >>> in tutti i casi il 00_metro della famiglia rigira: e' il denominatore e")
-  [void]$R.Add("      porta il gate G0-C. Costa 2 CSV, non una passata sprecata.")
-  [void]$R.Add("  >>> e i tre puntini stanno per IL BLOCCO INTERO della riga di lancio, con il")
-  [void]$R.Add("      suo irm e la sua guardia: si riprende da RIGA_R110_DA_MANDARE.md.")
-  [void]$R.Add("  rifare cio' che c'e' gia' : aggiungi -Rifai")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- COME SI RIPRENDE ---")
+  [void]$RefTxt.Add('  una famiglia sola  : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa ''EMADOW''')
+  [void]$RefTxt.Add('  due famiglie       : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa ''SWDOW,EMADOW''   <-- FRA APICI (checklist 65)')
+  [void]$RefTxt.Add('  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella R110_EMADOW_02_short.txt')
+  [void]$RefTxt.Add("  >>> in tutti i casi il 00_metro della famiglia rigira: e' il denominatore e")
+  [void]$RefTxt.Add("      porta il gate G0-C. Costa 2 CSV, non una passata sprecata.")
+  [void]$RefTxt.Add("  >>> e i tre puntini stanno per IL BLOCCO INTERO della riga di lancio, con il")
+  [void]$RefTxt.Add("      suo irm e la sua guardia: si riprende da RIGA_R110_DA_MANDARE.md.")
+  [void]$RefTxt.Add("  rifare cio' che c'e' gia' : aggiungi -Rifai")
 
-  Set-Content -LiteralPath $Referto -Value ($R -join "`r`n") -Encoding UTF8
+  Set-Content -LiteralPath $Referto -Value ($RefTxt -join "`r`n") -Encoding UTF8
   if(Test-Path -LiteralPath $Zip){ Remove-Item -LiteralPath $Zip -Force -ErrorAction SilentlyContinue }
   Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $Zip -Force
 }catch{

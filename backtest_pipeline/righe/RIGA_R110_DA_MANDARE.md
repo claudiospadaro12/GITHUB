@@ -390,7 +390,32 @@ Cartella e zip sul Desktop: `R110_LATI_VIVI_<MODO>_<data>_<ora>` — dentro:
 Checklist punto **63** (_"il parse si FA, non si dichiara impossibile"_):
 
 - ✅ il `.ps1` **parsa**: `/opt/pwsh/pwsh` + `[Parser]::ParseFile` → **0 errori**,
-  **13.884 token**; **ASCII puro** (0 caratteri non-ASCII, regola del 17/08);
+  **13.973 token**; **ASCII puro** (0 caratteri non-ASCII, regola del 17/08);
+- ✅ **l'audit del punto 79 (variabili CASE-INSENSITIVE) è stato FATTO su questo
+  file, ed è servito**: estratti tutti i nomi di variabile del **codice** (senza
+  commenti) e confrontati in minuscolo, è saltata fuori **la stessa coppia del
+  difetto gemello di R109** — `$R` (l'ArrayList del referto) contro `$r` (la
+  variabile di tre cicli). Oggi era innocua **solo per ordine delle istruzioni**,
+  che è esattamente la fragilità che ha fatto danno in R109: **rinominata in
+  `$RefTxt`** (151 occorrenze). Ri-audit sul codice: **zero collisioni**;
+- ✅ **e da lì è nato il gate che a R109 mancava — LA FINESTRA SI RICONTROLLA UN
+  ISTANTE PRIMA DI PASSARLA.** In R109 `$A` (il `ToDate`) era stato distrutto da
+  un `$a` di comodo e il giro a vuoto uscì **`ESITO: OK`, codice 0**, perché
+  *nessun gate guardava le date* — che sono metà di quello che un backtest
+  misura. **Riprodotto qui** iniettando `$daquando` minuscolo prima della catena:
+  il gate si ferma e stampa
+  `DaQuando=[InpUsaGuardian=true||true||0||true||N InpTF=16385]`, cioè **lo
+  stesso identico sintomo** (l'array unito dagli spazi);
+- ✅ **il punto 76 (il `$` dentro apici doppi che mostra codice)**: la coda
+  `COME SI RIPRENDE` del referto è scritta in **apici singoli**, verificato con
+  il grep prescritto **e leggendo il referto prodotto**;
+- 🔍 **e un secondo difetto vero trovato leggendo il referto vero** (non
+  rileggendo il sorgente): l'esito di cella scriveva
+  `RIGHE SBAGLIATE (IS -1 / OOS -1)` — il sentinella `-1` **crudo dentro una
+  frase**, che si legge *"meno una riga"* e non vuol dire niente. È il difetto 66
+  applicato alle **frasi** invece che alle colonne. Corretto: ora dice
+  `(IS n/d / OOS n/d ... 'n/d' = il CSV non e' stato prodotto)`, e il referto è
+  stato riletto per intero: **nessun `-1` crudo da nessuna parte**;
 - ✅ **`[CmdletBinding()]` c'è ed è PROVATO** (checklist 71, il difetto di
   famiglia trovato su R108): lanciato con **`-SoloControlo`** (una L sola), lo
   script **muore** con *"A parameter cannot be found that matches parameter name
