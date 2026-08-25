@@ -65,12 +65,18 @@
 #  COSA FA, in ordine, e DA SOLA:
 #    0.     si rifiuta di partire se MT5 O MetaEditor sono aperti
 #    0-bis. si rifiuta di CORRERE se i criteri non sono firmati
-#    1.     scarica AL PIN: i 6 file prova, il sorgente .mq5, l'include
-#           ABTG_PausaGuardian.mqh e (se c'e') la misura dei TICK
+#    1.     scarica AL PIN: i 6 file prova, i 3 ANTENATI R103, il sorgente
+#           .mq5, l'include ABTG_PausaGuardian.mqh e (se c'e') la misura
+#           dei TICK
 #           - GATE DI VERSIONE sul .mq5 (marcatore preso DAL SORGENTE)
 #           - GATE DELLE RIGHE VIVE (70 per file, MISURATE il 25/08)
 #           - GATE DELLA STELLA: la cella M15 differisce dalla sua cella
 #             metro ESATTAMENTE su InpTF (+ InpMagic), e su nient'altro
+#           - GATE DELL'ANTENATO: la cella METRO e' identica al file prova
+#             di R103 da cui e' copiata, salvo InpMagic/InpComment/
+#             InpNewsCurrencies. E' il gate che vede la corruzione
+#             SIMMETRICA (la stessa riga storta in ENTRAMBE le celle di un
+#             simbolo), che la stella per costruzione non puo' vedere.
 #           - GATE DEI VALORI: InpTF 16385/15 e InpPatternMode VIVO
 #           - GATE DELL'ASSE UNICO: un solo flag Y, ed e' InpMagic
 #           - GATE DEI MAGIC: unici, vergini, mai un magic vivo
@@ -133,6 +139,17 @@
 #      nessun PF, nessun DD, nessun G0 e NESSUN S0. Sta scritto anche
 #      nel suo referto, perche' non lo si scambi per il round.
 # =====================================================================
+# >>> [CmdletBinding()] NON E' DECORAZIONE, ED E' MISURATO (25/08, verifica
+#     di R108). Un .ps1 con il solo `param()` NON RIFIUTA i parametri che
+#     non conosce: li infila in $args e TIRA DRITTO, in silenzio.
+#     Riprodotto: `& $p -Pin X -Riprendi` su uno script che non ha
+#     -Riprendi stampa "args=[-Riprendi]" e prosegue, uscita 0.
+#     Conseguenza per QUESTA riga: un `-SoloControlo` con una L sola non e'
+#     un giro a vuoto, e' LA CORSA VERA -- 18 passate a tick reali su 4 anni
+#     di M15, avviate credendo di fare il controllo da un minuto. Con
+#     [CmdletBinding()] lo stesso refuso e' un errore di binding e lo script
+#     muore PRIMA di aprire MT5.
+[CmdletBinding()]
 param(
   # -Pin NON ha default: un default silenzioso ("lavoro") farebbe girare la
   #  punta del branch spacciandola per un commit congelato. Meglio morire.
@@ -141,11 +158,15 @@ param(
   [switch]$SoloControllo,          # giro a vuoto: NON apre MT5
   [switch]$CriteriFirmati,         # >>> lo preme CLAUDIO, non l'agente. Senza,
                                    #     la corsa vera non parte (exit 2).
-  [switch]$Riprendi,               # salta i lanci il cui artefatto c'e' gia'.
-                                   #  DEFAULT SPENTO: senza, ogni lancio e' di
-                                   #  ADESSO e la classe "artefatto stantio"
-                                   #  non esiste proprio (checklist 23 e 53).
-                                   #  Ogni lancio saltato finisce nei PROBLEMI.
+  # >>> NON ESISTE NESSUN -Riprendi, ed e' una scelta scritta (verifica del
+  #     25/08): la v1 lo dichiarava fra i parametri con il commento "salta i
+  #     lanci il cui artefatto c'e' gia'" e POI NON LO CONSULTAVA MAI. Un
+  #     interruttore documentato che non fa niente e' la guardia decorativa
+  #     del punto 14 applicata alla RIPRESA: chi lo passa dopo una corsa
+  #     interrotta crede di riprendere e RIFA' TUTTO da capo (18 passate a
+  #     tick reali). Tolto: chi lo scrive adesso prende un errore di binding
+  #     e muore subito. La ripresa VERA, implementata e provata, e'
+  #     -SoloSimbolo / -SoloCella.
   [switch]$ScreenOhlcM15,          # screen VELOCE: le celle M15 girano a
                                    #  MODELLO 1 (OHLC M1) invece che a tick
                                    #  reali. In questo modo il round NON
@@ -260,6 +281,26 @@ $SIMBOLI = @(
 )
 
 # ---------------------------------------------------------------------
+#  GLI ANTENATI R103: i file prova da cui ogni cella METRO e' stata
+#  COPIATA riga per riga. Servono al gate 1a-bis.
+#  >>> costruiti chiave per chiave e NON con un hashtable letterale
+#      multilinea: e' la classe di difetto 63 (una virgola a fine riga e
+#      lo script non PARSA, e nessuna guardia interna la intercetta).
+# ---------------------------------------------------------------------
+$AntenatoR103 = @{}
+$AntenatoR103["GBPUSD"] = "R103_ABTG_BreakingBand_GBPUSD_772161.txt"
+$AntenatoR103["EURUSD"] = "R103_ABTG_BreakingBand_EURUSD_772162.txt"
+$AntenatoR103["AUDUSD"] = "R103_ABTG_BreakingBand_AUDUSD_772163.txt"
+#  I SOLI delta ammessi fra la cella METRO e il suo antenato. Ognuno e'
+#  dichiarato nella testa dei file prova, e ognuno e' INERTE sui numeri:
+#   - InpMagic         : serie vergine 762xxx (identita' del lancio)
+#   - InpComment       : usato SOLO per comporre il commento dell'ordine
+#   - InpNewsCurrencies: riga TOLTA; con InpUseNewsFilter=false il filtro
+#                        non gira proprio (MISURATO nel sorgente, righe
+#                        1491-1496: `if(!InpUseNewsFilter||...) return`)
+$DeltaAmmessiR103 = @("InpMagic","InpComment","InpNewsCurrencies")
+
+# ---------------------------------------------------------------------
 #  LE CELLE. 'Val' = i valori che questo file DEVE avere: il gate della
 #  stella dice CHE COSA cambia, questo dice CHE COSA VALE. Se i due file
 #  di un simbolo fossero SCAMBIATI, la stella resterebbe verde e questo
@@ -282,8 +323,8 @@ function C([string]$sym,[string]$id,[string]$file,[string]$desc,[bool]$metro,
     # --- gemelle: finestra INTERA
     PfInt=-1.0; DdInt=-1.0; NInt=-1; ProfInt=-999999.0; PgInt=99.9; GemInt="NON MISURATO";
     # --- gemelle: IS e OOS (solo celle M15)
-    PfIS=-1.0;  DdIS=-1.0;  NIS=-1;  ProfIS=-999999.0;  GemIS="NON MISURATO";
-    PfOOS=-1.0; DdOOS=-1.0; NOOS=-1; ProfOOS=-999999.0; GemOOS="NON MISURATO";
+    PfIS=-1.0;  DdIS=-1.0;  NIS=-1;  ProfIS=-999999.0;  GemIS="NON MISURATO";  PgIS=99.9;
+    PfOOS=-1.0; DdOOS=-1.0; NOOS=-1; ProfOOS=-999999.0; GemOOS="NON MISURATO"; PgOOS=99.9;
     # --- PASSO 0, dalla passata SINGOLA (report .htm)
     P0Stato="NON MISURATO"; P0Prima="NON MISURATA"; P0N=-1; P0Finestra="NON MISURATA";
     P0TakeNetMed=-1.0; P0TakeNetMedia=-1.0; P0TakeLordoMed=-1.0; P0Rapporto=-1.0;
@@ -934,6 +975,44 @@ foreach($s in $SymLavoro){
 }
 Dico "gate della STELLA: ogni cella M15 differisce dalla sua cella metro SOLO su InpTF" "Green"
 
+# --- 1a-bis. IL GATE DELL'ANTENATO. Il gate della stella confronta le due
+#     celle di un simbolo FRA LORO: per costruzione NON PUO' VEDERE una
+#     corruzione applicata a ENTRAMBE. MISURATO il 25/08 facendo girare il
+#     driver su un repo corrotto: InpBBPeriod portato da 20 a 25 nelle DUE
+#     celle di GBPUSD passava la stella, i valori, l'asse unico, i magic, le
+#     righe vive -- tutto verde, uscita 0. Restavano fuori 64 dei 70 input.
+#     La cella METRO esiste per RIPRODURRE R103: la si confronta con il file
+#     prova di R103 da cui e' stata copiata, PRIMA di bruciare le passate.
+#     Senza questo gate la corruzione la prendeva G0, ma tre passate dopo e
+#     dicendo "il banco e' storto" invece di "il file e' storto".
+#     >>> IL CONFRONTO E' PER NOME, NON PER POSIZIONE: l'antenato ha una riga
+#         in piu' (InpNewsCurrencies) e un confronto posizionale sfaserebbe
+#         tutto il resto accusando 40 righe sane (difetto 58, la colonna
+#         contata dalla fine).
+foreach($s in $SymLavoro){
+  $rifA = @($Lavori | Where-Object { $_.Sym -eq $s.Sym -and $_.Metro })
+  if($rifA.Count -ne 1){ throw ("simbolo " + $s.Sym + ": manca la cella METRO per il gate dell'antenato.") }
+  $nomeA = $AntenatoR103[$s.Sym]
+  if([string]::IsNullOrEmpty($nomeA)){ throw ("simbolo " + $s.Sym + ": nessun antenato R103 dichiarato. Non tiro a indovinare.") }
+  $fileA = Join-Path $Prove ("ANTENATO_" + $nomeA)
+  Scarica ("$RawPin/backtest_pipeline/prove/" + $nomeA) $fileA '@SIMBOLO'
+  $hA = @{}; foreach($r in (RigheVive $fileA)){ $hA[(NomeDi $r)] = $r }
+  $hM = @{}; foreach($r in (RigheVive (Join-Path $Prove $rifA[0].Prova))){ $hM[(NomeDi $r)] = $r }
+  $div = New-Object System.Collections.ArrayList
+  foreach($k in $hA.Keys){
+    if(-not $hM.ContainsKey($k)){ [void]$div.Add($k) }
+    elseif($hA[$k] -ne $hM[$k]){ [void]$div.Add($k) }
+  }
+  foreach($k in $hM.Keys){ if(-not $hA.ContainsKey($k)){ [void]$div.Add($k) } }
+  $extraA = @($div | Where-Object { $DeltaAmmessiR103 -notcontains $_ })
+  if($extraA.Count -gt 0){
+    throw ($rifA[0].Prova + " contro l'antenato " + $nomeA + ": differiscono anche su [" + ($extraA -join ", ") +
+           "], oltre ai soli delta dichiarati [" + ($DeltaAmmessiR103 -join ", ") +
+           "]. La cella METRO esiste per RIPRODURRE la cella viva di R103: con un input diverso il gate G0 fallirebbe TRE PASSATE PIU' TARDI, e direbbe 'il banco e' storto' invece di 'il file e' storto'.")
+  }
+  Dico ("gate dell'ANTENATO " + $s.Sym + ": il metro e' identico a " + $nomeA + " (delta: " + ($div -join ", ") + ")") "Green"
+}
+
 # --- 1b. I VALORI, letti NELL'ARTEFATTO CHE GIRA (checklist 34-bis).
 #     Il diff dice CHE cambiano; questo dice CHE COSA valgono: se i file
 #     di due simboli fossero SCAMBIATI, il diff resterebbe verde.
@@ -1447,7 +1526,20 @@ foreach($c in $Ordinati){
         }
       }
       # --- IL CANCELLO ZERO S0a, solo sulle celle M15 (criteri par. 3.4)
+      #  >>> E SOLO A TICK REALI. Con -ScreenOhlcM15 la cella e' girata a
+      #      OHLC M1: il take viene misurato sui prezzi di deal costruiti da
+      #      barre finte, ed e' PROPRIO la grandezza che l'OHLC distorce di
+      #      piu' su M15 (REGISTRO_TEST.md par. 2). Dare li' un SUPERATO/
+      #      FALLITO sarebbe un verdetto verde su un numero che non esiste.
+      #      MISURATO il 25/08 facendo girare lo screen: senza questo if il
+      #      referto usciva 'S0a SUPERATO' su tutti e tre i simboli, ogni
+      #      riga con esito OK e 'ESITO: COMPLETO ... nessun guasto', exit 0.
+      #      La regola stava DUE VOLTE nella prosa e ZERO volte nel codice:
+      #      e' esattamente il difetto 67. Adesso e' un if.
       if(-not $c.Metro){
+        if($ScreenOhlcM15){
+          $c.S0a = "NON GIUDICABILE -- questa cella e' girata a OHLC M1 (-ScreenOhlcM15): il take misurato su barre OHLC NON e' il take. Nessun verdetto S0a si da' qui, ne' SUPERATO ne' FALLITO. Serve un giro a MODELLO 4."
+        } else {
         $v = VerdettoS0a ([double]$p0.TakeNetMed)
         $c.P0TakeLordoMed = [double]$v.Lordo
         $c.P0Rapporto     = [double]$v.Rapporto
@@ -1456,6 +1548,7 @@ foreach($c in $Ordinati){
         if($v.Verdetto -like "FALLITO*"){
           [void]$Problemi.Add("CANCELLO ZERO S0a FALLITO su " + $c.Sym + ": " + $v.Verdetto +
                               " >>> E' LA RISPOSTA DEL ROUND SU QUESTO SIMBOLO, NON UN GUASTO: il take a M15 non copre il costo, e i numeri di PF/DD che seguono si leggono SAPENDO questo. Gli altri simboli proseguono (criteri D5).")
+        }
         }
       }
     }
@@ -1547,12 +1640,17 @@ foreach($c in $Ordinati){
           if($null -ne $rr[0].Dd){ $c.DdIS = [double]$rr[0].Dd }
           if($null -ne $rr[0].N){  $c.NIS  = [int]$rr[0].N }
           if($null -ne $rr[0].Profit){ $c.ProfIS = [double]$rr[0].Profit }
+          #  G4 dei criteri: "PEGGIOR GIORNATA, misurata SEMPRE". La colonna
+          #  c'e' nell'OPTFRAME e LeggiOpt la legge gia': non leggerla qui
+          #  vorrebbe dire buttare una misura di RISCHIO gia' pagata.
+          if($null -ne $rr[0].Pg){ $c.PgIS = [double]$rr[0].Pg }
         } else {
           $c.GemOOS = $gg
           if($null -ne $rr[0].Pf){ $c.PfOOS = [double]$rr[0].Pf }
           if($null -ne $rr[0].Dd){ $c.DdOOS = [double]$rr[0].Dd }
           if($null -ne $rr[0].N){  $c.NOOS  = [int]$rr[0].N }
           if($null -ne $rr[0].Profit){ $c.ProfOOS = [double]$rr[0].Profit }
+          if($null -ne $rr[0].Pg){ $c.PgOOS = [double]$rr[0].Pg }
         }
       }
       if($gg -ne "IDENTICI" -and $gg -ne "NON MISURATO (CSV non letto)"){
@@ -1569,6 +1667,11 @@ foreach($c in $Ordinati){
       }
     }
     $c.Esito = "OK"
+    #  >>> LO SCREEN OHLC NON PRODUCE UN ESITO 'OK'. La riga della TABELLA
+    #      MADRE porta il marchio addosso, non in una nota a tre pagine di
+    #      distanza: chi legge la tabella deve vedere il marchio NELLA
+    #      TABELLA (difetto 67, misurato eseguendo il 25/08).
+    if($ScreenOhlcM15){ $c.Esito = "NON GIUDICABILE" }
     if([int]$c.NInt -lt 0 -or $c.P0Stato -notlike "MISURATO*"){ $c.Esito = "INCOMPLETA (vedi PROBLEMI)" }
   }
 
@@ -1641,7 +1744,6 @@ try{
   if($ScreenOhlcM15){ $sw += "-ScreenOhlcM15 (le celle M15 girano a OHLC M1: NIENTE di questo giro e' GIUDICABILE)" }
   if($SoloSimbolo -ne ""){ $sw += "-SoloSimbolo " + $SoloSimbolo }
   if($SoloCella -ne ""){ $sw += "-SoloCella " + $SoloCella + " (la cella METRO del suo simbolo e' girata lo stesso: senza il metro il numero non si legge)" }
-  if($Riprendi){ $sw += "-Riprendi" }
   if($sw.Count -eq 0){ $sw += "nessuno (corsa piena)" }
   [void]$R.Add("switch di questo giro: " + ($sw -join " | "))
   [void]$R.Add("stato dei criteri: " + $Firma)
@@ -1731,14 +1833,33 @@ try{
   [void]$R.Add("      i soli segnali intraday sopravvissuti tengono 12-15 barre, non 1-6.")
   [void]$R.Add("")
   [void]$R.Add("--- LA TABELLA MADRE ---   (attese: " + $CelleAttese + " righe per CSV, " + $PassateAttese + " passate)")
-  [void]$R.Add(("  {0,-8} {1,-11} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-6} {9,-9} {10,-7} {11,-7} {12,-6} {13}" -f `
-                "SIMB","CELLA","INTprof","INTpf","INTdd","INTn","ISprof","ISpf","ISn","OOSprof","OOSpf","OOSdd","OOSn","ESITO"))
+  #  >>> LA COLONNA ISdd C'E'. La v1 leggeva il DD della IS dal CSV e poi non
+  #      lo stampava da nessuna parte: una misura di RISCHIO raccolta e
+  #      buttata. E il RISCHIO non si sospende mai (Emendamento regola B).
+  [void]$R.Add(("  {0,-8} {1,-11} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-7} {9,-6} {10,-9} {11,-7} {12,-7} {13,-6} {14}" -f `
+                "SIMB","CELLA","INTprof","INTpf","INTdd","INTn","ISprof","ISpf","ISdd","ISn","OOSprof","OOSpf","OOSdd","OOSn","ESITO"))
   foreach($c in $Ordinati){
-    [void]$R.Add(("  {0,-8} {1,-11} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-6} {9,-9} {10,-7} {11,-7} {12,-6} {13}" -f `
+    [void]$R.Add(("  {0,-8} {1,-11} {2,-9} {3,-7} {4,-7} {5,-6} {6,-9} {7,-7} {8,-7} {9,-6} {10,-9} {11,-7} {12,-7} {13,-6} {14}" -f `
                   $c.Sym,$c.Id,(FmtE $c.ProfInt),(Fmt3 $c.PfInt),(Fmt2 $c.DdInt),(FmtN $c.NInt),
-                  (FmtE $c.ProfIS),(Fmt3 $c.PfIS),(FmtN $c.NIS),
+                  (FmtE $c.ProfIS),(Fmt3 $c.PfIS),(Fmt2 $c.DdIS),(FmtN $c.NIS),
                   (FmtE $c.ProfOOS),(Fmt3 $c.PfOOS),(Fmt2 $c.DdOOS),(FmtN $c.NOOS),$c.Esito))
   }
+  [void]$R.Add("")
+  # --- G4: LA PEGGIOR GIORNATA, MISURATA SEMPRE (criteri par. 5, G4).
+  #     Due viste, e vanno tenute distinte: quella del report .htm e' sulla
+  #     finestra INTERA della passata SINGOLA; quelle del CSV sono per
+  #     FINESTRA (INTERA / IS / OOS) e vengono dall'OPTFRAME. Se divergono,
+  #     e' un'informazione, non un guasto: sono due strumenti diversi.
+  [void]$R.Add("--- G4: LA PEGGIOR GIORNATA (muro prop: -5,00% su 100k) ---")
+  [void]$R.Add(("  {0,-8} {1,-11} {2,-12} {3,-12} {4,-10} {5,-10} {6}" -f `
+                "SIMB","CELLA","htm-INTERA","quando","csv-INTERA","csv-IS","csv-OOS"))
+  foreach($c in $Ordinati){
+    [void]$R.Add(("  {0,-8} {1,-11} {2,-12} {3,-12} {4,-10} {5,-10} {6}" -f `
+                  $c.Sym,$c.Id,(FmtPg $c.P0Pegg),$c.P0PeggData,
+                  (FmtPg $c.PgInt),(FmtPg $c.PgIS),(FmtPg $c.PgOOS)))
+  }
+  [void]$R.Add("  (tutti in % del deposito. 'n/d' = NON MISURATA, mai 0.)")
+  [void]$R.Add("")
   [void]$R.Add("  gemelli: " )
   foreach($c in $Ordinati){
     [void]$R.Add("    " + $c.Sym + " " + $c.Id + "  INTERA: " + $c.GemInt + " | IS: " + $c.GemIS + " | OOS: " + $c.GemOOS)
@@ -1786,9 +1907,16 @@ try{
   [void]$R.Add("")
   # --- L'ESITO SCRITTO NEL REFERTO DICE LE STESSE PAROLE DELLO SCHERMO,
   #     e distingue PARZIALE da COMPLETO CON RILIEVI (checklist 47 e 68).
-  $koR = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -notlike "SOLO CONTROLLO*" })
+  $koR = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -notlike "SOLO CONTROLLO*" -and $_.Esito -ne "NON GIUDICABILE" })
   if($Fatale -ne ""){
     [void]$R.Add("ESITO: FERMATO -- " + $Fatale)
+  }
+  elseif($ScreenOhlcM15 -and -not $SoloControllo){
+    #  >>> LO SCREEN HA UN ESITO SUO, E NON PUO' ESSERE 'COMPLETO'. Senza
+    #      questo ramo il referto chiudeva con "tutte le celle hanno prodotto
+    #      i numeri attesi ... nessun guasto" e uscita 0 su una tabella che
+    #      per costruzione non vale niente (misurato il 25/08).
+    [void]$R.Add("ESITO: SCREEN OHLC -- NESSUN VERDETTO. Le celle M15 sono girate a MODELLO 1 (OHLC M1), non a tick reali: nessun cancello si applica, nessun S0a e' stato dato, e ogni riga M15 e' marcata NON GIUDICABILE. Su M5/M15 l'OHLC inganna, ed e' MISURATO in casa (REGISTRO_TEST.md par. 2). Questo giro puo' produrre AL MASSIMO il PERMESSO di un giro a tick reali. Celle senza numeri: " + $koR.Count + " - problemi: " + $Problemi.Count + " - rilievi: " + $Rilievi.Count + ".")
   }
   elseif($SoloControllo){
     if($koR.Count -gt 0 -or $Problemi.Count -gt 0){
@@ -1891,7 +2019,13 @@ Write-Host ""
 #              2 = criteri non firmati
 # =====================================================================
 if($Fatale -ne ""){ Write-Host ("ESITO: FERMATO -- " + $Fatale) -ForegroundColor Red; exit 1 }
-$ko = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -notlike "SOLO CONTROLLO*" })
+$ko = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -notlike "SOLO CONTROLLO*" -and $_.Esito -ne "NON GIUDICABILE" })
+if($ScreenOhlcM15 -and -not $SoloControllo){
+  Write-Host  "ESITO: SCREEN OHLC -- NESSUN VERDETTO. Le celle M15 sono girate a OHLC M1:" -ForegroundColor Yellow
+  Write-Host  "       nessun cancello, nessun S0a, ogni riga M15 marcata NON GIUDICABILE." -ForegroundColor Yellow
+  Write-Host ("       Celle senza numeri: " + $ko.Count + " - problemi: " + $Problemi.Count + " - rilievi: " + $Rilievi.Count + ". Lo zip esiste: mandalo.") -ForegroundColor Yellow
+  exit 1
+}
 if($SoloControllo){
   if($ko.Count -gt 0 -or $Problemi.Count -gt 0){
     Write-Host ("ESITO: GIRO A VUOTO CON PROBLEMI (" + $Problemi.Count + ") -- NESSUNA passata, e c'e' da leggere il referto") -ForegroundColor Yellow
