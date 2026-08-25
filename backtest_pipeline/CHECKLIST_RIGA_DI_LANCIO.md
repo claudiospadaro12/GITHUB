@@ -3840,3 +3840,84 @@ tester, che **non passa dal parser dei deal**. Un difetto del parser non e' mai
 una scusa per rimandare la lettura di un drawdown che viene da un'altra fonte:
 **prima si stabilisce QUALE misura passava dal pezzo rotto**, e solo quella si
 sospende.
+
+---
+
+## 🆕 AGGIUNTA DEL 25/08/2026 (notte) — trovata RI-verificando R110 **dopo la firma di Claudio**
+
+## 82. 🔏 IL GATE CERCA UN TOKEN LETTERALE, LA PROSA LO NOMINA: la firma data resta INVISIBILE, e il referto la nega agli atti
+
+_Difetto vero, gia' committato in `R110_CRITERI.md` (`40e5bcf`), trovato PRIMA
+dell'invio e **RIPRODOTTO eseguendo il driver vero sul file vero al pin**._
+
+Claudio firma. Il titolo del documento passa da `CRITERI **[DA FIRMARE]**` a
+`CRITERI **FIRMATI**`, e in testa arriva il timbro: _"FIRMO R110 — Claudio,
+25/08/2026 sera"_. Ma il gate del driver e' scritto cosi':
+
+```powershell
+$daFirmare = (Select-String -LiteralPath $critFile -SimpleMatch -Pattern '[DA FIRMARE]' -Quiet)
+```
+
+`-SimpleMatch` cerca la stringa **in tutto il file**, non nel titolo — **ed e'
+giusto che lo faccia**: un lucchetto rimasto in una sezione E' un pezzo non
+firmato. Il problema e' che nel file ne restavano **due**, e nessuna delle due
+era il titolo:
+
+| riga | cos'era | perche' era rimasta |
+|---|---|---|
+| 11 | _"Questo documento porta `[DA FIRMARE]` nel titolo, e il driver LO LEGGE al pin"_ | **la prosa che SPIEGA il lucchetto**, diventata falsa con la firma (punto 45) |
+| 607 | `## 10. LE SEI DECISIONI — **[DA FIRMARE]**` | il lucchetto del paragrafo delle decisioni, tolto solo dal titolo |
+
+**Misurato, eseguendo il driver sul file firmato:**
+
+```
+corsa vera SENZA -CriteriFirmati  ->  EXIT=2   "NON PARTO: I CRITERI NON SONO FIRMATI"
+corsa vera CON  -CriteriFirmati   ->  EXIT=0, e nel referto TRE frasi FALSE:
+    stato dei criteri: NON FIRMATI (il file porta ancora [DA FIRMARE])
+    switch di questo giro: -CriteriFirmati (FIRMA IN RIGA di Claudio: ...)
+    RILIEVO: "I criteri portano ancora [DA FIRMARE] ... la firma e' quella data in riga"
+```
+
+**Il costo, ed e' doppio.** Davanti: Claudio legge la sua stessa firma in testa
+al documento e il driver gli risponde che non ha firmato — e' il gate che grida
+sempre del punto 47, con l'aggravante che stavolta grida **contro un fatto
+scritto**. Dietro, ed e' peggio: la pagina prescrive `-CriteriFirmati`, quindi
+il round **parte lo stesso** e il **referto** — l'unico artefatto che resta agli
+atti — dichiara `NON FIRMATI` su un round firmato, e attribuisce la firma a una
+"firma in riga" che non c'e' mai stata. Fra un mese, chi apre lo zip per sapere
+se quel round era autorizzato, trova la risposta **sbagliata**.
+
+### Perche' e' una classe a se'
+
+Il **77** dice che una ricetta `sed` non puo' contenere il token che cerca. Il
+**45** dice che un difetto chiuso sopravvive dove nessuno ha rigrepato. Questo
+e' il caso in cui i due si sommano su un **interruttore di autorizzazione**: la
+prosa che spiega un gate a token letterale **e' essa stessa un input del gate**,
+e resta indietro esattamente quando lo stato cambia — cioe' **il giorno della
+firma**, l'unico giorno in cui quel gate viene davvero esercitato.
+
+> ✅ **REGOLA, in quattro pezzi:**
+> 1. **Un token di stato (`[DA FIRMARE]`, `[BOZZA]`, `TODO`, `[BLOCCATO]`) non
+>    si NOMINA mai nel documento che lo porta.** La prosa dice *"il lucchetto
+>    della firma"*, non lo scrive. Altrimenti spegnere lo stato e' impossibile
+>    senza rendere illeggibile la spiegazione.
+> 2. **Cambiare stato e' un `grep -c`, non una modifica al titolo**: dopo la
+>    firma, `grep -cF '<token>' <file>` **deve dare 0**. E' il doppio conteggio
+>    del punto 77 applicato alla firma. (Qui dava **2**.)
+> 3. **Le frasi che il referto scrive sullo stato si costruiscono sul VALORE
+>    LETTO, mai su un ramo solo.** `if($CriteriFirmati)` non basta: serve
+>    `if($CriteriFirmati -and $daFirmare)` per "firma in riga" e il ramo
+>    `elseif($CriteriFirmati)` per **"switch INERTE, il file era gia' firmato"**.
+>    Uno switch di bypass che si autodescrive sempre allo stesso modo mente
+>    meta' delle volte.
+> 4. ⚠️ **E la variabile di stato nasce PRIMA del `try`** (41-bis): la raccolta
+>    la usa, e su un throw precedente `$null` si legge **"firmato"** — cioe' il
+>    referto dichiarerebbe un'autorizzazione che non ha mai verificato.
+>
+> 🧪 **E si prova nei DUE versi** (punto 55): col lucchetto tolto la corsa vera
+> deve **partire senza lo switch**, e col lucchetto rimesso deve tornare a
+> **exit 2**. Provati tutti e due: 0/2 e 2/2.
+> 🔁 **Corollario per le righe di lancio**: quando il gate si apre, lo switch di
+> bypass **si toglie dalla riga**. Lasciarlo "tanto e' innocuo" lo trasforma in
+> un bypass permanente scritto nella pagina, che il giorno in cui qualcuno
+> rimette un lucchetto **non fara' fermare niente**.
