@@ -437,6 +437,12 @@ $Rilievi   = New-Object System.Collections.ArrayList
 $Fatale    = ""
 $nAnt      = -1
 $Firma     = "NON LETTA"
+#  >>> CHECKLIST 41-bis: $daFirmare lo LEGGE la raccolta, che sta FUORI dal
+#      try. Se nascesse dentro, su un throw precedente varrebbe $null --
+#      cioe' FALSO -- e il referto direbbe "criteri firmati" senza averli
+#      mai letti. Il valore prudente e' $true: "non ho letto" non e' "e'
+#      firmato" (checklist 40-ter).
+$daFirmare = $true
 $Terminal  = ""; $MetaEditor = ""; $DataFolder = ""
 $Ordinati  = @()      # checklist 41-bis: la raccolta lo scorre SEMPRE
 $Vive      = @{}
@@ -1586,7 +1592,11 @@ try{
   [void]$RefTxt.Add("modo: " + $Modo + $(if($SoloControllo){ "   <<< GIRO A VUOTO: NESSUNA passata, NESSUN CSV, NESSUN numero di round qui dentro" } else { "" }))
   $sw = @()
   if($SoloControllo){ $sw += "-SoloControllo (nessuna passata)" }
-  if($CriteriFirmati){ $sw += "-CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora [DA FIRMARE])" }
+  #  >>> E DICE IL VERO NEI DUE CASI. Con i criteri gia' firmati NEL FILE lo
+  #      switch e' inerte: scrivere "la firma e' quella data in riga" sarebbe
+  #      una bugia agli atti, sulla riga che dice se il round era autorizzato.
+  if($CriteriFirmati -and $daFirmare){ $sw += "-CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora il lucchetto)" }
+  elseif($CriteriFirmati){ $sw += "-CriteriFirmati (INERTE, e va bene: i criteri risultano gia' FIRMATI NEL FILE al pin -- la firma e' quella del documento, non una firma in riga)" }
   if($SoloEa -ne ""){ $sw += "-SoloEa " + $SoloEa }
   if($SoloCella -ne ""){ $sw += "-SoloCella " + $SoloCella + " (il 00_metro della sua famiglia e' girato lo stesso: e' il denominatore e porta il gate G0-C)" }
   if($Rifai){ $sw += "-Rifai (i CSV precedenti sono stati rifatti)" }
@@ -1795,9 +1805,12 @@ try{
   }
   [void]$RefTxt.Add("")
   [void]$RefTxt.Add("--- COME SI RIPRENDE ---")
-  [void]$RefTxt.Add('  una famiglia sola  : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa ''EMADOW''')
-  [void]$RefTxt.Add('  due famiglie       : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa ''SWDOW,EMADOW''   <-- FRA APICI (checklist 65)')
-  [void]$RefTxt.Add('  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella R110_EMADOW_02_short.txt')
+  [void]$RefTxt.Add('  una famiglia sola  : ... & $p -Pin <PIN> -SoloEa ''EMADOW''')
+  [void]$RefTxt.Add('  due famiglie       : ... & $p -Pin <PIN> -SoloEa ''SWDOW,EMADOW''   <-- FRA APICI (checklist 65)')
+  [void]$RefTxt.Add('  una cella sola     : ... & $p -Pin <PIN> -SoloCella R110_EMADOW_02_short.txt')
+  [void]$RefTxt.Add('  >>> senza -CriteriFirmati: i criteri sono FIRMATI NEL FILE al pin. Se una')
+  [void]$RefTxt.Add('      ripresa uscisse con codice 2, vuol dire che il file dei criteri e'' tornato')
+  [void]$RefTxt.Add('      col lucchetto: si legge il documento, NON si aggira lo switch.')
   [void]$RefTxt.Add("  >>> in tutti i casi il 00_metro della famiglia rigira: e' il denominatore e")
   [void]$RefTxt.Add("      porta il gate G0-C. Costa 2 CSV, non una passata sprecata.")
   [void]$RefTxt.Add("  >>> e i tre puntini stanno per IL BLOCCO INTERO della riga di lancio, con il")

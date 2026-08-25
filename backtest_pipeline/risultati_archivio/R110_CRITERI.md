@@ -8,11 +8,18 @@
 > La firma vale per le SEI decisioni del § 10 **con le proposte**. Firma a
 > numeri non visti. La corsa si lancia con `-CriteriFirmati`.
 
-> 🔒 **Questo documento porta `[DA FIRMARE]` nel titolo, e il driver LO LEGGE al pin.**
-> Finché la stringa è lì, la **corsa vera** si ferma con `exit 2`. Il **giro a
-> vuoto** parte lo stesso (non apre MT5, non produce nessun numero) e serve
-> proprio a far leggere questi criteri prima di firmarli.
-> Le decisioni da firmare sono **sei**, e stanno al § 10.
+> 🔓 **IL LUCCHETTO E' APERTO.** Questo documento **portava il lucchetto della
+> firma** nel titolo e nel § 10; il driver lo cerca **al pin, in tutto il file**,
+> e finché lo trova la **corsa vera** si ferma con `exit 2` (il **giro a vuoto**
+> parte lo stesso: non apre MT5 e non produce nessun numero, e serve proprio a
+> far leggere questi criteri prima di firmarli). Con la firma qui sopra il
+> lucchetto è stato **tolto da tutti e due i punti**, quindi la corsa vera parte
+> **senza `-CriteriFirmati`**.
+> ⚠️ **E la parola del lucchetto non compare più da nessuna parte in questa
+> pagina, nemmeno nella prosa che lo spiega**: il gate cerca la STRINGA, non il
+> titolo — una citazione in prosa terrebbe la porta chiusa a firma data
+> (checklist 82).
+> Le decisioni firmate sono **sei**, e stanno al § 10.
 
 **Origine**: Claudio, sera del 25/08/2026, dopo i verdetti short di R107:
 _"non si possono provare i vari motori?"_ — non è contento di chiudere la
@@ -604,7 +611,7 @@ restano **non misurati**, e vanno detti tali.
 
 ---
 
-## 10. ✍️ LE SEI DECISIONI — **[DA FIRMARE]**
+## 10. ✍️ LE SEI DECISIONI — **FIRMATE** ("FIRMO R110", Claudio, 25/08/2026 sera)
 
 ### D1 · Quali famiglie entrano
 

@@ -13,7 +13,7 @@ short **non ha mai avuto un numero suo**:
 
 **Perimetro**: `risultati_archivio/CENSIMENTO_LATI_SHORT_2026-08-25.md` — tabella
 **1d** e § 5, **punti 1 e 2** della lista ordinata.
-**Criteri**: `risultati_archivio/R110_CRITERI.md` — ⚠️ **[DA FIRMARE]**, 6 decisioni.
+**Criteri**: `risultati_archivio/R110_CRITERI.md` — ✅ **FIRMATI** ("FIRMO R110", Claudio 25/08 sera), 6 decisioni.
 **Driver**: `righe/RIGA_R110_LATI_VIVI.ps1` (marcatore `MARCATORE_RIGA_R110_v1`).
 **File prova**: `prove/R110_*.txt` — **dodici** (3 per famiglia).
 
@@ -41,14 +41,20 @@ invocato. Su tutte le altre il merito nascerà **sospeso**.
 
 ---
 
-## 🔴 IL CANCELLO DELLA FIRMA — **è CHIUSO, e va aperto da Claudio**
+## 🟢 IL CANCELLO DELLA FIRMA — **è APERTO: Claudio ha firmato**
 
-`R110_CRITERI.md` porta `[DA FIRMARE]` nel titolo. Il driver **lo legge al pin**:
+`R110_CRITERI.md` al pin porta in testa **`FIRMO R110` — Claudio, 25/08/2026
+sera**, e il lucchetto è stato **tolto da tutti e due i punti** in cui stava
+(titolo e § 10). Il driver lo cerca **al pin, in tutto il file**: non trovandolo
+più, la **corsa vera parte da sola** e `-CriteriFirmati` **non serve** (per
+questo non compare nelle righe qui sotto).
 
-- il **giro a vuoto parte lo stesso** (non apre MT5, non produce nessun numero);
-- la **corsa vera si ferma con `exit 2`**, a meno di `-CriteriFirmati`.
+> ⚠️ **Se la corsa vera uscisse con codice 2**, non è un guasto: vuol dire che il
+> file dei criteri è tornato col lucchetto. Si legge il documento — **non si
+> aggira lo switch**. `-CriteriFirmati` resta disponibile ed è la *firma in riga*,
+> ma su un file già firmato è inerte e il referto lo scrive come tale.
 
-**Le sei decisioni** (§ 10 dei criteri, tutte con la proposta già scritta):
+**Le sei decisioni FIRMATE** (§ 10 dei criteri, tutte con la proposta già scritta):
 
 | | decisione | proposta |
 |---|---|---|
@@ -249,8 +255,9 @@ il round per un falso allarme):
 
 E poi, in ordine:
 
-- `criteri: NON FIRMATI (il file porta ancora [DA FIRMARE])` — **è giusto così
-  finché non firmi**, e il giro a vuoto prosegue lo stesso;
+- `criteri: FIRMATI (nessun [DA FIRMARE] nel file)` — **e dev'essere questa**: se
+  legge `NON FIRMATI` il file dei criteri al pin è tornato col lucchetto, e la
+  corsa vera si fermerebbe con codice 2;
 - `driver generico PINNATO (...), MaxBars alzato, AllowLiveTrading=false x2`;
 - `12 file prova + 4 antenati scaricati al pin, righe vive verificate (SUPNAS 45 / SUPDAX 45 / SWDOW 47 / EMADOW 46)`;
 - `gate dell'ANTENATO: ogni cella e' la copia riga per riga del suo file prova R103, salvo i delta dichiarati`;
@@ -271,11 +278,12 @@ E poi, in ordine:
 
 ---
 
-## 2️⃣ POI la corsa vera — **solo dopo aver firmato le cinque decisioni**
+## 2️⃣ POI la corsa vera — **le sei decisioni sono già firmate**
 
-Se hai tolto il `[DA FIRMARE]` dal file dei criteri, il gate si apre da solo e
-`-CriteriFirmati` non serve. Se preferisci **firmare in riga**, aggiungilo: la
-firma finisce **scritta nel referto**.
+Il gate si apre da solo: il file dei criteri al pin **non porta più il
+lucchetto**, quindi `-CriteriFirmati` **non serve e non c'è**. Se un giorno
+servisse la *firma in riga* (file col lucchetto e firma data a voce), si
+aggiunge `-CriteriFirmati` e la firma finisce **scritta nel referto**.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
@@ -283,7 +291,7 @@ firma finisce **scritta nel referto**.
     $pin='40e5bcf0e6d1ac1da2a4953e5a57bcb892a45fd4'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati;
+    $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
@@ -312,7 +320,7 @@ fermerebbe le altre.
     $pin='40e5bcf0e6d1ac1da2a4953e5a57bcb892a45fd4'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloEa 'EMADOW';
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloEa 'EMADOW';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
@@ -327,7 +335,7 @@ restano la forma di casa.*
     $pin='40e5bcf0e6d1ac1da2a4953e5a57bcb892a45fd4'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloEa 'SWDOW,EMADOW';
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloEa 'SWDOW,EMADOW';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
@@ -339,7 +347,7 @@ restano la forma di casa.*
     $pin='40e5bcf0e6d1ac1da2a4953e5a57bcb892a45fd4'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloCella 'R110_EMADOW_02_short.txt';
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella 'R110_EMADOW_02_short.txt';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
