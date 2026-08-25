@@ -3643,3 +3643,91 @@ dell'autotest**, con `RACCOLTA PARZIALE` e nessuna tabella.
 > riceve gli argomenti giusti. Il giro a vuoto va letto **aprendo gli artefatti
 > che produce** — qui bastava aprire un `.ini` dello zip, ed e' esattamente
 > quello che ha fatto Claudio.
+
+---
+
+## 🆕 AGGIUNTA DEL 25/08/2026 — trovata verificando R110 (i lati vivi sugli indici)
+
+## 80. 🫥 LA COLONNA EREDITATA DAL ROUND GEMELLO CHE LA FAMIGLIA NUOVA NON ESPORTA: il sentinella ONESTO camuffa un criterio IMPOSSIBILE
+
+_Difetto vero, gia' committato in `RIGA_R110_LATI_VIVI.ps1` (righe 91-93 e
+538-541), in `R110_CRITERI.md` (§ 5 G4-bis e § 5.1) e in
+`RIGA_R110_DA_MANDARE.md` (punto 6 delle "cose da guardare per prime"),
+trovato PRIMA dell'invio e **RIPRODOTTO** eseguendo il parser vero del driver
+sull'intestazione VERA dei quattro EA del round._
+
+R110 nasce dichiarandosi *"`RIGA_R107_LATI_SHORT.ps1` adattata da TRE famiglie
+a QUATTRO"*. Insieme alla macchina, si e' ereditata **una colonna**:
+
+```
+# nel driver R110, come commento:
+#  L'intestazione VERA e' MISURATA sugli artefatti (OPTFRAME esteso):
+#    Pass,Profit,...,Equity DD %,Trades,Peggior Giornata %,...
+```
+
+La frase *"MISURATA sugli artefatti"* **era vera** — sugli artefatti di R107.
+I tre EA d'apertura di R107 scrivono un OPTFRAME a **11 colonne**
+(`Peggior Giornata %`, `Perdite Consecutive Max`, `Serie Perdente Peggiore`).
+I **quattro** EA di R110 scrivono `double stats[7]` e l'header
+
+```
+"Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades"
+```
+
+cioe' **otto colonne, senza la peggior giornata**. E' il punto 18 (la misura
+fatta sulla grandezza sbagliata) applicato **alla FAMIGLIA** invece che al
+timeframe: il controllo sembra fatto, e la cosa misurata e' un'altra.
+
+**Ma quello che rende la classe nuova e' come FINISCE, non come nasce.** Il
+punto 66 ha imposto la convenzione onesta: *un numero non misurato si scrive
+`n/d`*. Qui la convenzione funziona **perfettamente** — e proprio per questo:
+
+| | |
+|---|---|
+| il parser cerca la colonna per nome | non la trova, torna `$null` — **giusto** |
+| il sentinella resta al valore iniziale | `99.9` |
+| il formattatore stampa | **`n/d`** — **giusto** |
+| il referto dichiara la convenzione | *"`n/d` = non misurato"* — **giusto** |
+
+Ogni singolo pezzo si comporta bene, **e il risultato e' che una colonna
+STRUTTURALMENTE IMPOSSIBILE e' indistinguibile da una colonna che stavolta
+non e' uscita.** Il controllo positivo del parser non aiuta (`kPg` e'
+facoltativo: il CSV si legge benissimo senza).
+
+**Il costo, misurato su R110.** I criteri **[DA FIRMARE]** dicevano, al
+cancello G4-bis: _"LA PEGGIOR GIORNATA, SEMPRE — per ogni cella, sempre,
+anche a `n` sottile. E' rischio, e il rischio non si sospende mai"_, e il
+foglio della riga mandava Claudio a leggerla per prima fra le voci di
+rischio. Firmata quella riga, il round sarebbe uscito con **dodici celle su
+dodici a `n/d`** in quella colonna — e un criterio firmato non si corregge
+dopo (punto 57). Le due uscite sbagliate sarebbero state: fermare il round
+per un falso allarme sul parser, oppure imparare che i criteri sono "circa".
+Aggravante: la strada per averla **esisteva** (R103 la misurava dai deal del
+report `.htm`) e nessuno l'aveva confrontata con quella ereditata.
+
+> ✅ **REGOLA, in tre pezzi.**
+> 1. **Quando un round e' l'adattamento di un gemello, si rifa' la LISTA
+>    DELLE COLONNE sul SORGENTE della famiglia NUOVA**, non si eredita
+>    l'intestazione. Grep secco, un EA per volta:
+>    ```
+>    grep -o 'string head = "[^"]*"' <EA>.mq5
+>    grep -o 'double stats\[[0-9]*\]'  <EA>.mq5
+>    ```
+>    Se le colonne che i criteri nominano non ci sono **tutte**, il criterio
+>    va riscritto **prima della firma**, non tradotto dopo.
+> 2. **Ogni colonna nominata in un criterio porta accanto CHI la produce.**
+>    "peggior giornata" non e' una grandezza: e' `stats[8]` di *quell'*
+>    OPTFRAME, oppure i deal di un report `.htm`, oppure i per-trade
+>    `abtg_trades_*` — e sono tre strumenti diversi, con tre disponibilita'
+>    diverse. In R110 il quarto EA (`ABTG_SupRev_DAX_H4_Ottimizzato`) **non
+>    ha nemmeno `ExportTrades()`**: nemmeno il ripiego era uniforme.
+> 3. **Una colonna che NON PUO' uscire si dichiara nel referto, non si
+>    lascia al sentinella.** Il `n/d` da solo dice *"stavolta no"*; serve la
+>    riga che dice *"MAI, e per questo motivo"*, e il driver la scrive
+>    **verificandolo a runtime** (`$cols -notcontains 'Peggior Giornata %'`
+>    -> RILIEVO), non a commento.
+>
+> 🧭 **Dove si annida**: ogni round "adattato da", ogni parser con colonne
+> **facoltative** (`if($null -ne $kPg)`), ogni criterio che elenca metriche
+> con la formula *"sempre, anche a n sottile"*. La domanda secca, una per
+> metrica: **"chi scrive questo numero, e l'ho aperto?"**
