@@ -3353,3 +3353,142 @@ le virgole) sono quelle dei casi anomali.
 > libera. Vale al contrario per chi legge: se una colonna di testo arriva
 > tronca a meta' frase, **non e' il testo ad essere corto, sono le colonne ad
 > essere scivolate** (e' il punto 58 visto dal lato di chi SCRIVE).
+
+---
+
+## 🆕 AGGIUNTE DEL 25/08/2026 — trovate verificando R109 (`RIGA_R109_ATREXH.ps1`), tutte e tre **ESEGUENDO**
+
+## 76. 🫥 LA VARIABILE DEL `foreach` SOPRAVVIVE AL CICLO, E VENT'ANNI DOPO UNA STRINGA IN APICI DOPPI SE LA MANGIA
+
+_Difetto vero, gia' committato in `RIGA_R109_ATREXH.ps1` (298ac2c, riga 2143),
+trovato PRIMA dell'invio e **RIPRODOTTO**. Rileggere il codice NON bastava: il
+difetto si e' visto solo aprendo il referto che la riga aveva appena scritto._
+
+La coda del referto voleva **mostrare** un pezzo di comando:
+
+```powershell
+[void]$R.Add("      Una riga '& $p ...' incollata da sola riusa la copia locale")
+```
+
+`$p` doveva essere **testo**, il path dello script scaricato dal blocco della
+chat. Ma e' in **apici DOPPI**, quindi PowerShell lo espande — e nello script
+`$p` **esiste**: e' la variabile del ciclo dei problemi, venti righe piu' su.
+
+```powershell
+foreach($p in $Problemi){ [void]$R.Add("  - " + $p) }
+```
+
+⚠️ **In PowerShell la variabile di un `foreach` NON muore col ciclo**: resta
+in scope, e vale **l'ULTIMO elemento**. Riprodotto:
+
+```
+PRIMA (apici doppi): Una riga '& SECONDO: un problema lungo che finirebbe dentro la frase ...' incollata da sola
+DOPO  (apici sing.): Una riga '& $p ...' incollata da sola
+```
+
+Le due facce sono **tutte e due cattive** e si alternano da sole:
+- **zero problemi** -> `$p` e' vuota, e la frase esce mozza: `Una riga '&  ...'`;
+- **almeno un problema** -> nel mezzo della frase ci finisce **un paragrafo
+  intero**, e sembra un guasto del referto proprio nella corsa andata male.
+
+E' il difetto di quoting piu' banale che esista (`$` dentro apici doppi) con
+un'aggravante che lo rende invisibile: di solito una variabile inesistente
+espande a **vuoto** e qualcuno se ne accorge; qui esisteva, e diceva
+un'altra cosa.
+
+> ✅ **REGOLA**: **una stringa che deve MOSTRARE del codice si scrive in apici
+> SINGOLI.** Sempre, anche quando "tanto quella variabile non c'e'".
+> E il controllo si fa **ESEGUENDO e leggendo l'artefatto**, non rileggendo il
+> sorgente: sul sorgente `"... $p ..."` si legge come si voleva scriverlo.
+> Grep di partenza su ogni driver, prima di mandare:
+> `grep -n '"[^"]*\$[a-z]' <file>.ps1` e, per le variabili di ciclo,
+> l'elenco dei `foreach(` e dei `ForEach-Object { param($x)` gia' usati nel file.
+
+## 77. ♻️ LA RICETTA DEL PIN CHE RISCRIVE SE STESSA (e il suo stesso controllo)
+
+_Difetto vero, gia' committato in `RIGA_R109_DA_MANDARE.md` (b26ba67), trovato
+PRIMA dell'invio e **RIPRODOTTO due volte** (la prima correzione era ancora
+sbagliata)._
+
+Ogni foglio `*_DA_MANDARE.md` ha in fondo la ricetta che sostituisce il
+segnaposto col commit vero. Era scritta cosi':
+
+```bash
+sed -i "s/@@PIN@@/$SHA/g" backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md
+grep -c "@@PIN@@" backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md   # DEVE dare 0
+```
+
+Il `/g` su **tutta la pagina** non tocca solo i tre blocchi di lancio: tocca
+anche **la riga del `sed`, la riga del `grep` e la prosa che spiega cos'e' il
+segnaposto**. Dopo il primo pin la pagina dice `<sha> e' un segnaposto e va
+sostituito`, e **la ricetta e' morta**: alla prossima ri-pinnatura — che
+succede sul serio, il 25/08 e' successo sullo storico indici, dove `826f008`
+non conteneva l'ultima correzione del driver — cerca un token che non c'e'
+piu' e **non sostituisce niente, uscendo 0**.
+
+⚠️ E la trappola ha un secondo giro: la prima correzione, che restringeva il
+`sed` ai soli punti d'uso (`s|\$pin='@@PIN@@'|...|`), **conteneva a sua volta
+il token per esteso** e si riscriveva lo stesso. Misurato: il controllo
+`grep -c` dava **5** invece di **3**.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **il token si COMPONE in una variabile**, cosi' la ricetta non contiene
+>    mai la stringa che sta cercando: `TOK='@@PIN'"@@"`;
+> 2. **si sostituiscono i PUNTI D'USO, non la pagina** (`s|\$pin='$TOK'|...|g`
+>    piu' la riga del riquadro, `s|^$TOK\$|$SHA|`): la prosa che spiega deve
+>    restare leggibile anche dopo;
+> 3. **DUE conteggi, non uno**: `grep -c "\$pin='$SHA'"` **deve dare 3** e
+>    `grep -c "\$pin='$TOK'"` **deve dare 0**. Il solo "0 segnaposto rimasti"
+>    lo supera a mani basse anche un `sed` che **non ha matchato niente** —
+>    e' il guardiano decorativo del punto 14 applicato a un `sed`.
+> 4. e la pagina porta anche la ricetta di **RI-PINNATURA** (vecchio -> nuovo,
+>    con i due conteggi), perche' il pin si rifa' piu' spesso di quanto si creda.
+>
+> 🧪 **Si prova su una COPIA della pagina prima di scriverla nel foglio.** Costa
+> dieci secondi e questa e' stata sbagliata due volte di fila.
+
+## 78. 🗓️ L'ARTEFATTO CHE PORTA DELLE DATE MA NON PORTA **LA PROPRIA**: l'eta' si misura su un numero che non e' quello
+
+_Difetto vero, gia' committato in `RIGA_R109_ATREXH.ps1` (298ac2c, righe
+1261-1268) **e promesso nei criteri firmandi** (`R109_CRITERI.md` §4.2:
+"sopra i 30 giorni esce un rilievo anche se il file c'e'"). Trovato PRIMA
+dell'invio, sul file vero._
+
+Il punto 23 dice: **chi consuma un artefatto ne guarda l'ETA', non solo
+l'esistenza**, e propone `LastWriteTime`. Qui il punto 23 era stato letto,
+applicato... e **tutte e due le strade mentivano**:
+
+1. il `LastWriteTime` e' quello del file **scaricato al pin adesso**: dice
+   sempre *"oggi"*, qualunque sia l'eta' della misura. Non e' un controllo, e'
+   un timbro;
+2. il driver allora ripiegava sulla **prima data DENTRO il CSV**:
+   ```powershell
+   $dm = [regex]::Match((Get-Content $tk -Raw),'(\d{4}\.\d{2}\.\d{2})')
+   if($dm.Success){ $s.TickData = $dm.Groups[1].Value + " (prima data nel CSV)" }
+   ```
+   ma `misura_tick_U30USD.csv` contiene `2024.09.26` — che e' **l'inizio dello
+   STORICO DEL BROKER**, non il giorno in cui la sonda ha girato. La misura era
+   del **2026-08-20**, cioe' di **sei giorni prima**.
+
+Il referto stampava `[file: 2024.09.26]` accanto a una misura fresca: **un
+falso allarme garantito**, di quelli che fermano un round da otto ore (punto
+44). E il rilievo dei 30 giorni **promesso nei criteri non esisteva proprio**
+(punto 57: il criterio firmato che assegna una misura a uno strumento che non
+puo' produrla).
+
+La data vera stava, e sta, **solo nel referto gemello**
+`REFERTO_MISURA_TICK_U30USD.txt`, riga `data: 2026-08-20 19:53:55`.
+
+> ✅ **REGOLA**: **la data di un artefatto non e' una data QUALSIASI trovata
+> dentro l'artefatto.** Prima di misurare l'eta' di qualcosa si risponde a
+> due domande, per iscritto:
+> 1. **questo file contiene la propria data di produzione?** Aprirlo e
+>    guardarlo. Molti CSV di misura contengono le date del **dominio**
+>    (inizio storico, prima operazione) e nessuna data di **produzione**;
+> 2. **se no, chi ce l'ha?** Di solito il `.txt`/`.md` gemello scritto dallo
+>    stesso strumento. **Si scarica anche quello, al pin, e finisce nello zip.**
+>
+> E se il gemello non c'e', **si dichiara che il controllo dell'eta' NON e'
+> stato fatto** — non lo si da' per superato (28-bis, il verde per assenza).
+> ⚠️ Corollario per chi SCRIVE uno strumento di misura: **ogni artefatto porta
+> dentro la propria riga `data:`**, CSV compresi. Il gemello e' una toppa.
