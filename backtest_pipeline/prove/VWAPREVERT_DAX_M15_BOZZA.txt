@@ -19,14 +19,22 @@
 # =====================================================================
 #  !!!  QUESTO FILE NON PUO' GIRARE OGGI  !!!
 # ---------------------------------------------------------------------
-#  L'EA  ABTG_VwapRevert.mq5  NON ESISTE ANCORA.  Va scritto (stima 5-7
-#  ore, specifica nel dossier P1).  Questo file e' la SPECIFICA
-#  CONGELATA di cosa dovra' misurare: ipotesi e criteri sono scritti
-#  PRIMA di aver visto un solo numero, che e' l'unico modo per cui
-#  varranno qualcosa quando i numeri arriveranno.
+#  AGGIORNAMENTO 25/08/2026 (sera): l'EA  mql5\Experts\ABTG_VwapRevert.mq5
+#  ADESSO ESISTE.  Scritto, non compilato (in ambiente non c'e'
+#  MetaEditor): la prima compilazione e' il primo controllo vero.
+#  Tesi del porting, con TUTTI gli scostamenti dal Pine dichiarati
+#  uno per uno:  VWAPREVERT_TESI.md
+#
+#  MA IL FILE RESTA FERMO LO STESSO, per il motivo originale:
+#  i CRITERI DI DETTAGLIO sono [DA FIRMARE] da Claudio, e i criteri
+#  si firmano PRIMA dei numeri, mai dopo.
 #  Precedente identico: R101_DAX_02_volumi.txt ("finche' non sono
 #  firmati, questo file non deve girare").
-#  E i CRITERI DI DETTAGLIO sono [DA FIRMARE] da Claudio.
+#
+#  Questo file resta la SPECIFICA CONGELATA di cosa dovra' misurare:
+#  ipotesi e criteri sono scritti PRIMA di aver visto un solo numero,
+#  che e' l'unico modo per cui varranno qualcosa quando i numeri
+#  arriveranno.
 # =====================================================================
 #
 # ---------------------------------------------------------------------
@@ -175,10 +183,15 @@
 #      o basso (short) del proprio range, ed e' engulfing oppure
 #      "minimo piu' alto + chiusura sopra il massimo precedente";
 #    - filtro anti-candelone: range della barra <= InpAtrMult * ATR;
-#    - ordine STOP oltre l'estremo del setup + buffer ATR, ANNULLATO
-#      dopo 2 barre se non riempie  (in Pine c'e' anche un ramo "limit"
+#    - ordine STOP oltre l'estremo + buffer ATR, ANNULLATO dopo
+#      2 barre se non riempie  (in Pine c'e' anche un ramo "limit"
 #      che in MT5 NON si traduce: un BUY LIMIT sopra il prezzo non
 #      riempie mai.  Si implementa SOLO il ramo STOP);
+#      >>> CORRETTO IN FASE DI PORTING: le barre sono TRE, non due
+#          (bar_index - signalBar > 2 lascia vivo t+1, t+2, t+3), e
+#          l'estremo e' quello della barra di CONFERMA, non di setup
+#          (il Pine assegna longEntry/longStopStored nella barra in
+#          cui scatta longSignalOnce).  Vedi il blocco DIVERGENZE.
 #    - SL all'estremo del setup - buffer, con PAVIMENTO a InpSlAtrFloor
 #      * ATR (anti-stop-stretto);
 #    - lo spread modellato dentro i prezzi di ingresso e di uscita
@@ -206,8 +219,45 @@
 @DAQUANDO 2024.09.26
 
 # ---------------------------------------------------------------------
+#  DIVERGENZE FRA QUESTA BOZZA E L'EA COME E' STATO SCRITTO
+#  (25/08/2026 sera -- dichiarate, non nascoste.  Dettaglio completo
+#   in VWAPREVERT_TESI.md par. 9)
+# ---------------------------------------------------------------------
+#  I NOMI degli input pinnati qui sotto sono stati RISPETTATI nell'EA
+#  dove esistevano: InpSigmaMult, InpLookback, InpTpR, InpSlAtrFloor,
+#  InpAtrMult, InpRiskPercent, InpMaxTradesPerDay, InpPartialR,
+#  InpBreakEven, InpUsePartial.  Cambiano tre cose:
+#
+#  1) InpUsePartial: nell'EA il DEFAULT e' SPENTO (l'autore non ha
+#     nessun parziale).  La bozza lo pinnava ACCESO.  Regola di casa:
+#     la CELLA BASE dev'essere il PORTING NUDO, altrimenti la prima
+#     misura e' gia' una nostra variante.  >>> Qui sotto e' stato
+#     portato a 0 e il parziale diventa una GAMBA da accendere DOPO
+#     (passo 7 dell'ordine di misura nella tesi).
+#
+#  2) "ordine STOP annullato dopo 2 barre" (riga della specifica qui
+#     sopra) e' IMPRECISO DI UNA BARRA.  Il Pine cancella quando
+#     bar_index - signalBar > 2, quindi l'ordine e' vivo per TRE barre
+#     (t+1, t+2, t+3).  L'EA usa InpOrderLifeBars = 3, che e' il
+#     numero FEDELE.  Pinnato qui sotto perche' si legga.
+#
+#  3) L'ATR dell'autore NON e' ATR(10).  Nel Pine targetTF vale la
+#     stringa "Chart", che non e' un case dello switch e cade sul ramo
+#     di default 1440: su M15 la lunghezza diventa 10*1440/15 = 960
+#     barre.  E' quasi certamente un bug dell'autore.  L'EA porta
+#     l'INTENZIONE (InpAtrPeriod = 10) e permette di riprodurre la
+#     LETTERA con InpAtrPeriod = 960.  >>> E' una GAMBA DI TRADUZIONE,
+#     non una taratura: va misurata a parte, non messa nella griglia.
+#
+#  Input NUOVI dell'EA, tutti SPENTI di default e tutti pinnati qui
+#  sotto perche' la cella base sia inequivocabile:
+#     InpMinSessionBars, InpSessionStartHour, InpSlFloorMode,
+#     InpSlUseSetupBar, InpSpreadExtraPts, InpMaxSpreadPctSL,
+#     InpEngulfingOnly, InpUseHourFilter.
+#
+# ---------------------------------------------------------------------
 #  LA GRIGLIA -- e' uno SCREENING, non un verdetto.
-#  Sweep stretto: 3 assi, 2x3x2 = 12 celle.  Tutto il resto pinnato al
+#  Sweep stretto: 3 assi, 3x2x3 = 18 celle.  Tutto il resto pinnato al
 #  default del sorgente (geometria della candela compresa: bodyPercent,
 #  wickMultiple, dojiBodyPercent, closePercent NON entrano nello sweep
 #  -- sono le manopole che il backtest girerebbe verso il passato).
@@ -215,26 +265,42 @@
 
 # quante deviazioni standard fanno "lontano dalla VWAP".
 #   1,0 = il default dell'autore; 1,5 e 2,0 sono piu' selettivi.
-InpSigmaMult=1.5||1.0||0.5||2.0||Y
+InpSigmaMult=1.0||1.0||0.5||2.0||Y
 
 # quante barre indietro per l'estremo che qualifica la candela.
 #   20 = il default dell'autore.
 InpLookback=20||20||0||20||N
 
-# il target, in multipli di R (dopo il parziale a 1R).
+# il target, in multipli di R.
 InpTpR=2.0||2.0||0.5||2.5||Y
 
 # pavimento dello stop in ATR: impedisce lo stop-a-pelo sulle candele
 # minuscole.  0,2 = default dell'autore; 0,5 = piu' prudente.
-InpSlAtrFloor=0.35||0.2||0.15||0.5||Y
+# ATTENZIONE: nel modo AUTORE il pavimento NON allarga lo stop, riduce
+# il LOTTO e allontana il TARGET (tesi par. 4.4).
+InpSlAtrFloor=0.2||0.2||0.15||0.5||Y
 
 # --- pinnati, NON spazzolati (dichiarati qui perche' si leggano) ---
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpMaxTradesPerDay=2||2||0||2||N
 InpAtrMult=1.5||1.5||0||1.5||N
-InpUsePartial=1||1||0||1||N
+InpAtrPeriod=10||10||0||10||N
+InpOrderLifeBars=3||3||0||3||N
+
+# --- la CELLA BASE e' la cella AUTORE: tutte le varianti di casa
+#     partono SPENTE.  Se una di queste cambia, l'EA lo scrive nel log
+#     ("questa cella NON e' la cella AUTORE del porting").
+InpUsePartial=0||0||0||0||N
 InpPartialR=1.0||1.0||0||1.0||N
 InpBreakEven=1||1||0||1||N
+InpMinSessionBars=0||0||0||0||N
+InpSessionStartHour=-1||-1||0||-1||N
+InpSlFloorMode=0||0||0||0||N
+InpSlUseSetupBar=0||0||0||0||N
+InpSpreadExtraPts=0||0||0||0||N
+InpMaxSpreadPctSL=0||0||0||0||N
+InpEngulfingOnly=0||0||0||0||N
+InpUseHourFilter=0||0||0||0||N
 
 # =====================================================================
 #  GEMELLO -- stesso file, cambia solo il simbolo, per il cancello S5.
