@@ -1,4 +1,6 @@
-# 📐 R105 — IL ROUND DI PORTAFOGLIO (criteri, 🔴 BOZZA [DA FIRMARE])
+# 📐 R105 — IL ROUND DI PORTAFOGLIO (criteri ✅ FIRMATI)
+
+**FIRMATO da Claudio il 25/08/2026, in chat: "FIRMO TUTTE E TRE"** (F1+F2+F3, senza modifiche).
 
 _Richiesto da Claudio il 25/08 ("INTANTO PREPARAMI R105 PORTAFOGLIO").
 È il round della domanda vera: **"quali EA insieme mi fanno salire i
