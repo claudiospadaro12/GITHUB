@@ -392,10 +392,23 @@ tester scrive nel Journal non è misurata, e un `grep` che non trova niente
 sarebbe un **verde per assenza** (checklist 28-bis).
 
 ➡️ **È la decisione D2.** Comunque sia firmata, il driver cerca al pin
-`risultati_archivio/misura_tick/misura_tick_<SIMBOLO>.csv`, **stampa la riga
-`TICK` e la DATA DEL FILE**, e se manca scrive un **RILIEVO obbligatorio**
-(checklist 23: chi consuma un artefatto ne guarda **l'età**, non solo
-l'esistenza — sopra i **30 giorni** esce un rilievo anche se il file c'è).
+`risultati_archivio/misura_tick/misura_tick_<SIMBOLO>.csv` e **stampa la riga
+`TICK`**; se manca, scrive un **RILIEVO obbligatorio**.
+
+E ne guarda **l'ETÀ**, non solo l'esistenza (checklist 23): **sopra i 30 giorni
+esce un rilievo anche se il file c'è**.
+
+> 🔴 **E l'età si legge nel posto giusto, che non è quello ovvio** — corretto
+> dal verificatore il 25/08, era un difetto vero. **Il CSV NON contiene la data
+> della misura**: le date che ci stanno dentro sono l'**inizio dello storico**
+> (`2024.09.26`). E il `LastWriteTime` è quello del file **scaricato adesso**,
+> quindi dice sempre *"oggi"* e non misura niente. La data vera sta **solo** nel
+> referto gemello `REFERTO_MISURA_TICK_<SIMBOLO>.txt`, riga `data:` — che il
+> driver ora scarica al pin, legge, e mette nel referto e nello zip.
+> Prima stampava `[file: 2024.09.26]` accanto a una misura fatta **sei giorni
+> prima**: un falso allarme garantito. Se il referto gemello **manca**, il
+> driver **dichiara che il controllo dei 30 giorni non è stato fatto** — non lo
+> dà per superato.
 
 ### 4.3 🔴 IL TERZO PALETTO — **NIENTE IS/OOS IN R109**, ed è la decisione **D3**
 

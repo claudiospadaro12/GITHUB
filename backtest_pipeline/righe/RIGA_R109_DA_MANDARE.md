@@ -10,10 +10,12 @@ porting **P2** della caccia M5/M15 indici del 25/08 (voto **9/10 — PROVA SUBIT
 `R109_U30USD_00_long.txt`, `R109_U30USD_01_short.txt`,
 `R109_NASUSD_00_long.txt`, `R109_NASUSD_01_short.txt` — **sei**.
 
-> 🟡 **NON È ANCORA PASSATO DAL VERIFICATORE-STRINGHE.** Questo foglio esce dal
-> **builder**. Le stringhe qui dentro **non sono definitive**: il pin è un
-> **segnaposto** (`@@PIN@@`) e va sostituito **dopo** il passaggio del
-> verificatore, che può ancora cambiare il driver.
+> 🟢 **PASSATO DAL VERIFICATORE-STRINGHE il 25/08 — verdetto `FAIL → CORRETTO`.**
+> **Sette** difetti trovati e corretti (elenco in fondo alla pagina), di cui
+> **tre di classe NUOVA**, finiti in `CHECKLIST_RIGA_DI_LANCIO.md` (punti 76-78). Le
+> stringhe qui dentro sono quelle **definitive**; resta solo il pin, che è
+> ancora un **segnaposto** (`@@PIN@@`) e va sostituito con la ricetta a **due
+> commit** qui sotto — **il primo commit deve contenere anche le correzioni**.
 
 ---
 
@@ -145,40 +147,75 @@ taglio si fa dopo, **sui conteggi veri**.
 
 ---
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **il commit congelato su cui gira tutto**
 
 ```
 @@PIN@@
 ```
 
-🔴 **`@@PIN@@` È UN SEGNAPOSTO E VA SOSTITUITO PRIMA DI DETTARE LA RIGA.**
-Il driver **non è ancora passato dal verificatore-stringhe**: finché non passa,
-un pin vero sarebbe una promessa che non possiamo mantenere. Sequenza, in
-quest'ordine — **due commit, non uno**:
+🔴 **IL PIN QUI SOPRA È ANCORA UN SEGNAPOSTO E VA SOSTITUITO PRIMA DI DETTARE
+LA RIGA.** Il verificatore ha **cambiato il driver** (sei correzioni) **e questa pagina** (la settima): il commit
+da pinnare è quello che **le contiene**. Sequenza, in quest'ordine —
+**due commit, non uno**:
 
 ```bash
-# 1. i file che il driver SCARICA (dopo le eventuali correzioni del verificatore)
+F=backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md
+# 1. i file che il driver SCARICA (correzioni del verificatore COMPRESE)
 git add backtest_pipeline/righe/RIGA_R109_ATREXH.ps1 \
         backtest_pipeline/risultati_archivio/R109_CRITERI.md \
         backtest_pipeline/prove/R109_*.txt
-git commit -m "R109: driver + criteri + file prova"
+git commit -m "R109: driver corretto dal verificatore + criteri + file prova"
 git push
 SHA=$(git rev-parse HEAD)
-# 2. il pin dentro questa pagina, che il driver NON scarica
-sed -i "s/@@PIN@@/$SHA/g" backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md
-git add backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md && git commit -m "R109: pin" && git push
-grep -c "@@PIN@@" backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md   # DEVE dare 0
+# 2. il pin dentro questa pagina, che il driver NON scarica.
+#    >>> IL TOKEN SI COMPONE IN UNA VARIABILE, e non e' un vezzo: se lo
+#        scrivessi per esteso qui sotto, il sed riscriverebbe QUESTE STESSE
+#        RIGHE e alla prossima ri-pinnatura la ricetta sarebbe morta. Provato.
+TOK='@@PIN'"@@"
+#    >>> E si sostituiscono SOLO i quattro punti d'uso (3 blocchi + il riquadro
+#        del pin), non tutta la pagina: la prosa che SPIEGA il segnaposto deve
+#        restare leggibile.
+sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|^$TOK\$|$SHA|" "$F"
+grep -c "\$pin='$SHA'" "$F"   # DEVE dare 3  (i tre blocchi di lancio)
+grep -c "\$pin='$TOK'" "$F"   # DEVE dare 0  (nessun segnaposto rimasto nei blocchi)
+git add "$F" && git commit -m "R109: pin" && git push
+```
+
+🔁 **E SE IL PIN VA RIFATTO** (una correzione al driver a giro iniziato: è
+successo il 25/08 sullo storico indici, dove `826f008` non conteneva l'ultima
+correzione) — il segnaposto non c'è più, quindi si sostituisce **il pin
+VECCHIO**, e si controlla che **non ne resti nemmeno uno**:
+
+```bash
+F=backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md
+VECCHIO=<il pin scritto adesso nella pagina>
+git push && NUOVO=$(git rev-parse HEAD)
+sed -i "s|$VECCHIO|$NUOVO|g" "$F"
+grep -c "$NUOVO" "$F"     # DEVE dare 4  (il riquadro + i tre blocchi)
+grep -c "$VECCHIO" "$F"   # DEVE dare 0
 ```
 
 ⚠️ Se il segnaposto resta, l'`irm` prende un **404**, `-ErrorAction Stop` è
 terminante e **la riga muore lì**: non parte niente. È il comportamento voluto,
-ma è un giro sprecato — meglio il `grep -c` qui sopra.
+ma è un giro sprecato — meglio i due `grep -c` qui sopra, che si leggono
+**insieme**: il primo dice che la sostituzione **è avvenuta ovunque serviva**,
+il secondo che **non ne è rimasta nessuna**. Uno solo dei due non basta (un
+`sed` che non matcha niente supera il secondo controllo a mani basse).
 
 **Cosa scarica il driver al pin** (e quindi cosa deve essere già in repo):
 i **sei** file prova, `R109_CRITERI.md`, il sorgente
 `mql5/Experts/ABTG_AtrExhaustVol.mq5`, l'include
-`mql5/Include/ABTG_PausaGuardian.mqh` e — dove esiste —
-`risultati_archivio/misura_tick/misura_tick_<SIMBOLO>.csv`.
+`mql5/Include/ABTG_PausaGuardian.mqh` e — dove esistono —
+`risultati_archivio/misura_tick/misura_tick_<SIMBOLO>.csv` **e il suo referto
+gemello `REFERTO_MISURA_TICK_<SIMBOLO>.txt`** (è lì, e **solo** lì, che sta la
+**data della misura**: nel CSV non c'è).
+
+⚠️ **Se il pin non contiene `R109_CRITERI.md` la riga si ferma dicendo
+`R109_CRITERI.md NON SI E' SCARICATO al pin ...`** e scrive lo zip lo stesso.
+🔴 **NON è "i criteri non sono firmati"**: è il **pin** sbagliato (o un commit
+che quel file non contiene ancora, o la cache di raw). Prima della correzione
+del verificatore quel caso usciva dal riquadro rosso *"I CRITERI NON SONO
+FIRMATI"* — e mandava a firmare otto decisioni per un problema di pin.
 **Non c'è nessun antenato da scaricare: questo motore non ha antenati** (§ *I
 GATE*).
 
@@ -195,9 +232,13 @@ commit congelato.
   compilare** — e su questo round sarebbe il falso negativo peggiore: manderebbe
   a cercare **errori di porting che non esistono**. La riga si rifiuta di
   partire in tutti e due i casi.
-- **NESSUNA SEDIA VIVA VIENE TOCCATA.** Magic **vergini, blocco `7744xx`**:
-  `grep -rno '7744[0-9][0-9]'` su tutto il repo dà **4 occorrenze, tutte del
-  valore `774401`**, e stanno **solo** nel sorgente nuovo e nella sua tesi.
+- **NESSUNA SEDIA VIVA VIENE TOCCATA.** Magic **vergini, blocco `7744xx`**.
+  🔁 **Grep rifatto dal verificatore il 25/08**, fuori dai file di R109:
+  **4 occorrenze del valore `774401`** (3 in `ATREXHAUST_TESI.md`, 1 nel
+  sorgente) **più 3 richiami ai magic short di R109 stesso** (`774420`,
+  `774440`, `774460`) in `CENSIMENTO_LATI_SHORT_2026-08-25.md`, che è un
+  documento scritto **oggi e su R109**: non è una sedia viva.
+  **Nessun altro `7744xx` esiste nel repo.**
   🔴 **E `774401` è VIETATO dal driver**: è il **default compilato** dell'EA, e
   se una cella girasse col default — pin saltato, o MT5 che si ricorda l'ultimo
   valore (checklist **25**) — **il magic lo direbbe**.
@@ -245,7 +286,7 @@ quando l'output è prodotto eseguendo, va detto; **qui non lo è**). I conteggi
 (**6 celle, 13 passate, 41 righe**) sono invece **misurati sugli artefatti**.
 
 ```
-    simboli ......................  3   (D30EUR, NASUSD, U30USD)
+    simboli ......................  3   (D30EUR, U30USD, NASUSD)
     celle ........................  6   (long: 3 | short: 3)
     passate ......................  13   (1 collaudo autotest + 2 per cella: singola + gemelle)
     righe vive per file prova ....  41   (42 input del sorgente meno InpNewsCurrencies)
@@ -254,10 +295,13 @@ quando l'output è prodotto eseguendo, va detto; **qui non lo è**). I conteggi
     FINESTRA : 2024.09.26 -> 2026.08.21   modello 4 (TICK REALI)
 ```
 
-> ⚠️ **`(D30EUR, NASUSD, U30USD)` è in ORDINE ALFABETICO, non nell'ordine del
-> dossier.** La lista è costruita con `Sort-Object -Unique`, che **ordina**, e
-> il driver lo dice da solo a schermo due righe sotto. **Un falso allarme qui
-> costa un giro** — è il punto **70**, pagato su R107.
+> ⚠️ **`(D30EUR, U30USD, NASUSD)` è l'ORDINE IN CUI GIRANO** — quello del
+> dossier — **ed è lo stesso ordine di TUTTE le tabelle del referto.** Non è
+> alfabetico, e non deve esserlo. 🔴 **Corretto dal verificatore il 25/08**: il
+> driver stampava qui `(D30EUR, NASUSD, U30USD)` (alfabetico, perché la lista
+> nasceva da `Sort-Object -Unique`) mentre catena e tabelle uscivano
+> nell'ordine del dossier — **due ordini diversi nella stessa corsa**, cioè un
+> falso allarme che costa un giro (punto **70**, pagato su R107).
 
 E poi, in ordine:
 
@@ -274,7 +318,12 @@ E poi, in ordine:
   verificati NEI FILE`;
 - **tre righe `profondita' TICK <simbolo>:`** — ⚠️ **U30USD dirà la sua riga
   misurata, D30EUR e NASUSD diranno `NON MISURATA`**, ed è la decisione **D2**:
-  non è un guasto del driver, è un buco vero del repo;
+  non è un guasto del driver, è un buco vero del repo. 📅 Accanto alla riga di
+  U30USD il referto scrive ora **`[misurata il 2026-08-20 (N giorni fa)]`**, e
+  **sopra i 30 giorni esce un RILIEVO** — è quello che i criteri § 4.2
+  promettevano e che il driver **non faceva**: leggeva la prima data del CSV
+  (`2024.09.26`, che è l'**inizio dello storico**, non il giorno della misura)
+  e la stampava sotto l'etichetta `[file: ...]`. Corretto dal verificatore;
 - `include installato: ABTG_PausaGuardian.mqh (... byte)`;
 - 🔴 **`COMPILATO ABTG_AtrExhaustVol v1.00 (.ex5 riscritto adesso, rc=0, warning: N)`**
   — **è questa la riga che conta**. Se invece esce il riquadro rosso
@@ -401,7 +450,10 @@ Cartella e zip sul Desktop: `R109_ATREXH_<MODO>_<data>_<ora>` — dentro, **per 
   durata in barre, peggior giornata. Se mancano, il cancello zero non esiste;
 - **13 `.ini`**, quelli che hanno girato davvero, **compreso
   `collaudo_autotest.ini`** (che serve anche a rileggere l'autotest a mano);
-- i **sei file prova al pin** e la misura dei tick dove esiste;
+- i **sei file prova al pin**, la **misura dei tick** dove esiste
+  (`misura_tick_<SIMB>.csv`) **e il suo referto gemello**
+  `REFERTO_MISURA_TICK_<SIMB>.txt`, che è l'unico posto dove sta la **data
+  della misura**;
 - **`compile_ABTG_AtrExhaustVol.log`** ← 🔴 **su questo round è il secondo file
   più importante dopo il referto**: è il verbale della prima compilazione;
 - i file per-trade `<SIMB>_<cella>_pertrade_singola.csv`, quando l'EA li scrive.
@@ -414,6 +466,20 @@ Cartella e zip sul Desktop: `R109_ATREXH_<MODO>_<data>_<ora>` — dentro, **per 
    il round si è fermato da solo e **non c'è niente da leggere**: c'è da
    guardare il codice. Se dice **`NON LETTO`**, **ogni numero del referto è
    `NON CONVALIDATO`** — e "non letto" **non è** "superato".
+
+   > 🟡 **MA DA CHE PARTE STA IL DUBBIO, detto prima di leggerlo.**
+   > `NON LETTO` **non è un mezzo-`DIVERGE`** e **non è un indizio contro
+   > l'EA**: è **incertezza NOSTRA**. Le **cinque radici** in cui il driver
+   > cerca il log dell'agente del tester (`<dati>\Tester`, `<dati>\MQL5\Logs`,
+   > `<dati>\logs`, `<Terminal>\Tester`, `<installazione>\Tester`) **non sono
+   > mai state misurate su un MT5 vero**: sono l'ipotesi migliore di chi ha
+   > scritto la riga. Se il motore divergesse davvero l'esito sarebbe
+   > **`DIVERGE`**, e il round si sarebbe **già fermato**.
+   > 👉 **Si toglie in cinque minuti**: MT5 → Strategy Tester → ricarica
+   > `collaudo_autotest.ini` (è nello zip) in **test singolo** → scheda
+   > **Esperti** → copia in chat le righe `[ATREXH][AUTOTEST]` **e dimmi in
+   > quale cartella stava il file**, così la prossima riga cerca nel posto
+   > **misurato** invece che nei cinque ipotizzati.
 2. 📊 **IL PASSO 0, PRIMA TABELLA: SI CONTA.** `n`, giorni operativi,
    **`MAX/GG`**, **`AL-CAP`**, `OP/SED`. ⚠️ **`AL-CAP` è la colonna che nessuno
    guarda e che cambia la lettura**: se molte giornate hanno toccato il cap di
@@ -531,12 +597,50 @@ Cartella e zip sul Desktop: `R109_ATREXH_<MODO>_<data>_<ora>` — dentro, **per 
   repo, tutte del valore `774401`**, e stanno solo nel sorgente nuovo e nella
   sua tesi. `774401` è **nella lista dei vietati**.
 
+---
+
+## 🔎 IL VERIFICATORE-STRINGHE — **`FAIL → CORRETTO`, sei difetti (25/08)**
+
+Rieseguito tutto sopra (`/opt/pwsh/pwsh`): parse **0 errori**, **ASCII puro**,
+**0 comandi non risolti**, **32 funzioni**, **52 array literal / 0 elementi con
+espressione binaria non parentesizzata**, gate del porting **6/6 OK** sotto
+`it-IT`, i **cinque gate sul sorgente fatti fallire uno per uno** su copie
+corrotte (pivot che ridipinge, volume da shift 0, `return(true)` di cortesia,
+interruttore del volume, volume fuori dall'AND — **tutti FERMANO**), il **gate
+A0 nei suoi tre stati** con log finti (`SUPERATO` · `DIVERGE` · `NON LETTO`, più
+log **vecchio** → non letto, log **UTF-16** → letto, variante accesa → segnalata),
+il **PASSO 0** sul report finto coi **17 numeri calcolati a mano prima** (tutti
+centrati), `-SoloControlo` con una L e `-Riprendi` → **errore di binding, lo
+script muore**.
+
+**I sette difetti, e come sono stati corretti** (tre sono **classi nuove**,
+finite in `CHECKLIST_RIGA_DI_LANCIO.md` come punti **76, 77, 78**):
+
+| | difetto | classe | correzione |
+|---|---|---|---|
+| **1** | 📅 **L'età della misura dei tick non veniva mai calcolata**, e la data stampata era la **prima data dello STORICO** (`2024.09.26`) sotto l'etichetta `[file: ...]` — su una misura fatta **6 giorni prima**. I criteri § 4.2 promettono *"sopra i 30 giorni esce un rilievo anche se il file c'è"*: non esisteva | 🆕 **classe nuova → punto 78** (+ **57**, **23**, **44**) | il driver scarica anche `REFERTO_MISURA_TICK_<SIMB>.txt`, legge la sua riga `data:`, stampa **`[misurata il ... (N giorni fa)]`** e alza un **RILIEVO sopra i 30 giorni**. Se il referto gemello manca, dichiara che **il controllo NON è stato fatto** |
+| **2** | 🧨 **La peggior giornata poteva uscire `0.00`** su una misura inesistente: se i numeri del report non si convertono (formato diverso da quello atteso) `$netto` restava `0.0` su ogni deal, e G4 — *"il numero da guardare"* — stampava **zero**. **Riprodotto** con un report a decimali-virgola | **66** (sentinella applicata a metà) — ed è il difetto di R103 rinato sulla colonna peggiore | controllo positivo **sul VALORE** e non solo sulla colonna: cella **piena** che non si converte → `NON AFFIDABILE`, tutte le misure `n/d`. Cella **vuota** (il profitto della riga `in`) resta zero: **nessun falso positivo** (checklist 55) |
+| **3** | 🥫 **Pin sbagliato → riquadro rosso "I CRITERI NON SONO FIRMATI"** e `exit 2`. Mandava a firmare otto decisioni per un **404** | **22** / **47** (messaggio che dichiara una causa non misurata) | `NON LETTI` ≠ `NON FIRMATI`: ora si ferma con la causa vera, il pin scritto per esteso, e **passa dalla raccolta** (referto + zip) |
+| **4** | 🧷 **`NON LETTO` del gate A0 non diceva da che parte sta il dubbio** — le cinque radici del log non sono mai state misurate su MT5 vero | **17** (lo strumento dato per presente), applicata al **percorso** | referto e foglio ora dicono che `NON LETTO` è **incertezza nostra**, non un indizio contro l'EA, e come toglierla in cinque minuti |
+| **5** | 🔤 **`(D30EUR, NASUSD, U30USD)` in testa, `(D30EUR, U30USD, NASUSD)` in tutte le tabelle** — due ordini nella stessa corsa | **70** | si stampa l'**ordine reale**, e lo si dichiara |
+| **6** | 🫥 **`"... '& $p ...' incollata da sola"` in APICI DOPPI**: `$p` non è il path dello script, è **la variabile del `foreach` dei PROBLEMI venti righe sopra** — che in PowerShell **sopravvive al ciclo**. Senza problemi la frase usciva mozza (`'&  ...'`); **con** problemi ci finiva dentro **il testo intero dell'ultimo problema**. Trovato **eseguendo**, non leggendo | 🆕 **classe nuova → punto 76** | apici singoli |
+| **7** | ♻️ **La ricetta del pin, in questa pagina, riscriveva SE STESSA**: `sed s/@@PIN@@/$SHA/g` su tutta la pagina toccava anche la riga del `sed`, quella del `grep` di controllo e la prosa. Dopo il primo pin **la ricetta era morta** — e la ri-pinnatura succede sul serio (25/08, storico indici: `826f008` non conteneva l'ultima correzione). **Riprodotto due volte**: anche la prima correzione si riscriveva | 🆕 **classe nuova → punto 77** | token composto in una variabile (`TOK='@@PIN'"@@"`), sostituzione dei **soli quattro punti d'uso**, **DUE conteggi** (`3` e `0`, perché "0 segnaposto rimasti" lo supera anche un `sed` che non ha matchato niente), e la **ricetta di RI-PINNATURA** in fondo. Provate tutte e due su una copia |
+
+🟢 **Indurimento, oltre ai difetti**: la regex del gate del porting ora copre
+anche `sinput` e `input static` (le due forme legali di MQL5 che avrebbe
+mancato), e **i suoi limiti sono dichiarati nel codice**: due input sulla stessa
+riga, commento `/* */` prima del valore e `input` indentato **non si estraggono
+e FANNO FERMARE il gate** (sono *fail-closed*, provati uno per uno).
+L'indentazione resta fuori **di proposito**: `^\s*input` prenderebbe anche le
+righe dentro un commento a blocco e inventerebbe input inesistenti (checklist 55).
+
 🟡 **Non verificato, e va detto**: tutto ciò che richiede **MT5** — **la
 compilazione vera** (che su questo EA è *la* domanda), il comportamento del
-tester, **dove MT5 scrive il log dell'agente** (il gate A0 lo cerca in cinque
-radici e dichiara `NON LETTO` se non lo trova), **se il tester onori `MaxBars`**,
-**se i tick reali ci siano davvero** su D30EUR e NASUSD, la durata reale, e
-**ogni singolo numero**.
+tester, **dove MT5 scrive il log dell'agente** (difetto 4: cinque radici
+**ipotizzate**, mai misurate), **se il tester onori `MaxBars`**, **se i tick
+reali ci siano davvero** su D30EUR e NASUSD, **il formato esatto dei numeri nel
+report `.htm`** (il difetto 2 ora lo *dichiara* invece di indovinarlo), la
+durata reale, e **ogni singolo numero**.
 
 > ⚠️ **I due rischi residui più concreti, dichiarati.**
 > **(a) LA COMPILAZIONE**: è la prima, e può semplicemente fallire. Il driver è

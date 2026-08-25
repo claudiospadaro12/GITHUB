@@ -456,9 +456,24 @@ function UgualeVal([string]$a,[string]$b){
   }
   return $false
 }
+#  >>> I LIMITI DI QUESTA REGEX, PROVATI E DICHIARATI (25/08). Quasi tutti
+#      sono FAIL-CLOSED, cioe' fanno FERMARE il gate invece di farlo passare:
+#      un input che la regex NON estrae ma che il file prova pinna esce come
+#      "non e' un input del sorgente" -> throw. Provati uno per uno:
+#        - due input sulla stessa riga  -> valore storto     -> FERMA
+#        - commento /* */ prima del valore -> valore storto   -> FERMA
+#        - input INDENTATO (spazi prima) -> non estratto      -> FERMA
+#      L'unico caso FAIL-OPEN e' un input NUOVO nel sorgente scritto in una
+#      forma che la regex non vede E non pinnato nel file prova: girerebbe al
+#      suo default compilato senza che nessuno lo sappia (checklist 25).
+#      Percio' 'sinput' e 'static' sono coperti qui sotto -- sono le due
+#      forme legali di MQL5 che il gate avrebbe mancato. L'INDENTAZIONE
+#      resta fuori DI PROPOSITO: un '^\s*input' prenderebbe anche le righe
+#      dentro un commento a blocco e inventerebbe input che non esistono,
+#      cioe' un falso FERMATO su un sorgente sano (checklist 55).
 function DefaultDalSorgente([string]$testo){
   $h = @{}
-  foreach($m in [regex]::Matches($testo,'(?m)^input\s+(?:bool|int|double|long|string|ENUM_\w+)\s+(\w+)\s*=\s*([^;]+);')){
+  foreach($m in [regex]::Matches($testo,'(?m)^s?input\s+(?:static\s+)?(?:bool|int|double|long|string|ENUM_\w+)\s+(\w+)\s*=\s*([^;]+);')){
     $h[$m.Groups[1].Value] = (ValDefault $m.Groups[2].Value)
   }
   return $h
@@ -642,8 +657,29 @@ function LeggiDeal([string]$path){
     if($null -ne $sw){ $netto += [double]$sw }
     $tipo = ""; if($iTipo -ge 0){ $tipo = ("" + $celle[$iTipo]).ToLower().Trim() }
     $vol = $null; if($iVol -ge 0){ $vol = (NumInv $celle[$iVol]) }
+    $prz = (NumInv $celle[$iPrez])
+    #  >>> IL CONTROLLO POSITIVO SUL *VALORE*, non solo sulla COLONNA.
+    #      Le colonne hanno gia' il loro controllo positivo (sopra). Questo
+    #      copre il caso in cui la colonna e' giusta e il NUMERO non si
+    #      converte -- per esempio perche' il report scrive i decimali in un
+    #      formato diverso da quello MISURATO ("45 005.54").
+    #      Senza, $netto resterebbe 0.0 su TUTTI i deal e la PEGGIOR
+    #      GIORNATA uscirebbe "0.00": un numero PLAUSIBILE E FALSO proprio
+    #      sulla colonna che i criteri (G4) chiamano quella da guardare per
+    #      prima, e in violazione della convenzione di sentinella
+    #      (checklist 66: "n/d", MAI 0). RIPRODOTTO il 25/08 su un report
+    #      finto con i decimali a virgola.
+    #      >>> Una cella VUOTA vale ZERO ed e' normale (MT5 lascia vuoto il
+    #          profitto della riga 'in'): si segnala solo la cella PIENA che
+    #          non si converte (checklist 55: riparare il falso positivo
+    #          senza perdere il vero positivo).
+    $illeg = $false
+    if($iProf -ge 0 -and $null -eq $pr  -and ("" + $celle[$iProf]).Trim() -ne ""){ $illeg = $true }
+    if($iComm -ge 0 -and $null -eq $cm  -and ("" + $celle[$iComm]).Trim() -ne ""){ $illeg = $true }
+    if($iSwap -ge 0 -and $null -eq $sw  -and ("" + $celle[$iSwap]).Trim() -ne ""){ $illeg = $true }
+    if($null -eq $prz -and ("" + $celle[$iPrez]).Trim() -ne ""){ $illeg = $true }
     [void]$out.Add([pscustomobject]@{
-      Ora=$d; Dir=$dir; Tipo=$tipo; Volume=$vol; Prezzo=(NumInv $celle[$iPrez]); Netto=$netto
+      Ora=$d; Dir=$dir; Tipo=$tipo; Volume=$vol; Prezzo=$prz; Netto=$netto; Illeggibile=$illeg
     })
   }
   return @($out)
@@ -678,8 +714,9 @@ function Passo0($deal,[double]$punto,[int]$barSec,[double]$deposito,[int]$cap){
   $dur  = New-Object System.Collections.ArrayList
   $perGiorno = @{}
   $opGiorno  = @{}
-  $n = 0; $anom = 0; $prima = $null; $ultima = $null
+  $n = 0; $anom = 0; $illegN = 0; $prima = $null; $ultima = $null
   foreach($d in $ordinati){
+    if($d.Illeggibile){ $illegN++ }
     if($d.Dir -eq "in"){
       if($null -ne $apertoOra){ $anom++ }      # due 'in' di fila: una posizione alla volta violata
       $apertoOra = $d.Ora; $apertoPrezzo = $d.Prezzo; $apertoNetto = [double]$d.Netto; $apertoVol = $d.Volume
@@ -710,9 +747,16 @@ function Passo0($deal,[double]$punto,[int]$barSec,[double]$deposito,[int]$cap){
     }
   }
   $r.N = $n
-  $r.Anomalie = $anom
+  $r.Anomalie = $anom + $illegN
   if($null -ne $prima){ $r.Prima = $prima.ToString("yyyy.MM.dd",$INV) }
   if($null -ne $ultima){ $r.Ultima = $ultima.ToString("yyyy.MM.dd",$INV) }
+  #  I NUMERI ILLEGGIBILI VENGONO PRIMA di tutto il resto: se il formato dei
+  #  numeri non e' quello che crediamo, NIENTE di questo report si legge --
+  #  e in particolare la peggior giornata NON esce "0.00" (vedi LeggiDeal).
+  if($illegN -gt 0){
+    $r.Stato = "NON AFFIDABILE: " + $illegN + " deal hanno numeri PRESENTI ma NON CONVERTIBILI (profitto/commissione/swap/prezzo). Il formato dei numeri del report NON e' quello atteso (MISURATO: migliaia con lo spazio, decimali col punto). Nessuna misura del PASSO 0 si da', e la PEGGIOR GIORNATA resta n/d invece di 0.00."
+    return $r
+  }
   if($anom -gt 0){
     $r.Stato = "NON AFFIDABILE: " + $anom + " deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere)"
     return $r
@@ -924,9 +968,17 @@ if($SelettoreAVuoto){
 }
 
 Titolo "NUMERI ATTESI (dichiarati PRIMA della corsa)"
-Write-Host ("    simboli ......................  " + $SymLavoro.Count + "   (" + ($SymAttivi -join ", ") + ")") -ForegroundColor White
-Write-Host  "        >>> in ORDINE ALFABETICO, non nell'ordine del dossier: la lista e'" -ForegroundColor DarkGray
-Write-Host  "            costruita con Sort-Object -Unique, che ORDINA (checklist 70)." -ForegroundColor DarkGray
+#  >>> L'ELENCO CHE SI STAMPA E' QUELLO CHE GIRA, non un altro (checklist 70).
+#      $SymAttivi nasce da Sort-Object -Unique, che ORDINA: usarlo qui
+#      stampava (D30EUR, NASUSD, U30USD) mentre la catena, il gate della
+#      stella, la tabella dei tick e TUTTE le tabelle del referto escono
+#      nell'ordine di $SymLavoro (D30EUR, U30USD, NASUSD, l'ordine del
+#      dossier). Due ordini diversi nella STESSA corsa sono un falso allarme
+#      che costa un giro: si stampa l'ordine REALE, e lo si dichiara.
+$SymStampa = @($SymLavoro | ForEach-Object { $_.Sym })
+Write-Host ("    simboli ......................  " + $SymLavoro.Count + "   (" + ($SymStampa -join ", ") + ")") -ForegroundColor White
+Write-Host  "        >>> e' l'ORDINE IN CUI GIRANO (quello del dossier), ed e' lo stesso" -ForegroundColor DarkGray
+Write-Host  "            ordine di TUTTE le tabelle del referto. NON e' l'ordine alfabetico." -ForegroundColor DarkGray
 Write-Host ("    celle ........................  " + $Lavori.Count + "   (long: " + @($Lavori | Where-Object { $_.Lato -eq "LONG" }).Count + " | short: " + @($Lavori | Where-Object { $_.Lato -eq "SHORT" }).Count + ")") -ForegroundColor White
 Write-Host ("    passate ......................  " + $PassateAttese + "   (1 collaudo autotest + 2 per cella: singola + gemelle)") -ForegroundColor White
 Write-Host ("    righe vive per file prova ....  " + $RigheAtte + "   (42 input del sorgente meno InpNewsCurrencies)") -ForegroundColor White
@@ -1006,16 +1058,29 @@ New-Item -ItemType Directory -Force -Path $Work,$Prove,$Logs,$SrcDir,$Risultati,
 Titolo "0-BIS. LA FIRMA DEI CRITERI"
 $critFile = Join-Path $Work "R109_CRITERI.md"
 $daFirmare = $true
+$critScaricati = $true
 try{
   Scarica ("$RawPin/backtest_pipeline/risultati_archivio/R109_CRITERI.md") $critFile 'R109'
   $daFirmare = (Select-String -LiteralPath $critFile -SimpleMatch -Pattern '[DA FIRMARE]' -Quiet)
   if($daFirmare){ $Firma = "NON FIRMATI (il file porta ancora [DA FIRMARE])" }
   else          { $Firma = "FIRMATI (nessun [DA FIRMARE] nel file)" }
 }catch{
+  $critScaricati = $false
   $Firma = "NON LETTI (" + $_.Exception.Message + ")"
   $daFirmare = $true
 }
 if($Firma -like "FIRMATI*"){ Dico ("criteri: " + $Firma) "Green" } else { Dico ("criteri: " + $Firma) "Yellow" }
+#  >>> "NON LETTI" NON E' "NON FIRMATI", ED E' UNA DIAGNOSI DIVERSA.
+#      Senza questo if, un pin sbagliato (o un file non ancora pushato, o la
+#      cache di raw) usciva dal riquadro rosso "I CRITERI NON SONO FIRMATI",
+#      che manda Claudio a firmare otto decisioni mentre il problema e' il
+#      PIN. Un messaggio che dichiara una causa non misurata e' della stessa
+#      famiglia del referto stantio: si ferma qui, con la causa vera, e
+#      passa dal catch generale -> Fatale -> RACCOLTA (che scrive il referto).
+if(-not $critScaricati){
+  throw ("R109_CRITERI.md NON SI E' SCARICATO al pin '" + $Pin + "' -- " + $Firma +
+         " >>> NON e' 'i criteri non sono firmati': e' il FILE che non e' arrivato. Sospetti in ordine: (1) il pin non esiste, o e' un commit che quel file non contiene ancora (ricetta a DUE COMMIT: il primo porta driver+criteri+prove, ed e' QUELLO da pinnare); (2) la cache di raw.githubusercontent (~5 minuti dopo il push); (3) la rete. Controlla il PIN prima di firmare qualunque cosa.")
+}
 if($daFirmare -and -not $SoloControllo -and -not $CriteriFirmati){
   Write-Host ""
   Write-Host "#####################################################################" -ForegroundColor Red
@@ -1094,7 +1159,7 @@ if($txtSrc -notmatch 'VolumeSpike_Calc[\s\S]{0,400}?if\(media<=0\s*\|\|\s*mult<=
   throw ($Ea + ".mq5: VolumeSpike_Calc non blocca a dato mancante. Un filtro senza dati non deve inventare un veto, ma un MOTORE senza dati NON ESISTE (tesi par. 8.2). Mi fermo.")
 }
 #  4. il volume NON deve essere spegnibile da un input
-$spegni = @([regex]::Matches($txtSrc,'(?m)^input\s+\w+\s+(Inp\w*(?:UseVolume|VolumeOn|VolFiltro|UseVolFilter)\w*)\s*='))
+$spegni = @([regex]::Matches($txtSrc,'(?m)^s?input\s+(?:static\s+)?\w+\s+(Inp\w*(?:UseVolume|VolumeOn|VolFiltro|UseVolFilter)\w*)\s*='))
 if($spegni.Count -gt 0){
   throw ($Ea + ".mq5 ha un input che spegne il volume (" + (($spegni | ForEach-Object { $_.Groups[1].Value }) -join ", ") + "). Il picco di volume E' la tesi di questo candidato: un EA che potesse girare senza sarebbe UN ALTRO MOTORE, e la misura sarebbe irripetibile. Mi fermo.")
 }
@@ -1258,15 +1323,40 @@ foreach($s in $SymLavoro){
     $riga = @(Get-Content -LiteralPath $tk | Where-Object { $_ -match '(?i)TICK' } | Select-Object -First 1)
     if($riga.Count -gt 0){ $s.TickMisurati = ("" + $riga[0]).Trim() }
     else { $s.TickMisurati = "file presente ma senza riga TICK" }
-    $fi = Get-Item -LiteralPath $tk
-    $s.TickData = $fi.LastWriteTime.ToString("yyyy-MM-dd",$INV)
-    #  L'ETA' DELL'ARTEFATTO, non solo la sua esistenza (checklist 23).
-    #  >>> NOTA: e' la data del file SCARICATO ADESSO, quindi non dice
-    #      quando la MISURA e' stata fatta. Percio' si guarda la data
-    #      scritta DENTRO il referto gemello, e in mancanza si dichiara.
-    $dm = [regex]::Match((Get-Content -LiteralPath $tk -Raw),'(\d{4}\.\d{2}\.\d{2})')
-    if($dm.Success){ $s.TickData = $dm.Groups[1].Value + " (prima data nel CSV)" }
     Copy-Item -LiteralPath $tk -Destination (Join-Path $Sosta ("misura_tick_" + $s.Sym + ".csv")) -Force -ErrorAction SilentlyContinue
+    #  L'ETA' DELLA MISURA, non l'eta' del file (checklist 23), ed e' quello
+    #  che i criteri par. 4.2 PROMETTONO: "sopra i 30 giorni esce un rilievo
+    #  anche se il file c'e'".
+    #  >>> DUE TRAPPOLE, misurate sull'artefatto vero il 25/08:
+    #      1. il LastWriteTime e' quello del file SCARICATO ADESSO: dice
+    #         sempre "oggi" e non misura niente;
+    #      2. le date DENTRO il CSV sono l'INIZIO DELLO STORICO (2024.09.26),
+    #         NON il giorno in cui la sonda ha girato. Stamparle sotto
+    #         l'etichetta "file:" farebbe leggere "questa misura e' del 2024"
+    #         su una misura del 2026 -- un falso allarme che costa un giro
+    #         (checklist 44).
+    #      La data VERA sta SOLO nel referto gemello, riga 'data:'.
+    $s.TickData = "DATA DELLA MISURA NON NOTA (il CSV non la contiene)"
+    $rf = Join-Path $Work ("REFERTO_MISURA_TICK_" + $s.Sym + ".txt")
+    try{
+      Scarica ("$RawPin/backtest_pipeline/risultati_archivio/misura_tick/REFERTO_MISURA_TICK_" + $s.Sym + ".txt") $rf ""
+      Copy-Item -LiteralPath $rf -Destination (Join-Path $Sosta ("REFERTO_MISURA_TICK_" + $s.Sym + ".txt")) -Force -ErrorAction SilentlyContinue
+      $dm = [regex]::Match((Get-Content -LiteralPath $rf -Raw),'(?m)^data:\s*(\d{4}-\d{2}-\d{2})')
+      if($dm.Success){
+        $dMis = [datetime]::MinValue
+        if([datetime]::TryParseExact($dm.Groups[1].Value,"yyyy-MM-dd",$INV,[Globalization.DateTimeStyles]::None,[ref]$dMis)){
+          $ggMis = [int]((New-TimeSpan -Start $dMis -End (Get-Date)).TotalDays)
+          $s.TickData = "misurata il " + $dm.Groups[1].Value + " (" + $ggMis + " giorni fa)"
+          if($ggMis -gt 30){
+            [void]$Rilievi.Add("MISURA DEI TICK VECCHIA su " + $s.Sym + ": ha " + $ggMis + " giorni, sopra la soglia di 30 dei criteri par. 4.2. Il file c'e' e si legge, ma dice cosa aveva il broker ALLORA: il verdetto della sonda su questi indici e' 'TICK REALI PARZIALI', e una profondita' parziale puo' muoversi in tutti e due i sensi. E' un RILIEVO, non un gate.")
+          }
+        } else {
+          $s.TickData = "data della misura ILLEGGIBILE nel referto gemello"
+        }
+      }
+    }catch{
+      [void]$Rilievi.Add("ETA' DELLA MISURA DEI TICK NON VERIFICATA su " + $s.Sym + ": il CSV c'e', ma il referto gemello REFERTO_MISURA_TICK_" + $s.Sym + ".txt NON e' al pin, e la data della misura sta SOLO li'. Il controllo dei 30 giorni promesso dai criteri par. 4.2 NON e' stato fatto: il numero dei tick va letto senza sapere di quando e'.")
+    }
     Dico ("profondita' TICK " + $s.Sym + ": " + $s.TickMisurati) "Green"
   }catch{
     $s.TickMisurati = "NON MISURATA (nessun misura_tick_" + $s.Sym + ".csv al pin)"
@@ -1630,7 +1720,9 @@ if($SoloControllo){
   }
   if($AutotestStato -like "SUPERATO*"){ Dico ("GATE A0 SUPERATO: sette blocchi su sette") "Green" }
   else {
-    [void]$Problemi.Add("GATE A0 NON LETTO: " + $AutotestStato + " >>> NON e' un autotest superato, ed e' la decisione D5: si prosegue, ma OGNI NUMERO DI QUESTO ROUND ESCE MARCATO 'NON CONVALIDATO'. Non aver trovato il log non e' aver letto un esito (checklist 28-bis, il verde per assenza). COME AVERLO A MANO: aprire MT5, Strategy Tester, ricaricare collaudo_autotest.ini (e' nello zip) in test singolo, e leggere la scheda Esperti.")
+    [void]$Problemi.Add("GATE A0 NON LETTO: " + $AutotestStato + " >>> NON e' un autotest superato, ed e' la decisione D5: si prosegue, ma OGNI NUMERO DI QUESTO ROUND ESCE MARCATO 'NON CONVALIDATO'. Non aver trovato il log non e' aver letto un esito (checklist 28-bis, il verde per assenza)." +
+                        " >>> E DA CHE PARTE STA IL DUBBIO, DICHIARATO: le cinque radici in cui questo driver cerca il log dell'agente del tester NON SONO MAI STATE MISURATE SU UN MT5 VERO -- sono l'ipotesi migliore di chi ha scritto la riga, non un fatto. Quindi 'NON LETTO' e' molto piu' probabilmente NOSTRO (cerchiamo nel posto sbagliato) che dell'EA: NON e' un indizio che il motore sbagli, e NON va letto come un mezzo-DIVERGE. Se il motore divergesse davvero, l'esito sarebbe 'DIVERGE' e il round si sarebbe gia' fermato." +
+                        " COME TOGLIERE IL DUBBIO IN CINQUE MINUTI: aprire MT5, Strategy Tester, ricaricare collaudo_autotest.ini (e' nello zip) in test singolo, leggere la scheda Esperti e copiare in chat le righe [ATREXH][AUTOTEST]. E annotare DOVE stava il file: cosi' la prossima riga cerca nel posto misurato invece che nei cinque ipotizzati.")
     Dico ("GATE A0 NON LETTO: " + $AutotestStato) "Yellow"
   }
 }
@@ -1750,8 +1842,8 @@ foreach($c in $Ordinati){
         #      giu' (difetto 67): con la sequenza spaiata anche il CONTEGGIO
         #      e' sospetto, e la colonna FINESTRA e' l'ultima della tabella
         #      "SI CONTA" -- cioe' quella che si legge accanto a n.
-        $c.P0Finestra = "NON AFFIDABILE (sequenza in/out spaiata: anche n e' sospetto)"
-        [void]$Problemi.Add($c.Prova + ": " + $p0.Anomalie + " deal NON accoppiati o con volume diverso. Con UNA POSIZIONE ALLA VOLTA e InpTP1Pct=0 non dovrebbe succedere: le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3).")
+        $c.P0Finestra = "NON AFFIDABILE (vedi PROBLEMI: anche n e' sospetto)"
+        [void]$Problemi.Add($c.Prova + ": " + $p0.Anomalie + " deal ANOMALI -- " + $p0.Stato + " >>> Le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3).")
       }
       # --- LA FINESTRA VERA (criteri par. 4.1)
       #     >>> l'ANOMALIA VIENE PRIMA: se la sequenza in/out e' spaiata, la
@@ -1946,6 +2038,14 @@ try{
   [void]$R.Add("  >>> 'NON LETTO' NON E' 'SUPERATO'. Se l'esito non e' SUPERATO, ogni numero")
   [void]$R.Add("      di questo referto e' NON CONVALIDATO (criteri D5). L'autotest si legge")
   [void]$R.Add("      ESEGUENDO, non compilando: nel giro a vuoto NON esiste, ed e' giusto.")
+  [void]$R.Add("  >>> MA 'NON LETTO' NON E' NEMMENO UN INDIZIO CONTRO L'EA, e va detto da che")
+  [void]$R.Add("      parte sta il dubbio: LE CINQUE RADICI in cui questo driver cerca il log")
+  [void]$R.Add("      dell'agente del tester NON SONO MAI STATE MISURATE SU UN MT5 VERO. Sono")
+  [void]$R.Add("      l'ipotesi migliore di chi ha scritto la riga. 'NON LETTO' vuol dire quasi")
+  [void]$R.Add("      sempre CHE CERCHIAMO NEL POSTO SBAGLIATO NOI, non che il motore diverga:")
+  [void]$R.Add("      se divergesse, l'esito sarebbe DIVERGE e il round si sarebbe fermato da")
+  [void]$R.Add("      solo. Si toglie in cinque minuti ricaricando collaudo_autotest.ini in")
+  [void]$R.Add("      test singolo e leggendo la scheda Esperti -- e annotando DOVE stava il file.")
   [void]$R.Add("")
   [void]$R.Add("--- LA FINESTRA, IL MODELLO E IL RISCHIO ---")
   if($ScreenOhlcM15){
@@ -1984,7 +2084,7 @@ try{
   [void]$R.Add("")
   [void]$R.Add("--- LA PROFONDITA' DEI TICK (criteri D2) ---")
   foreach($s in $SymLavoro){
-    [void]$R.Add("  " + $s.Sym.PadRight(8) + " " + $s.TickMisurati + "   [file: " + $s.TickData + "]")
+    [void]$R.Add("  " + $s.Sym.PadRight(8) + " " + $s.TickMisurati + "   [" + $s.TickData + "]")
   }
   [void]$R.Add("  >>> A modello 4 senza tick reali MT5 NON SI FERMA: ripiega e produce numeri")
   [void]$R.Add("      PLAUSIBILI E FALSI, e nessuna guardia di questo driver puo' accorgersene.")
@@ -2140,7 +2240,14 @@ try{
   [void]$R.Add("      convalidano.")
   [void]$R.Add("  >>> E OGNI RIGA DI RIPRESA E' UN BLOCCO INTERO col suo irm e la sua guardia")
   [void]$R.Add("      (checklist 42): i tre puntini stanno per il blocco di RIGA_R109_DA_MANDARE.md.")
-  [void]$R.Add("      Una riga '& $p ...' incollata da sola riusa la copia locale e il pin di prima.")
+  #  >>> APICI SINGOLI, E NON E' UN VEZZO (trovato ESEGUENDO, 25/08). In apici
+  #      DOPPI questa riga espandeva $p -- che in questo script NON e' il path
+  #      dello script scaricato, ma la variabile del foreach dei PROBLEMI venti
+  #      righe piu' su (in PowerShell la variabile di un foreach SOPRAVVIVE al
+  #      ciclo). Risultato: senza problemi la frase usciva "Una riga '&  ...'",
+  #      e CON problemi ci finiva dentro il TESTO INTERO dell'ultimo problema.
+  #      La riga che deve MOSTRARE del codice si scrive in apici singoli.
+  [void]$R.Add('      Una riga ''& $p ...'' incollata da sola riusa la copia locale e il pin di prima.')
 
   Set-Content -LiteralPath $Referto -Value ($R -join "`r`n") -Encoding UTF8
   if(Test-Path -LiteralPath $Zip){ Remove-Item -LiteralPath $Zip -Force -ErrorAction SilentlyContinue }
