@@ -11,9 +11,11 @@ misurato**: `R33`, `R94`, `R102` e `R103` hanno **tutti** `InpTF=16385` (H1).
 `R108_EURUSD_00_metroH1.txt`, `R108_EURUSD_01_m15.txt`,
 `R108_AUDUSD_00_metroH1.txt`, `R108_AUDUSD_01_m15.txt` — **sei**.
 
-> ⚠️ **Questo foglio NON è ancora la riga da dettare.** Passa dal
-> verificatore-stringhe prima di arrivare a Claudio: il pin qui sotto è
-> **proposto**, non confermato.
+> ✅ **PASSATO DAL VERIFICATORE-STRINGHE il 25/08.** Verdetto: **FAIL →
+> corretto**. Sei difetti trovati **eseguendo**, tutti corretti nel driver e
+> in queste righe; il dettaglio è in fondo, al § *COSA È GIÀ STATO
+> VERIFICATO*. Il pin è cambiato: quello vecchio
+> (`3d5a3a8…`) **non contiene le correzioni e non va usato**.
 
 ---
 
@@ -79,21 +81,39 @@ difetti scritti nella sua testa invece che cancellati.
 
 ---
 
-## 📌 IL PIN PROPOSTO — **`3d5a3a84134465edcbafe8d276d28b6813dd2772`**
+## 📌 IL PIN — **`de7134e284afc5577f262293d9641abd4dbbeab3`**
 
 ```
-3d5a3a84134465edcbafe8d276d28b6813dd2772
+de7134e284afc5577f262293d9641abd4dbbeab3
 ```
 
-✅ **Verificato eseguendo** che quel commit contiene **tutti e dieci** gli
-artefatti che il driver scarica: il driver, i **sei** file prova, i criteri, il
-sorgente `ABTG_BreakingBand.mq5` e l'include `ABTG_PausaGuardian.mqh`
-(`git cat-file -e <sha>:<file>` su ognuno).
+🔴 **`de7134e284afc5577f262293d9641abd4dbbeab3` È UN SEGNAPOSTO E VA SOSTITUITO PRIMA DI DETTARE LA RIGA.**
+Il verificatore ha corretto il driver, quindi il pin del builder
+(`3d5a3a8…`) è **scaduto**: punta a un `RIGA_R108_BB_M15.ps1` senza le
+correzioni. Sequenza, in quest'ordine — **due commit, non uno**:
 
-⚠️ **Questo foglio è stato committato DOPO il pin, e va bene**: il driver non lo
-scarica. Ma **il pin si rilegge DOPO il push, non prima** (checklist 6 e 55): se
-il verificatore corregge una riga del driver, dei file prova o dei criteri,
-**questo blocco va ripinnato e questa pagina riscritta**.
+```bash
+# 1. il SOLO file che il driver scarica ed è cambiato
+git add backtest_pipeline/righe/RIGA_R108_BB_M15.ps1
+git commit -m "R108: correzioni del verificatore (gate antenato, screen OHLC, CmdletBinding)"
+git push
+SHA=$(git rev-parse HEAD)
+# 2. il pin dentro questa pagina, che il driver NON scarica
+sed -i "s/de7134e284afc5577f262293d9641abd4dbbeab3/$SHA/g" backtest_pipeline/righe/RIGA_R108_DA_MANDARE.md
+git add backtest_pipeline/righe/RIGA_R108_DA_MANDARE.md && git commit -m "R108: pin" && git push
+grep -c "de7134e284afc5577f262293d9641abd4dbbeab3" backtest_pipeline/righe/RIGA_R108_DA_MANDARE.md   # DEVE dare 0
+```
+
+✅ **Gli altri nove artefatti che il driver scarica NON sono stati toccati** e
+stanno già in repo da prima: i **sei** file prova, i criteri, il sorgente
+`ABTG_BreakingBand.mq5`, l'include `ABTG_PausaGuardian.mqh` — più i **tre
+antenati R103** (`R103_ABTG_BreakingBand_{GBPUSD_772161,EURUSD_772162,AUDUSD_772163}.txt`),
+che il gate nuovo scarica al pin. Quindi **un solo file da committare prima
+del pin**.
+
+⚠️ Se il segnaposto resta, l'`irm` prende un 404, `-ErrorAction Stop` è
+terminante e **la riga muore lì**: non parte niente. È il comportamento
+voluto, ma è un giro sprecato — meglio il `grep -c` qui sopra.
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
 silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola per un
@@ -139,11 +159,14 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='3d5a3a84134465edcbafe8d276d28b6813dd2772'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='de7134e284afc5577f262293d9641abd4dbbeab3'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R108_BB_M15.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R108_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
-    if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem "$env:USERPROFILE\Desktop\R108_BB_M15_*.zip" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
+    if($z.Count -eq 0){ Write-Host '!!! NESSUNO ZIP DI ADESSO: la riga si e'' fermata prima della raccolta. Copia lo SCHERMO, non cercare file.' -ForegroundColor Red }
+    else { Write-Host ('ZIP: ' + $z[0].FullName) -ForegroundColor Green };
+    if($rc -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
 
 ### Cosa deve dire — **le righe sono state PRODOTTE ESEGUENDO e incollate dall'output** (checklist 70)
@@ -174,6 +197,11 @@ E poi, in ordine:
   finché non firmi**, e il giro a vuoto prosegue lo stesso;
 - `6 file prova scaricati al pin, 70 righe di input ciascuno`;
 - `gate della STELLA: ogni cella M15 differisce dalla sua cella metro SOLO su InpTF`;
+- **tre righe `gate dell'ANTENATO <simbolo>: il metro e' identico a
+  R103_ABTG_BreakingBand_...txt (delta: InpNewsCurrencies, InpMagic, InpComment)`**
+  — è il gate **nuovo**, aggiunto dal verificatore: la stella confronta le due
+  celle **fra loro** e per costruzione **non può vedere** una riga storta uguale
+  in **tutte e due**. Il metro si confronta col file R103 da cui è copiato;
 - `valori, pattern VIVO, TF del grafico, asse unico e 42 magic vergini verificati NEI FILE`;
 - `ABTG_BreakingBand.mq5 al pin, version 1.03, InpTF e' un input libero`;
 - **tre righe `profondita' TICK <simbolo>:`** — ⚠️ **oggi diranno `NON MISURATA`,
@@ -199,11 +227,15 @@ firma finisce **scritta nel referto**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='3d5a3a84134465edcbafe8d276d28b6813dd2772'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='de7134e284afc5577f262293d9641abd4dbbeab3'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R108_BB_M15.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R108_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati;
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem "$env:USERPROFILE\Desktop\R108_BB_M15_*.zip" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
+    if($rc -eq 2){ Write-Host '!!! CRITERI NON FIRMATI: non e'' partito NIENTE e NON c''e'' nessuno zip. Leggi le sei decisioni qui sopra.' -ForegroundColor Red }
+    elseif($z.Count -eq 0){ Write-Host '!!! NESSUNO ZIP DI ADESSO: la riga si e'' fermata prima della raccolta. Copia lo SCHERMO, non cercare file.' -ForegroundColor Red }
+    else { Write-Host ('ZIP DA MANDARE: ' + $z[0].FullName) -ForegroundColor Green;
+           if($rc -ne 0){ Write-Host 'ESITO: PARZIALE, SCREEN O FERMO - lo zip esiste: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } } }
 ```
 
 Si incolla **il blocco INTERO**: è **un comando solo** (checklist 21). Tre righe
@@ -230,11 +262,15 @@ fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='3d5a3a84134465edcbafe8d276d28b6813dd2772'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='de7134e284afc5577f262293d9641abd4dbbeab3'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R108_BB_M15.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R108_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloSimbolo 'GBPUSD';
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloSimbolo 'GBPUSD'; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem "$env:USERPROFILE\Desktop\R108_BB_M15_*.zip" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
+    if($rc -eq 2){ Write-Host '!!! CRITERI NON FIRMATI: non e'' partito NIENTE e NON c''e'' nessuno zip. Leggi le sei decisioni qui sopra.' -ForegroundColor Red }
+    elseif($z.Count -eq 0){ Write-Host '!!! NESSUNO ZIP DI ADESSO: la riga si e'' fermata prima della raccolta. Copia lo SCHERMO, non cercare file.' -ForegroundColor Red }
+    else { Write-Host ('ZIP DA MANDARE: ' + $z[0].FullName) -ForegroundColor Green;
+           if($rc -ne 0){ Write-Host 'ESITO: PARZIALE, SCREEN O FERMO - lo zip esiste: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } } }
 ```
 
 **Due simboli** — ⚠️ **l'elenco va FRA APICI** (checklist 65: senza, la virgola
@@ -243,11 +279,15 @@ fa un **array** e il binder lo unisce con uno spazio):
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='3d5a3a84134465edcbafe8d276d28b6813dd2772'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='de7134e284afc5577f262293d9641abd4dbbeab3'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R108_BB_M15.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R108_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloSimbolo 'EURUSD,AUDUSD';
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloSimbolo 'EURUSD,AUDUSD'; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem "$env:USERPROFILE\Desktop\R108_BB_M15_*.zip" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
+    if($rc -eq 2){ Write-Host '!!! CRITERI NON FIRMATI: non e'' partito NIENTE e NON c''e'' nessuno zip. Leggi le sei decisioni qui sopra.' -ForegroundColor Red }
+    elseif($z.Count -eq 0){ Write-Host '!!! NESSUNO ZIP DI ADESSO: la riga si e'' fermata prima della raccolta. Copia lo SCHERMO, non cercare file.' -ForegroundColor Red }
+    else { Write-Host ('ZIP DA MANDARE: ' + $z[0].FullName) -ForegroundColor Green;
+           if($rc -ne 0){ Write-Host 'ESITO: PARZIALE, SCREEN O FERMO - lo zip esiste: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } } }
 ```
 
 **Una cella sola** (la cella METRO del suo simbolo rigira lo stesso):
@@ -255,11 +295,15 @@ fa un **array** e il binder lo unisce con uno spazio):
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='3d5a3a84134465edcbafe8d276d28b6813dd2772'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='de7134e284afc5577f262293d9641abd4dbbeab3'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R108_BB_M15.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R108_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloCella 'R108_GBPUSD_01_m15.txt';
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloCella 'R108_GBPUSD_01_m15.txt'; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem "$env:USERPROFILE\Desktop\R108_BB_M15_*.zip" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
+    if($rc -eq 2){ Write-Host '!!! CRITERI NON FIRMATI: non e'' partito NIENTE e NON c''e'' nessuno zip. Leggi le sei decisioni qui sopra.' -ForegroundColor Red }
+    elseif($z.Count -eq 0){ Write-Host '!!! NESSUNO ZIP DI ADESSO: la riga si e'' fermata prima della raccolta. Copia lo SCHERMO, non cercare file.' -ForegroundColor Red }
+    else { Write-Host ('ZIP DA MANDARE: ' + $z[0].FullName) -ForegroundColor Green;
+           if($rc -ne 0){ Write-Host 'ESITO: PARZIALE, SCREEN O FERMO - lo zip esiste: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } } }
 ```
 
 In **tutti** i casi la **cella METRO del simbolo rigira**: è la prova che il
@@ -271,20 +315,38 @@ sprecata.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='3d5a3a84134465edcbafe8d276d28b6813dd2772'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='de7134e284afc5577f262293d9641abd4dbbeab3'; $p="$env:USERPROFILE\RIGA_R108.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R108_BB_M15.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R108_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -ScreenOhlcM15;
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -ScreenOhlcM15; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem "$env:USERPROFILE\Desktop\R108_BB_M15_*.zip" -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
+    if($rc -eq 2){ Write-Host '!!! CRITERI NON FIRMATI: non e'' partito NIENTE e NON c''e'' nessuno zip. Leggi le sei decisioni qui sopra.' -ForegroundColor Red }
+    elseif($z.Count -eq 0){ Write-Host '!!! NESSUNO ZIP DI ADESSO: la riga si e'' fermata prima della raccolta. Copia lo SCHERMO, non cercare file.' -ForegroundColor Red }
+    else { Write-Host ('ZIP DA MANDARE: ' + $z[0].FullName) -ForegroundColor Green;
+           if($rc -ne 0){ Write-Host 'ESITO: PARZIALE, SCREEN O FERMO - lo zip esiste: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } } }
 ```
 
 🔴 **E QUESTO GIRO NON PUÒ PRODURRE UN VERDETTO, per costruzione.** Le celle M15
 girano in **OHLC M1**, e su M5/M15 **l'OHLC inganna — ed è MISURATO in casa**
 (`REGISTRO_TEST.md` §2: _"in OHLC i Live5m davano numeri finti enormi (+129k DAX,
-+30k Nasdaq). In real tick: morti."_). Il driver **impone la regola col codice,
-non con una nota**: la cartella e lo zip si chiamano `SCREENOHLC`, e **ogni riga
-M15 esce marcata `NON GIUDICABILE`**. Al massimo produce **il permesso** di un
-giro a tick reali.
++30k Nasdaq). In real tick: morti."_).
+
+⚠️ **Questa promessa era FALSA fino alla verifica del 25/08, e il verificatore
+l'ha resa vera.** Nella v1 lo switch cambiava solo il **nome** della cartella:
+fatto girare lo screen, il referto usciva con **`S0a SUPERATO` su tutti e tre i
+simboli**, ogni riga con esito `OK`, `ESITO: COMPLETO ... nessun guasto` e
+**uscita 0** — cioè un cancello verde su numeri che per costruzione non valgono
+niente. È il difetto **67** (la regola scritta nella prosa e mai imposta dal
+codice). Adesso è un `if`, ed è stato **provato eseguendolo**:
+
+- ogni riga M15 della TABELLA MADRE esce con `ESITO = NON GIUDICABILE`;
+- **nessun verdetto S0a**: né `SUPERATO` né `FALLITO`, solo
+  `NON GIUDICABILE -- questa cella e' girata a OHLC M1`;
+- il referto chiude con `ESITO: SCREEN OHLC -- NESSUN VERDETTO` e **esce 1**,
+  così la riga in chat non può annunciarlo come un round riuscito;
+- la cartella e lo zip si chiamano `SCREENOHLC`.
+
+Al massimo produce **il permesso** di un giro a tick reali.
 
 ---
 
@@ -311,7 +373,8 @@ Cartella e zip sul Desktop: `R108_BB_M15_<MODO>_<data>_<ora>` — dentro, **per 
   — ⚠️ **sono la fonte di TUTTO il PASSO 0**: prima operazione, take in pip,
   durata in barre, peggior giornata. Se mancano, il cancello zero non esiste;
 - **18 `.ini`**, quelli che hanno girato davvero;
-- i **sei file prova al pin**, così lo zip è autosufficiente;
+- i **sei file prova al pin** + i **tre antenati** `ANTENATO_R103_ABTG_BreakingBand_*.txt`,
+  così lo zip è autosufficiente e porta dentro anche **il metro del metro**;
 - `compile_BreakingBand.log`;
 - i file per-trade `<SIMB>_<cella>_pertrade_singola.csv`, quando l'EA li scrive.
 
@@ -339,6 +402,16 @@ Cartella e zip sul Desktop: `R108_BB_M15_<MODO>_<data>_<ora>` — dentro, **per 
    **1-3 barre**, va scritto come **allarme sulla robustezza anche a cancelli
    verdi**: `arXiv 2605.04004` §6.2 misura che i soli segnali intraday
    sopravvissuti alla sua falsificazione tengono **12-15 barre**, non 1-6.
+4-bis. 🧨 **LA TABELLA `G4: LA PEGGIOR GIORNATA`** (aggiunta dal verificatore).
+   Muro prop giornaliero **−5,00% su 100k**, e i criteri §5 dicono che a M15 *"il
+   numero da guardare non è il DD totale, è la peggior giornata"*. La v1 la
+   **misurava e non la stampava**: la colonna `Peggior Giornata %` dell'OPTFRAME
+   veniva letta e buttata, per la finestra INTERA e per IS/OOS. Adesso ci sono
+   **quattro viste**: `htm-INTERA` (dal report della singola, con la data),
+   `csv-INTERA`, `csv-IS`, `csv-OOS`. Stessa storia per **`ISdd`**, che era letto
+   e mai scritto: adesso è una colonna della TABELLA MADRE. 👉 **Il rischio non si
+   sospende mai** (Emendamento regola B): un DD/una giornata si leggono a
+   qualunque `n`, anche quando il MERITO è sospeso.
 5. 🧱 **LA COLONNA `FINESTRA` DEL PASSO 0.** `@DAQUANDO 2022.07.01` è **DERIVATO**
    dal tetto delle 100.000 barre, **non misurato**. Se dice `ACCORCIATA`, la
    finestra reale è più corta di quella nominale e **va riscritta nel referto
@@ -374,64 +447,108 @@ Cartella e zip sul Desktop: `R108_BB_M15_<MODO>_<data>_<ora>` — dentro, **per 
 
 ## ✅ COSA È GIÀ STATO VERIFICATO — **eseguendo**, prima dell'invio
 
-Checklist punto **63** (_"il parse si FA, non si dichiara impossibile"_):
+Due passaggi: il **builder** (25/08) e poi il **verificatore-stringhe**, che ha
+rifatto tutto da capo e ha trovato **sei difetti veri**. Verdetto:
+**FAIL → corretto**.
 
-- ✅ il `.ps1` **parsa**: `/opt/pwsh/pwsh` + `[Parser]::ParseFile` → **0 errori**,
-  16.597 token; **ASCII puro** (0 byte non-ASCII, regola del 17/08);
-- 🔍 **e un difetto VERO trovato così, prima dell'invio**: in PowerShell
-  l'operatore **virgola ha precedenza più alta del `+`**, quindi
-  `@($a,$b,$a+2)` **non** è una lista di tre numeri — è `($a,$b,$a) + (2)`,
-  cioè una **concatenazione di array che DUPLICA `$a`**. Il gate dei magic
-  **accusava di collisione il primo file sano del round**. Corretto in tre
-  punti, con le parentesi e il commento che spiega perché;
-- ✅ **i gate girano DAVVERO sui sei file veri**, stubbando il download dal repo
-  locale: righe vive 70×6, stella, valori, pattern vivo, TF del grafico, asse
-  unico, **42 magic vergini** → tutti passati;
-- ✅ **e i gate sono stati fatti FALLIRE, uno per uno** (un gate che non scatta
-  mai non è dimostrato). Provati e **tutti scattati**: `InpTF` scambiato fra le
-  due celle, un terzo input mosso, **il `InpPatternMode` sbagliato del file del
-  cacciatore**, il **magic di R103** `760030`, un magic duplicato fra celle, un
-  **secondo asse Y**, `@DAQUANDO` spostato, `@PERIODO H1` su una cella M15,
-  `@SIMBOLO` sbagliato, `InpMinRR`/`InpMinTPatATR` **accesi**, il rischio
-  cambiato, una riga di input tolta, il sorgente di **un'altra versione**,
-  `InpTF` **non più un `input`**. Più i **tre casi 34-bis a stella VERDE** (la
-  stessa corruzione in **entrambe** le celle di un simbolo: li prendono il gate
-  dei valori e quello dell'asse unico). Più il **controllo positivo** finale: i
-  file sani ripassano;
+### 🔧 I SEI DIFETTI TROVATI DAL VERIFICATORE — tutti **riprodotti**, non dedotti
+
+| | difetto | come è stato trovato | classe |
+|---|---|---|---|
+| **V1** | 🔴 **`-ScreenOhlcM15` era solo un nome di cartella.** Fatto girare lo screen: `S0a SUPERATO` su tutti e tre i simboli, ogni riga `OK`, `ESITO: COMPLETO ... nessun guasto`, **uscita 0** — un cancello verde su numeri che per costruzione non valgono niente. La testa del driver dichiarava *"qui è un if, non una frase"*: **non era un if** | eseguito il ramo screen col tester stubbato | **67** (regola nella prosa, mai nel codice) |
+| **V2** | 🔴 **`[CmdletBinding()]` mancante.** Un `.ps1` col solo `param()` **non rifiuta** i parametri che non conosce: li mette in `$args` e **tira dritto in silenzio**. Riprodotto: `& $p -Pin X -Riprendi` stampa `args=[-Riprendi]` ed esce 0. 👉 Su **questa** riga vuol dire che **`-SoloControlo` con una L sola non è un giro a vuoto: è LA CORSA VERA**, 18 passate a tick reali su 4 anni di M15 | eseguito su uno script-sonda | **NUOVA (71)** |
+| **V3** | 🟠 **`-Riprendi` decorativo**: dichiarato fra i parametri con il commento *"salta i lanci il cui artefatto c'è già"* e **mai consultato** (`grep`: 3 occorrenze, tutte prosa). Chi lo passava dopo una corsa interrotta rifaceva **tutto** | grep + esecuzione | **14/15** (guardia decorativa) |
+| **V4** | 🟠 **La corruzione SIMMETRICA passava tutti i gate.** `InpBBPeriod` 20→25 in **entrambe** le celle di GBPUSD: stella verde, valori verdi, asse unico verde, magic verdi, **uscita 0**. Restavano scoperti **64 dei 70 input** — e la stella per costruzione non può vederli, perché confronta le due celle *fra loro* | driver fatto girare su un repo corrotto | **NUOVA (72)** |
+| **V5** | 🟠 **La coda della riga in chat prometteva lo zip anche quando non c'è.** `exit 2` (criteri non firmati) e il gate MT5-aperto escono **prima** della raccolta: il messaggio diceva lo stesso *"lo zip esiste lo stesso: mandalo"* | eseguita la coda nei 4 esiti | **22 / 26-bis** |
+| **V6** | 🟠 **`ISdd` e la peggior giornata letti e buttati.** `$c.DdIS` e `$c.PgInt` erano assegnati dal CSV e **non stampati da nessuna parte**; `Pg` di IS e OOS non era nemmeno letto. Ma i criteri §5 **G4** dicono *"peggior giornata, misurata SEMPRE"*, e il **rischio non si sospende mai** | grep delle proprietà con 1 sola occorrenza | famiglia **66** |
+
+**Tutti e sei corretti nel driver o in queste righe, e le correzioni sono state
+riprovate eseguendo.** V2 e V4 sono **classi nuove**: sono andate nella
+`CHECKLIST_RIGA_DI_LANCIO.md` ai punti **71** e **72**.
+
+⚠️ **V2 è un difetto di FAMIGLIA, non di R108**: `grep -c CmdletBinding` sui
+**dodici** driver di round (`RIGA_R95` … `RIGA_R108`) dà **0 su 12**. R108 è
+l'unico corretto. Gli altri undici restano esposti — è lavoro a sé, dichiarato.
+
+### 🧪 E COSA È STATO FATTO GIRARE DAVVERO
+
+- ✅ **parse reale**, non analisi statica: `/opt/pwsh/pwsh` +
+  `[Parser]::ParseFile` → **0 errori**, 17.455 token; **ASCII puro** (0 byte
+  non-ASCII, regola del 17/08); **0 token PS7-only** (niente ternari, `&&`,
+  `??`) — sul VPS/PC c'è **Windows PowerShell 5.1**;
+- ✅ **i sei blocchi `powershell` di questa pagina parsano**, e ognuno è **UN
+  SOLO statement** (checklist 21: incollato spezzato sarebbero comandi
+  indipendenti), **zero byte non-ASCII**;
+- ✅ **la precedenza virgola/`+`** (`@($a,$b,$a+2)` che duplica `$a`, trovata dal
+  builder) verificata **sull'AST, non a grep**: 41 array literal, **0 elementi
+  con un'espressione binaria non parentesizzata**. Le tre correzioni sono
+  complete e non ce ne sono altre;
+- ✅ **i file prova diffati riga per riga contro R103**: le tre celle metro sono
+  identiche a `R103_ABTG_BreakingBand_{GBPUSD_772161,EURUSD_772162,AUDUSD_772163}.txt`
+  salvo `InpMagic`, `InpComment` e `InpNewsCurrencies` (tolta; inerte perché
+  `InpUseNewsFilter=false` e il sorgente esce subito — righe 1491-1496). E il
+  **PatternMode è quello giusto**: `2 / 0 / 1`, letto nei file R103, non a
+  memoria. Le celle M15 differiscono dal loro metro **solo** su `@PERIODO`,
+  `@DAQUANDO`, `InpTF` e `InpMagic`;
+- ✅ **magic 762000-762057 VERGINI, rifatto il grep**: nel repo esiste un solo
+  `762xxx` ed è `762821` — **un URL di un blog MQL5**, non un magic. E
+  `$MagicVietati` contiene i magic R103 di BreakingBand (`760020/760030/760040`
+  + gemelli), che sono **proprio le tre sedie vive di questo round**;
+- ✅ **i gate fatti FALLIRE uno per uno, 17 casi su repo corrotto: 17 su 17
+  scattano.** `InpTF` scambiato, un terzo input mosso, **il `InpPatternMode`
+  sbagliato del cacciatore**, il magic R103 `760030`, un magic duplicato, un
+  secondo asse `Y`, `@DAQUANDO` spostato, `@PERIODO H1` su una cella M15,
+  `@SIMBOLO` sbagliato, `InpMinRR` e `InpMinTPatATR` accesi, il rischio
+  cambiato, una riga tolta, sorgente di altra versione, `InpTF` non più
+  `input`, include monco. **Nella v1 uno di questi 17 NON scattava** (la
+  corruzione simmetrica): adesso lo prende il gate dell'antenato;
+- ✅ **otto corruzioni SIMMETRICHE** (`InpBBPeriod`, `InpBBDev`, `InpSL_ATRmult`,
+  `InpBulgeWidthMult`, `InpBEatATR`, `InpMaxTradesPerDay`,
+  `InpUseCongestionFilter`, `InpTP1Pct`) → **8 su 8 fermate** dal gate nuovo,
+  e il **controllo positivo** (file sani) ripassa;
 - ✅ **le due fabbriche di `.ini` provate**: 18 `.ini` scritti e riletti —
-  `Model`, `Period`, `Symbol`, `FromDate`/`ToDate`, `AllowLiveTrading=false`,
-  `InpTF`, `InpPatternMode`, il magic — e **zero `||` nella passata singola**
-  (un `||` rimasto sarebbe un'ottimizzazione travestita, e in ottimizzazione
-  **non esiste nessun report `.htm`**: il PASSO 0 resterebbe muto);
-- ✅ **il parser dei DEAL provato su un report finto** con l'intestazione
-  **italiana** vera: take **18 pip**, durata **4 barre**, peggior giornata
-  **−0,014%**, prima operazione, `n` — **tutti i numeri attesi, calcolati a
-  mano prima**. E i **controlli negativi**: report **senza la colonna Prezzo**
-  (→ si rifiuta e lo dice: *"senza il prezzo il take in pip NON esiste"*),
-  intestazione ignota, **sequenza in/out spaiata** (→ `NON AFFIDABILE`, e il
-  take resta `n/d`: **non si stima**), report in **UTF-16**, lista vuota;
-- ✅ **il parser del CSV provato sotto cultura it-IT** con l'intestazione VERA
-  dell'OPTFRAME di questo EA: `1.19900` letto **uno-virgola-199** (non 1199);
-  gemelli `IDENTICI` / `DIVERSI su profitto` / `NON VALIDO: 1 righe invece di 2`
-  / colonne ignote (→ **si rifiuta di indovinare** e stampa quelle che ha visto);
-- ✅ **il cancello zero S0a provato nei suoi TRE stati** più il quarto: take 18 e
-  6 pip → `SUPERATO`; 3,0 e 2,3 → `SOSPESO`; 1,0 e 0,0 → `FALLITO`; take non
-  misurato → `NON MISURATO`. **E il caso vero del DIARIO** (2,5 pip) esce
-  `SOSPESO`, non `FALLITO`: la banda di incertezza fa il suo mestiere;
-- ✅ **gli switch provati anche nelle combinazioni che questa pagina non propone**
-  (checklist 67): `-ScreenOhlcM15`, `-SoloSimbolo 'GBPUSD'`,
-  `'GBPUSD EURUSD'` (senza virgola), `'PIPPO'` (rifiutata con l'elenco dei nomi
-  validi), `-SoloCella` (**la cella metro rigira**), `-SoloSimbolo` +
-  `-SoloCella` **incoerenti**, **selettore a vuoto** (`exit 1`), e **criteri non
-  firmati sulla corsa vera** (`exit 2`, verificato);
-- ✅ **la convenzione di sentinella letta SU TUTTE LE COLONNE** facendo girare il
-  referto a secco: profitto, PF, DD, `n`, **take, durata** e peggior giornata
-  escono **tutti `n/d`**, mai `-1`, mai `0.000` (difetto **66**);
-- ✅ i **sei file prova** passano `controlla_prova.py`: **70 pin, 2 celle, 0
-  problemi**, e il blocco input è **copiato riga per riga** dai file prova di
-  R103 — non scritto a memoria;
-- ✅ **il commit pinnato contiene tutti e dieci gli artefatti** che il driver
-  scarica (`git cat-file -e` su ognuno).
+  `Model` 1/4, `Period` H1/M15, `Symbol`, `FromDate`/`ToDate`,
+  `AllowLiveTrading=false` in **entrambi** i blocchi `[Experts]`, `InpTF`,
+  `InpPatternMode`, i 18 magic **tutti distinti** (762000…762057) — e **zero
+  `||` nella passata singola** (in ottimizzazione non esiste nessun report
+  `.htm`: il PASSO 0 resterebbe muto);
+- ✅ **il parser dei DEAL provato su un report finto con intestazione italiana e
+  i numeri calcolati A MANO PRIMA**: due operazioni, take **18,0 pip**
+  (1.20180−1.20000), perdita **6,0 pip**, durata mediana **5 barre M15** (4 e
+  6), peggior giornata **−0,007%** il 2022.07.06 (netto −7,00 su 100.000),
+  prima operazione e `n` — **tutti centrati**. Più i **controlli negativi**:
+  report **senza la colonna Prezzo** (→ *"senza il prezzo il take in pip NON
+  esiste"*), intestazione ignota (→ 0 deal), **sequenza in/out spaiata** (→
+  `NON AFFIDABILE`, e il take resta `n/d`: **non si stima**), report in
+  **UTF-16** (→ letto lo stesso), lista vuota;
+- ✅ **tutto sotto cultura `it-IT`**, che è quella del PC: `1.19900` letto
+  **uno-virgola-199** e non *millecentonovantanove*; `9 005.54` (spazio delle
+  migliaia di MT5) letto `9005,54`;
+- ✅ **il cancello S0a nei suoi stati**: 18 e 6 pip → `SUPERATO`; 3,0 e 2,3 →
+  `SOSPESO`; 1,0 e 0,0 → `FALLITO`; non misurato → `NON MISURATO`. **E il caso
+  vero del DIARIO** (2,5 pip) esce `SOSPESO`, non `FALLITO`;
+- ✅ **i gemelli**: `IDENTICI` / `DIVERSI su profitto` / `NON VALIDO: 1 righe
+  invece di 2` / colonne ignote (→ **si rifiuta di indovinare** e stampa quelle
+  che ha visto);
+- ✅ **gli switch e i loro esiti, eseguiti**: giro a vuoto → `exit 0`, 18 `.ini`;
+  **corsa vera senza `-CriteriFirmati` → `exit 2`** con le sei decisioni a
+  schermo; `-SoloSimbolo 'PIPPO'` → `exit 1` con l'elenco dei nomi validi;
+  `-SoloSimbolo 'EURUSD,AUDUSD'` → 2 simboli, 20 passate; `-SoloCella` → **la
+  cella metro rigira** (modo `RIPRESA`); `-ScreenOhlcM15` → modo `SCREENOHLC`,
+  righe `NON GIUDICABILE`, `exit 1`; **`-SoloControlo` (una L) → errore di
+  binding, lo script muore** (era il difetto V2);
+- ✅ **la coda delle righe di chat eseguita nei quattro esiti** con uno zip
+  **vecchio di 7 giorni** già sul Desktop: `exit 2` → *"non è partito NIENTE e
+  NON c'è nessuno zip"*; fermata prima della raccolta → *"NESSUNO ZIP DI
+  ADESSO"* (**lo zip vecchio NON viene scambiato per quello di adesso**);
+  parziale → stampa il percorso dello zip **e** l'avviso; OK → stampa lo zip;
+- ✅ **la convenzione di sentinella su TUTTE le colonne**, letta facendo girare
+  il referto a secco: profitto, PF, DD, `n`, take, durata, **ISdd** e le
+  **quattro colonne della peggior giornata** escono **tutte `n/d`**, mai `-1`,
+  mai `0.000`;
+- ✅ **l'ordine dei simboli promesso = quello stampato**: `AUDUSD, EURUSD,
+  GBPUSD`, alfabetico, **incollato dall'output** e non riscritto a mano
+  (checklist 70).
 
 🟡 **Non verificato, e va detto**: tutto ciò che richiede **MT5** — la
 **compilazione vera**, il comportamento del tester, **se il tester onori
