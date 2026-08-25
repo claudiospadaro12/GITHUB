@@ -69,6 +69,19 @@ R108 è morto **di SEGNALE, non di costo** — il cancello zero S0a era
 `R33`, `R94`, `R102`, `R103` hanno **tutti** `InpTF=16385` (H1); R108 ha
 misurato `InpTF=15` (M15). **Fra i due non c'è niente.**
 
+### 🔎 E c'è un dettaglio LETTO NEL SORGENTE che M15 non aveva
+
+`ABTG_BreakingBand.mq5`, **riga 213**, l'input su cui si regge tutto il round:
+
+```mql5
+input ENUM_TIMEFRAMES InpTF = PERIOD_H1;   // TF operativo (guida: D1/H4/H1/M30)
+```
+
+👉 **`M30` sta nella lista dei TF che il motore dichiara operativi. `M15` non
+c'era.** È una riga **letta nel sorgente il 25/08**, non un ricordo, e non è una
+prova di niente — un commento non è una misura. Ma è la differenza fra *"proviamo
+un TF a caso"* e *"proviamo l'ultimo TF che l'autore del motore nomina"*.
+
 > ### ❓ LA DOMANDA, testuale: **DOV'È IL CONFINE DELL'EDGE?**
 > Fra **H1 e M30** (e allora il capitolo della discesa di TF è chiuso), oppure
 > fra **M30 e M15** (e allora M30 è un candidato che nessuno ha ancora guardato).
@@ -444,6 +457,16 @@ situazione che § 8 chiama **esito misto**.
 
 ### G4 · **PEGGIOR GIORNATA** — misurata **sempre**, anche se favorevole
 
+> 🫥 **CHECKLIST 80, e la colonna NON è stata ereditata dal gemello.** Il punto
+> 80 (nato verificando R110) dice che una colonna presa dal round gemello può
+> essere **strutturalmente impossibile** per la famiglia nuova, e che il `n/d`
+> onesto la **camuffa**. Quindi è stata **riverificata nel sorgente di questo
+> EA**, il 25/08: `ABTG_BreakingBand.mq5` riga **1591** dichiara
+> `double stats[10]` e riga **1625** scrive un OPTFRAME a **11 colonne** che
+> contiene `Peggior Giornata %`. ✅ **La colonna esiste**, quindi qui un `n/d`
+> vuol dire *"stavolta non è uscita"* e **non** *"non può uscire"* — ed è
+> proprio la distinzione che il punto 80 impone di dichiarare **prima**.
+
 Muro prop giornaliero: **−5% su 100k**. La nostra peggiore misurata (R51) è
 **−2,06%**; R108 a M15 ha misurato max **−2,03%**. Il referto stampa **quattro
 viste**: `htm-INTERA` (con la data), `csv-INTERA`, `csv-IS`, `csv-OOS`.
@@ -592,6 +615,62 @@ backtest misura. Trovato da **Claudio**, aprendo un `.ini` dello zip.
 📌 **La lezione di metodo, che vale più del difetto**: provare una funzione
 chiamandola da un test dimostra che **la funzione** è giusta, **non** che riceve
 **gli argomenti** giusti.
+
+### 9.1 🎲 E IL SECONDO DIFETTO DI FAMIGLIA: `Sort-Object` **NON È STABILE** (checklist 81)
+
+Arrivato **mentre R111 si costruiva**, e morde questo driver **in pieno**, perché
+il parser dei deal è copiato dal gemello R108, che aveva:
+
+```powershell
+$ordinati = @($deal | Sort-Object Ora)
+```
+
+Un gesto **difensivo** che introduce il difetto che vuole evitare: sulle chiavi
+**uguali** `Sort-Object` dà un ordine **arbitrario**, e `-Stable` esiste solo da
+PowerShell 7 (sul PC di Claudio c'è **Windows PowerShell 5.1**). Su dati di
+mercato **i pari al secondo sono la regola**: basta una posizione chiusa e la
+successiva aperta dentro lo stesso secondo. Ogni gruppo invertito trasforma una
+coppia `in`/`out` perfetta in `out`/`in`.
+
+🔴 **MISURATO nella corsa vera di R109: 34 false anomalie e 16 operazioni perse**
+— e il driver **accusava l'EA**, l'unico pezzo innocente della catena.
+
+⚠️ **E il sospetto su R108 è aritmetico, non retorico.** Il suo referto registra
+*"EURUSD M15: **2 deal non accoppiati**"*. Un gruppo invertito = **2 anomalie e 1
+operazione persa**. Non è dimostrato qui, ma **è esattamente il numero che questo
+difetto produce**, e va scritto perché nel referto R108 quell'anomalia è a
+registro come *"da capire"*.
+
+➡️ **In R111 è impedito così, e ogni pezzo è stato ESEGUITO:**
+
+1. **non si ordina**: si usa **l'ordine della fonte** (i deal dell'`.htm` sono in
+   ordine di **ticket**, che è cronologico e non ha pari);
+2. **"arriva ordinato" è un'assunzione, e si MISURA**: il driver conta i **salti
+   all'indietro** e i **gruppi a pari secondo**, e li **stampa nel referto**
+   (`ordinamento dei deal (checklist 81): ...`). Il conteggio dei gruppi a pari è
+   proprio il numero che a R109 è servito per la diagnosi;
+3. **se la fonte NON è monotona**, si riordina **solo** con una **chiave di
+   spareggio univoca** — il numero d'**AFFARE**, che il parser ora **legge e
+   conserva apposta** (in R109 lo scartava: per questo la scorciatoia non era
+   disponibile) — e **lo si dichiara**;
+4. **se lo spareggio non c'è**, si scrive **NON MISURATO** e **non si stima**;
+5. gli **altri** `Sort-Object` del file sono stati riesaminati uno per uno:
+   `TrovaReport` ha ora uno **spareggio sul `FullName`** (due file scritti nello
+   stesso istante darebbero un vincitore arbitrario); `Mediana` e
+   `Sort-Object -Unique` sono **dichiarati legittimi**, perché nel primo la
+   chiave **è** l'elemento (i pari sono indistinguibili) e nel secondo i pari
+   **vengono deduplicati**;
+6. **quando la guardia scatta, il driver NON accusa l'EA** (lezione **81-bis**):
+   il messaggio porta con sé la misura dell'ordinamento e manda a confrontare i
+   **tre testimoni indipendenti** — CSV OPTFRAME, deal `out` dell'`.htm`,
+   per-trade dell'EA. *"Chi ha toccato il dato PRIMA della guardia?"* viene prima
+   di *"la guardia è troppo severa?"*.
+
+🧪 **E la batteria è stata scritta con i PARI COSTRUITI APPOSTA**, perché una
+batteria a chiavi tutte distinte **non può vedere questo difetto** — è
+esattamente perché il report finto di R108 aveva orari tutti diversi che il
+difetto è passato. Compresa la **controprova**: sullo stesso input, il codice
+vecchio inventa **fino a 4 anomalie e scende a n=2** contro un `n` vero di **4**.
 
 ---
 
