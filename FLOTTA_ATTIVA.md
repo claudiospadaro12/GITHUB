@@ -41,7 +41,7 @@ _Legenda stato: ✅ validato tick reali · 🟡 nativo/da verificare · ❌ scar
 ## 🟡 IN OSSERVAZIONE / DA VERIFICARE (Ottimizzati + nativi)
 | Grafico | EA | Simbolo | TF | Nota |
 |---|---|---|---|---|
-| D30EURH1 | SupRev_DAX_H1_Ottimizzato | DAX | H1 | 🔴 **NON IN CAMPO** (970911: assente dai censimenti .chr 23/08 e 25/08 E dalla lista Esperti VPS verificata da Claudio il 25/08 22:15 — riga storica, mai deployata o rimossa senza verbale) |
+| D30EURH1 | SupRev_DAX_H1_Ottimizzato | DAX | H1 | 🔴 **SPENTA L'11/08 CON DELIBERA DI CLAUDIO** (`REFERTO_FUORILISTA.md`: IS −240 / OOS +1.312, IS rosso → "VAI CON LO SPEGNIMENTO"). Confermata assente da censimenti .chr 23-25/08 e lista Esperti VPS 25/08 22:15. Questa riga era rimasta indietro di 14 giorni |
 | D30EURH4 | SupRev_DAX_H4_Ottimizzato | DAX | H4 | 🟡 marginale RT (970912) — ✅ confermata in campo (Esperti 25/08 22:15) |
 | D30EURH41 | SuperWave_DAX_H4_Ottimizzato | DAX | H4 | 🔴 **NON IN CAMPO** (770512: assente da censimenti ed Esperti 25/08 22:15) |
 | D30EURH42 | SuperWave | DAX | H4 | 🔴 **NON IN CAMPO** (nativo DAX: assente; il SuperWave nativo vivo e' su U30USD) |
