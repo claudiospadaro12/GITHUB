@@ -126,6 +126,14 @@ viva**, e nemmeno il lato short. Sono **tre celle diverse**, e la sedia è la pr
 95e5200181fbbc33ff324fe461e5567915070abe
 ```
 
+> ☠️ **I PIN BRUCIATI DI QUESTO ROUND — non lanciare niente con questi.**
+> *(Sono STORIA: la ricetta di ri-pinnatura qui sotto tocca solo i punti d'uso e
+> non deve mai riscriverli — checklist 77-bis.)*
+>
+> | pin | perché è bruciato |
+> |---|---|
+> | `40e5bcf0e6d1ac1da2a4953e5a57bcb892a45fd4` | **il gate della firma era chiuso su criteri FIRMATI.** Nel file dei criteri restavano **due** lucchetti (la prosa che li spiegava e il titolo del § 10), e il gate cerca la stringa **in tutto il file**. Misurato eseguendo: la corsa vera **senza** `-CriteriFirmati` usciva **codice 2** su un documento che portava in testa *"FIRMO R110"*; e **con** `-CriteriFirmati` — la forma che quel blocco aveva — **girava per intero, tutte e 12 le celle OK**, lasciando agli atti un referto che diceva `stato dei criteri: NON FIRMATI` e attribuiva la firma a una *"firma in riga"* mai data. ⚠️ **Non fallisce rumorosamente**: produce un round completo con l'autorizzazione sbagliata scritta nel verbale. Corretto in `95e5200` (checklist **82**). |
+
 ⚠️ **Il pin si rilegge DOPO il push, non prima** (checklist 6 e 55). Il commit da
 pinnare deve contenere **tutti e diciotto** gli artefatti: il driver, i **dodici**
 file prova, i criteri, e i **quattro file prova ANTENATI di R103** (che il driver
