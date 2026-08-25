@@ -1,4 +1,13 @@
-# ✍️ R109 — **ATR EXHAUSTION & VOLUME SPIKE** su indici M15 (D30EUR · U30USD · NASUSD), **LONG e SHORT separati** — CRITERI **[DA FIRMARE]**
+# ✍️ R109 — **ATR EXHAUSTION & VOLUME SPIKE** su indici M15 (D30EUR · U30USD · NASUSD), **LONG e SHORT separati** — CRITERI **FIRMATI**
+
+> 🖊️ **FIRMA: "FIRMO" — Claudio, 25/08/2026 sera.** Le otto decisioni del § 10
+> valgono come proposte (D1 solo cella autore, D2 tick misurati prima su
+> D30EUR/NASUSD, D3 niente IS/OOS: si conta, D4 spread 2,0 dichiarato,
+> D5 autotest NON CONVALIDATO/DIVERGE ferma, D6 cella fallita si chiude da
+> sola, D7 cap 3 per cella con conteggio giornate al cap, D8 tick reali).
+> Firma a numeri non visti. ⚠️ La corsa vera parte SOLO col pin corretto del
+> difetto ToDate trovato dal giro a vuoto del 25/08 21:48 (vedi referto del
+> round): il pin cf6126d e' SUPERATO per la corsa.
 
 > 🔒 **Il titolo porta `[DA FIRMARE]` e non è decorazione.** Il driver
 > `righe/RIGA_R109_ATREXH.ps1` **scarica questo file al pin e ci cerca dentro
