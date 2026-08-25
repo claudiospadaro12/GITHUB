@@ -1,0 +1,150 @@
+﻿REFERTO R107 - IL RICONTROLLO DEI LATI SHORT
+DOW (U30USD) - DAX (D30EUR) - NASDAQ (NASUSD), M5, TICK REALI
+modo: CORSA
+switch di questo giro: -CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora [DA FIRMARE])
+     Senza -Rifai il driver generico SALTA le finestre gia' presenti. I file saltati
+     sono marcati 'SALTATA DAL DRIVER' o 'A META'' e finiscono nei PROBLEMI, non in OK.
+stato dei criteri: NON FIRMATI (il file porta ancora [DA FIRMARE])
+data: 2026-08-25 21:23:49   (questa data deve essere di ADESSO)
+     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.
+     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.
+avvio: 2026-08-25 21:14:44   durata: 0.2 ore
+pin: 690773f79fcb97ba3884f280694e3e4c4bb39d99
+criteri: risultati_archivio\R107_CRITERI.md   perimetro: R107_CODA_LATI_SHORT.md
+finestra: 2024.09.26 -> 2026.06.30   split 40/60   modello 4 (tick reali)   deposito 100000
+     IS  2024.09.26 - 2025.06.09
+     OOS 2025.06.10 - 2026.06.30
+     (le stesse di R88, R97, R98 e R101: e' l'unico modo di confrontare i round alla pari)
+spread: Spread=0 scritto NELL'INI = spread CORRENTE del feed BCM, dichiarato.
+     NON e' uno stress di spread e NON e' una misura dello spread.
+rischio: 1,00% nei file prova. IN CAMPO SUL 100K E' 0,65%.
+     >>> OGNI DD DI QUESTO REFERTO E' ALL'1%. Per confrontarlo col forward del
+     100k si MOLTIPLICA PER 0,65 (criteri par. 2.4). Chi salta la conversione
+     confronta due cose diverse.
+
+--- CONVENZIONE DI SENTINELLA (checklist 66) ---
+  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le
+  colonne: profitto, PF, DD, n e peggior giornata. Un '0.000' su un PF sarebbe un
+  numero PLAUSIBILE, e si leggerebbe 'ha perso tutto'.
+
+--- IL GATE G0: LA CELLA LONG SI RIPRODUCE? (criteri par. 5) ---
+  DOW (ABTG_Dow_Apertura_US / U30USD, magic del sorgente 770202)
+     atteso agli atti : PF 1.270 | DD 4.39% | n 130
+     misurato adesso  : PF 1.270 | DD 4.39% | n 130
+     gemelli          : IDENTICI
+     VERDETTO G0      : RIPRODOTTO (PF 1.270, DD 4.39%, n 130)
+     fonte dei numeri : REFERTO_ROUND54_LATI_DOW.md par.1 (riga solo LONG) + R101_REFERTO.md riga 26 (riprodotto il 23/08)
+     CANARINO         : n IS 74 / n OOS 130   (NON e' un gate - Emendamento regola B)
+  DAX (ABTG_DAX_Apertura_EU / D30EUR, magic del sorgente 770101)
+     atteso agli atti : PF 1.397 | DD 7.23% | n 270
+     misurato adesso  : PF 1.397 | DD 7.23% | n 270
+     gemelli          : IDENTICI
+     VERDETTO G0      : RIPRODOTTO (PF 1.397, DD 7.23%, n 270)
+     fonte dei numeri : R101_REFERTO.md righe 27 e 68: e' R101 che ha messo AGLI ATTI il n del DAX (IS 175 / OOS 270)
+     CANARINO         : n IS 175 / n OOS 270   (NON e' un gate - Emendamento regola B)
+  NAS (ABTG_Nasdaq_Apertura_US / NASUSD, magic del sorgente 770201)
+     atteso agli atti : NESSUNO -- G0 NON APPLICABILE su questa famiglia.
+                        'Non applicabile' NON e' 'superato': qui non c'e' nessuna
+                        prova che il banco sia sano, e il round lo dichiara.
+     misurato adesso  : PF 1.110 | DD 5.62% | n 113
+     gemelli          : IDENTICI
+     VERDETTO G0      : NON APPLICABILE (nessuna sedia viva, nessun numero agli atti) -- misurato adesso: PF 1.110, DD 5.62%, n 113
+     fonte dei numeri : NESSUNA: sul Nasdaq non esiste nessuna sedia viva con questa geometria (770201 e' SPENTA). Non c'e' niente da riprodurre e NON c'e' G0.
+     CANARINO         : n IS 85 / n OOS 113   (NON e' un gate - Emendamento regola B)
+  NOTA: 'NON MISURATO' NON e' 'va bene'. Un gate che non legge niente non e' un
+  gate verde. Se il metro non si riproduce, la cella short di QUELLA famiglia non
+  e' stata nemmeno lanciata -- e le altre famiglie sono andate avanti.
+
+--- IL GATE G0-BIS: IL DOW SHORT E' UNA RIPRODUZIONE DI R54 ---
+  cella  : R107_DOW_01_short.txt
+  atteso : PF 0.840 | DD 8.62% | n 73
+  fonte  : REFERTO_ROUND54_LATI_DOW.md par.1, riga 'solo SHORT': OOS -2.591,58 | PF 0,840 | DD 8,62% | n 73 (e IS +6.463,44 | PF 1,511 | DD 2,68% | n 73)
+  misurato adesso : PF 0.840 | DD 8.62% | n 73
+  >>> NON ferma il round, MA se non torna il banco e' SOSPETTO e anche le celle
+      DAX e NASUSD vanno lette con riserva. Il verdetto sta nei PROBLEMI o nei RILIEVI.
+
+--- LA TABELLA MADRE ---   (attese: 2 righe per CSV, 12 CSV, 24 passate)
+  IS e OOS accanto, perche' su un round sui LATI la differenza fra le due finestre
+  E' il risultato (vedi LA SPINA DORSALE in fondo). dPF e dDD sono il DELTA OOS
+  contro la cella LONG della stessa famiglia.
+  FAM  CELLA       ISprof    ISpf    ISdd    ISn    OOSprof   OOSpf   OOSdd   OOSn   dPF      dDD%    PeggGio% ESITO
+  DOW  00_metro    +2812     1.222   5.67    74     +6722     1.270   4.39    130    0.000    0.00    -1.02    OK
+  DOW  01_short    +6463     1.511   2.68    73     -2592     0.840   8.62    73     -0.430   +4.23   -1.01    OK
+  DAX  00_metro    +3789     1.126   5.44    175    +18030    1.397   7.23    270    0.000    0.00    -1.08    OK
+  DAX  01_short    -996      0.965   7.47    138    -1865     0.957   12.31   257    -0.440   +5.07   -1.04    OK
+  NAS  00_riflong  +1371     1.080   4.43    85     +1873     1.110   5.62    113    0.000    0.00    -1.06    OK
+  NAS  01_short    +8399     3.220   2.09    58     -10569    0.460   11.34   59     -0.650   +5.72   -1.06    OK
+
+--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---
+  DOW  00_metro    magic 761000/761001   InpAllowLong=1 / InpAllowShort=0   muove: (niente: e' la cella LONG)
+       LA CELLA VIVA DEL DOW -- il METRO (gate G0), non un candidato
+  DOW  01_short    magic 761010/761011   InpAllowLong=0 / InpAllowShort=1   muove: InpAllowLong + InpAllowShort
+       IL LATO SHORT del Dow -- e' una RIPRODUZIONE di R54 (gate G0-bis)
+  DAX  00_metro    magic 761100/761101   InpAllowLong=1 / InpAllowShort=0   muove: (niente: e' la cella LONG)
+       LA CELLA VIVA DEL DAX -- il METRO (gate G0), non un candidato
+  DAX  01_short    magic 761110/761111   InpAllowLong=0 / InpAllowShort=1   muove: InpAllowLong + InpAllowShort
+       IL LATO SHORT del DAX -- LA MISURA NUOVA DEL ROUND (registro riga A3, mai fatta)
+  NAS  00_riflong  magic 761200/761201   InpAllowLong=1 / InpAllowShort=0   muove: (niente: e' la cella LONG)
+       IL RIFERIMENTO LONG del Nasdaq -- NON e' un metro: nessun numero agli atti
+  NAS  01_short    magic 761210/761211   InpAllowLong=0 / InpAllowShort=1   muove: InpAllowLong + InpAllowShort
+       IL LATO SHORT del Nasdaq -- geometria del Dow TRASPOSTA (criteri par. 2.3 e 7)
+
+--- LA SPINA DORSALE: DOVE STANNO LE DISCESE (criteri par. 4.2) ---
+  FATTO DI CALENDARIO: la discesa documentata dentro questa finestra e' la
+  correzione di FEBBRAIO-APRILE 2025, e cade DENTRO L'IS (l'IS finisce il
+  2025.06.09). L'OOS e' quasi tutto salita.
+  >>> COME SI LEGGE UNA SHORT VERDE IN IS E ROSSA IN OOS: la prima ipotesi NON e'
+      'il lato e' instabile', e' che L'EDGE DELLO SHORT VIVA NELLE DISCESE e che
+      l'IS ne contenga una mentre l'OOS quasi no. R54 chiamo' quel risultato
+      'il 28 ribaltamento' e lo lesse come rumore di regime: guardando il
+      calendario, la spiegazione piu' semplice e' un'altra.
+  >>> [INFERITO], E RESTA [INFERITO]: questo round NON misura i sotto-periodi.
+      Non sa quanto del profitto IS venga da febbraio-aprile, e NON sa se l'OOS
+      contenga discese di ampiezza paragonabile. Non lo assuma nessuno.
+      La misura vera e' un round di PROVA DI REGIME fatto apposta (decisione D3).
+
+--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---
+  * NON APPLICA I CANCELLI. G1 (n>=30), G2 (PF OOS >= 1,10 E positivo in IS),
+    G3 (coerenza cross-mercato) e G4 (campione) li applica il REFERTO DEL ROUND,
+    a mano, sopra questa tabella. Qui ci sono i numeri, non i verdetti.
+  * G3 in particolare NON e' meccanizzabile qui: e' il confronto fra TRE tabelle.
+    Ed e' il cancello che in R46 fermo' un candidato che faceva +31%.
+  * IL NASUSD E' UNA TRASPOSIZIONE, NON UNA SEDIA (criteri par. 2.3). buffer e
+    offset sono in PUNTI ASSOLUTI e i due indici non hanno la stessa scala:
+    1000 punti sono lo 0,023% su un Dow a ~44.000 e lo 0,05% su un Nasdaq a
+    ~20.000. >>> SE LE CELLE NASUSD ESCONO ROSSE, IL RISULTATO E' 'LA GEOMETRIA
+    DEL DOW NON SI TRASPORTA SUL NASDAQ', NON 'il Nasdaq non ha edge in
+    apertura'. Sono due frasi diverse e solo la prima e' misurata qui.
+  * IL DOW SHORT NON E' UNA MISURA NUOVA: e' una riproduzione di R54, che lo
+    aveva gia' BOCCIATO PER MERITO (PF OOS 0,840, n 73, quindi non per campione).
+    Da solo NON riapre la domanda sul Dow: serve da metro e da riga di paragone.
+  * LA MISURA NUOVA DEL ROUND E' IL DAX SHORT. Il registro (riga A3) la teneva
+    'in coda' da un anno, e per di piu' su una geometria diversa (rottura secca).
+  * NON PROMUOVE NIENTE (G5). Due delle tre sedie stanno sul conto 100k: un
+    cambio al forward e' una firma successiva, con il suo referto.
+  * NON misura lo spread, non misura i sotto-periodi, non fa la prova di regime.
+  * LA FINESTRA E' UN SOLO REGIME (21 mesi di indici che salgono) e IL LATO SHORT
+    PARTE SVANTAGGIATO PER REGIME. Un 'niente edge short' qui NON chiude la
+    domanda per sempre: la chiude PER QUESTA EPOCA.
+
+--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (7)
+  - I criteri portano ancora [DA FIRMARE] nel file, ma la corsa e' partita con -CriteriFirmati: la firma e' quella data in riga da Claudio. VA SCRITTO NEL REFERTO DEL ROUND.
+  - CANARINO DOW: n IS = 74, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa famiglia e' SOSPESO (criteri par. 5, G4) -- e' un risultato, non un guasto.
+  - CANARINO DOW: n OOS = 130, sotto 150. Vale la stessa sospensione, e il lato short assottiglia ancora.
+  - GATE G0-BIS SUPERATO: R107_DOW_01_short.txt riproduce il numero di R54 (PF 0.840 | DD 8.62% | n 73). E' la conferma che il banco e' lo stesso di agosto: le celle DAX e NASUSD si leggono sullo stesso metro.
+  - G0 sulla famiglia NAS: NON APPLICABILE. NESSUNA: sul Nasdaq non esiste nessuna sedia viva con questa geometria (770201 e' SPENTA). Non c'e' niente da riprodurre e NON c'e' G0. I numeri della sua cella long sono un RIFERIMENTO (denominatore della short), NON una riproduzione: nessuno puo' dire che il banco e' sano guardando questa famiglia.
+  - CANARINO NAS: n IS = 85, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa famiglia e' SOSPESO (criteri par. 5, G4) -- e' un risultato, non un guasto.
+  - CANARINO NAS: n OOS = 113, sotto 150. Vale la stessa sospensione, e il lato short assottiglia ancora.
+
+--- PROBLEMI (questi SI sono guasti) ---   (0)
+  nessuno.
+
+ESITO: COMPLETO CON RILIEVI -- tutte e 6 le celle hanno prodotto i numeri attesi. I 7 rilievi sono RISULTATI del round (canarino, G1 non misurabile, G0 non applicabile sul NAS), non guasti.
+
+--- COME SI RIPRENDE ---
+  una famiglia sola  : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa 'DAX'
+  due famiglie       : ... & $p -Pin <PIN> -CriteriFirmati -SoloEa 'DOW,NAS'   <-- FRA APICI (checklist 65)
+  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella R107_DAX_01_short.txt
+  >>> in tutti i casi la cella LONG della famiglia rigira: e' il denominatore.
+      Costa 2 CSV, non una passata sprecata.
+  rifare cio' che c'e' gia' : aggiungi -Rifai
