@@ -2,7 +2,7 @@
 
 **La richiesta**: Claudio, 25/08/2026 — _"per gli Indici cerchiamo di fare i
 test con piu' anni di storico"_.
-**Criteri**: `risultati_archivio/STORICO_INDICI_CRITERI.md` — ⚠️ **[DA FIRMARE]**, **sei** decisioni.
+**Criteri**: `risultati_archivio/STORICO_INDICI_CRITERI.md` — ✅ **FIRMATI** ("FIRMO CON PROPOSTE", Claudio 25/08 sera; pin della firma = `490f112…`, ed e' quello nelle righe).
 **Driver**: `righe/RIGA_STORICO_INDICI.ps1` (marcatore `MARCATORE_RIGA_STORICO_INDICI_v1`).
 **Script MQL5 nuovo**: `mql5/Scripts/ABTG_ContaBarreEXT.mq5` (`CONTA-EXT-v1`) — **mai compilato**, lo compila il driver.
 
@@ -131,8 +131,9 @@ spazio, **misura** lo spazio libero, e si ferma.
 📨 **Poi manda**: `Desktop\STORICO_INDICI_<data>_<ora>.zip`.
 ⚠️ Dentro `REFERTO_STORICO_INDICI.txt` c'è una riga **`data:`**: deve essere di
 **ADESSO**. Se è di ieri, hai mandato lo zip di una corsa vecchia.
-📖 **Cosa leggere per primo**: la colonna `STATO` delle sei decisioni (adesso
-sono tutte `DA_FIRMARE`) e la riga `spazio libero`: **servono ~4 GB liberi**.
+📖 **Cosa leggere per primo**: la colonna `STATO` delle sei decisioni (al pin
+attuale devono uscire tutte `FIRMATO`) e la riga `spazio libero`: **servono
+~4 GB liberi**.
 
 ---
 
