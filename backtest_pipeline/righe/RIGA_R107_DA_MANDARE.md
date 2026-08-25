@@ -110,7 +110,9 @@ commit congelato.
 
 **Cosa deve dire** (altrimenti la corsa vera non parte):
 
-- in testa: `famiglie 3 (DOW, DAX, NAS)`, `celle 6 (di cui LONG: 3)`,
+- in testa: `famiglie 3 (DAX, DOW, NAS)` — ⚠️ **in ordine alfabetico, non
+  DOW-DAX-NAS**: la riga li ordina con `Sort-Object -Unique`, e un falso allarme
+  qui costa un giro (checklist 40-quater) —, `celle 6 (di cui LONG: 3)`,
   `CSV attesi 12`, `passate 24`, `IS 2024.09.26 -> 2025.06.09`,
   `OOS 2025.06.10 -> 2026.06.30`;
 - i tre G0 dichiarati **prima** della corsa: `DOW : PF 1.270 | DD 4.39% | n 130`,
@@ -160,17 +162,57 @@ fermerebbe le altre.
 
 ### 🔁 Se serve riprendere
 
+> ⚠️ **Ogni riga di ripresa è un BLOCCO INTERO, con il suo `irm` e la sua guardia**
+> (checklist **42**). `$p` e `$pin` nascono **dentro** il `& { ... }` del blocco
+> qui sopra, che è uno **scope figlio**: quando quel blocco finisce **non esistono
+> più**. Una riga `& $p -Pin $pin ...` incollata da sola in una console nuova
+> muore con _"The expression after '&' ... produced an object that was not valid"_;
+> e — peggio — incollata in una console **ancora calda** funziona, ma riusa la
+> **copia locale già scaricata** e il **pin di prima** (è il difetto del 10/08).
+
+**Una famiglia sola** (qui il DAX, la misura nuova del round):
+
 ```powershell
-# una famiglia sola
-& $p -Pin $pin -CriteriFirmati -SoloEa 'DAX'
-# due famiglie -- ⚠️ FRA APICI (checklist 65: senza, la virgola fa un ARRAY)
-& $p -Pin $pin -CriteriFirmati -SoloEa 'DOW,NAS'
-# una cella sola
-& $p -Pin $pin -CriteriFirmati -SoloCella R107_DAX_01_short.txt
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='690773f79fcb97ba3884f280694e3e4c4bb39d99'; $p="$env:USERPROFILE\RIGA_R107.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R107_LATI_SHORT.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R107_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloEa 'DAX';
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+```
+
+**Due famiglie** — ⚠️ **l'elenco va FRA APICI** (checklist 65: senza, la virgola
+fa un **array** e il binder lo unisce con uno spazio):
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='690773f79fcb97ba3884f280694e3e4c4bb39d99'; $p="$env:USERPROFILE\RIGA_R107.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R107_LATI_SHORT.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R107_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloEa 'DOW,NAS';
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+```
+
+**Una cella sola** (la long della sua famiglia rigira lo stesso):
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='690773f79fcb97ba3884f280694e3e4c4bb39d99'; $p="$env:USERPROFILE\RIGA_R107.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R107_LATI_SHORT.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R107_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloCella 'R107_DAX_01_short.txt';
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
 
 In **tutti** i casi la **cella LONG della famiglia rigira**: è il denominatore, e
 senza denominatore lo short non si legge. Costa **2 CSV**, non una passata sprecata.
+
+> 📎 Il referto stampa in fondo un promemoria `COME SI RIPRENDE` in forma
+> **abbreviata** (`... & $p -Pin <PIN> ...`): quei tre puntini stanno per il
+> blocco intero qui sopra. **Si riprende da questa pagina, non da quella riga.**
 
 ---
 
