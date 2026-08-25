@@ -1,4 +1,12 @@
-# ✍️ R107 — IL RICONTROLLO DEI LATI SHORT (Dow · DAX · Nasdaq) — CRITERI **[DA FIRMARE]**
+# ✍️ R107 — IL RICONTROLLO DEI LATI SHORT (Dow · DAX · Nasdaq) — CRITERI **FIRMATI**
+
+> 🖊️ **FIRMA: "FIRMO CON PROPOSTE" — Claudio, 25/08/2026.** Le tre decisioni del
+> § 10 valgono come proposte: **D1 SÌ** (trasposizione letterale NASUSD),
+> **D2 SÌ** (cancello di merito = R54 criterio 3), **D3 SÌ** (niente finestra
+> dedicata, solo lettura per spina dorsale). Firma a numeri non visti, come da
+> regola. La corsa vera si lancia con `-CriteriFirmati` (il file al pin 690773f
+> porta ancora `[DA FIRMARE]`: il flag è la registrazione della firma, questo
+> documento ne è il verbale).
 
 **Perimetro**: `risultati_archivio/R107_CODA_LATI_SHORT.md` (richiesta di Claudio
 del 25/08/2026: _"Mettilo in coda. Ricontrollo short DAX e Nasdaq e Dow"_).
@@ -470,13 +478,13 @@ scritto qui **prima** dei numeri, non dopo.
 
 ---
 
-## 10. ✍️ LE TRE DECISIONI — **[DA FIRMARE]**
+## 10. ✍️ LE TRE DECISIONI — **FIRMATE ("FIRMO CON PROPOSTE", 25/08/2026)**
 
-> Finché questa sezione porta `[DA FIRMARE]` nel titolo del documento, la corsa
-> vera non parte. Si firma **a numeri non visti**: è la regola di casa, e questo
-> round tocca **due sedie che stanno sui soldi**.
+> Firmate a numeri non visti, come da regola di casa. Le caselle qui sotto
+> restano nel testo originale per il verbale: la firma "CON PROPOSTE" vale
+> **SÌ su tutte e tre le proposte**.
 
-### D1 · La geometria NASUSD
+### D1 · La geometria NASUSD — ✅ FIRMATA: SÌ, trasposizione letterale
 
 **Proposta: trasposizione LETTERALE della geometria del Dow** (buffer 1000,
 offset 400, in punti assoluti), **con il limite dichiarato** al § 2.3 e la
@@ -486,7 +494,7 @@ degli ATR. Scartata perché sarebbe **un parametro nuovo scelto a tavolino senza
 misura** — cioè l'inizio della pesca, su un simbolo che ha già tre bocciature.
 👉 **[ ] SÌ, trasposizione letterale   [ ] NO, si fa altro (dire cosa)**
 
-### D2 · Il cancello di merito sullo short
+### D2 · Il cancello di merito sullo short — ✅ FIRMATA: SÌ, quello di R54
 
 **Proposta: identico a R54 criterio 3 — PF OOS ≥ 1,10 E positivo in IS.**
 **Alternativa scartata**: un cancello più permissivo (es. "PF > 1,00"). Scartata
@@ -494,7 +502,7 @@ perché cambiare il metro adesso rende incomparabile il Dow-2026 col Dow-2025, e
 il Dow è la riga di controllo di tutto il round.
 👉 **[ ] SÌ, quello di R54   [ ] NO (dire quale)**
 
-### D3 · La finestra di DISCESA dedicata (febbraio-aprile 2025)
+### D3 · La finestra di DISCESA dedicata (febbraio-aprile 2025) — ✅ FIRMATA: SÌ, solo lettura
 
 **Proposta: NO, non in R107.** Motivo aritmetico al § 4.2: ~60 giorni di borsa
 × ~1 operazione/giorno, con l'EMA H4 che taglia gli short → **sotto G1 per
