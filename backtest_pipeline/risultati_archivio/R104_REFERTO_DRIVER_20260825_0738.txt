@@ -1,0 +1,114 @@
+=====================================================================
+ R104 - MFE: QUANTO VIENE RESTITUITO PRIMA DI 1R
+ ABTG_MaxMinNotte_DAX_Short_Ottimizzato  --  D30EUR M15
+=====================================================================
+data:     2026-08-25 07:39:32   <<< DEVE essere di ADESSO
+modo:     CORSA
+pin:      4be07ed3f2d80024032bbf2258f1abe58079db42
+criteri:  backtest_pipeline\risultati_archivio\R104_CRITERI_MFE_MAXMIN_DAX.md
+          (autorizzati da Claudio in chat il 24/08/2026: 'Si, misuriamo quanto succede')
+driver:   backtest_pipeline\righe\RIGA_R104_MFE_MAXMIN_DAX.ps1  (MARCATORE_RIGA_R104_v1)
+motore:   ABTG_MaxMinNotte_DAX_Short_Ottimizzato_MFE.mq5   (COPIA DI MISURA, marcatore MARCATORE_MFE_R104_v1)
+prova:    backtest_pipeline\prove\R104_MaxMinDAX_MFE.txt
+finestra: 2024.09.26 -> 2026.08.24   modello 4 = TICK REALI   deposito 100000
+magic:    750010 (di MISURA). Il magic VIVO 770411 e' VIETATO e controllato nel codice.
+durata:   0.7 minuti di passata
+
+--- LA DOMANDA, ed e' di Claudio (24/08, davanti al trade #3221475) ---
+  su quante operazioni il prezzo raggiunge un profitto flottante importante
+  e POI torna indietro SENZA mai toccare il 1o target (1R, dove scatta la
+  parziale + lo stop in pari)?  E quanto, in media, viene restituito?
+
+--- COME SI LEGGE, PRIMA DEI NUMERI ---
+  * R = distanza fra prezzo di apertura e STOP INIZIALE (2,5 x ATR M15 su
+    questa sedia): la stessa unita' con cui il sorgente calcola TP1/TP2/TPfinal.
+  * mfe_R e' misurato TICK PER TICK dal contatore dentro l'EA di misura, sui
+    tick del modello 4. E' la misura migliore disponibile, ma resta una misura
+    del BANCO: fill ideali, spread corrente, nessuno slippage.
+  * mfe_R puo' essere NEGATIVO: vuol dire che il prezzo non e' MAI andato a
+    favore nemmeno di un tick. Non si azzera, o si perderebbe quel fatto.
+  * tp1_toccato e' il FLAG INTERNO VERO dell'EA (gPart1). >>> E HA UN LIMITE,
+    DICHIARATO: nel sorgente vivo gPart1 diventa true SOLO SE LA PARZIALE E'
+    STATA ESEGUITA DAVVERO ('if(parzOK) gPart1=true;'). Al lotto minimo la
+    parziale arrotonda a zero, non parte, e il flag resta false ANCHE SE il
+    prezzo aveva toccato 1R. Per questo accanto c'e' SEMPRE la lettura
+    GEOMETRICA (tp1_geom_1R = mfe_R >= 1R sulla R INIZIALE). Se le due
+    percentuali divergono molto, la differenza E' un risultato: vuol dire che
+    il 1R 'contabile' dell'EA e quello geometrico non sono la stessa cosa --
+    e non lo sono, perche' ManagePos ricalcola R dallo stop CORRENTE, che il
+    trailing puo' aver gia' spostato.
+
+--- IL CAMPIONE ---
+  operazioni chiuse (righe del CSV) ....  29
+  cancello G1 (n >= 30) ...............  NON PASSATO -> le percentuali sono NON MISURABILI
+  righe senza mfe_R leggibile ..........  0
+  righe senza realizzato_R leggibile ...  0
+  CONTROLLO D'IGIENE ...................  OK: 29 righe MFE = 29 posizioni chiuse contate nello storico dei deal
+
+--- L'ISTOGRAMMA DI mfe_R (il massimo profitto flottante, in R) ---
+  <0.3R          5    17.2%  #####
+  0.3-0.5R       3    10.3%  ###
+  0.5-0.8R       3    10.3%  ###
+  0.8-1.0R       2     6.9%  ##
+  >=1R          16    55.2%  ################
+  (intervalli chiusi a sinistra e aperti a destra: 0.5-0.8R vuol dire
+   0.5 <= mfe_R < 0.8. Il secchio >=1R e' quello che HA toccato il 1o
+   obiettivo dal punto di vista GEOMETRICO.)
+
+--- LA RISPOSTA ALLA DOMANDA ---
+  operazioni con mfe_R >= 0,5R ..................  21
+  di queste, con tp1_toccato = 0 ................  5
+  % SU TUTTE le operazioni ......................  NON MISURABILE
+       (mfe_R >= 0,5R E tp1_toccato = 0, su n = 29)
+  % SULLE SOLE operazioni arrivate a 0,5R .......  NON MISURABILE
+       (denominatore 21, non 29: e' un'ALTRA frazione, si legge
+        accanto alla prima e mai al posto suo)
+  la stessa cosa con la lettura GEOMETRICA ......  NON MISURABILE
+       (mfe_R >= 0,5R E tp1_geom_1R = 0, su n = 29 -- vedi il limite di gPart1)
+
+  QUANTO VIENE RESTITUITO su quel sottoinsieme:
+    media di (mfe_R - realizzato_R) .............  1.252 R
+    calcolata su ................................  5 operazioni delle 5 del sottoinsieme
+    (le altre non avevano un realizzato_R leggibile e sono state ESCLUSE,
+     non contate come zero)
+
+--- IL TETTO TEORICO (criteri par. 6) ---
+  somma dei realizzato_R ........................  12.93 R
+  somma se OGNI mfe_R >= 1R fosse incassato a 1R   6.60 R
+  operazioni che hanno toccato 1R ...............  16
+  >>> IL SECONDO NUMERO E' UN LIMITE SUPERIORE IRREALIZZABILE, MAI UN
+      OBIETTIVO OPERATIVO. Nessuno sa in anticipo quale operazione
+      tocchera' 1R, e incassare sempre a 1R spegnerebbe anche quelle che
+      poi sono andate a 3R o a 4R. Serve solo a dare la SCALA di cio' di
+      cui si sta parlando.
+
+--- QUELLO CHE QUESTO ROUND NON DICE, DICHIARATO ---
+  * NON promuove e NON boccia niente, e NON cambia una virgola del forward.
+    E' informazione su un meccanismo gia' in campo (criteri par. 5).
+  * NON propone nessuna soglia diversa e NON tocca il trailing. Se questi
+    numeri suggeriscono un aggiustamento, quella conversazione e' SUCCESSIVA
+    e SEPARATA, con firma propria (criteri par. 7).
+  * NON e' un walk-forward e NON e' un'ottimizzazione: UNA passata, i
+    parametri vivi esatti, zero assi spazzolati.
+  * UNA SOLA FINESTRA e UN SOLO REGIME (21 mesi di indici): il numero che
+    esce descrive QUESTA epoca, non la sedia in eterno.
+  * NON c'e' il controllo delle due passate gemelle (girerebbero sullo
+    stesso file comune e la seconda cancellerebbe la prima). Al suo posto
+    c'e' il confronto col conteggio dello storico dei deal, qui sopra.
+
+--- NOTE (non sono guasti: sono risultati o limiti dichiarati) ---
+  - G1 NON PASSATO: 29 operazioni, sotto le 30 del criterio. Le PERCENTUALI sono NON MISURABILI e il referto le scrive cosi'. L'istogramma resta stampato, perche' contare non e' stimare -- ma non se ne ricava nessuna frequenza.
+
+--- PROBLEMI ---   (0)
+  nessuno.
+
+--- COSA C'E' IN QUESTO ZIP ---
+  ABTG_MFE_MaxMinDAX.csv                           3257 byte   2026-08-25 07:39
+  abtg_trades_750010.csv                           2886 byte   2026-08-25 07:39
+  compile_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_MFE.log       7570 byte   2026-08-25 07:38
+  log_ea.txt                                      43508 byte   2026-08-25 07:39
+  R104_MaxMinDAX_MFE.txt                           5806 byte   2026-08-25 07:38
+  R104_passata.ini                                 1410 byte   2026-08-25 07:38
+  report_passata.htm                             190044 byte   2026-08-25 07:39
+
+ESITO: NON MISURABILE -- la corsa e' RIUSCITA, il campione e' troppo piccolo (n = 29 < 30). E' una risposta, non un guasto: lo zip va mandato lo stesso.
