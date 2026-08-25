@@ -501,6 +501,16 @@ $Problemi  = New-Object System.Collections.ArrayList
 $Rilievi   = New-Object System.Collections.ArrayList
 $Fatale    = ""
 $Firma     = "NON LETTA"
+#  >>> LO STATO DELLA FIRMA NASCE QUI, PRIMA DEL try (checklist 82 punto 4 e
+#      41-bis): la RACCOLTA lo usa per scrivere agli atti chi ha autorizzato
+#      la corsa, e su un throw precedente un $null si leggerebbe "firmato".
+#      $daFirmare = il file porta ancora il lucchetto.
+#      $CritiLetti = il file dei criteri e' stato DAVVERO scaricato al pin.
+#      Sono DUE cose diverse, e il difetto 82 nasce dal confonderle: un
+#      download fallito lascerebbe $daFirmare a true e il referto direbbe
+#      "il file porta il lucchetto" di un file che non ha mai letto.
+$daFirmare  = $true
+$CritiLetti = $false
 $Terminal  = ""; $MetaEditor = ""; $DataFolder = ""; $InstDir = ""
 $MqlFiles  = ""; $CommonFiles = ""
 $Ordinati  = @()      # checklist 41-bis: la raccolta lo scorre SEMPRE
@@ -1215,14 +1225,18 @@ New-Item -ItemType Directory -Force -Path $Work,$Prove,$Logs,$SrcDir,$Risultati,
 # =====================================================================
 Titolo "0-BIS. LA FIRMA DEI CRITERI"
 $critFile = Join-Path $Work "R111_CRITERI.md"
-$daFirmare = $true
 try{
   Scarica ("$RawPin/backtest_pipeline/risultati_archivio/R111_CRITERI.md") $critFile 'R111'
+  $CritiLetti = $true
   $daFirmare = (Select-String -LiteralPath $critFile -SimpleMatch -Pattern '[DA FIRMARE]' -Quiet)
   if($daFirmare){ $Firma = "NON FIRMATI (il file porta ancora [DA FIRMARE])" }
   else          { $Firma = "FIRMATI (nessun [DA FIRMARE] nel file)" }
 }catch{
+  #  >>> NON LETTI != NON FIRMATI, e la differenza finisce nel referto: il
+  #      cancello resta CHIUSO (non si autorizza cio' che non si e' letto),
+  #      ma nessuna frase dira' "il file porta il lucchetto".
   $Firma = "NON LETTI (" + $_.Exception.Message + ")"
+  $CritiLetti = $false
   $daFirmare = $true
 }
 if($Firma -like "FIRMATI*"){ Dico ("criteri: " + $Firma) "Green" } else { Dico ("criteri: " + $Firma) "Yellow" }
@@ -1231,10 +1245,20 @@ if($daFirmare -and -not $SoloControllo -and -not $CriteriFirmati){
   Write-Host "#####################################################################" -ForegroundColor Red
   Write-Host "#  NON PARTO: I CRITERI DI R111 NON SONO FIRMATI.                   #" -ForegroundColor Red
   Write-Host "#####################################################################" -ForegroundColor Red
-  Write-Host "  R111_CRITERI.md porta ancora [DA FIRMARE], ed E' VOLUTO: la PRE-FIRMA di" -ForegroundColor Yellow
-  Write-Host "  Claudio del 25/08 ('FIRMO R111') e' sul PERIMETRO -- 'BB M30, il confine" -ForegroundColor Yellow
-  Write-Host "  fra l'H1 vivo e l'M15 morto' -- NON sulle sette decisioni qui sotto, che" -ForegroundColor Yellow
-  Write-Host "  restano SMENTIBILI finche' la corsa non parte." -ForegroundColor Yellow
+  if($CritiLetti){
+    Write-Host "  R111_CRITERI.md porta ancora [DA FIRMARE], ed E' VOLUTO: la PRE-FIRMA di" -ForegroundColor Yellow
+    Write-Host "  Claudio del 25/08 ('FIRMO R111') e' sul PERIMETRO -- 'BB M30, il confine" -ForegroundColor Yellow
+    Write-Host "  fra l'H1 vivo e l'M15 morto' -- NON sulle sette decisioni qui sotto, che" -ForegroundColor Yellow
+    Write-Host "  restano SMENTIBILI finche' la corsa non parte." -ForegroundColor Yellow
+  } else {
+    #  >>> IL RAMO CHE R110 NON AVEVA: non ho LETTO i criteri, quindi non posso
+    #      dire NIENTE sul loro stato. Il cancello resta chiuso lo stesso --
+    #      non si autorizza cio' che non si e' letto -- ma la ragione e' un'altra
+    #      e va detta, o il referto mette agli atti una frase falsa.
+    Write-Host ("  NON HO POTUTO LEGGERE R111_CRITERI.md AL PIN: " + $Firma) -ForegroundColor Red
+    Write-Host "  Non e' 'i criteri non sono firmati': e' 'non so che cosa dicano'. Il pin" -ForegroundColor Yellow
+    Write-Host "  potrebbe non contenere il file. Il cancello resta CHIUSO lo stesso." -ForegroundColor Yellow
+  }
   Write-Host "" -ForegroundColor Yellow
   Write-Host "  LE SETTE DECISIONI, PRE-FIRMATE CON PROPOSTE (criteri par. 11):" -ForegroundColor Yellow
   Write-Host "   D1  il METRO G0 gira a modello 1 (OHLC M1), come R103 e R108?   -> SI" -ForegroundColor Yellow
@@ -1258,9 +1282,23 @@ if($daFirmare -and -not $SoloControllo -and -not $CriteriFirmati){
   Write-Host ""
   exit 2
 }
-if($daFirmare -and $CriteriFirmati){
+#  >>> LE FRASI SULLO STATO DELLA FIRMA SI COSTRUISCONO SUL VALORE LETTO, MAI
+#      SU UN RAMO SOLO (checklist 82 punto 3). Tre stati, tre frasi diverse:
+#      lucchetto presente / file gia' firmato (switch INERTE) / criteri NON
+#      LETTI. Uno switch di bypass che si autodescrive sempre allo stesso modo
+#      mente meta' delle volte -- ed e' quello che il 25/08 ha messo agli atti
+#      "NON FIRMATI" su un round firmato (R110).
+if($CriteriFirmati -and $CritiLetti -and $daFirmare){
   [void]$Rilievi.Add("I criteri portano ancora [DA FIRMARE] nel file, ED E' LA FORMA VOLUTA (criteri, par. 'LA FORMA DEL LUCCHETTO'): la PRE-FIRMA di Claudio del 25/08 -- 'FIRMO R111' -- e' sul PERIMETRO del round ('BB M30, il confine fra l'H1 vivo e l'M15 morto'), non sulle sette decisioni del par. 11, che erano scritte prima dei numeri e restavano smentibili. La corsa e' partita con -CriteriFirmati, che e' la REGISTRAZIONE di quella pre-firma. VA LETTO COSI' NEL REFERTO DEL ROUND: autorizzato il PERIMETRO, proposte le SETTE DECISIONI.")
   Dico "corsa autorizzata da -CriteriFirmati = registrazione della PRE-FIRMA sul perimetro (25/08, 'FIRMO R111')" "Yellow"
+}
+elseif($CriteriFirmati -and $CritiLetti -and -not $daFirmare){
+  [void]$Rilievi.Add("-CriteriFirmati e' stato passato ma e' INERTE: il file dei criteri al pin NON porta piu' il lucchetto, quindi il cancello si sarebbe aperto da solo e questa corsa e' autorizzata DAL FILE, non dallo switch. >>> LO SWITCH VA TOLTO DALLA RIGA (checklist 82): lasciarlo 'tanto e' innocuo' lo trasforma in un bypass permanente scritto nella pagina, che il giorno in cui qualcuno rimette un lucchetto non fara' fermare niente.")
+  Dico "-CriteriFirmati INERTE: i criteri al pin sono gia' firmati. Togli lo switch dalla riga." "Yellow"
+}
+elseif($CriteriFirmati -and -not $CritiLetti){
+  [void]$Problemi.Add("-CriteriFirmati e' stato passato, ma R111_CRITERI.md NON E' STATO LETTO al pin (" + $Firma + "). Questa corsa NON e' autorizzata da nessun documento verificato: lo switch ha scavalcato un cancello che non ha nemmeno potuto misurare. Agli atti va scritto COSI', e non 'criteri non firmati'. Sospetto n.1: il pin non contiene il file dei criteri.")
+  Dico ("-CriteriFirmati passato ma i criteri NON sono stati letti: " + $Firma) "Red"
 }
 
 # =====================================================================
@@ -1339,6 +1377,17 @@ function GateAntenato([string]$sym,$cellaMetro,[string]$nomeAnt,$deltaAmmessi,[s
     elseif($hAnt[$k] -ne $hMet[$k]){ [void]$div.Add($k) }
   }
   foreach($k in $hMet.Keys){ if(-not $hAnt.ContainsKey($k)){ [void]$div.Add($k) } }
+  #  >>> L'ELENCO SI ORDINA, ED E' LA CHECKLIST 70 (misurato il 25/08, eseguendo
+  #      questo driver sei volte di fila). $div nasce scorrendo le CHIAVI DI UN
+  #      HASHTABLE, che in PowerShell NON hanno ordine -- e su .NET l'hash delle
+  #      stringhe e' randomizzato PER PROCESSO, quindi l'ordine cambia A OGNI
+  #      CORSA: sei giri hanno dato QUATTRO ordini diversi degli stessi tre
+  #      nomi. Il foglio DA_MANDARE chiede a Claudio di confrontare questa riga
+  #      a schermo: senza ordinamento non potrebbe combaciare quasi mai, e un
+  #      falso allarme qui costa un giro. Il punto 70 dice di incollare l'atteso
+  #      DALL'OUTPUT: qui non basta, perche' l'output non e' sempre lo stesso --
+  #      va reso DETERMINISTICO ALLA FONTE, e poi incollato.
+  $div = @($div | Sort-Object)
   $extraA = @($div | Where-Object { $deltaAmmessi -notcontains $_ })
   if($extraA.Count -gt 0){
     throw ($cellaMetro.Prova + " contro l'antenato " + $etichetta + " " + $nomeAnt + ": differiscono anche su [" + ($extraA -join ", ") +
@@ -1593,8 +1642,12 @@ $ex5 = Join-Path $MqlExperts ($NomeEa + ".ex5")
 $logC= Join-Path $MqlExperts ($NomeEa + ".log")
 #  backup DATATO e MAI sovrascritto (checklist 12): il .ex5 vecchio e'
 #  l'unica prova di cosa girava prima su questa macchina.
-$bakMq5 = $mq5 + ".prima_r108_" + $Stamp
-$bakEx5 = $ex5 + ".prima_r108_" + $Stamp
+#  >>> IL NOME DICE IL ROUND GIUSTO: era ".prima_r108_", ereditato dal gemello.
+#      Un backup e' un artefatto che qualcuno leggera' fra sei mesi per sapere
+#      COSA GIRAVA PRIMA DI QUESTO ROUND: se si chiama col nome di un altro
+#      round, dice il falso proprio sull'unica cosa che deve dire.
+$bakMq5 = $mq5 + ".prima_r111_" + $Stamp
+$bakEx5 = $ex5 + ".prima_r111_" + $Stamp
 if((Test-Path -LiteralPath $mq5) -and -not (Test-Path -LiteralPath $bakMq5)){ Copy-Item -LiteralPath $mq5 -Destination $bakMq5 -Force }
 if((Test-Path -LiteralPath $ex5) -and -not (Test-Path -LiteralPath $bakEx5)){ Copy-Item -LiteralPath $ex5 -Destination $bakEx5 -Force }
 Copy-Item -LiteralPath $srcMq5 -Destination $mq5 -Force
@@ -1912,7 +1965,7 @@ foreach($c in $Ordinati){
         #      MISURA DELL'ORDINAMENTO e i tre testimoni da confrontare.
         [void]$Problemi.Add($c.Prova + ": " + $p0.Anomalie + " deal NON accoppiati (la sequenza in/out non e' alternata). Le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3). >>> PRIMA DI ACCUSARE L'EA, checklist 81-bis: ORDINAMENTO = [" + $p0.Ordinamento + "]. In R109 anomalie identiche a queste erano INVENTATE da un Sort-Object instabile sui deal a pari secondo, e l'EA era pulito. Qui i deal NON sono stati riordinati alla cieca, ma la verifica resta la stessa: confrontare n con i TRE TESTIMONI INDIPENDENTI -- il CSV OPTFRAME di questa cella (colonna Trades), i soli deal 'out' dell'.htm, e il per-trade abtg_trades_*.csv scritto dall'EA. Se i tre concordano fra loro e a dissentire e' questo parser, il difetto e' QUI.")
       }
-      # --- LA FINESTRA VERA (criteri par. 4.1): la prima operazione entro
+      # --- LA FINESTRA VERA (criteri par. 4.2): la prima operazione entro
       #     N mesi dall'inizio = PIENA. Oltre = ACCORCIATA, e va nei PROBLEMI.
       if($p0.Prima -ne "NON MISURATA"){
         $dIni = [datetime]::ParseExact($c.DataDa,"yyyy.MM.dd",$INV)
@@ -1921,7 +1974,7 @@ foreach($c in $Ordinati){
           $c.P0Finestra = "PIENA (prima op. " + $p0.Prima + ", entro " + $MesiPrimaOp + " mesi dall'inizio)"
         } else {
           $c.P0Finestra = "ACCORCIATA (prima op. " + $p0.Prima + ", finestra dichiarata dal " + $c.DataDa + ")"
-          [void]$Problemi.Add($c.Prova + " FINESTRA ACCORCIATA: la prima operazione e' del " + $p0.Prima + ", la finestra dichiarata parte dal " + $c.DataDa + ". >>> @DAQUANDO NON E' UNA MISURA, e' DERIVATO dal tetto delle 100.000 barre (criteri par. 4.1): la finestra REALE e' piu' corta di quella nominale e va RISCRITTA NEL REFERTO PRIMA di leggere qualunque numero di questa cella.")
+          [void]$Problemi.Add($c.Prova + " FINESTRA ACCORCIATA: la prima operazione e' del " + $p0.Prima + ", la finestra dichiarata parte dal " + $c.DataDa + ". >>> @DAQUANDO NON E' UNA MISURA, e' DERIVATO dal tetto delle 100.000 barre (criteri par. 4.2): la finestra REALE e' piu' corta di quella nominale e va RISCRITTA NEL REFERTO PRIMA di leggere qualunque numero di questa cella.")
         }
       }
       # --- IL CANCELLO ZERO S0a, solo sulle celle M30 (criteri par. 3.3)
@@ -2162,7 +2215,16 @@ try{
   else              { [void]$RefTxt.Add("modo: " + $Modo) }
   $sw = @()
   if($SoloControllo){ $sw += "-SoloControllo (nessuna passata)" }
-  if($CriteriFirmati){ $sw += "-CriteriFirmati (REGISTRAZIONE della PRE-FIRMA di Claudio del 25/08, 'FIRMO R111', che e' sul PERIMETRO del round e non sulle sette decisioni: il file dei criteri porta [DA FIRMARE] APPOSTA)" }
+  #  >>> TRE RAMI, COSTRUITI SUL VALORE LETTO (checklist 82 punto 3). Il ramo
+  #      unico e' il difetto: descriveva sempre lo stesso stato, e su un file
+  #      gia' firmato -- o mai letto -- avrebbe messo agli atti una frase falsa.
+  if($CriteriFirmati -and $CritiLetti -and $daFirmare){
+    $sw += "-CriteriFirmati (REGISTRAZIONE della PRE-FIRMA di Claudio del 25/08, 'FIRMO R111', che e' sul PERIMETRO del round e non sulle sette decisioni: il file dei criteri porta il lucchetto APPOSTA)"
+  } elseif($CriteriFirmati -and $CritiLetti){
+    $sw += "-CriteriFirmati (INERTE: il file dei criteri al pin NON porta piu' il lucchetto, il cancello si sarebbe aperto da solo. Questa corsa e' autorizzata DAL FILE, e lo switch va tolto dalla riga)"
+  } elseif($CriteriFirmati){
+    $sw += "-CriteriFirmati (SCAVALCO NON VERIFICATO: R111_CRITERI.md non e' stato letto al pin, quindi nessun documento ha autorizzato questa corsa -- vedi PROBLEMI)"
+  }
   if($ScreenOhlcM30){ $sw += "-ScreenOhlcM30 (le celle M30 girano a OHLC M1: NIENTE di questo giro e' GIUDICABILE)" }
   if($SoloSimbolo -ne ""){ $sw += "-SoloSimbolo " + $SoloSimbolo }
   if($SoloCella -ne ""){ $sw += "-SoloCella " + $SoloCella + " (la cella METRO del suo simbolo e' girata lo stesso: senza il metro il numero non si legge)" }

@@ -16,16 +16,27 @@ una proposta non gli piace, si cambia **qui**, e poi si gira — mai il contrari
 
 ### 🧷 LA FORMA DEL LUCCHETTO — dichiarata, perché il driver la legge
 
-Il titolo di questo file porta la stringa `[DA FIRMARE]`, e **non è
-decorazione**: il driver `righe/RIGA_R111_BB_M30.ps1` **scarica questo file al
-pin** e ci cerca dentro **quella stringa esatta**.
+Il titolo di questo file porta **il lucchetto della firma**, e non è
+decorazione: il driver `righe/RIGA_R111_BB_M30.ps1` **scarica questo file al
+pin** e ci cerca dentro **quel token esatto**, e lo cerca **in tutto il file**,
+non solo nel titolo — perché un lucchetto rimasto in una sezione **è** un pezzo
+non firmato.
+
+🔒 **Per questo il token non è scritto in prosa da nessuna parte in questa
+pagina, nemmeno una volta** — e non è pignoleria, è la **checklist 82**, nata il
+25/08 su R110: un documento che NOMINA il proprio lucchetto **non si può più
+sbloccare**, perché dopo la firma il gate continua a trovarlo nelle righe che lo
+spiegano, e il referto — l'unico artefatto che resta agli atti — dichiara *NON
+FIRMATO* un round firmato. Regola operativa, secca: **il giorno in cui si toglie
+il lucchetto, `grep` del token su questo file deve dare ZERO.** Oggi ne trova
+**uno**, ed è il titolo.
 
 | stato | cosa succede |
 |---|---|
-| stringa presente, **giro a vuoto** (`-SoloControllo`) | **parte lo stesso**: non apre MT5, non produce nessun numero |
-| stringa presente, **corsa vera** senza `-CriteriFirmati` | **si ferma, `exit 2`**, e stampa a schermo le sette decisioni |
-| stringa presente, **corsa vera** con `-CriteriFirmati` | **parte**, e scrive nel referto un **RILIEVO** che cita **la pre-firma del 25/08** come autorizzazione |
-| stringa tolta dal file | il gate si apre da solo |
+| lucchetto presente, **giro a vuoto** (`-SoloControllo`) | **parte lo stesso**: non apre MT5, non produce nessun numero |
+| lucchetto presente, **corsa vera** senza `-CriteriFirmati` | **si ferma, `exit 2`**, e stampa a schermo le sette decisioni |
+| lucchetto presente, **corsa vera** con `-CriteriFirmati` | **parte**, e scrive nel referto un **RILIEVO** che cita **la pre-firma del 25/08** come autorizzazione |
+| lucchetto tolto dal titolo (unica occorrenza) | il gate si apre da solo, e `-CriteriFirmati` **va tolto dalla riga**: il referto lo dichiara *switch INERTE* |
 
 👉 **Perché il lucchetto resta chiuso anche con la pre-firma in mano.** Perché
 la pre-firma è sul **perimetro**, non sulle sette decisioni; e perché un file
@@ -704,8 +715,8 @@ vecchio inventa **fino a 4 anomalie e scende a n=2** contro un `n` vero di **4**
 > 🖊️ **Stato: PRE-FIRMATE.** La pre-firma di Claudio (*"FIRMO R111"*, 25/08) è
 > sul **perimetro**; queste sette proposte sono scritte **prima dei numeri** e
 > **restano smentibili da Claudio finché la corsa non parte**. Il file conserva
-> `[DA FIRMARE]` **apposta**, così la corsa vera pretende `-CriteriFirmati` e la
-> firma **finisce scritta nel referto** (§ 🧷).
+> **il lucchetto della firma apposta**, così la corsa vera pretende
+> `-CriteriFirmati` e la firma **finisce scritta nel referto** (§ 🧷).
 
 | | decisione | ✅ PROPOSTA | ❌ alternativa scartata, e perché |
 |---|---|---|---|

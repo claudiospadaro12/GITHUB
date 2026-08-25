@@ -106,6 +106,15 @@ Perciò `R111_CRITERI.md` conserva `[DA FIRMARE]`, e il driver lo legge al pin:
 - la **corsa vera si ferma con `exit 2`**, a meno di `-CriteriFirmati` — che è
   la **registrazione della pre-firma**, e finisce **scritta nel referto**.
 
+> 🔏 **E il lucchetto nel file dei criteri è UNO SOLO, nel titolo** — la prosa
+> che lo spiega **non lo nomina**, e non è pignoleria: è la **checklist 82**,
+> nata il 25/08 su R110, dove ne erano rimasti **due** in prosa e il round è
+> uscito a `exit 2` **su criteri firmati**, con il referto che agli atti
+> dichiarava *NON FIRMATI* un round firmato. Regola: **il giorno in cui si
+> toglie il lucchetto, `grep` del token su `R111_CRITERI.md` deve dare ZERO**, e
+> `-CriteriFirmati` **si toglie dalla riga** (il driver lo dichiara *INERTE* e
+> lo scrive nel referto, invece di descriversi sempre allo stesso modo).
+
 **Le sette decisioni** (§ 11 dei criteri, tutte con la proposta già scritta):
 
 | | decisione | ✅ proposta |
@@ -130,7 +139,10 @@ Perciò `R111_CRITERI.md` conserva `[DA FIRMARE]`, e il driver lo legge al pin:
 @@PIN@@
 ```
 
-🔴 **Il valore qui sopra è un SEGNAPOSTO e va sostituito prima di dettare la riga.**
+🔴 **Finché lì sopra c'è il segnaposto, la riga NON si detta**: va sostituito col
+commit vero. *(Frase scritta così apposta — resta vera anche dopo la pinnatura,
+quando lì sopra c'è uno SHA: checklist **77**, la prosa che spiega deve restare
+leggibile in tutti e due gli stati.)*
 Sequenza — **il token si COMPONE in una variabile**, così la ricetta non contiene
 mai la stringa che sta cercando (checklist **77**), e **si sostituiscono i PUNTI
 D'USO, non la pagina**, altrimenti dopo il primo pin la ricetta stessa è morta:
@@ -258,7 +270,14 @@ E poi, in ordine:
 - `gate della STELLA: ogni cella M30 differisce dalla sua cella metro SOLO su InpTF`;
 - **SEI righe di antenato, due per simbolo** — `gate dell'ANTENATO R108 <sim>:
   ... (delta: InpComment, InpMagic)` e `gate dell'ANTENATO R103 <sim>: ...
-  (delta: InpComment, InpMagic, InpNewsCurrencies)`;
+  (delta: InpComment, InpMagic, InpNewsCurrencies)`.
+  ⚠️ **L'elenco dei delta esce in ORDINE ALFABETICO, e adesso è deterministico**:
+  nasce dalle chiavi di un hashtable, che in PowerShell **non hanno ordine** (e su
+  .NET l'hash delle stringhe è randomizzato **per processo**). **Misurato il
+  25/08: sei corse, quattro ordini diversi degli stessi tre nomi.** Il driver
+  adesso li **ordina** prima di stamparli — altrimenti questa riga non avrebbe
+  potuto combaciare quasi mai, ed è il punto **70** (un falso allarme qui costa
+  un giro);
 - `valori, pattern VIVO, TF del grafico, asse unico e 42 magic vergini verificati NEI FILE`;
 - `ABTG_BreakingBand.mq5 al pin, version 1.03, InpTF e' un input libero`;
 - **tre righe `profondita' TICK <simbolo>:`** — ⚠️ **diranno `NON MISURATA`, ed è
@@ -491,7 +510,7 @@ stata ESEGUITA:**
 🟡 **Nessun MT5 qui**: tutto ciò che segue è stato fatto girare col **parser vero
 di PowerShell** e con **i file veri del repo**, mai a occhio.
 
-**93 controlli eseguiti, 0 falliti**, in tre batterie:
+**93 controlli eseguiti, 0 falliti**, in quattro batterie:
 
 **1) Il driver, staticamente** — `[Parser]::ParseFile` → **0 errori**, 20.590
 token; **ASCII puro** (0 byte non-ASCII, regola del 17/08); **0 token PS7-only**;
@@ -540,6 +559,31 @@ mediano **45,0 pip**, perdita mediana **20,0**, durata mediana **2,0 barre M30**
 lo **spareggio** e dichiarazione; non monotona **senza** spareggio → **NON
 MISURATO** e nessuna stima; `TrovaReport` con **due file allo stesso istante** →
 **25 chiamate, sempre lo stesso file**.
+
+### 🔍 E POI LA VERIFICA INDIPENDENTE (25/08 sera) — **sei correzioni, tutte ESEGUITE**
+
+Il verificatore ha rifatto tutto **eseguendo il driver vero end-to-end** su un
+MT5 finto (terminale, MetaEditor e tester sostituiti da stub, artefatti veri del
+repo): **giro a vuoto → exit 0** con i 18 `.ini` scritti e riletti; **corsa vera
+completa → exit 0** con G0 3/3, S0a, tabella madre, ponte e G4; **corsa vera
+senza `-CriteriFirmati` → exit 2** con le sette decisioni a schermo;
+**`-ScreenOhlcM30` → exit 1** e ogni riga M30 `NON GIUDICABILE`; **G0 rotto →
+i tre simboli si fermano e le celle M30 non partono**; **dieci corruzioni del
+repo, dieci fermate, controprova verde**; **batteria dei PARI** sul `Passo0`
+vero (in/out nello stesso secondo, out+in nello stesso secondo con volumi
+diversi, tre deal nello stesso secondo, fonte non monotona con e senza
+spareggio) → **MISURATO senza anomalie** dove deve, **NON MISURATO dichiarato**
+dove non c'è la chiave; **cultura it-IT** → `NumInv`, i formati e `GateDate`
+identici all'invariante. Correzioni applicate:
+
+| # | cosa | classe |
+|---|---|---|
+| 1 | i criteri **nominavano** il proprio lucchetto in prosa (3 occorrenze invece di 1): toglierlo dal titolo **non** avrebbe aperto il gate, e la tabella dei criteri prometteva il contrario | **82** |
+| 2 | `-CriteriFirmati` si autodescriveva **con un ramo solo**: su un file già firmato — o **mai letto** — il referto avrebbe messo agli atti una frase falsa. Adesso sono **tre rami sul valore letto**, e lo stato nasce **prima del `try`** | **82** · **41-bis** |
+| 3 | l'elenco dei **delta dell'antenato** usciva dalle chiavi di un hashtable: **sei corse, quattro ordini diversi**. Adesso è ordinato, e questa pagina combacia | **70** |
+| 4 | due rimandi `criteri par. 4.1` dove il paragrafo è il **4.2** — e uno finisce nei PROBLEMI del referto, proprio quando scatta il rischio n.1 del round | **43** |
+| 5 | il backup del `.mq5`/`.ex5` si chiamava `.prima_r108_`: l'artefatto che deve dire *cosa girava prima di R111* portava il nome di un altro round | **45** |
+| 6 | la prosa del pin restava falsa dopo la pinnatura (*"il valore qui sopra è un segnaposto"* sotto uno SHA vero) | **77** |
 
 🟡 **NON verificato, e va detto**: tutto ciò che richiede **MT5** — la
 compilazione vera, il comportamento del tester, **se il tester onori `MaxBars`**
