@@ -1,0 +1,116 @@
+# =====================================================================
+#  R110 -- EMADOW / cella 01_long
+#  I LATI MAI MISURATI DEI MOTORI VIVI SUGLI INDICI
+#  ABTG_EMA200 su U30USD H1
+# ---------------------------------------------------------------------
+#  CRITERI:   backtest_pipeline\risultati_archivio\R110_CRITERI.md  [DA FIRMARE]
+#  DRIVER:    backtest_pipeline\righe\RIGA_R110_LATI_VIVI.ps1  (MARCATORE_RIGA_R110_v1)
+#  ORIGINE:   Claudio, 25/08/2026, dopo i verdetti short di R107:
+#             "non si possono provare i vari motori?" -- e la mappa che
+#             risponde e' CENSIMENTO_LATI_SHORT_2026-08-25.md, tabella 1d:
+#             questa sedia gira L+S dal luglio scorso e IL SUO LATO SHORT
+#             NON HA MAI AVUTO UN NUMERO SUO.
+#
+#  >>> QUESTA E' LA CELLA: 01_long
+#      SOLO LONG (InpAllowShort=false). Il denominatore del lato short.
+#
+#  >>> DA DOVE VIENE QUESTO FILE, e non e' una frase: e' un GATE.
+#      Il corpo e' la COPIA RIGA PER RIGA dell'ANTENATO
+#        prove\R103_ABTG_EMA200_U30USD_771531.txt
+#      cioe' il file prova che ha girato in R103 su questa stessa sedia.
+#      Gli UNICI delta ammessi, e il driver li pretende per NOME
+#      (checklist 72 -- il gate differenziale non vede la corruzione
+#      SIMMETRICA, percio' ci si confronta con l'ANTENATO, non solo col
+#      gemello):
+#        - InpMagic          (blocco vergine 763xxx, coppia gemella)
+#        - InpAllowShort     (true -> false: E' L'ASSE DEL ROUND)
+#      Nient'altro. Ne' un buffer, ne' un TP, ne' un sotto-parametro
+#      di un filtro spento.
+#
+#  >>> LA SEDIA VIVA: magic 771531, rischio 1,0%, commento letto nel
+#      censimento .chr del 25/08/2026 07:31
+#      (censimento_rischio_2026-08-25_0731.txt). Il magic 771531 e'
+#      VIETATO in questo round e il driver lo controlla: qui gira
+#      763310/763311, che non ha mai operato niente.
+#      >>> magic del SORGENTE = 771501 (l'identita' del motore, e il
+#          gate di versione controlla QUELLO). Il magic della SEDIA e il
+#          magic del FILE PROVA sono tre cose diverse.
+#
+#  IL CAMPIONE PIU' GRASSO DI CASA: 712 operazioni in R103. E' l'unico posto del parco dove un lato da solo puo' arrivare a n>=150 su questa finestra.
+#
+#  >>> IL NUMERO R103 DI QUESTA SEDIA, e va letto per quello che e':
+#        +30.647 EUR | PF 1,42 | DD 6,48% | n 712 (R103_REFERTO_BLOCCO1_INDICI.md, 2o posto)
+#      NON E' IL METRO DI QUESTO ROUND E NON PUO' ESSERLO. R103 girava a
+#      MODELLO 1 (OHLC su M1) su UNA FINESTRA UNICA di 21 mesi SENZA
+#      split; R110 gira a MODELLO 4 (TICK REALI) con lo split 40/60.
+#      Due banchi diversi e due finestre diverse. E che sugli indici
+#      OHLC e tick reali NON diano lo stesso numero e' MISURATO, non
+#      temuto: SupRev_DOW_H4 fece PF 2,77 in OHLC e PF 0,79 a tick
+#      reali (revalidation 30/07, contratto REVOCATO -- R103_CRITERI
+#      par. 3.3). Quel numero sta qui come CONTESTO DICHIARATO.
+#
+#  >>> LA SOMMA DEI DUE LATI NON RIPRODUCE IL METRO, ED E' PER
+#      COSTRUZIONE (MISURATO NEL SORGENTE, non dedotto):
+#      ABTG_EMA200.mq5 apre la sua funzione di
+#      ingresso con "se ho gia' una posizione (o un pendente) esco".
+#      Con un lato spento lo SLOT resta libero: operazioni che nel metro
+#      erano BLOCCATE da una posizione dell'altro lato, nella cella a un
+#      lato solo diventano possibili. Quindi n(01_long) + n(02_short)
+#      NON deve fare n(00_metro), e nessuno lo pretenda: e' un fatto del
+#      motore, non un difetto del banco.
+#
+#  >>> IL REGIME, SCRITTO PRIMA DEI NUMERI: la finestra e' 21 mesi di
+#      INDICI IN SALITA. IL LATO SHORT PARTE SVANTAGGIATO PER REGIME. Un
+#      "niente edge short" qui NON chiude la domanda per sempre: la
+#      chiude PER QUESTA EPOCA.
+#
+#  >>> RISCHIO 1,00% qui dentro, 0,65% in campo sul 100k: OGNI DD di
+#      questo file va MOLTIPLICATO PER 0,65 per confrontarlo col forward.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=EMA200 DOW
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMagic=763310||763310||1||763311||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
