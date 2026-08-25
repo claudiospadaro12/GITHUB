@@ -246,6 +246,16 @@ punto è.
   (checklist 48), funzioni definite fuori dal `try`, argomenti di
   `Start-Process` virgolettati (un percorso utente con uno spazio dentro
   diventerebbe due argomenti).
+- ⚠️ **LA RAM DELLA CONVERSIONE, e non so misurarla da qui.** `--converti`
+  tiene **tutte** le barre del simbolo in un dizionario prima di scrivere il
+  CSV. La corsa promossa del 18/08 ne teneva **2,5 milioni** (2019-2026) e ha
+  girato. Sedici anni sono **~5,6 milioni**: piu' del doppio, e stimo **~1 GB
+  di RAM**. Se python muore con `MemoryError` **non e' un bug dei dati**: si
+  spezza la finestra in due tranche (2010-2017 e 2018-2026, `-Cartella`
+  diverse), si tengono i due CSV e si concatenano a mano — e **lo si
+  dichiara**, perche' un simbolo `_EXT` nato da due tranche va detto.
+  📌 Da mettere davanti al verificatore: **conviene che il driver spezzi da
+  solo la conversione sopra una soglia di anni?**
 - ⚠️ Le **stime di spazio** (0,8 GB HistData / 9 GB Dukascopy) sono
   **[INFERITO]**: estrapolate da byte veri di un'ora campione, non da una corsa
   piena. Il driver le confronta con lo spazio libero **misurato** e pretende
