@@ -1,6 +1,6 @@
 # 🧯 RIGA DI LANCIO — ABTG_ChiudiSedie (spegnere le sedie revocate, senza toccare il resto)
 
-**Pin: `94946f46dcb99d185a98f7f780a4a2537e810796`** (branch `lavoro`).
+**Pin: `360a36c111333e820fdc3e1124352ea4b61aa22c`** (branch `lavoro`).
 Sorgente: `mql5/Scripts/ABTG_ChiudiSedie.mq5`.
 
 > 🔒 **IL PIN E' SCRITTO** nelle **tre** occorrenze (l'intestazione qui sopra,
@@ -60,7 +60,7 @@ l'altra non sono un programma).
 ```powershell
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-  $h="94946f46dcb99d185a98f7f780a4a2537e810796"
+  $h="360a36c111333e820fdc3e1124352ea4b61aa22c"
   if($h -notmatch '^[0-9a-f]{40}$'){ throw "PIN NON SCRITTO: sostituisci il segnaposto con lo SHA del commit" }
   $src="$env:USERPROFILE\ABTG_ChiudiSedie.mq5"
   Remove-Item $src -Force -ErrorAction SilentlyContinue
@@ -214,7 +214,7 @@ sul Desktop con un **nome proprio e datato** e crea lo zip.
 
 ```powershell
 & {
-  $h="94946f46dcb99d185a98f7f780a4a2537e810796"
+  $h="360a36c111333e820fdc3e1124352ea4b61aa22c"
   if($h -notmatch '^[0-9a-f]{40}$'){ throw "PIN NON SCRITTO" }
   $root=Join-Path $env:APPDATA "MetaQuotes\Terminal"
   $dati=@(Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName "MQL5\Experts") })
