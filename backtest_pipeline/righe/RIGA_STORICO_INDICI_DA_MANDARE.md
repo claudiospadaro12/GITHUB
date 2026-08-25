@@ -9,7 +9,7 @@ test con piu' anni di storico"_.
 > ⚠️ **QUESTE STRINGHE NON SONO DEFINITIVE.** Devono ancora passare dal
 > **verificatore-stringhe**. Non mandarle a Claudio prima.
 
-**PIN PROPOSTO**: `826f008a6fa92b8adc3e7302f4b8c92ccee9491f`
+**PIN PROPOSTO**: `bcc483f14c6c93cbb546e742a35538e2e8ebc4c8`
 _(contiene tutti e tre gli artefatti: driver, criteri, `.mq5`. Se il
 verificatore cambia una riga, **il pin cambia** e queste righe vanno riscritte:
 girare al pin vecchio vuol dire girare codice di ieri senza accorgersene.)_
@@ -95,7 +95,7 @@ come le vede la macchina, prima di firmarle.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='826f008a6fa92b8adc3e7302f4b8c92ccee9491f';
+    $pin='bcc483f14c6c93cbb546e742a35538e2e8ebc4c8';
     $p="$env:USERPROFILE\RIGA_STORICO_INDICI.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_STORICO_INDICI.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v1' -Quiet)){ throw 'SCRIPT VECCHIO: il pin non contiene il driver nuovo.' };
