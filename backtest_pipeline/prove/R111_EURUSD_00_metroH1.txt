@@ -1,0 +1,155 @@
+# =====================================================================
+#  EA: ABTG_BreakingBand
+#
+#  R111 -- BREAKING BAND SU M30: IL METRO -- riproduzione della cella viva H1 di R103 (gate G0)
+#          EURUSD -- cella 00_metroH1
+#
+#  CRITERI:   backtest_pipeline\risultati_archivio\R111_CRITERI.md  [DA FIRMARE]
+#             (PRE-FIRMA di Claudio 25/08 sul PERIMETRO: "FIRMO R111")
+#  DRIVER:    backtest_pipeline\righe\RIGA_R111_BB_M30.ps1  (MARCATORE_RIGA_R111_v1)
+#  ANTENATI:  backtest_pipeline\prove\R108_EURUSD_00_metroH1.txt
+#             backtest_pipeline\prove\R103_ABTG_BreakingBand_EURUSD_772162.txt
+#
+#  DA DOVE VIENE OGNI RIGA, e non e' scritta a memoria: il blocco input qui
+#  sotto e' COPIATO RIGA PER RIGA da R108_EURUSD_00_metroH1.txt
+#  (la cella METRO di R108), che a sua volta e' la copia riga per riga di
+#  R103_ABTG_BreakingBand_EURUSD_772162.txt -- la CELLA VIVA misurata in R103.
+#  Le uniche righe toccate sono quelle elencate in "COSA CAMBIA".
+#  >>> IL DRIVER LO VERIFICA CON DUE GATE DELL'ANTENATO, non lo crede:
+#      contro il file R108 (delta ammessi: InpMagic, InpComment) e contro il
+#      file R103 (delta ammessi: InpMagic, InpComment, InpNewsCurrencies).
+#      E' il punto 72 della checklist: il gate della STELLA confronta le due
+#      celle di un simbolo FRA LORO, e per costruzione NON PUO' VEDERE la
+#      stessa riga storta in ENTRAMBE.
+# ---------------------------------------------------------------------
+#  COSA CAMBIA RISPETTO ALLA CELLA METRO DI R108, e nient'altro:
+#    - InpMagic  : coppia VERGINE 764020/764021 (blocco 764xxx) invece
+#      di 762020/762021 (R108). Un magic di un round precedente NON e'
+#      vergine: i deal si incrocerebbero nella cache e nei per-trade.
+#    - InpComment: 'R111 BB EURUSD'. INERTE sui numeri: nel sorgente
+#      InpComment serve SOLO a comporre il commento dell'ordine, e
+#      nel tester non lo legge nessuno.
+#    - NIENT'ALTRO. InpTF resta 16385 (PERIOD_H1) e @DAQUANDO resta
+#      2020.01.01: questa cella deve RIPRODURRE R103, non convincere.
+#
+#  IL PATTERN MODE E' QUELLO VIVO DI QUESTO SIMBOLO, e NON e' 2 per tutti:
+#    GBPUSD InpPatternMode=2 (entrambi) | EURUSD =0 (solo CONTINUAZIONE)
+#    AUDUSD =1 (solo INVERSIONE).
+#  Qui vale InpPatternMode=0, cioe' solo CONTINUAZIONE. Pinnarli tutti a 2
+#  vorrebbe dire misurare UN ALTRO MOTORE su due simboli su tre: e' il difetto n.2 del file del
+#  cacciatore di R108, trovato diffando i tre file prova di R103.
+# ---------------------------------------------------------------------
+#  I NUMERI CHE QUESTA CELLA DEVE RIPRODURRE (gate G0, criteri par. 5)
+#    fonte: R103_REFERTO_DRIVER_FOREX_METALLI_20260824_1922.txt, TABELLA 1
+#           e -- seconda conferma, MISURATA il 25/08 -- il referto di R108,
+#           che con questa stessa cella ha fatto G0 3/3 al centesimo.
+#    finestra 2020.01.01 -> 2026.06.30, modello 1 (OHLC M1),
+#    deposito 100.000, Spread=0, rischio 1,0%:
+#        profitto +8271   PF 1.936   DD 2.51%   n 59
+#        prima operazione: 2020.02.03
+#    >>> IL MODELLO E' 1 (OHLC M1) E NON SI CAMBIA: R103 e' girato
+#        cosi'. Un metro a tick reali NON riprodurrebbe MAI quel
+#        numero, e boccerebbe un banco sano.
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  H1
+@DAQUANDO 2020.01.01
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpStdPeriod=20||20||0||20||N
+InpStdSmaPeriod=50||50||0||50||N
+InpAtrPeriod=14||14||0||14||N
+InpPatternMode=0||0||0||0||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeRefBars=20||20||0||20||N
+InpBulgeMinBars=3||3||0||3||N
+InpBulgeMaxBars=20||20||0||20||N
+InpBulgeMinImpBars=1||1||0||1||N
+InpBulgeCandleMaxATR=0.0||0.0||0||0.0||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+InpBulgeMedianDistPct=0.75||0.75||0||0.75||N
+InpBulgeEndMode=1||1||0||1||N
+InpBulgeDirMode=1||1||0||1||N
+InpImpulseATR=1.5||1.5||0||1.5||N
+InpRientroMaxATR=1.5||1.5||0||1.5||N
+InpInvViolentBars=3||3||0||3||N
+InpZigZagATR=1.5||1.5||0||1.5||N
+InpDeepSpikeATR=1.5||1.5||0||1.5||N
+InpPostATRRef=1||1||0||1||N
+InpBandRidingMaxBars=20||20||0||20||N
+InpPostBulgeMaxBars=30||30||0||30||N
+InpReinflateTolPct=1.05||1.05||0||1.05||N
+InpUseShadowFilter=false||false||0||false||N
+InpShadowBodyMult=1.5||1.5||0||1.5||N
+InpUseRangeReduction=false||false||0||false||N
+InpRangeReductionPct=30.0||30.0||0||30.0||N
+InpContNoImpulseBandReturn=false||false||0||false||N
+InpNarrowBars=2||2||0||2||N
+InpStdDownMode=0||0||0||0||N
+InpFlatSlopeATR=0.05||0.05||0||0.05||N
+InpSlopeSource=0||0||0||0||N
+InpRetestBufferATR=0.15||0.15||0||0.15||N
+InpContRequireNarrow=true||true||0||true||N
+InpContRequireStdDown=true||true||0||true||N
+InpUseReversalCandle=false||false||0||false||N
+InpRevBodyMaxPct=33.0||33.0||0||33.0||N
+InpRevShadowMinPct=50.0||50.0||0||50.0||N
+InpMinSolidita=0.0||0.0||0||0.0||N
+InpSL_ATRmult=3.0||3.0||0||3.0||N
+InpTPMode=0||0||0||0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpTPRefreshBars=1||1||0||1||N
+InpBEatATR=1.0||1.0||0||1.0||N
+InpBEMode=0||0||0||0||N
+InpMinTPatATR=0.0||0.0||0||0.0||N
+InpMinRR=0.0||0.0||0||0.0||N
+InpUseCongestionFilter=false||false||0||false||N
+InpCongBars=15||15||0||15||N
+InpCongCSMin=4||4||0||4||N
+InpCongCDAStdBars=10||10||0||10||N
+InpCongWidthDropPct=15.0||15.0||0||15.0||N
+InpCongLateralATR=1.0||1.0||0||1.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=R111 BB EURUSD
+InpMagic=764020||764020||1||764021||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# =====================================================================
+#  NOTE
+# =====================================================================
+#  1. InpMagic e' la coppia GEMELLA della passata sulla FINESTRA INTERA.
+#     Il driver riscrive il magic per gli altri lanci di questa cella
+#     (singola = base+2, gemelle IS = base+4, gemelle OOS = base+6):
+#     e' il pattern di R103, e serve a non far collidere i file per-trade.
+#     Blocco 764xxx: VERGINE, verificato in tutto il repo il 25/08/2026
+#     (zero occorrenze di 7640xx). Occupati e VIETATI nel driver: 760xxx
+#     (R103), 761xxx (R107), 762xxx (R108), 763xxx (R110), 7744xx (R109).
+#
+#  2. InpMinTPatATR e InpMinRR restano a 0.0 (SPENTI) DI PROPOSITO: sono
+#     le due valvole che imporrebbero un take minimo, e accenderle dentro
+#     il round che MISURA il take vorrebbe dire misurare il filtro invece
+#     del motore. Se il cancello zero S0 fallisce, la variante "con
+#     valvola accesa" e' un round NUOVO, non un salvataggio di questo.
+#
+#  3. La riga InpNewsCurrencies e' TOLTA di proposito (come in R108): un
+#     pin di stringa VUOTO MT5 lo IGNORA e usa il default compilato (che
+#     qui e' "" comunque, quindi il comportamento non cambia). E con
+#     InpUseNewsFilter=false il filtro non gira proprio.
+#
+#  4. Il TF del GRAFICO (@PERIODO) e InpTF coincidono, ed e' voluto: si
+#     vuole misurare il motore a H1, non un motore H1 letto da un
+#     grafico di altro TF (trappola pagata in R102 su SuperWave).
+# =====================================================================

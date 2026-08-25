@@ -1,0 +1,169 @@
+# =====================================================================
+#  EA: ABTG_BreakingBand
+#
+#  R111 -- BREAKING BAND SU M30: LA MISURA NUOVA -- lo stesso motore a M30, tick reali
+#          EURUSD -- cella 01_m30
+#
+#  CRITERI:   backtest_pipeline\risultati_archivio\R111_CRITERI.md  [DA FIRMARE]
+#             (PRE-FIRMA di Claudio 25/08 sul PERIMETRO: "FIRMO R111")
+#  DRIVER:    backtest_pipeline\righe\RIGA_R111_BB_M30.ps1  (MARCATORE_RIGA_R111_v1)
+#  ANTENATI:  backtest_pipeline\prove\R108_EURUSD_00_metroH1.txt
+#             backtest_pipeline\prove\R103_ABTG_BreakingBand_EURUSD_772162.txt
+#
+#  DA DOVE VIENE OGNI RIGA, e non e' scritta a memoria: il blocco input qui
+#  sotto e' COPIATO RIGA PER RIGA da R108_EURUSD_00_metroH1.txt
+#  (la cella METRO di R108), che a sua volta e' la copia riga per riga di
+#  R103_ABTG_BreakingBand_EURUSD_772162.txt -- la CELLA VIVA misurata in R103.
+#  Le uniche righe toccate sono quelle elencate in "COSA CAMBIA".
+#  >>> IL DRIVER LO VERIFICA CON DUE GATE DELL'ANTENATO, non lo crede:
+#      contro il file R108 (delta ammessi: InpMagic, InpComment) e contro il
+#      file R103 (delta ammessi: InpMagic, InpComment, InpNewsCurrencies).
+#      E' il punto 72 della checklist: il gate della STELLA confronta le due
+#      celle di un simbolo FRA LORO, e per costruzione NON PUO' VEDERE la
+#      stessa riga storta in ENTRAMBE.
+# ---------------------------------------------------------------------
+#  COSA CAMBIA RISPETTO ALLA CELLA METRO DI R108, e nient'altro:
+#    - InpTF     : 30 (PERIOD_M30) invece di 16385 (PERIOD_H1).
+#      E' L'UNICO ASSE DEL ROUND: fra questa cella e la sua cella
+#      metro cambia UNA RIGA, piu' il magic.
+#    - @PERIODO  : M30 invece di H1 (il grafico segue InpTF).
+#    - @DAQUANDO : 2018.07.01 invece di 2020.01.01. NON E' UNA MISURA:
+#      e' DERIVATO dal tetto delle 100.000 barre. Forex ~240 barre M30
+#      a settimana -> 100.000/240 = 416,7 settimane = 8,0 anni, cioe'
+#      ESATTAMENTE la finestra 2018.07.01 -> 2026.06.30. Siamo AL
+#      LIMITE del tetto, non sotto: il PASSO 0 deve dichiarare la data
+#      della PRIMA OPERAZIONE VERA, e se cade molto dopo il 2018.07.01
+#      la finestra reale va riscritta nel referto PRIMA dei numeri.
+#    - InpMagic / InpComment: come sopra.
+#    - NIENT'ALTRO. In particolare InpPatternMode resta quello VIVO.
+#
+#  IL PATTERN MODE E' QUELLO VIVO DI QUESTO SIMBOLO, e NON e' 2 per tutti:
+#    GBPUSD InpPatternMode=2 (entrambi) | EURUSD =0 (solo CONTINUAZIONE)
+#    AUDUSD =1 (solo INVERSIONE).
+#  Qui vale InpPatternMode=0, cioe' solo CONTINUAZIONE. Pinnarli tutti a 2
+#  vorrebbe dire misurare UN ALTRO MOTORE su due simboli su tre: e' il difetto n.2 del file del
+#  cacciatore di R108, trovato diffando i tre file prova di R103.
+# ---------------------------------------------------------------------
+#  QUESTA CELLA NON HA NESSUN NUMERO AGLI ATTI: e' la misura nuova.
+#  M30 e' IL PUNTO DI MEZZO MAI MISURATO fra due punti che MISURATI
+#  lo sono, sullo STESSO motore e sugli STESSI tre simboli:
+#    H1  (R103) : profitto +8271   PF 1.936   DD 2.51%   n 59 -- VIVO
+#    M15 (R108) : sei finestre su sei ROSSE, morto di SEGNALE e non
+#                 di costo (il cancello S0a passava).
+#  La domanda di R111 e' una sola: DOV'E' IL CONFINE?
+#
+#  LA FREQUENZA ATTESA, dichiarata PRIMA e [INFERITA]:
+#    H1  59 op in 6,5 anni = ~9,1/anno
+#    M15 87 op in 4 anni = ~21,8/anno
+#    -> interpolazione geometrica fra i DUE PUNTI MISURATI:
+#       ~14/anno -> ~113 sulla finestra INTERA di 8 anni, ~56 per finestra IS/OOS.
+#    NON e' una misura: se n esce molto diverso, quello e' gia' un
+#    risultato (a M15 la frequenza NON scalava col numero di barre).
+#
+#  MODELLO 4 = TICK REALI. Su M30 nessuno ha misurato se l'OHLC
+#  inganni quanto su M15, e non si assume: si gira a tick reali.
+#  Un giro OHLC e' ammesso solo come screen, con lo switch
+#  -ScreenOhlcM30, e in quel caso OGNI numero e' NON GIUDICABILE.
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  M30
+@DAQUANDO 2018.07.01
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=30||30||0||30||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpStdPeriod=20||20||0||20||N
+InpStdSmaPeriod=50||50||0||50||N
+InpAtrPeriod=14||14||0||14||N
+InpPatternMode=0||0||0||0||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeRefBars=20||20||0||20||N
+InpBulgeMinBars=3||3||0||3||N
+InpBulgeMaxBars=20||20||0||20||N
+InpBulgeMinImpBars=1||1||0||1||N
+InpBulgeCandleMaxATR=0.0||0.0||0||0.0||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+InpBulgeMedianDistPct=0.75||0.75||0||0.75||N
+InpBulgeEndMode=1||1||0||1||N
+InpBulgeDirMode=1||1||0||1||N
+InpImpulseATR=1.5||1.5||0||1.5||N
+InpRientroMaxATR=1.5||1.5||0||1.5||N
+InpInvViolentBars=3||3||0||3||N
+InpZigZagATR=1.5||1.5||0||1.5||N
+InpDeepSpikeATR=1.5||1.5||0||1.5||N
+InpPostATRRef=1||1||0||1||N
+InpBandRidingMaxBars=20||20||0||20||N
+InpPostBulgeMaxBars=30||30||0||30||N
+InpReinflateTolPct=1.05||1.05||0||1.05||N
+InpUseShadowFilter=false||false||0||false||N
+InpShadowBodyMult=1.5||1.5||0||1.5||N
+InpUseRangeReduction=false||false||0||false||N
+InpRangeReductionPct=30.0||30.0||0||30.0||N
+InpContNoImpulseBandReturn=false||false||0||false||N
+InpNarrowBars=2||2||0||2||N
+InpStdDownMode=0||0||0||0||N
+InpFlatSlopeATR=0.05||0.05||0||0.05||N
+InpSlopeSource=0||0||0||0||N
+InpRetestBufferATR=0.15||0.15||0||0.15||N
+InpContRequireNarrow=true||true||0||true||N
+InpContRequireStdDown=true||true||0||true||N
+InpUseReversalCandle=false||false||0||false||N
+InpRevBodyMaxPct=33.0||33.0||0||33.0||N
+InpRevShadowMinPct=50.0||50.0||0||50.0||N
+InpMinSolidita=0.0||0.0||0||0.0||N
+InpSL_ATRmult=3.0||3.0||0||3.0||N
+InpTPMode=0||0||0||0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpTPRefreshBars=1||1||0||1||N
+InpBEatATR=1.0||1.0||0||1.0||N
+InpBEMode=0||0||0||0||N
+InpMinTPatATR=0.0||0.0||0||0.0||N
+InpMinRR=0.0||0.0||0||0.0||N
+InpUseCongestionFilter=false||false||0||false||N
+InpCongBars=15||15||0||15||N
+InpCongCSMin=4||4||0||4||N
+InpCongCDAStdBars=10||10||0||10||N
+InpCongWidthDropPct=15.0||15.0||0||15.0||N
+InpCongLateralATR=1.0||1.0||0||1.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=R111 BB EURUSD
+InpMagic=764030||764030||1||764031||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# =====================================================================
+#  NOTE
+# =====================================================================
+#  1. InpMagic e' la coppia GEMELLA della passata sulla FINESTRA INTERA.
+#     Il driver riscrive il magic per gli altri lanci di questa cella
+#     (singola = base+2, gemelle IS = base+4, gemelle OOS = base+6):
+#     e' il pattern di R103, e serve a non far collidere i file per-trade.
+#     Blocco 764xxx: VERGINE, verificato in tutto il repo il 25/08/2026
+#     (zero occorrenze di 7640xx). Occupati e VIETATI nel driver: 760xxx
+#     (R103), 761xxx (R107), 762xxx (R108), 763xxx (R110), 7744xx (R109).
+#
+#  2. InpMinTPatATR e InpMinRR restano a 0.0 (SPENTI) DI PROPOSITO: sono
+#     le due valvole che imporrebbero un take minimo, e accenderle dentro
+#     il round che MISURA il take vorrebbe dire misurare il filtro invece
+#     del motore. Se il cancello zero S0 fallisce, la variante "con
+#     valvola accesa" e' un round NUOVO, non un salvataggio di questo.
+#
+#  3. La riga InpNewsCurrencies e' TOLTA di proposito (come in R108): un
+#     pin di stringa VUOTO MT5 lo IGNORA e usa il default compilato (che
+#     qui e' "" comunque, quindi il comportamento non cambia). E con
+#     InpUseNewsFilter=false il filtro non gira proprio.
+#
+#  4. Il TF del GRAFICO (@PERIODO) e InpTF coincidono, ed e' voluto: si
+#     vuole misurare il motore a M30, non un motore M30 letto da un
+#     grafico di altro TF (trappola pagata in R102 su SuperWave).
+# =====================================================================
