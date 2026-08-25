@@ -3,6 +3,9 @@
 _Corsa: 25/08/2026 21:24-21:48 (0,4 ore), pin `de7134e`, driver
 `RIGA_R108_BB_M15.ps1` v1. Esito driver: **PARZIALE** — 1 cella su 6 con il
 PASSO 0 non misurabile (EURUSD M15, deal non accoppiati), tutte le altre OK.
+**[AGG. 26/08: quel "non accoppiati" era un difetto del PARSER
+(`Sort-Object` non stabile), non dell'EA. PROBLEMA CHIUSO e PASSO 0
+RECUPERATO — vedi il blocco PROBLEMA APERTO in fondo.]**
 Zip agli atti: `R108_BB_M15_CORSA_20260825_2124.zip`. Criteri FIRMATI da
 Claudio il 25/08 ("FIRMO CON PROPOSTE", D1-D6, verbale in `R108_CRITERI.md`)._
 
@@ -60,12 +63,64 @@ il banco.
 
 ## 🚨 PROBLEMA APERTO (1) e RILIEVI
 
-- **EURUSD M15: 2 deal non accoppiati** nel report della passata singola
-  (con MaxPositions=1 non dovrebbe accadere). Il PASSO 0 di quella cella e'
-  dichiarato NON MISURATO, non stimato. **Non si spende tester per rifarlo**:
-  il merito della cella e' comunque rosso da 4 CSV concordi; resta a registro
-  come anomalia da capire SE il motore M15 tornasse mai in gioco (non e' il
-  caso).
+- ~~**EURUSD M15: 2 deal non accoppiati**~~ → **CHIUSO il 26/08. Non era
+  l'EA: era il PARSER del driver.** Stessa causa provata su R109
+  (`R109_INDAGINE_DEAL_2026-08-26.md`, checklist 81): `$deal | Sort-Object Ora`
+  (riga **652** di `RIGA_R108_BB_M15.ps1`) — **`Sort-Object` non e' stabile** e
+  sui deal che condividono lo **stesso secondo** ne inverte l'ordine, facendo
+  sembrare spaiata una sequenza perfetta.
+
+  **La prova** (riparsing indipendente dei sei `.htm` in ordine nativo, che e'
+  l'ordine di ticket — cronologico e senza pari):
+
+  | cella | in | out | alternanza nativa | gruppi a pari secondo | anomalie referto |
+  |---|---|---|---|---|---|
+  | **EURUSD M15** | 87 | 87 | **PERFETTA** | **1** | **2** |
+  | GBPUSD M15 | 227 | 227 | PERFETTA | 0 | 0 |
+  | AUDUSD M15 | 118 | 118 | PERFETTA | 0 | 0 |
+  | EURUSD metro H1 | 59 | 59 | PERFETTA | 0 | 0 |
+  | GBPUSD metro H1 | 126 | 126 | PERFETTA | 0 | 0 |
+  | AUDUSD metro H1 | 64 | 64 | PERFETTA | 0 | 0 |
+
+  **L'unica cella con un gruppo a pari secondo e' l'unica cella segnalata**, e
+  le altre cinque sono il controllo positivo a zero. Il gruppo e' uno solo:
+
+  ```
+  2025.10.27 15:15:01 | aff 148 | EURUSD | buy  | in  | vol 6.35 | px 1.16395 | R108 BB EURUSD CONT L
+  2025.10.27 15:15:01 | aff 149 | EURUSD | sell | out | vol 6.35 | px 1.16404 | tp 1.16400
+  ```
+  (posizione aperta e chiusa in TP **entro lo stesso secondo** — legittimo su
+  tick reali). Riprodotto il ciclo `Passo0` (righe 659-707) in Python: ordine
+  nativo → **n=87, anomalie 0**; col gruppo invertito → **n=86, anomalie 2**,
+  cioe' **esattamente** il numero del referto driver. In R108 il `Passo0` non
+  ha il controllo sul volume che ha R109, quindi un gruppo invertito costa
+  **sempre 2** anomalie: la firma "2 deal" = **un solo** gruppo, e torna.
+
+  E il conteggio giusto e' quello dei CSV: **n=87**, come gia' scritto nella
+  tabella qui sopra. **`MaxPositions=1` non e' mai stato violato.**
+
+- **PASSO 0 di EURUSD M15, RECUPERATO** dal parse pulito (nessun tester speso,
+  bastava l'`.htm` gia' in archivio). Era l'unico `n/d` del round:
+
+  | | EURUSD M15 |
+  |---|---|
+  | n / vincenti / perdenti | 87 / 48 / 39 |
+  | take netto **mediano** | **5,30 pip** (medio 7,29) |
+  | take **lordo** mediano | 6,80 pip = **4,53x** lo spread → **S0a SUPERATO** |
+  | perdita mediana | **9,50 pip** |
+  | durata mediana | 5,43 barre M15 (media 13,68) |
+  | peggior giornata | **−1,73%** il 2026.04.19 |
+
+  **E rafforza la lettura 1 del round, invece di scalfirla**: anche EURUSD
+  **passa il cancello del costo** (4,53x, come GBPUSD 5,4x e AUDUSD 3,6x) e
+  muore lo stesso, con la stessa geometria storta — **incassa 5,3 e perde
+  9,5**. Il terzo simbolo che mancava ora dice la stessa cosa: **non e' morto
+  di costo, e' morto di segnale.** La peggior giornata rientra nel "max
+  −2,03%" gia' dichiarato, che quindi non cambia.
+
+  > Il **verdetto del round non si muove di un euro**: PF, DD e n vengono dai
+  > CSV OPTFRAME, che non passano dal parser dei deal. Restava n/d una
+  > *misura di contorno*, ed era n/d **per un difetto nostro**.
 - **Riserva D2 su tutti i numeri a modello 4**: la profondita' tick di
   GBPUSD/EURUSD/AUDUSD non e' misurata in repo (unica misura esistente:
   U30USD). La riserva e' stampata dal driver su ogni simbolo. Nota: la
