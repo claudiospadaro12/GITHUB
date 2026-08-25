@@ -79,9 +79,14 @@ serve **frequenza intraday** su **forex (GBPUSD/EURUSD in primis)** e **oro**.
 | **Forex Factory** | **403** | `/forum/71-trading-systems` | 🔴 **NULLA** — quinta di fila |
 | **SSRN** | **403** | Cloudflare su `papers.ssrn.com` | 🔴 **NULLA** — quinta di fila |
 
-**Traduzione onesta:** su 8 fonti, **4 hanno funzionato** (Code Base, arXiv,
-Quantpedia, lettura raw di GitHub), **2 sono leggibili solo a metà**
-(TradingView senza sorgente), **2 sono mute** (Forex Factory, SSRN).
+**Traduzione onesta:** su 8 fonti, **5 hanno funzionato col SORGENTE in mano**
+(Code Base, **TradingView**, arXiv, Quantpedia, lettura raw di GitHub) e
+**3 sono mute** (ricerca GitHub, Forex Factory, SSRN).
+🔓 **TradingView è passata da "nulla" a "utile" DENTRO questa caccia**: la
+prima misura della giornata la dava senza sorgente, poi è arrivato il canale
+del §1-bis. **La riga vecchia l'ho riscritta, non cancellata**: chi legge deve
+sapere che il verdetto "TradingView è nulla" delle quattro cacce precedenti
+era vero per l'endpoint provato allora, e **falso in generale**.
 
 ### Cosa ho sfogliato dove ha funzionato
 
