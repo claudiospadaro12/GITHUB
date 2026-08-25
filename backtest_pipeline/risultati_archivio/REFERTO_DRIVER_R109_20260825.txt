@@ -1,0 +1,234 @@
+﻿REFERTO R109 - ATR EXHAUSTION & VOLUME SPIKE, la PRIMA misura in assoluto
+ABTG_AtrExhaustVol v1.00 su D30EUR, U30USD, NASUSD -- M15
+SEI celle: tre simboli x DUE LATI (long e short SEPARATI, regola di casa 25/08)
+porting del candidato P2 della caccia M5/M15 indici del 25/08 (voto 9/10)
+modo: CORSA
+switch di questo giro: -CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora [DA FIRMARE])
+stato dei criteri: FIRMATI (riga di STATO: FIRMATI)
+data: 2026-08-25 22:27:38   (questa data deve essere di ADESSO)
+     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.
+     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.
+avvio: 2026-08-25 22:10:50   durata: 0.3 ore
+pin: 5a9d5e04a64677d3b9cb678c52b251b4ece94721
+criteri: risultati_archivio\R109_CRITERI.md   tesi: ATREXHAUST_TESI.md
+dossier: caccia_strategie\CACCIA_M5M15_INDICI_2026-08-25.md (P2)
+compilato: SI, .ex5 riscritto adesso (0 warning)
+     >>> ED E' LA PRIMA COMPILAZIONE DELLA VITA DI QUESTO EA: il .mq5
+         dichiara in testa di non essere mai stato compilato ne' testato.
+
+--- IL GATE A0: L'AUTOTEST DEL MOTORE ---
+  stato: SUPERATO
+  log:   C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\Tester\logs\20260825.log
+    LI	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] pivot 5/5 | ATRx2.00 | vol>1.50x(20) | prox=PERC | trig=AUTORE | D30EUR | magic 774400
+    CE	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] pivot: high ok=1 (atteso 1) | high no=0 (atteso 0) | plateau=0 (atteso 0) | low ok=1 (atteso 1) | low no=0 (atteso 0)
+    FO	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] prossimita': dentro=1 (atteso 1) | sotto=1 (atteso 1) | fuori=0 (atteso 0) | bordo=1 (atteso 1) | livello 0=0 (atteso 0)
+    MJ	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] esaurimento: 2.5ATR=1 (atteso 1) | 1.5ATR=0 (atteso 0) | 2.0ATR=0 (atteso 0) | ATR 0=0 (atteso 0) | negativa=0 (atteso 0)
+    CR	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] volume: 2.0x=1 (atteso 1) | 1.4x=0 (atteso 0) | 1.5x=0 (atteso 0) | media 0=0 (atteso 0, e' COSTITUTIVO)
+    PJ	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] grilletto autore: c>o=1 (atteso 1) | c>hPrev=1 (atteso 1) | nessuno=0 (atteso 0) | short=1 (atteso 1)
+    OD	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] grilletto close: 80%=1 (atteso 1) | 20%=0 (atteso 0) | short 20%=1 (atteso 1) | piatta=0 (atteso 0)
+    EM	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] segnale long: completo=1 (atteso 1) | senza volume=0 (atteso 0) | senza esaurimento=0 (atteso 0)
+    ID	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] segnale long: lontano=0 (atteso 0) | senza grilletto=0 (atteso 0) | pivot assente=0 (atteso 0) | SHORT speculare=1 (atteso 1)
+    OO	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] pavimento SL: 99.00 (atteso 99.00) | 97.00 (atteso 97.00) | 99.80 (atteso 99.80) | short 101.00 (atteso 101.00)
+    FM	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] orario: 10 in 8-20=1 (atteso 1) | 21=0 (atteso 0) | estremo 8=1 (atteso 1) | 2 in 22-6=1 (atteso 1)
+    IG	0	22:11:11.731	Core 1	2026.06.01 00:00:00   [ATREXH][AUTOTEST] esito motore: SETTE BLOCCHI SU SETTE, la regola ragiona come la firma.
+  >>> 'NON LETTO' NON E' 'SUPERATO'. Se l'esito non e' SUPERATO, ogni numero
+      di questo referto e' NON CONVALIDATO (criteri D5). L'autotest si legge
+      ESEGUENDO, non compilando: nel giro a vuoto NON esiste, ed e' giusto.
+  >>> MA 'NON LETTO' NON E' NEMMENO UN INDIZIO CONTRO L'EA, e va detto da che
+      parte sta il dubbio: LE CINQUE RADICI in cui questo driver cerca il log
+      dell'agente del tester NON SONO MAI STATE MISURATE SU UN MT5 VERO. Sono
+      l'ipotesi migliore di chi ha scritto la riga. 'NON LETTO' vuol dire quasi
+      sempre CHE CERCHIAMO NEL POSTO SBAGLIATO NOI, non che il motore diverga:
+      se divergesse, l'esito sarebbe DIVERGE e il round si sarebbe fermato da
+      solo. Si toglie in cinque minuti ricaricando collaudo_autotest.ini in
+      test singolo e leggendo la scheda Esperti -- e annotando DOVE stava il file.
+
+--- LA FINESTRA, IL MODELLO E IL RISCHIO ---
+  2024.09.26 -> 2026.08.21   modello 4 (TICK REALI)
+  NIENTE IS/OOS (criteri D3): l'Emendamento A dimensiona l'IS sulle OPERAZIONI,
+     e le operazioni non le conoscevamo. Questo round CONTA; il taglio si fa
+     dopo, sui conteggi veri. >>> Quindi da qui NON esce nessun out-of-sample.
+  UN SOLO REGIME: lo storico BCM sugli indici parte dal 2024.09.26 (MISURATO,
+     stato COMPLETO = il broker non ha altro) ed e' prevalentemente RIALZISTA.
+     Questo motore e' CONTROTENDENZA. >>> IL MERITO E' SOSPESO PER COSTRUZIONE
+     (criteri par. 7), a QUALUNQUE n. Il RISCHIO invece si legge tutto: un
+     drawdown e' un fatto accaduto (Emendamento regola B).
+  NESSUN DATO DUKASCOPY: sugli indici i file _EXT NON ESISTONO ancora. Questo
+     round gira SOLO su BCM, con i costi di BCM. Non e' una proprieta' del
+     mercato: e' una proprieta' di un broker.
+  spread: Spread=0 scritto NELL'INI = spread CORRENTE del feed BCM.
+     A modello 4 il bid/ask arriva dai tick. In nessun modello c'e' SLIPPAGE.
+  rischio: 1,00% nei file prova (default del porting). IN CAMPO SI GIRA A 0,65%
+     e l'autore usava 0,5%: ogni euro e ogni % di DD qui dentro va MOLTIPLICATO
+     per 0,65 (o 0,5) prima di confrontarlo con qualcos'altro.
+  cap giornaliero: 3 PER CELLA, cioe' PER LATO. >>> LA SOMMA DEI DUE LATI DI UN
+     SIMBOLO NON E' LA CELLA 'ENTRAMBI': e' un LIMITE SUPERIORE. In R109 long e
+     short non si bloccano a vicenda, in campo si'.
+
+--- CONVENZIONE DI SENTINELLA (checklist 66) ---
+  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le
+  colonne: profitto, PF, DD, n, take, perdita, durata e peggior giornata.
+
+--- LA PROFONDITA' DEI TICK (criteri D2) ---
+  D30EUR   NON MISURATA (nessun misura_tick_D30EUR.csv al pin)   [n/d]
+  U30USD   U30USD,TICK,67618571,2024.09.26,-,TICK REALI PARZIALI   [misurata il 2026-08-20 (6 giorni fa)]
+  NASUSD   NON MISURATA (nessun misura_tick_NASUSD.csv al pin)   [n/d]
+  >>> A modello 4 senza tick reali MT5 NON SI FERMA: ripiega e produce numeri
+      PLAUSIBILI E FALSI, e nessuna guardia di questo driver puo' accorgersene.
+
+--- IL PASSO 0, PRIMA PARTE: SI CONTA (criteri par. 3.0 e S0b) ---
+  SIMB     LATO    n      PRIMA-OP    ULTIMA-OP   GIORNI  MAX/GG  AL-CAP   OP/SED  FINESTRA
+  D30EUR   LONG    815    2024.09.30  2026.08.20  n/d     n/d     n/d      n/d     NON AFFIDABILE (vedi PROBLEMI: anche n e' sospetto)
+  D30EUR   SHORT   921    2024.09.30  2026.08.20  n/d     n/d     n/d      n/d     NON AFFIDABILE (vedi PROBLEMI: anche n e' sospetto)
+  U30USD   LONG    885    2024.09.30  2026.08.20  n/d     n/d     n/d      n/d     NON AFFIDABILE (vedi PROBLEMI: anche n e' sospetto)
+  U30USD   SHORT   920    2024.09.30  2026.08.20  n/d     n/d     n/d      n/d     NON AFFIDABILE (vedi PROBLEMI: anche n e' sospetto)
+  NASUSD   LONG    655    2024.09.30  2026.08.20  355     3       99       1.33    PIENA (prima op. 2024.09.30, ultima 2026.08.20)
+  NASUSD   SHORT   740    2024.09.30  2026.08.20  n/d     n/d     n/d      n/d     NON AFFIDABILE (vedi PROBLEMI: anche n e' sospetto)
+  GIORNI = giornate con almeno un'operazione. MAX/GG = massimo in una giornata.
+  AL-CAP = giornate che hanno toccato il cap di 3: se sono tante, OP/SED e' un
+     LIMITE INFERIORE e non la frequenza del motore (criteri D7).
+  OP/SED = n diviso i GIORNI FERIALI fra prima e ultima operazione. E' un
+     DERIVATO, non una misura: NON toglie le feste di borsa, quindi SOTTOSTIMA.
+  ATTESA DICHIARATA PRIMA: 0,5-2 operazioni al giorno per lato, ed era una
+     [STIMA DEL CACCIATORE], mai una misura nostra. Se n esce molto piu' basso,
+     quello E' GIA' UN RISULTATO: la frequenza e' la ragione per cui il round
+     esiste (challenge).
+
+--- IL PASSO 0, SECONDA PARTE: IL CANCELLO ZERO SUL COSTO (criteri par. 3) ---
+  Si legge PRIMA di qualunque PF. Il take e' misurato SUI PREZZI dei deal
+  (in -> out) del report .htm, in PUNTI INDICE (su BCM questi tre indici hanno
+  2 decimali: 1 punto indice = 1,00 di prezzo = 100 punti MT5). Su un indice il
+  'pip' NON ESISTE. Il take e' GIA' AL NETTO dello spread (entry all'ask, uscita
+  al bid): il LORDO si ottiene aggiungendo lo spread dichiarato.
+  spread DICHIARATO: 2.0 punti indice   [NON MISURATO -- criteri D4]
+  soglia S0a: take LORDO MEDIANO dei vincenti >= 3.0x lo spread
+  SIMB     LATO    TAKEnet    TAKElordo  RAPPORTO   PERDmed   DURmed    STATO PASSO 0
+  D30EUR   LONG    n/d        n/d        n/d        n/d       n/d       NON AFFIDABILE: 6 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere)
+  D30EUR   SHORT   n/d        n/d        n/d        n/d       n/d       NON AFFIDABILE: 13 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere)
+  U30USD   LONG    n/d        n/d        n/d        n/d       n/d       NON AFFIDABILE: 2 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere)
+  U30USD   SHORT   n/d        n/d        n/d        n/d       n/d       NON AFFIDABILE: 7 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere)
+  NASUSD   LONG    84.35      86.35      43.18      50.10     4.21      MISURATO
+  NASUSD   SHORT   n/d        n/d        n/d        n/d       n/d       NON AFFIDABILE: 6 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere)
+  (TAKE e PERD in PUNTI INDICE, MEDIANE -- non medie. DUR in barre M15.)
+  PERDmed e' la miglior stima di R che il report contenga: le perdenti escono
+     allo stop. Sotto 5 punti indice = stop stretto = LOTTO GRANDE, e lo
+     slippage si mangia l'operazione (R55). Il pavimento InpMinSLPts e' SPENTO.
+
+  S0a D30EUR LONG: NON MISURATO (nessun vincente, o prezzi illeggibili)
+      take medio (non mediano) sui vincenti: n/d punti indice netti
+      durata media (non mediana): n/d barre M15
+      peggior giornata (dal report): n/d%  il n/d   (muro prop: -5,00%)
+  S0a D30EUR SHORT: NON MISURATO (nessun vincente, o prezzi illeggibili)
+      take medio (non mediano) sui vincenti: n/d punti indice netti
+      durata media (non mediana): n/d barre M15
+      peggior giornata (dal report): n/d%  il n/d   (muro prop: -5,00%)
+  S0a U30USD LONG: NON MISURATO (nessun vincente, o prezzi illeggibili)
+      take medio (non mediano) sui vincenti: n/d punti indice netti
+      durata media (non mediana): n/d barre M15
+      peggior giornata (dal report): n/d%  il n/d   (muro prop: -5,00%)
+  S0a U30USD SHORT: NON MISURATO (nessun vincente, o prezzi illeggibili)
+      take medio (non mediano) sui vincenti: n/d punti indice netti
+      durata media (non mediana): n/d barre M15
+      peggior giornata (dal report): n/d%  il n/d   (muro prop: -5,00%)
+  S0a NASUSD LONG: SUPERATO -- take lordo mediano 86.4 punti indice = 43.18x lo spread (soglia 3.0x).  [SPREAD NON MISURATO: 2.0 punti indice DICHIARATI, criteri D4]
+      take medio (non mediano) sui vincenti: 120.28 punti indice netti
+      durata media (non mediana): 24.29 barre M15
+      peggior giornata (dal report): -4.30%  il 2025.06.19   (muro prop: -5,00%)
+  S0a NASUSD SHORT: NON MISURATO (nessun vincente, o prezzi illeggibili)
+      take medio (non mediano) sui vincenti: n/d punti indice netti
+      durata media (non mediana): n/d barre M15
+      peggior giornata (dal report): n/d%  il n/d   (muro prop: -5,00%)
+
+--- LA TABELLA MADRE ---   (attese: 2 righe per CSV, 13 passate)
+  SIMB     LATO    PROFITTO   PF       DD%      n       GEMELLI      ESITO
+  D30EUR   LONG    -43608     0.911    56.22    818     IDENTICI     INCOMPLETA (vedi PROBLEMI)
+  D30EUR   SHORT   -59085     0.831    67.83    927     IDENTICI     INCOMPLETA (vedi PROBLEMI)
+  U30USD   LONG    -10725     0.978    44.32    886     IDENTICI     INCOMPLETA (vedi PROBLEMI)
+  U30USD   SHORT   -46279     0.917    57.18    923     IDENTICI     INCOMPLETA (vedi PROBLEMI)
+  NASUSD   LONG    -48548     0.885    59.21    655     IDENTICI     OK
+  NASUSD   SHORT   -5405      0.990    44.07    743     IDENTICI     INCOMPLETA (vedi PROBLEMI)
+  >>> IL PF DI QUESTA TABELLA NON E' UN VERDETTO DI MERITO. Un solo regime, un
+      motore controtendenza, nessun out-of-sample: il numero dice quanto e'
+      costato opporsi a QUESTO toro, non se l'idea funziona (criteri par. 7).
+
+--- G4: LA PEGGIOR GIORNATA (muro prop: -5,00% su 100k) ---
+  E' IL NUMERO DA GUARDARE, piu' del DD totale: la peggiore misurata in casa e'
+  -2,06% (R51), e i tre indici si esauriscono spesso INSIEME.
+  SIMB     LATO    htm          quando       csv (OPTFRAME)
+  D30EUR   LONG    n/d          n/d          -4.82
+  D30EUR   SHORT   n/d          n/d          -5.01
+  U30USD   LONG    n/d          n/d          -4.38
+  U30USD   SHORT   n/d          n/d          -9.72
+  NASUSD   LONG    -4.30        2025.06.19   -4.57
+  NASUSD   SHORT   n/d          n/d          -4.30
+  (tutti in % del deposito, a rischio 1,00%. 'n/d' = NON MISURATA, mai 0.)
+  >>> E LE DUE VISTE SONO DUE STRUMENTI DIVERSI: la colonna htm viene dal report
+      della passata singola, la colonna csv dall'OPTFRAME della gemella. Se
+      divergono e' un'informazione, non un guasto.
+
+--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---
+  D30EUR   LONG    magic 774410/774411 (gemelle) 774412 (singola)  modello 4
+       InpAllowLong=true  InpAllowShort=false  SOLO LONG -- il fade al pivot BASSO. In un toro e' il lato che compra i minimi.
+  D30EUR   SHORT   magic 774420/774421 (gemelle) 774422 (singola)  modello 4
+       InpAllowLong=false  InpAllowShort=true  SOLO SHORT -- il fade al pivot ALTO, ed e' il lato SIMMETRIZZATO (tesi par. 4.3).
+  U30USD   LONG    magic 774430/774431 (gemelle) 774432 (singola)  modello 4
+       InpAllowLong=true  InpAllowShort=false  SOLO LONG -- il fade al pivot BASSO. In un toro e' il lato che compra i minimi.
+  U30USD   SHORT   magic 774440/774441 (gemelle) 774442 (singola)  modello 4
+       InpAllowLong=false  InpAllowShort=true  SOLO SHORT -- il fade al pivot ALTO, ed e' il lato SIMMETRIZZATO (tesi par. 4.3).
+  NASUSD   LONG    magic 774450/774451 (gemelle) 774452 (singola)  modello 4
+       InpAllowLong=true  InpAllowShort=false  SOLO LONG -- il fade al pivot BASSO. In un toro e' il lato che compra i minimi.
+  NASUSD   SHORT   magic 774460/774461 (gemelle) 774462 (singola)  modello 4
+       InpAllowLong=false  InpAllowShort=true  SOLO SHORT -- il fade al pivot ALTO, ed e' il lato SIMMETRIZZATO (tesi par. 4.3).
+  collaudo autotest: magic 774400, 2026.06.01 -> 2026.06.30, modello 1 (nessun numero di round)
+  >>> 774401, il DEFAULT COMPILATO dell'EA, e' VIETATO in tutto il round: se una
+      cella girasse col default, il magic lo direbbe.
+
+--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---
+  * NON PROMUOVE E NON BOCCIA NIENTE (G5). Questo EA NON va in forward: lo dice
+    la sua stessa tesi, in testa.
+  * NON APPLICA G2 (merito) E G3 (coerenza cross-simbolo): il merito e' sospeso
+    per costruzione. Se S0 e G1 sono verdi su piu' celle, il passo dopo e' un
+    ROUND NUOVO, non una promozione.
+  * NON HA GIRATO NESSUNA ABLAZIONE (criteri D1): prossimita' PERC vs ATR,
+    grilletto AUTORE vs CLOSE, buffer/pavimento dello SL, parziale+BE+trailing
+    restano tutte da misurare, e solo SE questo round passa S0.
+  * NON MISURA LO SPREAD: la soglia di S0a usa un valore DICHIARATO.
+  * NON MISURA LA PROFONDITA' DEI TICK (esiste solo per U30USD).
+  * NON FA LA PROVA DI REGIME, e non la puo' fare: il broker non ha altro
+    storico. Quando ci sara' la pipeline Dukascopy _EXT sugli indici, questo
+    round va RIFATTO su una finestra che contenga almeno un orso.
+  * NIENTE M5 e niente cella 'entrambi i lati'.
+  * NESSUN NUMERO D'AUTORE e' entrato qui dentro: Pine -> MQL5 non e' un
+    porting, e' una riscrittura, e i conteggi divergono per costruzione (cap
+    giornaliero, media del volume, STOPS_LEVEL, short simmetrizzato).
+
+--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (4)
+  - PROFONDITA' TICK NON MISURATA su D30EUR: in tutto il repo esiste una sola misura dei tick sugli indici, ed e' U30USD (67.618.571 tick dal 2024.09.26). Le celle girano a MODELLO 4 e MT5, se i tick reali non ci sono, NON SI FERMA: ripiega e produce numeri PLAUSIBILI E FALSI. Nessuna guardia di questo driver puo' accorgersene. E' la decisione D2 dei criteri: ogni numero a modello 4 su D30EUR va letto con questa riserva.
+  - PROFONDITA' TICK NON MISURATA su NASUSD: in tutto il repo esiste una sola misura dei tick sugli indici, ed e' U30USD (67.618.571 tick dal 2024.09.26). Le celle girano a MODELLO 4 e MT5, se i tick reali non ci sono, NON SI FERMA: ripiega e produce numeri PLAUSIBILI E FALSI. Nessuna guardia di questo driver puo' accorgersene. E' la decisione D2 dei criteri: ogni numero a modello 4 su NASUSD va letto con questa riserva.
+  - in MQL5\Experts esisteva GIA' un ABTG_AtrExhaustVol.ex5 prima di questo round. Il .mq5 dichiara di non essere mai stato compilato: o qualcuno lo ha compilato a mano (e allora va detto), o e' di un altro giro di R109. Backup datato messo da parte.
+  - FREQUENZA CENSURATA su NASUSD LONG: 99 giornate su 355 operative (28%) hanno toccato il cap di 3. Le operazioni per seduta di questa cella sono un LIMITE INFERIORE, non la frequenza del motore: chi legge il numero senza questa riga legge un numero mutilato.
+
+--- PROBLEMI (questi SI sono guasti, o risposte scomode) ---   (10)
+  - R109_D30EUR_00_long.txt: 6 deal ANOMALI -- NON AFFIDABILE: 6 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere) >>> Le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3).
+  - R109_D30EUR_00_long.txt: il conteggio NON torna fra i due strumenti -- report .htm dice n=815, il CSV dell'OPTFRAME dice n=818. Sono la STESSA cella sulla STESSA finestra: uno dei due sta contando un'altra cosa (o il parser dei deal, o il magic). Nessun numero di questa cella si legge finche' non si sa quale.
+  - R109_D30EUR_01_short.txt: 13 deal ANOMALI -- NON AFFIDABILE: 13 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere) >>> Le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3).
+  - R109_D30EUR_01_short.txt: il conteggio NON torna fra i due strumenti -- report .htm dice n=921, il CSV dell'OPTFRAME dice n=927. Sono la STESSA cella sulla STESSA finestra: uno dei due sta contando un'altra cosa (o il parser dei deal, o il magic). Nessun numero di questa cella si legge finche' non si sa quale.
+  - R109_U30USD_00_long.txt: 2 deal ANOMALI -- NON AFFIDABILE: 2 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere) >>> Le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3).
+  - R109_U30USD_00_long.txt: il conteggio NON torna fra i due strumenti -- report .htm dice n=885, il CSV dell'OPTFRAME dice n=886. Sono la STESSA cella sulla STESSA finestra: uno dei due sta contando un'altra cosa (o il parser dei deal, o il magic). Nessun numero di questa cella si legge finche' non si sa quale.
+  - R109_U30USD_01_short.txt: 7 deal ANOMALI -- NON AFFIDABILE: 7 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere) >>> Le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3).
+  - R109_U30USD_01_short.txt: il conteggio NON torna fra i due strumenti -- report .htm dice n=920, il CSV dell'OPTFRAME dice n=923. Sono la STESSA cella sulla STESSA finestra: uno dei due sta contando un'altra cosa (o il parser dei deal, o il magic). Nessun numero di questa cella si legge finche' non si sa quale.
+  - R109_NASUSD_01_short.txt: 6 deal ANOMALI -- NON AFFIDABILE: 6 deal non accoppiati o con volume diverso (una posizione alla volta / niente parziali: non dovrebbe succedere) >>> Le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.3).
+  - R109_NASUSD_01_short.txt: il conteggio NON torna fra i due strumenti -- report .htm dice n=740, il CSV dell'OPTFRAME dice n=743. Sono la STESSA cella sulla STESSA finestra: uno dei due sta contando un'altra cosa (o il parser dei deal, o il magic). Nessun numero di questa cella si legge finche' non si sa quale.
+
+ESITO: PARZIALE -- 5 celle su 6 NON hanno prodotto i numeri attesi, piu' 10 problemi. NON e' un round completo.
+
+--- COME SI RIPRENDE ---
+  un simbolo solo    : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo 'U30USD'
+  due simboli        : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo 'D30EUR,NASUSD'   <-- FRA APICI (checklist 65)
+  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella 'R109_U30USD_01_short.txt'
+  >>> in tutti i casi il COLLAUDO DELL'AUTOTEST rigira: costa minuti, ed e' la
+      prova che il motore ragiona come la sua firma. Senza, i numeri non si
+      convalidano.
+  >>> E OGNI RIGA DI RIPRESA E' UN BLOCCO INTERO col suo irm e la sua guardia
+      (checklist 42): i tre puntini stanno per il blocco di RIGA_R109_DA_MANDARE.md.
+      Una riga '& $p ...' incollata da sola riusa la copia locale e il pin di prima.
