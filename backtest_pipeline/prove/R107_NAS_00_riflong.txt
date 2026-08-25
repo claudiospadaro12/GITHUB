@@ -1,0 +1,155 @@
+# =====================================================================
+#  R107 NAS 00_riflong  --  IL RIFERIMENTO LONG DEL NASDAQ
+#  ABTG_Nasdaq_Apertura_US  su  NASUSD  M5, TICK REALI
+#  >>> NON E' UN METRO, E LA DIFFERENZA NON E' UNA SFUMATURA. <<<
+# ---------------------------------------------------------------------
+#  CRITERI: backtest_pipeline\risultati_archivio\R107_CRITERI.md
+#  PERIMETRO: risultati_archivio\R107_CODA_LATI_SHORT.md
+#  >>> I CRITERI DI DETTAGLIO SONO [DA FIRMARE].
+#
+#  PERCHE' NON E' UN METRO:
+#    un METRO e' una cella che RIPRODUCE un numero AGLI ATTI. Sul Nasdaq
+#    non esiste nessuna sedia viva con questa geometria (il magic 770201
+#    e' SPENTO e resta spento) e non esiste nessun numero agli atti da
+#    riprodurre. Quindi qui NON c'e' nessun gate G0 e NON si puo' dire
+#    "il banco e' sano" sulla base di questa cella.
+#    Serve a UNA cosa sola: dare un DENOMINATORE alla cella short. Senza,
+#    "PF short 0,9" non si saprebbe se e' un giudizio sul lato o sulla
+#    geometria trasposta.
+#
+#  CHE GEOMETRIA E' QUESTA:
+#    E' LA GEOMETRIA VIVA DEL DOW, TRASPOSTA DI PESO su NASUSD.
+#    Copia carattere per carattere del blocco input di
+#    prove\R101_DOW_00_viva.txt, con @SIMBOLO cambiato e il blocco R30
+#    aggiunto (vedi sotto). Stessa ora 14:30 SERVER (apertura USA),
+#    stesso range 35', stesso EntryMode=2 (RETEST), stesso buffer 1000
+#    punti, stesso offset 400, stesso EMA H4, stesso floor stop 500,
+#    stessa chiusura 17:30 server, stesso rischio 1%.
+#
+#  >>> IL LIMITE DI QUESTA SCELTA, DETTO PRIMA DEI NUMERI:
+#      buffer e offset sono in PUNTI ASSOLUTI, e i due indici non hanno
+#      la stessa scala. 1000 punti = 10 punti indice: su un Dow a ~44.000
+#      sono lo 0,023%, su un Nasdaq a ~20.000 sono lo 0,05% -- il DOPPIO
+#      in termini relativi. Trasporre e' quindi una SCELTA, non una
+#      neutralita'. E' stata presa cosi' apposta: qualunque riscalatura
+#      (per ATR, per prezzo, per volatilita') sarebbe un PARAMETRO NUOVO
+#      deciso a tavolino senza misura, cioe' l'inizio della pesca.
+#      CONSEGUENZA, che il referto DEVE scrivere: se le celle NASUSD
+#      escono rosse, il risultato e' "LA GEOMETRIA DEL DOW NON SI
+#      TRASPORTA SUL NASDAQ", NON "il Nasdaq non ha edge in apertura".
+#      Sono due frasi diverse e solo la prima e' misurata qui.
+#
+#  IL BLOCCO R30 (15 input in fondo, prima di InpMagic): esiste SOLO in
+#  ABTG_Nasdaq_Apertura_US.mq5 -- regime di volatilita' adattivo e filtro
+#  S/R, aggiunti nel round 30 e MAI validati. Sono pinnati SPENTI
+#  (InpUseVolRegime=0, InpUseSRFilter=0). MISURATO nel sorgente il 25/08:
+#  UpdateVolRegime() ritorna alla prima riga se l'interruttore e' falso,
+#  VolRegimeSL() ritorna lo stop invariato, SRBlocked() ritorna false
+#  subito. Con i due interruttori a 0 il motore Nasdaq E' il motore Dow.
+#
+#  ALTRE DUE DIFFERENZE DI FAMIGLIA, dichiarate:
+#    - il .mq5 del Nasdaq e' version 1.02, quello del Dow 1.01: la
+#      differenza E' il blocco R30 (diff del core fatto il 25/08).
+#    - il Nasdaq NON ha InpAllowReverse (ce l'ha solo il DAX): infatti
+#      qui non compare, ed e' giusto cosi'.
+#
+#  MAGIC VERGINI 761200/761201 (blocco 761xxx, libero al 25/08).
+#  Il magic 770201 (Nasdaq Apertura, SPENTA) e' VIETATO e controllato
+#  nel driver: una sedia spenta e' comunque un'identita' occupata.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=400||400||0||400||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- BLOCCO R30, SOLO NASDAQ: i due opt-in che il Dow non ha ---
+#     Pinnati SPENTI: cosi' questo motore e' il motore del Dow.
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20.0||20.0||0||20.0||N
+InpVolHighPct=80.0||80.0||0||80.0||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=761200||761200||1||761201||Y

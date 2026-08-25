@@ -1,0 +1,127 @@
+# =====================================================================
+#  R107 DAX 01_short  --  IL LATO SHORT DELLA GEOMETRIA VIVA DEL DAX
+#  ABTG_DAX_Apertura_EU  su  D30EUR  M5, TICK REALI
+#  >>> E' LA MISURA NUOVA DEL ROUND. Le altre cinque celle la servono.
+# ---------------------------------------------------------------------
+#  CRITERI: backtest_pipeline\risultati_archivio\R107_CRITERI.md
+#  PERIMETRO: risultati_archivio\R107_CODA_LATI_SHORT.md
+#  >>> I CRITERI DI DETTAGLIO SONO [DA FIRMARE].
+#
+#  COSA CAMBIA QUI RISPETTO A R107_DAX_00_metro.txt:
+#    InpAllowLong   1 -> 0
+#    InpAllowShort  0 -> 1
+#    (piu' InpMagic, che e' l'asse gemello di controllo)
+#    E BASTA. Il driver conta le righe diverse E VERIFICA QUALI SONO.
+#
+#  PERCHE' QUESTA E' LA CELLA CHE GIUSTIFICA IL ROUND:
+#    Sul Dow il lato short e' gia' stato misurato su questa geometria e
+#    su questa finestra (R54, 14/08: OOS PF 0,840, BOCCIATO).
+#    SUL DAX NO. E non e' una dimenticanza recente: sta scritto nel
+#    REGISTRO_TEST.md, riga A3, dal luglio scorso --
+#      "A3 | DAX_Apertura_EU | D30EUR | SOLO SHORT, ST OFF, buffer
+#       200-600 | real tick | -- | in coda"
+#    e quella riga e' rimasta "in coda" per un anno. Per di piu' A3
+#    parlava della geometria VECCHIA (range 15', buffer 200-600, rottura
+#    secca); la sedia viva di oggi e' un'ALTRA cosa (RETEST, range 35',
+#    buffer 500, offset 200). Quindi il lato short della geometria che
+#    sta sui soldi NON E' MAI STATO MISURATO. Questo file lo misura.
+#
+#  ATTENZIONE A NON CITARE I NUMERI SBAGLIATI (e ce ne sono tre in giro):
+#    1. REGISTRO_TEST, tabella "caccia motore M5": "qualsiasi SHORT
+#       <= 0,92". E' il motore MARCO su ROTTURA SECCA, non il retest.
+#    2. REGISTRO_TEST, riga O3: "DAX_M3, short 0%". Altro EA, altro TF.
+#    3. MaxMinNotte DAX gira SHORT e fa PF 2,05: e' il BOX NOTTURNO
+#       delle 07:59, non l'apertura delle 08:00. Non e' la stessa cosa
+#       e NON e' una previsione per questa cella.
+#    Nessuno dei tre e' un precedente su questa geometria.
+#
+#  L'ATTESO, SCRITTO PRIMA DEI NUMERI: TANTI trade, non pochi. Sul DAX
+#  il filtro EMA e' SPENTO (InpUseEmaFilter=0), quindi niente taglia gli
+#  short per direzione: e' ragionevole [INFERITO] aspettarsi un n dello
+#  stesso ordine del metro (270 OOS / 175 IS), non i 73 del Dow.
+#  Se invece uscisse un n piccolo, la prima cosa da guardare NON e' il
+#  merito: e' InpSkipIfTight=1, che sul DAX salta i trade con lo stop
+#  troppo stretto e potrebbe mordere in modo asimmetrico sui due lati.
+#
+#  MAGIC VERGINI 761110/761111 (blocco 761xxx, libero al 25/08).
+#  Il magic vivo 770101 NON compare qui.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500||500||0||500||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=200||200||0||200||N
+InpFadeOffsetPts=0||0||0||0||N
+InpAllowReverse=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=0||0||0||0||N
+InpSkipIfTight=1||1||0||1||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=761110||761110||1||761111||Y
