@@ -256,6 +256,18 @@ simulatore TradingView).
 campione si allarga). Storico BCM sugli indici: dal **2024.09.26** (misurato,
 `REFERTO_SONDA_STORICO_17-08.md`, stato COMPLETO) ≈ **450 sedute**.
 
+> ⚖️ **REGOLA DEI DUE LATI + STORICO LUNGO (CLAUDE.md, congelata il 25/08).**
+> Due conseguenze dirette su questo candidato:
+> 1. **Long E short si misurano TUTTI E DUE, sempre** — è già il punto 1 del §6,
+>    ed è anche il lato che ho simmetrizzato (§4.3): a maggior ragione.
+> 2. **La profondità dei dati BCM sugli indici si MISURA, non si assume.** Il
+>    "dal 2024.09.26" qui sopra viene dalla sonda del 17/08: **va rifatta prima
+>    del round**, perché se il broker nel frattempo ha allungato lo storico
+>    cambia il conteggio delle operazioni e quindi l'esito dell'Emendamento §A.
+>    ⚠️ **E c'è il tetto del tester: ~100.000 barre per corsa** → **M15 ≈ 4 anni,
+>    M5 ≈ 1,3 anni**. Per finestre più lunghe si sale di TF o si spezza la corsa
+>    in tranche, **dichiarandolo**. Su M5 questo morde subito.
+
 ### 📊 Frequenza — ⚠️ **STIME, NON MISURE**
 
 | | valore | rango |
