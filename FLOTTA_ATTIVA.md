@@ -41,10 +41,10 @@ _Legenda stato: ✅ validato tick reali · 🟡 nativo/da verificare · ❌ scar
 ## 🟡 IN OSSERVAZIONE / DA VERIFICARE (Ottimizzati + nativi)
 | Grafico | EA | Simbolo | TF | Nota |
 |---|---|---|---|---|
-| D30EURH1 | SupRev_DAX_H1_Ottimizzato | DAX | H1 | 🟡 (970911) |
-| D30EURH4 | SupRev_DAX_H4_Ottimizzato | DAX | H4 | 🟡 marginale RT (970912) |
-| D30EURH41 | SuperWave_DAX_H4_Ottimizzato | DAX | H4 | 🟡 (770512) |
-| D30EURH42 | SuperWave | DAX | H4 | 🟡 nativo |
+| D30EURH1 | SupRev_DAX_H1_Ottimizzato | DAX | H1 | 🔴 **NON IN CAMPO** (970911: assente dai censimenti .chr 23/08 e 25/08 E dalla lista Esperti VPS verificata da Claudio il 25/08 22:15 — riga storica, mai deployata o rimossa senza verbale) |
+| D30EURH4 | SupRev_DAX_H4_Ottimizzato | DAX | H4 | 🟡 marginale RT (970912) — ✅ confermata in campo (Esperti 25/08 22:15) |
+| D30EURH41 | SuperWave_DAX_H4_Ottimizzato | DAX | H4 | 🔴 **NON IN CAMPO** (770512: assente da censimenti ed Esperti 25/08 22:15) |
+| D30EURH42 | SuperWave | DAX | H4 | 🔴 **NON IN CAMPO** (nativo DAX: assente; il SuperWave nativo vivo e' su U30USD) |
 | D30EURM15 | MaxMinNotte_DAX_Short_Ottimizzato | DAX | M15 | ✅ (770411) |
 | D30EURM3 | SuperWave_EA | DAX | M3 | 🟡 test M3 |
 | U30USDH12 | SuperWave_DOW_H1_Ottimizzato | Dow | H1 | 🟡 (770511) |
