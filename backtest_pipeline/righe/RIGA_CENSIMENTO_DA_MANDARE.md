@@ -3,9 +3,11 @@
 **Pin: `94946f46dcb99d185a98f7f780a4a2537e810796`** (branch `lavoro`).
 Script: `backtest_pipeline/censimento_rischio.ps1` — marcatore `MARCATORE_CENSIMENTO_V2`.
 
-> 🛑 **FINCHE' C'E' IL SEGNAPOSTO, QUESTA RIGA NON SI MANDA.** Il blocco si
-> rifiuta di partire se `$h` non e' un SHA da 40 caratteri. Dopo il commit:
-> sostituirlo nelle **due** occorrenze (PASSO 1 e PASSO 2), o `git rev-parse HEAD`.
+> 🔒 **IL PIN E' SCRITTO** nelle **tre** occorrenze (l'intestazione qui sopra,
+> il PASSO 1, il PASSO 2). Tutti e due i blocchi si rifiutano di partire se
+> `$h` non e' un SHA da 40 caratteri esadecimali, cosi' un segnaposto non puo'
+> finire in console per distrazione (checklist punto 4 + punto 63).
+> **Se lo script viene ritoccato, il pin va rifatto in tutte e tre.**
 
 ---
 

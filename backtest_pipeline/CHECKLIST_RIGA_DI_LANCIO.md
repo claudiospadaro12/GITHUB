@@ -3058,3 +3058,33 @@ codice l'if che la fa rispettare: se non c'e', la regola non esiste. Il
 controllo da fare a ogni verifica: **elencare gli switch del driver e
 provare le combinazioni che il DA_MANDARE non propone** - sono quelle che
 nessuno ha mai eseguito.
+
+## 68. IL VERDETTO BINARIO SENZA LO STATO "NON HO FATTO NIENTE" (25/08, ABTG_ChiudiSedie v1.00, preso PRIMA dell'invio)
+
+Un esito calcolato su QUEL CHE RESTA (restaP==0 && restaO==0 -> PULITO)
+non distingue "ho pulito" da "NON HO TROVATO NIENTE DA PULIRE". E il caso
+"non trovo niente" e' il refuso piu' comune che esista: il SELETTORE
+SBAGLIATO (un magic con una cifra storta). La v1.00 avrebbe stampato
+ESITO: PULITO su una revisione mai cominciata, con la posizione orfana
+della sedia vera ancora viva - l'incidente del 24/08 riprodotto dallo
+strumento nato per impedirlo.
+
+**REGOLA**: ogni verdetto calcolato sullo stato residuo deve avere un
+TERZO STATO per "il selettore non ha corrisposto a nulla" - e se le cause
+non sono distinguibili dal codice, si dicono TUTTE, non si sceglie la
+piu' bella. (Parente di 66: la' la vittima era una colonna, qui la RIGA
+DI VERDETTO che la riga di lancio dice di leggere.)
+
+## 69. LA CANCELLAZIONE PREVENTIVA SPACCIATA PER CONTROLLO DI FRESCHEZZA (25/08, stessa verifica)
+
+"Cancello l'artefatto vecchio, poi controllo che esista" SEMBRA piu'
+forte del LastWriteTime prima/dopo (punto 54) - e lo e', FINCHE' LA
+CANCELLAZIONE RIESCE. Fatta con -ErrorAction SilentlyContinue (28-bis)
+degrada in silenzio a "esiste", cioe' al controllo che il punto 54 vieta
+per nome: MT5/MetaEditor/antivirus tengono il file aperto, la Remove-Item
+fallisce zitta, e il Test-Path trova l'artefatto VECCHIO stampando OK.
+
+**REGOLA**: se cancelli prima, devi FALLIRE RUMOROSAMENTE se il file
+sopravvive - e il timestamp lo verifichi LO STESSO. Vale per ogni
+artefatto su una macchina dove il produttore e' vivo e tiene i file
+aperti.

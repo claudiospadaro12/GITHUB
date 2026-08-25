@@ -3,13 +3,13 @@
 **Pin: `94946f46dcb99d185a98f7f780a4a2537e810796`** (branch `lavoro`).
 Sorgente: `mql5/Scripts/ABTG_ChiudiSedie.mq5`.
 
-> 🛑 **FINCHE' C'E' IL SEGNAPOSTO, QUESTA RIGA NON SI MANDA.** Il blocco ha
-> dentro una guardia che si rifiuta di partire se `$h` non e' un SHA da 40
-> caratteri: e' li' apposta, cosi' il segnaposto non puo' finire in console
-> per distrazione (checklist punto 4 + punto 63, regola 2: _"se il parse/pin
-> non si puo' scrivere, la riga non esce col pin scritto"_).
-> Dopo il commit: sostituire il segnaposto nelle **due** occorrenze
-> (PASSO 1 e PASSO 3) con l'hash vero, oppure `git rev-parse HEAD`.
+> 🔒 **IL PIN E' SCRITTO** nelle **tre** occorrenze (l'intestazione qui sopra,
+> il PASSO 1, il PASSO 3). Tutti e due i blocchi hanno dentro una guardia che
+> si rifiuta di partire se `$h` non e' un SHA da 40 caratteri esadecimali:
+> serve perche' un segnaposto non possa finire in console per distrazione
+> (checklist punto 4 + punto 63, regola 2: _"se il parse/pin non si puo'
+> scrivere, la riga non esce col pin scritto"_).
+> **Se lo script viene ritoccato, il pin va rifatto in tutte e tre.**
 
 ---
 
@@ -29,10 +29,11 @@ scrivendolo):
    i valori dell'ultimo lancio nella finestra dello script**: al rilancio
    `InpEseguiDavvero` e' ancora `true` e i magic vecchi sono ancora scritti.
 
-> 📛 Nota sul marcatore: nel log si legge `ABTG_ChiudiSedie v1.00 - due sicure`
-> perche' **due** sono le sicure richieste; la terza (la conferma a schermo) e'
-> nata scrivendo lo script. Il marcatore resta quello: e' un numero di
-> versione, non un conteggio.
+> 📛 Nota sul marcatore: nel log si legge
+> `ABTG_ChiudiSedie v1.01 - due sicure + esito a tre stati`. **Due** sono le
+> sicure richieste (la terza, la conferma a schermo, e' nata scrivendo lo
+> script): il conteggio nel marcatore e' storico, non aritmetico.
+> La **v1.01** aggiunge il terzo stato dell'esito finale — vedi il PASSO 2.
 
 > ⚠️ **Questa riga NON ha la guardia MT5-chiuso, ed e' voluto.** Sul VPS il
 > terminale **e' il forward**: non si chiude. `metaeditor64` compila
@@ -64,7 +65,7 @@ l'altra non sono un programma).
   $src="$env:USERPROFILE\ABTG_ChiudiSedie.mq5"
   Remove-Item $src -Force -ErrorAction SilentlyContinue
   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$h/mql5/Scripts/ABTG_ChiudiSedie.mq5" -OutFile $src -ErrorAction Stop
-  if(-not (Select-String -Path $src -SimpleMatch -Pattern 'ABTG_ChiudiSedie v1.00 - due sicure' -Quiet)){ throw "sorgente VECCHIO o troncato (cache di raw): riprova fra 5 minuti" }
+  if(-not (Select-String -Path $src -SimpleMatch -Pattern 'ABTG_ChiudiSedie v1.01 - due sicure + esito a tre stati' -Quiet)){ throw "sorgente VECCHIO o troncato (cache di raw): riprova fra 5 minuti" }
   if(-not (Select-String -Path $src -Pattern '^input\s+string\s+InpMagics\s*=\s*""\s*;' -Quiet)){ throw "PRIMA SICURA ASSENTE nel sorgente: non si installa" }
   if(-not (Select-String -Path $src -Pattern '^input\s+bool\s+InpEseguiDavvero\s*=\s*false\s*;' -Quiet)){ throw "SECONDA SICURA ASSENTE nel sorgente: non si installa" }
   $inc=@(Select-String -Path $src -Pattern '^#include|^#import' | ForEach-Object { $_.Line.Trim() })
@@ -91,16 +92,24 @@ l'altra non sono un programma).
     $v=Get-Item -LiteralPath $mq -ErrorAction Stop
     if($v.PSIsContainer -or $v.Length -ne $len){ throw ("COPIA NON VERIFICATA in " + $dst) }
     $ex=[System.IO.Path]::ChangeExtension($mq,".ex5")
+    $exPrima=$null
+    if(Test-Path -LiteralPath $ex){ $exPrima=(Get-Item -LiteralPath $ex).LastWriteTime }
     Remove-Item -LiteralPath $ex -Force -ErrorAction SilentlyContinue
-    $t0=Get-Date
+    if(Test-Path -LiteralPath $ex){ throw ("EX5 VECCHIO NON CANCELLABILE in " + $dst + " (del " + $exPrima + "): qualcuno lo tiene aperto. NON compilo: un ex5 vecchio che sopravvive si spaccia per nuovo.") }
+    $t0=(Get-Date).AddSeconds(-2)
     & $me ("/compile:"+$mq) "/log" | Out-Null
     while((-not (Test-Path -LiteralPath $ex)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
     if(-not (Test-Path -LiteralPath $ex)){
       Get-Content ([System.IO.Path]::ChangeExtension($mq,".log")) -ErrorAction SilentlyContinue | Select-Object -Last 40
       throw ("COMPILAZIONE FALLITA in " + $dst + " -- sopra le ultime righe del log. Se MetaEditor era aperto, chiudilo e rilancia.")
     }
+    $exDopo=(Get-Item -LiteralPath $ex).LastWriteTime
+    if($exDopo -lt $t0){
+      Get-Content ([System.IO.Path]::ChangeExtension($mq,".log")) -ErrorAction SilentlyContinue | Select-Object -Last 40
+      throw ("EX5 NON RIGENERATO in " + $dst + ": e' del " + $exDopo + ", la compilazione e' partita alle " + $t0 + ". Il binario e' VECCHIO sotto un sorgente NUOVO (checklist 54): NON usare lo script.")
+    }
     $fatti++
-    Write-Host ("  OK  " + $d.Name + "   sorgente " + $v.Length + " byte   ex5 " + (Get-Item $ex).Length + " byte")
+    Write-Host ("  OK  " + $d.Name + "   sorgente " + $v.Length + " byte   ex5 " + (Get-Item $ex).Length + " byte   scritto " + $exDopo)
   }
   foreach($s in $saltati){ Write-Host ("  SALTATA  " + $s) -ForegroundColor Yellow }
   Write-Host ("INSTALLATO E COMPILATO IN: " + $fatti + " cartelle dati su " + $dati.Count)
@@ -110,8 +119,10 @@ l'altra non sono un programma).
 ```
 
 **Cosa si legge, e sono quattro cose:**
-1. una riga `OK` **per ogni cartella dati**, con **byte del sorgente** e **byte
-   dell'`.ex5`** (punto 27-ter: la copia si verifica sul contenuto, non sul nome);
+1. una riga `OK` **per ogni cartella dati**, con **byte del sorgente**, **byte
+   dell'`.ex5`** e **l'ora in cui l'`.ex5` e' stato scritto** — quell'ora deve
+   essere di **adesso** (punto 27-ter: la copia si verifica sul contenuto, non
+   sul nome; punto 54: un `.ex5` vecchio sopravvissuto si spaccia per nuovo);
 2. `INSTALLATO E COMPILATO IN: N cartelle dati su N` — **i due numeri devono
    coincidere**; se non coincidono, guarda le righe `SALTATA`;
 3. **zero** righe rosse del compilatore;
@@ -142,7 +153,7 @@ operando**: pilotarlo e' esattamente il gesto che la checklist vieta
 
 | # | riga attesa | se manca |
 |---|---|---|
-| 1 | `ABTG_ChiudiSedie v1.00 - due sicure` + `conto : <login> <server> (DEMO, HEDGING)` | **fermati**: e' il terminale sbagliato o l'`.ex5` e' vecchio |
+| 1 | `ABTG_ChiudiSedie v1.01 - due sicure + esito a tre stati` + `conto : <login> <server> (DEMO, HEDGING)` | **fermati**: e' il terminale sbagliato o l'`.ex5` e' vecchio |
 | 2 | `InpMagics e' VUOTO -> MODALITA' CENSIMENTO (default sicuro).` | se non c'e', qualcuno ha lasciato dei magic nella finestra |
 | 3 | la tabella `POSIZ. / PENDEN.` con magic, ticket, tipo, volume, prezzo, P/L | conto vuoto = `NIENTE DA ELENCARE` |
 | 4 | `--- RIEPILOGO PER MAGIC ---` | **e' da qui che si copiano i numeri** |
@@ -169,7 +180,19 @@ pendenti, quali magic) e solo allora **Si'**.
 **Cosa si legge dopo, e sono tre cose:**
 1. una riga **per ogni ticket**, con esito e **retcode**;
 2. il `RIEPILOGO` — `CHIUSE / CANCELLATI / gia' spariti / MERCATO CHIUSO / FALLITI`;
-3. il `CONTROLLO FINALE` con `ESITO: PULITO` **oppure** `ESITO: NON PULITO`.
+3. il `CONTROLLO FINALE`, che ha **tre** esiti e non due:
+
+| esito | vuol dire | cosa fai |
+|---|---|---|
+| `ESITO: PULITO` | c'era roba di quei magic e adesso non c'e' piu' | revisione chiusa (ma stacca gli EA a mano) |
+| `ESITO: NON PULITO` | e' rimasto qualcosa | leggi i retcode riga per riga, **non** dichiarare chiusa la revisione |
+| `ESITO: NIENTE DA FARE` | la lista **non corrispondeva a niente di aperto**: lo script non ha chiuso NULLA | o e' una **verifica** dopo una corsa gia' andata bene, **o hai sbagliato i magic**. Torna al `RIEPILOGO PER MAGIC` del censimento e **ricontrolla i numeri** |
+
+> ⛔ **Il terzo esito e' la ragione della v1.01.** Con un magic sbagliato di una
+> cifra la corsa non trova niente, non tocca niente — e fino alla v1.00
+> stampava lo stesso `ESITO: PULITO`, cioe' dichiarava finito un lavoro mai
+> cominciato mentre la posizione orfana della sedia vera restava viva. E' *lo
+> stesso incidente del 24/08* che questo attrezzo doveva impedire.
 
 > 🕐 **Mercato chiuso non e' un errore.** Lo script lo scrive
 > (`MERCATO CHIUSO, rilancia piu' tardi`), **tira dritto con gli altri

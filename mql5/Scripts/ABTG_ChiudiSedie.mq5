@@ -52,6 +52,16 @@
 //|    Serve la spunta "Consenti trading algoritmico" nella finestra  |
 //|    dello script: senza, lo script lo dice e si ferma.             |
 //|                                                                  |
+//|  L'ESITO FINALE HA TRE STATI, non due (v1.01):                    |
+//|    PULITO        = c'era roba di quei magic, e adesso non c'e';   |
+//|    NON PULITO    = e' rimasto qualcosa: revisione NON chiusa;     |
+//|    NIENTE DA FARE= la lista non corrispondeva a NULLA. Puo'       |
+//|      voler dire "verifica dopo una corsa andata bene" oppure      |
+//|      "hai sbagliato i magic": lo script non puo' distinguerle e   |
+//|      quindi le dice tutte e due. Fino alla v1.00 questo caso      |
+//|      stampava PULITO, cioe' un lavoro mai cominciato dichiarato   |
+//|      finito.                                                      |
+//|                                                                   |
 //|  Referto: scheda Esperti + MQL5\Files\ABTG_ChiudiSedie_report.txt |
 //|  (ASCII, una riga per ticket, con retcode: si rilegge dopo).      |
 //|                                                                  |
@@ -61,14 +71,14 @@
 //|  non torna verde il file e' una BOZZA.                            |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.00"
+#property version   "1.01"
 #property script_show_inputs
 
 // unica dipendenza: la libreria STANDARD di MetaTrader 5, presente in
 // ogni installazione. Nessun include di casa da installare a parte.
 #include <Trade\Trade.mqh>
 
-#define MARCATORE "ABTG_ChiudiSedie v1.00 - due sicure"
+#define MARCATORE "ABTG_ChiudiSedie v1.01 - due sicure + esito a tre stati"
 
 //--- INPUT ----------------------------------------------------------
 input string InpMagics        = "";     // Magic da spegnere (es. "770611,250604"). VUOTO = solo censimento
@@ -705,7 +715,12 @@ void OnStart()
                     ArraySize(posTk),ArraySize(ordTk)));
    Reg("");
 
-   if(ArraySize(posTk)==0 && ArraySize(ordTk)==0)
+   // Serve piu' avanti, al CONTROLLO FINALE: una corsa che non ha trovato
+   // NIENTE da trattare non e' una corsa "PULITA", e' una corsa che non ha
+   // fatto niente. Le due cose si scrivono diverse.
+   bool nienteDaFare = (ArraySize(posTk)==0 && ArraySize(ordTk)==0);
+
+   if(nienteDaFare)
      {
       Reg("  NIENTE DA FARE: nessuna posizione e nessun pendente con quei magic.");
       Reg("  (se te ne aspettavi: controlla i numeri nel riepilogo per magic qui sopra)");
@@ -775,10 +790,31 @@ void OnStart()
       if(InLista(OrderGetInteger(ORDER_MAGIC))) restaO++;
      }
    Reg(StringFormat("    restano %d posizioni e %d pendenti con quei magic.",restaP,restaO));
-   if(restaP==0 && restaO==0)
-     Reg("    ESITO: PULITO. Le sedie in lista non hanno piu' niente di aperto.");
+   if(restaP>0 || restaO>0)
+     {
+      Reg("    ESITO: NON PULITO. Qualcosa e' rimasto: NON dichiarare chiusa la revisione.");
+     }
+   else if(nienteDaFare)
+     {
+      // TERZO STATO, e non e' un dettaglio: con un magic sbagliato di una
+      // cifra la corsa non trova niente, non tocca niente, e la vecchia
+      // stesura stampava lo stesso "ESITO: PULITO" -- cioe' dichiarava
+      // finito un lavoro mai cominciato, mentre la posizione orfana della
+      // sedia vera restava viva. E' esattamente l'incidente del 24/08 che
+      // questo attrezzo doveva impedire. Le due cause qui sotto non sono
+      // distinguibili dallo script: si dicono tutte e due (checklist 66,
+      // la sentinella si dichiara, non si arrotonda a un numero buono).
+      Reg("    ESITO: NIENTE DA FARE - questa corsa non ha chiuso NULLA.");
+      Reg("    Due possibilita', e la sciogli tu:");
+      Reg("      a) e' una VERIFICA dopo una corsa andata a buon fine -> tutto a posto;");
+      Reg("      b) e' il PRIMO giro su quei magic -> ALLORA I MAGIC SONO SBAGLIATI.");
+      Reg("    Ricontrolla i numeri nel RIEPILOGO PER MAGIC qui sopra PRIMA di");
+      Reg("    dichiarare chiusa la revisione.");
+     }
    else
-     Reg("    ESITO: NON PULITO. Qualcosa e' rimasto: NON dichiarare chiusa la revisione.");
+     {
+      Reg("    ESITO: PULITO. Le sedie in lista non hanno piu' niente di aperto.");
+     }
 
    ScriviReport();
   }
