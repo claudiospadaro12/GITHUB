@@ -3447,6 +3447,47 @@ il token per esteso** e si riscriveva lo stesso. Misurato: il controllo
 > 🧪 **Si prova su una COPIA della pagina prima di scriverla nel foglio.** Costa
 > dieci secondi e questa e' stata sbagliata due volte di fila.
 
+### 77-bis. 🧟 E LA RI-PINNATURA CHE RISCRIVE LA **STORIA** (sbagliata dallo stesso verificatore, la sera stessa)
+
+_Aggiunto il 25/08 dopo averlo **eseguito**: la ricetta di ri-pinnatura scritta
+poche ore prima -- quella che doveva rimediare al difetto qui sopra -- era
+sbagliata a sua volta._
+
+Quando il pin va rifatto (e va rifatto: il 25/08 **due volte**, `826f008` sullo
+storico indici e `cf6126d` su R109), il segnaposto non c'e' piu' e si sostituisce
+il **pin vecchio**. La ricetta diceva:
+
+```bash
+VECCHIO=<il pin scritto adesso nella pagina>
+sed -i "s|$VECCHIO|$NUOVO|g" "$F"
+grep -c "$NUOVO" "$F"     # DEVE dare 4
+```
+
+Due difetti, e il secondo e' quello cattivo:
+
+1. **`<il pin scritto adesso nella pagina>` e' ambiguo.** In pagina i pin
+   compaiono anche **ABBREVIATI**: un `grep -o 'cf6126d[0-9a-f]*' | head -1`
+   pesca il `cf6126d` a **sette** caratteri della prosa, non lo SHA a 40.
+2. ☠️ **Un `sed` largo riscrive la MEMORIA.** La pagina conteneva la riga
+   _"il pin `cf6126d` e' BRUCIATO -- non lanciare niente con quello"_ e la
+   tabella dei difetti che spiega **perche'**. Misurato: la sostituzione larga
+   prendeva **6 occorrenze invece di 4**, e la pagina finiva per dire
+   **"il pin `<quello NUOVO>` e' BRUCIATO"** — cioe' l'esatto contrario del
+   vero, sulla riga piu' importante della pagina.
+
+> ✅ **REGOLA**: **il pin vecchio si legge DAI PUNTI D'USO, e si sostituisce solo
+> li'.** Le menzioni in prosa di un pin sono **storia** (perche' e' stato
+> bruciato, cosa conteneva): **non si toccano mai**.
+> ```bash
+> VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{40}')
+> sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|" "$F"
+> grep -c "\$pin='$NUOVO'" "$F"     # DEVE dare 3
+> grep -c "\$pin='$VECCHIO'" "$F"   # DEVE dare 0
+> ```
+> ⚠️ E il conteggio atteso **cambia** fra la prima pinnatura e le successive
+> (perche' la pagina intanto si e' riempita di storia): si **riconta sulla
+> pagina vera**, non si copia il numero dalla volta prima.
+
 ## 78. 🗓️ L'ARTEFATTO CHE PORTA DELLE DATE MA NON PORTA **LA PROPRIA**: l'eta' si misura su un numero che non e' quello
 
 _Difetto vero, gia' committato in `RIGA_R109_ATREXH.ps1` (298ac2c, righe
