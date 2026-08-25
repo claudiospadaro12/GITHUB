@@ -120,10 +120,10 @@ viva**, e nemmeno il lato short. Sono **tre celle diverse**, e la sedia è la pr
 
 ---
 
-## 📌 IL PIN — **`95e5200181fbbc33ff324fe461e5567915070abe`**
+## 📌 IL PIN — **`4d6952f1a29c2ccb50056d23df2b6d7588ece445`**
 
 ```
-95e5200181fbbc33ff324fe461e5567915070abe
+4d6952f1a29c2ccb50056d23df2b6d7588ece445
 ```
 
 > ☠️ **I PIN BRUCIATI DI QUESTO ROUND — non lanciare niente con questi.**
@@ -234,7 +234,7 @@ d'uso cambiano, **la riga di storia resta intatta**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='95e5200181fbbc33ff324fe461e5567915070abe'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4d6952f1a29c2ccb50056d23df2b6d7588ece445'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -296,7 +296,7 @@ aggiunge `-CriteriFirmati` e la firma finisce **scritta nel referto**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='95e5200181fbbc33ff324fe461e5567915070abe'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4d6952f1a29c2ccb50056d23df2b6d7588ece445'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -325,7 +325,7 @@ fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='95e5200181fbbc33ff324fe461e5567915070abe'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4d6952f1a29c2ccb50056d23df2b6d7588ece445'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloEa 'EMADOW';
@@ -340,7 +340,7 @@ restano la forma di casa.*
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='95e5200181fbbc33ff324fe461e5567915070abe'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4d6952f1a29c2ccb50056d23df2b6d7588ece445'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloEa 'SWDOW,EMADOW';
@@ -352,7 +352,7 @@ restano la forma di casa.*
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='95e5200181fbbc33ff324fe461e5567915070abe'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4d6952f1a29c2ccb50056d23df2b6d7588ece445'; $p="$env:USERPROFILE\RIGA_R110.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R110_LATI_VIVI.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R110_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella 'R110_EMADOW_02_short.txt';
