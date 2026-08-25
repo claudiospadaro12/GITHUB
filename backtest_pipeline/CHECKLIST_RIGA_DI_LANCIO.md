@@ -3492,3 +3492,113 @@ La data vera stava, e sta, **solo nel referto gemello**
 > stato fatto** — non lo si da' per superato (28-bis, il verde per assenza).
 > ⚠️ Corollario per chi SCRIVE uno strumento di misura: **ogni artefatto porta
 > dentro la propria riga `data:`**, CSV compresi. Il gemello e' una toppa.
+
+---
+
+## 🆕 AGGIUNTA DEL 25/08/2026 — **il primo difetto di questa serie arrivato fino al PC di Claudio**
+
+## 79. 🔠 LE VARIABILI DI POWERSHELL SONO **CASE-INSENSITIVE**: `$a` di un ciclo distrugge `$A` della configurazione, e il giro a vuoto esce **0**
+
+_Difetto vero, **girato sul PC di Claudio** (giro a vuoto R109 delle 21:48,
+zip `R109_ATREXH_CONTROLLO_20260825_2148`, pin `cf6126d`), trovato da Claudio
+leggendo gli `.ini` dello zip — **non** dal verificatore, che aveva provato le
+fabbriche `.ini` in isolamento. **Riprodotto**, e ce n'erano **DUE** nello
+stesso file._
+
+`RIGA_R109_ATREXH.ps1` dichiarava la finestra del round con due nomi corti:
+
+```powershell
+$Da = "2024.09.26"        # FromDate
+$A  = "2026.08.21"        # ToDate
+```
+
+Novecento righe piu' sotto, il **gate della STELLA** — a **scope di script** —
+si prendeva due variabili di comodo:
+
+```powershell
+$a = $Vive[$la[0].Prova]      # <<< $a E' $A. In PowerShell non esiste il maiuscolo.
+$b = $Vive[$sh[0].Prova]
+```
+
+Da li' in poi `$A` **non e' piu' una data**: e' un **array di 41 stringhe**, gli
+input della cella LONG dell'ultimo simbolo. E il colpo di grazia e' la
+**conversione implicita**: passato a un parametro `[string]$a`, PowerShell
+unisce l'array con `$OFS`, cioe' **uno spazio**. Nell'`.ini` che ha girato:
+
+```
+FromDate=2024.09.26
+ToDate=InpUsaGuardian=true||true||0||true||N InpPivotLeft=5||5||0||5||N InpPivotRight=5||...
+```
+
+e nel referto: `2024.09.26 -> InpUsaGuardian=true||...`.
+
+**Quattro cose lo rendono la classe piu' cattiva vista finora:**
+
+1. 🟢 **il giro a vuoto e' uscito `ESITO: OK`, codice 0.** Le fabbriche `.ini`
+   avevano gate su 41 parametri, `Period`, `Model`, `Symbol`, l'asse Y, il
+   magic, `AllowLiveTrading` — **e nessuno sulle DATE**. La finestra e' meta'
+   di quello che un backtest MISURA, e non era controllata.
+2. 🤫 **MT5 non protesta**: con un `ToDate` invalido non si sa cosa faccia
+   (forse corre fino a oggi). La corsa vera avrebbe prodotto numeri
+   **plausibili su una finestra NON DICHIARATA**.
+3. 👀 **A schermo sembrava tutto giusto**: la riga `FINESTRA : 2024.09.26 ->
+   2026.08.21` si stampa **PRIMA** del gate della stella, cioe' prima del
+   danno. Chi guardava la console non poteva vedere niente.
+4. 🧪 **La verifica in isolamento non poteva trovarlo.** Il verificatore aveva
+   provato le due fabbriche chiamandole da uno script di prova, dove `$A` non
+   veniva mai sporcata. **Il difetto non e' nella funzione: e' nel FLUSSO
+   DELLE VARIABILI dello script.**
+
+### E il gemello nello stesso file, che non era ancora esploso
+
+Stesso audit, stesso file: `$RefTxt` si chiamava **`$R`** (l'ArrayList del
+referto, `[void]$R.Add(...)` 180 volte), e nella costruzione del referto c'era
+
+```powershell
+foreach($r in $AutotestRighe){ [void]$R.Add("    " + $r) }
+```
+
+`$r` **e'** `$R`. Al primo giro l'ArrayList diventa una **stringa**, e
+`[void]$R.Add(...)` muore con *"[System.String] does not contain a method
+named 'Add'"*. Riprodotto. **Nel giro a vuoto non succede** — `$AutotestRighe`
+e' vuoto e il ramo non gira — **ma nella corsa vera si', sempre**: dopo 3-12
+ore di tick reali il referto sarebbe uscito **troncato alla sezione
+dell'autotest**, con `RACCOLTA PARZIALE` e nessuna tabella.
+
+> ✅ **REGOLA, in quattro pezzi:**
+> 1. **Nomi CORTI solo per le temporanee, nomi LUNGHI per configurazione e
+>    stato.** `$Da`/`$A` diventano `$DataDa`/`$DataA`, `$R` diventa `$RefTxt`.
+>    Una variabile che vive per tutto lo script **non puo' chiamarsi con una
+>    lettera**, perche' prima o poi qualcuno usera' quella lettera in un ciclo.
+> 2. **L'audit si fa sull'AST, non a occhio** — e va fatto su **ogni** driver
+>    prima dell'invio: si elencano le assegnazioni **fuori dalle funzioni**
+>    (assegnazioni **e variabili di `foreach`**) e si cercano le chiavi che
+>    compaiono con **grafie diverse**:
+>    ```powershell
+>    # collisione = stessa chiave .ToLower(), grafie diverse
+>    $ast.FindAll({param($n) $n -is [Language.AssignmentStatementAst] -or $n -is [Language.ForEachStatementAst]},$true)
+>    ```
+>    ⚠️ **Una collisione fa male solo se la temporanea e' assegnata DOPO che la
+>    variabile lunga e' nata**: in `R103`, `R107` e `R108` la stessa coppia
+>    `$R`/`$r` esiste ed e' **innocua** perche' tutti i `foreach($r ...)` stanno
+>    **prima** della riga che crea `$R`. E' una mina disinnescata: si segnala
+>    lo stesso, perche' basta spostare una riga per armarla.
+> 3. **LE DATE SONO UN PARAMETRO COME GLI ALTRI, e si controllano come gli
+>    altri.** In ogni fabbrica di `.ini`, tre controlli sugli ARGOMENTI e uno
+>    sull'ARTEFATTO:
+>    ```powershell
+>    if($da -notmatch '^\d{4}\.\d{2}\.\d{2}$'){ throw }          # forma
+>    if(-not [datetime]::TryParseExact($a,"yyyy.MM.dd",...)){ throw }  # giorno che esiste
+>    if($d2 -le $d1){ throw }                                     # verso
+>    if($testo -notmatch ('(?m)^ToDate=' + [regex]::Escape($a) + '\r?$')){ throw }  # nel testo
+>    ```
+>    e il **giro a vuoto rilegge le due righe DALL'`.ini`**, non dalla variabile
+>    che le ha prodotte.
+> 4. **Il referto che stampa una finestra impossibile deve DIRLO**, non
+>    limitarsi a mostrarla: chi legge il fondo del referto non riapre gli `.ini`.
+>
+> 🧨 **E la lezione di metodo, che vale piu' del difetto**: provare una funzione
+> **chiamandola da un test** dimostra che la funzione e' giusta, **non** che
+> riceve gli argomenti giusti. Il giro a vuoto va letto **aprendo gli artefatti
+> che produce** — qui bastava aprire un `.ini` dello zip, ed e' esattamente
+> quello che ha fatto Claudio.
