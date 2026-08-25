@@ -735,7 +735,7 @@ function Gemelli($righe){
 #  tornava una lista vuota su una tabella perfettamente leggibile).
 #  >>> QUI E' ESTESO CON TRE COLONNE IN PIU' -- Tipo, Volume e PREZZO --
 #      perche' senza il PREZZO non esiste nessun take in pip, cioe' non
-#      esiste il PASSO 0 (criteri par. 3.4).
+#      esiste il PASSO 0 (criteri par. 3.3).
 #  Intestazione MISURATA (MT5 italiano):
 #    Ora | Affare | Simbolo | Tipo | Direzione | Volume | Prezzo |
 #    Ordine | Commissioni | Swap | Profitto | Bilancio | Commento
@@ -858,7 +858,7 @@ function LeggiDeal([string]$path){
 
 # =====================================================================
 #  IL PASSO 0 -- accoppia i deal in -> out e ne tira fuori le misure che
-#  i criteri par. 3.4 chiedono. Con InpMaxPositions=1 e InpTPMode=0
+#  i criteri par. 3.3 chiedono. Con InpMaxPositions=1 e InpTPMode=0
 #  (mediana secca, nessuna parziale) la sequenza DEVE essere alternata.
 #  >>> SE NON LO E', LA MISURA SI DICHIARA NON MISURATA E NON SI STIMA.
 #      E' scritto nei criteri prima di girare, e qui e' l'if che lo impone
@@ -997,7 +997,7 @@ function Passo0($deal,[double]$pip,[int]$barSec,[double]$deposito){
 
 # =====================================================================
 #  IL VERDETTO DEL CANCELLO ZERO S0a. E' una FUNZIONE e non tre righe in
-#  mezzo al ciclo, per due motivi: (1) la regola dei criteri par. 3.4 sta
+#  mezzo al ciclo, per due motivi: (1) la regola dei criteri par. 3.3 sta
 #  in UN posto solo, (2) e' PROVABILE senza aprire MT5 -- e un cancello
 #  che non e' mai stato fatto scattare non e' dimostrato.
 #  Torna un oggetto, mai una stringa sola: chi chiama ha bisogno anche del
@@ -1924,7 +1924,7 @@ foreach($c in $Ordinati){
           [void]$Problemi.Add($c.Prova + " FINESTRA ACCORCIATA: la prima operazione e' del " + $p0.Prima + ", la finestra dichiarata parte dal " + $c.DataDa + ". >>> @DAQUANDO NON E' UNA MISURA, e' DERIVATO dal tetto delle 100.000 barre (criteri par. 4.1): la finestra REALE e' piu' corta di quella nominale e va RISCRITTA NEL REFERTO PRIMA di leggere qualunque numero di questa cella.")
         }
       }
-      # --- IL CANCELLO ZERO S0a, solo sulle celle M30 (criteri par. 3.4)
+      # --- IL CANCELLO ZERO S0a, solo sulle celle M30 (criteri par. 3.3)
       #  >>> E SOLO A TICK REALI. Con -ScreenOhlcM30 la cella e' girata a
       #      OHLC M1: il take viene misurato sui prezzi di deal costruiti da
       #      barre finte, ed e' PROPRIO la grandezza che l'OHLC distorce di
