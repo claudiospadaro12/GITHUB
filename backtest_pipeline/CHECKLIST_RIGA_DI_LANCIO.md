@@ -3731,3 +3731,112 @@ report `.htm`) e nessuno l'aveva confrontata con quella ereditata.
 > **facoltative** (`if($null -ne $kPg)`), ogni criterio che elenca metriche
 > con la formula *"sempre, anche a n sottile"*. La domanda secca, una per
 > metrica: **"chi scrive questo numero, e l'ho aperto?"**
+
+---
+
+## 🆕 AGGIUNTA DEL 26/08/2026 — dall'indagine sui "deal anomali" di R109
+
+## 81. 🎲 `Sort-Object` **NON E' STABILE**: riordina cio' che era GIA' in ordine, e l'errore che produce e' PLAUSIBILE e punta sul BERSAGLIO SBAGLIATO
+
+_Difetto vero, **girato nella corsa vera di R109** (25/08) e diagnosticato il
+26/08 (`risultati_archivio/R109_INDAGINE_DEAL_2026-08-26.md`, commit `06a0cac`).
+**Riprodotto** in modo indipendente dal verificatore._
+
+`RIGA_R109_ATREXH.ps1`, riga 710, dentro il parser dei deal:
+
+```powershell
+$ordinati = @($deal | Sort-Object Ora)
+```
+
+Un gesto **difensivo** — "ordino per sicurezza" — che ha introdotto il difetto
+che voleva evitare. `Sort-Object` di PowerShell **non e' stabile**: sulle chiavi
+**uguali** l'ordine d'uscita e' **arbitrario**. (Il parametro `-Stable` esiste
+**solo da PowerShell 7**: sul PC di Claudio, che ha **Windows PowerShell 5.1**,
+non c'e' — quindi "aggiungo `-Stable`" **non e' una correzione che arriva sul
+posto**.)
+
+Su dati di mercato i **pari ci sono sempre**: due deal nello stesso **secondo**
+sono la norma (posizione aperta e stoppata dentro il secondo; oppure chiusura di
+un trade e apertura del successivo). Ogni gruppo invertito trasforma una coppia
+`in`/`out` perfetta in `out`/`in`, e da li' la sequenza sembra **spaiata**.
+
+**I numeri, misurati sulla corsa vera:**
+
+| cella | gruppi a pari secondo | n prodotto | false anomalie |
+|---|---|---|---|
+| D30EUR long  | 3 | 815 (vero 818) | 6  |
+| D30EUR short | 6 | 921 (vero 927) | 13 |
+| U30USD long  | 1 | 885 (vero 886) | 2  |
+| U30USD short | 4 | 920 (vero 923) | 7  |
+| NASUSD long  | **0** | 655 (vero 655) | **0** |
+| NASUSD short | 3 | 740 (vero 743) | 6  |
+
+**34 false anomalie e 16 operazioni perse.** NASUSD long era pulita **solo
+perche' non aveva deal a pari secondo**: il controllo positivo perfetto, arrivato
+per caso. Riprodotto qui: **un gruppo invertito = 2 anomalie e 1 operazione
+persa**, e l'aritmetica `anomalie = 2·A + 3·B` torna su **sei celle su sei**.
+
+### Perche' e' una classe a se', e non il punto 70
+
+Il **70** dice che `Sort-Object -Unique` **ORDINA** dove credevi solo
+deduplicasse: si scopre **confrontando due stringhe a schermo**, ed e' un
+fastidio di presentazione. Questo dice che `Sort-Object` **RIORDINA CIO' CHE ERA
+GIA' IN ORDINE** quando la chiave ha dei pari — e **non si vede affatto**,
+perche' non produce un errore: produce un **errore PLAUSIBILE**.
+
+☠️ **Ed e' questa la parte cara.** Il driver ha scritto:
+
+> _"deal NON accoppiati o con volume diverso. Con UNA POSIZIONE ALLA VOLTA e
+> InpTP1Pct=0 **non dovrebbe succedere**"_
+
+cioe' ha accusato **l'EA** — l'unico pezzo innocente della catena — con una
+frase tecnicamente ineccepibile. Sono state bruciate ore a cercare un difetto
+nel motore e nel tester, che erano puliti: il conteggio giusto ce l'avevano
+**tre testimoni indipendenti** (CSV OPTFRAME, deal `out` dell'`.htm`, per-trade
+scritto dall'EA), e **l'unico dissenziente era il nostro parser**.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **Non si ordina cio' che arriva gia' ordinato da una fonte con chiave
+>    univoca.** I deal dell'`.htm` sono in ordine di **TICKET**, che e'
+>    cronologico e **non ha pari**. Il sort non serviva a niente.
+> 2. **Se ordinare serve davvero, la chiave deve avere una SPAREGGIO UNIVOCO**:
+>    `Sort-Object Ora, @{Expression={[long]$_.Affare}}` — e allora la colonna di
+>    spareggio va **letta e conservata** dal parser (in R109 `LeggiDeal` la
+>    scartava, ed e' il motivo per cui la scorciatoia non era disponibile).
+>    ⚠️ **Vale doppio per i timestamp al secondo**: su dati di mercato i pari
+>    non sono un caso limite, sono la regola.
+> 3. **"Arriva gia' ordinato" e' un'ASSUNZIONE, e si MISURA**: si controlla la
+>    monotonia e, se il file la smentisce, **si DICHIARA e non si misura** —
+>    non si riordina alla cieca, che e' il difetto di sopra:
+>    ```powershell
+>    $fuoriOrdine = 0
+>    for($i=1; $i -lt $ordinati.Count; $i++){ if($ordinati[$i].Ora -lt $ordinati[$i-1].Ora){ $fuoriOrdine++ } }
+>    if($fuoriOrdine -gt 0){ $r.Stato = "NON MISURATO: i deal NON arrivano in ordine..."; return $r }
+>    ```
+>
+> 🧪 **E il test si scrive coi PARI COSTRUITI APPOSTA.** Una batteria su dati
+> con chiavi tutte diverse **non puo' vedere questo difetto**: e' esattamente
+> perche' il report finto del verificatore aveva orari tutti distinti che il
+> difetto e' passato. Ogni parser che ordina va provato con **almeno un gruppo
+> di record a chiave identica**.
+
+### 81-bis. 🛡️ E LA GUARDIA HA FUNZIONATO — va detto, perche' e' la parte da NON cambiare
+
+Il driver **non ha inventato numeri**: si e' accorto che qualcosa non tornava,
+ha **rifiutato** di dare le misure del Passo 0, ha scritto `n/d` invece di zeri,
+ha marcato la cella `NON AFFIDABILE` e ha messo dieci righe nei PROBLEMI. Ha
+sbagliato **la diagnosi**, non il comportamento. La classificazione "anomalo"
+non era troppo stretta: era **giusta**, ed era l'**input** a essere corrotto
+prima di arrivarci.
+
+> **Corollario**: quando una guardia scatta, la prima domanda non e' _"la guardia
+> e' troppo severa?"_ ma **_"chi ha toccato il dato PRIMA della guardia?"_**.
+> Allentare la guardia avrebbe nascosto il difetto e lasciato in piedi 34
+> anomalie invisibili e 16 operazioni mancanti.
+
+⚠️ **E il verdetto di RISCHIO del round non e' toccato**: DD 44-68% e peggior
+giornata −9,72% vengono dai **CSV OPTFRAME**, cioe' dalla curva di equity del
+tester, che **non passa dal parser dei deal**. Un difetto del parser non e' mai
+una scusa per rimandare la lettura di un drawdown che viene da un'altra fonte:
+**prima si stabilisce QUALE misura passava dal pezzo rotto**, e solo quella si
+sospende.
