@@ -45,10 +45,10 @@ di una famiglia la differenza è **letteralmente di due righe** (più `InpMagic`
 
 ---
 
-## 📌 IL PIN — **`PIN_DA_ASSEGNARE`**
+## 📌 IL PIN — **`690773f79fcb97ba3884f280694e3e4c4bb39d99`**
 
 ```
-PIN_DA_ASSEGNARE
+690773f79fcb97ba3884f280694e3e4c4bb39d99
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima** (checklist 6 e 55). Il commit da
@@ -101,7 +101,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_ASSEGNARE'; $p="$env:USERPROFILE\RIGA_R107.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='690773f79fcb97ba3884f280694e3e4c4bb39d99'; $p="$env:USERPROFILE\RIGA_R107.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R107_LATI_SHORT.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R107_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -143,7 +143,7 @@ firma finisce **scritta nel referto**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_ASSEGNARE'; $p="$env:USERPROFILE\RIGA_R107.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='690773f79fcb97ba3884f280694e3e4c4bb39d99'; $p="$env:USERPROFILE\RIGA_R107.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R107_LATI_SHORT.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R107_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati;
