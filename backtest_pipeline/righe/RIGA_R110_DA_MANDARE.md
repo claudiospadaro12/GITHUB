@@ -13,7 +13,7 @@ short **non ha mai avuto un numero suo**:
 
 **Perimetro**: `risultati_archivio/CENSIMENTO_LATI_SHORT_2026-08-25.md` — tabella
 **1d** e § 5, **punti 1 e 2** della lista ordinata.
-**Criteri**: `risultati_archivio/R110_CRITERI.md` — ⚠️ **[DA FIRMARE]**, 5 decisioni.
+**Criteri**: `risultati_archivio/R110_CRITERI.md` — ⚠️ **[DA FIRMARE]**, 6 decisioni.
 **Driver**: `righe/RIGA_R110_LATI_VIVI.ps1` (marcatore `MARCATORE_RIGA_R110_v1`).
 **File prova**: `prove/R110_*.txt` — **dodici** (3 per famiglia).
 
@@ -48,7 +48,7 @@ invocato. Su tutte le altre il merito nascerà **sospeso**.
 - il **giro a vuoto parte lo stesso** (non apre MT5, non produce nessun numero);
 - la **corsa vera si ferma con `exit 2`**, a meno di `-CriteriFirmati`.
 
-**Le cinque decisioni** (§ 10 dei criteri, tutte con la proposta già scritta):
+**Le sei decisioni** (§ 10 dei criteri, tutte con la proposta già scritta):
 
 | | decisione | proposta |
 |---|---|---|
@@ -57,6 +57,7 @@ invocato. Su tutte le altre il merito nascerà **sospeso**.
 | **D3** | il metro numerico che **non c'è** | **G0-B `NON APPLICABILE` e dichiarato**. R103 girava a **OHLC M1 su finestra unica**, qui è **tick reali con split 40/60**: non c'è niente da riprodurre. Al suo posto mordono **G0-A (antenato)** e **G0-C (gemelli)** |
 | **D4** | tre celle per famiglia o due? | **TRE** (metro + long + short). Il metro costa 8 passate in tutto e in cambio dà l'unico ancoraggio verificabile del round, il denominatore vero e la misura dello sbilancio dei lati |
 | **D5** | se una famiglia non passa G0-A o G0-C | **quella famiglia si ferma, le altre tre vanno avanti** (come R100, R101, R107) |
+| **D6** 🆕 | la **peggior giornata** che questi quattro EA **non esportano** | **NON MISURABILE, e dichiarata.** Misurato nel sorgente al pin: tutti e quattro scrivono un OPTFRAME a **8 colonne** (`double stats[7]`), **senza `Peggior Giornata %`** — ce l'hanno i tre EA d'apertura di **R107**, da cui questa macchina è stata copiata. La colonna esce **`n/d` per costruzione** e il driver **lo verifica a runtime** e lo scrive come rilievo. Il rischio si giudica su **DD equity IS/OOS** e sul **`dDD%` contro il metro** |
 
 > 🚦 **E RESTA IL CANCELLO DEL TRAFFICO: una macchina, un lavoro.** Il PC di
 > backtest ha un solo MT5. ⚠️ **R109 è in coda sulla stessa macchina**: R110
@@ -98,8 +99,10 @@ METRO`**, e il verdetto G0-B dice **`NON APPLICABILE`**.
 
 **MISURATO NEL SORGENTE**, non dedotto. Tutti e quattro i motori aprono la
 funzione di ingresso con *"se ho già una posizione (o un pendente) esco"* — e
-**solo dopo** guardano il lato (`ABTG_EMA200.mq5` riga 185, i tre SupRev/SuperWave
-righe 173-180).
+**solo dopo** guardano il lato. Le citazioni sono scritte come **marcatore da
+cercare**, non come numero di riga (checklist 43): in `OnNewBar()` cerca
+`if(HasPosition()` — `ABTG_EMA200` riga **186**, i due SupRev righe **174/181**,
+`ABTG_SuperWave_DOW_H1` righe **176/183** (misurate al pin del 25/08).
 
 ➡️ Nel metro un segnale short che arriva mentre è aperta una posizione **long**
 viene buttato via; nella cella `02_short` quello slot è **libero** e quel segnale
@@ -367,8 +370,14 @@ Cartella e zip sul Desktop: `R110_LATI_VIVI_<MODO>_<data>_<ora>` — dentro:
 
 - **`REFERTO_R110.txt`** ← **è questo che conta**;
 - i **24 CSV** di ottimizzazione (2 righe l'uno: le gemelle di controllo);
-- i **dodici file prova al pin** **e i quattro ANTENATI di R103**, così chi apre
-  lo zip fra un mese può **rifare il gate G0-A a mano** senza tornare in repo;
+- i **file prova al pin delle celle che hanno girato** **e i loro ANTENATI di
+  R103**, così chi apre lo zip fra un mese può **rifare il gate G0-A a mano**
+  senza tornare in repo (in una **ripresa** ci sono solo quelli della famiglia
+  ripresa: gli avanzi del giro prima non entrano più);
+- i **`gen_*.ini` che hanno girato davvero**, due per cella (IS e OOS): il
+  driver ne **rilegge `FromDate`/`ToDate` dall'artefatto** e si lamenta se non
+  sono la finestra dichiarata. È il gesto con cui Claudio ha trovato il
+  `ToDate` storto di R109 — e nella corsa vera l'anteprima non esiste;
 - `compile_SUPNAS.log`, `compile_SUPDAX.log`, `compile_SWDOW.log`, `compile_EMADOW.log`;
 - (solo nel giro a vuoto) le **12 anteprime `.ini`**.
 
@@ -396,10 +405,16 @@ Cartella e zip sul Desktop: `R110_LATI_VIVI_<MODO>_<data>_<ora>` — dentro:
    l'OOS è quasi tutto salita. **E c'è un fatto nuovo che punta lì, di ieri**:
    R107 ha misurato il **NAS short a PF IS 3,220 e PF OOS 0,460**. Resta
    **[INFERITO]**: R110 non misura i sotto-periodi.
-6. ⚖️ **IL RISCHIO SI GIUDICA SEMPRE**, a qualunque `n`: **DD e peggior
-   giornata** di ogni lato. Un DD è un fatto accaduto — e queste sono sedie che
-   stanno sui soldi. ⚠️ Ogni DD è **all'1%**: per confrontarlo col forward del
-   100k si **moltiplica per 0,65**.
+6. ⚖️ **IL RISCHIO SI GIUDICA SEMPRE**, a qualunque `n`: **DD equity IS e OOS**
+   di ogni lato, e il **`dDD%` contro il `00_metro`** — che è poi la domanda
+   vera (*il lato peggiora o migliora il rischio della sedia?*). Un DD è un
+   fatto accaduto, e queste sono sedie che stanno sui soldi. ⚠️ Ogni DD è
+   **all'1%**: per confrontarlo col forward del 100k si **moltiplica per 0,65**.
+   🚫 **La peggior giornata NON esce da questo round**: i quattro EA non la
+   esportano (OPTFRAME a 8 colonne, misurato nel sorgente) e la colonna
+   `PeggGio%` è **`n/d` per costruzione** — criteri **G4-bis**, decisione
+   **D6**. Non è un guasto e non è un CSV mancante: il referto lo dichiara da
+   solo, riga per riga.
 
 ---
 
@@ -494,7 +509,40 @@ Checklist punto **63** (_"il parse si FA, non si dichiara impossibile"_):
   **un profitto negativo** (`-2592`, che con un sentinella a `-1` sarebbe stato
   indistinguibile da una perdita di 1 euro) e **una peggior giornata negativa**
   (`-1.00`, che con il formattatore generico sarebbe uscita `n/d` su un valore
-  misurato);
+  misurato). ⚠️ **Il formattatore è giusto e la colonna resta comunque vuota**:
+  vedi il difetto qui sotto;
+- 🔴 **IL DIFETTO PIÙ GROSSO TROVATO IN VERIFICA, e ha cambiato i criteri prima
+  della firma**: il round prometteva la **peggior giornata** *"sempre, per ogni
+  cella"* (§ 5 G4-bis) — **e questi quattro EA non la esportano.** Misurato nel
+  sorgente, un `.mq5` per volta: `double stats[7]`, header
+  `Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades`,
+  **otto colonne**. La colonna ce l'hanno i **tre EA d'apertura di R107**
+  (undici colonne), da cui questa macchina era stata copiata. Riprodotto
+  eseguendo il parser vero sulle due intestazioni: con quella di R107 esce
+  `-1.00`, con quella **vera di questa famiglia** esce **`n/d`**. Corretto:
+  G4-bis riscritto, **decisione D6** aggiunta, e il driver adesso **verifica a
+  runtime** che la colonna manchi e **lo dichiara come rilievo** — perché il
+  `n/d` onesto del punto 66 stava camuffando una misura **impossibile**.
+  È la nuova voce **80** della checklist;
+- 🔴 **e il gate G0-C aveva due stati invece di tre**: con il CSV del metro non
+  prodotto, il referto scriveva *"il banco non è deterministico"* — cioè una
+  diagnosi **sbagliata** sulla riga che questa pagina dice di leggere per prima,
+  e che manda a cercare il guasto nel posto opposto. Riprodotto eseguendo.
+  Corretto: `G0-C FALLITO` (misurato e storto) e `G0-C NON ESEGUITO` (non
+  misurabile, si ripara rilanciando) sono adesso due esiti diversi, con due
+  colori diversi. La distinzione **esisteva già venti righe sotto**, per le
+  celle dei lati;
+- 🔴 **e nella corsa vera nessuno guardava gli `.ini` che girano**: l'anteprima
+  esiste solo nel giro a vuoto e porta **solo la gamba IS**, quindi la finestra
+  **OOS** — quella su cui si dà il verdetto — non era **mai** confrontata con un
+  artefatto. È la classe che ha bruciato il pin di R109. Corretto: adesso il
+  driver rilegge `FromDate`/`ToDate` dai **`gen_*.ini` che MT5 ha consumato**,
+  su tutte e due le gambe, e **li mette nello zip**;
+- 🟠 **e lo zip di una RIPRESA portava dentro gli avanzi del giro prima**:
+  misurato (`-SoloEa 'EMADOW'` dopo un giro pieno metteva nello zip tutti e 12 i
+  file prova e tutti e 4 gli antenati). Con un ri-pin in mezzo sarebbero del pin
+  **vecchio**, indistinguibili. Corretto: la raccolta copia **per nome, solo ciò
+  che ha girato**;
 - ✅ **il parser del CSV provato sotto cultura it-IT** con l'intestazione VERA
   dell'OPTFRAME: `0.84003` letto **zero-virgola-84** (non 84003), gemelli
   `IDENTICI`; e i **controlli negativi**: intestazioni ignote → **si rifiuta di
@@ -511,6 +559,18 @@ Checklist punto **63** (_"il parse si FA, non si dichiara impossibile"_):
   esce **alfabetico** mentre il dettaglio esce in ordine di dominio;
 - ✅ **i 24 magic cercati uno per uno** in tutto il repo: **zero occorrenze**. E
   il blocco `7744xx` di **R109** è stato verificato **estraneo**;
+- ✅ **l'audit del punto 81 (`Sort-Object` NON è stabile) fatto e MISURATO coi
+  pari costruiti apposta.** Le tre occorrenze del driver sono tutte **sicure per
+  struttura, non per fortuna**: in tutte e tre **l'elemento È la chiave** (una
+  stringa senza payload), quindi due pari sono indistinguibili e `-Unique` li
+  collassa. Provato con l'ordine d'ingresso **mescolato 300 volte** e con un
+  **doppione forzato** 200 volte: **una sola uscita distinta** ogni volta. E col
+  **controllo positivo** che dimostra che il test *saprebbe* vederlo — sei
+  oggetti con la stessa `Ora` e un payload diverso danno **361 ordini distinti
+  su 500 giri**. ⚠️ E il `Sort-Object -Unique` delle famiglie **non va tolto**:
+  quell'ordine alfabetico è **promesso alla lettera qui sopra** (punto 70) e
+  copiato dall'output vero — toglierlo romperebbe il confronto a schermo. Il
+  perché sta scritto **nel codice**, così nessuno lo ri-deduce;
 - ✅ **la natura dei motori è stata LETTA NEL SORGENTE**, non assunta: tutti e
   quattro hanno `InpAllowLong`/`InpAllowShort` (il driver si ferma se non li
   trova), e tutti e quattro escono dalla funzione d'ingresso **prima** di

@@ -14,7 +14,7 @@
 #    (Claudio, sera del 25/08/2026, dopo i verdetti short di R107:
 #     "non si possono provare i vari motori?")
 #
-#  >>> I CRITERI SONO [DA FIRMARE] (CINQUE decisioni, par. 10). Questo
+#  >>> I CRITERI SONO [DA FIRMARE] (SEI decisioni, par. 10). Questo
 #      driver LEGGE il file dei criteri al pin e, se ci trova ancora la
 #      stringa del lucchetto, la CORSA VERA non parte (exit 2). Il GIRO
 #      A VUOTO parte lo stesso: non apre MT5, non produce nessun numero,
@@ -90,7 +90,23 @@
 #
 #  (66)  LA SENTINELLA SU TUTTE LE COLONNE. profitto, PF, DD, n E
 #       peggior giornata. E la peggior giornata ha il sentinella IN
-#       ALTO (99.9), perche' negli artefatti veri e' SEMPRE negativa.
+#       ALTO (99.9), perche' dove esiste e' SEMPRE negativa.
+#
+#  (80) >>> MA LA PEGGIOR GIORNATA IN R110 NON ESISTE, E VA SAPUTO PRIMA.
+#       MISURATO NEL SORGENTE AL PIN, non ereditato: tutti e QUATTRO gli
+#       EA di questo round scrivono un OPTFRAME a OTTO colonne
+#         "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,
+#          Sharpe Ratio,Equity DD %,Trades"
+#       con 'double stats[7]' in OnTester(). La colonna
+#       'Peggior Giornata %' CE L'HANNO I TRE EA D'APERTURA DI R107
+#       (header a UNDICI colonne), ed e' da li' che questa macchina e'
+#       stata copiata. Quindi la colonna PeggGio% della tabella madre
+#       esce 'n/d' su TUTTE E DODICI le celle, PER COSTRUZIONE: non e'
+#       un guasto del parser e non e' un CSV mancante.
+#       Il sentinella onesto del punto 66 dice "stavolta no"; qui la
+#       risposta e' "MAI", e la differenza la DICHIARA il codice (un
+#       RILIEVO verificato a runtime sulle intestazioni vere, non un
+#       commento). Criteri G4-bis, decisione D6.
 #
 #  (63)  NESSUN HASHTABLE LETTERALE MULTILINEA: le tabelle nascono da
 #       funzioni e da assegnazioni separate. E il parse e' stato FATTO,
@@ -535,9 +551,17 @@ function NumInv($s){
 #   3. se NON riconosce le colonne torna $null E DICE QUALI INTESTAZIONI
 #      HA VISTO -- perche' il 23/08, per scoprire la parola mancante, e'
 #      servito aprire lo zip a mano.
-#  L'intestazione VERA e' MISURATA sugli artefatti (OPTFRAME esteso):
-#    Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,
-#    Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,...
+#  >>> L'INTESTAZIONE VERA DI QUESTA FAMIGLIA, LETTA NEI QUATTRO .mq5 AL
+#      PIN (checklist 80 -- NON ereditata dal round gemello):
+#        Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,
+#        Sharpe Ratio,Equity DD %,Trades,<gli input>
+#      OTTO colonne. 'Peggior Giornata %' NON C'E': ce l'hanno i tre EA
+#      d'apertura di R107 (header a UNDICI colonne), da cui questa
+#      macchina e' stata copiata. Percio' 'peggior giornata' resta un
+#      SINONIMO FACOLTATIVO qui sotto -- il CSV si legge benissimo senza
+#      -- e l'assenza viene DICHIARATA come rilievo nella catena, invece
+#      di sparire dentro un 'n/d' che sembrerebbe "stavolta non e'
+#      uscita" quando la verita' e' "non esce MAI".
 # =====================================================================
 $script:CsvIntestazioni = @()
 function LeggiOpt([string]$path){
@@ -647,6 +671,18 @@ if($SoloCella -ne ""){
   $famSc = $sc[0].Fam
   $Lavori = @($Lavori | Where-Object { $_.Prova -eq $SoloCella -or ($_.Fam -eq $famSc -and $_.Metro) })
 }
+#  >>> CHECKLIST 81, e la risposta e' MISURATA, non assunta. Sort-Object NON e'
+#      stabile, e qui la chiave HA i pari (ogni famiglia compare 3 volte, una
+#      per cella). MA i pari NON portano nessun payload: l'elemento E' la
+#      chiave (una stringa), quindi due "SUPNAS" sono indistinguibili e quale
+#      dei due sopravviva a -Unique non cambia niente. Provato con l'ordine
+#      d'ingresso MESCOLATO 300 volte: UNA sola uscita distinta.
+#      E il consumatore e' un test di APPARTENENZA (-contains), non un indice:
+#      $FamLavoro prende l'ordine da $FAMIGLIE, cioe' l'ordine del DOMINIO.
+#      >>> E NON SI "CORREGGE" TOGLIENDO IL SORT: quest'ordine ALFABETICO e'
+#          promesso alla lettera nel foglio della riga (checklist 70), ed e'
+#          stato copiato dall'output vero. Toglierlo qui romperebbe il
+#          confronto a schermo che Claudio fa prima di dare il via.
 $FamAttive = @($Lavori | ForEach-Object { $_.Fam } | Sort-Object -Unique)
 $FamLavoro = @($FAMIGLIE | Where-Object { $FamAttive -contains $_.Id })
 if($Lavori.Count -eq 0){ $SelettoreAVuoto = $true }
@@ -764,12 +800,15 @@ if($daFirmare -and -not $SoloControllo -and -not $CriteriFirmati){
   Write-Host "#####################################################################" -ForegroundColor Red
   Write-Host "#  NON PARTO: I CRITERI DI R110 NON SONO FIRMATI.                   #" -ForegroundColor Red
   Write-Host "#####################################################################" -ForegroundColor Red
-  Write-Host "  R110_CRITERI.md porta ancora [DA FIRMARE]. Sono CINQUE decisioni (par. 10):" -ForegroundColor Yellow
+  Write-Host "  R110_CRITERI.md porta ancora [DA FIRMARE]. Sono SEI decisioni (par. 10):" -ForegroundColor Yellow
   Write-Host "   D1  quali famiglie entrano (proposta: 4, senza SupRev DAX H1)" -ForegroundColor Yellow
   Write-Host "   D2  il cancello di merito sui lati (proposta: quello di R54)" -ForegroundColor Yellow
   Write-Host "   D3  il metro numerico che NON c'e' -- G0-B non applicabile e dichiarato" -ForegroundColor Yellow
   Write-Host "   D4  tre celle per famiglia (metro + long + short), o solo due?" -ForegroundColor Yellow
   Write-Host "   D5  cosa si fa se una famiglia non passa G0-A o G0-C" -ForegroundColor Yellow
+  Write-Host "   D6  la PEGGIOR GIORNATA che questi quattro EA NON esportano (OPTFRAME a" -ForegroundColor Yellow
+  Write-Host "       8 colonne, MISURATO nel sorgente): si dichiara NON MISURABILE e la" -ForegroundColor Yellow
+  Write-Host "       colonna esce n/d per costruzione, oppure si rimanda a un round suo" -ForegroundColor Yellow
   Write-Host "" -ForegroundColor Yellow
   Write-Host "  COSA PUOI FARE ADESSO, in ordine:" -ForegroundColor Yellow
   Write-Host "   1. il GIRO A VUOTO gira lo stesso: rilancia con -SoloControllo." -ForegroundColor Yellow
@@ -880,6 +919,11 @@ foreach($c in $Lavori){
     throw ("GATE DELL'ANTENATO FALLITO su " + $c.Prova + " contro prove\" + $fam.Antenato + ": " + ($guasti -join " ; ") +
            ". La frase 'il corpo e' copiato riga per riga da R103' e' un GATE, non un commento: se non torna, questo round girerebbe su un motore diverso da quello che sta sui soldi.")
   }
+  #  >>> CHECKLIST 81: anche qui l'elemento E' la chiave (nomi di input), i pari
+  #      sono impossibili nella pratica e comunque indistinguibili; l'uscita e'
+  #      una FRASE del referto, non un ordine su cui si misuri qualcosa, e non
+  #      e' promessa in nessun documento. Provato con un doppione FORZATO, 200
+  #      giri: sempre la stessa stringa.
   $c.Antenato = "OK (delta: " + (($ammessi | Sort-Object) -join " + ") + ")"
 }
 foreach($fam in $FamLavoro){ $fam.Antenati = "OK (3 celle contro prove\" + $fam.Antenato + ")" }
@@ -1207,7 +1251,15 @@ foreach($c in $Ordinati){
   #       il difetto di R109 non era nella funzione, era nel FLUSSO DELLE
   #       VARIABILI, e domani questo script puo' crescere.)
   if($DaQuando -ne "2024.09.26" -or $Fino -ne "2026.06.30"){
-    throw ("LA FINESTRA E' STATA SPORCATA prima di " + $c.Prova + ": DaQuando=[" + $DaQuando + "] Fino=[" + $Fino +
+    #  >>> E IL VALORE SPORCO SI TRONCA. Quando la variabile e' diventata un
+    #      ARRAY (il difetto R109) la conversione a stringa unisce con $OFS e
+    #      il messaggio diventa un paragrafo di 2.600 caratteri: finisce
+    #      dentro la riga ESITO: del referto, cioe' proprio la riga che
+    #      Claudio deve leggere. Il fatto e' che e' sporca, non il contenuto.
+    $sporca = ("" + $DaQuando); $sporcaF = ("" + $Fino)
+    if($sporca.Length  -gt 60){ $sporca  = $sporca.Substring(0,60)  + " ...[+" + ($sporca.Length-60)  + " caratteri: la variabile e' diventata un ARRAY]" }
+    if($sporcaF.Length -gt 60){ $sporcaF = $sporcaF.Substring(0,60) + " ...[+" + ($sporcaF.Length-60) + " caratteri: la variabile e' diventata un ARRAY]" }
+    throw ("LA FINESTRA E' STATA SPORCATA prima di " + $c.Prova + ": DaQuando=[" + $sporca + "] Fino=[" + $sporcaF +
            "] invece di [2024.09.26] e [2026.06.30]. NON lancio: MT5 non protesta per una data storta e produrrebbe numeri PLAUSIBILI su una finestra NON DICHIARATA (checklist 79).")
   }
   Write-Host ("           finestra: " + $DaQuando + " -> " + $Fino + "   (ricontrollata adesso, non solo dichiarata in testa)") -ForegroundColor Gray
@@ -1254,6 +1306,37 @@ foreach($c in $Ordinati){
       }
       if($tag -eq "IS"){ $c.IS = $nn } else { $c.OOS = $nn }
     }
+
+    # ---------- GLI .ini CHE HANNO GIRATO DAVVERO (checklist 79)
+    #  Il giro a vuoto legge l'ANTEPRIMA, ma l'anteprima porta SOLO la gamba
+    #  IS -- e nella corsa vera non viene nemmeno prodotta. Cosi' la finestra
+    #  OOS, che e' quella su cui si da' il verdetto, non sarebbe MAI stata
+    #  confrontata con un ARTEFATTO: sarebbe solo stampata nel referto come
+    #  fatto. Qui si rileggono TUTTE E DUE le gambe dai gen_*.ini che MT5 ha
+    #  consumato, e i due file finiscono nello zip -- e' esattamente il gesto
+    #  con cui Claudio ha trovato il ToDate storto di R109.
+    #  >>> Le gambe SALTATE dal driver generico si escludono: il loro .ini e'
+    #      di un altro giro, e accusarlo sarebbe un falso allarme (punto 44).
+    foreach($tag in @("IS","OOS")){
+      if($vecchie -contains $tag){ continue }
+      $gi = Join-Path $Work ("gen_" + $fam.Ea + "_" + $fam.Sym + "_" + $tag + "_" + $c.Id + ".ini")
+      if(-not (Test-Path -LiteralPath $gi)){
+        [void]$Problemi.Add($c.Prova + " / " + $tag + ": non trovo l'.ini che ha girato (" + (Split-Path -Leaf $gi) +
+                            "): la finestra di questa gamba NON e' stata verificata sull'artefatto.")
+        continue
+      }
+      $gt = Get-Content -LiteralPath $gi -Raw
+      $gf = [regex]::Match($gt,'(?m)^FromDate=([0-9.]+)\r?$')
+      $gz = [regex]::Match($gt,'(?m)^ToDate=([0-9.]+)\r?$')
+      $at1 = $(if($tag -eq "IS"){ $IS_Da } else { $OOS_Da })
+      $at2 = $(if($tag -eq "IS"){ $IS_A  } else { $OOS_A  })
+      if(-not $gf.Success -or -not $gz.Success -or $gf.Groups[1].Value -ne $at1 -or $gz.Groups[1].Value -ne $at2){
+        [void]$Problemi.Add($c.Prova + " / " + $tag + ": l'.ini CHE HA GIRATO porta FromDate=[" + $gf.Groups[1].Value + "] ToDate=[" + $gz.Groups[1].Value +
+                            "] invece di [" + $at1 + "] e [" + $at2 + "]. I numeri di questa gamba NON sono della finestra dichiarata: non si leggono.")
+      }
+      Copy-Item -LiteralPath $gi -Destination (Join-Path $Sosta ("gen_" + $c.Fam + "_" + $c.Id + "_" + $tag + ".ini")) -Force -ErrorAction SilentlyContinue
+    }
+
     if($vecchie.Count -eq 2){
       $c.Esito = "SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)"
       [void]$Problemi.Add($c.Prova + ": " + $c.Esito + ". Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.")
@@ -1299,6 +1382,17 @@ foreach($c in $Ordinati){
       $fam.Gemelli = $c.Gemelli
       $fam.NOOS = $c.NOOS; $fam.NIS = $c.NIS
       $fam.PfOOS = $c.PfOOS; $fam.DdOOS = $c.DdOOS; $fam.ProfOOS = $c.ProfOOS
+      #  >>> CHECKLIST 80: LA COLONNA CHE QUESTA FAMIGLIA NON ESPORTA.
+      #      Si verifica sulle INTESTAZIONI VERE del CSV appena letto, non a
+      #      commento. Senza questa riga il 'n/d' della colonna PeggGio' si
+      #      legge "stavolta non e' uscita", mentre la verita' e' "non esce
+      #      MAI": e' il sentinella onesto del punto 66 che camuffa un
+      #      criterio impossibile. E' un RILIEVO (un fatto del round), non
+      #      un problema: non c'e' niente da riparare.
+      if($null -ne $rOOS -and @($script:CsvIntestazioni) -notcontains "Peggior Giornata %"){
+        [void]$Rilievi.Add("PEGGIOR GIORNATA " + $c.Fam + ": la colonna 'Peggior Giornata %' NON esiste nell'OPTFRAME di " + $fam.Ea +
+                           " (double stats[7], header a 8 colonne -- MISURATO nel sorgente al pin; l'hanno i tre EA d'apertura di R107, da cui questa macchina e' stata copiata). La colonna PeggGio% di questa famiglia esce n/d PER COSTRUZIONE: NON e' un guasto del parser e NON e' un CSV mancante. Il rischio si giudica su DD equity IS/OOS e sul dDD% contro il 00_metro (criteri G4-bis, decisione D6).")
+      }
       #  >>> G0-C: L'UNICO GATE NUMERICO CHE ESISTE IN QUESTO ROUND.
       #      Il metro NUMERICO (G0-B) non c'e' e non puo' esserci: R103
       #      girava a OHLC M1 su finestra unica, qui si gira a tick reali
@@ -1306,11 +1400,26 @@ foreach($c in $Ordinati){
       #      banco e' DETERMINISTICO: due passate a parametri identici
       #      devono dare lo stesso numero al centesimo.
       if($c.Gemelli -ne "IDENTICI"){
-        $fam.Metro = "IGIENE FALLITA (G0-C) -- gemelli: " + $c.Gemelli
+        #  >>> TRE STATI, NON DUE (checklist 68 e 40-ter). "NON HO POTUTO
+        #      MISURARE" e "HO MISURATO E SONO DIVERSI" mandano a cercare il
+        #      guasto in due posti OPPOSTI: il primo si ripara rilanciando la
+        #      famiglia, il secondo vuol dire che il banco e' storto e che di
+        #      questa sedia non si legge piu' niente. Dirli con la stessa
+        #      frase e' un refuso sulla riga che il foglio della riga manda a
+        #      leggere per PRIMA. (Sulle celle dei LATI la distinzione c'era
+        #      gia': vedi il ramo else piu' sotto. Qui mancava.)
+        $misurato = -not ($c.Gemelli -like "NON MISURATO*")
+        if($misurato){
+          $fam.Metro = "G0-C FALLITO (banco NON deterministico) -- gemelli: " + $c.Gemelli
+          [void]$Problemi.Add("GATE G0-C FALLITO sulla famiglia " + $c.Fam + ": gemelli " + $c.Gemelli +
+                              ". Due passate a parametri IDENTICI hanno dato numeri diversi: il banco non e' deterministico e su questa famiglia NON si legge niente. Le celle dei lati NON sono state lanciate; le altre famiglie proseguono.")
+        } else {
+          $fam.Metro = "G0-C NON ESEGUITO (il CSV del metro non c'e': " + $c.Gemelli + ") -- e 'NON ESEGUITO' NON e' 'FALLITO'"
+          [void]$Problemi.Add("GATE G0-C NON ESEGUITO sulla famiglia " + $c.Fam + ": il CSV del 00_metro non e' stato prodotto o non si legge (" + $c.Gemelli +
+                              "). NON e' dimostrato che il banco sia storto: NON e' stato possibile misurarlo. Le cause si dicono TUTTE, non si sceglie la piu' bella: MT5 rimasto aperto, Tester\cache che ripesca una passata gia' calcolata, storico mancante sul simbolo, tester uscito male. Si rilancia questa famiglia con  -SoloEa '" + $c.Fam + "' -Rifai . Le celle dei lati NON sono state lanciate; le altre famiglie proseguono.")
+        }
         $FamFerme += $c.Fam
-        [void]$Problemi.Add("GATE G0-C FALLITO sulla famiglia " + $c.Fam + ": gemelli " + $c.Gemelli +
-                            ". Due passate a parametri identici hanno dato numeri diversi: il banco non e' deterministico e su questa famiglia NON si legge niente. Le celle dei lati NON sono state lanciate; le altre famiglie proseguono.")
-        Dico ("GATE G0-C FALLITO su " + $c.Fam + ": " + $fam.Metro) "Red"
+        Dico ("G0-C su " + $c.Fam + ": " + $fam.Metro) "Red"
       } else {
         $fam.Metro = "G0-A OK (antenato) + G0-C OK (gemelli identici). G0-B NON APPLICABILE: misurato adesso PF " + (Fmt3 $c.PfOOS) + ", DD " + (Fmt2 $c.DdOOS) + "%, n " + (FmtN $c.NOOS)
         [void]$Rilievi.Add("G0-B sulla famiglia " + $c.Fam + ": NON APPLICABILE, e NON e' 'superato'. Il numero R103 di questa sedia (" + $fam.R103 +
@@ -1445,11 +1554,29 @@ try{
   #  i file prova che HANNO GIRATO **e gli ANTENATI**, cosi' lo zip e'
   #  autosufficiente: chi lo apre fra un mese puo' rifare il gate G0-A a
   #  mano senza tornare in repo.
-  foreach($dir in @($Prove,$Anten,$Sosta)){
-    if($dir -and (Test-Path -LiteralPath $dir)){
-      foreach($f in @(Get-ChildItem -LiteralPath $dir -File -ErrorAction SilentlyContinue)){
-        Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Cart $f.Name) -Force
-      }
+  #  >>> E SI COPIANO PER NOME, SOLO QUELLI CHE HANNO GIRATO (checklist 53 e
+  #      56). $Prove e $Anten NON si svuotano fra un giro e l'altro -- e non
+  #      devono, sono la copia al pin -- ma copiarle in blocco vuol dire che
+  #      lo zip di una RIPRESA (-SoloEa / -SoloCella) porta dentro i file
+  #      prova delle celle che NON hanno girato, avanzati dal giro prima.
+  #      MISURATO: dopo un giro pieno, un '-SoloEa EMADOW' metteva nello zip
+  #      tutti e 12 i file prova e tutti e 4 gli antenati. Con un RI-PIN in
+  #      mezzo quelli sarebbero del pin VECCHIO, indistinguibili -- proprio
+  #      mentre il foglio promette "chi lo apre fra un mese rifa' il G0-A".
+  foreach($c in $Lavori){
+    $fp = Join-Path $Prove $c.Prova
+    if(Test-Path -LiteralPath $fp){ Copy-Item -LiteralPath $fp -Destination (Join-Path $Cart $c.Prova) -Force }
+  }
+  foreach($fam in $FamLavoro){
+    $fa = Join-Path $Anten $fam.Antenato
+    if(Test-Path -LiteralPath $fa){ Copy-Item -LiteralPath $fa -Destination (Join-Path $Cart $fam.Antenato) -Force }
+  }
+  #  la SOSTA invece si copia intera: e' gia' svuotata a ogni giro (punto 56)
+  #  e contiene solo artefatti di ADESSO (anteprime, log del compilatore, e
+  #  gli .ini che hanno girato).
+  if(Test-Path -LiteralPath $Sosta){
+    foreach($f in @(Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue)){
+      Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Cart $f.Name) -Force
     }
   }
 
@@ -1489,6 +1616,16 @@ try{
   [void]$RefTxt.Add("  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le")
   [void]$RefTxt.Add("  colonne: profitto, PF, DD, n e peggior giornata. Un '0.000' su un PF sarebbe un")
   [void]$RefTxt.Add("  numero PLAUSIBILE, e si leggerebbe 'ha perso tutto'.")
+  [void]$RefTxt.Add("  >>> E UN'ECCEZIONE DICHIARATA, perche' un 'n/d' onesto puo' nascondere una")
+  [void]$RefTxt.Add("      misura IMPOSSIBILE (checklist 80): la colonna PeggGio% esce 'n/d' su TUTTE")
+  [void]$RefTxt.Add("      le celle di questo round PER COSTRUZIONE. I quattro EA scrivono un OPTFRAME")
+  [void]$RefTxt.Add("      a OTTO colonne (double stats[7]), senza 'Peggior Giornata %': ce l'hanno i")
+  [void]$RefTxt.Add("      tre EA d'apertura di R107, da cui questa macchina e' stata copiata.")
+  [void]$RefTxt.Add("      Qui 'n/d' NON vuol dire 'stavolta non e' uscita': vuol dire 'non esce MAI'.")
+  [void]$RefTxt.Add("      Il rischio si legge su DD equity IS/OOS e sul dDD% contro il 00_metro")
+  [void]$RefTxt.Add("      (criteri G4-bis, decisione D6). Averla vuol dire 12 passate SINGOLE in piu':")
+  [void]$RefTxt.Add("      e' un round successivo, e ABTG_SupRev_DAX_H4_Ottimizzato non ha nemmeno")
+  [void]$RefTxt.Add("      ExportTrades(), quindi su SUPDAX non c'e' nemmeno la strada dei per-trade.")
   [void]$RefTxt.Add("")
   [void]$RefTxt.Add("--- I GATE, E QUALE DI LORO PUO' MORDERE (criteri par. 5) ---")
   [void]$RefTxt.Add("  G0-A  ANTENATO : ogni cella e' la copia riga per riga del file prova R103 di")
@@ -1504,6 +1641,15 @@ try{
   [void]$RefTxt.Add("  G0-C  GEMELLI  : le due righe del CSV identiche al centesimo. E' l'unico gate")
   [void]$RefTxt.Add("                   NUMERICO del round: dimostra che il banco e' DETERMINISTICO,")
   [void]$RefTxt.Add("                   non che e' giusto.")
+  [void]$RefTxt.Add("                   >>> E HA TRE ESITI, non due (checklist 68):")
+  [void]$RefTxt.Add("                       'G0-A OK + G0-C OK'      = misurato e sano;")
+  [void]$RefTxt.Add("                       'G0-C FALLITO'          = MISURATO e storto -- due passate")
+  [void]$RefTxt.Add("                                                 identiche, numeri diversi: il banco")
+  [void]$RefTxt.Add("                                                 non e' deterministico;")
+  [void]$RefTxt.Add("                       'G0-C NON ESEGUITO'     = il CSV del metro non c'e'. NON e'")
+  [void]$RefTxt.Add("                                                 dimostrato che il banco sia storto:")
+  [void]$RefTxt.Add("                                                 non e' stato possibile misurarlo, e")
+  [void]$RefTxt.Add("                                                 si ripara rilanciando la famiglia.")
   foreach($fam in $FamLavoro){
     [void]$RefTxt.Add("")
     [void]$RefTxt.Add("  " + $fam.Id + " (" + $fam.Ea + " / " + $fam.Sym + " " + $fam.Per + ", sedia viva " + $fam.MagicVivo + ", sorgente " + $fam.MagicSrc + ")")
@@ -1688,7 +1834,9 @@ if($SoloControllo){
   Write-Host ("  MODO: " + $Modo) -ForegroundColor White
   Write-Host ("  ATTESI:  " + (2*$Lavori.Count) + " CSV (" + $Lavori.Count + " celle x IS/OOS), " + $CelleAttese + " righe l'uno, " + (4*$Lavori.Count) + " passate.") -ForegroundColor White
   foreach($fam in $FamLavoro){
-    $col = if($fam.Metro -like "G0-A OK*"){ "Green" } elseif($fam.Metro -eq "NON MISURATO"){ "Yellow" } else { "Red" }
+    #  tre stati anche nel COLORE (checklist 68): verde = misurato e sano,
+    #  giallo = NON misurato (non e' un verdetto), rosso = misurato e storto.
+    $col = if($fam.Metro -like "G0-A OK*"){ "Green" } elseif($fam.Metro -eq "NON MISURATO" -or $fam.Metro -like "G0-C NON ESEGUITO*"){ "Yellow" } else { "Red" }
     Write-Host ("  METRO " + $fam.Id + ": " + $fam.Metro) -ForegroundColor $col
     Write-Host ("     CANARINO " + $fam.Id + ": n IS " + (FmtN $fam.NIS) + " / n OOS " + (FmtN $fam.NOOS) + "   (NON e' un gate: regola B)") -ForegroundColor White
   }

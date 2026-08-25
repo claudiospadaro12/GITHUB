@@ -1,10 +1,18 @@
-# ✍️ R110 — I LATI MAI MISURATI DEI MOTORI VIVI SUGLI INDICI — CRITERI **[DA FIRMARE]**
+# ✍️ R110 — I LATI MAI MISURATI DEI MOTORI VIVI SUGLI INDICI — CRITERI **FIRMATI**
+
+> 🖊️ **FIRMA: "FIRMO R110" — Claudio, 25/08/2026 sera.** Data DOPO che gli
+> erano stati presentati i 5 difetti del verificatore e la nascita della
+> **sesta decisione** (D6: la peggior giornata non esportata da questi 4 EA →
+> rischio letto su DD equity IS/OOS + delta contro il metro) e l'esclusione
+> di SupRev DAX H1 (spenta con sua delibera l'11/08, `REFERTO_FUORILISTA.md`).
+> La firma vale per le SEI decisioni del § 10 **con le proposte**. Firma a
+> numeri non visti. La corsa si lancia con `-CriteriFirmati`.
 
 > 🔒 **Questo documento porta `[DA FIRMARE]` nel titolo, e il driver LO LEGGE al pin.**
 > Finché la stringa è lì, la **corsa vera** si ferma con `exit 2`. Il **giro a
 > vuoto** parte lo stesso (non apre MT5, non produce nessun numero) e serve
 > proprio a far leggere questi criteri prima di firmarli.
-> Le decisioni da firmare sono **cinque**, e stanno al § 10.
+> Le decisioni da firmare sono **sei**, e stanno al § 10.
 
 **Origine**: Claudio, sera del 25/08/2026, dopo i verdetti short di R107:
 _"non si possono provare i vari motori?"_ — non è contento di chiudere la
@@ -71,9 +79,20 @@ fare guardando la tabella (sommare `01_long` e `02_short` e confrontarli con
 **MISURATO NEL SORGENTE**, non dedotto. Tutti e quattro i motori aprono la loro
 funzione di ingresso così:
 
-- `ABTG_EMA200.mq5` riga 185: `if(HasPosition() || HasPending()) return;`
-- `ABTG_SupRev_*_Ottimizzato.mq5` righe 173-180 (idem `ABTG_SuperWave_DOW_H1`):
-  `if(HasPosition()){ ... return; }` poi `if(HasPending()) return;`
+_(Le citazioni sono scritte come **marcatore da cercare** e non come numero di
+riga: un numero di riga non si sposta col codice, e una citazione che drifta
+manda il verificatore a cercare la prova nel posto sbagliato — checklist 43.
+I numeri qui accanto sono **misurati al pin del 25/08** e valgono come conferma,
+non come indirizzo.)_
+
+- `ABTG_EMA200.mq5`, in `void OnNewBar()`, prima istruzione — cerca
+  `if(HasPosition() || HasPending()) return;` *(riga **186** al pin)*
+- `ABTG_SupRev_NAS_H1_Ottimizzato.mq5` e `ABTG_SupRev_DAX_H4_Ottimizzato.mq5`,
+  in `void OnNewBar(MqlDateTime &now)` — cerca `if(HasPosition())` *(riga
+  **174**)* e poi `if(HasPending()) return;` *(riga **181**)*
+- `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`, stesso schema ma **più in basso**
+  perché il blocco del flip è più lungo — `if(HasPosition())` *(riga **176**)*
+  e `if(HasPending()) return;` *(riga **183**)*
 
 ...e **solo dopo** arriva il controllo del lato (`if(up && !InpAllowLong) return;`).
 
@@ -416,10 +435,53 @@ sul MERITO, mai sul RISCHIO"*.
   Producono **indizi** e servono a G3 come conferma di direzione, non come
   promotori. (Stessa scelta firmata in R101 decisione 3 e in R107 G4.)
 
-### G4-bis · **LA PEGGIOR GIORNATA, SEMPRE** — in tutte le colonne
+### G4-bis · 🚫 **LA PEGGIOR GIORNATA: NON MISURABILE IN R110** — e va detto **prima** della firma
 
-Per ogni cella, sempre, anche a `n` sottile: `peggior giornata %`. È rischio, e
-il rischio non si sospende mai.
+> ⚠️ **Questo paragrafo era sbagliato fino al 25/08 sera** e diceva _"la peggior
+> giornata, SEMPRE, per ogni cella, anche a `n` sottile"_. Era **una colonna
+> ereditata dal round gemello R107** insieme alla macchina che la legge. Su
+> questa famiglia di motori **non esiste**.
+
+**MISURATO NEL SORGENTE AL PIN**, un `.mq5` per volta, non dedotto e non
+ricordato:
+
+| EA | array di `OnTester()` | header scritto da `OnTesterDeinit()` |
+|---|---|---|
+| `ABTG_SupRev_NAS_H1_Ottimizzato` | `double stats[7]` | `Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades` |
+| `ABTG_SupRev_DAX_H4_Ottimizzato` | `double stats[7]` | idem |
+| `ABTG_SuperWave_DOW_H1_Ottimizzato` | `double stats[7]` | idem |
+| `ABTG_EMA200` | `double stats[7]` | idem |
+
+**Otto colonne. `Peggior Giornata %` NON C'È.** Ce l'hanno i **tre EA
+d'apertura di R107** (header a **undici** colonne: `…,Trades,Peggior Giornata %,
+Perdite Consecutive Max,Serie Perdente Peggiore`), ed è da lì che questa
+macchina è stata copiata.
+
+➡️ **Conseguenza, scritta prima dei numeri**: la colonna `PeggGio%` della
+tabella madre esce **`n/d` su tutte e dodici le celle, PER COSTRUZIONE**. Non è
+un guasto del parser e non è un CSV mancante. Il driver **lo verifica a runtime
+sulle intestazioni vere** e lo scrive come **RILIEVO**, perché un `n/d` da solo
+si legge *"stavolta non è uscita"* mentre qui vuol dire *"non esce mai"*.
+
+**Il rischio resta giudicato lo stesso** (Emendamento **regola B**: _"il campione
+sottile sospende il giudizio sul MERITO, mai sul RISCHIO"_), su ciò che c'è:
+
+- **DD equity IS e OOS** di ogni cella — che è un fatto accaduto;
+- **`dDD%` contro il `00_metro`** della stessa famiglia — che è **letteralmente
+  la domanda del round**: *il lato peggiora o migliora il rischio della sedia?*
+
+**La strada per averla, dichiarata e NON percorsa qui.** R103 la misurò su
+**queste stesse sedie** leggendo i **deal del report `.htm`** di una passata
+singola (`RIGA_R103_CLASSIFICA_FLOTTA.ps1`, `$sd.PeggiorGiornata`), e usò la
+colonna dell'OPTFRAME solo come **seconda misura indipendente, quando c'era**
+(`if($cols -contains "Peggior Giornata %")`). Portarla in R110 vuol dire
+**dodici passate SINGOLE in più** (`Optimization=0`, una per cella): è **un
+round successivo**, non un'aggiunta di stasera.
+⚠️ E non sarebbe nemmeno uniforme: **`ABTG_SupRev_DAX_H4_Ottimizzato` non ha
+`ExportTrades()`** (gli altri tre sì), quindi su **SUPDAX** non esiste neppure
+la strada dei per-trade.
+
+👉 È la decisione **D6** del § 10.
 
 ### G5 · **NESSUNA PROMOZIONE ESCE DA QUESTO ROUND**
 
@@ -430,8 +492,11 @@ suo. R110 produce **informazione**, non deploy.
 ### 5.1 📊 Cosa si scrive nel referto, per ogni cella
 
 Sempre, e sempre col `n` accanto: `profitto IS/OOS · PF IS/OOS · DD IS/OOS ·
-n IS/OOS · Δ vs la cella 00_metro della stessa famiglia (PF e DD) · peggior
-giornata % · esito G1 · esito G2 · esito G3`.
+n IS/OOS · Δ vs la cella 00_metro della stessa famiglia (PF e DD) · esito G1 ·
+esito G2 · esito G3`.
+⚠️ **La colonna `peggior giornata %` c'è nella tabella ma esce `n/d` su tutte e
+dodici le celle**, e il motivo sta nel **G4-bis**: questi quattro EA non la
+esportano. È dichiarato nel referto, non lasciato al sentinella.
 
 E **due righe obbligatorie in più**:
 
@@ -444,6 +509,9 @@ E **due righe obbligatorie in più**:
 > un numero **non misurato** si scrive **`n/d`**. Mai `-1`, mai `0.000`.
 > `0.000` su un PF è un numero **plausibile** che si legge *"ha perso tutto"*.
 > Vale per profitto, PF, DD, `n` **e** peggior giornata.
+> ⚠️ **E la peggior giornata è il caso in cui il `n/d` onesto nasconde una misura
+> IMPOSSIBILE**: esce `n/d` su tutte e dodici le celle **per costruzione** (G4-bis,
+> decisione D6). Il referto lo dice a parole, perché il sentinella da solo non basta.
 
 ---
 
@@ -453,8 +521,9 @@ E **due righe obbligatorie in più**:
 - **Nessun filtro nuovo.** Chi volesse "aiutare" un lato con un filtro sta
   facendo **un altro round**.
 - **Nessuna riga di MQL5.** I quattro `.mq5` hanno già `InpAllowLong` e
-  `InpAllowShort` (**verificato nel sorgente il 25/08**, righe 58-59 / 59-60 /
-  62-63), e il driver si ferma se non li trova.
+  `InpAllowShort` — cerca `input bool   InpAllowLong` (`ABTG_EMA200` **righe
+  58-59**, gli altri tre **59-60**, misurate al pin del 25/08) — e il driver
+  **si ferma se non li trova**, con un gate suo.
 - **Nessuna coda 2026.07-08.** Allungare `Fino` sposterebbe anche lo split al
   40%, cambiando **sia l'IS sia l'OOS**: i numeri non sarebbero più confrontabili
   con R107.
@@ -494,8 +563,10 @@ restano **non misurati**, e vanno detti tali.
 
 - ✅ il **primo numero in assoluto** sul lato short di **quattro sedie vive** —
   su EMADOW con un campione che può reggere l'Emendamento regola A;
-- ✅ una misura del **rischio per lato** (DD e peggior giornata) su sedie che
-  stanno sui soldi: e quello si giudica **sempre**, anche a `n` sottile;
+- ✅ una misura del **rischio per lato** (**DD equity IS/OOS** e **`dDD%` contro il
+  metro**) su sedie che stanno sui soldi: e quello si giudica **sempre**, anche a
+  `n` sottile. ⚠️ **La peggior giornata no**: questi quattro EA non la esportano
+  (G4-bis, decisione D6);
 - ✅ un confronto **alla pari con R107** (stessa finestra, stesso banco, stesso
   metro di merito);
 - ✅ una **proposta di round successivo**: modifica di contratto su una sedia,
@@ -533,7 +604,7 @@ restano **non misurati**, e vanno detti tali.
 
 ---
 
-## 10. ✍️ LE CINQUE DECISIONI — **[DA FIRMARE]**
+## 10. ✍️ LE SEI DECISIONI — **[DA FIRMARE]**
 
 ### D1 · Quali famiglie entrano
 
@@ -590,6 +661,32 @@ nemmeno lanciate: sopra un metro sbagliato non misurerebbero niente), **e le
 altre tre vanno avanti.** Stessa scelta firmata in R100, R101 e R107: *una sedia
 storta non porta via anche le altre.*
 👉 **[ ] SÌ, famiglia ferma e le altre avanti   [ ] NO, si ferma tutto il round**
+
+### D6 · La **peggior giornata** che questi quattro EA non esportano
+
+⚠️ **Decisione aggiunta il 25/08 sera, in verifica, PRIMA della firma** — perché
+un criterio firmato non si corregge dopo (checklist 57). Il § 5 **G4-bis**
+prometteva la peggior giornata *"sempre, per ogni cella, anche a `n` sottile"*:
+è **una colonna ereditata da R107** insieme alla macchina che la legge, e su
+questi quattro motori **non esiste** (`double stats[7]`, header a **otto**
+colonne — misurato nel sorgente al pin, un `.mq5` per volta).
+
+**Proposta: si dichiara `NON MISURABILE` in R110.** La colonna `PeggGio%` resta
+nella tabella madre ma esce **`n/d` su tutte e dodici le celle, per
+costruzione**, e **il driver lo verifica a runtime** sulle intestazioni vere del
+CSV e lo scrive come **RILIEVO** — perché un `n/d` da solo si legge *"stavolta
+non è uscita"*, mentre qui vuol dire *"non esce mai"*. Il **rischio si giudica
+lo stesso**, su **DD equity IS/OOS** e sul **`dDD%` contro il `00_metro`**.
+
+**Alternativa**: prenderla come la prese R103, dai **deal del report `.htm`** di
+una passata singola — **dodici passate in più** (`Optimization=0`), quindi un
+round successivo. E comunque **non uniforme**: `ABTG_SupRev_DAX_H4_Ottimizzato`
+non ha nemmeno `ExportTrades()`, quindi su **SUPDAX** non c'è neppure la strada
+dei per-trade.
+
+👉 **[ ] SÌ, NON MISURABILE e dichiarata (la colonna esce n/d, il rischio si
+legge sul DD)   [ ] NO, voglio la peggior giornata: si aggiungono le 12 passate
+singole**
 
 ### 10.1 🟢 Cosa **non** serve firmare, e perché
 
