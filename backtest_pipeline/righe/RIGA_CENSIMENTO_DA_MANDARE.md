@@ -1,6 +1,6 @@
 # 📏 RIGA DI LANCIO — censimento_rischio **v2** (il VIVO separato dal RESIDUO)
 
-**Pin: `INSERIRE_SHA_DEL_COMMIT`** (branch `lavoro`).
+**Pin: `94946f46dcb99d185a98f7f780a4a2537e810796`** (branch `lavoro`).
 Script: `backtest_pipeline/censimento_rischio.ps1` — marcatore `MARCATORE_CENSIMENTO_V2`.
 
 > 🛑 **FINCHE' C'E' IL SEGNAPOSTO, QUESTA RIGA NON SI MANDA.** Il blocco si
@@ -46,7 +46,7 @@ nuovo si vedono affiancati.
 ```powershell
 & {
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-  $h="INSERIRE_SHA_DEL_COMMIT"
+  $h="94946f46dcb99d185a98f7f780a4a2537e810796"
   if($h -notmatch '^[0-9a-f]{40}$'){ throw "PIN NON SCRITTO: sostituisci il segnaposto con lo SHA del commit" }
   $p="$env:USERPROFILE\censimento_rischio.ps1"
   Remove-Item $p -Force -ErrorAction SilentlyContinue
@@ -97,7 +97,7 @@ rimasto sul Desktop verrebbe raccolto come se fosse di adesso).
 
 ```powershell
 & {
-  $h="INSERIRE_SHA_DEL_COMMIT"
+  $h="94946f46dcb99d185a98f7f780a4a2537e810796"
   if($h -notmatch '^[0-9a-f]{40}$'){ throw "PIN NON SCRITTO" }
   $ref=Join-Path ([Environment]::GetFolderPath("Desktop")) "censimento_rischio.txt"
   if(-not (Test-Path -LiteralPath $ref)){ throw "NESSUN REFERTO: il PASSO 1 non e' andato" }
