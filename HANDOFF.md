@@ -7,6 +7,27 @@
 
 ---
 
+## 🧭 AGGIORNAMENTO 25/08 SERA — R107 FIRMATO, CACCIA M5/M15 CHIUSA, R108 IN PREPARAZIONE
+
+- ✍️ **R107 (lati short Dow/DAX/Nasdaq) FIRMATO**: "FIRMO CON PROPOSTE" 25/08
+  (D1 trasposizione letterale NAS, D2 cancello R54, D3 solo lettura spina
+  dorsale). Verbale in `R107_CRITERI.md` (52ebe61). Stringhe consegnate
+  (pin `690773f`, verificatore PASS): giro a vuoto + corsa vera con
+  `-CriteriFirmati`. **In attesa che Claudio lanci sul PC di backtest.**
+- 🏹 **Caccia M5/M15 per la challenge CHIUSA** (2 dossier del 25/08 in
+  `caccia_strategie/`): lotto INDICI promuove ATR-Exhaustion+VolumeSpike
+  (9/10), VWAP MeanReversion (8/10), OutOfTheNoise (in coda); lotto
+  FOREX+ORO promuove **BreakingBand su M15 (zero codice, `InpTF` gia' input,
+  motore vivo R103)**, KA-Gold Keltner (Code Base 48251), DayFlow VWAP
+  Relay. File prova `prove/R108_BB_M15_FOREX.txt` gia' OK. Scoperte:
+  TradingView RIAPERTA (procedura nel memo fonti); soffitto del costo M5
+  misurato da terzi (arXiv 2605.04004) spiega i nostri M5 morti; il volume
+  come conferma vale SOLO sugli indici (non si esporta su forex/oro).
+- 🔜 **R108 = BreakingBand M15** in preparazione (criteri [DA FIRMARE] +
+  driver via filiera builder→verificatore). ⚠️ @DAQUANDO 2022.07.01 e'
+  DERIVATO dal tetto 100k barre, PASSO 0 dichiara la prima operazione vera;
+  celle M5 solo diagnostiche (~1,3 anni di tetto).
+
 ## 🧭 AGGIORNAMENTO 25/08 — REVISIONE CHIUSA, R104+R105 CHIUSI, ATTREZZI IN CONSEGNA
 
 - ✅ **Revisione "A+b" VERIFICATA** (censimento VPS 07:31: 4 spente sparite, 5
