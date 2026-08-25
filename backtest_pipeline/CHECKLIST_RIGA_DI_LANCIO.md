@@ -3240,3 +3240,116 @@ cercare il guasto nella parte sana.
 > e un confronto posizionale sfasa tutto il resto e accusa quaranta righe
 > sane — e' il punto 58 (la colonna contata dalla fine) applicato alle righe.
 > Provato: 8 corruzioni simmetriche su 8 fermate, e i file sani ripassano.
+
+---
+
+## 🆕 AGGIUNTE DEL 25/08/2026 — trovate verificando RIGA_STORICO_INDICI (storico lungo degli indici)
+
+## 73. ➕ IL `+` DENTRO UN `@(...)` CON LE VIRGOLE: la virgola lega piu' stretto, e l'array diventa **UNA RIGA SOLA**
+
+_Difetto vero, gia' committato in `RIGA_STORICO_INDICI.ps1` (bcc483f, righe
+1058-1064 e 885-886), trovato PRIMA dell'invio e **RIPRODOTTO ESEGUENDO**._
+
+In PowerShell la **virgola ha precedenza piu' alta del `+`**. Quindi questo:
+
+```powershell
+Set-Content $set -Value @(
+  "InpSimboli=" + ($chiesti -join ","),
+  "InpTF=M15,H1",
+  "InpFileCsv=ABTG_ContaBarreEXT.csv",
+  "InpAutoTest=false")
+```
+
+non e' un array di quattro righe: e' `"InpSimboli=" + (array di tutto il
+resto)`, cioe' **UNA stringa sola**. Eseguito, il `.set` usciva cosi':
+
+```
+[InpSimboli=NASUSD_EXT InpTF=M15,H1 InpFileCsv=ABTG_ContaBarreEXT.csv InpAttesaSec=30 InpTettoAtteso=100000 InpAutoTest=false]
+righe: 1
+```
+
+**Il costo se passa**: MT5 carica quel preset, `InpSimboli` diventa quella
+frase intera, `SymbolExist()` fallisce, il referto della verifica esce
+`SIMBOLO NON ESISTE` — e tutti e cinque gli altri input restano **all'ultimo
+valore usato a mano** (punto 25). Cioe' una serata a cercare un import che era
+andato benissimo. Stessa riga, stessa sera, la variante innocua: l'anteprima
+del CSV con intestazione, numero di barre e anni **appiccicati sulla stessa
+riga**.
+
+> ✅ **REGOLA**: dentro un `@(...)` **ogni elemento che contiene un `+` va fra
+> parentesi sue** — `@(("a: " + $x), ("b: " + $y))` — oppure si costruisce
+> l'array con `$righe += (...)` una riga per volta (che e' anche l'unica forma
+> che si legge bene in un diff).
+> ⚠️ **E non si vede rileggendo**: la riga sbagliata e quella giusta sono
+> identiche a meno di due parentesi. Si vede **solo eseguendo e guardando
+> l'artefatto**: `Get-Content $set | %{ "[" + $_ + "]" }` e si contano le
+> righe. Ogni file di parametri generato da uno script si stampa cosi' almeno
+> una volta. Parente di 63 (la virgola di troppo in un hashtable) e di 65
+> (l'elenco senza apici in chat): la famiglia e' **"la punteggiatura di
+> PowerShell che cambia il TIPO di quello che hai scritto"**.
+
+## 74. 🧠 LA RAM DELLA FASE BATCH E' UN CANCELLO COME LO SPAZIO DISCO — e si misura PRIMA, sul parser vero
+
+_Trovato il 25/08 verificando la conversione a 16 anni di `histdata_m1.py`.
+Il costruttore aveva scritto "stimo ~1 GB, non so misurarlo da qui": **si
+misurava**, e il numero vero era **quasi il quadruplo**._
+
+`--converti` tiene tutte le barre del simbolo in un dizionario prima di
+scrivere il CSV. Misurato eseguendo il **suo** parser (`leggi_righe_histdata`)
+su 400.000 barre vere e leggendo l'RSS: **~690 byte per barra**.
+
+| finestra | barre | RAM |
+|---|---:|---:|
+| 2019-2026, la corsa **gia' girata** il 18/08 | 2,5 M | ~1,7 GB |
+| 2010-2026, quella nuova | 5,6 M | **~3,8 GB** |
+
+**Dove fa male**: il `MemoryError` non arriva all'inizio, arriva **in fondo**,
+dopo che lo scarico e' finito — la parte lunga — e su un PC con MT5 aperto
+prima ancora arriva lo swap. E' il difetto 19 (la durata stimata contro il
+timeout) applicato alla MEMORIA invece che al tempo.
+
+> ✅ **REGOLA, in tre pezzi**:
+> 1. **si misura**: si fa girare la funzione vera dello strumento su un
+>    campione (10^5 righe basta) e si legge l'RSS. Costa un minuto e
+>    trasforma un "stimo ~1 GB" in un numero.
+> 2. **si spezza NEL MODO IN CUI LO STRUMENTO FILTRA DAVVERO.** Qui
+>    `--converti` **ignora `--da/--a`** e ingerisce tutti gli zip **della
+>    cartella**: spezzare per intervallo avrebbe prodotto CSV cumulativi e la
+>    concatenazione un file **pieno di duplicati, grosso e plausibile**.
+>    Spezzare per **cartella** e' esatto. **Prima di spezzare si legge come il
+>    filtro e' implementato**, non come si chiama l'opzione.
+> 3. **il pezzo si DICHIARA nel referto**: un artefatto nato da tre passate
+>    non e' lo stesso artefatto nato da una, e chi lo usera' fra un mese deve
+>    saperlo dal file, non dalla chat.
+> ⚠️ E la taglia della tranche non si sceglie a occhio: si prende **quella che
+> quella macchina ha gia' retto** (qui 2,5 M barre, 18/08).
+
+## 75. 🔤 `FileWrite` SU UN HANDLE `FILE_CSV` NON METTE GLI APICI: una virgola nel testo sposta le colonne, e chi legge **TRONCA senza errore**
+
+_Difetto vero, gia' committato in `ABTG_ContaBarreEXT.mq5` (bcc483f, righe 191
+e 276), trovato PRIMA dell'invio e **RIPRODOTTO**._
+
+MQL5 scrive i campi cosi' come sono. La colonna diagnostica piu' importante
+dello script era:
+
+```
+SIMBOLO NON ESISTE (import non fatto, o MT5 chiuso male dopo l'import)
+```
+
+Con `Import-Csv` dall'altra parte, quel campo diventa **due colonne**, la
+seconda non ha intestazione e **viene buttata via in silenzio**. Provato:
+
+```
+ESITO LETTO: [SIMBOLO NON ESISTE (import non fatto]
+```
+
+Nessun errore, nessun avviso: solo la meta' della frase che spiegava **cosa
+fare**. Ed e' sempre la riga peggiore a perderci, perche' le frasi lunghe (con
+le virgole) sono quelle dei casi anomali.
+
+> ✅ **REGOLA**: in un CSV a virgole prodotto da MQL5, **nessun campo di testo
+> puo' contenere una virgola** — si scrive con `;` o con ` - `, e ci si mette
+> una funzione di rete (`StringReplace(t,",",";")`) sull'ultima colonna, quella
+> libera. Vale al contrario per chi legge: se una colonna di testo arriva
+> tronca a meta' frase, **non e' il testo ad essere corto, sono le colonne ad
+> essere scivolate** (e' il punto 58 visto dal lato di chi SCRIVE).
