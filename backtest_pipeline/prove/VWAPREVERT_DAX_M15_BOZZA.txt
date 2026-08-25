@@ -1,0 +1,258 @@
+# =====================================================================
+#  VWAPREVERT (bozza)  --  VWAP REVERT: la VWAP di sessione come MOTORE
+#  ABTG_VwapRevert  su  D30EUR  M15, TICK REALI
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA:
+#    backtest_pipeline\caccia_strategie\CACCIA_M5M15_INDICI_2026-08-25.md  (P1)
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "VWAP Mean Reversion Strategy" di sumbloke077,
+#    TradingView, pubblicato 02/04/2026, sorgente Pine pubblico
+#    (scriptAccess "open_no_auth"), letto riga per riga il 25/08/2026.
+#      https://www.tradingview.com/script/YBqnzqDK-VWAP-Mean-Reversion-Strategy/
+#    Copia archiviata in casa:
+#      caccia_strategie\biblioteca\sorgenti\
+#      VwapMeanReversion_sumbloke077_tvYBqnzqDK_2026-08-25.pine
+#    LICENZA: [INCERTO] -- il sorgente non ha intestazione di licenza.
+#    L'attribuzione va ripetuta in testa a ABTG_VwapRevert.mq5.
+#
+# =====================================================================
+#  !!!  QUESTO FILE NON PUO' GIRARE OGGI  !!!
+# ---------------------------------------------------------------------
+#  L'EA  ABTG_VwapRevert.mq5  NON ESISTE ANCORA.  Va scritto (stima 5-7
+#  ore, specifica nel dossier P1).  Questo file e' la SPECIFICA
+#  CONGELATA di cosa dovra' misurare: ipotesi e criteri sono scritti
+#  PRIMA di aver visto un solo numero, che e' l'unico modo per cui
+#  varranno qualcosa quando i numeri arriveranno.
+#  Precedente identico: R101_DAX_02_volumi.txt ("finche' non sono
+#  firmati, questo file non deve girare").
+#  E i CRITERI DI DETTAGLIO sono [DA FIRMARE] da Claudio.
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  Dentro la sessione la VWAP e' il prezzo che il flusso ha davvero
+#  pagato.  Quando il prezzo si allontana oltre 1 deviazione standard
+#  volume-pesata E LI' STAMPA UNA CANDELA DI RIFIUTO all'estremo delle
+#  ultime N barre, confermata dalla barra successiva, chi ha inseguito
+#  e' in perdita: il ritorno verso la VWAP e' il suo costo.
+#
+#  LA DOMANDA VERA, ed e' una sola:
+#    la VWAP di sessione -- che come FILTRO DIREZIONALE R101 (gradino
+#    07_vwap) ha bocciato per INCOERENZA fra Dow e DAX (PF +0,007 sul
+#    Dow, -0,061 sul DAX) -- ha un edge quando diventa il MOTORE, cioe'
+#    quando senza la sua banda non esiste nessun segnale?
+#
+#  PERCHE' LA DOMANDA HA SENSO (e non e' "riproviamo la stessa cosa"):
+#    ROBUSTEZZA.md misura la differenza fra le due forme.
+#      filtro AGGIUNTO DOPO a un motore gia' tarato ..... 0 successi su 5
+#        (R20 ADX, R12, R26, R45, R54 -- e R101/07 e' il sesto)
+#      filtro che E' la strategia dall'inizio ........... 30 celle su 30
+#        (ABTG_EMA200 Dow, R29, PASS pieno)
+#    R101/07 e' il primo caso.  Questo round e' il secondo.
+#
+#  PERCHE' NON E' UN CADUTO (lista completa nel dossier par. 2/P1):
+#    - NON e' breakout d'apertura M5 (capitolo chiuso 26.07.26): nessun
+#      box, nessun orario d'ingresso, zero input di sessione.
+#    - NON e' R42 (fade degli estremi del range d'apertura, 0/24+0/24):
+#      il livello non e' l'estremo di un box di 15 minuti, e' una banda
+#      statistica ricalcolata a ogni barra sulla sessione in corso.
+#    - NON e' R45/ORB (0/48): non c'e' nessuna rottura da confermare.
+#    - NON e' R95/Sweep+Reclaim (0/30 su EURJPY): non serve che nessun
+#      livello venga bucato e riconquistato.
+#    - NON e' R98/intraday momentum (0/6): non c'e' nessun legame fra
+#      primi 30 minuti e ultimi 30 minuti; e la direzione e' OPPOSTA
+#      (qui si compra la debolezza, li' si comprava la forza).
+#
+#  QUALE BUCO RIEMPIE (report\ROTTA_PROP.md + R52_CENSIMENTO_LATI.md):
+#    (a) MEAN REVERSION INTRADAY su indici -- non ce l'abbiamo;
+#    (b) motore SIMMETRICO vero (long e short dallo stesso codice) --
+#        le nostre celle vive sono quasi tutte long-only;
+#    (c) motore che LAVORA NEL LATERALE, dove LARRY fa -6.445 nel 2019;
+#    (d) FASCIA ORARIA 10:00-16:00 server, oggi vuota nella flotta
+#        (le sedie stanno alla campanella, di notte, o su H1/H4).
+#
+# ---------------------------------------------------------------------
+#  CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)  [DA FIRMARE]
+# ---------------------------------------------------------------------
+#
+#  PASSO 0 -- I CANCELLI CHE SI LEGGONO PRIMA DI OGNI ALTRA COSA
+#
+#  S0  CANCELLO ZERO / COSTO.  Sul TOTALE della finestra, il risultato
+#      LORDO medio per operazione della cella nuda deve valere almeno
+#      3x lo spread medio della fascia, in PUNTI INDICE.
+#      Metro: R98_CRITERI.md par. 3.2, ed e' il cancello che ha
+#      bocciato R98 in una riga (lordo medio -0,31 punti indice).
+#      ATTENZIONE, ed e' una lacuna dichiarata: lo spread medio di BCM
+#      su D30EUR in M15 NON E' MISURATO IN CASA.  Il valore "1-2 punti
+#      indice" viene da R98_CRITERI.md ed e' [INCERTO].
+#      >>> PRIMA di leggere S0 va misurato con uno script sul simbolo.
+#      Se non lo si misura, S0 NON si puo' adjudicare e va dichiarato
+#      non misurabile -- non stimato.
+#
+#  S1  CAMPIONE.  Si CONTANO le operazioni prima di guardare qualunque
+#      PF.  Emendamento della Finestra par. A: servono >=150 operazioni
+#      IS.  Attese [STIMATE, non misurate]: 0,5-2 trade/giorno per
+#      indice su ~450 sedute -> 225-900 totali -> 90-360 in IS.
+#      >>> Se n IS < 150 scatta la VALVOLA R59: il round misura il
+#          RISCHIO (DD massimo, peggior giornata: fatti accaduti, validi
+#          a qualunque n) e SOSPENDE il giudizio sul MERITO.
+#          E' un esito legittimo del round, non un guasto.
+#
+#  S2  IGIENE.  I due magic gemelli (773400/773401) devono dare righe
+#      IDENTICHE AL CENTESIMO in ogni CSV.  Se non lo sono, il file
+#      non si legge.
+#
+#  I CANCELLI DI MERITO (si leggono solo se S0 e S1 passano)
+#
+#  S3  PF OOS >= 1,20 sulla cella scelta.
+#  S4  DD OOS <= 8% a rischio 1% (= 5,2% a 0,65%, sotto il muro del 10%
+#      con margine).  report\METRO_PROP.md.
+#  S5  COERENZA FRA I DUE SIMBOLI.  E' il cancello che ha ucciso il
+#      gradino 07 di R101, e va rispettato anche quando fa comodo il
+#      contrario: se il segno del PF e' OPPOSTO fra D30EUR e U30USD,
+#      NON C'E' CANDIDATO -- esattamente come allora.
+#  S6  ALTOPIANO.  La cella si sceglie al CENTRO dell'altopiano, MAI il
+#      picco.  Dodici Spearman IS->OOS negative su tredici, l'ultima
+#      (R58) sui tick reali del nostro broker.  La regola di selezione
+#      si dichiara INSIEME al numero, altrimenti il numero non vuol
+#      dire niente.
+#
+#  FALSIFICAZIONE DICHIARATA
+#    Se S0 fallisce, la risposta e' NO e il capitolo VWAP si chiude in
+#    entrambe le forme (filtro E motore).  Niente "riproviamo con
+#    un'altra soglia": su un motore senza edge un'altra griglia trova
+#    solo picchi di rumore, e la cella verde per caso e' quella che
+#    brucia la challenge.
+#
+# ---------------------------------------------------------------------
+#  MODELLO E FINESTRA
+# ---------------------------------------------------------------------
+#  MODELLO: TICK REALI (modello 4).  NON negoziabile.
+#    Su M5/M15 l'OHLC 1-min INGANNA, ed e' misurato in casa: i Live5m
+#    davano +129k finti sul DAX in OHLC ed erano morti a tick reali
+#    (REGISTRO_TEST.md par. 2).  Lo screening OHLC su questo motore
+#    vale SOLO per contare le operazioni, mai per leggere il segno.
+#
+#  FINESTRA: 2024.09.26 -> 2026.06.30, split 40/60
+#    IS  fino al 2025.06.09
+#    OOS dal   2025.06.10
+#    (le stesse di R88/R97/R98/R101: cosi' i numeri si confrontano)
+#
+#  @DAQUANDO E' MISURATO, NON IPOTIZZATO:
+#    risultati_archivio\REFERTO_SONDA_STORICO_17-08.md -- indici ed
+#    energia a BCM partono dal 2024.09.26, stato dichiarato COMPLETO
+#    (= non manca sul disco: il broker NON CE L'HA).
+#
+# ---------------------------------------------------------------------
+#  MAGIC
+# ---------------------------------------------------------------------
+#  773400 / 773401 -- blocco 7734xx, VERIFICATO LIBERO in tutto il repo
+#  il 25/08/2026 (nessuna occorrenza in .mq5, .txt, .md).
+#  Nessun magic vivo compare in questo file: il tester non deve poter
+#  incrociare i deal del forward.
+#
+# ---------------------------------------------------------------------
+#  RISCHIO
+# ---------------------------------------------------------------------
+#  Il file gira a InpRiskPercent=1.00 per confrontarsi con l'archivio.
+#  In campo sul 100k si gira a 0,65%: OGNI DD di questo round si
+#  converte x0,65 prima del confronto col forward.
+#
+# ---------------------------------------------------------------------
+#  COSA DEVE AVERE L'EA  (specifica per chi lo scrive)
+# ---------------------------------------------------------------------
+#  DAL SORGENTE PINE, DA TENERE (il motore):
+#    - VWAP di sessione volume-pesata su hlc3, azzerata al cambio
+#      giorno, calcolata SOLO su barre CHIUSE (la barra 0 si esclude:
+#      il nostro VwapBias() gia' parte da i=1);
+#    - deviazione standard volume-pesata: sqrt(cumPV2/cumVol - vwap^2),
+#      bande a +/- InpSigmaMult;
+#    - candela di rifiuto (hammer/doji per il long, shooting star/doji
+#      per lo short) che tocca l'estremo delle ultime InpLookback barre;
+#    - BARRA DI CONFERMA: la barra successiva chiude nel 30% alto (long)
+#      o basso (short) del proprio range, ed e' engulfing oppure
+#      "minimo piu' alto + chiusura sopra il massimo precedente";
+#    - filtro anti-candelone: range della barra <= InpAtrMult * ATR;
+#    - ordine STOP oltre l'estremo del setup + buffer ATR, ANNULLATO
+#      dopo 2 barre se non riempie  (in Pine c'e' anche un ramo "limit"
+#      che in MT5 NON si traduce: un BUY LIMIT sopra il prezzo non
+#      riempie mai.  Si implementa SOLO il ramo STOP);
+#    - SL all'estremo del setup - buffer, con PAVIMENTO a InpSlAtrFloor
+#      * ATR (anti-stop-stretto);
+#    - lo spread modellato dentro i prezzi di ingresso e di uscita
+#      (l'autore lo fa, ed e' la lezione R55: e' il pezzo migliore del
+#      file e va tenuto).
+#
+#  DA AGGIUNGERE (la gestione: la parte che sappiamo fare noi):
+#    - rischio in PERCENTUALE dell'equity (mai lotto fisso);
+#    - PARZIALE 1R + BREAKEVEN + RUNNER 2R (le nostre DAX/Dow);
+#    - InpMaxTradesPerDay -- CAP GIORNALIERO, prerequisito prop, non
+#      rifinitura: il muro dei -5.000 EUR su 100k butta fuori anche col
+#      totale intatto (METRO_PROP.md);
+#    - filtro spread in % dello stop (standard di casa, R55);
+#    - OnTester (senza, il driver si rifiuta di partire);
+#    - magic number impostato.
+#
+#  DA MISURARE E DICHIARARE, non da assumere:
+#    - se BCM espone SYMBOL_VOLUME_REAL su D30EUR.  Se no, la VWAP e'
+#      TICK-VOLUME-pesata, e va scritto nel referto.  [INCERTO]
+#
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# ---------------------------------------------------------------------
+#  LA GRIGLIA -- e' uno SCREENING, non un verdetto.
+#  Sweep stretto: 3 assi, 2x3x2 = 12 celle.  Tutto il resto pinnato al
+#  default del sorgente (geometria della candela compresa: bodyPercent,
+#  wickMultiple, dojiBodyPercent, closePercent NON entrano nello sweep
+#  -- sono le manopole che il backtest girerebbe verso il passato).
+# ---------------------------------------------------------------------
+
+# quante deviazioni standard fanno "lontano dalla VWAP".
+#   1,0 = il default dell'autore; 1,5 e 2,0 sono piu' selettivi.
+InpSigmaMult=1.5||1.0||0.5||2.0||Y
+
+# quante barre indietro per l'estremo che qualifica la candela.
+#   20 = il default dell'autore.
+InpLookback=20||20||0||20||N
+
+# il target, in multipli di R (dopo il parziale a 1R).
+InpTpR=2.0||2.0||0.5||2.5||Y
+
+# pavimento dello stop in ATR: impedisce lo stop-a-pelo sulle candele
+# minuscole.  0,2 = default dell'autore; 0,5 = piu' prudente.
+InpSlAtrFloor=0.35||0.2||0.15||0.5||Y
+
+# --- pinnati, NON spazzolati (dichiarati qui perche' si leggano) ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=2||2||0||2||N
+InpAtrMult=1.5||1.5||0||1.5||N
+InpUsePartial=1||1||0||1||N
+InpPartialR=1.0||1.0||0||1.0||N
+InpBreakEven=1||1||0||1||N
+
+# =====================================================================
+#  GEMELLO -- stesso file, cambia solo il simbolo, per il cancello S5.
+#  Da salvare come  VWAPREVERT_DOW_M15_BOZZA.txt  con:
+#     @SIMBOLO  U30USD
+#     @PERIODO  M15
+#     @DAQUANDO 2024.09.26
+#  S5: se il segno del PF e' OPPOSTO fra i due, NON C'E' CANDIDATO.
+#  E' esattamente il cancello che ha ucciso il gradino 07 di R101, e
+#  vale anche quando fa comodo il contrario.
+# =====================================================================
+
+# =====================================================================
+#  NOTA SUL NUMERO DI ROUND (25/08/2026)
+#  Questo file NON porta un numero di round: e' una BOZZA, come
+#  JPY_LIQSWEEP_BOZZA.txt.  Il numero lo assegna chi lancia, DOPO che
+#  l'EA esiste e i criteri sono firmati.  Motivo pratico: il 25/08 due
+#  agenti hanno proposto due round diversi con la stessa etichetta R108
+#  (l'altro e' prove\R108_BB_M15_FOREX.txt).  Un numero di round si
+#  prende quando si parte, non quando si propone.
+# =====================================================================

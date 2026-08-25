@@ -110,3 +110,58 @@ quantconnect.com
 - Restano bloccati (dichiarati, non ipotizzati): SSRN 403, TradingView
   pagine script 404, GitHub 403 (web+API), Forex Factory 403, Quantpedia,
   RePEc egress-blocked.
+
+---
+
+## 🔓 AGGIORNAMENTO 25/08/2026 — TRADINGVIEW SI LEGGE, SORGENTE COMPRESO
+
+_Misurato durante la caccia M5/M15 indici (`CACCIA_M5M15_INDICI_2026-08-25.md`)._
+
+Per **cinque dossier di fila** (16/08, 19/08, 21/08, 22/08, 23/08)
+TradingView è stata dichiarata **NULLA**, con due diagnosi diverse: prima
+`404 Publication not found` sulle pagine script, poi `200 ma zero link
+/script/ nell'HTML`. **Oggi la fonte risponde, e il Pine si scarica.**
+
+| cosa | stato 25/08/2026 |
+|---|---|
+| pagina tag `tradingview.com/scripts/<tag>/` | 🟢 **200**, e l'HTML contiene **link + titoli** degli script |
+| paginazione `/scripts/<tag>/page-N/` | 🟢 funziona |
+| filtro `?script_type=strategies` | 🟢 funziona (separa le strategie backtestabili dagli indicatori) |
+| pagina del singolo script | 🟢 200, `<title>` con nome + autore + tipo — **ma il Pine NON è nell'HTML** |
+| **il sorgente Pine** | 🟢 **si scarica** — vedi sotto |
+
+### La procedura, in tre passi
+
+1. **Elenco**: `https://www.tradingview.com/scripts/<tag>/page-N/?script_type=strategies`
+   → estrarre gli anchor con `data-qa-id="ui-lib-card-link-title"`
+   (danno slug **e** titolo).
+2. **Hash**: `https://www.tradingview.com/script/<slug>/`
+   → cercare nell'HTML `PUB;<32 cifre esadecimali>`.
+3. **Sorgente**: `https://pine-facade.tradingview.com/pine-facade/get/PUB;<hash>/last`
+   → JSON con `source` (**il Pine completo**), `scriptName`, `created`,
+   `scriptAccess` (`open_no_auth` = open source).
+
+⚠️ **La trappola in cui sono caduto per primo:** usare lo *slug corto*
+(`PUB;OkbSIHvu`) restituisce `{"code":404,"message":"Script is not found."}`.
+**Serve l'hash a 32 cifre**, quello dentro l'HTML della pagina.
+
+⏱️ Ritmo usato: **~1,2 s fra le richieste**. Nessun 429, nessun 503.
+
+### E il resto della mappa, rimisurato lo stesso giorno
+
+| fonte | 25/08/2026 |
+|---|---|
+| `mql5.com` (Code Base + download ZIP) | 🟢 **200** |
+| `export.arxiv.org` (API) | 🟢 **200** — ⚠️ **solo `https://`**: `http://` risponde 301 e 0 entry |
+| `quantpedia.com` (con `-L` + User-Agent) | 🟢 **200** sulle pagine strategia |
+| `tradingview.com` + `pine-facade.tradingview.com` | 🟢 **200** ← **NOVITÀ** |
+| `github.com` · `api.github.com` (ricerca) | 🔴 **403** — quinta caccia di fila |
+| `papers.ssrn.com` | 🔴 **403** (Cloudflare) |
+| `forexfactory.com` | 🔴 **403** |
+| `alexandria.unisg.ch` · `researchgate.net` · `cxoadvisory.com` · `substack.com` · `quantitativo.com` | 🔴 **CONNECT tunnel 403** = egress bloccato dal proxy. Sono i mirror dei paper che SSRN non ci lascia leggere: **il buco della letteratura resta aperto** |
+
+> 🎯 **Conseguenza operativa:** con il Code Base ormai esaurito sugli indici
+> intraday (`vwap` → 0 titoli, `dax` → 0, `retest` → 1, misurato tre volte con
+> filtri diversi), **TradingView diventa la fonte principale per i meccanismi
+> nuovi.** Il prezzo resta quello del mandato §3D: **Pine → MQL5 non è un
+> porting, è una riscrittura**, e i numeri mostrati dagli autori valgono zero.
