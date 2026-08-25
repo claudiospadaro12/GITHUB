@@ -7,6 +7,38 @@
 
 ---
 
+## 🧭 AGGIORNAMENTO 25/08 — REVISIONE CHIUSA, R104+R105 CHIUSI, ATTREZZI IN CONSEGNA
+
+- ✅ **Revisione "A+b" VERIFICATA** (censimento VPS 07:31: 4 spente sparite, 5
+  taglie nuove esatte, somma 35,25%). Argento orfano chiuso dallo SL server.
+  Flotta viva REALE: **35 sedie** (Ichimoku era un fantasma .chr — ERRATA agli
+  atti, e il suo DD trovato nel report: 21,5% a taglia 0,5% → candidato
+  BOCCIATO dalla corsia rischio).
+- 📐 **R104 chiuso**: trailing largo NET-POSITIVO (12,93R raccolti vs 6,60R del
+  tetto "incassa a 1R"); 5 restituzioni ~1,25R = prezzo dei runner; n=29<30 →
+  conteggi, non frequenze. Nessun cambio al forward.
+- 🏁 **R105 chiuso** (firmato ed eseguito in giornata, zero ore tester):
+  **la squadra ottima È la flotta intera** (verificato anti-pesca split 14+7);
+  peggior giorno −4,74% STRUTTURALE, due cluster (GapFill-lunedì + Dow, che nei
+  10 giorni neri vale −21k da solo); leva unica = manopola globale **×0,74**
+  (≈ la convenzione 0,65 del 100k, ora misurata). Dataset giornaliero 481g×40
+  agli atti (`R105_dataset_giornaliero.csv`).
+- 🛠️ **Attrezzi** (post-incidente posizioni orfane): `ABTG_ChiudiSedie.mq5`
+  v1.01 (tre sicure + esito a TRE stati) e `censimento_rischio.ps1 v2`
+  (profilo attivo CONFIG/UNICO/ASSUNTO, FUORI SALVATAGGIO, residui fuori
+  somma). Verificatore: FAIL→corretti→**checklist 68-69** (verdetto senza lo
+  stato "niente da fare"; cancellazione preventiva spacciata per freschezza).
+  Pin: ChiudiSedie `360a36c`, censimento `94946f4`. Righe in DA_MANDARE.
+- 💰 Stime agli atti: 31/12/26 (prudente +27,3k su 100k) e 1M prop (cauto
+  ~260k/anno netti al 90%) — SEMPRE con la scala dell'onestà e l'ancora del
+  forward (~pari: il banco va DIMOSTRATO tagliando dopo tagliando).
+- 🔴 **IN ATTESA DI FIRMA: R106 "LA SQUADRA DA CHALLENGE"** — simulazione di
+  challenge rolling sul dataset (probabilità di passare, flotta vs squadre per
+  criteri, split anti-pesca). Zero ore tester, gira in minuti alla firma.
+- Watchpoint: **Jackson Hole gio 27 - ven 28** (alta volatilità, Guardian B1 in
+  guardia); scheda live 24/08 agli atti (conferme: volumi-su-ORB = candidato
+  R101; correlazioni rotte = verdetto G3; spunti PSAR-trailing e ORB-DAX).
+
 ## 🏆 AGGIORNAMENTO 24/08 pomeriggio — **R103 PRONTO E BENEDETTO: la classifica della FLOTTA (40 sedie, anni negativi inclusi)**
 
 - ✍️ Firmato da Claudio ("FIRMO TUTTE E TRE, PARTIAMO") + chiarimento mattina
