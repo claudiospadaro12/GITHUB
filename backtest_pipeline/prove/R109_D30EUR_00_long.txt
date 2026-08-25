@@ -1,0 +1,153 @@
+# =====================================================================
+#  EA: ABTG_AtrExhaustVol   (magic 774401 = DEFAULT del sorgente, VIETATO qui)
+#
+#  R109 -- ATR EXHAUSTION & VOLUME SPIKE, prima misura in assoluto
+#          D30EUR -- cella 00_long (LONG SOLO)
+#
+#  CRITERI:   backtest_pipeline\risultati_archivio\R109_CRITERI.md  [DA FIRMARE]
+#  DRIVER:    backtest_pipeline\righe\RIGA_R109_ATREXH.ps1  (MARCATORE_RIGA_R109_v1)
+#  TESI:      ATREXHAUST_TESI.md   (gli scostamenti dal Pine, uno per uno)
+#  DOSSIER:   backtest_pipeline\caccia_strategie\CACCIA_M5M15_INDICI_2026-08-25.md (P2, 9/10)
+#
+#  DA DOVE VIENE OGNI RIGA, e NON e' scritta a memoria: ogni valore qui sotto
+#  e' il DEFAULT COMPILATO del sorgente ABTG_AtrExhaustVol.mq5. Non c'e' un
+#  round precedente da cui copiare -- questo motore non e' mai stato misurato
+#  -- quindi l'antenato E' IL SORGENTE, e il driver lo verifica a ogni corsa
+#  con il GATE DEL PORTING (estrae 'input <tipo> <nome> = <valore>;' dal .mq5
+#  al pin e lo confronta riga per riga con questo file).
+# ---------------------------------------------------------------------
+#  COSA CAMBIA RISPETTO AI DEFAULT DEL SORGENTE, e NIENT'ALTRO:
+#    - InpAllowLong  = true
+#    - InpAllowShort = false
+#      >>> E' L'UNICO ASSE DEL ROUND: i due lati si misurano SEPARATI
+#          (REGOLA DEI DUE LATI, CLAUDE.md 25/08). Il sorgente ha
+#          true/true; una cella "entrambi" non permetterebbe di
+#          distinguere i lati, ed e' proprio quello che serve qui --
+#          lo SHORT e' il lato che abbiamo SIMMETRIZZATO rispetto al
+#          Pine (ATREXHAUST_TESI.md par. 4.3, unico scostamento dentro
+#          il motore).
+#    - InpMagic   : 774410/774411 (blocco 7744xx VERGINE). Il default del
+#      sorgente e' 774401 ed e' VIETATO in tutto il round: se una cella
+#      girasse col default -- pin saltato, oppure MT5 che si ricorda
+#      l'ultimo valore (checklist 25) -- il magic lo direbbe.
+#    - InpComment : identita' del lancio, inerte sui numeri.
+#    - la riga InpNewsCurrencies e' TOLTA: un pin di stringa VUOTO MT5 lo
+#      IGNORA e usa il default compilato (che qui e' "" comunque). E' la
+#      regola che controlla_prova.py verifica.
+#    - NIENT'ALTRO. In particolare NON si tocca niente del MOTORE.
+#
+#  QUESTA CELLA NON HA NESSUN NUMERO AGLI ATTI, e non puo' averne:
+#  l'EA NON E' MAI STATO COMPILATO (lo dice il .mq5 stesso). La prima F7
+#  della sua vita avviene dentro questo round, sul PC di Claudio.
+#  E NESSUN NUMERO D'AUTORE entra qui: Pine -> MQL5 non e' un porting,
+#  e' una riscrittura (mandato par. 3D).
+#
+#  LE DUE RIGHE CHE NON SI TOCCANO MAI (criteri par. 6):
+#    InpVolSpikeMult=1.5 e InpVolSmaBars=20. E' il punto in cui il
+#    candidato esterno, REGISTRO_TEST.md par.MODIFICHE e il corso del
+#    24/08 concordano INDIPENDENTEMENTE. Girarli trasformerebbe una
+#    convergenza in una manopola da girare verso il passato.
+#
+#  InpMaxTradesPerDay=3 e' l'UNICO default che si scosta dal Pine, ed e'
+#  per REGOLA DI CASA (criterio C6 del dossier), non per misura. Con i
+#  lati separati il cap vale PER CELLA: la somma dei due lati NON e' la
+#  cella "entrambi" (criteri par. 1.0). E la frequenza misurata e'
+#  CENSURATA DALL'ALTO: il referto stampa quante giornate hanno toccato
+#  il cap.
+#
+#  InpVerbose=true e InpAutoTest=true NON sono cosmetica: senza, non
+#  esistono le righe [ATREXH][AUTOTEST] e il GATE A0 non ha niente da
+#  leggere. L'autotest si legge ESEGUENDO, non compilando (checklist 20).
+#
+#  MODELLO 4 = TICK REALI. Su M15 l'OHLC inganna, ed e' MISURATO in casa
+#  (REGISTRO_TEST.md par.2: +129k finti sul DAX). Qui morde piu' del
+#  solito: l'ingresso nasce da un ESTREMO DI BARRA e lo stop sta a un
+#  tick dal minimo (buffer 0), quindi in OHLC stop e target dello stesso
+#  trade sarebbero decisi da un'IPOTESI sull'ordine di visita dentro la
+#  barra. Un giro OHLC e' ammesso solo come screen (-ScreenOhlcM15), e
+#  in quel caso OGNI numero e' marcato NON GIUDICABILE.
+#
+#  PROFONDITA' TICK: MISURATA solo su U30USD (67.618.571 tick dal
+#  2024.09.26, referto del 20/08). Su D30EUR e NASUSD NON ESISTE nessuna
+#  misura: e' la decisione D2 dei criteri.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=true||true||0||true||N
+InpPivotLeft=5||5||0||5||N
+InpPivotRight=5||5||0||5||N
+InpProxMode=0||0||0||0||N
+InpProxPercent=0.5||0.5||0||0.5||N
+InpProxAtrMult=0.5||0.5||0||0.5||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrExhaustMult=2.0||2.0||0||2.0||N
+InpVolSmaBars=20||20||0||20||N
+InpVolSpikeMult=1.5||1.5||0||1.5||N
+InpTrigMode=0||0||0||0||N
+InpTrigClosePct=70.0||70.0||0||70.0||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLBufferPts=0||0||0||0||N
+InpMinSLPts=0||0||0||0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_RR=1.0||1.0||0||1.0||N
+InpTP1Pct=0||0||0||0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailAtr=false||false||0||false||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpMaxTradesPerDay=3||3||0||3||N
+InpOneTradePerLevel=false||false||0||false||N
+InpUseHourFilter=false||false||0||false||N
+InpHourStart=8||8||0||8||N
+InpHourEnd=20||20||0||20||N
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=R109 ATREXH D30EUR L
+InpMagic=774410||774410||1||774411||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# =====================================================================
+#  NOTE
+# =====================================================================
+#  1. InpMagic e' la coppia GEMELLA della passata di OTTIMIZZAZIONE sulla
+#     finestra intera (774410/774411). Il driver riscrive il magic per la
+#     passata SINGOLA di questa cella (774412): e' il pattern di
+#     R103/R108, e serve a non far collidere i file per-trade
+#     (abtg_trades_<EA>_<Simbolo>_<magic>.csv, e FILE_WRITE TRONCA).
+#     Blocco 7744xx: VERGINE, verificato in tutto il repo il 25/08/2026
+#     (le uniche 4 occorrenze sono il valore 774401 nel sorgente nuovo e
+#     nella sua tesi, e 774401 e' VIETATO qui).
+#
+#  2. NIENTE IS/OOS in R109 (criteri D3). L'Emendamento A dice che l'IS
+#     si dimensiona SULLE OPERAZIONI (>=150), e le operazioni non le
+#     conosciamo ancora: questo round CONTA, il taglio si fa dopo, sui
+#     conteggi veri. Percio' questa cella ha DUE lanci, non sei.
+#
+#  3. Le quattro ablazioni della tesi (prossimita' PERC vs ATR,
+#     grilletto AUTORE vs CLOSE, buffer/pavimento dello SL, parziale +
+#     BE + trailing) NON girano qui (criteri D1): su un motore mai
+#     compilato e mai misurato una griglia e' una PESCA.
+#
+#  4. Il TF del GRAFICO (@PERIODO) e' M15 e l'EA legge gTF =
+#     PERIOD_CURRENT: cioe' il timeframe lo FISSA questa riga. Non c'e'
+#     nessun InpTF da tenere allineato -- e proprio per questo @PERIODO
+#     e' un gate del driver, non un commento.
+#
+#  5. @DAQUANDO 2024.09.26 e' MISURATO per le BARRE
+#     (REFERTO_SONDA_STORICO_17-08.md, stato COMPLETO = il broker non ha
+#     altro), e confermato dalla misura dei tick su U30USD. Il PASSO 0
+#     dichiara comunque la data della PRIMA e dell'ULTIMA operazione:
+#     prima operazione oltre 2 mesi dall'inizio = FINESTRA ACCORCIATA.
+# =====================================================================
