@@ -1,0 +1,181 @@
+﻿REFERTO R108 - IL BREAKING BAND SU M15
+ABTG_BreakingBand v1.03 su GBPUSD, EURUSD, AUDUSD
+due celle per simbolo, e fra loro cambia SOLO InpTF (16385 -> 15)
+modo: CORSA
+switch di questo giro: -CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora [DA FIRMARE])
+stato dei criteri: NON FIRMATI (il file porta ancora [DA FIRMARE])
+data: 2026-08-25 21:47:53   (questa data deve essere di ADESSO)
+     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.
+     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.
+avvio: 2026-08-25 21:24:21   durata: 0.4 ore
+pin: de7134e284afc5577f262293d9641abd4dbbeab3
+criteri: risultati_archivio\R108_CRITERI.md   dossier: caccia_strategie\CACCIA_M5M15_FOREX_ORO_2026-08-25.md (P1)
+compilato: SI, .ex5 riscritto adesso
+
+--- LE FINESTRE E I MODELLI ---
+  METRO H1 : 2020.01.01 -> 2026.06.30   modello 1 (OHLC M1)
+     >>> il modello 1 NON e' una svista: R103 e' girato cosi', e un metro a
+         tick reali non riprodurrebbe MAI quel numero (criteri D1).
+  M15      : 2022.07.01 -> 2026.06.30   modello 4 (TICK REALI)
+     IS  2022.07.01 -> 2024.06.30     OOS 2024.07.01 -> 2026.06.30
+     >>> divisione 2+2 anni (criteri D3), NON il 40/60 degli altri round:
+         questi CSV IS/OOS NON sono confrontabili con quelli 40/60. Dichiarato.
+  spread: Spread=0 scritto NELL'INI = spread CORRENTE del feed BCM.
+     A modello 1 e' UNA SOLA FOTOGRAFIA applicata a tutta la finestra; a
+     modello 4 il bid/ask arriva dai tick. In nessuno dei due c'e' slippage.
+  rischio: 1,00% nei file prova. IN CAMPO SUL 100K LE BB SONO ALL'1,0% (R103),
+     ma le sedie del 100k girano allo 0,65%: ogni DD va convertito prima di
+     confrontarlo col forward.
+
+--- CONVENZIONE DI SENTINELLA (checklist 66) ---
+  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le
+  colonne: profitto, PF, DD, n, take, durata e peggior giornata.
+
+--- IL GATE G0: LA CELLA METRO H1 SI RIPRODUCE? (criteri par. 5) ---
+  GBPUSD   (InpPatternMode VIVO = 2)
+     atteso agli atti : profitto +5415 | PF 1.199 | DD 7.75% | n 126 | prima op. 2020.01.14
+     misurato adesso  : profitto +5415 | PF 1.199 | DD 7.75% | n 126 | prima op. 2020.01.14
+     gemelli          : IDENTICI
+     VERDETTO G0      : RIPRODOTTO (PF 1.199, DD 7.75%, n 126, prima op. 2020.01.14)
+     profondita' TICK : NON MISURATA (nessun misura_tick_GBPUSD.csv al pin)
+     fonte dei numeri : R103_REFERTO_DRIVER_FOREX_METALLI_20260824_1922.txt, TABELLA 1
+  EURUSD   (InpPatternMode VIVO = 0)
+     atteso agli atti : profitto +8271 | PF 1.936 | DD 2.51% | n 59 | prima op. 2020.02.03
+     misurato adesso  : profitto +8271 | PF 1.936 | DD 2.51% | n 59 | prima op. 2020.02.03
+     gemelli          : IDENTICI
+     VERDETTO G0      : RIPRODOTTO (PF 1.936, DD 2.51%, n 59, prima op. 2020.02.03)
+     profondita' TICK : NON MISURATA (nessun misura_tick_EURUSD.csv al pin)
+     fonte dei numeri : R103_REFERTO_DRIVER_FOREX_METALLI_20260824_1922.txt, TABELLA 1
+  AUDUSD   (InpPatternMode VIVO = 1)
+     atteso agli atti : profitto +5365 | PF 1.541 | DD 2.13% | n 64 | prima op. 2020.02.05
+     misurato adesso  : profitto +5365 | PF 1.541 | DD 2.13% | n 64 | prima op. 2020.02.05
+     gemelli          : IDENTICI
+     VERDETTO G0      : RIPRODOTTO (PF 1.541, DD 2.13%, n 64, prima op. 2020.02.05)
+     profondita' TICK : NON MISURATA (nessun misura_tick_AUDUSD.csv al pin)
+     fonte dei numeri : R103_REFERTO_DRIVER_FOREX_METALLI_20260824_1922.txt, TABELLA 1
+  NOTA: 'NON MISURATO' NON e' 'va bene'. Un gate che non legge niente non e' un
+  gate verde. Se il metro non si riproduce, la cella M15 di QUEL simbolo non e'
+  stata nemmeno lanciata -- e gli altri simboli sono andati avanti.
+
+--- IL PASSO 0: IL CANCELLO ZERO SUL COSTO (criteri par. 3) ---
+  Si legge PRIMA di qualunque PF. Il take e' misurato SUI PREZZI dei deal
+  (in -> out) del report .htm della passata singola, quindi in PIP e senza
+  nessuna conversione di valuta. E' GIA' AL NETTO dello spread (entry all'ask,
+  uscita al bid): il LORDO si ottiene aggiungendo lo spread dichiarato.
+  spread DICHIARATO: 1.5 pip   [NON MISURATO -- criteri D4]
+  soglia S0a: take LORDO MEDIANO dei vincenti >= 3.0x lo spread
+  SIMB     CELLA       PRIMA-OP      n      TAKEnet   TAKElordo PERDmed   DURmed   FINESTRA
+  GBPUSD   00_metroH1  2020.01.14    126    13.00     n/d       40.60     2.59     PIENA (prima op. 2020.01.14, entro 6 mesi dall'inizio)
+  GBPUSD   01_m15      2022.07.11    227    6.65      8.15      16.50     4.00     PIENA (prima op. 2022.07.11, entro 6 mesi dall'inizio)
+  EURUSD   00_metroH1  2020.02.03    59     10.45     n/d       23.50     3.53     PIENA (prima op. 2020.02.03, entro 6 mesi dall'inizio)
+  EURUSD   01_m15      2022.07.12    86     n/d       n/d       n/d       n/d      PIENA (prima op. 2022.07.12, entro 6 mesi dall'inizio)
+  AUDUSD   00_metroH1  2020.02.05    64     10.10     n/d       24.20     3.27     PIENA (prima op. 2020.02.05, entro 6 mesi dall'inizio)
+  AUDUSD   01_m15      2022.07.08    118    3.95      5.45      8.45      3.21     PIENA (prima op. 2022.07.08, entro 6 mesi dall'inizio)
+  (TAKE in PIP, mediana sui VINCENTI. DUR in BARRE del TF della cella.)
+
+  S0a GBPUSD: SUPERATO -- take lordo mediano 8.2 pip = 5.43x lo spread (soglia 3.0x).  [SPREAD NON MISURATO: 1.5 pip DICHIARATO, criteri D4]
+      stato del PASSO 0: MISURATO
+      take medio (non mediano) sui vincenti: 7.58 pip netto
+      durata media (non mediana): 10.21 barre
+      peggior giornata: -1.61%  il 2025.02.03   (muro prop: -5,00%)
+  S0a EURUSD: NON MISURATO (nessun vincente, o prezzi illeggibili)
+      stato del PASSO 0: NON AFFIDABILE: 2 deal non accoppiati (la sequenza in/out non e' alternata)
+      take medio (non mediano) sui vincenti: n/d pip netto
+      durata media (non mediana): n/d barre
+      peggior giornata: n/d%  il n/d   (muro prop: -5,00%)
+  S0a AUDUSD: SUPERATO -- take lordo mediano 5.4 pip = 3.63x lo spread (soglia 3.0x).  [SPREAD NON MISURATO: 1.5 pip DICHIARATO, criteri D4]
+      stato del PASSO 0: MISURATO
+      take medio (non mediano) sui vincenti: 4.67 pip netto
+      durata media (non mediana): 13.10 barre
+      peggior giornata: -1.31%  il 2024.07.04   (muro prop: -5,00%)
+  >>> LA DURATA E' UNA MISURA, NON UN CANCELLO (criteri par. 3.4, S0c). Se la
+      mediana esce 1-3 barre, va scritto come SEGNALE DI ALLARME sulla
+      robustezza anche a cancelli verdi: arXiv 2605.04004 par. 6.2 misura che
+      i soli segnali intraday sopravvissuti tengono 12-15 barre, non 1-6.
+
+--- LA TABELLA MADRE ---   (attese: 2 righe per CSV, 30 passate)
+  SIMB     CELLA       INTprof   INTpf   INTdd   INTn   ISprof    ISpf    ISdd    ISn    OOSprof   OOSpf   OOSdd   OOSn   ESITO
+  GBPUSD   00_metroH1  +5415     1.199   7.75    126    n/d       n/d     n/d     n/d    n/d       n/d     n/d     n/d    OK
+  GBPUSD   01_m15      -8754     0.823   14.22   227    -1351     0.935   5.81    107    -7511     0.743   13.20   120    OK
+  EURUSD   00_metroH1  +8271     1.936   2.51    59     n/d       n/d     n/d     n/d    n/d       n/d     n/d     n/d    OK
+  EURUSD   01_m15      -8872     0.637   9.22    87     -4104     0.712   5.31    49     -4973     0.533   6.77    38     INCOMPLETA (vedi PROBLEMI)
+  AUDUSD   00_metroH1  +5365     1.541   2.13    64     n/d       n/d     n/d     n/d    n/d       n/d     n/d     n/d    OK
+  AUDUSD   01_m15      -3131     0.865   7.48    118    -2762     0.781   4.95    61     -381      0.965   3.72    57     OK
+
+--- G4: LA PEGGIOR GIORNATA (muro prop: -5,00% su 100k) ---
+  SIMB     CELLA       htm-INTERA   quando       csv-INTERA csv-IS     csv-OOS
+  GBPUSD   00_metroH1  -1.08        2026.03.03   -1.02      n/d        n/d
+  GBPUSD   01_m15      -1.61        2025.02.03   -2.03      -2.03      -1.58
+  EURUSD   00_metroH1  -1.05        2023.12.20   -1.02      n/d        n/d
+  EURUSD   01_m15      n/d          n/d          -1.16      -1.05      -1.16
+  AUDUSD   00_metroH1  -1.04        2025.08.07   -1.25      n/d        n/d
+  AUDUSD   01_m15      -1.31        2024.07.04   -1.32      -1.05      -1.32
+  (tutti in % del deposito. 'n/d' = NON MISURATA, mai 0.)
+
+  gemelli: 
+    GBPUSD 00_metroH1  INTERA: IDENTICI | IS: NON MISURATO | OOS: NON MISURATO
+    GBPUSD 01_m15  INTERA: IDENTICI | IS: IDENTICI | OOS: IDENTICI
+    EURUSD 00_metroH1  INTERA: IDENTICI | IS: NON MISURATO | OOS: NON MISURATO
+    EURUSD 01_m15  INTERA: IDENTICI | IS: IDENTICI | OOS: IDENTICI
+    AUDUSD 00_metroH1  INTERA: IDENTICI | IS: NON MISURATO | OOS: NON MISURATO
+    AUDUSD 01_m15  INTERA: IDENTICI | IS: IDENTICI | OOS: IDENTICI
+
+--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---
+  GBPUSD   00_metroH1  magic 762000/762001 (int) 762002 (sing) 762004/762005 (IS) 762006/762007 (OOS)
+       InpTF=16385  InpPatternMode=2  modello 1  IL METRO -- la cella VIVA di R103 a H1. Gate G0: deve RIPRODURRE, non convincere.
+  GBPUSD   01_m15      magic 762010/762011 (int) 762012 (sing) 762014/762015 (IS) 762016/762017 (OOS)
+       InpTF=15  InpPatternMode=2  modello 4  LA MISURA NUOVA -- lo stesso motore a M15. Unico input diverso: InpTF.
+  EURUSD   00_metroH1  magic 762020/762021 (int) 762022 (sing) 762024/762025 (IS) 762026/762027 (OOS)
+       InpTF=16385  InpPatternMode=0  modello 1  IL METRO -- la cella VIVA di R103 a H1. Gate G0: deve RIPRODURRE, non convincere.
+  EURUSD   01_m15      magic 762030/762031 (int) 762032 (sing) 762034/762035 (IS) 762036/762037 (OOS)
+       InpTF=15  InpPatternMode=0  modello 4  LA MISURA NUOVA -- lo stesso motore a M15. Unico input diverso: InpTF.
+  AUDUSD   00_metroH1  magic 762040/762041 (int) 762042 (sing) 762044/762045 (IS) 762046/762047 (OOS)
+       InpTF=16385  InpPatternMode=1  modello 1  IL METRO -- la cella VIVA di R103 a H1. Gate G0: deve RIPRODURRE, non convincere.
+  AUDUSD   01_m15      magic 762050/762051 (int) 762052 (sing) 762054/762055 (IS) 762056/762057 (OOS)
+       InpTF=15  InpPatternMode=1  modello 4  LA MISURA NUOVA -- lo stesso motore a M15. Unico input diverso: InpTF.
+
+--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---
+  * NON APPLICA I CANCELLI DI MERITO. G2 (positivo in ENTRAMBE le finestre, PF
+    OOS >= 1,10, DD OOS < 10%) e G3 (coerenza cross-simbolo) li applica il
+    REFERTO DEL ROUND, a mano, sopra questa tabella. Qui ci sono i numeri.
+  * G3 in particolare NON e' meccanizzabile: e' un confronto fra TRE tabelle,
+    ed e' il cancello che protegge dal 'uno su tre e' andato bene'. Un simbolo
+    su tre NON e' un edge: e' rumore, finche' qualcuno non dimostra il contrario.
+  * LA PROFONDITA' DEI TICK sui tre simboli NON E' MISURATA IN REPO (esiste una
+    sola misura, ed e' U30USD). A modello 4 senza tick reali MT5 NON SI FERMA:
+    ripiega e produce numeri PLAUSIBILI E FALSI. Vedi la riga 'profondita' TICK'
+    di ogni simbolo qui sopra e i RILIEVI.
+  * LO SPREAD NON E' MISURATO: la soglia di S0a usa un valore DICHIARATO.
+  * @DAQUANDO 2022.07.01 e' DERIVATO dal tetto delle 100.000 barre, NON e' una
+    misura. La colonna FINESTRA del PASSO 0 dice se e' stata rispettata.
+  * NIENTE M5. Con ~1,3 anni di tetto sarebbe NON GIUDICABILE per costruzione.
+  * NON PROMUOVE NIENTE (G5) e non tocca nessuna sedia in forward. Le tre
+    BreakingBand H1 restano dove sono.
+  * NON HA TOCCATO UNA RIGA DI ABTG_BreakingBand.mq5.
+
+--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (10)
+  - I criteri portano ancora [DA FIRMARE] nel file, ma la corsa e' partita con -CriteriFirmati: la firma e' quella data in riga da Claudio. VA SCRITTO NEL REFERTO DEL ROUND.
+  - PROFONDITA' TICK NON MISURATA su GBPUSD: in tutto il repo esiste una sola misura dei tick, ed e' U30USD. La cella M15 gira a MODELLO 4 e MT5, se i tick reali non ci sono, NON SI FERMA: ripiega e produce numeri PLAUSIBILI E FALSI. Nessuna guardia di questo driver puo' accorgersene. E' la decisione D2 dei criteri: ogni numero a modello 4 su GBPUSD va letto con questa riserva.
+  - PROFONDITA' TICK NON MISURATA su EURUSD: in tutto il repo esiste una sola misura dei tick, ed e' U30USD. La cella M15 gira a MODELLO 4 e MT5, se i tick reali non ci sono, NON SI FERMA: ripiega e produce numeri PLAUSIBILI E FALSI. Nessuna guardia di questo driver puo' accorgersene. E' la decisione D2 dei criteri: ogni numero a modello 4 su EURUSD va letto con questa riserva.
+  - PROFONDITA' TICK NON MISURATA su AUDUSD: in tutto il repo esiste una sola misura dei tick, ed e' U30USD. La cella M15 gira a MODELLO 4 e MT5, se i tick reali non ci sono, NON SI FERMA: ripiega e produce numeri PLAUSIBILI E FALSI. Nessuna guardia di questo driver puo' accorgersene. E' la decisione D2 dei criteri: ogni numero a modello 4 su AUDUSD va letto con questa riserva.
+  - CANARINO GBPUSD IS: n = 107, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa finestra e' SOSPESO; il RISCHIO si legge lo stesso (regola B). >>> L'attesa dichiarata PRIMA era ~155 per finestra, e ERA [INFERITA]: se n e' molto piu' basso, la frequenza a M15 NON scala col numero di barre, e quello e' gia' un risultato.
+  - CANARINO GBPUSD OOS: n = 120, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa finestra e' SOSPESO; il RISCHIO si legge lo stesso (regola B). >>> L'attesa dichiarata PRIMA era ~155 per finestra, e ERA [INFERITA]: se n e' molto piu' basso, la frequenza a M15 NON scala col numero di barre, e quello e' gia' un risultato.
+  - CANARINO EURUSD IS: n = 49, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa finestra e' SOSPESO; il RISCHIO si legge lo stesso (regola B). >>> L'attesa dichiarata PRIMA era ~155 per finestra, e ERA [INFERITA]: se n e' molto piu' basso, la frequenza a M15 NON scala col numero di barre, e quello e' gia' un risultato.
+  - CANARINO EURUSD OOS: n = 38, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa finestra e' SOSPESO; il RISCHIO si legge lo stesso (regola B). >>> L'attesa dichiarata PRIMA era ~155 per finestra, e ERA [INFERITA]: se n e' molto piu' basso, la frequenza a M15 NON scala col numero di barre, e quello e' gia' un risultato.
+  - CANARINO AUDUSD IS: n = 61, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa finestra e' SOSPESO; il RISCHIO si legge lo stesso (regola B). >>> L'attesa dichiarata PRIMA era ~155 per finestra, e ERA [INFERITA]: se n e' molto piu' basso, la frequenza a M15 NON scala col numero di barre, e quello e' gia' un risultato.
+  - CANARINO AUDUSD OOS: n = 57, sotto i 150 dell'Emendamento regola A. Il giudizio di MERITO su questa finestra e' SOSPESO; il RISCHIO si legge lo stesso (regola B). >>> L'attesa dichiarata PRIMA era ~155 per finestra, e ERA [INFERITA]: se n e' molto piu' basso, la frequenza a M15 NON scala col numero di barre, e quello e' gia' un risultato.
+
+--- PROBLEMI (questi SI sono guasti, o risposte scomode) ---   (1)
+  - R108_EURUSD_01_m15.txt: 2 deal NON accoppiati (la sequenza in/out non e' alternata). Con InpMaxPositions=1 e InpTPMode=0 non dovrebbe succedere: le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.4).
+
+ESITO: PARZIALE -- 1 celle su 6 NON hanno prodotto i numeri attesi, piu' 1 problemi. NON e' un round completo.
+
+--- COME SI RIPRENDE ---
+  un simbolo solo    : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo 'GBPUSD'
+  due simboli        : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo 'GBPUSD,EURUSD'   <-- FRA APICI (checklist 65)
+  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella 'R108_GBPUSD_01_m15.txt'
+  >>> in tutti i casi la cella METRO del simbolo rigira: e' la prova che il
+      banco e' sano, e senza non si legge niente.
+  >>> E OGNI RIGA DI RIPRESA E' UN BLOCCO INTERO col suo irm e la sua guardia
+      (checklist 42): i tre puntini stanno per il blocco di RIGA_R108_DA_MANDARE.md.
+      Una riga '& R108_EURUSD_01_m15.txt: 2 deal NON accoppiati (la sequenza in/out non e' alternata). Con InpMaxPositions=1 e InpTPMode=0 non dovrebbe succedere: le misure del PASSO 0 di questa cella sono DICHIARATE NON MISURATE e non si stimano (criteri par. 3.4). ...' incollata da sola riusa la copia locale e il pin di prima.
