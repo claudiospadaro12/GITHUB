@@ -70,6 +70,24 @@ string Trim(const string s)
    return(t);
   }
 
+//+------------------------------------------------------------------+
+//|  NIENTE VIRGOLE DENTRO UN CAMPO DI UN CSV A VIRGOLE.              |
+//|  FileWrite() su un handle FILE_CSV **non mette gli apici**: una   |
+//|  virgola dentro la colonna Esito diventa una COLONNA IN PIU', e   |
+//|  chi legge (Import-Csv del driver) TRONCA la frase al primo       |
+//|  spezzone senza dare nessun errore. Riprodotto il 25/08:          |
+//|    "SIMBOLO NON ESISTE (import non fatto, o MT5 chiuso male..."   |
+//|  arrivava al referto come "SIMBOLO NON ESISTE (import non fatto". |
+//|  Le stringhe qui sotto sono gia' scritte senza virgole: questa    |
+//|  funzione e' la rete, per quelle che verranno.                    |
+//+------------------------------------------------------------------+
+string SenzaVirgole(const string s)
+  {
+   string t=s;
+   StringReplace(t,",",";");
+   return(t);
+  }
+
 ENUM_TIMEFRAMES TFDaNome(const string nome,bool &ok)
   {
    ok=true;
@@ -147,7 +165,8 @@ bool ContaSerie(const string sym,const ENUM_TIMEFRAMES tf,RigaEXT &r)
    MqlRates rate[];
    while(letti<tot)
      {
-      int quanti=(int)MathMin((long)BLOCCO,tot-letti);
+      long resta=tot-letti;
+      int  quanti=(int)(resta>(long)BLOCCO?(long)BLOCCO:resta);
       int n=CopyRates(sym,tf,(int)letti,quanti,rate);
       if(n<=0)
         {
@@ -189,7 +208,7 @@ bool ContaSerie(const string sym,const ENUM_TIMEFRAMES tf,RigaEXT &r)
      {
       if(InpTettoAtteso>0 && (long)tot==(long)InpTettoAtteso)
          r.esito="ATTENZIONE: barre = ESATTAMENTE il tetto ("+IntegerToString(InpTettoAtteso)+
-                 "). Non e' il dato, e' 'Max barre nel grafico'. Mettilo a ILLIMITATO e rileggi.";
+                 "). Non e' il dato: e' 'Max barre nel grafico'. Mettilo a ILLIMITATO e rileggi.";
       else if(r.anniVuoti!="")
          r.esito="ANNI VUOTI: "+r.anniVuoti;
       else
@@ -273,7 +292,8 @@ void OnStart()
       if(!esiste)
         {
          for(int k=0;k<ntf;k++)
-            FileWrite(fh,s,Trim(tfn[k]),"0","-","-","-","SIMBOLO NON ESISTE (import non fatto, o MT5 chiuso male dopo l'import)");
+            FileWrite(fh,s,Trim(tfn[k]),"0","-","-","-",
+                      SenzaVirgole("SIMBOLO NON ESISTE (import non fatto; oppure MT5 chiuso male dopo l'import)"));
          PrintFormat("!! %s: NON ESISTE. Se l'import c'e' stato, e' la chiusura sporca di MT5: le barre si salvano, la registrazione del simbolo no.",s);
          problemi++;
          continue;
@@ -298,8 +318,8 @@ void OnStart()
          FileWrite(fh,s,r.tf,IntegerToString((int)r.barre),
                    (r.prima==0?"-":TimeToString(r.prima,TIME_DATE|TIME_MINUTES)),
                    (r.ultima==0?"-":TimeToString(r.ultima,TIME_DATE|TIME_MINUTES)),
-                   (r.anniVuoti==""?"-":r.anniVuoti),
-                   r.esito);
+                   (r.anniVuoti==""?"-":SenzaVirgole(r.anniVuoti)),
+                   SenzaVirgole(r.esito));
          if(!letto || r.esito!="OK")
             problemi++;
         }

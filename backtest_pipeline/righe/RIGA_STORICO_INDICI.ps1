@@ -81,6 +81,9 @@ param(
   [int]   $FermoMinuti   = 25,      # battito: quanti minuti di NON CRESCITA prima di dichiarare fermo
   [int]   $PausaMs       = 0,       # 0 = lascia il default dello strumento (HistData 1500, Duka 250)
   [int]   $GBLiberiMin   = 0,       # 0 = lo calcola dalla stima, x3 di margine
+  [int]   $AnniPerTranche = 8,      # RAM: la conversione HistData tiene TUTTE le barre in memoria
+                                    #   (~690 byte a barra, MISURATO). 8 anni = ~2,6 M barre = ~1,8 GB,
+                                    #   che e' la taglia gia' girata il 18/08. Se esce MemoryError: 4.
   [string]$Cartella      = ""       # dove lavorare (default: ~\abtg_storico_indici)
 )
 
@@ -189,6 +192,19 @@ function Scarica($url,$dest,$marcatore){
   }
 }
 
+# --- una copia si verifica sul CONTENUTO, non sull'esistenza del nome:
+#     se in destinazione c'e' una CARTELLA che si chiama come il file,
+#     Copy-Item ci mette il file DENTRO e Test-Path dice di si'
+#     (checklist 27-ter).
+function CopiaVerificata($da,$a){
+  $len = (Get-Item -LiteralPath $da).Length
+  Copy-Item -LiteralPath $da -Destination $a -Force
+  $v = Get-Item -LiteralPath $a -ErrorAction SilentlyContinue
+  if(-not $v -or $v.PSIsContainer -or $v.Length -ne $len){
+    throw ("copia NON verificata: " + $a + " (lunghezza diversa dall'originale, o e' una cartella)")
+  }
+}
+
 # --- lancio di un eseguibile esterno, guardia abbassata SOLO qui intorno
 #     (con $ErrorActionPreference='Stop' una riga di stderr di python fa
 #      esplodere PowerShell 5.1 con NativeCommandError)
@@ -218,6 +234,40 @@ function EseguiNativo($exe,$argv,$logfile){
 #  Le fasi SENZA segnale di crescita (la conversione, che e' solo CPU)
 #  NON usano il battito: si dichiarano e vale solo il timeout.
 # ---------------------------------------------------------------------
+#  CONTARE LE RIGHE DI UN CSV DA 250 MB.
+#  '(@(Get-Content $f)).Count' costruisce in memoria un array di 5,6
+#  MILIONI di stringhe: su PS 5.1 sono ~1 GB di RAM e minuti di CPU, e
+#  lo si pagava subito dopo la conversione, cioe' nel momento in cui la
+#  RAM e' gia' il collo di bottiglia. Qui si legge in streaming.
+function ContaRighe($file){
+  if(-not (Test-Path -LiteralPath $file)){ return -1 }
+  $n = 0
+  $sr = $null
+  try{
+    $sr = New-Object System.IO.StreamReader($file)
+    while($null -ne $sr.ReadLine()){ $n++ }
+  }catch{ $n = -1 }
+  finally{ if($sr){ try{ $sr.Close() }catch{ } } }
+  return $n
+}
+
+#  UNO ZIP IN CACHE E' "GIA' FATTO" SOLO SE SI APRE.
+#  Il difetto 16 (la cache che si avvelena da sola): un file troncato da
+#  un'interruzione resta sul disco, la ripresa lo conta come fatto e
+#  quell'anno non si riscarica MAI PIU'. histdata_m1.py il suo controllo
+#  ce l'ha (_zip_valido, riga 282) ma non lo esegue mai, perche' con la
+#  casella marcata 'fatto' quell'anno non gli viene nemmeno chiesto.
+try{ Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction Stop }catch{ }
+function ZipBuono($f){
+  try{
+    $z = [System.IO.Compression.ZipFile]::OpenRead($f)
+    $n = 0
+    foreach($e in $z.Entries){ if($e.FullName -like "*.csv"){ $n++ } }
+    $z.Dispose()
+    return ($n -gt 0)
+  }catch{ return $false }
+}
+
 function ByteCartella($path){
   if(-not (Test-Path -LiteralPath $path)){ return [int64]0 }
   $s = [int64]0
@@ -251,7 +301,12 @@ function EseguiConBattito($exe,$argv,$logfile,$sorveglia,$timeoutMin,$fermoMin){
   while($true){
     try{ $p.Refresh() }catch{ }
     if($p.HasExited){ break }
-    Start-Sleep -Seconds 20
+    #  5 secondi, non 20: il battito si misura in MINUTI di non crescita,
+    #  ma questo sonno e' anche il ritardo con cui ci si accorge che il
+    #  processo E' FINITO. A 20 s, moltiplicato per 17 anni, erano ~6
+    #  minuti di attesa a vuoto dentro una fase che senza di essa
+    #  durerebbe la meta'.
+    Start-Sleep -Seconds 5
     $b = (ByteCartella $sorveglia)
     if(Test-Path -LiteralPath $logfile){ $b += (Get-Item -LiteralPath $logfile).Length }
     if($b -gt $ultimoByte){
@@ -303,13 +358,24 @@ New-Item -ItemType Directory -Force -Path $Work,$Logs,$Strum,$Cart,$CartDat,$Car
 # =====================================================================
 #  F0. MT5 CHIUSO -- solo se serve davvero
 # =====================================================================
+#  MT5 aperto: riscrive i suoi file all'uscita, e la registrazione del
+#  simbolo custom fatta adesso verrebbe cancellata.
+#  METAEDITOR aperto: e' SINGLE-INSTANCE. Con una copia gia' viva il
+#  nostro 'metaeditor64.exe /compile' TORNA SUBITO SENZA COMPILARE
+#  (checklist 39), e F7/F8 dichiarerebbero "NON compilato adesso" su un
+#  sorgente sano. I driver gemelli (R97, R103) guardano tutti e due:
+#  qui ne guardavo uno solo.
+#  Lo scarico (F5) NON apre MT5 e NON ha bisogno di questa guardia.
 if(($Importa -or $Verifica) -and -not $SoloControllo){
-  if(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue){
+  $vivi = @(Get-Process -Name "terminal64","metaeditor64" -ErrorAction SilentlyContinue)
+  if($vivi.Count -gt 0){
     Write-Host ""
-    Write-Host "!!! MT5 E' APERTO e questa corsa deve scrivere nella sua cartella dati." -ForegroundColor Red
+    Write-Host ("!!! APERTO: " + (($vivi | ForEach-Object { $_.ProcessName } | Sort-Object -Unique) -join ", ")) -ForegroundColor Red
     Write-Host "    MT5 riscrive i suoi file all'uscita: quello che facciamo adesso" -ForegroundColor Yellow
-    Write-Host "    verrebbe cancellato. Chiudi MetaTrader (TUTTE le istanze) e rilancia." -ForegroundColor Yellow
-    Write-Host "    Non lo ammazzo io: potrebbe essere Claudio che sta guardando un grafico." -ForegroundColor Yellow
+    Write-Host "    verrebbe cancellato. E con MetaEditor aperto la compilazione torna" -ForegroundColor Yellow
+    Write-Host "    subito SENZA compilare, e il referto direbbe 'non compila' di uno" -ForegroundColor Yellow
+    Write-Host "    script sano. Chiudi MetaTrader E MetaEditor (tutte le istanze)." -ForegroundColor Yellow
+    Write-Host "    Non li ammazzo io: potrebbe essere Claudio che sta guardando un grafico." -ForegroundColor Yellow
     exit 1
   }
 }
@@ -331,6 +397,52 @@ $Sedi = @(
   (S "225JPY" "Nikkei 225"  "jpxjpy" "JPNIDXJPY"     "-" "-")
 )
 function Sede($bcm){ return ($Sedi | Where-Object { $_.Bcm -eq $bcm } | Select-Object -First 1) }
+
+# =====================================================================
+#  IL PRESET SI GENERA DAL SORGENTE -- E SI VERIFICA.
+#  (checklist 25: un input che il .set NON nomina non torna al suo
+#  default, resta l'ultimo valore usato A MANO, che MT5 ricorda.)
+#  La generazione da sola non basta, ed e' il difetto trovato il 25/08
+#  RIPRODUCENDOLO: se la regex non aggancia una riga (un refuso nel
+#  sorgente, un 'sinput', un punto e virgola perso) il generatore non se
+#  ne accorge, scrive un preset con un input IN MENO, e il valore che
+#  gli avevamo assegnato -- per esempio InpFileCsv -- viene buttato in
+#  silenzio: l'import girerebbe sul CSV dell'altra volta.
+#  Percio': le chiavi che DOBBIAMO poter imporre si dichiarano, e se una
+#  manca la fase si ferma invece di scrivere un preset a meta'.
+# =====================================================================
+function InputDalSorgente($srcFile){
+  $inputs = New-Object System.Collections.Specialized.OrderedDictionary
+  foreach($riga in (Get-Content -LiteralPath $srcFile)){
+    $m = [regex]::Match($riga,'^\s*(?:s)?input\s+\w+\s+(\w+)\s*=\s*([^;]+);')
+    if($m.Success){ $inputs[$m.Groups[1].Value] = $m.Groups[2].Value.Trim().Trim('"') }
+  }
+  return $inputs
+}
+
+function ScriviPreset($srcFile,$destSet,$obbligatori,$valori,$minimoInput){
+  $inputs = InputDalSorgente $srcFile
+  if($inputs.Count -lt $minimoInput){
+    throw ("preset NON scritto: in " + (Split-Path -Leaf $srcFile) + " ho trovato " + $inputs.Count +
+           " input invece di almeno " + $minimoInput + ". Il sorgente non e' quello che mi aspetto, e un preset a meta' fa girare MT5 con i valori dell'ultima volta.")
+  }
+  $mancanti = @($obbligatori | Where-Object { -not $inputs.Contains($_) })
+  if($mancanti.Count -gt 0){
+    throw ("preset NON scritto: in " + (Split-Path -Leaf $srcFile) + " non ho trovato gli input " + ($mancanti -join ", ") +
+           ". Sono quelli che questa corsa DEVE imporre: scriverli fuori dal preset vorrebbe dire lasciare a MT5 l'ultimo valore usato a mano.")
+  }
+  $righe = @()
+  foreach($k in $inputs.Keys){
+    $v = $inputs[$k]
+    if($valori.ContainsKey($k)){ $v = $valori[$k] }
+    $righe += ($k + "=" + $v)
+  }
+  #  e i valori che avevamo per un input che NON esiste nel sorgente si
+  #  dichiarano: sono ordini dati a nessuno.
+  $orfani = @($valori.Keys | Where-Object { -not $inputs.Contains($_) })
+  Set-Content -LiteralPath $destSet -Value $righe -Encoding ASCII
+  return @{ Inputs = $inputs.Count; Orfani = $orfani }
+}
 
 # --- lettura delle decisioni. Definite QUI, fuori dal try: una funzione
 #     dichiarata dentro un try che muore prima non esiste (checklist 48).
@@ -364,6 +476,60 @@ function ChiudiMT5Pulito([int]$secondi = 90){
   }
   Start-Sleep -Seconds 3
   return $false
+}
+
+# =====================================================================
+#  LA COMPILAZIONE, FATTA COME DEVE (checklist 39, 54, 12)
+#   - il .ex5 vecchio si SALVA con un nome datato prima di toccarlo: e'
+#     l'unica prova di cosa girava, e se la compilazione fallisce e'
+#     anche l'unico modo di fare l'import a mano stasera. Cancellarlo e
+#     basta -- come faceva la v1 -- vuol dire che una compilazione
+#     fallita LEVA anche la strada di riserva.
+#   - il verdetto e' il LastWriteTime PRIMA/DOPO, non "esiste".
+#   - /log:<file> con un nome NOSTRO, e il log finisce nella RACCOLTA:
+#     ABTG_ContaBarreEXT non e' MAI stato compilato, e se non compila
+#     quel log e' l'unica cosa che dice perche'. Senza, Claudio manda
+#     uno zip che non contiene la risposta.
+#   - se fallisce, il .mq5 torna al backup: sorgente e binario non
+#     possono restare due versioni diverse.
+# =====================================================================
+function CompilaMQL5($mq5,$etichetta){
+  $ex5  = [IO.Path]::ChangeExtension($mq5,".ex5")
+  $logC = [IO.Path]::ChangeExtension($mq5,".log")
+  $bak  = $ex5 + ".prima_storico_indici_" + $Stamp
+  if((Test-Path -LiteralPath $ex5) -and -not (Test-Path -LiteralPath $bak)){
+    Copy-Item -LiteralPath $ex5 -Destination $bak -Force -ErrorAction SilentlyContinue
+  }
+  $prima = (Get-Date).AddYears(-100)
+  if(Test-Path -LiteralPath $ex5){ $prima = (Get-Item -LiteralPath $ex5).LastWriteTime }
+  Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
+  $global:LASTEXITCODE = 0
+  & $MetaEditor ("/compile:" + $mq5) ("/log:" + $logC) | Out-Null
+  $rcMe = $LASTEXITCODE
+  $dopo = $null
+  if(Test-Path -LiteralPath $ex5){ $dopo = (Get-Item -LiteralPath $ex5).LastWriteTime }
+  $ok = ($null -ne $dopo) -and ($dopo -gt $prima)
+  $testo = ""
+  if(Test-Path -LiteralPath $logC){
+    try{ $testo = (Get-Content -LiteralPath $logC -Raw -Encoding Unicode) }catch{ $testo = "" }
+    if($testo -notmatch '(?i)error|warning'){ try{ $testo = (Get-Content -LiteralPath $logC -Raw) }catch{ } }
+    #  il log entra SEMPRE nella raccolta, riuscita o no: e' la risposta
+    #  alla domanda "perche' non compila".
+    Copy-Item -LiteralPath $logC -Destination (Join-Path $CartLog ("compile_" + $etichetta + ".log")) -Force -ErrorAction SilentlyContinue
+  }
+  if(-not $ok){
+    Write-Host ("   !! " + $etichetta + " NON compilato (metaeditor rc=" + $rcMe + ", .ex5 non riscritto).") -ForegroundColor Red
+    if($testo -ne ""){
+      foreach($r in @($testo -split "\r?\n" | Where-Object { $_ -match '(?i)error|warning' } | Select-Object -First 12)){
+        Write-Host ("      " + $r) -ForegroundColor DarkYellow
+      }
+    } else { Write-Host "      (nessun log prodotto da MetaEditor: e' aperto un'altra volta?)" -ForegroundColor DarkYellow }
+    if(Test-Path -LiteralPath $bak){
+      Copy-Item -LiteralPath $bak -Destination $ex5 -Force -ErrorAction SilentlyContinue
+      Write-Host ("      il .ex5 di prima e' stato rimesso al suo posto (" + (Split-Path -Leaf $bak) + ").") -ForegroundColor Yellow
+    }
+  }
+  return @{ Ok = $ok; Rc = $rcMe; Log = $logC; AvevaBackup = (Test-Path -LiteralPath $bak) }
 }
 
 function LanciaScriptMT5($nomeScript,$setName,$simboloGrafico,$fileAtteso,$timeoutMin){
@@ -484,7 +650,12 @@ $ps.Nota  = "USA30IDXUSD = 2012"
 
 if($RifaiSondaDow -and -not $SoloControllo){
   Write-Host ""
-  Write-Host "   -RifaiSondaDow: rifaccio SOLO le due caselle mai misurate (~12 richieste)." -ForegroundColor Yellow
+  #  la prosa e il codice devono dire la stessa cosa (checklist 67): qui
+  #  i simboli sondati sono TRE, non due -- il terzo e' il controllo
+  #  positivo, cioe' l'unico di cui sappiamo gia' la risposta.
+  Write-Host "   -RifaiSondaDow: rifaccio le due caselle mai misurate (DJIIDXUSD, USA2000IDXUSD)" -ForegroundColor Yellow
+  Write-Host "   PIU' USA30IDXUSD come CONTROLLO POSITIVO (di quello la risposta e' gia' agli atti:" -ForegroundColor Yellow
+  Write-Host "   OK dal 2012). Se torna rosso anche lui, il problema e' la rete, non le caselle." -ForegroundColor Yellow
   $sonda = Join-Path $Strum "sonda_dukascopy.ps1"
   try{
     Scarica ("$RawPin/backtest_pipeline/sonda_dukascopy.ps1") $sonda 'SONDA DUKASCOPY'
@@ -493,7 +664,7 @@ if($RifaiSondaDow -and -not $SoloControllo){
     Copy-Item -LiteralPath $logS -Destination (Join-Path $CartLog "sonda_dow.txt") -Force -ErrorAction SilentlyContinue
     $csvS = Join-Path $Dsk "sonda_dukascopy\sonda_dukascopy.csv"
     if(Test-Path -LiteralPath $csvS){
-      Copy-Item -LiteralPath $csvS -Destination (Join-Path $CartDat "sonda_dow_20260825.csv") -Force
+      Copy-Item -LiteralPath $csvS -Destination (Join-Path $CartDat ("sonda_dow_" + $Stamp + ".csv")) -Force
       $ps.Esito = "RIFATTA (2 caselle) - rc " + $rcS
     } else {
       [void]$Problemi.Add("F2: -RifaiSondaDow non ha prodotto sonda_dukascopy.csv. Guarda " + $logS)
@@ -521,9 +692,21 @@ $anni = [Math]::Max(1, $AnnoA - $AnnoDa + 1)
 #   Dukascopy: 12,4 KB per ora di DAX (596 ore = 7,4 MB, corsa 18/08);
 #             il Nasdaq nella sonda pesa 5,4 volte il DAX sulla stessa
 #             ora (95.995 contro 17.875 byte). 7.512 ore l'anno.
+#   Il conto di HistData NON e' "zip + csv": la stessa barra finisce sul
+#   disco SEI volte, e contarne due era una stima che passava il cancello
+#   con un terzo dello spazio che serve davvero. Per anno e per simbolo:
+#     5 MB  zip in cache                (~330k barre/anno)
+#     5 MB  copia dello zip nella cartella della TRANCHE di conversione
+#    15 MB  CSV della tranche           (~45 byte a riga)
+#    15 MB  CSV finale concatenato
+#    15 MB  copia in MQL5\Files
+#    15 MB  copia che lo STRUMENTO fa da solo sul Desktop (+ il suo zip)
+#    20 MB  il simbolo custom dentro MT5 (150 MB ogni 2,5 M barre, 14/08)
+#   ------
+#    ~80 MB/anno. Su 17 anni: 1,36 GB, che col x3 di margine chiede ~4 GB.
 $MBAnno = @{}
 if($Fonte -eq "histdata"){
-  foreach($s in $Simboli){ $MBAnno[$s] = 20.0 }          # 5 zip + 15 csv
+  foreach($s in $Simboli){ $MBAnno[$s] = 80.0 }
 } else {
   foreach($s in $Simboli){
     $kbOra = 12.4
@@ -545,15 +728,21 @@ Write-Host  "   Piu' lo spazio dentro MT5 per il simbolo custom: ~150 MB ogni 2,
 Write-Host  "   di barre M1 (misurato il 14/08 sui forex _EXT)." -ForegroundColor DarkGray
 
 $soglia = if($GBLiberiMin -gt 0){ [double]$GBLiberiMin } else { [Math]::Max(3.0, $GBTot * 3.0) }
-$drive  = (Split-Path -Qualifier $Work)
+$drive  = "(ignoto)"
 $liberi = -1.0
+#  Split-Path -Qualifier ESPLODE su un percorso senza lettera di unita'
+#  (un -Cartella su percorso UNC \\server\share\...): stava FUORI da
+#  questo try e ammazzava tutta la corsa in F3, giro a vuoto compreso.
+#  Riprodotto il 25/08. Adesso il caso ha il suo esito: NON MISURABILE.
 try{
-  $d = Get-PSDrive -Name ($drive -replace ':','') -ErrorAction Stop
+  $drive  = (Split-Path -Qualifier $Work)
+  $d      = Get-PSDrive -Name ($drive -replace ':','') -ErrorAction Stop
   $liberi = [double]$d.Free / 1GB
-}catch{ }
+  if($null -eq $d.Free){ $liberi = -1.0 }
+}catch{ $liberi = -1.0 }
 if($liberi -lt 0){
-  [void]$Note.Add("F3: non sono riuscito a misurare lo spazio libero su " + $drive + ": dichiarato, non assunto.")
-  Write-Host ("   spazio libero su " + $drive + ": NON MISURABILE") -ForegroundColor Yellow
+  [void]$Problemi.Add("F3: SPAZIO LIBERO NON MISURABILE su " + $drive + " (Get-PSDrive non risponde, o il percorso non ha una lettera di unita'). Lo scarico parte lo stesso, ma il margine x3 NON e' stato verificato: DICHIARATO, non assunto.")
+  Write-Host ("   spazio libero su " + $drive + ": NON MISURABILE (lo scarico parte, ma il margine non e' verificato)") -ForegroundColor Yellow
   $psz.Esito = "NON MISURABILE"
 } else {
   Write-Host ("   spazio libero su " + $drive + ": " + (N2 $liberi) + " GB   (serve almeno " + (N2 $soglia) + " GB, x3 di margine)") -ForegroundColor White
@@ -625,7 +814,9 @@ if(-not $SoloControllo -and $PuoScaricare){
 #  F4. IL CANARINO DI RITMO -- un cancello deciso PRIMA di misurare
 # =====================================================================
 $Proiezione = -1.0
-$Canarino   = "NON MISURATO"
+$Canarino   = $(if($SoloControllo){ "NON MISURATO (giro a vuoto: il canarino costa richieste vere, si misura nella corsa)" }
+                elseif(-not $PuoScaricare){ "NON MISURATO (un cancello a monte ha gia' fermato lo scarico: vedi PROBLEMI)" }
+                else{ "NON MISURATO" })
 if($PuoScaricare -and -not $SoloControllo){
   Titolo "F4 - CANARINO DI RITMO (cancello: soglia firmata, decisa PRIMA)"
   $pcn = NuovoPasso "F4" "canarino di ritmo"
@@ -675,18 +866,24 @@ if($PuoScaricare -and -not $SoloControllo){
   }
   Copy-Item -LiteralPath $log -Destination (Join-Path $CartLog "canarino.txt") -Force -ErrorAction SilentlyContinue
   Write-Host ("   PROIEZIONE sullo scarico chiesto: " + (N1 $Proiezione) + " ORE   (soglia " + (N1 $SogliaOre) + ")") -ForegroundColor White
+  #  IL CANARINO E' IL CANCELLO DELLO **SCARICO NUOVO**, non di tutto il
+  #  resto. Prima spegneva anche $PuoScaricare, e allora un canarino rosso
+  #  fermava pure la CONVERSIONE e l'IMPORT di anni gia' scaricati e gia'
+  #  sul disco: la riga 2 (-Importa) rifa' sempre F4, e una serata di rete
+  #  storta avrebbe impedito di importare dati che non avevano piu' niente
+  #  a che fare con la rete. Adesso: rosso = non si scarica NIENTE DI
+  #  NUOVO; quello che c'e' gia' in cache si converte e si importa, e la
+  #  differenza e' scritta nel referto.
   if($rc -ne 0){
     $Canarino = "ROSSO (lo strumento e' uscito con " + $rc + ")"
-    $PuoScaricare = $false
-    [void]$Problemi.Add("F4 CANARINO ROSSO: " + $ScriptPy + " e' uscito con " + $rc + " sul pezzo di prova. Non si scarica niente. Guarda " + $log)
+    [void]$Problemi.Add("F4 CANARINO ROSSO: " + $ScriptPy + " e' uscito con " + $rc + " sul pezzo di prova. NIENTE SCARICO NUOVO (gli anni gia' in cache si convertono lo stesso). Guarda " + $log)
     $pcn.Esito = "ROSSO (rc " + $rc + ")"
   }
   elseif($Proiezione -gt $SogliaOre){
     $Canarino = "ROSSO (" + (N1 $Proiezione) + " ore > " + (N1 $SogliaOre) + ")"
-    $PuoScaricare = $false
-    [void]$Problemi.Add("F4 CANARINO ROSSO: lo scarico chiesto costa " + (N1 $Proiezione) + " ore, sopra la soglia FIRMATA di " + (N1 $SogliaOre) + ". NON si scarica niente: si cambia strada o si firma un'altra soglia.")
+    [void]$Problemi.Add("F4 CANARINO ROSSO: lo scarico chiesto costa " + (N1 $Proiezione) + " ore, sopra la soglia FIRMATA di " + (N1 $SogliaOre) + ". NON si scarica niente di nuovo: si cambia strada o si firma un'altra soglia.")
     $pcn.Esito = "ROSSO"
-    Write-Host "   !! CANARINO ROSSO. Il cancello era deciso PRIMA di misurare: non scarico." -ForegroundColor Red
+    Write-Host "   !! CANARINO ROSSO. Il cancello era deciso PRIMA di misurare: non scarico niente di nuovo." -ForegroundColor Red
   }
   else{
     $Canarino = "VERDE (" + (N1 $Proiezione) + " ore <= " + (N1 $SogliaOre) + ")"
@@ -722,7 +919,7 @@ if($PuoScaricare -and -not $SoloControllo){
 #  La conversione, che e' solo CPU e non fa crescere niente, il battito
 #  NON lo usa: e' dichiarata, e ha solo il timeout.
 # =====================================================================
-if($PuoScaricare -and -not $SoloControllo -and $Canarino -like "VERDE*"){
+if($PuoScaricare -and -not $SoloControllo){
   Titolo "F5 - SCARICO (ripartibile, un anno alla volta, battito sulla CRESCITA dei file)"
   foreach($simbolo in $Simboli){
     $sd = Sede $simbolo
@@ -751,7 +948,30 @@ if($PuoScaricare -and -not $SoloControllo -and $Canarino -like "VERDE*"){
       $giaFatto = $false
       if($Fonte -eq "histdata"){
         $zipAnno = @(Get-ChildItem -LiteralPath $LavFonte -Filter ("DAT_ASCII_" + $codice.ToUpper() + "_M1_" + $anno + "*.zip") -ErrorAction SilentlyContinue)
-        $giaFatto = ($zipAnno.Count -gt 0)
+        #  non "esiste": SI APRE. Uno zip troncato conta come non fatto,
+        #  cosi' il rilancio lo riscarica (checklist 16).
+        $rotti = @($zipAnno | Where-Object { -not (ZipBuono $_.FullName) })
+        foreach($zr in $rotti){
+          Write-Host ("   " + $simbolo + " " + $anno + ": zip ILLEGGIBILE in cache (" + $zr.Name + "): lo cancello e lo riscarico.") -ForegroundColor Yellow
+          [void]$Note.Add("F5: " + $simbolo + " " + $anno + ": zip in cache illeggibile (" + $zr.Name + "), cancellato e riscaricato.")
+          Remove-Item -LiteralPath $zr.FullName -Force -ErrorAction SilentlyContinue
+        }
+        $giaFatto = (($zipAnno.Count - $rotti.Count) -gt 0)
+        #  L'ANNO IN CORSO NON E' MAI "GIA' FATTO".
+        #  histdata_m1.py, per l'anno in corso, scarica uno zip AL MESE
+        #  (riga 1360: [(anno,m) for m in range(1,oggi.month)]). Con il
+        #  filtro qui sopra UN SOLO mese presente bastava a marcare tutto
+        #  l'anno come fatto: una corsa interrotta a marzo lasciava
+        #  gennaio-febbraio e i mesi dopo NON SAREBBERO PIU' STATI
+        #  scaricati da nessun rilancio, senza comparire fra gli "anni
+        #  mancanti". E' la cache che si avvelena da sola (checklist 16),
+        #  qui in versione "buco dentro l'anno".
+        #  Rifarlo costa poco: python ha la sua cache PER ZIP e i mesi
+        #  gia' presi li dichiara CACHE senza riscaricarli.
+        if($anno -eq (Get-Date).Year){
+          if($giaFatto){ Write-Host ("   " + $simbolo + " " + $anno + ": anno IN CORSO (zip mensili) -- ricontrollo i mesi, non lo do per fatto.") -ForegroundColor DarkGray }
+          $giaFatto = $false
+        }
       } else {
         $giaFatto = (Test-Path -LiteralPath $pezzo)
       }
@@ -761,6 +981,12 @@ if($PuoScaricare -and -not $SoloControllo -and $Canarino -like "VERDE*"){
         continue
       }
 
+      #  qui, e solo qui, morde il canarino: si sta per prendere roba
+      #  NUOVA dalla rete.
+      if(-not ($Canarino -like "VERDE*")){
+        [void]$Problemi.Add("F5: " + $simbolo + " " + $anno + " NON SCARICATO: canarino non verde (" + $Canarino + "). Gli anni gia' in cache restano usabili.")
+        continue
+      }
       $pa = NuovoPasso "F5" ($simbolo + " " + $anno)
       $pa.Inizio = (Ora)
       $t0  = Get-Date
@@ -794,7 +1020,7 @@ if($PuoScaricare -and -not $SoloControllo -and $Canarino -like "VERDE*"){
           # nome PROPRIO SUBITO (checklist 26): la chiamata dell'anno dopo
           # riscrive lo stesso file, e senza questa copia il pezzo sparisce
           Copy-Item -LiteralPath $csvStrum -Destination $pezzo -Force
-          $pa.Nota = "" + (@(Get-Content -LiteralPath $pezzo)).Count + " righe, " + (N1 $sec) + " s"
+          $pa.Nota = "" + (ContaRighe $pezzo) + " righe, " + (N1 $sec) + " s"
         }
       }
       if(-not $fresco){
@@ -824,29 +1050,141 @@ if($PuoScaricare -and -not $SoloControllo -and $Canarino -like "VERDE*"){
     $tot = 0
 
     if($Fonte -eq "histdata"){
-      # UNA conversione sola, in fondo, su tutta la finestra. Fase senza
-      # segnale di crescita: niente battito, solo il codice d'uscita e
-      # l'artefatto. E' DICHIARATA, non taciuta.
-      $pcv = NuovoPasso "F5" ($simbolo + " conversione (tutta la finestra)")
-      $pcv.Inizio = (Ora)
-      Write-Host ("   " + $simbolo + ": converto TUTTI gli zip in cartella (fase di sola CPU: puo' stare zitta per minuti)") -ForegroundColor Gray
-      Remove-Item -LiteralPath $csvStrum -Force -ErrorAction SilentlyContinue
-      $t0 = Get-Date
-      $logc = Join-Path $Logs ("converti_" + $simbolo + ".txt")
-      $rcC = EseguiNativo $Python @("-u",$PyFile,"--converti","--simboli",$codice,"--da",("" + $AnnoDa),"--a",("" + $AnnoA),"--cartella",$LavFonte) $logc
-      Copy-Item -LiteralPath $logc -Destination (Join-Path $CartLog (Split-Path -Leaf $logc)) -Force -ErrorAction SilentlyContinue
-      $pcv.Fine = (Ora); $pcv.Min = [Math]::Round((New-TimeSpan -Start $t0 -End (Get-Date)).TotalMinutes,1)
-      if((Test-Path -LiteralPath $csvStrum) -and ((Get-Item -LiteralPath $csvStrum).LastWriteTime -ge $t0)){
-        Copy-Item -LiteralPath $csvStrum -Destination $finale -Force
-        $tot = (@(Get-Content -LiteralPath $finale)).Count - 1
-        $pcv.Esito = if($rcC -eq 0){ "OK" } else { "CON PROBLEMI (rc " + $rcC + ")" }
-        $pcv.Nota  = "" + $tot + " barre M1"
-        if($rcC -ne 0){ [void]$Problemi.Add("F5: " + $simbolo + ": la conversione e' uscita con " + $rcC + " (banda di prezzo? fuso EST fisso? zip rotti?). LEGGI " + $logc + ": il CSV c'e' ma il verdetto NON e' pulito.") }
-      } else {
-        $pcv.Esito = "NESSUN CSV DI ADESSO"
-        [void]$Problemi.Add("F5: " + $simbolo + ": la conversione non ha scritto un CSV adesso (rc " + $rcC + "). Guarda " + $logc)
+      # =================================================================
+      #  LA CONVERSIONE, A TRANCHE DI ANNI. E per CARTELLA, mai con --da/--a.
+      #
+      #  PERCHE' SI SPEZZA (numero MISURATO il 25/08, non stimato):
+      #    ingerisci_zip() tiene TUTTE le barre del simbolo in un
+      #    dizionario prima di scrivere il CSV. Misurato eseguendo
+      #    leggi_righe_histdata() su 400.000 barre vere di indice:
+      #    +275 MB di RSS = ~690 byte per barra.
+      #      2,5 M barre (2019-2026, la corsa GIA' GIRATA il 18/08) = ~1,7 GB
+      #      5,6 M barre (2010-2026, questa)                        = ~3,8 GB
+      #    Su un PC con 8 GB e MT5 aperto, 3,8 GB e' la differenza fra
+      #    una fase lenta e un MemoryError a fine corsa, cioe' dopo aver
+      #    scaricato tutto. Le tranche tengono il picco alla dimensione
+      #    che questa macchina ha GIA' retto.
+      #
+      #  PERCHE' PER CARTELLA E NON CON --da/--a:
+      #    --converti IGNORA --da/--a (ingerisci_zip(cartella, set(pairs))
+      #    riga 1394: ingerisce tutti gli zip DELLA CARTELLA). Spezzare
+      #    per anno con --da/--a darebbe ogni volta lo STESSO CSV
+      #    cumulativo e la concatenazione un file pieno di duplicati:
+      #    grosso, plausibile e sbagliato. Spezzare per CARTELLA e' la
+      #    stessa cosa che il codice fa gia', in piccolo.
+      #    Gli zip di anni diversi non hanno barre in comune, quindi le
+      #    tranche non si sovrappongono e la concatenazione in ordine di
+      #    anno e' esatta.
+      #
+      #  E' una fase di sola CPU: niente battito (non fa crescere niente),
+      #  solo codice d'uscita e artefatto. DICHIARATA, non taciuta.
+      # =================================================================
+      if($AnniPerTranche -lt 1){ $AnniPerTranche = 1 }
+      $anniOrd = @($fattiAnni | Sort-Object)
+      $blocchi = New-Object System.Collections.ArrayList
+      $cur     = New-Object System.Collections.ArrayList
+      foreach($a in $anniOrd){
+        [void]$cur.Add($a)
+        if($cur.Count -ge $AnniPerTranche){ [void]$blocchi.Add(@($cur.ToArray())); $cur = New-Object System.Collections.ArrayList }
+      }
+      if($cur.Count -gt 0){ [void]$blocchi.Add(@($cur.ToArray())) }
+      if($blocchi.Count -gt 1){
+        Write-Host ("   " + $simbolo + ": " + $anniOrd.Count + " anni = " + $blocchi.Count + " TRANCHE di conversione (RAM misurata ~690 byte/barra).") -ForegroundColor Yellow
+        [void]$Note.Add("F5: " + $simbolo + ": la conversione e' stata fatta in " + $blocchi.Count + " TRANCHE di anni (" +
+                        (($blocchi | ForEach-Object { "" + $_[0] + "-" + $_[$_.Count-1] }) -join ", ") +
+                        ") e i pezzi sono stati concatenati in ordine di anno. E' DICHIARATO: il CSV finale non nasce da una sola passata. " +
+                        "Motivo: ~690 byte di RAM per barra M1 misurati, 5,6 M barre sarebbero ~3,8 GB in un colpo solo.")
+      }
+
+      $pezziCsv = @()
+      $rcCtot   = 0
+      $conversioneOk = $true
+      $k = 0
+      foreach($b in $blocchi){
+        $k++
+        $etichetta = "" + $b[0] + "-" + $b[$b.Count-1]
+        $pcv = NuovoPasso "F5" ($simbolo + " conversione tranche " + $k + "/" + $blocchi.Count + " (" + $etichetta + ")")
+        $pcv.Inizio = (Ora)
+        if($blocchi.Count -eq 1){
+          $cartConv = $LavFonte           # una sola tranche: nessuna copia, si converte in casa
+          $csvAtteso = $csvStrum
+          $zipCopiati = @()
+        } else {
+          $cartConv = Join-Path $Work ("conv\" + $simbolo + "_t" + $k)
+          Remove-Item -LiteralPath $cartConv -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $cartConv | Out-Null
+          $zipCopiati = @()
+          foreach($a in $b){
+            foreach($z in @(Get-ChildItem -LiteralPath $LavFonte -Filter ("DAT_ASCII_" + $codice.ToUpper() + "_M1_" + $a + "*.zip") -ErrorAction SilentlyContinue)){
+              Copy-Item -LiteralPath $z.FullName -Destination $cartConv -Force
+              $zipCopiati += $z.Name
+            }
+          }
+          $csvAtteso = Join-Path $cartConv ($simbolo + "_M1.csv")
+        }
+        Write-Host ("   " + $simbolo + " tranche " + $k + "/" + $blocchi.Count + " (" + $etichetta + "): converto (sola CPU: puo' stare zitta per minuti)") -ForegroundColor Gray
+        Remove-Item -LiteralPath $csvAtteso -Force -ErrorAction SilentlyContinue
+        $t0 = Get-Date
+        $logc = Join-Path $Logs ("converti_" + $simbolo + "_t" + $k + ".txt")
+        $rcC = EseguiNativo $Python @("-u",$PyFile,"--converti","--simboli",$codice,"--cartella",$cartConv) $logc
+        Copy-Item -LiteralPath $logc -Destination (Join-Path $CartLog (Split-Path -Leaf $logc)) -Force -ErrorAction SilentlyContinue
+        $pcv.Fine = (Ora); $pcv.Min = [Math]::Round((New-TimeSpan -Start $t0 -End (Get-Date)).TotalMinutes,1)
+
+        #  se python ha CANCELLATO uno zip perche' illeggibile, va tolto
+        #  anche dalla CACHE: se no la copia rotta resta li' e la ripresa
+        #  continua a darla per buona (checklist 16).
+        foreach($nz in $zipCopiati){
+          if(-not (Test-Path -LiteralPath (Join-Path $cartConv $nz))){
+            Remove-Item -LiteralPath (Join-Path $LavFonte $nz) -Force -ErrorAction SilentlyContinue
+            [void]$Problemi.Add("F5: " + $simbolo + ": lo zip " + $nz + " era ROTTO (lo strumento l'ha cancellato). L'ho tolto anche dalla cache: RILANCIA LA STESSA RIGA e verra' riscaricato.")
+          }
+        }
+
+        if((Test-Path -LiteralPath $csvAtteso) -and ((Get-Item -LiteralPath $csvAtteso).LastWriteTime -ge $t0)){
+          $righeTr = (ContaRighe $csvAtteso) - 1
+          $pezziCsv += $csvAtteso
+          $pcv.Esito = if($rcC -eq 0){ "OK" } else { "CON PROBLEMI (rc " + $rcC + ")" }
+          $pcv.Nota  = "" + $righeTr + " barre M1"
+          if($rcC -ne 0){
+            $rcCtot = $rcC
+            [void]$Problemi.Add("F5: " + $simbolo + " tranche " + $etichetta + ": la conversione e' uscita con " + $rcC + " (banda di prezzo? fuso EST fisso? zip rotti?). LEGGI log\" + (Split-Path -Leaf $logc) + ": il CSV c'e' ma il verdetto NON e' pulito.")
+          }
+        } else {
+          $pcv.Esito = "NESSUN CSV DI ADESSO"
+          $conversioneOk = $false
+          [void]$Problemi.Add("F5: " + $simbolo + " tranche " + $etichetta + ": la conversione non ha scritto un CSV adesso (rc " + $rcC + "). Guarda log\" + (Split-Path -Leaf $logc) +
+                              ". Se e' un MemoryError: rilancia con -AnniPerTranche piu' basso.")
+        }
         ScriviStato
+      }
+
+      if($pezziCsv.Count -eq 0){
+        $sd.Fase   = "CONVERSIONE FALLITA"
+        $sd.Perche = "gli zip ci sono ma nessuna tranche ha prodotto un CSV: vedi PROBLEMI"
         continue
+      }
+      #  i pezzi in UNO, in ordine di anno, con UNA intestazione sola.
+      Remove-Item -LiteralPath $finale -Force -ErrorAction SilentlyContinue
+      $sw = New-Object System.IO.StreamWriter($finale,$false,[System.Text.Encoding]::ASCII)
+      $intestazioneScritta = $false
+      foreach($pz in $pezziCsv){
+        $sr = New-Object System.IO.StreamReader($pz)
+        while(($l = $sr.ReadLine()) -ne $null){
+          if($l.StartsWith("Time,")){
+            if(-not $intestazioneScritta){ $sw.WriteLine($l); $intestazioneScritta = $true }
+            continue
+          }
+          if($l.Length -lt 10){ continue }
+          $sw.WriteLine($l); $tot++
+        }
+        $sr.Close()
+      }
+      $sw.Close()
+      if(-not $intestazioneScritta){
+        [void]$Problemi.Add("F5: " + $simbolo + ": nei CSV di tranche non c'era nessuna riga di intestazione 'Time,...': il file finale e' senza intestazione e l'import lo rifiuterebbe.")
+      }
+      if(-not $conversioneOk){
+        [void]$Problemi.Add("F5: " + $simbolo + ": il CSV finale e' fatto con " + $pezziCsv.Count + " tranche su " + $blocchi.Count + ". E' MONCO, e gli anni che mancano sono quelli della tranche fallita.")
       }
       ScriviStato
     } else {
@@ -882,8 +1220,16 @@ if($PuoScaricare -and -not $SoloControllo -and $Canarino -like "VERDE*"){
     try{
       $testa = @(Get-Content -LiteralPath $finale -TotalCount 6)
       $coda  = @(Get-Content -LiteralPath $finale -Tail 3)
-      Set-Content -LiteralPath (Join-Path $CartDat ($simbolo + "_M1_ANTEPRIMA.txt")) -Encoding ASCII -Value `
-        (@("file: " + $finale, "barre M1: " + $tot, "anni scaricati: " + $sd.Anni, "", "--- prime righe ---") + $testa + @("", "--- ultime righe ---") + $coda)
+      #  OGNI ELEMENTO FRA PARENTESI. Dentro un @(...) la VIRGOLA lega
+      #  piu' stretto del '+': scritto senza parentesi,
+      #    @("a: " + $x, "b: " + $y)
+      #  non e' un array di due righe, e' UNA stringa sola
+      #  ("a: " + ($x,"b: ") + $y). L'anteprima usciva con intestazione,
+      #  barre e anni tutti appiccicati sulla stessa riga -- visto
+      #  ESEGUENDO, non leggendo.
+      $capo = @(("file: " + $finale), ("barre M1: " + $tot), ("anni scaricati: " + $sd.Anni), "", "--- prime righe ---")
+      Set-Content -LiteralPath (Join-Path $CartDat ($simbolo + "_M1_ANTEPRIMA.txt")) -Encoding ASCII `
+        -Value ($capo + $testa + @("", "--- ultime righe ---") + $coda)
     }catch{ [void]$Note.Add("F5: anteprima di " + $simbolo + " non scritta (" + $_.Exception.Message + ")") }
 
     $mancanti = @($AnnoDa..$AnnoA | Where-Object { $fattiAnni -notcontains $_ })
@@ -930,41 +1276,57 @@ if($Prepara -and $CsvFinali.Count -gt 0 -and -not $SoloControllo){
   #     DST della v2 e' stata MISURATA e peggiora, par. 15)
   $srcImp = Join-Path $Strum "ABTG_ImportaStoricoEsterno.mq5"
   Scarica ("$RawPin/mql5/Scripts/ABTG_ImportaStoricoEsterno.mq5") $srcImp 'InpSimboloNuovo'
-  Copy-Item -LiteralPath $srcImp -Destination (Join-Path $MqlScr "ABTG_ImportaStoricoEsterno.mq5") -Force
+  CopiaVerificata $srcImp (Join-Path $MqlScr "ABTG_ImportaStoricoEsterno.mq5")
 
-  # --- TUTTI gli input del sorgente, coi loro default
-  $inputs = New-Object System.Collections.Specialized.OrderedDictionary
-  foreach($riga in (Get-Content -LiteralPath $srcImp)){
-    $m = [regex]::Match($riga,'^\s*input\s+\w+\s+(\w+)\s*=\s*([^;]+);')
-    if($m.Success){
-      $v = $m.Groups[2].Value.Trim().Trim('"')
-      $inputs[$m.Groups[1].Value] = $v
-    }
-  }
-  Write-Host ("   input trovati nel sorgente: " + $inputs.Count + " (il preset li nomina TUTTI)") -ForegroundColor Gray
+  #  gli otto input che questa corsa DEVE imporre. Se il sorgente ne
+  #  cambia uno di nome, qui si sente il rumore (vedi ScriviPreset).
+  $ObbligatoriImport = @("InpSimboloSorgente","InpSimboloNuovo","InpFileCsv","InpFormato",
+                         "InpShiftOre","InpAutoShift","InpShiftMax","InpCancellaEsistente")
 
   foreach($f in $CsvFinali){
     $simbolo = [IO.Path]::GetFileNameWithoutExtension($f) -replace "_M1$",""
+    #  la copia si verifica sul CONTENUTO, non sull'esistenza del nome
+    #  (checklist 27-ter). Qui sono 250 MB: una copia troncata dal disco
+    #  pieno darebbe un import "riuscito" su meta' storico.
+    $lenSrc = (Get-Item -LiteralPath $f).Length
     Copy-Item -LiteralPath $f -Destination $MqlFiles -Force
-    $vals = @{}
-    foreach($k in $inputs.Keys){ $vals[$k] = $inputs[$k] }
-    $vals["InpSimboloSorgente"]   = $simbolo
-    $vals["InpSimboloNuovo"]      = $simbolo + "_EXT"
-    $vals["InpFileCsv"]           = (Split-Path -Leaf $f)
-    $vals["InpFormato"]           = "1"
-    $vals["InpShiftOre"]          = "0"
-    $vals["InpAutoShift"]         = "true"
-    $vals["InpShiftMax"]          = "6"
-    $vals["InpCancellaEsistente"] = "true"
-    if($vals.ContainsKey("InpAutoTest")){ $vals["InpAutoTest"] = "false" }
+    $vDst = Get-Item -LiteralPath (Join-Path $MqlFiles (Split-Path -Leaf $f)) -ErrorAction SilentlyContinue
+    if(-not $vDst -or $vDst.PSIsContainer -or $vDst.Length -ne $lenSrc){
+      throw ("copia di " + (Split-Path -Leaf $f) + " in MQL5\Files NON verificata (lunghezza diversa dall'originale o e' una cartella): disco pieno?")
+    }
+    $vals = @{
+      "InpSimboloSorgente"   = $simbolo
+      "InpSimboloNuovo"      = $simbolo + "_EXT"
+      "InpFileCsv"           = (Split-Path -Leaf $f)
+      "InpFormato"           = "1"
+      "InpShiftOre"          = "0"
+      "InpAutoShift"         = "true"
+      "InpShiftMax"          = "6"
+      "InpCancellaEsistente" = "true"
+      "InpAutoTest"          = "false"     # se il sorgente non ce l'ha, esce fra gli ORFANI
+    }
     $setName = "abtg_import_" + $simbolo + "_EXT.set"
-    $righe = @()
-    foreach($k in $inputs.Keys){ $righe += ($k + "=" + $vals[$k]) }
-    Set-Content -LiteralPath (Join-Path $MqlPre $setName) -Value $righe -Encoding ASCII
+    $esitoSet = ScriviPreset $srcImp (Join-Path $MqlPre $setName) $ObbligatoriImport $vals 8
+    foreach($o in $esitoSet.Orfani){
+      [void]$Note.Add("F6: il preset di " + $simbolo + " non nomina " + $o + " perche' quell'input NON esiste in ABTG_ImportaStoricoEsterno v1 (la v2 si'). Nessun effetto: e' dichiarato.")
+    }
     $Presets += ,@($simbolo,$setName)
-    Write-Host ("   " + $simbolo + " -> MQL5\Files\" + (Split-Path -Leaf $f) + "  +  MQL5\Presets\" + $setName) -ForegroundColor Green
+    Write-Host ("   " + $simbolo + " -> MQL5\Files\" + (Split-Path -Leaf $f) + "  +  MQL5\Presets\" + $setName +
+                "  (" + $esitoSet.Inputs + " input nominati)") -ForegroundColor Green
   }
   $pp6.Fine = (Ora); $pp6.Esito = "OK"; $pp6.Nota = "" + $Presets.Count + " preset"
+  ScriviStato
+}
+elseif($Prepara){
+  #  UNA FASE CHIESTA NON PUO' SPARIRE DAL REFERTO (checklist 68).
+  #  Senza questo ramo, '-Prepara' con lo scarico fermo al cancello non
+  #  lasciava nessuna riga: la fase chiesta semplicemente non esisteva, e
+  #  una fase che non compare si legge come una fase andata bene.
+  $pp6 = NuovoPasso "F6" "prepara import"
+  $pp6.Inizio = (Ora); $pp6.Fine = (Ora)
+  $pp6.Esito = "NON ESEGUITA"
+  $pp6.Nota  = $(if($SoloControllo){ "giro a vuoto: -SoloControllo non tocca MT5, per costruzione" }
+                 else{ "nessun CSV finale da preparare: lo scarico non e' arrivato in fondo (vedi PROBLEMI)" })
   ScriviStato
 }
 
@@ -978,13 +1340,17 @@ if($Importa -and $Presets.Count -gt 0 -and -not $SoloControllo){
 
   # compilazione: .ex5 SCRITTO ADESSO, altrimenti gira quello vecchio
   $mq5 = Join-Path $DataFolder "MQL5\Scripts\ABTG_ImportaStoricoEsterno.mq5"
-  $ex5 = [IO.Path]::ChangeExtension($mq5,".ex5")
-  $t0c = Get-Date
-  Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
-  & $MetaEditor "/compile:$mq5" "/log" | Out-Null
-  if(-not (Test-Path -LiteralPath $ex5) -or (Get-Item -LiteralPath $ex5).LastWriteTime -lt $t0c){
-    [void]$Problemi.Add("F7: ABTG_ImportaStoricoEsterno NON compilato adesso: l'import NON parte.")
+  $pcc = NuovoPasso "F7" "compila ABTG_ImportaStoricoEsterno"
+  $pcc.Inizio = (Ora)
+  $cmp = CompilaMQL5 $mq5 "ABTG_ImportaStoricoEsterno"
+  $pcc.Fine = (Ora)
+  if(-not $cmp.Ok){
+    $pcc.Esito = "FALLITA (rc " + $cmp.Rc + ")"
+    [void]$Problemi.Add("F7: ABTG_ImportaStoricoEsterno NON compilato adesso (metaeditor rc " + $cmp.Rc +
+                        "): l'import NON parte. Il log del compilatore e' nello zip, in log\compile_ABTG_ImportaStoricoEsterno.log." +
+                        $(if($cmp.AvevaBackup){ " Il .ex5 di prima e' stato rimesso al suo posto: l'import a mano resta possibile." }else{ "" }))
   } else {
+    $pcc.Esito = "OK"
     Dico "ABTG_ImportaStoricoEsterno compilato adesso" "Green"
     foreach($p in $Presets){
       if((Trascorse) -ge $OreMax){
@@ -1009,6 +1375,15 @@ if($Importa -and $Presets.Count -gt 0 -and -not $SoloControllo){
       Copy-Item -LiteralPath $refImp -Destination (Join-Path $CartDat "ABTG_ImportEsterno_referto.csv") -Force
     }
   }
+}
+elseif($Importa){
+  #  stessa ragione di F6: una fase CHIESTA compare sempre (checklist 68)
+  $pi0 = NuovoPasso "F7" "import in MT5"
+  $pi0.Inizio = (Ora); $pi0.Fine = (Ora)
+  $pi0.Esito = "NON ESEGUITA"
+  $pi0.Nota  = $(if($SoloControllo){ "giro a vuoto: -SoloControllo non apre MT5, per costruzione" }
+                 else{ "nessun preset da importare: F6 non e' arrivata in fondo (vedi PROBLEMI)" })
+  ScriviStato
 }
 
 # =====================================================================
@@ -1042,26 +1417,31 @@ if($Verifica -and -not $SoloControllo){
     New-Item -ItemType Directory -Force -Path $MqlScr,$MqlPre | Out-Null
     $srcV = Join-Path $Strum "ABTG_ContaBarreEXT.mq5"
     Scarica ("$RawPin/mql5/Scripts/ABTG_ContaBarreEXT.mq5") $srcV 'CONTA-EXT-v1'
-    Copy-Item -LiteralPath $srcV -Destination (Join-Path $MqlScr "ABTG_ContaBarreEXT.mq5") -Force
+    CopiaVerificata $srcV (Join-Path $MqlScr "ABTG_ContaBarreEXT.mq5")
     $mq5v = Join-Path $MqlScr "ABTG_ContaBarreEXT.mq5"
-    $ex5v = [IO.Path]::ChangeExtension($mq5v,".ex5")
-    $t0c = Get-Date
-    Remove-Item -LiteralPath $ex5v -Force -ErrorAction SilentlyContinue
-    & $MetaEditor "/compile:$mq5v" "/log" | Out-Null
-    if(-not (Test-Path -LiteralPath $ex5v) -or (Get-Item -LiteralPath $ex5v).LastWriteTime -lt $t0c){
-      throw "ABTG_ContaBarreEXT NON compilato adesso (guarda il .log accanto al .mq5)."
+    $cmpV = CompilaMQL5 $mq5v "ABTG_ContaBarreEXT"
+    if(-not $cmpV.Ok){
+      throw ("ABTG_ContaBarreEXT NON compilato (metaeditor rc " + $cmpV.Rc + "). E' uno script NUOVO, mai compilato prima: " +
+             "il log del compilatore e' nello zip in log\compile_ABTG_ContaBarreEXT.log ed e' quello che dice la riga e l'errore. " +
+             "Il resto della corsa (scarico e import) NON dipende da questa fase.")
     }
     # TUTTI i simboli chiesti, anche quelli che potrebbero non esistere:
     # e' il referto che deve dire 'NON ESISTE', non il silenzio.
     $chiesti = @($Simboli | ForEach-Object { $_ + "_EXT" })
     $setV = "abtg_conta_ext.set"
-    Set-Content -LiteralPath (Join-Path $MqlPre $setV) -Encoding ASCII -Value @(
-      "InpSimboli=" + ($chiesti -join ","),
-      "InpTF=M15,H1",
-      "InpFileCsv=ABTG_ContaBarreEXT.csv",
-      "InpAttesaSec=30",
-      "InpTettoAtteso=100000",
-      "InpAutoTest=false")
+    #  anche questo preset si genera DAL SORGENTE: scritto a mano
+    #  resterebbe indietro il giorno che lo script guadagna un input, e
+    #  quell'input prenderebbe l'ultimo valore usato a mano (checklist 25).
+    $valsV = @{
+      "InpSimboli"     = ($chiesti -join ",")
+      "InpTF"          = "M15,H1"
+      "InpFileCsv"     = "ABTG_ContaBarreEXT.csv"
+      "InpAttesaSec"   = "30"
+      "InpTettoAtteso" = "100000"
+      "InpAutoTest"    = "false"
+    }
+    $esitoV = ScriviPreset $srcV (Join-Path $MqlPre $setV) @("InpSimboli","InpTF","InpFileCsv","InpAutoTest") $valsV 6
+    foreach($o in $esitoV.Orfani){ [void]$Note.Add("F8: il preset del conteggio non nomina " + $o + ": quell'input non esiste nel sorgente al pin.") }
     $csvV = Join-Path $DataFolder "MQL5\Files\ABTG_ContaBarreEXT.csv"
     Remove-Item -LiteralPath $csvV -Force -ErrorAction SilentlyContinue
     $grafico = $Simboli[0]
@@ -1088,11 +1468,29 @@ if($Verifica -and -not $SoloControllo){
   $pv.Fine = (Ora)
   ScriviStato
 }
+elseif($Verifica){
+  $pv0 = NuovoPasso "F8" "conta barre _EXT"
+  $pv0.Inizio = (Ora); $pv0.Fine = (Ora)
+  $pv0.Esito = "NON ESEGUITA"
+  $pv0.Nota  = "giro a vuoto: -SoloControllo non apre MT5, per costruzione"
+  ScriviStato
+}
 
 }catch{
   Write-Host ""
   Write-Host ("!!! CORSA FERMATA: " + $_.Exception.Message) -ForegroundColor Red
   [void]$Problemi.Add("CORSA FERMATA: " + $_.Exception.Message)
+  #  il passo che era APERTO quando e' saltato tutto non puo' restare
+  #  "NON ESEGUITO": era cominciato. La differenza fra "non l'ho fatto" e
+  #  "l'ho cominciato e mi si e' rotto in mano" e' quella che dice DOVE
+  #  guardare (checklist 68).
+  foreach($p in $Passi){
+    if($p.Inizio -ne "" -and $p.Fine -eq ""){
+      $p.Fine  = (Ora)
+      $p.Esito = "INTERROTTO"
+      $p.Nota  = $_.Exception.Message
+    }
+  }
 }
 
 # =====================================================================
@@ -1100,10 +1498,28 @@ if($Verifica -and -not $SoloControllo){
 #  scarico non puo' restare con una casella vuota. Una casella vuota si
 #  legge come "e' andato tutto bene e non c'era niente da dire".
 # =====================================================================
+#  E il MOTIVO deve essere quello VERO, non un elenco di sospetti: in un
+#  giro a vuoto "non scaricato" e' il comportamento CHIESTO, e leggerlo
+#  accanto a un ESITO: OK fa sembrare rotta una corsa perfetta
+#  (checklist 44 e 68: "saltata" e "non girata" non sono la stessa cosa).
 foreach($s in $Sedi){
+  if($s.Fase -eq "NON RICHIESTO" -and $Dec.Count -eq 0){
+    $s.Fase   = "NON VALUTATO"
+    $s.Perche = "la corsa si e' fermata prima di leggere i criteri: nessun simbolo e' stato ne' incluso ne' escluso"
+    continue
+  }
   if($s.Fase -eq "IN GIRO" -and $s.Barre -lt 0){
-    $s.Fase   = "NON SCARICATO"
-    $s.Perche = "la fase di scarico non e' stata eseguita (criteri non firmati, canarino rosso, spazio, o tetto ore): vedi PROBLEMI"
+    if($SoloControllo){
+      $s.Fase   = "NON SCARICATO (giro a vuoto)"
+      $s.Perche = "-SoloControllo non scarica niente per costruzione: e' il comportamento chiesto, non un guasto" +
+                  $(if(-not $PuoScaricare){ " -- e comunque un cancello e' chiuso: vedi PROBLEMI" }else{ "" })
+    } elseif(-not $PuoScaricare){
+      $s.Fase   = "NON SCARICATO (cancello chiuso)"
+      $s.Perche = "una guardia ha fermato lo scarico PRIMA di partire (criteri non firmati, spazio, python, canarino): il motivo esatto e' fra i PROBLEMI"
+    } else {
+      $s.Fase   = "NON SCARICATO"
+      $s.Perche = "lo scarico e' partito e non ha prodotto niente per questo simbolo: vedi PROBLEMI"
+    }
   }
 }
 
@@ -1188,9 +1604,16 @@ if($CsvFinali.Count -gt 0 -and $Presets.Count -gt 0){
 Set-Content -LiteralPath $Referto -Value $o -Encoding ASCII
 ScriviStato
 
-# --- raccolta: UN solo zip, in fondo, sulla cartella di sosta
+# --- raccolta: UN solo zip, in fondo, sulla cartella di sosta.
+#     Lo zip si ANNUNCIA solo se ESISTE: un catch vuoto e una riga verde
+#     che dice "ZIP PRONTO DA MANDARE" sono il guardiano decorativo del
+#     punto 14 applicato alla raccolta -- Claudio cerca sul Desktop un
+#     file che non c'e' e la riga torna indietro per niente.
 $zip = Join-Path $Dsk ("STORICO_INDICI_" + $Stamp + ".zip")
-try{ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force }catch{ }
+$zipErr = ""
+try{ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force -ErrorAction Stop }
+catch{ $zipErr = $_.Exception.Message }
+$zipFatto = (Test-Path -LiteralPath $zip)
 $n = @(Get-ChildItem -LiteralPath $Cart -Recurse -File -ErrorAction SilentlyContinue).Count
 
 Write-Host ""
@@ -1198,11 +1621,28 @@ Write-Host "====================================================================
 Get-Content -LiteralPath $Referto | Select-Object -Last 40 | ForEach-Object { Write-Host $_ }
 Write-Host "=====================================================================" -ForegroundColor Cyan
 Write-Host ("RACCOLTA: " + $n + " file in " + $Cart) -ForegroundColor Green
-Write-Host ("ZIP PRONTO DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host "Verifica che dentro ci siano, per nome:" -ForegroundColor DarkGray
+if($zipFatto){
+  Write-Host ("ZIP PRONTO DA MANDARE: " + $zip) -ForegroundColor Green
+} else {
+  Write-Host ("!! LO ZIP NON E' STATO CREATO (" + $zipErr + ")") -ForegroundColor Red
+  Write-Host ("   MANDA LA CARTELLA: " + $Cart) -ForegroundColor Yellow
+  [void]$Problemi.Add("F9: Compress-Archive non ha prodotto lo zip (" + $zipErr + "). La cartella di raccolta c'e' e va mandata cosi' com'e'.")
+  #  il referto e' gia' scritto: ci si aggiunge la stessa verita', o il
+  #  file direbbe ESITO: OK mentre la console dice il contrario.
+  try{ Add-Content -LiteralPath $Referto -Value ("`r`nAVVISO F9: lo zip NON e' stato creato (" + $zipErr + "). Va mandata la cartella " + $Cart) }catch{ }
+}
+#  L'ELENCO ATTESO NON SI SCRIVE A MEMORIA: si STAMPA DA QUELLO CHE C'E'
+#  DAVVERO (checklist 70). Cosi' la riga in chat e la console non possono
+#  promettere due cose diverse, e un file che manca si vede QUI.
+Write-Host "DENTRO CI SONO QUESTI FILE (contati adesso, non a memoria):" -ForegroundColor DarkGray
+foreach($fz in @(Get-ChildItem -LiteralPath $Cart -Recurse -File -ErrorAction SilentlyContinue | Sort-Object FullName)){
+  $rel = $fz.FullName.Substring($Cart.Length).TrimStart([char]92)
+  Write-Host ("   - " + $rel + "   (" + [Math]::Round($fz.Length/1024.0,1) + " KB)") -ForegroundColor DarkGray
+}
+Write-Host "E questi DEVONO esserci:" -ForegroundColor DarkGray
 Write-Host "   - REFERTO_STORICO_INDICI.txt        (la riga 'data:' deve essere di ADESSO)" -ForegroundColor DarkGray
 Write-Host "   - STORICO_INDICI_CRITERI.md         (i criteri al pin, come li ha letti la corsa)" -ForegroundColor DarkGray
-Write-Host "   - dati\*_M1_ANTEPRIMA.txt           (prime e ultime righe di ogni CSV prodotto)" -ForegroundColor DarkGray
+if($CsvFinali.Count -gt 0){ Write-Host "   - dati\*_M1_ANTEPRIMA.txt           (prime e ultime righe di ogni CSV prodotto)" -ForegroundColor DarkGray }
 if($Importa){ Write-Host "   - dati\ABTG_ImportEsterno_referto.csv (shift, copertura, verdetto)" -ForegroundColor DarkGray }
 if($Verifica){ Write-Host "   - dati\ABTG_ContaBarreEXT.csv        (prima/ultima barra M15 e H1)" -ForegroundColor DarkGray }
 Write-Host "   - log\*.txt e log\*.log             (console degli strumenti e log MT5)" -ForegroundColor DarkGray

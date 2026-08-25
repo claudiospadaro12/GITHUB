@@ -255,9 +255,24 @@ si ferma lo stesso.
   e parte dal 2012 · ritmo Dukascopy ~4 min/giorno · HistData 2019-2026 per
   NASUSD/225JPY/SPXUSD promossi · `grxeur` bocciato · cancello ZERO chiuso a
   0,061-0,101% · shift +5 su 3 simboli su 3.
-- **[INFERITO]** stime di **spazio** (0,8 GB HistData / 9 GB Dukascopy):
-  estrapolate dai byte misurati su un'ora campione, non da una corsa piena —
-  il driver le ricontrolla contro lo spazio libero **prima** di partire.
+- **[INFERITO]** stime di **spazio**: la riga 0,8 GB contava solo _zip +
+  CSV_. La stessa barra finisce sul disco **sei volte** (zip, copia nella
+  cartella di tranche, CSV di tranche, CSV finale, copia in `MQL5\Files`,
+  copia che lo strumento fa da solo sul Desktop) piu' il simbolo custom
+  dentro MT5: **~80 MB per anno e per simbolo**, cioe' **~1,4 GB** per
+  NASUSD 2010-2026. Il driver lo ricontrolla contro lo spazio libero
+  **misurato**, col x3 di margine (**~4 GB richiesti**), **prima** di
+  partire. Dukascopy resta ~9 GB di cache `.bi5`.
+- **[VERIFICATO 25/08, misurando]** la **RAM** della conversione:
+  `histdata_m1.py --converti` tiene tutte le barre del simbolo in un
+  dizionario. Misurato eseguendo il suo parser su 400.000 barre vere:
+  **~690 byte per barra**. Quindi 2,5 M barre (la corsa gia' girata il
+  18/08) = ~1,7 GB, e **5,6 M barre (2010-2026) sarebbero ~3,8 GB in un
+  colpo solo**. Per questo il driver converte a **tranche di 8 anni** e
+  concatena i pezzi in ordine — spezzando per **cartella**, perche'
+  `--converti` **ignora `--da/--a`** e spezzare per anno darebbe CSV
+  cumulativi pieni di duplicati. Il fatto che il CSV nasca da piu'
+  tranche e' **dichiarato nel referto**.
 - **[INCERTO]** che HistData `nsxusd` sia pulito anche **prima** del 2019: la
   corsa promossa copre 2019-2026. Gli anni 2010-2018 **non sono mai stati
   guardati** e possono avere la stessa malattia del `grxeur`. Per questo il
