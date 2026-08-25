@@ -3088,3 +3088,50 @@ fallisce zitta, e il Test-Path trova l'artefatto VECCHIO stampando OK.
 sopravvive - e il timestamp lo verifichi LO STESSO. Vale per ogni
 artefatto su una macchina dove il produttore e' vivo e tiene i file
 aperti.
+
+## 70. L'ELENCO ATTESO SCRITTO NELL'ORDINE DEL DOMINIO, STAMPATO DAL CODICE IN ORDINE ALFABETICO (R107, 25/08 - preso PRIMA dell'invio)
+
+Il DA_MANDARE prometteva, fra le righe che Claudio deve confrontare a
+schermo per dare il via libera alla corsa vera:
+
+```
+- in testa: `famiglie 3 (DOW, DAX, NAS)`, `celle 6 (di cui LONG: 3)`, ...
+```
+
+Il driver pero' costruisce quell'elenco cosi':
+
+```powershell
+$FamAttive = @($Lavori | ForEach-Object { $_.Fam } | Sort-Object -Unique)
+...
+Write-Host ("    famiglie ... " + $FamLavoro.Count + "   (" + ($FamAttive -join ", ") + ")")
+```
+
+`Sort-Object -Unique` **ordina**: a schermo esce `(DAX, DOW, NAS)`, non
+`(DOW, DAX, NAS)`. L'ordine del DOMINIO (Dow per primo perche' e' il metro
+e la riga di paragone del round) non e' l'ordine ALFABETICO, e nessuno dei
+due e' sbagliato: e' il documento che promette il primo mentre il codice
+stampa il secondo.
+
+**Perche' e' una classe a se' e non il 40-quater.** Il 40-quater dice
+_"ogni numero atteso si RICALCOLA con la formula dell'EA"_: li' il rimedio
+e' rifare il conto. Qui non c'e' nessun conto da rifare — il valore e'
+giusto, e' **l'ORDINE** a essere diverso, e l'unico modo di accorgersene e'
+**ESEGUIRE il blocco che stampa e confrontare la stringa carattere per
+carattere con quella scritta nel documento**. Rileggere il codice non
+basta: `Sort-Object -Unique` si legge come "togli i doppioni" e il fatto
+che ordini anche passa inosservato (e' lo stesso inganno del punto 62, dove
+`-Unique` su una lista di uno srotolava una stringa).
+
+**Il costo se passa**: Claudio confronta, vede due elenchi diversi, e
+**ferma il round per un falso allarme** — oppure impara che gli attesi del
+documento sono "circa", e allora il gesto del confronto non serve piu' a
+niente. E' il danno del 40-quater (erosione della fiducia nei controlli)
+per una causa diversa.
+
+> ✅ **REGOLA**: ogni stringa che il documento chiede a Claudio di
+> CONFRONTARE A SCHERMO va **prodotta eseguendo il codice che la stampa**,
+> e incollata nel documento **dall'output**, mai riscritta a mano
+> nell'ordine che sembra naturale. Sospetti di partenza in ogni driver:
+> `Sort-Object`, `-Unique`, `Group-Object`, `Get-ChildItem` (che ordina per
+> nome), le chiavi di un `@{}` (che in PowerShell **non** hanno ordine
+> garantito: serve `[ordered]@{}`).
