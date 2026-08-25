@@ -1,6 +1,46 @@
 # =====================================================================
 #  EA: ABTG_BreakingBand
 #
+#  >>>>>>  ATTENZIONE: QUESTO FILE NON E' PIU' L'ARTEFATTO CHE GIRA.  <<<<<<
+#
+#  E' l'ANTENATO di R108, scritto dal cacciatore il 25/08/2026. Il round
+#  vero gira su SEI file, uno per cella:
+#      prove\R108_GBPUSD_00_metroH1.txt   prove\R108_GBPUSD_01_m15.txt
+#      prove\R108_EURUSD_00_metroH1.txt   prove\R108_EURUSD_01_m15.txt
+#      prove\R108_AUDUSD_00_metroH1.txt   prove\R108_AUDUSD_01_m15.txt
+#  La PROSA qui sotto (ipotesi, cancello zero, tetto delle 100.000 barre)
+#  resta valida ed e' stata ripresa nei criteri: risultati_archivio\
+#  R108_CRITERI.md. Quello che NON regge sono due cose, misurate il 25/08
+#  dal costruttore della riga e dichiarate qui invece che cancellate:
+#
+#  DIFETTO 1 -- IL MAGIC NON ERA VERGINE.
+#    Il file pinnava InpMagic=760030||...||760031: e' ESATTAMENTE la coppia
+#    con cui R103 ha girato ABTG_BreakingBand su EURUSD
+#    (prove\R103_ABTG_BreakingBand_EURUSD_772162.txt, riga InpMagic).
+#    Un magic di un round precedente non e' libero: i pass in cache e i
+#    file per-trade abtg_trades_*_<magic>.csv si sovrascriverebbero fra
+#    due round. Corretto: blocco 762xxx, VERGINE (zero occorrenze in tutto
+#    il repo, verificato il 25/08).
+#
+#  DIFETTO 2 -- LA CELLA NON ERA "LA STESSA" PER TUTTI E TRE I SIMBOLI.
+#    Il file pinnava InpPatternMode=2 e dichiarava "la stessa identica
+#    cella (unico input diverso: InpTF)". Le tre celle vive di R103 NON
+#    hanno lo stesso pattern: GBPUSD=2 (entrambi), EURUSD=0 (solo
+#    CONTINUAZIONE), AUDUSD=1 (solo INVERSIONE). Misurato diffando i tre
+#    file prova di R103. Con un 2 su EURUSD e AUDUSD il round non avrebbe
+#    misurato "lo stesso motore a M15": avrebbe misurato UN ALTRO MOTORE,
+#    e il confronto con R103 non sarebbe esistito.
+#
+#  TERZA COSA, NON UN DIFETTO MA UNA MANCANZA: qui non c'era nessun
+#  METRO. R108 aggiunge tre celle H1 che RIPRODUCONO i numeri di R103
+#  (gate G0): senza, "M15 va male" e "il banco e' storto" sarebbero
+#  indistinguibili.
+#
+#  Il magic qui sotto e' stato portato a 762010 perche' anche un lancio
+#  per sbaglio di questo file non possa collidere con niente: cosi'
+#  com'e' ora equivale alla cella R108_GBPUSD_01_m15.txt.
+# ---------------------------------------------------------------------
+#
 #  R108 — BREAKING BAND su M15: il ramo che la fonte del motore dichiara
 #         operativo e che non abbiamo MAI misurato.
 #
@@ -9,6 +49,7 @@
 #                      -Simbolo GBPUSD -Etichetta r108gbp
 #    ... idem EURUSD (r108eur) e AUDUSD (r108aud)
 #  => 3 passate. E' uno SCREENING, non un verdetto.
+#  [SUPERATO dai sei file elencati in testa.]
 #
 #  Nato da: caccia_strategie/CACCIA_M5M15_FOREX_ORO_2026-08-25.md (P1)
 #  Mandato di Claudio: "Dobbiamo avere piu' strategie su TF 5 min e 15 min.
@@ -206,7 +247,7 @@ InpNewsBeforeMin=60||60||0||60||N
 InpNewsAfterMin=30||30||0||30||N
 InpNewsShiftMinutes=0||0||0||0||N
 InpComment=R108 BB M15
-InpMagic=760030||760030||1||760031||Y
+InpMagic=762010||762010||1||762011||Y
 InpMaxSpread=0||0||0||0||N
 InpVerbose=true||true||0||true||N
 
