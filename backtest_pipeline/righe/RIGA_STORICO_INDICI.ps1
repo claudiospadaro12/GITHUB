@@ -1096,6 +1096,18 @@ if($Verifica -and -not $SoloControllo){
 }
 
 # =====================================================================
+#  PRIMA DEL REFERTO: un simbolo "IN GIRO" che non e' mai arrivato allo
+#  scarico non puo' restare con una casella vuota. Una casella vuota si
+#  legge come "e' andato tutto bene e non c'era niente da dire".
+# =====================================================================
+foreach($s in $Sedi){
+  if($s.Fase -eq "IN GIRO" -and $s.Barre -lt 0){
+    $s.Fase   = "NON SCARICATO"
+    $s.Perche = "la fase di scarico non e' stata eseguita (criteri non firmati, canarino rosso, spazio, o tetto ore): vedi PROBLEMI"
+  }
+}
+
+# =====================================================================
 #  F9. IL REFERTO -- si scrive SEMPRE, anche a corsa monca
 # =====================================================================
 $o = New-Object System.Collections.ArrayList
