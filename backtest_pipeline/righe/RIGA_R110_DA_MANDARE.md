@@ -127,6 +127,47 @@ La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
 silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola per un
 commit congelato.
 
+### 🔧 LA RICETTA DEL PIN — **prima pinnatura** (checklist 77)
+
+Il segnaposto è in **7 punti**: **5** blocchi di lancio, il riquadro e il titolo.
+La ricetta **compone il token in una variabile**, così non contiene mai la
+stringa che sta cercando (altrimenti si riscriverebbe da sola), e tocca **solo i
+punti d'uso** — la prosa che spiega deve restare leggibile anche dopo.
+
+```bash
+F=backtest_pipeline/righe/RIGA_R110_DA_MANDARE.md
+SHA=<il commit vero, 40 caratteri>
+TOK='@@PIN'"@@"
+sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|^$TOK\$|$SHA|; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|g" "$F"
+grep -c "\$pin='$SHA'" "$F"   # DEVE dare 5   <- i punti d'uso
+grep -c "$TOK" "$F"           # DEVE dare 0   <- nessun segnaposto rimasto
+```
+
+⚠️ **Servono TUTTI E DUE i conteggi.** Il solo *"0 segnaposto rimasti"* lo supera
+a mani basse anche un `sed` che **non ha matchato niente**: è il guardiano
+decorativo del punto 14 applicato a un `sed`.
+✅ **Provata su una copia della pagina prima di scriverla qui**: 7 → 5 + 1 + 1, e
+`0` segnaposto residui.
+
+### ♻️ E LA RICETTA DI **RI-PINNATURA** (checklist 77-bis) — perché il pin si rifà
+
+```bash
+F=backtest_pipeline/righe/RIGA_R110_DA_MANDARE.md
+NUOVO=<il commit nuovo, 40 caratteri>
+VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{40}')
+echo "vecchio: $VECCHIO"
+sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
+grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 5
+grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
+```
+
+⚠️ **Il pin vecchio si legge DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con
+un `grep` largo: in pagina i pin compaiono anche **abbreviati**, e un `sed` largo
+**riscrive la STORIA** — una riga come *"il pin X è BRUCIATO"* diventerebbe *"il
+pin \<quello NUOVO\> è BRUCIATO"*, cioè l'esatto contrario del vero.
+✅ **Provata anche questa su una copia**, con una riga di storia dentro: i 5 punti
+d'uso cambiano, **la riga di storia resta intatta**.
+
 ---
 
 ## ⚠️ COSA SAPERE PRIMA DI LANCIARE
