@@ -17,14 +17,14 @@ versione con il preset del conteggio che usciva **su una riga sola** e la
 conversione a 16 anni in un colpo solo (~3,8 GB di RAM, misurati).
 
 **Il pin da usare e' quello del commit che porta le correzioni**, e nelle **tre
-righe di lancio** qui sotto sta scritto come `461948fc44e7d06925b9e6559d91cbc4123d98e8`. Dopo il commit+push si
+righe di lancio** qui sotto sta scritto come `490f11252820da5c61d29f7afd5f141a55614967`. Dopo il commit+push si
 esegue **una volta sola** questo (sostituisce **tutte** le occorrenze del
 segnaposto, compresa quella dentro il comando stesso: e' fatto apposta, dopo
 questo giro il foglio e' pinnato e non si ri-sostituisce):
 
 ```powershell
 $sha = (git rev-parse HEAD)
-(Get-Content backtest_pipeline\righe\RIGA_STORICO_INDICI_DA_MANDARE.md -Raw).Replace('461948fc44e7d06925b9e6559d91cbc4123d98e8',$sha) |
+(Get-Content backtest_pipeline\righe\RIGA_STORICO_INDICI_DA_MANDARE.md -Raw).Replace('490f11252820da5c61d29f7afd5f141a55614967',$sha) |
   Set-Content backtest_pipeline\righe\RIGA_STORICO_INDICI_DA_MANDARE.md -Encoding UTF8
 ```
 
@@ -120,7 +120,7 @@ spazio, **misura** lo spazio libero, e si ferma.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='461948fc44e7d06925b9e6559d91cbc4123d98e8';
+    $pin='490f11252820da5c61d29f7afd5f141a55614967';
     $p="$env:USERPROFILE\RIGA_STORICO_INDICI.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_STORICO_INDICI.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v1' -Quiet)){ throw 'SCRIPT VECCHIO: il pin non contiene il driver nuovo.' };
@@ -149,7 +149,7 @@ MT5.**
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='461948fc44e7d06925b9e6559d91cbc4123d98e8';
+    $pin='490f11252820da5c61d29f7afd5f141a55614967';
     $p="$env:USERPROFILE\RIGA_STORICO_INDICI.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_STORICO_INDICI.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
@@ -192,7 +192,7 @@ Il tester gira sempre con `AllowLiveTrading=false`.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $vivi=@(Get-Process -Name terminal64,metaeditor64 -EA SilentlyContinue);
     if($vivi.Count -gt 0){ throw ('APERTO: ' + (($vivi | ForEach-Object { $_.ProcessName } | Sort-Object -Unique) -join ', ') + ' -- chiudi MT5 E MetaEditor (tutte le istanze) e rilancia.') };
-    $pin='461948fc44e7d06925b9e6559d91cbc4123d98e8';
+    $pin='490f11252820da5c61d29f7afd5f141a55614967';
     $p="$env:USERPROFILE\RIGA_STORICO_INDICI.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_STORICO_INDICI.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
