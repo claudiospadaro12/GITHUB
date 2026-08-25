@@ -133,10 +133,10 @@ Perciò `R111_CRITERI.md` conserva `[DA FIRMARE]`, e il driver lo legge al pin:
 
 ---
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`6e7d34c0debd3a49f98cf7227ee59f238cad6191`**
 
 ```
-@@PIN@@
+6e7d34c0debd3a49f98cf7227ee59f238cad6191
 ```
 
 🔴 **Finché lì sopra c'è il segnaposto, la riga NON si detta**: va sostituito col
@@ -233,7 +233,7 @@ prima: la pagina intanto si riempie di storia.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='6e7d34c0debd3a49f98cf7227ee59f238cad6191'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R111_BB_M30.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R111_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -303,7 +303,7 @@ criteri** e poi si gira: **i criteri si cambiano PRIMA dei numeri, mai dopo.**
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='6e7d34c0debd3a49f98cf7227ee59f238cad6191'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R111_BB_M30.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R111_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati; $rc=$LASTEXITCODE;
@@ -337,7 +337,7 @@ fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='6e7d34c0debd3a49f98cf7227ee59f238cad6191'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R111_BB_M30.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R111_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloSimbolo 'GBPUSD'; $rc=$LASTEXITCODE;
@@ -354,7 +354,7 @@ un **array** e il binder lo unisce con uno spazio):
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='6e7d34c0debd3a49f98cf7227ee59f238cad6191'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R111_BB_M30.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R111_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloSimbolo 'EURUSD,AUDUSD'; $rc=$LASTEXITCODE;
@@ -371,7 +371,7 @@ metro il numero non si legge — costa 3 passate, non una corsa sprecata):
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='6e7d34c0debd3a49f98cf7227ee59f238cad6191'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R111_BB_M30.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R111_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -SoloCella 'R111_GBPUSD_01_m30.txt'; $rc=$LASTEXITCODE;
@@ -387,7 +387,7 @@ metro il numero non si legge — costa 3 passate, non una corsa sprecata):
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $t0=Get-Date; $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $t0=Get-Date; $pin='6e7d34c0debd3a49f98cf7227ee59f238cad6191'; $p="$env:USERPROFILE\RIGA_R111.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R111_BB_M30.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R111_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -CriteriFirmati -ScreenOhlcM30; $rc=$LASTEXITCODE;
