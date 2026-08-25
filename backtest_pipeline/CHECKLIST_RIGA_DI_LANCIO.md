@@ -3921,3 +3921,85 @@ firma**, l'unico giorno in cui quel gate viene davvero esercitato.
 > bypass **si toglie dalla riga**. Lasciarlo "tanto e' innocuo" lo trasforma in
 > un bypass permanente scritto nella pagina, che il giorno in cui qualcuno
 > rimette un lucchetto **non fara' fermare niente**.
+
+---
+
+## 🆕 AGGIUNTA DEL 25/08/2026 (notte) — trovata verificando R111 (Breaking Band su M30), **ESEGUENDO il driver sei volte di fila**
+
+## 70-bis. 🎰 L'ELENCO CHE CAMBIA ORDINE **A OGNI CORSA**: le chiavi di un hashtable non sono "un altro ordine", sono **NESSUN ordine** — e "incollalo dall'output" NON BASTA
+
+_Difetto vero, gia' committato in `RIGA_R111_BB_M30.ps1` (`9fe1baa`, funzione
+`GateAntenato`) e in `RIGA_R111_DA_MANDARE.md` (l'elenco che Claudio deve
+confrontare a schermo prima di dare il via libera). Trovato PRIMA dell'invio, e
+**MISURATO facendo girare il driver sei volte**._
+
+Il gate dell'antenato costruisce l'elenco dei delta ammessi cosi':
+
+```powershell
+$hAnt = @{}; foreach($riga in (RigheVive $fileAnt)){ $hAnt[(NomeDi $riga)] = $riga }
+...
+foreach($k in $hAnt.Keys){ ... [void]$div.Add($k) ... }
+Dico ("gate dell'ANTENATO ... (delta: " + ($div -join ", ") + ")")
+```
+
+e il foglio `*_DA_MANDARE.md` prometteva, fra le righe da confrontare a schermo:
+
+```
+gate dell'ANTENATO R103 <sim>: ... (delta: InpComment, InpMagic, InpNewsCurrencies)
+```
+
+**Misurato: sei corse dello stesso driver sugli stessi file, QUATTRO ordini
+diversi degli stessi tre nomi.**
+
+```
+(delta: InpNewsCurrencies, InpMagic, InpComment)
+(delta: InpComment, InpMagic, InpNewsCurrencies)
+(delta: InpNewsCurrencies, InpMagic, InpComment)
+(delta: InpMagic, InpComment, InpNewsCurrencies)
+(delta: InpNewsCurrencies, InpComment, InpMagic)
+(delta: InpComment, InpNewsCurrencies, InpMagic)
+```
+
+La causa non e' PowerShell: e' che **l'hash delle stringhe di .NET e'
+randomizzato PER PROCESSO**. Un `Hashtable` non ha un ordine "diverso da quello
+che credevi" — **non ha ordine, e non e' nemmeno lo stesso due volte**.
+
+### Perche' non e' il punto 70, ed e' peggio
+
+Il **70** e' nato su `Sort-Object -Unique`: l'ordine e' **un altro** ma e'
+**sempre lo stesso**, e la sua regola — *"la stringa attesa si produce ESEGUENDO
+il codice che la stampa, e si incolla nel documento DALL'OUTPUT"* — **basta e
+funziona**. Qui la stessa regola, applicata alla lettera, **produce comunque un
+documento sbagliato**: si esegue una volta, si incolla quell'ordine, e alla
+corsa successiva la riga non combacia lo stesso. Chi verifica "eseguendo e
+confrontando" **vede verde una volta su quattro** e non capisce perche'.
+
+☠️ **E il costo e' quello del 70 moltiplicato**: e' una riga che il documento
+manda Claudio a **confrontare a schermo prima di autorizzare la corsa vera**. O
+ferma il round per un falso allarme, o impara che gli attesi del documento sono
+"circa" — e allora il gesto del confronto non serve piu' a niente. In piu' **due
+referti dello stesso identico round si leggono come diversi**, e fra sei mesi
+sembrano due misure.
+
+⚠️ Il punto 70 lo nominava gia' come sospetto (*"le chiavi di un `@{}` non hanno
+ordine garantito: serve `[ordered]@{}`"*) — e **non e' bastato**: nel driver
+l'hashtable serve per il **lookup per nome** (che e' il modo giusto, il confronto
+posizionale sarebbe il difetto 58), quindi il sospetto non scattava. Il difetto
+non e' l'hashtable: e' **stampare le sue chiavi**.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **Ogni elenco che finisce a schermo o in un referto si ORDINA ALLA FONTE**,
+>    subito prima di stamparlo: `$div = @($div | Sort-Object)`. Non si ordina il
+>    documento intorno all'output: si rende l'output **deterministico**.
+> 2. **La prova non e' UNA esecuzione: sono ALMENO CINQUE**, in **processi
+>    diversi** (l'hash e' randomizzato per processo: cinque giri nella stessa
+>    sessione darebbero sempre la stessa risposta e non proverebbero niente).
+>    Se l'elenco non e' identico cinque volte su cinque, il documento non puo'
+>    prometterlo.
+> 3. **La domanda da farsi su ogni riga che il documento chiede di confrontare**:
+>    *"da dove esce questo elenco?"*. Se la risposta contiene `.Keys`,
+>    `Get-ChildItem`, `Group-Object`, `Where-Object` su una hashtable o un
+>    `foreach` su un `@{}`, **l'ordine non esiste**: va imposto.
+>
+> 🧭 **E la controprova costa dieci secondi**: prima `Sort-Object`, quattro ordini
+> su sei giri; dopo, **sei giri su sei identici**. Provata.
