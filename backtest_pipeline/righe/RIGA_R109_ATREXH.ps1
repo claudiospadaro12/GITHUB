@@ -707,7 +707,45 @@ function Passo0($deal,[double]$punto,[int]$barSec,[double]$deposito,[int]$cap){
     GiorniOp=-1; MaxGiorno=-1; GiorniAlCap=-1; Sedute=-1; OpSeduta=-1.0
   }
   if($null -eq $deal -or @($deal).Count -eq 0){ $r.Stato = "NON MISURATO (nessun deal letto dal report)"; return $r }
-  $ordinati = @($deal | Sort-Object Ora)
+  #  >>> NIENTE Sort-Object, ED E' UNA CORREZIONE PAGATA (indagine del 26/08,
+  #      R109_INDAGINE_DEAL_2026-08-26.md). Qui c'era:
+  #          $ordinati = @($deal | Sort-Object Ora)
+  #      `Sort-Object` di PowerShell NON E' STABILE: sulle chiavi uguali
+  #      l'ordine d'uscita e' ARBITRARIO (il parametro -Stable esiste solo da
+  #      PS 7, e il PC di Claudio ha Windows PowerShell 5.1). I deal che
+  #      condividono il SECONDO -- apertura e stop dentro lo stesso secondo,
+  #      oppure chiusura e riapertura nello stesso secondo -- venivano
+  #      INVERTITI, e una coppia in/out invertita fa sembrare SPAIATA una
+  #      sequenza perfetta.
+  #      MISURATO sulla corsa vera: 34 false anomalie e 16 operazioni perse su
+  #      5 celle su 6 (la sesta, NASUSD long, era pulita solo perche' non ha
+  #      deal a pari secondo). Ogni gruppo invertito costa 2 anomalie e 1
+  #      operazione: RIPRODOTTO qui, e l'aritmetica 2*A + 3*B torna su tutte
+  #      e sei le celle.
+  #      >>> E IL DANNO PEGGIORE NON E' IL NUMERO: e' che il messaggio
+  #          d'errore era PLAUSIBILE e accusava L'EA ("una posizione alla
+  #          volta / niente parziali: non dovrebbe succedere"), cioe' l'unico
+  #          pezzo innocente della catena.
+  #      >>> E IL SORT NON SERVIVA: i deal arrivano dall'.htm in ordine di
+  #          TICKET, che e' cronologico e -- a differenza dell'orario -- NON
+  #          HA PARI. Era un gesto difensivo che ha introdotto il difetto che
+  #          voleva evitare.
+  $ordinati = @($deal)
+  #  >>> MA "arrivano gia' ordinati" e' un'ASSUNZIONE, e in questa casa le
+  #      assunzioni si MISURANO o si DICHIARANO (mai si danno per buone).
+  #      Si controlla, e se il file smentisse l'assunzione NON si ordina alla
+  #      cieca -- si dichiara e si rifiuta di misurare, perche' riordinare
+  #      senza una chiave di spareggio univoca e' esattamente il difetto di
+  #      sopra. La chiave giusta ci sarebbe (il numero d'AFFARE, che LeggiDeal
+  #      oggi non conserva): se un giorno servisse davvero, si legge quella.
+  $fuoriOrdine = 0
+  for($i=1; $i -lt $ordinati.Count; $i++){
+    if($ordinati[$i].Ora -lt $ordinati[$i-1].Ora){ $fuoriOrdine++ }
+  }
+  if($fuoriOrdine -gt 0){
+    $r.Stato = "NON MISURATO: i deal del report NON arrivano in ordine cronologico (" + $fuoriOrdine + " salti all'indietro). Il PASSO 0 assume l'ordine di TICKET dell'.htm e NON riordina, perche' un Sort-Object sull'ORA non e' stabile e sui deal a pari secondo inventa anomalie (indagine del 26/08). Serve la chiave di spareggio sul numero d'AFFARE, che oggi LeggiDeal non conserva: finche' non c'e', questa cella NON si misura e non si stima."
+    return $r
+  }
   $apertoOra = $null; $apertoPrezzo = $null; $apertoNetto = 0.0; $apertoVol = $null
   $take = New-Object System.Collections.ArrayList
   $perd = New-Object System.Collections.ArrayList
