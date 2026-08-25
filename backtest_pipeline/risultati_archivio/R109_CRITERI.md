@@ -1,3 +1,5 @@
+STATO_CRITERI_R109: FIRMATI
+
 # ✍️ R109 — **ATR EXHAUSTION & VOLUME SPIKE** su indici M15 (D30EUR · U30USD · NASUSD), **LONG e SHORT separati** — CRITERI **FIRMATI**
 
 > 🖊️ **FIRMA: "FIRMO" — Claudio, 25/08/2026 sera.** Le otto decisioni del § 10

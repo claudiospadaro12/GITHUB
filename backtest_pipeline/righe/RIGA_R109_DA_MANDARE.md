@@ -10,12 +10,17 @@ porting **P2** della caccia M5/M15 indici del 25/08 (voto **9/10 — PROVA SUBIT
 `R109_U30USD_00_long.txt`, `R109_U30USD_01_short.txt`,
 `R109_NASUSD_00_long.txt`, `R109_NASUSD_01_short.txt` — **sei**.
 
-> 🟢 **PASSATO DAL VERIFICATORE-STRINGHE il 25/08 — verdetto `FAIL → CORRETTO`.**
-> **Sette** difetti trovati e corretti (elenco in fondo alla pagina), di cui
-> **tre di classe NUOVA**, finiti in `CHECKLIST_RIGA_DI_LANCIO.md` (punti 76-78). Le
-> stringhe qui dentro sono quelle **definitive**; resta solo il pin, che è
-> ancora un **segnaposto** (`@@PIN@@`) e va sostituito con la ricetta a **due
-> commit** qui sotto — **il primo commit deve contenere anche le correzioni**.
+> 🟢 **PASSATO DAL VERIFICATORE-STRINGHE il 25/08 — verdetto `FAIL → CORRETTO`,
+> in DUE giri.** **Dieci** difetti trovati e corretti (elenco in fondo alla
+> pagina), di cui **quattro di classe NUOVA** finiti in
+> `CHECKLIST_RIGA_DI_LANCIO.md` (punti **76-79**).
+>
+> 🔴 **IL PIN `cf6126d` È BRUCIATO — NON LANCIARE NIENTE CON QUELLO.** Il suo
+> giro a vuoto è uscito **`ESITO: OK`** con `ToDate` corrotto in tutti e 12 gli
+> `.ini` delle celle: la corsa vera avrebbe girato su una **finestra non
+> dichiarata**. Trovato da **Claudio** aprendo un `.ini` dello zip delle 21:48.
+> Serve un **pin nuovo** sul commit che contiene le correzioni (§ IL PIN), e
+> **il giro a vuoto va rifatto**.
 
 ---
 
@@ -181,19 +186,27 @@ grep -c "\$pin='$TOK'" "$F"   # DEVE dare 0  (nessun segnaposto rimasto nei bloc
 git add "$F" && git commit -m "R109: pin" && git push
 ```
 
-🔁 **E SE IL PIN VA RIFATTO** (una correzione al driver a giro iniziato: è
-successo il 25/08 sullo storico indici, dove `826f008` non conteneva l'ultima
-correzione) — il segnaposto non c'è più, quindi si sostituisce **il pin
-VECCHIO**, e si controlla che **non ne resti nemmeno uno**:
+🔁 **E SE IL PIN VA RIFATTO** — succede sul serio: il 25/08 **due volte**
+(`826f008` sullo storico indici, e `cf6126d` qui, bruciato dal difetto del
+`ToDate`). Il segnaposto non c'è più, quindi si sostituisce **il pin vecchio**:
 
 ```bash
 F=backtest_pipeline/righe/RIGA_R109_DA_MANDARE.md
-VECCHIO=<il pin scritto adesso nella pagina>
+# il pin VECCHIO si legge DAI PUNTI D'USO, non "a occhio dalla pagina"
+VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{40}')
 git push && NUOVO=$(git rev-parse HEAD)
-sed -i "s|$VECCHIO|$NUOVO|g" "$F"
-grep -c "$NUOVO" "$F"     # DEVE dare 4  (il riquadro + i tre blocchi)
-grep -c "$VECCHIO" "$F"   # DEVE dare 0
+sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|" "$F"
+grep -c "\$pin='$NUOVO'" "$F"     # DEVE dare 3
+grep -c "\$pin='$VECCHIO'" "$F"   # DEVE dare 0
 ```
+
+🔴 **E NON un `sed -i "s|$VECCHIO|$NUOVO|g"` secco.** Provato, e sbagliava: in
+pagina i pin compaiono anche **ABBREVIATI e in PROSA** (`cf6126d` nella riga
+*"il pin `cf6126d` è BRUCIATO"* e nella tabella dei difetti). Un `sed` largo
+prendeva **6 occorrenze invece di 4** e riscriveva la **storia** — la pagina
+avrebbe detto *"il pin `<nuovo>` è bruciato"*, cioè l'esatto contrario del
+vero. Le menzioni in prosa sono **memoria**, non pin da usare: **non si
+toccano**. Stessa regola del punto **77**: si sostituiscono i **punti d'uso**.
 
 ⚠️ Se il segnaposto resta, l'`irm` prende un **404**, `-ErrorAction Stop` è
 terminante e **la riga muore lì**: non parte niente. È il comportamento voluto,
@@ -332,6 +345,17 @@ E poi, in ordine:
   correggere;
 - in fondo: `.ini scritti e verificati: 13 su 13` e
   `ESITO: GIRO A VUOTO COMPLETATO`.
+
+> 🔴 **E POI APRI UN `.ini` DELLO ZIP — sempre, non solo stavolta.** È così che
+> è stato preso il difetto del `ToDate` (il giro a vuoto diceva `ESITO: OK`).
+> Le due righe da guardare, in `NASUSD_01_short_singola.ini`:
+> ```
+> FromDate=2024.09.26
+> ToDate=2026.08.21
+> ```
+> **Devono essere due date.** Adesso il driver le controlla da solo in quattro
+> punti (argomenti, testo dell'`.ini`, rilettura nel giro a vuoto, referto), ma
+> **il gesto di aprire l'artefatto resta il controllo che ha funzionato**.
 
 > ⚠️ **Quello che il giro a vuoto NON può fare, detto prima.** `-SoloControllo`
 > **non apre MT5**: nessun `n`, nessun PF, nessun DD, **nessun S0** e —
@@ -613,8 +637,28 @@ il **PASSO 0** sul report finto coi **17 numeri calcolati a mano prima** (tutti
 centrati), `-SoloControlo` con una L e `-Riprendi` → **errore di binding, lo
 script muore**.
 
-**I sette difetti, e come sono stati corretti** (tre sono **classi nuove**,
-finite in `CHECKLIST_RIGA_DI_LANCIO.md` come punti **76, 77, 78**):
+### 🔴 SECONDO GIRO — i due difetti trovati **sul PC di Claudio**, non qui
+
+Il pin **`cf6126d` è BRUCIATO**: il suo giro a vuoto (21:48) è uscito **`ESITO:
+OK`** con dentro un difetto che cambiava **la finestra del round**. L'ha trovato
+**Claudio**, aprendo un `.ini` dello zip. È la lezione di metodo di tutta la
+serata: **provare una funzione chiamandola da un test dimostra che la funzione è
+giusta, non che riceve gli argomenti giusti.**
+
+| | difetto | classe | correzione |
+|---|---|---|---|
+| **8** | 🔠 **`ToDate` CORROTTO in tutti e 12 gli `.ini` delle celle.** La finestra si chiamava `$Da` / `$A`; novecento righe sotto il **gate della STELLA** faceva `$a = $Vive[...]` a scope di script — e **in PowerShell `$a` È `$A`**. La data di fine diventava un **array di 41 stringhe**, che un parametro `[string]` unisce con `$OFS` (**uno spazio**): `ToDate=InpUsaGuardian=true\|\|true\|\|0\|\|true\|\|N InpPivotLeft=5\|\|...`. Lo stesso testo nel referto, sezione *LA FINESTRA*. ⚠️ **Il giro a vuoto è uscito 0**: le fabbriche controllavano 41 parametri, `Period`, `Model`, `Symbol`, asse Y, magic e `AllowLiveTrading` — **mai le DATE**. E a schermo la riga `FINESTRA :` si stampa **prima** del danno, quindi sembrava giusta | 🆕 **classe nuova → punto 79** | `$Da`/`$A` → **`$DataDa`/`$DataA`** (nomi lunghi = non collidibili); **`GateDate`** in **tutte e due** le fabbriche (forma `aaaa.mm.gg` + giorno che esiste + `ToDate > FromDate`) e **`GateDateIni`** sullo **stato finale del testo**; il **giro a vuoto rilegge le due righe dall'`.ini`**; il **referto dichiara** una finestra impossibile invece di mostrarla |
+| **9** | 🧨 **Il gemello dello stesso difetto, non ancora esploso**: l'ArrayList del referto si chiamava **`$R`** e la sua costruzione conteneva `foreach($r in $AutotestRighe){ [void]$R.Add(...) }`. Al primo giro `$R` diventa una **stringa** → *"[System.String] does not contain a method named 'Add'"*. **Invisibile nel giro a vuoto** (l'autotest è vuoto), **fatale nella corsa vera**: referto **troncato** alla sezione dell'autotest e `RACCOLTA PARZIALE` **dopo 3-12 ore di tick reali**. Riprodotto | 🆕 **punto 79** (stessa classe) | `$R` → **`$RefTxt`** (180 occorrenze) |
+| **10** | ✍️ **Il gate della firma non riconosceva i criteri FIRMATI.** `R109_CRITERI.md` porta la firma di Claudio in testa (*"FIRMA: «FIRMO» — 25/08 sera"*) **e** due `[DA FIRMARE]` residui **nella prosa che spiega il lucchetto**. Il `Select-String` secco li trovava → **`exit 2` su criteri firmati** | **77** (il token cercato dove lo si spiega) | il gate legge, **in quest'ordine**: la riga di stato `STATO_CRITERI_R109:`, poi la **FIRMA in testa**, poi — solo come ultima spiaggia — `[DA FIRMARE]`, **dichiarando l'ambiguità** in un rilievo |
+
+> 📝 **Una riga che conviene aggiungere in testa a `R109_CRITERI.md`** (non
+> l'ho scritta io: la firma è di Claudio, non del verificatore) —
+> `STATO_CRITERI_R109: FIRMATI`. Con quella, il gate non ha più bisogno di
+> dedurre niente. **Senza, funziona lo stesso**: la firma in testa basta.
+
+---
+
+### PRIMO GIRO — **i sette difetti** trovati qui, prima dell'invio (tre sono **classi nuove**, punti **76, 77, 78**):
 
 | | difetto | classe | correzione |
 |---|---|---|---|

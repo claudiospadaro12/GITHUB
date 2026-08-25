@@ -204,9 +204,9 @@ $RMinPunti       = 5.0           # sotto questa perdita mediana (~ R) scatta
                                  #  lo slippage si mangia l'operazione" (R55).
 
 #--- LE FINESTRE. Criteri par. 4.
-$Da        = "2024.09.26"        # MISURATO: REFERTO_SONDA_STORICO_17-08.md,
+$DataDa        = "2024.09.26"        # MISURATO: REFERTO_SONDA_STORICO_17-08.md,
                                  #  stato COMPLETO = il broker non ha altro.
-$A         = "2026.08.21"        # ultimo venerdi' prima del round
+$DataA         = "2026.08.21"        # ultimo venerdi' prima del round
 $MesiPrimaOp = 2                 # prima operazione entro N mesi = FINESTRA
                                  #  PIENA. 2 e non 6 (R103/R108): su 23 mesi,
                                  #  sei mesi sarebbero un quarto della finestra
@@ -985,14 +985,14 @@ Write-Host ("    righe vive per file prova ....  " + $RigheAtte + "   (42 input 
 Write-Host ("    righe per CSV di ottimizz. ...  " + $CelleAttese + "   (le due gemelle di controllo)") -ForegroundColor White
 Write-Host ""
 if($ScreenOhlcM15){
-  Write-Host ("    FINESTRA : " + $Da + " -> " + $A + "   modello 1 (OHLC M1)   <<< -ScreenOhlcM15 ACCESO") -ForegroundColor Yellow
+  Write-Host ("    FINESTRA : " + $DataDa + " -> " + $DataA + "   modello 1 (OHLC M1)   <<< -ScreenOhlcM15 ACCESO") -ForegroundColor Yellow
   Write-Host  "               >>> E' UNO SCREEN. OGNI RIGA DI QUESTO GIRO ESCE MARCATA" -ForegroundColor Yellow
   Write-Host  "                   'NON GIUDICABILE'. Su M15 l'OHLC inganna, ed e' MISURATO" -ForegroundColor Yellow
   Write-Host  "                   in casa (REGISTRO_TEST.md par.2). E qui morde PIU' del" -ForegroundColor Yellow
   Write-Host  "                   solito: l'ingresso nasce da un ESTREMO DI BARRA e lo stop" -ForegroundColor Yellow
   Write-Host  "                   sta a un tick dal minimo. Nessun cancello si applica." -ForegroundColor Yellow
 } else {
-  Write-Host ("    FINESTRA : " + $Da + " -> " + $A + "   modello 4 (TICK REALI)") -ForegroundColor White
+  Write-Host ("    FINESTRA : " + $DataDa + " -> " + $DataA + "   modello 4 (TICK REALI)") -ForegroundColor White
 }
 Write-Host  "    NIENTE IS/OOS, ed e' la decisione D3: l'Emendamento A dimensiona l'IS" -ForegroundColor White
 Write-Host  "    SULLE OPERAZIONI, e le operazioni non le conosciamo ancora. Questo round" -ForegroundColor White
@@ -1061,9 +1061,34 @@ $daFirmare = $true
 $critScaricati = $true
 try{
   Scarica ("$RawPin/backtest_pipeline/risultati_archivio/R109_CRITERI.md") $critFile 'R109'
-  $daFirmare = (Select-String -LiteralPath $critFile -SimpleMatch -Pattern '[DA FIRMARE]' -Quiet)
-  if($daFirmare){ $Firma = "NON FIRMATI (il file porta ancora [DA FIRMARE])" }
-  else          { $Firma = "FIRMATI (nessun [DA FIRMARE] nel file)" }
+  #  >>> LA FIRMA SI LEGGE SU UNA RIGA DI STATO DEDICATA, NON CERCANDO UNA
+  #      PAROLA CHE COMPARE ANCHE NELLA PROSA CHE LA SPIEGA (25/08, stessa
+  #      classe del punto 77 della checklist). Il file dei criteri contiene
+  #      DUE righe che PARLANO del lucchetto -- il paragrafo che spiega cos'e'
+  #      il "[DA FIRMARE]" e il titolo del par. 10 -- e un Select-String secco
+  #      le trova anche quando Claudio HA firmato in testa: la corsa vera
+  #      uscirebbe 'exit 2' su criteri firmati, e sarebbe un giro sprecato.
+  #      Ordine: (1) la riga di STATO se c'e'; (2) la FIRMA in testa;
+  #      (3) il vecchio [DA FIRMARE], e in quel caso lo si DICHIARA ambiguo.
+  $critTesto = (Get-Content -LiteralPath $critFile -Raw)
+  $mSt = [regex]::Match($critTesto,'(?im)^\s*(?:<!--\s*)?STATO[_ ]CRITERI[_ ]R109\s*:\s*(FIRMATI|DA FIRMARE)')
+  $mFi = [regex]::Match($critTesto,'(?im)^>?\s*.{0,8}\*\*FIRMA:\s*"?FIRMO')
+  $haLucchetto = (Select-String -LiteralPath $critFile -SimpleMatch -Pattern '[DA FIRMARE]' -Quiet)
+  if($mSt.Success){
+    $daFirmare = ($mSt.Groups[1].Value.ToUpper() -ne "FIRMATI")
+    if($daFirmare){ $Firma = "NON FIRMATI (riga di STATO: DA FIRMARE)" }
+    else          { $Firma = "FIRMATI (riga di STATO: FIRMATI)" }
+  } elseif($mFi.Success){
+    $daFirmare = $false
+    $Firma = "FIRMATI (trovata la FIRMA in testa al file)"
+    if($haLucchetto){
+      [void]$Rilievi.Add("I CRITERI SONO FIRMATI (la firma e' in testa al file) MA il testo contiene ancora la stringa '[DA FIRMARE]' nella prosa che la spiega. Il gate ha usato la FIRMA, che e' il dato piu' forte. Per togliere l'ambiguita' basta una riga in testa al file: 'STATO_CRITERI_R109: FIRMATI'.")
+    }
+  } else {
+    $daFirmare = $haLucchetto
+    if($daFirmare){ $Firma = "NON FIRMATI (il file porta ancora [DA FIRMARE], e non c'e' ne' riga di STATO ne' firma in testa)" }
+    else          { $Firma = "FIRMATI (nessun [DA FIRMARE] nel file)" }
+  }
 }catch{
   $critScaricati = $false
   $Firma = "NON LETTI (" + $_.Exception.Message + ")"
@@ -1278,7 +1303,7 @@ foreach($c in $Lavori){
   }
   # --- @SIMBOLO / @PERIODO / @DAQUANDO, confrontati e non creduti.
   $m = [regex]::Match($tx,'(?m)^@DAQUANDO\s+([0-9]{4}\.[0-9]{2}\.[0-9]{2})')
-  if(-not $m.Success -or $m.Groups[1].Value -ne $Da){ throw ($c.Prova + ": @DAQUANDO non e' " + $Da) }
+  if(-not $m.Success -or $m.Groups[1].Value -ne $DataDa){ throw ($c.Prova + ": @DAQUANDO non e' " + $DataDa) }
   $sm = [regex]::Match($tx,'(?m)^@SIMBOLO\s+(\S+)')
   if(-not $sm.Success -or $sm.Groups[1].Value -ne $c.Sym){ throw ($c.Prova + ": @SIMBOLO non e' " + $c.Sym) }
   $pm = [regex]::Match($tx,'(?m)^@PERIODO\s+(\S+)')
@@ -1561,7 +1586,40 @@ Dico ("COMPILATO " + $Ea + " v" + $EaVer + " (.ex5 riscritto adesso, rc=" + $rcM
 #      un modello dedotto sarebbe la classe di difetto 49 (la spia
 #      costruita sulla cella che non sa dire lo stato "a meta'").
 # =====================================================================
+#  >>> LA FINESTRA E' UN PARAMETRO COME GLI ALTRI, E VA CONTROLLATA COME
+#      GLI ALTRI (pagato il 25/08 sul PC di Claudio, giro a vuoto delle
+#      21:48, pin cf6126d). Le fabbriche controllavano i 41 parametri, il
+#      Period, il Model, l'asse Y, il magic, AllowLiveTrading... e NON le
+#      DATE. Una $DataA corrotta e' passata da tutti i gate, e' finita
+#      nell'.ini come
+#         ToDate=InpUsaGuardian=true||true||0||true||N InpPivotLeft=5||...
+#      ed e' uscita ESITO 0. La finestra e' la meta' di quello che un
+#      backtest MISURA: se non e' quella dichiarata, il numero non risponde
+#      alla domanda -- e MT5 con un ToDate invalido non si sa cosa faccia
+#      (forse corre fino a oggi), quindi non e' nemmeno un errore rumoroso.
+function GateDate([string]$eti,[string]$da,[string]$a){
+  #  1. la FORMA, su tutte e due
+  if($da -notmatch '^\d{4}\.\d{2}\.\d{2}$'){ throw ($eti + ": FromDate non e' una data 'aaaa.mm.gg' ma [" + $da + "]. La finestra non e' quella dichiarata: mi fermo PRIMA di scrivere l'ini.") }
+  if($a  -notmatch '^\d{4}\.\d{2}\.\d{2}$'){ throw ($eti + ": ToDate non e' una data 'aaaa.mm.gg' ma [" + $a + "]. La finestra non e' quella dichiarata: mi fermo PRIMA di scrivere l'ini.") }
+  #  2. che siano date VERE (2026.02.31 ha la forma giusta e non esiste)
+  $d1 = [datetime]::MinValue; $d2 = [datetime]::MinValue
+  if(-not [datetime]::TryParseExact($da,"yyyy.MM.dd",$INV,[Globalization.DateTimeStyles]::None,[ref]$d1)){ throw ($eti + ": FromDate [" + $da + "] ha la forma di una data ma non e' un giorno che esiste.") }
+  if(-not [datetime]::TryParseExact($a ,"yyyy.MM.dd",$INV,[Globalization.DateTimeStyles]::None,[ref]$d2)){ throw ($eti + ": ToDate [" + $a + "] ha la forma di una data ma non e' un giorno che esiste.") }
+  #  3. e che vadano nel verso giusto
+  if($d2 -le $d1){ throw ($eti + ": ToDate (" + $a + ") non e' DOPO FromDate (" + $da + "): la finestra e' vuota o rovesciata.") }
+}
+#  >>> E il controllo si ripete SULLO STATO FINALE DEL TESTO, come tutti
+#      gli altri gate di queste fabbriche: quello sopra guarda gli
+#      ARGOMENTI, questo guarda l'ARTEFATTO CHE GIRA (checklist 34-bis).
+function GateDateIni([string]$eti,[string]$testo,[string]$da,[string]$a){
+  if($testo -notmatch ('(?m)^FromDate=' + [regex]::Escape($da) + '\r?$')){ throw ($eti + ": nell'ini la riga FromDate non e' 'FromDate=" + $da + "'.") }
+  if($testo -notmatch ('(?m)^ToDate='   + [regex]::Escape($a)  + '\r?$')){ throw ($eti + ": nell'ini la riga ToDate non e' 'ToDate=" + $a + "'.") }
+  $nf = @([regex]::Matches($testo,'(?m)^FromDate=')).Count
+  $nt = @([regex]::Matches($testo,'(?m)^ToDate=')).Count
+  if($nf -ne 1 -or $nt -ne 1){ throw ($eti + ": nell'ini ci sono " + $nf + " righe FromDate e " + $nt + " righe ToDate invece di una ciascuna.") }
+}
 function IniOtt($cella,[string]$da,[string]$a,[int]$magic,[int]$modello,[string]$dest,[string]$report){
+  GateDate ("ini OTT " + $cella.Prova) $da $a
   $out = New-Object System.Collections.ArrayList
   foreach($r in $Vive[$cella.Prova]){
     if((NomeDi $r) -eq "InpMagic"){ [void]$out.Add("InpMagic=" + $magic + "||" + $magic + "||1||" + ($magic+1) + "||Y") }
@@ -1602,9 +1660,11 @@ Report=$report
 [TesterInputs]
 $inputs
 "@
+  GateDateIni ("ini OTT " + $cella.Prova) $testo $da $a
   Set-Content -LiteralPath $dest -Value $testo -Encoding ASCII
 }
 function IniSingola($cella,[string]$da,[string]$a,[int]$magic,[int]$modello,[string]$dest,[string]$report){
+  GateDate ("ini SINGOLA " + $cella.Prova) $da $a
   $out = New-Object System.Collections.ArrayList
   foreach($r in $Vive[$cella.Prova]){
     $nome = NomeDi $r
@@ -1649,6 +1709,7 @@ Report=$report
 [TesterInputs]
 $inputs
 "@
+  GateDateIni ("ini SINGOLA " + $cella.Prova) $testo $da $a
   Set-Content -LiteralPath $dest -Value $testo -Encoding ASCII
 }
 
@@ -1749,7 +1810,7 @@ foreach($c in $Ordinati){
   Write-Host "------------------------------------------------------------------" -ForegroundColor Cyan
   Write-Host ("  [" + $idx + "/" + $Ordinati.Count + "]  " + $c.Prova + "   <<< " + $c.Lato + " SOLO") -ForegroundColor Cyan
   Write-Host ("           " + $c.Desc) -ForegroundColor Cyan
-  Write-Host ("           M15 | modello " + $c.Modello + " | " + $Da + " -> " + $A + " | magic base " + $c.Base) -ForegroundColor Cyan
+  Write-Host ("           M15 | modello " + $c.Modello + " | " + $DataDa + " -> " + $DataA + " | magic base " + $c.Base) -ForegroundColor Cyan
   Write-Host "------------------------------------------------------------------" -ForegroundColor Cyan
   $tCella = Get-Date
 
@@ -1758,8 +1819,8 @@ foreach($c in $Ordinati){
   $iniSing = Join-Path $Work ($c.Sym + "_" + $c.Id + "_singola.ini")
   $iniInt  = Join-Path $Work ($c.Sym + "_" + $c.Id + "_gemelle.ini")
   $repSing = "R109_" + $c.Sym + "_" + $c.Id + "_singola"
-  IniSingola $c $Da $A ($c.Base + 2) $c.Modello $iniSing $repSing
-  IniOtt     $c $Da $A  $c.Base      $c.Modello $iniInt  ("R109_" + $c.Sym + "_" + $c.Id + "_gemelle")
+  IniSingola $c $DataDa $DataA ($c.Base + 2) $c.Modello $iniSing $repSing
+  IniOtt     $c $DataDa $DataA  $c.Base      $c.Modello $iniInt  ("R109_" + $c.Sym + "_" + $c.Id + "_gemelle")
   Copy-Item -LiteralPath $iniSing -Destination (Join-Path $Sosta ($c.Sym + "_" + $c.Id + "_singola.ini")) -Force
   Copy-Item -LiteralPath $iniInt  -Destination (Join-Path $Sosta ($c.Sym + "_" + $c.Id + "_gemelle.ini")) -Force
 
@@ -1776,6 +1837,19 @@ foreach($c in $Ordinati){
       if($atx -notmatch ('(?m)^InpAllowLong=' + $c.Val["InpAllowLong"] + '(\||\r|$)')){ [void]$guai.Add($pair[1] + ": InpAllowLong non e' " + $c.Val["InpAllowLong"] + " NELL'INI CHE GIRA") }
       if($atx -notmatch ('(?m)^InpAllowShort=' + $c.Val["InpAllowShort"] + '(\||\r|$)')){ [void]$guai.Add($pair[1] + ": InpAllowShort non e' " + $c.Val["InpAllowShort"] + " NELL'INI CHE GIRA") }
       if($atx -notmatch '(?m)^InpAutoTest=true(\||\r|$)'){ [void]$guai.Add($pair[1] + ": InpAutoTest non e' true NELL'INI CHE GIRA") }
+      #  >>> LA FINESTRA, che il 25/08 e' passata da TUTTI i controlli qui
+      #      sopra con dentro il dump dei TesterInputs. Si legge la riga
+      #      COM'E' SCRITTA NELL'INI, non la variabile che l'ha prodotta.
+      $mf = [regex]::Match($atx,'(?m)^FromDate=(.*?)\r?$')
+      $mt = [regex]::Match($atx,'(?m)^ToDate=(.*?)\r?$')
+      if(-not $mf.Success -or $mf.Groups[1].Value -notmatch '^\d{4}\.\d{2}\.\d{2}$'){
+        [void]$guai.Add($pair[1] + ": FromDate NELL'INI CHE GIRA non e' una data ma [" + $(if($mf.Success){ $mf.Groups[1].Value } else { "riga assente" }) + "]")
+      }
+      if(-not $mt.Success -or $mt.Groups[1].Value -notmatch '^\d{4}\.\d{2}\.\d{2}$'){
+        [void]$guai.Add($pair[1] + ": ToDate NELL'INI CHE GIRA non e' una data ma [" + $(if($mt.Success){ $mt.Groups[1].Value } else { "riga assente" }) + "]")
+      }
+      if($mf.Success -and $mt.Success -and $mf.Groups[1].Value -ne $DataDa){ [void]$guai.Add($pair[1] + ": FromDate e' " + $mf.Groups[1].Value + " invece di " + $DataDa) }
+      if($mf.Success -and $mt.Success -and $mt.Groups[1].Value -ne $DataA){  [void]$guai.Add($pair[1] + ": ToDate e' "   + $mt.Groups[1].Value + " invece di " + $DataA) }
     }
     if($guai.Count -gt 0){
       foreach($g in $guai){ [void]$Problemi.Add("giro a vuoto / " + $c.Sym + " " + $c.Id + ": " + $g) }
@@ -1790,7 +1864,7 @@ foreach($c in $Ordinati){
   # -------------------------------------------------------------------
   #  5a. LA PASSATA SINGOLA -> il report .htm -> TUTTO IL PASSO 0
   # -------------------------------------------------------------------
-  Write-Host ("  -- PASSATA SINGOLA " + $Da + " -> " + $A + " (magic " + ($c.Base+2) + ")") -ForegroundColor White
+  Write-Host ("  -- PASSATA SINGOLA " + $DataDa + " -> " + $DataA + " (magic " + ($c.Base+2) + ")") -ForegroundColor White
   $t0 = Get-Date
   $minS = Lancia $iniSing
   Dico ("  ... passata singola: " + $minS.ToString("0.0",$INV) + " minuti") "Gray"
@@ -1851,13 +1925,13 @@ foreach($c in $Ordinati){
       #         non farsi sovrascrivere da un verdetto PIENA/ACCORCIATA che
       #         suonerebbe rassicurante su un conteggio sospetto.
       if($p0.Anomalie -eq 0 -and $p0.Prima -ne "NON MISURATA"){
-        $dIni = [datetime]::ParseExact($Da,"yyyy.MM.dd",$INV)
+        $dIni = [datetime]::ParseExact($DataDa,"yyyy.MM.dd",$INV)
         $dPri = [datetime]::ParseExact($p0.Prima,"yyyy.MM.dd",$INV)
         if($dPri -le $dIni.AddMonths($MesiPrimaOp)){
           $c.P0Finestra = "PIENA (prima op. " + $p0.Prima + ", ultima " + $p0.Ultima + ")"
         } else {
-          $c.P0Finestra = "ACCORCIATA (prima op. " + $p0.Prima + ", finestra dal " + $Da + ")"
-          [void]$Problemi.Add($c.Prova + " FINESTRA ACCORCIATA: la prima operazione e' del " + $p0.Prima + ", la finestra dichiarata parte dal " + $Da + " (che e' MISURATO: sonda del 17/08, stato COMPLETO). Se lo scarto e' grande, o il motore ha impiegato mesi a sparare -- e allora e' una MISURA DI FREQUENZA -- oppure i dati partono dopo. Va deciso QUALE dei due PRIMA di leggere qualunque numero di questa cella.")
+          $c.P0Finestra = "ACCORCIATA (prima op. " + $p0.Prima + ", finestra dal " + $DataDa + ")"
+          [void]$Problemi.Add($c.Prova + " FINESTRA ACCORCIATA: la prima operazione e' del " + $p0.Prima + ", la finestra dichiarata parte dal " + $DataDa + " (che e' MISURATO: sonda del 17/08, stato COMPLETO). Se lo scarto e' grande, o il motore ha impiegato mesi a sparare -- e allora e' una MISURA DI FREQUENZA -- oppure i dati partono dopo. Va deciso QUALE dei due PRIMA di leggere qualunque numero di questa cella.")
         }
       }
       # --- IL CANARINO n (criteri G1). NON E' UN GATE.
@@ -2000,13 +2074,13 @@ try{
     }
   }
 
-  $R = New-Object System.Collections.ArrayList
-  [void]$R.Add("REFERTO R109 - ATR EXHAUSTION & VOLUME SPIKE, la PRIMA misura in assoluto")
-  [void]$R.Add("ABTG_AtrExhaustVol v" + $EaVer + " su D30EUR, U30USD, NASUSD -- M15")
-  [void]$R.Add("SEI celle: tre simboli x DUE LATI (long e short SEPARATI, regola di casa 25/08)")
-  [void]$R.Add("porting del candidato P2 della caccia M5/M15 indici del 25/08 (voto 9/10)")
-  if($SoloControllo){ [void]$R.Add("modo: " + $Modo + "   <<< GIRO A VUOTO: NESSUNA passata, NESSUN CSV, NESSUN numero di round qui dentro") }
-  else              { [void]$R.Add("modo: " + $Modo) }
+  $RefTxt = New-Object System.Collections.ArrayList
+  [void]$RefTxt.Add("REFERTO R109 - ATR EXHAUSTION & VOLUME SPIKE, la PRIMA misura in assoluto")
+  [void]$RefTxt.Add("ABTG_AtrExhaustVol v" + $EaVer + " su D30EUR, U30USD, NASUSD -- M15")
+  [void]$RefTxt.Add("SEI celle: tre simboli x DUE LATI (long e short SEPARATI, regola di casa 25/08)")
+  [void]$RefTxt.Add("porting del candidato P2 della caccia M5/M15 indici del 25/08 (voto 9/10)")
+  if($SoloControllo){ [void]$RefTxt.Add("modo: " + $Modo + "   <<< GIRO A VUOTO: NESSUNA passata, NESSUN CSV, NESSUN numero di round qui dentro") }
+  else              { [void]$RefTxt.Add("modo: " + $Modo) }
   $sw = @()
   if($SoloControllo){ $sw += "-SoloControllo (nessuna passata; MA COMPILA)" }
   if($CriteriFirmati){ $sw += "-CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora [DA FIRMARE])" }
@@ -2014,232 +2088,245 @@ try{
   if($SoloSimbolo -ne ""){ $sw += "-SoloSimbolo " + $SoloSimbolo }
   if($SoloCella -ne ""){ $sw += "-SoloCella " + $SoloCella }
   if($sw.Count -eq 0){ $sw += "nessuno (corsa piena)" }
-  [void]$R.Add("switch di questo giro: " + ($sw -join " | "))
-  [void]$R.Add("stato dei criteri: " + $Firma)
-  [void]$R.Add("data: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (questa data deve essere di ADESSO)")
-  [void]$R.Add("     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.")
-  [void]$R.Add("     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.")
-  [void]$R.Add("avvio: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   durata: " + ((New-TimeSpan -Start $Avvio -End (Get-Date)).TotalHours).ToString("0.0",$INV) + " ore")
-  [void]$R.Add("pin: " + $Pin)
-  [void]$R.Add("criteri: risultati_archivio\R109_CRITERI.md   tesi: ATREXHAUST_TESI.md")
-  [void]$R.Add("dossier: caccia_strategie\CACCIA_M5M15_INDICI_2026-08-25.md (P2)")
-  [void]$R.Add("compilato: " + $(if($Compilato){ "SI, .ex5 riscritto adesso" + $(if($Warning -ge 0){ " (" + $Warning + " warning)" } else { "" }) } else { "NO" }))
-  [void]$R.Add("     >>> ED E' LA PRIMA COMPILAZIONE DELLA VITA DI QUESTO EA: il .mq5")
-  [void]$R.Add("         dichiara in testa di non essere mai stato compilato ne' testato.")
-  [void]$R.Add("")
-  [void]$R.Add("--- IL GATE A0: L'AUTOTEST DEL MOTORE ---")
-  [void]$R.Add("  stato: " + $AutotestStato)
-  [void]$R.Add("  log:   " + $AutotestFile)
+  [void]$RefTxt.Add("switch di questo giro: " + ($sw -join " | "))
+  [void]$RefTxt.Add("stato dei criteri: " + $Firma)
+  [void]$RefTxt.Add("data: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (questa data deve essere di ADESSO)")
+  [void]$RefTxt.Add("     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.")
+  [void]$RefTxt.Add("     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.")
+  [void]$RefTxt.Add("avvio: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   durata: " + ((New-TimeSpan -Start $Avvio -End (Get-Date)).TotalHours).ToString("0.0",$INV) + " ore")
+  [void]$RefTxt.Add("pin: " + $Pin)
+  [void]$RefTxt.Add("criteri: risultati_archivio\R109_CRITERI.md   tesi: ATREXHAUST_TESI.md")
+  [void]$RefTxt.Add("dossier: caccia_strategie\CACCIA_M5M15_INDICI_2026-08-25.md (P2)")
+  [void]$RefTxt.Add("compilato: " + $(if($Compilato){ "SI, .ex5 riscritto adesso" + $(if($Warning -ge 0){ " (" + $Warning + " warning)" } else { "" }) } else { "NO" }))
+  [void]$RefTxt.Add("     >>> ED E' LA PRIMA COMPILAZIONE DELLA VITA DI QUESTO EA: il .mq5")
+  [void]$RefTxt.Add("         dichiara in testa di non essere mai stato compilato ne' testato.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- IL GATE A0: L'AUTOTEST DEL MOTORE ---")
+  [void]$RefTxt.Add("  stato: " + $AutotestStato)
+  [void]$RefTxt.Add("  log:   " + $AutotestFile)
   if(@($AutotestRighe).Count -gt 0){
-    foreach($r in $AutotestRighe){ [void]$R.Add("    " + $r) }
+    foreach($r in $AutotestRighe){ [void]$RefTxt.Add("    " + $r) }
   } else {
-    [void]$R.Add("    (nessuna riga [ATREXH][AUTOTEST] raccolta)")
+    [void]$RefTxt.Add("    (nessuna riga [ATREXH][AUTOTEST] raccolta)")
   }
-  [void]$R.Add("  >>> 'NON LETTO' NON E' 'SUPERATO'. Se l'esito non e' SUPERATO, ogni numero")
-  [void]$R.Add("      di questo referto e' NON CONVALIDATO (criteri D5). L'autotest si legge")
-  [void]$R.Add("      ESEGUENDO, non compilando: nel giro a vuoto NON esiste, ed e' giusto.")
-  [void]$R.Add("  >>> MA 'NON LETTO' NON E' NEMMENO UN INDIZIO CONTRO L'EA, e va detto da che")
-  [void]$R.Add("      parte sta il dubbio: LE CINQUE RADICI in cui questo driver cerca il log")
-  [void]$R.Add("      dell'agente del tester NON SONO MAI STATE MISURATE SU UN MT5 VERO. Sono")
-  [void]$R.Add("      l'ipotesi migliore di chi ha scritto la riga. 'NON LETTO' vuol dire quasi")
-  [void]$R.Add("      sempre CHE CERCHIAMO NEL POSTO SBAGLIATO NOI, non che il motore diverga:")
-  [void]$R.Add("      se divergesse, l'esito sarebbe DIVERGE e il round si sarebbe fermato da")
-  [void]$R.Add("      solo. Si toglie in cinque minuti ricaricando collaudo_autotest.ini in")
-  [void]$R.Add("      test singolo e leggendo la scheda Esperti -- e annotando DOVE stava il file.")
-  [void]$R.Add("")
-  [void]$R.Add("--- LA FINESTRA, IL MODELLO E IL RISCHIO ---")
+  [void]$RefTxt.Add("  >>> 'NON LETTO' NON E' 'SUPERATO'. Se l'esito non e' SUPERATO, ogni numero")
+  [void]$RefTxt.Add("      di questo referto e' NON CONVALIDATO (criteri D5). L'autotest si legge")
+  [void]$RefTxt.Add("      ESEGUENDO, non compilando: nel giro a vuoto NON esiste, ed e' giusto.")
+  [void]$RefTxt.Add("  >>> MA 'NON LETTO' NON E' NEMMENO UN INDIZIO CONTRO L'EA, e va detto da che")
+  [void]$RefTxt.Add("      parte sta il dubbio: LE CINQUE RADICI in cui questo driver cerca il log")
+  [void]$RefTxt.Add("      dell'agente del tester NON SONO MAI STATE MISURATE SU UN MT5 VERO. Sono")
+  [void]$RefTxt.Add("      l'ipotesi migliore di chi ha scritto la riga. 'NON LETTO' vuol dire quasi")
+  [void]$RefTxt.Add("      sempre CHE CERCHIAMO NEL POSTO SBAGLIATO NOI, non che il motore diverga:")
+  [void]$RefTxt.Add("      se divergesse, l'esito sarebbe DIVERGE e il round si sarebbe fermato da")
+  [void]$RefTxt.Add("      solo. Si toglie in cinque minuti ricaricando collaudo_autotest.ini in")
+  [void]$RefTxt.Add("      test singolo e leggendo la scheda Esperti -- e annotando DOVE stava il file.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA FINESTRA, IL MODELLO E IL RISCHIO ---")
+  #  >>> LA FINESTRA SI CONTROLLA ANCHE QUI, ED E' L'ULTIMA RETE (25/08).
+  #      Il 25/08 la data di FINE e' arrivata FIN QUI corrotta e il referto
+  #      ha stampato "2024.09.26 -> InpUsaGuardian=true||..." senza che
+  #      nulla protestasse. Un referto che stampa una finestra impossibile
+  #      deve DIRLO, non limitarsi a mostrarla: chi legge il fondo del
+  #      referto non ricontrolla gli .ini.
+  $finOk = ($DataDa -match '^\d{4}\.\d{2}\.\d{2}$') -and ($DataA -match '^\d{4}\.\d{2}\.\d{2}$')
+  if(-not $finOk){
+    [void]$Problemi.Add("LA FINESTRA DEL ROUND NON E' UNA COPPIA DI DATE: FromDate=[" + $DataDa + "] ToDate=[" + $DataA + "]. NESSUN numero di questo referto risponde alla domanda, perche' non si sa su QUALE periodo sia stato misurato. Non leggere niente: rilancia con la riga corretta.")
+    [void]$RefTxt.Add("  !!! FINESTRA CORROTTA: [" + $DataDa + "] -> [" + $DataA + "]")
+    [void]$RefTxt.Add("      >>> NESSUN NUMERO DI QUESTO REFERTO E' LEGGIBILE: non si sa su quale")
+    [void]$RefTxt.Add("          periodo sia stato misurato. Vedi PROBLEMI.")
+  }
   if($ScreenOhlcM15){
-    [void]$R.Add("  " + $Da + " -> " + $A + "   modello 1 (OHLC M1)  <<< SCREEN")
-    [void]$R.Add("     >>> OGNI RIGA DI QUESTO REFERTO E' *NON GIUDICABILE*. Su M5/M15 l'OHLC")
-    [void]$R.Add("         inganna, ed e' MISURATO in casa (REGISTRO_TEST.md par. 2). E qui")
-    [void]$R.Add("         morde di piu': l'ingresso nasce da un ESTREMO DI BARRA e lo stop sta")
-    [void]$R.Add("         a un tick dal minimo, quindi stop e target dello stesso trade sono")
-    [void]$R.Add("         decisi da un'IPOTESI sull'ordine di visita dentro la barra.")
+    [void]$RefTxt.Add("  " + $DataDa + " -> " + $DataA + "   modello 1 (OHLC M1)  <<< SCREEN")
+    [void]$RefTxt.Add("     >>> OGNI RIGA DI QUESTO REFERTO E' *NON GIUDICABILE*. Su M5/M15 l'OHLC")
+    [void]$RefTxt.Add("         inganna, ed e' MISURATO in casa (REGISTRO_TEST.md par. 2). E qui")
+    [void]$RefTxt.Add("         morde di piu': l'ingresso nasce da un ESTREMO DI BARRA e lo stop sta")
+    [void]$RefTxt.Add("         a un tick dal minimo, quindi stop e target dello stesso trade sono")
+    [void]$RefTxt.Add("         decisi da un'IPOTESI sull'ordine di visita dentro la barra.")
   } else {
-    [void]$R.Add("  " + $Da + " -> " + $A + "   modello 4 (TICK REALI)")
+    [void]$RefTxt.Add("  " + $DataDa + " -> " + $DataA + "   modello 4 (TICK REALI)")
   }
-  [void]$R.Add("  NIENTE IS/OOS (criteri D3): l'Emendamento A dimensiona l'IS sulle OPERAZIONI,")
-  [void]$R.Add("     e le operazioni non le conoscevamo. Questo round CONTA; il taglio si fa")
-  [void]$R.Add("     dopo, sui conteggi veri. >>> Quindi da qui NON esce nessun out-of-sample.")
-  [void]$R.Add("  UN SOLO REGIME: lo storico BCM sugli indici parte dal 2024.09.26 (MISURATO,")
-  [void]$R.Add("     stato COMPLETO = il broker non ha altro) ed e' prevalentemente RIALZISTA.")
-  [void]$R.Add("     Questo motore e' CONTROTENDENZA. >>> IL MERITO E' SOSPESO PER COSTRUZIONE")
-  [void]$R.Add("     (criteri par. 7), a QUALUNQUE n. Il RISCHIO invece si legge tutto: un")
-  [void]$R.Add("     drawdown e' un fatto accaduto (Emendamento regola B).")
-  [void]$R.Add("  NESSUN DATO DUKASCOPY: sugli indici i file _EXT NON ESISTONO ancora. Questo")
-  [void]$R.Add("     round gira SOLO su BCM, con i costi di BCM. Non e' una proprieta' del")
-  [void]$R.Add("     mercato: e' una proprieta' di un broker.")
-  [void]$R.Add("  spread: Spread=" + $SpreadIni + " scritto NELL'INI = spread CORRENTE del feed BCM.")
-  [void]$R.Add("     A modello 4 il bid/ask arriva dai tick. In nessun modello c'e' SLIPPAGE.")
-  [void]$R.Add("  rischio: 1,00% nei file prova (default del porting). IN CAMPO SI GIRA A 0,65%")
-  [void]$R.Add("     e l'autore usava 0,5%: ogni euro e ogni % di DD qui dentro va MOLTIPLICATO")
-  [void]$R.Add("     per 0,65 (o 0,5) prima di confrontarlo con qualcos'altro.")
-  [void]$R.Add("  cap giornaliero: 3 PER CELLA, cioe' PER LATO. >>> LA SOMMA DEI DUE LATI DI UN")
-  [void]$R.Add("     SIMBOLO NON E' LA CELLA 'ENTRAMBI': e' un LIMITE SUPERIORE. In R109 long e")
-  [void]$R.Add("     short non si bloccano a vicenda, in campo si'.")
-  [void]$R.Add("")
-  [void]$R.Add("--- CONVENZIONE DI SENTINELLA (checklist 66) ---")
-  [void]$R.Add("  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le")
-  [void]$R.Add("  colonne: profitto, PF, DD, n, take, perdita, durata e peggior giornata.")
-  [void]$R.Add("")
-  [void]$R.Add("--- LA PROFONDITA' DEI TICK (criteri D2) ---")
+  [void]$RefTxt.Add("  NIENTE IS/OOS (criteri D3): l'Emendamento A dimensiona l'IS sulle OPERAZIONI,")
+  [void]$RefTxt.Add("     e le operazioni non le conoscevamo. Questo round CONTA; il taglio si fa")
+  [void]$RefTxt.Add("     dopo, sui conteggi veri. >>> Quindi da qui NON esce nessun out-of-sample.")
+  [void]$RefTxt.Add("  UN SOLO REGIME: lo storico BCM sugli indici parte dal 2024.09.26 (MISURATO,")
+  [void]$RefTxt.Add("     stato COMPLETO = il broker non ha altro) ed e' prevalentemente RIALZISTA.")
+  [void]$RefTxt.Add("     Questo motore e' CONTROTENDENZA. >>> IL MERITO E' SOSPESO PER COSTRUZIONE")
+  [void]$RefTxt.Add("     (criteri par. 7), a QUALUNQUE n. Il RISCHIO invece si legge tutto: un")
+  [void]$RefTxt.Add("     drawdown e' un fatto accaduto (Emendamento regola B).")
+  [void]$RefTxt.Add("  NESSUN DATO DUKASCOPY: sugli indici i file _EXT NON ESISTONO ancora. Questo")
+  [void]$RefTxt.Add("     round gira SOLO su BCM, con i costi di BCM. Non e' una proprieta' del")
+  [void]$RefTxt.Add("     mercato: e' una proprieta' di un broker.")
+  [void]$RefTxt.Add("  spread: Spread=" + $SpreadIni + " scritto NELL'INI = spread CORRENTE del feed BCM.")
+  [void]$RefTxt.Add("     A modello 4 il bid/ask arriva dai tick. In nessun modello c'e' SLIPPAGE.")
+  [void]$RefTxt.Add("  rischio: 1,00% nei file prova (default del porting). IN CAMPO SI GIRA A 0,65%")
+  [void]$RefTxt.Add("     e l'autore usava 0,5%: ogni euro e ogni % di DD qui dentro va MOLTIPLICATO")
+  [void]$RefTxt.Add("     per 0,65 (o 0,5) prima di confrontarlo con qualcos'altro.")
+  [void]$RefTxt.Add("  cap giornaliero: 3 PER CELLA, cioe' PER LATO. >>> LA SOMMA DEI DUE LATI DI UN")
+  [void]$RefTxt.Add("     SIMBOLO NON E' LA CELLA 'ENTRAMBI': e' un LIMITE SUPERIORE. In R109 long e")
+  [void]$RefTxt.Add("     short non si bloccano a vicenda, in campo si'.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- CONVENZIONE DI SENTINELLA (checklist 66) ---")
+  [void]$RefTxt.Add("  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le")
+  [void]$RefTxt.Add("  colonne: profitto, PF, DD, n, take, perdita, durata e peggior giornata.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA PROFONDITA' DEI TICK (criteri D2) ---")
   foreach($s in $SymLavoro){
-    [void]$R.Add("  " + $s.Sym.PadRight(8) + " " + $s.TickMisurati + "   [" + $s.TickData + "]")
+    [void]$RefTxt.Add("  " + $s.Sym.PadRight(8) + " " + $s.TickMisurati + "   [" + $s.TickData + "]")
   }
-  [void]$R.Add("  >>> A modello 4 senza tick reali MT5 NON SI FERMA: ripiega e produce numeri")
-  [void]$R.Add("      PLAUSIBILI E FALSI, e nessuna guardia di questo driver puo' accorgersene.")
-  [void]$R.Add("")
-  [void]$R.Add("--- IL PASSO 0, PRIMA PARTE: SI CONTA (criteri par. 3.0 e S0b) ---")
-  [void]$R.Add(("  {0,-8} {1,-7} {2,-6} {3,-11} {4,-11} {5,-7} {6,-7} {7,-8} {8,-7} {9}" -f `
+  [void]$RefTxt.Add("  >>> A modello 4 senza tick reali MT5 NON SI FERMA: ripiega e produce numeri")
+  [void]$RefTxt.Add("      PLAUSIBILI E FALSI, e nessuna guardia di questo driver puo' accorgersene.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- IL PASSO 0, PRIMA PARTE: SI CONTA (criteri par. 3.0 e S0b) ---")
+  [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-6} {3,-11} {4,-11} {5,-7} {6,-7} {7,-8} {8,-7} {9}" -f `
                 "SIMB","LATO","n","PRIMA-OP","ULTIMA-OP","GIORNI","MAX/GG","AL-CAP","OP/SED","FINESTRA"))
   foreach($c in $Ordinati){
-    [void]$R.Add(("  {0,-8} {1,-7} {2,-6} {3,-11} {4,-11} {5,-7} {6,-7} {7,-8} {8,-7} {9}" -f `
+    [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-6} {3,-11} {4,-11} {5,-7} {6,-7} {7,-8} {8,-7} {9}" -f `
                   $c.Sym,$c.Lato,(FmtN $c.P0N),$c.P0Prima,$c.P0Ultima,(FmtN $c.P0GiorniOp),
                   (FmtN $c.P0MaxGiorno),(FmtN $c.P0GiorniAlCap),(Fmt2 $c.P0OpSeduta),$c.P0Finestra))
   }
-  [void]$R.Add("  GIORNI = giornate con almeno un'operazione. MAX/GG = massimo in una giornata.")
-  [void]$R.Add("  AL-CAP = giornate che hanno toccato il cap di 3: se sono tante, OP/SED e' un")
-  [void]$R.Add("     LIMITE INFERIORE e non la frequenza del motore (criteri D7).")
-  [void]$R.Add("  OP/SED = n diviso i GIORNI FERIALI fra prima e ultima operazione. E' un")
-  [void]$R.Add("     DERIVATO, non una misura: NON toglie le feste di borsa, quindi SOTTOSTIMA.")
-  [void]$R.Add("  ATTESA DICHIARATA PRIMA: 0,5-2 operazioni al giorno per lato, ed era una")
-  [void]$R.Add("     [STIMA DEL CACCIATORE], mai una misura nostra. Se n esce molto piu' basso,")
-  [void]$R.Add("     quello E' GIA' UN RISULTATO: la frequenza e' la ragione per cui il round")
-  [void]$R.Add("     esiste (challenge).")
-  [void]$R.Add("")
-  [void]$R.Add("--- IL PASSO 0, SECONDA PARTE: IL CANCELLO ZERO SUL COSTO (criteri par. 3) ---")
-  [void]$R.Add("  Si legge PRIMA di qualunque PF. Il take e' misurato SUI PREZZI dei deal")
-  [void]$R.Add("  (in -> out) del report .htm, in PUNTI INDICE (su BCM questi tre indici hanno")
-  [void]$R.Add("  2 decimali: 1 punto indice = 1,00 di prezzo = 100 punti MT5). Su un indice il")
-  [void]$R.Add("  'pip' NON ESISTE. Il take e' GIA' AL NETTO dello spread (entry all'ask, uscita")
-  [void]$R.Add("  al bid): il LORDO si ottiene aggiungendo lo spread dichiarato.")
-  [void]$R.Add("  spread DICHIARATO: " + $SpreadPuntiDich.ToString("0.0",$INV) + " punti indice   [NON MISURATO -- criteri D4]")
-  [void]$R.Add("  soglia S0a: take LORDO MEDIANO dei vincenti >= " + $S0aMult.ToString("0.0",$INV) + "x lo spread")
-  [void]$R.Add(("  {0,-8} {1,-7} {2,-10} {3,-10} {4,-10} {5,-9} {6,-9} {7}" -f `
+  [void]$RefTxt.Add("  GIORNI = giornate con almeno un'operazione. MAX/GG = massimo in una giornata.")
+  [void]$RefTxt.Add("  AL-CAP = giornate che hanno toccato il cap di 3: se sono tante, OP/SED e' un")
+  [void]$RefTxt.Add("     LIMITE INFERIORE e non la frequenza del motore (criteri D7).")
+  [void]$RefTxt.Add("  OP/SED = n diviso i GIORNI FERIALI fra prima e ultima operazione. E' un")
+  [void]$RefTxt.Add("     DERIVATO, non una misura: NON toglie le feste di borsa, quindi SOTTOSTIMA.")
+  [void]$RefTxt.Add("  ATTESA DICHIARATA PRIMA: 0,5-2 operazioni al giorno per lato, ed era una")
+  [void]$RefTxt.Add("     [STIMA DEL CACCIATORE], mai una misura nostra. Se n esce molto piu' basso,")
+  [void]$RefTxt.Add("     quello E' GIA' UN RISULTATO: la frequenza e' la ragione per cui il round")
+  [void]$RefTxt.Add("     esiste (challenge).")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- IL PASSO 0, SECONDA PARTE: IL CANCELLO ZERO SUL COSTO (criteri par. 3) ---")
+  [void]$RefTxt.Add("  Si legge PRIMA di qualunque PF. Il take e' misurato SUI PREZZI dei deal")
+  [void]$RefTxt.Add("  (in -> out) del report .htm, in PUNTI INDICE (su BCM questi tre indici hanno")
+  [void]$RefTxt.Add("  2 decimali: 1 punto indice = 1,00 di prezzo = 100 punti MT5). Su un indice il")
+  [void]$RefTxt.Add("  'pip' NON ESISTE. Il take e' GIA' AL NETTO dello spread (entry all'ask, uscita")
+  [void]$RefTxt.Add("  al bid): il LORDO si ottiene aggiungendo lo spread dichiarato.")
+  [void]$RefTxt.Add("  spread DICHIARATO: " + $SpreadPuntiDich.ToString("0.0",$INV) + " punti indice   [NON MISURATO -- criteri D4]")
+  [void]$RefTxt.Add("  soglia S0a: take LORDO MEDIANO dei vincenti >= " + $S0aMult.ToString("0.0",$INV) + "x lo spread")
+  [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-10} {3,-10} {4,-10} {5,-9} {6,-9} {7}" -f `
                 "SIMB","LATO","TAKEnet","TAKElordo","RAPPORTO","PERDmed","DURmed","STATO PASSO 0"))
   foreach($c in $Ordinati){
-    [void]$R.Add(("  {0,-8} {1,-7} {2,-10} {3,-10} {4,-10} {5,-9} {6,-9} {7}" -f `
+    [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-10} {3,-10} {4,-10} {5,-9} {6,-9} {7}" -f `
                   $c.Sym,$c.Lato,(Fmt2 $c.P0TakeNetMed),(Fmt2 $c.P0TakeLordoMed),(Fmt2 $c.P0Rapporto),
                   (Fmt2 $c.P0PerdMed),(Fmt2 $c.P0DurMed),$c.P0Stato))
   }
-  [void]$R.Add("  (TAKE e PERD in PUNTI INDICE, MEDIANE -- non medie. DUR in barre M15.)")
-  [void]$R.Add("  PERDmed e' la miglior stima di R che il report contenga: le perdenti escono")
-  [void]$R.Add("     allo stop. Sotto " + $RMinPunti.ToString("0",$INV) + " punti indice = stop stretto = LOTTO GRANDE, e lo")
-  [void]$R.Add("     slippage si mangia l'operazione (R55). Il pavimento InpMinSLPts e' SPENTO.")
-  [void]$R.Add("")
+  [void]$RefTxt.Add("  (TAKE e PERD in PUNTI INDICE, MEDIANE -- non medie. DUR in barre M15.)")
+  [void]$RefTxt.Add("  PERDmed e' la miglior stima di R che il report contenga: le perdenti escono")
+  [void]$RefTxt.Add("     allo stop. Sotto " + $RMinPunti.ToString("0",$INV) + " punti indice = stop stretto = LOTTO GRANDE, e lo")
+  [void]$RefTxt.Add("     slippage si mangia l'operazione (R55). Il pavimento InpMinSLPts e' SPENTO.")
+  [void]$RefTxt.Add("")
   foreach($c in $Ordinati){
-    [void]$R.Add("  S0a " + $c.Sym + " " + $c.Lato + ": " + $c.S0a)
-    [void]$R.Add("      take medio (non mediano) sui vincenti: " + (Fmt2 $c.P0TakeNetMedia) + " punti indice netti")
-    [void]$R.Add("      durata media (non mediana): " + (Fmt2 $c.P0DurMedia) + " barre M15")
-    [void]$R.Add("      peggior giornata (dal report): " + (FmtPg $c.P0Pegg) + "%  il " + $c.P0PeggData + "   (muro prop: -5,00%)")
+    [void]$RefTxt.Add("  S0a " + $c.Sym + " " + $c.Lato + ": " + $c.S0a)
+    [void]$RefTxt.Add("      take medio (non mediano) sui vincenti: " + (Fmt2 $c.P0TakeNetMedia) + " punti indice netti")
+    [void]$RefTxt.Add("      durata media (non mediana): " + (Fmt2 $c.P0DurMedia) + " barre M15")
+    [void]$RefTxt.Add("      peggior giornata (dal report): " + (FmtPg $c.P0Pegg) + "%  il " + $c.P0PeggData + "   (muro prop: -5,00%)")
   }
-  [void]$R.Add("")
-  [void]$R.Add("--- LA TABELLA MADRE ---   (attese: " + $CelleAttese + " righe per CSV, " + $PassateAttese + " passate)")
-  [void]$R.Add(("  {0,-8} {1,-7} {2,-10} {3,-8} {4,-8} {5,-7} {6,-12} {7}" -f `
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA TABELLA MADRE ---   (attese: " + $CelleAttese + " righe per CSV, " + $PassateAttese + " passate)")
+  [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-10} {3,-8} {4,-8} {5,-7} {6,-12} {7}" -f `
                 "SIMB","LATO","PROFITTO","PF","DD%","n","GEMELLI","ESITO"))
   foreach($c in $Ordinati){
-    [void]$R.Add(("  {0,-8} {1,-7} {2,-10} {3,-8} {4,-8} {5,-7} {6,-12} {7}" -f `
+    [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-10} {3,-8} {4,-8} {5,-7} {6,-12} {7}" -f `
                   $c.Sym,$c.Lato,(FmtE $c.ProfInt),(Fmt3 $c.PfInt),(Fmt2 $c.DdInt),(FmtN $c.NInt),
                   $c.GemInt,$c.Esito))
   }
-  [void]$R.Add("  >>> IL PF DI QUESTA TABELLA NON E' UN VERDETTO DI MERITO. Un solo regime, un")
-  [void]$R.Add("      motore controtendenza, nessun out-of-sample: il numero dice quanto e'")
-  [void]$R.Add("      costato opporsi a QUESTO toro, non se l'idea funziona (criteri par. 7).")
-  [void]$R.Add("")
-  [void]$R.Add("--- G4: LA PEGGIOR GIORNATA (muro prop: -5,00% su 100k) ---")
-  [void]$R.Add("  E' IL NUMERO DA GUARDARE, piu' del DD totale: la peggiore misurata in casa e'")
-  [void]$R.Add("  -2,06% (R51), e i tre indici si esauriscono spesso INSIEME.")
-  [void]$R.Add(("  {0,-8} {1,-7} {2,-12} {3,-12} {4}" -f "SIMB","LATO","htm","quando","csv (OPTFRAME)"))
+  [void]$RefTxt.Add("  >>> IL PF DI QUESTA TABELLA NON E' UN VERDETTO DI MERITO. Un solo regime, un")
+  [void]$RefTxt.Add("      motore controtendenza, nessun out-of-sample: il numero dice quanto e'")
+  [void]$RefTxt.Add("      costato opporsi a QUESTO toro, non se l'idea funziona (criteri par. 7).")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- G4: LA PEGGIOR GIORNATA (muro prop: -5,00% su 100k) ---")
+  [void]$RefTxt.Add("  E' IL NUMERO DA GUARDARE, piu' del DD totale: la peggiore misurata in casa e'")
+  [void]$RefTxt.Add("  -2,06% (R51), e i tre indici si esauriscono spesso INSIEME.")
+  [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-12} {3,-12} {4}" -f "SIMB","LATO","htm","quando","csv (OPTFRAME)"))
   foreach($c in $Ordinati){
-    [void]$R.Add(("  {0,-8} {1,-7} {2,-12} {3,-12} {4}" -f `
+    [void]$RefTxt.Add(("  {0,-8} {1,-7} {2,-12} {3,-12} {4}" -f `
                   $c.Sym,$c.Lato,(FmtPg $c.P0Pegg),$c.P0PeggData,(FmtPg $c.PgInt)))
   }
-  [void]$R.Add("  (tutti in % del deposito, a rischio 1,00%. 'n/d' = NON MISURATA, mai 0.)")
-  [void]$R.Add("  >>> E LE DUE VISTE SONO DUE STRUMENTI DIVERSI: la colonna htm viene dal report")
-  [void]$R.Add("      della passata singola, la colonna csv dall'OPTFRAME della gemella. Se")
-  [void]$R.Add("      divergono e' un'informazione, non un guasto.")
-  [void]$R.Add("")
-  [void]$R.Add("--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---")
+  [void]$RefTxt.Add("  (tutti in % del deposito, a rischio 1,00%. 'n/d' = NON MISURATA, mai 0.)")
+  [void]$RefTxt.Add("  >>> E LE DUE VISTE SONO DUE STRUMENTI DIVERSI: la colonna htm viene dal report")
+  [void]$RefTxt.Add("      della passata singola, la colonna csv dall'OPTFRAME della gemella. Se")
+  [void]$RefTxt.Add("      divergono e' un'informazione, non un guasto.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---")
   foreach($c in $Ordinati){
-    [void]$R.Add(("  {0,-8} {1,-7} magic {2}/{3} (gemelle) {4} (singola)  modello {5}" -f `
+    [void]$RefTxt.Add(("  {0,-8} {1,-7} magic {2}/{3} (gemelle) {4} (singola)  modello {5}" -f `
                   $c.Sym,$c.Lato,$c.Base,($c.Base+1),($c.Base+2),$c.Modello))
-    [void]$R.Add("       InpAllowLong=" + $c.Val["InpAllowLong"] + "  InpAllowShort=" + $c.Val["InpAllowShort"] + "  " + $c.Desc)
+    [void]$RefTxt.Add("       InpAllowLong=" + $c.Val["InpAllowLong"] + "  InpAllowShort=" + $c.Val["InpAllowShort"] + "  " + $c.Desc)
   }
-  [void]$R.Add("  collaudo autotest: magic " + $CollaudoMagic + ", " + $CollaudoDa + " -> " + $CollaudoA + ", modello 1 (nessun numero di round)")
-  [void]$R.Add("  >>> 774401, il DEFAULT COMPILATO dell'EA, e' VIETATO in tutto il round: se una")
-  [void]$R.Add("      cella girasse col default, il magic lo direbbe.")
-  [void]$R.Add("")
-  [void]$R.Add("--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---")
-  [void]$R.Add("  * NON PROMUOVE E NON BOCCIA NIENTE (G5). Questo EA NON va in forward: lo dice")
-  [void]$R.Add("    la sua stessa tesi, in testa.")
-  [void]$R.Add("  * NON APPLICA G2 (merito) E G3 (coerenza cross-simbolo): il merito e' sospeso")
-  [void]$R.Add("    per costruzione. Se S0 e G1 sono verdi su piu' celle, il passo dopo e' un")
-  [void]$R.Add("    ROUND NUOVO, non una promozione.")
-  [void]$R.Add("  * NON HA GIRATO NESSUNA ABLAZIONE (criteri D1): prossimita' PERC vs ATR,")
-  [void]$R.Add("    grilletto AUTORE vs CLOSE, buffer/pavimento dello SL, parziale+BE+trailing")
-  [void]$R.Add("    restano tutte da misurare, e solo SE questo round passa S0.")
-  [void]$R.Add("  * NON MISURA LO SPREAD: la soglia di S0a usa un valore DICHIARATO.")
-  [void]$R.Add("  * NON MISURA LA PROFONDITA' DEI TICK (esiste solo per U30USD).")
-  [void]$R.Add("  * NON FA LA PROVA DI REGIME, e non la puo' fare: il broker non ha altro")
-  [void]$R.Add("    storico. Quando ci sara' la pipeline Dukascopy _EXT sugli indici, questo")
-  [void]$R.Add("    round va RIFATTO su una finestra che contenga almeno un orso.")
-  [void]$R.Add("  * NIENTE M5 e niente cella 'entrambi i lati'.")
-  [void]$R.Add("  * NESSUN NUMERO D'AUTORE e' entrato qui dentro: Pine -> MQL5 non e' un")
-  [void]$R.Add("    porting, e' una riscrittura, e i conteggi divergono per costruzione (cap")
-  [void]$R.Add("    giornaliero, media del volume, STOPS_LEVEL, short simmetrizzato).")
-  [void]$R.Add("")
+  [void]$RefTxt.Add("  collaudo autotest: magic " + $CollaudoMagic + ", " + $CollaudoDa + " -> " + $CollaudoA + ", modello 1 (nessun numero di round)")
+  [void]$RefTxt.Add("  >>> 774401, il DEFAULT COMPILATO dell'EA, e' VIETATO in tutto il round: se una")
+  [void]$RefTxt.Add("      cella girasse col default, il magic lo direbbe.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---")
+  [void]$RefTxt.Add("  * NON PROMUOVE E NON BOCCIA NIENTE (G5). Questo EA NON va in forward: lo dice")
+  [void]$RefTxt.Add("    la sua stessa tesi, in testa.")
+  [void]$RefTxt.Add("  * NON APPLICA G2 (merito) E G3 (coerenza cross-simbolo): il merito e' sospeso")
+  [void]$RefTxt.Add("    per costruzione. Se S0 e G1 sono verdi su piu' celle, il passo dopo e' un")
+  [void]$RefTxt.Add("    ROUND NUOVO, non una promozione.")
+  [void]$RefTxt.Add("  * NON HA GIRATO NESSUNA ABLAZIONE (criteri D1): prossimita' PERC vs ATR,")
+  [void]$RefTxt.Add("    grilletto AUTORE vs CLOSE, buffer/pavimento dello SL, parziale+BE+trailing")
+  [void]$RefTxt.Add("    restano tutte da misurare, e solo SE questo round passa S0.")
+  [void]$RefTxt.Add("  * NON MISURA LO SPREAD: la soglia di S0a usa un valore DICHIARATO.")
+  [void]$RefTxt.Add("  * NON MISURA LA PROFONDITA' DEI TICK (esiste solo per U30USD).")
+  [void]$RefTxt.Add("  * NON FA LA PROVA DI REGIME, e non la puo' fare: il broker non ha altro")
+  [void]$RefTxt.Add("    storico. Quando ci sara' la pipeline Dukascopy _EXT sugli indici, questo")
+  [void]$RefTxt.Add("    round va RIFATTO su una finestra che contenga almeno un orso.")
+  [void]$RefTxt.Add("  * NIENTE M5 e niente cella 'entrambi i lati'.")
+  [void]$RefTxt.Add("  * NESSUN NUMERO D'AUTORE e' entrato qui dentro: Pine -> MQL5 non e' un")
+  [void]$RefTxt.Add("    porting, e' una riscrittura, e i conteggi divergono per costruzione (cap")
+  [void]$RefTxt.Add("    giornaliero, media del volume, STOPS_LEVEL, short simmetrizzato).")
+  [void]$RefTxt.Add("")
   if($Rilievi.Count -gt 0){
-    [void]$R.Add("--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (" + $Rilievi.Count + ")")
-    foreach($n in $Rilievi){ [void]$R.Add("  - " + $n) }
-    [void]$R.Add("")
+    [void]$RefTxt.Add("--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (" + $Rilievi.Count + ")")
+    foreach($n in $Rilievi){ [void]$RefTxt.Add("  - " + $n) }
+    [void]$RefTxt.Add("")
   }
-  [void]$R.Add("--- PROBLEMI (questi SI sono guasti, o risposte scomode) ---   (" + $Problemi.Count + ")")
-  if($Problemi.Count -eq 0){ [void]$R.Add("  nessuno.") }
-  foreach($p in $Problemi){ [void]$R.Add("  - " + $p) }
+  [void]$RefTxt.Add("--- PROBLEMI (questi SI sono guasti, o risposte scomode) ---   (" + $Problemi.Count + ")")
+  if($Problemi.Count -eq 0){ [void]$RefTxt.Add("  nessuno.") }
+  foreach($p in $Problemi){ [void]$RefTxt.Add("  - " + $p) }
   if($Fatale -ne ""){
-    [void]$R.Add("")
-    [void]$R.Add("--- FERMATO ---")
-    [void]$R.Add("  " + $Fatale)
+    [void]$RefTxt.Add("")
+    [void]$RefTxt.Add("--- FERMATO ---")
+    [void]$RefTxt.Add("  " + $Fatale)
   }
-  [void]$R.Add("")
+  [void]$RefTxt.Add("")
   # --- L'ESITO SCRITTO NEL REFERTO DICE LE STESSE PAROLE DELLO SCHERMO,
   #     e distingue PARZIALE da COMPLETO CON RILIEVI (checklist 47 e 68).
   $koR = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -notlike "SOLO CONTROLLO*" -and $_.Esito -ne "NON GIUDICABILE" })
   if($Fatale -ne ""){
-    [void]$R.Add("ESITO: FERMATO -- " + $Fatale)
+    [void]$RefTxt.Add("ESITO: FERMATO -- " + $Fatale)
   }
   elseif($ScreenOhlcM15 -and -not $SoloControllo){
-    [void]$R.Add("ESITO: SCREEN OHLC -- NESSUN VERDETTO. Le celle sono girate a MODELLO 1 (OHLC M1), non a tick reali: nessun cancello si applica, nessun S0a e' stato dato, e ogni riga e' marcata NON GIUDICABILE. Questo giro puo' produrre AL MASSIMO il PERMESSO di un giro a tick reali. Celle senza numeri: " + $koR.Count + " - problemi: " + $Problemi.Count + " - rilievi: " + $Rilievi.Count + ".")
+    [void]$RefTxt.Add("ESITO: SCREEN OHLC -- NESSUN VERDETTO. Le celle sono girate a MODELLO 1 (OHLC M1), non a tick reali: nessun cancello si applica, nessun S0a e' stato dato, e ogni riga e' marcata NON GIUDICABILE. Questo giro puo' produrre AL MASSIMO il PERMESSO di un giro a tick reali. Celle senza numeri: " + $koR.Count + " - problemi: " + $Problemi.Count + " - rilievi: " + $Rilievi.Count + ".")
   }
   elseif($SoloControllo){
     if($koR.Count -gt 0 -or $Problemi.Count -gt 0){
-      [void]$R.Add("ESITO: GIRO A VUOTO CON PROBLEMI (" + $Problemi.Count + ") -- NESSUNA passata. NON lanciare la corsa vera prima di aver letto i PROBLEMI.")
+      [void]$RefTxt.Add("ESITO: GIRO A VUOTO CON PROBLEMI (" + $Problemi.Count + ") -- NESSUNA passata. NON lanciare la corsa vera prima di aver letto i PROBLEMI.")
     } else {
-      [void]$R.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN numero, NESSUN autotest. QUESTO ZIP NON E' IL ROUND. Ma L'EA COMPILA, e quella e' una notizia: non era mai stato compilato.")
+      [void]$RefTxt.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN numero, NESSUN autotest. QUESTO ZIP NON E' IL ROUND. Ma L'EA COMPILA, e quella e' una notizia: non era mai stato compilato.")
     }
   }
   elseif($koR.Count -gt 0){
-    [void]$R.Add("ESITO: PARZIALE -- " + $koR.Count + " celle su " + $Ordinati.Count + " NON hanno prodotto i numeri attesi, piu' " + $Problemi.Count + " problemi. NON e' un round completo.")
+    [void]$RefTxt.Add("ESITO: PARZIALE -- " + $koR.Count + " celle su " + $Ordinati.Count + " NON hanno prodotto i numeri attesi, piu' " + $Problemi.Count + " problemi. NON e' un round completo.")
   }
   elseif($Problemi.Count -gt 0){
-    [void]$R.Add("ESITO: COMPLETO CON PROBLEMI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri, ma ci sono " + $Problemi.Count + " problemi (fra cui puo' esserci un S0a FALLITO, che e' una RISPOSTA e non un guasto). I numeri si leggono ACCANTO ai problemi, non invece dei problemi.")
+    [void]$RefTxt.Add("ESITO: COMPLETO CON PROBLEMI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri, ma ci sono " + $Problemi.Count + " problemi (fra cui puo' esserci un S0a FALLITO, che e' una RISPOSTA e non un guasto). I numeri si leggono ACCANTO ai problemi, non invece dei problemi.")
   }
   elseif($Rilievi.Count -gt 0){
-    [void]$R.Add("ESITO: COMPLETO CON RILIEVI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi. I " + $Rilievi.Count + " rilievi sono RISULTATI del round (canarino, frequenza censurata, stop stretto, durata corta, tick non misurati, S0a sospeso), non guasti.")
+    [void]$RefTxt.Add("ESITO: COMPLETO CON RILIEVI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi. I " + $Rilievi.Count + " rilievi sono RISULTATI del round (canarino, frequenza censurata, stop stretto, durata corta, tick non misurati, S0a sospeso), non guasti.")
   }
   else{
-    [void]$R.Add("ESITO: OK -- tutte le celle hanno prodotto i numeri attesi, nessun problema e nessun rilievo.")
+    [void]$RefTxt.Add("ESITO: OK -- tutte le celle hanno prodotto i numeri attesi, nessun problema e nessun rilievo.")
   }
-  [void]$R.Add("")
-  [void]$R.Add("--- COME SI RIPRENDE ---")
-  [void]$R.Add('  un simbolo solo    : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo ''U30USD''')
-  [void]$R.Add('  due simboli        : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo ''D30EUR,NASUSD''   <-- FRA APICI (checklist 65)')
-  [void]$R.Add('  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella ''R109_U30USD_01_short.txt''')
-  [void]$R.Add("  >>> in tutti i casi il COLLAUDO DELL'AUTOTEST rigira: costa minuti, ed e' la")
-  [void]$R.Add("      prova che il motore ragiona come la sua firma. Senza, i numeri non si")
-  [void]$R.Add("      convalidano.")
-  [void]$R.Add("  >>> E OGNI RIGA DI RIPRESA E' UN BLOCCO INTERO col suo irm e la sua guardia")
-  [void]$R.Add("      (checklist 42): i tre puntini stanno per il blocco di RIGA_R109_DA_MANDARE.md.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- COME SI RIPRENDE ---")
+  [void]$RefTxt.Add('  un simbolo solo    : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo ''U30USD''')
+  [void]$RefTxt.Add('  due simboli        : ... & $p -Pin <PIN> -CriteriFirmati -SoloSimbolo ''D30EUR,NASUSD''   <-- FRA APICI (checklist 65)')
+  [void]$RefTxt.Add('  una cella sola     : ... & $p -Pin <PIN> -CriteriFirmati -SoloCella ''R109_U30USD_01_short.txt''')
+  [void]$RefTxt.Add("  >>> in tutti i casi il COLLAUDO DELL'AUTOTEST rigira: costa minuti, ed e' la")
+  [void]$RefTxt.Add("      prova che il motore ragiona come la sua firma. Senza, i numeri non si")
+  [void]$RefTxt.Add("      convalidano.")
+  [void]$RefTxt.Add("  >>> E OGNI RIGA DI RIPRESA E' UN BLOCCO INTERO col suo irm e la sua guardia")
+  [void]$RefTxt.Add("      (checklist 42): i tre puntini stanno per il blocco di RIGA_R109_DA_MANDARE.md.")
   #  >>> APICI SINGOLI, E NON E' UN VEZZO (trovato ESEGUENDO, 25/08). In apici
   #      DOPPI questa riga espandeva $p -- che in questo script NON e' il path
   #      dello script scaricato, ma la variabile del foreach dei PROBLEMI venti
@@ -2247,9 +2334,9 @@ try{
   #      ciclo). Risultato: senza problemi la frase usciva "Una riga '&  ...'",
   #      e CON problemi ci finiva dentro il TESTO INTERO dell'ultimo problema.
   #      La riga che deve MOSTRARE del codice si scrive in apici singoli.
-  [void]$R.Add('      Una riga ''& $p ...'' incollata da sola riusa la copia locale e il pin di prima.')
+  [void]$RefTxt.Add('      Una riga ''& $p ...'' incollata da sola riusa la copia locale e il pin di prima.')
 
-  Set-Content -LiteralPath $Referto -Value ($R -join "`r`n") -Encoding UTF8
+  Set-Content -LiteralPath $Referto -Value ($RefTxt -join "`r`n") -Encoding UTF8
   if(Test-Path -LiteralPath $Zip){ Remove-Item -LiteralPath $Zip -Force -ErrorAction SilentlyContinue }
   Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $Zip -Force
 }catch{
