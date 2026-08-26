@@ -7,6 +7,34 @@
 
 ---
 
+## 🧭 AGGIORNAMENTO 26/08 POMERIGGIO — FIRME, ANALISI DIAL, SCALETTA SERALE
+
+- ✍️ **FIRME di giornata**: "FIRMO LO STUDIO ANATOMIA CON PROPOSTE" (criteri
+  sbloccati, pin `3b95be3`), "FIRMO x S&P" (emendamento D-B: SIMBOLI
+  NASUSD,SPXUSD; pin storico `2ba0286`), "FIRMO R110" (gia' del 25/08 sera).
+- 📊 **Due analisi chiuse sui 481 giorni** (base riconciliata al centesimo):
+  `ANALISI_DIAL_TAGLIE` — pass-rate fa il PICCO a dial 1,00 (99,6%) e crolla
+  sopra (dirupo a d≈1,055; a 1,15 pass 96,7%); alzare i lotti NON aumenta il
+  guadagno per challenge (piatto 8,5-9,3k), accorcia solo i giorni.
+  `ANALISI_SOPRAVVIVENZA_FUNDED` — alla taglia firmata sopravvivenza 12 mesi
+  100% (230/230), ma da d≈1,06 restare diventa MOLTO piu' difficile che
+  passare (1 anno funded = 21x i giorni neri di una challenge). Proposta
+  DUE-DIAL: challenge 1,00 / funded 0,74 (da firmare all'apertura challenge).
+  Ipotesi di Claudio "piu' difficile passare che restare" = giusta alla
+  taglia firmata, per un capello.
+- 🔴 Risposta data e motivata: NO all'aumento lotti col Guardian come rete
+  (slippage 21,5 pt misurato, guardian-as-stop = sistema non misurato).
+- 📼 Trade del giorno letti a Claudio: MaxMinNotte DAX short +227 (08:27) e
+  DAX Apertura RETEST long +226 (10:26, parziale+BE+trailing da manuale) —
+  stesso indice, due lati, stesso giorno: la scorrelazione dal vivo.
+- 🌆 **SCALETTA SERALE PRONTA** (Claudio arriva al PC piu' tardi): 1)
+  conta-barre (grafico NASUSD_EXT M15 + Riga 2); 2) R110 pin `4d6952f`
+  (giro a vuoto + corsa SENZA switch); 3) misure lampo pin `03268a2`
+  (blocchi 1+2, MT5 puo' restare aperto); 4) anatomia pin `3b95be3`
+  (blocchi 1+2); 5) Riga 1 storico pin `2ba0286` (scarico S&P ~6 min);
+  6) diagnosi DAX pin `386346d` (blocchi 1+2). Le stringhe sono nei
+  rispettivi DA_MANDARE, tutte col PASS del verificatore.
+
 ## 🧭 AGGIORNAMENTO 26/08 — LA NOTTATA DEI QUATTRO ROUND (R107-R111) E DEI 16 ANNI DI NASDAQ
 
 - 🏁 **CHIUSI CON REFERTO (0 problemi aperti)**: **R107** (short aperture:
