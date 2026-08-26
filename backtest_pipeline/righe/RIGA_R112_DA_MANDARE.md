@@ -71,15 +71,19 @@ sbagliato). Le date sono **in ora server BCM** (ora italiana − 1).
 ⚠️ **Il pin si rilegge DOPO il push, non prima** (checklist 6 e 55). Il commit da
 pinnare deve contenere **TUTTI** gli artefatti che il driver riscarica al pin:
 il driver, i **4** file prova `R112_*.txt`, i criteri, i **2 antenati R110**
-(`R110_EMADOW_00_metro.txt`, `R110_EMADOW_02_short.txt`) **e i 4 CSV di
+(`R110_EMADOW_00_metro.txt`, `R110_EMADOW_02_short.txt`), **i 4 CSV di
 riferimento G0-B in `prove/R110_CSV_EMADOW/`**
-(`ABTG_EMA200_U30USD_{IS,OOS}_{00_metro,02_short}.csv`).
-🔴 **Attenzione, difetto trovato (e riparato nell'albero di lavoro) il 26/08**:
-i CSV erano stati committati sotto un **percorso raddoppiato**
+(`ABTG_EMA200_U30USD_{IS,OOS}_{00_metro,02_short}.csv`) e — già in repo da
+prima, ma il driver li riscarica lo stesso al pin — `walkforward_generico.ps1`,
+`mql5/Experts/ABTG_EMA200.mq5`, `mql5/Include/ABTG_PausaGuardian.mqh`.
+🔴 **Storia di un difetto già riparato**: i CSV di riferimento erano stati
+committati sotto un **percorso raddoppiato**
 (`prove/backtest_pipeline/prove/R110_CSV_EMADOW/` — commit `460d615`). Lo
-spostamento al percorso giusto è **in staging, non ancora committato**: il
-commit che lo contiene deve entrare nel pin, o il driver si ferma allo scarico
-dei riferimenti (e fermarsi lì è il comportamento giusto).
+spostamento al percorso giusto è **committato** in `d5df1a8` (`git mv`), e il
+percorso raddoppiato **non esiste più nell'albero** — verificato dal
+verificatore il 26/08 con `git ls-tree -r`. Resta valido il motivo per cui la
+cosa conta: se un CSV di riferimento mancasse al pin, il driver si fermerebbe
+allo scarico dei riferimenti, e fermarsi lì è il comportamento giusto.
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
 silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola per un
@@ -223,7 +227,13 @@ Cartella e zip sul Desktop: `R112_EMADOW_CONTRATTO_<MODO>_<data>_<ora>` — dent
 
 - **`REFERTO_R112.txt`** ← **è questo che conta** (tabella madre con le DUE
   colonne nuove `PeggGio%fisso` e `PeggGio%eq`, i gate cella per cella, le
-  letture INFO (a)(b)(c)(d) del cancello di portafoglio — il verdetto è a mano);
+  letture INFO (a)(b)(c)(d) del cancello di portafoglio — il verdetto è a mano).
+  ⚠️ **Quando si applica il cancello a mano, si guarda il SEGNO**: il DD di (b)
+  è un numero **positivo** (più basso = meglio), la peggior giornata di (c) è un
+  numero **negativo** perché è una perdita (`-0,37%` è **peggio** di `-0,31%`).
+  Il `≤` del § 6 dei criteri è scritto sulla **profondità** della perdita:
+  applicato alle cifre col segno così come sono stampate **rovescia** il
+  criterio (c). Il referto lo ripete su ogni riga (c);
 - gli **8 CSV** di ottimizzazione (2 righe l'uno: le gemelle di controllo);
 - gli **8 file per-trade** `pertrade_<cella>_<magic>.csv` (la materia prima
   della peggior giornata);
@@ -304,10 +314,12 @@ F=backtest_pipeline/risultati_archivio/R112_CRITERI.md
 grep -cF "$TOKF" "$F"    # oggi, a criteri FIRMATI: DEVE dare 0 (prima della firma dava 2)
 ```
 
-⚠️ Nota d'igiene (checklist 45/82): i commenti in testa ai quattro file prova
-`R112_*.txt` — scritti prima della firma — nominano ancora il lucchetto per
-esteso. Il gate legge **solo** `R112_CRITERI.md`, quindi non morde; ma a un
-eventuale ri-pin conviene ripulire anche quelle righe di prosa.
+✅ Nota d'igiene (checklist 45/82), **già chiusa**: i commenti in testa ai quattro
+file prova `R112_*.txt` erano stati scritti prima della firma e nominavano il
+lucchetto per esteso; sono stati ripuliti in `521ceec`. Verificato dal
+verificatore il 26/08: il token **non compare in nessuno** dei quattro file
+prova, né nel driver, né in questa pagina (dove è **composto**, mai scritto
+intero — così un `grep` per spegnere lo stato non trova la ricetta stessa).
 
 E si prova **nei due versi** (checklist 82): col lucchetto tolto la corsa vera
 deve **partire senza switch**; col lucchetto rimesso deve tornare a **uscita 2**.

@@ -4320,3 +4320,58 @@ scritto il numero.** Qui il numero arrivava a destinazione nudo.
 > codice (`00:00 NY = 05:00 server BCM`), perche' un lettore che deve fare
 > l'addizione a mente la sbaglia proprio quando e' stanco. Vale per referti,
 > tabelle di chat, nomi di file e `InpSessionHour`.
+
+---
+
+## 🆕 AGGIUNTA DEL 26/08/2026 (sera) — trovata verificando R112 (il contratto dell'EMADOW), **ESEGUENDO il driver e leggendo il referto che produce**
+
+## 87. ➖ IL CRITERIO SCRITTO CON `<=` E IL NUMERO STAMPATO **COL SEGNO**: il confronto letterale del referto dà il verdetto **ROVESCIATO**
+
+_Difetto vero, trovato PRIMA dell'invio in `RIGA_R112_EMADOW_CONTRATTO.ps1`
+(sezione "IL CANCELLO DI PORTAFOGLIO" del referto), e **riprodotto**: nella corsa
+di laboratorio il referto stampava, uno sotto l'altro,_
+
+```
+     (b) DD OOS       : 2.66%  contro metro 7.83%
+     (c) pegg.giornata: -0.37% (fisso)  contro metro -0.31%
+```
+
+_sotto l'intestazione «un dial è CANDIDATO se in OOS ... **(b) DD <= metro,
+(c) peggior giornata <= metro**»._
+
+Le due righe **non si leggono con lo stesso verso**, e niente lo diceva:
+
+- **(b)** è una **magnitudine positiva**: `2,66 <= 7,83` è vero, e vuol dire
+  davvero "non peggiore". Il `<=` funziona sulle cifre come stanno.
+- **(c)** è un **numero negativo**, perché è una **perdita**: `-0,37 <= -0,31`
+  è **vero** come aritmetica, e vuol dire **il contrario** di quello che il
+  criterio chiede — quella giornata è **più profonda**, cioè PEGGIO del metro.
+
+Cioè: applicando alla lettera il criterio firmato alle cifre stampate, il
+criterio (c) risultava **SODDISFATTO esattamente nel caso in cui deve fallire**.
+E il referto era stato costruito apposta perché il verdetto si desse **A MANO**
+leggendo quelle righe (il driver "non giudica", per G5). Il numero era giusto,
+il gate era giusto, la firma era giusta: **si rovesciava la lettura**.
+
+È il parente stretto del punto 86 (*un orario senza il suo orologio*) e del 58
+(*la colonna letta contando dalla fine*): il numero arriva a destinazione
+**nudo**, e chi lo legge ci mette sopra la convenzione sbagliata — con la
+differenza, qui, che le due convenzioni **convivono nella stessa lista di
+criteri**, a due righe di distanza.
+
+> ✅ **REGOLA, due pezzi insieme:**
+> 1. **Un criterio scritto con `<=` / `>=` si stampa accanto al VERSO in
+>    parole**, sulla riga stessa e non in testa al paragrafo:
+>    `[numeri POSITIVI: più basso = meglio]`,
+>    `[numeri NEGATIVI: più vicino a zero = meglio]`. Se in una stessa lista di
+>    criteri due grandezze hanno verso opposto, **va detto che è così**: è la
+>    condizione che produce l'errore, e nessuno la nota da solo.
+> 2. **Prima di firmare un criterio, si guarda come lo stamperà lo strumento.**
+>    Un `≤` scritto pensando alla *profondità di una perdita* e un referto che
+>    stampa quella perdita *col segno* sono due cose diverse, e il documento
+>    firmato non può correggere il referto: è il referto che deve dichiarare la
+>    convenzione con cui va letto il documento.
+>
+> Corollario: **una colonna che può essere negativa non si mette accanto a una
+> che non può esserlo senza etichettarle tutte e due** (qui `OOSdd` e
+> `PeggGio%fisso`, nella stessa tabella madre).
