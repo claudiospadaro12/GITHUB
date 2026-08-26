@@ -4178,3 +4178,145 @@ essere rossa) con un meccanismo nuovo: non un parametro passato da noi, ma un
 > PowerShell, bias sceso a **0,0 %** togliendo l'intestazione dal campione). Una
 > tolleranza scelta a occhio sopra uno stimatore mai misurato non e' un
 > controllo: e' un generatore di rumore che insegna a ignorare le note.
+
+---
+
+## 🆕 AGGIUNTA DEL 26/08/2026 (sera) — trovate verificando `RIGA_DIAGNOSI_DAX.ps1`, il driver **mai eseguito** (il builder non aveva PowerShell)
+
+## 85. ✂️ LA LISTA CHE LO STRUMENTO **TRONCA**, CONTATA COME SE FOSSE INTERA — e il taglio non e' neutro: pende dalla parte di **una delle due ipotesi**
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_DIAGNOSI_DAX.ps1`
+(`fe2e502`), trovato PRIMA dell'invio e **RIPRODOTTO due volte, eseguendo il
+driver vero contro `histdata_m1.py` vero su ZIP sintetici._
+
+La diagnosi del DAX ha una domanda a due esiti — **Q1: i prezzi impossibili sono
+un problema di SCALA/VALUTA (giornate intere sbagliate) o SPAZZATURA (pochi tick
+storti)?** — e la risponde contando, giorno per giorno, chi sta sopra e chi sta
+sotto le 500 barre fuori banda. I giorni li legge dal referto dello strumento con
+questa riga:
+
+```
+    2019-01-04    900 barre  min 2906.949  max 13002.114
+```
+
+Solo che `diagnosi_fuori_banda()` di `histdata_m1.py` stampa:
+
+```python
+righe.append("  i GIORNI peggiori (max 40, ordinati per barre fuori banda):")
+ordinati = sorted(per_giorno.keys(), key=lambda g: -per_giorno[g][0])
+for g in sorted(ordinati[:40]):        # <- QUARANTA. E il resto?
+...
+righe.append("    (... e altri %d giorni)" % (len(per_giorno) - 40))
+```
+
+**Misurato, su un anno finto con 45 giornate INTERE fuori banda e 19 giorni di
+soli spike:**
+
+| dove | cosa dice |
+|---|---|
+| la riga dei totali (completa) | `barre fuori banda: 40690, in 64 giorni.` |
+| l'elenco (troncato) | 40 righe + `(... e altri 24 giorni)` |
+| **il referto del driver** | `giornate INTERE: 40; giorni con sporco isolato (<500 barre): 0` |
+| **la lettura automatica** | *"non e' spazzatura, e' un problema di SCALA/VALUTA"* |
+| codice d'uscita | **0**, `ESITO: OK` |
+
+Cioe' **la risposta a Q1 l'ha scelta il troncamento**, non la misura. E non e'
+sfortuna: il taglio e' `ordinati per barre DECRESCENTI`, quindi butta via
+**sempre e solo i giorni con poche barre** — che sono *esattamente* la
+definizione di una delle due ipotesi. Un cap "primi N" su una lista **ordinata**
+non e' un campione: e' un filtro che vota.
+
+### Perche' e' una classe a se'
+
+Il **83** e' il gemello che scrive un altro formato; il **81** e' l'ordinamento
+che sposta il bersaglio. Qui il formato e' giusto, la regex aggancia, e ogni
+singola riga letta e' **vera**: e' l'**insieme** a essere parziale, e il driver
+non ha modo di accorgersene *dalle righe che ha letto*. Se ne accorge solo
+confrontandole con un **totale che arriva da un'altra riga**.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **Prima di contare le righe di un elenco prodotto da un altro strumento, si
+>    apre il sorgente di quello strumento e si cerca il cap** (`[:40]`, `head`,
+>    `LIMIT`, `max N`, `Select-Object -First`). Se c'e', il conto derivato **non
+>    e' il conto**.
+> 2. **Il totale e il dettaglio non vengono mai dalla stessa riga: si
+>    RICONCILIANO.** `totale - somma(dettaglio) > 0` e' il rilevatore che
+>    funziona anche se domani il testo del cap cambia. Qui:
+>    `FuoriGiorni - (GiorniInteri + GiorniSpike)`.
+> 3. **Quando la riconciliazione non torna, la domanda resta SOSPESA** e il
+>    rilievo va nella lista del codice d'uscita — non si sceglie "l'ipotesi piu'
+>    probabile". Il difetto qui non era il numero sbagliato: era la **frase in
+>    italiano** che ne concludeva una delle due.
+>
+> 🧭 **Dove si annida**: ogni `--diagnosi`, `--top`, `i peggiori N`, ogni tabella
+> "prime 10 celle", ogni `MAX_RIGHE` di un referto MQL5. E **peggiora con la
+> gravita'**: gli anni piu' malati sono quelli che sforano il cap.
+
+### 85-bis. 🛡️ LA GUARDIA CHE ESISTE SOLO QUANDO ESISTE IL SUO METRO
+
+Stesso file, stessa serata, e vale la pena separarla dal **84** perche' il
+cancello qui **non** stava nel renderer: stava nel posto giusto, calcolato prima
+dei referti, e finiva davvero nella lista del codice d'uscita. Era avvolto in un
+`if`:
+
+```powershell
+if($AnniCtrl.Count -gt 0){        # <- il controllo positivo (Nasdaq)
+  ...
+  if($ctrlPeggiore -lt $SogliaDensita){ $Problemi.Add("verdetto SOSPESO") }
+}
+```
+
+La soglia `-SogliaDensita 55` **non e' un criterio firmato** e su quel feed non
+era mai stata misurata: l'unica cosa che la giustificava era il **controllo
+positivo** sulla serie promossa. **Misurato**, su un banco con i soli ZIP del DAX
+(niente Nasdaq in cache — che e' anche cio' che fa `-SaltaControllo`):
+
+```
+VERDETTO : MARCIO -- nessun anno sano ne' riparabile
+--- PROBLEMI ---   nessuno
+ESITO: OK                       codice d'uscita = 0
+```
+
+Il verdetto MARCIO manda, per proposta scritta nel referto stesso, alla *strada
+2*: **~25 ore di crawl Dukascopy, due notti**. Decise da una soglia che in quella
+corsa **non era stata confrontata con niente** — su una riga che si presentava
+pulita. La guardia non ha taciuto: **non e' proprio esistita**, perche' il ramo
+in cui vive e' il ramo fortunato.
+
+> ✅ **REGOLA: il ramo `else` di una guardia non e' "niente da fare", e' il caso
+> PIU' pericoloso.** Se un verdetto poggia su una soglia, e la soglia poggia su
+> un controllo, allora **"controllo assente" e "controllo fallito" devono
+> produrre lo STESSO rilievo**. Il grep che lo trova: per ogni `$Problemi.Add`
+> dentro un `if(<qualcosa esiste>)`, chiedersi *"e quando non esiste?"*. Se la
+> risposta e' una frase in prosa nel referto, il cancello e' aperto.
+>
+> ⚠️ **Corollario sugli switch che "vanno piu' veloci"**: `-SaltaControllo` e
+> compagnia spengono spesso proprio il metro. Uno switch che disattiva una misura
+> deve disattivare **anche il verdetto che quella misura sorregge**, non solo la
+> misura.
+
+## 86. 🕐 UN ORARIO SENZA IL SUO OROLOGIO: la tabella che Claudio legge dice `02:00-15:00` e non dice **di dove**
+
+Stesso file. Il driver misura la finestra di sessione ora per ora e la stampa
+nella colonna `finestra` del referto — che e' **l'unico posto del referto dove
+Claudio legge degli orari**. La legenda sotto la tabella spiegava tutto
+(`prima e ultima ora TOCCATA dal feed`) **tranne l'orologio**. Il fuso era
+scritto, ma in un **altro file** dello zip (`MAPPA_SESSIONI.txt`).
+
+E qui non e' pedanteria, perche' i due orologi raccontano due storie diverse:
+
+| se `02:00` fosse... | vuol dire |
+|---|---|
+| ora **server BCM** (l'ora di casa: DAX 8, Nasdaq 14) | il feed apre **6 ore prima** del DAX: sessione assurda, dato sospetto |
+| ora di **New York** (quella vera: e' cosi' che HistData scrive) | `02:00 NY = 07:00 server = 08:00 italiane`, cioe' **la mattina europea**: convenzione normalissima |
+
+La regola di casa (`CLAUDE.md`: *ora server = ora italiana − 1*) e la lezione del
+06/08 (*log di MT5 = ora locale, grafico = ora server*) dicono la stessa cosa da
+due anni: **prima di dire che un orario e' strano, si stabilisce in quale ora e'
+scritto il numero.** Qui il numero arrivava a destinazione nudo.
+
+> ✅ **REGOLA: ogni ora stampata porta il suo fuso NELLA STESSA schermata in cui
+> viene letta**, non in un allegato — e con la conversione accanto, fatta dal
+> codice (`00:00 NY = 05:00 server BCM`), perche' un lettore che deve fare
+> l'addizione a mente la sbaglia proprio quando e' stanco. Vale per referti,
+> tabelle di chat, nomi di file e `InpSessionHour`.
