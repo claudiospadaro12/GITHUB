@@ -589,17 +589,17 @@ dial):
 
 ## 6. 📊 LA TABELLA UNICA — tutte le censite, una riga per prop
 
-| prop / programma | daily | totale | statico? | EA MT5 | news | weekend | consistenza | tempo min/trade | dial max che regge il **giorno gia' accaduto** | verdetto |
-|---|---:|---:|---|---|---|---|---|---|---:|---|
-| 🥇 **FTMO 2-Step SWING** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si | 🟢 **nessuna restrizione** | 🟢 libero | 🟢 nessuna | non dichiarato | **1,055** | ✅ **CANDIDATA** |
-| 🥈 **FundedNext Stellar 2-Step** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si (**fee add-on**) | 🟢 libere in challenge · 🟡 −60% profitto ±5 min sul funded | 🟢 libero ovunque | 🟢 nessuna sui CFD | non dichiarato | **1,055** | ✅ **CANDIDATA** |
-| 🥉 **Alpha Capital Alpha Swing** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si (MT5 da confermare) | 🟢 permesse | 🟢 libero | 🔴 **40% (o 15%?) sui payout** | 🔴 **2 minuti** | **1,055** | ✅ **CANDIDATA** (2 domande bloccanti) |
-| 🟡 **Goat 2-Step Standard** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si | 🟡 permesse, profitto cappato all'1% ±5 min | 🟡 si, **ma gap ven/lun punito** | 🟢 nessuna | non dichiarato | **1,055** | 🟡 **RISERVA** |
-| 🟠 **The5ers High Stakes** | **5%** | **10%** | 🟢 statici (daily su chiusura giorno prima) | 🟢 si | 🔴 **esecuzione vietata ±2 min** | 🟢 libero | 🟢 nessuna dura | non dichiarato | **1,055** | ❌ **BOCCIATA** (news · one-sided · rollover) |
-| 🔴 **FundingPips 2 Step Standard** | **5%** | **10%** | 🟢 statici | 🟢 si | 🔴 **vietato anche TENERE ±10 min** | 🔴 **auto-close il venerdi'** | 🟢 nessuna in eval | non dichiarato | **1,055** | ❌ **BOCCIATA** |
-| 🔴 **Blueberry Funded** | **4%** | **10%** | 🟢 statici | 🟢 si | 🔴 vietate ±2 min | 🟢 si | 🟢 nessuna | non dichiarato | **0,844** | ❌ **BOCCIATA** |
-| 🔴 **E8 Markets** | 2% soft (Signature) | 3-4% **TRAILING** / 8% statico (Pro) | 🔴 no | ❓ fonti in conflitto | 🔴 vietate ±2 min | ❓ | 🔴 **35-40%** | 🔴 50% trade ≥ 1 min | — | ❌ **BOCCIATA** |
-| ⚫ **Upcomers Thunderbolt** | **3%** | **6% TRAILING** | 🔴 no | 🟢 si | ❓ | 🟢 si | 🟡 15-20% | 🔴 **2 minuti** | **0,633** | ❌ **GIA' BOCCIATA 26/08** |
+| prop / programma | daily | totale | statico? | EA MT5 | news | weekend | consistenza | tempo min/trade | 🔝 **taglia max / prezzo / leva indici** | 🏦 **payout** | dial max che regge il **giorno gia' accaduto** | verdetto |
+|---|---:|---:|---|---|---|---|---|---|---|---|---:|---|
+| 🥇 **FTMO 2-Step SWING** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si | 🟢 **nessuna restrizione** | 🟢 libero | 🟢 nessuna | non dichiarato | **$200k** conto singolo · **€1.080** · indici **1:15** (oro 1:9 o 1:15 → [INCERTO]) · tetto **$400k/strategia** | 🟢 **on-demand dal 14° gg** (conto **piatto**) · min $20 · 80→90% · 🔴 il prelievo **azzera il cuscinetto** | **1,055** | ✅ **CANDIDATA** |
+| 🥈 **FundedNext Stellar 2-Step** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si (**fee add-on**) | 🟢 libere in challenge · 🟡 −60% profitto ±5 min sul funded | 🟢 libero ovunque | 🟢 nessuna sui CFD | non dichiarato | **$200k** conto singolo · **$1.099,99** · indici **1:25 eval / 1:15 funded** · tetto **$300k/strategia EA** | 🟡 **21 gg poi ogni 14**; on-demand **solo con add-on** · min **$250** · 80→90→95% · 🔴 il prelievo **azzera il cuscinetto** | **1,055** | ✅ **CANDIDATA** |
+| 🥉 **Alpha Capital Alpha Swing** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si (MT5 da confermare) | 🟢 permesse | 🟢 libero | 🔴 **40% (o 15%?) sui payout** | 🔴 **2 minuti** | **$200k** conto singolo · prezzo max **NON LETTO** · leva indici **NON DICHIARATA** su Swing · tetto **$400k persona / $300k strategia** · 🔴 **limite di LOTTI** con sanzione | 🟡 **bisettimanale O on-demand, scelto UNA VOLTA all'iscrizione** · min **NON DICHIARATO** · 80→90% · 🔴 consistency blocca | **1,055** | ✅ **CANDIDATA** (2 domande bloccanti) |
+| 🟡 **Goat 2-Step Standard** | **5%** | **10%** | 🟢 **entrambi STATICI** | 🟢 si | 🟡 permesse, profitto cappato all'1% ±5 min | 🟡 si, **ma gap ven/lun punito** | 🟢 nessuna | non dichiarato | taglia max **[INCERTO]** ($400k? $800k?) · prezzi $36→$2.998 · indici **1:20 eval / 1:10 funded** · oro **[INCERTO]** | 🔴 **solo bisettimanale** · min **$100** · 80→100% con add-on · 🔴 servono **3-4 giorni con ≥0,5%** + **cap $3.000/giorno** | **1,055** | 🟡 **RISERVA** |
+| 🟠 **The5ers High Stakes** | **5%** | **10%** | 🟢 statici (daily su chiusura giorno prima) | 🟢 si | 🔴 **esecuzione vietata ±2 min** | 🟢 libero | 🟢 nessuna dura | non dichiarato | 🔴 non censito (bocciata prima) | 🔴 non censito | **1,055** | ❌ **BOCCIATA** (news · one-sided · rollover) |
+| 🔴 **FundingPips 2 Step Standard** | **5%** | **10%** | 🟢 statici | 🟢 si | 🔴 **vietato anche TENERE ±10 min** | 🔴 **auto-close il venerdi'** | 🟢 nessuna in eval | non dichiarato | 🔴 non censito (bocciata prima) — tetto $400k (repo 13/08) | 🟡 repo 13/08: Weekly 60% · Bi-weekly 80% · Monthly 100% · On-Demand 90% | **1,055** | ❌ **BOCCIATA** |
+| 🔴 **Blueberry Funded** | **4%** | **10%** | 🟢 statici | 🟢 si | 🔴 vietate ±2 min | 🟢 si | 🟢 nessuna | non dichiarato | 🔴 non censito (bocciata prima) | 🔴 non censito | **0,844** | ❌ **BOCCIATA** |
+| 🔴 **E8 Markets** | 2% soft (Signature) | 3-4% **TRAILING** / 8% statico (Pro) | 🔴 no | ❓ fonti in conflitto | 🔴 vietate ±2 min | ❓ | 🔴 **35-40%** | 🔴 50% trade ≥ 1 min | 🔴 non censito | 🔴 non censito | — | ❌ **BOCCIATA** |
+| ⚫ **Upcomers Thunderbolt** | **3%** | **6% TRAILING** | 🔴 no | 🟢 si | ❓ | 🟢 si | 🟡 15-20% | 🔴 **2 minuti** | fino a **$1,5M** (cap totale) · 100k a ~$99,90 | primo a 7-14 gg · min **$45** · split **99%** · 🟡 Best Day 15-20% | **0,633** | ❌ **GIA' BOCCIATA 26/08** |
 
 ---
 
@@ -645,6 +645,14 @@ dial):
 | 10 | **Durata dei nostri trade** | 🔴 **misura IMPOSSIBILE oggi**: `ExportTrades()` non esporta `open_time` (debito M2, terzo mandato che lo chiede) |
 | 11 | **Quota dei nostri trade dentro le finestre news** | mai calcolata: serve per pesare le regole "soft" di FundedNext (−60%) e Goat (cap 1%) |
 | 12 | **Reputazione: verifica indipendente** | ForexPeaceArmy, PropFirmMatch e Trustpilot **non apribili**; ho solo rassegne di terzi via search |
+| 13 | **Prezzo della taglia MASSIMA** di Alpha Capital e di Goat | 🔴 **NON LETTO** (per Goat ho solo la forbice $36 → $2.998, e il 2.998 e' su un **Instant**, non sul 2-Step) |
+| 14 | **Taglia massima reale di Goat** | 🔴 fonti in conflitto: $400k / $800k / $2M. **Non risolto** |
+| 15 | **Leva su indici e oro di Alpha Capital Swing** | 🔴 **NON DICHIARATA** (ho solo Alpha One: metalli 1:9) |
+| 16 | **Leva sull'oro di FTMO Swing** | 🔴 **due letture in conflitto nella stessa giornata**: FAQ = 1:9 metalli · Trading Update 02/02/2026 = XAU 1:15 su Swing |
+| 17 | **Il limite di LOTTI di Alpha Capital, per taglia** | 🔴 **NON DICHIARATO** — ed e' una regola **sanzionatoria** (2ª violazione = conto disattivato) |
+| 18 | **Primo prelievo e minimo prelevabile di Alpha Capital** | 🔴 **NON DICHIARATI** |
+| 19 | **Se il prelievo azzera il cuscinetto su Alpha Capital e Goat** | 🔴 **NON DICHIARATO** — su FTMO e FundedNext e' **dichiarato SI'** |
+| 20 | **Il nostro tempo di libro piatto** | 🔴 buco NOSTRO: FTMO chiede **zero posizioni e zero pendenti** per il payout, e **non sappiamo quante finestre piatte la flotta lasci in un mese** |
 
 ---
 
@@ -712,7 +720,33 @@ nostro −4,74% **gia' accaduto** lo sfonda, servirebbe d ≤ 0,844 · news viet
 
 ---
 
-## 11. ❓ LE TRE DOMANDE CHE RESTANO APERTE — **decide Claudio, non io**
+### 🔝 E CON L'ORIENTAMENTO "TAGLIA ALTA", la classifica cambia? — **si', in parte**
+
+| criterio della taglia alta | vince |
+|---|---|
+| **taglia massima in UN conto** | 🤝 **pari a $200.000**: FTMO, FundedNext e Alpha Capital sono **identiche**. Nessuna vende di piu' in un colpo (Goat forse, ma le fonti si contraddicono) |
+| 🔴 **capitale massimo per la NOSTRA (unica) strategia** | 🥇 **FTMO: $400.000** (= due conti da 200k, esattamente al tetto "per trader **o strategia**"). FundedNext e Alpha si fermano a **$300.000 per strategia** |
+| **scaling oltre il tetto** | 🥇 FTMO **fino a $2M** con condizioni **scritte e verificabili** (≥10% netto in 4 cicli mensili + ≥2 payout). FundedNext dichiara **$4M** ma senza condizioni lette |
+| **leva sugli indici** (piu' leva = meno margine impegnato) | 🥇 **FundedNext 1:25 in challenge / 1:15 sul funded** batte FTMO Swing (1:15) e Goat funded (1:10) |
+| **prezzo della taglia grande** | 🥇 **FTMO €1.080** per il 200k contro **$1.099,99** di FundedNext: praticamente pari, con FTMO leggermente sotto al cambio corrente |
+| **regole che cambiano con la taglia** | 🥇 **FTMO: dichiarato NO** (_"same for every account size"_). 🔴 **Goat: SI'**, e cambia **per data d'acquisto** |
+
+> ⚖️ **Verdetto sull'aggiornamento: la classifica NON si ribalta, si rinforza.**
+> FTMO resta prima **anche sul criterio nuovo**, e per un motivo che prima non
+> avevamo scritto: **e' l'unica che porta la NOSTRA singola strategia fino a
+> $400.000** (le altre due la fermano a 300k) e **l'unica che dichiara per
+> iscritto che le regole non cambiano con la taglia**.
+> 🔴 **Ma la taglia alta introduce un rischio che nessuna prop puo' togliere e
+> che e' NOSTRO: l'esecuzione.** A 400k un ingresso DAX vale **~47 lotti**
+> `[INFERITO]`, e i 21,5 punti di slippage misurati in R109 su un solo stop
+> Nasdaq dicono che **il divario fra backtest e realta' cresce con la taglia**.
+> **La taglia non si sceglie sul listino: si sceglie dopo aver misurato lo
+> slippage alla taglia scelta.** Oggi quella misura, sopra il 100k, **non
+> esiste in casa.**
+
+---
+
+## 11. ❓ LE DOMANDE CHE RESTANO APERTE — **decide Claudio, non io**
 
 ### ❓ Q1 — Quale pedaggio si preferisce pagare: **la leva o la clausola**?
 FTMO Swing e FundedNext hanno **gli stessi muri** e passano entrambe il metro.
@@ -753,6 +787,36 @@ giorni) e che sopra **1,055** c'e' il dirupo. `ANALISI_SOPRAVVIVENZA` raccomanda
 
 ---
 
+### ❓ Q4 — **Quanto grande, davvero? E si accetta di misurare PRIMA?**
+Nessuna candidata vende piu' di **$200.000 in un conto solo**. Sopra i 200k si
+va **per composizione** (due conti) o **per scaling**, e li' mordono i tetti
+**per STRATEGIA**: FTMO **$400k**, FundedNext e Alpha **$300k**. Noi abbiamo
+**una sola flotta**: e' quella la strategia che il tetto conta.
+> 🎯 **Le tre uscite:** (a) **200k singolo** e si guarda come si comporta lo
+> slippage prima di raddoppiare; (b) **2 × 200k su FTMO** = 400k, al tetto
+> esatto, sapendo che la clausola _"identically traded strategies across
+> multiple FTMO accounts"_ e' scritta **proprio** per questo caso e va chiusa
+> per iscritto; (c) 200k + scaling FTMO (+25% ogni 4 mesi, condizioni scritte).
+> 🔴 **La casa raccomanda di NON saltare il passo della misura**: `METRO_PROP`
+> §12 e R109 dicono che la taglia **non cambia le percentuali ma cambia
+> l'esecuzione**, e sopra il 100k **non l'abbiamo mai misurata**. Costerebbe
+> **una serie di trade reali alla taglia nuova**, non un backtest.
+
+### ❓ Q5 — **Prelevare spesso, o tenere il cuscinetto?**
+FTMO e FundedNext **dichiarano entrambe** che il prelievo **riporta il pavimento
+del muro totale al capitale iniziale**: il profitto smette di essere cuscinetto
+nel momento in cui lo incassi.
+> 🎯 **Il tradeoff, coi nostri numeri:** a dial 1,00 il lordo mediano e'
+> **12.125 €/mese** (netto 80% ≈ 9.700 €) e il DD misurato e' **6,37%** contro
+> un muro del **10%**. **Prelevare ogni ciclo = vivere sempre a 10 punti dal
+> pavimento** (la condizione peggiore misurata). **Lasciar correre due-tre cicli
+> = comprare cuscinetto pagandolo in liquidita'.**
+> 🔴 E su **FTMO** c'e' il vincolo operativo in piu': il payout si chiede **a
+> libro piatto**, e la nostra flotta ha quasi sempre qualcosa di aperto.
+> **Serve una procedura di "finestra piatta" — che oggi non esiste.**
+
+---
+
 ## 12. 🛑 COSA NON AUTORIZZA QUESTO DOSSIER
 
 - **Nessun acquisto.** Vale la **regola D3**: risposta **scritta** del supporto
@@ -760,7 +824,23 @@ giorni) e che sopra **1,055** c'e' il dirupo. `ANALISI_SOPRAVVIVENZA` raccomanda
   `report/DOMANDE_SUPPORTO_PROP.md` e in `docs/REGOLAMENTO_FTMO_2026-08.md` §(b);
   a quelle si aggiungono le nuove: **fee EA di FundedNext**, **hedging o
   netting**, **consistency Alpha 40% o 15%**, **reset giornaliero Alpha**,
-  **fuso server The5ers/Goat**.
+  **fuso server The5ers/Goat**, e le sei nate dagli aggiornamenti di stasera:
+  1. _"Our single proprietary EA portfolio would run on TWO accounts of $200,000
+     each with you. Does that hit the '$400,000 per trader OR strategy' cap, and
+     does it count as 'identically traded strategies across multiple accounts'?"_
+     (FTMO) / _"...against the $300,000 per EA strategy cap?"_ (FundedNext, Alpha)
+  2. _"What is the exact leverage on INDICES and on XAUUSD on a SWING account of
+     $200,000? Your FAQ says 1:9 for metals, your Trading Update of 2 Feb 2026
+     says 1:15 for XAU on Swing. Which one is in force today?"_ (FTMO)
+  3. _"Is there a maximum LOT SIZE limit per position on a funded account, and
+     what is its exact value for each account size?"_ (Alpha Capital — regola
+     sanzionatoria, valore non pubblicato)
+  4. _"After a payout, is the maximum loss floor recalculated back to the initial
+     balance?"_ (Alpha Capital, Goat — le altre due l'hanno gia' dichiarato)
+  5. _"Can a Reward be requested while positions are still open? Our portfolio is
+     rarely flat."_ (FTMO)
+  6. _"What is the exact price of the LARGEST 2-Step account you sell?"_
+     (Alpha Capital, Goat — prezzo non letto)
 - **Nessuna modifica al forward**, nessun cambio di soglia del Guardian, nessun
   cambio di dial, nessun round. Ogni spostamento e' una **FIRMA di Claudio sui
   contratti**.
