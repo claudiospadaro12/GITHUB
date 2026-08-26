@@ -529,8 +529,14 @@ Dico ("python uscito con " + $RcPython + " dopo " + (N1 ((New-TimeSpan -Start $I
 
 #  L'ECO A SCHERMO: le righe che Claudio deve poter leggere SENZA aprire
 #  un file. Si prendono dal log della corsa, per schema.
+#  ATTENZIONE: I RILIEVI DELLO STRUMENTO CI VANNO DENTRO, e non e' un di piu':
+#  un rilievo che vive solo in un file che nessuno apre e' un rilievo che
+#  non esiste. Percio' si prendono anche le righe "!!!" (l'avviso
+#  sull'ora sbagliata) e i trattini dell'elenco finale dei rilievi.
 foreach($linea in @(Get-Content -LiteralPath $logRun -ErrorAction SilentlyContinue)){
   if($linea -match '^\s*(barre lette|giorni BUONI|RAM di picco|ESITO:)' -or
+     $linea -match '^\s*!!!' -or
+     $linea -match '^\s+- \S' -or
      $linea -match 'INVERNO .* ESTATE ' -or
      $linea -match '-> (coerente col DST|EST FISSO|INCERTO)'){
     Write-Host ("   " + $linea.Trim()) -ForegroundColor DarkGray
