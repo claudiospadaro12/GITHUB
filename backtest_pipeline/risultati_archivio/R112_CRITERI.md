@@ -1,4 +1,15 @@
-# ✍️ R112 — IL CONTRATTO DELL'EMADOW: SHORT-ONLY, E A QUALE DIAL? — CRITERI [DA FIRMARE]
+# ✍️ R112 — IL CONTRATTO DELL'EMADOW: SHORT-ONLY, E A QUALE DIAL? — CRITERI **FIRMATI**
+
+> 🖊️ **FIRMA: "FIRMO R112" — Claudio, 26/08/2026 sera.** Data dopo la
+> presentazione del disegno del round (le due domande, il cancello di
+> portafoglio congelato, i tre dial fissi con la dichiarazione d'onestà,
+> il G0-B applicabile, il G5 senza deploy e la nota sul cap C1). La firma
+> vale per le SEI decisioni del § 10 con le proposte. Firma a numeri
+> nuovi non visti (i numeri di R110 sono dichiarati come già visti nel
+> § 0 — è esattamente ciò che il cancello congelato protegge).
+> 🔓 **IL LUCCHETTO È APERTO**: la parola del lucchetto è stata tolta da
+> tutto il file (titolo e § 10), quindi la corsa vera parte **senza
+> switch**. La stringa non compare più nemmeno in prosa (checklist 82).
 
 **Origine**: Claudio, 26/08/2026 sera — _"PREPARA IL ROUND CONTRATTO EMADOW
 SHORT"_ — dopo il titolo di R110: il lato short dell'EMA200 Dow è la prima
@@ -207,7 +218,7 @@ SWDOW short rosso) e il referto lo RIPORTA, senza rimisurarlo.
   short è verde in IS e OOS, ma i sotto-periodi non sono misurati.
 - Durata attesa: 8 gambe (~3-4 min l'una a tick reali) ≈ **30-45 minuti**.
 
-## 10. 🖊️ LE DECISIONI DA FIRMARE [DA FIRMARE]
+## 10. 🖊️ LE DECISIONI — **FIRMATE** ("FIRMO R112", 26/08/2026)
 
 | # | decisione | proposta |
 |---|---|---|
@@ -218,6 +229,7 @@ SWDOW short rosso) e il referto lo RIPORTA, senza rimisurarlo.
 | **D5** | anti-pesca | i dial sono {1, 2, 3} e **non si aggiungono dial a risultati visti**; un dial intermedio richiede un round nuovo con firma nuova |
 | **D6** | esito e uso | § 8: nessun deploy; candidatura → proposta di delibera separata col check del cap C1 |
 
-**Firma proposta: "FIRMO R112"** (con eventuali PROPOSTE). La corsa vera
-parte solo a criteri firmati: il driver cerca il lucchetto in tutto questo
-file. Il giro a vuoto parte comunque e serve a leggere questi criteri.
+**Firma data: "FIRMO R112" (Claudio, 26/08/2026 sera)** — verbale in
+testa al file. Il driver cerca il lucchetto in tutto questo file: tolto
+dalla firma, la corsa vera parte senza switch. Il giro a vuoto parte
+comunque e serve a rileggere questi criteri.
