@@ -4375,3 +4375,23 @@ criteri**, a due righe di distanza.
 > Corollario: **una colonna che può essere negativa non si mette accanto a una
 > che non può esserlo senza etichettarle tutte e due** (qui `OOSdd` e
 > `PeggGio%fisso`, nella stessa tabella madre).
+
+## 88. 🧹 LA PULIZIA PRE-CORSA CHE CANCELLA LE PROVE DELLA CORSA PRECEDENTE (pagata su R112, 26/08 sera)
+
+R112, corsa vera lanciata DUE volte. La prima (~21:00) ha girato davvero le
+16 passate: 8 CSV scritti E gli 8 file per-trade in Common\Files. La seconda
+(22:37, 19 secondi) ha fatto in quest'ordine: (1) PULIZIA pre-corsa dei
+`abtg_trades_*_7634*.csv` — CANCELLATI i per-trade della prima corsa; (2) le
+celle SALTATE perche' i CSV c'erano gia'; (3) raccolta: per-trade "NON esiste
+in Common\Files" -> peggior giornata n/d su TUTTE le celle. **Il secondo
+lancio ha distrutto una misura vera del primo.** La degradazione e' stata
+onesta (n/d col motivo, esito PARZIALE, exit 1: il banco non ha mentito), ma
+la misura e' andata persa e la corsa va rifatta con -Rifai.
+
+> ✅ **REGOLA: la pulizia degli artefatti condivisi (cartella comune, cache)
+> si fa PER CELLA, immediatamente prima del lancio di QUELLA cella — mai in
+> blocco a inizio corsa.** Su un percorso di ripresa/salto, una pulizia
+> globale anticipata cancella prove che nessuno rigenerera'. Corollario: se
+> una cella viene SALTATA, i suoi artefatti condivisi esistenti vanno
+> RACCOLTI (con l'eta' dichiarata), non pretesi freschi: "fresco o niente"
+> vale solo per le celle che sono girate davvero in questo lancio.
