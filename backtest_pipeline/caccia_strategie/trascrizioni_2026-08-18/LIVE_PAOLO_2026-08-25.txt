@@ -1,0 +1,321 @@
+Buonasera a tutti, buonasera a tutti. Ciao buonasera, ciao buonasera, buonasera a tutti. Alla dove? Chiamo trading diary live anch'io. 
+
+Ti trovo Giacomino. Aspetta che mi chiamo Giacomino di nuovo così almeno mi trovi meglio. Vai, ti chiamo Giacomino adesso. 
+
+Contenti, registrare monete in sale immobili, assegna organizzazione. Ci pensi di mettere il chat disponibile tutto? Eh sì, faccio tutto, non ti preoccupare. Bene ragazzi, spero che abbiate fatto buone vacanze. 
+
+Iniziamo subito. Bene, eravamo rimasti... prima di iniziare c'è qualche domanda specifica anche se ci si era già visti velocemente ieri. Sono notizie di Emiliano, tutto a posto? Emiliano è stato dimesso, domattina la live la farà lui.
+
+Allora, se non ci sono domande sul progresso, questo terminiamo il mese di settembre, anche se noi avremmo dovuto terminarla a fine agosto visto che abbiamo avuto tre settimane di stop, il ciclo delle lezioni lo finiamo a settembre e poi riprenderemo a ottobre con il ciclo un'altra volta da zero. Ci sono qualche ignorante, mi pare, di aver capito dalle atte, dalle cose. Ci sono degli ignoranti che hanno iniziato da poco? Nessuno risponde? C'è qualche ignorante? Antonio Ingarossa? Mi ha scritto un'email oggi, mi pare, vero Antonio? Ho sbagliato? Bene, allora i nuovi... è un attimo di pazienza che abbiano fatto il percorso avvicinamento. 
+
+Io termino il ciclo di marzo con delle strategie già iniziate e poi voi riprenderete tutto. Per allinearvi voi potete andare su circle nella sezione ripasso, slide di ripasso che vi faccio vedere dov'è, e voi trovate tutti gli argomenti che abbiamo trattato nel ciclo di ripasso laterale. Allora, intanto andiamo qua dentro, condividiamo lo schermo, bene, qua trovate la sezione slide di ripasso operativo e nelle slide di ripasso operativo le trovate numerate in forma progressiva tutti gli argomenti che abbiamo trattato durante questo percorso così vi potete allineare. 
+
+Bene, poi sempre andando sulle registrazioni, andate nella zona registrazioni, eccole qua, e nella mia parte, qua giù, trovate tutte le registrazioni con l'argomento che abbiamo trattato. Pertanto non avete nessun tipo di difficoltà di individuare tutto l'argomento trattato in questi tre mesi, li potete allineare e seguire meglio questa parte finale del ciclo teorico. Bene, a questo punto iniziamo e oggi eravamo arrivati alla golden cross e stasera invece partiamo con la strategia del super trend che non abbiamo ancora fatto in questo periodo, dopodiché ci rimarrà da rivedere la FIBA H4 e poi un altro po' di teoria trasversale a tutte le strategie. 
+
+La strategia super trend ha molti punti di contatti analoghi alla strategia EMA A200, perché si fonda su principi analoghi. Vediamo cosa ci dobbiamo dire sul super trend. La strategia super trend è sia una strategia di breakout, cioè trend following, sia di reversal, anche se noi tendenzialmente teniamo a utilizzarla nella configurazione reversal. 
+
+Vediamo cosa ci dice il super trend. Il super trend è un indicatore creato da un certo Oliver Swan che vuole cercare di riconoscere l'inizio di una nuova fase di mercato, combinando nella sua formula il trend con segnali operativi VSL. Il super trend ha anche la particolarità che è poi utilizzato dagli operatori come punto di riferimento tecnico dinamico, in quanto si adatta costantemente al prezzo. 
+
+Vedete che il super trend segnato a questa linea rossa ha una formula che tiene conto dell'HR, infatti, e del numero dei periodi, per quanto riguarda la volatilità delle singole candele. Quando il super trend è di colore verde vuol dire che siamo in un trend rialzista, quando diventa di colore rosso vuol dire che siamo in un trend ribassista. Questa non la chiameremo inversione del super trend. 
+
+Quando il trend cambia la sua direzione da un percorso rialzista a un percorso ribassista. E' utilizzato in varie modalità, quella principale come elemento di supporto e di resistenza. Quando il prezzo arriva in prossimità di un livello di super trend il prezzo reagisce e rimbassa. 
+
+Parare a riconoscere quando c'è un potenziale punto di rimbasso e quando c'è un'inversione del super trend confermata, perché è una prosecuzione. Questa inversione del super trend con la prosecuzione della produzione può dare origine a un'altra strategia che si chiama super trend inverse. Per quanto ne abbiamo l'inversione del super trend reversal è quando rimbassa e ritorna indietro. 
+
+Lavoreremo anche il super trend in inversione del super trend quando prosegue, come potrebbe essere in questo caso. Noi lo useremo non in un'unica modalità, la modalità standard del super trend è quando è settato con un periodo 3.10, però nei nostri grafici noi lo caricheremo 3 volte e l'avremo anche in un periodo 2.5 barra 10 e 3.5 barra 10. Nelle strategie di Emiliano di reversal noi useremo il punto 3.5.10 barra 10 perché è l'evento più forte. 
+
+Percanto lo useremo come supporto di esistenza, come punto per individuare dei punti d'ingresso, per avere una conferma del trend e per impostare degli stop loss dinamici. La strategia super trend reversal si basa sul rimbalzo del super trend confermato dalla candela successiva. Pertanto come in tutte le strategie anche sul super trend reversal dobbiamo sempre attendere la conferma della candela successiva. 
+
+Il super trend esiste sempre come supporto di resistenza, come linea di resistenza dinamica, come supporto e come resistenza. E' particolarmente efficace sui time frame h4 di uni e weekly, questo se non possiamo lavorare un super trend in di uno come un super trend in m15 o in h1. Il prezzo tendenzialmente esiste sempre sui super trend. 
+
+Vi faccio vedere un diagramma a caso, qui vediamo un po' di rumenta, per ora qua al limite ce la rimettiamo così riteniamo solo dentro super trend. Allora leghiamo i livelli di Larry che non ci interessano, il reggio analisi non ci interessa, Larry che nasce non ci interessa, questo non ci interessa. Vediamo un po' di roba così abbiamo un grafico pulito per fare i nostri esempi. 
+
+Ci mettiamo un bel grafico a candele e carichiamo il nostro super trend. Tutti avete super trend? Anche i nuovi arrivati hanno super trend? Qualcuno che non ha super trend me lo dica ora. Sì Stefano sono in vacanza. 
+
+Comunque a beneficio dei nuovi e dei vecchi vi metto a disposizione l'indicatore super trend per chi non lo avesse. I nuovi arrivati non abbiate timore a scrivere o a parlare ragazzi, qui siamo apposta per super trend. Tutti gli indicatori per i nuovi arrivati nella sezione di circo, nella sezione indicatori avete tutti gli indicatori che vengono utilizzati durante il percorso, però per vostra semplicità ve lo dò. 
+
+Pertanto carichiamo il super trend, eccolo qua l'abbiamo caricato, lo vedete questa linea, lo metto di un colore che riuscate a vedere meglio, mettiamo una bella barra larga, eccolo qua. Ecco che vedete questo super trend, come vedete questo è il super trend che vi ho mandato, è già settato con un periodo da TR10 e un moltiplicatore di 3.5 e vedete che il super trend sostiene il trend e ha tanti punti dove appunto viene testato e viene respinto. Questi sono tutt'una serie di punti che sono idoni per quanto riguarda il super trend reversal, invece quando parleremo di applicare la strategia super trend inverte, noi andremo a cercare di individuare non i punti di rimbasso, ma i punti di rottura e di prosecuzione del trend. 
+
+Qui notate già una prima cosa abbastanza importante che quando c'è una rottura il trend che può fare la nostra strategia è molto più ampio di quando non c'è mediamente un rimbasso, non è sempre vero assoluto, infatti in questo caso c'è un rimbasso piuttosto lungo, però vedete che quando c'è una rottura del super trend e vedremo come individuare queste rotture il trend normalmente è sempre più lungo, vedete? Il grosso vantaggio è che in queste rotture normalmente lo stop è stretto, pertanto il rapporto rischio rendimento è sempre un rapporto rischio rendimento piuttosto elevato. Qui avete linea verde trend long, linea rossa trend short, linea arancione è lo switch e il cambio del super trend, quando super trend il trend diventa da short a long o viceversa. Abbiamo già detto che il super trend agisce come supporto, resistenza dinamica, i trend più forti sono in H4 e in D1, pertanto cercare sempre di trovare a lavorare il super trend soprattutto quando siamo in reversal su livelli H4 o D1. 
+
+Già vedete come lo stesso strumento cambia il suo rendimento all'inversione, questo è un H12, questo è un D1, pertanto vedete che qui il rimbalzo è importante. Come si fa a avere tre livelli di super trend sul grafico? È molto semplice, basta caricarlo tre volte cambiando ogni volta il valore del moltiplicatore, la prima volta di default è 3.5, la seconda volta lo caricate a 3 e quindi lo ricaricate a 2.5. Ecco che abbiamo i nostri tre livelli di super trend, questo unicamente perché poi me lo avresti chiesto dopo come si fa a caricare il super trend tre volte, basta caricarlo tre volte con tre dati diversi. Per la strategia che noi andremo a studiare non ci interessano i tre livelli, ci è sufficiente avere il livello 3.5. Ovviamente il livello di super trend diventa più potente se è combinato con altri elementi, come la media mobile, i livelli di Fibonacci, il supporto e resistenza. 
+
+A questo punto andiamo a mettere dentro gli elementi che non ci possano interessare, intanto torno in H4 perché è un ottimo timeframe per lavorare su super trend. Mettiamo uno strumento chiamato SUDAP, mettiamo uno strumento diverso, potrebbe essere benissimo, questo ho messo ora, è un RGB bio, ma mettiamo un EUROSDK, è uno strumento che ci dà tutte le varie combinazioni immaginabili e mettiamo dentro una media 200. Quando noi abbiamo la confluenza della media 200 con il livello di super trend, come in questo caso, questo diventa un punto di reazione più forte. 
+
+Ogni volta che noi troviamo una confluenza di questo tipo, il punto di reazione non lo consideriamo più forte. Questo livello qua, super trend e commedia, cosa vuol dire? Vuol dire che abbiamo due ostacoli che sono confluenti l'uno con l'altro, pertanto quando applicheremo questa strategia dovremo considerare anche questa cosa. L'altro elemento che diventa importante quando parliamo di super trend è la confluenza con i livelli tecnici. 
+
+Se noi abbiamo una confluenza del livello di super trend e dei livelli tecnici, quella confluenza va da sé e diventa ancora più forte. Andiamo a vedere, vediamo solo i livelli di RERRI, quelli che ci interessano, da H1 insomma non se le prende i livelli di RERRI bassi. Qui ci sono tre livelli di RERRI, qui abbiamo un livello di RERRI H1, H4 e D1. 
+
+Quando abbiamo questa confluenza con i livelli di RERRI e il supporto, ecco che in questo caso non solo abbiamo la confluenza tra il super trend e la media 200, ma abbiamo anche una confluenza con resistenze dinamiche, ecco che questo diventa un livello di resistenza forte. Vediamo se ne troviamo un altro con una confluenza. Eccolo qua, qui abbiamo un'altra confluenza, media 200, super trend e resistenze, questo diventa un altro punto di resistenza forte dove questo livello può essere considerato importante per fare un reversal.
+
+Poi, come abbiamo detto, qual è un altro livello tecnico che puoi aiutare per individuare se questo super trend è un livello che puoi ottenere? In questo caso qui avremmo media 200, super trend, bravissimo, Fibonacci, io qua mi tiro il mio bel Fibonacci e ho Fibonacci a 61,8. Ecco che quando c'è una configurazione di questo tipo diventa efficace pensare a fare un super trend reversal. Qui abbiamo la confluenza del reversal della media 200, del reversal del super trend, del reversal di Fibonacci e le resistenze. 
+
+Ecco che questo diventa un punto importante da studiare. Non si è detto come si fa a trattare Fibonacci, Fibonacci si tratta sempre dal punto a dove parte il movimento, a dove finisce. Fibonacci lo puoi già trovare quando il prezzo inizia a fare questa candela di ricrassamento e qui si vede che siamo in piena golden area, pertanto questo diventa uno strumento abbastanza interessante per mettere il nostro ingresso. 
+
+Lo stop è qui dove lo mettiamo, eventualmente a livello di invalidazione, perché se il prezzo supera questo livello vuol dire che il movimento short viene invalidato. Ricordiamoci questo super trend Fibonacci, qual è la nostra area di interesse? L'area compresa tra 38,2 e 61,8. Quando il prezzo rompe 71,8 il movimento è invalidato, si sta predisponendo un nuovo movimento inverso.
+
+Ovviamente Fibonacci non è che ci aiuta a predire il futuro, ricordiamocelo, ci aiuta a misurare i movimenti dei prezzi. Mi ripeto, il prezzo si muove sempre a onde, pertanto dopo che ha fatto un onda short deve fare un ricrassamento long, poi fa un'altra estensione short, poi fa un altro ricrassamento long, poi farà un'altra estensione short e farà un ricrassamento long. Quando il ricrassamento tende a diminuire, cosa vuol dire? Il movimento sta esaurendo. 
+
+Bravissimo, quindi fa un altro movimento short. Quando il prezzo va a chiudere il suo movimento sopra l'ultimo minimo, cosa abbiamo? Un cambio di carattere. In questo caso ha fatto un movimento unico che addirittura è andato sopra due minimi, anzi sopra tre minimi, qui ha fatto direttamente un cambio di carattere, di struttura e un unico movimento. 
+
+Ecco che qua il prezzo inizia a rifare il suo movimento opposto dalla parte opposta. Questo cosa vuol dire? Vuol dire che la lettura di questa strategia che poi andremo a studiare non va mai trattata in modo isolata, va sempre contestualizzata al movimento di mercato. Chiaro come concetto? Chiaro per tutti? Questo è importante per poi applicarla bene. 
+
+Nessuna domanda? Ok. Questo ragionamento per tutti? Bene. Ok. 
+
+Vediamo tutti gli oggetti che abbiamo scritto e torniamo sul nostro grafico. Percianto, noi dobbiamo sempre combinarlo con media mobile, livelli di Fibonacci e supporti resistenti. È ovvio come in questo caso abbiamo la confluenza di tutti e quattro gli elementi nella condizione assolutamente più favorevole. 
+
+Punti chiave. Time frame consigliati. Da H4 a Wheatley. 
+
+Cosa cambia in questo contesto H4 a Wheatley? Avremo meno rumore di mercato, ma sicuramente, specialmente se andiamo in Wheatley, possiamo avere operazioni che stanno in macchina un po' più di tempo. Pertanto, quando noi si va a posizionare il nostro ordine pendente, è sempre tener conto dell'ADR. Cos'è l'ADR? È la media del movimento che fa il prezzo ogni singolo giorno. 
+
+L'ADR vuol dire Average Daily Range. Pertanto, se io metto un'operazione e quel prezzo mi va a testare la nostra media, il rimbalzo che io mi aspetto nella giornata sarà analogo a quello che può essere l'ADR di quel prezzo. L'ADR come lo leggerete se volete avere un indicatore nel settore dei in circolo che io ora vi distribuisco, soprattutto per noi, che si chiama Range Analysis. 
+
+Come funziona questo indicatore? Questo indicatore vedremo molto utile, perché in un colpo d'occhio si dice quello che è il movimento atteso del prezzo. Allora, rimaniamo qua sopra e lo carichiamo. Quando voi lo caricate in Range Analysis, lo trovate con questo pulsantino in alto a destra, ADR. 
+
+Lo vedete? Cliccando su questo pulsante vi si aprono tutte queste righe. La riga azzurra centrale è il livello di apertura del prezzo nella data odierna. Questo cosa vuol dire? Vuol dire che oggi il prezzo ha aperto su questo livello. 
+
+Infatti, se si va qui a mezzanotte, questo è il punto di apertura del prezzo. ADR vuol dire che il prezzo non ci si aspetta che in un giorno faccia un movimento, in questo caso, di 55 pip. Perché cosa prende lui? Prende la media dell'estensione massima della candela degli ultimi 50 giorni. 
+
+Questa ADR non mi ricordo quant'è, 50 giorni pare. 50 giorni, l'abbiamo trattato sempre così. Range Analysis, 50 giorni, eccole qua. 
+
+D'accordo? Perciò il prezzo negli ultimi 50 giorni ha fatto una media di 55 pip al giorno. Cosa ne aspetto io? Pertanto mi posso aspettare che dal punto di apertura il prezzo possa fare 55 pip in una direzione o 55 pip nell'altra direzione. Qui abbiamo due righe. 
+
+Abbiamo una riga che rappresenta la metà di 55 pip, pertanto dalla linea blu a questa linea in questo caso sono 22,5 pip. Mentre dalla linea centrale a questa riga è la massima estensione che può avere se il prezzo ha tutto nella stessa direzione, 55 pip. Pertanto qualora gli avessi ipotizzato stamattina di fare un'operazione reversal su Supertrend aspettandolo a questo livello, questo era un livello raggiungibile. 
+
+Per tutti siete d'accordo? Siete chiari? Sì, è chiaro. Queste lezioni sono soprattutto per i nuovi arvidi. Se avete qualche dubbio ditelo senza timore. 
+
+D'accordo? Vi prendiamo un altro esempio. Il prezzo è andato nella direzione opposta, però in questo caso si sta ipotizzando una confluenza, guardate, non ci siamo ancora, si verificherà tra qualche giorno, tra il Supertrend e la media 200 in H4. Poi qui si può vedere, quello lo vedremo dopo, le confluenze con diversi time frame. 
+
+Abbiamo degli indicatori che ci consentono di vedere se ci sono anche confluenze con diversi time frame. Intanto partiamo dalla cosa più semplice, come siamo messi, questa può essere interessante, qui abbiamo una resistenza in H12, qui una resistenza in D1, pertanto questa è una bella zona da considerare come un punto possibile di rinvaso. Vedete? H12, D1, Supertrend, se la media 200 arriva in questa zona, qui un rinvaso di Supertrend ci sta tutto. 
+
+Quello che dobbiamo fare noi, specialmente per chi ha un'operatività che deve coordinare con i suoi impegni lavorativi o familiari, lo studio serale lo potete fare, cioè la sera voi potete studiare quello che può verificare il giorno dopo. Vi faccio un esempio, ho messo Odicad, a Odicad quanto c'è di 50 pip di HDR? Il prezzo apre qua, da qua a qua giù ci sono 63 pip, questo potrebbe essere un punto di rinvaso? Potrebbe essere un punto di rinvaso, tenete conto che il movimento è partito da qua, se uno tira Fibonacci, ho Fibonacci proprio su questo livello e questo mi rimane, vado in D1, questo è proprio un movimento in D1, lo vedete, e questo rimane un movimento che torna indietro, la nostra confluenza con l'ADR in H4 si vede chiaramente, potrebbe essere un punto interessante. Mettiamo le resistenze, qui abbiamo una resistenza in H4, ecco che questa valutazione può essere assolutamente interessante, si ha una distanza più o meno compatibile con l'ADR se dovesse arrivarsi, pertanto uno si potrebbe studiare, potrebbe anche mettere i pendenti ora, però potrebbe rivederlo domani mattina, domani mattina prima di andare al lavoro, guarda come ha aperto il mercato, fa uno studio del mercato e vede che qui il prezzo si traccia, questo potrebbe essere un punto di ritratto ottimale, è una brutta configurazione perché qui il mercato è laterale, vedete, mercato è laterale, però è un mercato laterale con un prezzo sopra la media 200, prezzo sopra la media 200 che cosa vuol dire? Vuol dire che il prezzo è legamente short, è legamente long, pertanto anche se qui mi dice che è short, questa media non viene rotta, è possibile che ci sia un rimbalzo su livello, magari piccolo, e che possa tornare su, ora questo l'ho visto sempre con una certa attenzione, pertanto ogni cosa andiamo a cercare, se è in frame alto, il rimbalzo è su quel trend, con il prezzo che tocca o viola il livello del segnale iniziale come possibile investizione, che cosa vuol dire? Tocca o viola? Questa è una cosa importante sul quale non possiamo avere dubbi, allora il prezzo tocca il super trend, questo è un tocco del super trend, cioè il prezzo è arrivato sul super trend, l'ha toccato ma non lo ha superato, questa invece è una violazione del super trend, perché il prezzo è andato oltre il super trend e poi è stato respinto, pertanto questo è un ottimo segnale di ingresso, poi abbiamo il prezzo invece brecca il super trend quando il prezzo chiude sopra la candela, andiamo un po' se qui ci troviamo un altro esempio, eccolo qua, il super trend la candela chiude oltre il livello del super trend, questo è un break del super trend e il break del super trend vuol dire che il super trend si inverte, da long diventa short e si intende un'altra configurazione, vedete qua il prezzo ha chiuso oltre il livello di super trend, quando il prezzo chiude oltre il livello del super trend abbiamo l'inversione.
+
+L'inversione quando è confermata Fabrizio? Quando la candela successiva apre oltre. Quando tutto il corpo della candela successiva, l'apertura e anche la chiusura, questa sarebbe una conferma, però questa conferma è rosso o verde? Verde sì. Pertanto vuol dire che il prezzo sta riflessionando, se l'avessi avuta rossa, vediamo un po' se troviamo un esempio. 
+
+Posso chiedere una cosa qui? Subito, subito, un attimo solo che me la chiedi subito, eccola qua, in questo caso la candela successiva chiude con tutto il corpo sopra, con lo stesso colore, questa alla chiusura di questa candela è una conferma di inversione. Questa è una conferma, questa qui rappresentava un'indecisione perché la candela successiva ce l'hai di colore inverso, pertanto dopo un'espansione, fermo restando che qui non è l'esempio più bello perché siamo in laterale, perché Fibonacci funziona sempre quando è in trend, non quando è laterale, ecco qua, questo è un bel esempio, questo rompe candela verde, ecco che questa è una conferma di inversione, vedi? Perché siamo in trend, qui si vede che siamo in trend, lo vedete? Massimo, minimo, massimo, minimo, massimo, minimo, massimo, minimo, domanda a questo punto per i più esperti, per i più anziani, questa operazione di reversal l'avreste fatta voi? Quelle candele lì darebbero un risultato? Voi siete qua, dovete decidere se fare un o meno un'operazione reversal sul super trend. Allora, fermo restando che qui non l'ha ancora testato il super trend, pertanto normalmente se il super trend non è mai stato testato non lo rompe mai al primo colpo il 3.5, però vedete che qui l'imbalzo a fronte di un'ADR di 50 pip, il rimbalzo massimo è stato, questo è stato che bello, di 80 pip, per tanto questo è andato in profit, però io non l'avrei fatta perché arrivavo da un trend crescente, solido, perché avrei fatto un reversal contro trend, perché il trend è crescente, mentre avrei fatto questo ingresso perché a favore di trend, perché qui ho la rottura confermata verde e il trend che prosegue. 
+
+Anche perché siamo sopra la EMA. Quello lì esattamente, bravo. Questa è un'operazione con un trend longer. 
+
+Non saresti entrato però con la strategia super trend reversal? No, sarei entrato con l'inverter, con l'inversione su trend. Ok. Sarei entrato alla finitura di questa candela. 
+
+Ma tra l'inverter e il reversal, quello potenzialmente più profittevole è l'inverter, giusto? Non c'è una risposta a questa domanda. Per esempio, sono due strategie che si usano in due contesti diversi. Allora, qui in questo caso, se dipendi di reversal, qui avresti messo uno stop più o meno, qui andrebbe visto con il supporto e resistenza. 
+
+Vediamo un po' come siamo messi. Qui non c'è supporto e resistenza, in questa zona. Questa zona non c'è nulla. 
+
+L'unico qualcosa di buono c'è su questo livello. Questi due massimi, questi tre massimi. Il super trend costruisce anche da un livello di resistenza. 
+
+Pertanto, la resistenza si poteva mettere, lo stoppe leggermente sopra questa linea. Questa è la linea di massima liquidità. Pertanto, se uno faceva un reversal qui, doveva mettere un primo ordine qua e un secondo ordine più o meno, la diere 50 l'avrei messo più o meno a 20-25 pip da questo punto. 
+
+Pertanto, in questo caso, sarebbe stata un'operazione che andava a profitto. Però, nel mio piano di trading, cosa c'è nel mio piano di trading? Ve l'ho sempre detto, io cerco sempre di fare operazioni a favore di trend, non operazioni contro trend. Per esempio, questa operazione l'avrei fatta. 
+
+Perché l'avrei fatta questa operazione? Perché era un rimbalzo a favore di trend, sempre che io avessi avuto delle confluenze. In questo caso, non avrei avuto delle confluenze e non l'avrei fatta, perché non ho la media a 200, ho il super trend, non ho Fibonacci che mi aiuta, perché qui Fibonacci non mi aiuta, perché qui ho un doppio massimo. Vedete, questa qui in basso, invalida un po' Fibonacci. 
+
+Questa è un'operazione da tentare con uno stop molto stretto, però qui c'è il rischio di andarsi a prendere lo stop, perché in questo caso lo stop è uno come l'avrebbe messo qua. Lo stop tu lo devi mettere o leggermente sotto questo livello che c'è la media a 200, devi mettere perlomeno una ventina di punti dalla media a 200, a metà dell'ADR. L'ADR è 50, devi mettere a 25 punti. 
+
+Vediamo a 25 punti dove si andava a finire, 25 punti se era dentro, se era qui, poco più basso, 25 punti se era qui. Mi avrei avuto impugnato. Che avrebbe successo? Non ho resistenza. 
+
+Questa qui, non ho una resistenza che mi aiuta. Pertanto bisogna non farsi prendere dalla FOMO e bisogna sempre cercare la massima confluenza dei fattori positivi che ci sostengano il nostro trend. O sennò dobbiamo allargare il trend, diminuire la sale di ingresso e aumentare molto lo stop. 
+
+Qui si deve mettere perlomeno come stop. Se si metteva su questo livello con questi minimi non avrebbe preso lo stop. Pertanto gli indicatori che possiamo tenere molto, però gli stop loss dobbiamo impararli a cercare noi, a cercarli noi i livelli. 
+
+Questo 1, 2, 3, 4, questo qua, sicuramente richiede una tolleranza maggiore di quella precedente, ma questo potrebbe essere uno stop buono. Allontanandosi molto dal livello dobbiamo diminuire la size, perché la size si determina sempre in funzione da dove mettiamo lo stop. Il percorso logico che noi dobbiamo fare è sempre lo stesso. 
+
+Primo, esiste una configurazione di trend favorevole? Secondo, trovata la configurazione di trend favorevole esistono più confluenze che sostengono il mio trigger, il trigger cioè il rafforzo delle mie condizioni di ingresso. A questo punto, se ho queste confluenze, prima di mettere l'ordine metto lo stop e mi vado a cercare il punto tecnico dove metterlo. Una volta individuato il punto tecnico dove metterlo stop, a questo punto calcolo la size in base al mio livello di rischio e vedo, anzi prima di calcolare la size, il profit che mi garantisce un rischio di rendimento almeno 1 a 1, se ho tutte queste condizioni calcolo la size e metto il mio ingresso a mercato o il mio ordine fondente. 
+
+Si Paolo, ho bisogno di fare una domanda sull'esempio che hai appena trattato, c'è lì, allora ci hai fatto vedere che se saresti entrato Reversal in direzione... No, se avessi avuto la terza confluenza perché avevo la media e quell'altro io normalmente cerco anche una resistenza o un pibonacci favorevole, capito? Si, però non mi torna una cosa, cioè lì il super trend aveva appena cambiato colore, da verde era passato rosso, tu in quel caso saresti entrato lo stesso long in ottica Reversal? Allora, dov'era il punto non lo ricordo? L'abbiamo perso, comunque non hai più lo schermo condiviso. No? No. Allora, ma sono perso, non lo trovo più. 
+
+Ecco, questo potrebbe essere un esempio. Non siamo in questa condizione. Ho il super trend che mi torna indietro, io mi trovo in queste condizioni qua su. 
+
+Mi vado a vedere quant'è l'ADR 50, da qua a qua quanto sono? A 200 pip. Bisogna vedere quanti giorni sono, vediamo dove apre il mercato, il mercato apre qui a 200, da qui a qui sono 100 pip, va bene? Qui c'è probabilmente una notizia, a guardare sempre che non ci sono le notizie. Qui pertanto ho una confluenza, il primo elemento importante, confluenza tra il super trend e la media 200, va bene? Questo è il primo elemento importante. 
+
+Il secondo elemento importante che vado a ricercarmi, ho delle resistenze, qui c'è una resistenza monthly, eccola qua, vedete? Pertanto ho una resistenza forte qua. Il fatto di avere super trend, media 200, resistenza monthly, rimbalzo in direzione del trend, cioè mi rimane sopra la media 200, questo per me è un elemento che poteva convincermi a fare l'operazione. Timonacci, Timonacci potrebbe essere l'unico elemento che poteva crearmi qualche dubbio, perché qui siamo su 78 di Timonacci, stiamo proprio al limite dell'invalidazione, però l'altra parte bisogna prendersi i rischi con uno stop leggermente sotto la resistenza monthly, questa era un'operazione, come vedete, con un bel rimbalzo, è chiaro? Questo è un rimbalzo nella direzione del trend, chiaro Stefano? Chiaro Paolo, ma se quando ci troviamo davanti al possibile setup di ingresso, vediamo che il super trend sta cambiando colore... Non lo puoi vedere qui che sta cambiando colore? Sì, prima non lo potevo vedere, però immaginiamo... Te quando sei qui non lo sai che cambia colore? Sì, quello sì, cioè nel ragionamento che hai appena fatto non lo posso sapere, però poniamo la situazione in cui sono tutte vere le confluenze che abbiamo appena discusso e in corrispondenza di queste confluenze vediamo che il super trend sta cambiando colore.
+
+Non lo puoi vedere che sta cambiando colore? Non lo vedi? Tu qui lo vedi verde? Sì. Non lo vedi? Che cambia colore? Lo vedi solo qua. Ma qui c'è un'altra strategia, tu hai due strategie, tu hai o il reversal, cioè il prezzo viene respinto e chiude all'interno del super trend, dentro il floor, oppure si chiude fuori. 
+
+Quando si chiude fuori c'è l'inversione. Poi il prezzo chiude l'inversione, non è detto che prosegua, in questo caso infatti ti ha fatto ritracciamento e se fai ritracciamento te l'ha fatto fino a 50. La strategia reversal è quella di individuare il prezzo che arriva su un muro e rimbalza sul muro. 
+
+Il rimbalzo è tanto più probabile quanto il muro è più solido. La solidità gli dà la confluenza tecnica con gli altri fattori. La solidità gli dà la confluenza con altri medie, livelli tecnici. 
+
+Ti lascio questo livello. Andiamo in H4, andiamo in D1, andiamo in weekly. In weekly potrei trovare anche una media 50.
+
+Vediamo se fosse una media 50 in weekly o una media 100. Io qua, su questo punto, mi trovo una media 50 e una media 100 su livello superiore. È un alto livello tecnico di rimbalzo forse. 
+
+Non ce l'ho proprio la media 50 perché appunto l'incrocio è questo, però se qui ci avessi avuto la media 50 in weekly sarebbe stato un altro punto di rimbalzo interessante. D'accordo? Noi dobbiamo andare a cercare il numero di confluenze. Più confluenze importanti hai su quel livello, più sicuro, più probabile è la possibilità che il prezzo venga respinto. 
+
+Va bene? Va bene. Paolo, mentre abbiamo l'operazione in macchina, il super trend ci cambia colore a spavore della nostra posizione, possiamo permetterci di uscire anticipatamente? Certo. Ok. 
+
+Ti ricordo che qui sei di 1, pertanto una volta che ti ha fatto questo rimbalzo. Allora, vediamo quando va. Guarda, questo è un programma a mezzanotte. 
+
+Il prezzo rimbalza a mezzanotte qua. La DR quant'è? 60. 60 pip quanto sono? Sono fino a questo punto.
+
+Qui dove tu lo sei risposto come obiettivo. Soprattutto il primo obiettivo potrebbe essere tranquillamente su questi massimi, che guarda caso sono proprio a livello 78 punti. Pertanto uno se lo poteva mettere anche più basso. 
+
+Io come obiettivo metto 60 punti della DR. Sì, è ragionevolmente raggiungibile. D'accordo? Poi è ovvio che in unity cosa si nota? La marea com'è? Short. Giusto? Sì. 
+
+Il prezzo è sotto la media 200 uniti. Il B1 è sopra. Il B1 è sopra.
+
+Il weekly è sotto. Pertanto quando il prezzo ti rompe quest'altro livello, a questo punto cosa ti vai a fare? Ti vai a fare un super trend invert in versione di marea. Giusto? Sì, marea più grande c'è weekly. 
+
+Ricordiamoci, secondo il teorema di Dow che viene ricoperto da Helder, il trend si guarda sempre su tre time frame. Un time frame dove si va a vedere il trend di fondo che è il time frame superiore. Il trend dove si vede il segnale che è il time frame operativo e il trend inferiore che è il trend con il quale si va a fare l'ingresso a mercato.
+
+In questo caso, con questa rottura di super trend, il prezzo è sostenuto, è sotto la media 200 del time frame superiore. Pertanto questo è un trend che prosegue. È chiaro? Sì, anche secondo la logica della frattalità Paolo. 
+
+Esattamente. Questa è un'operazione contrada al trend di fondo. E' ovvio che se facevi queste operazioni, per il tempo erano operazioni che si concludevano con grande successo. 
+
+Questa è un'operazione che rispetta tutti gli ingressi della strategia, perché è un'operazione fatta a favore di trend di fondo. Questa è un'operazione che, uscito qua, aveva fatto 500 pip, questo diventava un bel rimbalzo sulla media 200, un reversal media 200 super trend. Questa sarebbe stata comunque un'operazione di reversal su super trend a favore di trend. 
+
+Questa sarebbe stata a favore di trend e avesse avuto un altro bel movimento di altri 800 pip. Pertanto queste potevano essere due operazioni che con un ingresso di 0.10 uno faceva 1.300 euro. La seconda operazione come rimbalzo sul super trend, non è che la media, la ema, poteva essere vicina e disturbare. 
+
+Questa sarebbe stata molto più bella se la ema era sopra. Però ti tieni conto che tra super trend e questa ema ci sono 86 pip. Poi la porti giù, chiaro? Il conto è che l'operazione, guarda te la metto qua, dove era? Questa sarebbe stata il super trend, d'accordo? Quindi uno che questa operazione non ce l'hai, se il segnale lo vedi in weekly questo diventa il tuo trend frame operativo, il tuo trend frame di monto lo devi andare a cercare in monthly e in monthly è comunque in un trend l'elemento short, qui lo vedi i possibili segnali da studiare. 
+
+In monthly il trend frame di fondo e in D1 il trend frame di ingresso. In D1 uno aspettava l'ingresso, lo andava a studiare qua. Poi qui cosa potresti fare? Secondo quello che noi abbiamo imparato a conoscere, per avere delle conferme che questo poteva essere un punto di intervento. 
+
+Proviamo a mettere le gnasci, vediamo dove ce l'ho. Eccole qua, ho sbagliato in strategia, H3Mode, dove ce l'ho? E' con l'H, è quello lì, ci sei. No no, non è questo. 
+
+Switch mode, non è H3Mode. E' H3Mode. E' H3Mode. 
+
+E' H3Mode, grazie. Allora mettiamoci qua, mettiamo le gnasci. Guarda un po' che cosa so? Vedi il trend, doji, ripartenza.
+
+Pertanto questo era un movimento confermato anche dalle gnasci. Come? Che si va a finire dove? Sulla media 200. Movimento di quanto? Di 158 pippe. 
+
+Dove c'è 158 pippe? Per me non è uno stafolo. Magari fa che si sia in cooperazione da 158 pippe. Ah beh certo, sì perché in effetti essendo su timeframe multi sembra poco spazio. 
+
+Ci sono tanti, però attento che queste sono quelle cose che uno se le può studiare la sera e poi entra al mercato magari dopo due giorni. Sì sì, sono tutte operazioni di lungo periodo queste. Sì, e guarda questa, questa qua. 
+
+Qui c'è la confluenza, questo o rimbalzo se rompe questo prezzo viene giù. Vedi qui c'è la confluenza, rompe il super trend e la media 200, questo viene giù. Infatti una volta che ha rotto, qua, eccolo qua, c'è la rottura, è la conferma. 
+
+Ti dici di conto che qui siamo in D1 perché qui siamo dopo due giorni e non ti fai prendere da fomo. Entri a questo punto sulla chiusura di questa candela, questo è un profitto da 154 punti. Qui lo stop dove lo vai a mettere, lo vai a mettere sopra questo massimo. 
+
+Ma in quel caso l'entrata non si può cercare su un time frame inferiore. Certo. Per cui si può massimizzare di più e entrare un po' più alto. 
+
+Certo, allora, una cosa è la rottura confermata in D1, una cosa è la rottura confermata in H4 e in H1. Questa è una rottura confermata dove il prezzo comunque è andato a ritracciare, è andato a ritrenderla. Vedi che qui una volta che hai il super trend e short, prezzo sotto la media 200, questo è un trend che continua perché è sostenuto sia dal super trend che dalla media.
+
+Sì, Paolo. Vediamo un po' se abbiamo qualche opportunità, così oltre al fatto la teoria. Per la teoria vorrei chiedere una cosa sul super trend.
+
+Certo. Mentre andavamo tra le varie time frame, ho notato che spesso capita che magari il super trend è verde, magari sto facendo una domanda stupida, il super trend è verde ma scende, cioè il prezzo scende via bassista. Per esempio me ne ricordo uno in D1 verso dicembre-gennaio, proprio dove stavi provando a vedere per la strategia, erano tanti che vede il super trend e invece era tutto in discesa, oppure rosso il super trend era tutto in salita.
+
+No, tu devi partire da un concetto, che il prezzo si muove sempre ad onde. Faccio vedere una cosa ora, aspetta un secondo, questo è il caso, qui c'è il super trend che da short si diventa long e poi torna a short, d'accordo? Sì. Cosa fondamentale che non dobbiamo mai dimenticare, il prezzo si muove ad onde, il prezzo per andare da A a B non va mai in modo diritto, il prezzo va da A a B facendo delle onde.
+
+Questo trend si dice che è un trend sano quando l'espansione, questa si chiama da A a 1 si chiama espansione, da A a 2 si chiama ritracciamento. Quando il ritracciamento è fatto più o meno allo stesso livello dell'espansione precedente, il trend è sano. Tieni conto che non devono mai rimanere spazi vuoti, se il trend si finisce qua vuol dire che c'è qualcosa che non torna, qui il prezzo dovrà ritornare poco dopo, se invece il prezzo arriva qua o arriva leggermente più sotto il trend è sano, perché non devono mai rimanere spazi senza negoziazione, chiaro? Ok, sì.
+
+Questo è il primo concetto. Il prezzo se deve andare da A a B non solo non si va con un unico movimento, ma secondo la teoria di un certo signore Weikoff, il prezzo si va con un movimento espansivo, poi prende fiato e poi fa un altro movimento espansivo. Questo è quello che normalmente è presso quando si sposta da A a B. Pertanto fa un movimento espansivo, fa una fase di riso e poi fa un altro movimento espansivo. 
+
+D'accordo? Cambio colore questo qua così lo riconosci. Io vado su un time frame alto, io vedo solo questi due movimenti. Man mano che scendo il time frame vedo che all'interno di un movimento unico c'è tanti movimenti secondari. 
+
+Questo concetto si chiama frattalità. Io questo qua lo guardo in diuno, sono 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 giorni. Pertanto sono quasi tre candele weekly. 
+
+Se lo vado in H1 vedo 17 candele in diuno, se vado in H4 troverò 17 candele per 6. D'accordo? Quando il movimento fa questa fase di respiro, è una fase dove lui ricarica le file, dove ricarica benzina. Normalmente qui il super trend inverte. Torniamo ora all'esempio prima del grafico. 
+
+Eccolo qua. Qui il movimento lo ha fatto in basso, ha fatto un movimento espansivo. Vedi che ha fatto un movimento espansivo? Sì. 
+
+D'accordo? Qui il movimento si è messo in laterale. Quando si è messo in laterale il super trend è invertito, per poi rimettersi in un movimento un'altra volta espansivo. Qui siamo in D1, d'accordo? Il movimento espansivo parte da qua, finisce qua. 
+
+Andiamo a esaminare queste due colonne weekly. Tu lo vedi tutto come un unico movimento short? Sì. D'accordo? Pertanto se io dovessi fare un'operazione in D1, in questa finestra, sarebbe possibile farla long o farla short? Short.
+
+Esatto. Pertanto il super trend ci aiuta a capire dove sta andando il movimento. Però per fare operazioni io cerco sempre il trend superiore e la passo in direzione di marea. 
+
+Quindi la marea è short. È ovvio che se io questa marea la prendo qua su, il punto bello per prendere questa marea sarebbe stato questo. Perché sarebbe stato questo secondo te? Perché c'è il cambio di trend, di super trend. 
+
+C'è il cambio di trend ma c'è un'altra cosa. Poi c'è anche che si contra il super trend con la media 200. Esatto, c'è il breakout della media 200. 
+
+Pertanto la media 200 è stata breakata, il prezzo si è posizionato sotto, questo è un chiaro segnale che il prezzo si sta mettendo short. Questa shortata qua inizia il 6 di giugno di maggio del 2021 e finisce il 23 di ottobre del 2022. Dura un anno e mezzo. 
+
+Vedi che fa un attimo in crescita e poi decresce. È solo dovuto al fatto che si sta... Quindi dici questo? Sì, era quello. No, ma ti devi andare a vedere in Bruno. 
+
+Questo passaggio qua è all'interno di questo movimento, scusami, all'interno di questo movimento di tanti trattamenti. I movimenti short però questi sono tutti i trattamenti long. Queste operazioni si possono tradare per un ritracciamento di questo tipo, è un ritracciamento di 340 punti.
+
+Però se te lo fai in direzione di trend, in qualsiasi punto entri tu sei sicura di non andare in stop. Se la fai contro trend non lo recuperi più. Ti faccio un esempio. 
+
+Ipotizziamo che tu invece di entrare in questo punto entri in questo punto, va bene? Mi sto entrando e vado al contrario rispetto a quelli altri. Andrai in slow down ma poi il prezzo ti torna a tuo favore. Invece te lo fai in questo punto, in questo punto, anziché in questo punto, questo punto che non lo recuperi più, perché il prezzo ti va giù. 
+
+Per recuperare questo punto, che è il 24 ottobre 2021, devi aspettare che il prezzo arrivi al primo gennaio del 2023, dopo un anno e mezzo. Allora, specialmente su trend prime alti, bisogna avere la pazienza di aspettare il timing, l'ingresso giusto. Allora, qui c'è la marea short, questa è una marea potente perché è una marea liquid. 
+
+Nel momento in cui ti prendi uno, ti va a cercare un'etappe nella direzione della marea. Se non vuoi stare tanto nel mercato, lavori in D1 e ti vai in H4 a cercare un'etappa a favore della marea. Ipotizziamo che la marea è questa qua. 
+
+Questa è chiaramente una marea, d'accordo? Se ti vai in H4... Non sono perso, non lo trovo più. Ottobre 2021 era. Qui siamo 2018 addirittura, vediamo se ci arriva, perché l'ho presa a caso prima. 
+
+Però Paolo, con queste operazioni non fai in tempo a morire. Cosa? Con queste operazioni uno fa in tempo a morire. Non è che fai in tempo a morire, è in frame. 
+
+Si, dovresti prendere anche altre operazioni su time frame inferiori perché altrimenti... Questa è l'operazione in H1 e in H4, è l'operazione che faccio anche due settimane a volte. Dicevo su time frame tipo D1 che durano un anno e mezzo. Prima c'è la parte D1 dall'H4, io la sto facendo in H4 ora. 
+
+Facciamo un'operazione qualcosa di reale, vediamo se abbiamo qualcosa di reale. Mettiamo la dashboard, dashboard supertrend V6, eccola qua, e queste ne sono due. Il time frame operativo è comunque basso, H4 D1, cioè non è V1, O, M, N. No, V1 ti vai a vedere la marea di fondo. 
+
+Esatto, esatto. V1 la vai a vedere in V1, se sei in H4 la vai a vedere in D1. Per esempio, andiamo a vedere. 
+
+Questa qua è lontana, auditi HF, eccola qua. Questa qui come la vediamo? Qui è una fase laterale. Qui siamo in H1, in H4 questo sembrerebbe. 
+
+Se rimbalza è un'operazione di rimbalzo a favore di trend. Siamo a una distanza compatibile con l'ADR, andiamo a vedere in D1 che cosa si dice. In D1 è un trend longer, qui si è messo short e farà un ritrattamento. 
+
+Pertanto questa sarebbe un'operazione a favore di trend. Qui c'è da stabilire ora, uno potrebbe mettere un ordine pendente sul super trend, un ordine pendente sulla media 200, questo sarebbe un rimbalzo a favore di trend. Vediamo se c'è dei livelli che ci interessano. 
+
+Qui abbiamo un H4 e un H1 come resistenza. Pertanto le resistenze ce le abbiamo. Lo stop dove lo andiamo a mettere? Lo stop lo andiamo a mettere in questo caso sotto la cuspide. 
+
+Quanti punti sono di stop? Sono 11 punti di stop. Lo stop è sicuro. Come si calcula? Lo stop lo devi considerare a livello tecnico, dove c'è una zona di liquidità. 
+
+Qui il prezzo dei punti tecnici è la cuspide. Se il prezzo arriva qua e non rimbalza vuol dire che il super trend non rimane invertito. A quanti punti metti? Non lo metto in punti, lo metto a livello tecnico. 
+
+Io sto qui per capire dove si può affermare il prezzo. Facciamo un ragionamento più completo. Ipotizziamo che il prezzo arrivi, tocca qua e la candela chiude qua sopra. 
+
+Il super trend inverte quando la candela mi chiude sotto il super trend. Pertanto se la candela mi chiude sotto il super trend, il super trend inverte. Cosa può succedere? Il trend è sempre in trend, pertanto Fibonacci lo posso tirare.
+
+Fibonacci qui ce l'ho a 50, qui ce l'ho a 61. Un super trend di Fibonacci a 50, il super trend ce l'ho a 50, la media 200 ce l'ho a 61. Lo stoppi dove me lo vado a mettere, me lo vado a mettere sotto il 78,6. 
+
+Mi coincide con la cuspide. Se lo volevo fare apposta come esempio non veniva. Abbiamo qua una resistenza H4-H1, qui abbiamo delle altre, qui abbiamo un H12. 
+
+Ora qui cosa succede? Io mi voglio mettere, lo stop tecnico va messo sotto il 78,6. Se voglio star sicuro lo metto sotto il 100. Perché cosa vuol dire? Perché se arriva qua giù ha rotto, però se arriva qua giù ormai non lo ritendo più. 
+
+Qua bisogna anche un po' ragionare, non bisogna essere meccani. Ma lì puoi tirare lo stesso Fibonacci anche se in laterale? Non sono in laterale, io sono in trend qua. L'unica cosa preoccupante in questo trend qual è? Che qui ha fatto un minimo più basso, però se vado in D1 io ho comunque un trend long.
+
+L'accordo? Qui sono ancora al posto che mi sostiene il trend. E quando sei in time frame così alti, i tei profit metti sempre sulle resistenze supporti? Certo, ragiono. È detto che metto un ordine qua, un ordine qua che sono in golden area. 
+
+Se il prezzo non rimbalza su questo supertrend in H4 o in questo in H5, è ovvio che qua ho un problema. Perché se il prezzo mi chiude qua sotto, qui il supertrend ce l'ho invertito. E' anche probabile che essendo su 61 il prezzo prenda e poi mi richiude sopra. 
+
+Qui può succedere che rompe il supertrend e qui prosegue il short e vado in stopper subito. Come può darsi che arriva, tocca e poi vada a rifacciarmi sopra. Il progettivo dove me lo metto? Esiste un 1 a 1. Qui ci metto il secondo ordine, lo stop e lo metto qua. 
+
+La mia prima parzializzazione la metterò sul 38.2 che vuol dire che se mi entra questo qua ho fatto 10 pippe di profitto. Se mi entra il secondo ordine ne faccio 20. Qui come stoppe ho 14 punti di stopper. 
+
+Posso tenere questa operazione perché qui ho gli elementi. Ho operazione a favore di trend, rimbalza a favore di trend, supertrend 3.5, media 200 che mi sostiene. Se ho il trend comunque long va bene, ci sono.
+
+Ma 17 punti non sono troppo pochi. Devo vederlo tecnico, devo stare sicuro perché qua ho un imbarazzo. Ho un imbarazzo che questo minimo entra a questo. 
+
+Questa vuol dire che se prezzo qui cosa può fare? Questo elemento va a rimbalzare qua e mi torna sopra, vuol dire che il prezzo prosegue longer. Questo rimbalzo me lo fa sicuramente, però non so fino a come rimbalza. Io a 17 punti metto la parzializzazione e mi porto lo stop in pari. 
+
+E come money management sto tranquillo. E' un obiettivo quasi sicuramente raggiungibile. Vi spiego Natalia.
+
+Sì ma ho sempre paura che non lo facciamo respirare abbastanza, che 17 sono pochi. Ma questo può anche tornare indietro, non è mica detto che va davanti. Lui può benissimo arrivare qua, rifare il secondo minimo inferiore e si rimette giù. 
+
+Poi ognuno fa il money management come crede. Un terzo o due terzi, vero? Un terzo o due terzi qua, qua parzializzi, porti lo stop in pari. Poi una volta che la parzializzazione ha portato lo stop in pari, si te le prende tutte e due. 
+
+Qui è probabile che le prenda tutte e due, perché abbiamo proprio un 50 e un 61. Io domattina metto gli ordini e poi vediamo dopo domani come andrà a finire. Con lo stop lo metto qua giù. 
+
+Però domani c'è una notizia importante, non ho guardato come sono appunto letto mattina. Tu audì, mi sa che stanotte c'è notizia. Stanotte c'è. 
+
+Comunque conviene aspettare domattina. Domattina vediamo com'è, passa tra notizie e si vede. Jackson Hole ma più avanti mi sembra. 
+
+Jackson Hole ma venerdì. Audì l'outlook di questa settimana lo dà dibole e il THS la dà forte. Pertanto ci sta un ritardamento short. 
+
+L'avete visto l'outlook settimanale che ha postato Emiliano? No, ancora no. Guardatelo, dove l'ha messo comunicazione importante. Eccolo qua. 
+
+Qui mi hanno messo tre documenti sull'outlook settimanale. Secondo l'analisi fondamentale il COT e l'analisi geopolitica potrebbero fare le notizie, potrebbero fare le monete. Dico, è possibile avere questa dashboard che hai tu? Sì, per eseguire e spiegare la prossima settimana come funziona. 
+
+Intanto prendetela. Come preferisci? No, tanto la devo riguardare perché io questa strategia la faccio poco. Io preferisco fare Supertrend e Inverter, mi piace di più. 
+
+Comunque ve la do questa dashboard. Questa è Supertrend e la media. Questa è Supertrend e Inverter. 
+
+A me piace di più Supertrend e Inverter. C'è sull'internet Supertrend. Paolo, il tuo cavallo di battaglia è ancora la strategia Daxin M3? Sì, sì. 
+
+Ora ho messo che non la faccio perché sono stato in vacanze e poi il mercato era laterale. Quella, l'Orbe, il Golden Cross e Supertrend e Inverter sono quelle che mi piacciono di più. Belle strategie.
+
+Sono quelle che mi piacciono di più. È mai tradatta la notizia che c'è una volta all'anno, adesso a fine agosto? Quella sul simposio che fanno tutti i banchieri mondiali? Sì. Ma quella non è un rilascio notizia.
+
+Quello è sui movimenti anomali del mercato in base alle interviste che rilasciano. Quello sono giorni di altissima volatilità che non sai dove va il mercato. Quindi non l'hai mai fatta perché è molto pericolosa, vero? No, ma non si fa quella.
+
+Non sai quando esce e non sai come esce la notizia. Non lo puoi spiegare. Eccola qua, mandata.
+
+Mi manda anche il Supertrend Inverter così si vedrà anche questa. Grazie. Ok? Sì.
+
+Ragazzi, io vi saluto. Che domani torno a casa e da giovedì ritorno al mio computer. Buon rientro, Paolo.
+
+Ragazzi, a presto. Grazie dell'attenzione. Spero di avervi dato qualche buona indicazione.
+
+Grazie, Paolo. Ciao.
