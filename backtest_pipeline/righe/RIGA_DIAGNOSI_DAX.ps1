@@ -1293,6 +1293,35 @@ if($Anni.Count -gt 0){
     $Verdetto = "NON MISURATO -- nessun anno classificabile"
   }
 
+  #  ################################################################
+  #  LA GUARDIA CHE CONTROLLA LA GUARDIA (checklist 81-bis: quando
+  #  scatta un allarme, la prima domanda non e' "e' troppo severo?" ma
+  #  "chi ha toccato il dato prima?" -- qui: "la soglia descrive questo
+  #  feed?").
+  #  HistData NON scrive le barre dei minuti senza scambi: se anche il
+  #  NASDAQ -- che e' la serie PROMOSSA, quella sana -- avesse densita'
+  #  sotto la soglia, allora sotto soglia ci sta il FEED, non il DAX, e
+  #  ogni "MARCIO per densita'" di qui sopra sarebbe un falso allarme.
+  #  Non si aggiusta la soglia da soli: si DICHIARA e si dice come
+  #  rifare la corsa.
+  #  ################################################################
+  if($AnniCtrl.Count -gt 0){
+    $ctrlPeggiore = -1.0
+    foreach($c in $AnniCtrl){
+      if($c.Densita -lt 0){ continue }
+      if($ctrlPeggiore -lt 0 -or $c.Densita -lt $ctrlPeggiore){ $ctrlPeggiore = $c.Densita }
+    }
+    $marciPerDensita = @($Anni | Where-Object { $_.Classe -eq "MARCIO" -and $_.Perche -like "*BUCHI dentro le ore*" })
+    if($ctrlPeggiore -ge 0 -and $ctrlPeggiore -lt $SogliaDensita){
+      [void]$Lettura.Add("ATTENZIONE ALLA SOGLIA, NON AI DATI: il controllo positivo nsxusd -- che e' la serie PROMOSSA -- ha densita' minima " + (N1 $ctrlPeggiore) + ", cioe' anche LUI sotto la soglia " + (N1 $SogliaDensita) + ". Vuol dire che sotto soglia ci sta il FEED (HistData non scrive i minuti senza scambi), non il DAX: i " + $marciPerDensita.Count + " anni marcati MARCIO per densita' NON sono un verdetto valido. Si rilancia la stessa riga con -SogliaDensita di poco sotto " + (N1 $ctrlPeggiore) + ", e si dichiara il valore usato.")
+      if($marciPerDensita.Count -gt 0){
+        [void]$Problemi.Add("P8: " + $marciPerDensita.Count + " anni sono MARCIO per densita', ma la soglia " + (N1 $SogliaDensita) + " boccia anche il controllo positivo (minimo " + (N1 $ctrlPeggiore) + "): quel pezzo di verdetto e' SOSPESO, non confermato.")
+      }
+    } elseif($ctrlPeggiore -ge 0) {
+      [void]$Lettura.Add("La soglia di densita' " + (N1 $SogliaDensita) + " e' compatibile con questo feed: il controllo positivo nsxusd sta sopra (minimo " + (N1 $ctrlPeggiore) + ") in tutti gli anni misurati. Quindi una densita' bassa sul DAX e' una differenza DEL DAX.")
+    }
+  }
+
   # --- Q1: prezzi impossibili
   $anniSporchi = @($Anni | Where-Object { $_.FuoriBarre -gt 0 } | ForEach-Object { $_.Anno })
   if($anniSporchi.Count -eq 0){
@@ -1482,6 +1511,13 @@ if($ConvenzDa -ne ""){
 [void]$RefRighe.Add("     finche' questa diagnosi non e' letta e firmata.")
 [void]$RefRighe.Add("  4. Gli anni non presenti in cache NON sono stati guardati: se il")
 [void]$RefRighe.Add("     referto non li nomina, non esistono per questa misura.")
+[void]$RefRighe.Add("  5. LA BANDA PRENDE SOLO GLI ERRORI GROSSOLANI. E' un controllo di")
+[void]$RefRighe.Add("     ORDINE DI GRANDEZZA (becca il fattore 1.000 o un 2.906 su un DAX")
+[void]$RefRighe.Add("     da 13.000), NON un giudizio sul prezzo: un anno quotato, che so,")
+[void]$RefRighe.Add("     a meta' valore ma dentro 4000-45000 passerebbe la banda senza")
+[void]$RefRighe.Add("     fiatare. Per questo il referto stampa il MINIMO e il MASSIMO di")
+[void]$RefRighe.Add("     ogni anno qui sopra: se un anno ha estremi che non stanno con")
+[void]$RefRighe.Add("     quelli degli anni vicini, e' un sospetto che la banda non vede.")
 [void]$RefRighe.Add("")
 [void]$RefRighe.Add("--- PROPOSTA PER IL PROSSIMO PASSO (proposta, NON una firma) ---")
 [void]$RefRighe.Add("  Se il verdetto e' SANO PARZIALE o RIPARABILE, il passo successivo NON")
