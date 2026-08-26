@@ -17,8 +17,17 @@ picco è **33 MB, misurata** (vedi sotto), non stimata.
 ## 📌 IL PIN DI QUESTA RIGA
 
 ```
-92e4cffb71bd5a125c0cbc6c22c32cd5f1800c0b
+@@PIN@@
 ```
+
+> 🛑 **PIN DA RIASSEGNARE — LA RIGA NON SI MANDA COSÌ.** Il pin `92e4cff` è
+> **bruciato**: la verifica del 26/08 ha corretto `anatomia_aperture.py` (il
+> rilievo sui giorni sospetti non arrivava al codice d'uscita), il driver
+> `RIGA_ANATOMIA_APERTURE.ps1` (la stima delle barre gridava a ogni corsa sana) e
+> i criteri (il fuso). Sono **tutti e tre** file che il driver scarica **al pin**:
+> un pin vecchio farebbe girare il codice col difetto, e la riga *annuncerebbe*
+> una correzione che il suo SHA non contiene (checklist 4). Si committa, si
+> pusha, si esegue la ricetta in fondo alla pagina, e **poi** la riga esce.
 
 ---
 
@@ -74,22 +83,31 @@ cancello ZERO degli `_EXT` è ancora **CHIUSO** (diff media H1 0,061–0,101% co
 
 ---
 
-## 🕐 IL FUSO — la trappola, disinnescata due volte
+## 🕐 IL FUSO — la trappola, e perché il canarino non è un lusso
 
 ```
 apertura cash Nasdaq = 09:30 NEW YORK = 14:30 ora server BCM = 15:30 italiana
 ```
 
-Il CSV di HistData è scritto in **ora locale di New York** (misurato: 8 import su
-8 hanno calibrato uno shift fisso +5 contro il nativo BCM). Quindi qui
-**`09:30` è già l'apertura, e non si converte niente**: chi passasse `14:30`
+Il CSV di HistData lo leggiamo come **ora locale di New York**, quindi qui
+**`09:30` è già l'apertura e non si converte niente**: chi passasse `14:30`
 misurerebbe il primo pomeriggio di New York.
 
-E per non fidarsi nemmeno di questo, lo strumento **misura la convenzione da
-solo** — il **CANARINO DEL FUSO** guarda mese per mese l'ora della pausa
-giornaliera del feed e l'ora della riapertura di settimana. Se gennaio e luglio
-danno la stessa ora → il feed segue il DST → `09:30` vale tutto l'anno.
-**È la prima riga da leggere nel referto**, prima di ogni altra cosa.
+⚠️ **Ma va detto per intero, perché è la cosa più carica di tutto il round.**
+La **specifica pubblica di HistData** dice il contrario — _«EST **senza**
+correzione per l'ora legale»_ — e se avesse ragione lei, per **otto mesi su
+dodici** (metà marzo → inizio novembre) staremmo misurando **un'ora dopo**
+l'apertura vera, con numeri perfettamente plausibili. Contro la specifica c'è una
+**misura di casa**: 8 import HistData su 8 hanno calibrato uno **shift fisso +5**
+contro il nativo BCM, e uno shift fisso su sette anni è impossibile se il feed è
+EST fisso. **Però quegli 8 simboli sono forex e oro: il Nasdaq non è fra loro.**
+
+➡️ Per **questo** file, quindi, il fuso è **dedotto**, e l'unica misura diretta è
+il **CANARINO**: guarda mese per mese l'ora della pausa giornaliera del feed *e*
+l'ora della riapertura di settimana — due transizioni **indipendenti**. Gennaio e
+luglio uguali → DST → `09:30` vale tutto l'anno. Se si muovono **tutte e due**,
+non è una transizione storta: **è il fuso**, e lo strumento lo scrive con una riga
+sua. **È la prima riga da leggere nel referto**, prima di ogni altra cosa.
 
 ---
 
@@ -100,7 +118,7 @@ dati** per dire se è leggibile, e legge lo stato dei criteri. Incolla il **bloc
 INTERO** (è un comando solo).
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='92e4cffb71bd5a125c0cbc6c22c32cd5f1800c0b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_ANATOMIA_APERTURE.ps1"; Remove-Item $p -Force -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ANATOMIA_APERTURE.ps1" -OutFile $p -EA Stop; if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ANATOMIA_APERTURE_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' }; $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE; if($rc -eq 2){ throw 'NON PARTITA (uscita 2): leggi il rosso qui sopra, rimedia e rilancia questo stesso blocco' }; $dsk=[Environment]::GetFolderPath('Desktop'); $c=@(Get-ChildItem (Join-Path $dsk 'ANATOMIA_APERTURE_*\CENSIMENTO_FONTE.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 }); if($c.Count -eq 0){ throw 'NESSUN CENSIMENTO DI ADESSO: la corsa non ha scritto niente' }; Write-Host ('CENSIMENTO: ' + $c[0].FullName) -ForegroundColor Cyan; if($rc -ne 0){ Write-Host 'QUALCOSA NON TORNA: mandami il CENSIMENTO_FONTE.txt qui sopra PRIMA del blocco 2.' -ForegroundColor Yellow } else { Write-Host 'FONTE OK. Il blocco 2 parte solo a criteri firmati (vedi sotto).' -ForegroundColor Green } }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_ANATOMIA_APERTURE.ps1"; Remove-Item $p -Force -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ANATOMIA_APERTURE.ps1" -OutFile $p -EA Stop; if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ANATOMIA_APERTURE_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' }; $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE; if($rc -eq 2){ throw 'NON PARTITA (uscita 2): leggi il rosso qui sopra, rimedia e rilancia questo stesso blocco' }; $dsk=[Environment]::GetFolderPath('Desktop'); $c=@(Get-ChildItem (Join-Path $dsk 'ANATOMIA_APERTURE_*\CENSIMENTO_FONTE.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 }); if($c.Count -eq 0){ throw 'NESSUN CENSIMENTO DI ADESSO: la corsa non ha scritto niente' }; Write-Host ('CENSIMENTO: ' + $c[0].FullName) -ForegroundColor Cyan; if($rc -ne 0){ Write-Host 'QUALCOSA NON TORNA: mandami il CENSIMENTO_FONTE.txt qui sopra PRIMA del blocco 2.' -ForegroundColor Yellow } else { Write-Host 'FONTE OK. Il blocco 2 parte solo a criteri firmati (vedi sotto).' -ForegroundColor Green } }
 ```
 
 **Le righe da guardare a schermo:**
@@ -137,7 +155,7 @@ Da lanciare **dopo** aver letto i criteri, averli firmati, e dopo che ti ho
 mandato il **pin nuovo** (la firma cambia il file, quindi cambia il pin).
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='92e4cffb71bd5a125c0cbc6c22c32cd5f1800c0b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_ANATOMIA_APERTURE.ps1"; Remove-Item $p -Force -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ANATOMIA_APERTURE.ps1" -OutFile $p -EA Stop; if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ANATOMIA_APERTURE_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' }; $global:LASTEXITCODE=0; & $p -Pin $pin; $rc=$LASTEXITCODE; if($rc -eq 2){ throw 'NON PARTITA (uscita 2): leggi il rosso qui sopra, rimedia e rilancia questo stesso blocco' }; $dsk=[Environment]::GetFolderPath('Desktop'); $z=@(Get-ChildItem (Join-Path $dsk 'ANATOMIA_APERTURE_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 }); if($z.Count -eq 0){ throw 'NESSUNO ZIP DI ADESSO: la corsa non e'' arrivata alla raccolta' }; if($rc -ne 0){ Write-Host 'MISURATO CON RILIEVI: i rilievi sono una RISPOSTA, non un guasto -- lo zip va mandato LO STESSO.' -ForegroundColor Yellow }; Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_ANATOMIA_APERTURE.ps1"; Remove-Item $p -Force -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ANATOMIA_APERTURE.ps1" -OutFile $p -EA Stop; if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ANATOMIA_APERTURE_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' }; $global:LASTEXITCODE=0; & $p -Pin $pin; $rc=$LASTEXITCODE; if($rc -eq 2){ throw 'NON PARTITA (uscita 2): leggi il rosso qui sopra, rimedia e rilancia questo stesso blocco' }; $dsk=[Environment]::GetFolderPath('Desktop'); $z=@(Get-ChildItem (Join-Path $dsk 'ANATOMIA_APERTURE_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 }); if($z.Count -eq 0){ throw 'NESSUNO ZIP DI ADESSO: la corsa non e'' arrivata alla raccolta' }; if($rc -ne 0){ Write-Host 'CORSA CON RILIEVI O PROBLEMI: leggi ESITO qui sopra -- in tutti e due i casi e'' gia'' una risposta, e lo zip va mandato LO STESSO.' -ForegroundColor Yellow }; Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan }
 ```
 
 > ⚠️ **Il blocco 2 non porta nessuno switch di bypass, ed è voluto.** Esiste

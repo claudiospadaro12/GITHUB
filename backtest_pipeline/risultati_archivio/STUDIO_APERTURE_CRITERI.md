@@ -80,12 +80,39 @@ comodo, e va detto che è comodo.
 
 ---
 
-## 2. 🕐 IL FUSO — misurato, non assunto
+## 2. 🕐 IL FUSO — dedotto da una misura, e **contro la specifica del fornitore**
 
-L'ora scritta nel CSV è **ora locale di NEW YORK**. Non è un'assunzione: 8 import
-HistData su 8 hanno calibrato uno **shift fisso +5** contro il nativo BCM
-(`REFERTO_IMPORT_6_SIMBOLI.md`), e uno shift fisso su sette anni è possibile solo
-se il feed segue il DST americano come il server.
+> ⚠️ **QUESTA È LA DECISIONE PIÙ CARICA DEL ROUND, E VA FIRMATA SAPENDO CHE COSA
+> POGGIA SU CHE COSA.** Se l'ora è sbagliata, tutto lo studio misura un'altra
+> cosa **con numeri perfettamente plausibili** — che è il modo peggiore di
+> sbagliare. Quindi qui si scrivono **tutte e tre** le cose che si sanno,
+> comprese quelle che remano contro.
+
+**1. 📕 La specifica pubblica di HistData dice il CONTRARIO.** Agli atti, nel
+nostro stesso repo (`backtest_pipeline/dukascopy/histdata_m1.py`, righe 81-84):
+_«TimeZone: Eastern Standard Time (EST) time-zone **WITHOUT** Day Light Savings
+adjustments»_. Presa alla lettera, `09:30` del file sarebbe l'apertura cash solo
+d'inverno, e da **metà marzo a inizio novembre** (otto mesi su dodici, **non**
+«metà anno») punterebbe **un'ora dopo** l'apertura vera.
+
+**2. 📐 La misura di casa dice l'opposto, ed è una misura.** 8 import HistData su
+8 hanno calibrato uno **shift fisso +5** contro lo storico nativo BCM, con
+differenza media **0,0054-0,0110 %** su feed 2018-2024
+(`REFERTO_IMPORT_6_SIMBOLI.md`). Il server BCM segue il DST **europeo**: se il
+file fosse EST fisso lo scarto sarebbe **+5 d'inverno e +6 d'estate**, e nessuno
+shift unico potrebbe dare quella differenza media su sette anni. Uno shift fisso
++5 è compatibile **solo** con timestamp in ora locale di New York.
+
+**3. 🚧 Ma quegli 8 simboli sono FOREX E ORO — nessun indice.** Sono AUDJPY,
+CHFJPY, EURJPY, GBPCAD, XAUUSD, USDJPY, EURUSD, GBPUSD. **`NASUSD` non è fra
+questi**, e il suo CSV non è mai stato calibrato contro il nativo BCM (lo storico
+BCM degli indici parte dal 26/09/2024). Quindi per **questo** file la convenzione
+è **estrapolata**, non misurata: si assume che HistData applichi la stessa
+convenzione a indici e forex.
+
+➡️ **Perciò la misura diretta su questo file la fa il CANARINO, a ogni corsa** —
+ed è per questo che esiste, e per questo si legge **per prima**. Finché il
+canarino non parla, il fuso di `NASUSD_M1.csv` è una **deduzione**.
 
 ```
 apertura cash Nasdaq = 09:30 NEW YORK = 14:30 ora server BCM = 15:30 italiana
@@ -99,8 +126,13 @@ apertura cash Nasdaq = 09:30 NEW YORK = 14:30 ora server BCM = 15:30 italiana
   misura da solo, mese per mese, l'ora d'inizio della pausa giornaliera del feed
   e l'ora della riapertura di settimana. Se gennaio e luglio danno la stessa ora →
   il feed segue il DST → `09:30` è l'apertura **tutto l'anno**. Se luglio scivola
-  di un'ora → **EST FISSO**, e allora metà anno sarebbe misurato fuori bersaglio:
-  lo strumento **lo dichiara e alza il codice d'uscita**, non tira dritto.
+  di un'ora → **EST FISSO**, e allora **otto mesi su dodici** sarebbero misurati
+  fuori bersaglio: lo strumento **lo dichiara e alza il codice d'uscita**, non
+  tira dritto.
+- ➡️ Le due misure sono **indipendenti** e il referto le tiene separate: se si
+  muovono **tutte e due** non è una transizione storta, **è il fuso**, e lo
+  strumento lo scrive con una riga sua. Se se ne muove **una sola**, va guardata
+  quella transizione — non si conclude niente sul fuso.
 - ⚠️ **Il canarino si legge PRIMA di ogni altra cosa.** Se dice EST FISSO, tutto
   il resto del referto non si legge: si rifà.
 
@@ -169,7 +201,11 @@ rompe e poi torna dentro. Senza una casella sua finirebbe schiacciato dentro
 `RANGE` o dentro un `DRIVE`, cioè un errore **plausibile** — il tipo peggiore.
 
 ⚠️ **I giorni che rompono da TUTTI E DUE i lati.** Vince la regola del **FADE**
-(una rottura rimangiata dice più di una riuscita), e il giorno porta la bandiera
+(una rottura rimangiata dice più di una riuscita) — **quando la chiusura è oltre
+uno dei due bordi**. Se invece un giorno a due lati chiude **dentro** il range di
+riferimento, nessun `FADE` si applica e la cascata lo porta in `RIENTRO`: è la
+casella giusta, ed è verificato riga per riga. In tutti e tre i casi il giorno
+porta la bandiera
 **`DUE_LATI = 1`** nel CSV. **Il referto li conta in una colonna sua**: così il
 peso di questa regola di priorità si **misura** invece di restare una scelta
 nascosta. Se quella colonna è grossa, la regola va discussa — e allora sarà una
@@ -188,6 +224,13 @@ margine = max( K x ampiezza del range di riferimento ;  P% del prezzo d'apertura
 
 Nessuno dei due è pescato da un backtest: **non c'è nessun backtest da cui
 pescarli**, ed è il vantaggio di misurare prima di ottimizzare.
+
+> 🔬 **I BORDI, dichiarati** (perché una definizione che non dice cosa succede
+> *esattamente sulla soglia* non è meccanica): la rottura è `>=` — toccare
+> **esattamente** `bordo + margine` **è** rottura; e la banda morta della
+> persistenza è **esclusiva** — un movimento pari **esattamente** a
+> `deadband_pct` è **PIATTO**, non una direzione. Verificato eseguendo, sui
+> valori di confine e a un tick da entrambi i lati.
 
 ### 3.5 La persistenza
 
@@ -242,7 +285,19 @@ leggibili anche con la pre-apertura sottile, e la misura che conta vive nell'ora
 **dopo** l'apertura.
 
 **Se in un anno i sospetti superano `--quota-sospetti` = 20 %**, il referto alza un
-**RILIEVO** con nome e cognome dell'anno. Non ferma niente: dichiara.
+**RILIEVO** con nome e cognome dell'anno **e lo strumento esce con 1**. Non ferma
+niente: dichiara — ma lo dichiara anche al **codice d'uscita**, non solo dentro a
+un file. *(Il 26/08 questo rilievo viveva solo nel testo del referto: un anno al
+38,7 % di giorni malati usciva **0** e la riga di lancio stampava «ESITO: OK».
+Trovato in verifica, riprodotto, corretto — e adesso c'è la prova 13
+dell'autotest che lo tiene fermo.)*
+
+> 📐 **Il denominatore della quota, dichiarato**: `SOSPETTI / (BUONI + SOSPETTI)`,
+> cioè sui giorni **MISURABILI** — **non** sui giorni di calendario. I giorni
+> `SENZA APERTURA` (feste, domeniche del feed 24 h) **non entrano sotto**:
+> contarli diluirebbe la quota proprio negli anni con più buchi, cioè
+> spegnerebbe l'allarme dove serve di più. Il referto stampa la formula accanto
+> alla colonna `%SOSPETTI`.
 
 ---
 

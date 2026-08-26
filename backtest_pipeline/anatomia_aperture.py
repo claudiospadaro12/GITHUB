@@ -787,8 +787,17 @@ def scandisci(cfg, percorso, ogni=1000000):
 #  IL CANARINO DEL FUSO. Misura, non assume.
 # =====================================================================
 def canarino_fuso(diag):
+    """Torna (righe, rilievi) con rilievi = LISTA, una voce per MISURA.
+
+    E' una lista e non una voce sola perche' il referto stesso dichiara
+    che le due misure sono INDIPENDENTI e che 'se una sola delle due si
+    muove, non e' il fuso: e' quella transizione'. Con una variabile sola
+    l'ultima misura sovrascriveva la prima, e il caso PIU' GRAVE (tutte e
+    due dicono EST FISSO = e' proprio il fuso) si leggeva identico al caso
+    lieve (ne ha parlato una). L'informazione che distingue i due casi e'
+    esattamente quella che serve per decidere."""
     righe = []
-    rilievo = None
+    rilievi = []
     righe.append("CANARINO DEL FUSO -- il feed segue il DST americano?")
     righe.append("  Si guarda, mese per mese, (a) l'ora d'inizio della PAUSA piu' larga")
     righe.append("  della giornata (la manutenzione del feed, ~17:00-18:00 New York) e")
@@ -830,8 +839,7 @@ def canarino_fuso(diag):
         me, _ = moda(estate)
         if mi is None or me is None:
             righe.append("  %-19s NON MISURABILE (servono mesi invernali E estivi)" % etichetta)
-            if rilievo is None:
-                rilievo = "canarino del fuso non misurabile su '%s'" % etichetta
+            rilievi.append("canarino del fuso non misurabile su '%s'" % etichetta)
             continue
         delta = me - mi
         righe.append("  %-19s INVERNO %s   ESTATE %s   differenza %+d min" %
@@ -840,13 +848,16 @@ def canarino_fuso(diag):
             righe.append("      -> coerente col DST: ora locale di NEW YORK.")
         elif -75 <= delta <= -45:
             righe.append("      -> EST FISSO: FERMARSI. L'apertura cash NON e' alle 09:30")
-            righe.append("         del file da marzo a novembre.")
-            rilievo = "il canarino del fuso dice EST FISSO su '%s': lo studio va rifatto" % etichetta
+            righe.append("         del file da meta' marzo a inizio novembre (NON meta' anno:")
+            righe.append("         il DST americano dura otto mesi su dodici).")
+            rilievi.append("il canarino del fuso dice EST FISSO su '%s': lo studio va rifatto" % etichetta)
         else:
             righe.append("      -> INCERTO (differenza anomala): guardare i mesi uno per uno.")
-            if rilievo is None:
-                rilievo = "canarino del fuso INCERTO su '%s' (differenza %+d min)" % (etichetta, delta)
-    return righe, rilievo
+            rilievi.append("canarino del fuso INCERTO su '%s' (differenza %+d min)" % (etichetta, delta))
+    if len([x for x in rilievi if "EST FISSO" in x]) >= 2:
+        rilievi.append("EST FISSO su TUTTE E DUE le misure indipendenti: non e' una "
+                       "transizione storta, e' il FUSO. Lo studio non si legge.")
+    return righe, rilievi
 
 
 # =====================================================================
@@ -1227,15 +1238,19 @@ def tabella_gap(cfg, righe, titolo):
     return out
 
 
-def blocco_copertura(cfg, righe, diag, titolo):
-    out = [titolo]
-    out.append("  Il conto della malattia: quanti giorni sono stati ESCLUSI e perche'.")
-    out.append("  %6s %8s %8s %10s %10s %12s" %
-               ("ANNO", "GIORNI", "BUONI", "SOSPETTI", "NO-APERT", "%SOSPETTI"))
+def quota_sospetti_anno(righe):
+    """anno -> (giorni, buoni, sospetti, senza apertura, quota%).
+
+    LA QUOTA HA UN DENOMINATORE, E VA DETTO QUAL E': sospetti sui giorni
+    MISURABILI (buoni + sospetti), NON sui giorni di calendario. I giorni
+    SENZA APERTURA sono feste e domeniche del feed 24h: contarli sotto
+    farebbe scendere la quota proprio negli anni con piu' buchi. Il
+    referto stampa la formula accanto alla colonna, o il numero si legge
+    per quello che non e' (checklist 83)."""
     anni = {}
     for r in righe:
         anni.setdefault(r.get("anno"), []).append(r)
-    rilievi = []
+    fuori = []
     for anno in sorted(k for k in anni.keys() if k is not None):
         gg = anni[anno]
         buoni = len([x for x in gg if x.get("stato") == "OK" and x.get("classe")])
@@ -1243,11 +1258,39 @@ def blocco_copertura(cfg, righe, diag, titolo):
         noap = len([x for x in gg if x.get("stato") == "SENZA_APERTURA"])
         misurabili = buoni + sosp
         quota = (100.0 * sosp / misurabili) if misurabili else None
-        out.append("  %6d %8d %8d %10d %10d %12s" %
-                   (anno, len(gg), buoni, sosp, noap, f(quota, 1)))
+        fuori.append((anno, len(gg), buoni, sosp, noap, quota))
+    return fuori
+
+
+def rilievi_quota(cfg, righe):
+    """I RILIEVI SULLA QUOTA DEI SOSPETTI, IN UN POSTO SOLO.
+
+    Esiste come funzione a se' perche' questi rilievi devono finire in DUE
+    posti che prima divergevano: il testo del referto E il CODICE
+    D'USCITA. Prima nascevano dentro blocco_copertura, cioe' dentro UN
+    referto, e il codice d'uscita non li vedeva mai: un anno al 38,7% di
+    giorni malati usciva 0 = 'ESITO: OK' mentre il referto scriveva
+    'MISURATO CON RILIEVI'. Le due cose non possono divergere
+    (checklist 14 e 22)."""
+    fuori = []
+    for anno, _gg, _buoni, _sosp, _noap, quota in quota_sospetti_anno(righe):
         if quota is not None and quota > cfg.quota_sospetti:
-            rilievi.append("anno %d: %s%% di giorni sospetti (soglia %.1f%%)" %
-                           (anno, f(quota, 1), cfg.quota_sospetti))
+            fuori.append("anno %d: %s%% di giorni sospetti (soglia %.1f%%)" %
+                         (anno, f(quota, 1), cfg.quota_sospetti))
+    return fuori
+
+
+def blocco_copertura(cfg, righe, diag, titolo):
+    out = [titolo]
+    out.append("  Il conto della malattia: quanti giorni sono stati ESCLUSI e perche'.")
+    out.append("  %6s %8s %8s %10s %10s %12s" %
+               ("ANNO", "GIORNI", "BUONI", "SOSPETTI", "NO-APERT", "%SOSPETTI"))
+    for anno, tot, buoni, sosp, noap, quota in quota_sospetti_anno(righe):
+        out.append("  %6d %8d %8d %10d %10d %12s" %
+                   (anno, tot, buoni, sosp, noap, f(quota, 1)))
+    out.append("  %SOSPETTI = SOSPETTI / (BUONI + SOSPETTI), cioe' sui giorni")
+    out.append("   MISURABILI: NON su GIORNI, che comprende feste e domeniche del")
+    out.append("   feed 24h. E' la stessa quota su cui morde --quota-sospetti.")
     out.append("")
     out.append("  I giorni SENZA APERTURA, per giorno della settimana. Le domeniche e")
     out.append("  le feste di borsa stanno LEGITTIMAMENTE in quel conto (il feed e' 24h")
@@ -1298,7 +1341,7 @@ def blocco_copertura(cfg, righe, diag, titolo):
     out.append("   una chiave unica: nessun riordino alla cieca, nessun pari da")
     out.append("   sciogliere.)")
     out.append("")
-    return out, rilievi
+    return out
 
 
 def costruisci_referto(cfg, righe, diag, percorso_dati, titolo, note_fase,
@@ -1307,18 +1350,15 @@ def costruisci_referto(cfg, righe, diag, percorso_dati, titolo, note_fase,
     r += righe_fuso
     r.append("")
     r += blocco_definizioni(cfg)
-    rilievi = []
     if con_copertura:
-        blocco, ril = blocco_copertura(cfg, righe, diag, "--- COPERTURA E GIORNI SOSPETTI ---")
-        r += blocco
-        rilievi += ril
+        r += blocco_copertura(cfg, righe, diag, "--- COPERTURA E GIORNI SOSPETTI ---")
     r += tabella_classi(cfg, righe, "--- DISTRIBUZIONE DELLE CLASSI, PER ANNO ---", "anno")
     r += tabella_classi(cfg, righe, "--- DISTRIBUZIONE DELLE CLASSI, PER REGIME DICHIARATO ---", "regime")
     r += tabella_mfe_per_classe(cfg, righe, "--- ESCURSIONI MEDIANE PER CLASSE ---")
     r += tabella_finestre(cfg, righe, "--- IL MOVIMENTO GREZZO, FINESTRA PER FINESTRA ---")
     r += tabella_persistenza(cfg, righe, "--- PERSISTENZA ---")
     r += tabella_gap(cfg, righe, "--- LE CLASSI CONDIZIONATE AL GAP ---")
-    return r, rilievi
+    return r
 
 
 # =====================================================================
@@ -1525,7 +1565,7 @@ def autotest():
             diag_finto["gap_sessione"].setdefault((2015, mese), []).append(17 * 60)
             diag_finto["apertura_sett"].setdefault((2015, mese), []).append(18 * 60)
     testo, ril = canarino_fuso(diag_finto)
-    assert ril is None, ril
+    assert ril == [], ril
     assert any("NEW YORK" in x for x in testo)
     diag_est = {"gap_sessione": {}, "apertura_sett": {}}
     for mese, ora in ((1, 17 * 60), (7, 16 * 60)):
@@ -1533,9 +1573,47 @@ def autotest():
             diag_est["gap_sessione"].setdefault((2015, mese), []).append(ora)
             diag_est["apertura_sett"].setdefault((2015, mese), []).append(ora + 60)
     _t2, ril2 = canarino_fuso(diag_est)
-    assert ril2 is not None and "EST FISSO" in ril2, ril2
+    assert any("EST FISSO" in x for x in ril2), ril2
+    # tutte e due le misure si sono mosse: il rilievo deve DIRLO, non
+    # ridursi a quello dell'ultima misura letta
+    assert any("TUTTE E DUE" in x for x in ril2), ril2
+    # e una misura sola che si muove NON deve diventare "e' il fuso"
+    diag_meta = {"gap_sessione": {}, "apertura_sett": {}}
+    for mese, ora in ((1, 17 * 60), (7, 16 * 60)):
+        for g in range(1, 16):
+            diag_meta["gap_sessione"].setdefault((2015, mese), []).append(ora)
+            diag_meta["apertura_sett"].setdefault((2015, mese), []).append(18 * 60)
+    _t3, ril3 = canarino_fuso(diag_meta)
+    assert any("EST FISSO" in x for x in ril3), ril3
+    assert not any("TUTTE E DUE" in x for x in ril3), ril3
     log("12. canarino del fuso provato nei DUE versi: DST -> nessun rilievo;")
-    log("    EST fisso -> RILIEVO 'EST FISSO': OK")
+    log("    EST fisso -> RILIEVO; e UNA misura sola non diventa 'e' il fuso': OK")
+    ok += 1
+
+    # ---- IL RILIEVO SULLA QUOTA DEI SOSPETTI DEVE ESISTERE COME FATTO
+    #      SEPARATO DAL TESTO DEL REFERTO. Se vive solo dentro un referto,
+    #      il codice d'uscita non lo vede: e' il difetto trovato in
+    #      verifica (un anno al 38,7% usciva "ESITO: OK").
+    finti = []
+    for i in range(100):
+        finti.append({"anno": 2016, "stato": "OK", "classe": "RANGE"})
+    for i in range(40):
+        finti.append({"anno": 2016, "stato": "SOSPETTO", "classe": ""})
+    for i in range(300):
+        finti.append({"anno": 2017, "stato": "SENZA_APERTURA", "classe": ""})
+    for i in range(100):
+        finti.append({"anno": 2017, "stato": "OK", "classe": "RANGE"})
+    ril_q = rilievi_quota(cfg, finti)
+    assert len(ril_q) == 1 and "2016" in ril_q[0], ril_q
+    # il 2017 NON deve suonare: ha 0 sospetti su 100 misurabili, e le 300
+    # giornate senza apertura non entrano nel denominatore
+    assert "2017" not in " ".join(ril_q), ril_q
+    tab = quota_sospetti_anno(finti)
+    assert tab[0][5] is not None and abs(tab[0][5] - 100.0 * 40 / 140) < 0.001, tab[0]
+    assert tab[1][5] == 0.0, tab[1]
+    log("13. quota dei sospetti: 40/140 = %.1f%% -> RILIEVO che arriva al CODICE" %
+        tab[0][5])
+    log("    D'USCITA (e le 300 giornate senza apertura NON diluiscono): OK")
     ok += 1
 
     for tmp in (percorso, grezzo):
@@ -1545,8 +1623,8 @@ def autotest():
             pass
 
     log("")
-    log("AUTOTEST: %d/%d prove superate." % (ok, 12))
-    return 0 if ok == 12 else 2
+    log("AUTOTEST: %d/%d prove superate." % (ok, 13))
+    return 0 if ok == 13 else 2
 
 
 def _cartella_tmp():
@@ -1683,15 +1761,24 @@ def main():
     log(" giorni BUONI %d   SOSPETTI %d   SENZA APERTURA %d" %
         (len(buoni), len(sosp), len(noap)))
 
-    righe_fuso, rilievo_fuso = canarino_fuso(diag)
+    righe_fuso, rilievi_fuso = canarino_fuso(diag)
     for x in righe_fuso:
         log("  " + x)
 
     rilievi = []
     if avviso_ora:
         rilievi.append(avviso_ora)
-    if rilievo_fuso:
-        rilievi.append(rilievo_fuso)
+    rilievi += rilievi_fuso
+    #  I RILIEVI SULLA QUOTA DEI SOSPETTI SI CALCOLANO **QUI**, sui giorni
+    #  di TUTTO il file, e finiscono nella stessa lista che decide il
+    #  CODICE D'USCITA. Prima nascevano dentro il singolo referto e il
+    #  codice d'uscita non li vedeva mai: un anno al 38,7% di giorni
+    #  malati usciva 0 (= "ESITO: OK" anche nel referto del driver e
+    #  niente giallo in chat) mentre il referto scriveva "MISURATO CON
+    #  RILIEVI". Il testo e il codice d'uscita non possono divergere
+    #  (checklist 22), e un cancello che non puo' alzare il codice e' un
+    #  cancello decorativo (checklist 14).
+    rilievi += rilievi_quota(cfg, righe)
     if diag["fuori_ordine"] > 0:
         rilievi.append("%d righe FUORI ORDINE cronologico nel file: dichiarato, non "
                        "riordinato alla cieca" % diag["fuori_ordine"])
@@ -1744,12 +1831,15 @@ def main():
                     righe))
 
     for nome, titolo, nota, sotto in blocchi:
-        testo, ril = costruisci_referto(cfg, sotto, diag, percorso, titolo, nota, righe_fuso)
+        testo = costruisci_referto(cfg, sotto, diag, percorso, titolo, nota, righe_fuso)
         testo.append("--- RILIEVI DI QUESTA CORSA ---")
-        tutti = rilievi + ril
-        if not tutti:
+        #  la STESSA lista in tutti e tre i referti, ed e' la stessa che
+        #  decide il codice d'uscita: cosi' il conto scritto in fondo al
+        #  referto e il numero che legge la riga di lancio non possono
+        #  raccontare due storie diverse.
+        if not rilievi:
             testo.append("  nessuno")
-        for x in tutti:
+        for x in rilievi:
             testo.append("  - " + x)
         testo.append("")
         testo.append("--- QUELLO CHE QUESTO STUDIO NON PUO' DIRE ---")
@@ -1759,8 +1849,8 @@ def main():
         testo.append("  Non dice niente su DAX e Dow: qui c'e' un simbolo solo.")
         testo.append("  Non sostituisce il cancello qualita' del feed, che e' in verifica.")
         testo.append("")
-        testo.append("ESITO: " + ("OK" if not (rilievi + ril) else
-                                  "MISURATO CON RILIEVI (%d)" % len(rilievi + ril)))
+        testo.append("ESITO: " + ("OK" if not rilievi else
+                                  "MISURATO CON RILIEVI (%d)" % len(rilievi)))
         percorso_ref = os.path.join(cartella, nome)
         scrivi_atomico(percorso_ref, testo)
         prodotti.append(percorso_ref)

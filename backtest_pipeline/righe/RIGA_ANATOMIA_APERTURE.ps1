@@ -208,12 +208,15 @@ function AnagraficaCsv($file){
   $ris.Esiste  = $true
   $ris.MB      = [Math]::Round($it.Length / 1MB, 1)
   $ris.Scritto = $it.LastWriteTime.ToString("yyyy-MM-dd HH:mm",$INV)
-  $testa = @(Get-Content -LiteralPath $file -TotalCount 4 -ErrorAction SilentlyContinue)
+  $testa = @(Get-Content -LiteralPath $file -TotalCount 6 -ErrorAction SilentlyContinue)
+  $SoloDati = New-Object System.Collections.ArrayList
   foreach($linea in $testa){
     if($linea -match '^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2},'){
       $ris.Formato = "FORMATO1"; if($ris.Prima -eq ""){ $ris.Prima = $linea }
+      [void]$SoloDati.Add($linea)
     } elseif($linea -match '^\d{8} \d{6};'){
       $ris.Formato = "HISTDATA_GREZZO"; if($ris.Prima -eq ""){ $ris.Prima = $linea }
+      [void]$SoloDati.Add($linea)
     } elseif($linea -match '^Time,'){
       if($ris.Formato -eq "?"){ $ris.Formato = "FORMATO1" }
     }
@@ -222,7 +225,14 @@ function AnagraficaCsv($file){
   #  5 milioni di righe qui costerebbe secondi e serve solo l'ordine di
   #  grandezza (il numero VERO lo stampa lo strumento in P5, e i due si
   #  confrontano nel referto).
-  $lung = @($testa | Where-Object { $_.Length -gt 0 } | ForEach-Object { $_.Length + 2 })
+  #  LA MEDIA SI FA SULLE SOLE RIGHE DI DATI. L'INTESTAZIONE
+  #  "Time,Open,High,Low,Close,Volume" e' lunga 30 caratteri contro i ~68
+  #  di una barra: infilata in una media da quattro campioni tirava giu'
+  #  la media a 59,25 e gonfiava la stima del 14,8% MISURATO. Sopra il 5%
+  #  di tolleranza, cioe' la NOTA "barre STIMATE X contro le 5.233.590
+  #  agli atti" sarebbe scattata a OGNI corsa sana: un allarme che suona
+  #  sempre e' un allarme che non si legge piu' (checklist 47).
+  $lung = @($SoloDati | Where-Object { $_.Length -gt 0 } | ForEach-Object { $_.Length + 2 })
   if($lung.Count -gt 0){
     $media = 0.0
     foreach($lu in $lung){ $media = $media + $lu }
