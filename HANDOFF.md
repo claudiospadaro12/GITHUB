@@ -7,6 +7,40 @@
 
 ---
 
+## 🧭 AGGIORNAMENTO 26/08 — LA NOTTATA DEI QUATTRO ROUND (R107-R111) E DEI 16 ANNI DI NASDAQ
+
+- 🏁 **CHIUSI CON REFERTO (0 problemi aperti)**: **R107** (short aperture:
+  DAX short niente edge n257, Dow=R54 confermato, NAS non si trasporta; long
+  RITESTATI e riprodotti), **R108** (BB M15: morta di SEGNALE non di costo,
+  6/6 rosse, S0a passato su tutti e 3 — EURUSD recuperato dall'indagine),
+  **R109** (ATR Exhaustion M15: bocciato dalla corsia RISCHIO, DD 44-68%,
+  peggior giornata −9,72%; EA ASSOLTO — A0 7/7; frequenza alta misurata;
+  lezione: pavimento SL obbligatorio sui futuri M15), **R111** (il CONFINE:
+  gradiente MONOTONO H1>M30>M15 su tutti e 3 i simboli; GBPUSD misurabile a
+  campione pieno per finestra e dice NO; capitolo discesa-TF della BB CHIUSO).
+- 🔬 **INDAGINE DEAL**: i "deal anomali" di R108/R109 erano il PARSER
+  (`Sort-Object` NON stabile sui pari secondo, checklist 81) — EA innocenti,
+  fix per il record nei driver. Checklist 63→**82** in 36 ore (classi 64-82).
+- ✍️ **FIRME di Claudio**: R108 "FIRMO CON PROPOSTE", R109 "FIRMO",
+  R110 "FIRMO R110" (timbrata NEI criteri: la corsa gira SENZA switch),
+  R111 pre-firma "FIRMO R111", STORICO 6 decisioni firmate.
+- 📡 **STORICO NASDAQ**: 16 anni HistData M1 scaricati (5,23M barre, prezzi
+  sani 2010→2026) e IMPORTATI in MT5 come `NASUSD_EXT` (shift +5 auto,
+  copertura 97%). Cancello qualita' resta CHIUSO (diff 0,0756% > 0,05%) come
+  dichiarato: dati prodotti, uso = firma successiva. Conta-barre da rifare
+  a grafico aperto (stasera).
+- 🎯 **PRONTI PER STASERA (PC)**: zip conta-barre (Riga 2 dopo grafico
+  NASUSD_EXT M15 + scroll) e **R110** (lati short dei motori vivi, pin
+  `4d6952f`, giro a vuoto + corsa SENZA -CriteriFirmati, 20-45 min).
+- 📼 **Live Paolo 25/08 analizzata**: spunto top = `ABTG_SupertrendInvert`
+  gia' in repo, mai misurato sugli indici (candidato R112 dopo R110); ADR
+  50gg meccanizzabile; Jackson Hole "non si trada" confermato dal docente
+  (data 27-28 = prudenziale, attribuzione corretta). VWAP MR portato
+  (`ABTG_VwapRevert.mq5` + tesi, col bug ATR-960 dell'autore trovato).
+- 🧹 Flotta: 970911 SPENTA con delibera 11/08 (REFERTO_FUORILISTA) —
+  FLOTTA_ATTIVA corretta; restano da pulire RIEPILOGO_FORWARD,
+  TRACKING_FORWARD, CLASSIFICA_PF (in corso).
+
 ## 🧭 AGGIORNAMENTO 25/08 SERA — R107 FIRMATO, CACCIA M5/M15 CHIUSA, R108 IN PREPARAZIONE
 
 - ✍️ **R107 (lati short Dow/DAX/Nasdaq) FIRMATO**: "FIRMO CON PROPOSTE" 25/08
