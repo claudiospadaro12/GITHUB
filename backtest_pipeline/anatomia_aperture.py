@@ -134,6 +134,7 @@ DEF_MAX_BUCO_MIN   = 3         # buco interno all'ora d'apertura oltre il quale 
 DEF_MIN_BARRE_PRE  = 30        # copertura della pre-apertura (solo INFORMATIVA, non esclude)
 DEF_CASSAFORTE_DA  = 2021      # da questo anno in poi: cassaforte della FASE 2
 DEF_QUOTA_SOSPETTI = 20.0      # se in un anno i sospetti superano questa %, e' un RILIEVO
+DEF_MIN_GIORNI_ANNO = 150      # sotto: la distribuzione di quell'anno NON e' leggibile
 
 
 # ---------------------------------------------------------------------
@@ -292,6 +293,7 @@ class Config(object):
         self.min_barre_pre = int(args.min_barre_pre)
         self.cassaforte_da = int(args.cassaforte_da)
         self.quota_sospetti = float(args.quota_sospetti)
+        self.min_giorni_anno = int(args.min_giorni_anno)
         # finestre derivate, in minuti dalla mezzanotte
         self.pre_da = self.apertura - self.minuti_pre
         self.pre_a = self.apertura - 1
@@ -1019,7 +1021,7 @@ def blocco_definizioni(cfg):
     return r
 
 
-def tabella_classi(righe, titolo, chiave):
+def tabella_classi(cfg, righe, titolo, chiave):
     """Distribuzione delle classi per <chiave> (anno o regime), con i
     giorni sospetti e senza apertura in colonne PROPRIE: nessun giorno
     sparisce dal conto."""
@@ -1035,6 +1037,7 @@ def tabella_classi(righe, titolo, chiave):
         ordine = [x for x in ORDINE_REGIMI if x in gruppi] + \
                  [x for x in sorted(gruppi.keys()) if x not in ORDINE_REGIMI]
     out.append(titolo)
+    sotto_g1 = []
     intest = "  %-12s %7s %7s" % (chiave.upper(), "GIORNI", "BUONI")
     for c in ORDINE_CLASSI:
         intest += " %10s" % c
@@ -1051,11 +1054,26 @@ def tabella_classi(righe, titolo, chiave):
             riga += " %5d/%4s" % (n, pct(n, len(buoni), 0))
         due = len([x for x in buoni if x.get("due_lati")])
         riga += " %8d %8d %9d" % (due, sosp, noap)
+        #  IL CANCELLO G1 E' IMPOSTO QUI, non solo scritto nei criteri: una
+        #  regola che vive nella prosa e non nel codice e' una regola che
+        #  qualcuno leggera' di fretta (checklist 67). La riga si stampa
+        #  LO STESSO -- nessun gruppo sparisce -- ma porta il marchio.
+        if len(buoni) < cfg.min_giorni_anno:
+            riga += "   <-- SOTTO G1: NON LEGGIBILE"
+            sotto_g1.append(str(k))
         out.append(riga)
     out.append("  (per ogni classe: conteggio / % sui GIORNI BUONI. 2LATI = giorni che")
     out.append("   hanno rotto da tutti e due i lati. SOSPETTI e NO-APERT sono ESCLUSI")
     out.append("   dai conteggi delle classi ma restano scritti qui: nessun giorno")
     out.append("   sparisce dall'elenco.)")
+    if sotto_g1:
+        out.append("  CANCELLO G1 (>= %d giorni buoni): NON LEGGIBILI -> %s" %
+                   (cfg.min_giorni_anno, ", ".join(sotto_g1)))
+        out.append("   Quelle righe si stampano lo stesso, ma le loro percentuali NON")
+        out.append("   si citano: su un campione cosi' sottile sono rumore. (Il 2010 e'")
+        out.append("   un moncone di novembre-dicembre: e' atteso che ci finisca.)")
+    else:
+        out.append("  CANCELLO G1 (>= %d giorni buoni): superato da tutti." % cfg.min_giorni_anno)
     out.append("")
     return out
 
@@ -1294,8 +1312,8 @@ def costruisci_referto(cfg, righe, diag, percorso_dati, titolo, note_fase,
         blocco, ril = blocco_copertura(cfg, righe, diag, "--- COPERTURA E GIORNI SOSPETTI ---")
         r += blocco
         rilievi += ril
-    r += tabella_classi(righe, "--- DISTRIBUZIONE DELLE CLASSI, PER ANNO ---", "anno")
-    r += tabella_classi(righe, "--- DISTRIBUZIONE DELLE CLASSI, PER REGIME DICHIARATO ---", "regime")
+    r += tabella_classi(cfg, righe, "--- DISTRIBUZIONE DELLE CLASSI, PER ANNO ---", "anno")
+    r += tabella_classi(cfg, righe, "--- DISTRIBUZIONE DELLE CLASSI, PER REGIME DICHIARATO ---", "regime")
     r += tabella_mfe_per_classe(cfg, righe, "--- ESCURSIONI MEDIANE PER CLASSE ---")
     r += tabella_finestre(cfg, righe, "--- IL MOVIMENTO GREZZO, FINESTRA PER FINESTRA ---")
     r += tabella_persistenza(cfg, righe, "--- PERSISTENZA ---")
@@ -1349,6 +1367,7 @@ def autotest():
     a.min_barre_pre = 30
     a.cassaforte_da = 2021
     a.quota_sospetti = 20.0
+    a.min_giorni_anno = 150
     cfg = Config(a)
     assert not cfg.problemi_config, cfg.problemi_config
     log("1. configurazione di default coerente: OK")
@@ -1564,6 +1583,8 @@ def main():
     ap.add_argument("--cassaforte-da", dest="cassaforte_da", type=int, default=DEF_CASSAFORTE_DA)
     ap.add_argument("--quota-sospetti", dest="quota_sospetti", type=float,
                     default=DEF_QUOTA_SOSPETTI)
+    ap.add_argument("--min-giorni-anno", dest="min_giorni_anno", type=int,
+                    default=DEF_MIN_GIORNI_ANNO)
     args = ap.parse_args()
 
     log("=====================================================================")

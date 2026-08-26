@@ -290,9 +290,13 @@ mercato barra per barra, e va letto così.
 
 ## 7. 🚦 I CANCELLI DI QUESTO ROUND
 
-- **G1 — campione**: la distribuzione di un anno si legge solo con **≥ 150 giorni
-  buoni** in quell'anno. Sotto, si stampa ma si dichiara **non leggibile**.
-  *(Il 2010 ha ~35 giorni: è un moncone di novembre-dicembre e va letto come tale.)*
+- **G1 — campione** (`--min-giorni-anno`, default **150**): la distribuzione di un
+  anno si legge solo con **≥ 150 giorni buoni** in quell'anno.
+  ✅ **È imposto dal CODICE, non solo scritto qui**: il referto marca la riga con
+  `<-- SOTTO G1: NON LEGGIBILE` ed elenca gli anni bocciati sotto la tabella. La
+  riga **si stampa lo stesso** (nessun gruppo sparisce), ma le sue percentuali
+  **non si citano**. *(Verificato eseguendo: il **2010** ci finisce, ed è atteso —
+  è un moncone di novembre-dicembre, ~35 giorni.)*
 - **G2 — il canarino del fuso deve essere verde.** Rosso ⇒ il resto non si legge.
 - **G3 — nessuna promozione, nessuna firma, nessun cambio in forward.** Sempre.
 - **G4 — nessuna ipotesi di motore scritta guardando la cassaforte.** È il vincolo
