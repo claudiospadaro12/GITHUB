@@ -95,11 +95,31 @@
 #        (2) due GIORNATE intere fuori banda sono lo 0,77% delle barre:
 #            con la regola "poche barre E pochi giorni" finivano MARCIO,
 #            mentre si escludono con due date. Da qui la regola OPPURE.
-#    NON PROVATO, e va detto: questo .ps1 non e' mai stato ESEGUITO (in
-#      cloud non c'e' PowerShell). Sono stati controllati ASCII puro,
-#      bilanciamento di parentesi e graffe fuori da stringhe e commenti,
-#      e le stringhe di formato. Il primo giro vero e' il BLOCCO 1, che
-#      apposta non misura niente e serve solo a vedere se sta in piedi.
+#    ESEGUITO DAVVERO IL 26/08 (verificatore, pwsh 7.4.6 + histdata_m1.py
+#      VERO + banchi di ZIP sintetici, con stub solo su rete/RAM/Desktop):
+#      parse reale del file, giro a vuoto (BLOCCO 1), giro completo
+#      (BLOCCO 2) su 5 anni finti, i tre rami di D-F piu' il file dei
+#      criteri illeggibile, zip rotto, cache vuota, controllo positivo
+#      nei DUE versi, e il CSV avvelenato nella cache (cl.83: la diagnosi
+#      per anno NON lo legge, come promesso -- verificato dalla riga
+#      "fonte: ZIP in ...anno_AAAA" di ogni referto). Quattro difetti
+#      trovati COSI', e tutti e quattro invisibili a rileggere il codice:
+#        1. l'elenco dei giorni sporchi dello strumento e' TRONCATO a 40
+#           e ordinato per barre: Q1 rispondeva "e' SCALA/VALUTA" con 19
+#           giorni di spike buttati via dal taglio;
+#        2. la guardia-sulla-guardia sulla densita' viveva dentro
+#           "if(controllo positivo esiste)": senza zip nsxusd in cache un
+#           MARCIO usciva con PROBLEMI nessuno ed ESITO OK (uscita 0);
+#        3. la console stampava "ESITO: OK" verde mentre lo script usciva
+#           1 (cache vuota): due esiti da due espressioni diverse;
+#        4. la colonna 'finestra' del referto non diceva in che OROLOGIO
+#           sono scritte le ore (sono NY, non ora server BCM).
+#    NON PROVATO, e va detto: -EstendiIndietro (P5) non e' stato
+#      esercitato -- serve la rete di HistData; il ramo "ZIP API non
+#      caricata" non e' stato forzato; e nessuna di queste corse e' mai
+#      girata su Windows PowerShell 5.1, che resta il primo giro vero.
+#      Percio' il BLOCCO 1 esiste: non misura niente e serve solo a
+#      vedere se sta in piedi sulla macchina di Claudio.
 #
 #  LE FASI
 #   P0  pin, cultura invariante, cartelle, RAM, ZIP API
@@ -1305,21 +1325,41 @@ if($Anni.Count -gt 0){
   #  Non si aggiusta la soglia da soli: si DICHIARA e si dice come
   #  rifare la corsa.
   #  ################################################################
-  if($AnniCtrl.Count -gt 0){
-    $ctrlPeggiore = -1.0
-    foreach($c in $AnniCtrl){
-      if($c.Densita -lt 0){ continue }
-      if($ctrlPeggiore -lt 0 -or $c.Densita -lt $ctrlPeggiore){ $ctrlPeggiore = $c.Densita }
+  #  IL CANCELLO SI CALCOLA SEMPRE, ANCHE (SOPRATTUTTO) QUANDO IL METRO
+  #  NON C'E' -- checklist 84. Prima questo blocco stava tutto dentro
+  #  "if($AnniCtrl.Count -gt 0)": la guardia esisteva solo nel ramo
+  #  fortunato, e nel caso che costa (nessuno zip nsxusd in cache, o
+  #  -SaltaControllo) NON esisteva affatto. MISURATO il 26/08 su un banco
+  #  con i soli zip grxeur a densita' 25 e 50: VERDETTO MARCIO, PROBLEMI
+  #  nessuno, ESITO OK, uscita 0 -- cioe' due notti di crawl Dukascopy
+  #  (strada 2 della D-F) decise da una soglia mai confrontata con
+  #  niente, su una corsa che si presentava pulita.
+  $marciPerDensita = @($Anni | Where-Object { $_.Classe -eq "MARCIO" -and $_.Perche -like "*BUCHI dentro le ore*" })
+  $ctrlPeggiore = -1.0
+  foreach($c in $AnniCtrl){
+    if($c.Densita -lt 0){ continue }
+    if($ctrlPeggiore -lt 0 -or $c.Densita -lt $ctrlPeggiore){ $ctrlPeggiore = $c.Densita }
+  }
+  if($ctrlPeggiore -lt 0){
+    #  nessun metro: -SogliaDensita non e' un criterio firmato e su
+    #  questo feed non e' MAI stata misurata. Senza controllo positivo un
+    #  MARCIO per densita' non e' un verdetto: e' una soglia che parla
+    #  da sola.
+    if($marciPerDensita.Count -gt 0){
+      [void]$Problemi.Add("P8: " + $marciPerDensita.Count + " anni sono MARCIO per DENSITA', ma il controllo positivo nsxusd NON e' stato misurato (nessuno zip nsxusd in cache per quegli anni, oppure -SaltaControllo): la soglia " + (N1 $SogliaDensita) + " non e' stata confrontata con NIENTE. Quel pezzo di verdetto e' SOSPESO, non confermato.")
+      [void]$Lettura.Add("ATTENZIONE: i " + $marciPerDensita.Count + " anni marcati MARCIO per densita' lo sono per la sola soglia " + (N1 $SogliaDensita) + ", che qui non ha avuto nessun metro. HistData non scrive le barre dei minuti senza scambi, quindi una densita' bassa puo' essere COME SCRIVE IL FEED e non un difetto del DAX. Prima di dare per morto il DAX HistData (e pagare le ~25 ore di crawl della strada 2), va rifatta questa stessa corsa con gli zip nsxusd degli stessi anni in cache.")
+      foreach($r in $marciPerDensita){ $r.Perche = $r.Perche + "  [SOSPESO: soglia senza metro, controllo positivo non misurato]" }
+    } else {
+      [void]$Note.Add("P8: controllo positivo nsxusd non misurato, ma nessun anno e' MARCIO per densita': la soglia " + (N1 $SogliaDensita) + " non ha deciso niente in questa corsa.")
     }
-    $marciPerDensita = @($Anni | Where-Object { $_.Classe -eq "MARCIO" -and $_.Perche -like "*BUCHI dentro le ore*" })
-    if($ctrlPeggiore -ge 0 -and $ctrlPeggiore -lt $SogliaDensita){
-      [void]$Lettura.Add("ATTENZIONE ALLA SOGLIA, NON AI DATI: il controllo positivo nsxusd -- che e' la serie PROMOSSA -- ha densita' minima " + (N1 $ctrlPeggiore) + ", cioe' anche LUI sotto la soglia " + (N1 $SogliaDensita) + ". Vuol dire che sotto soglia ci sta il FEED (HistData non scrive i minuti senza scambi), non il DAX: i " + $marciPerDensita.Count + " anni marcati MARCIO per densita' NON sono un verdetto valido. Si rilancia la stessa riga con -SogliaDensita di poco sotto " + (N1 $ctrlPeggiore) + ", e si dichiara il valore usato.")
-      if($marciPerDensita.Count -gt 0){
-        [void]$Problemi.Add("P8: " + $marciPerDensita.Count + " anni sono MARCIO per densita', ma la soglia " + (N1 $SogliaDensita) + " boccia anche il controllo positivo (minimo " + (N1 $ctrlPeggiore) + "): quel pezzo di verdetto e' SOSPESO, non confermato.")
-      }
-    } elseif($ctrlPeggiore -ge 0) {
-      [void]$Lettura.Add("La soglia di densita' " + (N1 $SogliaDensita) + " e' compatibile con questo feed: il controllo positivo nsxusd sta sopra (minimo " + (N1 $ctrlPeggiore) + ") in tutti gli anni misurati. Quindi una densita' bassa sul DAX e' una differenza DEL DAX.")
+  } elseif($ctrlPeggiore -lt $SogliaDensita){
+    [void]$Lettura.Add("ATTENZIONE ALLA SOGLIA, NON AI DATI: il controllo positivo nsxusd -- che e' la serie PROMOSSA -- ha densita' minima " + (N1 $ctrlPeggiore) + ", cioe' anche LUI sotto la soglia " + (N1 $SogliaDensita) + ". Vuol dire che sotto soglia ci sta il FEED (HistData non scrive i minuti senza scambi), non il DAX: i " + $marciPerDensita.Count + " anni marcati MARCIO per densita' NON sono un verdetto valido. Si rilancia la stessa riga con -SogliaDensita di poco sotto " + (N1 $ctrlPeggiore) + ", e si dichiara il valore usato.")
+    if($marciPerDensita.Count -gt 0){
+      [void]$Problemi.Add("P8: " + $marciPerDensita.Count + " anni sono MARCIO per densita', ma la soglia " + (N1 $SogliaDensita) + " boccia anche il controllo positivo (minimo " + (N1 $ctrlPeggiore) + "): quel pezzo di verdetto e' SOSPESO, non confermato.")
+      foreach($r in $marciPerDensita){ $r.Perche = $r.Perche + "  [SOSPESO: la soglia boccia anche il controllo positivo]" }
     }
+  } else {
+    [void]$Lettura.Add("La soglia di densita' " + (N1 $SogliaDensita) + " e' compatibile con questo feed: il controllo positivo nsxusd sta sopra (minimo " + (N1 $ctrlPeggiore) + ") in tutti gli anni misurati. Quindi una densita' bassa sul DAX e' una differenza DEL DAX.")
   }
 
   # --- Q1: prezzi impossibili
@@ -1327,12 +1367,38 @@ if($Anni.Count -gt 0){
   if($anniSporchi.Count -eq 0){
     $VerdettoQ1 = "NESSUNA barra fuori banda negli anni misurati."
   } else {
-    $interi = 0; $spike = 0
-    foreach($r in $Anni){ if($r.GiorniInteri -gt 0){ $interi += $r.GiorniInteri }; if($r.GiorniSpike -gt 0){ $spike += $r.GiorniSpike } }
+    $interi = 0; $spike = 0; $oltre = 0
+    foreach($r in $Anni){
+      if($r.GiorniInteri -gt 0){ $interi += $r.GiorniInteri }
+      if($r.GiorniSpike -gt 0){ $spike += $r.GiorniSpike }
+      #  L'ELENCO DELLO STRUMENTO E' TRONCATO, E IL TAGLIO NON E' NEUTRO.
+      #  diagnosi_fuori_banda() stampa "i GIORNI peggiori (max 40,
+      #  ordinati per barre fuori banda)": oltre il quarantesimo i giorni
+      #  esistono ma NON sono nel referto, quindi non sono in questo
+      #  conto. E siccome l'ordine e' per barre DECRESCENTI, quello che
+      #  si perde sono i giorni con POCHE barre, cioe' proprio gli SPIKE:
+      #  il troncamento pende tutto dalla parte di "GIORNATE INTERE".
+      #  MISURATO il 26/08 su un anno finto con 45 giornate intere e 19
+      #  di spike: il referto diceva "intere 40, isolati 0" e concludeva
+      #  SCALA/VALUTA, cioe' una delle due risposte di Q1 scelta da un
+      #  troncamento. Il buco si conta dal totale, che invece e' completo
+      #  (riga "barre fuori banda: N, in M giorni").
+      if($r.FuoriGiorni -ge 0 -and $r.GiorniInteri -ge 0){
+        $fuoriElenco = $r.FuoriGiorni - ($r.GiorniInteri + $r.GiorniSpike)
+        if($fuoriElenco -gt 0){ $oltre += $fuoriElenco }
+      }
+    }
     $VerdettoQ1 = "barre fuori banda negli anni: " + ($anniSporchi -join ", ") +
-                  ". Giornate INTERE fuori banda (>=500 barre in un giorno): " + $interi +
+                  ". Sui giorni ELENCATI dallo strumento (che ne stampa al massimo 40 per anno): " +
+                  "giornate INTERE fuori banda (>=500 barre in un giorno): " + $interi +
                   "; giorni con sporco isolato (<500 barre): " + $spike + "."
-    if($interi -gt 0 -and $spike -eq 0){
+    if($oltre -gt 0){
+      $VerdettoQ1 = $VerdettoQ1 + " ATTENZIONE: altri " + $oltre + " giorni sporchi NON sono in quell'elenco" +
+                    " (lo strumento taglia a 40 ordinando per barre fuori banda, quindi il taglio butta via" +
+                    " i giorni con POCHE barre = gli spike): la ripartizione qui sopra NON e' completa e Q1 resta SOSPESA."
+      [void]$Problemi.Add("P8 Q1: l'elenco dei giorni sporchi e' TRONCATO -- " + $oltre + " giorni oltre il quarantesimo non compaiono nel referto dello strumento, e il taglio (ordinato per barre) toglie proprio gli spike. La divisione fra GIORNATE INTERE e SPAZZATURA e' misurata solo sui giorni elencati: Q1 NON e' sciolta. Per scioglierla serve la lista completa dell'anno colpito (i suoi numeri totali, quelli si', sono nella tabella).")
+      [void]$Lettura.Add("Q1: NON concludo fra SCALA/VALUTA e SPAZZATURA. I giorni sporchi sono piu' di quanti lo strumento ne elenchi (" + $oltre + " oltre il taglio dei 40), e il taglio e' sbilanciato verso le giornate intere: qualunque conclusione qui sarebbe un artefatto del troncamento, non una misura. I TOTALI (barre e giorni fuori banda) restano validi e stanno nella tabella.")
+    } elseif($interi -gt 0 -and $spike -eq 0){
       [void]$Lettura.Add("Q1: le barre impossibili coprono GIORNATE INTERE, non tick isolati -> non e' spazzatura, e' un problema di SCALA/VALUTA o di strumento diverso in quei giorni. Da confrontare con il prezzo del giorno prima e del giorno dopo (i valori stanno nei referti per anno).")
     } elseif($interi -eq 0 -and $spike -gt 0){
       [void]$Lettura.Add("Q1: le barre impossibili sono POCHE e in giorni isolati -> SPAZZATURA (tick storti), non un cambio di scala. Sono escludibili elencandoli.")
@@ -1449,6 +1515,17 @@ if($Anni.Count -eq 0){ [void]$RefRighe.Add("  nessun anno diagnosticato.") }
 [void]$RefRighe.Add("  'finestra' = prima e ultima ora TOCCATA dal feed; 'piene' = quante di")
 [void]$RefRighe.Add("  quelle ore hanno almeno " + $MinBarrePerOra + " barre in meta' dei giorni; 'dens' =")
 [void]$RefRighe.Add("  barre medie per ora toccata (60 = giornata piena, molto meno = buchi).")
+#  OGNI ORA DICHIARA IL SUO FUSO, anche qui: la colonna 'finestra' e'
+#  l'unico posto del referto dove Claudio legge degli ORARI, e senza
+#  questa riga li leggerebbe in ora server BCM (l'ora di casa: DAX 8,
+#  Nasdaq 14). Sono NY: 02:00 NY cade dentro la mattina europea, cioe'
+#  la "sessione ballerina" 2020-2023 racconta una storia diversa a
+#  seconda dell'orologio con cui la si legge.
+[void]$RefRighe.Add("  ATTENZIONE ALL'OROLOGIO: le ore della colonna 'finestra' sono quelle")
+[void]$RefRighe.Add("  SCRITTE NEL FILE HISTDATA, cioe' ORA LOCALE DI NEW YORK. NON sono ora")
+[void]$RefRighe.Add("  server BCM e NON sono ora italiana. Ora server BCM = NY+5 (NY+4 nelle")
+[void]$RefRighe.Add("  finestre in cui il DST americano e quello europeo sono sfasati); ora")
+[void]$RefRighe.Add("  italiana = server BCM + 1. Esempio: 02:00 NY = 07:00 server = 08:00 IT.")
 [void]$RefRighe.Add("  'fuoriB' e 'giorni' vengono dal referto di histdata_m1.py --diagnosi;")
 [void]$RefRighe.Add("  'finestra' e 'dens' dalla mappa oraria calcolata da questa riga sugli")
 [void]$RefRighe.Add("  ZIP (conteggio di COPERTURA: non applica il filtro OHLC del .py, quindi")
@@ -1494,10 +1571,13 @@ if($AnniCtrl.Count -eq 0){
 [void]$RefRighe.Add("  Queste soglie sono PARAMETRI di questa riga (-SogliaDensita,")
 [void]$RefRighe.Add("  -SogliaFuoriBanda, -MaxGiorniSporchi), NON criteri firmati: si")
 [void]$RefRighe.Add("  possono discutere, e i numeri grezzi qui sopra restano validi comunque.")
+$OraModaleSrv = -1
+if($OraModale -ge 0){ $OraModaleSrv = ($OraModale + 5) % 24 }
 if($ConvenzDa -ne ""){
   [void]$RefRighe.Add("")
   [void]$RefRighe.Add("  LA CONVENZIONE DIVERSA, MISURATA: dal " + $ConvenzDa + " al " + $ConvenzA +
-                      " l'apertura modale non e' quella della serie (" + (OraTxt $OraModale) + ").")
+                      " l'apertura modale non e' quella della serie (" + (OraTxt $OraModale) + " ora di NEW YORK, = " +
+                      (OraTxt $OraModaleSrv) + " ora server BCM).")
 }
 [void]$RefRighe.Add("")
 [void]$RefRighe.Add("--- QUELLO CHE QUESTA CORSA NON PUO' DIRE ---")
@@ -1610,9 +1690,19 @@ Write-Host ("ZIP DA MANDARE IN CHAT: " + $ZipFin) -ForegroundColor Cyan
 Write-Host "ELENCO FILE ATTESI (prodotto dal codice, non scritto a mano):" -ForegroundColor Cyan
 foreach($att in @($Attesi | Sort-Object -Unique)){ Write-Host ("   " + $att) }
 Write-Host ""
-if($Problemi.Count -gt 0){
-  Write-Host ("ESITO: PARZIALE -- " + $Problemi.Count + " problemi. IL REFERTO VA MANDATO LO STESSO:") -ForegroundColor Yellow
+#  L'ESITO A SCHERMO E QUELLO DEL REFERTO NASCONO DALLO STESSO NUMERO
+#  (checklist 22 e 84 pezzo 2). Prima questo ramo guardava
+#  $Problemi.Count mentre il referto e l'uscita guardavano anche
+#  $PuoDiagnosticare e $AnniFatti: con la cache vuota la console
+#  stampava un "ESITO: OK" VERDE e lo script usciva 1 -- MISURATO il
+#  26/08. Due esiti calcolati da due espressioni diverse ne hanno sempre
+#  uno che mente, ed e' quello che si legge a schermo.
+if($Uscita -ne 0){
+  Write-Host ("ESITO: PARZIALE (uscita " + $Uscita + ") -- " + $Problemi.Count + " problemi, anni diagnosticati " + $AnniFatti + " su " + $AnniChiesti.Count + " chiesti. IL REFERTO VA MANDATO LO STESSO:") -ForegroundColor Yellow
   foreach($prob in $Problemi){ Write-Host ("   - " + $prob) -ForegroundColor Yellow }
+  if($Problemi.Count -eq 0){
+    Write-Host "   - nessun problema elencato, ma non e' stato diagnosticato NESSUN anno (cache vuota, o D-F non autorizza): vedi il referto." -ForegroundColor Yellow
+  }
 } else {
   Write-Host "ESITO: OK" -ForegroundColor Green
 }

@@ -37,7 +37,16 @@ Il fatto da cui si parte (`REFERTO_HISTDATA_FATTIBILITA.md` §13): il 18/08 il
 DAX di HistData (`grxeur`) è stato **bocciato dai cancelli dello strumento** per
 due motivi — **prezzo minimo 2.906** (un DAX sotto 8.000 non esiste) e
 **sessione ballerina** (apertura 00:00 fino a 2020-05, **02:00 da 2020-06 a
-2023-11**, poi di nuovo 00:00). Da allora **nessuno ha guardato dove stanno
+2023-11**, poi di nuovo 00:00).
+
+> 🕐 **E queste ore sono ORA DI NEW YORK**, perché è l'orologio con cui HistData
+> scrive i suoi file — **non** l'ora server BCM e **non** l'ora italiana. Ora
+> server BCM = NY+5 (NY+4 nelle finestre in cui il DST americano e quello
+> europeo sono sfasati); ora italiana = server+1. Quindi quel `02:00` è
+> **07:00 server = 08:00 italiane**. Vale per *ogni* orario di questa pagina e
+> del referto: lo dice anche il referto, in fondo alla tabella.
+
+Da allora **nessuno ha guardato dove stanno
 quelle righe**: il modo `--diagnosi` di `histdata_m1.py` esiste dal 19/08 e
 **non è mai stato eseguito sui dati veri**.
 
@@ -152,7 +161,7 @@ rosso):
 | uscita | significa | cosa fare |
 |---|---|---|
 | **0** | diagnosi completa | manda lo zip |
-| **1** | parziale (un anno non misurabile, uno zip rotto, D-F non firmata) | **manda lo zip lo stesso**: "non misurabile" è già una risposta |
+| **1** | parziale, **oppure un pezzo di verdetto SOSPESO** (un anno non misurabile, uno zip rotto, D-F non firmata, la soglia di densità senza metro, l'elenco dei giorni sporchi troncato dallo strumento) | **manda lo zip lo stesso**: "non misurabile" è già una risposta, e i PROBLEMI del referto dicono quale pezzo è sospeso |
 | **2** | non è partita (pin, python, strumento, autotest, RAM) | leggi il rosso, rimedia, rilancia lo stesso blocco |
 
 **Rilanciare è sicuro**: la corsa non modifica nessun dato (li legge soltanto) e
@@ -170,6 +179,8 @@ anno      barre   fuoriB  giorni   fuori%  finestra    piene      dens  classe  
 2021     219240     1680       2    0.766  02:00-15:00    14      60.0  RIPARABILE   sporco ISOLATO ...; finestra diversa ma DENSA
 ```
 
+- **`finestra`** = prima e ultima ora toccata dal feed, **in ora di New York**
+  (server BCM = NY+5, italiana = server+1). Il referto lo ripete sotto la tabella.
 - **`piene`** = quante ore hanno almeno 30 barre in metà dei giorni;
   **`dens`** = barre medie per ora toccata. **60 = giornata piena.**
 - **`n/d` vuol dire NON MISURATO.** Mai uno zero al posto di un buco.
