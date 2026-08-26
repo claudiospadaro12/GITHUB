@@ -1,4 +1,11 @@
-# 🧭 R113 — PROVA DI REGIME NASUSD_EXT — CRITERI **[DA FIRMARE]**
+# 🧭 R113 — PROVA DI REGIME NASUSD_EXT — CRITERI **FIRMATI**
+
+> 🖊️ **FIRMA: "FIRMO R113" — Claudio, 27/08/2026 notte** (testuale:
+> "FIRMO GUARDIAN R113 ED ANDIAMO AVANTI ANCORA UN PO"). La firma vale
+> per le OTTO decisioni del § 9 con le proposte (comprese LATERALE_NAS
+> 2015-16 adattata e l'esclusione di R98). Firma a numeri non visti.
+> 🔓 Il lucchetto è tolto da titolo e § 9: la corsa vera partirà senza
+> switch (checklist 82).
 
 _Bozza scritta il 27/08/2026, PRIMA di qualunque numero, dalla sessione
 agente su incarico della sessione principale. Nessun driver e nessun file
@@ -257,7 +264,7 @@ R112: la misura prima, il contratto poi).
 
 ---
 
-## 9. ✍️ LE DECISIONI — **[DA FIRMARE]**
+## 9. ✍️ LE DECISIONI — **FIRMATE** ("FIRMO R113", 27/08/2026 notte)
 
 _Si firmano con **"FIRMO R113"** (eventualmente "con proposte", indicando
 la D e il valore). Dopo la firma: il token di stato va tolto dal titolo E

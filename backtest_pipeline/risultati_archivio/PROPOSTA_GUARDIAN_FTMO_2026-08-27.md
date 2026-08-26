@@ -558,7 +558,19 @@ condotta (§4.8).
 
 ---
 
-## ✍️ BLOCCO FIRMA
+## ✍️ BLOCCO FIRMA — 🖊️ **FIRMATO**
+
+> **FIRMA: "FIRMO GUARDIAN" — Claudio, 27/08/2026 notte (00:10 circa,
+> testuale: "FIRMO GUARDIAN R113 ED ANDIAMO AVANTI ANCORA UN PO").**
+> La firma copre le **10 decisioni con le proposte e le raccomandazioni
+> come scritte**, compresa la **decisione 9 nella versione raccomandata**:
+> le soglie nuove **si provano prima sul dry-run 100k** (unico modo di
+> misurare la pausa a 3,5% sul flottante) — quindi il 100k cambierà
+> preset con questa autorizzazione. La decisione 10 (i 5 prerequisiti
+> a-e) resta un ELENCO DA ESEGUIRE prima del conto pagato: firmarla non
+> la esegue. Le righe 1-3 riaprono consapevolmente le soglie della
+> FIRMA 1 del 18/08 con la misura nuova di R109 (regola di ripensamento
+> rispettata, come argomentato nel § 3).
 
 > Si firma scrivendo **`FIRMO PRESET GUARDIAN FTMO`**, indicando **quali
 > decisioni** si accettano (per numero) e quali si rimandano.
