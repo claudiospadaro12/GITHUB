@@ -228,12 +228,19 @@ $RigheViveAntenatoAtt = 45
 $Modello          = 1            # OHLC su M1: l'UNICO banco che esiste su
                                  # un simbolo fatto di barre M1 importate.
 $Deposito         = 100000       # taglia prop, come i round di casa
-$SpreadIni        = 0            # 0 = riga Spread SCRITTA nell'ini: su un
-                                 # simbolo custom e' lo spread FISSO
-                                 # impostato all'import, identico per tutte
-                                 # le finestre PER COSTRUZIONE (stessa riga
-                                 # in tutti i 18 .ini). Come i round OHLC
-                                 # di casa (R100/R102/R103), dichiarato.
+$SpreadIni        = 0            # 0 = riga Spread SCRITTA nell'ini, e nella
+                                 # convenzione di casa (walkforward_generico
+                                 # riga 484) vuol dire "spread CORRENTE del
+                                 # simbolo", come R100/R102/R103.
+                                 # >>> IL VALORE EFFETTIVO IN PUNTI NON E'
+                                 # MISURATO DA QUESTO DRIVER e non si ricava
+                                 # da un .ps1: sta nella configurazione
+                                 # BINARIA del simbolo custom. Si DICHIARA
+                                 # MANCANTE, non si deduce (checklist 89).
+                                 # Cio' che invece E' verificato: la stessa
+                                 # riga in tutti e 18 gli .ini, riletta
+                                 # nell'artefatto -> coerenza interna dei
+                                 # confronti _EXT-vs-_EXT PER COSTRUZIONE.
 $CelleAttese      = 2            # le due passate GEMELLE, per CSV
 
 #--- MAGIC VIETATI (criteri par. 5): la sedia viva/sorgente 970913 e i
@@ -628,6 +635,14 @@ if($SoloCella -ne ""){
   $Lavori = $celleScelte
 }
 if($Lavori.Count -eq 0){ $SelettoreAVuoto = $true }
+#  >>> L'ELENCO DEGLI ATTESI NASCE QUI, FUORI E PRIMA DEL try, e NON dentro la
+#      catena: se lo si costruisse al passo 4, una corsa fermata al passo 2
+#      arriverebbe alla raccolta con $Ordinati VUOTO e il referto direbbe
+#      "attesi 0 CSV" con la sezione ATTESI vs TROVATI vuota -- cioe' l'ATTESO
+#      si adatterebbe a quanto e' successo, che e' il contrario del suo
+#      mestiere. Con le 18 celle qui, una corsa fermata subito stampa 18 righe
+#      "NON ESEGUITA" e 18 "MANCA", che e' la verita'.
+$Ordinati = @($Lavori | Sort-Object F, Cella)
 
 Write-Host ""
 Write-Host "#####################################################################" -ForegroundColor Cyan
@@ -658,6 +673,13 @@ Write-Host  "    importate, SENZA tick reali BCM. Questi sono dati di un ALTRO b
 Write-Host  "    si legge la FORMA (verde/rosso), MAI i numeri fini; confronti SOLO" -ForegroundColor Yellow
 Write-Host  "    _EXT-contro-_EXT. G0-EXT superato per firma, bordo sottile 0,199" -ForegroundColor Yellow
 Write-Host  "    dichiarato." -ForegroundColor Yellow
+Write-Host ""
+Write-Host  "    >>> LO SPREAD EFFETTIVO E' *NON MISURATO*, ed e' dichiarato mancante e non" -ForegroundColor Yellow
+Write-Host ("    dedotto: Spread=" + $SpreadIni + " nell'ini vuol dire 'spread corrente del simbolo', e su") -ForegroundColor Yellow
+Write-Host  "    un CUSTOM il valore vero sta nella config binaria del simbolo. L'importatore" -ForegroundColor Yellow
+Write-Host  "    scrive spread=0 in ogni barra M1: il banco POTREBBE essere SENZA ATTRITO." -ForegroundColor Yellow
+Write-Host  "    Identico in tutte e 18 le finestre PER COSTRUZIONE (i confronti reggono)," -ForegroundColor Yellow
+Write-Host  "    ma va letto prima dei PF. Il referto lo spiega per esteso (checklist 89)." -ForegroundColor Yellow
 Write-Host ""
 Write-Host  "    >>> QUESTO ROUND NON PROMUOVE NIENTE (G5 per costruzione): produce la" -ForegroundColor Yellow
 Write-Host  "    risposta a IPOTESI-S (griglia par. 6, si spunta A MANO nel referto del" -ForegroundColor Yellow
@@ -1041,7 +1063,7 @@ Dico ("COMPILATO " + $EaNome + " v" + $EaVersione + " (.ex5 riscritto adesso, rc
 #     dipende da un altro: un guasto ferma QUELLA cella, non la catena.
 # =====================================================================
 Titolo ("4. LA CATENA - " + $Lavori.Count + " lanci, uno alla volta")
-$Ordinati = @($Lavori | Sort-Object F, Cella)
+#  $Ordinati e' gia' pronto da PRIMA del try (vedi il commento la' sopra).
 $csvStaging = Join-Path $MqlFiles ("OptResults_" + $EaNome + "_" + $SimboloRound + ".csv")
 $indiceCella = 0
 foreach($cellaCorr in $Ordinati){
@@ -1142,7 +1164,22 @@ foreach($cellaCorr in $Ordinati){
   else {
     $csvAlternativi = @(Get-ChildItem -Path $MqlFiles -Filter "OptResults_*.csv" -ErrorAction SilentlyContinue |
                         Where-Object { $_.LastWriteTime -ge $avvioCella } | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
-    if($csvAlternativi.Count -gt 0){ $csvTrovato = $csvAlternativi[0].FullName; Dico ("(CSV trovato con un altro nome: " + $csvAlternativi[0].Name + ")") "DarkYellow" }
+    #  >>> IL NOME DELL'OptResults CONTIENE IL SIMBOLO: l'EA lo compone con
+    #      MQL_PROGRAM_NAME e _Symbol (OptFrame_FileName, riga 555-558). Quindi
+    #      un ripiego "prendo il primo CSV fresco" puo' prendere i numeri di UN
+    #      ALTRO BANCO -- p.es. NASUSD (BCM) invece di NASUSD_EXT. Si controlla
+    #      il nome, e in ogni caso il ripiego NON resta a schermo: finisce nel
+    #      referto e nel codice d'uscita (checklist 84).
+    if($csvAlternativi.Count -gt 0){
+      $nomeCsvAlt = $csvAlternativi[0].Name
+      if($nomeCsvAlt -notlike ("*_" + $SimboloRound + ".csv")){
+        [void]$Problemi.Add($cellaCorr.Prova + ": in MQL5\Files e' comparso un CSV FRESCO che NON porta il simbolo di questo round nel nome (" + $nomeCsvAlt + " invece di " + (Split-Path -Leaf $csvStaging) + "). Il nome dell'OptResults lo scrive l'EA con MQL_PROGRAM_NAME e _Symbol: leggerlo vorrebbe dire prendere i numeri di un ALTRO banco. NON lo leggo.")
+      } else {
+        $csvTrovato = $csvAlternativi[0].FullName
+        [void]$Rilievi.Add($cellaCorr.Prova + ": il CSV atteso (" + (Split-Path -Leaf $csvStaging) + ") non c'era e ho letto il fresco " + $nomeCsvAlt + ", che porta lo stesso simbolo. Da guardare: in una corsa sana i due nomi coincidono.")
+        Dico ("(CSV trovato con un altro nome: " + $nomeCsvAlt + ")") "DarkYellow"
+      }
+    }
   }
   if($csvTrovato -eq ""){
     $cellaCorr.Esito = "NESSUN CSV (il tester non ha scritto niente)"
@@ -1282,13 +1319,32 @@ try{
   [void]$RefTxt.Add("pin: " + $Pin)
   [void]$RefTxt.Add("criteri: risultati_archivio\R113_CRITERI.md (otto decisioni, par. 9)")
   [void]$RefTxt.Add("banco: modello " + $Modello + " (OHLC su M1)   deposito " + $Deposito + "   leva 100   EUR")
-  [void]$RefTxt.Add("spread: Spread=" + $SpreadIni + " scritto NELL'INI di OGNI finestra = lo spread del")
-  [void]$RefTxt.Add("     simbolo messo agli atti invece che lasciato allo stato nascosto del")
-  [void]$RefTxt.Add("     terminale (la convenzione dei round OHLC di casa, R100/R102/R103). Su un")
-  [void]$RefTxt.Add("     simbolo CUSTOM e' lo spread FISSO impostato all'import: IDENTICO per")
-  [void]$RefTxt.Add("     tutte le finestre PER COSTRUZIONE (stessa riga in tutti i 18 .ini).")
-  [void]$RefTxt.Add("     La coerenza interna e' cio' che rende leggibile il confronto relativo;")
-  [void]$RefTxt.Add("     il valore assoluto NON si legge (criteri par. 1 punto 3).")
+  [void]$RefTxt.Add("spread: Spread=" + $SpreadIni + " scritto NELL'INI di OGNI finestra = nella convenzione")
+  [void]$RefTxt.Add("     di casa (R100/R102/R103, walkforward_generico riga 484) vuol dire SPREAD")
+  [void]$RefTxt.Add("     CORRENTE DEL SIMBOLO, messo agli atti invece che lasciato allo stato")
+  [void]$RefTxt.Add("     nascosto del terminale. VERIFICATO NELL'ARTEFATTO: la stessa riga in")
+  [void]$RefTxt.Add("     tutti e 18 gli .ini -> il banco e' IDENTICO fra le finestre PER")
+  [void]$RefTxt.Add("     COSTRUZIONE, ed e' questa coerenza interna che rende leggibile il")
+  [void]$RefTxt.Add("     confronto relativo _EXT-vs-_EXT.")
+  [void]$RefTxt.Add("  >>> IL VALORE EFFETTIVO IN PUNTI E' *NON MISURATO*, e si dichiara mancante")
+  [void]$RefTxt.Add("      invece di dedurlo (i criteri par. 1 punto 3 lo chiedevano letto: questo")
+  [void]$RefTxt.Add("      driver NON puo' leggerlo, e dirlo e' l'unica risposta onesta).")
+  [void]$RefTxt.Add("      Perche' non si deduce, con DUE nomi (checklist 83 e 89):")
+  [void]$RefTxt.Add("      (1) ABTG_ImportaStoricoEsterno.mq5 scrive spread = 0 in OGNI barra M1")
+  [void]$RefTxt.Add("          importata (riga 327) e copia SYMBOL_SPREAD_FLOAT dal simbolo BCM,")
+  [void]$RefTxt.Add("          ma NON copia SYMBOL_SPREAD: se il tester prende lo spread dalla")
+  [void]$RefTxt.Add("          BARRA, questo banco e' SENZA ATTRITO (spread zero);")
+  [void]$RefTxt.Add("      (2) se invece ripiega su SYMBOL_SPREAD del simbolo custom, il valore e'")
+  [void]$RefTxt.Add("          quello che il simbolo si e' portato dietro alla creazione.")
+  [void]$RefTxt.Add("      Quale delle due sia, QUI NON E' MISURATO. Non sposta i confronti fra")
+  [void]$RefTxt.Add("      finestre (identico ovunque), MA un edge SHORT giudicato su un banco")
+  [void]$RefTxt.Add("      forse senza attrito e' una cosa da sapere PRIMA di leggere i PF.")
+  [void]$RefTxt.Add("      Come si chiude, ed e' un passo A SE': in MT5 -> Vista -> Simboli ->")
+  [void]$RefTxt.Add("      " + $SimboloRound + " -> campo Spread (o Specifiche del simbolo nel tester).")
+  [void]$RefTxt.Add("      Nota agli atti: STORICO_INDICI_CRITERI.md riga 157 dice gia' 'nel tester")
+  [void]$RefTxt.Add("      lo spread e' quello che si imposta', e ABTG_ImportaStoricoEsterno.mq5")
+  [void]$RefTxt.Add("      riga 33 dice 'SPREAD E COMMISSIONI restano quelli che imposti nel")
+  [void]$RefTxt.Add("      tester': nessuno dei due dichiara uno spread FISSO messo all'import.")
   [void]$RefTxt.Add("orologi (checklist 86): le finestre sono DATE DI CALENDARIO a giorni interi;")
   [void]$RefTxt.Add("     le barre _EXT sono in ORA SERVER BCM (shift +5 verificato all'import);")
   [void]$RefTxt.Add("     'data:' e 'avvio:' qui sopra sono ORA DEL PC (= ora italiana sul VPS).")
@@ -1319,8 +1375,9 @@ try{
   [void]$RefTxt.Add("  G5                : NESSUNA promozione, per costruzione (par. 7).")
   [void]$RefTxt.Add("")
   [void]$RefTxt.Add("--- LA TABELLA MADRE ---   (attese: " + $CelleAttese + " righe gemelle per CSV, " + $Ordinati.Count + " CSV, " + (2*$Ordinati.Count) + " passate)")
-  [void]$RefTxt.Add("  VERSI DICHIARATI (checklist 87): PROF col SEGNO (+ guadagno / - perdita);")
-  [void]$RefTxt.Add("  DD% e' una MAGNITUDINE POSITIVA (piu' basso = meglio). n e' in USCITE;")
+  [void]$RefTxt.Add("  VERSI DICHIARATI (checklist 87) - in questa riga ce ne sono TRE diversi:")
+  [void]$RefTxt.Add("  PROF col SEGNO (+ guadagno / - perdita); PF sempre POSITIVO (piu' ALTO =")
+  [void]$RefTxt.Add("  meglio); DD% MAGNITUDINE POSITIVA (piu' BASSO = meglio). n e' in USCITE;")
   [void]$RefTxt.Add("  ~pos = n/2 arrotondato in giu' (equivalenza misurata R112 par. 3, e' una stima).")
   [void]$RefTxt.Add("  E.2: PIENO (n>=20) / SOSPESO (8-19) / NON MIS. (<8) - meccanica, non verdetto.")
   [void]$RefTxt.Add(("  {0,-4} {1,-13} {2,-9} {3,-24} {4,-9} {5,-7} {6,-7} {7,-7} {8,-6} {9,-9} {10}" -f `

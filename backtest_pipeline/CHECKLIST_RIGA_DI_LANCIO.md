@@ -4395,3 +4395,122 @@ la misura e' andata persa e la corsa va rifatta con -Rifai.
 > una cella viene SALTATA, i suoi artefatti condivisi esistenti vanno
 > RACCOLTI (con l'eta' dichiarata), non pretesi freschi: "fresco o niente"
 > vale solo per le celle che sono girate davvero in questo lancio.
+
+---
+
+## 🆕 AGGIUNTE DEL 27/08/2026 — trovate verificando R113 (prova di regime su NASUSD_EXT), **ESEGUENDO il driver 40 volte su un banco stubbato**
+
+## 89. 💶 IL PARAMETRO DEL BANCO COPIATO DAL ROUND GEMELLO CHE, SU UN SIMBOLO **CUSTOM**, VUOL DIRE UN'ALTRA COSA — e il referto lo racconta come un fatto
+
+_Difetto vero, trovato PRIMA dell'invio in `RIGA_R113_REGIME_NASUSD.ps1` (riga
+231 e blocco `spread:` del referto). Il criterio FIRMATO pretendeva una misura,
+il driver ci ha messo una **deduzione**, e la deduzione e' contraddetta dagli
+strumenti che stanno **nello stesso repo**._
+
+I criteri di R113 (§ 1 punto 3) dicono: _"Lo spread e' quello FISSO impostato
+sul simbolo custom, identico per tutte le finestre — **il valore effettivo va
+letto e dichiarato nel referto**"_. Il driver scrive `Spread=0` negli `.ini`
+(la convenzione di casa, ereditata da R100/R102/R103, dove vuol dire *spread
+CORRENTE* — `walkforward_generico.ps1` riga 484) e il referto concludeva:
+
+```
+Su un simbolo CUSTOM e' lo spread FISSO impostato all'import: IDENTICO per
+tutte le finestre PER COSTRUZIONE (stessa riga in tutti i 18 .ini).
+```
+
+**La seconda meta' della frase e' vera e VERIFICATA** (stessa riga in 18 `.ini`,
+riletta nell'artefatto). **La prima meta' non e' mai stata misurata, e il repo
+la contraddice in due punti:**
+
+| dove | cosa dice davvero |
+|---|---|
+| `ABTG_ImportaStoricoEsterno.mq5` riga 327 | `out[n].spread = 0;` — **ogni barra M1** importata porta spread **zero** |
+| stesso file, righe 196-203 | copia `SYMBOL_SPREAD_FLOAT` dal simbolo BCM ma **non** copia `SYMBOL_SPREAD` |
+| stesso file, riga 33 | *"SPREAD E COMMISSIONI restano quelli che imposti nel tester"* |
+| `STORICO_INDICI_CRITERI.md` riga 157 | *"nel tester lo spread e' quello che si imposta"* |
+
+Cioe': **all'import non viene impostato nessuno spread fisso.** O il tester
+prende lo spread dalla **barra** — e allora quel banco e' **SENZA ATTRITO** — o
+ripiega su `SYMBOL_SPREAD` del custom. **Quale delle due, nessuno l'ha
+misurato**, e il round chiedeva se esiste un edge **SHORT**: un edge short
+giudicato su un banco forse a costo zero e' esattamente il numero che poi si
+prova a promuovere.
+
+### Perche' e' una classe a se'
+
+Il **18** e' la profondita' misurata su un TF e la corsa girata su un altro; il
+**80** e' la colonna ereditata dal round gemello che la famiglia nuova non
+esporta. Qui il valore e' **identico** a quello dei round gemelli (`Spread=0`) e
+la riga nell'`.ini` e' **giusta**: cambia il **significato**, perche' sotto c'e'
+un simbolo **CUSTOM** invece di un feed del broker. Il difetto non e' nel
+codice — e' nella **frase in italiano** che il referto ci costruisce sopra, ed
+e' invisibile a qualunque gate perche' l'artefatto e' perfetto.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **Quando un round cambia il TIPO di simbolo (broker -> CUSTOM/importato),
+>    ogni parametro del banco ereditato da un round gemello si ri-legge nel
+>    senso NUOVO**, non si copia col suo commento. Il grep che lo trova:
+>    `Spread=`, `Model=`, `Leverage=`, `Currency=`, `Deposit=` — per ognuno,
+>    *"chi fornisce questo valore, adesso?"*.
+> 2. **Un criterio firmato che dice "va LETTO" e uno strumento che non puo'
+>    leggerlo si chiudono DICHIARANDO MANCANTE** (regola di casa: misurato, o
+>    dichiarato mancante, **mai ipotizzato** — punti 11 e 17), **con i due nomi
+>    delle due cause** (punto 83) e col **gesto che chiuderebbe la domanda**.
+>    Un `n/d` motivato vale piu' di una frase sicura.
+> 3. **Si separa sempre cio' che e' VERIFICATO da cio' che e' DEDOTTO, nella
+>    stessa riga del referto.** Qui: *"identico fra le finestre"* = verificato
+>    nell'artefatto (e basta a reggere i confronti relativi); *"vale N punti"* =
+>    non misurato. Le due cose stavano in una frase sola, e la seconda si
+>    prendeva la credibilita' della prima.
+
+### 89-bis. 🏷️ IL RIPIEGO "PRENDO IL PRIMO ARTEFATTO FRESCO" QUANDO IL NOME DELL'ARTEFATTO CONTIENE IL **SIMBOLO**
+
+Stessa verifica, stesso file, e **riprodotto**. Il driver cerca il CSV del
+tester col nome atteso; se non lo trova ripiega sul primo `OptResults_*.csv`
+**fresco**, e lo diceva solo a schermo:
+
+```powershell
+if($csvAlternativi.Count -gt 0){ $csvTrovato = $csvAlternativi[0].FullName
+  Dico ("(CSV trovato con un altro nome: " + $csvAlternativi[0].Name + ")") "DarkYellow" }
+```
+
+Ma l'EA compone quel nome con `MQL_PROGRAM_NAME` **e `_Symbol`**
+(`OptFrame_FileName()`, riga 555-558): `OptResults_<EA>_<SIMBOLO>.csv`. Quindi
+un `OptResults_ABTG_SupRev_NAS_H1_Ottimizzato_**NASUSD**.csv` (il feed **BCM**)
+sarebbe stato letto al posto di `..._NASUSD_EXT.csv` — **stesso EA, banco
+diverso** — e il parser a 8 colonne l'avrebbe accettato senza una piega.
+Misurato sul banco stubbato: **18 celle su 18 lette dal file sbagliato,
+`ESITO: OK`, codice d'uscita 0.** E l'unica traccia era una riga gialla scorsa
+via a schermo un'ora prima (e' il punto **84** applicato a un *ripiego*).
+
+> ✅ **REGOLA: un ripiego che accetta un artefatto con un nome DIVERSO da quello
+> atteso (1) controlla la parte di nome che porta l'IDENTITA' (simbolo, magic,
+> TF) e rifiuta se non torna, e (2) non resta a schermo — finisce nel referto e
+> nel codice d'uscita.** Se il nome di un file e' l'unica cosa che distingue due
+> banchi, allora quel nome **e' un dato**, non un'etichetta.
+
+### 89-ter. 📋 L'ELENCO DEGLI "ATTESI" COSTRUITO DENTRO LA CORSA: si accorcia da solo quando la corsa muore presto
+
+Stessa verifica, stesso file, **riprodotto**. La lista delle celle (`$Ordinati`)
+nasceva **dentro** il `try`, al passo 4. Una corsa fermata al passo 2 (simbolo
+custom mancante) arrivava alla raccolta con la lista **VUOTA**, e il referto
+scriveva:
+
+```
+--- LA TABELLA MADRE ---   (attese: 2 righe gemelle per CSV, 0 CSV, 0 passate)
+--- FILE ATTESI vs TROVATI ---
+                                     <-- sezione VUOTA
+```
+
+Zero attesi, zero trovati, **nessuna riga mancante**: la sezione che esiste
+apposta per far vedere i buchi **non aveva piu' buchi da far vedere**. L'`ESITO:
+FERMATO` e il codice 1 c'erano (quindi non e' il punto **84**), ma **l'ATTESO si
+era adattato a quello che era successo** — che e' il contrario del suo mestiere.
+Spostata la lista **prima del `try`**, la stessa corsa stampa 18 righe
+`NON ESEGUITA` e 18 `MANCA`.
+
+> ✅ **REGOLA: l'elenco degli ATTESI si costruisce dal PERIMETRO DICHIARATO del
+> round, fuori e prima del `try`, mai dal cammino percorso.** Un "attesi: N" che
+> puo' valere 0 non e' un atteso: e' un consuntivo travestito. Vale per gli
+> attesi-vs-trovati, per i "passate: N" e per ogni riga di riepilogo che il
+> lettore usa per contare cosa manca.

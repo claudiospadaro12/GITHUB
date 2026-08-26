@@ -57,6 +57,35 @@ degli artefatti condivisi PER CELLA** (checklist 88: mai in blocco a inizio
 corsa; una cella già fatta viene **raccolta con l'età dichiarata**, si rifà
 solo con `-Rifai`).
 
+### 💶 E LO SPREAD DI QUESTO BANCO È **NON MISURATO** — dichiarato, non dedotto
+
+I criteri (§ 1 punto 3) chiedevano che *"il valore effettivo dello spread sia
+**letto** e dichiarato nel referto"*. **Questo driver non può leggerlo** — sta
+nella configurazione **binaria** del simbolo custom, non in un file di testo —
+e allora lo **dichiara mancante**, che è la regola di casa (misurato, o
+dichiarato mancante: **mai ipotizzato**). Due cose separate, e non vanno
+confuse:
+
+- ✅ **Quello che è VERIFICATO**: la riga `Spread=0` è **la stessa in tutti e 18
+  gli `.ini`**, riletta nell'artefatto. Il banco è **identico fra le finestre
+  per costruzione** → i confronti **_EXT-vs-_EXT** (l'unica lettura che i
+  criteri permettono) **reggono comunque**.
+- ❓ **Quello che NON è misurato**: quanti punti di spread paga davvero una
+  operazione. `ABTG_ImportaStoricoEsterno.mq5` scrive `spread = 0` in **ogni
+  barra M1** importata (riga 327) e **non** copia `SYMBOL_SPREAD` dal simbolo
+  BCM. Quindi **o** il tester prende lo spread dalla barra — e allora questo
+  banco è **senza attrito** — **o** ripiega su `SYMBOL_SPREAD` del custom. Non
+  lo sappiamo, e il referto lo scrive così, con due nomi.
+
+> **Perché conta**: non sposta il confronto fra finestre, ma **un edge SHORT
+> giudicato su un banco forse senza attrito** è una cosa da sapere **prima** di
+> leggere i PF, non dopo. Se Claudio vuole chiudere la domanda è **un gesto
+> solo, un'altra volta**: in MT5 → *Vista → Simboli → `NASUSD_EXT` → campo
+> Spread* (oppure *Specifiche del simbolo* nel tester). Non serve per far
+> partire R113.
+
+---
+
 ⚠️ **Il simbolo è CUSTOM**: se `NASUSD_EXT` non c'è nel terminale, il driver
 si ferma **prima** di aprire MT5 con l'errore onesto *"NASUSD_EXT non trovato:
 va reimportato con la Riga 2 dello storico"*. Se le barre ci sono ma il tester
@@ -98,9 +127,11 @@ commit congelato.
   con `AllowLiveTrading=false`, **verificato nell'artefatto** riletto.
 - **36 passate** (18 lanci × 2 gemelle), **18 CSV** (uno per lancio: finestra
   unica, niente IS/OOS), `Model=1` (**OHLC su M1** — l'unico banco che esiste
-  su _EXT), deposito 100.000, leva 100, **`Spread=0` scritto nell'ini** = lo
-  spread **fisso del simbolo custom**, identico per tutte le finestre per
-  costruzione, dichiarato nel referto.
+  su _EXT), deposito 100.000, leva 100, **`Spread=0` scritto nell'ini** = nella
+  convenzione di casa (R100/R102/R103) *spread **corrente** del simbolo*,
+  **identico in tutti e 18 gli `.ini`** — e questo è **verificato
+  nell'artefatto**, quindi i confronti fra finestre reggono per costruzione.
+  ⚠️ **Il valore effettivo in punti è NON MISURATO**, vedi il riquadro qui sotto.
 - **Zero parametri spazzolati**: l'unico asse `Y` è `InpMagic` (sweep a passo
   5: base e base+5). Finestra e lato cambiano **fra** i file, mai dentro.
 - **Il round non scarica storico** e non tocca `bases\<server>\ticks` né
@@ -139,6 +170,8 @@ codice**, non copiati da un'esecuzione — il driver non è ancora mai girato su
 PC di backtest: al primo giro, se una riga non torna, fa fede il referto):
 
 - `lanci ........................ 18` e `passate ...................... 36`;
+- il riquadro giallo `LO SPREAD EFFETTIVO E' *NON MISURATO*` — **deve esserci**:
+  è la dichiarazione del § qui sopra, e sta prima dei numeri apposta;
 - `criteri: FIRMATI (nessun lucchetto nel file al pin)` — **e dev'essere
   questa**: se legge `NON FIRMATI` il file al pin è tornato col lucchetto, e
   la corsa vera si fermerebbe con codice 2;
