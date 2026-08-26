@@ -1,0 +1,30 @@
+CENSIMENTO DELLA FONTE -- anatomia delle aperture
+data: 2026-08-26 18:22:38   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+macchina: DESKTOP-H4D7CAJ   utente: Master
+pin: 3b95be3a4f38e20e4b875699e7e7e6d0f28f3f4a
+
+  TROVATO   C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv
+            347.2 MB, scritto il 2026-08-26 17:09, formato FORMATO1
+            barre STIMATE 5354027 (il numero VERO lo conta lo strumento)
+            prima riga di dati: 2010.11.14 18:01,2135.000000,2135.000000,2134.500000,2134.500000,0
+            ultima riga       : 2026.07.31 16:13,28269.432000,28279.399000,28269.432000,28272.632000,0
+            => E' QUESTA LA FONTE USATA.
+  TROVATO   C:\Users\Master\histdata_m1\NASUSD_M1.csv
+            170.5 MB, scritto il 2026-08-18 21:08, formato FORMATO1
+            barre STIMATE 2629505 (il numero VERO lo conta lo strumento)
+            prima riga di dati: 2019.01.01 18:00,6334.159000,6338.160000,6330.060000,6337.870000,0
+            ultima riga       : 2026.07.31 16:13,28269.432000,28279.399000,28269.432000,28272.632000,0
+            -> C'E' ANCHE QUESTA, e NON e' quella usata (si usa C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv).
+
+FONTE: MISURABILE -- C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv
+
+IL FUSO, DICHIARATO (e non e' un dettaglio):
+  l'ora scritta in questo CSV e' ORA LOCALE DI NEW YORK. Non e'
+  un'assunzione: 8 import HistData su 8 hanno calibrato uno shift
+  FISSO +5 contro il nativo BCM, e uno shift fisso su sette anni e'
+  possibile solo se il feed segue il DST americano come il server.
+  apertura cash Nasdaq = 09:30 New York = 14:30 server BCM = 15:30 italiana.
+  Percio' -OraApertura vale 09:30 e NON si converte niente.
+  Chi passasse 14:30 misurerebbe il primo pomeriggio di New York.
+  E lo strumento non si fida nemmeno di questo: il CANARINO DEL FUSO
+  misura da solo, mese per mese, se il feed segue il DST.

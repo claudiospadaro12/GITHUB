@@ -1,0 +1,104 @@
+=====================================================================
+ REFERTO DEL DRIVER -- ANATOMIA DELLE APERTURE (FASE 1)
+=====================================================================
+data: 2026-08-26 18:23:04   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+avvio: 2026-08-26 18:22:37   durata: 0.45 min
+macchina: DESKTOP-H4D7CAJ   utente: Master
+pin: 3b95be3a4f38e20e4b875699e7e7e6d0f28f3f4a
+strumento: anatomia_aperture.py ANATOMIA_APERTURE_v1 (al pin, autotest superato)
+python: C:\Users\Master\AppData\Local\Programs\Python\Python314\python.exe  3.14.7
+stato dei criteri: FIRMATI NEL FILE
+switch -CriteriFirmati: non passato
+
+!!! QUESTA CORSA NON FIRMA NIENTE E NON PROMUOVE NIENTE.
+    E' la FASE 1: anatomia descrittiva. Non c'e' un profit factor,
+    non c'e' un'equity, non c'e' un motore. Una classe frequente NON
+    e' un edge: e' una frequenza.
+
+!!! IL CANCELLO QUALITA' DEL FEED E' IN VERIFICA (misure lampo del
+    26/08, tre eventi anomali). Lo studio gira lo stesso, ma
+    L'INTERPRETAZIONE DI QUESTI NUMERI DIPENDE DA QUELL'ESITO.
+    Contromisura interna: i giorni con copertura oraria anomala sono
+    esclusi dai conteggi e contati a parte, cosi' il peso della
+    malattia si LEGGE nella colonna SOSPETTI invece di restare
+    mescolato ai risultati.
+
+!!! LA REGOLA DELLE DUE FASI, che il referto ripete apposta:
+    le IPOTESI di motore si scrivono SOLO sul referto _IS_ (fino al
+    2020). Il referto _CASSAFORTE_ (2021-2026) NON si guarda per
+    costruirle: serve a validarle DOPO che sono congelate. Se le
+    ipotesi nascono guardando la cassaforte, la cassaforte non e' piu'
+    una validazione.
+
+--- LA FONTE ---
+  stato   : MISURABILE
+  file    : C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv
+  formato : FORMATO1   (riconosciuto APRENDO il file, non dal nome)
+  347.2 MB, scritto il 2026-08-26 17:09
+  prima riga di dati: 2010.11.14 18:01,2135.000000,2135.000000,2134.500000,2134.500000,0
+  ultima riga       : 2026.07.31 16:13,28269.432000,28279.399000,28269.432000,28272.632000,0
+  barre attese agli atti (referto storico indici 25/08): 5233590
+  Il dettaglio di TUTTI i candidati sta in CENSIMENTO_FONTE.txt.
+
+--- IL FUSO ---
+  ora del file = NEW YORK. apertura cash Nasdaq = 09:30 New York
+  = 14:30 ora server BCM = 15:30 italiana. -OraApertura passata: 09:30
+  Qui NON si converte niente, e lo strumento MISURA la convenzione
+  da solo (canarino del fuso, mese per mese, in testa a ogni referto).
+
+--- LE RIGHE CHIAVE DELLA CORSA (dal log dello strumento) ---
+  barre lette: 5233590   giorni di calendario: 4877
+  giorni BUONI 3899   SOSPETTI 74   SENZA APERTURA 904
+  pausa giornaliera   INVERNO 16:14   ESTATE 16:14   differenza +0 min
+  -> coerente col DST: ora locale di NEW YORK.
+  apertura settimana  INVERNO 18:00   ESTATE 18:00   differenza +0 min
+  -> coerente col DST: ora locale di NEW YORK.
+  RAM di picco del processo: non misurabile su questa macchina
+  ESITO: MISURATO CON RILIEVI -- 1. Gli artefatti CI SONO e vanno
+  - anno 2023: 22.9% di giorni sospetti (soglia 20.0%)
+
+  righe di dati nel CSV per-giorno: 4877
+  codice d'uscita dello strumento : 1
+  (0 = misurato / 1 = misurato CON RILIEVI, e i rilievi sono una
+   risposta / 2 = non partito. n/d = non misurato, mai uno zero.)
+
+--- COME SI LEGGERA' IL RISULTATO (scritto PRIMA di vederlo) ---
+  1. Si apre PRIMA il CANARINO DEL FUSO. Se dice EST FISSO, tutto il
+     resto e' misurato un'ora fuori bersaglio per meta' anno e va
+     rifatto: non si legge nient'altro.
+  2. Poi la COPERTURA. Se un anno ha molti giorni sospetti, i suoi
+     conteggi valgono meno: e' la malattia del feed, misurata.
+  3. Poi la DISTRIBUZIONE DELLE CLASSI del referto _IS_. La domanda
+     di Claudio era 'quale setup si presenta di piu''.
+  4. Una classe frequente NON e' un edge. Le escursioni mediane per
+     classe dicono se quel movimento e' abbastanza grande da pagare
+     spread e stop -- e QUELLO si misura in FASE 2, non qui.
+  5. La colonna 2LATI dice quanto pesa la regola di priorita' della
+     classificazione: se e' grossa, quella regola e' una scelta che
+     conta e va discussa, non un dettaglio.
+
+--- QUELLO CHE QUESTA CORSA NON PUO' DIRE ---
+  Un simbolo solo (NASUSD): niente DAX e niente Dow. HistData non
+  ha il Dow, e il DAX (grxeur) e' BOCCIATO in attesa di diagnosi
+  (decisione D-F, referto storico indici del 25/08). Sono round a se'.
+  Un feed solo (HistData), che NON e' BCM: spread, orari di seduta e
+  prezzi non sono quelli su cui si opera.
+  Nessun costo, nessun fill, nessuna posizione: qui non si puo'
+  dedurre se un motore guadagnerebbe.
+
+--- FILE ATTESI E FILE TROVATI ---
+  attesi : ANATOMIA_APERTURE_CASSAFORTE_2021_2026.txt, ANATOMIA_APERTURE_COMPLETO.txt, ANATOMIA_APERTURE_IS_2010_2020.txt, ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, CENSIMENTO_FONTE.txt, REFERTO_ANATOMIA_APERTURE.txt
+  trovati: ANATOMIA_APERTURE_CASSAFORTE_2021_2026.txt, ANATOMIA_APERTURE_COMPLETO.txt, ANATOMIA_APERTURE_IS_2010_2020.txt, ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, CENSIMENTO_FONTE.txt, REFERTO_ANATOMIA_APERTURE.txt
+           (+ la cartella log\ con 2 file: l'uscita cruda di ogni chiamata a python)
+           REFERTO_ANATOMIA_APERTURE.txt e' l'ULTIMO file scritto: se stai leggendo questa riga, c'e'.
+  MANCANTI: nessuno
+
+--- NOTE ---
+  - P3: esiste una SECONDA copia leggibile in C:\Users\Master\histdata_m1\NASUSD_M1.csv (170.5 MB, prima riga di dati 2019.01.01 18:00,6334.159000,6338.160000,6330.060000,6337.870000,0). NON e' quella misurata: lo studio vuole la finestra PIU' LUNGA, e la copia scelta e' C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv.
+  - P5: lo strumento e' uscito con 1 = MISURATO CON RILIEVI. NON e' un guasto: gli artefatti ci sono e i rilievi sono scritti in fondo a ogni referto.
+
+--- PROBLEMI ---
+  nessuno
+
+ESITO: MISURATO CON RILIEVI -- la corsa e' riuscita e lo strumento ha
+       segnalato dei rilievi (in fondo a ogni referto). Va mandato tutto.

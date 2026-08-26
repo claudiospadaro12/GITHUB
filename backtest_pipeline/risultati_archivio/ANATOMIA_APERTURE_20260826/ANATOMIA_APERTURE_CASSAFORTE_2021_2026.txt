@@ -1,0 +1,258 @@
+=====================================================================
+ ANATOMIA DELLE APERTURE -- NASUSD -- CASSAFORTE 2021-2026  [NON PER LE IPOTESI]
+=====================================================================
+strumento: ANATOMIA_APERTURE_v1   (FASE 1: ANATOMIA DESCRITTIVA)
+dati     : C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv
+barre lette: 5233590   giorni di calendario visti: 4877
+            (questi due numeri, il CANARINO DEL FUSO e i conteggi di
+             igiene del file valgono su TUTTO il file: sono diagnostica
+             del DATO. Le tabelle piu' sotto valgono sulla finestra di
+             QUESTO referto.)
+prima barra: 2010.11.14 18:01    ultima barra: 2026.07.31 16:13   (ORA DEL FILE = NEW YORK)
+
+!!! QUESTO NON E' UN BACKTEST. Qui dentro non c'e' e non ci sara' MAI
+    un profit factor, un'equity, un drawdown o un numero di trade.
+    Sono CONTEGGI su quello che il mercato ha fatto all'apertura.
+    Nessun motore, nessuna promozione, nessuna firma.
+
+!!! IL CANCELLO QUALITA' DEL FEED E' IN VERIFICA (26/08/2026).
+    Le MISURE LAMPO del cancello _EXT stanno esaminando TRE eventi
+    anomali, e il cancello ZERO e' ancora CHIUSO (diff media H1
+    0,061-0,101% contro <=0,05% richiesto). Questo studio GIRA LO
+    STESSO, ma L'INTERPRETAZIONE DI QUESTI NUMERI DIPENDE DALL'ESITO
+    DI QUELLE MISURE. Se il feed risultasse malato in un periodo, i
+    conteggi di quel periodo vanno riletti, non riusati com'e'.
+    Contromisura gia' dentro: i giorni con copertura oraria anomala
+    sono ESCLUSI dai conteggi e contati a parte (GIORNI SOSPETTI).
+
+!!! I DATI SONO DI HISTDATA, NON DI BCM. Spread, orari di seduta e
+    prezzi non sono quelli su cui si opera. Un'anatomia del feed
+    esterno descrive il MERCATO, non il conto.
+
+--- LA REGOLA DELLE DUE FASI (vincolo, non consiglio) ---
+  FASE 1 (questo file): si MISURA. Nessuna ipotesi di motore.
+  FASE 2 (round futuri): le IPOTESI si scrivono guardando SOLO gli
+    anni fino al 2020, e si validano su 2021-oggi + tick BCM.
+  Percio' i referti sono TRE e separati: quello dell'addestramento,
+  quello della CASSAFORTE e quello completo di contesto. Se una
+  ipotesi nasce guardando la cassaforte, la cassaforte non e' piu'
+  una validazione: e' un secondo campione d'addestramento.
+  QUESTA E' LA CASSAFORTE (2021-2026). NON SI GUARDA per costruire ipotesi: serve a validarle DOPO che sono state congelate.
+
+--- IL FUSO, DICHIARATO ---
+  L'ora scritta nel CSV e' ORA LOCALE DI NEW YORK (misura di casa:
+  8 import HistData su 8 hanno calibrato shift FISSO +5 contro il
+  nativo BCM, possibile solo se il feed segue il DST americano).
+  apertura cash Nasdaq = 09:30 New York = 14:30 ora server BCM = 15:30 italiana.
+  (server = NY+5, oppure NY+4 nelle settimane DST sfasate di marzo e
+   ottobre/novembre: e' il +5 che vale per la maggioranza dell'anno.)
+  QUI NON SI CONVERTE NIENTE: si legge l'ora com'e' scritta.
+
+--- LE SENTINELLE, UNA SOLA CONVENZIONE ---
+  Nei REFERTI: n/d = NON MISURATO. Mai uno zero al posto di un buco.
+  Nel CSV per-giorno: il campo NON MISURATO e' VUOTO, non zero.
+  Chi lo apre con un foglio di calcolo o con Import-Csv deve leggere
+  la cella vuota come 'non misurato', non come 'zero': su un gap o su
+  un'escursione lo zero sarebbe un numero perfettamente plausibile.
+
+CANARINO DEL FUSO -- il feed segue il DST americano?
+  Si guarda, mese per mese, (a) l'ora d'inizio della PAUSA piu' larga
+  della giornata (la manutenzione del feed, ~17:00-18:00 New York) e
+  (b) l'ora della RIAPERTURA DI SETTIMANA, cioe' la prima barra dopo
+  un silenzio di almeno 12 ore. Se GENNAIO e LUGLIO danno la
+  STESSA ora -> il feed segue il DST = ORA LOCALE DI NEW YORK, e allora
+  l'apertura cash sta alle 09:30 del file TUTTO L'ANNO.
+  Se LUGLIO e' un'ora PRIMA -> feed a EST FISSO: meta' anno verrebbe
+  misurato un'ora fuori bersaglio. In quel caso lo studio NON e' valido
+  cosi' com'e' e va rifatto con l'ora corretta mese per mese.
+  Le due misure sono INDIPENDENTI: guardano due transizioni diverse
+  del feed (la pausa di ogni giorno e la riapertura della domenica
+  sera). Se una sola delle due si muove, non e' il fuso: e' quella
+  transizione, e va guardata a parte.
+  pausa giornaliera   mese per mese: 01=16:14 02=16:14 03=15:14 04=16:14 05=16:14 06=16:14
+                                     07=16:14 08=16:14 09=16:14 10=16:14 11=16:14 12=16:14
+  pausa giornaliera   INVERNO 16:14   ESTATE 16:14   differenza +0 min
+      -> coerente col DST: ora locale di NEW YORK.
+  apertura settimana  mese per mese: 01=18:00 02=18:00 03=17:00 04=18:00 05=18:00 06=18:00
+                                     07=18:00 08=18:00 09=18:00 10=18:00 11=18:00 12=18:00
+  apertura settimana  INVERNO 18:00   ESTATE 18:00   differenza +0 min
+      -> coerente col DST: ora locale di NEW YORK.
+
+--- LE DEFINIZIONI, CONGELATE PRIMA DI GUARDARE I NUMERI ---
+  apertura      = Open della barra delle 09:30 (ora del file = New York)
+  pre-apertura  = i 60 minuti prima (08:30-09:29): massimo e minimo
+  gap           = apertura meno l'ULTIMA CHIUSURA CASH precedente (ultima
+                  barra con orario <= 16:00 del giorno di borsa prima)
+  range di rif. = massimo e minimo dei primi 15 minuti
+  finestra di giudizio = i primi 60 minuti
+  margine di rottura = max( 0.10 x ampiezza del range di rif. ;
+                            0.020% del prezzo d'apertura )
+                  (la frazione perche' la rottura si misuri sulla
+                   volatilita' del giorno; il pavimento perche' con un
+                   range quasi nullo qualunque tick sarebbe 'rottura')
+
+  IL SUFFISSO NOMINA SEMPRE IL LATO DELLA ROTTURA:
+   DRIVE-UP    rompe AL RIALZO dopo il minuto 15 e CHIUDE la finestra
+               sopra il massimo del range di rif. + margine
+   DRIVE-DOWN  rompe AL RIBASSO e chiude sotto il minimo - margine
+   FADE-UP     rompe AL RIALZO e chiude SOTTO il minimo - margine
+               (la rottura rialzista e' stata rimangiata)
+   FADE-DOWN   rompe AL RIBASSO e chiude SOPRA il massimo + margine
+   RANGE       non rompe da nessuno dei due lati
+   RIENTRO     rompe, ma chiude DENTRO il range di riferimento
+  Cascata deterministica: RANGE -> FADE -> DRIVE -> RIENTRO. Un giorno
+  che rompe DA TUTTI E DUE I LATI finisce nel FADE (una rottura
+  rimangiata dice piu' di una riuscita) e porta la bandiera DUE_LATI:
+  il referto li CONTA, cosi' il peso della regola di priorita' si legge
+  invece di restare una scelta nascosta.
+
+  escursioni: SU e GIU' DAL PREZZO D'APERTURA, in punti indice e in %
+  del prezzo. Il % e' l'unico metro confrontabile fra il Nasdaq a 2.135
+  del 2010 e quello a 28.272 del 2026: una soglia in PUNTI su 16 anni
+  non e' la stessa soglia.
+  'favorevole/contraria' non esiste senza una posizione: qui si
+  misurano SU e GIU', e la lettura per classe usa la direzione della
+  classe (per un DRIVE-UP il favorevole e' il SU).
+
+  GIORNO SOSPETTO (escluso dai conteggi, contato a parte):
+   - meno di 55 barre nella finestra di giudizio (su 60 attese), oppure
+   - un buco interno di piu' di 3 minuti, oppure
+   - la barra dell'apertura manca (prezzo d'apertura non osservato)
+  GIORNO SENZA APERTURA (feste, weekend, buchi di feed): nessuna barra
+  nei primi 5 minuti. Non e' un giorno di borsa misurabile.
+  copertura della pre-apertura: sotto 30 barre su 60 e' solo un'INFO,
+  non esclude il giorno (il gap e il range pre restano leggibili).
+
+  I REGIMI SONO UN'ETICHETTA DI CALENDARIO, non una misura: nessuno ha
+  datato le fasi barra per barra. 2010-2019 / 2020 covid / 2021 /
+  2022 orso / 2023-2026.
+
+--- COPERTURA E GIORNI SOSPETTI ---
+  Il conto della malattia: quanti giorni sono stati ESCLUSI e perche'.
+    ANNO   GIORNI    BUONI   SOSPETTI   NO-APERT    %SOSPETTI
+    2021      311      256          1         54          0.4
+    2022      310      258          0         52          0.0
+    2023      309      158         47        104         22.9
+    2024      313      258          1         54          0.4
+    2025      312      255          2         55          0.8
+    2026      181      145          5         31          3.3
+  %SOSPETTI = SOSPETTI / (BUONI + SOSPETTI), cioe' sui giorni
+   MISURABILI: NON su GIORNI, che comprende feste e domeniche del
+   feed 24h. E' la stessa quota su cui morde --quota-sospetti.
+
+  I giorni SENZA APERTURA, per giorno della settimana. Le domeniche e
+  le feste di borsa stanno LEGITTIMAMENTE in quel conto (il feed e' 24h
+  e la domenica sera ha barre, ma non ha un'apertura cash); un mucchio
+  di giorni INFRASETTIMANALI li' dentro sarebbe invece un buco di feed.
+    lun        12
+    mar         8
+    mer        16
+    gio        16
+    ven        11
+    dom       287
+    -> infrasettimanali senza apertura: 63 (feste di borsa + eventuali
+       buchi di feed: qui NON si distinguono, e va detto)
+
+  I MOTIVI dei giorni sospetti (un giorno puo' averne piu' d'uno):
+    barra d'apertura mancante                          1
+    buco interno oltre la soglia                      10
+    copertura oraria sotto la soglia                  50
+
+  righe del file scartate (formato/OHLC incoerente): 0
+  barre duplicate nella finestra d'apertura (tenuta la prima): 0
+  righe FUORI ORDINE cronologico: 0
+  date che ricompaiono dopo essere gia' state chiuse: 0
+  (l'ordinamento del file e' un'ASSUNZIONE e qui viene MISURATA. Le
+   barre della finestra d'apertura sono indicizzate per MINUTO, che e'
+   una chiave unica: nessun riordino alla cieca, nessun pari da
+   sciogliere.)
+
+--- DISTRIBUZIONE DELLE CLASSI, PER ANNO ---
+  ANNO          GIORNI   BUONI   DRIVE-UP DRIVE-DOWN    FADE-UP  FADE-DOWN      RANGE    RIENTRO    2LATI SOSPETTI  NO-APERT
+  2021             311     256    71/  28    49/  19    11/   4     4/   2    22/   9    99/  39       29        1        54
+  2022             310     258    64/  25    62/  24    12/   5     6/   2    12/   5   102/  40       36        0        52
+  2023             309     158    37/  23    36/  23     6/   4     3/   2     9/   6    67/  42       25       47       104
+  2024             313     258    65/  25    61/  24     7/   3    18/   7    14/   5    93/  36       46        1        54
+  2025             312     255    67/  26    48/  19     9/   4    12/   5    22/   9    97/  38       40        2        55
+  2026             181     145    43/  30    32/  22     5/   3     5/   3     4/   3    56/  39       22        5        31   <-- SOTTO G1: NON LEGGIBILE
+  (per ogni classe: conteggio / % sui GIORNI BUONI. 2LATI = giorni che
+   hanno rotto da tutti e due i lati. SOSPETTI e NO-APERT sono ESCLUSI
+   dai conteggi delle classi ma restano scritti qui: nessun giorno
+   sparisce dall'elenco.)
+  CANCELLO G1 (>= 150 giorni buoni): NON LEGGIBILI -> 2026
+   Quelle righe si stampano lo stesso, ma le loro percentuali NON
+   si citano: su un campione cosi' sottile sono rumore. (Il 2010 e'
+   un moncone di novembre-dicembre: e' atteso che ci finisca.)
+
+--- DISTRIBUZIONE DELLE CLASSI, PER REGIME DICHIARATO ---
+  REGIME        GIORNI   BUONI   DRIVE-UP DRIVE-DOWN    FADE-UP  FADE-DOWN      RANGE    RIENTRO    2LATI SOSPETTI  NO-APERT
+  2021             311     256    71/  28    49/  19    11/   4     4/   2    22/   9    99/  39       29        1        54
+  2022_orso        310     258    64/  25    62/  24    12/   5     6/   2    12/   5   102/  40       36        0        52
+  2023-2026       1115     816   212/  26   177/  22    27/   3    38/   5    49/   6   313/  38      133       55       244
+  (per ogni classe: conteggio / % sui GIORNI BUONI. 2LATI = giorni che
+   hanno rotto da tutti e due i lati. SOSPETTI e NO-APERT sono ESCLUSI
+   dai conteggi delle classi ma restano scritti qui: nessun giorno
+   sparisce dall'elenco.)
+  CANCELLO G1 (>= 150 giorni buoni): superato da tutti.
+
+--- ESCURSIONI MEDIANE PER CLASSE ---
+  Mediana (e quartili) dell'escursione DAL PREZZO D'APERTURA, in % del
+  prezzo, sui giorni BUONI di ciascuna classe. FAVOREVOLE = nel verso
+  della classe; CONTRARIA = nel verso opposto. Per RANGE/RIENTRO, che
+  non hanno un verso, si stampano SU e GIU' cosi' come sono.
+  CLASSE           n   amp15%     MFE15%     MAE15%     MFE60%     MAE60%   chius60%
+  DRIVE-UP       347    0.436      0.279     -0.136      0.685     -0.136      0.560
+  DRIVE-DOWN     288    0.487      0.276     -0.147      0.828     -0.148      0.647
+  FADE-UP         50    0.379      0.183     -0.198      0.547     -0.334      0.393
+  FADE-DOWN       48    0.368      0.156     -0.170      0.451     -0.311      0.382
+  RANGE           83    0.499      0.165     -0.228      0.183     -0.239      0.019
+  RIENTRO        514    0.448      0.185     -0.187      0.286     -0.307     -0.000
+
+  Le CODE (quartili) sulle due classi di spinta, finestra 60':
+   DRIVE-UP    n=347  Q1 0.476  mediana 0.685  Q3 0.976  massimo 8.566
+   DRIVE-DOWN  n=288  Q1 0.540  mediana 0.828  Q3 1.159  massimo 2.887
+
+--- IL MOVIMENTO GREZZO, FINESTRA PER FINESTRA ---
+  Mediana dell'escursione massima SU e GIU' dal prezzo d'apertura e
+  della chiusura di finestra, in % del prezzo, su TUTTI i giorni buoni
+  (nessun condizionamento: e' la fotografia grezza del movimento).
+  FINESTRA      n    SU med%   GIU med% |chius| med% ampiezza med%
+         5   1330      0.135     -0.124        0.138        0.300
+        15   1330      0.195     -0.187        0.200        0.446
+        30   1330      0.251     -0.240        0.257        0.596
+        60   1330      0.334     -0.316        0.360        0.783
+
+--- PERSISTENZA ---
+  Domanda: la direzione dei primi 15 minuti CONTINUA fino al minuto 60?
+  direzione dei primi 15' = segno di (chiusura 15' - apertura), con banda
+  morta di 0.050% del prezzo. PERSISTE = la chiusura a 60' e' PIU' AVANTI
+  nello stesso verso della chiusura a 15'.
+  DIREZIONE           n persiste % persiste   estens. med%
+  SU                595      324       54.5          0.056
+  GIU               521      274       52.6          0.022
+  PIATTO            214      n/d        n/d            n/d
+  (estensione = quanto ancora si muove nel verso, in % del prezzo:
+   negativa vuol dire che e' tornata indietro.)
+
+--- LE CLASSI CONDIZIONATE AL GAP ---
+  Le classi condizionate al GAP d'apertura (apertura contro l'ultima
+  chiusura cash). Le soglie del gap sono in % del prezzo e sono le
+  stesse tre di sempre: sotto -0,25%, dentro, sopra +0,25%.
+  FASCIA                     n   DRIVE-UP DRIVE-DOWN    FADE-UP  FADE-DOWN      RANGE    RIENTRO
+  GAP GIU < -0.25%         411   111/  27    97/  24    12/   3    20/   5    19/   5   152/  37
+  PIATTO -0.25..0.25       434   105/  24    79/  18    21/   5     9/   2    35/   8   185/  43
+  GAP SU  > +0.25%         485   131/  27   112/  23    17/   4    19/   4    29/   6   177/  36
+  gap n/d                    0     0/ n/d     0/ n/d     0/ n/d     0/ n/d     0/ n/d     0/ n/d
+  gap mediano 0.069%   |gap| mediano 0.433%   |gap| Q3 0.840%   n=1330
+
+--- RILIEVI DI QUESTA CORSA ---
+  - anno 2023: 22.9% di giorni sospetti (soglia 20.0%)
+
+--- QUELLO CHE QUESTO STUDIO NON PUO' DIRE ---
+  Non dice se un motore guadagnerebbe: non ci sono spread, non ci
+  sono fill, non ci sono costi, non c'e' una posizione. Una classe
+  frequente NON e' un edge: e' una frequenza.
+  Non dice niente su DAX e Dow: qui c'e' un simbolo solo.
+  Non sostituisce il cancello qualita' del feed, che e' in verifica.
+
+ESITO: MISURATO CON RILIEVI (1)
