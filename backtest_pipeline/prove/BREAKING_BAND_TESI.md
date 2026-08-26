@@ -14,7 +14,14 @@ spiegato in dettaglio (soprattutto Paolo 30.04 e 05.05).
 ## I PARAMETRI (citazioni verificate)
 - Indici IN SESSIONE: BB(37, dev 3, shift 0). DAX: sempre 37/3.
 - Valute e mercati chiusi/laterali: BB(20, dev 2).
-- TF: dimostrata su tutti; operativita' M5/M15.
+- TF: dimostrata su tutti; ~~operativita' M5/M15~~ ⚠️ **MISURATA E
+  FALSIFICATA (nota 26/08)** — il gradiente misurato dice il contrario:
+  **TF: dimostrata a H1 (viva, R103); M30 pareggio sotto soglia (R111);
+  M15 morta (R108). Il capitolo discesa-TF e' CHIUSO il 26/08.**
+  Numeri: R108 (M15) = 6/6 finestre rosse sui 3 simboli, morta di
+  segnale col costo a posto (`R108_REFERTO.md`); R111 (M30) = gradiente
+  monotono H1>M30>M15, GBPUSD a campione pieno IS 181/OOS 174 dice NO —
+  PF OOS 1,087 sotto l'asticella 1,10 (`R111_REFERTO.md`).
 - Indicatori di contorno: StdDev custom di Paolo (sotto la propria SMA
   = compressione; parametri NON noti), ADX custom (<20 congestione,
   >25 forza, ~50 fine corsa), Supertrend 3.5 per il trailing.

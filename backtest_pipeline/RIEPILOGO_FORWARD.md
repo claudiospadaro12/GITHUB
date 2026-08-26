@@ -3,6 +3,12 @@
 Portafoglio EA **_Ottimizzato_ validati in real-tick**, pronti per il forward su demo BCM 50503392.
 Regola: rischio 1%, girano in parallelo ai nativi (magic diversi). NIENTE hedging/martingala.
 
+> **Nota 26/08** — questo documento fotografa il portafoglio del 26.07. Da allora:
+> **970911 SupRev_DAX_H1_Ott SPENTA l'11/08** con delibera di Claudio ("VAI CON LO
+> SPEGNIMENTO", `REFERTO_FUORILISTA.md`) e **770512 SuperWave_DAX_H4_Ott (+ nativo
+> SuperWave DAX) NON IN CAMPO** (assenti da censimenti .chr 23-25/08 ed Esperti VPS
+> 25/08 22:15). Le righe sotto sono marcate, non cancellate. Stato vivo: `FLOTTA_ATTIVA.md`.
+
 ---
 
 ## PORTAFOGLIO VALIDATO (12 EA, 5 strumenti)
@@ -14,7 +20,7 @@ Regola: rischio 1%, girano in parallelo ai nativi (magic diversi). NIENTE hedgin
 | 3 | ABTG_EMA200_Ottimizzato | Oro | XAUUSD | H4 | L/S | 1.92 | basso | 971501 |
 | 4 | ABTG_GoldenCross_Ottimizzato | Oro | XAUUSD | H1 | L/S | 1.58 | basso | 970301 |
 | 5 | ABTG_DAX_Apertura_EU_Ottimizzato | DAX | D30EUR | M5 | **LONG** | 1.49 | 3.8 | 770111 |
-| 6 | ABTG_SupRev_DAX_H1_Ottimizzato | DAX | D30EUR | H1 | L/S | 1.45 | 5.6 | 970911 |
+| 6 | ~~ABTG_SupRev_DAX_H1_Ottimizzato~~ 🔴 **SPENTA l'11/08 con delibera di Claudio** (`REFERTO_FUORILISTA.md`: IS −240 / OOS +1.312, IS rosso → "VAI CON LO SPEGNIMENTO"); assente da censimenti .chr 23-25/08 ed Esperti VPS 25/08 22:15 _(nota 26/08)_ | DAX | D30EUR | H1 | L/S | 1.45 | 5.6 | 970911 |
 | 7 | ABTG_SupRev_DAX_H4_Ottimizzato | DAX | D30EUR | H4 | L/S | 1.96 | 5.7 | 970912 |
 | 8 | ABTG_MaxMinNotte_DAX_Short_Ottimizzato | DAX | D30EUR | M15 | **SHORT** | 2.05 | 3.1 | 770411 |
 | 9 | ABTG_SupRev_NAS_H1_Ottimizzato | Nasdaq | NASUSD | H1 | L/S | 1.57 | **1.2** | 970913 |
@@ -22,7 +28,7 @@ Regola: rischio 1%, girano in parallelo ai nativi (magic diversi). NIENTE hedgin
 | 11 | ABTG_SupRev_CAC_H4_Ottimizzato | CAC 40 | F40EUR | H4 | L/S | 1.79 | 3.5 | 970915 |
 | 12 | ABTG_SupRev_DOW_H1_Ottimizzato (opzionale) | Dow | U30USD | H1 | L/S | 1.20 | 10 | 970916 |
 | 13 | ABTG_SuperWave_DOW_H1_Ottimizzato | Dow | U30USD | H1 | L/S | 1.52 | 4.0 | 770511 |
-| 14 | ABTG_SuperWave_DAX_H4_Ottimizzato | DAX | D30EUR | H4 | L/S | 1.28 | 3.3 | 770512 |
+| 14 | ~~ABTG_SuperWave_DAX_H4_Ottimizzato~~ 🔴 **NON IN CAMPO** (770512 assente da censimenti .chr 23-25/08 ed Esperti VPS 25/08 22:15; fonte: `FLOTTA_ATTIVA.md` corretta il 25/08) _(nota 26/08)_ | DAX | D30EUR | H4 | L/S | 1.28 | 3.3 | 770512 |
 
 _(SuperWave = cross EMA14x200 a favore del Supertrend, dalla dashboard. Validati real-tick 26.07.26.)_
 
@@ -38,7 +44,7 @@ Apri questi grafici e trascina l'EA indicato:
 
 **DAX — D30EUR**
 - **D30EUR M5** → DAX_Apertura_EU (LONG mattina)
-- **D30EUR H1** → SupRev_DAX_H1
+- ~~**D30EUR H1** → SupRev_DAX_H1~~ 🔴 spenta l'11/08 (delibera di Claudio, `REFERTO_FUORILISTA.md`) — grafico NON piu' previsto _(nota 26/08)_
 - **D30EUR H4** → SupRev_DAX_H4
 - **D30EUR M15** → MaxMinNotte_DAX_Short (night-box SHORT)
 
@@ -54,7 +60,7 @@ Apri questi grafici e trascina l'EA indicato:
 - **F40EUR H4** → SupRev_CAC_H4
 
 **DAX SuperWave**
-- **D30EUR H4** → SuperWave_DAX_H4 (nuovo; grafico H4 separato da SupRev_DAX_H4)
+- ~~**D30EUR H4** → SuperWave_DAX_H4 (nuovo; grafico H4 separato da SupRev_DAX_H4)~~ 🔴 NON IN CAMPO (assente da censimenti ed Esperti VPS 25/08; fonte: `FLOTTA_ATTIVA.md`) _(nota 26/08)_
 
 **Totale: 13 grafici (14 col Dow H1 SupRev opzionale).**
 Quando tutto e' a posto: File > Profili > Salva con nome ("FORWARD") per richiamarli in un click.
@@ -75,7 +81,7 @@ Sicuro anche con MT5 aperto (copia+compila, non lancia backtest).
 - **Breakout M5 in apertura**: DAX/Nasdaq aperture (tranne DAX LONG), Live5m, Live5m_v2, DAX_M3, ORB_Fibo, Londra_ORB. Anche coi filtri di Emiliano (correlazione/volumi) sul Nasdaq: morto.
 - **Aperture su FTSE/Dow/Stoxx/CAC**: solo il DAX ha edge in apertura (LONG).
 - **MaxMinNotte** su FTSE/CAC/Stoxx: solo il DAX (SHORT + correlazione) rende.
-- **SuperWave (cross 14x200)** su oro/Nasdaq: morto. Vivo su Dow H1 / DAX H4.
+- **SuperWave (cross 14x200)** su oro/Nasdaq: morto. Vivo su Dow H1 / DAX H4. _(Nota 26/08: "vivo" qui = edge nel backtest; in campo oggi c'e' solo il Dow H1 — il DAX H4, Ott e nativo, e' NON IN CAMPO, vedi `FLOTTA_ATTIVA.md`.)_
 
 ## COSA FUNZIONA (i motori veri)
 - **SupertrendReversal** (reversal su Supertrend): generalizza su oro, DAX, Nasdaq, Dow, CAC (H1/H4). E' la spina dorsale.

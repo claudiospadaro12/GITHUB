@@ -19,7 +19,7 @@ Claudio carica il CSV qui → Claude parsa, calcola e compila le tabelle sotto.
 | 971501 | EMA200_Ottimizzato | XAUUSD | H4 | 1.92 | basso |
 | 970301 | GoldenCross_Ottimizzato | XAUUSD | H1 | 1.58 | basso |
 | 770111 | DAX_Apertura_EU_Ottimizzato | D30EUR | M5 | 1.49 | 3.8% |
-| 970911 | SupRev_DAX_H1_Ottimizzato | D30EUR | H1 | 1.45 | 5.6% |
+| 970911 | ~~SupRev_DAX_H1_Ottimizzato~~ 🔴 **SPENTA l'11/08 con delibera di Claudio** (`REFERTO_FUORILISTA.md`: IS −240 / OOS +1.312, IS rosso → "VAI CON LO SPEGNIMENTO"); assente da censimenti .chr 23-25/08 ed Esperti VPS 25/08 22:15 _(nota 26/08)_ | D30EUR | H1 | 1.45 | 5.6% |
 | 970912 | SupRev_DAX_H4_Ottimizzato | D30EUR | H4 | 1.96 | 5.7% |
 | 770411 | MaxMinNotte_DAX_Short_Ottimizzato | D30EUR | M15 | 2.05 | 3.1% |
 | 970913 | SupRev_NAS_H1_Ottimizzato | NASUSD | H1 | 1.57 | 1.2% |
@@ -27,7 +27,7 @@ Claudio carica il CSV qui → Claude parsa, calcola e compila le tabelle sotto.
 | 970915 | SupRev_CAC_H4_Ottimizzato | F40EUR | H4 | 1.79 | 3.5% |
 | 970916 | SupRev_DOW_H1_Ottimizzato | U30USD | H1 | 1.20 | 10% |
 | 770511 | SuperWave_DOW_H1_Ottimizzato | U30USD | H1 | 1.52 | 4.0% |
-| 770512 | SuperWave_DAX_H4_Ottimizzato | D30EUR | H4 | 1.28 | 3.3% |
+| 770512 | ~~SuperWave_DAX_H4_Ottimizzato~~ 🔴 **NON IN CAMPO** (assente da censimenti .chr 23-25/08 ed Esperti VPS 25/08 22:15; fonte: `FLOTTA_ATTIVA.md` corretta il 25/08) _(nota 26/08)_ | D30EUR | H4 | 1.28 | 3.3% |
 
 ### EMA200 nuovi in forward (attaccati 01/08 su VPS, H4, tick reali PFmed ≥1.3)
 _Motore più robusto finora. Girano in parallelo all'EMA200_Ott oro (771501). Oro NON riattaccato (doppione)._

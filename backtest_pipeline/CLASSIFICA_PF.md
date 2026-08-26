@@ -23,8 +23,8 @@ _Ultimo aggiornamento backtest: 26.07.26. Forward: — (in attesa primo CSV)._
 | 9 | SupRev_NAS_H1_Ottimizzato | Nasdaq NASUSD | H1 | 970913 | 1.57 | 1.2 | | | |
 | 10 | SuperWave_DOW_H1_Ottimizzato | Dow U30USD | H1 | 770511 | 1.52 | 4.0 | | | |
 | 11 | DAX_Apertura_EU_Ottimizzato | DAX D30EUR | M5 | 770111 | 1.49 | 3.8 | | | |
-| 12 | SupRev_DAX_H1_Ottimizzato | DAX D30EUR | H1 | 970911 | 1.45 | 5.6 | | | |
-| 13 | SuperWave_DAX_H4_Ottimizzato | DAX D30EUR | H4 | 770512 | 1.28 | 3.3 | | | |
+| 12 | ~~SupRev_DAX_H1_Ottimizzato~~ 🔴 **SPENTA l'11/08 con delibera di Claudio** (`REFERTO_FUORILISTA.md`: IS −240 / OOS +1.312, IS rosso → "VAI CON LO SPEGNIMENTO"); assente da censimenti .chr 23-25/08 ed Esperti VPS 25/08 22:15 _(nota 26/08)_ | DAX D30EUR | H1 | 970911 | 1.45 | 5.6 | | | niente forward: sedia spenta |
+| 13 | ~~SuperWave_DAX_H4_Ottimizzato~~ 🔴 **NON IN CAMPO** (assente da censimenti .chr 23-25/08 ed Esperti VPS 25/08 22:15; fonte: `FLOTTA_ATTIVA.md` corretta il 25/08) _(nota 26/08)_ | DAX D30EUR | H4 | 770512 | 1.28 | 3.3 | | | niente forward: non in campo |
 | 14 | SupRev_DOW_H1_Ottimizzato | Dow U30USD | H1 | 970916 | 1.20 | 10 | | | |
 
 ## 🔵 NATIVI con edge (≈ base degli ottimizzati oro)
