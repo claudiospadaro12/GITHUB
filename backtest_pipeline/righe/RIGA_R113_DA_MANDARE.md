@@ -95,10 +95,10 @@ o si rifà la Riga 2.
 
 ---
 
-## 📌 IL PIN — ⛔ NON ANCORA ASSEGNATO (segnaposto)
+## 📌 IL PIN — ✅ ASSEGNATO il 27/08/2026 notte (commit col PASS del verificatore: 3 difetti FAIL->CORRETTO, checklist 89/89-bis/89-ter nate qui)
 
 ```
-@@PIN@@
+9ddf37b467db7999084991253f6d55ed698a0a7a
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima** (checklist 6 e 55). Il commit
@@ -158,7 +158,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R113.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9ddf37b467db7999084991253f6d55ed698a0a7a'; $p="$env:USERPROFILE\RIGA_R113.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R113_REGIME_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R113_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -203,7 +203,7 @@ dei criteri **al pin, in tutto il file**, e nel file firmato («FIRMO R113»,
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R113.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9ddf37b467db7999084991253f6d55ed698a0a7a'; $p="$env:USERPROFILE\RIGA_R113.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R113_REGIME_NASUSD.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R113_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
