@@ -1,0 +1,82 @@
+=====================================================================
+ REFERTO -- STORICO ESTERNO DEGLI INDICI
+=====================================================================
+data: 2026-08-26 23:26:39   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+avvio: 2026-08-26 23:20:50   durata: 0.10 h
+macchina: DESKTOP-H4D7CAJ   utente: Master
+pin: 2ba0286d6ea228dffc581fe59f01f3c7ead44976
+modo: CORSA VERA
+
+!!! I DATI SONO DI UN ALTRO BROKER (histdata), NON DI BCM.
+    Spread, orari di seduta e prezzi NON sono quelli su cui si opera.
+    Nel tester lo spread e' quello che si imposta, non quello storico:
+    su stop stretti puo' spostare il verdetto (R55: 1,5 punti indice).
+
+!!! IL CANCELLO ZERO SUGLI INDICI _EXT E' ANCORA CHIUSO.
+    diff media H1 misurata 0,061-0,101% contro il <=0,05% richiesto
+    (REFERTO_HISTDATA_FATTIBILITA.md par. 14-15). Questi dati si
+    PRODUCONO e si MISURANO; NON sono autorizzati per i round.
+
+REGOLA D'USO (D-C): i simboli _EXT sono PROVA DI REGIME a parametri
+CONGELATI. Qui non si tara niente e non si promuove nessuna cella.
+
+--- DECISIONI LETTE AL PIN ---
+  D-A   FONTE                  histdata                 FIRMATO
+  D-B   SIMBOLI                NASUSD,SPXUSD            FIRMATO
+  D-C   USO                    SOLO_PROVA_REGIME        FIRMATO
+  D-D   FINESTRA               2010-2026                FIRMATO
+  D-E   SOGLIA_CANARINO_ORE    20                       FIRMATO
+  D-F   STRADA_DAX             diagnosi_prima           FIRMATO
+
+--- I CINQUE INDICI: NESSUNO SPARISCE DA QUESTO ELENCO ---
+  BCM      CHE          FASE                               BARRE / PERCHE'
+  NASUSD   Nasdaq 100   IMPORTATO come NASUSD_EXT          5233590 righe M1, anni: 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
+  D30EUR   DAX 40       FUORI GIRO (dichiarato)            grxeur BOCCIATO (min 2.906 impossibile + sessione ballerina 2020-2023): prima la diagnosi, D-F
+  U30USD   Dow Jones    FUORI GIRO (dichiarato)            HistData non ha il Dow; Dukascopy si' (2012) ma costa ~12,7 giorni di crawl
+  SPXUSD   S&P 500      IMPORTATO come SPXUSD_EXT          4598932 righe M1, anni: 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
+  225JPY   Nikkei 225   FUORI GIRO (dichiarato)            non incluso in D-B per questo giro
+
+--- CANARINO DI RITMO ---
+  VERDE (0.1 ore <= 20.0)   (proiezione 0.1 ore, soglia 20.0)
+
+--- VERIFICA DEI SIMBOLI _EXT (barre per anno: scheda Esperti nei log) ---
+  SIMBOLO        TF                BARRE PRIMA              ULTIMA             ANNI VUOTI / ESITO
+  NASUSD_EXT     PERIOD_M15       362325 2010.11.14 23:00   2026.07.31 21:00   - / OK
+  NASUSD_EXT     PERIOD_H1         93085 2010.11.14 23:00   2026.07.31 21:00   - / OK
+  SPXUSD_EXT     PERIOD_M15       102880 2021.12.13 19:30   2026.07.31 21:00   - / LETTURA INTERROTTA a 102880 barre su 360619 (CopyRates ha reso -1)
+  SPXUSD_EXT     PERIOD_H1         92932 2010.11.14 23:00   2026.07.31 21:00   - / OK
+
+--- PASSI ---
+  FASE  PASSO                                    INIZIO    FINE      MIN     ESITO
+  F1    criteri al pin                           23:20:50  23:20:50  0.0     OK  -- 6 decisioni, 0 da firmare
+  F2    sonda Dow                                23:20:50  23:20:50  0.0     GIA' MISURATA (giro3 15/08) - non rilanciata  -- USA30IDXUSD = 2012
+  F3    spazio disco                             23:20:50  23:20:50  0.0     OK  -- 2.66 GB stimati
+  F4    python trovato e >= 3.8                  23:20:50  23:20:51  0.0     OK  -- C:\Users\Master\AppData\Local\Programs\Python\Python314\python.exe
+  F4    histdata_m1.py al pin                    23:20:51  23:20:51  0.0     OK  -- marcatore HD-M1-v4 verificato
+  F4    canarino di ritmo                        23:20:51  23:22:18  0.0     VERDE  -- esplorazione 86.5 s, rc 0
+  F5    NASUSD 2026                              23:22:18  23:22:23  0.1     OK  -- 7 zip, 5.0 s
+  F5    NASUSD conversione tranche 1/3 (2010-2017) 23:22:23  23:22:46  0.4     OK  -- 2338466 barre M1
+  F5    NASUSD conversione tranche 2/3 (2018-2025) 23:22:47  23:23:22  0.6     OK  -- 2696269 barre M1
+  F5    NASUSD conversione tranche 3/3 (2026-2026) 23:23:23  23:23:26  0.0     OK  -- 198855 barre M1
+  F5    SPXUSD 2026                              23:23:33  23:23:38  0.1     OK  -- 7 zip, 5.0 s
+  F5    SPXUSD conversione tranche 1/3 (2010-2017) 23:23:38  23:24:00  0.4     OK  -- 1807286 barre M1
+  F5    SPXUSD conversione tranche 2/3 (2018-2025) 23:24:00  23:24:35  0.6     OK  -- 2592814 barre M1
+  F5    SPXUSD conversione tranche 3/3 (2026-2026) 23:24:37  23:24:39  0.0     OK  -- 198832 barre M1
+  F6    prepara import                           23:24:46  23:24:49  0.0     OK  -- 2 preset
+  F7    compila ABTG_ImportaStoricoEsterno       23:24:49  23:24:51  0.0     OK
+  F7    import NASUSD_EXT                        23:24:51  23:25:37  0.8     OK
+  F7    import SPXUSD_EXT                        23:25:37  23:26:22  0.8     OK
+  F8    conta barre _EXT                         23:26:22  23:26:39  0.0     OK  -- 4 righe
+
+--- NOTE ---
+  - F5: NASUSD: la conversione e' stata fatta in 3 TRANCHE di anni (2010-2017, 2018-2025, 2026-2026) e i pezzi sono stati concatenati in ordine di anno. E' DICHIARATO: il CSV finale non nasce da una sola passata. Motivo: ~690 byte di RAM per barra M1 misurati, 5,6 M barre sarebbero ~3,8 GB in un colpo solo.
+  - F5: SPXUSD: la conversione e' stata fatta in 3 TRANCHE di anni (2010-2017, 2018-2025, 2026-2026) e i pezzi sono stati concatenati in ordine di anno. E' DICHIARATO: il CSV finale non nasce da una sola passata. Motivo: ~690 byte di RAM per barra M1 misurati, 5,6 M barre sarebbero ~3,8 GB in un colpo solo.
+  - F6: il preset di NASUSD non nomina InpAutoTest perche' quell'input NON esiste in ABTG_ImportaStoricoEsterno v1 (la v2 si'). Nessun effetto: e' dichiarato.
+  - F6: il preset di SPXUSD non nomina InpAutoTest perche' quell'input NON esiste in ABTG_ImportaStoricoEsterno v1 (la v2 si'). Nessun effetto: e' dichiarato.
+
+ESITO: OK
+
+PROSSIMO PASSO: i CSV sono in MQL5\Files e i preset in MQL5\Presets.
+Se l'import non e' stato fatto in automatico: in MT5, Navigatore >
+Script > Aggiorna, trascina ABTG_ImportaStoricoEsterno su un grafico,
+Carica > il preset del simbolo, e guarda la scheda ESPERTI.
