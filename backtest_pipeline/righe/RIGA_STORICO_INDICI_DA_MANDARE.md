@@ -2,7 +2,9 @@
 
 **La richiesta**: Claudio, 25/08/2026 — _"per gli Indici cerchiamo di fare i
 test con piu' anni di storico"_.
-**Criteri**: `risultati_archivio/STORICO_INDICI_CRITERI.md` — ✅ **FIRMATI** ("FIRMO CON PROPOSTE", Claudio 25/08 sera; pin della firma = `490f112…`, ed e' quello nelle righe).
+**Criteri**: `risultati_archivio/STORICO_INDICI_CRITERI.md` — ✅ **FIRMATI** ("FIRMO CON PROPOSTE", Claudio 25/08 sera) **+ EMENDAMENTO D-B** ("FIRMO x S&P", 26/08: simboli `NASUSD,SPXUSD`). Pin attuale nelle righe = `2ba0286…` (quello dell'emendamento).
+
+> ☠️ **PIN SUPERATI di questo foglio** (storia, non si tocca): `bcc483f` (difetti pre-verifica) → `461948f` (corretto, pre-firma) → `490f112` (firma, solo NASUSD) → **`2ba0286` (attuale: emendamento S&P)**. Con un pin vecchio la corsa gira sui criteri di quel momento: la riga di lancio dice sempre quello giusto.
 **Driver**: `righe/RIGA_STORICO_INDICI.ps1` (marcatore `MARCATORE_RIGA_STORICO_INDICI_v1`).
 **Script MQL5 nuovo**: `mql5/Scripts/ABTG_ContaBarreEXT.mq5` (`CONTA-EXT-v1`) — **mai compilato**, lo compila il driver.
 
