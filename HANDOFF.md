@@ -7,6 +7,30 @@
 
 ---
 
+## 🌙 AGGIORNAMENTO 26/08 NOTTE (2) — CHIUSURE DI MEZZANOTTE
+
+- 🏁 **R112 CHIUSO**: nessun dial passa il cancello (dial 2 fermato dalla
+  peggior giornata −2,70 vs −2,45, dial 3 dal DD): sedia 771531 resta
+  com'e'. G0-B OK due volte (banco riproducibile). Peggior giornata della
+  sedia viva misurata (−2,45% fisso). Scoperta: n = deal di USCITA,
+  posizioni ≈ n/2. Checklist 87 e 88 nate qui. `R112_REFERTO.md`.
+- 📚 **STORICO INDICI COMPLETO AL 100%** (corsa 23:34): tutte e 4 le serie
+  OK — NASUSD 362.325 M15 / 93.085 H1, SPXUSD 360.619 M15 / 92.932 H1,
+  2010→2026 zero anni vuoti. Capitolo chiuso.
+- 🏛️ **FTMO, due letture pronte da firmare**: `ANALISI_TAGLIA_FASE1` (la
+  LEVA 1:15 e' il problema, non la taglia: C1 a 5 SL = 149% del margine ai
+  massimi) e `PROPOSTA_GUARDIAN_FTMO` (10 decisioni, "FIRMO PRESET
+  GUARDIAN FTMO"). Claudio orientato a taglia alta: il milione non si
+  compra, si scala (supplemento dossier).
+- 📐 **R113 BOZZA PRONTA** (`R113_CRITERI.md` [DA FIRMARE], 8 decisioni,
+  "FIRMO R113"): prova di regime SUPNAS su 6 finestre NASUSD_EXT, lettura
+  IPOTESI-S pre-dichiarata. Dopo firma: 18 file prova + driver (SENZA
+  walkforward_generico: finestre uniche, niente split) + verificatore.
+- 📈 Pagella 26/08: massimo storico 100k (100.777,29), 7/8 vincenti.
+- ⚠️ **27-28/08 Jackson Hole**: nessun lancio live, Guardian di guardia.
+
+---
+
 ## 🌙 AGGIORNAMENTO 26/08 NOTTE — R112 FIRMATO, PIANO PROP v14, DOSSIER PROP, EXCEL
 
 Claudio scollegato in serata ("A DOPO"). Stato al momento del distacco:
