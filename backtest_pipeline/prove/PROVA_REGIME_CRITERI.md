@@ -27,6 +27,21 @@ chiusure H1 importate e quelle NATIVE di BCM nel periodo comune). Regola:
   barre H1 in comune -> **il simbolo NON si usa**. Prima si sistema il feed
   (fuso, festivi, fonte), poi si misura.
 
+> 🖊️ **EMENDAMENTO FIRMATO — "FIRMO FRIGO NASUSD", Claudio, 26/08/2026.**
+> Per i soli INDICI si aggiunge il **metro RELATIVO**: diff media <= **0,20 x
+> volatilita' oraria misurata** del simbolo, valido SOLO se accompagnato da
+> (a) eventi di diff-max SPIEGATI uno per uno (movimento vero, non buco:
+> misurato il 26/08, 3/3 eventi veri — `LETTURA_MISURE_LAMPO_2026-08-26.md`),
+> (b) copertura barre H1 >= 80% (misurata: 97%). Il metro 0,20 era stato
+> PROPOSTO il 25/08 (`ANALISI_CANCELLO_ZERO_EXT`) PRIMA delle misure di vol:
+> non e' ritagliato sui numeri.
+> **Esito con le misure del 26/08**: `NASUSD_EXT` rapporto **0,199** ->
+> **AMMESSO alla prova di regime** (bordo sottile: dichiarato). `SPXUSD_EXT`
+> 0,203 e `225JPY_EXT` 0,232 -> **RESTANO IN FRIGO**. Per i FOREX resta il
+> solo metro assoluto 0,05%, invariato.
+> Limiti d'uso invariati (D-C storico): parametri CONGELATI, solo prova di
+> regime, MAI promozione di celle da dati esterni.
+
   **CORREZIONE DICHIARATA (14/08, prima di guardare qualunque numero di
   performance).** La prima stesura diceva "2 points": era un'unita' di
   misura sbagliata, non una soglia severa. Due points su EURUSD sono 0,2
