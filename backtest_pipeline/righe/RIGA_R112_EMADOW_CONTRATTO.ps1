@@ -1248,3 +1248,535 @@ foreach($cellaCorr in $Ordinati){
     [void]$Problemi.Add($cellaCorr.Prova + ": il driver generico e' uscito con codice " + $LASTEXITCODE)
   }
   $cellaCorr.Min = [math]::Round((New-TimeSpan -Start $avvioCella -End (Get-Date)).TotalMinutes,1)
+
+  if(-not $SoloControllo){
+    # ---------- UN CSV VECCHIO NON E' UN CSV OK: SI GUARDA LA DATA.
+    #  walkforward_generico.ps1 salta la finestra il cui CSV esiste gia',
+    #  e gli stati sono TRE, non due (checklist 49): salta per FINESTRA.
+    $gambeVecchie = @()
+    foreach($tagGamba in @("IS","OOS")){
+      $percorsoCsvGamba = CsvDi $cellaCorr $tagGamba
+      $numRigheCsv = -1
+      if(Test-Path -LiteralPath $percorsoCsvGamba){
+        $numRigheCsv = (@(Get-Content -LiteralPath $percorsoCsvGamba).Count) - 1
+        if((Get-Item -LiteralPath $percorsoCsvGamba).LastWriteTime -lt $avvioCella){ $gambeVecchie += $tagGamba }
+      }
+      if($tagGamba -eq "IS"){ $cellaCorr.IS = $numRigheCsv } else { $cellaCorr.OOS = $numRigheCsv }
+    }
+
+    # ---------- GLI .ini CHE HANNO GIRATO DAVVERO (checklist 79): si
+    #  rileggono FromDate/ToDate dai gen_*.ini che MT5 ha consumato, su
+    #  tutte e due le gambe, e i file finiscono nello zip. Le gambe
+    #  SALTATE si escludono: il loro .ini e' di un altro giro (punto 44).
+    foreach($tagGamba in @("IS","OOS")){
+      if($gambeVecchie -contains $tagGamba){ continue }
+      $percorsoGenIni = Join-Path $Work ("gen_" + $EaNome + "_" + $SimboloRound + "_" + $tagGamba + "_" + $cellaCorr.Id + ".ini")
+      if(-not (Test-Path -LiteralPath $percorsoGenIni)){
+        [void]$Problemi.Add($cellaCorr.Prova + " / " + $tagGamba + ": non trovo l'.ini che ha girato (" + (Split-Path -Leaf $percorsoGenIni) +
+                            "): la finestra di questa gamba NON e' stata verificata sull'artefatto.")
+        continue
+      }
+      $testoGenIni = Get-Content -LiteralPath $percorsoGenIni -Raw
+      $matchFrom = [regex]::Match($testoGenIni,'(?m)^FromDate=([0-9.]+)\r?$')
+      $matchTo   = [regex]::Match($testoGenIni,'(?m)^ToDate=([0-9.]+)\r?$')
+      $attesoDa = $(if($tagGamba -eq "IS"){ $IS_Da } else { $OOS_Da })
+      $attesoA  = $(if($tagGamba -eq "IS"){ $IS_A  } else { $OOS_A  })
+      if(-not $matchFrom.Success -or -not $matchTo.Success -or $matchFrom.Groups[1].Value -ne $attesoDa -or $matchTo.Groups[1].Value -ne $attesoA){
+        [void]$Problemi.Add($cellaCorr.Prova + " / " + $tagGamba + ": l'.ini CHE HA GIRATO porta FromDate=[" + $matchFrom.Groups[1].Value + "] ToDate=[" + $matchTo.Groups[1].Value +
+                            "] invece di [" + $attesoDa + "] e [" + $attesoA + "]. I numeri di questa gamba NON sono della finestra dichiarata: non si leggono.")
+      }
+      Copy-Item -LiteralPath $percorsoGenIni -Destination (Join-Path $Sosta ("gen_EMADOW_" + $cellaCorr.Id + "_" + $tagGamba + ".ini")) -Force -ErrorAction SilentlyContinue
+    }
+
+    if($gambeVecchie.Count -eq 2){
+      $cellaCorr.Esito = "SALTATA DAL DRIVER (IS+OOS gia' presenti da un lancio precedente)"
+      [void]$Problemi.Add($cellaCorr.Prova + ": " + $cellaCorr.Esito + ". Le righe tornano ma i file NON sono di questo lancio: rilancia con -Rifai.")
+    }
+    elseif($gambeVecchie.Count -eq 1){
+      $cellaCorr.Esito = "A META' (" + $gambeVecchie[0] + " e' di un lancio PRECEDENTE, l'altra gamba e' di adesso)"
+      [void]$Problemi.Add($cellaCorr.Prova + ": " + $cellaCorr.Esito + ". Le due gambe vengono da due giri diversi: rilancia questa cella con -Rifai.")
+    }
+    elseif([int]$cellaCorr.IS -eq $CelleAttese -and [int]$cellaCorr.OOS -eq $CelleAttese){ $cellaCorr.Esito = "OK" }
+    else{
+      #  sentinella anche NELLE FRASI (checklist 66): -1 crudo si legge
+      #  "meno una riga", che non vuol dire niente.
+      $cellaCorr.Esito = "RIGHE SBAGLIATE (IS " + (FmtN $cellaCorr.IS) + " / OOS " + (FmtN $cellaCorr.OOS) + ", attese " + $CelleAttese + "; 'n/d' = il CSV non e' stato prodotto)"
+      [void]$Problemi.Add($cellaCorr.Prova + ": " + $cellaCorr.Esito + ". Cache del tester, oppure lo sweep dei magic non ha spazzolato: il file NON si legge.")
+    }
+
+    # ---------- LE MISURE, lette dai CSV (parser col controllo positivo)
+    $lettureOOS = LeggiOpt (CsvDi $cellaCorr "OOS")
+    $cellaCorr.Gemelli = Gemelli $lettureOOS
+    if($null -eq $lettureOOS){
+      [void]$Problemi.Add($cellaCorr.Prova + ": CSV OOS non letto o colonne non riconosciute. Intestazioni viste: [" + (($script:CsvIntestazioni | Select-Object -First 12) -join " | ") + "]")
+    } elseif(@($lettureOOS).Count -ge 1){
+      if($null -ne $lettureOOS[0].Pf){     $cellaCorr.PfOOS   = [double]$lettureOOS[0].Pf }
+      if($null -ne $lettureOOS[0].Dd){     $cellaCorr.DdOOS   = [double]$lettureOOS[0].Dd }
+      if($null -ne $lettureOOS[0].N){      $cellaCorr.NOOS    = [int]$lettureOOS[0].N }
+      if($null -ne $lettureOOS[0].Profit){ $cellaCorr.ProfOOS = [double]$lettureOOS[0].Profit }
+    }
+    $lettureIS = LeggiOpt (CsvDi $cellaCorr "IS")
+    if($null -eq $lettureIS){
+      [void]$Problemi.Add($cellaCorr.Prova + ": CSV IS non letto o colonne non riconosciute.")
+    } elseif(@($lettureIS).Count -ge 1){
+      if($null -ne $lettureIS[0].Pf){     $cellaCorr.PfIS   = [double]$lettureIS[0].Pf }
+      if($null -ne $lettureIS[0].Dd){     $cellaCorr.DdIS   = [double]$lettureIS[0].Dd }
+      if($null -ne $lettureIS[0].N){      $cellaCorr.NIS    = [int]$lettureIS[0].N }
+      if($null -ne $lettureIS[0].Profit){ $cellaCorr.ProfIS = [double]$lettureIS[0].Profit }
+    }
+
+    # ---------- G0-C: I GEMELLI. Sul metro e' FATALE per la catena; sulle
+    #  celle short e' igiene che finisce nei PROBLEMI. TRE stati
+    #  (checklist 68): FALLITO (misurato e storto) e NON ESEGUITO (il CSV
+    #  non c'e') mandano a cercare il guasto in posti OPPOSTI.
+    if($cellaCorr.Gemelli -ne "IDENTICI"){
+      $gemelliMisurati = -not ($cellaCorr.Gemelli -like "NON MISURATO*")
+      if($cellaCorr.Metro){
+        if($gemelliMisurati){
+          [void]$Problemi.Add("GATE G0-C FALLITO sul 00_metro: gemelli " + $cellaCorr.Gemelli +
+                              ". Due passate a parametri IDENTICI hanno dato numeri diversi: il banco non e' deterministico e su questo round NON si legge niente. Le celle successive NON sono state lanciate.")
+          $CatenaFerma = "G0-C FALLITO sul 00_metro: banco non deterministico"
+        } else {
+          [void]$Problemi.Add("GATE G0-C NON ESEGUITO sul 00_metro: il CSV non e' stato prodotto o non si legge (" + $cellaCorr.Gemelli +
+                              "). NON e' dimostrato che il banco sia storto: NON e' stato possibile misurarlo. Cause possibili, TUTTE: MT5 rimasto aperto, Tester\cache, storico mancante, tester uscito male. Si rilancia con -Rifai. Le celle successive NON sono state lanciate.")
+          $CatenaFerma = "G0-C NON ESEGUITO sul 00_metro (CSV mancante)"
+        }
+        Dico ("G0-C sul 00_metro: " + $cellaCorr.Gemelli) "Red"
+      } else {
+        if($gemelliMisurati -or $cellaCorr.Gemelli -ne "NON MISURATO (CSV non letto)"){
+          [void]$Problemi.Add($cellaCorr.Prova + ": gemelli " + $cellaCorr.Gemelli + ". Le due righe dovevano essere identiche al centesimo: questa cella non si legge.")
+        }
+      }
+    } elseif($cellaCorr.Metro) {
+      Dico ("G0-C sul 00_metro: IDENTICI (banco deterministico). Metro misurato: PF " + (Fmt3 $cellaCorr.PfOOS) + " | DD " + (Fmt2 $cellaCorr.DdOOS) + "% | n " + (FmtN $cellaCorr.NOOS)) "Green"
+    }
+
+    # ---------- G0-B: LA RIPRODUZIONE DI R110 (decisione D3). Solo per
+    #  le celle che hanno un riferimento (00_metro e 01_short_r1). Il
+    #  MISMATCH e' FATALE: ferma il lancio delle celle successive, NON
+    #  la raccolta. NON ESEGUITO e' un guasto, non un "superato".
+    if($cellaCorr.RifG0BTag -ne ""){
+      $esitiG0B = New-Object System.Collections.ArrayList
+      foreach($tagGamba in @("IS","OOS")){
+        $csvRifG0B = Join-Path $RifG0B ($EaNome + "_" + $SimboloRound + "_" + $tagGamba + "_" + $cellaCorr.RifG0BTag + ".csv")
+        $esitoGamba = ConfrontaG0B (CsvDi $cellaCorr $tagGamba) $csvRifG0B
+        [void]$esitiG0B.Add($tagGamba + ": " + $esitoGamba)
+        if($esitoGamba -like "MISMATCH*"){
+          [void]$Problemi.Add("G0-B FALLITO su " + $cellaCorr.Prova + " (" + $tagGamba + " contro R110 " + $cellaCorr.RifG0BTag + "): " + $esitoGamba +
+                              ". Il banco NON ha riprodotto R110 a parita' di tutto (criteri par. 5, decisione D3: FATALE). Se il banco non e' riproducibile fra corse, e' una notizia piu' grossa del round e va nel suo referto. Le celle successive NON sono state lanciate; la raccolta si fa lo stesso.")
+        } elseif($esitoGamba -like "NON ESEGUITO*"){
+          [void]$Problemi.Add("G0-B NON ESEGUITO su " + $cellaCorr.Prova + " (" + $tagGamba + "): " + $esitoGamba + ". 'NON ESEGUITO' NON e' 'superato': e' un guasto (il confronto non e' stato possibile).")
+        }
+      }
+      $cellaCorr.G0B = ($esitiG0B -join " | ")
+      if($cellaCorr.G0B -like "*MISMATCH*"){
+        if($CatenaFerma -eq ""){ $CatenaFerma = "G0-B MISMATCH su " + $cellaCorr.Id + ": il banco non riproduce R110" }
+        Dico ("G0-B su " + $cellaCorr.Id + ": " + $cellaCorr.G0B) "Red"
+      } elseif($cellaCorr.G0B -like "*NON ESEGUITO*"){
+        Dico ("G0-B su " + $cellaCorr.Id + ": " + $cellaCorr.G0B) "Yellow"
+      } else {
+        Dico ("G0-B su " + $cellaCorr.Id + ": RIPRODOTTO AL CENTESIMO (14 stringhe su 14 identiche a R110, IS+OOS)") "Green"
+      }
+    } else {
+      $cellaCorr.G0B = "NON APPLICABILE (dial mai misurato prima: e' la misura nuova, non c'e' niente da riprodurre)"
+    }
+
+    # ---------- LA MACCHINA PER-TRADE (decisione D4): raccolta,
+    #  G0-C-bis, identita' di gamba, riconciliazione, peggior giornata.
+    AnalisiPerTrade $cellaCorr $avvioCella
+    if($cellaCorr.PtStato -like "MISURATA*"){
+      Dico ("peggior giornata OOS " + $cellaCorr.Id + ": " + $cellaCorr.PgData + "  " + (FmtE $cellaCorr.PgEuro) + " EUR  (" + (FmtPg $cellaCorr.PgPctFisso) + "% su 100k fisso, " + (FmtPg $cellaCorr.PgPctEq) + "% su equity inizio giornata; " + (FmtN $cellaCorr.PgGiorni) + " giorni con chiusure)") "Yellow"
+      Dico ("   dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento. IS: n/d per costruzione.") "Yellow"
+    } else {
+      Dico ("peggior giornata OOS " + $cellaCorr.Id + ": " + $cellaCorr.PtStato) "Yellow"
+    }
+
+    # ---------- G1 MISURABILITA' (rilievo, non gate)
+    if(-not $cellaCorr.Metro){
+      if([int]$cellaCorr.NOOS -ge 0 -and [int]$cellaCorr.NOOS -lt 30){
+        [void]$Rilievi.Add($cellaCorr.Prova + ": n OOS = " + $cellaCorr.NOOS + ", sotto la soglia G1 di 30. Il verdetto su questa cella e' NON MISURABILE, NON 'non funziona' (criteri par. 5, G1). E' una risposta del round.")
+      }
+      elseif([int]$cellaCorr.NOOS -ge 150){
+        [void]$Rilievi.Add($cellaCorr.Prova + ": n OOS = " + $cellaCorr.NOOS + ", SOPRA i 150 dell'Emendamento regola A: il giudizio di MERITO si puo' dare per intero.")
+      }
+    }
+  } else { $cellaCorr.Esito = "SOLO CONTROLLO" }
+
+  # --- L'ANTEPRIMA del giro a vuoto: si LEGGE (finestra IS calcolata,
+  #     asse unico, magic, e LATO+DIAL nell'ini che MT5 leggerebbe),
+  #     poi va in sosta subito (il nome non porta l'etichetta e la
+  #     successiva la sovrascriverebbe, checklist 31).
+  if($SoloControllo){
+    $percorsoAnteprima = Join-Path $Work ("anteprima_" + $EaNome + "_" + $SimboloRound + ".ini")
+    if(Test-Path -LiteralPath $percorsoAnteprima){
+      $testoAnteprima = Get-Content -LiteralPath $percorsoAnteprima -Raw
+      $matchAntFrom = [regex]::Match($testoAnteprima,'(?m)^FromDate=([0-9.]+)\r?$')
+      $matchAntTo   = [regex]::Match($testoAnteprima,'(?m)^ToDate=([0-9.]+)\r?$')
+      if(-not $matchAntFrom.Success -or -not $matchAntTo.Success){ [void]$Problemi.Add("giro a vuoto / " + $cellaCorr.Id + ": nell'anteprima non trovo FromDate/ToDate.") }
+      elseif($matchAntFrom.Groups[1].Value -ne $IS_Da -or $matchAntTo.Groups[1].Value -ne $IS_A){
+        [void]$Problemi.Add("giro a vuoto / " + $cellaCorr.Id + ": il driver generico calcola la finestra IS " + $matchAntFrom.Groups[1].Value + " - " + $matchAntTo.Groups[1].Value +
+                            ", ma questa riga (e i criteri par. 1) dicono " + $IS_Da + " - " + $IS_A + ". O e' cambiata la FrazioneIS del driver, o e' cambiata la finestra: le due cose NON possono divergere.")
+      }
+      $assiYAnteprima = @([regex]::Matches($testoAnteprima,'(?m)^(\w+)=[^\r\n]*\|\|\s*[Yy]\s*\r?$') | ForEach-Object { $_.Groups[1].Value })
+      if($assiYAnteprima.Count -ne 1 -or $assiYAnteprima[0] -ne "InpMagic"){
+        [void]$Problemi.Add("giro a vuoto / " + $cellaCorr.Id + ": gli assi spazzolati nell'anteprima sono [" + ($assiYAnteprima -join ", ") + "] invece del solo InpMagic.")
+      }
+      if($testoAnteprima -notmatch ('(?m)^InpMagic=' + $cellaCorr.Magic + '\|\|')){
+        [void]$Problemi.Add("giro a vuoto / " + $cellaCorr.Id + ": nell'anteprima InpMagic non parte da " + $cellaCorr.Magic + ".")
+      }
+      #  LATO E DIAL, NELL'INI CHE GIRA DAVVERO: e' l'unica cosa che
+      #  questo round misura.
+      foreach($chiaveVal in $cellaCorr.Val.Keys){
+        if($testoAnteprima -notmatch ('(?m)^' + $chiaveVal + '=' + [regex]::Escape($cellaCorr.Val[$chiaveVal]) + '\s*\r?$') -and
+           $testoAnteprima -notmatch ('(?m)^' + $chiaveVal + '=' + [regex]::Escape($cellaCorr.Val[$chiaveVal]) + '\|\|')){
+          [void]$Problemi.Add("giro a vuoto / " + $cellaCorr.Id + ": nell'anteprima " + $chiaveVal + " non vale " + $cellaCorr.Val[$chiaveVal] + ". E' il CONTRATTO, cioe' l'unica cosa che questo round misura.")
+        }
+      }
+      Copy-Item -LiteralPath $percorsoAnteprima -Destination (Join-Path $Sosta ("anteprima_EMADOW_" + $cellaCorr.Id + ".ini")) -Force
+      Remove-Item -LiteralPath $percorsoAnteprima -Force -ErrorAction SilentlyContinue
+    } else { [void]$Problemi.Add("giro a vuoto: nessuna anteprima .ini per " + $cellaCorr.Prova) }
+  }
+  Write-Host ("    esito: " + $cellaCorr.Esito + "   [" + $cellaCorr.Min.ToString("0.0",$INV) + " min]") -ForegroundColor Gray
+}
+
+if($SoloControllo){
+  $numAnteprime = @(Get-ChildItem -LiteralPath $Sosta -Filter "anteprima_*.ini" -ErrorAction SilentlyContinue).Count
+  if($numAnteprime -ne $Ordinati.Count){ [void]$Problemi.Add("giro a vuoto: " + $numAnteprime + " anteprime .ini invece di " + $Ordinati.Count + ".") }
+  Write-Host ""
+  Write-Host ("    anteprime .ini in sosta: " + $numAnteprime + " su " + $Ordinati.Count + "   -> " + $Sosta) -ForegroundColor White
+  Write-Host  "    >>> IL GIRO A VUOTO NON MISURA NESSUN NUMERO: niente n, niente PF," -ForegroundColor Yellow
+  Write-Host  "        niente DD, niente G0-B, niente G0-C, NESSUNA peggior giornata." -ForegroundColor Yellow
+  Write-Host  "        Conferma gli ARTEFATTI (e G0-A, l'antenato, che gira prima di MT5)." -ForegroundColor Yellow
+  Write-Host  "        'Model=4' nell'anteprima e' una COSTANTE del ramo di prova del" -ForegroundColor Yellow
+  Write-Host  "        driver generico: stavolta COINCIDE con la corsa vera (-Modello 4)." -ForegroundColor Yellow
+}
+
+}catch{
+  $Fatale = $_.Exception.Message
+  Write-Host ""
+  Write-Host ("!!! FERMATO: " + $Fatale) -ForegroundColor Red
+}
+
+# =====================================================================
+#  5. RACCOLTA. Si fa SEMPRE, anche a esito parziale o fermato -- e
+#     anche con G0-B in MISMATCH (il mismatch non ferma la raccolta:
+#     si raccoglie tutto e si dichiara).
+# =====================================================================
+Titolo "5. RACCOLTA SUL DESKTOP"
+$Modo = if($SoloControllo){ "CONTROLLO" } elseif($SoloCella -ne ""){ "RIPRESA" } else { "CORSA" }
+$Cart = Join-Path $Dsk ("R112_EMADOW_CONTRATTO_" + $Modo + "_" + $Stamp)
+$Zip  = Join-Path $Dsk ("R112_EMADOW_CONTRATTO_" + $Modo + "_" + $Stamp + ".zip")
+$Referto = Join-Path $Cart "REFERTO_R112.txt"
+try{
+  New-Item -ItemType Directory -Force -Path $Cart | Out-Null
+  foreach($cellaRacc in $Lavori){
+    foreach($tagGamba in @("IS","OOS")){
+      $csvDaCopiare = CsvDi $cellaRacc $tagGamba
+      if(Test-Path -LiteralPath $csvDaCopiare){ Copy-Item -LiteralPath $csvDaCopiare -Destination (Join-Path $Cart (Split-Path -Leaf $csvDaCopiare)) -Force }
+    }
+    #  i per-trade della cella, PER NOME (solo cio' che ha girato: 56)
+    foreach($magRacc in @([int]$cellaRacc.Magic, ([int]$cellaRacc.Magic + 1))){
+      $ptDaCopiare = Join-Path $Work ("pertrade_" + $cellaRacc.Id + "_" + $magRacc + ".csv")
+      if(Test-Path -LiteralPath $ptDaCopiare){
+        if((Get-Item -LiteralPath $ptDaCopiare).LastWriteTime -ge $Avvio){
+          Copy-Item -LiteralPath $ptDaCopiare -Destination (Join-Path $Cart (Split-Path -Leaf $ptDaCopiare)) -Force
+        }
+      }
+    }
+    #  il file prova che ha girato
+    $provaDaCopiare = Join-Path $Prove $cellaRacc.Prova
+    if(Test-Path -LiteralPath $provaDaCopiare){ Copy-Item -LiteralPath $provaDaCopiare -Destination (Join-Path $Cart $cellaRacc.Prova) -Force }
+  }
+  #  gli ANTENATI e i RIFERIMENTI G0-B: lo zip e' autosufficiente, chi lo
+  #  apre fra un mese rifa' G0-A e G0-B a mano senza tornare in repo.
+  foreach($nomeAntenato in @($Lavori | ForEach-Object { $_.AntFile } | Sort-Object -Unique)){
+    $antDaCopiare = Join-Path $Anten $nomeAntenato
+    if(Test-Path -LiteralPath $antDaCopiare){ Copy-Item -LiteralPath $antDaCopiare -Destination (Join-Path $Cart $nomeAntenato) -Force }
+  }
+  foreach($rifDaCopiare in @(Get-ChildItem -LiteralPath $RifG0B -Filter "*.csv" -ErrorAction SilentlyContinue)){
+    Copy-Item -LiteralPath $rifDaCopiare.FullName -Destination (Join-Path $Cart ("RIF_R110_" + $rifDaCopiare.Name)) -Force
+  }
+  #  la SOSTA si copia intera: e' svuotata a ogni giro (56) e contiene
+  #  solo artefatti di ADESSO (anteprime, log compilatore, gen_*.ini).
+  if(Test-Path -LiteralPath $Sosta){
+    foreach($fileSosta in @(Get-ChildItem -LiteralPath $Sosta -File -ErrorAction SilentlyContinue)){
+      Copy-Item -LiteralPath $fileSosta.FullName -Destination (Join-Path $Cart $fileSosta.Name) -Force
+    }
+  }
+
+  $RefTxt = New-Object System.Collections.ArrayList
+  [void]$RefTxt.Add("REFERTO R112 - IL CONTRATTO DELL'EMADOW: SHORT-ONLY, E A QUALE DIAL?")
+  [void]$RefTxt.Add("ABTG_EMA200 / U30USD H1 - sedia viva 771531 (0,65% in campo sul 100k)")
+  [void]$RefTxt.Add("modo: " + $Modo + $(if($SoloControllo){ "   <<< GIRO A VUOTO: NESSUNA passata, NESSUN CSV, NESSUN numero di round qui dentro" } else { "" }))
+  $switchGiro = @()
+  if($SoloControllo){ $switchGiro += "-SoloControllo (nessuna passata)" }
+  #  >>> CHECKLIST 82: la frase sulla firma si costruisce sul VALORE
+  #      LETTO, mai su un ramo solo. Lo switch inerte va detto inerte.
+  if($CriteriFirmati -and $daFirmare){ $switchGiro += "-CriteriFirmati (FIRMA IN RIGA di Claudio: il file dei criteri portava ancora il lucchetto)" }
+  elseif($CriteriFirmati){ $switchGiro += "-CriteriFirmati (INERTE, e va bene: i criteri risultano gia' FIRMATI NEL FILE al pin -- la firma e' quella del documento, non una firma in riga)" }
+  if($SoloCella -ne ""){ $switchGiro += "-SoloCella " + $SoloCella + " (il 00_metro e' girato lo stesso: e' il denominatore e porta G0-B e G0-C)" }
+  if($Rifai){ $switchGiro += "-Rifai (i CSV precedenti sono stati rifatti)" }
+  if($switchGiro.Count -eq 0){ $switchGiro += "nessuno (corsa piena, ripresa dei CSV gia' presenti ATTIVA)" }
+  [void]$RefTxt.Add("switch di questo giro: " + ($switchGiro -join " | "))
+  [void]$RefTxt.Add("stato dei criteri: " + $Firma)
+  [void]$RefTxt.Add("data: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (questa data deve essere di ADESSO)")
+  [void]$RefTxt.Add("avvio: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   durata: " + ((New-TimeSpan -Start $Avvio -End (Get-Date)).TotalHours).ToString("0.0",$INV) + " ore")
+  [void]$RefTxt.Add("pin: " + $Pin)
+  [void]$RefTxt.Add("criteri: risultati_archivio\R112_CRITERI.md (sei decisioni, par. 10)")
+  [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "   split 40/60   modello " + $Modello + " (tick reali)   deposito " + $Deposito)
+  [void]$RefTxt.Add("     IS  " + $IS_Da + " - " + $IS_A)
+  [void]$RefTxt.Add("     OOS " + $OOS_Da + " - " + $OOS_A)
+  [void]$RefTxt.Add("     (LE STESSE DI R110, dichiaratamente: e' cio' che rende G0-B possibile)")
+  [void]$RefTxt.Add("spread: Spread=" + $SpreadIni + " scritto NELL'INI = spread CORRENTE del feed BCM, dichiarato.")
+  [void]$RefTxt.Add("rischio: il dial nei file e' 1,0 / 2,0 / 3,0. IN CAMPO SUL 100K SI MOLTIPLICA PER 0,65:")
+  [void]$RefTxt.Add("     dial 1,0 -> 0,65% per trade in campo (la sedia com'e' oggi)")
+  [void]$RefTxt.Add("     dial 2,0 -> 1,30% per trade in campo")
+  [void]$RefTxt.Add("     dial 3,0 -> 1,95% per trade in campo  <<< un solo SL vivo impegna il 60% del cap C1 (3,25%)")
+  [void]$RefTxt.Add("     Ogni DD di questo referto e' al dial dichiarato della sua riga: per il campo x0,65.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- CONVENZIONE DI SENTINELLA (checklist 66) ---")
+  [void]$RefTxt.Add("  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le")
+  [void]$RefTxt.Add("  colonne, comprese le due nuove PeggGio%fisso e PeggGio%eq.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA PEGGIOR GIORNATA: LA CONVENZIONE, CONGELATA PRIMA (decisione D4) ---")
+  [void]$RefTxt.Add("  * giornata = somma dei net_profit CHIUSI nella stessa DATA SERVER BCM.")
+  [void]$RefTxt.Add("    >>> L'OROLOGIO E' L'ORA SERVER BCM (ora italiana - 1 in questo periodo:")
+  [void]$RefTxt.Add("        checklist 86): le close_time dei per-trade sono scritte cosi' dall'EA.")
+  [void]$RefTxt.Add("  * DUE denominatori, tutti e due: % sul deposito FISSO 100k e % sull'equity")
+  [void]$RefTxt.Add("    di inizio giornata (100k + cumulato dei giorni OOS precedenti).")
+  [void]$RefTxt.Add("  * SOLO OOS. LA PEGGIOR GIORNATA IS E' n/d PER COSTRUZIONE SU TUTTO IL ROUND:")
+  [void]$RefTxt.Add("    il driver generico corre gamba IS poi gamba OOS nella stessa chiamata e")
+  [void]$RefTxt.Add("    l'export sovrascrive il file del magic a ogni gamba -- sopravvive l'ultima.")
+  [void]$RefTxt.Add("    E NON lo si assume: lo si MISURA (tutte le close_time devono cadere in OOS;")
+  [void]$RefTxt.Add("    se una sola cade prima, la cella esce n/d, mai un numero sbagliato).")
+  [void]$RefTxt.Add("  * RICONCILIAZIONE: i position_id DISTINTI del file devono combaciare col n OOS")
+  [void]$RefTxt.Add("    dell'OPTFRAME. ATTENZIONE: le RIGHE sono i DEAL DI USCITA e con TP1 al 50% +")
+  [void]$RefTxt.Add("    trailing una posizione chiude in DUE deal, quindi righe > n e' NORMALE; il")
+  [void]$RefTxt.Add("    confronto giusto e' sui position_id distinti. Scarto -> dichiarato, mai zitto.")
+  [void]$RefTxt.Add("  * >>> IL LIMITE PIU' IMPORTANTE: questa e' la peggior giornata dei CHIUSI.")
+  [void]$RefTxt.Add("    Il muro giornaliero delle prop (e il Guardian) guardano l'equity FLOTTANTE,")
+  [void]$RefTxt.Add("    che qui non c'e' (R109 ha misurato quanto pesa la differenza). Questa misura")
+  [void]$RefTxt.Add("    SOTTOSTIMA ed e' un PAVIMENTO, non il numero del muro.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- I GATE (criteri par. 5) ---")
+  [void]$RefTxt.Add("  G0-A  ANTENATO  : copia riga per riga del file prova R110, salvo i delta")
+  [void]$RefTxt.Add("                    dichiarati. Catena R103 -> R110 -> R112. Gira PRIMA di MT5.")
+  [void]$RefTxt.Add("  G0-B  RIPRODUZIONE DI R110: APPLICABILE, per la prima volta, e FATALE (D3).")
+  [void]$RefTxt.Add("                    Stesso banco + stessa finestra + stessi input -> le 7 colonne")
+  [void]$RefTxt.Add("                    statistiche delle 2 righe IDENTICHE COME STRINGHE, IS e OOS.")
+  [void]$RefTxt.Add("                    TRE esiti: OK / MISMATCH (fatale) / NON ESEGUITO (guasto,")
+  [void]$RefTxt.Add("                    NON 'superato'). Riguarda 00_metro e 01_short_r1; r2 e r3")
+  [void]$RefTxt.Add("                    sono la misura NUOVA: per loro G0-B e' NON APPLICABILE.")
+  [void]$RefTxt.Add("  G0-C  GEMELLI   : le due righe del CSV identiche al centesimo (determinismo).")
+  [void]$RefTxt.Add("  G0-C-bis        : i DUE file per-trade gemelli identici riga per riga tranne")
+  [void]$RefTxt.Add("                    la colonna magic. E' il G0-C al livello del singolo trade.")
+  [void]$RefTxt.Add("  G1 MISURABILITA': n OOS >= 30 per cella (atteso: largamente superato).")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LA TABELLA MADRE ---   (attese: " + $CelleAttese + " righe per CSV, " + (2*$Lavori.Count) + " CSV, " + (4*$Lavori.Count) + " passate)")
+  [void]$RefTxt.Add("  dPF e dDD sono il DELTA OOS contro il 00_metro. PeggGio = peggior giornata OOS")
+  [void]$RefTxt.Add("  dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento.")
+  [void]$RefTxt.Add(("  {0,-12} {1,-9} {2,-7} {3,-7} {4,-6} {5,-9} {6,-7} {7,-7} {8,-6} {9,-8} {10,-7} {11,-13} {12,-11} {13}" -f `
+                "CELLA","ISprof","ISpf","ISdd","ISn","OOSprof","OOSpf","OOSdd","OOSn","dPF","dDD%","PeggGio%fisso","PeggGio%eq","ESITO"))
+  $rifMetro = @($Ordinati | Where-Object { $_.Metro })[0]
+  foreach($cellaRef in $Ordinati){
+    $deltaPf = "n/d"; $deltaDd = "n/d"
+    if([double]$cellaRef.PfOOS -ge 0 -and [double]$rifMetro.PfOOS -ge 0){ $deltaPf = ([double]$cellaRef.PfOOS - [double]$rifMetro.PfOOS).ToString("+0.000;-0.000;0.000",$INV) }
+    if([double]$cellaRef.DdOOS -ge 0 -and [double]$rifMetro.DdOOS -ge 0){ $deltaDd = ([double]$cellaRef.DdOOS - [double]$rifMetro.DdOOS).ToString("+0.00;-0.00;0.00",$INV) }
+    [void]$RefTxt.Add(("  {0,-12} {1,-9} {2,-7} {3,-7} {4,-6} {5,-9} {6,-7} {7,-7} {8,-6} {9,-8} {10,-7} {11,-13} {12,-11} {13}" -f `
+                  $cellaRef.Id,(FmtE $cellaRef.ProfIS),(Fmt3 $cellaRef.PfIS),(Fmt2 $cellaRef.DdIS),(FmtN $cellaRef.NIS),
+                  (FmtE $cellaRef.ProfOOS),(Fmt3 $cellaRef.PfOOS),(Fmt2 $cellaRef.DdOOS),(FmtN $cellaRef.NOOS),
+                  $deltaPf,$deltaDd,(FmtPg $cellaRef.PgPctFisso),(FmtPg $cellaRef.PgPctEq),$cellaRef.Esito))
+  }
+  [void]$RefTxt.Add("  (la colonna 'Peggior Giornata %' NON esiste nell'OPTFRAME di questo EA -- 8")
+  [void]$RefTxt.Add("   colonne, misurato nel sorgente al pin: qui viene dai PER-TRADE, decisione D4.")
+  [void]$RefTxt.Add("   PeggGio IS: n/d PER COSTRUZIONE, vedi la convenzione in testa.)")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- LE CELLE, GATE PER GATE ---")
+  foreach($cellaRef in $Ordinati){
+    [void]$RefTxt.Add(("  {0,-12} magic {1}/{2}   InpAllowLong={3} InpAllowShort={4} InpRiskPercent={5}" -f `
+                  $cellaRef.Id,$cellaRef.Magic,($cellaRef.Magic+1),$cellaRef.Val["InpAllowLong"],$cellaRef.Val["InpAllowShort"],$cellaRef.Val["InpRiskPercent"]))
+    [void]$RefTxt.Add("       " + $cellaRef.Desc)
+    [void]$RefTxt.Add("       G0-A antenato : " + $cellaRef.Antenato)
+    [void]$RefTxt.Add("       G0-B          : " + $cellaRef.G0B)
+    [void]$RefTxt.Add("       G0-C gemelli  : " + $cellaRef.Gemelli)
+    [void]$RefTxt.Add("       G0-C-bis (pt) : " + $cellaRef.GemPt)
+    [void]$RefTxt.Add("       per-trade     : " + $cellaRef.PtStato)
+    [void]$RefTxt.Add("       riconciliaz.  : " + $cellaRef.Riconc)
+    if($cellaRef.PtStato -like "MISURATA*"){
+      [void]$RefTxt.Add("       peggior giornata OOS : " + $cellaRef.PgData + "  " + (FmtE $cellaRef.PgEuro) + " EUR = " + (FmtPg $cellaRef.PgPctFisso) + "% su 100k fisso | " + (FmtPg $cellaRef.PgPctEq) + "% su equity inizio giornata")
+      [void]$RefTxt.Add("       giorni con chiusure  : " + (FmtN $cellaRef.PgGiorni) + "   le 3 peggiori: " + $cellaRef.PgTop3)
+      [void]$RefTxt.Add("       tetto volume (R109)  : volume max " + (Fmt2 $cellaRef.VolMax) + " lotti, " + (Fmt2 $cellaRef.VolQuota) + "% delle righe al massimo")
+      [void]$RefTxt.Add("       (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento)")
+    }
+  }
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- IL CANCELLO DI PORTAFOGLIO (criteri par. 6): I NUMERI, NON IL VERDETTO ---")
+  [void]$RefTxt.Add("  INFO: il verdetto lo da' il REFERTO DEL ROUND, a mano. Un dial e' CANDIDATO se")
+  [void]$RefTxt.Add("  in OOS: (a) profitto > metro, (b) DD <= metro, (c) peggior giornata <= metro")
+  [void]$RefTxt.Add("  (denominatore FISSO; con un n/d il criterio (c) e' NON VALUTABILE e la")
+  [void]$RefTxt.Add("  candidatura resta SOSPESA), (d) profitto IS > 0. Fra i dial che passano vince")
+  [void]$RefTxt.Add("  il PIU' BASSO (D2-bis). Vietato aggiungere dial a risultati visti (D5).")
+  foreach($cellaRef in @($Ordinati | Where-Object { -not $_.Metro })){
+    [void]$RefTxt.Add("  INFO " + $cellaRef.Id + " (dial " + $cellaRef.Val["InpRiskPercent"] + "):")
+    [void]$RefTxt.Add("     (a) profitto OOS : " + (FmtE $cellaRef.ProfOOS) + "  contro metro " + (FmtE $rifMetro.ProfOOS))
+    [void]$RefTxt.Add("     (b) DD OOS       : " + (Fmt2 $cellaRef.DdOOS) + "%  contro metro " + (Fmt2 $rifMetro.DdOOS) + "%")
+    [void]$RefTxt.Add("     (c) pegg.giornata: " + (FmtPg $cellaRef.PgPctFisso) + "% (fisso)  contro metro " + (FmtPg $rifMetro.PgPctFisso) + "%")
+    [void]$RefTxt.Add("     (d) profitto IS  : " + (FmtE $cellaRef.ProfIS))
+    [void]$RefTxt.Add("     >>> il verdetto lo da' il referto del round, a mano.")
+  }
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---")
+  [void]$RefTxt.Add("  * NON APPLICA IL CANCELLO DI PORTAFOGLIO e non promuove niente (G5): nessun")
+  [void]$RefTxt.Add("    deploy esce da qui. La sedia 771531 resta com'e'. Se un dial passa, il")
+  [void]$RefTxt.Add("    referto del round produce la PROPOSTA DI DELIBERA (atto separato di Claudio,")
+  [void]$RefTxt.Add("    col check del cap C1 = 3,25% di rischio aperto).")
+  [void]$RefTxt.Add("  * G3 NON APPLICABILE (un solo motore, un solo mercato): il contesto")
+  [void]$RefTxt.Add("    cross-motore resta quello di R110 e non viene rimisurato.")
+  [void]$RefTxt.Add("  * UN SOLO REGIME: 21 mesi di indici in salita. Ogni verdetto vale PER QUESTA")
+  [void]$RefTxt.Add("    EPOCA (criteri par. 9). La prova di regime lunga sul Dow resta BLOCCATA.")
+  [void]$RefTxt.Add("  * NON misura il flottante intragiornata, non misura i sotto-periodi, non fa")
+  [void]$RefTxt.Add("    la prova di regime, non scrive una riga di MQL5.")
+  [void]$RefTxt.Add("  * Il COMPOUNDING e' il motivo per cui si MISURA invece di moltiplicare: al")
+  [void]$RefTxt.Add("    2-3% l'equity si muove, PF e DD NON scalano lineari. E il TETTO DI VOLUME")
+  [void]$RefTxt.Add("    (R109: morde all'8,9% delle operazioni) puo' rendere 'gentile' il DD ai dial")
+  [void]$RefTxt.Add("    alti: la lettura del volume massimo sta nella sezione delle celle.")
+  [void]$RefTxt.Add("")
+  if($Rilievi.Count -gt 0){
+    [void]$RefTxt.Add("--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (" + $Rilievi.Count + ")")
+    foreach($rilievoRef in $Rilievi){ [void]$RefTxt.Add("  - " + $rilievoRef) }
+    [void]$RefTxt.Add("")
+  }
+  [void]$RefTxt.Add("--- PROBLEMI (questi SI sono guasti) ---   (" + $Problemi.Count + ")")
+  if($Problemi.Count -eq 0){ [void]$RefTxt.Add("  nessuno.") }
+  foreach($problemaRef in $Problemi){ [void]$RefTxt.Add("  - " + $problemaRef) }
+  if($Fatale -ne ""){
+    [void]$RefTxt.Add("")
+    [void]$RefTxt.Add("--- FERMATO ---")
+    [void]$RefTxt.Add("  " + $Fatale)
+  }
+  [void]$RefTxt.Add("")
+  # --- L'ESITO DEL REFERTO DICE LE STESSE PAROLE DELLO SCHERMO, e i
+  #     gate ARRIVANO al codice d'uscita: la lista che decide e' LA
+  #     STESSA che finisce nel testo (checklist 84).
+  $celleKoRef = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -ne "SOLO CONTROLLO" })
+  $mismatchG0B = @($Ordinati | Where-Object { $_.G0B -like "*MISMATCH*" })
+  if($Fatale -ne ""){
+    [void]$RefTxt.Add("ESITO: FERMATO -- " + $Fatale)
+  }
+  elseif($SoloControllo){
+    if($celleKoRef.Count -gt 0 -or $Problemi.Count -gt 0){
+      [void]$RefTxt.Add("ESITO: GIRO A VUOTO CON PROBLEMI (" + $Problemi.Count + ") -- NESSUNA passata. NON lanciare la corsa vera prima di aver letto i PROBLEMI.")
+    } else {
+      [void]$RefTxt.Add("ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV, NESSUN numero. QUESTO ZIP NON E' IL ROUND.")
+    }
+  }
+  elseif($mismatchG0B.Count -gt 0){
+    [void]$RefTxt.Add("ESITO: FERMATO SUL BANCO -- G0-B MISMATCH su " + (@($mismatchG0B | ForEach-Object { $_.Id }) -join ", ") + ": il banco NON ha riprodotto R110 a parita' di tutto (criteri D3, FATALE). I numeri di questo giro NON si leggono come round; la raccolta c'e' tutta e il mismatch e' dichiarato riga per riga nei PROBLEMI. E' una notizia piu' grossa del round: referto suo.")
+  }
+  elseif($celleKoRef.Count -gt 0){
+    [void]$RefTxt.Add("ESITO: PARZIALE -- " + $celleKoRef.Count + " celle su " + $Ordinati.Count + " NON hanno prodotto i numeri (elenco qui sopra), piu' " + $Problemi.Count + " problemi. NON e' un round completo.")
+  }
+  elseif($Problemi.Count -gt 0){
+    [void]$RefTxt.Add("ESITO: COMPLETO CON PROBLEMI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi, ma ci sono " + $Problemi.Count + " problemi. I numeri si leggono ACCANTO ai problemi, non invece dei problemi.")
+  }
+  elseif($Rilievi.Count -gt 0){
+    [void]$RefTxt.Add("ESITO: COMPLETO CON RILIEVI -- tutte e " + $Ordinati.Count + " le celle hanno prodotto i numeri attesi. I " + $Rilievi.Count + " rilievi sono RISULTATI del round, non guasti.")
+  }
+  else{
+    [void]$RefTxt.Add("ESITO: OK -- tutte le celle hanno prodotto i numeri attesi, nessun problema e nessun rilievo in elenco.")
+  }
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("--- COME SI RIPRENDE ---")
+  [void]$RefTxt.Add('  una cella sola : ... & $p -Pin <PIN> -SoloCella R112_02_short_r2.txt')
+  [void]$RefTxt.Add('  rifare cio'' che c''e'' gia'' : aggiungi -Rifai')
+  [void]$RefTxt.Add("  >>> il 00_metro rigira SEMPRE: e' il denominatore e porta G0-B e G0-C.")
+  [void]$RefTxt.Add("  >>> i tre puntini stanno per IL BLOCCO INTERO della riga di lancio, con il")
+  [void]$RefTxt.Add("      suo irm e la sua guardia: si riprende da RIGA_R112_DA_MANDARE.md.")
+  [void]$RefTxt.Add('  >>> senza -CriteriFirmati: se una ripresa esce con codice 2, il file dei')
+  [void]$RefTxt.Add('      criteri al pin porta (ancora, o di nuovo) il lucchetto: si legge il')
+  [void]$RefTxt.Add('      documento, NON si aggira lo switch.')
+
+  Set-Content -LiteralPath $Referto -Value ($RefTxt -join "`r`n") -Encoding UTF8
+  if(Test-Path -LiteralPath $Zip){ Remove-Item -LiteralPath $Zip -Force -ErrorAction SilentlyContinue }
+  Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $Zip -Force
+}catch{
+  Write-Host ("!!! RACCOLTA PARZIALE: " + $_.Exception.Message) -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "=====================================================================" -ForegroundColor White
+Write-Host "  R112 - FINE" -ForegroundColor White
+function RigaFinale([string]$percorsoFinale,[string]$codaFinale){
+  if(Test-Path -LiteralPath $percorsoFinale){ Write-Host ("   " + $percorsoFinale + "   " + $codaFinale) -ForegroundColor White }
+  else                                      { Write-Host ("   " + $percorsoFinale + "   <<< NON ESISTE") -ForegroundColor Red }
+}
+RigaFinale $Cart    ""
+RigaFinale $Zip     "<- e' questo che mi mandi"
+RigaFinale $Referto "<- la riga 'data:' deve essere di ADESSO, la riga 'modo:' dice se e' il round o un giro a vuoto"
+Write-Host "=====================================================================" -ForegroundColor White
+if($SoloControllo){
+  Write-Host ("  MODO: " + $Modo + " -- GIRO A VUOTO. NESSUNA passata, NESSUN CSV, NESSUN numero") -ForegroundColor Yellow
+  Write-Host ("        di round. Anteprime .ini attese: " + $Ordinati.Count + ". G0-B, G0-C e peggior") -ForegroundColor Yellow
+  Write-Host  "        giornata: NON ESEGUITI, ed e' giusto cosi'. (G0-A l'antenato SI:" -ForegroundColor Yellow
+  Write-Host  "        gira PRIMA di MT5 ed e' gia' passato.) QUESTO ZIP NON E' IL ROUND." -ForegroundColor Yellow
+} else {
+  Write-Host ("  MODO: " + $Modo) -ForegroundColor White
+  Write-Host ("  ATTESI:  " + (2*$Lavori.Count) + " CSV (" + $Lavori.Count + " celle x IS/OOS), " + $CelleAttese + " righe l'uno, " + (4*$Lavori.Count) + " passate, " + (2*$Lavori.Count) + " per-trade.") -ForegroundColor White
+}
+foreach($cellaFinale in $Ordinati){
+  $coloreFinale = "Green"; if($cellaFinale.Esito -ne "OK" -and $cellaFinale.Esito -ne "SOLO CONTROLLO"){ $coloreFinale = "Yellow" }
+  Write-Host ("   " + $cellaFinale.Id.PadRight(14) + " " + $cellaFinale.Esito) -ForegroundColor $coloreFinale
+  if(-not $SoloControllo){
+    $coloreG0B = if($cellaFinale.G0B -like "*MISMATCH*"){ "Red" } elseif($cellaFinale.G0B -like "*NON ESEGUITO*"){ "Yellow" } elseif($cellaFinale.G0B -like "IS: OK*"){ "Green" } else { "Gray" }
+    Write-Host ("     G0-B: " + $cellaFinale.G0B) -ForegroundColor $coloreG0B
+    Write-Host ("     peggior giornata OOS: " + $(if($cellaFinale.PtStato -like "MISURATA*"){ $cellaFinale.PgData + " " + (FmtPg $cellaFinale.PgPctFisso) + "% fisso / " + (FmtPg $cellaFinale.PgPctEq) + "% eq (pavimento dei CHIUSI)" } else { $cellaFinale.PtStato })) -ForegroundColor Gray
+  }
+}
+if($Rilievi.Count -gt 0){
+  Write-Host ""
+  Write-Host "   RILIEVI (risultati del round, NON guasti):" -ForegroundColor Yellow
+  foreach($rilievoFin in $Rilievi){ Write-Host ("    - " + $rilievoFin) -ForegroundColor Yellow }
+}
+if($Problemi.Count -gt 0){
+  Write-Host ""
+  Write-Host "   PROBLEMI DA LEGGERE:" -ForegroundColor Red
+  foreach($problemaFin in $Problemi){ Write-Host ("    - " + $problemaFin) -ForegroundColor Red }
+}
+Write-Host ""
+# =====================================================================
+#  L'ESITO IN CONSOLE DICE LE STESSE PAROLE DEL REFERTO, ogni ramo
+#  finisce con un exit ESPLICITO, e i gate ARRIVANO al codice d'uscita
+#  (checklist 84: la lista dei problemi che decide e' la stessa scritta
+#  nel referto). CODICI: 0 = OK / COMPLETO CON RILIEVI; 1 = parziale,
+#  fermato, con problemi, G0-B mismatch, o selettore a vuoto;
+#  2 = criteri non firmati.
+# =====================================================================
+if($Fatale -ne ""){ Write-Host ("ESITO: FERMATO -- " + $Fatale) -ForegroundColor Red; exit 1 }
+$celleKoFinali = @($Ordinati | Where-Object { $_.Esito -ne "OK" -and $_.Esito -ne "SOLO CONTROLLO" })
+$mismatchFinali = @($Ordinati | Where-Object { $_.G0B -like "*MISMATCH*" })
+if($SoloControllo){
+  if($celleKoFinali.Count -gt 0 -or $Problemi.Count -gt 0){
+    Write-Host ("ESITO: GIRO A VUOTO CON PROBLEMI (" + $Problemi.Count + ") -- NESSUNA passata, e c'e' da leggere il referto") -ForegroundColor Yellow
+    exit 1
+  }
+  Write-Host "ESITO: GIRO A VUOTO COMPLETATO -- NESSUNA passata, NESSUN CSV. QUESTO ZIP NON E' IL ROUND." -ForegroundColor Green
+  exit 0
+}
+if($mismatchFinali.Count -gt 0){
+  Write-Host ("ESITO: FERMATO SUL BANCO -- G0-B MISMATCH (il banco non riproduce R110, criteri D3). Lo zip esiste: mandalo, e' la notizia del giro.") -ForegroundColor Red
+  exit 1
+}
+if($celleKoFinali.Count -gt 0){
+  Write-Host ("ESITO: PARZIALE (" + $celleKoFinali.Count + " celle su " + $Ordinati.Count + " non hanno prodotto i numeri, " + $Problemi.Count + " problemi) -- lo zip esiste: mandalo") -ForegroundColor Yellow
+  exit 1
+}
+if($Problemi.Count -gt 0){
+  Write-Host ("ESITO: COMPLETO CON PROBLEMI (" + $Problemi.Count + ") -- i numeri ci sono TUTTI, ma vanno letti ACCANTO ai problemi. Lo zip esiste: mandalo.") -ForegroundColor Yellow
+  exit 1
+}
+if($Rilievi.Count -gt 0){
+  Write-Host ("ESITO: COMPLETO CON RILIEVI (" + $Rilievi.Count + " rilievi da leggere nel referto, nessuna cella mancante e nessun guasto)") -ForegroundColor Green
+  exit 0
+}
+Write-Host "ESITO: OK" -ForegroundColor Green
+exit 0
