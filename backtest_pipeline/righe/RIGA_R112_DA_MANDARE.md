@@ -11,9 +11,10 @@ viva **771531**, 0,65% in campo sul 100k). **Quattro celle**:
 | `02_short_r2` | solo S | **2,0** | 763420/763421 | la scala del dial, primo gradino |
 | `03_short_r3` | solo S | **3,0** | 763430/763431 | il gradino di pari-DD atteso (7,83/2,66 ≈ 2,9) |
 
-**Criteri**: `risultati_archivio/R112_CRITERI.md` — 🔴 **NON ANCORA FIRMATI**
-(sei decisioni, § 10; il **lucchetto della firma** sta in **due punti** del file:
-titolo e § 10). **La corsa vera parte solo a criteri firmati** — vedi il blocco 2.
+**Criteri**: `risultati_archivio/R112_CRITERI.md` — ✅ **FIRMATI** ("**FIRMO
+R112**", Claudio, 26/08/2026 sera — commit `f2a5764`): il **lucchetto della
+firma** è stato tolto da **tutti e due** i punti in cui stava (titolo e § 10),
+quindi la corsa vera **parte da sola**, senza switch — vedi il blocco 2.
 **Driver**: `righe/RIGA_R112_EMADOW_CONTRATTO.ps1` (marcatore `MARCATORE_RIGA_R112_v1`).
 **File prova**: `prove/R112_*.txt` — **quattro**.
 
@@ -73,9 +74,12 @@ il driver, i **4** file prova `R112_*.txt`, i criteri, i **2 antenati R110**
 (`R110_EMADOW_00_metro.txt`, `R110_EMADOW_02_short.txt`) **e i 4 CSV di
 riferimento G0-B in `prove/R110_CSV_EMADOW/`**
 (`ABTG_EMA200_U30USD_{IS,OOS}_{00_metro,02_short}.csv`).
-🔴 **Alla data di stesura di questa pagina la cartella `prove/R110_CSV_EMADOW/`
-NON è ancora in repo**: va committata (copiando i 4 CSV dallo zip di R110)
-**prima** di assegnare il pin, o il driver si ferma allo scarico.
+🔴 **Attenzione, difetto trovato (e riparato nell'albero di lavoro) il 26/08**:
+i CSV erano stati committati sotto un **percorso raddoppiato**
+(`prove/backtest_pipeline/prove/R110_CSV_EMADOW/` — commit `460d615`). Lo
+spostamento al percorso giusto è **in staging, non ancora committato**: il
+commit che lo contiene deve entrare nel pin, o il driver si ferma allo scarico
+dei riferimenti (e fermarsi lì è il comportamento giusto).
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
 silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola per un
@@ -145,8 +149,9 @@ commit congelato.
 
 E poi, in ordine:
 
-- `criteri: ...` — **prima della firma dirà `NON FIRMATI`**, ed è giusto così: il
-  giro a vuoto parte comunque. Dopo la firma deve dire `FIRMATI`;
+- `criteri: FIRMATI (nessun lucchetto nel file al pin)` — **e dev'essere
+  questa**: se legge `NON FIRMATI` il file dei criteri al pin è tornato col
+  lucchetto, e la corsa vera si fermerebbe con codice 2;
 - `driver generico PINNATO (...), MaxBars alzato, AllowLiveTrading=false x2`;
 - `4 file prova + 2 antenati R110 + 4 CSV riferimento G0-B scaricati al pin, righe vive verificate (46 ovunque)`;
 - `gate dell'ANTENATO: ogni cella e' la copia riga per riga del suo file prova R110, salvo i delta dichiarati (catena R103 -> R110 -> R112)`;
@@ -160,18 +165,19 @@ E poi, in ordine:
 
 ---
 
-## 2️⃣ POI la corsa vera — **parte solo a criteri firmati**
+## 2️⃣ POI la corsa vera — **le sei decisioni sono già firmate**
 
-Il driver cerca il **lucchetto della firma** nel file dei criteri **al pin, in
-tutto il file** (oggi sta in **due punti**: titolo e § 10). Finché c'è, la corsa
-vera esce con **codice 2** e non tocca MT5 — ed è il comportamento giusto, non
-un guasto: **si firma il documento, non si aggira il gate**. Quando Claudio
-firma ("FIRMO R112") e il lucchetto viene tolto **da tutto il file**, questo
-stesso blocco parte da solo — **nessuno switch di bypass sta in questa pagina**
-(checklist 82: uno switch lasciato "tanto è innocuo" diventa un bypass
-permanente). La *firma in riga* (`-CriteriFirmati`) esiste per il solo caso
-"file col lucchetto e firma data a voce", finisce scritta nel referto, e su un
-file già firmato è **inerte** (e il referto lo dice).
+Il gate si apre da solo: il driver cerca il **lucchetto della firma** nel file
+dei criteri **al pin, in tutto il file**, e nel file firmato ("FIRMO R112",
+26/08 sera) non lo trova più — quindi questo blocco parte **senza switch**, e
+**nessuno switch di bypass sta in questa pagina** (checklist 82: uno switch
+lasciato "tanto è innocuo" diventa un bypass permanente).
+
+> ⚠️ **Se la corsa vera uscisse con codice 2**, non è un guasto: vuol dire che
+> il file dei criteri al pin è tornato col lucchetto. **Si legge il documento,
+> non si aggira il gate.** La *firma in riga* (`-CriteriFirmati`) esiste per il
+> solo caso "file col lucchetto e firma data a voce", finisce scritta nel
+> referto, e su un file già firmato è **inerte** (e il referto lo dice tale).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
@@ -239,7 +245,7 @@ Cartella e zip sul Desktop: `R112_EMADOW_CONTRATTO_<MODO>_<data>_<ora>` — dent
 |---|---|---|
 | **0** | OK / COMPLETO CON RILIEVI (i rilievi sono risultati, non guasti) | manda lo zip |
 | **1** | parziale, fermato, con problemi, **G0-B MISMATCH** (fatale ma la raccolta c'è tutta), o selettore a vuoto | **manda lo zip lo stesso** e leggi i PROBLEMI |
-| **2** | **criteri non firmati** (solo la corsa vera; il giro a vuoto parte comunque) | leggi `R112_CRITERI.md` § 10, firma, rilancia |
+| **2** | **il file dei criteri al pin porta il lucchetto** (solo la corsa vera; il giro a vuoto parte comunque). Coi criteri già firmati NON deve succedere: se succede, il file è **tornato** col lucchetto | si legge il documento, **non** si aggira il gate |
 
 ---
 
@@ -286,16 +292,22 @@ pagina intanto può essersi riempita di storia — pin bruciati in tabella).
 ### E la firma dei criteri
 
 Il gate del driver cerca una **stringa letterale** dentro `R112_CRITERI.md`, in
-**tutto il file**. Firmare vuol dire **toglierla da tutto il file**, non solo
-dal titolo: adesso ce ne sono **due** (titolo e § 10). Il controllo è un
-conteggio, non un colpo d'occhio (il token si compone, mai scritto per esteso —
-checklist 82):
+**tutto il file**. I criteri sono **già firmati** (26/08 sera): prima della
+firma il lucchetto stava in **due punti** (titolo e § 10), e firmare ha voluto
+dire toglierlo **da tutto il file**. Il controllo è un conteggio, non un colpo
+d'occhio (il token si compone, mai scritto per esteso — checklist 82), e **deve
+restare a zero**:
 
 ```bash
 TOKF='[DA '"FIRMARE]"
 F=backtest_pipeline/risultati_archivio/R112_CRITERI.md
-grep -cF "$TOKF" "$F"    # PRIMA della firma: 2   ·   DOPO la firma: DEVE dare 0
+grep -cF "$TOKF" "$F"    # oggi, a criteri FIRMATI: DEVE dare 0 (prima della firma dava 2)
 ```
+
+⚠️ Nota d'igiene (checklist 45/82): i commenti in testa ai quattro file prova
+`R112_*.txt` — scritti prima della firma — nominano ancora il lucchetto per
+esteso. Il gate legge **solo** `R112_CRITERI.md`, quindi non morde; ma a un
+eventuale ri-pin conviene ripulire anche quelle righe di prosa.
 
 E si prova **nei due versi** (checklist 82): col lucchetto tolto la corsa vera
 deve **partire senza switch**; col lucchetto rimesso deve tornare a **uscita 2**.

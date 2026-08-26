@@ -13,12 +13,15 @@
 #             EMADOW SHORT" -- dopo il titolo di R110 (EMADOW short:
 #             OOS PF 1,891 su n 302, DD 2,66% contro 7,83% della sedia).
 #
-#  >>> I CRITERI SONO DA FIRMARE (SEI decisioni, par. 10). Questo driver
-#      LEGGE il file dei criteri al pin e, se ci trova ancora la stringa
-#      del lucchetto (composta nel codice, MAI scritta per esteso qui:
-#      checklist 82), la CORSA VERA non parte (exit 2). Il GIRO A VUOTO
-#      parte lo stesso. -CriteriFirmati e' la firma IN RIGA di Claudio;
-#      su un file gia' firmato e' INERTE e il referto lo dice.
+#  >>> LA FIRMA DEI CRITERI SI LEGGE NEL FILE AL PIN, NON SI RICORDA:
+#      se il driver ci trova ancora la stringa del lucchetto (composta
+#      nel codice, MAI scritta per esteso qui: checklist 82), la CORSA
+#      VERA non parte (exit 2); il GIRO A VUOTO parte lo stesso.
+#      [Alla stesura di questa riga i criteri risultano FIRMATI: "FIRMO
+#      R112", Claudio 26/08/2026 sera, lucchetto tolto da tutto il file
+#      -- ma fa fede SOLO cio' che il gate legge al pin, non questa
+#      nota.] -CriteriFirmati e' la firma IN RIGA di Claudio; su un
+#      file gia' firmato e' INERTE e il referto lo dice.
 #
 #  DA DOVE NASCE, dichiarato: e' RIGA_R110_LATI_VIVI.ps1
 #  (MARCATORE_RIGA_R110_v1, girata il 25-26/08, 12 celle 0 guasti)
@@ -412,6 +415,14 @@ function FmtE($valore){
 function FmtPg($valore){
   if($null -eq $valore){ return "n/d" }
   if([double]$valore -ge 99.0){ return "n/d" }
+  return ([double]$valore).ToString("+0.00;-0.00;0.00",$INV)
+}
+#  L'euro della peggior giornata si stampa COI CENTESIMI (le top-3 li
+#  portano gia': due formati diversi per lo stesso numero sarebbero il
+#  difetto 83 in miniatura). Sentinella come FmtE (-999999 -> n/d).
+function FmtEuroCent($valore){
+  if($null -eq $valore){ return "n/d" }
+  if([double]$valore -le -999998.0){ return "n/d" }
   return ([double]$valore).ToString("+0.00;-0.00;0.00",$INV)
 }
 function NumInv($testoNumero){
@@ -1385,7 +1396,7 @@ foreach($cellaCorr in $Ordinati){
     #  G0-C-bis, identita' di gamba, riconciliazione, peggior giornata.
     AnalisiPerTrade $cellaCorr $avvioCella
     if($cellaCorr.PtStato -like "MISURATA*"){
-      Dico ("peggior giornata OOS " + $cellaCorr.Id + ": " + $cellaCorr.PgData + "  " + (FmtE $cellaCorr.PgEuro) + " EUR  (" + (FmtPg $cellaCorr.PgPctFisso) + "% su 100k fisso, " + (FmtPg $cellaCorr.PgPctEq) + "% su equity inizio giornata; " + (FmtN $cellaCorr.PgGiorni) + " giorni con chiusure)") "Yellow"
+      Dico ("peggior giornata OOS " + $cellaCorr.Id + ": " + $cellaCorr.PgData + "  " + (FmtEuroCent $cellaCorr.PgEuro) + " EUR  (" + (FmtPg $cellaCorr.PgPctFisso) + "% su 100k fisso, " + (FmtPg $cellaCorr.PgPctEq) + "% su equity inizio giornata; " + (FmtN $cellaCorr.PgGiorni) + " giorni con chiusure)") "Yellow"
       Dico ("   dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento. IS: n/d per costruzione.") "Yellow"
     } else {
       Dico ("peggior giornata OOS " + $cellaCorr.Id + ": " + $cellaCorr.PtStato) "Yellow"
@@ -1603,7 +1614,7 @@ try{
     [void]$RefTxt.Add("       per-trade     : " + $cellaRef.PtStato)
     [void]$RefTxt.Add("       riconciliaz.  : " + $cellaRef.Riconc)
     if($cellaRef.PtStato -like "MISURATA*"){
-      [void]$RefTxt.Add("       peggior giornata OOS : " + $cellaRef.PgData + "  " + (FmtE $cellaRef.PgEuro) + " EUR = " + (FmtPg $cellaRef.PgPctFisso) + "% su 100k fisso | " + (FmtPg $cellaRef.PgPctEq) + "% su equity inizio giornata")
+      [void]$RefTxt.Add("       peggior giornata OOS : " + $cellaRef.PgData + "  " + (FmtEuroCent $cellaRef.PgEuro) + " EUR = " + (FmtPg $cellaRef.PgPctFisso) + "% su 100k fisso | " + (FmtPg $cellaRef.PgPctEq) + "% su equity inizio giornata")
       [void]$RefTxt.Add("       giorni con chiusure  : " + (FmtN $cellaRef.PgGiorni) + "   le 3 peggiori: " + $cellaRef.PgTop3)
       [void]$RefTxt.Add("       tetto volume (R109)  : volume max " + (Fmt2 $cellaRef.VolMax) + " lotti, " + (Fmt2 $cellaRef.VolQuota) + "% delle righe al massimo")
       [void]$RefTxt.Add("       (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento)")
@@ -1616,6 +1627,8 @@ try{
   [void]$RefTxt.Add("  (denominatore FISSO; con un n/d il criterio (c) e' NON VALUTABILE e la")
   [void]$RefTxt.Add("  candidatura resta SOSPESA), (d) profitto IS > 0. Fra i dial che passano vince")
   [void]$RefTxt.Add("  il PIU' BASSO (D2-bis). Vietato aggiungere dial a risultati visti (D5).")
+  [void]$RefTxt.Add("  (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa")
+  [void]$RefTxt.Add("   e' un pavimento -- vale per ogni riga (c) qui sotto)")
   foreach($cellaRef in @($Ordinati | Where-Object { -not $_.Metro })){
     [void]$RefTxt.Add("  INFO " + $cellaRef.Id + " (dial " + $cellaRef.Val["InpRiskPercent"] + "):")
     [void]$RefTxt.Add("     (a) profitto OOS : " + (FmtE $cellaRef.ProfOOS) + "  contro metro " + (FmtE $rifMetro.ProfOOS))
