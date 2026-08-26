@@ -22,10 +22,20 @@
   massimi) e `PROPOSTA_GUARDIAN_FTMO` (10 decisioni, "FIRMO PRESET
   GUARDIAN FTMO"). Claudio orientato a taglia alta: il milione non si
   compra, si scala (supplemento dossier).
-- 📐 **R113 BOZZA PRONTA** (`R113_CRITERI.md` [DA FIRMARE], 8 decisioni,
-  "FIRMO R113"): prova di regime SUPNAS su 6 finestre NASUSD_EXT, lettura
-  IPOTESI-S pre-dichiarata. Dopo firma: 18 file prova + driver (SENZA
-  walkforward_generico: finestre uniche, niente split) + verificatore.
+- 📐 **R113 FIRMATO E PRONTO AL LANCIO** ("FIRMO R113" + "FIRMO GUARDIAN"
+  ~00:10): criteri firmati, 18 file prova, driver con fabbrica .ini
+  propria (no walkforward), verificatore FAIL->CORRETTO (3 difetti,
+  checklist 89/89-bis/89-ter: spread dichiarato NON MISURATO - il banco
+  _EXT potrebbe essere senza attrito -, elenco attesi fuori dal try,
+  ripiego CSV che poteva leggere il banco sbagliato). **PIN `9ddf37b`**,
+  stringhe consegnate in chat (blocchi 1+2, MT5 chiuso, stima 10-25 min).
+- 📨 **TRE MAIL PROP INVIATE da Claudio** (~23:50-00:00): FTMO, FundedNext
+  (auto-ack 12-24h), Alpha — 5 domande su misura ciascuna. Le risposte
+  scritte decidono la classifica (girarle in chat appena arrivano).
+- 🖊️ **"FIRMO GUARDIAN"**: preset FTMO firmato con le 10 decisioni,
+  compresa D9 versione raccomandata (soglie nuove provate PRIMA sul 100k).
+  I 5 prerequisiti (D10) restano da eseguire.
+- 💰 Stima 5×200k archiviata (`STIMA_GUADAGNI_5PROP_2026-08-27.md`).
 - 📈 Pagella 26/08: massimo storico 100k (100.777,29), 7/8 vincenti.
 - ⚠️ **27-28/08 Jackson Hole**: nessun lancio live, Guardian di guardia.
 
