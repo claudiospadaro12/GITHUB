@@ -1,0 +1,120 @@
+=====================================================================
+ REFERTO -- MISURE LAMPO DEL CANCELLO ZERO _EXT
+=====================================================================
+data: 2026-08-26 18:04:37   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+avvio: 2026-08-26 18:03:23   durata: 1.23 min
+macchina: DESKTOP-H4D7CAJ   utente: Master
+pin: 03268a291e922f79b4e32a75e7bef2fa279048ea
+strumento: histdata_m1.py HD-M1-v4 (scaricato al pin, autotest 11/11)
+python: C:\Users\Master\AppData\Local\Programs\Python\Python314\python.exe  3.14.7
+RAM libera all'avvio: 4319.09 MB (soglia 2000 MB)
+
+!!! QUESTA CORSA NON FIRMA NIENTE. Il cancello zero resta 0,05% e i
+    tre indici _EXT restano IN FRIGO. Qui ci sono i numeri che
+    servono a decidere fra metro assoluto e metro relativo, e basta.
+
+!!! I DATI SONO DI HISTDATA, NON DI BCM. La vol misurata qui e' quella
+    del feed esterno: sul periodo comune i due feed hanno per
+    definizione range simili, ma il numero NON e' BCM. Dichiarato.
+
+--- LE FONTI, SIMBOLO PER SIMBOLO (nessuno sparisce) ---
+  NASUSD   MISURABILE               CSV Formato1 in C:\Users\Master\histdata_m1
+  225JPY   MISURABILE               CSV Formato1 in C:\Users\Master\histdata_m1
+  SPXUSD   MISURABILE               CSV Formato1 in C:\Users\Master\histdata_m1
+  EURUSD   MISURABILE               7 ZIP in C:\Users\Master\abtg_storico_esterno\zip
+
+--- MISURA 1: VOLATILITA' ORARIA (range H1 medio, % del prezzo) ---
+  Il perimetro della diff agli atti e' il PERIODO IN CUI IL NATIVO BCM
+  ESISTE: dal 26/09/2024 in poi. Percio' la colonna da leggere e'
+  'vol 2025' (l'unico anno intero dentro quel periodo). Il TOTALE e'
+  su tutta la finestra del CSV e comprende anni in cui il confronto
+  col nativo non esiste: si stampa per contesto, non per decidere.
+
+  SIM      diff atti  vol TOTALE   vol 2025     rap/TOT    rap/2025   metro 0,20 x vol (SOLO INFORMATIVO)
+  NASUSD   0.0662%    0.3616%      0.3324%      0.18       0.20       sotto 0,20
+  225JPY   0.0871%    0.3738%      0.3747%      0.23       0.23       SOPRA 0,20
+  SPXUSD   0.0527%    0.2797%      0.2602%      0.19       0.20       SOPRA 0,20
+  EURUSD   0.0041%    0.1232%      n/d          0.03       n/d        sotto 0,20 (su TOTALE)
+
+  ATTENZIONE AL PERIMETRO, e' diverso fra indici e forex:
+   - i tre INDICI: il nativo BCM parte dal 26/09/2024, quindi la diff
+     agli atti e' misurata solo li' -> si legge 'rap/2025'.
+   - EURUSD: il nativo BCM copre tutto il periodo importato, quindi la
+     sua diff e' su tutto -> per lui il numero coerente e' 'rap/TOT'.
+  n/d = NON MISURATO (mai uno zero al posto di un buco).
+  La colonna 'metro 0,20' e' SOLO INFORMATIVA: la soglia 0,20 x vol e'
+  una PROPOSTA (REFERTO_HISTDATA par. 16.2), non un criterio firmato.
+
+  vol per anno, come letta dal referto dello strumento:
+    NASUSD: 2019=0.2657 2020=0.5198 2021=0.3032 2022=0.5292 2023=0.2888 2024=0.2751 2025=0.3324 2026=0.3758
+    225JPY: 2019=0.2801 2020=0.4594 2021=0.3229 2022=0.3684 2023=0.2982 2024=0.3901 2025=0.3747 2026=0.5526
+    SPXUSD: 2019=0.2103 2020=0.4603 2021=0.2225 2022=0.4059 2023=0.2127 2024=0.1906 2025=0.2602 2026=0.2560
+    EURUSD: 2018=0.1315 2019=0.0892 2020=0.1384 2021=0.0986 2022=0.1799 2023=0.1252 2024=0.0999
+
+--- MISURA 2: ANATOMIA DEGLI EVENTI (3) ---
+  A_20260323  centro 2026.03.23 06:00 (ora NY, come e' scritta nel CSV)
+            = 2026.03.23 11:00 ORA SERVER, +/- 3 ore
+            perche': diff max SIMULTANEA sui tre indici (72.856 pt NASUSD, 1.964 pt 225JPY, 18.615 pt SPXUSD -- import_ext_v2 19/08)
+            atteso : se e' movimento vero: range dell'ora ~3,1% su NASUSD, ~4,2% su 225JPY, ~2,9% su SPXUSD. DENTRO la finestra DST sfasata: l'ora giusta puo' essere 06:00 o 07:00 NY.
+  B_20251120  centro 2025.11.20 11:00 (ora NY, come e' scritta nel CSV)
+            = 2025.11.20 16:00 ORA SERVER, +/- 3 ore
+            perche': diff max di NASUSD_EXT (60.221,8 pt) nei DUE import: v1 18/08 e 17 anni del 25/08
+            atteso : se e' movimento vero: range dell'ora ~2,5% su NASUSD (60.221,8 pt su ~2.375.000). Fuori dalle finestre DST: lo shift +5 e' certo.
+  C_20260109  centro 2026.01.09 09:00 (ora NY, come e' scritta nel CSV)
+            = 2026.01.09 14:00 ORA SERVER, +/- 3 ore
+            perche': diff max di 225JPY_EXT nell'import v1 del 18/08 (1.526,5 pt) -- e cade FUORI dalle finestre DST, quindi il colpevole NON puo' essere il calendario: e' la pista SESSIONI (la malattia gia' vista sul GRXEUR, e la domanda D-F sulla strada del DAX)
+            atteso : se e' movimento vero: range dell'ora ~3,2% su 225JPY (1.526,5 pt su ~47.220). Ma l'ipotesi in testa qui e' la TERZA (sessione storta): guarda il CONTEGGIO delle barre per ora, non solo il range -- 60 attese, molte meno = il feed non copriva quell'ora.
+
+  COME SI LEGGE (le tre ipotesi del par. 16.1, scritte PRIMA di guardare):
+   1. BUCO DI FEED: nel riquadro 'buchi > 1 min' compare un buco che
+      copre l'ora dell'evento, o la finestra e' VUOTA -> il confronto
+      metteva a fronte ore diverse. E' l'ipotesi principale.
+   2. EVENTO VERO: le barre ci sono tutte e il range dell'ora e' del
+      2-4% -> il movimento e' reale e la diff nasce solo dall'ora di
+      disallineamento durante il botto. Si conferma sul grafico BCM.
+   3. SESSIONE STORTA: barre presenti ma il conteggio orario e' molto
+      sotto le 60 attese, o le ore intorno sono asimmetriche.
+  E c'e' una DOMANDA IN PIU', che l'evento C serve a decidere:
+   A cade DENTRO una finestra DST sfasata, C cade FUORI e in un mese in
+   cui nessuno dei due calendari e' in ora legale. Se anche C e' malato,
+   il DST NON E' LA CAUSA (o non e' l'unica) e la pista giusta e' quella
+   delle SESSIONI del feed -- la stessa malattia che ha bocciato GRXEUR,
+   cioe' la domanda D-F sulla strada del DAX. Se invece C e' sano, il
+   sospetto torna tutto sul calendario.
+
+  LETTURA GIA' FATTA DAL DRIVER (dove ha potuto):
+    nessuna finestra vuota: le barre ci sono su tutti i simboli chiesti.
+
+  L'ordine di grandezza atteso [DERIVATO dagli atti] sta scritto qui
+  sopra, riga 'atteso' di OGNI evento: e' li' e non in questa prosa
+  apposta, cosi' un evento aggiunto domani porta con se' il suo numero.
+
+--- QUELLO CHE QUESTA CORSA NON PUO' DIRE ---
+  Qui si vede UN SOLO FEED: HistData. Se le barre esterne sono sane,
+  il colpevole puo' essere il NATIVO BCM, e quello si guarda solo sui
+  grafici (par. 16.1: H1 di NASUSD/225JPY/SPXUSD e dei tre _EXT, barre
+  10:00-11:00-12:00 SERVER del giorno dell'evento, Ctrl+D).
+
+--- FILE ATTESI E FILE TROVATI ---
+  attesi : CENSIMENTO_FONTI.txt, estrai_A_20260323_nsxusd-jpxjpy-spxusd.txt, estrai_B_20251120_nsxusd-jpxjpy-spxusd.txt, estrai_C_20260109_nsxusd-jpxjpy-spxusd.txt, REFERTO_MISURE_LAMPO.txt, vol_eurusd.txt, vol_nsxusd-jpxjpy-spxusd.txt
+  trovati: CENSIMENTO_FONTI.txt, estrai_A_20260323_nsxusd-jpxjpy-spxusd.txt, estrai_B_20251120_nsxusd-jpxjpy-spxusd.txt, estrai_C_20260109_nsxusd-jpxjpy-spxusd.txt, REFERTO_MISURE_LAMPO.txt, vol_eurusd.txt, vol_nsxusd-jpxjpy-spxusd.txt
+           (+ la cartella log\ con 6 file: l'uscita cruda di ogni chiamata a python)
+           REFERTO_MISURE_LAMPO.txt e' l'ULTIMO file scritto: se stai leggendo questa riga, c'e'.
+  Il controllo di COSA C'E' DENTRO LO ZIP viene dopo questo referto (lo
+  zip contiene il referto, quindi non puo' stare qui): e' stampato a
+  schermo come 'contenuto dello zip verificato: N file'.
+  MANCANTI: nessuno
+
+--- NOTE ---
+  - P3: NASUSD: esiste una SECONDA copia leggibile in C:\Users\Master\abtg_storico_indici (347.2 MB, prima riga 2010.11.14 18:01). NON e' quella misurata: si e' usata C:\Users\Master\histdata_m1, perche' il confronto col nativo BCM esiste solo dal 26/09/2024 e perche' il file piu' corto costa meta' RAM.
+  - P3: SPXUSD: esiste una SECONDA copia leggibile in C:\Users\Master\abtg_storico_indici (298.2 MB, prima riga 2010.11.14 18:00). NON e' quella misurata: si e' usata C:\Users\Master\histdata_m1, perche' il confronto col nativo BCM esiste solo dal 26/09/2024 e perche' il file piu' corto costa meta' RAM.
+  - P3: EURUSD: C:\Users\Master\abtg_storico_esterno\EURUSD_M1.csv esiste ma e' in formato HistData grezzo (lo scrive importa_storico_esterno.ps1): NON e' una fonte per questo strumento.
+  - P5: evento A_20260323: il referto ha SOVRASCRITTO un file dello stesso minuto (nome referto_histdata_2026-08-26_1804.txt): il contenuto e' di adesso
+  - P5: evento B_20251120: il referto ha SOVRASCRITTO un file dello stesso minuto (nome referto_histdata_2026-08-26_1804.txt): il contenuto e' di adesso
+  - P5: evento C_20260109: il referto ha SOVRASCRITTO un file dello stesso minuto (nome referto_histdata_2026-08-26_1804.txt): il contenuto e' di adesso
+  - P6: EURUSD: nel referto non c'e' la riga dell'anno 2025 (il CSV non copre quell'anno?): il rapporto sul perimetro del confronto resta n/d.
+
+--- PROBLEMI ---
+  nessuno
+
+ESITO: OK -- vol misurata su 4 simboli su 4 (misurabili 4)
