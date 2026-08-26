@@ -1,5 +1,12 @@
 # 🏛️ DOSSIER PROP CANDIDATE — la prima challenge di Claudio (26/08/2026)
 
+> 📨 **AGGIORNAMENTO 27/08/2026 ~00:30 — MAIL INVIATA A FTMO** (support@ftmo.com)
+> con le 5 domande scritte (leva per strumento, margini overnight/stop-out,
+> tetti di volume, clausola 2x200k/strategie identiche, gap trading).
+> In attesa di risposta scritta: quando arriva va negli atti e decide la
+> classifica (Q1 e Q4). Fonte del testo: ANALISI_TAGLIA_FASE1 par. 6 +
+> domande del dossier.
+
 _Mandato: trovare 3-5 prop firm che reggano il NOSTRO profilo misurato, con i
 valori esatti presi dalle fonti ufficiali, la riga "cosa ci morde" e un verdetto
 preliminare per ciascuna. **Nessun acquisto e' autorizzato da questo file**:
