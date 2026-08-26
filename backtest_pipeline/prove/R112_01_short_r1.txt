@@ -1,0 +1,102 @@
+# =====================================================================
+#  R112 -- cella 01_short_r1
+#  IL CONTRATTO DELL'EMADOW: SHORT-ONLY, E A QUALE DIAL?
+#  ABTG_EMA200 su U30USD H1
+# ---------------------------------------------------------------------
+#  CRITERI:   backtest_pipeline\risultati_archivio\R112_CRITERI.md  [DA FIRMARE]
+#  DRIVER:    backtest_pipeline\righe\RIGA_R112_EMADOW_CONTRATTO.ps1  (MARCATORE_RIGA_R112_v1)
+#  ORIGINE:   Claudio, 26/08/2026 sera: "PREPARA IL ROUND CONTRATTO
+#             EMADOW SHORT" -- dopo il titolo di R110 (EMADOW short:
+#             OOS PF 1,891 su n 302, DD 2,66% contro 7,83% della sedia).
+#
+#  >>> QUESTA E' LA CELLA: 01_short_r1
+#      SOLO SHORT, dial 1,0 -- lo short di R110 riprodotto: porta il
+#      G0-B (riproduzione al centesimo) e la peggior giornata del lato.
+#
+#  >>> DICHIARAZIONE D'ONESTA' DEL ROUND: I NUMERI DI R110 SONO GIA'
+#      STATI VISTI. Le protezioni sono nei criteri (par. 0): cancello di
+#      portafoglio congelato PRIMA dei numeri nuovi, dial {1,2,3}
+#      congelati con derivazione dichiarata, divieto di dial intermedi a
+#      risultati visti (D5).
+#
+#  >>> DA DOVE VIENE QUESTO FILE, e non e' una frase: e' un GATE.
+#      Il corpo e' la COPIA RIGA PER RIGA dell'ANTENATO
+#        prove\R110_EMADOW_02_short.txt
+#      cioe' il file prova che ha girato in R110 su questa stessa sedia
+#      (a sua volta gatato contro R103: la catena e' R103 -> R110 -> R112).
+#      Gli UNICI delta ammessi, e il driver li pretende per NOME
+#      (checklist 72):
+#        - InpMagic          (blocco vergine 763410, coppia gemella)
+#      Nient'altro. I delta sono di CONTRATTO (lato, rischio, magic),
+#      MAI del motore: ne' un buffer, ne' un TP, ne' un filtro.
+#
+#  >>> LA SEDIA VIVA: magic 771531, rischio in campo 0,65% sul 100k.
+#      771531 e 771501 (sorgente) sono VIETATI qui, e il blocco 7633xx
+#      e' bruciato da R110: qui gira 763410/763411, mai usato.
+#
+#  >>> IL BANCO E' LO STESSO DI R110 (modello 4, tick reali, stessa
+#      finestra, stesso split): per questo il G0-B stavolta E'
+#      APPLICABILE -- 00_metro e 01_short_r1 devono RIPRODURRE AL
+#      CENTESIMO i CSV di R110 archiviati in prove\R110_CSV_EMADOW\.
+#
+#  >>> PEGGIOR GIORNATA: la misura nuova del round. ABTG_EMA200 esporta
+#      i per-trade nella cartella comune a ogni fine test; il driver li
+#      raccoglie e calcola le giornate (par. 4 dei criteri: chiusi per
+#      data server, doppio denominatore, limite del flottante DICHIARATO,
+#      IS n/d per costruzione).
+#
+#  >>> RISCHIO nei file: 1,00% = dial 1,00. OGNI DD di questo file va
+#      MOLTIPLICATO PER 0,65 per confrontarlo col campo. Il cap C1
+#      (3,25% di rischio aperto) e' il metro della delibera, non di
+#      questa corsa.
+#
+#  >>> IL REGIME, SCRITTO PRIMA DEI NUMERI: 21 mesi di indici in salita.
+#      Ogni verdetto vale PER QUESTA EPOCA (criteri par. 9).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=EMA200 DOW
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMagic=763410||763410||1||763411||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
