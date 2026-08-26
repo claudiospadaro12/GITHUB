@@ -1,0 +1,57 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v4
+comando : --diagnosi --simboli grxeur --cartella C:\Users\Master\abtg_diagnosi_dax\anno_2023
+data: 2026-08-26 18:29 (ora del PC)
+cartella ZIP: C:\Users\Master\abtg_diagnosi_dax\anno_2023
+
+
+================ D30EUR (grxeur) ================
+fonte: ZIP in C:\Users\Master\abtg_diagnosi_dax\anno_2023
+DIAGNOSI FUORI BANDA -- D30EUR (grxeur), banda attesa 4000.0-45000.0
+  barre fuori banda: 3681, in 8 giorni.
+  per ANNO (giorni colpiti, barre, minimo e massimo visti):
+    2023:   8 giorni,   3681 barre, min 3793.089, max 4010.359
+  i GIORNI peggiori (max 40, ordinati per barre fuori banda):
+    2023-01-02    587 barre  min 3793.089  max 3865.379
+    2023-01-03    818 barre  min 3829.079  max 3922.339
+    2023-01-04    787 barre  min 3891.049  max 3984.199
+    2023-01-05    777 barre  min 3948.349  max 3976.389
+    2023-01-06    480 barre  min 3950.359  max 4001.499
+    2023-03-20     13 barre  min 3979.499  max 4010.359
+    2023-10-23     48 barre  min 3991.359  max 4003.389
+    2023-10-27    171 barre  min 3986.539  max 4001.589
+
+MAPPA MESE-PER-MESE DELL'ORA DI APERTURA (riuso di misura_fuso):
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2023-01  apertura modale 02:00  (su 21 giorni)
+  2023-02  apertura modale 02:00  (su 19 giorni)
+  2023-03  apertura modale 02:00  (su 23 giorni)
+  2023-04  apertura modale 02:00  (su 17 giorni)
+  2023-05  apertura modale 02:00  (su 20 giorni)
+  2023-06  apertura modale 02:00  (su 20 giorni)
+  2023-07  apertura modale 02:00  (su 19 giorni)
+  2023-08  apertura modale 02:00  (su 22 giorni)
+  2023-09  apertura modale 02:00  (su 20 giorni)
+  2023-10  apertura modale 02:00  (su 21 giorni)
+  2023-11  apertura modale 02:00  (su 20 giorni)
+  2023-12  apertura modale 00:00  (su 18 giorni)
+  INVERNO 02:00   ESTATE 02:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 02:00 (su 49 settimane)
+
+D30EUR (grxeur): 159626 barre M1, dal 2023.01.02 02:00 al 2023.12.29 15:57
+  prezzo minimo 3793.08900  massimo 17003.39900
+  ALLARME: prezzi FUORI dalla banda attesa 4000.0-45000.0. Simbolo sbagliato o unita' diverse: NON IMPORTARE.
+  2023: 159626 barre
+  buchi intragiornalieri > 60 min: 460  (peggiore: 182 min dopo 2023.03.03 10:58)
+  giorni feriali SENZA nessuna barra: 4  (primi: 2023-04-07, 2023-04-10, 2023-05-01, 2023-12-25)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+ESITO: OK
+(le barre fuori banda TROVATE sono il risultato della
+ diagnosi, non un guasto di questa corsa)

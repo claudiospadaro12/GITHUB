@@ -1,0 +1,89 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v4
+comando : --diagnosi --simboli grxeur --cartella C:\Users\Master\abtg_diagnosi_dax\anno_2020
+data: 2026-08-26 18:29 (ora del PC)
+cartella ZIP: C:\Users\Master\abtg_diagnosi_dax\anno_2020
+
+
+================ D30EUR (grxeur) ================
+fonte: ZIP in C:\Users\Master\abtg_diagnosi_dax\anno_2020
+DIAGNOSI FUORI BANDA -- D30EUR (grxeur), banda attesa 4000.0-45000.0
+  barre fuori banda: 108007, in 143 giorni.
+  per ANNO (giorni colpiti, barre, minimo e massimo visti):
+    2020: 143 giorni, 108007 barre, min 2906.949, max 3603.389
+  i GIORNI peggiori (max 40, ordinati per barre fuori banda):
+    2020-06-15    839 barre  min 3052.839  max 3184.299
+    2020-06-16    840 barre  min 3188.379  max 3277.369
+    2020-06-17    840 barre  min 3231.939  max 3282.899
+    2020-06-18    840 barre  min 3223.649  max 3289.939
+    2020-06-19    838 barre  min 3227.639  max 3300.579
+    2020-06-23    840 barre  min 3252.749  max 3317.879
+    2020-06-24    840 barre  min 3179.339  max 3287.399
+    2020-06-25    840 barre  min 3148.139  max 3260.999
+    2020-06-26    840 barre  min 3191.439  max 3271.699
+    2020-06-29    840 barre  min 3170.839  max 3252.279
+    2020-06-30    840 barre  min 3208.939  max 3259.199
+    2020-07-14    840 barre  min 3276.039  max 3342.499
+    2020-07-15    839 barre  min 3338.639  max 3399.299
+    2020-07-16    840 barre  min 3339.639  max 3376.699
+    2020-07-17    838 barre  min 3352.939  max 3378.399
+    2020-07-20    838 barre  min 3330.839  max 3395.399
+    2020-07-21    840 barre  min 3379.739  max 3451.169
+    2020-07-22    834 barre  min 3359.849  max 3401.999
+    2020-07-23    840 barre  min 3333.939  max 3401.089
+    2020-07-24    839 barre  min 3294.239  max 3339.969
+    2020-07-28    840 barre  min 3278.689  max 3317.889
+    2020-07-30    840 barre  min 3174.339  max 3311.289
+    2020-07-31    840 barre  min 3144.939  max 3245.799
+    2020-08-03    839 barre  min 3172.699  max 3263.399
+    2020-08-04    840 barre  min 3229.239  max 3278.589
+    2020-08-05    839 barre  min 3251.839  max 3292.599
+    2020-08-06    837 barre  min 3223.139  max 3285.949
+    2020-08-07    840 barre  min 3218.439  max 3262.199
+    2020-08-10    840 barre  min 3238.139  max 3275.999
+    2020-08-11    840 barre  min 3280.879  max 3349.299
+    2020-08-12    837 barre  min 3308.949  max 3376.799
+    2020-08-14    834 barre  min 3274.659  max 3345.699
+    2020-08-18    834 barre  min 3275.449  max 3333.099
+    2020-08-20    835 barre  min 3256.849  max 3290.089
+    2020-08-21    838 barre  min 3220.239  max 3293.039
+    2020-09-04    836 barre  min 3234.159  max 3327.979
+    2020-09-08    834 barre  min 3240.159  max 3327.469
+    2020-11-04    836 barre  min 3012.699  max 3172.789
+    2020-11-09    833 barre  min 3245.079  max 3441.679
+    2020-11-10    834 barre  min 3375.789  max 3459.899
+    (... e altri 103 giorni)
+
+MAPPA MESE-PER-MESE DELL'ORA DI APERTURA (riuso di misura_fuso):
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2020-01  apertura modale 00:00  (su 22 giorni)
+  2020-02  apertura modale 00:00  (su 20 giorni)
+  2020-03  apertura modale 00:00  (su 22 giorni)
+  2020-04  apertura modale 00:00  (su 21 giorni)
+  2020-05  apertura modale 00:00  (su 21 giorni)
+  2020-06  apertura modale 02:00  (su 12 giorni)
+  2020-07  apertura modale 02:00  (su 22 giorni)
+  2020-08  apertura modale 02:00  (su 21 giorni)
+  2020-09  apertura modale 02:00  (su 22 giorni)
+  2020-10  apertura modale 02:00  (su 22 giorni)
+  2020-11  apertura modale 02:00  (su 21 giorni)
+  2020-12  apertura modale 02:00  (su 21 giorni)
+  INVERNO 00:00   ESTATE 02:00   differenza +120 min
+  VERDETTO FUSO: INCERTO (differenza anomala). Guardare i mesi.
+  apertura di SETTIMANA modale 02:00 (su 28 settimane)
+
+D30EUR (grxeur): 259840 barre M1, dal 2020.01.01 18:04 al 2020.12.31 15:58
+  prezzo minimo 2906.94900  massimo 13827.30000
+  ALLARME: prezzi FUORI dalla banda attesa 4000.0-45000.0. Simbolo sbagliato o unita' diverse: NON IMPORTARE.
+  2020: 259840 barre
+  buchi intragiornalieri > 60 min: 94  (peggiore: 301 min dopo 2020.02.17 12:59)
+  giorni feriali SENZA nessuna barra: 2  (primi: 2020-04-10, 2020-12-25)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+ESITO: OK
+(le barre fuori banda TROVATE sono il risultato della
+ diagnosi, non un guasto di questa corsa)

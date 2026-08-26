@@ -1,0 +1,47 @@
+CENSIMENTO DEGLI ZIP -- diagnosi del DAX HistData (grxeur)
+data: 2026-08-26 18:28:47   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+macchina: DESKTOP-H4D7CAJ   utente: Master
+pin: 386346d18f15fd05587044b07bb271d48825c142
+
+Regola: il simbolo e l'anno si leggono dal nome del CSV DENTRO lo zip
+(DAT_ASCII_GRXEUR_M1_2020.csv), come fa histdata_m1.py: cosi' uno zip
+rinominato dal browser viene riconosciuto lo stesso.
+PERIMETRO, dichiarato: si guardano i file .zip che stanno NELLA cartella,
+non nelle sue sottocartelle. Se degli zip del DAX fossero finiti in una
+sottocartella di tranche, questa corsa NON li vede e li conta MANCANTI.
+
+--- cartella: C:\Users\Master\histdata_m1 ---
+    CSV D30EUR_M1.csv: 133.3 MB, scritto il 2026-08-18 21:07
+        prima riga di dati: 2019.01.01 18:03,10692.610000,10692.610000,10687.110000,10687.110000,0
+        -> DICHIARATO, ma NON e' la fonte di questa diagnosi: contiene tutti gli
+           anni insieme e lo strumento lo preferirebbe agli ZIP. Qui si va
+           ANNO PER ANNO, copiando gli zip in cartelle usa-e-getta.
+    CSV NASUSD_M1.csv: 170.5 MB, scritto il 2026-08-18 21:08
+        prima riga di dati: 2019.01.01 18:00,6334.159000,6338.160000,6330.060000,6337.870000,0
+        -> DICHIARATO, ma NON e' la fonte di questa diagnosi: contiene tutti gli
+           anni insieme e lo strumento lo preferirebbe agli ZIP. Qui si va
+           ANNO PER ANNO, copiando gli zip in cartelle usa-e-getta.
+    zip presenti: 74
+    di cui ILLEGGIBILI: 0
+
+--- cartella: C:\Users\Master\abtg_storico_indici ---
+    CSV NASUSD_M1.csv: 347.2 MB, scritto il 2026-08-26 17:09
+        prima riga di dati: 2010.11.14 18:01,2135.000000,2135.000000,2134.500000,2134.500000,0
+        -> DICHIARATO, ma NON e' la fonte di questa diagnosi: contiene tutti gli
+           anni insieme e lo strumento lo preferirebbe agli ZIP. Qui si va
+           ANNO PER ANNO, copiando gli zip in cartelle usa-e-getta.
+    zip presenti: 0
+    di cui ILLEGGIBILI: 0
+
+--- GLI ANNI DEL DAX (grxeur) ---
+finestra chiesta: 2019 -> 2026
+    2019  PRONTO   1 zip, 3.09 MB, il piu' recente scritto il System.Object[]
+    2020  PRONTO   1 zip, 3.09 MB, il piu' recente scritto il System.Object[]
+    2021  PRONTO   1 zip, 2.06 MB, il piu' recente scritto il System.Object[]
+    2022  PRONTO   1 zip, 2.22 MB, il piu' recente scritto il System.Object[]
+    2023  PRONTO   1 zip, 1.78 MB, il piu' recente scritto il System.Object[]
+    2024  PRONTO   1 zip, 3.87 MB, il piu' recente scritto il System.Object[]
+    2025  PRONTO   1 zip, 4.05 MB, il piu' recente scritto il System.Object[]
+    2026  PRONTO   7 zip, 2.49 MB, il piu' recente scritto il System.Object[]
+
+controllo positivo nsxusd: anni in cache 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026

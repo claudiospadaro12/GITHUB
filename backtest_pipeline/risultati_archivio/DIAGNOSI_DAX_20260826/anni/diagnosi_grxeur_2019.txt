@@ -1,0 +1,46 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v4
+comando : --diagnosi --simboli grxeur --cartella C:\Users\Master\abtg_diagnosi_dax\anno_2019
+data: 2026-08-26 18:28 (ora del PC)
+cartella ZIP: C:\Users\Master\abtg_diagnosi_dax\anno_2019
+
+
+================ D30EUR (grxeur) ================
+fonte: ZIP in C:\Users\Master\abtg_diagnosi_dax\anno_2019
+DIAGNOSI FUORI BANDA -- D30EUR (grxeur), banda attesa 4000.0-45000.0
+  nessuna barra fuori banda su 325977 barre.
+
+MAPPA MESE-PER-MESE DELL'ORA DI APERTURA (riuso di misura_fuso):
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2019-01  apertura modale 00:00  (su 18 giorni)
+  2019-02  apertura modale 00:00  (su 17 giorni)
+  2019-03  apertura modale 00:00  (su 20 giorni)
+  2019-04  apertura modale 00:00  (su 18 giorni)
+  2019-05  apertura modale 00:00  (su 22 giorni)
+  2019-06  apertura modale 00:00  (su 15 giorni)
+  2019-07  apertura modale 00:00  (su 20 giorni)
+  2019-08  apertura modale 00:00  (su 20 giorni)
+  2019-09  apertura modale 00:00  (su 21 giorni)
+  2019-10  apertura modale 00:00  (su 22 giorni)
+  2019-11  apertura modale 00:00  (su 19 giorni)
+  2019-12  apertura modale 00:00  (su 18 giorni)
+  INVERNO 00:00   ESTATE 00:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 18:03 (su 35 settimane)
+
+D30EUR (grxeur): 325977 barre M1, dal 2019.01.01 18:03 al 2019.12.31 13:11
+  prezzo minimo 10386.21000  massimo 13457.21000
+  ordine di grandezza dentro la banda attesa 4000.0-45000.0: OK
+  2019: 325977 barre
+  buchi intragiornalieri > 60 min: 207  (peggiore: 181 min dopo 2019.05.27 01:59)
+  giorni feriali SENZA nessuna barra: 1  (primi: 2019-04-19)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+ESITO: OK
+(le barre fuori banda TROVATE sono il risultato della
+ diagnosi, non un guasto di questa corsa)

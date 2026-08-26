@@ -1,0 +1,173 @@
+=====================================================================
+ REFERTO -- DIAGNOSI DEL DAX HISTDATA (grxeur)
+=====================================================================
+data: 2026-08-26 18:31:22   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+avvio: 2026-08-26 18:28:46   durata: 2.59 min
+macchina: DESKTOP-H4D7CAJ   utente: Master
+pin: 386346d18f15fd05587044b07bb271d48825c142
+strumento: histdata_m1.py HD-M1-v4 (al pin, autotest verificato)
+python: C:\Users\Master\AppData\Local\Programs\Python\Python314\python.exe  3.14.7
+banda di prezzo usata: 4000.0 - 45000.0  [tabella STRUMENTI di histdata_m1.py al pin]
+modo: OFFLINE: nessun byte di dati scaricato, si sono usati solo gli zip gia' in cache
+canarino di ritmo: NON MISURATO (nessuno scarico chiesto)
+
+!!! QUESTA CORSA NON IMPORTA NIENTE E NON AUTORIZZA NIENTE.
+    Nessun simbolo _EXT e' stato creato o toccato; MT5 non e' stato
+    aperto. Il CANCELLO ZERO sugli indici _EXT resta CHIUSO e la
+    decisione D-C dice SOLO_PROVA_REGIME: usare un eventuale
+    sottoinsieme sano richiede una FIRMA a parte, che qui non c'e'.
+
+!!! I DATI SONO DI HISTDATA, NON DI BCM: spread, orari di seduta e
+    prezzi non sono quelli del broker su cui si trada.
+
+--- L'AUTORIZZAZIONE (letta al pin, non assunta) ---
+  D-F FIRMATA con VALORE=diagnosi_prima (firma di Claudio del 25/08, letta al pin): questa diagnosi E' l'azione autorizzata.
+    D-A   FONTE                  histdata                 FIRMATO
+    D-B   SIMBOLI                NASUSD,SPXUSD            FIRMATO
+    D-C   USO                    SOLO_PROVA_REGIME        FIRMATO
+    D-D   FINESTRA               2010-2026                FIRMATO
+    D-E   SOGLIA_CANARINO_ORE    20                       FIRMATO
+    D-F   STRADA_DAX             diagnosi_prima           FIRMATO
+
+--- LE TRE DOMANDE (scritte PRIMA di guardare i numeri) ---
+  Q1 i prezzi impossibili: in quali anni, e scala/valuta o spazzatura?
+     RISPOSTA: barre fuori banda negli anni: 2020, 2021, 2022, 2023. Sui giorni ELENCATI dallo strumento (che ne stampa al massimo 40 per anno): giornate INTERE fuori banda (>=500 barre in un giorno): 124; giorni con sporco isolato (<500 barre): 4. ATTENZIONE: altri 350 giorni sporchi NON sono in quell'elenco (lo strumento taglia a 40 ordinando per barre fuori banda, quindi il taglio butta via i giorni con POCHE barre = gli spike): la ripartizione qui sopra NON e' completa e Q1 resta SOSPESA.
+  Q2 la sessione ballerina: quali ore coprono i giorni, e convenzione o buchi?
+     RISPOSTA: mesi con apertura diversa dalla modale: 42 (dal 2020-06 al 2023-11); anni con densita' sotto 55.0: 7.
+  Q3 esiste un sottoinsieme sano dichiarabile?
+     RISPOSTA: NO: nessun anno misurato regge i cancelli.
+
+--- LETTURA GIA' FATTA DAL CODICE (dove i numeri bastano) ---
+  - ATTENZIONE ALLA SOGLIA, NON AI DATI: il controllo positivo nsxusd -- che e' la serie PROMOSSA -- ha densita' minima 42.0, cioe' anche LUI sotto la soglia 55.0. Vuol dire che sotto soglia ci sta il FEED (HistData non scrive i minuti senza scambi), non il DAX: i 7 anni marcati MARCIO per densita' NON sono un verdetto valido. Si rilancia la stessa riga con -SogliaDensita di poco sotto 42.0, e si dichiara il valore usato.
+  - Q1: NON concludo fra SCALA/VALUTA e SPAZZATURA. I giorni sporchi sono piu' di quanti lo strumento ne elenchi (350 oltre il taglio dei 40), e il taglio e' sbilanciato verso le giornate intere: qualunque conclusione qui sarebbe un artefatto del troncamento, non una misura. I TOTALI (barre e giorni fuori banda) restano validi e stanno nella tabella.
+  - Q2: ci sono TUTTE E DUE le cose: anni con sessione spostata ma piena (convenzione) e anni con ore mezze vuote (buchi). Vanno trattati separatamente, anno per anno: la tabella qui sotto dice quale e' quale.
+
+--- ANNO PER ANNO (grxeur) ---
+  anno      barre   fuoriB  giorni   fuori% finestra    piene     dens classe       perche'
+  2019     325977        0       0    0.000 00:00-23:00    22     45.4 MARCIO       densita' 45.4 barre/ora sotto 55.0 = BUCHI dentro le ore  [SOSPESO: la soglia boccia anche il controllo positivo]
+  2020     259840   108007     143   41.567 02:00-15:00    14     51.7 MARCIO       sporco DIFFUSO (108007 barre = 41.567% in 143 giorni); finestra 02:00-15:00 diversa dalla modale 00:00-23:00; densita' 51.7 barre/ora sotto 55.0 = BUCHI dentro le ore  [SOSPESO: la soglia boccia anche il controllo positivo]
+  2021     187516    59081     103   31.507 02:00-15:00    14     51.9 MARCIO       sporco DIFFUSO (59081 barre = 31.507% in 103 giorni); finestra 02:00-15:00 diversa dalla modale 00:00-23:00; densita' 51.9 barre/ora sotto 55.0 = BUCHI dentro le ore  [SOSPESO: la soglia boccia anche il controllo positivo]
+  2022     205728   175397     224   85.257 02:00-15:00    14     57.0 MARCIO       sporco DIFFUSO (175397 barre = 85.257% in 224 giorni); finestra 02:00-15:00 diversa dalla modale 00:00-23:00
+  2023     159626     3681       8    2.306 02:00-15:00    14     41.8 MARCIO       sporco DIFFUSO (3681 barre = 2.306% in 8 giorni); finestra 02:00-15:00 diversa dalla modale 00:00-23:00; densita' 41.8 barre/ora sotto 55.0 = BUCHI dentro le ore  [SOSPESO: la soglia boccia anche il controllo positivo]
+  2024     332439        0       0    0.000 00:00-23:00    22     46.2 MARCIO       densita' 46.2 barre/ora sotto 55.0 = BUCHI dentro le ore  [SOSPESO: la soglia boccia anche il controllo positivo]
+  2025     335844        0       0    0.000 00:00-23:00    22     46.8 MARCIO       densita' 46.8 barre/ora sotto 55.0 = BUCHI dentro le ore  [SOSPESO: la soglia boccia anche il controllo positivo]
+  2026     198175        0       0    0.000 00:00-23:00    22     47.6 MARCIO       densita' 47.6 barre/ora sotto 55.0 = BUCHI dentro le ore  [SOSPESO: la soglia boccia anche il controllo positivo]
+
+  n/d = NON MISURATO (mai uno zero al posto di un buco).
+  'finestra' = prima e ultima ora TOCCATA dal feed; 'piene' = quante di
+  quelle ore hanno almeno 30 barre in meta' dei giorni; 'dens' =
+  barre medie per ora toccata (60 = giornata piena, molto meno = buchi).
+  ATTENZIONE ALL'OROLOGIO: le ore della colonna 'finestra' sono quelle
+  SCRITTE NEL FILE HISTDATA, cioe' ORA LOCALE DI NEW YORK. NON sono ora
+  server BCM e NON sono ora italiana. Ora server BCM = NY+5 (NY+4 nelle
+  finestre in cui il DST americano e quello europeo sono sfasati); ora
+  italiana = server BCM + 1. Esempio: 02:00 NY = 07:00 server = 08:00 IT.
+  'fuoriB' e 'giorni' vengono dal referto di histdata_m1.py --diagnosi;
+  'finestra' e 'dens' dalla mappa oraria calcolata da questa riga sugli
+  ZIP (conteggio di COPERTURA: non applica il filtro OHLC del .py, quindi
+  i totali possono differire di poche barre. Dichiarato).
+
+--- PREZZI E FUSO, ANNO PER ANNO (come li ha scritti lo strumento) ---
+  2019: prezzo 10386.21 - 13457.21, ALLARME banda no, buchi>60min 207, feriali vuoti 1
+        verdetto fuso dello strumento: il feed SEGUE il DST -> ora locale di New York.
+        apertura modale mese per mese: 2019-01=00:00 2019-02=00:00 2019-03=00:00 2019-04=00:00 2019-05=00:00 2019-06=00:00 2019-07=00:00 2019-08=00:00 2019-09=00:00 2019-10=00:00 2019-11=00:00 2019-12=00:00
+  2020: prezzo 2906.95 - 13827.30, ALLARME banda SI, buchi>60min 94, feriali vuoti 2
+        verdetto fuso dello strumento: INCERTO (differenza anomala). Guardare i mesi.
+        apertura modale mese per mese: 2020-01=00:00 2020-02=00:00 2020-03=00:00 2020-04=00:00 2020-05=00:00 2020-06=02:00 2020-07=02:00 2020-08=02:00 2020-09=02:00 2020-10=02:00 2020-11=02:00 2020-12=02:00
+  2021: prezzo 3461.05 - 4414.09, ALLARME banda SI, buchi>60min 0, feriali vuoti 2
+        verdetto fuso dello strumento: il feed SEGUE il DST -> ora locale di New York.
+        apertura modale mese per mese: 2021-01=02:00 2021-02=02:00 2021-03=02:00 2021-04=02:00 2021-05=02:00 2021-06=02:00 2021-07=02:00 2021-08=02:00 2021-09=02:00 2021-10=02:00 2021-11=02:00 2021-12=02:00
+  2022: prezzo 3247.34 - 4395.06, ALLARME banda SI, buchi>60min 2, feriali vuoti 2
+        verdetto fuso dello strumento: il feed SEGUE il DST -> ora locale di New York.
+        apertura modale mese per mese: 2022-01=02:00 2022-02=02:00 2022-03=02:00 2022-04=02:00 2022-05=02:00 2022-06=02:00 2022-07=02:00 2022-08=02:00 2022-09=02:00 2022-10=02:00 2022-11=02:00 2022-12=02:00
+  2023: prezzo 3793.09 - 17003.40, ALLARME banda SI, buchi>60min 460, feriali vuoti 4
+        verdetto fuso dello strumento: il feed SEGUE il DST -> ora locale di New York.
+        apertura modale mese per mese: 2023-01=02:00 2023-02=02:00 2023-03=02:00 2023-04=02:00 2023-05=02:00 2023-06=02:00 2023-07=02:00 2023-08=02:00 2023-09=02:00 2023-10=02:00 2023-11=02:00 2023-12=00:00
+  2024: prezzo 16343.26 - 20526.30, ALLARME banda no, buchi>60min 208, feriali vuoti 1
+        verdetto fuso dello strumento: il feed SEGUE il DST -> ora locale di New York.
+        apertura modale mese per mese: 2024-01=00:00 2024-02=00:00 2024-03=00:00 2024-04=00:00 2024-05=00:00 2024-06=00:00 2024-07=00:00 2024-08=00:00 2024-09=00:00 2024-10=00:00 2024-11=00:00 2024-12=00:00
+  2025: prezzo 18809.68 - 24773.30, ALLARME banda no, buchi>60min 206, feriali vuoti 1
+        verdetto fuso dello strumento: il feed SEGUE il DST -> ora locale di New York.
+        apertura modale mese per mese: 2025-01=00:00 2025-02=00:00 2025-03=00:00 2025-04=00:00 2025-05=00:00 2025-06=00:00 2025-07=00:00 2025-08=00:00 2025-09=00:00 2025-10=00:00 2025-11=00:00 2025-12=00:00
+  2026: prezzo 21859.78 - 25903.90, ALLARME banda no, buchi>60min 120, feriali vuoti 1
+        verdetto fuso dello strumento: il feed SEGUE il DST -> ora locale di New York.
+        apertura modale mese per mese: 2026-01=00:00 2026-02=00:00 2026-03=00:00 2026-04=00:00 2026-05=00:00 2026-06=00:00 2026-07=00:00
+
+--- CONTROLLO POSITIVO: nsxusd (NASUSD), la serie PROMOSSA ---
+  anno   giorni finestra     tocc  piene     dens
+  2019      311 00:00-23:00    23     22     47.6
+  2020      312 00:00-23:00    23     22     47.2
+  2021      311 00:00-23:00    23     22     47.8
+  2022      310 00:00-23:00    23     22     47.9
+  2023      309 00:00-23:00    23     22     42.0
+  2024      313 00:00-23:00    23     22     47.2
+  2025      312 00:00-23:00    23     22     47.3
+  2026      181 00:00-23:00    23     22     47.6
+  Serve a questo: se il DAX ha densita' 40 e il Nasdaq pure, allora 40
+  e' 'come scrive HistData', non 'malato'. Se il Nasdaq sta a 59 e il
+  DAX a 40, la differenza e' del DAX.
+
+--- IL VERDETTO, TRE ESITI (regole dichiarate PRIMA della misura) ---
+  MARCIO -- nessun anno sano ne' riparabile
+
+  Le regole, e i valori con cui e' girata questa corsa:
+    SANO       = 0 barre fuori banda + finestra uguale alla MODALE della
+                 serie + densita' >= 55.0 barre/ora coperta
+    RIPARABILE = solo difetti DICHIARABILI:
+                 - sporco ISOLATO: in <= 5 giorni (si escludono per data)
+                   OPPURE <= 0.10% delle barre (si scartano le barre
+                   fuori banda). Basta UNA delle due: sono due bonifiche diverse.
+                 - e/o finestra diversa dalla modale ma DENSA (= convenzione)
+    MARCIO     = sporco diffuso (tanti giorni E tante barre), oppure
+                 densita' sotto soglia (buchi dentro le ore)
+    NON CLASSIFICABILE = manca una misura. Non e' un verdetto: e' un buco.
+  Queste soglie sono PARAMETRI di questa riga (-SogliaDensita,
+  -SogliaFuoriBanda, -MaxGiorniSporchi), NON criteri firmati: si
+  possono discutere, e i numeri grezzi qui sopra restano validi comunque.
+
+  LA CONVENZIONE DIVERSA, MISURATA: dal 2020-06 al 2023-11 l'apertura modale non e' quella della serie (00:00 ora di NEW YORK, = 05:00 ora server BCM).
+
+--- QUELLO CHE QUESTA CORSA NON PUO' DIRE ---
+  1. Vede UN SOLO FEED (HistData). Che il DAX vero di quei giorni
+     valesse X lo dicono altri feed: Dukascopy (DEUIDXEUR, strada 2
+     della D-F) o il grafico BCM nativo dal 26/09/2024 in poi.
+  2. Non dice se il DAX HistData e' lo STESSO STRUMENTO del CFD BCM:
+     fra indice e future c'e' il basis, e quello nessun orario lo cura.
+  3. Non misura il CANCELLO ZERO (diff media contro il nativo): quello
+     si misura solo importando, e importare qui e' vietato da D-F
+     finche' questa diagnosi non e' letta e firmata.
+  4. Gli anni non presenti in cache NON sono stati guardati: se il
+     referto non li nomina, non esistono per questa misura.
+  5. LA BANDA PRENDE SOLO GLI ERRORI GROSSOLANI. E' un controllo di
+     ORDINE DI GRANDEZZA (becca il fattore 1.000 o un 2.906 su un DAX
+     da 13.000), NON un giudizio sul prezzo: un anno quotato, che so,
+     a meta' valore ma dentro 4000-45000 passerebbe la banda senza
+     fiatare. Per questo il referto stampa il MINIMO e il MASSIMO di
+     ogni anno qui sopra: se un anno ha estremi che non stanno con
+     quelli degli anni vicini, e' un sospetto che la banda non vede.
+
+--- PROPOSTA PER IL PROSSIMO PASSO (proposta, NON una firma) ---
+  Se il verdetto e' SANO PARZIALE o RIPARABILE, il passo successivo NON
+  e' importare: e' scrivere in STORICO_INDICI_CRITERI.md una decisione
+  nuova che dica ESATTAMENTE quale sottoinsieme si usa (anni + ore +
+  giorni esclusi) e con quale limite d'uso. Finche' quella firma non
+  c'e', il DAX HistData resta dov'e'.
+  Se il verdetto e' MARCIO, la strada 2 della D-F (Dukascopy DEUIDXEUR
+  sulle sole finestre di regime, ~25 ore di crawl) diventa quella buona.
+
+--- FILE ATTESI E FILE TROVATI ---
+  attesi : anni\diagnosi_grxeur_2019.txt, anni\diagnosi_grxeur_2020.txt, anni\diagnosi_grxeur_2021.txt, anni\diagnosi_grxeur_2022.txt, anni\diagnosi_grxeur_2023.txt, anni\diagnosi_grxeur_2024.txt, anni\diagnosi_grxeur_2025.txt, anni\diagnosi_grxeur_2026.txt, CENSIMENTO_ZIP_DAX.txt, MAPPA_SESSIONI.txt, REFERTO_DIAGNOSI_DAX.txt, STORICO_INDICI_CRITERI.md
+  trovati: anni\diagnosi_grxeur_2019.txt, anni\diagnosi_grxeur_2020.txt, anni\diagnosi_grxeur_2021.txt, anni\diagnosi_grxeur_2022.txt, anni\diagnosi_grxeur_2023.txt, anni\diagnosi_grxeur_2024.txt, anni\diagnosi_grxeur_2025.txt, anni\diagnosi_grxeur_2026.txt, CENSIMENTO_ZIP_DAX.txt, MAPPA_SESSIONI.txt, REFERTO_DIAGNOSI_DAX.txt, STORICO_INDICI_CRITERI.md
+           (+ la cartella log\ con 9 file: l'uscita cruda di ogni chiamata a python)
+           REFERTO_DIAGNOSI_DAX.txt e' l'ULTIMO file scritto: se stai leggendo questa riga, c'e'.
+  MANCANTI: nessuno
+
+--- NOTE ---
+  nessuna
+
+--- PROBLEMI ---
+  - P8: 7 anni sono MARCIO per densita', ma la soglia 55.0 boccia anche il controllo positivo (minimo 42.0): quel pezzo di verdetto e' SOSPESO, non confermato.
+  - P8 Q1: l'elenco dei giorni sporchi e' TRONCATO -- 350 giorni oltre il quarantesimo non compaiono nel referto dello strumento, e il taglio (ordinato per barre) toglie proprio gli spike. La divisione fra GIORNATE INTERE e SPAZZATURA e' misurata solo sui giorni elencati: Q1 NON e' sciolta. Per scioglierla serve la lista completa dell'anno colpito (i suoi numeri totali, quelli si', sono nella tabella).
+
+ESITO: PARZIALE -- 2 problemi, anni diagnosticati 8 su 8 chiesti.
+       'non misurabile' E' GIA' UNA RISPOSTA: questo referto va mandato lo stesso.

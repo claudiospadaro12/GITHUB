@@ -1,0 +1,90 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v4
+comando : --diagnosi --simboli grxeur --cartella C:\Users\Master\abtg_diagnosi_dax\anno_2021
+data: 2026-08-26 18:29 (ora del PC)
+cartella ZIP: C:\Users\Master\abtg_diagnosi_dax\anno_2021
+
+
+================ D30EUR (grxeur) ================
+fonte: ZIP in C:\Users\Master\abtg_diagnosi_dax\anno_2021
+DIAGNOSI FUORI BANDA -- D30EUR (grxeur), banda attesa 4000.0-45000.0
+  barre fuori banda: 59081, in 103 giorni.
+  per ANNO (giorni colpiti, barre, minimo e massimo visti):
+    2021: 103 giorni,  59081 barre, min 3461.049, max 4007.539
+  i GIORNI peggiori (max 40, ordinati per barre fuori banda):
+    2021-01-04    737 barre  min 3529.039  max 3610.389
+    2021-01-05    750 barre  min 3523.349  max 3574.499
+    2021-01-06    795 barre  min 3546.339  max 3624.199
+    2021-01-07    671 barre  min 3602.349  max 3635.389
+    2021-01-08    732 barre  min 3627.039  max 3657.499
+    2021-01-11    716 barre  min 3593.369  max 3640.499
+    2021-01-12    715 barre  min 3589.039  max 3633.389
+    2021-01-14    677 barre  min 3620.389  max 3646.389
+    2021-01-15    751 barre  min 3571.349  max 3633.379
+    2021-01-22    669 barre  min 3568.369  max 3612.059
+    2021-01-25    750 barre  min 3538.339  max 3623.199
+    2021-01-26    679 barre  min 3533.059  max 3607.499
+    2021-01-27    815 barre  min 3500.339  max 3594.079
+    2021-01-28    818 barre  min 3472.349  max 3573.199
+    2021-01-29    839 barre  min 3461.049  max 3532.379
+    2021-02-01    745 barre  min 3500.039  max 3546.199
+    2021-02-02    682 barre  min 3549.079  max 3605.089
+    2021-02-17    671 barre  min 3693.549  max 3725.859
+    2021-02-18    694 barre  min 3671.349  max 3710.999
+    2021-02-19    671 barre  min 3680.339  max 3719.339
+    2021-02-23    783 barre  min 3641.389  max 3706.499
+    2021-02-24    704 barre  min 3669.049  max 3718.089
+    2021-02-25    807 barre  min 3639.039  max 3729.199
+    2021-02-26    832 barre  min 3619.039  max 3676.389
+    2021-03-02    718 barre  min 3688.369  max 3728.339
+    2021-03-03    711 barre  min 3686.339  max 3741.349
+    2021-03-04    806 barre  min 3657.039  max 3717.079
+    2021-03-05    809 barre  min 3655.369  max 3714.499
+    2021-03-08    799 barre  min 3679.369  max 3775.089
+    2021-03-10    676 barre  min 3772.199  max 3825.199
+    2021-03-18    689 barre  min 3831.069  max 3877.199
+    2021-03-19    690 barre  min 3816.359  max 3860.369
+    2021-03-23    665 barre  min 3801.339  max 3840.499
+    2021-03-25    727 barre  min 3784.339  max 3856.039
+    2021-05-11    804 barre  min 3915.349  max 3978.499
+    2021-05-12    816 barre  min 3916.049  max 3965.349
+    2021-05-13    815 barre  min 3855.339  max 3972.059
+    2021-05-19    809 barre  min 3890.349  max 3979.089
+    2021-07-19    821 barre  min 3902.359  max 4004.549
+    2021-07-20    834 barre  min 3919.039  max 3978.039
+    (... e altri 63 giorni)
+
+MAPPA MESE-PER-MESE DELL'ORA DI APERTURA (riuso di misura_fuso):
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2021-01  apertura modale 02:00  (su 20 giorni)
+  2021-02  apertura modale 02:00  (su 20 giorni)
+  2021-03  apertura modale 02:00  (su 23 giorni)
+  2021-04  apertura modale 02:00  (su 21 giorni)
+  2021-05  apertura modale 02:00  (su 20 giorni)
+  2021-06  apertura modale 02:00  (su 21 giorni)
+  2021-07  apertura modale 02:00  (su 22 giorni)
+  2021-08  apertura modale 02:00  (su 22 giorni)
+  2021-09  apertura modale 02:00  (su 22 giorni)
+  2021-10  apertura modale 02:00  (su 21 giorni)
+  2021-11  apertura modale 02:00  (su 22 giorni)
+  2021-12  apertura modale 02:00  (su 22 giorni)
+  INVERNO 02:00   ESTATE 02:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 02:00 (su 51 settimane)
+
+D30EUR (grxeur): 187516 barre M1, dal 2021.01.04 02:00 al 2021.12.31 15:58
+  prezzo minimo 3461.04900  massimo 4414.08900
+  ALLARME: prezzi FUORI dalla banda attesa 4000.0-45000.0. Simbolo sbagliato o unita' diverse: NON IMPORTARE.
+  2021: 187516 barre
+  buchi intragiornalieri > 60 min: 0
+  giorni feriali SENZA nessuna barra: 2  (primi: 2021-04-02, 2021-12-24)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+ESITO: OK
+(le barre fuori banda TROVATE sono il risultato della
+ diagnosi, non un guasto di questa corsa)

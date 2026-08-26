@@ -1,0 +1,161 @@
+MAPPA DELLE SESSIONI -- diagnosi del DAX HistData (grxeur)
+data: 2026-08-26 18:28:47   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+
+Due misure, non una (e il perche' e' scritto nel driver):
+  ORE TOCCATE = ore con almeno 1 barra in almeno META' dei giorni del
+    periodo. Sono la FINESTRA di sessione, e ci sono sempre se c'e' un dato.
+  ORE PIENE   = ore con almeno 30 barre in almeno META' dei giorni
+    (30 e' la stessa soglia che histdata_m1.py usa in vol_oraria per
+    dire 'ora piena'). Un anno tutto a buchi ne ha ZERO.
+DENSITA' = barre medie per ora TOCCATA: 60 = giornata piena; molto meno =
+buchi dentro le ore. E' il numero che separa le due ipotesi di Q2:
+  finestra DIVERSA + densita' ALTA -> cambio di CONVENZIONE (sessione spostata)
+  finestra UGUALE  + densita' BASSA -> BUCHI DI FEED
+Le ore sono quelle SCRITTE NEL FILE, cioe' ora locale di New York
+(ora server BCM = NY+5, o NY+4 nelle finestre DST sfasate).
+
+=== grxeur 2019 ===
+  ANNO: 312 giorni con barre, 326032 righe lette, finestra 00:00-23:00 (23 ore toccate, 22 ore PIENE da 30 barre), densita' 45.4 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 0
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2019-01   27  00:00-23:00    23    22     28738    1064.4  46.3
+  2019-02   24  00:00-23:00    23    22     25082    1045.1  45.4
+  2019-03   26  00:00-23:00    22    22     26794    1030.5  46.7
+  2019-04   25  00:00-23:00    23    22     25505    1020.2  44.4
+  2019-05   27  00:00-23:00    23    22     28376    1051.0  45.7
+  2019-06   25  00:00-23:00    23    22     25750    1030.0  44.8
+  2019-07   27  00:00-23:00    23    22     28797    1066.6  46.4
+  2019-08   26  00:00-23:00    23    22     28503    1096.3  47.7
+  2019-09   26  00:00-23:00    23    22     27475    1056.7  45.9
+  2019-10   27  00:00-23:00    23    22     29776    1102.8  47.9
+  2019-11   25  00:00-23:00    22    22     26174    1047.0  47.6
+  2019-12   27  00:00-23:00    22    22     25062     928.2  42.2
+
+=== grxeur 2020 ===
+  ANNO: 283 giorni con barre, 259840 righe lette, finestra 02:00-15:00 (14 ore toccate, 14 ore PIENE da 30 barre), densita' 51.7 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 108007
+  e in quali ORE stanno: 02:00=7651  03:00=8449  04:00=8256  05:00=7945  06:00=7770  07:00=7635  08:00=7801  09:00=8044  10:00=8258  11:00=7925  12:00=7169  13:00=6690  14:00=6996  15:00=7418
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2020-01   27  00:00-23:00    22    22     28686    1062.4  48.3
+  2020-02   24  00:00-23:00    22    22     26101    1087.5  49.4
+  2020-03   27  00:00-23:00    22    22     28845    1068.3  48.6
+  2020-04   25  00:00-23:00    22    22     27482    1099.3  50.0
+  2020-05   26  00:00-23:00    22    22     27749    1067.3  48.2
+  2020-06   23  02:00-15:00    14    14     23014    1000.6  57.3
+  2020-07   23  02:00-15:00    14    14     18289     795.2  56.8
+  2020-08   21  02:00-15:00    14    14     16900     804.8  57.5
+  2020-09   22  02:00-15:00    14    14     17212     782.4  55.9
+  2020-10   22  02:00-15:00    14    14     16230     737.7  52.7
+  2020-11   21  02:00-15:00    14    14     15606     743.1  53.1
+  2020-12   22  02:00-15:00    14    14     13726     623.9  44.6
+
+=== grxeur 2021 ===
+  ANNO: 258 giorni con barre, 187516 righe lette, finestra 02:00-15:00 (14 ore toccate, 14 ore PIENE da 30 barre), densita' 51.9 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 59081
+  e in quali ORE stanno: 02:00=4281  03:00=5073  04:00=4629  05:00=4261  06:00=4163  07:00=4112  08:00=4269  09:00=4665  10:00=4857  11:00=4326  12:00=3583  13:00=3561  14:00=3550  15:00=3751
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2021-01   20  02:00-15:00    14    14     14157     707.9  50.6
+  2021-02   20  02:00-15:00    14    14     13168     658.4  47.0
+  2021-03   23  02:00-15:00    14    14     14789     643.0  45.9
+  2021-04   21  02:00-15:00    14    12     11937     568.4  40.6
+  2021-05   21  02:00-15:00    14    14     14009     667.1  47.6
+  2021-06   22  02:00-15:00    14    14     14214     646.1  46.1
+  2021-07   22  02:00-15:00    14    14     17763     807.4  57.7
+  2021-08   22  02:00-15:00    14    14     16640     756.4  54.0
+  2021-09   22  02:00-15:00    14    14     17978     817.2  58.4
+  2021-10   21  02:00-15:00    14    14     17197     818.9  58.5
+  2021-11   22  02:00-15:00    14    14     17467     794.0  56.7
+  2021-12   22  02:00-15:00    14    14     18197     827.1  59.1
+
+=== grxeur 2022 ===
+  ANNO: 258 giorni con barre, 205728 righe lette, finestra 02:00-15:00 (14 ore toccate, 14 ore PIENE da 30 barre), densita' 57.0 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 175397
+  e in quali ORE stanno: 02:00=12367  03:00=13172  04:00=12844  05:00=12446  06:00=12158  07:00=11952  08:00=12506  09:00=12764  10:00=13117  11:00=12938  12:00=12402  13:00=12253  14:00=12249  15:00=12229
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2022-01   21  02:00-15:00    14    14     17522     834.4  59.6
+  2022-02   20  02:00-15:00    14    14     16622     831.1  59.4
+  2022-03   23  02:00-15:00    14    14     18940     823.5  58.8
+  2022-04   20  02:00-15:00    14    14     16401     820.1  58.6
+  2022-05   22  02:00-15:00    14    14     17797     809.0  57.8
+  2022-06   22  02:00-15:00    14    14     17689     804.0  57.4
+  2022-07   21  02:00-15:00    14    14     16604     790.7  56.5
+  2022-08   23  02:00-15:00    14    14     17320     753.0  53.8
+  2022-09   22  02:00-15:00    14    14     17824     810.2  57.9
+  2022-10   21  02:00-15:00    14    14     17238     820.9  58.6
+  2022-11   22  02:00-15:00    14    14     16050     729.5  52.1
+  2022-12   21  02:00-15:00    14    14     15721     748.6  53.5
+
+=== grxeur 2023 ===
+  ANNO: 259 giorni con barre, 159626 righe lette, finestra 02:00-15:00 (14 ore toccate, 14 ore PIENE da 30 barre), densita' 41.8 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 3681
+  e in quali ORE stanno: 02:00=275  03:00=310  04:00=291  05:00=295  06:00=292  07:00=243  08:00=266  09:00=273  10:00=278  11:00=228  12:00=198  13:00=245  14:00=241  15:00=246
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2023-01   22  02:00-15:00    14    14     15627     710.3  50.7
+  2023-02   20  02:00-15:00    14    14     12646     632.3  45.2
+  2023-03   23  02:00-15:00     8     7     10995     478.0  40.8
+  2023-04   18  02:00-15:00     9     9      7888     438.2  38.8
+  2023-05   22  02:00-14:00     9     9      9362     425.5  40.8
+  2023-06   22  02:00-14:00     8     7      8915     405.2  36.7
+  2023-07   21  02:00-15:00     8     5      7834     373.0  34.5
+  2023-08   23  02:00-15:00    14    14     16551     719.6  51.4
+  2023-09   21  02:00-15:00    14    14     14846     707.0  50.5
+  2023-10   22  02:00-15:00    14    14     17372     789.6  56.4
+  2023-11   22  02:00-15:00    14    14     13807     627.6  44.8
+  2023-12   23  00:00-23:00    23    22     23783    1034.0  45.0
+
+=== grxeur 2024 ===
+  ANNO: 313 giorni con barre, 332498 righe lette, finestra 00:00-23:00 (23 ore toccate, 22 ore PIENE da 30 barre), densita' 46.2 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 0
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2024-01   27  00:00-23:00    23    22     28686    1062.4  46.2
+  2024-02   25  00:00-23:00    23    22     26728    1069.1  46.5
+  2024-03   25  00:00-23:00    23    22     25507    1020.3  44.4
+  2024-04   26  00:00-23:00    23    22     28229    1085.7  47.2
+  2024-05   27  00:00-23:00    23    22     28684    1062.4  46.2
+  2024-06   25  00:00-23:00    23    22     25310    1012.4  44.0
+  2024-07   27  00:00-23:00    23    22     29085    1077.2  46.8
+  2024-08   26  00:00-23:00    23    22     28231    1085.8  47.2
+  2024-09   26  00:00-23:00    23    22     27640    1063.1  46.2
+  2024-10   27  00:00-23:00    23    22     29863    1106.0  48.1
+  2024-11   25  00:00-23:00    23    22     27287    1091.5  47.5
+  2024-12   27  00:00-23:00    23    22     27248    1009.2  43.9
+
+=== grxeur 2025 ===
+  ANNO: 312 giorni con barre, 335900 righe lette, finestra 00:00-23:00 (23 ore toccate, 22 ore PIENE da 30 barre), densita' 46.8 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 0
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2025-01   27  00:00-23:00    23    22     28286    1047.6  45.5
+  2025-02   24  00:00-23:00    23    22     26039    1085.0  47.2
+  2025-03   26  00:00-23:00    23    22     27325    1051.0  45.7
+  2025-04   25  00:00-23:00    23    22     27614    1104.6  48.0
+  2025-05   26  00:00-23:00    23    22     28651    1102.0  47.9
+  2025-06   26  00:00-23:00    23    22     27760    1067.7  46.4
+  2025-07   27  00:00-23:00    23    22     30025    1112.0  48.3
+  2025-08   26  00:00-23:00    23    22     27254    1048.2  45.6
+  2025-09   26  00:00-23:00    23    22     28349    1090.3  47.4
+  2025-10   27  00:00-23:00    23    22     29980    1110.4  48.3
+  2025-11   25  00:00-23:00    23    22     26476    1059.0  46.0
+  2025-12   27  00:00-23:00    23    22     28141    1042.3  45.3
+
+=== grxeur 2026 ===
+  ANNO: 181 giorni con barre, 198179 righe lette, finestra 00:00-23:00 (23 ore toccate, 22 ore PIENE da 30 barre), densita' 47.6 barre/ora toccata
+  barre fuori banda 4000.0-45000.0: 0
+  mese      gg  finestra     tocc piene     barre  b/giorno  densita'
+  2026-01   26  00:00-23:00    23    22     27539    1059.2  46.1
+  2026-02   24  00:00-23:00    23    22     26235    1093.1  47.5
+  2026-03   27  00:00-23:00    23    22     29379    1088.1  47.3
+  2026-04   25  00:00-23:00    23    22     27894    1115.8  48.5
+  2026-05   26  00:00-23:00    23    22     27805    1069.4  46.5
+  2026-06   26  00:00-23:00    23    22     29165    1121.7  48.8
+  2026-07   27  00:00-23:00    23    22     30162    1117.1  48.6
+
+=== CONTROLLO POSITIVO: nsxusd (NASUSD), stessa misura, stessi anni ===
+  nsxusd 2019: 311 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 47.6
+  nsxusd 2020: 312 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 47.2
+  nsxusd 2021: 311 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 47.8
+  nsxusd 2022: 310 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 47.9
+  nsxusd 2023: 309 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 42.0
+  nsxusd 2024: 313 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 47.2
+  nsxusd 2025: 312 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 47.3
+  nsxusd 2026: 181 giorni, finestra 00:00-23:00, 23 ore toccate, 22 piene, densita' 47.6
+
