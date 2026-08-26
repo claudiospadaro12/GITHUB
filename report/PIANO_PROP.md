@@ -110,8 +110,9 @@ la misura — e il conflitto si scrive lo stesso.
 > ## La risposta, in una riga: **la MACCHINA e' matura sulla carta; le PROVE FORWARD no.**
 >
 > Non si valuta a calendario e non si valuta "a sensazione": **si valuta a
-> CANCELLI VERDI**. Sono cinque, elencati sotto con lo stato di oggi e la
-> fonte di ogni stato. Finche' uno solo e' rosso, la challenge non si compra —
+> CANCELLI VERDI**. Sono **sei** (il sesto nasce il 26/08 sera con
+> l'orientamento di Claudio sulla taglia), elencati sotto con lo stato di
+> oggi e la fonte di ogni stato. Finche' uno solo e' rosso, la challenge non si compra —
 > e la data e' una conseguenza, non un obiettivo. **Obiettivo realistico a
 > cancelli come stanno oggi: meta'-fine settembre 2026.**
 
@@ -136,13 +137,40 @@ campo** sul 100k con cap e muri firmati (v7, `REFERTO_GUARDIAN_FIRME.md`).
    18/08 — **non ha ancora la peggior giornata** delle sedie: la sta misurando
    R112 in questo momento (🥇 `R112_CRITERI.md` §4 e §8).
 
+### 🗣️ L'ORIENTAMENTO DICHIARATO DA CLAUDIO (26/08 sera) — registrato, NON e' una firma
+
+> _"con molta probabilita' voglio partire con una challenge tra le **PIU'
+> ALTE** che ci sono; mi fido dei nostri expert e ho la possibilita'
+> economica per iniziare da una challenge costosa"_ — **Claudio, 26/08/2026,
+> testuale.**
+
+📌 **Come lo tratta questo documento.** E' un **orientamento dichiarato**, e
+sta agli atti come tale: **non e' una firma, non congela niente e non
+autorizza nessun acquisto** (F4 resta congelata dal 13/08: challenge solo
+dopo forward maturo). Cambia pero' **il carico della prova**, e per questo
+nasce il **cancello 6**: le percentuali del nostro banco (pass-rate, DD,
+worst day) sono identiche a ogni taglia **SOLO SE la scala dei lotti e'
+davvero lineare** — e 🥇 R109 ha misurato che **non lo e'**. Su una taglia
+grande il rischio non e' il capitale perso in fee: e' che **la macchina si
+comporti in modo diverso da come e' stata misurata**, in silenzio.
+
+⚖️ Due cose oneste da dire accanto all'orientamento, entrambe misurate:
+- **la fiducia negli expert e' coerente coi numeri di banco** (99,6% di
+  challenge passate a d=1,00, sopravvivenza funded 100% su 230 finestre
+  annuali) — ma quegli stessi numeri poggiano su **UN SOLO regime toro** e su
+  **chiusure giornaliere**, cioe' sul caso piu' gentile (avvertenze b e d di C7);
+- **il forward, che e' la prova vera, ha 15 chiusure sul 100k**. La taglia
+  grande non e' vietata da nessuna misura: e' che oggi **nessuna misura la
+  sostiene ancora**, ed e' esattamente cio' che i sei cancelli servono a
+  cambiare entro meta'-fine settembre.
+
 📅 **VINCOLO DI CALENDARIO IMMEDIATO — JACKSON HOLE 27-28/08/2026.** Non si
 apre, non si compra e non si sposta nulla prima che il simposio sia passato:
 due giornate di headline sui tassi con una flotta che **non ha il filtro news
 acceso** (D1/D5 tuttora spenti) sono il posto sbagliato per iniziare
 qualunque cosa. Prima regola di casa applicata: si aspetta e si guarda.
 
-## 🚧 I CINQUE CANCELLI
+## 🚧 I SEI CANCELLI
 
 | # | cancello | stato oggi (26/08) | fonte dello stato | cosa lo fa diventare verde |
 |---|---|---|---|---|
@@ -151,6 +179,7 @@ qualunque cosa. Prima regola di casa applicata: si aspetta e si guarda.
 | **3** | **Dossier prop candidate a muri STATICI 5/10, con EA ammessi, e SCELTA fatta** | 🔴 **ROSSO** — **Upcomers BOCCIATA** il 26/08 (3% daily · 6% **trailing** · regola dei 2 minuti · one-sided bets · entita' Saint Lucia 2025 senza regolatore). Restano candidate **FTMO 2-Step Swing** (ipotesi di lavoro F1/F2) e **The5ers High Stakes** con riserve; **E8 e Alpha mai istruite**. 🆕 **Un secondo dossier prop e' IN ARRIVO dal cacciatore-config-prop** | 🥈🟡 `DOSSIER_PROP_UPCOMERS_2026-08-26.md` §8 · `report/SCHEDA_SECONDA_PROP.md` (classifica 13/08) · `docs/REGOLAMENTO_FTMO_2026-08.md` | un dossier **[VERIFICATO]** (non [LETTO-VIA-SEARCH]) su almeno DUE prop a muri statici + le risposte SCRITTE del supporto (E1/D3) + la scelta di Claudio in F1 |
 | **4** | **Preset Guardian sui muri della prop scelta + firma** | 🔴 **ROSSO** — il Guardian in campo e' tarato **solo su FTMO** (4,0 / 4,9 / 9,9 / reset 23 / DD statico). Il dossier Upcomers l'ha dimostrato per assurdo: su muri 3/6 ogni singola soglia sta **oltre** il muro che dovrebbe proteggere. Il preset "muri stretti" e' **proposta P1**, non esiste ancora | 🥇 preset+sorgente `mql5/Experts/ABTG_Guardian.mq5` (`InpDDMode` gia' presente, righe 53/355/367) · `DOSSIER_PROP_UPCOMERS_2026-08-26.md` §5 e §9-P1 | un preset per **famiglia di muri** (non uno solo), collaudato con autotest sul 100k, e la firma di Claudio. ➕ **manca l'enforcement**: gli EA non leggono ancora le bandiere del Guardian (decisione n.1 in lista firme) |
 | **5** | **Firma del piano DUE-DIAL all'apertura** (challenge d=1,00 · funded d=0,74) | 🔴 **ROSSO** — proposta consegnata il 26/08, **mai firmata**; e ha un **conflitto dichiarato** con la raccomandazione di R106 (che per la challenge diceva ×0,74). Serve anche la **prova di regime** al dial scelto: la sopravvivenza in ORSO **non e' misurata** | 🥇 `ANALISI_SOPRAVVIVENZA_FUNDED_2026-08-26.md` §raccomandazione · 🥇 `R106_REFERTO.md` §verdetto proposto | la parola di Claudio su **quale dial in quale fase** + prova di regime della flotta al dial scelto (macchina R50-R56-R59, Emendamento C) |
+| **6** 🆕 | 📏 **PROVA DELLA TAGLIA** — obbligatoria **prima** di comprare una taglia grande (200k+), nasce dall'orientamento dichiarato di Claudio del 26/08 | 🔴 **ROSSO — MAI FATTA.** Tutto il banco di casa (R105/R106, analisi dial, analisi DD totale) e' costruito su **base 100k** e su una **scala lineare** dei lotti: nessuna corsa e' mai stata fatta a 200k/500k. E R109 ha gia' misurato che la linearita' **si rompe** | 🥇 `R109_REFERTO.md` §"tre fatti collaterali": il lotto sbatte sul tetto **`SYMBOL_VOLUME_MAX`=100** (Dow/indici) ed e' stato **tagliato su 66 trade su 743 = 8,9%** — _"quei trade rischiavano MENO dell'1%, quindi i DD di questo round SOTTOSTIMANO il rischio e non si riscalano linearmente con la taglia"_; **slippage 21,5 punti** misurato su uno stop reale (perdita **doppia** dell'attesa), e cresce con la taglia · 🥇 `ANALISI_DD_TOTALE_2026-08-26.md` (il banco 100k che va riprodotto alla taglia target: **DD tot worst −6,37%**, **worst day −4,74%**, **il vincolo che morde e' il giornaliero**: margine 5% sul giorno contro 36% sul totale) | un **round di prova della taglia**: stessa flotta, stessa finestra, **deposito alla taglia target** (200k/500k), che misuri e riporti **(1)** quante operazioni finiscono al tetto di volume e su quali simboli, **(2)** se i lotti richiesti passano i **limiti di margine** del broker, **(3)** quanto si scostano DD, worst day e pass-rate dal banco 100k. **Se lo scostamento c'e', le percentuali NON sono trasferibili e la taglia grande va ricalcolata, non estrapolata** |
 
 ### 📊 CANCELLO 1 — LE OPERAZIONI FORWARD PER FAMIGLIA, CONTRO LA SOGLIA 20
 
@@ -237,6 +266,29 @@ promesso dal contratto, da confrontare col DD reale che oggi e' n/d).
 ⚠️ Segnalata anche **una riga con magic `770101` su NASUSD** (chiusa il
 22/07): o e' un grafico sbagliato o e' un magic riusato — va guardata, perche'
 sporca l'attribuzione della famiglia.
+
+### 📏 CANCELLO 6 — PERCHE' UNA TAGLIA GRANDE NON E' "LO STESSO CONTO PIU' GRANDE"
+
+L'intuizione naturale e' che le percentuali non cambino: rischio 0,65% su
+100k o su 500k, stessa curva, stessi muri in %. **E' vero solo se il lotto
+puo' crescere in proporzione.** Le due misure di casa che dicono che non
+sempre puo':
+
+| fatto misurato | dove | perche' morde di piu' alla taglia grande |
+|---|---|---|
+| **tetto `SYMBOL_VOLUME_MAX` = 100** — il lotto viene **tagliato**, e su NASUSD short e' successo **66 volte su 743 (8,9%)** | 🥇 `R109_REFERTO.md` §1 | il tetto e' **assoluto** (contratti), il rischio e' **relativo** (% del conto): a taglia doppia servono lotti doppi, e la stessa operazione sbatte sul tetto **prima**. I trade tagliati rischiano MENO del previsto → **il banco sottostima il rischio e sovrastima nulla**: la curva reale a taglia grande e' **diversa**, non solo scalata |
+| **slippage 21,5 punti** su uno stop reale (perdita **doppia** dell'attesa) | 🥇 `R109_REFERTO.md` §2 | l'ordine grande mangia piu' book: **lo slippage cresce con la taglia**, e cresce proprio dove fa piu' male (stop stretti dei motori d'apertura) |
+| **margine**: nessuno ha mai verificato che 8-9 posizioni simultanee alla taglia target passino i limiti del broker | — **buco dichiarato** | il picco misurato in M2 (9 posizioni di 8 sedie insieme) alla taglia grande diventa un impegno di margine mai provato |
+
+👉 **La regola che ne esce, proposta:** _la taglia grande si compra solo dopo
+che il banco e' stato RIPRODOTTO alla taglia target._ Il confronto atteso e'
+semplice e binario: se DD, worst day e pass-rate alla taglia target
+coincidono col banco 100k (`ANALISI_DD_TOTALE_2026-08-26.md`: worst day
+−4,74%, DD tot −6,37%, 0 violazioni), la scala regge e l'orientamento di
+Claudio e' sostenuto da una misura. **Se non coincidono, il numero giusto e'
+quello nuovo** — e la taglia va scelta su quello, non sull'estrapolazione.
+💡 Nota pratica a costo zero: **il cancello 6 non blocca i primi cinque**, si
+lavora in parallelo ed e' un round di banco, non una decisione.
 
 ---
 
@@ -355,6 +407,21 @@ falla aritmetica piu' grossa del piano.
 |---|---|---|---|---|---|
 | C7 | 🎛️ **LA MANOPOLA GLOBALE (dial) DELLA FLOTTA — e il piano DUE-DIAL** (nuova, v14) | **challenge: d = 1,00** (= le taglie firmate oggi, flotta post-revisione "A+b") · **funded: d = 0,74**. Il dial scala **linearmente tutta la flotta**; NON e' un parametro per sedia | 🥇 `ANALISI_DIAL_TAGLIE_2026-08-26.md` (base `R105_dataset_giornaliero.csv`, 481 giorni × 40 sedie, **controllo positivo riconciliato al centesimo** su 7 numeri agli atti): a d=1,00 **pass 99,6%**, mediana **12 giorni**, **0 violazioni**; **dirupo misurato a d≈1,055** (il 25/05/26 tocca il −5% esatto); a d=1,15 il pass **SCENDE** a 96,7% con **15 partenze bruciate**; a d=1,50 → 89,2% e 51 bruciate. Profitto mediano per challenge passata **quasi piatto 8,5-9,3 k€** (la corsa si ferma al target: il dial alto arriva **prima**, non **piu' in alto**) · 🥇 `ANALISI_SOPRAVVIVENZA_FUNDED_2026-08-26.md`: sopravvivenza funded 12 mesi **100% da 0,50 a 1,00** (statico E trailing), ma **87,8% a d=1,10**, **43,0% a 1,30**, **0,0% a 1,50** — e l'aritmetica dell'esposizione: **21 volte** i giorni neri di una challenge dentro un anno funded | 🔴 **CONFLITTO FRA DUE MISURE DI CASA, STESSO RANGO — dichiarato, non nascosto**: `R106_REFERTO.md` (25/08) raccomanda per la **challenge** la squadra **B = flotta × 0,74** (_"il premio assicurativo piu' economico mai misurato in casa"_); l'analisi del 26/08 raccomanda **1,00 in challenge e 0,74 in funded**. Non e' una contraddizione sui NUMERI (tornano al centesimo: a +10% il d=1,00 passa 99,2% e lo 0,74 98,3%) ma sull'**argomento**: R106 compra margine dal muro sempre, la due-dial lo compra **dove l'esposizione dura** (12 giorni contro 252). ⚠️ Avvertenze che valgono per TUTTE e due: **(a)** lo scaling lineare e' **ottimista** (R109: tetto `SYMBOL_VOLUME_MAX`, slippage che cresce — 21,5 punti misurati su uno stop Nasdaq); **(b)** le chiusure giornaliere sono un **limite inferiore** del rischio (il flottante intraday non c'e'); **(c)** il **Guardian non e' modellato** e non e' gratis: a dial alto trasformerebbe drawdown temporanei in **perdite chiuse** — _"alzare confidando nel Guardian cambia la macchina, non solo la scala"_; **(d)** 481 giorni = **UN SOLO regime, toro** | 📋 **PROPOSTO — e' il CANCELLO 5.** Il dial 1,00 e' **gia' congelato come stato dei contratti in campo** (firma "A+b" del 24/08: 4 sedie spente, 5 ridotte); cio' che **manca la firma** e' l'uso del dial **come scelta di fase** (1,00 in challenge / 0,74 in funded). 🛑 **Nessun cambio di taglia esce da qui**: ogni spostamento e' una firma sui CONTRATTI, riga per riga, con le avvertenze (a)-(d) lette ad alta voce. E la risposta secca all'idea di partenza di Claudio (_"aumentare i lotti confidando nel Guardian"_) e' **misurata: sopra la taglia firmata non c'e' spazio, c'e' un dirupo a 1,05** |
 
+> 📉 **Corollario di C7 — LA SPECIFICA DEI MURI DA CHIEDERE ALLA PROP** (🥇
+> `ANALISI_DD_TOTALE_2026-08-26.md`, 26/08, stessa base riconciliata): alla
+> taglia firmata il **DD totale peggiore mai visto e' −6,37%** (picco-valle
+> sui chiusi), contro un **worst day −4,74%**. Cioe': **il muro che morde e'
+> il GIORNALIERO** (margine **5%**), non il totale (margine **36%** contro un
+> muro 10%) — ed e' esattamente dove il Guardian gia' lavora (pausa 4,0).
+> Il DD totale e' **"un giorno cattivo piu' poco"**: 6,37 ≈ **1,3 ×** il
+> worst day, le discese non si accumulano su settimane. 👉 **La specifica per
+> il cacciatore-config-prop e' quindi: 5% giornaliero / 10% totale STATICI.**
+> Un totale statico all'**8%** reggerebbe ancora (0 violazioni su 481
+> partenze; le prime a d=1,30), ma **senza necessita' non si compra margine
+> piu' stretto**. E un totale **6% TRAILING si romperebbe persino sui
+> chiusi** (6,37 > 6): **muri statici o niente** — la bocciatura di Upcomers
+> (F7) esce confermata da una seconda strada indipendente.
+
 # AREA D — 📰 NEWS E ORARI
 
 | # | parametro | valore PROPOSTO | fonti (rango) | conflitti | stato |
@@ -419,13 +486,48 @@ offset dei loro server non verificato. Tutta la riga e' [LETTO-VIA-SEARCH].
 | M16 | ~~Debito ablazione~~ → ✅ **CHIUSA PER MISURA (v12, R84 a tick reali)**: **9 celle su 9 OOS-negative** — nessun filtro crea l'edge, l'EMA (il filtro piu' citato del corso) e' il PEGGIORE (OOS 0,681), il METODO COMPLETO chiude a 0,785 con **cautela formale** (unica cella sotto le 150 op: n=69 OOS / 102 tot). I default spenti delle sedie ora sono spenti **per misura, non per omissione**. ⚠️ **ECCEZIONE DA NON SEMPLIFICARE — il caso D**: la conferma **volumi-OR-ATR passa TUTTI e 4 i cancelli congelati** (n=311, migliora in ENTRAMBE le meta', PF tot 1,104 vs 0,988, DD dimezzato) pur restando **OOS-negativa (0,924)**: e' un **riduttore di perdita su base perdente**, mai un edge — ma per la lettera dei criteri apre la strada a un round di validazione vera (regimi + walk-forward): **PROPOSTA a Claudio, non chiusa d'ufficio** (→ lista decisioni). Resta in coda R84-bis: la copertura del filtro news sul CSV non e' misurata | — | `REFERTO_ROUND84_ABLAZIONE.md` (criteri congelati 18/08 sera, commit `2458b33`) |
 | M17 | **RITIRO FORMALE del verdetto "PostNews: nessun edge"** (v11): i 4 backtest del weekend 07/08 hanno **Trades=0** — il calendario dato all'EA aveva solo eventi **2026-2027** (e il gemello era vuoto, 0 byte): **e' stato misurato il nulla**. Va ritirato (non ribaltato) in `CLASSIFICA_WEEKEND.md` e `REFERTO_WEEKEND_FASE0.md`. Dati per rifarlo sul serio: **70 eventi ECB/FOMC in biblioteca** — bastano per la **prova di regime, MAI per il merito** (n<150, Emendamento A). Nota prop gia' agli atti: la PostNews e' **di fatto vietata su FundingPips** (l'azione cade sul bordo dei ±10 min anche tenuta) e **da sola non passa nessuna challenge** (giorni minimi + consistenza); la regola del corso "ott-mar = 19:30 IT" e' **FALSIFICATA su 11/17 eventi invernali** del nostro CSV | chat principale (ritiro nei due file) + PC backtest (eventuale prova di regime) | `ANALISI_CORSO_POSTNEWS_2026-08-18.md` §1.2-1.3 |
 | M5 | **Motori con edge sufficiente**: `DOVE_SIAMO` §4 dice che oggi non abbiamo un motore che passerebbe una prop | **cacciatore-strategie** + i round di casa | il piano configura il rischio; il rendimento lo devono portare le sedie |
+| M18 | ⏱️ **`open_time` (+ `package_id`) in `ExportTrades()`** — e' il **QUARTO mandato** che chiede lo stesso campo (M2 del 18/08 · `METRO_PROP` §13.2 pacchetti · dossier Upcomers P2 · questo giro). 🆕 **v14 — la precisazione che cambia la priorita'**: in **forward** la durata **si misura gia'** (il CSV del `TradeExporter` ha `open_time`: 15,2% delle chiusure dal 20/07 sotto i 2 minuti, 44% sulle Aperture DAX); e' **nel BACKTEST** che non si puo' — cioe' non possiamo dire se una cella NUOVA sara' conforme **prima** di metterla in campo | **mql5-ea-developer** (una riga per EA) + rigenerazione degli export | "aggiungere `open_time` all'export per-trade di tutti gli EA: senza, la conformita' a una durata minima non e' dimostrabile in backtest e l'unita' PACCHETTO (G2) resta ricostruita per approssimazione" |
+| M19 | 🔎 **IL SECONDO DOSSIER PROP — in arrivo** (cancello 3). Oggi le candidate a muri statici sono **istruite solo via search**: FTMO ha un dossier (`docs/REGOLAMENTO_FTMO_2026-08.md`), The5ers e' "candidata con riserve", **E8 e Alpha Capital non sono mai state istruite**. Serve il confronto ad **almeno DUE** prop a muri statici, con la specifica di C7 (**5% g / 10% tot STATICI**) e il criterio F8 applicato in ordine | **cacciatore-config-prop** (dossier gia' in preparazione, **citato qui come in arrivo**) | "istruire almeno due prop a **muri statici 5/10** con **EA ammessi per iscritto**: per ognuna → muri e loro natura (statico/trailing, su equity o balance), ora e fuso del reset, durata minima dei trade (esiste? vale anche per uno stop?), regole news in minuti, overnight/weekend, clausole discrezionali su strategie mono-direzione, tipo di conto HEDGING/NETTING, nomi dei simboli e fuso del server. **Con l'etichetta di verifica su ogni riga**: [VERIFICATO] solo se la pagina ufficiale e' stata aperta" |
+| M20 | 📊 **DD FORWARD PER FAMIGLIA** — il numero che manca per far diventare verde il cancello 1. Oggi le pagelle danno il P&L del giorno; **nessuno calcola il drawdown di una famiglia sulla sua serie forward**, quindi il confronto "DD reale ≤ DD promesso" (criterio firmato) **non e' eseguibile**: nella tabella del cancello 1 quella colonna e' `n/d` per tutte le 16 famiglie | **Claudio** (pagella serale come flusso: `scarica_pagella.ps1 -Installa`, attivita' 23:15) + chat principale per la misura | "dal CSV degli statement: per ogni famiglia, serie cumulata del netto e **massimo picco-valle**, contro il DD promesso in `CONTRATTI_SEDIE.md`. Va tenuta viva, non fatta una volta" |
+| M21 | 📏 **PROVA DELLA TAGLIA (cancello 6)**: riprodurre il banco alla **taglia target** (200k/500k) e misurare quante operazioni finiscono al tetto `SYMBOL_VOLUME_MAX`, se i lotti passano i limiti di **margine**, e di quanto si scostano DD / worst day / pass-rate dal banco 100k | **PC di backtest** (round di banco, criteri congelati prima) | "le percentuali del banco 100k valgono anche a 200k+? R109 dice che la scala **non e' lineare** (8,9% di trade tagliati dal tetto, slippage 21,5 pt): se lo scostamento esiste, la taglia grande si ricalcola, non si estrapola" |
+| M22 | 🌡️ **PROVA DI REGIME AL DIAL SCELTO** (dipendenza del cancello 5): la sopravvivenza della flotta in un mercato **ORSO** non e' misurata — 481 giorni = **un solo regime, toro** (avvertenza (b) dell'analisi sopravvivenza). Sugli indici il vincolo dati e' noto: il frigo si e' aperto **solo per NASUSD_EXT** (metro relativo 0,20×vol, rapporto 0,199), **SPXUSD e 225JPY restano dentro**, il **DAX lungo e' bloccato** (grxeur **non e' il DAX** fra 2020-06 e 2023-11: sessione 02-15 NY e prezzi 3,2-4,4k → [INFERITO] EuroStoxx50) | PC di backtest + `cacciatore-strategie` per i dati | fonti: `LETTURA_MISURE_LAMPO_2026-08-26.md` (eventi 3/3 **movimenti veri**: le diff giganti erano **disallineamenti di un'ora nei botti**, non spazzatura) · `LETTURA_DIAGNOSI_DAX_2026-08-26.md` · macchina R50-R56-R59 |
 | M6 | ~~Conferma del conto 100k~~ → ✅ **CHIUSO** (18/08 08:38): il dry-run gira su **`50504263`**, confermato dallo screenshot del terminale (titolo finestra) col Guardian v1.10 vivo | — | — |
 | M7 | Verifica **lotto fisso** dei due EA esterni (`BREAKOUT_EA_JPY_v3`, `DAXMasterEA_v2_0`) | Claudio/VPS (censimento gia' pronto) | rischio non controllato per definizione su un conto da 5.100 € |
 
 ## ✍️ LE FIRME CHE SERVONO A CLAUDIO (in ordine di urgenza)
 
-🆕 **v13 (21/08) — DUE FIRME NUOVE IN CIMA, entrambe a costo zero e
-indipendenti fra loro:**
+🆕 **v14 (26/08) — LA DECISIONE PIU' URGENTE STA IN CIMA E NON E' UN NUMERO:
+E' UNA SEQUENZA.**
+
+🚦 **FIRMA "CANCELLI" — approvare (o correggere) i SEI CANCELLI come
+condizione d'acquisto di una challenge.** Non impegna un euro e non tocca il
+forward: fissa **cosa dev'essere verde prima di comprare**, con l'obiettivo
+dichiarato di **meta'-fine settembre**. E' la firma che rende la risposta a
+_"siamo maturi?"_ una **procedura** invece di un'opinione. ⚠️ Dentro ci sono
+due voci che oggi sono rosse e non dipendono da Claudio (le 20 operazioni per
+famiglia, il secondo dossier prop) e **quattro che dipendono da lui**: la
+firma due-dial (C7), il preset Guardian per famiglia di muri (B10), l'invio
+delle domande al supporto (E1), e il **cancello 6 / prova della taglia**
+(M21) — nato oggi dal suo stesso orientamento sulla taglia alta.
+
+🎛️ **FIRMA "DUE-DIAL" (C7)** — challenge **d=1,00**, funded **d=0,74**. Si
+firma **all'apertura della challenge**, non prima; ma la scelta va decisa
+adesso perche' cambia i contratti. 🔴 Da leggere insieme al **conflitto con
+R106** dichiarato nella riga C7 (R106 raccomandava 0,74 anche in challenge):
+sono due misure di casa dello stesso rango, e la differenza sta
+nell'argomento, non nei numeri. **Raccomandazione dell'architetto-prop,
+dichiarata come tale: due-dial** — perche' l'esposizione della challenge dura
+**12 giorni mediani** e quella del funded **252**, e ogni punto di margine dal
+muro vale **21 volte di piu'** nella seconda.
+
+🧱 **FIRMA "PRESET MURI" (B10)** — autorizzare la costruzione del preset
+Guardian **per famiglia di muri** (non un secondo set di soglie cablate: un
+preset per profilo, coi rapporti gia' firmati 80%/98%). Costo ~0 di sviluppo
+(gli input ci sono tutti, trailing compreso), **1 round di autotest sul 100k**,
+e senza di esso il cancello 4 resta rosso su qualunque prop diversa da FTMO.
+
+🆕 **v13 (21/08) — DUE FIRME, entrambe a costo zero e
+indipendenti fra loro (ancora in attesa):**
 
 🔵 **FIRMA "METRO" (M14)** — congelare la voce **§13 GRIGLIA / MARTINGALA** di
 `report/METRO_PROP.md` (bozza consegnata oggi, commit `0a787ca`). **Non apre
@@ -512,8 +614,23 @@ _(A2/A4: FIRMA 4 · D-spegnimenti: FIRMA 5.)_
 
 ## 📊 IL CONTO DEL GIRO
 
-**37 parametri censiti: 12 congelati · 11 proposti · 13 aperti · 1 chiuso per
-misura (C5).**
+🆕 **v14 (26/08): 42 parametri censiti — 12 congelati · 15 proposti · 14
+aperti · 1 chiuso per misura (C5).** Cinque righe nuove, nessun valore
+firmato cambiato: **C7** (manopola globale + piano due-dial, PROPOSTO, col
+conflitto R106 dichiarato) · **B10** (preset Guardian per famiglia di muri,
+PROPOSTO) · **E8** (durata minima dei trade, APERTO — e la misura di casa che
+smentisce meta' del buco dichiarato dal dossier) · **F7** (Upcomers BOCCIATA,
+PROPOSTO) · **F8** (criterio di scelta della prop in 7 punti, PROPOSTO).
+Aggiornate: **C1** (il caso R112 che sfida il cap) e la testa del documento
+col **cancello challenge a sei porte**. In COSA MANCA entrano **M18** (
+`open_time`, quarto mandato), **M19** (secondo dossier prop, in arrivo),
+**M20** (DD forward per famiglia — il `n/d` che tiene rosso il cancello 1),
+**M21** (prova della taglia) e **M22** (prova di regime al dial scelto).
+🛑 **Zero modifiche al forward, zero preset toccati, zero acquisti
+autorizzati.**
+
+_(conteggio precedente, v13)_ **37 parametri: 12 congelati · 11 proposti · 13
+aperti · 1 chiuso per misura (C5).**
 Congelati: i 3 storici — A1 (0,65% su DD statico, 09/08) · F4 (challenge solo
 dopo forward maturo, 13/08) · F5 (cancello acquisti EA, 18/08 notte) — piu'
 le **8 righe firmate il 18/08** (verbale `FIRME_2026-08-18.md`): **B1**
