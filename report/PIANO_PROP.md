@@ -1,6 +1,7 @@
 # 🏛️ PIANO PROP — la tabella madre dei parametri per passare una prop
 
-_Prodotto dall'**architetto-prop**. Versione **v1**, primo giro: 18/08/2026 ~01:00._
+_Prodotto dall'**architetto-prop**. Versione **v14**, aggiornata il 26/08/2026 sera
+(prima stesura: 18/08/2026 ~01:00)._
 _Un solo documento, vivo: ogni numero ha la sua fonte e il suo stato. Le
 modifiche stanno nel CHANGELOG in fondo._
 
