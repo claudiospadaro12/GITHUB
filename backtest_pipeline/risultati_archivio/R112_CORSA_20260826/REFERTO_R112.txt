@@ -1,0 +1,200 @@
+﻿REFERTO R112 - IL CONTRATTO DELL'EMADOW: SHORT-ONLY, E A QUALE DIAL?
+ABTG_EMA200 / U30USD H1 - sedia viva 771531 (0,65% in campo sul 100k)
+modo: CORSA
+switch di questo giro: -Rifai (i CSV precedenti sono stati rifatti)
+stato dei criteri: FIRMATI (nessun lucchetto nel file al pin)
+data: 2026-08-26 23:09:43   (questa data deve essere di ADESSO)
+avvio: 2026-08-26 23:05:03   durata: 0.1 ore
+pin: f33f37426068a48068d82137cb43c5bf74c7de61
+criteri: risultati_archivio\R112_CRITERI.md (sei decisioni, par. 10)
+finestra: 2024.09.26 -> 2026.06.30   split 40/60   modello 4 (tick reali)   deposito 100000
+     IS  2024.09.26 - 2025.06.09
+     OOS 2025.06.10 - 2026.06.30
+     (LE STESSE DI R110, dichiaratamente: e' cio' che rende G0-B possibile)
+spread: Spread=0 scritto NELL'INI = spread CORRENTE del feed BCM, dichiarato.
+rischio: il dial nei file e' 1,0 / 2,0 / 3,0. IN CAMPO SUL 100K SI MOLTIPLICA PER 0,65:
+     dial 1,0 -> 0,65% per trade in campo (la sedia com'e' oggi)
+     dial 2,0 -> 1,30% per trade in campo
+     dial 3,0 -> 1,95% per trade in campo  <<< un solo SL vivo impegna il 60% del cap C1 (3,25%)
+     Ogni DD di questo referto e' al dial dichiarato della sua riga: per il campo x0,65.
+
+--- CONVENZIONE DI SENTINELLA (checklist 66) ---
+  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le
+  colonne, comprese le due nuove PeggGio%fisso e PeggGio%eq.
+
+--- LA PEGGIOR GIORNATA: LA CONVENZIONE, CONGELATA PRIMA (decisione D4) ---
+  * giornata = somma dei net_profit CHIUSI nella stessa DATA SERVER BCM.
+    >>> L'OROLOGIO E' L'ORA SERVER BCM (ora italiana - 1 in questo periodo:
+        checklist 86): le close_time dei per-trade sono scritte cosi' dall'EA.
+  * DUE denominatori, tutti e due: % sul deposito FISSO 100k e % sull'equity
+    di inizio giornata (100k + cumulato dei giorni OOS precedenti).
+  * SOLO OOS. LA PEGGIOR GIORNATA IS E' n/d PER COSTRUZIONE SU TUTTO IL ROUND:
+    il driver generico corre gamba IS poi gamba OOS nella stessa chiamata e
+    l'export sovrascrive il file del magic a ogni gamba -- sopravvive l'ultima.
+    E NON lo si assume: lo si MISURA (tutte le close_time devono cadere in OOS;
+    se una sola cade prima, la cella esce n/d, mai un numero sbagliato).
+  * RICONCILIAZIONE: i position_id DISTINTI del file devono combaciare col n OOS
+    dell'OPTFRAME. ATTENZIONE: le RIGHE sono i DEAL DI USCITA e con TP1 al 50% +
+    trailing una posizione chiude in DUE deal, quindi righe > n e' NORMALE; il
+    confronto giusto e' sui position_id distinti. Scarto -> dichiarato, mai zitto.
+  * >>> IL LIMITE PIU' IMPORTANTE: questa e' la peggior giornata dei CHIUSI.
+    Il muro giornaliero delle prop (e il Guardian) guardano l'equity FLOTTANTE,
+    che qui non c'e' (R109 ha misurato quanto pesa la differenza). Questa misura
+    SOTTOSTIMA ed e' un PAVIMENTO, non il numero del muro.
+
+--- I GATE (criteri par. 5) ---
+  G0-A  ANTENATO  : copia riga per riga del file prova R110, salvo i delta
+                    dichiarati. Catena R103 -> R110 -> R112. Gira PRIMA di MT5.
+  G0-B  RIPRODUZIONE DI R110: APPLICABILE, per la prima volta, e FATALE (D3).
+                    Stesso banco + stessa finestra + stessi input -> le 7 colonne
+                    statistiche delle 2 righe IDENTICHE COME STRINGHE, IS e OOS.
+                    TRE esiti: OK / MISMATCH (fatale) / NON ESEGUITO (guasto,
+                    NON 'superato'). Riguarda 00_metro e 01_short_r1; r2 e r3
+                    sono la misura NUOVA: per loro G0-B e' NON APPLICABILE.
+  G0-C  GEMELLI   : le due righe del CSV identiche al centesimo (determinismo).
+  G0-C-bis        : i DUE file per-trade gemelli identici riga per riga tranne
+                    la colonna magic. E' il G0-C al livello del singolo trade.
+  G1 MISURABILITA': n OOS >= 30 per cella (atteso: largamente superato).
+
+--- LA TABELLA MADRE ---   (attese: 2 righe per CSV, 8 CSV, 16 passate)
+  dPF e dDD sono il DELTA OOS contro il 00_metro. PeggGio = peggior giornata OOS
+  dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento.
+  ATTENZIONE AI SEGNI: ISdd/OOSdd sono POSITIVI (piu' basso = meglio), le due
+  colonne PeggGio sono NEGATIVE perche' sono PERDITE (piu' vicino a zero =
+  meno profonda: -0,37 e' PEGGIO di -0,31). Le due colonne non si leggono con
+  lo stesso verso, ed e' il criterio (c) del par. 6 a dipenderne.
+  CELLA        ISprof    ISpf    ISdd    ISn    OOSprof   OOSpf   OOSdd   OOSn   dPF      dDD%    PeggGio%fisso PeggGio%eq  ESITO
+  00_metro     +4585     1.201   5.73    237    +23321    1.524   7.83    517    0.000    0.00    -2.45         -1.98       OK
+  01_short_r1  +2607     1.232   4.51    125    +16948    1.891   2.66    302    +0.368   -5.17   -1.17         -1.00       OK
+  02_short_r2  +5075     1.222   8.90    127    +36527    1.886   5.30    315    +0.362   -2.54   -2.70         -1.99       OK
+  03_short_r3  +7434     1.215   13.17   128    +58567    1.873   7.92    324    +0.349   +0.08   -4.72         -3.00       OK
+  (la colonna 'Peggior Giornata %' NON esiste nell'OPTFRAME di questo EA -- 8
+   colonne, misurato nel sorgente al pin: qui viene dai PER-TRADE, decisione D4.
+   PeggGio IS: n/d PER COSTRUZIONE, vedi la convenzione in testa.)
+
+--- LE CELLE, GATE PER GATE ---
+  00_metro     magic 763400/763401   InpAllowLong=true InpAllowShort=true InpRiskPercent=1.0
+       LA SEDIA VIVA COM'E' (L+S, dial 1,0) -- denominatore, G0-C, G0-B contro R110, e la SUA peggior giornata (mai misurata)
+       G0-A antenato : OK contro R110_EMADOW_00_metro.txt (delta: InpMagic)
+       G0-B          : IS: OK | OOS: OK
+       G0-C gemelli  : IDENTICI
+       G0-C-bis (pt) : IDENTICI (a meno della colonna magic, 518 righe)
+       per-trade     : MISURATA (con SCARTO DICHIARATO nella riconciliazione)
+       riconciliaz.  : SCARTO DICHIARATO: 257 position_id distinti contro n OOS 517 dell'OPTFRAME (righe deal: 517). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+       peggior giornata OOS : 2026.06.23  -2448.42 EUR = -2.45% su 100k fisso | -1.98% su equity inizio giornata
+       giorni con chiusure  : 102   le 3 peggiori: 2026.06.23 -2448.42 | 2026.01.23 -2206.02 | 2025.08.07 -1929.16
+       tetto volume (R109)  : volume max 14.60 lotti, 0.19% delle righe al massimo
+       (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento)
+  01_short_r1  magic 763410/763411   InpAllowLong=false InpAllowShort=true InpRiskPercent=1.0
+       SOLO SHORT, dial 1,0 -- lo short di R110 riprodotto: il gate del banco (G0-B)
+       G0-A antenato : OK contro R110_EMADOW_02_short.txt (delta: InpMagic)
+       G0-B          : IS: OK | OOS: OK
+       G0-C gemelli  : IDENTICI
+       G0-C-bis (pt) : IDENTICI (a meno della colonna magic, 303 righe)
+       per-trade     : MISURATA (con SCARTO DICHIARATO nella riconciliazione)
+       riconciliaz.  : SCARTO DICHIARATO: 140 position_id distinti contro n OOS 302 dell'OPTFRAME (righe deal: 302). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+       peggior giornata OOS : 2026.03.31  -1169.73 EUR = -1.17% su 100k fisso | -1.00% su equity inizio giornata
+       giorni con chiusure  : 56   le 3 peggiori: 2026.03.31 -1169.73 | 2026.02.02 -1038.54 | 2026.02.06 -1032.75
+       tetto volume (R109)  : volume max 14.60 lotti, 0.33% delle righe al massimo
+       (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento)
+  02_short_r2  magic 763420/763421   InpAllowLong=false InpAllowShort=true InpRiskPercent=2.0
+       SOLO SHORT, dial 2,0 -- la scala del dial, primo gradino (misura NUOVA)
+       G0-A antenato : OK contro R110_EMADOW_02_short.txt (delta: InpMagic + InpRiskPercent)
+       G0-B          : NON APPLICABILE (dial mai misurato prima: e' la misura nuova, non c'e' niente da riprodurre)
+       G0-C gemelli  : IDENTICI
+       G0-C-bis (pt) : IDENTICI (a meno della colonna magic, 316 righe)
+       per-trade     : MISURATA (con SCARTO DICHIARATO nella riconciliazione)
+       riconciliaz.  : SCARTO DICHIARATO: 140 position_id distinti contro n OOS 315 dell'OPTFRAME (righe deal: 315). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+       peggior giornata OOS : 2026.03.31  -2702.85 EUR = -2.70% su 100k fisso | -1.99% su equity inizio giornata
+       giorni con chiusure  : 56   le 3 peggiori: 2026.03.31 -2702.85 | 2026.06.08 -2386.36 | 2026.02.02 -2242.15
+       tetto volume (R109)  : volume max 30.30 lotti, 0.32% delle righe al massimo
+       (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento)
+  03_short_r3  magic 763430/763431   InpAllowLong=false InpAllowShort=true InpRiskPercent=3.0
+       SOLO SHORT, dial 3,0 -- il gradino di pari-DD atteso (7,83/2,66 ~ 2,9; misura NUOVA)
+       G0-A antenato : OK contro R110_EMADOW_02_short.txt (delta: InpMagic + InpRiskPercent)
+       G0-B          : NON APPLICABILE (dial mai misurato prima: e' la misura nuova, non c'e' niente da riprodurre)
+       G0-C gemelli  : IDENTICI
+       G0-C-bis (pt) : IDENTICI (a meno della colonna magic, 325 righe)
+       per-trade     : MISURATA (con SCARTO DICHIARATO nella riconciliazione)
+       riconciliaz.  : SCARTO DICHIARATO: 140 position_id distinti contro n OOS 324 dell'OPTFRAME (righe deal: 324). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+       peggior giornata OOS : 2026.03.31  -4723.30 EUR = -4.72% su 100k fisso | -3.00% su equity inizio giornata
+       giorni con chiusure  : 56   le 3 peggiori: 2026.03.31 -4723.30 | 2026.06.08 -4197.24 | 2026.02.02 -3583.26
+       tetto volume (R109)  : volume max 48.40 lotti, 0.31% delle righe al massimo
+       (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa e' un pavimento)
+
+--- IL CANCELLO DI PORTAFOGLIO (criteri par. 6): I NUMERI, NON IL VERDETTO ---
+  INFO: il verdetto lo da' il REFERTO DEL ROUND, a mano. Un dial e' CANDIDATO se
+  in OOS: (a) profitto > metro; (b) DD non peggiore del metro; (c) peggior
+  giornata NON PIU' PROFONDA di quella del metro (denominatore FISSO; con un
+  n/d il criterio (c) e' NON VALUTABILE e la candidatura resta SOSPESA, mai
+  promossa); (d) profitto IS > 0. Fra i dial che passano vince il PIU' BASSO
+  (D2-bis). Vietato aggiungere dial a risultati visti (D5).
+  >>> ATTENZIONE AL SEGNO -- e' il punto in cui questo referto si leggerebbe
+      ROVESCIATO. (b) e' un numero POSITIVO (un DD di 7,83 e' PEGGIO di 2,66:
+      li' il '<=' del par. 6 si applica alle cifre come stanno). (c) e' un
+      numero NEGATIVO, perche' e' una PERDITA: -0,37% e' PEGGIO di -0,31%. Il
+      '<=' del par. 6 e' scritto sulla PROFONDITA' della perdita, non sul numero
+      con segno: applicato alle cifre COSI' COME SONO STAMPATE darebbe il
+      criterio (c) per SODDISFATTO proprio nel caso in cui la cella e' PEGGIO
+      del metro. Per (c) si legge: passa se il numero della cella e' PIU' VICINO
+      A ZERO di quello del metro.
+  (peggior giornata dei CHIUSI: il muro delle prop guarda il FLOTTANTE, questa
+   e' un pavimento -- vale per ogni riga (c) qui sotto)
+  INFO 01_short_r1 (dial 1.0):
+     (a) profitto OOS : +16948  contro metro +23321   [piu' alto = meglio]
+     (b) DD OOS       : 2.66%  contro metro 7.83%   [numeri POSITIVI: piu' basso = meglio]
+     (c) pegg.giornata: -1.17% (fisso)  contro metro -2.45%   [numeri NEGATIVI: piu' VICINO A ZERO = meglio. NON confrontare col '<=' le cifre col segno: lo rovescia]
+     (d) profitto IS  : +2607   [deve essere > 0]
+     >>> il verdetto lo da' il referto del round, a mano.
+  INFO 02_short_r2 (dial 2.0):
+     (a) profitto OOS : +36527  contro metro +23321   [piu' alto = meglio]
+     (b) DD OOS       : 5.30%  contro metro 7.83%   [numeri POSITIVI: piu' basso = meglio]
+     (c) pegg.giornata: -2.70% (fisso)  contro metro -2.45%   [numeri NEGATIVI: piu' VICINO A ZERO = meglio. NON confrontare col '<=' le cifre col segno: lo rovescia]
+     (d) profitto IS  : +5075   [deve essere > 0]
+     >>> il verdetto lo da' il referto del round, a mano.
+  INFO 03_short_r3 (dial 3.0):
+     (a) profitto OOS : +58567  contro metro +23321   [piu' alto = meglio]
+     (b) DD OOS       : 7.92%  contro metro 7.83%   [numeri POSITIVI: piu' basso = meglio]
+     (c) pegg.giornata: -4.72% (fisso)  contro metro -2.45%   [numeri NEGATIVI: piu' VICINO A ZERO = meglio. NON confrontare col '<=' le cifre col segno: lo rovescia]
+     (d) profitto IS  : +7434   [deve essere > 0]
+     >>> il verdetto lo da' il referto del round, a mano.
+
+--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---
+  * NON APPLICA IL CANCELLO DI PORTAFOGLIO e non promuove niente (G5): nessun
+    deploy esce da qui. La sedia 771531 resta com'e'. Se un dial passa, il
+    referto del round produce la PROPOSTA DI DELIBERA (atto separato di Claudio,
+    col check del cap C1 = 3,25% di rischio aperto).
+  * G3 NON APPLICABILE (un solo motore, un solo mercato): il contesto
+    cross-motore resta quello di R110 e non viene rimisurato.
+  * UN SOLO REGIME: 21 mesi di indici in salita. Ogni verdetto vale PER QUESTA
+    EPOCA (criteri par. 9). La prova di regime lunga sul Dow resta BLOCCATA.
+  * NON misura il flottante intragiornata, non misura i sotto-periodi, non fa
+    la prova di regime, non scrive una riga di MQL5.
+  * Il COMPOUNDING e' il motivo per cui si MISURA invece di moltiplicare: al
+    2-3% l'equity si muove, PF e DD NON scalano lineari. E il TETTO DI VOLUME
+    (R109: morde all'8,9% delle operazioni) puo' rendere 'gentile' il DD ai dial
+    alti: la lettura del volume massimo sta nella sezione delle celle.
+
+--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (7)
+  - R112_00_metro.txt: riconciliazione per-trade -- SCARTO DICHIARATO: 257 position_id distinti contro n OOS 517 dell'OPTFRAME (righe deal: 517). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+  - R112_01_short_r1.txt: riconciliazione per-trade -- SCARTO DICHIARATO: 140 position_id distinti contro n OOS 302 dell'OPTFRAME (righe deal: 302). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+  - R112_01_short_r1.txt: n OOS = 302, SOPRA i 150 dell'Emendamento regola A: il giudizio di MERITO si puo' dare per intero.
+  - R112_02_short_r2.txt: riconciliazione per-trade -- SCARTO DICHIARATO: 140 position_id distinti contro n OOS 315 dell'OPTFRAME (righe deal: 315). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+  - R112_02_short_r2.txt: n OOS = 315, SOPRA i 150 dell'Emendamento regola A: il giudizio di MERITO si puo' dare per intero.
+  - R112_03_short_r3.txt: riconciliazione per-trade -- SCARTO DICHIARATO: 140 position_id distinti contro n OOS 324 dell'OPTFRAME (righe deal: 324). Il confronto giusto e' sui position_id, NON sulle righe (deal di uscita: con TP1+trailing righe > n e' normale). La peggior giornata qui sotto e' calcolata lo stesso ma va letta con questa bandiera.
+  - R112_03_short_r3.txt: n OOS = 324, SOPRA i 150 dell'Emendamento regola A: il giudizio di MERITO si puo' dare per intero.
+
+--- PROBLEMI (questi SI sono guasti) ---   (0)
+  nessuno.
+
+ESITO: COMPLETO CON RILIEVI -- tutte e 4 le celle hanno prodotto i numeri attesi. I 7 rilievi sono RISULTATI del round, non guasti.
+
+--- COME SI RIPRENDE ---
+  una cella sola : ... & $p -Pin <PIN> -SoloCella R112_02_short_r2.txt
+  rifare cio' che c'e' gia' : aggiungi -Rifai
+  >>> il 00_metro rigira SEMPRE: e' il denominatore e porta G0-B e G0-C.
+  >>> i tre puntini stanno per IL BLOCCO INTERO della riga di lancio, con il
+      suo irm e la sua guardia: si riprende da RIGA_R112_DA_MANDARE.md.
+  >>> senza -CriteriFirmati: se una ripresa esce con codice 2, il file dei
+      criteri al pin porta (ancora, o di nuovo) il lucchetto: si legge il
+      documento, NON si aggira lo switch.
