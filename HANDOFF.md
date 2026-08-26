@@ -7,6 +7,51 @@
 
 ---
 
+## 🌃 AGGIORNAMENTO 26/08 SERA — LA SERATA DEI CINQUE ZIP: TUTTO ESEGUITO
+
+Claudio al PC dalle 17: **tutta la scaletta serale è stata eseguita e letta**.
+
+1. ✅ **STORICO (pin `2ba0286`)**: NASUSD_EXT conta-barre OK dopo il gesto
+   grafico (M15 362.325 / H1 93.085, zero anni vuoti); **SPXUSD_EXT importato**
+   (4.598.932 barre, diff 0,0608%). Resta solo il gesto grafico SPXUSD per il
+   suo conta (bassa priorità).
+2. ✅ **MISURE LAMPO (pin `03268a2`)**: vol oraria MISURATA, 3 eventi su 3 =
+   movimenti veri. → **FIRMA "FIRMO FRIGO NASUSD"** registrata come
+   emendamento in `prove/PROVA_REGIME_CRITERI.md`: metro relativo 0,20×vol
+   per i soli indici, **NASUSD_EXT AMMESSO alla prova di regime** (rapporto
+   0,199; parametri congelati, mai promozione), SPX/225JPY restano in frigo.
+3. ✅ **ANATOMIA APERTURE (pin `3b95be3`)**: canarino fuso VERDE (feed = ora
+   NY su due misure indipendenti), IS 2010-2020 pulito (sospetti 0-2%).
+   **Risposta: RIENTRO 38,7% ma payoff ~0; DRIVE 45% con asimmetria 5-6:1**
+   (MFE60 0,53-0,64% vs MAE 0,11%). Persistenza dei primi 15' ≈ moneta. Gap
+   non sposta le frequenze. Rilievo: 2023 (cassaforte) 22,9% sospetti.
+   Cassaforte SIGILLATA (archiviata, non letta). Lettura:
+   `LETTURA_ANATOMIA_APERTURE_2026-08-26.md` + artefatti in
+   `ANATOMIA_APERTURE_20260826/`. FASE 2 da disegnare sull'asimmetria.
+4. ✅ **DIAGNOSI DAX (pin `386346d`)**: **grxeur 2020-06→2023-11 NON è il
+   DAX** (sessione 02-15 NY + prezzi 3,2-4,4k, 2022 = 85% barre fuori banda;
+   [INFERITO] EuroStoxx50). 2019+2024-26 puliti ma insufficienti. Densità
+   SOSPESA (soglia bocciava anche il controllo positivo), Q1 SOSPESA
+   (troncamento). **DAX fuori dallo studio; strada 2 = Dukascopy DEUIDXEUR
+   (~25h, decisione di Claudio).** Lettura: `LETTURA_DIAGNOSI_DAX_2026-08-26.md`.
+5. ✅ **R110 CHIUSO (pin `4d6952f`, corsa 1,3h, 12/12, 0 guasti)**: referto
+   `R110_REFERTO.md`. **Titolo: EMADOW short = prima cella dei lati con
+   MERITO PIENO sugli indici, CANDIDATA** (OOS PF 1,891 n302, DD 2,66% vs
+   7,83% della sedia; verde anche in IS). SWDOW long 3,28 (n100, indizio) ma
+   short ROSSO 0,429; SUPNAS short verde-indizio 1,870 (n34); SUPDAX short
+   NON MISURABILE (n29). Spina dorsale (short vive nelle discese) confermata
+   terza volta — EMADOW short è l'eccezione che guadagna anche in salita.
+   **Nessuna promozione (G5)**: la proposta "EMADOW short-only/pesi diversi"
+   è un round di modifica contratto, da firmare.
+
+**Prossimi passi aperti**: round modifica contratto EMADOW; prova di regime
+NASUSD_EXT (criteri da scrivere — risponde a SUPNAS short e R107); FASE 2
+anatomia (ipotesi su IS, criteri propri); decisione Dukascopy DAX/Dow;
+gesto grafico SPXUSD; round VWAP MR / FVG / SupertrendInvert in coda.
+⚠️ Jackson Hole gio 27-ven 28/08: flotta senza filtro news, Guardian è la rete.
+
+---
+
 ## 🧭 AGGIORNAMENTO 26/08 POMERIGGIO — FIRME, ANALISI DIAL, SCALETTA SERALE
 
 - ✍️ **FIRME di giornata**: "FIRMO LO STUDIO ANATOMIA CON PROPOSTE" (criteri
