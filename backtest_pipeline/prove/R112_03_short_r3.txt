@@ -3,7 +3,7 @@
 #  IL CONTRATTO DELL'EMADOW: SHORT-ONLY, E A QUALE DIAL?
 #  ABTG_EMA200 su U30USD H1
 # ---------------------------------------------------------------------
-#  CRITERI:   backtest_pipeline\risultati_archivio\R112_CRITERI.md  [DA FIRMARE]
+#  CRITERI:   backtest_pipeline\risultati_archivio\R112_CRITERI.md  (FIRMATI: "FIRMO R112", 26/08/2026 sera)
 #  DRIVER:    backtest_pipeline\righe\RIGA_R112_EMADOW_CONTRATTO.ps1  (MARCATORE_RIGA_R112_v1)
 #  ORIGINE:   Claudio, 26/08/2026 sera: "PREPARA IL ROUND CONTRATTO
 #             EMADOW SHORT" -- dopo il titolo di R110 (EMADOW short:
