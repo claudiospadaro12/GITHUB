@@ -7,6 +7,47 @@
 
 ---
 
+## 🌙 AGGIORNAMENTO 26/08 NOTTE — R112 FIRMATO, PIANO PROP v14, DOSSIER PROP, EXCEL
+
+Claudio scollegato in serata ("A DOPO"). Stato al momento del distacco:
+
+- ✍️ **R112 "contratto EMADOW short" FIRMATO** ("FIRMO R112"): criteri
+  `R112_CRITERI.md` (lucchetto tolto), 4 file prova `prove/R112_*.txt`,
+  CSV riferimento G0-B in `prove/R110_CSV_EMADOW/`, driver
+  `righe/RIGA_R112_EMADOW_CONTRATTO.ps1` + foglio `RIGA_R112_DA_MANDARE.md`
+  (segnaposto @@PIN@@) costruiti. **IN CORSO: verifica del verificatore-
+  stringhe.** Dopo il PASS: pin, ripin ricette, stringhe a Claudio
+  (blocchi 1+2, MT5 CHIUSO, ~30-45 min). Novita' del round: G0-B
+  applicabile (riproduzione R110 al centesimo), peggior giornata dai
+  per-trade (OOS, doppio denominatore, IS n/d per costruzione).
+- 🚦 **PIANO_PROP v14**: sezione CANCELLO CHALLENGE a 6 cancelli (col 6°
+  nuovo: PROVA DELLA TAGLIA), orientamento di Claudio "challenge fra le
+  piu' alte" registrato come ORIENTAMENTO. Trovato: **criterio C3 gia'
+  scattato su Aperture DAX** (38 ingressi, -698 EUR -> corsia MERITO,
+  revisione dovuta; RETEST verde, BUY/SELL rossi); conteggi forward
+  dagli statement (solo Aperture DAX 38 e ORB 25 sopra soglia 20);
+  anomalia magic 770101 chiuso su NASUSD il 22/07 (da verificare al
+  prossimo censimento .chr); 15,2% delle chiusure forward sotto i 2 min.
+- 🏛️ **DOSSIER_PROP_CANDIDATE_2026-08-26.md**: 9 prop censite, classifica
+  FTMO Swing 2-Step > FundedNext Stellar > Alpha Swing > Goat (riserva).
+  Supplemento MILIONE: le taglie 1M dirette (Ment/Lux/Axi) hanno muri
+  6-7% < nostro 6,37% gia' accaduto -> il milione si scala da 200k
+  (FTMO ~32 mesi a >=10% netto/mese; tetto per strategia cade con lo
+  scaling SOLO su FTMO, dichiarato). Tutto [LETTO-VIA-SEARCH], da
+  riverificare sulle pagine prima dell'acquisto. Q1-Q10 aperte per
+  Claudio.
+- 📉 **ANALISI_DD_TOTALE_2026-08-26.md**: con muro 5% giornaliero, al
+  dial 1,00 il DD totale worst e' -6,37% sui chiusi (0 violazioni del
+  -10% su 481 partenze; trailing 6% romperebbe anche sui chiusi).
+- 📊 **report/MONITOR_CHALLENGE.xlsx** consegnato a Claudio (registro
+  challenge/funded: impostazioni, giornaliero coi muri, prelievi,
+  dashboard). Verifica LibreOffice non disponibile in ambiente (si
+  blocca anche su file banale): controllo a mano sulla riga d'esempio.
+- ⚠️ **Jackson Hole gio 27 - ven 28/08**: flotta senza filtro news,
+  Guardian e' la rete.
+
+---
+
 ## 🌃 AGGIORNAMENTO 26/08 SERA — LA SERATA DEI CINQUE ZIP: TUTTO ESEGUITO
 
 Claudio al PC dalle 17: **tutta la scaletta serale è stata eseguita e letta**.
