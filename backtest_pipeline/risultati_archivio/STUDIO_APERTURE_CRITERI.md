@@ -1,4 +1,12 @@
-# 🔬 STUDIO ANATOMIA APERTURE — 16 ANNI DI NASDAQ — CRITERI **[DA FIRMARE]**
+# 🔬 STUDIO ANATOMIA APERTURE — 16 ANNI DI NASDAQ — CRITERI **FIRMATI**
+
+> 🖊️ **FIRMA: "FIRMO LO STUDIO ANATOMIA CON PROPOSTE" — Claudio, 26/08/2026.**
+> Tutte le decisioni del § 9 valgono con le proposte: definizioni congelate
+> (DRIVE/FADE/RANGE/RIENTRO coi bordi esatti del § 2), cassaforte 2021-2026
+> (le ipotesi di motore si scrivono SOLO su 2010-2020), soglie ai default
+> dichiarati, dipendenza dall'esito misure lampo marcata in testa al referto.
+> Firma a numeri non visti. Il lucchetto e' stato tolto dai due punti che lo
+> portavano: la corsa vera (BLOCCO 2) ora parte.
 
 > 🔒 **QUESTO DOCUMENTO PORTA IL LUCCHETTO DELLA FIRMA.** Il driver lo scarica
 > **al pin** e ne cerca la parola-chiave **in tutto il file**: finché la trova, la
@@ -390,7 +398,7 @@ riproporre domani, con entusiasmo, una cosa già morta:
 
 ---
 
-## 9. ✍️ LE DECISIONI — **[DA FIRMARE]**
+## 9. ✍️ LE DECISIONI — **FIRMATE ("FIRMO LO STUDIO ANATOMIA CON PROPOSTE", 26/08/2026)**
 
 | # | decisione | proposta |
 |---|---|---|
