@@ -8,6 +8,18 @@ Claudio._
 
 **Nessun commit, nessun push** (richiesta esplicita del mandato).
 
+> 📌 **DUE AGGIUNTE AL MANDATO, arrivate il 26/08 sera e lavorate qui dentro:**
+> 1. **TAGLIA ALTA** — Claudio si orienta sulle taglie piu' grandi disponibili
+>    (200k/300k/400k+). → **§5-bis**: taglia massima per conto e prezzo · tetti
+>    di allocazione per persona **e per strategia** · se le regole cambiano con
+>    la taglia (**verificato, non assunto**) · leva su indici e oro · e
+>    l'aritmetica dei nostri lotti alla taglia scelta.
+> 2. **PAYOUT** — _"ogni quanto si puo' prelevare? anche tutti i giorni?"_ →
+>    **§5-ter**: primo prelievo · frequenza e opzioni a pagamento · minimo e
+>    split · cosa BLOCCA un payout · e **cosa succede al muro totale dopo un
+>    prelievo** (la voce che quasi nessuno guarda, e che su due prop su quattro
+>    e' dichiarata: **il cuscinetto si azzera**).
+
 ---
 
 ## 0. 🎯 CONTROLLO POSITIVO E STATO DELLE FONTI — leggere PRIMA di tutto
@@ -859,21 +871,35 @@ ftmo.com/en/faq/can-i-trade-news/ ·
 ftmo.com/en/faq/do-i-have-to-close-my-positions-overnight-or-before-the-weekend/ ·
 ftmo.com/en/forbidden-trading-practices/ ·
 ftmo.com/en/faq/which-instruments-can-i-trade-and-what-strategies-am-i-allowed-to-use/ ·
-ftmo.com/en/how-it-works/ · ftmo.com/en/1-step-challenge/
+ftmo.com/en/how-it-works/ · ftmo.com/en/1-step-challenge/ ·
+ftmo.com/en/reward-growth-and-scaling-plan/ ·
+ftmo.com/en/faq/what-capital-will-i-trade-on-an-ftmo-account/ ·
+ftmo.com/en/faq/how-many-accounts-can-i-have/ ·
+ftmo.com/en/faq/how-do-i-withdraw-my-profits/ ·
+ftmo.com/en/blog/trading-updates/trading-update-2-feb-2026/ (leva oro, letto **di
+riflesso** via thepayoutreport.com)
 
 **FundedNext:** help.fundednext.com/en/articles/8021076 (regole Stellar 2-Step) ·
 /9941519 (daily vs max loss) · /8019811 (calcolo daily) · /10701685 (news Stellar 2-Step) ·
 /10701447 (news) · /8020763 (EA) · /8388896 (restrizioni strategia) · /8019805 (copy trading) ·
-/8027523 (conti multipli) · /8592191 (add-on) · fundednext.com/cfds/stellar-2-step
+/8027523 (conti multipli) · /8592191 (add-on) · fundednext.com/cfds/stellar-2-step ·
+/8020768 (reward share) · /8020084 (come prelevare) · /8019659 (scale-up) ·
+/13349186 (FundedNext Pro scale-up) · /8019669 (leva) ·
+fundednext.com/general-rules/cfds/symbols-and-conditions · fundednext.com/symbols
 
 **Alpha Capital:** help.alphacapitalgroup.uk/en/articles/9789907 (Alpha Swing) ·
 /8420429 (Alpha Pro) · /10097421 (Alpha One) · /6934210 (daily risk limits) ·
 /10102634 (performance fee on demand) · alphacapitalgroup.uk/posts/alpha-capital-rules-explained... ·
-alphacapitalgroup.uk/posts/alpha-capital-swing-account-explained...
+alphacapitalgroup.uk/posts/alpha-capital-swing-account-explained... ·
+/8804535 (quanti conti / allocazione max per strategia) ·
+/6934289 (limite di lotti sui conti funded) · /6933852 (scaling plan) ·
+/10192958 (Alpha Three) · alphacapitalgroup.uk/ (homepage: "up to $200K") ·
+alphacapitalgroup.uk/product
 
 **Goat Funded Trader:** help.goatfundedtrader.com/en/articles/13575169 (2-Step Standard) ·
 /13575348 (2 Step GOAT) · /10742084 (news) · /14123389 (weekend gap) ·
-/collections/11969353 (Rules)
+/collections/11969353 (Rules) · /9549359 (reward e profit split) ·
+/10741910 (leva) · /10741905 (strumenti)
 
 **The5ers:** the5ers.com/faqs/prohibited-trading-practices/ ·
 help.the5ers.com/what-is-the-maximum-loss-and-the-maximum-daily-loss-in-the-high-stakes-program/ ·
@@ -890,7 +916,9 @@ the5ers.com/faqs/can-i-trade-during-news/ · the5ers.com/high-stakes/
 
 **Terze parti (etichettate come tali, mai criterio):** proptradingvibes.com ·
 tradetanto.com · propfirmmatch.com · thetrustedprop.com · tradingfinder.com ·
-brokeranalysis.com · eafunded.com · fortraders.com · nordman-algorithms.com
+brokeranalysis.com · eafunded.com · fortraders.com · nordman-algorithms.com ·
+thepayoutreport.com (aggiornamenti FTMO feb-2026) · quantvps.com · fxempire.com ·
+luxalgo.com · myfxbook.com
 
 **Interne:** `backtest_pipeline/risultati_archivio/ANALISI_DIAL_TAGLIE_2026-08-26.md` ·
 `ANALISI_SOPRAVVIVENZA_FUNDED_2026-08-26.md` ·
