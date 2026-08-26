@@ -4003,3 +4003,78 @@ non e' l'hashtable: e' **stampare le sue chiavi**.
 >
 > 🧭 **E la controprova costa dieci secondi**: prima `Sort-Object`, quattro ordini
 > su sei giri; dopo, **sei giri su sei identici**. Provata.
+
+---
+
+## 🆕 AGGIUNTA DEL 26/08/2026 — trovata verificando le due MISURE LAMPO del cancello _EXT, **ESEGUENDO** (il difetto era nella riga che stavamo per mandare)
+
+## 83. 🧬 DUE STRUMENTI GEMELLI SCRIVONO LO STESSO NOME DI FILE CON DUE FORMATI DIVERSI — e chi lo legge non dice "formato sbagliato", dice **"il file MANCA"**
+
+_Difetto vero, gia' committato nella bozza del par. 16.2 di
+`REFERTO_HISTDATA_FATTIBILITA.md` (la riga "gia' verificata il 19/08" che
+l'analisi del cancello prescriveva di lanciare stasera). Trovato PRIMA
+dell'invio e **RIPRODOTTO due volte, eseguendo il parser vero**._
+
+Nel repo ci sono **due** strumenti che portano dentro lo storico esterno, e
+tutti e due scrivono un file che si chiama **`<SIMBOLO>_M1.csv`**:
+
+| chi | dove | com'e' fatta la riga |
+|---|---|---|
+| `importa_storico_esterno.ps1` (righe 347-362) | `~\abtg_storico_esterno\` | `20190102 000000;1.146000;...` — **HistData grezzo**, separatore `;`, nessuna intestazione |
+| `histdata_m1.py --converti` (`scrivi_csv`) | `~\histdata_m1\` | `2019.01.02 00:00,1.146,...` — **"Formato 1"**, virgole, con intestazione |
+
+La bozza da lanciare diceva:
+`--vol-oraria --simboli eurusd --cartella "$env:USERPROFILE\abtg_storico_esterno"`.
+Li' dentro il file **c'e'**. Ma `leggi_csv_formato1` (riga 639) fa
+`campi = riga.split(",")` e poi `if len(campi) < 5: continue`: su una riga a
+punti e virgola **scarta TUTTO**. Eseguito sul parser vero:
+
+```
+barre lette da un CSV formato HistData grezzo: 0
+```
+
+**E qui arriva la parte che costa.** Zero barre finisce nel ramo generico che
+stampa:
+
+```
+NESSUNA BARRA: manca EURUSD_M1.csv e non ci sono ZIP utili.
+```
+
+cioe' **accusa un file mancante mentre il file e' li'**, con la data giusta e i
+dati giusti. E' il punto 81 (l'errore plausibile che punta sul bersaglio
+sbagliato) applicato a un **messaggio** invece che a un parser: chi legge il
+referto conclude "i dati non ci sono", va a **riscaricare** — e la misura che
+sblocca il cancello resta ferma un altro giorno.
+
+### E lo stesso messaggio mente una seconda volta, sul caso che stavamo cercando
+
+`--estrai`, da solo, prende la strada veloce e legge **soltanto la finestra**
+chiesta (righe 857-864). Se in quella finestra non c'e' niente — che e'
+**l'ipotesi 1, il buco di feed, la risposta che il round sta cercando** — il
+dizionario e' vuoto e si finisce **nello stesso ramo**, con la stessa frase
+*"manca `<SIM>`_M1.csv"*. Riprodotto su un banco con l'ora dell'evento
+svuotata: tre simboli su tre, tutti con il file sul disco.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **Un artefatto non si identifica dal NOME: si apre e si guarda la prima
+>    riga.** Prima di passare una cartella a uno strumento, la riga di lancio
+>    fa il censimento delle fonti e dichiara **formato per formato** cosa ha
+>    trovato (`FORMATO1` / `HISTDATA_GREZZO` / non riconosciuto). Dove due
+>    strumenti di casa scrivono lo stesso nome, il formato e' un'informazione
+>    di **stato**, non un dettaglio.
+> 2. **"Zero record" ha sempre almeno DUE cause, e vanno chiamate con nomi
+>    diversi**: *il file non c'e'* e *il file c'e' ma non dice quello che
+>    cerchi*. E' il punto 44 (la spia che non distingue "saltata" da "non
+>    girata") applicato a un parser. Se lo strumento non le distingue e non lo
+>    si vuole toccare, **le distingue il driver**, che sa gia' se il file
+>    esiste: nel referto ci va la traduzione giusta (*"FINESTRA VUOTA ->
+>    ipotesi 1 confermata"*), non la frase dello strumento.
+> 3. **E si prova col file dell'ALTRO gemello**, non solo con quello giusto:
+>    la prova positiva ("gli passo il mio CSV e funziona") non poteva vedere
+>    niente. Dieci righe del formato sbagliato e il parser vero: costa un
+>    minuto.
+>
+> 🧭 **Dove si annida**: ogni coppia di strumenti che produce "lo stesso dato"
+> (`dukascopy_m1.py` / `histdata_m1.py` / `importa_storico_esterno.ps1`), ogni
+> `--cartella` passata a mano in una riga di lancio, ogni ripiego "se il CSV
+> non c'e' guardo gli ZIP" (che qui **non scatta**, perche' il CSV c'e').
