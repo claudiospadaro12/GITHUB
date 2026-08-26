@@ -266,6 +266,14 @@ promesso dal contratto, da confrontare col DD reale che oggi e' n/d).
 ⚠️ Segnalata anche **una riga con magic `770101` su NASUSD** (chiusa il
 22/07): o e' un grafico sbagliato o e' un magic riusato — va guardata, perche'
 sporca l'attribuzione della famiglia.
+✅ **VERIFICATA da Claudio sul VPS, 26/08 sera**: sul grafico NASUSD c'e'
+**ABTG_SupRev_NAS** (l'inquilino giusto, sedia 970913) — nessun EA DAX sul
+grafico sbagliato OGGI. L'anomalia del 22/07 resta un fatto STORICO
+una-tantum (attach temporaneo di allora o magic riusato): si tiene d'occhio
+negli statement futuri, indagine solo se ricompare.
+✅ **E il grafico `D30EURM54`** (quello "senza EA visibile" dal censimento
+02/08) **NON ESISTE PIU'** sul VPS (verifica Claudio 26/08 sera): rimosso,
+caso chiuso.
 
 ### 📏 CANCELLO 6 — PERCHE' UNA TAGLIA GRANDE NON E' "LO STESSO CONTO PIU' GRANDE"
 
