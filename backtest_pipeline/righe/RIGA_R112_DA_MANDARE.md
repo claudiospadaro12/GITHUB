@@ -62,10 +62,10 @@ sbagliato). Le date sono **in ora server BCM** (ora italiana − 1).
 
 ---
 
-## 📌 IL PIN — ⚠️ **PIN DA ASSEGNARE** (la pagina esce col segnaposto)
+## 📌 IL PIN — ✅ **ASSEGNATO il 26/08/2026 notte** (commit col PASS del verificatore: 3 difetti FAIL->CORRETTO, checklist 87 nata qui)
 
 ```
-@@PIN@@
+f33f37426068a48068d82137cb43c5bf74c7de61
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima** (checklist 6 e 55). Il commit da
@@ -131,7 +131,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R112.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='f33f37426068a48068d82137cb43c5bf74c7de61'; $p="$env:USERPROFILE\RIGA_R112.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R112_EMADOW_CONTRATTO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R112_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -186,7 +186,7 @@ lasciato "tanto è innocuo" diventa un bypass permanente).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R112.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='f33f37426068a48068d82137cb43c5bf74c7de61'; $p="$env:USERPROFILE\RIGA_R112.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R112_EMADOW_CONTRATTO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R112_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
