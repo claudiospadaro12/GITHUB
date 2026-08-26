@@ -4078,3 +4078,103 @@ svuotata: tre simboli su tre, tutti con il file sul disco.
 > (`dukascopy_m1.py` / `histdata_m1.py` / `importa_storico_esterno.ps1`), ogni
 > `--cartella` passata a mano in una riga di lancio, ogni ripiego "se il CSV
 > non c'e' guardo gli ZIP" (che qui **non scatta**, perche' il CSV c'e').
+
+---
+
+## 🆕 AGGIUNTA DEL 26/08/2026 — trovata verificando l'ANATOMIA DELLE APERTURE (Fase 1)
+
+## 84. 🎭 IL CANCELLO CHE VIVE DENTRO IL RENDERER: il referto lo scrive, il codice d'uscita non l'ha mai saputo
+
+_Difetto vero, gia' committato in `backtest_pipeline/anatomia_aperture.py`
+(`92e4cff`), trovato PRIMA dell'invio e **RIPRODOTTO**: un anno con il **38,7 %
+di giornate malate** usciva **`ESITO: OK`**._
+
+Lo strumento ha un cancello dichiarato nei criteri: *"se in un anno i giorni
+sospetti superano il 20 %, il referto alza un RILIEVO"*. Ed e' scritto. Solo che
+nasceva **dentro la funzione che DISEGNA il referto**:
+
+```python
+def blocco_copertura(cfg, righe, diag, titolo):
+    ...
+    rilievi.append("anno %d: %s%% di giorni sospetti ...")
+    return out, rilievi                      # <- il rilievo esce di qui
+...
+for nome, titolo, nota, sotto in blocchi:
+    testo, ril = costruisci_referto(...)
+    tutti = rilievi + ril                    # <- e finisce SOLO nel testo
+...
+if rilievi:                                  # <- `ril` non e' mai qui dentro
+    return 1
+return 0
+```
+
+**Misurato, eseguendo, su un file sintetico col 2016 al 38,7 %:**
+
+| dove | cosa dice |
+|---|---|
+| `ANATOMIA_APERTURE_IS_*.txt` | `ESITO: MISURATO CON RILIEVI (1)` + `- anno 2016: 38.7% di giorni sospetti` |
+| codice d'uscita del processo | **0** |
+| eco che il driver copia nel referto | `giorni BUONI 942   SOSPETTI 101` · **`ESITO: OK`** |
+| riga in chat | **niente giallo**: `$rc -ne 0` non scatta |
+
+Cioe' il round si presentava **pulito** a Claudio, e l'unico posto dove la
+malattia era scritta era in fondo a un file che la riga stessa dichiarava «OK».
+
+### Perche' e' una classe a se'
+
+Il **14** e' il codice d'uscita che non guarda la lista dei falliti; il **22** e'
+il referto che dice una cosa e il codice d'uscita un'altra **perche' nessuno ha
+scritto l'ESITO**. Qui l'ESITO del referto era **GIUSTO** — il difetto e' che il
+verdetto **nasce nel livello di PRESENTAZIONE**, quindi la sua vita finisce con
+la stringa che ha prodotto. Ed e' un difetto *invisibile alla rilettura*: il
+codice del cancello c'e', e' corretto, ha pure il commento che spiega perche'
+esiste. Manca solo il **filo** fra chi lo calcola e chi decide.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **Un cancello si calcola in una funzione che NON STAMPA NIENTE**, prima dei
+>    referti, sull'insieme completo dei dati. Il renderer **legge**, non decide.
+>    `rilievi += rilievi_quota(cfg, righe)` sta nel `main`, non dentro il
+>    disegnatore della tabella.
+> 2. **La lista che finisce nel testo e quella che decide il codice d'uscita
+>    devono essere LO STESSO OGGETTO.** Se sono due (`rilievi` e `ril`), prima o
+>    poi una delle due e' incompleta — e sara' quella che nessuno guarda.
+> 3. 🔎 **Il grep secco che lo trova**: per ogni cancello promesso nei criteri,
+>    cercare la variabile del rilievo e verificare che compaia **anche** nel ramo
+>    che ritorna il codice d'uscita. Se compare solo dentro un `append` a una
+>    lista di righe di testo, **il cancello e' decorativo**.
+
+### 84-bis. 🧪 E LA BATTERIA DI CHI HA SCRITTO IL CODICE NON PUO' VEDERE QUESTO DIFETTO
+
+L'autotest dello strumento aveva **12 prove su 12 verdi**, comprese due sul
+canarino del fuso «provato nei due versi». Nessuna poteva accorgersene: provavano
+tutte **i pezzi** (la funzione di classificazione, il riconoscimento del formato,
+il canarino) e nessuna **il filo** fra un pezzo e il codice d'uscita. E' il
+corollario del punto **81**: una batteria vede i difetti che il suo autore ha
+gia' immaginato.
+
+> ✅ **Per ogni cancello dichiarato nei criteri serve una prova che lo esercita
+> DALL'ESTERNO**, sul valore che la riga di lancio legge davvero — non sulla
+> funzione interna. La prova 13 aggiunta qui costruisce 100 giorni buoni + 40
+> sospetti e pretende che il rilievo arrivi alla lista del codice d'uscita.
+> Corollario gratis, trovato nella stessa prova: **una quota ha un
+> DENOMINATORE**, e va stampato accanto alla colonna. `SOSPETTI / (BUONI +
+> SOSPETTI)` accanto a una colonna `GIORNI` si legge come `SOSPETTI / GIORNI`,
+> che e' un altro numero e piu' piccolo proprio negli anni piu' bucati.
+
+### 84-ter. 📏 LA TOLLERANZA TARATA A OCCHIO SU UNO STIMATORE CHE SBAGLIA DI PIU'
+
+Stessa verifica, `RIGA_ANATOMIA_APERTURE.ps1`. Il driver stima le barre di un CSV
+da 360 MB dividendo la dimensione per la **lunghezza media delle prime 4 righe**,
+e alza una NOTA se la stima si scosta oltre il **5 %** dal numero agli atti. Ma
+fra quelle 4 righe c'e' **l'intestazione** (`Time,Open,High,Low,Close,Volume`,
+30 caratteri contro i ~68 di una barra): la media crolla a **59,25** e la stima
+si gonfia del **14,8 % MISURATO**. La NOTA sarebbe scattata a **ogni corsa sana**,
+sul referto che Claudio legge — e' il punto **47** (la spia che non puo' che
+essere rossa) con un meccanismo nuovo: non un parametro passato da noi, ma un
+**bias sistematico dello stimatore piu' grande della sua stessa tolleranza**.
+
+> ✅ **Prima di scrivere una soglia di tolleranza, si MISURA il bias dello
+> stimatore su un campione del formato vero** (qui: due righe di Python e una di
+> PowerShell, bias sceso a **0,0 %** togliendo l'intestazione dal campione). Una
+> tolleranza scelta a occhio sopra uno stimatore mai misurato non e' un
+> controllo: e' un generatore di rumore che insegna a ignorare le note.
