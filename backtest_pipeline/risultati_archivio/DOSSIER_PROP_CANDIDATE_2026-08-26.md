@@ -3,7 +3,12 @@
 > 📨 **AGGIORNAMENTO 27/08/2026 ~00:30 — MAIL INVIATA A FTMO** (support@ftmo.com)
 > con le 5 domande scritte (leva per strumento, margini overnight/stop-out,
 > tetti di volume, clausola 2x200k/strategie identiche, gap trading).
-> 📨 **E MAIL A FUNDEDNEXT INVIATA alle 23:56** (5 domande: fee add-on EA,
+> 📨 **TUTTE E TRE LE MAIL INVIATE (conferma di Claudio, 27/08 ~00:00)**:
+> FTMO, FundedNext (23:56, auto-ack del bot: risposta in 12-24h) e Alpha
+> Capital. Tre risposte scritte in arrivo = la classifica finale si fara'
+> sui fatti. Domande su misura per ciascuna (FTMO: 2x200k + gap trading;
+> FundedNext: fee EA + cap strategia; Alpha: regola 2 minuti + consistency).
+> **E MAIL A FUNDEDNEXT INVIATA alle 23:56** (5 domande: fee add-on EA,
 > leva eval/funded, volumi, multi-conto/cap strategia, ciclo Scale-Up).
 > Auto-risposta del loro bot alle 23:57: risposta promessa in 12-24 ore.
 > In attesa di risposta scritta: quando arriva va negli atti e decide la
