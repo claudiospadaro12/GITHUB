@@ -7,6 +7,13 @@ fare i test con piu' anni di storico"**._
 > le decisioni (D-A histdata/M1, D-B NASUSD, D-C solo prova di regime,
 > D-D 2010-2026, D-E canarino 20 ore, D-F DAX diagnosi prima) firmate con i
 > valori proposti: le righe `@DECISIONE` sotto portano `STATO=FIRMATO`.
+>
+> 🖊️ **EMENDAMENTO D-B: "FIRMO x S&P" — Claudio, 26/08/2026.** SIMBOLI da
+> `NASUSD` a `NASUSD,SPXUSD` (l'S&P 500 era in coda gratis nella proposta
+> originale; HistData `spxusd`, stesso formato e stessa banda del Nasdaq).
+> Il driver e' multi-simbolo per costruzione (lista `-split ","` alla riga
+> 597) e SPXUSD e' gia' nella sua tabella dei cinque indici: nessuna
+> modifica al codice, solo questo valore. Ripin conseguente nel foglio.
 
 > ## ⚠️ QUESTO FILE E' UN CANCELLO, NON UNA NOTA
 > `RIGA_STORICO_INDICI.ps1` **legge questo file al pin** e cerca le righe
@@ -114,7 +121,7 @@ Il testo intorno e' per chi firma; il driver guarda solo quelle righe.
 
 ```
 @DECISIONE D-A CHIAVE=FONTE VALORE=histdata STATO=FIRMATO
-@DECISIONE D-B CHIAVE=SIMBOLI VALORE=NASUSD STATO=FIRMATO
+@DECISIONE D-B CHIAVE=SIMBOLI VALORE=NASUSD,SPXUSD STATO=FIRMATO
 @DECISIONE D-C CHIAVE=USO VALORE=SOLO_PROVA_REGIME STATO=FIRMATO
 @DECISIONE D-D CHIAVE=FINESTRA VALORE=2010-2026 STATO=FIRMATO
 @DECISIONE D-E CHIAVE=SOGLIA_CANARINO_ORE VALORE=20 STATO=FIRMATO
