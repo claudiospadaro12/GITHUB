@@ -1,0 +1,257 @@
+﻿REFERTO R110 - I LATI MAI MISURATI DEI MOTORI VIVI SUGLI INDICI
+SupRev NAS H1 (NASUSD) - SupRev DAX H4 (D30EUR) - SuperWave DOW H1 (U30USD) - EMA200 Dow (U30USD)
+modo: CORSA
+switch di questo giro: nessuno (corsa piena, ripresa dei CSV gia' presenti ATTIVA)
+     Senza -Rifai il driver generico SALTA le finestre gia' presenti. I file saltati
+     sono marcati 'SALTATA DAL DRIVER' o 'A META'' e finiscono nei PROBLEMI, non in OK.
+stato dei criteri: FIRMATI (nessun [DA FIRMARE] nel file)
+data: 2026-08-26 18:34:29   (questa data deve essere di ADESSO)
+     ATTENZIONE: la data fresca NON distingue un giro a vuoto da una corsa.
+     Quello che lo distingue e' la riga 'modo:' qui sopra e il NOME della cartella.
+avvio: 2026-08-26 17:17:28   durata: 1.3 ore
+pin: 4d6952f1a29c2ccb50056d23df2b6d7588ece445
+criteri: risultati_archivio\R110_CRITERI.md   perimetro: CENSIMENTO_LATI_SHORT_2026-08-25.md (tab. 1d, par. 5 punti 1-2)
+finestra: 2024.09.26 -> 2026.06.30   split 40/60   modello 4 (tick reali)   deposito 100000
+     IS  2024.09.26 - 2025.06.09
+     OOS 2025.06.10 - 2026.06.30
+     (le stesse di R88, R97, R98, R101 e R107: e' l'unico modo di leggere R110 accanto a R107)
+spread: Spread=0 scritto NELL'INI = spread CORRENTE del feed BCM, dichiarato.
+     NON e' uno stress di spread e NON e' una misura dello spread.
+rischio: 1,00% nei file prova. IN CAMPO SUL 100K E' 0,65%.
+     >>> OGNI DD DI QUESTO REFERTO E' ALL'1%. Per confrontarlo col forward del
+     100k si MOLTIPLICA PER 0,65 (criteri par. 2.6). Chi salta la conversione
+     confronta due cose diverse.
+
+--- CONVENZIONE DI SENTINELLA (checklist 66) ---
+  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000. Vale per TUTTE le
+  colonne: profitto, PF, DD, n e peggior giornata. Un '0.000' su un PF sarebbe un
+  numero PLAUSIBILE, e si leggerebbe 'ha perso tutto'.
+  >>> E UN'ECCEZIONE DICHIARATA, perche' un 'n/d' onesto puo' nascondere una
+      misura IMPOSSIBILE (checklist 80): la colonna PeggGio% esce 'n/d' su TUTTE
+      le celle di questo round PER COSTRUZIONE. I quattro EA scrivono un OPTFRAME
+      a OTTO colonne (double stats[7]), senza 'Peggior Giornata %': ce l'hanno i
+      tre EA d'apertura di R107, da cui questa macchina e' stata copiata.
+      Qui 'n/d' NON vuol dire 'stavolta non e' uscita': vuol dire 'non esce MAI'.
+      Il rischio si legge su DD equity IS/OOS e sul dDD% contro il 00_metro
+      (criteri G4-bis, decisione D6). Averla vuol dire 12 passate SINGOLE in piu':
+      e' un round successivo, e ABTG_SupRev_DAX_H4_Ottimizzato non ha nemmeno
+      ExportTrades(), quindi su SUPDAX non c'e' nemmeno la strada dei per-trade.
+
+--- I GATE, E QUALE DI LORO PUO' MORDERE (criteri par. 5) ---
+  G0-A  ANTENATO : ogni cella e' la copia riga per riga del file prova R103 di
+                   quella sedia, salvo i delta DICHIARATI. Gira PRIMA di MT5.
+  G0-B  NUMERICO : NON APPLICABILE su tutte e quattro le famiglie, e NON e'
+                   'superato'. R103 e' l'unico posto coi numeri di queste sedie,
+                   ma girava a MODELLO 1 (OHLC su M1) su UNA FINESTRA UNICA di
+                   21 mesi; qui e' MODELLO 4 (tick reali) con lo split 40/60.
+                   Due banchi, due finestre: non c'e' niente da riprodurre.
+                   E che OHLC e tick reali NON diano lo stesso numero sugli
+                   indici e' MISURATO: SupRev_DOW_H4 fece PF 2,77 in OHLC e
+                   PF 0,79 a tick reali (revalidation 30/07, contratto REVOCATO).
+  G0-C  GEMELLI  : le due righe del CSV identiche al centesimo. E' l'unico gate
+                   NUMERICO del round: dimostra che il banco e' DETERMINISTICO,
+                   non che e' giusto.
+                   >>> E HA TRE ESITI, non due (checklist 68):
+                       'G0-A OK + G0-C OK'      = misurato e sano;
+                       'G0-C FALLITO'          = MISURATO e storto -- due passate
+                                                 identiche, numeri diversi: il banco
+                                                 non e' deterministico;
+                       'G0-C NON ESEGUITO'     = il CSV del metro non c'e'. NON e'
+                                                 dimostrato che il banco sia storto:
+                                                 non e' stato possibile misurarlo, e
+                                                 si ripara rilanciando la famiglia.
+
+  SUPNAS (ABTG_SupRev_NAS_H1_Ottimizzato / NASUSD H1, sedia viva 970913, sorgente 970913)
+     antenato         : prove\R103_ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_970913.txt
+     G0-A             : OK (3 celle contro prove\R103_ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_970913.txt)
+     numero R103      : +6.765 | PF 1,65 | DD 1,48% | n 172   (R103, OHLC M1, 21 mesi pieni)
+                        ^^^ CONTESTO DICHIARATO, NON UN METRO (G0-B).
+     metro misurato   : PF 1.581 | DD 1.29% | n 96   (OOS, tick reali)
+     gemelli (G0-C)   : IDENTICI
+     VERDETTO         : G0-A OK (antenato) + G0-C OK (gemelli identici). G0-B NON APPLICABILE: misurato adesso PF 1.581, DD 1.29%, n 96
+     CANARINO         : n IS 76 / n OOS 96   (NON e' un gate - Emendamento regola B)
+     nota             : LA PROP-FRIENDLY: il DD piu' basso del parco indici.
+
+  SUPDAX (ABTG_SupRev_DAX_H4_Ottimizzato / D30EUR H4, sedia viva 970912, sorgente 970912)
+     antenato         : prove\R103_ABTG_SupRev_DAX_H4_Ottimizzato_D30EUR_970912.txt
+     G0-A             : OK (3 celle contro prove\R103_ABTG_SupRev_DAX_H4_Ottimizzato_D30EUR_970912.txt)
+     numero R103      : +7.856 | PF 2,05 | DD 4,22% | n 99   (R103, OHLC M1, 21 mesi pieni)
+                        ^^^ CONTESTO DICHIARATO, NON UN METRO (G0-B).
+     metro misurato   : PF 1.432 | DD 4.04% | n 65   (OOS, tick reali)
+     gemelli (G0-C)   : IDENTICI
+     VERDETTO         : G0-A OK (antenato) + G0-C OK (gemelli identici). G0-B NON APPLICABILE: misurato adesso PF 1.432, DD 4.04%, n 65
+     CANARINO         : n IS 31 / n OOS 65   (NON e' un gate - Emendamento regola B)
+     nota             : IL CAMPIONE PIU' SOTTILE del round: n 99 su 21 mesi INTERI. Un lato solo, sul solo OOS, puo' finire sotto G1.
+
+  SWDOW (ABTG_SuperWave_DOW_H1_Ottimizzato / U30USD H1, sedia viva 770511, sorgente 770511)
+     antenato         : prove\R103_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_770511.txt
+     G0-A             : OK (3 celle contro prove\R103_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_770511.txt)
+     numero R103      : +7.280 | PF 1,28 | DD 4,14% | n 290   (R103, OHLC M1, 21 mesi pieni)
+                        ^^^ CONTESTO DICHIARATO, NON UN METRO (G0-B).
+     metro misurato   : PF 1.220 | DD 4.21% | n 184   (OOS, tick reali)
+     gemelli (G0-C)   : IDENTICI
+     VERDETTO         : G0-A OK (antenato) + G0-C OK (gemelli identici). G0-B NON APPLICABILE: misurato adesso PF 1.220, DD 4.21%, n 184
+     CANARINO         : n IS 106 / n OOS 184   (NON e' un gate - Emendamento regola B)
+     nota             : Il secondo campione piu' grasso degli indici.
+
+  EMADOW (ABTG_EMA200 / U30USD H1, sedia viva 771531, sorgente 771501)
+     antenato         : prove\R103_ABTG_EMA200_U30USD_771531.txt
+     G0-A             : OK (3 celle contro prove\R103_ABTG_EMA200_U30USD_771531.txt)
+     numero R103      : +30.647 | PF 1,42 | DD 6,48% | n 712   (R103, OHLC M1, 21 mesi pieni)
+                        ^^^ CONTESTO DICHIARATO, NON UN METRO (G0-B).
+     metro misurato   : PF 1.524 | DD 7.83% | n 517   (OOS, tick reali)
+     gemelli (G0-C)   : IDENTICI
+     VERDETTO         : G0-A OK (antenato) + G0-C OK (gemelli identici). G0-B NON APPLICABILE: misurato adesso PF 1.524, DD 7.83%, n 517
+     CANARINO         : n IS 237 / n OOS 517   (NON e' un gate - Emendamento regola B)
+     nota             : IL CAMPIONE PIU' GRASSO DI CASA: 712 operazioni. L'unico posto del parco dove un LATO DA SOLO puo' arrivare a n>=150 su questa finestra. >>> E il magic del SORGENTE (771501) NON e' quello della SEDIA (771531): sono tre numeri diversi col magic del file prova.
+
+  NOTA: 'NON MISURATO' NON e' 'va bene', e 'NON APPLICABILE' NON e' 'superato'.
+  Se i gemelli di una famiglia non sono identici, le sue celle dei lati non sono
+  state nemmeno lanciate -- e le altre famiglie sono andate avanti (decisione D5).
+
+--- LA TABELLA MADRE ---   (attese: 2 righe per CSV, 24 CSV, 48 passate)
+  IS e OOS accanto, perche' su un round sui LATI la differenza fra le due finestre
+  E' il risultato (vedi LA SPINA DORSALE in fondo). dPF e dDD sono il DELTA OOS
+  contro il 00_metro della stessa famiglia -- cioe' contro LA SEDIA, non contro
+  l'altro lato.
+  FAM     CELLA     ISprof    ISpf    ISdd    ISn    OOSprof   OOSpf   OOSdd   OOSn   dPF      dDD%    PeggGio% ESITO
+  SUPNAS  00_metro  +1778     1.386   1.03    76     +3627     1.581   1.29    96     0.000    0.00    n/d      OK
+  SUPNAS  01_long   +880      1.311   0.92    47     +1928     1.448   1.62    62     -0.133   +0.33   n/d      OK
+  SUPNAS  02_short  +903      1.511   1.14    29     +1664     1.870   0.93    34     +0.289   -0.36   n/d      OK
+  SUPDAX  00_metro  +4242     3.808   1.67    31     +2646     1.432   4.04    65     0.000    0.00    n/d      OK
+  SUPDAX  01_long   +954      1.978   1.63    14     +1719     1.589   2.12    36     +0.157   -1.92   n/d      OK
+  SUPDAX  02_short  +3269     7.774   0.67    17     +947      1.290   3.60    29     -0.142   -0.44   n/d      OK
+  SWDOW   00_metro  +4236     1.397   3.48    106    +3455     1.220   4.21    184    0.000    0.00    n/d      OK
+  SWDOW   01_long   +2246     1.550   2.89    50     +10369    3.280   2.14    100    +2.060   -2.07   n/d      OK
+  SWDOW   02_short  +2878     1.446   3.62    60     -6090     0.429   7.53    84     -0.792   +3.32   n/d      OK
+  EMADOW  00_metro  +4585     1.201   5.73    237    +23321    1.524   7.83    517    0.000    0.00    n/d      OK
+  EMADOW  01_long   +1844     1.162   2.64    112    +5671     1.241   8.90    241    -0.283   +1.07   n/d      OK
+  EMADOW  02_short  +2607     1.232   4.51    125    +16948    1.891   2.66    302    +0.368   -5.17   n/d      OK
+
+--- LA SOMMA DEI LATI: PERCHE' NON TORNA, E NON E' UN DIFETTO ---
+  MISURATO NEL SORGENTE, non dedotto: tutti e quattro i motori aprono la funzione
+  di ingresso con 'se ho gia' una posizione (o un pendente) esco', e SOLO DOPO
+  guardano il lato. Nel 00_metro un segnale short che arriva mentre e' aperta una
+  posizione LONG viene buttato via; nella cella 02_short quello slot e' libero e
+  quel segnale ENTRA.
+  >>> n(01_long) + n(02_short) NON deve fare n(00_metro). Chi lo pretende sta
+      leggendo il banco, non il motore. E il corollario che conta per il verdetto:
+      IL LATO LONG DA SOLO NON E' LA SEDIA VIVA, e nemmeno il lato short.
+  SUPNAS  OOS:  metro n 96     long n 62     short n 34    
+  SUPDAX  OOS:  metro n 65     long n 36     short n 29    
+  SWDOW   OOS:  metro n 184    long n 100    short n 84    
+  EMADOW  OOS:  metro n 517    long n 241    short n 302   
+
+--- LE CELLE, COME SONO SCRITTE NEI FILE CHE HANNO GIRATO ---
+  SUPNAS  00_metro  magic 763000/763001   InpAllowLong=true / InpAllowShort=true   muove: (niente: e' la cella VIVA tale e quale)
+       LA CELLA VIVA COM'E' (L+S) -- porta il gate dell'ANTENATO e i gemelli
+       G0-A: OK (delta: InpMagic)
+  SUPNAS  01_long   magic 763010/763011   InpAllowLong=true / InpAllowShort=false   muove: InpAllowShort
+       SOLO LONG -- il denominatore del lato short
+       G0-A: OK (delta: InpAllowShort + InpMagic)
+  SUPNAS  02_short  magic 763020/763021   InpAllowLong=false / InpAllowShort=true   muove: InpAllowLong
+       SOLO SHORT -- LA MISURA NUOVA (mai fatta su questa sedia)
+       G0-A: OK (delta: InpAllowLong + InpMagic)
+  SUPDAX  00_metro  magic 763100/763101   InpAllowLong=true / InpAllowShort=true   muove: (niente: e' la cella VIVA tale e quale)
+       LA CELLA VIVA COM'E' (L+S) -- porta il gate dell'ANTENATO e i gemelli
+       G0-A: OK (delta: InpMagic)
+  SUPDAX  01_long   magic 763110/763111   InpAllowLong=true / InpAllowShort=false   muove: InpAllowShort
+       SOLO LONG -- il denominatore del lato short
+       G0-A: OK (delta: InpAllowShort + InpMagic)
+  SUPDAX  02_short  magic 763120/763121   InpAllowLong=false / InpAllowShort=true   muove: InpAllowLong
+       SOLO SHORT -- campione atteso il piu' sottile del round (H4)
+       G0-A: OK (delta: InpAllowLong + InpMagic)
+  SWDOW   00_metro  magic 763200/763201   InpAllowLong=true / InpAllowShort=true   muove: (niente: e' la cella VIVA tale e quale)
+       LA CELLA VIVA COM'E' (L+S) -- porta il gate dell'ANTENATO e i gemelli
+       G0-A: OK (delta: InpMagic)
+  SWDOW   01_long   magic 763210/763211   InpAllowLong=true / InpAllowShort=false   muove: InpAllowShort
+       SOLO LONG -- il denominatore del lato short
+       G0-A: OK (delta: InpAllowShort + InpMagic)
+  SWDOW   02_short  magic 763220/763221   InpAllowLong=false / InpAllowShort=true   muove: InpAllowLong
+       SOLO SHORT -- LA MISURA NUOVA (mai fatta su questa sedia)
+       G0-A: OK (delta: InpAllowLong + InpMagic)
+  EMADOW  00_metro  magic 763300/763301   InpAllowLong=true / InpAllowShort=true   muove: (niente: e' la cella VIVA tale e quale)
+       LA CELLA VIVA COM'E' (L+S) -- porta il gate dell'ANTENATO e i gemelli
+       G0-A: OK (delta: InpMagic)
+  EMADOW  01_long   magic 763310/763311   InpAllowLong=true / InpAllowShort=false   muove: InpAllowShort
+       SOLO LONG -- il denominatore del lato short
+       G0-A: OK (delta: InpAllowShort + InpMagic)
+  EMADOW  02_short  magic 763320/763321   InpAllowLong=false / InpAllowShort=true   muove: InpAllowLong
+       SOLO SHORT -- L'UNICA CELLA DEL ROUND che puo' arrivare a n>=150
+       G0-A: OK (delta: InpAllowLong + InpMagic)
+
+--- LA SPINA DORSALE: DOVE STANNO LE DISCESE (criteri par. 4.2) ---
+  FATTO DI CALENDARIO: la discesa documentata dentro questa finestra e' la
+  correzione di FEBBRAIO-APRILE 2025, e cade DENTRO L'IS (l'IS finisce il
+  2025.06.09). L'OOS e' quasi tutto salita.
+  >>> COME SI LEGGE UNO SHORT VERDE IN IS E ROSSO IN OOS: la prima ipotesi NON e'
+      'il lato e' rumore', e' che L'EDGE DELLO SHORT VIVA NELLE DISCESE e che l'IS
+      ne contenga una mentre l'OOS quasi no.
+  >>> E C'E' UN FATTO NUOVO CHE PUNTA LI', ED E' DI IERI: R107 ha misurato il NAS
+      short a PF IS 3,220 e PF OOS 0,460 -- l'IS con la discesa dentro, l'OOS
+      senza. E' il segnale piu' forte che l'archivio abbia su questa ipotesi.
+  >>> [INFERITO], E RESTA [INFERITO]: questo round NON misura i sotto-periodi.
+      Non sa quanto del profitto IS venga da febbraio-aprile, e NON sa se l'OOS
+      contenga discese di ampiezza paragonabile. Non lo assuma nessuno.
+      La misura vera e' un round di PROVA DI REGIME fatto apposta -- che oggi e'
+      BLOCCATO dal frigo dei dati esterni sugli indici.
+
+--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---
+  * NON APPLICA I CANCELLI. G1 (n>=30), G2 (PF OOS >= 1,10 E positivo in IS),
+    G3 (coerenza cross-motore) e G4 (campione) li applica il REFERTO DEL ROUND,
+    a mano, sopra questa tabella. Qui ci sono i numeri, non i verdetti.
+  * G3 in particolare NON e' meccanizzabile qui: e' il confronto fra QUATTRO
+    tabelle, su tre mercati e due logiche diverse. Ed e' il cancello che in R46
+    fermo' un candidato che faceva +31%.
+  * NON RIPRODUCE R103 e non pretende di farlo (G0-B). I numeri R103 in questo
+    referto sono CONTESTO, e sono di un altro banco.
+  * SE UN 01_long PASSA G2 E IL SUO 02_short E' ROSSO, la lettura NON e' 'lo short
+    non serve': e' 'questa sedia POTREBBE essere long-only', che e' una PROPOSTA
+    DI MODIFICA DI CONTRATTO -- cioe' un round successivo con la sua firma
+    (regola R52: non si spegne un lato guardando i risultati).
+  * NON PROMUOVE NIENTE (G5). Tutte e QUATTRO le sedie stanno sul conto 100k: un
+    cambio al forward e' una firma successiva, con il suo referto.
+  * NON misura lo spread, non misura i sotto-periodi, non fa la prova di regime.
+  * NON ESTENDE NIENTE agli altri CINQUE motori simmetrici mai smontati del
+    censimento (PTE Dow, PunteLarry, GapFill, SuperWave H2, SupRev Nikkei):
+    restano NON MISURATI, e vanno detti tali.
+  * LA FINESTRA E' UN SOLO REGIME (21 mesi di indici che salgono) e IL LATO SHORT
+    PARTE SVANTAGGIATO PER REGIME. Un 'niente edge short' qui NON chiude la
+    domanda per sempre: la chiude PER QUESTA EPOCA e per questi quattro motori.
+
+--- RILIEVI (NON sono guasti: sono RISULTATI del round) ---   (17)
+  - PEGGIOR GIORNATA SUPNAS: la colonna 'Peggior Giornata %' NON esiste nell'OPTFRAME di ABTG_SupRev_NAS_H1_Ottimizzato (double stats[7], header a 8 colonne -- MISURATO nel sorgente al pin; l'hanno i tre EA d'apertura di R107, da cui questa macchina e' stata copiata). La colonna PeggGio% di questa famiglia esce n/d PER COSTRUZIONE: NON e' un guasto del parser e NON e' un CSV mancante. Il rischio si giudica su DD equity IS/OOS e sul dDD% contro il 00_metro (criteri G4-bis, decisione D6).
+  - G0-B sulla famiglia SUPNAS: NON APPLICABILE, e NON e' 'superato'. Il numero R103 di questa sedia (+6.765 | PF 1,65 | DD 1,48% | n 172   (R103, OHLC M1, 21 mesi pieni)) viene da un ALTRO banco (modello 1 = OHLC su M1) e da un'ALTRA finestra (21 mesi pieni, senza split): non c'e' niente da riprodurre. Quello che e' dimostrato qui e' che i FILE sono quelli giusti (G0-A) e che il banco e' DETERMINISTICO (G0-C).
+  - CANARINO SUPNAS: il 00_metro fa n OOS = 96, gia' sotto i 150 dell'Emendamento regola A. Le celle dei LATI faranno di meno per costruzione: su questa famiglia il giudizio di MERITO nasce SOSPESO (criteri par. 5, G4). E' un risultato, non un guasto.
+  - PEGGIOR GIORNATA SUPDAX: la colonna 'Peggior Giornata %' NON esiste nell'OPTFRAME di ABTG_SupRev_DAX_H4_Ottimizzato (double stats[7], header a 8 colonne -- MISURATO nel sorgente al pin; l'hanno i tre EA d'apertura di R107, da cui questa macchina e' stata copiata). La colonna PeggGio% di questa famiglia esce n/d PER COSTRUZIONE: NON e' un guasto del parser e NON e' un CSV mancante. Il rischio si giudica su DD equity IS/OOS e sul dDD% contro il 00_metro (criteri G4-bis, decisione D6).
+  - G0-B sulla famiglia SUPDAX: NON APPLICABILE, e NON e' 'superato'. Il numero R103 di questa sedia (+7.856 | PF 2,05 | DD 4,22% | n 99   (R103, OHLC M1, 21 mesi pieni)) viene da un ALTRO banco (modello 1 = OHLC su M1) e da un'ALTRA finestra (21 mesi pieni, senza split): non c'e' niente da riprodurre. Quello che e' dimostrato qui e' che i FILE sono quelli giusti (G0-A) e che il banco e' DETERMINISTICO (G0-C).
+  - CANARINO SUPDAX: il 00_metro fa n OOS = 65, gia' sotto i 150 dell'Emendamento regola A. Le celle dei LATI faranno di meno per costruzione: su questa famiglia il giudizio di MERITO nasce SOSPESO (criteri par. 5, G4). E' un risultato, non un guasto.
+  - R110_SUPDAX_02_short.txt: n OOS = 29, sotto la soglia G1 di 30. Il verdetto su questa cella e' NON MISURABILE, NON 'non funziona' (criteri par. 5, G1). E' una risposta del round.
+  - PEGGIOR GIORNATA SWDOW: la colonna 'Peggior Giornata %' NON esiste nell'OPTFRAME di ABTG_SuperWave_DOW_H1_Ottimizzato (double stats[7], header a 8 colonne -- MISURATO nel sorgente al pin; l'hanno i tre EA d'apertura di R107, da cui questa macchina e' stata copiata). La colonna PeggGio% di questa famiglia esce n/d PER COSTRUZIONE: NON e' un guasto del parser e NON e' un CSV mancante. Il rischio si giudica su DD equity IS/OOS e sul dDD% contro il 00_metro (criteri G4-bis, decisione D6).
+  - G0-B sulla famiglia SWDOW: NON APPLICABILE, e NON e' 'superato'. Il numero R103 di questa sedia (+7.280 | PF 1,28 | DD 4,14% | n 290   (R103, OHLC M1, 21 mesi pieni)) viene da un ALTRO banco (modello 1 = OHLC su M1) e da un'ALTRA finestra (21 mesi pieni, senza split): non c'e' niente da riprodurre. Quello che e' dimostrato qui e' che i FILE sono quelli giusti (G0-A) e che il banco e' DETERMINISTICO (G0-C).
+  - PEGGIOR GIORNATA EMADOW: la colonna 'Peggior Giornata %' NON esiste nell'OPTFRAME di ABTG_EMA200 (double stats[7], header a 8 colonne -- MISURATO nel sorgente al pin; l'hanno i tre EA d'apertura di R107, da cui questa macchina e' stata copiata). La colonna PeggGio% di questa famiglia esce n/d PER COSTRUZIONE: NON e' un guasto del parser e NON e' un CSV mancante. Il rischio si giudica su DD equity IS/OOS e sul dDD% contro il 00_metro (criteri G4-bis, decisione D6).
+  - G0-B sulla famiglia EMADOW: NON APPLICABILE, e NON e' 'superato'. Il numero R103 di questa sedia (+30.647 | PF 1,42 | DD 6,48% | n 712   (R103, OHLC M1, 21 mesi pieni)) viene da un ALTRO banco (modello 1 = OHLC su M1) e da un'ALTRA finestra (21 mesi pieni, senza split): non c'e' niente da riprodurre. Quello che e' dimostrato qui e' che i FILE sono quelli giusti (G0-A) e che il banco e' DETERMINISTICO (G0-C).
+  - R110_EMADOW_01_long.txt: n OOS = 241, SOPRA i 150 dell'Emendamento regola A. Su questa cella il giudizio di MERITO si puo' dare per intero -- ed e' raro su un lato solo di un motore di indici.
+  - R110_EMADOW_02_short.txt: n OOS = 302, SOPRA i 150 dell'Emendamento regola A. Su questa cella il giudizio di MERITO si puo' dare per intero -- ed e' raro su un lato solo di un motore di indici.
+  - SOMMA DEI LATI SUPNAS (OOS): metro n 96 | long n 62 | short n 34. CHE LA SOMMA NON TORNI E' PER COSTRUZIONE: ABTG_SupRev_NAS_H1_Ottimizzato esce dalla funzione di ingresso se ha gia' una posizione (o un pendente) PRIMA di guardare il lato, quindi con un lato spento lo slot resta libero e passano operazioni che nel metro erano bloccate. Non e' un difetto del banco.
+  - SOMMA DEI LATI SUPDAX (OOS): metro n 65 | long n 36 | short n 29. CHE LA SOMMA NON TORNI E' PER COSTRUZIONE: ABTG_SupRev_DAX_H4_Ottimizzato esce dalla funzione di ingresso se ha gia' una posizione (o un pendente) PRIMA di guardare il lato, quindi con un lato spento lo slot resta libero e passano operazioni che nel metro erano bloccate. Non e' un difetto del banco.
+  - SOMMA DEI LATI SWDOW (OOS): metro n 184 | long n 100 | short n 84. CHE LA SOMMA NON TORNI E' PER COSTRUZIONE: ABTG_SuperWave_DOW_H1_Ottimizzato esce dalla funzione di ingresso se ha gia' una posizione (o un pendente) PRIMA di guardare il lato, quindi con un lato spento lo slot resta libero e passano operazioni che nel metro erano bloccate. Non e' un difetto del banco.
+  - SOMMA DEI LATI EMADOW (OOS): metro n 517 | long n 241 | short n 302. CHE LA SOMMA NON TORNI E' PER COSTRUZIONE: ABTG_EMA200 esce dalla funzione di ingresso se ha gia' una posizione (o un pendente) PRIMA di guardare il lato, quindi con un lato spento lo slot resta libero e passano operazioni che nel metro erano bloccate. Non e' un difetto del banco.
+
+--- PROBLEMI (questi SI sono guasti) ---   (0)
+  nessuno.
+
+ESITO: COMPLETO CON RILIEVI -- tutte e 12 le celle hanno prodotto i numeri attesi. I 17 rilievi sono RISULTATI del round (canarino, G1 non misurabile, G0-B non applicabile, somma dei lati), non guasti.
+
+--- COME SI RIPRENDE ---
+  una famiglia sola  : ... & $p -Pin <PIN> -SoloEa 'EMADOW'
+  due famiglie       : ... & $p -Pin <PIN> -SoloEa 'SWDOW,EMADOW'   <-- FRA APICI (checklist 65)
+  una cella sola     : ... & $p -Pin <PIN> -SoloCella R110_EMADOW_02_short.txt
+  >>> senza -CriteriFirmati: i criteri sono FIRMATI NEL FILE al pin. Se una
+      ripresa uscisse con codice 2, vuol dire che il file dei criteri e' tornato
+      col lucchetto: si legge il documento, NON si aggira lo switch.
+  >>> in tutti i casi il 00_metro della famiglia rigira: e' il denominatore e
+      porta il gate G0-C. Costa 2 CSV, non una passata sprecata.
+  >>> e i tre puntini stanno per IL BLOCCO INTERO della riga di lancio, con il
+      suo irm e la sua guardia: si riprende da RIGA_R110_DA_MANDARE.md.
+  rifare cio' che c'e' gia' : aggiungi -Rifai
