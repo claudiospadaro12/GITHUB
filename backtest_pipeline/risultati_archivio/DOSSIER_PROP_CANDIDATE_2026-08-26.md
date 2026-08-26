@@ -15,10 +15,17 @@ Claudio._
 >    la taglia (**verificato, non assunto**) · leva su indici e oro · e
 >    l'aritmetica dei nostri lotti alla taglia scelta.
 > 2. **PAYOUT** — _"ogni quanto si puo' prelevare? anche tutti i giorni?"_ →
->    **§5-ter**: primo prelievo · frequenza e opzioni a pagamento · minimo e
+>    **§5-quater**: primo prelievo · frequenza e opzioni a pagamento · minimo e
 >    split · cosa BLOCCA un payout · e **cosa succede al muro totale dopo un
 >    prelievo** (la voce che quasi nessuno guarda, e che su due prop su quattro
 >    e' dichiarata: **il cuscinetto si azzera**).
+> 3. **IL MILIONE** — _"da 1 milione non c'e' nulla?"_ → **§5-ter**: chi vende
+>    davvero a 7 cifre (cercate, non assunte) · le quattro scale delle candidate
+>    (passo, cadenza, condizioni) · **il tempo minimo teorico da 200k a 1M** ·
+>    se lo split migliora · e se i tetti **per strategia** sopravvivono allo
+>    scaling. 🔴 **Anticipazione del verdetto: a 7 cifre, comprando, non c'e'
+>    NIENTE per noi — tutte le ditte che vendono $500k-$1,5M hanno muri totali
+>    fra 6% e 7%, sotto il nostro drawdown gia' misurato.**
 
 ---
 
@@ -547,7 +554,136 @@ dial):
 
 ---
 
-## 5-ter. 🏦 I PAYOUT — "ogni quanto si puo' prelevare? anche tutti i giorni?"
+## 5-ter. 🚀 LA STRADA VERSO IL MILIONE — _"da 1 milione non c'e' nulla?"_
+
+> _Domanda di Claudio, 26/08 sera._ Risposta in una riga, poi i numeri:
+
+> ## 🔴 **SI', qualcosa a 7 cifre esiste — ma NON UNA SOLA di quelle che lo vendono ha muri che passiamo.**
+> Ho cercato (non assunto) le ditte che vendono **direttamente** 500k-1M+. Ne ho
+> trovate **quattro serie**. **Tutte e quattro hanno un muro totale fra il 6% e
+> il 7%** — sotto il nostro drawdown **gia' misurato di 6,37%** e sotto la nostra
+> **p99 di 8,1%**. 🎯 **E il motivo e' strutturale, non casuale: piu' grande e' la
+> taglia che una ditta ti vende subito, piu' stretto e' il muro con cui te la
+> vende.** Il **10% statico** — l'unico muro che i nostri numeri passano —
+> **esiste solo fino a $200k-$400k**.
+> **Quindi: il milione non si compra. Si costruisce, con lo scaling.**
+
+### 🅰️ CHI VENDE DIRETTAMENTE A 7 CIFRE — e perche' nessuna passa
+
+| ditta | 🔝 max ACQUISTABILE subito | daily | totale | EA / MT5 | 🔴 perche' e' FUORI per noi |
+|---|---:|---:|---:|---|---|
+| **Ment Funding** | 🟢 **$1.000.000** (gamma $25k → $1M) | **5%** | 🔴 **6% STATICO** _"fixed on starting balance, never trails"_ | 🟢 EA **custom** ammessi (🔴 **vietati** quelli comprati da terzi) · MT4/MT5/cTrader/Match/DXTrade | 🔴 **il nostro DD misurato 6,37% > 6%**: sfonda **con la storia gia' accaduta**, a dial 1,00. Piu': **news vietate ±3 min** (noi zero filtro) e **weekend solo con add-on a pagamento (+10% della fee)**, altrimenti chiusura forzata venerdi' 15:45 EST |
+| **Lux Trading Firm** | 🟢 piani fino a **$1.000.000** | 🔴 **4%** (balance-based, sforo = **terminazione immediata**) | 🔴 **6%** | EA e news: regole esistenti, dettaglio **NON LETTO** | 🔴 **doppia bocciatura aritmetica**: 4% daily contro il nostro **−4,74%** (servirebbe d ≤ 0,844) **e** 6% totale contro 6,37% |
+| **Axi Select** | 🟢 fino a **$1.000.000** (stadio "Pro M") — 🔴 **ma NON e' una challenge**: si depositano **$500 propri**, si chiudono 20 trade, si costruisce un "Edge Score" > 50 e si sale in **sei stadi** | NON DICHIARATO nelle pagine raggiunte | 🔴 **7%** (10% **solo** allo stadio Pro M), _"calculated in real time... based on unrealized losses"_ | 🟢 _"Axi Select supports MT5 Expert Advisors fully"_ | 🟠 **7% sta sotto la nostra p99 di 8,1%**; e il milione e' **l'ultimo di sei stadi**, non un prodotto in vendita. Modello **diverso** (broker + allocazione), da valutare a parte se mai |
+| **Upcomers** | 🟢 fino a **$1.500.000** | 🔴 3% | 🔴 **6% TRAILING** | 🟢 si | ⚫ **GIA' BOCCIATA il 26/08** — dossier dedicato |
+| _(quasi: )_ **FXIFY** | 🟡 **$400k** diretti (Two Phase **Classic**: $250k) | 🔴 **4%** sul Two Phase Classic | 🟢 **10% STATICO** (Classic) · 8% statico (2-Phase Pro) | 🟢 EA ammessi (**non** su Instant/Lightning) · news ammesse · weekend ammesso · MT5 | 🔴 **daily 4%** → il nostro −4,74% lo sfonda. Piu' **consistency 25%** sul conto funded (_"the highest single daily profit cannot exceed 25% of the total profit"_). 🟡 Ma **e' la piu' vicina del gruppo**: se un giorno si scendesse a d ≤ 0,84, la sua scala (**$400k → $4M**) sarebbe la piu' dichiarata di tutte |
+
+> 🔴 **Il pattern, scritto nero su bianco:** Ment **6%** · Lux **6%** · Axi **7%**
+> · Upcomers **6% trailing** · FXIFY Pro **8%**. **Nessuna arriva al 10% statico
+> sulle taglie grandi.** Non e' sfortuna: e' il modello di business — **piu'
+> capitale nominale dai subito, meno corda lasci.**
+
+### 🅱️ LE QUATTRO SCALE DELLE NOSTRE CANDIDATE — passo, cadenza, condizioni
+
+| | 🥇 **FTMO** | 🥈 **FundedNext (Pro Scale-Up)** | 🥉 **Alpha Capital** | 🟡 **Goat Funded Trader** |
+|---|---|---|---|---|
+| **max acquistabile subito** | **$200.000** | **$200.000** | **$200.000** | **[INCERTO]** ($400k? $800k?) |
+| **tipo di scala** | 🟢 **COMPOSTA: +25%** | 🟢 **COMPOSTA: +25%** | 🔴 **LINEARE: +10% del balance INIZIALE** (_"not 10% of the current balance"_) | 🟢🟢 **RADDOPPIO (×2)** |
+| **cadenza** | **ogni 4 mesi** | **ogni "qualifying cycle"** — 🔴 **durata NON DICHIARATA** chiaramente | a ogni richiesta, dopo il traguardo | a ogni traguardo |
+| **condizione per salire** | 🔴 **≥10% di profitto NETTO in 4 cicli mensili CONSECUTIVI** | 🟢 **4 payout ricevuti + ≥4% di crescita in ogni ciclo di payout qualificante + ≥2 mesi di attivita'** | **+10% di crescita**, e si chiede allo stadio del prelievo della performance fee | 🟢 **+10% di profitto sul balance iniziale** |
+| 🔴 **quante volte si puo' salire** | fino al tetto | fino al tetto | fino al tetto | 🔴 **MASSIMO 3 VOLTE** (dichiarato) |
+| **tetto dichiarato** | **$2.000.000** per trader (**$1M** sui conti Aggressive) | **$4.000.000** | 🔴 **due numeri**: _"$2M cumulative virtual capital growth ceiling"_ **ma** _"max combined simultaneous allocation $400.000"_ → **[INCERTO]** | **$2.000.000** dichiarato — 🔴 in conflitto con il tetto di **allocazione combinata $400.000** letto altrove |
+| **(c) lo split migliora?** | 🟢 **SI': 80% → 90%** (_"FTMO Traders being on the scale-up plan have their Profit Split ratio upgraded to 90/10"_) | 🟢 **SI': 80% → 90%** (fino a 95% con add-on) | 🔴 **NO in automatico**: _"you may request scaling of the account and your performance fee of **80%**"_ — il 90% arriva solo con Alpha Direct / add-on | 🟡 **[INCERTO]**: base 80% → 100% con add-on; una fonte parla di progressione 65%→95% legata alla taglia. 🔴 **E scalando si incassa solo il 50%** di quel 10% di profitto (invece dello split normale) |
+| 🔴 **(d) i tetti PER STRATEGIA restano sui conti scalati?** | 🟢 **NO — ed e' dichiarato**: il tetto di **$400.000** e' _"per trader **or strategy** (**prior to any scaling**)"_. 🎯 **Lo scaling e' la via ufficialmente prevista per superarlo** | 🔴 **NON DICHIARATO**: il cap **$300k per strategia EA** non e' mai messo in relazione con lo scale-up | 🔴 **NON DICHIARATO**: restano scritti **$300k per strategia** e **$400k simultanei**, senza dire cosa succede scalando | 🔴 **NON DICHIARATO**: il tetto per strategia **non esiste** nelle pagine raggiunte |
+
+### 🅲 (b) QUANTO CI VUOLE, AL MINIMO TEORICO, DA 200k A 1M
+
+> ⚠️ **`[INFERITO]` — calcolo dichiarato, non una promessa.** Applico la scala
+> pubblicata di ogni ditta partendo da **$200.000**, **assumendo che ogni
+> traguardo venga centrato al primo colpo** (cioe' il **caso migliore
+> possibile**, senza un solo ciclo mancato). Nessuna delle ditte dichiara un
+> tempo: **il numero e' aritmetica sulla loro scala, non una loro affermazione.**
+
+| ditta | scala | passi necessari da 200k a ≥1M | ⏱️ **tempo MINIMO teorico** | la condizione che lo rende difficile |
+|---|---|---:|---|---|
+| **FTMO** | ×1,25 ogni 4 mesi | **8** (200 → 250 → 312,5 → 390,6 → 488,3 → 610,4 → 763,0 → 953,7 → **1.192**) | 🔴 **32 mesi ≈ 2 anni e 8 mesi** | 🔴 **ogni passo vuole 4 mesi CONSECUTIVI a ≥10% netto** → **32 mesi di fila sopra il 10%.** Vedi il confronto sotto |
+| **FundedNext** | ×1,25 per ciclo | **8** (stessa aritmetica) | 🟡 **NON CALCOLABILE**: la durata del "qualifying cycle" **non e' dichiarata**. Se il ciclo e' il payout (14 gg) → ~4 mesi; se e' mensile → ~8 mesi. 🔴 **Non lo so, e non lo invento** | 🟢 la soglia e' **+4% per ciclo**, molto piu' morbida del 10% FTMO |
+| **Alpha Capital** | **+$20.000 fissi** per scala (10% di 200k) | 🔴 **40** | 🔴 **NON RAGGIUNGIBILE per questa strada**: il tetto di **allocazione simultanea e' $400.000**, che si tocca dopo **10** scale. Oltre, c'e' solo la frase sul _"$2M cumulative"_ → **[INCERTO]** | la scala **non compone**: piu' cresci, meno pesa ogni scatto |
+| **Goat Funded Trader** | 🟢 **×2**, ma **massimo 3 volte** | **3** (200 → 400 → 800 → **1.600**) | 🟢 **il piu' rapido di tutti**: 3 traguardi da +10% ciascuno. Al nostro ritmo mediano (sotto) sarebbero **~3 mesi** | 🔴 **il tetto delle 3 scalate e' dichiarato**: da 200k il massimo raggiungibile e' **$1,6M e poi ci si ferma**. E ogni scalata costa: si incassa **solo il 50%** di quel 10% |
+
+#### 🎯 IL CONFRONTO CHE CONTA — la scala di FTMO contro il NOSTRO ritmo misurato
+
+`ANALISI_SOPRAVVIVENZA` Tab.2, dial 1,00: **lordo mediano 12.125 €/mese su 100k
+= 12,1% al mese**, con la banda annuale p10-p90 fra **130,0 e 165,5 k€**.
+
+| | numero |
+|---|---|
+| che cosa chiede FTMO per ogni scatto | **≥10% netto**, per **4 mesi consecutivi** |
+| il nostro mese mediano misurato | **12,1% lordo** |
+| 🔴 **il margine** | **2,1 punti percentuali** — e il requisito e' sul **NETTO** |
+| quanti mesi di fila servono per andare da 200k a 1M | 🔴 **32** |
+
+> 🔴 **La lettura onesta, e non e' incoraggiante:** il nostro mese **mediano**
+> supera il requisito FTMO **di due punti** — il che vuol dire che **circa meta'
+> dei nostri mesi NON lo supererebbe**, e ne basta **uno** per azzerare il ciclo
+> di quattro. **La probabilita' di 32 mesi consecutivi sopra il 10% non l'abbiamo
+> mai calcolata** — ma con un mediano a 12,1% e una banda larga, **e' bassa**.
+> 🎯 **Quindi il numero vero da dire a Claudio non e' "32 mesi": e' "32 mesi
+> SENZA MAI SBAGLIARE UN MESE".** La scala FTMO e' progettata per essere
+> raggiunta da pochi, ed e' l'unica cosa che si puo' dire con certezza.
+> ⚠️ E c'e' un secondo effetto misurato: `METRO_PROP` §12 + R109 dicono che a
+> taglie alte **il rendimento reale scende** (cap di volume, slippage). Il 12,1%
+> mediano e' misurato **a 100k**: **usarlo a 800k e' l'ipotesi piu' ottimista
+> del dossier.**
+
+#### 🚨 E il cavillo che uccide la scala di Goat, proprio dove sembra vincere
+`[INFERITO]` — aritmetica nostra su un numero letto oggi. Goat dichiara un
+**cap di profitto di $3.000 al giorno sui conti funded**, e 🔴 **non e'
+dichiarato che il cap cresca con la taglia**:
+
+| taglia | $3.000/giorno valgono | il nostro ritmo mediano (12,1%/mese ≈ 0,57%/giorno) |
+|---:|---:|---|
+| 100k | **3,00%/giorno** | 🟢 comodissimo |
+| 200k | 1,50%/giorno | 🟢 comodo |
+| 800k | 🔴 **0,375%/giorno** | 🔴 **il cap sta SOTTO il nostro ritmo mediano** |
+
+> 🎯 **Cioe': la scala piu' veloce del dossier (×2 tre volte) porta dritta dentro
+> un tetto che, alla taglia di arrivo, vale meno di quanto la flotta produce di
+> media.** Se il cap non scala — **e la prop non dice che scali** — allora su
+> Goat **il milione e' nominale**: il conto e' grande, il rubinetto no.
+> 🔴 **DOMANDA SCRITTA OBBLIGATORIA prima di qualunque euro su Goat.**
+
+### 🅳 IL VERDETTO SULLA STRADA VERSO IL MILIONE
+
+1. 🔴 **A 7 cifre, comprando, NON C'E' NIENTE PER NOI.** Le quattro ditte serie
+   che vendono $500k-$1,5M subito (**Ment, Lux, Axi Select, Upcomers**) hanno
+   muri totali fra **6% e 7%**, tutti **sotto il nostro drawdown gia' accaduto
+   (6,37%)** e tutti sotto la **p99 (8,1%)**. **Non e' una questione di prezzo:
+   e' che quei conti non li finiremmo.**
+2. 🟢 **Il milione, per noi, e' una destinazione, non un acquisto.** Si parte a
+   **$200.000** (il massimo che le nostre candidate vendono) e si sale.
+3. 🥇 **Sulla SCALA, FTMO resta la migliore — per un motivo solo, ma decisivo:
+   e' l'UNICA che dichiara che il tetto per STRATEGIA ($400k) vale
+   _"prior to any scaling"_.** Su una casa che ha **una sola flotta**, quello e'
+   il punto in cui le altre tre tacciono — e un tetto per strategia non
+   dichiarato, su un conto scalato, e' esattamente il tipo di clausola che si
+   scopre **al momento del payout**.
+4. 🔴 **Ma la scala FTMO e' lenta e spietata: 32 mesi, tutti sopra il 10% netto.**
+   Il nostro mese mediano e' **12,1%**: ci passa sopra di due punti, il che
+   significa che **meta' dei mesi no**. **Vendere questa strada come "due anni e
+   mezzo" sarebbe disonesto.**
+5. 🟡 **La scala piu' rapida e' Goat (×2, tre volte, ~3 mesi teorici) — ma si
+   ferma a $1,6M per regola e sbatte contro il cap dei $3.000/giorno.** La piu'
+   morbida nelle condizioni e' **FundedNext** (+4% per ciclo invece del 10%
+   mensile di FTMO), **ma la cadenza dei cicli non e' dichiarata** e il cap per
+   strategia EA ($300k) **non e' mai messo in relazione con lo scaling**.
+6. 🔴 **La piu' lenta e' Alpha Capital, e non di poco: la sua scala e' LINEARE**
+   (+10% del balance **iniziale**, non del corrente). Da 200k servirebbero **40
+   scatti**, e il tetto di **$400.000 simultanei** arriva al decimo.
+
+---
+
+## 5-quater. 🏦 I PAYOUT — "ogni quanto si puo' prelevare? anche tutti i giorni?"
 
 > _Domanda diretta di Claudio, 26/08 sera._
 
@@ -665,6 +801,13 @@ dial):
 | 18 | **Primo prelievo e minimo prelevabile di Alpha Capital** | 🔴 **NON DICHIARATI** |
 | 19 | **Se il prelievo azzera il cuscinetto su Alpha Capital e Goat** | 🔴 **NON DICHIARATO** — su FTMO e FundedNext e' **dichiarato SI'** |
 | 20 | **Il nostro tempo di libro piatto** | 🔴 buco NOSTRO: FTMO chiede **zero posizioni e zero pendenti** per il payout, e **non sappiamo quante finestre piatte la flotta lasci in un mese** |
+| 21 | **Durata del "qualifying cycle" di FundedNext** | 🔴 **NON DICHIARATA** → il tempo da 200k a 1M su FundedNext **non e' calcolabile** |
+| 22 | **Se i tetti PER STRATEGIA valgono sui conti SCALATI** | 🔴 **NON DICHIARATO** su FundedNext, Alpha e Goat. **Solo FTMO lo dice** (_"prior to any scaling"_) |
+| 23 | **Se il cap di $3.000/giorno di Goat cresce con la taglia** | 🔴 **NON DICHIARATO** — ed e' il numero che decide se la sua scala rapida porta a un milione **vero** o **nominale** |
+| 24 | **Alpha: "$2M cumulative growth" contro "$400k simultaneous allocation"** | 🔴 **due tetti che non si parlano** nelle fonti raggiunte |
+| 25 | **La probabilita' di 32 mesi consecutivi sopra il 10% netto** | 🔴 buco NOSTRO: **mai calcolata.** Abbiamo il mediano (12,1%) e la banda annuale, **non la distribuzione dei mesi** |
+| 26 | **EA di Ment Funding** | 🔴 fonti in conflitto: _"EAs, scripts and copy trading without restrictions"_ contro _"custom EA si', bot comprati da terzi no"_ (irrilevante: bocciata sui muri) |
+| 27 | **Regole EA/news di Lux Trading Firm** | 🔴 **NON LETTE** (bocciata prima sull'aritmetica dei muri) |
 
 ---
 
@@ -742,6 +885,9 @@ nostro −4,74% **gia' accaduto** lo sfonda, servirebbe d ≤ 0,844 · news viet
 | **leva sugli indici** (piu' leva = meno margine impegnato) | 🥇 **FundedNext 1:25 in challenge / 1:15 sul funded** batte FTMO Swing (1:15) e Goat funded (1:10) |
 | **prezzo della taglia grande** | 🥇 **FTMO €1.080** per il 200k contro **$1.099,99** di FundedNext: praticamente pari, con FTMO leggermente sotto al cambio corrente |
 | **regole che cambiano con la taglia** | 🥇 **FTMO: dichiarato NO** (_"same for every account size"_). 🔴 **Goat: SI'**, e cambia **per data d'acquisto** |
+| 🚀 **la scala verso il milione** (§5-ter) | 🥇 **FTMO** — unica che dichiara che il tetto per **STRATEGIA** vale _"**prior to any scaling**"_, cioe' che **lo scaling e' la via prevista per superarlo**. Le altre tre **tacciono** su cosa succede al cap per strategia sui conti scalati. 🔴 Ma e' anche la piu' **lenta e severa**: **32 mesi tutti sopra il 10% netto** |
+| ⚡ **la scala piu' rapida** | 🟡 **Goat**: ×2 per tre volte (200k → **1,6M**, ~3 traguardi) — 🔴 **ma si ferma li' per regola**, e sbatte contro il **cap di $3.000/giorno** che a 800k vale **0,375%/giorno**, sotto il nostro ritmo mediano |
+| 🐌 **la scala piu' lenta** | 🔴 **Alpha Capital**: **LINEARE** (+10% del balance **iniziale**), **40 scatti** da 200k a 1M, e il tetto di **$400.000 simultanei** arriva al decimo |
 
 > ⚖️ **Verdetto sull'aggiornamento: la classifica NON si ribalta, si rinforza.**
 > FTMO resta prima **anche sul criterio nuovo**, e per un motivo che prima non
@@ -755,6 +901,28 @@ nostro −4,74% **gia' accaduto** lo sfonda, servirebbe d ≤ 0,844 · news viet
 > **La taglia non si sceglie sul listino: si sceglie dopo aver misurato lo
 > slippage alla taglia scelta.** Oggi quella misura, sopra il 100k, **non
 > esiste in casa.**
+>
+> 🚀 **E sul milione (§5-ter) la classifica NON cambia neppure li': FTMO resta
+> prima.** Non perche' la sua scala sia comoda — e' la piu' dura — ma perche'
+> e' **l'unica che dichiara in che rapporto sta lo scaling col tetto per
+> STRATEGIA**, che per una casa con **una sola flotta** e' il tetto vero.
+
+---
+
+## 10-bis. 🚨 LA RISPOSTA SECCA SULLA STRADA DEL MILIONE
+
+> ### 🔴 **A 7 cifre, comprando, NON C'E' NIENTE PER NOI.**
+> Le quattro che vendono davvero $500k-$1,5M subito — **Ment Funding ($1M),
+> Lux Trading Firm ($1M), Axi Select ($1M), Upcomers ($1,5M)** — hanno muri
+> totali fra il **6% e il 7%**. Il nostro drawdown **gia' accaduto** e' **6,37%**
+> e la p99 e' **8,1%**: **sono conti che non finiremmo, non conti che costano
+> troppo.**
+> ### 🟢 **Il milione, per noi, si costruisce: $200.000 + scala.**
+> E la scala migliore e' **FTMO** — non la piu' veloce, **la piu' dichiarata**.
+> ### 🔴 **E il numero da non nascondere: 32 mesi, tutti sopra il 10% netto.**
+> Il nostro mese mediano misurato e' **12,1%**. Due punti di margine
+> significano che **circa meta' dei mesi non ce la farebbe**, e **uno solo
+> azzera il ciclo di quattro**.
 
 ---
 
@@ -814,6 +982,19 @@ va **per composizione** (due conti) o **per scaling**, e li' mordono i tetti
 > l'esecuzione**, e sopra il 100k **non l'abbiamo mai misurata**. Costerebbe
 > **una serie di trade reali alla taglia nuova**, non un backtest.
 
+### ❓ Q6 — **Il milione e' un obiettivo o un'aspettativa?**
+La strada c'e' (**200k + scala**), ma nessuna delle quattro la regala:
+**FTMO 32 mesi tutti sopra il 10% netto** · **FundedNext cadenza non
+dichiarata** · **Alpha lineare, 40 scatti e un tetto a 400k** · **Goat
+velocissima ma ferma a $1,6M e con un cap di $3.000/giorno che a 800k vale
+0,375%/giorno**.
+> 🎯 **La domanda:** si sceglie la prop **per la scala** (e allora FTMO, con
+> tutte le sue clausole grigie) o **per l'operativita' del primo anno** (e
+> allora FundedNext, che ci lascia lavorare meglio e chiede il 4% invece del
+> 10%)? 🔴 **La casa dice una cosa sola con certezza: il milione NON si compra —
+> ogni ditta che oggi te lo vende subito lo vende con un muro che non passiamo,
+> e questo e' un fatto misurato contro il nostro 6,37%, non un'opinione.**
+
 ### ❓ Q5 — **Prelevare spesso, o tenere il cuscinetto?**
 FTMO e FundedNext **dichiarano entrambe** che il prelievo **riporta il pavimento
 del muro totale al capitale iniziale**: il profitto smette di essere cuscinetto
@@ -853,6 +1034,16 @@ nel momento in cui lo incassi.
      rarely flat."_ (FTMO)
   6. _"What is the exact price of the LARGEST 2-Step account you sell?"_
      (Alpha Capital, Goat — prezzo non letto)
+  7. _"Does the per-strategy allocation cap ($300,000) still apply AFTER a
+     scale-up, or is it — as at FTMO — a limit that applies 'prior to any
+     scaling'?"_ (FundedNext, Alpha, Goat — **la domanda del milione**)
+  8. _"Is the $3,000 daily profit cap on funded accounts scaled with account
+     size? On an $800,000 scaled account, is it still $3,000?"_ (Goat)
+  9. _"How long is one 'qualifying cycle' for the Pro Scale-Up program?"_
+     (FundedNext)
+  10. _"Is the $2M cumulative growth ceiling compatible with the $400,000
+      maximum simultaneous allocation? Which one binds a scaled account?"_
+      (Alpha Capital)
 - **Nessuna modifica al forward**, nessun cambio di soglia del Guardian, nessun
   cambio di dial, nessun round. Ogni spostamento e' una **FIRMA di Claudio sui
   contratti**.
@@ -911,6 +1102,15 @@ the5ers.com/faqs/can-i-trade-during-news/ · the5ers.com/high-stakes/
 /48174287980177 (risk per trade idea) · /34502157694865 (Zero) · fundingpips.com/trading-objectives
 
 **Blueberry Funded:** help.blueberryfunded.com/en/articles/11880026 (+ rassegne terze)
+
+**Taglie a 7 cifre (§5-ter):** mentfunding.com · luxtradingfirm.com/rules-of-engagement-3/ ·
+support.devrev.ai/.../how-is-the-7-maximum-loss-calculated-in-axi-select (help ufficiale Axi) ·
+fxify.com/blog/top-prop-firms-with-static-drawdown/ · fxify.com/blog/introducing-fxify-2-phase-pro/ ·
+help.goatfundedtrader.com/en/articles/10831213-how-does-the-scaling-plan-work ·
+help.fundednext.com/en/articles/13349186-fundednext-pro-the-scale-up-program ·
+help.fundednext.com/en/articles/8019659-does-fundednext-offer-a-scale-up-plan ·
+help.alphacapitalgroup.uk/en/articles/6933852-how-does-the-scaling-plan-work ·
+ftmo.com/en/reward-growth-and-scaling-plan/ · ftmo.com/en/premium-programme/
 
 **E8 Markets:** help.e8markets.com/en/articles/11775980 (E8 One) (+ rassegne terze)
 
