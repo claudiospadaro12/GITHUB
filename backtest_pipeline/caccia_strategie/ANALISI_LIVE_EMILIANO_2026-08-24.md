@@ -39,6 +39,29 @@ _Fonte: trascrizione caricata da Claudio la sera del 24/08. Ogni numero è
   news (R101: news OUT per criterio); la rete è il Guardian B1 (pausa 4%).
   Da sapere, non da agire: se le giornate fossero selvagge, i numeri di
   quei giorni si leggono col contesto.
+  - ✅ **CONFERMATO dalla live del 25/08** (Paolo, testuale): _"Quello sono
+    giorni di altissima volatilità che non sai dove va il mercato […] non
+    si fa quella. Non sai quando esce e non sai come esce la notizia."_
+  - ⚠️ **CORREZIONE sulla data**: nella trascrizione del 25/08 Paolo dice
+    solo **"venerdì"** e **"fine agosto"** — le date **27/28 NON sono nel
+    suo parlato**. La finestra gio-ven resta come prudenziale, ma non è
+    attribuibile a lui. Dettaglio in `ANALISI_LIVE_PAOLO_2026-08-25.md` §B1.
+
+---
+
+## ➡️ SEGUITO: live del 25/08 (Paolo, lezione SUPERTREND)
+Referto completo: **`ANALISI_LIVE_PAOLO_2026-08-25.md`** (stessa cartella).
+Non duplico qui: in sintesi, i tre spunti che ne escono con priorità alta sono
+il **filtro trend su TF superiore** (teorema dei 3 TF), l'**ADR a 50 giorni**
+(assente ovunque da noi) e il **riesame di `ABTG_SupertrendInvert` sugli
+indici** (EA già scritto, bocciato solo su oro H1). Bandiera di contrasto: il
+suo cavallo di battaglia è la **DAX M3**, che noi abbiamo misurato **morta**
+in real-tick (capitolo breakout M5 chiuso, `REGISTRO_TEST.md` riga 40).
+
+⚠️ Nota di lettura incrociata: Emiliano (24/08) parla **intraday su indici**,
+Paolo (25/08) parla **swing forex H4-Weekly**. Sono due mestieri diversi nello
+stesso corso: **una regola dell'uno non vale automaticamente per l'altro**. E
+sono **una fonte sola**, non due indipendenti.
 
 ## Minori / non azionabili
 - VWAP: il corso usa il GIORNALIERO per l'intraday; il nostro gradino 07
