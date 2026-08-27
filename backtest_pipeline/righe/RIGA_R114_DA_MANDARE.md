@@ -173,12 +173,18 @@ Il gate si apre da solo: il driver cerca il lucchetto della firma nel file dei
 criteri **al pin, in tutto il file**, e nel file firmato («FIRMO R114», 27/08
 mattina) non lo trova più — quindi questo blocco parte **senza switch**.
 
-> ⚠️ **Se la corsa vera uscisse con codice 2**, sono DUE casi diversi e il
-> referto dice quale: (a) i criteri al pin sono **tornati** col lucchetto —
-> si legge il documento, non si aggira il gate; (b) **il canarino non ha
-> morso** — round fermo per costruzione (checklist 84-bis), la diagnosi col
-> nome della causa è nei PROBLEMI del referto. In tutti e due i casi **lo zip
-> esiste: mandalo**.
+> ⚠️ **Se la corsa vera uscisse con codice 2**, sono DUE casi diversi, e si
+> distinguono **da cosa trovi sul Desktop** (verificato eseguendo):
+> - **(a) i criteri al pin sono tornati col lucchetto** → la riga si ferma
+>   **due secondi dopo il lancio, PRIMA di produrre qualunque artefatto**:
+>   sul Desktop **non c'è nessuna cartella e nessuno zip**, e non deve
+>   essercene. Quello che serve è **il riquadro rosso a schermo** («NON
+>   PARTO: I CRITERI DI R114 NON RISULTANO FIRMATI AL PIN»): copiamelo. Si
+>   legge il documento, non si aggira il gate.
+> - **(b) il canarino non ha morso** → round fermo per costruzione
+>   (checklist 84-bis): qui la raccolta **è stata fatta**, **lo zip esiste e
+>   va mandato**, e la diagnosi col nome della causa è nei PROBLEMI del
+>   referto.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
@@ -212,15 +218,18 @@ aggiunge `-Rifai`. ⚠️ **Ogni ripresa è il blocco intero con il suo `irm`**
 
 ### 📅 LE DUE RIGHE CHE CLAUDIO DEVE LEGGERE NEL REFERTO, PRIMA DI MANDARE LO ZIP
 
-1. **`modo:`** — dice `CORSA` (il round) o `CONTROLLO` (giro a vuoto: **non è
-   il round, non si manda come risultato**);
+1. **`modo:`** — sono **TRE**, e stanno anche nel nome della cartella e dello
+   zip: `CORSA` (il round pieno), `CONTROLLO` (giro a vuoto: **non è il round,
+   non si manda come risultato**), `RIPRESA` (giro con `-SoloCella`: contiene
+   **solo** i lanci di quella cella — verificato eseguendo);
 2. **`data:`** — **deve essere di ADESSO**. Se è di ieri è un referto stantio.
 
 ---
 
 ## 📦 COSA MANDARE (cosa torna indietro)
 
-Cartella e zip sul Desktop: `R114_LEVA_<MODO>_<data>_<ora>` — dentro:
+Cartella e zip sul Desktop: `R114_LEVA_<MODO>_<data>_<ora>` (`<MODO>` =
+`CORSA` / `CONTROLLO` / `RIPRESA`) — dentro:
 
 - **`REFERTO_R114.txt`** ← **è questo che conta**: le approssimazioni del
   banco (§ 1 dei criteri, ristampate), le righe **G-SPEC** per simbolo
@@ -247,8 +256,14 @@ Cartella e zip sul Desktop: `R114_LEVA_<MODO>_<data>_<ora>` — dentro:
 | codice | vuol dire | cosa fare |
 |---|---|---|
 | **0** | OK / COMPLETO CON RILIEVI (i rilievi sono risultati o note) | manda lo zip |
-| **1** | parziale, fermato, con problemi, o selettore a vuoto | **manda lo zip lo stesso** e leggi i PROBLEMI |
-| **2** | **due casi, il referto dice quale**: criteri al pin col lucchetto (coi criteri già firmati NON deve succedere), oppure **canarino che non morde** → round fermo per costruzione (84-bis) | si legge il documento / la diagnosi nei PROBLEMI — **non** si aggira il gate |
+| **1** | parziale, fermato a metà, o completo con problemi | **manda lo zip lo stesso** e leggi i PROBLEMI |
+| **2** | **due casi**: **canarino che non morde** (round fermo per costruzione, 84-bis) → **lo zip c'è**; oppure **criteri al pin col lucchetto** (coi criteri già firmati NON deve succedere) → **niente zip**, la riga muore prima | zip se c'è, altrimenti copiami il riquadro rosso |
+
+⚠️ **Quando NON c'è nessuno zip** (e va bene così: la riga si è fermata prima
+di produrre qualcosa, quindi non esiste nessun referto da leggere) — verificato
+eseguendo: **MT5 o MetaEditor aperto**, **`-Pin` mancante**, **`-SoloCella` con
+un nome che non esiste**, **criteri col lucchetto**. In tutti e quattro i casi
+quello che conta è il **messaggio rosso a schermo**: copiami quello.
 
 ---
 

@@ -4534,3 +4534,176 @@ macchine.
 > ```
 > E' la famiglia del punto 62 (`$lista[0]` che diventa un carattere):
 > non risponde `$null`, risponde una cosa PLAUSIBILE.
+
+---
+
+## 🆕 AGGIUNTE DEL 27/08/2026 — trovate verificando R114 (la prova della leva), **ESEGUENDO il driver su un banco stubbato che legge gli `.ini` veri**
+
+## 91. 🔗 IL RINVIO INTERNO DEL REFERTO NON E' UN GATE: «vedi PROBLEMI» che punta a una sezione VUOTA
+
+_Difetto vero, **RIPRODOTTO** in `RIGA_R114_PROVA_LEVA.ps1` (passo 3-TER + riga
+del referto), trovato PRIMA dell'invio._
+
+La sonda G-SPEC di R114 e' **obbligatoria per criterio firmato** (D5). Il driver
+la giudicava in due tempi: prima contava le righe `GSPEC;` **nuove** nel journal
+(delta), poi le filtrava per `GSPEC;<simbolo>;*`. Il gate stava **solo sul primo
+tempo**:
+
+```powershell
+if($deltaGspec -le 0){ [void]$Problemi.Add(...) }      # <- gate
+else { $SpecEstratte[$s] = @($righe | ? { $_ -like ("GSPEC;"+$s+";*") })
+       Dico ("G-SPEC " + $s + ": " + @(...).Count + " righe estratte") "Green" }   # <- 0 e' verde
+```
+
+Riprodotto con una sonda che stampa righe `GSPEC;` di un **altro simbolo** (e'
+il punto **89-bis** visto dal lato del contenuto invece che del nome del file):
+schermo **verde** `0 righe estratte`, `gspec_<sym>.txt` **vuoto** nello zip,
+referto che scrive `NON MISURATE (la sonda non ha stampato: vedi PROBLEMI)` con
+subito sotto `--- PROBLEMI --- (0) nessuno.`, **`ESITO: GIRO A VUOTO COMPLETATO`
+e uscita 0**. Il cancello che i criteri dichiarano obbligatorio non ha misurato
+niente e la riga dice di andare avanti.
+
+Il punto **84** dice che un cancello non puo' vivere solo nel renderer. Questo e'
+il gradino successivo: **il renderer rimanda a un'altra sezione del referto**, e
+quel rimando e' una promessa che nessuno mantiene.
+
+> ✅ **REGOLA, due pezzi:**
+> 1. **Ogni frase di referto che dice «vedi PROBLEMI» / «vedi RILIEVI» / «vedi
+>    sopra» deve avere, nel codice, la GARANZIA che quella voce e' stata
+>    aggiunta.** Se la scrivi in un ramo, in quel ramo ci va anche l'`Add`.
+>    Il grep che lo trova: `vedi PROBLEMI` -> per ognuno, *"chi lo mette, quel
+>    problema?"*.
+> 2. **Un filtro che svuota il risultato non e' un successo.** Fra il
+>    «quante righe grezze ho trovato» e il «quante ne ho riconosciute» ci sono
+>    DUE numeri: si giudicano **tutti e due**, e la differenza si spiega coi
+>    **due nomi** (punto 83) — qui: *ha girato su un altro simbolo* / *il
+>    formato della sonda e' cambiato*.
+
+## 92. ♻️ IL RAMO «GIA' FATTO» DELLA RIPRESA SALTA I GATE DEL RAMO FRESCO — e l'artefatto era stato SPOSTATO PRIMA di essere giudicato
+
+_Difetto vero, **RIPRODOTTO due volte** in `RIGA_R114_PROVA_LEVA.ps1` (passo 4),
+trovato PRIMA dell'invio._
+
+Il driver, come tutti i suoi gemelli, salta un lancio se il CSV c'e' gia' e non
+gli si passa `-Rifai` (checklist 15/88), e lo raccoglie **con l'eta' dichiarata**.
+Ma il CSV viene **spostato nella cartella dei risultati PRIMA** che i gate lo
+giudichino:
+
+```powershell
+Move-Item -LiteralPath $csvTrovato -Destination $percorsoCsv -Force   # <- prima
+...
+if($lancio.Righe -ne $CelleAttese){ ... }                             # <- poi
+elseif($lancio.Gemelli -ne "IDENTICI"){ $lancio.Esito = "G0-C FALLITO" }
+```
+
+Quindi sul disco resta il file di un lancio **gia' BOCCIATO**. Al giro dopo il
+ramo «GIA' FATTO» lo rilegge, **ricalcola i gemelli in una variabile che non
+guarda nessuno** e lo rimette in tabella. Riprodotto, con due CSV sporcati a
+mano nella cartella dei risultati:
+
+| cosa c'era sul disco | cosa faceva la ripresa |
+|---|---|
+| CSV coi **gemelli DIVERSI** (G0-C fallito nel giro che l'ha prodotto) | numeri della prima riga in tabella come buoni, **0 PROBLEMI, uscita 0** |
+| CSV **illeggibile** (intestazione non a 8 colonne) | riga tutta `n/d` in tabella, **0 PROBLEMI, uscita 0** |
+
+Il punto **23** copre l'artefatto d'ingresso **scaduto** (l'eta'); qui l'eta' e'
+guardata e **dichiarata**, ed e' la **QUALITA'** a non essere piu' guardata.
+
+> ✅ **REGOLA, due pezzi:**
+> 1. **Un artefatto si sposta al suo posto definitivo DOPO che i gate lo hanno
+>    promosso**, non prima. Se non si puo' (serve li' per leggerlo), allora
+>    accanto ci va lo **stato del giudizio**, e la ripresa lo legge.
+> 2. **Il ramo «lo avevo gia'» applica GLI STESSI gate del ramo «l'ho appena
+>    fatto».** Si scrivono una volta sola e si chiamano da tutti e due, oppure
+>    si rileggono **riga per riga** l'uno accanto all'altro. Un `Esito` che
+>    comincia con «GIA' FATTO» non e' una prova che i numeri esistano: e' una
+>    prova che **esiste un file**.
+
+## 93. 🕳️ DUE SENTINELLE CONFRONTATE FRA LORO RISULTANO «IDENTICHE» — e l'identita' era IL METRO DEL VERDETTO
+
+_Difetto vero, **RIPRODOTTO** in `RIGA_R114_PROVA_LEVA.ps1`
+(`IdentitaAlCentesimo`), trovato PRIMA dell'invio._
+
+R114 misura una cosa sola: **P2 e' identica a P1 al centesimo?** Se si', la
+sedia sale sulla prop senza riserve. Il confronto era:
+
+```powershell
+if([math]::Abs($lancioA.Prof - $lancioB.Prof) -gt 0.005){ $diff += "profitto" }
+...
+if($diff.Count -eq 0){ return "SI (identici al centesimo su profitto/PF/DD/n)" }
+```
+
+I campi non misurati valgono **`-999999` (profitto) e `-1` (PF, DD, n)** — la
+convenzione di sentinella di casa (punto **66**), scritta bene e rispettata in
+tabella (`n/d`). Ma **due sentinelle sono uguali fra loro**: due lanci senza
+numeri davano `SI (identici al centesimo)` — cioe' il **VERDE** — su due caselle
+vuote. Nello stesso referto, tre righe sopra, la tabella stampava onestamente
+`n/d n/d n/d n/d`.
+
+Il punto **66** e' *«la convenzione applicata a meta' delle colonne»*: la
+convenzione **c'era tutta**. Il buco e' un altro: **la sentinella e' onesta
+quando la si STAMPA e bugiarda quando la si CONFRONTA.**
+
+> ✅ **REGOLA: prima di confrontare due grandezze, si controlla che siano state
+> MISURATE tutte e due — con la sentinella di ognuna, non con una sola.**
+> ```powershell
+> if($a.Prof -le -999998.0 -or $b.Prof -le -999998.0 -or
+>    $a.Pf -lt 0 -or $b.Pf -lt 0 -or $a.N -lt 0 -or $b.N -lt 0){ return "n/d (non misurati)" }
+> ```
+> Vale per ogni `-eq`, `Abs(a-b)`, `Sort-Object`, `Measure-Object -Average` che
+> gira su colonne che possono valere «non misurato». E il grep che lo trova:
+> ogni funzione che **torna un giudizio** (`SI`/`NO`, `OK`/`MISMATCH`) si prova
+> **a tavolino con tutti gli argomenti a sentinella**, prima di mandarla.
+
+## 94. 🏷️ IL VALORE DI PARTENZA DI UN CAMPO DI GATE CHE, NEI GIRI IN CUI QUEL GATE NON GIRA, LO **NEGA AGLI ATTI**
+
+_Difetto vero, **RIPRODOTTO** in `RIGA_R114_PROVA_LEVA.ps1` (`CellaNuova`),
+trovato PRIMA dell'invio._
+
+Quattro celle, un campo `G0B` inizializzato per tutte con la stessa frase:
+
+```powershell
+G0B="NON APPLICABILE (nessun CSV di riferimento congelato: confronto INFO a mano)"
+```
+
+Vera per tre celle su quattro. Per la quarta (`C1_EMADOW`) e' **il contrario
+esatto della verita'**: e' l'**unica** cella con un riferimento congelato, il suo
+G0-B al centesimo e' l'unico aggancio DIMOSTRATO del round, ed e' il motivo per
+cui quella cella gira **a due gambe**. Il campo veniva sovrascritto solo nella
+corsa vera: quindi **il giro a vuoto** e **ogni `-SoloCella` su un'altra cella**
+mettevano nello zip un referto che dichiara agli atti *«EMADOW: nessun CSV di
+riferimento congelato»* — mentre nello stesso zip ci sono i due file `RIF_*.csv`
+che il driver ha scaricato apposta.
+
+Il punto **82** e' la firma che il referto nega perche' il gate cerca un token
+letterale. Questo e' la stessa ferita fatta dal **valore di default**: nessuno
+mente, semplicemente **l'inizializzazione buona per la maggioranza diventa una
+dichiarazione falsa sulla minoranza** — ed e' la minoranza che conta.
+
+> ✅ **REGOLA: il valore di partenza di un campo che finisce nel referto si
+> scrive PER RIGA, non per tabella.** Se le N righe non hanno tutte lo stesso
+> stato iniziale, l'inizializzazione uniforme e' gia' un errore: si distingue
+> **«NON APPLICABILE» (non esiste)** da **«NON ESEGUITO in questo giro»
+> (esiste e non e' stato fatto)** — sono due frasi diverse e solo una delle due
+> e' vera. E il controllo che lo trova: **si legge il referto del GIRO A VUOTO**
+> (dove quasi nessun campo e' stato riempito) e si chiede, riga per riga, *«e'
+> vero?»*.
+
+### 94-bis. 📦 E LA PAGINA CHE PROMETTE LO ZIP ANCHE SULLE USCITE CHE MUOIONO PRIMA DELLA RACCOLTA
+
+Stessa verifica, stessa sera, **misurato eseguendo**. `RIGA_R114_DA_MANDARE.md`
+scriveva, per l'uscita **2**: _«In tutti e due i casi **lo zip esiste:
+mandalo**»_. Falso per uno dei due: il ramo «criteri col lucchetto» esce **dentro
+il `try`, due secondi dopo il lancio**, e **salta la raccolta** — sul Desktop non
+c'e' nessuna cartella e nessuno zip. Stessa cosa per l'uscita **1** con MT5
+aperto, `-Pin` mancante o `-SoloCella` con un nome sbagliato.
+
+E' il punto **22** («il referto che istruisce sul passo dopo anche quando non
+c'e' niente») applicato alla **pagina di lancio**: Claudio cerca sul Desktop uno
+zip che non esiste e torna indietro a chiedere.
+
+> ✅ **REGOLA: la tabella delle uscite della pagina si compila ESEGUENDO ogni
+> ramo e guardando il Desktop.** Per ogni codice si scrive **se l'artefatto
+> c'e'** e, quando non c'e', **cosa mandare al posto suo** (qui: il riquadro
+> rosso a schermo). Un `exit` che sta PRIMA della raccolta e uno che sta DOPO
+> non si raccontano con la stessa frase.
