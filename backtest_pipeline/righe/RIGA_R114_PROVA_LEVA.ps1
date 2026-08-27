@@ -295,6 +295,12 @@ $CELLE[0].AntFile = "R103_ABTG_ORB_Ottimizzato_U30USD_770611.txt"
 $CELLE[1].AntFile = "R112_00_metro.txt"
 $CELLE[2].AntFile = "R103_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_770411.txt"
 $CELLE[3].AntFile = "R103_ABTG_SupertrendReversal_Ottimizzato_XAUUSD_970901.txt"
+#  >>> C1 e' l'UNICA cella con un CSV di riferimento CONGELATO: il testo di
+#      partenza del G0B (buono per le altre tre) direbbe il CONTRARIO in ogni
+#      giro in cui C1 non gira -- giro a vuoto, oppure -SoloCella su un'altra
+#      cella. Il referto finirebbe agli atti negando proprio il solo aggancio
+#      DIMOSTRATO del round (checklist 82: un gate non si nega in prosa).
+$CELLE[1].G0B = "NON ESEGUITO in questo giro (il riferimento congelato ESISTE: prove\R110_CSV_EMADOW\ABTG_EMA200_U30USD_IS/OOS_00_metro.csv -- il confronto al centesimo si fa nella corsa vera)"
 
 # =====================================================================
 #  I LANCI: celle x passate (x gambe per C1) + canarino + sonde.
@@ -477,7 +483,8 @@ function VerificaIniTesto([string]$testoIni,[string]$eaNome,[string]$simbolo,[st
   foreach($rigaAttesa in @(("Expert=" + $eaNome + ".ex5"),("Symbol=" + $simbolo),("Period=" + $periodo),
                            ("Model=" + $modello),("Spread=" + $SpreadIni),("Optimization=" + $optimization),
                            ("FromDate=" + $da),("ToDate=" + $a),("Deposit=" + $deposito),
-                           ("Currency=EUR"),("Leverage=" + $leva),"ShutdownTerminal=1")){
+                           ("Currency=EUR"),("Leverage=" + $leva),"ShutdownTerminal=1",
+                           "MaxBars=2000000000")){
     if($testoIni -notmatch ('(?m)^' + [regex]::Escape($rigaAttesa) + '\r?$')){ [void]$guastiIni.Add("manca la riga '" + $rigaAttesa + "'") }
   }
   $numAllowLive = @([regex]::Matches($testoIni,'(?m)^AllowLiveTrading=false\r?$')).Count
@@ -1366,8 +1373,20 @@ foreach($simboloSonda in $SimboliSonda){
     }
     $SpecEstratte[$simboloSonda] = @($righeGspecPulite | Where-Object { $_ -like ("GSPEC;" + $simboloSonda + ";*") })
     Set-Content -LiteralPath (Join-Path $Sosta ("gspec_" + $simboloSonda + ".txt")) -Value ($SpecEstratte[$simboloSonda] -join "`r`n") -Encoding ASCII
-    Dico ("G-SPEC " + $simboloSonda + ": " + @($SpecEstratte[$simboloSonda]).Count + " righe estratte (in sosta e nel referto)") "Green"
-    foreach($rigaGs in @($SpecEstratte[$simboloSonda] | Select-Object -First 30)){ Write-Host ("      " + $rigaGs) -ForegroundColor Gray }
+    if(@($SpecEstratte[$simboloSonda]).Count -eq 0){
+      #  >>> righe GSPEC nuove CI SONO, ma nessuna porta il nome di QUESTO
+      #      simbolo: il nome del simbolo dentro la riga E' IL DATO che
+      #      distingue i tre banchi, non un'etichetta (checklist 89-bis).
+      #      Senza questo ramo il giro a vuoto stampava "0 righe estratte"
+      #      in verde, il referto scriveva "NON MISURATE: vedi PROBLEMI" con
+      #      ZERO problemi, e usciva 0 -- su una sonda che i criteri
+      #      (decisione D5) dichiarano OBBLIGATORIA.
+      [void]$Problemi.Add("G-SPEC " + $simboloSonda + ": il journal ha " + $deltaGspec + " righe nuove col prefisso GSPEC; ma NESSUNA nella forma 'GSPEC;" + $simboloSonda + ";...'. Due nomi (checklist 83): (1) la sonda ha girato su un ALTRO simbolo (l'.ini dice " + $simboloSonda + ": il terminale ha aperto altro?); (2) il formato delle righe della sonda e' cambiato e il parser non lo riconosce piu'. Le specifiche margine di questo simbolo restano NON MISURATE. Prime righe viste: [" + ((@($righeGspecPulite | Select-Object -First 3)) -join " | ") + "]")
+      Dico ("G-SPEC " + $simboloSonda + ": " + $deltaGspec + " righe GSPEC nuove ma NESSUNA per questo simbolo (vedi PROBLEMI)") "Red"
+    } else {
+      Dico ("G-SPEC " + $simboloSonda + ": " + @($SpecEstratte[$simboloSonda]).Count + " righe estratte (in sosta e nel referto)") "Green"
+      foreach($rigaGs in @($SpecEstratte[$simboloSonda] | Select-Object -First 30)){ Write-Host ("      " + $rigaGs) -ForegroundColor Gray }
+    }
   }
 }
 
@@ -1477,7 +1496,6 @@ foreach($lancioCorr in $Ordinati){
     $lancioCorr.EtaCsv = $etaCsvVecchio.ToString("yyyy-MM-dd HH:mm:ss",$INV)
     $lancioCorr.Esito = "GIA' FATTO (CSV del " + $lancioCorr.EtaCsv + " ora del PC, NON di questo lancio)"
     $lancioCorr.RifiutiNota = "n/d (lancio saltato: i rifiuti journal si misurano solo su un lancio fresco)"
-    [void]$Rilievi.Add($lancioCorr.Id + ": " + $lancioCorr.Esito + ". Raccolto con l'eta' dichiarata; per rifarlo: -Rifai.")
     $lettureVecchie = LeggiOpt $percorsoCsv
     $lancioCorr.Gemelli = Gemelli $lettureVecchie
     if($null -ne $lettureVecchie -and @($lettureVecchie).Count -ge 1){
@@ -1486,6 +1504,28 @@ foreach($lancioCorr in $Ordinati){
       if($null -ne $lettureVecchie[0].Dd){     $lancioCorr.Dd   = [double]$lettureVecchie[0].Dd }
       if($null -ne $lettureVecchie[0].N){      $lancioCorr.N    = [int]$lettureVecchie[0].N }
       if($null -ne $lettureVecchie[0].Profit){ $lancioCorr.Prof = [double]$lettureVecchie[0].Profit }
+    }
+    #  >>> I GATE VALGONO ANCHE SUL CSV RACCOLTO (checklist 84). Il CSV
+    #      viene spostato in risultati_prove PRIMA che il G0-C lo giudichi:
+    #      sul disco puo' quindi esserci il file di un lancio GIA' BOCCIATO
+    #      (righe sbagliate o gemelli diversi) o illeggibile. Senza questi
+    #      tre controlli la ripresa lo rimetteva in tabella come buono, con
+    #      ZERO problemi e uscita 0 -- e il metro del VERDE confrontava due
+    #      SENTINELLE dichiarandole 'identiche al centesimo'.
+    if($null -eq $lettureVecchie){
+      $lancioCorr.Esito = "CSV VECCHIO ILLEGGIBILE (intestazione non a 8 colonne attese; file del " + $lancioCorr.EtaCsv + ")"
+      [void]$Problemi.Add($lancioCorr.Id + ": il CSV gia' presente NON si legge (checklist 80). NON e' un numero di questo round: rifallo con -Rifai.")
+    }
+    elseif($lancioCorr.Righe -ne $CelleAttese){
+      $lancioCorr.Esito = "CSV VECCHIO CON RIGHE SBAGLIATE (" + (FmtN $lancioCorr.Righe) + " invece di " + $CelleAttese + "; file del " + $lancioCorr.EtaCsv + ")"
+      [void]$Problemi.Add($lancioCorr.Id + ": il CSV gia' presente ha " + (FmtN $lancioCorr.Righe) + " righe invece di " + $CelleAttese + ": NON si legge. Rifallo con -Rifai.")
+    }
+    elseif($lancioCorr.Gemelli -ne "IDENTICI"){
+      $lancioCorr.Esito = "CSV VECCHIO CON G0-C FALLITO (" + $lancioCorr.Gemelli + "; file del " + $lancioCorr.EtaCsv + ")"
+      [void]$Problemi.Add($lancioCorr.Id + ": il CSV gia' presente NON passa il G0-C (gemelli " + $lancioCorr.Gemelli + "): il giro che lo ha prodotto lo aveva gia' bocciato e la ripresa non lo ripulisce. Rifallo con -Rifai.")
+    }
+    else {
+      [void]$Rilievi.Add($lancioCorr.Id + ": " + $lancioCorr.Esito + ". Raccolto con l'eta' dichiarata e RIGIUDICATO sul file (righe " + $CelleAttese + ", gemelli IDENTICI); per rifarlo: -Rifai.")
     }
     Write-Host ("    esito: " + $lancioCorr.Esito) -ForegroundColor DarkYellow
     continue
@@ -1664,6 +1704,14 @@ function IdentitaAlCentesimo($lancioA,$lancioB){
   if($null -eq $lancioA -or $null -eq $lancioB){ return "n/d" }
   if($lancioA.Esito -notlike "OK*" -and $lancioA.Esito -notlike "GIA' FATTO*"){ return "n/d (lancio A senza numeri leggibili)" }
   if($lancioB.Esito -notlike "OK*" -and $lancioB.Esito -notlike "GIA' FATTO*"){ return "n/d (lancio B senza numeri leggibili)" }
+  #  >>> DUE SENTINELLE NON SONO 'IDENTICHE' (checklist 66). Senza questa
+  #      riga due lanci senza numeri (Prof -999999, PF/DD/n -1) risultavano
+  #      uguali fra loro e questo metro -- che e' IL metro del VERDE --
+  #      stampava SI su due caselle vuote.
+  if($lancioA.Prof -le -999998.0 -or $lancioB.Prof -le -999998.0 -or
+     $lancioA.Pf -lt 0 -or $lancioB.Pf -lt 0 -or
+     $lancioA.Dd -lt 0 -or $lancioB.Dd -lt 0 -or
+     $lancioA.N  -lt 0 -or $lancioB.N  -lt 0){ return "n/d (numeri non misurati: due sentinelle non si confrontano)" }
   $diffTrovate = @()
   if([math]::Abs($lancioA.Prof - $lancioB.Prof) -gt 0.005){ $diffTrovate += "profitto" }
   if([math]::Abs($lancioA.Pf   - $lancioB.Pf)   -gt 0.005){ $diffTrovate += "PF" }
@@ -1735,6 +1783,10 @@ try{
   [void]$RefTxt.Add("  * margin call/stop-out del tester: ACCOUNT_MARGIN_SO_CALL/SO_SO stampati")
   [void]$RefTxt.Add("    dalla sonda, da leggere accanto al 100% scritto di FundedNext.")
   [void]$RefTxt.Add("  * valuta: banco EUR, challenge in USD -- approssimazione dichiarata.")
+  [void]$RefTxt.Add("  * spread: Spread=" + $SpreadIni + " scritto NELL'INI = spread CORRENTE del feed BCM")
+  [void]$RefTxt.Add("    (convenzione di casa R100/R102/R103/R110/R112). NON e' una misura, ed e'")
+  [void]$RefTxt.Add("    IDENTICO in tutti gli .ini del round: i confronti P1-P0 e P2-P1 reggono")
+  [void]$RefTxt.Add("    per costruzione. Simboli BCM del broker, NON custom (checklist 89).")
   [void]$RefTxt.Add("  * questo round misura il margine PER SEDIA, non il basket (buco dichiarato).")
   [void]$RefTxt.Add("  * gli EA del perimetro NON riducono il lotto sul margine (grep agli atti,")
   [void]$RefTxt.Add("    criteri par. 3-bis punto 3): un rifiuto e' NETTO (il trade manca, n cala);")
