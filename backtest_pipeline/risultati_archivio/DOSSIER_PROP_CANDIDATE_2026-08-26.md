@@ -18,6 +18,13 @@
 > pulito ma resta il muro daily 4%: eventuale 5a mail solo per chiedere
 > se esiste un programma 5%g/10% statico. The5ers 4.7 pulito (gia' agli
 > atti: il problema sono le regole, non la reputazione).
+> ❌ **Anche ThinkCapital ELIMINATA (27/08)**: stesso cartello Trustpilot
+> "recensioni false rimosse" — terza su tre delle nuove esplorate. In piu'
+> una recensione 2 stelle documenta la regola news rigidissima ("una sola
+> esecuzione su una notizia chiude il conto") = incompatibile con la
+> flotta senza filtro news a prescindere. L'esplorazione di prop NUOVE si
+> chiude: nessuna sopravvive. Shortlist definitiva: FTMO, FundedNext,
+> Alpha, Goat (+FXIFY solo se esiste un programma 5/10 statico).
 > Auto-ack ricevuto: ticket 8O1NLM, risposta promessa entro 2 giorni
 > lavorativi (uffici dom-ven 08-17 CET).
 > 📨 **TUTTE E TRE LE MAIL INVIATE (conferma di Claudio, 27/08 ~00:00)**:
