@@ -4707,3 +4707,21 @@ zip che non esiste e torna indietro a chiedere.
 > c'e'** e, quando non c'e', **cosa mandare al posto suo** (qui: il riquadro
 > rosso a schermo). Un `exit` che sta PRIMA della raccolta e uno che sta DOPO
 > non si raccontano con la stessa frase.
+
+## 95. 🎚️ LA RIGA `Leverage=N` DELL'INI DEL TESTER PUO' ESSERE IGNORATA IN SILENZIO (pagata su R114, 27/08/2026 — e il canarino l'ha presa)
+
+R114 doveva misurare il margine a leva prop: .ini con `Leverage=15`
+(verificato negli artefatti), tester che risponde `ACCOUNT_LEVERAGE;100`.
+Nessun errore, nessun avviso: se N non e' nella lista di leve che il
+tester di quel broker accetta, il banco RIPIEGA sulla leva del conto e
+tace. In piu' i simboli CFD portano un margin rate PROPRIO (0,01 sugli
+indici BCM): il margine del banco non somiglia a quello prop nemmeno a
+leva onorata.
+
+> ✅ **REGOLA, due pezzi:** (1) ogni round che tocca deposito/leva/margine
+> porta un CONTROLLO POSITIVO che DEVE produrre l'effetto (canarino del
+> rifiuto) e una SONDA che stampa l'`ACCOUNT_LEVERAGE` e i margin rate
+> OSSERVATI — il confronto ini-vs-osservato e' il gate; (2) il margine di
+> un broker si misura SUI SIMBOLI DI QUEL BROKER (demo/trial della prop
+> con ABTG_SondaMargine), mai per trasformazione della leva su simboli
+> altrui.

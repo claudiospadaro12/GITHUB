@@ -1,0 +1,249 @@
+﻿REFERTO R114 - LA PROVA DELLA LEVA (fase 2 della prova della taglia)
+4 celle x 3 passate: P0 aggancio 100k/lev100, P1 taglia 200k/lev100, P2 leva 200k/lev15
+
+modo: CORSA
+switch di questo giro: nessuno (corsa piena; un lancio con CSV gia' presente viene RACCOLTO con l'eta' dichiarata, checklist 88)
+stato dei criteri: FIRMATI (nessun lucchetto nel file al pin)
+data: 2026-08-27 09:56:17 ora del PC   (questa data deve essere di ADESSO)
+avvio: 2026-08-27 09:52:00 ora del PC   durata: 4.3 minuti
+pin: 5550cd75f86de1295c597edf5913e049d971bf2a
+criteri: risultati_archivio\R114_CRITERI.md (dieci decisioni, par. 10, FIRMATE 27/08 mattina)
+
+--- IL BANCO E LE SUE APPROSSIMAZIONI (criteri par. 1, ristampate qui) ---
+  * la leva dell'.ini e' UNA leva per tutto il conto; la prop la dichiara PER
+    CLASSE. Qui non mescola: ogni corsa e' MONO-simbolo, quindi Leverage=15 su
+    una corsa U30USD/D30EUR/XAUUSD E' la leva di quello strumento.
+  * il margine del tester passa dalle specifiche del SIMBOLO BCM: la sonda
+    G-SPEC qui sotto stampa cio' che il tester VEDE (margin rate compresi).
+    Se atteso e osservato divergono, FA FEDE L'OSSERVATO e la FASE 1 si corregge.
+  * margin call/stop-out del tester: ACCOUNT_MARGIN_SO_CALL/SO_SO stampati
+    dalla sonda, da leggere accanto al 100% scritto di FundedNext.
+  * valuta: banco EUR, challenge in USD -- approssimazione dichiarata.
+  * spread: Spread=0 scritto NELL'INI = spread CORRENTE del feed BCM
+    (convenzione di casa R100/R102/R103/R110/R112). NON e' una misura, ed e'
+    IDENTICO in tutti gli .ini del round: i confronti P1-P0 e P2-P1 reggono
+    per costruzione. Simboli BCM del broker, NON custom (checklist 89).
+  * questo round misura il margine PER SEDIA, non il basket (buco dichiarato).
+  * gli EA del perimetro NON riducono il lotto sul margine (grep agli atti,
+    criteri par. 3-bis punto 3): un rifiuto e' NETTO (il trade manca, n cala);
+    l'unica riduzione silenziosa e' il clamp a SYMBOL_VOLUME_MAX, contato dal
+    per-trade (colonna 'righe a 100'). C3 ORO: niente per-trade (dichiarato).
+orologi (checklist 86): le finestre sono DATE DI CALENDARIO server BCM;
+     i log del tester e 'data:'/'avvio:' qui sopra sono ORA LOCALE del PC
+     (sul VPS = ora italiana). Il grafico del tester e' in ora server.
+
+--- CONVENZIONE DI SENTINELLA (checklist 66) ---
+  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000.
+
+--- G-SPEC: LE SPECIFICHE MARGINE VISTE DAL TESTER (banco 200k / leva 15) ---
+  MARGINE_OSSERVATO_1LOTTO_* = OrderCalcMargin del tester (fa fede questo);
+  MARGINE_ATTESO_FORMULA_FASE1 = prezzo x contratto / leva, in valuta margine
+  del simbolo NON convertita (etichetta dichiarata). VOLUME_MAX chiude il
+  buco FASE 1 par. 0c su XAUUSD.
+  GSPEC;U30USD;TRADE_CALC_MODE;1
+  GSPEC;U30USD;MARGIN_INITIAL;40000.00000000
+  GSPEC;U30USD;MARGIN_MAINTENANCE;0.00000000
+  GSPEC;U30USD;MARGIN_RATE_BUY_INITIAL;0.01000000
+  GSPEC;U30USD;MARGIN_RATE_BUY_MAINT;0.01000000
+  GSPEC;U30USD;MARGIN_RATE_SELL_INITIAL;0.01000000
+  GSPEC;U30USD;MARGIN_RATE_SELL_MAINT;0.01000000
+  GSPEC;U30USD;CURRENCY_MARGIN;USD
+  GSPEC;U30USD;CURRENCY_PROFIT;USD
+  GSPEC;U30USD;CONTRACT_SIZE;10.00000000
+  GSPEC;U30USD;VOLUME_MIN;0.10000000
+  GSPEC;U30USD;VOLUME_MAX;100.00000000
+  GSPEC;U30USD;VOLUME_STEP;0.10000000
+  GSPEC;U30USD;VOLUME_LIMIT;0.00000000
+  GSPEC;U30USD;ACCOUNT_LEVERAGE;100
+  GSPEC;U30USD;ACCOUNT_CURRENCY;EUR
+  GSPEC;U30USD;ACCOUNT_MARGIN_SO_CALL;100.00000000
+  GSPEC;U30USD;ACCOUNT_MARGIN_SO_SO;50.00000000
+  GSPEC;U30USD;ACCOUNT_MARGIN_SO_MODE;0
+  GSPEC;U30USD;PREZZO_ASK;51030.50000000
+  GSPEC;U30USD;PREZZO_BID;51028.50000000
+  GSPEC;U30USD;MARGINE_OSSERVATO_1LOTTO_BUY;343.22000000
+  GSPEC;U30USD;MARGINE_OSSERVATO_1LOTTO_SELL;343.22000000
+  GSPEC;U30USD;MARGINE_ATTESO_FORMULA_FASE1_1LOTTO;5103.05000000
+  GSPEC;U30USD;FINE;sonda completata, l'EA si rimuove
+  GSPEC;D30EUR;TRADE_CALC_MODE;1
+  GSPEC;D30EUR;MARGIN_INITIAL;19600.00000000
+  GSPEC;D30EUR;MARGIN_MAINTENANCE;0.00000000
+  GSPEC;D30EUR;MARGIN_RATE_BUY_INITIAL;0.01000000
+  GSPEC;D30EUR;MARGIN_RATE_BUY_MAINT;0.01000000
+  GSPEC;D30EUR;MARGIN_RATE_SELL_INITIAL;0.01000000
+  GSPEC;D30EUR;MARGIN_RATE_SELL_MAINT;0.01000000
+  GSPEC;D30EUR;CURRENCY_MARGIN;EUR
+  GSPEC;D30EUR;CURRENCY_PROFIT;EUR
+  GSPEC;D30EUR;CONTRACT_SIZE;10.00000000
+  GSPEC;D30EUR;VOLUME_MIN;0.10000000
+  GSPEC;D30EUR;VOLUME_MAX;100.00000000
+  GSPEC;D30EUR;VOLUME_STEP;0.10000000
+  GSPEC;D30EUR;VOLUME_LIMIT;0.00000000
+  GSPEC;D30EUR;ACCOUNT_LEVERAGE;100
+  GSPEC;D30EUR;ACCOUNT_CURRENCY;EUR
+  GSPEC;D30EUR;ACCOUNT_MARGIN_SO_CALL;100.00000000
+  GSPEC;D30EUR;ACCOUNT_MARGIN_SO_SO;50.00000000
+  GSPEC;D30EUR;ACCOUNT_MARGIN_SO_MODE;0
+  GSPEC;D30EUR;PREZZO_ASK;25079.90000000
+  GSPEC;D30EUR;PREZZO_BID;25078.50000000
+  GSPEC;D30EUR;MARGINE_OSSERVATO_1LOTTO_BUY;196.00000000
+  GSPEC;D30EUR;MARGINE_OSSERVATO_1LOTTO_SELL;196.00000000
+  GSPEC;D30EUR;MARGINE_ATTESO_FORMULA_FASE1_1LOTTO;2507.99000000
+  GSPEC;D30EUR;FINE;sonda completata, l'EA si rimuove
+  GSPEC;XAUUSD;TRADE_CALC_MODE;0
+  GSPEC;XAUUSD;MARGIN_INITIAL;0.00000000
+  GSPEC;XAUUSD;MARGIN_MAINTENANCE;0.00000000
+  GSPEC;XAUUSD;MARGIN_RATE_BUY_INITIAL;10000.00000000
+  GSPEC;XAUUSD;MARGIN_RATE_BUY_MAINT;10000.00000000
+  GSPEC;XAUUSD;MARGIN_RATE_SELL_INITIAL;10000.00000000
+  GSPEC;XAUUSD;MARGIN_RATE_SELL_MAINT;10000.00000000
+  GSPEC;XAUUSD;CURRENCY_MARGIN;USD
+  GSPEC;XAUUSD;CURRENCY_PROFIT;USD
+  GSPEC;XAUUSD;CONTRACT_SIZE;100.00000000
+  GSPEC;XAUUSD;VOLUME_MIN;0.01000000
+  GSPEC;XAUUSD;VOLUME_MAX;100.00000000
+  GSPEC;XAUUSD;VOLUME_STEP;0.01000000
+  GSPEC;XAUUSD;VOLUME_LIMIT;0.00000000
+  GSPEC;XAUUSD;ACCOUNT_LEVERAGE;100
+  GSPEC;XAUUSD;ACCOUNT_CURRENCY;EUR
+  GSPEC;XAUUSD;ACCOUNT_MARGIN_SO_CALL;100.00000000
+  GSPEC;XAUUSD;ACCOUNT_MARGIN_SO_SO;50.00000000
+  GSPEC;XAUUSD;ACCOUNT_MARGIN_SO_MODE;0
+  GSPEC;XAUUSD;PREZZO_ASK;4535.52000000
+  GSPEC;XAUUSD;PREZZO_BID;4535.30000000
+  GSPEC;XAUUSD;MARGINE_OSSERVATO_1LOTTO_BUY;8580.52000000
+  GSPEC;XAUUSD;MARGINE_OSSERVATO_1LOTTO_SELL;8580.38000000
+  GSPEC;XAUUSD;MARGINE_ATTESO_FORMULA_FASE1_1LOTTO;4535.52000000
+  GSPEC;XAUUSD;FINE;sonda completata, l'EA si rimuove
+
+--- G-CAN: IL CANARINO DEL RILEVATORE (checklist 84-bis) ---
+  banco strozzato: deposito 2000 / leva 15 sugli input di C0, magic 763690/763691
+  esito lancio: ESEGUITO   gemelli: IDENTICI   n: 190 uscite   [2.5 min]
+  RILEVATORE: NON MORDE -> ROUND FERMO (exit 2). La diagnosi col nome della
+  causa sta nei PROBLEMI qui sotto (canarino B a passata singola compreso).
+  Il canarino NON entra in nessuna tabella di verdetto (criteri par. 4).
+
+--- I GATE ---
+  G0-A ANTENATO   : copia riga per riga, delta il SOLO InpMagic (checklist 72).
+       C0_ORB     OK contro R103_ABTG_ORB_Ottimizzato_U30USD_770611.txt (delta: il solo InpMagic)
+       C1_EMADOW  OK contro R112_00_metro.txt (delta: il solo InpMagic)
+       C2_MAXMIN  OK contro R103_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_770411.txt (delta: il solo InpMagic)
+       C3_ORO     OK contro R103_ABTG_SupertrendReversal_Ottimizzato_XAUUSD_970901.txt (delta: il solo InpMagic)
+  G0-B AGGANCIO   : al centesimo SOLO su C1_EMADOW (CSV R110 congelati);
+       per C0/C2/C3 il P0 si confronta con l'ARCHIVIO come INFO (G4 a mano):
+       C0_ORB     NON APPLICABILE (nessun CSV di riferimento congelato: confronto INFO a mano)
+       C1_EMADOW  NON ESEGUITO in questo giro (il riferimento congelato ESISTE: prove\R110_CSV_EMADOW\ABTG_EMA200_U30USD_IS/OOS_00_metro.csv -- il confronto al centesimo si fa nella corsa vera)
+       C2_MAXMIN  NON APPLICABILE (nessun CSV di riferimento congelato: confronto INFO a mano)
+       C3_ORO     NON APPLICABILE (nessun CSV di riferimento congelato: confronto INFO a mano)
+  G0-C GEMELLI    : 2 righe identiche al centesimo per CSV (magic +1).
+  G-SPEC / G-CAN  : sezioni sopra.
+  G1 CAMPIONE     : n in DEAL DI USCITA (~2 uscite = 1 posizione, convenzione
+       R112). Il round non giudica il MERITO dei motori: giudica il banco.
+  G4 ORDINE       : P0 rotto -> cella NON MISURABILE; i tagli a 100 lotti si
+       dichiarano come effetto TAGLIA (P1) PRIMA di leggere P2.
+  G5              : NESSUN deploy, per costruzione.
+
+--- LA TABELLA MADRE ---   (VERSI dichiarati, checklist 87: PROF col SEGNO;
+  PF piu' ALTO = meglio; DD% MAGNITUDINE POSITIVA, piu' BASSO = meglio; n in
+  USCITE; rifiuti = righe journal nuove del lancio col pattern del canarino;
+  vol max e righe a 100 dal per-trade CSV, n/d per C3 PER COSTRUZIONE.)
+  LANCIO                 DEPOSITO  LEVA GAMBA          PROF       PF      DD%      n  RIFIUTI   VOLMAX RIGHE100  ESITO
+  C0_ORB_P0                100000   100 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C0_ORB_P1                200000   100 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C0_ORB_P2                200000    15 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C1_EMADOW_P0_IS          100000   100 IS              n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C1_EMADOW_P0_OOS         100000   100 OOS             n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C1_EMADOW_P1_IS          200000   100 IS              n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C1_EMADOW_P1_OOS         200000   100 OOS             n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C1_EMADOW_P2_IS          200000    15 IS              n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C1_EMADOW_P2_OOS         200000    15 OOS             n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C2_MAXMIN_P0             100000   100 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C2_MAXMIN_P1             200000   100 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C2_MAXMIN_P2             200000    15 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C3_ORO_P0                100000   100 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C3_ORO_P1                200000   100 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+  C3_ORO_P2                200000    15 UNICA           n/d      n/d      n/d    n/d      n/d      n/d      n/d  NON ESEGUITO
+
+--- I DELTA CHE DECIDONO (criteri par. 3): P1-P0 = TAGLIA, P2-P1 = LEVA ---
+  (delta col segno; DD confrontati come magnitudini col verso dichiarato;
+   'identita' al centesimo' = profitto/PF/DD/n entro 0,005, n esatto)
+  C0_ORB   [G4 A MANO (P0 contro archivio: confronto INFO, vedi referto -- nessun CSV di riferimento congelato)]
+     archivio P0 (INFO): R103 blocco INDICI (BANCO DIVERSO, OHLC M1 -- nota (a2)): prof +17.487, PF 1,67, DD 3,00%, n 190
+     P1-P0 (taglia): dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d
+     P2-P1 (leva)  : dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d  rifiuti P2: n/d
+     INFO 'verdetto a mano': P2 identica a P1 al centesimo? n/d (lancio A senza numeri leggibili); P1 identica a P0 (attesa: n identico, resto scala con la taglia)? n/d (lancio A senza numeri leggibili)
+  C1_EMADOW   [DA MISURARE]
+     archivio P0 (INFO): G0-B AL CENTESIMO contro prove\R110_CSV_EMADOW (stesso banco tick reali, dimostrato due volte in R112)
+     P1-P0 (taglia) (IS): dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d
+     P2-P1 (leva)   (IS): dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d  rifiuti P2: n/d
+     INFO 'verdetto a mano': P2 identica a P1 al centesimo? n/d (lancio A senza numeri leggibili); P1 identica a P0 (attesa: n identico, resto scala con la taglia)? n/d (lancio A senza numeri leggibili)
+     P1-P0 (taglia) (OOS): dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d
+     P2-P1 (leva)   (OOS): dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d  rifiuti P2: n/d
+     INFO 'verdetto a mano': P2 identica a P1 al centesimo? n/d (lancio A senza numeri leggibili); P1 identica a P0 (attesa: n identico, resto scala con la taglia)? n/d (lancio A senza numeri leggibili)
+  C2_MAXMIN   [G4 A MANO (P0 contro archivio: confronto INFO, vedi referto -- nessun CSV di riferimento congelato)]
+     archivio P0 (INFO): R103 blocco INDICI (BANCO DIVERSO, OHLC M1 -- nota (a2)): prof +8.445, PF 2,26, DD 1,98%, n 41
+     P1-P0 (taglia): dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d
+     P2-P1 (leva)  : dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d  rifiuti P2: n/d
+     INFO 'verdetto a mano': P2 identica a P1 al centesimo? n/d (lancio A senza numeri leggibili); P1 identica a P0 (attesa: n identico, resto scala con la taglia)? n/d (lancio A senza numeri leggibili)
+  C3_ORO   [G4 A MANO (P0 contro archivio: confronto INFO, vedi referto -- nessun CSV di riferimento congelato)]
+     archivio P0 (INFO): R103 forex (STESSO banco OHLC M1): prof +4.792, PF 1,33, DD 3,5%, n 208
+     P1-P0 (taglia): dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d
+     P2-P1 (leva)  : dProf n/d  dn n/d  PF n/d->n/d  DD% n/d->n/d  righe100 n/d->n/d  rifiuti P2: n/d
+     INFO 'verdetto a mano': P2 identica a P1 al centesimo? n/d (lancio A senza numeri leggibili); P1 identica a P0 (attesa: n identico, resto scala con la taglia)? n/d (lancio A senza numeri leggibili)
+
+--- LA LETTURA PRE-DICHIARATA (criteri par. 6) - IL VERDETTO E' A MANO ---
+  [VERDE]  P2 IDENTICA a P1 al centesimo E zero rifiuti journal E zero righe
+           a 100 comparse in P2 che in P1 non c'erano -> sale senza riserve
+  [GIALLO] rifiuti su <= 5% degli INGRESSI di P1 (posizioni, ~n/2) E profitto
+           di finestra positivo E DD% entro il DD promesso -> sale SOLO
+           RIDOTTA (riduzione al 20% del conto, formula FASE 1 par. 3a, D7)
+  [ROSSO]  rifiuti > 5% degli ingressi O profitto che cambia segno O DD%
+           oltre il promesso -> NON sale a questa leva
+  [BIANCO] P0 non riproduce l'antenato (G4) -> NON MISURABILE
+  >>> non esiste un 'quasi verde': P2 diversa da P1 con ZERO rifiuti trovati
+      e' un'ANOMALIA da spiegare prima del verdetto, non un giallo d'ufficio.
+
+--- LISTA DELLE SEDIE AMMISSIBILI ALLA PROP (D10) - STAMPATA VUOTA, SI ---
+--- COMPILA A MANO NELLA DELIBERA D'ACQUISTO (cancello 6), NON QUI      ---
+  sedia (magic vivo)              verdetto        riduzione calcolata   note
+  ORB Dow (770611)                [        ]      [              ]      [                    ]
+  EMA200 Dow (771531)             [        ]      [              ]      [il metro gira a 1%: a fini margine e' PIU' severo della sedia a 0,65%]
+  MaxMinNotte DAX Short (770411)  [        ]      [              ]      [                    ]
+  SupRev oro (970901)             [        ]      [              ]      [                    ]
+  le altre ~27 sedie senza volumi agli atti: NON MISURATO per costruzione --
+  mai un verdetto per analogia (criteri par. 7).
+
+--- FILE ATTESI vs TROVATI ---
+  R114_C0_ORB_P0.csv               non atteso (round fermo dal canarino)
+  R114_C0_ORB_P1.csv               non atteso (round fermo dal canarino)
+  R114_C0_ORB_P2.csv               non atteso (round fermo dal canarino)
+  R114_C1_EMADOW_P0_IS.csv         non atteso (round fermo dal canarino)
+  R114_C1_EMADOW_P0_OOS.csv        non atteso (round fermo dal canarino)
+  R114_C1_EMADOW_P1_IS.csv         non atteso (round fermo dal canarino)
+  R114_C1_EMADOW_P1_OOS.csv        non atteso (round fermo dal canarino)
+  R114_C1_EMADOW_P2_IS.csv         non atteso (round fermo dal canarino)
+  R114_C1_EMADOW_P2_OOS.csv        non atteso (round fermo dal canarino)
+  R114_C2_MAXMIN_P0.csv            non atteso (round fermo dal canarino)
+  R114_C2_MAXMIN_P1.csv            non atteso (round fermo dal canarino)
+  R114_C2_MAXMIN_P2.csv            non atteso (round fermo dal canarino)
+  R114_C3_ORO_P0.csv               non atteso (round fermo dal canarino)
+  R114_C3_ORO_P1.csv               non atteso (round fermo dal canarino)
+  R114_C3_ORO_P2.csv               non atteso (round fermo dal canarino)
+
+--- PROBLEMI (questi SI sono guasti) ---   (1)
+  - CANARINO: NESSUN rifiuto nel journal NE' in gemelle NE' in singola, a deposito 2000 / leva 15. Due nomi (checklist 83): (1) il tester NON sta simulando Leverage=15 nel calcolo margine (criteri par. 1 punto 4: il banco non simula la leva, il round si ferma qui); (2) la stringa vera del journal non e' fra i candidati [not enough money | no money | insufficient funds | insufficient money | denaro insufficiente | fondi insufficienti | margine insufficiente | soldi insufficienti] -- si apre il log del tester in C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\Tester e si legge COSA scrive su un ordine rifiutato. ROUND FERMO (exit 2).
+
+ESITO: ROUND FERMO DAL CANARINO (exit 2) -- il rilevatore dei rifiuti non ha
+morso sul controllo positivo: NESSUN 'zero rifiuti' delle celle e' leggibile.
+La diagnosi con la causa nominata sta nei PROBLEMI. Non e' un guasto del PC:
+e' il gate 84-bis che fa il suo mestiere.
+
+--- COME SI RIPRENDE ---
+  una cella sola : ... & $p -Pin <PIN> -SoloCella R114_C2_MAXMIN.txt
+  rifare cio' che c'e' gia' : aggiungi -Rifai
+  >>> -SoloCella prende la cella INTERA (P0 e' il denominatore di P1/P2).
+      Canarino e sonde girano a OGNI corsa vera: il rilevatore si riprova.
+  >>> un lancio con CSV gia' presente viene RACCOLTO con l'eta' dichiarata
+      (checklist 88); i suoi rifiuti journal restano n/d (non rimisurabili).
+  >>> i tre puntini stanno per IL BLOCCO INTERO della riga di lancio:
+      si riprende da RIGA_R114_DA_MANDARE.md.
