@@ -601,6 +601,73 @@ Thank you — I will not purchase before receiving these answers in writing.
 
 ---
 
+## 📬 RISPOSTA SCRITTA DI FINTOKEI — 27/08/2026 (support@fintokei.com, via Intercom)
+
+`[RISPOSTA SCRITTA]` — rango massimo delle fonti, sopra le FAQ lette via search.
+Risposta sintetica, punto per punto, con link agli articoli ufficiali:
+
+- **Q1 — LA DOMANDA CHE DECIDEVA TUTTO IL VERDETTO:**
+  > _"The 3% risk limit applies to **all open positions combined**, not just
+  > individually."_
+  🔴🔴 **È LA LETTURA PEGGIORE DELLE DUE. CONFERMATO: AGGREGATO, NON PER-TRADE.**
+  Link: `support.fintokei.com/en/articles/11315976`.
+- **Q2 — Consistency Restrictions:** confermano che scattano per violazione
+  delle regole scritte **"and may also be applied at our discretion"** —
+  🔴 la clausola discrezionale non viene smentita, viene **riconfermata a
+  parole loro**.
+- **Q3 — EA:** _"Self-developed, fully owned EAs are allowed; the standard is
+  that the strategy logic and decisions must genuinely be yours."_ 🟡 **NON
+  risponde al SI/NO diretto chiesto** ("un portfolio automatico di 35 EA che
+  gira incustodito su un VPS è accettabile?") — resta la stessa formula
+  generica della FAQ. Aggiunto un link nuovo, mai visto prima:
+  `.../10419735-copy-trading-and-eas-what-is-allowed-and-what-prohibited`
+  — **da leggere**, potrebbe contenere il criterio pratico che manca.
+- **Q4 — muri:** nessuna informazione nuova, rimanda alle due FAQ già lette
+  (`6538826`, `12058210`) — **confermano indirettamente** quanto gia' scritto
+  al §3-4 (muro totale statico 10%, daily su balance per lo Swing).
+- **Q5 — leva/weekend/news/conti:** rimanda alle FAQ gia' lette, piu' un link
+  nuovo sul **rimborso**: `.../6921693-can-i-get-a-refund-for-my-purchase`
+  — **da leggere**, rilevante per il prezzo/rimborso mai emerso al §4.
+
+### ⚖️ COSA CAMBIA NEL VERDETTO — la condizione C-1 del §7 si e' risolta, in negativo
+
+Il file prevedeva esattamente questo bivio (§7, "Le due condizioni per passare
+a PROMOSSA"): _"Se il 3% e' aggregato → serve C-2, e comunque si scende a
+riserva."_ **E' successo.**
+
+🔴 **Aritmetica invariata, ora CONFERMATA e non piu' ipotetica:**
+- cap Fintokei sul rischio aperto aggregato: **3,00%**
+- nostro cap C1 **firmato**: **3,25%** — gia' sopra
+- nostro rischio aperto **realmente misurato**: **5,85%** (03/08, 9 posizioni
+  di 8 sedie) — quasi il doppio
+
+🔴 **Fintokei, COSI' COM'E' OGGI LA FLOTTA, non passa.** Non per una bandiera
+rossa di legittimita' (quella e' a posto, vedi §2 e §6) ma per un numero
+nostro che non ci sta sotto il loro numero. La penale non e' la perdita del
+conto: e' **leva tagliata a 1:10 + tetto ±1%/giorno** — un conto vivo ma
+improduttivo (§5.2).
+
+### 🚪 STATO ORA: **RISERVA, CONDIZIONATA A C-2 — decide Claudio**
+
+Per passare da RISERVA a PROMOSSA serve **C-2**, esattamente come gia'
+scritto al §7, e **non e' una modifica che si applica da questo file**:
+
+1. Abbassare il cap C1 del Guardian da **3,25% a ≤ 2,50%** (margine sotto
+   il 3% di Fintokei) — **proposta, non applicata: decide Claudio**.
+2. **Rimisurare in forward** quanto spesso la flotta tocca davvero quella
+   soglia col nuovo cap — il 5,85% del 03/08 dice che oggi il Guardian non
+   ci tiene sotto il 3%, e non sappiamo se l'abbia mai fatto rispettare.
+3. Restano da leggere i **due link nuovi** (copy-trading/EA, rimborso) prima
+   di chiudere il fascicolo — potrebbero contenere il criterio pratico sulla
+   Q3 che la risposta generica non ha dato.
+
+🎯 **In una riga:** Fintokei resta un'ottima prop sulla carta (muri, leva,
+tempo, EA-policy tutti passati), ma **la flotta cosi' com'e' oggi non ci
+starebbe sotto il loro tetto di rischio aperto** — serve una decisione di
+Claudio sul Guardian prima di riaprire il fascicolo, non un'altra mail.
+
+---
+
 ## 9. 🧾 COSA NON HO POTUTO VEDERE — l'elenco onesto
 
 1. 🔴🔴 **Se il cap del 3% sul rischio aperto e' PER TRADE o AGGREGATO.** Le
@@ -683,14 +750,16 @@ posizioni) · `.../6538884` (payout) · `.../9286450` (dimensione ordini) ·
 | **FTMO** | 10% statico | 🟢 shortlist |
 | **FundedNext** | statico | 🟢 shortlist |
 | **Alpha Capital** | statico | 🟢 shortlist (bloccata dal debito `open_time`, min 2 min) |
-| 🆕 **Fintokei ProTrader Swing** | 🟢 **10% STATICO** + 🟢 **daily su BALANCE** + 🟢 **leva 1:50 indici** | 🟡 **IN SOSPESO — potenziale candidata #1, blocca solo il cap 3% sul rischio aperto** |
+| 🆕 **Fintokei ProTrader Swing** | 🟢 **10% STATICO** + 🟢 **daily su BALANCE** + 🟢 **leva 1:50 indici** | 🟠 **RISERVA — risposta scritta 27/08 conferma cap 3% AGGREGATO: la flotta com'e' oggi (5,85% misurato) non ci sta. Serve C-2 (abbassare C1 Guardian, decide Claudio) prima di riaprire** |
 | **Key to Prop** | 🔴 trailing su picco equity | ❌ bocciata (27/08) |
 | **Upcomers, E8** | 🔴 trailing | ❌ bocciate (26/08) |
 | **FundingPips** | cap per idea 1,2% | ❌ bocciata (26/08) |
 
-> 🎯 **Se la risposta a Q1 e' "il 3% e' per singola posizione", Fintokei
-> ProTrader Swing e' la prop migliore che abbiamo trovato — meglio di FTMO
-> sul giornaliero (base balance invece che equity), meglio sulla leva
-> (1:50 indici contro 1:15-1:25), meglio sul tempo (illimitato), meglio sul
-> gap trading (non vietato) e meglio sulla durata minima (assente, quindi il
-> debito `open_time` non blocca).** Il costo di scoprirlo e' **una mail.**
+> 🎯 **AGGIORNAMENTO 27/08 pomeriggio: la risposta scritta e' arrivata, ed e'
+> la lettura peggiore delle due su Q1 — "3% AGGREGATO su tutte le posizioni
+> aperte insieme", non per singola posizione.** Fintokei resta sulla carta
+> la prop con le regole migliori del censimento (muri, leva, tempo, EA), ma
+> **il nostro rischio aperto reale (5,85%) e' quasi il doppio del loro tetto
+> (3%), e il cap C1 firmato (3,25%) e' gia' sopra.** Non e' piu' una domanda
+> aperta: e' una decisione di Claudio (abbassare il cap C1 del Guardian e
+> rimisurare in forward) prima di poter comprare.
