@@ -593,6 +593,12 @@ allocation I may hold across ProTrader / ProTrader Swing accounts?
 Thank you — I will not purchase before receiving these answers in writing.
 ```
 
+> 📬 **AGGIORNAMENTO 27/08/2026: MAIL INVIATA.** Claudio ha mandato le 5
+> domande al supporto Fintokei. **Nessun acquisto autorizzato finche' la
+> risposta scritta (specialmente Q1, il cap 3% per-trade vs aggregato) non
+> arriva e non entra agli atti** — regola D3. Il verdetto resta **IN
+> SOSPESO** fino ad allora.
+
 ---
 
 ## 9. 🧾 COSA NON HO POTUTO VEDERE — l'elenco onesto
