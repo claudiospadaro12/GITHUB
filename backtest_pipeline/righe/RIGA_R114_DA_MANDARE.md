@@ -77,10 +77,10 @@ DELLE SEDIE AMMISSIBILI stampata VUOTA**, che si compila nella delibera.
 
 ---
 
-## 📌 IL PIN — ⚠️ NON ANCORA ASSEGNATO (si assegna DOPO il push, mai prima)
+## 📌 IL PIN — ✅ ASSEGNATO il 27/08/2026 (commit col PASS del verificatore: 9 difetti FAIL->CORRETTO, checklist 91-94bis nate qui)
 
 ```
-@@PIN@@
+5550cd75f86de1295c597edf5913e049d971bf2a
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima** (checklist 6 e 55). Il commit
@@ -140,7 +140,7 @@ commit congelato.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R114.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='5550cd75f86de1295c597edf5913e049d971bf2a'; $p="$env:USERPROFILE\RIGA_R114.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R114_PROVA_LEVA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R114_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -189,7 +189,7 @@ mattina) non lo trova più — quindi questo blocco parte **senza switch**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_R114.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='5550cd75f86de1295c597edf5913e049d971bf2a'; $p="$env:USERPROFILE\RIGA_R114.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R114_PROVA_LEVA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R114_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
