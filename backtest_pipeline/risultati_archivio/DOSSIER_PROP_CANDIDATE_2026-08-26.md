@@ -33,6 +33,19 @@
 > clausole-cavillo (cap $3k/giorno, weekend, 1-Step peggiorato per data
 > d'acquisto) ora hanno il contesto che meritavano. SHORTLIST FINALE A
 > TRE: FTMO, FundedNext, Alpha (+FXIFY solo se esiste 5/10 statico).
+> 🧪 **FREE TRIAL FTMO APERTO (27/08 ~10:10)**: conto demo 200.000 USD,
+> HEDGE, server FTMO-Demo, MT5 dedicato sul PC di backtest, login fatto.
+> Il trial dura 14 giorni DALLA PRIMA OPERAZIONE (da attivare entro
+> 3/09); la sonda margine non lo attiva (zero ordini). Programma: sonde
+> stasera -> margini VERI; PIANO PROVA GENERALE in scrittura (flotta sul
+> trial da lunedi' 31/08, firma nel weekend). E' la prova in costume
+> gratuita della challenge.
+> ❌ **KEYTOPROP BOCCIATA** (27/08, segnalazione amico BCM — vagliata come
+> tutte): muro totale TRAILING sul picco equity (testo loro), 7 regole non
+> dichiarate, recensioni in prevalenza di affiliati, unlisted su
+> PropFirmMatch; broker dietro = Key to Markets (nessun legame BCM
+> documentato). Porta di rientro: 5 risposte scritte tutte positive
+> (VAGLIO_KEYTOPROP_2026-08-27.md par. 7).
 > Auto-ack ricevuto: ticket 8O1NLM, risposta promessa entro 2 giorni
 > lavorativi (uffici dom-ven 08-17 CET).
 > 📨 **TUTTE E TRE LE MAIL INVIATE (conferma di Claudio, 27/08 ~00:00)**:
