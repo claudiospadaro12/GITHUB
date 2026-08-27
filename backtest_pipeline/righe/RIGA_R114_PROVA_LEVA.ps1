@@ -396,7 +396,13 @@ function RigheSecche($righeInput,[int]$magicSecco){
   foreach($rigaCorr in @($righeInput)){
     $nomeChiave = NomeDi $rigaCorr
     if($nomeChiave -eq "InpMagic"){ [void]$fuori.Add("InpMagic=" + $magicSecco) }
-    else { [void]$fuori.Add($nomeChiave + "=" + (ValoreDi $rigaCorr)) }
+    else {
+      #  il VALORE di una riga in forma sweep 'v||v||0||v||N' e' il primo
+      #  segmento; una riga gia' secca (es. InpNewsFile=...) passa intera.
+      $valoreSecco = ValoreDi $rigaCorr
+      if($valoreSecco -match '\|\|'){ $valoreSecco = @($valoreSecco -split '\|\|')[0] }
+      [void]$fuori.Add($nomeChiave + "=" + $valoreSecco)
+    }
   }
   $testoSecco = (@($fuori) -join "`r`n")
   if($testoSecco -match '\|\|'){ throw "fabbrica input secchi: e' rimasto uno sweep '||'. Sarebbe un'ottimizzazione, non una passata singola." }
