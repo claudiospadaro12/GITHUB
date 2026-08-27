@@ -10,6 +10,14 @@
 > 📨 **QUARTA MAIL INVIATA A THE5ERS (27/08 mattina)**: domande mirate su
 > news ±2 min, rollover notturno, one-sided bets, leva, muri High Stakes.
 > Se la risposta ammorbidisce la lettura delle FAQ, The5ers rientra.
+> 🕵️ **CACCIA RECENSIONI DI CLAUDIO (27/08 mattina)**: FunderPro e Funded
+> Trading Plus ELIMINATE prima ancora del vaglio regole — tutte e due con
+> il cartello Trustpilot "Violazione delle linee guida: rimosse diverse
+> recensioni false" (reputazione comprata = fuori senza appello; su FTP
+> anche recensioni sul crollo del servizio post-acquisizione). FXIFY 4.3
+> pulito ma resta il muro daily 4%: eventuale 5a mail solo per chiedere
+> se esiste un programma 5%g/10% statico. The5ers 4.7 pulito (gia' agli
+> atti: il problema sono le regole, non la reputazione).
 > Auto-ack ricevuto: ticket 8O1NLM, risposta promessa entro 2 giorni
 > lavorativi (uffici dom-ven 08-17 CET).
 > 📨 **TUTTE E TRE LE MAIL INVIATE (conferma di Claudio, 27/08 ~00:00)**:
