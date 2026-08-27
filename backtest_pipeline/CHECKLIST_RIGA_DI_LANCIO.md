@@ -4514,3 +4514,23 @@ Spostata la lista **prima del `try`**, la stessa corsa stampa 18 righe
 > puo' valere 0 non e' un atteso: e' un consuntivo travestito. Vale per gli
 > attesi-vs-trovati, per i "passate: N" e per ogni riga di riepilogo che il
 > lettore usa per contare cosa manca.
+
+## 90. 🗂️ `BaseName` E `Extension` SU UNA CARTELLA: la nostra data nel nome diventa un'estensione (trovato eseguendo, 27/08/2026, riga pulizia Desktop mai spedita)
+
+Le nostre cartelle di round hanno la data nel nome (`R113_DAX_2026.08.26`).
+PowerShell ci legge dentro un'estensione: misurato su pwsh 7.4.6,
+`Extension` = `.26`. La formula classica per il nome alternativo --
+`$item.BaseName + '_dup_' + $stamp + $item.Extension` -- produce quindi
+`R113_DAX_2026.08.26_dup_20260827_071500.26`: un'estensione spuria
+appiccicata a una CARTELLA. E `DirectoryInfo.BaseName` NON si comporta
+uguale su 5.1 e su 7: lo stesso codice da' due nomi diversi sulle due
+macchine.
+
+> ✅ **Regola: `BaseName`/`Extension` si usano SOLO sui file.** Per una
+> cartella il nome e' `$v.Name`, intero:
+> ```powershell
+> $ext=''; $base=$v.Name
+> if(-not $v.PSIsContainer){ $ext=$v.Extension; $base=$v.Name.Substring(0,$v.Name.Length-$ext.Length) }
+> ```
+> E' la famiglia del punto 62 (`$lista[0]` che diventa un carattere):
+> non risponde `$null`, risponde una cosa PLAUSIBILE.
