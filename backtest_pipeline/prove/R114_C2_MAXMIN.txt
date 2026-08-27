@@ -1,0 +1,93 @@
+# =====================================================================
+#  R114 -- C2_MAXMIN: LA PROVA DELLA LEVA (fase 2 della prova della taglia)
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato su D30EUR M15 -- sedia viva 770411 (0,65%)
+# ---------------------------------------------------------------------
+#  CRITERI:  backtest_pipeline\risultati_archivio\R114_CRITERI.md
+#            (FIRMATI: "FIRMO R114", Claudio, 27/08/2026 mattina)
+#  DRIVER:   backtest_pipeline\righe\RIGA_R114_PROVA_LEVA.ps1
+#            (MARCATORE_RIGA_R114_v1)
+#
+#  >>> QUESTO FILE E' UNO SOLO PER TUTTA LA CELLA (criteri, nota di
+#      costruzione): le TRE passate P0/P1/P2 e i gemelli vivono negli
+#      .ini e nell'asse magic del DRIVER, non in file prova separati.
+#      Deposito, leva, valuta e modello NON stanno qui: sono PARAMETRI
+#      DI BANCO che il driver scrive nell'.ini (Deposit= / Leverage= /
+#      Currency= / Model=), passata per passata -- decisione D2:
+#        P0 aggancio  100.000 / leva 100  (il banco dell'antenato)
+#        P1 taglia    200.000 / leva 100
+#        P2 leva      200.000 / leva  15  (LA DOMANDA DEL ROUND)
+#
+#  >>> DA DOVE VIENE QUESTO FILE, e non e' una frase: e' un GATE (G0-A,
+#      checklist 72). Il corpo e' la COPIA RIGA PER RIGA dell'ANTENATO
+#        prove\R103_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_770411.txt
+#      e l'UNICO delta ammesso, preteso PER NOME dal driver, e':
+#        - InpMagic   760320/760321 (antenato) -> 763640/763641 (blocco
+#          vergine 7636xx, schema 763600 + C*20 + P*2 + G; nel file
+#          sta la coppia di P0; P1/P2 le riscrive il driver nell'.ini:
+#          763642/763643 e 763644/763645)
+#      Ne' un buffer, ne' un lato, ne' una data: rischio, finestra e
+#      parametri restano quelli dell'antenato.
+#
+#  BANCO DI QUESTA CELLA (dall'antenato, criteri par. 2): tick reali (4)
+#  FINESTRA: 2024.09.26 -> 2026.06.30 (quella dell'antenato)
+#
+#  >>> I magic vivi 770611, 771531, 770411, 970901 e i blocchi bruciati
+#      7633xx/7634xx/7635xx sono VIETATI e il driver li controlla.
+#  >>> G5: nessun deploy -- questa cella non tocca VPS ne' sedie.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0.0||0.0||0||0.0||N
+InpMaxBoxPts=0.0||0.0||0||0.0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000.0||3000.0||0||3000.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50.0||50.0||0||50.0||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=true||true||0||true||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN DAX SHORT
+InpMagic=763640||763640||1||763641||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

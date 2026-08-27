@@ -1,0 +1,83 @@
+# =====================================================================
+#  R114 -- C3_ORO: LA PROVA DELLA LEVA (fase 2 della prova della taglia)
+#  ABTG_SupertrendReversal_Ottimizzato su XAUUSD H4 -- sedia viva 970901 (1,0%)
+# ---------------------------------------------------------------------
+#  CRITERI:  backtest_pipeline\risultati_archivio\R114_CRITERI.md
+#            (FIRMATI: "FIRMO R114", Claudio, 27/08/2026 mattina)
+#  DRIVER:   backtest_pipeline\righe\RIGA_R114_PROVA_LEVA.ps1
+#            (MARCATORE_RIGA_R114_v1)
+#
+#  >>> QUESTO FILE E' UNO SOLO PER TUTTA LA CELLA (criteri, nota di
+#      costruzione): le TRE passate P0/P1/P2 e i gemelli vivono negli
+#      .ini e nell'asse magic del DRIVER, non in file prova separati.
+#      Deposito, leva, valuta e modello NON stanno qui: sono PARAMETRI
+#      DI BANCO che il driver scrive nell'.ini (Deposit= / Leverage= /
+#      Currency= / Model=), passata per passata -- decisione D2:
+#        P0 aggancio  100.000 / leva 100  (il banco dell'antenato)
+#        P1 taglia    200.000 / leva 100
+#        P2 leva      200.000 / leva  15  (LA DOMANDA DEL ROUND)
+#
+#  >>> DA DOVE VIENE QUESTO FILE, e non e' una frase: e' un GATE (G0-A,
+#      checklist 72). Il corpo e' la COPIA RIGA PER RIGA dell'ANTENATO
+#        prove\R103_ABTG_SupertrendReversal_Ottimizzato_XAUUSD_970901.txt
+#      e l'UNICO delta ammesso, preteso PER NOME dal driver, e':
+#        - InpMagic   760250/760251 (antenato) -> 763660/763661 (blocco
+#          vergine 7636xx, schema 763600 + C*20 + P*2 + G; nel file
+#          sta la coppia di P0; P1/P2 le riscrive il driver nell'.ini:
+#          763662/763663 e 763664/763665)
+#      Ne' un buffer, ne' un lato, ne' una data: rischio, finestra e
+#      parametri restano quelli dell'antenato.
+#
+#  BANCO DI QUESTA CELLA (dall'antenato, criteri par. 2): OHLC su M1 (1), finestra R103 forex
+#  FINESTRA: 2020.01.01 -> 2026.06.30 (quella dell'antenato)
+#
+#  >>> I magic vivi 770611, 771531, 770411, 970901 e i blocchi bruciati
+#      7633xx/7634xx/7635xx sono VIETATI e il driver li controlla.
+#  >>> G5: nessun deploy -- questa cella non tocca VPS ne' sedie.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2020.01.01
+InpUsaGuardian=true||true||0||true||N
+InpTF=16388||16388||0||16388||N
+InpStMult=2.5||2.5||0||2.5||N
+InpStAtrPeriod=7||7||0||7||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseConfluence=true||true||0||true||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+InpSLBufferPips=3.0||3.0||0||3.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=2.5||2.5||0||2.5||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=STREV OTT
+InpMagic=763660||763660||1||763661||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
