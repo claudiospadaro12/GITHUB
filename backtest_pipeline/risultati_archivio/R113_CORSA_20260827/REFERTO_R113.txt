@@ -1,0 +1,304 @@
+﻿REFERTO R113 - PROVA DI REGIME NASUSD_EXT: L'EDGE SHORT VIVE NELLE DISCESE?
+ABTG_SupRev_NAS_H1_Ottimizzato / NASUSD_EXT H1 - sedia viva 970913 (che NON si tocca: G5)
+
+>>> QUESTI SONO DATI DI UN ALTRO BROKER - spread, orari di seduta e prezzi
+>>> NON SONO BCM (decisione D-C del 25/08, emendamento FRIGO del 26/08).
+>>> IL LIMITE COSTITUTIVO (criteri par. 1): NASUSD_EXT e' barre M1
+>>> importate (HistData), SENZA tick reali BCM: banco OHLC su M1 (modello 1).
+>>> La differenza fra i banchi e' MISURATA (SupRev_DOW_H4: PF 2,77 OHLC vs
+>>> 0,79 tick reali). Si legge la FORMA (verde/rosso, ordini di grandezza),
+>>> MAI i numeri fini. Confronti SOLO _EXT-contro-_EXT fra finestre: mai
+>>> '_EXT contro BCM', mai 'questa cella contro il suo numero R110'.
+>>> G0-EXT superato PER FIRMA (26/08): rapporto 0,199 sul metro relativo
+>>> 0,20 - BORDO SOTTILE, dichiarato.
+
+modo: CORSA
+switch di questo giro: nessuno (corsa piena; una cella con CSV gia' presente viene RACCOLTA con l'eta' dichiarata, checklist 88)
+stato dei criteri: FIRMATI (nessun lucchetto nel file al pin)
+data: 2026-08-27 07:35:37 ora del PC   (questa data deve essere di ADESSO)
+avvio: 2026-08-27 07:30:11 ora del PC   durata: 5.4 minuti
+pin: 9ddf37b467db7999084991253f6d55ed698a0a7a
+criteri: risultati_archivio\R113_CRITERI.md (otto decisioni, par. 9)
+banco: modello 1 (OHLC su M1)   deposito 100000   leva 100   EUR
+spread: Spread=0 scritto NELL'INI di OGNI finestra = nella convenzione
+     di casa (R100/R102/R103, walkforward_generico riga 484) vuol dire SPREAD
+     CORRENTE DEL SIMBOLO, messo agli atti invece che lasciato allo stato
+     nascosto del terminale. VERIFICATO NELL'ARTEFATTO: la stessa riga in
+     tutti e 18 gli .ini -> il banco e' IDENTICO fra le finestre PER
+     COSTRUZIONE, ed e' questa coerenza interna che rende leggibile il
+     confronto relativo _EXT-vs-_EXT.
+  >>> IL VALORE EFFETTIVO IN PUNTI E' *NON MISURATO*, e si dichiara mancante
+      invece di dedurlo (i criteri par. 1 punto 3 lo chiedevano letto: questo
+      driver NON puo' leggerlo, e dirlo e' l'unica risposta onesta).
+      Perche' non si deduce, con DUE nomi (checklist 83 e 89):
+      (1) ABTG_ImportaStoricoEsterno.mq5 scrive spread = 0 in OGNI barra M1
+          importata (riga 327) e copia SYMBOL_SPREAD_FLOAT dal simbolo BCM,
+          ma NON copia SYMBOL_SPREAD: se il tester prende lo spread dalla
+          BARRA, questo banco e' SENZA ATTRITO (spread zero);
+      (2) se invece ripiega su SYMBOL_SPREAD del simbolo custom, il valore e'
+          quello che il simbolo si e' portato dietro alla creazione.
+      Quale delle due sia, QUI NON E' MISURATO. Non sposta i confronti fra
+      finestre (identico ovunque), MA un edge SHORT giudicato su un banco
+      forse senza attrito e' una cosa da sapere PRIMA di leggere i PF.
+      Come si chiude, ed e' un passo A SE': in MT5 -> Vista -> Simboli ->
+      NASUSD_EXT -> campo Spread (o Specifiche del simbolo nel tester).
+      Nota agli atti: STORICO_INDICI_CRITERI.md riga 157 dice gia' 'nel tester
+      lo spread e' quello che si imposta', e ABTG_ImportaStoricoEsterno.mq5
+      riga 33 dice 'SPREAD E COMMISSIONI restano quelli che imposti nel
+      tester': nessuno dei due dichiara uno spread FISSO messo all'import.
+orologi (checklist 86): le finestre sono DATE DI CALENDARIO a giorni interi;
+     le barre _EXT sono in ORA SERVER BCM (shift +5 verificato all'import);
+     'data:' e 'avvio:' qui sopra sono ORA DEL PC (= ora italiana sul VPS).
+rischio: 1,0% per trade nei file (come gli antenati R110). La sedia in campo
+     sta a 0,65% sul 100k: OGNI DD di questo referto va MOLTIPLICATO x0,65
+     per confrontarlo col forward - ma il confronto col forward NON si fa
+     qui (dati di un altro broker).
+
+--- CONVENZIONE DI SENTINELLA (checklist 66) ---
+  Un numero NON MISURATO si scrive 'n/d'. MAI -1, MAI 0.000.
+
+--- I GATE (criteri par. 4) ---
+  G0-EXT AMMISSIONE : superato PER FIRMA (26/08), bordo sottile 0,199 dichiarato.
+  G0-A  ANTENATO    : copia riga per riga del file prova R110_SUPNAS, salvo
+                      @SIMBOLO + @DAQUANDO + InpMagic (e la riga NUOVA @FINOA,
+                      documentata nei file). Catena R103 -> R110 -> R113.
+                      Gira PRIMA di MT5, su TUTTI i 18 file.
+  G0-B              : NON APPLICABILE, dichiarato: nessun round e' mai girato
+                      su NASUSD_EXT, non c'e' niente da riprodurre.
+  G0-C  GEMELLI     : le due righe del CSV identiche al centesimo (magic +5).
+  G1    CAMPIONE    : unita' = USCITE (STAT_TRADES), la stessa di tutti i round
+                      di casa; ~2 uscite = 1 posizione (MISURATO in R112 par. 3:
+                      la colonna ~pos e' quella STIMA). Soglie E.2: n>=20 verdetto
+                      pieno di merito / 8-19 SOSPESO / <8 NON MISURATO. La
+                      colonna E.2 e' la TASSONOMIA meccanica, non un verdetto.
+                      E.3: il campione sottile sospende il MERITO, MAI il RISCHIO.
+  G2    RISCHIO     : vedi la sezione G2 sotto - i METRI, il verdetto e' a mano.
+  G5                : NESSUNA promozione, per costruzione (par. 7).
+
+--- LA TABELLA MADRE ---   (attese: 2 righe gemelle per CSV, 18 CSV, 36 passate)
+  VERSI DICHIARATI (checklist 87) - in questa riga ce ne sono TRE diversi:
+  PROF col SEGNO (+ guadagno / - perdita); PF sempre POSITIVO (piu' ALTO =
+  meglio); DD% MAGNITUDINE POSITIVA (piu' BASSO = meglio). n e' in USCITE;
+  ~pos = n/2 arrotondato in giu' (equivalenza misurata R112 par. 3, e' una stima).
+  E.2: PIENO (n>=20) / SOSPESO (8-19) / NON MIS. (<8) - meccanica, non verdetto.
+  F    FINESTRA      CELLA     GIUDICA                  PROF      PF      DD%     n(usc)  ~pos   E.2       ESITO
+  F0   TORO          00_metro  merito (controllo)       +317      2.187   0.35    8       ~4     SOSPESO   OK
+  F0   TORO          01_long   merito (controllo)       +378      0.000   0.28    2       ~1     NON MIS.  OK
+  F0   TORO          02_short  merito (controllo)       -59       0.777   0.40    6       ~3     NON MIS.  OK
+  F1   ORSO          00_metro  merito + rischio         -10       0.958   0.35    7       ~3     NON MIS.  OK
+  F1   ORSO          01_long   merito + rischio         -10       0.958   0.35    7       ~3     NON MIS.  OK
+  F1   ORSO          02_short  merito + rischio         0         0.000   0.00    0       ~0     NON MIS.  OK
+  F2   CROLLO        00_metro  SOLO rischio (E.3)       -96       0.396   0.37    3       ~1     NON MIS.  OK
+  F2   CROLLO        01_long   SOLO rischio (E.3)       +63       0.000   0.21    2       ~1     NON MIS.  OK
+  F2   CROLLO        02_short  SOLO rischio (E.3)       -159      0.000   0.22    1       ~0     NON MIS.  OK
+  F3   CROLLO_ANNO   00_metro  merito                   +256      2.604   0.37    5       ~2     NON MIS.  OK
+  F3   CROLLO_ANNO   01_long   merito                   +415      0.000   0.21    4       ~2     NON MIS.  OK
+  F3   CROLLO_ANNO   02_short  merito                   -159      0.000   0.22    1       ~0     NON MIS.  OK
+  F4   LATERALE_NAS  00_metro  merito + rischio         -1235     0.664   1.81    55      ~27    PIENO     OK
+  F4   LATERALE_NAS  01_long   merito + rischio         -867      0.626   1.07    34      ~17    PIENO     OK
+  F4   LATERALE_NAS  02_short  merito + rischio         -370      0.729   1.23    21      ~10    PIENO     OK
+  F5   VECCHIA       00_metro  SOLO rischio (regola B)  +649      1.152   1.66    94      ~47    PIENO     OK
+  F5   VECCHIA       01_long   SOLO rischio (regola B)  +555      1.228   1.27    55      ~27    PIENO     OK
+  F5   VECCHIA       02_short  SOLO rischio (regola B)  +89       1.049   0.96    39      ~19    PIENO     OK
+  (niente colonna 'peggior giornata': NON e' nel perimetro di R113. L'OPTFRAME
+   di questo EA ha 8 colonne statistiche, misurato nel sorgente al pin.)
+
+--- FILE ATTESI vs TROVATI ---
+  R113_F0_00_metro.csv         trovato (2026-08-27 07:30)
+  R113_F0_01_long.csv          trovato (2026-08-27 07:30)
+  R113_F0_02_short.csv         trovato (2026-08-27 07:31)
+  R113_F1_00_metro.csv         trovato (2026-08-27 07:31)
+  R113_F1_01_long.csv          trovato (2026-08-27 07:31)
+  R113_F1_02_short.csv         trovato (2026-08-27 07:32)
+  R113_F2_00_metro.csv         trovato (2026-08-27 07:32)
+  R113_F2_01_long.csv          trovato (2026-08-27 07:32)
+  R113_F2_02_short.csv         trovato (2026-08-27 07:32)
+  R113_F3_00_metro.csv         trovato (2026-08-27 07:33)
+  R113_F3_01_long.csv          trovato (2026-08-27 07:33)
+  R113_F3_02_short.csv         trovato (2026-08-27 07:33)
+  R113_F4_00_metro.csv         trovato (2026-08-27 07:33)
+  R113_F4_01_long.csv          trovato (2026-08-27 07:34)
+  R113_F4_02_short.csv         trovato (2026-08-27 07:34)
+  R113_F5_00_metro.csv         trovato (2026-08-27 07:34)
+  R113_F5_01_long.csv          trovato (2026-08-27 07:35)
+  R113_F5_02_short.csv         trovato (2026-08-27 07:35)
+
+--- LE CELLE, GATE PER GATE ---
+  F0_00_metro            magic 763500/763505   InpAllowLong=true InpAllowShort=true
+       finestra TORO 2021.01.01 -> 2021.12.31   giudica: merito (controllo)
+       G0-A antenato : OK contro R110_SUPNAS_00_metro.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:30:40 ora del PC
+       esito         : OK
+  F0_01_long             magic 763501/763506   InpAllowLong=true InpAllowShort=false
+       finestra TORO 2021.01.01 -> 2021.12.31   giudica: merito (controllo)
+       G0-A antenato : OK contro R110_SUPNAS_01_long.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:30:57 ora del PC
+       esito         : OK
+  F0_02_short            magic 763502/763507   InpAllowLong=false InpAllowShort=true
+       finestra TORO 2021.01.01 -> 2021.12.31   giudica: merito (controllo)
+       G0-A antenato : OK contro R110_SUPNAS_02_short.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:31:13 ora del PC
+       esito         : OK
+  F1_00_metro            magic 763510/763515   InpAllowLong=true InpAllowShort=true
+       finestra ORSO 2022.01.01 -> 2022.10.31   giudica: merito + rischio
+       G0-A antenato : OK contro R110_SUPNAS_00_metro.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:31:31 ora del PC
+       esito         : OK
+  F1_01_long             magic 763511/763516   InpAllowLong=true InpAllowShort=false
+       finestra ORSO 2022.01.01 -> 2022.10.31   giudica: merito + rischio
+       G0-A antenato : OK contro R110_SUPNAS_01_long.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:31:47 ora del PC
+       esito         : OK
+  F1_02_short            magic 763512/763517   InpAllowLong=false InpAllowShort=true
+       finestra ORSO 2022.01.01 -> 2022.10.31   giudica: merito + rischio
+       G0-A antenato : OK contro R110_SUPNAS_02_short.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:32:04 ora del PC
+       esito         : OK
+  F2_00_metro            magic 763520/763525   InpAllowLong=true InpAllowShort=true
+       finestra CROLLO 2020.02.01 -> 2020.04.30   giudica: SOLO rischio (E.3)
+       G0-A antenato : OK contro R110_SUPNAS_00_metro.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:32:16 ora del PC
+       esito         : OK
+  F2_01_long             magic 763521/763526   InpAllowLong=true InpAllowShort=false
+       finestra CROLLO 2020.02.01 -> 2020.04.30   giudica: SOLO rischio (E.3)
+       G0-A antenato : OK contro R110_SUPNAS_01_long.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:32:30 ora del PC
+       esito         : OK
+  F2_02_short            magic 763522/763527   InpAllowLong=false InpAllowShort=true
+       finestra CROLLO 2020.02.01 -> 2020.04.30   giudica: SOLO rischio (E.3)
+       G0-A antenato : OK contro R110_SUPNAS_02_short.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:32:46 ora del PC
+       esito         : OK
+  F3_00_metro            magic 763530/763535   InpAllowLong=true InpAllowShort=true
+       finestra CROLLO_ANNO 2020.01.01 -> 2020.12.31   giudica: merito
+       G0-A antenato : OK contro R110_SUPNAS_00_metro.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:33:05 ora del PC
+       esito         : OK
+  F3_01_long             magic 763531/763536   InpAllowLong=true InpAllowShort=false
+       finestra CROLLO_ANNO 2020.01.01 -> 2020.12.31   giudica: merito
+       G0-A antenato : OK contro R110_SUPNAS_01_long.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:33:22 ora del PC
+       esito         : OK
+  F3_02_short            magic 763532/763537   InpAllowLong=false InpAllowShort=true
+       finestra CROLLO_ANNO 2020.01.01 -> 2020.12.31   giudica: merito
+       G0-A antenato : OK contro R110_SUPNAS_02_short.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:33:38 ora del PC
+       esito         : OK
+  F4_00_metro            magic 763540/763545   InpAllowLong=true InpAllowShort=true
+       finestra LATERALE_NAS 2015.01.01 -> 2016.06.30   giudica: merito + rischio
+       G0-A antenato : OK contro R110_SUPNAS_00_metro.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:33:58 ora del PC
+       esito         : OK
+  F4_01_long             magic 763541/763546   InpAllowLong=true InpAllowShort=false
+       finestra LATERALE_NAS 2015.01.01 -> 2016.06.30   giudica: merito + rischio
+       G0-A antenato : OK contro R110_SUPNAS_01_long.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:34:17 ora del PC
+       esito         : OK
+  F4_02_short            magic 763542/763547   InpAllowLong=false InpAllowShort=true
+       finestra LATERALE_NAS 2015.01.01 -> 2016.06.30   giudica: merito + rischio
+       G0-A antenato : OK contro R110_SUPNAS_02_short.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:34:35 ora del PC
+       esito         : OK
+  F5_00_metro            magic 763550/763555   InpAllowLong=true InpAllowShort=true
+       finestra VECCHIA 2011.01.01 -> 2012.12.31   giudica: SOLO rischio (regola B)
+       G0-A antenato : OK contro R110_SUPNAS_00_metro.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:34:55 ora del PC
+       esito         : OK
+  F5_01_long             magic 763551/763556   InpAllowLong=true InpAllowShort=false
+       finestra VECCHIA 2011.01.01 -> 2012.12.31   giudica: SOLO rischio (regola B)
+       G0-A antenato : OK contro R110_SUPNAS_01_long.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:35:15 ora del PC
+       esito         : OK
+  F5_02_short            magic 763552/763557   InpAllowLong=false InpAllowShort=true
+       finestra VECCHIA 2011.01.01 -> 2012.12.31   giudica: SOLO rischio (regola B)
+       G0-A antenato : OK contro R110_SUPNAS_02_short.txt (delta: @DAQUANDO + @SIMBOLO + InpMagic; riga nuova: @FINOA)
+       G0-C gemelli  : IDENTICI
+       CSV           : righe 2   LastWriteTime 2026-08-27 07:35:34 ora del PC
+       esito         : OK
+
+--- G2 RISCHIO (criteri par. 4): I METRI, NON IL VERDETTO ---
+  Metro per cella = DD OOS R110 a rischio 1% (STA NEI CRITERI COME ORIGINE,
+  non come paragone di merito): 00_metro 1,29 | 01_long 1,62 | 02_short 0,93.
+  Soglia di SEGNALAZIONE: in una finestra avversa (F1 ORSO, F2 CROLLO, F5
+  VECCHIA) DD > 2x il metro della cella E comunque > 20%.
+  [DD = MAGNITUDINI POSITIVE, piu' basso = meglio - checklist 87. Si legge la
+   FORMA/ordine di grandezza, coerente col par. 1.]
+  INFO F1_00_metro          DD 0.35%   metro R110 1.29%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F1_01_long           DD 0.35%   metro R110 1.62%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F1_02_short          DD 0.00%   metro R110 0.93%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F2_00_metro          DD 0.37%   metro R110 1.29%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F2_01_long           DD 0.21%   metro R110 1.62%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F2_02_short          DD 0.22%   metro R110 0.93%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F5_00_metro          DD 1.66%   metro R110 1.29%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F5_01_long           DD 1.27%   metro R110 1.62%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  INFO F5_02_short          DD 0.96%   metro R110 0.93%   soglia (2x metro E >20%): 20.00%   -> lettura A MANO
+  >>> La SEGNALAZIONE FORMALE DI REVISIONE della sedia 970913 (se scatta) e'
+      del referto del round, A MANO: decisione a Claudio, nessun automatismo
+      su dati esterni (D-C + regola B, criteri par. 4 G2).
+
+--- LETTURA IPOTESI-S (criteri par. 6) - LE CASELLE SONO VUOTE APPOSTA ---
+  La lettura e' PRE-DICHIARATA (scritta PRIMA dei numeri) e si spunta A MANO
+  NEL REFERTO DEL ROUND, mai da questo driver. Si legge sulla cella 02_short;
+  00_metro e 01_long sono contesto. F2 (CROLLO) e F5 (VECCHIA) NON entrano
+  nel verdetto (giudicano solo il rischio); F4 (LATERALE_NAS) e' contesto:
+  nessuna condizione ci poggia sopra. 'Verde in ORSO ma sottile in
+  CROLLO_ANNO' (o viceversa) = NON CONCLUSIVA: non esiste 'confermata a meta''.
+  [ ] CONFERMATA ............. short PF >= 1,10 con n >= 20 in ORSO _E_ in
+                               CROLLO_ANNO, _E_ PF < 1,10 in TORO
+  [ ] SMENTITA ............... short PF < 0,90 con n >= 20 in ORSO _E_ in
+                               CROLLO_ANNO
+  [ ] MOTORE PER TUTTE LE     short PF >= 1,10 con n >= 20 in ORSO,
+      STAGIONI ............... CROLLO_ANNO _E_ TORO (etichetta diversa,
+                               NON promozione: G5 resta)
+  [ ] NON CONCLUSIVA ......... ogni altro quadro (segni misti fra le due
+                               finestre avverse, o campioni sottili/non
+                               misurati dove serviva il verdetto)
+  (le caselle si spuntano a mano nel referto del round)
+
+--- QUELLO CHE QUESTO REFERTO NON DICE, DICHIARATO ---
+  * NON spunta IPOTESI-S e NON applica G2: numeri e metri stampati, verdetti
+    a mano (la lettura pre-dichiarata non si tocca dopo i numeri, D5).
+  * NON promuove niente (G5 per costruzione): nessuna cella entra in flotta,
+    cambia stato o si muove in classifica per un numero uscito su un _EXT.
+    'Facciamo la sedia short-only' e' un round SUCCESSIVO su dati BCM.
+  * NIENTE peggior giornata e NIENTE per-trade: fuori perimetro. L'EA scrive
+    comunque abtg_trades_*_7635xx.csv nella cartella comune: NON letti, NON
+    raccolti, NON cancellati da questo driver.
+  * I numeri R110 citati stanno come ORIGINE delle celle e metro G2 del
+    RISCHIO, mai come paragone di merito (banchi diversi).
+  * NON misura il flottante, non fa split IS/OOS (finestre UNICHE di regime),
+    non scrive una riga di MQL5.
+
+--- PROBLEMI (questi SI sono guasti) ---   (0)
+  nessuno.
+
+ESITO: OK -- tutte le celle hanno prodotto i numeri attesi, nessun problema e nessun rilievo in elenco.
+
+--- COME SI RIPRENDE ---
+  una cella sola : ... & $p -Pin <PIN> -SoloCella R113_F1_02_short.txt
+  rifare cio' che c'e' gia' : aggiungi -Rifai
+  >>> in R113 NESSUNA cella e' denominatore di un'altra: -SoloCella lancia
+      solo quella. Una cella con CSV gia' presente viene RACCOLTA con l'eta'
+      dichiarata, non rifatta (checklist 88): per rifarla serve -Rifai.
+  >>> i tre puntini stanno per IL BLOCCO INTERO della riga di lancio, con il
+      suo irm e la sua guardia: si riprende da RIGA_R113_DA_MANDARE.md.
+  >>> senza -CriteriFirmati: se una ripresa esce con codice 2, il file dei
+      criteri al pin porta (ancora, o di nuovo) il lucchetto: si legge il
+      documento, NON si aggira lo switch.
