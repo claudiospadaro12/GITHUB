@@ -25,6 +25,14 @@
 > flotta senza filtro news a prescindere. L'esplorazione di prop NUOVE si
 > chiude: nessuna sopravvive. Shortlist definitiva: FTMO, FundedNext,
 > Alpha, Goat (+FXIFY solo se esiste un programma 5/10 statico).
+> ❌❌ **GOAT FUNDED TRADER: DA RISERVA A BOCCIATA (27/08, caccia di
+> Claudio)**: QUARTO cartello Trustpilot "recensioni false rimosse", e le
+> recensioni recenti in vetrina documentano il pattern peggiore — prelievi
+> ostacolati (KYC da rifare) e "non ho infranto alcuna regola ma il conto
+> e' stato comunque chiuso". La riserva esce dalla classifica: le sue
+> clausole-cavillo (cap $3k/giorno, weekend, 1-Step peggiorato per data
+> d'acquisto) ora hanno il contesto che meritavano. SHORTLIST FINALE A
+> TRE: FTMO, FundedNext, Alpha (+FXIFY solo se esiste 5/10 statico).
 > Auto-ack ricevuto: ticket 8O1NLM, risposta promessa entro 2 giorni
 > lavorativi (uffici dom-ven 08-17 CET).
 > 📨 **TUTTE E TRE LE MAIL INVIATE (conferma di Claudio, 27/08 ~00:00)**:
