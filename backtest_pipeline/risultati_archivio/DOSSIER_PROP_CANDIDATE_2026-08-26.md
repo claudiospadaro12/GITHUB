@@ -3,6 +3,13 @@
 > 📨 **AGGIORNAMENTO 27/08/2026 ~00:30 — MAIL INVIATA A FTMO** (support@ftmo.com)
 > con le 5 domande scritte (leva per strumento, margini overnight/stop-out,
 > tetti di volume, clausola 2x200k/strategie identiche, gap trading).
+> 📬 **PRIMA RISPOSTA ARRIVATA (FundedNext, 27/08 00:16, scritta)**: leva
+> indici 1:15 ANCHE in challenge (FAQ 1:25 smentita), fee EA $30 una
+> tantum, zero tetti lotti, margin call 100%, multi-conto vietato,
+> Scale-Up 4 payout/2 mesi/4% -> +25%. Atti: RISPOSTA_FUNDEDNEXT_2026-08-27.md
+> 📨 **QUARTA MAIL INVIATA A THE5ERS (27/08 mattina)**: domande mirate su
+> news ±2 min, rollover notturno, one-sided bets, leva, muri High Stakes.
+> Se la risposta ammorbidisce la lettura delle FAQ, The5ers rientra.
 > 📨 **TUTTE E TRE LE MAIL INVIATE (conferma di Claudio, 27/08 ~00:00)**:
 > FTMO, FundedNext (23:56, auto-ack del bot: risposta in 12-24h) e Alpha
 > Capital. Tre risposte scritte in arrivo = la classifica finale si fara'
