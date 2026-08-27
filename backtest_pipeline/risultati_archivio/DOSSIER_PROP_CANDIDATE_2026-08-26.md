@@ -10,6 +10,8 @@
 > 📨 **QUARTA MAIL INVIATA A THE5ERS (27/08 mattina)**: domande mirate su
 > news ±2 min, rollover notturno, one-sided bets, leva, muri High Stakes.
 > Se la risposta ammorbidisce la lettura delle FAQ, The5ers rientra.
+> Auto-ack ricevuto: ticket 8O1NLM, risposta promessa entro 2 giorni
+> lavorativi (uffici dom-ven 08-17 CET).
 > 📨 **TUTTE E TRE LE MAIL INVIATE (conferma di Claudio, 27/08 ~00:00)**:
 > FTMO, FundedNext (23:56, auto-ack del bot: risposta in 12-24h) e Alpha
 > Capital. Tre risposte scritte in arrivo = la classifica finale si fara'
