@@ -638,6 +638,10 @@ $CanarinoKo = $false          # true -> ROUND FERMO, exit 2
 $PatternImparato = $null      # il verdetto del canarino (stringa journal)
 $SpecEstratte = @{}           # simbolo -> righe GSPEC estratte
 $G0BEsiti = @{}               # "IS"/"OOS" -> esito ConfrontaG0B
+#  >>> CHECKLIST 41-bis: la RACCOLTA usa anche questi tre -- nascono QUI.
+$SimboliSonda = @("U30USD","D30EUR","XAUUSD")
+$RifG0BIS  = Join-Path $RifG0B "ABTG_EMA200_U30USD_IS_00_metro.csv"
+$RifG0BOOS = Join-Path $RifG0B "ABTG_EMA200_U30USD_OOS_00_metro.csv"
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico([string]$testo,[string]$colore="Gray"){ Write-Host ("[" + (Ora) + "] " + $testo) -ForegroundColor $colore }
@@ -1047,9 +1051,8 @@ foreach($cellaCorr in $CELLE){
   Scarica ("$RawPin/backtest_pipeline/prove/" + $cellaCorr.Prova) (Join-Path $Prove $cellaCorr.Prova) '@SIMBOLO'
   Scarica ("$RawPin/backtest_pipeline/prove/" + $cellaCorr.AntFile) (Join-Path $Anten $cellaCorr.AntFile) '@SIMBOLO'
 }
-#--- i 2 CSV di riferimento G0-B (metro EMADOW R110, gambe IS e OOS)
-$RifG0BIS  = Join-Path $RifG0B "ABTG_EMA200_U30USD_IS_00_metro.csv"
-$RifG0BOOS = Join-Path $RifG0B "ABTG_EMA200_U30USD_OOS_00_metro.csv"
+#--- i 2 CSV di riferimento G0-B (metro EMADOW R110, gambe IS e OOS;
+#    i percorsi nascono PRIMA del try, checklist 41-bis)
 Scarica ("$RawPin/backtest_pipeline/prove/R110_CSV_EMADOW/ABTG_EMA200_U30USD_IS_00_metro.csv")  $RifG0BIS  'Pass'
 Scarica ("$RawPin/backtest_pipeline/prove/R110_CSV_EMADOW/ABTG_EMA200_U30USD_OOS_00_metro.csv") $RifG0BOOS 'Pass'
 foreach($cellaCorr in $CELLE){
@@ -1327,8 +1330,8 @@ if(@($guastiCanB).Count -gt 0){ throw ("canarino B: .ini non conforme: " + ($gua
 Copy-Item -LiteralPath $iniCanA -Destination (Join-Path $Sosta "gen_R114_canarino_A.ini") -Force
 Copy-Item -LiteralPath $iniCanB -Destination (Join-Path $Sosta "gen_R114_canarino_B.ini") -Force
 Dico ("ini canarino A/B: Deposit=" + $CanDeposito + " Leverage=" + $CanLeva + " Currency=EUR Model=" + $CELLE[0].Modello + " magic " + $CanMagicBase + "/" + ($CanMagicBase+1) + " (B: singola, solo diagnosi)") "Gray"
-#--- le 3 sonde G-SPEC (banco P2: 200k / leva 15)
-$SimboliSonda = @("U30USD","D30EUR","XAUUSD")
+#--- le 3 sonde G-SPEC (banco P2: 200k / leva 15; $SimboliSonda nasce
+#    PRIMA del try, checklist 41-bis)
 foreach($simboloSonda in $SimboliSonda){
   $testoSonda = TestoIni "ABTG_SondaMargine" $simboloSonda "H1" 1 $SpecDa $SpecA $SpecDeposito $SpecLeva 0 ("OptReport_R114_sonda_" + $simboloSonda) @()
   $iniSonda = Join-Path $Work ("gen_R114_sonda_" + $simboloSonda + ".ini")
