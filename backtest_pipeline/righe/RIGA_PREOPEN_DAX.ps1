@@ -162,8 +162,13 @@ $PWattesi = @(60,120,180,240,300)
 $ROattesi = @(200,400,600)
 
 #--- I MAGIC VIETATI. Un'identita' non in campo resta comunque occupata.
-#    770202 e' IL MAGIC VIVO di questa sedia: se comparisse in un file
-#    prova, il tester incrocerebbe i deal del forward.
+#    770101 e' IL MAGIC VIVO di questa sedia e 770411 quello dell'ALTRA
+#    sedia viva sul DAX (MaxMinNotte Short): se uno dei due comparisse in
+#    un file prova, il tester incrocerebbe i deal del forward.
+#    Sono VIETATI anche i magic gia' BRUCIATI da un round precedente
+#    (R101, R107, e i cinque blocchi del round PREOPEN DOW del 28/08):
+#    riusarli mescolerebbe i deal di due misure diverse nella cache del
+#    tester e negli export per-trade, che portano il magic nel nome.
 $MagicVietati = @(770101,                                  # <<< LA SEDIA VIVA DAX
                   770411,                                  # <<< L'ALTRA SEDIA VIVA SUL DAX
                                                            #     (MaxMinNotte DAX Short:
@@ -752,10 +757,10 @@ function Lav([string]$id,[string]$file,[string]$fase,[string]$lato,[string]$desc
     Gemelli="NON MISURATO"; DatiIS=$null; DatiOOS=$null }
 }
 $LAVORI = @()
-$LAVORI += (Lav "metro_long"   "PREOPEN_METRO_DAX_M15.txt"        "METRO"   "LONG"  "METRO 0c: livello ORB (RangeMode=0) su M15, lato LONG"  773700 773701 "1" "0" "0" @("InpRangeMode","InpPrevWindowMin"))
-$LAVORI += (Lav "metro_short"  "PREOPEN_METRO_DAX_M15_SHORT.txt"  "METRO"   "SHORT" "METRO 0c: livello ORB (RangeMode=0) su M15, lato SHORT" 773800 773801 "0" "1" "0" @("InpRangeMode","InpPrevWindowMin","InpAllowLong","InpAllowShort"))
-$LAVORI += (Lav "griglia_long" "PREOPEN_RETEST_DAX_M15.txt"       "GRIGLIA" "LONG"  "LA GRIGLIA: livello PRE-apertura, lato LONG"            773500 773501 "1" "0" "1" @())
-$LAVORI += (Lav "griglia_short" "PREOPEN_RETEST_DAX_M15_SHORT.txt" "GRIGLIA" "SHORT" "LA GRIGLIA: livello PRE-apertura, lato SHORT"          773600 773601 "0" "1" "1" @("InpAllowLong","InpAllowShort"))
+$LAVORI += (Lav "metro_long"   "PREOPEN_METRO_DAX_M15.txt"        "METRO"   "LONG"  "METRO 0c: livello ORB (RangeMode=0) su M15, lato LONG"  781800 781801 "1" "0" "0" @("InpRangeMode","InpPrevWindowMin"))
+$LAVORI += (Lav "metro_short"  "PREOPEN_METRO_DAX_M15_SHORT.txt"  "METRO"   "SHORT" "METRO 0c: livello ORB (RangeMode=0) su M15, lato SHORT" 781900 781901 "0" "1" "0" @("InpRangeMode","InpPrevWindowMin","InpAllowLong","InpAllowShort"))
+$LAVORI += (Lav "griglia_long" "PREOPEN_RETEST_DAX_M15.txt"       "GRIGLIA" "LONG"  "LA GRIGLIA: livello PRE-apertura, lato LONG"            781600 781601 "1" "0" "1" @())
+$LAVORI += (Lav "griglia_short" "PREOPEN_RETEST_DAX_M15_SHORT.txt" "GRIGLIA" "SHORT" "LA GRIGLIA: livello PRE-apertura, lato SHORT"          781700 781701 "0" "1" "1" @("InpAllowLong","InpAllowShort"))
 $ProvaCosto = "PREOPEN_COSTO_DAX_M15.txt"
 $ProvaBase  = "PREOPEN_RETEST_DAX_M15.txt"
 
@@ -926,6 +931,18 @@ try{
   $nPw = @($PWvals).Count
   $nRo = @($ROvals).Count
   Dico ("assi letti nel file prova: InpPrevWindowMin " + $nPw + " valori, InpRetestOffsetPts " + $nRo + " valori -> " + ($nPw*$nRo) + " celle x 2 gemelli = " + ($nPw*$nRo*2) + " passate per finestra e per lato") "Yellow"
+
+  # --- L'ORA DELLA TABELLA DI CALENDARIO SI LEGGE NEL FILE PROVA, NON SI
+  #     SCRIVE A MEMORIA (checklist 40-quater: l'atteso calcolato con una
+  #     formula che non e' quella dell'artefatto che gira). $AperturaMin
+  #     serve solo alla tabella della sovrapposizione col box notturno: se
+  #     divergesse dall'ora di sessione del file prova, quella tabella
+  #     descriverebbe un'apertura che il round non usa.
+  $apDaProva = [int](($hBase["InpSessionHour"] -split '\|\|')[0]) * 60 + [int](($hBase["InpSessionMin"] -split '\|\|')[0])
+  if($apDaProva -ne $AperturaMin){
+    throw ("l'apertura del file prova e' " + (OraDiMin $apDaProva) + " server ma questa riga calcola la sovrapposizione col box notturno su " + (OraDiMin $AperturaMin) + ". Sono due orologi diversi: la tabella non descriverebbe questo round.")
+  }
+  Dico ("apertura confermata sul file prova: " + (OraDiMin $AperturaMin) + " server  (box della sedia gemella 770411: " + (OraDiMin $BoxDaMin) + " - " + (OraDiMin ($BoxAMin-1)) + ")") "Green"
 
   foreach($lv in $LAVORI){
     $h = $mappe[$lv.Prova]
@@ -1443,14 +1460,43 @@ ScriviRef ""
 try{
   $MetroPf.Clear()   # gia' creato PRIMA del try -- "LATO,roIdx" -> PF OOS del metro
   $MetroCel.Clear()
-  ScriviRef ">>> UN CONFONDIMENTO VERO, misurato nel sorgente (ABTG_DAX_Apertura_EU.mq5"
-  ScriviRef "    righe 656-684): il candidato (InpRangeMode=1) arma alle 14:30 server e"
-  ScriviRef "    chiude la finestra alle 17:30 (3h00); il metro (InpRangeMode=0,"
-  ScriviRef "    InpRangeMinutes=35) arma alle 15:05 e chiude alla stessa ora (2h25). Il"
-  ScriviRef "    delta fra candidato e metro e' in parte TEMPO (+35 min, +24% di finestra),"
-  ScriviRef "    non solo LIVELLO. Chi legge un vantaggio del candidato sul metro deve"
-  ScriviRef "    sapere che una parte non misurata di quel vantaggio potrebbe essere"
-  ScriviRef "    semplicemente la finestra piu' lunga."
+  ScriviRef ">>> UN CONFONDIMENTO VERO, misurato nel sorgente (ABTG_DAX_Apertura_EU.mq5,"
+  ScriviRef "    riga 674 e righe 709-737: refEndMin = openMin quando RangeMode non e'"
+  ScriviRef "    OPENING): il candidato (InpRangeMode=1) arma alle 08:00 server e chiude"
+  ScriviRef "    la finestra alle 17:30 (9h30); il metro (InpRangeMode=0,"
+  ScriviRef "    InpRangeMinutes=35) arma alle 08:35 e chiude alla stessa ora (8h55). Il"
+  ScriviRef "    delta fra candidato e metro e' in parte TEMPO (+35 min, +6,5% di"
+  ScriviRef "    finestra), non solo LIVELLO."
+  ScriviRef "    >>> E' MOLTO MENO GRAVE CHE SUL DOW, dove gli stessi 35 minuti valevano"
+  ScriviRef "    +24% perche' la finestra del Dow e' di 3 ore invece di 9 e mezza. Resta"
+  ScriviRef "    dichiarato: chi legge un vantaggio del candidato sul metro deve sapere"
+  ScriviRef "    che una parte non misurata di quel vantaggio potrebbe essere la finestra"
+  ScriviRef "    piu' lunga, e qui quella parte e' piccola ma non nulla."
+  ScriviRef ""
+  ScriviRef ">>> LA SOVRAPPOSIZIONE DI CALENDARIO CON LA SEDIA VIVA GEMELLA"
+  ScriviRef "    ABTG_MaxMinNotte_DAX_Short_Ottimizzato (magic 770411, SHORT ONLY, box"
+  ScriviRef "    notturno 23:00-04:59 server letto nel sorgente, ordini STOP alle 07:59,"
+  ScriviRef "    cutoff ingressi 08:30). Per ogni valore dell'asse (a), quanti minuti"
+  ScriviRef "    della finestra da cui il CANDIDATO ricava il livello cadono DENTRO quel"
+  ScriviRef "    box:"
+  ScriviRef "      prevWin   finestra del livello    minuti nel box 23:00-04:59"
+  foreach($pwv in @($PWuso)){
+    $mb = MinutiNelBox ([int]$pwv)
+    $da = OraDiMin ($AperturaMin - [int]$pwv)
+    $a  = OraDiMin $AperturaMin
+    $q  = "n/d"
+    if($mb -ge 0){ $q = ("" + $mb) }
+    ScriviRef ("      {0,7}   {1} - {2}          {3}" -f [int]$pwv, $da, $a, $q)
+  }
+  ScriviRef "    >>> QUESTA E' UNA TABELLA DI CALENDARIO, NON UNA MISURA DI TRADE IN"
+  ScriviRef "    COMUNE. Dice che le celle larghe costruiscono il livello dentro il box"
+  ScriviRef "    della sedia viva; NON dice se i due motori operano negli stessi GIORNI."
+  ScriviRef "    Quella misura vuole i due export per-trade e si fa DOPO, e SOLO se il"
+  ScriviRef "    round passa (vedi la coda di questo referto)."
+  ScriviRef "    >>> E il rischio e' ASIMMETRICO: la 770411 e' SHORT ONLY, quindi sul"
+  ScriviRef "    lato LONG di questo round un doppione di lato NON PUO' esistere; sul"
+  ScriviRef "    lato SHORT e' il caso peggiore possibile (stesso simbolo, stesso lato,"
+  ScriviRef "    stessa mezz'ora, livello dalla stessa finestra)."
   ScriviRef ""
   foreach($lato in @("LONG","SHORT")){
     $lv = @($LAVORI | Where-Object { $_.Fase -eq "METRO" -and $_.Lato -eq $lato })[0]
@@ -1480,15 +1526,30 @@ try{
     }
     if($lato -eq "LONG"){
       ScriviRef "  ATTESA DICHIARATA (non un gate): su M5 la stessa cella e' agli atti in"
-      ScriviRef "  R101 con OOS +6.722 / PF 1,270 / DD 4,39% / n 130 e IS +2.812 / PF 1,222"
-      ScriviRef "  / DD 5,67% / n 74, offset 400. Se qui su M15 esce vicino, il TF su questo"
-      ScriviRef "  motore e' quasi neutro; se esce lontano, il TF conta -- ed e' esattamente"
-      ScriviRef "  perche' il metro 0c e' stato preteso. In tutti e due i casi il metro del"
-      ScriviRef "  round e' IL NUMERO MISURATO QUI, non quello di R101."
+      ScriviRef "  R101 con IS +3.789 / PF 1,126 / DD 5,44% / n 175 e OOS +18.030 / PF 1,397"
+      ScriviRef "  / DD 7,23% / n 270, offset 200 (il valore VIVO del DAX: e' la COLONNA 200"
+      ScriviRef "  che riproduce la sedia, non la 400). Riprodotti al millesimo anche da"
+      ScriviRef "  R107 (G0 DAX). Se qui su M15 esce vicino, il TF su questo motore e' quasi"
+      ScriviRef "  neutro; se esce lontano, il TF conta -- ed e' esattamente perche' il metro"
+      ScriviRef "  0c e' stato preteso. In tutti e due i casi il metro del round e' IL NUMERO"
+      ScriviRef "  MISURATO QUI, non quello di R101."
+      ScriviRef "  >>> E QUESTA E' LA BARRA VERA DEL ROUND, LATO LONG: col metro a PF 1,397"
+      ScriviRef "  il criterio '+0,10 di PF' chiede al candidato circa 1,50. Non e' un"
+      ScriviRef "  cancello che si supera per caso, e non e' un difetto del round: e' che la"
+      ScriviRef "  sedia viva del DAX e' forte."
     }else{
-      ScriviRef "  PROMEMORIA: con il filtro EMA acceso e 21 mesi di regime rialzista lo"
-      ScriviRef "  short entra poco o niente. Un n basso qui e' ATTESO, e se il metro short"
-      ScriviRef "  ha n(OOS) sotto 30 il confronto '+0,10 di PF' sul lato short NON SI FA."
+      ScriviRef "  PROMEMORIA -- E QUI IL DAX NON E' IL DOW: il filtro EMA su questa sedia"
+      ScriviRef "  e' SPENTO, quindi il lato short ENTRA (non e' il caso del Dow, dove"
+      ScriviRef "  l'EMA H4 accesa lo taglia quasi tutto). Il numero agli atti su M5 e'"
+      ScriviRef "  R107: IS -996 / PF 0,965 / n 138 e OOS -1.865 / PF 0,957 / DD 12,31% /"
+      ScriviRef "  n 257 -- verdetto 'NIENTE EDGE, e stavolta e' misurato' (n 257 = merito"
+      ScriviRef "  misurabile per l'Emendamento A), rosso anche nell'IS che contiene la"
+      ScriviRef "  discesa feb-apr 2025."
+      ScriviRef "  >>> Conseguenza sul cancello: il metro short sta SOTTO 1, quindi"
+      ScriviRef "  'batterlo di +0,10' darebbe ~1,06, che e' SOTTO il pavimento 1,10. Su"
+      ScriviRef "  questo lato il cancello che morde e' il PF>=1,10 ASSOLUTO, e vanno"
+      ScriviRef "  superati TUTTI E DUE. E se il metro short ha n(OOS) sotto 30 il"
+      ScriviRef "  confronto '+0,10 di PF' non si fa proprio."
     }
     ScriviRef ""
   }
@@ -1666,8 +1727,9 @@ foreach($lato in @("LONG","SHORT")){
 }
 ScriviRef ""
 ScriviRef "  >>> I DUE CAPPELLI CHE VANNO INSIEME ALLA PAROLA 'PASSA':"
-ScriviRef "      1. 35 MINUTI: il candidato opera dalle 14:30, il metro dalle 15:05"
-ScriviRef "         (misurato nel sorgente). Parte del delta e' TEMPO, non LIVELLO."
+ScriviRef "      1. 35 MINUTI: il candidato opera dalle 08:00, il metro dalle 08:35"
+ScriviRef "         (misurato nel sorgente). Parte del delta e' TEMPO, non LIVELLO,"
+ScriviRef "         ed e' +6,5% di finestra (sul Dow erano +24%)."
 ScriviRef "      2. SCREENING: la regione e' stata cercata DENTRO l'OOS, come dice il"
 ScriviRef "         criterio firmato. NON e' una selezione walk-forward. La lettura"
 ScriviRef "         walk-forward e' stampata sotto ogni griglia, qui sopra."
@@ -1689,12 +1751,26 @@ ScriviRef ""
 ScriviRef " E QUELLO CHE QUESTO ROUND NON DICE, dichiarato:"
 ScriviRef "  - un round che PASSA produce una CELLA CANDIDATA, non una sedia. La"
 ScriviRef "    promozione in forward e' un'altra decisione, con un'altra firma."
-ScriviRef "  - il DOPPIONE MASCHERATO (punto 3 di COME PUO' MORIRE) NON e'"
-ScriviRef "    misurato qui: se le celle vincenti coincidessero giorno per giorno"
-ScriviRef "    con quelle di ABTG_MaxMinNotte il candidato andrebbe SCARTATO per"
-ScriviRef "    correlazione, e quella misura vuole la sovrapposizione delle"
-ScriviRef "    GIORNATE, non i PF. Va fatta dopo, se e solo se il round passa."
-ScriviRef "  - il gemello DAX e' il passo SUCCESSIVO, non questo."
+ScriviRef "  - il DOPPIONE con ABTG_MaxMinNotte_DAX_Short_Ottimizzato (magic"
+ScriviRef "    770411, SEDIA VIVA, SHORT ONLY) NON e' misurato qui. La tabella"
+ScriviRef "    di calendario stampata sopra dice solo QUANTI MINUTI della"
+ScriviRef "    finestra del livello cadono dentro il box notturno di quella"
+ScriviRef "    sedia: NON dice se i due motori operano negli stessi GIORNI."
+ScriviRef "    Se coincidessero, il candidato andrebbe SCARTATO per correlazione"
+ScriviRef "    (ROTTA_PROP regola 1) anche coi numeri buoni, perche' il drawdown"
+ScriviRef "    della prop e' UNO."
+ScriviRef "    >>> IL PASSO SUCCESSIVO, GIA' PROGRAMMATO E NON FATTO QUI:"
+ScriviRef "        due PASSATE SINGOLE sulla stessa finestra (la cella promossa"
+ScriviRef "        con un magic vergine, e la cella viva 770411 con un ALTRO"
+ScriviRef "        magic vergine -- mai il 770411 vero), poi i due export"
+ScriviRef "        per-trade abtg_trades_<EA>_D30EUR_<magic>.csv in"
+ScriviRef "        Common\\Files, e il conto delle GIORNATE in comune."
+ScriviRef "        Nota di onesta': sovrapposizione_sedie.py NON serve a"
+ScriviRef "        questo -- legge gli statement del FORWARD"
+ScriviRef "        (data/statements/trades_auto.csv), non i per-trade di un"
+ScriviRef "        backtest. Quel pezzo di codice va scritto."
+ScriviRef "  - il gemello NASDAQ e' un round A PARTE (RIGA_PREOPEN_NAS.ps1),"
+ScriviRef "    preparato insieme a questo, e li' la sedia e' SPENTA dal 18/08."
 ScriviRef "  - lo spread NON e' misurato: e' DICHIARATO 2,0 punti indice."
 ScriviRef ""
 if($Fatale -ne ""){
