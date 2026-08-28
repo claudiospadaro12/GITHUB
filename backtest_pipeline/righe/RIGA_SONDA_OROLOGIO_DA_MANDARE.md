@@ -17,7 +17,7 @@ STESSA ORA**?"* La risposta è **una tabella**, non un P/L.
 | | |
 |---|---|
 | **EA (nuovo, mai compilato)** | `mql5/Experts/ABTG_SondaOrologio.mq5` |
-| **Driver** | `righe/RIGA_SONDA_OROLOGIO.ps1` (marcatore `MARCATORE_RIGA_SONDA_OROLOGIO_v1`) |
+| **Driver** | `righe/RIGA_SONDA_OROLOGIO.ps1` (marcatore `MARCATORE_RIGA_SONDA_OROLOGIO_v2`) |
 | **Specifica CONGELATA** | `prove/SONDA_OROLOGIO_FX.txt` — ipotesi, criteri **C1-C7**, date. **Si legge PRIMA della tabella** |
 | **File prova (7)** | `prove/SONDA_OROLOGIO_00_GEMELLI.txt` + `_01_EURUSD_LONG` `_02_EURUSD_SHORT` `_03_GBPUSD_LONG` `_04_GBPUSD_SHORT` `_05_XAUUSD_LONG` `_06_XAUUSD_SHORT` |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_OROLOGIO.md` |
@@ -67,10 +67,10 @@ MISURATO. Non è una stima prudente: è un'ignota.** Per questo il driver ha
 
 ---
 
-## 📌 IL PIN — **`5ecbbfc7b9f5493a71f7dab9bb30894359260235`**
+## 📌 IL PIN — **`0349f98144a699a1d45cd1a6ccb5cf010d5caabd`**
 
 ```
-5ecbbfc7b9f5493a71f7dab9bb30894359260235
+0349f98144a699a1d45cd1a6ccb5cf010d5caabd
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit pinnato deve contenere
@@ -91,7 +91,7 @@ NUOVO=<il commit nuovo, 40 caratteri>
 VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{40}')
 echo "vecchio: $VECCHIO"
 sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
-grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3 (i tre blocchi: controllo, ricognizione, cella)
+grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 4 (controllo, ricognizione, cella, ricomposizione)
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
 ```
 
@@ -145,9 +145,9 @@ questa pagina e basta. Un link non scade, un blocco `powershell` sì.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='5ecbbfc7b9f5493a71f7dab9bb30894359260235'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo -TutteLeCelle;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -178,9 +178,9 @@ questa pagina e basta. Un link non scade, un blocco `powershell` sì.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='5ecbbfc7b9f5493a71f7dab9bb30894359260235'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -205,9 +205,9 @@ in cima: `01_eurusd_long`, `02_eurusd_short`, `03_gbpusd_long`,
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='5ecbbfc7b9f5493a71f7dab9bb30894359260235'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '01_eurusd_long';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
@@ -220,6 +220,35 @@ in cima: `01_eurusd_long`, `02_eurusd_short`, `03_gbpusd_long`,
 
 🟡 **`-TutteLeCelle` esiste** (le sette di fila, un solo zip) **ma si usa solo
 DOPO aver letto il cronometro.** Al buio sono 868 passate.
+
+---
+
+## 4️⃣ **RICOMPOSIZIONE** — dopo che le SEI celle di misura sono girate
+
+> 🔴 **C1 è un criterio DI INSIEME ("almeno due simboli su tre"), e ogni riga di
+> lancio sopra gira UNA cella alla volta.** Sei lanci con `-SoloCella` producono
+> **sei referti separati**, nessuno dei quali ha il verdetto C1 su tutti e tre i
+> simboli insieme. Serve un settimo lancio, **DOPO** i sei, che li rilegge TUTTI.
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -TutteLeCelle;
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
+```
+
+- ✅ **QUASI ISTANTANEO**: il driver generico salta le finestre già fatte
+  ("già fatto, salto") e rilegge i CSV già prodotti dalle sei corse precedenti —
+  non riapre il tester da capo.
+- 🔴 **IL PIN DEVE ESSERE LO STESSO** usato per le sei celle di misura. Con un pin
+  diverso la riga **cancella `risultati_prove\`** e le sei celle già girate **sono
+  perse**: un ri-pin a metà round significa ricominciare da capo.
+- Il referto che torna da questo settimo lancio è quello che riporta **C1 su
+  tutti e tre i simboli** — è quello da guardare per il verdetto d'insieme,
+  non i sei referti parziali.
 
 ---
 
