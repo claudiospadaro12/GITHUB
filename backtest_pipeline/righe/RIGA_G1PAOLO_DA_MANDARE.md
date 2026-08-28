@@ -17,7 +17,7 @@ misurati** — `InpAdxMin` (20 vs **25**), `InpEma2` (89 vs **50**), `InpUseStoc
 | | |
 |---|---|
 | **EA misurati** | `mql5/Experts/ABTG_SupertrendReversal.mq5` · `mql5/Experts/ABTG_SupertrendInvert.mq5` |
-| **Driver** | `righe/RIGA_G1PAOLO.ps1` (marcatore `MARCATORE_RIGA_G1PAOLO_v1`) |
+| **Driver** | `righe/RIGA_G1PAOLO.ps1` (marcatore `MARCATORE_RIGA_G1PAOLO_v2`) |
 | **File prova** | `prove/G1PAOLO_00_suprev_base.txt` · `_01_suprev_ema50.txt` · `_10_invert_base.txt` · `_11_invert_adx25.txt` · `_12_invert_stochoff.txt` |
 | **Criteri congelati** | `prove/REFERTO_PREPARAZIONE_G1PAOLO.md` ← **si legge PRIMA dei numeri** |
 
@@ -92,10 +92,10 @@ Split **IS/OOS 40/60** ⇒ **quattro sotto-finestre per cella**.
 
 ---
 
-## 📌 IL PIN — **`c333d6d763b0cc3093011d3fadfc8fdf00077ec4`**
+## 📌 IL PIN — **`8341d3e6382f15e53b1b47f526924a8fcbb95ed0`**
 
 ```
-c333d6d763b0cc3093011d3fadfc8fdf00077ec4
+8341d3e6382f15e53b1b47f526924a8fcbb95ed0
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
@@ -152,13 +152,17 @@ a mani basse anche un `sed` che **non ha matchato niente**.
 
 ---
 
-## 0️⃣ PASSO 0 — **RACCOMANDATO**: misurare la profondità **TICK** dell'oro
+## 0️⃣ PASSO 0 — **OBBLIGATORIO** (non più "raccomandato"): misurare la profondità **M1 e TICK** dell'oro
 
-> 🔴 **La profondità TICK di XAUUSD NON È MAI STATA MISURATA in tutto il repo**
-> (`R86_CRITERI.md` §2.0, `R87_CRITERI.md` §2.0). Il `2024.07.05` del banco V è
-> la data **misurata su GBPUSD**, estesa per analogia: **[INFERITO]**.
-> Se i tick dell'oro partissero **dopo**, **i numeri del banco V non si
-> leggono** — è il **difetto n.18** della checklist di casa.
+> 🔴 **Corretto dal verificatore-stringhe (28/08): il PASSO 0 copre DUE
+> banchi, non uno.** La profondità TICK di XAUUSD non è mai stata misurata
+> (`R86_CRITERI.md` §2.0, `R87_CRITERI.md` §2.0; il `2024.07.05` del banco V è
+> [INFERITO] da GBPUSD). **Ma il banco S gira a modello 1 (OHLC su M1)**, e
+> anche la profondità M1 dell'oro non è mai stata misurata — solo inferita
+> indirettamente da un altro round (`R103_REFERTO_FINALE.md`, n=208 sulla
+> stessa finestra). Senza leggere anche quella riga, il banco S può girare su
+> una finestra più corta di quella dichiarata **senza che nessun gate se ne
+> accorga**.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
@@ -169,15 +173,19 @@ a mani basse anche un `sed` che **non ha matchato niente**.
     if($LASTEXITCODE -ne 0){ Write-Host 'PASSO 0 NON RIUSCITO: leggi il referto prima di andare avanti' -ForegroundColor Yellow } }
 ```
 
-📅 **La riga da leggere nel referto** è quella **`TICK`**, colonna
-**`PrimaDataLocale`** — ⚠️ **non** `PrimaDataServer`: sulle righe `TICK` quella
-colonna vale **sempre `-`** (misurato il 18/08 leggendo
-`ABTG_HistoryDownloader.mq5` righe 229-232). Chi legge la colonna sbagliata
-conclude che i tick non ci sono.
+📅 **Nel referto si leggono DUE righe, non una:**
 
-- Se `PrimaDataLocale` **≤ 2024.07.05** → si tira dritto.
-- Se è **più recente** → si rilancia G1-PAOLO con `-DaTick <la data vera>` **e lo
-  si scrive accanto ai numeri**.
+1. riga **`M1`**, colonna **`PrimaDataServer`** → deve essere **≤ 2020.01.01**
+   (è il banco S: il modello 1 costruisce le barre H4 dal M1);
+2. riga **`TICK`**, colonna **`PrimaDataLocale`** — ⚠️ **non** `PrimaDataServer`:
+   sulle righe `TICK` quella colonna vale **sempre `-`** (misurato il 18/08
+   leggendo `ABTG_HistoryDownloader.mq5` righe 229-232) → deve essere
+   **≤ 2024.07.05** (è il banco V). Chi legge la colonna sbagliata conclude che
+   i tick non ci sono.
+
+- Se **M1** parte dopo il 2020.01.01 → si rilancia con `-DaScreening <data vera>`.
+- Se **TICK** parte dopo il 2024.07.05 → si rilancia con `-DaTick <data vera>`.
+- In entrambi i casi: **si scrive accanto ai numeri**, non si tace.
 
 ⏱️ **`-TimeoutMin 240` è esplicito e voluto**: il default dello script è **90
 minuti** e scaduto quello **ammazza MT5 a metà scaricamento uscendo con codice
@@ -190,9 +198,9 @@ minuti** e scaduto quello **ammazza MT5 a metà scaricamento uscendo con codice
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='c333d6d763b0cc3093011d3fadfc8fdf00077ec4'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='8341d3e6382f15e53b1b47f526924a8fcbb95ed0'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_G1PAOLO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -211,6 +219,13 @@ minuti** e scaduto quello **ammazza MT5 a metà scaricamento uscendo con codice
 - **dieci** volte l'anteprima dell'`.ini` del driver generico, e in fondo
   `ESITO: CONTROLLO COMPLETATO`.
 
+> ⚠️ **Attenzione all'anteprima: NON è l'`.ini` che girerà davvero.**
+> `walkforward_generico.ps1` scrive l'anteprima del giro a vuoto sempre con
+> `Model=4` cablato, qualunque sia il banco vero — su questo round il banco S
+> girerà a **modello 1**, ma l'anteprima dirà "tick reali" lo stesso. **Il
+> modello vero è quello stampato da `RIGA_G1PAOLO` nelle due righe `banco S` /
+> `banco V`** più in alto nel referto, non quello nell'anteprima.
+
 > ⚠️ **Quello che il giro a vuoto NON può fare:** `-SoloControllo` **non apre
 > MT5**. Non esiste nessun `n`, nessun PF, nessun DD, **nessun controllo sui
 > gemelli**. Conferma gli **artefatti**, mai i numeri.
@@ -222,9 +237,9 @@ minuti** e scaduto quello **ammazza MT5 a metà scaricamento uscendo con codice
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='c333d6d763b0cc3093011d3fadfc8fdf00077ec4'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='8341d3e6382f15e53b1b47f526924a8fcbb95ed0'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_G1PAOLO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -246,9 +261,9 @@ comandi indipendenti, e un `throw` alla prima non fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='c333d6d763b0cc3093011d3fadfc8fdf00077ec4'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='8341d3e6382f15e53b1b47f526924a8fcbb95ed0'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_G1PAOLO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '12_invert_stochoff' -SoloBanco 'V' -Rifai;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
