@@ -84,10 +84,10 @@ numero.**
 
 ---
 
-## 📌 IL PIN — **`d9c9334703253ced86d6a6768fa5de9fcb905e01`**
+## 📌 IL PIN — **`7238265aa841e57a8dd3f7f44d3c099d019525ac`**
 
 ```
-d9c9334703253ced86d6a6768fa5de9fcb905e01
+7238265aa841e57a8dd3f7f44d3c099d019525ac
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
@@ -98,8 +98,10 @@ generico riscarica **al pin**).
 
 ✅ **Gia' verificato**: tutti e otto esistono nel commit sopra, letti con
 `git cat-file -s <pin>:<file>` **dopo** il push — e il `.mq5` nel pin contiene
-davvero il flat di fine seduta (7 occorrenze di `InpFlatFineSeduta`), il `.ps1`
-il suo marcatore.
+davvero il flat di fine seduta (7 occorrenze di `InpFlatFineSeduta`) **e le tre
+colonne di collaudo della v2** (`double stats[13]`, `Autotest Falliti,Flat
+Giorni,Flat Chiusure`); il `.ps1` porta il marcatore
+`MARCATORE_RIGA_PASSO0_VWAPREV_v2`.
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
 silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola per un
@@ -179,7 +181,7 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='d9c9334703253ced86d6a6768fa5de9fcb905e01'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7238265aa841e57a8dd3f7f44d3c099d019525ac'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -216,7 +218,7 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='d9c9334703253ced86d6a6768fa5de9fcb905e01'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7238265aa841e57a8dd3f7f44d3c099d019525ac'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -236,7 +238,7 @@ altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='d9c9334703253ced86d6a6768fa5de9fcb905e01'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7238265aa841e57a8dd3f7f44d3c099d019525ac'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '03_overnight' -Rifai;
