@@ -3488,6 +3488,63 @@ Due difetti, e il secondo e' quello cattivo:
 > (perche' la pagina intanto si e' riempita di storia): si **riconta sulla
 > pagina vera**, non si copia il numero dalla volta prima.
 
+### 77-ter. 🔢 I CONTEGGI DELLA RICETTA GUARDANO **UNA FORMA SOLA** DEL PIN: un punto d'uso scritto in un'altra forma e' STRUTTURALMENTE INVISIBILE
+
+_Trovato il 28/08/2026 verificando `RIGA_PREOPEN_DAX_DA_MANDARE.md` e
+`RIGA_PREOPEN_NAS_DA_MANDARE.md` (i due gemelli del round PREOPEN), **PRIMA
+dell'invio** e **RIPRODOTTO eseguendo la ricetta su una copia della pagina**._
+
+Il 77 e il 77-bis hanno sistemato **quali** espressioni deve avere il `sed`.
+Restava scoperto **come si controlla che siano BASTATE**. Nelle due pagine il
+`sed` era quello giusto — tre espressioni, punti d'uso, storia intatta:
+
+```bash
+sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
+```
+
+...e la terza espressione cerca il pin nella forma **`**\`sha\`**`** (bold +
+backtick), che e' come lo scrivono tutte le altre pagine della famiglia
+(`RIGA_PREOPEN_DOW`, `RIGA_ALLINEALONDRA`, `RIGA_PASSO0_FVGRET`,
+`RIGA_SONDA_OROLOGIO`). Le due pagine nuove pero' avevano scritto il titolo
+**senza backtick**:
+
+```
+## 📌 IL PIN — **b40c62c3652286a792e5f6fbdb96cac5898480f5**
+```
+
+Nessuna delle tre espressioni lo tocca. **MISURATO** eseguendo la ricetta con
+un pin finto: i tre conteggi danno **3 / 0 / 0**, cioe' tutti e tre verdi, e la
+pagina resta con **DUE pin diversi** — il titolo col vecchio, i tre blocchi di
+lancio col nuovo. E il titolo `IL PIN` e' **la prima cosa che Claudio legge**:
+il giro a vuoto che ne nasce e' quello classico (lanciare col pin sbagliato) o
+quello peggiore (non lanciare per niente, perche' la pagina si contraddice).
+
+**Perche' e' una classe a se' e non il 77:** il 77 dice *"sostituisci i punti
+d'uso"*; qui i punti d'uso erano stati sostituiti tutti tranne uno, e **il
+difetto non e' nel `sed`, e' nel CONTROLLO**. Tutti i conteggi della ricetta
+sono ancorati alla forma `$pin='...'`: possono dire soltanto *"i blocchi di
+lancio sono stati riscritti"*, **non** *"il pin vecchio non c'e' piu' in
+pagina"*. Un punto d'uso in un'altra forma tipografica non e' *sfuggito* al
+controllo — **non poteva entrarci**.
+
+> ✅ **REGOLA: il conteggio di chiusura non e' un NUMERO, e' un ELENCO.**
+> Dopo il `sed`, sempre:
+> ```bash
+> grep -n "$VECCHIO" "$F"   # ogni riga stampata va LETTA e classificata
+> ```
+> e **ogni riga che esce dev'essere STORIA riconoscibile** (*"il pin `x` e'
+> BRUCIATO perche'..."*, il verbale di un difetto — quelle non si toccano mai,
+> 77-bis). Se esce un **titolo**, un **riquadro**, una **tabella** o un
+> **blocco di lancio**, la ricetta ha mancato un punto d'uso: si aggiunge
+> l'espressione e si rifa'.
+> Un elenco vuoto e' il caso normale ed e' il piu' verde di tutti; un numero
+> "0 su tre forme che conosco" non vuol dire niente.
+>
+> 🧷 **E il corollario tipografico, che costa zero:** dentro una famiglia di
+> pagine il pin si scrive **in una forma sola** (qui: **`` **`sha`** ``**).
+> Una pagina gemella che cambia forma al titolo rompe la ricetta di TUTTE le
+> altre senza che nessun conteggio se ne accorga.
+
 ## 78. 🗓️ L'ARTEFATTO CHE PORTA DELLE DATE MA NON PORTA **LA PROPRIA**: l'eta' si misura su un numero che non e' quello
 
 _Difetto vero, gia' committato in `RIGA_R109_ATREXH.ps1` (298ac2c, righe
@@ -5332,3 +5389,114 @@ dall'ablazione.
 > letto i `return` che stanno sopra. In questa stessa riga la stessa frase e'
 > finita **tre volte** (commento del `.mq5`, commento del driver, tabella della
 > pagina): copiata, mai riverificata.
+
+---
+
+## 🆕 AGGIUNTE DEL 28/08/2026 (seconda passata) — trovate **ri-verificando** ALLINEA LONDRA dopo che i 6 difetti della prima passata erano stati corretti e la pagina **ri-pinnata**
+
+## 103. 🔢 IL PIN VECCHIO SOPRAVVIVE **IN FORMA ABBREVIATA** — e i tre conteggi della ricetta non lo vedono
+
+_Difetto vero, committato in `righe/RIGA_ALLINEALONDRA_DA_MANDARE.md` (riga 466)
+e in `prove/REFERTO_PREPARAZIONE_ALLINEALONDRA.md` (righe 351 e 378), trovato
+PRIMA dell'invio. **Misurato**: la pagina lancia sul pin
+`23bb9831242eeb71d1071791f20f2da64091d364` (tre blocchi su tre), e in fondo alla
+stessa pagina il timbro dice: "Il PIN e' verificato (28/08, sera): `9ed66e2...`
+e' antenato di origin/lavoro e tutti e otto gli artefatti..." — cioe' **il timbro
+di verifica nomina un commit SUPERATO**._
+
+Il punto **101-ter** aveva gia' insegnato che le dichiarazioni di stato sul pin
+sono piu' d'una e vanno cercate su **tutta** la pagina. La ricetta di
+ri-pinnatura e' stata irrobustita a **tre** conteggi. Su questa pagina escono
+di nuovo **`3 / 0 / 0`**, tutti e tre verdi, **col timbro che punta al pin
+sbagliato**.
+
+Il motivo e' nuovo e sta **nella forma del numero**, non nella frase:
+
+- il `sed` della ricetta e il conteggio "pin vecchi = 0" cercano
+  l'hash **a 40 caratteri** (`$pin='<40>'`, o la riga sola nel blocco di codice);
+- il timbro scrive l'hash **abbreviato con i puntini**: `9ed66e2...`. Sette
+  caratteri esadecimali dentro una frase in prosa: **non matcha niente**, ne' il
+  `sed`, ne' il conteggio dei pin vecchi, ne' il token del segnaposto.
+
+La forma abbreviata e' proprio quella che si usa **quando si racconta**, cioe'
+esattamente nei timbri di verifica e nei referti — i posti dove un pin stantio fa
+il danno peggiore, perche' e' l'unica riga che il lettore usa per decidere **se
+fidarsi**.
+
+> ✅ **REGOLA: la ri-pinnatura si chiude con un QUARTO conteggio, sul PREFISSO.**
+> Dopo il `sed`, su **ogni** file che parla di questo lancio (pagina **e**
+> referto di preparazione):
+>
+> ```bash
+> grep -rn "${VECCHIO:0:7}" backtest_pipeline/   # DEVE dare 0
+> grep -rn "${NUOVO:0:7}"   backtest_pipeline/   # deve dare >0 e SOLO i posti giusti
+> ```
+>
+> I primi 7 caratteri sono la forma in cui l'hash viene **raccontato**; i 40 sono
+> la forma in cui viene **eseguito**. La ricetta finora controllava solo la
+> seconda. **E il perimetro sono TUTTI i file che nominano il pin, non solo
+> quello che porta la riga** (qui il referto ne aveva due su tre).
+>
+> 📐 **Corollario, e vale oltre il pin:** ogni identificatore che esiste in
+> **forma lunga (eseguibile)** e **forma corta (narrativa)** — hash, magic
+> number, nome di file troncato — va cercato **in tutte e due le forme** prima di
+> dichiarare fatta una sostituzione.
+
+---
+
+## 104. 🔍 IL CENSIMENTO DELLE OCCORRENZE FATTO CON `grep` SULL'**IDENTIFICATORE** — e la quarta copia, scritta in PROSA con l'ETICHETTA UMANA, sopravvive alla correzione
+
+_Difetto vero, ancora in `mql5/Experts/ABTG_AllineaLondra.mq5` (righe 857-862)
+dopo il commit che doveva correggerlo (`23bb983`), trovato PRIMA dell'invio.
+E' il **punto 102 non chiuso**._
+
+Il punto 102 ha diagnosticato bene: l'affermazione falsa
+_"`Barre Allineate` e' contato PRIMA dei cancelli"_ era stata **copiata**, e il
+punto stesso dichiara che era finita **"tre volte"**. Le tre sono state corrette
+(dichiarazione della variabile, `OPTFRAME`, tabella della pagina) e ognuna e'
+verificabile nel diff. **Ma erano quattro.**
+
+La quarta e' l'**intestazione della funzione** che il round ablaziona:
+
+```
+//  INGRESSO -- il motore prima, i cancelli del contenitore poi.
+//  L'ordine e' voluto: il conteggio "Barre Allineate" deve dire
+//  quante OCCASIONI ha avuto il motore, PRIMA che il contenitore le
+//  filtrasse. ... ed e' esattamente la domanda della cella di ablazione.
+```
+
+Ed e' **la piu' dannosa delle quattro**: e' l'unica che dichiara l'**intenzione
+di progetto**, l'unica che sta **attaccata al codice** che si legge quando si
+controlla il flusso, e l'unica che tira la **conclusione vietata**
+(_"e' esattamente la domanda della cella di ablazione"_) dopo che le altre tre
+sono state corrette a dire il contrario. Risultato: **il sorgente pinnato e la
+pagina pinnata ora si contraddicono**, e chi apre il `.mq5` per verificare la
+pagina trova scritto proprio l'errore che la pagina ha appena tolto.
+
+Perche' e' sfuggita, ed e' la classe:
+
+- il censimento e' stato fatto con `grep gBarreAllineate` -> **3 occorrenze**
+  (righe 306, 867, 1227), e sono state corrette tutte e tre;
+- l'intestazione **non nomina mai la variabile**: scrive l'**etichetta umana**
+  della colonna del CSV, `"Barre Allineate"`, **con lo spazio**. Un `grep`
+  sull'identificatore non la puo' trovare — e nemmeno un `grep` sulla colonna, se
+  si cerca il nome del campo cosi' come compare nel codice.
+
+> ✅ **REGOLA: il perimetro di una correzione di documentazione non si definisce
+> con `grep` sull'IDENTIFICATORE.** Un'affermazione tecnica esiste in almeno tre
+> vestiti, e vanno cercati tutti e tre:
+> 1. il **nome di codice** (`gBarreAllineate`);
+> 2. l'**etichetta umana** (`Barre Allineate`, `"Barre Allineate"`, `BarreAllin`
+>    — con spazi, virgolette, abbreviazioni delle intestazioni di colonna);
+> 3. la **frase che la sostiene senza nominarla** (`PRIMA dei cancelli`,
+>    `prima che il contenitore`, `occasioni del motore`).
+>
+> Il terzo e' quello che sfugge sempre, e si trova cercando **la tesi**, non il
+> simbolo. In pratica: dopo aver corretto le occorrenze trovate col nome, si
+> rilegge **il blocco di commento sopra la funzione toccata** — l'intestazione e'
+> il posto dove la tesi vive senza il suo simbolo.
+>
+> ⚠️ E il contatore del censimento ("erano tre") **e' esso stesso un'asserzione
+> da verificare**: qui la correzione ha creduto al numero scritto nel punto della
+> checklist invece di ricontarle, e ha chiuso il difetto lasciandone fuori una.
+> **Un censimento si ri-esegue al momento della correzione, non si eredita.**
