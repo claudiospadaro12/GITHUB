@@ -1,0 +1,122 @@
+# =====================================================================
+#  G1-PAOLO  cella 00_suprev_base  --  LA BASELINE DEL MOTORE SUPREV
+#  ABTG_SupertrendReversal  su  XAUUSD  H4
+# ---------------------------------------------------------------------
+#  E' LA BASELINE DI UNA ABLAZIONE A STELLA, non un round di merito.
+#  Nasce dalla live di Paolo del 27/08/2026 sera, referto
+#  risultati_archivio\ANALISI_LIVE_PAOLO_2026-08-27.md, paragrafo 3:
+#
+#     "Il pezzo che vale di piu' non e' un'idea nuova: sono TRE INPUT
+#      CHE ABBIAMO GIA' NEL CODICE e non abbiamo mai misurato."
+#
+#  >>> E QUI VA DETTA SUBITO LA COSA CHE CAMBIA IL DISEGNO DEL ROUND.
+#      I TRE INPUT NON STANNO NELLO STESSO EA. Verificato per grep nel
+#      sorgente il 28/08/2026, uno per uno:
+#        InpEma2      -> SOLO famiglia SupRev (base, _Ottimizzato, Multi,
+#                        e tutti i per-simbolo DAX/DOW/NAS/CAC).
+#                        NON esiste nell'Invert, che usa
+#                        InpEma50Period / InpEma200Period.
+#        InpAdxMin    -> SOLO ABTG_SupertrendInvert (riga 65).
+#        InpUseStoch  -> SOLO ABTG_SupertrendInvert (riga 69).
+#      Nei SupRev il conteggio e' ZERO per tutti e due: quel motore NON
+#      HA un filtro ADX e NON HA un filtro stocastico, quindi non esiste
+#      nessun file in cui i tre interruttori possano stare insieme.
+#      Le quattro celle su un EA solo NON SI POSSONO FARE.
+#      -> l'ablazione si spezza su DUE motori, con DUE baseline: questo
+#         file (SupRev) e G1PAOLO_10_invert_base.txt (Invert).
+#
+#  CHE COSA GIRA QUI: il motore SupRev NATIVO, coi default del sorgente.
+#  E' l'EA della sedia viva su oro H4 (FLOTTA_ATTIVA.md, XAUUSDH43
+#  "SupertrendReversal nativo"; CLASSIFICHE.md squadra forward, magic
+#  770921, PF reale 1,46 DD 1,2% n 44). QUI NON SI TOCCA QUELLA SEDIA:
+#  i magic di questo round sono VERGINI, blocco 778xxx.
+#
+#  L'IPOTESI CHE LA COPPIA 00/01 FALSIFICA -- una sola, dichiarata:
+#    Il docente (r.1 della trascrizione) dice di avere BUTTATO VIA la
+#    media 89 e messo la 50: "la media 89, io l'ho sostituita con la
+#    media 50 [...] e' un'ottima media che ci indica quale e' la
+#    situazione giornaliera". Il nostro InpEma2=89 e' l'UNICO POSTO DEL
+#    REPO in cui la 89 sopravvive. L'ipotesi da falsificare e':
+#      "sostituire la 89 con la 50 sposta il risultato del motore
+#       SupRev su oro H4 in modo misurabile e nella stessa direzione su
+#       tutte e quattro le sotto-finestre."
+#    >>> Lui NON porta un numero, non porta un campione, dice "abbiamo
+#        visto". La sua e' un'impressione. La nostra sarebbe una misura.
+#        E l'autorevolezza di chi lo dice in diretta NON e' un dato.
+#
+#  CHE COSA MUOVE DAVVERO QUELL'INTERRUTTORE -- letto nel sorgente,
+#  ABTG_SupertrendReversal.mq5 righe 239-246, non a memoria:
+#      bool ConfluenceOK(double level,double atr){
+#         int hs[4]={hE1,hE2,hE3,hE4};
+#         for(i=0..3) if(|level - EMA_i| <= InpConflAtr*atr) return true;
+#         return false; }
+#    E' un OR SU QUATTRO MEDIE, non un filtro direzionale. Portare la
+#    89 a 50 NON allarga e NON stringe: SPOSTA UNA DELLE QUATTRO
+#    FINESTRE. Con 14/89/100/200 due bande su quattro (89 e 100) sono
+#    quasi sovrapposte su oro H4, cioe' una e' quasi ridondante; con
+#    14/50/100/200 le quattro bande sono distribuite.
+#    >>> CONSEGUENZA, SCRITTA PRIMA DI VEDERE I NUMERI: la direzione
+#        dell'effetto sul NUMERO DI OPERAZIONI NON E' PREVEDIBILE a
+#        tavolino. Puo' salire o scendere. Chi scrive qui "mi aspetto
+#        meno trade" sta indovinando, e a numeri usciti direbbe di
+#        averci preso comunque.
+#    >>> E vale SOLO perche' InpUseConfluence e' true: se qualcuno lo
+#        spegne, InpEma2 diventa inerte e la cella non misura niente.
+#        Per questo la riga InpUseConfluence e' scritta esplicita qui
+#        sotto ed e' controllata dal gate come VALORE ASSOLUTO.
+#
+#  I CRITERI DI LETTURA (esiti A/B/C/D), IL BANCO DOPPIO e la regola di
+#  concordanza stanno scritti UNA VOLTA SOLA in
+#  prove\REFERTO_PREPARAZIONE_G1PAOLO.md, e NON si ricopiano qui: un
+#  criterio scritto in cinque posti e' un criterio che a un certo punto
+#  diverge (lezione gia' pagata, PASSO 0 FVG).
+#
+#  DUE BANCHI, ed e' il driver a passarli, non questa direttiva:
+#    banco S (screening)  modello 1 OHLC M1  2020.01.01 -> 2026.06.30
+#    banco V (verdetto)   modello 4 TICK     2024.07.05 -> 2026.06.30
+#  La @DAQUANDO qui sotto e' quella del banco S. Il driver passa
+#  -DaQuando ESPLICITO per tutti e due i banchi e non si fida mai della
+#  direttiva: e' il difetto n.18 della checklist (profondita' misurata
+#  su una grandezza, corsa girata su un'altra).
+#
+#  MAGIC VERGINI 778000/778001: il blocco 778xxx e' stato cercato uno
+#  per uno in tutto il repo il 28/08/2026 -> ZERO occorrenze. Il magic
+#  del SORGENTE (770901) e quelli delle sedie vive (770921-770925,
+#  970901, 970911-970916) sono nella lista dei VIETATI del driver.
+#  Lo sweep gemello sui due magic e' anche il CONTROLLO D'IGIENE: le
+#  due righe del CSV devono uscire IDENTICHE AL CENTESIMO. Ed e' anche
+#  l'unico asse con flag Y: senza almeno un asse spazzolato il driver
+#  generico si rifiuta di partire.
+#
+#  >>> QUELLO CHE QUESTO FILE NON PUO' DIRE, detto prima:
+#      - non promuove e non boccia niente, e NON tocca il forward.
+#      - il banco S e' OHLC M1: il driver generico stesso lo scrive
+#        alla riga 65, "SOLO screening, mai verdetti". Da solo non
+#        autorizza nessuna proposta.
+#      - il banco V ha i tick veri ma un campione sottile: su oro H4 la
+#        misura agli atti e' n=44 (CLASSIFICHE.md), contro i 150
+#        dell'Emendamento regola A. Il MERITO resta sospeso, il RISCHIO
+#        no (regola B: un drawdown e' un fatto accaduto).
+#      - la profondita' TICK di XAUUSD NON E' MAI STATA MISURATA
+#        (R86_CRITERI par. 2.0, R87_CRITERI par. 2.0): il 2024.07.05 e'
+#        la data misurata su GBPUSD, estesa per analogia. [INFERITO]
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2020.01.01
+
+# --- LA BASELINE DICHIARATA (vale il default del sorgente: scritta per
+#     essere verificabile nell'.ini che ha girato, non per cambiare
+#     qualcosa). E' il blocco "Confluenza tecnica" al completo, cioe'
+#     esattamente il blocco in cui vive il delta. ---
+InpUseConfluence=1||1||0||1||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=778000||778000||1||778001||Y

@@ -1,0 +1,73 @@
+# =====================================================================
+#  G1-PAOLO  cella 12_invert_stochoff  --  LO STOCASTICO SI SPEGNE
+#  ABTG_SupertrendInvert  su  XAUUSD  H1
+# ---------------------------------------------------------------------
+#  E' la cella 10_invert_base con UN SOLO INTERRUTTORE MOSSO.
+#  Ablazione A STELLA, non a scala cumulativa: il diff fra questo file
+#  e il 10_invert_base e' di DUE righe e basta.
+#
+#  COSA CAMBIA RISPETTO AL 10_invert_base:
+#    InpUseStoch   1 (true)  ->  0 (false)     [IL DELTA]
+#    InpMagic      778300/778301  ->  778500/778501
+#
+#  PERCHE' ESISTE, con la citazione (trascrizione r.145, referto del
+#  28/08 par. 6.5 nota 3):
+#    il docente abbina "la standard deviation e la DIX [ADX] stanno
+#    bene insieme" e SCONSIGLIA lo stocastico in questo contesto:
+#    "a quel punto e' superfluo, LO STOCASTICO TI CONFONDE".
+#  Il nostro Invert lo ha ACCESO di default (InpUseStoch=true, 14/3/3,
+#  long %K>=40, short %K<=60 -- sorgente righe 69-74 e 238-244).
+#
+#  DIREZIONE ATTESA, SCRITTA PRIMA DI VEDERE I NUMERI: PIU' OPERAZIONI.
+#  Si toglie un cancello in AND da una catena di cinque (sorgente righe
+#  206-211), quindi il conteggio puo' solo salire o restare uguale. E,
+#  di nuovo: la direzione prevedibile NON e' il risultato. Il risultato
+#  e' QUANTE ne restituisce, e se quelle restituite sono in utile.
+#
+#  >>> ED E' LA CELLA PIU' IMPORTANTE DELLE CINQUE, per un motivo che
+#      non c'entra con la live. Il problema misurato di questo motore
+#      non e' che perde: e' che NON OPERA (REFERTO_CODA_FASCIA_B.md
+#      riga 31, "0 trade su 10 TF su 11" su USDJPY). Il referto del
+#      28/08 par. 7.1 avanza l'ipotesi che sia lo STACK dei filtri a
+#      strozzarlo, e la dichiara "ipotesi di lettura, NON una misura".
+#      Questa cella e' il primo anello di quella misura: se spegnendo
+#      UN filtro il motore torna a operare, l'ipotesi regge; se resta a
+#      zero, il collo di bottiglia e' altrove (RequireStrong, ADX o
+#      l'anti-estensione) e il round successivo sa dove guardare.
+#
+#  >>> E LA TRAPPOLA DA DICHIARARE ADESSO, non a numeri usciti:
+#      "piu' operazioni" NON e' un miglioramento. Un motore che passa
+#      da 2 a 200 trade e perde e' peggio di uno che non opera, perche'
+#      perde davvero soldi. Il conteggio apre la porta alla lettura del
+#      merito, non la sostituisce. La lezione di casa e' scritta:
+#      "il sovra-trading uccide".
+#
+#  I CRITERI DI LETTURA, IL BANCO DOPPIO e la regola di concordanza
+#  stanno UNA VOLTA SOLA in prove\REFERTO_PREPARAZIONE_G1PAOLO.md e in
+#  testa a G1PAOLO_10_invert_base.txt.
+#
+#  MAGIC VERGINI 778500/778501: blocco 778xxx, cercato uno per uno in
+#  tutto il repo il 28/08/2026 -> ZERO occorrenze.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2020.01.01
+
+# --- LA BASELINE DICHIARATA (identica al 10_invert_base) ---
+InpRequireStrong=1||1||0||1||N
+InpUseADX=1||1||0||1||N
+InpAdxPeriod=14||14||0||14||N
+InpAdxMin=20.0||20.0||0||20.0||N
+InpAdxRising=1||1||0||1||N
+
+# --- IL DELTA: e' l'UNICO interruttore mosso ---
+InpUseStoch=0||0||0||0||N
+
+InpUseStochH4=0||0||0||0||N
+InpUseExtensionFilter=1||1||0||1||N
+InpMaxExtAtr=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=778500||778500||1||778501||Y

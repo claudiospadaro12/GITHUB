@@ -1,0 +1,94 @@
+# =====================================================================
+#  G1-PAOLO  cella 10_invert_base  --  LA BASELINE DEL MOTORE INVERT
+#  ABTG_SupertrendInvert  su  XAUUSD  H1
+# ---------------------------------------------------------------------
+#  E' LA SECONDA BASELINE DELLA STESSA ABLAZIONE A STELLA, e ha una
+#  ragione precisa di esistere separata dalla prima:
+#  I TRE VALORI DELLA LIVE NON STANNO NELLO STESSO EA (verificato per
+#  grep nel sorgente il 28/08/2026):
+#     InpAdxMin    -> SOLO qui, ABTG_SupertrendInvert.mq5 riga 65
+#     InpUseStoch  -> SOLO qui, ABTG_SupertrendInvert.mq5 riga 69
+#     InpEma2      -> SOLO nella famiglia SupRev, che di ADX e di
+#                     stocastico non ha nemmeno un input.
+#  Quindi due motori, due baseline, e nessuna cella che mescola i due.
+#
+#  PERCHE' XAUUSD H1 E NON ORO H4:
+#   1. e' il TF che il sorgente dichiara nel suo stesso intestazione
+#      ("Basato sul documento Strategia SUPERTREND INVERT (H1)") ed e'
+#      il default InpTF=PERIOD_H1;
+#   2. e' quello che il docente indica come migliore per l'Invert
+#      (r.145: "funziona bene in H1 e sui tempi piu' veloci in M15
+#      [...] quella dove funziona meglio e' l'H1");
+#   3. c'e' gia' un grafico Invert su XAUUSD H1 nella flotta
+#      (FLOTTA_ATTIVA.md, XAUUSDH14, stato "da verificare"). QUI NON SI
+#      TOCCA: magic vergini 778xxx, il magic del sorgente (770801) e'
+#      nella lista dei vietati.
+#
+#  >>> LO STATO VERO DI QUESTO MOTORE, e va letto PRIMA dei numeri.
+#      REFERTO_CODA_FASCIA_B.md riga 31: "1/8 - NON OPERA. Su USDJPY,
+#      unico promosso: 0 trade su 10 TF su 11; su M15 fa 2 trade in 14
+#      mesi OOS. Un EA che non piazza ordini non e' un candidato, e' un
+#      grafico acceso a vuoto." Piu' la bocciatura su oro H1
+#      (report\PULIZIA_VPS_10-08.md).
+#      CONSEGUENZA SUL MODO DI LEGGERE QUESTE TRE CELLE:
+#        IL PRIMO NUMERO E' n, NON IL PROFIT FACTOR.
+#      Se la baseline esce con n=0 o n=1, il PF non esiste (o vale
+#      qualunque cosa) e le due celle di ablazione misurano soltanto
+#      QUANTE OPERAZIONI restituisce lo spegnimento di un filtro. E'
+#      gia' un risultato, ed e' quello che serve: il problema di questo
+#      motore non e' che perde, e' che non opera.
+#
+#  LA CATENA DI FILTRI, letta nel sorgente (righe 206-211), perche' le
+#  due celle di ablazione tolgono un anello di QUESTA catena e di
+#  nessun'altra:
+#      if(InpRequireStrong      && !IsStrong(...))     return;
+#      if(InpUseADX             && !AdxOK())           return;   <- 11
+#      if(InpUseStoch           && !StochOK(isLong))   return;   <- 12
+#      if(InpUseStochH4         && !StochH4OK(...))    return;   (off)
+#      if(InpUseExtensionFilter && !ExtensionOK(...))  return;
+#  Cinque cancelli in AND, quattro accesi di default. E' esattamente il
+#  quadro descritto nel referto del 28/08 par. 7.1: "il problema non e'
+#  il motore, e' lo STACK dei filtri" -- che li' era dichiarato
+#  IPOTESI DI LETTURA, NON MISURA. Questo round la misura.
+#
+#  E la nota tecnica dettata dal docente che ci riguarda davvero
+#  (r.145): "la DX parte sempre con una candela di ritardo". Il nostro
+#  AdxOK() legge il buffer allo SHIFT 1 (sorgente righe 227-234), cioe'
+#  su barra chiusa: quel ritardo c'e' ed e' dichiarato, non e' un bug.
+#
+#  I CRITERI DI LETTURA (esiti A/B/C/D), IL BANCO DOPPIO e la regola di
+#  concordanza stanno UNA VOLTA SOLA in
+#  prove\REFERTO_PREPARAZIONE_G1PAOLO.md.
+#
+#  DUE BANCHI, passati dal driver e non da questa direttiva:
+#    banco S (screening)  modello 1 OHLC M1  2020.01.01 -> 2026.06.30
+#    banco V (verdetto)   modello 4 TICK     2024.07.05 -> 2026.06.30
+#  La @DAQUANDO qui sotto e' quella del banco S.
+#
+#  MAGIC VERGINI 778300/778301: blocco 778xxx, cercato uno per uno in
+#  tutto il repo il 28/08/2026 -> ZERO occorrenze.
+#  Lo sweep gemello e' il controllo d'igiene (due righe identiche al
+#  centesimo) ed e' anche l'unico asse Y, senza il quale il driver
+#  generico si rifiuta di partire.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2020.01.01
+
+# --- LA BASELINE DICHIARATA (vale il default del sorgente: scritta per
+#     essere verificabile nell'.ini). E' la catena di filtri al
+#     completo, cioe' esattamente il blocco in cui vivono i due delta. ---
+InpRequireStrong=1||1||0||1||N
+InpUseADX=1||1||0||1||N
+InpAdxPeriod=14||14||0||14||N
+InpAdxMin=20.0||20.0||0||20.0||N
+InpAdxRising=1||1||0||1||N
+InpUseStoch=1||1||0||1||N
+InpUseStochH4=0||0||0||0||N
+InpUseExtensionFilter=1||1||0||1||N
+InpMaxExtAtr=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=778300||778300||1||778301||Y

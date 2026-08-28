@@ -1,0 +1,70 @@
+# =====================================================================
+#  G1-PAOLO  cella 11_invert_adx25  --  L'ADX PASSA DA 20 A 25
+#  ABTG_SupertrendInvert  su  XAUUSD  H1
+# ---------------------------------------------------------------------
+#  E' la cella 10_invert_base con UN SOLO INTERRUTTORE MOSSO.
+#  Ablazione A STELLA, non a scala cumulativa: il diff fra questo file
+#  e il 10_invert_base e' di DUE righe e basta.
+#
+#  COSA CAMBIA RISPETTO AL 10_invert_base:
+#    InpAdxMin   20.0  ->  25.0        [IL DELTA]
+#    InpMagic    778300/778301  ->  778400/778401
+#
+#  PERCHE' ESISTE, con la citazione per esteso (trascrizione r.145,
+#  etichetta [TRASCRITTO chiaro] nel referto del 28/08):
+#    "se la forza e' inferiore a 20 vuol dire che sei in una fase di
+#     lateralita', se la forza e' sopra 20 inizia a prendere forza,
+#     SOPRA 25 IL TREND E' IN FORZA [...] che e' in continuazione"
+#  e l'applicazione, con un trade bocciato in diretta:
+#    "questa qui NON ANDAVA FATTA perche' come vedete SIAMO SOTTO 25"
+#
+#  >>> E' L'UNICO DEI TRE VALORI CHE NON E' UN'IDEA NUOVA: il commento
+#      del nostro sorgente diceva GIA' "ideale >=25" (riga 65), scritto
+#      quando l'EA e' nato e MAI MISURATO. Il docente conferma a voce
+#      una nota che era gia' in casa. Non e' una seconda strada
+#      indipendente: e' la stessa fonte, due volte.
+#
+#  DIREZIONE ATTESA, SCRITTA PRIMA DI VEDERE I NUMERI: MENO OPERAZIONI.
+#  Il cancello si stringe (AdxOK() confronta a[0] >= InpAdxMin, sorgente
+#  riga 230), non c'e' nessun ramo che possa aggiungere ingressi.
+#  Questa e' l'unica delle tre celle in cui la direzione dell'effetto
+#  sul CONTEGGIO e' prevedibile per costruzione -- e proprio per questo
+#  NON e' un risultato: il risultato e' QUANTE ne toglie e SE toglie le
+#  perdenti o le vincenti.
+#
+#  IL RISCHIO SPECIFICO DI QUESTA CELLA, dichiarato prima:
+#    la baseline di questo motore potrebbe uscire con n vicino a ZERO
+#    (REFERTO_CODA_FASCIA_B.md riga 31: "0 trade su 10 TF su 11").
+#    Se la baseline fa n=0, questa cella fara' n=0 anche lei e NON
+#    MISURA NIENTE: n=0 contro n=0 non e' un'ablazione, e va scritto
+#    cosi' invece di raccontare che "il filtro non peggiora".
+#
+#  I CRITERI DI LETTURA, IL BANCO DOPPIO e la regola di concordanza
+#  stanno UNA VOLTA SOLA in prove\REFERTO_PREPARAZIONE_G1PAOLO.md e in
+#  testa a G1PAOLO_10_invert_base.txt.
+#
+#  MAGIC VERGINI 778400/778401: blocco 778xxx, cercato uno per uno in
+#  tutto il repo il 28/08/2026 -> ZERO occorrenze.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2020.01.01
+
+# --- LA BASELINE DICHIARATA (identica al 10_invert_base) ---
+InpRequireStrong=1||1||0||1||N
+InpUseADX=1||1||0||1||N
+InpAdxPeriod=14||14||0||14||N
+
+# --- IL DELTA: e' l'UNICO interruttore mosso ---
+InpAdxMin=25.0||25.0||0||25.0||N
+
+InpAdxRising=1||1||0||1||N
+InpUseStoch=1||1||0||1||N
+InpUseStochH4=0||0||0||0||N
+InpUseExtensionFilter=1||1||0||1||N
+InpMaxExtAtr=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=778400||778400||1||778401||Y

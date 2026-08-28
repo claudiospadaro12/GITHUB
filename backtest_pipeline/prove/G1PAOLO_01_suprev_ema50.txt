@@ -1,0 +1,64 @@
+# =====================================================================
+#  G1-PAOLO  cella 01_suprev_ema50  --  LA 89 DIVENTA 50
+#  ABTG_SupertrendReversal  su  XAUUSD  H4
+# ---------------------------------------------------------------------
+#  E' la cella 00_suprev_base con UN SOLO INTERRUTTORE MOSSO.
+#  Ablazione A STELLA, non a scala cumulativa: il diff fra questo file
+#  e il 00_suprev_base e' di DUE righe e basta.
+#
+#  COSA CAMBIA RISPETTO AL 00_suprev_base:
+#    InpEma2    89  ->  50            [IL DELTA]
+#    InpMagic   778000/778001  ->  778100/778101
+#
+#  PERCHE' ESISTE, con la citazione per esteso (trascrizione r.1,
+#  etichetta [TRASCRITTO chiaro] nel referto del 28/08):
+#    "mettiamo le nostre medie, da strategia abbiamo la media 5 [=200],
+#     la media 100, la media 89, IO L'HO SOSTITUITA CON LA MEDIA 50 e
+#     la media 14 [...] la media 50 la gialla perche' abbiamo visto che
+#     e' un'ottima media che ci indica quale e' la situazione
+#     giornaliera."
+#  Il nostro EA ha il set "DA STRATEGIA" (14/89/100/200) preso dal
+#  documento del corso. Con questo file diventa 14/50/100/200, cioe'
+#  esattamente il set che l'autore della strategia dichiara di usare
+#  oggi. E' l'UNICO POSTO DEL REPO in cui la 89 sopravvive.
+#
+#  >>> NON E' UN'ADOZIONE, E' UNA MISURA. Lui dice "abbiamo visto" e
+#      non porta ne' un numero ne' un campione. La stessa fonte, in 48
+#      ore, ha cambiato i confini della "golden area" e ha spostato il
+#      78,6 da invalidazione a ingresso (referto 28/08, par. 2). Il
+#      verdetto lo da' il numero, non chi lo ha detto in diretta.
+#
+#  L'IPOTESI, i criteri di lettura, il banco doppio e la regola di
+#  concordanza NON si riscrivono qui: stanno in testa a
+#  G1PAOLO_00_suprev_base.txt e in prove\REFERTO_PREPARAZIONE_G1PAOLO.md.
+#  Quello che va ricordato in questo file e' una cosa sola, ed e' la
+#  piu' facile da dimenticare a numeri usciti:
+#    LA DIREZIONE DELL'EFFETTO NON E' PREVEDIBILE. ConfluenceOK() e' un
+#    OR su quattro medie (sorgente righe 239-246): spostare la 89 sulla
+#    50 non allarga e non stringe il filtro, sposta una delle quattro
+#    finestre. Chiunque scriva "me lo aspettavo" dopo aver visto il
+#    segno sta raccontandosi una storia.
+#
+#  MAGIC VERGINI 778100/778101: blocco 778xxx, cercato uno per uno in
+#  tutto il repo il 28/08/2026 -> ZERO occorrenze. Il magic del
+#  sorgente (770901) e quelli della cella gemella non compaiono qui.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2020.01.01
+
+# --- LA BASELINE DICHIARATA (identica al 00_suprev_base) ---
+InpUseConfluence=1||1||0||1||N
+InpEma1=14||14||0||14||N
+
+# --- IL DELTA: e' l'UNICO interruttore mosso ---
+InpEma2=50||50||0||50||N
+
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=778100||778100||1||778101||Y
