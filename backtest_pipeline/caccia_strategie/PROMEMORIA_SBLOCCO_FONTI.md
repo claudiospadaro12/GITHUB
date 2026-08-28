@@ -102,6 +102,67 @@ quantconnect.com
 > 1 promosso e 12 scartati con motivo). Serve solo dargli piu' roba da
 > setacciare, senza passare da Claudio ogni volta.
 
+---
+
+## 🔓 AGGIORNAMENTO 28/08/2026 — DUE CANALI, misurati nella caccia intraday indici
+
+_Fonte: `caccia_strategie/CACCIA_INTRADAY_INDICI_2026-08-28.md` §1-bis e §1-ter._
+
+### A. TRADINGVIEW: usare la RICERCA TESTUALE, non i tag
+
+La strada a tag (25/08) e la sua correzione (26/08) restano valide ma sono
+lente. **Una sola richiesta fa tutto:**
+
+```
+https://www.tradingview.com/pubscripts-suggest-json/?search=<query+urlencoded>
+```
+
+JSON con, per ogni risultato:
+
+| campo | cosa da' |
+|---|---|
+| `scriptIdPart` | **`PUB;<hash 32 cifre>` GIA' PRONTO** — salta il passo "apri la pagina script per estrarre l'hash" |
+| `extra.kind` | `"strategy"` vs `"study"` — separa le strategie dagli indicatori |
+| `access` | **`1` = sorgente leggibile · `2`/`3` = protetto** — si sa PRIMA di sprecare una richiesta |
+| `agreeCount` | i like (l'unica popolarita' che TradingView espone) |
+| `author.username` | l'attribuzione |
+
+Poi il sorgente come sempre:
+`https://pine-facade.tradingview.com/pine-facade/get/PUB;<hash>/last` → `source`.
+
+**Verificato il 28/08 su 20 tentativi, nessuna eccezione:** con `access=2` il
+pine-facade risponde `{"code":401,"message":"User is not allowed to see source
+code of pine"}`; con `access=1` restituisce il Pine completo.
+
+⚠️ **Limiti misurati:** ~50 risultati per query, e **molte query naturali
+rendono ZERO** (`"DAX intraday"`, `"US30 intraday"`, `"afternoon reversal"`,
+`"flat at close"`, `"opening range fade"`). E' un motore di **titoli**, non di
+contenuti: servono **tante query corte**, non poche query precise.
+Anche i **tag** hanno buchi: `previousdayhighlow`, `timeofday`, `powerhour`,
+`lunch`, `indexfutures`, `poc`, `tpo`, `dailyrange`, `firsthour` → **0
+strategie ciascuno**.
+
+### B. GITHUB NON E' BLOCCATO: E' BLOCCATO `curl`
+
+Sei dossier (16, 19, 21, 22, 23, 25, 26/08) dichiarano GitHub **NULLO**. La
+diagnosi era sul dominio; il problema e' sul **trasporto**.
+
+| via | esito 28/08/2026 |
+|---|---|
+| `curl` su `api.github.com/search/...` | 🔴 **403** |
+| `curl` su `github.com/search?q=...` | 🔴 **403** |
+| **strumento `WebFetch` su `github.com/topics/...`** | 🟢 **200, pagina letta** (20 repo con nome, owner, stelle, descrizione) |
+| `curl` su `raw.githubusercontent.com/<url noto>` | 🟢 **200** |
+| strumento `WebSearch` | 🟢 restituisce URL GitHub veri, usabili come punto di partenza |
+
+**Ricetta:** `WebSearch` per trovare il repo → `WebFetch` per leggere la
+pagina → `raw.githubusercontent.com` (via `curl`) per scaricare i file.
+
+🟠 **Avvertenza dalla prima prova:** la pagina `topics/expert-advisor` e'
+quasi tutta **spam SEO** (repo `C#`/`HTML` con nomi da vetrina, 0-2 stelle su
+account nuovi, piu' tre repo con 115-117 stelle dal profilo "stelle
+comprate"). **Non partire dai topic: partire da una ricerca mirata.**
+
 ## AGGIORNAMENTO 19/08/2026 sera (misurato dalla caccia Londra)
 - **MQL5.com: SBLOCCATO (HTTP 200)** — e soprattutto
   `https://www.mql5.com/en/code/download/<id>` restituisce lo ZIP col

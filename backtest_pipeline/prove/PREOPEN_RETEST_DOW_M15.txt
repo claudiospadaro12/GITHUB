@@ -1,0 +1,266 @@
+# =====================================================================
+#  PREOPEN_RETEST_DOW  --  IL LIVELLO PRE-APERTURA, MAI ACCESO IN CASA
+#  ABTG_Dow_Apertura_US  su  U30USD  M15, TICK REALI
+#  Nato dalla CACCIA INTRADAY INDICI del 28/08/2026
+#  (caccia_strategie/CACCIA_INTRADAY_INDICI_2026-08-28.md)
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON DEVE GIRARE FINCHE' I CRITERI NON SONO FIRMATI.
+#      E' la specifica congelata di cosa misurare, non un lancio.
+#      Prima di qualunque riga di lancio: CHECKLIST_RIGA_DI_LANCIO.md.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE (e non e' un motore nuovo: e' un INTERRUTTORE NOSTRO
+#  che non e' mai stato acceso)
+#
+#  Misurato oggi nel repo, non ipotizzato:
+#    - `ABTG_Dow_Apertura_US.mq5` righe 195-199 dichiara TRE modi di
+#      costruire il livello:
+#         ABTG_RANGE_OPENING = 0  primi N minuti DOPO l'apertura
+#         ABTG_RANGE_PREV    = 1  max/min degli N minuti PRIMA
+#         ABTG_RANGE_PREVBAR = 2  candela precedente su InpLevelTF
+#    - righe 825 e 1028: con RangeMode=1 la finestra e'
+#         fromMin = openMin - InpPrevWindowMin ;  toMin = openMin
+#      cioe' ESATTAMENTE il "pre-market range".
+#    - Conteggio su TUTTI i file prova del repo (28/08/2026):
+#         InpRangeMode : 47 file su 48 lo pinnano a 0, uno solo lo
+#                        spazzola 0->2. **Il valore 1 non e' mai stato
+#                        la modalita' di una cella misurata.**
+#         InpPrevWindowMin : 28 file su 28 lo pinnano a 60. MAI mosso.
+#    [VERIFICATO con grep sul branch `lavoro`, 28/08/2026]
+#
+#  Quindi il livello "pre-apertura" e' un pezzo di macchina PAGATO E MAI
+#  USATO. Non serve scrivere codice: serve accendere l'interruttore.
+#
+# ---------------------------------------------------------------------
+#  LA FONTE ESTERNA CHE HA FATTO NASCERE LA DOMANDA (attribuzione)
+#
+#  `Tristan's Box: Pre-Market Range Breakout + Retest`
+#     autore  OhRayOhRay  --  TradingView, creato 2025-09-10
+#     licenza Mozilla Public License 2.0 (dichiarata in testa al Pine)
+#     https://www.tradingview.com/script/839e843390ad.../  (slug
+#     839e843390ad4d4388a56f4e598fdd3c, sorgente Pine letto riga per
+#     riga il 28/08/2026, copia in
+#     caccia_strategie/biblioteca/sorgenti/)
+#
+#  Cosa fa quel Pine: costruisce il box 04:00-09:30 ET (pre-market),
+#  aspetta la rottura in chiusura, poi pretende un TOCCO DI OMBRA sul
+#  livello e la chiusura FUORI della barra successiva, un solo ingresso
+#  per lato al giorno.
+#  Cosa NON prendiamo: la sua gestione. Nel suo sorgente lo stop e'
+#  spento di default (`useStop=false`) e quando lo si accende l'ordine
+#  e' rotto -- `strategy.exit("XL","Long_PM_Retest",...)` cita un id di
+#  ingresso che non esiste (l'ingresso si chiama "Long entry"): lo stop
+#  non si aggancia mai. Piu': nessun flat di fine sessione, sizing al 2%
+#  fisso dell'equity. Tutta la gestione ce l'abbiamo gia' migliore.
+#
+#  Traduzione nella nostra macchina, uno a uno:
+#     box pre-market      -> InpRangeMode=1 + InpPrevWindowMin
+#     rottura + ritorno   -> InpEntryMode=2 (ABTG_RETEST, LIMIT)
+#     profondita' rientro -> InpRetestOffsetPts
+#     un solo ciclo/gg    -> InpOneTradePerDay=1  (gia' cosi')
+#     mai overnight       -> InpCloseAtEnd=1 + InpCloseHour/Min
+#
+# ---------------------------------------------------------------------
+#  IPOTESI (scritta PRIMA di qualunque numero)
+#
+#   "Sul Dow, il livello che conta all'apertura di New York non e' il
+#    range dei primi 35 minuti (che e' rumore appena nato), ma il
+#    massimo/minimo che l'Europa ha gia' costruito nelle ore prima:
+#    e' un livello con PIU' SCAMBI DIETRO e PIU' ETA'. Se il retest --
+#    l'unica geometria che nei nostri referti ha sempre pagato
+#    (R42) e che e' gia' la modalita' viva della sedia Dow -- vale
+#    qualcosa, deve valere di piu' su un livello piu' vecchio e piu'
+#    grosso."
+#
+#   Le tre domande del mandato, mappate su un asse ciascuna:
+#     (a) DIMENSIONE del livello  -> InpPrevWindowMin (60..300 min)
+#     (b) ETA' del livello        -> lo stesso asse (piu' minuti =
+#                                    livello formato prima)
+#     (c) INVALIDAZIONE           -> InpRetestOffsetPts (quanto in
+#                                    profondita' si accetta il rientro
+#                                    prima di dichiarare fallita la
+#                                    rottura) + InpPendingExpiryMin=120
+#
+# ---------------------------------------------------------------------
+#  COME PUO' MORIRE (dichiarato prima, non dopo)
+#
+#   1. Frequenza. Un ciclo al giorno su ~450 sedute e' il tetto: se il
+#      retest non arriva, la giornata salta. Se n(OOS) < 30 il round
+#      NON da' verdetto di MERITO (valvola R59): misura solo il
+#      RISCHIO (DD, peggior giornata), che e' un fatto accaduto.
+#   2. La lezione esterna che gioca CONTRO: arXiv 2605.04004 (Mesfin
+#      2026), tabella 3, "ORB Pullback Entry" su MNQ: N=83, netto
+#      -4,44 punti, T=-1,27, win rate 19,3%, stop-out 80,7%.
+#      Gia' agli atti in report/SWEEP_MECCANISMI_2026-08-23.md, dove
+#      il conflitto e' stato sciolto cosi': T=-1,27 su N=83 non e' una
+#      falsificazione, ed e' sul NASDAQ, non sul Dow. Resta pero' il
+#      segnale che il retest su un livello GIOVANE (l'ORB) prende il
+#      fallimento della rottura, non la continuazione. Questo round
+#      chiede se un livello VECCHIO si comporta diversamente. Se la
+#      risposta e' no, la famiglia "retest" si chiude anche sul Dow e
+#      il valore del round e' quello: una porta chiusa con un numero.
+#   3. Doppione mascherato. `ABTG_MaxMinNotte` usa gia' un box notturno
+#      sul DAX, ma con ingresso a ROTTURA (BUY/SELL STOP), mai a
+#      retest, e sul Dow non e' mai stato misurato (R-archivio: box
+#      notturno provato su DAX/FTSE/CAC/Stoxx). Se le celle vincenti
+#      qui coincidessero giorno per giorno con quelle di MaxMinNotte,
+#      il candidato va scartato per correlazione (ROTTA_PROP regola 1),
+#      non promosso.
+#
+# ---------------------------------------------------------------------
+#  CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri)
+#
+#   PASSO 0 -- OBBLIGATORIO, PRIMA DI LEGGERE QUALUNQUE PF
+#     0a. CONTA le operazioni. n(OOS) < 30 -> valvola R59, niente
+#         verdetto di merito.
+#     0b. CANCELLO DEL COSTO (S0a, metro METRO_PROP D4 +
+#         R98_CRITERI 3.2): mediana del take LORDO >= 3 x spread.
+#         Spread di riferimento su U30USD: 2,0 punti indice
+#         [SPREAD NON MISURATO -- lato alto della forchetta 1-2 di
+#         R98_CRITERI]. Soglia operativa: take mediano >= 6,0 punti
+#         indice. Sotto, il round si ferma qui.
+#         Conversione: 1 punto indice = 100 punti MT5 su U30USD (R97).
+#     0c. METRO A PARI TF. La sedia viva gira su M5; questo file gira
+#         su M15 (richiesta del mandato del 28/08: "M15-H1, evita M5
+#         puro"). Percio' la cella METRO -- R101_DOW_00_viva, cioe'
+#         InpRangeMode=0 con tutto il resto identico -- va rifatta
+#         ANCHE su M15, altrimenti il delta che si legge mescola
+#         "livello diverso" e "timeframe diverso". R108/R111 hanno
+#         misurato un gradiente MONOTONO H1 > M30 > M15 su un altro
+#         motore: il TF non e' neutro e non si assume.
+#
+#   PASSA se, in OOS, esiste una REGIONE di >= 3 celle ADIACENTI con:
+#       - Profit > 0
+#       - PF >= 1,10          (pavimento di casa)
+#       - n >= 30             (sotto i 30 non e' un verdetto)
+#       - DD < 8%  a rischio 1%   (x0,65 per leggerlo a taglia 100k)
+#       - peggior giornata > -2,0%   (cancello prop inasprito; muro -5%)
+#   e se quella regione BATTE il metro 0c sullo stesso TF di almeno
+#   +0,10 di PF. Se pareggia il metro, il livello nuovo non serve.
+#
+#   SELEZIONE: centro dell'altopiano, MAI la cella migliore.
+#   Dodici Spearman IS->OOS negative su tredici, l'ultima (R58) sui
+#   tick reali del nostro broker.
+#
+#   MODELLO: TICK REALI, sempre. L'OHLC 1-min su questa famiglia ha
+#   gia' prodotto +129k finti sul DAX (REGISTRO_TEST.md par.2).
+#
+# ---------------------------------------------------------------------
+#  IL GEMELLO SHORT E' OBBLIGATORIO (regola di Claudio del 25/08:
+#  "ogni analisi misura SEMPRE tutti e due i lati").
+#  File gemello = QUESTO file con due righe scambiate:
+#       InpAllowLong=0||0||0||0||N
+#       InpAllowShort=1||1||0||1||N
+#  e magic 773600/773601 (verificati vergini nel repo il 28/08).
+#  Non e' un optional: senza il lato short questo round e' meta' round.
+#
+#  IL GEMELLO DAX (D30EUR) e' il passo successivo, non questo:
+#  cambia @SIMBOLO, InpSessionHour=8, InpSessionMin=0 (ORA SERVER
+#  BCM = ora italiana - 1) e la geometria pinnata sulla sedia DAX viva.
+#  ATTENZIONE sul DAX: con PrevWindowMin grande la finestra
+#  pre-apertura cade dentro la notte asiatica, cioe' dentro il box di
+#  `ABTG_MaxMinNotte_DAX_Short` -- li' il rischio di doppione e' ALTO
+#  e va misurato per sovrapposizione di giornate, non per intuizione.
+#
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (italiana - 1). Dow apre 14:30 server.
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- L'UNICA COSA CHE CAMBIA RISPETTO ALLA SEDIA VIVA:
+#     InpRangeMode 0 -> 1 (il livello e' il PRE-apertura, non l'ORB).
+#     L'ingresso resta il RETEST (2), che e' gia' la modalita' viva.
+InpEntryMode=2||2||0||2||N
+InpRangeMode=1||1||0||1||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- filtri: ESATTAMENTE come nella sedia viva Dow (R101_DOW_00_viva),
+#     nessuno acceso in piu'. Un filtro aggiunto a un motore gia' tarato
+#     ha 0 successi su 5 nel nostro storico (ROBUSTEZZA par.5B).
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+
+# --- rischio e gestione: identiche alla sedia viva Dow, non si tocca
+#     niente qui dentro. InpMinStopPts=500 e' il PAVIMENTO SL: e' la
+#     lezione R109 (senza pavimento il lotto sbatte su VOLUME_MAX e i
+#     DD sottostimano il rischio). Non si spegne.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- I DUE ASSI LIBERI: 5 x 3 = 15 celle. Screening, non verdetto.
+#     (a) DIMENSIONE/ETA' del livello, in minuti prima dell'apertura:
+#         60 = la sola cosa mai pinnata in casa (28 file su 28)
+#         300 = cinque ore = tutta la mattina europea prima di NY
+InpPrevWindowMin=60||60||60||300||Y
+#     (c) INVALIDAZIONE: quanto DENTRO il livello si accetta il rientro
+#         prima di dichiarare fallita la rottura. 400 = valore vivo.
+InpRetestOffsetPts=400||200||200||600||Y
+
+# --- controllo d'igiene: gemelli identici, magic VERGINI
+#     (773500/773501 verificati liberi in tutto il repo il 28/08/2026)
+InpMagic=773500||773500||1||773501||Y
