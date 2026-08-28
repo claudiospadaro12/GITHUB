@@ -218,7 +218,7 @@ un numero misurato adesso.**
 
 ### 7.1 Analisi statica del `.ps1`
 
-- **parsa**: PowerShell 7.4.6 + `[Parser]::ParseFile` → **0 errori**, 10.285 token;
+- **parsa**: PowerShell 7.4.6 + `[Parser]::ParseFile` → **0 errori**, 10.505 token;
 - **ASCII puro**: **0 byte non-ASCII** (regola del 17/08 — un `.ps1` con un'emoji
   dentro una stringa esplode su PowerShell 5.1 del VPS);
 - **non usa `$args`** (variabile automatica, punto 71);
@@ -348,10 +348,13 @@ CSV costruiti con l'**intestazione VERA dell'EA** (29 colonne, letta nel sorgent
 - **se il tester legga davvero dal 2022.07.01 a M15** (data **derivata** dal tetto
   delle 100.000 barre, non misurata);
 - **la durata** della corsa e **ogni singolo numero**;
-- 🟢 **IL PIN — messo e verificato il 28/08 sera**: `9ed66e2…`, **otto** artefatti
-  confermati con `git cat-file -s <pin>:<file>` (identici al working tree). Al
-  momento della consegna di questo referto il pin era ancora un segnaposto di 40
-  zeri; la sessione principale l'ha pinnato dopo il push, come da passo 10 sotto.
+- 🟢 **IL PIN — messo e verificato il 28/08 sera, terza pinnatura**: `21cec02…`,
+  otto artefatti confermati blob-identici al working tree. Al momento della
+  consegna di questo referto il pin era ancora un segnaposto di 40 zeri; la
+  sessione principale l'ha pinnato dopo il push (`9ed66e2…`), il verificatore
+  ha trovato 6 difetti, ri-pinnato (`23bb983…`), il verificatore ha trovato
+  ancora 2 difetti (una quarta copia di un errore già corretto altrove tre
+  volte), ri-corretto e ri-pinnato all'attuale — come da passo 10 sotto.
 
 ---
 
@@ -375,11 +378,15 @@ CSV costruiti con l'**intestazione VERA dell'EA** (29 colonne, letta nel sorgent
 
 1. ✅ **Push** degli otto artefatti sul branch `lavoro` — fatto;
 2. ✅ **pinnatura** della pagina con la ricetta e **rimozione del cartello del
-   segnaposto** nello stesso passo — fatto, pin `9ed66e2…`;
+   segnaposto** nello stesso passo — fatto, prima pinnatura `9ed66e2…`;
 3. ✅ verifica `git cat-file -s <pin>:<file>` sugli **otto** artefatti — fatto;
-4. ✅ **verificatore-stringhe** sulla pagina e sul driver — fatto (FAIL con 6
-   difetti, tutti corretti nello stesso passo in cui si scrive questa riga);
-5. **solo dopo**, la riga va a Claudio — e il primo giro è quello di **controllo**,
+4. ✅ **verificatore-stringhe**, prima passata — FAIL con 6 difetti, tutti
+   corretti, ri-pinnato `23bb983…`;
+5. ✅ **verificatore-stringhe**, seconda passata — FAIL con 2 difetti (una
+   quarta copia di un errore già corretto tre volte altrove), corretto,
+   ri-pinnato all'attuale `21cec02…`, tutti e otto gli artefatti riconfermati
+   blob-identici;
+6. **solo dopo**, la riga va a Claudio — e il primo giro è quello di **controllo**,
    che è anche la **prima compilazione** dell'EA.
 
 **La riga da mandare sta in `backtest_pipeline/righe/RIGA_ALLINEALONDRA_DA_MANDARE.md`

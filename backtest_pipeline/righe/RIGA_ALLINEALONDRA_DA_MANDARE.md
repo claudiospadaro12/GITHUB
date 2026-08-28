@@ -119,10 +119,10 @@ liberi** e la somma sarà **maggiore** del congiunto.
 
 ---
 
-## 📌 IL PIN — **`23bb9831242eeb71d1071791f20f2da64091d364`**
+## 📌 IL PIN — **`21cec021a4550ba776714e810a618a0d8a40a306`**
 
 ```
-23bb9831242eeb71d1071791f20f2da64091d364
+21cec021a4550ba776714e810a618a0d8a40a306
 ```
 
 
@@ -150,12 +150,17 @@ sed -i '/CARTELLO[-]INIZIO/,/CARTELLO[-]FINE/d' "$F"      # via il cartello del 
 grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3 (controllo, corsa, ripresa)
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
 grep -c 'PIN_NON[_]ANCORA_MESSO' "$F"   # DEVE dare 0
+grep -rn "${VECCHIO:0:7}" backtest_pipeline/righe/*.md backtest_pipeline/prove/*.md   # DEVE dare 0 (punto 103: il pin vecchio scritto ABBREVIATO in prosa, es. "9ed66e2...", non lo prende nessuno dei tre conteggi sopra)
 ```
 
-⚠️ **Servono TUTTI E TRE i conteggi.** Il solo *"0 pin vecchi rimasti"* lo supera
-a mani basse anche un `sed` che **non ha matchato niente**; e il terzo è il
+⚠️ **Servono TUTTI E QUATTRO i conteggi.** Il solo *"0 pin vecchi rimasti"* lo
+supera a mani basse anche un `sed` che **non ha matchato niente**; il terzo è il
 punto **101**: il cartello del segnaposto **sopravvive** alla pinnatura e finisce
-per dire *"il pin non funziona"* **puntando a un pin che funziona**.
+per dire *"il pin non funziona"* **puntando a un pin che funziona**. Il quarto è
+il punto **103**, trovato il 28/08 sulla seconda passata di questa stessa pagina:
+il pin vecchio scritto **abbreviato in prosa** (`9ed66e2…`, sette caratteri più
+puntini, nelle note "PIN verificato") **sopravvive** al `sed` sul pin per esteso,
+e certifica un commit che non è più quello a cui si lancia.
 
 > 🔎 **PERCHÉ QUELLE PARENTESI QUADRE — due trappole trovate ESEGUENDO la ricetta
 > su una copia, prima dell'invio, e sono la stessa trappola due volte: _uno
@@ -244,7 +249,7 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='23bb9831242eeb71d1071791f20f2da64091d364'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='21cec021a4550ba776714e810a618a0d8a40a306'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -290,7 +295,7 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='23bb9831242eeb71d1071791f20f2da64091d364'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='21cec021a4550ba776714e810a618a0d8a40a306'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -316,7 +321,7 @@ Si cambia **solo** ciò che sta dopo `-Pin $pin`. Combinazioni valide:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='23bb9831242eeb71d1071791f20f2da64091d364'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='21cec021a4550ba776714e810a618a0d8a40a306'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '01_nofinestra' -SoloBanco 'V' -Rifai;
@@ -436,7 +441,7 @@ Cartella e zip sul **Desktop**: `PASSO0_ALLINEALONDRA_<MODO>_<data>_<ora>` — d
 ## ✅ COSA È GIÀ STATO VERIFICATO — **eseguendo**, prima dell'invio
 
 - ✅ il `.ps1` **parsa**: PowerShell 7.4.6 + `[Parser]::ParseFile` → **0 errori**,
-  **10.285 token**; **ASCII puro** (0 byte non-ASCII, regola del 17/08);
+  **10.505 token**; **ASCII puro** (0 byte non-ASCII, regola del 17/08);
   **non usa `$args`**; **0 collisioni case-insensitive** fra nomi di variabile
   (punto 79); **0 parametri orfani** e **0 variabili assegnate e mai rilette**
   (punto 97);
@@ -463,7 +468,10 @@ davvero al 2024.07.05**, **se il tester legga davvero dal 2022.07.01** a M15, la
 **durata** e **ogni singolo numero**. Il giro di controllo copre gli artefatti
 **e la compilazione**; **i numeri li può dare solo la corsa**.
 
-🟢 **Il PIN è verificato** (28/08, sera): `9ed66e2…` è antenato di `origin/lavoro`
-e tutti e **otto** gli artefatti che lo script scarica esistono a quel commit con
-blob identici al working tree (`git cat-file -s`). Prima di questo commit qui
-c'era un segnaposto di 40 zeri; il suo cartello è stato rimosso nella pinnatura.
+🟢 **Il PIN è verificato** (28/08, terza pinnatura): `21cec02…` è antenato di
+`origin/lavoro` e tutti e **otto** gli artefatti che lo script scarica hanno a
+quel commit **blob identici al working tree** (`git rev-parse <pin>:<file>` vs
+`git hash-object`). I due pin precedenti (`9ed66e2…` prima passata, `23bb983…`
+seconda passata) sono **superati**: la seconda passata del verificatore ha
+trovato una quarta copia dell'errore su `Barre Allineate`, rimasta
+nell'intestazione di `ValutaBarraChiusa` nel `.mq5`.
