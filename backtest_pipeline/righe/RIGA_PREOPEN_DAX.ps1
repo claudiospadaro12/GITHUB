@@ -181,6 +181,8 @@ $MagicVietati = @(770101,                                  # <<< LA SEDIA VIVA D
                   773300,773301,                           # R101 metro Dow
                   773500,773501,773600,773601,             # round PREOPEN DOW (28/08)
                   773700,773701,773800,773801,773900,773901,
+                  782100,782101,782200,782201,             # round PREOPEN NAS (28/08),
+                  782300,782301,782400,782401,782500,782501, #  il gemello di questo
                   761200,761201,                           # R107 (bruciati)
                   750010,                                  # default del MaxMinNotte _MFE
                   772341,772601,772602,772611,772612,
@@ -932,18 +934,6 @@ try{
   $nRo = @($ROvals).Count
   Dico ("assi letti nel file prova: InpPrevWindowMin " + $nPw + " valori, InpRetestOffsetPts " + $nRo + " valori -> " + ($nPw*$nRo) + " celle x 2 gemelli = " + ($nPw*$nRo*2) + " passate per finestra e per lato") "Yellow"
 
-  # --- L'ORA DELLA TABELLA DI CALENDARIO SI LEGGE NEL FILE PROVA, NON SI
-  #     SCRIVE A MEMORIA (checklist 40-quater: l'atteso calcolato con una
-  #     formula che non e' quella dell'artefatto che gira). $AperturaMin
-  #     serve solo alla tabella della sovrapposizione col box notturno: se
-  #     divergesse dall'ora di sessione del file prova, quella tabella
-  #     descriverebbe un'apertura che il round non usa.
-  $apDaProva = [int](($hBase["InpSessionHour"] -split '\|\|')[0]) * 60 + [int](($hBase["InpSessionMin"] -split '\|\|')[0])
-  if($apDaProva -ne $AperturaMin){
-    throw ("l'apertura del file prova e' " + (OraDiMin $apDaProva) + " server ma questa riga calcola la sovrapposizione col box notturno su " + (OraDiMin $AperturaMin) + ". Sono due orologi diversi: la tabella non descriverebbe questo round.")
-  }
-  Dico ("apertura confermata sul file prova: " + (OraDiMin $AperturaMin) + " server  (box della sedia gemella 770411: " + (OraDiMin $BoxDaMin) + " - " + (OraDiMin ($BoxAMin-1)) + ")") "Green"
-
   foreach($lv in $LAVORI){
     $h = $mappe[$lv.Prova]
     if($null -eq $h){ throw ("mappa mancante per " + $lv.Prova) }
@@ -1016,6 +1006,18 @@ try{
     }
     $lv.CelleAttese = $nCelle
   }
+
+  # --- L'ORA DELLA TABELLA DI CALENDARIO SI LEGGE NEL FILE PROVA, NON SI
+  #     SCRIVE A MEMORIA (checklist 40-quater: l'atteso calcolato con una
+  #     formula che non e' quella dell'artefatto che gira). $AperturaMin
+  #     serve solo alla tabella della sovrapposizione col box notturno: se
+  #     divergesse dall'ora di sessione del file prova, quella tabella
+  #     descriverebbe un'apertura che il round non usa.
+  $apDaProva = [int](($hBase["InpSessionHour"] -split '\|\|')[0]) * 60 + [int](($hBase["InpSessionMin"] -split '\|\|')[0])
+  if($apDaProva -ne $AperturaMin){
+    throw ("l'apertura del file prova e' " + (OraDiMin $apDaProva) + " server ma questa riga calcola la sovrapposizione col box notturno su " + (OraDiMin $AperturaMin) + ". Sono due orologi diversi: la tabella non descriverebbe questo round.")
+  }
+  Dico ("apertura confermata sul file prova: " + (OraDiMin $AperturaMin) + " server  (box della sedia gemella 770411: " + (OraDiMin $BoxDaMin) + " - " + (OraDiMin ($BoxAMin-1)) + ")") "Green"
 
   # --- A QUALE VALORE IL METRO PINNA InpPrevWindowMin. Non si scrive a
   #     memoria: si LEGGE nei due file metro, e i due devono dire lo
