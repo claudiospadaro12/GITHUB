@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDA_OROLOGIO_v1
+#  MARCATORE_RIGA_SONDA_OROLOGIO_v2
 #  RIGA_SONDA_OROLOGIO.ps1  --  LA SONDA DELL'OROLOGIO
 #  ABTG_SondaOrologio su EURUSD / GBPUSD / XAUUSD, H1, TICK REALI,
 #  finestra 2011.01.01 -> 2026.06.30, sette celle:
@@ -238,6 +238,14 @@ function Gemelli($righe){
   if($null -eq $righe){ return "NON MISURATO (CSV non letto)" }
   if(@($righe).Count -ne 2){ return ("NON VALIDO: " + @($righe).Count + " righe invece di 2") }
   $a = $righe[0]; $b = $righe[1]
+  # DUE CORSE VUOTE SONO IDENTICHE PER COSTRUZIONE: zero contro zero non e'
+  # "banco deterministico", e' "banco che non ha misurato niente". CHECKLIST
+  # punto 93: la sentinella e' onesta quando la si STAMPA e bugiarda quando
+  # la si CONFRONTA -- qui la variante zero-contro-zero.
+  if($null -eq $a.N -or $null -eq $b.N){ return "NON MISURATO (giornate operate illeggibili)" }
+  if([double]$a.N -le 0 -and [double]$b.N -le 0){
+    return "NON MISURATO (ZERO operazioni in tutte e due le passate: due corse vuote escono identiche per costruzione e non dicono niente sul determinismo. Storico a TICK mancante sul simbolo, oppure cella mai girata)"
+  }
   $coppie = @(
     @("profitto",        $a.Profit,  $b.Profit),
     @("operazioni",      $a.N,       $b.N),
@@ -271,6 +279,7 @@ function C([string]$id,[string]$file,[string]$sym,[string]$lato,[string]$desc,
     Id=$id; Prova=$file; Sym=$sym; Lato=$lato; Desc=$desc;
     Magic=@($magic); AssiY=@($assiY); Celle=$nCelle;
     Esito="NON ESEGUITA"; Gemelli="NON PERTINENTE";
+    Fresca="NON PERTINENTE (cella non eseguita in questo giro)";
     RigheIS=-1; RigheOOS=-1; Secondi=-1.0;
     DatiIS=$null; DatiOOS=$null }
 }
@@ -649,6 +658,19 @@ try{
     $c.RigheOOS = @($rOOS).Count
     $c.Esito = "MISURATA"
 
+    # HA GIRATO IL TESTER, O I CSV ERANO GIA' LI'? Il driver generico salta le
+    # finestre gia' fatte ("gia' fatto, salto"): in quel caso questa cella e'
+    # stata RILETTA, non MISURATA (CHECKLIST punti 50, 92 e 101-bis).
+    $freschi = $true
+    foreach($f in @($csvIS,$csvOOS)){
+      if((Get-Item -LiteralPath $f).LastWriteTime -lt $tCella){ $freschi = $false }
+    }
+    if($freschi){ $c.Fresca = "SI (il tester ha girato in questo giro)" }
+    else{
+      $c.Fresca = "NO (CSV gia' presenti: RILETTI, non rimisurati)"
+      $c.Esito  = "RILETTA DA CSV GIA' PRESENTI (il tester NON ha girato in questo giro)"
+    }
+
     if($c.RigheIS -ne $c.Celle -or $c.RigheOOS -ne $c.Celle){
       [void]$Problemi.Add("cella " + $c.Id + ": righe nel CSV " + $c.RigheIS + " (IS) / " + $c.RigheOOS + " (OOS), attese " + $c.Celle + " per finestra. E' la CACHE del tester, oppure celle mute.")
     }
@@ -688,9 +710,11 @@ try{
       if($c.Gemelli -ne "IDENTICI"){
         [void]$Problemi.Add("cella 00_gemelli: gemelli " + $c.Gemelli + " -- il banco NON e' deterministico, e nessun numero delle altre sei celle si legge.")
       }
-      if($c.Secondi -gt 0){
+      if($freschi -and $c.Secondi -gt 0){
         $perPassata = $c.Secondi/4.0
         $Cronometro = ([double]$c.Secondi).ToString("0",$INV) + " s per 4 passate = " + ([double]$perPassata).ToString("0",$INV) + " s per passata -> una cella di misura (144 passate) costerebbe circa " + ([double]($perPassata*144.0/60.0)).ToString("0",$INV) + " minuti, e le SEI celle circa " + ([double]($perPassata*864.0/3600.0)).ToString("0.0",$INV) + " ore"
+      }elseif(-not $freschi){
+        $Cronometro = "NON MISURATO in questo giro: i CSV dei gemelli erano gia' presenti e il driver generico ha saltato il tester. Cronometrare una rilettura di file darebbe un numero plausibile e falso (CHECKLIST punti 50 e 101-bis)."
       }
     }
   }
@@ -762,6 +786,7 @@ foreach($c in $CELLE){
   [void]$RefTxt.Add("CELLA " + $c.Id + "  --  " + $c.Sym + " " + $c.Lato + "  --  magic " + (($c.Magic) -join "/"))
   [void]$RefTxt.Add("  " + $c.Desc)
   [void]$RefTxt.Add("  esito: " + $c.Esito + "   righe CSV: " + (FmtN $c.RigheIS) + " (IS) / " + (FmtN $c.RigheOOS) + " (OOS), attese " + $c.Celle)
+  [void]$RefTxt.Add("  il tester ha girato in questo giro: " + $c.Fresca)
   if($c.Id -eq "00_gemelli"){ [void]$RefTxt.Add("  gemelli: " + $c.Gemelli) }
   if($null -eq $c.DatiIS -and $null -eq $c.DatiOOS){
     [void]$RefTxt.Add("  (nessuna tabella: la cella non ha prodotto CSV in questo giro)")
@@ -872,6 +897,15 @@ foreach($lettura in @("IS","OOS","ENTRAMBE")){
 [void]$RefTxt.Add("E se la tabella e' PIATTA, l'esito e' VALIDO e va scritto cosi': il")
 [void]$RefTxt.Add("caduto D7 (l'ora del fix, chiuso il 22/08) esce CONFERMATO ED ESTESO")
 [void]$RefTxt.Add("e la pista dell'orologio si chiude con un numero NOSTRO.")
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add('IL VERDETTO C1 SI LEGGE SOLO A CELLE COMPLETE. Il criterio congelato')
+[void]$RefTxt.Add('chiede DUE DEI TRE SIMBOLI: e'' un criterio DI INSIEME, e questo referto')
+[void]$RefTxt.Add('riporta solo le celle di QUESTO giro. Quando le sei celle di misura sono')
+[void]$RefTxt.Add('girate, si rilancia la stessa riga con -TutteLeCelle e LO STESSO PIN: il')
+[void]$RefTxt.Add('driver generico salta le finestre gia'' fatte, quindi costa un minuto e')
+[void]$RefTxt.Add('produce IL referto con C1 su tutti e tre i simboli.')
+[void]$RefTxt.Add('ATTENZIONE: con un PIN DIVERSO la riga cancella risultati_prove\ e le celle')
+[void]$RefTxt.Add('gia'' girate SONO PERSE. Un ri-pin a meta'' round = si ricomincia da capo.')
 [void]$RefTxt.Add("")
 if($Fatale -ne ""){
   [void]$RefTxt.Add("!!! FERMATO: " + $Fatale)
