@@ -56,5 +56,5 @@ InpNewsFlatten=true
 === Generali ====
 InpComment=MAXMIN DAX SHORT
 InpMagic=770411
-InpMaxSpread=0
+InpMaxSpread=500
 InpVerbose=true

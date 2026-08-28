@@ -51,5 +51,5 @@ InpNewsShiftMinutes=0
 InpNewsCurrencies=
 InpNewsFlatten=true
 InpMagic=770401
-InpMaxSpread=0
+InpMaxSpread=500
 InpVerbose=true

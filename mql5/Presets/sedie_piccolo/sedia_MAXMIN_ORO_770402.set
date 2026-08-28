@@ -48,5 +48,5 @@ InpNewsCurrencies=
 InpNewsFlatten=true
 InpComment=MAXMIN ORO
 InpMagic=770402
-InpMaxSpread=0
+InpMaxSpread=150
 InpVerbose=true
