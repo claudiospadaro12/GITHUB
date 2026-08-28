@@ -93,6 +93,39 @@ redditizio dell'intera serata, e costa dieci minuti.
 con quello della **challenge a pagamento** — va letto quello che c'è scritto,
 non quello che ci aspettiamo.
 
+### 1.3-bis 🥇 TRADING OBJECTIVES — pagina ufficiale ftmo.com, incollata da Claudio 27/08 sera
+
+`[VERIFICATO]` — testo copiato direttamente dalla pagina "Obiettivi di
+trading" del sito, non da search. Copre 2-Step (Challenge + Verifica):
+
+- **Obiettivo di profitto**: 10% (Challenge) / 5% (Verifica), sul capitale
+  iniziale, nessun obiettivo di profitto sull'Account FTMO funded.
+- **Perdita Massima Totale**: **statica, 10% del capitale INIZIALE** —
+  esempio ufficiale conto 100k: limite fisso **$90.000**, per sempre.
+  **Vale anche sull'Account FTMO funded**, non solo in valutazione.
+- 🆕 **Perdita Massima Giornaliera — il meccanismo esatto, e NON è quello
+  che avevamo assunto**:
+  > *limite(giorno N) = saldo a mezzanotte CE(S)T del giorno N − 5% del
+  > CAPITALE INIZIALE (fisso in dollari, non del saldo corrente)*
+
+  Verificato con l'esempio ufficiale: giorno 1 limite $95.000 (100k−5k);
+  giorno 2 saldo $102k → limite $97.000 (102k **− 5k**, non −5,1k); giorno 3
+  saldo $101k → limite $96.000. **Il cuscino in dollari resta sempre 5.000
+  (5% dei 100k iniziali), l'ancora si sposta col saldo ma la SIZE del
+  cuscino no.** 🔴 Diverso da Fintokei ProTrader Swing, dove il cuscino
+  giornaliero CRESCE in valore assoluto col conto — qui NON cresce.
+  - La verifica di sforamento intraday è su **equity** (saldo + flottante
+    ± swap − commissioni), l'ancora di partenza del giorno è sul **saldo**
+    a mezzanotte (il flottante overnight non sposta l'ancora, ma il
+    cuscino resta fisso a 5k).
+- **Giorni minimi di trading**: 4, richiesti su Challenge+Verifica insieme;
+  **nessun minimo sull'Account funded**. Un giorno conta se almeno una
+  posizione è stata APERTA quel giorno (00:00-23:59 CET).
+
+🔴 **Ancora aperto**: questa pagina descrive il 2-Step generico, **non
+distingue Standard da Swing**. La domanda su overnight vietato o permesso
+sull'account Standard resta da chiudere (agente di ricerca in corso).
+
 ---
 
 # 2. 🕐 IL BLOCCO DEI FUSI — la parte che, sbagliata, invalida tutto
