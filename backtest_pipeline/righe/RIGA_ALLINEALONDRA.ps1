@@ -860,39 +860,55 @@ try{
         if(@($dati).Count -ne 2){
           [void]$Problemi.Add($eti2 + ": " + @($dati).Count + " righe nel CSV invece di 2. E' la CACHE del tester, oppure lo sweep dei gemelli non ha spazzolato.")
         }
-        foreach($riga in @($dati)){
-          if($null -eq $riga.AutoFail -or [double]$riga.AutoFail -ne 0){
-            [void]$Problemi.Add($eti2 + ": 'Autotest Falliti' = " + (FmtN $riga.AutoFail) + " invece di 0 (oppure -1 = autotest non eseguito, che NON e' 'passato'). Gli 8 blocchi del nucleo NON sono passati: i numeri di questa cella NON si leggono, si guarda il codice.")
-          }
-          if($null -ne $riga.Notti -and [double]$riga.Notti -gt 0){
-            [void]$Problemi.Add($eti2 + ": 'Notti Attraversate' = " + (FmtN $riga.Notti) + " invece di 0. La chiusura forzata di fine sessione NON e' stata ermetica: il mandato FTMO 'mai overnight' non e' rispettato su questo simbolo. Si dichiara, non si interpreta.")
-          }
-          if($null -ne $riga.SprSalt -and [double]$riga.SprSalt -gt 0){
-            [void]$Problemi.Add($eti2 + ": 'Ingressi Saltati Spread' = " + (FmtN $riga.SprSalt) + " ma il filtro di spread e' pinnato a 0 in tutti e quattro i file prova. IL FILE PROVA CHE HA GIRATO NON E' QUELLO CHE CREDIAMO.")
-          }
-          if($null -eq $riga.Finestra -or [int]$riga.Finestra -ne $cel.FinestraAttesa){
-            [void]$Problemi.Add($eti2 + ": 'Finestra Sessione' = " + (FmtN $riga.Finestra) + ", la cella " + $cel.Id + " la vuole " + $cel.FinestraAttesa + ". E' IL GATE DELL'ABLAZIONE: se questo numero non e' quello atteso, l'interruttore NON e' arrivato dentro il tester e il confronto 00 contro 01 non vuol dire niente.")
-          }
-          if($null -eq $riga.MinFlat -or [int]$riga.MinFlat -ne $cel.FlatAtteso){
-            [void]$Problemi.Add($eti2 + ": 'Minuto Flat Calcolato' = " + (FmtN $riga.MinFlat) + ", atteso " + $cel.FlatAtteso + " (630 = 10:30 con la finestra accesa, 1424 = 23:44 con la finestra spenta). Il flat NON e' caduto dove doveva.")
-          }
-          if($null -eq $riga.MinIni -or [int]$riga.MinIni -ne 180 -or
-             $null -eq $riga.MinIng -or [int]$riga.MinIng -ne 525 -or
-             $null -eq $riga.MinFine -or [int]$riga.MinFine -ne 645){
-            [void]$Problemi.Add($eti2 + ": la finestra DAVVERO usata e' " + (FmtN $riga.MinIni) + "/" + (FmtN $riga.MinIng) + "/" + (FmtN $riga.MinFine) + " minuti, attesi 180/525/645 (03:00 / 08:45 / 10:45 ORA SERVER). L'.ini non ha consegnato gli orari dichiarati.")
-          }
-          if($null -eq $riga.FlatAnt -or [int]$riga.FlatAnt -ne 15){
-            [void]$Problemi.Add($eti2 + ": 'Flat Anticipo Min' = " + (FmtN $riga.FlatAnt) + " invece di 15.")
-          }
-          if($null -ne $riga.LotMin -and [double]$riga.LotMin -gt 0){
-            [void]$Rilievi.Add($eti2 + ": 'Lotti Al Minimo' = " + (FmtN $riga.LotMin) + ". Su quegli ingressi il lotto e' stato alzato al minimo del broker, quindi il RISCHIO REALE e' piu' alto dello 0,65% dichiarato. Il numero si legge, ma con questa etichetta attaccata.")
-          }
-          if($null -ne $riga.IngTot -and [double]$riga.IngTot -le 0){
-            [void]$Rilievi.Add($eti2 + ": ZERO ingressi. Cella muta: o lo storico non copre la finestra, o il motore non si allinea mai. Guardare 'Barre Allineate' per distinguere le due cose.")
-          }
-          if($null -ne $riga.N -and [double]$riga.N -lt 150 -and [double]$riga.N -gt 0){
-            [void]$Rilievi.Add($eti2 + ": n = " + (FmtN $riga.N) + " operazioni, sotto la soglia dei 150. Emendamento della finestra regola A + valvola R59: su questa finestra il MERITO resta SOSPESO; il RISCHIO (peggior giornata, DD) si giudica lo stesso.")
-          }
+        # I GATE SI CONTANO SULLE RIGHE GEMELLE E SI SCRIVONO UNA VOLTA
+        # SOLA. Prima erano dentro un foreach sulle righe: due gemelle
+        # sporche producevano DUE messaggi identici, cioe' 192 PROBLEMI
+        # per 12 difetti veri. Un elenco di problemi che nessuno legge
+        # fino in fondo e' un elenco che non protegge niente.
+        # Il conteggio ("su 2 righe gemelle") resta, perche' un difetto
+        # su UNA sola gemella e' un fatto diverso da uno su tutte e due.
+        $prima = @($dati)[0]
+        $quanti = @($dati | Where-Object { $null -eq $_.AutoFail -or [double]$_.AutoFail -ne 0 }).Count
+        if($quanti -gt 0){
+          [void]$Problemi.Add($eti2 + ": 'Autotest Falliti' = " + (FmtN $prima.AutoFail) + " invece di 0 su " + $quanti + " righe gemelle (un -1 vuol dire autotest NON ESEGUITO, che NON e' 'passato'). Gli 8 blocchi del nucleo NON sono passati: i numeri di questa cella NON si leggono, si guarda il codice.")
+        }
+        $quanti = @($dati | Where-Object { $null -ne $_.Notti -and [double]$_.Notti -gt 0 }).Count
+        if($quanti -gt 0){
+          [void]$Problemi.Add($eti2 + ": 'Notti Attraversate' = " + (FmtN $prima.Notti) + " invece di 0 su " + $quanti + " righe gemelle. La chiusura forzata di fine sessione NON e' stata ermetica: il mandato FTMO 'mai overnight' non e' rispettato su questo simbolo. Si dichiara, non si interpreta.")
+        }
+        $quanti = @($dati | Where-Object { $null -ne $_.SprSalt -and [double]$_.SprSalt -gt 0 }).Count
+        if($quanti -gt 0){
+          [void]$Problemi.Add($eti2 + ": 'Ingressi Saltati Spread' = " + (FmtN $prima.SprSalt) + " su " + $quanti + " righe gemelle, ma il filtro di spread e' pinnato a 0 in tutti e quattro i file prova. IL FILE PROVA CHE HA GIRATO NON E' QUELLO CHE CREDIAMO.")
+        }
+        $quanti = @($dati | Where-Object { $null -eq $_.Finestra -or [int]$_.Finestra -ne $cel.FinestraAttesa }).Count
+        if($quanti -gt 0){
+          [void]$Problemi.Add($eti2 + ": 'Finestra Sessione' = " + (FmtN $prima.Finestra) + " su " + $quanti + " righe gemelle, la cella " + $cel.Id + " la vuole " + $cel.FinestraAttesa + ". E' IL GATE DELL'ABLAZIONE: se questo numero non e' quello atteso, l'interruttore NON e' arrivato dentro il tester e il confronto 00 contro 01 non vuol dire niente.")
+        }
+        $quanti = @($dati | Where-Object { $null -eq $_.MinFlat -or [int]$_.MinFlat -ne $cel.FlatAtteso }).Count
+        if($quanti -gt 0){
+          [void]$Problemi.Add($eti2 + ": 'Minuto Flat Calcolato' = " + (FmtN $prima.MinFlat) + " su " + $quanti + " righe gemelle, atteso " + $cel.FlatAtteso + " (630 = 10:30 con la finestra accesa, 1424 = 23:44 con la finestra spenta). Il flat NON e' caduto dove doveva.")
+        }
+        $quanti = @($dati | Where-Object { $null -eq $_.MinIni -or [int]$_.MinIni -ne 180 -or
+                                           $null -eq $_.MinIng -or [int]$_.MinIng -ne 525 -or
+                                           $null -eq $_.MinFine -or [int]$_.MinFine -ne 645 }).Count
+        if($quanti -gt 0){
+          [void]$Problemi.Add($eti2 + ": la finestra DAVVERO usata e' " + (FmtN $prima.MinIni) + "/" + (FmtN $prima.MinIng) + "/" + (FmtN $prima.MinFine) + " minuti su " + $quanti + " righe gemelle, attesi 180/525/645 (03:00 / 08:45 / 10:45 ORA SERVER). L'.ini non ha consegnato gli orari dichiarati.")
+        }
+        $quanti = @($dati | Where-Object { $null -eq $_.FlatAnt -or [int]$_.FlatAnt -ne 15 }).Count
+        if($quanti -gt 0){
+          [void]$Problemi.Add($eti2 + ": 'Flat Anticipo Min' = " + (FmtN $prima.FlatAnt) + " invece di 15 su " + $quanti + " righe gemelle.")
+        }
+        $quanti = @($dati | Where-Object { $null -ne $_.LotMin -and [double]$_.LotMin -gt 0 }).Count
+        if($quanti -gt 0){
+          [void]$Rilievi.Add($eti2 + ": 'Lotti Al Minimo' = " + (FmtN $prima.LotMin) + ". Su quegli ingressi il lotto e' stato alzato al minimo del broker, quindi il RISCHIO REALE e' piu' alto dello 0,65% dichiarato. Il numero si legge, ma con questa etichetta attaccata.")
+        }
+        $quanti = @($dati | Where-Object { $null -ne $_.IngTot -and [double]$_.IngTot -le 0 }).Count
+        if($quanti -gt 0){
+          [void]$Rilievi.Add($eti2 + ": ZERO ingressi su " + $quanti + " righe gemelle. Cella muta: o lo storico non copre la finestra, o il motore non si allinea mai. Guardare 'Barre Allineate' per distinguere le due cose.")
+        }
+        $quanti = @($dati | Where-Object { $null -ne $_.N -and [double]$_.N -lt 150 -and [double]$_.N -gt 0 }).Count
+        if($quanti -gt 0){
+          [void]$Rilievi.Add($eti2 + ": n = " + (FmtN $prima.N) + " operazioni, sotto la soglia dei 150. Emendamento della finestra regola A + valvola R59: su questa finestra il MERITO resta SOSPESO; il RISCHIO (peggior giornata, DD) si giudica lo stesso.")
         }
       }
     }
@@ -905,7 +921,13 @@ try{
   #     BEST-EFFORT, MAI un gate (punto 99). Il percorso dei log degli
   #     agent cambia fra le build di MT5.
   if(-not $SoloControllo){
-    $radici = @((Join-Path $dataFolder "Tester"), (Join-Path $env:APPDATA "MetaQuotes\Tester"))
+    # LE RADICI SI COSTRUISCONO UNA PER UNA E SOLO SE LA BASE ESISTE: un
+    # Join-Path su una variabile d'ambiente vuota non torna $null, LANCIA
+    # -- e farebbe morire la corsa dentro un raccoglitore che e'
+    # dichiarato BEST-EFFORT, cioe' l'esatto contrario del suo mestiere.
+    $radici = @()
+    if($dataFolder){  $radici += (Join-Path $dataFolder "Tester") }
+    if($env:APPDATA){ $radici += (Join-Path $env:APPDATA "MetaQuotes\Tester") }
     $righeAT = @()
     foreach($radice in $radici){
       if(-not (Test-Path -LiteralPath $radice)){ continue }
