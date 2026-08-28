@@ -55,5 +55,22 @@ Claudio Spadaro
 
 ## 📌 Stato in `PIANO_PROVA_GENERALE_FTMO.md` (X16)
 
-Resta 🟡 **IN ATTESA DI RISPOSTA SCRITTA** finché non arriva un sì/no netto.
-Nessun deploy che dipenda da questo punto nel frattempo.
+✅ **CHIUSO 28/08** — risposta arrivata da Romeo Pagani, netta:
+
+> _"It is very simple. If your strategy is gap trading, it is also not allowed
+> in the Evaluation. Please refer to my email above: news trading and holding
+> over the weekend are allowed during the Evaluation; gap trading is different
+> and was mentioned in my previous email."_
+
+**Il gap trading è vietato ANCHE in Evaluation** — è l'unica delle pratiche
+vietate che non ha l'eccezione Evaluation-vs-funded (news trading e weekend
+holding invece SONO permessi in Evaluation, come già chiuso in X1).
+
+### ➡️ Conseguenza pratica, non ancora verificata
+Serve capire quali EA della flotta aprono posizioni (a) a ridosso di news ad
+alto impatto senza filtro attivo (`InpUseNewsFilter` è spesso `false` di
+default — vedi `VERIFICA_FEDELTA_GOLDENCROSS_PDF_2026-08-19.md` §2.7 G14), o
+(b) nelle 2 ore prima di una chiusura di mercato di almeno 2 ore, senza un
+cutoff. È lo stesso tipo di buco già segnalato in **X15** (concentrazione di
+rischio) — attivo da SUBITO, non solo a conto finanziato. **Proposto a
+Claudio, non ancora auditato.**
