@@ -1,0 +1,220 @@
+# =====================================================================
+#  PASSO 0 -- VWAP REVERT 00_nudo  --  IL MOTORE, DUE LATI INSIEME
+#  ABTG_VwapRevert  su  D30EUR  M15, TICK REALI
+#  magic gemelli 773400 / 773401
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA:
+#    caccia_strategie\CACCIA_M5M15_INDICI_2026-08-25.md  (candidato P1)
+#  SPECIFICA CONGELATA (la griglia da 18 celle, NON questo file):
+#    prove\VWAPREVERT_DAX_M15_BOZZA.txt   <- ha ancora il cartello
+#    "NON PUO' GIRARE": i suoi CRITERI DI MERITO sono [DA FIRMARE].
+#  TESI DEL PORTING (scostamenti dal Pine, uno per uno):
+#    VWAPREVERT_TESI.md
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "VWAP Mean Reversion Strategy" di
+#    sumbloke077, TradingView, pubblicato 02/04/2026, sorgente Pine
+#    pubblico (scriptAccess "open_no_auth").
+#      https://www.tradingview.com/script/YBqnzqDK-VWAP-Mean-Reversion-Strategy/
+#    LICENZA: [INCERTO] -- il sorgente non ha intestazione di licenza.
+#    L'attribuzione e' ripetuta in testa a ABTG_VwapRevert.mq5.
+#
+# =====================================================================
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+# ---------------------------------------------------------------------
+#  E' il PASSO 0 preteso dal dossier (par. 6, paletto 2):
+#     "PASSO 0 obbligatorio: contare le operazioni prima di leggere
+#      il PF. Se n IS < 150 scatta la valvola R59."
+#
+#  Si misura QUANTE OPERAZIONI produce il motore VWAP REVERT nudo, e
+#  quanto costa la regola intraday. Il Profit Factor che esce dal CSV
+#  SI LEGGE MA NON SI GIUDICA: i criteri di merito S3/S4/S5/S6 della
+#  BOZZA non sono firmati, non c'e' altopiano da leggere su quattro
+#  celle, e quattro celle non sono un round.
+#
+#  >>> LA BOZZA RESTA FERMA. Questo file NON la sblocca e non la
+#      sostituisce: la BOZZA e' una GRIGLIA da 18 celle che sceglie
+#      una taratura, e una griglia si lancia dopo la firma. Qui non si
+#      spazzola NIENTE tranne il magic gemello.
+#
+# ---------------------------------------------------------------------
+#  L'IPOTESI (dalla BOZZA, non riscritta: richiamata)
+# ---------------------------------------------------------------------
+#  Dentro la sessione la VWAP e' il prezzo che il flusso ha davvero
+#  pagato. Quando il prezzo si allontana oltre 1 deviazione standard
+#  volume-pesata E LI' STAMPA UNA CANDELA DI RIFIUTO all'estremo delle
+#  ultime 20 barre, confermata dalla barra successiva, chi ha inseguito
+#  e' in perdita: il ritorno verso la VWAP e' il suo costo.
+#
+#  LA DOMANDA DEL DOSSIER, che questo PASSO 0 NON risponde ancora:
+#    la VWAP -- bocciata come FILTRO direzionale in R101 (gradino
+#    07_vwap: PF +0,007 sul Dow, -0,061 sul DAX, INCOERENTE) -- ha un
+#    edge quando diventa il MOTORE? Qui si misura solo se il campione
+#    per rispondere ESISTE.
+#
+# ---------------------------------------------------------------------
+#  LA DOMANDA DEL PASSO 0, e i tre esiti congelati PRIMA dei numeri
+# ---------------------------------------------------------------------
+#  A. n per lato >= 150 in IS  -> il campione c'e', Emendamento della
+#     Finestra regola A soddisfatto: il round vero si puo' disegnare e
+#     i criteri di merito della BOZZA si possono portare alla firma.
+#
+#  B. n per lato < 150 in IS   -> scatta la VALVOLA R59: il MERITO
+#     resta SOSPESO, il RISCHIO si giudica lo stesso (un drawdown e'
+#     un fatto accaduto, valido a qualunque n).
+#     >>> NON si allarga il motore per fare campione. La stima della
+#         BOZZA era 0,5-2 trade/giorno per indice [STIMATA, mai
+#         misurata]: questo giro la sostituisce con un numero.
+#
+#  C. n enorme (molte centinaia)-> la banda e' troppo stretta. La
+#     manopola e' InpSigmaMult VERSO L'ALTO (piu' selettiva), che e'
+#     gia' un asse della BOZZA -- NON il rischio, e NON un filtro
+#     nuovo appiccicato sopra (ROBUSTEZZA.md: filtro aggiunto dopo a
+#     un motore gia' tarato = 0 successi su 5).
+#
+# ---------------------------------------------------------------------
+#  IL CANCELLO S0 (il COSTO) NON E' IN QUESTA TABELLA
+# ---------------------------------------------------------------------
+#  S0 pretende che il risultato LORDO medio per operazione valga
+#  almeno 3x lo spread medio della fascia, IN PUNTI INDICE. Due cose
+#  mancano e vanno dichiarate mancanti, non stimate:
+#    - lo spread medio di BCM su D30EUR in M15 NON E' MISURATO IN CASA
+#      (il "1-2 punti indice" di R98_CRITERI.md e' [INCERTO]);
+#    - il rapporto punti MT5 / punti indice su D30EUR NON E' AGLI ATTI
+#      (R97 lo ha misurato su U30USD e NASUSD, non sul DAX).
+#  Finche' non sono misurati, S0 e' NON ADJUDICABILE. Si legge la
+#  mediana del take lordo nell'export per-trade in Common\Files
+#  (abtg_trades_ABTG_VwapRevert_D30EUR_<magic>.csv) e si riporta il
+#  numero grezzo, senza pronunciare il verdetto.
+#
+# ---------------------------------------------------------------------
+#  IGIENE (cancello S2 della BOZZA, e qui vale gia')
+# ---------------------------------------------------------------------
+#  I due magic gemelli devono dare righe IDENTICHE AL CENTESIMO in
+#  ogni CSV. Se non lo sono, il banco non e' deterministico e il
+#  numero non si legge. E' l'unico motivo per cui InpMagic e' l'unico
+#  asse spazzolato.
+#
+# ---------------------------------------------------------------------
+#  IL FLAT DI FINE SEDUTA -- e' ACCESO, ed e' una scelta di CONTRATTO
+# ---------------------------------------------------------------------
+#  InpFlatFineSeduta=1 alle 20:45 ORA SERVER (= 21:45 italiana).
+#  Aggiunto all'EA il 28/08/2026: alle 20:45 chiude ogni posizione,
+#  cancella ogni pendente e non riapre fino al giorno dopo.
+#
+#  PERCHE' e' acceso nella cella base, cioe' perche' la cella base NON
+#  e' il porting nudo del Pine su questo punto:
+#    FTMO Standard (leva 1:100 -- quella che vogliamo tenere) impone
+#    restrizioni overnight / weekend / news SOLO sul conto finanziato.
+#    Un motore che apre e chiude dentro la seduta non incontra mai quel
+#    vincolo. L'alternativa e' scendere a Swing, leva 1:30.
+#    Un candidato che in backtest guadagna TENENDO OVERNIGHT non e'
+#    misurabile per il posto che deve occupare: sarebbe un numero che
+#    descrive una macchina che in campo non potremmo far girare.
+#  Ed e' COERENTE CON LA TESI: la VWAP di sessione si azzera ogni
+#  giorno; una posizione tenuta oltre la seduta non ha piu' il livello
+#  che l'ha generata.
+#
+#  IL COSTO DELLA REGOLA NON SI STIMA: SI MISURA. E' la cella
+#  03_overnight (PASSO0_VWAPREV_03_overnight.txt), che spegne il flat
+#  e cambia SOLO quello. Se il motore vive solo tenendo overnight,
+#  quel confronto lo dice in una riga.
+#
+#  ATTENZIONE ALL'ORA: 20:45 e' ORA SERVER. Il server BCM e' UN'ORA
+#  INDIETRO rispetto all'italiana. D30EUR chiude alle 21:00 server.
+#  Sul gemello U30USD (che chiude piu' tardi) lo stesso valore taglia
+#  prima della chiusura del simbolo: e' VOLUTO, perche' il cancello S5
+#  confronta i due simboli e un parametro diverso li renderebbe
+#  inconfrontabili.
+#
+# ---------------------------------------------------------------------
+#  MODELLO E FINESTRA
+# ---------------------------------------------------------------------
+#  MODELLO: TICK REALI (modello 4). NON negoziabile.
+#    Su M5/M15 l'OHLC 1-min INGANNA, ed e' misurato in casa: i Live5m
+#    davano +129k finti sul DAX in OHLC ed erano morti a tick reali
+#    (REGISTRO_TEST.md par. 2).
+#
+#  FINESTRA: 2024.09.26 -> 2026.06.30, split 40/60 (le stesse di
+#    R88/R97/R98/R101, cosi' i numeri si confrontano).
+#
+#  @DAQUANDO E' MISURATO, NON IPOTIZZATO:
+#    risultati_archivio\REFERTO_SONDA_STORICO_17-08.md -- indici a BCM
+#    partono dal 2024.09.26, stato dichiarato COMPLETO.
+#
+#  AVVERTENZA DI REGIME, che vale per ogni numero di questo giro:
+#    21 mesi di feed BCM sugli indici sono UN SOLO REGIME RIALZISTA.
+#    Il lato SHORT parte svantaggiato PER REGIME, non per merito del
+#    motore. Un "niente edge short" letto qui chiude la domanda per
+#    QUESTA EPOCA, non in assoluto.
+#
+# ---------------------------------------------------------------------
+#  MAGIC
+# ---------------------------------------------------------------------
+#  773400 / 773401 -- blocco 7734xx. VERIFICATO LIBERO in tutto il
+#  repo il 25/08/2026 dal cacciatore e RIVERIFICATO il 28/08/2026:
+#  zero occorrenze operative in .mq5, .txt, .md, .ps1, .ini, .csv.
+#  Nessun magic vivo compare in questo file: il tester non deve poter
+#  incrociare i deal del forward.
+#
+# ---------------------------------------------------------------------
+#  RISCHIO
+# ---------------------------------------------------------------------
+#  Gira a InpRiskPercent=1.00 per confrontarsi con l'archivio.
+#  In campo sul 100k si gira a 0,65%: OGNI DD di questo giro si
+#  converte x0,65 prima del confronto col forward.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA -- identica in tutte e quattro le celle.
+#     Si pinnano in forma COMPLETA (v||v||0||v||N) e non con "Nome=v"
+#     secco: un pin secco imposta il VALORE ma NON spegne il flag di
+#     ottimizzazione che MT5 ricorda dall'ultima griglia di questo EA
+#     (CHECKLIST_RIGA_DI_LANCIO.md punto 5). I tre assi della BOZZA
+#     (InpSigmaMult, InpTpR, InpSlAtrFloor) sono i primi a essere
+#     pinnati proprio per questo.
+InpSigmaMult=1.0||1.0||0||1.0||N
+InpTpR=2.0||2.0||0||2.0||N
+InpSlAtrFloor=0.2||0.2||0||0.2||N
+InpLookback=20||20||0||20||N
+InpAtrPeriod=10||10||0||10||N
+InpAtrMult=1.5||1.5||0||1.5||N
+InpOrderLifeBars=3||3||0||3||N
+InpAtrBufferPct=0.01||0.01||0||0.01||N
+
+# --- le VARIANTI DI CASA: tutte SPENTE. La cella base e' il porting.
+InpSlFloorMode=0||0||0||0||N
+InpSlUseSetupBar=0||0||0||0||N
+InpEngulfingOnly=0||0||0||0||N
+InpUsePartial=0||0||0||0||N
+InpUseTrailAtr=0||0||0||0||N
+InpMinSessionBars=0||0||0||0||N
+InpSessionStartHour=-1||-1||0||-1||N
+InpSpreadExtraPts=0||0||0||0||N
+InpMaxSpreadPctSL=0||0||0||0||N
+InpUseHourFilter=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpCloseOnOpposite=1||1||0||1||N
+
+# --- IL FLAT DI FINE SEDUTA: acceso, 20:45 ORA SERVER.
+#     InpStopNuoviMinPrimaFlat resta a 0 (SPENTO): e' una gamba da
+#     misurare a parte, non un default da assumere.
+InpFlatFineSeduta=1||1||0||1||N
+InpFlatOra=20||20||0||20||N
+InpFlatMinuto=45||45||0||45||N
+InpStopNuoviMinPrimaFlat=0||0||0||0||N
+
+# --- RISCHIO E CAP (il cap e' il criterio C6, obbligatorio) ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=2||2||0||2||N
+
+# --- I DUE LATI: qui INSIEME. E' la cella che porta i gemelli ---
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=773400||773400||1||773401||Y

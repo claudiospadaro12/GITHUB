@@ -1,0 +1,101 @@
+# =====================================================================
+#  PASSO 0 -- VWAP REVERT 03_overnight  --  IL FLAT SPENTO
+#  ABTG_VwapRevert  su  D30EUR  M15, TICK REALI
+#  magic gemelli 773430 / 773431
+# ---------------------------------------------------------------------#
+#  E' la cella 00_nudo (prove\ABTG_VwapRevert.txt) con UN SOLO
+#  INTERRUTTORE MOSSO. Ablazione A STELLA, non a scala cumulativa: il
+#  diff fra questo file e il 00_nudo e' di DUE righe e basta.
+#
+#  L'IPOTESI, I TRE ESITI (A / B / C), il cancello S0 (costo), il
+#  cancello S2 (gemelli) e l'avvertenza di REGIME sono quelli scritti
+#  in testa a prove\ABTG_VwapRevert.txt e NON si riscrivono qui: un
+#  criterio ricopiato in quattro posti e' un criterio che a un certo
+#  punto diverge.
+#
+#  COSA CAMBIA RISPETTO AL 00_nudo:
+#    InpFlatFineSeduta   1  ->  0   [SI SPEGNE]
+#    InpMagic            773400/773401  ->  773430/773431
+#
+#  PERCHE' ESISTE, e non e' una gamba di rifinitura:
+#  il 00_nudo ha il FLAT DI FINE SEDUTA ACCESO, che e' uno SCOSTAMENTO
+#  DICHIARATO dal Pine di sumbloke077 (l'autore non chiude a fine
+#  giornata). Una regola di casa messa nella cella base senza misurarne
+#  il costo e' esattamente il difetto che la fabbrica di EA vieta:
+#  "una variabile alla volta, e si confronta SEMPRE con/senza".
+#
+#  QUESTA E' LA CELLA CON/SENZA. Misura in una riga quanto costa --
+#  o quanto rende -- obbligare il motore a stare dentro la seduta.
+#
+#  >>> COME SI LEGGE, ed e' il punto che conta:
+#      questa cella NON PUO' VINCERE. Anche se facesse molto meglio del
+#      00_nudo, NON diventa la cella da mandare in campo: tenere
+#      posizioni overnight e' incompatibile con FTMO Standard (leva
+#      1:100) sul conto finanziato, che e' il posto per cui questo
+#      candidato viene costruito. Serve a sapere QUANTO stiamo pagando
+#      per la leva 1:100, cioe' a rendere la scelta un numero invece
+#      che un'opinione.
+#      Se il divario fosse enorme, la conseguenza NON e' "accendiamo
+#      l'overnight": e' "questo motore non e' un motore intraday, e va
+#      giudicato per quello che e'".
+#
+#  >>> E l'EA lo DICHIARA da solo: con InpFlatFineSeduta=0 scrive nel
+#      log "flat di fine seduta SPENTO: questa cella TIENE POSIZIONI
+#      OVERNIGHT". Il log e' agli atti insieme al numero.
+#
+#  MAGIC VERGINI 773430/773431: cercati uno per uno in tutto il repo
+#  il 28/08/2026 -> ZERO occorrenze.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA -- identica in tutte e quattro le celle.
+#     Si pinnano in forma COMPLETA (v||v||0||v||N) e non con "Nome=v"
+#     secco: un pin secco imposta il VALORE ma NON spegne il flag di
+#     ottimizzazione che MT5 ricorda dall'ultima griglia di questo EA
+#     (CHECKLIST_RIGA_DI_LANCIO.md punto 5). I tre assi della BOZZA
+#     (InpSigmaMult, InpTpR, InpSlAtrFloor) sono i primi a essere
+#     pinnati proprio per questo.
+InpSigmaMult=1.0||1.0||0||1.0||N
+InpTpR=2.0||2.0||0||2.0||N
+InpSlAtrFloor=0.2||0.2||0||0.2||N
+InpLookback=20||20||0||20||N
+InpAtrPeriod=10||10||0||10||N
+InpAtrMult=1.5||1.5||0||1.5||N
+InpOrderLifeBars=3||3||0||3||N
+InpAtrBufferPct=0.01||0.01||0||0.01||N
+
+# --- le VARIANTI DI CASA: tutte SPENTE. La cella base e' il porting.
+InpSlFloorMode=0||0||0||0||N
+InpSlUseSetupBar=0||0||0||0||N
+InpEngulfingOnly=0||0||0||0||N
+InpUsePartial=0||0||0||0||N
+InpUseTrailAtr=0||0||0||0||N
+InpMinSessionBars=0||0||0||0||N
+InpSessionStartHour=-1||-1||0||-1||N
+InpSpreadExtraPts=0||0||0||0||N
+InpMaxSpreadPctSL=0||0||0||0||N
+InpUseHourFilter=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpCloseOnOpposite=1||1||0||1||N
+
+# --- IL FLAT DI FINE SEDUTA: acceso, 20:45 ORA SERVER.
+#     InpStopNuoviMinPrimaFlat resta a 0 (SPENTO): e' una gamba da
+#     misurare a parte, non un default da assumere.
+InpFlatFineSeduta=0||0||0||0||N
+InpFlatOra=20||20||0||20||N
+InpFlatMinuto=45||45||0||45||N
+InpStopNuoviMinPrimaFlat=0||0||0||0||N
+
+# --- RISCHIO E CAP (il cap e' il criterio C6, obbligatorio) ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=2||2||0||2||N
+
+# --- I DUE LATI: qui INSIEME. E' la cella che porta i gemelli ---
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=773430||773430||1||773431||Y

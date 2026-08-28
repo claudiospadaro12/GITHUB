@@ -90,8 +90,34 @@
 //|  calc_on_every_tick = false. Niente look-ahead, niente repaint.   |
 //|                                                                   |
 //|  CAP GIORNALIERO OBBLIGATORIO (criterio C6 del dossier):          |
-//|  InpMaxTradesPerDay parte a 2, ed e' l'unico default che si       |
-//|  scosta dall'autore per regola di casa e non per misura.          |
+//|  InpMaxTradesPerDay parte a 2. Insieme al FLAT DI FINE SEDUTA     |
+//|  qui sotto sono i DUE soli default che si scostano dall'autore    |
+//|  per REGOLA DI CASA e non per misura.                             |
+//|                                                                   |
+//|  FLAT DI FINE SEDUTA -- InpFlatFineSeduta, DEFAULT ACCESO.        |
+//|    Aggiunto il 28/08/2026 su richiesta esplicita: il motore deve  |
+//|    essere VERAMENTE intraday. All'ora di flat (ORA SERVER) chiude |
+//|    tutte le posizioni di questo magic, cancella i pendenti e NON  |
+//|    riapre fino al giorno dopo: nessuna posizione a cavallo della  |
+//|    notte, nessuna a cavallo del fine settimana.                   |
+//|    PERCHE' e' acceso di default, ed e' una scelta di CONTRATTO,   |
+//|    non di taratura: FTMO Standard (leva 1:100) impone restrizioni |
+//|    overnight / weekend / news SOLO sul conto finanziato. Un EA    |
+//|    che apre e chiude dentro la seduta non incontra mai quel       |
+//|    vincolo, e permette di restare a 1:100 invece di scendere a    |
+//|    1:30 (Swing). E' anche COERENTE CON LA TESI: la VWAP di        |
+//|    sessione si azzera ogni giorno, quindi una posizione tenuta    |
+//|    oltre la seduta non ha piu' il livello che l'ha generata.      |
+//|    >>> E' uno SCOSTAMENTO DAL PINE, dichiarato: l'autore non      |
+//|        chiude a fine giornata. Chi vuole la cella AUTORE PURA     |
+//|        mette InpFlatFineSeduta=false, e l'EA lo scrive nel log    |
+//|        ("tiene posizioni OVERNIGHT"). Il costo della regola si    |
+//|        MISURA con quella gamba, non si stima.                     |
+//|    >>> LIMITE VERO, dichiarato: il flat vive dentro OnTick. Se il |
+//|        simbolo smette di mandare tick prima dell'ora di flat, la  |
+//|        chiusura slitta al primo tick utile. Su un CFD indice      |
+//|        dentro l'orario di negoziazione i tick ci sono; ai bordi   |
+//|        della seduta va verificato sul referto.                    |
 //|                                                                   |
 //|  ORARI: SEMPRE ORA SERVER. Il server BCM e' UN'ORA INDIETRO       |
 //|  rispetto all'ora italiana (DAX 09:00 IT = 08:00 server).         |
@@ -184,6 +210,20 @@ input int    InpHourEnd          = 16;    // Ora SERVER di fine (inclusa)
 input bool   InpFridayClose      = false; // Venerdi': chiudi tutto oltre l'ora e non riaprire
 input int    InpFridayCloseHour  = 20;    // Ora SERVER del venerdi' oltre cui chiudo
 
+input group "=== FLAT DI FINE SEDUTA (motore VERAMENTE intraday) ==="
+//--- ACCESO di default: e' la seconda regola di casa dopo il cap giornaliero.
+//    Vedi il blocco in testa al file per il perche' (FTMO Standard, leva 1:100)
+//    e per lo scostamento dichiarato dal Pine dell'autore.
+input bool   InpFlatFineSeduta   = true;  // Chiudi TUTTO a fine seduta e non riaprire fino a domani
+input int    InpFlatOra          = 20;    // Ora SERVER del flat (20 server = 21 italiana)
+input int    InpFlatMinuto       = 45;    // Minuto SERVER del flat
+//--- quanti minuti PRIMA del flat si smette di piazzare nuovi pendenti.
+//    0 = SPENTO (default neutro): la gamba si misura, non si assume.
+//    A che serve: un ordine riempito a 20:44 e chiuso d'ufficio a 20:45 e'
+//    solo spread pagato. Ma "quanto costa" e' un numero, non un'opinione:
+//    si accende in una gamba a parte e si confronta.
+input int    InpStopNuoviMinPrimaFlat = 0; // Niente nuovi ordini negli ultimi X minuti prima del flat (0 = spento)
+
 input group "=== Rischio ==="
 input double InpRiskPercent      = 1.0;   // Rischio per trade, % del saldo (autore: 1.0 -- coincide)
 
@@ -214,6 +254,7 @@ int      hAtr = INVALID_HANDLE;
 datetime gLastBar = 0;
 int      gDay = -1, gTradesToday = 0;
 ulong    gUltimoTicketContato = 0;      // per contare gli ingressi ESEGUITI, non quelli ordinati
+int      gFlatLogGiorno = -1;           // il flat scrive UNA riga al giorno, non una a tick
 
 //--- METRICHE DA PROP. L'Equity DD dice se il conto sopravvive; una prop
 //    invece ti chiude per il LIMITE GIORNALIERO, che e' un'altra cosa.
@@ -502,6 +543,36 @@ bool OraAmmessa_Calc(const int ora, const int start, const int end)
    return(ora>=start || ora<=end);
   }
 
+//+------------------------------------------------------------------+
+//| FLAT DI FINE SEDUTA -- nucleo puro.                                |
+//| Vero quando l'ora corrente ha raggiunto o superato l'ora di flat.  |
+//| Il confronto si fa in MINUTI DEL GIORNO, non ora per ora: con      |
+//| 20:45 un confronto sulla sola ora chiuderebbe alle 20:00 o alle    |
+//| 21:00, mai alle 20:45.                                             |
+//| La finestra di flat va dall'ora di flat alla MEZZANOTTE: e' voluto |
+//| ed e' cio' che rende il motore intraday davvero intraday. Non      |
+//| esiste nessun caso "a cavallo della mezzanotte", perche' oltre la  |
+//| mezzanotte c'e' un altro giorno e un'altra VWAP di sessione.       |
+//+------------------------------------------------------------------+
+bool DopoOrarioFlat_Calc(const int ora,const int minuto,
+                         const int flatOra,const int flatMinuto)
+  {
+   return(ora*60 + minuto >= flatOra*60 + flatMinuto);
+  }
+
+//+------------------------------------------------------------------+
+//| Coda della seduta: siamo negli ultimi 'anticipoMin' minuti prima   |
+//| del flat? Con anticipoMin <= 0 la guardia e' SPENTA e la funzione  |
+//| e' sempre falsa (default neutro dichiarato).                       |
+//+------------------------------------------------------------------+
+bool CodaSeduta_Calc(const int ora,const int minuto,
+                     const int flatOra,const int flatMinuto,
+                     const int anticipoMin)
+  {
+   if(anticipoMin <= 0) return(false);
+   return(ora*60 + minuto >= flatOra*60 + flatMinuto - anticipoMin);
+  }
+
 //==================================================================
 //  CICLO DI VITA
 //==================================================================
@@ -551,6 +622,13 @@ int OnInit()
      { Print("ERRORE: InpMaxSpreadPctSL non puo' essere negativo."); return(INIT_FAILED); }
    if(!InpAllowLong && !InpAllowShort)
      { Print("ERRORE: entrambi i lati spenti: l'EA non avrebbe niente da fare."); return(INIT_FAILED); }
+   if(InpFlatOra<0 || InpFlatOra>23 || InpFlatMinuto<0 || InpFlatMinuto>59)
+     { Print("ERRORE: InpFlatOra deve stare fra 0 e 23 e InpFlatMinuto fra 0 e 59 (ORA SERVER)."); return(INIT_FAILED); }
+   if(InpStopNuoviMinPrimaFlat < 0)
+     { Print("ERRORE: InpStopNuoviMinPrimaFlat non puo' essere negativo (0 = spento)."); return(INIT_FAILED); }
+   //--- una coda piu' lunga dell'intera giornata spegnerebbe l'EA in silenzio.
+   if(InpFlatFineSeduta && InpStopNuoviMinPrimaFlat >= InpFlatOra*60+InpFlatMinuto)
+     { Print("ERRORE: InpStopNuoviMinPrimaFlat copre tutta la giornata: nessun ingresso sarebbe mai possibile."); return(INIT_FAILED); }
 
    hAtr = iATR(_Symbol, gTF, InpAtrPeriod);
    if(hAtr==INVALID_HANDLE)
@@ -562,8 +640,18 @@ int OnInit()
    if(InpSlFloorMode!=VR_FLOOR_AUTORE || InpSlUseSetupBar || InpUsePartial ||
       InpUseTrailAtr || InpMinSessionBars>0 || InpSessionStartHour>=0 ||
       InpSpreadExtraPts>0 || InpEngulfingOnly || InpUseHourFilter ||
-      InpUseNewsFilter || InpFridayClose || InpMaxSpreadPctSL>0)
+      InpUseNewsFilter || InpFridayClose || InpMaxSpreadPctSL>0 ||
+      InpStopNuoviMinPrimaFlat>0)
       Log("ATTENZIONE: almeno una variante e' accesa. Questa cella NON e' la cella AUTORE del porting.");
+
+   //--- Il FLAT si dichiara nei DUE versi, perche' il default e' ACCESO e
+   //    l'acceso e' gia' uno scostamento dall'autore. Chi legge il log
+   //    deve sapere sempre in quale delle due macchine si trova.
+   if(InpFlatFineSeduta)
+      Log(StringFormat("FLAT DI FINE SEDUTA ACCESO alle %02d:%02d ORA SERVER: motore INTRADAY, niente overnight ne' weekend. Scostamento dichiarato dal Pine (l'autore non chiude).",
+                       InpFlatOra, InpFlatMinuto));
+   else
+      Log("ATTENZIONE: flat di fine seduta SPENTO: questa cella TIENE POSIZIONI OVERNIGHT ed e' incompatibile con un conto FTMO Standard finanziato. E' la gamba di confronto, non la cella da mandare in campo.");
 
    if(InpUseNewsFilter) LoadNews();
    if(InpAutoTest)      AutoTestVwapRevert();
@@ -583,12 +671,16 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
-   if(FridayCloseCheck()) return;      // venerdi' oltre l'ora: chiudo e non riapro
-
    //--- Sta QUI e non dopo il filtro della nuova barra: su M15 la caduta
    //    peggiore di giornata succede in mezzo a una candela.
+   //    E sta PRIMA delle chiusure d'ufficio: se il flat porta via la
+   //    posizione, la caduta di quella giornata dev'essere gia' contata.
    AggiornaPeggiorGiornata();
    AggiornaContatoreTrade();           // il cap conta gli ingressi ESEGUITI
+
+   if(FridayCloseCheck())   return;    // venerdi' oltre l'ora: chiudo e non riapro
+   if(FlatFineSedutaCheck())return;    // fine seduta: chiudo tutto e non riapro
+
    ManageAll();                        // parziale / pari / trailing: a ogni tick
 
    if(!IsNewBar()) return;             // le DECISIONI solo a barra chiusa
@@ -644,6 +736,7 @@ void OnNewBar()
 
    if(CountPositions()>0) return;                       // una posizione alla volta per magic
    if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
+   if(!CodaSedutaOK()) return;                          // troppo vicino al flat (0 = spento)
    if(!OraOK())    return;
    if(!SpreadOK()) return;
    if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())) return;
@@ -1075,6 +1168,65 @@ bool FridayCloseCheck()
   }
 
 //+------------------------------------------------------------------+
+//| FLAT DI FINE SEDUTA -- il motore e' intraday per COSTRUZIONE.      |
+//|                                                                    |
+//| Raggiunta l'ora di flat (ORA SERVER, mai quella del PC): chiude    |
+//| ogni posizione di questo magic su questo simbolo, cancella ogni    |
+//| pendente, e torna true -- e il true ferma OnTick, quindi NON si    |
+//| riapre fino al giorno dopo. Nessuna posizione a cavallo della      |
+//| notte, nessuna a cavallo del fine settimana.                       |
+//|                                                                    |
+//| Perche' i pendenti si cancellano insieme alle posizioni: un        |
+//| BUY STOP lasciato vivo oltre il flat riempirebbe di notte o        |
+//| lunedi' in gap, cioe' esattamente cio' che questa regola esiste    |
+//| per impedire.                                                      |
+//|                                                                    |
+//| Il log si scrive UNA VOLTA per giornata (gFlatLogGiorno): senza,   |
+//| a ogni tick della coda di seduta uscirebbe una riga.               |
+//+------------------------------------------------------------------+
+bool FlatFineSedutaCheck()
+  {
+   if(!InpFlatFineSeduta) return(false);
+   MqlDateTime t; TimeToStruct(TimeCurrent(),t);
+   if(!DopoOrarioFlat_Calc(t.hour,t.min,InpFlatOra,InpFlatMinuto)) return(false);
+
+   int chiuse=0;
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong p=PositionGetTicket(i);
+      if(p==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      if(gTrade.PositionClose(p)) chiuse++;
+      else Log("flat di fine seduta: chiusura FALLITA -- "+gTrade.ResultRetcodeDescription());
+     }
+   CancellaOrdini(0);
+
+   if(t.day_of_year!=gFlatLogGiorno)
+     {
+      gFlatLogGiorno = t.day_of_year;
+      Log(StringFormat("flat di fine seduta alle %02d:%02d server: %d posizioni chiuse, pendenti cancellati, niente overnight.",
+                       InpFlatOra, InpFlatMinuto, chiuse));
+     }
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| Guardia sui NUOVI ordini nella coda della seduta.                  |
+//| true = si puo' ancora aprire. Con InpStopNuoviMinPrimaFlat = 0     |
+//| (default) e' sempre true: non cambia niente rispetto a prima.      |
+//+------------------------------------------------------------------+
+bool CodaSedutaOK()
+  {
+   if(!InpFlatFineSeduta) return(true);
+   if(InpStopNuoviMinPrimaFlat <= 0) return(true);
+   MqlDateTime t; TimeToStruct(TimeCurrent(),t);
+   if(CodaSeduta_Calc(t.hour,t.min,InpFlatOra,InpFlatMinuto,InpStopNuoviMinPrimaFlat))
+     { Log("coda di seduta: niente nuovi ordini, il flat e' troppo vicino."); return(false); }
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
 //| Il cap giornaliero conta gli ingressi ESEGUITI, non quelli         |
 //| ordinati: con un ordine pendente che puo' scadere senza riempire,  |
 //| contare i piazzamenti significherebbe bruciare il cap con ordini   |
@@ -1390,8 +1542,29 @@ void AutoTestVwapRevert()
                (int)o1,(int)o2,(int)o3,(int)o4);
    if(!(m1 && !m2 && m3 && !m4 && o1 && !o2 && o3 && o4)) falliti++;
 
+   //--- 10. IL FLAT DI FINE SEDUTA (flat alle 20:45 server)
+   //    Il caso che conta e' il TERZO: alle 20:00 il flat NON deve
+   //    scattare. Un confronto sulla sola ora ("t.hour >= 20") lo
+   //    farebbe scattare, e chiuderebbe 45 minuti prima ogni giorno.
+   bool f1 = DopoOrarioFlat_Calc(20,45,20,45);   // esatto -> si'
+   bool f2 = DopoOrarioFlat_Calc(20,46,20,45);   // dopo   -> si'
+   bool f3 = DopoOrarioFlat_Calc(20, 0,20,45);   // stessa ora, prima -> NO
+   bool f4 = DopoOrarioFlat_Calc(23,59,20,45);   // fino a mezzanotte -> si'
+   bool f5 = DopoOrarioFlat_Calc( 9,30,20,45);   // mattina -> no
+   bool f6 = DopoOrarioFlat_Calc( 0, 0,20,45);   // giorno nuovo -> no
+   //    la coda: 30 minuti prima delle 20:45 = dalle 20:15
+   bool q1 = CodaSeduta_Calc(20,15,20,45,30);    // esatto -> si'
+   bool q2 = CodaSeduta_Calc(20,14,20,45,30);    // un minuto prima -> no
+   bool q3 = CodaSeduta_Calc(20,50,20,45,30);    // oltre il flat -> si'
+   bool q4 = CodaSeduta_Calc(20,15,20,45, 0);    // guardia SPENTA -> sempre no
+   PrintFormat("[VWAPREV][AUTOTEST] flat 20:45: esatto=%d (atteso 1) | 20:46=%d (atteso 1) | 20:00=%d (atteso 0) | 23:59=%d (atteso 1) | 09:30=%d (atteso 0) | 00:00=%d (atteso 0)",
+               (int)f1,(int)f2,(int)f3,(int)f4,(int)f5,(int)f6);
+   PrintFormat("[VWAPREV][AUTOTEST] coda 30min: 20:15=%d (atteso 1) | 20:14=%d (atteso 0) | 20:50=%d (atteso 1) | spenta=%d (atteso 0)",
+               (int)q1,(int)q2,(int)q3,(int)q4);
+   if(!(f1 && f2 && !f3 && f4 && !f5 && !f6 && q1 && !q2 && q3 && !q4)) falliti++;
+
    Print("[VWAPREV][AUTOTEST] esito motore: ", (falliti==0
-         ? "NOVE BLOCCHI SU NOVE, la regola ragiona come la firma."
+         ? "DIECI BLOCCHI SU DIECI, la regola ragiona come la firma."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
 
    //--- e la guardia del conto, col suo autotest gia' pronto nell'include
