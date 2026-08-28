@@ -4725,3 +4725,60 @@ leva onorata.
 > un broker si misura SUI SIMBOLI DI QUEL BROKER (demo/trial della prop
 > con ABTG_SondaMargine), mai per trasformazione della leva su simboli
 > altrui.
+
+---
+
+## 🆕 AGGIUNTA DEL 28/08/2026 — trovata verificando G1-PAOLO, **eseguendo il driver del round su un banco stubbato**
+
+## 96. 🖼️ L'ANTEPRIMA DEL GIRO A VUOTO NON E' L'ARTEFATTO CHE GIRERA' — e mente proprio sul campo che il round sta misurando
+
+_Difetto vero, gia' committato in `walkforward_generico.ps1` (righe 504 e 514),
+trovato PRIMA dell'invio della riga G1-PAOLO._
+
+Il punto 5 dice di **leggere la stampa** del giro a vuoto e confrontarla col file
+prova. Il punto 14 dice che il **codice d'uscita** del giro a vuoto deve
+dipendere dai sotto-lavori. Questo copre il terzo pezzo, che non c'era:
+**l'anteprima che il giro a vuoto SCRIVE SUL DISCO puo' essere diversa dall'.ini
+che girera' davvero.**
+
+```powershell
+# riga 504 -- il nome NON contiene l'etichetta: N chiamate, UN file
+$anteprima=Join-Path $Work "anteprima_$($Expert)_$Simbolo$SuffBroker.ini"
+...
+Model=4            # riga 514, CABLATO nell'anteprima
+...
+Model=$Modello     # riga 645, la corsa VERA
+```
+
+Su un round a due banchi (G1-PAOLO: banco S a **modello 1 OHLC M1**, banco V a
+**modello 4 tick reali**) succedono due cose insieme:
+1. le **dieci** anteprime collassano in **due** file (uno per EA), e vince
+   l'ultima chiamata — e' il punto 26 (piu' chiamate, una sola raccolta)
+   applicato all'anteprima;
+2. tutte e due dicono **`Model=4`**, cioe' **il contrario** di quello che il
+   banco S girera'. Chi apre l'anteprima per controllare che lo screening sia
+   davvero OHLC legge "tick reali" e conclude che il round e' sbagliato — o,
+   peggio, legge "tick reali" e ci crede.
+
+> ✅ **REGOLA: quello che il giro a vuoto scrive su disco si confronta, campo per
+> campo, con quello che scrive la corsa vera.** Se l'anteprima e' generata da un
+> pezzo di codice DIVERSO da quello della corsa (qui due here-string gemelle),
+> quel codice va **unificato** o i campi che divergono vanno dichiarati nella
+> pagina della riga. E l'anteprima porta nel NOME tutto cio' che la distingue
+> (etichetta, banco, finestra): un'anteprima sovrascritta e' un'anteprima
+> stantia, cioe' il referto vecchio del 17/08 travestito da controllo.
+
+### 96-bis. 🚪 IL PARAMETRO DI RIPIEGO CHE UN GATE DELLO STESSO SCRIPT RENDE INUSABILE
+
+Stessa verifica, stesso script. `RIGA_G1PAOLO.ps1` ha `-DaScreening` per
+accorciare la finestra del banco S se la profondita' misurata risultasse piu'
+corta... e alla riga 378 ha il gate `if($mappa["@DAQUANDO"] -ne $DaScreening){
+throw }`, cioe' **confronta i file prova col parametro invece che col valore
+dichiarato**. Passare `-DaScreening 2021.01.01` fa fallire tutti e cinque i file
+prova: **la via d'uscita e' sbarrata dal guardiano della porta accanto.**
+
+> ✅ **REGOLA: un gate che protegge un valore DICHIARATO si confronta col valore
+> DICHIARATO (una costante), non col parametro che serve a cambiarlo.** Se il
+> parametro viene mosso, il gate non salta: **degrada a RILIEVO** e la differenza
+> finisce scritta accanto ai numeri. Controllo pratico: per ogni parametro di
+> ripiego citato nella pagina, **si lancia il giro a vuoto passandolo davvero**.
