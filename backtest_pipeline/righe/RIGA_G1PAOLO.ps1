@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_G1PAOLO_v1
+#  MARCATORE_RIGA_G1PAOLO_v2
 #  RIGA_G1PAOLO.ps1  --  I TRE VALORI DELLA LIVE DI PAOLO DEL 27/08,
 #                        MESSI SUL BANCO. ABLAZIONE A STELLA.
 # ---------------------------------------------------------------------
@@ -108,6 +108,10 @@ $ErrorActionPreference = "Stop"
 [Threading.Thread]::CurrentThread.CurrentUICulture = [Globalization.CultureInfo]::InvariantCulture
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $INV = [Globalization.CultureInfo]::InvariantCulture
+# il valore DICHIARATO nei cinque file prova. Il gate confronta con QUESTO,
+# non con -DaScreening: altrimenti il parametro che serve ad accorciare la
+# finestra viene bocciato dal guardiano della porta accanto.
+$DaScreeningDichiarato = "2020.01.01"
 
 $Avvio  = Get-Date
 $Stamp  = $Avvio.ToString("yyyyMMdd_HHmm", $INV)
@@ -312,7 +316,7 @@ try{
   # il driver generico pinna il branch da cui riscarica il .mq5: senza
   # questo, il pin varrebbe per il driver e NON per gli EA misurati.
   $testoDrv = Get-Content -LiteralPath $drv -Raw
-  if($testoDrv -notmatch '\$EABranch\s*=\s*"lavoro"'){ throw "walkforward_generico.ps1 non ha la riga \$EABranch attesa: non lo posso pinnare." }
+  if($testoDrv -notmatch '\$EABranch\s*=\s*"lavoro"'){ throw 'walkforward_generico.ps1 non ha la riga $EABranch = "lavoro" attesa: non lo posso pinnare (il pin varrebbe per il driver e NON per gli EA misurati).' }
   $testoDrv = $testoDrv -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
   Set-Content -LiteralPath $drv -Value $testoDrv -Encoding ASCII
   Dico "driver generico scaricato e PINNATO (riscarica gli EA al pin, non dalla punta del branch)" "Green"
@@ -375,7 +379,7 @@ try{
     # cambia per motore (SupRev H4, Invert H1).
     if($mappa["@SIMBOLO"]  -ne $Simbolo){       throw ($cel.Prova + ": @SIMBOLO e' " + $mappa["@SIMBOLO"] + ", atteso " + $Simbolo) }
     if($mappa["@PERIODO"]  -ne $cel.Periodo){   throw ($cel.Prova + ": @PERIODO e' " + $mappa["@PERIODO"] + ", la cella " + $cel.Id + " lo vuole " + $cel.Periodo) }
-    if($mappa["@DAQUANDO"] -ne $DaScreening){   throw ($cel.Prova + ": @DAQUANDO e' " + $mappa["@DAQUANDO"] + ", atteso " + $DaScreening + " (la finestra del banco S; il banco V la riceve da -DaQuando esplicito)") }
+    if($mappa["@DAQUANDO"] -ne $DaScreeningDichiarato){ throw ($cel.Prova + ": @DAQUANDO e' " + $mappa["@DAQUANDO"] + ", atteso " + $DaScreeningDichiarato + " (la finestra dichiarata del banco S; le date vere le passa il driver con -DaQuando esplicito)") }
 
     # GATE DEI VALORI ASSOLUTI: quanto valgono gli input chiave IN
     # QUESTO FILE. Prende i due casi che il diff non puo' vedere: due
@@ -430,6 +434,9 @@ try{
     }
   }
   Dico ("geometria, valori assoluti, stella e magic: TUTTI PASSATI (" + $magicVisti.Count + " magic unici su 10)") "Green"
+  if($DaScreening -ne $DaScreeningDichiarato){
+    [void]$Rilievi.Add("banco S girato dal " + $DaScreening + " invece del " + $DaScreeningDichiarato + " dichiarato nei file prova: finestra accorciata a mano dopo il PASSO 0. Va scritto accanto ai numeri.")
+  }
 
   # -------------------------------------------------------------------
   #  3. L'INCLUDE -- il pezzo che il driver generico non fa
@@ -440,6 +447,7 @@ try{
   # affidabile (un broker si installa dove vuole).
   $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
   $dataFolder = ""
+  $ripiego    = ""
   foreach($cartella in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)){
     if($cartella.Name -ieq "Common"){ continue }
     $originFile = Join-Path $cartella.FullName "origin.txt"
@@ -448,13 +456,30 @@ try{
     try{ $installDir = (Get-Content $originFile -Raw -ErrorAction Stop).Trim() }catch{ continue }
     if($installDir -notlike "*BCM*"){ continue }
     if(-not (Test-Path (Join-Path $installDir "terminal64.exe"))){ continue }
-    $dataFolder = $cartella.FullName
-    break
+    # LA STESSA REGOLA DEL GEMELLO CHE COMPILA, non una regola nuova:
+    # walkforward_generico.ps1 e scarica_storico.ps1 prendono "BCM Markets
+    # MT5 Terminal" ESCLUDENDO "-V3" (l'istanza del 100k). Installare
+    # l'include in un terminale e compilare nell'altro vuol dire venti
+    # "compilazione fallita" dopo un giro a vuoto verde.
+    if($installDir -like "*BCM Markets MT5 Terminal*" -and $installDir -notlike "*-V3*"){
+      $dataFolder = $cartella.FullName; break
+    }
+    if($ripiego -eq ""){ $ripiego = $cartella.FullName }
+  }
+  if($dataFolder -eq "" -and $ripiego -ne ""){
+    $dataFolder = $ripiego
+    [void]$Rilievi.Add("cartella dati scelta per RIPIEGO (" + $ripiego + "): nessuna 'BCM Markets MT5 Terminal' non -V3. Se il driver generico ne sceglie un'altra, la compilazione fallisce.")
   }
   if($dataFolder -and (Test-Path $dataFolder)){
     $incDir = Join-Path $dataFolder "MQL5\Include"
     New-Item -ItemType Directory -Force -Path $incDir | Out-Null
-    Copy-Item $incSrc -Destination $incDir -Force
+    $lenAtteso = (Get-Item -LiteralPath $incSrc).Length
+    Copy-Item -LiteralPath $incSrc -Destination $incDir -Force
+    # la copia si verifica sul CONTENUTO, non sull'esistenza del nome: se in
+    # $incDir esiste gia' una CARTELLA con quel nome, Copy-Item ci mette il
+    # file DENTRO e Test-Path direbbe comunque "vero".
+    $vIn = Get-Item -LiteralPath (Join-Path $incDir "ABTG_PausaGuardian.mqh") -ErrorAction Stop
+    if($vIn.PSIsContainer -or $vIn.Length -ne $lenAtteso){ throw ("ABTG_PausaGuardian.mqh copiato ma NON verificato in " + $incDir) }
     $Include = "INSTALLATO in " + $incDir
     Dico $Include "Green"
   }else{
