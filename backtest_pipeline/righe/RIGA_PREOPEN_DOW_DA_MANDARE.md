@@ -46,7 +46,7 @@ l'interruttore c'è dal primo giorno** (`ComputeLevels`, ramo `ABTG_RANGE_PREV`)
 | | |
 |---|---|
 | **EA** | `mql5/Experts/ABTG_Dow_Apertura_US.mq5` — **la sedia viva**, magic `770202`, **non si tocca** |
-| **Driver** | `backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1` (marcatore `MARCATORE_RIGA_PREOPEN_DOW_v1`) |
+| **Driver** | `backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1` (marcatore `MARCATORE_RIGA_PREOPEN_DOW_v2`) |
 | **File prova** | `prove/PREOPEN_RETEST_DOW_M15.txt` (**i criteri**) · `_SHORT.txt` · `PREOPEN_METRO_DOW_M15.txt` · `PREOPEN_METRO_DOW_M15_SHORT.txt` · `PREOPEN_COSTO_DOW_M15.txt` |
 | **Origine** | caccia intraday indici del 28/08, §2, candidato **P1 "Tristan's Box"** |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_PREOPEN_DOW.md` |
@@ -90,6 +90,18 @@ punti indice). Quindi, come in **R109**:
 > **SOSPESO**, non SUPERATO. È voluto: *dare un verdetto secco su un numero
 > dentro l'incertezza del suo metro è il modo più elegante di sbagliare.*
 > **Se preferisci il confronto secco a 6,0, dimmelo e lo cambio in due righe.**
+
+| take LORDO | criterio FIRMATO | driver |
+|---|---|---|
+| 4,0 | si ferma | 🔴 FALLITO → si ferma |
+| 5,0–5,99 | si ferma | 🟡 SOSPESO → PROSEGUE |
+| 6,0–7,0 | passa | 🟡 SOSPESO → prosegue |
+| 7,01+ | passa | ✅ SUPERATO |
+
+> 🔴 **La conseguenza da vedere per prima:** nella banda **5,0–6,0** il criterio
+> **FIRMATO** direbbe *«il round si ferma qui»* e io **PROSEGUO** (col cappello).
+> È **l'unico punto** in cui la mia interpretazione **allarga** un cancello
+> congelato: va approvato o negato adesso, non dopo aver visto il numero.
 
 ### 2️⃣ Con le **parziali accese**, «il take» non è un numero solo
 
@@ -168,15 +180,18 @@ condividesse il magic **cancellerebbe la prova del gate** (CHECKLIST 41).
 
 ---
 
-## 📌 IL PIN — **`4e83415513f74fc9044bce97d375bcd05a9a4bd5`**
+## 📌 IL PIN — **`89f9d148d7784f0dbfcc44ddfa4feb6711864e7b`**
 
 ```
-4e83415513f74fc9044bce97d375bcd05a9a4bd5
+89f9d148d7784f0dbfcc44ddfa4feb6711864e7b
 ```
 
-> 🔴 **IL PIN QUI SOPRA È UN SEGNAPOSTO E NON FUNZIONA.** Va sostituito col
-> commit vero **dopo il push**, e finché è così **la riga non parte** (l'`irm`
-> dà 404 e comunque `-Pin` pretende 40 caratteri **esadecimali**).
+✅ **Pin VERIFICATO il 28/08**: commit esistente su `origin/lavoro`, e i **nove**
+artefatti che lo script scarica (`walkforward_generico.ps1`, `RIGA_PREOPEN_DOW.ps1`,
+i cinque file prova, `ABTG_PausaGuardian.mqh`, `ABTG_Dow_Apertura_US.mq5`) hanno a
+quel commit lo **stesso contenuto** che hanno adesso sul branch.
+_(Storia: prima della pinnatura qui c'era un segnaposto; il cartello che lo diceva
+è stato tolto nello stesso passo in cui il pin è diventato vero.)_
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
 contenere **tutti e otto** gli artefatti che lo script scarica:
@@ -215,9 +230,9 @@ tipo *«il pin X è BRUCIATO»*, un `sed` largo **riscriverebbe la storia**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='4e83415513f74fc9044bce97d375bcd05a9a4bd5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='89f9d148d7784f0dbfcc44ddfa4feb6711864e7b'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -258,9 +273,9 @@ tipo *«il pin X è BRUCIATO»*, un `sed` largo **riscriverebbe la storia**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='4e83415513f74fc9044bce97d375bcd05a9a4bd5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='89f9d148d7784f0dbfcc44ddfa4feb6711864e7b'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -278,9 +293,9 @@ altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='4e83415513f74fc9044bce97d375bcd05a9a4bd5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='89f9d148d7784f0dbfcc44ddfa4feb6711864e7b'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloFase 'GRIGLIA' -Rifai;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE - normale su una ripresa: lo zip esiste, mandalo' -ForegroundColor Yellow } }
 ```
@@ -356,6 +371,12 @@ punto**: non è un verdetto.
    e i DD del round sottostimano**. Sui **bordi larghi** della griglia
    (`PrevWindowMin=300` → stop più largo → lotto più piccolo) questo
    **NON è misurato**: è un `[DA VERIFICARE]` dichiarato, non un risultato.
+5. ⏱️ **Il confronto col metro porta un confondimento di 35 MINUTI, misurato
+   nel sorgente** (`ABTG_Dow_Apertura_US.mq5`, righe 656-684): il candidato
+   arma alle **14:30 server** (`InpRangeMode=1`), il metro alle **15:05**
+   (`InpRangeMode=0`, `InpRangeMinutes=35`) — finestra **3h00 contro 2h25**,
+   **+24%**. Un vantaggio del candidato sul metro è **in parte tempo, non
+   livello**: il referto lo stampa accanto a ogni verdetto `PASSA`.
 
 ---
 
