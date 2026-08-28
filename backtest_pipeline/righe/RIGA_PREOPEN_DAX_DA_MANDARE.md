@@ -129,15 +129,20 @@ confronto col metro. Il driver **lo impone con un gate** — un file prova con
 ## 🚨 IL DOPPIONE — la cosa che rende questo round diverso dal Dow
 
 `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` (**SEDIA VIVA**, magic `770411`)
-**gioca già il range pre-apertura del DAX**. Letto nel sorgente il 28/08:
+**gioca già il range pre-apertura del DAX**. Letto nel sorgente il 28/08 —
+⚠️ le righe qui sotto sono quelle del file **della sedia viva**
+(`ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5`, quello che porta `InpMagic = 770411`
+alla riga 115). Il gemello `..._MFE.mq5` è **identico riga per riga tranne
+`InpMagic`** (verificato con `diff` sugli `input`) ma è **sfasato di 20 righe**:
+se apri quello, i numeri di questa colonna non tornano.
 
-| cosa | valore (ORA SERVER) | righe del `.mq5` |
+| cosa | valore (ORA SERVER) | righe del `.mq5` (file della sedia viva) |
 |---|---|---|
-| box notturno | **23:00 → 04:59** | 71-74 |
-| ordini **STOP** posati | **07:59** | 79-80 |
-| cutoff ingressi | **08:30** («solo la rottura *fresca*») | 81-82 |
-| flat | 17:30 | 83-84 |
-| lato | 🔴 **SHORT ONLY** | 91-92 |
+| box notturno | **23:00 → 04:59** | 51-54 |
+| ordini **STOP** posati | **07:59** | 59-60 |
+| cutoff ingressi | **08:30** («solo la rottura *fresca*») | 61-62 |
+| flat | 17:30 | 63-64 |
+| lato | 🔴 **SHORT ONLY** | 71-72 |
 
 Il nostro candidato arma alle **08:00** sul max/min di
 `[08:00 − InpPrevWindowMin, 08:00)`. **Quanto si sovrappongono si calcola**, e
@@ -268,7 +273,7 @@ condividesse il magic **cancellerebbe la prova del gate** (CHECKLIST 41).
 
 ---
 
-## 📌 IL PIN — **b40c62c3652286a792e5f6fbdb96cac5898480f5**
+## 📌 IL PIN — **`b40c62c3652286a792e5f6fbdb96cac5898480f5`**
 
 ```
 b40c62c3652286a792e5f6fbdb96cac5898480f5
@@ -302,9 +307,10 @@ sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VEC
 grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
 sed -n '1,/LA RICETTA DI/p' "$F" | grep -ci "segnaposto\|non funziona\|la riga non parte"   # DEVE dare 0
+grep -rn "${VECCHIO:0:7}" backtest_pipeline/   # DEVE dare 0 (punto 103: il pin vecchio non esiste piu' in NESSUNA forma, nemmeno abbreviato in prosa)
 ```
 
-⚠️ **Servono TUTTI E TRE i conteggi.** I primi due sono il punto 77: il solo
+⚠️ **Servono TUTTI E QUATTRO i conteggi.** I primi due sono il punto 77: il solo
 *«0 pin vecchi rimasti»* lo supera a mani basse anche un `sed` che **non ha
 matchato niente**. Il terzo va letto **solo sopra la ricetta** (`sed -n
 '1,/LA RICETTA DI/p'`), non su tutto il file: la ricetta stessa nomina

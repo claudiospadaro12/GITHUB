@@ -116,7 +116,9 @@ script che **asserisce** ogni sostituzione, poi il diff è stato **letto**:
 | LONG ↔ COSTO | `InpPrevWindowMin`, `InpRetestOffsetPts`, `InpMagic` | ✅ |
 
 Conteggio parametri: **73 per file sul DAX**, **87 per file sul Nasdaq** (i 73
-del DAX meno `InpAllowReverse`, più i **15 del blocco R30**, più `InpLevelTF`).
+del DAX **meno** `InpAllowReverse`, **più** i **15 del blocco R30**:
+73 − 1 + 15 = 87. `InpLevelTF` c'è in **tutti e due** i file e non entra nel
+conto).
 **E il driver lo ri-verifica da solo prima di aprire MT5** (gate della stella,
 confronto **per nome** e non per posizione).
 
@@ -344,14 +346,17 @@ gate della stella) e si pretende **il messaggio giusto**:
 - ❌ **Il doppione DAX ↔ `770411` non è misurato**: la tabella è di
   **calendario**. Le giornate in comune sono il passo successivo (§4).
 - ❌ **La correlazione Dow ↔ Nasdaq non è misurata**: stesso passo successivo.
-- ❌ **I pin sono SEGNAPOSTO (`@@PIN@@`) in tutte e due le pagine.** Vanno
-  sostituiti **dopo il push**. Prima pinnatura = sostituire i **5** `@@PIN@@` per
-  pagina (di cui **3** nella forma `$pin='…'`, che è il conteggio della ricetta),
-  **e togliere il cartello del segnaposto nello stesso passo** (CHECKLIST 101:
-  il cartello è un **punto d'uso**, non prosa, e se sopravvive dice *«non
-  funziona»* puntando a un pin che funziona).
-- ❌ **Le righe non sono state passate al verificatore-stringhe.** È il passo
-  che manca.
+- ✅ **I pin NON sono più segnaposto** (aggiornato dopo `bb62e87`): tutte e due le
+  pagine portano il pin vero **`b40c62c3652286a792e5f6fbdb96cac5898480f5`** nei tre
+  blocchi di lancio e il cartello del segnaposto è stato tolto. Ri-verificato il
+  28/08 dal verificatore-stringhe: il pin è **antenato di `origin/lavoro`**; i
+  **sedici** artefatti che i due script scaricano hanno al pin lo **stesso blob**
+  che hanno a `HEAD` e nel working tree (`git rev-parse <pin>:<file>` ==
+  `HEAD:<file>` == `git hash-object`); i `raw.githubusercontent.com/.../<pin>/...`
+  rispondono **200** e contengono i due marcatori.
+- ✅ **Le righe SONO state passate al verificatore-stringhe** (28/08): FAIL con
+  5 difetti, tutti doc-only (nessuno tocca i 16 artefatti scaricati → nessun
+  ri-pin necessario), corretti nello stesso passo in cui si scrive questa riga.
 
 ---
 

@@ -271,7 +271,7 @@ prova del gate** (CHECKLIST 41).
 
 ---
 
-## 📌 IL PIN — **b40c62c3652286a792e5f6fbdb96cac5898480f5**
+## 📌 IL PIN — **`b40c62c3652286a792e5f6fbdb96cac5898480f5`**
 
 ```
 b40c62c3652286a792e5f6fbdb96cac5898480f5
@@ -300,10 +300,11 @@ sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VEC
 grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
 sed -n '1,/LA RICETTA DI/p' "$F" | grep -ci "segnaposto\|non funziona\|la riga non parte"   # DEVE dare 0
+grep -rn "${VECCHIO:0:7}" backtest_pipeline/   # DEVE dare 0 (punto 103: nemmeno abbreviato in prosa)
 ```
 
-⚠️ **Servono TUTTI E TRE i conteggi** (punti 77 e 101; il terzo va letto **solo
-sopra la ricetta**, non su tutto il file — la ricetta stessa nomina
+⚠️ **Servono TUTTI E QUATTRO i conteggi** (punti 77, 101 e 103; il terzo va letto
+**solo sopra la ricetta**, non su tutto il file — la ricetta stessa nomina
 "segnaposto"/"non funziona" nella propria prosa, un `grep` largo non
 darebbe mai 0), e il perimetro è
 **questo file e basta**, perché la riga di lancio **esiste in un posto solo**
