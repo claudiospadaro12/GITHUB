@@ -1026,8 +1026,13 @@ foreach($cel in $CELLE){
                (FmtN (Val2 $ris $tag "Allin")), (FmtN (Val2 $ris $tag "Tetto")))
       [void]$RefTxt.Add($riga)
     }
+    # LO STATO DI PARTENZA SI SCRIVE PER RIGA, NON PER TABELLA (punto 94):
+    # "non eseguita e nessun CSV" e "eseguita e riletta" sono due frasi
+    # diverse, e una sola delle due e' vera per ogni cella. Un "NO" secco
+    # qui direbbe "il tester non ha girato" anche dove non e' mai stato
+    # nemmeno chiesto di girare.
     $esito = "NON ESEGUITA in questo giro e NESSUN CSV trovato sul disco"
-    $fresca = "NO"
+    $fresca = "NON PERTINENTE (cella mai lanciata in questo giro, e nessun CSV di un giro precedente)"
     if($null -ne $ris){ $esito = $ris.Esito; $fresca = $ris.Fresca }
     [void]$RefTxt.Add("               esito: " + $esito)
     [void]$RefTxt.Add("               il tester ha girato in questo giro: " + $fresca)
