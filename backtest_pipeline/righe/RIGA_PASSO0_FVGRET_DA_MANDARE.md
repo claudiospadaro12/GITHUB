@@ -53,10 +53,10 @@ un'ipotesi dell'agente cacciatore. **Questo giro la sostituisce con un numero.**
 
 ---
 
-## 📌 IL PIN — **`71bbd2002d42ad75c7404a4d3a39082e7d367d70`**
+## 📌 IL PIN — **`55cacfa9f99a05c248ddf60d22a5362d7dc34b04`**
 
 ```
-71bbd2002d42ad75c7404a4d3a39082e7d367d70
+55cacfa9f99a05c248ddf60d22a5362d7dc34b04
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
@@ -135,7 +135,7 @@ dire l'esatto contrario del vero.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='55cacfa9f99a05c248ddf60d22a5362d7dc34b04'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -175,7 +175,7 @@ build, e resta comunque nei RILIEVI, mai un blocco.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='55cacfa9f99a05c248ddf60d22a5362d7dc34b04'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -195,7 +195,7 @@ altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='55cacfa9f99a05c248ddf60d22a5362d7dc34b04'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '02_short' -Rifai;
