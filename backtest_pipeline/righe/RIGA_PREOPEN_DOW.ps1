@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_PREOPEN_DOW_v1
+#  MARCATORE_RIGA_PREOPEN_DOW_v2
 #  RIGA_PREOPEN_DOW.ps1  --  IL LIVELLO PRE-APERTURA SUL DOW
 #  ABTG_Dow_Apertura_US  su  U30USD  M15, TICK REALI
 #
@@ -728,6 +728,14 @@ $roCentro   = -1
 $MagicCosto = -1
 $PwMetro    = -1           # il valore a cui il metro pinna InpPrevWindowMin
 $DatiDaDisco = $false      # vero se un CSV NON e' di questo lancio
+$Verdetti    = @{}         # NASCE QUI, non dentro il try: il blocco del VERDETTO lo
+                           #  legge FUORI. Nato dentro, un errore nella LETTURA DEL
+                           #  METRO lo lasciava $null e "$Verdetti.ContainsKey(...)"
+                           #  moriva fuori da ogni try -> niente referto e niente zip,
+                           #  cioe' proprio nel caso in cui servono (checklist 48).
+                           #  RIPRODOTTO eseguendo il 28/08.
+$MetroPf     = @{}         # spostati fuori per simmetria con $Verdetti
+$MetroCel    = @{}
 
 try{
   Titolo ("PREOPEN DOW -- il livello pre-apertura -- modo " + $Modo)
@@ -1370,8 +1378,17 @@ ScriviRef ""
 
 # --- il metro, lato per lato
 try{
-  $MetroPf = @{}     # "LATO,roIdx" -> PF OOS del metro
-  $MetroCel = @{}
+  $MetroPf.Clear()   # gia' creato PRIMA del try -- "LATO,roIdx" -> PF OOS del metro
+  $MetroCel.Clear()
+  ScriviRef ">>> UN CONFONDIMENTO VERO, misurato nel sorgente (ABTG_Dow_Apertura_US.mq5"
+  ScriviRef "    righe 656-684): il candidato (InpRangeMode=1) arma alle 14:30 server e"
+  ScriviRef "    chiude la finestra alle 17:30 (3h00); il metro (InpRangeMode=0,"
+  ScriviRef "    InpRangeMinutes=35) arma alle 15:05 e chiude alla stessa ora (2h25). Il"
+  ScriviRef "    delta fra candidato e metro e' in parte TEMPO (+35 min, +24% di finestra),"
+  ScriviRef "    non solo LIVELLO. Chi legge un vantaggio del candidato sul metro deve"
+  ScriviRef "    sapere che una parte non misurata di quel vantaggio potrebbe essere"
+  ScriviRef "    semplicemente la finestra piu' lunga."
+  ScriviRef ""
   foreach($lato in @("LONG","SHORT")){
     $lv = @($LAVORI | Where-Object { $_.Fase -eq "METRO" -and $_.Lato -eq $lato })[0]
     ScriviRef ("--- PASSO 0c -- IL METRO A PARI TF (M15), lato " + $lato + " ---")
@@ -1416,7 +1433,7 @@ try{
   # =====================================================================
   #  I CRITERI DI ACCETTAZIONE, applicati lato per lato.
   # =====================================================================
-  $Verdetti = @{}
+  $Verdetti.Clear()   # gia' creato PRIMA del try
   foreach($lato in @("LONG","SHORT")){
     $lv = @($LAVORI | Where-Object { $_.Fase -eq "GRIGLIA" -and $_.Lato -eq $lato })[0]
     ScriviRef ("=====================================================================")
@@ -1584,6 +1601,13 @@ foreach($lato in @("LONG","SHORT")){
   if($Verdetti.ContainsKey($lato)){ $vd = $Verdetti[$lato] }
   ScriviRef ("  lato " + $lato + " ........... " + $vd)
 }
+ScriviRef ""
+ScriviRef "  >>> I DUE CAPPELLI CHE VANNO INSIEME ALLA PAROLA 'PASSA':"
+ScriviRef "      1. 35 MINUTI: il candidato opera dalle 14:30, il metro dalle 15:05"
+ScriviRef "         (misurato nel sorgente). Parte del delta e' TEMPO, non LIVELLO."
+ScriviRef "      2. SCREENING: la regione e' stata cercata DENTRO l'OOS, come dice il"
+ScriviRef "         criterio firmato. NON e' una selezione walk-forward. La lettura"
+ScriviRef "         walk-forward e' stampata sotto ogni griglia, qui sopra."
 if($DatiDaDisco){
   ScriviRef ""
   ScriviRef "  >>> NESSUNO DEI VERDETTI QUI SOPRA E' DEFINITIVO: almeno un CSV di"
