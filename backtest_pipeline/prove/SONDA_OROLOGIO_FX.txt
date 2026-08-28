@@ -1,0 +1,185 @@
+# =====================================================================
+#  SONDA_OROLOGIO_FX  --  PASSO 0 del candidato P1 della caccia del 28/08
+#  Dossier: caccia_strategie/CACCIA_INTRADAY_FOREX_ORO_2026-08-28.md
+# =====================================================================
+#
+# ATTENZIONE, LEGGERE PRIMA DI LANCIARE: QUESTO NON E' UN FILE PROVA DI
+# STRATEGIA. E' UN FILE PROVA DI MISURA.
+#
+# Non chiede "quanto guadagna". Chiede: "esiste una fascia oraria in cui il
+# LORDO medio per giornata vale almeno TRE VOLTE lo spread mediano misurato
+# IN QUELLA STESSA ORA?". La risposta e' una tabella, non un P/L.
+#
+# L'EA NON ESISTE ANCORA. Va costruito dalla filiera
+# mql5-ea-developer -> verificatore, e la specifica e' in fondo a questo file.
+# Riferimento di implementazione letto sul web (47 righe di Pine, due soli
+# parametri, flat obbligatorio a fine giornata):
+#   "Mateo's Time of Day Analysis LE-SE", @MateoH_, TradingView
+#   PUB;f493382224324212b424bd89b27ddd9f
+#   [licenza NON dichiarata dall'autore -> la sonda si scrive DA ZERO,
+#    non si traduce. Il Pine e' un riferimento di specifica, non un sorgente
+#    da copiare.]
+#
+# ---------------------------------------------------------------------
+# IPOTESI (scritta PRIMA di qualunque numero)
+# ---------------------------------------------------------------------
+# Una valuta tende a DEPREZZARSI durante le proprie ore di contrattazione
+# locali, perche' in quelle ore i partecipanti locali sono compratori netti
+# di valuta estera: pagano l'estero quando i loro uffici sono aperti.
+# Non e' un pattern di prezzo: e' un flusso d'ordini che ha un orario
+# d'ufficio, e la controparte ha un nome (il tesoriere che deve regolare).
+#
+# Se l'ipotesi e' vera sui NOSTRI dati e sul NOSTRO broker, allora esiste
+# una fascia oraria in cui il rendimento medio per giornata e' diverso da
+# zero in modo sistematico, E abbastanza grande da pagare lo spread.
+#
+# Fonti (SCHEDA BIBLIOGRAFICA VERIFICATA, TESTO NON LETTO: tutti i mirror
+# sono bloccati all'egress -- vedi dossier sezione 4):
+#   Breedon, F. e Ranaldo, A., "Intraday Patterns in FX Returns and Order
+#     Flow", Journal of Money, Credit and Banking (2013), 45(5), 953-965.
+#   Krohn, I., Mueller, P., Whelan, P., "Foreign Exchange Fixings and
+#     Returns around the Clock", The Journal of Finance (2024)
+#     / Bank of Canada Staff Working Paper 2021-48.
+#
+# PRECEDENTE CONTRARIO IN CASA, da tenere davanti agli occhi:
+#   SWEEP_MECCANISMI_LIBERI_2026-08-22.md sezione D7 ha gia' chiuso "l'ora
+#   del fix" (Michelberger & Witte 2015): volatilita' si', DIREZIONE no.
+#   Questa sonda misura una cosa diversa (la deriva media di un BLOCCO DI
+#   ORE, non la volatilita' di un minuto) -- ma se la tabella e' piatta,
+#   D7 esce CONFERMATO ED ESTESO e la pista si chiude per sempre.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (CONGELATI PRIMA DI VEDERE I NUMERI)
+# ---------------------------------------------------------------------
+# C1 - CANCELLO ZERO (si legge PRIMA di ogni P/L):
+#      per almeno UNA fascia oraria, su almeno DUE dei tre simboli,
+#      |lordo medio per giornata| >= 3 x spread mediano DELLA STESSA ORA.
+#      Se no -> ROUND CHIUSO, pista dell'orologio chiusa con un numero
+#      nostro. E' un esito valido e va scritto cosi'.
+#
+# C2 - LA CELLA NON SI SCEGLIE PERCHE' E' LA PIU' VERDE.
+#      24 ore x 3 simboli x 2 lati = 144 celle: a caso qualcuna e' verde.
+#      La cella vale SOLO se e' quella che la TESI aveva indicato PRIMA
+#      (le ore locali della valuta: ore europee per EUR, ore londinesi per
+#      GBP, ore americane per USD). Se l'ora verde NON e' quella prevista,
+#      il round e' NEGATIVO anche se il numero e' positivo.
+#      Esempio di cosa NON diventare: TradingView "Timeframe Time of Day
+#      Buying and Selling Strategy" (@tormunddookie, 193 like), 48 input
+#      categorici Long/Short/None, spazio di ricerca 3^48.
+#
+# C3 - ALTOPIANO, NON PICCO: la fascia buona deve avere accanto ORE
+#      ADIACENTI dello stesso segno. Un'ora verde isolata fra due rosse
+#      e' rumore, non un motore. (12 Spearman IS->OOS negative su 13.)
+#
+# C4 - RISCHIO PRIMA DEL MERITO (Emendamento della Finestra, punto B):
+#      si riporta SEMPRE la PEGGIOR GIORNATA per ogni fascia, anche se il
+#      merito non passa. Muro FTMO: -5.000 su 100k in una sola giornata.
+#
+# C5 - CAMPIONE: >= 150 giornate per fascia in ciascuna meta' IS/OOS.
+#      Con ~250 giornate/anno per fascia, 15,5 anni ne danno ~3.800:
+#      abbondante. Il campione NON e' il collo di bottiglia qui.
+#
+# C6 - L'ORA E' IN ORA SERVER BCM (ora italiana - 1), e il referto DEVE
+#      dichiarare che le ore d'ufficio di Londra/New York si spostano
+#      rispetto all'ora server per ~4 settimane l'anno (ora legale USA e
+#      UE non coincidenti; il Giappone non cambia). Questa prima sonda
+#      misura in ORA SERVER FISSA, con l'errore noto e DICHIARATO.
+#
+# C7 - Nessuna promozione da questa corsa. Questa sonda non promuove
+#      niente e non tocca nessuna sedia viva: produce una tabella.
+#
+# ---------------------------------------------------------------------
+# LE DATE: MISURATE, NON IPOTIZZATE
+# ---------------------------------------------------------------------
+#   GBPUSD  inizio storico 1993.05.11  (sonda PrimaDataTF del 17/08,
+#           R102_ABTG_BreakingBand_GBPUSD_772161.txt riga 117)
+#   EURUSD  inizio storico 1971.01.03  (idem, R102_..._EURUSD_772162.txt)
+#           ATTENZIONE: l'euro non esiste prima del 1999.01.04
+#           (R102_CRITERI.md riga 350). Prima e' serie SINTETICA.
+#   XAUUSD  inizio storico 2004.06.11  (R100, citato in R102_CRITERI.md
+#           riga 156: 2004.06.11 -> 2026.06.30)
+#
+# LA FINESTRA 2011.01.01 -> 2026.06.30 E' ARITMETICA, NON ESTETICA:
+#   tetto del tester = 100.000 barre; forex su H1 ~120 barre/settimana;
+#   100.000 / 120 = 833 settimane = 16,0 anni. 15,5 anni stanno dentro
+#   con margine, e coprono quattro regimi (toro, orso, laterale, crollo
+#   2020) come chiede l'Emendamento della Finestra, punto C.
+#
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  H1
+@DAQUANDO 2011.01.01
+
+# ---------------------------------------------------------------------
+# LO SWEEP: si spazzola L'ORA, e SOLO l'ora.
+# Una passata per ogni ora d'ingresso; la durata del blocco e' il secondo
+# asse, tenuto CORTO apposta (3 valori, non 24) per non moltiplicare le
+# celle e non trasformare la misura in una pesca.
+# ---------------------------------------------------------------------
+InpOraIngresso=0||0||1||23||Y
+InpOreDurata=4||4||4||12||Y
+
+# --- tutto il resto PINNATO, e i motivi sono scritti ---
+# lato: si misurano ENTRAMBI in due corse separate (regola dei due lati,
+#       25/08). Prima corsa LONG, seconda SHORT, stessa griglia.
+InpAllowLong=1||||||N
+InpAllowShort=0||||||N
+# rischio: la taglia di confronto di casa. NON e' la taglia prop (0,65%).
+InpRiskPercent=1.0||||||N
+# stop di sola protezione: la sonda NON deve essere gestita, deve MISURARE.
+# 10 ATR = praticamente mai toccato: serve solo a non lasciare una
+# posizione nuda se il broker salta un'uscita.
+InpSLatrMult=10.0||||||N
+InpATRPeriod=14||||||N
+# nessun take: si esce SOLO all'ora, mai al prezzo. E' il punto della sonda.
+InpTPatrMult=0.0||||||N
+# una posizione alla volta, una al giorno.
+InpMaxPositions=1||||||N
+InpMaxTradesPerDay=1||||||N
+# nessun filtro di spread NELLA MISURA: lo spread va MISURATO, non filtrato.
+# (Se lo filtriamo, misuriamo le ore buone di uno spread che ci siamo scelti.)
+InpMaxSpreadPts=0||||||N
+
+# =====================================================================
+#  SPECIFICA PER mql5-ea-developer -- ABTG_SondaOrologio.mq5 (~120 righe)
+# =====================================================================
+#  COSA FA, in quattro righe:
+#  1. All'inizio della barra H1 la cui ora server == InpOraIngresso, se non
+#     c'e' nessuna posizione aperta, apre UNA posizione (long o short
+#     secondo gli input) con rischio InpRiskPercent sulla distanza dello
+#     stop di protezione.
+#  2. Dopo InpOreDurata ore, CHIUDE. Sempre. Senza condizioni.
+#  3. CHIUSURA FORZATA DI FINE GIORNATA, incondizionata e non
+#     disattivabile: se la posizione e' ancora aperta all'ultima barra
+#     della giornata di contrattazione, si chiude comunque. Questo
+#     requisito NON e' negoziabile (mandato FTMO del 28/08: mai overnight),
+#     e va scritto in modo che nessun input possa spegnerlo.
+#     -> Da rubare a "SP500 Session Gap Fade Strategy" (c exlux, MPL 2.0,
+#        TradingView J1U1NNgx): il flat non a fine sessione ma N MINUTI
+#        PRIMA della fine, con N come input. L'ultima mezz'ora ha lo
+#        spread peggiore e i riempimenti peggiori.
+#  4. In OnTester (o su file CSV) scrive, PER OGNI PASSATA:
+#       - ora d'ingresso, durata, simbolo, lato
+#       - numero di giornate operate
+#       - LORDO medio per operazione, in PUNTI e in valuta
+#       - SPREAD MEDIANO e p95 misurati NELL'ORA D'INGRESSO
+#         (non la media della giornata: lezione R55, lo spread si legge
+#          nel momento in cui si paga)
+#       - PEGGIOR GIORNATA in % dell'equity
+#       - percentuale di giornate positive
+#
+#  COSA NON DEVE AVERE, ed e' altrettanto importante:
+#  - nessun indicatore, nessuna media, nessuna banda, nessun ADX;
+#  - nessuna condizione di prezzo di nessun tipo per entrare;
+#  - nessun take profit;
+#  - nessun filtro di volatilita', di spread o di notizie.
+#  Se entra una sola condizione di prezzo, la sonda smette di misurare
+#  l'orologio e comincia a misurare un motore -- che e' un altro round.
+#
+#  DECISIONE APERTA, da firmare PRIMA di lanciare:
+#  ora server fissa (semplice, errore noto di ~4 settimane l'anno sui
+#  cambi di ora legale) OPPURE ora locale della piazza (giusto, piu'
+#  codice). Questa sonda e' scritta per la PRIMA opzione, e il referto
+#  deve dichiararlo.
+# =====================================================================

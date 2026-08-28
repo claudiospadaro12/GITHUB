@@ -163,6 +163,92 @@ quasi tutta **spam SEO** (repo `C#`/`HTML` con nomi da vetrina, 0-2 stelle su
 account nuovi, piu' tre repo con 115-117 stelle dal profilo "stelle
 comprate"). **Non partire dai topic: partire da una ricerca mirata.**
 
+### C. 🔧 IL PATTERN `PUB;` DEL 25/08 E' SBAGLIATO — l'identificatore NON e' esadecimale
+
+_Aggiunto il 28/08 dalla caccia intraday FOREX+ORO
+(`CACCIA_INTRADAY_FOREX_ORO_2026-08-28.md` §1-bis)._
+
+La procedura del 25/08 (§ piu' sotto) dice di cercare nell'HTML
+**`PUB;<32 cifre esadecimali>`**. **E' falso**, e ha gia' prodotto un buco a
+verbale: il 25/08 lo script `9morbD5t-15-Minute-Gold-Trend-Following-Strategy`
+e' finito nel dossier come **"NON VALUTATO — la pagina non contiene
+l'identificatore"**, ed era in pieno bersaglio (oro, 15 minuti).
+
+Misurato oggi sulla stessa pagina: `PUB;v0d1rwLHjXobyApD15BLp3iWRG8DxwkJ` —
+**32 caratteri ALFANUMERICI MISTI**. Il pattern giusto e':
+
+```
+PUB;([0-9A-Za-z]{32})
+```
+
+**Confermato anche dal canale §A:** nel JSON di `pubscripts-suggest-json` il
+campo `scriptIdPart` e' a volte esadecimale (`PUB;7150ebfb...`) e a volte
+alfanumerico (`PUB;sYGbx3r01uJ8uIveIa5yqtaEPlA3dfeA`). **Sono entrambi validi.**
+
+> ⚠️ **La lezione, e vale oltre TradingView:** un pattern sbagliato non
+> produce un errore, produce **un candidato "non letto"** — che nel dossier
+> sembra un buco dichiarato e invece era un candidato perso per un refuso di
+> regex. **Su 7 script provati il 25/08, 1 era un falso-vuoto: il 14%.**
+> Col pattern corretto quel candidato si e' aperto ed e' risultato **8 righe
+> di Pine v3 senza stop**: scarto, ma con un verdetto invece che con un
+> punto interrogativo.
+
+### D. 🚨 "ZERO RISULTATI SU UN TAG" NON E' UNA MISURA DI ASSENZA
+
+_Stessa caccia, §6.4 — ed e' una smentita a un errore mio._
+
+I tag TradingView `killzone`, `timeofday`, `hourofday`, `overlap`,
+`asiansession` rendono **zero strategie**. Da li' avevo concluso _"l'ora del
+giorno come motore su TradingView non esiste"_. **La ricerca testuale del §A
+sulla query `time of day` ne rende TRE**, tutte col sorgente leggibile.
+
+➡️ **Regola operativa: un tag vuoto va verificato con
+`pubscripts-suggest-json` PRIMA di scriverne una conclusione.** Costa una
+richiesta; scriverne una conclusione sbagliata costa un dossier.
+
+### E. 🔓 QUANTPEDIA: la sitemap rende 1.118 slug, non 82 — e la nota "non ricontrollarla" va CANCELLATA
+
+_Stessa caccia, §1-ter._
+
+Il dossier del 25/08 aveva scritto: _"la sezione gratuita di Quantpedia, per
+un mandato intraday, non serve. **Non ricontrollarla.**"_ Quella nota nasceva
+dagli **82 slug** che rende la pagina `/strategies`. **La sitemap ne rende
+1.118:**
+
+```
+https://quantpedia.com/sitemap.xml                              <- indice
+https://quantpedia.com/wp-sitemap-posts-pod_cpt_strategy-1.xml  -> 1.118 slug strategia
+https://quantpedia.com/wp-sitemap-posts-post-1.xml              -> 1.155 post di blog (GRATUITI)
+```
+
+E fra i 1.118 ci sono, in tema intraday FX/oro:
+`intraday-currency-seasonality` · `intraday-reversal-in-currency-markets` ·
+`overnight-intraday-weekly-reversal-in-currency-futures` ·
+`price-overreactions-in-the-forex` · `exponential-fx-mean-reversion-strategy` ·
+`payroll-news-timing-in-fx` · `seasonality-in-gold` · `gold-market-timing`.
+
+🔴 **Vittoria a meta', e va detta:** quelle pagine sono **PREMIUM** — aperte,
+restituiscono la home page (Quantpedia dichiara _"~70 free strategies"_ contro
+_"900+"_). **Dalla sitemap si legge il NOME dell'effetto, non le regole.**
+I **post di blog** invece sono gratuiti e si leggono.
+
+> 📌 **Forma corretta da usare d'ora in poi:** _"la sitemap di Quantpedia e' un
+> INDICE DI EFFETTI da usare come punto di partenza bibliografico; le regole
+> sono a pagamento e non si comprano."_ E' esattamente cosi' che il 28/08 e'
+> nato il candidato P1 della caccia forex.
+
+### F. 📕 `SETACCIO_MANUALE.md` NON e' l'indice completo degli scarti
+
+Il grep degli id Code Base gia' setacciati su `caccia_strategie/*.md` ne rende
+**53**, ma i file `report/SWEEP_MECCANISMI_*.md` ne contengono **altri che non
+sono indicizzati li'**. Il 28/08 ho riletto e riscaricato `19500` e `17474`,
+gia' scartati il 22/08 (§D5 di `SWEEP_MECCANISMI_LIBERI_2026-08-22.md`).
+**Costo: ~15 minuti.**
+
+➡️ **Il prossimo cacciatore deve grep-are `report/SWEEP_*` INSIEME a
+`caccia_strategie/*`**, oppure qualcuno deve consolidare tutti gli id in un
+unico file.
+
 ## AGGIORNAMENTO 19/08/2026 sera (misurato dalla caccia Londra)
 - **MQL5.com: SBLOCCATO (HTTP 200)** — e soprattutto
   `https://www.mql5.com/en/code/download/<id>` restituisce lo ZIP col

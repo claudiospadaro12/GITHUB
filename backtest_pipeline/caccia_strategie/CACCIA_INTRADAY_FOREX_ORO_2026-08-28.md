@@ -247,7 +247,7 @@ tag" NON è una misura di assenza.** Correzione applicata al §6.4.
 
 ---
 
-## 2. 🥇 I PROMOSSI — due, più una specifica
+## 2. 🥇 I PROMOSSI — due candidati, più DUE specifiche
 
 ---
 
