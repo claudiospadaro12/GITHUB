@@ -1,0 +1,202 @@
+# =====================================================================
+#  PREOPEN_RETEST_DAX  --  IL GEMELLO SHORT
+#  ABTG_DAX_Apertura_EU  su  D30EUR  M15, TICK REALI
+#  Gemello di prove\PREOPEN_RETEST_DAX_M15.txt
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON DEVE GIRARE FINCHE' I CRITERI NON SONO FIRMATI.
+#      I criteri stanno SOLO nel file LONG (PREOPEN_RETEST_DAX_M15.txt,
+#      sezioni IPOTESI / COME PUO' MORIRE / CRITERI DI ACCETTAZIONE) e
+#      NON si ricopiano qui: un criterio scritto in due posti e' un
+#      criterio che prima o poi diverge. Questo file porta SOLO il
+#      perimetro del lato short.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE
+#  Regola di casa del 25/08/2026 (CLAUDE.md, "REGOLA DEI DUE LATI"):
+#  "ogni analisi misura SEMPRE tutti e due i lati (long E short) - anche
+#  se un lato e' gia' vivo in forward, si RITESTA".
+#
+#  COSA CAMBIA RISPETTO AL FILE LONG -- TRE RIGHE, NESSUN'ALTRA:
+#     InpAllowLong    1 -> 0
+#     InpAllowShort   0 -> 1
+#     InpMagic        781600/781601 -> 781700/781701
+#  Tutto il resto e' IDENTICO CARATTERE PER CARATTERE (questo file e'
+#  stato GENERATO dal file LONG, non ribattuto), e il driver del round
+#  lo VERIFICA prima di aprire MT5 (gate della stella).
+#
+#  MAGIC 781700/781701: verificati vergini in tutto il repo il
+#  28/08/2026 (grep su tutti i file, .git escluso: ZERO occorrenze).
+#  Il magic VIVO di questa sedia e' 770101 e non compare in nessun file
+#  di questo round. E' nella lista dei VIETATI del driver.
+#
+# ---------------------------------------------------------------------
+#  IL CAPPELLO DA METTERE SUL RISULTATO SHORT, SCRITTO PRIMA DI VEDERLO
+#  -- ED E' L'OPPOSTO DI QUELLO DEL DOW, NON UNA COPIA.
+#
+#  Sul DOW il gemello short partiva svantaggiato PER MECCANISMO: filtro
+#  EMA H4 acceso, 21 mesi sopra la media, lo short quasi non entra e un
+#  n basso era ATTESO.
+#  SUL DAX NON E' COSI', ed e' MISURATO:
+#    - il filtro EMA su questa sedia e' SPENTO (InpUseEmaFilter=0),
+#      quindi gBias vale 0 e il lato short entra davvero;
+#    - R107 (25/08, tick reali, STESSA finestra e STESSO split) ha
+#      gia' misurato il lato short del DAX in apertura con la geometria
+#      viva:  IS  -996  / PF 0,965 / n 138
+#             OOS -1.865 / PF 0,957 / DD 12,31% / n 257
+#      e con n 257 l'Emendamento A rende il MERITO misurabile. Il
+#      verdetto agli atti e': "NIENTE EDGE, e stavolta e' misurato"
+#      (R107_REFERTO.md, verdetto 1; riga A3 del registro da attesa a
+#      rossa). E non e' nemmeno la scusa del regime: e' rosso anche
+#      nell'IS, che contiene la discesa di febbraio-aprile 2025.
+#
+#  CONSEGUENZE DA DICHIARARE ADESSO, NON DOPO:
+#   - la domanda di questo gemello NON e' "il DAX ha un edge short in
+#     apertura?" (risposta gia' data: no). E': "cambiare il LIVELLO da
+#     ORB a pre-apertura resuscita un lato bocciato con campione
+#     pieno?". L'onere della prova e' PIU' ALTO, non piu' basso;
+#   - un n(OOS) ALTO qui e' atteso (il metro ne fa 257). Se una cella
+#     ne fa pochi, la causa e' il riempimento del LIMIT o
+#     InpSkipIfTight=1, non la scarsita' di segnali;
+#   - il cancello che morde su questo lato e' il PF >= 1,10 ASSOLUTO:
+#     il metro short e' sotto 1, quindi "batterlo di +0,10" darebbe
+#     ~1,06, che sta sotto il pavimento. Vanno superati TUTTI E DUE;
+#   - >>> ED E' QUESTO IL LATO CON IL RISCHIO DI DOPPIONE MASSIMO:
+#     `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` (sedia viva, 770411) e'
+#     SHORT ONLY, sullo stesso simbolo, nella stessa mezz'ora, e con
+#     PrevWindowMin 240 o 300 il livello viene dalla stessa finestra.
+#     Sul lato LONG quel doppione NON PUO' esistere. Vedi la tabella
+#     della sovrapposizione nel file LONG, punto 2 di COME PUO' MORIRE.
+#
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (italiana - 1). DAX apre 08:00 server.
+#     (CLAUDE.md, FUSO ORARIO BCM: 09:00 IT = 08:00 server. Un 9 qui
+#      sarebbe l'ora italiana e il file andrebbe cestinato.)
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- L'UNICA COSA CHE CAMBIA RISPETTO ALLA SEDIA VIVA:
+#     InpRangeMode 0 -> 1 (il livello e' il PRE-apertura, non l'ORB).
+#     L'ingresso resta il RETEST (2), che e' gia' la modalita' viva e
+#     che R83 ha incoronato sul DAX in un duello contro STOP e CONFERMA.
+InpEntryMode=2||2||0||2||N
+InpRangeMode=1||1||0||1||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=500||500||0||500||N
+InpPendingExpiryMin=120||120||0||120||N
+# --- >>> LE DUE RIGHE DEL LATO, ROVESCIATE RISPETTO AL FILE LONG <<<
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+# --- R51, ESISTE SOLO SUL DAX (il Dow e il Nasdaq non ce l'hanno).
+#     0 = com'e' in forward. A 1 il retest avrebbe DUE cicli al giorno
+#     invece di uno: sarebbe un altro motore, non un altro livello.
+InpAllowReverse=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- filtri: ESATTAMENTE come nella sedia viva DAX (R101_DAX_00_viva),
+#     nessuno acceso in piu'. Un filtro aggiunto a un motore gia' tarato
+#     ha 0 successi su 5 nel nostro storico (ROBUSTEZZA par.5B), e su
+#     questa sedia R101 ha misurato che METTERE l'EMA 14/200 H1 e' NO.
+#     >>> ATTENZIONE, differenza col Dow che cambia la lettura dello
+#         SHORT: qui InpUseEmaFilter=0. Sul Dow e' 1, ed e' il motivo
+#         per cui li' il lato short quasi non entra. Sul DAX entra.
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+
+# --- rischio e gestione: identiche alla sedia viva DAX, non si tocca
+#     niente qui dentro.
+#     >>> InpMinStopPts=0 e InpSkipIfTight=1: E' LA SEDIA VIVA DEL DAX,
+#         e sono DIVERSI dal Dow (500 / 0). Il Dow ha il pavimento SL
+#         per la lezione R109; il DAX no, e il suo contratto (DD 6,25%
+#         R16 / 7,23% R46) e' stato misurato COSI'. Mettere il pavimento
+#         qui vorrebbe dire cambiare DUE cose insieme (livello + stop) e
+#         rendere il confronto col metro illeggibile.
+#         >>> IL RISCHIO CHE RESTA, DICHIARATO: senza pavimento, sui
+#         bordi larghi della griglia lo stop puo' diventare stretto e il
+#         lotto sbattere sul soffitto VOLUME_MAX / sul pavimento
+#         VOLUME_MIN di CalcLotByRisk -- e in quel caso i DD di questo
+#         round SOTTOSTIMANO il rischio vero. E' [DA VERIFICARE], non un
+#         risultato: il referto stampa min/max/valori distinti dei
+#         volumi della cella del cancello proprio per farlo vedere.
+#         E con InpSkipIfTight=1 una cella puo' anche SALTARE il trade
+#         invece di entrare stretta: un n basso puo' venire da li'.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=0||0||0||0||N
+InpSkipIfTight=1||1||0||1||N
+InpVerbose=1||1||0||1||N
+
+# --- I DUE ASSI LIBERI: 5 x 3 = 15 celle. Screening, non verdetto.
+#     (a) DIMENSIONE/ETA' del livello, in minuti prima dell'apertura:
+#         60 = la sola cosa mai pinnata in casa (23 file DAX su 23)
+#         300 = cinque ore = tutta la notte asiatica fino a Francoforte
+#         >>> e sono i valori del round DOW, non ritarati: i tre gemelli
+#             della famiglia devono avere la STESSA griglia, altrimenti
+#             i tre verdetti non si confrontano.
+InpPrevWindowMin=60||60||60||300||Y
+#     (c) INVALIDAZIONE / PROFONDITA' DEL RIENTRO: quanto DENTRO il
+#         livello si accetta il rientro prima di dichiarare fallita la
+#         rottura. 200 = IL VALORE VIVO della sedia DAX (il Dow vive a
+#         400), ed e' il primo dell'asse: le celle 400 e 600 sono il
+#         "piu' verso il centro del range" chiesto dalla caccia par.5.1.
+InpRetestOffsetPts=400||200||200||600||Y
+
+# --- controllo d'igiene: gemelli identici, magic VERGINI
+#     (781600/781601 verificati liberi in tutto il repo il 28/08/2026)
+InpMagic=781700||781700||1||781701||Y

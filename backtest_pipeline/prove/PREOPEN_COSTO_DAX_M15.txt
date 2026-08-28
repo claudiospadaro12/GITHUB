@@ -1,0 +1,207 @@
+# =====================================================================
+#  PREOPEN_COSTO_DAX_M15  --  LA CELLA DEL CANCELLO DEL COSTO (PASSO 0b)
+#  ABTG_DAX_Apertura_EU  su  D30EUR  M15, TICK REALI
+#  UNA PASSATA SINGOLA, NON UN'OTTIMIZZAZIONE.
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON DEVE GIRARE FINCHE' I CRITERI NON SONO FIRMATI.
+#      I criteri stanno SOLO in prove\PREOPEN_RETEST_DAX_M15.txt.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE -- lo pretende il PASSO 0b del file prova LONG:
+#
+#    "0b. CANCELLO DEL COSTO (S0a, metro METRO_PROP D4 + R98_CRITERI
+#     3.2): mediana del take LORDO >= 3 x spread. Spread di riferimento
+#     su D30EUR: 2,0 punti indice [SPREAD NON MISURATO -- lato alto
+#     della forchetta 1-2 di R98_CRITERI, ed e' il valore che
+#     R109_CRITERI D4 dichiara per tutti e tre gli indici]. Soglia
+#     operativa: take mediano >= 6,0 punti indice. Sotto, il round si
+#     ferma qui. Conversione: cifre=2, tick=0.10 -> 1 punto indice =
+#     100 punti MT5 = 1,00 di PREZZO (R97/R98, R109_CRITERI 308-311)."
+#
+#  E QUI STA IL MOTIVO PER CUI SERVE UN FILE A PARTE, non una colonna
+#  del round. Il take in punti indice si calcola dal PREZZO DI INGRESSO
+#  e dal PREZZO DI USCITA. Nessuno dei due esce dal CSV
+#  dell'ottimizzazione (OPTFRAME esporta profitto, PF, DD, n, peggior
+#  giornata: non i prezzi). E l'export per-trade dell'EA
+#  (abtg_trades_*.csv, riga 2237) esporta solo i deal di USCITA --
+#  close_time, volume, prezzo, netto -- quindi non ha il prezzo
+#  d'INGRESSO. L'unico artefatto che ha tutti e due i prezzi e' il
+#  REPORT .htm di una PASSATA SINGOLA (Optimization=0), che e' lo stesso
+#  strumento con cui R109 ha misurato lo stesso cancello sugli indici.
+#  Percio': una passata, un report, un magic dedicato.
+#
+#  MAGIC DEDICATO 782000/782001 -- E' UNA REGOLA, NON UN VEZZO
+#  (CHECKLIST punto 41: "il gate e la corsa che condividono il magic:
+#  la corsa cancella la prova del gate"). L'export per-trade porta il
+#  MAGIC nel nome del file: se il cancello girasse con un magic della
+#  griglia, le 60 passate della griglia sovrascriverebbero la prova del
+#  cancello. Qui il magic non compare in NESSUN altro file del round.
+#  Verificati vergini in tutto il repo il 28/08/2026 (ZERO occorrenze).
+#
+# ---------------------------------------------------------------------
+#  QUALE CELLA, E PERCHE' PROPRIO QUESTA -- SCELTA PRIMA DEI NUMERI
+#  Il CENTRO GEOMETRICO della griglia del round, non il suo picco.
+#  I due valori e il perche' stanno accanto alle righe, in fondo.
+#
+#  COSA CAMBIA RISPETTO AL FILE LONG DEL ROUND -- TRE RIGHE:
+#     InpPrevWindowMin    asse 60..300 -> PIN 180
+#     InpRetestOffsetPts  asse 200..600 -> PIN 400
+#     InpMagic            781600/781601 -> 782000/782001
+#  Nient'altro. Il meccanismo misurato e' lo STESSO del round
+#  (InpRangeMode=1, InpEntryMode=2), altrimenti il cancello starebbe
+#  misurando il costo di un altro motore.
+#
+#  NOTA SULLE PARZIALI, che cambia la DEFINIZIONE del take e va detta
+#  PRIMA: questa sedia ha la parziale ACCESA (InpTP1_ClosePct=50) e il
+#  breakeven al primo obiettivo (InpBreakevenAtTP1=1). Quindi una
+#  posizione produce PIU' DI UNA uscita, e "il take" non e' un numero
+#  solo. La definizione usata dal cancello e' dichiarata nel driver e
+#  nel referto del round; qui basti che il file NON la sceglie di
+#  nascosto: la parziale resta accesa perche' e' com'e' la sedia viva,
+#  e spegnerla per comodita' di misura vorrebbe dire misurare un motore
+#  che nessuno fa girare.
+#
+#  L'ASSE InpMagic RESTA con flag Y (due celle gemelle) anche se la
+#  passata del cancello e' SINGOLA: serve al driver generico, che si
+#  rifiuta di partire senza almeno un asse spazzolato, per produrre
+#  l'elenco completo dei parametri da cui il driver del round ricava
+#  l'ini della passata singola. Nella passata singola il magic e'
+#  pinnato a 782000 e nell'ini non resta nessun '||'.
+#
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (italiana - 1). DAX apre 08:00 server.
+#     (CLAUDE.md, FUSO ORARIO BCM: 09:00 IT = 08:00 server. Un 9 qui
+#      sarebbe l'ora italiana e il file andrebbe cestinato.)
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- L'UNICA COSA CHE CAMBIA RISPETTO ALLA SEDIA VIVA:
+#     InpRangeMode 0 -> 1 (il livello e' il PRE-apertura, non l'ORB).
+#     L'ingresso resta il RETEST (2), che e' gia' la modalita' viva e
+#     che R83 ha incoronato sul DAX in un duello contro STOP e CONFERMA.
+InpEntryMode=2||2||0||2||N
+InpRangeMode=1||1||0||1||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=500||500||0||500||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+# --- R51, ESISTE SOLO SUL DAX (il Dow e il Nasdaq non ce l'hanno).
+#     0 = com'e' in forward. A 1 il retest avrebbe DUE cicli al giorno
+#     invece di uno: sarebbe un altro motore, non un altro livello.
+InpAllowReverse=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- filtri: ESATTAMENTE come nella sedia viva DAX (R101_DAX_00_viva),
+#     nessuno acceso in piu'. Un filtro aggiunto a un motore gia' tarato
+#     ha 0 successi su 5 nel nostro storico (ROBUSTEZZA par.5B), e su
+#     questa sedia R101 ha misurato che METTERE l'EMA 14/200 H1 e' NO.
+#     >>> ATTENZIONE, differenza col Dow che cambia la lettura dello
+#         SHORT: qui InpUseEmaFilter=0. Sul Dow e' 1, ed e' il motivo
+#         per cui li' il lato short quasi non entra. Sul DAX entra.
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+
+# --- rischio e gestione: identiche alla sedia viva DAX, non si tocca
+#     niente qui dentro.
+#     >>> InpMinStopPts=0 e InpSkipIfTight=1: E' LA SEDIA VIVA DEL DAX,
+#         e sono DIVERSI dal Dow (500 / 0). Il Dow ha il pavimento SL
+#         per la lezione R109; il DAX no, e il suo contratto (DD 6,25%
+#         R16 / 7,23% R46) e' stato misurato COSI'. Mettere il pavimento
+#         qui vorrebbe dire cambiare DUE cose insieme (livello + stop) e
+#         rendere il confronto col metro illeggibile.
+#         >>> IL RISCHIO CHE RESTA, DICHIARATO: senza pavimento, sui
+#         bordi larghi della griglia lo stop puo' diventare stretto e il
+#         lotto sbattere sul soffitto VOLUME_MAX / sul pavimento
+#         VOLUME_MIN di CalcLotByRisk -- e in quel caso i DD di questo
+#         round SOTTOSTIMANO il rischio vero. E' [DA VERIFICARE], non un
+#         risultato: il referto stampa min/max/valori distinti dei
+#         volumi della cella del cancello proprio per farlo vedere.
+#         E con InpSkipIfTight=1 una cella puo' anche SALTARE il trade
+#         invece di entrare stretta: un n basso puo' venire da li'.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=0||0||0||0||N
+InpSkipIfTight=1||1||0||1||N
+InpVerbose=1||1||0||1||N
+
+# --- LA CELLA DEL CANCELLO: i due assi PINNATI al CENTRO della griglia
+#     del round, dichiarato PRIMA di qualunque numero.
+#       InpPrevWindowMin   = 180  (asse 60..300 passo 60: la 3a di 5)
+#       InpRetestOffsetPts = 400  (asse 200..600 passo 200: la 2a di 3)
+#     La regola di casa dice "centro dell'altopiano, MAI il picco"; qui
+#     l'altopiano non c'e' ancora (nessun numero e' stato letto), e il
+#     surrogato onesto del centro e' il centro della GRIGLIA.
+#     >>> Nota DAX: 180 minuti = finestra 05:00-08:00 server, cioe' la
+#     PRIMA cella dell'asse che NON tocca il box 23:00-04:59 della sedia
+#     viva ABTG_MaxMinNotte_DAX_Short (confina con esso di un minuto).
+#     Non e' stata scelta per questo -- e' il centro geometrico -- ma va
+#     saputo quando si legge il take.
+InpPrevWindowMin=180||180||0||180||N
+#     (c) INVALIDAZIONE / PROFONDITA' DEL RIENTRO: quanto DENTRO il
+#         livello si accetta il rientro prima di dichiarare fallita la
+#         rottura. 200 = IL VALORE VIVO della sedia DAX (il Dow vive a
+#         400), ed e' il primo dell'asse: le celle 400 e 600 sono il
+#         "piu' verso il centro del range" chiesto dalla caccia par.5.1.
+InpRetestOffsetPts=400||400||0||400||N
+
+# --- controllo d'igiene: gemelli identici, magic VERGINI
+#     (781600/781601 verificati liberi in tutto il repo il 28/08/2026)
+InpMagic=782000||782000||1||782001||Y

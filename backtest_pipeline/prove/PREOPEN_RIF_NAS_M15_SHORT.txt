@@ -1,0 +1,192 @@
+# =====================================================================
+#  PREOPEN_RIF_NAS_M15_SHORT  --  IL RIFERIMENTO A PARI TF, LATO SHORT
+#  ABTG_Nasdaq_Apertura_US  su  NASUSD  M15, TICK REALI
+#
+#  >>> ANCHE QUESTO E' UN RIFERIMENTO, NON UN METRO: nessun numero agli
+#      atti da riprodurre, nessun gate G0. Il perche' sta per esteso in
+#      prove\PREOPEN_RIF_NAS_M15.txt e non si ricopia.
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON DEVE GIRARE FINCHE' I CRITERI NON SONO FIRMATI.
+#      I criteri stanno SOLO in prove\PREOPEN_RETEST_NAS_M15.txt.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE, e perche' non e' uno zelo
+#  Il criterio del round dice: la regione vincente deve BATTERE il
+#  riferimento sullo stesso TF di almeno +0,10 di PF. La regola dei due
+#  lati (CLAUDE.md, 25/08) rende il gemello SHORT obbligatorio. Le due
+#  cose insieme fanno una conseguenza sola: senza un riferimento SHORT
+#  il lato short avrebbe un numero e nessun denominatore, cioe' NON
+#  SAREBBE GIUDICABILE.
+#  Costa 6 passate per finestra (3 offset x 2 magic gemelli).
+#
+#  COSA CAMBIA RISPETTO A PREOPEN_RIF_NAS_M15.txt -- TRE RIGHE:
+#     InpAllowLong    1 -> 0
+#     InpAllowShort   0 -> 1
+#     InpMagic        782300/782301 -> 782400/782401
+#  Nient'altro, e il driver lo verifica prima di aprire MT5.
+#
+#  E VALE LO STESSO CAPPELLO DEL GEMELLO SHORT DEL ROUND: con il filtro
+#  EMA acceso e 21 mesi di regime rialzista lo short entra poco o niente
+#  (in MonitorRetest lo short passa solo con gBias 0 o -1). Un n basso
+#  qui e' ATTESO -- R107 su M5 ne contava 59 in OOS.
+#  >>> Se il riferimento short ha n(OOS) sotto 30, il confronto
+#  "+0,10 di PF" sul lato short NON SI FA: si dichiara che il
+#  denominatore non esiste, e il lato short resta un fatto di RISCHIO
+#  (drawdown, peggior giornata) senza verdetto di MERITO -- valvola R59
+#  applicata al DENOMINATORE, non solo al candidato.
+#
+#  MAGIC 782400/782401: verificati vergini in tutto il repo il
+#  28/08/2026 (grep su tutti i file, .git escluso: ZERO occorrenze).
+#
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (italiana - 1). Nasdaq apre 14:30 server.
+#     (CLAUDE.md, FUSO ORARIO BCM: 15:30 IT = 14:30 server. Un 15 qui
+#      sarebbe l'ora italiana e il file andrebbe cestinato.)
+#     >>> InpCloseHour/Min 17:30 NON e' il default dell'EA (che e'
+#     21:45): e' l'orario della GEOMETRIA TRASPOSTA di R107, tenuto
+#     identico perche' il riferimento 0c deve essere quella cella li'.
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- >>> LA RIGA DEL RIFERIMENTO: il livello e' l'ORB (RangeMode=0),
+#     come in R107_NAS_00_riflong. E' L'UNICA differenza di MECCANISMO
+#     rispetto al file del round. L'ingresso resta il RETEST (2).
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+# --- >>> LE DUE RIGHE DEL LATO, ROVESCIATE <<<
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- filtri: ESATTAMENTE come in R107_NAS_00_riflong (che a sua volta
+#     copia i filtri della sedia viva DOW), nessuno acceso in piu'.
+#     Un filtro aggiunto a un motore gia' tarato ha 0 successi su 5 nel
+#     nostro storico (ROBUSTEZZA par.5B), e R84 ha misurato che sul
+#     Nasdaq nessuna combinazione di filtri salva lo scheletro.
+#     >>> Il filtro EMA e' ACCESO (1/50 su H4, cioe' prezzo contro EMA
+#     H4). In MonitorRetest lo short passa solo con gBias 0 o -1: in 21
+#     mesi di Nasdaq sopra la sua EMA H4 il lato short entra poco.
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+
+# --- rischio e gestione: identiche a R107_NAS_00_riflong.
+#     InpMinStopPts=500 e' il PAVIMENTO SL: e' la lezione R109 (senza
+#     pavimento il lotto sbatte sui limiti di volume e i DD sottostimano
+#     il rischio). Non si spegne. Con InpSkipIfTight=0 il pavimento si
+#     APPLICA invece di far saltare il trade.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- BLOCCO R30, SOLO NASDAQ: i due opt-in che il Dow non ha ---
+#     Pinnati SPENTI: cosi' questo motore e' il motore del Dow.
+#     I sotto-parametri sono INERTI ma restano pinnati, perche' i cinque
+#     file del round devono avere lo STESSO elenco di parametri.
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20.0||20.0||0||20.0||N
+InpVolHighPct=80.0||80.0||0||80.0||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+
+# --- >>> INERTE con RangeMode=0: PINNATO, non spazzolato.
+#     MOTIVO, LETTO NEL SORGENTE e non assunto: in ComputeLevels()
+#     (righe 859-872) il ramo che usa InpPrevWindowMin e' SOLO quello di
+#     ABTG_RANGE_PREV; con ABTG_RANGE_OPENING la finestra e'
+#     openMin .. openMin+InpRangeMinutes e InpPrevWindowMin NON ENTRA nel
+#     calcolo. L'unica altra funzione che lo legge e' OpeningBodyDir()
+#     (righe 1077-1084), usata solo da TryPlaceDelayed() (InpEntryMode
+#     DELAYED), e qui InpEntryMode=2 (RETEST).
+#     Spazzolarlo darebbe CINQUE RIGHE IDENTICHE per ogni offset: 5x la
+#     macchina per zero informazione, e un lettore distratto crederebbe
+#     di guardare una griglia dove non c'e'.
+#     Il valore 60 non e' scelto: e' quello di R107_NAS_00_riflong.
+InpPrevWindowMin=60||60||0||60||N
+#     (c) INVALIDAZIONE / PROFONDITA' DEL RIENTRO: quanto DENTRO il
+#         livello si accetta il rientro. 400 = il valore di
+#         R107_NAS_00_riflong (trasposto dal Dow); 200 e 600 sono il
+#         "piu' al bordo" e il "piu' verso il centro" chiesti dalla
+#         caccia DAX par. 5.1.
+#         >>> Il default compilato dell'EA e' 0 (riga 225), cioe' LIMIT
+#         esattamente sul livello: quel valore NON e' nell'asse, e va
+#         saputo -- questo round misura tre profondita' di rientro, non
+#         il caso "sul livello".
+InpRetestOffsetPts=400||200||200||600||Y
+
+# --- controllo d'igiene: gemelli identici, magic VERGINI
+#     (782400/782401 verificati liberi in tutto il repo il 28/08/2026)
+#     Il magic 770201 (sedia SPENTA) e' VIETATO e controllato nel
+#     driver: una sedia spenta e' comunque un'identita' occupata.
+#     E i magic 761200/761201 di R107 sono BRUCIATI: non si riusano.
+InpMagic=782400||782400||1||782401||Y

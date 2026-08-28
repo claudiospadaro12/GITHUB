@@ -1,0 +1,214 @@
+# =====================================================================
+#  PREOPEN_COSTO_NAS_M15  --  LA CELLA DEL CANCELLO DEL COSTO (PASSO 0b)
+#  ABTG_Nasdaq_Apertura_US  su  NASUSD  M15, TICK REALI
+#  UNA PASSATA SINGOLA, NON UN'OTTIMIZZAZIONE.
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON DEVE GIRARE FINCHE' I CRITERI NON SONO FIRMATI.
+#      I criteri stanno SOLO in prove\PREOPEN_RETEST_NAS_M15.txt.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE -- lo pretende il PASSO 0b del file prova LONG:
+#  mediana del take LORDO >= 3 x spread. Spread di riferimento su
+#  NASUSD: 2,0 punti indice [SPREAD NON MISURATO -- lato alto della
+#  forchetta 1-2 di R98_CRITERI, ed e' il valore che R109_CRITERI D4
+#  dichiara per tutti e tre gli indici]. Soglia operativa: take mediano
+#  >= 6,0 punti indice. Sotto, il round si ferma qui.
+#  Conversione MISURATA in R97 (gate firmato del round): su NASUSD
+#  1 punto indice = 100 punti MT5 = 1,00 di PREZZO. R88 aveva dovuto
+#  correggere la premessa sbagliata "1 punto indice = 10 point": qui il
+#  numero non si assume, si cita la misura.
+#
+#  E QUI STA IL MOTIVO PER CUI SERVE UN FILE A PARTE, non una colonna
+#  del round. Il take in punti indice si calcola dal PREZZO DI INGRESSO
+#  e dal PREZZO DI USCITA. Nessuno dei due esce dal CSV
+#  dell'ottimizzazione (OPTFRAME esporta profitto, PF, DD, n, peggior
+#  giornata: non i prezzi), e l'export per-trade dell'EA
+#  (abtg_trades_*.csv) esporta solo i deal di USCITA. L'unico artefatto
+#  che ha tutti e due i prezzi e' il REPORT .htm di una PASSATA SINGOLA
+#  (Optimization=0), lo stesso strumento con cui R109 ha misurato lo
+#  stesso cancello sugli indici. Percio': una passata, un report, un
+#  magic dedicato.
+#
+#  MAGIC DEDICATO 782500/782501 -- E' UNA REGOLA, NON UN VEZZO
+#  (CHECKLIST punto 41: "il gate e la corsa che condividono il magic:
+#  la corsa cancella la prova del gate"). L'export per-trade porta il
+#  MAGIC nel nome del file: se il cancello girasse con un magic della
+#  griglia, le 60 passate della griglia sovrascriverebbero la prova del
+#  cancello. Qui il magic non compare in NESSUN altro file del round.
+#  Verificati vergini in tutto il repo il 28/08/2026 (ZERO occorrenze).
+#
+# ---------------------------------------------------------------------
+#  COSA CAMBIA RISPETTO AL FILE LONG DEL ROUND -- TRE RIGHE:
+#     InpPrevWindowMin    asse 60..300 -> PIN 180
+#     InpRetestOffsetPts  asse 200..600 -> PIN 400
+#     InpMagic            782100/782101 -> 782500/782501
+#  Nient'altro. Il meccanismo misurato e' lo STESSO del round
+#  (InpRangeMode=1, InpEntryMode=2), altrimenti il cancello starebbe
+#  misurando il costo di un altro motore.
+#
+#  NOTA SULLE PARZIALI, che cambia la DEFINIZIONE del take e va detta
+#  PRIMA: questa sedia ha la parziale ACCESA (InpTP1_ClosePct=50) e il
+#  breakeven al primo obiettivo (InpBreakevenAtTP1=1). Quindi una
+#  posizione produce PIU' DI UNA uscita, e "il take" non e' un numero
+#  solo. La definizione usata dal cancello e' dichiarata nel driver e
+#  nel referto del round; qui basti che il file NON la sceglie di
+#  nascosto: la parziale resta accesa perche' e' com'e' la geometria di
+#  riferimento, e spegnerla per comodita' di misura vorrebbe dire
+#  misurare un motore che nessuno fa girare.
+#
+#  L'ASSE InpMagic RESTA con flag Y (due celle gemelle) anche se la
+#  passata del cancello e' SINGOLA: serve al driver generico, che si
+#  rifiuta di partire senza almeno un asse spazzolato, per produrre
+#  l'elenco completo dei parametri da cui il driver del round ricava
+#  l'ini della passata singola. Nella passata singola il magic e'
+#  pinnato a 782500 e nell'ini non resta nessun '||'.
+#
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (italiana - 1). Nasdaq apre 14:30 server.
+#     (CLAUDE.md, FUSO ORARIO BCM: 15:30 IT = 14:30 server. Un 15 qui
+#      sarebbe l'ora italiana e il file andrebbe cestinato.)
+#     >>> InpCloseHour/Min 17:30 NON e' il default dell'EA (che e'
+#     21:45): e' l'orario della GEOMETRIA TRASPOSTA di R107, tenuto
+#     identico perche' il riferimento 0c deve essere quella cella li'.
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- L'UNICA COSA CHE CAMBIA RISPETTO ALLA GEOMETRIA DI RIFERIMENTO:
+#     InpRangeMode 0 -> 1 (il livello e' il PRE-apertura, non l'ORB).
+#     L'ingresso resta il RETEST (2), come in R107_NAS_00_riflong.
+InpEntryMode=2||2||0||2||N
+InpRangeMode=1||1||0||1||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- filtri: ESATTAMENTE come in R107_NAS_00_riflong (che a sua volta
+#     copia i filtri della sedia viva DOW), nessuno acceso in piu'.
+#     Un filtro aggiunto a un motore gia' tarato ha 0 successi su 5 nel
+#     nostro storico (ROBUSTEZZA par.5B), e R84 ha misurato che sul
+#     Nasdaq nessuna combinazione di filtri salva lo scheletro.
+#     >>> Il filtro EMA e' ACCESO (1/50 su H4, cioe' prezzo contro EMA
+#     H4). In MonitorRetest lo short passa solo con gBias 0 o -1: in 21
+#     mesi di Nasdaq sopra la sua EMA H4 il lato short entra poco.
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+
+# --- rischio e gestione: identiche a R107_NAS_00_riflong.
+#     InpMinStopPts=500 e' il PAVIMENTO SL: e' la lezione R109 (senza
+#     pavimento il lotto sbatte sui limiti di volume e i DD sottostimano
+#     il rischio). Non si spegne. Con InpSkipIfTight=0 il pavimento si
+#     APPLICA invece di far saltare il trade.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- BLOCCO R30, SOLO NASDAQ: i due opt-in che il Dow non ha ---
+#     Pinnati SPENTI: cosi' questo motore e' il motore del Dow.
+#     I sotto-parametri sono INERTI ma restano pinnati, perche' i cinque
+#     file del round devono avere lo STESSO elenco di parametri.
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20.0||20.0||0||20.0||N
+InpVolHighPct=80.0||80.0||0||80.0||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+
+# --- LA CELLA DEL CANCELLO: i due assi PINNATI al CENTRO della griglia
+#     del round, dichiarato PRIMA di qualunque numero.
+#       InpPrevWindowMin   = 180  (asse 60..300 passo 60: la 3a di 5)
+#       InpRetestOffsetPts = 400  (asse 200..600 passo 200: la 2a di 3,
+#                                  ed e' anche il valore di R107)
+#     La regola di casa dice "centro dell'altopiano, MAI il picco"; qui
+#     l'altopiano non c'e' ancora (nessun numero e' stato letto), e il
+#     surrogato onesto del centro e' il centro della GRIGLIA.
+#     Sceglierla dopo aver visto i PF sarebbe pescare la cella che fa
+#     passare il cancello.
+InpPrevWindowMin=180||180||0||180||N
+#     (c) INVALIDAZIONE / PROFONDITA' DEL RIENTRO: quanto DENTRO il
+#         livello si accetta il rientro. 400 = il valore di
+#         R107_NAS_00_riflong (trasposto dal Dow); 200 e 600 sono il
+#         "piu' al bordo" e il "piu' verso il centro" chiesti dalla
+#         caccia DAX par. 5.1.
+#         >>> Il default compilato dell'EA e' 0 (riga 225), cioe' LIMIT
+#         esattamente sul livello: quel valore NON e' nell'asse, e va
+#         saputo -- questo round misura tre profondita' di rientro, non
+#         il caso "sul livello".
+InpRetestOffsetPts=400||400||0||400||N
+
+# --- controllo d'igiene: gemelli identici, magic VERGINI
+#     (782500/782501 verificati liberi in tutto il repo il 28/08/2026)
+#     Il magic 770201 (sedia SPENTA) e' VIETATO e controllato nel
+#     driver: una sedia spenta e' comunque un'identita' occupata.
+#     E i magic 761200/761201 di R107 sono BRUCIATI: non si riusano.
+InpMagic=782500||782500||1||782501||Y
