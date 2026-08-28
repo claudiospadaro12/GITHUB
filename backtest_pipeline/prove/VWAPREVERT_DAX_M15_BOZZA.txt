@@ -255,6 +255,43 @@
 #     InpSlUseSetupBar, InpSpreadExtraPts, InpMaxSpreadPctSL,
 #     InpEngulfingOnly, InpUseHourFilter.
 #
+#  4) AGGIUNTA DEL 28/08/2026 -- FLAT DI FINE SEDUTA, e il default e'
+#     ACCESO.  InpFlatFineSeduta=1 alle 20:45 ORA SERVER: chiude ogni
+#     posizione, cancella ogni pendente e non riapre fino al giorno
+#     dopo.  E' il QUARTO scostamento, e come il cap giornaliero e'
+#     una REGOLA DI CASA, non una taratura:
+#       FTMO Standard (leva 1:100, quella che vogliamo tenere) impone
+#       restrizioni overnight/weekend/news SOLO sul conto finanziato.
+#       Un motore che apre e chiude dentro la seduta non incontra mai
+#       quel vincolo; l'alternativa e' scendere a Swing, leva 1:30.
+#       Un candidato che guadagna TENENDO OVERNIGHT produrrebbe un
+#       numero che descrive una macchina che in campo non potremmo far
+#       girare.
+#     Ed e' coerente con la tesi: la VWAP di sessione si azzera ogni
+#     giorno, quindi una posizione tenuta oltre la seduta non ha piu'
+#     il livello che l'ha generata.
+#     >>> IL COSTO DELLA REGOLA NON SI STIMA: SI MISURA. Sta nella
+#         cella 03_overnight del PASSO 0
+#         (prove\PASSO0_VWAPREV_03_overnight.txt), che spegne il flat
+#         e cambia SOLO quello.
+#     >>> QUANDO QUESTA GRIGLIA SARA' FIRMATA E GIRERA', i quattro pin
+#         nuovi vanno aggiunti qui sotto in forma completa, o MT5
+#         rispazzolera' i flag che ricorda:
+#            InpFlatFineSeduta=1||1||0||1||N
+#            InpFlatOra=20||20||0||20||N
+#            InpFlatMinuto=45||45||0||45||N
+#            InpStopNuoviMinPrimaFlat=0||0||0||0||N
+#         NON sono stati messi nel blocco pinnato qui in fondo perche'
+#         questo file e' e resta FERMO: si toccano alla firma, insieme
+#         al resto, cosi' la modifica si vede in un diff solo.
+#
+#  PASSO 0 (28/08/2026): prima di questa griglia gira un
+#  CONTA-OPERAZIONI a quattro celle, che NON da' verdetti --
+#  prove\ABTG_VwapRevert.txt + PASSO0_VWAPREV_0[123]_*.txt,
+#  riga righe\RIGA_PASSO0_VWAPREV_DA_MANDARE.md.
+#  E' il paletto 2 del dossier: contare le operazioni PRIMA di leggere
+#  qualunque PF.
+#
 # ---------------------------------------------------------------------
 #  LA GRIGLIA -- e' uno SCREENING, non un verdetto.
 #  Sweep stretto: 3 assi, 3x2x3 = 18 celle.  Tutto il resto pinnato al
