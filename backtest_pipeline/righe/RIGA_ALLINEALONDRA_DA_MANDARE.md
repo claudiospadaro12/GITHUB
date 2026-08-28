@@ -119,10 +119,10 @@ liberi** e la somma sarà **maggiore** del congiunto.
 
 ---
 
-## 📌 IL PIN — **`9ed66e22739f7de200dbc86c8e26c55abb8d96a8`**
+## 📌 IL PIN — **`23bb9831242eeb71d1071791f20f2da64091d364`**
 
 ```
-9ed66e22739f7de200dbc86c8e26c55abb8d96a8
+23bb9831242eeb71d1071791f20f2da64091d364
 ```
 
 
@@ -244,7 +244,7 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='9ed66e22739f7de200dbc86c8e26c55abb8d96a8'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='23bb9831242eeb71d1071791f20f2da64091d364'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -290,7 +290,7 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='9ed66e22739f7de200dbc86c8e26c55abb8d96a8'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='23bb9831242eeb71d1071791f20f2da64091d364'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -316,7 +316,7 @@ Si cambia **solo** ciò che sta dopo `-Pin $pin`. Combinazioni valide:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='9ed66e22739f7de200dbc86c8e26c55abb8d96a8'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='23bb9831242eeb71d1071791f20f2da64091d364'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '01_nofinestra' -SoloBanco 'V' -Rifai;
