@@ -299,7 +299,7 @@ scritto nel referto che la riga di lancio produce.
 | `backtest_pipeline/prove/ABTG_FvgRetest.txt` | **cella `00_nudo`** — motore nudo, due lati insieme. È il nome che il driver generico prende **da solo** con `-Expert ABTG_FvgRetest` |
 | `backtest_pipeline/prove/PASSO0_FVGRET_01_long.txt` | **cella `01_long`** — solo long |
 | `backtest_pipeline/prove/PASSO0_FVGRET_02_short.txt` | **cella `02_short`** — solo short |
-| `backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1` | il driver della corsa (marcatore `MARCATORE_RIGA_PASSO0_FVGRET_v1`) |
+| `backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1` | il driver della corsa (marcatore `MARCATORE_RIGA_PASSO0_FVGRET_v2`) |
 | `backtest_pipeline/righe/RIGA_PASSO0_FVGRET_DA_MANDARE.md` | **la pagina con la riga di lancio** |
 
 ### Perché **tre** celle e non una
@@ -337,7 +337,7 @@ risultano già nel repo): il salto è **voluto, non un refuso**.
 ## 7. 🧪 COSA È STATO VERIFICATO ESEGUENDO
 
 - ✅ `RIGA_PASSO0_FVGRET.ps1` **parsa**: `pwsh` + `[Parser]::ParseFile` →
-  **0 errori, 4.592 token**; **ASCII puro** su tutti e quattro i file nuovi
+  **0 errori, 5.273 token** (ricontato il 28/08 dopo i fix); **ASCII puro** su tutti e quattro i file nuovi
   (0 caratteri non-ASCII — regola del 17/08);
 - ⚠️ **CORRETTO dal verificatore-stringhe (28/08): l'audit "zero collisioni"
   era FALSO.** Trovata `$Celle`/`$CELLE` (stessa variabile in PowerShell,
@@ -358,8 +358,9 @@ risultano già nel repo): il salto è **voluto, non un refuso**.
   stella **non può vedere**, e che qui prende il gate della **baseline**);
 - ✅ **la ricetta del pin provata su una copia della pagina**: 5 segnaposto →
   **3 punti d'uso + riquadro + titolo**, **0 residui**. Il pin è poi stato
-  **inserito davvero** (`71bbd200…`) e **verificato contenere tutti e sette gli
-  artefatti** che lo script scarica, `ABTG_FvgRetest.mq5` compreso;
+  **inserito davvero** (`71bbd200…` — pin poi SUPERATO dai fix del 28/08) e
+  **verificato contenere tutti e sette gli artefatti** che lo script scarica,
+  `ABTG_FvgRetest.mq5` compreso;
 - ✅ **e anche la ricetta di RI-pinnatura provata su una copia**, con dentro una
   **riga di storia** costruita apposta (*"il pin X è BRUCIATO"*): i **3 punti
   d'uso** cambiano, **la riga di storia resta intatta** — che è il motivo per cui
@@ -392,21 +393,14 @@ cosa guardare nel referto — è:
 
 ### 👉 `backtest_pipeline/righe/RIGA_PASSO0_FVGRET_DA_MANDARE.md`
 
-Il pin è **già inserito** in quella pagina — `71bbd2002d42ad75c7404a4d3a39082e7d367d70`,
-verificato contenere **tutti e sette** gli artefatti che lo script scarica.
-In sintesi, **prima il giro a vuoto** (non apre MT5):
+Il pin vivo sta **solo** in quella pagina (`55cacfa9f99a05c248ddf60d22a5362d7dc34b04`).
+Il pin `71bbd2002d42ad75c7404a4d3a39082e7d367d70` citato più sopra è **BRUCIATO**
+dai fix del 28/08 e non va più incollato da nessuna parte.
 
-```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
-    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
-    if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera.' -ForegroundColor Red } }
-```
-
-e **poi la corsa vera**, che è lo stesso blocco **senza `-SoloControllo`**.
+La riga si prende **solo** da quella pagina. Qui non se ne tiene copia: un
+blocco incollabile in due posti diversi scade a metà (CHECKLIST punto 100,
+28/08) — la pagina `_DA_MANDARE.md` è l'unica fonte viva del giro a vuoto e
+della corsa vera.
 Risultati: cartella + **zip** sul Desktop (`PASSO0_FVGRET_<MODO>_<data>_<ora>`)
 con `REFERTO_PASSO0_FVGRET.txt`, i file prova girati e i sei CSV.
 

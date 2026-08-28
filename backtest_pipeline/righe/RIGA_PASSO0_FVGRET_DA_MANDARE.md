@@ -149,8 +149,11 @@ dire l'esatto contrario del vero.
 - `file prova scaricati: 3`;
 - `include scaricato: ABTG_PausaGuardian.mqh (<n> byte)`;
 - `geometria, valori dei lati, baseline, stella e magic: TUTTI PASSATI`;
-- `terminale scelto: ...` — **deve coincidere** con quello che stampa il
-  driver generico (stesso selettore, corretto il 28/08);
+- `terminale scelto: ...` — il driver generico **non stampa** il terminale sul
+  ramo BCM, non c'è niente da confrontare a occhio: il selettore è **lo stesso
+  codice** nei due script (verificato riga per riga il 28/08). Quello che
+  guardi tu è che il percorso contenga `BCM Markets MT5 Terminal` e **non**
+  contenga `-V3`;
 - `include: INSTALLATO e VERIFICATO in ...`;
 - `rischio ..... <n>% (default di InpRiskPercent letto NEL .mq5 al pin)`;
 - **`compilato ABTG_FvgRetest: OK (<n> KB, <ora>)`** — è il primo risultato
@@ -247,7 +250,7 @@ Cartella e zip sul **Desktop**: `PASSO0_FVGRET_<MODO>_<data>_<ora>` — dentro:
 ## ✅ COSA È GIÀ STATO VERIFICATO — **eseguendo**, prima dell'invio
 
 - ✅ il `.ps1` **parsa**: `pwsh` + `[Parser]::ParseFile` → **0 errori**,
-  **4.592 token**; **ASCII puro** (0 caratteri non-ASCII, regola del 17/08);
+  **5.273 token** (ricontato il 28/08 dopo i fix); **ASCII puro** (0 caratteri non-ASCII, regola del 17/08);
 - ✅ **audit delle collisioni CASE-INSENSITIVE fatto sui token del codice**:
   **zero collisioni**. Ed è servito: la prima stesura aveva `$R` (l'ArrayList
   del referto) contro `$r` (tre cicli) — **la stessa coppia del difetto di
