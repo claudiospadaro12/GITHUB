@@ -671,7 +671,37 @@ Si dichiara, col motivo. **Circa il 20% del testo.**
 
 ---
 
+---
+
+## 🔁 AGGIORNAMENTO 28/08 — LA LIVE DEL MATTINO DOPO RENDE CONCRETA LA Y6
+
+📄 **`risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-28.md`**.
+**Non duplico: si legge lì.** Le tre righe che toccano QUESTO referto:
+
+1. 🥊 **Y6 (medie: target o ingresso?) smette di essere astratta.** L'allievo
+   **Pier** racconta che **la sera del 27/08 era in call con Paolo** davanti a
+   un hammer sul DAX: hanno deciso di **aspettare la confluenza SuperTrend +
+   EMA200** e _"alla fine **non ci ha preso**"_ — **zero operazioni**. Emiliano
+   il mattino dopo: _"è palesemente una candela che conferma un segnale
+   d'ingresso long **a prescindere dal super trend, dalla media** […] **ti ha
+   fatto desistere, hai perso il momento**"_. → referto 28/08 §3.
+2. 🔎 **E questo tocca il §7.1 di QUESTO referto** (_"perché il nostro Invert
+   non opera: il problema è lo STACK dei filtri"_): il fondatore descrive lo
+   stesso fallimento su un trade reale. ⚠️ **n=1: indizio convergente, NON
+   misura.** La prova resta un round G1, un filtro per volta.
+3. 🟢 **Il DOPPIO ORDINE ASIMMETRICO (P18) prende la frazione:** Paolo diceva
+   _"size piccola / size più grossa"_ senza numero; Emiliano dice **"un terzo
+   sul cipettino"** e il resto sul livello a maggiore confluenza —
+   **`InpFirstFraction = 0.3333`**. → referto 28/08 §4.
+4. 🛡️ **Il tuo P23 (rollover guard) ha un gemello sugli indici:** _"sul DAX si
+   allarga lo spread anche fino a 8 punti, non ha volume"_. **E la nostra
+   guardia `InpMaxSpread` è a 0 (spenta)** in `MaxMinNotte` e `Nightly`
+   → referto 28/08 §2.3.
+
+---
+
 ### 🔗 Referti collegati
+- `risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-28.md` — **la live del mattino dopo**: Y6 diventa un caso concreto, il doppio ordine prende la frazione 1/3, la bandiera DAX-overnight
 - `risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-27.md` — **la live dello stesso giorno, mattina** (§1: stesso evento macro, trattamento opposto; §4: convergenze e §5-Y6 la divergenza sulle medie)
 - `caccia_strategie/ANALISI_LIVE_PAOLO_2026-08-25.md` — la lezione SuperTrend di cui questa è **il seguito diretto** (contraddetta su golden area, 3.0/3.5, Jackson Hole)
 - `caccia_strategie/ANALISI_LIVE_EMILIANO_2026-08-24.md` — watchpoint Jackson Hole

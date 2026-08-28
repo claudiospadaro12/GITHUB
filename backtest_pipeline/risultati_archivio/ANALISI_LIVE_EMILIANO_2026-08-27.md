@@ -639,7 +639,35 @@ del 27/08 sera (~21:34)**, SuperTrend Reversal + SuperTrend Invert.
 
 ---
 
+---
+
+## 🔁 AGGIORNAMENTO 28/08 — È ARRIVATA LA LIVE DEL GIORNO DOPO (EMILIANO, 08:30)
+
+📄 **`risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-28.md`** — **il seguito
+dichiarato di questa live** (_"in base a quello che vi ho spiegato ieri sulla
+pre-session"_). **Non duplico qui: si legge lì.** Le quattro righe che toccano
+QUESTO referto:
+
+1. 🏆 **Il §3.1 di questo referto (le 2 obbligatorie) si COMPLETA:** oggi
+   Emiliano detta **il contenuto della seconda regola**, che qui era solo
+   un'etichetta — _"l'analisi multi time frame serve per due cose: **la prima
+   per tracciare i livelli, la seconda per vedere la pre-section. Fine.**"_
+   → referto 28/08 §1.
+2. 🔴 **La soglia `≥3/4` NON è pronunciata nemmeno oggi.** Secondo giorno su
+   due. Lo **spunto vivaio** di §3.2 si indebolisce ancora.
+3. 🧮 **Il buco del R:R (§6.3 di questo referto) ha ora un secondo dato:** ieri
+   bocciava un **~0,5:1**, oggi **approva un 1:1** con runner. **Una soglia
+   minima dichiarata continua a non esistere** → referto 28/08 §6.3.
+4. 🚫 **Novità operativa vera, e verificata nel sorgente:** _"**sul DAX di notte
+   io non mi azzardo neanche lontanamente a operare**"_ (spread fino a 8 punti,
+   niente volume). **`ABTG_MaxMinNotte.mq5` lo fa già** (`InpCloseHour=17:30`,
+   `InpCloseAtEnd=true`, box notturno usato come livello e non come sessione)
+   → referto 28/08 §2.
+
+---
+
 ### 🔗 Referti collegati
+- `risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-28.md` — **la live del giorno dopo, di cui questa è il prerequisito dichiarato**: le due regole per intero, la pre-section in M15, il doppio ordine 1/3, la bandiera DAX-overnight
 - `risultati_archivio/ANALISI_LIVE_PAOLO_2026-08-27.md` — **la live della sera dello stesso giorno** (Paolo): SuperTrend Reversal + Invert, ADR, ADX 25, dashboard
 - `risultati_archivio/ANALISI_ABTG_OUTLOOK_2026-08-27.md` — outlook settimanale + checklist `.docx` (la fonte che questa live **conferma sul metodo e contraddice sulla direzione**)
 - `caccia_strategie/ANALISI_LIVE_EMILIANO_2026-08-24.md` — live 24/08 (Paolo), watchpoint Jackson Hole
