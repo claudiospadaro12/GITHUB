@@ -14,7 +14,7 @@ nudo su `D30EUR M15`, a **tick reali**, su tre celle.
 | | |
 |---|---|
 | **EA** | `mql5/Experts/ABTG_FvgRetest.mq5` (adattamento in casa del Code Base **71467**) |
-| **Driver** | `righe/RIGA_PASSO0_FVGRET.ps1` (marcatore `MARCATORE_RIGA_PASSO0_FVGRET_v1`) |
+| **Driver** | `righe/RIGA_PASSO0_FVGRET.ps1` (marcatore `MARCATORE_RIGA_PASSO0_FVGRET_v2`) |
 | **File prova** | `prove/ABTG_FvgRetest.txt` · `prove/PASSO0_FVGRET_01_long.txt` · `prove/PASSO0_FVGRET_02_short.txt` |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_KSQFVG.md` |
 | **Tesi del motore** | `FVG_TESI.md` |
@@ -123,14 +123,21 @@ dire l'esatto contrario del vero.
 
 ---
 
-## 1️⃣ PRIMA il giro a vuoto (**nessuna passata, non apre MT5**)
+## 1️⃣ PRIMA il giro a vuoto (**nessuna passata; APRE MetaEditor per compilare, non MT5**)
+
+> ⚠️ **Corretto il 28/08: questo EA non era mai stato compilato da nessuno.**
+> Il giro a vuoto ora **compila davvero** l'EA prima di dichiararsi
+> completato — dura circa un minuto in più, ma se c'è un errore di sintassi
+> lo scopriamo qui, non a corsa avviata. **Se la compilazione fallisce, il
+> risultato del PASSO 0 è quello**: le righe rosse del log compaiono in
+> console e in `COMPILAZIONE_FALLITA.log` dentro lo zip — si manda così com'è.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -142,10 +149,20 @@ dire l'esatto contrario del vero.
 - `file prova scaricati: 3`;
 - `include scaricato: ABTG_PausaGuardian.mqh (<n> byte)`;
 - `geometria, valori dei lati, baseline, stella e magic: TUTTI PASSATI`;
-- `include: INSTALLATO in ...` — ⚠️ se dice **NON INSTALLATO** finisce nei
-  **RILIEVI** e la compilazione passerà **solo se il file era già lì**;
+- `terminale scelto: ...` — **deve coincidere** con quello che stampa il
+  driver generico (stesso selettore, corretto il 28/08);
+- `include: INSTALLATO e VERIFICATO in ...`;
+- `rischio ..... <n>% (default di InpRiskPercent letto NEL .mq5 al pin)`;
+- **`compilato ABTG_FvgRetest: OK (<n> KB, <ora>)`** — è il primo risultato
+  vero di questo PASSO 0. Se invece esce `COMPILAZIONE FALLITA`, le righe
+  rosse sopra **sono il risultato**: si copiano in chat;
 - tre volte l'anteprima dell'`.ini` del driver generico, e in fondo
   `ESITO: CONTROLLO COMPLETATO`.
+
+Nel referto della **corsa vera**, guarda anche la sezione **`AUTOTEST DEL
+NUCLEO`**: se dice `DIVERGE`, i numeri della tabella non si leggono. Se dice
+`NON LETTO`, non è un guasto — il percorso dei log degli agent cambia fra le
+build, e resta comunque nei RILIEVI, mai un blocco.
 
 > ⚠️ **Quello che il giro a vuoto NON può fare:** `-SoloControllo` **non apre
 > MT5**. Non esiste nessun `n`, nessun PF, nessun DD, **nessun controllo sui
@@ -160,7 +177,7 @@ dire l'esatto contrario del vero.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -180,7 +197,7 @@ altre.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '02_short' -Rifai;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```

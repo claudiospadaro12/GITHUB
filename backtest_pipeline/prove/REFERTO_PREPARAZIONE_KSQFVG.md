@@ -339,8 +339,12 @@ risultano già nel repo): il salto è **voluto, non un refuso**.
 - ✅ `RIGA_PASSO0_FVGRET.ps1` **parsa**: `pwsh` + `[Parser]::ParseFile` →
   **0 errori, 4.592 token**; **ASCII puro** su tutti e quattro i file nuovi
   (0 caratteri non-ASCII — regola del 17/08);
-- ✅ **audit delle collisioni CASE-INSENSITIVE sui token del codice: zero.**
-  Ed è servito — la prima stesura aveva **`$R`** (l'ArrayList del referto) contro
+- ⚠️ **CORRETTO dal verificatore-stringhe (28/08): l'audit "zero collisioni"
+  era FALSO.** Trovata `$Celle`/`$CELLE` (stessa variabile in PowerShell,
+  case-insensitive — il difetto arrivato fino al PC di Claudio, punto 79)
+  — innocua per caso in questa versione ma rimossa comunque, l'inizializzazione
+  morta dava un falso senso di sicurezza. Restava vera la coppia trovata prima:
+  aveva **`$R`** (l'ArrayList del referto) contro
   **`$r`** (tre cicli), **la stessa coppia del difetto di R109**, rinominata
   `$RefTxt`; e usava **`$args`**, che è una **variabile automatica** di
   PowerShell, rinominata `$argv`;

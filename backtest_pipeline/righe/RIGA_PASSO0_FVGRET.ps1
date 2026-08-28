@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_PASSO0_FVGRET_v1
+#  MARCATORE_RIGA_PASSO0_FVGRET_v2
 #  RIGA_PASSO0_FVGRET.ps1  --  PASSO 0 DEL MOTORE FAIR VALUE GAP
 #  ABTG_FvgRetest  su  D30EUR  M15, TICK REALI, tre celle:
 #     00_nudo   long + short insieme   magic 776000/776001
@@ -77,8 +77,7 @@ param(
   [string]$Periodo       = "M15",
   [string]$DaQuando      = "2024.09.26",
   [string]$Fino          = "2026.06.30",
-  [int]$Deposito         = 100000,
-  [double]$Rischio       = 1.0
+  [int]$Deposito         = 100000
 )
 $ErrorActionPreference = "Stop"
 [Threading.Thread]::CurrentThread.CurrentCulture   = [Globalization.CultureInfo]::InvariantCulture
@@ -102,8 +101,14 @@ $RawPin = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Problemi = New-Object System.Collections.ArrayList
 $Rilievi  = New-Object System.Collections.ArrayList
 $Fatale   = ""
-$Celle    = @()
 $Include  = "NON INSTALLATO"
+$Terminale = "n/d"
+$Compilato = "NON TENTATA"
+$RiskEA    = "n/d"
+$Autotest  = @()
+# NOTA: le celle stanno in $CELLE (piu' avanti), popolata PRIMA del try.
+# Qui non si dichiara nessun "$Celle": in PowerShell sarebbe LA STESSA
+# variabile (case-insensitive, punto 79 / R109).
 $Modo     = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
@@ -251,7 +256,7 @@ try{
   Dico ("pin ......... " + $Pin)
   Dico ("celle ....... " + @($Ordinati).Count + " su 3")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (split 40/60 del driver generico)")
-  Dico ("banco ....... Modello 4 (TICK REALI), deposito " + $Deposito + ", rischio " + $Rischio + "%")
+  Dico ("banco ....... Modello 4 (TICK REALI), deposito " + $Deposito)
 
   # -------------------------------------------------------------------
   #  1. SCARICO AL PIN
@@ -367,37 +372,73 @@ try{
   Dico "geometria, valori dei lati, baseline, stella e magic: TUTTI PASSATI" "Green"
 
   # -------------------------------------------------------------------
-  #  3. L'INCLUDE -- il pezzo che il driver generico non fa
+  #  3. L'INCLUDE E LA COMPILAZIONE -- i due pezzi che il driver
+  #     generico non fa (l'include) o fa troppo tardi (la compilazione).
   # -------------------------------------------------------------------
-  Titolo "3. INSTALLO L'INCLUDE"
-  # SI PARTE DA origin.txt, non da una spazzolata di Program Files: ogni
-  # cartella dati dice da quale installazione arriva, ed e' l'unico modo
-  # affidabile (un broker si installa dove vuole). E' anche molto piu'
-  # veloce di un -Recurse su Program Files.
-  $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-  $dataFolder = ""
-  foreach($d in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)){
-    if($d.Name -ieq "Common"){ continue }
-    $o = Join-Path $d.FullName "origin.txt"
-    if(-not (Test-Path $o)){ continue }
-    $inst = ""
-    try{ $inst = (Get-Content $o -Raw -ErrorAction Stop).Trim() }catch{ continue }
-    if($inst -notlike "*BCM*"){ continue }
-    if(-not (Test-Path (Join-Path $inst "terminal64.exe"))){ continue }
-    $dataFolder = $d.FullName
-    break
+  Titolo "3. INSTALLO L'INCLUDE E COMPILO"
+  # IL SELETTORE E' LO STESSO, RIGA PER RIGA, DI walkforward_generico.ps1.
+  # Prima qui c'era "il primo origin.txt che contiene BCM": su una
+  # macchina con DUE istanze (la -V3 del 100k esiste, CHECKLIST punto 26)
+  # i due script potevano scegliere TERMINALI DIVERSI -- include
+  # installato in uno, compilazione fatta nell'altro. E' il punto 27 con
+  # l'aggravante che il referto stampa "INSTALLATO" in verde. Se il
+  # selettore del driver generico cambia, cambia anche questo: si
+  # toccano insieme.
+  $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
+  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+  if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+  if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1." }
+  $instDir    = $cand.DirectoryName
+  $MetaEditor = Join-Path $instDir "metaeditor64.exe"
+  $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  $dataFolder = (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
+  if(-not $dataFolder){ throw ("cartella dati non trovata per " + $instDir) }
+  $Terminale = $instDir
+  Dico ("terminale scelto: " + $instDir + "  (DEVE essere lo stesso che stampa il driver generico)") "Yellow"
+
+  # LA COPIA SI VERIFICA SUL CONTENUTO, NON SUL NOME (punto 27-ter): se
+  # in Include esistesse una CARTELLA con quel nome, Copy-Item ci
+  # metterebbe il file DENTRO e Test-Path direbbe verde lo stesso.
+  $incDir = Join-Path $dataFolder "MQL5\Include"
+  New-Item -ItemType Directory -Force -Path $incDir | Out-Null
+  $lenInc = (Get-Item -LiteralPath $incSrc).Length
+  Copy-Item $incSrc -Destination $incDir -Force
+  $vInc = Get-Item -LiteralPath (Join-Path $incDir "ABTG_PausaGuardian.mqh") -ErrorAction Stop
+  if($vInc.PSIsContainer -or $vInc.Length -ne $lenInc){ throw "include copiato ma NON verificato (lunghezza diversa)." }
+  $Include = "INSTALLATO e VERIFICATO in " + $incDir
+  Dico $Include "Green"
+
+  # --- LA COMPILAZIONE, IN ENTRAMBI I RAMI (controllo E corsa vera).
+  #     QUESTO EA NON E' MAI STATO COMPILATO DA NESSUNO: un giro di
+  #     controllo che non compila non controlla la cosa PIU' PROBABILE che
+  #     vada storta, e l'errore uscirebbe dentro il driver generico, che
+  #     muore con "compilazione fallita" senza dire perche' (punti 20/27).
+  #     L'.ex5 si CANCELLA prima: senza, un binario vecchio farebbe
+  #     passare per riuscita una compilazione fallita (punto 23).
+  $mq5 = Join-Path $Work ($EA + ".mq5")
+  Scarica ($RawPin + "/mql5/Experts/" + $EA + ".mq5") $mq5
+  $mRisk = [regex]::Match((Get-Content -LiteralPath $mq5 -Raw), 'input\s+double\s+InpRiskPercent\s*=\s*([0-9.]+)')
+  if($mRisk.Success){ $RiskEA = $mRisk.Groups[1].Value }
+  Dico ("rischio ..... " + $RiskEA + "% (default di InpRiskPercent letto NEL .mq5 al pin: i file prova NON lo pinnano)")
+  $dstExp = Join-Path $dataFolder "MQL5\Experts"
+  New-Item -ItemType Directory -Force -Path $dstExp | Out-Null
+  $dstMq5 = Join-Path $dstExp ($EA + ".mq5")
+  Copy-Item $mq5 -Destination $dstMq5 -Force
+  $ex5 = Join-Path $dstExp ($EA + ".ex5")
+  Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+  $t0 = Get-Date
+  & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
+  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+  if(-not (Test-Path -LiteralPath $ex5)){
+    $logC = Join-Path $dstExp ($EA + ".log")
+    if(Test-Path -LiteralPath $logC){
+      Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force
+      Get-Content -LiteralPath $logC -Tail 40 | ForEach-Object { Write-Host $_ -ForegroundColor Red }
+    }
+    throw ("COMPILAZIONE FALLITA: " + $EA + " non era MAI stato compilato da nessuno. Gli errori sono qui sopra e in COMPILAZIONE_FALLITA.log dentro lo zip.")
   }
-  if($dataFolder -and (Test-Path $dataFolder)){
-    $incDir = Join-Path $dataFolder "MQL5\Include"
-    New-Item -ItemType Directory -Force -Path $incDir | Out-Null
-    Copy-Item $incSrc -Destination $incDir -Force
-    $Include = "INSTALLATO in " + $incDir
-    Dico $Include "Green"
-  }else{
-    $Include = "NON INSTALLATO: cartella dati BCM non trovata"
-    [void]$Rilievi.Add("ABTG_PausaGuardian.mqh NON installato (cartella dati BCM non trovata). Se era gia' li' la compilazione passa lo stesso; se non c'era, il driver generico muore con 'compilazione fallita'.")
-    Dico $Include "Yellow"
-  }
+  $Compilato = "OK (" + [int]((Get-Item -LiteralPath $ex5).Length/1024) + " KB, " + (Get-Item -LiteralPath $ex5).LastWriteTime.ToString("HH:mm:ss",$INV) + ")"
+  Dico ("compilato " + $EA + ": " + $Compilato) "Green"
 
   # -------------------------------------------------------------------
   #  4. LE CORSE
@@ -451,6 +492,29 @@ try{
       [void]$Problemi.Add("cella " + $c.Id + ": gemelli " + $c.Gemelli + " -- il banco non e' deterministico, il numero non si legge.")
     }
   }
+
+  # --- L'AUTOTEST DEL NUCLEO (nove blocchi) scrive solo su Print/Log:
+  #     in ottimizzazione nessuno la legge, il percorso dei log cambia
+  #     fra le build MT5 -- e' un raccoglitore BEST-EFFORT, MAI un gate
+  #     (punto 99 della checklist).
+  if(-not $SoloControllo){
+    $radici = @((Join-Path $dataFolder "Tester"), (Join-Path $env:APPDATA "MetaQuotes\Tester"))
+    $righeAT = @()
+    foreach($rr in $radici){
+      if(-not (Test-Path -LiteralPath $rr)){ continue }
+      $logs = @(Get-ChildItem -LiteralPath $rr -Recurse -Filter *.log -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $Avvio })
+      foreach($lg in $logs){
+        $righeAT += @(Select-String -LiteralPath $lg.FullName -SimpleMatch -Pattern "[FVGRET][AUTOTEST]" -ErrorAction SilentlyContinue | ForEach-Object { $_.Line })
+      }
+    }
+    $Autotest = @($righeAT | ForEach-Object { ($_ -replace '^.*\[FVGRET\]\[AUTOTEST\]','[AUTOTEST]').Trim() } | Select-Object -Unique)
+    if($Autotest.Count -gt 0){
+      Set-Content -LiteralPath (Join-Path $Work "AUTOTEST_FVGRET.txt") -Value ($Autotest -join "`r`n") -Encoding ASCII
+      Dico ("autotest del nucleo letto dai log degli agent: " + $Autotest.Count + " righe") "Green"
+    }else{
+      [void]$Rilievi.Add("AUTOTEST del nucleo NON LETTO: nessuna riga [FVGRET][AUTOTEST] nei log degli agent (il percorso cambia fra le build). Il collaudo dei nove blocchi NON e' agli atti di questa corsa. Non e' un guasto della corsa (punto 99).")
+    }
+  }
 }
 catch{
   $Fatale = ("" + $_.Exception.Message)
@@ -474,8 +538,14 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
 [void]$RefTxt.Add("pin:  " + $Pin)
 [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (split 40/60)")
-[void]$RefTxt.Add("banco: Modello 4 TICK REALI, deposito " + $Deposito + ", rischio " + $Rischio + "%")
+[void]$RefTxt.Add("banco: Modello 4 TICK REALI, deposito " + $Deposito + ", rischio " + $RiskEA + "% (default di InpRiskPercent letto nel .mq5 al pin -- i file prova NON lo pinnano)")
+[void]$RefTxt.Add("terminale: " + $Terminale)
 [void]$RefTxt.Add("include: " + $Include)
+[void]$RefTxt.Add("compilazione: " + $Compilato)
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add("--- AUTOTEST DEL NUCLEO (nove blocchi, letti dai log degli agent) ---")
+if($Autotest.Count -gt 0){ foreach($a in $Autotest){ [void]$RefTxt.Add("  " + $a) } }
+else { [void]$RefTxt.Add("  NON LETTO (vedi RILIEVI). Non e' un verdetto: e' un'assenza.") }
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.")
 [void]$RefTxt.Add("E' un CONTA-OPERAZIONI: misura la FREQUENZA del motore FVG nudo.")
@@ -511,7 +581,7 @@ foreach($c in $CELLE){
 [void]$RefTxt.Add("   non per merito del motore. Un 'niente edge short' letto qui chiude")
 [void]$RefTxt.Add("   la domanda per QUESTA EPOCA, non in assoluto.")
 [void]$RefTxt.Add("3. IL CANCELLO C2 (il costo) NON E' IN QUESTA TABELLA. Si legge nella")
-[void]$RefTxt.Add("   mediana del take LORDO, nell'export per-trade in Common\\Files:")
+[void]$RefTxt.Add("   mediana del take LORDO, nell'export per-trade in Common\Files:")
 [void]$RefTxt.Add("     abtg_trades_ABTG_FvgRetest_" + $Simbolo + "_<magic>.csv")
 [void]$RefTxt.Add("   ATTENZIONE: quel file porta il MAGIC nel nome, non la finestra:")
 [void]$RefTxt.Add("   la gamba OOS SOVRASCRIVE la gamba IS dello stesso magic. Quello")
@@ -536,6 +606,10 @@ Set-Content -LiteralPath $refPath -Value ($RefTxt -join "`r`n") -Encoding ASCII
 Write-Host ($RefTxt -join "`r`n")
 
 # --- gli artefatti: solo cio' che ha girato, copiato PER NOME.
+foreach($f in @("AUTOTEST_FVGRET.txt","COMPILAZIONE_FALLITA.log")){
+  $src = Join-Path $Work $f
+  if(Test-Path -LiteralPath $src){ Copy-Item $src -Destination $Cart -Force }
+}
 foreach($c in $Ordinati){
   $src = Join-Path $Prove $c.Prova
   if(Test-Path -LiteralPath $src){ Copy-Item $src -Destination $Cart -Force }
