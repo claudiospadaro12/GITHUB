@@ -17,12 +17,13 @@ doppio: aggiunge frequenza E toglie la dipendenza dal downgrade di leva.**
 
 ## ⚡ IL RISULTATO IN UNA RIGA
 
-> **Su 8 canali passati al controllo positivo (4 vivi, 3 muti da sei cacce,
-> 9 host bloccati all'egress), 1.598 titoli del Code Base ricrawlati
+> **Su 9 canali passati al controllo positivo (5 vivi, 3 muti da sette cacce,
+> 13 host bloccati all'egress), 1.598 titoli del Code Base ricrawlati
 > (catalogo COMPLETO: pagina 41 = 0 elementi), 26 tag TradingView interrogati
-> per 236 strategie uniche, 8 query arXiv, 1.118 slug Quantpedia enumerati e
-> 4 query al motore di ricerca — sono arrivato al SORGENTE su 23 oggetti
-> (17 Pine + 6 `.mq5`). Ne propongo DUE, più una specifica. E il primo NON è
+> per 236 strategie uniche **più 10 query alla ricerca testuale** (canale
+> nuovo, §1-quater), 8 query arXiv, 1.118 slug Quantpedia enumerati e 4 query
+> al motore di ricerca — sono arrivato al SORGENTE su 28 oggetti
+> (22 Pine + 6 `.mq5`). Ne propongo DUE, più DUE specifiche. E il primo NON è
 > un EA: è un MECCANISMO di letteratura peer-review che il progetto non ha
 > mai misurato, e la cui prova costa UNA passata di tester.**
 >
@@ -93,6 +94,7 @@ una strategia** (§2, P1).
 | **TradingView** | **200** | tag `/scripts/vwap/?script_type=strategies` → **21 anchor** `data-qa-id="ui-lib-card-link-title"`; `pine-facade` rende il campo `source` | 🟢 **PASSA, SORGENTE COMPRESO.** ⚠️ **La procedura del memo aveva un secondo difetto: l'ho trovato e corretto — §1-bis** |
 | **arXiv API** (`https://export.arxiv.org`) | **200** | `cat:q-fin.TR` rende titoli e date veri (dal 25/11/2024 a oggi) | 🟢 **PASSA come canale** · 🔴 **STERILE sul mandato**: §4 |
 | **Quantpedia** | **200** | `wp-sitemap-posts-pod_cpt_strategy-1.xml` rende **1.118 slug** di strategia + `wp-sitemap-posts-post-1.xml` rende **1.155 post** di blog | 🟢 **PASSA — e la nota del 25/08 "non ricontrollarla" era SBAGLIATA: §1-ter** |
+| 🆕 **TradingView — RICERCA TESTUALE** (`/pubscripts-suggest-json/`) | **200** | `?search=session%20close` → **34 risultati** con `scriptIdPart`, `extra.kind` (strategy/study) e `access` (1 = sorgente leggibile) | 🟢 **PASSA, ed è NETTAMENTE MIGLIORE del canale a tag: §1-quater** |
 | **motore di ricerca web** (tool) | ok | 4 query, risultati con titoli, riviste, volumi e pagine | 🟢 **PASSA per la BIBLIOGRAFIA** · 🔴 **NON per il testo**: i PDF che indica sono tutti dietro egress bloccato |
 | **GitHub ricerca** (`api.github.com/search`) | **403** | — | 🔴 **NULLA — settima caccia di fila** |
 | **SSRN** (`papers.ssrn.com`) | **403** | — | 🔴 **NULLA — settima di fila** |
@@ -177,6 +179,40 @@ esiste in letteratura e come si chiama**, che è precisamente il gancio da cui
 > intraday"_ → **falso**. La forma giusta è: **"la sitemap di Quantpedia è un
 > INDICE DI EFFETTI da usare come punto di partenza bibliografico; le regole
 > sono a pagamento e non si comprano."**
+
+### 1-quater. 🆕 IL CANALE CHE HO TROVATO A CACCIA IN CORSO — e che mi ha SMENTITO
+
+**Onestà prima di tutto: questo canale non l'ho scoperto io.** Mentre lavoravo,
+la **sessione gemella** che oggi batte il lotto INDICI l'ha scritto nel memo
+fonti (`PROMEMORIA_SBLOCCO_FONTI.md`, agg. 28/08 §A). **Io l'ho verificato in
+proprio e l'ho applicato al mio bersaglio**, e vale la pena dirlo perché **mi
+ha falsificato una conclusione che avevo già scritto** (§6.4, corretta).
+
+```
+https://www.tradingview.com/pubscripts-suggest-json/?search=<query>
+```
+
+Una sola richiesta e rende, per ogni risultato: **`scriptIdPart`
+(`PUB;<hash>` già pronto)**, `extra.kind` (`strategy` vs `study`), **`access`
+(`1` = sorgente leggibile, `2`/`3` = protetto)**, `agreeCount` (i like) e
+`author.username`. ➡️ **Si sa PRIMA se un oggetto è una strategia e se il
+sorgente si può leggere**, invece di scoprirlo dopo tre richieste.
+
+**Misurato da me oggi su 10 query in bersaglio** (`intraday forex`,
+`gold intraday`, `london session`, `new york session`, `session close`,
+`end of day exit`, `forex mean reversion`, `XAUUSD strategy`,
+`intraday reversal`, `time of day`) → **21 strategie uniche col sorgente
+leggibile**, di cui **5 mai viste dal canale a tag**.
+
+🔴 **E qui viene la parte che mi riguarda: il canale a tag mi aveva fatto
+scrivere una conclusione FALSA.** Avevo misurato che i tag `timeofday`,
+`hourofday`, `killzone`, `overlap`, `asiansession` rendono **zero strategie**,
+e ne avevo dedotto _"su TradingView l'ora del giorno come motore non esiste"_.
+**La ricerca testuale `time of day` ne rende TRE, tutte col sorgente
+leggibile**, e una di esse è **l'implementazione di riferimento esatta della
+sonda che avevo appena specificato per il P1** (§2, P4). ➡️ **La conclusione
+corretta è: i tag di TradingView hanno buchi enormi e "zero risultati su un
+tag" NON è una misura di assenza.** Correzione applicata al §6.4.
 
 ### Cosa ho sfogliato, dove ha funzionato
 
@@ -530,6 +566,53 @@ invece che *sull'ultima candela* è gratis.
 
 ---
 
+### 4️⃣ P4 — `Mateo's Time of Day Analysis LE-SE`: 🎯 **la SONDA del P1, già scritta da un altro — trovata DOPO aver specificato il P1**
+
+```
+NOME            Mateo's Time of Day Analysis LE-SE  (shorttitle "Time of Day LE")
+FONTE / URL     TradingView, scriptIdPart PUB;f493382224324212b424bd89b27ddd9f
+                https://www.tradingview.com/script/f493382224324212b424bd89b27ddd9f/
+                PINE SCARICATO E LETTO (47 righe)
+AUTORE / DATA   @MateoH_ · created 2024-05-31T19:41:22Z · access open_no_auth
+                POPOLARITA' 35 like  [VERIFICATO nel JSON della ricerca]
+LICENZA         [INCERTO] nessuna licenza dichiarata nel sorgente
+```
+
+🎯 **Perché è in dossier, e perché è la conferma più forte che il P1 abbia
+preso:** il P1 l'ho specificato **prima** di trovare questo (una sonda a due
+parametri, ora d'ingresso e ora d'uscita, flat a fine giornata, che misura la
+percentuale di giornate positive per fascia oraria). **Poi la ricerca testuale
+me l'ha messo davanti già scritto.** Il commento dell'autore, righe 3-4, è la
+mia stessa frase con altre parole:
+
+> _"This is a simple script to determine **if entering a long position at a
+> specific time has a higher probability of being up if exited at a different
+> specific time**. Use the TradingView 'Percent Profitable' to help determine
+> this. The inverse is true for short trades, just reverse the percentage."_
+
+**Le quattro righe che contano, e che confermano la specifica riga per riga:**
+
+| cosa serviva al P1 | come lo fa lui |
+|---|---|
+| **due soli parametri** | `StartTime = input.int(0930)` · `EndTime = input.int(1600)`. **Non ce ne sono altri** (a parte le date di backtest) |
+| **flat a fine sessione, incondizionato** | `Strategy.closeAllAtEndOfSession(comment = "End Of Day")` — ultima riga del file, **sempre attiva**, più `strategy.close_all()` nella finestra d'uscita |
+| **niente look-ahead** | `process_orders_on_close = true` nell'header |
+| **è una MISURA, non una strategia** | **non c'è nessuno stop loss e nessun sizing — e l'autore lo dichiara**: si legge la *Percent Profitable*, non il P/L |
+
+🔴 **Ed è per questo che NON è un candidato EA, ed è promosso come STRUMENTO:**
+senza stop loss non passa il §4 come strategia. **Ma come sonda è corretto**,
+e serve esattamente il compito che gli chiediamo.
+
+```
+VERDETTO   🟢 PROMOSSO COME STRUMENTO / SPECIFICA (non come EA)
+COSA VALE  è la CONFERMA INDIPENDENTE che la sonda del P1 è costruibile in
+           47 righe, ed è il riferimento da mettere sotto gli occhi di
+           mql5-ea-developer quando costruira' ABTG_SondaOrologio.
+           Attribuzione: @MateoH_, TradingView PUB;f4933822...
+```
+
+---
+
 ## 3. 🗑️ GLI SCARTATI — uno per riga, con la riga di codice che lo prova
 
 ### 3.1 MQL5 Code Base — **6 sorgenti letti**
@@ -563,6 +646,18 @@ invece che *sull'ultima candela* è gratis.
 | S20 | **`Seasonal Strategies V1`** | [`9PArRAI9`](https://www.tradingview.com/script/9PArRAI9-Seasonal-Strategies-V1/) · created **2025-12-29** · 176 righe | 🔴 **FUORI MANDATO**: entra e esce su **date di calendario** (`mmdd = month*100 + dayofmonth`, riga 12) → posizioni tenute per **settimane**. Famiglia calendario, chiusa da R63 (**0/24 su 11.928 operazioni**) |
 | S21 | **`Koala Script` (Koala System EURUSD 15min)** | [`wtx6cq4I`](https://www.tradingview.com/script/wtx6cq4I-Koala-System-EURUSD-15min/) · © SoftKill21 · **MPL 2.0** · created **2020-08-30** · 133 righe | 🟡 **NON è uno scarto per difetto: è il GEMELLO di P2** dello stesso autore (stesso stack di 5 SMMA, stesso `tp/sl=300`, più MACD e ATR sopra). **Scartato in favore di P2 perché ha più condizioni per la stessa tesi** — e la regola di casa dice di prendere la versione con meno manopole. ➡️ **Se P2 dovesse passare, questo è la prima variante da provare come CELLA, non come EA** |
 
+### 3.2-bis TradingView — **5 Pine in più, trovati dalla RICERCA TESTUALE** (§1-quater)
+
+_Questi cinque il canale a tag non me li aveva mostrati. Uno è il P4
+(promosso), quattro sono qui._
+
+| # | script | autore / popolarità | la riga che lo prova |
+|---|---|---|---|
+| 🚨 **S26** | **`Timeframe Time of Day Buying and Selling Strategy`** | [`PUB;185202f4...`](https://www.tradingview.com/script/185202f453a842bd8c84b8eb8300d7c5/) · @tormunddookie · created **2021-08-01** · **193 like** · 151 righe | 🔴 **QUARANTOTTO INPUT CATEGORICI, UNO PER OGNI MEZZ'ORA DELLA GIORNATA:** `array.set(timeframes_options, N, input(defval='None', options=['Long','Short','None'], title='HHMM-HHMM'))` × 48. **L'ottimizzatore sceglie, per ciascuna delle 48 mezz'ore e in modo indipendente, se comprare, vendere o stare fermo.** ➡️ 🎯 **QUESTO SCARTO VALE PIÙ DI MOLTI PROMOSSI, e va letto due volte: è il P1 FATTO NEL MODO SBAGLIATO.** Lo spazio di ricerca è **3^48**. Qualunque risultato positivo di questo script è, con probabilità ~1, rumore. **È l'illustrazione vivente della trappola scritta al §8**, e la ragione per cui il round del P1 deve dichiarare PRIMA quale ora la tesi prevede |
+| **S27** | **`Timeframe Time of Day and Day of Week Buying and Selling Strategy`** | stesso autore · created **2021-08-18** · **126 like** · 169 righe | 🔴 **Lo stesso, moltiplicato per cinque giorni.** Non l'ho letto oltre l'intestazione degli input: il §4 non si ammorbidisce, e il motivo è già scritto sopra |
+| **S28** | **`Forex Master v4.0 (EUR/USD Mean-Reversion Algorithm)`** | [`PUB;2765`](https://www.tradingview.com/script/2765/) · @Stable_Camel · Pine **v2** · **3.319 like** — 🥇 **la strategia forex più votata che ho incontrato in sette cacce** · **36 righe** | 🔴 **FUORI DAL MANDATO NON NEGOZIABILE: nessuna sessione, nessun flat, tiene overnight.** Le uniche uscite sono `strategy.exit(..., profit = 500, loss = 500)`. 🟢 **Ma il motore merita una riga onesta, perché non è spazzatura:** `Condition1 = crossover(Price, Lower) and SmoothedADX1 < SmoothedADX2`, cioè **fade della banda inferiore SOLO quando l'ADX sta scendendo** (ema6 del DX sotto la ema12). **Il regime è costitutivo, non appiccicato** — non è il "coltello che cade" di R60. ⚠️ **Nessun sizing, Pine v2 del 2014-2018, e i 3.319 like sono popolarità, non evidenza.** ➡️ **Da riprendere in un mandato SENZA il vincolo intraday, non in questo** |
+| **S29** | **`Intraday Forex EMA Trend Strategy (MTF + Sessions + DD)`** | [`PUB;81cd4e07...`](https://www.tradingview.com/script/81cd4e0703624c7faf1cc989a8325f76/) · @jams1811 · created **2026-02-02** · 12 like · 112 righe | 🔴 **La sessione filtra SOLO l'ingresso** (righe 17-18): le uscite sono `strategy.exit` con stop/limit (righe 94, 98), **nessun `close_all`** → **tiene overnight**, viola il requisito. Il motore è `ema(9)/ema(20)`: doppione di `CrossEma`. 🟢 Da tenere agli atti: `maxDailyDD = input.float(10.0, "Max Daily Drawdown (%)")` — **un cap di perdita giornaliera dentro l'EA** è raro e in ottica prop è la cosa giusta |
+
 ### 3.3 Le piste del mandato che ho dovuto **CHIUDERE**, e con quali prove
 
 | # | pista | verdetto | le prove |
@@ -581,7 +676,7 @@ invece che *sull'ultima candela* è gratis.
 | 🔴 **Il testo dei due paper del P1** (SNB, Bank of Canada, AUT, INSEAD, RePEc, EconStor, Wiley, QMUL: **tutti egress-bloccati**, misurati uno per uno oggi) | **È il buco più grave.** Ho la scheda bibliografica e l'enunciato, **non le tabelle**: quindi **non conosco la grandezza dell'effetto né se gli autori dichiarano che sopravvive ai costi.** ➡️ È il motivo per cui P1 parte come **MISURA** e non come strategia, e il motivo per cui la voce "testabile senza riscritture" prende 1 e non 2 |
 | 🔴 **Le pagine strategia di Quantpedia in tema** (`intraday-currency-seasonality`, `intraday-reversal-in-currency-markets`, ...) | **Sono PREMIUM**: rendono la home page. Dalla sitemap ho **il nome dell'effetto, non le regole**. Utile come indice bibliografico (§1-ter), inutile come sorgente |
 | 🔴 **Ricerca GitHub, SSRN, Forex Factory (403, settima caccia di fila)** | Zero repo nuovi, zero letteratura peer-review scaricabile, e continuo a non sapere **come sono invecchiati** i sistemi intraday su forex e oro |
-| 🟡 **219 delle 236 strategie TradingView raccolte** | Ho aperto e letto **17**, scelte in bersaglio. Il giacimento non è esaurito — ma i 17 letti sono un campione onesto della sua qualità, e la qualità è bassa |
+| 🟡 **La grande maggioranza delle strategie TradingView raccolte** | 236 dal canale a tag + 21 leggibili dalla ricerca testuale; ne ho aperte e lette **22**, scelte in bersaglio. Il giacimento non è esaurito — ma le 22 lette sono un campione onesto della sua qualità, e la qualità è bassa |
 | 🟡 **67 dei 73 titoli in tema del Code Base** | Ne ho letti **6** nel sorgente. Gli altri erano fuori bersaglio a titolo+sezione (utility, pannelli, calcolatori) o **già setacciati** (il grep degli id già a verbale ne ha esclusi 53) |
 | ⚠️ **Nessun backtest è stato eseguito qui** | In questo ambiente non esistono MT5 né Strategy Tester. **Nessun numero di questo dossier è stato misurato oggi**: quelli di casa vengono dai referti citati, quelli di fuori sono etichettati `[DICHIARATO]` o `[NON VERIFICATO]` |
 
@@ -625,13 +720,25 @@ Il mandato chiedeva esplicitamente di controllarlo. **Verificato con `ls` e
    22/08. ⚠️ **Costo: ~15 minuti.** ➡️ **Il prossimo cacciatore deve grep-are
    `report/SWEEP_*` insieme a `caccia_strategie/*`**, oppure qualcuno deve
    consolidare gli id in un unico file.
-4. 🕳️ **Su TradingView l'ora del giorno come MOTORE non esiste.** I tag
+4. 🚨 **"ZERO RISULTATI SU UN TAG" NON È UNA MISURA DI ASSENZA — e me ne sono
+   accorto smentendo me stesso, a caccia in corso.** Avevo misurato che i tag
    `killzone`, `timeofday`, `hourofday`, `overlap`, `asiansession` rendono
-   **zero strategie**. Esiste solo come *filtro* sopra un motore di prezzo.
-   **Nel Code Base esiste, ma solo dentro martingale** (S1, S2, S3).
-   ➡️ **Il terreno del P1 è vergine da entrambi i lati.** Che è insieme
-   l'argomento migliore e il campanello d'allarme: o nessuno ci ha guardato,
-   o ci hanno guardato tutti e non funziona. **Lo decide la nostra misura.**
+   **zero strategie**, e avevo scritto che _"su TradingView l'ora del giorno
+   come motore non esiste"_. **La ricerca testuale `time of day` ne rende
+   TRE**, tutte col sorgente leggibile — e una è **l'implementazione di
+   riferimento della sonda del P1** (P4). ➡️ **Regola nuova per il prossimo
+   cacciatore: un tag vuoto va verificato con la ricerca testuale PRIMA di
+   scriverne una conclusione.** Costa una richiesta; scriverne una conclusione
+   sbagliata costa un dossier.
+   🟡 **Quello che resta vero, riformulato onestamente:** l'ora del giorno come
+   motore su TradingView è **raro e fatto male** — le tre implementazioni
+   trovate sono **una sonda senza stop** (P4) e **due macchine da overfitting
+   con 48 e 240 input categorici** (S26, S27). **Nel Code Base esiste, ma solo
+   dentro martingale** (S1, S2, S3). ➡️ **Il terreno del P1 non è vergine: è
+   calpestato male.** Il che è insieme l'argomento migliore (nessuno l'ha
+   misurato con disciplina) e il campanello d'allarme (in 3^48 celle qualcosa
+   di verde si trova sempre). **Lo decide la nostra misura, coi criteri
+   congelati prima.**
 
 ---
 
@@ -692,6 +799,14 @@ rumore. **Se l'ora verde non è quella che la tesi prevedeva, il round è
 NEGATIVO anche se il numero è positivo.** Questa riga va copiata nei criteri
 e firmata prima di lanciare.
 
+📌 **E non è una preoccupazione teorica: la trappola ha un nome e un
+indirizzo.** È **S26** (§3.2-bis), `Timeframe Time of Day Buying and Selling
+Strategy`, **193 like su TradingView**: quarantotto input categorici
+Long/Short/None, uno per ogni mezz'ora, spazio di ricerca **3^48**. **È
+esattamente il P1 lasciato libero di scegliersi le ore dopo aver visto i
+numeri.** ➡️ **Va messo sotto gli occhi di chi firmerà i criteri del round,
+come esempio di ciò che il round NON deve diventare.**
+
 ---
 
 ## 9. 📋 RIEPILOGO PER LA CODA
@@ -701,8 +816,11 @@ e firmata prima di lanciare.
 | **P1** | **`L'OROLOGIO` — deriva intraday per blocco di sessione** (Breedon & Ranaldo 2013 · Krohn/Mueller/Whelan 2024) | fuori, **bibliografia verificata, TESTO NON LETTO** | **il primo motore della flotta che NON guarda il prezzo.** 36 sedie su 36 guardano il prezzo | **9/10** | 🟢 **PROVA SUBITO, come MISURA** | una sonda di ~120 righe + **una passata**. File prova consegnato: `prove/SONDA_OROLOGIO_FX.txt` |
 | **P2** | **`Money maker EURUSD 15min`** (TradingView `jU2JCWZr`, **Pine letto**, MPL 2.0) | fuori | **forex M15 con FLAT OBBLIGATORIO a fine sessione** + tetto 2 op/giorno: il bersaglio esatto del mandato FTMO | **7/10** | 🟡 **IN CODA, subito dietro P1** | 3-5 ore di riscrittura Pine→MQL5 + **la cella di ablazione senza finestra oraria** (senza quella è un doppione del SuperWave) |
 | **P3** | **`SP500 Session Gap Fade`** (`J1U1NNgx`, © exlux, MPL 2.0) | fuori | — | — | 🟢 **PROMOSSO COME SPECIFICA, SCARTO COME EA** | copiare il `flat_before_min` (chiusura **N minuti PRIMA** della fine sessione) in **ogni** EA intraday che costruiremo |
+| **P4** | **`Mateo's Time of Day Analysis LE-SE`** (`PUB;f4933822...`, @MateoH_, **Pine letto**) | fuori | — | — | 🟢 **PROMOSSO COME STRUMENTO** (senza SL non è un EA) | è la **sonda del P1 già scritta in 47 righe**: riferimento per `mql5-ea-developer` |
 | S1-S6 | **sei scarti da sorgente `.mq5`** | — | — | — | 🔴 | motivo + riga di codice, §3.1 |
-| S7-S21 | **quindici scarti da sorgente Pine** | — | — | — | 🔴 | motivo + riga di codice, §3.2 |
+| S7-S21 | **quindici scarti da sorgente Pine** (canale a tag) | — | — | — | 🔴 | motivo + riga di codice, §3.2 |
+| 🚨 **S26** | **`Timeframe Time of Day`** — 48 input categorici, spazio 3^48 | — | — | — | 🔴 | **è il P1 fatto male**: da leggere PRIMA di scrivere i criteri del round, §3.2-bis |
+| S27-S29 | tre scarti dalla ricerca testuale (fra cui la strategia forex **più votata** della piattaforma, 3.319 like, fuori mandato perché tiene overnight) | — | — | — | 🔴 | §3.2-bis |
 | S22-S25 | **quattro piste del mandato**, chiuse o rinviate con le prove | — | — | — | 🔴/🟡/⚪ | §3.3 — servono a non ricercarle il giro dopo |
 
 ---
@@ -711,12 +829,14 @@ e firmata prima di lanciare.
 
 **Il web gratuito, sul bersaglio esatto di oggi — "motore intraday su
 forex/oro che chiude in giornata" — ha UN SOLO oggetto leggibile, e non è
-nemmeno bello.** 236 strategie TradingView raccolte, 17 Pine letti riga per
-riga, 1.598 titoli del Code Base, 6 `.mq5` letti: **uno solo** ha finestra
-d'ingresso + flat obbligatorio + rischio in % + take sopra il costo. Gli altri
-sedici Pine sono senza stop (sei di loro), con la tesi dentro un `input`
-(tre), col 100% dell'equity per operazione (tre), o tengono overnight (quattro).
-**E il Code Base, sull'orologio, ha solo martingale.**
+nemmeno bello.** 236 strategie TradingView raccolte a tag più 21 dalla ricerca
+testuale, **22 Pine letti riga per riga**, 1.598 titoli del Code Base, 6
+`.mq5` letti: **uno solo** ha finestra d'ingresso + flat obbligatorio +
+rischio in % + take sopra il costo. Degli altri ventuno Pine: **otto sono
+senza stop loss**, **quattro mettono la tesi dentro un `input`** (uno di loro
+la mette in 48 input), **tre usano il 100% dell'equity per operazione**,
+**sette tengono overnight**. **E il Code Base, sull'orologio, ha solo
+martingale.**
 
 🎯 **Ma la conclusione operativa NON è "niente da fare". È che oggi la cosa
 più preziosa non l'ha portata il codice: l'ha portata la BIBLIOGRAFIA.**
@@ -746,12 +866,17 @@ chiude la pista in un verso o nell'altro, con numeri nostri, per sempre.**
 
 _Dossier compilato il 28/08/2026. Fonti aperte davvero: **MQL5 Code Base**
 (catalogo completo 1.598 titoli, 6 sorgenti `.mq5` scaricati, decodificati e
-letti), **TradingView** (26 tag, 236 strategie raccolte, **17 Pine scaricati e
-letti via pine-facade**), **arXiv** (8 query API), **Quantpedia** (sitemap:
-1.118 slug strategia + 1.155 post; 3 pagine aperte), **motore di ricerca web**
-(4 query, usato SOLO per la scheda bibliografica). Fonti dichiarate NULLE:
-GitHub ricerca (403), SSRN (403), Forex Factory (403) — **settima caccia di
-fila per tutte e tre**. Host bloccati all'egress: 13, elencati al §1.
+letti), **TradingView** (26 tag → 236 strategie raccolte, **più 10 query alla
+ricerca testuale** → 21 strategie leggibili; **22 Pine scaricati e letti via
+pine-facade**), **arXiv** (8 query API), **Quantpedia** (sitemap: 1.118 slug
+strategia + 1.155 post; 3 pagine aperte), **motore di ricerca web** (4 query,
+usato SOLO per la scheda bibliografica). Fonti dichiarate NULLE: GitHub
+ricerca via `curl` (403), SSRN (403), Forex Factory (403) — **settima caccia
+di fila per tutte e tre**. ⚠️ **Su GitHub la sessione gemella ha misurato oggi
+che lo strumento `WebFetch` passa dove `curl` prende 403: il canale NON è
+morto, è morto il trasporto** (`PROMEMORIA_SBLOCCO_FONTI.md` agg. 28/08 §B) —
+**io non l'ho usato in questa caccia**, e lo dichiaro invece di attribuirmelo.
+Host bloccati all'egress: 13, elencati al §1.
 **Nessun numero di performance dichiarato da un autore ha pesato su un
 punteggio.** Nessun EA nostro è stato toccato, nessun parametro in forward è
 stato modificato, nessun codice EA è stato scritto._
@@ -764,6 +889,15 @@ qualunque `.mq5` derivato**:_
   **Mozilla Public License 2.0**_
 - _`Trade Hour V4` è di **© mablue (Masoud Azizi)** (TradingView `4KxpN6N6`),
   **Mozilla Public License 2.0** — citato come reperto, non promosso_
+- _`Mateo's Time of Day Analysis LE-SE` è di **@MateoH_** (TradingView
+  `PUB;f493382224324212b424bd89b27ddd9f`) — **licenza [INCERTO]: nessuna
+  dichiarata nel sorgente.** ⚠️ Prima di derivarne codice, la licenza va
+  chiarita: qui è citato come **riferimento di specifica**, e la sonda va
+  scritta da zero_
+- _il canale di ricerca testuale di TradingView (§1-quater) e la diagnosi
+  GitHub sono stati **trovati dalla sessione gemella del 28/08**
+  (`CACCIA_INTRADAY_INDICI_2026-08-28.md`): qui il primo è stato **applicato e
+  verificato in proprio**, il secondo solo citato._
 - _il meccanismo del P1 è di **Breedon, F. e Ranaldo, A.** (JMCB 2013, 45(5),
   953-965) e **Krohn, I., Mueller, P., Whelan, P.** (Journal of Finance 2024 /
   Bank of Canada SWP 2021-48). **Testo NON letto: egress bloccato.**_
