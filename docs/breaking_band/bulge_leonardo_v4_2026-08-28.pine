@@ -1,0 +1,88 @@
+//@version=5
+indicator("Bulge Strategy — Leonardo v4", overlay=true, max_labels_count=500, max_lines_count=500)
+
+// ══════════════════════════════════
+// INPUTS
+// ══════════════════════════════════
+bb_len  = input.int(20,    "BB Lunghezza",      group="Setup")
+bb_mult = input.float(2.0, "BB Moltiplicatore", group="Setup", step=0.1)
+atr_len = input.int(14,    "ATR Periodi",       group="Setup")
+sl_mult = input.float(3.0, "SL x ATR",         group="Setup", step=0.5)
+show_bb = input.bool(true, "Mostra BB",         group="Visual")
+show_sl = input.bool(true, "Mostra SL / TP",    group="Visual")
+
+// ══════════════════════════════════
+// CALCOLI
+// ══════════════════════════════════
+[mid, upper, lower] = ta.bb(close, bb_len, bb_mult)
+atr = ta.atr(atr_len)
+
+// Bande gonfie = larghezza attuale > larghezza 5 barre fa
+width       = upper - lower
+bande_gonfie = width > width[5]
+
+// Posizione prezzo dentro le bande: 0 = banda inf, 1 = banda sup
+pos = (close - lower) / width
+
+// ══════════════════════════════════
+// SEGNALI — 3 condizioni ciascuno
+// ══════════════════════════════════
+
+// LONG: bande si stanno espandendo
+//       nelle ultime 10 barre il prezzo ha toccato la banda superiore
+//       adesso il prezzo è nella metà inferiore delle bande (pos < 0.35)
+sig_long = bande_gonfie
+         and ta.highest(high, 10) >= upper[5]
+         and pos < 0.20
+
+// SHORT: bande si stanno espandendo
+//        nelle ultime 10 barre il prezzo ha toccato la banda inferiore
+//        adesso il prezzo è nella metà superiore delle bande (pos > 0.65)
+sig_short = bande_gonfie
+          and ta.lowest(low, 10) <= lower[5]
+          and pos > 0.35
+
+// Anti-spam: non ripetere per 5 barre
+var int cl = 999
+var int cs = 999
+cl := sig_long  ? 0 : cl + 1
+cs := sig_short ? 0 : cs + 1
+long_ok  = sig_long  and cl > 5
+short_ok = sig_short and cs > 5
+
+// ══════════════════════════════════
+// LABEL
+// ══════════════════════════════════
+if long_ok
+    label.new(bar_index, low - atr * 0.5,
+         text="⬆ LONG", style=label.style_label_up,
+         color=color.new(color.green, 0), textcolor=color.white, size=size.normal)
+    if show_sl
+        line.new(bar_index, low - atr * sl_mult, bar_index + 10, low - atr * sl_mult,
+             color=color.new(color.red, 30), width=1, style=line.style_dashed)
+        line.new(bar_index, mid, bar_index + 10, mid,
+             color=color.new(color.green, 30), width=1, style=line.style_dashed)
+
+if short_ok
+    label.new(bar_index, high + atr * 0.5,
+         text="⬇ SHORT", style=label.style_label_down,
+         color=color.new(color.red, 0), textcolor=color.white, size=size.normal)
+    if show_sl
+        line.new(bar_index, high + atr * sl_mult, bar_index + 10, high + atr * sl_mult,
+             color=color.new(color.red, 30), width=1, style=line.style_dashed)
+        line.new(bar_index, mid, bar_index + 10, mid,
+             color=color.new(color.green, 30), width=1, style=line.style_dashed)
+
+// ══════════════════════════════════
+// BB PLOT
+// ══════════════════════════════════
+p1 = plot(show_bb ? upper : na, "BB Upper", color=color.new(color.red,  40), linewidth=1)
+p2 = plot(show_bb ? mid   : na, "BB Mid",   color=color.new(color.gray, 30), linewidth=1)
+p3 = plot(show_bb ? lower : na, "BB Lower", color=color.new(color.blue, 40), linewidth=1)
+fill(p1, p3, color=color.new(color.blue, 92))
+
+// ══════════════════════════════════
+// ALERTS
+// ══════════════════════════════════
+alertcondition(long_ok,  "🟢 LONG",  "LONG  — TP mediana, SL 3xATR")
+alertcondition(short_ok, "🔴 SHORT", "SHORT — TP mediana, SL 3xATR")
