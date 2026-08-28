@@ -36,7 +36,7 @@ Quindi il lavoro di oggi **non è stato "scrivere l'EA"**, ma:
 | **normalizzazione / volumi** | ✅ `NormalizePrice`, `NormVol`, retcode letto dopo ogni ordine | `PiazzaOrdine`, `LotByRisk` |
 | **attribuzione della fonte** | ✅ in testa al file, con URL, data, copia in biblioteca e licenza dichiarata **[INCERTO]** | righe 7-25 |
 | **magic vergine** | ✅ `773400`, blocco `7734xx` | riverificato oggi |
-| **autotest del nucleo puro** | ✅ blocchi `[VWAPREV][AUTOTEST]` | `AutoTestVwapRevert()` |
+| **autotest del nucleo puro** | ✅ blocchi `[VWAPREV][AUTOTEST]`, **e dalla v2 l'esito esce in COLONNA** (`Autotest Falliti`), perché in ottimizzazione le `Print` degli agent non le legge nessuno | `AutoTestVwapRevert()`, `OnTester` |
 
 ### 🟠 Il "difetto R109" (pavimento SL vero): **presente, ma dichiarato e con la via d'uscita già in codice**
 
@@ -179,9 +179,27 @@ in tutto il repo.
 ## 5. 🟡 COSA **NON** HO VERIFICATO — dichiarato, non taciuto
 
 - **La compilazione.** L'EA non è mai stato compilato da nessuno. Se MetaEditor
-  si lamenta, **quello è il risultato del PASSO 0**.
-- **L'esito dell'autotest**: si legge **eseguendo**, nella scheda Esperti.
+  si lamenta, **quello è il risultato del PASSO 0**. Dalla **v2** della riga il
+  **giro di controllo compila davvero** (in entrambi i rami), quindi la risposta
+  arriva in **un minuto**, non a corsa avviata — ma finché non gira sul PC di
+  Claudio resta **non misurata**.
+- **L'esito dell'autotest.** ⚠️ **Non si legge nella scheda Esperti**: in
+  ottimizzazione le `Print` girano sugli **agent** e non le legge nessuno
+  (CHECKLIST punto 34). Dalla **v2** esce in **colonna** nel CSV
+  (`Autotest Falliti`: `0` = tutti passati, `>0` = DIVERGE, `-1` = non
+  eseguito) e la riga ci fa un **gate**. La riga da cercare nell'EA è
+  `esito motore:`, che deve dire **DIECI BLOCCHI SU DIECI** — non "dieci righe
+  `[VWAPREV][AUTOTEST]`", che sono **17**.
 - **Il flat sui tick veri** (il caso "niente tick prima dell'ora di flat").
+  ⚠️ E la riga di log `flat di fine seduta ... N posizioni chiuse` **si scrive
+  ogni giorno anche con `N = 0`**: la sua **assenza non significa** "niente da
+  chiudere". Dalla **v2** il dato è in colonna (`Flat Giorni`, `Flat Chiusure`).
+- **Il costo della cella `03_overnight`.** Il costo si legge come delta di
+  `Prof OOS` e di `n` fra `00_nudo` e `03_overnight`. **Non è un costo puro**:
+  col flat spento la posizione notturna tiene occupato lo slot
+  (`if(CountPositions()>0) return`) e blocca gli ingressi del giorno dopo — un
+  `n` più basso lì è **anche meccanica dello slot, non solo mercato**. Il P&L
+  delle sole posizioni che attraversano la notte **questo giro non lo misura**.
 - **Se BCM espone `SYMBOL_VOLUME_REAL` su D30EUR.** Finché non è misurato, la
   VWAP è **TICK-VOLUME-pesata** — ed è il dato su cui poggia la banda, cioè il
   motore intero. **[INCERTO, già dichiarato nella tesi]**

@@ -20,7 +20,7 @@ regola intraday**.
 | | |
 |---|---|
 | **EA** | `mql5/Experts/ABTG_VwapRevert.mq5` (porting da **sumbloke077**, TradingView `YBqnzqDK`) |
-| **Driver** | `righe/RIGA_PASSO0_VWAPREV.ps1` (marcatore `MARCATORE_RIGA_PASSO0_VWAPREV_v1`) |
+| **Driver** | `righe/RIGA_PASSO0_VWAPREV.ps1` (marcatore `MARCATORE_RIGA_PASSO0_VWAPREV_v2`) |
 | **File prova** | `prove/ABTG_VwapRevert.txt` · `prove/PASSO0_VWAPREV_01_long.txt` · `prove/PASSO0_VWAPREV_02_short.txt` · `prove/PASSO0_VWAPREV_03_overnight.txt` |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_VWAPREV.md` |
 | **Tesi del porting** | `VWAPREVERT_TESI.md` |
@@ -132,34 +132,56 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
   compilare**. La riga si rifiuta di partire in tutti e due i casi.
 - 🔴 **L'EA NON È MAI STATO COMPILATO DA NESSUNO.** Scritto il 25/08, modificato
   il 28/08 (flat di fine seduta): in quell'ambiente **non esiste MetaEditor**.
-  **Se la compilazione fallisce, il risultato del PASSO 0 è quello** e va
-  riportato così com'è — non è un guasto della riga.
+  **Per questo il giro di controllo ADESSO COMPILA DAVVERO**: è il primo
+  risultato vero di questo PASSO 0, e costa **un minuto** invece di scoprirlo
+  a corsa avviata. **Se la compilazione fallisce, il risultato del PASSO 0 è
+  quello** e va riportato così com'è — non è un guasto della riga. Lo script
+  cancella l'`.ex5` prima di compilare (un binario vecchio farebbe passare per
+  riuscita una compilazione fallita) e, se fallisce, **stampa in rosso le
+  ultime 40 righe del log di MetaEditor** e si ferma.
 - 🧩 **La riga installa `ABTG_PausaGuardian.mqh`** in `MQL5\Include` prima di
   compilare. `walkforward_generico.ps1` **non lo fa** (verificato: nel driver
   generico la stringa `PausaGuardian` non compare), e senza quel file l'EA non
-  compila.
+  compila. La copia si verifica **sul contenuto** (lunghezza), non sul nome.
+- 🎯 **Il terminale è scelto con lo STESSO selettore di
+  `walkforward_generico.ps1`** (`*BCM Markets MT5 Terminal*` escludendo
+  `*-V3*`, ripiego `*BCM Markets*`), e la riga **lo stampa**: deve essere lo
+  stesso che stampa poi il driver generico. Prima era "il primo `origin.txt`
+  che contiene BCM", e su una macchina con due istanze i due script potevano
+  scegliere **terminali diversi** — include in uno, compilazione nell'altro.
 - **NESSUNA SEDIA VIVA VIENE TOCCATA.** Magic vergini `7734xx`,
   `AllowLiveTrading=false` negli `.ini` (lo scrive il driver generico).
 - **16 passate** (4 celle × 2 finestre × 2 gemelle), **8 CSV**, `Model=4`
   (**tick reali**), finestra **2024.09.26 → 2026.06.30**, split 40/60,
-  deposito **100.000**, rischio **1%**.
+  deposito **100.000**, rischio **`InpRiskPercent = 1.0`** — e quel numero è
+  **letto dal file prova**, dove morde davvero, non da un parametro della riga.
+- ♻️ **Se il pin cambia, la cache di `%USERPROFILE%\abtg_passo0_vwaprev` viene
+  CANCELLATA** (file prova e CSV del pin vecchio). Senza, il gate di
+  idempotenza del driver generico riproporrebbe i CSV di ieri come se fossero
+  di oggi.
 - **Zero parametri spazzolati.** L'unico asse `Y` è `InpMagic`, e il driver
   **si ferma** se in un file prova ne trova un secondo.
 - 🔧 Se non è già stato fatto: MT5 → Strumenti → Opzioni → Grafici →
   **"Max barre nel grafico" = Illimitato**.
-- ⏱️ **Durata [STIMA, non una previsione]: 15-40 minuti** più la compilazione.
-  R107 fece 24 passate a tick reali sulla stessa finestra in 9 minuti.
+- ⏱️ **Durata [STIMA, non una previsione]:** giro di controllo **~1 minuto**
+  (compilazione compresa); corsa vera **15-40 minuti**. R107 fece 24 passate a
+  tick reali sulla stessa finestra in 9 minuti.
 
 ---
 
-## 1️⃣ PRIMA il giro a vuoto (**nessuna passata, non apre MT5**)
+## 1️⃣ PRIMA il giro di controllo (**~1 minuto — COMPILA, non apre il tester**)
+
+> 🔧 **Non è più un giro a vuoto.** Scarica al pin, passa i gate sui file prova,
+> installa l'include **e COMPILA L'EA**. La compilazione è **il primo risultato
+> vero** di questo PASSO 0: l'EA non era mai stato compilato da nessuno.
+> Il **tester** non viene aperto: nessun `n`, nessun PF, nessun numero.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='d9c9334703253ced86d6a6768fa5de9fcb905e01'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -171,14 +193,21 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
 - `file prova scaricati: 4`;
 - `include scaricato: ABTG_PausaGuardian.mqh (<n> byte)`;
 - `geometria, valori dei tre interruttori, baseline assoluta, stella e magic: TUTTI PASSATI`;
-- `include: INSTALLATO in ...` — ⚠️ se dice **NON INSTALLATO** finisce nei
-  **RILIEVI** e la compilazione passerà **solo se il file era già lì**;
+- `terminale scelto: C:\Program Files\BCM Markets MT5 Terminal` — ⚠️ **è il
+  numero da confrontare** con quello che stampa poi il driver generico: devono
+  essere **lo stesso**;
+- `include: INSTALLATO e VERIFICATO in ...`;
+- 🔴 **`compilato: ABTG_VwapRevert.ex5`** ← **è questa la riga che conta.** Se
+  invece esce `COMPILAZIONE FALLITA`, sopra ci sono in **rosso** le ultime 40
+  righe del log di MetaEditor: **copiale in chat, sono il risultato**;
 - quattro volte l'anteprima dell'`.ini` del driver generico, e in fondo
   `ESITO: CONTROLLO COMPLETATO`.
 
-> ⚠️ **Quello che il giro a vuoto NON può fare:** `-SoloControllo` **non apre
-> MT5**. Non esiste nessun `n`, nessun PF, nessun DD, **nessun controllo sui
-> gemelli**. Conferma gli **artefatti**, mai i numeri.
+> ⚠️ **Quello che il giro di controllo NON può fare:** `-SoloControllo` **non
+> apre il tester**. Non esiste nessun `n`, nessun PF, nessun DD, **nessun
+> controllo sui gemelli** e **nessuna colonna di collaudo** (l'autotest esce dal
+> CSV, e il CSV lo produce solo la corsa). Conferma gli **artefatti** e la
+> **compilazione**, mai i numeri.
 
 ---
 
@@ -189,7 +218,7 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='d9c9334703253ced86d6a6768fa5de9fcb905e01'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -209,7 +238,7 @@ altre.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='d9c9334703253ced86d6a6768fa5de9fcb905e01'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '03_overnight' -Rifai;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
@@ -230,15 +259,33 @@ Cartella e zip sul **Desktop**: `PASSO0_VWAPREV_<MODO>_<data>_<ora>` — dentro:
    **non si manda come risultato**);
 2. **`data:`** — **deve essere di ADESSO**.
 
-### 🔬 E una cosa che NON sta nel referto: la scheda **Esperti**
+### 🔬 IL COLLAUDO STA NEL REFERTO, IN TRE COLONNE — **non** nella scheda Esperti
 
-L'EA stampa in avvio **DIECI blocchi `[VWAPREV][AUTOTEST]`** — il decimo è
-proprio il **flat di fine seduta**. Se l'ultima riga dice **`DIVERGE`**, i numeri
-**non si leggono**: c'è da guardare il codice.
-Nelle tre celle col flat acceso deve comparire anche
-`flat di fine seduta alle 20:45 server: N posizioni chiuse`. Se **non compare
-mai**, il flat non ha mai avuto niente da chiudere — possibile, ma **va detto**,
-non dato per scontato.
+⚠️ **La scheda Esperti qui NON si guarda, ed è misurato perché:** in
+**ottimizzazione** le `Print` girano **sugli agent** e non le legge nessuno
+(CHECKLIST punto 34). Un autotest che stampasse `DIVERGE` su un agent non
+fermerebbe niente e nessuno lo vedrebbe. Per questo l'EA porta l'esito
+**dentro il CSV**, e il referto lo stampa sotto ogni cella:
+
+```
+collaudo: autotest falliti = 0 (atteso 0) | flat giorni = 41 | flat chiusure = 27   [flat dichiarato: 1]
+```
+
+| colonna | come si legge |
+|---|---|
+| **`autotest falliti` = 0** | la riga `esito motore:` dell'EA dice **DIECI BLOCCHI SU DIECI**: i numeri della tabella **si leggono** |
+| **`autotest falliti` > 0** | **DIVERGE**: i numeri **NON si leggono**, c'è da guardare il codice → finisce nei **PROBLEMI** |
+| **`autotest falliti` = `non-eseg` / `assente`** | nessun gate: il numero è **senza collaudo** → **PROBLEMI** |
+| **`flat giorni`** | giornate in cui il flat è scattato. Col flat **ACCESO** uno **zero** è un **rilievo**; col flat **SPENTO** (cella `03_overnight`) un valore **> 0** è un **problema**: l'interruttore non morde |
+| **`flat chiusure`** | posizioni davvero chiuse dal flat, in totale |
+
+> 🚫 **E una lettura FALSA che è stata tolta**: la riga di log
+> `flat di fine seduta alle 20:45 server: N posizioni chiuse` **si scrive OGNI
+> GIORNO, anche con `N = 0`** (letto in `FlatFineSedutaCheck`). Quindi la sua
+> **assenza non voleva dire** _"non c'era niente da chiudere"_ — voleva dire che
+> l'EA non aveva mai visto un tick dopo le 20:45, **oppure** che quel log non
+> era leggibile affatto. Adesso il numero è una **colonna**, e l'assenza smette
+> di essere un indizio da interpretare.
 
 ---
 
@@ -253,7 +300,15 @@ non dato per scontato.
    indici). Il lato **short parte svantaggiato per REGIME**, non per merito del
    motore. Un *"niente edge short"* letto qui chiude la domanda **per questa
    epoca**, non in assoluto.
-3. 🕗 **La `03_overnight` non può vincere** — vedi il riquadro rosso sopra.
+3. 🕗 **La `03_overnight` non può vincere** — vedi il riquadro rosso sopra. **E
+   quello che ne esce NON è un costo puro:** il costo si legge come delta di
+   `Prof OOS` e di `n` fra `00_nudo` e `03_overnight`. Non è un costo puro: col
+   flat spento la posizione notturna tiene occupato lo slot
+   (`if(CountPositions()>0) return`) e blocca gli ingressi del giorno dopo — un
+   `n` più basso qui è **anche meccanica dello slot, non solo mercato**. Il P&L
+   delle sole posizioni che attraversano la notte **questo giro non lo misura**.
+   È lo stesso meccanismo dell'avvertenza 1, e qui morde **di più**: lì lo slot
+   resta occupato per una barra, qui per **giorni**.
 4. 💰 **Il cancello S0 (il costo) NON È ADJUDICABILE OGGI, e non si stima.**
    Lo **spread medio di BCM su D30EUR in M15 non è misurato in casa** (il
    "1-2 punti indice" di `R98_CRITERI.md` è **[INCERTO]**) e il **rapporto punti
@@ -298,8 +353,25 @@ non dato per scontato.
   > prende il **gate della BASELINE ASSOLUTA**, che confronta con **valori
   > dichiarati nel driver**, non con un altro file.
 
+### 🔧 E COSA È CAMBIATO NELLA **v2** (7 difetti trovati dal verificatore, 28/08)
+
+| # | difetto | fix |
+|---|---|---|
+| **1** 🔴 | autotest e flat scrivevano solo `Print`: **in ottimizzazione non li legge nessuno** | escono in **tre colonne** del CSV (`Autotest Falliti`, `Flat Giorni`, `Flat Chiusure`), lette **per nome** e trasformate in **gate** |
+| **2** 🔴 | il giro di controllo **non compilava** un EA mai compilato prima | compila in **entrambi** i rami, cancella l'`.ex5` prima, stampa il log in rosso se fallisce |
+| **3** 🔴 | selettore cartella dati **diverso** da `walkforward_generico.ps1` | stesso selettore riga per riga, e la riga **stampa il terminale scelto** |
+| **4** | cache **non ripulita** al ri-pin | `pin_corrente.txt`: se il pin cambia, prove e CSV vecchi vengono cancellati; e la baseline nuda si riscarica **sempre** |
+| **5** | parametro `-Rischio` **orfano** (solo stampato, mai passato) | rimosso; il referto stampa `InpRiskPercent` **letto dal file prova** |
+| **6** | criterio di lettura della `03_overnight` **incompleto** | scritto che **non è un costo puro**: lo slot occupato dalla posizione notturna cambia la **popolazione** dei trade |
+| **7** | due istruzioni di lettura **false** nel sorgente | la riga del flat si scrive **ogni giorno anche con 0 chiuse**; e non "dieci blocchi `[VWAPREV][AUTOTEST]`" (sono 17 righe) ma **`esito motore:` deve dire DIECI BLOCCHI SU DIECI** — che ora è la colonna `Autotest Falliti = 0` |
+
 🟡 **Non verificato, e va detto**: tutto ciò che richiede **MT5** — la
-**compilazione** dell'EA (qui non c'è MetaEditor), l'esito dell'**autotest**
-(si legge eseguendo), il comportamento del **flat sui tick veri**, la durata
-reale, e **ogni singolo numero**. Il giro a vuoto copre gli artefatti; **i
+**compilazione** dell'EA (qui non c'è MetaEditor), l'esito dell'**autotest**,
+il comportamento del **flat sui tick veri**, la durata reale, e **ogni singolo
+numero**. Il giro di controllo copre gli artefatti **e la compilazione**; **i
 numeri li può dare solo la corsa**.
+
+⚠️ **E le tre colonne nuove sono codice mai compilato**: `stats[13]`, l'`head` a
+**quattordici** colonne e lo `StringFormat` a quattordici specificatori sono
+allineati **per lettura**, non per esecuzione. Se `MetaEditor` si lamenta di
+`OnTester`/`OnTesterDeinit`, **è lì che si guarda per primo**.

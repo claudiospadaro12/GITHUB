@@ -87,10 +87,13 @@
 #    Flat Giorni       = 0 con flat ACCESO -> rilievo
 #    Flat Giorni       > 0 con flat SPENTO -> problema (non morde)
 #
-#  QUANTO CI METTE [STIMA, non una previsione]: 8 passate a tick reali
-#  (4 celle x 2 finestre) x 2 gemelle = 16 passate su 21 mesi di M15.
-#  R107 fece 24 passate a tick reali sulla stessa finestra in 9 minuti.
-#  Stima 15-40 minuti piu' la compilazione.
+#  QUANTO CI METTE [STIMA, non una previsione]:
+#   - GIRO DI CONTROLLO (-SoloControllo): ~1 minuto. NON e' piu' un giro a
+#     vuoto: scarica, passa i gate sui file prova, installa l'include E
+#     COMPILA DAVVERO. La compilazione e' il primo risultato vero.
+#   - CORSA VERA: 8 passate a tick reali (4 celle x 2 finestre) x 2
+#     gemelle = 16 passate su 21 mesi di M15. R107 fece 24 passate a tick
+#     reali sulla stessa finestra in 9 minuti. Stima 15-40 minuti.
 #
 #  LA RIGA CHE SI INCOLLA sta in righe\RIGA_PASSO0_VWAPREV_DA_MANDARE.md
 # =====================================================================
@@ -136,6 +139,7 @@ $Problemi = New-Object System.Collections.ArrayList
 $Rilievi  = New-Object System.Collections.ArrayList
 $Fatale   = ""
 $Include  = "NON INSTALLATO"
+$Compilazione = "NON TENTATA"
 $Modo     = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
@@ -475,37 +479,66 @@ try{
   Dico "geometria, valori dei tre interruttori, baseline assoluta, stella e magic: TUTTI PASSATI" "Green"
 
   # -------------------------------------------------------------------
-  #  3. L'INCLUDE -- il pezzo che il driver generico non fa
+  #  3. L'INCLUDE E LA COMPILAZIONE -- i due pezzi che il driver
+  #     generico non fa (l'include) o fa troppo tardi (la compilazione).
   # -------------------------------------------------------------------
-  Titolo "3. INSTALLO L'INCLUDE"
-  # SI PARTE DA origin.txt, non da una spazzolata di Program Files: ogni
-  # cartella dati dice da quale installazione arriva, ed e' l'unico modo
-  # affidabile (un broker si installa dove vuole). E' anche molto piu'
-  # veloce di un -Recurse su Program Files.
+  Titolo "3. INSTALLO L'INCLUDE E COMPILO"
+  # IL SELETTORE E' LO STESSO, RIGA PER RIGA, DI walkforward_generico.ps1
+  # (righe 545-549 e 586-589). Prima qui c'era "il primo origin.txt che
+  # contiene BCM": su una macchina con due istanze (la -V3 del 100k
+  # esiste, CHECKLIST punto 26) i due script potevano scegliere
+  # TERMINALI DIVERSI -- l'include installato in uno e la compilazione
+  # fatta nell'altro, cioe' il difetto del punto 27 con l'aggravante che
+  # nessuno se ne accorge. Se il selettore del driver cambia, cambia
+  # anche questo: si toccano insieme.
+  $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
+  $c = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+  if(-not $c){ $c = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+  if(-not $c){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1." }
+  $instDir = $c.DirectoryName
+  $MetaEditor = Join-Path $instDir "metaeditor64.exe"
   $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-  $dataFolder = ""
-  foreach($d in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)){
-    if($d.Name -ieq "Common"){ continue }
-    $o = Join-Path $d.FullName "origin.txt"
-    if(-not (Test-Path $o)){ continue }
-    $inst = ""
-    try{ $inst = (Get-Content $o -Raw -ErrorAction Stop).Trim() }catch{ continue }
-    if($inst -notlike "*BCM*"){ continue }
-    if(-not (Test-Path (Join-Path $inst "terminal64.exe"))){ continue }
-    $dataFolder = $d.FullName
-    break
+  $dataFolder = (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
+  if(-not $dataFolder){ throw ("cartella dati non trovata per " + $instDir) }
+  Dico ("terminale scelto: " + $instDir + "  (DEVE essere lo stesso che stampa il driver generico)") "Yellow"
+
+  # LA COPIA SI VERIFICA SUL CONTENUTO, NON SUL NOME (punto 27-ter): se
+  # in Include esistesse una CARTELLA con quel nome, Copy-Item ci
+  # metterebbe il file DENTRO e Test-Path direbbe verde lo stesso.
+  $incDir = Join-Path $dataFolder "MQL5\Include"
+  New-Item -ItemType Directory -Force -Path $incDir | Out-Null
+  $len = (Get-Item -LiteralPath $incSrc).Length
+  Copy-Item $incSrc -Destination $incDir -Force
+  $v = Get-Item -LiteralPath (Join-Path $incDir "ABTG_PausaGuardian.mqh") -ErrorAction Stop
+  if($v.PSIsContainer -or $v.Length -ne $len){ throw "include copiato ma NON verificato (lunghezza diversa)." }
+  $Include = "INSTALLATO e VERIFICATO in " + $incDir
+  Dico $Include "Green"
+
+  # --- LA COMPILAZIONE, IN ENTRAMBI I RAMI (controllo E corsa vera).
+  #     QUESTO EA NON E' MAI STATO COMPILATO DA NESSUNO. Un giro di
+  #     controllo che non compila non controlla la cosa piu' probabile
+  #     che vada storta: costava un minuto scoprirlo, e invece si
+  #     scopriva a corsa avviata dentro il driver generico, che muore con
+  #     "compilazione fallita" senza dire perche' (punto 20/27).
+  #     L'.ex5 si CANCELLA prima: senza, un binario vecchio farebbe
+  #     passare per riuscita una compilazione fallita (punto 23).
+  $mq5 = Join-Path $Work "ABTG_VwapRevert.mq5"
+  Scarica ($RawPin + "/mql5/Experts/ABTG_VwapRevert.mq5") $mq5
+  $dstMq5 = Join-Path $dataFolder "MQL5\Experts\ABTG_VwapRevert.mq5"
+  New-Item -ItemType Directory -Force -Path (Join-Path $dataFolder "MQL5\Experts") | Out-Null
+  Copy-Item $mq5 -Destination $dstMq5 -Force
+  $ex5 = Join-Path $dataFolder "MQL5\Experts\ABTG_VwapRevert.ex5"
+  Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+  $t0 = Get-Date
+  & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
+  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+  if(-not (Test-Path -LiteralPath $ex5)){
+    $log = Join-Path $dataFolder "MQL5\Experts\ABTG_VwapRevert.log"
+    if(Test-Path $log){ Get-Content $log -Tail 40 | ForEach-Object { Write-Host $_ -ForegroundColor Red } }
+    throw "COMPILAZIONE FALLITA: l'EA non era mai stato compilato. Gli errori sono qui sopra."
   }
-  if($dataFolder -and (Test-Path $dataFolder)){
-    $incDir = Join-Path $dataFolder "MQL5\Include"
-    New-Item -ItemType Directory -Force -Path $incDir | Out-Null
-    Copy-Item $incSrc -Destination $incDir -Force
-    $Include = "INSTALLATO in " + $incDir
-    Dico $Include "Green"
-  }else{
-    $Include = "NON INSTALLATO: cartella dati BCM non trovata"
-    [void]$Rilievi.Add("ABTG_PausaGuardian.mqh NON installato (cartella dati BCM non trovata). Se era gia' li' la compilazione passa lo stesso; se non c'era, il driver generico muore con 'compilazione fallita'.")
-    Dico $Include "Yellow"
-  }
+  Dico "compilato: ABTG_VwapRevert.ex5" "Green"
+  $Compilazione = "OK (" + $ex5 + ")"
 
   # -------------------------------------------------------------------
   #  4. LE CORSE
@@ -554,9 +587,34 @@ try{
     $c.DdIS  = $rIS[0].Dd;  $c.DdOOS  = $rOOS[0].Dd
     $c.ProfIS= $rIS[0].Profit; $c.ProfOOS = $rOOS[0].Profit
     if($null -ne $rOOS[0].Pg){ $c.PgOOS = $rOOS[0].Pg }
+    $c.Autotest     = $rOOS[0].Autotest
+    $c.FlatGiorni   = $rOOS[0].FlatGiorni
+    $c.FlatChiusure = $rOOS[0].FlatChiusure
     $c.Esito = "MISURATA"
     if($c.Gemelli -ne "IDENTICI"){
       [void]$Problemi.Add("cella " + $c.Id + ": gemelli " + $c.Gemelli + " -- il banco non e' deterministico, il numero non si legge (cancello S2).")
+    }
+
+    # --- I GATE DI COLLAUDO. Sono la ragione per cui l'autotest e il
+    #     flat sono usciti in colonna: in ottimizzazione le Print degli
+    #     agent non le legge nessuno (CHECKLIST punto 34), quindi
+    #     "l'autotest e' verde" non era MAI stato verificato da niente.
+    if($null -eq $c.Autotest -or $c.Autotest -lt 0){
+      [void]$Problemi.Add("cella " + $c.Id + ": AUTOTEST NON ESEGUITO (colonna assente o -1): i numeri non hanno gate.")
+    }
+    elseif($c.Autotest -gt 0){
+      [void]$Problemi.Add("cella " + $c.Id + ": AUTOTEST DIVERGE (" + $c.Autotest + " blocchi falliti): i numeri NON si leggono.")
+    }
+    # la gamba IS gira con lo stesso binario: se li' l'autotest diverge,
+    # e' lo stesso codice a essere rotto, e va detto anche se l'OOS tace.
+    if($null -ne $rIS[0].Autotest -and $rIS[0].Autotest -gt 0){
+      [void]$Problemi.Add("cella " + $c.Id + ": AUTOTEST DIVERGE nella gamba IS (" + $rIS[0].Autotest + " blocchi falliti).")
+    }
+    if($c.VFlat -eq "1" -and $c.FlatGiorni -eq 0){
+      [void]$Rilievi.Add("cella " + $c.Id + ": flat ACCESO ma scattato in ZERO giornate.")
+    }
+    if($c.VFlat -eq "0" -and $c.FlatGiorni -gt 0){
+      [void]$Problemi.Add("cella " + $c.Id + ": flat SPENTO eppure scattato: l'interruttore non morde.")
     }
   }
 }
@@ -584,6 +642,7 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (split 40/60)")
 [void]$RefTxt.Add("banco: Modello 4 TICK REALI, deposito " + $Deposito + ", rischio " + $Baseline["InpRiskPercent"] + "% (letto dal file prova, non da un parametro)")
 [void]$RefTxt.Add("include: " + $Include)
+[void]$RefTxt.Add("compilazione: " + $Compilazione)
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.")
 [void]$RefTxt.Add("E' un CONTA-OPERAZIONI: misura la FREQUENZA del motore VWAP REVERT")
@@ -605,6 +664,10 @@ foreach($c in $CELLE){
            $c.Id, (FmtN $c.NIS), (FmtN $c.NOOS), (Fmt2 $c.PfIS), (Fmt2 $c.PfOOS),
            (Fmt2 $c.DdOOS), (FmtE $c.ProfOOS), (FmtPg $c.PgOOS), $c.Gemelli)
   [void]$RefTxt.Add($riga)
+  # LE TRE COLONNE DI COLLAUDO, lette dal CSV (gamba OOS). Non sono
+  # metriche di merito: dicono se le altre si possono leggere.
+  [void]$RefTxt.Add(("              collaudo: autotest falliti = {0} (atteso 0) | flat giorni = {1} | flat chiusure = {2}   [flat dichiarato: {3}]" -f `
+                     (FmtCol $c.Autotest), (FmtCol $c.FlatGiorni), (FmtCol $c.FlatChiusure), $c.VFlat))
   [void]$RefTxt.Add("              esito: " + $c.Esito + "  |  " + $c.Desc)
 }
 [void]$RefTxt.Add("")
@@ -625,6 +688,13 @@ foreach($c in $CELLE){
 [void]$RefTxt.Add("   sapere QUANTO stiamo pagando per restare a 1:100. Se il divario")
 [void]$RefTxt.Add("   fosse enorme, la conseguenza e' 'questo non e' un motore intraday',")
 [void]$RefTxt.Add("   non 'accendiamo l'overnight'.")
+[void]$RefTxt.Add("   E IL COSTO NON E' UN COSTO PURO: il costo si legge come delta di Prof")
+[void]$RefTxt.Add("   OOS e di n fra 00_nudo e 03_overnight. Non e' un costo puro: col flat")
+[void]$RefTxt.Add("   spento la posizione notturna tiene occupato lo slot")
+[void]$RefTxt.Add("   (if(CountPositions()>0) return) e blocca gli ingressi del giorno dopo")
+[void]$RefTxt.Add("   -- un n piu' basso qui e' anche meccanica dello slot, non solo")
+[void]$RefTxt.Add("   mercato. Il P&L delle sole posizioni che attraversano la notte questo")
+[void]$RefTxt.Add("   giro non lo misura.")
 [void]$RefTxt.Add("4. IL CANCELLO S0 (il costo) NON E' ADJUDICABILE OGGI, e non si stima:")
 [void]$RefTxt.Add("   lo spread medio di BCM su " + $Simbolo + " in M15 NON e' misurato in casa, e")
 [void]$RefTxt.Add("   il rapporto punti MT5 / punti indice su " + $Simbolo + " NON e' agli atti")
@@ -634,14 +704,20 @@ foreach($c in $CELLE){
 [void]$RefTxt.Add("   ATTENZIONE: quel file porta il MAGIC nel nome, non la finestra: la")
 [void]$RefTxt.Add("   gamba OOS SOVRASCRIVE la gamba IS dello stesso magic.")
 [void]$RefTxt.Add("")
-[void]$RefTxt.Add("--- E UNA COSA DA GUARDARE NELLA SCHEDA ESPERTI, non in questa tabella ---")
-[void]$RefTxt.Add("L'EA stampa in avvio DIECI blocchi [VWAPREV][AUTOTEST]. Il decimo e' il")
-[void]$RefTxt.Add("flat di fine seduta. Se l'ultima riga dice DIVERGE, i numeri di questa")
-[void]$RefTxt.Add("tabella NON si leggono: c'e' da guardare il codice.")
-[void]$RefTxt.Add("Nelle celle con flat ACCESO deve comparire anche la riga")
-[void]$RefTxt.Add("'flat di fine seduta alle 20:45 server: N posizioni chiuse'. Se non")
-[void]$RefTxt.Add("compare MAI, il flat non ha mai avuto niente da chiudere -- il che e'")
-[void]$RefTxt.Add("possibile, ma va detto, non dato per scontato.")
+[void]$RefTxt.Add("--- LE TRE COLONNE DI COLLAUDO, e non si guardano nella scheda Esperti ---")
+[void]$RefTxt.Add("In OTTIMIZZAZIONE le Print girano sugli agent e NON LE LEGGE NESSUNO.")
+[void]$RefTxt.Add("Percio' l'autotest e il flat escono in COLONNA nel CSV, e questo referto")
+[void]$RefTxt.Add("le stampa sotto ogni cella:")
+[void]$RefTxt.Add("  'autotest falliti' = 0  -> la riga 'esito motore:' dell'EA dice DIECI")
+[void]$RefTxt.Add("                            BLOCCHI SU DIECI: i numeri si leggono.")
+[void]$RefTxt.Add("  'autotest falliti' > 0  -> DIVERGE: i numeri di questa tabella NON si")
+[void]$RefTxt.Add("                            leggono, c'e' da guardare il codice.")
+[void]$RefTxt.Add("  'autotest falliti' non-eseg / assente -> nessun gate: il numero e'")
+[void]$RefTxt.Add("                            senza collaudo, e va detto.")
+[void]$RefTxt.Add("  'flat giorni' = giornate in cui il flat e' scattato. Col flat ACCESO")
+[void]$RefTxt.Add("                  uno zero e' un rilievo; col flat SPENTO un valore >0 e'")
+[void]$RefTxt.Add("                  un problema: l'interruttore non morde.")
+[void]$RefTxt.Add("  'flat chiusure' = posizioni davvero chiuse dal flat, in totale.")
 [void]$RefTxt.Add("")
 if($Fatale -ne ""){
   [void]$RefTxt.Add("!!! FERMATO: " + $Fatale)
