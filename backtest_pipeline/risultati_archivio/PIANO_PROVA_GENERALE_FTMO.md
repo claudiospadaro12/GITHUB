@@ -171,6 +171,15 @@ La carta è 🟡. Il grafico è 🥇. Procedura, 30 secondi:
 | **+2** | FTMO segue le date DST **americane** | ⚠️ tutti gli orari sono **+3** su BCM, e il reset Guardian va a **`2`** |
 | **0 / altro** | 🛑 **SI FERMA TUTTO** | nessun deploy finché il numero non è spiegato |
 
+### ✅ ESITO DELLA VERIFICA — fatta 28/08/2026 mattina, +1 CONFERMATO
+
+`[VERIFICATO]` — Claudio ha letto la barra di stato MT5 (non il grafico a
+occhio, non il log): candela XAUUSD H1 in formazione timestampata **09:00**,
+orologio del PC (ora italiana) **08:39**. La candela di un'ora appena
+iniziata stampata alle 09:00 con l'orologio italiano poco prima delle 09:00
+è **coerente solo con server = italiana + 1**: la carta regge, **si procede
+con `InpDailyResetHour = 1` su FTMO** come già scritto in tabella.
+
 > ⚠️ **La trappola imparata il 06/08, sbagliando** (`CLAUDE.md`): **le schede
 > Esperti e Giornale di MT5 sono in ORA LOCALE del PC; il grafico è in ORA
 > SERVER.** Il confronto si fa **col grafico**, mai col log. Chi fa il
