@@ -854,12 +854,16 @@ void GestisciPosizione()
   }
 
 //==================================================================
-//  INGRESSO -- il motore prima, i cancelli del contenitore poi.
-//  L'ordine e' voluto: il conteggio "Barre Allineate" deve dire
-//  quante OCCASIONI ha avuto il motore, PRIMA che il contenitore le
-//  filtrasse. Se le barre allineate sono tante e gli ingressi zero,
-//  il collo di bottiglia e' il contenitore -- ed e' esattamente la
-//  domanda della cella di ablazione.
+//  INGRESSO -- il motore prima, poi i cancelli del contenitore che
+//  RESTANO. Attenzione all'ordine VERO: quando si arriva qui il flat
+//  ha GIA' filtrato (OnTick esce alla riga 622 con ChiudiTutto()), e
+//  il flat e' proprio il cancello che l'ablazione sposta. Quindi
+//  "Barre Allineate" NON conta le occasioni del motore prima dei
+//  cancelli: le conta DOPO il flat, cioe' su una FINESTRA DIVERSA in
+//  ogni cella (00: 03:00-10:29, 01: 00:00-23:43, ~3,2x per sola
+//  costruzione). Il numero si legge SOLO dentro una cella, come
+//  rapporto IngTot/BarreAllin; fra 00 e 01 NON si confronta, e NON
+//  risponde da solo alla domanda della cella di ablazione.
 //==================================================================
 void ValutaBarraChiusa(const int minutoOra)
   {
