@@ -5006,3 +5006,60 @@ sotto una tabella di numeri perfettamente formattati.
 >
 > 🔁 E vale al contrario: **un autotest che nessun giro previsto legge non e' un
 > collaudo, e' codice morto che rassicura chi lo ha scritto.**
+
+---
+
+## 🆕 AGGIUNTA DEL 28/08/2026 — trovata alla SECONDA passata su `RIGA_PASSO0_FVGRET` (dopo i fix)
+
+## 100. 🧟‍♂️ IL BLOCCO DI LANCIO STANTIO E **AUTO-COERENTE**: pin vecchio + marcatore vecchio si proteggono a vicenda, e la guardia "SCRIPT VECCHIO" lo lascia passare
+
+_Difetto vero, gia' committato in `backtest_pipeline/prove/REFERTO_PREPARAZIONE_KSQFVG.md`
+(par. 8, righe 395-406, piu' la tabella degli artefatti a riga 302), trovato PRIMA
+dell'invio — alla **seconda** passata, dopo che i fix della prima erano stati
+applicati e ri-pinnati correttamente **nella pagina della riga**._
+
+La riga di lancio viveva in **due** file: la pagina ufficiale
+(`righe/RIGA_PASSO0_FVGRET_DA_MANDARE.md`) e, "in sintesi", il **referto di
+preparazione**. Dopo la correzione del `.ps1` la pagina e' stata ri-pinnata a
+regola d'arte (3 punti d'uso, marcatore bumpato `_v1` -> `_v2`, ricetta del punto
+77 eseguita e verificata). Il referto no: **e' rimasto un blocco completo,
+incollabile, col pin vecchio `71bbd200...` e il marcatore vecchio `_v1`.**
+
+L'aggravante e' tutta qui, ed e' il motivo per cui **non e' il punto 45**
+(residuo di PROSA) e **non e' il corollario del punto 98** (bump del marcatore):
+
+```powershell
+$pin='71bbd200...';                                         # <- pin VECCHIO
+irm ".../GITHUB/$pin/.../RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
+if(-not (Select-String -Path $p -Pattern 'MARCATORE_..._v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+```
+
+Il pin vecchio serve lo script vecchio, **che il marcatore `_v1` ce l'ha davvero**:
+la guardia **passa a mani basse** e Claudio gira, in perfetta buona fede, esattamente
+il sorgente da cui i fix dovevano salvarlo. Verificato commit alla mano: quello
+script ha il `-Rischio` orfano stampato come se fosse il banco (**punto 97**) e il
+selettore "primo `origin.txt` che contiene BCM" (**punti 27/37**). Il bump del
+marcatore protegge dal blocco vecchio **rimasto in chat col pin nuovo**; contro una
+copia **integralmente** vecchia non puo' niente, perche' pin e marcatore sono
+coerenti *fra loro*, solo che descrivono il passato.
+
+La causa strutturale e' meccanica, non di disattenzione: **la ricetta di
+ri-pinnatura ha un perimetro di UN file** (`F=...DA_MANDARE.md`), e i suoi due
+conteggi (`DEVE dare 3` / `DEVE dare 0`) sono verdi anche quando esiste una
+seconda copia fuori perimetro. Una ricetta che si autoverifica dentro il proprio
+perimetro **non puo' accorgersi di cio' che sta fuori**.
+
+> ✅ **REGOLA: la riga di lancio esiste in UN SOLO posto.** Ogni altro artefatto
+> del round (referto di preparazione, dossier, HANDOFF, verbale) **cita la pagina,
+> non la riga**: un link non puo' scadere, un blocco `powershell` si'.
+> ```
+> # prima di dichiarare fatto un ri-pin, SEMPRE, su tutto il repo:
+> grep -rn "<nome dello script>.ps1" --include=*.md .        # chi porta una copia?
+> grep -rn "<pin vecchio>\|MARCATORE_..._v<n-1>" .           # DEVE dare 0
+> ```
+> ⚠️ E se una seconda copia deve proprio esistere, **il perimetro della ricetta di
+> ri-pinnatura diventa l'elenco di TUTTI i file che la portano**, dichiarato nella
+> ricetta stessa e ricontato uno per uno.
+> 🔴 Corollario sui pin bruciati: un pin superato **resta vivo su `raw.githubusercontent`
+> per sempre**. "E' vecchio" non lo disinnesca: finche' un `.md` lo porta dentro un
+> blocco incollabile, e' una riga di lancio armata.
