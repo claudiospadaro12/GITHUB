@@ -168,10 +168,10 @@ condividesse il magic **cancellerebbe la prova del gate** (CHECKLIST 41).
 
 ---
 
-## 📌 IL PIN — **`PINPINPINPINPINPINPINPINPINPINPINPINPIN0`**
+## 📌 IL PIN — **`4e83415513f74fc9044bce97d375bcd05a9a4bd5`**
 
 ```
-PINPINPINPINPINPINPINPINPINPINPINPINPIN0
+4e83415513f74fc9044bce97d375bcd05a9a4bd5
 ```
 
 > 🔴 **IL PIN QUI SOPRA È UN SEGNAPOSTO E NON FUNZIONA.** Va sostituito col
@@ -215,7 +215,7 @@ tipo *«il pin X è BRUCIATO»*, un `sed` largo **riscriverebbe la storia**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PINPINPINPINPINPINPINPINPINPINPINPINPIN0'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4e83415513f74fc9044bce97d375bcd05a9a4bd5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -258,7 +258,7 @@ tipo *«il pin X è BRUCIATO»*, un `sed` largo **riscriverebbe la storia**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PINPINPINPINPINPINPINPINPINPINPINPINPIN0'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4e83415513f74fc9044bce97d375bcd05a9a4bd5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -278,7 +278,7 @@ altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PINPINPINPINPINPINPINPINPINPINPINPINPIN0'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4e83415513f74fc9044bce97d375bcd05a9a4bd5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DOW.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DOW.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DOW_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloFase 'GRIGLIA' -Rifai;
