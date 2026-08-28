@@ -1,0 +1,133 @@
+# =====================================================================
+#  PREOPEN_METRO_DOW_M15_SHORT  --  IL METRO A PARI TF, LATO SHORT
+#  ABTG_Dow_Apertura_US  su  U30USD  M15, TICK REALI
+#  NON E' UN CANDIDATO: e' il DENOMINATORE del gemello short.
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON DEVE GIRARE FINCHE' I CRITERI NON SONO FIRMATI.
+#      I criteri stanno SOLO in prove\PREOPEN_RETEST_DOW_M15.txt.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE, e perche' non e' uno zelo
+#
+#  Il criterio di accettazione del round dice: la regione vincente deve
+#  BATTERE IL METRO sullo stesso TF di almeno +0,10 di PF. La regola dei
+#  due lati (CLAUDE.md, 25/08) rende il gemello SHORT obbligatorio.
+#  Le due cose insieme fanno una conseguenza sola: senza un metro SHORT
+#  il lato short avrebbe un numero e nessun denominatore, cioe' NON
+#  SAREBBE GIUDICABILE. Un lato che si misura ma non si puo' giudicare
+#  e' meta' round travestito da round intero.
+#
+#  Costa 6 passate per finestra (3 offset x 2 magic gemelli): e' la
+#  spesa piu' piccola di tutto il giro.
+#
+#  COSA CAMBIA RISPETTO A PREOPEN_METRO_DOW_M15.txt -- TRE RIGHE:
+#     InpAllowLong    1 -> 0
+#     InpAllowShort   0 -> 1
+#     InpMagic        773700/773701 -> 773800/773801
+#  Nient'altro, e il driver lo verifica prima di aprire MT5.
+#
+#  E VALE LO STESSO CAPPELLO DEL GEMELLO SHORT DEL ROUND: con il filtro
+#  EMA acceso e 21 mesi di regime rialzista lo short entra poco o
+#  niente (in MonitorRetest lo short passa solo con gBias 0 o -1). Un
+#  n basso qui e' ATTESO. Se il metro short ha n(OOS) sotto 30, il
+#  confronto "+0,10 di PF" sul lato short NON SI FA: si dichiara che il
+#  denominatore non esiste, e il lato short resta un fatto di RISCHIO
+#  (drawdown, peggior giornata) senza verdetto di MERITO -- valvola R59
+#  applicata al METRO, non solo al candidato.
+#
+#  MAGIC 773800/773801: verificati vergini in tutto il repo il
+#  28/08/2026 (grep su tutti i file, .git escluso: ZERO occorrenze).
+#
+# =====================================================================
+
+
+@SIMBOLO  U30USD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (italiana - 1). Dow apre 14:30 server.
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- >>> LA RIGA DEL METRO: il livello e' l'ORB, come nella sedia viva.
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- filtri: ESATTAMENTE come nella sedia viva Dow (R101_DOW_00_viva),
+#     nessuno acceso in piu'.
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+
+# --- rischio e gestione: identiche alla sedia viva Dow.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- >>> INERTE con RangeMode=0: PINNATO, non spazzolato (vedi testa).
+InpPrevWindowMin=60||60||0||60||N
+# --- l'asse che RESTA, per confrontare a pari offset col round.
+InpRetestOffsetPts=400||200||200||600||Y
+
+# --- controllo d'igiene: gemelli identici, magic VERGINI
+#     (773700/773701 verificati liberi in tutto il repo il 28/08/2026)
+InpMagic=773800||773800||1||773801||Y

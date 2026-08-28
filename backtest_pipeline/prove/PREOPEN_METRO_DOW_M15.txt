@@ -1,0 +1,176 @@
+# =====================================================================
+#  PREOPEN_METRO_DOW_M15  --  IL METRO A PARI TIMEFRAME (PASSO 0c)
+#  ABTG_Dow_Apertura_US  su  U30USD  M15, TICK REALI
+#  NON E' UN CANDIDATO: e' il DENOMINATORE del round PREOPEN.
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON DEVE GIRARE FINCHE' I CRITERI NON SONO FIRMATI.
+#      I criteri stanno SOLO in prove\PREOPEN_RETEST_DOW_M15.txt e non
+#      si ricopiano qui.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE -- lo pretende il PASSO 0c del file prova LONG:
+#
+#    "0c. METRO A PARI TF. La sedia viva gira su M5; questo file gira
+#     su M15 (richiesta del mandato del 28/08: 'M15-H1, evita M5
+#     puro'). Percio' la cella METRO -- R101_DOW_00_viva, cioe'
+#     InpRangeMode=0 con tutto il resto identico -- va rifatta ANCHE su
+#     M15, altrimenti il delta che si legge mescola 'livello diverso' e
+#     'timeframe diverso'. R108/R111 hanno misurato un gradiente
+#     MONOTONO H1 > M30 > M15 su un altro motore: il TF non e' neutro e
+#     non si assume."
+#
+#  Senza questo file il criterio "la regione BATTE il metro sullo stesso
+#  TF di almeno +0,10 di PF" NON E' CALCOLABILE. Non e' un extra.
+#
+# ---------------------------------------------------------------------
+#  COSA CAMBIA RISPETTO AL FILE LONG DEL ROUND -- TRE COSE, DICHIARATE:
+#
+#   1. InpRangeMode   1 -> 0
+#      E' L'UNICA differenza di MECCANISMO. Il livello torna a essere il
+#      range dei primi 35 minuti DOPO l'apertura (ORB), come nella sedia
+#      viva. Tutto il resto del motore e' identico.
+#
+#   2. InpPrevWindowMin: da asse spazzolato (60..300) a PIN a 60.
+#      MOTIVO, LETTO NEL SORGENTE al pin e non assunto: in
+#      ComputeLevels() il ramo che usa InpPrevWindowMin e' SOLO quello
+#      di ABTG_RANGE_PREV; con ABTG_RANGE_OPENING la finestra e'
+#      openMin .. openMin+InpRangeMinutes e InpPrevWindowMin NON ENTRA
+#      nel calcolo. L'unica altra funzione che lo legge e'
+#      OpeningBodyDir(), usata solo da TryPlaceDelayed() (InpEntryMode
+#      DELAYED), e qui InpEntryMode=2 (RETEST).
+#      Quindi con RangeMode=0 quell'asse e' INERTE: lasciarlo spazzolato
+#      produrrebbe CINQUE RIGHE IDENTICHE per ogni offset, cioe' 5 volte
+#      la macchina per zero informazione, e un lettore distratto
+#      crederebbe di guardare una griglia dove non c'e'.
+#      Il valore 60 non e' scelto: e' quello della sedia viva
+#      (R101_DOW_00_viva riga InpPrevWindowMin=60).
+#
+#   3. InpMagic 773500/773501 -> 773700/773701 (vergini, vedi sotto).
+#
+#  L'asse InpRetestOffsetPts RESTA spazzolato 200/400/600, identico al
+#  file del round: cosi' il confronto col metro si fa A PARI OFFSET, e
+#  l'unica cosa diversa fra le due tabelle e' da dove viene il LIVELLO.
+#
+# ---------------------------------------------------------------------
+#  COSA CAMBIA RISPETTO A R101_DOW_00_viva (la sedia viva congelata),
+#  perche' il metro deve essere riconoscibile come "quella cella li'":
+#     @PERIODO             M5  -> M15      <- e' IL PUNTO di questo file
+#     InpRetestOffsetPts   pin 400 -> asse 200/400/600
+#     InpLevelTF           (assente) -> pinnato a 16385
+#                          e' il DEFAULT COMPILATO dell'EA (PERIOD_H1) ed
+#                          e' INERTE con RangeMode 0 e 1 (ComputeLevels
+#                          lo legge solo nel ramo PREVBAR): la riga c'e'
+#                          solo perche' il file del round ce l'ha, e i
+#                          due file devono differire per una cosa sola.
+#     InpMagic             773300/773301 -> 773700/773701
+#  NESSUN'ALTRA riga cambia, e il driver del round lo verifica.
+#
+#  I NUMERI DELLA SEDIA VIVA AGLI ATTI (su M5, R101_REFERTO.md par. 1-2,
+#  cella 00_viva, finestra 2024.09.26->2026.06.30 split 40/60, tick
+#  reali, deposito 100.000, rischio 1%):
+#     IS   +2.812 | PF 1,222 | DD 5,67% | n  74
+#     OOS  +6.722 | PF 1,270 | DD 4,39% | n 130
+#     peggior giornata -1,02%
+#  >>> ATTENZIONE: quello sopra e' su M5. Questo file gira su M15 e non
+#      c'e' NESSUN obbligo che riproduca quei numeri: se li riproduce,
+#      il TF su questo motore e' quasi neutro; se non li riproduce, il
+#      TF conta e il confronto col round andava fatto proprio cosi'.
+#      In tutti e due i casi il numero da usare come metro e' QUELLO
+#      MISURATO QUI, su M15. Non e' un gate, e' un'attesa dichiarata.
+#
+#  MAGIC 773700/773701: verificati vergini in tutto il repo il
+#  28/08/2026 (grep su tutti i file, .git escluso: ZERO occorrenze).
+#  Il magic vivo di questa sedia e' 770202 e non compare qui.
+#
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- sessione: ORA SERVER BCM (italiana - 1). Dow apre 14:30 server.
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- >>> LA RIGA DEL METRO: il livello e' l'ORB, come nella sedia viva.
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=1000||1000||0||1000||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- filtri: ESATTAMENTE come nella sedia viva Dow (R101_DOW_00_viva),
+#     nessuno acceso in piu'.
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+
+# --- rischio e gestione: identiche alla sedia viva Dow.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410||410||0||410||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- >>> INERTE con RangeMode=0: PINNATO, non spazzolato (vedi testa).
+InpPrevWindowMin=60||60||0||60||N
+# --- l'asse che RESTA, per confrontare a pari offset col round.
+InpRetestOffsetPts=400||200||200||600||Y
+
+# --- controllo d'igiene: gemelli identici, magic VERGINI
+#     (773700/773701 verificati liberi in tutto il repo il 28/08/2026)
+InpMagic=773700||773700||1||773701||Y
