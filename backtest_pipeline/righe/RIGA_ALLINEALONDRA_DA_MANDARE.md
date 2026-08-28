@@ -177,17 +177,19 @@ per dire *"il pin non funziona"* **puntando a un pin che funziona**.
 >    quelle parole compaiono anche **nella ricetta stessa e nella prosa che la
 >    spiega**. Un controllo impossibile da soddisfare è un controllo che dopo due
 >    volte nessuno guarda più: è il punto 101 al quadrato.
-> 2. La riga di `sed` che toglie il cartello, in prima stesura, era
->    `/CARTELLO-INIZIO/,/CARTELLO-FINE/d` scritta **coi marcatori letterali**.
->    Risultato **misurato**: `sed` cancella il cartello, poi **incontra la propria
->    riga di ricetta** (che contiene il marcatore d'apertura), riapre l'intervallo,
->    non trova più la chiusura e **cancella il file fino in fondo** — da 380 righe
->    a 148, cioè **la pagina di lancio decapitata mentre la si pinnava**.
+> 2. La riga di `sed` che toglie il cartello, in prima stesura, aveva i **marcatori
+>    scritti per intero**. Risultato **misurato eseguendo**: `sed` cancella il
+>    cartello, poi **incontra la propria riga di ricetta** — che contiene il
+>    marcatore d'apertura — **riapre l'intervallo**, non trova più una chiusura e
+>    **cancella il file fino in fondo**: da 457 righe a 148, cioè **la pagina di
+>    lancio decapitata proprio mentre la si pinnava**. (E anche questa spiegazione,
+>    scritta la prima volta coi marcatori per intero, ha fatto scattare la stessa
+>    trappola: da 457 a 169. Per questo qui sopra non compaiono mai per esteso.)
 >
-> Le parentesi quadre risolvono tutte e due: `[-]` matcha un trattino, ma **queste
-> righe non contengono più il token né i marcatori letterali**, quindi lo
-> strumento non incontra più se stesso. Il token `PIN_NON` + `_ANCORA_MESSO` e i
-> marcatori `<!-- CARTELLO... -->` esistono **solo dentro il cartello**.
+> Le parentesi quadre risolvono tutte e due i casi: `[-]` e `[_]` matchano il
+> trattino e il trattino basso, ma **nessuna riga di questa sezione contiene più il
+> token o i marcatori per intero**, quindi lo strumento non incontra più se stesso.
+> Token e marcatori esistono **solo dentro il cartello**.
 
 🔴 **E il perimetro della ricetta è UN FILE SOLO — questo (CHECKLIST punto 100).**
 Il referto di preparazione **NON contiene il blocco di lancio**, apposta: cita
