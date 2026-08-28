@@ -282,6 +282,10 @@ bool     gTettoContatoOggi = false;
 ulong    gTicket        = 0;
 bool     gPart1Fatta    = false;
 bool     gBeFatto       = false;
+//--- 1R CONGELATO ALL'APERTURA: la distanza dello stop iniziale, in
+//    prezzo. Non si ricalcola mai dallo stop corrente, che dopo il
+//    breakeven vale zero (vedi il commento in GestisciPosizione).
+double   gRiskIniziale  = 0.0;
 
 //--- ticket gia' contato come "notte attraversata": una posizione
 //    conta UNA volta sola, non a ogni tick.
@@ -296,7 +300,7 @@ int      gUsciteMercato = 0;     // stop o take: se n'e' andata senza di noi
 int      gNottiAttrav   = 0;     // DEVE essere 0
 int      gLottiAlMinimo = 0;     // rischio REALE piu' alto del dichiarato, quante volte
 int      gSaltiSpread   = 0;     // quanto morde il filtro di spread
-int      gGiorniTetto   = 0;     // giornate in cui il tetto e' stato raggiunto
+int      gGiorniTetto   = 0;     // giornate in cui il tetto ha BLOCCATO almeno un segnale
 int      gParziali      = 0;
 int      gBreakeven     = 0;
 int      gBarreAllineate= 0;     // barre chiuse col motore acceso, PRIMA dei cancelli
@@ -590,9 +594,16 @@ void OnDeinit(const int reason)
 //|   2. il cambio giornata azzera il tetto (a tick, non a barra:     |
 //|      se la prima barra del giorno arriva tardi il tetto sarebbe   |
 //|      ancora quello di ieri);                                      |
-//|   3. IL FLAT VIENE PRIMA DI TUTTO IL RESTO ed e' incondizionato;  |
-//|   4. poi la gestione (parziale, pari, trailing), a ogni tick;     |
-//|   5. l'ingresso si valuta SOLO all'apertura di una barra nuova.   |
+//|   3. IL CANARINO DELLA NOTTE si legge PRIMA del flat. Difetto     |
+//|      trovato rileggendo la prima stesura: stava dentro la         |
+//|      gestione, che pero' viene SALTATA proprio quando il flat e'  |
+//|      vero -- cioe' esattamente a mezzanotte, l'unico momento in   |
+//|      cui una notte attraversata si puo' vedere. Cosi' la colonna  |
+//|      sarebbe stata 0 per costruzione, e una colonna che non puo'  |
+//|      accendersi non e' un canarino: e' un ornamento;              |
+//|   4. IL FLAT VIENE PRIMA DI TUTTO IL RESTO ed e' incondizionato;  |
+//|   5. poi la gestione (parziale, pari, trailing), a ogni tick;     |
+//|   6. l'ingresso si valuta SOLO all'apertura di una barra nuova.   |
 //+------------------------------------------------------------------+
 void OnTick()
   {
@@ -604,16 +615,47 @@ void OnTick()
 
    int minutoOra = tn.hour*60 + tn.min;
 
-   //--- 3. IL FLAT. Sempre, prima di tutto, senza condizioni.
+   //--- 3. il canarino, PRIMA del flat (vedi il blocco qui sopra).
+   ControllaNotteAttraversata(tn.day_of_year);
+
+   //--- 4. IL FLAT. Sempre, prima di tutto il resto, senza condizioni.
    if(DevoFlat_Calc(minutoOra, InpUsaFinestraSessione, MinInizio(), MinFine(), InpFlatAnticipoMin))
      { ChiudiTutto(); return; }
 
-   //--- 4. la posizione viva.
+   //--- 5. la posizione viva.
    GestisciPosizione();
 
-   //--- 5. l'ingresso, solo su barra nuova.
+   //--- 6. l'ingresso, solo su barra nuova.
    if(!NuovaBarra()) return;
    ValutaBarraChiusa(minutoOra);
+  }
+
+//+------------------------------------------------------------------+
+//| IL CANARINO DEL FLAT. Una posizione di questo magic ancora viva   |
+//| in una giornata server diversa da quella in cui e' stata aperta   |
+//| vuol dire che il flat NON e' stato ermetico: il simbolo non ha    |
+//| mandato tick in tempo, e abbiamo dormito in posizione.            |
+//| La colonna "Notti Attraversate" DEVE essere ZERO. Se non lo e',   |
+//| si dichiara e non si interpreta.                                  |
+//| Ogni posizione conta UNA volta sola (chiave: il ticket).          |
+//+------------------------------------------------------------------+
+void ControllaNotteAttraversata(const int giornoOggi)
+  {
+   for(int i = PositionsTotal()-1; i >= 0; i--)
+     {
+      ulong tk = PositionGetTicket(i);
+      if(tk == 0) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
+      if(PositionGetString(POSITION_SYMBOL) != _Symbol)  continue;
+      if(tk == gTicketNotteContata) continue;
+      MqlDateTime tApe; TimeToStruct((datetime)PositionGetInteger(POSITION_TIME), tApe);
+      if(tApe.day_of_year != giornoOggi)
+        {
+         gNottiAttrav++;
+         gTicketNotteContata = tk;
+         Log("ATTENZIONE: posizione ancora viva al cambio di giornata del server. Il flat non ha trovato tick in tempo.");
+        }
+     }
   }
 
 //+------------------------------------------------------------------+
@@ -686,11 +728,10 @@ void ChiudiTutto()
 
 void AzzeraStatoPosizione()
   {
-   gTicket         = 0;
-   gPart1Fatta     = false;
-   gBeFatto        = false;
-   gGiornoIngresso = -1;
-   gNotteContata   = false;
+   gTicket        = 0;
+   gPart1Fatta    = false;
+   gBeFatto       = false;
+   gRiskIniziale  = 0.0;
   }
 
 //==================================================================
@@ -706,12 +747,10 @@ void GestisciPosizione()
       //    pari ripartono da zero: e' l'ipotesi prudente.
       ulong orfana = TrovaPosizione();
       if(orfana == 0) return;
-      gTicket = orfana;
-      gPart1Fatta = false;
-      gBeFatto    = false;
-      MqlDateTime to; TimeToStruct((datetime)PositionGetInteger(POSITION_TIME), to);
-      gGiornoIngresso = to.day_of_year;
-      gNotteContata   = false;
+      gTicket       = orfana;
+      gPart1Fatta   = false;
+      gBeFatto      = false;
+      gRiskIniziale = 0.0;   // sconosciuto: sotto si ricostruisce dallo stop, e' un ripiego dichiarato
       Log("posizione orfana adottata (riavvio?): gestione ripresa da zero.");
      }
 
@@ -724,16 +763,6 @@ void GestisciPosizione()
       return;
      }
 
-   //--- il canarino del flat: una posizione viva al cambio di giornata
-   //    del server vuol dire che il flat NON e' stato ermetico.
-   MqlDateTime tn; TimeToStruct(TimeCurrent(), tn);
-   if(gGiornoIngresso >= 0 && tn.day_of_year != gGiornoIngresso && !gNotteContata)
-     {
-      gNottiAttrav++;
-      gNotteContata = true;
-      Log("ATTENZIONE: posizione ancora viva al cambio di giornata del server. Il flat non ha trovato tick in tempo.");
-     }
-
    bool   isLong = (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY);
    double openP  = PositionGetDouble(POSITION_PRICE_OPEN);
    double sl     = PositionGetDouble(POSITION_SL);
@@ -742,31 +771,50 @@ void GestisciPosizione()
    double bid    = SymbolInfoDouble(_Symbol, SYMBOL_BID);
    double ask    = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
-   //--- 1R = la distanza dello stop iniziale. Se lo stop e' stato gia'
-   //    spostato in pari, il riferimento si ricostruisce dall'ATR: e'
-   //    un ripiego dichiarato, e conta solo per il trailing.
-   double risk = isLong ? (openP - sl) : (sl - openP);
+   //--- QUANTO VALE 1R -- e qui c'era un difetto della prima stesura,
+   //    trovato rileggendo: 1R veniva ricalcolato ogni volta come
+   //    (apertura - stop attuale). Ma DOPO il breakeven lo stop STA
+   //    sull'apertura, quindi quella distanza diventa ZERO e il
+   //    riferimento scivolava sull'ATR del momento -- cioe' "1R"
+   //    cambiava valore a meta' operazione. Adesso 1R e' la distanza
+   //    dello stop DELL'APERTURA, congelata in gRiskIniziale; le due
+   //    ricostruzioni sotto sono solo ripieghi per una posizione
+   //    adottata dopo un riavvio, e sono dichiarati.
+   double risk = gRiskIniziale;
+   if(risk <= 0) risk = isLong ? (openP - sl) : (sl - openP);
    if(risk <= 0){ double a = AtrVal(); if(a > 0) risk = a*InpAtrSLmult; }
 
    //--- PARZIALE A 1R + STOP IN PARI.
    //    Lezione del 07/08 (costata 112,78 EUR su due short oro a 0,01
    //    lotti): al lotto minimo NormVol(vol*%) arrotonda a 0, il
    //    parziale non parte, e con lui saltava anche il breakeven.
-   //    Da allora IL PARI NON DIPENDE DALLA RIUSCITA DEL PARZIALE.
-   if(!gPart1Fatta && InpTP1_R > 0 && risk > 0)
+   //    Da allora IL PARI NON DIPENDE DALLA RIUSCITA DEL PARZIALE:
+   //    sono due blocchi separati, con due bandierine separate.
+   if(InpTP1_R > 0 && risk > 0 && (!gPart1Fatta || !gBeFatto))
      {
       double tgt = isLong ? openP + risk*InpTP1_R : openP - risk*InpTP1_R;
       bool   hit = isLong ? (bid >= tgt) : (ask <= tgt);
       if(hit)
         {
-         bool parzOK = false;
-         if(InpTP1Pct > 0)
+         //--- 1) il parziale.
+         if(!gPart1Fatta && InpTP1Pct > 0)
            {
             double cv = NormVol(vol*InpTP1Pct/100.0);
-            if(cv > 0 && cv < vol && gTrade.PositionClosePartial(gTicket, cv))
-              { parzOK = true; gParziali++; }
+            if(cv <= 0 || cv >= vol)
+              {
+               //--- strutturalmente impossibile (lotto minimo): si
+               //    smette di provarci, ma il pari resta in piedi.
+               gPart1Fatta = true;
+               Log("1o target (1R): parziale NON eseguibile al lotto minimo. Si va avanti col solo stop in pari.");
+              }
+            else if(gTrade.PositionClosePartial(gTicket, cv))
+              { gPart1Fatta = true; gParziali++; Log("1o target (1R): parziale eseguito."); }
+            else
+               Log(StringFormat("1o target (1R): parziale NON riuscito (retcode %d): ritento al tick successivo.", gTrade.ResultRetcode()));
            }
-         bool beOK = false;
+         //--- 2) lo stop in pari, INDIPENDENTE dal parziale. Se il
+         //    broker rifiuta (prezzo troppo vicino allo stops level)
+         //    la bandierina NON si alza e si ritenta al tick dopo.
          if(InpBreakeven && !gBeFatto)
            {
             double bePari = NormalizzaPrezzo(openP);
@@ -774,15 +822,11 @@ void GestisciPosizione()
             //--- il pari si fa SOLO se MIGLIORA lo stop: cosi' non si
             //    ripete a ogni tick e non allarga mai il rischio.
             bool migliora = isLong ? (bePari > slOra) : (slOra == 0 || bePari < slOra);
-            if(migliora && gTrade.PositionModify(gTicket, bePari, tp))
-              { beOK = true; gBeFatto = true; gBreakeven++; }
+            if(!migliora)
+               gBeFatto = true;                       // lo stop e' gia' meglio del pari
+            else if(gTrade.PositionModify(gTicket, bePari, tp))
+              { gBeFatto = true; gBreakeven++; Log("1o target (1R): stop portato in pari."); }
            }
-         //--- il "fatto" si segna comunque: il target a 1R e' passato,
-         //    e non va rivalutato a ogni tick successivo.
-         gPart1Fatta = true;
-         if(parzOK || beOK)
-            Log(parzOK ? "1o target (1R): parziale eseguito + stop in pari."
-                       : "1o target (1R): stop in pari (parziale non eseguibile al lotto minimo).");
         }
      }
 
@@ -919,12 +963,10 @@ void Apri(const bool isLong)
    ulong tk = TrovaPosizione();
    if(tk == 0){ Log("ordine eseguito ma posizione non trovata: la gestione la adottera' al tick successivo."); }
 
-   MqlDateTime tn; TimeToStruct(TimeCurrent(), tn);
-   gTicket         = tk;
-   gPart1Fatta     = false;
-   gBeFatto        = false;
-   gGiornoIngresso = tn.day_of_year;
-   gNotteContata   = false;
+   gTicket       = tk;
+   gPart1Fatta   = false;
+   gBeFatto      = false;
+   gRiskIniziale = dist;      // 1R congelato: e' la distanza dello stop DAVVERO usata
 
    gTradesToday++;
    gIngressiTot++;
@@ -1167,7 +1209,7 @@ double OnTester()
    //--- CANARINI
    stats[14] = (double)gLottiAlMinimo;   // rischio REALE piu' alto del dichiarato, quante volte
    stats[15] = (double)gSaltiSpread;     // quanto morde il filtro di spread
-   stats[16] = (double)gGiorniTetto;     // giornate in cui il tetto di 2 e' stato raggiunto
+   stats[16] = (double)gGiorniTetto;     // giornate in cui il tetto di 2 ha BLOCCATO un segnale
    stats[17] = (double)gParziali;
    stats[18] = (double)gBreakeven;
    //--- ECO DELLA CONFIGURAZIONE: sono i numeri che l'EA ha DAVVERO
@@ -1211,7 +1253,7 @@ void OnTesterDeinit()
       if(!header_scritto)
         {
          //--- 29 nomi = Pass + Simbolo + 27 valori di stats[].
-         string head = "Pass,Simbolo,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Ingressi Totali,Ingressi Long,Ingressi Short,Uscite Flat,Uscite Stop O Take,Notti Attraversate,Lotti Al Minimo,Ingressi Saltati Spread,Giorni Con Tetto Raggiunto,Parziali Eseguite,Breakeven Eseguiti,Finestra Sessione,Minuto Inizio Sessione,Minuto Fine Ingressi,Minuto Fine Sessione,Flat Anticipo Min,Minuto Flat Calcolato,Autotest Falliti,Barre Allineate";
+         string head = "Pass,Simbolo,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Ingressi Totali,Ingressi Long,Ingressi Short,Uscite Flat,Uscite Stop O Take,Notti Attraversate,Lotti Al Minimo,Ingressi Saltati Spread,Giorni Tetto Bloccante,Parziali Eseguite,Breakeven Eseguiti,Finestra Sessione,Minuto Inizio Sessione,Minuto Fine Ingressi,Minuto Fine Sessione,Flat Anticipo Min,Minuto Flat Calcolato,Autotest Falliti,Barre Allineate";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
