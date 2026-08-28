@@ -268,22 +268,20 @@ condividesse il magic **cancellerebbe la prova del gate** (CHECKLIST 41).
 
 ---
 
-## 📌 IL PIN — **@@PIN@@**
+## 📌 IL PIN — **b40c62c3652286a792e5f6fbdb96cac5898480f5**
 
 ```
-@@PIN@@
+b40c62c3652286a792e5f6fbdb96cac5898480f5
 ```
 
-> 🔴 **IL PIN QUI SOPRA È UN SEGNAPOSTO E NON FUNZIONA.** Va sostituito col
-> commit vero **dopo il push**, e finché è così **LA RIGA NON PARTE** (il driver
-> pretende 40 caratteri esadecimali).
-> ⚠️ **E questo riquadro è un PUNTO D'USO, non prosa** (CHECKLIST 101): va
-> **tolto o riscritto al passato** nello stesso passo in cui il pin diventa
-> vero, altrimenti la pagina dirà *«non funziona»* puntando a un pin che
-> funziona — e il cartello si consuma.
+✅ **Pin VERIFICATO il 28/08**: commit esistente su `origin/lavoro`, e i **nove**
+artefatti che lo script scarica (`walkforward_generico.ps1`, `RIGA_PREOPEN_DAX.ps1`,
+i cinque file prova, `ABTG_PausaGuardian.mqh`, `ABTG_DAX_Apertura_EU.mq5`) hanno a
+quel commit lo **stesso contenuto** che hanno adesso sul branch (`git cat-file -s`
+su tutti e nove).
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
-contenere **tutti e otto** gli artefatti che lo script scarica:
+contenere **tutti e nove** gli artefatti che lo script scarica:
 `walkforward_generico.ps1`, `RIGA_PREOPEN_DAX.ps1`, i **cinque** file prova,
 `ABTG_PausaGuardian.mqh` e **`ABTG_DAX_Apertura_EU.mq5`**.
 
@@ -303,12 +301,17 @@ echo "vecchio: $VECCHIO"
 sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
 grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
-grep -ci "segnaposto\|non funziona\|la riga non parte" "$F"   # DEVE dare 0
+sed -n '1,/LA RICETTA DI/p' "$F" | grep -ci "segnaposto\|non funziona\|la riga non parte"   # DEVE dare 0
 ```
 
 ⚠️ **Servono TUTTI E TRE i conteggi.** I primi due sono il punto 77: il solo
 *«0 pin vecchi rimasti»* lo supera a mani basse anche un `sed` che **non ha
-matchato niente**. Il terzo è il punto 101: è il cartello del segnaposto che
+matchato niente**. Il terzo va letto **solo sopra la ricetta** (`sed -n
+'1,/LA RICETTA DI/p'`), non su tutto il file: la ricetta stessa nomina
+"segnaposto" e "non funziona" nella propria prosa esplicativa, e un `grep`
+largo su tutto il file **non può mai dare 0** — è il punto 101 al quadrato,
+lo stesso trovato oggi su `RIGA_ALLINEALONDRA_DA_MANDARE.md`. Il vero
+bersaglio del terzo conteggio è il cartello del segnaposto che
 sopravvive alla pinnatura.
 
 ⚠️ **E il perimetro della ricetta è QUESTO FILE E BASTA**, perché la riga di
@@ -326,7 +329,7 @@ grep -rn "RIGA_PREOPEN_DAX.ps1" --include=*.md .   # nessun altro .md deve porta
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PREOPEN_DAX.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='b40c62c3652286a792e5f6fbdb96cac5898480f5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DAX.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DAX.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DAX_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -375,7 +378,7 @@ stubbato il 28/08):
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PREOPEN_DAX.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='b40c62c3652286a792e5f6fbdb96cac5898480f5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DAX.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DAX.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DAX_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -395,7 +398,7 @@ altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PREOPEN_DAX.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='b40c62c3652286a792e5f6fbdb96cac5898480f5'; $p="$env:USERPROFILE\RIGA_PREOPEN_DAX.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_DAX.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_DAX_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloFase 'GRIGLIA' -Rifai;

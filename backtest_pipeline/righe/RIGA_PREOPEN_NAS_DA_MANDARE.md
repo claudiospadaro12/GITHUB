@@ -271,19 +271,17 @@ prova del gate** (CHECKLIST 41).
 
 ---
 
-## 📌 IL PIN — **@@PIN@@**
+## 📌 IL PIN — **b40c62c3652286a792e5f6fbdb96cac5898480f5**
 
 ```
-@@PIN@@
+b40c62c3652286a792e5f6fbdb96cac5898480f5
 ```
 
-> 🔴 **IL PIN QUI SOPRA È UN SEGNAPOSTO E NON FUNZIONA.** Va sostituito col
-> commit vero **dopo il push**, e finché è così **LA RIGA NON PARTE**.
-> ⚠️ **E questo riquadro è un PUNTO D'USO, non prosa** (CHECKLIST 101): va
-> **tolto o riscritto al passato** nello stesso passo in cui il pin diventa
-> vero.
+✅ **Pin VERIFICATO il 28/08**: commit esistente su `origin/lavoro`, e i **nove**
+artefatti che lo script scarica hanno a quel commit lo **stesso contenuto** che
+hanno adesso sul branch (`git cat-file -s` su tutti e nove).
 
-⚠️ **Il pin si rilegge DOPO il push.** Il commit deve contenere **tutti e otto**
+⚠️ **Il pin si rilegge DOPO il push.** Il commit deve contenere **tutti e nove**
 gli artefatti che lo script scarica: `walkforward_generico.ps1`,
 `RIGA_PREOPEN_NAS.ps1`, i **cinque** file prova, `ABTG_PausaGuardian.mqh` e
 **`ABTG_Nasdaq_Apertura_US.mq5`**.
@@ -301,10 +299,13 @@ echo "vecchio: $VECCHIO"
 sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
 grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
-grep -ci "segnaposto\|non funziona\|la riga non parte" "$F"   # DEVE dare 0
+sed -n '1,/LA RICETTA DI/p' "$F" | grep -ci "segnaposto\|non funziona\|la riga non parte"   # DEVE dare 0
 ```
 
-⚠️ **Servono TUTTI E TRE i conteggi** (punti 77 e 101), e il perimetro è
+⚠️ **Servono TUTTI E TRE i conteggi** (punti 77 e 101; il terzo va letto **solo
+sopra la ricetta**, non su tutto il file — la ricetta stessa nomina
+"segnaposto"/"non funziona" nella propria prosa, un `grep` largo non
+darebbe mai 0), e il perimetro è
 **questo file e basta**, perché la riga di lancio **esiste in un posto solo**
 (CHECKLIST 100):
 
@@ -319,7 +320,7 @@ grep -rn "RIGA_PREOPEN_NAS.ps1" --include=*.md .
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PREOPEN_NAS.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='b40c62c3652286a792e5f6fbdb96cac5898480f5'; $p="$env:USERPROFILE\RIGA_PREOPEN_NAS.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_NAS.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_NAS_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -361,7 +362,7 @@ stubbato il 28/08):
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PREOPEN_NAS.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='b40c62c3652286a792e5f6fbdb96cac5898480f5'; $p="$env:USERPROFILE\RIGA_PREOPEN_NAS.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_NAS.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_NAS_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -378,7 +379,7 @@ Si incolla **il blocco INTERO**: è **un comando solo**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PREOPEN_NAS.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='b40c62c3652286a792e5f6fbdb96cac5898480f5'; $p="$env:USERPROFILE\RIGA_PREOPEN_NAS.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PREOPEN_NAS.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PREOPEN_NAS_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloFase 'GRIGLIA' -Rifai;
