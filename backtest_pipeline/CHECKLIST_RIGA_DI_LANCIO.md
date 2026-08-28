@@ -4948,3 +4948,61 @@ mai, perche' le due dichiarazioni stanno a **123 righe di distanza**.
 > bumpato lo stesso** (`_v2` -> `_v3`). Altrimenti il blocco VECCHIO rimasto in
 > chat — identico tranne il pin — passa la guardia `Select-String` a mani basse
 > e riporta Claudio esattamente sul sorgente che non compila.
+
+---
+
+## 🆕 AGGIUNTA DEL 28/08/2026 — trovata verificando il PASSO 0 di `ABTG_FvgRetest` (Fair Value Gap)
+
+## 99. 🔇 IL COLLAUDO CHE IL CODICE PORTA CON SE' E CHE IL GIRO PREVISTO RENDE **STRUTTURALMENTE ILLEGGIBILE**
+
+_Difetto vero, gia' committato in `mql5/Experts/ABTG_FvgRetest.mq5`
+(`AutoTestFvg()`, righe 1231-1340, chiamato da `OnInit` alla riga 513 con
+`InpAutoTest = true` di default) piu' `backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1`,
+trovato PRIMA dell'invio._
+
+Il punto 20 copre **il gesto sbagliato chiesto a Claudio** ("F7 e copiami le tre
+righe di AUTOTEST": F7 compila e basta). Questo copre il gradino sotto, ed e'
+piu' silenzioso: **non viene chiesto NESSUN gesto**, e il modo in cui la corsa e'
+disegnata rende l'output impossibile da leggere **anche se lo si volesse**.
+
+`ABTG_FvgRetest.mq5` si porta dietro un autotest serio: **nove blocchi** sul
+nucleo puro (rilevazione del vuoto, contiguita', taglia a percentile,
+mitigazione, finestra, eta', conferma, pavimento SL, orario), che finisce con
+
+```mql5
+Print("[FVGRET][AUTOTEST] esito motore: ", (falliti==0
+      ? "NOVE BLOCCHI SU NOVE, la regola ragiona come la firma."
+      : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
+```
+
+Il PASSO 0 pero' gira **solo in OTTIMIZZAZIONE** (`Optimization=1` nell'`.ini`
+del driver generico). In ottimizzazione ogni pass gira dentro un **agent**, e le
+`Print` dell'agent finiscono nei **log dell'agent**
+(`...\Tester\Agent-127.0.0.1-300x\logs\<data>.log`), non nel Giornale del
+terminale e non in nessun artefatto della raccolta. Risultato misurato sulla
+carta: quel verdetto viene stampato **12 volte** (3 celle x 2 finestre x 2
+gemelle) e **buttato via 12 volte**.
+
+L'aggravante che lo rende una classe e non una svista: **quell'EA non era mai
+stato eseguito da nessuno.** L'autotest era quindi l'**unica** prova disponibile
+che il nucleo si comporti come la tesi dichiarata — e la corsa che doveva
+produrla la rendeva invisibile per costruzione. Un `DIVERGE` sarebbe passato
+sotto una tabella di numeri perfettamente formattati.
+
+> ✅ **REGOLA: quando un EA contiene un autotest (o qualunque `Print` di
+> collaudo), la riga di lancio deve rispondere a DUE domande, non a una:**
+> 1. **In quale MODO gira** questa corsa? Ottimizzazione -> le `Print` sono nei
+>    log degli agent; test singolo -> sono nel Giornale.
+> 2. **Chi porta quelle righe dentro lo zip?** Se la risposta e' "nessuno", si
+>    aggiunge il raccoglitore (uno `Select-String` sui log degli agent piu'
+>    recenti di `$Avvio`, con l'esito copiato nel referto), oppure si dichiara
+>    nel referto che **il collaudo NON e' stato letto**.
+>
+> ⚠️ Il raccoglitore e' **best-effort, mai un gate**: il percorso dei log degli
+> agent cambia fra le build di MT5 (`<DataFolder>\Tester\` oppure
+> `%APPDATA%\MetaQuotes\Tester\`), e un gate su un percorso incerto fermerebbe
+> una corsa sana. Se non trova niente, deve dirlo nei RILIEVI — **"non l'ho
+> letto" e' un'informazione, "non l'ho cercato" no**.
+>
+> 🔁 E vale al contrario: **un autotest che nessun giro previsto legge non e' un
+> collaudo, e' codice morto che rassicura chi lo ha scritto.**
