@@ -417,3 +417,51 @@ _Nuovo EA dalla dashboard SuperWave (magic 770501). Ingresso: incrocio EMA14xEMA
 - Dow H1: tutte 9 positive, real-tick (1.52) anche > OHLC (1.42). Robusto.
 - DAX H4: 7/9 positive, DD basso. Secondario.
 - La dashboard SuperWave (cross EMA14x200 + Supertrend) e' diventata un EA reale validato. Il Dow conferma di essere lo strumento piu' tradabile del parco (SupRev + SuperWave).
+
+---
+
+## G1-PAOLO — i tre valori della live del 27/08, PREPARATO (28.08.26) — NON ANCORA GIRATO
+
+_Ablazione a stella sui tre input che la live di Paolo del 27/08 sera ha
+nominato e che **abbiamo gia' nel codice senza averli mai misurati**
+(`risultati_archivio/ANALISI_LIVE_PAOLO_2026-08-27.md` §3, spunti P1/P2/P5)._
+
+**🔴 La correzione che cambia il disegno, verificata per grep nel sorgente:
+i tre input NON stanno nello stesso EA.**
+
+| input | dove vive DAVVERO |
+|---|---|
+| `InpEma2` (89 vs **50**) | **solo** famiglia **SupRev** (base + tutti i derivati) |
+| `InpAdxMin` (20 vs **25**) | **solo** `ABTG_SupertrendInvert` (riga 65) |
+| `InpUseStoch` (ON vs **OFF**) | **solo** `ABTG_SupertrendInvert` (riga 69) |
+
+La famiglia SupRev **non ha** un filtro ADX ne' uno stocastico: non sono spenti,
+**non esistono** (`adx=0 stoch=0` su tutti e dieci i file). Le "quattro celle su
+un EA solo" non si possono fare, e **nessun input e' stato aggiunto a nessun EA**
+(quattro di quelli hanno una sedia viva).
+
+**5 celle, 2 motori, 2 banchi**, tutte su **XAUUSD**:
+
+| cella | EA | TF | delta | magic |
+|---|---|---|---|---|
+| 00_suprev_base | `ABTG_SupertrendReversal` | H4 | baseline `InpEma2=89` | 778000/778001 |
+| 01_suprev_ema50 | `ABTG_SupertrendReversal` | H4 | **`InpEma2` 89 -> 50** | 778100/778101 |
+| 10_invert_base | `ABTG_SupertrendInvert` | H1 | baseline ADX 20 + Stoch ON | 778300/778301 |
+| 11_invert_adx25 | `ABTG_SupertrendInvert` | H1 | **`InpAdxMin` 20 -> 25** | 778400/778401 |
+| 12_invert_stochoff | `ABTG_SupertrendInvert` | H1 | **`InpUseStoch` ON -> OFF** | 778500/778501 |
+
+**Banchi**: S = modello 1 OHLC M1 2020.01.01->2026.06.30 (il campione, n≈208
+sull'antenato R103/R114) · V = modello 4 tick reali 2024.07.05->2026.06.30 (il
+riempimento vero, campione sottile: n=44 agli atti su oro H4).
+**Criterio congelato**: il delta si propone solo se ha lo **stesso segno su
+tutte e 4 le sotto-finestre**; segno opposto fra S e V sull'OOS = **conflitto
+dichiarato, nessuna proposta**.
+
+- Artefatti: `prove/G1PAOLO_*.txt` (5) · `prove/REFERTO_PREPARAZIONE_G1PAOLO.md`
+  (criteri PRIMA dei numeri) · `righe/RIGA_G1PAOLO.ps1` ·
+  `righe/RIGA_G1PAOLO_DA_MANDARE.md`.
+- ⚠️ **Aperto**: la profondita' **TICK di XAUUSD non e' mai stata misurata**
+  (R86/R87 §2.0). Il `2024.07.05` e' **INFERITO** da GBPUSD -> PASSO 0 nella
+  pagina della riga.
+- ⚠️ **Nessuna sedia viva toccata.** Nessun numero: **il round non e' ancora
+  girato.**
