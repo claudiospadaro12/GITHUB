@@ -5063,3 +5063,105 @@ perimetro **non puo' accorgersi di cio' che sta fuori**.
 > 🔴 Corollario sui pin bruciati: un pin superato **resta vivo su `raw.githubusercontent`
 > per sempre**. "E' vecchio" non lo disinnesca: finche' un `.md` lo porta dentro un
 > blocco incollabile, e' una riga di lancio armata.
+
+---
+
+## 🆕 AGGIUNTA DEL 28/08/2026 — trovata verificando la SONDA DELL'OROLOGIO (PASSO 0, P1 caccia intraday forex/oro)
+
+## 101. 🧩 IL CRITERIO SI LEGGE SU **N** ARTEFATTI, E LA PAGINA PRESCRIVE DI PRODURLI **UNO ALLA VOLTA** — senza mai dire di ricomporli
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1`
+(la lettura dei CSV vive dentro `foreach($c in $Ordinate)`, righe 599-651) piu'
+`righe/RIGA_SONDA_OROLOGIO_DA_MANDARE.md` (par. 3, *"POI la misura, UNA CELLA ALLA
+VOLTA"*), trovato PRIMA dell'invio._
+
+Il punto **35** copre la corsa spezzata contro una **raccolta distruttiva**: la
+seconda serata rade al suolo la prima. Questo e' il caso opposto e piu' silenzioso,
+perche' **non si perde niente**: la raccolta e' cumulativa (cartelle col
+timestamp), i CSV restano tutti in `risultati_prove\`, ogni zip e' completo di
+cio' che ha girato. Quello che non esiste e' **il giro che li rimette insieme**.
+
+Il criterio congelato del round (**C1**) e' scritto cosi': *"per almeno UNA fascia
+oraria, su almeno **DUE DEI TRE SIMBOLI**"*. E' un criterio **di insieme**: non si
+puo' leggere su una cella. Ma la riga legge i CSV **solo delle celle di questo
+giro**:
+
+```powershell
+foreach($c in $Ordinate){            # con -SoloCella qui dentro c'e' UNA cella
+  ...
+  $c.DatiIS = LeggiOpt $csvIS        # le altre cinque restano $null PER SEMPRE
+}
+...
+$celleMisurate = @($CELLE | Where-Object { ... $null -ne $_.DatiIS ... }).Count
+```
+
+Risultato del percorso che la pagina prescrive (sei celle, una per volta): **sei
+zip, sei referti, e sei volte la riga**
+
+```
+lettura ENTRAMBE : ... -> C1 NON MISURATO PER INTERO (celle con dati 1 su 6)
+```
+
+Il terzo stato e' scritto benissimo ed e' **onesto** — ma resta l'ultima parola del
+round. La misura che decide se una pista di ricerca si chiude **non viene mai
+adjudicata**, e l'unica strada che resta e' rifare a mano, in un foglio, proprio il
+conto che lo strumento dichiarava di togliere di mano a chi legge.
+
+L'aggravante: **la ricomposizione ESISTE gia' nel codice e costa quasi zero**. Il
+driver generico salta le finestre gia' fatte (`"gia' fatto, salto"`), quindi un
+`-TutteLeCelle` lanciato in fondo rilegge tutti i CSV senza riaprire il tester.
+**Non e' scritto da nessuna parte**: ne' nella pagina, ne' nella riga
+`COME SI RIPRENDE` del referto.
+
+> ✅ **REGOLA: quando il criterio del round e' DI INSIEME (`almeno due dei tre`,
+> `la mediana delle sei celle`, `il confronto fra i due lati`), la pagina della riga
+> deve avere un PASSO DI RICOMPOSIZIONE esplicito e numerato, dopo l'ultima gamba.**
+> Tre domande, e vanno tutte e tre nella pagina:
+> 1. **chi ricompone?** (un modo dello script, non un foglio di Claudio);
+> 2. **quanto costa?** (se rilegge la cache, si dice che e' istantaneo, altrimenti
+>    nessuno lo lancia dopo tre sere di tester);
+> 3. **cosa lo invalida?** Qui: la riga **cancella `risultati_prove\` quando il pin
+>    cambia**. Un ri-pin a meta' round (cioe' il gesto normale dopo una correzione)
+>    **distrugge tutte le celle gia' girate**, e questo va scritto accanto al passo,
+>    non dedotto dal codice.
+>
+> 🔎 Il grep che lo trova: si cerca nella riga **dove viene letto l'artefatto**
+> (`Import-Csv`, `LeggiOpt`, `Get-Content`) e si guarda **su quale collezione cicla**.
+> Se cicla su *"le celle di questo giro"* (`$Ordinate`) mentre il criterio parla di
+> *"le celle del round"* (`$CELLE`), il verdetto d'insieme non uscira' mai.
+
+### 101-bis. ⏱️ E LA PASSATA DI RICOMPOSIZIONE CRONOMETRA UNA **RILETTURA DI FILE** e la stampa come se fosse la corsa
+
+_Stessa verifica, stesso file (righe 615-694)._
+
+Corollario che nasce dal punto sopra e vale da solo. Il cronometro della cella dei
+gemelli si calcola cosi', **senza chiedersi se il tester abbia girato**:
+
+```powershell
+$tCella = Get-Date
+& powershell $argv                  # il driver puo' dire "gia' fatto, salto"
+$c.Secondi = (New-TimeSpan -Start $tCella -End (Get-Date)).TotalSeconds
+...
+$perPassata = $c.Secondi/4.0        # "-> una cella di misura costerebbe circa X minuti"
+```
+
+Nella passata di ricomposizione — e in qualunque **secondo** lancio della
+ricognizione — i CSV ci sono gia', il tester non si apre, e il referto stampa un
+numero **preciso, plausibile e falso** nello slot che la pagina indica a Claudio
+come *"il numero su cui si decide"*. Nello stesso giro `$c.Esito` dice `MISURATA`
+su celle che sono state solo **rilette**.
+
+E' il punto **50** (*il referto del giro a vuoto indistinguibile da quello della
+corsa vera*) applicato al ramo **"gia' fatto"** della ripresa del punto **92**.
+
+> ✅ **REGOLA: ogni numero che il referto presenta come MISURATO deve avere accanto,
+> nel codice, la prova che la misura e' avvenuta IN QUESTO GIRO.** Il metro piu'
+> economico e' la data dell'artefatto contro l'istante d'inizio della cella:
+> ```powershell
+> $freschi = $true
+> foreach($f in @($csvIS,$csvOOS)){ if((Get-Item -LiteralPath $f).LastWriteTime -lt $tCella){ $freschi=$false } }
+> ```
+> Se non e' fresco: l'esito diventa **"RILETTA DA CSV GIA' PRESENTI"** e il
+> cronometro **"NON MISURATO in questo giro"**. Un cronometro che misura un
+> `Copy-Item` non e' un cronometro sbagliato: e' un cronometro che sta misurando
+> un'altra cosa.
