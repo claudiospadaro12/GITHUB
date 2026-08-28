@@ -5219,3 +5219,116 @@ Il danno e' doppio, e il secondo e' peggiore del primo:
 > O la si verifica insieme all'artefatto, o si scrive **con la sua data** e al
 > passato. Una dichiarazione di stato senza data e' vera per dieci minuti e
 > falsa per sempre.
+
+---
+
+## 🆕 AGGIUNTE DEL 28/08/2026 (sera) — trovate verificando il PASSO 0 **ALLINEA LONDRA** (candidato P2 della caccia intraday forex/oro), pagina **gia' pinnata e gia' dichiarata verificata**
+
+## 101-ter. 🪧🪧 LA **SECONDA** DICHIARAZIONE DI STATO SUL PIN, FUORI DAL CARTELLO — e i **tre** conteggi della ricetta escono verdi lo stesso
+
+_Difetto vero, gia' committato in `righe/RIGA_ALLINEALONDRA_DA_MANDARE.md`
+(righe 447-448 al commit 7a5f7d3), trovato PRIMA dell'invio. **Misurato**: il pin
+`9ed66e2...` e' VERO (antenato di `origin/lavoro`, gli **otto** artefatti hanno
+blob identici al working tree), il cartello e' stato tolto come prescrive il
+punto 101 — e **in fondo alla stessa pagina** resta scritto:
+"**E non e' verificato il PIN**, perche' **non esiste ancora**: vedi il riquadro
+rosso in cima". Il riquadro rosso non esiste piu'._
+
+Il punto 101 ha insegnato a togliere **il cartello**. La ricetta di pinnatura si
+e' irrobustita fino a **tre** conteggi (pin nuovi = 3, pin vecchi = 0, token del
+segnaposto = 0) e su questa pagina escono **`3 / 0 / 0`**: tutti e tre verdi,
+**con la pagina rotta**.
+
+Il motivo e' che la dichiarazione di stato sul pin **non era una sola**:
+
+1. la prima stava nel **cartello**, dentro i marcatori, dentro il perimetro del
+   `sed` -> tolta, giustamente;
+2. la seconda stava a **quattrocento righe di distanza**, in fondo alla sezione
+   _"COSA E' GIA' STATO VERIFICATO"_, come **ultima riga della lista di cio' che
+   NON e' verificato** — cioe' nel posto piu' onesto e piu' invisibile della
+   pagina. Fuori dai marcatori, senza il token, e senza nemmeno le parole
+   cercate dal conteggio del punto 101 ("segnaposto", "non funziona", "la riga
+   non parte"): dice `non esiste ancora`.
+
+E si porta dietro un **rinvio morto** (_"vedi il riquadro rosso in cima"_) che e'
+il sintomo, non il difetto: **un rinvio a una sezione che la pinnatura ha
+cancellato**. E' il punto 91 (il rinvio interno che non e' un gate) applicato
+alla pagina di lancio invece che al referto.
+
+> ✅ **REGOLA: la pinnatura non cerca IL cartello, cerca TUTTE le frasi che
+> parlano dello stato del pin.** Il perimetro del `sed` e' il cartello; il
+> perimetro della **verifica** e' la pagina intera. Prima di dichiarare pinnata
+> una pagina, oltre ai tre conteggi:
+> ```bash
+> grep -nEi "pin.*(non esiste|non e'? verificat|segnaposto|provvisori|da sostituire)|(non esiste|non verificat).*pin" "$F"   # DEVE dare 0
+> grep -nEi "vedi il riquadro|vedi il cartello|qui sopra|in cima" "$F"   # ogni rinvio va RILETTO: la pinnatura cancella sezioni
+> ```
+> 📐 **E la regola che sta sotto:** una lista di *"cosa NON e' verificato"* e' la
+> parte della pagina che **invecchia per prima**, perche' e' fatta apposta di
+> dichiarazioni di stato. Va rivisitata **per intero** a ogni pinnatura, riga per
+> riga, e ogni voce che nel frattempo **e' stata verificata** si sposta di
+> sezione **con la data**. Non e' prosa: e' l'inventario delle cose che mancano,
+> e un inventario stantio dice che manca cio' che c'e'.
+
+---
+
+## 102. 📊 IL CONTATORE DI CONTROLLO CHE STA **A VALLE DEL CANCELLO CHE IL ROUND STA TOGLIENDO**: cambia la sua stessa finestra di conteggio, e il referto prescrive proprio il rapporto fra le celle
+
+_Difetto vero, trovato leggendo il sorgente di `ABTG_AllineaLondra.mq5` mentre si
+verificava la riga del suo PASSO 0 (28/08/2026, prima dell'invio). L'EA non era
+mai stato compilato: il difetto e' nella **lettura promessa**, non nel codice._
+
+Il round e' un'**ablazione**: cella `00` con la finestra di sessione accesa,
+cella `01` con la finestra spenta. Per capire **dove sta il collo di bottiglia**
+l'EA esporta una colonna di diagnostica, `Barre Allineate`, dichiarata in tre
+posti (sorgente, driver, pagina) come:
+
+> _"le occasioni del MOTORE, contate **PRIMA** dei cancelli del contenitore"_
+
+e la pagina aggiunge la prescrizione di lettura:
+
+> _"il numero serve al **RAPPORTO FRA CELLE**, non in valore assoluto"_.
+
+**Letto nel sorgente, invece:** `gBarreAllineate++` vive dentro
+`ValutaBarraChiusa()`, e `OnTick` **esce prima** con
+`if(DevoFlat_Calc(...)) { ChiudiTutto(); return; }`. Il flat **e' un cancello del
+contenitore**, ed e' l'unico che l'interruttore dell'ablazione **sposta**:
+
+| cella | il flat e' vero... | quindi `Barre Allineate` conta le barre di... |
+|---|---|---|
+| `00_finestra` | fuori 03:00-10:30 | **03:00-10:29** -> ~30 barre M15 al giorno |
+| `01_nofinestra` | dalle 23:44 | **00:00-23:43** -> ~95 barre M15 al giorno |
+
+Il rapporto fra le due celle e' quindi **~3,2x per costruzione**, e non dice
+niente su quanto spesso il motore si allinea — che e' una proprieta' del
+mercato, **identica nelle due celle**. Chi legge il referto come il referto stesso
+prescrive conclude *"senza la finestra il motore ha il triplo delle occasioni"*:
+una frase che descrive **la larghezza della finestra di conteggio**, non il
+motore.
+
+### Perche' e' una classe a se', e non il 97-bis
+
+Il **97-bis** dice che una gamba CON/SENZA cambia anche la **popolazione dei
+trade**, e obbliga a elencare gli effetti di secondo ordine prima di chiamare
+"costo" la differenza. Qui la preparazione **l'aveva fatto** — aveva elencato
+l'ancoraggio a mezzanotte del tetto giornaliero — e ha comunque mancato questo,
+perche' l'effetto **non e' sui trade: e' sullo STRUMENTO DI MISURA**. E' il
+contatore messo li' **apposta per spiegare l'ablazione** a essere spostato
+dall'ablazione.
+
+> ✅ **REGOLA: per ogni colonna di diagnostica, si scrive DOVE sta nel flusso e
+> QUALE cancello ha gia' attraversato — e se quel cancello e' l'asse del round,
+> la colonna NON si confronta fra le celle.** Il controllo si fa in due mosse,
+> sul sorgente:
+> 1. si risale dal `contatore++` fino all'ingresso di `OnTick`/`OnBar`, elencando
+>    **ogni `return` che sta prima**;
+> 2. si incrocia quell'elenco con gli **input che il round muove**. Ogni
+>    intersezione e' una colonna che **cambia significato da cella a cella**: o si
+>    sposta il contatore a monte di tutti i `return`, o accanto al numero si
+>    scrive la sua **finestra di conteggio** e si vieta il rapporto.
+>
+> ⚠️ E la frase _"contato PRIMA dei cancelli"_ e' una **asserzione sul flusso di
+> controllo**: non si scrive perche' la si e' intesa cosi', si scrive dopo aver
+> letto i `return` che stanno sopra. In questa stessa riga la stessa frase e'
+> finita **tre volte** (commento del `.mq5`, commento del driver, tabella della
+> pagina): copiata, mai riverificata.
