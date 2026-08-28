@@ -4782,3 +4782,108 @@ prova: **la via d'uscita e' sbarrata dal guardiano della porta accanto.**
 > parametro viene mosso, il gate non salta: **degrada a RILIEVO** e la differenza
 > finisce scritta accanto ai numeri. Controllo pratico: per ogni parametro di
 > ripiego citato nella pagina, **si lancia il giro a vuoto passandolo davvero**.
+
+---
+
+## 🆕 AGGIUNTA DEL 28/08/2026 — trovata verificando il PASSO 0 di `ABTG_VwapRevert` (VWAP Revert)
+
+## 97. 🎗️ IL PARAMETRO ORFANO CHE IL REFERTO STAMPA COME SE FOSSE IL BANCO
+
+_Difetto vero, gia' committato in `backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1`
+(param `[double]$Rischio = 1.0` alla riga 101, stampato alle righe 305 e 535),
+trovato PRIMA dell'invio della riga._
+
+Il punto 96-bis copre il parametro di ripiego che un **gate** rende inusabile.
+Questo copre il caso opposto e piu' silenzioso: **un parametro che non va da
+nessuna parte, e che il referto racconta come un fatto misurato.**
+
+```powershell
+[double]$Rischio = 1.0                                   # dichiarato...
+Dico ("banco ....... Modello 4 (TICK REALI), deposito " + $Deposito + ", rischio " + $Rischio + "%")
+[void]$RefTxt.Add("banco: Modello 4 TICK REALI, deposito " + $Deposito + ", rischio " + $Rischio + "%")
+$argv = @("-Expert",$EA,"-Prova",...,"-Deposito",("" + $Deposito))   # ...e mai passato
+```
+
+Il rischio vero mordeva da un'altra parte (`InpRiskPercent` nei file prova, pinnato
+a 1.0): finche' i due numeri coincidono **non si vede niente**. Il giorno che
+qualcuno lancia `-Rischio 0.5` — che e' esattamente il gesto che il parametro
+promette — il banco gira all'1% e **il referto che finisce nello zip dice 0,5%**.
+E' il referto stantio del 17/08 con un meccanismo nuovo: non un file vecchio, ma
+un **numero mai applicato scritto accanto a numeri veri**.
+
+Gli altri parametri dello stesso `param()` erano sani proprio perche' facevano
+**tutti e due** i mestieri: `-Simbolo`, `-Periodo`, `-DaQuando` sono **passati** al
+driver **e** confrontati coi file prova. La differenza si vede solo mettendo in
+fila i tre usi.
+
+> ✅ **REGOLA: per ogni parametro dichiarato in un `param()`, si fa il grep del suo
+> nome nello stesso file e si conta dove finisce.** Tre esiti, uno solo buono:
+> 1. **passato** a chi esegue (o scritto nell'artefatto che esegue) → sano;
+> 2. **solo confrontato** in un gate → sano solo se il gate confronta con la
+>    costante dichiarata (punto 96-bis);
+> 3. **solo stampato** → **si toglie il parametro**, e il referto stampa il valore
+>    che morde davvero, letto dove morde:
+>    ```powershell
+>    [void]$RefTxt.Add("banco: ... rischio " + $Baseline["InpRiskPercent"] + "% (letto dal file prova, non da un parametro)")
+>    ```
+> Corollario di lettura: **una riga del referto che descrive il banco deve citare
+> la FONTE del numero** (`.ini`, file prova, parametro), altrimenti chi la legge
+> non puo' sapere se e' una misura o una decorazione.
+
+## 97-bis. ⚖️ LA CELLA "CON/SENZA" CHE CAMBIA ANCHE LA **POPOLAZIONE**: il costo che esce non e' il costo
+
+_Difetto vero, gia' committato in `prove/PASSO0_VWAPREV_03_overnight.txt`,
+`righe/RIGA_PASSO0_VWAPREV.ps1` (avvertenza 1 del referto) e nella pagina della
+riga, trovato PRIMA dell'invio. **Misurato nel sorgente**, non dedotto._
+
+La cella `03_overnight` esiste per una ragione giusta e scritta bene (_"una regola
+di casa messa nella cella base senza misurarne il costo"_): spegne
+`InpFlatFineSeduta` e **cambia solo quello**. Ma in `ABTG_VwapRevert.mq5`
+(`OnNewBar`) c'e' questo, e vale per **tutte** le celle:
+
+```mql5
+if(CountPositions()>0) return;      // una posizione alla volta per magic
+```
+
+Col flat **acceso**, alle 20:45 la posizione se ne va e la mattina dopo lo slot e'
+**libero**. Col flat **spento**, la posizione sopravvive alla notte e **blocca ogni
+ingresso** finche' non chiude. Quindi il confronto `00_nudo` vs `03_overnight` non
+misura *"quanto costa chiudere alle 20:45"*: misura **due popolazioni di trade
+diverse**, e il `n` piu' basso della cella overnight non e' un risultato del
+mercato, e' la meccanica dello slot.
+
+L'aggravante di metodo: **quella stessa avvertenza era gia' scritta**, parola per
+parola, per le celle `01_long`/`02_short` (_"la somma dei lati non fara' il
+00_nudo, e non e' un difetto"_) — e **non e' stata riportata sulla terza cella,
+dove lo stesso meccanismo morde di piu'**, perche' li' lo slot resta occupato per
+**giorni**, non per una barra.
+
+> ✅ **REGOLA: in una gamba CON/SENZA si elencano gli EFFETTI DI SECONDO ORDINE
+> dell'interruttore prima di chiamare "costo" la differenza.** La domanda secca:
+> _"questo interruttore cambia anche QUANTI trade il motore puo' prendere?"_. Se
+> si': la differenza si dichiara come **pacchetto** (`effetto della regola +
+> popolazione che la regola cambia`), e il referto lo scrive **accanto al numero**,
+> non in fondo. Se il costo "puro" serve davvero, ci vuole un'altra misura (es. il
+> P&L delle sole posizioni che avrebbero attraversato la notte), e va detto che
+> **questo giro non ce l'ha**.
+> 📋 **E l'avvertenza gia' scritta per una cella si RILEGGE contro tutte le
+> altre**: un'avvertenza copiata su 2 celle su 3 e' peggio del silenzio, perche'
+> chi legge deduce che sulla terza il problema non c'e'.
+
+### 97-ter. 🤐 IL SIGNIFICATO DATO A UN'ASSENZA CHE IL CODICE NON LE DA'
+
+Stessa verifica. La pagina della riga istruiva: _"nelle tre celle col flat acceso
+deve comparire `flat di fine seduta alle 20:45 server: N posizioni chiuse`. Se non
+compare mai, il flat non ha mai avuto niente da chiudere"_. **Letto nel sorgente
+(`FlatFineSedutaCheck`), e' falso**: la riga si scrive **una volta al giorno,
+sempre**, appena arriva un tick dopo l'ora di flat — anche con `chiuse = 0`. Quindi
+"non compare mai" non vuol dire *"non c'era niente da chiudere"*: vuol dire **che
+l'EA non ha mai visto un tick dopo le 20:45**, oppure — ed e' il caso vero qui —
+che quel log **non e' leggibile affatto** (punto 34: in ottimizzazione le `Print`
+degli agent non si leggono).
+
+> ✅ **REGOLA: prima di scrivere in una pagina "se X non compare, vuol dire Y", si
+> apre il codice che stampa X e si guarda QUANDO lo stampa.** Un'assenza ha un
+> significato solo se la presenza e' garantita nel caso contrario. Nel dubbio, il
+> numero si conta in una **colonna** (punto 34) e l'assenza smette di essere
+> un indizio da interpretare.
