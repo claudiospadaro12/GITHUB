@@ -53,10 +53,10 @@ un'ipotesi dell'agente cacciatore. **Questo giro la sostituisce con un numero.**
 
 ---
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`71bbd2002d42ad75c7404a4d3a39082e7d367d70`**
 
 ```
-@@PIN@@
+71bbd2002d42ad75c7404a4d3a39082e7d367d70
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
@@ -69,19 +69,30 @@ commit congelato. Il driver **pinna anche `$EABranch` dentro
 `walkforward_generico.ps1`**, altrimenti il pin varrebbe per il driver e **non
 per l'EA misurato**.
 
-### 🔧 LA RICETTA DEL PIN
+✅ **Il pin è GIÀ INSERITO** (prima pinnatura fatta il 28/08, dopo il push) ed è
+stato **verificato contenere tutti e sette gli artefatti** che lo script
+scarica: `walkforward_generico.ps1`, `RIGA_PASSO0_FVGRET.ps1`, i **tre** file
+prova, `ABTG_PausaGuardian.mqh` e **`ABTG_FvgRetest.mq5`**.
+
+### ♻️ LA RICETTA DI **RI-PINNATURA** — se un artefatto viene corretto
 
 ```bash
 F=backtest_pipeline/righe/RIGA_PASSO0_FVGRET_DA_MANDARE.md
-SHA=<il commit vero, 40 caratteri>
-TOK='@@PIN'"@@"
-sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|^$TOK\$|$SHA|; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|g" "$F"
-grep -c "\$pin='$SHA'" "$F"   # DEVE dare 3   <- i punti d'uso
-grep -c "$TOK" "$F"           # DEVE dare 0   <- nessun segnaposto rimasto
+NUOVO=<il commit nuovo, 40 caratteri>
+VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{40}')
+echo "vecchio: $VECCHIO"
+sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
+grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3
+grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
 ```
 
-⚠️ **Servono TUTTI E DUE i conteggi**: il solo *"0 segnaposto rimasti"* lo
-supera a mani basse anche un `sed` che **non ha matchato niente**.
+⚠️ **Servono TUTTI E DUE i conteggi**: il solo *"0 pin vecchi rimasti"* lo supera
+a mani basse anche un `sed` che **non ha matchato niente**.
+
+⚠️ **E il pin vecchio si legge DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai
+con un `grep` largo: se un giorno questa pagina avrà una riga di storia del tipo
+*"il pin X è BRUCIATO"*, un `sed` largo **riscriverebbe la storia** facendole
+dire l'esatto contrario del vero.
 
 ---
 
@@ -117,7 +128,7 @@ supera a mani basse anche un `sed` che **non ha matchato niente**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -147,7 +158,7 @@ supera a mani basse anche un `sed` che **non ha matchato niente**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -167,7 +178,7 @@ altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '02_short' -Rifai;

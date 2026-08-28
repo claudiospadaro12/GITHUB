@@ -353,7 +353,13 @@ risultano già nel repo): il salto è **voluto, non un refuso**.
   **corruzione SIMMETRICA** su tutte e tre le celle (quella che il gate della
   stella **non può vedere**, e che qui prende il gate della **baseline**);
 - ✅ **la ricetta del pin provata su una copia della pagina**: 5 segnaposto →
-  **3 punti d'uso + riquadro + titolo**, **0 residui**;
+  **3 punti d'uso + riquadro + titolo**, **0 residui**. Il pin è poi stato
+  **inserito davvero** (`71bbd200…`) e **verificato contenere tutti e sette gli
+  artefatti** che lo script scarica, `ABTG_FvgRetest.mq5` compreso;
+- ✅ **e anche la ricetta di RI-pinnatura provata su una copia**, con dentro una
+  **riga di storia** costruita apposta (*"il pin X è BRUCIATO"*): i **3 punti
+  d'uso** cambiano, **la riga di storia resta intatta** — che è il motivo per cui
+  il pin vecchio si legge dai punti d'uso e mai con un `grep` largo;
 - ✅ verificato che il gate `OnTester` del driver generico
   (`'double\s+OnTester\s*\('`, riga 158) **matcha** la firma dell'EA;
 - ✅ verificato che il driver generico **sa risolvere gli enum custom** del
@@ -382,14 +388,14 @@ cosa guardare nel referto — è:
 
 ### 👉 `backtest_pipeline/righe/RIGA_PASSO0_FVGRET_DA_MANDARE.md`
 
-Il pin (`@@PIN@@`) va sostituito **dopo il push**, con la ricetta che sta in
-quella pagina ed è già stata provata su una copia. In sintesi, **prima il giro a
-vuoto** (non apre MT5):
+Il pin è **già inserito** in quella pagina — `71bbd2002d42ad75c7404a4d3a39082e7d367d70`,
+verificato contenere **tutti e sette** gli artefatti che lo script scarica.
+In sintesi, **prima il giro a vuoto** (non apre MT5):
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<IL PIN>'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='71bbd2002d42ad75c7404a4d3a39082e7d367d70'; $p="$env:USERPROFILE\RIGA_PASSO0_FVGRET.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_FVGRET.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_FVGRET_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
