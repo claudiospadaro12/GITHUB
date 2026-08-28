@@ -3,6 +3,44 @@
 #  Dossier: caccia_strategie/CACCIA_INTRADAY_FOREX_ORO_2026-08-28.md
 # =====================================================================
 #
+# #####################################################################
+# #  NOTA DI ESECUZIONE, aggiunta il 28/08/2026 dalla filiera che ha  #
+# #  costruito l'EA. NON tocca ne' l'ipotesi, ne' i criteri C1-C7,    #
+# #  ne' la griglia: quelli restano CONGELATI parola per parola.      #
+# #####################################################################
+# #                                                                   #
+# #  QUESTO FILE E' LA SPECIFICA. NON SI LANCIA.                      #
+# #  Gli artefatti che GIRANO sono sette, e discendono da qui:        #
+# #     SONDA_OROLOGIO_00_GEMELLI.txt        (determinismo + cronometro)
+# #     SONDA_OROLOGIO_01_EURUSD_LONG.txt                             #
+# #     SONDA_OROLOGIO_02_EURUSD_SHORT.txt                            #
+# #     SONDA_OROLOGIO_03_GBPUSD_LONG.txt                             #
+# #     SONDA_OROLOGIO_04_GBPUSD_SHORT.txt                            #
+# #     SONDA_OROLOGIO_05_XAUUSD_LONG.txt                             #
+# #     SONDA_OROLOGIO_06_XAUUSD_SHORT.txt                            #
+# #  Servono perche' la misura vuole TRE SIMBOLI x DUE LATI in corse  #
+# #  SEPARATE (regola dei due lati, 25/08), e un file prova porta un  #
+# #  solo @SIMBOLO e un solo lato.                                    #
+# #                                                                   #
+# #  E C'E' UN SECONDO MOTIVO, ED E' UN DIFETTO DI QUESTO FILE, che   #
+# #  si DICHIARA invece di correggerlo di nascosto:                   #
+# #  le righe pinnate qui sotto sono scritte 'Nome=1||||||N', cioe'   #
+# #  con SEI barre. Spezzate su '||' danno QUATTRO campi, e           #
+# #  walkforward_generico.ps1 tratta come "pin secco" tutto cio' che  #
+# #  ne ha meno di CINQUE: lo riscriverebbe come                      #
+# #     Nome=1||||||N||1||||||N||0||1||||||N||N                       #
+# #  e MT5 lo leggerebbe storto SENZA dire niente (e' esattamente la  #
+# #  trappola n.3 scritta in testa al driver generico: "un parametro  #
+# #  sbagliato viene ignorato in silenzio").                          #
+# #  La forma di casa e' 'Nome=valore||valore||0||valore||N' (cinque  #
+# #  campi), ed e' quella usata nei sette file esecutivi. I VALORI    #
+# #  sono gli stessi, uno per uno: cambia solo la sintassi.           #
+# #                                                                   #
+# #  DECISIONE APERTA IN FONDO A QUESTO FILE, ORA FIRMATA:            #
+# #  la sonda misura in ORA SERVER FISSA (opzione semplice), con      #
+# #  l'errore noto di ~4 settimane l'anno DICHIARATO nel referto.     #
+# #####################################################################
+#
 # ATTENZIONE, LEGGERE PRIMA DI LANCIARE: QUESTO NON E' UN FILE PROVA DI
 # STRATEGIA. E' UN FILE PROVA DI MISURA.
 #

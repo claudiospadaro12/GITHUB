@@ -1,0 +1,115 @@
+# =====================================================================
+#  SONDA DELL'OROLOGIO -- CELLA 06_xauusd_short  --  XAUUSD SHORT
+#  ABTG_SondaOrologio  su  XAUUSD  H1, TICK REALI
+# ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  E' il PASSO 0 -- di MISURA -- del candidato P1 della caccia intraday
+#  forex/oro del 28/08/2026. Produce una TABELLA, non un P/L.
+#
+#  L'IPOTESI, i CRITERI C1-C7 e la SPECIFICA DELL'EA stanno TUTTI, per
+#  intero, nel file congelato
+#        backtest_pipeline/prove/SONDA_OROLOGIO_FX.txt
+#  e NON si riscrivono qui: un criterio ricopiato in sette file e' un
+#  criterio che prima o poi diverge. Quel file e' la SPECIFICA; questo
+#  e' l'ARTEFATTO ESEGUIBILE che ne discende.
+#
+#  >>> PERCHE' QUESTO FILE ESISTE E NON SI LANCIA IL FILE CONGELATO.
+#      Due motivi, tutti e due misurati leggendo walkforward_generico.ps1:
+#      1. IL FILE CONGELATO E' UNO SOLO, e la misura vuole TRE SIMBOLI
+#         per DUE LATI (regola dei due lati, 25/08: "ogni analisi misura
+#         SEMPRE tutti e due i lati... si RITESTA"). Sei corse separate,
+#         sei file.
+#      2. LA SINTASSI DEI PIN NEL FILE CONGELATO NON E' ESEGUIBILE.
+#         Le righe pinnate erano scritte 'Nome=1||||||N' (sei barre):
+#         spezzate su '||' danno QUATTRO campi, e il driver generico
+#         tratta come "pin secco" tutto cio' che ne ha meno di CINQUE,
+#         riscrivendolo 'Nome=1||||||N||1||||||N||0||1||||||N||N'.
+#         MT5 lo leggerebbe come un parametro storto SENZA dire niente.
+#         La forma di casa e' 'Nome=valore||valore||0||valore||N'
+#         (cinque campi), ed e' quella usata qui sotto. Il difetto e'
+#         DICHIARATO nel file congelato, non corretto di nascosto.
+#
+#  CHE COSA CAMBIA QUESTO FILE RISPETTO AGLI ALTRI CINQUE:
+#    SOLO il SIMBOLO, il LATO e il MAGIC. Tutto il resto e' identico,
+#    riga per riga, e il driver lo verifica PRIMA di aprire MT5 contro
+#    valori DICHIARATI NEL DRIVER (non contro un file gemello: una
+#    corruzione SIMMETRICA su tutti e sei passerebbe un diff, lezione
+#    R108/R110).
+#
+#  LA FINESTRA: 2011.01.01 -> 2026.06.30, ARITMETICA E NON ESTETICA.
+#    tetto del tester ~100.000 barre; forex su H1 ~120 barre/settimana;
+#    100.000/120 = 833 settimane = 16,0 anni. 15,5 anni stanno dentro
+#    con margine e coprono quattro regimi (toro, orso, laterale, crollo
+#    2020), come chiede l'Emendamento della Finestra punto C.
+#  ED E' DENTRO LO STORICO DI TUTTI E TRE I SIMBOLI, MISURATO:
+#    GBPUSD dal 1993.05.11 | EURUSD dal 1999.01.04 (l'euro non esiste
+#    prima: il 1971 del feed e' serie SINTETICA) | XAUUSD dal
+#    2004.06.11. Per questo @DAQUANDO e' 2011.01.01 su TUTTI E TRE e
+#    non tre date diverse: le tre date storiche servono a DIMOSTRARE
+#    che il 2011 c'e', non a spostare la finestra.
+#
+#  LO STORICO DI QUESTO SIMBOLO: inizio 2004.06.11 (R100, citato in R102_CRITERI.md riga 156: 2004.06.11 -> 2026.06.30).
+#
+#  MAGIC VERGINE 777206: blocco 7772xx, cercato UNO PER UNO in tutto il
+#  repo il 28/08/2026 -> ZERO occorrenze. Nessun magic di nessuna sedia
+#  viva e nessuno dei round recenti compare qui.
+#
+#  >>> QUELLO CHE QUESTO FILE NON PUO' DIRE, detto prima:
+#      - non promuove e non boccia niente (criterio C7). Nessuna sedia
+#        viva viene toccata, nessuna cella va in forward.
+#      - misura in ORA SERVER FISSA (criterio C6): gli uffici di Londra
+#        e New York si spostano rispetto all'ora server per ~4 settimane
+#        l'anno. L'errore e' NOTO e DICHIARATO, non corretto.
+#      - la PEGGIOR GIORNATA in % e' condizionata alla TAGLIA: il lotto
+#        esce da un rischio dell'1% su uno stop di 10 ATR, quindi e'
+#        piccolo. Non e' il rischio di una versione operabile.
+#      - l'EA NON E' MAI STATO COMPILATO DA NESSUNO: se MetaEditor si
+#        lamenta, il risultato del PASSO 0 e' quello, e va riportato
+#        cosi' com'e'.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2011.01.01
+
+# ---------------------------------------------------------------------
+# LO SWEEP: si spazzola L'ORA, e SOLO l'ora.
+# Una passata per ogni ora d'ingresso (24); la durata del blocco e' il
+# secondo asse, tenuto CORTO apposta (3 valori, non 24) per non
+# moltiplicare le celle e non trasformare la misura in una pesca.
+# 24 x 3 = 72 celle per finestra, 144 passate per file (IS + OOS).
+# ---------------------------------------------------------------------
+InpOraIngresso=0||0||1||23||Y
+InpOreDurata=4||4||4||12||Y
+
+
+# --- TUTTO IL RESTO PINNATO, e i motivi sono scritti ---
+# IL LATO: SHORT. I due lati si misurano in DUE CORSE SEPARATE, mai
+# nella stessa: l'EA si rifiuta di partire con tutti e due accesi,
+# perche' con tutti e due la colonna "Lato" non vorrebbe dire niente.
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+# rischio: la taglia di confronto di casa. NON e' la taglia prop (0,65%).
+InpRiskPercent=1.0||1.0||0||1.0||N
+# stop di SOLA PROTEZIONE: la sonda non deve essere gestita, deve
+# MISURARE. 10 ATR = praticamente mai toccato: serve solo a non lasciare
+# una posizione nuda se il broker salta un'uscita. La colonna
+# "Uscite Stop O Orfane" dice quante volte e' stato toccato: attesa ~0.
+InpSLatrMult=10.0||10.0||0||10.0||N
+InpATRPeriod=14||14||0||14||N
+# nessun take: si esce SOLO all'ora, mai al prezzo. E' il punto della sonda.
+InpTPatrMult=0.0||0.0||0||0.0||N
+# una posizione alla volta, una al giorno.
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=1||1||0||1||N
+# nessun filtro di spread NELLA MISURA: lo spread va MISURATO, non
+# filtrato. Se lo filtriamo, misuriamo le ore buone di uno spread che ci
+# siamo scelti noi. La colonna "Giorni Saltati Spread" DEVE uscire 0.
+InpMaxSpreadPts=0||0||0||0||N
+# chiusura forzata di fine giornata: 30 minuti prima delle 23:59 server,
+# cioe' alle 23:29. NON e' un interruttore: e' l'ANTICIPO. Il flat non
+# si puo' spegnere con nessun valore di questo parametro.
+InpFlatAnticipoMin=30||30||0||30||N
+# il magic e' PINNATO: la cella dei gemelli (00_gemelli) e' l'unica
+# che spazzola i magic, e lo fa perche' li' il determinismo E' la misura.
+InpMagic=777206||777206||0||777206||N

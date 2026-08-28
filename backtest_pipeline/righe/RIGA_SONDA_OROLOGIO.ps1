@@ -1,0 +1,916 @@
+# =====================================================================
+#  MARCATORE_RIGA_SONDA_OROLOGIO_v1
+#  RIGA_SONDA_OROLOGIO.ps1  --  LA SONDA DELL'OROLOGIO
+#  ABTG_SondaOrologio su EURUSD / GBPUSD / XAUUSD, H1, TICK REALI,
+#  finestra 2011.01.01 -> 2026.06.30, sette celle:
+#     00_gemelli        EURUSD long, ora e durata INCHIODATE, magic
+#                       gemelli 777290/777291 -> DETERMINISMO + CRONOMETRO
+#     01_eurusd_long    EURUSD  LONG    magic 777201
+#     02_eurusd_short   EURUSD  SHORT   magic 777202
+#     03_gbpusd_long    GBPUSD  LONG    magic 777203
+#     04_gbpusd_short   GBPUSD  SHORT   magic 777204
+#     05_xauusd_long    XAUUSD  LONG    magic 777205
+#     06_xauusd_short   XAUUSD  SHORT   magic 777206
+# ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  E' il PASSO 0 -- di MISURA -- del candidato P1 della caccia intraday
+#  forex/oro del 28/08/2026. Produce una TABELLA, non un P/L.
+#  Criterio C7, congelato prima di vedere i numeri:
+#     "Nessuna promozione da questa corsa. Questa sonda non promuove
+#      niente e non tocca nessuna sedia viva: produce una tabella."
+#
+#  L'IPOTESI e i CRITERI C1-C7 stanno in testa a
+#  prove\SONDA_OROLOGIO_FX.txt e NON si riscrivono qui: un criterio
+#  ricopiato in tre posti e' un criterio che prima o poi diverge.
+#
+#  ------------------------------------------------------------------
+#  PERCHE' ESISTE QUESTO FILE invece di sette righe di
+#  walkforward_generico.ps1 incollate a mano. Quattro motivi:
+#
+#   1. I GATE SUL PERIMETRO. Il driver generico controlla il FORMATO,
+#      non il PERIMETRO: non sa che i sette file devono differire solo
+#      per simbolo, lato e magic; non sa quali magic sono vietati; non
+#      sa che @PERIODO deve essere H1 e @DAQUANDO 2011.01.01; e
+#      soprattutto NON SA che una riga pinnata con QUATTRO campi
+#      (Nome=1||||||N) viene riscritta storta e MT5 la ignora in
+#      silenzio. Qui si controlla tutto PRIMA di aprire MT5.
+#
+#   2. LA COMPILAZIONE. ABTG_SondaOrologio.mq5 NON E' MAI STATO
+#      COMPILATO DA NESSUNO (scritto il 28/08 in un ambiente senza
+#      MetaEditor). Il giro di controllo COMPILA DAVVERO: e' il primo
+#      risultato vero di questo PASSO 0, e costa un minuto invece di
+#      scoprirlo dopo ore di tester.
+#
+#   3. LA TABELLA. La misura NON e' una riga per cella: sono 72 righe
+#      per cella (24 ore x 3 durate). Il referto le rende leggibili e
+#      calcola il rapporto del cancello C1 dalle colonne che l'EA
+#      esporta, senza che nessuno debba rifarlo in un foglio.
+#
+#   4. LA RACCOLTA. Regola di casa (CLAUDE.md, righe di lancio punto 2):
+#      a fine test i risultati finiscono in una cartella sul Desktop e
+#      in uno zip pronto da mandare. Sempre, anche a corsa fermata.
+#  ------------------------------------------------------------------
+#
+#  IL COSTO DELLA CORSA, DETTO PRIMA -- e' la ragione dei tre modi.
+#   Una cella di misura = 72 celle x 2 finestre = 144 passate a TICK
+#   REALI su 15,5 anni di H1. Sei celle = 864 passate. E' un ordine di
+#   grandezza sopra qualunque round di casa (R107: 24 passate a tick
+#   reali su 21 mesi in 9 minuti).
+#   >>> NON E' UNA STIMA, E' UN'IGNOTA: quanto costi una passata su
+#       15,5 anni di tick forex in casa NON E' MAI STATO MISURATO.
+#   Per questo il modo di default e' la RICOGNIZIONE: gira solo la
+#   cella 00_gemelli (4 passate), che serve a due cose insieme --
+#   collaudare il determinismo del banco E CRONOMETRARE una passata.
+#   Il referto stampa il tempo per passata e la moltiplicazione, cosi'
+#   la decisione di lanciare le sei celle si prende su un numero.
+#
+#  QUELLO CHE NON FA, dichiarato:
+#   - NON GIUDICA e NON PROMUOVE niente (C7). Nessuna sedia viva viene
+#     toccata: i magic 7772xx sono VERGINI (cercati uno per uno in
+#     tutto il repo il 28/08/2026: zero occorrenze) e il driver
+#     generico scrive AllowLiveTrading=false in ogni .ini.
+#   - NON adjudica i criteri C2 (l'ora dev'essere quella che la TESI
+#     aveva indicato prima) e C3 (altopiano, non picco): quelli si
+#     leggono sulla tabella, e sono giudizi, non conti. Il referto
+#     stampa i dati che servono e lo DICE.
+#   - NON scarica storico. La profondita' del feed su EURUSD/GBPUSD/
+#     XAUUSD e' agli atti (R100/R102); che i TICK REALI arrivino
+#     davvero fino al 2011 NON lo e': lo dira' il numero di operazioni
+#     per cella, e il referto lo mette accanto alla soglia C5.
+#   - non scrive una riga di MQL5.
+#
+#  LA RIGA CHE SI INCOLLA sta in righe\RIGA_SONDA_OROLOGIO_DA_MANDARE.md
+#  ed e' l'UNICO posto in cui esiste (CHECKLIST punto 100).
+# =====================================================================
+[CmdletBinding()]
+param(
+  # -Pin NON ha default: un default silenzioso ("lavoro") farebbe girare
+  #  la punta del branch spacciandola per un commit congelato.
+  [string]$Pin           = "",
+  [switch]$SoloControllo,          # giro a vuoto: NON apre il tester (ma COMPILA)
+  [switch]$TutteLeCelle,           # le sette celle di fila: e' la corsa LUNGA
+  [switch]$Rifai,                  # rifa' anche i CSV gia' presenti
+  [string]$SoloCella     = "",     # una cella sola, per Id
+  [string]$Periodo       = "H1",
+  [string]$DaQuando      = "2011.01.01",
+  [string]$Fino          = "2026.06.30",
+  [int]$Deposito         = 100000,
+  [int]$Modello          = 4       # 4 = TICK REALI. Vedi il RILIEVO nel referto se lo si cambia.
+)
+$ErrorActionPreference = "Stop"
+[Threading.Thread]::CurrentThread.CurrentCulture   = [Globalization.CultureInfo]::InvariantCulture
+[Threading.Thread]::CurrentThread.CurrentUICulture = [Globalization.CultureInfo]::InvariantCulture
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$INV = [Globalization.CultureInfo]::InvariantCulture
+
+$EA     = "ABTG_SondaOrologio"
+$Avvio  = Get-Date
+$Stamp  = $Avvio.ToString("yyyyMMdd_HHmm", $INV)
+$Dsk    = Join-Path $env:USERPROFILE "Desktop"
+$Work   = Join-Path $env:USERPROFILE "abtg_sonda_orologio"
+$Prove  = Join-Path $Work "prove"
+$RawPin = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
+
+# --- TUTTO CIO' CHE LA RACCOLTA USA NASCE QUI, PRIMA DEL try.
+#     In PowerShell una `function` non e' dichiarativa, e' un'ISTRUZIONE:
+#     se il flusso non ci passa sopra il nome non esiste, e la raccolta
+#     esploderebbe proprio nella corsa fermata da un gate, cioe' l'unica
+#     in cui il referto serve davvero.
+$Problemi  = New-Object System.Collections.ArrayList
+$Rilievi   = New-Object System.Collections.ArrayList
+$Fatale    = ""
+$Terminale = "n/d"
+$Compilato = "NON TENTATA"
+$Cronometro= "non misurato"
+
+$Modo = "CORSA"
+if($SoloControllo){ $Modo = "CONTROLLO" }
+
+function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
+function Dico([string]$t,[string]$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
+function Titolo([string]$t){ Write-Host ""; Write-Host ("=== " + $t + " ===") -ForegroundColor Cyan }
+
+function Scarica([string]$url,[string]$dest){
+  Remove-Item -LiteralPath $dest -Force -ErrorAction SilentlyContinue
+  Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing -ErrorAction Stop
+  if(-not (Test-Path -LiteralPath $dest)){ throw ("scarico fallito: " + $url) }
+}
+
+function RigheVive([string]$p){
+  return @(Get-Content -LiteralPath $p | Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' })
+}
+
+function NumInv($s){
+  $v = 0.0
+  $t = ("" + $s).Replace([string][char]160,"").Replace(" ","").Trim()
+  if($t -eq ""){ return $null }
+  if([double]::TryParse($t,[Globalization.NumberStyles]::Float,$INV,[ref]$v)){ return $v }
+  return $null
+}
+
+# --- LA CONVENZIONE DI SENTINELLA. Un numero non misurato non deve MAI
+#     uscire come numero plausibile: in R103 il PF non misurato usciva
+#     "0.000", che si legge "ha perso tutto". Qui esce "n/d".
+# FmtN: CONTEGGI. Non esiste un conteggio negativo, quindi un negativo e'
+#   la sentinella "non misurato" e deve uscire "n/d", non "-1".
+function FmtN($v){ if($null -eq $v){ return "n/d" }; if([int]$v -lt 0){ return "n/d" }; return ([int]$v).ToString($INV) }
+# Fmt2: GRANDEZZE CON SEGNO. E QUI IL NEGATIVO NON SI TOCCA, ed e' il
+#   contrario di quello che fanno i driver gemelli: il LORDO puo' essere
+#   legittimamente negativo (una fascia in cui il prezzo scende e' la
+#   meta' della tesi: "la valuta si deprezza nelle proprie ore"), e la
+#   PEGGIOR GIORNATA e' negativa SEMPRE. Applicare qui la stessa
+#   sentinella di FmtN cancellerebbe meta' della misura scambiandola per
+#   un dato mancante (e' il difetto del punto 66, al rovescio).
+function Fmt2($v){ if($null -eq $v){ return "n/d" }; return ([double]$v).ToString("0.00",$INV) }
+
+# =====================================================================
+#  IL PARSER DEL CSV DI OTTIMIZZAZIONE.
+#  Le colonne si cercano PER NOME, mai per posizione. Se non le
+#  riconosce torna $null E DICE quali intestazioni ha visto, invece di
+#  indovinare (punto 80: una colonna che la famiglia non esporta non
+#  deve diventare un sentinella "onesto" che camuffa un criterio
+#  impossibile -- qui l'assenza e' un PROBLEMA, non un trattino).
+#  L'intestazione VERA di questo EA, LETTA NEL SORGENTE (OnTesterDeinit),
+#  e' a 28 colonne piu' quelle dei parametri.
+# =====================================================================
+$script:CsvIntestazioni = @()
+$ColonneObbligatorie = @("Ora Ingresso","Ore Durata","Lato","Giornate Operate",
+                         "Lordo Medio Punti","Lordo Medio Valuta",
+                         "Spread Mediano Ingresso","Spread P95 Ingresso",
+                         "Rapporto Lordo Su Spread","Giornate Positive %",
+                         "Ore Medie Tenuta","Uscite Ora","Uscite Flat",
+                         "Uscite Stop O Orfane","Notti Attraversate",
+                         "Lotti Al Minimo","Autotest Falliti",
+                         "Giorni Saltati Spread","Peggior Giornata %",
+                         "Profit","Trades")
+
+function LeggiOpt([string]$path){
+  # AZZERARE QUI NON E' PULIZIA, E' UN GATE. Senza, un CSV MANCANTE
+  # lasciava in piedi le intestazioni dell'ULTIMO file letto bene, e il
+  # referto scriveva "Intestazioni viste: ..." elencando colonne che in
+  # quella cella nessuno aveva mai visto: un valore vecchio che racconta
+  # un fatto mai accaduto.
+  $script:CsvIntestazioni = @()
+  if(-not (Test-Path -LiteralPath $path)){ return $null }
+  $righe = @()
+  try{ $righe = @(Import-Csv -LiteralPath $path) }catch{ return $null }
+  if($righe.Count -eq 0){ return $null }
+  $cols = @($righe[0].PSObject.Properties.Name)
+  $script:CsvIntestazioni = $cols
+  foreach($c in $ColonneObbligatorie){
+    if(-not ($cols -contains $c)){ return $null }
+  }
+  $out = New-Object System.Collections.ArrayList
+  foreach($r in $righe){
+    [void]$out.Add([pscustomobject]@{
+      Ora      = (NumInv $r."Ora Ingresso")
+      Durata   = (NumInv $r."Ore Durata")
+      Lato     = (NumInv $r."Lato")
+      N        = (NumInv $r."Giornate Operate")
+      LordoPt  = (NumInv $r."Lordo Medio Punti")
+      LordoVal = (NumInv $r."Lordo Medio Valuta")
+      SprMed   = (NumInv $r."Spread Mediano Ingresso")
+      SprP95   = (NumInv $r."Spread P95 Ingresso")
+      C1       = (NumInv $r."Rapporto Lordo Su Spread")
+      PctPos   = (NumInv $r."Giornate Positive %")
+      OreTen   = (NumInv $r."Ore Medie Tenuta")
+      UscOra   = (NumInv $r."Uscite Ora")
+      UscFlat  = (NumInv $r."Uscite Flat")
+      UscStop  = (NumInv $r."Uscite Stop O Orfane")
+      Notti    = (NumInv $r."Notti Attraversate")
+      LotMin   = (NumInv $r."Lotti Al Minimo")
+      Autotest = (NumInv $r."Autotest Falliti")
+      SprSalt  = (NumInv $r."Giorni Saltati Spread")
+      PegGio   = (NumInv $r."Peggior Giornata %")
+      Profit   = (NumInv $r."Profit")
+      Trades   = (NumInv $r."Trades")
+    })
+  }
+  return @($out)
+}
+
+# --- I GEMELLI: le due righe devono essere IDENTICHE AL CENTESIMO.
+#     E' l'unico controllo d'igiene del banco, ed e' il motivo per cui
+#     la cella 00_gemelli esiste. "Una riga sola" NON e' "gemelli ok":
+#     e' uno sweep che non ha spazzolato, e va detto come tale.
+$TolGemelli = 0.005
+function Gemelli($righe){
+  if($null -eq $righe){ return "NON MISURATO (CSV non letto)" }
+  if(@($righe).Count -ne 2){ return ("NON VALIDO: " + @($righe).Count + " righe invece di 2") }
+  $a = $righe[0]; $b = $righe[1]
+  $coppie = @(
+    @("profitto",        $a.Profit,  $b.Profit),
+    @("operazioni",      $a.N,       $b.N),
+    @("lordo in punti",  $a.LordoPt, $b.LordoPt),
+    @("spread mediano",  $a.SprMed,  $b.SprMed),
+    @("peggior giornata",$a.PegGio,  $b.PegGio)
+  )
+  foreach($ch in $coppie){
+    if($null -eq $ch[1] -or $null -eq $ch[2]){ return ("NON MISURATO (" + $ch[0] + " illeggibile)") }
+    if([math]::Abs([double]$ch[1] - [double]$ch[2]) -gt $TolGemelli){
+      return ("DIVERSI su " + $ch[0] + ": " + $ch[1] + " contro " + $ch[2])
+    }
+  }
+  return "IDENTICI"
+}
+
+# =====================================================================
+#  LE SETTE CELLE.
+#  'AssiY' = i nomi degli assi con flag Y che quel file DEVE avere,
+#  esattamente quelli e nessun altro. E' il gate che impedisce a una
+#  griglia di rientrare dalla finestra o a un asse di sparire.
+# =====================================================================
+# ATTENZIONE al nome del parametro: NON si chiama $celle. In PowerShell
+# le variabili sono CASE-INSENSITIVE (punto 79), e $celle sarebbe LA
+# STESSA variabile di $CELLE, l'elenco delle sette celle. Qui e' solo
+# uno scope diverso e funzionerebbe lo stesso, ma e' esattamente la
+# classe di difetto che il 25/08 e' arrivata fino al PC di Claudio.
+function C([string]$id,[string]$file,[string]$sym,[string]$lato,[string]$desc,
+          [int[]]$magic,[string[]]$assiY,[int]$nCelle){
+  return [pscustomobject]@{
+    Id=$id; Prova=$file; Sym=$sym; Lato=$lato; Desc=$desc;
+    Magic=@($magic); AssiY=@($assiY); Celle=$nCelle;
+    Esito="NON ESEGUITA"; Gemelli="NON PERTINENTE";
+    RigheIS=-1; RigheOOS=-1; Secondi=-1.0;
+    DatiIS=$null; DatiOOS=$null }
+}
+$CELLE = @()
+$CELLE += (C "00_gemelli"      "SONDA_OROLOGIO_00_GEMELLI.txt"      "EURUSD" "LONG"  "DETERMINISMO DEL BANCO + CRONOMETRO (ora e durata inchiodate: NON e' una misura dell'orologio)" @(777290,777291) @("InpMagic") 2)
+$CELLE += (C "01_eurusd_long"  "SONDA_OROLOGIO_01_EURUSD_LONG.txt"  "EURUSD" "LONG"  "EURUSD lato LONG  -- la tabella 24 ore x 3 durate" @(777201) @("InpOraIngresso","InpOreDurata") 72)
+$CELLE += (C "02_eurusd_short" "SONDA_OROLOGIO_02_EURUSD_SHORT.txt" "EURUSD" "SHORT" "EURUSD lato SHORT -- regola dei due lati (25/08)" @(777202) @("InpOraIngresso","InpOreDurata") 72)
+$CELLE += (C "03_gbpusd_long"  "SONDA_OROLOGIO_03_GBPUSD_LONG.txt"  "GBPUSD" "LONG"  "GBPUSD lato LONG" @(777203) @("InpOraIngresso","InpOreDurata") 72)
+$CELLE += (C "04_gbpusd_short" "SONDA_OROLOGIO_04_GBPUSD_SHORT.txt" "GBPUSD" "SHORT" "GBPUSD lato SHORT" @(777204) @("InpOraIngresso","InpOreDurata") 72)
+$CELLE += (C "05_xauusd_long"  "SONDA_OROLOGIO_05_XAUUSD_LONG.txt"  "XAUUSD" "LONG"  "XAUUSD lato LONG" @(777205) @("InpOraIngresso","InpOreDurata") 72)
+$CELLE += (C "06_xauusd_short" "SONDA_OROLOGIO_06_XAUUSD_SHORT.txt" "XAUUSD" "SHORT" "XAUUSD lato SHORT" @(777206) @("InpOraIngresso","InpOreDurata") 72)
+
+# --- LA BASELINE ASSOLUTA: i valori che ogni file prova DEVE pinnare.
+#     Si confronta con QUESTI, dichiarati nel driver, e non con un file
+#     gemello: una corruzione SIMMETRICA (la stessa riga storta in tutti
+#     e sette) passerebbe un diff a mani basse (lezione R108/R110).
+$Baseline = [ordered]@{
+  "InpRiskPercent"     = "1.0"
+  "InpSLatrMult"       = "10.0"
+  "InpATRPeriod"       = "14"
+  "InpTPatrMult"       = "0.0"
+  "InpMaxPositions"    = "1"
+  "InpMaxTradesPerDay" = "1"
+  "InpMaxSpreadPts"    = "0"
+  "InpFlatAnticipoMin" = "30"
+}
+
+# --- LA GRIGLIA LETTERALE delle sei celle di misura. Non "due assi Y":
+#     ESATTAMENTE questi due assi con ESATTAMENTE questi estremi. Se
+#     qualcuno stringesse la griglia a 8 ore la tabella cambierebbe
+#     forma senza che nessuno se ne accorga.
+$GrigliaAttesa = [ordered]@{
+  "InpOraIngresso" = "0||0||1||23||Y"
+  "InpOreDurata"   = "4||4||4||12||Y"
+}
+
+# --- I MAGIC VIETATI: sedie vive e round recenti. Un'identita' non in
+#     campo resta comunque occupata.
+$MagicVietati = @(775501, 776000,776001, 776100,776101, 776200,776201, 776400,776401,
+                  773400,773401, 773410,773411, 773420,773421, 773430,773431,
+                  763000,763010,763020,763100,763110,763120,
+                  763200,763210,763220,763300,763310,763320,
+                  773200,773201,773230,773231,773300,773301,
+                  770101,770511,771531,970912,970913)
+
+# --- L'ELENCO CHIUSO DEI PARAMETRI AMMESSI in un file prova di questa
+#     sonda. Serve a una cosa sola, ed e' LA cosa: impedire che entri
+#     una condizione di PREZZO. Un nome fuori da questa lista ferma
+#     tutto, anche se l'EA quel parametro ce l'ha.
+$ParametriAmmessi = @("InpOraIngresso","InpOreDurata","InpAllowLong","InpAllowShort",
+                      "InpRiskPercent","InpSLatrMult","InpATRPeriod","InpTPatrMult",
+                      "InpMaxPositions","InpMaxTradesPerDay","InpMaxSpreadPts",
+                      "InpFlatAnticipoMin","InpMagic")
+
+# =====================================================================
+#  QUALI CELLE GIRANO -- e perche' il default e' UNA SOLA.
+#  Vedi "IL COSTO DELLA CORSA" in testa: 864 passate a tick reali su
+#  15,5 anni non si lanciano al buio.
+# =====================================================================
+$Ordinate = @()
+if($SoloCella -ne ""){
+  $Ordinate = @($CELLE | Where-Object { $_.Id -eq $SoloCella })
+}elseif($TutteLeCelle){
+  $Ordinate = @($CELLE)
+}else{
+  $Ordinate = @($CELLE | Where-Object { $_.Id -eq "00_gemelli" })
+  if(-not $SoloControllo){ $Modo = "RICOGNIZIONE" }
+}
+
+try{
+  Titolo ("SONDA DELL'OROLOGIO (" + $EA + ") -- modo " + $Modo)
+
+  # -------------------------------------------------------------------
+  #  0. LE GUARDIE, PRIMA DI TOCCARE QUALUNQUE COSA
+  # -------------------------------------------------------------------
+  if($Pin -eq ""){ throw "-Pin obbligatorio: senza, girerebbe la punta del branch spacciandola per un commit congelato." }
+  if($Pin -notmatch '^[0-9a-f]{40}$'){ throw ("-Pin deve essere un commit di 40 caratteri esadecimali, ricevuto: " + $Pin) }
+  if(Get-Process terminal64,metaeditor64 -ErrorAction SilentlyContinue){
+    throw "MT5 O METAEDITOR APERTO: col terminale aperto il tester non gira (zero CSV), con MetaEditor aperto la compilazione torna subito senza compilare."
+  }
+  if($SoloCella -ne "" -and @($Ordinate).Count -eq 0){
+    throw ("-SoloCella '" + $SoloCella + "' non esiste. Validi: " + ((@($CELLE | ForEach-Object { $_.Id })) -join ", "))
+  }
+  if($SoloCella -ne "" -and $TutteLeCelle){
+    throw "-SoloCella e -TutteLeCelle insieme non vogliono dire niente: scegline uno."
+  }
+  if($Periodo -ne "H1"){
+    throw ("-Periodo e' " + $Periodo + ": i sette file prova dichiarano @PERIODO H1 e il gate li confronta. La sonda entra all'apertura di una barra H1: su un altro TF misurerebbe un'altra cosa.")
+  }
+  if($Modello -ne 4){
+    [void]$Rilievi.Add("MODELLO " + $Modello + " invece di 4 (TICK REALI). Lo SPREAD e' meta' di questa misura, e fuori dai tick reali lo spread NON e' quello del feed: la colonna 'Spread Mediano Ingresso' smette di voler dire cio' che il criterio C1 le chiede. Il numero si legge SOLO come screening.")
+  }
+
+  $passate = 0
+  foreach($c in $Ordinate){ $passate += $c.Celle*2 }
+
+  Dico ("pin ......... " + $Pin)
+  Dico ("celle ....... " + @($Ordinate).Count + " su 7   [" + ((@($Ordinate | ForEach-Object { $_.Id })) -join ", ") + "]")
+  Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (split 40/60 del driver generico)")
+  Dico ("banco ....... Modello " + $Modello + ", deposito " + $Deposito + ", periodo " + $Periodo)
+  Dico ("passate ..... " + $passate + " a tick reali su 15,5 anni di H1") "Yellow"
+  if($Modo -eq "RICOGNIZIONE"){
+    Write-Host ""
+    Write-Host "###################################################################" -ForegroundColor Yellow
+    Write-Host "#  MODO RICOGNIZIONE: gira SOLO la cella 00_gemelli (4 passate).  #" -ForegroundColor Yellow
+    Write-Host "#  Serve a DUE cose insieme:                                      #" -ForegroundColor Yellow
+    Write-Host "#    - collaudare il DETERMINISMO del banco (le due righe gemelle #" -ForegroundColor Yellow
+    Write-Host "#      devono uscire identiche al centesimo);                     #" -ForegroundColor Yellow
+    Write-Host "#    - CRONOMETRARE una passata su 15,5 anni di tick, che in casa #" -ForegroundColor Yellow
+    Write-Host "#      NON e' mai stato misurato.                                 #" -ForegroundColor Yellow
+    Write-Host "#  Il referto stampa il tempo e la moltiplicazione x144. La corsa #" -ForegroundColor Yellow
+    Write-Host "#  vera si lancia DOPO, una cella per volta, con -SoloCella.      #" -ForegroundColor Yellow
+    Write-Host "###################################################################" -ForegroundColor Yellow
+  }
+
+  # -------------------------------------------------------------------
+  #  1. SCARICO AL PIN
+  # -------------------------------------------------------------------
+  Titolo "1. SCARICO AL PIN"
+  New-Item -ItemType Directory -Force -Path $Work,$Prove | Out-Null
+
+  # --- se il pin cambia, la cache va via: senza, il gate di idempotenza
+  #     del driver generico riproporrebbe i CSV di ieri come se fossero
+  #     di oggi (e i file prova vecchi passerebbero i gate nuovi).
+  $pinFile = Join-Path $Work "pin_corrente.txt"
+  $pinVecchio = ""
+  if(Test-Path -LiteralPath $pinFile){ $pinVecchio = (Get-Content -LiteralPath $pinFile -Raw).Trim() }
+  if($pinVecchio -ne $Pin){
+    Remove-Item -LiteralPath $Prove -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath (Join-Path $Work "risultati_prove") -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Force -Path $Prove | Out-Null
+    if($pinVecchio -ne ""){ Dico ("pin cambiato (" + $pinVecchio + " -> " + $Pin + "): cache dei file prova e dei CSV CANCELLATA.") "Yellow" }
+    Set-Content -LiteralPath $pinFile -Value $Pin -Encoding ASCII
+  }
+
+  $drv = Join-Path $Work "walkforward_generico.ps1"
+  Scarica ($RawPin + "/backtest_pipeline/walkforward_generico.ps1") $drv
+  # il driver generico pinna il branch da cui riscarica il .mq5: senza
+  # questo, il pin varrebbe per il driver e NON per l'EA misurato.
+  $testoDrv = Get-Content -LiteralPath $drv -Raw
+  if($testoDrv -notmatch '\$EABranch\s*=\s*"lavoro"'){ throw "walkforward_generico.ps1 non ha la riga \$EABranch attesa: non lo posso pinnare." }
+  $testoDrv = $testoDrv -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
+  Set-Content -LiteralPath $drv -Value $testoDrv -Encoding ASCII
+  Dico "driver generico scaricato e PINNATO (riscarica l'EA al pin, non dalla punta del branch)" "Green"
+
+  # TUTTI E SETTE i file prova si scaricano SEMPRE, anche quando gira una
+  # cella sola: i gate del perimetro (magic unici, valori dei lati) sono
+  # gate DI INSIEME, e su un file solo non direbbero niente.
+  foreach($c in $CELLE){
+    Scarica ($RawPin + "/backtest_pipeline/prove/" + $c.Prova) (Join-Path $Prove $c.Prova)
+  }
+  Dico ("file prova scaricati: " + @(Get-ChildItem $Prove -Filter SONDA_OROLOGIO_*.txt).Count + " su 7") "Green"
+
+  # -------------------------------------------------------------------
+  #  2. I GATE SUI FILE PROVA -- girano PRIMA di aprire MT5
+  # -------------------------------------------------------------------
+  Titolo "2. GATE SUI FILE PROVA"
+  $mappe = @{}
+  foreach($c in $CELLE){
+    $f = Join-Path $Prove $c.Prova
+    $righe = RigheVive $f
+    $h = @{}
+    $assiTrovati = New-Object System.Collections.ArrayList
+    foreach($r in $righe){
+      if($r -match '^@'){
+        $parti = ($r -split '\s+',2)
+        if($h.ContainsKey($parti[0])){ throw ($c.Prova + ": DUE direttive '" + $parti[0] + "'.") }
+        $h[$parti[0]] = $parti[1].Trim()
+        continue
+      }
+      $i = $r.IndexOf("=")
+      if($i -lt 0){ throw ($c.Prova + ": riga senza '=' e senza '#': '" + $r + "'.") }
+      $nome = $r.Substring(0,$i).Trim()
+      $val  = $r.Substring($i+1).Trim()
+      if($h.ContainsKey($nome)){ throw ($c.Prova + ": DUE righe per '" + $nome + "'. In [TesterInputs] un parametro doppio fa fare a MT5 ZERO passate.") }
+
+      # GATE DELLA SINTASSI DEI CINQUE CAMPI -- e' il difetto trovato nel
+      # file congelato SONDA_OROLOGIO_FX.txt. Una riga con quattro campi
+      # (Nome=1||||||N) viene trattata dal driver generico come "pin
+      # secco" e riscritta storta: MT5 la ignora IN SILENZIO.
+      $campi = $val -split '\|\|'
+      if($campi.Count -ne 5){
+        throw ($c.Prova + ": '" + $nome + "' ha " + $campi.Count + " campi invece di 5. La forma di casa e' 'Nome=valore||valore||0||valore||N'. Con quattro campi il driver generico la riscrive storta e MT5 la ignora senza dire niente.")
+      }
+      if($campi[4].Trim() -ne "N" -and $campi[4].Trim() -ne "Y"){
+        throw ($c.Prova + ": '" + $nome + "' ha flag '" + $campi[4] + "' invece di N o Y.")
+      }
+
+      # GATE DELL'ELENCO CHIUSO: nessuna condizione di prezzo puo' entrare.
+      if(-not ($ParametriAmmessi -contains $nome)){
+        throw ($c.Prova + ": '" + $nome + "' NON e' nell'elenco chiuso dei parametri della sonda. La sonda misura l'OROLOGIO: se entra un parametro che non e' in elenco, smette di misurare l'orologio e comincia a misurare un motore -- che e' un altro round.")
+      }
+
+      $h[$nome] = $val
+      if($campi[4].Trim() -eq "Y"){ [void]$assiTrovati.Add($nome) }
+    }
+
+    # GATE GEOMETRIA
+    if($h["@SIMBOLO"]  -ne $c.Sym){     throw ($c.Prova + ": @SIMBOLO e' " + $h["@SIMBOLO"] + ", la cella " + $c.Id + " lo vuole " + $c.Sym) }
+    if($h["@PERIODO"]  -ne $Periodo){   throw ($c.Prova + ": @PERIODO e' " + $h["@PERIODO"] + ", atteso " + $Periodo) }
+    if($h["@DAQUANDO"] -ne $DaQuando){  throw ($c.Prova + ": @DAQUANDO e' " + $h["@DAQUANDO"] + ", atteso " + $DaQuando) }
+
+    # GATE DEGLI ASSI: esattamente quelli dichiarati, nessuno in piu'.
+    $attesi = @($c.AssiY | Sort-Object)
+    $visti  = @($assiTrovati | Sort-Object)
+    if(($attesi -join ",") -ne ($visti -join ",")){
+      throw ($c.Prova + ": gli assi con flag Y sono [" + ($visti -join ",") + "], la cella " + $c.Id + " li vuole [" + ($attesi -join ",") + "].")
+    }
+
+    # GATE DELLA GRIGLIA LETTERALE (solo per le celle di misura)
+    if($c.Id -ne "00_gemelli"){
+      foreach($k in $GrigliaAttesa.Keys){
+        if($h[$k] -ne $GrigliaAttesa[$k]){
+          throw ($c.Prova + ": '" + $k + "' vale '" + $h[$k] + "', la griglia congelata vuole '" + $GrigliaAttesa[$k] + "'. Stringere la griglia cambia la forma della tabella senza che si veda.")
+        }
+      }
+    }
+
+    # GATE DEI VALORI DEI LATI: prende il caso che nessun diff vede, cioe'
+    # due file SCAMBIATI fra loro.
+    $vl = ($h["InpAllowLong"]  -split '\|\|')[0]
+    $vs = ($h["InpAllowShort"] -split '\|\|')[0]
+    $wl = "0"; $ws = "1"
+    if($c.Lato -eq "LONG"){ $wl = "1"; $ws = "0" }
+    if($vl -ne $wl){ throw ($c.Prova + ": InpAllowLong vale "  + $vl + ", la cella " + $c.Id + " (" + $c.Lato + ") lo vuole " + $wl) }
+    if($vs -ne $ws){ throw ($c.Prova + ": InpAllowShort vale " + $vs + ", la cella " + $c.Id + " (" + $c.Lato + ") lo vuole " + $ws) }
+
+    # GATE DELLA BASELINE ASSOLUTA: contro valori DICHIARATI QUI, non
+    # contro un file gemello. Una corruzione simmetrica passerebbe un
+    # diff e non passa questo.
+    foreach($k in $Baseline.Keys){
+      if(-not $h.ContainsKey($k)){ throw ($c.Prova + ": manca il pin di '" + $k + "': la baseline dev'essere verificabile nell'.ini, non dedotta.") }
+      $v0 = ($h[$k] -split '\|\|')[0]
+      if($v0 -ne $Baseline[$k]){
+        throw ($c.Prova + ": '" + $k + "' vale " + $v0 + ", la baseline dichiarata di questa sonda lo vuole " + $Baseline[$k])
+      }
+    }
+
+    $mappe[$c.Id] = $h
+  }
+
+  # GATE DEI MAGIC: unici in tutto l'insieme, mai uno vietato.
+  $magicVisti = @{}
+  foreach($c in $CELLE){
+    $h = $mappe[$c.Id]
+    $mg = $h["InpMagic"] -split '\|\|'
+    $lista = @()
+    if($mg[4].Trim() -eq "Y"){
+      $da = [int]$mg[1]; $passo = [int]$mg[2]; $a = [int]$mg[3]
+      if($passo -le 0){ throw ($c.Prova + ": InpMagic e' un asse Y con passo " + $passo + ".") }
+      for($m = $da; $m -le $a; $m += $passo){ $lista += $m }
+    }else{
+      $lista = @([int]$mg[0])
+    }
+    if(@($lista).Count -ne @($c.Magic).Count){
+      throw ($c.Prova + ": la cella " + $c.Id + " vuole " + @($c.Magic).Count + " magic, il file ne produce " + @($lista).Count + ".")
+    }
+    # L'ORDINE DI QUESTI TRE CONTROLLI E' PARTE DEL GATE, e ci e' voluta
+    # una prova per capirlo: con l'identita' PER PRIMA, i controlli
+    # "VIETATO" e "DUPLICATO" non potevano scattare MAI (un magic che
+    # differisce da quello atteso viene fermato prima), cioe' erano
+    # decorazione. Prima si nomina il PERICOLO -- toccare una sedia viva,
+    # incrociare due celle -- e solo dopo lo scostamento innocuo.
+    for($i = 0; $i -lt @($lista).Count; $i++){
+      $n = [int]$lista[$i]
+      if($MagicVietati -contains $n){ throw ($c.Prova + ": magic " + $n + " e' VIETATO (sedia viva o round recente). Un'identita' non in campo resta comunque occupata.") }
+      if($magicVisti.ContainsKey($n)){ throw ("magic " + $n + " usato in due celle: " + $magicVisti[$n] + " e " + $c.Prova) }
+      if($n -ne [int]$c.Magic[$i]){ throw ($c.Prova + ": magic " + $n + ", la cella " + $c.Id + " vuole " + $c.Magic[$i] + ".") }
+      $magicVisti[$n] = $c.Prova
+    }
+  }
+  Dico "geometria, assi, griglia letterale, lati, baseline assoluta, elenco chiuso e magic: TUTTI PASSATI su 7 file su 7" "Green"
+
+  # -------------------------------------------------------------------
+  #  3. LA COMPILAZIONE -- il pezzo che il driver generico fa troppo
+  #     tardi e senza dire perche'.
+  # -------------------------------------------------------------------
+  Titolo "3. COMPILO L'EA"
+  # IL SELETTORE E' LO STESSO, RIGA PER RIGA, DI walkforward_generico.ps1
+  # (punti 26/27): su una macchina con DUE istanze i due script potrebbero
+  # scegliere TERMINALI DIVERSI. Se il selettore del driver generico
+  # cambia, cambia anche questo: si toccano insieme.
+  $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
+  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+  if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+  if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1." }
+  $instDir    = $cand.DirectoryName
+  $MetaEditor = Join-Path $instDir "metaeditor64.exe"
+  $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  $dataFolder = (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
+  if(-not $dataFolder){ throw ("cartella dati non trovata per " + $instDir) }
+  $Terminale = $instDir
+  Dico ("terminale scelto: " + $instDir + "  (DEVE essere lo stesso che stampa il driver generico)") "Yellow"
+
+  # QUESTO EA NON E' MAI STATO COMPILATO DA NESSUNO: un giro di controllo
+  # che non compila non controlla la cosa PIU' PROBABILE che vada storta.
+  # L'.ex5 si CANCELLA prima: senza, un binario vecchio farebbe passare
+  # per riuscita una compilazione fallita (punto 23).
+  $mq5 = Join-Path $Work ($EA + ".mq5")
+  Scarica ($RawPin + "/mql5/Experts/" + $EA + ".mq5") $mq5
+  $dstExp = Join-Path $dataFolder "MQL5\Experts"
+  New-Item -ItemType Directory -Force -Path $dstExp | Out-Null
+  $dstMq5 = Join-Path $dstExp ($EA + ".mq5")
+  Copy-Item $mq5 -Destination $dstMq5 -Force
+  $ex5 = Join-Path $dstExp ($EA + ".ex5")
+  Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+  $t0 = Get-Date
+  & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
+  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+  if(-not (Test-Path -LiteralPath $ex5)){
+    $logC = Join-Path $dstExp ($EA + ".log")
+    if(Test-Path -LiteralPath $logC){
+      Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force
+      Get-Content -LiteralPath $logC -Tail 40 | ForEach-Object { Write-Host $_ -ForegroundColor Red }
+    }
+    throw ("COMPILAZIONE FALLITA: " + $EA + " non era MAI stato compilato da nessuno. Gli errori sono qui sopra e in COMPILAZIONE_FALLITA.log dentro lo zip.")
+  }
+  $Compilato = "OK (" + [int]((Get-Item -LiteralPath $ex5).Length/1024) + " KB, " + (Get-Item -LiteralPath $ex5).LastWriteTime.ToString("HH:mm:ss",$INV) + ")"
+  Dico ("compilato " + $EA + ": " + $Compilato) "Green"
+
+  # -------------------------------------------------------------------
+  #  4. LE CORSE
+  # -------------------------------------------------------------------
+  Titolo "4. LE CORSE"
+  $Risultati = Join-Path $Work ("risultati_prove\" + $EA)
+  foreach($c in $Ordinate){
+    Dico ("cella " + $c.Id + " -- " + $c.Desc) "Cyan"
+    # NON si chiama $args: e' una VARIABILE AUTOMATICA di PowerShell
+    # (punto 71). Questo script non usa $args da nessuna parte.
+    $argv = @("-ExecutionPolicy","Bypass","-File",$drv,
+              "-Expert",$EA,
+              "-Prova",(Join-Path $Prove $c.Prova),
+              "-Etichetta",$c.Id,
+              "-Simbolo",$c.Sym,
+              "-Periodo",$Periodo,
+              "-DaQuando",$DaQuando,
+              "-Fino",$Fino,
+              "-Modello",("" + $Modello),
+              "-Deposito",("" + $Deposito))
+    if($SoloControllo){ $argv += "-SoloControllo" }
+    if($Rifai){ $argv += "-Rifai" }
+    $tCella = Get-Date
+    $global:LASTEXITCODE = 0
+    & powershell $argv
+    $rc = $LASTEXITCODE
+    $c.Secondi = (New-TimeSpan -Start $tCella -End (Get-Date)).TotalSeconds
+    if($rc -ne 0){
+      $c.Esito = "FERMATA (codice " + $rc + ")"
+      [void]$Problemi.Add("cella " + $c.Id + ": il driver generico e' uscito con codice " + $rc)
+      continue
+    }
+    if($SoloControllo){ $c.Esito = "CONTROLLO OK"; continue }
+
+    $csvIS  = Join-Path $Risultati ($EA + "_" + $c.Sym + "_IS_"  + $c.Id + ".csv")
+    $csvOOS = Join-Path $Risultati ($EA + "_" + $c.Sym + "_OOS_" + $c.Id + ".csv")
+    $rIS  = LeggiOpt $csvIS
+    $rOOS = LeggiOpt $csvOOS
+    if($null -eq $rIS -or $null -eq $rOOS){
+      # DUE CAUSE DIVERSE, DUE MESSAGGI DIVERSI: "il file non c'e'" e "il
+      # file c'e' ma non ha le colonne della sonda" si riparano in due
+      # posti opposti, e confonderli fa perdere il giro dopo.
+      $mancanti = @()
+      foreach($f in @($csvIS,$csvOOS)){ if(-not (Test-Path -LiteralPath $f)){ $mancanti += (Split-Path $f -Leaf) } }
+      if(@($mancanti).Count -gt 0){
+        $c.Esito = "CSV MANCANTE"
+        [void]$Problemi.Add("cella " + $c.Id + ": CSV NON PRODOTTO dal tester: " + ($mancanti -join ", ") + ". Storico mancante sul simbolo, MT5 gia' aperto, oppure la cella non e' girata.")
+      }else{
+        $c.Esito = "CSV SENZA LE COLONNE DELLA SONDA"
+        [void]$Problemi.Add("cella " + $c.Id + ": il CSV c'e' ma NON ha le colonne della sonda (l'.ex5 che ha girato non e' questo EA?). Intestazioni viste: " + ($script:CsvIntestazioni -join " | "))
+      }
+      continue
+    }
+    $c.DatiIS  = $rIS
+    $c.DatiOOS = $rOOS
+    $c.RigheIS  = @($rIS).Count
+    $c.RigheOOS = @($rOOS).Count
+    $c.Esito = "MISURATA"
+
+    if($c.RigheIS -ne $c.Celle -or $c.RigheOOS -ne $c.Celle){
+      [void]$Problemi.Add("cella " + $c.Id + ": righe nel CSV " + $c.RigheIS + " (IS) / " + $c.RigheOOS + " (OOS), attese " + $c.Celle + " per finestra. E' la CACHE del tester, oppure celle mute.")
+    }
+
+    # --- I GATE DI COLLAUDO, letti DALLE COLONNE (in ottimizzazione le
+    #     Print degli agent non le legge nessuno -- punto 99).
+    foreach($tag in @("IS","OOS")){
+      $dati = $rIS
+      if($tag -eq "OOS"){ $dati = $rOOS }
+      $atFail = @($dati | Where-Object { $null -eq $_.Autotest -or [double]$_.Autotest -ne 0 }).Count
+      if($atFail -gt 0){
+        [void]$Problemi.Add("cella " + $c.Id + " (" + $tag + "): 'Autotest Falliti' diverso da 0 su " + $atFail + " passate. I numeri di questa cella NON si leggono: si guarda il codice.")
+      }
+      $notti = @($dati | Where-Object { $null -ne $_.Notti -and [double]$_.Notti -gt 0 }).Count
+      if($notti -gt 0){
+        [void]$Problemi.Add("cella " + $c.Id + " (" + $tag + "): 'Notti Attraversate' > 0 su " + $notti + " passate. La chiusura forzata di fine giornata NON e' stata ermetica su questo simbolo: il mandato 'mai overnight' non e' rispettato e va detto.")
+      }
+      $salti = @($dati | Where-Object { $null -ne $_.SprSalt -and [double]$_.SprSalt -gt 0 }).Count
+      if($salti -gt 0){
+        [void]$Problemi.Add("cella " + $c.Id + " (" + $tag + "): 'Giorni Saltati Spread' > 0 su " + $salti + " passate, ma il filtro di spread e' pinnato a 0. Il file prova che ha girato NON e' quello che credevamo.")
+      }
+      $sotto = @($dati | Where-Object { $null -ne $_.N -and [double]$_.N -lt 150 }).Count
+      if($sotto -gt 0){
+        [void]$Rilievi.Add("cella " + $c.Id + " (" + $tag + "): " + $sotto + " fasce su " + @($dati).Count + " hanno MENO di 150 giornate operate. Criterio C5: su quelle fasce il MERITO resta sospeso (il RISCHIO no).")
+      }
+      $stop = @($dati | Where-Object { $null -ne $_.UscStop -and $null -ne $_.N -and [double]$_.N -gt 0 -and ([double]$_.UscStop/[double]$_.N) -gt 0.01 }).Count
+      if($stop -gt 0){
+        [void]$Rilievi.Add("cella " + $c.Id + " (" + $tag + "): su " + $stop + " fasce lo stop di protezione (10 ATR) o una posizione orfana ha chiuso piu' dell'1% delle operazioni. Lo stop doveva essere un paracadute mai aperto: se morde, la sonda sta misurando anche lo stop.")
+      }
+    }
+
+    # --- I GEMELLI: solo per la cella 00_gemelli, ed e' li' che il
+    #     determinismo del banco si misura. "Una riga sola" NON e'
+    #     "gemelli ok": e' uno sweep che non ha spazzolato.
+    if($c.Id -eq "00_gemelli"){
+      $c.Gemelli = Gemelli $rOOS
+      if($c.Gemelli -ne "IDENTICI"){
+        [void]$Problemi.Add("cella 00_gemelli: gemelli " + $c.Gemelli + " -- il banco NON e' deterministico, e nessun numero delle altre sei celle si legge.")
+      }
+      if($c.Secondi -gt 0){
+        $perPassata = $c.Secondi/4.0
+        $Cronometro = ([double]$c.Secondi).ToString("0",$INV) + " s per 4 passate = " + ([double]$perPassata).ToString("0",$INV) + " s per passata -> una cella di misura (144 passate) costerebbe circa " + ([double]($perPassata*144.0/60.0)).ToString("0",$INV) + " minuti, e le SEI celle circa " + ([double]($perPassata*864.0/3600.0)).ToString("0.0",$INV) + " ore"
+      }
+    }
+  }
+}
+catch{
+  $Fatale = ("" + $_.Exception.Message)
+  Write-Host ""
+  Write-Host ("!!! FERMATO: " + $Fatale) -ForegroundColor Red
+}
+
+# =====================================================================
+#  RACCOLTA -- SEMPRE, anche quando la corsa si e' fermata a meta'.
+#  Regola di casa: i risultati finiscono sul Desktop e in uno zip.
+# =====================================================================
+Titolo "RACCOLTA"
+$Cart = Join-Path $Dsk ("SONDA_OROLOGIO_" + $Modo + "_" + $Stamp)
+New-Item -ItemType Directory -Force -Path $Cart | Out-Null
+
+$RefTxt = New-Object System.Collections.ArrayList
+[void]$RefTxt.Add("=====================================================================")
+[void]$RefTxt.Add(" SONDA DELL'OROLOGIO -- " + $EA + " -- EURUSD / GBPUSD / XAUUSD " + $Periodo)
+[void]$RefTxt.Add("=====================================================================")
+[void]$RefTxt.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto (NON e' il risultato)")
+[void]$RefTxt.Add("                      RICOGNIZIONE = solo determinismo e cronometro")
+[void]$RefTxt.Add("                      CORSA = la misura")
+[void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
+[void]$RefTxt.Add("pin:  " + $Pin)
+[void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (split 40/60)")
+[void]$RefTxt.Add("banco: Modello " + $Modello + ", deposito " + $Deposito + ", rischio 1,0% (pinnato nei file prova)")
+[void]$RefTxt.Add("terminale: " + $Terminale)
+[void]$RefTxt.Add("compilazione: " + $Compilato)
+[void]$RefTxt.Add("cronometro: " + $Cronometro)
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add("QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO (criterio C7).")
+[void]$RefTxt.Add("La sonda non promuove niente e non tocca nessuna sedia viva:")
+[void]$RefTxt.Add("produce la TABELLA qui sotto. Ipotesi e criteri C1-C7 stanno in")
+[void]$RefTxt.Add("prove/SONDA_OROLOGIO_FX.txt e si leggono PRIMA della tabella.")
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add("LE TRE COSE DA SAPERE PRIMA DI LEGGERE UN NUMERO:")
+[void]$RefTxt.Add(" 1. ORA SERVER FISSA (criterio C6, scelta FIRMATA). Gli uffici di")
+[void]$RefTxt.Add("    Londra e New York si spostano rispetto all'ora server per ~4")
+[void]$RefTxt.Add("    settimane l'anno (ora legale USA e UE non coincidenti; il")
+[void]$RefTxt.Add("    Giappone non cambia). L'errore c'e', e' noto, NON e' corretto.")
+[void]$RefTxt.Add(" 2. IL LORDO E' LA DERIVA SUL BID, non il risultato eseguito: bid")
+[void]$RefTxt.Add("    all'ingresso contro bid all'uscita, nei due versi. Lo spread")
+[void]$RefTxt.Add("    resta FUORI dalla misura, apposta, perche' il cancello C1 lo")
+[void]$RefTxt.Add("    confronta a parte. La media e' sulle GIORNATE OPERATE, non")
+[void]$RefTxt.Add("    sulle giornate di calendario.")
+[void]$RefTxt.Add(" 3. LA PEGGIOR GIORNATA IN % E' CONDIZIONATA ALLA TAGLIA: il lotto")
+[void]$RefTxt.Add("    esce da un rischio dell'1% su uno stop di 10 ATR, quindi e'")
+[void]$RefTxt.Add("    piccolo e la percentuale e' piccola con lui. NON e' il rischio")
+[void]$RefTxt.Add("    di una versione operabile: quella avrebbe uno stop diverso.")
+[void]$RefTxt.Add("")
+
+# --- LA TABELLA. Una per cella e per finestra: 24 ore x 3 durate.
+function RigaTabella($dati,[int]$ora){
+  $s = ("{0,3} |" -f $ora)
+  foreach($d in @(4,8,12)){
+    $r = @($dati | Where-Object { $null -ne $_.Ora -and [int]$_.Ora -eq $ora -and $null -ne $_.Durata -and [int]$_.Durata -eq $d })
+    if(@($r).Count -ne 1){ $s += "   n/d    n/d  n/d   n/d|"; continue }
+    $x = $r[0]
+    $s += ("{0,5}{1,8}{2,6}{3,7}|" -f (FmtN $x.N), (Fmt2 $x.LordoPt), (Fmt2 $x.C1), (Fmt2 $x.PegGio))
+  }
+  return $s
+}
+
+foreach($c in $CELLE){
+  [void]$RefTxt.Add("---------------------------------------------------------------------")
+  [void]$RefTxt.Add("CELLA " + $c.Id + "  --  " + $c.Sym + " " + $c.Lato + "  --  magic " + (($c.Magic) -join "/"))
+  [void]$RefTxt.Add("  " + $c.Desc)
+  [void]$RefTxt.Add("  esito: " + $c.Esito + "   righe CSV: " + (FmtN $c.RigheIS) + " (IS) / " + (FmtN $c.RigheOOS) + " (OOS), attese " + $c.Celle)
+  if($c.Id -eq "00_gemelli"){ [void]$RefTxt.Add("  gemelli: " + $c.Gemelli) }
+  if($null -eq $c.DatiIS -and $null -eq $c.DatiOOS){
+    [void]$RefTxt.Add("  (nessuna tabella: la cella non ha prodotto CSV in questo giro)")
+    [void]$RefTxt.Add("")
+    continue
+  }
+  if($c.Id -eq "00_gemelli"){
+    [void]$RefTxt.Add("  (nessuna tabella oraria: qui l'ora e' inchiodata. Questa cella")
+    [void]$RefTxt.Add("   collauda il BANCO, non l'orologio.)")
+    [void]$RefTxt.Add("")
+    continue
+  }
+  foreach($tag in @("IS","OOS")){
+    $dati = $c.DatiIS
+    if($tag -eq "OOS"){ $dati = $c.DatiOOS }
+    if($null -eq $dati){ continue }
+    [void]$RefTxt.Add("")
+    [void]$RefTxt.Add("  finestra " + $tag + "   (n = giornate operate | lordo = punti MT5 sul bid | C1 = |lordo|/spread mediano | pegg = peggior giornata %)")
+    [void]$RefTxt.Add("  ora |     4 ORE                |     8 ORE                |    12 ORE")
+    [void]$RefTxt.Add("      |    n   lordo    C1   pegg|    n   lordo    C1   pegg|    n   lordo    C1   pegg")
+    for($h = 0; $h -le 23; $h++){ [void]$RefTxt.Add("  " + (RigaTabella $dati $h)) }
+    $sopra = @($dati | Where-Object { $null -ne $_.C1 -and [double]$_.C1 -ge 3.0 })
+    [void]$RefTxt.Add("  fasce con C1 >= 3 in questa finestra: " + @($sopra).Count + " su " + @($dati).Count)
+    if(@($sopra).Count -gt 0){
+      foreach($x in @($sopra | Sort-Object -Property @{Expression={[double]$_.C1}} -Descending | Select-Object -First 6)){
+        [void]$RefTxt.Add(("    ora {0,2}  durata {1,2}h  n={2,5}  lordo={3,8}  spread mediano={4,6}  C1={5,5}  giornate positive={6,6}%  ore medie tenuta={7,5}" -f `
+          [int]$x.Ora, [int]$x.Durata, (FmtN $x.N), (Fmt2 $x.LordoPt), (Fmt2 $x.SprMed), (Fmt2 $x.C1), (Fmt2 $x.PctPos), (Fmt2 $x.OreTen)))
+      }
+    }
+  }
+  [void]$RefTxt.Add("")
+}
+
+# --- IL CANCELLO C1, CONTATO E NON GIUDICATO.
+[void]$RefTxt.Add("=====================================================================")
+[void]$RefTxt.Add(" IL CANCELLO C1 -- contato dal driver, NON adjudicato")
+[void]$RefTxt.Add("=====================================================================")
+[void]$RefTxt.Add("C1 (congelato): per almeno UNA fascia oraria, su almeno DUE dei tre")
+[void]$RefTxt.Add("simboli, |lordo medio per giornata| >= 3 x spread mediano DELLA")
+[void]$RefTxt.Add("STESSA ORA. Il rapporto lo calcola l'EA e lo scrive in colonna, cosi'")
+[void]$RefTxt.Add("nessuno lo puo' rifare storto in un foglio.")
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add(">>> IL CRITERIO CONGELATO NON DICE SU QUALE FINESTRA SI LEGGE C1.")
+[void]$RefTxt.Add("    Il conto e' riportato per tutte e tre le letture, e la scelta di")
+[void]$RefTxt.Add("    quale vale e' di chi firma, non di questo script.")
+$sim = @("EURUSD","GBPUSD","XAUUSD")
+# --- QUANTE CELLE DI MISURA HANNO DAVVERO PRODOTTO DATI.
+#     Serve al TERZO STATO del cancello, e non e' un dettaglio: senza,
+#     una corsa che non ha misurato NIENTE stampava "C1 NON PASSATO",
+#     cioe' l'affermazione piu' forte possibile ricavata da zero dati
+#     (CHECKLIST punti 68 e 94). "Non ho misurato" e "ho misurato e non
+#     passa" sono due cose diverse, e la seconda chiude una pista.
+$celleMisurate = @($CELLE | Where-Object { $_.Id -ne "00_gemelli" -and $null -ne $_.DatiIS -and $null -ne $_.DatiOOS }).Count
+$simMancanti = New-Object System.Collections.ArrayList
+foreach($s in $sim){
+  $q = @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne "00_gemelli" -and $null -ne $_.DatiOOS }).Count
+  if($q -eq 0){ [void]$simMancanti.Add($s) }
+}
+[void]$RefTxt.Add("  celle di misura con dati in questa corsa: " + $celleMisurate + " su 6")
+if(@($simMancanti).Count -gt 0){
+  [void]$RefTxt.Add("  simboli senza NESSUNA cella misurata: " + ($simMancanti -join ", "))
+}
+foreach($lettura in @("IS","OOS","ENTRAMBE")){
+  $simOk = New-Object System.Collections.ArrayList
+  foreach($s in $sim){
+    $trovato = $false
+    foreach($c in @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne "00_gemelli" })){
+      if($null -eq $c.DatiIS -or $null -eq $c.DatiOOS){ continue }
+      foreach($x in @($c.DatiOOS)){
+        if($null -eq $x.C1){ continue }
+        $okIs = $false
+        $y = @($c.DatiIS | Where-Object { $null -ne $_.Ora -and [int]$_.Ora -eq [int]$x.Ora -and $null -ne $_.Durata -and [int]$_.Durata -eq [int]$x.Durata })
+        if(@($y).Count -eq 1 -and $null -ne $y[0].C1 -and [double]$y[0].C1 -ge 3.0){ $okIs = $true }
+        $okOos = ([double]$x.C1 -ge 3.0)
+        if($lettura -eq "IS"       -and $okIs){ $trovato = $true }
+        if($lettura -eq "OOS"      -and $okOos){ $trovato = $true }
+        if($lettura -eq "ENTRAMBE" -and $okIs -and $okOos){ $trovato = $true }
+      }
+    }
+    if($trovato){ [void]$simOk.Add($s) }
+  }
+  # TRE STATI, non due. "NON MISURATO" non e' una sfumatura: e' la
+  # differenza fra "la pista si chiude" e "la corsa non e' finita".
+  # Con due simboli gia' sopra soglia il PASSATO e' un fatto anche se
+  # manca il terzo -- il criterio ne chiede DUE. Il NON PASSATO invece
+  # pretende che tutte e sei le celle abbiano dati.
+  $esito = "NON PASSATO"
+  if(@($simOk).Count -ge 2){ $esito = "PASSATO" }
+  elseif($celleMisurate -lt 6){ $esito = "NON MISURATO PER INTERO (celle con dati " + $celleMisurate + " su 6: qui NON si legge un 'no')" }
+  $elenco = "nessuno"
+  if(@($simOk).Count -gt 0){ $elenco = ($simOk -join ", ") }
+  [void]$RefTxt.Add("  lettura " + $lettura.PadRight(8) + " : simboli con almeno una fascia a C1>=3 = " + @($simOk).Count + " (" + $elenco + ")  ->  C1 " + $esito)
+}
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add("ATTENZIONE, e vale piu' del conto qui sopra: C1 e' il CANCELLO ZERO,")
+[void]$RefTxt.Add("non il verdetto. Restano DUE criteri che questo script NON adjudica")
+[void]$RefTxt.Add("e non puo' adjudicare, perche' sono giudizi e non conti:")
+[void]$RefTxt.Add("  C2 - LA CELLA NON VALE PERCHE' E' LA PIU' VERDE. Vale solo se e'")
+[void]$RefTxt.Add("       quella che la TESI aveva indicato PRIMA: ore europee per EUR,")
+[void]$RefTxt.Add("       ore londinesi per GBP, ore americane per USD. Se l'ora verde")
+[void]$RefTxt.Add("       NON e' quella prevista, il round e' NEGATIVO anche col numero")
+[void]$RefTxt.Add("       positivo. 24 ore x 3 simboli x 2 lati = 144 celle: a caso")
+[void]$RefTxt.Add("       qualcuna e' verde.")
+[void]$RefTxt.Add("  C3 - ALTOPIANO, NON PICCO: la fascia buona deve avere accanto ORE")
+[void]$RefTxt.Add("       ADIACENTI dello stesso segno. Un'ora verde isolata fra due")
+[void]$RefTxt.Add("       rosse e' rumore. Si legge scorrendo la colonna 'lordo' delle")
+[void]$RefTxt.Add("       tabelle qui sopra, riga per riga.")
+[void]$RefTxt.Add("E se la tabella e' PIATTA, l'esito e' VALIDO e va scritto cosi': il")
+[void]$RefTxt.Add("caduto D7 (l'ora del fix, chiuso il 22/08) esce CONFERMATO ED ESTESO")
+[void]$RefTxt.Add("e la pista dell'orologio si chiude con un numero NOSTRO.")
+[void]$RefTxt.Add("")
+if($Fatale -ne ""){
+  [void]$RefTxt.Add("!!! FERMATO: " + $Fatale)
+  [void]$RefTxt.Add("")
+}
+[void]$RefTxt.Add("PROBLEMI: " + $Problemi.Count)
+foreach($p in $Problemi){ [void]$RefTxt.Add("  - " + $p) }
+[void]$RefTxt.Add("RILIEVI: " + $Rilievi.Count)
+foreach($p in $Rilievi){ [void]$RefTxt.Add("  - " + $p) }
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add('COME SI RIPRENDE: si riparte dalla pagina righe/RIGA_SONDA_OROLOGIO_DA_MANDARE.md,')
+[void]$RefTxt.Add('che e'' l''UNICO posto in cui la riga di lancio esiste (CHECKLIST punto 100).')
+
+$refPath = Join-Path $Cart "REFERTO_SONDA_OROLOGIO.txt"
+Set-Content -LiteralPath $refPath -Value ($RefTxt -join "`r`n") -Encoding ASCII
+Write-Host ($RefTxt -join "`r`n")
+
+# --- gli artefatti: solo cio' che ha girato, copiato PER NOME.
+foreach($f in @("COMPILAZIONE_FALLITA.log")){
+  $src = Join-Path $Work $f
+  if(Test-Path -LiteralPath $src){ Copy-Item $src -Destination $Cart -Force }
+}
+foreach($c in $Ordinate){
+  $src = Join-Path $Prove $c.Prova
+  if(Test-Path -LiteralPath $src){ Copy-Item $src -Destination $Cart -Force }
+  foreach($tag in @("IS","OOS")){
+    $f = Join-Path $Work ("risultati_prove\" + $EA + "\" + $EA + "_" + $c.Sym + "_" + $tag + "_" + $c.Id + ".csv")
+    if(Test-Path -LiteralPath $f){ Copy-Item $f -Destination $Cart -Force }
+  }
+}
+$zip = $Cart + ".zip"
+Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
+Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
+Write-Host ""
+Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
+Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
+Write-Host "FILE ATTESI NELLO ZIP: REFERTO_SONDA_OROLOGIO.txt + i file prova girati + i CSV IS/OOS" -ForegroundColor Gray
+
+if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
+if($Problemi.Count -gt 0){ Write-Host "ESITO: COMPLETATO CON PROBLEMI" -ForegroundColor Yellow; exit 1 }
+Write-Host ("ESITO: " + $Modo + " COMPLETATO") -ForegroundColor Green
+exit 0
