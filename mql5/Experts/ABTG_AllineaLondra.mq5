@@ -303,7 +303,7 @@ int      gSaltiSpread   = 0;     // quanto morde il filtro di spread
 int      gGiorniTetto   = 0;     // giornate in cui il tetto ha BLOCCATO almeno un segnale
 int      gParziali      = 0;
 int      gBreakeven     = 0;
-int      gBarreAllineate= 0;     // barre chiuse col motore acceso, PRIMA dei cancelli
+int      gBarreAllineate= 0;     // barre chiuse col motore acceso, DOPO il cancello del flat (mai prima di TUTTI)
 
 //--- COLLAUDO. -1 = autotest non eseguito (che NON e' "passato").
 int      gAutotestFalliti = -1;
@@ -1224,7 +1224,7 @@ double OnTester()
                                                : FlatGiornataMinuto_Calc(InpFlatAnticipoMin));
    //--- COLLAUDO E OCCASIONI
    stats[25] = (double)gAutotestFalliti; // 0 = tutti passati; >0 DIVERGE; -1 non eseguito
-   stats[26] = (double)gBarreAllineate;  // occasioni del MOTORE, prima dei cancelli del CONTENITORE
+   stats[26] = (double)gBarreAllineate;  // occasioni del motore viste DOPO il flat: NON si confronta fra celle con flat diverso
 
    //--- criterio: Recovery Factor, come il resto della flotta (robusto
    //    al singolo trade fortunato). La cella si sceglie comunque al

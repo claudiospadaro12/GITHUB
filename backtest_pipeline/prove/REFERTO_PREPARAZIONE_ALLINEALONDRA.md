@@ -348,12 +348,10 @@ CSV costruiti con l'**intestazione VERA dell'EA** (29 colonne, letta nel sorgent
 - **se il tester legga davvero dal 2022.07.01 a M15** (data **derivata** dal tetto
   delle 100.000 barre, non misurata);
 - **la durata** della corsa e **ogni singolo numero**;
-- 🔴 **IL PIN.** La pagina porta un **segnaposto di 40 zeri**, dichiarato come tale
-  nel suo riquadro rosso. **Nessuno ha verificato che gli artefatti esistano al
-  pin, perché il pin non esiste ancora**: la verifica
-  `git cat-file -s <pin>:<file>` sui **sette** artefatti si fa **dopo il push**,
-  ed è compito della sessione principale. Il driver ha una **guardia esplicita**
-  che riconosce i 40 zeri e si ferma (provata eseguendo).
+- 🟢 **IL PIN — messo e verificato il 28/08 sera**: `9ed66e2…`, **otto** artefatti
+  confermati con `git cat-file -s <pin>:<file>` (identici al working tree). Al
+  momento della consegna di questo referto il pin era ancora un segnaposto di 40
+  zeri; la sessione principale l'ha pinnato dopo il push, come da passo 10 sotto.
 
 ---
 
@@ -375,11 +373,12 @@ CSV costruiti con l'**intestazione VERA dell'EA** (29 colonne, letta nel sorgent
 
 ## 10. ➡️ IL PASSO DOPO
 
-1. **Push** dei sette artefatti sul branch `lavoro`;
-2. **pinnatura** della pagina con la ricetta (tre conteggi: `3 / 0 / 0`) e
-   **rimozione del cartello del segnaposto** nello stesso passo;
-3. verifica `git cat-file -s <pin>:<file>` sui **sette** artefatti;
-4. **verificatore-stringhe** sulla pagina e sul driver;
+1. ✅ **Push** degli otto artefatti sul branch `lavoro` — fatto;
+2. ✅ **pinnatura** della pagina con la ricetta e **rimozione del cartello del
+   segnaposto** nello stesso passo — fatto, pin `9ed66e2…`;
+3. ✅ verifica `git cat-file -s <pin>:<file>` sugli **otto** artefatti — fatto;
+4. ✅ **verificatore-stringhe** sulla pagina e sul driver — fatto (FAIL con 6
+   difetti, tutti corretti nello stesso passo in cui si scrive questa riga);
 5. **solo dopo**, la riga va a Claudio — e il primo giro è quello di **controllo**,
    che è anche la **prima compilazione** dell'EA.
 

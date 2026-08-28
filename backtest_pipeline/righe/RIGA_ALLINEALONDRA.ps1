@@ -685,7 +685,7 @@ try{
   $dataFolder = (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
   if(-not $dataFolder){ throw ("cartella dati non trovata per " + $instDir) }
   $Terminale = $instDir
-  Dico ("terminale scelto: " + $instDir + "  (DEVE essere lo stesso che stampa il driver generico)") "Yellow"
+  Dico ("terminale scelto: " + $instDir + "  (selettore IDENTICO a walkforward_generico.ps1 righe 545-548; su BCM il generico NON stampa il terminale, quindi questa e' l'unica riga che lo dice)") "Yellow"
 
   # LA COPIA SI VERIFICA SUL CONTENUTO, NON SUL NOME (punto 27-ter): se
   # in Include esistesse una CARTELLA con quel nome, Copy-Item ci
@@ -1040,19 +1040,29 @@ foreach($cel in $CELLE){
 }
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("COME SI LEGGE LA TABELLA 1 -- tre avvertenze, non tre note:")
-[void]$RefTxt.Add(" 1. 'BarreAllin' (Barre Allineate) sono le OCCASIONI DEL MOTORE, contate")
-[void]$RefTxt.Add("    PRIMA dei cancelli del contenitore. Il rapporto IngTot/BarreAllin dice")
-[void]$RefTxt.Add("    DOVE sta il collo di bottiglia: se le barre allineate sono tante e gli")
-[void]$RefTxt.Add("    ingressi pochi, a filtrare e' il CONTENITORE (finestra, tetto, slot) --")
-[void]$RefTxt.Add("    che e' esattamente la domanda della cella di ablazione.")
-[void]$RefTxt.Add("    ATTENZIONE: una barra allineata NON e' un'occasione persa. Un")
-[void]$RefTxt.Add("    allineamento e' uno STATO e resta vero per molte barre di fila: la")
-[void]$RefTxt.Add("    stessa spinta viene contata decine di volte. Il numero serve al")
-[void]$RefTxt.Add("    RAPPORTO fra celle, non in valore assoluto.")
+[void]$RefTxt.Add(" 1. 'BarreAllin' NON e' contato prima di TUTTI i cancelli, ed e' la cosa")
+[void]$RefTxt.Add("    da sapere prima di guardarlo. LETTO NEL SORGENTE: gBarreAllineate++")
+[void]$RefTxt.Add("    (riga 867) sta dentro ValutaBarraChiusa, ma OnTick esce PRIMA con")
+[void]$RefTxt.Add("    'if(DevoFlat_Calc(...)){ ChiudiTutto(); return; }' (righe 622-623).")
+[void]$RefTxt.Add("    Il FLAT e' un cancello del contenitore, ed e' proprio quello che")
+[void]$RefTxt.Add("    l'ablazione sposta. Quindi la FINESTRA DI CONTEGGIO cambia da cella")
+[void]$RefTxt.Add("    a cella:")
+[void]$RefTxt.Add("       00_finestra   -> conta le barre di 03:00-10:29  (~30 barre M15/gg)")
+[void]$RefTxt.Add("       01_nofinestra -> conta le barre di 00:00-23:43  (~95 barre M15/gg)")
+[void]$RefTxt.Add("    >>> IL RAPPORTO 01/00 VALE ~3,2 PER COSTRUZIONE e NON dice niente")
+[void]$RefTxt.Add("        sul motore: quanto spesso il motore si allinea e' una proprieta'")
+[void]$RefTxt.Add("        del mercato, IDENTICA nelle due celle. NON si confronta.")
+[void]$RefTxt.Add("    DENTRO UNA CELLA il rapporto IngTot/BarreAllin si legge, e dice")
+[void]$RefTxt.Add("    quanto mordono slot, tetto e finestra d'ingresso. Ma una barra")
+[void]$RefTxt.Add("    allineata NON e' un'occasione persa: l'allineamento e' uno STATO e")
+[void]$RefTxt.Add("    resta vero per molte barre, quindi la stessa spinta e' contata")
+[void]$RefTxt.Add("    decine di volte.")
 [void]$RefTxt.Add(" 2. n(02_long) + n(03_short) NON FA n(00_finestra), e NON e' un guasto.")
-[void]$RefTxt.Add("    Misurato nel sorgente (ValutaBarraChiusa): il giro esce con")
-[void]$RefTxt.Add("    'if(ContaPosizioni() >= InpMaxPositions) return' PRIMA di guardare il")
-[void]$RefTxt.Add("    lato, e gTradesToday e' UNO SOLO per i due lati. Con un lato spento")
+[void]$RefTxt.Add("    Misurato nel sorgente: SegnaleAllineamento() (riga 866) filtra gia' il")
+[void]$RefTxt.Add("    lato; SUBITO DOPO arrivano lo slot ('if(ContaPosizioni() >=")
+[void]$RefTxt.Add("    InpMaxPositions) return', riga 871) e il tetto, che sono UNO SOLO per")
+[void]$RefTxt.Add("    i due lati (gTradesToday). Nel 00 una posizione long occupa lo slot e")
+[void]$RefTxt.Add("    blocca uno short che sarebbe entrato. Con un lato spento")
 [void]$RefTxt.Add("    slot e tetto restano liberi: la somma sara' MAGGIORE del congiunto.")
 [void]$RefTxt.Add(" 3. Le colonne Long/Short del 00_finestra e le celle 02/03 rispondono a DUE")
 [void]$RefTxt.Add("    domande diverse: le prime dicono quanto trada ogni lato NELLA")
@@ -1171,6 +1181,8 @@ foreach($banco in $BANCHI){
   }
   [void]$RefTxt.Add("")
 }
+[void]$RefTxt.Add("    ^^^ la colonna BarreAllin di queste due righe NON si confronta: ha due")
+[void]$RefTxt.Add("        finestre di conteggio diverse (vedi avvertenza 1 della tabella 1).")
 [void]$RefTxt.Add("!!! E LA DIFFERENZA NON E' UN COSTO PURO. Va letta come un PACCHETTO:")
 [void]$RefTxt.Add("      (finestra d'ingresso rimossa) + (ancoraggio a MEZZANOTTE SERVER)")
 [void]$RefTxt.Add("    Con la finestra spenta il TETTO di 2 ingressi al giorno resta acceso,")
@@ -1200,6 +1212,15 @@ foreach($banco in $BANCHI){
 [void]$RefTxt.Add("    - l'ORA GIUSTA. Gli orari sono i numeri letterali del Pine letti come ora")
 [void]$RefTxt.Add("      server: un PUNTO DI PARTENZA dichiarato, non una conversione di fuso.")
 [void]$RefTxt.Add("      La sessione e' l'asse del PRIMO ROUND VERO, e quello e' un altro giro.")
+[void]$RefTxt.Add("      MISURATO con la regola di casa (server = ora italiana - 1, ancora:")
+[void]$RefTxt.Add("      DAX 09:00 IT = 08:00 server): l'orologio del server BCM segna la")
+[void]$RefTxt.Add("      STESSA ora di Londra tutto l'anno. Quindi 03:00-08:45 SERVER sono")
+[void]$RefTxt.Add("      03:00-08:45 DI LONDRA, e Londra apre alle 08:00: la finestra")
+[void]$RefTxt.Add("      d'ingresso contiene 45 MINUTI DI LONDRA SU 5h45. Questo giro conta")
+[void]$RefTxt.Add("      quindi operazioni prese quasi tutte PRIMA dell'apertura di Londra,")
+[void]$RefTxt.Add("      mentre la tesi del candidato parla delle 'prime ore di Londra'.")
+[void]$RefTxt.Add("      Il conteggio vale; l'etichetta no. Il flat delle 10:30 server e'")
+[void]$RefTxt.Add("      invece meta' mattina di Londra, come vuole la tesi.")
 [void]$RefTxt.Add("")
 if($Fatale -ne ""){
   [void]$RefTxt.Add("!!! FERMATO: " + $Fatale)

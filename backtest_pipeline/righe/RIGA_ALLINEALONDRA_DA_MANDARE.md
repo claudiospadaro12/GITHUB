@@ -212,8 +212,11 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
   compila. La copia si verifica **sul contenuto** (lunghezza), non sul nome.
 - 🎯 **Il terminale è scelto con lo STESSO selettore di
   `walkforward_generico.ps1`** (righe 545-548: `*BCM Markets MT5 Terminal*`
-  escludendo `*-V3*`, ripiego `*BCM Markets*`), e la riga **lo stampa**: deve
-  essere lo stesso che stampa poi il driver generico.
+  escludendo `*-V3*`, ripiego `*BCM Markets*`), e **questa riga è l'unica che lo
+  stampa**: su BCM il driver generico **non stampa il terminale** (la sua
+  `Write-Host "terminale:"` di riga 583 vive solo nel ramo di un broker ESTERNO).
+  Non c'è quindi niente da confrontare: il selettore è identico per costruzione, e
+  se un giorno cambia in un file va cambiato nell'altro **nello stesso commit**.
 - **NESSUNA SEDIA VIVA VIENE TOCCATA.** Magic vergini `7776xx`,
   `AllowLiveTrading=false` negli `.ini` (lo scrive il driver generico).
 - 💰 **Rischio `InpRiskPercent = 0,65%`**, pinnato **nei file prova**, dove morde
@@ -256,8 +259,8 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 - `driver generico scaricato e PINNATO`;
 - `file prova scaricati: 4 su 4` · `include scaricato: ABTG_PausaGuardian.mqh (<n> byte)`;
 - 🔴 **`sintassi a 5 campi, elenco chiuso, asse unico, geometria, interruttori, baseline assoluta, stella e magic: TUTTI PASSATI su 4 file su 4 (8 magic unici su 8)`**;
-- `terminale scelto: C:\Program Files\BCM Markets MT5 Terminal` — ⚠️ **è il nome
-  da confrontare** con quello che stampa poi il driver generico;
+- `terminale scelto: C:\Program Files\BCM Markets MT5 Terminal` — è l'**unico**
+  posto in cui il nome compare: il driver generico su BCM non lo stampa;
 - `include: INSTALLATO e VERIFICATO in ...`;
 - 🔴 **`compilato ABTG_AllineaLondra: OK (... KB, ...)`** ← **è questa la riga che
   conta.** Se invece esce `COMPILAZIONE FALLITA`, sopra ci sono in **rosso** le
@@ -386,13 +389,16 @@ Cartella e zip sul **Desktop**: `PASSO0_ALLINEALONDRA_<MODO>_<data>_<ora>` — d
 | **`Minuto Inizio/Fine Ingressi/Fine Sessione`** | attesi **180 / 525 / 645** = 03:00 / 08:45 / 10:45 **ORA SERVER**. È l'eco della configurazione: dice cosa l'EA ha **davvero** usato, non cosa l'`.ini` credeva di passargli |
 | **`Ingressi Saltati Spread` = 0** | canarino: il filtro è pinnato a 0. Se è `> 0`, **il file prova che ha girato non è quello che crediamo** |
 | **`Lotti Al Minimo` > 0** | il lotto è salito al minimo del broker: il **rischio REALE è più alto dello 0,65%** → **RILIEVO** |
-| **`Barre Allineate`** | le **occasioni del MOTORE**, contate **prima** dei cancelli del contenitore. Il rapporto `Ingressi Totali / Barre Allineate` dice **dove sta il collo di bottiglia** |
+| **`Barre Allineate`** | barre allineate viste **DOPO** il cancello del flat: nella `00` copre **03:00-10:29**, nella `01` **00:00-23:43**. 🔴 **NON si confronta fra `00` e `01`** (rapporto ~3,2× per sola larghezza della finestra di conteggio). Dentro UNA cella il rapporto `Ingressi Totali / Barre Allineate` dice quanto mordono slot, tetto e finestra d'ingresso |
 | **`Giorni Tetto Bloccante`** | giornate in cui il tetto di 2 ha **bloccato** un segnale. Si legge **insieme** all'ablazione (vedi il riquadro sul pacchetto) |
 | **`Trades` ≥ 150** | criterio del PASSO 0, **per finestra**. Sotto → **RILIEVO**: **MERITO sospeso**, **RISCHIO no** |
 
-> ⚠️ **`Barre Allineate` non è "occasioni perse".** Un allineamento è uno **STATO**
-> e resta vero per molte barre di fila: la stessa spinta viene contata decine di
-> volte. **Il numero serve al RAPPORTO fra celle, non in valore assoluto.**
+> ⚠️ **`Barre Allineate` non è "occasioni perse", e non è nemmeno "le occasioni
+> del motore".** Due limiti, tutti e due letti nel sorgente: (a) un allineamento è
+> uno **STATO** e resta vero per molte barre, quindi la stessa spinta è contata
+> decine di volte; (b) `gBarreAllineate++` (riga 867) sta **a valle** del `return`
+> del flat (righe 622-623), e il flat è il cancello che l'ablazione sposta.
+> 🔴 **Il numero si legge SOLO dentro una cella, MAI nel rapporto fra `00` e `01`.**
 
 ---
 
@@ -410,6 +416,19 @@ Cartella e zip sul **Desktop**: `PASSO0_ALLINEALONDRA_<MODO>_<data>_<ora>` — d
    UTC). ⚠️ **La conversione a tavolino è la trappola già pagata in casa**
    (`CLAUDE.md`: log in ora locale ≠ grafico in ora server). **La sessione è
    l'asse del PRIMO ROUND VERO, e quello è un altro giro.**
+   📐 **E questo si può misurare subito, con la regola di casa** (`CLAUDE.md`:
+   server = ora italiana − 1 → **UTC+1 d'estate, UTC+0 d'inverno**, cioè
+   **l'orologio del server BCM segna la stessa ora di Londra tutto l'anno**;
+   ancora di controllo: DAX 09:00 IT = 08:00 server):
+   ➡️ **`03:00-08:45` server SONO `03:00-08:45` ora di Londra.** Londra apre alle
+   **08:00**, quindi la finestra d'ingresso contiene **45 minuti di Londra su
+   5h45**: il resto è Tokyo e pre-Londra. Il flat delle 10:30 server è invece
+   metà mattina di Londra, come vuole la tesi.
+   🔴 **Quindi questo PASSO 0 conta operazioni prese quasi tutte PRIMA
+   dell'apertura di Londra**, mentre la tesi del candidato parla delle *"prime
+   ore di Londra"*. Il conteggio resta valido; **la sua etichetta no**, e il
+   primo round vero deve spazzolare `InpSessStartHour`/`InpEntryEndHour` almeno
+   fino a coprire 08:00-11:00 server.
 4. 📉 **Il MERITO.** Niente promozioni, niente proposte, nessuna sedia toccata.
 
 ---
@@ -444,5 +463,7 @@ davvero al 2024.07.05**, **se il tester legga davvero dal 2022.07.01** a M15, la
 **durata** e **ogni singolo numero**. Il giro di controllo copre gli artefatti
 **e la compilazione**; **i numeri li può dare solo la corsa**.
 
-🔴 **E non è verificato il PIN**, perché non esiste ancora: vedi il riquadro rosso
-in cima.
+🟢 **Il PIN è verificato** (28/08, sera): `9ed66e2…` è antenato di `origin/lavoro`
+e tutti e **otto** gli artefatti che lo script scarica esistono a quel commit con
+blob identici al working tree (`git cat-file -s`). Prima di questo commit qui
+c'era un segnaposto di 40 zeri; il suo cartello è stato rimosso nella pinnatura.
