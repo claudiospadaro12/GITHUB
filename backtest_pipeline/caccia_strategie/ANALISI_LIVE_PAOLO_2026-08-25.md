@@ -661,3 +661,27 @@ _Detto con il motivo, come vuole la regola di casa._
 _Referto compilato leggendo il file **riga per riga** (321/321). Ogni valore
 riportato ha la sua citazione e il numero di riga. Ogni incrocio col repo è
 verificato **nel sorgente o nel registro**, mai a memoria._
+
+---
+
+# 🔁 SEGUITO — LIVE PAOLO DEL 27/08 SERA (referto separato)
+
+📄 **`risultati_archivio/ANALISI_LIVE_PAOLO_2026-08-27.md`** — è **il seguito
+diretto di questa lezione**, dichiarato in apertura dal docente: _"riprendiamo
+il discorso dal Supertrend, **come avevamo fatto martedì sera**"_.
+**Non duplico i contenuti: si legge lì.** Qui restano solo le **quattro
+correzioni che riguardano QUESTO file**:
+
+| # | Cosa cambia | Dove |
+|---|---|---|
+| **1** | 🔴 **B3 / S3 vanno CORRETTI: `ABTG_SupertrendInvert` NON è stato misurato solo su oro H1.** `REFERTO_CODA_FASCIA_B.md` riga 31: su **USDJPY** fa **0 trade su 10 TF su 11** (2 trade in 14 mesi su M15) → _"non è un candidato, è un grafico acceso a vuoto"_. **Il problema non è che perde: è che con `RequireStrong` + ADX + Stocastico + anti-estensione tutti accesi NON OPERA.** L'entusiasmo di S3 va ricalibrato di conseguenza | referto 27/08 §7 e §7.1 |
+| **2** | 🔴 **S8 (Fibonacci golden area) DECLASSATO a NON IMPLEMENTABILE.** Due giorni dopo il docente sposta la golden area da **38,2-61,8** a **61-78,6**, e il **78,6 passa da INVALIDAZIONE (stop) a INGRESSO**. Confini instabili = la sceglierebbe l'implementatore | referto 27/08 §2 |
+| **3** | 🟡 **La riduzione «ci basta il 3.5» è RITRATTATA**: _"non va trascurato nemmeno il livello standard, che è il **3.0**"_ → **doppio ordine sulle DUE linee ST (1° sul 3.0, 2° sotto il 3.5)**. ✅ **E questa versione è quella che i NOSTRI numeri sostengono** (3.5 su 3 sedie, 3.0 su 2, 2.5 su 1) | referto 27/08 §3.3 |
+| **4** | 🟢 **La bandiera rossa metodologica** (_"in qualsiasi punto entri sei sicura di non andare in stop"_) è **ammorbidita dallo stesso docente**: _"**non dico sei sicuro di non prenderlo stop**, ma riduci notevolmente la possibilità"_ | referto 27/08 §5, Y8 |
+
+➕ **E l'ADR (S2) guadagna il pezzo che mancava:** il lookback è **spiegato**
+(_"10 settimane, per tante 50 giorni di operatività"_ → 10×5 = 50 giorni di
+borsa, il che **risolve l'esitazione** di questa lezione) e arrivano **tre casi
+di scarto/accettazione decisi in diretta** su `distanza(prezzo, ST) ≤ ADR`.
+⚠️ Il prerequisito **Q6 (High-Low o True Range? quale confine di giornata?)
+resta APERTO**, come qui.

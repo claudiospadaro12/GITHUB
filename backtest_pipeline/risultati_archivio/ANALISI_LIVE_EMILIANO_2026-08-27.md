@@ -616,7 +616,31 @@ dove è nata l'idea, non si tocca niente.
 
 ---
 
+---
+
+## 🔁 AGGIORNAMENTO 28/08 — È ARRIVATA LA LIVE DELLA *SERA* DELLO STESSO GIORNO (PAOLO)
+
+📄 **`risultati_archivio/ANALISI_LIVE_PAOLO_2026-08-27.md`** — live di **Paolo
+del 27/08 sera (~21:34)**, SuperTrend Reversal + SuperTrend Invert.
+**Non duplico qui: si legge lì.** Le tre righe che toccano QUESTO referto:
+
+1. 🚨 **Il §2 di questo referto (_"nel giorno di Jackson Hole non se ne parla
+   mai"_) va letto in coppia:** **la sera dello stesso giorno Paolo lo nomina,
+   lo data e ci costruisce sopra l'operatività** (rimanda i pendenti a
+   mezzanotte per lo spread). **Stesso giorno, stessa accademia, trattamento
+   opposto.** → referto Paolo §1.
+2. 🟢 **Il RETEST (§3.3) si irrobustisce con una MOTIVAZIONE MECCANICA nuova:**
+   la rottura del SuperTrend **crea un imbalance che il prezzo deve tornare a
+   coprire**, quindi il ritracciamento _"quasi sempre"_ c'è. **Il conteggio
+   delle strade indipendenti NON cambia (resta 2: accademia + nostro forward).**
+3. 🟡 **Divergenza fra i due mentori sulle MEDIE (M14 di questo referto):**
+   Emiliano _"le medie fanno da obiettivi"_ (target, non ingressi); **Paolo
+   entra sulla confluenza con la media**. → referto Paolo §5, Y6.
+
+---
+
 ### 🔗 Referti collegati
+- `risultati_archivio/ANALISI_LIVE_PAOLO_2026-08-27.md` — **la live della sera dello stesso giorno** (Paolo): SuperTrend Reversal + Invert, ADR, ADX 25, dashboard
 - `risultati_archivio/ANALISI_ABTG_OUTLOOK_2026-08-27.md` — outlook settimanale + checklist `.docx` (la fonte che questa live **conferma sul metodo e contraddice sulla direzione**)
 - `caccia_strategie/ANALISI_LIVE_EMILIANO_2026-08-24.md` — live 24/08 (Paolo), watchpoint Jackson Hole
 - `caccia_strategie/ANALISI_LIVE_PAOLO_2026-08-25.md` — live 25/08, lezione Supertrend
