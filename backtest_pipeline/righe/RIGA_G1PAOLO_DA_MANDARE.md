@@ -92,10 +92,10 @@ Split **IS/OOS 40/60** ⇒ **quattro sotto-finestre per cella**.
 
 ---
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`c333d6d763b0cc3093011d3fadfc8fdf00077ec4`**
 
 ```
-@@PIN@@
+c333d6d763b0cc3093011d3fadfc8fdf00077ec4
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
@@ -190,7 +190,7 @@ minuti** e scaduto quello **ammazza MT5 a metà scaricamento uscendo con codice
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='c333d6d763b0cc3093011d3fadfc8fdf00077ec4'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_G1PAOLO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -222,7 +222,7 @@ minuti** e scaduto quello **ammazza MT5 a metà scaricamento uscendo con codice
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='c333d6d763b0cc3093011d3fadfc8fdf00077ec4'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_G1PAOLO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -246,7 +246,7 @@ comandi indipendenti, e un `throw` alla prima non fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='c333d6d763b0cc3093011d3fadfc8fdf00077ec4'; $p="$env:USERPROFILE\RIGA_G1PAOLO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_G1PAOLO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_G1PAOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '12_invert_stochoff' -SoloBanco 'V' -Rifai;
