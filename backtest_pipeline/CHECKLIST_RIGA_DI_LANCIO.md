@@ -5165,3 +5165,57 @@ corsa vera*) applicato al ramo **"gia' fatto"** della ripresa del punto **92**.
 > cronometro **"NON MISURATO in questo giro"**. Un cronometro che misura un
 > `Copy-Item` non e' un cronometro sbagliato: e' un cronometro che sta misurando
 > un'altra cosa.
+
+---
+
+## 🆕 AGGIUNTA DEL 28/08/2026 — trovata verificando PREOPEN_RETEST_DOW (candidato P1 della caccia intraday indici)
+
+## 101. 🪧 IL CARTELLO «QUESTO PIN E' UN SEGNAPOSTO E NON FUNZIONA» CHE SOPRAVVIVE ALLA PINNATURA — e i due conteggi della ricetta lo dichiarano SANO
+
+_Difetto vero, gia' committato in `righe/RIGA_PREOPEN_DOW_DA_MANDARE.md`
+(righe 171-179 al commit 6834391), trovato PRIMA dell'invio. **Misurato**: il pin
+`4e83415...` e' VERO (antenato di `origin/lavoro`, i 9 artefatti hanno blob
+identici al working tree, e i raw al pin rispondono **200**) — e la pagina, dieci
+righe sotto, dice che non funziona._
+
+La pagina di lancio nasce col segnaposto e col suo cartello:
+
+```
+## 📌 IL PIN — **@@PIN@@**
+> 🔴 IL PIN QUI SOPRA E' UN SEGNAPOSTO E NON FUNZIONA. Va sostituito col commit
+> vero dopo il push, e finche' e' cosi' LA RIGA NON PARTE.
+```
+
+Poi si pinna. La ricetta del **punto 77** funziona esattamente come deve:
+sostituisce **solo i punti d'uso** (`$pin='...'`, la riga nuda, il riquadro) e
+**lascia in piedi la prosa** — che era la regola numero 2 di quel punto,
+_"la prosa che spiega deve restare leggibile anche dopo"_. E i suoi due conteggi
+escono verdi (`3` pin nuovi, `0` pin vecchi).
+
+Solo che il token e' sparito e **la prosa e' rimasta**: adesso il cartello non
+spiega piu' un segnaposto, **parla del pin vero**. La pagina dice
+_"il pin qui sopra non funziona, la riga non parte"_ **puntando a un pin che
+funziona**. La ricetta non puo' accorgersene: verifica **stringhe di pin**, non
+**frasi sul pin**.
+
+Il danno e' doppio, e il secondo e' peggiore del primo:
+1. **il giro non parte** — Claudio legge il riquadro rosso e (giustamente) non
+   incolla niente: un round preparato, verificato e pinnato resta fermo;
+2. ☠️ **il cartello si consuma.** Se la pagina che dice "SEGNAPOSTO" e' quella
+   pinnata bene, la volta dopo quel riquadro non viene piu' letto — e la volta
+   dopo ancora il segnaposto sara' vero.
+
+> ✅ **REGOLA: il cartello del segnaposto E' UN PUNTO D'USO, non prosa.** Sta
+> nel perimetro del `sed` di pinnatura e si TOGLIE (o si riscrive in passato:
+> _"pinnata il GG/MM: prima di questo commit qui c'era un segnaposto"_) nello
+> stesso passo in cui il pin diventa vero.
+> ```bash
+> # terzo conteggio della ricetta, oltre ai due del punto 77:
+> grep -ci "segnaposto\|non funziona\|la riga non parte" "$F"   # DEVE dare 0
+> ```
+> 📐 **E la regola generale, che vale oltre il pin:** ogni frase che dichiara
+> **lo stato di un artefatto** ("e' un segnaposto", "non e' ancora pushato",
+> "questo file e' una bozza") e' **un'asserzione verificabile**, non un commento.
+> O la si verifica insieme all'artefatto, o si scrive **con la sua data** e al
+> passato. Una dichiarazione di stato senza data e' vera per dieci minuti e
+> falsa per sempre.
