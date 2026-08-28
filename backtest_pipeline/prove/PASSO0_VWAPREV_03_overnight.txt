@@ -39,6 +39,14 @@
 #      l'overnight": e' "questo motore non e' un motore intraday, e va
 #      giudicato per quello che e'".
 #
+#  >>> E ATTENZIONE A COSA E' DAVVERO QUESTA DIFFERENZA:
+#      Il costo si legge come delta di Prof OOS e di n fra 00_nudo e
+#      03_overnight. Non e' un costo puro: col flat spento la posizione
+#      notturna tiene occupato lo slot (if(CountPositions()>0) return)
+#      e blocca gli ingressi del giorno dopo -- un n piu' basso qui e'
+#      anche meccanica dello slot, non solo mercato. Il P&L delle sole
+#      posizioni che attraversano la notte questo giro non lo misura.
+#
 #  >>> E l'EA lo DICHIARA da solo: con InpFlatFineSeduta=0 scrive nel
 #      log "flat di fine seduta SPENTO: questa cella TIENE POSIZIONI
 #      OVERNIGHT". Il log e' agli atti insieme al numero.
@@ -81,9 +89,13 @@ InpUseNewsFilter=0||0||0||0||N
 InpFridayClose=0||0||0||0||N
 InpCloseOnOpposite=1||1||0||1||N
 
-# --- IL FLAT DI FINE SEDUTA: acceso, 20:45 ORA SERVER.
+# --- IL FLAT DI FINE SEDUTA: SPENTO. E' L'UNICO DELTA DI QUESTA CELLA.
+#     L'ora resta pinnata (20:45 ORA SERVER) anche se qui non morde:
+#     va confrontata riga per riga col 00_nudo dal gate della stella.
 #     InpStopNuoviMinPrimaFlat resta a 0 (SPENTO): e' una gamba da
 #     misurare a parte, non un default da assumere.
+#     Controllo in colonna: con questo file la colonna 'Flat Giorni'
+#     del CSV DEVE valere 0. Se e' >0 l'interruttore non morde.
 InpFlatFineSeduta=0||0||0||0||N
 InpFlatOra=20||20||0||20||N
 InpFlatMinuto=45||45||0||45||N

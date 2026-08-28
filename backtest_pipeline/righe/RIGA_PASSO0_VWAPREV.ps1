@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_PASSO0_VWAPREV_v1
+#  MARCATORE_RIGA_PASSO0_VWAPREV_v2
 #  RIGA_PASSO0_VWAPREV.ps1  --  PASSO 0 DEL MOTORE VWAP REVERT
 #  ABTG_VwapRevert  su  D30EUR  M15, TICK REALI, quattro celle:
 #     00_nudo       long + short insieme, flat ON   magic 773400/773401
@@ -70,13 +70,22 @@
 #
 #  RISCHIO DICHIARATO: l'EA non e' MAI STATO COMPILATO da nessuno --
 #  scritto il 25/08/2026, modificato il 28/08 (flat di fine seduta), e
-#  in quell'ambiente non esiste MetaEditor. Se MetaEditor si lamenta,
-#  il risultato del PASSO 0 e' quello, e va riportato cosi' com'e'.
+#  in quell'ambiente non esiste MetaEditor. PER QUESTO IL GIRO DI
+#  CONTROLLO (-SoloControllo) ADESSO COMPILA DAVVERO: la compilazione e'
+#  il primo risultato vero di questo PASSO 0, e si scopre in un minuto,
+#  non dopo mezz'ora di tick reali. Se MetaEditor si lamenta, lo script
+#  stampa le ultime 40 righe del log e SI FERMA.
 #
-#  DOVE SI LEGGE SE IL MOTORE RAGIONA: l'EA stampa in avvio le righe
-#  [VWAPREV][AUTOTEST] -- DIECI blocchi, di cui il decimo e' proprio il
-#  flat di fine seduta. Si leggono ESEGUENDO, nella scheda Esperti, non
-#  compilando. Se l'ultima riga dice "DIVERGE", i numeri non si leggono.
+#  DOVE SI LEGGE SE IL MOTORE RAGIONA: NON nella scheda Esperti.
+#  In OTTIMIZZAZIONE le Print girano sugli agent e non le legge nessuno
+#  (CHECKLIST punto 34). L'autotest e il flat escono in TRE COLONNE del
+#  CSV -- 'Autotest Falliti', 'Flat Giorni', 'Flat Chiusure' -- e questo
+#  script ci fa un GATE:
+#    Autotest Falliti  = 0   -> i numeri si leggono
+#    Autotest Falliti  > 0   -> DIVERGE, i numeri NON si leggono
+#    Autotest Falliti  = -1  -> autotest non eseguito: nessun gate
+#    Flat Giorni       = 0 con flat ACCESO -> rilievo
+#    Flat Giorni       > 0 con flat SPENTO -> problema (non morde)
 #
 #  QUANTO CI METTE [STIMA, non una previsione]: 8 passate a tick reali
 #  (4 celle x 2 finestre) x 2 gemelle = 16 passate su 21 mesi di M15.
@@ -97,8 +106,12 @@ param(
   [string]$Periodo       = "M15",
   [string]$DaQuando      = "2024.09.26",
   [string]$Fino          = "2026.06.30",
-  [int]$Deposito         = 100000,
-  [double]$Rischio       = 1.0
+  [int]$Deposito         = 100000
+  # NIENTE -Rischio: era un PARAMETRO ORFANO (CHECKLIST punto 97). Non
+  # veniva passato a nessuno, veniva solo STAMPATO nel referto -- cioe'
+  # un numero mai applicato scritto accanto a numeri veri. Il rischio che
+  # morde davvero e' InpRiskPercent, pinnato nei file prova, e il referto
+  # lo legge da li' dichiarando la fonte.
 )
 $ErrorActionPreference = "Stop"
 [Threading.Thread]::CurrentThread.CurrentCulture   = [Globalization.CultureInfo]::InvariantCulture
@@ -156,14 +169,25 @@ function FmtN($v){ if($null -eq $v){ return "n/d" }; if([int]$v -lt 0){ return "
 function Fmt2($v){ if($null -eq $v){ return "n/d" }; if([double]$v -lt 0){ return "n/d" }; return ([double]$v).ToString("0.00",$INV) }
 function FmtE($v){ if($null -eq $v){ return "n/d" }; if([double]$v -le -999998.0){ return "n/d" }; return ([double]$v).ToString("+0;-0;0",$INV) }
 function FmtPg($v){ if($null -eq $v){ return "n/d" }; if([double]$v -ge 99.0){ return "n/d" }; return ([double]$v).ToString("0.00",$INV) }
+# --- LE COLONNE DI COLLAUDO hanno una sentinella DIVERSA: qui il -1 e'
+#     un'INFORMAZIONE ("autotest non eseguito"), non un buco. Se lo
+#     passassi a FmtN uscirebbe "n/d" e si confonderebbe col caso
+#     "colonna assente", che e' un'altra cosa e va detta.
+function FmtCol($v){ if($null -eq $v){ return "assente" }; if([int]$v -lt 0){ return "non-eseg" }; return ([int]$v).ToString($INV) }
 
 # --- IL PARSER DEL CSV DI OTTIMIZZAZIONE.
 #     Le colonne si cercano PER NOME, mai per posizione. Se non le
 #     riconosce torna $null E DICE quali intestazioni ha visto, invece di
 #     indovinare.
 #     L'intestazione VERA di questo EA, LETTA NEL SORGENTE (OnTester,
-#     'double stats[10]'), e' a UNDICI colonne e CONTIENE
-#     'Peggior Giornata %'. Non e' ereditata da un round gemello.
+#     'double stats[13]'), e' a QUATTORDICI colonne e CONTIENE
+#     'Peggior Giornata %' piu' le tre di COLLAUDO ('Autotest Falliti',
+#     'Flat Giorni', 'Flat Chiusure'). Non e' ereditata da un round
+#     gemello.
+#     Le tre di collaudo si leggono PER NOME come le altre, e sono
+#     FACOLTATIVE nel parser: se mancano, il ciclo delle celle lo
+#     dichiara come PROBLEMA ("autotest non eseguito"), invece di far
+#     fallire la lettura di tutto il CSV.
 $script:CsvIntestazioni = @()
 function LeggiOpt([string]$path){
   if(-not (Test-Path -LiteralPath $path)){ return $null }
@@ -173,6 +197,7 @@ function LeggiOpt([string]$path){
   $cols = @($righe[0].PSObject.Properties.Name)
   $script:CsvIntestazioni = $cols
   $kProf = $null; $kPf = $null; $kDd = $null; $kN = $null; $kPg = $null; $kMg = $null
+  $kAt = $null; $kFg = $null; $kFc = $null
   foreach($k in $cols){
     $l = ("" + $k).Trim().ToLower()
     if($l -eq "profit" -or $l -eq "profitto"){ $kProf = $k }
@@ -181,6 +206,9 @@ function LeggiOpt([string]$path){
     if($l -eq "trades" -or $l -eq "operazioni"){ $kN = $k }
     if($l -eq "peggior giornata %" -or $l -eq "worst day %"){ $kPg = $k }
     if($l -eq "inpmagic"){ $kMg = $k }
+    if($l -eq "autotest falliti"){ $kAt = $k }
+    if($l -eq "flat giorni"){ $kFg = $k }
+    if($l -eq "flat chiusure"){ $kFc = $k }
   }
   if($null -eq $kProf -or $null -eq $kPf -or $null -eq $kDd -or $null -eq $kN){ return $null }
   $out = New-Object System.Collections.ArrayList
@@ -189,9 +217,14 @@ function LeggiOpt([string]$path){
     if($null -ne $kPg){ $pg = (NumInv $r.$kPg) }
     $mg = ""
     if($null -ne $kMg){ $mg = ("" + $r.$kMg).Trim() }
+    $at = $null; $fg = $null; $fc = $null
+    if($null -ne $kAt){ $at = (NumInv $r.$kAt) }
+    if($null -ne $kFg){ $fg = (NumInv $r.$kFg) }
+    if($null -ne $kFc){ $fc = (NumInv $r.$kFc) }
     [void]$out.Add([pscustomobject]@{
       Profit = (NumInv $r.$kProf); Pf = (NumInv $r.$kPf); Dd = (NumInv $r.$kDd)
-      N = (NumInv $r.$kN); Pg = $pg; Magic = $mg })
+      N = (NumInv $r.$kN); Pg = $pg; Magic = $mg
+      Autotest = $at; FlatGiorni = $fg; FlatChiusure = $fc })
   }
   return @($out)
 }
@@ -230,7 +263,8 @@ function C([string]$id,[string]$file,[string]$desc,[int]$m1,[int]$m2,
     VLong=$vLong; VShort=$vShort; VFlat=$vFlat; Diff=@($diff);
     Esito="NON ESEGUITA"; Gemelli="NON MISURATO";
     NIS=-1; NOOS=-1; PfIS=-1.0; PfOOS=-1.0; DdIS=-1.0; DdOOS=-1.0;
-    ProfIS=-999999.0; ProfOOS=-999999.0; PgOOS=99.9 }
+    ProfIS=-999999.0; ProfOOS=-999999.0; PgOOS=99.9;
+    Autotest=$null; FlatGiorni=$null; FlatChiusure=$null }
 }
 $CELLE = @()
 $CELLE += (C "00_nudo"      "ABTG_VwapRevert.txt"                "IL MOTORE, due lati insieme, INTRADAY -- porta i gemelli" 773400 773401 "1" "1" "1" @())
@@ -302,13 +336,28 @@ try{
   Dico ("pin ......... " + $Pin)
   Dico ("celle ....... " + @($Ordinati).Count + " su 4")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (split 40/60 del driver generico)")
-  Dico ("banco ....... Modello 4 (TICK REALI), deposito " + $Deposito + ", rischio " + $Rischio + "%")
+  Dico ("banco ....... Modello 4 (TICK REALI), deposito " + $Deposito + ", rischio " + $Baseline["InpRiskPercent"] + "% (letto dal file prova, non da un parametro)")
 
   # -------------------------------------------------------------------
   #  1. SCARICO AL PIN
   # -------------------------------------------------------------------
   Titolo "1. SCARICO AL PIN"
+  # --- LA CACHE SI BUTTA QUANDO CAMBIA IL PIN (CHECKLIST punti 14 e 23).
+  #     $Work sopravvive fra un lancio e l'altro: senza questo, i CSV e i
+  #     file prova del pin VECCHIO resterebbero sul disco e il gate di
+  #     idempotenza del driver generico ("il CSV c'e' gia', salto") li
+  #     riproporrebbe come se fossero del pin nuovo. E' il referto stantio
+  #     del 17/08 travestito da ripresa di corsa.
+  $pinFile = Join-Path $Work "pin_corrente.txt"
+  $pinVecchio = ""
+  if(Test-Path -LiteralPath $pinFile){ $pinVecchio = (Get-Content -LiteralPath $pinFile -Raw).Trim() }
+  if($pinVecchio -ne $Pin){
+    Remove-Item -LiteralPath $Prove -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath (Join-Path $Work "risultati_prove") -Recurse -Force -ErrorAction SilentlyContinue
+    Dico ("pin cambiato (" + $pinVecchio + " -> " + $Pin + "): artefatti del pin vecchio CANCELLATI") "Yellow"
+  }
   New-Item -ItemType Directory -Force -Path $Work,$Prove | Out-Null
+  Set-Content -LiteralPath $pinFile -Value $Pin -Encoding ASCII
 
   $drv = Join-Path $Work "walkforward_generico.ps1"
   Scarica ($RawPin + "/backtest_pipeline/walkforward_generico.ps1") $drv
@@ -324,11 +373,12 @@ try{
     Scarica ($RawPin + "/backtest_pipeline/prove/" + $c.Prova) (Join-Path $Prove $c.Prova)
   }
   # il 00_nudo serve SEMPRE: e' il termine di paragone del gate della
-  # stella, anche quando gira una cella sola.
+  # stella, anche quando gira una cella sola. E si riscarica SEMPRE, non
+  # "solo se non c'e'": una copia rimasta da un pin precedente farebbe
+  # confrontare le celle di oggi con la baseline di ieri, e il gate
+  # direbbe verde a un delta che nessuno ha dichiarato.
   $fNudo = Join-Path $Prove "ABTG_VwapRevert.txt"
-  if(-not (Test-Path -LiteralPath $fNudo)){
-    Scarica ($RawPin + "/backtest_pipeline/prove/ABTG_VwapRevert.txt") $fNudo
-  }
+  Scarica ($RawPin + "/backtest_pipeline/prove/ABTG_VwapRevert.txt") $fNudo
   Dico ("file prova scaricati: " + @(Get-ChildItem $Prove -Filter *.txt).Count) "Green"
 
   $incSrc = Join-Path $Work "ABTG_PausaGuardian.mqh"
@@ -532,7 +582,7 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
 [void]$RefTxt.Add("pin:  " + $Pin)
 [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (split 40/60)")
-[void]$RefTxt.Add("banco: Modello 4 TICK REALI, deposito " + $Deposito + ", rischio " + $Rischio + "%")
+[void]$RefTxt.Add("banco: Modello 4 TICK REALI, deposito " + $Deposito + ", rischio " + $Baseline["InpRiskPercent"] + "% (letto dal file prova, non da un parametro)")
 [void]$RefTxt.Add("include: " + $Include)
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.")

@@ -256,6 +256,15 @@ int      gDay = -1, gTradesToday = 0;
 ulong    gUltimoTicketContato = 0;      // per contare gli ingressi ESEGUITI, non quelli ordinati
 int      gFlatLogGiorno = -1;           // il flat scrive UNA riga al giorno, non una a tick
 
+//--- CONTATORI CHE DEVONO USCIRE IN COLONNA, NON IN UN Print.
+//    In OTTIMIZZAZIONE le Print girano sugli agent e NON LE LEGGE NESSUNO:
+//    un autotest che stampa "DIVERGE" su un agent non ferma niente e non si
+//    vede. Questi tre numeri finiscono nell'OPTFRAME (OnTester) e diventano
+//    tre colonne del CSV, cosi' il driver puo' farci un GATE.
+int      gAutotestFalliti = -1;   // -1 = autotest non eseguito
+int      gFlatGiorni      = 0;    // giornate in cui il flat di fine seduta e' scattato
+int      gFlatChiusure    = 0;    // posizioni chiuse in totale dal flat di fine seduta
+
 //--- METRICHE DA PROP. L'Equity DD dice se il conto sopravvive; una prop
 //    invece ti chiude per il LIMITE GIORNALIERO, che e' un'altra cosa.
 double gDayStartEquity = 0.0;
@@ -1201,10 +1210,12 @@ bool FlatFineSedutaCheck()
       else Log("flat di fine seduta: chiusura FALLITA -- "+gTrade.ResultRetcodeDescription());
      }
    CancellaOrdini(0);
+   gFlatChiusure += chiuse;
 
    if(t.day_of_year!=gFlatLogGiorno)
      {
       gFlatLogGiorno = t.day_of_year;
+      gFlatGiorni++;
       Log(StringFormat("flat di fine seduta alle %02d:%02d server: %d posizioni chiuse, pendenti cancellati, niente overnight.",
                        InpFlatOra, InpFlatMinuto, chiuse));
      }
@@ -1567,6 +1578,10 @@ void AutoTestVwapRevert()
          ? "DIECI BLOCCHI SU DIECI, la regola ragiona come la firma."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
 
+   //--- e lo stesso esito ESCE IN COLONNA (OnTester -> stats[10]): in
+   //    ottimizzazione questa Print non la legge nessuno.
+   gAutotestFalliti = falliti;
+
    //--- e la guardia del conto, col suo autotest gia' pronto nell'include
    ABTG_AutotestGuardia();
   }
@@ -1675,7 +1690,7 @@ void ExportTrades()
 double OnTester()
   {
    ExportTrades();
-   double stats[10];
+   double stats[13];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1687,6 +1702,12 @@ double OnTester()
    stats[7] = gWorstDayPct;                             // Peggior Giornata % (negativo)
    stats[8] = TesterStatistics(STAT_MAX_CONLOSSES);     // Perdite Consecutive Max
    stats[9] = TesterStatistics(STAT_CONLOSSMAX);        // Serie Perdente Peggiore (denaro)
+   //--- le tre colonne di COLLAUDO. Non sono metriche di merito: sono il
+   //    gate che dice se i numeri accanto si possono leggere. In
+   //    ottimizzazione le Print degli agent non le legge nessuno.
+   stats[10] = (double)gAutotestFalliti;   // 0 = tutti passati; >0 = DIVERGE; -1 = non eseguito
+   stats[11] = (double)gFlatGiorni;        // 0 col flat spento: se e' >0 l'interruttore non morde
+   stats[12] = (double)gFlatChiusure;      // posizioni davvero chiuse dal flat
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1709,14 +1730,19 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
+         //--- ATTENZIONE: 'head' e lo StringFormat qui sotto si toccano
+         //    SEMPRE INSIEME. Una colonna aggiunta a uno solo dei due
+         //    sfasa tutto il CSV e il driver legge il numero sbagliato
+         //    sotto il nome giusto.
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Autotest Falliti,Flat Giorni,Flat Chiusure";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4],
-                                data[5], data[6], data[7], data[8], data[9]);
+                                data[5], data[6], data[7], data[8], data[9],
+                                data[10], data[11], data[12]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
