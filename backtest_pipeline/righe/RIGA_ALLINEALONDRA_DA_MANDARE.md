@@ -119,25 +119,14 @@ liberi** e la somma sarà **maggiore** del congiunto.
 
 ---
 
-## 📌 IL PIN — **`0000000000000000000000000000000000000000`**
+## 📌 IL PIN — **`9ed66e22739f7de200dbc86c8e26c55abb8d96a8`**
 
 ```
-0000000000000000000000000000000000000000
+9ed66e22739f7de200dbc86c8e26c55abb8d96a8
 ```
 
-<!-- CARTELLO-INIZIO -->
-> 🔴 **IL PIN QUI SOPRA È UN SEGNAPOSTO DI 40 ZERI E NON FUNZIONA.** `PIN_NON_ANCORA_MESSO`
-> Va sostituito col commit vero **dopo il push**, con la ricetta qui sotto.
-> **Finché è così LA RIGA NON PARTE**: il driver ha una guardia esplicita che
-> riconosce i 40 zeri e si ferma (verificata eseguendo).
-> ⚠️ **Nessuno ha ancora verificato che gli artefatti esistano al pin**, perché
-> il pin non esiste: la verifica `git cat-file -s <pin>:<file>` si fa **dopo il
-> push**, sui **sette** artefatti dell'elenco qui sotto.
-> *(Questo cartello è un **PUNTO D'USO**, non prosa: sta nel perimetro del `sed`
-> di pinnatura e si toglie nello stesso passo — CHECKLIST punto 101.)*
-<!-- CARTELLO-FINE -->
 
-Il commit da pinnare deve contenere **tutti e sette** gli artefatti che lo script
+Il commit da pinnare deve contenere **tutti e otto** gli artefatti che lo script
 scarica: `backtest_pipeline/walkforward_generico.ps1`,
 `backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1`, i **quattro** file prova
 `backtest_pipeline/prove/PASSO0_ALLINEALONDRA_*.txt`,
@@ -252,7 +241,7 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='0000000000000000000000000000000000000000'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9ed66e22739f7de200dbc86c8e26c55abb8d96a8'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -298,7 +287,7 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='0000000000000000000000000000000000000000'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9ed66e22739f7de200dbc86c8e26c55abb8d96a8'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -324,7 +313,7 @@ Si cambia **solo** ciò che sta dopo `-Pin $pin`. Combinazioni valide:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='0000000000000000000000000000000000000000'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9ed66e22739f7de200dbc86c8e26c55abb8d96a8'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '01_nofinestra' -SoloBanco 'V' -Rifai;
