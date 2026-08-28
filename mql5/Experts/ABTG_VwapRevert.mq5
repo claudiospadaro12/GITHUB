@@ -1557,22 +1557,24 @@ void AutoTestVwapRevert()
    //    Il caso che conta e' il TERZO: alle 20:00 il flat NON deve
    //    scattare. Un confronto sulla sola ora ("t.hour >= 20") lo
    //    farebbe scattare, e chiuderebbe 45 minuti prima ogni giorno.
-   bool f1 = DopoOrarioFlat_Calc(20,45,20,45);   // esatto -> si'
-   bool f2 = DopoOrarioFlat_Calc(20,46,20,45);   // dopo   -> si'
-   bool f3 = DopoOrarioFlat_Calc(20, 0,20,45);   // stessa ora, prima -> NO
-   bool f4 = DopoOrarioFlat_Calc(23,59,20,45);   // fino a mezzanotte -> si'
-   bool f5 = DopoOrarioFlat_Calc( 9,30,20,45);   // mattina -> no
-   bool f6 = DopoOrarioFlat_Calc( 0, 0,20,45);   // giorno nuovo -> no
+   //  NOMI fl* e non f*: f1..f4 sono gia' dichiarate dal blocco 6
+   //  (anti-candelone, sopra) nello STESSO scope di funzione.
+   bool fl1 = DopoOrarioFlat_Calc(20,45,20,45);   // esatto -> si'
+   bool fl2 = DopoOrarioFlat_Calc(20,46,20,45);   // dopo   -> si'
+   bool fl3 = DopoOrarioFlat_Calc(20, 0,20,45);   // stessa ora, prima -> NO
+   bool fl4 = DopoOrarioFlat_Calc(23,59,20,45);   // fino a mezzanotte -> si'
+   bool fl5 = DopoOrarioFlat_Calc( 9,30,20,45);   // mattina -> no
+   bool fl6 = DopoOrarioFlat_Calc( 0, 0,20,45);   // giorno nuovo -> no
    //    la coda: 30 minuti prima delle 20:45 = dalle 20:15
    bool q1 = CodaSeduta_Calc(20,15,20,45,30);    // esatto -> si'
    bool q2 = CodaSeduta_Calc(20,14,20,45,30);    // un minuto prima -> no
    bool q3 = CodaSeduta_Calc(20,50,20,45,30);    // oltre il flat -> si'
    bool q4 = CodaSeduta_Calc(20,15,20,45, 0);    // guardia SPENTA -> sempre no
    PrintFormat("[VWAPREV][AUTOTEST] flat 20:45: esatto=%d (atteso 1) | 20:46=%d (atteso 1) | 20:00=%d (atteso 0) | 23:59=%d (atteso 1) | 09:30=%d (atteso 0) | 00:00=%d (atteso 0)",
-               (int)f1,(int)f2,(int)f3,(int)f4,(int)f5,(int)f6);
+               (int)fl1,(int)fl2,(int)fl3,(int)fl4,(int)fl5,(int)fl6);
    PrintFormat("[VWAPREV][AUTOTEST] coda 30min: 20:15=%d (atteso 1) | 20:14=%d (atteso 0) | 20:50=%d (atteso 1) | spenta=%d (atteso 0)",
                (int)q1,(int)q2,(int)q3,(int)q4);
-   if(!(f1 && f2 && !f3 && f4 && !f5 && !f6 && q1 && !q2 && q3 && !q4)) falliti++;
+   if(!(fl1 && fl2 && !fl3 && fl4 && !fl5 && !fl6 && q1 && !q2 && q3 && !q4)) falliti++;
 
    Print("[VWAPREV][AUTOTEST] esito motore: ", (falliti==0
          ? "DIECI BLOCCHI SU DIECI, la regola ragiona come la firma."

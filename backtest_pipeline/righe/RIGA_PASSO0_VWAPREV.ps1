@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_PASSO0_VWAPREV_v2
+#  MARCATORE_RIGA_PASSO0_VWAPREV_v3
 #  RIGA_PASSO0_VWAPREV.ps1  --  PASSO 0 DEL MOTORE VWAP REVERT
 #  ABTG_VwapRevert  su  D30EUR  M15, TICK REALI, quattro celle:
 #     00_nudo       long + short insieme, flat ON   magic 773400/773401

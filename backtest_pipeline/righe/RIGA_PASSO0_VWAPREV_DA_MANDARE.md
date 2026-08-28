@@ -20,7 +20,7 @@ regola intraday**.
 | | |
 |---|---|
 | **EA** | `mql5/Experts/ABTG_VwapRevert.mq5` (porting da **sumbloke077**, TradingView `YBqnzqDK`) |
-| **Driver** | `righe/RIGA_PASSO0_VWAPREV.ps1` (marcatore `MARCATORE_RIGA_PASSO0_VWAPREV_v2`) |
+| **Driver** | `righe/RIGA_PASSO0_VWAPREV.ps1` (marcatore `MARCATORE_RIGA_PASSO0_VWAPREV_v3`) |
 | **File prova** | `prove/ABTG_VwapRevert.txt` · `prove/PASSO0_VWAPREV_01_long.txt` · `prove/PASSO0_VWAPREV_02_short.txt` · `prove/PASSO0_VWAPREV_03_overnight.txt` |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_VWAPREV.md` |
 | **Tesi del porting** | `VWAPREVERT_TESI.md` |
@@ -101,7 +101,7 @@ generico riscarica **al pin**).
 davvero il flat di fine seduta (7 occorrenze di `InpFlatFineSeduta`) **e le tre
 colonne di collaudo della v2** (`double stats[13]`, `Autotest Falliti,Flat
 Giorni,Flat Chiusure`); il `.ps1` porta il marcatore
-`MARCATORE_RIGA_PASSO0_VWAPREV_v2`.
+`MARCATORE_RIGA_PASSO0_VWAPREV_v3`.
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
 silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola per un
@@ -183,7 +183,7 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='7238265aa841e57a8dd3f7f44d3c099d019525ac'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -220,7 +220,7 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='7238265aa841e57a8dd3f7f44d3c099d019525ac'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -240,7 +240,7 @@ altre.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='7238265aa841e57a8dd3f7f44d3c099d019525ac'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '03_overnight' -Rifai;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```

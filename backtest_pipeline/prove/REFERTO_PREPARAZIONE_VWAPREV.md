@@ -29,8 +29,8 @@ Quindi il lavoro di oggi **non è stato "scrivere l'EA"**, ma:
 
 | convenzione di casa | stato | dove |
 |---|---|---|
-| **ASCII puro** nel sorgente | ✅ **0 caratteri non-ASCII** su 1.727 righe | misurato con `grep` |
-| **OPTFRAME a 11 colonne** | ✅ `double stats[10]` + `FrameAdd`, header con `Peggior Giornata %` | `OnTester` / `OnTesterDeinit` |
+| **ASCII puro** nel sorgente | ✅ **0 caratteri non-ASCII** (verificato dopo i fix v2/v3) | misurato con `grep` |
+| **OPTFRAME a 14 colonne** | ✅ `double stats[13]` + `FrameAdd`, header con `Peggior Giornata %` + `Autotest Falliti`/`Flat Giorni`/`Flat Chiusure` (dalla v2) | `OnTester` / `OnTesterDeinit` |
 | **niente look-ahead** | ✅ setup su shift **2**, conferma su shift **1**, ordine all'apertura della **0**; la VWAP parte da `shiftFine >= 1` | `OnNewBar`, `CalcVwapBanda` |
 | **`STOPS_LEVEL` rispettato** | ✅ tre controlli: distanza dal mercato, SL dal livello d'ingresso, TP (che viene **tolto**, non forzato) | `PiazzaOrdine` |
 | **normalizzazione / volumi** | ✅ `NormalizePrice`, `NormVol`, retcode letto dopo ogni ordine | `PiazzaOrdine`, `LotByRisk` |
