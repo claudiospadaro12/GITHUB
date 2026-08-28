@@ -4887,3 +4887,64 @@ degli agent non si leggono).
 > significato solo se la presenza e' garantita nel caso contrario. Nel dubbio, il
 > numero si conta in una **colonna** (punto 34) e l'assenza smette di essere
 > un indizio da interpretare.
+
+---
+
+## 🆕 AGGIUNTA DEL 28/08/2026 — trovata alla SECONDA passata su `RIGA_PASSO0_VWAPREV`
+
+## 98. 🧱 IL CODICE MAI COMPILATO "VERIFICATO PER LETTURA": si controlla l'ALLINEAMENTO e non si controlla la RIDICHIARAZIONE
+
+_Difetto vero, gia' committato in `mql5/Experts/ABTG_VwapRevert.mq5`
+(`AutoTestVwapRevert()`, righe 1437-1440 e 1560-1563), trovato PRIMA dell'invio —
+alla **seconda** passata, dopo che la prima aveva fatto aggiungere proprio quel
+blocco di codice._
+
+Il punto 20 e il 27 coprono il gesto che non produce l'output e il binario che
+non c'e'. Questo copre il gradino prima: **il sorgente non compila affatto**, e
+l'unico controllo che era stato fatto era quello che il difetto NON tocca.
+
+L'agente aveva dichiarato, in buona fede e con precisione: _"`stats[13]`, l'`head`
+a 14 colonne e lo `StringFormat` a 14 specificatori sono allineati **per lettura**,
+non per esecuzione"_. **Quell'allineamento era davvero giusto** (verificato: 14
+nomi, 14 specificatori, 14 argomenti, mappatura `data[0..12]` in ordine). Il
+sorgente non compilava lo stesso, per una ragione che nessuna rilettura
+dell'`OnTester` poteva vedere: il blocco di autotest **numero 10**, aggiunto per
+collaudare il flat di fine seduta, dichiarava
+
+```mql5
+bool f1 = DopoOrarioFlat_Calc(20,45,20,45);   // riga 1560
+```
+
+mentre `f1..f4` erano **gia' dichiarate** dal blocco **numero 6**
+(anti-candelone, riga 1437) **nella stessa funzione e nello stesso scope** — in
+`AutoTestVwapRevert()` non c'e' una sola graffa annidata fra la riga 1358 e la
+1587. In C++/MQL5 e' un errore secco, `'f1' - variable already defined`: **niente
+`.ex5`, niente corsa, giro a vuoto sul VPS**.
+
+Perche' e' una classe e non una svista: **un autotest cresce per BLOCCHI
+NUMERATI, e ogni blocco riusa lo stesso alfabeto di nomi corti** (`f1..f4`,
+`q1..q4`, `s1..s7`). Finche' i blocchi vengono aggiunti da chi ha in testa solo
+l'ultimo, la collisione e' questione di tempo. E la rilettura umana non la vede
+mai, perche' le due dichiarazioni stanno a **123 righe di distanza**.
+
+> ✅ **REGOLA: quando un file non compilabile in ambiente viene MODIFICATO, il
+> controllo statico non e' "rileggo il pezzo che ho toccato". Sono due passate
+> meccaniche, sempre tutte e due:**
+> 1. **le graffe/parentesi bilanciate e l'allineamento header/format** (quello
+>    che l'agente fa gia');
+> 2. **lo scan delle RIDICHIARAZIONI nello stesso scope**, che nessun occhio fa.
+>    Trenta righe di script, e gira ovunque:
+> ```python
+> # per ogni file: togli commenti e stringhe, poi cammina sulle graffe
+> # tenendo uno STACK di scope; ogni "<tipo> <nome>" a inizio istruzione
+> # entra nello scope in cima. Se il nome c'e' gia' -> ERRORE, con le due righe.
+> ```
+> ⚠️ E lo scan si passa **su tutti i gemelli**, non solo sul file toccato
+> (punto 2): la stessa sera l'ha passato anche `ABTG_FvgRetest.mq5` — pulito, e
+> saperlo vale quanto trovare il difetto.
+>
+> 🔴 **E il corollario che vale per la RIGA**: quando la correzione sta in un
+> `.mq5` e il `.ps1` non cambia, il **marcatore di versione del `.ps1` va
+> bumpato lo stesso** (`_v2` -> `_v3`). Altrimenti il blocco VECCHIO rimasto in
+> chat — identico tranne il pin — passa la guardia `Select-String` a mani basse
+> e riporta Claudio esattamente sul sorgente che non compila.
