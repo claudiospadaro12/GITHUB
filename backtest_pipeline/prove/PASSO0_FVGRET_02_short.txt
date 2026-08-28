@@ -1,0 +1,48 @@
+# =====================================================================
+#  PASSO 0 -- FVGRET 02_short  --  SOLO SHORT
+#  ABTG_FvgRetest  su  D30EUR  M15, TICK REALI
+# ---------------------------------------------------------------------
+#  E' la cella 00_nudo (prove\ABTG_FvgRetest.txt) con UN SOLO
+#  INTERRUTTORE MOSSO. Ablazione A STELLA: il diff fra questo file e il
+#  00_nudo e' di DUE righe e basta.
+#
+#  COSA CAMBIA RISPETTO AL 00_nudo:
+#    InpAllowLong    1  ->  0   [SI SPEGNE]
+#    InpMagic        776000/776001  ->  776400/776401
+#
+#  PERCHE' ESISTE: regola dei DUE LATI di Claudio (25/08/2026). Vale
+#  esattamente quanto la cella long, e su questa finestra vale FORSE DI
+#  PIU': i 21 mesi del feed BCM sugli indici sono UN SOLO REGIME
+#  RIALZISTA (criterio C6 del dossier), quindi IL LATO SHORT PARTE
+#  SVANTAGGIATO PER REGIME, non per merito del motore.
+#  >>> Un "niente edge short" letto qui chiude la domanda PER QUESTA
+#      EPOCA E PER QUESTO MOTORE, non in assoluto. Va scritto cosi'.
+#
+#  >>> E LA SOMMA DEI LATI NON FARA' IL 00_nudo: stessa ragione della
+#      cella long (una posizione alla volta, una decisione per barra),
+#      misurata nel sorgente in IngressiAmmessi() e CercaIngresso().
+#
+#  L'IPOTESI, I TRE ESITI (A / B / C) e IL CANCELLO C2 sono quelli
+#  scritti in testa a prove\ABTG_FvgRetest.txt e NON si riscrivono qui.
+#
+#  MAGIC VERGINI 776400/776401: cercati uno per uno in tutto il repo il
+#  28/08/2026 -> ZERO occorrenze.
+#  >>> NOTA: il blocco 7762xx e' stato SCARTATO perche' NON e' vergine
+#      (776200 e 776201 risultano gia' nel repo). Il salto da 7761xx a
+#      7764xx e' voluto, non un refuso.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA (identica al 00_nudo) ---
+InpRegimeMode=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+
+# --- I DUE LATI: qui SOLO SHORT. E' l'UNICO interruttore mosso ---
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=776400||776400||1||776401||Y

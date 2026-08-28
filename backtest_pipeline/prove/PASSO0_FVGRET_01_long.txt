@@ -1,0 +1,51 @@
+# =====================================================================
+#  PASSO 0 -- FVGRET 01_long  --  SOLO LONG
+#  ABTG_FvgRetest  su  D30EUR  M15, TICK REALI
+# ---------------------------------------------------------------------
+#  E' la cella 00_nudo (prove\ABTG_FvgRetest.txt) con UN SOLO
+#  INTERRUTTORE MOSSO. Ablazione A STELLA, non a scala cumulativa: il
+#  diff fra questo file e il 00_nudo e' di DUE righe e basta.
+#
+#  COSA CAMBIA RISPETTO AL 00_nudo:
+#    InpAllowShort   1  ->  0   [SI SPEGNE]
+#    InpMagic        776000/776001  ->  776100/776101
+#
+#  PERCHE' ESISTE: regola dei DUE LATI di Claudio (25/08/2026) --
+#  "ogni analisi misura SEMPRE tutti e due i lati (long E short), anche
+#  se un lato e' gia' vivo in forward, si RITESTA". Il dossier stima la
+#  frequenza PER LATO (0,3-1,0 operazioni per seduta per lato): senza
+#  questa cella quel numero non e' misurabile.
+#
+#  >>> E LA SOMMA DEI LATI NON FARA' IL 00_nudo, e non e' un difetto.
+#      MISURATO NEL SORGENTE: IngressiAmmessi() esce con
+#      "if(CountPositions()>0) return(false)" PRIMA di guardare il lato,
+#      e CercaIngresso() fa "return" dopo la prima decisione della barra.
+#      Con lo short spento lo slot resta libero e qui entrano segnali
+#      long che nel 00_nudo erano stati buttati via perche' una posizione
+#      short era gia' aperta. E' un fatto del motore.
+#
+#  L'IPOTESI, I TRE ESITI (A / B / C) e IL CANCELLO C2 sono quelli
+#  scritti in testa a prove\ABTG_FvgRetest.txt e NON si riscrivono qui:
+#  un criterio ricopiato in tre posti e' un criterio che a un certo punto
+#  diverge. La soglia dei 150 dell'Emendamento regola A si applica A
+#  QUESTA CELLA, perche' e' qui che "per lato" vuol dire qualcosa.
+#
+#  MAGIC VERGINI 776100/776101: cercati uno per uno in tutto il repo il
+#  28/08/2026 -> ZERO occorrenze. Il magic del sorgente (775501) e quelli
+#  delle altre due celle non compaiono qui.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA (identica al 00_nudo) ---
+InpRegimeMode=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+
+# --- I DUE LATI: qui SOLO LONG. E' l'UNICO interruttore mosso ---
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=776100||776100||1||776101||Y

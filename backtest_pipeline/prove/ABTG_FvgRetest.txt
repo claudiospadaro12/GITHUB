@@ -1,0 +1,132 @@
+# =====================================================================
+#  PASSO 0 -- FVGRET 00_nudo  --  IL MOTORE FVG NUDO, DUE LATI INSIEME
+#  ABTG_FvgRetest  su  D30EUR  M15, TICK REALI
+# ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  E' il PASSO 0 preteso dal dossier della caccia SMC del 26/08/2026
+#  (backtest_pipeline\caccia_strategie\CACCIA_SMC_OB_FVG_2026-08-26.md,
+#  scheda P1, paragrafo "FREQUENZA [STIMA - NON MISURATA]"):
+#
+#     "La frequenza e' il primo dato del round, prima di qualunque PF."
+#
+#  Si misura QUANTE OPERAZIONI produce il meccanismo. Il Profit Factor
+#  che esce dal CSV si LEGGE ma NON si giudica: a questo stadio non
+#  esistono criteri firmati, non esiste ablazione, e una cella sola non
+#  e' un round.
+#
+#  TESI DEL MOTORE (FVG_TESI.md par. 1):
+#    Un Fair Value Gap e' una finestra di prezzo che nessuno ha
+#    contrattato: tre candele in cui il mercato si e' mosso troppo in
+#    fretta perche' ci fosse un venditore per ogni compratore. Il prezzo
+#    tende a tornarci. Si entra sul RITORNO dentro il vuoto, nella
+#    direzione del movimento che lo ha creato: e' continuazione su
+#    pullback, non reversal e non breakout.
+#
+#  L'IPOTESI CHE QUESTO FILE FALSIFICA -- ed e' UNA SOLA, dichiarata:
+#    Il dossier stima [IPOTESI, NON MISURA] che un FVG a tre barre nasca
+#    sul 2-4% delle barre M15 e che, dopo isTraded + ritorno + candela di
+#    conferma, restino 0,3-1,0 operazioni per seduta PER LATO, cioe'
+#    ~150-500 operazioni in 21 mesi per lato.
+#    >>> Il numero 2-4% e' un'ipotesi dell'agente cacciatore, non una
+#        misura. Questo file esiste per sostituirla con un numero vero.
+#
+#  I TRE ESITI POSSIBILI, SCRITTI PRIMA DI VEDERE IL NUMERO
+#  (criteri di accettazione del PASSO 0 -- si congelano QUI, non dopo):
+#
+#    A. n per lato >= 150 in 21 mesi
+#       -> il campione c'e'. L'Emendamento della Finestra regola A e'
+#          SODDISFATTO, e il round vero si puo' disegnare (ablazione del
+#          regime, spazzolata di InpTPAtrMult verso l'alto, due lati).
+#
+#    B. n per lato < 150
+#       -> scatta la VALVOLA R59 / Emendamento regola B: il MERITO resta
+#          SOSPESO, il RISCHIO si giudica lo stesso (un drawdown e' un
+#          fatto accaduto, non una stima). NON si allarga il motore per
+#          fare campione: si dichiara che a M15 su 21 mesi il meccanismo
+#          non fa numero, e si decide se cambiare simbolo o TF.
+#
+#    C. n enorme (migliaia)
+#       -> il filtro di taglia e' troppo largo. LA MANOPOLA GIUSTA E'
+#          InpGapPctOfMax VERSO L'ALTO (la taglia del vuoto), NON il
+#          rischio e NON un filtro nuovo appiccicato sopra: in casa il
+#          filtro aggiunto a un motore gia' tarato fa 0 successi su 5
+#          (ROBUSTEZZA.md par. 5B).
+#
+#  E LA SECONDA MISURA, CHE VALE QUANTO LA PRIMA -- IL CANCELLO C2:
+#    mediana del take LORDO >= 3 x spread. Soglia di casa: 6,0 PUNTI
+#    INDICE (spread di riferimento 2,0 punti indice, DICHIARATO NON
+#    MISURATO -- R98_CRITERI.md par. 3.2 e METRO_PROP D4).
+#    Si legge nell'export per-trade abtg_trades_ABTG_FvgRetest_D30EUR_
+#    <magic>.csv in Common\Files, NON nel PF.
+#    >>> ATTENZIONE ALLA CONVERSIONE (criterio C5): su U30USD e NASUSD
+#        1 punto indice = 100 punti MT5 (R97, due misure concordi).
+#        SU D30EUR IL RAPPORTO NON E' AGLI ATTI: va letto sul simbolo
+#        prima di convertire qualunque cosa. [DA VERIFICARE]
+#    >>> E la regola di lettura di METRO_PROP D4: se il rapporto cade
+#        fra 2,5x e 3,5x IL VERDETTO NON SI DA'. Si misura lo spread col
+#        RealCost Spread P95 Logger (Code Base 74148) e si rilegge.
+#
+#  CHE COSA GIRA, ESATTAMENTE: IL MOTORE NUDO.
+#    Tutti gli input non elencati qui sotto sono BLINDATI AL DEFAULT DEL
+#    SORGENTE dal driver, che li legge dal .mq5 (prove\LEGGIMI.md). Non
+#    si trascrivono a mano apposta: una riga ricopiata storta e' un EA
+#    che non esiste. I default del sorgente SONO GIA' la baseline --
+#    l'adattamento in casa e' nato per questo (FVG_TESI.md par. 3-4):
+#      InpRegimeMode   = REG_NONE      (l'autore parte da BOTH: EMA+ADX)
+#      InpEntryMode    = ENTRY_RITORNO (la tesi, non la formazione)
+#      InpGapMode      = GAP_PERCENTILE, InpGapPctOfMax = 10
+#      InpMinSLAtr     = 0.50          (PAVIMENTO SL ACCESO, C4/R109)
+#      InpTP1Pct = 0, InpBEAtrTrigger = 0, InpUseTrailAtr = false
+#                                      (gestione SPENTA: senza, la
+#                                       mediana del take non esiste)
+#      InpMaxDailyDDPct = 0, InpMaxTotalDDPct = 0
+#                                      (muri SPENTI in backtest: un muro
+#                                       NASCONDE il rischio da misurare.
+#                                       R109 col muro al 10% avrebbe
+#                                       scritto "DD 10%" invece del 56%)
+#      InpMaxTradesPerDay = 3          (cap C6: gli FVG nascono in
+#                                       grappoli, stop correlati nella
+#                                       stessa seduta)
+#    Le QUATTRO righe qui sotto sono scritte esplicite pur valendo il
+#    default: sono la BASELINE DICHIARATA del round, e devono essere
+#    verificabili nell'artefatto .ini che ha girato, non dedotte.
+#
+#  MAGIC VERGINI 776000/776001: blocco 776xxx, cercati UNO PER UNO in
+#  tutto il repo il 28/08/2026 -> ZERO occorrenze. Il magic del SORGENTE
+#  e' 775501 e NON compare qui: il tester non deve poter incrociare
+#  nessun deal di nessuna sedia.
+#  Lo sweep gemello sui due magic e' anche il CONTROLLO D'IGIENE: le due
+#  righe del CSV devono uscire IDENTICHE AL CENTESIMO. Se non lo sono, il
+#  banco non e' deterministico e il file non si legge.
+#  Ed e' anche l'unico asse con flag Y: senza almeno un asse spazzolato
+#  il driver generico si rifiuta di partire.
+#
+#  >>> QUELLO CHE QUESTO FILE NON PUO' DIRE, detto prima:
+#      - non promuove e non boccia niente. E' un CONTA-OPERAZIONI.
+#      - non misura i due lati separati: li misurano i file gemelli
+#        PASSO0_FVGRET_01_long.txt e _02_short.txt (regola dei DUE LATI
+#        di Claudio, 25/08). E n(long) + n(short) NON fara' n(nudo):
+#        l'EA tiene UNA posizione alla volta, quindi con un lato spento
+#        lo slot resta libero e entrano segnali che qui vengono buttati.
+#        E' un fatto del motore, non un guasto del banco.
+#      - i 21 mesi del feed BCM sugli indici sono UN SOLO REGIME
+#        RIALZISTA (criterio C6). Va dichiarato prima, non dopo.
+#      - l'EA NON E' MAI STATO COMPILATO da nessuno: se MetaEditor si
+#        lamenta, il PASSO 0 e' quello, e va riportato cosi'.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA (valgono il default: scritte per essere
+#     verificabili nell'.ini, non per cambiare qualcosa) ---
+InpRegimeMode=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+
+# --- I DUE LATI: qui INSIEME. E' la differenza con i file 01 e 02 ---
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=776000||776000||1||776001||Y
