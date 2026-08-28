@@ -1,0 +1,141 @@
+# =====================================================================
+#  PASSO 0 -- ALLINEA LONDRA  --  CELLA 01_nofinestra
+#  >>> E' LA CELLA DI ABLAZIONE: L'ASSE PRINCIPALE DI QUESTO PASSO 0 <<<
+#  ABTG_AllineaLondra  su  EURUSD  M15
+#  magic gemelli 777610 / 777611
+# ---------------------------------------------------------------------
+#  E' la cella 00_finestra con UN SOLO INTERRUTTORE MOSSO. Ablazione
+#  A STELLA, non a scala cumulativa: il diff fra questo file e il
+#  00_finestra e' di DUE RIGHE e basta.
+#
+#  COSA CAMBIA RISPETTO AL 00_finestra:
+#    InpUsaFinestraSessione   1  ->  0   [SI SPEGNE]
+#    InpMagic                 777600/777601  ->  777610/777611
+#
+#  L'IPOTESI, i tre esiti A/B/C, il perche' del filtro di spread
+#  spento, il perche' del Guardian a 0 e l'avvertenza sugli orari in
+#  ORA SERVER sono scritti in testa a
+#  prove\PASSO0_ALLINEALONDRA_00_finestra.txt e NON si riscrivono qui:
+#  un criterio ricopiato in quattro posti e' un criterio che prima o poi
+#  diverge.
+#
+#  ---------------------------------------------------------------------
+#  PERCHE' ESISTE QUESTA CELLA -- e' la domanda del dossier, letterale:
+#
+#    "ABTG_SuperWave / ABTG_CrossEma / ABTG_GoldenCross: adiacenza
+#     CONCETTUALE seria, sono tutti motori di allineamento/incrocio di
+#     medie. La differenza e' il CONTENITORE (sessione + flat + tetto
+#     2/giorno), non il segnale. Ed e' esattamente per questo che il
+#     round deve avere una cella di ablazione: lo stesso allineamento
+#     SENZA la finestra oraria. Se il nudo va uguale, la sessione non
+#     serve e il candidato e' un doppione; se il nudo crolla, il
+#     contenitore E' il motore."
+#     (CACCIA_INTRADAY_FOREX_ORO_2026-08-28.md, scheda P2)
+#  ---------------------------------------------------------------------
+#
+#  >>> COSA ISOLA DAVVERO QUESTO INTERRUTTORE, DETTO PER NON BARARE.
+#      Isola LA FINESTRA D'INGRESSO. NON isola il flat (che non si
+#      spegne mai: mandato FTMO "mai overnight" del 28/08) e NON isola
+#      il tetto giornaliero (che e' un input a parte, InpMaxTradesDay).
+#      Letto nel sorgente, non dedotto:
+#        - DentroFinestraIngresso_Calc(...) con usaFinestra=false
+#          risponde SEMPRE vero: il filtro d'orario sull'ingresso sparisce;
+#        - DevoFlat_Calc(...) con usaFinestra=false cade a
+#          FlatGiornataMinuto_Calc(15) = minuto 1424 = 23:44 ORA SERVER.
+#          Il flat esiste ancora, solo a fine GIORNATA invece che a fine
+#          sessione. La colonna "Minuto Flat Calcolato" lo mostra: deve
+#          valere 1424 qui e 630 nelle altre tre celle.
+#
+#  >>> E L'EFFETTO DI SECONDO ORDINE, che va letto ACCANTO al numero e
+#      non in fondo (CHECKLIST punto 97-bis: in una gamba CON/SENZA si
+#      elencano gli effetti collaterali dell'interruttore PRIMA di
+#      chiamare "costo" la differenza).
+#
+#      IL TETTO DI 2 INGRESSI AL GIORNO RESTA ACCESO ANCHE QUI.
+#      Con la finestra spenta il motore NON opera "distribuito su tutto
+#      il giorno": prende i PRIMI DUE segnali allineati dopo il cambio
+#      di giornata del server, e poi tace fino a mezzanotte. Nel
+#      sorgente (OnTick) gTradesToday si azzera al cambio di
+#      tn.day_of_year, e ValutaBarraChiusa esce con
+#      "if(gTradesToday >= InpMaxTradesDay) return".
+#      Su un allineamento a 5 medie -- che e' uno STATO, non un evento,
+#      e resta vero per molte barre di fila -- questo vuol dire che i
+#      due ingressi cadranno tipicamente nelle prime barre M15 dopo le
+#      00:00 SERVER, non "in giro per la giornata".
+#
+#      QUINDI: questa cella NON misura "lo stesso motore, tutto il
+#      giorno". Misura "lo stesso motore, ANCORATO A MEZZANOTTE SERVER".
+#      La differenza col 00_finestra e' un PACCHETTO:
+#          (finestra d'ingresso rimossa) + (ancoraggio a mezzanotte)
+#      e va riportata cosi'. Chi volesse il motore davvero libero deve
+#      alzare ANCHE InpMaxTradesDay -- che sarebbe una cella a DUE righe
+#      mosse, cioe' un'altra misura, e questo giro non ce l'ha.
+#      La colonna "Giorni Tetto Bloccante" dice quante giornate il tetto
+#      ha davvero morso, e va letta insieme al conteggio.
+#
+#  MAGIC VERGINI 777610/777611: cercati uno per uno in tutto il repo il
+#  28/08/2026 -> ZERO occorrenze.
+# =====================================================================
+@SIMBOLO  EURUSD
+@PERIODO  M15
+@DAQUANDO 2022.07.01
+
+# --- IL MOTORE: CONGELATO ai default dell'autore. NON e' un asse.
+InpSmma1=3||3||0||3||N
+InpSmma2=6||6||0||6||N
+InpSmma3=9||9||0||9||N
+InpSmma4=50||50||0||50||N
+InpEmaLenta=200||200||0||200||N
+
+# --- I DUE LATI: insieme, come nel 00_finestra.
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- >>> L'UNICA RIGA CHE CAMBIA DAL 00_finestra: LA FINESTRA E' SPENTA.
+InpUsaFinestraSessione=0||0||0||0||N
+
+# --- LA FINESTRA resta DICHIARATA con gli stessi numeri del 00_finestra
+#     (l'ablazione deve cambiare UNA cosa sola). Con l'interruttore a 0
+#     questi valori non filtrano piu' gli ingressi, ma restano nelle
+#     colonne "Minuto Inizio/Fine Ingressi/Fine Sessione": e' cosi' che
+#     si dimostra che l'unica differenza e' l'interruttore.
+InpSessStartHour=3||3||0||3||N
+InpSessStartMin=0||0||0||0||N
+InpEntryEndHour=8||8||0||8||N
+InpEntryEndMin=45||45||0||45||N
+InpSessEndHour=10||10||0||10||N
+InpSessEndMin=45||45||0||45||N
+
+# --- IL FLAT: identico. Qui cade a 23:44 server invece che alle 10:30,
+#     perche' con la finestra spenta vale il flat di fine GIORNATA.
+InpFlatAnticipoMin=15||15||0||15||N
+
+# --- PERIMETRO OPERATIVO: IDENTICO. Il tetto NON si tocca (vedi
+#     l'effetto di secondo ordine qui sopra).
+InpMaxTradesDay=2||2||0||2||N
+InpMaxPositions=1||1||0||1||N
+
+# --- STOP E GESTIONE: identici al 00_finestra.
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=1||1||0||1||N
+InpTPfinal_R=2.0||2.0||0||2.0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- RISCHIO: identico.
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- FILTRO DI SPREAD: SPENTO, identico.
+InpMaxSpread=0||0||0||0||N
+InpMaxSpreadPctSL=0.0||0.0||0||0.0||N
+
+# --- GENERALI: identici.
+InpUsaGuardian=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo.
+InpMagic=777610||777610||1||777611||Y

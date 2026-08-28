@@ -1,0 +1,157 @@
+# =====================================================================
+#  PASSO 0 -- ALLINEA LONDRA  --  CELLA 00_finestra  (LA BASELINE)
+#  ABTG_AllineaLondra  su  EURUSD  M15
+#  magic gemelli 777600 / 777601
+# =====================================================================
+#
+#  ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  E' il PASSO 0 del candidato P2 della caccia intraday forex/oro del
+#  28/08/2026 (caccia_strategie\CACCIA_INTRADAY_FOREX_ORO_2026-08-28.md,
+#  scheda P2, voto 7/10). Si misura QUANTE OPERAZIONI produce il motore,
+#  prima di qualunque lettura di merito -- valvola R59, Emendamento
+#  della finestra regola A ("l'unita' di misura e' l'OPERAZIONE").
+#  Il PF che esce dal CSV si LEGGE ma NON si giudica: non ci sono
+#  criteri di merito firmati, non c'e' walk-forward vero e quattro
+#  celle non sono un round.
+#  ---------------------------------------------------------------------
+#
+#  L'IPOTESI, in una riga (dossier, "TESI IN UNA RIGA"):
+#    "Nelle prime ore di Londra il flusso istituzionale e' direzionale:
+#     quando tutte le scale temporali dalla piu' corta alla piu' lunga
+#     sono gia' d'accordo, quel consenso e' flusso e non rumore, e dura
+#     fino a meta' mattina -- dopo di che il flusso si esaurisce e la
+#     posizione non ha piu' ragione di esistere."
+#
+#  LA DOMANDA DEL PASSO 0, e i tre esiti congelati PRIMA dei numeri:
+#    A. n >= 150 per finestra (IS e OOS)  -> il campione c'e', il round
+#       vero si puo' disegnare e i criteri si portano alla firma;
+#    B. n <  150                          -> MERITO SOSPESO (valvola
+#       R59 / Emendamento regola B); il RISCHIO si giudica lo stesso
+#       (peggior giornata %, Equity DD %). NON si allarga il motore per
+#       fare campione;
+#    C. n enorme                          -> la manopola e' la FINESTRA
+#       (InpEntryEndHour/Min), NON il rischio e NON un filtro nuovo
+#       appiccicato sopra.
+#
+#  LA SECONDA DOMANDA, che e' quella per cui il round esiste davvero,
+#  si legge sul confronto con la cella 01_nofinestra:
+#    "il contenitore (sessione + flat + tetto) E' il motore, oppure
+#     questo e' un doppione di ABTG_SuperWave / ABTG_CrossEma /
+#     ABTG_GoldenCross con un orologio addosso?"
+#  Il dossier dichiara l'adiacenza concettuale e ne fa il carico della
+#  prova di chi propone. Qui la si misura.
+#
+#  ---------------------------------------------------------------------
+#  QUESTA E' LA CELLA BASELINE: tutte le altre tre differiscono da
+#  QUESTO FILE di DUE RIGHE SOLE (l'interruttore + il magic), e il
+#  driver RIGA_ALLINEALONDRA.ps1 lo verifica PRIMA di aprire MT5.
+#  Ablazione A STELLA, non a scala cumulativa.
+#  ---------------------------------------------------------------------
+#
+#  LE CINQUE MEDIE SONO CONGELATE AI DEFAULT DELL'AUTORE (3/6/9/50/200)
+#  e NON sono un asse. Il mandato del costruttore dell'EA lo dice in
+#  testa al sorgente: "cinque manopole puntate sul passato. NEL PRIMO
+#  ROUND SI SPAZZOLA LA SESSIONE, NON LE MEDIE."
+#
+#  GLI ORARI SONO IN ORA SERVER E NON SONO UNA CONVERSIONE.
+#  Il Pine dice "0300-0845" e "0300-1045" nel fuso DELLO SCAMBIO del
+#  grafico TradingView (tipicamente UTC su un cross FX). Qui i numeri
+#  letterali dell'autore sono letti come ORA SERVER BCM: e' un PUNTO DI
+#  PARTENZA dichiarato, non una traduzione. La conversione a tavolino e'
+#  la trappola gia' pagata in casa (CLAUDE.md: i log di MT5 sono in ora
+#  LOCALE, il grafico e' in ora SERVER). I tre minuti-del-giorno DAVVERO
+#  usati escono in colonna ("Minuto Inizio Sessione", "Minuto Fine
+#  Ingressi", "Minuto Fine Sessione"), cosi' nessuno deve fidarsi
+#  dell'.ini per sapere quale finestra ha girato.
+#
+#  IL FILTRO DI SPREAD E' SPENTO, ED E' UNA SCELTA DICHIARATA.
+#  Il PASSO 0 misura il MOTORE NUDO. La colonna "Ingressi Saltati
+#  Spread" deve quindi restare a ZERO, e il driver ne fa un CANARINO: se
+#  e' > 0, il file prova che ha girato NON e' questo.
+#  >>> NESSUNA CELLA SI PROMUOVE CON IL FILTRO SPENTO (lezione R55).
+#
+#  IL GUARDIAN E' PINNATO A 0, ED E' UNA SCELTA DI BANCO.
+#  Nel tester ABTG_GuardiaIngresso e' comunque fail-open (le
+#  GlobalVariable del Guardian non esistono: verificato in
+#  mql5\Include\ABTG_PausaGuardian.mqh, righe 53-55), quindi 0 e 1
+#  darebbero lo stesso risultato. Si pinna 0 lo stesso per togliere una
+#  dipendenza NON MISURATA: se sul PC di backtest esistesse una
+#  GlobalVariable ABTG_PAUSA_GIORNO rimasta da un'installazione viva,
+#  gli ingressi verrebbero soppressi in silenzio e il conteggio di
+#  questo PASSO 0 sarebbe piu' basso senza che nessuno lo veda.
+#
+#  MAGIC VERGINI 777600/777601: il blocco 7776xx e' stato cercato UNO
+#  PER UNO in tutto il repo il 28/08/2026 -> ZERO occorrenze fuori dal
+#  default del sorgente. NESSUNA SEDIA VIVA VIENE TOCCATA.
+# =====================================================================
+@SIMBOLO  EURUSD
+@PERIODO  M15
+@DAQUANDO 2022.07.01
+
+# --- IL MOTORE: CONGELATO ai default dell'autore. NON e' un asse.
+#     Si pinnano in forma COMPLETA (v||v||0||v||N) e non con "Nome=v"
+#     secco: un pin secco imposta il VALORE ma NON spegne il flag di
+#     ottimizzazione che MT5 ricorda dall'ultima griglia di questo EA
+#     (CHECKLIST_RIGA_DI_LANCIO.md punto 5).
+InpSmma1=3||3||0||3||N
+InpSmma2=6||6||0||6||N
+InpSmma3=9||9||0||9||N
+InpSmma4=50||50||0||50||N
+InpEmaLenta=200||200||0||200||N
+
+# --- I DUE LATI: qui INSIEME (il motore e' simmetrico per costruzione,
+#     AllineaLong_Calc e AllineaShort_Calc sono mutuamente esclusivi).
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- LA CELLA DI ABLAZIONE: qui la finestra e' ACCESA.
+InpUsaFinestraSessione=1||1||0||1||N
+
+# --- LA FINESTRA, IN ORA SERVER (03:00 / 08:45 / 10:45 = minuti
+#     180 / 525 / 645). Escono in colonna: si verificano, non si
+#     assumono.
+InpSessStartHour=3||3||0||3||N
+InpSessStartMin=0||0||0||0||N
+InpEntryEndHour=8||8||0||8||N
+InpEntryEndMin=45||45||0||45||N
+InpSessEndHour=10||10||0||10||N
+InpSessEndMin=45||45||0||45||N
+
+# --- IL FLAT: NON e' disattivabile da nessun input. Questo lo sposta
+#     solo PIU' PRESTO. 15' -> flat alle 10:30 server = minuto 630.
+InpFlatAnticipoMin=15||15||0||15||N
+
+# --- PERIMETRO OPERATIVO (Pine: max_intraday_filled_orders(2),
+#     pyramiding 1).
+InpMaxTradesDay=2||2||0||2||N
+InpMaxPositions=1||1||0||1||N
+
+# --- STOP E GESTIONE (rifatti: ATR invece dei 300 punti fissi del Pine)
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=1||1||0||1||N
+InpTPfinal_R=2.0||2.0||0||2.0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- RISCHIO: 0,65% -- lo standard di casa del cap C1 firmato il 18/08.
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- FILTRO DI SPREAD: SPENTO. Vedi il blocco in testa.
+InpMaxSpread=0||0||0||0||N
+InpMaxSpreadPctSL=0.0||0.0||0||0.0||N
+
+# --- GENERALI. InpAutoTest ACCESO: l'esito degli 8 blocchi esce nella
+#     colonna "Autotest Falliti" del CSV, che il driver usa come GATE.
+InpUsaGuardian=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo.
+#     Servono a una cosa sola: le due righe del CSV devono uscire
+#     IDENTICHE AL CENTESIMO. Se non lo sono, il banco non e'
+#     deterministico e nessun numero di questa corsa si legge.
+InpMagic=777600||777600||1||777601||Y

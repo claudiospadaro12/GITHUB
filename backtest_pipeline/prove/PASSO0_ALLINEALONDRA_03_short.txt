@@ -1,0 +1,89 @@
+# =====================================================================
+#  PASSO 0 -- ALLINEA LONDRA  --  CELLA 03_short  (SOLO SHORT)
+#  ABTG_AllineaLondra  su  EURUSD  M15
+#  magic gemelli 777630 / 777631
+# ---------------------------------------------------------------------
+#  E' la cella 00_finestra con UN SOLO INTERRUTTORE MOSSO. Ablazione
+#  A STELLA: il diff fra questo file e il 00_finestra e' di DUE RIGHE.
+#
+#  COSA CAMBIA RISPETTO AL 00_finestra:
+#    InpAllowLong    1  ->  0   [SI SPEGNE]
+#    InpMagic        777600/777601  ->  777630/777631
+#
+#  L'IPOTESI, i tre esiti A/B/C e tutte le avvertenze di banco stanno in
+#  testa a prove\PASSO0_ALLINEALONDRA_00_finestra.txt.
+#  IL PERCHE' DI QUESTA CELLA E DELLA GEMELLA 02_long -- la contesa
+#  dello slot e del tetto, il fatto che la somma dei due lati NON fara'
+#  il congiunto, e la nota di regime -- e' scritto UNA VOLTA SOLA in
+#  testa a prove\PASSO0_ALLINEALONDRA_02_long.txt e vale IDENTICO qui.
+#  (CHECKLIST punto 97-bis: un'avvertenza scritta su una cella e non
+#  sull'altra fa dedurre che sull'altra il problema non ci sia.)
+#
+#  E QUI VALE ANCHE AL ROVESCIO, che e' la meta' che di solito manca:
+#  spegnendo il LONG si liberano lo slot e il tetto per lo SHORT, quindi
+#  il numero di questa cella e' PIU' ALTO di "Ingressi Short" letto nel
+#  00_finestra. Le due grandezze NON si confrontano fra loro: la prima
+#  dice "quanto trada lo short da solo", la seconda "quanto trada lo
+#  short nella configurazione che andrebbe in campo". Servono a due
+#  domande diverse e il referto le tiene separate.
+#
+#  MAGIC VERGINI 777630/777631: cercati uno per uno in tutto il repo il
+#  28/08/2026 -> ZERO occorrenze.
+# =====================================================================
+@SIMBOLO  EURUSD
+@PERIODO  M15
+@DAQUANDO 2022.07.01
+
+# --- IL MOTORE: CONGELATO ai default dell'autore. NON e' un asse.
+InpSmma1=3||3||0||3||N
+InpSmma2=6||6||0||6||N
+InpSmma3=9||9||0||9||N
+InpSmma4=50||50||0||50||N
+InpEmaLenta=200||200||0||200||N
+
+# --- >>> L'UNICA RIGA CHE CAMBIA DAL 00_finestra: IL LONG E' SPENTO.
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+
+# --- LA CELLA DI ABLAZIONE: qui la finestra e' ACCESA (come nel 00).
+InpUsaFinestraSessione=1||1||0||1||N
+
+# --- LA FINESTRA, IN ORA SERVER: identica al 00_finestra.
+InpSessStartHour=3||3||0||3||N
+InpSessStartMin=0||0||0||0||N
+InpEntryEndHour=8||8||0||8||N
+InpEntryEndMin=45||45||0||45||N
+InpSessEndHour=10||10||0||10||N
+InpSessEndMin=45||45||0||45||N
+
+# --- IL FLAT: identico.
+InpFlatAnticipoMin=15||15||0||15||N
+
+# --- PERIMETRO OPERATIVO: identico.
+InpMaxTradesDay=2||2||0||2||N
+InpMaxPositions=1||1||0||1||N
+
+# --- STOP E GESTIONE: identici.
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=1||1||0||1||N
+InpTPfinal_R=2.0||2.0||0||2.0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- RISCHIO: identico.
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- FILTRO DI SPREAD: SPENTO, identico.
+InpMaxSpread=0||0||0||0||N
+InpMaxSpreadPctSL=0.0||0.0||0||0.0||N
+
+# --- GENERALI: identici.
+InpUsaGuardian=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo.
+InpMagic=777630||777630||1||777631||Y

@@ -1,0 +1,120 @@
+# =====================================================================
+#  PASSO 0 -- ALLINEA LONDRA  --  CELLA 02_long  (SOLO LONG)
+#  ABTG_AllineaLondra  su  EURUSD  M15
+#  magic gemelli 777620 / 777621
+# ---------------------------------------------------------------------
+#  E' la cella 00_finestra con UN SOLO INTERRUTTORE MOSSO. Ablazione
+#  A STELLA: il diff fra questo file e il 00_finestra e' di DUE RIGHE.
+#
+#  COSA CAMBIA RISPETTO AL 00_finestra:
+#    InpAllowShort   1  ->  0   [SI SPEGNE]
+#    InpMagic        777600/777601  ->  777620/777621
+#
+#  L'IPOTESI, i tre esiti A/B/C e tutte le avvertenze di banco stanno in
+#  testa a prove\PASSO0_ALLINEALONDRA_00_finestra.txt e NON si
+#  riscrivono qui.
+#
+#  ---------------------------------------------------------------------
+#  PERCHE' ESISTE, visto che l'EA esporta gia' "Ingressi Long" e
+#  "Ingressi Short" in colonna -- ed e' una domanda legittima.
+#
+#  Le due colonne del 00_finestra danno la frequenza dei due lati DENTRO
+#  LA POPOLAZIONE CONGIUNTA, che e' il numero giusto per la
+#  configurazione che andrebbe in campo. NON danno la frequenza PROPRIA
+#  di un lato, perche' nella cella congiunta i due lati si contendono
+#  DUE risorse condivise (letto nel sorgente, non dedotto):
+#    1. LO SLOT. ValutaBarraChiusa esce con
+#       "if(ContaPosizioni() >= InpMaxPositions) return" PRIMA di
+#       guardare il lato: una posizione long viva mangia il segnale
+#       short che nasce mentre e' aperta, e viceversa;
+#    2. IL TETTO GIORNALIERO. gTradesToday e' UNO SOLO per i due lati:
+#       due long al mattino chiudono la giornata anche allo short.
+#  Con un lato spento quelle due risorse restano libere, e qui entrano
+#  segnali che nel 00_finestra erano stati buttati.
+#
+#  >>> QUINDI n(02_long) + n(03_short) NON FARA' n(00_finestra), e NON
+#      e' un difetto: e' un fatto del motore, misurato nel codice.
+#      Vale nei due versi: la somma sara' MAGGIORE del congiunto.
+#
+#  >>> E NON C'E' PRIORITA' FRA I LATI, che e' l'altra cosa che si
+#      poteva temere: AllineaLong_Calc e AllineaShort_Calc sono
+#      MUTUAMENTE ESCLUSIVI per costruzione (il prezzo non puo' stare
+#      sopra tutte e cinque le medie e sotto tutte e cinque nella stessa
+#      barra), quindi l'ordine in cui SegnaleAllineamento() li prova non
+#      favorisce nessuno dei due. L'interferenza e' solo quella dello
+#      slot e del tetto.
+#
+#  A CHE SERVE, in una riga: sapere se il lato LONG, DA SOLO, ha un
+#  campione sufficiente per un giudizio di MERITO (soglia 150,
+#  Emendamento regola A). Il dossier segnala che questo motore e' "a
+#  favore del trend, quindi nelle mattine di trend forte e' CORRELATO
+#  alle sedie long della flotta": sapere quanto pesa ciascun lato e' il
+#  primo mattone di quella misura di correlazione, che NON si fa qui.
+#
+#  NOTA DI REGIME, e vale per il confronto fra questa cella e la 03:
+#  la finestra 2022.07 -> 2026.06 su EURUSD NON e' un solo regime (c'e'
+#  il crollo verso la parita' del 2022 e la risalita 2023-2025), quindi
+#  qui il lato short NON parte svantaggiato "per epoca" come succedeva
+#  ai PASSO 0 gemelli sugli indici. Va detto perche' cambia la lettura:
+#  un "niente edge short" letto QUI non ha l'attenuante del regime.
+#
+#  MAGIC VERGINI 777620/777621: cercati uno per uno in tutto il repo il
+#  28/08/2026 -> ZERO occorrenze.
+# =====================================================================
+@SIMBOLO  EURUSD
+@PERIODO  M15
+@DAQUANDO 2022.07.01
+
+# --- IL MOTORE: CONGELATO ai default dell'autore. NON e' un asse.
+InpSmma1=3||3||0||3||N
+InpSmma2=6||6||0||6||N
+InpSmma3=9||9||0||9||N
+InpSmma4=50||50||0||50||N
+InpEmaLenta=200||200||0||200||N
+
+# --- >>> L'UNICA RIGA CHE CAMBIA DAL 00_finestra: LO SHORT E' SPENTO.
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+
+# --- LA CELLA DI ABLAZIONE: qui la finestra e' ACCESA (come nel 00).
+InpUsaFinestraSessione=1||1||0||1||N
+
+# --- LA FINESTRA, IN ORA SERVER: identica al 00_finestra.
+InpSessStartHour=3||3||0||3||N
+InpSessStartMin=0||0||0||0||N
+InpEntryEndHour=8||8||0||8||N
+InpEntryEndMin=45||45||0||45||N
+InpSessEndHour=10||10||0||10||N
+InpSessEndMin=45||45||0||45||N
+
+# --- IL FLAT: identico.
+InpFlatAnticipoMin=15||15||0||15||N
+
+# --- PERIMETRO OPERATIVO: identico.
+InpMaxTradesDay=2||2||0||2||N
+InpMaxPositions=1||1||0||1||N
+
+# --- STOP E GESTIONE: identici.
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=1||1||0||1||N
+InpTPfinal_R=2.0||2.0||0||2.0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- RISCHIO: identico.
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- FILTRO DI SPREAD: SPENTO, identico.
+InpMaxSpread=0||0||0||0||N
+InpMaxSpreadPctSL=0.0||0.0||0||0.0||N
+
+# --- GENERALI: identici.
+InpUsaGuardian=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo.
+InpMagic=777620||777620||1||777621||Y
