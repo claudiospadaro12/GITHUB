@@ -3527,23 +3527,19 @@ lancio sono stati riscritti"*, **non** *"il pin vecchio non c'e' piu' in
 pagina"*. Un punto d'uso in un'altra forma tipografica non e' *sfuggito* al
 controllo — **non poteva entrarci**.
 
-> ✅ **REGOLA: il conteggio di chiusura non e' un NUMERO, e' un ELENCO.**
-> Dopo il `sed`, sempre:
-> ```bash
-> grep -n "$VECCHIO" "$F"   # ogni riga stampata va LETTA e classificata
-> ```
-> e **ogni riga che esce dev'essere STORIA riconoscibile** (*"il pin `x` e'
-> BRUCIATO perche'..."*, il verbale di un difetto — quelle non si toccano mai,
-> 77-bis). Se esce un **titolo**, un **riquadro**, una **tabella** o un
-> **blocco di lancio**, la ricetta ha mancato un punto d'uso: si aggiunge
-> l'espressione e si rifa'.
-> Un elenco vuoto e' il caso normale ed e' il piu' verde di tutti; un numero
-> "0 su tre forme che conosco" non vuol dire niente.
+> ✅ **LA REGOLA CHE LO PRENDE E' IL QUARTO CONTEGGIO DEL PUNTO 103**
+> (`grep -rn "${VECCHIO:0:7}"` **deve dare 0**, su tutti i file che nominano il
+> pin). Il 103 e' nato lo stesso giorno per la forma **abbreviata**; questo caso
+> dimostra che lo stesso conteggio serve anche per la forma **lunga scritta in
+> un altro modo**, ed e' il motivo per cui il quarto conteggio va sul **numero
+> nudo** e non su una delle sue confezioni.
 >
-> 🧷 **E il corollario tipografico, che costa zero:** dentro una famiglia di
-> pagine il pin si scrive **in una forma sola** (qui: **`` **`sha`** ``**).
-> Una pagina gemella che cambia forma al titolo rompe la ricetta di TUTTE le
-> altre senza che nessun conteggio se ne accorga.
+> 🧷 **E il corollario tipografico, che costa zero e va rispettato a monte:**
+> dentro una famiglia di pagine il pin si scrive **in una forma sola**
+> (convenzione di casa: **`` **`sha`** ``**, bold + backtick — cosi' lo scrivono
+> `RIGA_PREOPEN_DOW`, `RIGA_ALLINEALONDRA`, `RIGA_PASSO0_FVGRET`,
+> `RIGA_SONDA_OROLOGIO`). Una pagina gemella che al titolo cambia confezione
+> rompe la ricetta di TUTTE le altre, e i tre conteggi restano verdi.
 
 ## 78. 🗓️ L'ARTEFATTO CHE PORTA DELLE DATE MA NON PORTA **LA PROPRIA**: l'eta' si misura su un numero che non e' quello
 
