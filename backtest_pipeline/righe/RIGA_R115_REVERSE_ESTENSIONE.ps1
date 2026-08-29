@@ -514,13 +514,13 @@ try{
     $lv.DatiIS=$rIS; $lv.DatiOOS=$rOOS; $lv.RigheIS=@($rIS).Count; $lv.RigheOOS=@($rOOS).Count
     $lv.Gem = (Gemelli $rOOS)
     if(@($rOOS).Count -ge 1){
-      $r=$rOOS[0]; $lv.PfOOS=[double](if($null -ne $r.Pf){$r.Pf}else{-1.0}); $lv.DdOOS=[double](if($null -ne $r.Dd){$r.Dd}else{-1.0})
-      $lv.NOOS=[int](if($null -ne $r.N){$r.N}else{-1}); $lv.ProfOOS=[double](if($null -ne $r.Profit){$r.Profit}else{-999999.0})
+      $r=$rOOS[0]; $lv.PfOOS=[double]$(if($null -ne $r.Pf){$r.Pf}else{-1.0}); $lv.DdOOS=[double]$(if($null -ne $r.Dd){$r.Dd}else{-1.0})
+      $lv.NOOS=[int]$(if($null -ne $r.N){$r.N}else{-1}); $lv.ProfOOS=[double]$(if($null -ne $r.Profit){$r.Profit}else{-999999.0})
       if($null -ne $r.Profit -and $null -ne $r.N -and [double]$r.N -gt 0){ $lv.AspOOS=[double]$r.Profit/[double]$r.N }
     }
     if(@($rIS).Count -ge 1){
-      $r=$rIS[0]; $lv.PfIS=[double](if($null -ne $r.Pf){$r.Pf}else{-1.0}); $lv.DdIS=[double](if($null -ne $r.Dd){$r.Dd}else{-1.0})
-      $lv.NIS=[int](if($null -ne $r.N){$r.N}else{-1}); $lv.ProfIS=[double](if($null -ne $r.Profit){$r.Profit}else{-999999.0})
+      $r=$rIS[0]; $lv.PfIS=[double]$(if($null -ne $r.Pf){$r.Pf}else{-1.0}); $lv.DdIS=[double]$(if($null -ne $r.Dd){$r.Dd}else{-1.0})
+      $lv.NIS=[int]$(if($null -ne $r.N){$r.N}else{-1}); $lv.ProfIS=[double]$(if($null -ne $r.Profit){$r.Profit}else{-999999.0})
     }
     $lv.Esito="MISURATA"
     if(@($rOOS).Count -ne 2){ [void]$Problemi.Add($lv.Id + ": il CSV OOS ha " + @($rOOS).Count + " righe invece di 2 (gemelli). Cache del tester o celle mute: guardare prima di leggere.") }
