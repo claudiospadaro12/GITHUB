@@ -72,3 +72,21 @@ feed vero, ed e' proprio dove i test sintetici non arrivano.
 
 Il verdetto sul motore P3 resta **SOSPESO in attesa del ri-conteggio**: prima
 si conta, poi si giudica.
+
+---
+
+## AGGIORNAMENTO 29/08 ore 23:02 — v1.01 (need corretto) DA' ANCORA ZERO
+
+Rilanciato a pin `65df62c` con `BarrePerGiornoPieno()` in `CalcCono`/
+`CalcVwapSessione` (`need=(14+4)*~96` barre = ~18 giorni pieni, abbondante).
+Compilazione OK (78 KB), Flat Giorni 294 (gira ogni giorno), autotest non letto
+(percorso log cambiato, RILIEVO), **ma Trades ANCORA 0 su tutte e 3 le celle.**
+
+**Conseguenza onesta: il baco del `need` era reale ma NON era la causa dello
+zero.** Il blocco e' un ALTRO cancello in `OnNewBar` (cono non affidabile /
+warmup nDays<14 per il matcher delle sedute ragged / pos / grilletto che non
+scatta). L'EA NON ha contatori per-cancello, quindi la causa non e' leggibile
+dai CSV. **Prossimo passo: instrumentare `OnNewBar` con un contatore per ogni
+early-return, esposto come colonne nel CSV di OnTester** (nessun cambio di
+logica), poi UNA corsa diagnostica dice esattamente quale gate mangia ogni
+barra. Il verdetto P3 resta sospeso finche' il motore non entra.
