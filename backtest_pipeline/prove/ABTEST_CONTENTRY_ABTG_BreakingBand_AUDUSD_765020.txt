@@ -1,0 +1,116 @@
+# =====================================================================
+#  MARCATORE_PROVA_ABTEST_CONTENTRY_v1
+#  A/B CONTINUAZIONE -- ABTG_BreakingBand su AUDUSD H1
+#  MISURA A/B del TIMING D'INGRESSO della continuazione (InpContEntryMode).
+#  NON e' un round che promuove: e' una misura A/B. Non tocca il forward.
+# ---------------------------------------------------------------------
+#  COSA MISURA (l'UNICO parametro-strategia spazzato):
+#    InpContEntryMode  0 = PRIMO tocco storico (1.03)
+#                      1 = RETEST banda opposta (Leonardo p.4, 1.04)
+#                      2 = IN-BULGE di Claudio (1.05: primo-tocco-opposta +
+#                          trend mediana + candela direzionale + range)
+#  Tutto il resto = la CELLA VIVA di R103 su AUDUSD (InpPatternMode 1),
+#  byte per byte, tranne:
+#    - InpMagic          : coppia VERGINE 765020/765021 (blocco 7650xx mai
+#                          usato; verificato in tutto il repo)
+#    - i 5 input NUOVI di v1.05 (non esistevano al pin di R103): 4 restano
+#      ai DEFAULT del sorgente e InpContEntryMode e' l'ASSE A/B.
+#
+#  L'ASSE INERTE InpMagic (gemelli): come in R103/R108, InpMagic e' l'asse
+#  che non cambia NIENTE della strategia -- esiste solo per la GEMELLA di
+#  determinismo (i due magic devono dare PF/DD/n identici a parita' di
+#  mode). Percio' "l'unico parametro spazzato e' InpContEntryMode" (il
+#  magic non e' un parametro-strategia). 3 mode x 2 gemelli = 6 celle.
+#
+#  ANTENATO (gate 1a-bis del driver): questa cella base e' identica a
+#  R103_ABTG_BreakingBand_AUDUSD_772163.txt salvo InpMagic e i 5 input
+#  nuovi di v1.05.
+#
+#  I 4 input del mode 2 restano ai DEFAULT del sorgente (vincolo della
+#  sessione principale): InpTrendSlopeFactor=0.08, InpTrendSlopeBars=5,
+#  InpContEntryMaxRangeATR=2.0, InpContRequireMidFirst=false.
+#
+#  FINESTRA: 2020.01.01 -> 2026.06.30, split 40/60 di R103 (IS 40% / OOS
+#  60%), tick reali (Model 4). La convenzione IS/OOS la applica il driver.
+# =====================================================================
+
+@SIMBOLO  AUDUSD
+@PERIODO  H1
+@DAQUANDO 2020.01.01
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpStdPeriod=20||20||0||20||N
+InpStdSmaPeriod=50||50||0||50||N
+InpAtrPeriod=14||14||0||14||N
+InpPatternMode=1||1||0||1||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeRefBars=20||20||0||20||N
+InpBulgeMinBars=3||3||0||3||N
+InpBulgeMaxBars=20||20||0||20||N
+InpBulgeMinImpBars=1||1||0||1||N
+InpBulgeCandleMaxATR=0.0||0.0||0||0.0||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+InpBulgeMedianDistPct=0.75||0.75||0||0.75||N
+InpBulgeEndMode=1||1||0||1||N
+InpBulgeDirMode=1||1||0||1||N
+InpImpulseATR=1.5||1.5||0||1.5||N
+InpRientroMaxATR=1.5||1.5||0||1.5||N
+InpInvViolentBars=3||3||0||3||N
+InpZigZagATR=1.5||1.5||0||1.5||N
+InpDeepSpikeATR=1.5||1.5||0||1.5||N
+InpPostATRRef=1||1||0||1||N
+InpBandRidingMaxBars=20||20||0||20||N
+InpPostBulgeMaxBars=30||30||0||30||N
+InpReinflateTolPct=1.05||1.05||0||1.05||N
+InpUseShadowFilter=false||false||0||false||N
+InpShadowBodyMult=1.5||1.5||0||1.5||N
+InpUseRangeReduction=false||false||0||false||N
+InpRangeReductionPct=30.0||30.0||0||30.0||N
+InpContNoImpulseBandReturn=false||false||0||false||N
+InpNarrowBars=2||2||0||2||N
+InpStdDownMode=0||0||0||0||N
+InpFlatSlopeATR=0.05||0.05||0||0.05||N
+InpSlopeSource=0||0||0||0||N
+InpRetestBufferATR=0.15||0.15||0||0.15||N
+InpContRequireNarrow=true||true||0||true||N
+InpContRequireStdDown=true||true||0||true||N
+InpContEntryMode=0||0||1||2||Y
+InpTrendSlopeFactor=0.08||0.08||0||0.08||N
+InpTrendSlopeBars=5||5||0||5||N
+InpContEntryMaxRangeATR=2.0||2.0||0||2.0||N
+InpContRequireMidFirst=false||false||0||false||N
+InpUseReversalCandle=false||false||0||false||N
+InpRevBodyMaxPct=33.0||33.0||0||33.0||N
+InpRevShadowMinPct=50.0||50.0||0||50.0||N
+InpMinSolidita=0.0||0.0||0||0.0||N
+InpSL_ATRmult=3.0||3.0||0||3.0||N
+InpTPMode=0||0||0||0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpTPRefreshBars=1||1||0||1||N
+InpBEatATR=1.0||1.0||0||1.0||N
+InpBEMode=0||0||0||0||N
+InpMinTPatATR=0.0||0.0||0||0.0||N
+InpMinRR=0.0||0.0||0||0.0||N
+InpUseCongestionFilter=false||false||0||false||N
+InpCongBars=15||15||0||15||N
+InpCongCSMin=4||4||0||4||N
+InpCongCDAStdBars=10||10||0||10||N
+InpCongWidthDropPct=15.0||15.0||0||15.0||N
+InpCongLateralATR=1.0||1.0||0||1.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpComment=BB AUDUSD
+InpMagic=765020||765020||1||765021||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
