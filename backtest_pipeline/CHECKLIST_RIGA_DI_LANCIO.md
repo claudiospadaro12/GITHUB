@@ -5496,3 +5496,26 @@ Perche' e' sfuggita, ed e' la classe:
 > da verificare**: qui la correzione ha creduto al numero scritto nel punto della
 > checklist invece di ricontarle, e ha chiuso il difetto lasciandone fuori una.
 > **Un censimento si ri-esegue al momento della correzione, non si eredita.**
+
+---
+
+## 🧨 `[tipo](if(...))` / `)(if(...)` — PARSA PULITO, MUORE A RUNTIME (29/08/2026)
+
+_Pagato in R115: la corsa vera si e' fermata a runtime con **"The term 'if'
+is not recognized as the name of a cmdlet"**. Il gate precedente (che faceva
+`ParseFile`) l'aveva dato PASS: il costrutto e' sintatticamente valido, quindi
+il parser non fiata. E `-SoloControllo` non ci arriva mai — quel ramo fa
+`continue` PRIMA di leggere i CSV, cioe' prima della riga incriminata._
+
+In PowerShell `if` e' uno **statement**, non un'espressione. Dentro una
+parentesi di raggruppamento o subito dopo un cast — `[double](if(...){...}else{...})`
+oppure `(...)(if(...))` — le parentesi valgono come **grouping expression** e
+il loro contenuto viene eseguito come **comando**: PowerShell cerca un cmdlet
+di nome `if` e non lo trova. Per usare un `if` come valore serve il
+**subexpression operator**: `[double]$(if(...){...}else{...})`.
+
+> ✅ **REGOLA (controllo statico, perche' `ParseFile` da solo NON lo prende):**
+> `grep -P '\]\(if\(|\)\(if\('` su ogni `.ps1` toccato **deve dare ZERO**.
+> Ogni `if` usato come valore va scritto `$(if(...))`. E dove il difetto vive
+> nel ramo della corsa vera (non toccato da `-SoloControllo`), il giro a vuoto
+> **non e' una prova sufficiente**: PASS al controllo != PASS alla corsa.
