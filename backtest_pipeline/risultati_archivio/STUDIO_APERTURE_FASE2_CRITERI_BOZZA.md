@@ -1,9 +1,18 @@
 # 📐 CRITERI FASE 2 — IL MOTORE DELLE APERTURE [BOZZA — DA FIRMARE]
 
-> **Stato: BOZZA.** Scritta il 29/08 guardando SOLO il referto
-> `LETTURA_ANATOMIA_APERTURE_2026-08-26.md` (FASE 1, IS 2010-2020 Nasdaq).
-> La cassaforte 2021-2026 resta SIGILLATA finche' i criteri non sono firmati.
-> Nessun motore, nessun numero, finche' Claudio non firma. Regola delle due fasi.
+> **Stato: FIRMATA il 29/08/2026** (Claudio: "FIRMO LA FASE 2"). Scritta
+> guardando SOLO il referto `LETTURA_ANATOMIA_APERTURE_2026-08-26.md`
+> (FASE 1, IS 2010-2020 Nasdaq). Da qui in avanti la cassaforte 2021-2026 puo'
+> essere aperta UNA volta, in validazione. Regola delle due fasi.
+>
+> **DECISIONI FIRMATE (par. 2 e 4):**
+> - **Feature di selezione da testare: F1 (forza della rottura) + F3
+>   (allineamento HTF), UNA ALLA VOLTA** (ablazione a stella). F2 (ampiezza OR)
+>   e F4 (ora) restano IN RISERVA, si accendono solo se F1/F3 non bastano.
+> - **Prova di regime: SI', il motore si prova su NASDAQ + DAX + DOW** (non un
+>   simbolo solo). L'anatomia FASE 1 e' Nasdaq; per DAX/Dow si assume per
+>   analogia in prima battuta e si MISURA la coerenza cross-simbolo.
+> - Criteri di lettura par. 5 CONFERMATI.
 
 ## 0) DA DOVE NASCE (il fatto misurato, non l'opinione)
 L'anatomia FASE 1 ha misurato, su 2.569 giorni buoni, stabile anno per anno:
