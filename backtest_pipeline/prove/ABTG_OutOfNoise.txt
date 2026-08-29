@@ -1,0 +1,130 @@
+# =====================================================================
+#  PASSO 0 -- OUT OF THE NOISE  --  IL MOTORE NUDO, DUE LATI INSIEME
+#  ABTG_OutOfNoise  su  NASUSD  M15, TICK REALI
+# ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  E' il PASSO 0 del candidato P3 "Out of the Noise Intraday con VWAP"
+#  (porting del Pine di Yuri Lopukhov, MIT, TradingView gJeM3LZ5), scheda
+#  in caccia_strategie\CACCIA_M5M15_INDICI_2026-08-25.md (voto 7/10, in
+#  coda). Stessa macchina dei PASSO 0 gemelli FVGRET e VWAPREV:
+#
+#     "La frequenza e' il primo dato del round, prima di qualunque PF."
+#
+#  Si misura QUANTE OPERAZIONI produce il cono di rumore orario. Il
+#  Profit Factor che esce dal CSV si LEGGE ma NON si giudica: a questo
+#  stadio non esistono criteri firmati, non esiste ablazione, e tre celle
+#  non sono un round.
+#
+#  TESI DEL MOTORE (dal sorgente, tre pezzi):
+#    Attorno all'apertura c'e' un CONO DI RUMORE che si allarga con l'ora
+#    del giorno: la banda e' open/close-di-ieri per (1 +/- media su 14
+#    giorni di |close/open-1| alla STESSA posizione oraria). Solo un
+#    prezzo che esce da quel cono e' squilibrio vero. La VWAP di sessione
+#    fa da trailing, il cono da secondo binario. STOP vero al broker
+#    (ATR x 1.5, pavimento obbligatorio), FLAT a fine seduta, mai
+#    overnight. Non e' un box di 15 minuti: e' rumore che cresce.
+#
+#  LA DOMANDA DEL PASSO 0 e I TRE ESITI, congelati PRIMA di vedere il
+#  numero (criteri di accettazione -- si firmano QUI, non dopo):
+#
+#    A. n per lato >= 150 in 21 mesi
+#       -> il campione c'e'. Emendamento della Finestra regola A
+#          SODDISFATTO, il round vero si puo' disegnare (due lati,
+#          ablazione del cono, spazzolata di InpConeDays / InpSlAtrMult).
+#
+#    B. n per lato < 150
+#       -> VALVOLA R59 / Emendamento regola B: il MERITO resta SOSPESO,
+#          il RISCHIO si giudica lo stesso (un drawdown e' un fatto
+#          accaduto, non una stima). NON si allarga il motore per fare
+#          campione: si dichiara che a M15 su 21 mesi il cono non fa
+#          numero, e si decide se cambiare TF (M5) o simbolo.
+#
+#    C. n enorme (migliaia)
+#       -> il cono e' troppo stretto (poca storia o InpConeDays basso).
+#          La manopola e' InpConeDays / la geometria del cono, NON il
+#          rischio e NON un filtro nuovo appiccicato sopra.
+#
+#  E LA SECONDA MISURA, CHE VALE QUANTO LA PRIMA -- IL CANCELLO S0:
+#    mediana del take LORDO in PUNTI INDICE >= ~3-4x lo spread tipico.
+#    E' il cancello che ha bocciato R98. Spread tipico NASUSD: 1-2 punti
+#    indice [INCERTO, DICHIARATO NON MISURATO in questa corsa]; soglia di
+#    ordine ~6 punti indice.
+#    >>> QUI LA CONVERSIONE E' AGLI ATTI (a differenza del DAX): su NASUSD
+#        1 punto indice = 100 punti MT5 (R97, due misure concordi), ed e'
+#        gia' il default InpMT5PerPuntoIndice=100 DICHIARATO qui sotto.
+#        L'export per-trade scrive la colonna take_idx_pts GIA' in punti
+#        indice: NON serve nessuna conversione a mano. Si legge in
+#        Common\Files: abtg_trades_ABTG_OutOfNoise_NASUSD_<magic>.csv,
+#        NON nel PF.
+#    >>> ATTENZIONE: quel file porta il MAGIC nel nome, non la finestra:
+#        la gamba OOS SOVRASCRIVE la gamba IS dello stesso magic. Quello
+#        che resta a disco e' l'ULTIMA finestra girata.
+#
+#  SESSIONE / FUSO (regola fissa di casa, difetto gia' pagato):
+#    NASUSD apre 15:30 IT = 14:30 SERVER, chiude ~21:00 server. Gli input
+#    di sessione dell'EA vanno in ORA SERVER. Il DEFAULT DEL SORGENTE E'
+#    IL DAX (08:00-16:30): per NASUSD i quattro valori 14/30/21/0 NON sono
+#    il default e vanno DICHIARATI qui sotto -- il driver generico blinda
+#    tutto al default del .mq5, quindi senza queste righe l'EA girerebbe
+#    NASUSD con gli orari del DAX. Il driver del PASSO 0 RIFIUTA un file
+#    con InpSessionStartHour=15 (ora italiana).
+#
+#  CHE COSA GIRA, ESATTAMENTE: la cella base gia' decisa (default
+#  prop-sani del sorgente, blindati dal driver che li legge dal .mq5):
+#      InpSlMode        = SL_ATR, InpSlAtrMult = 1.5
+#      InpSlFloorAtrMult= 0.5  (PAVIMENTO SL ACCESO, R109: mai a zero)
+#      InpConeDays      = 14   (min 14)
+#      InpRiskPercent   = 0.65 (default di casa)
+#      InpMaxTradesPerDay = 2
+#      InpCloseOnOpposite = true (chiude sul grilletto opposto, non riapre
+#                                 invertito: close-only, no reverse)
+#      InpMT5PerPuntoIndice = 100 (NASUSD, R97) -- DICHIARATO qui sotto
+#                                 perche' e' load-bearing per il cancello S0
+#    Le righe qui sotto sono la BASELINE DICHIARATA: verificabili
+#    nell'artefatto .ini che ha girato, non dedotte.
+#
+#  MAGIC VERGINI 767700/767701: blocco 7677xx, cercati UNO PER UNO in
+#  tutto il repo il 2026-08-29 -> ZERO occorrenze. Il magic del SORGENTE
+#  (773500) e' VIETATO nel driver e NON compare qui. I blocchi gia' usati
+#  (R103 760xxx, R107 761xxx, R108 762xxx, R112 7634xx, Bulge 765xxx,
+#  R115 766xxx) sono evitati: 7677xx e' fuori da tutti.
+#  Lo sweep gemello sui due magic e' anche il CONTROLLO D'IGIENE: le due
+#  righe del CSV devono uscire IDENTICHE AL CENTESIMO. E' anche l'unico
+#  asse con flag Y: senza almeno un asse spazzolato il driver generico si
+#  rifiuta di partire.
+#
+#  >>> QUELLO CHE QUESTO FILE NON PUO' DIRE, detto prima:
+#      - non promuove e non boccia niente. E' un CONTA-OPERAZIONI.
+#      - non misura i due lati separati: li misurano i file gemelli
+#        PASSO0_OUTOFNOISE_01_long.txt e _02_short.txt (regola dei DUE
+#        LATI di Claudio, 25/08). E n(long) + n(short) NON fara' n(nudo):
+#        l'EA tiene UNA posizione alla volta (CountPositions()>0 blocca
+#        l'ingresso, GestisciUscita/OnNewBar decidono una cosa per barra),
+#        quindi con un lato spento lo slot resta libero e entrano segnali
+#        che qui vengono buttati. E' un fatto del motore.
+#      - i 21 mesi del feed BCM sugli indici sono UN SOLO REGIME
+#        RIALZISTA. Va dichiarato prima, non dopo.
+#      - l'EA NON E' MAI STATO COMPILATO da nessuno: se MetaEditor si
+#        lamenta, il PASSO 0 e' quello, e va riportato cosi'.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA: SESSIONE IN ORA SERVER (fuso di casa) ---
+#     NASUSD 14:30-21:00 SERVER = 15:30-22:00 IT. Mai 15 (ora italiana).
+InpSessionStartHour=14||14||0||14||N
+InpSessionStartMin=30||30||0||30||N
+InpSessionEndHour=21||21||0||21||N
+InpSessionEndMin=0||0||0||0||N
+
+# --- BASELINE: conversione punti indice (R97), load-bearing per S0 ---
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- I DUE LATI: qui INSIEME. E' la differenza con i file 01 e 02 ---
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=767700||767700||1||767701||Y

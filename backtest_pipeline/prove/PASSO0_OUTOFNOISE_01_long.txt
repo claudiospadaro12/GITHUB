@@ -1,0 +1,51 @@
+# =====================================================================
+#  PASSO 0 -- OUT OF THE NOISE 01_long  --  SOLO LONG
+#  ABTG_OutOfNoise  su  NASUSD  M15, TICK REALI
+# ---------------------------------------------------------------------
+#  E' la cella 00_nudo (prove\ABTG_OutOfNoise.txt) con UN SOLO
+#  INTERRUTTORE MOSSO. Ablazione A STELLA, non a scala cumulativa: il
+#  diff fra questo file e il 00_nudo e' di DUE righe e basta.
+#
+#  COSA CAMBIA RISPETTO AL 00_nudo:
+#    InpAllowShort   1  ->  0   [SI SPEGNE]
+#    InpMagic        767700/767701  ->  767710/767711
+#
+#  TUTTO IL RESTO E' IDENTICO al 00_nudo: la sessione in ORA SERVER
+#  (14/30/21/0), InpMT5PerPuntoIndice=100 e la cella base restano quelli.
+#  Il driver del PASSO 0 lo verifica col gate della stella prima di
+#  aprire MT5.
+#
+#  PERCHE' ESISTE: regola dei DUE LATI di Claudio (25/08/2026) --
+#  "ogni analisi misura SEMPRE tutti e due i lati (long E short)". La
+#  frequenza PER LATO e' il numero su cui morde la soglia dei 150
+#  dell'Emendamento regola A: senza questa cella non e' misurabile.
+#
+#  >>> E LA SOMMA DEI LATI NON FARA' IL 00_nudo, e non e' un difetto.
+#      L'EA tiene UNA posizione alla volta: con lo short spento lo slot
+#      resta libero e qui entrano segnali long che nel 00_nudo erano
+#      stati buttati via. E' un fatto del motore.
+#
+#  L'IPOTESI, I TRE ESITI (A / B / C) e IL CANCELLO S0 sono quelli
+#  scritti in testa a prove\ABTG_OutOfNoise.txt e NON si riscrivono qui.
+#
+#  MAGIC VERGINI 767710/767711: blocco 7677xx, cercati uno per uno in
+#  tutto il repo il 2026-08-29 -> ZERO occorrenze.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA (identica al 00_nudo) ---
+InpSessionStartHour=14||14||0||14||N
+InpSessionStartMin=30||30||0||30||N
+InpSessionEndHour=21||21||0||21||N
+InpSessionEndMin=0||0||0||0||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- I DUE LATI: qui SOLO LONG. E' l'UNICO interruttore mosso ---
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=767710||767710||1||767711||Y

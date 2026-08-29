@@ -1,0 +1,50 @@
+# =====================================================================
+#  PASSO 0 -- OUT OF THE NOISE 02_short  --  SOLO SHORT
+#  ABTG_OutOfNoise  su  NASUSD  M15, TICK REALI
+# ---------------------------------------------------------------------
+#  E' la cella 00_nudo (prove\ABTG_OutOfNoise.txt) con UN SOLO
+#  INTERRUTTORE MOSSO. Ablazione A STELLA: il diff fra questo file e il
+#  00_nudo e' di DUE righe e basta.
+#
+#  COSA CAMBIA RISPETTO AL 00_nudo:
+#    InpAllowLong    1  ->  0   [SI SPEGNE]
+#    InpMagic        767700/767701  ->  767740/767741
+#
+#  TUTTO IL RESTO E' IDENTICO al 00_nudo: sessione in ORA SERVER
+#  (14/30/21/0), InpMT5PerPuntoIndice=100 e cella base restano quelli.
+#
+#  PERCHE' ESISTE: regola dei DUE LATI di Claudio (25/08/2026). Vale
+#  esattamente quanto la cella long, e su questa finestra vale FORSE DI
+#  PIU': i 21 mesi del feed BCM sugli indici sono UN SOLO REGIME
+#  RIALZISTA, quindi IL LATO SHORT PARTE SVANTAGGIATO PER REGIME, non
+#  per merito del motore.
+#  >>> Un "niente edge short" letto qui chiude la domanda PER QUESTA
+#      EPOCA E PER QUESTO MOTORE, non in assoluto. Va scritto cosi'.
+#
+#  >>> E LA SOMMA DEI LATI NON FARA' IL 00_nudo: stessa ragione della
+#      cella long (una posizione alla volta, una decisione per barra).
+#
+#  L'IPOTESI, I TRE ESITI (A / B / C) e IL CANCELLO S0 sono quelli
+#  scritti in testa a prove\ABTG_OutOfNoise.txt e NON si riscrivono qui.
+#
+#  MAGIC VERGINI 767740/767741: blocco 7677xx, cercati uno per uno in
+#  tutto il repo il 2026-08-29 -> ZERO occorrenze.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+
+# --- LA BASELINE DICHIARATA (identica al 00_nudo) ---
+InpSessionStartHour=14||14||0||14||N
+InpSessionStartMin=30||30||0||30||N
+InpSessionEndHour=21||21||0||21||N
+InpSessionEndMin=0||0||0||0||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- I DUE LATI: qui SOLO SHORT. E' l'UNICO interruttore mosso ---
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo ---
+InpMagic=767740||767740||1||767741||Y
