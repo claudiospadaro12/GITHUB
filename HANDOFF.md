@@ -3,7 +3,80 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-08-15 mattina**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-08-29 pomeriggio**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🗓️ AGGIORNAMENTO 29/08 — SAGA IN-BULGE, PAGELLA, SETACCIO PINE, STATO TF-BASSO
+
+### 🎯 IN-BULGE del Bulge — costruito, misurato, CHIUSO ordinato
+- **`ABTG_BreakingBand.mq5` → v1.05** (commit su `lavoro`). Aggiunto input opt-in
+  **`InpContEntryMode`**: 0=primo tocco (storico, sedie vive), 1=retest banda
+  opposta (protocollo scritto), **2=IN-BULGE di Claudio** (primo-tocco-opposta +
+  filtro trend mediana + candela direzionale + range). Scoperta chiave: l'EA
+  entrava al PRIMO tocco, il protocollo scritto dice RETEST, ma il VERO IN-BULGE
+  di Claudio (stabile su v1/v3/v10 dei suoi Pine) e' **primo-tocco-con-trend**.
+- **A/B MISURATA** (`REFERTO_ABTEST_CONTENTRY_2026-08-29.md`, driver
+  `RIGA_ABTEST_CONTENTRY.ps1`, pin 203a519, GBPUSD/EURUSD/AUDUSD H1 tick reali):
+  **VINCE IL PRIMO TOCCO (mode 0).** PF OOS EURUSD (test decisivo, solo
+  continuazione): mode 0 = 2.944 (n43) vs mode 2 = 0.948 (n8, PERDE). GBPUSD
+  mode 0 = 1.904 > mode 2 = 1.495. AUDUSD tris identico (solo inversione,
+  InpContEntryMode inerte = **conferma correttezza build**). Mode 2 over-filtra.
+- **CONSEGUENZA: default resta 0, mode 1/2 restano codice opt-in misurato NON
+  adottato** (come R91/InpMinRR). Niente grid-search (Seconda Caccia). Riserve:
+  campione sottile (merito sospeso) + tick BCM forex non misurati. Capitolo chiuso.
+
+### 📊 PAGELLA SETTIMANALE 24-29/08 (`report/PAGELLA_SETT_2026-08-29.md`)
+- +303,95 EUR totali, ma **due conti opposti**: piccolo −60,51 (PF 0.76, 34
+  trade, tutto) vs 100k dry-run +364,46 (PF 1.46, 11 trade, SOLO indici).
+  **La selettivita' ha vinto.**
+- **DAX Apertura EU RETEST BUY** = edge su ENTRAMBI (+40 / +586). **ORB OTT BUY**
+  = peggiore (−19,98 / **−405,35**) → conferma forward "ORB chiuso" → OSSERVAZIONE
+  al prossimo censimento (criterio uscita sedie). Bias 17% coerente (forex 0%,
+  DAX 75%).
+
+### 🧹 3 corse lette + setaccio 32 Pine esterni
+- **Corse** (G1PAOLO, VWAPREV, FVGRET): nessuna da' una proposta. VWAPREV/FVGRET
+  sono D30EUR M15 (bassi TF indici): VWAPREV campione sottile+OOS perde, FVGRET
+  DD 42,9% (bocciato rischio).
+- **32 Pine esterni valutati → 0 candidati nuovi.** Tutti dominati (EMA-cross→HAM,
+  BB-MR→Bulge, struttura→HH&LL) o chiusi (ORB/breakout) o red-flag (3 recovery/
+  griglia: 2 pyramiding + 1 rebuy; 2 licenza CC-NC). **2 mattoncini archiviati**:
+  idea EMA-retest (Grant), Laguerre RSI.
+- **Tassonomia Bulge di Claudio mappata** (dai suoi Pine BOLL BULGE v1/v3/v10 +
+  Sequence 1-2-3-4): IN-BULGE (opposta+trend) / POST-BULGE (=INVERSIONE, gia'
+  nell'EA) / 3a famiglia RANGE-o-CONTINUATION (**Claudio non ha ancora deciso**).
+- **I DUE motori veri di Claudio**: (1) SuperTrend+EMA9/21 → rappresentante **HAM**;
+  (2) Bollinger mean-reversion → **Bulge** (schierato) + cugini.
+
+### 📉 STATO TF-BASSO SUGLI INDICI (l'obiettivo dichiarato di Claudio)
+- **R108/R111**: il Bulge NON scende a M15/M30 (6/6 finestre rosse, "morto di
+  SEGNALE non di costo"). La tesi "operativita' M5/M15" del Bulge e' MISURATA E FALSA.
+- **R109 ATR Exhaustion Volume Spike su INDICI** (D30EUR/NASUSD/U30USD M15):
+  **BOCCIATO SENZA APPELLO** dalla corsia rischio (DD 44-68% a 1%, peggior
+  giornata −9,72% vs muro −5%). MA **la FREQUENZA c'e'** (655-927 op/cella in 21
+  mesi): sugli indici la frequenza low-TF esiste, **manca il SEGNALE/edge**.
+  Lezione congelata: **pavimento SL OBBLIGATORIO** (mai InpMinSLPts=0) per ogni
+  futuro candidato M15 indici; gate per riaprire = **prova di regime** (_EXT, in frigo).
+- **Lettura d'insieme**: la lane FADE/mean-reversion su indici M15 (R109 + VWAPREV
+  + FVGRET) = frequenza si', edge no (tutto bocciato/debole, e sono 21 mesi di
+  UN solo toro). L'edge indici vero vive nell'**APERTURA/RETEST** (DAX Apertura
+  vince in forward), non nei fade. Prossimo candidato fade gia' in porting citato
+  da R109: **VWAP Mean Reversion** con SL strutturale (= il pezzo che mancava).
+
+### 🧵 FILI APERTI (decisioni/lavori)
+- **HH&LL** (struttura pivot, LonesomeTheBlue+ABTG): l'unico motore NUOVO del
+  giorno. Da riscrivere come `strategy` → PASSO 0.
+- **HAM su oro**: consolidare 4 varianti (TEST A/WIDE/v10/PROFIT MAX) in un EA,
+  sizing LotByRisk, rispettare split Emiliano-Lock/Optimizer.
+- **ORB OTT BUY**: osservazione/spegnimento al censimento (perde in forward).
+- **3a famiglia Bulge**: decidere RANGE vs CONTINUATION prima di costruirla.
+- **Micro-dettaglio mode 2**: ATR aref (congelato) vs corrente dei Pine — 1 riga,
+  default aref, cambiabile.
+- **.set delle 3 sedie BB vive** non in repo (TODO da R91).
+- **[DA CHIARIRE con Claudio] "l'orologio"**: cita cosa intende — candidati:
+  (a) fuso BCM / ora log MT5 vs grafico, (b) pagella automatica 23:15, (c) altro
+  strumento/EA a orario.
 
 ---
 
