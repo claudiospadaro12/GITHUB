@@ -1,12 +1,19 @@
-# 🧪 R115 — LEVA REVERSE (DAX) + ESTENSIONE RETEST (Nasdaq, Dow) — CRITERI **[DA FIRMARE]**
+# 🧪 R115 — LEVA REVERSE (DAX) + ESTENSIONE RETEST (Nasdaq, Dow) — CRITERI **FIRMATI**
 
-> ⚠️ **[DA FIRMARE]** — bozza scritta il 29/08/2026, PRIMA di qualunque
-> numero, dalla sessione agente su incarico della sessione principale.
-> I file prova e il driver esistono, ma la CORSA VERA non parte finche'
-> questo lucchetto non e' tolto (il driver legge questo file al pin e, se
-> ci trova la stringa del lucchetto, gira solo il giro a vuoto: exit 2).
-> Ovunque lo si CITI a lucchetto chiuso, si scrive spezzato — `[DA` +
-> `FIRMARE]` — per non tenere aperto il cancello con una citazione.
+> 🖊️ **FIRMATO — Claudio, 29/08/2026.** Firma con UNA scelta esplicita di
+> perimetro: **GEOMETRIA NATIVA per simbolo** (NON la geometria-DAX sugli
+> US). Bozza scritta lo stesso giorno, PRIMA di qualunque numero, dalla
+> sessione agente. Il lucchetto e' TOLTO: il driver, che legge questo file
+> al pin, ora trova "FIRMATI" e la corsa vera puo' partire. Il MECCANISMO
+> del cancello resta com'e' (se un domani ricomparisse la stringa del
+> lucchetto — scritta spezzata `[DA` + `FIRMARE]` per non richiuderlo per
+> sbaglio in una citazione — la corsa vera si fermerebbe con exit 2).
+>
+> **La scelta della firma, spiegata:** e' il **test EQUO** — "esiste un
+> edge retest su QUESTO simbolo, al suo meglio?" — non un confronto a
+> geometria costante. Cosi' un eventuale FALLITO su Nasdaq/Dow non si puo'
+> liquidare come "gli avevo messo i parametri del DAX": ogni simbolo gira
+> con la geometria della sua sedia viva.
 
 ---
 
@@ -23,9 +30,11 @@ criteri congelati PRIMA dei numeri:
   (tetto rigido **2 cicli/giorno**, solo RETEST, mai due posizioni vive
   insieme, secondo ciclo solo da flat — conto HEDGING). **La cattura
   extra vale il rischio?**
-- **(b) ESTENSIONE a NASDAQ e DOW** — il RETEST con la **geometria del DAX
-  vivo** su Nasdaq Apertura US e Dow Apertura US, OOS, per vedere se
-  l'edge del retest regge oltre il DAX.
+- **(b) ESTENSIONE a NASDAQ e DOW** — il RETEST alla **GEOMETRIA NATIVA di
+  ciascun simbolo** (firma 29/08) su Nasdaq Apertura US e Dow Apertura US,
+  OOS, per vedere se l'edge del retest esiste su quei simboli **al loro
+  meglio**. Non e' un confronto a geometria costante col DAX: e' il test
+  equo per ciascuno.
 
 **QUESTA E' UNA MISURA, NON UN ROUND CHE PROMUOVE.** Non tocca il forward
 (G5), non promuove nessuna sedia. Magic **VERGINI** (blocco 766xxx).
@@ -80,11 +89,26 @@ senza gli altri due non vuol dire niente.
 | DOW_00_long    | ABTG_Dow_Apertura_US   | U30USD | LONG            | 766210/766211 |
 | DOW_01_short   | ABTG_Dow_Apertura_US   | U30USD | SHORT           | 766220/766221 |
 
-**Geometria (tutte e 7, = DAX vivo 770101):** retest `InpEntryMode=2`,
-range di apertura `InpRangeMode=0` a 35 min, buffer 500, offset retest 200,
-trailing fisso 410, parziale 50%, `InpRiskPercent=0.65` (taglia viva),
-tutti i filtri SPENTI. **Cambia SOLO** il simbolo, l'ora di sessione, il
-lato e (sul DAX) il reverse.
+**Geometria — NATIVA per simbolo (firma 29/08).** Comune a tutte e 7: retest
+`InpEntryMode=2`, parziale 50%, `InpRiskPercent=0.65` (taglia uniforme, per
+DD comparabile — dichiarato, NON e' la taglia nativa US), mai overnight,
+RoundLevels/News OFF. La GEOMETRIA (range, buffer, offset, filtro trend,
+chiusura) e' quella della **sedia viva di ogni simbolo**, letta dai config:
+
+| | RangeMode | RangeMin | LevelTF | Buffer | Offset | filtro EMA | chiusura server | fonte |
+|---|---|---|---|---|---|---|---|---|
+| **DAX** (D30EUR)   | 0 (apertura) | 35 | — | 500  | 200 | OFF      | 17:30 | 770101 vivo (R103) |
+| **Dow** (U30USD)   | 0 (apertura) | 35 | — | 1000 | 400 | ON (H4, 1/50) | 17:30 | **770202 vivo** (R103, gia' retest) |
+| **Nasdaq** (NASUSD)| 2 (candela H1 prec.) | 15 | H1 | 300 | 0 | ON (H4, 1/50) | 20:45 | preset live `ABTG_Nasdaq_Apertura_US.set` + overlay H4 |
+
+- **Dow**: la sedia viva 770202 **e' gia' un retest** — la geometria non e'
+  inventata, e' quella misurata in R103.
+- **Nasdaq**: la sedia viva e' **BREAKOUT**, non retest. Quindi
+  `InpEntryMode=2` e `InpRetestOffsetPts=0` sono **[INFERITO]** (nessun
+  valore retest vivo su Nasdaq); il resto della geometria (RangeMode 2,
+  RangeMin 15, LevelTF H1, buffer 300, filtro H4, chiusura 20:45) e'
+  quella del preset vivo. **Cambia** il simbolo, l'ora di sessione, la
+  geometria nativa, il lato e (sul solo DAX) il reverse.
 
 **⚖️ REGOLA DEI DUE LATI (25/08):** sugli indici si misurano SEMPRE long
 E short. Per questo Nasdaq e Dow hanno un file per lato. Il DAX vivo e'
@@ -153,8 +177,8 @@ l'ora server usata per ogni simbolo.
   ≥ 1,10 con DD sotto il muro. **Prior MISURATO da rileggere**
   (`CACCIA_MOTORE_APERTURE.md`, 02/08): il retest a un'altra geometria
   usci' **Dow 0,94 · Nasdaq 0,73 (DD 27%) · DAX 0,79**, BOCCIATO. Se
-  anche a geometria-DAX + finestra-OOS il Nasdaq rifa' un DD del genere,
-  **e' un rischio, e il rischio si legge sempre**.
+  anche a **geometria nativa** + finestra-OOS il Nasdaq rifa' un DD del
+  genere, **e' un rischio, e il rischio si legge sempre**.
 
 **⚖️ CAMPIONE SOTTILE → MERITO SOSPESO, RISCHIO SEMPRE (valvola R59):**
 se `n(OOS) < 150` (soglia della REGOLA DELLA FINESTRA, emendamento 16/08),

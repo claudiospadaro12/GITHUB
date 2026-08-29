@@ -5,7 +5,8 @@
 #      (a) LEVA REVERSE sul DAX (InpAllowReverse false vs true), A/B a
 #          TRE celle (00 vivo / 01 bilat / 02 reverse) per non cambiare
 #          due cose insieme -- vedi criteri par. 1.
-#      (b) ESTENSIONE del RETEST (geometria del DAX vivo) su Nasdaq e Dow,
+#      (b) ESTENSIONE del RETEST (GEOMETRIA NATIVA per simbolo, firma
+#          Claudio 29/08) su Nasdaq e Dow,
 #          due lati ciascuno (REGOLA DEI DUE LATI, 25/08).
 #    7 celle, 3 EA, 3 simboli. Ogni cella = coppia gemella su InpMagic.
 # ---------------------------------------------------------------------
@@ -164,10 +165,10 @@ $LAVORI = @(
   (L "DAX_00_vivo"    "R115_DAX_00_vivo.txt"    "ABTG_DAX_Apertura_EU"    "D30EUR" 8  "true"  "false" "false" 766010 766011 "LEVA REVERSE -- A (la 770101 viva: long-only, reverse off). BASELINE."),
   (L "DAX_01_bilat"   "R115_DAX_01_bilat.txt"   "ABTG_DAX_Apertura_EU"    "D30EUR" 8  "true"  "true"  "false" 766020 766021 "LEVA REVERSE -- A' (due lati, reverse off): isola il costo del solo primo ciclo short."),
   (L "DAX_02_reverse" "R115_DAX_02_reverse.txt" "ABTG_DAX_Apertura_EU"    "D30EUR" 8  "true"  "true"  "true"  766030 766031 "LEVA REVERSE -- B (reverse acceso). L'A/B a UNA variabile e' 01 vs 02."),
-  (L "NAS_00_long"    "R115_NAS_00_long.txt"    "ABTG_Nasdaq_Apertura_US" "NASUSD" 14 "true"  "false" ""      766110 766111 "ESTENSIONE retest DAX-geometria su Nasdaq, lato LONG."),
-  (L "NAS_01_short"   "R115_NAS_01_short.txt"   "ABTG_Nasdaq_Apertura_US" "NASUSD" 14 "false" "true"  ""      766120 766121 "ESTENSIONE retest DAX-geometria su Nasdaq, lato SHORT."),
-  (L "DOW_00_long"    "R115_DOW_00_long.txt"    "ABTG_Dow_Apertura_US"    "U30USD" 14 "true"  "false" ""      766210 766211 "ESTENSIONE retest DAX-geometria su Dow, lato LONG (NON il Dow vivo)."),
-  (L "DOW_01_short"   "R115_DOW_01_short.txt"   "ABTG_Dow_Apertura_US"    "U30USD" 14 "false" "true"  ""      766220 766221 "ESTENSIONE retest DAX-geometria su Dow, lato SHORT.")
+  (L "NAS_00_long"    "R115_NAS_00_long.txt"    "ABTG_Nasdaq_Apertura_US" "NASUSD" 14 "true"  "false" ""      766110 766111 "ESTENSIONE retest, GEOMETRIA NATIVA Nasdaq (retest INFERITO), lato LONG."),
+  (L "NAS_01_short"   "R115_NAS_01_short.txt"   "ABTG_Nasdaq_Apertura_US" "NASUSD" 14 "false" "true"  ""      766120 766121 "ESTENSIONE retest, GEOMETRIA NATIVA Nasdaq (retest INFERITO), lato SHORT."),
+  (L "DOW_00_long"    "R115_DOW_00_long.txt"    "ABTG_Dow_Apertura_US"    "U30USD" 14 "true"  "false" ""      766210 766211 "ESTENSIONE retest, GEOMETRIA NATIVA Dow (= 770202 vivo, gia' retest), lato LONG."),
+  (L "DOW_01_short"   "R115_DOW_01_short.txt"   "ABTG_Dow_Apertura_US"    "U30USD" 14 "false" "true"  ""      766220 766221 "ESTENSIONE retest, GEOMETRIA NATIVA Dow (= 770202 vivo), lato SHORT.")
 )
 
 # --- LA BASELINE PER EA (per il gate della stella): il file 00/long del
@@ -187,6 +188,18 @@ $DeltaDi["NAS_00_long"]    = @()
 $DeltaDi["NAS_01_short"]   = @("InpAllowLong","InpAllowShort")
 $DeltaDi["DOW_00_long"]    = @()
 $DeltaDi["DOW_01_short"]   = @("InpAllowLong","InpAllowShort")
+
+# --- LA GEOMETRIA ATTESA, PER EA (firma Claudio 29/08: NATIVA per simbolo,
+#     non geometria-DAX sugli US). E' il metro contro cui si legge ogni
+#     file prova, e prende il baseline nativo CORROTTO (che la stella, che
+#     guarda solo i delta fra celle dello stesso EA, per costruzione non
+#     vede). Valori LETTI: DAX = 770101 vivo; Dow = 770202 vivo (retest,
+#     R103); Nasdaq = preset live ABTG_Nasdaq_Apertura_US.set + overlay H4
+#     (retest INFERITO -- la sedia viva Nasdaq e' breakout).
+$GeoEA = @{}
+$GeoEA["ABTG_DAX_Apertura_EU"]    = @{ RangeMode="0"; RangeMin="35"; Buffer="500.0";  Offset="200.0"; Ema="false"; CloseH="17" }
+$GeoEA["ABTG_Nasdaq_Apertura_US"] = @{ RangeMode="2"; RangeMin="15"; Buffer="300.0";  Offset="0.0";   Ema="true";  CloseH="20" }
+$GeoEA["ABTG_Dow_Apertura_US"]    = @{ RangeMode="0"; RangeMin="35"; Buffer="1000.0"; Offset="400.0"; Ema="true";  CloseH="17" }
 
 # =====================================================================
 #  TUTTO CIO' CHE LA RACCOLTA USA NASCE QUI, PRIMA DEL try (in PowerShell
@@ -420,14 +433,22 @@ try{
       $italiana = $lv.ShAtt + 1
       throw ($lv.Prova + ": InpSessionHour e' " + $sh + ", atteso " + $lv.ShAtt + " (ORA SERVER BCM). " + $italiana + " sarebbe l'ora italiana: cestinare (CLAUDE.md, FUSO ORARIO BCM).")
     }
-    # BASELINE geometrica (uguale per tutte e 7)
+    # BASELINE COMUNE (tutte e 7): il retest e' la tesi, la taglia e'
+    # uniforme (DD comparabile), mai overnight.
     if(($h["InpEntryMode"]   -split '\|\|')[0] -ne "2"){     throw ($lv.Prova + ": InpEntryMode deve essere 2 (RETEST): e' la tesi del round.") }
-    if(($h["InpRangeMode"]   -split '\|\|')[0] -ne "0"){     throw ($lv.Prova + ": InpRangeMode deve essere 0 (range di apertura, come il DAX vivo).") }
-    if(($h["InpRangeMinutes"]-split '\|\|')[0] -ne "35"){    throw ($lv.Prova + ": InpRangeMinutes deve essere 35 (geometria DAX vivo).") }
-    if(($h["InpBufferPoints"]-split '\|\|')[0] -ne "500.0"){ throw ($lv.Prova + ": InpBufferPoints deve essere 500.0 (geometria DAX vivo).") }
-    if(($h["InpRetestOffsetPts"]-split '\|\|')[0] -ne "200.0"){ throw ($lv.Prova + ": InpRetestOffsetPts deve essere 200.0 (geometria DAX vivo).") }
-    if(($h["InpRiskPercent"] -split '\|\|')[0] -ne "0.65"){  throw ($lv.Prova + ": InpRiskPercent deve essere 0.65 (taglia viva).") }
+    if(($h["InpRiskPercent"] -split '\|\|')[0] -ne "0.65"){  throw ($lv.Prova + ": InpRiskPercent deve essere 0.65 (taglia uniforme, DD comparabile).") }
     if(($h["InpCloseAtEnd"]  -split '\|\|')[0] -ne "true"){  throw ($lv.Prova + ": InpCloseAtEnd deve essere true (intraday, mai overnight).") }
+    # GEOMETRIA NATIVA PER EA (firma 29/08). Il metro e' $GeoEA, LETTO dai
+    # config vivi (DAX 770101 / Dow 770202 / Nasdaq preset+H4). Prende il
+    # baseline nativo corrotto, che la stella non vede.
+    $geo = $GeoEA[$lv.Ea]
+    if($null -eq $geo){ throw ($lv.Prova + ": nessuna geometria attesa per l'EA " + $lv.Ea) }
+    if(($h["InpRangeMode"]      -split '\|\|')[0] -ne $geo.RangeMode){ throw ($lv.Prova + ": InpRangeMode e' " + (($h["InpRangeMode"] -split '\|\|')[0]) + ", la geometria nativa di " + $lv.Ea + " lo vuole " + $geo.RangeMode + ".") }
+    if(($h["InpRangeMinutes"]   -split '\|\|')[0] -ne $geo.RangeMin){  throw ($lv.Prova + ": InpRangeMinutes e' " + (($h["InpRangeMinutes"] -split '\|\|')[0]) + ", nativa " + $lv.Ea + " = " + $geo.RangeMin + ".") }
+    if(($h["InpBufferPoints"]   -split '\|\|')[0] -ne $geo.Buffer){    throw ($lv.Prova + ": InpBufferPoints e' " + (($h["InpBufferPoints"] -split '\|\|')[0]) + ", nativa " + $lv.Ea + " = " + $geo.Buffer + ".") }
+    if(($h["InpRetestOffsetPts"]-split '\|\|')[0] -ne $geo.Offset){    throw ($lv.Prova + ": InpRetestOffsetPts e' " + (($h["InpRetestOffsetPts"] -split '\|\|')[0]) + ", nativa " + $lv.Ea + " = " + $geo.Offset + ".") }
+    if(($h["InpUseEmaFilter"]   -split '\|\|')[0] -ne $geo.Ema){       throw ($lv.Prova + ": InpUseEmaFilter e' " + (($h["InpUseEmaFilter"] -split '\|\|')[0]) + ", nativa " + $lv.Ea + " = " + $geo.Ema + " (DAX EMA off; Dow/Nasdaq filtro H4 on).") }
+    if(($h["InpCloseHour"]      -split '\|\|')[0] -ne $geo.CloseH){    throw ($lv.Prova + ": InpCloseHour e' " + (($h["InpCloseHour"] -split '\|\|')[0]) + ", nativa " + $lv.Ea + " = " + $geo.CloseH + " (Nasdaq chiude 20:45 server, DAX/Dow 17:30).") }
     # GATE DEI VALORI: lati e reverse (vede due file scambiati)
     $vl = ($h["InpAllowLong"]  -split '\|\|')[0]
     $vs = ($h["InpAllowShort"] -split '\|\|')[0]

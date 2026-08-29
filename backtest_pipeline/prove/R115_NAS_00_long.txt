@@ -1,30 +1,35 @@
 # =====================================================================
 #  R115 -- NAS_00_long: ABTG_Nasdaq_Apertura_US su NASUSD M5, TICK REALI (Modello 4)
-#  ESTENSIONE RETEST -- Nasdaq, lato LONG (geometria del DAX vivo sul simbolo Nasdaq)
-#  Finestra: 2024.09.26 -> 2026.06.30 (21 mesi, UN solo regime; il tetto
-#  e' il PAVIMENTO TICK misurato dalla sonda 17/08: il broker BCM non ha
-#  storico indici prima del 2024.09.26 -- non e' una scelta, e' il disco).
-#  Criteri CONGELATI (PRIMA dei numeri): risultati_archivio/R115_CRITERI.md
+#  ESTENSIONE RETEST -- Nasdaq, lato LONG (GEOMETRIA NATIVA Nasdaq)
+#  Finestra: 2024.09.26 -> 2026.06.30 (21 mesi, UN solo regime; pavimento
+#  TICK misurato dalla sonda 17/08: il broker BCM non ha storico indici
+#  prima del 2024.09.26).
+#  Criteri FIRMATI (Claudio, 29/08): risultati_archivio/R115_CRITERI.md
 # ---------------------------------------------------------------------
-#  >>> QUESTO FILE E' UNA MISURA, NON UN ROUND CHE PROMUOVE. Non tocca il
-#      forward (G5) e non promuove nessuna sedia. I magic sono VERGINI
-#      (blocco 766xxx, verificato libero in tutto il repo il 29/08).
+#  >>> MISURA, NON un round che promuove. Non tocca il forward (G5).
+#      Magic VERGINI (blocco 766xxx, verificato libero il 29/08).
 #
-#  DA DOVE VIENE OGNI VALORE (misurato, non a memoria):
-#    - la geometria e' quella del DAX vivo 770101, LETTA in
-#      prove/R103_ABTG_DAX_Apertura_EU_D30EUR_770101.txt (la cella in
-#      utile OOS: +392,96 / PF 1,065 / 244 trade). Retest (InpEntryMode=2),
-#      range di apertura (InpRangeMode=0, 35 min), buffer 500, offset 200,
-#      trailing fisso 410, parziale 50%, rischio 0,65% (taglia viva).
-#    - l'EA Nasdaq NON ha InpAllowReverse (misurato nel sorgente): la riga NON e' in questo file. Tutto il resto = geometria DAX vivo. Cambia SOLO simbolo + ora di sessione.
+#  >>> GEOMETRIA NATIVA DEL SIMBOLO (firma 29/08: NON la geometria-DAX).
+#      E' il test EQUO: "esiste un edge retest su QUESTO simbolo, al suo
+#      meglio?", non un confronto a geometria costante.
+#  Geometria = sedia Nasdaq apertura viva (preset live
+#      ABTG_Nasdaq_Apertura_US.set + overlay H4 ABTG_Apertura_Nasdaq_US_H4.set,
+#      magic 770201): InpRangeMode=2 (candela H1 precedente), RangeMin=15,
+#      InpLevelTF=H1 (16385), InpBufferPoints=300, filtro EMA H4 ON
+#      (Fast=1, Slow=50, FilterTF=16388, richiesto: 'Nasdaq positivo SOLO
+#      col filtro H4'), chiusura 20:45 server (nativa, piu' tardi di DAX/Dow).
+#      >>> [INFERITO]: la sedia Nasdaq VIVA e' BREAKOUT, non retest. Quindi
+#      InpEntryMode=2 (retest) e InpRetestOffsetPts=0 sono INFERITI (nessun
+#      valore retest vivo su Nasdaq). Rischio 0.65 (uniforme, dichiarato);
+#      RoundLevels/News OFF (dichiarato, come R103; il preset live li ha ON
+#      ma sono overlay, non geometria, e il News chiederebbe il CSV).
 #
-#  L'ORA DI SESSIONE E' IN ORA SERVER BCM (regola di casa, FUSO ORARIO):
-#    Nasdaq/US apre 15:30 IT = 14:30 server -> InpSessionHour=14, InpSessionMin=30.
+#  L'ORA DI SESSIONE E' IN ORA SERVER BCM (fuso: IT - 1h):
+#    Nasdaq/US apre 15:30 IT = 14:30 server -> InpSessionHour=14, min=30.
 #
-#  IL LATO: SOLO LONG. Il lato SHORT e' nel file gemello NAS_01 (REGOLA DEI DUE LATI, 25/08: sugli indici si misurano SEMPRE tutti e due).
+#  IL LATO: SOLO LONG. Lato SHORT nel gemello NAS_01 (REGOLA DEI DUE LATI, 25/08).
 #  L'ASSE SPAZZOLATO e' InpMagic (coppia gemella 766110/766111): due passate
-#  identiche al centesimo = igiene del banco (deterministico). Nessun
-#  altro asse: e' una CELLA, non una griglia.
+#  identiche al centesimo = igiene del banco. Nessun altro asse.
 # =====================================================================
 
 @SIMBOLO  NASUSD
@@ -34,34 +39,34 @@
 InpUsaGuardian=true||true||0||true||N
 InpSessionHour=14||14||0||14||N
 InpSessionMin=30||30||0||30||N
-InpRangeMinutes=35||35||0||35||N
-InpCloseHour=17||17||0||17||N
-InpCloseMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
 InpCloseAtEnd=true||true||0||true||N
 InpOneTradePerDay=true||true||0||true||N
 InpMaxPosSimbolo=0||0||0||0||N
 InpEntryMode=2||2||0||2||N
-InpRangeMode=0||0||0||0||N
+InpRangeMode=2||2||0||2||N
 InpLevelTF=16385||16385||0||16385||N
 InpPrevWindowMin=60||60||0||60||N
-InpBufferPoints=500.0||500.0||0||500.0||N
+InpBufferPoints=300.0||300.0||0||300.0||N
 InpOCTimeframe=0||0||0||0||N
 InpPendingExpiryMin=120||120||0||120||N
 InpAllowLong=true||true||0||true||N
 InpAllowShort=false||false||0||false||N
 InpMinRangePts=0.0||0.0||0||0.0||N
 InpMaxRangePts=0.0||0.0||0||0.0||N
-InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
 InpFadeOffsetPts=0.0||0.0||0||0.0||N
 InpDelayMinutes=30||30||0||30||N
 InpDelayDirMode=0||0||0||0||N
 InpUseGapFill=false||false||0||false||N
 InpGapMinPoints=150.0||150.0||0||150.0||N
 InpGapMinRR=1.5||1.5||0||1.5||N
-InpUseEmaFilter=false||false||0||false||N
-InpEmaFast=14||14||0||14||N
-InpEmaSlow=200||200||0||200||N
-InpFilterTF=16385||16385||0||16385||N
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
 InpUseSupertrend=false||false||0||false||N
 InpStAtrPeriod=10||10||0||10||N
 InpStMultiplier=2.5||2.5||0||2.5||N
