@@ -99,6 +99,9 @@
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|  CHANGELOG                                                        |
+//|  v1.02 (2026-08-29) - DIAGNOSTICA: contatori per-cancello in      |
+//|    OnNewBar (nessun cambio di logica), esposti come colonne nuove  |
+//|    in coda al CSV di OnTester per capire quale gate mangia le barre|
 //|  v1.01 (2026-08-29) - FIX WARMUP CONO (baco n=0 del PASSO 0).     |
 //|    CalcCono/CalcVwapSessione dimensionavano la copia storica su   |
 //|    BarrePerSeduta() (barre DENTRO la seduta), ma CopyRates(...,0,  |
@@ -116,7 +119,7 @@
 //|    con barre fuori-seduta intercalate (guardia anti-regressione).  |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati - porting da Yuri Lopukhov (MIT, TradingView gJeM3LZ5)"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -200,6 +203,26 @@ int      gFlatLogGiorno = -1;           // il flat scrive UNA riga al giorno
 int      gAutotestFalliti = -1;   // -1 = non eseguito
 int      gFlatGiorni      = 0;    // giornate in cui il flat e' scattato
 int      gFlatChiusure    = 0;    // posizioni chiuse dal flat
+
+//--- DIAGNOSTICA v1.02 (SOLO MISURA, nessun cambio di logica): un
+//    contatore per ogni punto di uscita/blocco di OnNewBar, piu' alcune
+//    spie (chiamate totali, cono ok, max nDays raggiunto, grilletti,
+//    chiamate ad ApriPosizione). Escono IN COLONNA nell'OPTFRAME
+//    (OnTester) per capire QUALE cancello ferma ogni barra a 0 trade.
+long gCntOnNewBar       = 0;   // chiamate totali a OnNewBar
+long gCntCloseEvalBad   = 0;   // return: closeEval<=0
+long gCntGestioneUscita = 0;   // return: c'era posizione aperta (gestione uscita)
+long gCntConoKo         = 0;   // return: cono non affidabile (!coneOk)
+long gCntWarmup         = 0;   // return: nDays < InpConeMinDays (warmup)
+long gCntPrimaBarra     = 0;   // return: pos<=0 (prima barra della seduta)
+long gCntMaxTrades      = 0;   // return: cap trade/giorno raggiunto
+long gCntFuoriSeduta    = 0;   // return: fuori seduta
+long gCntSpread         = 0;   // return: spread non ok
+long gCntConeOk         = 0;   // volte con coneOk==true
+long gCntBull           = 0;   // grilletto bull true (PRIMA dei gate AllowLong/Short)
+long gCntBear           = 0;   // grilletto bear true (PRIMA dei gate AllowLong/Short)
+long gCntApri           = 0;   // chiamate effettive ad ApriPosizione
+int  gMaxNDays          = 0;   // massimo nDays mai raggiunto (warmup chiuso se >=InpConeMinDays)
 
 //--- metriche da prop: la peggior giornata in % (numero negativo).
 double gDayStartEquity = 0.0;
@@ -494,13 +517,19 @@ bool IsNewBar()
 //+------------------------------------------------------------------+
 void OnNewBar()
   {
+   gCntOnNewBar++;                            // DIAG: chiamate totali a OnNewBar
+
    double upper=0, lower=0, avgMove=0, vwap=0;
    int    nDays=0, nMoves=0, pos=-1;
    bool   coneOk = CalcCono(1, upper, lower, avgMove, nDays, nMoves, pos);
    bool   vwapOk = CalcVwapSessione(1, vwap);
 
+   //--- DIAG: spie del cono (contate a OGNI barra, prima dei cancelli).
+   if(coneOk) gCntConeOk++;
+   if(nDays > gMaxNDays) gMaxNDays = nDays;    // massimo nDays mai raggiunto
+
    double closeEval = iClose(_Symbol, gTF, 1);
-   if(closeEval<=0) return;
+   if(closeEval<=0){ gCntCloseEvalBad++; return; }
 
    //--- fronte dei grilletti sulla barra appena chiusa
    bool bull = coneOk && Grilletto_Calc(true , closeEval, upper, lower);
@@ -510,22 +539,27 @@ void OnNewBar()
    //    Chiudere rischio viene PRIMA di tutti i cancelli operativi.
    if(CountPositions()>0)
      {
+      gCntGestioneUscita++;                    // DIAG: barra spesa in gestione uscita
       GestisciUscita(coneOk, vwapOk, closeEval, upper, lower, vwap, bull, bear);
       return;                                 // una posizione alla volta per magic
      }
 
    //--- INGRESSI
-   if(!coneOk) return;                        // cono non affidabile: niente segnale
-   if(nDays < InpConeMinDays) return;         // storia insufficiente (warmup)
-   if(pos <= 0) return;                        // prima barra della seduta: mai ingresso (autore)
-   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
-   if(!InSedutaOra(TimeCurrent())) return;    // si entra solo DENTRO la seduta
-   if(!SpreadOK()) return;
+   if(!coneOk){ gCntConoKo++; return; }                        // cono non affidabile: niente segnale
+   if(nDays < InpConeMinDays){ gCntWarmup++; return; }         // storia insufficiente (warmup)
+   if(pos <= 0){ gCntPrimaBarra++; return; }                    // prima barra della seduta: mai ingresso (autore)
+   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay){ gCntMaxTrades++; return; }
+   if(!InSedutaOra(TimeCurrent())){ gCntFuoriSeduta++; return; }    // si entra solo DENTRO la seduta
+   if(!SpreadOK()){ gCntSpread++; return; }
+
+   //--- DIAG: i grilletti superstiti, PRIMA dei gate AllowLong/AllowShort.
+   if(bull) gCntBull++;
+   if(bear) gCntBear++;
 
    if(InpAllowLong && bull)
-     { ApriPosizione(true, upper, lower); return; }   // una sola decisione per barra
+     { gCntApri++; ApriPosizione(true, upper, lower); return; }   // una sola decisione per barra
    if(InpAllowShort && bear)
-      ApriPosizione(false, upper, lower);
+     { gCntApri++; ApriPosizione(false, upper, lower); }
   }
 
 //+------------------------------------------------------------------+
@@ -1215,7 +1249,7 @@ void ExportTrades()
 double OnTester()
   {
    ExportTrades();
-   double stats[13];
+   double stats[27];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1231,6 +1265,31 @@ double OnTester()
    stats[10] = (double)gAutotestFalliti;   // 0 = passati; >0 = DIVERGE; -1 = non eseguito
    stats[11] = (double)gFlatGiorni;        // giornate col flat scattato
    stats[12] = (double)gFlatChiusure;      // posizioni chiuse dal flat
+   //--- DIAGNOSTICA v1.02: i contatori per-cancello di OnNewBar, in coda.
+   //    L'ordine QUI e nell'header/row di OnTesterDeinit si toccano SEMPRE
+   //    INSIEME (una colonna aggiunta a uno solo sfasa tutto il CSV).
+   stats[13] = (double)gCntOnNewBar;       // OnNewBar Chiamate
+   stats[14] = (double)gCntConeOk;         // Cono Ok
+   stats[15] = (double)gMaxNDays;          // Max nDays
+   stats[16] = (double)gCntCloseEvalBad;   // Ret CloseEval Bad
+   stats[17] = (double)gCntGestioneUscita; // Ret Gestione Uscita
+   stats[18] = (double)gCntConoKo;         // Ret Cono Ko
+   stats[19] = (double)gCntWarmup;         // Ret Warmup
+   stats[20] = (double)gCntPrimaBarra;     // Ret Prima Barra
+   stats[21] = (double)gCntMaxTrades;      // Ret Max Trades
+   stats[22] = (double)gCntFuoriSeduta;    // Ret Fuori Seduta
+   stats[23] = (double)gCntSpread;         // Ret Spread
+   stats[24] = (double)gCntBull;           // Bull True
+   stats[25] = (double)gCntBear;           // Bear True
+   stats[26] = (double)gCntApri;           // Apri Chiamate
+
+   //--- riga riepilogo (utile se il CSV non basta): stessi numeri, in log.
+   PrintFormat("[NOISE][DIAG] OnNewBar=%I64d ConoOk=%I64d MaxNDays=%d | ret: closeEval=%I64d gestione=%I64d conoKo=%I64d warmup=%I64d primaBarra=%I64d maxTrades=%I64d fuoriSeduta=%I64d spread=%I64d | bull=%I64d bear=%I64d apri=%I64d",
+               gCntOnNewBar, gCntConeOk, gMaxNDays,
+               gCntCloseEvalBad, gCntGestioneUscita, gCntConoKo, gCntWarmup,
+               gCntPrimaBarra, gCntMaxTrades, gCntFuoriSeduta, gCntSpread,
+               gCntBull, gCntBear, gCntApri);
+
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1255,15 +1314,18 @@ void OnTesterDeinit()
         {
          //--- 'head' e lo StringFormat qui sotto si toccano SEMPRE INSIEME:
          //    una colonna aggiunta a uno solo sfasa tutto il CSV.
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Autotest Falliti,Flat Giorni,Flat Chiusure";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Autotest Falliti,Flat Giorni,Flat Chiusure,OnNewBar Chiamate,Cono Ok,Max nDays,Ret CloseEval Bad,Ret Gestione Uscita,Ret Cono Ko,Ret Warmup,Ret Prima Barra,Ret Max Trades,Ret Fuori Seduta,Ret Spread,Bull True,Bear True,Apri Chiamate";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f",
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4],
                                 data[5], data[6], data[7], data[8], data[9],
-                                data[10], data[11], data[12]);
+                                data[10], data[11], data[12],
+                                data[13], data[14], data[15], data[16], data[17],
+                                data[18], data[19], data[20], data[21], data[22],
+                                data[23], data[24], data[25], data[26]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
