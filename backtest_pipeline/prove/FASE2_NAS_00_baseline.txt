@@ -1,0 +1,211 @@
+# =====================================================================
+#  FASE 2 -- IL MOTORE DELLE APERTURE (drive-following) / cella 00_baseline
+#  ABTG_Nasdaq_Apertura_US su NASUSD_EXT M15 -- SCREENING OHLC (Modello 1)
+# ---------------------------------------------------------------------
+#  CONTRATTO FIRMATO:
+#    backtest_pipeline\risultati_archivio\STUDIO_APERTURE_FASE2_CRITERI_BOZZA.md
+#    (FIRMATA 29/08/2026, "FIRMO LA FASE 2")
+#  ANATOMIA (i fatti): risultati_archivio\LETTURA_ANATOMIA_APERTURE_2026-08-26.md
+#  AMENDAMENTO de-2022: caccia_strategie\CACCIA_NASDAQ_DRIVE_2026-08-29.md
+#
+#  >>> QUESTA E' LA BASELINE DELL'ABLAZIONE A STELLA (§2 del contratto):
+#      il MOTORE NUDO, F1 SPENTO e F3 SPENTO. Le altre tre celle muovono
+#      UN SOLO interruttore ciascuna rispetto a questo file. Il diff fra
+#      ogni cella e questa e' di POCHE righe, e il driver lo verifica col
+#      gate della stella prima di aprire MT5.
+#
+#  LA DOMANDA (contratto §1): esiste un FILTRO DI SELEZIONE, applicato AL
+#  MOMENTO DELLA ROTTURA, che sposta la miscela verso i DRIVE (payoff
+#  5-6:1, tengono) e via dai RIENTRO (payoff ~0, rientrano)? Baseline =
+#  drive-following NUDO: rompe l'OR dei primi 15' con pendenti e lascia
+#  correre il runner. E' la MONETA contro cui si misurano F1 e F3.
+#
+#  ------------------------------------------------------------------
+#  >>> IL LIMITE COSTITUTIVO DEL BANCO (contratto §4, dichiarato):
+#      NASUSD_EXT sono barre M1 HistData, SENZA tick reali BCM -> banco
+#      OHLC (modello 1). Qui si legge la FORMA dell'edge (verde/rosso,
+#      ordini di grandezza, coerenza fra le celle), MAI i numeri fini.
+#      Il VERDETTO A TICK e' possibile SOLO sulla cassaforte recente
+#      2024.09.26 -> 2026 (BCM), che si apre UNA volta in validazione,
+#      DOPO che l'ablazione FASE 1 ha scelto. NON si apre qui.
+#
+#  >>> ATTENZIONE FUSO (bloccante, da verificare prima della corsa):
+#      su NASUSD_EXT l'anatomia ha MISURATO che le 09:30 del file sono
+#      l'apertura cash tutto l'anno (feed a ora di NEW YORK, canarino DST
+#      verde). Percio' qui InpSessionHour=9, InpSessionMin=30 -- NON 14:30.
+#      Il 14:30 SERVER e' l'apertura sul feed TICK BCM (NASUSD), e vale
+#      SOLO per la cella di validazione a tick, non per questo screening
+#      _EXT. >>> Se l'import MT5 di NASUSD_EXT avesse shiftato i timestamp
+#      a ora server, questo 9 va riportato all'ora giusta PRIMA di girare:
+#      un CSV di risultati con l'apertura sbagliata si cestina (CLAUDE.md).
+#
+#  >>> IL TETTO 100k BARRE (dichiarato): il tester tiene ~100.000 barre
+#      per corsa -> M15 ~ 4 anni. La finestra IS di questo screening e'
+#      2017.01.01 -> 2020.07.01 (~3,5 anni, sotto il tetto), scelta perche'
+#      e' MULTI-REGIME (prova di regime, contratto §5C): toro 2017, orso
+#      Q4-2018, laterale 2019, CROLLO+V covid 2020. E' un SOTTOINSIEME
+#      dell'IS 2010-2020 del contratto: le tranche piu' vecchie
+#      (2010-2013, 2013-2016) si aggiungono DOPO aver confermato la
+#      profondita' vera di NASUSD_EXT con
+#      scarica_storico.ps1 -Simboli "NASUSD_EXT" -SoloReferto
+#      (la prima data NON si inventa).
+#
+#  ------------------------------------------------------------------
+#  >>> CRITERI DI LETTURA CONGELATI (contratto §5) -- valgono per le 4 celle:
+#    - DECIDE l'ASPETTATIVA PER TRADE (non solo il PF), con la coerenza
+#      fra sotto-periodi. Un motore che vive di una coda rara si guarda
+#      anche sulla peggior giornata e sulle perdite consecutive.
+#    - RISCHIO mai sospeso (regola B): DD e peggior giornata contro il
+#      muro prop, SEMPRE, a qualunque n.
+#    - CAMPIONE: >= 150 trade per giudicare il MERITO; sotto, merito
+#      sospeso (l'apertura fa ~1 setup/giorno -> il campione arriva coi
+#      3,5 anni, ~ qualche centinaio di rotture; si conta e si dichiara).
+#    - LETTURA ANCHE senza-2023 E senza-2022 (amendamento de-2022, caccia
+#      29/08): se l'edge sparisce togliendo il 2022 -> e' effetto di
+#      regime di volatilita', non un motore. Sulla finestra IS di questo
+#      file (2017-2020) il 2022 non c'e': il de-2022 morde in VALIDAZIONE
+#      sulla cassaforte, ed e' scritto qui perche' e' parte del contratto.
+#    - VINCE la FASE 2 solo se un filtro (F1 o F3) da aspettativa/trade
+#      POSITIVA e STABILE, con DD sotto il muro. Un solo periodo o un solo
+#      simbolo = non dimostrato. Nasdaq PRIMA; DAX/Dow DOPO, non ora.
+#
+#  >>> DA QUESTO FILE NON ESCE NESSUNA PROMOZIONE: e' conoscenza di
+#      selezione su dati OHLC di un altro broker. La stella sceglie; il
+#      tick della cassaforte giudica.
+#
+#  ------------------------------------------------------------------
+#  IL BERSAGLIO DI DISEGNO (contratto §3), FISSO in tutte e 4 le celle:
+#    - RUNNER OBBLIGATORIO: InpRunnerTP_R=-1 = NESSUN cap. Il residuo
+#      corre verso la coda (DRIVE-DOWN Q3 0,90%, max 3,06%) ed esce solo a
+#      trailing / fine sessione. NON si cappa a 1R.
+#    - SL con PAVIMENTO OBBLIGATORIO (R109): InpMinStopPts=500 (5 punti
+#      indice), MAI 0. InpSkipIfTight=0 = il pavimento si APPLICA, non fa
+#      saltare il trade.
+#    - Trailing LARGO che arma dopo 1R (InpTrailStartR=1) per non
+#      strozzare la corsa (lezione 07/08 sui trailing precoci).
+#
+#  MAGIC VERGINI 767200/767201: blocco 7672xx, cercato in tutto il repo
+#  il 2026-08-29 -> ZERO occorrenze. Blocco della FASE 2:
+#    00_baseline 767200/767201 | 01_F1_k10 767210/767211
+#    02_F1_k15   767220/767221 | 03_F3_ema  767230/767231
+#  L'ASSE SPAZZOLATO E' SOLO InpMagic (i due gemelli di controllo).
+# =====================================================================
+
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2017.01.01
+@FINOA    2020.07.01
+
+# --- sessione: ORA NY del feed _EXT (09:30 = apertura cash; vedi FUSO sopra)
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=9||9||0||9||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=15||15||0||15||N
+InpCloseMin=55||55||0||55||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- ingresso: BREAKOUT dell'OR dei primi 15' (drive-following nudo) ---
+InpEntryMode=0||0||0||0||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=200||200||0||200||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- F3 (allineamento HTF via EMA): SPENTO nella baseline. Acceso solo
+#     nella cella 03_F3_ema. EMA 14/200 su H1 = concordanza col trend
+#     maggiore (contratto §2, F3). E' l'UNICO filtro che copre F3: il
+#     motore NON ha un input F3 dedicato, e' questo (dichiarato in consegna).
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+
+# --- rischio e gestione: DRIVE-FOLLOWING (fisso in tutte e 4 le celle) ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=1||1||0||1||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=1.0||1.0||0||1.0||N
+InpTrailMode=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=3.0||3.0||0||3.0||N
+InpTrailFixedPts=410||410||0||410||N
+
+# --- >>> F1 (forza della rottura): SPENTO nella baseline (0 = pendente
+#     nudo intra-candela). Acceso nelle celle 01/02. E' l'UNICO
+#     interruttore che le due celle F1 muovono rispetto a questo file.
+InpMinBreakoutRangeATR=0.0||0.0||0||0.0||N
+
+# --- >>> RUNNER SENZA CAP (§3): -1 = corre verso la coda. FISSO.
+InpRunnerTP_R=-1||-1||0||-1||N
+
+# --- pavimento SL OBBLIGATORIO (R109): mai 0. FISSO.
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+
+# --- blocco R30 (opt-in del solo Nasdaq): pinnato SPENTO. I sotto-
+#     parametri restano pinnati perche' le 4 celle devono avere lo STESSO
+#     elenco di parametri (gate della stella).
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20.0||20.0||0||20.0||N
+InpVolHighPct=80.0||80.0||0||80.0||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- l'UNICO asse spazzolato: i due magic gemelli di controllo ---
+InpMagic=767200||767200||1||767201||Y

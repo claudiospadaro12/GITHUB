@@ -1,0 +1,135 @@
+# =====================================================================
+#  FASE 2 -- ablazione a stella / cella 03_F3_ema  --  F3 ACCESO (HTF EMA)
+#  ABTG_Nasdaq_Apertura_US su NASUSD_EXT M15 -- SCREENING OHLC (Modello 1)
+# ---------------------------------------------------------------------
+#  E' la cella 00_baseline con UN SOLO INTERRUTTORE MOSSO. F1 resta
+#  SPENTO (breakout a pendente nudo): qui si prova SOLO F3.
+#
+#  COSA CAMBIA RISPETTO AL 00_baseline (DUE righe e basta):
+#    InpUseEmaFilter          0  ->  1        [F3 SI ACCENDE]
+#    InpMagic                 767200/767201  ->  767230/767231
+#  TUTTO IL RESTO E' IDENTICO. F1 (InpMinBreakoutRangeATR) resta 0.
+#
+#  >>> F3 = QUESTO FILTRO, e la consegna lo DICHIARA: il motore NON ha un
+#      input "F3" dedicato. L'allineamento HTF del contratto §2 e' coperto
+#      da InpUseEmaFilter, che in TrendBias() legge EMA veloce vs EMA
+#      lenta su InpFilterTF e permette SOLO i trade a favore (long se
+#      EMA14>EMA200, short se EMA14<EMA200). Qui: EMA 14/200 su H1
+#      (InpFilterTF=16385). Ipotesi (contratto §2, F3): il DRIVE che va
+#      col trend maggiore tiene di piu' -> sposta la miscela verso i DRIVE
+#      concordi e scarta i RIENTRO contro-trend.
+#      >>> H1 e' la scelta di questo round; D1 (InpFilterTF=16408) e' la
+#      variante gemella se H1 non basta -- NON in questo file (una feature,
+#      un TF per volta). 14/200 sono valori DA MANUALE, non pescati.
+#
+#  Criteri di lettura, limite OHLC, fuso _EXT (09:30 NY), tetto 100k e
+#  finestra 2017-2020 multi-regime: in testa a prove\FASE2_NAS_00_baseline.txt,
+#  NON si riscrivono qui.
+#
+#  MAGIC VERGINI 767230/767231: blocco 7672xx, ZERO occorrenze al 29/08.
+# =====================================================================
+
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2017.01.01
+@FINOA    2020.07.01
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=9||9||0||9||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=15||15||0||15||N
+InpCloseMin=55||55||0||55||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+InpEntryMode=0||0||0||0||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=200||200||0||200||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- >>> F3 ACCESO: EMA 14/200 su H1. E' l'UNICO interruttore mosso ---
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=1||1||0||1||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=1.0||1.0||0||1.0||N
+InpTrailMode=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=3.0||3.0||0||3.0||N
+InpTrailFixedPts=410||410||0||410||N
+
+# --- F1 (forza rottura): SPENTO in questa cella (si prova SOLO F3) ---
+InpMinBreakoutRangeATR=0.0||0.0||0||0.0||N
+
+InpRunnerTP_R=-1||-1||0||-1||N
+
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20.0||20.0||0||20.0||N
+InpVolHighPct=80.0||80.0||0||80.0||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+InpMagic=767230||767230||1||767231||Y

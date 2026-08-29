@@ -1,0 +1,127 @@
+# =====================================================================
+#  FASE 2 -- ablazione a stella / cella 02_F1_k15  --  F1 ACCESO, k=1.5
+#  ABTG_Nasdaq_Apertura_US su NASUSD_EXT M15 -- SCREENING OHLC (Modello 1)
+# ---------------------------------------------------------------------
+#  E' la cella 00_baseline con UN SOLO INTERRUTTORE MOSSO. Gemella di
+#  01_F1_k10: cambia SOLO la soglia k, per leggere la SUPERFICIE di F1
+#  (due punti: 1,0 e 1,5), MAI il picco isolato. NON e' una griglia.
+#
+#  COSA CAMBIA RISPETTO AL 00_baseline (DUE righe e basta):
+#    InpMinBreakoutRangeATR   0.0  ->  1.5   [F1 SI ACCENDE, piu' severo]
+#    InpMagic                 767200/767201  ->  767220/767221
+#
+#  k=1.5: la candela di rottura deve avere range >= 1,5 x ATR(M15,14) =
+#  rottura ancora piu' decisa, meno trade, atteso piu' selettivo verso i
+#  DRIVE. Se 1,5 taglia troppo (campione sotto i 150 -> merito sospeso) e
+#  1,0 no, e' un fatto della superficie da leggere, non un difetto.
+#
+#  Confound timing->chiusura, criteri di lettura, limite OHLC, fuso _EXT,
+#  tetto 100k e finestra 2017-2020: in testa a 00_baseline e a 01_F1_k10,
+#  NON si riscrivono qui.
+#
+#  MAGIC VERGINI 767220/767221: blocco 7672xx, ZERO occorrenze al 29/08.
+# =====================================================================
+
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2017.01.01
+@FINOA    2020.07.01
+
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=9||9||0||9||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=15||15||0||15||N
+InpCloseMin=55||55||0||55||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+InpEntryMode=0||0||0||0||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=200||200||0||200||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=1||1||0||1||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=1.0||1.0||0||1.0||N
+InpTrailMode=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=3.0||3.0||0||3.0||N
+InpTrailFixedPts=410||410||0||410||N
+
+# --- >>> F1 ACCESO a k=1.5: e' l'UNICO interruttore mosso ---
+InpMinBreakoutRangeATR=1.5||1.5||0||1.5||N
+
+InpRunnerTP_R=-1||-1||0||-1||N
+
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20.0||20.0||0||20.0||N
+InpVolHighPct=80.0||80.0||0||80.0||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+InpMagic=767220||767220||1||767221||Y
