@@ -271,6 +271,15 @@ input ENUM_ABTG_TRAIL InpTrailMode = (ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE; // Ti
 input ENUM_TIMEFRAMES InpTrailTF = PERIOD_M1;         // (TRAIL_PREVBAR) TF della candela per il trailing (piano: M1)
 input double InpTrailAtrMult    = 2.0;                // (TRAIL_ATR) trailing = X * ATR
 input double InpTrailFixedPts   = 410;                // (TRAIL_FIXED) trailing in punti (piano DAX: 410 punti)
+//  RUNNER (FASE 2 drive-following, §3 dei criteri): il residuo dopo la parziale
+//  NON si deve cappare presto, deve CORRERE verso la coda (DRIVE-DOWN Q3 0,90%,
+//  max 3,06%). Questo input controlla il TP finale dell'ordine, in R:
+//    = 0 -> comportamento STORICO invariato: TP a InpTP1_R*3 (di norma 3R).
+//    > 0 -> cap esplicito del runner a questi R.
+//    < 0 -> NESSUN cap (es. -1): il runner esce SOLO a trailing / incrocio /
+//           fine sessione. E' la forma richiesta dal drive-following.
+//  ⚠️ Default 0 = neutro: non cambia niente in forward finche' non lo si tocca.
+input double InpRunnerTP_R      = 0.0;                // TP finale del runner in R (0=storico 3R, >0=cap, <0=nessun cap/coda)
 
 input group "=== Obiettivi a numeri tondi (approx. Multipivot/%Custom) ==="
 input bool   InpUseRoundLevels  = false;              // Usa i numeri tondi come 1o obiettivo
@@ -291,6 +300,28 @@ input group "=== Slippage & floor SL (consiglio amico) ==="
 input double InpSlippagePts   = 0;      // Slippage stimato in PUNTI: peggiora l'entry del breakout (backtest ONESTO + live). 0=off
 input double InpMinStopPts    = 0;      // Floor minimo di STOP in punti (~ spread+slippage+cuscinetto). 0=off
 input bool   InpSkipIfTight   = true;   // Se lo stop del breakout < floor -> SALTA il trade (invece di entrare troppo stretto)
+
+input group "=== F1 Forza della rottura (FASE 2 drive-following, opt-in) ==="
+//  FASE 2 -- feature F1 dell'ablazione a stella (criteri firmati 29/08/2026,
+//  STUDIO_APERTURE_FASE2_CRITERI_BOZZA.md). Ipotesi: una rottura DECISA
+//  (candela ampia) tiene di piu' di una sfilacciata, quindi sposta la miscela
+//  verso i DRIVE (payoff 5-6:1) e via dai RIENTRO (payoff ~0).
+//
+//  COSA FA, e va saputo perche' cambia il MECCANISMO d'ingresso:
+//   - InpMinBreakoutRangeATR = 0  ->  BREAKOUT NUDO invariato: ordini pendenti
+//     BUY STOP/SELL STOP che si riempiono intra-candela (la baseline dell'ablazione).
+//   - InpMinBreakoutRangeATR > 0  ->  il motore NON piazza pendenti: ARMA e
+//     sorveglia la candela di rottura sul TF del grafico. Entra a mercato SOLO
+//     se una candela CHIUDE oltre il livello+buffer (rottura confermata) E il suo
+//     range (max-min) >= k x ATR(TF grafico, InpAtrPeriodMgmt). k = questo input.
+//
+//  ATTENZIONE (dichiarato per l'ablazione): accendere F1 cambia l'entry da
+//  "pendente intra-candela" a "mercato su chiusura di candela". Il confronto
+//  baseline vs F1 misura quindi F1 + il cambio di timing insieme. Per isolare il
+//  solo timing (confronto pulito) si puo' girare una cella di controllo con k
+//  minuscolo (es. 0.01 = conferma-su-chiusura senza gate di ampiezza).
+//  Applicata SEMPRE alla barra di rottura, MAI a posizione gia' aperta.
+input double InpMinBreakoutRangeATR = 0.0; // F1: range candela di rottura >= k x ATR (0 = spento, pendente nudo)
 
 input group "=== Filtro VOLUMI (regola Emiliano: rottura valida solo con volumi) ==="
 input bool   InpUseVolumeFilter = false;  // Entra solo se il volume della rottura supera la media
@@ -477,6 +508,16 @@ int ABTG_OnInit()
                         InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
                         (InpBreakevenAtTP1 ? "si" : "no"),
                         EnumToString(InpTrailMode), EnumToString(InpTrailTF), InpTrailStartR));
+   //--- FASE 2 (drive-following): stampo i due parametri del round cosi' che la
+   //    riga CONFIG IN USO copra anche loro (un input applicato ma non stampato
+   //    e' gia' costato caro: vedi il caso RangeMode).
+   ABTGLog(StringFormat("CONFIG FASE 2 -> F1 forza rottura=%.2f x ATR %s | runner TP=%.2fR (%s) | EMA HTF (F3)=%s%s",
+                        InpMinBreakoutRangeATR,
+                        (InpMinBreakoutRangeATR > 0 ? "[ACCESO: entrata su chiusura candela]" : "[spento: pendente nudo]"),
+                        InpRunnerTP_R,
+                        (InpRunnerTP_R < 0 ? "NESSUN cap: corre verso la coda" : (InpRunnerTP_R > 0 ? "cap esplicito" : "storico 3R")),
+                        (InpUseEmaFilter ? "ACCESO" : "spento"),
+                        (InpUseEmaFilter ? StringFormat(" (EMA %d/%d su %s)", InpEmaFast, InpEmaSlow, EnumToString(InpFilterTF)) : "")));
    if(InpEntryMode == ABTG_GAPFILL && !InpUseGapFill)
       ABTGLog("NOTA: modalita' GAPFILL attiva. Il vecchio flag InpUseGapFill=false viene IGNORATO (prima faceva ricadere l'EA nel breakout senza dirlo).");
    if(InpEntryMode == ABTG_DELAYED && InpDelayDirMode == ABTG_DIR_BREAK &&
@@ -729,14 +770,23 @@ void ABTG_OnTick()
            {
             int refEndMin = (InpRangeMode == ABTG_RANGE_OPENING) ? rangeEndMin : openMin;
             if(nowMin >= refEndMin)
-              { if(TryPlaceBreakout()) gPhase = PH_PLACED; }
+              {
+               //--- FASE 2 F1: con InpMinBreakoutRangeATR>0 non si piazzano pendenti,
+               //    si ARMA e si sorveglia la candela di rottura (entrata a mercato
+               //    su chiusura). Con =0 resta il breakout nudo a pendenti.
+               if(InpMinBreakoutRangeATR > 0)
+                 { if(ArmBreakout()) gPhase = PH_ARMED; }
+               else
+                 { if(TryPlaceBreakout()) gPhase = PH_PLACED; }
+              }
            }
          break;
 
       case PH_ARMED:
          if(newsBlk) break;
-         if(InpEntryMode == ABTG_OPENCONFIRM) MonitorOpenConfirm();  // aspetto una candela che APRA oltre
-         else                                 MonitorRetest();       // RETEST: rottura poi LIMIT sul livello
+         if(InpEntryMode == ABTG_OPENCONFIRM)   MonitorOpenConfirm();      // aspetto una candela che APRA oltre
+         else if(InpEntryMode == ABTG_BREAKOUT) MonitorBreakoutStrength(); // F1: candela di rottura ampia
+         else                                   MonitorRetest();           // RETEST: rottura poi LIMIT sul livello
          break;
 
       case PH_PLACED:
@@ -954,7 +1004,7 @@ bool TryPlaceBreakout()
          else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
         }
       double lot = skip ? 0.0 : CalcLotByRisk(dist);
-      double tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+      double tp  = RunnerTP(entry, dist, +1);
       if(!skip && lot > 0 && dist > 0)
         {
          if(gTrade.BuyStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" BUY"))
@@ -979,7 +1029,7 @@ bool TryPlaceBreakout()
          else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
         }
       double lot = skip ? 0.0 : CalcLotByRisk(dist);
-      double tp  = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+      double tp  = RunnerTP(entry, dist, -1);
       if(!skip && lot > 0 && dist > 0)
         {
          if(gTrade.SellStop(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" SELL"))
@@ -1040,7 +1090,7 @@ bool TryPlaceRangeFade()
       double sl    = NormalizePrice(entry + slDist);
       double dist  = sl - entry;
       double lot   = SRBlocked(entry, -1) ? 0.0 : CalcLotByRisk(dist);   // R30: filtro S/R
-      double tp    = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+      double tp    = RunnerTP(entry, dist, -1);
       if(lot > 0 && dist > 0)
         {
          if(gTrade.SellLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" FADE SELL"))
@@ -1057,7 +1107,7 @@ bool TryPlaceRangeFade()
       double sl    = NormalizePrice(entry - slDist);
       double dist  = entry - sl;
       double lot   = SRBlocked(entry, +1) ? 0.0 : CalcLotByRisk(dist);   // R30: filtro S/R
-      double tp    = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+      double tp    = RunnerTP(entry, dist, +1);
       if(lot > 0 && dist > 0)
         {
          if(gTrade.BuyLimit(lot, entry, _Symbol, sl, tp, ORDER_TIME_SPECIFIED, expiry, ABTG_DEF_NAME+" FADE BUY"))
@@ -1198,7 +1248,7 @@ bool TryPlaceDelayed()
 
    double lot = CalcLotByRisk(dist);
    if(lot <= 0) { ABTGLog("DELAYED: lotto calcolato a 0: niente trade."); return(true); }
-   double tp = (InpTP1_R > 0) ? NormalizePrice((dir > 0) ? entry + dist*TpTotalR() : entry - dist*TpTotalR()) : 0.0;
+   double tp = RunnerTP(entry, dist, dir);
 
    //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
    if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_Nasdaq_Apertura_US")) return(false);
@@ -1310,8 +1360,7 @@ void MonitorOpenConfirm()
       sl   = NormalizePrice((dir > 0) ? entry - dist : entry + dist);
      }
 
-   double tp  = (InpTP1_R > 0) ? NormalizePrice((dir > 0) ? entry + dist*TpTotalR()
-                                                          : entry - dist*TpTotalR()) : 0.0;
+   double tp  = RunnerTP(entry, dist, (int)dir);
    double lot = CalcLotByRisk(dist);
    if(lot <= 0) { ABTGLog("OPENCONFIRM: lotto nullo, niente trade."); gPhase = PH_DONE; return; }
 
@@ -1325,6 +1374,122 @@ void MonitorOpenConfirm()
       ABTGLog(StringFormat("OPENCONFIRM %s: candela aperta a %.5f oltre %.5f, volumi ok -> entrato a mercato.",
                            (dir > 0 ? "BUY" : "SELL"), op, (dir > 0 ? buyTrig : sellTrig)));
      }
+  }
+
+//+------------------------------------------------------------------+
+//| FASE 2 - F1: ARMA il breakout "a candela di rottura".            |
+//|  Come TryPlaceBreakout per filtri e livelli, ma NON piazza i     |
+//|  pendenti: memorizza range/buffer/bias e passa a PH_ARMED. La    |
+//|  decisione d'ingresso la prende MonitorBreakoutStrength() a ogni |
+//|  candela chiusa. Stessi filtri del breakout nudo (spread,        |
+//|  conferma volumi/ATR, ampiezza range) cosi' l'unico delta vero   |
+//|  rispetto alla baseline e' il gate di forza + il timing su       |
+//|  chiusura di candela (dichiarato nei criteri FASE 2).            |
+//+------------------------------------------------------------------+
+bool ArmBreakout()
+  {
+   if(!ComputeLevels(gRangeHigh, gRangeLow))
+     { ABTGLog("F1 BREAKOUT: livelli non ancora calcolabili (dati non pronti): riprovo."); return(false); }
+
+   double rangePts = (gRangeHigh - gRangeLow) / _Point;
+   if(InpMinRangePts > 0 && rangePts < InpMinRangePts)
+     { ABTGLog(StringFormat("F1 BREAKOUT: candela %.0f pt < min %.0f: niente trade (whipsaw).", rangePts, InpMinRangePts)); return(true); }
+   if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+     { ABTGLog(StringFormat("F1 BREAKOUT: candela %.0f pt > max %.0f: niente trade (stop troppo largo).", rangePts, InpMaxRangePts)); return(true); }
+   if(!SpreadOK())  { ABTGLog("F1 BREAKOUT: spread troppo alto: nessun trade oggi."); return(true); }
+   if(!ConfirmOK()) { ABTGLog("F1 BREAKOUT: rottura non confermata (ne' volumi ne' ATR): niente trade."); return(true); }
+
+   UpdateVolRegime();   // R30: il regime si misura all'ARMING, come gBuffer e gBias
+
+   gBuffer    = EffectiveBuffer();
+   gBias      = TrendBias();
+   gLastOCBar = 0;
+   ABTGLog(StringFormat("F1 BREAKOUT armato: range %.5f-%.5f, buffer %.0f pt, bias %d, soglia rottura %.2f x ATR. Attendo una candela che CHIUDA oltre con range sufficiente.",
+                        gRangeHigh, gRangeLow, gBuffer/_Point, gBias, InpMinBreakoutRangeATR));
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
+//| FASE 2 - F1: a ogni candela NUOVA (TF del grafico) guarda la     |
+//|  candela appena CHIUSA. Entra a mercato SOLO se ha chiuso oltre  |
+//|  il livello+buffer (rottura confermata = DRIVE che tiene) E il   |
+//|  suo range (max-min) >= InpMinBreakoutRangeATR x ATR (rottura    |
+//|  DECISA, non sfilacciata). SL/lot/TP identici al breakout nudo,  |
+//|  runner e pavimento SL gestiti dagli stessi input.              |
+//+------------------------------------------------------------------+
+void MonitorBreakoutStrength()
+  {
+   ENUM_TIMEFRAMES btf = (ENUM_TIMEFRAMES)Period();   // la candela di rottura sta sul TF del grafico
+   datetime bt = iTime(_Symbol, btf, 0);
+   if(bt <= 0 || bt == gLastOCBar) return;            // una sola valutazione per candela nuova
+   gLastOCBar = bt;
+
+   // la candela appena CHIUSA e' lo shift 1
+   double hi = iHigh (_Symbol, btf, 1);
+   double lo = iLow  (_Symbol, btf, 1);
+   double cl = iClose(_Symbol, btf, 1);
+   if(hi <= 0 || lo <= 0 || cl <= 0) return;
+
+   double buyTrig  = NormalizePrice(gRangeHigh + gBuffer);
+   double sellTrig = NormalizePrice(gRangeLow  - gBuffer);
+   bool   longOK   = (gBias == 0 || gBias == +1);
+   bool   shortOK  = (gBias == 0 || gBias == -1);
+
+   //--- direzione: la candela deve aver CHIUSO oltre il livello (rottura tenuta)
+   int dir = 0;
+   if(InpAllowLong  && longOK  && cl >= buyTrig)  dir = +1;
+   if(InpAllowShort && shortOK && cl <= sellTrig) dir = -1;
+   if(dir == 0) return;   // nessuna chiusura oltre il livello su questa candela: aspetto
+
+   //--- F1: la candela di rottura deve essere AMPIA (>= k x ATR)
+   double atr = AtrValue();
+   double rng = hi - lo;
+   if(atr > 0 && rng < InpMinBreakoutRangeATR * atr)
+     {
+      ABTGLog(StringFormat("F1: candela di rottura %.0f pt < %.2f x ATR (%.0f pt): rottura sfilacciata, salto.",
+                           rng/_Point, InpMinBreakoutRangeATR, InpMinBreakoutRangeATR*atr/_Point));
+      return;
+     }
+
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   if(ask <= 0 || bid <= 0) return;
+
+   double entry = (dir > 0) ? ask : bid;
+   double sl;
+   if(InpSLMode == ABTG_SL_RANGE) sl = (dir > 0) ? sellTrig : buyTrig;
+   else                           sl = (dir > 0) ? entry - AtrValue()*InpAtrSlMult
+                                                 : entry + AtrValue()*InpAtrSlMult;
+   sl = NormalizePrice(VolRegimeSL(entry, sl));   // R30: scala lo stop col regime
+
+   double dist = (dir > 0) ? (entry - sl) : (sl - entry);
+   if(dist <= 0) { ABTGLog("F1: distanza di stop nulla, salto."); return; }
+   if(SRBlocked(entry, dir)) return;              // R30: livello S/R addosso -> salto questa candela
+   if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+     {
+      if(InpSkipIfTight)
+        { ABTGLog(StringFormat("F1 saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts));
+          gPhase = PH_DONE; return; }
+      dist = InpMinStopPts*_Point;
+      sl   = NormalizePrice((dir > 0) ? entry - dist : entry + dist);
+     }
+
+   double lot = CalcLotByRisk(dist);
+   if(lot <= 0) { ABTGLog("F1: lotto nullo, niente trade."); gPhase = PH_DONE; return; }
+   double tp = RunnerTP(entry, dist, dir);
+
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_Nasdaq_Apertura_US")) return;
+   bool ok = (dir > 0) ? gTrade.Buy (lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" F1 BUY")
+                       : gTrade.Sell(lot, _Symbol, 0.0, sl, tp, ABTG_DEF_NAME+" F1 SELL");
+   if(ok)
+     {
+      gPhase = PH_PLACED;
+      ABTGLog(StringFormat("F1 %s: candela di rottura chiusa a %.5f oltre %.5f, range %.0f pt (>= %.2fxATR) -> entrato a mercato SL %.5f lot %.2f.",
+                           (dir > 0 ? "BUY" : "SELL"), cl, (dir > 0 ? buyTrig : sellTrig), rng/_Point, InpMinBreakoutRangeATR, sl, lot));
+     }
+   else
+      ABTGLog("F1: ingresso a mercato fallito: "+gTrade.ResultRetcodeDescription());
   }
 
 bool ArmRetest()
@@ -1392,7 +1557,7 @@ void MonitorRetest()
             else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
            }
          double lot = skip ? 0.0 : CalcLotByRisk(dist);
-         double tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
+         double tp  = RunnerTP(entry, dist, +1);
          if(!skip && lot > 0 && dist > 0)
            {
             //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
@@ -1426,7 +1591,7 @@ void MonitorRetest()
             else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
            }
          double lot = skip ? 0.0 : CalcLotByRisk(dist);
-         double tp  = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
+         double tp  = RunnerTP(entry, dist, -1);
          if(!skip && lot > 0 && dist > 0)
            {
             //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
@@ -1521,10 +1686,29 @@ bool TryPlaceGapFill()
 //+------------------------------------------------------------------+
 double TpTotalR()
   {
-   // TP dell'ordine impostato piu' lontano (es. 3R); la parziale a TP1_R
-   // e la gestione avvengono comunque via ManagePosition().
+   // FASE 2: il runner puo' essere lasciato CORRERE verso la coda.
+   if(InpRunnerTP_R < 0) return(0.0);            // <0 = nessun cap: solo trailing/fine sessione
+   if(InpRunnerTP_R > 0) return(InpRunnerTP_R);  // >0 = cap esplicito a questi R
+   // ==0 = comportamento storico: TP dell'ordine impostato piu' lontano (es. 3R);
+   // la parziale a TP1_R e la gestione avvengono comunque via ManagePosition().
    double r = InpTP1_R > 0 ? InpTP1_R*3.0 : 0.0;
    return(r <= 0 ? 3.0 : r);
+  }
+
+//+------------------------------------------------------------------+
+//| Prezzo del TP finale (runner) per l'ordine, in direzione dir.    |
+//|  Ritorna 0 = NESSUN take profit (runner puro trailing) quando:   |
+//|   - il runner e' senza cap (InpRunnerTP_R < 0), oppure           |
+//|   - non c'e' parziale/obiettivo (InpTP1_R <= 0), oppure          |
+//|   - la distanza di rischio non e' valida.                        |
+//|  Centralizza la logica prima sparsa nei singoli rami d'ingresso  |
+//|  cosi' "runner senza cap" non mette per errore il TP sull'entry. |
+//+------------------------------------------------------------------+
+double RunnerTP(double entry, double dist, int dir)
+  {
+   double tpR = TpTotalR();
+   if(InpTP1_R <= 0 || tpR <= 0 || dist <= 0 || dir == 0) return(0.0);
+   return(NormalizePrice(entry + dir*dist*tpR));
   }
 
 //+------------------------------------------------------------------+
