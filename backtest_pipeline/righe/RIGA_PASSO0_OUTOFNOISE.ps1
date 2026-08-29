@@ -513,7 +513,7 @@ try{
     }
   }
 
-  # --- L'AUTOTEST DEL NUCLEO (otto blocchi) scrive solo su Print/Log:
+  # --- L'AUTOTEST DEL NUCLEO (nove blocchi, v1.01) scrive solo su Print/Log:
   #     in ottimizzazione nessuno la legge, il percorso dei log cambia
   #     fra le build MT5 -- e' un raccoglitore BEST-EFFORT, MAI un gate.
   if(-not $SoloControllo){
@@ -563,7 +563,7 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("include: " + $Include)
 [void]$RefTxt.Add("compilazione: " + $Compilato)
 [void]$RefTxt.Add("")
-[void]$RefTxt.Add("--- AUTOTEST DEL NUCLEO (otto blocchi, letti dai log degli agent) ---")
+[void]$RefTxt.Add("--- AUTOTEST DEL NUCLEO (nove blocchi v1.01, letti dai log degli agent) ---")
 if($Autotest.Count -gt 0){ foreach($a in $Autotest){ [void]$RefTxt.Add("  " + $a) } }
 else { [void]$RefTxt.Add("  NON LETTO (vedi RILIEVI). Non e' un verdetto: e' un'assenza.") }
 [void]$RefTxt.Add("")

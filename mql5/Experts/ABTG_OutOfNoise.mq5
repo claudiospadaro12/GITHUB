@@ -97,8 +97,26 @@
 //|  testato da chi ha scritto il file: compilare in MetaEditor (F7) |
 //|  e validare nel tester A TICK REALI.                            |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//|  CHANGELOG                                                        |
+//|  v1.01 (2026-08-29) - FIX WARMUP CONO (baco n=0 del PASSO 0).     |
+//|    CalcCono/CalcVwapSessione dimensionavano la copia storica su   |
+//|    BarrePerSeduta() (barre DENTRO la seduta), ma CopyRates(...,0,  |
+//|    need,...) copia barre CONSECUTIVE sul CALENDARIO, incluse le    |
+//|    fuori-seduta. Su un indice ~24h (NASUSD ~92-96 barre M15/gg)    |
+//|    'need' copriva ~5 giorni: il raccoglitore trovava ~5 sedute su  |
+//|    14, nDays restava < InpConeMinDays e OnNewBar bloccava OGNI     |
+//|    ingresso (0 trade). Ora 'need' e' dimensionato sulle barre di   |
+//|    GIORNO PIENO (BarrePerGiornoPieno, ~24h/TF = limite superiore   |
+//|    teorico di barre/gg), che garantisce una copertura minima in    |
+//|    GIORNI di calendario sufficiente a raccogliere le sedute.       |
+//|    Logica di cono/grilletto/bande/uscita/pavimento/fuso/gate       |
+//|    INVARIATA: cambia solo il DIMENSIONAMENTO della copia.          |
+//|    Aggiunto blocco 9 all'autotest: riproduce il baco su una copia  |
+//|    con barre fuori-seduta intercalate (guardia anti-regressione).  |
+//+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati - porting da Yuri Lopukhov (MIT, TradingView gJeM3LZ5)"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -330,6 +348,37 @@ long SessionStamp_Calc(const datetime t,const int startMinuti)
   }
 
 //+------------------------------------------------------------------+
+//| Quante SEDUTE distinte (in-seduta, per SessionStamp) stanno nei   |
+//| primi 'copied' istanti di times[] - proxy di quante sedute il     |
+//| raccoglitore del cono puo' raggiungere in una copia. Serve alla   |
+//| GUARDIA ANTI-REGRESSIONE dell'autotest: dimostra che una copia    |
+//| dimensionata sul GIORNO PIENO contiene abbastanza sedute anche    |
+//| con barre fuori-seduta intercalate, mentre una copia dimensionata |
+//| sulle barre-di-seduta (il baco n=0) no. times[] atteso ordinato   |
+//| nel tempo (le barre di una seduta sono contigue): conta un nuovo  |
+//| stamp quando cambia rispetto all'ultimo in-seduta visto. Taglia a |
+//| maxWanted (early-out come il raccoglitore che si ferma a found).  |
+//+------------------------------------------------------------------+
+int ContaSeduteDistinte_Calc(const datetime &times[],const int copied,
+                             const int startMin,const int endMin,const int maxWanted)
+  {
+   int  conta=0; long ultimo=0; bool haUltimo=false;
+   int  lim = (copied<ArraySize(times)) ? copied : ArraySize(times);
+   for(int i=0;i<lim;i++)
+     {
+      MqlDateTime d; TimeToStruct(times[i],d);
+      if(!InSeduta_Calc(MinutiDelGiorno_Calc(d.hour,d.min), startMin, endMin)) continue;
+      long st = SessionStamp_Calc(times[i], startMin);
+      if(!haUltimo || st!=ultimo)
+        {
+         conta++; ultimo=st; haUltimo=true;
+         if(maxWanted>0 && conta>=maxWanted) return(maxWanted);
+        }
+     }
+   return(conta);
+  }
+
+//+------------------------------------------------------------------+
 //| FLAT DI FINE SEDUTA - nucleo puro. Vero quando l'ora corrente ha  |
 //| raggiunto o superato l'ora di fine seduta. Confronto in MINUTI    |
 //| del giorno, non ora per ora.                                      |
@@ -534,13 +583,30 @@ bool BarraInSeduta(const datetime t)
 //--- l'istante corrente (ora server) e' dentro la seduta?
 bool InSedutaOra(const datetime t){ return(BarraInSeduta(t)); }
 
-//--- stima delle barre per seduta, per dimensionare la copia.
+//--- stima delle barre DENTRO la seduta (usata SOLO come tetto degli
+//    array per-seduta, es. cap della VWAP: e' la logica di posizione
+//    oraria, che e' corretta e NON va toccata).
 int BarrePerSeduta()
   {
    long per = PeriodSeconds(gTF); if(per<=0) per=300;
    int minuti = MinutiEndSeduta()-MinutiStartSeduta(); if(minuti<=0) minuti=480;
    int b = (int)((minuti*60)/per) + 2;
    return(b<4?4:b);
+  }
+
+//--- stima delle barre di un GIORNO PIENO di calendario (~24h / TF).
+//    SERVE SOLO a dimensionare 'need' della copia storica (CopyRates
+//    conta barre CONSECUTIVE sul CALENDARIO, non sulla seduta). Su un
+//    simbolo ~24h una seduta occupa solo una frazione del giorno: usare
+//    le barre-di-seduta sottostimava 'need' e il warmup non si chiudeva
+//    mai (baco n=0, PASSO 0). 24h/TF e' il limite SUPERIORE di barre in
+//    un giorno: se il feed ne produce meno (gap, halt), 'need' barre
+//    coprono ancora PIU' giorni -> dimensionamento conservativo-sicuro.
+int BarrePerGiornoPieno()
+  {
+   long per = PeriodSeconds(gTF); if(per<=0) per=300;
+   int b = (int)(86400/per);       // barre teoriche in 24h di calendario
+   return(b<10?10:b);
   }
 
 //+------------------------------------------------------------------+
@@ -566,11 +632,16 @@ bool CalcCono(const int shiftEval,double &upper,double &lower,double &avgMove,
    upper=0; lower=0; avgMove=0; nDays=0; nMoves=0; pos=-1;
    if(shiftEval<1) return(false);
 
+   //--- 'need' sulle barre di GIORNO PIENO (non di seduta): la copia deve
+   //    coprire InpConeDays sedute + quella corrente + margine per
+   //    weekend/festivi. Con barre-di-giorno-pieno come divisore reale,
+   //    (InpConeDays+4) barre/giorno garantiscono >= (InpConeDays+4)
+   //    giorni di calendario di copertura anche su un simbolo ~24h.
    MqlRates r[]; ArraySetAsSeries(r,true);
-   int need = (InpConeDays+3)*BarrePerSeduta() + shiftEval + 5;
-   if(need>20000) need=20000;
+   int need = (InpConeDays+4)*BarrePerGiornoPieno() + shiftEval + 5;
+   if(need>20000) need=20000;                 // tetto anti-abuso invariato
    int copied = CopyRates(_Symbol, gTF, 0, need, r);
-   if(copied<=shiftEval+2) return(false);
+   if(copied<=shiftEval+2) return(false);      // degradazione pulita: niente storia -> niente cono
 
    //--- la barra da valutare dev'essere DENTRO la seduta
    if(!BarraInSeduta(r[shiftEval].time)) return(false);
@@ -650,8 +721,11 @@ bool CalcVwapSessione(const int shiftEval,double &vwap)
    vwap=0;
    if(shiftEval<1) return(false);
 
+   //--- basta la seduta CORRENTE, ma 'need' va misurato in barre di
+   //    GIORNO PIENO (calendario), non di seduta: 2 giorni pieni coprono
+   //    la seduta in corso anche dopo un gap notturno o di weekend.
    MqlRates r[]; ArraySetAsSeries(r,true);
-   int need = 2*BarrePerSeduta() + shiftEval + 5;
+   int need = 2*BarrePerGiornoPieno() + shiftEval + 5;
    if(need>20000) need=20000;
    int copied = CopyRates(_Symbol, gTF, 0, need, r);
    if(copied<=shiftEval) return(false);
@@ -1005,8 +1079,33 @@ void AutoTestNoise()
                (int)sm1,(int)sm2,ip1,ip2,ip3);
    if(!(sm1 && !sm2 && MathAbs(ip1-5.0)<1e-6 && MathAbs(ip2-1.0)<1e-6 && MathAbs(ip3-5.0)<1e-6)) falliti++;
 
+   //--- 9. LA GUARDIA DEL WARMUP (baco n=0 del PASSO 0, fix v1.01).
+   //    Simulo un feed ~24h: 96 barre M15/giorno di CALENDARIO, con la
+   //    finestra intraday US 14:30-21:00 server marcata in-seduta.
+   //    Su questo stream conto le sedute distinte in due finestre:
+   //     - vecchio dimensionamento (barre-di-SEDUTA), replicando il 28
+   //       del referto: (14+3)*28 = 476 barre -> ~5 sedute, SOTTO le 14
+   //       minime -> il baco n=0;
+   //     - nuovo dimensionamento (barre-di-GIORNO-PIENO): (14+4)*96 =
+   //       1728 barre -> >= 14 sedute -> warmup che si chiude.
+   int    cdTest = 14;                          // come InpConeDays di casa
+   int    usStart = MinutiDelGiorno_Calc(14,30);
+   int    usEnd   = MinutiDelGiorno_Calc(21, 0);
+   int    barreGiorno = 96;                      // 24h / M15
+   int    needVecchio = (cdTest+3)*28;           // baco: barre-di-seduta
+   int    needNuovo   = (cdTest+4)*barreGiorno;  // fix:  barre-di-giorno-pieno
+   int    totBarre = needNuovo + 200;            // stream abbastanza lungo
+   datetime tSim[]; ArrayResize(tSim, totBarre);
+   datetime baseSim = D'2024.01.01 00:00:00';
+   for(int i=0;i<totBarre;i++) tSim[i] = baseSim + (datetime)((long)i*900); // +15 min
+   int sedVecchio = ContaSeduteDistinte_Calc(tSim, needVecchio, usStart, usEnd, cdTest);
+   int sedNuovo   = ContaSeduteDistinte_Calc(tSim, needNuovo,   usStart, usEnd, cdTest);
+   PrintFormat("[NOISE][AUTOTEST] warmup: sedute con dim.SEDUTA(%d barre)=%d (atteso < %d = il baco) | con dim.GIORNO-PIENO(%d barre)=%d (atteso %d = warmup chiuso)",
+               needVecchio, sedVecchio, cdTest, needNuovo, sedNuovo, cdTest);
+   if(!(sedVecchio < cdTest && sedNuovo >= cdTest)) falliti++;
+
    Print("[NOISE][AUTOTEST] esito motore: ", (falliti==0
-         ? "OTTO BLOCCHI SU OTTO, la regola ragiona come la firma."
+         ? "NOVE BLOCCHI SU NOVE, la regola ragiona come la firma."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
 
    gAutotestFalliti = falliti;
