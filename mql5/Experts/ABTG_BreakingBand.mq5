@@ -39,8 +39,12 @@
 //|        1 = sul RETEST (primo tocco -> allontanamento -> secondo  |
 //|        tocco della banda opposta, protocollo Leonardo punto 4,   |
 //|        con guardia anti ritorno sulla banda dell'impulso);       |
+//|        2 = IN-BULGE di CLAUDIO (primo tocco della banda opposta  |
+//|        + trend della mediana a favore + candela direzionale +    |
+//|        range contenuto; NON i filtri narrow/std della guida).    |
 //|      - direzione del trade = direzione dell'impulso originario;  |
-//|      - bande in fase di chiusura + deviazione standard in calo.  |
+//|      - bande in fase di chiusura + deviazione standard in calo   |
+//|        (mode 0/1; in mode 2 sostituite da trend+candela+range).  |
 //|      - invalidazioni assolute: candela > 1.5 x ATR, zig-zag,     |
 //|        spike profondi, band riding > 20 candele.                 |
 //|                                                                  |
@@ -103,6 +107,33 @@
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|  CHANGELOG                                                        |
+//|                                                                   |
+//|  1.05 - IN-BULGE DI CLAUDIO (InpContEntryMode=2, opt-in, default |
+//|    0 = comportamento 1.04 invariato). Il 29/08/2026 Claudio ha   |
+//|    dichiarato che il VERO in-bulge che lui tratta e' la          |
+//|    definizione dei suoi indicatori "BOLL BULGE v1/v3/v10",       |
+//|    STABILE su tre versioni: NON e' il retest (mode 1, resta come |
+//|    controllo), ma il PRIMO tocco della banda OPPOSTA filtrato da |
+//|    (a) TREND della mediana inclinato nella direzione dell'impulso|
+//|    (slope della mediana su InpTrendSlopeBars barre >= atr x       |
+//|    InpTrendSlopeFactor), (b) CANDELA DIREZIONALE nella direzione |
+//|    dell'impulso (close>open e close>close[1], speculare a short),|
+//|    (c) RANGE contenuto (high-low <= InpContEntryMaxRangeATR x    |
+//|    atr). In mode 2 NON si applicano i filtri narrow/std della    |
+//|    guida (InpContRequireNarrow / InpContRequireStdDown): quelli  |
+//|    sono la definizione della GUIDA (mode 0), non quella di       |
+//|    Claudio; trend+candela+range prendono il loro posto. Cancello |
+//|    OPZIONALE mediana-prima (InpContRequireMidFirst, default OFF):|
+//|    pretende che la mediana sia stata toccata dopo l'impulso e    |
+//|    prima di questo tocco della banda opposta. Nuova funzione     |
+//|    dedicata CheckEntryContinuazioneClaudio; mode 0 e mode 1      |
+//|    restano INTATTI (nessun bit cambia in campo con il default 0, |
+//|    le 3 sedie forex vive girano identiche). Nuovi input          |
+//|    InpTrendSlopeFactor / InpTrendSlopeBars / InpContEntryMaxRange|
+//|    ATR / InpContRequireMidFirst; nuovi contatori di funnel       |
+//|    cCont_mode2 / cX_c2Trend / cX_c2Candle / cX_c2Range /         |
+//|    cX_c2MidFirst. DA MISURARE in A/B contro mode 0 (nudo) e      |
+//|    mode 1 (retest) sullo stesso periodo e simboli.               |
 //|                                                                   |
 //|  1.04 - TIMING D'INGRESSO DELLA CONTINUAZIONE (InpContEntryMode, |
 //|    opt-in, default 0 = comportamento 1.03 invariato). NASCE DA UN|
@@ -212,7 +243,7 @@
 //|        da OnTester (PrintFunnel). Nessun impatto sul CSV.         |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.04"
+#property version   "1.05"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -283,7 +314,11 @@ input int    InpSlopeSource    = 0;     // 0 = banda dell'impulso (tabella/filtr
 input double InpRetestBufferATR= 0.15;  // LEONARDO: buffer del limit sul retest (0.1-0.2 x ATR) - solo INVERSIONE
 input bool   InpContRequireNarrow  = true; // CONTINUAZIONE: pretendi bande in chiusura. La guida si contraddice (tabella REGOLE UFFICIALI: si; sezione C: "le bande possono essere ancora gonfie"). Esposto per A/B
 input bool   InpContRequireStdDown = true; // CONTINUAZIONE: pretendi deviazione standard in calo (idem: regola dichiarata per l'inversione, dedotta per la continuazione). Esposto per A/B
-input int    InpContEntryMode  = 0;     // [1.04] CONTINUAZIONE: quando scatta l'ingresso sulla banda opposta. 0 = PRIMO tocco (comportamento storico 1.03, invariato); 1 = RETEST (primo tocco -> allontanamento -> secondo tocco, protocollo Leonardo punto 4)
+input int    InpContEntryMode  = 0;     // [1.04/1.05] CONTINUAZIONE: quando scatta l'ingresso sulla banda opposta. 0 = PRIMO tocco (comportamento storico 1.03, invariato); 1 = RETEST (primo tocco -> allontanamento -> secondo tocco, protocollo Leonardo punto 4); 2 = IN-BULGE di Claudio (primo tocco + trend mediana + candela direzionale + range, senza i filtri narrow/std della guida)
+input double InpTrendSlopeFactor   = 0.08;// [1.05] mode 2: forza del trend della mediana. |slope mediana| >= atr x questo (Pine di Claudio: trendSlopeFactor)
+input int    InpTrendSlopeBars     = 5;   // [1.05] mode 2: barre su cui si misura lo slope della mediana (mediana[i] - mediana[i+N]) (Pine: slopeLen)
+input double InpContEntryMaxRangeATR = 2.0;// [1.05] mode 2: range massimo della candela d'ingresso in ATR (Pine: maxRangeATR_In)
+input bool   InpContRequireMidFirst  = false;// [1.05] mode 2 (OPZIONALE, default OFF): pretendi che la mediana sia stata toccata dopo l'impulso e prima del tocco della banda opposta
 input bool   InpUseReversalCandle = false; // GUIDA (regola OPZIONALE): candela di inversione sul livello di test
 input double InpRevBodyMaxPct  = 33.0;  // SCELTA NOSTRA: corpo massimo % del range per dirla "di rigetto"
 input double InpRevShadowMinPct= 50.0;  // SCELTA NOSTRA: ombra di rigetto minima % del range
@@ -371,6 +406,9 @@ bool     gTouchedOpposite=false;
 bool     gOppReached=false;    // 1.04: primo tocco della banda opposta avvenuto (attesa retest)
 bool     gOppLeft=false;       // 1.04: dopo il primo tocco il prezzo si e' allontanato (retest abilitato)
 int      gOppReachedBar=-1;    // 1.04: gPostBars del primo tocco (diagnostica)
+//--- 1.05 IN-BULGE di Claudio (InpContEntryMode=2): flag del cancello opzionale
+//    mediana-prima. RELOAD-SAFE: al riavvio la macchina riparte da IDLE.
+bool     gContMidTouched=false;// 1.05: la mediana e' stata toccata nella fase post con la continuazione viva
 bool     gReachedMedian=false;
 int      gMedianBar=-1;        // gPostBars in cui e' stata raggiunta la mediana
 double   gWidthAtMedian=0.0;
@@ -394,6 +432,12 @@ long cCont_oppFirst=0;          // primi tocchi della banda opposta registrati (
 long cCont_retest=0;            // retest validi che hanno prodotto un tentativo di ingresso
 long cX_contRetestImpReturn=0;  // setup morti: ritorno sulla banda dell'impulso fra primo tocco e retest
 long cX_contRetestExpired=0;    // setup scaduti (InpPostBulgeMaxBars) mentre attendevano il retest
+//--- 1.05 IN-BULGE di Claudio (mode 2, solo diagnostica del funnel)
+long cCont_mode2=0;             // ingressi validi dell'in-bulge di Claudio (mode 2)
+long cX_c2Trend=0;              // scarti mode 2: mediana non inclinata a favore (o storico insufficiente)
+long cX_c2Candle=0;            // scarti mode 2: candela non direzionale nella direzione dell'impulso
+long cX_c2Range=0;             // scarti mode 2: candela d'ingresso troppo grande (range > soglia)
+long cX_c2MidFirst=0;          // scarti mode 2: mediana non toccata prima (cancello mediana-prima)
 long cE_contNarrow=0, cE_contStd=0, cE_contShadow=0, cE_contRange=0, cE_contRev=0,
      cE_contSolid=0, cE_contBlocked=0;
 long cE_invSlope=0, cE_invNarrow=0, cE_invStd=0, cE_invReinf=0, cE_invShadow=0,
@@ -443,8 +487,10 @@ int OnInit()
      { Print("ERRORE: InpPostATRRef deve essere 0 o 1."); return(INIT_FAILED); }
    if(InpInvViolentBars<1)
      { Print("ERRORE: InpInvViolentBars deve essere >= 1 (1 = comportamento v1.00)."); return(INIT_FAILED); }
-   if(InpContEntryMode<0 || InpContEntryMode>1)
-     { Print("ERRORE: InpContEntryMode deve essere 0 (primo tocco) o 1 (retest)."); return(INIT_FAILED); }
+   if(InpContEntryMode<0 || InpContEntryMode>2)
+     { Print("ERRORE: InpContEntryMode deve essere 0 (primo tocco), 1 (retest) o 2 (in-bulge di Claudio)."); return(INIT_FAILED); }
+   if(InpTrendSlopeBars<1)
+     { Print("ERRORE: InpTrendSlopeBars deve essere >= 1."); return(INIT_FAILED); }
 
    gTrade.SetExpertMagicNumber(InpMagic);
    gTrade.SetTypeFillingBySymbol(_Symbol);
@@ -479,7 +525,7 @@ int OnInit()
    Log(StringFormat("avviato su %s %s. Bollinger %d/%.1f, StdDev %d con SMA%d, ATR %d. Modo pattern: %s. Entry continuazione: %s.",
        _Symbol,EnumToString(InpTF),InpBBPeriod,InpBBDev,InpStdPeriod,InpStdSmaPeriod,InpAtrPeriod,
        (InpPatternMode==0?"SOLO CONTINUAZIONE":(InpPatternMode==1?"SOLO INVERSIONE":"ENTRAMBI")),
-       (InpContEntryMode==1?"RETEST banda opposta (Leonardo p.4)":"PRIMO tocco (storico)")));
+       (InpContEntryMode==1?"RETEST banda opposta (Leonardo p.4)":(InpContEntryMode==2?"IN-BULGE di Claudio (trend+candela+range)":"PRIMO tocco (storico)"))));
    return(INIT_SUCCEEDED);
   }
 
@@ -720,6 +766,7 @@ void ResetPattern(string motivo)
    gRetrRangeSum=0.0; gRetrBars=0; gRetrShadowViol=0; gRideBars=0;
    gPostAtrRef=0.0; gInvViolBars=0;
    gOppReached=false; gOppLeft=false; gOppReachedBar=-1;   // 1.04 retest mode
+   gContMidTouched=false;                                  // 1.05 in-bulge di Claudio
   }
 
 void AdvanceMachine()
@@ -853,6 +900,7 @@ void ValidateBulge(int i,double atr,double w)
    gTouchedOpposite=false; gReachedMedian=false; gMedianBar=-1; gWidthAtMedian=0.0;
    gRetrRangeSum=0.0; gRetrBars=0; gRetrShadowViol=0; gRideBars=0;
    gOppReached=false; gOppLeft=false; gOppReachedBar=-1;   // 1.04 retest mode
+   gContMidTouched=false;                                  // 1.05 in-bulge di Claudio
    //--- ATR CONGELATO a fine bulge: e' il metro con cui la guida misura le
    //    candele del ritracciamento ("grandi rispetto all'impulso"). Con l'ATR
    //    corrente le soglie si stringono da sole mentre il mercato si calma:
@@ -937,6 +985,11 @@ void UpdatePost(int i,double atr,double w)
      }
    if(!gContAlive && !gInvAlive){ ResetPattern(""); return; }
 
+   //--- 1.05 IN-BULGE di Claudio (cancello mediana-prima): registra se la
+   //    mediana e' stata toccata durante la fase post con la continuazione
+   //    ancora viva, PRIMA che il tocco della banda opposta consumi il setup.
+   if(gContAlive && TouchMedian(i)) gContMidTouched=true;
+
    //--- TEST DELLA BANDA OPPOSTA: obbligatorio per la continuazione,
    //    PROIBITO per l'inversione (se la tocca, non e' piu' inversione).
    if(TouchOppositeBand(i))
@@ -967,6 +1020,15 @@ void UpdatePost(int i,double atr,double w)
             //--- gOppReached ma non ancora allontanato: barre contigue attaccate
             //    alla banda contano come UN tocco solo, non un retest: si attende.
             return;
+           }
+         else if(InpContEntryMode==2)
+           {
+            //--- 1.05 IN-BULGE di CLAUDIO: come mode 0 entra al PRIMO tocco della
+            //    banda opposta e consuma il setup, ma i filtri non sono quelli
+            //    della guida (narrow/std): sono trend mediana + candela + range.
+            cCont_test++;
+            if(ModoConsente(PAT_CONT)) CheckEntryContinuazioneClaudio(i,aref);
+            gContAlive=false;
            }
          else
            {
@@ -1060,6 +1122,67 @@ void CheckEntryContinuazione(int i,double atr)
    cO_cont++;
 
    Log(StringFormat("CONTINUAZIONE valida (%s). Solidita' %.1f%%. %s",(isLong?"LONG":"SHORT"),solid,det));
+   Enter(isLong,PAT_CONT,solid);
+  }
+
+//--- CONTINUAZIONE "IN-BULGE di CLAUDIO" (InpContEntryMode=2, [1.05]).
+//    Definizione canonica STABILE sugli indicatori "BOLL BULGE v1/v3/v10",
+//    scelta il 29/08/2026. Entra al PRIMO tocco della banda opposta (come
+//    mode 0) ma NON applica i filtri narrow/std della guida: usa i tre criteri
+//    dei Pine di Claudio -- trend della mediana inclinato nella direzione
+//    dell'impulso, candela direzionale, range contenuto -- piu' un cancello
+//    OPZIONALE mediana-prima. E' proprio questa la differenza che l'A/B deve
+//    misurare contro mode 0 (nudo) e mode 1 (retest).
+//    MAPPATURA Pine -> file: slopeBasis = basis - basis[slopeLen] diventa
+//    gMid[i] - gMid[i+InpTrendSlopeBars]; close[1] diventa gR[i+1].close (serie
+//    con indice crescente = piu' vecchio); barRange diventa gR[i].high-gR[i].low.
+void CheckEntryContinuazioneClaudio(int i,double atr)
+  {
+   if(!TradingConsentito()){ cE_contBlocked++; return; }
+
+   bool isLong=(gBulgeDir>0);
+
+   //--- 1) FILTRO TREND (il cuore della definizione): la MEDIANA deve essere
+   //    inclinata nella direzione dell'impulso su InpTrendSlopeBars barre.
+   int j=i+InpTrendSlopeBars;
+   if(j>=ArraySize(gMid))
+     { cX_c2Trend++; Log("mode2 scartata: storico mediana insufficiente per lo slope."); return; }
+   double slopeMediana=gMid[i]-gMid[j];
+   double soglia=atr*InpTrendSlopeFactor;
+   bool trendOk = isLong ? (slopeMediana >  soglia) : (slopeMediana < -soglia);
+   if(!trendOk)
+     { cX_c2Trend++;
+       Log(StringFormat("mode2 scartata: mediana non inclinata a favore (slope %.6f, soglia %.6f).",slopeMediana,soglia));
+       return; }
+
+   //--- 2) CANDELA DIREZIONALE nella direzione dell'impulso
+   //    (Pine long: close>open and close>close[1]; short speculare).
+   bool candOk = isLong ? (gR[i].close>gR[i].open && gR[i].close>gR[i+1].close)
+                        : (gR[i].close<gR[i].open && gR[i].close<gR[i+1].close);
+   if(!candOk)
+     { cX_c2Candle++; Log("mode2 scartata: candela non direzionale nella direzione dell'impulso."); return; }
+
+   //--- 3) RANGE della candela d'ingresso contenuto
+   double rg=gR[i].high-gR[i].low;
+   if(rg > InpContEntryMaxRangeATR*atr)
+     { cX_c2Range++;
+       Log(StringFormat("mode2 scartata: candela troppo grande (range %.5f > %.2f x ATR).",rg,InpContEntryMaxRangeATR));
+       return; }
+
+   //--- 4) MEDIANA-PRIMA (opzionale, default OFF): la mediana dev'essere stata
+   //    toccata dopo l'impulso e prima di questo tocco della banda opposta.
+   if(InpContRequireMidFirst && !gContMidTouched)
+     { cX_c2MidFirst++; Log("mode2 scartata: mediana non toccata prima del tocco della banda opposta (cancello mediana-prima)."); return; }
+
+   //--- solidita' per il log (coerenza con le altre entry); filtro solo se >0
+   string det="";
+   double solid=CalcSolidita(true,i,true,det);
+   if(InpMinSolidita>0.0 && solid<InpMinSolidita)
+     { cE_contSolid++; Log(StringFormat("mode2 scartata: solidita' %.1f%% < %.1f%%. %s",solid,InpMinSolidita,det)); return; }
+
+   cCont_mode2++;
+   Log(StringFormat("IN-BULGE Claudio (mode 2) valido (%s). Slope mediana %.6f. Solidita' %.1f%%. %s",
+       (isLong?"LONG":"SHORT"),slopeMediana,solid,det));
    Enter(isLong,PAT_CONT,solid);
   }
 
@@ -1660,6 +1783,10 @@ void PrintFunnel()
    PrintFormat("[BB-FUNNEL] FASE 2 CONT retest(mode=%d)  primoTocco=%d retestValidi=%d "
                "mortiRitornoImpulso=%d scaduti=%d",
                InpContEntryMode,(int)cCont_oppFirst,(int)cCont_retest,(int)cX_contRetestImpReturn,(int)cX_contRetestExpired);
+   PrintFormat("[BB-FUNNEL] FASE 2 CONT mode2 (Claudio)  validi=%d | scarti: trend=%d candela=%d "
+               "range=%d medianaPrima=%d  (slopeFactor=%.3f slopeBars=%d maxRangeATR=%.2f midFirst=%s)",
+               (int)cCont_mode2,(int)cX_c2Trend,(int)cX_c2Candle,(int)cX_c2Range,(int)cX_c2MidFirst,
+               InpTrendSlopeFactor,InpTrendSlopeBars,InpContEntryMaxRangeATR,(InpContRequireMidFirst?"ON":"OFF"));
    PrintFormat("[BB-FUNNEL] FASE 3 CONT  scarti: bandeNonChiuse=%d stdNonInCalo=%d ombre=%d range=%d "
                "candelaRigetto=%d solidita=%d bloccati=%d  ==> OK=%d",
                (int)cE_contNarrow,(int)cE_contStd,(int)cE_contShadow,(int)cE_contRange,(int)cE_contRev,
