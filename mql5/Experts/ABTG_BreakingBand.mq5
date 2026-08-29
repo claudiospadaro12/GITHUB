@@ -33,8 +33,12 @@
 //|   PATTERN 1 - CONTINUAZIONE (In-Bulge)                           |
 //|     UpdatePost + CheckEntryContinuazione                         |
 //|      - ritracciamento ORDINATO e diretto verso la banda OPPOSTA; |
-//|      - ENTRY al TOCCO della banda opposta (corpo o spike che     |
-//|        INTERSECA la banda - regola tecnica del PROMPT);          |
+//|      - ENTRY sulla banda opposta (corpo/spike che INTERSECA la   |
+//|        banda - regola del PROMPT). QUANDO scatta lo decide       |
+//|        InpContEntryMode: 0 = al PRIMO tocco (storico 1.03);      |
+//|        1 = sul RETEST (primo tocco -> allontanamento -> secondo  |
+//|        tocco della banda opposta, protocollo Leonardo punto 4,   |
+//|        con guardia anti ritorno sulla banda dell'impulso);       |
 //|      - direzione del trade = direzione dell'impulso originario;  |
 //|      - bande in fase di chiusura + deviazione standard in calo.  |
 //|      - invalidazioni assolute: candela > 1.5 x ATR, zig-zag,     |
@@ -99,6 +103,27 @@
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|  CHANGELOG                                                        |
+//|                                                                   |
+//|  1.04 - TIMING D'INGRESSO DELLA CONTINUAZIONE (InpContEntryMode, |
+//|    opt-in, default 0 = comportamento 1.03 invariato). NASCE DA UN|
+//|    RISCONTRO DEL 29/08/2026: il codice entrava al PRIMO tocco    |
+//|    della banda opposta, ma il protocollo di Leonardo (In-Bulge,  |
+//|    punto 4) dice "Entrata: sul RETEST della banda opposta        |
+//|    all'impulso". I due comportamenti non sono lo stesso momento. |
+//|    InpContEntryMode=0 (default): PRIMO tocco, ramo di codice     |
+//|    IDENTICO a 1.03, nessun bit cambia in campo. Mode 1:          |
+//|    RETEST - il primo tocco NON entra e NON consuma il setup;     |
+//|    serve poi almeno una barra che si allontana dalla banda       |
+//|    opposta e un SECONDO tocco per entrare. GUARDIA sempre attiva |
+//|    in mode 1 (protocollo punto 2): se fra il primo tocco e il    |
+//|    retest il prezzo torna sulla banda dell'IMPULSO, il setup e'  |
+//|    invalidato. Tutte le invalidazioni della fase post e la       |
+//|    scadenza InpPostBulgeMaxBars continuano a valere durante      |
+//|    l'attesa del retest. Le 3 sedie forex vive (EURUSD/GBPUSD/    |
+//|    AUDUSD, magic 76003x) NON sono toccate: girano col default 0. |
+//|    Nuovi contatori di funnel cCont_oppFirst / cCont_retest /     |
+//|    cX_contRetestImpReturn / cX_contRetestExpired. DA MISURARE in |
+//|    A/B (mode 1 contro mode 0) sullo stesso periodo e simboli.    |
 //|                                                                   |
 //|  1.03 - CANCELLO DI RR MINIMO (InpMinRR, opt-in, default 0 =      |
 //|    comportamento 1.02 invariato). NASCE DA UN FATTO DEL FORWARD:  |
@@ -187,7 +212,7 @@
 //|        da OnTester (PrintFunnel). Nessun impatto sul CSV.         |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.03"
+#property version   "1.04"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -258,6 +283,7 @@ input int    InpSlopeSource    = 0;     // 0 = banda dell'impulso (tabella/filtr
 input double InpRetestBufferATR= 0.15;  // LEONARDO: buffer del limit sul retest (0.1-0.2 x ATR) - solo INVERSIONE
 input bool   InpContRequireNarrow  = true; // CONTINUAZIONE: pretendi bande in chiusura. La guida si contraddice (tabella REGOLE UFFICIALI: si; sezione C: "le bande possono essere ancora gonfie"). Esposto per A/B
 input bool   InpContRequireStdDown = true; // CONTINUAZIONE: pretendi deviazione standard in calo (idem: regola dichiarata per l'inversione, dedotta per la continuazione). Esposto per A/B
+input int    InpContEntryMode  = 0;     // [1.04] CONTINUAZIONE: quando scatta l'ingresso sulla banda opposta. 0 = PRIMO tocco (comportamento storico 1.03, invariato); 1 = RETEST (primo tocco -> allontanamento -> secondo tocco, protocollo Leonardo punto 4)
 input bool   InpUseReversalCandle = false; // GUIDA (regola OPZIONALE): candela di inversione sul livello di test
 input double InpRevBodyMaxPct  = 33.0;  // SCELTA NOSTRA: corpo massimo % del range per dirla "di rigetto"
 input double InpRevShadowMinPct= 50.0;  // SCELTA NOSTRA: ombra di rigetto minima % del range
@@ -340,6 +366,11 @@ int      gPostBars=0;          // candele trascorse dalla fine del bulge
 bool     gContAlive=false;     // pattern di CONTINUAZIONE ancora valido
 bool     gInvAlive=false;      // pattern di INVERSIONE ancora valido
 bool     gTouchedOpposite=false;
+//--- 1.04 RETEST MODE della continuazione (InpContEntryMode=1). RELOAD-SAFE:
+//    al riavvio la macchina riparte da IDLE, questi flag ripartono a zero.
+bool     gOppReached=false;    // 1.04: primo tocco della banda opposta avvenuto (attesa retest)
+bool     gOppLeft=false;       // 1.04: dopo il primo tocco il prezzo si e' allontanato (retest abilitato)
+int      gOppReachedBar=-1;    // 1.04: gPostBars del primo tocco (diagnostica)
 bool     gReachedMedian=false;
 int      gMedianBar=-1;        // gPostBars in cui e' stata raggiunta la mediana
 double   gWidthAtMedian=0.0;
@@ -358,6 +389,11 @@ long cP_expired=0, cX_contImp=0, cX_contZig=0, cX_contSpike=0, cX_contReinf=0,
      cX_contRide=0, cX_contRitorno=0, cX_invViol=0, cX_invSpike=0, cX_invReinf=0,
      cX_invRide=0, cX_invOpp=0;
 long cInv_mediana=0, cInv_retest=0, cCont_test=0;
+//--- 1.04 RETEST MODE della continuazione (solo diagnostica del funnel)
+long cCont_oppFirst=0;          // primi tocchi della banda opposta registrati (mode 1)
+long cCont_retest=0;            // retest validi che hanno prodotto un tentativo di ingresso
+long cX_contRetestImpReturn=0;  // setup morti: ritorno sulla banda dell'impulso fra primo tocco e retest
+long cX_contRetestExpired=0;    // setup scaduti (InpPostBulgeMaxBars) mentre attendevano il retest
 long cE_contNarrow=0, cE_contStd=0, cE_contShadow=0, cE_contRange=0, cE_contRev=0,
      cE_contSolid=0, cE_contBlocked=0;
 long cE_invSlope=0, cE_invNarrow=0, cE_invStd=0, cE_invReinf=0, cE_invShadow=0,
@@ -407,6 +443,8 @@ int OnInit()
      { Print("ERRORE: InpPostATRRef deve essere 0 o 1."); return(INIT_FAILED); }
    if(InpInvViolentBars<1)
      { Print("ERRORE: InpInvViolentBars deve essere >= 1 (1 = comportamento v1.00)."); return(INIT_FAILED); }
+   if(InpContEntryMode<0 || InpContEntryMode>1)
+     { Print("ERRORE: InpContEntryMode deve essere 0 (primo tocco) o 1 (retest)."); return(INIT_FAILED); }
 
    gTrade.SetExpertMagicNumber(InpMagic);
    gTrade.SetTypeFillingBySymbol(_Symbol);
@@ -438,9 +476,10 @@ int OnInit()
 
    if(InpUseNewsFilter) LoadNews();
 
-   Log(StringFormat("avviato su %s %s. Bollinger %d/%.1f, StdDev %d con SMA%d, ATR %d. Modo pattern: %s.",
+   Log(StringFormat("avviato su %s %s. Bollinger %d/%.1f, StdDev %d con SMA%d, ATR %d. Modo pattern: %s. Entry continuazione: %s.",
        _Symbol,EnumToString(InpTF),InpBBPeriod,InpBBDev,InpStdPeriod,InpStdSmaPeriod,InpAtrPeriod,
-       (InpPatternMode==0?"SOLO CONTINUAZIONE":(InpPatternMode==1?"SOLO INVERSIONE":"ENTRAMBI"))));
+       (InpPatternMode==0?"SOLO CONTINUAZIONE":(InpPatternMode==1?"SOLO INVERSIONE":"ENTRAMBI")),
+       (InpContEntryMode==1?"RETEST banda opposta (Leonardo p.4)":"PRIMO tocco (storico)")));
    return(INIT_SUCCEEDED);
   }
 
@@ -680,6 +719,7 @@ void ResetPattern(string motivo)
    gTouchedOpposite=false; gReachedMedian=false; gMedianBar=-1; gWidthAtMedian=0.0;
    gRetrRangeSum=0.0; gRetrBars=0; gRetrShadowViol=0; gRideBars=0;
    gPostAtrRef=0.0; gInvViolBars=0;
+   gOppReached=false; gOppLeft=false; gOppReachedBar=-1;   // 1.04 retest mode
   }
 
 void AdvanceMachine()
@@ -812,6 +852,7 @@ void ValidateBulge(int i,double atr,double w)
    gContAlive=true; gInvAlive=true;
    gTouchedOpposite=false; gReachedMedian=false; gMedianBar=-1; gWidthAtMedian=0.0;
    gRetrRangeSum=0.0; gRetrBars=0; gRetrShadowViol=0; gRideBars=0;
+   gOppReached=false; gOppLeft=false; gOppReachedBar=-1;   // 1.04 retest mode
    //--- ATR CONGELATO a fine bulge: e' il metro con cui la guida misura le
    //    candele del ritracciamento ("grandi rispetto all'impulso"). Con l'ATR
    //    corrente le soglie si stringono da sole mentre il mercato si calma:
@@ -827,7 +868,12 @@ void UpdatePost(int i,double atr,double w)
   {
    gPostBars++;
    if(gPostBars>InpPostBulgeMaxBars)
-     { cP_expired++; ResetPattern("fase post-bulge scaduta senza test valido."); return; }
+     {
+      //--- 1.04: se il retest mode era in attesa (primo tocco gia' avvenuto) e
+      //    non e' arrivato il secondo tocco, si conta a parte oltre a cP_expired.
+      if(InpContEntryMode==1 && gContAlive && gOppReached) cX_contRetestExpired++;
+      cP_expired++; ResetPattern("fase post-bulge scaduta senza test valido."); return;
+     }
 
    //--- metro di misura della fase post (vedi InpPostATRRef)
    double aref = (InpPostATRRef==1 && gPostAtrRef>0.0) ? gPostAtrRef : atr;
@@ -899,14 +945,55 @@ void UpdatePost(int i,double atr,double w)
       if(gInvAlive){ gInvAlive=false; cX_invOpp++; Log("inversione invalidata: il prezzo ha toccato la banda opposta."); }
       if(gContAlive)
         {
-         cCont_test++;
-         if(ModoConsente(PAT_CONT)) CheckEntryContinuazione(i,aref);
-         //--- il test obbligatorio e' avvenuto: il setup di continuazione e' consumato
-         gContAlive=false;
+         if(InpContEntryMode==1)
+           {
+            //--- RETEST MODE (Leonardo punto 4): il PRIMO tocco non entra e non
+            //    consuma il setup; serve un allontanamento e un secondo tocco.
+            if(!gOppReached)
+              {
+               gOppReached=true; gOppReachedBar=gPostBars; gOppLeft=false; cCont_oppFirst++;
+               Log("continuazione (retest mode): PRIMO tocco della banda opposta registrato, attendo allontanamento e retest.");
+               return;                           // setup VIVO, nessuna entrata
+              }
+            if(gOppLeft)
+              {
+               //--- RETEST VALIDO: tocco tornato dopo essersi allontanato
+               cCont_retest++; cCont_test++;
+               if(ModoConsente(PAT_CONT)) CheckEntryContinuazione(i,aref);
+               gContAlive=false;
+               ResetPattern("");
+               return;
+              }
+            //--- gOppReached ma non ancora allontanato: barre contigue attaccate
+            //    alla banda contano come UN tocco solo, non un retest: si attende.
+            return;
+           }
+         else
+           {
+            //--- PRIMO TOCCO (InpContEntryMode=0, comportamento storico 1.03)
+            cCont_test++;
+            if(ModoConsente(PAT_CONT)) CheckEntryContinuazione(i,aref);
+            //--- il test obbligatorio e' avvenuto: il setup di continuazione e' consumato
+            gContAlive=false;
+           }
         }
       ResetPattern("");
       return;
      }
+
+   //--- 1.04 RETEST MODE: GUARDIA del protocollo Leonardo punto 2 (attiva
+   //    SEMPRE in mode 1, indipendente da InpContNoImpulseBandReturn). Se fra
+   //    il primo tocco dell'opposta e il retest il prezzo torna a toccare la
+   //    banda dell'IMPULSO, il setup di continuazione e' invalidato.
+   if(InpContEntryMode==1 && gContAlive && gOppReached && TouchImpulseBand(i,0.0))
+     { gContAlive=false; cX_contRetestImpReturn++;
+       Log("continuazione (retest mode) invalidata: ritorno sulla banda dell'impulso fra primo tocco e retest (Leonardo punto 2)."); }
+
+   //--- 1.04 RETEST MODE: prima barra dopo il primo tocco che NON tocca l'opposta
+   //    (siamo qui perche' TouchOppositeBand e' falso) -> il prezzo si e'
+   //    allontanato, il prossimo tocco della banda opposta sara' un retest valido.
+   if(InpContEntryMode==1 && gContAlive && gOppReached && !gOppLeft)
+     { gOppLeft=true; Log("continuazione (retest mode): prezzo allontanato dalla banda opposta, retest ora abilitato."); }
 
    //--- RIENTRO ALLA MEDIANA (inversione): puo' superarla, mai la banda opposta
    if(gInvAlive && !gReachedMedian && TouchMedian(i))
@@ -1552,8 +1639,8 @@ void ExportTrades()
 //==================================================================
 void PrintFunnel()
   {
-   PrintFormat("[BB-FUNNEL] %s %s  pattern=%d  endMode=%d dirMode=%d postAtrRef=%d",
-               _Symbol,EnumToString(InpTF),InpPatternMode,InpBulgeEndMode,InpBulgeDirMode,InpPostATRRef);
+   PrintFormat("[BB-FUNNEL] %s %s  pattern=%d  endMode=%d dirMode=%d postAtrRef=%d contEntryMode=%d",
+               _Symbol,EnumToString(InpTF),InpPatternMode,InpBulgeEndMode,InpBulgeDirMode,InpPostATRRef,InpContEntryMode);
    PrintFormat("[BB-FUNNEL] FASE 1  tentati=%d | morti in fase: oltre%dcandele=%d bandriding=%d",
                (int)cB_start,InpBulgeMaxBars,(int)cB_maxbars,(int)cB_riding);
    PrintFormat("[BB-FUNNEL] FASE 1  arrivati a validazione=%d | scartati: corti=%d senzaImpulsive=%d "
@@ -1570,6 +1657,9 @@ void PrintFunnel()
    PrintFormat("[BB-FUNNEL] FASE 2  scaduti(>%d barre)=%d | mediana raggiunta=%d | retest banda impulso=%d | "
                "tocco banda opposta=%d",
                InpPostBulgeMaxBars,(int)cP_expired,(int)cInv_mediana,(int)cInv_retest,(int)cCont_test);
+   PrintFormat("[BB-FUNNEL] FASE 2 CONT retest(mode=%d)  primoTocco=%d retestValidi=%d "
+               "mortiRitornoImpulso=%d scaduti=%d",
+               InpContEntryMode,(int)cCont_oppFirst,(int)cCont_retest,(int)cX_contRetestImpReturn,(int)cX_contRetestExpired);
    PrintFormat("[BB-FUNNEL] FASE 3 CONT  scarti: bandeNonChiuse=%d stdNonInCalo=%d ombre=%d range=%d "
                "candelaRigetto=%d solidita=%d bloccati=%d  ==> OK=%d",
                (int)cE_contNarrow,(int)cE_contStd,(int)cE_contShadow,(int)cE_contRange,(int)cE_contRev,
