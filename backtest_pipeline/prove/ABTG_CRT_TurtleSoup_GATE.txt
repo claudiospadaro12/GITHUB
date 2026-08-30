@@ -25,10 +25,11 @@
 #     copre il plausibile (Nasdaq ~15000, ~1-2%/gg = ~150-300 pt). Se la
 #     griglia mostra il gate che non morde in questo range, si ritara.
 #
-# @SIMBOLO  NASUSD_EXT
-# @PERIODO  M15
-# @DAQUANDO 2020.01.01
-# @FINOA    2024.01.01
+# Direttive @ NUDE (senza # davanti): commentate = gate vuoto.
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2020.01.01
+@FINOA    2024.01.01
 #
 # LA CELLA (secchi = pin) + il GATE ACCESO
 InpWickFactor=2.0
