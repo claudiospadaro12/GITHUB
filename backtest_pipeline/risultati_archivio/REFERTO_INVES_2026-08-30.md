@@ -48,8 +48,39 @@ peggior giornata piccola (-1.29%). n=215 >= 150 -> **merito MISURABILE.**
    Serve il per-trade CSV `abtg_trades_ABTG_InvEsaurimento_NASUSD_EXT_769020.csv`
    (E3) in Common\Files, segmentato per regime.
 
-## CONSEGUENZA
-La chiave firmata (E1 esaurimento ADR) e' bocciata onestamente. Ma il round NON e'
-un buco: E3 (conferma) e' un candidato VERDE a basso DD che batte i caduti, e
-allinea la misura di casa con le due cacce di oggi. Prossimo passo: lettura per
-regime di E3 (serve il per-trade CSV), poi conferma a tick. Nessun forward toccato.
+## AGGIORNAMENTO: LETTURA PER REGIME DI E3 (769020) — il verde totale INGANNA
+
+| regime | n | tot_net | asp/tr | win% |
+|---|---|---|---|---|
+| 2017 TORO | 59 | **-5604** | -95.0 | 57.6 |
+| Q4-2018 ORSO | 18 | +2946 | +163.7 | 72.2 |
+| 2019 LATERALE | 2 | -1107 | (n=2) | 0 |
+| CROLLO-GIU 2020 | 3 | -73 | (n=3) | 66.7 |
+| RIPRESA-V 2020 | 9 | +839 | +93.2 | 77.8 |
+| resto 2020 | 9 | +5597 | +621.9 | 66.7 |
+
+**E3 NON e' un motore robusto: e' una MEAN-REVERSION REGIME-CONDIZIONALE.**
+- **PERDE nel toro pulito 2017** (-5604, -95/trade): un'inversione bleeda in un trend.
+- **VINCE nel volatile/bilaterale** (orso Q4-2018 +2946, ripresa-V +5597 nel
+  resto-2020): quando il mercato oscilla, l'inversione confermata paga.
+- Il +6422 totale e' la SOMMA di questi opposti: **il totale diluisce, per regime
+  e' una moneta SUL REGIME** (verde in volatilita', rosso in trend).
+- Campioni per regime THIN (18/9/9/3/2 tranne 2017): merito per-regime SOSPESO.
+
+**Conseguenza pesante e onesta**: la cassaforte tick 2024.09->2026 e' un TORO
+PULITO -> E3 la' dentro PROBABILMENTE PERDE (come ha perso nel 2017). Quindi un
+verdetto tick "cosi' com'e'" e' quasi certo rosso. E3 **non e' un mattone stabile**:
+e' un motore che serve VOLATILITA', e per essere dispiegabile vorrebbe un GATE DI
+REGIME (si accende solo in alta volatilita'/mercato bilaterale) -- lo stesso schema
+dello short crash-only.
+
+## CONSEGUENZA (aggiornata, onesta)
+- La chiave firmata E1 (esaurimento ADR) e' bocciata. E3 (conferma) e' VERDE nel
+  TOTALE ma REGIME-CONDIZIONALE per regime: paga in volatilita', perde nel toro.
+- La lezione della CONFERMA (E3>E1>baseline) resta valida e converge con DAX/Dow.
+  Ma E3 non e' promuovibile as-is: e' vol-dipendente, servirebbe un gate di regime.
+- Questo allinea E3 allo SHORT crash-only e alla tesi pomeridiana Dow: sugli indici,
+  i motori reversal/mean-reversion sono VOLATILITA'-condizionali, non all-weather.
+- Prossimo utile: NON forzare E3 sulla cassaforte-toro (perderebbe); piuttosto il
+  suo edge (e quello dello short) va cercato dietro un GATE DI VOLATILITA'/REGIME,
+  misurato. Nessun forward toccato.
