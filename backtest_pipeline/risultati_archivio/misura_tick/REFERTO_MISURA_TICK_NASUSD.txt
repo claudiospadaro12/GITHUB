@@ -1,0 +1,19 @@
+MISURA DELLA PROFONDITA' DEI TICK REALI -- NASUSD @ BCM
+data: 2026-08-30 09:40:49   (corsa partita alle 2026-08-30 09:38:24)
+script: scarica_storico.ps1 pinnato a 2f2437cbe20304372fd2a84e83d0b9b203a2ab6b
+riga: -Simboli NASUSD -Da 2022.01.01 -Timeframes M1,M5 -TimeoutMin 240 -Auto
+codice di uscita (scarica_storico.ps1): 0
+
+I TICK REALI DI NASUSD PARTONO DAL 2024.09.26   (166509474 tick, verdetto: TICK REALI PARZIALI)
+MURO DELLE BARRE M1, colonna PrimaDataServer: 2024.09.26
+
+NASUSD M1 barre=660018 locale=2024.09.26 server=2024.09.26 -> IL BROKER NON HA PIU' STORICO
+NASUSD M5 barre=132017 locale=2024.09.26 server=2024.09.26 -> IL BROKER NON HA PIU' STORICO
+NASUSD TICK barre=166509474 locale=2024.09.26 server=- -> TICK REALI PARZIALI
+
+COME SI LEGGE:
+ - la colonna che DECIDE e' la prima data VERA dei tick + il conteggio.
+ - se i tick partono dal 2024.09.26 (come U30USD): la finestra cassaforte
+   FASE 2 2024.09.26 -> 2026 e' coperta da tick VERI, i suoi numeri reggono.
+ - se partono DOPO, o sono pochi/assenti: a Model 4 MT5 ha usato tick
+   FINTI e la cassaforte va RILETTA o RIFATTA.
