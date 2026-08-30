@@ -1,6 +1,6 @@
 # =====================================================================
 #  MARCATORE_RIGA_CRT_TICK_DIAG_v1
-#  RIGA_CRT_TICK_G.ps1  --  CRT DIAG TICK BCM: il verdetto vero nel toro.
+#  RIGA_CRT_TICK_DIAG.ps1  --  CRT DIAG TICK BCM: il verdetto vero nel toro.
 #  Cella vincente (wick 2.0, mid 0, side 2) + GATE ON ADX(D1)<=100 (ADX spento, DIAGNOSTICO), a TICK
 #  REALI (Modello 4) su NASUSD BCM M15, 2024.09.26->2026.06.30. Unico asse Y
 #  = InpMagic gemelli (769107/769108). E' un VERDETTO (tick), non OHLC.
@@ -53,7 +53,7 @@ $PerTrade_ok = "NON TROVATO"
 $Modo      = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
-# la cella vincente + il GATE acceso a ADX<=30. NB: InpCloseHour=21 (SERVER BCM).
+# la cella vincente + il GATE acceso a ADX<=100. NB: InpCloseHour=21 (SERVER BCM).
 $FissiAttesi = @{ "InpWickFactor"="2.0"; "InpUseMidGate"="0"; "InpSide"="2";
                   "InpUseRegimeGate"="true"; "InpRegimeTF"="16408";
                   "InpAdxMax"="100.0"; "InpAtrMinPts"="0.0" }
@@ -107,7 +107,7 @@ try{
   Scarica ($RawPin + "/backtest_pipeline/prove/" + $ProvaNome) $fProva
   Dico ("prova scaricato: " + $ProvaNome) "Green"
 
-  Titolo "2. GATE SUL PROVA (cella vincente + gate ADX<=30 + gemelli, TICK BCM)"
+  Titolo "2. GATE SUL PROVA (cella vincente + gate ADX<=100 + gemelli, TICK BCM)"
   $righe = RigheVive $fProva
   $h = @{}
   $assiY = New-Object System.Collections.ArrayList
@@ -136,7 +136,7 @@ try{
 
   foreach($k in @($FissiAttesi.Keys)){
     $v = ($h[$k] -split '\|\|')[0]
-    if($v -ne $FissiAttesi[$k]){ throw ($ProvaNome + ": " + $k + " e' '" + $v + "', atteso '" + $FissiAttesi[$k] + "' (cella vincente / gate ADX<=30 acceso su D1).") }
+    if($v -ne $FissiAttesi[$k]){ throw ($ProvaNome + ": " + $k + " e' '" + $v + "', atteso '" + $FissiAttesi[$k] + "' (cella vincente / gate ADX<=100 acceso su D1).") }
   }
 
   $mg = $h["InpMagic"] -split '\|\|'
@@ -158,7 +158,7 @@ try{
   if($ch -ne "21"){ throw ($ProvaNome + ": InpCloseHour deve essere 21 (flat RTH 21:00 server su NASUSD BCM), trovato '" + $ch + "'.") }
   if($cm -ne "0"){  throw ($ProvaNome + ": InpCloseMin deve essere 0, trovato '" + $cm + "'.") }
 
-  Dico "geometria BCM, 1 asse Y = InpMagic (gemelli 769107/769108), cella vincente + GATE ADX<=30 (D1), pavimento SL, FUSO SERVER (flat 21): TUTTI PASSATI" "Green"
+  Dico "geometria BCM, 1 asse Y = InpMagic (gemelli 769107/769108), cella vincente + GATE ADX<=100 (D1), pavimento SL, FUSO SERVER (flat 21): TUTTI PASSATI" "Green"
 
   Titolo "3. TERMINALE E COMPILAZIONE (NASUSD nativo BCM)"
   $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
@@ -245,7 +245,7 @@ New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 
 $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("=====================================================================")
-[void]$RefTxt.Add(" CRT DIAG TICK BCM (ADX<=30) -- verdetto nel toro su " + $Simbolo + " " + $Periodo)
+[void]$RefTxt.Add(" CRT DIAG TICK BCM (ADX<=100) -- verdetto nel toro su " + $Simbolo + " " + $Periodo)
 [void]$RefTxt.Add("=====================================================================")
 [void]$RefTxt.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto, NON e' il risultato")
 [void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
@@ -277,7 +277,7 @@ foreach($p in $Rilievi){ [void]$RefTxt.Add("  - " + $p) }
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add('COME SI RIPRENDE: dalla pagina righe/RIGA_CRT_TICK_DIAG_DA_MANDARE.md.')
 
-$refPath = Join-Path $Cart "REFERTO_CRT_TICK_G.txt"
+$refPath = Join-Path $Cart "REFERTO_CRT_TICK_DIAG.txt"
 Set-Content -LiteralPath $refPath -Value ($RefTxt -join "`r`n") -Encoding ASCII
 Write-Host ($RefTxt -join "`r`n")
 
@@ -304,7 +304,7 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host "FILE ATTESI NELLO ZIP: REFERTO_CRT_TICK_G.txt + il prova + i per-trade CSV (abtg_trades_..._769107/769108.csv) + la griglia gemelli (IS, tick)" -ForegroundColor Gray
+Write-Host "FILE ATTESI NELLO ZIP: REFERTO_CRT_TICK_DIAG.txt + il prova + i per-trade CSV (abtg_trades_..._769107/769108.csv) + la griglia gemelli (IS, tick)" -ForegroundColor Gray
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
 if($Problemi.Count -gt 0){ Write-Host "ESITO: COMPLETATO CON PROBLEMI" -ForegroundColor Yellow; exit 1 }

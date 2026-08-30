@@ -1,6 +1,6 @@
 # 📬 CRT DIAGNOSTICO (ADX<=100) — LA RIGA DA MANDARE
 
-**Che cos'è:** la cella vincente + **GATE ON ADX(D1)≤30** a **TICK REALI (Modello 4)**
+**Che cos'è:** la cella vincente + **GATE ON ADX(D1)≤100** a **TICK REALI (Modello 4)**
 su **NASUSD BCM** M15, **2024.09.26 → 2026.06.30** (il toro attuale). Unico asse Y =
 gemelli magic 769107/769108. **È un VERDETTO tick, non OHLC.**
 
@@ -16,7 +16,7 @@ gemelli magic 769107/769108. **È un VERDETTO tick, non OHLC.**
 | | |
 |---|---|
 | **Driver** | `righe/RIGA_CRT_TICK_DIAG.ps1` (marcatore `MARCATORE_RIGA_CRT_TICK_DIAG_v1`) |
-| **File prova** | `prove/ABTG_CRT_TurtleSoup_TICK_G.txt` (cella + gate ADX≤30, gemelli, flat 21) |
+| **File prova** | `prove/ABTG_CRT_TurtleSoup_TICK_DIAG.txt` (cella + gate ADX≤100, gemelli, flat 21) |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~15-40 min (tick, 21 mesi).
 
@@ -47,6 +47,6 @@ gemelli magic 769107/769108. **È un VERDETTO tick, non OHLC.**
 ```
 
 ## 📦 COSA TORNA
-Zip sul Desktop `CRT_TICK_DIAG_...zip` → `REFERTO_CRT_TICK_G.txt` + il prova + **i due
+Zip sul Desktop `CRT_TICK_DIAG_...zip` → `REFERTO_CRT_TICK_DIAG.txt` + il prova + **i due
 per-trade CSV** `abtg_trades_..._769107/769108.csv` + la griglia gemelli (tick).
 **Mandami lo zip** e leggo il verdetto tick.
