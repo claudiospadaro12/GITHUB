@@ -8,7 +8,7 @@
 # deployabile ORA, senza Dukascopy.
 # ==========================================================================
 #
-# LA CELLA VINCENTE: wick 2.0, mid 0, side 2, GATE ON ADX(D1)<=30 (ATR 100).
+# LA CELLA VINCENTE: wick 2.0, mid 0, side 2, GATE ON ADX(D1)<=30 (ATR OFF, ADX-only).
 #   Fissi (secchi). Unico asse Y = InpMagic gemelli (769105/769106, vergini):
 #   2 passate identiche, 2 per-trade CSV distinti (determinismo + lettura).
 #

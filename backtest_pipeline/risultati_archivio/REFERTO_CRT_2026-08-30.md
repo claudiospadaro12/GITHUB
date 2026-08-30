@@ -241,3 +241,27 @@ su BCM e' un muro.
 **FIX: InpAtrMinPts 100 -> 0** (ATR OFF, solo ADX<=30). E' anche il discriminante:
 se con ATR=0 appaiono trade -> era l'ATR (confermato, e leggiamo il PF vero); se
 restano 0 -> ADX>30 sempre (toro forte, gate flat) o D1 no-data. Round rifatto con ATR=0.
+
+### 2o TENTATIVO (ATR=0, pin 9e99e48): ANCORA 0 TRADE, gateBlk=2573
+
+Con l'ATR spento il gate blocca ANCORA tutti i 2573 pattern (gateBlk=2573, 0 trade).
+Quindi NON era (solo) l'ATR. Restano DUE ipotesi, e vanno separate:
+- **(a) ADX(D1) > 30 per tutti i 2573**: il toro 2024-2026 e' cosi' trendante che
+  il daily ADX non scende mai <=30 -> il gate tiene il CRT FLAT = COMPORTAMENTO
+  GIUSTO (non perde nel regime sbagliato; e' la tesi "deploy sicuro").
+- **(b) D1 no-data nel tester tick**: iADX/iATR su D1 non popolano in Modello 4 su
+  simbolo nativo -> RegimeGateOk torna sempre false -> blocca tutto = BACO (live
+  non tradebbe MAI, nemmeno nel chop -> inutile).
+  NB: se ADX leggesse 0 (empty), 0<=30 sarebbe TRUE -> passerebbe. Blocca -> ADX
+  legge >30 OPPURE CopyBuffer/BarsCalculated fallisce.
+
+**IL DISCRIMINANTE (prossimo round, decisivo): InpAdxMax=100** (ADX<=100 sempre
+vero) con ATR=0. Se appaiono trade -> il gate LEGGE il D1 (nessun baco), e lo 0 a
+ADX<=30 era regime VERO (toro forte, gate flat = deploy sicuro). Se restano 0 ->
+baco D1-no-data nel tester tick, da correggere nell'EA prima di ogni deploy.
+
+**NOTA STRATEGICA (onesta)**: comunque vada, il payoff del CRT e' DIFFERITO -- vive
+nel chop, che a tick BCM non raggiungiamo (serve Dukascopy), e nel toro attuale sta
+(giustamente) flat = zero reddito ORA. Gli altri 5 motori (Chaos, DAX ReEntry, Dow
+ModelB, H1 Retest, DAX ValueArea) sono non testati e potrebbero dare un mattone
+deployabile nel regime ATTUALE. Dopo il discriminante, valutare il pivot.

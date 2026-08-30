@@ -250,7 +250,7 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto, NON e' il risultato")
 [void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
 [void]$RefTxt.Add("pin:  " + $Pin)
-[void]$RefTxt.Add("cella: wick 2.0, mid 0, side 2 | GATE ON ADX(D1)<=30, ATR 100 | gemelli 769105/769106")
+[void]$RefTxt.Add("cella: wick 2.0, mid 0, side 2 | GATE ON ADX(D1)<=30, ATR OFF (ADX-only) | gemelli 769105/769106")
 [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (tick BCM, UN SOLO REGIME toro)")
 [void]$RefTxt.Add("banco: MODELLO 4 (TICK REALI) -- VERDETTO. Deposito " + $Deposito)
 [void]$RefTxt.Add("fuso: NASUSD BCM = ora SERVER -> flat RTH 21:00 server (NON 16 NY).")
