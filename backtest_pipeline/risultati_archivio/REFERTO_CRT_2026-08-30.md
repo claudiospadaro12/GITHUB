@@ -92,3 +92,47 @@ magic dedicato, per-trade CSV segmentato per regime -> confermare che il verde
 viene dal crollo 2020 + orso 2022 (non da un artefatto OHLC di un periodo). Se
 confermato: candidato storm-gated, da Dukascopy per il tick e da accoppiare a un
 gate di volatilita'/regime (misurato, non appiccicato).
+
+## STAGE-2 — la cella robusta PER REGIME (per-trade CSV, gemelli identici)
+
+_Corsa: 30/08/2026 20:14, pin `ad60f874ec888a2ec2dee75454c9e19d74a17647`. Cella
+robusta (wick 2.0, mid 0, side 2), gemelli 769101/769102 IDENTICI (determinismo OK),
+320 trade su 2020-2024. Zip: CRT_EXT_S2_CORSA_20260830_2014.zip._
+
+| regime | n | tot_net | asp/tr | win% | segno |
+|---|---|---|---|---|---|
+| **CROLLO 2020** (feb-apr) | 30 | **-2760** | -92.0 | 46.7 | 🔴 PERDE |
+| resto 2020 (ripresa/chop) | 66 | +1221 | +18.5 | 60.6 | 🟢 |
+| **TORO 2021** (trend liscio) | 68 | -609 | -8.9 | 52.9 | 🔴 piatto |
+| **ORSO 2022** (grind ribassista) | 73 | +2633 | +36.1 | 53.4 | 🟢 |
+| **2023** (range/chop) | 83 | **+5259** | +63.4 | 62.7 | 🟢 il grosso |
+| TOTALE | 320 | +5744 | +17.9 | | |
+
+Lati: LONG +2541 (n=151), SHORT +3203 (n=169) -> **due lati veri, lo short paga
+di piu'** (riempie il buco short).
+
+**LA TESI "storm" ERA IMPRECISA — la misura la CORREGGE (onesto):**
+- 🔴 **NON e' un motore da CROLLO**: nel crollo covid 2020 PERDE -2760 (-92/trade).
+  Un turtle-soup che fada gli sweep in un crollo violento prende il coltello che
+  cade. Il crash e' il suo nemico, non il suo regime.
+- 🔴 **NON e' un motore da TREND liscio**: toro 2021 piatto/rosso (atteso).
+- 🟢 **E' un motore da CHOP / RANGE / GRIND**: vince nell'orso-a-gradini 2022
+  (+2633), nel range 2023 (+5259, il grosso) e nella ripresa-chop resto-2020
+  (+1221). Vuole mercati bilaterali, volatili ma NON in crollo direzionale.
+- => e' una **mean-reversion CONDIZIONATA AL REGIME DI RANGE**, non "storm-only".
+
+**I DUE MURI + UN TERZO (concentrazione):**
+1. OHLC OTTIMISTA: coerente col tick (2024-2026 = toro liscio-ish -> PF 0.5, cioe'
+   perde nel liscio, esatto). I numeri veri a tick sono piu' bassi.
+2. VERDETTO TICK NEL REGIME GIUSTO IMPOSSIBILE su BCM: il chop 2022/2023 e' pre
+   26/09/2024 -> nessun tick. Il tick BCM copre solo il toro (dove perde). Serve
+   Dukascopy per il verdetto vero nel regime di range.
+3. CONCENTRAZIONE 2023: +5259 dei +5744 vengono dal 2023. Il SEGNO e' coerente in
+   3 regimi di chop su 5, ma la TAGLIA dell'edge e' 2023-pesante -> incerta.
+
+**VERDETTO STAGE-2: NON deployabile ORA (il forward e' un toro -> perderebbe, come
+il tick), ma NON morto. E' un motore da RANGE, regime-condizionale. Per renderlo
+dispiegabile servono DUE cose insieme: (a) un GATE DI REGIME che lo accenda solo
+in chop/range bilaterale e lo spenga in crollo e in trend liscio (misurato); (b)
+Dukascopy per il verdetto tick nel regime giusto. Strada lunga. Parcheggiato come
+candidato CHOP-GATED, thesis raffinata, registrato.**
