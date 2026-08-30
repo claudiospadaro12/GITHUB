@@ -285,3 +285,33 @@ BACKTESTARE il gated a tick su BCM finche' l'EA non legge il D1 in modo robusto 
 tester. FIX EA necessario (warmup/robustezza dell'handle D1, o misura di regime
 calcolata dalle barre M15 aggregate a giorno senza handle D1 separato). Poi rifare
 il gated tick.
+
+## CHIUSURA DELLA GIORNATA CRT (30/08, 23:30) — PARCHEGGIO ONESTO
+
+Round finale (EA corretto con CopyRates, pin 1ae826a):
+- GATED TICK (ADX<=30): 0 trade, gateBlk=2573.
+- DIAG (ADX<=100, soglie sempre-vere): ANCORA 0 trade, gateBlk=2573.
+Compilazioni fresche (68/70 KB): l'EA corretto E' girato. Il codice della lettura
+regime e' stato riletto riga per riga: shift 1, riordino, minimi corretti. Eppure
+RegimeGateOk torna sempre false -> anche CopyRates(D1) non consegna dati usabili
+nel tester tick su nativo, in un modo che le griglie non mostrano piu'.
+
+**LIMITE DIAGNOSTICO RAGGIUNTO (dichiarato):** dalle griglie headless non si vede
+altro. Il prossimo passo utile e' un TEST SINGOLO MANUALE nel tester MT5 (GUI) con
+l'EA instrumentato a stampare PERCHE' RegimeGateOk fallisce (got di CopyRates,
+GetLastError, nAtr/nAdx, adx calcolato) e lettura del Giornale. E' un'altra
+sessione di lavoro, non un altro giro di griglia.
+
+**STATO FINALE DEL CRT (bilancio della giornata, tutto misurato):**
+- Motore nudo: MORTO nel toro a tick (0/30, PF 0.5). VIVO nel chop su OHLC.
+- GATE ADX<=30 su OHLC: VALIDATO e favoloso (+10135, ogni regime positivo,
+  DD dimezzato, concentrazione risolta). La tesi chop-gate e' CONFERMATA su OHLC.
+- Verdetto TICK del gated: NON OTTENIBILE oggi (baco lettura D1 nel tester tick,
+  3 tentativi + fix + discriminanti). NON deployabile senza tick valido (regola).
+- PARCHEGGIATO come candidato forte con 2 strade riaperte quando si vuole:
+  (a) debug manuale MT5 col Giornale (1 sessione); (b) Dukascopy per il verdetto
+  nel SUO regime (chop). I magic 7691xx restano riservati al CRT.
+
+**PIVOT DICHIARATO:** il valore adesso e' nei 5 motori costruiti e MAI testati
+(Chaos Lyapunov - riga gia' PRONTA -, DAX ReEntry, Dow ModelB, H1 NY Retest, DAX
+ValueArea): possono dare un mattone deployabile nel regime ATTUALE.
