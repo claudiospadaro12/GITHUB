@@ -54,11 +54,16 @@ consecutive. La parziale ha domato il singolo giorno, non la serie.
   (spread reale, mai misurato su NASUSD) e' load-bearing. Va misurato lo spread
   (Spread Logger 74148) prima di qualunque promozione.
 
-## VERDETTO PROVVISORIO
+## AGGIORNAMENTO 30/08: RISERVA TICK SCIOLTA -> i numeri REGGONO
+`misura_tick` su NASUSD (referto in `misura_tick/`): **166.509.474 tick REALI dal
+2024.09.26** (come U30USD). La finestra cassaforte 2024.09.26->2026 e' coperta
+INTERAMENTE da tick veri: **i numeri sotto NON sono il ripiego di MT5, sono
+reali.** Il verdetto da provvisorio diventa CONFERMATO.
+
+## VERDETTO (confermato dai tick reali)
 La FASE 2 NON promuove un candidato forward oggi. Ma NON e' un buco nell'acqua:
-1. **Prima**: misurare la profondita' tick di NASUSD (`misura_tick`) -- senza,
-   questi numeri potrebbero essere il ripiego di MT5. Se i tick sono thin, la
-   corsa va rifatta (o Dukascopy).
+1. **Dati VERI** (166M tick dal 2024.09.26): l'OHLC era ottimista, a tick l'edge
+   e' sottile ma reale sul long, negativo sul simmetrico. Fatto accertato.
 2. **Se i tick sono reali**: il long e' un edge sottile da difendere sul costo;
    lo short va staccato dal simmetrico e messo dietro un GATE di regime.
 3. **Robustezza-per-regime**: gia' verde a OHLC (FASE 1). Il nodo e' il COSTO,
