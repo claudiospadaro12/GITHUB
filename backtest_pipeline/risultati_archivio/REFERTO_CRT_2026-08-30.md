@@ -219,3 +219,25 @@ scarta i direzionali (dove muore), in OGNI regime. E' costitutivo e MISURATO.
   FATTIBILE (tick c'e') e testa se il gate porta il tick da PF 0.5 a >=1 nel
   regime ATTUALE**. Se verde -> edge TICK-VERIFICATO nel toro di oggi ->
   DEPLOYABILE ora, SENZA aspettare Dukascopy. E' il prossimo round giusto.
+
+## GATED TICK BCM -- 1o TENTATIVO: 0 TRADE, baco di SCALA ATR scovato (non un verdetto)
+
+_Corsa: 30/08/2026 22:45, pin 6cef95d. Gemelli 769105/769106 su NASUSD BCM tick
+2024-2026. RISULTATO: 0 trade. NON e' un verdetto -- e' un baco tecnico, scovato
+dai contatori diagnostici._
+
+- OnNewBar 37313, Ret No Pattern 34740 -> **2573 PATTERN rilevati** (il motore vede
+  i setup). **Ret Gate Regime = 2573**: il gate ha BLOCCATO TUTTI. Trade = 0.
+- Params confermati: RegimeGate=1, RegimeTF=16408 (D1), AdxMax=30, **AtrMinPts=100**,
+  CloseHour=21.
+
+**CAUSA (baco di scala ATR, feed-dipendente):** su _EXT (S2G) lo stesso gate a
+ATR=100 lasciava passare 201 trade; su BCM NATIVO 0. Il _Point di NASUSD BCM
+differisce dal custom _EXT -> l'ATR convertito (atrPrezzo/(InpMT5PerPuntoIndice*
+_Point)) esce SOTTO 100 sempre -> la condizione ATR>=100 blocca tutto. L'ATR era
+gia' inutile nella griglia (AtrMin 0==100 su _EXT). Pinnato a 100 credendolo neutro:
+su BCM e' un muro.
+
+**FIX: InpAtrMinPts 100 -> 0** (ATR OFF, solo ADX<=30). E' anche il discriminante:
+se con ATR=0 appaiono trade -> era l'ATR (confermato, e leggiamo il PF vero); se
+restano 0 -> ADX>30 sempre (toro forte, gate flat) o D1 no-data. Round rifatto con ATR=0.

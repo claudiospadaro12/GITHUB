@@ -43,8 +43,11 @@ InpUseRegimeGate=true
 InpRegimeTF=16408
 InpRegimeAdxPeriod=14
 InpRegimeAtrPeriod=14
+# InpAtrMinPts=0.0: ATR OFF. Su BCM nativo il _Point differisce dal feed _EXT
+#   e l'ATR convertito esce <100 sempre (bloccava tutto). L'ATR era gia' inutile
+#   nella griglia (0==100 su _EXT): il gate e' ADX-only. Solo ADX<=30 decide.
 InpAdxMax=30.0
-InpAtrMinPts=100.0
+InpAtrMinPts=0.0
 # --- L'UNICO ASSE Y: i gemelli sul magic (2 passate identiche, CSV distinti).
 InpMagic=769105||769105||1||769106||Y
 # ==========================================================================

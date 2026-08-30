@@ -56,7 +56,7 @@ if($SoloControllo){ $Modo = "CONTROLLO" }
 # la cella vincente + il GATE acceso a ADX<=30. NB: InpCloseHour=21 (SERVER BCM).
 $FissiAttesi = @{ "InpWickFactor"="2.0"; "InpUseMidGate"="0"; "InpSide"="2";
                   "InpUseRegimeGate"="true"; "InpRegimeTF"="16408";
-                  "InpAdxMax"="30.0"; "InpAtrMinPts"="100.0" }
+                  "InpAdxMax"="30.0"; "InpAtrMinPts"="0.0" }
 # i gemelli sul magic: l'UNICO asse Y. Vergini (769105/769106).
 $MagicGemelli = @(769105,769106)
 
