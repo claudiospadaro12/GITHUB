@@ -1,0 +1,54 @@
+# ==========================================================================
+# ABTG_CRT_TurtleSoup_EXT  -  TIEBREAKER DI REGIME (OHLC su _EXT multi-regime)
+# Motore CRT Turtle Soup da Neo Malesa (n30dyn4m1c), licenza MIT.
+# Nasce DOPO il verdetto tick NASUSD (toro): 0/30 celle verdi, motore senza edge
+# nel toro. Domanda residua: vive nella TEMPESTA (crollo 2020, orso 2022)?
+# ==========================================================================
+#
+# IPOTESI DEL TIEBREAKER
+#   Il CRT e' un fade/reversal: il TORO e' il suo peggior regime. Il tick BCM
+#   copre solo il toro (dove e' morto). Questo screening OHLC su NASUSD_EXT
+#   2020-2024 lo mette nei regimi che a tick NON possiamo raggiungere: crollo
+#   2020, toro 2021, orso 2022, ripartenza 2023. Se e' verde SOLO nella
+#   tempesta e rosso nel toro 2021 -> mattone "storm-only" da gate (come lo
+#   short e come E3). Se e' rosso ANCHE nella tempesta -> sepoltura definitiva.
+#
+# >>> IL TETTO OHLC INGANNA (load-bearing): questo gira a MODELLO 1 (OHLC su
+#     barre M1 HistData del feed _EXT), NON a tick reali. Qui si legge la
+#     FORMA (verde/rosso, coerenza fra regimi), MAI i numeri fini. E' gia'
+#     OTTIMISTA: se anche l'OHLC e' rosso ovunque, il tick sarebbe peggio.
+#
+# >>> IL FUSO E' INVERTITO (critico). Su NASUSD_EXT il feed HistData e' a ora
+#     di NEW YORK (canarino DST verde, anatomia). Quindi il FLAT RTH e' 16:00
+#     NY = InpCloseHour=16, NON 21 (che sarebbe l'ora server BCM). E' l'OPPOSTO
+#     della cella tick, ed e' giusto perche' il feed e' un altro.
+#
+# >>> LETTURA PER REGIME: il totale 2020-2024 DILUISCE (E3 insegna: totale puo'
+#     mascherare l'opposto). La domanda vera si legge dal per-trade CSV in
+#     Common\Files (abtg_trades_ABTG_CRT_TurtleSoup_NASUSD_EXT_<magic>.csv),
+#     segmentato: crollo 2020 / toro 2021 / orso 2022 / 2023.
+#
+# CRITERI DI ACCETTAZIONE (congelati, coerenti col round tick)
+#   - PROMUOVE a "storm-gated" (passo successivo) SOLO se: verde e coerente nei
+#     SOTTO-PERIODI di tempesta (crollo 2020 E/O orso 2022) con DD sotto il muro,
+#     e NON solo per una cella outlier (centro altopiano). Il rosso nel toro 2021
+#     e' ATTESO e non boccia (regime sbagliato per un fade).
+#   - BOCCIA (sepoltura) se rosso anche nella tempesta, o verde solo in una
+#     cella isolata (rumore).
+#   - DUE LATI (long E short) sempre. Pavimento SL R109. Flat intraday.
+#
+# @SIMBOLO  NASUSD_EXT         # storico ESTERNO (HistData, ora NY). Va importato.
+# @PERIODO  M15
+# @DAQUANDO 2020.01.01         # crollo 2020 + toro 2021 + orso 2022 + 2023
+# @FINOA    2024.01.01         # stessa finestra dello SHORTGATE (comparabile)
+#
+# SWEEP (identico al round tick: 3 assi)
+InpWickFactor=3.0||2.0||0.5||4.0||Y
+InpUseMidGate=1||0||1||1||Y
+InpSide=2||0||1||2||Y
+# --- FISSI (non spazzolati): FLAT RTH 16:00 NY sul feed _EXT (fuso INVERTITO,
+#     NON 21 server). Zero overnight. Pavimento SL R109.
+InpCloseHour=16||16||16||16||N
+InpCloseMin=0||0||0||0||N
+InpMinStopPts=500||500||500||500||N
+# ==========================================================================
