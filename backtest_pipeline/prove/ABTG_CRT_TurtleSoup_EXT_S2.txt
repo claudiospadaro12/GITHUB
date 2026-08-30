@@ -26,10 +26,11 @@
 #   fade). Se viene dal toro o da un mese outlier -> artefatto -> sepoltura.
 #   Se dalla tempesta -> candidato storm-gated CONFERMATO.
 #
-# @SIMBOLO  NASUSD_EXT
-# @PERIODO  M15
-# @DAQUANDO 2020.01.01
-# @FINOA    2024.01.01
+# Le direttive @ vanno NUDE (senza # davanti): commentate = gate vuoto.
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2020.01.01
+@FINOA    2024.01.01
 #
 # LA CELLA (valori SECCHI = pin): i 3 assi del motore, fissi alla cella robusta
 InpWickFactor=2.0
