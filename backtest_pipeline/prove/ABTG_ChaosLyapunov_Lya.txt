@@ -1,0 +1,63 @@
+# =====================================================================
+#  ABTG_ChaosLyapunov  -- SCREENING del GATE LLE (Chaos/Lyapunov)
+#  Fonte: jojoale (jojoalb), MQL5 Code Base 76446, 24/08/2026,
+#         file 'lyapunov.mq5' (letto per intero, 278 righe). Zero porting
+#         (nativo MQL5). Attribuzione a jojoale in testa al .mq5 derivato.
+#  Dossier: caccia_strategie/CACCIA_GATE_REGIME_INDICI_2026-08-30 (in chat).
+# ---------------------------------------------------------------------
+#  L'IPOTESI (perche' questo parametro conta)
+#    Il motore e' un EMA-cross 9/21 (trigger generico, gia' visto in
+#    SuperWave) GATED da un filtro di REGIME NUOVO: l'esponente di Lyapunov
+#    piu' grande (LLE) calcolato in phase-space. Riga 217 del sorgente:
+#      if(lyapunov_exponent > InpLyaThreshold) return;  // niente trade
+#    => opera SOLO quando la dinamica di prezzo e' DETERMINISTICA/predicibile
+#    (LLE <= soglia), resta FLAT nel rumore caotico. Il gate E' costitutivo
+#    (il filtro E' il motore, non appiccicato): senza gate e' un EMA-cross
+#    nudo. La DOMANDA del test: il gate LLE trasforma un EMA-cross mediocre
+#    in un edge sugli indici, concentrando i trade in un regime leggibile?
+#    Se muovendo InpLyaThreshold NIENTE cambia (stessi trade, stesso PF),
+#    il gate e' DECORATIVO e il candidato cade. Se stringendo il gate il PF
+#    sale e i trade calano in modo ordinato, il gate morde ed e' l'edge.
+#
+#  CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri)
+#    PROMUOVE (al passo 2: versione intraday-flat + tick recente) se TUTTI:
+#      1. il gate MORDE: al crescere di InpLyaThreshold i trade aumentano in
+#         modo monotono (soglia larga = piu' trade) -> il filtro e' attivo,
+#         non silenzioso;
+#      2. esiste una fascia di soglia con PF >= 1.3 su OHLC E DD < 8%, con
+#         il profitto NON concentrato in una singola cella (centro di un
+#         altopiano, non picco isolato -- regola di casa);
+#      3. la segmentazione per regime (per-trade CSV, finestra 2020-2024 che
+#         contiene crollo 2020 / toro 2021 / orso 2022) mostra che l'edge
+#         NON viene da un solo sotto-periodo di rumore.
+#    BOCCIA se: il PF e' piatto rispetto alla soglia (gate decorativo),
+#      oppure tutto rosso, oppure l'edge e' una cella outlier.
+#
+#  LIMITE COSTITUTIVO DEL BANCO (dichiarato)
+#    NASUSD_EXT = barre M1 HistData, SENZA tick BCM -> banco OHLC (modello 1),
+#    ottimista su M15. Qui si legge la FORMA (verde/rosso, ordini di
+#    grandezza, coerenza), MAI i numeri fini. Il verdetto a tick e' possibile
+#    solo sulla cassaforte recente BCM 2024.09.26->2026 (un solo regime toro):
+#    l'edge di regime NON e' verificabile a tick BCM (limite gia' noto dallo
+#    shortgate). Feed EXT a ora NEW YORK: qui NON c'e' logica di sessione
+#    nell'EA (tiene overnight) -- questo screening misura il gate SUL MOTORE
+#    NUDO. Se il gate mostra edge, il passo 2 aggiunge il FLAT INTRADAY
+#    (vincolo duro del mandato) + rischio 0.65% + eventuale lato-solo.
+#
+#  COSA SI OVERRIDE (flag N) e PERCHE'
+#    InpRiskPercent: sorgente=0.15 -> 1.0 per confronto pulito con l'archivio
+#      (tutte le nostre misure di screening girano all'1%).
+#  ------------------------------------------------------------------
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2020.01.01
+#   ^ finestra dello SHORTGATE (crollo 2020 + toro 2021 + orso 2022 +
+#     ripartenza 2023) per comparabilita' di regime. Il pavimento VERO di
+#     NASUSD_EXT non e' stato misurato in questa caccia: [INCERTO], potrebbe
+#     estendersi prima -- da sondare con scarica_storico/import se serve OOS.
+#
+#  LO SWEEP (screening stretto: mappa il gate, non lo giudica)
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpLyaThreshold=0.00||-0.06||0.03||0.12||Y
+InpLyaLookback=100||50||50||150||Y
+InpSlAtrMult=1.5||1.5||0.5||2.5||Y
