@@ -1,0 +1,92 @@
+# =====================================================================
+#  INVERSIONE DA ESAURIMENTO -- cella 01_E1 (E2 + ESAURIMENTO)  <<< CHIAVE
+#  ABTG_InvEsaurimento su NASUSD_EXT M15 -- SCREENING OHLC (Modello 1)
+# ---------------------------------------------------------------------
+#  CONTRATTO FIRMATO (30/08/2026): STUDIO_INVERSIONE_ESAURIMENTO_CRITERI_BOZZA.md
+#
+#  >>> DIFF DALLA BASELINE (gate della stella): UNA sola feature +
+#      il magic. Rispetto a INVES_NAS_00_baseline cambiano ESATTAMENTE
+#      due righe:
+#        InpUseE1   0 -> 1     (accende l'esaurimento, la feature)
+#        InpMagic   769000 -> 769010 / 769011 (i gemelli di controllo)
+#      TUTTO IL RESTO E' IDENTICO al baseline. Se diverge altro, il gate
+#      lo blocca prima di aprire MT5.
+#
+#  >>> QUESTA E' LA CELLA CHIAVE DI TUTTO LO STUDIO. La tesi (contratto
+#      sezione 0 e 3): il fade "normale" e' MORTO (R108/R109/R95); l'edge,
+#      se esiste, sta SUGLI ESTREMI di esaurimento -- mosse che hanno gia'
+#      speso >= 1.0x l'ADR14. E1 e' proprio la variabile che i fade
+#      caduti NON avevano: loro faddavano range ordinari, qui si entra
+#      SOLO quando la benzina della giornata e' finita.
+#
+#  COME SI LEGGE (contro il baseline 00):
+#   - se 01_E1 da aspettativa/trade POSITIVA e STABILE dove 00 e' rosso,
+#     con DD sotto il muro e >= 150 trade -> l'esaurimento e' l'edge.
+#   - se 01_E1 e' identico a 00 (stesso rosso da fade morto) -> e' lo
+#     stesso motore: E1 non seleziona niente, e si chiude onestamente
+#     (verdetto della firma: "l'esaurimento e' raccoglibile solo dentro
+#     il drive-following short, non come motore a se'").
+#   - se E1 alza il PF ma taglia il campione sotto ~150 -> selezione, non
+#     edge: il PF non e' un dato (regola del campione).
+#   - ATTENZIONE al 2020: E1 acceso deve prendere il crollo-giu e la V.
+#
+#  Tutti i limiti del banco (OHLC Modello 1, fuso NY 09:30, tetto 100k,
+#  finestra multi-regime 2017-2020, criteri di lettura sezione 5,
+#  prop-hardening con pavimento SL mai 0) sono quelli del file 00_baseline
+#  -- qui NON si ripetono: si tiene UNA sola fonte per la stella.
+# =====================================================================
+
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2017.01.01
+@FINOA    2020.07.01
+
+# --- Guardian: fail-open nel tester ---
+InpUsaGuardian=1||1||0||1||N
+
+# --- E2 (IL LIVELLO): SEMPRE attivo (identico al baseline) ---
+InpUsePrevDayLevels=1||1||0||1||N
+InpUseSessionExtreme=1||1||0||1||N
+InpLevelTolPts=200||200||0||200||N
+
+# --- >>> E1 (ESAURIMENTO): ACCESO. E' LA FEATURE DI QUESTA CELLA.
+#     Valori bloccati dalla firma: >= 1.0x l'ADR a 14 giorni.
+InpUseE1=1||1||0||1||N
+InpE1_AdrDays=14||14||0||14||N
+InpE1_AdrMult=1.0||1.0||0||1.0||N
+
+# --- E3 (PERDITA DI SPINTA): SPENTO (identico al baseline) ---
+InpUseE3=0||0||0||0||N
+InpE3_Bars=3||3||0||3||N
+
+# --- sessione: ORA NY del feed _EXT (09:30; flat 15:55) ---
+InpSessionHour=9||9||0||9||N
+InpSessionMin=30||30||0||30||N
+InpSessionEndHour=15||15||0||15||N
+InpSessionEndMin=55||55||0||55||N
+
+# --- STOP LOSS: oltre l'estremo + PAVIMENTO OBBLIGATORIO (R109, mai 0) ---
+InpSlBufferPts=300||300||0||300||N
+InpMinStopPts=500||500||0||500||N
+
+# --- USCITA: rientro verso la VWAP + flat fine seduta ---
+InpUseVwapTP=1||1||0||1||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpCloseOnOpposite=0||0||0||0||N
+
+# --- rischio e cap (fisso in tutte le celle) ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxTradesPerDay=2||2||0||2||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- conversione punti indice ---
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- generali ---
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
+# --- l'UNICO asse spazzolato: i due magic gemelli di controllo ---
+InpMagic=769010||769010||1||769011||Y

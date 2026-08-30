@@ -1,0 +1,90 @@
+# =====================================================================
+#  INVERSIONE DA ESAURIMENTO -- cella 02_E3 (E2 + PERDITA DI SPINTA)
+#  ABTG_InvEsaurimento su NASUSD_EXT M15 -- SCREENING OHLC (Modello 1)
+# ---------------------------------------------------------------------
+#  CONTRATTO FIRMATO (30/08/2026): STUDIO_INVERSIONE_ESAURIMENTO_CRITERI_BOZZA.md
+#
+#  >>> DIFF DALLA BASELINE (gate della stella): UNA sola feature +
+#      il magic. Rispetto a INVES_NAS_00_baseline cambiano ESATTAMENTE
+#      due righe:
+#        InpUseE3   0 -> 1     (accende la conferma perdita di spinta)
+#        InpMagic   769000 -> 769020 / 769021
+#      E1 RESTA SPENTO (InpUseE1=0), per ISOLARE l'effetto di E3 dal
+#      filtro esaurimento. TUTTO IL RESTO E' IDENTICO al baseline.
+#
+#  COS'E' E3 (firma): al livello, le ultime InpE3_Bars barre (2-3) hanno
+#  range STRETTAMENTE DECRESCENTE = il momentum della mossa cala prima
+#  dell'inversione. E' una conferma di "perdita di spinta" diversa
+#  dall'esaurimento di E1 (che misura quanto ADR ha gia' speso il giorno):
+#  E3 guarda la MICRO-struttura al livello, E1 la MACRO-quota della
+#  giornata. Questa cella dice se la sola conferma micro, senza il filtro
+#  ADR, seleziona qualcosa.
+#
+#  COME SI LEGGE (contro il baseline 00):
+#   - E3 taglia i tocchi "di slancio" (barre ancora larghe) e lascia solo
+#     i tocchi "che rallentano". Se sposta l'aspettativa/trade in positivo
+#     con >= 150 trade e DD sotto il muro -> conferma utile.
+#   - se alza il PF ma svuota il campione -> selezione, non edge.
+#   - il confronto vero e' a TRE: 00 (nudo) vs 01 (E1, la chiave) vs 02
+#     (E3). Se E1 domina e E3 aggiunge poco, E3 resta opt-in e non entra
+#     nel baseline promosso.
+#
+#  Tutti i limiti del banco (OHLC Modello 1, fuso NY 09:30, tetto 100k,
+#  finestra multi-regime 2017-2020, criteri di lettura sezione 5,
+#  prop-hardening con pavimento SL mai 0) sono quelli del file 00_baseline.
+# =====================================================================
+
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2017.01.01
+@FINOA    2020.07.01
+
+# --- Guardian: fail-open nel tester ---
+InpUsaGuardian=1||1||0||1||N
+
+# --- E2 (IL LIVELLO): SEMPRE attivo (identico al baseline) ---
+InpUsePrevDayLevels=1||1||0||1||N
+InpUseSessionExtreme=1||1||0||1||N
+InpLevelTolPts=200||200||0||200||N
+
+# --- E1 (ESAURIMENTO): SPENTO -- per ISOLARE E3 dal filtro esaurimento ---
+InpUseE1=0||0||0||0||N
+InpE1_AdrDays=14||14||0||14||N
+InpE1_AdrMult=1.0||1.0||0||1.0||N
+
+# --- >>> E3 (PERDITA DI SPINTA): ACCESO. E' LA FEATURE DI QUESTA CELLA.
+#     Firma: 2-3 barre a range strettamente calante al livello.
+InpUseE3=1||1||0||1||N
+InpE3_Bars=3||3||0||3||N
+
+# --- sessione: ORA NY del feed _EXT (09:30; flat 15:55) ---
+InpSessionHour=9||9||0||9||N
+InpSessionMin=30||30||0||30||N
+InpSessionEndHour=15||15||0||15||N
+InpSessionEndMin=55||55||0||55||N
+
+# --- STOP LOSS: oltre l'estremo + PAVIMENTO OBBLIGATORIO (R109, mai 0) ---
+InpSlBufferPts=300||300||0||300||N
+InpMinStopPts=500||500||0||500||N
+
+# --- USCITA: rientro verso la VWAP + flat fine seduta ---
+InpUseVwapTP=1||1||0||1||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpCloseOnOpposite=0||0||0||0||N
+
+# --- rischio e cap (fisso in tutte le celle) ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxTradesPerDay=2||2||0||2||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- conversione punti indice ---
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- generali ---
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
+# --- l'UNICO asse spazzolato: i due magic gemelli di controllo ---
+InpMagic=769020||769020||1||769021||Y

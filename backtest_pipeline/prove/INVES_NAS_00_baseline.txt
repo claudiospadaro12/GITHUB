@@ -1,0 +1,141 @@
+# =====================================================================
+#  INVERSIONE DA ESAURIMENTO -- cella 00_baseline (E2 nudo)
+#  ABTG_InvEsaurimento su NASUSD_EXT M15 -- SCREENING OHLC (Modello 1)
+# ---------------------------------------------------------------------
+#  CONTRATTO FIRMATO (30/08/2026, "FIRMO"):
+#    backtest_pipeline\risultati_archivio\
+#      STUDIO_INVERSIONE_ESAURIMENTO_CRITERI_BOZZA.md
+#
+#  >>> QUESTA E' LA BASELINE DELL'ABLAZIONE A STELLA (contratto sezione
+#      ablazione): il motore d'inversione NUDO al livello. E2 (il
+#      livello) e' SEMPRE attivo -- e' il baseline. E1 (esaurimento) e
+#      E3 (perdita di spinta) sono SPENTI. Le altre due celle muovono UN
+#      SOLO interruttore ciascuna rispetto a questo file (+ il magic).
+#
+#  LA DOMANDA (contratto sezione 1): esiste una condizione di
+#  ESAURIMENTO ESTREMO -- misurabile al momento, senza guardare avanti --
+#  che rende l'inversione a un livello un motore (aspettativa/trade
+#  positiva, DD sotto il muro), e NON l'ennesimo fade morto? Il baseline
+#  fada OGNI livello raggiunto dopo una mossa direzionale: e' la MONETA
+#  contro cui si misura E1 (la cella CHIAVE, 01_E1).
+#
+#  >>> COSA LO SEPARA DAI FADE CADUTI (il cancello che passa PER PRIMO):
+#      R108/R109 (fade M15/M30 morti, DD 44-68%), R95 (sweep+reclaim
+#      30/30 in perdita), R101 gradino 07 (VWAP). La tesi e' che E1
+#      (esaurimento estremo >= 1.0x ADR14) sia la variabile che quei
+#      round NON avevano. Se col baseline (E2 nudo) i numeri sono gia'
+#      identici ai fade morti -> atteso: e' lo stesso motore. Il salto,
+#      se c'e', deve arrivare accendendo E1 nella cella 01.
+#
+#  ------------------------------------------------------------------
+#  >>> IL LIMITE COSTITUTIVO DEL BANCO (contratto sezione 4, dichiarato):
+#      NASUSD_EXT sono barre HistData, SENZA tick reali BCM -> banco OHLC
+#      (Modello 1). Qui si legge la FORMA dell'edge (verde/rosso, ordini
+#      di grandezza, coerenza fra le celle), MAI i numeri fini. Il
+#      VERDETTO A TICK e' possibile SOLO sulla cassaforte recente
+#      2024.09.26 -> 2026 (BCM), che si apre UNA volta in validazione,
+#      DOPO che la stella ha scelto. NON si apre qui.
+#
+#  >>> ATTENZIONE FUSO (bloccante): su NASUSD_EXT l'anatomia ha MISURATO
+#      che le 09:30 del file sono l'apertura cash NY tutto l'anno (feed a
+#      ora di New York, canarino DST verde). Percio' InpSessionHour=9,
+#      InpSessionMin=30 -- NON 14:30 (quello e' l'apertura sul feed TICK
+#      BCM e vale solo per la cella di validazione a tick). Un CSV con
+#      l'apertura sbagliata si cestina (CLAUDE.md).
+#
+#  >>> LA FINESTRA: 2017.01.01 -> 2020.07.01 (~3,5 anni, sotto il tetto
+#      100k barre a M15). E' MULTI-REGIME (prova di regime): toro 2017,
+#      ORSO Q4-2018, laterale 2019, CROLLO+V covid 2020. La prova
+#      DECISIVA e' il 2020: crollo-giu e ripresa-V sono i due piu' grandi
+#      esaurimenti, uno per lato. Se il motore non li prende, non e' lui.
+#
+#  ------------------------------------------------------------------
+#  >>> CRITERI DI LETTURA CONGELATI (contratto sezione 5) -- 3 celle:
+#    - DECIDE l'ASPETTATIVA PER TRADE, con la coerenza fra i sotto-
+#      periodi (lettura per REGIME: il totale diluisce).
+#    - RISCHIO mai sospeso (regola B): DD e PEGGIOR GIORNATA contro il
+#      muro prop, SEMPRE, a qualunque n. Un'inversione entra CONTRO una
+#      mossa forte: il "coltello che cade" e' il pericolo n.1 -> il
+#      PAVIMENTO SL (InpMinStopPts, mai 0) e la peggior giornata sono
+#      load-bearing (colonne dedicate nel CSV di OnTester).
+#    - CAMPIONE: >= 150 trade per il MERITO; sotto, merito sospeso,
+#      rischio sempre.
+#    - VINCE solo se una cella da aspettativa/trade positiva e STABILE,
+#      con DD sotto il muro, E BATTE il precedente fade morto. Un solo
+#      periodo o un solo simbolo = non dimostrato (Nasdaq PRIMA;
+#      DAX/Dow dopo se regge).
+#
+#  >>> DA QUESTO FILE NON ESCE NESSUNA PROMOZIONE: e' conoscenza di
+#      selezione su dati OHLC di un altro broker. La stella sceglie; il
+#      tick della cassaforte giudica. Non si tocca il forward.
+#
+#  ------------------------------------------------------------------
+#  PROP-HARDENING (fisso in tutte e 3 le celle): SL vero al broker con
+#  PAVIMENTO obbligatorio (InpMinStopPts=500 pti MT5 = 5 pti indice, MAI
+#  0 -> OnInit rifiuta), ingresso SINGOLO (nessuna mediazione/griglia/
+#  raddoppio/aggiunta su posizione aperta), cap 2 trade/giorno, FLAT a
+#  fine seduta (15:55, niente overnight), export per-trade CSV + OnTester.
+#
+#  MAGIC VERGINI blocco 7690xx: cercato in tutto il repo il 2026-08-30
+#  con rg -> ZERO occorrenze (l'unico "769045" e' un valore di
+#  correlazione in un JSON, non un magic). Blocco dell'ablazione:
+#    00_baseline 769000/769001 | 01_E1 769010/769011 | 02_E3 769020/769021
+#  L'ASSE SPAZZOLATO E' SOLO InpMagic (i due gemelli di controllo).
+# =====================================================================
+
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+@DAQUANDO 2017.01.01
+@FINOA    2020.07.01
+
+# --- Guardian: fail-open nel tester (non cambia i risultati) ---
+InpUsaGuardian=1||1||0||1||N
+
+# --- E2 (IL LIVELLO): baseline SEMPRE attivo (prev-day + estremo seduta) ---
+InpUsePrevDayLevels=1||1||0||1||N
+InpUseSessionExtreme=1||1||0||1||N
+InpLevelTolPts=200||200||0||200||N
+
+# --- >>> E1 (ESAURIMENTO): SPENTO nel baseline. E' l'UNICO interruttore
+#     che la cella 01_E1 muove rispetto a questo file. Valori bloccati
+#     dalla firma: >= 1.0x l'ADR a 14 giorni.
+InpUseE1=0||0||0||0||N
+InpE1_AdrDays=14||14||0||14||N
+InpE1_AdrMult=1.0||1.0||0||1.0||N
+
+# --- >>> E3 (PERDITA DI SPINTA): SPENTO nel baseline. E' l'UNICO
+#     interruttore che la cella 02_E3 muove. Firma: 2-3 barre calanti.
+InpUseE3=0||0||0||0||N
+InpE3_Bars=3||3||0||3||N
+
+# --- sessione: ORA NY del feed _EXT (09:30 = apertura cash; flat 15:55) ---
+InpSessionHour=9||9||0||9||N
+InpSessionMin=30||30||0||30||N
+InpSessionEndHour=15||15||0||15||N
+InpSessionEndMin=55||55||0||55||N
+
+# --- STOP LOSS: oltre l'estremo + PAVIMENTO OBBLIGATORIO (R109, mai 0) ---
+InpSlBufferPts=300||300||0||300||N
+InpMinStopPts=500||500||0||500||N
+
+# --- USCITA: rientro verso la VWAP (media) + flat fine seduta ---
+InpUseVwapTP=1||1||0||1||N
+InpTP_R=1.5||1.5||0||1.5||N
+InpCloseOnOpposite=0||0||0||0||N
+
+# --- rischio e cap (fisso in tutte le celle) ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxTradesPerDay=2||2||0||2||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- conversione punti indice (NASUSD: 100 pti MT5 = 1 pto indice) ---
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- generali ---
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
+# --- l'UNICO asse spazzolato: i due magic gemelli di controllo ---
+InpMagic=769000||769000||1||769001||Y
