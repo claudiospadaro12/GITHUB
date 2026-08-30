@@ -1,0 +1,57 @@
+# ==========================================================================
+# ABTG_OpeningReversalB  -  SPEC/GRIGLIA (criteri congelati PRIMA dei numeri)
+# Motore Opening Reversal Model B da alfredhastings_wk (TradingView), MPL 2.0.
+# Portato in MQL5, gestione e prop-hardening propri. Attribuzione obbligatoria.
+# Dossier: caccia_strategie/CACCIA_DOW_M5M15_2026-08-30.md
+# ==========================================================================
+#
+# IPOTESI
+#   Quando il drive d'apertura FALLISCE a un livello anziano (min/max di ieri,
+#   estremo overnight, apertura di oggi, estremo dei primi 6 minuti) e la
+#   candela di segnale CONFERMA il rifiuto, il prezzo torna: si entra sul
+#   PULLBACK (non sulla rottura), TP a 2R, SL reale oltre l'estremo. E' un
+#   fade a TRE stadi di CONFERMA (failure-evidence >=3, signal-bar score >=4,
+#   follow-through >=60%) PRIMA dell'ingresso -> il ramo che il cimitero del
+#   fade NUDO (R42 0/24, R60, R109 DD 44-68%) non ha MAI misurato. La lezione
+#   28/08 §5.5: la variabile discriminante non e' il gap, e' la CONFERMA.
+#
+# CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)
+#   - PASSO 0 (cancello S0): misurare lo SPREAD reale U30USD M5 (logger 74148,
+#     mai usato) -> il lordo medio/op deve coprirlo con margine, altrimenti STOP.
+#   - Verdetto SOLO a tick reali BCM (2024.09.26->2026, un solo regime toro:
+#     rischio si', merito sospeso se n<150). Screening regime (2020/2022) SOLO
+#     su NASUSD_EXT OHLC / U30USD_EXT se disponibile.
+#   - SCORRELAZIONE -- CANCELLO DURO, da MISURARE PRIMA del verdetto: questo
+#     motore entra ALLA CAMPANELLA US, dove gia' operano la sedia viva 770202
+#     (Dow Apertura long) e PREOPEN_RETEST. Se i giorni-segnale COINCIDONO con
+#     770202 -> NON diversifica -> SCARTO (raddoppia rischio sullo stesso
+#     evento, malattia del doppione Apertura_Marco ritirato 06/08).
+#   - L'EA ha gli orari come INPUT: se all'apertura correla con 770202, si
+#     RIPROVA nella fascia POMERIDIANA VUOTA (ultime 2 ore, dove la letteratura
+#     mette il reversal) con gate volatilita' -- senza modifiche di codice.
+#   - I tre SCORE devono MORDERE: alzando le soglie (fail 3->4, signal 4->5) i
+#     trade calano e la qualita' sale in modo ordinato. Se il PF e' piatto
+#     rispetto alle soglie -> lo scoring e' decorativo -> scarto.
+#   - Ingresso a STOP sul pullback, SL VERO oltre l'estremo + PAVIMENTO
+#     InpMinStopPts (R109). NIENTE tick 0.25 hardcoded (usa _Point del simbolo).
+#   - Rischio % (MAI lotto fisso). Cap 2 trade/gg. FLAT fine seduta (ora
+#     server), zero overnight.
+#   - DUE LATI (gemello short obbligatorio), regola di casa 25/08.
+#   - Promozione cella: CENTRO dell'altopiano, MAI il picco.
+#
+# @SIMBOLO  U30USD              # Dow (il buco cercato); poi NASUSD/D30EUR
+# @PERIODO  M5
+# @DAQUANDO 2024.09.26          # tick BCM sugli indici (muro dati noto)
+#
+# SWEEP (screening stretto - le soglie degli score, centro altopiano)
+# InpFailScoreMin: evidenze minime di fallimento del drive al livello
+InpFailScoreMin=3||3||2||5||Y
+# InpSignalScoreMin: punteggio minimo della candela di segnale (conferma rifiuto)
+InpSignalScoreMin=4||4||3||6||Y
+# InpFollowThroughPct: conferma di continuazione del reversal, in %
+InpFollowThroughPct=60.0||60.0||50.0||75.0||Y
+# TP in multipli di R (rischio); l'originale punta a 2R
+InpTP_R=2.0||2.0||1.5||3.0||Y
+# lato: 0=solo long, 1=solo short, 2=entrambi (gemello short obbligatorio)
+InpSide=2||0||1||2||Y
+# ==========================================================================

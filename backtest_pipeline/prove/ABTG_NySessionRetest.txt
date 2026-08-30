@@ -1,0 +1,58 @@
+# ==========================================================================
+# ABTG_NySessionRetest  -  SPEC/GRIGLIA (criteri congelati PRIMA dei numeri)
+# Motore NY Session Trend Retest da itzkarmakyo (TradingView), MPL 2.0.
+# Portato in MQL5, gestione e prop-hardening propri. Attribuzione obbligatoria.
+# Dossier: caccia_strategie/CACCIA_H1_INTRADAY_INDICI_2026-08-30.md
+# ==========================================================================
+#
+# IPOTESI
+#   Nel verso del trend ORARIO (EMA200 su H1), dopo che il prezzo si allontana
+#   dalla VWAP di sessione e poi vi RITORNA, si entra sul RETEST -- ma SOLO
+#   quando la VWAP ha pendenza e il mercato si espande (non compresso). E' un
+#   RETEST-IN-TREND (la geometria che nei referti ha sempre pagato, R42), NON
+#   breakout/fade/momentum. Primo motore H1-intraday della flotta + primo
+#   motore VWAP (buco reale: tutti i nostri H1/H4 sono SWING, tutto l'intraday
+#   nostro e' M5/M15). Il gate slope+espansione E' costitutivo: senza, e' un
+#   retest nudo.
+#
+# CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)
+#   - PASSO 0: misurare lo SPREAD reale H1 (logger 74148, mai usato finora) e
+#     la FREQUENZA dei retest-VWAP (INFERITA bassa: H1 puro = pochi/settimana).
+#     Campione sottile -> valvola R59: il RISCHIO si giudica, il MERITO si
+#     sospende finche' n<150.
+#   - Verdetto SOLO a tick reali BCM (2024.09.26->2026, un solo regime toro).
+#     Screening di REGIME (crollo 2020 / orso 2022) SOLO su NASUSD_EXT OHLC.
+#   - VINCOLO DURO: InpCloseAtEnd=1, FLAT a fine seduta USA (ora server), zero
+#     overnight. Se un solo trade resta overnight -> il file e' invalido.
+#   - Il GATE slope+espansione deve MORDERE: alle 2 tarature (vs OFF) i trade
+#     e il PF devono cambiare in modo ordinato. Se OFF == ON -> gate
+#     decorativo -> scarto (lezione 0/5 del filtro appiccicato).
+#   - Rischio % (MAI il 10% fisso dell'originale). SL strutturale
+#     lowest/highest(5) + PAVIMENTO InpMinStopPts (R109).
+#   - DUE LATI (long E short), regola di casa 25/08.
+#   - Promozione cella: CENTRO dell'altopiano, MAI il picco.
+#   - Deve passare i caduti (breakout/fade/momentum): non e' nessuno di questi.
+#   - SCORRELAZIONE (da MISURARE): lavora nella finestra apertura USA dove gia'
+#     stanno Dow Apertura e PREOPEN_RETEST. Se entra NEGLI STESSI GIORNI ->
+#     non diversifica -> penalita'. Da scrivere PRIMA del verdetto.
+#
+# @SIMBOLO  U30USD              # lead Dow; poi D30EUR e NASUSD
+# @PERIODO  H1
+# @DAQUANDO 2024.09.26          # tick BCM sugli indici (muro dati noto)
+#
+# SWEEP (screening stretto - il gate a 2 tarature vs OFF, centro altopiano)
+# InpEmaTrend: gate di direzione trend orario (pinnato al valore canonico)
+InpEmaTrend=200||200||200||200||N
+# InpVwapSlopeMin: pendenza minima della VWAP per operare (0 = gate OFF)
+InpVwapSlopeMin=0.00||0.00||0.00||0.00||Y
+# InpExpansionMin: espansione minima del range di sessione per operare (0 = OFF)
+InpExpansionMin=0.00||0.00||0.00||0.00||Y
+# InpSlLookback: barre per lo SL strutturale (lowest/highest)
+InpSlLookback=5||5||3||8||Y
+# ==========================================================================
+# NOTA sulle soglie del gate: i range min/max sopra sono LASCIATI DA TARARE
+# dopo il PASSO 0 (misura di slope/espansione tipiche su H1 U30USD). Non si
+# inventano prima di aver visto la scala reale delle due grandezze: si misura
+# la distribuzione, poi si mette OFF + 2 tarature attorno alla mediana. Regola
+# di casa (dichiarare la regola di taratura insieme al numero).
+# ==========================================================================

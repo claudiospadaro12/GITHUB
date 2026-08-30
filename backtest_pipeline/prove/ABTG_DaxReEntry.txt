@@ -1,0 +1,50 @@
+# ==========================================================================
+# ABTG_DaxReEntry  -  SPEC/GRIGLIA (criteri congelati PRIMA dei numeri)
+# Meccanica da DAX ReEntry Signals (KepiroG, TradingView), reimplementata.
+# Licenza fonte NON dichiarata: attribuzione obbligatoria in testa al .mq5.
+# Dossier: caccia_strategie/CACCIA_DAX_M5M15_2026-08-30.md
+# ==========================================================================
+#
+# IPOTESI
+#   Il range della sessione europea mattutina (09:35-12:05 CET = 08:35-11:05
+#   SERVER BCM) definisce il valore del giorno. Nella fascia sottile
+#   12:05-15:15 CET (= 11:05-14:15 SERVER) una rottura degli estremi che poi
+#   RIENTRA (reclaim confermato a barra chiusa) e' una FALSA rottura: il
+#   prezzo torna verso l'estremo opposto. Sweep+reclaim sul range MATTUTINO,
+#   su INDICE M5 (non forex come R95, non alla campanella come R42). Il
+#   reclaim CONFERMATO E' il motore -- e' la conferma che a R42 mancava.
+#
+# CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)
+#   - PASSO 0 (cancello S0, PRIMA di ogni PF): costruire l'EA, contare le
+#     operazioni (>=150 per il merito, altrimenti valvola R59: rischio si',
+#     merito sospeso) e verificare che il LORDO medio/operazione sia >= 3x lo
+#     SPREAD della fascia mezzogiorno (liquidita' sottile: il costo e' il
+#     CRITERIO, non un contorno). Se il lordo non copre 3x lo spread -> STOP.
+#   - Verdetto SOLO a tick reali (modello 4). OHLC 1-min = solo conteggio.
+#   - Si giudica per REGIME dichiarato (21 mesi BCM = un solo regime toro:
+#     rischio si', merito sospeso).
+#   - Promozione cella: CENTRO dell'altopiano, MAI il picco.
+#   - DUE LATI misurati sempre (long E short), regola di casa 25/08.
+#   - CAP GIORNALIERO OBBLIGATORIO (controtendenza in trend forte = serie
+#     perdenti): default 2/gg, 1/lato.
+#   - SL VERO al broker con PAVIMENTO (R109): InpMinStopPts, mai zero.
+#   - FLAT a fine seduta (ora server), zero overnight.
+#   - Deve battere i caduti: NON e' ORB (fade, non alla campanella), NON R42
+#     (serve rottura-oltre + reclaim CONFERMATO), NON R95 (era forex M30-H4),
+#     NON MaxMinNotte (box notturno vs mattutino). Se degenera -> scarto.
+#   - SCORRELAZIONE (vincolo scritto PRIMA): i giorni-segnale NON devono
+#     coincidere con MaxMinNotte_DAX_Short. Se scattano gli stessi giorni,
+#     non aggiunge diversificazione -> penalita'.
+#
+# @SIMBOLO  D30EUR
+# @PERIODO  M5
+# @DAQUANDO 2024.09.26          # tick BCM sugli indici (muro dati noto)
+#
+# SWEEP (screening stretto - centro altopiano, non picco)
+# InpBreakPts: sweep sotto/sopra il livello, in PUNTI INDICE, prima del reclaim
+InpBreakPts=20.0||20.0||10.0||40.0||Y
+# InpSlFracRange: SL = estremo - range*frazione (RR ~2.2:1 alla frazione 0.454)
+InpSlFracRange=0.454||0.454||0.300||0.700||Y
+# lato: 0=solo long, 1=solo short, 2=entrambi (censimento dei due lati)
+InpSide=2||0||1||2||Y
+# ==========================================================================
