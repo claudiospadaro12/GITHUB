@@ -1,0 +1,69 @@
+# ==========================================================================
+# ABTG_DaxValueArea  -  SPEC/GRIGLIA (criteri congelati PRIMA dei numeri)
+# Cuore AUTOMATIZZABILE del metodo volumetrico DAX V5 di Claudio.
+# Fonte metodo: docs/metodi/PROMPT_Volumetrico_apertura_DAX_20260625.docx
+# Analisi: docs/metodi/ANALISI_METODO_VOLUMETRICO_DAX_V5.md
+# ==========================================================================
+#
+# IPOTESI
+#   Il VALORE ACCETTATO nella sessione precedente (Value Area = fascia di
+#   prezzo che contiene ~70% del volume attorno al POC) governa l'apertura
+#   di oggi. Regola FASE 5 del metodo:
+#     - apertura SOPRA VAH -> bias direzionale rialzista
+#     - apertura DENTRO la Value Area -> rotazione (balance day)
+#     - apertura SOTTO VAL -> bias direzionale ribassista
+#   Due motori in uno, selezionati dalla posizione dell'apertura:
+#     BALANCE (open dentro VA): fade dei bordi -> LONG a VAL target POC/VAH,
+#       SHORT a VAH target POC/VAL (rotazione).
+#     DIREZIONALE (accettazione FUORI dalla VA, confermata): continuazione
+#       nel verso della rottura (open oltre il bordo + InpAcceptBars barre
+#       che ACCETTANO fuori = la CONFERMA, non la rottura nuda).
+#   La CONFERMA (accettazione) e' la variabile viva, come in tutta la
+#   sessione (E3, Dow Model B, DAX ReEntry): non il tocco del livello.
+#
+# CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)
+#   - Verdetto SOLO a tick reali (modello 4). OHLC = solo conteggio.
+#   - Si giudica per REGIME dichiarato (21 mesi BCM = un solo regime toro:
+#     rischio si', merito sospeso se n<150 - valvola R59).
+#   - Promozione cella: CENTRO dell'altopiano, MAI il picco.
+#   - DUE LATI misurati sempre (long E short), regola di casa 25/08.
+#   - SL VERO al broker con PAVIMENTO (R109): InpMinStopPts, mai 0.
+#   - FLAT a fine seduta cash DAX (ora server), zero overnight.
+#   - Il gate della CONFERMA (InpAcceptBars) deve MORDERE: alzandolo i
+#     trade direzionali calano e la qualita' sale in modo ordinato. Se il
+#     PF e' piatto rispetto ad esso -> conferma decorativa -> scarto.
+#   - Deve battere i caduti e NON degenerare in ORB/breakout nudo: il
+#     livello e' VOLUMETRICO (Value Area), non geometrico (range).
+#   - SCORRELAZIONE (da MISURARE): i giorni-segnale NON devono coincidere
+#     con MaxMinNotte_DAX_Short ne' con DAX ReEntry (769300, range mattutino).
+#
+# >>> IL MURO DEL VOLUME (dichiarato, load-bearing): il volume su CFD indici
+#     BCM e' TICK-VOLUME, NON volume scambiato reale. Il Volume Profile e i
+#     livelli POC/VAH/VAL sono un PROXY. Qui si legge la FORMA di un edge di
+#     valore-accettato, MAI il libro ordini. E' l'avvertenza n.1 del metodo.
+#
+# >>> PASSO-0 SPECIFICHE DAX (prima della corsa vera): misurare la
+#     conversione punti di D30EUR (InpMT5PerPuntoIndice: US=100, DAX da
+#     VERIFICARE) e confermare il flat cash DAX 16:30 server (CLAUDE.md:
+#     DAX chiude 17:30 IT = 16:30 server). Il storico D30EUR M5 a tick va
+#     sondato (scarica_storico.ps1 -SoloReferto): tetto ~100k barre.
+#
+# @SIMBOLO  D30EUR
+# @PERIODO  M5
+# @DAQUANDO 2024.09.26          # muro tick BCM sugli indici
+# @FINOA    2026.06.30
+#
+# SWEEP (screening stretto - centro altopiano, non picco)
+# InpVaPercent: percentuale di volume nella Value Area (standard 70)
+InpVaPercent=70.0||65.0||5.0||75.0||Y
+# InpAcceptBars: barre di ACCETTAZIONE fuori dalla VA per confermare il
+#   direzionale (la CONFERMA; 0 = rottura nuda, da battere)
+InpAcceptBars=2||1||1||4||Y
+# lato: 0=solo long, 1=solo short, 2=entrambi (censimento due lati)
+InpSide=2||0||1||2||Y
+# --- FISSI (non spazzolati): DAX cash close 16:30 server (17:30 IT, CLAUDE.md).
+#     Zero overnight. Pavimento SL R109. VA dalla sessione PRECEDENTE.
+InpCloseHour=16||16||16||16||N
+InpCloseMin=30||30||30||30||N
+InpMinStopPts=500||500||500||500||N
+# ==========================================================================
