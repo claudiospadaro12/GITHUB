@@ -265,3 +265,23 @@ nel chop, che a tick BCM non raggiungiamo (serve Dukascopy), e nel toro attuale 
 (giustamente) flat = zero reddito ORA. Gli altri 5 motori (Chaos, DAX ReEntry, Dow
 ModelB, H1 Retest, DAX ValueArea) sono non testati e potrebbero dare un mattone
 deployabile nel regime ATTUALE. Dopo il discriminante, valutare il pivot.
+
+### DISCRIMINANTE (pin 343e139, AdxMax=100, ATR=0): 0 TRADE -> BACO D1 CONFERMATO
+
+Con InpAdxMax=100 (ADX<=100 e' SEMPRE vero, l'ADX va 0-100) + ATR=0, il gate blocca
+ANCORA tutti i 2573 pattern (gateBlk=2573, 0 trade). Logica ferrea: se entrambe le
+condizioni-soglia sono sempre vere, l'unico modo di bloccare e' RegimeGateOk()=false
+per DATO MANCANTE. **CONFERMATO: iADX/iATR su D1 NON popolano nel tester Modello 4
+(tick) su simbolo NATIVO BCM -> RegimeGateOk torna sempre false -> gate blocca tutto.**
+NON e' il regime (ADX>30): e' un baco tecnico di lettura del D1 nel tester tick.
+
+**PERCHE' su OHLC _EXT funzionava e su tick BCM no**: _EXT e' Modello 1 su simbolo
+CUSTOM (D1 costruito dall'M1 importato -> disponibile); BCM tick e' Modello 4 su
+simbolo NATIVO (il D1 higher-TF non viene servito all'handle come atteso).
+
+**IMPLICAZIONE**: il gate FUNZIONA (provato su OHLC, ogni regime verde) e LIVE l'iADX
+(D1) funziona (dati reali). Il baco e' SOLO nel tester tick -> NON possiamo
+BACKTESTARE il gated a tick su BCM finche' l'EA non legge il D1 in modo robusto nel
+tester. FIX EA necessario (warmup/robustezza dell'handle D1, o misura di regime
+calcolata dalle barre M15 aggregate a giorno senza handle D1 separato). Poi rifare
+il gated tick.
