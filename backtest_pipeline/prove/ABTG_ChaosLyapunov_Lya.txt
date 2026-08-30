@@ -60,4 +60,8 @@
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpLyaThreshold=0.00||-0.06||0.03||0.12||Y
 InpLyaLookback=100||50||50||150||Y
-InpSlAtrMult=1.5||1.5||0.5||2.5||Y
+InpSlAtrMult=1.5||0.5||0.5||2.5||Y
+# --- FISSO (non spazzolato): pavimento SL R109 esplicito (il gate del driver lo
+#     PRETENDE pinnato; il default dell'EA e' gia' 500, qui e' dichiarato). Il
+#     motore e' NUDO (InpCloseAtEnd default false = tiene overnight, screening).
+InpMinStopPts=500||500||500||500||N
