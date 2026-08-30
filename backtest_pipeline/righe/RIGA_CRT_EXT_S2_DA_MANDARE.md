@@ -17,9 +17,9 @@ magic, niente overwrite), su NASUSD_EXT M15 OHLC 2020-2024. Li segmento per regi
 | | |
 |---|---|
 | **Driver** | `righe/RIGA_CRT_EXT_S2.ps1` (marcatore `MARCATORE_RIGA_CRT_EXT_S2_v1`) |
-| **File prova** | `prove/ABTG_CRT_TurtleSoup_EXT_S2.txt` (cella singola, 0 assi Y) |
+| **File prova** | `prove/ABTG_CRT_TurtleSoup_EXT_S2.txt` (cella FISSA, 1 asse Y = InpMagic sui gemelli 769101/769102) |
 
-**MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~5-15 min (una cella sola).
+**MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~5-15 min (1 cella, 2 gemelli sul magic).
 
 ## 📌 IL PIN — **`<PIN>`**  ⛔ DA INSERIRE DOPO IL PUSH
 
