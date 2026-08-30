@@ -90,6 +90,14 @@ input double InpWickFactor       = 3.0;   // Wick di rifiuto di C1 >= Kx il corp
 input int    InpUseMidGate       = 1;     // Gate del 50% MidNotReached (1=ON, 0=OFF) (griglia)
 input int    InpSide             = 2;     // Lato: 0=solo long, 1=solo short, 2=entrambi (griglia)
 
+input group "=== GATE DI REGIME (costitutivo, opzionale; default OFF = originale) ==="
+input bool           InpUseRegimeGate   = false;       // Gate ON/OFF. false = EA IDENTICO a oggi (nessun controllo)
+input ENUM_TIMEFRAMES InpRegimeTF       = PERIOD_D1;   // TF su cui si misura il regime (barra CHIUSA, shift 1)
+input int            InpRegimeAdxPeriod = 14;          // Periodo ADX del gate
+input double         InpAdxMax          = 30.0;        // Opera SOLO se ADX(InpRegimeTF) <= questo (NON trend/crollo forte)
+input int            InpRegimeAtrPeriod = 14;          // Periodo ATR del gate
+input double         InpAtrMinPts       = 0.0;         // Opera SOLO se ATR(InpRegimeTF) in PUNTI INDICE >= questo (0 = neutro)
+
 input group "=== STOP LOSS (ordine vero al broker; pavimento R109) ==="
 input int    InpSlBufferPts      = 0;     // Buffer oltre l'estremo del wick di C1, in PUNTI MT5 (0 = estremo esatto)
 input int    InpMinStopPts       = 500;   // PAVIMENTO SL OBBLIGATORIO in PUNTI MT5 (5 pti indice US). MAI 0.
@@ -122,6 +130,12 @@ input bool   InpAutoTest         = true;    // Stampa le righe [CRTTS][AUTOTEST]
 //==================================================================
 ENUM_TIMEFRAMES gTF = PERIOD_CURRENT;   // il TF del grafico
 
+//--- handle degli indicatori NATIVI del gate di regime. Creati in OnInit
+//    SOLO quando InpUseRegimeGate==true (con gate OFF restano INVALID_HANDLE
+//    e l'EA e' identico a oggi). Rilasciati in OnDeinit.
+int      gAdxHandle = INVALID_HANDLE;
+int      gAtrHandle = INVALID_HANDLE;
+
 datetime gLastBar = 0;
 int      gDay = -1, gTradesToday = 0;
 ulong    gUltimoTicketContato = 0;      // conta gli ingressi ESEGUITI, non gli ordini
@@ -152,6 +166,7 @@ long gCntMaxTrades    = 0;   // return: cap trade/giorno raggiunto
 long gCntFuoriOrario  = 0;   // return: oltre l'orario di flat
 long gCntSpread       = 0;   // return: spread non ok
 long gCntNoPattern    = 0;   // return: nessun pattern CRT
+long gCntGateBloccati = 0;   // return: pattern valido SOPPRESSO dal gate di regime
 long gCntLongCand     = 0;   // candidati LONG
 long gCntShortCand    = 0;   // candidati SHORT
 long gCntApri         = 0;   // chiamate effettive ad ApriPosizione
@@ -290,6 +305,20 @@ double PrezzoInPuntiIndice_Calc(const double distPrezzo,
    return(distPrezzo/den);
   }
 
+//+------------------------------------------------------------------+
+//| GATE DI REGIME - nucleo puro. Passa (true = si puo' operare) SOLO |
+//| se ENTRAMBE: ADX <= adxMax (regime NON fortemente direzionale,    |
+//| esclude crollo e trend liscio forte) E ATR in PUNTI INDICE >=     |
+//| atrMinPts (abbastanza range da fadare, esclude il toro calmo).    |
+//| E' la traduzione della lettura per regime: il CRT e' una          |
+//| mean-reversion da chop/range bilaterale.                          |
+//+------------------------------------------------------------------+
+bool RegimeGate_Calc(const double adx,const double atrPts,
+                     const double adxMax,const double atrMinPts)
+  {
+   return(adx <= adxMax && atrPts >= atrMinPts);
+  }
+
 //==================================================================
 //  CICLO DI VITA
 //==================================================================
@@ -325,6 +354,24 @@ int OnInit()
    if(InpMT5PerPuntoIndice<=0)
      { Print("ERRORE: InpMT5PerPuntoIndice deve essere > 0."); return(INIT_FAILED); }
 
+   //--- GATE DI REGIME: gli handle NATIVI si creano SOLO se il gate e' attivo.
+   //    Con gate OFF non si tocca nulla (l'EA e' identico a oggi). Con gate ON
+   //    un handle INVALID e' un errore duro (OnInit RIFIUTA), perche' il gate
+   //    deciderebbe alla cieca.
+   if(InpUseRegimeGate)
+     {
+      if(InpRegimeAdxPeriod<=0)
+        { Print("ERRORE: InpRegimeAdxPeriod deve essere > 0 (gate di regime)."); return(INIT_FAILED); }
+      if(InpRegimeAtrPeriod<=0)
+        { Print("ERRORE: InpRegimeAtrPeriod deve essere > 0 (gate di regime)."); return(INIT_FAILED); }
+      if(InpAtrMinPts<0)
+        { Print("ERRORE: InpAtrMinPts non puo' essere negativo (gate di regime)."); return(INIT_FAILED); }
+      gAdxHandle = iADX(_Symbol, InpRegimeTF, InpRegimeAdxPeriod);
+      gAtrHandle = iATR(_Symbol, InpRegimeTF, InpRegimeAtrPeriod);
+      if(gAdxHandle==INVALID_HANDLE || gAtrHandle==INVALID_HANDLE)
+        { Print("ERRORE: handle iADX/iATR del gate di regime non creato (INVALID_HANDLE)."); return(INIT_FAILED); }
+     }
+
    if(InpAutoTest) AutoTestCRT();
 
    Log(StringFormat("avviato su %s %s. Wick x%.2f, midGate %s, side %s, SL buffer %d + pavimento %d pti MT5, TP1 close %.0f%% (BE %s), rischio %.2f%%, cap %d/gg, flat %s %02d:%02d, magic %I64d.",
@@ -336,13 +383,20 @@ int OnInit()
        InpRiskPercent, InpMaxTradesPerDay,
        (InpCloseAtEnd?"ON":"off"), InpCloseHour, InpCloseMin, InpMagic));
    Log("Ingresso SINGOLO: una posizione per magic, nessuna aggiunta/mediazione/griglia su posizione aperta (contratto). SL e TP2 sono ordini VERI al broker.");
+   if(InpUseRegimeGate)
+      Log(StringFormat("GATE DI REGIME ON su %s: opero solo se ADX(%d) <= %.1f E ATR(%d) >= %.1f pti idx (barra CHIUSA, shift 1). Fuori regime: FLAT.",
+          EnumToString(InpRegimeTF), InpRegimeAdxPeriod, InpAdxMax, InpRegimeAtrPeriod, InpAtrMinPts));
+   else
+      Log("GATE DI REGIME OFF: comportamento identico all'originale (nessun controllo di regime).");
    return(INIT_SUCCEEDED);
   }
 
 void OnDeinit(const int reason)
   {
-   //--- nessun handle indicatore da rilasciare: il contesto (le tre barre
-   //    del pattern) e' letto da CopyRates/iOHLC senza stato persistente.
+   //--- il pattern (le tre barre) e' letto da iOHLC senza stato persistente;
+   //    gli UNICI handle sono quelli del gate di regime, creati solo se ON.
+   if(gAdxHandle!=INVALID_HANDLE){ IndicatorRelease(gAdxHandle); gAdxHandle=INVALID_HANDLE; }
+   if(gAtrHandle!=INVALID_HANDLE){ IndicatorRelease(gAtrHandle); gAtrHandle=INVALID_HANDLE; }
   }
 
 //+------------------------------------------------------------------+
@@ -372,6 +426,36 @@ bool IsNewBar()
    datetime t = iTime(_Symbol, gTF, 0);
    if(t!=gLastBar){ gLastBar=t; return(true); }
    return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| GATE DI REGIME live: legge ADX e ATR di InpRegimeTF sulla barra   |
+//| CHIUSA (shift 1) e chiede al nucleo puro RegimeGate_Calc se il    |
+//| regime e' operabile. Niente look-ahead: shift 1, non la barra in  |
+//| formazione. Se i dati non ci sono ancora (inizio storico) o gli   |
+//| handle mancano -> gate NON soddisfatto (niente trade), NON errore.|
+//| ATR e' in PREZZO: lo converto in PUNTI INDICE con la stessa       |
+//| conversione del resto del motore (coerenza della soglia).         |
+//+------------------------------------------------------------------+
+bool RegimeGateOk()
+  {
+   if(gAdxHandle==INVALID_HANDLE || gAtrHandle==INVALID_HANDLE) return(false);
+
+   //--- servono almeno 2 barre del regime-TF per leggere lo shift 1.
+   if(BarsCalculated(gAdxHandle)<2 || BarsCalculated(gAtrHandle)<2) return(false);
+
+   double adxBuf[]; double atrBuf[];
+   //--- start_pos = 1 (ultima barra CHIUSA), count = 1. Buffer 0:
+   //    iADX main line (ADX), iATR valore ATR in PREZZO.
+   if(CopyBuffer(gAdxHandle,0,1,1,adxBuf)<1) return(false);
+   if(CopyBuffer(gAtrHandle,0,1,1,atrBuf)<1) return(false);
+
+   double adx      = adxBuf[0];
+   double atrPrezzo= atrBuf[0];
+   if(adx<0 || atrPrezzo<=0) return(false);   // valore non pronto
+
+   double atrPts = PrezzoInPuntiIndice_Calc(atrPrezzo, InpMT5PerPuntoIndice, _Point);
+   return(RegimeGate_Calc(adx, atrPts, InpAdxMax, InpAtrMinPts));
   }
 
 //+------------------------------------------------------------------+
@@ -407,6 +491,12 @@ void OnNewBar()
    int sig = SegnaleCRT_Calc(o1,c1,h1,l1, o2,c2,h2,l2,
                              InpWickFactor, (InpUseMidGate==1), InpSide);
    if(sig==0){ gCntNoPattern++; return; }
+
+   //--- GATE DI REGIME (costitutivo, opzionale): un pattern valido viene
+   //    comunque SOPPRESSO se il regime non e' da chop/range bilaterale
+   //    (ADX troppo alto = trend/crollo forte, oppure ATR troppo basso =
+   //    toro calmo). Con gate OFF questo blocco e' inerte.
+   if(InpUseRegimeGate && !RegimeGateOk()){ gCntGateBloccati++; return; }
 
    bool isLong = (sig>0);
    if(isLong) gCntLongCand++; else gCntShortCand++;
@@ -795,6 +885,16 @@ void AutoTestCRT()
                (int)fl1,(int)fl2,ip1);
    if(!(fl1 && !fl2 && MathAbs(ip1-5.0)<1e-6)) falliti++;
 
+   //--- 9. GATE DI REGIME: passa SOLO con ADX<=max AND ATR>=min. Le quattro
+   //    combinazioni (adxMax=30, atrMin=40): solo (adx ok, atr ok) -> true.
+   bool rg1=RegimeGate_Calc(25.0, 50.0, 30.0, 40.0);   // adx<=max, atr>=min -> true
+   bool rg2=RegimeGate_Calc(35.0, 50.0, 30.0, 40.0);   // adx>max            -> false
+   bool rg3=RegimeGate_Calc(25.0, 30.0, 30.0, 40.0);   // atr<min            -> false
+   bool rg4=RegimeGate_Calc(35.0, 30.0, 30.0, 40.0);   // entrambi ko        -> false
+   PrintFormat("[CRTTS][AUTOTEST] gateRegime: okok=%d(1) adxAlto=%d(0) atrBasso=%d(0) entrambiKo=%d(0)",
+               (int)rg1,(int)rg2,(int)rg3,(int)rg4);
+   if(!(rg1 && !rg2 && !rg3 && !rg4)) falliti++;
+
    Print("[CRTTS][AUTOTEST] esito motore: ", (falliti==0
          ? "OTTO BLOCCHI SU OTTO, il motore ragiona come i sorgenti."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
@@ -891,7 +991,7 @@ void ExportTrades()
 double OnTester()
   {
    ExportTrades();
-   double stats[22];
+   double stats[23];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -919,10 +1019,11 @@ double OnTester()
    stats[19] = (double)gCntLongCand;       // Long Cand
    stats[20] = (double)gCntShortCand;      // Short Cand
    stats[21] = (double)gCntApri;           // Apri Chiamate
+   stats[22] = (double)gCntGateBloccati;   // Ret Gate Regime (pattern soppressi dal gate)
 
-   PrintFormat("[CRTTS][DIAG] OnNewBar=%I64d | ret: posAperta=%I64d noDati=%I64d maxTrades=%I64d fuoriOrario=%I64d noPattern=%I64d | longCand=%I64d shortCand=%I64d apri=%I64d",
+   PrintFormat("[CRTTS][DIAG] OnNewBar=%I64d | ret: posAperta=%I64d noDati=%I64d maxTrades=%I64d fuoriOrario=%I64d noPattern=%I64d gateRegime=%I64d | longCand=%I64d shortCand=%I64d apri=%I64d",
                gCntOnNewBar, gCntGestione, gCntNoDati, gCntMaxTrades,
-               gCntFuoriOrario, gCntNoPattern, gCntLongCand, gCntShortCand, gCntApri);
+               gCntFuoriOrario, gCntNoPattern, gCntGateBloccati, gCntLongCand, gCntShortCand, gCntApri);
 
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
@@ -948,17 +1049,17 @@ void OnTesterDeinit()
         {
          //--- 'head' e lo StringFormat qui sotto si toccano SEMPRE INSIEME:
          //    una colonna aggiunta a uno solo sfasa tutto il CSV.
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Autotest Falliti,Flat Giorni,Flat Chiusure,OnNewBar Chiamate,Ret Posizione Aperta,Ret No Dati,Ret Max Trades,Ret Fuori Orario,Ret No Pattern,Long Cand,Short Cand,Apri Chiamate";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Autotest Falliti,Flat Giorni,Flat Chiusure,OnNewBar Chiamate,Ret Posizione Aperta,Ret No Dati,Ret Max Trades,Ret Fuori Orario,Ret No Pattern,Long Cand,Short Cand,Apri Chiamate,Ret Gate Regime";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4],
                                 data[5], data[6], data[7], data[8], data[9],
                                 data[10], data[11], data[12],
                                 data[13], data[14], data[15], data[16], data[17],
-                                data[18], data[19], data[20], data[21]);
+                                data[18], data[19], data[20], data[21], data[22]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
