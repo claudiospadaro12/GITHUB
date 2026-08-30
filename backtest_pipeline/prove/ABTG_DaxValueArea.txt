@@ -66,4 +66,8 @@ InpSide=2||0||1||2||Y
 InpCloseHour=16||16||16||16||N
 InpCloseMin=30||30||30||30||N
 InpMinStopPts=500||500||500||500||N
+# Guardian OFF nello SCREENING: si misura l'edge RAW (come i 5 candidati fratelli,
+#   Guardian-free). Al DEPLOY si riaccende (come il gated short 770250). L'EA
+#   include ABTG_PausaGuardian.mqh -> la riga di lancio DEVE installarlo (pattern INVES).
+InpUsaGuardian=false||false||false||false||N
 # ==========================================================================
