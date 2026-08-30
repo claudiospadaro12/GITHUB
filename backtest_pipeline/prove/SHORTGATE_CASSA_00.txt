@@ -1,0 +1,153 @@
+# =====================================================================
+#  SHORTGATE CASSA -- CONFERMA A TICK del BREAKDOWN SHORT GATED
+#  ABTG_Nasdaq_Apertura_US su NASUSD (BCM LIVE) M15 -- MODELLO 4 (TICK REALI)
+#  cella UNICA: shortgate  =  IL CANDIDATO (breakdown short gated H4)
+# ---------------------------------------------------------------------
+#  CHE COS'E'. Lo SCREENING OHLC su NASUSD_EXT (referto REFERTO_SHORTGATE_
+#  2026-08-30.md) ha dato FORMA VERDE: PF 1.84, DD 2.07%, edge concentrato
+#  nell'ORSO confermato per regime (orso 2022 il bulk, +4020 su 49 trade,
+#  win 89.8%). Questa e' la CONFERMA A TICK: si prende lo STESSO motore short
+#  e si misura SOLO se gli ingressi che scattano SOPRAVVIVONO ai COSTI TICK
+#  reali (spread + slippage) sulla finestra BCM disponibile. NON promuove,
+#  NON tocca il forward: e' una MISURA di sopravvivenza ai costi.
+#
+#  >>> LE INVERSIONI RISPETTO ALLO SCREENING EXT (adattato da SHORTGATE_NAS_
+#      BREAKDOWN.txt, NON riusato). Ogni riga con la sua ragione:
+#    - SIMBOLO NASUSD (BCM live), NON NASUSD_EXT. Model 4 (tick reali), NON 1.
+#    - FUSO NORMALE BCM: InpSessionHour=14, InpSessionMin=30 (15:30 IT -1 =
+#      14:30 server). E' l'OPPOSTO dello screening (li' 9:30 = apertura NY sul
+#      feed _EXT a ora di New York). Qui il feed e' BCM: vale la regola di casa
+#      (IT-1=server). Il gate PRETENDE 14/30 e RIFIUTA 9.
+#    - FINESTRA 2024.09.26 -> 2026.06.30 (pavimento TICK BCM, sonda 17/08).
+#    - MAGIC VERGINI 768300/768301 (NON 767120 dello screening EXT).
+#
+#  >>> IL MOTORE SHORT E' IDENTICO ALLO SCREENING (si misura il COSTO, non un
+#      motore diverso). Direzione COSTITUTIVA: InpEntryMode=0 (BREAKOUT =
+#      drive-down following, il gate RIFIUTA 2 = retest R115), InpAllowLong=
+#      false, InpAllowShort=true. Gate di regime = il MOTORE (dossier par.1):
+#      InpUseEmaFilter=true, InpEmaFast=50, InpEmaSlow=200, InpFilterTF=16388
+#      (H4). Lo short e' ammesso SOLO se EMA 50<200 su H4 (regime ribassista).
+#      Pavimento SL R109: InpMinStopPts=500, InpSkipIfTight=false (si APPLICA).
+#      Rischio 0.65% (conservativo). Geometria nativa Nasdaq: buffer 300,
+#      range 15'. TUTTO come lo screening: l'unica cosa nuova sono i COSTI TICK.
+#
+#  >>> LA FINESTRA e' UN SOLO REGIME RIALZISTA, DICHIARATO. I tick BCM sugli
+#      indici partono dal 26/09/2024: NON raggiungono NESSUN orso. Il gate H4
+#      sparera' POCO (come nel toro 2021 dello screening: ~17 trade/anno) ->
+#      CAMPIONE SOTTILE atteso -> MERITO SOSPESO (valvola R59). Questa corsa
+#      misura la SOPRAVVIVENZA AI COSTI degli ingressi che scattano, NON l'edge
+#      dell'orso (a tick su BCM e' irraggiungibile: nessun orso nei dati).
+#
+#  >>> L'ORA DI CHIUSURA InpCloseHour=20, InpCloseMin=45 e' l'ORA SERVER della
+#      sedia Nasdaq apertura VIVA su BCM (preset live, R115). Intraday, mai
+#      overnight (InpCloseAtEnd=true).
+#
+#  MAGIC VERGINI 768300/768301 (blocco 7683xx, cercato in tutto il repo il
+#  2026-08-30 -> ZERO occorrenze; NON 767120 screening EXT, NON 7681xx FASE 2
+#  CASSA, NON 7690xx INVES, NON 7672xx FASE 1, NON 766xxx R115). L'UNICO asse
+#  spazzolato e' InpMagic (i due gemelli di controllo, igiene del banco: due
+#  passate identiche al centesimo).
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- sessione: ORA SERVER BCM (fuso: IT - 1h). Nasdaq apre 15:30 IT = 14:30
+#     server. Chiusura 20:45 server (nativa sedia viva), mai overnight.
+InpUsaGuardian=false||false||0||false||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- ingresso: BREAKDOWN dell'OR (drive-down following), SOLO SHORT ---
+InpEntryMode=0||0||0||0||N
+InpRangeMode=2||2||0||2||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=300.0||300.0||0||300.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- GATE DI REGIME (il gate E' il motore): EMA 50x200 su H4 ribassista ---
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=50||50||0||50||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+
+# --- rischio e gestione: come lo screening EXT (motore identico) ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+
+# --- overlay OFF ---
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=
+InpNewsFlatten=true||true||0||true||N
+
+# --- >>> pavimento SL OBBLIGATORIO (R109): 500 pt, mai 0; si APPLICA. FISSO.
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=false||false||0||false||N
+
+# --- overlay OFF (Volume/Atr/Confirm) ---
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- l'UNICO asse spazzolato: i due magic gemelli di controllo ---
+InpMagic=768300||768300||1||768301||Y
