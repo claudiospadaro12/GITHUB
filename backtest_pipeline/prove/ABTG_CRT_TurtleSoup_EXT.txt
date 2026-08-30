@@ -37,10 +37,15 @@
 #     cella isolata (rumore).
 #   - DUE LATI (long E short) sempre. Pavimento SL R109. Flat intraday.
 #
-# @SIMBOLO  NASUSD_EXT         # storico ESTERNO (HistData, ora NY). Va importato.
-# @PERIODO  M15
-# @DAQUANDO 2020.01.01         # crollo 2020 + toro 2021 + orso 2022 + 2023
-# @FINOA    2024.01.01         # stessa finestra dello SHORTGATE (comparabile)
+# Le direttive @ vanno NUDE (senza # davanti, senza commento in coda): il driver
+#   le legge e ci fa i gate; commentate = gate vuoto (difetto gia' pagato).
+# @SIMBOLO: storico ESTERNO (HistData, ora NY). Va importato con la Riga dello storico esterno.
+@SIMBOLO  NASUSD_EXT
+@PERIODO  M15
+# @DAQUANDO: crollo 2020 + toro 2021 + orso 2022 + 2023
+@DAQUANDO 2020.01.01
+# @FINOA: stessa finestra dello SHORTGATE (comparabile)
+@FINOA    2024.01.01
 #
 # SWEEP (identico al round tick: 3 assi)
 InpWickFactor=3.0||2.0||0.5||4.0||Y
