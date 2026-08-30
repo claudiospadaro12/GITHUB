@@ -130,11 +130,11 @@ input bool   InpAutoTest         = true;    // Stampa le righe [CRTTS][AUTOTEST]
 //==================================================================
 ENUM_TIMEFRAMES gTF = PERIOD_CURRENT;   // il TF del grafico
 
-//--- handle degli indicatori NATIVI del gate di regime. Creati in OnInit
-//    SOLO quando InpUseRegimeGate==true (con gate OFF restano INVALID_HANDLE
-//    e l'EA e' identico a oggi). Rilasciati in OnDeinit.
-int      gAdxHandle = INVALID_HANDLE;
-int      gAtrHandle = INVALID_HANDLE;
+//--- NIENTE handle iADX/iATR sul TF di regime: nel tester TICK su simbolo
+//    NATIVO gli handle MTF non popolano (BarsCalculated<2 / CopyBuffer fallisce
+//    sempre) e il gate bloccava TUTTO per dato-mancante. Il regime si calcola
+//    ORA a mano dalle barre del TF superiore prese con CopyRates (affidabili nel
+//    tester, anche tick, anche simbolo nativo). Vedi RegimeGateOk().
 
 datetime gLastBar = 0;
 int      gDay = -1, gTradesToday = 0;
@@ -319,6 +319,98 @@ bool RegimeGate_Calc(const double adx,const double atrPts,
    return(adx <= adxMax && atrPts >= atrMinPts);
   }
 
+//+------------------------------------------------------------------+
+//| ATR - nucleo puro. MEDIA dei True Range su 'period' barre.        |
+//| Serie CRONOLOGICA (indice 0 = piu' vecchia, n-1 = piu' recente).  |
+//| TR(i) = max(high-low, |high-close_prev|, |low-close_prev|).       |
+//| Servono period+1 barre (ogni TR usa la chiusura precedente). Usa  |
+//| gli ULTIMI 'period' TR (indici n-period..n-1). Ritorna -1 se i    |
+//| dati non bastano (SOLO a inizio storia). Valore in PREZZO.        |
+//+------------------------------------------------------------------+
+double AtrMedia_Calc(const double &high[],const double &low[],const double &close[],
+                     const int n,const int period)
+  {
+   if(period<=0) return(-1.0);
+   if(n < period+1) return(-1.0);
+   double somma=0.0;
+   for(int i=n-period; i<n; i++)
+     {
+      double tr = MathMax(high[i]-low[i],
+                          MathMax(MathAbs(high[i]-close[i-1]),
+                                  MathAbs(low[i]-close[i-1])));
+      somma += tr;
+     }
+   return(somma/period);
+  }
+
+//+------------------------------------------------------------------+
+//| ADX di WILDER - nucleo puro. Calcolato dalle barre del TF di      |
+//| regime (stessa scala 0-100 dell'iADX main line, buffer 0).        |
+//| Serie CRONOLOGICA (indice 0 = piu' vecchia, n-1 = piu' recente).  |
+//|   +DM/-DM da high/low, TR di Wilder, smoothing di Wilder su TR e   |
+//|   DM, +DI/-DI, DX = 100*|+DI - -DI|/(+DI + -DI), ADX = media di    |
+//|   Wilder del DX. Ritorna l'ADX sull'ultima barra (n-1).           |
+//| Servono almeno 2*period+1 barre (period per il primo DI + period  |
+//| DX per la prima media). Ritorna -1 se i dati non bastano.         |
+//+------------------------------------------------------------------+
+double AdxWilder_Calc(const double &high[],const double &low[],const double &close[],
+                      const int n,const int period)
+  {
+   if(period<=0) return(-1.0);
+   if(n < 2*period+1) return(-1.0);
+
+   int m = n-1;                       // valori TR/+DM/-DM: uno per ogni barra i=1..n-1
+   double tr[],plusDM[],minusDM[];
+   ArrayResize(tr,m); ArrayResize(plusDM,m); ArrayResize(minusDM,m);
+   for(int i=1;i<n;i++)
+     {
+      int j=i-1;
+      double up = high[i]-high[i-1];
+      double dn = low[i-1]-low[i];
+      plusDM[j]  = (up>dn && up>0.0) ? up : 0.0;
+      minusDM[j] = (dn>up && dn>0.0) ? dn : 0.0;
+      tr[j]      = MathMax(high[i]-low[i],
+                           MathMax(MathAbs(high[i]-close[i-1]),
+                                   MathAbs(low[i]-close[i-1])));
+     }
+
+   //--- primo smoothing di Wilder = somma dei primi 'period' valori.
+   double smTR=0.0, smP=0.0, smM=0.0;
+   for(int j=0;j<period;j++){ smTR+=tr[j]; smP+=plusDM[j]; smM+=minusDM[j]; }
+
+   double dx[]; ArrayResize(dx,m); int dxCount=0;
+   //--- primo DX (DI calcolati dalla prima somma smussata).
+   {
+    double pDI = (smTR>0.0) ? 100.0*smP/smTR : 0.0;
+    double mDI = (smTR>0.0) ? 100.0*smM/smTR : 0.0;
+    double s   = pDI+mDI;
+    dx[dxCount++] = (s>0.0) ? 100.0*MathAbs(pDI-mDI)/s : 0.0;
+   }
+   //--- smoothing di Wilder passo-passo sui valori successivi.
+   for(int j=period;j<m;j++)
+     {
+      smTR = smTR - smTR/period + tr[j];
+      smP  = smP  - smP /period + plusDM[j];
+      smM  = smM  - smM /period + minusDM[j];
+      double pDI = (smTR>0.0) ? 100.0*smP/smTR : 0.0;
+      double mDI = (smTR>0.0) ? 100.0*smM/smTR : 0.0;
+      double s   = pDI+mDI;
+      dx[dxCount++] = (s>0.0) ? 100.0*MathAbs(pDI-mDI)/s : 0.0;
+     }
+
+   if(dxCount < period) return(-1.0);
+
+   //--- ADX = media di Wilder del DX: media semplice dei primi 'period',
+   //    poi smussamento di Wilder sui rimanenti.
+   double adx=0.0;
+   for(int j=0;j<period;j++) adx+=dx[j];
+   adx/=period;
+   for(int j=period;j<dxCount;j++)
+      adx = (adx*(period-1)+dx[j])/period;
+
+   return(adx);
+  }
+
 //==================================================================
 //  CICLO DI VITA
 //==================================================================
@@ -354,10 +446,11 @@ int OnInit()
    if(InpMT5PerPuntoIndice<=0)
      { Print("ERRORE: InpMT5PerPuntoIndice deve essere > 0."); return(INIT_FAILED); }
 
-   //--- GATE DI REGIME: gli handle NATIVI si creano SOLO se il gate e' attivo.
-   //    Con gate OFF non si tocca nulla (l'EA e' identico a oggi). Con gate ON
-   //    un handle INVALID e' un errore duro (OnInit RIFIUTA), perche' il gate
-   //    deciderebbe alla cieca.
+   //--- GATE DI REGIME: NIENTE handle iADX/iATR (nel tester TICK su simbolo
+   //    NATIVO gli handle MTF non popolano e il gate bloccava TUTTO per dato
+   //    mancante). ADX e ATR si calcolano a mano dalle barre del TF di regime
+   //    via CopyRates (affidabili nel tester). Con gate ON si validano solo i
+   //    periodi e la soglia ATR; con gate OFF non si tocca nulla (EA identico).
    if(InpUseRegimeGate)
      {
       if(InpRegimeAdxPeriod<=0)
@@ -366,10 +459,6 @@ int OnInit()
         { Print("ERRORE: InpRegimeAtrPeriod deve essere > 0 (gate di regime)."); return(INIT_FAILED); }
       if(InpAtrMinPts<0)
         { Print("ERRORE: InpAtrMinPts non puo' essere negativo (gate di regime)."); return(INIT_FAILED); }
-      gAdxHandle = iADX(_Symbol, InpRegimeTF, InpRegimeAdxPeriod);
-      gAtrHandle = iATR(_Symbol, InpRegimeTF, InpRegimeAtrPeriod);
-      if(gAdxHandle==INVALID_HANDLE || gAtrHandle==INVALID_HANDLE)
-        { Print("ERRORE: handle iADX/iATR del gate di regime non creato (INVALID_HANDLE)."); return(INIT_FAILED); }
      }
 
    if(InpAutoTest) AutoTestCRT();
@@ -393,10 +482,9 @@ int OnInit()
 
 void OnDeinit(const int reason)
   {
-   //--- il pattern (le tre barre) e' letto da iOHLC senza stato persistente;
-   //    gli UNICI handle sono quelli del gate di regime, creati solo se ON.
-   if(gAdxHandle!=INVALID_HANDLE){ IndicatorRelease(gAdxHandle); gAdxHandle=INVALID_HANDLE; }
-   if(gAtrHandle!=INVALID_HANDLE){ IndicatorRelease(gAtrHandle); gAtrHandle=INVALID_HANDLE; }
+   //--- NESSUN handle da rilasciare: il pattern (le tre barre) e' letto da
+   //    iOHLC e il gate di regime calcola ADX/ATR da CopyRates, senza handle
+   //    indicatore. Niente stato persistente sul terminale.
   }
 
 //+------------------------------------------------------------------+
@@ -429,30 +517,62 @@ bool IsNewBar()
   }
 
 //+------------------------------------------------------------------+
-//| GATE DI REGIME live: legge ADX e ATR di InpRegimeTF sulla barra   |
-//| CHIUSA (shift 1) e chiede al nucleo puro RegimeGate_Calc se il    |
-//| regime e' operabile. Niente look-ahead: shift 1, non la barra in  |
-//| formazione. Se i dati non ci sono ancora (inizio storico) o gli   |
-//| handle mancano -> gate NON soddisfatto (niente trade), NON errore.|
-//| ATR e' in PREZZO: lo converto in PUNTI INDICE con la stessa       |
-//| conversione del resto del motore (coerenza della soglia).         |
+//| Estrae dal TF di regime, con CopyRates a SHIFT 1 (barra CHIUSA,    |
+//| niente look-ahead), gli ultimi 'quante' bar in serie CRONOLOGICA  |
+//| (indice 0 = piu' vecchia) dentro high/low/close. Ritorna il numero |
+//| di barre effettivamente ottenute (0 = fallito). CopyRates sul TF   |
+//| superiore e' AFFIDABILE nel tester (anche tick, anche simbolo      |
+//| nativo): e' il motivo del fix, niente handle MTF.                  |
+//+------------------------------------------------------------------+
+int LeggiBarreRegime(const int quante,double &high[],double &low[],double &close[])
+  {
+   if(quante<=0) return(0);
+   MqlRates r[];
+   ArraySetAsSeries(r,true);                  // r[0] = shift 1 (la piu' recente chiusa)
+   int got = CopyRates(_Symbol, InpRegimeTF, 1, quante, r);
+   if(got<=0) return(0);
+   ArrayResize(high,got); ArrayResize(low,got); ArrayResize(close,got);
+   //--- da serie (recente->vecchia) a CRONOLOGICA (vecchia->recente).
+   for(int i=0;i<got;i++)
+     {
+      int s=got-1-i;
+      high[i]  = r[s].high;
+      low[i]   = r[s].low;
+      close[i] = r[s].close;
+     }
+   return(got);
+  }
+
+//+------------------------------------------------------------------+
+//| GATE DI REGIME live: calcola ADX e ATR di InpRegimeTF sulla barra |
+//| CHIUSA (shift 1) DALLE BARRE prese con CopyRates (NON dall'handle  |
+//| iADX/iATR, che nel tester tick su simbolo nativo non popola). Poi  |
+//| chiede al nucleo puro RegimeGate_Calc se il regime e' operabile.   |
+//| Niente look-ahead: shift 1. Se i dati non bastano (SOLO a inizio   |
+//| storia, prime ~2*period barre D1) -> gate NON soddisfatto, non     |
+//| errore. ATR e' in PREZZO: lo converto in PUNTI INDICE con la       |
+//| stessa conversione del resto del motore (coerenza della soglia).   |
 //+------------------------------------------------------------------+
 bool RegimeGateOk()
   {
-   if(gAdxHandle==INVALID_HANDLE || gAtrHandle==INVALID_HANDLE) return(false);
+   double h[],l[],c[];
 
-   //--- servono almeno 2 barre del regime-TF per leggere lo shift 1.
-   if(BarsCalculated(gAdxHandle)<2 || BarsCalculated(gAtrHandle)<2) return(false);
+   //--- ATR(InpRegimeAtrPeriod): servono period+1 barre chiuse.
+   int nAtr = LeggiBarreRegime(InpRegimeAtrPeriod+1, h, l, c);
+   if(nAtr < InpRegimeAtrPeriod+1) return(false);
+   double atrPrezzo = AtrMedia_Calc(h, l, c, nAtr, InpRegimeAtrPeriod);
+   if(atrPrezzo<=0) return(false);   // dato non pronto (o barre piatte a inizio storia)
 
-   double adxBuf[]; double atrBuf[];
-   //--- start_pos = 1 (ultima barra CHIUSA), count = 1. Buffer 0:
-   //    iADX main line (ADX), iATR valore ATR in PREZZO.
-   if(CopyBuffer(gAdxHandle,0,1,1,adxBuf)<1) return(false);
-   if(CopyBuffer(gAtrHandle,0,1,1,atrBuf)<1) return(false);
-
-   double adx      = adxBuf[0];
-   double atrPrezzo= atrBuf[0];
-   if(adx<0 || atrPrezzo<=0) return(false);   // valore non pronto
+   //--- ADX(InpRegimeAdxPeriod): serve piu' storia (2*period per la prima
+   //    media di Wilder). Prendo di piu' quando c'e', cosi' l'ADX si stabilizza
+   //    verso il valore di regime; a inizio storia ne ottengo meno e il gate
+   //    resta chiuso finche' non ci sono almeno 2*period+1 barre chiuse.
+   int needAdx = 2*InpRegimeAdxPeriod+2;
+   int wantAdx = needAdx+100;
+   int nAdx = LeggiBarreRegime(wantAdx, h, l, c);
+   if(nAdx < needAdx) return(false);
+   double adx = AdxWilder_Calc(h, l, c, nAdx, InpRegimeAdxPeriod);
+   if(adx<0) return(false);          // dato non pronto
 
    double atrPts = PrezzoInPuntiIndice_Calc(atrPrezzo, InpMT5PerPuntoIndice, _Point);
    return(RegimeGate_Calc(adx, atrPts, InpAdxMax, InpAtrMinPts));
@@ -895,8 +1015,32 @@ void AutoTestCRT()
                (int)rg1,(int)rg2,(int)rg3,(int)rg4);
    if(!(rg1 && !rg2 && !rg3 && !rg4)) falliti++;
 
+   //--- 10. ATR MANUALE (media dei TR) su una serie D1 nota a mano. Serie
+   //    CRONOLOGICA. Trend regolare: high=10..19, low=high-2, close=high-1.
+   //    Ogni TR=2 -> ATR(period 3) = 2.00 esatto. Serie piatta: high/low/close
+   //    costanti -> TR=2 (high-low) -> ATR = 2.00.
+   double thi[10]={10,11,12,13,14,15,16,17,18,19};
+   double tlo[10]={ 8, 9,10,11,12,13,14,15,16,17};
+   double tcl[10]={ 9,10,11,12,13,14,15,16,17,18};
+   double fhi[10]={10,10,10,10,10,10,10,10,10,10};
+   double flo[10]={ 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+   double fcl[10]={ 9, 9, 9, 9, 9, 9, 9, 9, 9, 9};
+   double atrT = AtrMedia_Calc(thi,tlo,tcl,10,3);   // 2.00
+   double atrF = AtrMedia_Calc(fhi,flo,fcl,10,3);   // 2.00
+   PrintFormat("[CRTTS][AUTOTEST] ATR manuale: trend=%.4f(2.0000) piatto=%.4f(2.0000)", atrT, atrF);
+   if(!(MathAbs(atrT-2.0)<1e-6 && MathAbs(atrF-2.0)<1e-6)) falliti++;
+
+   //--- 11. ADX MANUALE (Wilder) sulle stesse serie. Trend perfetto e
+   //    monotono: ogni +DM=1, -DM=0, TR=2 -> +DI=50, -DI=0, DX=100 su tutte le
+   //    barre -> ADX(period 3) = 100.00 esatto. Serie piatta: +DM=-DM=0 ->
+   //    +DI=-DI=0 -> DX=0 -> ADX = 0.00.
+   double adxT = AdxWilder_Calc(thi,tlo,tcl,10,3);  // 100.00
+   double adxF = AdxWilder_Calc(fhi,flo,fcl,10,3);  //   0.00
+   PrintFormat("[CRTTS][AUTOTEST] ADX manuale: trend=%.4f(100.0000) piatto=%.4f(0.0000)", adxT, adxF);
+   if(!(MathAbs(adxT-100.0)<1e-6 && MathAbs(adxF-0.0)<1e-6)) falliti++;
+
    Print("[CRTTS][AUTOTEST] esito motore: ", (falliti==0
-         ? "OTTO BLOCCHI SU OTTO, il motore ragiona come i sorgenti."
+         ? "UNDICI BLOCCHI SU UNDICI, il motore ragiona come i sorgenti (ATR/ADX manuali inclusi)."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
 
    gAutotestFalliti = falliti;
