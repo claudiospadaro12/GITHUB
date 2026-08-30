@@ -1,0 +1,55 @@
+# ==========================================================================
+# ABTG_CRT_TurtleSoup  -  SPEC (l'EA NON esiste ancora: va costruito)
+# Motore CRT Turtle Soup da Neo Malesa (n30dyn4m1c), licenza MIT.
+# Fonte: https://github.com/n30dyn4m1c/crt-turtlesoup-ea
+# Sorgenti letti: biblioteca/sorgenti/CRT_TurtleSoup_NeoMalesa_MIT/
+# ==========================================================================
+#
+# IPOTESI
+#   Quando una candela spazza il minimo (o massimo) della candela PRECEDENTE e
+#   poi RICHIUDE dentro il suo range con un lungo wick di rifiuto (>= 3x il
+#   corpo), la rottura era falsa: e' liquidita' presa e non continuazione.
+#   Entrando nel verso OPPOSTO (fade strutturato), con SL all'estremo del wick
+#   e target al centro/estremo del range spazzato, ci si aspetta un edge di
+#   REVERSAL nel LATERALE e nei momenti di esaurimento - il buco della flotta
+#   (tutta trend-following + aperture). Il wick di rifiuto e il gate del 50%
+#   SONO la strategia (filtro-che-e'-il-motore), non un cerotto.
+#
+# CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)
+#   - Verdetto SOLO a tick reali (modello 4). OHLC 1-min = solo screening/conteggio.
+#   - Si giudica per REGIME dichiarato (la finestra 21 mesi BCM = un solo regime:
+#     rischio si', merito sospeso - valvola R59 / emendamento finestra).
+#   - Promozione della cella: CENTRO dell'altopiano, MAI il picco (12 Spearman
+#     IS->OOS negative su 13).
+#   - DUE LATI misurati sempre (long E short), regola di casa 25/08.
+#   - Deve battere i caduti: NON e' ORB/breakout, NON fade nudo, NON momentum,
+#     NON LiquiditySweep-a-livelli (R89). Se in pratica degenera in uno di questi
+#     -> scarto.
+#   - RISCHIO: DD della cella promossa entro il muro; peggior GIORNATA sotto il
+#     cap 5% prop; se concentra i trade nello stesso giorno -> penalita' prop.
+#   - SL VERO al broker con PAVIMENTO (R109): niente stop a pelo di prezzo.
+#
+# COSA COSTRUIRE (l'EA, prima di poter lanciare questa griglia)
+#   - Rilevatore pattern a 3 candele (da CRTTS_M15.mq5 righe 90-108 + gate
+#     MidNotReached di crt-ts.mq5): C2 range, C1 falsa rottura con wick>=Kx corpo
+#     e richiusura, C0 entry all'open.
+#   - Esecuzione REALE (CTrade), magic dedicato, rischio in % dell'equity.
+#   - SL = estremo wick C1 + pavimento InpMinStopPts (R109).
+#   - Gestione nostra: parziale a TP1 (mid range) + breakeven + runner a TP2.
+#   - InpCloseAtEnd=1: FLAT a fine seduta (ora SERVER BCM), niente overnight.
+#   - OnTester (recovery factor) - altrimenti il driver non parte.
+#   - Un solo simbolo per grafico (NON il loop multi-symbol dell'originale).
+#
+# @SIMBOLO  D30EUR          # lead DAX; poi U30USD (Dow) e NASUSD (Nasdaq)
+# @PERIODO  M15
+# @DAQUANDO                 # <-- VUOTO: da MISURARE con scarica_storico.ps1 -SoloReferto
+#                           #     (indici BCM: tetto ~100k barre -> M15 ~4 anni/corsa)
+#
+# SWEEP (screening stretto - centro altopiano, non picco)
+# WickFactor: quanto dev'essere lungo il wick di rifiuto rispetto al corpo
+InpWickFactor=3.0||2.0||0.5||4.0||Y
+# gate del 50%: entry-bar deve stare oltre meta' del range di C1 (ON/OFF)
+InpUseMidGate=1||0||1||1||Y
+# lato: long / short / entrambi (per il censimento dei due lati)
+InpSide=2||0||1||2||Y
+# ==========================================================================
