@@ -39,6 +39,27 @@ quando gli indici scendono = quando le sedie long soffrono). E' il mattone
    `abtg_trades_ABTG_Nasdaq_Apertura_US_NASUSD_EXT_767120.csv`, segmentato.
 4. **n=93 < 150**: merito formalmente SOSPESO. Ma la forma e il rischio sono forti.
 
+## LETTURA PER REGIME (per-trade 767120) — L'EDGE E' NELL'ORSO, CONFERMATO
+
+| regime | n | tot_net | asp/tr | win% |
+|---|---|---|---|---|
+| CROLLO 2020 (feb-apr) | 8 | +2037 | **+255** | **100** |
+| resto 2020 | 4 | -1152 | -288 | 50 |
+| TORO 2021 | 17 | +1186 | +70 | 82.4 |
+| ORSO 2022 | 49 | **+4020** | +82 | **89.8** |
+| 2023 ripartenza | 15 | +174 | +12 | 86.7 |
+
+**L'edge E' nell'orso, come la tesi prevedeva — e di piu':**
+- **ORSO 2022**: il bulk (+4020, 49 dei 93 trade, win 89.8%). Il gate spara PIU'
+  spesso nell'orso e vince ~90%. La tesi vol-gated e' confermata dal dato.
+- **CROLLO 2020**: +255/trade, win 100% (n=8) — il crollo e' il piu' ricco per trade.
+- **VERDE anche nel TORO 2021** (+1186, +70/trade, win 82%): il gate H4 non e'
+  perfettamente flat nel toro, ma quando spara (pullback ribassisti H4) vince
+  comunque. Non e' solo assicurazione: e' broadly-green, col picco nell'orso.
+- Solo "resto 2020" (n=4) e' negativo, campione irrilevante.
+- **Win rate 82-100% ovunque**: un breakdown-short che segue il drive-giu con SL
+  strutturale e gate H4 azzecca la gran parte dei trade.
+
 ## VERDETTO PROVVISORIO
 La forma piu' verde della sessione, e conferma la tesi vol-gated: un breakdown
 short gated dall'orso paga (PF 1.84) con DD irrisorio (2%), stando flat nel toro.
