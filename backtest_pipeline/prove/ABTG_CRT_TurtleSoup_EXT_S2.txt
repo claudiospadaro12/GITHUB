@@ -1,0 +1,40 @@
+# ==========================================================================
+# ABTG_CRT_TurtleSoup_EXT_S2  -  STAGE-2: la cella robusta, letta PER REGIME
+# Motore CRT Turtle Soup da Neo Malesa (n30dyn4m1c), licenza MIT.
+# Nasce dopo il tiebreaker _EXT (13/30 celle verdi): conferma che il verde
+# della cella robusta viene dalla TEMPESTA (crollo 2020 + orso 2022), non da
+# un artefatto OHLC di un singolo periodo.
+# ==========================================================================
+#
+# LA CELLA (la piu' robusta del tiebreaker: n=320, PF 1.18, +5744, DD 5.9%)
+#   InpWickFactor=2.0, InpUseMidGate=0, InpSide=2 (due lati). UNA cella sola,
+#   nessuno sweep -> il per-trade CSV in Common\Files e' PULITO (una sola
+#   passata), e si legge PER REGIME.
+#
+# >>> IL TETTO OHLC INGANNA (Modello 1, feed _EXT). Si legge la FORMA per
+#     REGIME, mai i numeri fini. E' OTTIMISTA: il tick sarebbe piu' basso.
+# >>> FUSO INVERTITO: feed _EXT a ora NEW YORK -> flat RTH 16:00 NY (NON 21).
+#
+# LA DOMANDA DELLO STAGE-2 (congelata)
+#   Segmentando il per-trade CSV per regime:
+#     - crollo 2020 (feb-apr), toro 2021, orso 2022, 2023.
+#   Il verde deve venire dai SOTTO-PERIODI di TEMPESTA (crollo 2020 E/O orso
+#   2022), col toro 2021 rosso o piatto (atteso per un fade). Se il verde
+#   viene invece dal toro 2021 o da un solo mese outlier -> il tiebreaker era
+#   un artefatto e si seppellisce. Se viene dalla tempesta -> candidato
+#   storm-gated CONFERMATO (da Dukascopy per il tick, + gate volatilita').
+#
+# @SIMBOLO  NASUSD_EXT
+# @PERIODO  M15
+# @DAQUANDO 2020.01.01
+# @FINOA    2024.01.01
+#
+# LA CELLA SINGOLA (valori SECCHI = pin, nessuno sweep: 1 passata, CSV pulito)
+InpWickFactor=2.0
+InpUseMidGate=0
+InpSide=2
+# --- FISSI: flat RTH 16:00 NY (feed _EXT). Pavimento SL R109.
+InpCloseHour=16
+InpCloseMin=0
+InpMinStopPts=500
+# ==========================================================================
