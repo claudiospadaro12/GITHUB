@@ -1,0 +1,47 @@
+# ==========================================================================
+# ABTG_CRT_TurtleSoup_GATE  -  il GATE DI REGIME, spazzato (does it MORDE?)
+# Motore CRT Turtle Soup da Neo Malesa (n30dyn4m1c), licenza MIT.
+# Nasce dopo lo stage-2: il CRT vince nel CHOP/RANGE (2022/2023), perde nel
+# crollo 2020 e nel toro liscio 2021. Il gate deve ACCENDERSI nel chop e
+# SPEGNERSI in crollo/trend. Qui si SPAZZANO le sue due soglie.
+# ==========================================================================
+#
+# LA DOMANDA: esiste una taratura del gate (ADX max + ATR min su D1) che
+#   TAGLIA le perdite del crollo 2020 (-2760) e del toro 2021 (-609),
+#   TENENDO le vincite del chop (orso 2022 +2633, range 2023 +5259)?
+#   Se SI': la cella gated ha total PIU' ALTO dell'ungated (+5744) con MENO
+#   trade (n<320) -> il gate ha tagliato i perdenti, tenuto i vincenti ->
+#   MORDE. Se muovendo le soglie NIENTE cambia (stessi trade) -> gate
+#   decorativo -> il chop-gate FALLISCE e il CRT si seppellisce.
+#
+# LA CELLA (fissa alla robusta dello stage-2): wick 2.0, mid 0, side 2.
+# IL GATE (costitutivo): opera SOLO se ADX(D1) <= InpAdxMax E ATR(D1) in
+#   punti indice >= InpAtrMinPts. Entrambe su barra CHIUSA (shift 1).
+#
+# >>> OHLC INGANNA (Modello 1, ottimista). Forma, non numeri fini.
+# >>> FUSO INVERTITO: feed _EXT a ora NEW YORK -> flat RTH 16:00 NY.
+# >>> ATR SCALE [INCERTA, esploratorio]: la scala dell'ATR D1 di NASUSD in
+#     punti indice NON e' stata misurata; il range InpAtrMinPts 0..300
+#     copre il plausibile (Nasdaq ~15000, ~1-2%/gg = ~150-300 pt). Se la
+#     griglia mostra il gate che non morde in questo range, si ritara.
+#
+# @SIMBOLO  NASUSD_EXT
+# @PERIODO  M15
+# @DAQUANDO 2020.01.01
+# @FINOA    2024.01.01
+#
+# LA CELLA (secchi = pin) + il GATE ACCESO
+InpWickFactor=2.0
+InpUseMidGate=0
+InpSide=2
+InpCloseHour=16
+InpCloseMin=0
+InpMinStopPts=500
+InpUseRegimeGate=true
+InpRegimeTF=16408
+InpRegimeAdxPeriod=14
+InpRegimeAtrPeriod=14
+# LE DUE SOGLIE DEL GATE = i due assi Y (la griglia)
+InpAdxMax=25.0||20.0||5.0||40.0||Y
+InpAtrMinPts=100.0||0.0||100.0||300.0||Y
+# ==========================================================================
