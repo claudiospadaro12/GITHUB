@@ -1,6 +1,13 @@
 # 🔄 CRITERI — MOTORE D'INVERSIONE DA ESAURIMENTO [BOZZA — DA FIRMARE]
 
-> **Stato: BOZZA, in attesa della firma di Claudio.** Nata dalla sua idea del
+> **Stato: FIRMATA il 30/08/2026** (Claudio: "FIRMO", coi default proposti).
+> **VALORI BLOCCATI**: E1 = giornata che ha speso >= **1.0x l'ADR a 14 giorni**;
+> E2 = livello = **massimo/minimo del giorno prima + estremo di seduta**; E3 =
+> **2-3 barre a range calante** al livello (spento nel baseline, acceso in
+> ablazione); prova di regime = **Nasdaq PRIMA**, DAX/Dow dopo se regge; criteri
+> di lettura §5 CONFERMATI. Da qui nascono i file prova e la riga.
+>
+> Nata dalla sua idea del
 > 30/08: _"un ordine su un livello quando il prezzo, partito in direzione
 > contraria, sta finendo la benzina e torna indietro."_ Ripulita dalla trappola
 > (NON e' una riparazione/mediazione: e' un motore d'inversione A SE', a rischio
