@@ -133,8 +133,13 @@ ENUM_TIMEFRAMES gTF = PERIOD_CURRENT;   // il TF del grafico
 //--- NIENTE handle iADX/iATR sul TF di regime: nel tester TICK su simbolo
 //    NATIVO gli handle MTF non popolano (BarsCalculated<2 / CopyBuffer fallisce
 //    sempre) e il gate bloccava TUTTO per dato-mancante. Il regime si calcola
-//    ORA a mano dalle barre del TF superiore prese con CopyRates (affidabili nel
-//    tester, anche tick, anche simbolo nativo). Vedi RegimeGateOk().
+//    a mano dalle barre lette con CopyRates. MISURATO POI: nel tester tick su
+//    NASUSD nativo NEMMENO CopyRates(D1) consegna barre (0 trade, 2573 pattern
+//    soppressi, anche con soglie sempre-vere). Percio' ora c'e' una SECONDA
+//    VIA, autosufficiente: se il TF di regime non consegna, le giornate si
+//    COSTRUISCONO aggregando le barre del TF del GRAFICO (che nel tester ci
+//    sono sempre, e' il TF di test). Vedi LeggiBarreRegime()/
+//    LeggiGiorniDaGrafico()/RegimeGateOk().
 
 datetime gLastBar = 0;
 int      gDay = -1, gTradesToday = 0;
@@ -170,6 +175,24 @@ long gCntGateBloccati = 0;   // return: pattern valido SOPPRESSO dal gate di reg
 long gCntLongCand     = 0;   // candidati LONG
 long gCntShortCand    = 0;   // candidati SHORT
 long gCntApri         = 0;   // chiamate effettive ad ApriPosizione
+
+//--- GATE DI REGIME: da QUALE via e' arrivato il dato. Escono IN COLONNA
+//    nell'OPTFRAME. Se "Via D1" e' 0 e "Via M15" e' > 0, il tester NON
+//    serviva il TF di regime e il fallback ha salvato la corsa; se sono
+//    ZERO ENTRAMBI e "Ret Gate Regime" e' alto, il dato non arriva da
+//    nessuna delle due vie (allora si guardano le righe [GATE-DIAG]).
+long gGateViaD1  = 0;        // valutazioni RIUSCITE col TF di regime diretto
+long gGateViaM15 = 0;        // valutazioni RIUSCITE col fallback aggregato dal grafico
+
+//--- fotografia dell'ULTIMA lettura del regime, per le righe [GATE-DIAG].
+//    Riempita da LeggiBarreRegime()/LeggiGiorniDaGrafico(): sono SOLO
+//    misura, non entrano in nessuna decisione.
+int gDiagGotTF   = 0;        // ritorno di CopyRates sul TF di regime
+int gDiagErrTF   = 0;        // GetLastError() SUBITO dopo quel CopyRates
+int gDiagGotBar  = 0;        // barre del TF del GRAFICO copiate dal fallback
+int gDiagErrBar  = 0;        // GetLastError() subito dopo quel CopyRates
+int gDiagGiorni  = 0;        // giorni COMPLETI aggregati dal fallback
+int gDiagVia     = 0;        // 0 = nessuna via, 1 = TF diretto, 2 = fallback aggregato
 
 //--- metriche da prop: la peggior giornata in % (numero negativo).
 double gDayStartEquity = 0.0;
@@ -411,6 +434,88 @@ double AdxWilder_Calc(const double &high[],const double &low[],const double &clo
    return(adx);
   }
 
+//+------------------------------------------------------------------+
+//| CHIAVE DI GIORNO DI CALENDARIO - nucleo puro. anno*10000 +        |
+//| mese*100 + giorno (es. 2024.01.03 -> 20240103). Serve a           |
+//| raggruppare le barre intraday in giornate. Chiave 0 = "nessun     |
+//| giorno" (le chiavi vere sono >= 19700101), usata come "non        |
+//| escludere niente".                                                |
+//+------------------------------------------------------------------+
+long ChiaveGiorno_Calc(const datetime t)
+  {
+   MqlDateTime d; TimeToStruct(t,d);
+   return((long)d.year*10000 + (long)d.mon*100 + (long)d.day);
+  }
+
+//+------------------------------------------------------------------+
+//| AGGREGAZIONE INTRADAY -> GIORNI - nucleo puro (l'AUTOTEST la      |
+//| interroga su una serie sintetica, senza mercato).                 |
+//|                                                                   |
+//| Prende le barre del TF del GRAFICO in ordine CRONOLOGICO (indice  |
+//| 0 = la piu' vecchia) e le raggruppa per GIORNO DI CALENDARIO      |
+//| della loro 'time':                                                |
+//|   open  = open della PRIMA barra del giorno                       |
+//|   high  = MAX degli high del giorno                               |
+//|   low   = MIN dei low del giorno                                  |
+//|   close = close dell'ULTIMA barra del giorno                      |
+//|                                                                   |
+//| chiaveGiornoCorrente: le barre di QUEL giorno vengono SCARTATE.   |
+//|   E' il giorno in cui sta vivendo la barra corrente del grafico:  |
+//|   quel giorno NON e' finito, la sua "barra giornaliera" non e'    |
+//|   chiusa e usarla sarebbe LOOK-AHEAD. Passare 0 per non escludere |
+//|   niente (serve solo all'autotest).                               |
+//| scartaPrimoGiorno: il PRIMO giorno del gruppo viene buttato via   |
+//|   perche' la finestra di barre copiate quasi sempre comincia a    |
+//|   meta' giornata -> quel giorno sarebbe TRONCATO (high/low/open   |
+//|   falsi). Si tengono solo giorni COMPLETI.                        |
+//|                                                                   |
+//| Ritorna il numero di giorni prodotti (0 se non ne resta nessuno). |
+//+------------------------------------------------------------------+
+int AggregaGiorni_Calc(const datetime &tm[],const double &op[],const double &hi[],
+                       const double &lo[],const double &cl[],const int n,
+                       const long chiaveGiornoCorrente,const bool scartaPrimoGiorno,
+                       double &dOpen[],double &dHigh[],double &dLow[],double &dClose[])
+  {
+   ArrayResize(dOpen,0); ArrayResize(dHigh,0); ArrayResize(dLow,0); ArrayResize(dClose,0);
+   if(n<=0) return(0);
+
+   double tOpen[],tHigh[],tLow[],tClose[]; long tKey[];
+   ArrayResize(tOpen,n); ArrayResize(tHigh,n); ArrayResize(tLow,n);
+   ArrayResize(tClose,n); ArrayResize(tKey,n);
+
+   int ng=0;
+   for(int i=0;i<n;i++)
+     {
+      long k = ChiaveGiorno_Calc(tm[i]);
+      if(chiaveGiornoCorrente!=0 && k==chiaveGiornoCorrente) continue;  // giorno IN CORSO: mai
+      if(ng==0 || k!=tKey[ng-1])
+        {
+         tKey[ng]=k; tOpen[ng]=op[i]; tHigh[ng]=hi[i]; tLow[ng]=lo[i]; tClose[ng]=cl[i];
+         ng++;
+        }
+      else
+        {
+         if(hi[i]>tHigh[ng-1]) tHigh[ng-1]=hi[i];
+         if(lo[i]<tLow[ng-1])  tLow[ng-1] =lo[i];
+         tClose[ng-1]=cl[i];                     // l'ultima barra del giorno detta la chiusura
+        }
+     }
+
+   int start = (scartaPrimoGiorno ? 1 : 0);
+   int out   = ng-start;
+   if(out<=0) return(0);
+
+   ArrayResize(dOpen,out); ArrayResize(dHigh,out); ArrayResize(dLow,out); ArrayResize(dClose,out);
+   for(int j=0;j<out;j++)
+     {
+      dOpen[j] =tOpen [start+j];
+      dHigh[j] =tHigh [start+j];
+      dLow[j]  =tLow  [start+j];
+      dClose[j]=tClose[start+j];
+     }
+   return(out);
+  }
+
 //==================================================================
 //  CICLO DI VITA
 //==================================================================
@@ -473,8 +578,15 @@ int OnInit()
        (InpCloseAtEnd?"ON":"off"), InpCloseHour, InpCloseMin, InpMagic));
    Log("Ingresso SINGOLO: una posizione per magic, nessuna aggiunta/mediazione/griglia su posizione aperta (contratto). SL e TP2 sono ordini VERI al broker.");
    if(InpUseRegimeGate)
+     {
       Log(StringFormat("GATE DI REGIME ON su %s: opero solo se ADX(%d) <= %.1f E ATR(%d) >= %.1f pti idx (barra CHIUSA, shift 1). Fuori regime: FLAT.",
           EnumToString(InpRegimeTF), InpRegimeAdxPeriod, InpAdxMax, InpRegimeAtrPeriod, InpAtrMinPts));
+      Log(StringFormat("GATE: due vie. 1) CopyRates(%s) diretto. 2) FALLBACK autosufficiente: se la prima non consegna abbastanza barre, le GIORNATE si aggregano dalle barre di %s (giorno di calendario; il giorno IN CORSO e il primo giorno troncato si scartano). Le colonne 'Gate Via D1' / 'Gate Via M15' dell'OPTFRAME dicono quale via ha lavorato; le prime 5 volte che il gate chiude per DATO MANCANTE esce una riga [CRTTS][GATE-DIAG].",
+          EnumToString(InpRegimeTF), EnumToString((ENUM_TIMEFRAMES)Period())));
+      if(InpRegimeTF!=PERIOD_D1)
+         Log(StringFormat("ATTENZIONE (onesta', non errore): InpRegimeTF = %s ma il FALLBACK sa costruire SOLO GIORNATE. Se la via diretta non consegna, il gate misurera' ADX/ATR su barre GIORNALIERE, non su %s: i numeri non sono confrontabili con una cella ottimizzata su quel TF.",
+             EnumToString(InpRegimeTF), EnumToString(InpRegimeTF)));
+     }
    else
       Log("GATE DI REGIME OFF: comportamento identico all'originale (nessun controllo di regime).");
    return(INIT_SUCCEEDED);
@@ -517,62 +629,219 @@ bool IsNewBar()
   }
 
 //+------------------------------------------------------------------+
-//| Estrae dal TF di regime, con CopyRates a SHIFT 1 (barra CHIUSA,    |
-//| niente look-ahead), gli ultimi 'quante' bar in serie CRONOLOGICA  |
-//| (indice 0 = piu' vecchia) dentro high/low/close. Ritorna il numero |
-//| di barre effettivamente ottenute (0 = fallito). CopyRates sul TF   |
-//| superiore e' AFFIDABILE nel tester (anche tick, anche simbolo      |
-//| nativo): e' il motivo del fix, niente handle MTF.                  |
+//| FALLBACK AUTOSUFFICIENTE - giorni COSTRUITI dalle barre del TF     |
+//| del GRAFICO. Perche' esiste: nel tester TICK su simbolo NATIVO ne  |
+//| gli handle MTF (iADX/iATR) ne' CopyRates(D1) hanno mai consegnato  |
+//| dati -> il gate bloccava TUTTI i pattern per dato-mancante. Le     |
+//| barre del TF di TEST invece ci sono SEMPRE: e' il TF su cui gira   |
+//| la corsa. Quindi la giornata la costruiamo noi.                    |
+//|                                                                    |
+//| COME: CopyRates(_Symbol, _Period, 1, M) - shift 1, barre CHIUSE -  |
+//| con M = barre-per-giorno * (giorni voluti + 10), tetto 20000; se   |
+//| il tester ne da' meno si usa quel che c'e'. Poi AggregaGiorni_Calc |
+//| raggruppa per GIORNO DI CALENDARIO (high=max, low=min, close=      |
+//| ultima, open=prima).                                               |
+//|                                                                    |
+//| DUE GIORNI SI BUTTANO SEMPRE, per onesta':                         |
+//|   - il giorno IN CORSO (quello della barra corrente del grafico):  |
+//|     e' una giornata NON chiusa, usarla sarebbe look-ahead;         |
+//|   - il PRIMO giorno della finestra: quasi sempre TRONCATO (la      |
+//|     finestra comincia a meta' giornata) -> high/low falsi.         |
+//|                                                                    |
+//| DIFFERENZA ONESTA rispetto al D1 del broker: il "giorno di         |
+//| calendario" del feed puo' NON coincidere con la barra D1 del       |
+//| broker (i confini di sessione e il rollover possono spostare       |
+//| qualche barra di qua o di la'). Quindi high/low/close di un        |
+//| singolo giorno possono differire un po'. Ma la SCALA dei due       |
+//| indicatori e' la stessa: ADX resta 0-100 (e' un rapporto, non      |
+//| dipende dall'unita') e ATR resta un range giornaliero in prezzo.   |
+//| La soglia ADX <= 30 conserva quindi il suo significato; e' la      |
+//| CELLA di ottimizzazione che va riletta su questa via, non la       |
+//| semantica del gate.                                                |
+//|                                                                    |
+//| Ritorna quanti giorni ha messo in high/low/close (CRONOLOGICI,     |
+//| indice 0 = il piu' vecchio), 0 se non ce l'ha fatta.               |
 //+------------------------------------------------------------------+
-int LeggiBarreRegime(const int quante,double &high[],double &low[],double &close[])
+int LeggiGiorniDaGrafico(const int giorniVoluti,double &high[],double &low[],double &close[])
   {
-   if(quante<=0) return(0);
+   gDiagGotBar=0; gDiagErrBar=0; gDiagGiorni=0;
+   if(giorniVoluti<=0) return(0);
+
+   //--- quante barre del grafico servono per coprire i giorni voluti.
+   int secBar = PeriodSeconds(_Period);
+   if(secBar<=0) secBar=900;                       // difensivo: M15
+   int perGiorno = (int)(86400/secBar);
+   if(perGiorno<1) perGiorno=1;
+   long voglio = (long)perGiorno*(long)(giorniVoluti+10);   // +10 giorni di margine
+   if(voglio>20000) voglio=20000;                  // tetto ragionevole
+   if(voglio<2)     voglio=2;
+
    MqlRates r[];
-   ArraySetAsSeries(r,true);                  // r[0] = shift 1 (la piu' recente chiusa)
-   int got = CopyRates(_Symbol, InpRegimeTF, 1, quante, r);
+   ArraySetAsSeries(r,false);                      // r[0] = la PIU' VECCHIA
+   ResetLastError();
+   int got = CopyRates(_Symbol, _Period, 1, (int)voglio, r);   // shift 1 = barre CHIUSE
+   gDiagErrBar = (int)GetLastError();
+   gDiagGotBar = got;
    if(got<=0) return(0);
-   ArrayResize(high,got); ArrayResize(low,got); ArrayResize(close,got);
-   //--- da serie (recente->vecchia) a CRONOLOGICA (vecchia->recente).
+
+   //--- il giorno della barra CORRENTE (shift 0) e' il giorno IN CORSO: escluso.
+   datetime tCur = iTime(_Symbol,_Period,0);
+   if(tCur<=0) tCur = TimeCurrent();
+   long keyOggi = ChiaveGiorno_Calc(tCur);
+
+   //--- L'ORDINE NON SI DA' PER BUONO: si CHIEDE ai timestamp. Se r[0] e' piu'
+   //    recente di r[got-1] l'array e' rovesciato e va riletto al contrario.
+   //    (Un array letto al contrario aggregherebbe i giorni a rovescio e la
+   //    "chiusura" sarebbe l'apertura: errore silenzioso, meglio prevenirlo.)
+   bool inverso = (got>1 && r[0].time > r[got-1].time);
+
+   datetime tm[]; double op[],hi[],lo[],cl[];
+   ArrayResize(tm,got); ArrayResize(op,got); ArrayResize(hi,got);
+   ArrayResize(lo,got); ArrayResize(cl,got);
    for(int i=0;i<got;i++)
      {
-      int s=got-1-i;
-      high[i]  = r[s].high;
-      low[i]   = r[s].low;
-      close[i] = r[s].close;
+      int s = (inverso ? got-1-i : i);          // s scorre dal PIU' VECCHIO
+      tm[i]=r[s].time; op[i]=r[s].open; hi[i]=r[s].high;
+      lo[i]=r[s].low;  cl[i]=r[s].close;
      }
-   return(got);
+
+   double dO[],dH[],dL[],dC[];
+   int nd = AggregaGiorni_Calc(tm,op,hi,lo,cl,got, keyOggi, true, dO,dH,dL,dC);
+   gDiagGiorni = nd;
+   if(nd<=0) return(0);
+
+   //--- tengo gli ULTIMI 'giorniVoluti' giorni (i piu' recenti).
+   int use = (nd>giorniVoluti ? giorniVoluti : nd);
+   int off = nd-use;
+   ArrayResize(high,use); ArrayResize(low,use); ArrayResize(close,use);
+   for(int j=0;j<use;j++)
+     {
+      high[j] =dH[off+j];
+      low[j]  =dL[off+j];
+      close[j]=dC[off+j];
+     }
+   return(use);
   }
 
 //+------------------------------------------------------------------+
-//| GATE DI REGIME live: calcola ADX e ATR di InpRegimeTF sulla barra |
-//| CHIUSA (shift 1) DALLE BARRE prese con CopyRates (NON dall'handle  |
-//| iADX/iATR, che nel tester tick su simbolo nativo non popola). Poi  |
-//| chiede al nucleo puro RegimeGate_Calc se il regime e' operabile.   |
-//| Niente look-ahead: shift 1. Se i dati non bastano (SOLO a inizio   |
-//| storia, prime ~2*period barre D1) -> gate NON soddisfatto, non     |
-//| errore. ATR e' in PREZZO: lo converto in PUNTI INDICE con la       |
-//| stessa conversione del resto del motore (coerenza della soglia).   |
+//| Estrae le barre del regime in serie CRONOLOGICA (indice 0 = piu'   |
+//| vecchia) dentro high/low/close, a SHIFT 1 (barre CHIUSE, niente    |
+//| look-ahead). DUE VIE, in ordine di preferenza:                     |
+//|                                                                    |
+//|   VIA 1 - CopyRates(InpRegimeTF): il TF di regime vero e proprio.  |
+//|           Si usa se consegna almeno 'minimo' barre.                |
+//|   VIA 2 - FALLBACK: giorni AGGREGATI dalle barre del TF del        |
+//|           grafico (LeggiGiorniDaGrafico). Scatta SOLO se la via 1  |
+//|           fallisce o torna meno di 'minimo' barre.                 |
+//|                                                                    |
+//| 'quante' = quante barre si vorrebbero (con margine), 'minimo' =    |
+//| quante ne servono davvero per far tornare i conti a ATR/ADX.       |
+//| Ritorna il numero di barre consegnate; gDiagVia dice da che via.   |
+//+------------------------------------------------------------------+
+int LeggiBarreRegime(const int quante,const int minimo,double &high[],double &low[],double &close[])
+  {
+   gDiagGotTF=0; gDiagErrTF=0; gDiagGotBar=0; gDiagErrBar=0; gDiagGiorni=0; gDiagVia=0;
+   if(quante<=0) return(0);
+
+   //--- VIA 1: il TF di regime, diretto.
+   MqlRates r[];
+   ArraySetAsSeries(r,true);                  // r[0] = shift 1 (la piu' recente chiusa)
+   ResetLastError();
+   int got = CopyRates(_Symbol, InpRegimeTF, 1, quante, r);
+   gDiagErrTF = (int)GetLastError();
+   gDiagGotTF = got;
+   if(got>0 && got>=minimo)
+     {
+      //--- l'ordine si CHIEDE ai timestamp, non al flag as-series.
+      bool inverso = (got>1 && r[0].time > r[got-1].time);
+      ArrayResize(high,got); ArrayResize(low,got); ArrayResize(close,got);
+      //--- uscita sempre CRONOLOGICA (indice 0 = la piu' vecchia).
+      for(int i=0;i<got;i++)
+        {
+         int s = (inverso ? got-1-i : i);
+         high[i]  = r[s].high;
+         low[i]   = r[s].low;
+         close[i] = r[s].close;
+        }
+      gDiagVia = 1;
+      return(got);
+     }
+
+   //--- VIA 2: fallback autosufficiente sulle barre del grafico.
+   int nd = LeggiGiorniDaGrafico(quante, high, low, close);
+   if(nd>0 && nd>=minimo){ gDiagVia = 2; return(nd); }
+
+   gDiagVia = 0;                              // nessuna via ce l'ha fatta
+   return(nd);
+  }
+
+//+------------------------------------------------------------------+
+//| DIAGNOSTICA del gate quando fallisce per DATO MANCANTE (non per   |
+//| soglia): stampa SOLO le prime 5 volte (su decine di migliaia di   |
+//| barre il log esploderebbe e il Giornale diventa illeggibile).     |
+//| Si legge nel Giornale di un TEST SINGOLO: dice esattamente quante |
+//| barre ha dato ogni via, con che errore, e cosa serviva.           |
+//+------------------------------------------------------------------+
+void DiagGateDatoMancante(const string motivo,const int n,
+                          const int needAtr,const int needAdx)
+  {
+   static int stampe=0;
+   if(stampe>=5) return;
+   stampe++;
+   string via = (gDiagVia==1 ? "TF diretto" : (gDiagVia==2 ? "FALLBACK aggregato dal grafico" : "NESSUNA"));
+   PrintFormat("[CRTTS][GATE-DIAG] %d/5 %s | %s | via=%s | %s diretto: got=%d err=%d | fallback %s: barre=%d err=%d giorni=%d | ottenute n=%d, servono ATR>=%d ADX>=%d | ESITO: gate CHIUSO per DATO MANCANTE (non per soglia)",
+               stampe,
+               TimeToString(TimeCurrent(),TIME_DATE|TIME_MINUTES),
+               motivo, via,
+               EnumToString(InpRegimeTF), gDiagGotTF, gDiagErrTF,
+               EnumToString((ENUM_TIMEFRAMES)_Period), gDiagGotBar, gDiagErrBar, gDiagGiorni,
+               n, needAtr, needAdx);
+  }
+
+//+------------------------------------------------------------------+
+//| GATE DI REGIME live: calcola ADX e ATR del regime sulla barra      |
+//| CHIUSA (shift 1) DALLE BARRE lette da LeggiBarreRegime (via TF     |
+//| diretto o via fallback aggregato), NON da handle iADX/iATR (che    |
+//| nel tester tick su simbolo nativo non popolano). Poi chiede al     |
+//| nucleo puro RegimeGate_Calc se il regime e' operabile.             |
+//|                                                                    |
+//| UNA SOLA LETTURA per entrambi gli indicatori: si prende la         |
+//| finestra piu' lunga fra quella che serve all'ATR (period+1) e      |
+//| quella che serve all'ADX (2*period+2), con 100 barre di margine    |
+//| perche' la media di Wilder si assesti. AtrMedia_Calc usa comunque  |
+//| solo gli ULTIMI 'period' TR, quindi con i default (ATR 14 / ADX    |
+//| 14 -> finestra 130, identica a prima) i valori NON cambiano.       |
+//|                                                                    |
+//| Niente look-ahead: shift 1, e il giorno in corso e' escluso anche  |
+//| nel fallback. Se i dati non bastano -> gate NON soddisfatto (non   |
+//| e' un errore) + riga [GATE-DIAG] per le prime 5 volte.             |
+//| ATR e' in PREZZO: convertito in PUNTI INDICE con la stessa         |
+//| conversione del resto del motore (coerenza della soglia).          |
 //+------------------------------------------------------------------+
 bool RegimeGateOk()
   {
    double h[],l[],c[];
 
-   //--- ATR(InpRegimeAtrPeriod): servono period+1 barre chiuse.
-   int nAtr = LeggiBarreRegime(InpRegimeAtrPeriod+1, h, l, c);
-   if(nAtr < InpRegimeAtrPeriod+1) return(false);
-   double atrPrezzo = AtrMedia_Calc(h, l, c, nAtr, InpRegimeAtrPeriod);
-   if(atrPrezzo<=0) return(false);   // dato non pronto (o barre piatte a inizio storia)
+   int needAtr = InpRegimeAtrPeriod+1;        // ogni TR usa la chiusura precedente
+   int needAdx = 2*InpRegimeAdxPeriod+2;      // 2*period per la prima media di Wilder
+   int need    = (needAtr>needAdx ? needAtr : needAdx);
+   int want    = need+100;                    // margine: l'ADX si stabilizza
 
-   //--- ADX(InpRegimeAdxPeriod): serve piu' storia (2*period per la prima
-   //    media di Wilder). Prendo di piu' quando c'e', cosi' l'ADX si stabilizza
-   //    verso il valore di regime; a inizio storia ne ottengo meno e il gate
-   //    resta chiuso finche' non ci sono almeno 2*period+1 barre chiuse.
-   int needAdx = 2*InpRegimeAdxPeriod+2;
-   int wantAdx = needAdx+100;
-   int nAdx = LeggiBarreRegime(wantAdx, h, l, c);
-   if(nAdx < needAdx) return(false);
-   double adx = AdxWilder_Calc(h, l, c, nAdx, InpRegimeAdxPeriod);
-   if(adx<0) return(false);          // dato non pronto
+   int n = LeggiBarreRegime(want, need, h, l, c);
+   if(n < need)
+     { DiagGateDatoMancante("barre insufficienti", n, needAtr, needAdx); return(false); }
+
+   double atrPrezzo = AtrMedia_Calc(h, l, c, n, InpRegimeAtrPeriod);
+   if(atrPrezzo<=0)
+     { DiagGateDatoMancante("ATR non calcolabile", n, needAtr, needAdx); return(false); }
+
+   double adx = AdxWilder_Calc(h, l, c, n, InpRegimeAdxPeriod);
+   if(adx<0)
+     { DiagGateDatoMancante("ADX non calcolabile", n, needAtr, needAdx); return(false); }
+
+   //--- da qui il DATO C'E': la valutazione e' riuscita, conto da che via.
+   if(gDiagVia==1)      gGateViaD1++;
+   else if(gDiagVia==2) gGateViaM15++;
 
    double atrPts = PrezzoInPuntiIndice_Calc(atrPrezzo, InpMT5PerPuntoIndice, _Point);
    return(RegimeGate_Calc(adx, atrPts, InpAdxMax, InpAtrMinPts));
@@ -1039,8 +1308,52 @@ void AutoTestCRT()
    PrintFormat("[CRTTS][AUTOTEST] ADX manuale: trend=%.4f(100.0000) piatto=%.4f(0.0000)", adxT, adxF);
    if(!(MathAbs(adxT-100.0)<1e-6 && MathAbs(adxF-0.0)<1e-6)) falliti++;
 
+   //--- 12. AGGREGAZIONE intraday -> GIORNI (il FALLBACK del gate), su una
+   //    serie sintetica calcolabile a mano: 2 giorni x 4 barre + 1 barra del
+   //    "giorno in corso" che DEVE sparire.
+   //      giorno A (2024.01.02): open 10 | high max(15,16,14,13.5)=16
+   //                             low min(9,8,11,12)=8 | close ultima = 13.2
+   //      giorno B (2024.01.03): open 20 | high max(25,24,26,23.5)=26
+   //                             low min(19,18,21,22)=18 | close ultima = 23.3
+   //      giorno C (2024.01.04): UNA barra, e' il giorno IN CORSO -> ESCLUSO.
+   //    Due letture: senza scarto del primo giorno -> 2 giorni (A,B);
+   //    con lo scarto (come fa il gate) -> 1 giorno, il solo B.
+   datetime agT[9]={D'2024.01.02 00:00',D'2024.01.02 06:00',D'2024.01.02 12:00',D'2024.01.02 18:00',
+                    D'2024.01.03 00:00',D'2024.01.03 06:00',D'2024.01.03 12:00',D'2024.01.03 18:00',
+                    D'2024.01.04 00:00'};
+   double agO[9]={10.0,11.0,12.0,13.0, 20.0,21.0,22.0,23.0, 30.0};
+   double agH[9]={15.0,16.0,14.0,13.5, 25.0,24.0,26.0,23.5, 31.0};
+   double agL[9]={ 9.0, 8.0,11.0,12.0, 19.0,18.0,21.0,22.0, 29.0};
+   double agC[9]={11.0,12.0,13.0,13.2, 21.0,22.0,23.0,23.3, 30.5};
+
+   double dO[],dH[],dL[],dC[];
+   int nTutti = AggregaGiorni_Calc(agT,agO,agH,agL,agC,9, 20240104, false, dO,dH,dL,dC);
+   bool aggA = (nTutti==2) &&
+               MathAbs(dO[0]-10.0)<1e-9 && MathAbs(dH[0]-16.0)<1e-9 &&
+               MathAbs(dL[0]- 8.0)<1e-9 && MathAbs(dC[0]-13.2)<1e-9 &&
+               MathAbs(dO[1]-20.0)<1e-9 && MathAbs(dH[1]-26.0)<1e-9 &&
+               MathAbs(dL[1]-18.0)<1e-9 && MathAbs(dC[1]-23.3)<1e-9;
+   PrintFormat("[CRTTS][AUTOTEST] aggregazione giorni: n=%d(2) A[o=%.2f(10.00) h=%.2f(16.00) l=%.2f(8.00) c=%.2f(13.20)] B[o=%.2f(20.00) h=%.2f(26.00) l=%.2f(18.00) c=%.2f(23.30)] | giorno in corso escluso=%s",
+               nTutti,
+               (nTutti>0?dO[0]:0.0),(nTutti>0?dH[0]:0.0),(nTutti>0?dL[0]:0.0),(nTutti>0?dC[0]:0.0),
+               (nTutti>1?dO[1]:0.0),(nTutti>1?dH[1]:0.0),(nTutti>1?dL[1]:0.0),(nTutti>1?dC[1]:0.0),
+               (nTutti==2?"SI":"NO"));
+   if(!aggA) falliti++;
+
+   double eO[],eH[],eL[],eC[];
+   int nScarto = AggregaGiorni_Calc(agT,agO,agH,agL,agC,9, 20240104, true, eO,eH,eL,eC);
+   bool aggB = (nScarto==1) &&
+               MathAbs(eO[0]-20.0)<1e-9 && MathAbs(eH[0]-26.0)<1e-9 &&
+               MathAbs(eL[0]-18.0)<1e-9 && MathAbs(eC[0]-23.3)<1e-9;
+   long chiave = ChiaveGiorno_Calc(D'2024.01.03 12:00');
+   PrintFormat("[CRTTS][AUTOTEST] aggregazione col primo giorno SCARTATO (come il gate): n=%d(1) resta B[o=%.2f(20.00) h=%.2f(26.00) l=%.2f(18.00) c=%.2f(23.30)] | chiaveGiorno=%I64d(20240103)",
+               nScarto,
+               (nScarto>0?eO[0]:0.0),(nScarto>0?eH[0]:0.0),(nScarto>0?eL[0]:0.0),(nScarto>0?eC[0]:0.0),
+               chiave);
+   if(!(aggB && chiave==20240103)) falliti++;
+
    Print("[CRTTS][AUTOTEST] esito motore: ", (falliti==0
-         ? "UNDICI BLOCCHI SU UNDICI, il motore ragiona come i sorgenti (ATR/ADX manuali inclusi)."
+         ? "DODICI BLOCCHI SU DODICI, il motore ragiona come i sorgenti (ATR/ADX manuali e aggregazione giorni inclusi)."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
 
    gAutotestFalliti = falliti;
@@ -1135,7 +1448,7 @@ void ExportTrades()
 double OnTester()
   {
    ExportTrades();
-   double stats[23];
+   double stats[25];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1164,10 +1477,14 @@ double OnTester()
    stats[20] = (double)gCntShortCand;      // Short Cand
    stats[21] = (double)gCntApri;           // Apri Chiamate
    stats[22] = (double)gCntGateBloccati;   // Ret Gate Regime (pattern soppressi dal gate)
+   //--- da QUALE via e' arrivato il dato del gate (0 e 0 = non e' mai arrivato).
+   stats[23] = (double)gGateViaD1;         // Gate Via D1
+   stats[24] = (double)gGateViaM15;        // Gate Via M15
 
-   PrintFormat("[CRTTS][DIAG] OnNewBar=%I64d | ret: posAperta=%I64d noDati=%I64d maxTrades=%I64d fuoriOrario=%I64d noPattern=%I64d gateRegime=%I64d | longCand=%I64d shortCand=%I64d apri=%I64d",
+   PrintFormat("[CRTTS][DIAG] OnNewBar=%I64d | ret: posAperta=%I64d noDati=%I64d maxTrades=%I64d fuoriOrario=%I64d noPattern=%I64d gateRegime=%I64d | longCand=%I64d shortCand=%I64d apri=%I64d | gate: viaD1=%I64d viaM15=%I64d",
                gCntOnNewBar, gCntGestione, gCntNoDati, gCntMaxTrades,
-               gCntFuoriOrario, gCntNoPattern, gCntGateBloccati, gCntLongCand, gCntShortCand, gCntApri);
+               gCntFuoriOrario, gCntNoPattern, gCntGateBloccati, gCntLongCand, gCntShortCand, gCntApri,
+               gGateViaD1, gGateViaM15);
 
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
@@ -1193,17 +1510,19 @@ void OnTesterDeinit()
         {
          //--- 'head' e lo StringFormat qui sotto si toccano SEMPRE INSIEME:
          //    una colonna aggiunta a uno solo sfasa tutto il CSV.
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Autotest Falliti,Flat Giorni,Flat Chiusure,OnNewBar Chiamate,Ret Posizione Aperta,Ret No Dati,Ret Max Trades,Ret Fuori Orario,Ret No Pattern,Long Cand,Short Cand,Apri Chiamate,Ret Gate Regime";
+         //    26 colonne fisse: Pass + data[0..24].
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Autotest Falliti,Flat Giorni,Flat Chiusure,OnNewBar Chiamate,Ret Posizione Aperta,Ret No Dati,Ret Max Trades,Ret Fuori Orario,Ret No Pattern,Long Cand,Short Cand,Apri Chiamate,Ret Gate Regime,Gate Via D1,Gate Via M15";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4],
                                 data[5], data[6], data[7], data[8], data[9],
                                 data[10], data[11], data[12],
                                 data[13], data[14], data[15], data[16], data[17],
-                                data[18], data[19], data[20], data[21], data[22]);
+                                data[18], data[19], data[20], data[21], data[22],
+                                data[23], data[24]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
