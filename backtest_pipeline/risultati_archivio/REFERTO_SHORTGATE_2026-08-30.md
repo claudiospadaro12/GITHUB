@@ -60,9 +60,32 @@ quando gli indici scendono = quando le sedie long soffrono). E' il mattone
 - **Win rate 82-100% ovunque**: un breakdown-short che segue il drive-giu con SL
   strutturale e gate H4 azzecca la gran parte dei trade.
 
-## VERDETTO PROVVISORIO
-La forma piu' verde della sessione, e conferma la tesi vol-gated: un breakdown
-short gated dall'orso paga (PF 1.84) con DD irrisorio (2%), stando flat nel toro.
-Prossimo passo: lettura per regime (serve il per-trade) per confermare che l'edge
-e' nell'orso, non nel rumore. Poi resta il limite duro: verdetto tick in un orso
-richiede dati esterni (Dukascopy), i tick BCM non ci arrivano. Nessun forward toccato.
+## CONFERMA A TICK BCM (cassaforte 2024.09-2026, pin edc0412) — SOPRAVVIVE AI COSTI
+
+| cella | n | PF | DD% | Profit | asp/tr | pegg.gio |
+|---|---|---|---|---|---|---|
+| shortgate TICK BCM | 104 | **1.097** | 4.54 | +1951 | +18.8 | -0.72 |
+
+**Gli ingressi NON sono fantasia OHLC: reggono spread + slippage reali.**
+- PF **1.097 > 1** a TICK, sulla finestra 2024-2026 (toro). POSITIVO anche dove lo
+  short e' teoricamente svantaggiato -> il gate H4 lo accende solo sui pullback
+  ribassisti H4, che pagano anche in un bull.
+- DD 4.54% (sotto il muro), peggior giornata -0.72% (irrisoria). asp/tr +18.8.
+- n=104 < 150 -> merito formalmente sospeso, ma la FORMA e' coerente e il rischio
+  e' basso.
+- E' SOTTILE nel toro (PF 1.097, come il drive-long) MA e' il pezzo DECORRELATO:
+  fira in condizioni H4 ribassiste, cioe' quando la flotta long soffre.
+
+## VERDETTO (aggiornato: forma verde + costo confermato)
+Il gated short e' il candidato piu' completo della sessione:
+1. **OHLC screening**: PF 1.84, edge nell'orso confermato per regime (2022 +4020
+   win 90%, crollo 2020 +255/tr win 100%), verde anche nel toro 2021.
+2. **TICK BCM (cost-survival)**: PF 1.097 POSITIVO nel toro, DD 4.5%, ingressi
+   reali (non OHLC-fantasia).
+-> profilo DISPIEGABILE: fa poco in calma/toro, molto nelle tempeste, scorrelato
+   dalla flotta long. Insieme al drive-long (che vive nella calma) = 2 mattoni
+   scorrelati che entrambi sopravvivono a tick.
+Limite duro residuo: il verdetto tick NELL'ORSO resta impossibile su BCM (serve
+Dukascopy). Prossime opzioni: (a) deploy PICCOLO in forward a taglia ridotta come
+il drive-long; (b) import tick Dukascopy 2020/2022 per il verdetto orso vero.
+Nessun forward toccato.
