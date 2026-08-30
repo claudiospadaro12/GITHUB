@@ -235,3 +235,25 @@ mutate a vicenda e non ce ne saremmo accorti se non dopo settimane.
 short attivi, EMA200-bias off, WPR off, ATR uscita 14, `SLfromDoji` off,
 TP1Pct 50, breakeven on, trailing on, max 1 posizione, filtro news off.
 **Cambiano SOLO buffer e target: e' un esperimento a una variabile per parte.**
+
+---
+
+## 🌩️ SEDIA NUOVA — GATED SHORT NASUSD (magic 770250) — deploy 30/08/2026 (CONTO PICCOLO ~5k)
+
+| Grafico | EA | Simbolo | TF | Magic | Stato |
+|---|---|---|---|---|---|
+| NASUSD M15 | **ABTG_Nasdaq_Apertura_US** (base) | Nasdaq | M15 | **770250** | 🆕🌩️ forward dal 30/08, rischio **0,35%**, Guardian ON |
+
+**Il primo mattone "TEMPESTA"**: breakdown short GATED — spara SOLO quando
+l'apertura Nasdaq rompe al ribasso **E** l'EMA 50<200 su H4 e' ribassista.
+Scorrelato per costruzione dalla flotta long (fira quando gli indici scendono).
+
+- **Preset**: `mql5/presets/ABTG_GatedShort_NASUSD_770250_LIVE.set`
+- **Contratto**: `report/CONTRATTO_GATEDSHORT_770250.md` (regole di uscita FIRME 18/08)
+- **Conto**: **PICCOLO ~5k**, SEPARATO dal forward 50503392 e dal 100K FTMO.
+- **Numeri promessi** (scalati a 0,35%): DD ~2,4%, PF 1,097 tick (toro) / 1,84
+  OHLC (orso), ~5 trade/mese (MENO in calma — e' un motore da crollo).
+- **Riserva dura**: verdetto ORSO e' OHLC (screening EXT), NON tick — i tick BCM
+  partono dal 2024.09, nessun orso. Deploy PICCOLO/osservazione per questo.
+- ✅ **Preset verificato a schermo il 30/08** (5 valori firma OK: Long=false,
+  Short=true, Magic=770250, Risk=0,35, apertura 14:30 server BCM).
