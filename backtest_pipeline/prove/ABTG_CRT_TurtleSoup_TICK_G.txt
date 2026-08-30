@@ -1,0 +1,50 @@
+# ==========================================================================
+# ABTG_CRT_TurtleSoup_TICK_G  -  GATED TICK BCM: il verdetto vero nel toro
+# Motore CRT Turtle Soup da Neo Malesa (n30dyn4m1c), licenza MIT.
+# La cella vincente + GATE ADX<=30, a TICK REALI su NASUSD BCM 2024-2026.
+# Nasce dopo il gate confermato su OHLC: l'ungated a tick nel toro era PF 0.5
+# (morto). Il gate taglia i trend-trade -> qui si misura se il gate porta il
+# tick a PF >= 1 NEL REGIME ATTUALE. Se verde -> edge TICK-VERIFICATO ->
+# deployabile ORA, senza Dukascopy.
+# ==========================================================================
+#
+# LA CELLA VINCENTE: wick 2.0, mid 0, side 2, GATE ON ADX(D1)<=30 (ATR 100).
+#   Fissi (secchi). Unico asse Y = InpMagic gemelli (769105/769106, vergini):
+#   2 passate identiche, 2 per-trade CSV distinti (determinismo + lettura).
+#
+# >>> QUESTO E' A TICK REALI (Modello 4) SU BCM: e' un VERDETTO, non uno
+#     screening OHLC. Ma 21 mesi = UN SOLO REGIME (toro): merito sospeso se
+#     n<150 (R59), rischio SEMPRE (DD e peggior giornata contro il muro).
+#
+# >>> IL FUSO E' QUELLO DI CASA (NON invertito): NASUSD BCM e' a ora SERVER
+#     (IT-1). L'apertura RTH e' 14:30 server, il FLAT RTH e' 21:00 SERVER
+#     (16:00 ET). QUINDI InpCloseHour=21, NON 16 (che vale solo sul feed _EXT
+#     a ora NY). E' l'OPPOSTO dei round _EXT: qui il gate PRETENDE 21.
+#
+# LA DOMANDA: il gated CRT a tick BCM 2024-2026 ha PF >= 1 (edge reale nel
+#   toro), DD sotto il muro, peggior giornata sotto il cap 5%? Se si' ->
+#   deployabile piccolo. Se PF < 1 -> il gate migliora ma non basta a tick nel
+#   toro; resta un motore da chop (Dukascopy per il verdetto nel suo regime).
+#
+# Direttive @ NUDE (senza # davanti): commentate = gate vuoto.
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# LA CELLA VINCENTE (secchi = pin) + IL GATE ACCESO A ADX<=30
+InpWickFactor=2.0
+InpUseMidGate=0
+InpSide=2
+InpCloseHour=21
+InpCloseMin=0
+InpMinStopPts=500
+InpUseRegimeGate=true
+InpRegimeTF=16408
+InpRegimeAdxPeriod=14
+InpRegimeAtrPeriod=14
+InpAdxMax=30.0
+InpAtrMinPts=100.0
+# --- L'UNICO ASSE Y: i gemelli sul magic (2 passate identiche, CSV distinti).
+InpMagic=769105||769105||1||769106||Y
+# ==========================================================================
