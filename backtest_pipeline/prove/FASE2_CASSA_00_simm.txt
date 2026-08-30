@@ -1,0 +1,157 @@
+# =====================================================================
+#  FASE 2 CASSA -- VALIDAZIONE A TICK del MOTORE DELLE APERTURE Nasdaq
+#  (drive-following) / cella 00_simm  =  IL CANDIDATO (SIMMETRICO)
+#  ABTG_Nasdaq_Apertura_US su NASUSD (BCM LIVE) M15 -- MODELLO 4 (TICK REALI)
+# ---------------------------------------------------------------------
+#  CHE COS'E'. La FASE 1 (screening OHLC 2017-2020 su NASUSD_EXT, referto
+#  REFERTO_FASE2_DRIVE_2026-08-30.md) ha stabilito che il drive-following
+#  NUDO ha edge ed e' ROBUSTO PER REGIME (verde in toro/orso/laterale/
+#  crollo, piu' forte nello stress; PF 1.32 su 832 trade). Questa e' la
+#  CASSAFORTE: si conferma a TICK REALI su BCM che l'edge sopravvive a
+#  spread e slippage. NON promuove, NON tocca il forward (G5): e' l'OOS
+#  del disegno a due fasi, si apre UNA volta e NON si ottimizza.
+#
+#  >>> LE INVERSIONI RISPETTO ALLA FASE 1 (adattato da FASE2_NAS_00_baseline,
+#      NON riusato). Ogni riga con la sua ragione:
+#    - SIMBOLO NASUSD (BCM live), NON NASUSD_EXT. Model 4 (tick), NON 1.
+#    - FUSO NORMALE BCM: InpSessionHour=14, InpSessionMin=30 (15:30 IT -1 =
+#      14:30 server). E' l'OPPOSTO della FASE 1 (li' 9:30 = apertura NY sul
+#      feed _EXT). Qui il feed e' BCM: vale la regola di casa (IT-1=server).
+#    - RISCHIO 0.65% (taglia di casa, DD comparabile), NON 1.0%.
+#    - PARZIALE RIMESSA (gestione prop vera): InpTP1_ClosePct=50 (meta' chiude
+#      a 1R), InpTP1_R=1.0, InpBreakevenAtTP1=true; l'altra meta' corre senza
+#      cap (InpRunnerTP_R=-1). Doma il DD 15.6% della diagnostica all-runner.
+#    - SL floor InpMinStopPts=500 (R109), InpSkipIfTight=false (il pavimento
+#      si APPLICA, non fa saltare il trade).
+#    - F1 e F3 SPENTI (bocciati in FASE 1): InpMinBreakoutRangeATR=0.0 (F1),
+#      InpUseEmaFilter=false (F3). Il baseline nudo era il migliore sull'edge.
+#
+#  >>> LA CELLA. SIMMETRICO = il motore vero: InpAllowLong=true e
+#      InpAllowShort=true. Il long e' il pane (positivo in ogni regime); lo
+#      short aggiunge edge nei crolli rapidi e il simmetrico lo raccoglie da
+#      solo (FASE 1: +11108 nel crollo 2020). Il gemello 01_long isola il
+#      COSTO dello short su una finestra SENZA crolli (premio-assicurazione).
+#
+#  >>> LA FINESTRA e' 2024.09.26 -> 2026.06.30 (pavimento TICK BCM, sonda
+#      17/08). E' UN SOLO REGIME RIALZISTA, dichiarato: la robustezza-per-
+#      regime e' gia' stabilita a OHLC in FASE 1; qui si misura SOLO il costo
+#      reale a tick. La FrazioneIS (40/60) serve al driver generico come
+#      contesto di lettura (regge in entrambe le meta'?), NON come selezione:
+#      su questa finestra NON si sceglie nulla.
+#
+#  >>> L'ORA DI CHIUSURA InpCloseHour=20, InpCloseMin=45 e' l'ORA SERVER della
+#      sedia Nasdaq apertura VIVA su BCM (preset live, R115). Intraday, mai
+#      overnight (InpCloseAtEnd=true).
+#
+#  MAGIC VERGINI 768100/768101 (blocco 7681xx, cercato in tutto il repo il
+#  2026-08-30 -> ZERO occorrenze; NON 7672xx FASE 1, NON 766xxx R115, NON
+#  767xxx PASSO0/short). L'UNICO asse spazzolato e' InpMagic (i due gemelli
+#  di controllo, igiene del banco: due passate identiche al centesimo).
+#  Blocco FASE 2 CASSA: 00_simm 768100/768101 | 01_long 768110/768111.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- sessione: ORA SERVER BCM (fuso: IT - 1h). Nasdaq apre 15:30 IT = 14:30
+#     server. Chiusura 20:45 server (nativa sedia viva), mai overnight.
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+
+# --- ingresso: BREAKOUT dell'OR dei primi 15' (drive-following NUDO) ---
+InpEntryMode=0||0||0||0||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=200.0||200.0||0||200.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+
+# --- F3 (allineamento HTF via EMA): SPENTO (bocciato in FASE 1) ---
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+
+# --- rischio e gestione: DRIVE-FOLLOWING con PARZIALE RIMESSA (prop) ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpSLMode=1||1||0||1||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=1.0||1.0||0||1.0||N
+InpTrailMode=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=3.0||3.0||0||3.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+
+# --- >>> RUNNER SENZA CAP (l'altra meta' corre verso la coda). FISSO.
+InpRunnerTP_R=-1||-1||0||-1||N
+
+# --- >>> F1 (forza della rottura): SPENTO (0 = pendente nudo). Bocciato FASE 1.
+InpMinBreakoutRangeATR=0.0||0.0||0||0.0||N
+
+# --- >>> pavimento SL OBBLIGATORIO (R109): 500 pt, mai 0; si APPLICA. FISSO.
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=false||false||0||false||N
+
+# --- overlay OFF (come R103): RoundLevels/News/Volume/Atr spenti ---
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- l'UNICO asse spazzolato: i due magic gemelli di controllo ---
+InpMagic=768100||768100||1||768101||Y
