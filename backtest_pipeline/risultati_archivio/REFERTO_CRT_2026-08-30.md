@@ -54,3 +54,41 @@ tick possibile su BCM (servirebbe Dukascopy). Cheap da misurare, ma senza illude
   li' -> sepoltura definitiva; se verde solo tempesta -> candidato storm-gated
   (come lo short), da Dukascopy per il tick. Decide Claudio.
 - Registrato in REGISTRO_TEST.md come motore-senza-edge (toro tick).
+
+## AGGIORNAMENTO — TIEBREAKER DI REGIME (_EXT OHLC 2020-2024): NON SEPPELLITO
+
+_Corsa: 30/08/2026 19:44, pin `6a0b10de1a3b3af27a50c48c69abc9013aebf920`. Modello 1
+OHLC, NASUSD_EXT M15 (392 MB storico), finestra 2020-2024 (crollo 2020 + toro 2021 +
+orso 2022 + 2023), sweep 3 assi, flat 16:00 NY. Zip: CRT_EXT_CORSA_20260830_1944.zip._
+
+**La tempesta cambia il quadro: 13 celle su 30 con PF>=1 (verde sul TOTALE
+2020-2024, INCLUSO il toro 2021 che a fade fa male).**
+
+| cella | PF | profit | n | DD% | config |
+|---|---|---|---|---|---|
+| robusta (n alto) | **1.18** | **+5744** | 320 | 5.9 | wick 2.0, mid 0, **side 2** |
+| miglior PF | 1.50 | +2915 | 50 | 2.1 | wick 3.5, mid 1, long (n thin) |
+| coerente | 1.11 | +2654 | 205 | 5.1 | wick 3.5, mid 0, side 2 |
+
+- **13/30 verdi, PF fino a 1.50, DD basso (2-6%)**: NON e' un outlier isolato, e'
+  una fascia verde coerente. La cella robusta (n=320, PF 1.18, DD 5.9%) e' netta.
+- **Il contrasto col tick e' REALE**: il tick 2024-2026 e' un toro a bassa
+  volatilita' (il peggio per un fade) -> 0/30. Il 2020-2024 ha crollo+orso (la
+  volatilita' che il fade ama) -> verde. Stesso motore, regime diverso.
+
+**I DUE MURI, dichiarati (niente hype):**
+1. **OHLC INGANNA ed e' OTTIMISTA**: il tick e' PF 0.5 nel toro, quindi i numeri
+   veri sono PIU' BASSI. Il +5744 e' forma, non cassa.
+2. **VERDETTO TICK NELLA TEMPESTA IMPOSSIBILE su BCM** (muro dati 26/09/2024):
+   il verde viene (quasi certo) dal crollo/orso, che a tick BCM non raggiungiamo.
+   Serve Dukascopy per il verdetto vero.
+
+**CONSEGUENZA**: il CRT NON e' morto -- e' un motore STORM-CONDIZIONALE, come lo
+short e come E3: vive in volatilita', muore nel toro calmo. Non deployabile as-is
+(il forward oggi e' un toro calmo -> perderebbe), ma non da buttare.
+
+**STAGE-2 (prossimo, cheap)**: la cella robusta (side 2, wick 2.0, mid 0) da sola,
+magic dedicato, per-trade CSV segmentato per regime -> confermare che il verde
+viene dal crollo 2020 + orso 2022 (non da un artefatto OHLC di un periodo). Se
+confermato: candidato storm-gated, da Dukascopy per il tick e da accoppiare a un
+gate di volatilita'/regime (misurato, non appiccicato).
