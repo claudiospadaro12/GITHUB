@@ -57,9 +57,61 @@ e/o parziale = gestione, §5F).
    somma net_profit per finestra di regime. **Serve quel CSV.**
 3. **DD sopra/vicino al muro**: baseline 15.6% @1.0% (~10% @0.65%). Da gestire.
 
-## VERDETTO PROVVISORIO
-Il motore drive-following delle aperture Nasdaq mostra una FORMA VERDE a OHLC su
-un arco multi-regime — il miglior segnale della sessione. I filtri F1/F3 non
-affilano l'edge (il nudo e' gia' il migliore) ma domano la coda di rischio.
-**Prossimo passo obbligato: la lettura PER REGIME (serve il per-trade CSV), poi
-la conferma a tick sulla cassaforte 2024.09->2026.** Nessun forward toccato.
+## LETTURA PER REGIME (per-trade CSV 767200 baseline / 767230 F3) — LA DECISIVA
+
+**BASELINE nudo (767200), net_profit sommato per regime:**
+
+| regime | n | tot_net | asp/trade | win% |
+|---|---|---|---|---|
+| 2017 TORO | 212 | +30794 | +145 | 46.7 |
+| Q4-2018 ORSO | 64 | +22983 | **+359** | 46.9 |
+| 2019 LATERALE | 248 | +27456 | +111 | 37.9 |
+| 2020 (feb-apr, crollo+V) | 46 | +40246 | **+875** | 50.0 |
+
+**L'EDGE SOPRAVVIVE A OGNI REGIME, ed e' PIU' FORTE nell'orso e nel crollo.**
+Non e' un artefatto toro. Un drive-follower si nutre di volatilita' -> shine
+proprio dove gli indici si muovono di piu'. Verde in toro, orso, laterale, crollo.
+
+**F3 EMA (767230): PEGGIORA proprio nei regimi stressati** — Q4-2018 asp +10
+(vs +359 nudo), 2020 intero NEGATIVO (-26/trade). Il filtro HTF fa whipsaw nel
+crollo/V e blocca i drive migliori. **F3 bocciato, e la lettura per regime spiega
+perche'.**
+
+## IL LATO SHORT (la domanda di Claudio) — misurato, onesto: edge NARROW, solo crolli veri
+Split del baseline per LATO e per fase (mapping close-deal confermato sul toro 2017):
+
+| finestra | LONG n / net / asp | SHORT n / net / asp |
+|---|---|---|
+| CROLLO-GIU (20feb-23mar 2020) | 12 / +4871 / +406 | **7 / +11108 / +1587** |
+| RIPRESA-V (24mar-30apr 2020) | 14 / +26486 / +1892 | 12 / -6074 / -506 |
+| Q4-2018 orso (choppy) | 30 / +22044 / +735 | 34 / +939 / **+28 (~piatto)** |
+| 2017 toro | 118 / +31104 | 94 / -310 |
+
+- **Il LONG e' il pane**: positivo in OGNI regime, enorme nella ripresa-V (+1892),
+  forte anche nell'orso Q4-2018 (i rimbalzi ribassisti sono drive UP violenti).
+- **Lo SHORT ha edge VERO solo nel CROLLO-GIU genuino** (2020 feb-mar: +1587/trade,
+  il piu' alto in assoluto). Nell'orso CHOPPY (Q4-2018) e' ~piatto (+28); nei
+  range e nella ripresa PERDE. **Lo short degli indici e' un fenomeno da CROLLO
+  RAPIDO, non da orso generico** — e il motore simmetrico lo raccoglie da solo
+  (lo short ha fatto +11108 nel crollo 2020 senza che glielo chiedessimo).
+
+## VERDETTO PROVVISORIO (aggiornato con la lettura per regime)
+1. **Il drive-following delle aperture Nasdaq e' un motore VERDE e ROBUSTO PER
+   REGIME** al tetto OHLC (positivo toro/orso/laterale/crollo, piu' forte nello
+   stress). E' il miglior candidato della sessione, e risponde al "motore Nasdaq".
+2. **Il LONG e' il breadwinner**; lo SHORT aggiunge edge solo nei crolli rapidi
+   (ma li' e' fortissimo). Un motore SIMMETRICO cattura entrambi: il long ogni
+   giorno, lo short quando arriva il crollo. **Risposta alla domanda short:
+   esiste, ma e' crash-concentrato — misurato con orso e crollo nei dati.**
+3. **F1/F3 non affilano l'edge**; domano il rischio (peggior giornata) ma non lo
+   portano sotto il muro da soli. DD 15.6%@1.0% (~10%@0.65%) da gestire.
+
+## I DUE CANCELLI CHE RESTANO
+- **OHLC INGANNA** (specie il crollo: barre enormi = ingressi/uscite OHLC molto
+  ottimistici). Il verdetto a tick e' possibile SOLO sulla cassaforte 2024.09->
+  2026 (BCM): li' si conferma il FORMA, e li' cade il de-2022/de-2023.
+- **DD sopra il muro**: si gestisce con la parziale (che avevamo tolto per la
+  diagnostica) e/o una taglia piu' bassa. Gestione, non motore (§5F).
+
+**Nessun forward toccato. Prossimo passo: portare il motore simmetrico sulla
+cassaforte 2024-2026 a TICK, con la parziale rimessa, per il verdetto vero.**
