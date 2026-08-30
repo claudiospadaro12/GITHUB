@@ -59,9 +59,16 @@
 #         barra e' dopo 2020.01.01, il driver lo dira'; NON inventare la data.
 #   - Per coprire ANCHE 2019 e 2025-2026 serve una SECONDA tranche o un TF piu'
 #     alto (il tetto 100k barre morde: M15 ~4 anni, M5 ~1.3 anni per corsa).
-#   - Sessione in ORA SERVER: Nasdaq 14:30 server. Su EXT (HistData, shift +5
-#     verso server) il mapping e' quello dell'import; se la colonna
-#     InpSessionHour nei CSV non e' 14 -> ora sbagliata, cestinare (CLAUDE.md).
+#   - Sessione in ORA NEW YORK (FUSO INVERTITO rispetto alla regola di casa).
+#     Su NASUSD_EXT il feed HistData e' a ORA DI NEW YORK: l'anatomia lo ha
+#     MISURATO (canarino DST verde, LETTURA_ANATOMIA_APERTURE_2026-08-26.md:
+#     "il feed segue il DST americano -> le 09:30 del file sono l'apertura cash
+#     TUTTO l'anno"). Percio' qui InpSessionHour=9 / InpSessionMin=30, NON 14.
+#     Il 14:30 SERVER (regola IT-1=server) vale SOLO per la cella tick della
+#     cassaforte BCM (NASUSD), NON per questo screening _EXT. Se la colonna
+#     InpSessionHour nei CSV di questa corsa non e' 9 -> ora sbagliata,
+#     cestinare (CLAUDE.md). [CORRETTO 30/08: la stesura iniziale portava 14
+#     assumendo un mapping server; smentito dalla misura FASE2 sullo STESSO feed.]
 #   - Magic VERGINI (blocco 767xxx). Nessun forward toccato. Nessuna sedia viva.
 #   - L'ASSE spazzolato e' SOLO InpMagic (gemelli): due passate identiche al
 #     centesimo = igiene del banco. Config FISSA: e' un diagnostico, non
@@ -83,7 +90,7 @@
 @DAQUANDO 2020.01.01
 
 InpUsaGuardian=false||false||0||false||N
-InpSessionHour=14||14||0||14||N
+InpSessionHour=9||9||0||9||N
 InpSessionMin=30||30||0||30||N
 InpRangeMinutes=15||15||0||15||N
 InpCloseHour=20||20||0||20||N
