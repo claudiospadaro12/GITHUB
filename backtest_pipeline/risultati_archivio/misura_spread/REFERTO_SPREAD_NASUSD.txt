@@ -1,0 +1,47 @@
+=====================================================================
+  SPREAD REALE DAI TICK STORICI -- NASUSD @ BCM
+=====================================================================
+finestra    : 2024.09.26 -> 2026.06.30
+seduta      : minuti 870-1260 ora SERVER BCM (14:30-21:00)
+conversione : 1 pto indice = 100 pti MT5 (R97); point=0.01000
+tick letti  : 156146398
+
+---------------------------------------------------------------------
+  1) LA RIGA CHE DECIDE -- BID/ASK
+---------------------------------------------------------------------
+  % tick con TICK_FLAG_ASK      : 99.618 %
+  % tick con ask > 0            : 100.000 %
+  % tick con ask usabile        : 100.000 %  (ask>0 && ask>=bid)
+  % tick SOLO-BID (ask<=0)      : 0.000 %
+
+  VERDETTO: OK: ask valido su ~tutti i tick -> a Model 4 lo spread VERO e' stato usato; Spread=0 e' onesto SE la mediana spread e' bassa.
+
+---------------------------------------------------------------------
+  2) DISTRIBUZIONE SPREAD (seduta, solo tick con ask usabile)
+---------------------------------------------------------------------
+  tick seduta (totali)          : 85288320
+  tick seduta (ask usabile)     : 85288320
+  tick seduta SOLO-BID          : 0
+
+                     PUNTI INDICE      PUNTI MT5
+  mediana spread   :  1.7000      170
+  P90 spread       :  1.8000      180
+  P95 spread       :  1.9000      190
+  max spread       :  8.2000     820
+  media spread     :  1.6462     164.6
+  overflow (oltre cap): 0 tick
+
+---------------------------------------------------------------------
+  COME SI LEGGE (criteri congelati)
+---------------------------------------------------------------------
+  - Se ASK valido su ~tutti i tick E mediana bassa (1-2 pti indice):
+    la cassaforte a Spread=0 ha usato spread reale, PF 1.083 e' ONESTO,
+    e lo spread NON e' il collo di bottiglia.
+  - Se MOLTI tick sono SOLO-BID: PF 1.083 e' OTTIMISTA -> la corsa
+    cassaforte va RIFATTA imponendo Spread = P95 misurato.
+  - CANCELLO S0: la mediana TAKE LORDO del motore (dal per-trade
+    cassaforte) deve essere >= ~3-4x lo spread mediano. Soglia
+    dichiarata; il take si confronta DOPO, con quel numero alla mano.
+
+  CAVEAT: broker singolo (BCM), una sola finestra storica, spread
+  misurato sui tick del broker (non e' lo spread di esecuzione live).

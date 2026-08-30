@@ -1,0 +1,20 @@
+Sezione,Metrica,Valore,Nota
+BIDASK,tick_totali,156146398,intera finestra
+BIDASK,pct_ask_flag,99.618,TICK_FLAG_ASK
+BIDASK,pct_ask_positivo,100.000,ask>0
+BIDASK,pct_ask_usabile,100.000,ask>0 && ask>=bid
+BIDASK,pct_solo_bid,0.000,ask<=0 (SMASCHERA Spread=0)
+BIDASK,verdetto,ASK_OK,OK: ask valido su ~tutti i tick -> a Model 4 lo spread VERO e' stato usato; Spread=0 e' onesto SE la mediana spread e' bassa.
+SEDUTA,finestra_min_server,870-1260,minuti da mezzanotte, ora SERVER BCM
+SEDUTA,tick_seduta_totali,85288320,tutti i tick nella seduta
+SEDUTA,tick_seduta_ask_usab,85288320,usati per lo spread
+SEDUTA,tick_seduta_solo_bid,0,solo-bid nella seduta
+SPREAD,mediana_idx,1.7000,punti indice
+SPREAD,p90_idx,1.8000,punti indice
+SPREAD,p95_idx,1.9000,punti indice
+SPREAD,max_idx,8.2000,punti indice (esatto)
+SPREAD,media_idx,1.6462,punti indice
+SPREAD,mediana_ptsMT5,170,punti MT5
+SPREAD,p95_ptsMT5,190,punti MT5
+SPREAD,max_ptsMT5,820,punti MT5 (esatto)
+SPREAD,overflow_tick,0,tick oltre il cap istogramma

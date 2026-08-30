@@ -60,6 +60,18 @@ consecutive. La parziale ha domato il singolo giorno, non la serie.
 INTERAMENTE da tick veri: **i numeri sotto NON sono il ripiego di MT5, sono
 reali.** Il verdetto da provvisorio diventa CONFERMATO.
 
+## AGGIORNAMENTO 30/08: SPREAD MISURATO -> PF 1.083 e' ONESTO, il costo NON e' il collo di bottiglia
+`ABTG_SpreadTick` sui tick reali (referto in `misura_spread/`):
+- **0% tick solo-bid** (99.6% col flag ASK, 100% ask usabile) -> a Model 4 la
+  cassaforte a Spread=0 ha usato lo SPREAD VERO. **PF 1.083 e' ONESTO, non gonfiato.**
+- **Spread mediano 1.7 punti indice** (P95 1.9, max 8.2) in seduta 14:30-21:00.
+  E' BASSO e stabile. Il cancello S0 (take mediano >= 3-4x spread = >= ~5-7 pti
+  indice) e' comodamente superato da un drive-follower che tiene i runner sulla
+  coda -> **il motore NON e' cost-bound.**
+- **Conseguenza**: l'edge sottile (PF 1.083) e' sottile per RAGIONI INTRINSECHE,
+  non per il costo. Non c'e' una leva-costo economica per salvarlo: lo spread e'
+  gia' basso e gia' contato. Il vero problema resta il DD 11.7% (sopra il muro).
+
 ## VERDETTO (confermato dai tick reali)
 La FASE 2 NON promuove un candidato forward oggi. Ma NON e' un buco nell'acqua:
 1. **Dati VERI** (166M tick dal 2024.09.26): l'OHLC era ottimista, a tick l'edge
