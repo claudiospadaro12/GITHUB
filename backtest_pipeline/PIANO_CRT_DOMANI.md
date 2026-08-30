@@ -45,3 +45,44 @@ ancora, il Giornale dice PERCHE' in un test manuale di 5 minuti.
   giuste e gia' passate dal gate: cambia SOLO il pin (post-build).
 - Magic CRT: 769100 (deploy), gemelli test 7691xx. Riservati.
 - Il gated short 770250 continua a girare sul conto piccolo: non si tocca.
+
+---
+
+## AGGIORNAMENTO NOTTURNO (00:05) — BUILD v3 PRONTA, REVISIONATA, PUSHATA
+
+EA v3 committato al pin **8d71a3b16dab3303761811434892b6540c8ebced** (revisione:
+ASCII 0, graffe 125=125, CSV 26=26=26, fallback+diag+autotest 12 verificati).
+Le righe DIAG e TICK_G sono INVARIATE e gia' gate-approvate: cambia solo il pin.
+
+### STRINGA 1 DI DOMATTINA — DIAG (ADX<=100, risponde "il gate riceve dati?")
+
+PRIMA il giro a vuoto:
+```
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='8d71a3b16dab3303761811434892b6540c8ebced'; $p="$env:USERPROFILE\RIGA_CRT_TICK_DIAG.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_CRT_TICK_DIAG.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CRT_TICK_DIAG_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
+    if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera.' -ForegroundColor Red } }
+```
+POI la corsa vera (stesso blocco senza `-SoloControllo`):
+```
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='8d71a3b16dab3303761811434892b6540c8ebced'; $p="$env:USERPROFILE\RIGA_CRT_TICK_DIAG.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_CRT_TICK_DIAG.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CRT_TICK_DIAG_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin;
+    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
+```
+LETTURA: nella griglia guardare n (trade) e le colonne "Gate Via D1"/"Gate Via M15".
+- n>0 e ViaM15>0 -> il fallback lavora -> STRINGA 2.
+- n=0 ancora -> test singolo MANUALE in MT5 e leggere nel Giornale le righe
+  [CRTTS][GATE-DIAG] (max 5): dicono got/err/via/minimi = la causa scritta.
+
+### STRINGA 2 DI DOMATTINA — GATED TICK (ADX<=30, il VERDETTO)
+Identica alla 1 ma con `RIGA_CRT_TICK_G.ps1` e marcatore `MARCATORE_RIGA_CRT_TICK_G_v1`
+(stesso pin 8d71a3b...). Lettura: PF>=1 + DD sotto muro + pegg.gio <5% -> VERDE ->
+preset deploy conto piccolo. PF<1 -> chiusura onesta, CRT parcheggiato con verdetto
+tick vero, pivot al Chaos (riga gia' pronta).
