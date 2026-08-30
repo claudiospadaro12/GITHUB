@@ -14,6 +14,8 @@
 | Taglia | **0.35%** (PICCOLA: ~meta' dello standard 0.65%) |
 | Guardian | ON (`InpUsaGuardian=true`) |
 | Fuso | 14:30 server BCM (apertura NASUSD), flat 20:45 server |
+| **Conto deploy** | **conto PICCOLO ~5k (osservazione), NON i 100K FTMO** (Claudio 30/08) |
+| Attivata il | 30/08/2026, preset caricato e verificato a schermo (5 valori firma OK) |
 
 ## VALORI PROMESSI (dal backtest, scalati alla taglia 0.35%)
 _Fonte: `backtest_pipeline/risultati_archivio/REFERTO_SHORTGATE_2026-08-30.md`_
@@ -46,6 +48,9 @@ _Fonte: `backtest_pipeline/risultati_archivio/REFERTO_SHORTGATE_2026-08-30.md`_
 Aggiunge **0.35%** di rischio aperto (un SL vivo). Cap di casa **3.25%** (C1):
 ampiamente sotto, e la sedia ha raramente una posizione aperta (~5/mese, bassa
 frequenza). Nessuno sfondamento.
+**Nota conto**: gira sul conto PICCOLO ~5k, SEPARATO dal forward 50503392 e dal
+100K FTMO. Il rischio aperto e i DD si misurano sul conto piccolo; NON entra nel
+conteggio del cap 3.25% della flotta principale finche' resta su questo conto.
 
 ## PERCHE' QUESTA SEDIA (il ruolo nella flotta)
 E' il primo mattone "TEMPESTA": scorrelato per costruzione dalla flotta long
