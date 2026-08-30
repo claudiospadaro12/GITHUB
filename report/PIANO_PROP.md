@@ -1,6 +1,6 @@
 # 🏛️ PIANO PROP — la tabella madre dei parametri per passare una prop
 
-_Prodotto dall'**architetto-prop**. Versione **v14**, aggiornata il 26/08/2026 sera
+_Prodotto dall'**architetto-prop**. Versione **v15**, aggiornata il 30/08/2026
 (prima stesura: 18/08/2026 ~01:00)._
 _Un solo documento, vivo: ogni numero ha la sua fonte e il suo stato. Le
 modifiche stanno nel CHANGELOG in fondo._
@@ -99,6 +99,30 @@ la misura — e il conflitto si scrive lo stesso.
 - ✍️ `report/FIRME_2026-08-18.md` — riletto per intero in questo giro: e' il
   criterio che regge il **cancello 1** (merito per famiglia a 20 operazioni)
   e il **cancello 2** (censimento dei contratti come prerequisito dichiarato)
+
+**🆕 Fonti nuove del quindicesimo giro (v15, 30/08/2026)** — la giornata dei
+candidati costruiti e del primo deploy "TEMPESTA":
+- 🥈 **sei sorgenti EA NUOVE**, costruite e pushate oggi sul branch `lavoro`
+  (rivedute, ASCII puro, presidi prop: SL floor R109, LotByRisk, una
+  posizione/magic senza martingala, flat-EOD, CSV+OnTester+autotest) — **NON
+  compilate ne' testate: candidati da imbuto, NON promossi**:
+  `mql5/Experts/ABTG_CRT_TurtleSoup.mq5` (769100) ·
+  `ABTG_ChaosLyapunov.mq5` (769200) · `ABTG_DaxReEntry.mq5` (769300) ·
+  `ABTG_OpeningReversalB.mq5` (769400) · `ABTG_NySessionRetest.mq5` (769500) ·
+  `ABTG_DaxValueArea.mq5` (769600, in costruzione)
+- 🥇 `backtest_pipeline/risultati_archivio/REFERTO_SHORTGATE_2026-08-30.md`
+  (screening del gated short: OHLC PF **1.84** con edge nell'ORSO confermato
+  per regime — orso 2022 +4020 win 89,8%, crollo 2020 +255/tr win 100% — e
+  **tick BCM PF 1.097** che conferma la sopravvivenza ai costi nel toro)
+- 🥈 `report/CONTRATTO_GATEDSHORT_770250.md` (contratto della sedia short
+  deployata oggi sul conto piccolo ~5k) + `FLOTTA_ATTIVA.md` §sedia nuova
+- 🥈 `backtest_pipeline/righe/RIGA_CRT_DA_MANDARE.md` +
+  `backtest_pipeline/righe/RIGA_CRT.ps1` (riga di lancio CRT PRONTA, gate del
+  verificatore passato — l'unico candidato con la corsa gia' pronta da mandare)
+- 🥇 `backtest_pipeline/REGISTRO_TEST.md` §1 (la lista dei caduti: il breakout
+  d'apertura M5 e' morto su Nasdaq/FTSE/**Dow**, vivo SOLO sul DAX solo long —
+  i sei candidati sono meccanismi **diversi** sulla stessa inefficienza, non
+  la stessa griglia morta: passano il filtro della seconda caccia)
 
 ---
 
@@ -474,6 +498,119 @@ offset dei loro server non verificato. Tutta la riga e' [LETTO-VIA-SEARCH].
 
 ---
 
+# AREA G — 🧩 CANDIDATI DELL'IMBUTO, SCORRELAZIONI E ORDINE DEI TEST (nuova, v15)
+
+> 🔴 **Niente di quest'area e' in forward.** I sei EA del 30/08 sono **sorgenti
+> non compilate**: candidati da imbuto, magic assegnati e vergini, presidi prop
+> gia' dentro. **Un candidato non e' una sedia**: entra nell'imbuto (screening
+> IS/OOS a criteri congelati), e solo un round positivo + contratto lo
+> promuove. L'unica cosa **gia' viva** e' il deploy short 770250, e sta su un
+> **conto separato** fuori dal cap principale.
+
+## G0 — 🌩️ IL DEPLOY VIVO: GATED SHORT NASUSD 770250 (conto piccolo ~5k)
+
+| campo | valore | fonte |
+|---|---|---|
+| motore / regime | breakdown short GATED da EMA 50×200 su H4 ribassista — **vive nel CROLLO e nell'orso** | 🥇 `REFERTO_SHORTGATE_2026-08-30.md` |
+| taglia · conto | **0,35%** · conto PICCOLO ~5k, **separato** dal 50503392 e dal 100k FTMO | 🥈 `CONTRATTO_GATEDSHORT_770250.md` |
+| valori promessi | DD ~2,4% (scala lineare da 4,54% @0,65% tick) · peggior giornata ~−0,4% · ~5/mese, **di piu' nell'orso** | 🥇 referto + contratto |
+| riserva dura | il verdetto ORSO e' **OHLC**, non tick (i tick BCM partono da 09/2024 = nessun orso): merito sospeso (n=104<150), rischio no | 🥇 referto §cancelli chiusi |
+| stato | 📋 **REGISTRATO — sedia in osservazione (deploy piccolo, Claudio 30/08)**; regole di uscita FIRME 18/08 applicate nel contratto | 🥈 contratto §regole |
+
+📌 **Cap rischio**: aggiunge **0,35%** (un SL vivo) ma **sul conto piccolo, NON
+nel cap 3,25% della flotta principale** finche' resta li'. E' il primo mattone
+"TEMPESTA": scorrelato **per costruzione** dalla flotta long (fira quando gli
+indici scendono = quando le sedie long soffrono). E' la prima misura concreta
+di decorrelazione del progetto, ed e' la ragione per cui l'osservazione vale.
+
+## G1 — 📇 I SEI CANDIDATI: DOVE SI INCASTRA CIASCUNO
+
+| # | EA (magic) | simbolo/TF | meccanismo | REGIME in cui vive | buco che riempie | prontezza |
+|---|---|---|---|---|---|---|
+| **CRT** | `ABTG_CRT_TurtleSoup` (769100) | NASUSD **M15** tick | fade strutturato di **falsa rottura** (wick rifiuto ≥K×corpo + gate 50%) | **laterale + reversal**, e cattura gli short | primo **fade di liquidita'** misurato (R89 lo chiuse su altri, "non bocciato: non misurato", `REGISTRO_TEST` §note) | 🟢 **riga PRONTA** (`RIGA_CRT_DA_MANDARE.md`, gate passato) |
+| **Lyapunov** | `ABTG_ChaosLyapunov` (769200) | NASUSD_EXT **M15** OHLC | EMA-cross **gated** dall'esponente di Lyapunov (opera solo in regime leggibile) | **trend leggibile** (flat nel caos) | primo **filtro di regime costitutivo** su un trigger direzionale | 🟡 sorgente pronta; screening 2020-2024 da lanciare |
+| **DaxReEntry** | `ABTG_DaxReEntry` (769300) | D30EUR **M5** | **sweep+reclaim** del range mattutino, fascia mezzogiorno | **laterale/mean-revert** intraday DAX | fade DAX **fuori dall'apertura** (la famiglia viva e' solo breakout-long in apertura) | 🔴 bloccato **PASSO-0 DAX** (M23) |
+| **DowModelB** | `ABTG_OpeningReversalB` (769400) | U30USD **M5** | **fade a 3 stadi** (failure-evidence + signal-bar + follow-through) del drive US | **reversal in apertura US** | il **lato opposto** dell'apertura Dow (la famiglia breakout Dow e' MORTA, `REGISTRO_TEST` §316) | 🟡 sorgente pronta; ⚠️ **correlazione con 770202 da MISURARE** |
+| **NyRetest** | `ABTG_NySessionRetest` (769500) | U30USD **H1** | **VWAP-retest** in trend, continuazione | **trend** di seduta USA | primo motore **H1-intraday** e primo **VWAP** della flotta | 🔴 bloccato spread U30USD (M24) |
+| **DaxValueArea** | `ABTG_DaxValueArea` (769600) | D30EUR **M5** | Market Profile: VP sessione prec. (POC/VAH/VAL su tick-volume PROXY), open-vs-VA, balance+direzionale | **laterale (balance) + trend (direzionale)** DAX | primo motore **volumetrico**; automatizza il metodo V5 di Claudio | 🔴 in costruzione + PASSO-0 DAX (M23) |
+
+**Lettura strategica (il punto del giro).** I sei candidati non sono un'altra
+mano di parametri sullo stesso motore: sono **sei meccanismi diversi**, e la
+maggior parte guarda i **regimi che oggi la flotta NON copre**. Il parco vivo
+e' quasi tutto **trend/breakout long in apertura** (Aperture DAX, ORB,
+SupertrendReversal) — che soffre nel laterale e nel crollo. I candidati portano
+esattamente i mattoni mancanti: **fade/mean-revert** (CRT, DaxReEntry,
+DowModelB, DaxValueArea-balance), **gate di regime** (Lyapunov), **continuazione
+su TF piu' alto** (NyRetest). Il gated short 770250 gia' vivo copre il crollo.
+Se anche solo due di questi passano l'imbuto, la flotta smette di essere
+**mono-regime** — ed e' la sola cosa che, in prop, trasforma un edge fragile in
+una curva che sopravvive ai cambi di mercato (Emendamento C, prova di regime).
+
+## G2 — 🗺️ LA MAPPA DELLE SCORRELAZIONI (chi spara quando)
+
+Orari in **ora server BCM** (= italiana −1 in agosto); fra parentesi l'ora IT.
+
+| finestra server (IT) | candidati/sedie che sparano | rischio doppione | verdetto |
+|---|---|---|---|
+| **08:00-16:30 (09:00-17:30)** apertura+seduta DAX | Aperture DAX (vive) · **DaxReEntry** (mezzogiorno) · **DaxValueArea** (open+seduta) | 🟡 tutti su D30EUR ma **meccanismi opposti**: breakout-long in apertura vs fade/reclaim/value **piu' tardi** → sovrapposizione d'orario, non di segnale | da MISURARE la coincidenza dei minuti |
+| **14:30 (15:30)** apertura US, primo impulso | **DowModelB** (fade, U30USD) · **770202 Aperture DOW** (breakout, U30USD) · Nasdaq aperture (vive) | 🔴 **DOPPIONE POTENZIALE**: stesso simbolo, stesso evento d'apertura. Ma DowModelB e' un **fade a 3 stadi** che entra **DOPO** conferma (piu' tardi del breakout nudo) e nel **verso opposto** → potrebbe essere anti-correlato o sovrapposto | ⚠️ **MISURA OBBLIGATORIA prima del forward** (M25) |
+| **14:30-21:00 (15:30-22:00)** seduta USA | **NyRetest** (U30USD H1, continuazione) · **CRT** (NASUSD M15, fade) · **Lyapunov** (NASUSD_EXT, trend) | 🟡 stessa seduta ma **simboli e logiche diverse** (Dow-trend-H1 vs Nasdaq-fade-M15 vs Nasdaq-trend): correlazione attesa bassa, da misurare | medio |
+| **regime H4 ribassista** (quando gli indici scendono) | **Gated short 770250** (vivo, conto piccolo) | 🟢 **DECORRELATO per costruzione** dalla flotta long: fira quando le altre soffrono | confermato per regime (referto) |
+
+**Le due decorrelazioni vere e i due doppioni da sorvegliare.**
+- ✅ **Decorrelati**: (1) gated short 770250 vs tutta la flotta long (misurato per
+  regime); (2) i motori **fade/value** (CRT, DaxReEntry, DaxValueArea-balance)
+  vs i breakout-long in apertura — vivono nel laterale, che e' il nemico dei
+  breakout.
+- 🔴 **Doppioni da misurare prima di qualunque forward**: (1) **DowModelB vs
+  770202** all'apertura US (stesso simbolo, stesso evento — la regola dei
+  gemelli in area C morde qui: due posizioni sullo stesso trigger = rischio
+  doppio per il cap C1); (2) i **tre motori DAX** (Aperture/DaxReEntry/
+  DaxValueArea) sullo stesso D30EUR — la sovrapposizione e' d'orario, ma se i
+  minuti coincidono in un giorno di rottura, sommano rischio sullo stesso
+  simbolo. Entrambi → **M25**, con lo strumento gia' esistente
+  (`sovrapposizione_sedie.py` di M2), da rifare quando i candidati hanno un
+  forward.
+
+## G3 — 🎯 L'ORDINE DI PRIORITA' DEI TEST (proposto, decide Claudio)
+
+Criteri d'ordine, in ordine: **(a) prontezza dati** (nessun PASSO-0 aperto),
+**(b) buco piu' importante** che riempie, **(c) minor rischio di doppione**.
+
+| priorita' | candidato | perche' PRIMO | cosa serve |
+|---|---|---|---|
+| **1ª** | **CRT TurtleSoup** (769100) | 🟢 **unico con la corsa PRONTA** (riga+gate passati), NASUSD tutto misurato (conversione 100, muro tick, flat 21:00), buco "fade di liquidita'" mai misurato, **zero rischio doppione** (fade M15 vs breakout in apertura) | mandare `RIGA_CRT_DA_MANDARE.md` (giro a vuoto che compila l'EA nuovo, poi corsa) |
+| **2ª** | **Lyapunov** (769200) | dati pronti (NASUSD_EXT OHLC 2020-2024, gia' in casa), buco "gate di regime", nessun doppione. Screening OHLC = economico e veloce | congelare i criteri IS/OOS + riga di lancio |
+| **3ª** | **DowModelB** (769400) | buco pregiato (il lato opposto dell'apertura Dow, dove il breakout e' MORTO) — **ma** va PRIMA misurata la correlazione con 770202: se e' doppione, cambia tutto | riga di lancio **+ M25** (correlazione con 770202) come cancello preliminare |
+| **4ª** | **NyRetest** (769500) | primo H1/VWAP, buon buco — bloccato dallo **spread U30USD** su H1-intraday (M24): senza il costo reale il verdetto e' fantasia | PASSO-0 spread U30USD (M24) |
+| **5ª** | **DaxReEntry** (769300) | buco DAX-laterale utile — bloccato dal **PASSO-0 DAX** (M23: conversione punti + flat 16:30) | M23 |
+| **6ª** | **DaxValueArea** (769600) | il piu' ambizioso (volumetrico) ma **ancora in costruzione** + PASSO-0 DAX + il muro del tick-volume-proxy | finire l'EA, M23, e criteri che pesino il proxy |
+
+## G4 — 🧮 IL CAP RISCHIO CON LE SEDIE NUOVE IPOTETICHE
+
+Cap di casa **3,25% = 5 SL vivi da 0,65%** (C1, firmato 18/08). I candidati, se
+promossi, entrano da **sedie giovani → 0,3%** (A2, <30 trade forward). Il conto:
+
+- **gated short 770250**: **0,35% fuori dal cap principale** (conto separato). Se
+  un giorno migrasse sul conto della challenge, entrerebbe come **1 SL** e la
+  regola dei due lati (25/08) diventerebbe anche requisito prop (F7/E8).
+- **sei candidati a 0,3% ciascuno** = **1,8%** di rischio aperto **se sparassero
+  tutti insieme** — ma il cap conta gli **SL VIVI SIMULTANEI**, non le sedie
+  accese, e la mappa G2 mostra che **non sparano nella stessa finestra**: il
+  grosso del rischio simultaneo resta quello di apertura (dove gia' oggi il cap
+  morde). Il caso peggiore concreto e' la finestra US 14:30 (DowModelB + Nasdaq
+  aperture + eventuale 770202) e la finestra DAX (tre motori D30EUR): li' il cap
+  fa il suo lavoro e **rifiuta** il quinto SL.
+- ✅ **Nessuno sfondamento previsto** a queste taglie — ma il numero vero lo dara'
+  **M25** (sovrapposizione coi candidati in forward). Il cap **resta com'e'
+  firmato**: sono i contratti delle sedie nuove che dovranno starci dentro (nota
+  gia' in C1 per il caso R112).
+
+📌 **Stato area G**: tutte le righe sono 📋 **PROPOSTE/REGISTRATE** — nessun
+congelamento chiesto (i candidati non hanno ancora un round). La sola firma
+implicita gia' data e' il **deploy piccolo del 770250** (parola di Claudio
+30/08, deploy in osservazione, non una promozione).
+
 ## 🕳️ COSA MANCA E CHI LO PORTA
 
 | # | buco | chi lo porta | la domanda esatta |
@@ -501,6 +638,10 @@ offset dei loro server non verificato. Tutta la riga e' [LETTO-VIA-SEARCH].
 | M22 | 🌡️ **PROVA DI REGIME AL DIAL SCELTO** (dipendenza del cancello 5): la sopravvivenza della flotta in un mercato **ORSO** non e' misurata — 481 giorni = **un solo regime, toro** (avvertenza (b) dell'analisi sopravvivenza). Sugli indici il vincolo dati e' noto: il frigo si e' aperto **solo per NASUSD_EXT** (metro relativo 0,20×vol, rapporto 0,199), **SPXUSD e 225JPY restano dentro**, il **DAX lungo e' bloccato** (grxeur **non e' il DAX** fra 2020-06 e 2023-11: sessione 02-15 NY e prezzi 3,2-4,4k → [INFERITO] EuroStoxx50) | PC di backtest + `cacciatore-strategie` per i dati | fonti: `LETTURA_MISURE_LAMPO_2026-08-26.md` (eventi 3/3 **movimenti veri**: le diff giganti erano **disallineamenti di un'ora nei botti**, non spazzatura) · `LETTURA_DIAGNOSI_DAX_2026-08-26.md` · macchina R50-R56-R59 |
 | M6 | ~~Conferma del conto 100k~~ → ✅ **CHIUSO** (18/08 08:38): il dry-run gira su **`50504263`**, confermato dallo screenshot del terminale (titolo finestra) col Guardian v1.10 vivo | — | — |
 | M7 | Verifica **lotto fisso** dei due EA esterni (`BREAKOUT_EA_JPY_v3`, `DAXMasterEA_v2_0`) | Claudio/VPS (censimento gia' pronto) | rischio non controllato per definizione su un conto da 5.100 € |
+| M23 | 📏 **PASSO-0 DAX (D30EUR)** — blocca DaxReEntry (769300) e DaxValueArea (769600): la **conversione punti** (`InpMT5PerPuntoIndice` su DAX: 100 come US? da VERIFICARE) e il **flat di fine seduta cash** (16:30 server) NON sono misurati. Col default US (22:00) il DAX resterebbe in **overnight** — il difetto che la riga CRT ha gia' evitato scegliendo NASUSD. E' un affinamento **prima dei numeri** (regola di casa) | **cacciatore-strategie** / PC di backtest (sonda su un CSV D30EUR) | "quanti `_Point` MT5 vale 1 punto indice su D30EUR, e a che ora server chiude la seduta cash del DAX? Senza, ogni backtest DAX dei due candidati e' spazzatura (regola InpSessionHour)" |
+| M24 | 📏 **PASSO-0 SPREAD U30USD** — blocca NyRetest (769500, H1-intraday) e pesa su DowModelB (769400, M5): un motore intraday su Dow vive o muore sul **costo reale**. Lo spread U30USD su M5 e H1 non e' censito; senza, un verdetto OHLC e' fantasia (come lo shortgate insegna: OHLC inganna) | **cacciatore-strategie** / PC | "spread tipico e worst-case di U30USD su M5 e H1 (tick reali), per sapere se un retest-continuazione paga i costi prima di spenderci un round" |
+| M25 | 🔴 **CORRELAZIONE DowModelB vs 770202** (cancello preliminare della 3ª priorita' G3) e **sovrapposizione dei tre motori DAX** su D30EUR — con lo strumento gia' esistente (`sovrapposizione_sedie.py` di M2), da rifare quando i candidati hanno un forward/backtest con `open_time` | PC di backtest, dopo i primi round dei candidati | "DowModelB e 770202 aprono sullo stesso evento d'apertura US: sono un doppione (rischio doppio per il cap C1) o sono anti-correlati (fade vs breakout)? E i tre motori DAX coincidono nei minuti nei giorni di rottura?" — dipende da M18 (`open_time` in backtest) |
+| M26 | 🐻 **IMPORT TICK DUKASCOPY per il verdetto ORSO** — il gated short 770250 (e ogni motore short/crollo) **non potra' MAI** avere un verdetto tick in un orso su BCM (tick BCM dal 26/09/2024 = nessun orso). Il verdetto ORSO oggi e' solo **OHLC** (PF 1.84): la conferma vera dei costi in un crollo richiede storico tick esterno (Dukascopy 2020/2022) | PC di backtest (import gia' progettato in M12, strada Dukascopy) | "importare i tick Dukascopy del crollo 2020 e dell'orso 2022 per NASUSD, cosi' il verdetto short-orso non resta OHLC-fantasia — e' la sola via al merito pieno del mattone TEMPESTA" |
 
 ## ✍️ LE FIRME CHE SERVONO A CLAUDIO (in ordine di urgenza)
 
@@ -622,7 +763,21 @@ _(A2/A4: FIRMA 4 · D-spegnimenti: FIRMA 5.)_
 
 ## 📊 IL CONTO DEL GIRO
 
-🆕 **v14 (26/08): 42 parametri censiti — 12 congelati · 15 proposti · 14
+🆕 **v15 (30/08): 42 parametri invariati nei valori · nasce l'AREA G** —
+candidati dell'imbuto, mappa scorrelazioni, ordine dei test. Sette voci nuove
+REGISTRATE/PROPOSTE, **zero congelamenti chiesti** (i candidati non hanno
+ancora un round): **G0** (deploy gated short 770250 su conto piccolo, in
+osservazione — unica cosa viva, fuori dal cap principale) · **G1** (i 6
+candidati: dove si incastra ciascuno, regime, buco) · **G2** (mappa
+scorrelazioni: 2 decorrelazioni vere + 2 doppioni da misurare) · **G3**
+(ordine dei test: CRT primo, corsa gia' pronta) · **G4** (cap con le sedie
+nuove ipotetiche: nessuno sfondamento previsto, il numero vero lo dara' M25).
+In COSA MANCA entrano **M23** (PASSO-0 DAX), **M24** (spread U30USD), **M25**
+(correlazione DowModelB↔770202 + tre motori DAX), **M26** (import tick
+Dukascopy per il verdetto orso). 🛑 **Zero modifiche al forward, zero preset
+toccati, zero acquisti autorizzati, nessun candidato promosso.**
+
+_(conteggio precedente, v14)_ **42 parametri censiti — 12 congelati · 15 proposti · 14
 aperti · 1 chiuso per misura (C5).** Cinque righe nuove, nessun valore
 firmato cambiato: **C7** (manopola globale + piano due-dial, PROPOSTO, col
 conflitto R106 dichiarato) · **B10** (preset Guardian per famiglia di muri,
@@ -681,4 +836,5 @@ B9 — e le due consegne di M15 (screenshot fuso + `super trend.ex4`).
 | 18/08/2026 ~20:35 | v11.1 | 📸 **M15a CHIUSA-MISURATA, conflitto B3 DECISO**: screenshot di Claudio con Market Watch **19:35:27** e orologio Windows **20:35** nello stesso istante → **BCM = ora italiana −1 (UTC+1 in agosto)**. La regola di casa e' CONFERMATA dalla misura; l'affermazione del corso ("sostanzialmente sul GMT" = IT−2) e' **falsificata sull'oggi** — stesso broker, un'ora di errore. Il reset 23 del Guardian resta giusto (23 server = 00:00 IT). All'E1 resta SOLO la domanda invernale (il server segue il DST europeo o e' UTC+1 fisso?). M15b (`super trend.ex4` lez. 10) ancora aperta. Conteggi invariati | screenshot MT5+Windows di Claudio in chat ("ORARI. BMC 1 ORA INDIETRO.") |
 | 19/08/2026 mattina | **v12** | 🌙 **Assorbita la notte 18-19/08.** (1) **M16 CHIUSA PER MISURA** (R84, tick reali): 9/9 celle OOS negative, metodo completo del corso bocciato (cautela formale: cella I n=69<150); i default spenti ora sono spenti PER MISURA. **Non semplificato**: la cella D (volumi OR ATR) passa TUTTI e 4 i cancelli congelati (PF tot 1,104 vs 0,988, DD dimezzato, n=311) pur restando OOS-negativa — riduttore di perdita, mai edge → **decisione n.2 in lista**: proposta a Claudio di validazione vera, non chiusura d'ufficio. R84-bis (copertura CSV news) in coda. (2) **R83**: duello ad armi pari (canarini al centesimo 291/291 e 311/311) — sul DAX il **RETEST vince e incorona la config della sedia viva 770101** (divergenza #15 chiusa a favore del campo); sul Nasdaq **zero modalita' positive** (autopsia retest: 74/78 perdite = stop pieni 1R vs vincite 0,18R); con R84: **12 configurazioni, 12 OOS negative** = terzo verdetto indipendente sulla 770201, **FIRMA 5 rafforzata**; C6 aggiornata: EA collaudato (6/6) e in armeria; lezione: la stessa regola cambia segno tra mercati. (3) **M12**: passo 4 eseguito ma **3 `_EXT` IN FRIGO** (cancello ZERO: diff 0,0608-0,1010% > 0,05%; shift +5 confermato 3/3); causa parziale misurata (settimane DST ~6,6%, spiega ~¼ sugli indici; secondo sospettato: basis cash-vs-future); **importatore v2 DST-aware gia' SCRITTO** (IMP-EXT-v2, da collaudare, sequenza §14-bis.6); previsione pre-registrata: la cura DST da sola probabilmente non basta su NASUSD/225JPY; **D30EUR HistData BOCCIATO** (min 2906 impossibile), diagnosi da assegnare; **M13 resta bloccata** dal cancello. (4) **Pagella 18/08**: rischio aperto ~4,84% stimato a fine serata = serata-tipo p95 di M2 → 🔔 promemoria in C1 e **nuova decisione n.1: migrazione EA all'include** (l'unico pezzo firmato senza enforcement in campo). (5) Registrato SENZA giudizio (cantiere dell'altra sessione): primo trade della sedia GapContinuation `774101` (−51,90; stop sul massimo dell'opening range senza buffer; **R85 in preparazione** dall'altra sessione). M15a era gia' chiusa in v11.1; M15b (`super trend.ex4`) resta aperta. Conteggi invariati: **37 parametri (12C · 11P · 13A · 1 chiuso)** | R83+R84 (commit `2458b33`), HistData §13-14-bis, `PAGELLA_2026-08-18.md` |
 | 21/08/2026 | **v13** | 🕸️ **M14 CHIUSA A META': la voce GRIGLIA/MARTINGALA del METRO_PROP esiste** (`METRO_PROP.md` §13, bozza da firmare, commit `0a787ca`). Contenuto vero: 5 test binari (T1 stop depositato al broker · T2 cap costante · T3 perdita nota **prima** · T4 riarmo sulle perdite = scarto anche col cap · T5 size crescente = obbligo di dichiarare 7,59× e 20,78×); **G2 unita' = PACCHETTO** con l'esempio numerico (100 pacchetti → **390 ticket**, win rate 70% → **53,8%**: i due errori vanno in **direzioni opposte**, uno gonfia il campione e l'altro sgonfia il win rate) e la ricostruzione dei pacchetti dal CSV di oggi (stesso `symbol`+`magic`+`close_time` identico, perche' SL e TP sono unici); **G3 scheda della coda** a 6 misure + il conto dei pacchetti pieni consecutivi che uccidono il conto (**15,4 a 0,65% · 5,7 a 1,76% · 2,5 a 4,03%**); **G4 flottante contro il muro giornaliero** — misurabile su `gWorstDayPct` (equity a ogni tick, gia' in tutti gli EA) ma servono **finestra prop (reset 23 BCM, B3)**, **export per giorno** e **`open_time`/`package_id`**; segnalato il buco del **cap C1 cieco sugli ordini PENDENTI** (`ABTG_Guardian.mq5:159` cicla su `PositionsTotal()`) e quello di `dd_portafoglio.py` (serie giornaliera dal `close_time`: il flottante multi-giorno e' invisibile). 🔴 **Sulle regole prop la resa e' magra e dichiarata tale**: "GRID vietato" esiste **solo** come voce di un video con link affiliati (FundedNext, 4° rango); **FTMO non ha divieto testuale** ma ha la clausola discrezionale sulle _"substantially larger position sizes"_ che la progressione ×1,5 colpisce; The5ers/FundingPips/E8/Alpha **non hanno una sola riga nel repo** → richiesta **N3** al cacciatore-config-prop. **Nuovo file: `report/NODO_MEDIAZIONE_2026-08-21.md`** (riconciliazione dei due verdetti 12/08 vs 18/08, stato delle 6 condizioni — **2 risolte, 2 mezze, 2 bloccanti** — e le tre opzioni A/B/C per Claudio). **Nessun parametro cambia valore, nessun round aperto, niente toccato in forward**: M14 passa da "da scrivere" a "scritta, in attesa di firma", e nascono due voci nella lista firme | decisione di Claudio del 21/08 in chat ("1,2,3 si guardano") + `STATO_QUATTRO_STRATEGIE_2026-08-21.md` scheda 1 |
+| 30/08/2026 | **v15** | 🧩 **NASCE L'AREA G — i candidati dell'imbuto.** Incorporati i **sei EA nuovi** costruiti e pushati oggi (`ABTG_CRT_TurtleSoup` 769100 · `ABTG_ChaosLyapunov` 769200 · `ABTG_DaxReEntry` 769300 · `ABTG_OpeningReversalB` 769400 · `ABTG_NySessionRetest` 769500 · `ABTG_DaxValueArea` 769600) — sorgenti ASCII-pure coi presidi prop (SL floor R109, LotByRisk, una posizione/magic no-martingala, flat-EOD, CSV+OnTester+autotest), **NON compilate ne' testate: candidati, non sedie**. Passano il filtro della seconda caccia perche' sono **meccanismi diversi** (fade/reclaim/value/gate-regime/VWAP-continuazione) sulla stessa inefficienza, non la griglia morta del breakout Dow/Nasdaq (`REGISTRO_TEST` §316). Aree nuove: **G1** (dove si incastra ciascuno + regime + buco), **G2** (mappa scorrelazioni: decorrelati = gated short vs flotta long e fade vs breakout; 🔴 doppioni da misurare = DowModelB↔770202 all'apertura US e i tre motori DAX su D30EUR), **G3** (ordine test: **CRT primo** — unica corsa PRONTA, gate passato; poi Lyapunov, DowModelB dopo la correlazione, NyRetest/DaxReEntry/DaxValueArea dietro i PASSO-0), **G4** (cap 3,25% con le sedie nuove ipotetiche a 0,3%: nessuno sfondamento previsto, non sparano nella stessa finestra). **G0**: registrato il **deploy vivo del GATED SHORT 770250** (conto piccolo ~5k, taglia 0,35%, Guardian ON, deploy in osservazione — parola di Claudio 30/08) — 🥇 `REFERTO_SHORTGATE_2026-08-30.md`: edge nell'orso confermato per regime (2022 +4020 win 89,8%, crollo 2020 win 100%), tick BCM PF 1.097 sopravvive ai costi; **fuori dal cap principale** (conto separato), primo mattone "TEMPESTA" decorrelato. In COSA MANCA: **M23** (PASSO-0 DAX: conversione punti + flat 16:30), **M24** (spread U30USD M5/H1), **M25** (correlazione DowModelB↔770202 + sovrapposizione DAX), **M26** (import tick Dukascopy per il verdetto orso, oggi solo OHLC). **Nessun valore firmato cambiato, nessun candidato promosso, forward intatto** | sei EA nuovi + referto shortgate + contratto 770250 + riga CRT pronta (branch `lavoro`, 30/08) |
 | 26/08/2026 sera | **v14** | 🚦 **NASCE IL CANCELLO CHALLENGE, in testa al documento.** Risposta alla domanda di Claudio ("quando possiamo iniziare a valutare una challenge? siamo maturi?"): **la macchina e' matura sulla carta, le prove forward no** — si valuta a **CANCELLI VERDI**, obiettivo **meta'-fine settembre 2026**. Sei cancelli con stato e fonte: (1) famiglie a 20+ op forward con DD reale ≤ promesso — 🔴 **solo 2 famiglie su 17 sopra soglia** (Aperture DAX 38 ingressi **in perdita −698,46 €**, ORB 25 in utile) e **DD reale n/d ovunque**; (2) censimento contratti — 🟡 esiste, ma **senza la peggior giornata**, che **R112 sta misurando adesso**; (3) dossier prop a muri statici — 🔴 **Upcomers bocciata**, secondo dossier **in arrivo**; (4) preset Guardian sui muri della prop scelta — 🔴 il Guardian e' tarato solo su FTMO; (5) firma del piano due-dial — 🔴 mai firmata; **(6) 🆕 PROVA DELLA TAGLIA**, nata dall'**orientamento dichiarato di Claudio** del 26/08 sera (_"voglio partire con una challenge tra le PIU' ALTE... ho la possibilita' economica"_ — registrato come orientamento, **non come firma**): prima di comprare 200k+ va misurato che i lotti non sbattano su **`SYMBOL_VOLUME_MAX`=100** (R109: **66 trade su 743 = 8,9%** tagliati) e sui limiti di margine, perche' le percentuali sono trasferibili **solo se la scala e' lineare** — e lo slippage misurato (**21,5 pt**) dice che non lo e'. 📅 Registrato il vincolo **Jackson Hole 27-28/08**: non si inizia nulla prima. 🆕 **Conteggio forward per famiglia [CALCOLO DI QUESTO GIRO]** dal CSV degli statement (chiusure fino al 25/08), con convenzioni dichiarate (ingressi vs chiusure, 100k tenuto fuori) — e la colonna **DD reale lasciata `n/d`, non inventata** (→ M20, serve la pagella serale come flusso). Righe nuove: **C7** (dial 1,00 challenge / 0,74 funded; pass **99,6%** e **dirupo a d≈1,055**; profitto mediano per passata **piatto 8,5-9,3 k€**; 🔴 **conflitto dichiarato con R106** che per la challenge raccomandava 0,74), **B10** (preset per famiglia di muri: su 3/6 **ogni** soglia di casa sta oltre il muro), **E8** (regola dei 2 minuti: 🥇 **misurato in casa** — **15,2%** delle chiusure dal 20/07 sotto i 2 min, **44% sulle Aperture DAX** — e **conflitto risolto dalla gerarchia**: in forward la durata **si misura**, in backtest no), **F7** (Upcomers **BOCCIATA**: 3% daily, 6% trailing su equity, T&C che negano il diritto ai profitti, delisting, Saint Lucia 2025), **F8** (criterio di scelta della prop in 7 punti, il muro prima del traguardo). **Corollario di C7 dall'`ANALISI_DD_TOTALE`**: DD totale worst **−6,37%** contro worst day **−4,74%** → **il vincolo che morde e' il giornaliero** (margine 5% contro 36%), specifica per il cacciatore = **5% g / 10% tot STATICI**, e un **6% trailing si romperebbe persino sui chiusi**. **C1** aggiornata col caso R112 (una short-only a 1,95%/trade impegnerebbe il **60% del cap 3,25%** con un solo SL vivo). → **42 parametri (12C · 15P · 14A · 1 chiuso)** | analisi dial + sopravvivenza funded + DD totale (26/08), dossier Upcomers, R110 chiuso e R112 firmato, letture misure lampo e anatomia aperture, forward ricontato sugli statement del 25/08 |
