@@ -1,9 +1,11 @@
 # 📬 CRT — STAGE-2 (cella robusta per regime) — **LA RIGA DA MANDARE**
 
 **Che cos'è:** la conferma **per regime** della cella robusta del tiebreaker
-(wick 2.0, mid 0, side 2 → n=320, PF 1.18, +5744, DD 5.9%). **UNA cella sola**
-(nessuno sweep) su NASUSD_EXT M15 OHLC 2020-2024 → il per-trade CSV esce **pulito**
-e lo segmento per regime (crollo 2020 / toro 2021 / orso 2022 / 2023).
+(wick 2.0, mid 0, side 2 → n=320, PF 1.18, +5744, DD 5.9%). Cella **FISSA**, con
+l'unico asse Y sui **gemelli del magic** (769101/769102, pattern INVES: il generico
+pretende ≥1 asse Y) → 2 passate identiche, **2 per-trade CSV distinti** (nome per
+magic, niente overwrite), su NASUSD_EXT M15 OHLC 2020-2024. Li segmento per regime
+(crollo 2020 / toro 2021 / orso 2022 / 2023).
 
 > 🔴 **SCREENING OHLC (ottimista).** La domanda: il verde viene dalla **TEMPESTA**
 > (crollo 2020 e/o orso 2022) o è un artefatto? Il toro 2021 rosso/piatto è
@@ -46,6 +48,6 @@ e lo segmento per regime (crollo 2020 / toro 2021 / orso 2022 / 2023).
 ```
 
 ## 📦 COSA TORNA
-Zip sul Desktop `CRT_EXT_S2_...zip` → `REFERTO_CRT_EXT_S2.txt` + il prova + **il
-per-trade CSV** `abtg_trades_ABTG_CRT_TurtleSoup_NASUSD_EXT_769100.csv` (l'artefatto
-che conta) + la griglia a 1 riga. **Mandami lo zip** e lo segmento per regime.
+Zip sul Desktop `CRT_EXT_S2_...zip` → `REFERTO_CRT_EXT_S2.txt` + il prova + **i due
+per-trade CSV** `abtg_trades_..._769101.csv` e `..._769102.csv` (identici: gemelli) +
+la griglia gemelli. **Mandami lo zip** e li segmento per regime.

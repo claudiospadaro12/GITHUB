@@ -2,34 +2,36 @@
 # ABTG_CRT_TurtleSoup_EXT_S2  -  STAGE-2: la cella robusta, letta PER REGIME
 # Motore CRT Turtle Soup da Neo Malesa (n30dyn4m1c), licenza MIT.
 # Nasce dopo il tiebreaker _EXT (13/30 celle verdi): conferma che il verde
-# della cella robusta viene dalla TEMPESTA (crollo 2020 + orso 2022), non da
-# un artefatto OHLC di un singolo periodo.
+# della cella robusta viene dalla TEMPESTA (crollo 2020 + orso 2022).
 # ==========================================================================
 #
 # LA CELLA (la piu' robusta del tiebreaker: n=320, PF 1.18, +5744, DD 5.9%)
-#   InpWickFactor=2.0, InpUseMidGate=0, InpSide=2 (due lati). UNA cella sola,
-#   nessuno sweep -> il per-trade CSV in Common\Files e' PULITO (una sola
-#   passata), e si legge PER REGIME.
+#   InpWickFactor=2.0, InpUseMidGate=0, InpSide=2 (due lati) -> FISSI (secchi).
 #
-# >>> IL TETTO OHLC INGANNA (Modello 1, feed _EXT). Si legge la FORMA per
-#     REGIME, mai i numeri fini. E' OTTIMISTA: il tick sarebbe piu' basso.
+# >>> PERCHE' I GEMELLI SUL MAGIC (pattern INVES): il generico PRETENDE almeno
+#     UN asse Y (caso R58: senza sweep esce con "nessun parametro da
+#     spazzolare"). Qui l'UNICO asse Y e' InpMagic, spazzato su DUE gemelli
+#     (769101, 769102): stessa identica cella, due passate, DUE per-trade CSV
+#     con nome DIVERSO (il nome include il magic) -> niente overwrite, e i due
+#     devono uscire IDENTICI (controllo di determinismo). Si legge o l'uno o
+#     l'altro, segmentato per regime.
+#
+# >>> IL TETTO OHLC INGANNA (Modello 1, feed _EXT, OTTIMISTA). Forma per
+#     regime, mai numeri fini. Il tick sarebbe piu' basso.
 # >>> FUSO INVERTITO: feed _EXT a ora NEW YORK -> flat RTH 16:00 NY (NON 21).
 #
-# LA DOMANDA DELLO STAGE-2 (congelata)
-#   Segmentando il per-trade CSV per regime:
-#     - crollo 2020 (feb-apr), toro 2021, orso 2022, 2023.
-#   Il verde deve venire dai SOTTO-PERIODI di TEMPESTA (crollo 2020 E/O orso
-#   2022), col toro 2021 rosso o piatto (atteso per un fade). Se il verde
-#   viene invece dal toro 2021 o da un solo mese outlier -> il tiebreaker era
-#   un artefatto e si seppellisce. Se viene dalla tempesta -> candidato
-#   storm-gated CONFERMATO (da Dukascopy per il tick, + gate volatilita').
+# LA DOMANDA (congelata): segmentando il per-trade CSV per regime (crollo 2020
+#   / toro 2021 / orso 2022 / 2023), il verde deve venire dalla TEMPESTA
+#   (crollo 2020 E/O orso 2022), col toro 2021 rosso/piatto (atteso per un
+#   fade). Se viene dal toro o da un mese outlier -> artefatto -> sepoltura.
+#   Se dalla tempesta -> candidato storm-gated CONFERMATO.
 #
 # @SIMBOLO  NASUSD_EXT
 # @PERIODO  M15
 # @DAQUANDO 2020.01.01
 # @FINOA    2024.01.01
 #
-# LA CELLA SINGOLA (valori SECCHI = pin, nessuno sweep: 1 passata, CSV pulito)
+# LA CELLA (valori SECCHI = pin): i 3 assi del motore, fissi alla cella robusta
 InpWickFactor=2.0
 InpUseMidGate=0
 InpSide=2
@@ -37,4 +39,6 @@ InpSide=2
 InpCloseHour=16
 InpCloseMin=0
 InpMinStopPts=500
+# --- L'UNICO ASSE Y: i gemelli sul magic (2 passate identiche, CSV distinti).
+InpMagic=769101||769101||1||769102||Y
 # ==========================================================================

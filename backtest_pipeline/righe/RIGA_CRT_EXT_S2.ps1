@@ -1,17 +1,21 @@
 # =====================================================================
 #  MARCATORE_RIGA_CRT_EXT_S2_v1
 #  RIGA_CRT_EXT_S2.ps1  --  CRT TURTLE SOUP: STAGE-2, la cella robusta
-#  letta PER REGIME. UNA cella sola (wick 2.0, mid 0, side 2), Modello 1
-#  OHLC su NASUSD_EXT M15, 2020-2024. Raccoglie il per-trade CSV pulito da
-#  Common\Files per segmentarlo (crollo 2020 / toro 2021 / orso 2022 / 2023).
+#  letta PER REGIME. Cella FISSA (wick 2.0, mid 0, side 2), UNICO asse Y =
+#  InpMagic sui GEMELLI (769101/769102), Modello 1 OHLC su NASUSD_EXT M15,
+#  2020-2024. Raccoglie i 2 per-trade CSV (nome per magic) da Common\Files.
 # ---------------------------------------------------------------------
 #  Nasce dopo il tiebreaker _EXT (13/30 celle verdi). La domanda: il verde
 #  della cella robusta viene dalla TEMPESTA o e' un artefatto?
 #
-#  >>> UNA CELLA SOLA (nessuno sweep): i 3 assi sono valori SECCHI nel prova
-#      (pin). Il generico fa 1 passata -> il per-trade CSV in Common\Files
-#      NON si sovrascrive (nello sweep si', per quello serve lo stage-2).
-#  >>> OHLC INGANNA (Modello 1, ottimista). Si legge la FORMA per regime.
+#  >>> PATTERN INVES (gemelli sul magic): il generico PRETENDE >=1 asse Y
+#      (caso R58). L'unico asse Y qui e' InpMagic su 2 gemelli: stessa cella,
+#      2 passate, 2 per-trade CSV con nome DIVERSO (include il magic) ->
+#      niente overwrite (a differenza di uno sweep dei parametri). Con
+#      FrazioneIS 1.0 la gamba IS e' la finestra intera 2020-2024 e la OOS e'
+#      un range INVERTITO che MT5 non esegue -> il per-trade CSV non si
+#      sovrascrive (come in INVES). I due gemelli devono uscire IDENTICI.
+#  >>> OHLC INGANNA (Modello 1, ottimista). Forma per regime.
 #  >>> FUSO INVERTITO: feed _EXT a ora NY -> flat RTH 16:00 NY (NON 21).
 #
 #  LA RIGA CHE SI INCOLLA sta in righe\RIGA_CRT_EXT_S2_DA_MANDARE.md
@@ -39,7 +43,6 @@ $Dsk       = Join-Path $env:USERPROFILE "Desktop"
 $Work      = Join-Path $env:USERPROFILE "abtg_crt_ext_s2"
 $Prove     = Join-Path $Work "prove"
 $ProvaNome = $EA + "_EXT_S2.txt"
-$MagicCella= 769100
 $RawPin    = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 
 $Problemi  = New-Object System.Collections.ArrayList
@@ -52,8 +55,10 @@ $PerTrade_ok = "NON TROVATO"
 $Modo      = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
-# i 3 assi DEVONO essere pinnati SECCHI a questi valori (la cella robusta), 0 Y.
+# la cella robusta: i 3 assi del motore FISSI (secchi) a questi valori.
 $CellaAttesa = @{ "InpWickFactor"="2.0"; "InpUseMidGate"="0"; "InpSide"="2" }
+# i gemelli sul magic: l'UNICO asse Y. Vergini (7691xx: 769100 = CRT, questi 2 liberi).
+$MagicGemelli = @(769101,769102)
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico([string]$t,[string]$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
@@ -69,6 +74,9 @@ function RigheVive([string]$p){
   return @(Get-Content -LiteralPath $p | Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' })
 }
 
+function CommonFilesDir(){ return (Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files") }
+function PerTradeNome([int]$magic){ return ("abtg_trades_" + $EA + "_" + $Simbolo + "_" + $magic + ".csv") }
+
 try{
   Titolo ("CRT TURTLE SOUP -- STAGE-2 cella robusta per REGIME (" + $EA + ") -- modo " + $Modo)
 
@@ -80,7 +88,7 @@ try{
 
   Dico ("pin ......... " + $Pin)
   Dico ("simbolo ..... " + $Simbolo + " " + $Periodo + " (feed _EXT a ora NEW YORK: flat 16:00 NY)")
-  Dico ("cella ....... wick 2.0, mid 0, side 2 (la robusta del tiebreaker) -- 1 passata, CSV pulito")
+  Dico ("cella ....... wick 2.0, mid 0, side 2 (la robusta) | gemelli magic 769101/769102")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (crollo 2020 + toro 2021 + orso 2022 + 2023)")
   Dico ("banco ....... MODELLO 1 (OHLC) -- SCREENING. Deposito " + $Deposito)
 
@@ -99,7 +107,7 @@ try{
   Scarica ($RawPin + "/backtest_pipeline/prove/" + $ProvaNome) $fProva
   Dico ("prova scaricato: " + $ProvaNome) "Green"
 
-  Titolo "2. GATE SUL PROVA (cella singola, 0 assi Y)"
+  Titolo "2. GATE SUL PROVA (cella fissa + gemelli sul magic)"
   $righe = RigheVive $fProva
   $h = @{}
   $assiY = New-Object System.Collections.ArrayList
@@ -123,13 +131,22 @@ try{
   if($h["@DAQUANDO"] -ne $DaQuando){ throw ($ProvaNome + ": @DAQUANDO e' " + $h["@DAQUANDO"] + ", atteso " + $DaQuando) }
   if($h["@FINOA"]    -ne $Fino){     throw ($ProvaNome + ": @FINOA e' " + $h["@FINOA"] + ", atteso " + $Fino) }
 
-  # GATE STAGE-2: ZERO assi Y (e' una cella sola, non uno sweep).
-  if(@($assiY).Count -ne 0){ throw ($ProvaNome + ": lo stage-2 e' UNA cella (0 assi Y). Trovati assi Y: {" + (@($assiY) -join ", ") + "}.") }
+  # GATE: l'UNICO asse Y deve essere InpMagic (i gemelli).
+  if(@($assiY).Count -ne 1){ throw ($ProvaNome + ": deve avere ESATTAMENTE un asse Y (InpMagic, i gemelli). Trovati: " + @($assiY).Count + " {" + (@($assiY) -join ", ") + "}.") }
+  if($assiY[0] -ne "InpMagic"){ throw ($ProvaNome + ": l'unico asse Y deve essere InpMagic, invece e' " + $assiY[0] + ".") }
 
-  # GATE DELLA CELLA: i 3 assi pinnati SECCHI ai valori della cella robusta.
+  # GATE DELLA CELLA: i 3 assi del motore pinnati SECCHI ai valori robusti.
   foreach($k in @($CellaAttesa.Keys)){
     $v = ($h[$k] -split '\|\|')[0]
     if($v -ne $CellaAttesa[$k]){ throw ($ProvaNome + ": " + $k + " e' '" + $v + "', la cella robusta lo vuole '" + $CellaAttesa[$k] + "'.") }
+  }
+
+  # GATE DEI GEMELLI: i due magic dello sweep = 769101/769102, vergini.
+  $mg = $h["InpMagic"] -split '\|\|'
+  if($mg.Count -lt 4){ throw ($ProvaNome + ": InpMagic non ha il formato default||start||step||stop||Y.") }
+  $gm = @([int]$mg[1], [int]$mg[3])
+  if(($gm | Sort-Object | Out-String) -ne (($MagicGemelli | Sort-Object) | Out-String)){
+    throw ($ProvaNome + ": i gemelli magic sono " + ($gm -join "/") + ", attesi " + ($MagicGemelli -join "/") + ".")
   }
 
   # GATE PAVIMENTO SL (R109) e FUSO NY (flat 16).
@@ -141,7 +158,7 @@ try{
   if($ch -ne "16"){ throw ($ProvaNome + ": InpCloseHour deve essere 16 (flat 16:00 NY sul feed _EXT), trovato '" + $ch + "'.") }
   if($cm -ne "0"){  throw ($ProvaNome + ": InpCloseMin deve essere 0, trovato '" + $cm + "'.") }
 
-  Dico "geometria _EXT, 0 assi Y (cella sola), cella robusta (2.0/0/2), pavimento SL, FUSO NY (16): TUTTI PASSATI" "Green"
+  Dico "geometria _EXT, 1 asse Y = InpMagic (gemelli 769101/769102), cella robusta (2.0/0/2), pavimento SL, FUSO NY (16): TUTTI PASSATI" "Green"
 
   Titolo "3. TERMINALE, SIMBOLO CUSTOM, COMPILAZIONE"
   $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
@@ -185,19 +202,20 @@ try{
   $Compilato = "OK (" + [int]((Get-Item -LiteralPath $ex5).Length/1024) + " KB, " + (Get-Item -LiteralPath $ex5).LastWriteTime.ToString("HH:mm:ss",$INV) + ")"
   Dico ("compilato " + $EA + ": " + $Compilato) "Green"
 
-  # IL PER-TRADE CSV VECCHIO SI CANCELLA PRIMA: senza, se la corsa non lo
-  # riscrivesse (zero trade) si leggerebbe quello di una corsa vecchia.
-  $commonFiles = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
-  $perTradeNome = "abtg_trades_" + $EA + "_" + $Simbolo + "_" + $MagicCella + ".csv"
-  $perTradeSrc  = Join-Path $commonFiles $perTradeNome
-  Remove-Item -LiteralPath $perTradeSrc -Force -ErrorAction SilentlyContinue
-  Dico ("per-trade CSV vecchio cancellato (se c'era): " + $perTradeNome) "Gray"
+  # I PER-TRADE CSV VECCHI SI CANCELLANO PRIMA (uno per gemello): senza, se la
+  # corsa non li riscrivesse si leggerebbe una corsa vecchia.
+  $commonFiles = CommonFilesDir
+  foreach($m in $MagicGemelli){
+    $pt = Join-Path $commonFiles (PerTradeNome $m)
+    Remove-Item -LiteralPath $pt -Force -ErrorAction SilentlyContinue
+  }
+  Dico "per-trade CSV vecchi cancellati (769101/769102, se c'erano)" "Gray"
 
   if($SoloControllo){
     Dico "SoloControllo: compilazione e gate OK, NON apro MT5. La corsa vera e' la seconda riga." "Green"
   }
   else{
-    Titolo "4. LA CORSA (generico, 1 cella, Modello 1)"
+    Titolo "4. LA CORSA (generico, gemelli, Modello 1, FrazioneIS 1.0)"
     $argv = @("-ExecutionPolicy","Bypass","-File",$drv,
               "-Expert",$EA,
               "-Prova",$fProva,
@@ -214,12 +232,13 @@ try{
     if($rc -ne 0){
       [void]$Problemi.Add("il generico e' uscito con codice " + $rc + ".")
     }
-    if(Test-Path -LiteralPath $perTradeSrc){
-      $PerTrade_ok = "TROVATO (" + [int]((Get-Item -LiteralPath $perTradeSrc).Length) + " byte)"
+    $trovati = 0
+    foreach($m in $MagicGemelli){
+      $pt = Join-Path $commonFiles (PerTradeNome $m)
+      if(Test-Path -LiteralPath $pt){ $trovati++ }
     }
-    else{
-      [void]$Problemi.Add("per-trade CSV non prodotto in Common\Files: " + $perTradeNome + " (zero trade? FILE_COMMON non scritto?).")
-    }
+    if($trovati -gt 0){ $PerTrade_ok = "TROVATI " + $trovati + " su 2 (gemelli 769101/769102)" }
+    else{ [void]$Problemi.Add("nessun per-trade CSV prodotto in Common\Files per i gemelli (zero trade? FILE_COMMON non scritto?).") }
   }
 }
 catch{
@@ -239,7 +258,7 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto, NON e' il risultato")
 [void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
 [void]$RefTxt.Add("pin:  " + $Pin)
-[void]$RefTxt.Add("cella: wick 2.0, mid 0, side 2 (la robusta: n=320, PF 1.18, +5744, DD 5.9% nel tiebreaker)")
+[void]$RefTxt.Add("cella: wick 2.0, mid 0, side 2 (n=320, PF 1.18, +5744, DD 5.9% nel tiebreaker) | gemelli 769101/769102")
 [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (crollo 2020 + toro 2021 + orso 2022 + 2023)")
 [void]$RefTxt.Add("banco: MODELLO 1 (OHLC) -- SCREENING OTTIMISTA. Deposito " + $Deposito)
 [void]$RefTxt.Add("fuso: feed _EXT a ora NEW YORK -> flat RTH 16:00 NY.")
@@ -249,11 +268,12 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("per-trade CSV: " + $PerTrade_ok)
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("LA DOMANDA: il verde della cella robusta viene dalla TEMPESTA?")
-[void]$RefTxt.Add("Si legge il per-trade CSV segmentato per regime (close_time / net_profit):")
+[void]$RefTxt.Add("Si legge un per-trade CSV (i due gemelli sono identici) segmentato per")
+[void]$RefTxt.Add("regime (close_time / net_profit):")
 [void]$RefTxt.Add("  - CROLLO 2020 (feb-apr), TORO 2021, ORSO 2022, 2023.")
 [void]$RefTxt.Add("Il verde DEVE venire dal crollo 2020 E/O dall'orso 2022 (il toro 2021")
-[void]$RefTxt.Add("rosso/piatto e' ATTESO per un fade). Se viene dal toro o da un mese")
-[void]$RefTxt.Add("outlier -> artefatto -> sepoltura. Se dalla tempesta -> storm-gated CONFERMATO.")
+[void]$RefTxt.Add("rosso/piatto e' ATTESO). Se viene dal toro o da un mese outlier ->")
+[void]$RefTxt.Add("artefatto -> sepoltura. Se dalla tempesta -> storm-gated CONFERMATO.")
 [void]$RefTxt.Add("")
 if($Fatale -ne ""){ [void]$RefTxt.Add("!!! FERMATO: " + $Fatale); [void]$RefTxt.Add("") }
 [void]$RefTxt.Add("PROBLEMI: " + $Problemi.Count)
@@ -273,12 +293,13 @@ foreach($f in @("COMPILAZIONE_FALLITA.log")){
 }
 $srcProva = Join-Path $Prove $ProvaNome
 if(Test-Path -LiteralPath $srcProva){ Copy-Item $srcProva -Destination $Cart -Force }
-# il per-trade CSV (l'artefatto che conta per lo stage-2) da Common\Files.
-$commonFiles2 = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
-$perTradeNome2 = "abtg_trades_" + $EA + "_" + $Simbolo + "_" + $MagicCella + ".csv"
-$perTradeSrc2  = Join-Path $commonFiles2 $perTradeNome2
-if(Test-Path -LiteralPath $perTradeSrc2){ Copy-Item $perTradeSrc2 -Destination $Cart -Force }
-# e la griglia a 1 riga (il totale della cella).
+# i per-trade CSV (l'artefatto che conta per lo stage-2) da Common\Files, ambedue i gemelli.
+$commonFiles2 = CommonFilesDir
+foreach($m in $MagicGemelli){
+  $pt = Join-Path $commonFiles2 (PerTradeNome $m)
+  if(Test-Path -LiteralPath $pt){ Copy-Item $pt -Destination $Cart -Force }
+}
+# e la griglia (2 righe, i gemelli) dal generico.
 $Results = Join-Path $Work ("risultati_prove\" + $EA)
 foreach($leg in @("IS","OOS")){
   $f = Join-Path $Results ($EA + "_" + $Simbolo + "_" + $leg + "_ohlc.csv")
@@ -290,7 +311,7 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host "FILE ATTESI NELLO ZIP: REFERTO_CRT_EXT_S2.txt + il prova + il per-trade CSV (abtg_trades_..._769100.csv) + la griglia a 1 riga" -ForegroundColor Gray
+Write-Host "FILE ATTESI NELLO ZIP: REFERTO_CRT_EXT_S2.txt + il prova + i per-trade CSV (abtg_trades_..._769101/769102.csv) + la griglia gemelli" -ForegroundColor Gray
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
 if($Problemi.Count -gt 0){ Write-Host "ESITO: COMPLETATO CON PROBLEMI" -ForegroundColor Yellow; exit 1 }
