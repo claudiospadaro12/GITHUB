@@ -180,3 +180,42 @@ gate.**
 **PROSSIMI PASSI**: (a) STAGE-2 per regime della cella AdxMax=30 (confermare che il
 + viene dal chop e crollo/toro sono ~flat); (b) valutare deploy piccolo chop-gated
 (sicuro: flat nel toro); (c) Dukascopy per il verdetto tick nel chop.
+
+## STAGE-2 GATED per REGIME (ADX<=30) — CONFERMA, E OGNI REGIME DIVENTA POSITIVO
+
+_Corsa: 30/08/2026 22:29, pin `e2c527fbc4b7976324102312de2bf7386257883e`. Cella
+vincente + GATE ON ADX(D1)<=30, gemelli 769103/769104 IDENTICI, 201 trade. Zip:
+CRT_EXT_S2G_CORSA_20260830_2229.zip._
+
+**Confronto UNGATED -> GATED per regime (la prova che il gate FUNZIONA):**
+
+| regime | UNGATED n / net | GATED n / net | cosa ha fatto il gate |
+|---|---|---|---|
+| CROLLO 2020 | 30 / **-2760** | 8 / **+694** | tagliati 22 coltelli, sign FLIP |
+| resto 2020 | 66 / +1221 | 38 / +1548 | tenuto+migliorato |
+| TORO 2021 | 68 / **-609** | 57 / **+571** | sign FLIP (tolti i trend-trade) |
+| ORSO 2022 | 73 / +2633 | 54 / **+3253** | meno trade, PIU' profitto |
+| 2023 range | 83 / +5259 | 44 / +4070 | meno concentrato |
+| **TOTALE** | 320 / **+5744** | 201 / **+10135** | +2x, ogni regime POSITIVO |
+
+**IL GATE HA FATTO DI PIU' CHE TAGLIARE LE PERDITE:**
+- **Ogni singolo regime e' ora POSITIVO** (crollo +694, resto2020 +1548, toro +571,
+  orso +3253, 2023 +4070). NESSUN regime perdente. Win% su ovunque (56-68%).
+- **I due regimi che PERDEVANO hanno FLIPPATO di segno**: crollo -2760->+694,
+  toro -609->+571. Il gate ha rimosso i trade ad ADX alto (direzionali/coltello)
+  DENTRO ogni periodo, tenendo i momenti non-trend (chop-like) che pagano ovunque.
+- **CONCENTRAZIONE 2023 CROLLATA**: da 92% del totale (ungated) a 40% (gated).
+  Il motore non e' piu' 2023-dipendente -> molto piu' robusto.
+- Aspettativa/trade **quasi TRIPLICATA**: +17.9 -> +50.4.
+
+**LETTURA**: il gate ADX<=30 non e' un "chop-only switch": e' un SELETTORE DI
+QUALITA' che tiene i momenti non-direzionali (dove il fade struttura paga) e
+scarta i direzionali (dove muore), in OGNI regime. E' costitutivo e MISURATO.
+
+**IL MURO CHE RESTA (e la strada che si APRE):**
+- OHLC OTTIMISTA: +10135 e' FORMA. Serve il tick.
+- MA: il tick BCM 2024-2026 (toro) e' un regime che l'UNGATED perdeva (PF 0.5).
+  Il gate taglia i trend-trade -> **un GATED TICK su NASUSD BCM 2024-2026 e'
+  FATTIBILE (tick c'e') e testa se il gate porta il tick da PF 0.5 a >=1 nel
+  regime ATTUALE**. Se verde -> edge TICK-VERIFICATO nel toro di oggi ->
+  DEPLOYABILE ora, SENZA aspettare Dukascopy. E' il prossimo round giusto.
