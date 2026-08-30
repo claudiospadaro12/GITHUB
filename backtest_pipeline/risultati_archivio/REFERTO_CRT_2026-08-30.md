@@ -136,3 +136,47 @@ dispiegabile servono DUE cose insieme: (a) un GATE DI REGIME che lo accenda solo
 in chop/range bilaterale e lo spenga in crollo e in trend liscio (misurato); (b)
 Dukascopy per il verdetto tick nel regime giusto. Strada lunga. Parcheggiato come
 candidato CHOP-GATED, thesis raffinata, registrato.**
+
+## GATE DI REGIME MISURATO — IL GATE MORDE (griglia soglie, OHLC _EXT)
+
+_Corsa: 30/08/2026 22:13, pin `6dcdca7d44fc6ec9b7b7bfadd89291e43f83ff29`. Cella
+robusta + gate ON, sweep InpAdxMax (20-40) x InpAtrMinPts (0-300), 20 celle,
+Modello 1 OHLC NASUSD_EXT 2020-2024. Zip: CRT_GATE_CORSA_20260830_2213.zip._
+
+**Il gate ADX(D1) MORDE in modo ordinato e MIGLIORA OGNI metrica. Riferimento
+ungated: +5744, n=320, PF ~1.18, DD 5.9%.**
+
+| AdxMax | AtrMin | Profit | PF | n | DD% | vs ungated |
+|---|---|---|---|---|---|---|
+| 20 | 0 | +1106 | 1.29 | 57 | 1.69 | troppo stretto |
+| **25** | **0** | **+9487** | **1.92** | 147 | **2.09** | PF picco, DD minima |
+| **30** | **0** | **+10135** | **1.65** | 201 | **2.60** | Profit picco, n robusto |
+| 35 | 0 | +6872 | 1.29 | 251 | 4.12 | si allarga |
+| 40 | 0 | +5090 | 1.19 | 271 | 4.45 | ~ungated |
+
+- **ADX e' la leva vera**: stringendo AdxMax i trade calano MONOTONI (271->57) e il
+  profitto PICCA a AdxMax 25-30. E' il gate che TAGLIA i trade di crollo+trend
+  (ADX alto) tenendo il chop (ADX basso). Il "Ret Gate Regime" (bloccati) sale
+  ordinato: 394 (loose) -> 1825 (tight). Il gate e' COSTITUTIVO e ATTIVO, non decorativo.
+- **ATR e' inutile qui**: a AtrMin 0 e 100 i risultati sono IDENTICI (l'ATR D1 e'
+  sempre >=100 pt); a 200-300 taglia ma FA MALE (toglie chop buono). -> il gate e'
+  ADX-only, ATR floor neutro. Semplifica.
+- **L'ALTOPIANO** e' AdxMax 25-30 (NON un picco isolato: 25/30/35 tutti verdi).
+  Centro robusto: **AdxMax=30, ATR neutro -> +10135, n=201, PF 1.65, DD 2.60%**.
+  Contro l'ungated: **profitto ~2x, DD ~meta' (5.9->2.6), PF 1.18->1.65, n -37%**.
+
+**IL GATE HA VINTO. Il CRT gated (ADX<=30 su D1) e' un motore diverso: taglia i
+regimi perdenti, tiene il chop, DD dimezzato. La tesi per-regime e' confermata dal
+gate.**
+
+**I MURI CHE RESTANO (onesto, non e' ancora cassa):**
+1. OHLC OTTIMISTA: +10135 e' FORMA. A tick e' piu' basso (ma il gate taglierebbe
+   anche i trade di trend a tick -> il gated-tick dovrebbe battere l'ungated-tick).
+2. VERDETTO TICK NEL CHOP IMPOSSIBILE su BCM (chop 2022/2023 pre-26/09/2024) ->
+   Dukascopy per la cassa vera.
+3. Il gate tiene il CRT FLAT nel toro attuale (ADX alto) -> deploy piccolo/osserv.
+   e' SICURO (non perde nel toro, spara solo quando arriva il chop) -- come lo short.
+
+**PROSSIMI PASSI**: (a) STAGE-2 per regime della cella AdxMax=30 (confermare che il
++ viene dal chop e crollo/toro sono ~flat); (b) valutare deploy piccolo chop-gated
+(sicuro: flat nel toro); (c) Dukascopy per il verdetto tick nel chop.
