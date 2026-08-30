@@ -5557,3 +5557,27 @@ era l'unico fuori standard.
 > coda: il controllo positivo non partirebbe mai. Controllo pratico: prima di
 > mandare, `grep -nP '^\s*#\s*@(SIMBOLO|PERIODO|DAQUANDO)'` sul prova **deve
 > dare ZERO**, e ogni riga `@` non deve contenere un secondo `#`.
+
+## 30/08/2026 — la scheda `.md` descrive la geometria VECCHIA del prova (non quella reale)
+
+_Pagato al SECONDO giro di gate sullo stage-2 CRT (`RIGA_CRT_EXT_S2`)._ Il
+design era stato RISCRITTO per risolvere i 2 bloccanti del primo giro: da
+**cella singola a 0 assi Y** (scartata dal generico, caso R58) a **cella FISSA
+con 1 asse Y = InpMagic sui gemelli** (pattern INVES). Lo `.ps1`, il prova e il
+gate erano tutti coerenti col NUOVO design (`assiY count=1 -> InpMagic`,
+verificato eseguendo la logica di lettura del wrapper sul prova vero). Ma la
+scheda da mandare `RIGA_CRT_EXT_S2_DA_MANDARE.md`, nella riga della tabella
+"File prova", descriveva ancora il prova come **"(cella singola, 0 assi Y)"** —
+cioe' esattamente la forma RIFIUTATA al primo giro, quella che il gate del
+wrapper (`if(@($assiY).Count -ne 1){ throw ... }`) ora BLOCCA. La riga di
+lancio sarebbe girata pulita; la prosa che la accompagna mentiva sulla geometria
+del prova.
+
+> ✅ **REGOLA: quando il design di un round CAMBIA, la scheda `.md` da mandare
+> si rilegge riga per riga contro il prova REALE** — non solo il marcatore
+> `.md`=`.ps1`. Ogni descrizione della geometria del prova (numero di assi Y,
+> celle fisse vs sweep, simbolo/TF/finestra) deve combaciare con quello che i
+> gate del wrapper leggono davvero dal file. Una descrizione stantia che
+> sopravvive a un riscrittura e' un difetto del pacchetto anche se le due
+> stringhe eseguibili sono corrette: confonde chi legge e riporta a galla il
+> design gia' bocciato.
