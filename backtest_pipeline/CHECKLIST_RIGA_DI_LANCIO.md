@@ -5519,3 +5519,41 @@ di nome `if` e non lo trova. Per usare un `if` come valore serve il
 > Ogni `if` usato come valore va scritto `$(if(...))`. E dove il difetto vive
 > nel ramo della corsa vera (non toccato da `-SoloControllo`), il giro a vuoto
 > **non e' una prova sufficiente**: PASS al controllo != PASS alla corsa.
+
+---
+
+## 🧷 LE DIRETTIVE `@` DEL PROVA COMMENTATE / COL COMMENTO IN CODA — IL GATE DEL WRAPPER LE LEGGE VUOTE (30/08/2026)
+
+_Trovato verificando la riga del CRT Turtle Soup PRIMA dell'invio. Il prova
+`prove/ABTG_CRT_TurtleSoup.txt` scriveva le direttive come `# @SIMBOLO  NASUSD`
+(con `#` davanti) e con un commento in coda al valore (`@DAQUANDO 2024.09.26
+# muro tick...`). Il wrapper `RIGA_CRT.ps1` fa i suoi gate leggendo `@SIMBOLO/
+@PERIODO/@DAQUANDO` dal prova con `RigheVive` (che scarta ogni riga `^\s*#`) e
+poi `($r -split '\s+',2)[1].Trim()`. Risultato: le direttive commentate NON
+entrano nella mappa, il gate legge `[]` e il **controllo positivo `-SoloControllo`
+sarebbe morto al primo gate** — un giro a vuoto sul VPS bruciato prima ancora
+di compilare._
+
+Due modi distinti in cui lo stesso gate viene affamato, tutti e due presenti:
+1. **`#` davanti alla direttiva** (`# @SIMBOLO NASUSD`): il filtro dei commenti
+   la cancella. Il gate confronta `[]` col valore atteso e fallisce (o, se il
+   confronto fosse un `-eq` permissivo, PASSEREBBE su una geometria mai letta —
+   peggio).
+2. **commento in coda al valore** (`@DAQUANDO 2024.09.26   # muro...`): la
+   direttiva entra, ma il valore diventa `2024.09.26 # muro...` e il gate
+   `-ne '2024.09.26'` scatta su una stringa che "sembra giusta" a occhio.
+
+La convenzione di casa (misurata su ~20 prove: `FASE2_*`, `R101_*`, `R110_*`,
+`ABTG_PTE`, ...) e' **direttiva NUDA**: `@SIMBOLO  NASUSD` senza `#` davanti e
+senza commento in coda; la spiegazione va nelle righe `#` SOPRA. Il prova CRT
+era l'unico fuori standard.
+
+> ✅ **REGOLA: le direttive `@` di un prova si scrivono NUDE** (nessun `#`
+> davanti, nessun commento sulla stessa riga del valore) — la spiegazione sta
+> nelle righe di commento sopra. **E ogni gate che legge un `@` dal prova si
+> collauda contro il prova VERO**, non a mano: si esegue la logica di lettura
+> del wrapper (`RigheVive` + split) sul file reale e si stampano i valori
+> letti. Se un gate atteso legge `[]`, la direttiva e' commentata o sporca di
+> coda: il controllo positivo non partirebbe mai. Controllo pratico: prima di
+> mandare, `grep -nP '^\s*#\s*@(SIMBOLO|PERIODO|DAQUANDO)'` sul prova **deve
+> dare ZERO**, e ogni riga `@` non deve contenere un secondo `#`.
