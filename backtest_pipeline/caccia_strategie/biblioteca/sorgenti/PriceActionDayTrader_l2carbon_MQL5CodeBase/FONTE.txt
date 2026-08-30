@@ -1,0 +1,10 @@
+Fonte:  MQL5 Code Base - https://www.mql5.com/en/code/68704
+EA:     "Price Action Intraday Trading - Expert for MT5"
+Autore: l2carbon  (data pubblicazione 2026.01.30)
+File:   Daily_Price_Action_EA.mq5 (nome interno PriceActionDayTrader.mq5), 1237 righe
+Licenza: #property copyright "Price Action Day Trader" - NESSUNA licenza esplicita
+         dichiarata nel sorgente. MQL5 Code Base = sorgente scaricabile e studiabile,
+         ma senza MIT/BSD esplicito il riuso in un derivato committato e' INCERTO.
+         -> Attribuzione OBBLIGATORIA in testa a qualunque .mq5 derivato; verificare
+            i termini Code Base prima di distribuire un derivato.
+Scaricato e letto per intero il 2026-08-30 (caccia motori TF basso).

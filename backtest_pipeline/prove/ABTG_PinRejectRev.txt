@@ -1,0 +1,103 @@
+# ==========================================================================
+# ABTG_PinRejectRev  -  SPEC (l'EA NON esiste ancora: va costruito)
+# Motore = RAMO REVERSAL del "Price Action Day Trader" di l2carbon,
+#   MQL5 Code Base 68704 (https://www.mql5.com/en/code/68704), letto per intero
+#   il 2026-08-30. Sorgente archiviato:
+#   caccia_strategie/biblioteca/sorgenti/PriceActionDayTrader_l2carbon_MQL5CodeBase/
+#   Licenza NON dichiarata nel sorgente -> attribuzione obbligatoria; termini
+#   Code Base da verificare prima di distribuire un derivato (INCERTO).
+# ==========================================================================
+#
+# IPOTESI
+#   Nella FASCIA POMERIDIANA US (buco misurato della flotta: nessuna sedia
+#   opera dopo l'apertura, 28/08 par.5.7), quando il prezzo tocca un LIVELLO
+#   S/R strutturale recente (massimo/minimo delle ultime ~20 barre) e stampa
+#   un PIN BAR di rifiuto (wick >= K x corpo dal lato del livello, richiuso
+#   dentro) su barra CHIUSA, la spinta e' esaurita: si entra nel verso del
+#   rifiuto (SHORT a resistenza / LONG a supporto). Il rifiuto-al-livello E'
+#   il motore (non un cerotto): niente livello o niente wick = niente trade.
+#   Diverso dai caduti: NON e' ORB/breakout (fada un livello, non lo insegue),
+#   NON e' fade NUDO (serve il livello S/R + il wick di rifiuto, non la sola
+#   deviazione dalla media), NON e' momentum di chiusura (R98), NON e'
+#   sweep+reclaim forex (R95: qui indice, livello = swing lookback non la
+#   candela adiacente). Aggancio economico: reversal di fine seduta US (le
+#   "ultime 2 ore" della letteratura intraday-reversal) su indice liquido.
+#
+# ATTENZIONE - PARZIALE DOPPIONE, dichiarato prima dei numeri:
+#   e' la stessa FAMIGLIA "wick-reject reversal" del CRT Turtle Soup (gia' in
+#   imbuto, prova ABTG_CRT_TurtleSoup). Differenza vera: il TRIGGER e il
+#   LIVELLO. CRT = sweep dell'estremo della candela ADIACENTE + reclaim.
+#   Questo = pin bar di rifiuto a un LIVELLO S/R rolling (swing 20 barre) nella
+#   sola fascia pomeridiana. Se in banco i giorni-segnale COINCIDONO col CRT
+#   (stessi trade) -> e' un doppione e si SCARTA a favore del CRT (piu' pulito,
+#   MIT). La scorrelazione dal CRT va MISURATA, non assunta.
+#
+# CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)
+#   - Verdetto SOLO a tick reali (modello 4). OHLC 1-min = solo screening/conteggio.
+#   - Campione minimo 150 operazioni per un giudizio di MERITO (emendamento
+#     finestra A); la finestra tick BCM indici = 21 mesi UN SOLO regime toro ->
+#     merito SOSPESO (valvola R59), si giudica il RISCHIO. Per lo screening di
+#     regime orso/crollo: SOLO OHLC su NASUSD_EXT (2020/2022), mai tick.
+#   - Promozione cella: CENTRO dell'altopiano, MAI il picco (12 Spearman IS->OOS
+#     negative su 13).
+#   - DUE LATI misurati sempre (long E short), regola di casa 25/08. Il buco
+#     prioritario e' lo SHORT: si legge per primo il ramo SHORT-a-resistenza.
+#   - RISCHIO: DD della cella promossa entro il muro; peggior GIORNATA sotto il
+#     cap 5% prop; se concentra piu' segnali lo stesso pomeriggio -> penalita'
+#     prop (rischio giornaliero, non edge diversificato).
+#   - SL VERO al broker con PAVIMENTO (R109). NB: l'originale usa StopLossPips
+#     FISSO (40) -> su indice = ~40 punti = stop ridicolo: DA RIFARE strutturale
+#     (oltre il wick del pin bar) + pavimento InpMinStopPts. Questa e' la parte
+#     di gestione che mettiamo NOI.
+#   - PASSO 0 obbligatorio PRIMA di ogni PF: (a) misurare @DAQUANDO reale di
+#     NASUSD con scarica_storico.ps1 -SoloReferto; (b) contare le operazioni
+#     nella sola fascia pomeridiana (rischio: troppo poche -> campione sottile);
+#     (c) misurare lo SPREAD pomeridiano NASUSD (logger Code Base 74148, mai
+#     usato): lordo medio/trade >= 3x spread, altrimenti l'edge e' mangiato.
+#
+# COSA COSTRUIRE (l'EA, prima di poter lanciare questa griglia)
+#   - ISOLARE il solo ramo REVERSAL: pin bar (IsPinBar righe 301-329) +
+#     rifiuto a livello (IsAtSupport/IsAtResistance righe 460-489, lookback
+#     swing) su barra 1 CHIUSA. SCARTARE i rami pro-trend engulfing/inside-bar
+#     (mescolano un motore diverso; il gate MA20/50 va tolto o reso opzionale).
+#   - Esecuzione REALE gia' presente (OrderSend, SL vero) + sizing rischio %
+#     (CalculateLotSize righe 882-912, gia' scalabile a 100k via tick value):
+#     riusabili quasi tali e quali. Cap perdita giornaliera (CheckDailyLossLimit)
+#     e flat EOD (CloseAtEndOfDay) gia' nel sorgente: buon scaffold.
+#   - SL strutturale (oltre il wick del pin) + pavimento InpMinStopPts (R109),
+#     al posto dello StopLossPips fisso.
+#   - Fascia POMERIDIANA in ora SERVER, niente overnight, flat a fine seduta.
+#   - Magic dedicato; OnTester (recovery factor), altrimenti il driver non parte.
+#   - Un solo simbolo per grafico.
+#
+# Le direttive @ vanno NUDE (senza # davanti):
+@SIMBOLO  NASUSD
+@PERIODO  M15
+# @DAQUANDO: muro tick BCM sugli indici (misurato ripetutamente); CONFERMARE
+#   con scarica_storico.ps1 -Simboli "NASUSD" -SoloReferto prima di lanciare.
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# SWEEP (screening stretto - centro altopiano, non picco)
+# --- FASCIA POMERIDIANA US in ORA SERVER (IT-1). La "coda" della seduta US
+#     (ultime ~2-3 ore prima della chiusura RTH 21:00 server) e' dove la
+#     letteratura mette il reversal. Si spazzola l'inizio fascia; fine = flat.
+InpStartHour=18||17||1||19||Y
+# lato: 0=long 1=short 2=entrambi. Il buco prioritario e' lo SHORT.
+InpSide=1||0||1||2||Y
+# forza del rifiuto: wick del pin bar in multipli del corpo
+InpPinBarRatio=2.0||2.0||0.5||3.0||Y
+# tolleranza al livello S/R (in punti indice); quanto vicino al livello per validare
+InpSRTolerancePts=1000||500||500||1500||Y
+# --- FISSI (non spazzolati) ---
+# lookback dei livelli S/R (swing recenti): pinnato al default sorgente
+InpSRLookback=20||20||20||20||N
+# chiusura RTH NASUSD 21:00 server (16:00 ET). Zero overnight.
+InpEndHour=21||21||21||21||N
+InpCloseAtEnd=1||1||1||1||N
+# PAVIMENTO SL (R109): 500 punti MT5 = 5 punti indice US, MAI 0 e MAI il
+#   StopLossPips fisso dell'originale.
+InpMinStopPts=500||500||500||500||N
+# rischio di casa
+InpRiskPercent=0.65||0.65||0.65||0.65||N
+# ==========================================================================
