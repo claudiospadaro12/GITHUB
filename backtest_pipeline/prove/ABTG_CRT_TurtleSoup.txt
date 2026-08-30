@@ -40,10 +40,17 @@
 #   - OnTester (recovery factor) - altrimenti il driver non parte.
 #   - Un solo simbolo per grafico (NON il loop multi-symbol dell'originale).
 #
-# @SIMBOLO  D30EUR          # lead DAX; poi U30USD (Dow) e NASUSD (Nasdaq)
+# @SIMBOLO  NASUSD          # PRIMO tick run: NASUSD (specifiche MISURATE: conversione
+#                           #   100 pti MT5/pt indice R97, muro tick 26/09/2024, chiusura
+#                           #   RTH 21:00 server). D30EUR (lead DICHIARATO) e U30USD
+#                           #   seguono DOPO un PASSO-0 che misura le LORO specifiche
+#                           #   (flat DAX 16:30 server, conversione punti DAX): finche'
+#                           #   non sono misurate, i default US del CRT (flat 22:00,
+#                           #   conv 100) NON si applicano ciecamente al DAX. Affinamento
+#                           #   PRIMA dei numeri (regola di casa), documentato.
 # @PERIODO  M15
-# @DAQUANDO                 # <-- VUOTO: da MISURARE con scarica_storico.ps1 -SoloReferto
-#                           #     (indici BCM: tetto ~100k barre -> M15 ~4 anni/corsa)
+# @DAQUANDO 2024.09.26      # muro tick BCM sugli indici (misurato ripetutamente)
+# @FINOA    2026.06.30      # coda cassaforte (come SHORTGATE_CASSA)
 #
 # SWEEP (screening stretto - centro altopiano, non picco)
 # WickFactor: quanto dev'essere lungo il wick di rifiuto rispetto al corpo
@@ -52,4 +59,8 @@ InpWickFactor=3.0||2.0||0.5||4.0||Y
 InpUseMidGate=1||0||1||1||Y
 # lato: long / short / entrambi (per il censimento dei due lati)
 InpSide=2||0||1||2||Y
+# --- FISSI (non spazzolati): il FLAT su NASUSD e' la chiusura RTH 21:00 server
+#     (16:00 ET), NON il default US-afterhours 22:00 dell'EA. Zero overnight.
+InpCloseHour=21||21||21||21||N
+InpCloseMin=0||0||0||0||N
 # ==========================================================================
