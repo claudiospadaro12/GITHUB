@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_NYRETEST_v1
+#  MARCATORE_RIGA_NYRETEST_v2
 #  RIGA_NYRETEST.ps1  --  NY SESSION RETEST: PASSO 0 + MISURA a tick BCM.
 #  ABTG_NySessionRetest (VWAP-retest in trend, primo H1-intraday della
 #  flotta) su U30USD H1, TICK REALI (Modello 4), 2024.09.26->2026.06.30.
@@ -69,6 +69,7 @@ $FissiAttesi = @{ "InpEmaTrend"="200";
                   "InpVwapSlopeMin"="0.00"; "InpExpansionMin"="0.00";
                   "InpVwapSlopePeriod"="5"; "InpExpansionLookback"="10";
                   "InpSlLookback"="5"; "InpSlBufferPts"="300";
+                  "InpRetestBufferPts"="0";
                   "InpCloseAtEnd"="true";
                   "InpAllowLong"="true"; "InpAllowShort"="true";
                   "InpRiskPercent"="0.65"; "InpMaxTradesPerDay"="2" }
@@ -250,12 +251,24 @@ try{
       [void]$Problemi.Add("il generico e' uscito con codice " + $rc + " (storico mancante? CSV non prodotto?).")
     }
     $trovati = 0
+    $conte = New-Object System.Collections.ArrayList
     foreach($m in $MagicGemelli){
       $pt = Join-Path $commonFiles (PerTradeNome $m)
-      if(Test-Path -LiteralPath $pt){ $trovati++ }
+      if(Test-Path -LiteralPath $pt){
+        $ops = @(Get-Content -LiteralPath $pt).Count - 1
+        if($ops -lt 0){ $ops = 0 }
+        [void]$conte.Add("" + $m + "=" + $ops)
+        if($ops -gt 0){ $trovati++ }
+        else{ [void]$Problemi.Add("per-trade del magic " + $m + ": SOLO l'intestazione, ZERO operazioni. File troncato da una passata a vuoto (gamba OOS degenere) oppure zero trade veri: in nessuno dei due casi e' una misura.") }
+      }
+      else{ [void]$Problemi.Add("per-trade del magic " + $m + " NON prodotto in Common\Files (zero trade? FILE_COMMON non scritto? cache del tester?).") }
     }
-    if($trovati -gt 0){ $PerTrade_ok = "TROVATI " + $trovati + " su 2 (gemelli 769501/769502)" }
-    else{ [void]$Problemi.Add("nessun per-trade CSV prodotto in Common\Files per i gemelli (zero trade? FILE_COMMON non scritto? cache del tester?).") }
+    if($conte.Count -eq 2){
+      $c1 = [int](($conte[0] -split "=")[1]); $c2 = [int](($conte[1] -split "=")[1])
+      if($c1 -ne $c2){ [void]$Problemi.Add("GEMELLI DIVERGENTI: " + $c1 + " e " + $c2 + " operazioni. Due passate identiche devono dare lo STESSO numero: se divergono il banco non e' deterministico e la misura non si legge.") }
+    }
+    if($conte.Count -gt 0){ $PerTrade_ok = "OPERAZIONI per magic -> " + ($conte -join " | ") + "   (file con dati: " + $trovati + " su 2)" }
+    else{ $PerTrade_ok = "NESSUN FILE in Common\Files" }
   }
 }
 catch{

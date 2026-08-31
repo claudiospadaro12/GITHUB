@@ -91,6 +91,11 @@ InpExpansionLookback=10
 InpSlLookback=5
 InpSlBufferPts=300
 InpMinStopPts=500
+# Sensibilita' del retest PINNATA ESPLICITA (31/08, dal gate): su H1 e' il
+# parametro che piu' determina la FREQUENZA, cioe' proprio cio' che il PASSO 0
+# misura. 0 = tocco esatto della VWAP: il numero misurato porta con se' la
+# sua condizione, non un default implicito.
+InpRetestBufferPts=0
 # FUSO SERVER BCM (IT-1): seduta 14:30 -> flat 20:55. MAI 9:30 / 16:00 (ET).
 InpSessionHour=14
 InpSessionMin=30

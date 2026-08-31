@@ -1067,6 +1067,25 @@ void ExportTrades()
      }
 
    string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"+IntegerToString((long)InpMagic)+".csv";
+   //--- R82 / checklist 41: il nome contiene il MAGIC, non la FINESTRA. Una
+   //    passata SENZA uscite (gamba OOS degenere di FrazioneIS 1.0, cella muta,
+   //    finestra vuota) NON deve TRONCARE il per-trade gia' scritto da una
+   //    passata buona con lo stesso magic. Se il file non c'e', si scrive
+   //    l'intestazione da sola: "girata e zero trade" resta distinguibile.
+   int nOut=0;
+   for(int j=0;j<nd;j++)
+     {
+      ulong tj=HistoryDealGetTicket(j);
+      if(tj==0) continue;
+      if(HistoryDealGetInteger(tj,DEAL_MAGIC)!=InpMagic) continue;
+      long ej=HistoryDealGetInteger(tj,DEAL_ENTRY);
+      if(ej==DEAL_ENTRY_OUT || ej==DEAL_ENTRY_OUT_BY) nOut++;
+     }
+   if(nOut<=0 && FileIsExist(fn,FILE_COMMON))
+     {
+      PrintFormat("[NYRT] per-trade: 0 uscite in questa passata, %s NON toccato (mai troncare il per-trade di un'altra finestra).",fn);
+      return;
+     }
    int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
    if(h==INVALID_HANDLE) return;
    FileWrite(h,"close_time","symbol","magic","position_id","dir","volume",

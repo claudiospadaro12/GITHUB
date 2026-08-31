@@ -5676,3 +5676,79 @@ un wrapper di round diventa una geometria mai decisa da nessuno.
 >    nel codice. E la divergenza si cerca sempre: **grep delle date in tutti e
 >    quattro i posti** (`.ps1` param, `.ps1` intestazione, prova, scheda `.md`)
 >    prima di approvare una riga.
+
+---
+
+## 🧹 LA GAMBA **OOS DEGENERE** CHE PUO' TRONCARE IL PER-TRADE DELLA GAMBA **IS** — e la spia che la guarda con `Test-Path` (31/08/2026)
+
+_Trovata verificando il pacchetto **NY SESSION RETEST** (`RIGA_NYRETEST.ps1`,
+`ABTG_NySessionRetest.mq5`, pin `55368bb1`) **prima** dell'invio. E' la
+specializzazione del punto **41** ("il gate e la corsa che condividono il
+magic") al caso in cui le due fasi che condividono il magic sono **le due gambe
+dello stesso `walkforward_generico.ps1`**._
+
+`walkforward_generico.ps1` gira **sempre** due finestre (`$WF` = IS + OOS): il
+ciclo e' cablato, non c'e' nessun `-SoloIS`. Con **`-FrazioneIS 1.0`** (il
+modo di casa per dire "una tranche sola") esce:
+
+```
+IS  : 2024.09.26 -> 2026.06.30
+OOS : 2026.07.01 -> 2026.06.30     <-- FromDate > ToDate
+```
+
+La gamba OOS e' **degenere e dichiarata inutile** — e la riga di lancio lo dice
+a Claudio a chiare lettere: *"il rosso del generico sul CSV OOS e' ATTESO: NON
+rilanciare"*. **Ma gira lo stesso, con gli STESSI magic**, e l'EA chiama
+`ExportTrades()` da `OnTester()` **a ogni passata**, aprendo
+`Common\Files\abtg_trades_<EA>_<SIM>_<magic>.csv` in `FILE_WRITE`, cioe'
+**troncando**. Se MT5 esegue anche una sola passata a zero operazioni su quella
+finestra, il per-trade della IS — che in un PASSO 0 **e' il deliverable**, non un
+accessorio — resta con la **sola intestazione**.
+
+**Cosa fa MT5 con `FromDate > ToDate` NON E' MISURATO.** E non serve saperlo per
+decidere: il costo di proteggersi e' due righe, il costo di sbagliare e' l'intero
+round da rifare.
+
+E il difetto **non si vede**, perche' la spia di fine corsa era:
+
+```powershell
+if(Test-Path -LiteralPath $pt){ $trovati++ }
+...
+if($trovati -gt 0){ $PerTrade_ok = "TROVATI " + $trovati + " su 2" }
+```
+
+Un file **troncato all'intestazione esiste**: `Test-Path` dice si', il referto
+scrive `TROVATI 2 su 2`, l'esito e' **verde**, lo zip parte. Ed e' peggio ancora
+con `-gt 0`: **1 su 2** non aggiunge nessun problema e esce verde uguale. E' il
+punto **40** che si ripresenta — *"non ho potuto misurare" e "ho misurato e va
+bene" finiscono nello stesso ramo* — appeso al meccanismo del punto **41**.
+
+> ✅ **REGOLA (tripla):**
+>
+> 1. **`ExportTrades()` non tronca mai un file che non ha niente da scriverci
+>    dentro.** Il nome contiene il **magic**, non la **finestra** (punto 41):
+>    una passata senza uscite (gamba OOS degenere, cella muta, finestra vuota,
+>    pass ripescato) deve **lasciare stare** il per-trade di un'altra passata.
+>    ```cpp
+>    if(nOut<=0 && FileIsExist(fn,FILE_COMMON)) return;   // mai troncare
+>    ```
+>    Il caso "girata e zero trade davvero" resta distinguibile: il file **non
+>    c'era**, e allora si scrive l'intestazione da sola.
+>
+> 2. **Gli artefatti si RICONTANO, non si `Test-Path`.** Per un per-trade il
+>    conto e' `righe - 1` = **operazioni**, ed e' esattamente il numero che il
+>    PASSO 0 sta misurando: va **nel referto**, non lasciato a chi apre il CSV.
+>    Tre esiti **diversi**: file assente / file a sola intestazione / N
+>    operazioni. I primi due sono `PROBLEMI` (esito giallo, exit 1).
+>
+> 3. **Se il round schiera i GEMELLI, il referto CONFRONTA i due numeri.** Due
+>    passate identiche che danno conti diversi = banco non deterministico = la
+>    misura non si legge (e' il gate `G3 gemelli divergenti` che la casa ha gia'
+>    altrove). Senza il confronto, i gemelli sono un **asse Y decorativo**:
+>    costano il doppio del tempo macchina e non rispondono a niente.
+>
+> ⚠️ **E il corollario velenoso di questa classe:** la riga *insegnava a
+> Claudio a ignorare* proprio la gamba che poteva distruggere il risultato
+> ("il rosso sull'OOS e' ATTESO, non rilanciare"). Quando un pacchetto
+> **dichiara innocuo** un pezzo della corsa, quel pezzo va guardato **piu'**
+> degli altri: nessuno lo controllera' piu' dopo di te.

@@ -24,7 +24,7 @@ ablazione dichiarata). Unico asse Y = **gemelli magic 769501/769502**.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_NYRETEST.ps1` (marcatore `MARCATORE_RIGA_NYRETEST_v1`) |
+| **Driver** | `righe/RIGA_NYRETEST.ps1` (marcatore `MARCATORE_RIGA_NYRETEST_v2`) |
 | **File prova** | `prove/ABTG_NySessionRetest.txt` (cella fissa gate-OFF, gemelli, fuso server) |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~10-30 min (tick H1, 21
@@ -40,7 +40,7 @@ rosso sul CSV `*_OOS` è **atteso**, NON rilanciare.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_NYRETEST.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_NYRETEST.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera.' -ForegroundColor Red } }
 ```
@@ -52,7 +52,7 @@ rosso sul CSV `*_OOS` è **atteso**, NON rilanciare.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_NYRETEST.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_NYRETEST.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
@@ -64,3 +64,13 @@ per-trade CSV** `abtg_trades_ABTG_NySessionRetest_U30USD_769501/769502.csv`
 + la griglia gemelli (IS, tick — 2 righe identiche, con Autotest Falliti, Flat
 Giorni/Chiusure e la diagnostica dei cancelli in colonna). **Mandami lo zip** e da
 lì escono le 2 tarature del gate per il round vero.
+
+🕐 **PRIMA DI LEGGERE:** apri `REFERTO_NYRETEST.txt` e controlla la riga
+`data:` — deve essere **l'ora di adesso**. Se è di un giro precedente stai
+leggendo un referto stantio. E la riga `modo:` deve dire **CORSA**, non
+CONTROLLO (il giro a vuoto non è il risultato).
+
+📊 Nel referto la riga `per-trade CSV:` stampa **le operazioni per magic**
+(`OPERAZIONI per magic -> 769501=N | 769502=N`): è già la frequenza del
+PASSO 0, e i due numeri devono essere **UGUALI** (gemelli deterministici —
+se divergono la riga alza PROBLEMA da sola).
