@@ -121,3 +121,19 @@ fatti della corsa prima **restano lì**, non vengono toccati).
   riga di ripresa sono stampati in console e nel referto della riga.
 - `1` → fermato prima: **pin non valido**, terminale/compilazione, o **MT5 già
   APERTO** (rete che protegge il forward).
+
+## ⚠️ CORREZIONI DEL 31/08 (dal FAIL del verificatore — v2 corretta, stesso marcatore, PIN NUOVO)
+- Lo script ora RITENTA i blocchi di tick (i simboli appena selezionati
+  rispondono -1 al primo accesso) e dichiara `blocchi persi:` nel referto —
+  DEVE essere 0 per ogni simbolo, insieme a `tick letti` (decine/centinaia
+  di milioni) e `point=0.01000`.
+- Il cancello di compilazione cancella l'.ex5 prima e aspetta l'artefatto
+  (MetaEditor DEVE essere CHIUSO prima di lanciare, oltre a MT5).
+- La riga di RIPRESA e' ora SELF-CONTAINED (la vecchia usava variabili di un
+  blocco morto): usare SOLO la STRINGA 3 consegnata in chat, coi simboli che
+  il referto dichiara mancanti.
+- Un CSV "fresco" ma vuoto NON esce piu' 0: si pretende tick_totali > 0.
+- A FINE CORSA MT5 viene CHIUSO e resta chiuso: il PC torna pronto per i
+  tester. NON lanciare questa riga mentre gira un backtest.
+- Conversione 100 MISURATA su tutti e tre: NASUSD (R97 + v1 30/08),
+  U30USD (R55/R97), D30EUR (Breakin 31/08).

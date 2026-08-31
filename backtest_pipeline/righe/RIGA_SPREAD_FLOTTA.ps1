@@ -55,7 +55,8 @@ param(
   [double]$PuntiPerIndice = 100.0,           # 1 pto indice = 100 pti MT5 (misurata su tutti e 3)
   [int]   $GiorniBlocco   = 7,               # lettura tick a blocchi di N giorni
   [int]   $TimeoutMin     = 420,             # tetto: 3 simboli x ~150M tick l'uno possibile
-  [switch]$ChiudiMT5                         # ammazza un MT5 aperto (MAI sul VPS)
+  [switch]$ChiudiMT5,                        # ammazza un MT5 aperto (MAI sul VPS)
+  [switch]$SoloControllo                     # giro a vuoto: trova+compila+preset, NON apre MT5
 )
 
 $ErrorActionPreference = "Stop"
@@ -159,9 +160,23 @@ New-Item -ItemType Directory -Force -Path $DstDir | Out-Null
 $Mq5 = Join-Path $DstDir "ABTG_SpreadOrario.mq5"
 Scarica ($RawPin + "/mql5/Scripts/ABTG_SpreadOrario.mq5") $Mq5 'SPREAD ORARIO MULTI-SIMBOLO v2'
 Write-Host ("   sorgente pinnato -> " + $Mq5) -ForegroundColor Green
+$Ex5  = [System.IO.Path]::ChangeExtension($Mq5, ".ex5")
+$Log5 = [System.IO.Path]::ChangeExtension($Mq5, ".log")
+# checklist 33-bis: (1) il .ex5 di ieri fa passare il gate su una compilazione
+# FALLITA oggi -> si cancella PRIMA; (2) MetaEditor e' SINGLE-INSTANCE: se ne
+# gira gia' una copia il processo torna subito e compila l'altra istanza ->
+# si aspetta l'ARTEFATTO, non il ritorno del processo.
+Remove-Item -LiteralPath $Ex5  -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $Log5 -Force -ErrorAction SilentlyContinue
+$t0 = Get-Date
 & $MetaEditor "/compile:$Mq5" "/log" | Out-Null
-$Ex5 = [System.IO.Path]::ChangeExtension($Mq5, ".ex5")
-if(-not (Test-Path $Ex5)){ Write-Host "ERRORE di compilazione (nessun .ex5)." -ForegroundColor Red; exit 1 }
+while((-not (Test-Path -LiteralPath $Ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+if(-not (Test-Path -LiteralPath $Ex5)){
+  Write-Host "ERRORE di compilazione (nessun .ex5 dopo 180 s)." -ForegroundColor Red
+  if(Test-Path -LiteralPath $Log5){ Get-Content -LiteralPath $Log5 -ErrorAction SilentlyContinue | Select-Object -Last 40 | ForEach-Object { Write-Host $_ -ForegroundColor DarkYellow } }
+  Write-Host "   (se MetaEditor era gia' APERTO: chiudilo e rilancia)" -ForegroundColor Yellow
+  exit 1
+}
 Write-Host "   compilato: ABTG_SpreadOrario.ex5" -ForegroundColor Green
 
 # =====================================================================
@@ -202,6 +217,14 @@ if($running){
   Write-Host "   Aggiungi -ChiudiMT5 per farlo chiudere da solo (MAI SUL VPS: li'" -ForegroundColor Red
   Write-Host "   spegneresti la FLOTTA IN FORWARD)." -ForegroundColor Red
   exit 1
+}
+
+if($SoloControllo){
+  Write-Host ""
+  Write-Host "GIRO A VUOTO OK: terminale trovato, motore SCARICATO DAL PIN e COMPILATO," -ForegroundColor Green
+  Write-Host "preset scritto, MT5 CHIUSO. Non ho aperto MT5 e non ho toccato nessun file." -ForegroundColor Green
+  Write-Host "Per la corsa vera: la stessa riga SENZA -SoloControllo." -ForegroundColor Yellow
+  exit 0
 }
 
 # cancella gli output vecchi DEI SIMBOLI RICHIESTI: cosi' un file
@@ -267,15 +290,27 @@ function Coda-Log {
   }
   return $tutto
 }
+function Csv-Buono($percorso){
+  # FRESCO (scritto dopo l'avvio) **E NON VUOTO**: la riga TUTTO deve portare
+  # tick_totali > 0. Un CSV di sole 'n/d' e' una misura FALLITA (tick non
+  # letti), non una misura completa: non deve far uscire 0.
+  if(-not (Test-Path -LiteralPath $percorso)){ return $false }
+  try{ $lw = (Get-Item -LiteralPath $percorso).LastWriteTime }catch{ return $false }
+  if($lw -lt $script:Avvio){ return $false }
+  $ok = $false
+  foreach($riga in @(Get-Content -LiteralPath $percorso -ErrorAction SilentlyContinue)){
+    if($riga -like "TUTTO,*"){
+      $campi = $riga -split ","
+      if($campi.Count -ge 2 -and $campi[1] -match '^[0-9]+$' -and [int64]$campi[1] -gt 0){ $ok = $true }
+    }
+  }
+  return $ok
+}
 function Conta-CsvFreschi {
-  # quanti CSV per-simbolo sono comparsi FRESCHI (scritti dopo l'avvio)
+  # quanti CSV per-simbolo sono FRESCHI e NON VUOTI
   $n = 0
   foreach($s in $script:ListaSim){
-    $c = Join-Path $script:FilesDir ("spread_orario_" + $s + ".csv")
-    if(Test-Path -LiteralPath $c){
-      $lw = (Get-Item -LiteralPath $c).LastWriteTime
-      if($lw -ge $script:Avvio){ $n = $n + 1 }
-    }
+    if(Csv-Buono (Join-Path $script:FilesDir ("spread_orario_" + $s + ".csv"))){ $n = $n + 1 }
   }
   return $n
 }
@@ -323,17 +358,11 @@ $SimFatti   = @()
 $SimMancano = @()
 foreach($s in $ListaSim){
   $c = Join-Path $FilesDir ("spread_orario_" + $s + ".csv")
-  $fresco = $false
-  if(Test-Path -LiteralPath $c){
-    $lw = (Get-Item -LiteralPath $c).LastWriteTime
-    if($lw -ge $Avvio){ $fresco = $true }
-  }
-  if($fresco){
-    Copy-Item -LiteralPath $c -Destination $Cart -Force -ErrorAction SilentlyContinue
-    $SimFatti += $s
-  } else {
-    $SimMancano += $s
-  }
+  $fresco = Csv-Buono $c
+  # si copia comunque quello che c'e' (anche un CSV vuoto e' una prova),
+  # ma VUOTO conta come MANCANTE: un parziale non esce 0.
+  if(Test-Path -LiteralPath $c){ Copy-Item -LiteralPath $c -Destination $Cart -Force -ErrorAction SilentlyContinue }
+  if($fresco){ $SimFatti += $s } else { $SimMancano += $s }
 }
 $haTxt = $false
 if(Test-Path -LiteralPath $TxtOut){
@@ -412,7 +441,7 @@ Write-Host ""
 Write-Host "ATTENZIONE: MISURA PARZIALE (riprendibile)." -ForegroundColor Red
 if(-not $finito){ Write-Host "  la riga di chiusura 'SPREAD FLOTTA FINITA' non e' arrivata (timeout?)." -ForegroundColor Red }
 if($SimMancano.Count -gt 0){
-  Write-Host ("  CSV mancanti: " + ($SimMancano -join ", ")) -ForegroundColor Red
+  Write-Host ("  CSV mancanti (assenti, o presenti con 0 tick letti): " + ($SimMancano -join ", ")) -ForegroundColor Red
   Write-Host ("  RIPRESA: rilancia la stessa riga con -Simboli """ + ($SimMancano -join ",") + """") -ForegroundColor Yellow
 }
 if(-not $haTxt){ Write-Host "  manca il referto txt fresco (il parziale, se c'e', e' in MQL5\Files)." -ForegroundColor Red }

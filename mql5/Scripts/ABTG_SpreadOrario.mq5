@@ -146,6 +146,7 @@ bool MisuraSimbolo(const string symIn, const datetime from, const datetime to, c
    int giorniBlocco = InpGiorniBlocco; if(giorniBlocco < 1) giorniBlocco = 1;
    long passo = (long)giorniBlocco * 24 * 3600;
    int nBlocchi = 0;
+   long blocchiPersi = 0;   // blocchi che NON si sono fatti leggere (got<0)
 
    datetime a = from;
    while(a < to && !IsStopped())
@@ -154,7 +155,23 @@ bool MisuraSimbolo(const string symIn, const datetime from, const datetime to, c
       if(b > to) b = to;
 
       MqlTick tk[];
-      int got = CopyTicksRange(sym, tk, COPY_TICKS_ALL, (ulong)a*1000, (ulong)b*1000);
+      //  IL PRIMO accesso alla base tick di un simbolo APPENA messo in
+      //  Market Watch da SymbolSelect torna -1 (o 0) mentre il terminale
+      //  la apre/sincronizza: senza ritenta il blocco si perde IN
+      //  SILENZIO e la tabella esce PLAUSIBILE E FALSA. Qui morde piu'
+      //  che nella v1: li' si leggeva il simbolo DEL GRAFICO (gia'
+      //  sincronizzato), qui due simboli su tre entrano a corsa avviata.
+      //  Stesso pattern gia' PROVATO in ABTG_HistoryDownloader.mq5
+      //  (DownloadTicks, righe 38-46).
+      int got = -1, tries = 0;
+      while(!IsStopped() && tries < 240)          // 240 x 250 ms = 60 s per blocco
+        {
+         got = CopyTicksRange(sym, tk, COPY_TICKS_ALL, (ulong)a*1000, (ulong)b*1000);
+         if(got > 0) break;
+         if(got == 0 && tries > 8) break;         // finestra davvero senza tick
+         Sleep(250); tries++;
+        }
+      if(got < 0) blocchiPersi++;
       if(got > 0)
         {
          for(int i=0; i<got; i++)
@@ -296,6 +313,7 @@ bool MisuraSimbolo(const string symIn, const datetime from, const datetime to, c
       FileWriteString(th, "  " + sym + " -- spread reale dai tick storici, per ORA SERVER BCM\r\n");
       FileWriteString(th, "=====================================================================\r\n");
       FileWriteString(th, "tick letti  : " + (string)totTick + "\r\n");
+      FileWriteString(th, "blocchi persi: " + (string)blocchiPersi + "  (se > 0 la tabella e' PARZIALE: tick non letti)\r\n");
       FileWriteString(th, "conversione : 1 pto indice = " + DoubleToString(InpPuntiPerIndice,0) + " pti MT5; point=" + DoubleToString(point,5) + "\r\n");
       FileWriteString(th, "\r\n");
       FileWriteString(th, "  1) LA RIGA CHE DECIDE -- BID/ASK\r\n");
@@ -337,8 +355,8 @@ bool MisuraSimbolo(const string symIn, const datetime from, const datetime to, c
       FileFlush(th);   // pattern DUKA: il referto e' leggibile anche a meta' corsa
      }
 
-   PrintFormat("SPREAD SIMBOLO FINITO %s : tick=%I64d, ask_usabile=%.2f%%, solo_bid=%.2f%%",
-               sym, totTick, pAskUsab, pSoloBid);
+   PrintFormat("SPREAD SIMBOLO FINITO %s : tick=%I64d, blocchi_persi=%I64d, ask_usabile=%.2f%%, solo_bid=%.2f%%",
+               sym, totTick, blocchiPersi, pAskUsab, pSoloBid);
    return true;
   }
 
