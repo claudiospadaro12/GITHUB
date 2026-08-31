@@ -445,6 +445,12 @@ gli stop. **Si misura al PASSO 0.** E la regola di lettura di `METRO_PROP` D4:
 Spread P95 Logger* (Code Base 74148, **promosso il 23/08 e mai usato**) e si
 rilegge.
 
+> 📡 **AGGIORNAMENTO 31/08 — misura in corso dal 31/08, riga pronta:** il
+> logger di casa è finalmente in campo — `RIGA_SPREAD_FLOTTA.ps1` +
+> `ABTG_SpreadOrario.mq5` (v2) misurano lo spread **orario** (mediana/P95 per
+> ora server) su **NASUSD, U30USD, D30EUR** dai tick storici. I numeri
+> arriveranno col referto; fino ad allora il 2,0 resta **[NON MISURATO]**.
+
 ### 🏛️ In ottica prop
 🟢 **Scorrelazione alta**: nessuna sedia viva usa **un vuoto di prezzo** come
 livello. Su M15 indici oggi gira solo `MaxMinNotte DAX Short` (notte europea):
