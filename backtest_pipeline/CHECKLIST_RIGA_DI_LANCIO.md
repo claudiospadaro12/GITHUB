@@ -6144,3 +6144,57 @@ fresco", esce **0**.
 >    totali > 0). Un CSV di sole `n/d` e' una misura **fallita**: deve uscire
 >    **2**, non 0. E' il punto 13 (un parziale non esce 0) applicato al
 >    contenuto invece che alla presenza.
+
+---
+
+## 🩶 LA FASCIA COPERTA DA **DUE** BULLET DEL CRITERIO CONGELATO — e il codice del verdetto automatico scioglie l'ambiguita' **NEL VERSO CHE PROMUOVE** (31/08/2026)
+
+_Trovata verificando la **SONDA M0PB** (`RIGA_SONDAM0PB.ps1` + `prove/M0PB_FREQUENZA_M5/M15.txt`, pin `2c4b466`) **prima** dell'invio, **eseguendo** il driver su un banco stubbato con CSV OPTFRAME finti. Nessuna serata bruciata._
+
+Il criterio F2, congelato nel prova PRIMA dei numeri, dice **tre** cose:
+
+```
+>= 6,0 punti  -> PASSA
+<  5,0 punti  -> SCARTO
+fra 5,0 e 7,0 -> VERDETTO SOSPESO (spread da misurare, Code Base 74148)
+```
+
+La fascia **6,0-7,0 e' coperta da DUE bullet insieme**: il primo dice PASSA, il
+terzo dice SOSPESO. Nessuno se ne era accorto perche' letti uno per volta sono
+tutti e due sensati. **Ma tre artefatti dello stesso pacchetto danno due
+risposte diverse:**
+
+| artefatto | cosa dice della fascia 6,0-7,0 |
+|---|---|
+| `prove/M0PB_FREQUENZA_M*.txt` (criterio congelato) | **ambiguo**: PASSA *e* SOSPESO |
+| header del driver + pagina `_DA_MANDARE.md` | «< 5,0 MORTO; **5,0-7,0 SOSPESO**» |
+| `function Verdetto` del driver (il verdetto che finisce in tabella) | **VIVO** |
+
+```powershell
+if($take -lt $F2_BASSO){ $morto = $true }
+elseif($take -lt $SOGLIA_F2){ $sospeso = $true }      # <<< SOSPESO solo 5,0-6,0
+...
+if($take -le $F2_ALTO){ return "VIVO (F2 in fascia 5,0-7,0: spread da misurare, 74148)" }
+```
+
+Eseguito su una cella con take mediano **6,80** e RR 0,861, la colonna
+**VERDETTO** del referto scrive **VIVO** dove la pagina consegnata a Claudio
+promette **SOSPESO**. E la direzione non e' casuale: **l'ambiguita' si e'
+sciolta dal lato che fa passare il motore**, cioe' quello che nessuno
+ricontrollera' (un MORTO si guarda, un VIVO si festeggia).
+
+> ✅ **REGOLA (tre meta').**
+> 1. **Un criterio congelato si legge cercando le SOVRAPPOSIZIONI, non solo i
+>    buchi.** Per ogni cancello: si prende l'asse dei valori e si verifica che
+>    ogni punto cada in **UNA sola** clausola. Due clausole sullo stesso
+>    intervallo = criterio non congelato, e' congelata solo la sua *prosa*.
+> 2. **Quando la sovrapposizione c'e' gia' ed e' troppo tardi per riscrivere il
+>    criterio, vince la clausola PIU' SEVERA** — e si dichiara che si e' scelta
+>    quella. Muovere un criterio verso il permissivo dopo averlo scritto e'
+>    esattamente la mossa che il progetto ha vietato a se stesso.
+> 3. **Il verdetto AUTOMATICO va DIFFATO contro la pagina, riga per riga, e
+>    ESEGUITO su una cella di ognuna delle fasce.** Qui bastava una cella a
+>    6,80 per vedere le due parole diverse. Il gate «l'header ricopia le
+>    soglie» (che questo driver ha, ed e' buono) copia i **numeri** 5,0 / 6,0 /
+>    7,0 e **non copia le disuguaglianze**: le soglie combaciavano e il verdetto
+>    no.
