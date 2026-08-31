@@ -528,3 +528,25 @@ espansione decorativa). Porta di rientro MECCANICA: tagliando quando la
 finestra tick BCM dara' n>=150 sulla cella slope 75 (~5.4 trade/mese, stima
 2027) o Dukascopy pre-2024. Referto completo:
 risultati_archivio/REFERTO_NYRETEST_2026-08-31.md
+
+---
+
+## IMPORT DUKASCOPY TICK — PASSO 0 CONSEGNATO (31/08/2026): strumenti pronti, NIENTE lancio
+
+L'operazione che sblocca i DUE verdetti parcheggiati (NY Retest slope75
+n=114<150; CRT candidato-chop senza tick del suo regime). Consegnati:
+- `dukascopy/DUKASCOPY_PASSO0.md` — fattibilita' misurata (tick Dow/Nasdaq
+  dal 2012, ~4 min/giorno di crawl misurato il 18/08 = il muro vero),
+  mappa fuso UTC->server con le 4 settimane sfasate USA/EU nella
+  sovrapposizione, criteri della SONDA congelati PRIMA (mediana diff
+  minuto <=0,05%, copertura >=80%, discriminante DST);
+- `dukascopy/dukascopy_tick.py` (DUKA-TICK-v1, autotest 9/9 in cloud) —
+  .bi5 -> CSV tick mensili in ORA SERVER, due calendari DST implementati,
+  cache condivisa col fratello M1, riconversione --solo-cache gratis;
+- `mql5/Scripts/ABTG_ImportaTickEsterno.mq5` (BOZZA, MAI COMPILATA) —
+  clone U30USD/NASUSD -> U30USD_DK/NASUSD_DK + CustomTicksReplace +
+  sonda incorporata col cancello.
+Missioni proposte (da firmare): B = NASUSD 2022-2023 (2 notti) prima,
+A = U30USD 2019-2024 (4-5 notti) poi. Le righe di lancio arriveranno con
+verificatore quando Claudio decidera'. Regola d'uso: SOLO verdetti a
+parametri congelati, mai taratura su feed esterno.
