@@ -1,0 +1,189 @@
+# =====================================================================
+#  M0PB -- PASSO 0: SONDA DI FREQUENZA E DI TAGLIA  --  PROVA VERA, M15
+#  Impulso estremo (RSI 6) + rientro sulla EMA5  --  indici, contatore
+# ---------------------------------------------------------------------
+#  PROMOSSA il 31/08/2026 sera dalla bozza M0PB_FREQUENZA_BOZZA.txt
+#  (rimossa nello stesso commit: la storia sta in git). I CRITERI QUI
+#  SOTTO SONO QUELLI CONGELATI NELLA BOZZA PRIMA DI VEDERE QUALUNQUE
+#  NUMERO: non si sono mossi. Rispetto alla bozza cambiano solo i FATTI
+#  gia' corretti nell'AGGIORNAMENTO 31/08: la sonda ESISTE
+#  (mql5\Experts\ABTG_SondaM0PB.mq5, Expert e non Script, per avere le
+#  colonne OPTFRAME) e il nome vero dell'input dello stop e'
+#  InpStopAtrMult (la bozza diceva InpAtrStopMult).
+#
+#  GEMELLA: M0PB_FREQUENZA_M5.txt, IDENTICA salvo @PERIODO (il gate
+#  della riga di lancio verifica il diff meccanicamente). Due file e
+#  non uno perche' il generico confronta/legge @PERIODO dal prova: un
+#  @PERIODO overridato da fuori sarebbe uno stato nascosto.
+#
+#  DOSSIER DI CACCIA:
+#    backtest_pipeline\caccia_strategie\CACCIA_FREQUENZA_2026-08-31.md (P1)
+#  FIRMA: report\FIRME_2026-08-31.md, FIRMA 2 (cancello H8).
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "M0PB" (Momentum Pull Back) di Marcns_,
+#    TradingView, created 2022-12-13, Pine v5, scriptAccess
+#    "open_no_auth", licenza Mozilla Public License 2.0.
+#      https://www.tradingview.com/script/GnsUpEsB-M0PB-Momentum-Pullback/
+#    Copia archiviata:
+#      caccia_strategie\biblioteca\sorgenti\
+#      M0PB_MomentumPullback_Marcns_MPL2_tvGnsUpEsB_2026-08-31.pine
+#    L'attribuzione completa sta in testa a ABTG_SondaM0PB.mq5.
+#
+# =====================================================================
+#  COSA GIRA E COSA NON GIRA
+# ---------------------------------------------------------------------
+#  ABTG_SondaM0PB e' un CONTATORE: NESSUN ordine, nessun lotto, nessun
+#  magic, nessuna sedia. Conta segnali per LATO e misura distanze in
+#  punti indice. Il precedente di casa e' la SondaMediazione (firma di
+#  Claudio del 21/08, "metro, frequenza").
+#
+#  MODELLO DI CORSA: 2 = "Solo prezzi di apertura". Il segnale nasce su
+#  BARRA CHIUSA (T5 del sorgente) e non si apre niente: il tick non
+#  aggiunge informazione e costa ore. VERIFICATO nel generico: il
+#  valore di -Modello finisce tale e quale nella riga Model= dell'.ini
+#  (walkforward_generico.ps1, blocco [Tester]), e 2 e' il modello
+#  "Open prices only" del tester MT5. NOTA DICHIARATA: il generico
+#  marca OGNI modello diverso da 4 col suffisso "_ohlc" nel nome del
+#  CSV -- qui la marca si legge "non-tick", non "OHLC M1".
+#
+#  IL CSV RIGA-PER-SEGNALE NON ESCE IN QUESTO GIRO: la corsa e' in
+#  ottimizzazione (2 passate) e la sonda lo spegne apposta (le passate
+#  si sovrascriverebbero -- trappola gia' scritta nel referto FVGRET).
+#  I numeri si leggono dalle 48 COLONNE OPTFRAME.
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE (CONGELATI IL 31/08 PRIMA DI OGNI NUMERO)
+# ---------------------------------------------------------------------
+#  F1 - PAVIMENTO DI FREQUENZA (pavimento duro, di Claudio 31/08):
+#       segnali per LATO >= 1 al giorno di borsa contato (colonne
+#       "Segnali Long/Short Al Giorno").
+#       < 1/giorno  -> SCARTO IMMEDIATO. Niente EA, niente griglia.
+#       1-2/giorno  -> PASSA, ma al minimo.
+#       > 2/giorno  -> PASSA nella fascia preferita da Claudio.
+#
+#  F2 - TAGLIA DEL TAKE (metro di casa C2): mediana della distanza
+#       ingresso -> highest(12)/lowest(12) AL MOMENTO DEL SEGNALE, in
+#       punti indice (colonne "Take Mediano Long/Short Punti Indice").
+#       >= 6,0 punti  -> PASSA   (3 x 2,0 punti di spread di riferimento)
+#       <  5,0 punti  -> SCARTO
+#       fra 5,0 e 7,0 -> VERDETTO SOSPESO: si misura lo spread vero col
+#                        Code Base 74148 (RealCost Spread P95 Logger,
+#                        promosso il 23/08, MAI ancora usato) e si
+#                        rilegge. 2,0 punti e' una STIMA di METRO_PROP
+#                        D4, marcata [SPREAD NON MISURATO].
+#
+#  F3 - STOP MEDIANO da leggere sempre (colonne "Stop Mediano ...").
+#       Nessun cancello: e' un numero DA CONOSCERE (forma win-rate
+#       alto / RR basso = quella che il DD trailing prop punisce).
+#
+#  F4 - MURO GIORNALIERO PROP: massimo di segnali in UNA giornata
+#       (colonne "Max Segnali Giorno ..."). E' il numero che taglia
+#       InpMaxTradesPerDay dell'EA futuro sui dati, non a occhio.
+#
+#  F4-bis - CANCELLO H8 (FIRMA 2 del 31/08, testuale: "Ogni motore ad
+#       alta frequenza entra in flotta SOLO con E >= 0.075R misurata A
+#       TICK. Frequenza sotto questo cancello = portata finta (DD e
+#       costi)."). La sonda restituisce RR = mediana(take)/mediana(stop)
+#       (colonne "RR Da Mediane Long/Short").
+#       RR mediano < 0,70 -> SCARTO PER ARITMETICA, e NON si spende una
+#       corsa a tick. Tabella congelata (par. 5-bis del dossier):
+#       RR 0,36 -> serve WR 79,0% | 0,50 -> 71,7% | 0,73 -> 62,2% |
+#       1,00 -> 53,8% (colonne "Win Rate Necessario ... Pct").
+#
+#  F5 - DUE LATI, SEMPRE E SEPARATI (regola di Claudio del 25/08).
+#       Ogni numero ha la sua colonna Long e la sua Short: NESSUN
+#       totale aggregato entra in un verdetto.
+#
+#  F6 - GRADIENTE DI TIMEFRAME, dichiarato prima: la sonda gira su M5 E
+#       su M15 (questa prova + la gemella). Attesi piu' segnali e take
+#       piu' piccoli a M5; se la taglia crolla a M5 e' il gradiente
+#       R108/R111 visto dall'altro lato, e va detto.
+#
+#  IL VERDETTO SI LEGGE SULLA PASSATA CON Modo Prezzo Ingresso = 1
+#  (apertura barra successiva, fedele al Pine). La passata con 0 e'
+#  INFORMATIVA: misura gratis la sensibilita' al prezzo d'ingresso.
+#
+# =====================================================================
+#  COLLAUDI DA VERIFICARE PRIMA DI LEGGERE QUALUNQUE NUMERO
+# ---------------------------------------------------------------------
+#  - "Autotest Falliti" = 0 su "Autotest Blocchi" = 12 (-1 = NON girato
+#    e il file non vale).
+#  - "Rsi Divergenza Max" ~ 0 (T1: la traduzione dell'RSI e' giusta).
+#  - "Atr Divergenza Rel Media Pct" attesa NON zero con InpAtrModoPine
+#    true (T3: Wilder contro SMA; se viene ~0 il collaudo non ha
+#    misurato ed e' un problema, non un successo).
+#  - "Punto Indice Prezzo" = 1,00 (T8: conversione 100 misurata sui tre
+#    indici; se non viene 1,00 la taglia e' sbagliata di un fattore).
+#  - Le DUE passate devono contare GLI STESSI segnali e GLI STESSI
+#    giorni (il modo del prezzo d'ingresso non tocca il conteggio).
+#
+# =====================================================================
+#  LIMITI DICHIARATI PRIMA (non dopo)
+# ---------------------------------------------------------------------
+#  - FINESTRA: 2024.09.26 -> 2026.06.30, la stessa delle altre corse
+#    indici. Il pavimento 2024.09.26 e' MISURATO
+#    (risultati_archivio\REFERTO_SONDA_STORICO_17-08.md). Andare piu'
+#    indietro in open-prices NON e' misurato che si possa: non si
+#    assume, e la coerenza con le corse gia' fatte vale di piu'.
+#  - TETTO ~100.000 BARRE DEL TESTER (regola di casa del 25/08): 21
+#    mesi di M5 possono ECCEDERE il tetto (~1,3 anni a M5). Non si
+#    spezza in tranche: la sonda DICHIARA DA SOLA la finestra effettiva
+#    con "Giorni Contati" e "Barre Valutate", e la firma del tetto e'
+#    "Barre Valutate" IDENTICHE su simboli diversi (checklist punto
+#    36). F1 e' per-giorno sul denominatore CONTATO, quindi resta
+#    leggibile; il campione ridotto si dichiara nel referto.
+#  - UN SOLO REGIME (toro): questo passo conta OCCASIONI e misura
+#    GEOMETRIE, non merito. Il merito si misura a tick, dopo (R57).
+#  - Nessun numero dell'autore usato: il "60-70% win rate" resta
+#    [DICHIARATO DALL'AUTORE, NON VERIFICATO].
+#
+# =====================================================================
+#  L'ASSE Y -- PERCHE' InpModoPrezzoIngresso, E PERCHE' NON E' UNO SWEEP
+# ---------------------------------------------------------------------
+#  Il generico RIFIUTA zero assi ("sarebbe un backtest singolo, non un
+#  walk-forward") e la sonda NON ha magic da usare come gemelli. L'asse
+#  minimo si mette sull'UNICO input a due valori ENTRAMBI informativi:
+#    1 = apertura barra successiva (fedele al Pine)  <- RIGA DEL VERDETTO
+#    0 = chiusura barra di segnale                   <- sensibilita' GRATIS
+#  2 passate utili, non decorative. InpStopAtrMult invece resta PINNATO
+#  a 2,75: lo sweep dello stop e' ARITMETICO (T10 del sorgente,
+#  RR(mult) = RR(2,75) * 2,75 / mult, con "Atr Mediano Punti Indice" in
+#  colonna) e sweeparlo servirebbe solo a PESCARE il moltiplicatore che
+#  fa passare il cancello H8 -- vietato per costruzione.
+#
+# =====================================================================
+#  DOVE GIRA
+# ---------------------------------------------------------------------
+#  @SIMBOLO e' il LEAD (U30USD). NASUSD e D30EUR girano con -Simbolo
+#  del generico: override DICHIARATO dal wrapper (RIGA_SONDAM0PB.ps1),
+#  supportato dal generico (il parametro -Simbolo vince sulla
+#  direttiva; misurato nel codice, righe 60 e 303). Sei corse in
+#  tutto: 3 simboli x {M5, M15}, etichette U30/NAS/DAX_M5/M15.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpRsiPeriod=6
+InpRsiHigh=90.0
+InpRsiLow=10.0
+InpEmaPeriod=5
+InpFinestraBarre=6
+InpBarreTarget=12
+InpAtrPeriod=10
+InpStopAtrMult=2.75
+InpAtrModoPine=true
+InpModoPrezzoIngresso=1||0||1||1||Y
+InpPuntiPerIndice=100.0
+InpUsaFinestraOraria=false
+InpOraInizioServer=14
+InpOraFineServer=21
+InpWarmupBarre=300
+InpConfrontaMT5=true
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=M0PB_SONDA

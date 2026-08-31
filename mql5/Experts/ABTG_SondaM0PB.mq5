@@ -62,7 +62,8 @@
 //|  LE TRE DOMANDE, E SONO LE UNICHE                                 |
 //|  ------------------------------------------------------------    |
 //|  dossier: caccia_strategie\CACCIA_FREQUENZA_2026-08-31.md (P1)    |
-//|  criteri: backtest_pipeline\prove\M0PB_FREQUENZA_BOZZA.txt        |
+//|  criteri: prove\M0PB_FREQUENZA_M5.txt + gemella M15 (ex _BOZZA,   |
+//|           promossa il 31/08 sera: criteri IDENTICI, congelati)     |
 //|  firma  : report\FIRME_2026-08-31.md (FIRMA 2, cancello H8)       |
 //|                                                                  |
 //|   1. Quante volte al giorno, PER LATO, il mercato offre un        |
