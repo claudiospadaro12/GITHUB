@@ -623,6 +623,7 @@ Si dichiara, col motivo. **Circa il 20% del testo.**
 ---
 
 ### 🔗 Referti collegati
+- ➡️ **`risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-31.md` — la live di LUNEDÌ 31/08 (la successiva).** Non duplico: lì stanno **MT5 + AI Assistant/MCP** (Giacomo), l'apertura del **corso MACRO applicata** (statistiche dichiarate, mai misurate), l'**avvertimento sui pendenti nei rilasci NFP/CPI** — che è il pezzo con la ricaduta più diretta sul nostro prop-hardening — e la conferma che la gestione *"chiudi il primo pezzo → stop a pari"* è **già nel nostro codice** (`InpBreakevenAtTP1`). Lo **spunto S4 (rilevatore di pre-section) resta invariato**: il 31/08 non aggiunge la definizione numerica che manca
 - `risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-27.md` — **la live di IERI, di cui questa è il seguito dichiarato** (§1: le due regole passano da etichetta a contenuto; §6.3: il R:R 0,5:1 bocciato ieri vs l'1:1 approvato oggi)
 - `risultati_archivio/ANALISI_LIVE_PAOLO_2026-08-27.md` — **la live della sera prima** (§3: lo scontro sul trade dell'hammer; §4: il doppio ordine asimmetrico; Y6 che oggi si allarga)
 - `risultati_archivio/ANALISI_ABTG_OUTLOOK_2026-08-27.md` — outlook settimanale + checklist `.docx` del **16 agosto**, il documento che oggi lui cita come fonte delle due regole
