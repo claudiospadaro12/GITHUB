@@ -1,0 +1,74 @@
+# =====================================================================
+#  ABTG_ChaosLyapunov  -- ABLAZIONE del GATE LLE (baseline gate-off)
+#  Figlio diretto di REFERTO_CHAOS_2026-08-31.md (griglia 105 celle):
+#  l'EA e' gia' BOCCIATO da criterio congelato (fascia PF>=1.3 & DD<8 =
+#  1 cella outlier su 105) e la tesi "LLE basso = tradeable" e'
+#  FALSIFICATA (PF medio 0.42 a gate stretto, 1.33 a gate largo +0.09).
+#  QUESTO ROUND NON RIAPRE QUEL VERDETTO: l'EA resta bocciato in OGNI
+#  caso, qualunque numero esca da qui. Niente e' deployabile da questo
+#  round.
+# ---------------------------------------------------------------------
+#  LA DOMANDA APERTA (l'unica onesta rimasta, questo round la chiude)
+#    Alla griglia manca la BASELINE GATE-OFF: il motore NUDO (EMA-cross
+#    9/21 senza gate) sulla stessa finestra. Senza quel numero non si sa
+#    se il verde a gate largo (PF 1.33 medio a thr+0.09) sia merito del
+#    gate o solo drift Nasdaq 2020-2023 + ottimismo OHLC che attraversano
+#    un EMA-cross qualunque.
+#    - Se il NUDO fa uguale o meglio del gated -> il gate LLE non
+#      aggiunge NIENTE nemmeno al suo punto migliore -> SEPOLTURA
+#      DEFINITIVA del filtro.
+#    - Se il gated batte il nudo con margine netto -> il LLE entra nella
+#      cassetta degli attrezzi come INGREDIENTE misurato (gate candidato
+#      per ALTRI motori, da rimisurare la' prima dell'uso). NON resuscita
+#      questo EA.
+#
+#  IL DISEGNO: 2 celle, ablazione secca sull'UNICO asse InpLyaThreshold
+#    - thr = 0.09  -> il gate al suo MEGLIO (vedi scelta dichiarata)
+#    - thr = 999.0 -> gate SEMPRE APERTO = motore NUDO. La logica nel
+#      sorgente (riga 205-207) e' `return(lle > soglia)`: con soglia
+#      999 il blocco non scatta MAI. CONTROLLO DI LETTURA meccanico:
+#      nella cella 999 la colonna "Gate Chaos Ko" del CSV deve stare a
+#      ~0; se non e' cosi', la corsa non ha misurato il nudo e si butta.
+#
+#  SCELTA DICHIARATA (onesta' prima dei numeri)
+#    Le coordinate fisse lb=50 / sl=0.5 / thr=0.09 sono la cella MIGLIORE
+#    della griglia gia' vista (PF 1.789, +33175, DD 8.78, n=71): questa
+#    e' un'ablazione AL PUNTO DI MASSIMO del gate. Se nemmeno LI' il
+#    gated batte il nudo, il filtro e' morto senza appello. La scelta
+#    post-griglia e' legittima SOLO perche' il round non promuove l'EA:
+#    misura l'INGREDIENTE, non seleziona una cella da deployare.
+#
+#  CRITERI CONGELATI (PRIMA dei numeri)
+#    L'ingrediente LLE si PROMUOVE (in cassetta attrezzi, da rimisurare
+#    su altro motore prima di qualunque uso) SOLO se la cella gated
+#    batte la nuda su TUTTI E DUE:
+#      1. PF_gated >= PF_nudo + 0.20
+#      2. profit_gated >= profit_nudo
+#    Altrimenti: SEPOLTURA definitiva del filtro LLE.
+#    In OGNI caso l'EA resta bocciato e NIENTE e' deployabile da questo
+#    round. Banco OHLC (Modello 1): si legge il CONFRONTO tra le due
+#    righe, MAI i numeri assoluti.
+#
+#  MAGIC: resta il fisso dell'EA (769200, mai deployato) -- NON e' un
+#    asse e non si tocca. Le 2 celle sovrascrivono lo stesso per-trade
+#    CSV: come per la griglia, il per-trade di questa corsa NON si legge.
+#  ------------------------------------------------------------------
+@SIMBOLO NASUSD_EXT
+@PERIODO M15
+@DAQUANDO 2020.01.01
+@FINOA 2024.01.01
+#   ^ stessa finestra della griglia (crollo 2020 + toro 2021 + orso 2022
+#     + ripartenza 2023): l'ablazione si confronta SOLO a parita' di
+#     finestra, simbolo, periodo e banco.
+#
+#  L'UNICO ASSE (2 valori: 0.09 = gate al meglio, 999.0 = motore nudo)
+InpLyaThreshold=0.09||0.09||998.91||999.0||Y
+# --- FISSI (secchi, coordinate della cella migliore della griglia)
+InpLyaLookback=50||50||0||50||N
+InpSlAtrMult=0.5||0.5||0||0.5||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+# --- FISSO (non spazzolato): pavimento SL R109 esplicito (il gate del driver lo
+#     PRETENDE pinnato; il default dell'EA e' gia' 500, qui e' dichiarato). Il
+#     motore e' NUDO (InpCloseAtEnd default false = tiene overnight, come in
+#     griglia: l'ablazione cambia UNA cosa sola, la soglia).
+InpMinStopPts=500||500||500||500||N
