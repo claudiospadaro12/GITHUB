@@ -381,3 +381,20 @@ header coerente con l'EA compilato, per-trade presenti, numeri non identici).
 **PROSSIMO PASSO:** rilanciare la DIAG (v3, ADX≤100) col pin nuovo — stavolta
 girera' davvero — e leggere n + "Gate Via D1"/"Gate Via M15". Poi TICK_G per
 il verdetto.
+
+## ✅ DIAG VERA (31/08 08:23, pin ba56eeb, EA v3): IL GATE RICEVE I DATI — VIA D1
+
+_Prima esecuzione REALE della v3 (freschezza verificata: modo CORSA, compile
+81KB 08:23:13, per-trade 2/2, header a 26 colonne). Zip
+CRT_TICK_DIAG_CORSA_20260831_0823._
+
+- **Trades = 2039** (era 0). **Gate Via D1 = 1269, Gate Via M15 = 0**: il
+  CopyRates(D1) introdotto in v2 LEGGE il daily nel tester tick — il baco era
+  SOLO negli handle iADX/iATR (provato il 30/08 alle 23:07), il fallback M15
+  della v3 non e' mai servito. Ret Gate Regime = 156 = solo warmup iniziale.
+- Gemelli 769107/769108 byte-identici: determinismo OK.
+- Controprova di coerenza: ADX<=100 = gate spento -> PF 0.462, -75354,
+  DD 76.5% — nel range dell'ungated morto (0.43-0.73). Il banco e' lo stesso.
+
+**CONSEGUENZA: la strada al verdetto tick e' APERTA. Prossima corsa: TICK_G
+(ADX<=30), stesso pin — IL verdetto del gated CRT nel toro.**
