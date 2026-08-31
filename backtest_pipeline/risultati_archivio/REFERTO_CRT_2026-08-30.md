@@ -244,6 +244,12 @@ restano 0 -> ADX>30 sempre (toro forte, gate flat) o D1 no-data. Round rifatto c
 
 ### 2o TENTATIVO (ATR=0, pin 9e99e48): ANCORA 0 TRADE, gateBlk=2573
 
+> ⚠️ **INVALIDATO IL 31/08 — CORSA MAI ESEGUITA.** Il generico ha trovato i CSV
+> del 1o tentativo nella stessa workdir e ha SALTATO le passate (`-Rifai` non
+> passato, generico:615): lo zip conteneva i numeri del 22:45, non una corsa
+> nuova. Vedi la sezione "CORREZIONE DEL 31/08" in fondo. La diagnosi del muro
+> ATR (trovata per lettura del codice) resta valida; questa "misura" no.
+
 Con l'ATR spento il gate blocca ANCORA tutti i 2573 pattern (gateBlk=2573, 0 trade).
 Quindi NON era (solo) l'ATR. Restano DUE ipotesi, e vanno separate:
 - **(a) ADX(D1) > 30 per tutti i 2573**: il toro 2024-2026 e' cosi' trendante che
@@ -288,6 +294,15 @@ il gated tick.
 
 ## CHIUSURA DELLA GIORNATA CRT (30/08, 23:30) — PARCHEGGIO ONESTO
 
+> ⚠️ **INVALIDATO IL 31/08 — LE DUE CORSE "FINALI" NON SONO MAI PARTITE.**
+> Stessa causa del 2o tentativo: workdir riusate senza `-Rifai` → il generico
+> ha saltato tutto e i wrapper hanno raccolto i CSV stantii (header VECCHIO a
+> 24 colonne, per-trade NON TROVATI, numeri byte-identici). La conclusione
+> "anche CopyRates non consegna dati" e' COSTRUITA SU CODICE MAI ESEGUITO:
+> l'EA v2 (CopyRates) e la v3 (fallback M15) non sono MAI stati visti dal
+> tester. Vedi "CORREZIONE DEL 31/08" in fondo. Il parcheggio e' SOSPESO:
+> prima si rifanno le corse per davvero.
+
 Round finale (EA corretto con CopyRates, pin 1ae826a):
 - GATED TICK (ADX<=30): 0 trade, gateBlk=2573.
 - DIAG (ADX<=100, soglie sempre-vere): ANCORA 0 trade, gateBlk=2573.
@@ -315,3 +330,54 @@ sessione di lavoro, non un altro giro di griglia.
 **PIVOT DICHIARATO:** il valore adesso e' nei 5 motori costruiti e MAI testati
 (Chaos Lyapunov - riga gia' PRONTA -, DAX ReEntry, Dow ModelB, H1 NY Retest, DAX
 ValueArea): possono dare un mattone deployabile nel regime ATTUALE.
+
+---
+
+## 🚨 CORREZIONE DEL 31/08 (mattina) — QUATTRO CORSE SU SEI NON SONO MAI PARTITE
+
+_Scoperta analizzando lo zip DIAG delle 06:32 del 31/08 (pin 8d71a3b, EA v3):
+CSV con l'header VECCHIO a 24 colonne (senza "Gate Via D1"/"Gate Via M15" che
+la v3 appena compilata stampa), per-trade NON TROVATI, gateBlk=2573
+byte-identico al giorno prima. Impossibile: o il CSV mentiva, o la corsa non
+era mai partita. Era la seconda._
+
+**LA CAUSA (una riga, `walkforward_generico.ps1:615`):** se il CSV col tag
+della passata esiste gia' nella workdir e `-Rifai` non e' passato, il generico
+stampa `gia' fatto, salto` e NON esegue. E' una feature (riprendere griglie
+interrotte), ma i wrapper TICK_G e TICK_DIAG riusano la stessa workdir a ogni
+lancio → dal secondo lancio in poi TUTTO viene saltato e lo zip impacchetta i
+CSV del giro prima come fossero freschi.
+
+**IL CENSIMENTO CORRETTO delle 6 corse tick della saga:**
+
+| Ora | Round | Pin | EA | Eseguita? |
+|---|---|---|---|---|
+| 30/08 22:45 | TICK_G (ATR=100) | 6cef95d | v1 handle | ✅ VERA (workdir vergine) |
+| 30/08 22:52 | TICK_G "ATR=0" | 9e99e48 | v1 | ❌ SALTATA (CSV stantio) |
+| 30/08 23:07 | DIAG (ADX≤100) | 343e139 | v1 | ✅ VERA (workdir vergine) |
+| 30/08 23:26 | TICK_G "CopyRates" | 1ae826a | v2 | ❌ SALTATA |
+| 30/08 23:29 | DIAG "CopyRates" | 1ae826a | v2 | ❌ SALTATA |
+| 31/08 06:32 | DIAG v3 | 8d71a3b | v3 | ❌ SALTATA |
+
+**COSA RESTA IN PIEDI (misurato su corse VERE):**
+- Il baco degli HANDLE iADX/iATR D1 nel tester tick su nativo e' PROVATO:
+  la DIAG delle 23:07 (vera, soglie sempre-vere ADX≤100+ATR=0) ha dato 0 trade
+  con 2573 pattern → RegimeGateOk()=false per dato mancante. Questo regge.
+- Il gate ADX≤30 VALIDATO su OHLC (+10135, ogni regime positivo) regge: quelle
+  erano corse OHLC su workdir proprie, mai riusate.
+
+**COSA CADE (conclusioni su codice mai eseguito):**
+- "Anche CopyRates fallisce" → MAI MISURATO. La v2 non e' mai girata.
+- "La v3 non risolve" → MAI MISURATO. La v3 non e' mai girata.
+- Il "LIMITE DIAGNOSTICO RAGGIUNTO" e il parcheggio della chiusura → SOSPESI.
+  Il verdetto tick del gated CRT e' forse a UNA corsa vera di distanza.
+
+**IL FIX (fatto, 31/08):** `-Rifai` aggiunto all'`$argv` del generico in
+ENTRAMBI i wrapper (`RIGA_CRT_TICK_G.ps1`, `RIGA_CRT_TICK_DIAG.ps1`) — un
+wrapper di verdetto non riprende mai: rifa'. Classe nuova aggiunta a
+`CHECKLIST_RIGA_DI_LANCIO.md` (skip-senza-Rifai + controllo di freschezza:
+header coerente con l'EA compilato, per-trade presenti, numeri non identici).
+
+**PROSSIMO PASSO:** rilanciare la DIAG (v3, ADX≤100) col pin nuovo — stavolta
+girera' davvero — e leggere n + "Gate Via D1"/"Gate Via M15". Poi TICK_G per
+il verdetto.

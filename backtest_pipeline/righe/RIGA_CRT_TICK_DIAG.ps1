@@ -217,6 +217,7 @@ try{
               "-Fino",$Fino,
               "-FrazioneIS","1.0",
               "-Modello","4",
+              "-Rifai",
               "-Deposito",("" + $Deposito))
     $global:LASTEXITCODE = 0
     & powershell $argv

@@ -5581,3 +5581,47 @@ del prova.
 > sopravvive a un riscrittura e' un difetto del pacchetto anche se le due
 > stringhe eseguibili sono corrette: confonde chi legge e riporta a galla il
 > design gia' bocciato.
+
+## 🧟 IL WRAPPER CHE RIUSA LA WORKDIR SENZA `-Rifai`: il generico SALTA la corsa e serve il CSV STANTIO come fresco (31/08/2026)
+
+_Pagata sul CRT, la piu' cara della saga: QUATTRO corse (TICK_G 22:52 e 23:26,
+DIAG 23:29 del 30/08, DIAG 06:32 del 31/08) sono state dichiarate "eseguite"
+e NESSUNA e' mai partita._
+
+Il meccanismo, riga per riga:
+1. `walkforward_generico.ps1:615` — se il CSV col tag della passata ESISTE gia'
+   nella workdir e `-Rifai` non e' passato, stampa `gia' fatto, salto` in
+   DarkGray e fa `continue`. E' una FEATURE (riprendere una griglia interrotta
+   a meta'), non un baco del generico.
+2. Ma un wrapper di VERDETTO che riusa la stessa workdir (`abtg_crt_tick_g`,
+   `abtg_crt_tick_diag`) al secondo lancio trova i CSV del giorno prima →
+   il generico salta TUTTE le passate → esce con codice 0 → il wrapper
+   raccoglie i CSV VECCHI e li impacchetta nello zip come risultato fresco.
+3. Il travestimento e' perfetto: l'EA e' stato APPENA ricompilato (81 KB,
+   orario fresco nel referto), il gate e' passato, lo zip arriva puntuale.
+   L'unica riga che dice la verita' e' quel `salto` grigio in mezzo alla
+   console, che nessuno rilegge.
+
+Come e' stata SMASCHERATA (i tre segni, da cercare sempre):
+- l'header del CSV era nel formato VECCHIO (24 colonne, senza le colonne
+  nuove "Gate Via D1"/"Gate Via M15" che l'EA v3 appena compilato stampa);
+- i per-trade CSV in Common\Files erano NON TROVATI (il wrapper li cancella
+  prima della corsa: se la corsa non parte, nessuno li riscrive);
+- i numeri erano BYTE-IDENTICI alla corsa del giorno prima (gateBlk=2573).
+
+Conseguenza metodologica: le conclusioni tratte da quelle corse ("anche
+CopyRates fallisce", "la v3 non risolve") erano INVALIDE — costruite su
+codice MAI ESEGUITO. Due versioni dell'EA sono state giudicate senza che il
+tester le abbia mai viste.
+
+> ✅ **REGOLA (tripla):**
+> 1. **Ogni wrapper che chiama il generico su una workdir riusabile passa
+>    SEMPRE `-Rifai`** — un wrapper di verdetto non "riprende" mai: rifa'.
+>    (Fatto il 31/08 su `RIGA_CRT_TICK_G.ps1` e `RIGA_CRT_TICK_DIAG.ps1`.)
+> 2. **Il gate del verificatore controlla che `-Rifai` sia nell'`$argv`** di
+>    ogni wrapper che rilancia su una workdir gia' usata.
+> 3. **Chi legge un referto verifica la FRESCHEZZA, non solo la presenza**:
+>    header del CSV coerente con le colonne dell'EA appena compilato,
+>    per-trade presenti, numeri NON byte-identici alla corsa precedente.
+>    Un risultato identico al precedente dopo una modifica al codice non e'
+>    "conferma": e' il primo indizio che il codice non e' mai girato.

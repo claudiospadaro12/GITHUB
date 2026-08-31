@@ -48,6 +48,14 @@ ancora, il Giornale dice PERCHE' in un test manuale di 5 minuti.
 
 ---
 
+> ⛔ **SUPERATO IL 31/08 MATTINA — NON USARE LE STRINGHE QUI SOTTO.**
+> La DIAG delle 06:32 al pin 8d71a3b NON e' mai partita: i wrapper riusavano la
+> workdir senza `-Rifai` e il generico saltava le passate servendo CSV stantii
+> (generico:615 — classe nuova in CHECKLIST_RIGA_DI_LANCIO.md, correzione
+> completa in REFERTO_CRT_2026-08-30.md, sezione "CORREZIONE DEL 31/08").
+> I wrapper sono stati corretti (`-Rifai` sempre) → **serve il PIN NUOVO
+> post-fix: le stringhe valide sono quelle consegnate in chat il 31/08.**
+
 ## AGGIORNAMENTO NOTTURNO (00:05) — BUILD v3 PRONTA, REVISIONATA, PUSHATA
 
 EA v3 committato al pin **8d71a3b16dab3303761811434892b6540c8ebced** (revisione:
