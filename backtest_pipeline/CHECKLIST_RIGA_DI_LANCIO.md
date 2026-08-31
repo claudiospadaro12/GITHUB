@@ -5873,3 +5873,21 @@ che come **impossibilita' geometrica**.
 > un altro TF **cambia significato**, e puo' cambiarlo fino a rendere il
 > motore muto. Quando si cambia `@PERIODO`, si rileggono TUTTI i parametri
 > contati in barre e si dichiara che cosa diventano in tempo.
+
+## 🌙 IL FLAT A "ORA DEL GIORNO" SI RESETTA A MEZZANOTTE: senza tick fra il flat e le 24:00 la posizione DORME (31/08/2026, pagata sul PASSO 0 NyRetest M15)
+
+`DopoOrarioFlat_Calc(ora,min) >= flat` e' vera solo fino a mezzanotte. Nei
+giorni in cui il mercato NON ha tick fra l'orario di flat e le 24:00 (festivi
+USA, venerdi' corti, settimane di sfasamento DST) il flat non trova mai un
+tick su cui scattare, a mezzanotte la condizione torna falsa, e la posizione
+sopravvive fino allo SL o alla riapertura successiva — misurate chiusure a
+23:05, 00:18, 01:34, 07:15, weekend interi (28 posizioni su 460, net +7360
+di fortuna pura = gap risk reale non protetto).
+
+> ✅ **REGOLA: ogni EA con vincolo zero-overnight ha DUE flat**: quello serale
+> a ora-del-giorno E il **flat di recupero** — al primo tick, se una posizione
+> risulta aperta da un giorno di CALENDARIO precedente (chiave
+> anno*10000+mese*100+giorno, MAI day_of_year che fallisce a cavallo d'anno),
+> si chiude subito, a qualunque ora. E chi legge un per-trade CSV con vincolo
+> flat **ordina le chiusure per ora del giorno**: una sola chiusura fuori
+> fascia = vincolo violato, va spiegata o il file e' invalido.

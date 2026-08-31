@@ -24,7 +24,7 @@ ablazione dichiarata). Unico asse Y = **gemelli magic 769501/769502**.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_NYRETEST.ps1` (marcatore `MARCATORE_RIGA_NYRETEST_v3`) |
+| **Driver** | `righe/RIGA_NYRETEST.ps1` (marcatore `MARCATORE_RIGA_NYRETEST_v4`) |
 | **File prova** | `prove/ABTG_NySessionRetest.txt` (cella fissa gate-OFF, gemelli, fuso server) |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~15-40 min (tick M15, 21
@@ -40,7 +40,7 @@ rosso sul CSV `*_OOS` è **atteso**, NON rilanciare.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_NYRETEST.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_NYRETEST.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera.' -ForegroundColor Red } }
 ```
@@ -52,7 +52,7 @@ rosso sul CSV `*_OOS` è **atteso**, NON rilanciare.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_NYRETEST.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_NYRETEST.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```

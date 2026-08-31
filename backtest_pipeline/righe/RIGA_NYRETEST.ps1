@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_NYRETEST_v3
+#  MARCATORE_RIGA_NYRETEST_v4
 #  RIGA_NYRETEST.ps1  --  NY SESSION RETEST: PASSO 0 + MISURA a tick BCM.
 #  ABTG_NySessionRetest (VWAP-retest in trend, VWAP-retest intraday della
 #  flotta) su U30USD M15, TICK REALI (Modello 4), 2024.09.26->2026.06.30.

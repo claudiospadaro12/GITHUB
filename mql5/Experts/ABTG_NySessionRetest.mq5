@@ -327,6 +327,15 @@ bool DopoOrarioFlat_Calc(const int ora,const int minuto,
   }
 
 //+------------------------------------------------------------------+
+//| Chiave di calendario (anno*10000+mese*100+giorno): confrontabile  |
+//| con <, robusta a cavallo di mese/anno. Pura, per l'autotest.      |
+//+------------------------------------------------------------------+
+long GiornoChiave_Calc(const int anno,const int mese,const int giorno)
+  {
+   return((long)anno*10000 + (long)mese*100 + (long)giorno);
+  }
+
+//+------------------------------------------------------------------+
 //| Conversione: distanza di PREZZO -> PUNTI INDICE.                  |
 //+------------------------------------------------------------------+
 double PrezzoInPuntiIndice_Calc(const double distPrezzo,
@@ -799,7 +808,31 @@ void ManageOpenPosition()
 bool FlatFineSedutaCheck()
   {
    MqlDateTime t; TimeToStruct(TimeCurrent(),t);
-   if(!DopoOrarioFlat_Calc(t.hour,t.min,InpCloseHour,InpCloseMin)) return(false);
+   //--- FLAT DI RECUPERO (misurato 31/08, PASSO 0 M15: 28 posizioni su 460
+   //    sopravvissute al flat perche' il mercato NON aveva tick fra le 20:55
+   //    e la mezzanotte -- festivi USA, settimane DST, venerdi' corti -- e a
+   //    mezzanotte la condizione a ora-del-giorno si RESETTA: chiusure viste
+   //    alle 23:05, 00:18, 01:34 e perfino 07:15, weekend interi compresi).
+   //    Il vincolo e' ZERO OVERNIGHT, non "zero overnight se il calendario
+   //    collabora": una posizione aperta in un GIORNO PRECEDENTE si chiude
+   //    al PRIMO tick disponibile, a qualunque ora del giorno.
+   bool recupero=false;
+   if(InpCloseAtEnd)
+     {
+      long chiaveOggi=GiornoChiave_Calc(t.year,t.mon,t.day);
+      for(int i=PositionsTotal()-1;i>=0;i--)
+        {
+         ulong p=PositionGetTicket(i);
+         if(p==0) continue;
+         if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
+         if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+         MqlDateTime ta; TimeToStruct((datetime)PositionGetInteger(POSITION_TIME),ta);
+         if(GiornoChiave_Calc(ta.year,ta.mon,ta.day) < chiaveOggi){ recupero=true; break; }
+        }
+      if(recupero)
+         Log("flat di RECUPERO: posizione di un giorno precedente ancora aperta (il flat serale non ha avuto tick), chiudo al primo tick disponibile.");
+     }
+   if(!recupero && !DopoOrarioFlat_Calc(t.hour,t.min,InpCloseHour,InpCloseMin)) return(false);
 
    //--- oltre l'orario di fine: niente nuovi ingressi. Se InpCloseAtEnd,
    //    chiudo tutto (mai overnight). In ogni caso ritorno true per fermare
@@ -1016,9 +1049,15 @@ void AutoTestRetest()
    bool sm1=(SessionStamp_Calc(tA,mS)==SessionStamp_Calc(tB,mS));  // stessa seduta
    bool sm2=(SessionStamp_Calc(tA,mS)==SessionStamp_Calc(tC,mS));  // diverse
    double ip1=PrezzoInPuntiIndice_Calc(5.0,100.0,0.01);   // 5.0
-   PrintFormat("[NYRT][AUTOTEST] seduta: apert=%d(1) dentro=%d(1) fine=%d(0) pre=%d(0) | flat esatto=%d(1) prima=%d(0) | stamp same=%d(1) diff=%d(0) | conv=%.2f(5.00)",
-               (int)se1,(int)se2,(int)se3,(int)se4,(int)fl1,(int)fl2,(int)sm1,(int)sm2,ip1);
-   if(!(se1 && se2 && !se3 && !se4 && fl1 && !fl2 && sm1 && !sm2 && MathAbs(ip1-5.0)<1e-6)) falliti++;
+   //--- flat di RECUPERO (31/08): la chiave di calendario ordina anche a
+   //    cavallo di mese e anno (il confronto day_of_year li' fallirebbe).
+   bool gk1=(GiornoChiave_Calc(2026,1,2)  > GiornoChiave_Calc(2026,1,1));   // giorno dopo
+   bool gk2=(GiornoChiave_Calc(2026,2,1)  > GiornoChiave_Calc(2026,1,31));  // cavallo di mese
+   bool gk3=(GiornoChiave_Calc(2027,1,1)  > GiornoChiave_Calc(2026,12,31)); // cavallo di anno
+   bool gk4=(GiornoChiave_Calc(2026,8,31) == GiornoChiave_Calc(2026,8,31)); // stesso giorno
+   PrintFormat("[NYRT][AUTOTEST] seduta: apert=%d(1) dentro=%d(1) fine=%d(0) pre=%d(0) | flat esatto=%d(1) prima=%d(0) | stamp same=%d(1) diff=%d(0) | conv=%.2f(5.00) | chiave gg=%d%d%d%d(1111)",
+               (int)se1,(int)se2,(int)se3,(int)se4,(int)fl1,(int)fl2,(int)sm1,(int)sm2,ip1,(int)gk1,(int)gk2,(int)gk3,(int)gk4);
+   if(!(se1 && se2 && !se3 && !se4 && fl1 && !fl2 && sm1 && !sm2 && MathAbs(ip1-5.0)<1e-6 && gk1 && gk2 && gk3 && gk4)) falliti++;
 
    Print("[NYRT][AUTOTEST] esito motore: ", (falliti==0
          ? "SEI BLOCCHI SU SEI, il motore ragiona come il sorgente."

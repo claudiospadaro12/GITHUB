@@ -28,3 +28,45 @@ request.security del Pine sorgente). Il prova e' aggiornato (@PERIODO M15,
 motivazione misurata dentro), wrapper v3, stessa cella, stessi gemelli,
 stessi criteri congelati. La corsa H1 resta agli atti come misura valida:
 "frequenza su H1 = 0 per costruzione".
+
+---
+
+## PASSO 0 SU M15 (corsa VERA 10:08, pin c673b98): IL MOTORE PARLA — E UNA FALLA NEL FLAT
+
+_Freschezza: modo CORSA, compile 67KB 10:08:32, per-trade 769501=623 | 769502=623
+(gemelli IDENTICI), PROBLEMI 0. Zip NYRETEST_CORSA_20260831_1008._
+
+### LA MISURA (retest NUDO, gate regime OFF — e' la baseline voluta)
+- **n = 623 deal / 460 posizioni** in 459 giorni (~1 posizione/giorno) ->
+  n >> 150: alla taratura il MERITO si potra' giudicare (R59 soddisfatta).
+- **PF 0.998, profit -199** su 100k: il retest nudo e' in PAREGGIO PERFETTO.
+  (Confronto: il CRT nudo era PF 0.46. Qui il gate costitutivo slope+espansione
+  ha una base da cui puo' realisticamente estrarre — e' il quadro ideale per
+  la taratura, che era lo scopo del passo.)
+- Mediana take: WIN +87.8 punti indice (n=310) / LOSS -57.1 (n=313) -> il
+  take mediano paga ampiamente lo spread del Dow.
+- LATI: LONG n=351, +2450, win 51.9% | SHORT n=272, -2650, win 47.1% ->
+  il lato corto zavorra (toro), il lungo galleggia.
+- DD 12.97%, peggior giornata -2.89%, autotest 0, RegimeKo=0 (gate OFF vero).
+- Scala per la taratura: mediane slope/espansione da leggere nel per-trade
+  al round successivo (gate ON vs OFF attorno alla mediana).
+
+### 🔴 VIOLAZIONE DEL VINCOLO DURO (dichiarata): 30 chiusure OLTRE il flat
+30 deal su 623 chiusi alle 23:05 / 00:18 / 01:34 / 07:15 — domeniche sera,
+festivi USA (Memorial Day, Labor Day, Juneteenth), settimane DST di marzo.
+Net di quei deal: +7360 (FORTUNA, non merito: e' gap risk weekend/festivo
+non protetto). **Per la lettera del vincolo congelato il file e' INVALIDO
+come prova di "zero overnight"** — le misure di scala (frequenza, mediane,
+lati) restano fatti misurati.
+
+**CAUSA (letta nel sorgente):** DopoOrarioFlat_Calc confronta solo l'ORA DEL
+GIORNO (>=20:55). Se il mercato non ha tick fra le 20:55 e la mezzanotte
+(festivo, venerdi' corto, sfasamento DST), a mezzanotte la condizione si
+RESETTA e la posizione dorme fino allo SL o alla riapertura (weekend incluso).
+
+**FIX (v4, 31/08):** FLAT DI RECUPERO — se una posizione risulta aperta da un
+GIORNO DI CALENDARIO PRECEDENTE (GiornoChiave_Calc, robusto a cavallo di
+mese/anno, autotestato), si chiude al PRIMO tick disponibile a qualunque ora.
+Limite residuo dichiarato: senza tick non si chiude nulla — l'esposizione
+minima fino alla prima riapertura e' irreducibile senza calendario festivi.
+Il PASSO 0 va RIFATTO con la v4 per avere il file valido agli atti.
