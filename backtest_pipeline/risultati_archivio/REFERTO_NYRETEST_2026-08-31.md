@@ -133,3 +133,43 @@ naturale R59: se a soglie piu' alte n scende sotto 150, il merito e'
 sospeso comunque -> la mappa si chiude li' in ogni caso. Le celle
 slope=45 (gia' misurate: 211/1.17 e 212/1.17) fanno da sentinella di
 continuita'. UNA corsa, poi verdetto definitivo della taratura.
+
+---
+
+## 🏁 ESTENSIONE FINALE (corsa VERA 11:42, pin 77435cb, 8/8): MAPPA COMPLETA — VERDETTO DELLA TARATURA
+
+_Sentinelle slope=45 riprodotte ESATTE (211/1.174, 212/1.166), cache 0/0,
+autotest 0, PROBLEMI 0. Zip NYRETEST_TAR2_CORSA_20260831_1142._
+
+**IL BORDO, MISURATO (exp=0):**
+
+| slope | n | PF (sl5/sl7) | DD (sl7) | pegg.gio |
+|---|---|---|---|---|
+| 45 | 211/212 | 1.174 / 1.166 | 5.8% | -1.13 |
+| 60 | 160 | 1.137 / 1.195 | 5.6% | -1.12 |
+| **75** | **115/114** | **1.374 / 1.427** | **3.7%** | **-0.69** |
+| 90 | 75/76 | 1.248 / 1.280 | 2.2% | -0.66 |
+
+**VERDETTO (criteri congelati, applicati alla lettera):**
+- Il PF tocca il massimo a slope 75 (1.37/1.43, banda coerente su sl 5 e 7,
+  DD 3.7-4.7%, peggior giornata -0.69%): la barra PF>=1.3 & DD<8 e' RAGGIUNTA
+  **ma con n=114-115 < 150 -> MURO R59: il MERITO e' SOSPESO.** Non
+  promovibile, come pre-dichiarato.
+- A slope 60 (n=160, sopra il muro) il PF e' 1.14-1.20: sotto barra.
+- **TARATURA CHIUSA: "gate REALE, edge sotto barra al n minimo."** Nessuna
+  terza estensione (ultimo giro, scritto nel prova e rispettato).
+
+**LA CARTA D'IDENTITA' FINALE DEL NY SESSION RETEST (tutta misurata oggi):**
+motore nudo in pareggio (PF 1.002, n=625); gate slope COSTITUTIVO e REALE
+a tick (primo della flotta): monotono, dimezza il DD, espansione decorativa;
+la selettivita' cresce col vigore del trend VWAP fino a PF ~1.4 su campione
+sottile. RISCHIO (giudicabile sempre, R59): eccellente nella banda alta
+(DD 2-5%, pegg.gio -0.7%).
+
+**PORTA DI RIENTRO (dichiarata, meccanica, non discrezionale):** la finestra
+tick BCM CRESCE ogni mese. La cella slope 75 produce ~5.4 trade/mese: quando
+la finestra dara' n>=150 sulla STESSA cella (stima: primavera-estate 2027, o
+prima se il regime cambia frequenza), si rimisura con criteri identici — e'
+un TAGLIANDO calendarizzato, non una seconda caccia. In alternativa:
+Dukascopy pre-2024 sul Dow per allungare indietro (stessa coda del CRT).
+NIENTE deploy oggi: la regola R59 non si aggira.

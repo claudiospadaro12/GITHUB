@@ -518,3 +518,13 @@ si resetta a mezzanotte (fix: flat di recupero + open_time nel CSV), criterio
 zero-overnight-assoluto fisicamente irraggiungibile (riscritto prima dei
 numeri). Prossimo: TARATURA del gate slope+espansione (criteri gia' nel
 prova). Referto: risultati_archivio/REFERTO_NYRETEST_2026-08-31.md
+
+### NY Session Retest — TARATURA CHIUSA (31/08): gate REALE, edge sotto barra al n minimo
+Estensione finale 8 celle: PF massimo a slope 75 (1.37/1.43, DD 3.7-4.7%,
+pegg.gio -0.69%) ma n=114-115 < 150 -> muro R59, merito sospeso. A slope 60
+(n=160) PF 1.14-1.20 sotto barra. NON promosso, NON deployabile. Primo gate
+costitutivo della flotta VALIDATO a tick (slope VWAP: monotono, DD dimezzato;
+espansione decorativa). Porta di rientro MECCANICA: tagliando quando la
+finestra tick BCM dara' n>=150 sulla cella slope 75 (~5.4 trade/mese, stima
+2027) o Dukascopy pre-2024. Referto completo:
+risultati_archivio/REFERTO_NYRETEST_2026-08-31.md
