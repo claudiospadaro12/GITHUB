@@ -5752,3 +5752,66 @@ bene" finiscono nello stesso ramo* — appeso al meccanismo del punto **41**.
 > ("il rosso sull'OOS e' ATTESO, non rilanciare"). Quando un pacchetto
 > **dichiara innocuo** un pezzo della corsa, quel pezzo va guardato **piu'**
 > degli altri: nessuno lo controllera' piu' dopo di te.
+
+---
+
+## 🧊 L'ABLAZIONE ANCORATA ALLA **CELLA MIGLIORE DI UNA GRIGLIA GIA' GIRATA** E' UN CACHE-HIT **PER COSTRUZIONE** — e il pass ripescato non falsa il numero: **fa sparire la riga**, con esito VERDE (31/08/2026)
+
+_Trovata verificando il pacchetto **CHAOS ABLAZIONE** (`RIGA_CHAOSABL.ps1`,
+`prove/ABTG_ChaosLyapunov_Abl.txt`, pin `a6a363c7`) **prima** dell'invio.
+E' il punto **38** che si ripresenta in una forma in cui la cache non e' un
+rischio ma una **certezza aritmetica**._
+
+Il punto 38 parlava del **canarino**: una cella di controllo che per sfortuna
+era gia' stata girata. Qui non c'e' nessuna sfortuna. Un'ablazione si costruisce
+**apposta** cosi':
+
+> *"le coordinate fisse lb=50 / sl=0.5 / thr=0.09 sono la **cella MIGLIORE della
+> griglia gia' vista**: questa e' un'ablazione **al punto di massimo** del gate"*
+
+Cioe' la meta' GATED del confronto **e' — per definizione — una passata che il
+round precedente ha gia' calcolato**, sullo stesso simbolo, periodo, finestra,
+Modello, deposito e con gli stessi input blindati. Misurato sui due file prova:
+la griglia (`ABTG_ChaosLyapunov_Lya.txt`) spazzolava
+`InpLyaThreshold=0.00||-0.06||0.03||0.12||Y` (contiene **0.09**),
+`InpLyaLookback=100||50||50||150||Y` (contiene **50**),
+`InpSlAtrMult=1.5||0.5||0.5||2.5||Y` (contiene **0.5**); e il sorgente dell'EA
+non e' cambiato (`git diff cc99ea5 a6a363c -- mql5/Experts/ABTG_ChaosLyapunov.mq5`
+= **vuoto**). **Non e' un rischio: e' la cella che il round sta misurando.**
+
+**E la conseguenza non e' quella del punto 38.** Li' il pass ripescato tornava
+con un numero vecchio ma **tornava**. Qui l'export vive nei FRAME
+(`FrameAdd` dentro `OnTester()`, CSV scritto da `OnTesterDeinit()` leggendo
+`FrameNext`): **un pass non rieseguito non chiama `OnTester()`, quindi non
+manda nessun frame, quindi non ha nessuna riga nel CSV.** L'ablazione a 2 celle
+torna con **1 riga sola — quella NUDA** — e il confronto, che e' l'unico
+contenuto del round, non esiste piu'.
+
+E nessuno lo dice: `walkforward_generico.ps1` stampa il suo blocco rosso della
+cache (righe 686-694) ma **finisce senza `exit` non nullo**, quindi il wrapper
+legge `$LASTEXITCODE = 0` e stampa `ESITO: CORSA COMPLETATO` **in verde**, con
+lo zip pronto e dentro un CSV a meta'.
+
+> ✅ **REGOLA (tripla):**
+>
+> 1. **Ogni round che rimisura una cella di un round precedente svuota
+>    `Tester\cache` — e lo dichiara nel referto con i due conteggi** (prima e
+>    dopo, punto **46**: `-LiteralPath` non va sul percorso col wildcard, e un
+>    `Remove-Item -EA SilentlyContinue` non sa dirti che non ha fatto niente).
+>    Il test meccanico prima di approvare una riga di ablazione: **si aprono i
+>    DUE file prova** (quello del round precedente e quello nuovo) e si guarda
+>    se le coordinate fisse del nuovo **cadono dentro la griglia del vecchio**.
+>    Se ci cadono, senza svuotare la cache il round e' gia' perso.
+>
+> 2. **Un CSV di ablazione si CONTA, non si `Test-Path`.** Le righe dati devono
+>    essere **esattamente quante sono le celle**, e il wrapper deve verificare
+>    che **portino i valori dell'asse che ha chiesto** (qui: la colonna
+>    `InpLyaThreshold` con `0.09` e `999`, letta con `InvariantCulture`).
+>    Righe mancanti -> `PROBLEMI`, esito **giallo**, `exit 1`. Il conto non si
+>    lascia a chi apre lo zip.
+>
+> 3. **Il codice d'uscita di un driver figlio non e' un verdetto.**
+>    `walkforward_generico.ps1` diagnostica in ROSSO **a schermo** e esce **0**:
+>    un wrapper che si limita a `if($LASTEXITCODE -ne 0)` eredita solo i
+>    silenzi. Ogni diagnostica del figlio che il round considera FATALE va
+>    **rimisurata sugli artefatti** dal wrapper, dopo la corsa.

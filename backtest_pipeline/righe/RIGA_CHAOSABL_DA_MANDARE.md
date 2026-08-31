@@ -19,7 +19,7 @@ senza filtro). EA `ABTG_ChaosLyapunov` su **NASUSD_EXT M15**, **OHLC (Modello
 | | |
 |---|---|
 | **EA** | `mql5/Experts/ABTG_ChaosLyapunov.mq5` (già compilato OK il 31/08; la riga ricompila comunque al pin) |
-| **Driver** | `righe/RIGA_CHAOSABL.ps1` (marcatore `MARCATORE_RIGA_CHAOSABL_v1`) |
+| **Driver** | `righe/RIGA_CHAOSABL.ps1` (marcatore `MARCATORE_RIGA_CHAOSABL_v2`) |
 | **File prova** | `prove/ABTG_ChaosLyapunov_Abl.txt` (1 asse a 2 valori + fissi pinnati) |
 | **Include** | **nessuno** (solo `Trade\Trade.mqh`, di serie) |
 
@@ -72,7 +72,7 @@ bocciato.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_CHAOSABL.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_CHAOSABL.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOSABL_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOSABL_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -91,7 +91,7 @@ ABTG_ChaosLyapunov: OK (<n> KB)`; `ESITO: CONTROLLO COMPLETATO`.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_CHAOSABL.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_CHAOSABL.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOSABL_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOSABL_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -113,7 +113,8 @@ rilanciare**. **Mandami lo zip.**
 1. riga `InpLyaThreshold=0.09` → **GATED** (il gate al suo meglio);
 2. riga `InpLyaThreshold=999.0` → **NUDO** (gate sempre aperto);
 3. 🧪 **controllo di lettura meccanico:** nella riga 999 la colonna **`Gate Chaos
-   Ko` deve stare a ~0** (999 non blocca mai). Se non è ~0, la corsa **non ha
+   Ko` deve stare a ESATTAMENTE 0** (l'LLE è un logaritmo: non può superare 999,
+   quindi il conteggio è provabilmente zero). Se non è 0, la corsa **non ha
    misurato il nudo**: si butta e si indaga, non si interpreta;
 4. poi i criteri congelati: `PF_gated ≥ PF_nudo + 0.20` **E** `profit_gated ≥
    profit_nudo` → LLE in cassetta attrezzi; **altrimenti sepoltura definitiva**.
@@ -121,3 +122,15 @@ rilanciare**. **Mandami lo zip.**
 
 > 📏 Il per-trade CSV di questa corsa **non si legge** (2 celle, stesso magic
 > 769200 → sopravvive solo l'ultima passata), come già dichiarato per la griglia.
+
+## 🧊 CONTROLLI DI FRESCHEZZA (aggiunti al v2, dopo il gate del 31/08)
+
+- **Giro a vuoto e corsa**: in console deve comparire `Tester\cache svuotata:
+  prima <n> file, dopo 0` — la cella gated 0.09 è GIÀ girata nella griglia di
+  stamattina: senza svuotare la cache MT5 la RIPESCEREBBE e la riga sparirebbe
+  dal CSV (con esito verde!).
+- **Corsa**: nel referto la riga `righe CSV IS:` deve dire **2 righe dati
+  (attese 2), soglie 0.09 e 999 PRESENTI** — il confronto È il round: una riga
+  sola = niente ablazione, la riga alza PROBLEMA da sola.
+- 🕐 Apri `REFERTO_CHAOSABL.txt` e guarda la riga `data:` in cima — se non è di
+  oggi hai riaperto uno zip vecchio. E `modo:` deve dire CORSA.

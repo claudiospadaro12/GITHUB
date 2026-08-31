@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_CHAOSABL_v1
+#  MARCATORE_RIGA_CHAOSABL_v2
 #  RIGA_CHAOSABL.ps1  --  CHAOS ABLAZIONE: baseline GATE-OFF del filtro
 #  LLE. Due celle secche sullo stesso banco della griglia gia' vista:
 #  thr=0.09 (il gate al suo MEGLIO) contro thr=999.0 (gate sempre aperto
@@ -55,6 +55,13 @@
 #      CONTROLLA (bases\Custom\history\NASUSD_EXT) e se manca ci si
 #      ferma con l'errore onesto (NON lo si costruisce qui).
 #   4. I GATE SUL PROVA (1 asse, fissi pinnati) + LA RACCOLTA.
+#   5. LA CACHE DEL TESTER (punto 38). La cella GATED (thr 0.09 / lb 50 /
+#      sl 0.5) E' GIA' in cache dalla griglia di stamattina: senza svuotare
+#      Tester\cache MT5 la RIPESCA invece di rieseguirla, e un pass
+#      ripescato NON manda il frame -> nel CSV resta la SOLA riga NUDA.
+#      Si svuota, si conta prima e dopo, e i due numeri vanno nel referto.
+#   6. IL CONTO DELLE RIGHE del CSV IS. Il generico diagnostica in rosso ma
+#      esce 0: le 2 righe (soglie 0.09 e 999) si RICONTANO qui.
 #
 #  LA RIGA CHE SI INCOLLA sta in righe\RIGA_CHAOSABL_DA_MANDARE.md
 # =====================================================================
@@ -90,6 +97,8 @@ $Terminale = "n/d"
 $Compilato = "NON TENTATA"
 $RiskEA    = "n/d"
 $Simbolo_ok= "NON VERIFICATO"
+$CacheTxt  = "NON SVUOTATA"
+$RigheCsv  = "n/d"
 $Modo      = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
@@ -234,6 +243,34 @@ try{
   $Terminale = $instDir
   Dico ("terminale scelto: " + $instDir + "  (DEVE essere lo stesso che stampa il generico)") "Yellow"
 
+  # LA CACHE DEL TESTER (checklist punto 38) -- QUI E' LOAD-BEARING, non una
+  # precauzione: la cella GATED di questa ablazione (thr 0.09 / lb 50 / sl 0.5)
+  # E' LA CELLA MIGLIORE DELLA GRIGLIA DI STAMATTINA, cioe' una passata GIA'
+  # CALCOLATA su stesso simbolo, periodo, finestra, Modello 1, deposito e stessi
+  # input blindati (sorgente EA invariato). MT5 la ripescherebbe SENZA
+  # rieseguirla; un pass ripescato non chiama OnTester, non manda il frame, e
+  # quindi NON HA RIGA nel CSV: l'ablazione tornerebbe con la sola riga NUDA.
+  # Si svuota SOLO Tester\cache (MAI bases\<server>\ticks, che e' lo storico),
+  # a MT5 chiuso (guardia al punto 0). Si conta PRIMA e DOPO e si stampano tutti
+  # e due (punto 46: Remove-Item -EA SilentlyContinue non sa dire che non ha
+  # fatto niente; e niente -LiteralPath sul percorso col wildcard).
+  $cacheT = Join-Path $dataFolder "Tester\cache"
+  if(Test-Path -LiteralPath $cacheT){
+    $ncPrima = @(Get-ChildItem -LiteralPath $cacheT -Recurse -File -ErrorAction SilentlyContinue).Count
+    Remove-Item (Join-Path $cacheT "*") -Recurse -Force -ErrorAction SilentlyContinue
+    $ncDopo  = @(Get-ChildItem -LiteralPath $cacheT -Recurse -File -ErrorAction SilentlyContinue).Count
+    $CacheTxt = "prima " + $ncPrima + " file, dopo " + $ncDopo
+    if($ncDopo -gt 0){
+      [void]$Problemi.Add("Tester\cache NON si e' svuotata (prima " + $ncPrima + ", dopo " + $ncDopo + "): la cella gated 0.09 e' gia' in cache dalla griglia e verrebbe RIPESCATA -> CSV a una riga sola.")
+      Dico ("Tester\cache NON SVUOTATA: " + $CacheTxt) "Red"
+    }
+    else{ Dico ("Tester\cache svuotata: " + $CacheTxt) "Green" }
+  }
+  else{
+    $CacheTxt = "cartella assente (" + $cacheT + "): niente da svuotare"
+    Dico ("Tester\cache: " + $CacheTxt) "Yellow"
+  }
+
   # IL SIMBOLO E' CUSTOM (storico ESTERNO): il tester accetta NASUSD_EXT solo
   # se le barre sono state importate. Si CONTROLLA e se manca ci si ferma con
   # l'errore ONESTO -- NON lo si costruisce qui.
@@ -293,6 +330,41 @@ try{
     if($rc -ne 0){
       [void]$Problemi.Add("il generico e' uscito con codice " + $rc + " (storico mancante? sweep degenere? CSV non prodotto?).")
     }
+
+    # IL CONTO DELLE RIGHE. Il generico diagnostica in ROSSO a schermo ma esce
+    # con codice 0: senza questo blocco la riga uscirebbe VERDE con l'ablazione
+    # a meta'. Le righe dati devono essere ESATTAMENTE 2 e portare le DUE
+    # soglie: 0.09 (gated) e 999 (nudo).
+    $csvIS = Join-Path $Work ("risultati_prove\" + $EA + "\" + $EA + "_" + $Simbolo + "_IS_ohlc.csv")
+    if(-not (Test-Path -LiteralPath $csvIS)){
+      $RigheCsv = "CSV IS ASSENTE"
+      [void]$Problemi.Add("il CSV IS non e' stato prodotto: " + $csvIS)
+    }
+    else{
+      $tutte = @(Get-Content -LiteralPath $csvIS)
+      $dati  = @($tutte | Select-Object -Skip 1 | Where-Object { $_.Trim() -ne "" })
+      $RigheCsv = "" + $dati.Count + " righe dati (attese 2)"
+      if($dati.Count -ne 2){
+        [void]$Problemi.Add("il CSV IS ha " + $dati.Count + " righe dati invece di 2: l'ablazione NON ha misurato le due celle (pass RIPESCATO dalla cache? cella gia' girata in griglia?). Il confronto NON si legge.")
+      }
+      else{
+        $intest = @($tutte[0] -split ",")
+        $iThr = -1
+        for($k=0; $k -lt $intest.Count; $k++){ if($intest[$k].Trim() -eq "InpLyaThreshold"){ $iThr = $k } }
+        if($iThr -lt 0){
+          [void]$Problemi.Add("nel CSV IS manca la colonna InpLyaThreshold: senza, non si sa quale riga e' la gated e quale la nuda.")
+        }
+        else{
+          $sog = New-Object System.Collections.ArrayList
+          foreach($d in $dati){ $c = @($d -split ","); [void]$sog.Add([double]::Parse($c[$iThr].Trim(), $INV)) }
+          $sogOrd = @($sog | Sort-Object)
+          if(([math]::Abs($sogOrd[0] - 0.09) -gt 0.0001) -or ([math]::Abs($sogOrd[1] - 999.0) -gt 0.0001)){
+            [void]$Problemi.Add("le soglie nel CSV IS sono {" + (@($sogOrd | ForEach-Object { $_.ToString("0.####",$INV) }) -join ", ") + "}, attese {0.09, 999}: la corsa non ha misurato gated contro nudo.")
+          }
+          else{ $RigheCsv = $RigheCsv + ", soglie 0.09 e 999 PRESENTI" }
+        }
+      }
+    }
   }
 }
 catch{
@@ -321,6 +393,8 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("terminale: " + $Terminale)
 [void]$RefTxt.Add("simbolo custom: " + $Simbolo_ok)
 [void]$RefTxt.Add("compilazione: " + $Compilato)
+[void]$RefTxt.Add("cache tester: " + $CacheTxt + "   <- punto 38: la cella gated 0.09 e' GIA' girata in griglia; senza svuotare sarebbe RIPESCATA e sparirebbe dal CSV")
+[void]$RefTxt.Add("righe CSV IS: " + $RigheCsv + "   <- devono essere 2: 0.09 gated + 999 nudo")
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("L'EA E' GIA' BOCCIATO (griglia 105 celle, 31/08) E RESTA BOCCIATO IN OGNI CASO.")
 [void]$RefTxt.Add("QUESTA CORSA MISURA L'INGREDIENTE (gate LLE), NON L'EA. NIENTE E' DEPLOYABILE.")
