@@ -1,0 +1,279 @@
+# ==========================================================================
+# ABTG_BreakinBox  -  GAMBA A: TP AL LATO OPPOSTO DEL BOX  (LA TESI)
+#
+# *** BOZZA -- NON LANCIARE FINCHE' LA RIGA DI LANCIO NON ESISTE. ***
+# Marcato BOZZA per la regola di casa: un file prova si "spegne" da BOZZA
+# solo quando la sua riga di lancio e' stata scritta e gattata contro
+# backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md (inclusa la classe nuova
+# skip-senza -Rifai, che nella saga CRT ha prodotto 4 corse zombie su 6).
+# Gli input pinnati qui sotto ESISTONO tutti in mql5/Experts/ABTG_BreakinBox.mq5
+# (verificati nome per nome): MT5 IGNORA IN SILENZIO un pin che non trova, ed
+# e' cosi' che nacque il falso "0/8" del FiboH4 (REGISTRO_TEST par.2-bis).
+#
+# Motore: BREAKIN del box notturno. Spec di casa mai provata
+#   caccia_strategie/ANALISI_NIGHTLY_PDF_2026-08-23.md par.7b ("proposta unica")
+# Dossier che lo promuove 9/10 e impone l'ablazione
+#   caccia_strategie/CACCIA_CRT_SECONDA_2026-08-31.md par.4
+# Conferma esterna indipendente (geometria, non codice)
+#   github.com/martin254/Asian-Turtle-Soup-Trading-Bot  [licenza NON dichiarata]
+# ==========================================================================
+#
+# IPOTESI (una riga)
+#   La falsa rottura di un RANGE DI SESSIONE (box notturno 22:00-04:59 ORA
+#   SERVER) e' un ingresso con edge SOLO quando il target e' il LATO OPPOSTO
+#   DEL BOX -- cioe' quando il take e' grande abbastanza da superare il
+#   soffitto di frizione che ha ucciso il CRT (take = meta' di UNA candela
+#   M15). L'edge sta nella TAGLIA DEL TAKE e nella DURATA, non nel grilletto.
+#
+# LA DOMANDA A CUI QUESTO ROUND DEVE RISPONDERE (dossier par.10)
+#   >>> Il falso breakout di un range paga quando il take e' GRANDE -- o non
+#       paga mai?
+#   Il grilletto "buca e rientra" e' gia' stato misurato TRE volte da tre
+#   banchi indipendenti, e tutte e tre con un target piccolo e una durata di
+#   1-6 barre. Se il take grande non lo salva, la famiglia "sweep di
+#   liquidita'" ha QUATTRO falsificazioni indipendenti e si chiude come sono
+#   stati chiusi il capitolo M5 e il capitolo M1. Anche quella e' una
+#   risposta utile: smetteremo di cercarla.
+#
+# ==========================================================================
+# CRITERI DI ACCETTAZIONE -- CONGELATI PRIMA DI VEDERE UN SOLO NUMERO
+# ==========================================================================
+#
+#   ABLAZIONE OBBLIGATORIA (senza, il round NON e' giudicabile)
+#     GAMBA A = questo file  -> InpTP_RR=0   TP al LATO OPPOSTO DEL BOX
+#     GAMBA B = file gemello -> InpTP_RR=2.0 TP a RR FISSO (il CONTROLLO,
+#                               cioe' la geometria di R95)
+#     file gemello: prove/ABTG_BreakinBox_RRFISSO_BOZZA.txt
+#     >>> SE VINCE L'RR FISSO, questo motore e' R95 con un livello nuovo e
+#         IL CAPITOLO SI CHIUDE LI'. Scritto ORA, prima dei numeri.
+#     Le due gambe sono file SEPARATI (e non due celle di una griglia) per
+#     un motivo tecnico che e' gia' costato in casa: il per-trade CSV porta
+#     il MAGIC nel nome, quindi due celle sullo stesso magic si
+#     sovrascrivono e la mediana del take -- che e' il cancello C2 -- non
+#     sarebbe leggibile per la gamba perdente.
+#
+#   PASSO 0 -- FREQUENZA: livelli/armamenti IS >= 150 per lato. Sotto ->
+#     "NON MISURABILE" (canarino R89, che chiuse per carenza di livelli con
+#     14 trade IS), NON "senza edge". La spec par.7b promette ~250 livelli/anno
+#     per lato: il contatore che lo verifica e' gia' in colonna nell'OPTFRAME
+#     (Breach Alto / Breach Basso / Armamenti Scaduti).
+#
+#   PASSO 0 -- COSTO (C2, metro R98_CRITERI par.3.2 + METRO_PROP D4):
+#     mediana del take LORDO REALIZZATO >= 3 x spread. Spread di riferimento
+#     2,0 punti indice [SPREAD NON MISURATO: e' il lato alto della forchetta;
+#     il RealCost Spread P95 Logger, Code Base 74148, e' promosso dal 23/08 e
+#     MAI USATO -- questa e' la quinta volta che un file lo scrive].
+#     >>> Soglia operativa: take mediano >= 6,0 punti indice.
+#     Fra 2,5x e 3,5x: verdetto SOSPESO, si misura lo spread e si rilegge.
+#     La mediana si calcola sulla colonna take_idx_pts del per-trade CSV.
+#
+#   RISCHIO (non si sospende MAI, a qualunque n -- Emendamento della
+#     Finestra regola B): DD <= 15% e peggior giornata > -5,00%.
+#     Le due colonne escono da sole nell'OPTFRAME (Equity DD %, Peggior
+#     Giornata %).
+#
+#   MERITO: PF OOS >= 1,10 con IS positivo, sui DUE LATI misurati SEPARATI
+#     (regola di Claudio 25/08). I lati si leggono dalla colonna dir del
+#     per-trade CSV, non da due corse.
+#
+#   SELEZIONE: CENTRO DELL'ALTOPIANO, MAI IL PICCO (12 Spearman su 13
+#     negative). La regola di selezione si DICHIARA INSIEME al numero,
+#     altrimenti il numero non vuol dire niente.
+#
+#   COLLAUDO (gate, non merito): la colonna "Autotest Falliti" deve valere 0.
+#     Se vale >0 il motore DIVERGE dalla spec e i risultati NON si leggono.
+#     Se vale -1 l'autotest non e' girato (InpAutoTest spento): file invalido.
+#
+#   ZERO OVERNIGHT: il flat e' a due tempi (orario + recupero). Chiusura
+#     TARDIVA MA IN GIORNATA (open_date == close_date) = REGOLARE. Chiusura
+#     a GIORNO SUCCESSIVO = OVERNIGHT VERO: si conta col suo gap-risk, e
+#     sopra il 5% delle posizioni il file e' INVALIDO. La distinzione la
+#     misura il per-trade CSV da solo (colonne open_time / close_time).
+#
+# ==========================================================================
+# LA LISTA DEI CADUTI CHE QUESTO CANDIDATO DEVE PASSARE
+# (riletta PRIMA di scrivere il file, non dopo -- REGISTRO_TEST.md)
+# ==========================================================================
+#   R95 -- SWEEP + RECLAIM (ABTG_LiquiditySweep, magic 772600, R95_REFERTO):
+#     30 passate su 30 in perdita, PF 0,65-0,80, DD 27-99,9%, n 149-3.641.
+#     >>> COME SI DISTINGUE: R95 entra sulla STESSA BARRA che buca e
+#         richiude, su uno swing di 21 barre, con TP a RR fisso. Qui il
+#         livello e' un box di ~7 ore, l'armamento pretende una CHIUSURA
+#         FUORI e l'ingresso e' DIFFERITO a una barra successiva, e il TP e'
+#         il lato opposto del box. Tre assi su tre, e la GAMBA B misura
+#         proprio quanto pesa il terzo.
+#   CRT Turtle Soup (REFERTO_CRT_2026-08-30, chiuso il 31/08): 0/30 celle a
+#     tick, PF 0,459 col gate, 17 mesi su 19 rossi, long E short.
+#     >>> COME SI DISTINGUE: il "range" del CRT era UNA candela M15, il take
+#         la sua meta'. Qui il range e' 7 ore e il take e' tutto il box.
+#   arXiv 2605.04004 par.4.3 (Mesfin, n=6.442): liquidity grab su un estremo
+#     di sessione, ingresso a barra+1. Fade T=-14,12; col grab T=-13,24.
+#     >>> COME SI DISTINGUE: il par.6.2 dello STESSO paper dice che il
+#         soffitto vale "specifically to single-bar directional predictions"
+#         e che le uniche due strategie che lo superano "hold positions for
+#         12-15 bars rather than 1-6". Qui la posizione vive fino al flat
+#         di fine seduta: e' esattamente la classe 12-15 barre.
+#   R42 -- fade degli estremi d'apertura: 0/24 IS e 0/24 OOS.
+#   R45 / famiglia ORB -- rottura di box di sessione: 0/48, ~210 celle.
+#     >>> Attenzione: quella e' la ROTTURA. Questo motore e' il suo
+#         COMPLEMENTO (opera quando la rottura FALLISCE). Non e' lo stesso
+#         trade, ed e' la ragione strutturale della scorrelazione qui sotto.
+#   ABTG_Nightly -- fade del box notturno, 0/8 su forex: e' un FADE A LIMIT
+#     sui bordi, con RR 0,86 dichiarato (problema di GEOMETRIA, non di
+#     parametri). Qui non si fa fade sul bordo: si aspetta che il breakout
+#     chiuda fuori e poi FALLISCA, e il RR non e' 0,86 per costruzione (SL
+#     oltre lo sweep, TP a tutto il box).
+#   "filtro appiccicato a motore gia' tarato" (ROBUSTEZZA par.5B): 0 successi
+#     su 5. >>> Qui il livello e' COSTITUTIVO (senza box non c'e' motore) e
+#     il filtro ampiezza InpMinBoxATR parte NEUTRO (0.0): non e' un filtro
+#     appiccicato, e in questo file non e' nemmeno acceso.
+#
+# ==========================================================================
+# SCORRELAZIONE -- DA MISURARE, NON DA DICHIARARE
+# ==========================================================================
+#   La sedia VIVA ABTG_MaxMinNotte_DAX_Short_Ottimizzato (magic 770411)
+#   opera il BREAKOUT dello stesso identico box, sullo stesso simbolo.
+#   Questo motore ne opera la FALSA ROTTURA: dove lei entra (chiusura fuori
+#   dal box), lui si ARMA e sta fermo; entra solo se quel breakout fallisce.
+#   Sono mutuamente esclusivi PER COSTRUZIONE.
+#   [IPOTESI: correlazione negativa -- NON MISURATA]. La misura costa zero
+#   perche' le serie per-trade esistono gia' da tutte e due le parti.
+#   >>> ROTTA_PROP regola 1 MORDE: stesso box, stesso simbolo -> MAI le due
+#       a rischio pieno insieme finche' la correlazione non e' misurata.
+#   >>> Il 91,1% delle notti rompe un lato (ANALISI_NIGHTLY_PDF par.370):
+#       i candidati sono tanti. Per questo InpMaxTradesPerDay=2 (cap) e il
+#       consumo del lato sono ACCESI, e la PEGGIOR GIORNATA va letta, non
+#       solo il DD.
+#
+# ==========================================================================
+# LIMITI DICHIARATI PRIMA (non dopo aver visto i numeri)
+# ==========================================================================
+#   - REGIME UNICO: sugli indici BCM la finestra a tick reali parte dal
+#     2024.09.26 (pavimento MISURATO, REFERTO_SONDA_STORICO_17-08.md,
+#     COMPLETO) ed e' UN SOLO REGIME (toro). Il MERITO e' provvisorio per
+#     costruzione; il RISCHIO vale pieno (Emendamento della Finestra, B).
+#   - TETTO DEL TESTER: ~100.000 barre per corsa -> su M15 sono ~4 anni.
+#     La finestra 2024.09.26 -> 2026.06.30 ci sta in una tranche sola.
+#   - IL BOX SI LEGGE DALLE BARRE M1: serve la storia M1 nel tester. Il
+#     modello a tick reali la fornisce; in OHLC 1-min il box e' ancora
+#     calcolabile ma il resto NON e' un verdetto (C3: verdetti solo a tick).
+#   - InpMT5PerPuntoIndice=100 e' [DA VERIFICARE su D30EUR] (per gli indici
+#     US e' 100, R97). ATTENZIONE, e' innocuo per la logica: la conversione
+#     NON tocca nessun trade -- SL, buffer e pavimento sono in PUNTI MT5.
+#     Tocca SOLO la colonna take_idx_pts del per-trade CSV, cioe' la lettura
+#     del cancello C2. Se il fattore fosse diverso, la mediana si riscala di
+#     un fattore noto senza rifare la corsa.
+#   - ORA DEL FLAT: 17:30 SERVER e' l'ora della sedia viva 770411 sullo
+#     stesso simbolo (confronto ad armi pari). Nota che il DAX CASH chiude
+#     16:30 server (CLAUDE.md: 17:30 IT); il CFD D30EUR resta scambiabile
+#     oltre. Il flat e' un INPUT: 16:30 e' la prima gamba di taratura, e
+#     appartiene al round DOPO, non a questa misura.
+#   - Nessun backtest e' stato eseguito da chi ha scritto questo file:
+#     nell'ambiente di sviluppo non esistono MT5 ne' Strategy Tester.
+#
+# ==========================================================================
+# GEOMETRIA DEL LANCIO
+# ==========================================================================
+#   - MODELLO 4 (TICK REALI BCM). D30EUR NATIVO, M15.
+#   - SIMBOLO LEAD = D30EUR (DAX), ed e' quello che pinna la BOZZA del
+#     dossier al par.9. Il motivo NON e' l'abitudine: e' che l'unico argomento
+#     di scorrelazione STRUTTURALE di questo candidato (la sedia viva 770411
+#     che opera il BREAKOUT dello stesso box) esiste SOLO sul DAX. Misurarlo
+#     prima altrove butterebbe via la meta' piu' interessante del round.
+#     NASUSD e U30USD sono la SECONDA GAMBA (il titolo del promosso dice
+#     "esteso agli INDICI"), e si aprono solo se il DAX da' segno di vita.
+#   - UNICO ASSE Y = InpMagic, GEMELLI 769701/769702 (VERGINI, verificati
+#     repo-wide il 31/08; il 769700 e' il default dell'EA e resta libero per
+#     un eventuale forward). Due passate IDENTICHE = controllo di
+#     determinismo + due per-trade CSV DISTINTI in Common\Files:
+#       abtg_trades_ABTG_BreakinBox_D30EUR_769701.csv
+#       abtg_trades_ABTG_BreakinBox_D30EUR_769702.csv
+#     Devono uscire IDENTICI. Se differiscono, c'e' stato dello stato
+#     sporco fra le passate e i numeri non si leggono.
+#   - UNA SOLA TRANCHE, FrazioneIS 1.0: la gamba "IS" del generico e' la
+#     finestra intera e la gamba "OOS" e' degenere (0 giorni) e si IGNORA.
+#     La guardia anti-troncamento dell'EA fa si' che la passata degenere
+#     NON cancelli il per-trade gia' scritto.
+#   - NIENTE griglia in questa corsa. Qui si MISURA (frequenza, taglia del
+#     take, forma dell'imbuto nei contatori). Le soglie di InpMinBoxATR e la
+#     taratura di InpConfirmMaxBars / InpMinBarreRientro appartengono al
+#     round DOPO: le soglie non si inventano prima di aver visto la scala
+#     reale delle grandezze. Regola di casa, scritta qui insieme al metodo.
+#
+# >>> FUSO BCM (NON invertito): D30EUR su BCM e' a ORA SERVER = ora italiana
+#     meno un'ora. Il box notturno 22:00-04:59 SERVER = 23:00-05:59 IT.
+#     La finestra operativa parte alle 08:00 SERVER = 09:00 IT = APERTURA
+#     DEL DAX (CLAUDE.md). La riga di lancio deve GATTARE questi valori e
+#     RIFIUTARE il 23 (che sarebbe l'ora italiana del box) e il 9 (che
+#     sarebbe l'ora italiana dell'apertura).
+#     ATTENZIONE APERTA: la finestra 22:00-04:59 viene dal PDF di corso
+#     [PAG 26/28] ed e' DEDOTTA dagli screenshot .bcm. La domanda D1 del
+#     referto ANALISI_NIGHTLY_PDF e' ancora APERTA a Claudio. Se D1 dice
+#     "ora italiana", i quattro input del box si spostano di un'ora -- e
+#     sono input, non righe di codice.
+#
+# Le direttive @ vanno NUDE (senza # davanti e senza commenti in coda):
+# commentate o sporche = gate vuoto.
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- IL LIVELLO: il box notturno. TUTTE LE ORE IN ORA SERVER BCM.
+InpBoxStartHour=22
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBarreBox=120
+#
+# --- FILTRO AMPIEZZA DEL BOX: NEUTRO in questa corsa (0.0 = spento).
+#     Si accende nel round DOPO, e SOLO in ATR relativo: la soglia in punti
+#     assoluti ha gia' spento 3 mercati in silenzio (par.6.3). Qui si misura
+#     la scala del rapporto larghezza_box/ATR, non si sceglie una soglia.
+InpMinBoxATR=0.0
+InpAtrPeriod=14
+#
+# --- FINESTRA OPERATIVA (sessione europea) IN ORA SERVER BCM.
+InpOpStartHour=8
+InpOpStartMin=0
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+#
+# --- IL GRILLETTO DIFFERITO: e' l'asse che distingue da R95.
+#     1 = la barra dopo l'armamento e' la prima che puo' entrare (e non e'
+#     mai la stessa barra che ha chiuso fuori). 8 barre M15 = 2 ore per
+#     vedere fallire la rottura, poi l'armamento scade.
+InpMinBarreRientro=1
+InpConfirmMaxBars=8
+#
+# --- DUE LATI (regola 25/08): si misurano insieme qui e si LEGGONO
+#     SEPARATI dal per-trade CSV (colonna dir LONG/SHORT).
+InpAllowLong=true
+InpAllowShort=true
+#
+# --- SL oltre l'estremo dello SWEEP + PAVIMENTO OBBLIGATORIO (C4/R109).
+InpSlBufferPts=300
+InpMinStopPts=500
+#
+# --- L'ABLAZIONE, GAMBA A: 0 = TP AL LATO OPPOSTO DEL BOX (LA TESI).
+#     La gamba B (RR fisso 2.0 = il controllo R95) sta nel file gemello.
+InpTP_RR=0.0
+#
+# --- Rischio 1% per confronto pulito col resto del REGISTRO_TEST (il
+#     default dell'EA e' lo 0,65% di casa: qui si alza SOLO per rendere il
+#     DD confrontabile con le righe gia' a registro, e il DD scala lineare).
+InpRiskPercent=1.0
+InpMaxTradesPerDay=2
+#
+# --- Conversione punti indice: 100 e' il valore US (R97). Su D30EUR e'
+#     DA VERIFICARE, e tocca SOLO la colonna take_idx_pts (vedi limiti).
+InpMT5PerPuntoIndice=100
+#
+# --- COLLAUDO: l'autotest DEVE girare (la colonna Autotest Falliti e' un
+#     gate del file, non un dettaglio).
+InpAutoTest=true
+#
+# --- L'UNICO ASSE Y: i gemelli sul magic (2 passate identiche, CSV distinti).
+InpMagic=769701||769701||1||769702||Y
+# ==========================================================================

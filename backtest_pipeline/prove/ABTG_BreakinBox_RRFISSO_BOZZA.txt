@@ -1,0 +1,139 @@
+# ==========================================================================
+# ABTG_BreakinBox  -  GAMBA B: TP A RR FISSO  (IL CONTROLLO = geometria R95)
+#
+# *** BOZZA -- NON LANCIARE FINCHE' LA RIGA DI LANCIO NON ESISTE. ***
+# Gemello di prove/ABTG_BreakinBox_BOZZA.txt (GAMBA A). Le due gambe si
+# lanciano INSIEME e si leggono INSIEME: da sole non decidono niente.
+#
+# Motore: BREAKIN del box notturno (mql5/Experts/ABTG_BreakinBox.mq5).
+# Dossier che impone questa ablazione:
+#   caccia_strategie/CACCIA_CRT_SECONDA_2026-08-31.md par.4
+#   ("la prova che decide, dichiarata PRIMA")
+# ==========================================================================
+#
+# A COSA SERVE QUESTO FILE, in una riga
+#   E' IL CONTROLLO NEGATIVO. Identico alla gamba A in OGNI parametro
+#   tranne UNO: il TAKE PROFIT. Qui il TP e' a RR FISSO sulla distanza
+#   dello stop -- cioe' ESATTAMENTE la geometria d'uscita di R95, il motore
+#   misurato 30 passate su 30 in perdita.
+#
+#   >>> LA REGOLA DI LETTURA, CONGELATA PRIMA DEI NUMERI:
+#       - Se vince la GAMBA A (TP al lato opposto del box), la tesi regge:
+#         l'edge sta nella TAGLIA DEL TAKE e nella DURATA, ed e' coerente
+#         con il par.6.2 di arXiv 2605.04004 ("the ceiling applies
+#         specifically to single-bar directional predictions"; le uniche
+#         due strategie che lo superano "hold positions for 12-15 bars
+#         rather than 1-6").
+#       - SE VINCE QUESTA GAMBA B, il motore e' R95 CON UN LIVELLO NUOVO
+#         e IL CAPITOLO SI CHIUDE. Non si cerca "un RR migliore": quella
+#         sarebbe pesca sullo stesso morto, vietata dalla Regola della
+#         Seconda Caccia (19/08).
+#       - Se le due gambe sono INDISTINGUIBILI, il TP non e' la variabile
+#         che conta e la tesi del dossier e' falsificata lo stesso: il
+#         candidato torna in coda, non passa.
+#
+#   Perche' un FILE separato e non due celle di una griglia: il per-trade
+#   CSV porta il MAGIC nel nome, quindi due celle sullo stesso magic si
+#   sovrascrivono e la mediana del take -- che e' il cancello C2 -- non
+#   sarebbe leggibile per la gamba perdente. Qui i magic sono diversi e
+#   tutti e due i per-trade sopravvivono.
+#
+# PERCHE' RR = 2.0 E NON UN ALTRO NUMERO
+#   E' il valore canonico del motore ospite ABTG_LiquiditySweep in R95 ed e'
+#   il RR dichiarato dalla fonte esterna che conferma la geometria
+#   (martin254, "RR 1:2"). Un valore DA MANUALE, non pescato: il controllo
+#   deve essere la geometria standard, non la sua versione migliore.
+#   Un secondo valore di RR NON si aggiunge qui: aggiungerebbe un asse alla
+#   griglia e trasformerebbe un'ablazione a due gambe in una caccia al
+#   picco. Se serve, e' un round dopo.
+#
+# ==========================================================================
+# CRITERI DI ACCETTAZIONE -- IDENTICI ALLA GAMBA A, e sono gia' congelati
+# nel file gemello (frequenza >=150/lato, take mediano >= 6,0 punti indice,
+# DD <= 15%, peggior giornata > -5,00%, PF OOS >= 1,10 sui due lati letti
+# separati, centro dell'altopiano MAI il picco, Autotest Falliti = 0,
+# overnight veri <= 5%).
+# Non si riscrivono qui per non farli divergere: si legge il gemello.
+# L'unica cosa che cambia fra i due file e' InpTP_RR (e il magic, che
+# serve solo a non sovrascrivere il CSV).
+# ==========================================================================
+#
+# LIMITI DICHIARATI PRIMA -- gli stessi della gamba A:
+#   regime unico (toro) sulla finestra tick BCM dal 2024.09.26; il box si
+#   legge dalle barre M1; InpMT5PerPuntoIndice=100 e' [DA VERIFICARE] su
+#   D30EUR e tocca SOLO la colonna take_idx_pts, non i trade; il flat
+#   17:30 SERVER e' quello della sedia viva 770411 (il DAX cash chiude
+#   16:30 server: e' la prima gamba di taratura del round DOPO).
+#   Nessun backtest e' stato eseguito da chi ha scritto questo file.
+#
+# GEOMETRIA DEL LANCIO
+#   - MODELLO 4 (TICK REALI BCM). D30EUR NATIVO, M15. Stessa finestra
+#     della gamba A: se le finestre divergono, l'ablazione non e' valida.
+#   - UNICO ASSE Y = InpMagic, GEMELLI 769711/769712 (VERGINI, verificati
+#     repo-wide il 31/08). Due passate identiche = determinismo + due
+#     per-trade CSV distinti in Common\Files:
+#       abtg_trades_ABTG_BreakinBox_D30EUR_769711.csv
+#       abtg_trades_ABTG_BreakinBox_D30EUR_769712.csv
+#   - UNA SOLA TRANCHE, FrazioneIS 1.0 (gamba OOS degenere, si IGNORA).
+#
+# >>> FUSO BCM (NON invertito): ORA SERVER = ora italiana meno un'ora.
+#     Box 22:00-04:59 SERVER (= 23:00-05:59 IT), finestra operativa da
+#     08:00 SERVER (= 09:00 IT, apertura DAX). La riga di lancio gatta i
+#     valori e RIFIUTA il 23 e il 9 (che sono le ore italiane).
+#
+# Le direttive @ vanno NUDE (senza # davanti e senza commenti in coda).
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- IL LIVELLO: identico alla gamba A. ORA SERVER BCM.
+InpBoxStartHour=22
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBarreBox=120
+#
+# --- FILTRO AMPIEZZA: NEUTRO, identico alla gamba A.
+InpMinBoxATR=0.0
+InpAtrPeriod=14
+#
+# --- FINESTRA OPERATIVA: identica alla gamba A. ORA SERVER BCM.
+InpOpStartHour=8
+InpOpStartMin=0
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+#
+# --- GRILLETTO DIFFERITO: identico alla gamba A. Se cambiasse anche
+#     questo, l'ablazione misurerebbe due cose insieme e non varrebbe.
+InpMinBarreRientro=1
+InpConfirmMaxBars=8
+#
+# --- DUE LATI: identici alla gamba A.
+InpAllowLong=true
+InpAllowShort=true
+#
+# --- SL: identico alla gamba A. Pavimento OBBLIGATORIO (C4/R109).
+InpSlBufferPts=300
+InpMinStopPts=500
+#
+# ==========================================================================
+# --- >>> QUESTA E' L'UNICA RIGA CHE CAMBIA FRA LE DUE GAMBE <<<
+#     2.0 = TP a RR FISSO sulla distanza dello stop = LA GEOMETRIA DI R95.
+#     Nella gamba A questa riga vale 0.0 (TP al lato opposto del box).
+InpTP_RR=2.0
+# ==========================================================================
+#
+# --- Rischio e cap: identici alla gamba A.
+InpRiskPercent=1.0
+InpMaxTradesPerDay=2
+#
+InpMT5PerPuntoIndice=100
+#
+# --- COLLAUDO: l'autotest DEVE girare (Autotest Falliti = 0 e' un gate).
+InpAutoTest=true
+#
+# --- L'UNICO ASSE Y: i gemelli sul magic (2 passate identiche, CSV distinti).
+InpMagic=769711||769711||1||769712||Y
+# ==========================================================================
