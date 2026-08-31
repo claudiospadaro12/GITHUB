@@ -116,8 +116,8 @@ Zip NYRETEST_TAR_CORSA_20260831_1110._
 
 **LE TRE LETTURE (contro i criteri congelati):**
 - (a) IL GATE SLOPE MORDE: n monotono 625->211, DD crolla 12.9->5.8, e la
-  banda slope=45 e' COERENTE su tutti e 3 gli SlLookback (1.17/1.17/1.17
-  con sl 5 e 7) — NON e' una cella outlier, e' una banda vera. Primo gate
+  banda slope=45 e' COERENTE su sl 5 e 7 (PF 1.174 e 1.166; sl 3 NO,
+  PF 0.975 -- corretto il 31/08 su rilievo del verificatore) — NON e' una cella outlier, e' una banda vera. Primo gate
   costitutivo della giornata che aggiunge valore misurabile A TICK.
 - (a-bis) L'ESPANSIONE E' DECORATIVA: n quasi immobile (625->621->604),
   PF piatto -> asse da spegnere, misurato.
