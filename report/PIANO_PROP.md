@@ -1,6 +1,6 @@
 # 🏛️ PIANO PROP — la tabella madre dei parametri per passare una prop
 
-_Prodotto dall'**architetto-prop**. Versione **v15**, aggiornata il 30/08/2026
+_Prodotto dall'**architetto-prop**. Versione **v16**, aggiornata il 31/08/2026
 (prima stesura: 18/08/2026 ~01:00)._
 _Un solo documento, vivo: ogni numero ha la sua fonte e il suo stato. Le
 modifiche stanno nel CHANGELOG in fondo._
@@ -124,6 +124,39 @@ candidati costruiti e del primo deploy "TEMPESTA":
   i sei candidati sono meccanismi **diversi** sulla stessa inefficienza, non
   la stessa griglia morta: passano il filtro della seconda caccia)
 
+**🆕 Fonti nuove del sedicesimo giro (v16, 31/08/2026 sera)** — la giornata in
+cui i candidati sono andati a verdetto e Claudio ha posto la domanda della
+PORTATA (_"la flotta e' viva ma troppo LENTA"_):
+- 🥇 **cinque referti di round consegnati in 48 ore**, tutti letti per intero:
+  `REFERTO_NYRETEST_2026-08-31.md` (motore muto su H1 **per costruzione**, poi
+  su M15: nudo **PF 1,002 / 462 posizioni**; gate slope **REALE e monotono**,
+  cella top slope 75 **PF 1,37-1,43 / DD 3,7%** ma **n=115 < 150 → merito
+  SOSPESO**, tagliando calendarizzato) · `REFERTO_CRT_2026-08-30.md`
+  (**0 celle su 30 con PF≥1**: motore senza edge) ·
+  `REFERTO_CHAOS_2026-08-31.md` + `REFERTO_CHAOSABL_2026-08-31.md` (tesi
+  **invertita** e ablazione: gate 1,789 vs nudo 1,150, **non promosso** per la
+  lettera del criterio) · `REFERTO_BREAKIN_2026-08-31.md` (**candidato
+  CHIUSO**: vince il controllo) · `REFERTO_INVES_2026-08-30.md` (E1 firmata
+  **fallisce**, E3 verde: PF 1,16, **+29,9 €/trade**, n=215)
+- 🥈🟡 `backtest_pipeline/caccia_strategie/DOSSIER_PROP_ORBITFUNDED_2026-08-30.md`
+  (**il secondo dossier prop** chiesto in M19 e' arrivato — ma su un prodotto
+  **instant**, non su una challenge a muri statici: **[INDIZIO CONCORDE]** su
+  10% statico / 5% daily, **[INCERTO — CRITICO]** su EA ammessi, piattaforma e
+  strumenti → **verdetto: non vale i ~$900, e' buio, non prove a carico**.
+  ⚠️ **M19 resta APERTO**: serviva un confronto fra DUE prop a **muri statici
+  con EA ammessi per iscritto**, e questo non lo e')
+- 🥇 **il forward vero, ricontato in questo giro**: `trades_auto.csv` e
+  `trades_100k.csv` (aggiornati **29/08**, chiusure fino al **28/08 19:14**)
+  incrociati col censimento `.chr` **piu' fresco in repo**
+  (`censimento_rischio_2026-08-25_0731.txt`, 52 righe → **37 sedie vive**) e
+  con `CONTRATTI_SEDIE.md` — e' la base dell'**AREA H**
+- 🥈 `docs/REGOLAMENTO_FUNDINGPIPS_2026-08.md` (riletto per i requisiti di
+  frequenza: min 3 giorni, consistency 35% sui reward, **7 giorni
+  profittevoli/30** sullo Zero, **"high-frequency trading" fra le pratiche
+  VIETATE**, e la **"Risk Per Trade Idea"** a finestra di 10 minuti che
+  colpisce i nostri gemelli) · `docs/REGOLAMENTO_FTMO_2026-08.md` (target
+  10%/5%, **min 4 giorni**, **nessun limite di tempo**)
+
 ---
 
 # 🚦 CANCELLO CHALLENGE — si valuta a CANCELLI VERDI (obiettivo meta'-fine settembre)
@@ -160,6 +193,20 @@ campo** sul 100k con cap e muri firmati (v7, `REFERTO_GUARDIAN_FIRME.md`).
 3. il **censimento dei contratti** — prerequisito dichiarato alla FIRMA 2 del
    18/08 — **non ha ancora la peggior giornata** delle sedie: la sta misurando
    R112 in questo momento (🥇 `R112_CRITERI.md` §4 e §8).
+
+> 🆕 **v16 (31/08) — due aggiornamenti sui cancelli, da leggere qui:**
+> - **CANCELLO 3**: il secondo dossier prop **e' arrivato** — ma su
+>   **Orbit Funded "1M Instant"**, cioe' un prodotto **instant, non una
+>   challenge a muri statici**, e con **EA ammessi / piattaforma / strumenti
+>   tutti [INCERTO]** (verdetto del dossier: _"non vale i ~$900: e' buio"_).
+>   👉 **Il cancello resta ROSSO e M19 resta aperto**: serviva il confronto
+>   fra DUE prop a muri statici 5/10 con EA ammessi **per iscritto**.
+> - 🚄 **NUOVO, e riguarda la DATA**: l'**AREA H** misura che, anche a
+>   cancelli verdi, **passare le due fasi richiede 2,8-4,5 mesi** alla portata
+>   della flotta migrata (**8,9-14,4 mesi** con la squadra prop di oggi).
+>   _"Meta'-fine settembre"_ resta la data in cui si puo' **comprare**, non
+>   quella in cui si e' funded — e su FTMO/FundingPips **non c'e' limite di
+>   tempo**, quindi la lentezza costa **tempo e opportunita', non l'esito**.
 
 ### 🗣️ L'ORIENTAMENTO DICHIARATO DA CLAUDIO (26/08 sera) — registrato, NON e' una firma
 
@@ -611,6 +658,207 @@ congelamento chiesto (i candidati non hanno ancora un round). La sola firma
 implicita gia' data e' il **deploy piccolo del 770250** (parola di Claudio
 30/08, deploy in osservazione, non una promozione).
 
+---
+
+# AREA H — 🚄 ARITMETICA DELLA PORTATA (nuova, v16 — 31/08/2026)
+
+> 🗣️ **La domanda di Claudio, 31/08 sera: _"la flotta e' viva ma troppo LENTA —
+> servono trade con frequenza"_.**
+>
+> ## La risposta in una riga: **ha ragione sul FATTO, ma il numero dice che il collo di bottiglia NON e' la frequenza.**
+>
+> La portata di una flotta non e' un numero, e' un **prodotto di tre fattori**:
+>
+> ```
+> profitto/mese  =  N (trade/mese)  ×  E (aspettativa per trade, in R)  ×  rischio per trade
+> ```
+>
+> Uno dei tre e' **gia' bloccato per misura** (il rischio: dirupo a d≈1,055,
+> C7), uno e' **misurato e oggi ha il segno sbagliato** (E: il forward di
+> agosto e' negativo), e solo il terzo e' quello che la domanda propone di
+> alzare. 🔴 **N × E con E < 0 non produce profitto: produce perdita piu' in
+> fretta.** La frequenza e' un **moltiplicatore**, non un generatore.
+
+## H0 — 📊 LA PORTATA ATTUALE, MISURATA
+
+🥇 **[CALCOLO DI QUESTO GIRO]**. Fonti: `data/statements/trades_auto.csv` e
+`trades_100k.csv` (aggiornati 29/08, chiusure fino al **28/08 19:14**) ·
+`backtest_pipeline/risultati_archivio/censimento_rischio_2026-08-25_0731.txt`
+(la foto piu' fresca della flotta: 52 righe → **37 sedie di trading uniche**
+sul conto piccolo, piu' le copie mirror del 100k) · `report/CONTRATTI_SEDIE.md`
+(la colonna "Op/mese promesse", sedia per sedia).
+**Convenzioni dichiarate**: finestra **03→28/08 (26 giorni)** per il conto
+piccolo e **10→28/08 (19 giorni)** per il 100k; **ingressi** = righe raggruppate
+per (magic, simbolo, `open_time`, lato); proiezione mensile lineare ×30/giorni;
+sono **escluse** le sedie assenti dal censimento del 25/08 (i "morti in
+osservazione" spenti a inizio agosto: 770103, 770121, 770311, 770501, 770601,
+770203, 770701, 990001… — tutte con l'ultima chiusura fra il 27/07 e l'11/08).
+
+| squadra | sedie | **PROMESSO** (op/mese, contratti) | **MISURATO** (op/mese) | resa |
+|---|---:|---:|---:|---:|
+| 🧩 **flotta intera viva** (conto piccolo) | **37** | **176,9** | **111,9** (97 ingressi / 26 gg) | **63%** |
+| 🛡️ **squadra prop reale** = il dry-run 100k (770101 · 770202 · 770611 · 770411 · 770901) | **5** | **46,1** | **34,7** (22 chiusure / 19 gg) | **75%** |
+| ⚫ sedie del censimento a **ZERO** nella finestra | **13 su 37** | 21,0 | **0** | 0% |
+
+🔴 **I 13 muti** (35% della flotta): `250604` Gold Ichimoku · `771321` PTE Dow ·
+`771332` PTE GBPUSD B25 · `772162`/`772163` BreakingBand · **tutti e cinque i
+GapFill** (772231-35) · `772341` Larry Dow · `772344` Larry GBPJPY · `970912`
+SupRev DAX H4. Valgono **21 op/mese promesse che non arrivano** — e per cinque
+di loro (GapFill) il sospetto di guasto e' agli atti da nove giorni
+(`CENSIMENTO_FREQUENZA_FLOTTA_2026-08-22.md` §6, mai verificato sul VPS).
+👉 **Prima riga del gap: 21 op/mese sono gia' pagate e non consegnate.**
+
+## H1 — 💶 L'ASPETTATIVA PER TRADE — e il conflitto che decide tutto
+
+| fonte | rango | aspettativa per trade | in R | note |
+|---|---|---|---|---|
+| **BANCO** — `ANALISI_DIAL_TAGLIE_2026-08-26.md` T3 a d=1,00: **+13.083 €/mese** su 100k, diviso per le **176,9 op/mese** promesse | 🥇 | **+73,96 €** = **+0,0740%** del conto | **+0,091R** (rischio medio dichiarato **0,812%**: somma 30,05% su 37 sedie, ricalcolo di questo giro) | 21 mesi, **un solo regime toro**, chiusure giornaliere, scala lineare |
+| **BANCO, seconda strada** — `METRO_PROP.md` §9: DAX Apertura **+0,075R** per trade | 🥇 | +0,049% a 0,65% | **+0,075R** | motore singolo, coerente col precedente entro il 20% |
+| **FORWARD 100k** (10-28/08, n=**22**) | 🥇 | **+28,89 €** = **+0,029%** | **+0,044R** (a 0,65%) | 🔵 **n=22 → il MERITO non e' giudicabile** (muro R59). Vale come ordine di grandezza |
+| 🔴 **FORWARD conto piccolo** (03-28/08, n=**97 ingressi**, sole sedie vive) | 🥇 | **−3,76 €** = **−0,0738%** su ~5.100 € | **−0,091R** | **ESATTAMENTE l'opposto del banco, stesso modulo** |
+
+🔴🔴 **IL CONFLITTO, dichiarato e non nascosto: due misure NOSTRE, stesso rango
+🥇, segno opposto.** Il banco dice **+0,091R**, il forward di agosto dice
+**−0,091R**. Non e' un dettaglio di taratura: e' il **segno** del fattore E
+dell'equazione. La gerarchia non risolve (stesso rango); risolve solo il
+**campione**: il banco ha 21 mesi × 35 sedie, il forward ha 26 giorni e
+**nessuna famiglia con 20 operazioni pulite dopo la revisione del 24/08**
+(cancello 1). 👉 **Finche' E non ha un segno accertato in forward, comprare
+frequenza e' comprare un moltiplicatore su un numero di segno ignoto.**
+
+## H2 — 🎯 IL FABBISOGNO — quanti trade servono per passare
+
+Regole prese dalle schede gia' agli atti (nessuna nuova ricerca):
+
+| prop | target fase 1 / fase 2 | limite di tempo | giorni minimi | fonte |
+|---|---|---|---|---|
+| **FTMO 2-Step** (F1, ipotesi di lavoro) | **10% / 5%** | 🟢 **NESSUNO** — _"the Trading Period is indefinite"_ | **4 giorni** di trading per fase | 🥈 `docs/REGOLAMENTO_FTMO_2026-08.md` righe 15-17 |
+| **FundingPips 2-Step Standard** | **8% (o 10%) / 5%** | 🟢 illimitato | **3 giorni** P1 | 🥈 `docs/REGOLAMENTO_FUNDINGPIPS_2026-08.md` §1 |
+| **The5ers** | (censita solo la consistenza) | — | **3 giorni PROFITTEVOLI**, dove profittevole = chiuso ≥ **0,5% del saldo iniziale** | 🥈 `CONFIG_PROP_2026-08-18.md` riga 489 |
+
+**Il conto** (rischio di casa **0,65%** per trade, A1 congelata):
+
+| aspettativa usata | profitto per trade | trade per **+10%** | per **+5%** | per **+8%** |
+|---|---:|---:|---:|---:|
+| **E alta = 0,075R** (METRO §9) | 0,0488% | **205** | 103 | 164 |
+| **E bassa = 0,046R** (la cella verde piu' recente: `REFERTO_INVES_2026-08-30` E3, +29,9 €/trade a 0,65% su 100k) | 0,0299% | **334** | 167 | 268 |
+
+**Tradotto in tempo, ai tre livelli di portata misurati:**
+
+| scenario | portata | +10% (fase 1) | 2 fasi (10%+5%) |
+|---|---:|---:|---:|
+| 🔴 **oggi** — squadra prop reale (5 sedie) | 34,7 op/mese | **5,9 – 9,6 mesi** | **8,9 – 14,4 mesi** |
+| 🟡 **flotta intera migrata**, portata MISURATA | 111,9 op/mese | **1,8 – 3,0 mesi** | **2,8 – 4,5 mesi** |
+| 🟢 **flotta intera, portata PROMESSA** (i 13 muti che parlano) | 176,9 op/mese | 1,2 – 1,9 mesi | 1,7 – 2,8 mesi |
+| 📐 controprova indipendente — **banco R105** a taglie firmate (non a 0,65% piatto) | — | mediana **12 giorni** a +8% | — |
+
+✅ **Le due strade si riconciliano** (ed e' il controllo che rende il conto
+credibile): banco **13,08%/mese** × (0,65/0,812 = **0,80** di taglia) ×
+(111,9/176,9 = **0,63** di frequenza reale) = **6,6%/mese** — che a 0,0488-
+0,059% per trade sono proprio i **112 trade/mese** misurati. Il divario fra
+"12 giorni" e "1,8-3 mesi" **non e' un errore**: e' fatto di **due terzi di
+taglia** e **due terzi di frequenza**, misurati entrambi.
+
+## H3 — 🕳️ IL GAP, in un numero solo per scenario
+
+| domanda | gap |
+|---|---|
+| **su FTMO / FundingPips (nessun limite di tempo)** | il gap **non e' di superamento, e' di TEMPO**: **77 op/mese** (111,9 − 34,7) separano "8,9-14,4 mesi" da "2,8-4,5 mesi" per le due fasi. 🟢 **E quelle 77 op/mese sono GIA' IN CASA**: sono le 32 sedie della flotta che non stanno sul conto prop |
+| **su una prop con limite di 30 giorni** (nessuna delle censite ce l'ha oggi, ma esistono) | servono **205-334 trade in un mese**: gap **170-300 op/mese** contro le 34,7 di oggi. **Non colmabile** ne' migrando ne' con sedie nuove: sarebbe da rifiutare in F8, non da inseguire |
+| **sui requisiti di FREQUENZA/CONSISTENZA gia' censiti** | vedi H5: due li passiamo larghi, **due li sfioriamo o li falliamo** |
+
+## H4 — ⚖️ (a) TANTE SEDIE PICCOLE · (b) 1-2 MOTORI VELOCI · (c) MIX — il conto, non l'opinione
+
+### 🔬 LA LEGGE MISURATA DI QUESTA SETTIMANA: **il gate che crea l'edge divide la frequenza per 4-6**
+
+Quattro round in 48 ore, quattro motori diversi, **stessa forma**:
+
+| motore (round) | NUDO: op/mese · PF | CON IL GATE: op/mese · PF | fattore di frequenza |
+|---|---|---|---:|
+| **NY Retest** U30USD M15 (`REFERTO_NYRETEST_2026-08-31`) | **21,9 pos/mese** (462 pos / 21,1 mesi) · **PF 1,002** | slope 75: **5,4/mese** (115 deal) · **PF 1,37-1,43**, DD 3,7%, pegg.gio −0,69% | **÷4,1** (÷5,5 se si conta in posizioni) |
+| **Chaos Lyapunov** NASUSD_EXT M15 (`REFERTO_CHAOSABL_2026-08-31`) | **8,2/mese** (395 / 48 mesi) · **PF 1,150**, DD 21,0% | gate 0.09: **1,5/mese** (71) · **PF 1,789**, DD 8,8% | **÷5,6** |
+| **Inversione da esaurimento** (`REFERTO_INVES_2026-08-30`) | **7,7/mese** (323 / 42 mesi) · **PF 1,00** | E3: **5,1/mese** (215) · **PF 1,16** | ÷1,5 |
+| **Breakin Box** D30EUR M15 (`REFERTO_BREAKIN_2026-08-31`) | **19,7/mese** (416 / 21,1) · **PF 1,007**, DD 24,1% | RR 2,0: **16,8/mese** · PF 1,106, **DD 19,7% > cancello 15% → CHIUSO** | ÷1,2 |
+
+🔴 **E il rovescio della legge, altrettanto misurato: TUTTE le versioni ad alta
+frequenza che abbiamo in casa hanno PF ≈ 1,00** (NyRetest 1,002 · BreakinBox
+1,007 · InvEsaurimento 1,00) — cioe' **aspettativa ZERO**. Un motore a 20-30
+trade/mese con PF 1,00 **non aggiunge portata: aggiunge DD** (12,9% e 24,1%
+misurati) **e costi**. E il CRT, l'unico fade ad alta frequenza portato a
+verdetto tick, e' **0 celle su 30 con PF≥1** (`REFERTO_CRT_2026-08-30`).
+
+### Il conto delle tre strade, a parita' di obiettivo (**+5%/mese di portata in piu'**)
+
+| strada | cosa serve, in numeri | fattibilita' misurata |
+|---|---|---|
+| **(a) N sedie nuove da ~5 trade/mese** | ogni sedia rende 5 × 0,0488% = **+0,24%/mese** → servono **~20 sedie nuove** | 🔴 **fuori portata a settembre**: negli ultimi 3 giorni l'imbuto ha misurato **6 candidati e ne ha promossi 0** (CRT bocciato · Chaos non promosso · ChaosAbl non promosso · BreakinBox chiuso · NyRetest merito sospeso · InvEsaurimento E1 fallita, E3 verde ma OHLC su `_EXT`). ✅ Ma **non e' inutile**: le sedie nuove comprano **regime**, non solo trade (G1/G2, R105 D5) |
+| **(b) 1-2 motori ad alta frequenza (20-40/mese)** | per fare +5%/mese con **30 trade/mese** serve **E = 0,256R** per trade | 🔴 **mai misurata in casa**: e' **2,8× la migliore aspettativa di banco** (0,091R) e **5,6× la cella verde piu' recente** (0,046R). ⚠️ E la legge qui sopra dice che **quando l'edge compare, la frequenza se ne va**. 🟢 Il conto pero' cambia se si abbassa l'asticella: un motore a **30 trade/mese con E di casa (0,075R)** vale **+1,46%/mese** — cioe' **piu' di TUTTA la squadra prop di oggi**. E' un obiettivo sensato; "alta frequenza" da sola non lo e' |
+| **(c) MIX** | migrare + 3-5 sedie nuove scorrelate + 1 motore veloce **solo se con edge** | 🟢 **e' l'unica combinazione che regge l'aritmetica** — dettaglio sotto |
+| **(d) 🆕 MIGRARE cio' che e' gia' validato** _(non era nelle tre opzioni della domanda, ed e' il pezzo grosso)_ | portare la flotta dal conto piccolo alla configurazione prop: **da 34,7 a 111,9 op/mese = ×3,2** | 🟢 **costo di ricerca ZERO** (le sedie esistono, i contratti sono scritti, R105 D5 ha gia' verificato che _"la squadra ottima e' la flotta INTERA"_ — nessun sottoinsieme la batte). 🔴 **Ma e' subordinata a due cancelli**: il **cancello 1** (famiglie a 20 op con DD reale ≤ promesso — oggi `n/d` ovunque) e il **cap C1** (3,25%: 112 op/mese concentrate nelle stesse due finestre lo fanno mordere piu' spesso, e i **gemelli** sono posizione doppia su una prop) |
+
+### 🎯 RACCOMANDAZIONE DELL'ARCHITETTO-PROP (dichiarata come tale — decide Claudio)
+
+**MIX, in QUEST'ORDINE, perche' l'aritmetica ordina da sola:**
+
+1. **PRIMA il segno di E, non la frequenza.** E' l'unico fattore che puo'
+   rendere negativo tutto il prodotto. Costa **zero round**: e' M20 (DD e
+   aspettativa forward per famiglia) + la pagella serale come **flusso**.
+   Senza questo, ogni trade in piu' e' un moltiplicatore su un segno ignoto.
+2. **POI la migrazione (d)** — ×3,2 di portata senza inventare niente, a
+   scaglioni e col cap C1 acceso davvero (gli EA **non leggono ancora** le
+   bandiere del Guardian: e' il pezzo firmato senza enforcement, C1). Da sola
+   porta le due fasi da **8,9-14,4 mesi a 2,8-4,5 mesi**.
+3. **IN PARALLELO, i 13 muti** (+21 op/mese promesse, costo: una verifica sul
+   VPS di Algo Trading e build `.ex5` — GapFill in testa, 5 simboli su 5 a zero).
+4. **POI (a), le sedie nuove scorrelate**, per il **regime** prima che per la
+   frequenza: la flotta e' mono-regime (trend/breakout long in apertura) e
+   R105 dice che il rischio e' **di squadra**, non di sedia.
+5. **(b) alta frequenza: SI', ma con un cancello scritto prima** — vedi H8: si
+   ammette un motore veloce **solo** se porta **E ≥ 0,075R misurata a tick**.
+   Oggi l'unica porta aperta e' il **tagliando NyRetest slope 75** (PF 1,37-1,43,
+   DD 3,7%, ma **n=115 < 150**: merito sospeso per R59) — e si apre con **M26**
+   (tick Dukascopy) o col calendario, non con un'altra griglia.
+
+🛑 **E la strada che NON esiste: alzare la taglia.** E' l'unica leva che darebbe
+portata subito, ed e' **chiusa per misura**: dirupo a **d≈1,055**, e a d=1,15 il
+pass-rate **scende** (99,6% → 96,7%) con 15 partenze bruciate (C7).
+
+## H5 — 📅 I REQUISITI DI FREQUENZA E CONSISTENZA DELLE PROP, contro i NOSTRI numeri
+
+🥇 misure di questo giro sul **dry-run 100k** (13 giornate con chiusure su 19
+giorni, 5 positive e 8 negative) e sul conto piccolo (22 giornate).
+
+| requisito censito | prop | il nostro numero MISURATO | esito |
+|---|---|---|---|
+| **giorni minimi di trading: 4** (fase) | FTMO 2-Step | **13 giornate con chiusure in 19 giorni** sul 100k | 🟢 **passato largo** — la lentezza NON ci fa cadere qui |
+| **giorni minimi: 3** (P1) | FundingPips 2-Step | idem | 🟢 passato |
+| **best day ≤ 50%** del profitto dei giorni positivi | FTMO **1-Step** | **43,6%** sul 100k (il 20/08 vale 998,58 € su 2.289,36 € di giorni positivi) · **50,0% esatto** sul conto piccolo | 🟠 **AL LIMITE, gia' oggi.** E peggiora **abbassando** la frequenza: meno giorni positivi = piu' peso sul migliore. Argomento **a favore** della frequenza, e a favore del **2-Step** (che la regola non ce l'ha) |
+| **consistency score 35%** sui reward on-demand | FundingPips | **43,6%** | 🔴 **oggi NON conforme** (il payout resterebbe trattenuto, non e' breach) |
+| **3 giorni PROFITTEVOLI ≥ 0,5%** del saldo | The5ers | 🔴 **1 giornata su 13** sul 100k supera +0,5% (solo il 20/08, +1,00%) | 🔴 **il requisito da solo costerebbe ~2 mesi**: a questo ritmo servono ~39 giornate per farne 3 |
+| **7 giorni profittevoli / 30** | FundingPips **Zero** | 5 giornate positive su 13 (38%) → ~11/30, ma **solo ~2/30 sopra lo 0,5%** | 🟠 dipende dalla definizione: **da chiedere per iscritto** |
+| ⛔ **"high-frequency trading" fra le pratiche VIETATE** | FundingPips | — | 🔴 **rischio regolamentare della strada (b)**: la definizione non e' data. Un motore a 30-40 trade/mese non e' HFT in senso tecnico, ma **la clausola e' discrezionale** e va chiarita PRIMA di costruire su quella strada |
+| ⛔ **"Risk Per Trade Idea" max 2%** per idea (= nuova posizione entro **10 minuti** nella stessa direzione) | FundingPips (Master ≥25k) | 🥇 M2: **9 posizioni di 8 sedie aperte insieme = 5,85%** il 03/08 08:15; i **gemelli** sparano lo stesso segnale **nello stesso secondo** | 🔴 **HARD BREACH** su quella prop, cosi' come siamo messi. La frequenza **concentrata nella stessa finestra** e' esattamente il pattern che colpisce |
+
+📌 **La lettura che serve a Claudio**: sulle due prop che stiamo istruendo
+(FTMO 2-Step, FundingPips 2-Step) **nessuna regola ci boccia per lentezza** —
+i giorni minimi li passiamo con margine 3×. La lentezza costa **tempo e
+opportunita'**, non l'esito. Dove la lentezza **morde davvero** e' altrove:
+sui **giorni profittevoli ≥0,5%** (The5ers) e sulla **concentrazione del
+giorno migliore** (43,6-50,0%, gia' al limite).
+
+## H6-H9 — LA TABELLA MADRE DELLE RIGHE NUOVE
+
+| # | parametro | valore PROPOSTO | fonti (rango) | conflitti | stato |
+|---|---|---|---|---|---|
+| H6 | 🚄 **Portata minima della squadra prop** (op/mese) | **≥ 110 ingressi/mese** = la flotta intera migrata alla portata gia' MISURATA (111,9). Oggi la squadra prop reale ne fa **34,7** | 🥇 calcolo di questo giro su `trades_auto.csv`/`trades_100k.csv` + `CONTRATTI_SEDIE.md` (promesso 176,9) · 🥇 `ANALISI_DIAL_TAGLIE_2026-08-26.md` T3 (13,08%/mese a d=1,00, riconciliato con la portata reale al fattore 0,80×0,63) | ⚠️ il numero **non e' un obiettivo di per se'**: e' il valore di N nell'equazione. Con E<0 alzarlo peggiora il conto. E 112 op/mese concentrate nelle stesse finestre fanno **mordere il cap C1** piu' spesso (M25) | 📋 **PROPOSTO (v16)** — si congela solo insieme a H7 (il segno di E) |
+| H7 | 💶 **Aspettativa per trade di riferimento del piano** (E) | **da accertare in forward**; oggi il piano lavora con la **banda 0,046R – 0,091R** dichiarata, e la usa **solo per stimare tempi**, mai per promettere risultati | 🥇 banco: +0,091R (dial T3 ÷ contratti) e +0,075R (`METRO_PROP` §9) · 🥇 forward 100k +0,044R (n=22) · 🥇 forward piccolo **−0,091R** (n=97) | 🔴🔴 **CONFLITTO FRA DUE MISURE DI CASA, STESSO RANGO, SEGNO OPPOSTO** (banco +0,091R vs forward −0,091R, stesso modulo). Non risolvibile per gerarchia: si risolve **solo col campione** (cancello 1 + M20) | 🔓 **APERTO (v16)** — **e' la riga piu' importante di tutto il documento oggi**: e' il fattore che decide il segno del prodotto |
+| H8 | 🧪 **Cancello di ammissione di un motore "ad ALTA FREQUENZA"** | un motore veloce entra nell'imbuto come tale **solo se** porta **E ≥ 0,075R misurata a tick** (= l'aspettativa di casa) **e** DD ≤ 15% (cancello congelato) **e** n ≥ 150 (R59). **La frequenza da sola non e' un merito**: PF 1,00 × 30 trade/mese = **zero profitto e DD in piu'** | 🥇 la legge misurata di H4 su **4 round in 48 ore** (NyRetest ÷4,1 · Chaos ÷5,6 · InvEs ÷1,5 · Breakin ÷1,2) · 🥇 le tre versioni veloci in casa **tutte a PF≈1,00** · 🥇 `REFERTO_CRT_2026-08-30` (0/30 celle) | ⚠️ il cancello **non vieta** la caccia a motori veloci: vieta di chiamare "portata" una frequenza senza edge. ⛔ E va letto con la clausola FundingPips _"high-frequency trading"_ fra le pratiche vietate (H5): definizione **[INCERTO]**, da chiedere | 📋 **PROPOSTO (v16)** — se firmato, e' il mandato standard per la caccia "frequenza" |
+| H9 | 📅 **Conformita' ai requisiti di frequenza/consistenza** delle prop candidate | registrare e sorvegliare: **giorni minimi** (passati 3× largo), **best day ≤50%** (misurato **43,6%** sul 100k, **50,0%** sul piccolo), **consistency 35%** FundingPips (**non conforme oggi**), **giorni profittevoli ≥0,5%** The5ers (**1 su 13**) | 🥇 misure di questo giro sui due CSV · 🥈 `docs/REGOLAMENTO_FTMO_2026-08.md` · `docs/REGOLAMENTO_FUNDINGPIPS_2026-08.md` · `CONFIG_PROP_2026-08-18.md` righe 459-460, 489-490 | ⚠️ le soglie sono **[LETTO-VIA-SEARCH]** salvo FTMO (dossier). La misura del best-day e' su **13 giornate**: indicativa, non un verdetto | 🔓 **APERTO (v16)** — si chiude con la scelta della prop (F1) + la misura tenuta viva (→ M27) |
+
+📌 **Stato area H**: **3 PROPOSTE + 1 APERTA**, zero congelamenti chiesti,
+**zero modifiche al forward**. Nessuna sedia accesa, spenta o ridotta da questa
+sezione: e' aritmetica, e la firma resta a Claudio.
+
 ## 🕳️ COSA MANCA E CHI LO PORTA
 
 | # | buco | chi lo porta | la domanda esatta |
@@ -641,9 +889,35 @@ implicita gia' data e' il **deploy piccolo del 770250** (parola di Claudio
 | M23 | 📏 **PASSO-0 DAX (D30EUR)** — blocca DaxReEntry (769300) e DaxValueArea (769600): la **conversione punti** (`InpMT5PerPuntoIndice` su DAX: 100 come US? da VERIFICARE) e il **flat di fine seduta cash** (16:30 server) NON sono misurati. Col default US (22:00) il DAX resterebbe in **overnight** — il difetto che la riga CRT ha gia' evitato scegliendo NASUSD. E' un affinamento **prima dei numeri** (regola di casa) | **cacciatore-strategie** / PC di backtest (sonda su un CSV D30EUR) | "quanti `_Point` MT5 vale 1 punto indice su D30EUR, e a che ora server chiude la seduta cash del DAX? Senza, ogni backtest DAX dei due candidati e' spazzatura (regola InpSessionHour)" |
 | M24 | 📏 **PASSO-0 SPREAD U30USD** — blocca NyRetest (769500, H1-intraday) e pesa su DowModelB (769400, M5): un motore intraday su Dow vive o muore sul **costo reale**. Lo spread U30USD su M5 e H1 non e' censito; senza, un verdetto OHLC e' fantasia (come lo shortgate insegna: OHLC inganna) | **cacciatore-strategie** / PC | "spread tipico e worst-case di U30USD su M5 e H1 (tick reali), per sapere se un retest-continuazione paga i costi prima di spenderci un round" |
 | M25 | 🔴 **CORRELAZIONE DowModelB vs 770202** (cancello preliminare della 3ª priorita' G3) e **sovrapposizione dei tre motori DAX** su D30EUR — con lo strumento gia' esistente (`sovrapposizione_sedie.py` di M2), da rifare quando i candidati hanno un forward/backtest con `open_time` | PC di backtest, dopo i primi round dei candidati | "DowModelB e 770202 aprono sullo stesso evento d'apertura US: sono un doppione (rischio doppio per il cap C1) o sono anti-correlati (fade vs breakout)? E i tre motori DAX coincidono nei minuti nei giorni di rottura?" — dipende da M18 (`open_time` in backtest) |
+| M27 | 🚄 **IL SEGNO DI E — la misura che comanda l'area H.** Oggi il banco dice **+0,091R** per trade e il forward di agosto **−0,091R**: due misure di casa, stesso rango, **segno opposto**. Finche' resta cosi', ogni ragionamento sulla frequenza e' un moltiplicatore su un numero di segno ignoto. Serve: aspettativa per trade **per famiglia** sulla serie forward (non solo il netto: media, mediana, R medio) tenuta **viva**, e la stessa cosa sul 100k dove le taglie sono gia' quelle prop | **Claudio** (pagella serale come flusso: `scarica_pagella.ps1 -Installa`) + chat principale per il calcolo | "per ogni famiglia: n ingressi, netto, **aspettativa per trade in R**, e DD picco-valle della serie — contro il DD e le op/mese promesse in `CONTRATTI_SEDIE.md`. E' M20 con una colonna in piu', ed e' la colonna che decide" |
+| M28 | 📅 **CENSIMENTO DEI REQUISITI DI FREQUENZA E CONSISTENZA** delle prop candidate — oggi ne abbiamo pezzi sparsi (FTMO 4 giorni · FundingPips 3 giorni + consistency 35% + 7 giorni profittevoli/30 sullo Zero · The5ers 3 giorni ≥0,5%) e **due clausole che colpiscono proprio la strada "frequenza"**: _"high-frequency trading"_ fra le pratiche vietate su FundingPips (definizione mai trovata) e la **"Risk Per Trade Idea"** (max 2% combinato per idea = nuova posizione entro **10 minuti** nella stessa direzione), che colpisce **i nostri gemelli e il pile-up di M2** | **cacciatore-config-prop** (dentro il mandato M19 sul secondo dossier) | "per ogni prop candidata a muri statici 5/10: giorni minimi (e la definizione di 'giorno di trading' e di 'giorno profittevole'), limite di tempo, consistency/best-day (soglia e formula esatta), **definizione letterale di 'high-frequency trading'** fra le pratiche vietate, e se esiste una regola tipo 'risk per trade idea' con finestra in minuti. Etichetta di verifica su ogni riga" |
+| M29 | 📈 **LA PROVA DI PORTATA A PORTAFOGLIO** — il banco R105 misura la flotta a **taglie miste** (rischio medio 0,812%); un conto prop la vorrebbe a **0,65% piatto** e con **un gemello per famiglia** (nota area C). Nessuno ha mai misurato la portata **e il cap C1** di QUELLA configurazione: quante op/mese restano dopo aver tolto i gemelli, quante volte il cap rifiuta un ingresso, e quanto profitto/mese ne esce | PC di backtest (rianalisi del dataset R105, zero ore di tester) + `sovrapposizione_sedie.py` | "sul dataset `R105_dataset_giornaliero.csv`: rifare il conto con **un gemello per famiglia** e **0,65% piatto** — quante op/mese, quanto profitto/mese, e quante volte il cap 3,25% avrebbe morso. E' la portata VERA della squadra prop, che oggi stimiamo per riconciliazione (0,80 × 0,63) invece di misurarla" |
 | M26 | 🐻 **IMPORT TICK DUKASCOPY per il verdetto ORSO** — il gated short 770250 (e ogni motore short/crollo) **non potra' MAI** avere un verdetto tick in un orso su BCM (tick BCM dal 26/09/2024 = nessun orso). Il verdetto ORSO oggi e' solo **OHLC** (PF 1.84): la conferma vera dei costi in un crollo richiede storico tick esterno (Dukascopy 2020/2022) | PC di backtest (import gia' progettato in M12, strada Dukascopy) | "importare i tick Dukascopy del crollo 2020 e dell'orso 2022 per NASUSD, cosi' il verdetto short-orso non resta OHLC-fantasia — e' la sola via al merito pieno del mattone TEMPESTA" |
 
 ## ✍️ LE FIRME CHE SERVONO A CLAUDIO (in ordine di urgenza)
+
+🆕 **v16 (31/08) — LA DECISIONE PIU' URGENTE E' L'ORDINE DELLE MOSSE SULLA
+PORTATA (area H).**
+
+🚄 **FIRMA "PORTATA" — approvare (o correggere) l'ORDINE delle quattro mosse**,
+che l'aritmetica ordina cosi': **(1) il SEGNO di E prima di tutto** (M27: senza,
+ogni trade in piu' e' un moltiplicatore su un numero di segno ignoto — banco
++0,091R contro forward −0,091R) · **(2) la MIGRAZIONE** della flotta gia'
+validata sulla configurazione prop (**×3,2 di portata, costo di ricerca zero**;
+subordinata al cancello 1 e al cap C1, che oggi **nessun EA legge**) ·
+**(3) i 13 muti** (+21 op/mese gia' pagate: una verifica sul VPS, GapFill in
+testa) · **(4) le sedie nuove per REGIME**, non per frequenza. **Non impegna un
+euro e non tocca il forward**: fissa **dove va il lavoro delle prossime due
+settimane**.
+
+🧪 **FIRMA "CANCELLO ALTA FREQUENZA" (H8)** — un motore veloce entra
+nell'imbuto **solo con E ≥ 0,075R misurata a tick** (+ DD ≤15% + n ≥150).
+Nasce da una legge misurata su **4 round in 48 ore** (il gate che crea l'edge
+divide la frequenza per 4-6) e dal fatto che **le tre versioni veloci che
+abbiamo hanno tutte PF ≈ 1,00**. Serve a non spendere settembre a inseguire
+frequenza che non e' portata. ⚠️ Da leggere insieme alla clausola FundingPips
+_"high-frequency trading"_ fra le pratiche **vietate** (definizione [INCERTO],
+→ M28).
 
 🆕 **v14 (26/08) — LA DECISIONE PIU' URGENTE STA IN CIMA E NON E' UN NUMERO:
 E' UNA SEQUENZA.**
@@ -763,7 +1037,25 @@ _(A2/A4: FIRMA 4 · D-spegnimenti: FIRMA 5.)_
 
 ## 📊 IL CONTO DEL GIRO
 
-🆕 **v15 (30/08): 42 parametri invariati nei valori · nasce l'AREA G** —
+🆕 **v16 (31/08): 46 parametri — 12 congelati · 18 proposti · 15 aperti · 1
+chiuso per misura. Nasce l'AREA H — ARITMETICA DELLA PORTATA**, risposta alla
+domanda di Claudio (_"troppo LENTA"_) trasformata in numeri. Quattro righe
+nuove, **nessun valore firmato cambiato**: **H6** (portata minima della squadra
+prop: ≥110 op/mese contro le **34,7** di oggi, PROPOSTO) · **H7**
+(**l'aspettativa per trade E — APERTO col conflitto piu' pesante del
+documento**: banco **+0,091R** contro forward **−0,091R**, stesso rango, segno
+opposto) · **H8** (cancello di ammissione dei motori ad alta frequenza: **E ≥
+0,075R misurata a tick**, perche' PF 1,00 × 30 trade/mese = zero profitto e DD
+in piu', PROPOSTO) · **H9** (conformita' ai requisiti di frequenza/consistenza:
+best day **43,6%** sul 100k contro il 50% FTMO 1-Step e il **35%** FundingPips,
+APERTO). In COSA MANCA entrano **M27** (il segno di E), **M28** (censimento dei
+requisiti di frequenza/consistenza + la definizione letterale di
+_"high-frequency trading"_ vietato su FundingPips), **M29** (prova di portata a
+portafoglio: un gemello per famiglia a 0,65% piatto). 🛑 **Zero modifiche al
+forward, zero preset toccati, zero acquisti autorizzati, nessuna sedia accesa o
+spenta da questa sezione.**
+
+_(conteggio precedente, v15)_ **42 parametri invariati nei valori · nasce l'AREA G** —
 candidati dell'imbuto, mappa scorrelazioni, ordine dei test. Sette voci nuove
 REGISTRATE/PROPOSTE, **zero congelamenti chiesti** (i candidati non hanno
 ancora un round): **G0** (deploy gated short 770250 su conto piccolo, in
@@ -821,6 +1113,7 @@ B9 — e le due consegne di M15 (screenshot fuso + `super trend.ex4`).
 
 | data | versione | cosa e' cambiato | perche' |
 |---|---|---|---|
+| 31/08/2026 sera | **v16** | 🚄 **NASCE L'AREA H — ARITMETICA DELLA PORTATA.** Risposta alla domanda di Claudio (_"la flotta e' viva ma troppo LENTA — servono trade con frequenza"_) trasformata in numeri, con l'equazione dichiarata in testa: **profitto/mese = N × E × rischio**, e la constatazione che dei tre fattori **uno e' gia' bloccato per misura** (il rischio: dirupo a d≈1,055, C7), **uno ha oggi il segno sbagliato** (E: forward di agosto negativo) e solo il terzo e' quello che la domanda propone di alzare. 🥇 **[CALCOLO DI QUESTO GIRO]** su `trades_auto.csv`/`trades_100k.csv` (chiusure fino al **28/08**) + censimento `.chr` **25/08** (37 sedie vive) + `CONTRATTI_SEDIE.md`: **PORTATA** — flotta intera **111,9 op/mese misurate contro 176,9 promesse (resa 63%)**, squadra prop reale (i 5 mirror del 100k) **34,7 contro 46,1 (75%)**, e **13 sedie su 37 a ZERO** che valgono **21 op/mese pagate e non consegnate** (i 5 GapFill in testa, sospetto di guasto agli atti dal 22/08 e mai verificato). **FABBISOGNO** — a 0,65%/trade servono **205 trade** per il +10% con E=0,075R, **334** con E=0,046R (la cella verde piu' recente, INVES E3): oggi **5,9-9,6 mesi**, con la flotta migrata **1,8-3,0 mesi**. Le due strade si **riconciliano** (banco 13,08%/mese × 0,80 di taglia × 0,63 di frequenza = 6,6%/mese). **GAP** — su FTMO/FundingPips (**nessun limite di tempo**, min 4 e 3 giorni: li passiamo 3× largo) il gap **non e' di superamento ma di TEMPO: 77 op/mese, e sono gia' in casa**. 🔬 **LA LEGGE MISURATA DEL GIORNO, su 4 round in 48 ore: il gate che crea l'edge DIVIDE la frequenza per 4-6** (NyRetest ÷4,1 · Chaos ÷5,6 · InvEsaurimento ÷1,5 · Breakin ÷1,2) — e **tutte le versioni veloci che abbiamo hanno PF≈1,00** (NyRetest 1,002 · Breakin 1,007 · InvEs 1,00): **frequenza senza edge non e' portata, e' DD e costi** (CRT: 0/30 celle). Il conto delle strade: **(a)** servirebbero **~20 sedie nuove** (e l'imbuto ha promosso **0 su 6** in tre giorni); **(b)** un motore veloce che da solo faccia +5%/mese chiede **E=0,256R = 2,8× la migliore aspettativa mai misurata in casa** — ma a **E di casa** un motore da 30 trade/mese vale **+1,46%/mese, piu' di tutta la squadra prop di oggi**; **(d) 🆕 MIGRARE cio' che e' gia' validato** (×3,2 di portata, costo di ricerca ZERO, R105 D5: _"la squadra ottima e' la flotta INTERA"_) e' il pezzo grosso che la domanda non elencava. **Raccomandazione dichiarata: MIX, in quest'ordine — prima il SEGNO di E, poi la migrazione, poi i 13 muti, poi le sedie nuove per REGIME, e l'alta frequenza solo col cancello H8.** 🆕 **H5, misure di conformita' mai fatte prima**: **best day 43,6%** sul 100k (**50,0% esatto** sul piccolo) contro il 50% di FTMO 1-Step e il **35% di FundingPips (oggi NON conforme)**; **1 giornata su 13** supera il +0,5% richiesto dai "giorni profittevoli" The5ers (≈2 mesi solo per il requisito); e due clausole che colpiscono proprio la strada "frequenza": **"high-frequency trading" fra le pratiche vietate** su FundingPips e la **"Risk Per Trade Idea"** a finestra 10 minuti, che colpisce **i gemelli e il pile-up di M2**. Righe nuove **H6-H9**; in COSA MANCA **M27** (il segno di E), **M28** (requisiti di frequenza/consistenza + definizione letterale di HFT), **M29** (portata a portafoglio con un gemello per famiglia a 0,65% piatto). 📥 Assorbiti anche i cinque referti del 30-31/08 e il **dossier Orbit Funded** (secondo dossier arrivato, ma su un prodotto **instant** con EA/piattaforma/strumenti **[INCERTO]** → **M19 resta APERTO**). **Nessun valore firmato cambiato, forward intatto** → **46 parametri (12C · 18P · 15A · 1 chiuso)** | domanda di Claudio del 31/08 sera + i 5 referti di round + il forward ricontato al 28/08 |
 | 18/08/2026 ~01:00 | **v1** | prima stesura: 29 parametri in 6 aree, dalle fonti elencate in testa. Incorporati: dossier config-prop 18/08 (3 preset .set veri, censimento 6 prop non verificato, 36 buchi), le 9 proposte P1-P9, il censimento rischio 17-18/08 (tre sedie al 2% corrette a 1%), DOVE_SIAMO 17/08 (agosto −11%, manca il criterio di uscita). **NON incorporata** l'analisi trascrizioni (in lavorazione): 5 parametri marcati 🎬 in attesa | non esisteva un posto unico dove i numeri della prop stessero con fonte e stato |
 | 18/08/2026 ~01:15 | v1.1 | incorporato lo **script CrewAI incollato da Claudio** (rango 4): breaker 4,3-4,5% aggiunto alle fonti di B1 (quarta voce convergente sul buffer prima del muro), sizing 0,5% aggiunto ai conflitti di A1, snapshot mezzanotte broker in B3 **con la discordanza di fuso (00:00 GMT vs 00:00 CET) segnata come [INCERTO]**. Eseguita la verifica richiesta sul Guardian: riga 155 misura su **equity** → il flottante e' contato, nessun buco nuovo (resta B4 sulla baseline) | materiale nuovo in chat durante il primo giro |
 | 18/08/2026 ~01:45 | **v2** | incorporato il referto dell'**analista-trascrizioni** (11 trascrizioni = 7 fonti indipendenti, resa numerica bassa). **Nessun parametro cambia valore e nessuno si chiude**: i 4 punti caldi (buffer 4/9, ora reset, minuti news, recovery dei 4 EA) NON sono confermati dal parlato → le note 🎬 su A3/C1/D1/D2/F2 passano da "in arrivo" a "risposto: niente". Novita' incorporate: **FundedNext 1-Step 3%/6%** [a voce] in F1 (daily 3% = 🔴 per il metro di casa) · rinforzo **static-not-trailing** su B5/F3 (video PropEA) · **divieto hedge multi-account FundedNext** in E2 (risposta a voce alla domanda tipo-2 D3; la nostra conferma scritta resta da fare) · **nuova riga E6**: cosa le prop rilevano (magic condiviso, input identici, tratti simili — dal video VIETATO PER NOI, tenuto come intelligence difensiva) → **30 parametri (2C · 13P · 15A)**. In COSA MANCA: M3 chiuso, **M8** (4 screenshot, Claudio) e **M9** (ri-trascrizione del file troncato, Claudio) aggiunti | consegna dell'analista-trascrizioni (commit `bd78950`) |
