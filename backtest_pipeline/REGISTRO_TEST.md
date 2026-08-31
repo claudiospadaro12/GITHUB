@@ -498,3 +498,13 @@ e' UNA cella su 105 -> outlier -> BOCCIA da criterio congelato. Il verde a gate
 largo = drift Nasdaq + ottimismo OHLC su EMA-cross, non edge del gate. n sottile
 ovunque (55-92 trade/4 anni). **La tesi "LLE basso = tradeable" e' falsificata
 sugli indici.** Magic 769200 libero. Il calcolo LLE resta come mattone misurato.
+
+### Chaos ablazione (31/08, corsa 09:57) — ingrediente LLE NON promosso (criterio congelato)
+Gate al massimo (0.09) vs nudo (999) su 2020-2024 OHLC: PF 1.789 vs 1.150,
+DD 8.78% vs 21.01%, profit 33175 vs 39724. Passa la condizione PF (+0.64),
+fallisce profit_totale -> sepoltura da lettera congelata. Osservazione
+registrata: la condizione profit_totale e' anti-filtro per costruzione
+(lezione in checklist, vale per le ablazioni FUTURE, non retroattiva).
+Porta di rientro: round nuovo su motore diverso con criteri risk-adjusted
+congelati prima. EA resta bocciato. Referto:
+risultati_archivio/REFERTO_CHAOSABL_2026-08-31.md

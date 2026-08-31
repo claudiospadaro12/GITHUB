@@ -5815,3 +5815,18 @@ lo zip pronto e dentro un CSV a meta'.
 >    un wrapper che si limita a `if($LASTEXITCODE -ne 0)` eredita solo i
 >    silenzi. Ogni diagnostica del figlio che il round considera FATALE va
 >    **rimisurata sugli artefatti** dal wrapper, dopo la corsa.
+
+## ⚖️ IL CRITERIO "PROFIT TOTALE >=" IN UN'ABLAZIONE DI FILTRO E' ANTI-FILTRO PER COSTRUZIONE (31/08/2026, pagata sull'ablazione Chaos)
+
+Un filtro che taglia trade perde quasi sempre profitto TOTALE anche quando
+aggiunge edge per-trade vero (Chaos: -82% trade, 83% del profitto tenuto,
+DD dimezzato, PF +0.64 -> bocciato dalla condizione profit_totale). Il
+verdetto congelato SI APPLICA lo stesso (i criteri non si cambiano dopo i
+numeri) — la lezione vale per i round FUTURI:
+
+> ✅ **REGOLA: in un'ablazione con/senza filtro, le condizioni si congelano
+> su metriche per-trade o risk-adjusted** (PF, profit/DD, aspettativa/trade,
+> peggior giornata) — MAI sul profitto totale, che punisce strutturalmente
+> qualunque filtro. E il criterio va riletto AD ALTA VOCE chiedendosi: "un
+> filtro PERFETTO passerebbe questa condizione?" Se no, il criterio e' rotto
+> prima ancora di partire.
