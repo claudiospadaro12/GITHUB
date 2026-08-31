@@ -266,6 +266,7 @@ try{
               "-Fino",$Fino,
               ("-FrazioneIS"),("" + $FrazioneIS),
               "-Modello","1",
+              "-Rifai",
               "-Deposito",("" + $Deposito))
     $global:LASTEXITCODE = 0
     & powershell $argv

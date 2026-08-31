@@ -398,3 +398,48 @@ CRT_TICK_DIAG_CORSA_20260831_0823._
 
 **CONSEGUENZA: la strada al verdetto tick e' APERTA. Prossima corsa: TICK_G
 (ADX<=30), stesso pin — IL verdetto del gated CRT nel toro.**
+
+## 🏁 VERDETTO TICK DEL GATED (31/08 08:28, pin ba56eeb, corsa VERA): ROSSO — E IL CRT SI CHIUDE BENE
+
+_Freschezza verificata: modo CORSA, compile 80KB 08:28:05, per-trade 2/2,
+header 26 colonne, gemelli 769105/769106 byte-identici. Zip
+CRT_TICK_G_CORSA_20260831_0828._
+
+**LA MISURA (tick reali, NASUSD 2024.09.26->2026.06.30, gate ADX(D1)<=30):**
+
+| | GATED (ADX<=30) | UNGATED (DIAG, ADX<=100) |
+|---|---|---|
+| PF | **0.459** | 0.462 |
+| Profit | -65522 | -75354 |
+| n (deals) | 1460 | 2039 |
+| DD equity | 67.2% | 76.5% |
+| Pegg. giornata | -2.0% | -2.0% |
+
+- Il gate LAVORA meccanicamente: 866 blocchi (vs 156 di solo warmup nella
+  DIAG), Via D1=1621/M15=0, -28% di trade. Ma il PF NON si muove: 0.459
+  contro 0.462. **L'ADX(D1)<=30 non isola un sottoinsieme profittevole nel
+  toro a tick: taglia volume, non taglia perdita.**
+- Per-trade, nessuna sacca nascosta: **17 mesi su 19 in rosso** (peggiore
+  2025.02 -10834; unici positivi 2026.02 +230 e 2026.06 +29, spiccioli),
+  LONG -22422 (n=775) e SHORT -43100 (n=685): perdono TUTTI E DUE i lati.
+
+**LA LETTURA ONESTA:**
+- Il flip visto su OHLC (+10135, ogni regime verde) era misurato su _EXT
+  2020-2024 MULTI-REGIME. Sul toro 2024-2026, l'unica finestra
+  tick-misurabile su BCM, il gate non salva niente. La promessa OHLC
+  multi-regime resta NON VERIFICATA a tick: servirebbero i tick del chop
+  (Dukascopy), come dichiarato dal primo giorno.
+- Verdetto: **il gated CRT nel toro a tick e' PF 0.46 = NON deployabile.**
+  Niente conto piccolo, niente preset, magic 769100 NON scende in campo.
+
+**CHIUSURA NEL MIGLIORE DEI MODI (come chiesto da Claudio il 30/08 sera):**
+- Il CRT si chiude con un **verdetto tick VERO** — non con un baco. La saga
+  ha fruttato: EA v3 robusto (CopyRates D1 + fallback M15 + diagnostica),
+  la classe skip-senza-Rifai in checklist, la prova che gli handle
+  iADX/iATR D1 non popolano nel tester tick su nativo (nota per OGNI EA
+  futuro con gate su TF superiore).
+- **PARCHEGGIATO** come candidato-chop: si riapre SOLO con tick Dukascopy
+  del regime range (2022-2023) o se il mercato torna chop e si vuole il
+  forward-test. Magic 7691xx restano riservati.
+- **PIVOT ESEGUITO**: si passa ai 5 motori mai testati, primo il Chaos
+  Lyapunov (riga gia' pronta e gate-passata).

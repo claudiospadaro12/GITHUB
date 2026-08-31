@@ -1,5 +1,10 @@
 # 🌅 PIANO DI DOMANI MATTINA — CHIUDERE IL CRT NEL MIGLIORE DEI MODI
 
+> ✅ **ESEGUITO E CHIUSO IL 31/08 MATTINA.** DIAG vera 08:23 (gate riceve dati
+> via D1, 2039 trade), TICK_G vera 08:28: **PF 0.459 = ROSSO, il gate non
+> salva a tick nel toro**. CRT parcheggiato con verdetto tick VERO. Verbale
+> completo in `risultati_archivio/REFERTO_CRT_2026-08-30.md`. Pivot al Chaos.
+
 _Scritto la notte del 30/08 su richiesta di Claudio: "NON MI ARRENDO CON CRT.
 Domani prima chiudo questo EA nel migliore dei modi, poi il resto."_
 

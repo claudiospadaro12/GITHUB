@@ -465,3 +465,23 @@ dichiarato, nessuna proposta**.
   pagina della riga.
 - ⚠️ **Nessuna sedia viva toccata.** Nessun numero: **il round non e' ancora
   girato.**
+
+---
+
+## CRT TURTLE SOUP (Neo Malesa, MIT) — CHIUSO 31/08/2026: senza edge a tick nel toro, gate compreso
+
+Saga completa in `risultati_archivio/REFERTO_CRT_2026-08-30.md`. In sintesi:
+
+| banco | finestra | config | risultato | verdetto |
+|---|---|---|---|---|
+| tick BCM M4 | 2024-2026 (toro) | sweep 30 celle, ungated | PF 0.43-0.73, 0/30 | 🔴 morto nel toro |
+| OHLC _EXT M1 | 2020-2024 (4 regimi) | cella robusta | +5744, vive nel CHOP (2022/2023), perde crollo e toro | 🟡 motore da range |
+| OHLC _EXT M1 | 2020-2024 | + gate ADX(D1)<=30 | +10135, OGNI regime positivo | 🟢 gate valido su OHLC |
+| tick BCM M4 | 2024-2026 (toro) | + gate ADX(D1)<=30, corsa VERA | **PF 0.459** (ungated 0.462), 17/19 mesi rossi, 2 lati rossi | 🔴 **il gate non salva a tick** |
+
+- **NON deployabile. PARCHEGGIATO** candidato-chop: si riapre solo con tick
+  Dukascopy del regime range, o mercato tornato chop. Magic 7691xx riservati.
+- Lasciti tecnici: EA v3 (CopyRates D1 + fallback M15 — gli handle iADX/iATR
+  su D1 NON popolano nel tester tick su nativo: vale per ogni EA futuro);
+  classe "skip-senza-Rifai" in CHECKLIST_RIGA_DI_LANCIO.md (4 corse della
+  saga erano zombie: CSV stantii spacciati per freschi).
