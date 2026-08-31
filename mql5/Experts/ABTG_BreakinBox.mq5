@@ -155,8 +155,10 @@
 //|                                                                  |
 //|  STATO: CANDIDATO DA BACKTEST. NON e' una sedia, NON va in        |
 //|    forward finche' un round a TICK REALI non lo promuove, e la    |
-//|    promozione richiede l'ablazione qui sopra. File prova (BOZZA)  |
-//|    in backtest_pipeline/prove/ABTG_BreakinBox_*_BOZZA.txt.        |
+//|    promozione richiede l'ablazione qui sopra. File prova:        |
+//|    backtest_pipeline/prove/ABTG_BreakinBox.txt (gamba A) e        |
+//|    ABTG_BreakinBox_RRFISSO.txt (gamba B); riga di lancio:         |
+//|    backtest_pipeline/righe/RIGA_BREAKIN.ps1.                      |
 //|                                                                  |
 //|  ASCII puro (regola di casa): niente accenti e niente emoji       |
 //|    dentro le stringhe. NON compilato ne' testato da chi ha        |

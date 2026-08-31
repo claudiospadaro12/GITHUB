@@ -1,11 +1,11 @@
 # ==========================================================================
 # ABTG_BreakinBox  -  GAMBA A: TP AL LATO OPPOSTO DEL BOX  (LA TESI)
 #
-# *** BOZZA -- NON LANCIARE FINCHE' LA RIGA DI LANCIO NON ESISTE. ***
-# Marcato BOZZA per la regola di casa: un file prova si "spegne" da BOZZA
-# solo quando la sua riga di lancio e' stata scritta e gattata contro
-# backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md (inclusa la classe nuova
-# skip-senza -Rifai, che nella saga CRT ha prodotto 4 corse zombie su 6).
+# PROMOSSO DA BOZZA IL 31/08/2026: la riga di lancio esiste
+# (righe/RIGA_BREAKIN.ps1, marcatore MARCATORE_RIGA_BREAKIN_v1), scritta
+# e gattata contro backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md (inclusa
+# la classe skip-senza -Rifai, che nella saga CRT ha prodotto 4 corse
+# zombie su 6). Si lancia SOLO dalla scheda righe/RIGA_BREAKIN_DA_MANDARE.md.
 # Gli input pinnati qui sotto ESISTONO tutti in mql5/Experts/ABTG_BreakinBox.mq5
 # (verificati nome per nome): MT5 IGNORA IN SILENZIO un pin che non trova, ed
 # e' cosi' che nacque il falso "0/8" del FiboH4 (REGISTRO_TEST par.2-bis).
@@ -43,7 +43,7 @@
 #     GAMBA A = questo file  -> InpTP_RR=0   TP al LATO OPPOSTO DEL BOX
 #     GAMBA B = file gemello -> InpTP_RR=2.0 TP a RR FISSO (il CONTROLLO,
 #                               cioe' la geometria di R95)
-#     file gemello: prove/ABTG_BreakinBox_RRFISSO_BOZZA.txt
+#     file gemello: prove/ABTG_BreakinBox_RRFISSO.txt
 #     >>> SE VINCE L'RR FISSO, questo motore e' R95 con un livello nuovo e
 #         IL CAPITOLO SI CHIUDE LI'. Scritto ORA, prima dei numeri.
 #     Le due gambe sono file SEPARATI (e non due celle di una griglia) per
@@ -203,24 +203,22 @@
 # >>> FUSO BCM (NON invertito): D30EUR su BCM e' a ORA SERVER = ora italiana
 #     meno un'ora. Il box notturno 23:00-04:59 SERVER = 00:00-05:59 IT.
 #     La finestra operativa parte alle 08:00 SERVER = 09:00 IT = APERTURA
-#     DEL DAX (CLAUDE.md). La riga di lancio deve GATTARE questi valori e
-#     RIFIUTARE il 23 (che sarebbe l'ora italiana del box) e il 9 (che
-#     sarebbe l'ora italiana dell'apertura).
+#     DEL DAX (CLAUDE.md). La riga di lancio deve GATTARE questi valori:
+#     PRETENDE InpBoxStartHour=23 e RIFIUTA il 22 (la vecchia deduzione
+#     dal PDF [PAG 26/28], DEDOTTA dagli screenshot .bcm e SUPERATA), e
+#     PRETENDE InpOpStartHour=8 RIFIUTANDO il 9 (che sarebbe l'ora
+#     italiana dell'apertura).
 #     DOMANDA D1 CHIUSA IL 31/08 (meccanicamente, non a memoria): il box e'
 #     23:00->04:59 SERVER perche' e' ESATTAMENTE il box della sedia viva
-#     770411 (R103: # CONVERSIONE D30EUR [NON MISURATA]: il 100 di InpMT5PerPuntoIndice e' il
+#     770411 (R103: InpBoxStartHour=23, InpBoxEndHour=4:59, preset live)
+#     e la mutua esclusivita' letterale PRETENDE lo stesso box.
+#
+# CONVERSIONE D30EUR [NON MISURATA]: il 100 di InpMT5PerPuntoIndice e' il
 # fattore MISURATO su NASUSD/U30USD (R97), MAI su D30EUR. Prima di leggere
 # il cancello C2 (mediana take in punti indice) la conversione SI MISURA
 # DAL PER-TRADE DEL ROUND STESSO, come R97: digits dei prezzi + mediana
 # dei movimenti, due misure indipendenti concordi. Se esce diversa da 100,
 # take_idx_pts si riscala a posteriori senza rifare la corsa.
-InpBoxStartHour=23, InpBoxEndHour=4:59, preset live) --
-#     e la mutua esclusivita' letterale PRETENDE lo stesso box. La vecchia
-#     deduzione 22:00 dal PDF
-#     [PAG 26/28] ed e' DEDOTTA dagli screenshot .bcm. La domanda D1 del
-#     referto ANALISI_NIGHTLY_PDF e' ancora APERTA a Claudio. Se D1 dice
-#     "ora italiana", i quattro input del box si spostano di un'ora -- e
-#     sono input, non righe di codice.
 #
 # Le direttive @ vanno NUDE (senza # davanti e senza commenti in coda):
 # commentate o sporche = gate vuoto.

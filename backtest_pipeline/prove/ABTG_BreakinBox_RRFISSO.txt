@@ -1,8 +1,10 @@
 # ==========================================================================
 # ABTG_BreakinBox  -  GAMBA B: TP A RR FISSO  (IL CONTROLLO = geometria R95)
 #
-# *** BOZZA -- NON LANCIARE FINCHE' LA RIGA DI LANCIO NON ESISTE. ***
-# Gemello di prove/ABTG_BreakinBox_BOZZA.txt (GAMBA A). Le due gambe si
+# PROMOSSO DA BOZZA IL 31/08/2026: la riga di lancio esiste
+# (righe/RIGA_BREAKIN.ps1, marcatore MARCATORE_RIGA_BREAKIN_v1). Si lancia
+# SOLO dalla scheda righe/RIGA_BREAKIN_DA_MANDARE.md.
+# Gemello di prove/ABTG_BreakinBox.txt (GAMBA A). Le due gambe si
 # lanciano INSIEME e si leggono INSIEME: da sole non decidono niente.
 #
 # Motore: BREAKIN del box notturno (mql5/Experts/ABTG_BreakinBox.mq5).
@@ -77,9 +79,11 @@
 #   - UNA SOLA TRANCHE, FrazioneIS 1.0 (gamba OOS degenere, si IGNORA).
 #
 # >>> FUSO BCM (NON invertito): ORA SERVER = ora italiana meno un'ora.
-#     Box 22:00-04:59 SERVER (= 23:00-05:59 IT), finestra operativa da
-#     08:00 SERVER (= 09:00 IT, apertura DAX). La riga di lancio gatta i
-#     valori e RIFIUTA il 23 e il 9 (che sono le ore italiane).
+#     Box 23:00-04:59 SERVER (= 00:00-05:59 IT, il box della sedia viva
+#     770411), finestra operativa da 08:00 SERVER (= 09:00 IT, apertura
+#     DAX). La riga di lancio gatta i valori: PRETENDE 23 e RIFIUTA il 22
+#     (vecchia deduzione dal PDF, superata), PRETENDE 8 e RIFIUTA il 9
+#     (che sarebbe l'ora italiana dell'apertura).
 #
 # Le direttive @ vanno NUDE (senza # davanti e senza commenti in coda).
 @SIMBOLO  D30EUR
