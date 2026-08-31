@@ -56,7 +56,16 @@
 #     (abtg_trades_ABTG_NySessionRetest_U30USD_769501/769502.csv). Il per-trade
 #     CSV e' il CUORE di questo passo: con una griglia vera sarebbe
 #     inutilizzabile (stesso magic -> sopravvive solo l'ultima passata).
-#   - MODELLO 4 (tick reali BCM), U30USD NATIVO, H1.
+#   - MODELLO 4 (tick reali BCM), U30USD NATIVO, M15.
+#     >>> PERCHE' M15 E NON H1 (misurato il 31/08, corsa 09:51): su H1 il
+#     motore e' strutturalmente MUTO -- la seduta 14:30-20:55 contiene 6
+#     barre H1 (open 15..20), la prima e' esclusa per regola (pos 0) e la
+#     pendenza VWAP chiede 5 barre di seduta: l'unica barra che potrebbe
+#     tradare chiude alle 21:00, OLTRE il flat 20:55. Contatori esatti:
+#     9256 OnNewBar = 7083 fuori-seduta/contesto + 2171 pos/pendenza + 2.
+#     ZERO ingressi possibili per costruzione. Su M15 la seduta ha ~25
+#     barre e la pendenza a 5 respira. Il TREND resta su H1 (handle
+#     dedicato nell'EA, come il request.security del Pine sorgente).
 #   - UNA SOLA TRANCHE, FrazioneIS 1.0: la gamba "IS" del generico e' la
 #     finestra intera, la gamba "OOS" e' degenere (0 giorni) e si IGNORA.
 #     21 mesi = UN SOLO REGIME (toro): merito sospeso se n<150 (R59), rischio
@@ -75,7 +84,7 @@
 # 2026.06.30 = fine finestra dichiarata ("fino a oggi disponibile"): NON si
 # eredita dal default del generico (classe 31/08).
 @SIMBOLO U30USD
-@PERIODO H1
+@PERIODO M15
 @DAQUANDO 2024.09.26
 @FINOA 2026.06.30
 #

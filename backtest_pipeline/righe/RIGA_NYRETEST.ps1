@@ -1,13 +1,13 @@
 # =====================================================================
-#  MARCATORE_RIGA_NYRETEST_v2
+#  MARCATORE_RIGA_NYRETEST_v3
 #  RIGA_NYRETEST.ps1  --  NY SESSION RETEST: PASSO 0 + MISURA a tick BCM.
-#  ABTG_NySessionRetest (VWAP-retest in trend, primo H1-intraday della
-#  flotta) su U30USD H1, TICK REALI (Modello 4), 2024.09.26->2026.06.30.
+#  ABTG_NySessionRetest (VWAP-retest in trend, VWAP-retest intraday della
+#  flotta) su U30USD M15, TICK REALI (Modello 4), 2024.09.26->2026.06.30.
 #  CELLA FISSA con gate regime a soglie NEUTRE (slope 0 / exp 0 = OFF
 #  dichiarato). Unico asse Y = InpMagic gemelli (769501/769502).
 # ---------------------------------------------------------------------
 #  QUESTO E' UN PASSO DI MISURA. NON PROMUOVE NIENTE E NON DA' UN VERDETTO
-#  DI MERITO: qui si misurano la FREQUENZA reale dei retest-VWAP su H1, la
+#  DI MERITO: qui si misurano la FREQUENZA reale dei retest-VWAP su M15, la
 #  mediana del take in PUNTI INDICE (dal per-trade CSV) e il costo reale
 #  (implicito nei tick BCM). Le 2 tarature del gate (vs OFF) arrivano DOPO,
 #  attorno alla mediana misurata. 21 mesi = UN SOLO REGIME (toro): merito
@@ -31,7 +31,7 @@ param(
   [string]$Pin          = "",
   [switch]$SoloControllo,
   [string]$Simbolo      = "U30USD",
-  [string]$Periodo      = "H1",
+  [string]$Periodo      = "M15",  # 31/08: su H1 il motore e' strutturalmente MUTO (seduta=6 barre, prima esclusa, pendenza VWAP a 5 -> l'unica barra utile chiude oltre il flat 20:55). Misurato: 0 trade su 459 giorni, 9256=7083+2171+2. Il trend resta su H1 (handle dedicato).
   [string]$DaQuando     = "2024.09.26",
   [string]$Fino         = "2026.06.30",  # dichiarata nel prova (@FINOA) e gattata: MAI ereditata dal default del generico (classe 31/08)
   [double]$FrazioneIS   = 1.0,           # finestra intera; la gamba OOS del generico e' degenere e si ignora
@@ -301,13 +301,13 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("QUESTO E' IL PASSO 0 + MISURA. NON PROMUOVE NIENTE, NIENTE VERDETTO DI MERITO.")
 [void]$RefTxt.Add("COME SI LEGGE (quando i CSV tornano):")
-[void]$RefTxt.Add("  - FREQUENZA: n trade nella griglia gemelli (2 righe identiche). H1 puro:")
+[void]$RefTxt.Add("  - FREQUENZA: n trade nella griglia gemelli (2 righe identiche). M15 in seduta:")
 [void]$RefTxt.Add("    attesi pochi/settimana. Se n<150 il MERITO resta sospeso (R59);")
 [void]$RefTxt.Add("    il RISCHIO (DD, peggior giornata, autotest, flat) si giudica SEMPRE.")
 [void]$RefTxt.Add("  - VINCOLO DURO: zero overnight. Colonne Flat Giorni / Flat Chiusure +")
 [void]$RefTxt.Add("    orari nel per-trade CSV: un solo trade oltre il flat = file INVALIDO.")
 [void]$RefTxt.Add("  - MEDIANA DEL TAKE in PUNTI INDICE: colonna take_idx_pts del per-trade")
-[void]$RefTxt.Add("    CSV. E' il numero che decide se il retest H1 paga lo spread U30USD")
+[void]$RefTxt.Add("    CSV. E' il numero che decide se il retest M15 paga lo spread U30USD")
 [void]$RefTxt.Add("    (implicito nei tick BCM) e la SCALA delle 2 tarature del gate.")
 [void]$RefTxt.Add("  - DUE LATI: colonna dir (LONG/SHORT) del per-trade CSV, letti separati.")
 [void]$RefTxt.Add("  - DIAGNOSTICA CANCELLI: colonne OnNewBar/Ret*/Regime Ko/Trend Ko dicono")
