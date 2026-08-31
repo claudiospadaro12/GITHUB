@@ -1183,7 +1183,10 @@ void OnTesterDeinit()
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
+      //--- 27 campi fissi: %d (Pass) + 26 %f (data[0..25]). Contati il 31/08:
+      //    prima c'erano 25 %f e data[25] (Apri Chiamate) cadeva in silenzio,
+      //    sfasando di uno TUTTE le colonne dei parametri appese in coda.
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4],
                                 data[5], data[6], data[7], data[8], data[9],
                                 data[10], data[11], data[12],

@@ -1,5 +1,5 @@
 # ==========================================================================
-# ABTG_NySessionRetest  -  SPEC/GRIGLIA (criteri congelati PRIMA dei numeri)
+# ABTG_NySessionRetest  -  SPEC/PROVA (criteri congelati PRIMA dei numeri)
 # Motore NY Session Trend Retest da itzkarmakyo (TradingView), MPL 2.0.
 # Portato in MQL5, gestione e prop-hardening propri. Attribuzione obbligatoria.
 # Dossier: caccia_strategie/CACCIA_H1_INTRADAY_INDICI_2026-08-30.md
@@ -36,23 +36,75 @@
 #     stanno Dow Apertura e PREOPEN_RETEST. Se entra NEGLI STESSI GIORNI ->
 #     non diversifica -> penalita'. Da scrivere PRIMA del verdetto.
 #
-# @SIMBOLO  U30USD              # lead Dow; poi D30EUR e NASUSD
-# @PERIODO  H1
-# @DAQUANDO 2024.09.26          # tick BCM sugli indici (muro dati noto)
-#
-# SWEEP (screening stretto - il gate a 2 tarature vs OFF, centro altopiano)
-# InpEmaTrend: gate di direzione trend orario (pinnato al valore canonico)
-InpEmaTrend=200||200||200||200||N
-# InpVwapSlopeMin: pendenza minima della VWAP per operare (0 = gate OFF)
-InpVwapSlopeMin=0.00||0.00||0.00||0.00||Y
-# InpExpansionMin: espansione minima del range di sessione per operare (0 = OFF)
-InpExpansionMin=0.00||0.00||0.00||0.00||Y
-# InpSlLookback: barre per lo SL strutturale (lowest/highest)
-InpSlLookback=5||5||3||8||Y
 # ==========================================================================
-# NOTA sulle soglie del gate: i range min/max sopra sono LASCIATI DA TARARE
-# dopo il PASSO 0 (misura di slope/espansione tipiche su H1 U30USD). Non si
-# inventano prima di aver visto la scala reale delle due grandezze: si misura
-# la distribuzione, poi si mette OFF + 2 tarature attorno alla mediana. Regola
-# di casa (dichiarare la regola di taratura insieme al numero).
+# QUESTO LANCIO E' IL PASSO 0 + MISURA A TICK: NON E' IL VERDETTO.
+#   CELLA FISSA con il GATE A SOGLIE NEUTRE (InpVwapSlopeMin=0, InpExpansionMin
+#   =0: il gate resta nel codice ma NON morde -- e' l'ablazione "OFF" dichiarata
+#   nell'EA). Qui si misurano: FREQUENZA reale dei retest-VWAP su H1, mediana
+#   del take in PUNTI INDICE (dal per-trade CSV), costo reale dello spread
+#   (implicito nei tick BCM), scala tipica di slope/espansione. SOLO DOPO
+#   questa misura si mettono le 2 tarature del gate attorno alla mediana
+#   (round successivo, gate ON vs OFF): le soglie NON si inventano prima di
+#   aver visto la scala reale delle due grandezze -- regola di casa, dichiarata
+#   qui insieme al metodo. Anche lo sweep di InpSlLookback (3/5/8) appartiene
+#   al round di taratura, NON a questa misura.
+#
+# GEOMETRIA DEL LANCIO
+#   - UNICO ASSE Y = InpMagic, GEMELLI 769501/769502 (vergini, verificati
+#     repo-wide; il 769500 e' il default dell'EA e resta al forward): 2 passate
+#     identiche = determinismo + 2 per-trade CSV DISTINTI in Common\Files
+#     (abtg_trades_ABTG_NySessionRetest_U30USD_769501/769502.csv). Il per-trade
+#     CSV e' il CUORE di questo passo: con una griglia vera sarebbe
+#     inutilizzabile (stesso magic -> sopravvive solo l'ultima passata).
+#   - MODELLO 4 (tick reali BCM), U30USD NATIVO, H1.
+#   - UNA SOLA TRANCHE, FrazioneIS 1.0: la gamba "IS" del generico e' la
+#     finestra intera, la gamba "OOS" e' degenere (0 giorni) e si IGNORA.
+#     21 mesi = UN SOLO REGIME (toro): merito sospeso se n<150 (R59), rischio
+#     SEMPRE (DD e peggior giornata contro il muro).
+#
+# >>> FUSO DI CASA (NON invertito): U30USD BCM e' a ora SERVER (IT-1).
+#     RTH NY 09:30-16:00 ET -> 14:30-21:00 SERVER. Quindi:
+#     InpSessionHour=14, InpSessionMin=30 (NON 9:30, che e' l'ora ET);
+#     InpCloseHour=20, InpCloseMin=55 (flat poco PRIMA del close 21:00 server;
+#     NON 16, che e' l'ora NY dei feed _EXT). La riga di lancio gatta tutti e
+#     quattro i valori e RIFIUTA il 9 e il 16.
+#
+# Direttive @ NUDE (senza # davanti e senza commenti in coda): commentate o
+# sporche = gate vuoto. Lead Dow (U30USD); D30EUR e NASUSD verranno dopo.
+# 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici (muro dati noto).
+# 2026.06.30 = fine finestra dichiarata ("fino a oggi disponibile"): NON si
+# eredita dal default del generico (classe 31/08).
+@SIMBOLO U30USD
+@PERIODO H1
+@DAQUANDO 2024.09.26
+@FINOA 2026.06.30
+#
+# LA CELLA FISSA DELLA MISURA (secchi = pin; la riga di lancio li gatta)
+# Gate direzione: EMA200 su H1, valore canonico del sorgente.
+InpEmaTrend=200
+# GATE REGIME A SOGLIE NEUTRE (0 = OFF dichiarato): questa e' la MISURA.
+InpVwapSlopeMin=0.00
+InpExpansionMin=0.00
+InpVwapSlopePeriod=5
+InpExpansionLookback=10
+# SL strutturale del sorgente + pavimento R109 (mai 0).
+InpSlLookback=5
+InpSlBufferPts=300
+InpMinStopPts=500
+# FUSO SERVER BCM (IT-1): seduta 14:30 -> flat 20:55. MAI 9:30 / 16:00 (ET).
+InpSessionHour=14
+InpSessionMin=30
+InpCloseHour=20
+InpCloseMin=55
+# VINCOLO DURO del mandato: flat di fine seduta acceso, zero overnight.
+InpCloseAtEnd=true
+# DUE LATI (regola 25/08): si misurano insieme qui, si leggono separati dal
+# per-trade CSV (colonna dir LONG/SHORT).
+InpAllowLong=true
+InpAllowShort=true
+# Rischio di casa e cap giornaliero.
+InpRiskPercent=0.65
+InpMaxTradesPerDay=2
+# --- L'UNICO ASSE Y: i gemelli sul magic (2 passate identiche, CSV distinti).
+InpMagic=769501||769501||1||769502||Y
 # ==========================================================================
