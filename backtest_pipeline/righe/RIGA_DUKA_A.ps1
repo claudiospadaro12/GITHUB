@@ -1,7 +1,14 @@
 # =====================================================================
-#  MARCATORE_RIGA_DUKA_A_v2
+#  MARCATORE_RIGA_DUKA_A_v3
 #  RIGA_DUKA_A.ps1  --  MISSIONE A DUKASCOPY: download TICK del Dow
 #                       USA30IDXUSD -> CSV mensili U30USD_DK (31/08/2026)
+# ---------------------------------------------------------------------
+#  v3 (31/08 pomeriggio): MOTORE CURL. Il server datafeed.dukascopy.com
+#  strozza l'impronta TLS di python-urllib (WinError 10060/10054 + 503
+#  a raffica, anche con User-Agent Mozilla) ma fa passare curl.exe --
+#  MISURATO: curl.exe sul canarino EURUSD 200/24043 byte nello stesso
+#  minuto in cui lo script urllib moriva. Questa riga passa SEMPRE
+#  --motore curl al .py (DUKA-TICK-v2) e pretende curl.exe come gate.
 # ---------------------------------------------------------------------
 #  COSA FA, IN ORDINE E DA SOLA:
 #    1. GATE python  : trova il python VERO (non lo stub del Microsoft
@@ -13,8 +20,12 @@
 #                      errore onesto e stop, PRIMA di scaricare un byte.
 #    3. GATE cache   : la cartella di lavoro e' scrivibile (file di
 #                      prova scritto e cancellato).
+#    3b. GATE curl   : curl.exe presente (Get-Command curl.exe, SOLO
+#                      Application: in PowerShell 5.1 'curl' e' un alias
+#                      di Invoke-WebRequest e NON conta). E' il motore
+#                      di rete misurato-passante del 31/08.
 #    4. dukascopy_tick.py AL PIN (Remove-Item prima, marcatore
-#                      DUKA-TICK-v1 preteso dentro il file).
+#                      DUKA-TICK-v2 preteso dentro il file).
 #    5. AUTOTEST del .py PRIMA della corsa (--autotest, senza rete):
 #                      se non esce 0 con "AUTOTEST: TUTTO OK." -> STOP
 #                      ROSSO, la corsa non parte.
@@ -22,6 +33,8 @@
 #                      download.
 #    7. CORSA VERA   : la missione A con finestra DICHIARATA
 #                      2019-01-01 -> 2024-09-25, strumento USA30IDXUSD,
+#                      SEMPRE --motore curl (il motore misurato-passante;
+#                      urllib resta la via manuale del .py),
 #                      --dst usa (default del progetto: il discriminante
 #                      congelato in DUKASCOPY_PASSO0.md par. 3c si
 #                      esegue DOPO, alla sonda dell'import; se vince
@@ -74,7 +87,7 @@
 #  & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_A.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_A.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: NON COMPLETO - leggi il REFERTO sul Desktop' } }
 #
 #  -Pin NON HA DEFAULT, apposta (lezione della riga sorella del 20/08):
@@ -139,6 +152,7 @@ $EsitoRiga = "NON PARTITA"
 $RcPy      = -1
 $refFresco = $false
 $Python    = ""
+$CurlExe   = ""
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico($t,$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
@@ -190,6 +204,7 @@ Write-Host "#  puro HTTP: MT5 puo' restare APERTO, le sedie continuano.         
 Write-Host "#####################################################################" -ForegroundColor Cyan
 Dico ("pin      : " + $Pin)
 Dico ("modo     : " + $Modo)
+Dico ("motore   : curl (misurato-passante 31/08: il server strozza python-urllib)")
 Dico ("finestra : " + $Da + " -> " + $A + "   strumento: " + $Simbolo + "   dst: " + $Dst)
 Dico ("lavoro   : " + $Lavoro + "  (cache raw\ CONDIVISA con dukascopy_m1)")
 Dico ("raccolta : " + $Cart)
@@ -256,16 +271,34 @@ try{
   Dico ("cache scrivibile: " + $RawDir) "Green"
 
   # ===================================================================
-  #  PASSO 4 - LO SCRIPT AL PIN, col marcatore DUKA-TICK-v1
+  #  GATE 3B - CURL.EXE: il motore di rete della corsa (misurato 31/08:
+  #  il server strozza l'impronta TLS di python-urllib, curl passa).
+  #  NB Windows PowerShell 5.1: 'curl' e' un ALIAS di Invoke-WebRequest,
+  #  quindi si pretende curl.exe ESPLICITO e SOLO CommandType Application.
   # ===================================================================
-  Titolo "PASSO 4 - dukascopy_tick.py al pin (marcatore DUKA-TICK-v1)"
-  Scarica ("$RawPin/backtest_pipeline/dukascopy/dukascopy_tick.py") $DukaPy 'DUKA-TICK-v1'
+  Titolo "GATE 3B - curl.exe presente (motore di rete misurato-passante)"
+  $CurlExe = (Get-Command curl.exe -CommandType Application -ErrorAction SilentlyContinue |
+              Select-Object -First 1 -ExpandProperty Source)
+  if(-not $CurlExe){
+    throw ("CURL.EXE ASSENTE: la corsa usa --motore curl perche' il server strozza " +
+           "python-urllib (misurato 31/08). Su Windows 10 1803+ curl.exe sta in " +
+           "C:\Windows\System32: se manca, il PC va sistemato prima. " +
+           "NB: 'curl' senza .exe in PowerShell e' Invoke-WebRequest e NON conta.")
+  }
+  Dico ("curl.exe: " + $CurlExe) "Green"
+
+  # ===================================================================
+  #  PASSO 4 - LO SCRIPT AL PIN, col marcatore DUKA-TICK-v2
+  # ===================================================================
+  Titolo "PASSO 4 - dukascopy_tick.py al pin (marcatore DUKA-TICK-v2)"
+  Scarica ("$RawPin/backtest_pipeline/dukascopy/dukascopy_tick.py") $DukaPy 'DUKA-TICK-v2'
   Dico "dukascopy_tick.py scaricato al pin, marcatore verificato" "Green"
 
   # ===================================================================
-  #  PASSO 5 - AUTOTEST PRIMA DELLA CORSA (senza rete). Rosso = stop.
+  #  PASSO 5 - AUTOTEST PRIMA DELLA CORSA (senza rete esterna: il caso
+  #  curl usa un server HTTP locale acceso dall'autotest). Rosso = stop.
   # ===================================================================
-  Titolo "PASSO 5 - autotest del .py (9 controlli, senza rete)"
+  Titolo "PASSO 5 - autotest del .py (10 controlli, senza rete esterna)"
   $logAuto = Join-Path $Cart "autotest.txt"
   $rcA = EseguiNativo $Python @("-u",$DukaPy,"--autotest") $logAuto
   $autoOk = $false
@@ -285,7 +318,7 @@ try{
   #  il giro a vuoto deve uscire col codice giusto). Si usa il guard.
   # ===================================================================
   if($SoloControllo){
-    $EsitoRiga = "SOLO CONTROLLO: TUTTI I GATE PASSATI (python, disco, cache, autotest). Nessun download eseguito."
+    $EsitoRiga = "SOLO CONTROLLO: TUTTI I GATE PASSATI (python, disco, cache, curl.exe, autotest). Nessun download eseguito."
     Dico $EsitoRiga "Green"
     Write-Host ""
     Write-Host ("    Proiezione della corsa vera: " + $GiorniTot + " giorni iterati x ~4 min/giorno") -ForegroundColor Yellow
@@ -300,6 +333,7 @@ try{
   Titolo ("PASSO 7 - " + $Modo)
   Write-Host ("    finestra DICHIARATA : " + $Da + " -> " + $A + "  (" + $GiorniTot + " giorni iterati, sabato escluso)") -ForegroundColor White
   Write-Host ("    strumento           : " + $Simbolo + " -> U30USD_DK") -ForegroundColor White
+  Write-Host ("    motore di rete      : curl (" + $CurlExe + ") -- misurato-passante 31/08") -ForegroundColor White
   Write-Host ("    dst                 : " + $Dst + "  (discriminante congelato: si esegue DOPO, alla sonda dell'import)") -ForegroundColor White
   if(-not $SoloCache){
     Write-Host ""
@@ -331,7 +365,7 @@ try{
   Remove-Item -LiteralPath $RefPy -Force -ErrorAction SilentlyContinue
   $t0 = Get-Date
   $argv = @("-u",$DukaPy,"--simboli",$Simbolo,"--da",$Da,"--a",$A,
-            "--dst",$Dst,"--fuso","server",
+            "--dst",$Dst,"--fuso","server","--motore","curl",
             "--pausa-ms",("" + $PausaMs),"--cartella",$Lavoro)
   if($SoloCache){ $argv += "--solo-cache" }
   $RcPy = EseguiNativo $Python $argv $Console
@@ -402,12 +436,13 @@ try{
     }
 
     $r = New-Object System.Collections.ArrayList
-    [void]$r.Add("=== REFERTO MISSIONE A DUKASCOPY -- TICK DOW (RIGA_DUKA_A v1) ===")
+    [void]$r.Add("=== REFERTO MISSIONE A DUKASCOPY -- TICK DOW (RIGA_DUKA_A v3) ===")
     [void]$r.Add("data     : " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + "  (avvio " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ")")
     [void]$r.Add("modo     : " + $Modo)
     [void]$r.Add("pin      : " + $Pin)
     [void]$r.Add("finestra : " + $Da + " -> " + $A + "  (" + $GiorniTot + " giorni iterati, sabato escluso)")
     [void]$r.Add("strumento: " + $Simbolo + " -> U30USD_DK   dst: " + $Dst + "   fuso: server")
+    [void]$r.Add("motore   : curl" + $(if($CurlExe){ " (" + $CurlExe + ")" }else{ " (NON TROVATO: gate 3B fermato)" }) + "  -- misurato-passante 31/08, urllib strozzato dal server")
     [void]$r.Add("python   : " + $(if($Python){ $Python }else{ "NON TROVATO" }))
     [void]$r.Add("")
     [void]$r.Add("ESITO    : " + $EsitoRiga)

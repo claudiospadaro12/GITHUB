@@ -251,3 +251,29 @@ E il `.mq5` va compilato e passato al verificatore con la riga.
   discriminante e' pronto) · ritmo reale del crawl tick (proiezione in log).
 
 **Nessun parametro degli EA in forward cambia per questo documento.**
+
+---
+
+## 8. 🚀 ADDENDUM 31/08 pomeriggio — IL BLOCCO ANTI-PYTHON e la CURA (motore curl, DUKA-TICK-v2)
+
+**[MISURATO, PC di backtest Windows, 31/08 pomeriggio]** Il server
+`datafeed.dukascopy.com` **strozza le connessioni di Python-urllib**
+(WinError 10060/10054 + 503 a raffica, anche con User-Agent Mozilla) ma
+**fa passare `curl.exe` e `Invoke-WebRequest`**: `curl.exe` sul canarino
+`EURUSD/2025/05/16/15h_ticks.bi5` = **HTTP 200, 24043 byte**, mentre nello
+stesso minuto lo script python moriva. E' **discriminazione dell'impronta
+TLS**, non un ban dell'IP.
+
+**La cura**: `dukascopy_tick.py` e' passato a **`DUKA-TICK-v2`** con
+`--motore {urllib,curl}` (default urllib = storico; la riga di lancio v3
+passa **sempre** `--motore curl`). La richiesta grezza via `subprocess` su
+`curl`/`curl.exe`; **retry/backoff/contatori/log identici e condivisi** fra
+i due motori. Autotest esteso a **10 controlli** (il decimo esercita il
+motore curl contro un server HTTP locale: 200 con byte noti, 404,
+503-poi-200).
+
+**E la pipeline a valle e' SANA — gia' misurato**: nella corsa delle 15:18
+(controllo positivo passato) il feed **Dow** era stato misurato: ordine
+campi **`p1_ask`, coerenza 100% su 108108 tick**, **divisore 1000**
+(mediana 42156 in banda). Va cambiato SOLO il motore di rete; nessun
+numero DST/CSV/cache si tocca.

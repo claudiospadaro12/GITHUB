@@ -21,6 +21,18 @@
 #    Il proxy cloud BLOCCA datafeed.dukascopy.com (403 sul CONNECT,
 #    misurato il 18/08). Quindi: PC di backtest.
 #
+#  IL MOTORE DI RETE (v2, misurato il 31/08 pomeriggio dal PC di backtest)
+#    Il server datafeed.dukascopy.com STRANGOLA le connessioni di
+#    Python-urllib (WinError 10060/10054 + 503 a raffica, anche con
+#    User-Agent Mozilla) ma fa passare curl.exe e Invoke-WebRequest.
+#    MISURATO: curl.exe sul canarino EURUSD/2025/05/16/15h_ticks.bi5
+#    = HTTP 200, 24043 byte, mentre NELLO STESSO MINUTO questo script
+#    con urllib moriva. E' discriminazione dell'IMPRONTA TLS, non un ban.
+#    Cura: --motore curl (subprocess su curl/curl.exe). Il default resta
+#    urllib (comportamento storico invariato); la riga di lancio passa
+#    SEMPRE --motore curl. Retry/backoff/contatori/log sono IDENTICI e
+#    CONDIVISI fra i due motori: cambia solo la richiesta grezza.
+#
 #  REGOLA D'USO (congelata, report/ASPETTATIVE_REALISTICHE.md)
 #    I dati importati servono SOLO per VERDETTI A PARAMETRI CONGELATI
 #    (prova di regime, allungamento del campione di una cella gia'
@@ -63,7 +75,10 @@
 #    rilancia con --solo-cache --dst europa: zero riscarichi.
 #
 #  USO (PC di backtest; python 3.8+, come dukascopy_m1.py)
-#    --autotest              round-trip + fusi + CSV, SENZA rete
+#    --autotest              round-trip + fusi + CSV + motore curl su
+#                            server HTTP locale (niente rete esterna)
+#    --motore urllib|curl    motore di rete (default urllib = storico;
+#                            curl = il motore misurato-passante 31/08)
 #    --simboli USA30IDXUSD   nomi Dukascopy, virgole
 #    --da/--a YYYY-MM-DD     finestra DICHIARATA (obbligatoria in corsa)
 #    --dst usa|europa        calendario del server (default usa)
@@ -93,8 +108,11 @@ import argparse
 import io
 import lzma
 import os
+import shutil
 import struct
+import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -102,7 +120,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 
 BASE = "https://datafeed.dukascopy.com/datafeed"
-VERSIONE = "DUKA-TICK-v1"          # marcatore: la riga di lancio lo cerchera' PRIMA di eseguire
+VERSIONE = "DUKA-TICK-v2"          # marcatore: la riga di lancio lo cerchera' PRIMA di eseguire
 RECORD = struct.Struct(">IIIff")   # ms-offset, p1, p2, vol1, vol2 (big-endian)
 ATTESE_RETRY = [2, 5, 15, 30]      # secondi, come sonda_dukascopy.ps1
 MAX_ERR_CONSEC = 20                # 15/08: quando Dukascopy bandisce risponde 503 a TUTTO
@@ -184,25 +202,90 @@ def converti_fuso(dt_utc, fuso, dst):
 #  RETE + CACHE: identiche per costruzione a dukascopy_m1.py (stessa
 #  cartella raw/, stessi .assente): quello che l'M1 ha gia' scaricato
 #  il tick NON lo riscarica, e viceversa.
+#
+#  DUE MOTORI, UNA SOLA LOGICA (v2, 31/08): la richiesta GREZZA ha due
+#  implementazioni (urllib storico, curl misurato-passante); il giro di
+#  retry/backoff/log sta in UN punto solo (scarica_url) ed e' identico
+#  per costruzione. Ogni richiesta grezza torna (classe, dati, msg):
+#    OK      -> byte validi
+#    ASSENTE -> 404 vero (si memorizza .assente)
+#    RIPROVA -> errore di rete / 429 / 5xx: si ritenta con backoff
+#    FERMO   -> errore HTTP non ritentabile: si molla subito
 # ---------------------------------------------------------------------
+MOTORE = {"nome": "urllib", "tmpdir": ""}   # impostato da imposta_motore()
+
+
+def imposta_motore(nome, tmpdir):
+    MOTORE["nome"] = nome
+    MOTORE["tmpdir"] = tmpdir
+
+
+def binario_curl():
+    return "curl.exe" if os.name == "nt" else "curl"
+
+
+def _richiesta_urllib(url):
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            dati = r.read()
+        return ("OK", dati, "")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return ("ASSENTE", b"", "")
+        msg = "ERRORE %d" % e.code
+        if e.code == 429 or 500 <= e.code <= 504:
+            return ("RIPROVA", b"", msg)
+        return ("FERMO", b"", msg)
+    except Exception as e:
+        return ("RIPROVA", b"", "ERRORE rete: %s" % e)
+
+
+def _richiesta_curl(url):
+    # Il tempfile sta in una dir DENTRO la cartella di lavoro (mai il /tmp
+    # di sistema) e viene SEMPRE rimosso (finally).
+    dtmp = MOTORE["tmpdir"] or os.getcwd()
+    os.makedirs(dtmp, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix="curl_", suffix=".bin", dir=dtmp)
+    os.close(fd)
+    try:
+        cmd = [binario_curl(), "-s", "-o", tmp, "-w", "%{http_code}",
+               "--max-time", "30", url]
+        # lista di argomenti, MAI shell=True
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if proc.returncode != 0:
+            # errore di connessione/timeout di curl -> stessa via dei
+            # retry di rete di urllib
+            return ("RIPROVA", b"", "ERRORE curl exit %d" % proc.returncode)
+        codice = proc.stdout.decode("ascii", "replace").strip()
+        if codice == "200":
+            with open(tmp, "rb") as fh:
+                return ("OK", fh.read(), "")
+        if codice == "404":
+            return ("ASSENTE", b"", "")
+        # 5xx e ogni altro codice: si ritenta come un 503
+        return ("RIPROVA", b"", "ERRORE %s" % codice)
+    finally:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+
+
 def scarica_url(url, pausa_ms):
     ultimo = "ERRORE sconosciuto"
+    richiesta = _richiesta_curl if MOTORE["nome"] == "curl" else _richiesta_urllib
     for tentativo in range(len(ATTESE_RETRY) + 1):
         if pausa_ms > 0:
             time.sleep(pausa_ms / 1000.0)
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=30) as r:
-                dati = r.read()
+        classe, dati, msg = richiesta(url)
+        if classe == "OK":
             return ("OK", dati)
-        except urllib.error.HTTPError as e:
-            if e.code == 404:
-                return ("ASSENTE", b"")
-            ultimo = "ERRORE %d" % e.code
-            if not (e.code == 429 or 500 <= e.code <= 504):
-                return (ultimo, b"")
-        except Exception as e:
-            ultimo = "ERRORE rete: %s" % e
+        if classe == "ASSENTE":
+            return ("ASSENTE", b"")
+        ultimo = msg
+        if classe == "FERMO":
+            return (ultimo, b"")
         if tentativo < len(ATTESE_RETRY):
             att = ATTESE_RETRY[tentativo]
             log("      (il server dice '%s', riprovo fra %d s)" % (ultimo, att))
@@ -477,7 +560,7 @@ def raccogli_desktop(file_da_copiare, nome_zip):
 #  misura la corsa vera): dimostra che QUESTO codice non si morde la coda.
 # ---------------------------------------------------------------------
 def autotest():
-    log("=== AUTOTEST dukascopy_tick (%s, sintetico, senza rete) ===" % VERSIONE)
+    log("=== AUTOTEST dukascopy_tick (%s, sintetico, senza rete esterna) ===" % VERSIONE)
     # 1. round-trip: 3 tick noti -> lzma -> decodifica -> confronto
     tick_noti = [
         (1000, 3294400, 3294150, 1.5, 2.5),      # ms, ask, bid, volA, volB
@@ -568,6 +651,73 @@ def autotest():
     assert st.invertiti == 1, "conteggio ask<bid"
     log("9. statistiche di sanita' (ask<bid contati): OK")
 
+    # 10. MOTORE CURL contro un server HTTP LOCALE (127.0.0.1, porta
+    #     effimera, avviato QUI dentro): 200 con byte noti, 404, e
+    #     503-poi-200 (il retry condiviso). Niente rete esterna.
+    #     Se curl non c'e' nell'ambiente dell'autotest: SALTATO, non rosso.
+    if shutil.which(binario_curl()) is None:
+        log("10. motore curl: SALTATO (binario '%s' non presente in questo ambiente)"
+            % binario_curl())
+    else:
+        import http.server
+        import threading
+        contenuto = b"BYTES-NOTI-DUKA-TICK-v2"
+
+        class _Handler(http.server.BaseHTTPRequestHandler):
+            colpi_flaky = 0
+
+            def _manda(self, codice, corpo):
+                self.send_response(codice)
+                self.send_header("Content-Length", str(len(corpo)))
+                self.end_headers()
+                if corpo:
+                    self.wfile.write(corpo)
+
+            def do_GET(self):
+                if self.path == "/ok":
+                    self._manda(200, contenuto)
+                elif self.path == "/flaky":
+                    type(self).colpi_flaky += 1
+                    if type(self).colpi_flaky == 1:
+                        self._manda(503, b"")
+                    else:
+                        self._manda(200, contenuto)
+                else:
+                    self._manda(404, b"")
+
+            def log_message(self, *a):   # zitto: il referto e' il nostro log
+                pass
+
+        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
+        porta = srv.server_address[1]
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        motore_prima = dict(MOTORE)
+        attese_prima = ATTESE_RETRY[:]
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                imposta_motore("curl", td)
+                # attese azzerate SOLO qui: la LOGICA di retry e' la stessa
+                # per costruzione, cambia il tempo (il test non dorme 2 s)
+                ATTESE_RETRY[:] = [0] * len(ATTESE_RETRY)
+                base = "http://127.0.0.1:%d" % porta
+                esito, dati = scarica_url(base + "/ok", 0)
+                assert esito == "OK" and dati == contenuto, "curl 200: %s" % esito
+                esito, dati = scarica_url(base + "/manca", 0)
+                assert esito == "ASSENTE" and dati == b"", "curl 404: %s" % esito
+                esito, dati = scarica_url(base + "/flaky", 0)
+                assert esito == "OK" and dati == contenuto, "curl 503-poi-200: %s" % esito
+                assert _Handler.colpi_flaky == 2, \
+                    "attese 2 richieste su /flaky, viste %d" % _Handler.colpi_flaky
+                resti = os.listdir(td)
+                assert resti == [], "tempfile curl non rimossi: %s" % resti
+            log("10. motore curl (server locale: 200 byte noti, 404 -> ASSENTE, "
+                "503-poi-200 col retry, tempfile puliti): OK")
+        finally:
+            MOTORE.update(motore_prima)
+            ATTESE_RETRY[:] = attese_prima
+            srv.shutdown()
+            srv.server_close()
+
     log("")
     log("AUTOTEST: TUTTO OK.")
     return 0
@@ -593,6 +743,7 @@ def corri(argv):
     ap.add_argument("--a", default="")
     ap.add_argument("--dst", choices=["usa", "europa"], default="usa")
     ap.add_argument("--fuso", choices=["server", "utc"], default="server")
+    ap.add_argument("--motore", choices=["urllib", "curl"], default="urllib")
     ap.add_argument("--pausa-ms", type=int, default=250)
     ap.add_argument("--divisore", type=int, default=0)
     ap.add_argument("--solo-cache", action="store_true")
@@ -616,8 +767,33 @@ def corri(argv):
     os.makedirs(raw, exist_ok=True)
     os.makedirs(out, exist_ok=True)
 
+    # --- il MOTORE DI RETE, verificato PRIMA di toccare il server ------
+    versione_curl = ""
+    if args.motore == "curl":
+        percorso_curl = shutil.which(binario_curl())
+        if not percorso_curl:
+            log("ERRORE: --motore curl ma il binario '%s' NON e' nel PATH." % binario_curl())
+            log("        Senza curl questo motore non esiste: installa curl")
+            log("        (su Windows 10 1803+ e' gia' in C:\\Windows\\System32)")
+            log("        oppure usa --motore urllib. MI FERMO.")
+            return 2
+        try:
+            vv = subprocess.run([binario_curl(), "--version"],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            versione_curl = vv.stdout.decode("ascii", "replace").splitlines()[0].strip()
+        except Exception as e:
+            log("ERRORE: '%s --version' non parte (%s). MI FERMO." % (binario_curl(), e))
+            return 2
+    imposta_motore(args.motore, os.path.join(lavoro, "tmp_curl"))
+
     log("=== DUKASCOPY -> TICK CSV (%s) ===" % VERSIONE)
     log("cartella di lavoro: " + lavoro)
+    if args.motore == "curl":
+        log("motore di rete    : curl [%s]" % versione_curl)
+        log("                    (l'impronta TLS di python-urllib e' strozzata dal")
+        log("                     server: WinError 10060/10054 + 503, misurato 31/08)")
+    else:
+        log("motore di rete    : urllib (storico; se il server strozza, --motore curl)")
     if args.fuso == "utc":
         log("fuso in uscita    : UTC (solo per confronti: l'import usa 'server')")
     else:
@@ -789,6 +965,8 @@ def corri(argv):
     testa.write("=== DUKASCOPY -> TICK CSV: referto ===\n")
     testa.write("versione: %s\n" % VERSIONE)
     testa.write("comando : %s\n" % " ".join(argv))
+    testa.write("motore  : %s%s\n" % (args.motore,
+                (" [" + versione_curl + "]") if versione_curl else ""))
     testa.write("ESITO   : %s\n" % esito)
     testa.write("data: %s (ora del PC)  =  %s UTC\n" % (
         datetime.now().strftime("%Y-%m-%d %H:%M"),

@@ -25,6 +25,21 @@ non tocca nessun numero.** L'import e la sonda sono il passo dopo.
 > continuano a girare. Il proxy del cloud invece **blocca** Dukascopy
 > (misurato il 18/08): quindi PC di backtest, non cloud.
 
+## 🚀 MOTORE CURL (v3 — la cura misurata del 31/08)
+
+> Il server **strozza l'impronta TLS di python-urllib** (WinError
+> 10060/10054 + 503 a raffica, anche con User-Agent Mozilla) ma **fa
+> passare curl.exe** — MISURATO il 31/08 pomeriggio: `curl.exe` sul
+> canarino EURUSD = HTTP 200, 24043 byte, **nello stesso minuto** in cui
+> lo script urllib moriva. Percio' questa riga passa **SEMPRE
+> `--motore curl`** al `.py` (marcatore `DUKA-TICK-v2`) e ha un **gate
+> nuovo**: `curl.exe` deve esserci (su Windows 10 1803+ sta gia' in
+> `C:\Windows\System32`). NB: in PowerShell `curl` senza `.exe` e' un
+> alias di `Invoke-WebRequest` e NON conta — il gate lo sa. La pipeline
+> a valle e' SANA (feed Dow gia' misurato nella corsa 15:18: ordine campi
+> p1_ask coerenza 100% su 108108 tick, divisore 1000): cambia SOLO il
+> motore di rete.
+
 ## 🌙 E' UNA CORSA DA NOTTI — leggere PRIMA di lanciare
 
 - **Durata**: ~1.790 giorni iterati × ~4 min/giorno (ritmo **misurato** il
@@ -62,8 +77,9 @@ prevede e spostare la cache butterebbe via il gia' scaricato. Dichiarato.)
 ## 🧪 PRIMA: IL GIRO A VUOTO (obbligatorio, 1-2 minuti, ZERO download)
 
 Verifica python (pattern misurato della riga M1: niente stub del Microsoft
-Store), i 12 GB di disco, la cache scrivibile e fa girare l'**autotest 9/9**
-del `.py`. Se qualcosa e' rosso, si ferma PRIMA di toccare la rete.
+Store), i 12 GB di disco, la cache scrivibile, **curl.exe presente** (gate
+nuovo della v3) e fa girare l'**autotest 10/10** del `.py`. Se qualcosa e'
+rosso, si ferma PRIMA di toccare la rete.
 
 `<PIN>` = l'hash del commit che contiene QUESTO pacchetto, dato in chat.
 
@@ -71,7 +87,7 @@ del `.py`. Se qualcosa e' rosso, si ferma PRIMA di toccare la rete.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_A.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_A.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Da '2024-10-01' -A '2025-06-16' -SoloControllo;
     if($LASTEXITCODE -eq 0){ Write-Host 'GIRO A VUOTO: VERDE - tutti i gate passati, si puo lanciare la corsa' -ForegroundColor Green }
     else { Write-Host 'GIRO A VUOTO: ROSSO - NON lanciare la corsa, leggi REFERTO_DUKA_A.txt sul Desktop' -ForegroundColor Red } }
@@ -83,7 +99,7 @@ del `.py`. Se qualcosa e' rosso, si ferma PRIMA di toccare la rete.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_A.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_A.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Da '2024-10-01' -A '2025-06-16';
     if($LASTEXITCODE -eq 0){ Write-Host 'ESITO: CORSA COMPLETA - manda a Claude SOLO lo zip DUKA_A_*.zip dal Desktop' -ForegroundColor Green }
     elseif($LASTEXITCODE -eq 3){ Write-Host 'ESITO: RIPRENDIBILE - RILANCIA ESATTAMENTE QUESTA STESSA RIGA, la cache non riscarica niente' -ForegroundColor Yellow }
