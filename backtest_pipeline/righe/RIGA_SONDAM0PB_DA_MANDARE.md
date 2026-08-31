@@ -32,13 +32,16 @@ si apre niente: il tick non aggiunge informazione e costa ore):
 
 > 🎯 **I TRE CANCELLI (congelati PRIMA, verdetto AUTOMATICO nel referto, per
 > LATO):** **F1** segnali/giorno ≥ **1,00** → sotto: MORTO · **F2** take
-> mediano ≥ **6,0 punti indice** → < 5,0 MORTO; 5,0–7,0 **SOSPESO** [SPREAD NON
-> MISURATO — Code Base 74148 mai usato] · **H8** RR da mediane ≥ **0,70**
-> (FIRMA 2 del 31/08) → sotto: **MORTO PER ARITMETICA**, niente corsa a tick.
+> mediano: **VIVO solo SOPRA 7,0 punti indice**; < 5,0 MORTO; 5,0–7,0
+> **SOSPESO** [SPREAD NON MISURATO — Code Base 74148 mai usato; l'ambiguità
+> "≥6 passa / 5–7 sospeso" della prima stesura è sciolta verso la clausola
+> **più severa**, dichiarato — classe nuova in checklist 31/08] · **H8** RR
+> da mediane ≥ **0,70** (FIRMA 2 del 31/08) → sotto: **MORTO PER ARITMETICA**,
+> niente corsa a tick.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_SONDAM0PB.ps1` (marcatore `MARCATORE_RIGA_SONDAM0PB_v1`) |
+| **Driver** | `righe/RIGA_SONDAM0PB.ps1` (marcatore `MARCATORE_RIGA_SONDAM0PB_v2`) |
 | **File prova** | `prove/M0PB_FREQUENZA_M5.txt` + `prove/M0PB_FREQUENZA_M15.txt` |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.**
@@ -54,11 +57,13 @@ mai compilato può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_SONDAM0PB.ps1"; Remove-Item $p -EA SilentlyContinue;
-    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDAM0PB.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDAM0PB_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
-    if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera.' -ForegroundColor Red } }
+    $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDAM0PB.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDAM0PB.ps1" -OutFile $p -EA Stop;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDAM0PB_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDAM0PB_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+    if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDAM0PB_CONTROLLO_ DI ADESSO: il controllo non e'' arrivato alla raccolta' };
+    if($rc -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Mandami questo zip:' -ForegroundColor Red; Write-Host $z[0].FullName -ForegroundColor Yellow } else { Write-Host 'CONTROLLO OK: lancia il blocco 2.' -ForegroundColor Green } }
 ```
 
 ## 2️⃣ Corsa vera
@@ -66,11 +71,15 @@ mai compilato può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_SONDAM0PB.ps1"; Remove-Item $p -EA SilentlyContinue;
-    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDAM0PB.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDAM0PB_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin;
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
+    $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDAM0PB.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDAM0PB.ps1" -OutFile $p -EA Stop;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDAM0PB_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDAM0PB_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+    if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDAM0PB_CORSA_ DI ADESSO: la corsa non e'' arrivata alla raccolta' };
+    if($rc -ne 0){ Write-Host 'CORSA CON PROBLEMI: lo zip esiste lo stesso, mandalo.' -ForegroundColor Yellow };
+    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
+    Write-Host 'POI nel REFERTO: riga data: = adesso, riga modo: = CORSA.' -ForegroundColor Gray }
 ```
 
 ## 📦 COSA TORNA
@@ -115,10 +124,17 @@ F2 boccia nel verso giusto. Un solo regime (toro): questo passo conta
 **occasioni e geometrie**, non merito — il merito si misura **a tick, dopo, e
 SOLO se i tre cancelli reggono** (R57). Nessuna promozione esce da qui.
 
-## 🔴 AVVISI ROSSI ATTESI
+## 🔴 AVVISI ATTESI (rossi e gialli — nessuno di questi è un guasto)
 1. Il generico stamperà rosso sui CSV **`*_OOS`** (sei volte, una per corsa):
    con FrazioneIS 1.0 la gamba OOS è **degenere (0 giorni)** per costruzione.
    **Atteso: NON rilanciare.** Fa fede l'`ESITO:` finale della riga.
+1-bis. **6 avvisi GIALLI** _"il timeframe operativo E' il Period del tester"_:
+   la sonda usa `PERIOD_CURRENT` apposta (il TF glielo dà il prova). **Corretto
+   e voluto.**
+2-bis. ⚠️ **NON aprire i file `anteprima_*.ini`** del giro a vuoto: per un
+   difetto noto del generico (punto 96) l'anteprima scrive `Model=4`
+   **hardcoded** — la corsa vera usa **Model=2** come dichiarato. L'anteprima
+   mente proprio sul campo che questo round misura: fa fede il referto.
 2. **Tetto ~100k barre** (regola 25/08): 21 mesi di **M5** possono eccedere
    ~1,3 anni di tetto. La riga cerca da sola la **firma del tetto** (Barre
    Valutate IDENTICHE su simboli diversi, checklist punto 36) e confronta i

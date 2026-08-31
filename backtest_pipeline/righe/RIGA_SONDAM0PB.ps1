@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDAM0PB_v1
+#  MARCATORE_RIGA_SONDAM0PB_v2
 #  RIGA_SONDAM0PB.ps1 -- SONDA DI FREQUENZA M0PB (PASSO 0 della caccia
 #  frequenza del 31/08). ABTG_SondaM0PB e' un CONTATORE: NESSUN ordine,
 #  nessun lotto, nessun magic, nessuna sedia. SEI CORSE in sequenza:
@@ -35,8 +35,10 @@
 #
 #  I TRE CANCELLI (congelati nel prova PRIMA dei numeri, per LATO):
 #    F1  segnali/giorno >= 1,00           -> sotto: MORTO
-#    F2  take mediano   >= 6,0 punti idx  -> < 5,0 MORTO; 5,0-7,0
-#        SOSPESO [SPREAD NON MISURATO, Code Base 74148 mai usato]
+#    F2  take mediano: VIVO solo > 7,0 punti idx; < 5,0 MORTO; 5,0-7,0
+#        SOSPESO [SPREAD NON MISURATO, Code Base 74148 mai usato].
+#        31/08: l'ambiguita' ">=6 passa / 5-7 sospeso" del criterio e'
+#        sciolta verso la clausola PIU' SEVERA (classe nuova in checklist).
 #    H8  RR da mediane  >= 0,70           -> sotto: MORTO PER ARITMETICA
 #  Il verdetto di ogni corsa/lato esce AUTOMATICO nel referto, sulla
 #  passata con Modo Prezzo Ingresso = 1.
@@ -102,9 +104,10 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 #     Se lassu' cambiano e qui no, il referto direbbe un'altra cosa dal
 #     log della sonda: per questo il referto stampa ANCHE le soglie.
 $SOGLIA_F1 = 1.00     # segnali/giorno per lato
-$SOGLIA_F2 = 6.00     # take mediano, punti indice
-$F2_BASSO  = 5.00     # sotto: scarto secco; 5,0-7,0: sospeso (spread non misurato)
-$F2_ALTO   = 7.00
+$F2_BASSO  = 5.00     # take mediano, punti indice. Sotto 5,0: scarto secco.
+$F2_ALTO   = 7.00     # 5,0-7,0: SOSPESO (spread non misurato); VIVO solo SOPRA 7,0.
+                      # 31/08: l'ambiguita' del criterio (>=6 passa vs 5-7 sospeso)
+                      # e' sciolta verso la clausola PIU' SEVERA, dichiarato.
 $SOGLIA_H8 = 0.70     # RR da mediane
 $AUTOTEST_BLOCCHI_ATTESI = 12
 $NCelleCorsa = 2      # 1 asse (InpModoPrezzoIngresso) x 2 valori. CONTATE.
@@ -209,11 +212,10 @@ function Verdetto([double]$sigGg,[double]$take,[double]$rr){
   $sospeso = $false
   if($sigGg -lt $SOGLIA_F1){ $morto = $true }
   if($take -lt $F2_BASSO){ $morto = $true }
-  elseif($take -lt $SOGLIA_F2){ $sospeso = $true }
+  elseif($take -le $F2_ALTO){ $sospeso = $true }
   if($rr -lt $SOGLIA_H8){ $morto = $true }
   if($morto){ return "MORTO" }
-  if($sospeso){ return "SOSPESO (F2 fra 5,0 e 6,0: spread da misurare, 74148)" }
-  if($take -le $F2_ALTO){ return "VIVO (F2 in fascia 5,0-7,0: spread da misurare, 74148)" }
+  if($sospeso){ return "SOSPESO (F2 nella fascia 5,0-7,0: SPREAD NON MISURATO, Code Base 74148)" }
   return "VIVO"
 }
 
@@ -243,7 +245,7 @@ try{
   Dico ("corse ....... " + @($CorseDaFare).Count + " su 6 (3 simboli x M5/M15), " + $NCelleCorsa + " passate a corsa (asse InpModoPrezzoIngresso 1|0)")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
   Dico ("banco ....... MODELLO 2 (SOLO PREZZI DI APERTURA): contatore su barra chiusa, il tick non aggiunge niente. Deposito " + $Deposito + " (inerte: zero ordini)")
-  Dico ("cancelli .... F1 >= " + (Fmt2 $SOGLIA_F1) + " segnali/gg per lato | F2 take mediano >= " + (Fmt2 $SOGLIA_F2) + " punti idx | H8 RR >= " + (Fmt2 $SOGLIA_H8)) "Yellow"
+  Dico ("cancelli .... F1 >= " + (Fmt2 $SOGLIA_F1) + " segnali/gg per lato | F2 take mediano VIVO solo > " + (Fmt2 $F2_ALTO) + " punti idx (" + (Fmt2 $F2_BASSO) + "-" + (Fmt2 $F2_ALTO) + " sospeso) | H8 RR >= " + (Fmt2 $SOGLIA_H8)) "Yellow"
   Dico ("tetto barre . M5 su 21 mesi puo' eccedere ~100k barre: la finestra EFFETTIVA la dichiara la sonda (Giorni Contati / Barre Valutate)." ) "Yellow"
 
   # -------------------------------------------------------------------
@@ -488,8 +490,8 @@ try{
     $rigaVerdetto = $null
     $rigaSens     = $null
     foreach($cols in $righeDati){
-      $modo = LeggiCella $cols "Modo Prezzo Ingresso"
-      if([math]::Abs($modo - 1.0) -lt 0.001){ $rigaVerdetto = $cols } else { $rigaSens = $cols }
+      $modoRiga = LeggiCella $cols "Modo Prezzo Ingresso"
+      if([math]::Abs($modoRiga - 1.0) -lt 0.001){ $rigaVerdetto = $cols } else { $rigaSens = $cols }
     }
     if($null -eq $rigaVerdetto){
       [void]$Problemi.Add("corsa " + $c.Etichetta + ": nessuna passata con Modo Prezzo Ingresso = 1 (la riga del verdetto): CSV non leggibile.")
@@ -595,6 +597,10 @@ catch{
 # =====================================================================
 #  RACCOLTA -- SEMPRE, anche quando la corsa si e' fermata a meta'.
 # =====================================================================
+if($Modo -ne "CORSA" -and $Modo -ne "CONTROLLO"){
+  [void]$Problemi.Add("BUG INTERNO (punto 79 della checklist): la variabile del modo era stata sovrascritta e valeva " + $Modo + ". Nome del referto e dello zip ricostruiti.")
+  $Modo = "CORSA"; if($SoloControllo){ $Modo = "CONTROLLO" }
+}
 Titolo "RACCOLTA"
 $Cart = Join-Path $Dsk ("SONDAM0PB_" + $Modo + "_" + $Stamp)
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
@@ -617,8 +623,8 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("override simboli: @SIMBOLO dei prova = " + $SimboloLead + " (lead); NASUSD e D30EUR girano con -Simbolo del generico (il parametro vince sulla direttiva). DICHIARATO, non nascosto.")
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("--- I TRE CANCELLI (congelati PRIMA dei numeri; verdetto sulla passata Modo Prezzo Ingresso = 1) ---")
-[void]$RefTxt.Add("  F1 segnali/giorno per lato >= " + (Fmt2 $SOGLIA_F1) + "   | F2 take mediano >= " + (Fmt2 $SOGLIA_F2) + " punti indice")
-[void]$RefTxt.Add("  (F2: < " + (Fmt2 $F2_BASSO) + " scarto; " + (Fmt2 $F2_BASSO) + "-" + (Fmt2 $F2_ALTO) + " sospeso [SPREAD NON MISURATO, Code Base 74148 mai usato])")
+[void]$RefTxt.Add("  F1 segnali/giorno per lato >= " + (Fmt2 $SOGLIA_F1) + "   | F2 take mediano VIVO solo > " + (Fmt2 $F2_ALTO) + " punti indice")
+[void]$RefTxt.Add("  (F2: < " + (Fmt2 $F2_BASSO) + " scarto; " + (Fmt2 $F2_BASSO) + "-" + (Fmt2 $F2_ALTO) + " sospeso [SPREAD NON MISURATO, Code Base 74148 mai usato]; ambiguita' sciolta verso la clausola piu' severa, 31/08)")
 [void]$RefTxt.Add("  H8 RR da mediane >= " + (Fmt2 $SOGLIA_H8) + " (FIRMA 2 del 31/08: sotto = MORTO PER ARITMETICA, niente corsa a tick)")
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("--- LA TABELLA DEI CANCELLI, PER CORSA E PER LATO (mai aggregati) ---")
@@ -686,10 +692,14 @@ foreach($pf in @($PROVA_M5,$PROVA_M15)){
   if(Test-Path -LiteralPath $srcProva){ Copy-Item $srcProva -Destination $Cart -Force }
 }
 $Results = Join-Path $Work ("risultati_prove\" + $EA)
+$nOosTrovati = 0
 foreach($c in $CORSE){
   foreach($leg in @("IS","OOS")){
     $f = Join-Path $Results ($EA + "_" + $c.Simbolo + "_" + $leg + "_ohlc_" + $c.Etichetta + ".csv")
-    if(Test-Path -LiteralPath $f){ Copy-Item $f -Destination $Cart -Force }
+    if(Test-Path -LiteralPath $f){
+      Copy-Item $f -Destination $Cart -Force
+      if($leg -eq "OOS"){ $nOosTrovati++ }
+    }
   }
 }
 $zip = $Cart + ".zip"
@@ -699,8 +709,11 @@ Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
 Write-Host "FILE ATTESI NELLO ZIP: REFERTO_SONDAM0PB.txt + i 2 prova + 6 CSV OPTFRAME (ABTG_SondaM0PB_<SIMBOLO>_IS_ohlc_<ETICHETTA>.csv, 2 righe l'uno = le 2 passate)" -ForegroundColor Gray
-Write-Host "NOTA: i CSV *_OOS NON esistono MAI qui (FrazioneIS 1.0 = gamba OOS degenere)." -ForegroundColor Gray
+Write-Host ("CSV *_OOS trovati: " + $nOosTrovati + " (attesi 0: FrazioneIS 1.0 = gamba OOS degenere).") -ForegroundColor Gray
 Write-Host "      Il rosso del generico su quei file e' ATTESO: NON rilanciare." -ForegroundColor Gray
+if($nOosTrovati -gt 0){
+  Write-Host ("RILIEVO: " + $nOosTrovati + " CSV *_OOS esistono NONOSTANTE la gamba degenere: numeri su finestra NON dichiarata, NON leggerli. Sono nello zip solo come reperto.") -ForegroundColor Yellow
+}
 Write-Host "NOTA: nessun per-trade (zero ordini) e nessun CSV riga-per-segnale (ottimizzazione)." -ForegroundColor Gray
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }

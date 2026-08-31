@@ -65,7 +65,10 @@
 #  F2 - TAGLIA DEL TAKE (metro di casa C2): mediana della distanza
 #       ingresso -> highest(12)/lowest(12) AL MOMENTO DEL SEGNALE, in
 #       punti indice (colonne "Take Mediano Long/Short Punti Indice").
-#       >= 6,0 punti  -> PASSA   (3 x 2,0 punti di spread di riferimento)
+#       >  7,0 punti  -> PASSA   (3 x 2,0 punti di spread + margine per lo
+#                        spread NON misurato). NESSUNA sovrapposizione con
+#                        la fascia sospesa qui sotto (ambiguita' 31/08
+#                        sciolta verso la clausola PIU' SEVERA, dichiarato).
 #       <  5,0 punti  -> SCARTO
 #       fra 5,0 e 7,0 -> VERDETTO SOSPESO: si misura lo spread vero col
 #                        Code Base 74148 (RealCost Spread P95 Logger,
