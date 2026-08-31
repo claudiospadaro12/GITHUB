@@ -237,3 +237,28 @@ del Giornale.
 riattacco, profilo), le VIVA restano, le DA-DECIDERE vanno a Claudio con la
 C3 in mano. E il `PIANO_PROP` (H0) si aggiorna: ogni sedia che torna a
 parlare e' portata gia' pagata che rientra in casa. 🔊
+
+---
+
+## ✅ VERDETTO GAPFILL (31/08 16:48, log VPS letti da Claudio): VIVE-MA-SELETTIVE — sospetto guasto MORTO
+
+Prova diretta dallo screenshot dei log (scheda Esperti, conto 50503392):
+- 01:00:00 ABTG_GapFill (U30USD,H1): "spread 1000 points sopra il limite
+  300: rinvio alla barra successiva (barra 2 di 3)" — la GUARDIA spread
+  lavora.
+- **02:00:00 ABTG_GapFill (U30USD,H1): "GAP-FILL BUY @ 53409.50 SL 53311.50
+  TP 53559.50 lot 0.60 (gap -124.00 = 0.34 x ATR D1, spread 200 pts,
+  barra 3 della settimana, ordine 3272200)" — TRADE REALE APERTO.**
+
+Conclusione: il silenzio di agosto era selettivita' (gap assenti/piccoli +
+guardia spread), NON guasto. Il sospetto del 22/08 (CENSIMENTO §6) si chiude.
+Le altre 4 GapFill loggano dallo stesso motore: presunzione VIVE (conferma
+puntuale simbolo-per-simbolo alla prossima passata di checklist, priorita'
+bassa). NOTA per l'aritmetica della portata: le +21 op/mese "da recuperare"
+NON esistono come guasto — la frequenza promessa delle GapFill va invece
+RIVISTA al ribasso sul misurato (tagliando C3, non riparazione).
+
+Bonus dallo stesso screenshot: la flotta del piccolo OGGI e' vivissima —
+SuperWave DOW short a mercato alle 07:00, LARRY pendenti su 3 simboli + un
+TIME-STOP eseguito, EMA200 limiti, MaxMinNotte stop alle 08:00. Lo "zero
+trade di oggi" riguardava SOLO il 100k (5 mirror).
