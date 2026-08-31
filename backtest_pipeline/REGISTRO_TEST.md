@@ -551,6 +551,41 @@ A = U30USD 2019-2024 (4-5 notti) poi. Le righe di lancio arriveranno con
 verificatore quando Claudio decidera'. Regola d'uso: SOLO verdetti a
 parametri congelati, mai taratura su feed esterno.
 
+### CACCIA FREQUENZA (31/08 sera) — le tre righe che toccano questo registro
+
+Dossier completo: `caccia_strategie/CACCIA_FREQUENZA_2026-08-31.md`. Il resto
+sta li', non si duplica.
+
+- 🪦 **DUE LAPIDI NUOVE, da paper letti per intero — risparmiano due cacce.**
+  (a) arXiv **2605.11423** (Mesfin): il day-classifier volatilita'+volume+gap
+  su MNQ attiva su **4,4% dei giorni = 40 in 4 anni**, e l'autore ha gia'
+  falsificato **8 configurazioni direzionali su 8**. Ci lascia pero' una
+  conferma esterna del lead sul Dow: **77,6% di quei giorni si ribalta dal
+  picco intraday** (restituzione media 11,73 pt, picco fra le 14:00 e le 15:30
+  ET). (b) arXiv **2605.17724** (Mesfin): LSTM e gradient boosting su OHLCV
+  5-min MNQ, **nessuna configurazione sopra il tasso base del 51,8%**,
+  944 giorni. Conclusione dell'autore: **4 anni di OHLCV a 5 minuti su un solo
+  strumento NON BASTANO**. La nostra finestra tick sugli indici e' **21 mesi**,
+  meno della meta'. 👉 **Niente round ML sugli indici finche' i dati non
+  crescono.**
+- 🔴 **I due "vincitori" di arXiv 2605.04004 §5 (RTH Confluence, London Signal
+  B) NON sono riproducibili**: il loro cuore e' un classificatore GMM che
+  l'autore dichiara di "a separate research program" e che **non e' pubblicato
+  in nessuno dei suoi tre paper** (verificato per interrogazione autore su
+  arXiv). E comunque **fallirebbero il pavimento di frequenza**: 0,72 e 0,31
+  trade/giorno contro il minimo di 1. **Non si portano nell'imbuto.**
+- 🆕 **Unico promosso: `M0PB`** (Marcns_, MPL 2.0, TradingView, Pine letto
+  integrale) — impulso estremo RSI(6) **nel verso** + rientro sulla EMA5,
+  uscita al massimo mobile a 12 barre, stop 2,75·ATR(10), **un solo input
+  libero**, due lati simmetrici, zero bandiere rosse nel motore.
+  **PASSO 0 = SONDA DI CONTEGGIO, non griglia** (le tre fonti dati sono murate
+  dal proxy: la frequenza da qui NON si misura). Bozza con criteri congelati:
+  `prove/M0PB_FREQUENZA_BOZZA.txt`. Cancelli: **< 1 segnale/giorno → scarto**;
+  **take mediano < 6,0 punti indice → scarto**. Ablazione gia' congelata:
+  massimo mobile a 12 barre **contro** uscita a tempo alla barra 13.
+
+---
+
 ### BreakinBox (falsa rottura box notturno DAX) — CHIUSO 31/08: l'ablazione lo smaschera come R95 con un livello nuovo
 Ablazione A/B a tick (2024-2026, D30EUR): TP al lato opposto (tesi) PF 1.007
 DD 24.1% contro RR fisso 2.0 (controllo R95) PF 1.106 DD 19.7% -> vince il

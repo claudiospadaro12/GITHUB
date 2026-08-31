@@ -1,0 +1,216 @@
+# =====================================================================
+#  M0PB -- PASSO 0: SONDA DI FREQUENZA E DI TAGLIA  (BOZZA)
+#  Impulso estremo (RSI 6) + rientro sulla EMA5  --  indici, M5 e M15
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA:
+#    backtest_pipeline\caccia_strategie\CACCIA_FREQUENZA_2026-08-31.md  (P1)
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "M0PB" (Momentum Pull Back) di Marcns_,
+#    TradingView, created 2022-12-13, sorgente Pine v5 pubblico
+#    (scriptAccess "open_no_auth"), scaricato integrale e letto riga
+#    per riga il 31/08/2026.
+#      https://www.tradingview.com/script/GnsUpEsB-M0PB-Momentum-Pullback/
+#    LICENZA: Mozilla Public License 2.0 (dichiarata alla riga 1 del
+#    sorgente). Attribuzione OBBLIGATORIA in testa a qualunque .mq5
+#    derivato, insieme al link e alla licenza.
+#    Copia archiviata in casa:
+#      caccia_strategie\biblioteca\sorgenti\
+#      M0PB_MomentumPullback_Marcns_MPL2_tvGnsUpEsB_2026-08-31.pine
+#
+# =====================================================================
+#  !!!  QUESTO FILE NON PUO' GIRARE OGGI  !!!
+# ---------------------------------------------------------------------
+#  Non esiste ancora NE' l'EA NE' la sonda:
+#    - mql5\Scripts\ABTG_SondaM0PB.mq5   <- DA SCRIVERE
+#    - mql5\Experts\ABTG_M0PB.mq5        <- DA SCRIVERE, ma SOLO DOPO
+#                                           che la sonda ha dato i numeri
+#  Un file prova che pinna input inesistenti e' l'errore n.3 della
+#  CHECKLIST_RIGA_DI_LANCIO: MT5 IGNORA IN SILENZIO un pin che non
+#  trova. E' cosi' che e' nato il falso "0/8" del FiboH4
+#  (REGISTRO_TEST.md, sezione 2-bis). Prima la sonda, poi il numero.
+#
+#  PRECEDENTE DI CASA, identico nello spirito e gia' firmato da Claudio
+#  il 21/08 ("metro, frequenza"):
+#    mql5\Scripts\ABTG_SondaMediazione.mq5
+#    risultati_archivio\SONDA_MEDIAZIONE_FREQUENZA_2026-08-21.md
+#  Regola di quella sonda, che vale identica qui:
+#    NESSUN ordine, mai, nemmeno nel tester -- NESSUN lotto, nessun
+#    sizing -- NESSUN forward, nessuna sedia -- SOLO IL CONTEGGIO.
+#
+# =====================================================================
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  Un RSI(6) che tocca 90 (o 10) segnala uno squilibrio di flusso VERO
+#  in una direzione. Chi insegue l'impulso paga il prezzo peggiore; chi
+#  aspetta il RIENTRO sulla EMA(5) dei minimi (o dei massimi) compra lo
+#  stesso squilibrio al prezzo migliore, e ha davanti lo spazio fino al
+#  massimo mobile delle ultime 12 barre.
+#
+#  MA IL PUNTO DI QUESTO PASSO 0 NON E' L'EDGE. E' PRIMA:
+#  il meccanismo produce ABBASTANZA OCCASIONI (>= 1 al giorno) e con
+#  ABBASTANZA SPAZIO (>= 3x lo spread) da meritare che gli si scriva un
+#  EA? Se anche una sola delle due risposte e' no, il candidato muore
+#  qui e NON si spende una macchina.
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE (CONGELATI PRIMA DI VEDERE QUALUNQUE NUMERO)
+# ---------------------------------------------------------------------
+#  F1 - PAVIMENTO DI FREQUENZA (pavimento duro, di Claudio 31/08):
+#       segnali per LATO >= 1 al giorno di calendario di borsa.
+#       < 1/giorno  -> SCARTO IMMEDIATO. Niente EA, niente griglia.
+#       1-2/giorno  -> PASSA, ma al minimo.
+#       > 2/giorno  -> PASSA nella fascia preferita da Claudio.
+#
+#  F2 - TAGLIA DEL TAKE (metro di casa C2):
+#       mediana della distanza ingresso -> highest(12)/lowest(12),
+#       misurata AL MOMENTO DEL SEGNALE, in punti indice.
+#       >= 6,0 punti  -> PASSA   (3 x 2,0 punti di spread di riferimento)
+#       <  5,0 punti  -> SCARTO
+#       fra 5,0 e 7,0 -> VERDETTO SOSPESO: si misura finalmente lo
+#                        spread vero col Code Base 74148 (RealCost
+#                        Spread P95 Logger, promosso il 23/08 e MAI
+#                        ancora usato) e si rilegge.
+#       ATTENZIONE: 2,0 punti indice e' una STIMA dichiarata di
+#       METRO_PROP D4, NON una misura. E' marcata [SPREAD NON MISURATO]
+#       in ogni referto finche' 74148 non gira.
+#
+#  F3 - RR VERO, da leggere prima di qualunque numero di merito:
+#       mediana della distanza ingresso -> stop (2,75 x ATR(10)).
+#       Nessun cancello: e' un numero DA CONOSCERE. Se il take mediano
+#       e' molto piu' piccolo dello stop mediano, il motore e' ad alto
+#       win rate e RR basso, cioe' la forma che il DD TRAILING delle
+#       prop punisce (METRO_PROP, Upcomers). Va scritto nel referto,
+#       non scoperto dopo.
+#
+#  F4 - MURO GIORNALIERO PROP:
+#       massimo numero di segnali in UNA SOLA giornata, e giornata in
+#       cui e' successo. E' il numero che taglia InpMaxTradesPerDay sui
+#       dati invece che a occhio. Riferimento: la peggior giornata mai
+#       misurata in casa e' -2,06% (R51) con motori a ~1 trade/giorno;
+#       il muro prop e' -5,00% in una sola giornata.
+#
+#  F4-bis - CANCELLO H8 (FIRMATO DA CLAUDIO IL 31/08 SERA,
+#           report\FIRME_2026-08-31.md, FIRMA 2, testuale:
+#           "Ogni motore ad alta frequenza entra in flotta SOLO con
+#            E >= 0.075R misurata A TICK. Frequenza sotto questo
+#            cancello = portata finta (DD e costi). Vale per tutti i
+#            promossi della caccia-frequenza, da oggi.")
+#
+#       La sonda deve restituire il RR MEDIANO:
+#            RR = (mediana take)  /  (mediana stop)
+#                = (numero F2)    /  (numero F3)
+#
+#       Da E = p*RR - (1-p) si ricava il win rate NECESSARIO per
+#       superare 0,075R. Tabella calcolata PRIMA di vedere i numeri:
+#
+#            RR = 0,36  ->  serve win rate 79,0%   IRREALISTICO
+#            RR = 0,50  ->  serve win rate 71,7%   sopra il dichiarato
+#            RR = 0,73  ->  serve win rate 62,2%   al limite
+#            RR = 1,00  ->  serve win rate 53,8%   comodo
+#
+#       CANCELLO: RR mediano < 0,70  ->  SCARTO PER ARITMETICA, e NON
+#       si spende una corsa a tick. Con lo stop da 2,75 ATR dell'autore
+#       nessun win rate plausibile porterebbe E a 0,075R: sarebbe
+#       PORTATA FINTA, la cosa esatta che la FIRMA 2 esiste per non
+#       comprare.
+#
+#       CONSEGUENZA SUL PIANO, dichiarata adesso: il parametro che
+#       decide NON e' l'RSI, e' InpAtrStopMult -- che guarda caso e'
+#       l'UNICO input libero lasciato dall'autore, cioe' la manopola
+#       che ha girato lui. Quando (e se) si arrivera' allo sweep,
+#       si parte da li'.
+#
+#  F5 - DUE LATI, SEMPRE E SEPARATI (regola di Claudio del 25/08).
+#       I quattro numeri sopra si producono per il LONG e per lo SHORT
+#       distintamente. Mai un totale aggregato.
+#
+#  F6 - GRADIENTE DI TIMEFRAME, dichiarato prima:
+#       la sonda gira su M5 E su M15. Ci si aspetta piu' segnali e take
+#       piu' piccoli a M5. Il gradiente di casa (R108/R111) dice
+#       H1 > M30 > M15 sull'EDGE: se qui la taglia crolla a M5, e' la
+#       stessa curva vista dall'altro lato, e va detto.
+#
+# =====================================================================
+#  LIMITI DICHIARATI PRIMA (non dopo)
+# ---------------------------------------------------------------------
+#  - La finestra tick BCM sugli indici e' UN SOLO REGIME (toro). Questo
+#    PASSO 0 conta OCCASIONI e misura DISTANZE: sono numeri di
+#    FREQUENZA e di GEOMETRIA, non di merito, quindi il regime unico li
+#    tocca meno. Ma la frequenza di un motore a impulsi PUO' dipendere
+#    dal regime: il conteggio va spezzato ALMENO per anno.
+#  - Non serve il modello a tick per contare i segnali: il segnale nasce
+#    su BARRA CHIUSA. OHLC M1 basta e avanza per il conteggio. Il tick
+#    servira' DOPO, per il verdetto (R57).
+#  - NESSUN numero dell'autore e' stato usato: il "60-70% win rate"
+#    dichiarato nel commento del Pine e' [DICHIARATO DALL'AUTORE, NON
+#    VERIFICATO] e non entra in nessun criterio.
+#
+# =====================================================================
+#  L'ABLAZIONE OBBLIGATORIA, CONGELATA GIA' ADESSO (per il round DOPO)
+# ---------------------------------------------------------------------
+#  Se e solo se F1 e F2 passano, l'EA si scrive e la PRIMA cosa che
+#  deve girare e' l'ablazione sulla DURATA:
+#     A) uscita al MASSIMO MOBILE a 12 barre     <- la tesi dell'autore
+#     B) uscita A TEMPO alla barra 13            <- la geometria che
+#        arXiv 2605.04004 sezione 5.1 + decisione D041 dichiarano
+#        vincente, e che la sezione 6.2 spiega ("hold 12-15 bars rather
+#        than 1-6")
+#  L'autore stesso scrive nel sorgente: "The best trades tend to work
+#  within 2-6 bars" -- cioe' proprio la classe che quel paper dichiara
+#  SOTTO il soffitto di frizione. Se vince B, il motore vive ma la sua
+#  uscita e' sbagliata. Se perdono entrambe, la classe
+#  "impulso + pullback a TF basso" ha la sua falsificazione e si chiude.
+#
+#  E una seconda gamba, che costa ZERO riscrittura:
+#     C) pullback NUDO sulla EMA, senza armamento RSI
+#        <- esiste gia' come EA MQL5 nativo con sorgente allegato:
+#           EMA50BounceEA.mq5, mql5.com/en/articles/21283
+#           (Clemence Benjamin, 20/02/2026)
+#        Se C va come A, l'RSI e' decorazione e non e' "il filtro che
+#        E' il motore".
+#
+# =====================================================================
+#  PARAMETRI DELLA SONDA (nomi PROPOSTI: nessuno di questi esiste ancora)
+# ---------------------------------------------------------------------
+#  Sono qui per far vedere la forma, NON per essere pinnati.
+#  Nessuna riga di sweep: una sonda non si ottimizza, si legge.
+#
+#    InpRsiPeriod        = 6      (dal sorgente, cablato dall'autore)
+#    InpRsiHigh          = 90     (dal sorgente)
+#    InpRsiLow           = 10     (dal sorgente)
+#    InpEmaPeriod        = 5      (dal sorgente, su HIGH e su LOW)
+#    InpFinestraBarre    = 6      (dal sorgente: barssince(estremo) < 6)
+#    InpBarreTarget      = 12     (dal sorgente: highest/lowest(12))
+#    InpAtrPeriod        = 10     (dal sorgente)
+#    InpAtrStopMult      = 2.75   (dal sorgente: unico input libero)
+#    InpOraInizioServer  = <ORA SERVER BCM>   <- 14 per gli US, 8 per il DAX
+#    InpOraFineServer    = <ORA SERVER BCM>      (ora italiana - 1, REGOLA FISSA)
+#
+# =====================================================================
+#  DOVE GIRA
+# ---------------------------------------------------------------------
+#  I tre simboli con tick BCM e conversione MISURATA (= 100 su tutti e
+#  tre), cioe' quelli testabili subito:
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#   ^ MISURATO, non ipotizzato: risultati_archivio\REFERTO_SONDA_STORICO_17-08.md
+#     "100GBP 200AUD 225JPY D30EUR E35EUR E50EUR F40EUR NASUSD SPXUSD
+#      U30USD UKOIL USOIL -> 2024.09.26 -> COMPLETO"
+#
+#  Poi, nell'ordine, la stessa sonda identica su:
+#    U30USD  M15
+#    NASUSD  M5   e  M15
+#    D30EUR  M5   e  M15   (ora sessione 8, non 14: e' il DAX)
+#
+# =====================================================================
+#  LA RIGA DI LANCIO
+# ---------------------------------------------------------------------
+#  Passa PRIMA da backtest_pipeline\CHECKLIST_RIGA_DI_LANCIO.md,
+#  compresa la classe "skip-senza -Rifai" (nella saga CRT ha prodotto
+#  4 corse zombie su 6: CSV stantii spacciati per freschi).
+#  Include SEMPRE l'irm davanti che riscarica script e prova dal branch
+#  lavoro, e la riga di raccolta finale con Compress-Archive sul Desktop.
+# =====================================================================

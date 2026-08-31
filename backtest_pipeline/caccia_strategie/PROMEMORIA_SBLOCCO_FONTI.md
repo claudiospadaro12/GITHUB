@@ -312,3 +312,66 @@ TradingView è stata dichiarata **NULLA**, con due diagnosi diverse: prima
 > filtri diversi), **TradingView diventa la fonte principale per i meccanismi
 > nuovi.** Il prezzo resta quello del mandato §3D: **Pine → MQL5 non è un
 > porting, è una riscrittura**, e i numeri mostrati dagli autori valgono zero.
+
+---
+
+## 📅 31/08/2026 (sera) — CACCIA FREQUENZA: due correzioni tecniche e un buco nuovo
+
+Misurato oggi, non ipotizzato. Dossier:
+`caccia_strategie/CACCIA_FREQUENZA_2026-08-31.md`.
+
+### 1. 🔧 `pine-facade`: l'endpoint giusto e' `/get/`, NON `/translate/`
+
+| endpoint | cosa restituisce davvero |
+|---|---|
+| `pine-facade.tradingview.com/pine-facade/translate/<sid>/last` | 🔴 campi **`IL`** e **`ilTemplate`**, che sono **base64 CIFRATO** (bytecode compilato), **non** il Pine. Utile solo per `metaInfo` |
+| `pine-facade.tradingview.com/pine-facade/get/<sid>/last` | 🟢 **campo `source` = il Pine IN CHIARO**, piu' `scriptName`, `scriptAccess`, `created`, `lastVersionMaj` |
+
+Verificato oggi su **4 hash**. Il `;` di `PUB;` va **url-encodato** in `%3B`.
+Le sequenze `\r\n` vanno srotolate. **Da usare cosi' d'ora in poi.**
+
+### 2. 🔴 La ricerca per parola chiave del Code Base NON ESISTE
+
+`mql5.com/en/code/mt5/experts?keyword=<parola>` **ignora il parametro**:
+provato con `intraday`, `session`, `pullback` → **restituisce le stesse
+identiche 15 righe** della pagina 1 non filtrata. 👉 Il censimento del Code
+Base si fa **solo sfogliando `/page2`, `/page3`, ...**, e quindi si vede
+**solo cio' che e' recente per data**. Non scrivere piu' nei dossier "ho
+cercato X sul Code Base": non e' possibile da qui.
+
+### 3. 🕳️ IL BUCO NUOVO E IL PIU' GRAVE: **nessuna fonte di DATI di prezzo**
+
+Servivano per **misurare** la frequenza di un candidato (il pavimento di
+Claudio: >= 1 trade/giorno). Provate tre fonti indipendenti, **tutte e tre
+murate dal proxy di egress** (`connect_rejected`, policy):
+
+| host | esito 31/08 |
+|---|---|
+| `query1.finance.yahoo.com` (chart API, 5m/60d) | 🔴 **403 al CONNECT** |
+| `stooq.com` (CSV) | 🔴 **403 al CONNECT** |
+| `datafeed.dukascopy.com` (`.bi5`) | 🔴 **403 al CONNECT** — ⚠️ **e questo blocca anche l'IMPORT DUKASCOPY** preparato il 31/08 mattina: gli strumenti ci sono, il canale da qui no |
+
+> 🎯 **Conseguenza:** da questo ambiente **nessun agente puo' MISURARE una
+> frequenza, una distribuzione di take o uno spread.** Puo' solo leggere
+> sorgenti e paper, e **dichiarare i numeri come [DA MISURARE]**. Il numero lo
+> fa il PC di Claudio, sempre. E' il motivo per cui il PASSO 0 dei candidati
+> di frequenza deve essere una **SONDA DI CONTEGGIO**, non una griglia.
+
+### 4. Il resto della mappa, rimisurato oggi
+
+| fonte | 31/08/2026 |
+|---|---|
+| `mql5.com` (pagine + download ZIP + articles) | 🟢 **200** |
+| `export.arxiv.org` (API) + `arxiv.org/pdf` | 🟢 **200** (solo `https`) |
+| `tradingview.com` + `pine-facade` | 🟢 **200** |
+| `raw.githubusercontent.com` | 🟢 **200** |
+| `api.github.com` (ricerca) | 🔴 **403** — ottava di fila |
+| `papers.ssrn.com` | 🔴 **403** — ottava di fila |
+| `forexfactory.com` | 🔴 **403** — ottava di fila |
+
+### 5. 🏷️ TradingView: un tag nuovo da segnare come quasi-vuoto
+`sessions` rende **2 sole strategie**, contro le **24** (tetto di pagina) di
+`scalping`, `intraday`, `daytrading`, `futures`, `nasdaq`, `trendfollowing`,
+`volatility`, `meanreversion`. `pullback` ne rende **17**.
+Da affiancare ai buchi gia' noti (`falsebreakout`, `choch`, `rangebound`,
+`previousdayhighlow`, `timeofday`, `powerhour`, `dailyrange`, `firsthour`).

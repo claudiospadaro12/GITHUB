@@ -6089,3 +6089,58 @@ che sta li' dentro, apparentemente aggiornato.
 > dell'intestazione. Corollario: **un default che non e' piu' una missione valida
 > non e' un default, e' una trappola** — o si allinea alla missione corrente, o
 > si toglie e si rende il parametro obbligatorio come si e' fatto per `-Pin`.
+
+---
+
+## 105. 🕳️ `CopyTicksRange` SENZA RITENTA: il primo blocco del simbolo appena selezionato si perde IN SILENZIO — e la tabella esce plausibile e falsa
+
+_Difetto trovato il **31/08/2026** in verifica pre-consegna del round SPREAD
+FLOTTA (`mql5/Scripts/ABTG_SpreadOrario.mq5` al pin `e8dc39c`), **prima**
+dell'invio: nessuna serata bruciata, ma la classe e' quella che il progetto
+paga di piu' (`R108_CRITERI` D2: *"a modello 4 senza tick reali MT5 non si
+ferma, ripiega e produce numeri plausibili e falsi"*)._
+
+Lo Script cicla tre simboli con `SymbolSelect` + `CopyTicksRange` a blocchi di
+7 giorni, e legge cosi':
+
+```mql5
+int got = CopyTicksRange(sym, tk, COPY_TICKS_ALL, (ulong)a*1000, (ulong)b*1000);
+if(got > 0) { ...conta i tick... }
+a = b;                       // <-- got == -1 ? blocco PERSO, nessuno lo sa
+```
+
+**Il primo accesso alla base tick di un simbolo appena messo in Market Watch
+torna `-1` (o `0`)** mentre il terminale la apre/sincronizza: e' documentato, ed
+e' il motivo per cui lo strumento di casa gia' collaudato,
+`ABTG_HistoryDownloader.mq5::DownloadTicks` (righe 38-46), **ritenta**:
+
+```mql5
+int got = -1, tries = 0;
+while(!IsStopped() && tries < InpTimeoutSec*4)
+  {
+   got = CopyTicksRange(sym, tk, COPY_TICKS_ALL, (ulong)a*1000, (ulong)b*1000);
+   if(got > 0) break;
+   if(got == 0 && tries > 8) break;   // finestra davvero senza tick
+   Sleep(250); tries++;
+  }
+```
+
+Il predecessore v1 (`ABTG_SpreadTick.mq5`, girato il 30/08 su NASUSD, 156.146.398
+tick) **non ha mai visto il difetto** perche' leggeva **il simbolo DEL GRAFICO**,
+gia' sincronizzato all'avvio. Il difetto nasce con il **multi-simbolo**: due
+simboli su tre entrano a corsa avviata. Esito possibile senza ritenta: una
+tabella oraria costruita su meno tick (o su zero), **con l'aria di essere
+completa** — e una riga PowerShell che, guardando solo "il CSV esiste ed e'
+fresco", esce **0**.
+
+> ✅ **REGOLA (due meta', servono entrambe).**
+> 1. **Nel `.mq5`: ogni `CopyTicks`/`CopyTicksRange`/`CopyRates` su un simbolo
+>    che NON e' quello del grafico si scrive con il ciclo di ritenta**
+>    (`got > 0` esce, `got == 0` dopo N tentativi esce, `got < 0` riprova fino
+>    al tetto) **e conta i blocchi persi**, che finiscono nel referto: il
+>    silenzio va reso VISIBILE, non evitato a parola.
+> 2. **Nella riga: "file fresco" NON e' "misura riuscita".** Il gate di
+>    completezza legge il CONTENUTO (qui: la riga `TUTTO`, campo dei tick
+>    totali > 0). Un CSV di sole `n/d` e' una misura **fallita**: deve uscire
+>    **2**, non 0. E' il punto 13 (un parziale non esce 0) applicato al
+>    contenuto invece che alla presenza.
