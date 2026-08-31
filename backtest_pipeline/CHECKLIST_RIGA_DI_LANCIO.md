@@ -5625,3 +5625,54 @@ tester le abbia mai viste.
 >    per-trade presenti, numeri NON byte-identici alla corsa precedente.
 >    Un risultato identico al precedente dopo una modifica al codice non e'
 >    "conferma": e' il primo indizio che il codice non e' mai girato.
+
+## 🗓️ LA FINESTRA EREDITATA DAL DEFAULT DEL GENERICO: lo screening si mangia la CASSAFORTE che sara' l'OOS del passo dopo (31/08/2026)
+
+_Intercettata al gate sul round CHAOS LYAPUNOV (pin `cc99ea5`), PRIMA dell'invio.
+Nessun minuto di VPS bruciato: e' il primo difetto di geometria fermato dal
+verificatore invece che dal referto._
+
+`RIGA_CHAOS.ps1` dichiarava `[string]$Fino = "2026.06.30"` — che **non e' una
+scelta del round, e' il default di `walkforward_generico.ps1` (riga 62)**
+copiato dentro il wrapper. Tutto il resto del pacchetto diceva un'altra cosa:
+
+- il prova (`ABTG_ChaosLyapunov_Lya.txt`), criterio di accettazione 3:
+  *"finestra **2020-2024** che contiene crollo 2020 / toro 2021 / orso 2022"*;
+- l'intestazione dello stesso `.ps1`, riga 6: *"finestra intera **2020-2024**"*;
+- `PIANO_PROP.md`: *"screening **2020-2024** da lanciare"*;
+- il commento sotto `@DAQUANDO`: *"finestra dello **SHORTGATE** ... per
+  comparabilita' di regime"* — e `RIGA_SHORTGATE.ps1` ha
+  `$Fino = "2024.01.01"` (referto del 30/08: `2020.01.01->2024.01.01`).
+
+Il danno **non e'** la prosa disallineata: e' che la finestra di **SELEZIONE**
+si sarebbe mangiata **2024.09.26 -> 2026.06.30**, cioe' la **cassaforte BCM** che
+lo stesso prova dichiara come **unico** posto dove il verdetto a tick e'
+possibile. Si sceglie la cella su un periodo che poi si usa come fuori
+campione: il passo 2 sarebbe nato gia' contaminato, e nessun numero lo avrebbe
+detto. In piu' saltava la comparabilita' col vicino di casa: confrontare il PF
+di questo gate con il PF 1.84 dello shortgate misurato su 2020-2024 sarebbe
+stato confrontare due periodi diversi chiamandoli con lo stesso nome.
+
+La casa la finestra ce l'ha, ed e' **due righe separate**: screening EXT
+`2020.01.01 -> 2024.01.01` (`RIGA_SHORTGATE`, `RIGA_CRT_EXT`, `RIGA_CRT_GATE`)
+e cassaforte BCM `2024.09.26 -> 2026.06.30` (`RIGA_SHORTGATE_CASSA`). Il
+default `2026.06.30` del generico serve a chi passa `-DaQuando` e basta: dentro
+un wrapper di round diventa una geometria mai decisa da nessuno.
+
+> ✅ **REGOLA (tripla):**
+> 1. **Nessuna data di un wrapper di round e' un default ereditato.** `$DaQuando`
+>    e `$Fino` si scrivono guardando il round vicino sullo stesso simbolo e si
+>    **dichiarano nel prova come `@FINOA` NUDA**, non solo nel `param()`. Regola
+>    del 30/08 (direttive nude) estesa: **`@FINOA` sta accanto a `@DAQUANDO`**,
+>    e il wrapper la **gatta** come gia' fanno `RIGA_CRT_EXT` (riga 151) e
+>    compagnia. Un estremo che vive solo nel `param()` non ha nessuno che lo
+>    controlli.
+> 2. **La finestra di SCREENING non tocca MAI la finestra che sara' l'OOS.** Se
+>    il pacchetto dichiara "il verdetto a tick si fa sulla cassaforte X->Y",
+>    allora `X->Y` **sta fuori** dalla griglia dove si sceglie la cella. Il
+>    controllo e' meccanico: `$Fino` del round `<=` inizio della cassaforte.
+> 3. **Quando la prosa e il `param()` non dicono la stessa finestra, vince chi
+>    ha una RAGIONE misurata** (qui: il prova e lo shortgate), non chi e' scritto
+>    nel codice. E la divergenza si cerca sempre: **grep delle date in tutti e
+>    quattro i posti** (`.ps1` param, `.ps1` intestazione, prova, scheda `.md`)
+>    prima di approvare una riga.
