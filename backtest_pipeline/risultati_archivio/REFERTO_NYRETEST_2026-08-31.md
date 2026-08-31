@@ -70,3 +70,29 @@ mese/anno, autotestato), si chiude al PRIMO tick disponibile a qualunque ora.
 Limite residuo dichiarato: senza tick non si chiude nulla — l'esposizione
 minima fino alla prima riapertura e' irreducibile senza calendario festivi.
 Il PASSO 0 va RIFATTO con la v4 per avere il file valido agli atti.
+
+---
+
+## ✅ PASSO 0 VALIDO (corsa v5, 10:36, pin 50551fa): LA MISURA E' AGLI ATTI
+
+_Freschezza piena: modo CORSA, compile 68KB, per-trade 625=625 (gemelli
+identici), cache 0/0, PROBLEMI 0. Il conteggio overnight e' AUTOMATICO
+(open_time vs close_time). Zip NYRETEST_CORSA_20260831_1036._
+
+**LA MISURA DEL RETEST NUDO (gate regime OFF, la baseline della taratura):**
+- n = 625 deal / 462 posizioni in 459 giorni (~1/gg) -> merito giudicabile.
+- **PF 1.002, +214** su 100k: pareggio perfetto. DD 12.87%,
+  **peggior giornata -2.01%** (era -2.89 con la falla del flat: il flat di
+  recupero ha tagliato la coda peggiore).
+- Mediana take: WIN +87.6 punti indice / LOSS -58.0 -> RR implicito ~1.5,
+  paga lo spread con margine.
+- LATI: LONG +4789 (52.7% win) / SHORT -4575 (47.1%) -> nel toro lo short
+  zavorra: dato per la taratura (e per un eventuale InpAllowShort al verdetto,
+  DA MISURARE non da assumere).
+- **Overnight veri: 18/625 (2.88%) < soglia 5% firmata** -> RILIEVO dichiarato
+  (assenza di tick: festivi/weekend USA), file VALIDO. Autotest 0.
+
+**PROSSIMO ROUND (taratura del gate, criteri gia' congelati nel prova):** il
+gate slope+espansione deve MORDERE (trade e PF che cambiano in modo ordinato
+alle soglie vs OFF; OFF==ON = decorativo = scarto). Base di partenza in
+pareggio: qualunque selettivita' vera si vede subito.

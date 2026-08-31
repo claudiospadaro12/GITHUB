@@ -508,3 +508,13 @@ registrata: la condizione profit_totale e' anti-filtro per costruzione
 Porta di rientro: round nuovo su motore diverso con criteri risk-adjusted
 congelati prima. EA resta bocciato. Referto:
 risultati_archivio/REFERTO_CHAOSABL_2026-08-31.md
+
+### NY Session Retest — PASSO 0 VALIDO (31/08, corsa v5 10:36, tick M15 U30USD)
+Retest-VWAP nudo (gate OFF): n=625/21 mesi (~1/gg), **PF 1.002** (pareggio
+perfetto), DD 12.9%, pegg.gio -2.0%, take mediano win +87.6 idx pts, LONG
++4789 / SHORT -4575. Overnight veri 2.88% (<5% firmato, assenza tick festivi).
+Lezioni pagate nel round: H1 muto per costruzione, flat a ora-del-giorno che
+si resetta a mezzanotte (fix: flat di recupero + open_time nel CSV), criterio
+zero-overnight-assoluto fisicamente irraggiungibile (riscritto prima dei
+numeri). Prossimo: TARATURA del gate slope+espansione (criteri gia' nel
+prova). Referto: risultati_archivio/REFERTO_NYRETEST_2026-08-31.md
