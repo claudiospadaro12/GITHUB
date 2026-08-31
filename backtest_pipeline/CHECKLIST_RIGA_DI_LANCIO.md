@@ -6050,3 +6050,42 @@ Tre difetti dello stesso ramo `-SoloControllo`, tutti **eseguiti**:
 > ramo. E l'elenco degli "attesi" **si genera dai file che esistono davvero in
 > quel ramo** (`Get-ChildItem` sulla cartella di raccolta), mai da una lista
 > costante scritta a mano per il ramo piu' ricco.
+
+## 🆕 AGGIUNTA DEL 31/08/2026 (sera, SECONDA passata) — trovata ri-verificando **MISSIONE A DUKASCOPY v3 / motore curl** (pin `f3811f3f`) dopo che i quattro difetti della prima passata erano stati corretti
+
+## 🧊 LA GUARDIA DI FRESCHEZZA CONTROLLA IL **CODICE**, MAI LA **MISSIONE**: il default RITIRATO viaggia dentro lo script FRESCO — e il blocco di lancio in-script lo lancia **col marcatore giusto**
+
+Specializzazione del punto 100 (blocco stantio auto-coerente), ma **rovesciata**:
+li' il pin vecchio e il marcatore vecchio si proteggevano a vicenda; qui il
+marcatore e' **quello NUOVO e corretto** (`MARCATORE_RIGA_DUKA_A_v3`), il pin e'
+quello di oggi, il codice e' quello giusto — **e la missione lanciata e' quella
+RITIRATA**.
+
+Misurato: la prima passata aveva spostato la missione dalla finestra storica
+`2019-01-01 -> 2024-09-25` alla **tranche-sonda** `2024-10-01 -> 2025-06-16`
+(la storica scende a `-> 2024-09-30` per il confine di mese). La correzione e'
+stata applicata **alle due one-liner della scheda**, che passano `-Da/-A`
+espliciti. Ma dentro il `.ps1` sono rimasti:
+- i `param()` con `$Da = "2019-01-01"` / `$A = "2024-09-25"` — cioe' la finestra
+  ritirata, per giunta con `-A` **dentro** il mese di settembre 2024 (viola la
+  regola delle tranche a confine mensile scritta due voci sopra);
+- il blocco "**LA RIGA CHE SI INCOLLA**" in testa al file, che **non passa
+  `-Da/-A`** e quindi lancerebbe proprio quella finestra — superando la guardia
+  `SCRIPT VECCHIO`, perche' la guardia guarda il marcatore e il marcatore e'
+  fresco;
+- la prosa dell'intestazione che descrive la missione come la storica e la
+  durata come "4-5 notti", traduzione umana **gia' ritirata** in questa stessa
+  tornata (voce "IL NUMERO CALCOLATO SALDATO A UNA TRADUZIONE UMANA COSTANTE").
+
+Nessuno di questi morde le due stringhe verificate — ma mordono la **passata
+dopo**, quando un'altra sessione aprira' il file e copiera' il blocco di lancio
+che sta li' dentro, apparentemente aggiornato.
+
+> ✅ **REGOLA.** Quando una passata di verifica cambia la **MISSIONE** (finestra,
+> simbolo, tranche) e non solo il codice, la correzione si applica in **quattro**
+> posti, e si verificano tutti e quattro con `grep` sulle DATE, non sul nome del
+> parametro: (1) le one-liner della scheda, (2) i **default dei `param()`**,
+> (3) il **blocco di lancio scritto dentro lo script**, (4) la prosa
+> dell'intestazione. Corollario: **un default che non e' piu' una missione valida
+> non e' un default, e' una trappola** — o si allinea alla missione corrente, o
+> si toglie e si rende il parametro obbligatorio come si e' fatto per `-Pin`.

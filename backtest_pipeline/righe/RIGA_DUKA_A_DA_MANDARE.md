@@ -42,7 +42,7 @@ non tocca nessun numero.** L'import e la sonda sono il passo dopo.
 
 ## 🌙 E' UNA CORSA DA NOTTI — leggere PRIMA di lanciare
 
-- **Durata**: ~1.790 giorni iterati × ~4 min/giorno (ritmo **misurato** il
+- **Durata**: ~222 giorni iterati (la sonda; la storica ~1.800 giorni = ~120 ore = 5 giorni di corsa continua) × ~4 min/giorno (ritmo **misurato** il
   18/08) = TRANCHE-SONDA **~15 ore = una notte + una mattina**; la tranche
 storica (dopo il cancello) ~120 ore = **5 GIORNI di PC acceso, giorno e
 notte**. Il ritmo vero lo stampa il `.py`

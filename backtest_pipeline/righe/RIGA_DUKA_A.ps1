@@ -32,7 +32,7 @@
 #    6. -SoloControllo: si ferma QUI (referto + zip, exit 0). Nessun
 #                      download.
 #    7. CORSA VERA   : la missione A con finestra DICHIARATA
-#                      2019-01-01 -> 2024-09-25, strumento USA30IDXUSD,
+#                      2024-10-01 -> 2025-06-16 (sonda; storica 2019-01-01 -> 2024-09-30 dopo il cancello), strumento USA30IDXUSD,
 #                      SEMPRE --motore curl (il motore misurato-passante;
 #                      urllib resta la via manuale del .py),
 #                      --dst usa (default del progetto: il discriminante
@@ -63,7 +63,7 @@
 #    continuano a girare. (L'IMPORT in MT5 e' un ALTRO passo, con la
 #    sua riga e i suoi controlli.)
 #
-#  E' UNA CORSA DA NOTTI (4-5 col ritmo ~4 min/giorno misurato il 18/08):
+#  E' UNA CORSA LUNGA (~15 ore la tranche-sonda; ~5 GIORNI la storica, col ritmo ~4 min/giorno misurato il 18/08):
 #    - RIPRENDIBILE: verificato NEL .py (cache per ora, scritture
 #      atomiche, 404 memorizzati, CSV mensili scritti appena il mese e'
 #      completo; il mese in corso si rifa' dalla cache al rilancio).
@@ -77,7 +77,7 @@
 #
 #  FINESTRA: la tabella di DUKASCOPY_PASSO0.md par. 4b proponeva
 #    2019-09-01 -> 2024-09-26; la missione FIRMATA per questa riga e'
-#    2019-01-01 -> 2024-09-25 (piu' lunga in testa, si salda al tick
+#    2024-10-01 -> 2025-06-16 (sonda; storica 2019-01-01 -> 2024-09-30 dopo il cancello) (piu' lunga in testa, si salda al tick
 #    nativo BCM che parte il 2024-09-26 senza sovrapporsi). I default
 #    -Da/-A sono questi e il referto li dichiara.
 #
@@ -88,7 +88,7 @@
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_A.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_A.ps1" -OutFile $p;
 #      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
-#      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: NON COMPLETO - leggi il REFERTO sul Desktop' } }
+#      $global:LASTEXITCODE=0; & $p -Pin $pin -Da '2024-10-01' -A '2025-06-16'; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: NON COMPLETO - leggi il REFERTO sul Desktop' } }
 #
 #  -Pin NON HA DEFAULT, apposta (lezione della riga sorella del 20/08):
 #  senza -Pin valido lo script si ferma, cosi' non gira mai codice vecchio.
