@@ -1,0 +1,120 @@
+# ==========================================================================
+# ABTG_NySessionRetest_Tar2  -  SPEC/PROVA dell'ESTENSIONE FINALE della
+# TARATURA DEL GATE (criteri congelati PRIMA dei numeri).
+# Motore NY Session Trend Retest da itzkarmakyo (TradingView), MPL 2.0.
+# Portato in MQL5, gestione e prop-hardening propri. Attribuzione obbligatoria.
+# Dossier: caccia_strategie/CACCIA_H1_INTRADAY_INDICI_2026-08-30.md
+# Base misurata: REFERTO_NYRETEST_2026-08-31.md, sezione TARATURA (corsa
+# 48/48 celle, pin 606111d): il gate SLOPE MORDE (n 625->449->295->211,
+# DD 12.9->5.8, banda slope=45 coerente PF ~1.17 su sl 5/7), la barra
+# congelata (PF>=1.3 & DD<8 ad altopiano) NON e' raggiunta (0 celle su 48),
+# e il PF SALE ENTRANDO nel bordo del sweep (0.99@30 -> 1.17@45, con 45
+# tetto dichiarato). L'ESPANSIONE e' DECORATIVA, MISURATO: n 625->621->604,
+# PF piatto. Questa estensione era GIA' DICHIARATA nel referto (commit
+# 8ca26de) PRIMA dei suoi numeri: qui la si esegue, identica al dichiarato.
+# ==========================================================================
+#
+# LA DOMANDA DI QUESTO ROUND
+#   La mappa del bordo superiore: il PF tocca il massimo dentro [45,90] o
+#   continua a salire fin dove i trade finiscono? Si mappa slope 45/60/75/90
+#   (da meta' take mediano a ~1x take mediano, 87.6 punti indice) fino al
+#   MURO NATURALE R59: la cella con n<150 ha il merito SOSPESO comunque,
+#   quindi la mappa si chiude li' in ogni caso.
+#
+# GLI ASSI (2, non 3 -- l'estensione e' chirurgica):
+#   - InpVwapSlopeMin 45/60/75/90 (PUNTI INDICE, spostamento totale della
+#     VWAP ancorata su 5 barre M15 -- stessa unita' MISURATA nel sorgente,
+#     vedi prova _Tar). 45 = tetto della griglia 48 (sentinella), 90 = ~1x
+#     take mediano: sopra, il gate chiede alla VWAP smorzata piu' strada
+#     del take stesso -- muro concettuale oltre che statistico.
+#   - InpSlLookback 5/7: nella griglia 48 la banda slope=45 tiene con
+#     sl 5 (PF 1.174) e sl 7 (PF 1.166); sl 3 NO (PF 0.975) -> si porta
+#     avanti solo cio' che ha retto, scarto dichiarato.
+#   Celle totali: 4 x 2 = 8. Corsa piccola per costruzione.
+#
+# ASSE SPENTO, NON ASSUNTO: InpExpansionMin=0.00 FISSO perche' la griglia
+# 48 lo ha MISURATO decorativo (n 625->621->604 al crescere della soglia,
+# PF piatto). Non e' un'ipotesi: e' il criterio (a-bis) del referto.
+#
+# CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri):
+#   (a) BARRA INVARIATA: fascia candidata = PF >= 1.3 su TICK e DD < 8%
+#       in un ALTOPIANO (celle contigue; si promuove il CENTRO, MAI il
+#       picco; una cella outlier isolata NON e' un altopiano). La barra
+#       NON si abbassa a meta' round: e' la stessa della griglia 48.
+#   (b) MURO R59: la cella con n < 150 ha il MERITO SOSPESO -- non
+#       promuovibile A PRESCINDERE dal PF (il campione sottile sospende
+#       il giudizio sul merito, mai sul rischio). Se TUTTE le celle sopra
+#       slope 45 hanno n < 150, la taratura si CHIUDE con mappa completa
+#       e verdetto "gate reale ma edge sotto barra".
+#   (c) SENTINELLE DI CONTINUITA': le celle slope=45 DEVONO combaciare
+#       con la griglia 48 appena girata --
+#         sl=5: n=211, PF=1.174 (DD 6.51%)
+#         sl=7: n=212, PF=1.166 (DD 5.78%)
+#       tolleranza come la baseline OFF del round precedente: scostamento
+#       > 2% su n oppure > 0.05 su PF = PROBLEMA (banco non deterministico,
+#       la mappa estesa non si salda a quella vecchia e non si legge).
+#   (d) Il confronto (col nudo e tra celle) e' SEMPRE per-trade /
+#       risk-adjusted: PF, profit/DD, aspettativa per trade, peggior
+#       giornata. MAI profitto totale (anti-filtro per costruzione).
+#   (e) QUESTO E' L'ULTIMO GIRO DELLA TARATURA. Comunque vada, dopo c'e'
+#       SOLO il verdetto: niente terza estensione, niente griglia di
+#       raffinamento dentro la banda. Scritto per iscritto PRIMA dei
+#       numeri, contro la caccia al rumore: una mappa che si allunga a
+#       ogni bordo "promettente" e' curve fitting a rate.
+#   (f) Il RISCHIO si giudica SEMPRE (DD, peggior giornata, autotest 0);
+#       21 mesi = un solo regime (toro): qualunque promozione passa poi
+#       dalla prova di regime, non da qui.
+#
+# >>> PER-TRADE CSV: INUTILIZZABILE ANCHE QUI, NON VA LETTO. Magic FISSO
+#     769503: 8 passate scrivono lo STESSO file e sopravvive l'ultima.
+#     La riga di lancio lo cancella prima e NON lo raccoglie.
+#     Niente gemelli: il determinismo lo garantiscono le sentinelle (c).
+#
+# >>> FUSO DI CASA (NON invertito): U30USD BCM e' a ora SERVER (IT-1).
+#     RTH NY 09:30-16:00 ET -> 14:30-21:00 SERVER. InpSessionHour=14,
+#     InpSessionMin=30 (NON 9:30 ET); InpCloseHour=20, InpCloseMin=55
+#     (NON 16, ora NY dei feed _EXT). La riga di lancio gatta tutti e
+#     quattro i valori e RIFIUTA il 9 e il 16.
+#
+# Direttive @ NUDE (senza # davanti e senza commenti in coda): commentate o
+# sporche = gate vuoto. 2024.09.26 = pavimento MISURATO dei tick BCM sugli
+# indici; 2026.06.30 = fine finestra dichiarata (MAI ereditata dal default
+# del generico). Stessa finestra della griglia 48: le sentinelle (c)
+# valgono solo a finestra identica.
+@SIMBOLO U30USD
+@PERIODO M15
+@DAQUANDO 2024.09.26
+@FINOA 2026.06.30
+#
+# I FISSI: TUTTI come il prova _Tar (l'estensione muove SOLO il bordo alto
+# dello slope; tutto il resto e' la cella gia' misurata).
+InpEmaTrend=200
+InpVwapSlopePeriod=5
+InpExpansionLookback=10
+InpSlBufferPts=300
+InpMinStopPts=500
+InpRetestBufferPts=0
+# ASSE SPENTO PER MISURA (griglia 48: decorativo, n 625->621->604, PF piatto).
+InpExpansionMin=0.00
+# FUSO SERVER BCM (IT-1): seduta 14:30 -> flat 20:55. MAI 9:30 / 16:00 (ET).
+InpSessionHour=14
+InpSessionMin=30
+InpCloseHour=20
+InpCloseMin=55
+# VINCOLO DURO del mandato: flat di fine seduta acceso (v5: flat di recupero).
+InpCloseAtEnd=true
+# DUE LATI insieme come al PASSO 0 (i lati separati si rileggono al verdetto).
+InpAllowLong=true
+InpAllowShort=true
+# Rischio di casa e cap giornaliero.
+InpRiskPercent=0.65
+InpMaxTradesPerDay=2
+# MAGIC FISSO E VERGINE (verificato repo-wide): 769503, lo stesso della
+# griglia 48 -- serve identico per le sentinelle di continuita' (c).
+InpMagic=769503
+#
+# --- GLI ASSI DELL'ESTENSIONE (4 x 2 = 8 celle; le celle slope=45 sono
+#     DENTRO per costruzione: sentinelle di continuita' con la griglia 48).
+InpVwapSlopeMin=45||45||15||90||Y
+InpSlLookback=5||5||2||7||Y
+# ==========================================================================
