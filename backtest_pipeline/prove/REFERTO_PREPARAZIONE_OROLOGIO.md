@@ -17,8 +17,8 @@
 | `mql5/Experts/ABTG_SondaOrologio.mq5` | **NUOVO** — 972 righe di cui **~516 di codice**; il **nucleo operativo è ~120 righe**, il resto è intestazione, autotest e OPTFRAME |
 | `backtest_pipeline/prove/SONDA_OROLOGIO_00_GEMELLI.txt` | **NUOVO** — determinismo del banco **+ cronometro** |
 | `..._01_EURUSD_LONG` `_02_EURUSD_SHORT` `_03_GBPUSD_LONG` `_04_GBPUSD_SHORT` `_05_XAUUSD_LONG` `_06_XAUUSD_SHORT` | **NUOVI** — 3 simboli × 2 lati |
-| `backtest_pipeline/prove/SONDA_OROLOGIO_FX.txt` | **la SPECIFICA CONGELATA**, toccata **solo** con una nota d'esecuzione in testa (criteri e griglia intatti) |
-| `backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1` | **NUOVO** — marcatore `MARCATORE_RIGA_SONDA_OROLOGIO_v1` |
+| `backtest_pipeline/prove/SONDA_OROLOGIO_FX.txt` | **la SPECIFICA CONGELATA**, toccata **solo** con due note d'esecuzione in testa — la seconda (31/08) dichiara che **C1 si legge nella clausola più severa** (stessa fascia su ≥2 simboli). Criteri e griglia **intatti** |
+| `backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1` | **NUOVO** — marcatore **`MARCATORE_RIGA_SONDA_OROLOGIO_v3`** (era `_v1` in questa riga e `_v2` nel file: **il marcatore vive in UN posto solo, il `.ps1`** — questa tabella lo cita, non lo decide) |
 | `backtest_pipeline/righe/RIGA_SONDA_OROLOGIO_DA_MANDARE.md` | **NUOVO** — l'unica riga di lancio esistente |
 
 ---
@@ -255,3 +255,34 @@ Questa corsa **non promuove niente**, **non boccia nessuna sedia**, **non tocca 
 forward**. Produce una tabella. Se la tabella è piatta, l'esito è **valido**: il
 caduto **D7** esce **confermato ed esteso** e la pista dell'orologio si chiude
 **con un numero nostro**.
+
+---
+
+## ➕ APPENDICE — SECONDA VERIFICA, 31/08/2026 (driver portato a `v3`)
+
+Il pacchetto era del **28/08**, cioè **prima** delle ~15 classi nuove aggiunte
+alla checklist il **31/08**. È stato ri-verificato contro quelle, **eseguendo** il
+driver su un banco stubbato. Sette correzioni, due delle quali **bloccanti**:
+
+1. 🔴 **`-Rifai` non era nell'argv del generico** (classe zombie-run). Misurato:
+   con i CSV di ieri sul disco la v2 usciva **verde, exit 0**, con numeri vecchi.
+2. 🔴 **La RICOMPOSIZIONE si reggeva sul salto della cache del generico** — cioè
+   la trappola era diventata il metodo. Ora c'è **`-Ricomponi`**, che non chiama
+   il generico per costruzione e dichiara la data di ogni CSV riletto.
+3. 🟠 **C1 contato nella lettura LARGA** (due simboli su **ore diverse** =
+   `PASSATO`). Ora il verdetto è la **lettura severa**, la larga si stampa
+   etichettata, e la scelta è dichiarata **anche nella specifica congelata**.
+4. 🟠 **`@FINOA` mancante nei prova** e `$Fino` uguale al default del generico:
+   direttiva aggiunta **nuda** ai sette file e **gattata**.
+5. 🟠 **`Tester\cache` mai svuotata**: ora si svuota **coi due conteggi** — qui
+   morde davvero, perché il CSV nasce dai **frame** e un pass ripescato non
+   scrive nessuna riga.
+6. 🟠 **CSV contato ma non letto dentro**: nuovo gate su **tutte** le 24 ore × 3
+   durate e sulla colonna **`Lato`**.
+7. 🟡 **Rilievo automatico sulla profondità dei tick**: il tick nativo BCM parte
+   dal **2024.09.26**, la finestra dal **2011**; a `Model=4` MT5 non si ferma e
+   genera i tick dalle M1, quindi lo **spread** del tratto vecchio — **metà del
+   cancello C1** — non è quello del tick. Si dichiara, non si corregge.
+
+**Batteria rifatta sulla v3: 14 mutazioni dei file prova → 14 fermate**, più 6
+guardie del driver, più il controllo positivo prima e dopo.

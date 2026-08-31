@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDA_OROLOGIO_v2
+#  MARCATORE_RIGA_SONDA_OROLOGIO_v3
 #  RIGA_SONDA_OROLOGIO.ps1  --  LA SONDA DELL'OROLOGIO
 #  ABTG_SondaOrologio su EURUSD / GBPUSD / XAUUSD, H1, TICK REALI,
 #  finestra 2011.01.01 -> 2026.06.30, sette celle:
@@ -81,6 +81,60 @@
 #
 #  LA RIGA CHE SI INCOLLA sta in righe\RIGA_SONDA_OROLOGIO_DA_MANDARE.md
 #  ed e' l'UNICO posto in cui esiste (CHECKLIST punto 100).
+#
+#  ------------------------------------------------------------------
+#  CHE COSA CAMBIA NELLA v3 (31/08/2026, verifica pre-invio contro le
+#  classi nuove della checklist). Sono SEI cose, e tutte e sei nascono
+#  da difetti gia' pagati altrove:
+#
+#   A. "-Rifai" STA SEMPRE NELL'argv del driver generico (classe
+#      zombie-run del 31/08, saga CRT: quattro corse dichiarate
+#      "eseguite" e mai partite). Un wrapper di MISURA non "riprende":
+#      rifa'. La v2 lo passava solo se glielo si chiedeva, e la corsa
+#      di ricomposizione si REGGEVA sul salto: cioe' la trappola era
+#      diventata il metodo.
+#
+#   B. LA RICOMPOSIZIONE HA UN MODO SUO, "-Ricomponi", che NON apre il
+#      tester e NON compila: rilegge i CSV gia' prodotti e ricalcola il
+#      cancello C1 d'insieme. Cosi' la rilettura e' DICHIARATA invece
+#      che dedotta da un salto grigio in console (CHECKLIST 101-bis:
+#      cronometrare una rilettura di file da' un numero plausibile e
+#      falso -- qui il cronometro in quel modo non parte proprio).
+#
+#   C. Tester\cache SI SVUOTA, coi DUE CONTEGGI nel referto (punto 46 +
+#      classe cache-hit-per-costruzione del 31/08). Qui morde davvero:
+#      i CSV nascono dai FRAME, e un pass ripescato dalla cache non
+#      chiama OnTester(), quindi non manda nessun frame e non ha
+#      nessuna riga nel CSV. Con -Rifai il generico rifa' la passata,
+#      ma se MT5 la ripesca dalla sua cache il CSV torna MONCO.
+#
+#   D. LA FINESTRA NON E' PIU' UN DEFAULT EREDITATO (classe del 31/08):
+#      @FINOA e' scritta NUDA nei sette file prova, accanto a
+#      @DAQUANDO, e il driver la gatta. "2026.06.30" era anche il
+#      default di walkforward_generico.ps1: una geometria che coincide
+#      con un default e' una geometria che nessuno ha mai deciso.
+#
+#   E. IL CANCELLO C1 SI CONTA NELLA LETTURA SEVERA (classe del 31/08,
+#      "l'ambiguita' del criterio congelato sciolta nel verso che
+#      PROMUOVE"). Il criterio dice "per almeno UNA fascia oraria, su
+#      almeno DUE dei tre simboli": la v2 contava i simboli che avevano
+#      una fascia QUALSIASI, cioe' ammetteva DUE ORE DIVERSE su due
+#      simboli diversi. Misurato sul banco: con EURUSD verde alle 8 e
+#      GBPUSD verde alle 15 la v2 scriveva "C1 PASSATO". Adesso il
+#      verdetto e' la lettura SEVERA (la STESSA fascia su >=2 simboli)
+#      e la lettura larga si stampa accanto, ETICHETTATA.
+#
+#   F. IL CSV SI CONTA E SI GUARDA DENTRO: non basta il numero di
+#      righe, si verifica che l'asse chiesto ci sia tutto (24 ore x 3
+#      durate) e che la colonna "Lato" sia quella della cella.
+#
+#  E UN RILIEVO CHE IL DRIVER ALZA DA SOLO, PERCHE' TOCCA IL METRO:
+#   il tick NATIVO BCM agli atti parte dal 2024.09.26 (R109 par. D2,
+#   R97). Da 2011.01.01 a quella data il Modello 4 NON si ferma: MT5
+#   ripiega e genera i tick dalle barre M1. Il LORDO regge (e' deriva
+#   bid->bid), ma lo SPREAD -- che e' META' del cancello C1 -- in quel
+#   tratto NON e' lo spread del tick. Non si corregge: si DICHIARA, in
+#   console e nel referto, come prescrive il criterio C6 per il fuso.
 # =====================================================================
 [CmdletBinding()]
 param(
@@ -89,9 +143,18 @@ param(
   [string]$Pin           = "",
   [switch]$SoloControllo,          # giro a vuoto: NON apre il tester (ma COMPILA)
   [switch]$TutteLeCelle,           # le sette celle di fila: e' la corsa LUNGA
-  [switch]$Rifai,                  # rifa' anche i CSV gia' presenti
+  [switch]$Ricomponi,              # NON gira niente: rilegge i CSV gia' fatti e ricalcola C1
+  # NON esiste piu' un interruttore "-Rifai": il driver generico viene
+  # SEMPRE chiamato con -Rifai (classe zombie-run del 31/08). Una corsa
+  # di misura non riprende mai a meta': o rifa', o dichiara di rileggere
+  # (ed e' quello che fa -Ricomponi).
   [string]$SoloCella     = "",     # una cella sola, per Id
   [string]$Periodo       = "H1",
+  # LE DUE DATE SONO DICHIARATE NEI SETTE FILE PROVA (@DAQUANDO e @FINOA
+  # NUDE) e GATTATE qui sotto: nessuna delle due e' ereditata dal default
+  # di walkforward_generico.ps1 (classe del 31/08). Che "2026.06.30" sia
+  # anche il suo default e' una coincidenza, e da oggi e' una coincidenza
+  # VERIFICATA contro il prova.
   [string]$DaQuando      = "2011.01.01",
   [string]$Fino          = "2026.06.30",
   [int]$Deposito         = 100000,
@@ -122,9 +185,11 @@ $Fatale    = ""
 $Terminale = "n/d"
 $Compilato = "NON TENTATA"
 $Cronometro= "non misurato"
+$CacheTxt  = "NON SVUOTATA"
 
 $Modo = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
+if($Ricomponi){ $Modo = "RICOMPOSIZIONE" }
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico([string]$t,[string]$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
@@ -340,7 +405,10 @@ $ParametriAmmessi = @("InpOraIngresso","InpOreDurata","InpAllowLong","InpAllowSh
 #  15,5 anni non si lanciano al buio.
 # =====================================================================
 $Ordinate = @()
-if($SoloCella -ne ""){
+if($Ricomponi){
+  # RICOMPOSIZIONE: non gira niente, rilegge TUTTO quello che c'e'.
+  $Ordinate = @($CELLE)
+}elseif($SoloCella -ne ""){
   $Ordinate = @($CELLE | Where-Object { $_.Id -eq $SoloCella })
 }elseif($TutteLeCelle){
   $Ordinate = @($CELLE)
@@ -366,11 +434,29 @@ try{
   if($SoloCella -ne "" -and $TutteLeCelle){
     throw "-SoloCella e -TutteLeCelle insieme non vogliono dire niente: scegline uno."
   }
+  # -Ricomponi e' un modo A SE': non gira, rilegge. Mescolarlo con gli
+  # altri interruttori produrrebbe una corsa che dice di essere una
+  # rilettura o una rilettura che dice di essere una corsa -- ed e'
+  # esattamente la confusione che la classe zombie-run e' costata.
+  if($Ricomponi -and ($SoloControllo -or $TutteLeCelle -or $SoloCella -ne "")){
+    throw "-Ricomponi non si mescola con -SoloControllo / -TutteLeCelle / -SoloCella: rilegge SEMPRE tutte le celle gia' girate e non apre mai il tester. Lanciala da sola."
+  }
   if($Periodo -ne "H1"){
     throw ("-Periodo e' " + $Periodo + ": i sette file prova dichiarano @PERIODO H1 e il gate li confronta. La sonda entra all'apertura di una barra H1: su un altro TF misurerebbe un'altra cosa.")
   }
   if($Modello -ne 4){
     [void]$Rilievi.Add("MODELLO " + $Modello + " invece di 4 (TICK REALI). Lo SPREAD e' meta' di questa misura, e fuori dai tick reali lo spread NON e' quello del feed: la colonna 'Spread Mediano Ingresso' smette di voler dire cio' che il criterio C1 le chiede. Il numero si legge SOLO come screening.")
+  }
+  # --- LA PROFONDITA' DEI TICK: rilievo AUTOMATICO, e non e' una nota a
+  #     pie' di pagina. Il tick NATIVO BCM agli atti parte dal 2024.09.26
+  #     (R109 par. D2, R97). Prima di quella data il Modello 4 NON si
+  #     ferma: MT5 genera i tick dalle barre M1. Il LORDO (deriva
+  #     bid->bid) regge; lo SPREAD MEDIANO -- META' del cancello C1 --
+  #     no. Non e' misurato su questi tre simboli, e proprio per questo
+  #     va detto: "non ho misurato" non e' "va bene" (punto 40).
+  $TickNativoBCM = "2024.09.26"
+  if($Modello -eq 4 -and ([datetime]::ParseExact($DaQuando,"yyyy.MM.dd",$INV) -lt [datetime]::ParseExact($TickNativoBCM,"yyyy.MM.dd",$INV))){
+    [void]$Rilievi.Add("PROFONDITA' DEI TICK NON MISURATA su EURUSD/GBPUSD/XAUUSD. Il tick NATIVO BCM agli atti parte dal " + $TickNativoBCM + " (R109 par. D2, R97), la finestra parte dal " + $DaQuando + ". A Modello 4 senza tick reali MT5 NON si ferma: ripiega e genera i tick dalle barre M1. Il LORDO in punti (deriva bid->bid) regge; la colonna 'Spread Mediano Ingresso' nel tratto pre-" + $TickNativoBCM + " NON e' lo spread del tick, ed e' META' del cancello C1. Il rapporto C1 letto sulla gamba IS (la piu' vecchia) va letto con questa etichetta attaccata: e' un rapporto su spread RICOSTRUITO.")
   }
 
   $passate = 0
@@ -380,7 +466,20 @@ try{
   Dico ("celle ....... " + @($Ordinate).Count + " su 7   [" + ((@($Ordinate | ForEach-Object { $_.Id })) -join ", ") + "]")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (split 40/60 del driver generico)")
   Dico ("banco ....... Modello " + $Modello + ", deposito " + $Deposito + ", periodo " + $Periodo)
-  Dico ("passate ..... " + $passate + " a tick reali su 15,5 anni di H1") "Yellow"
+  if($Ricomponi){
+    Dico ("passate ..... ZERO: -Ricomponi NON apre il tester e NON compila, rilegge i CSV gia' prodotti") "Yellow"
+    Write-Host ""
+    Write-Host "###################################################################" -ForegroundColor Yellow
+    Write-Host "#  MODO RICOMPOSIZIONE: qui NON gira NIENTE, per costruzione.     #" -ForegroundColor Yellow
+    Write-Host "#  Rilegge i CSV delle celle gia' girate (stesso pin) e ricalcola #" -ForegroundColor Yellow
+    Write-Host "#  il cancello C1, che e' un criterio D'INSIEME e su un referto   #" -ForegroundColor Yellow
+    Write-Host "#  parziale non si puo' leggere.                                  #" -ForegroundColor Yellow
+    Write-Host "#  Nessun cronometro: cronometrare una rilettura di file darebbe  #" -ForegroundColor Yellow
+    Write-Host "#  un numero plausibile e falso (CHECKLIST 101-bis).              #" -ForegroundColor Yellow
+    Write-Host "###################################################################" -ForegroundColor Yellow
+  }else{
+    Dico ("passate ..... " + $passate + " a tick reali su 15,5 anni di H1, e si RIFANNO tutte (-Rifai sempre)") "Yellow"
+  }
   if($Modo -eq "RICOGNIZIONE"){
     Write-Host ""
     Write-Host "###################################################################" -ForegroundColor Yellow
@@ -481,6 +580,12 @@ try{
     if($h["@SIMBOLO"]  -ne $c.Sym){     throw ($c.Prova + ": @SIMBOLO e' " + $h["@SIMBOLO"] + ", la cella " + $c.Id + " lo vuole " + $c.Sym) }
     if($h["@PERIODO"]  -ne $Periodo){   throw ($c.Prova + ": @PERIODO e' " + $h["@PERIODO"] + ", atteso " + $Periodo) }
     if($h["@DAQUANDO"] -ne $DaQuando){  throw ($c.Prova + ": @DAQUANDO e' " + $h["@DAQUANDO"] + ", atteso " + $DaQuando) }
+    # @FINOA STA ACCANTO A @DAQUANDO, NUDA, e si gatta: una finestra che
+    # vive solo nel param() del wrapper non ha nessuno che la controlli,
+    # e "2026.06.30" e' anche il default di walkforward_generico.ps1
+    # (classe del 31/08: la finestra ereditata dal default del generico).
+    if(-not $h.ContainsKey("@FINOA")){  throw ($c.Prova + ": manca la direttiva @FINOA. La fine della finestra si DICHIARA nel prova accanto a @DAQUANDO, non si eredita dal default del driver generico.") }
+    if($h["@FINOA"]    -ne $Fino){      throw ($c.Prova + ": @FINOA e' " + $h["@FINOA"] + ", atteso " + $Fino) }
 
     # GATE DEGLI ASSI: esattamente quelli dichiarati, nessuno in piu'.
     $attesi = @($c.AssiY | Sort-Object)
@@ -557,81 +662,136 @@ try{
   #  3. LA COMPILAZIONE -- il pezzo che il driver generico fa troppo
   #     tardi e senza dire perche'.
   # -------------------------------------------------------------------
-  Titolo "3. COMPILO L'EA"
-  # IL SELETTORE E' LO STESSO, RIGA PER RIGA, DI walkforward_generico.ps1
-  # (punti 26/27): su una macchina con DUE istanze i due script potrebbero
-  # scegliere TERMINALI DIVERSI. Se il selettore del driver generico
-  # cambia, cambia anche questo: si toccano insieme.
-  $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
-  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-  if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-  if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1." }
-  $instDir    = $cand.DirectoryName
-  $MetaEditor = Join-Path $instDir "metaeditor64.exe"
-  $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-  $dataFolder = (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
-  if(-not $dataFolder){ throw ("cartella dati non trovata per " + $instDir) }
-  $Terminale = $instDir
-  Dico ("terminale scelto: " + $instDir + "  (DEVE essere lo stesso che stampa il driver generico)") "Yellow"
+  if($Ricomponi){
+    # RICOMPOSIZIONE: niente terminale, niente compilazione, niente cache.
+    # Non e' pigrizia: e' la garanzia che questo giro NON possa produrre
+    # un numero nuovo. Rilegge e basta, e lo dice in ogni riga del referto.
+    Titolo "3. COMPILAZIONE, TERMINALE E CACHE: SALTATI (modo RICOMPOSIZIONE)"
+    $Terminale  = "non pertinente (-Ricomponi non apre MT5)"
+    $Compilato  = "NON TENTATA (-Ricomponi non compila: rilegge soltanto)"
+    $CacheTxt   = "non pertinente (-Ricomponi non apre il tester)"
+    $Cronometro = "non pertinente: in RICOMPOSIZIONE non gira nessuna passata"
+    Dico "nessun terminale aperto, nessuna compilazione, nessuna passata: si rileggono i CSV gia' prodotti." "Yellow"
+  }else{
+    Titolo "3. COMPILO L'EA"
+    # IL SELETTORE E' LO STESSO, RIGA PER RIGA, DI walkforward_generico.ps1
+    # (punti 26/27): su una macchina con DUE istanze i due script potrebbero
+    # scegliere TERMINALI DIVERSI. Se il selettore del driver generico
+    # cambia, cambia anche questo: si toccano insieme.
+    $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
+    $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+    if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+    if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1." }
+    $instDir    = $cand.DirectoryName
+    $MetaEditor = Join-Path $instDir "metaeditor64.exe"
+    $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+    $dataFolder = (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
+    if(-not $dataFolder){ throw ("cartella dati non trovata per " + $instDir) }
+    $Terminale = $instDir
+    Dico ("terminale scelto: " + $instDir + "  (DEVE essere lo stesso che stampa il driver generico)") "Yellow"
 
-  # QUESTO EA NON E' MAI STATO COMPILATO DA NESSUNO: un giro di controllo
-  # che non compila non controlla la cosa PIU' PROBABILE che vada storta.
-  # L'.ex5 si CANCELLA prima: senza, un binario vecchio farebbe passare
-  # per riuscita una compilazione fallita (punto 23).
-  $mq5 = Join-Path $Work ($EA + ".mq5")
-  Scarica ($RawPin + "/mql5/Experts/" + $EA + ".mq5") $mq5
-  $dstExp = Join-Path $dataFolder "MQL5\Experts"
-  New-Item -ItemType Directory -Force -Path $dstExp | Out-Null
-  $dstMq5 = Join-Path $dstExp ($EA + ".mq5")
-  Copy-Item $mq5 -Destination $dstMq5 -Force
-  $ex5 = Join-Path $dstExp ($EA + ".ex5")
-  Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
-  $t0 = Get-Date
-  & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
-  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
-  if(-not (Test-Path -LiteralPath $ex5)){
-    $logC = Join-Path $dstExp ($EA + ".log")
-    if(Test-Path -LiteralPath $logC){
-      Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force
-      Get-Content -LiteralPath $logC -Tail 40 | ForEach-Object { Write-Host $_ -ForegroundColor Red }
+    # QUESTO EA NON E' MAI STATO COMPILATO DA NESSUNO: un giro di controllo
+    # che non compila non controlla la cosa PIU' PROBABILE che vada storta.
+    # L'.ex5 si CANCELLA prima: senza, un binario vecchio farebbe passare
+    # per riuscita una compilazione fallita (punto 23).
+    $mq5 = Join-Path $Work ($EA + ".mq5")
+    Scarica ($RawPin + "/mql5/Experts/" + $EA + ".mq5") $mq5
+    $dstExp = Join-Path $dataFolder "MQL5\Experts"
+    New-Item -ItemType Directory -Force -Path $dstExp | Out-Null
+    $dstMq5 = Join-Path $dstExp ($EA + ".mq5")
+    Copy-Item $mq5 -Destination $dstMq5 -Force
+    $ex5 = Join-Path $dstExp ($EA + ".ex5")
+    Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+    $t0 = Get-Date
+    & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
+    while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+    if(-not (Test-Path -LiteralPath $ex5)){
+      $logC = Join-Path $dstExp ($EA + ".log")
+      if(Test-Path -LiteralPath $logC){
+        Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force
+        Get-Content -LiteralPath $logC -Tail 40 | ForEach-Object { Write-Host $_ -ForegroundColor Red }
+      }
+      throw ("COMPILAZIONE FALLITA: " + $EA + " non era MAI stato compilato da nessuno. Gli errori sono qui sopra e in COMPILAZIONE_FALLITA.log dentro lo zip.")
     }
-    throw ("COMPILAZIONE FALLITA: " + $EA + " non era MAI stato compilato da nessuno. Gli errori sono qui sopra e in COMPILAZIONE_FALLITA.log dentro lo zip.")
+    $Compilato = "OK (" + [int]((Get-Item -LiteralPath $ex5).Length/1024) + " KB, " + (Get-Item -LiteralPath $ex5).LastWriteTime.ToString("HH:mm:ss",$INV) + ")"
+    Dico ("compilato " + $EA + ": " + $Compilato) "Green"
+
+    # -----------------------------------------------------------------
+    #  3-bis. LA CACHE DEL TESTER, COI DUE CONTEGGI (punto 46 + classe
+    #  cache-hit-per-costruzione del 31/08). Qui NON e' una precauzione
+    #  generica: il CSV di questa famiglia nasce dai FRAME, e un pass
+    #  ripescato dalla cache non chiama OnTester(), quindi non manda
+    #  nessun frame e non ha nessuna riga nel CSV. Il risultato non
+    #  sarebbe un numero vecchio: sarebbe una RIGA CHE SPARISCE, con la
+    #  corsa verde. Si svuota SOLO Tester\cache, MAI bases\<server>\ticks
+    #  (quello e' lo storico, e riscaricarlo costa ore).
+    # -----------------------------------------------------------------
+    $cacheT = Join-Path $dataFolder "Tester\cache"
+    if(Test-Path -LiteralPath $cacheT){
+      $ncPrima = @(Get-ChildItem -LiteralPath $cacheT -Recurse -File -ErrorAction SilentlyContinue).Count
+      Remove-Item (Join-Path $cacheT "*") -Recurse -Force -ErrorAction SilentlyContinue
+      $ncDopo  = @(Get-ChildItem -LiteralPath $cacheT -Recurse -File -ErrorAction SilentlyContinue).Count
+      $CacheTxt = "prima " + $ncPrima + " file, dopo " + $ncDopo
+      if($ncDopo -gt 0){
+        [void]$Problemi.Add("Tester\cache NON si e' svuotata (prima " + $ncPrima + ", dopo " + $ncDopo + "): un pass ripescato dalla cache non chiama OnTester(), non manda il frame e SPARISCE dal CSV. Le righe attese per cella vanno ricontate a mano prima di leggere qualunque numero.")
+        Dico ("Tester\cache NON SVUOTATA: " + $CacheTxt) "Red"
+      }
+      else{ Dico ("Tester\cache svuotata: " + $CacheTxt) "Green" }
+    }
+    else{
+      $CacheTxt = "cartella assente (" + $cacheT + "): niente da svuotare"
+      Dico ("Tester\cache: " + $CacheTxt) "Yellow"
+    }
   }
-  $Compilato = "OK (" + [int]((Get-Item -LiteralPath $ex5).Length/1024) + " KB, " + (Get-Item -LiteralPath $ex5).LastWriteTime.ToString("HH:mm:ss",$INV) + ")"
-  Dico ("compilato " + $EA + ": " + $Compilato) "Green"
 
   # -------------------------------------------------------------------
   #  4. LE CORSE
   # -------------------------------------------------------------------
-  Titolo "4. LE CORSE"
+  # NIENTE '(if(...))' come argomento: parsa pulito e muore a runtime
+  # (classe del 29/08). Il titolo si calcola prima, in una variabile.
+  $titolo4 = "4. LE CORSE"
+  if($Ricomponi){ $titolo4 = "4. RILETTURA DEI CSV GIA' PRODOTTI (nessuna corsa, per costruzione)" }
+  Titolo $titolo4
   $Risultati = Join-Path $Work ("risultati_prove\" + $EA)
   foreach($c in $Ordinate){
     Dico ("cella " + $c.Id + " -- " + $c.Desc) "Cyan"
-    # NON si chiama $args: e' una VARIABILE AUTOMATICA di PowerShell
-    # (punto 71). Questo script non usa $args da nessuna parte.
-    $argv = @("-ExecutionPolicy","Bypass","-File",$drv,
-              "-Expert",$EA,
-              "-Prova",(Join-Path $Prove $c.Prova),
-              "-Etichetta",$c.Id,
-              "-Simbolo",$c.Sym,
-              "-Periodo",$Periodo,
-              "-DaQuando",$DaQuando,
-              "-Fino",$Fino,
-              "-Modello",("" + $Modello),
-              "-Deposito",("" + $Deposito))
-    if($SoloControllo){ $argv += "-SoloControllo" }
-    if($Rifai){ $argv += "-Rifai" }
     $tCella = Get-Date
-    $global:LASTEXITCODE = 0
-    & powershell $argv
-    $rc = $LASTEXITCODE
-    $c.Secondi = (New-TimeSpan -Start $tCella -End (Get-Date)).TotalSeconds
-    if($rc -ne 0){
-      $c.Esito = "FERMATA (codice " + $rc + ")"
-      [void]$Problemi.Add("cella " + $c.Id + ": il driver generico e' uscito con codice " + $rc)
-      continue
+    if($Ricomponi){
+      # NON si chiama il driver generico: in RICOMPOSIZIONE il tester non
+      # si apre per costruzione, e $tCella serve solo a datare la lettura.
+      $c.Secondi = -1.0
+    }else{
+      # NON si chiama $args: e' una VARIABILE AUTOMATICA di PowerShell
+      # (punto 71). Questo script non usa $args da nessuna parte.
+      # E "-Rifai" STA SEMPRE DENTRO L'ARGV, non e' un'opzione: senza, il
+      # driver generico trova i CSV del giro prima, stampa "gia' fatto,
+      # salto" in grigio, esce 0, e questo wrapper impacchetta numeri
+      # VECCHI come freschi. E' la classe che nella saga CRT ha prodotto
+      # quattro corse dichiarate eseguite e mai partite (31/08). Chi vuole
+      # rileggere usa -Ricomponi, che lo DICE in ogni riga del referto.
+      $argv = @("-ExecutionPolicy","Bypass","-File",$drv,
+                "-Expert",$EA,
+                "-Prova",(Join-Path $Prove $c.Prova),
+                "-Etichetta",$c.Id,
+                "-Simbolo",$c.Sym,
+                "-Periodo",$Periodo,
+                "-DaQuando",$DaQuando,
+                "-Fino",$Fino,
+                "-Modello",("" + $Modello),
+                "-Rifai",
+                "-Deposito",("" + $Deposito))
+      if($SoloControllo){ $argv += "-SoloControllo" }
+      $global:LASTEXITCODE = 0
+      & powershell $argv
+      $rc = $LASTEXITCODE
+      $c.Secondi = (New-TimeSpan -Start $tCella -End (Get-Date)).TotalSeconds
+      if($rc -ne 0){
+        $c.Esito = "FERMATA (codice " + $rc + ")"
+        [void]$Problemi.Add("cella " + $c.Id + ": il driver generico e' uscito con codice " + $rc)
+        continue
+      }
+      if($SoloControllo){ $c.Esito = "CONTROLLO OK"; continue }
     }
-    if($SoloControllo){ $c.Esito = "CONTROLLO OK"; continue }
 
     $csvIS  = Join-Path $Risultati ($EA + "_" + $c.Sym + "_IS_"  + $c.Id + ".csv")
     $csvOOS = Join-Path $Risultati ($EA + "_" + $c.Sym + "_OOS_" + $c.Id + ".csv")
@@ -645,7 +805,9 @@ try{
       foreach($f in @($csvIS,$csvOOS)){ if(-not (Test-Path -LiteralPath $f)){ $mancanti += (Split-Path $f -Leaf) } }
       if(@($mancanti).Count -gt 0){
         $c.Esito = "CSV MANCANTE"
-        [void]$Problemi.Add("cella " + $c.Id + ": CSV NON PRODOTTO dal tester: " + ($mancanti -join ", ") + ". Storico mancante sul simbolo, MT5 gia' aperto, oppure la cella non e' girata.")
+        $perche = ". Storico mancante sul simbolo, MT5 gia' aperto, oppure la cella non e' girata."
+        if($Ricomponi){ $perche = ". In RICOMPOSIZIONE vuol dire una cosa sola: QUESTA CELLA NON E' ANCORA STATA GIRATA (o e' stata girata con un PIN diverso, e allora e' stata cancellata). Il cancello C1 d'insieme NON si legge finche' mancano celle." }
+        [void]$Problemi.Add("cella " + $c.Id + ": CSV NON PRODOTTO dal tester: " + ($mancanti -join ", ") + $perche)
       }else{
         $c.Esito = "CSV SENZA LE COLONNE DELLA SONDA"
         [void]$Problemi.Add("cella " + $c.Id + ": il CSV c'e' ma NON ha le colonne della sonda (l'.ex5 che ha girato non e' questo EA?). Intestazioni viste: " + ($script:CsvIntestazioni -join " | "))
@@ -658,21 +820,60 @@ try{
     $c.RigheOOS = @($rOOS).Count
     $c.Esito = "MISURATA"
 
-    # HA GIRATO IL TESTER, O I CSV ERANO GIA' LI'? Il driver generico salta le
-    # finestre gia' fatte ("gia' fatto, salto"): in quel caso questa cella e'
-    # stata RILETTA, non MISURATA (CHECKLIST punti 50, 92 e 101-bis).
+    # HA GIRATO IL TESTER, O I CSV ERANO GIA' LI'?
+    # In CORSA/RICOGNIZIONE il generico e' chiamato con -Rifai: un CSV
+    # piu' VECCHIO dell'inizio della cella non e' piu' una sfumatura da
+    # annotare, e' un PROBLEMA -- vuol dire che la passata non e' partita
+    # e che questi numeri vengono da un altro giro (classe zombie-run).
+    # In RICOMPOSIZIONE la rilettura e' il mestiere, e si DICHIARA con
+    # la data del file, che va confrontata con la riga 'data:'.
     $freschi = $true
+    $etaCsv = ""
     foreach($f in @($csvIS,$csvOOS)){
-      if((Get-Item -LiteralPath $f).LastWriteTime -lt $tCella){ $freschi = $false }
+      $lw = (Get-Item -LiteralPath $f).LastWriteTime
+      if($lw -lt $tCella){ $freschi = $false }
+      $etaCsv = $lw.ToString("yyyy-MM-dd HH:mm",$INV)
     }
-    if($freschi){ $c.Fresca = "SI (il tester ha girato in questo giro)" }
+    if($Ricomponi){
+      $c.Fresca = "NO, ED E' IL MESTIERE DI QUESTO MODO: CSV riletti, scritti il " + $etaCsv
+      $c.Esito  = "RILETTA (CSV del " + $etaCsv + ")"
+    }
+    elseif($freschi){ $c.Fresca = "SI (il tester ha girato in questo giro)" }
     else{
-      $c.Fresca = "NO (CSV gia' presenti: RILETTI, non rimisurati)"
+      $c.Fresca = "NO (CSV del " + $etaCsv + ": RILETTI, non rimisurati)"
       $c.Esito  = "RILETTA DA CSV GIA' PRESENTI (il tester NON ha girato in questo giro)"
+      [void]$Problemi.Add("cella " + $c.Id + ": i CSV sono del " + $etaCsv + ", cioe' PRECEDENTI a questa corsa, e il driver generico e' stato chiamato con -Rifai. La passata NON e' partita (MT5 gia' aperto? terminale sbagliato?) e questi numeri vengono da un ALTRO giro: non si leggono.")
     }
 
     if($c.RigheIS -ne $c.Celle -or $c.RigheOOS -ne $c.Celle){
-      [void]$Problemi.Add("cella " + $c.Id + ": righe nel CSV " + $c.RigheIS + " (IS) / " + $c.RigheOOS + " (OOS), attese " + $c.Celle + " per finestra. E' la CACHE del tester, oppure celle mute.")
+      [void]$Problemi.Add("cella " + $c.Id + ": righe nel CSV " + $c.RigheIS + " (IS) / " + $c.RigheOOS + " (OOS), attese " + $c.Celle + " per finestra. E' la CACHE del tester (un pass ripescato non chiama OnTester, non manda il frame e la riga SPARISCE), oppure celle mute.")
+    }
+
+    # --- IL CSV NON SI CONTA SOLTANTO: SI GUARDA DENTRO.
+    #     Le righe giuste con l'asse sbagliato sono la stessa bugia di
+    #     prima, scritta meglio (classe del 31/08, ablazione: "un CSV si
+    #     CONTA e deve portare i VALORI dell'asse che ha chiesto").
+    foreach($tag in @("IS","OOS")){
+      $dati = $rIS
+      if($tag -eq "OOS"){ $dati = $rOOS }
+      $latoAtteso = 1
+      if($c.Lato -eq "SHORT"){ $latoAtteso = -1 }
+      $latoStorto = @($dati | Where-Object { $null -eq $_.Lato -or [int]$_.Lato -ne $latoAtteso }).Count
+      if($latoStorto -gt 0){
+        [void]$Problemi.Add("cella " + $c.Id + " (" + $tag + "): la colonna 'Lato' non vale " + $latoAtteso + " su " + $latoStorto + " passate, ma la cella e' " + $c.Lato + ". Il file prova che ha girato NON e' quello di questa cella, oppure l'.ex5 non e' questo EA.")
+      }
+      if($c.Id -ne "00_gemelli"){
+        $mancano = New-Object System.Collections.ArrayList
+        for($h2 = 0; $h2 -le 23; $h2++){
+          foreach($d2 in @(4,8,12)){
+            $q = @($dati | Where-Object { $null -ne $_.Ora -and [int]$_.Ora -eq $h2 -and $null -ne $_.Durata -and [int]$_.Durata -eq $d2 }).Count
+            if($q -ne 1){ [void]$mancano.Add(("" + $h2 + "h/" + $d2 + "h x" + $q)) }
+          }
+        }
+        if(@($mancano).Count -gt 0){
+          [void]$Problemi.Add("cella " + $c.Id + " (" + $tag + "): l'asse chiesto (24 ore x 3 durate) NON e' tutto nel CSV. Celle mancanti o doppie: " + (($mancano | Select-Object -First 12) -join ", ") + " (in tutto " + @($mancano).Count + " su 72). Righe giuste con l'asse sbagliato sono numeri di un'altra griglia.")
+        }
+      }
     }
 
     # --- I GATE DI COLLAUDO, letti DALLE COLONNE (in ottimizzazione le
@@ -710,7 +911,10 @@ try{
       if($c.Gemelli -ne "IDENTICI"){
         [void]$Problemi.Add("cella 00_gemelli: gemelli " + $c.Gemelli + " -- il banco NON e' deterministico, e nessun numero delle altre sei celle si legge.")
       }
-      if($freschi -and $c.Secondi -gt 0){
+      if($Ricomponi){
+        $Cronometro = "non pertinente: in RICOMPOSIZIONE non gira nessuna passata, e cronometrare una rilettura di file darebbe un numero plausibile e falso (CHECKLIST 101-bis)."
+      }
+      elseif($freschi -and $c.Secondi -gt 0){
         $perPassata = $c.Secondi/4.0
         $Cronometro = ([double]$c.Secondi).ToString("0",$INV) + " s per 4 passate = " + ([double]$perPassata).ToString("0",$INV) + " s per passata -> una cella di misura (144 passate) costerebbe circa " + ([double]($perPassata*144.0/60.0)).ToString("0",$INV) + " minuti, e le SEI celle circa " + ([double]($perPassata*864.0/3600.0)).ToString("0.0",$INV) + " ore"
       }elseif(-not $freschi){
@@ -740,12 +944,15 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto (NON e' il risultato)")
 [void]$RefTxt.Add("                      RICOGNIZIONE = solo determinismo e cronometro")
 [void]$RefTxt.Add("                      CORSA = la misura")
+[void]$RefTxt.Add("                      RICOMPOSIZIONE = NESSUNA corsa: rilettura dei CSV gia' fatti")
 [void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
 [void]$RefTxt.Add("pin:  " + $Pin)
 [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (split 40/60)")
 [void]$RefTxt.Add("banco: Modello " + $Modello + ", deposito " + $Deposito + ", rischio 1,0% (pinnato nei file prova)")
 [void]$RefTxt.Add("terminale: " + $Terminale)
 [void]$RefTxt.Add("compilazione: " + $Compilato)
+[void]$RefTxt.Add("cache tester: " + $CacheTxt)
+[void]$RefTxt.Add("rifai: il driver generico e' chiamato SEMPRE con -Rifai (mai una passata saltata e spacciata per fresca)")
 [void]$RefTxt.Add("cronometro: " + $Cronometro)
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO (criterio C7).")
@@ -832,6 +1039,21 @@ foreach($c in $CELLE){
 [void]$RefTxt.Add(">>> IL CRITERIO CONGELATO NON DICE SU QUALE FINESTRA SI LEGGE C1.")
 [void]$RefTxt.Add("    Il conto e' riportato per tutte e tre le letture, e la scelta di")
 [void]$RefTxt.Add("    quale vale e' di chi firma, non di questo script.")
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add(">>> E IL CRITERIO E' AMBIGUO SU UN'ALTRA COSA, dichiarata qui invece")
+[void]$RefTxt.Add("    che sciolta di nascosto: 'per almeno UNA fascia oraria, su almeno")
+[void]$RefTxt.Add("    DUE dei tre simboli' si puo' leggere in due modi.")
+[void]$RefTxt.Add("      SEVERA: la STESSA fascia (stessa ora E stessa durata) sopra")
+[void]$RefTxt.Add("              soglia su >= 2 simboli. E' un fatto d'insieme.")
+[void]$RefTxt.Add("      LARGA : due simboli qualsiasi, ciascuno con una fascia SUA.")
+[void]$RefTxt.Add("              Due ore diverse su due simboli diversi passerebbero.")
+[void]$RefTxt.Add("    IL VERDETTO QUI SOTTO E' LA LETTURA SEVERA, ed e' una scelta")
+[void]$RefTxt.Add("    DICHIARATA: quando un criterio congelato copre lo stesso caso con")
+[void]$RefTxt.Add("    due clausole, in questa casa vince la piu' severa -- muovere un")
+[void]$RefTxt.Add("    criterio verso il permissivo dopo averlo scritto e' la mossa che")
+[void]$RefTxt.Add("    il progetto ha vietato a se stesso (CHECKLIST 31/08).")
+[void]$RefTxt.Add("    La lettura LARGA e' stampata accanto, etichettata, perche' e' un")
+[void]$RefTxt.Add("    dato utile -- ma NON e' il verdetto.")
 $sim = @("EURUSD","GBPUSD","XAUUSD")
 # --- QUANTE CELLE DI MISURA HANNO DAVVERO PRODOTTO DATI.
 #     Serve al TERZO STATO del cancello, e non e' un dettaglio: senza,
@@ -849,24 +1071,53 @@ foreach($s in $sim){
 if(@($simMancanti).Count -gt 0){
   [void]$RefTxt.Add("  simboli senza NESSUNA cella misurata: " + ($simMancanti -join ", "))
 }
+# --- LA FUNZIONE CHE DICE SE UNA FASCIA E' SOPRA SOGLIA IN UNA LETTURA.
+#     Sta qui, in un posto solo, perche' la lettura severa e quella larga
+#     devono usare LA STESSA regola: due copie della stessa disuguaglianza
+#     e' esattamente come divergono i criteri (checklist punto 104).
+function FasciaSopra($cella,[int]$ora,[int]$dur,[string]$lettura){
+  $xs = @($cella.DatiOOS | Where-Object { $null -ne $_.Ora -and [int]$_.Ora -eq $ora -and $null -ne $_.Durata -and [int]$_.Durata -eq $dur })
+  $ys = @($cella.DatiIS  | Where-Object { $null -ne $_.Ora -and [int]$_.Ora -eq $ora -and $null -ne $_.Durata -and [int]$_.Durata -eq $dur })
+  $okOos = ($xs.Count -eq 1 -and $null -ne $xs[0].C1 -and [double]$xs[0].C1 -ge 3.0)
+  $okIs  = ($ys.Count -eq 1 -and $null -ne $ys[0].C1 -and [double]$ys[0].C1 -ge 3.0)
+  if($lettura -eq "IS"){ return $okIs }
+  if($lettura -eq "OOS"){ return $okOos }
+  return ($okIs -and $okOos)
+}
+
 foreach($lettura in @("IS","OOS","ENTRAMBE")){
-  $simOk = New-Object System.Collections.ArrayList
+  # --- LETTURA SEVERA: la STESSA fascia su almeno DUE simboli. E' il
+  #     verdetto. Si scorre l'asse (24 ore x 3 durate) e per ogni fascia
+  #     si contano i SIMBOLI DISTINTI che la superano.
+  $simSevera = New-Object System.Collections.ArrayList
+  $fasciaSevera = ""
+  for($h3 = 0; $h3 -le 23; $h3++){
+    foreach($d3 in @(4,8,12)){
+      $qui = New-Object System.Collections.ArrayList
+      foreach($s in $sim){
+        foreach($c in @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne "00_gemelli" })){
+          if($null -eq $c.DatiIS -or $null -eq $c.DatiOOS){ continue }
+          if(FasciaSopra $c $h3 $d3 $lettura){ if(-not $qui.Contains($s)){ [void]$qui.Add($s) } }
+        }
+      }
+      if(@($qui).Count -gt @($simSevera).Count){
+        $simSevera = $qui
+        $fasciaSevera = "ora " + $h3 + ", durata " + $d3 + "h"
+      }
+    }
+  }
+  # --- LETTURA LARGA: quella della v2. Si stampa, NON decide.
+  $simLarga = New-Object System.Collections.ArrayList
   foreach($s in $sim){
     $trovato = $false
     foreach($c in @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne "00_gemelli" })){
       if($null -eq $c.DatiIS -or $null -eq $c.DatiOOS){ continue }
       foreach($x in @($c.DatiOOS)){
-        if($null -eq $x.C1){ continue }
-        $okIs = $false
-        $y = @($c.DatiIS | Where-Object { $null -ne $_.Ora -and [int]$_.Ora -eq [int]$x.Ora -and $null -ne $_.Durata -and [int]$_.Durata -eq [int]$x.Durata })
-        if(@($y).Count -eq 1 -and $null -ne $y[0].C1 -and [double]$y[0].C1 -ge 3.0){ $okIs = $true }
-        $okOos = ([double]$x.C1 -ge 3.0)
-        if($lettura -eq "IS"       -and $okIs){ $trovato = $true }
-        if($lettura -eq "OOS"      -and $okOos){ $trovato = $true }
-        if($lettura -eq "ENTRAMBE" -and $okIs -and $okOos){ $trovato = $true }
+        if($null -eq $x.Ora -or $null -eq $x.Durata){ continue }
+        if(FasciaSopra $c ([int]$x.Ora) ([int]$x.Durata) $lettura){ $trovato = $true }
       }
     }
-    if($trovato){ [void]$simOk.Add($s) }
+    if($trovato){ [void]$simLarga.Add($s) }
   }
   # TRE STATI, non due. "NON MISURATO" non e' una sfumatura: e' la
   # differenza fra "la pista si chiude" e "la corsa non e' finita".
@@ -874,11 +1125,14 @@ foreach($lettura in @("IS","OOS","ENTRAMBE")){
   # manca il terzo -- il criterio ne chiede DUE. Il NON PASSATO invece
   # pretende che tutte e sei le celle abbiano dati.
   $esito = "NON PASSATO"
-  if(@($simOk).Count -ge 2){ $esito = "PASSATO" }
+  if(@($simSevera).Count -ge 2){ $esito = "PASSATO" }
   elseif($celleMisurate -lt 6){ $esito = "NON MISURATO PER INTERO (celle con dati " + $celleMisurate + " su 6: qui NON si legge un 'no')" }
   $elenco = "nessuno"
-  if(@($simOk).Count -gt 0){ $elenco = ($simOk -join ", ") }
-  [void]$RefTxt.Add("  lettura " + $lettura.PadRight(8) + " : simboli con almeno una fascia a C1>=3 = " + @($simOk).Count + " (" + $elenco + ")  ->  C1 " + $esito)
+  if(@($simSevera).Count -gt 0){ $elenco = ($simSevera -join ", ") + " sulla fascia migliore (" + $fasciaSevera + ")" }
+  [void]$RefTxt.Add("  lettura " + $lettura.PadRight(8) + " SEVERA (stessa fascia): simboli = " + @($simSevera).Count + " (" + $elenco + ")  ->  C1 " + $esito)
+  $elencoL = "nessuno"
+  if(@($simLarga).Count -gt 0){ $elencoL = ($simLarga -join ", ") }
+  [void]$RefTxt.Add("  lettura " + $lettura.PadRight(8) + " larga  (fasce diverse ammesse, NON e' il verdetto): simboli = " + @($simLarga).Count + " (" + $elencoL + ")")
 }
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("ATTENZIONE, e vale piu' del conto qui sopra: C1 e' il CANCELLO ZERO,")
@@ -901,9 +1155,11 @@ foreach($lettura in @("IS","OOS","ENTRAMBE")){
 [void]$RefTxt.Add('IL VERDETTO C1 SI LEGGE SOLO A CELLE COMPLETE. Il criterio congelato')
 [void]$RefTxt.Add('chiede DUE DEI TRE SIMBOLI: e'' un criterio DI INSIEME, e questo referto')
 [void]$RefTxt.Add('riporta solo le celle di QUESTO giro. Quando le sei celle di misura sono')
-[void]$RefTxt.Add('girate, si rilancia la stessa riga con -TutteLeCelle e LO STESSO PIN: il')
-[void]$RefTxt.Add('driver generico salta le finestre gia'' fatte, quindi costa un minuto e')
-[void]$RefTxt.Add('produce IL referto con C1 su tutti e tre i simboli.')
+[void]$RefTxt.Add('girate, si lancia il blocco 4 della pagina: -Ricomponi (LO STESSO PIN).')
+[void]$RefTxt.Add('Quel modo NON apre il tester e NON compila: rilegge i CSV gia'' prodotti,')
+[void]$RefTxt.Add('lo dichiara cella per cella con la data del file, e ricalcola C1 sui tre')
+[void]$RefTxt.Add('simboli. NON si usa -TutteLeCelle per ricomporre: da oggi -TutteLeCelle')
+[void]$RefTxt.Add('RIFA'' DAVVERO tutte le passate (-Rifai sta sempre nell''argv), e sono ore.')
 [void]$RefTxt.Add('ATTENZIONE: con un PIN DIVERSO la riga cancella risultati_prove\ e le celle')
 [void]$RefTxt.Add('gia'' girate SONO PERSE. Un ri-pin a meta'' round = si ricomincia da capo.')
 [void]$RefTxt.Add("")
@@ -942,7 +1198,13 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host "FILE ATTESI NELLO ZIP: REFERTO_SONDA_OROLOGIO.txt + i file prova girati + i CSV IS/OOS" -ForegroundColor Gray
+# L'ELENCO DEGLI "ATTESI" SI GENERA DAI FILE CHE ESISTONO DAVVERO IN
+# QUESTO RAMO, mai da una lista costante scritta per il ramo piu' ricco:
+# una lista a mano esce rossa su un giro perfettamente verde (classe del
+# 31/08, e famiglia 89-ter).
+$dentro = @(Get-ChildItem -LiteralPath $Cart -File | Sort-Object Name)
+Write-Host ("FILE NELLO ZIP: " + @($dentro).Count) -ForegroundColor Gray
+foreach($f in $dentro){ Write-Host ("   " + $f.Name + "   (" + [int]($f.Length/1024) + " KB)") -ForegroundColor Gray }
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
 if($Problemi.Count -gt 0){ Write-Host "ESITO: COMPLETATO CON PROBLEMI" -ForegroundColor Yellow; exit 1 }

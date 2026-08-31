@@ -71,6 +71,7 @@
 @SIMBOLO  EURUSD
 @PERIODO  H1
 @DAQUANDO 2011.01.01
+@FINOA    2026.06.30
 
 # ---------------------------------------------------------------------
 # LO SWEEP: si spazzola L'ORA, e SOLO l'ora.

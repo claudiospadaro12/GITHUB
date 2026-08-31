@@ -6198,3 +6198,85 @@ ricontrollera' (un MORTO si guarda, un VIVO si festeggia).
 >    soglie» (che questo driver ha, ed e' buono) copia i **numeri** 5,0 / 6,0 /
 >    7,0 e **non copia le disuguaglianze**: le soglie combaciavano e il verdetto
 >    no.
+
+---
+
+## 🆕 AGGIUNTE DEL 31/08/2026 (sera, terza tornata) — trovate ri-verificando la **SONDA DELL'OROLOGIO** (pacchetto del **28/08**, cioè **precedente** alle classi nuove di oggi), **ESEGUENDO** il driver su un banco stubbato
+
+## 🧟‍♀️ LA PROCEDURA UFFICIALE COSTRUITA **SOPRA** LA TRAPPOLA: la pagina prescrive come METODO proprio il salto della cache che la classe zombie-run vieta
+
+_Trovata prima dell'invio. La classe zombie-run di stamattina (`-Rifai` sempre
+nell'argv) qui **non bastava**: applicata alla lettera avrebbe trasformato un
+lancio dichiarato "**quasi istantaneo**" in **868 passate a tick reali**, cioè
+giorni di macchina, senza che nessuno se ne accorgesse prima di lanciarlo._
+
+`RIGA_SONDA_OROLOGIO.ps1` v2 passava `-Rifai` solo se glielo si chiedeva. Fin qui
+è la classe nota. Il fatto nuovo è **il blocco 4 della pagina**, scritto in buona
+fede e già consegnato come procedura:
+
+> *"Quando le sei celle di misura sono girate, si rilancia la stessa riga con
+> `-TutteLeCelle` e LO STESSO PIN: **il driver generico salta le finestre già
+> fatte**, quindi costa un minuto e produce IL referto con C1 su tutti e tre i
+> simboli."*
+
+Cioè: **il comportamento che la casa ha appena classificato come trappola era
+diventato il MOTORE di una procedura ufficiale**, con tanto di spunta verde
+("QUASI ISTANTANEO"). Le due cose non si possono avere insieme, e la scelta non è
+fra "veloce" e "sicuro": è fra **una rilettura DICHIARATA** e **una corsa che
+finge**.
+
+Misurato sul banco, prima della correzione: CSV di ieri sul disco, generico che
+salta, referto con `PROBLEMI: 0`, `ESITO: CORSA COMPLETATO`, **exit 0**, zip
+puntuale. Le uniche righe oneste erano sette `RILETTA DA CSV GIA' PRESENTI`
+sepolte in mezzo alla tabella — nessuna delle quali alzava un problema.
+
+> ✅ **REGOLA (tripla).**
+> 1. **`-Rifai` sempre nell'argv** (classe di stamattina), **e in più**: un CSV
+>    più vecchio dell'inizio della cella diventa un **PROBLEMA con exit 1**, non
+>    una nota. Con `-Rifai` passato, "non è fresco" non ha più letture innocenti.
+> 2. **Se il round ha bisogno di rileggere — e spesso ce l'ha, perché i criteri
+>    d'insieme si leggono su N artefatti prodotti uno alla volta — la rilettura
+>    ha un MODO SUO** (`-Ricomponi`), che **non chiama nemmeno** il driver
+>    figlio, non compila, non cronometra, e **stampa la data di scrittura di ogni
+>    artefatto riletto**. La rilettura non è un effetto collaterale della cache:
+>    è una funzione, e si chiama col suo nome.
+> 3. **Quando una classe nuova vieta un comportamento, si cerca chi lo stava
+>    USANDO come metodo.** Il `grep` non è sul nome del parametro ma sulla
+>    PROMESSA: *"salta le finestre già fatte"*, *"costa un minuto"*, *"quasi
+>    istantaneo"*, *"non riapre il tester"*. Una riga di lancio che promette
+>    velocità **sta dichiarando di non rifare qualcosa**: va letta due volte.
+
+## 📡 `Model=4` SU UNA FINESTRA CHE **PRECEDE LA BASE TICK**, QUANDO LA METRICA **È LO SPREAD**
+
+_Stessa verifica. Specializzazione di `R108/R109 § D2` (*"a modello 4 senza tick
+reali MT5 non si ferma, ripiega e produce numeri plausibili e falsi"*), che fino
+a oggi viveva solo dentro le pagine di quei round e non in questa checklist._
+
+La sonda gira `Model=4` su **2011.01.01 → 2026.06.30**. Il tick **nativo** BCM
+agli atti parte dal **2024.09.26** (R97, R109, e tutta la saga Dukascopy nasce da
+lì): **circa il 90% della finestra non ha tick reali**, e MT5 li genera dalle
+barre M1 **senza fermarsi e senza dirlo**.
+
+Il punto che rende la cosa una classe a sé: **il round non misura un P/L, misura
+lo SPREAD**. Il cancello zero è `|lordo| >= 3 x spread mediano dell'ora`, e lo
+spread è **metà del rapporto**. Su tick generati quello **non è lo spread del
+feed**, e la gamba **IS** (la più vecchia) è **interamente** nel tratto senza
+tick. Il pacchetto dichiarava onestamente *"che i tick reali arrivino fino al
+2011 non è agli atti"*, ma ci appendeva **la sentinella sbagliata**: *"lo dirà il
+numero di operazioni per cella"*. Le operazioni ci sono lo stesso — il motore
+entra a un'ora fissa e chiude a un'ora fissa: **su tick generati funziona
+benissimo**. La sentinella non poteva scattare mai.
+
+> ✅ **REGOLA.** Prima di approvare un `Model=4`, si confronta `@DAQUANDO` con la
+> **data di inizio della base TICK** del broker (non con l'inizio delle barre:
+> sono due storici diversi). Se la finestra la precede:
+> 1. la riga alza un **RILIEVO automatico** che nomina **quale colonna** perde
+>    significato (qui: `Spread Mediano Ingresso`) e **quale criterio** ci si
+>    appoggia (qui: C1) — non un generico "i tick potrebbero mancare";
+> 2. **la sentinella dev'essere una grandezza che cambia davvero** quando i tick
+>    non ci sono. Il numero di operazioni **non lo è** per un motore che entra a
+>    orario. Se non esiste una sentinella, si dichiara che **non esiste**;
+> 3. e se la metrica del round **È** una grandezza tick-dipendente (spread,
+>    slippage, MFE intrabar), la lettura si **spezza per epoca**: dentro la base
+>    tick vale, fuori è un **ripiego dichiarato**.
+

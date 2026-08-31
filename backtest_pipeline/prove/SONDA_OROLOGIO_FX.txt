@@ -41,6 +41,32 @@
 # #  l'errore noto di ~4 settimane l'anno DICHIARATO nel referto.     #
 # #####################################################################
 #
+# #####################################################################
+# #  SECONDA NOTA DI ESECUZIONE -- 31/08/2026, verifica pre-invio.    #
+# #  NON cambia il testo di nessun criterio: dichiara COME SI LEGGE   #
+# #  un'ambiguita' che C1 aveva gia' addosso, e la scioglie dal lato  #
+# #  PIU' SEVERO (regola di casa: un criterio non si muove verso il   #
+# #  permissivo dopo essere stato scritto).                           #
+# #                                                                   #
+# #  C1 dice: "per almeno UNA fascia oraria, su almeno DUE dei tre    #
+# #  simboli". Si legge in due modi, e sono diversi:                  #
+# #    SEVERA -- la STESSA fascia (stessa ora E stessa durata) sopra  #
+# #              soglia su almeno due simboli. E' un fatto d'insieme. #
+# #    LARGA  -- due simboli qualsiasi, ciascuno con una fascia SUA:  #
+# #              EURUSD verde alle 8 e GBPUSD verde alle 15           #
+# #              passerebbero.                                        #
+# #  IL VERDETTO E' LA LETTURA SEVERA. Il driver conta e stampa       #
+# #  tutte e due, ma quella larga esce ETICHETTATA e non decide.      #
+# #  Motivo: 24 ore x 3 durate x 3 simboli x 2 lati sono 432 celle,   #
+# #  e "due simboli verdi da qualche parte" e' il genere di           #
+# #  coincidenza che C2 e C3 esistono apposta per non comprare.       #
+# #                                                                   #
+# #  E LA FINESTRA: 2011.01.01 -> 2026.06.30 e' scritta NUDA nei      #
+# #  sette file esecutivi (@DAQUANDO e @FINOA) e il driver la gatta:  #
+# #  nessuno dei due estremi e' ereditato dal default del driver      #
+# #  generico.                                                        #
+# #####################################################################
+#
 # ATTENZIONE, LEGGERE PRIMA DI LANCIARE: QUESTO NON E' UN FILE PROVA DI
 # STRATEGIA. E' UN FILE PROVA DI MISURA.
 #

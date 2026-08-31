@@ -17,7 +17,7 @@ STESSA ORA**?"* La risposta è **una tabella**, non un P/L.
 | | |
 |---|---|
 | **EA (nuovo, mai compilato)** | `mql5/Experts/ABTG_SondaOrologio.mq5` |
-| **Driver** | `righe/RIGA_SONDA_OROLOGIO.ps1` (marcatore `MARCATORE_RIGA_SONDA_OROLOGIO_v2`) |
+| **Driver** | `righe/RIGA_SONDA_OROLOGIO.ps1` (marcatore `MARCATORE_RIGA_SONDA_OROLOGIO_v3`) |
 | **Specifica CONGELATA** | `prove/SONDA_OROLOGIO_FX.txt` — ipotesi, criteri **C1-C7**, date. **Si legge PRIMA della tabella** |
 | **File prova (7)** | `prove/SONDA_OROLOGIO_00_GEMELLI.txt` + `_01_EURUSD_LONG` `_02_EURUSD_SHORT` `_03_GBPUSD_LONG` `_04_GBPUSD_SHORT` `_05_XAUUSD_LONG` `_06_XAUUSD_SHORT` |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_OROLOGIO.md` |
@@ -51,13 +51,22 @@ qualunque round di casa** (R107: 24 passate a tick reali su 21 mesi in 9 minuti)
 
 🔴 **Quanto costi una passata su 15,5 anni di tick forex in casa NON È MAI STATO
 MISURATO. Non è una stima prudente: è un'ignota.** Per questo il driver ha
-**tre modi**, e il **default è il più piccolo**:
+**quattro modi**, e il **default è il più piccolo**:
 
 | modo | come si chiede | cosa gira | a che serve |
 |---|---|---|---|
 | **CONTROLLO** | `-SoloControllo` | niente tester, ma **COMPILA** | il primo risultato vero: l'EA non è mai stato compilato |
 | **RICOGNIZIONE** | *(default, nessun interruttore)* | solo `00_gemelli`, **4 passate** | determinismo **+ CRONOMETRO** |
 | **CORSA** | `-SoloCella '<id>'` oppure `-TutteLeCelle` | quella cella / tutte e sette | la misura |
+| **RICOMPOSIZIONE** | `-Ricomponi` | **NIENTE: zero passate, zero compilazioni** | rilegge i CSV già fatti e dà **C1 sui tre simboli insieme** |
+
+> 🔴 **Da oggi (v3) ogni corsa RIFÀ DAVVERO.** Il driver chiama sempre
+> `walkforward_generico.ps1` con **`-Rifai`**: mai più una passata saltata in
+> grigio (*"già fatto, salto"*) e impacchettata come fresca — è la classe che
+> nella saga CRT ha prodotto **quattro corse dichiarate eseguite e mai partite**.
+> Conseguenza pratica: **`-TutteLeCelle` non è più un modo per "ricomporre"**, è
+> 868 passate vere. Per ricomporre c'è `-Ricomponi`, che non apre il tester **per
+> costruzione** e lo dichiara riga per riga col **timestamp di ogni CSV riletto**.
 
 > ✅ **L'ORDINE GIUSTO È: 1️⃣ controllo → 2️⃣ ricognizione → leggi il cronometro →
 > 3️⃣ una cella alla volta.** Il referto della ricognizione stampa
@@ -67,10 +76,10 @@ MISURATO. Non è una stima prudente: è un'ignota.** Per questo il driver ha
 
 ---
 
-## 📌 IL PIN — **`0349f98144a699a1d45cd1a6ccb5cf010d5caabd`**
+## 📌 IL PIN — **`@@PIN@@`**
 
 ```
-0349f98144a699a1d45cd1a6ccb5cf010d5caabd
+@@PIN@@
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit pinnato deve contenere
@@ -92,6 +101,7 @@ VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{
 echo "vecchio: $VECCHIO"
 sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
 grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 4 (controllo, ricognizione, cella, ricomposizione)
+grep -c "@@PIN@@" "$F"           # DEVE dare 0 (nessun segnaposto sopravvissuto)
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
 ```
 
@@ -137,6 +147,20 @@ questa pagina e basta. Un link non scade, un blocco `powershell` sì.
   del driver generico riproporrebbe i CSV di ieri come se fossero di oggi.
 - 🔧 Se non è già stato fatto: MT5 → Strumenti → Opzioni → Grafici →
   **"Max barre nel grafico" = Illimitato**.
+- 🧹 **La riga svuota `Tester\cache` prima di ogni corsa e scrive i DUE conteggi
+  nel referto** (`cache tester: prima N file, dopo 0`). Non è precauzione
+  generica: il CSV di questa famiglia nasce dai **FRAME**, e un pass ripescato
+  dalla cache **non chiama `OnTester()`**, quindi non manda il frame e la sua
+  riga **sparisce dal CSV** — con la corsa verde. Lo **storico** (`bases\...\ticks`)
+  **non viene toccato**.
+- 🔴 **LA PROFONDITÀ DEI TICK NON È MISURATA su questi tre simboli, e tocca il
+  metro.** Il tick **nativo** BCM agli atti parte dal **2024.09.26** (R109 § D2,
+  R97); la finestra parte dal **2011**. A `Model=4` senza tick reali **MT5 non si
+  ferma**: genera i tick dalle barre M1. Il **lordo** (deriva bid→bid) regge; lo
+  **spread mediano**, che è **metà del cancello C1**, nel tratto pre-2024.09.26
+  **non è lo spread del tick**. La riga alza da sola un **RILIEVO** che lo dice, e
+  il numero si legge con quell'etichetta attaccata — soprattutto sulla gamba
+  **IS**, che è tutta nel tratto vecchio.
 
 ---
 
@@ -145,11 +169,15 @@ questa pagina e basta. Un link non scade, un blocco `powershell` sì.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
-    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo -TutteLeCelle;
-    if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo -TutteLeCelle; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+    if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_CONTROLLO_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
+    if($rc -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Mandami questo zip:' -ForegroundColor Red; Write-Host $z[0].FullName -ForegroundColor Yellow }
+    else { Write-Host 'CONTROLLO OK: si passa al blocco 2.' -ForegroundColor Green };
+    Write-Host ('ZIP: ' + $z[0].FullName) -ForegroundColor Cyan; }
 ```
 
 **Cosa deve dire**, in ordine:
@@ -178,11 +206,15 @@ questa pagina e basta. Un link non scade, un blocco `powershell` sì.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
-    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin;
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_RICOGNIZIONE_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+    if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_RICOGNIZIONE_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
+    if($rc -ne 0){ Write-Host 'PARZIALE O CON PROBLEMI: lo zip esiste lo stesso, mandalo e leggi i PROBLEMI nel REFERTO.' -ForegroundColor Yellow };
+    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
+    Write-Host 'POI nel REFERTO: riga data: = adesso, riga modo: = quello che ti aspetti.' -ForegroundColor Gray; }
 ```
 
 **Le due righe da guardare nel referto:**
@@ -205,11 +237,15 @@ in cima: `01_eurusd_long`, `02_eurusd_short`, `03_gbpusd_long`,
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
-    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '01_eurusd_long';
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '01_eurusd_long'; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+    if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_CORSA_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
+    if($rc -ne 0){ Write-Host 'PARZIALE O CON PROBLEMI: lo zip esiste lo stesso, mandalo e leggi i PROBLEMI nel REFERTO.' -ForegroundColor Yellow };
+    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
+    Write-Host 'POI nel REFERTO: riga data: = adesso, riga modo: = quello che ti aspetti.' -ForegroundColor Gray; }
 ```
 
 > ⚠️ **Ogni ripresa è un BLOCCO INTERO, col suo `irm`.** `$p` e `$pin` nascono
@@ -219,7 +255,9 @@ in cima: `01_eurusd_long`, `02_eurusd_short`, `03_gbpusd_long`,
 > non fermerebbe le altre.
 
 🟡 **`-TutteLeCelle` esiste** (le sette di fila, un solo zip) **ma si usa solo
-DOPO aver letto il cronometro.** Al buio sono 868 passate.
+DOPO aver letto il cronometro.** Al buio sono 868 passate — e da oggi le
+**rifà tutte davvero** (`-Rifai` è sempre nell'argv): non è più una scorciatoia
+per rileggere. **Per rileggere c'è il blocco 4.**
 
 ---
 
@@ -233,16 +271,28 @@ DOPO aver letto il cronometro.** Al buio sono 868 passate.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='0349f98144a699a1d45cd1a6ccb5cf010d5caabd'; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -EA SilentlyContinue;
-    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -TutteLeCelle;
-    if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -Ricomponi; $rc=$LASTEXITCODE;
+    $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_RICOMPOSIZIONE_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+    if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_RICOMPOSIZIONE_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
+    if($rc -ne 0){ Write-Host 'PARZIALE O CON PROBLEMI: lo zip esiste lo stesso, mandalo e leggi i PROBLEMI nel REFERTO.' -ForegroundColor Yellow };
+    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
+    Write-Host 'POI nel REFERTO: riga data: = adesso, riga modo: = quello che ti aspetti.' -ForegroundColor Gray; }
 ```
 
-- ✅ **QUASI ISTANTANEO**: il driver generico salta le finestre già fatte
-  ("già fatto, salto") e rilegge i CSV già prodotti dalle sei corse precedenti —
-  non riapre il tester da capo.
+- ✅ **QUASI ISTANTANEO, E PER COSTRUZIONE**: `-Ricomponi` **non chiama nemmeno**
+  il driver generico, **non apre MT5**, **non compila**. Rilegge i CSV già
+  prodotti dalle sei corse precedenti e ricalcola C1. Nel referto lo dichiara in
+  chiaro: `modo: RICOMPOSIZIONE`, `cronometro: non pertinente`, e per **ogni
+  cella** la riga `il tester ha girato in questo giro: NO, ED È IL MESTIERE DI
+  QUESTO MODO: CSV riletti, scritti il <data e ora>`. **Quelle date sono il
+  controllo di freschezza**: se una è di un giro che credevi di aver rifatto,
+  quella cella va rilanciata.
+- 🔴 **Se una cella non è ancora stata girata**, `-Ricomponi` la mette nei
+  **PROBLEMI** (`QUESTA CELLA NON È ANCORA STATA GIRATA`) ed esce **1**: il
+  cancello C1 d'insieme **non si legge** finché ne manca una.
 - 🔴 **IL PIN DEVE ESSERE LO STESSO** usato per le sei celle di misura. Con un pin
   diverso la riga **cancella `risultati_prove\`** e le sei celle già girate **sono
   perse**: un ri-pin a metà round significa ricominciare da capo.
@@ -260,11 +310,18 @@ Cartella e zip sul **Desktop**: `SONDA_OROLOGIO_<MODO>_<data>_<ora>` — dentro:
 - i **file prova** delle celle che hanno girato;
 - i **CSV** `ABTG_SondaOrologio_<SIMBOLO>_IS_<cella>.csv` e `_OOS_<cella>.csv`.
 
-### 📅 Le due righe da guardare per prime nel referto
+### 📅 Le righe da guardare per prime nel referto
 
 1. **`modo:`** — `CORSA` (il risultato) / `RICOGNIZIONE` (solo banco e cronometro)
-   / `CONTROLLO` (giro a vuoto: **non si manda come risultato**);
-2. **`data:`** — **deve essere di ADESSO**.
+   / `CONTROLLO` (giro a vuoto: **non si manda come risultato**) /
+   `RICOMPOSIZIONE` (rilettura dichiarata: **nessun numero nuovo**);
+2. **`data:`** — **deve essere di ADESSO** (è la riga che il 17/08 ha fatto
+   rimandare due volte un referto stantio in buona fede);
+3. **`cache tester:`** — `prima N file, dopo 0`. Se dice *"NON si è svuotata"* è
+   nei **PROBLEMI**: i conteggi delle righe del CSV vanno riguardati a mano;
+4. **`il tester ha girato in questo giro:`** (una per cella) — in `CORSA` e
+   `RICOGNIZIONE` deve dire **SI**. Un **NO** lì è un **PROBLEMA** e vuol dire
+   che quei numeri vengono da un altro giro.
 
 ---
 
@@ -309,7 +366,16 @@ il driver ne fa dei **gate**:
    colonna, e la tabella lo dice.
 5. 🎯 **C1 è il CANCELLO ZERO, non il verdetto.** Il driver lo **conta** (per IS,
    per OOS e per **entrambe** — il criterio congelato non dice quale, e la scelta
-   è di chi firma). **C2 e C3 il driver NON li adjudica**, e non può:
+   è di chi firma). ⚖️ **E lo conta nella LETTURA SEVERA**: *"almeno una fascia
+   oraria, su almeno due dei tre simboli"* vuol dire **la STESSA fascia** (stessa
+   ora **e** stessa durata) sopra soglia su **≥ 2 simboli**. La lettura larga —
+   due simboli verdi ciascuno su un'ora **sua** — è stampata accanto, **etichettata
+   `NON è il verdetto`**. È una scelta **dichiarata**: quando un criterio congelato
+   copre lo stesso caso con due clausole, vince **la più severa** (classe del
+   31/08: l'ambiguità sciolta dal lato che promuove è quella che nessuno
+   ricontrolla). Misurato sul banco: con EURUSD verde alle 8 e GBPUSD verde alle
+   15 la **v2 scriveva `C1 PASSATO`**; la v3 scrive `NON PASSATO` nella severa e
+   dichiara il 2 nella larga. **C2 e C3 il driver NON li adjudica**, e non può:
    - **C2** — la cella vale **solo se è quella che la TESI aveva indicato PRIMA**
      (ore europee per EUR, ore londinesi per GBP, ore americane per USD). Se l'ora
      verde **non** è quella prevista, il round è **NEGATIVO** anche col numero
@@ -326,25 +392,61 @@ il driver ne fa dei **gate**:
 
 ## ✅ COSA È GIÀ STATO VERIFICATO — **eseguendo**, prima dell'invio
 
+**Prima passata (28/08), sul driver v2:**
+
 - ✅ il `.ps1` **parsa**: PowerShell 7.4.6 + `[Parser]::ParseFile` → **0 errori**;
   **ASCII puro** (0 byte non-ASCII, regola del 17/08); **non usa `$args`**;
   **0 collisioni case-insensitive** fra nomi di variabile (punto 79);
-  **0 variabili assegnate e mai rilette**;
-- ✅ **controllo positivo passato**, eseguito **prima e dopo** la batteria delle
-  corruzioni;
 - ✅ **e i gate sono stati fatti FALLIRE, uno per uno** — un gate che non scatta
-  mai non è dimostrato. **Diciannove corruzioni, diciannove fermate**, ognuna col
-  messaggio giusto (l'elenco completo è nel referto di preparazione);
-- ✅ **la tabella, i gate di collaudo, i gemelli e il conteggio C1 sono stati
-  ESEGUITI** su un banco stubbato con CSV sintetici che portano **l'intestazione
-  vera dell'EA**, in tre scenari (C1 passa / tabella piatta / collaudo rotto);
+  mai non è dimostrato. **Diciannove corruzioni, diciannove fermate**;
 - ✅ **`stats[26]`, l'header a 28 colonne e lo `StringFormat` a 28 specificatori**
   contati a macchina: **28 = 28 = 28**, `stats[0..25]` tutti assegnati e contigui;
 - ✅ **scan delle ridichiarazioni nello stesso scope MQL5** (punto 98): **zero**;
   graffe/tonde/quadre bilanciate; **nessun input orfano** (16 su 16 usati).
 
+**Seconda passata (31/08), contro le ~15 classi nuove della checklist — driver
+riscritto a `v3` ed ESEGUITO su un banco stubbato** (finto MetaEditor, finto
+`walkforward_generico.ps1`, CSV OPTFRAME sintetici con l'**intestazione vera**
+dell'EA):
+
+- 🔴 **DIFETTO BLOCCANTE trovato e corretto: `-Rifai` non era nell'argv** (classe
+  zombie-run del 31/08). **Misurato**: con i CSV di ieri sul disco e il generico
+  che salta, la v2 usciva **`PROBLEMI: 0` · `ESITO: CORSA COMPLETATO`** (verde,
+  exit 0) impacchettando numeri vecchi. La v3 esce **7 PROBLEMI, exit 1**, uno per
+  cella, con la **data dei CSV** nel messaggio;
+- 🔴 **DIFETTO BLOCCANTE trovato e corretto: la RICOMPOSIZIONE si reggeva proprio
+  su quel salto** (`-TutteLeCelle` + cache del generico). Ora è un modo suo,
+  **`-Ricomponi`**, che non chiama il generico **per costruzione**;
+- 🟠 **C1 contato nel verso che PROMUOVE** (classe del 31/08). **Misurato**: con
+  EURUSD sopra soglia alle **8** e GBPUSD alle **15** — due ore **diverse** — la v2
+  scriveva **`C1 PASSATO`**. La v3 conta la **lettura severa** (stessa fascia) e
+  scrive `NON PASSATO`, stampando la larga accanto ed etichettata;
+- 🟠 **finestra ereditata dal default del generico** (`2026.06.30` è anche il
+  default di `walkforward_generico.ps1`): ora **`@FINOA` è NUDA nei sette prova**,
+  accanto a `@DAQUANDO`, e il driver la **gatta**;
+- 🟠 **`Tester\cache` non veniva svuotata**: aggiunta col **doppio conteggio** nel
+  referto (qui morde davvero — i CSV nascono dai **frame**);
+- 🟠 **il CSV si contava, non si guardava dentro**: nuovo gate che pretende
+  **tutte** le 24 ore × 3 durate e la colonna **`Lato`** giusta per la cella;
+- 🟡 **RILIEVO nuovo, automatico**: profondità dei **tick** non misurata
+  (tick nativo BCM dal **2024.09.26**, finestra dal **2011**) → lo **spread** del
+  tratto vecchio non è quello del tick, ed è **metà di C1**;
+- ✅ **batteria di mutazioni rifatta sulla v3: 14 corruzioni dei file prova, 14
+  fermate**, ognuna col messaggio giusto (@FINOA tolta, @FINOA diversa, @DAQUANDO,
+  @SIMBOLO scambiato, griglia stretta, magic vietato, magic duplicato, baseline
+  dello stop, parametro di prezzo intruso, riga a 4 campi, lati scambiati, asse in
+  più, asse mancante, gemelli ridotti a uno) **+ 6 guardie del driver** (pin
+  assente, pin corto, `-Periodo` diverso, cella inesistente, `-Ricomponi` mescolato
+  con gli altri interruttori ×2);
+- ✅ **controllo positivo ri-eseguito prima e dopo** ogni corruzione: `ESITO:
+  CONTROLLO COMPLETATO`, exit 0;
+- ✅ scenari eseguiti sul banco: gemelli identici / gemelli divergenti / gemelli a
+  zero operazioni / collaudo rotto (autotest, notti, spread) / CSV monco /
+  ricomposizione con una cella mancante / corsa di una cella sola.
+
 🟡 **Non verificato, e va detto**: tutto ciò che richiede **MT5** — la
 **compilazione** dell'EA (qui non c'è MetaEditor), l'esito dell'**autotest**, il
 comportamento del **flat sui tick veri**, **se i tick reali arrivino davvero fino
-al 2011**, la **durata** e **ogni singolo numero**. Il giro di controllo copre gli
+al 2011** (vedi il rilievo qui sopra: è la cosa che più può cambiare la lettura di
+C1), la **durata** e **ogni singolo numero**. Il giro di controllo copre gli
 artefatti **e la compilazione**; **i numeri li può dare solo la corsa**.
