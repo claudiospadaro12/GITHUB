@@ -662,3 +662,23 @@ sta li', non si duplica.
   canale+RSI, e **l'allineamento a 5 medie del P2 del 28/08 (stesso autore,
   stessa coppia, stessa sessione, mai girato)**. Se i tre vanno uguale, **il
   contenitore E' l'edge** e il segnale non conta.
+
+## M0PB (Momentum Pull Back, Marcns tv/GnsUpEsB, MPL 2.0) — MORTO AL PASSO 0, 31/08/2026
+- **Verdetto: MORTO 12/12** (3 indici × 2 TF × 2 lati) alla sonda di conteggio
+  `ABTG_SondaM0PB` (contatore puro, zero ordini, open prices, pin `4e1cdf8`,
+  corsa 31/08 19:35). Referto: `risultati_archivio/REFERTO_SONDAM0PB_2026-08-31.md`.
+- **F1 (frequenza): 0/12.** Lato migliore 0,52 segnali/giorno (U30 M5 short)
+  contro soglia 1,00; su M15 0,15-0,21. Il claim "alta frequenza" della pagina
+  TradingView sui nostri indici RTH vale un segnale ogni 2 giorni per lato.
+- **H8 (RR >= 0,70, FIRMA 2): 7/12 sotto**, i 5 sopra a 0,70-0,74; win rate
+  necessario 62-70%. Stop 2,75xATR strutturalmente piu' largo del take.
+  T10: nessun mult va pescato per far passare il cancello.
+- **F2 (take > 7 punti idx): 12/12 verdi** (27-119 punti) — irrilevante senza
+  frequenza e senza RR.
+- Collaudi 6/6 verdi (autotest 0/12, determinismo 2 passate, ATR alla Pine
+  davvero diverso da iATR: 9,6-16,4%). Costo del verdetto: 1 compilazione +
+  12 passate (~minuti), ZERO corse a tick sprecate. **La sonda-prima-dell'EA
+  paga: e' il modo giusto di bocciare.**
+- **NON ritestare con altre griglie** (seconda caccia 19/08). Alternative gia'
+  in vivaio, stessa missione frequenza: LondonFx (RR 1,875, bozza congelata)
+  e Sonda dell'Orologio (pronta dal 28/08, mai girata).

@@ -619,3 +619,18 @@ ciascuno) + 1 abstract completo; **1 promosso, 0 in coda, 3 spec, 7 scarti
 motivati nel sorgente + ~245 scarti al primo taglio.**
 **Nessun backtest eseguito. Nessun numero d'autore usato in nessun punteggio.
 Nessun EA modificato, nessuna sedia toccata, nessun magic assegnato.**_
+
+---
+
+## ⚰️ ADDENDUM 31/08 SERA — ESITO DEL PROMOSSO: M0PB MORTO AL PASSO 0
+
+La sonda di conteggio (`ABTG_SondaM0PB`, corsa 19:35, pin `4e1cdf8`) ha
+bocciato M0PB **12/12** ai criteri congelati sopra: F1 0/12 (lato migliore
+0,52 segnali/giorno contro soglia 1,00), H8 7/12 sotto 0,70 (e mai oltre
+0,74; win rate necessario 62-70%), F2 12/12 verdi ma irrilevante.
+Referto completo: `risultati_archivio/REFERTO_SONDAM0PB_2026-08-31.md`;
+voce nel registro dei caduti aggiunta. Il punteggio 9/10 di questa scheda
+resta agli atti come giudizio DI CARTA pre-misura: la misura l'ha ribaltato,
+ed e' esattamente il lavoro del PASSO 0 (costo: minuti, zero tick).
+La caccia frequenza prosegue sui candidati della SECONDA BATTUTA
+(`CACCIA_FREQUENZA2_2026-08-31.md`): LondonFx e Sonda dell'Orologio.
