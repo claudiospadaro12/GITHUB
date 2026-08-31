@@ -55,8 +55,18 @@
 //|    di casa). NON compilato ne' testato da chi ha scritto il      |
 //|    file: compilare in MetaEditor (F7) e validare nel tester.    |
 //+------------------------------------------------------------------+
+//|  AGGIORNAMENTO 31/08 (classi del gemello NySessionRetest, ormai  |
+//|    obbligatorie per ogni EA zero-overnight):                     |
+//|    - il per-trade CSV scrive anche OPEN_TIME (distingue il flat  |
+//|      tardivo dall'overnight vero);                               |
+//|    - GUARDIA ANTI-TRONCAMENTO: una passata senza uscite NON      |
+//|      riscrive il per-trade gia' scritto con lo stesso magic;     |
+//|    - FLAT DI RECUPERO con GiornoChiave_Calc: una posizione       |
+//|      aperta in un giorno PRECEDENTE (niente tick fra il flat e   |
+//|      la mezzanotte) si chiude al PRIMO tick disponibile.         |
+//+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati - DAX ReEntry (meccanica da KepiroG, TradingView, reimplementata)"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -274,6 +284,16 @@ bool DopoOrarioFlat_Calc(const int ora,const int minuto,
                          const int flatOra,const int flatMinuto)
   {
    return(ora*60+minuto >= flatOra*60+flatMinuto);
+  }
+
+//+------------------------------------------------------------------+
+//| Chiave di calendario (anno*10000+mese*100+giorno): confrontabile  |
+//| con <, robusta a cavallo di mese/anno. Pura, per l'autotest.      |
+//| Serve al FLAT DI RECUPERO (classe 31/08 del gemello NyRetest).    |
+//+------------------------------------------------------------------+
+long GiornoChiave_Calc(const int anno,const int mese,const int giorno)
+  {
+   return((long)anno*10000 + (long)mese*100 + (long)giorno);
   }
 
 //+------------------------------------------------------------------+
@@ -596,7 +616,28 @@ bool ApriPosizione(const bool isLong)
 bool FlatFineSedutaCheck()
   {
    MqlDateTime t; TimeToStruct(TimeCurrent(),t);
-   if(!DopoOrarioFlat_Calc(t.hour,t.min,InpCloseHour,InpCloseMin)) return(false);
+   //--- FLAT DI RECUPERO (classe MISURATA il 31/08 sul gemello NyRetest,
+   //    PASSO 0 M15: 28 posizioni su 460 sopravvissute al flat perche' il
+   //    mercato NON aveva tick fra il flat e la mezzanotte -- festivi,
+   //    settimane DST, venerdi' corti -- e a mezzanotte la condizione a
+   //    ora-del-giorno si RESETTA). Il vincolo e' ZERO OVERNIGHT, non
+   //    "zero overnight se il calendario collabora": una posizione aperta
+   //    in un GIORNO PRECEDENTE si chiude al PRIMO tick disponibile, a
+   //    qualunque ora del giorno.
+   bool recupero=false;
+   long chiaveOggi=GiornoChiave_Calc(t.year,t.mon,t.day);
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong p=PositionGetTicket(i);
+      if(p==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      MqlDateTime ta; TimeToStruct((datetime)PositionGetInteger(POSITION_TIME),ta);
+      if(GiornoChiave_Calc(ta.year,ta.mon,ta.day) < chiaveOggi){ recupero=true; break; }
+     }
+   if(recupero)
+      Log("flat di RECUPERO: posizione di un giorno precedente ancora aperta (il flat serale non ha avuto tick), chiudo al primo tick disponibile.");
+   if(!recupero && !DopoOrarioFlat_Calc(t.hour,t.min,InpCloseHour,InpCloseMin)) return(false);
 
    int chiuse=0;
    for(int i=PositionsTotal()-1;i>=0;i--)
@@ -794,9 +835,15 @@ void AutoTestReEntry()
    bool sm1=(SessionStamp_Calc(tA,mRs)==SessionStamp_Calc(tB,mRs));  // stessa seduta
    bool sm2=(SessionStamp_Calc(tA,mRs)==SessionStamp_Calc(tC,mRs));  // diverse
    double ip1=PrezzoInPuntiIndice_Calc(5.0,100.0,0.01);   // 5.0
-   PrintFormat("[REENT][AUTOTEST] fasce: rangeApre=%d(1) rangeFine=%d(0) tradeApre=%d(1) tradeFine=%d(0) dentro=%d(1) | flat esatto=%d(1) prima=%d(0) | stamp same=%d(1) diff=%d(0) | conv=%.2f(5.00)",
-               (int)fr1,(int)fr2,(int)ft1,(int)ft2,(int)ft3,(int)fl1,(int)fl2,(int)sm1,(int)sm2,ip1);
-   if(!(fr1 && !fr2 && ft1 && !ft2 && ft3 && fl1 && !fl2 && sm1 && !sm2 && MathAbs(ip1-5.0)<1e-6)) falliti++;
+   //--- flat di RECUPERO (classe 31/08): la chiave di calendario ordina anche
+   //    a cavallo di mese e anno (il confronto day_of_year li' fallirebbe).
+   bool gk1=(GiornoChiave_Calc(2026,1,2)  > GiornoChiave_Calc(2026,1,1));   // giorno dopo
+   bool gk2=(GiornoChiave_Calc(2026,2,1)  > GiornoChiave_Calc(2026,1,31));  // cavallo di mese
+   bool gk3=(GiornoChiave_Calc(2027,1,1)  > GiornoChiave_Calc(2026,12,31)); // cavallo di anno
+   bool gk4=(GiornoChiave_Calc(2026,8,31) == GiornoChiave_Calc(2026,8,31)); // stesso giorno
+   PrintFormat("[REENT][AUTOTEST] fasce: rangeApre=%d(1) rangeFine=%d(0) tradeApre=%d(1) tradeFine=%d(0) dentro=%d(1) | flat esatto=%d(1) prima=%d(0) | stamp same=%d(1) diff=%d(0) | conv=%.2f(5.00) | chiave gg=%d%d%d%d(1111)",
+               (int)fr1,(int)fr2,(int)ft1,(int)ft2,(int)ft3,(int)fl1,(int)fl2,(int)sm1,(int)sm2,ip1,(int)gk1,(int)gk2,(int)gk3,(int)gk4);
+   if(!(fr1 && !fr2 && ft1 && !ft2 && ft3 && fl1 && !fl2 && sm1 && !sm2 && MathAbs(ip1-5.0)<1e-6 && gk1 && gk2 && gk3 && gk4)) falliti++;
 
    Print("[REENT][AUTOTEST] esito motore: ", (falliti==0
          ? "SEI BLOCCHI SU SEI, il motore ragiona come la meccanica."
@@ -828,9 +875,10 @@ void ExportTrades()
    if(!HistorySelect(0,TimeCurrent())) return;
    int nd=HistoryDealsTotal();
 
-   long   idIn[];   double pxIn[];   long dirIn[];   string cmIn[];
+   long   idIn[];   double pxIn[];   long dirIn[];   string cmIn[];   long tmIn[];
    int    cIn=0;
    ArrayResize(idIn,nd); ArrayResize(pxIn,nd); ArrayResize(dirIn,nd); ArrayResize(cmIn,nd);
+   ArrayResize(tmIn,nd);
    for(int i=0;i<nd;i++)
      {
       ulong tk=HistoryDealGetTicket(i);
@@ -841,13 +889,34 @@ void ExportTrades()
       pxIn[cIn]  = HistoryDealGetDouble (tk,DEAL_PRICE);
       dirIn[cIn] = HistoryDealGetInteger(tk,DEAL_TYPE);   // BUY entry = long
       cmIn[cIn]  = HistoryDealGetString (tk,DEAL_COMMENT);
+      tmIn[cIn]  = HistoryDealGetInteger(tk,DEAL_TIME);   // open_time: distingue flat tardivo da overnight vero
       cIn++;
      }
 
    string fn="abtg_trades_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"+IntegerToString((long)InpMagic)+".csv";
+   //--- GUARDIA ANTI-TRONCAMENTO (R82 / checklist 41, classe 31/08): il nome
+   //    contiene il MAGIC, non la finestra ne' la cella. Una passata SENZA
+   //    uscite (gamba OOS degenere di FrazioneIS 1.0, cella muta, finestra
+   //    vuota) NON deve TRONCARE il per-trade gia' scritto da una passata
+   //    buona con lo stesso magic. Se il file non c'e', si scrive
+   //    l'intestazione da sola: "girata e zero trade" resta distinguibile.
+   int nOut=0;
+   for(int j=0;j<nd;j++)
+     {
+      ulong tj=HistoryDealGetTicket(j);
+      if(tj==0) continue;
+      if(HistoryDealGetInteger(tj,DEAL_MAGIC)!=InpMagic) continue;
+      long ej=HistoryDealGetInteger(tj,DEAL_ENTRY);
+      if(ej==DEAL_ENTRY_OUT || ej==DEAL_ENTRY_OUT_BY) nOut++;
+     }
+   if(nOut<=0 && FileIsExist(fn,FILE_COMMON))
+     {
+      PrintFormat("[REENT] per-trade: 0 uscite in questa passata, %s NON toccato (mai troncare il per-trade di un'altra passata).",fn);
+      return;
+     }
    int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
    if(h==INVALID_HANDLE) return;
-   FileWrite(h,"close_time","symbol","magic","position_id","dir","volume",
+   FileWrite(h,"close_time","open_time","symbol","magic","position_id","dir","volume",
              "entry_price","exit_price","take_idx_pts","net_profit","comment");
 
    double den = InpMT5PerPuntoIndice*_Point;
@@ -863,9 +932,9 @@ void ExportTrades()
       double pxOut = HistoryDealGetDouble (tk,DEAL_PRICE);
       double net   = HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
 
-      double pxEntry=0; long dir=-1; string cm=""; bool trovato=false;
+      double pxEntry=0; long dir=-1; string cm=""; long tmEntry=0; bool trovato=false;
       for(int k=0;k<cIn;k++)
-         if(idIn[k]==posId){ pxEntry=pxIn[k]; dir=dirIn[k]; cm=cmIn[k]; trovato=true; break; }
+         if(idIn[k]==posId){ pxEntry=pxIn[k]; dir=dirIn[k]; cm=cmIn[k]; tmEntry=tmIn[k]; trovato=true; break; }
 
       bool isLong = (dir==DEAL_TYPE_BUY);
       double takeIdx = 0;
@@ -877,6 +946,7 @@ void ExportTrades()
 
       FileWrite(h,
                 TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                (trovato ? TimeToString((datetime)tmEntry,TIME_DATE|TIME_MINUTES|TIME_SECONDS) : "?"),
                 HistoryDealGetString(tk,DEAL_SYMBOL),
                 IntegerToString(InpMagic),
                 IntegerToString(posId),

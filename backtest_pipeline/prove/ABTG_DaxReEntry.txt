@@ -5,6 +5,17 @@
 # Dossier: caccia_strategie/CACCIA_DAX_M5M15_2026-08-30.md
 # ==========================================================================
 #
+# AGGIORNATO 31/08 (lancio "DAX REENTRY -- PASSO 0 + MISURA a tick"):
+#   - direttive @ rese NUDE (il batch del 30/08 le aveva COMMENTATE, il
+#     difetto n.1 gia' pagato dal gemello NySessionRetest: gate vuoto);
+#   - @FINOA dichiarato (la finestra si dichiara nel prova, non si eredita
+#     dal default del generico -- classe 31/08);
+#   - conversione D30EUR: InpMT5PerPuntoIndice=100 MISURATA, non piu' da
+#     verificare (Breakin 31/08, digits 2, mediane in scala -- referto
+#     risultati_archivio/REFERTO_BREAKIN_2026-08-31.md);
+#   - FISSI della cella pinnati riga per riga (fuso SERVER gattato dal
+#     wrapper: rifiuta il 9 dell'apertura e il 17 del flat = ore ITALIANE).
+#
 # IPOTESI
 #   Il range della sessione europea mattutina (09:35-12:05 CET = 08:35-11:05
 #   SERVER BCM) definisce il valore del giorno. Nella fascia sottile
@@ -24,21 +35,51 @@
 #   - Si giudica per REGIME dichiarato (21 mesi BCM = un solo regime toro:
 #     rischio si', merito sospeso).
 #   - Promozione cella: CENTRO dell'altopiano, MAI il picco.
+#     >>> QUESTO LANCIO E' PASSO 0 + MISURA, NON IL VERDETTO: qui NESSUNA
+#     cella viene promossa (la selezione centro-vs-picco e' del round di
+#     griglia che verra' DOPO la misura, se il cancello S0 passa).
 #   - DUE LATI misurati sempre (long E short), regola di casa 25/08.
 #   - CAP GIORNALIERO OBBLIGATORIO (controtendenza in trend forte = serie
 #     perdenti): default 2/gg, 1/lato.
 #   - SL VERO al broker con PAVIMENTO (R109): InpMinStopPts, mai zero.
 #   - FLAT a fine seduta (ora server), zero overnight.
+#     >>> VINCOLO RISCRITTO 31/08 (PRIMA dei numeri, classe NyRetest): si
+#     esige che nessuna posizione sopravviva al PRIMO TICK dopo il flat
+#     (flat di RECUPERO nell'EA). Le chiusure a giorno successivo (giorni
+#     SENZA tick fra flat e mezzanotte) si CONTANO nel wrapper: sopra il 5%
+#     delle posizioni = file INVALIDO; sotto = RILIEVO col suo gap-risk.
 #   - Deve battere i caduti: NON e' ORB (fade, non alla campanella), NON R42
 #     (serve rottura-oltre + reclaim CONFERMATO), NON R95 (era forex M30-H4),
 #     NON MaxMinNotte (box notturno vs mattutino). Se degenera -> scarto.
 #   - SCORRELAZIONE (vincolo scritto PRIMA): i giorni-segnale NON devono
 #     coincidere con MaxMinNotte_DAX_Short. Se scattano gli stessi giorni,
 #     non aggiunge diversificazione -> penalita'.
+#     >>> QUESTO LANCIO E' PASSO 0 + MISURA, NON IL VERDETTO: il banco non
+#     produce l'incrocio coi giorni della sedia (serve il suo per-trade):
+#     si misura DOPO, sui CSV, prima di qualunque promozione.
 #
-# @SIMBOLO  D30EUR
-# @PERIODO  M5
-# @DAQUANDO 2024.09.26          # tick BCM sugli indici (muro dati noto)
+# DICHIARAZIONI DEL BANCO (PASSO 0 + MISURA, FrazioneIS 1.0)
+#   - UNA TRANCHE: la gamba "IS" del generico e' la finestra intera, la
+#     "OOS" e' DEGENERE (0 giorni) e si IGNORA. Il rosso del generico sul
+#     CSV *_OOS e' ATTESO: NON rilanciare.
+#     >>> QUESTO LANCIO E' PASSO 0 + MISURA, NON IL VERDETTO: il criterio
+#     OOS non e' producibile qui (OOS inesistente per costruzione).
+#   - ASSI VERI (sotto, flag Y): il per-trade CSV in griglia e'
+#     INUTILIZZABILE come misura della griglia -- il nome porta il MAGIC
+#     (fisso 769300) e ogni passata con uscite lo RISCRIVE: resta SOLO
+#     l'ultima. La frequenza per cella si legge dalla colonna Trades della
+#     griglia IS; il per-trade serve al controllo overnight e alla scala
+#     del take della cella che l'ha scritto, DICHIARANDO il limite.
+#   - L'asse InpSlFracRange e' dichiarato ma di FATTO a UN valore (0.454):
+#     con step 0.300 il secondo passo (0.754) supera lo stop (0.700).
+#     DICHIARATO, non corretto: la spazzolata vera dell'SL e' del round di
+#     griglia, non del PASSO 0. Griglia effettiva: 3 x 1 x 3 = 9 passate.
+#
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+# @DAQUANDO = pavimento MISURATO dei tick BCM sugli indici (muro dati noto).
 #
 # SWEEP (screening stretto - centro altopiano, non picco)
 # InpBreakPts: sweep sotto/sopra il livello, in PUNTI INDICE, prima del reclaim
@@ -47,4 +88,33 @@ InpBreakPts=20.0||20.0||10.0||40.0||Y
 InpSlFracRange=0.454||0.454||0.300||0.700||Y
 # lato: 0=solo long, 1=solo short, 2=entrambi (censimento dei due lati)
 InpSide=2||0||1||2||Y
+#
+# --- FISSI (non spazzolati) -- la cella della MISURA, gattata dal wrapper ---
+# FUSO SERVER BCM (IT-1, regola fissa CLAUDE.md): range 08:35-11:05, trading
+# 11:05-14:15, flat 16:30 (= cash close 17:30 IT). Il 9 e il 17 sono le ore
+# ITALIANE: il wrapper li rifiuta per nome.
+InpRangeStartHour=8
+InpRangeStartMin=35
+InpRangeEndHour=11
+InpRangeEndMin=5
+InpTradeStartHour=11
+InpTradeStartMin=5
+InpTradeEndHour=14
+InpTradeEndMin=15
+InpCloseHour=16
+InpCloseMin=30
+# Pavimento SL (R109): 500 punti MT5 = 5 punti indice, MAI 0.
+InpMinStopPts=500
+# Rischio e cap di casa.
+InpRiskPercent=0.65
+InpMaxTradesPerDay=2
+# Conversione D30EUR: MISURATA (Breakin 31/08, referto in risultati_archivio).
+InpMT5PerPuntoIndice=100
+# Magic FISSO 769300 (blocco 7693xx, verificato libero repo-wide): con assi
+# veri NIENTE gemelli InpMagic (quel disegno e' della cella fissa).
+InpMagic=769300
+InpComment=REENT
+InpMaxSpread=0
+InpVerbose=false
+InpAutoTest=true
 # ==========================================================================
