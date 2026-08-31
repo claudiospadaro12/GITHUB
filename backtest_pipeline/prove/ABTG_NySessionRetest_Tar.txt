@@ -1,0 +1,135 @@
+# ==========================================================================
+# ABTG_NySessionRetest_Tar  -  SPEC/PROVA della TARATURA DEL GATE
+# (criteri congelati PRIMA dei numeri -- round successivo al PASSO 0 VALIDO)
+# Motore NY Session Trend Retest da itzkarmakyo (TradingView), MPL 2.0.
+# Portato in MQL5, gestione e prop-hardening propri. Attribuzione obbligatoria.
+# Dossier: caccia_strategie/CACCIA_H1_INTRADAY_INDICI_2026-08-30.md
+# Base misurata: REFERTO_NYRETEST_2026-08-31.md (corsa v5, pin 50551fa):
+#   retest NUDO (gate OFF) su U30USD M15 tick 2024.09.26->2026.06.30 =
+#   PF 1.002, n=625 deal, DD 12.87%, ~1 pos/gg, take mediano WIN +87.6
+#   punti indice, LOSS mediana -58.0, overnight veri 2.88% < 5%.
+# ==========================================================================
+#
+# LA DOMANDA DI QUESTO ROUND
+#   Il gate slope+espansione e' COSTITUTIVO (senza, e' un retest nudo -- e il
+#   nudo misurato sta in pareggio perfetto). Qui si misura SE IL GATE MORDE:
+#   una griglia di soglie ATTORNO alla scala misurata nel PASSO 0, con la
+#   cella OFF (slope 0 / exp 0) DENTRO la griglia come baseline interna.
+#
+# L'UNITA' DELLE DUE SOGLIE (letta nel sorgente, NON assunta -- lezione
+# ATR=100 del CRT: mai inventare soglie in unita' ignote):
+#   - InpVwapSlopeMin: PUNTI INDICE. In OnNewBar: slopeIdx =
+#     PrezzoInPuntiIndice_Calc(MathAbs(vwap - vwapSlopeRef), 100, _Point),
+#     dove vwapSlopeRef e' la VWAP ANCORATA InpVwapSlopePeriod=5 barre M15
+#     prima (stesso ancoraggio di seduta, LeggiSeduta). Quindi la soglia e'
+#     lo SPOSTAMENTO TOTALE della VWAP ancorata su 5 barre M15 (75 minuti),
+#     in punti indice Dow. NON e' per-barra, NON e' in punti MT5.
+#   - InpExpansionMin: PUNTI INDICE. expIdx = PrezzoInPuntiIndice_Calc(
+#     highest-lowest su InpExpansionLookback=10 barre M15, 100, _Point):
+#     l'escursione delle ultime 2,5 ore, in punti indice Dow.
+#   Conversione: InpMT5PerPuntoIndice=100 (default dell'EA, R97): 100 punti
+#   MT5 = 1 punto indice. Le soglie della griglia sono direttamente
+#   confrontabili col take mediano misurato (87.6 punti indice).
+#
+# LE GRIGLIE, ANCORATE ALLE SCALE MISURATE (ragionamento dichiarato):
+#   - SLOPE 0/15/30/45: la VWAP ancorata e' SMORZATA (media cumulativa dall'
+#     apertura: si muove meno del prezzo), quindi il suo spostamento su 75
+#     minuti e' una frazione dell'escursione prezzo. Ancore: 15 = ~1/4 della
+#     loss mediana (58), 30 = ~1/3 del take mediano (87.6), 45 = ~1/2 del
+#     take mediano (tetto della regola "da 0 a ~meta' take"). E' una PRIMA
+#     PASSATA che mappa la scala: se gia' il gradino 0->15 azzera i trade,
+#     il round dopo raffina DENTRO [0,15]; se 45 non morde, si sale.
+#   - ESPANSIONE 0/60/120/180: il range di 2,5 ore deve CONTENERE l'escursione
+#     che il take mediano sfrutta. Ancore: 60 = ~loss mediana (58), 120 =
+#     ~1.4x take mediano, 180 = ~2x take mediano (selettiva). Sotto 60 la
+#     soglia e' quasi certamente lasca su un indice che fa centinaia di punti
+#     al giorno; 180 deve tagliare le giornate compresse.
+#   - InpSlLookback 3/5/7: il prova del PASSO 0 assegnava lo sweep 3/5/8 a
+#     QUESTO round. La griglia MT5 e' ARITMETICA (start/step/stop): 3/5/8
+#     non si scrive; si usa 3||2||7 -> 3/5/7, scarto dichiarato (7 al posto
+#     di 8, stessa scala, un passo uniforme).
+#   Celle totali: 4 x 4 x 3 = 48. Regola della scheda (~60 celle a tick):
+#   passi DIMEZZATI rispetto ai 5-6 per asse della prima stesura, dichiarato.
+#
+# CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri -- ripresi dal prova
+# del PASSO 0 e resi operativi):
+#   (a) IL GATE DEVE MORDERE: al crescere di ciascuna soglia (scansione
+#       marginale: slope a exp=0, exp a slope=0, a parita' di SlLookback)
+#       n deve CALARE e il PF muoversi in modo ORDINATO (andamento leggibile,
+#       non zigzag di rumore cella per cella). Se OFF == ON -> gate
+#       decorativo -> scarto (lezione 0/5 del filtro appiccicato).
+#   (b) FASCIA CANDIDATA: PF >= 1.3 su TICK e DD < 8% in un ALTOPIANO --
+#       celle CONTIGUE, si promuove il CENTRO, MAI il picco; una cella
+#       outlier isolata NON e' un altopiano e non si promuove.
+#   (c) IL CONFRONTO COL NUDO (lezione anti-filtro del 31/08, checklist:
+#       "il criterio profit totale e' anti-filtro per costruzione") si fa
+#       SOLO su metriche per-trade / risk-adjusted: PF, profit/DD,
+#       aspettativa per trade, peggior giornata. MAI sul profitto totale,
+#       che punisce strutturalmente qualunque filtro che taglia trade.
+#   (d) OFF==ON OVUNQUE (n e PF invariati su tutta la griglia) -> il gate
+#       non distingue niente su questo simbolo/TF -> scarto del candidato
+#       gate, e per la REGOLA DELLA SECONDA CACCIA si cercano MECCANISMI
+#       alternativi, non altre griglie dello stesso gate.
+#   (e) BASELINE INTERNA: la cella OFF (slope 0 / exp 0 / SlLookback 5) deve
+#       RIPRODURRE il PASSO 0 v5 (n 625, PF 1.002): il magic diverso
+#       (769503) non tocca la logica. Se diverge, il banco non e'
+#       deterministico e la griglia non si legge.
+#   (f) Il RISCHIO si giudica SEMPRE (DD, peggior giornata, autotest 0);
+#       21 mesi = un solo regime (toro): qualunque promozione passa poi
+#       dalla prova di regime, non da qui.
+#
+# >>> PER-TRADE CSV: INUTILIZZABILE IN QUESTA GRIGLIA, NON VA LETTO.
+#     Il magic e' FISSO (769503) e il nome del file contiene il magic:
+#     48 passate scrivono lo STESSO file e sopravvive l'ULTIMA passata
+#     (con >0 uscite) in ordine di esecuzione degli agent -- cioe' una
+#     cella qualunque, non dichiarata. E' spazzatura per costruzione:
+#     la riga di lancio NON lo raccoglie e il referto lo dichiara.
+#     Niente gemelli qui: il determinismo lo garantisce la cella OFF (e).
+#
+# >>> FUSO DI CASA (NON invertito): U30USD BCM e' a ora SERVER (IT-1).
+#     RTH NY 09:30-16:00 ET -> 14:30-21:00 SERVER. InpSessionHour=14,
+#     InpSessionMin=30 (NON 9:30 ET); InpCloseHour=20, InpCloseMin=55
+#     (NON 16, ora NY dei feed _EXT). La riga di lancio gatta tutti e
+#     quattro i valori e RIFIUTA il 9 e il 16.
+#
+# Direttive @ NUDE (senza # davanti e senza commenti in coda): commentate o
+# sporche = gate vuoto. 2024.09.26 = pavimento MISURATO dei tick BCM sugli
+# indici; 2026.06.30 = fine finestra dichiarata (MAI ereditata dal default
+# del generico -- classe 31/08). Stessa finestra del PASSO 0: la baseline
+# interna (e) vale solo a finestra identica.
+@SIMBOLO U30USD
+@PERIODO M15
+@DAQUANDO 2024.09.26
+@FINOA 2026.06.30
+#
+# I FISSI: TUTTI come il PASSO 0 v5 (la taratura cambia SOLO le soglie del
+# gate + SlLookback; tutto il resto e' la cella gia' misurata).
+InpEmaTrend=200
+InpVwapSlopePeriod=5
+InpExpansionLookback=10
+InpSlBufferPts=300
+InpMinStopPts=500
+InpRetestBufferPts=0
+# FUSO SERVER BCM (IT-1): seduta 14:30 -> flat 20:55. MAI 9:30 / 16:00 (ET).
+InpSessionHour=14
+InpSessionMin=30
+InpCloseHour=20
+InpCloseMin=55
+# VINCOLO DURO del mandato: flat di fine seduta acceso (v5: flat di recupero).
+InpCloseAtEnd=true
+# DUE LATI insieme come al PASSO 0 (i lati separati si rileggono al verdetto).
+InpAllowLong=true
+InpAllowShort=true
+# Rischio di casa e cap giornaliero.
+InpRiskPercent=0.65
+InpMaxTradesPerDay=2
+# MAGIC FISSO E VERGINE (verificato repo-wide): 769503. NON e' un asse.
+# 769500 = forward, 769501/769502 = gemelli del PASSO 0.
+InpMagic=769503
+#
+# --- GLI ASSI DELLA TARATURA (4 x 4 x 3 = 48 celle; la cella OFF
+#     slope=0/exp=0 e' DENTRO la griglia: baseline interna di confronto).
+InpVwapSlopeMin=0.00||0||15||45||Y
+InpExpansionMin=0.00||0||60||180||Y
+InpSlLookback=5||3||2||7||Y
+# ==========================================================================
