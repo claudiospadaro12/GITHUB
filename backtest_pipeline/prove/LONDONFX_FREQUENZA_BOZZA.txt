@@ -1,0 +1,241 @@
+# =====================================================================
+#  LONDONFX -- PASSO 0: SONDA DI FREQUENZA E DI TAGLIA  --  *** BOZZA ***
+#  Canale SMA5(high)/SMA5(low) + estremo RSI, sessione di Londra
+#  Forex major (EURUSD lead) -- CONTATORE, non EA operativo
+# =====================================================================
+#
+#  #####################################################################
+#  ##  CARTELLO: QUESTA E' UNA BOZZA. NON E' UNA PROVA OPERATIVA.     ##
+#  ##  NON MANDARLA AL DRIVER. NON ESISTE ANCORA NESSUN .mq5.         ##
+#  #####################################################################
+#
+#  PERCHE' UNA BOZZA E NON UNA PROVA (regola di casa, non pigrizia):
+#  ne' l'EA ne' la sonda esistono. Un file prova che pinna input
+#  INESISTENTI e' l'errore n.3 della CHECKLIST_RIGA_DI_LANCIO, e MT5
+#  IGNORA IN SILENZIO un pin che non trova: e' cosi' che e' nato il
+#  falso "0/8" del FiboH4 (REGISTRO_TEST.md par. 2-bis). I nomi degli
+#  input qui sotto sono PROPOSTI, non verificati contro un sorgente.
+#  Diventano veri solo quando il .mq5 esiste e compila.
+#
+#  ORDINE OBBLIGATORIO: prima la SONDA, poi il NUMERO, poi -- SOLO se
+#  il numero regge -- l'EA operativo.
+#
+#  DOSSIER DI CACCIA:
+#    backtest_pipeline\caccia_strategie\CACCIA_FREQUENZA2_2026-08-31.md
+#    (SECONDA BATTUTA della caccia-frequenza, promosso P1)
+#  FIRMA: report\FIRME_2026-08-31.md, FIRMA 2 (cancello H8, E >= 0.075R).
+#  MANDATO: Claudio 31/08 -- pavimento 1-2 trade/GIORNO; simboli a
+#           minimo attrito (forex major).
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "EURUSD 5min london session strategy" di
+#    SoftKill21, TradingView, created 2020-08-30, Pine v4,
+#    scriptAccess "open_no_auth", licenza Mozilla Public License 2.0.
+#      https://www.tradingview.com/script/E6yr9CoN-EURUSD-5min-london-session-strategy/
+#    Copia archiviata:
+#      caccia_strategie\biblioteca\sorgenti\
+#      EurUsd5minLondonSession_SoftKill21-MPL2_tvE6yr9CoN_2026-08-31.pine
+#    L'attribuzione completa dovra' stare in testa al futuro .mq5.
+#
+#    SECONDO MOTORE (stesso contenitore, ablazione 2):
+#    "Money maker EURUSD 15min daytrader", stesso autore SoftKill21,
+#    MPL 2.0, promosso P2 il 28/08 e MAI GIRATO.
+#      https://www.tradingview.com/script/jU2JCWZr-Money-maker-EURUSD-15min-daytrader/
+#
+# =====================================================================
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  Nella sessione di Londra su un cambio major il flusso arriva a
+#  raffiche. Una chiusura FUORI dal canale stretto formato dalla media
+#  a 5 dei massimi e dalla media a 5 dei minimi segnala una raffica
+#  appena partita e non ancora finita. Se e' vero:
+#    (a) l'evento capita PIU' VOLTE AL GIORNO (l'autore dichiara ~5/gg
+#        e cappa a 6 nel sorgente) -> PORTATA;
+#    (b) l'escursione favorevole successiva e' abbastanza grande da
+#        pagare uno spread di ~1 pip con largo margine -> TAGLIA;
+#    (c) il rapporto fra escursione favorevole e avversa e' abbastanza
+#        alto da superare il cancello H8 con un win rate PLAUSIBILE
+#        (RR 1,875 letto nel sorgente -> serve 37,4% lordo / 42,0%
+#        netto a 1 pip di costo) -> GEOMETRIA.
+#  Se (a) e' falso il candidato muore per F1 senza scrivere un EA.
+#  Se (b) e' falso muore per F2, e con lui muore l'idea che la portata
+#  si compri sui major a M5.
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE (CONGELATI IL 31/08 PRIMA DI OGNI NUMERO)
+# ---------------------------------------------------------------------
+#  F1 - PAVIMENTO DI FREQUENZA (pavimento duro, di Claudio 31/08):
+#       segnali per LATO >= 1 al giorno di borsa contato.
+#       < 1/giorno  -> SCARTO IMMEDIATO. Niente EA, niente griglia.
+#       1-2/giorno  -> PASSA, ma al minimo.
+#       > 2/giorno  -> PASSA nella fascia preferita da Claudio.
+#       RIFERIMENTO DICHIARATO DALL'AUTORE (non nostro, non un numero
+#       di performance): "preferably no more than 5 trades / day".
+#
+#  F1-bis - ABLAZIONE 1, GRATIS: la sonda conta i segnali DUE VOLTE,
+#       col canale NUDO e col canale + conferma RSI. Motivo: l'autore
+#       stesso scrive sulla pagina "Then we can OPTIONALLY verify with
+#       the RSI", cioe' dichiara l'RSI un FILTRO APPICCICATO -- e in
+#       casa il filtro appiccicato a un motore gia' tarato fa
+#       0 SUCCESSI SU 5 (ROBUSTEZZA.md par. 5B).
+#       Se col RSI acceso i segnali scendono SOTTO 1/giorno, l'RSI
+#       UCCIDE IL PAVIMENTO e va tolto PRIMA di qualunque discorso di
+#       merito.
+#
+#  F2 - TAGLIA DEL TAKE (metro di casa C2): mediana dell'escursione
+#       FAVOREVOLE a 12 barre dall'ingresso, in PIP.
+#       >= 3,0 pip  -> PASSA   (3 x ~1,0 pip di spread di riferimento)
+#       <  3,0 pip  -> SCARTO
+#       fra 3,0 e 6,0 -> VERDETTO SOSPESO: si misura lo spread VERO col
+#                        Code Base 74148 (RealCost Spread P95 Logger,
+#                        promosso il 23/08, MAI ancora usato -- e'
+#                        la SESTA caccia che lo scrive) e si rilegge.
+#       ~1,0 pip e' una CONVENZIONE DI MERCATO, marcata
+#       [SPREAD NON MISURATO]: su EURUSD BCM non e' mai stato misurato.
+#
+#  F3 - ESCURSIONE AVVERSA mediana a 12 barre, in pip: da leggere
+#       sempre. Nessun cancello: serve a sapere se lo stop da 8 pip
+#       dell'autore sta SOPRA o SOTTO il rumore (pavimento SL, R109).
+#
+#  F4 - MURO GIORNALIERO PROP: massimo di segnali in UNA giornata.
+#       E' il numero che taglia InpMaxTradesPerDay sui DATI, non a
+#       occhio. ATTENZIONE: se (max segnali) x 0,65% supera il cap C1
+#       di rischio aperto (3,25%, firmato il 18/08), il cap va scritto
+#       nell'EA DAL PRIMO ROUND, non aggiunto dopo.
+#
+#  F4-bis - CANCELLO H8 (FIRMA 2 del 31/08, testuale: "Ogni motore ad
+#       alta frequenza entra in flotta SOLO con E >= 0.075R misurata A
+#       TICK. Frequenza sotto questo cancello = portata finta (DD e
+#       costi)."). La sonda restituisce RR = mediana(favorevole) /
+#       mediana(avversa).
+#       RR mediano < 0,70 -> SCARTO PER ARITMETICA, e NON si spende
+#       una corsa a tick.
+#       Tabella congelata, da p >= 1,075 / (RR + 1):
+#         RR 0,36 -> serve WR 79,0% | 0,73 -> 62,2% | 1,00 -> 53,8%
+#         RR 1,42 -> 44,4% | 1,56 -> 42,0% | 1,875 -> 37,4%
+#       La geometria dell'autore (tp=150 / sl=80 tick) da' RR 1,875:
+#       e' SOPRA 0,70, quindi il candidato NON e' uno scarto per
+#       aritmetica -- ma il RR che conta e' quello MISURATO qui.
+#
+#  F5 - DUE LATI, SEMPRE E SEPARATI (regola di Claudio del 25/08).
+#       Ogni numero ha la sua colonna Long e la sua Short: NESSUN
+#       totale aggregato entra in un verdetto.
+#       NOTA: l'autore usa soglie RSI ASIMMETRICHE (80 sopra / 10
+#       sotto) -> il suo lato short fa molti meno segnali. Da noi la
+#       soglia si misura SIMMETRICA.
+#
+#  F6 - GRADIENTE DI TIMEFRAME, dichiarato prima: la sonda gira su M5
+#       E su M15. Attesi piu' segnali e take piu' piccoli a M5. Se la
+#       taglia CROLLA a M5, e' il gradiente R108/R111 (H1 > M30 > M15,
+#       monotono su 3 simboli) visto dall'altro lato, e va detto.
+#
+#  F7 - ORA IN ORA SERVER, E SI SWEEPA. Il Pine usa
+#       time(res, "0300-1100") SENZA argomento di fuso -> usa il fuso
+#       dello SCAMBIO del simbolo, che su un grafico FX di TradingView
+#       e' [INCERTO] (UTC oppure New York a seconda del feed).
+#       In ORA SERVER BCM (= ora italiana - 1 = UTC+1 in agosto):
+#         se il grafico e' UTC  -> 04:00-12:00 server
+#         se il grafico e' NY   -> 08:00-16:00 server
+#       Entrambe cadono su Londra. L'ora NON si converte a tavolino:
+#       si SWEEPA su 3 valori di inizio. E si VERIFICA sull'orologio
+#       del server (CLAUDE.md: log MT5 in ora locale, grafico in ora
+#       server -- errore gia' pagato il 06/08).
+#
+# =====================================================================
+#  LIMITI DICHIARATI PRIMA (non dopo)
+# ---------------------------------------------------------------------
+#  - LA FREQUENZA NON E' MAI STATA MISURATA DA NESSUN AGENTE. Tre
+#    fonti dati indipendenti (Yahoo, Stooq, Dukascopy) sono murate al
+#    CONNECT dal proxy di egress. Il ~5/giorno e' DICHIARATO
+#    DALL'AUTORE sulla pagina e CONFERMATO DA DUE RIGHE DI CODICE
+#    (max_intraday_filled_orders(6) e max_intraday_loss(2, pct)):
+#    e' un fatto di COSTRUZIONE, non una performance -- ma resta
+#    [DICHIARATO], non [MISURATO].
+#  - LO SPREAD BCM SU EURUSD/GBPUSD/USDJPY NON ESISTE IN REPO.
+#  - UN SOLO REGIME se la finestra e' corta: questo passo conta
+#    OCCASIONI e misura GEOMETRIE, non merito. Il merito si misura a
+#    tick, dopo (R57).
+#  - TETTO ~100.000 BARRE DEL TESTER (regola di casa del 25/08): a M5
+#    sono ~1,3 anni per corsa. La sonda deve DICHIARARE DA SOLA la
+#    finestra effettiva ("Giorni Contati", "Barre Valutate"). La firma
+#    del tetto e' "Barre Valutate" IDENTICHE su simboli diversi
+#    (checklist punto 36). F1 e' per-giorno sul denominatore CONTATO,
+#    quindi resta leggibile anche col campione ridotto.
+#  - Nessun numero di performance dell'autore usato in nessun
+#    punteggio.
+#
+# =====================================================================
+#  ATTENZIONE SU @DAQUANDO -- VUOTO DI PROPOSITO, NON DIMENTICATO
+# ---------------------------------------------------------------------
+#  Il mandato diceva "i tick BCM forex partono da gen-1999 (pavimento
+#  R102 misurato)". HO RILETTO R102 E LA SECONDA META' NON REGGE:
+#    - R102_REFERTO_BLOCCO1.md riga 6: modello "OHLC M1"  [VERIFICATO]
+#    - riga 136: "niente tick reali"                      [VERIFICATO]
+#    - R102_REFERTO_BLOCCO2.md riga 19: "Prima operazione
+#      1999.01.04 su tutte e tre"                         [VERIFICATO]
+#  Quindi: ~27 anni di M1 OHLC MISURATI sul forex (vantaggio vero per
+#  lo SCREENING e per la PROVA DI REGIME), ma la profondita' TICK del
+#  forex BCM NON E' MAI STATA SONDATA -- stesso buco aperto di XAUUSD
+#  (REGISTRO_TEST.md, G1-PAOLO).
+#  @DAQUANDO SI MISURA con scarica_storico.ps1, non si copia da un
+#  referto che parlava di un altro modello. Finche' non e' misurata,
+#  la riga resta VUOTA e il file non parte.
+#
+# =====================================================================
+#  COSA GIRA E COSA NON GIRA
+# ---------------------------------------------------------------------
+#  Il futuro ABTG_SondaLondonFx sara' un CONTATORE: NESSUN ordine,
+#  nessun lotto, nessun magic, nessuna sedia. Conta segnali per LATO e
+#  misura escursioni in pip. Precedenti di casa: SondaMediazione
+#  (firma di Claudio del 21/08, "metro, frequenza") e SondaM0PB
+#  (scritta il 31/08).
+#  Chassis riusabile: mql5\Experts\ABTG_SondaM0PB.mq5 (Expert e non
+#  Script, per avere le colonne OPTFRAME).
+#
+#  MODELLO DI CORSA PROPOSTO: 2 = "Solo prezzi di apertura". Il
+#  segnale nasce su BARRA CHIUSA e non si apre niente: il tick non
+#  aggiunge informazione e costa ore. Il verdetto di MERITO, dopo,
+#  sara' a modello 4 (F6 di casa: verdetti solo a tick reali).
+#
+# =====================================================================
+#  GLI ASSI -- 3 celle utili, nessuna decorativa
+# ---------------------------------------------------------------------
+#  Il generico RIFIUTA zero assi. L'asse si mette sull'ORA DI INIZIO
+#  della sessione, che e' l'unica cosa genuinamente INCERTA (F7) e
+#  non una manopola pescata: 4 / 6 / 8 in ora server copre entrambe le
+#  letture del fuso del Pine.
+#  InpUsaRsi resta a due valori perche' E' l'ablazione F1-bis, non uno
+#  sweep di merito.
+#  TUTTO IL RESTO E' PINNATO ai default dell'autore: sweepare le
+#  soglie RSI o le lunghezze delle medie in un PASSO 0 servirebbe solo
+#  a pescare la cella che fa passare il pavimento -- vietato per
+#  costruzione.
+#
+# =====================================================================
+#  DOVE GIRA
+# ---------------------------------------------------------------------
+#  @SIMBOLO e' il LEAD (EURUSD, il simbolo dell'autore). GBPUSD e
+#  USDJPY girano con -Simbolo del generico (override DICHIARATO dal
+#  wrapper). Sei corse: 3 simboli x {M5, M15}.
+#  I tre sono i major "a minimo attrito" indicati da Claudio e i tre
+#  su cui R102 ha misurato l'inizio delle operazioni al 1999.01.04.
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  M5
+@DAQUANDO
+@FINOA    2026.06.30
+
+InpSmaPeriodo=5
+InpUsaRsi=true||false||1||true||Y
+InpRsiPeriodo=5
+InpRsiSoglia=80.0
+InpBarreOrizzonte=12
+InpOraInizioServer=6||4||2||8||Y
+InpOreSessione=8
+InpPipSize=0.0001
+InpWarmupBarre=300
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=LONDONFX_SONDA

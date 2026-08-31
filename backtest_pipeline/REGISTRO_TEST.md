@@ -600,3 +600,65 @@ Banda long vera ordinata col filtro, bordo aperto a break=40. Take mediano win
 +76.8 idx (long): S0 preannunciato largo, si chiude con lo spread flotta.
 Frequenza ~3-4/mese/lato: cecchino da mossa-4, non portata. Referto:
 risultati_archivio/REFERTO_DAXREENTRY_2026-08-31.md
+
+### CACCIA FREQUENZA — SECONDA BATTUTA (31/08 notte): le righe che toccano questo registro
+
+Dossier completo: `caccia_strategie/CACCIA_FREQUENZA2_2026-08-31.md`. Il resto
+sta li', non si duplica.
+
+- 🔧 **CORREZIONE MISURATA, e conta per ogni round forex futuro: il pavimento
+  1999 del forex e' su OHLC M1, NON sui tick.** `R102_REFERTO_BLOCCO1.md`
+  riga 6 dice *"modello OHLC M1"* e riga 136 *"niente tick reali"*;
+  `BLOCCO2` riga 19 dice *"Prima operazione 1999.01.04 su tutte e tre"*.
+  ➡️ Sul forex abbiamo **~27 anni di M1 OHLC misurati** (vantaggio vero per lo
+  SCREENING e per la PROVA DI REGIME: toro/orso/laterale/crollo si scelgono
+  davvero, contro i 21 mesi a regime unico degli indici), ma **la profondita'
+  TICK del forex BCM non e' mai stata sondata** — stesso buco aperto di XAUUSD
+  (G1-PAOLO). **`F6 verdetti solo a tick` non si ammorbidisce**: `@DAQUANDO` si
+  MISURA con `scarica_storico.ps1`.
+- 🪦 **Il Code Base ha smesso di produrre motori, ed e' misurato.** Interrogati
+  uno per uno i 20 id piu' recenti (76669 → 75473): **15 attrezzi** (pannelli,
+  calcolatori, sei utility `Quantora` di fila, logger), **3 recovery/basket**,
+  1 gia' bocciato (Chaos 76446), 1 motore generico. **Zero EA di sessione, zero
+  forex intraday, zero uscite a tempo, in quattro pagine.** ➡️ **Non aprire piu'
+  il Code Base per cercare MOTORI intraday: aprirlo per gli ATTREZZI** — come
+  il *RealCost Spread P95 Logger* (**74148**), promosso il 23/08 e **mai usato:
+  sesta caccia che lo scrive**.
+- 🆕 **QuantConnect e' raggiungibile (200 su bersaglio noto, mai usata prima in
+  6 dossier) ma NON e' una fonte per noi**: la libreria e' fatta di strategie
+  di PORTAFOGLIO a ribilancio giornaliero/mensile. Lette per intero
+  `Combining Mean Reversion and Momentum in Forex Market` (**ribilancio
+  MENSILE**, ~1-2 trade/mese, nessuno stop) e `Dual Thrust` (range breakout,
+  nessuno stop, ~1/giorno). **Quantpedia riconfermata PREMIUM** su 4 slug reali
+  (302.356 byte identici = home page).
+- 🔴 **DIREZIONE "tenuta lunga" (12-15 barre, arXiv 2605.04004 §6.2): ZERO
+  candidati nel web gratuito**, e il motivo e' strutturale (il retail esce su
+  TP/SL, l'accademia ribilancia il mese). 🎯 **La risposta e' in casa e non e'
+  mai stata accesa: la `SONDA DELL'OROLOGIO`** (EA `ABTG_SondaOrologio.mq5`,
+  7 file prova, `RIGA_SONDA_OROLOGIO_DA_MANDARE.md`, referto di preparazione —
+  tutti preparati il 28/08). **In `risultati_archivio` NON esiste nessun
+  referto: non e' MAI girata.** E' il solo meccanismo FX a tenuta di ore con
+  frequenza >=1/giorno che il progetto possieda.
+- 🆕 **Unico promosso: `EURUSD 5min london session strategy`** (SoftKill21,
+  MPL 2.0, TradingView, Pine v4 letto integrale, **52 righe / 8 input**) —
+  canale SMA5(high)/SMA5(low) rotto in **chiusura**, sessione di Londra,
+  conferma RSI(5) **che l'autore dichiara opzionale**, `close_all`
+  incondizionato a fine sessione, **`max_intraday_filled_orders(6)`** e
+  **`max_intraday_loss(2, percent_of_equity)`** dentro il motore.
+  🎯 **Il numero che lo promuove e' la GEOMETRIA: `tp=150 / sl=80` tick =
+  RR 1,875 → supera il cancello H8 con un win rate del 37,4% lordo / 42,0%
+  netto a 1 pip di costo, contro il 62-79% richiesto da M0PB e il 53,8% di
+  P2.** Frequenza **~5/giorno DICHIARATA DALL'AUTORE** sulla pagina e
+  confermata da due righe di codice — [DICHIARATA, non misurata: le tre fonti
+  dati restano murate].
+  **PASSO 0 = SONDA DI CONTEGGIO, non griglia.** Bozza coi criteri congelati:
+  `prove/LONDONFX_FREQUENZA_BOZZA.txt`. Cancelli: **<1 segnale/giorno →
+  scarto**; **escursione favorevole mediana <3,0 pip → scarto**; **RR<0,70 →
+  scarto per aritmetica senza corsa a tick**.
+  🔬 **Due ablazioni gia' congelate:** (1) canale **nudo** contro canale+RSI
+  (l'autore dichiara l'RSI accessorio → filtro appiccicato, 0/5 in casa);
+  (2) **UN SOLO EA contenitore** (`ABTG_LondonFx`: sessione + flat + cap
+  giornalieri + rischio %) con **tre motori a interruttore** — canale nudo,
+  canale+RSI, e **l'allineamento a 5 medie del P2 del 28/08 (stesso autore,
+  stessa coppia, stessa sessione, mai girato)**. Se i tre vanno uguale, **il
+  contenitore E' l'edge** e il segnale non conta.

@@ -375,3 +375,78 @@ murate dal proxy di egress** (`connect_rejected`, policy):
 `volatility`, `meanreversion`. `pullback` ne rende **17**.
 Da affiancare ai buchi gia' noti (`falsebreakout`, `choch`, `rangebound`,
 `previousdayhighlow`, `timeofday`, `powerhour`, `dailyrange`, `firsthour`).
+
+## 📅 31/08/2026 (notte) — SECONDA BATTUTA: una fonte NUOVA, una correzione, due conferme
+
+Misurato stanotte, non ipotizzato. Dossier:
+`caccia_strategie/CACCIA_FREQUENZA2_2026-08-31.md`.
+
+### 1. 🆕 QUANTCONNECT E' RAGGIUNGIBILE — e sei dossier dicono il contrario
+
+Controllo positivo su bersaglio noto:
+`quantconnect.com/learning/articles/investment-strategy-library/intraday-dynamic-pairs-trading-using-correlation-and-cointegration-approach`
+→ **HTTP 200, 264.951 byte, `<title>` corretto**. L'indice
+`/learning/articles/investment-strategy-library` si legge con `WebFetch`, e le
+pagine strategia contengono **regole in chiaro + frammenti di codice Python**.
+
+🔴 **MA il verdetto d'uso e' negativo, e va scritto per non riaprirla ogni
+volta:** la libreria QC e' fatta di strategie **di PORTAFOGLIO a ribilancio
+giornaliero/mensile**. Le poche "intraday" sono ETF/azionario US con **1 trade
+al giorno** e **senza stop loss**. **Per un mandato di frequenza intraday su
+CFD non e' una fonte.** Utile solo per un mandato di **allocazione**.
+
+### 2. 🔧 LO SLUG PUBBLICO DI TRADINGVIEW E' `imageUrl`, NON `scriptIdPart`
+
+Misurato sul promosso della battuta:
+
+| URL provato | esito |
+|---|---|
+| `tradingview.com/script/yMINlAO3-...` (primi 8 di `scriptIdPart`) | 🔴 **404** |
+| `tradingview.com/script/E6yr9CoN/` (campo **`imageUrl`** del JSON `pubscripts-suggest-json`) | 🟢 **200**, titolo corretto |
+
+> ⚠️ Stessa lezione del pattern `PUB;` sbagliato del 25/08: **un identificatore
+> sbagliato non da' un errore, da' un "candidato non letto"** — e nel dossier
+> sembra un buco dichiarato invece che un refuso. **Per citare la pagina
+> pubblica di uno script si usa `imageUrl`.**
+
+### 3. 📕 IL CODE BASE HA SMESSO DI PRODURRE MOTORI (misurato sui 20 id piu' recenti)
+
+Interrogati uno per uno da **76669 a 75473**: **15 attrezzi** (pannelli,
+calcolatori, gestori, logger — fra cui **sei utility `Quantora` di fila**),
+**3 recovery/basket**, 1 gia' bocciato, 1 motore generico. **Zero EA di
+sessione, zero forex intraday, zero uscite a tempo.**
+➡️ **Regola d'uso nuova: il Code Base si apre per gli ATTREZZI, non per i
+motori intraday.** (E con `?keyword=` rotto si vede comunque solo il recente
+per data.)
+
+### 4. 🔴 QUANTPEDIA: PREMIUM RICONFERMATO — 4 slug reali, 4 volte la home page
+
+`cross-market-intraday-time-series-momentum`,
+`sp500-futures-return-during-the-eu-open-period`,
+`intraday-currency-seasonality`,
+`jump-only-momentum-and-reversal-in-currency-markets`:
+**tutte HTTP 200 con 302.356 byte IDENTICI** = la home page.
+➡️ Forma definitiva: *"Quantpedia si usa per SAPERE CHE UN EFFETTO ESISTE e
+risalire al paper. Non per le regole. E su tre mandati intraday non ha mai
+prodotto un candidato."*
+
+### 5. 🟠 GITHUB: il topic `mql5` risponde ma e' SPAM SEO (conferma del 28/08)
+
+`github.com/topics/mql5?o=desc&s=updated` via `WebFetch` → **200**, ma i primi
+repo sono `NulveKN/*` e `ZrakD/*`: **0-3 stelle, linguaggio dichiarato `C#` su
+codice MQL5, tutti aggiornati lo stesso giorno**. **Non si parte dai topic.**
+
+### 6. Il resto della mappa, rimisurato stanotte
+
+| fonte | 31/08/2026 notte |
+|---|---|
+| `mql5.com` (pagine + download ZIP + articles) | 🟢 **200** |
+| `export.arxiv.org` (API, solo `https`) | 🟢 **200** |
+| `tradingview.com` + `pine-facade /get/` | 🟢 **200** |
+| `raw.githubusercontent.com` | 🟢 **200** |
+| 🆕 `quantconnect.com` | 🟢 **200** (ma vedi §1) |
+| `quantpedia.com` sitemap | 🟢 200 · pagine strategia 🔴 premium |
+| `api.github.com` (ricerca) | 🔴 **403 — NONA di fila** |
+| `papers.ssrn.com` | 🔴 **403 — NONA di fila** |
+| `forexfactory.com` | 🔴 **403 — NONA di fila** |
+| `query1.finance.yahoo.com` · `stooq.com` · `datafeed.dukascopy.com` | 🔴 **403 al CONNECT, tutti e tre** — **nessun agente puo' MISURARE una frequenza da qui** |
