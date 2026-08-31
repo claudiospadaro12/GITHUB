@@ -550,3 +550,12 @@ Missioni proposte (da firmare): B = NASUSD 2022-2023 (2 notti) prima,
 A = U30USD 2019-2024 (4-5 notti) poi. Le righe di lancio arriveranno con
 verificatore quando Claudio decidera'. Regola d'uso: SOLO verdetti a
 parametri congelati, mai taratura su feed esterno.
+
+### BreakinBox (falsa rottura box notturno DAX) — CHIUSO 31/08: l'ablazione lo smaschera come R95 con un livello nuovo
+Ablazione A/B a tick (2024-2026, D30EUR): TP al lato opposto (tesi) PF 1.007
+DD 24.1% contro RR fisso 2.0 (controllo R95) PF 1.106 DD 19.7% -> vince il
+controllo su PF E DD = tesi falsificata, e il controllo stesso buca il
+cancello DD<=15%. Candidato chiuso da criterio congelato, niente caccia
+all'RR. In cassa: conversione D30EUR=100 misurata (prima volta), frequenza
+~20/mese due lati, EA-mattone autotestato. Referto:
+risultati_archivio/REFERTO_BREAKIN_2026-08-31.md
