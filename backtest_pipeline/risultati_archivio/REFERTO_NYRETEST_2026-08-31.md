@@ -96,3 +96,40 @@ identici), cache 0/0, PROBLEMI 0. Il conteggio overnight e' AUTOMATICO
 gate slope+espansione deve MORDERE (trade e PF che cambiano in modo ordinato
 alle soglie vs OFF; OFF==ON = decorativo = scarto). Base di partenza in
 pareggio: qualunque selettivita' vera si vede subito.
+
+---
+
+## 🧪 TARATURA DEL GATE (corsa VERA 11:10, pin 606111d, 48/48 celle): IL GATE SLOPE MORDE — MA NON RAGGIUNGE LA BARRA
+
+_Freschezza piena: cache 0/0, 48 righe su 48, cella OFF = passo 0 ESATTO
+(n=625, PF 1.002 - riproducibilita' certificata), autotest 0/48, PROBLEMI 0.
+Zip NYRETEST_TAR_CORSA_20260831_1110._
+
+**LA MAPPA (colonna exp quasi irrilevante, tabella per slope a sl=5/7):**
+
+| slope (idx pts/75min) | n | PF (sl5) | PF (sl7) | DD (sl7) |
+|---|---|---|---|---|
+| 0 (OFF) | 625 | 1.00 | 0.95 | 14.5% |
+| 15 | 449 | 1.02 | 1.01 | 9.8% |
+| 30 | 295 | 0.99 | 1.03 | 5.9% |
+| **45** | **211** | **1.17** | **1.17** | **5.8%** |
+
+**LE TRE LETTURE (contro i criteri congelati):**
+- (a) IL GATE SLOPE MORDE: n monotono 625->211, DD crolla 12.9->5.8, e la
+  banda slope=45 e' COERENTE su tutti e 3 gli SlLookback (1.17/1.17/1.17
+  con sl 5 e 7) — NON e' una cella outlier, e' una banda vera. Primo gate
+  costitutivo della giornata che aggiunge valore misurabile A TICK.
+- (a-bis) L'ESPANSIONE E' DECORATIVA: n quasi immobile (625->621->604),
+  PF piatto -> asse da spegnere, misurato.
+- (b) LA BARRA NON E' RAGGIUNTA: celle PF>=1.3 & DD<8 = **0 su 48**.
+  Il meglio e' 1.17. Per il criterio congelato: NESSUNA cella candidata.
+
+**IL PUNTO APERTO (dichiarato ORA, prima dei suoi numeri):** il PF SALE
+ENTRANDO nel bordo del sweep (0.99@30 -> 1.17@45, e 45 era il tetto
+dichiarato = meta' del take mediano). La mappa e' INCOMPLETA verso l'alto.
+Estensione finale dichiarata: slope {45,60,75,90} x sl {5,7}, exp=0 fisso
+(decorativo, misurato), STESSA barra (PF>=1.3 & DD<8 ad altopiano) e muro
+naturale R59: se a soglie piu' alte n scende sotto 150, il merito e'
+sospeso comunque -> la mappa si chiude li' in ogni caso. Le celle
+slope=45 (gia' misurate: 211/1.17 e 212/1.17) fanno da sentinella di
+continuita'. UNA corsa, poi verdetto definitivo della taratura.
