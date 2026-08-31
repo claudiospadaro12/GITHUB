@@ -594,3 +594,9 @@ cancello DD<=15%. Candidato chiuso da criterio congelato, niente caccia
 all'RR. In cassa: conversione D30EUR=100 misurata (prima volta), frequenza
 ~20/mese due lati, EA-mattone autotestato. Referto:
 risultati_archivio/REFERTO_BREAKIN_2026-08-31.md
+
+### DaxReEntry — PASSO 0 misurato (31/08 16:25): LONG 6/6 verde (PF fino 1.80, DD 2.5%), SHORT morto, n<=92 -> merito sospeso R59
+Banda long vera ordinata col filtro, bordo aperto a break=40. Take mediano win
++76.8 idx (long): S0 preannunciato largo, si chiude con lo spread flotta.
+Frequenza ~3-4/mese/lato: cecchino da mossa-4, non portata. Referto:
+risultati_archivio/REFERTO_DAXREENTRY_2026-08-31.md
