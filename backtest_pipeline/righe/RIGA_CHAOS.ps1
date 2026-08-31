@@ -1,9 +1,9 @@
 # =====================================================================
-#  MARCATORE_RIGA_CHAOS_v1
+#  MARCATORE_RIGA_CHAOS_v2
 #  RIGA_CHAOS.ps1  --  CHAOS LYAPUNOV: screening del GATE LLE (mappa il
 #  gate, non lo giudica). EMA-cross 9/21 gated dall'esponente di Lyapunov
 #  piu' grande (opera SOLO in regime leggibile). ABTG_ChaosLyapunov su
-#  NASUSD_EXT M15, OHLC (Modello 1), finestra intera 2020-2024, sweep a 3
+#  NASUSD_EXT M15, OHLC (Modello 1), finestra 2020.01.01-2024.01.01, sweep a 3
 #  assi (InpLyaThreshold x InpLyaLookback x InpSlAtrMult). EA NUOVO.
 # ---------------------------------------------------------------------
 #  QUESTO E' UNO SCREENING. NON PROMUOVE NIENTE E NON DA' UN VERDETTO.
@@ -34,7 +34,7 @@
 #  >>> IL PAVIMENTO SL (R109): InpMinStopPts=500 (5 punti indice), MAI 0.
 #      Il gate lo pretende pinnato e RIFIUTA 0.
 #
-#  >>> UNA SOLA TRANCHE, DICHIARATO: finestra 2020.01.01 -> 2026.06.30
+#  >>> UNA SOLA TRANCHE, DICHIARATO: finestra 2020.01.01 -> 2024.01.01
 #      (crollo 2020 + toro 2021 + orso 2022 + ripartenza 2023 + ...). NON
 #      c'e' split IS/OOS interno: il gate si MAPPA sulla finestra intera.
 #      Il driver generico pretende una FrazioneIS: gli si passa 1.0, cosi'
@@ -64,7 +64,7 @@ param(
   [string]$Simbolo      = "NASUSD_EXT",
   [string]$Periodo      = "M15",
   [string]$DaQuando     = "2020.01.01",
-  [string]$Fino         = "2026.06.30",
+  [string]$Fino         = "2024.01.01",  # finestra SHORTGATE/CRT_EXT. La cassaforte BCM 2024.09.26+ resta FUORI: e' l'OOS del passo 2 (classe 31/08: mai ereditare la finestra dal default del generico)
   [double]$FrazioneIS   = 1.0,      # finestra intera; la gamba OOS del generico e' degenere e si ignora
   [int]$Deposito        = 100000
 )
@@ -175,6 +175,7 @@ try{
   if($h["@SIMBOLO"]  -ne $Simbolo){  throw ($ProvaName + ": @SIMBOLO e' " + $h["@SIMBOLO"] + ", atteso " + $Simbolo) }
   if($h["@PERIODO"]  -ne $Periodo){  throw ($ProvaName + ": @PERIODO e' " + $h["@PERIODO"] + ", atteso " + $Periodo) }
   if($h["@DAQUANDO"] -ne $DaQuando){ throw ($ProvaName + ": @DAQUANDO e' " + $h["@DAQUANDO"] + ", atteso " + $DaQuando) }
+  if($h["@FINOA"]    -ne $Fino){     throw ($ProvaName + ": @FINOA e' '" + $h["@FINOA"] + "', atteso " + $Fino + " (la finestra si dichiara nel prova, non si eredita dal default)") }
 
   # GATE DEI 3 ASSI: esattamente {InpLyaThreshold, InpLyaLookback, InpSlAtrMult}
   $assiOrd = @($assiY | Sort-Object)
@@ -351,7 +352,9 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host "FILE ATTESI NELLO ZIP: REFERTO_CHAOS.txt + il prova + i CSV IS/OOS_ohlc (nella CORSA)" -ForegroundColor Gray
+Write-Host "FILE ATTESI NELLO ZIP: REFERTO_CHAOS.txt + il prova + il CSV *_IS_ohlc (nella CORSA)." -ForegroundColor Gray
+Write-Host "NOTA: il CSV *_OOS_ohlc NON esiste MAI qui (FrazioneIS 1.0 = gamba OOS degenere)." -ForegroundColor Gray
+Write-Host "      Il rosso del generico su quel file e' ATTESO: NON rilanciare." -ForegroundColor Gray
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
 if($Problemi.Count -gt 0){ Write-Host "ESITO: COMPLETATO CON PROBLEMI" -ForegroundColor Yellow; exit 1 }

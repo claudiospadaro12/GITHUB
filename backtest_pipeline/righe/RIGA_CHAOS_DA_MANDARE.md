@@ -3,7 +3,7 @@
 **Che cos'è:** lo **screening del GATE LLE** — un EMA-cross 9/21 **incatenato**
 all'esponente di Lyapunov più grande (opera SOLO in regime "leggibile", flat nel
 caos). EA `ABTG_ChaosLyapunov`, **NUOVO — mai compilato**, su **NASUSD_EXT M15**,
-**OHLC (Modello 1)**, finestra intera **2020 → 2026**, sweep a **3 assi**. Gate
+**OHLC (Modello 1)**, finestra **2020.01.01 → 2024.01.01** (la cassaforte BCM 2024.09.26+ resta FUORI: è l'OOS del passo 2), sweep a **3 assi**. Gate
 LLE da jojoale (jojoalb), MQL5 Code Base 76446.
 
 > 🔴 **SCREENING, NON un verdetto.** Gira a **MODELLO 1 (OHLC)**: si legge la
@@ -18,7 +18,7 @@ LLE da jojoale (jojoalb), MQL5 Code Base 76446.
 | | |
 |---|---|
 | **EA** | `mql5/Experts/ABTG_ChaosLyapunov.mq5` (**nuovo**, Guardian-free) |
-| **Driver** | `righe/RIGA_CHAOS.ps1` (marcatore `MARCATORE_RIGA_CHAOS_v1`) |
+| **Driver** | `righe/RIGA_CHAOS.ps1` (marcatore `MARCATORE_RIGA_CHAOS_v2`) |
 | **File prova** | `prove/ABTG_ChaosLyapunov_Lya.txt` (sweep 3 assi + 2 fissi) |
 | **Include** | **nessuno** (solo `Trade\Trade.mqh`, di serie) |
 
@@ -63,8 +63,9 @@ e i trade calano in modo ordinato** → il gate **morde** ed è l'edge. È tutto
 
 ## 📐 FINESTRA — **una sola tranche** (mappa il gate, non IS/OOS)
 
-Finestra **2020.01.01 → 2026.06.30** (crollo 2020 + toro 2021 + orso 2022 +
-ripartenza). Nessuno split IS/OOS: il gate si **mappa sulla finestra intera**. Il
+Finestra **2020.01.01 → 2024.01.01** (crollo 2020 + toro 2021 + orso 2022 +
+ripartenza 2023) — identica allo SHORTGATE per comparabilità. La **cassaforte BCM
+2024.09.26 → 2026.06.30 resta FUORI**: è l'OOS del passo 2 e non si tocca qui. Nessuno split IS/OOS: il gate si **mappa sulla finestra intera**. Il
 generico pretende una `FrazioneIS`: la riga passa **`1.0`**, così la gamba "IS" è
 la finestra intera e la "OOS" è degenere e si ignora. Lettura per **REGIME** dal
 per-trade CSV in `Common\Files`:
@@ -99,7 +100,7 @@ per-trade CSV in `Common\Files`:
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_CHAOS.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_CHAOS.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOS_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOS_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -117,7 +118,7 @@ pavimento SL (R109): TUTTI PASSATI`; `simbolo custom: NASUSD_EXT TROVATO (...)`;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_CHAOS.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_CHAOS.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOS_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_CHAOS_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -129,5 +130,12 @@ Si incolla **il blocco INTERO**: è **un comando solo**.
 ## 📦 COSA TORNA INDIETRO
 
 Zip sul **Desktop**: `CHAOS_<MODO>_<data>_<ora>.zip` → dentro `REFERTO_CHAOS.txt`
-+ il prova + (nella corsa) i CSV `..._IS_ohlc.csv` e `..._OOS_ohlc.csv`. **Mandami
-lo zip.**
++ il prova + (nella corsa) il CSV `..._IS_ohlc.csv` (la finestra intera).
+⚠️ Il CSV `..._OOS_ohlc.csv` **NON esiste mai** (FrazioneIS 1.0 = gamba OOS
+degenere): il blocco ROSSO del generico su quel file è **ATTESO — NON
+rilanciare**. **Mandami lo zip.**
+
+> 📏 **Criterio 3 (segmentazione per regime): NON misurabile in questa griglia**
+> (dichiarato 31/08, prima dei numeri): le 105 celle scrivono lo stesso
+> per-trade CSV (magic fisso) e sopravvive solo l'ultima passata. Si misura
+> allo stage-2 a cella singola con magic dedicato.

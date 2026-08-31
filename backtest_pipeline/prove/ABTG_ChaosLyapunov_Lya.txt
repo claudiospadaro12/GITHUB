@@ -27,9 +27,15 @@
 #      2. esiste una fascia di soglia con PF >= 1.3 su OHLC E DD < 8%, con
 #         il profitto NON concentrato in una singola cella (centro di un
 #         altopiano, non picco isolato -- regola di casa);
-#      3. la segmentazione per regime (per-trade CSV, finestra 2020-2024 che
-#         contiene crollo 2020 / toro 2021 / orso 2022) mostra che l'edge
-#         NON viene da un solo sotto-periodo di rumore.
+#      3. la segmentazione per regime (finestra 2020-2024 che contiene
+#         crollo 2020 / toro 2021 / orso 2022) mostra che l'edge NON viene
+#         da un solo sotto-periodo di rumore.
+#         >>> NON MISURABILE IN QUESTA GRIGLIA (dichiarato 31/08, PRIMA dei
+#         numeri): le 105 celle scrivono lo stesso per-trade CSV (magic
+#         fisso) e sopravvive solo l'ultima passata, cella ignota. Il
+#         criterio 3 si misura allo STAGE-2 a cella singola (magic
+#         dedicato), dopo la scelta dell'altopiano. Nessun numero del
+#         per-trade di questa griglia va letto.
 #    BOCCIA se: il PF e' piatto rispetto alla soglia (gate decorativo),
 #      oppure tutto rosso, oppure l'edge e' una cella outlier.
 #
@@ -51,8 +57,13 @@
 @SIMBOLO  NASUSD_EXT
 @PERIODO  M15
 @DAQUANDO 2020.01.01
+@FINOA    2024.01.01
 #   ^ finestra dello SHORTGATE (crollo 2020 + toro 2021 + orso 2022 +
-#     ripartenza 2023) per comparabilita' di regime. Il pavimento VERO di
+#     ripartenza 2023), IDENTICA a RIGA_SHORTGATE (2020.01.01->2024.01.01)
+#     per comparabilita' di regime. La cassaforte BCM 2024.09.26->2026.06.30
+#     resta FUORI: e' l'OOS del passo 2 (verdetto a tick) e non si tocca qui
+#     (classe "finestra ereditata dal default del generico", 31/08).
+#     Il pavimento VERO di
 #     NASUSD_EXT non e' stato misurato in questa caccia: [INCERTO], potrebbe
 #     estendersi prima -- da sondare con scarica_storico/import se serve OOS.
 #
