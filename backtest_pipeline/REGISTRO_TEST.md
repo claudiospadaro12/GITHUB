@@ -485,3 +485,16 @@ Saga completa in `risultati_archivio/REFERTO_CRT_2026-08-30.md`. In sintesi:
   su D1 NON popolano nel tester tick su nativo: vale per ogni EA futuro);
   classe "skip-senza-Rifai" in CHECKLIST_RIGA_DI_LANCIO.md (4 corse della
   saga erano zombie: CSV stantii spacciati per freschi).
+
+---
+
+## CHAOS LYAPUNOV (gate LLE su EMA-cross, da jojoale CB76446) — BOCCIATO 31/08/2026
+
+Screening OHLC NASUSD_EXT M15 2020-2024, 105 celle (referto:
+`risultati_archivio/REFERTO_CHAOS_2026-08-31.md`). Il gate MORDE (15/15 gruppi
+monotoni) ma **al CONTRARIO della tesi**: gate stretto (solo "regime leggibile",
+LLE basso) = PF 0.39-0.42; gate largo = PF 1.25-1.33. La fascia PF>=1.3 & DD<8%
+e' UNA cella su 105 -> outlier -> BOCCIA da criterio congelato. Il verde a gate
+largo = drift Nasdaq + ottimismo OHLC su EMA-cross, non edge del gate. n sottile
+ovunque (55-92 trade/4 anni). **La tesi "LLE basso = tradeable" e' falsificata
+sugli indici.** Magic 769200 libero. Il calcolo LLE resta come mattone misurato.
