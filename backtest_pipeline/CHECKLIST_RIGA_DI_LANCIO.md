@@ -5930,3 +5930,123 @@ proprio vincolo ne' dimostrare che il fix ha funzionato.
 > **3. E il conteggio dev'essere POSSIBILE**: se il vincolo lega apertura e
 > chiusura, il per-trade CSV esporta **ENTRAMBE** le ore. Un vincolo che
 > nessuna colonna del referto sa misurare e' gia' un giro a vuoto.
+
+---
+
+## 🆕 AGGIUNTE DEL 31/08/2026 (sera) — trovate verificando **MISSIONE A DUKASCOPY** (`RIGA_DUKA_A.ps1` + `dukascopy_tick.py`, pin `1c9c497d`), **ESEGUENDO** il giro a vuoto, i quattro rami d'uscita e un banco di interruzione/ripresa
+
+## 🧱 LA FINESTRA COSTRUITA PER **NON SOVRAPPORSI** AL DATO NATIVO, CONTRO IL **CANCELLO CHE VIVE PROPRIO SULLA SOVRAPPOSIZIONE**
+
+_Intercettata al gate, prima dell'invio. Costo evitato: **~120 ore di crawl
+(5 giorni pieni di PC acceso)** per produrre un dataset che **non puo'
+fisicamente passare il proprio cancello zero**._
+
+La riga dichiarava, in tutti e tre i posti coerentemente (header `.ps1`,
+`param()`, scheda `.md`): finestra `2019-01-01 -> 2024-09-25`, con la
+motivazione esplicita *"si salda al tick nativo BCM che parte il 2024-09-26
+**senza sovrapporsi**"*. Non sovrapporsi sembra igiene: niente dato doppio,
+niente byte sprecati.
+
+Ma il cancello che quel dato deve passare e' una **SONDA DI SOVRAPPOSIZIONE**:
+- `DUKASCOPY_PASSO0.md` par. 4, passo 5: *"giorni campione **2024.10+**
+  contro tick NATIVI -> CANCELLO + discriminante DST"*;
+- `ABTG_ImportaTickEsterno.mq5` riga 86, lista congelata:
+  `2024.11.20;2025.06.16;2024.10.29;2024.10.31;2025.03.12;2025.03.25;2025.10.28;2026.03.11;2026.03.24;2026.06.15`
+  — **dieci giorni su dieci FUORI dalla finestra scaricata**;
+- e l'header dello stesso `.mq5` lo dice in chiaro: *"il tick BCM nativo parte
+  dal 2024.09.26: **la sovrapposizione c'e' ed e' lunga**"*.
+
+Copertura misurabile sui 10 giorni campione: **0%**. Cancello chiuso per
+costruzione, dopo cinque giorni di download. E il precedente e' vincolante:
+gli `_EXT` HistData sono IN FRIGO esattamente perche' quel cancello non e'
+passato.
+
+> ✅ **REGOLA.** Quando un dato esterno deve essere **CALIBRATO CONTRO** un dato
+> interno, la finestra di scarico **DEVE CONTENERE** i campioni di calibrazione,
+> e il controllo e' **meccanico, non narrativo**: si apre il file che contiene
+> la lista dei giorni campione (o il criterio che li genera) e si verifica
+> **giorno per giorno** che cadano dentro `-Da .. -A`. "Si salda senza
+> sovrapporsi" e' una frase che suona igienica e **nega il metro**: se esiste
+> una sonda di sovrapposizione, la sovrapposizione **e' un requisito**, non uno
+> spreco.
+> **Corollario di sequenza:** la tranche che serve la SONDA e' corta (qui ~15 h
+> contro ~120 h) e va **scaricata e giudicata PER PRIMA**. Si rischiano 15 ore
+> contro un cancello che in questa casa ha gia' bocciato una famiglia intera,
+> non 135.
+
+## ✂️ LE TRANCHE SPEZZATE A META' DI UN ARTEFATTO **MENSILE**: la seconda tranche **RISCRIVE** il mese della prima
+
+Specializzazione del punto 35. `dukascopy_tick.py` scrive **un CSV per mese**
+con `scrivi_atomico` (`os.replace`): il file mensile viene **sostituito**, mai
+appeso. Due tranche che condividono un mese (`... -> 2024-09-25` e
+`2024-09-26 -> ...`) producono un `U30USD_DK_ticks_2024-09.csv` che contiene
+**solo l'ultima meta' scritta**, senza nessun messaggio d'errore e con il
+referto che conta "1 file mensile prodotto" come se fosse intero.
+
+> ✅ **REGOLA.** Se la corsa produce artefatti a **granularita' fissa** (mese,
+> anno, simbolo), i confini delle tranche si mettono **sui confini della
+> granularita'**. Il controllo: `-A` di una tranche e `-Da` della successiva
+> non devono mai cadere dentro lo stesso periodo di aggregazione.
+
+## 🔢 IL NUMERO **CALCOLATO** SALDATO A UNA TRADUZIONE UMANA **COSTANTE**
+
+Misurato eseguendo: con `-Da 2024-10-01 -A 2025-06-16` la riga stampa
+
+```
+PROIEZIONE col ritmo del 18/08 (~4 min/giorno): ~15 ORE = 4-5 NOTTI.
+```
+
+Le "~15 ORE" sono calcolate dai parametri; il "= 4-5 NOTTI" e' una **stringa
+costante** incollata alla stessa frase. La traduzione non segue mai il calcolo
+e si contraddice al primo parametro diverso dal default. E anche al default e'
+falsa: **~120 ore sono 5 GIORNI di corsa CONTINUA** (PC acceso giorno *e*
+notte), non 4-5 nottate di dieci ore — chi legge "4-5 notti" pianifica ~50 ore
+e si trova al 40%.
+
+> ✅ **REGOLA.** In una frase sola non convivono un numero calcolato e la sua
+> traduzione costante: **o si calcola anche la traduzione** (`($ore/24)` giorni
+> di corsa continua) **o la si toglie**. E un'unita' di tempo destinata a
+> Claudio si dichiara nella scala che lui usa per decidere: **ore di PC acceso**,
+> non "notti".
+
+## 🕳️ LA GUARDIA DELLA CACHE AVVELENATA **CIECA AL TRONCAMENTO TOTALE**
+
+Il punto 16 pretende tre pezzi (butta la cache illeggibile / non scrivere
+roba invalida / scrittura atomica) e `dukascopy_tick.py` li ha tutti e tre:
+**misurato su banco**, tre file `.bi5` troncati a meta' vengono buttati e
+riscaricati, e il CSV torna identico al byte.
+
+Il quarto file del banco era troncato a **ZERO byte**, e li' la guardia e'
+cieca: `decodificabile(b"")` torna `True` per costruzione (un'ora senza tick
+e' un dato legittimo), quindi lo zero-byte resta in cache **per sempre** e i
+suoi tick sono persi in silenzio (nel banco: 1610 -> 1605 tick, rc 0, referto
+verde).
+
+> ✅ **REGOLA.** In una cache di ripresa, **"vuoto" e "distrutto" hanno la
+> stessa faccia**. O si distinguono con un marcatore esplicito (il file
+> `.assente` accanto, che questo script gia' usa per i 404 — basta pretenderlo
+> anche per le risposte 200 di lunghezza zero, e trattare uno `.bi5` di 0 byte
+> **senza** `.assente` come veleno da riscaricare), oppure la promessa
+> "la cache avvelenata si riscarica da sola" va **ristretta per iscritto** al
+> troncamento parziale.
+
+## 🧟 IL GIRO A VUOTO CHE SI PORTA VIA IL REFERTO DELLA NOTTE PRIMA
+
+Tre difetti dello stesso ramo `-SoloControllo`, tutti **eseguiti**:
+1. il `Remove-Item` del referto del `.py` (punto 23) vive **solo** nel ramo
+   della corsa vera: nel giro a vuoto un `referto_dukascopy_tick.txt` **di
+   undici giorni prima** viene copiato nella raccolta col nome
+   `referto_py_<stamp_DI_OGGI>.txt` e finisce nello zip per Claude;
+2. la riga "Attesi dentro:" nomina `console_duka_a_*.txt`, che nel giro a
+   vuoto **non viene mai creato** (lo zip contiene invece `python_versione.txt`,
+   che non e' nominato): il controllo degli attesi risulta rosso su un giro
+   perfettamente verde (famiglia 89-ter);
+3. lo `STATO_...txt` **unico e senza data nel nome** viene sovrascritto dal
+   giro a vuoto con *"Nessun download eseguito"*, cancellando lo stato
+   dell'ultima corsa vera.
+
+> ✅ **REGOLA.** Il ramo "a vuoto" **non scrive negli stessi file** del ramo
+> vero: ne' lo stato persistente, ne' le copie di artefatti prodotti dall'altro
+> ramo. E l'elenco degli "attesi" **si genera dai file che esistono davvero in
+> quel ramo** (`Get-ChildItem` sulla cartella di raccolta), mai da una lista
+> costante scritta a mano per il ramo piu' ricco.

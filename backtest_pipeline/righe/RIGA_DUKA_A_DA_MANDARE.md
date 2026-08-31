@@ -2,7 +2,14 @@
 
 **Che cos'e'.** Il **PASSO 1** del piano di `DUKASCOPY_PASSO0.md`: scarica i
 **tick Dukascopy del Dow** (`USA30IDXUSD`) sulla finestra **DICHIARATA
-2019-01-01 → 2024-09-25** (si salda al tick nativo BCM che parte il
+PRIMA la TRANCHE-SONDA 2024-10-01 → 2025-06-16, POI la storica** (corretto
+31/08 dal verificatore: la vecchia finestra 2019→2024-09-25 era costruita per
+NON sovrapporsi al nativo, ma il CANCELLO di validazione vive proprio sulla
+sovrapposizione — 0/10 giorni-sonda coperti. NB: diverge anche dal PASSO0
+par.4b, dichiarato). La tranche-sonda copre 6/10 giorni campione congelati e
+DUE finestre DST sfasate; la storica 2019-01-01 → 2024-09-30 (confini di MESE:
+mai spezzare un mese fra tranche, i CSV sono mensili) parte SOLO a cancello
+passato. (nota storica: la finestra originale si saldava al tick nativo BCM che parte il
 2024-09-26) e li converte in **CSV mensili `U30USD_DK_ticks_AAAA-MM.csv`**
 in ora server (calendario DST `usa`, il default del progetto — il
 **discriminante congelato** si esegue DOPO, alla sonda dell'import; se vince
@@ -21,7 +28,9 @@ non tocca nessun numero.** L'import e la sonda sono il passo dopo.
 ## 🌙 E' UNA CORSA DA NOTTI — leggere PRIMA di lanciare
 
 - **Durata**: ~1.790 giorni iterati × ~4 min/giorno (ritmo **misurato** il
-  18/08) = **~105-120 ore = 4-5 notti**. Il ritmo vero lo stampa il `.py`
+  18/08) = TRANCHE-SONDA **~15 ore = una notte + una mattina**; la tranche
+storica (dopo il cancello) ~120 ore = **5 GIORNI di PC acceso, giorno e
+notte**. Il ritmo vero lo stampa il `.py`
   ogni 25 giorni ("`RESTANO ~N ORE`"): se e' molto peggio, CTRL+C e si
   ridiscute — non si insiste.
 - **RIPRENDIBILE, gratis**: cache per ora scaricata (anche i 404),
@@ -62,8 +71,10 @@ del `.py`. Se qualcosa e' rosso, si ferma PRIMA di toccare la rete.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_A.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_A.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: NON COMPLETO - leggi il REFERTO sul Desktop' } }
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -Da '2024-10-01' -A '2025-06-16' -SoloControllo;
+    if($LASTEXITCODE -eq 0){ Write-Host 'GIRO A VUOTO: VERDE - tutti i gate passati, si puo lanciare la corsa' -ForegroundColor Green }
+    else { Write-Host 'GIRO A VUOTO: ROSSO - NON lanciare la corsa, leggi REFERTO_DUKA_A.txt sul Desktop' -ForegroundColor Red } }
 ```
 
 ## ▶️ POI: LA CORSA VERA (identica, senza `-SoloControllo`)
@@ -72,8 +83,11 @@ del `.py`. Se qualcosa e' rosso, si ferma PRIMA di toccare la rete.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_A.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_A.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: NON COMPLETO - leggi il REFERTO sul Desktop' } }
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -Da '2024-10-01' -A '2025-06-16';
+    if($LASTEXITCODE -eq 0){ Write-Host 'ESITO: CORSA COMPLETA - manda a Claude SOLO lo zip DUKA_A_*.zip dal Desktop' -ForegroundColor Green }
+    elseif($LASTEXITCODE -eq 3){ Write-Host 'ESITO: RIPRENDIBILE - RILANCIA ESATTAMENTE QUESTA STESSA RIGA, la cache non riscarica niente' -ForegroundColor Yellow }
+    else { Write-Host 'ESITO: FERMATA - leggi REFERTO_DUKA_A.txt sul Desktop: se dice ban 503 aspetta e RILANCIA la stessa riga' -ForegroundColor Red } }
 ```
 
 **Per riprendere dopo una notte / un'interruzione: si rilancia ESATTAMENTE
@@ -113,3 +127,15 @@ CSV mensili → `MQL5\Files` del terminale di backtest → Script
 **SONDA** coi criteri congelati (mediana ≤0,05%, copertura ≥80%,
 discriminante DST sulle 4 settimane sfasate) → solo dopo, il verdetto
 NY Retest a parametri congelati. Tutto in `DUKASCOPY_PASSO0.md` par. 4.
+
+## 🌙 TRANCHE STORICA (SOLO dopo che import+sonda passano il cancello)
+Identica alla corsa vera ma con `-Da '2019-01-01' -A '2024-09-30'` (~120 ore =
+5 giorni di PC acceso). NON lanciarla prima del cancello: 0/10 giorni-sonda
+starebbero nella finestra, e i confini sono di MESE per non riscrivere i CSV
+mensili della tranche-sonda.
+
+## ⚠️ DUE ZIP SUL DESKTOP
+A fine corsa ci saranno DUE zip: **`DUKA_A_<data_ora>.zip` (QUESTO va mandato)**
+e `dukascopy_tick.zip` (lo lascia il `.py`: ignoralo). E nel referto la riga
+`data :` deve essere di OGGI. Prima della notte: `powercfg /change
+standby-timeout-ac 0` (per rimettere com'era: `... 30`).

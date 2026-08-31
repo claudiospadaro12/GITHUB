@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_DUKA_A_v1
+#  MARCATORE_RIGA_DUKA_A_v2
 #  RIGA_DUKA_A.ps1  --  MISSIONE A DUKASCOPY: download TICK del Dow
 #                       USA30IDXUSD -> CSV mensili U30USD_DK (31/08/2026)
 # ---------------------------------------------------------------------
@@ -74,7 +74,7 @@
 #  & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
 #      $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_A.ps1"; Remove-Item $p -EA SilentlyContinue;
 #      irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_A.ps1" -OutFile $p;
-#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+#      if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_A_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
 #      $global:LASTEXITCODE=0; & $p -Pin $pin; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: NON COMPLETO - leggi il REFERTO sul Desktop' } }
 #
 #  -Pin NON HA DEFAULT, apposta (lezione della riga sorella del 20/08):
@@ -128,7 +128,7 @@ $Cart     = Join-Path $Dsk ("DUKA_A_" + $Stamp)
 $Zip      = Join-Path $Dsk ("DUKA_A_" + $Stamp + ".zip")
 $Referto  = Join-Path $Cart "REFERTO_DUKA_A.txt"
 $Console  = Join-Path $Cart ("console_duka_a_" + $Stamp + ".txt")
-$StatoFile= Join-Path $Dsk "STATO_DUKA_A.txt"
+$StatoFile= Join-Path $Dsk $(if($SoloControllo){"STATO_DUKA_A_GIROAVUOTO.txt"}else{"STATO_DUKA_A.txt"})
 
 $Problemi = New-Object System.Collections.ArrayList
 $Note     = New-Object System.Collections.ArrayList
@@ -137,6 +137,7 @@ if($SoloControllo){ $Modo = "SOLO CONTROLLO (nessun download)" }
 elseif($SoloCache){ $Modo = "SOLO CACHE (riconversione, zero rete)" }
 $EsitoRiga = "NON PARTITA"
 $RcPy      = -1
+$refFresco = $false
 $Python    = ""
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
@@ -288,7 +289,7 @@ try{
     Dico $EsitoRiga "Green"
     Write-Host ""
     Write-Host ("    Proiezione della corsa vera: " + $GiorniTot + " giorni iterati x ~4 min/giorno") -ForegroundColor Yellow
-    Write-Host ("    (ritmo MISURATO il 18/08) = ~" + $StimaOre.ToString("0",$INV) + " ORE = 4-5 notti.") -ForegroundColor Yellow
+    Write-Host ("    (ritmo MISURATO il 18/08) = ~" + $StimaOre.ToString("0",$INV) + " ORE = ~" + ($StimaOre/24.0).ToString("0.0",$INV) + " GIORNI di PC ACCESO, giorno E notte.") -ForegroundColor Yellow
     $CodiceUscita = 0
   }
 
@@ -302,7 +303,7 @@ try{
   Write-Host ("    dst                 : " + $Dst + "  (discriminante congelato: si esegue DOPO, alla sonda dell'import)") -ForegroundColor White
   if(-not $SoloCache){
     Write-Host ""
-    Write-Host ("    PROIEZIONE col ritmo del 18/08 (~4 min/giorno): ~" + $StimaOre.ToString("0",$INV) + " ORE = 4-5 NOTTI.") -ForegroundColor Yellow
+    Write-Host ("    PROIEZIONE col ritmo del 18/08 (~4 min/giorno): ~" + $StimaOre.ToString("0",$INV) + " ORE = ~" + ($StimaOre/24.0).ToString("0.0",$INV) + " GIORNI di PC ACCESO, giorno E notte.") -ForegroundColor Yellow
     Write-Host "    Il .py stampa ogni 25 giorni la proiezione VERA ('RESTANO ~N ORE'):" -ForegroundColor Yellow
     Write-Host "    se il ritmo e' molto peggio, CTRL+C e si ridiscute -- non si insiste." -ForegroundColor Yellow
     Write-Host ""
@@ -452,8 +453,9 @@ try{
     [void]$r.Add("in " + $TickDir + " per il passo di import.")
     Set-Content -LiteralPath $Referto -Value $r -Encoding ASCII
 
-    # copia del referto del .py, se c'e' (col nome proprio, checklist 26)
-    if(Test-Path -LiteralPath $RefPy){
+    # copia del referto del .py: SOLO nel ramo vero e SOLO se FRESCO (classe
+    # "il giro a vuoto si porta via il referto della notte prima", 31/08)
+    if(-not $SoloControllo -and $refFresco -and (Test-Path -LiteralPath $RefPy)){
       Copy-Item -LiteralPath $RefPy -Destination (Join-Path $Cart ("referto_py_" + $Stamp + ".txt")) -Force -ErrorAction SilentlyContinue
     }
 
@@ -471,7 +473,7 @@ try{
     Write-Host ""
     Write-Host ("RACCOLTA  : " + $Cart) -ForegroundColor Cyan
     Write-Host ("ZIP PRONTO: " + $Zip + "  (LEGGERO: referto+console, niente CSV)") -ForegroundColor Cyan
-    Write-Host ("Attesi dentro: REFERTO_DUKA_A.txt, console_duka_a_" + $Stamp + ".txt, autotest.txt") -ForegroundColor Cyan
+    Write-Host ("Attesi dentro: " + ((Get-ChildItem -LiteralPath $Cart | Sort-Object Name | Select-Object -ExpandProperty Name) -join ", ")) -ForegroundColor Cyan
   }catch{
     Write-Host ("!! raccolta non completata: " + $_.Exception.Message) -ForegroundColor Red
     if($CodiceUscita -eq 0){ $CodiceUscita = 3 }
