@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDALONDONFX_v1
+#  MARCATORE_RIGA_SONDALONDONFX_v2
 #  RIGA_SONDALONDONFX.ps1 -- SONDA DI FREQUENZA LONDONFX (PASSO 0 della
 #  caccia frequenza forex, SECONDA BATTUTA del 31/08).
 #  ABTG_SondaLondonFx e' un CONTATORE: NESSUN ordine, nessun lotto,
@@ -71,6 +71,16 @@
 #      chiamate di trading nel sorgente FUORI dai commenti. Attese ZERO
 #      (la riga di grep sta QUI e non nel .mq5, apposta: dentro il file
 #      combacerebbe con se' stessa).
+#  >>> IL CSV SI DATA PRIMA DI LEGGERLO (v2, difetto trovato dal
+#      verificatore ESEGUENDO, 31/08): la workdir e' RIUSABILE e non si
+#      svuota. "-Rifai" (che c'e', ed e' obbligatorio) copre il generico
+#      che SALTA la corsa, NON il generico che MUORE prima di rifarla --
+#      e se muore, il CSV della corsa PRECEDENTE resta dov'era. Riprodotto
+#      su banco: il referto usciva con tabella completa, 6 righe, autotest
+#      0/16, determinismo IDENTICI e "data:" di adesso, tutto da una corsa
+#      mai avvenuta. Ora ogni CSV viene confrontato con l'ORA DI AVVIO
+#      DELLA SUA CORSA: piu' vecchio = NON LETTO, e le due date finiscono
+#      nel referto.
 #  >>> UNA SOLA TRANCHE (FrazioneIS 1.0): la gamba "OOS" del generico
 #      e' DEGENERE (0 giorni) e si IGNORA. Il rosso del generico sui
 #      CSV *_OOS e' ATTESO: NON rilanciare. Il conteggio dei *_OOS
@@ -159,7 +169,7 @@ if($SoloControllo){ $Modo = "CONTROLLO" }
 function C([string]$et,[string]$sym,[string]$tf,[string]$prova,[int]$lungo){
   return [pscustomobject]@{ Etichetta=$et; Simbolo=$sym; Periodo=$tf; Prova=$prova; LungoAtteso=$lungo
     Righe=$null; RigheDati=$null; Giorni=$null; BarreVal=$null
-    Determinismo="NON VERIFICATO"; Cablaggio="NON VERIFICATO"; Sottoinsieme="NON VERIFICATO"
+    Determinismo="NON VERIFICATO"; Cablaggio="NON VERIFICATO"; Sottoinsieme="NON VERIFICATO"; CsvOra="n/d"
     AutoKo=-2; AutoBlocchi=$null; RsiDivMax=$null; PipEco=$null; PipPtiEco=$null
     CanaleInv=$null; BarreSaltate=$null; MaxGiornoTot=$null }
 }
@@ -488,6 +498,13 @@ try{
   Titolo ("4. LE CORSE (generico per corsa, Modello 2 OPEN PRICES, FrazioneIS " + $FrazioneIS + ")")
   foreach($c in $CorseDaFare){
     Dico ("CORSA " + $c.Etichetta + " | " + $c.Simbolo + " " + $c.Periodo + " | " + $c.Prova) "Cyan"
+    # L'ORA DI AVVIO DELLA CORSA: e' il METRO DI FRESCHEZZA del CSV che
+    # si leggera' dopo. La workdir e' RIUSABILE e NON si svuota: se il
+    # generico MUORE PRIMA di rifare la corsa (MT5 aperto nel frattempo,
+    # cartella dati non trovata, ...), il CSV della corsa PRECEDENTE
+    # resta esattamente dov'era. "-Rifai" copre il generico che SALTA,
+    # NON il generico che MUORE.
+    $tCorsa = Get-Date
     # "-Rifai" sta SEMPRE nell'argv: la classe skip-senza-Rifai ha
     # prodotto 4 corse zombie su 6 nella saga CRT (31/08).
     $argv = @("-ExecutionPolicy","Bypass","-File",$drv,
@@ -503,6 +520,10 @@ try{
               "-Rifai",
               "-Deposito",("" + $Deposito))
     if($SoloControllo){ $argv += "-SoloControllo" }
+    # l'argv finisce a schermo PER INTERO: "-Rifai c'e' o no" e' un gate
+    # del verificatore (checklist 31/08) e deve poter essere riletto nel
+    # log della console, non solo nel sorgente.
+    Dico ("argv generico: " + ($argv -join " "))
     $global:LASTEXITCODE = 0
     & powershell $argv
     $rc = $LASTEXITCODE
@@ -517,6 +538,19 @@ try{
     $csvIS = Join-Path $Work ("risultati_prove\" + $EA + "\" + $EA + "_" + $c.Simbolo + "_IS_ohlc_" + $c.Etichetta + ".csv")
     if(-not (Test-Path -LiteralPath $csvIS)){
       [void]$Problemi.Add("corsa " + $c.Etichetta + ": CSV OPTFRAME NON prodotto: " + $csvIS)
+      continue
+    }
+    # IL CSV SI DATA PRIMA DI LEGGERLO. Un CSV scritto PRIMA dell'avvio
+    # di questa corsa e' il reperto di una corsa PRECEDENTE rimasto nella
+    # workdir riusabile: leggerlo vorrebbe dire stampare una tabella
+    # completa, verde e PLAUSIBILE di numeri mai misurati oggi. Qui NON
+    # si legge, e il perche' finisce nel referto con le due date.
+    $csvItem  = Get-Item -LiteralPath $csvIS
+    $c.CsvOra = $csvItem.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV)
+    if($csvItem.LastWriteTime -lt $tCorsa){
+      [void]$Problemi.Add("corsa " + $c.Etichetta + ": CSV STANTIO, NON LETTO. E' scritto alle " + $c.CsvOra +
+        ", cioe' PRIMA dell'avvio di questa corsa (" + $tCorsa.ToString("yyyy-MM-dd HH:mm:ss",$INV) +
+        "): e' il CSV di una corsa PRECEDENTE rimasto nella workdir. Il generico e' MORTO prima di rifarlo (-Rifai copre il generico che SALTA, non quello che MUORE). Questa corsa NON ha numeri.")
       continue
     }
     $lin = @(Get-Content -LiteralPath $csvIS | Where-Object { $_.Trim() -ne "" })
@@ -780,6 +814,7 @@ foreach($c in $CORSE){
     [void]$RefTxt.Add("         ablazione F1-bis (invariante, dalla riga ora=8): NUDO L " + (FmtN $r8.NudoL) + " / S " + (FmtN $r8.NudoS) + "  contro  CON RSI L " + (FmtN $r8.ConRsiL) + " / S " + (FmtN $r8.ConRsiS) + " su " + (FmtN $r8.Giorni) + " giorni contati")
     [void]$RefTxt.Add("         orizzonte LUNGO (" + $c.LungoAtteso + " barre = 8 ore, INFORMATIVO, riga rsi=1 ora=8): MFE L " + (Fmt2 $r8.MfeLunL) + " / S " + (Fmt2 $r8.MfeLunS) + " pip | MAE L " + (Fmt2 $r8.MaeLunL) + " / S " + (Fmt2 $r8.MaeLunS) + " pip | ATR mediano sessione " + (Fmt2 $r8.AtrMed) + " pip")
   }
+  [void]$RefTxt.Add("         CSV letto: scritto alle " + $c.CsvOra + " -- FRESCO (piu' recente dell'avvio di QUESTA corsa: un CSV piu' vecchio sarebbe di una corsa precedente e NON verrebbe letto)")
   [void]$RefTxt.Add("         determinismo: " + $c.Determinismo + " | cablaggio: " + $c.Cablaggio + " | sottoinsieme: " + $c.Sottoinsieme)
   if($null -ne $c.MaxGiornoTot){
     [void]$RefTxt.Add("         muro giornaliero F4 (peggiore fra le passate): " + (FmtN $c.MaxGiornoTot) + " segnali x 0,65% = " + (Fmt2 (0.65*$c.MaxGiornoTot)) + "% di rischio aperto contro il cap C1 di 3,25% (18/08)")

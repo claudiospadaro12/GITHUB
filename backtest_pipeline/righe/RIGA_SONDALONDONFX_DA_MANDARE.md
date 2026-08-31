@@ -54,7 +54,7 @@ informazione e costa ore):
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_SONDALONDONFX.ps1` (marcatore `MARCATORE_RIGA_SONDALONDONFX_v1`) |
+| **Driver** | `righe/RIGA_SONDALONDONFX.ps1` (marcatore `MARCATORE_RIGA_SONDALONDONFX_v2`) |
 | **File prova** | `prove/LONDONFX_FREQUENZA_M5.txt` + `prove/LONDONFX_FREQUENZA_M15.txt` |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.**
@@ -72,7 +72,7 @@ mai compilato può cadere, ed è un risultato).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDALONDONFX_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDALONDONFX_CONTROLLO_ DI ADESSO: il controllo non e'' arrivato alla raccolta' };
@@ -86,7 +86,7 @@ mai compilato può cadere, ed è un risultato).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDALONDONFX_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDALONDONFX_CORSA_ DI ADESSO: la corsa non e'' arrivata alla raccolta' };
@@ -121,6 +121,11 @@ la sonda lo spegne apposta: le passate si sovrascriverebbero).
 - riga **`gemellaggio prova M5/M15:`** = VALIDO (SOLO le 2 differenze
   dichiarate: `@PERIODO` e `InpBarreOrizzonteLungo` 96/32);
 - riga **`csv *_OOS trovati:`** = **0** (sta NEL referto, non solo a schermo);
+- riga **`CSV letto: scritto alle ...`** sotto OGNI corsa: è l'ora in cui il CSV
+  è stato scritto, e la riga esiste solo se quell'ora è **più recente
+  dell'avvio della corsa**. Se una corsa dice invece `CSV STANTIO, NON LETTO`
+  fra i PROBLEMI, quel CSV è il reperto di un giro precedente (il generico è
+  morto prima di rifarlo): **quella corsa non ha numeri, si rilancia**;
 - **collaudi per corsa**: righe **6**, autotest **0/16 PASSATI**, `RsiDivMax`
   ~0 (L1), `PipEco` **0,00010** e `PipPti` **10,00** (L5 — l'equivalente forex
   del PuntoIdx della SondaM0PB), `CanInv` **0**, `BarreSalt` ~0 — e per corsa:

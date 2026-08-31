@@ -5626,6 +5626,63 @@ tester le abbia mai viste.
 >    Un risultato identico al precedente dopo una modifica al codice non e'
 >    "conferma": e' il primo indizio che il codice non e' mai girato.
 
+### 🧟‍♂️ …-bis. `-Rifai` COPRE IL GENERICO CHE **SALTA**, NON IL GENERICO CHE **MUORE**: il CSV precedente resta al suo posto e il wrapper lo legge come fresco (31/08/2026, sera)
+
+_Trovata verificando **SONDA LONDONFX** (`RIGA_SONDALONDONFX.ps1` v1, pin
+`60fcdcf3`) **prima** dell'invio, **ESEGUENDO** il driver su un banco stubbato:
+prima una corsa buona, poi una seconda corsa nella STESSA workdir con un
+generico che muore subito. Nessuna serata bruciata._
+
+Il wrapper faceva **tutto giusto** secondo la regola qui sopra: `-Rifai` era
+nell'`$argv`, ogni volta, per tutte e due le corse. Ma `-Rifai` protegge da UN
+solo modo di fallire — il generico che trova il CSV e **fa `continue`**. Non
+protegge dall'altro:
+
+1. la workdir del wrapper (`%USERPROFILE%\abtg_<round>`) e' **riusabile e non
+   si svuota**: al secondo lancio i CSV del primo lancio sono ancora li';
+2. lo spostamento in `vecchi\` che `-Rifai` provoca avviene **dentro** il
+   generico, **dopo** i suoi `Muori`. Se il generico muore PRIMA — `chiudi
+   MetaTrader prima di lanciare` (e basta che Claudio apra MT5 durante i 10-25
+   minuti di corsa), `cartella dati MT5 non trovata`, `non trovo terminal64` —
+   il CSV vecchio **non viene ne' spostato ne' riscritto**;
+3. il wrapper faceva `Test-Path` sul CSV e, trovandolo, lo **leggeva**.
+
+Riprodotto su banco, il referto della seconda corsa usciva cosi': tabella dei
+cancelli **completa** su tutte e 12 le passate, `righe 6`, `autotest 0/16
+PASSATI`, `determinismo IDENTICI`, `cablaggio OK`, `sottoinsieme OK`,
+`compilazione OK` con orario fresco, `data:` **di adesso**, zip puntuale — e
+**nessuno di quei numeri era stato misurato quel giorno**. L'unica traccia
+vera erano due righe in `PROBLEMI` ("il generico e' uscito con codice 1") e un
+`ESITO: COMPLETATO CON PROBLEMI` giallo. Ed e' proprio il ramo che la pagina
+insegna a NON temere: *"CORSA CON PROBLEMI: lo zip esiste lo stesso,
+mandalo"*.
+
+E' il punto **40** un'altra volta ("non ho potuto misurare" e "ho misurato e va
+bene" nello stesso ramo), sposato al punto **78** (l'artefatto che non porta la
+PROPRIA data): il CSV **non veniva mai datato**.
+
+> ✅ **REGOLA (doppia), da applicare a OGNI wrapper che legge un artefatto da
+> una workdir riusabile — cioe' a tutti:**
+>
+> 1. **Si prende l'ora PRIMA di lanciare la fase, e l'artefatto si DATA prima
+>    di leggerlo.** Piu' vecchio dell'avvio della sua fase = **non e' il suo**:
+>    `PROBLEMI`, e **NON si legge**. Tre esiti distinti e non due: assente /
+>    STANTIO / fresco.
+>    ```powershell
+>    $tCorsa = Get-Date
+>    & powershell $argv
+>    ...
+>    if((Get-Item -LiteralPath $csv).LastWriteTime -lt $tCorsa){ ...PROBLEMA...; continue }
+>    ```
+> 2. **Le due date finiscono NEL REFERTO**, non solo nella logica: la riga
+>    "CSV letto: scritto alle HH:mm:ss" e' quella che permette a chi legge di
+>    accorgersene senza fidarsi del codice. Un artefatto che non porta la
+>    propria data non e' verificabile da nessuno.
+>
+> ⚠️ **E il corollario:** `Test-Path` non e' mai un controllo di freschezza —
+> e nemmeno `-Rifai` lo e'. `-Rifai` dice al generico *"rifai"*; non dice al
+> wrapper *"quello che stai leggendo e' di oggi"*.
+
 ## 🗓️ LA FINESTRA EREDITATA DAL DEFAULT DEL GENERICO: lo screening si mangia la CASSAFORTE che sara' l'OOS del passo dopo (31/08/2026)
 
 _Intercettata al gate sul round CHAOS LYAPUNOV (pin `cc99ea5`), PRIMA dell'invio.
