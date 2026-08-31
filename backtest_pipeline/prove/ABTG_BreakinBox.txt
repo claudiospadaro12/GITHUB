@@ -72,6 +72,12 @@
 #     Le due colonne escono da sole nell'OPTFRAME (Equity DD %, Peggior
 #     Giornata %).
 #
+#   >>> DICHIARATO PRIMA DEI NUMERI (31/08, dal gate): QUESTO LANCIO E'
+#   MISURA + ABLAZIONE, NON IL VERDETTO. I due criteri qui sotto NON sono
+#   producibili da QUESTO banco (FrazioneIS 1.0 = niente gamba OOS; cella
+#   singola = niente altopiano): appartengono al round di griglia successivo
+#   e restano scritti per QUELLO. Da questa corsa si leggono: ablazione A/B,
+#   frequenza, C2 (dopo la conversione misurata), rischio, overnight.
 #   MERITO: PF OOS >= 1,10 con IS positivo, sui DUE LATI misurati SEPARATI
 #     (regola di Claudio 25/08). I lati si leggono dalla colonna dir del
 #     per-trade CSV, non da due corse.
