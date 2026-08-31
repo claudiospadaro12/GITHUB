@@ -24,7 +24,7 @@ ablazione dichiarata). Unico asse Y = **gemelli magic 769501/769502**.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_NYRETEST.ps1` (marcatore `MARCATORE_RIGA_NYRETEST_v4`) |
+| **Driver** | `righe/RIGA_NYRETEST.ps1` (marcatore `MARCATORE_RIGA_NYRETEST_v5`) |
 | **File prova** | `prove/ABTG_NySessionRetest.txt` (cella fissa gate-OFF, gemelli, fuso server) |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~15-40 min (tick M15, 21
@@ -40,7 +40,7 @@ rosso sul CSV `*_OOS` è **atteso**, NON rilanciare.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_NYRETEST.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_NYRETEST.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v5' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera.' -ForegroundColor Red } }
 ```
@@ -52,7 +52,7 @@ rosso sul CSV `*_OOS` è **atteso**, NON rilanciare.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_NYRETEST.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_NYRETEST.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_NYRETEST_v5' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
@@ -75,9 +75,21 @@ CONTROLLO (il giro a vuoto non è il risultato).
 PASSO 0, e i due numeri devono essere **UGUALI** (gemelli deterministici —
 se divergono la riga alza PROBLEMA da sola).
 
-## 🔁 PERCHÉ LA v3 È SU M15 (misurato, corsa H1 del 31/08 09:51)
+## 🔁 PERCHÉ QUESTO ROUND È SU M15 E NON H1 (misurato, corsa H1 del 31/08 09:51)
 Su H1 il motore è **strutturalmente muto**: seduta = 6 barre, la prima esclusa,
 la pendenza VWAP chiede 5 barre di seduta → l'unica barra utile chiude alle
 21:00, oltre il flat 20:55. **0 trade su 459 giorni, contatori esatti
 (9256 = 7083+2171+2)**. Su M15 la seduta ha ~25 barre. Il trend resta su H1
 (handle dedicato nell'EA, come il `request.security` del Pine sorgente).
+
+## 🌙 NOVITÀ v5 (dal quarto giro del verificatore)
+- L'EA scrive **`open_time`** nel per-trade CSV e ha il **flat di RECUPERO**
+  (una posizione di un giorno precedente si chiude al primo tick disponibile).
+- Il vincolo è stato **riscritto nel prova PRIMA dei numeri**: si esige che
+  nessuna posizione sopravviva al primo tick dopo il flat; le chiusure a
+  giorno successivo (giorni SENZA tick fra flat e mezzanotte) si **contano**:
+  **> 5% delle posizioni = file INVALIDO**, sotto = rilievo dichiarato.
+- La riga **svuota `Tester\cache`** (il prova è identico alla corsa v3: i
+  pass sarebbero ripescati e il CSV tornerebbe vuoto) e **misura da sola**
+  gli overnight veri: nel referto leggi le righe `cache tester:`,
+  `overnight veri:`, oltre a `data:` e `modo:`.

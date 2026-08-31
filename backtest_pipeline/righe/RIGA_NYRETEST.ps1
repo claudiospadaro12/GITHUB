@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_NYRETEST_v4
+#  MARCATORE_RIGA_NYRETEST_v5
 #  RIGA_NYRETEST.ps1  --  NY SESSION RETEST: PASSO 0 + MISURA a tick BCM.
 #  ABTG_NySessionRetest (VWAP-retest in trend, VWAP-retest intraday della
 #  flotta) su U30USD M15, TICK REALI (Modello 4), 2024.09.26->2026.06.30.
@@ -59,6 +59,8 @@ $Terminale = "n/d"
 $Compilato = "NON TENTATA"
 $Simbolo_ok= "NON VERIFICATO"
 $PerTrade_ok = "NON TROVATO"
+$CacheTxt  = "NON SVUOTATA"
+$Overnight_ok = "NON VERIFICATO"
 $Modo      = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
@@ -228,6 +230,30 @@ try{
   }
   Dico "per-trade CSV vecchi cancellati (769501/769502, se c'erano)" "Gray"
 
+  # LA CACHE DEL TESTER (checklist punto 38) -- QUI E' LOAD-BEARING: il prova e'
+  # BYTE-IDENTICO a quello della corsa v3 di oggi (stesso simbolo, periodo,
+  # finestra, modello, deposito, stessi magic), quindi la firma degli input e'
+  # la STESSA e i due pass sono gia' in cache. Con l'architettura a FRAME un
+  # pass RIPESCATO non chiama OnTester(): niente frame, niente riga nel CSV,
+  # nessun per-trade -> il round torna VUOTO.
+  # Si svuota SOLO Tester\cache (MAI bases\<server>\ticks, che e' lo storico).
+  $cacheT = Join-Path $dataFolder "Tester\cache"
+  if(Test-Path -LiteralPath $cacheT){
+    $ncPrima = @(Get-ChildItem -LiteralPath $cacheT -Recurse -File -ErrorAction SilentlyContinue).Count
+    Remove-Item (Join-Path $cacheT "*") -Recurse -Force -ErrorAction SilentlyContinue
+    $ncDopo  = @(Get-ChildItem -LiteralPath $cacheT -Recurse -File -ErrorAction SilentlyContinue).Count
+    $CacheTxt = "prima " + $ncPrima + " file, dopo " + $ncDopo
+    if($ncDopo -gt 0){
+      [void]$Problemi.Add("Tester\cache NON si e' svuotata (prima " + $ncPrima + ", dopo " + $ncDopo + "): i due pass della v3 sono gia' in cache e verrebbero RIPESCATI -> CSV senza righe e nessun per-trade.")
+      Dico ("Tester\cache NON SVUOTATA: " + $CacheTxt) "Red"
+    }
+    else{ Dico ("Tester\cache svuotata: " + $CacheTxt) "Green" }
+  }
+  else{
+    $CacheTxt = "cartella assente (" + $cacheT + "): niente da svuotare"
+    Dico ("Tester\cache: " + $CacheTxt) "Yellow"
+  }
+
   if($SoloControllo){
     Dico "SoloControllo: compilazione e gate OK, NON apro MT5. La corsa vera e' la seconda riga." "Green"
   }
@@ -269,6 +295,45 @@ try{
     }
     if($conte.Count -gt 0){ $PerTrade_ok = "OPERAZIONI per magic -> " + ($conte -join " | ") + "   (file con dati: " + $trovati + " su 2)" }
     else{ $PerTrade_ok = "NESSUN FILE in Common\Files" }
+    # IL VINCOLO, MISURATO QUI. Dopo il flat di RECUPERO un close_time notturno
+    # e' LEGITTIMO (primo tick disponibile): l'ora di chiusura DA SOLA non dice
+    # piu' niente. Si confrontano open_time e close_time (colonne 1 e 2).
+    $nTot = 0; $nOver = 0; $esempi = New-Object System.Collections.ArrayList
+    foreach($m in $MagicGemelli){
+      $pt = Join-Path $commonFiles (PerTradeNome $m)
+      if(-not (Test-Path -LiteralPath $pt)){ continue }
+      $nr = 0
+      foreach($riga in @(Get-Content -LiteralPath $pt)){
+        $nr++
+        if($nr -eq 1){ continue }
+        if($riga.Trim() -eq ""){ continue }
+        $col = $riga -split ';'
+        if($col.Count -lt 2){ continue }
+        $tChiu = $col[0].Replace('"','').Trim()
+        $tApri = $col[1].Replace('"','').Trim()
+        if($tApri -eq "?" -or $tApri -eq ""){ continue }
+        $nTot++
+        $gChiu = ($tChiu -split ' ')[0]
+        $gApri = ($tApri -split ' ')[0]
+        if($gChiu -ne $gApri){
+          $nOver++
+          if($esempi.Count -lt 5){ [void]$esempi.Add($tApri + " -> " + $tChiu) }
+        }
+      }
+      break   # i gemelli sono identici: basta il primo file buono
+    }
+    if($nTot -eq 0){ $Overnight_ok = "NON MISURABILE (nessuna riga con open_time: EA vecchio?)" }
+    else{
+      $pct = [math]::Round(100.0*$nOver/$nTot,2)
+      $Overnight_ok = "" + $nOver + " su " + $nTot + " (" + $pct + "%) chiuse in un GIORNO SUCCESSIVO all'apertura"
+      if($esempi.Count -gt 0){ $Overnight_ok += "   es: " + ($esempi -join " ; ") }
+      if($pct -gt 5.0){
+        [void]$Problemi.Add("OVERNIGHT VERI oltre la soglia dichiarata nel prova (5%): " + $pct + "% (" + $nOver + "/" + $nTot + "). Il file NON e' una misura valida.")
+      }
+      elseif($nOver -gt 0){
+        [void]$Rilievi.Add("overnight per ASSENZA DI TICK: " + $nOver + "/" + $nTot + " (" + $pct + "%), sotto la soglia del 5%. Il flat di recupero ha chiuso al primo tick: gap-risk residuo DICHIARATO, non azzerato.")
+      }
+    }
   }
 }
 catch{
@@ -298,14 +363,18 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("simbolo: " + $Simbolo_ok)
 [void]$RefTxt.Add("compilazione: " + $Compilato + "   <- EA NUOVO: se FALLITA, quello e' il risultato del passo")
 [void]$RefTxt.Add("per-trade CSV: " + $PerTrade_ok)
+[void]$RefTxt.Add("cache tester: " + $CacheTxt + "   <- punto 38: il prova e' identico alla corsa v3, senza svuotare i pass sarebbero RIPESCATI")
+[void]$RefTxt.Add("overnight veri: " + $Overnight_ok + "   <- open_time vs close_time, NON l'ora di chiusura da sola")
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("QUESTO E' IL PASSO 0 + MISURA. NON PROMUOVE NIENTE, NIENTE VERDETTO DI MERITO.")
 [void]$RefTxt.Add("COME SI LEGGE (quando i CSV tornano):")
 [void]$RefTxt.Add("  - FREQUENZA: n trade nella griglia gemelli (2 righe identiche). M15 in seduta:")
 [void]$RefTxt.Add("    attesi fino a 2/gg (cap InpMaxTradesPerDay): se n>=150 il MERITO NON e piu sospeso (R59);")
 [void]$RefTxt.Add("    il RISCHIO (DD, peggior giornata, autotest, flat) si giudica SEMPRE.")
-[void]$RefTxt.Add("  - VINCOLO DURO: zero overnight. Colonne Flat Giorni / Flat Chiusure +")
-[void]$RefTxt.Add("    orari nel per-trade CSV: un solo trade oltre il flat = file INVALIDO.")
+[void]$RefTxt.Add("  - VINCOLO (riscritto 31/08 nel prova): si esige che nessuna posizione")
+[void]$RefTxt.Add("    sopravviva al PRIMO TICK dopo il flat. Le chiusure a giorno successivo")
+[void]$RefTxt.Add("    (assenza di tick fra flat e 24:00) si CONTANO: riga 'overnight veri'.")
+[void]$RefTxt.Add("    Sopra il 5% = file invalido; sotto = RILIEVO col suo gap-risk.")
 [void]$RefTxt.Add("  - MEDIANA DEL TAKE in PUNTI INDICE: colonna take_idx_pts del per-trade")
 [void]$RefTxt.Add("    CSV. E' il numero che decide se il retest M15 paga lo spread U30USD")
 [void]$RefTxt.Add("    (implicito nei tick BCM) e la SCALA delle 2 tarature del gate.")

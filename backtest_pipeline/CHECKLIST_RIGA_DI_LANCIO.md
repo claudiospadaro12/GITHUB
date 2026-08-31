@@ -5891,3 +5891,42 @@ di fortuna pura = gap risk reale non protetto).
 > si chiude subito, a qualunque ora. E chi legge un per-trade CSV con vincolo
 > flat **ordina le chiusure per ora del giorno**: una sola chiusura fuori
 > fascia = vincolo violato, va spiegata o il file e' invalido.
+
+## 🚧 IL CRITERIO DI ACCETTAZIONE **FISICAMENTE IRRAGGIUNGIBILE SUL BANCO** — e il fix che lo riduce senza azzerarlo (31/08/2026, trovato PRIMA del quarto invio NyRetest)
+
+Il prova NyRetest congela: _"VINCOLO DURO: InpCloseAtEnd=1, FLAT a fine seduta
+USA, zero overnight. Se un solo trade resta overnight -> il file e' invalido."_
+La v3 lo ha violato (30 chiusure oltre il flat) e il file e' stato dichiarato
+invalido. La v4 aggiunge il **flat di recupero**, che chiude **al primo tick
+disponibile** una posizione aperta in un giorno di calendario precedente.
+
+**Ma "al primo tick disponibile" NON e' "in giornata".** Su un tester a tick
+una posizione si chiude SOLO su un tick: nei giorni senza tick fra il flat e
+le 24:00, nessun codice possibile chiude in giornata. Il recupero accorcia
+l'esposizione (dal weekend intero a poche ore), **non porta il conteggio a
+zero**. Quindi la v4, lanciata contro il criterio invariato, produce di nuovo
+chiusure a giorno successivo e **muore una seconda volta sullo stesso
+criterio** — un quarto giro a vuoto scritto nel prova prima ancora di partire.
+
+E c'e' il secondo morso: **il per-trade CSV aveva solo `close_time`**. Una
+chiusura alle 23:05 puo' essere (a) il flat scattato tardi sulla posizione di
+OGGI — legittima — oppure (b) una posizione di IERI — overnight vero. Senza
+`open_time` **le due sono indistinguibili**, e il round non puo' giudicare il
+proprio vincolo ne' dimostrare che il fix ha funzionato.
+
+> ✅ **REGOLA in due tempi.**
+> **1. Prima del lancio si rilegge ogni criterio di accettazione chiedendo
+> "il BANCO puo' fisicamente soddisfarlo?"** Un criterio che dipende da un
+> evento che il banco non garantisce (un tick a un'ora data, una barra che
+> non esiste, un dato prima del pavimento storico) non e' un criterio: e' una
+> condanna. Si riscrive **PRIMA dei numeri**, datato e dichiarato — mai dopo
+> aver visto il file.
+> **2. La forma sana e': soglia sul COMPORTAMENTO del codice, conteggio
+> DICHIARATO sull'effetto fisico.** Qui: _"il flat e' ARMATO -> nessuna
+> posizione sopravvive al primo tick utile dopo il flat (questo si esige);
+> le posizioni che attraversano la mezzanotte per ASSENZA DI TICK si CONTANO
+> e si dichiarano, e sono un RILIEVO col loro gap-risk, non un'invalidazione
+> automatica"_.
+> **3. E il conteggio dev'essere POSSIBILE**: se il vincolo lega apertura e
+> chiusura, il per-trade CSV esporta **ENTRAMBE** le ore. Un vincolo che
+> nessuna colonna del referto sa misurare e' gia' un giro a vuoto.

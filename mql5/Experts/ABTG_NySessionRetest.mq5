@@ -1089,9 +1089,10 @@ void ExportTrades()
    if(!HistorySelect(0,TimeCurrent())) return;
    int nd=HistoryDealsTotal();
 
-   long   idIn[];   double pxIn[];   long dirIn[];   string cmIn[];
+   long   idIn[];   double pxIn[];   long dirIn[];   string cmIn[];   long tmIn[];
    int    cIn=0;
    ArrayResize(idIn,nd); ArrayResize(pxIn,nd); ArrayResize(dirIn,nd); ArrayResize(cmIn,nd);
+   ArrayResize(tmIn,nd);
    for(int i=0;i<nd;i++)
      {
       ulong tk=HistoryDealGetTicket(i);
@@ -1102,6 +1103,7 @@ void ExportTrades()
       pxIn[cIn]  = HistoryDealGetDouble (tk,DEAL_PRICE);
       dirIn[cIn] = HistoryDealGetInteger(tk,DEAL_TYPE);   // BUY entry = long
       cmIn[cIn]  = HistoryDealGetString (tk,DEAL_COMMENT);
+      tmIn[cIn]  = HistoryDealGetInteger(tk,DEAL_TIME);   // open_time: distingue flat tardivo da overnight vero
       cIn++;
      }
 
@@ -1127,7 +1129,7 @@ void ExportTrades()
      }
    int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
    if(h==INVALID_HANDLE) return;
-   FileWrite(h,"close_time","symbol","magic","position_id","dir","volume",
+   FileWrite(h,"close_time","open_time","symbol","magic","position_id","dir","volume",
              "entry_price","exit_price","take_idx_pts","net_profit","comment");
 
    double den = InpMT5PerPuntoIndice*_Point;
@@ -1143,9 +1145,9 @@ void ExportTrades()
       double pxOut = HistoryDealGetDouble (tk,DEAL_PRICE);
       double net   = HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
 
-      double pxEntry=0; long dir=-1; string cm=""; bool trovato=false;
+      double pxEntry=0; long dir=-1; string cm=""; long tmEntry=0; bool trovato=false;
       for(int k=0;k<cIn;k++)
-         if(idIn[k]==posId){ pxEntry=pxIn[k]; dir=dirIn[k]; cm=cmIn[k]; trovato=true; break; }
+         if(idIn[k]==posId){ pxEntry=pxIn[k]; dir=dirIn[k]; cm=cmIn[k]; tmEntry=tmIn[k]; trovato=true; break; }
 
       bool isLong = (dir==DEAL_TYPE_BUY);
       double takeIdx = 0;
@@ -1157,6 +1159,7 @@ void ExportTrades()
 
       FileWrite(h,
                 TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                (trovato ? TimeToString((datetime)tmEntry,TIME_DATE|TIME_MINUTES|TIME_SECONDS) : "?"),
                 HistoryDealGetString(tk,DEAL_SYMBOL),
                 IntegerToString(InpMagic),
                 IntegerToString(posId),

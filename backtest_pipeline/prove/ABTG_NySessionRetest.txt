@@ -26,8 +26,22 @@
 #     sospende finche' n<150.
 #   - Verdetto SOLO a tick reali BCM (2024.09.26->2026, un solo regime toro).
 #     Screening di REGIME (crollo 2020 / orso 2022) SOLO su NASUSD_EXT OHLC.
-#   - VINCOLO DURO: InpCloseAtEnd=1, FLAT a fine seduta USA (ora server), zero
-#     overnight. Se un solo trade resta overnight -> il file e' invalido.
+#   - VINCOLO DURO (riscritto 31/08, PRIMA dei numeri della corsa v5, mai dopo
+#     aver visto il file): InpCloseAtEnd=1 e il flat ARMATO IN DUE TEMPI. Si
+#     ESIGE che nessuna posizione sopravviva al PRIMO TICK utile dopo il flat
+#     (serale o di recupero): questo il codice lo garantisce e il banco lo
+#     permette. NON si esige "zero chiusure dopo le 20:55": su un tester a
+#     tick una posizione si chiude solo SU UN TICK, e nei giorni senza tick
+#     fra il flat e le 24:00 (festivi USA, venerdi' corti, settimane DST) la
+#     chiusura in giornata e' fisicamente impossibile. Quindi:
+#       * chiusura TARDIVA MA IN GIORNATA (open_date == close_date, ora >
+#         flat) = REGOLARE, il flat e' scattato al primo tick.
+#       * chiusura A GIORNO SUCCESSIVO (close_date > open_date) = OVERNIGHT
+#         VERO: si CONTA, si dichiara col suo gap-risk ed e' un RILIEVO.
+#         Soglia dichiarata ORA: > 5% delle posizioni -> file INVALIDO.
+#     Con la v3 il conteggio grezzo era 28/460 (6,1% oltre il flat, net +7360
+#     di fortuna pura) SENZA distinguere tardive da overnight veri: la riga
+#     v5 misura la distinzione da sola (open_time vs close_time).
 #   - Il GATE slope+espansione deve MORDERE: alle 2 tarature (vs OFF) i trade
 #     e il PF devono cambiare in modo ordinato. Se OFF == ON -> gate
 #     decorativo -> scarto (lezione 0/5 del filtro appiccicato).
