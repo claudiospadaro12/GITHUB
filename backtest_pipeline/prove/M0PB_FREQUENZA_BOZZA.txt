@@ -214,3 +214,57 @@
 #  Include SEMPRE l'irm davanti che riscarica script e prova dal branch
 #  lavoro, e la riga di raccolta finale con Compress-Archive sul Desktop.
 # =====================================================================
+#
+# =====================================================================
+#  AGGIORNAMENTO 31/08/2026 (sera) -- LA SONDA ADESSO ESISTE
+# ---------------------------------------------------------------------
+#  I CRITERI SOPRA NON SONO STATI TOCCATI: restano congelati come
+#  erano. Qui sotto si correggono solo DUE FATTI, e vanno corretti
+#  PRIMA di scrivere la riga di lancio, perche' sono esattamente i
+#  due modi in cui MT5 ignora in silenzio quello che gli si passa.
+#
+#  FATTO 1 -- IL PERCORSO. La sonda NON sta in Scripts\ come diceva
+#  la bozza. Sta in:
+#      mql5\Experts\ABTG_SondaM0PB.mq5
+#  Motivo: un .mq5 in Scripts\ NON HA OnTester, quindi non puo'
+#  produrre le colonne di OPTFRAME -- e le colonne servono perche'
+#  InpStopAtrMult e' sweepabile e in ottimizzazione le Print girano
+#  sugli agent e non le legge nessuno. In piu' questo file prova
+#  pinna @SIMBOLO / @PERIODO / @DAQUANDO, cioe' e' gia' scritto per
+#  il tester. E' un Expert Advisor che non fa l'expert: NON APRE
+#  ORDINI, non ha CTrade, non ha magic.
+#
+#  FATTO 2 -- IL NOME DELL'INPUT DELLO STOP. La bozza proponeva
+#  "InpAtrStopMult". Il nome VERO, quello che esiste nel sorgente, e':
+#      InpStopAtrMult      (default 2.75, ammesso 0.1 - 6.0)
+#  E' l'unico asse sweepabile, ed e' la manopola del cancello H8.
+#
+#  NOTA SULLO SWEEP, misurata sul codice e non supposta: lo stop e'
+#  mult x ATR, quindi lo stop mediano e' LINEARE nel moltiplicatore e
+#  l'RR va esatto come 1/mult. Da UNA sola corsa si legge tutta la
+#  curva:  RR(mult) = RR(2,75) * 2,75 / mult. Per questo la sonda
+#  stampa anche l'ATR MEDIANO in punti indice. Lo sweep serve a
+#  CONFERMARE l'aritmetica, non a scoprirla, e soprattutto NON a
+#  pescare il moltiplicatore che fa passare il cancello: stringere lo
+#  stop alza l'RR sulla carta e fa prendere piu' stop nella realta',
+#  e questo costo la sonda NON puo' vederlo (non simula esiti).
+#
+#  ALTRI NOMI VERI, per il pin (gli altri sono cablati dall'autore):
+#      InpRsiPeriod 6 | InpRsiHigh 90 | InpRsiLow 10 | InpEmaPeriod 5
+#      InpFinestraBarre 6 | InpBarreTarget 12 | InpAtrPeriod 10
+#      InpAtrModoPine true       (ATR alla Pine = Wilder/RMA; false =
+#                                 SMA del TR, cioe' la convenzione di
+#                                 iATR in MQL5. I DUE SONO DIVERSI)
+#      InpModoPrezzoIngresso 1   (1 = apertura barra successiva, come
+#                                 il Pine; 0 = chiusura barra segnale)
+#      InpPuntiPerIndice 100     (misurato sui tre indici)
+#      InpUsaFinestraOraria false (default NEUTRO: si conta TUTTO)
+#      InpOraInizioServer / InpOraFineServer  (ORA SERVER, se accesa)
+#      InpWarmupBarre 300 | InpConfrontaMT5 true | InpScriviCsv true
+#      InpAutoTest true | InpVerbose true | InpTag "M0PB_SONDA"
+#
+#  MODELLO DI CORSA: bastano le APERTURE ("Solo prezzi di apertura").
+#  Il segnale nasce su BARRA CHIUSA e non si apre niente, quindi il
+#  tick non aggiunge informazione e costa ore. Il tick servira' DOPO,
+#  per il verdetto di merito (R57).
+# =====================================================================
