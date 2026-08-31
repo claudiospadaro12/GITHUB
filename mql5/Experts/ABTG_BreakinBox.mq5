@@ -58,7 +58,7 @@
 //|                                                                  |
 //|  IL MOTORE, in quattro righe                                      |
 //|    1. IL LIVELLO -- MAX e MIN del BOX NOTTURNO, finestra          |
-//|       22:00-04:59 ORA SERVER (input). NON uno swing, NON una      |
+//|       23:00-04:59 ORA SERVER (input, = box della sedia 770411). NON uno swing, NON una      |
 //|       candela: un range di ~7 ore. Si ricalcola a ogni barra dai  |
 //|       dati M1 (nessuno stato persistente: sopravvive a un         |
 //|       riavvio dell'EA a meta' giornata).                          |
@@ -127,7 +127,7 @@
 //|    TUTTE le ore di questo EA sono in ORA SERVER BCM, che e' ORA   |
 //|    ITALIANA MENO UN'ORA (CLAUDE.md, regola fissa). Non sono ore   |
 //|    italiane e non sono ore ET. Sono tutte INPUT.                  |
-//|      box notturno   22:00 -> 04:59 SERVER  (23:00 -> 05:59 IT)    |
+//|      box notturno   23:00 -> 04:59 SERVER  (00:00 -> 05:59 IT, = 770411)    |
 //|      finestra oper. 08:00 -> 17:30 SERVER  (09:00 -> 18:30 IT)    |
 //|    L'08:00 server e' l'apertura del DAX (CLAUDE.md); il 17:30     |
 //|    server e' l'ora del flat gia' usata dalla sedia viva 770411    |
@@ -166,7 +166,7 @@
 #property copyright "Progetto EA Aperture Mercati - BREAKIN del box notturno (spec di casa ANALISI_NIGHTLY_PDF 23/08, dossier CACCIA_CRT_SECONDA 31/08)"
 #property version   "1.00"
 #property strict
-#property description "BREAKIN del box notturno: falsa rottura del range 22:00-04:59 SERVER, ingresso DIFFERITO su conferma nella sessione europea."
+#property description "BREAKIN del box notturno: falsa rottura del range 23:00-04:59 SERVER (il box della sedia 770411), ingresso DIFFERITO su conferma nella sessione europea."
 #property description "ABLAZIONE OBBLIGATORIA: InpTP_RR=0 (TP al lato opposto del box, la tesi) contro InpTP_RR>0 (RR fisso, il controllo R95)."
 #property description "Tutte le ore sono in ORA SERVER BCM (ora italiana meno un'ora). DEMO, nessuna garanzia."
 
@@ -189,7 +189,7 @@ CTrade gTrade;
 input bool InpUsaGuardian = true;   // Guardian: pausa giornaliera (B1) e cap rischio aperto (C1)
 
 input group "=== BOX NOTTURNO -- il livello (ORA SERVER BCM = ora IT - 1) ==="
-input int    InpBoxStartHour   = 22;   // Ora inizio box (SERVER). 22 server = 23:00 IT
+input int    InpBoxStartHour   = 23;   // Ora inizio box (SERVER). 23 server = 00:00 IT -- IDENTICO alla sedia 770411 (R103): mutua esclusivita LETTERALE
 input int    InpBoxStartMin    = 0;    // Minuto inizio box
 input int    InpBoxEndHour     = 4;    // Ora fine box (SERVER). 4:59 server = 05:59 IT
 input int    InpBoxEndMin      = 59;   // Minuto fine box

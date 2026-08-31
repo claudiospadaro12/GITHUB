@@ -88,7 +88,7 @@
 @FINOA    2026.06.30
 #
 # --- IL LIVELLO: identico alla gamba A. ORA SERVER BCM.
-InpBoxStartHour=22
+InpBoxStartHour=23
 InpBoxStartMin=0
 InpBoxEndHour=4
 InpBoxEndMin=59
