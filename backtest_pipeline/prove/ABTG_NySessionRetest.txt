@@ -18,6 +18,10 @@
 # CRITERI DI ACCETTAZIONE  (congelati PRIMA dei numeri)
 #   - PASSO 0: misurare lo SPREAD reale H1 (logger 74148, mai usato finora) e
 #     la FREQUENZA dei retest-VWAP (INFERITA bassa: H1 puro = pochi/settimana).
+#     >>> ADDENDUM 31/08 (datato, non riscrittura): l'inferenza "H1 puro" e'
+#     MORTA col round H1 (0 trade per costruzione, referto 31/08). Su M15
+#     l'attesa e' fino a 2/gg (cap InpMaxTradesPerDay): se n>=150 il MERITO
+#     NON e' piu' sospeso (R59).
 #     Campione sottile -> valvola R59: il RISCHIO si giudica, il MERITO si
 #     sospende finche' n<150.
 #   - Verdetto SOLO a tick reali BCM (2024.09.26->2026, un solo regime toro).
@@ -40,7 +44,7 @@
 # QUESTO LANCIO E' IL PASSO 0 + MISURA A TICK: NON E' IL VERDETTO.
 #   CELLA FISSA con il GATE A SOGLIE NEUTRE (InpVwapSlopeMin=0, InpExpansionMin
 #   =0: il gate resta nel codice ma NON morde -- e' l'ablazione "OFF" dichiarata
-#   nell'EA). Qui si misurano: FREQUENZA reale dei retest-VWAP su H1, mediana
+#   nell'EA). Qui si misurano: FREQUENZA reale dei retest-VWAP su M15, mediana
 #   del take in PUNTI INDICE (dal per-trade CSV), costo reale dello spread
 #   (implicito nei tick BCM), scala tipica di slope/espansione. SOLO DOPO
 #   questa misura si mettono le 2 tarature del gate attorno alla mediana

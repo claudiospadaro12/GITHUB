@@ -302,7 +302,7 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("QUESTO E' IL PASSO 0 + MISURA. NON PROMUOVE NIENTE, NIENTE VERDETTO DI MERITO.")
 [void]$RefTxt.Add("COME SI LEGGE (quando i CSV tornano):")
 [void]$RefTxt.Add("  - FREQUENZA: n trade nella griglia gemelli (2 righe identiche). M15 in seduta:")
-[void]$RefTxt.Add("    attesi pochi/settimana. Se n<150 il MERITO resta sospeso (R59);")
+[void]$RefTxt.Add("    attesi fino a 2/gg (cap InpMaxTradesPerDay): se n>=150 il MERITO NON e piu sospeso (R59);")
 [void]$RefTxt.Add("    il RISCHIO (DD, peggior giornata, autotest, flat) si giudica SEMPRE.")
 [void]$RefTxt.Add("  - VINCOLO DURO: zero overnight. Colonne Flat Giorni / Flat Chiusure +")
 [void]$RefTxt.Add("    orari nel per-trade CSV: un solo trade oltre il flat = file INVALIDO.")

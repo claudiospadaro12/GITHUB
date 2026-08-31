@@ -5830,3 +5830,46 @@ numeri) — la lezione vale per i round FUTURI:
 > qualunque filtro. E il criterio va riletto AD ALTA VOCE chiedendosi: "un
 > filtro PERFETTO passerebbe questa condizione?" Se no, il criterio e' rotto
 > prima ancora di partire.
+
+## 🔇 IL TF DEL GRAFICO CHE NON CONTIENE ABBASTANZA BARRE DI SEDUTA: il motore e' MUTO **PER COSTRUZIONE**, e la corsa lo scopre in 20 minuti di tick (31/08/2026, pagata su NyRetest H1)
+
+_Pagata sulla corsa VERA delle 09:51 del 31/08: `ABTG_NySessionRetest` su
+U30USD **H1**, tick reali, 21 mesi, compile OK, gate tutti verdi, ambiente
+sano — e **0 trade su 459 giorni**. Non un bug: aritmetica._
+
+Il conto che nessuno aveva fatto, e che si fa **a mano, prima di lanciare**:
+
+1. **Quante barre del TF scelto stanno DENTRO la finestra di seduta?**
+   Seduta 14:30->20:55 server, TF H1, barre ammesse per `open` in
+   `[14:30, 20:55)` -> open 15,16,17,18,19,20 = **6 barre**.
+2. **Quante ne mangiano le regole d'ingresso, in barre DI SEDUTA?**
+   `pos<=0` (prima barra: mai ingresso) = 1. `InpVwapSlopePeriod=5` barre di
+   seduta per la pendenza -> serve `pos>=5`. Restano le barre con pos 5.
+3. **Quella che resta, sopravvive al FLAT?** La barra valutata e' la barra
+   CHIUSA (shift 1): la decisione cade all'apertura della barra DOPO. pos 5
+   apre alle 20:00 e chiude alle 21:00 -> la decisione cade alle 21:00, e
+   `FlatFineSedutaCheck()` (>= 20:55) fa `return` da `OnTick` **prima** di
+   `OnNewBar`. **Zero ingressi possibili. Per costruzione.**
+
+Il travestimento e' totale: nessun gate del wrapper puo' vederlo (simbolo,
+finestra, fissi, fuso, assi Y erano tutti CORRETTI), la compilazione riesce,
+il tester gira, i CSV escono. L'unico segnale e' il per-trade **header-only**
+— cioe' la spia aggiunta al giro precedente, che infatti ha alzato i 2
+PROBLEMI. Senza quella spia, il round sarebbe tornato "0 trade" e sarebbe
+stato letto come **verdetto di merito** ("il motore non trova retest") invece
+che come **impossibilita' geometrica**.
+
+> ✅ **REGOLA: prima di lanciare un motore INTRADAY su un TF, si conta.**
+> `barre_di_seduta = (fine_seduta - inizio_seduta) / TF` e poi si sottraggono
+> **in barre di seduta** tutti i lookback che il motore ancora all'inizio
+> sessione (pendenza, pos minima, warmup) e la barra persa dal flat. Se il
+> risultato e' **<= 0, o solo 1-2 barre**, il TF e' sbagliato: o si scende di
+> TF, o si accorciano i lookback — non si lancia. Il conto sta scritto **nel
+> prova**, accanto a `@PERIODO`, cosi' il prossimo lo rilegge.
+>
+> ⚠️ **E il corollario che vale doppio:** un lookback espresso in barre e' un
+> lookback espresso in **MINUTI** appena scegli il TF (5 barre = 5h su H1,
+> 1h15 su M15). Un parametro "canonico" ereditato da un sorgente scritto per
+> un altro TF **cambia significato**, e puo' cambiarlo fino a rendere il
+> motore muto. Quando si cambia `@PERIODO`, si rileggono TUTTI i parametri
+> contati in barre e si dichiara che cosa diventano in tempo.

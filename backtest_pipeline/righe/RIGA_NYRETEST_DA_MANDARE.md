@@ -1,13 +1,13 @@
 # 📬 NY SESSION RETEST — **LA RIGA DA MANDARE** (PASSO 0 + misura a tick)
 
 **Che cos'è:** primo giro in assoluto di **`ABTG_NySessionRetest`** (VWAP-retest in
-trend, **primo H1-intraday e primo VWAP della flotta**, mai compilato né testato):
-**PASSO 0 + MISURA a TICK REALI (Modello 4)** su **U30USD BCM H1**,
+trend, **primo intraday-VWAP della flotta**, mai compilato né testato):
+**PASSO 0 + MISURA a TICK REALI (Modello 4)** su **U30USD BCM M15** (trend su H1),
 **2024.09.26 → 2026.06.30**, **cella FISSA col gate regime OFF** (slope 0 / exp 0 =
 ablazione dichiarata). Unico asse Y = **gemelli magic 769501/769502**.
 **È una MISURA, non un verdetto.**
 
-> 🎯 **La domanda:** quanti retest-VWAP fa DAVVERO l'H1 sul Dow (frequenza), quanto
+> 🎯 **La domanda:** quanti retest-VWAP fa DAVVERO il motore sul Dow in M15 (frequenza), quanto
 > è grosso il take mediano in **punti indice** (per-trade CSV) e paga lo **spread
 > reale U30USD** (implicito nei tick, il blocco M24)? Da qui escono le **2 tarature
 > del gate** (vs OFF) del round successivo — le soglie **non si inventano prima di
@@ -27,7 +27,7 @@ ablazione dichiarata). Unico asse Y = **gemelli magic 769501/769502**.
 | **Driver** | `righe/RIGA_NYRETEST.ps1` (marcatore `MARCATORE_RIGA_NYRETEST_v3`) |
 | **File prova** | `prove/ABTG_NySessionRetest.txt` (cella fissa gate-OFF, gemelli, fuso server) |
 
-**MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~10-30 min (tick H1, 21
+**MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.** ⏱️ ~15-40 min (tick M15, 21
 mesi, 2 passate). La gamba OOS del generico è **degenere** (FrazioneIS 1.0): il
 rosso sul CSV `*_OOS` è **atteso**, NON rilanciare.
 
