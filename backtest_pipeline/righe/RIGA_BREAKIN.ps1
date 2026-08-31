@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_BREAKIN_v1
+#  MARCATORE_RIGA_BREAKIN_v2
 #  RIGA_BREAKIN.ps1  --  BREAKIN BOX: ABLAZIONE A/B (la prova che decide,
 #  dichiarata PRIMA). ABTG_BreakinBox su D30EUR M15, TICK REALI
 #  (Modello 4), 2024.09.26->2026.06.30, DUE GAMBE in sequenza:
@@ -539,6 +539,7 @@ try{
     if($conte.Count -eq 2){
       $c1 = [int](($conte[0] -split "=")[1]); $c2 = [int](($conte[1] -split "=")[1])
       if($c1 -ne $c2){ [void]$Problemi.Add("gamba " + $g.Id + ": GEMELLI DIVERGENTI sul per-trade: " + $c1 + " contro " + $c2 + " operazioni. Due passate identiche devono dare lo STESSO numero.") }
+      if($null -ne $g.NIS -and $c1 -ne [int]$g.NIS){ [void]$Problemi.Add("gamba " + $g.Id + ": Trades del CSV (" + $g.NIS + ") diverso dalle operazioni del per-trade (" + $c1 + "): il per-trade puo' essere stato riscritto dalla passata OOS degenere.") }
     }
     if($conte.Count -gt 0){ $g.OpsMagic = "OPERAZIONI per magic -> " + ($conte -join " | ") }
     else{ $g.OpsMagic = "NESSUN FILE in Common\Files" }

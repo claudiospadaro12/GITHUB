@@ -45,7 +45,7 @@ non decidono niente:
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_BREAKIN.ps1` (marcatore `MARCATORE_RIGA_BREAKIN_v1`) |
+| **Driver** | `righe/RIGA_BREAKIN.ps1` (marcatore `MARCATORE_RIGA_BREAKIN_v2`) |
 | **File prova** | `prove/ABTG_BreakinBox.txt` (gamba A) + `prove/ABTG_BreakinBox_RRFISSO.txt` (gamba B) |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.**
@@ -65,7 +65,7 @@ COMPILA: è lì che un EA mai compilato può cadere, ed è un risultato).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_BREAKIN.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_BREAKIN.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_BREAKIN_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_BREAKIN_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera.' -ForegroundColor Red } }
 ```
@@ -77,7 +77,7 @@ COMPILA: è lì che un EA mai compilato può cadere, ed è un risultato).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_BREAKIN.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_BREAKIN.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_BREAKIN_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_BREAKIN_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
@@ -124,3 +124,7 @@ FrazioneIS 1.0 la gamba OOS è **degenere (0 giorni)** per costruzione. È
 **atteso**: NON rilanciare, non è un errore. Fa fede l'`ESITO:` finale della
 riga (verde CORSA COMPLETATO oppure giallo/rosso coi PROBLEMI elencati nel
 referto).
+
+> 🧊 Nel referto controlla anche la riga **`cache tester:`** (svuotata, coi
+> conteggi) e ricorda: questo lancio è **MISURA + ABLAZIONE, non il verdetto**
+> — PF OOS e centro-altopiano appartengono al round di griglia successivo.

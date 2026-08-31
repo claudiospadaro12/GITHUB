@@ -52,6 +52,10 @@
 # ==========================================================================
 # CRITERI DI ACCETTAZIONE -- IDENTICI ALLA GAMBA A, e sono gia' congelati
 # nel file gemello (frequenza >=150/lato, take mediano >= 6,0 punti indice,
+# >>> DICHIARATO PRIMA DEI NUMERI (31/08, dal gate): QUESTO LANCIO E' MISURA
+# + ABLAZIONE, NON IL VERDETTO. PF OOS e centro-altopiano NON sono producibili
+# da questo banco (FrazioneIS 1.0 = niente OOS; cella singola = niente
+# altopiano): appartengono al round di griglia successivo.
 # DD <= 15%, peggior giornata > -5,00%, PF OOS >= 1,10 sui due lati letti
 # separati, centro dell'altopiano MAI il picco, Autotest Falliti = 0,
 # overnight veri <= 5%).
