@@ -1,0 +1,402 @@
+# =====================================================================
+#  DAYFLOW -- PASSO 0: SONDA DI FREQUENZA, TAGLIA E TENUTA
+#  *** BOZZA DEL CACCIATORE -- NON E' UNA PROVA OPERATIVA ***
+# ---------------------------------------------------------------------
+#  🔴 PERCHE' "BOZZA" E PERCHE' NON E' PIGRIZIA (regola di casa).
+#  Ne' l'EA ne' la sonda ESISTONO. Un file prova che pinna input
+#  inesistenti e' l'ERRORE N.3 della CHECKLIST_RIGA_DI_LANCIO, e MT5
+#  IGNORA IN SILENZIO un pin che non trova: e' cosi' che e' nato il
+#  falso "0/8" del FiboH4 (REGISTRO_TEST.md par. 2-bis).
+#  I nomi di input qui sotto sono PROPOSTI, non verificati nel sorgente.
+#  Ordine obbligato: prima la sonda, poi il numero, poi -- solo se il
+#  numero regge -- l'EA.
+#
+#  🔴 E QUANDO SARA' PROMOSSA VA SPEZZATA IN DUE FILE
+#  (DAYFLOW_FREQUENZA_M5.txt e _M15.txt), come si e' fatto per M0PB e
+#  LondonFx: il generico legge @PERIODO DAL PROVA, e un @PERIODO
+#  overridato da fuori sarebbe stato nascosto. Il criterio F6 congelato
+#  qui sotto ESIGE le due corse.
+#
+#  DOSSIER DI CACCIA:
+#    backtest_pipeline\caccia_strategie\CACCIA_FREQUENZA3_TV_GH_2026-09-01.md
+#    (TERZA BATTUTA della caccia-frequenza -- perimetro TradingView +
+#     GitHub. Unico promosso.)
+#  MANDATO: Claudio 01/09/2026 mattina -- "EA a TF bassi con 2 TRADE O
+#           PIU' AL GIORNO". Il pavimento e' SALITO da 1 a 2.
+#  FIRMA:   report\FIRME_2026-08-31.md, FIRMA 2 (cancello H8,
+#           E >= 0,075R misurata A TICK).
+#  VINCOLO PROP: report\CONFIG_PROP_2026-08-31.md, proposta P5 --
+#           "meno del 25% dei trade sotto i 60 secondi" (meta' del
+#           tetto E8, margine di casa). Vedi F7.
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "DayFlow VWAP Relay Forex Majors Strategy"
+#    (scriptName interno: "DayFlow VWAP Relay -- Majors")
+#    di (c) exlux, TradingView, Pine v6, created 2025-10-24, aggiornato
+#    2025-11-03, scriptAccess "open_no_auth", 111 "agree",
+#    licenza MOZILLA PUBLIC LICENSE 2.0 (dichiarata alla riga 1).
+#      https://www.tradingview.com/script/muhhiXQs-DayFlow-VWAP-Relay-Forex-Majors-Strategy/
+#    Copia archiviata e letta riga per riga (135 righe, TUTTE):
+#      caccia_strategie\biblioteca\sorgenti\
+#      DayFlowVwapRelayMajors_exlux-MPL2_tvmuhhiXQs_2026-09-01.pine
+#    L'attribuzione va ripetuta in testa a QUALUNQUE .mq5 derivato.
+#
+# =====================================================================
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  La VWAP ancorata al giorno e' il prezzo che il flusso ha davvero
+#  pagato. La DISTANZA da quella VWAP (il "residuo") descrive la
+#  giornata meglio del prezzo: se il residuo e' poco volatile rispetto
+#  al prezzo, la giornata e' BILANCIATA e gli estremi del residuo si
+#  fadano; se il residuo e' molto volatile, la giornata sta ESPANDENDO
+#  e le rotture della banda VWAP si seguono.
+#
+#  🎯 LA TESI IN UNA RIGA (ed e' quella che ci interessa davvero):
+#     "Non e' il segnale a decidere, e' il REGIME a decidere QUALE
+#      segnale corre."
+#
+#  Se e' vero:
+#    (a) l'evento capita PIU' VOLTE AL GIORNO, perche' il grilletto di
+#        posizione e' un PERCENTILE (per costruzione ~25% delle barre
+#        lo soddisfa, su qualunque mercato e qualunque regime) e non
+#        un evento di CODA -> PORTATA;
+#    (b) l'escursione favorevole successiva paga lo spread con margine
+#        -> TAGLIA;
+#    (c) il rapporto favorevole/avverso supera il cancello H8 con un
+#        win rate plausibile -> GEOMETRIA;
+#    (d) la posizione si tiene abbastanza a lungo da stare sopra il
+#        muro d'attrito e sotto la clausola HFT delle prop -> TENUTA.
+#
+#  🔬 E LA DIFFERENZA CHE VALE, scritta PRIMA della misura, perche' e'
+#  la ragione per cui questo candidato viene provato dopo che M0PB e'
+#  morto al PASSO 0 il 31/08 con 0,52 segnali/giorno contro 1,00:
+#    - M0PB armava su RSI(6) >= 90, cioe' un EVENTO DI CODA: quanto
+#      spesso capiti dipende dalla distribuzione, e sui nostri indici
+#      RTH e' capitato un giorno si' e uno no.
+#    - DayFlow arma su `resid <= percentile_25(resid, 63)`, cioe' una
+#      soglia AUTO-NORMALIZZANTE: il 25% delle ultime 63 barre lo
+#      soddisfa PER DEFINIZIONE.
+#  >>> Questa e' l'unica ragione strutturale per cui la frequenza
+#  DERIVATA di DayFlow non dovrebbe collassare come quella di M0PB.
+#  E' un'ARGOMENTAZIONE, non una misura: questa corsa la mette alla
+#  prova. Se collassa lo stesso, l'argomento "percentile invece di
+#  coda" e' falsificato, e vale per ogni caccia futura.
+#
+# =====================================================================
+#  COSA GIRA E COSA NON GIRA
+# ---------------------------------------------------------------------
+#  ABTG_SondaDayFlow (DA SCRIVERE) e' un CONTATORE: NESSUN ordine,
+#  nessun lotto, nessun magic, nessuna sedia, nessun include di
+#  trading. Conta segnali per LATO e per MOTORE (fade / breakout) e
+#  misura escursioni. Precedenti di casa validi e collaudati:
+#  SondaMediazione (firma di Claudio del 21/08, "metro, frequenza"),
+#  SondaM0PB (31/08: compilata al primo colpo, autotest 0/12, ha
+#  ucciso il candidato in minuti e ZERO corse a tick sprecate),
+#  SondaLondonFx (31/08 sera).
+#  Controllo meccanico che il verificatore DEVE fare prima di lanciare:
+#  grep delle chiamate di trading sul .mq5 -> ZERO occorrenze fuori
+#  dalle righe di commento.
+#
+#  MODELLO DI CORSA: 2 = "Solo prezzi di apertura". Il segnale nasce su
+#  BARRA CHIUSA (il Pine ha calc_on_every_tick=false e
+#  process_orders_on_close=true, righe 12-13) e non si apre niente.
+#  Il verdetto di MERITO, dopo, sara' a modello 4 (F6 di casa: verdetti
+#  solo a tick reali, R57).
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE (CONGELATI IL 01/09/2026 PRIMA DI OGNI NUMERO)
+# ---------------------------------------------------------------------
+#  F1 - PAVIMENTO DI FREQUENZA -- IL NUOVO, PIU' ALTO DI PRIMA.
+#       Mandato di Claudio del 01/09: "2 TRADE O PIU' AL GIORNO".
+#       Metro: segnali per LATO al giorno di borsa CONTATO.
+#         < 2,00 /giorno  -> SCARTO IMMEDIATO. Niente EA, niente
+#                            griglia, nessuna corsa a tick.
+#         2,00-3,00       -> PASSA, al minimo.
+#         > 3,00          -> PASSA nella fascia preferita.
+#       >>> ATTENZIONE, DUE DENOMINATORI DIVERSI, ed e' dichiarato qui
+#       perche' letto male e' una trappola:
+#         - "segnali GREZZI" = quante volte la condizione e' vera;
+#         - "segnali ESEGUIBILI" = quanti sopravvivono a
+#           pyramiding=0 (una posizione per volta) + cooldown.
+#       IL CANCELLO F1 SI APPLICA AI SEGNALI ESEGUIBILI. I grezzi si
+#       stampano lo stesso, perche' il loro rapporto dice quanta
+#       portata il cooldown sta buttando via.
+#
+#       🔴 FREQUENZA DICHIARATA DALL'AUTORE: **NON ESISTE.**
+#       Ho letto la pagina per intero: l'autore descrive l'effetto dei
+#       parametri sul conteggio ("Raising it demands stronger
+#       confirmation and reduces trade count", "Wider bands reduce
+#       breakout frequency") ma NON SCRIVE MAI UN NUMERO di trade al
+#       giorno, e dichiara esplicitamente "No performance claims".
+#       Quindi la frequenza di questo candidato e' **[DERIVATA DAL
+#       CODICE], NON [DICHIARATA]**, e va etichettata cosi' ovunque.
+#       Il criterio 1 del mandato chiede la frequenza "dichiarata E
+#       riscontrabile nel codice"; l'intestazione dello stesso mandato
+#       dice "DICHIARATI O DERIVABILI DAL CODICE". Ho applicato la
+#       seconda, E DICHIARO DI AVERLO FATTO: se Claudio vuole la
+#       lettura stretta, questo candidato non entra e la battuta
+#       chiude a zero promossi.
+#
+#  F1-bis - LA DERIVAZIONE, scritta per intero perche' sia
+#       falsificabile (e' il numero su cui si regge la promozione):
+#         - finestra 0700-1700 UTC = 10 ore
+#             -> 120 barre M5/giorno, 40 barre M15/giorno
+#         - gamba FADE, condizione di posizione: `resid <= res_lo`
+#           dove res_lo = percentile 25 su 63 barre
+#             -> ~25% delle barre PER COSTRUZIONE
+#         - gate micro-flow `mf > 0,20`: sotto random walk
+#             ~31% delle barre a M5, ~17% a M15 (vedi F8 per il
+#             perche' i due numeri sono diversi)
+#         - prodotto: ~7,8% delle barre a M5, ~4,3% a M15, PER LATO
+#             -> GREZZI: ~9,4/giorno/lato a M5; ~1,7/giorno/lato a M15
+#         - soffitto degli ESEGUIBILI = barre_giorno / (tenuta +
+#           cooldown 10):
+#             M5  con tenuta 15 barre -> 120/25 = ~4,8/giorno
+#             M15 con tenuta 15 barre ->  40/25 = ~1,6/giorno
+#       >>> CONSEGUENZA CONGELATA PRIMA DEI NUMERI:
+#       **A M15 -- il timeframe che l'autore usa per la sua demo --
+#       il candidato NON DOVREBBE RAGGIUNGERE IL PAVIMENTO DI 2/GIORNO.
+#       Il pavimento nuovo punta su M5.** Se la misura dice il
+#       contrario su M15, la mia derivazione e' sbagliata e va detto.
+#
+#  F2 - TAGLIA DEL TAKE (metro di casa C2): mediana dell'escursione
+#       FAVOREVOLE a 12 barre dall'ingresso, e la soglia e'
+#       3 x SPREAD DI RIFERIMENTO.
+#       🔴 LO SPREAD BCM NON E' MAI STATO MISURATO IN REPO -- ne' sui
+#       major, ne' sull'oro. I valori qui sotto sono CONVENZIONI DI
+#       MERCATO, marcate **[SPREAD NON MISURATO]**:
+#         EURUSD / GBPUSD  ~1,0 pip   -> soglia F2 = 3,0 pip
+#         XAUUSD           ~0,30 USD  -> soglia F2 = 0,90 USD
+#       FASCE CONGELATE (nessun punto cade in due clausole -- la
+#       lezione della prosa-congelata-invece-del-criterio, 31/08):
+#         MFE mediana <  3 x spread            -> MORTO F2 (SCARTO)
+#         MFE mediana >= 3x e <= 6x lo spread  -> VERDETTO SOSPESO
+#         MFE mediana >  6 x spread            -> PASSA F2
+#       VERDETTO SOSPESO = si misura lo spread VERO col Code Base
+#       74148 (RealCost Spread P95 Logger, promosso il 23/08 e MAI
+#       USATO: **e' la SETTIMA caccia che lo scrive**) e si rilegge.
+#
+#  F3 - ESCURSIONE AVVERSA mediana a 12 barre: da leggere sempre,
+#       nessun cancello. Serve a sapere se lo stop dell'autore
+#       (1,2 x ATR(14)) sta SOPRA o SOTTO il rumore -> pavimento SL
+#       obbligatorio, R109.
+#
+#  F4 - MURO GIORNALIERO PROP: massimo di segnali in UNA giornata, per
+#       lato e totale. E' il numero che taglia InpMaxTradesPerDay
+#       dell'EA futuro SUI DATI, non a occhio.
+#       🚨 Se (max segnali) x 0,65% supera il cap C1 di rischio aperto
+#       (3,25%, firmato il 18/08), il cap va scritto nell'EA DAL PRIMO
+#       ROUND, non aggiunto dopo. Su un motore che punta a 4-5
+#       trade/giorno questo non e' un dettaglio: 5 stop nella stessa
+#       mattina sono 3,25%, cioe' ESATTAMENTE il cap.
+#
+#  F5 - CANCELLO H8 (FIRMA 2 del 31/08). La sonda restituisce
+#       RR = mediana(favorevole) / mediana(avversa).
+#       **RR mediano < 0,70 -> SCARTO PER ARITMETICA**, e NON si spende
+#       una corsa a tick.
+#       Da p >= 1,075 / (RR + 1), tabella congelata:
+#         RR 0,70 -> serve WR 63,2%
+#         RR 1,00 -> 53,8%
+#         RR 1,31 -> 46,5%   <- geometria dell'autore al netto di 1 pip
+#         RR 1,50 -> 43,0%   <- geometria dell'autore LORDA
+#       🟢 GEOMETRIA LETTA NEL SORGENTE (righe 41-42, 105-106):
+#         sl_atr = 1,2 ; tp_atr = 1,8  -> **RR = 1,50 ESATTO**.
+#       Il rapporto NON dipende dall'ATR (si semplifica): e' 1,50 su
+#       qualunque simbolo e qualunque timeframe. E' SOPRA 0,70, quindi
+#       il candidato NON e' uno scarto per aritmetica -- ma il RR che
+#       CONTA e' quello MISURATO qui, non quello dichiarato dai
+#       parametri.
+#
+#  F6 - DUE LATI SEMPRE E SEPARATI (regola di Claudio del 25/08) e
+#       DUE MOTORI SEMPRE SEPARATI. Ogni numero ha quattro colonne:
+#       fade-long, fade-short, break-long, break-short.
+#       NESSUN totale aggregato entra in un verdetto.
+#       >>> E' anche l'ABLAZIONE GRATIS di questa battuta: i due motori
+#       vivono nello STESSO contenitore e sono scelti da UNA sola
+#       variabile (l'expansion score). Quindi si legge subito:
+#         - se il fade regge e il breakout no (o viceversa), il
+#           regime-arbitro sta scegliendo male e va misurato da solo;
+#         - se REGGONO ENTRAMBI, l'arbitro e' l'edge, ed e' la
+#           scoperta che vale la battuta;
+#         - se NON REGGE NESSUNO DEI DUE, la classe "residuo dalla
+#           VWAP a TF basso" ha la sua falsificazione e si chiude in
+#           un round -- ricordando che il fade e' adiacente ad
+#           ABTG_VwapRevert e il breakout ad ABTG_OutOfNoise, DUE
+#           candidati di casa gia' scritti e MAI GIRATI.
+#
+#  F7 - TENUTA (criterio 3 del mandato + vincolo prop P5). Mediana
+#       della tenuta, in barre del proprio TF.
+#         mediana < 12 barre -> il candidato sta sotto il muro
+#           d'attrito misurato da arXiv 2605.04004 par. 6.2 ("the two
+#           strategy types that avoid this ceiling hold positions for
+#           12-15 bars rather than 1-6") -> VERDETTO SOSPESO, e si
+#           dichiara.
+#         quota di trade sotto i 60 SECONDI >= 25% -> SCARTO PROP
+#           (P5, CONFIG_PROP_2026-08-31.md).
+#       >>> ATTESA DICHIARATA PRIMA: con stop e take ad ATR(14) su M5 e
+#       M15 la tenuta si misura in DECINE DI MINUTI, non in secondi.
+#       La clausola HFT NON dovrebbe mordere -- ma si misura, non si
+#       assume, ed e' la prima volta che una sonda di casa la conta.
+#
+#  F8 - 🔧 IL RILIEVO TECNICO CHE CAMBIA LA LETTURA DEI DUE TF,
+#       trovato leggendo il sorgente e NON la descrizione.
+#       Il gate micro-flow legge `request.security_lower_tf(M1, close)`
+#       (riga 79) e lo riassume con micro_flow(a, micro_span=10)
+#       (righe 51-63). Ma quell'array contiene SOLO le barre M1
+#       CONTENUTE NELLA BARRA CORRENTE:
+#         - su M5  -> 5 barre M1 -> la riga 56 esclude la piu' fresca
+#                     -> restano **4 confronti**, e il parametro
+#                        micro_span=10 e' TRONCATO IN SILENZIO;
+#         - su M15 -> 15 barre M1 -> **10 confronti**, cioe' il
+#                        parametro e' onorato per intero.
+#       >>> CONSEGUENZE, congelate prima dei numeri:
+#         1. a M5 il "micro flow" NON e' una conferma da una finestra
+#            piu' larga: e' la FORMA DELLA CANDELA DI SEGNALE. E' un
+#            filtro DIVERSO, non lo stesso filtro piu' veloce.
+#         2. la granularita' cambia anche la SEVERITA' del gate: con 4
+#            confronti `mf > 0,20` vuol dire mf >= 0,50; con 10
+#            confronti vuol dire mf >= 0,40. Il gate e' PIU' LARGO a
+#            M5. E' il motivo del 31% contro 17% di F1-bis.
+#         3. quindi **M5 e M15 NON sono lo stesso motore a due
+#            velocita'**, e il confronto fra le due corse va letto
+#            sapendolo. Nel porting MQL5 questo va reso ESPLICITO con
+#            un input in MINUTI (non in barre), altrimenti si eredita
+#            un troncamento silenzioso.
+#       Nessun cancello su F8: e' una lettura, e va nel referto.
+#
+# =====================================================================
+#  LIMITI DICHIARATI PRIMA (non dopo)
+# ---------------------------------------------------------------------
+#  - LA FREQUENZA NON E' STATA MISURATA DA NESSUN AGENTE, di nuovo.
+#    Le tre fonti dati (Yahoo, Stooq, Dukascopy) restano murate al
+#    CONNECT dal proxy di egress. Questa corsa e' la PRIMA misura.
+#  - LA FREQUENZA E' [DERIVATA], NON [DICHIARATA]: l'autore non
+#    scrive nessun numero (vedi F1). E la lezione M0PB dice che anche
+#    quando e' dichiarata puo' mentire.
+#  - LO SPREAD BCM NON ESISTE IN REPO, ne' major ne' oro (F2).
+#  - LA PROFONDITA' TICK del forex BCM non e' mai stata sondata (il
+#    1999.01.04 di R102 e' su OHLC M1, riga 6 "modello OHLC M1" e riga
+#    136 "niente tick reali"). Quella di XAUUSD nemmeno (rilievo
+#    aperto G1-PAOLO). Questo PASSO gira a modello 2, quindi non ne ha
+#    bisogno; il verdetto di MERITO si'.
+#  - LE ESCURSIONI SONO LIMITI SUPERIORI: la sonda misura N barre
+#    piene, il motore vero ha un cooldown e un'inversione. Su F2 la
+#    distorsione e' conservativa nel verso giusto (se non passa qui,
+#    non passa nemmeno vero); su F5 NO -- anche la MAE e' un limite
+#    superiore, le due distorsioni vanno nello STESSO verso e non si
+#    cancellano in modo dimostrabile. L'RR misurato qui e'
+#    un'INDICAZIONE, e il cancello si applica SAPENDOLO.
+#  - LA SONDA NON SIMULA ESITI: non sa quante volte il take sarebbe
+#    stato preso PRIMA dello stop. Quello lo vede solo il tick.
+#  - `margin_long=0, margin_short=0` (riga 14 del Pine) rende la curva
+#    di equity dell'autore priva di significato (leva infinita: il
+#    tester non puo' MAI rifiutare un ordine). Non ci tocca -- non
+#    usiamo numeri d'autore -- ma va scritto perche' chi apre la
+#    pagina vede un grafico che non vale niente.
+#  - Nessun numero di performance dell'autore usato in nessun
+#    punteggio. L'autore, a suo merito, non ne pubblica.
+#
+# =====================================================================
+#  GLI ASSI -- pochi, e nessuno decorativo
+# ---------------------------------------------------------------------
+#  Il generico RIFIUTA zero assi. E in un PASSO 0 gli assi NON sono
+#  sweep di merito: servono a coprire cio' che e' genuinamente IGNOTO.
+#  ASSE 1 = InpExpansionGate (3 valori: 0,50 / 0,65 / 0,80).
+#    E' l'ARBITRO fra i due motori, cioe' la tesi stessa. Muoverlo
+#    sposta il confine fade/breakout: le tre celle dicono se il
+#    confine e' un altopiano o un picco. 0,65 e' il default d'autore.
+#  ASSE 2 = InpOraInizioServer (2 valori: 6 / 8).
+#    L'autore scrive "0700-1700 UTC". Ora server BCM = ora italiana -1
+#    = UTC+1 in questo periodo -> 08:00-18:00 SERVER. Ma il Pine usa
+#    `time(timeframe.period, sess_str)` SENZA argomento di fuso
+#    (riga 82), quindi il fuso e' quello dello SCAMBIO del simbolo,
+#    che su un feed FX di TradingView e' **[INCERTO]**. Non si
+#    converte a tavolino: si sweepa. E si VERIFICA sull'orologio del
+#    server (CLAUDE.md: log MT5 in ora locale, grafico in ora server
+#    -- errore gia' pagato il 06/08).
+#  TUTTO IL RESTO E' PINNATO ai default dell'autore. Sweepare
+#  sig_len, stdev_mult, micro_gate, sl_atr o tp_atr in un PASSO 0
+#  servirebbe solo a pescare la cella che fa passare il pavimento:
+#  VIETATO PER COSTRUZIONE. In particolare sl_atr/tp_atr restano
+#  1,2/1,8 perche' il loro RAPPORTO (1,50) e' la ragione per cui il
+#  candidato passa l'aritmetica H8: toccarlo qui sarebbe barare.
+#  NOTA: la sonda NON PROMUOVE NIENTE. Nessuna cella di questa corsa
+#  va promossa -- si LEGGONO le colonne. E se e quando si scegliera'
+#  una cella, sara' il CENTRO DELL'ALTOPIANO, mai il picco (12
+#  Spearman IS->OOS negative su 13).
+#
+# =====================================================================
+#  DOVE GIRA
+# ---------------------------------------------------------------------
+#  @SIMBOLO e' il LEAD: EURUSD (il simbolo della demo dell'autore).
+#  Le altre gambe girano con -Simbolo del generico (override
+#  DICHIARATO dal wrapper):
+#    EURUSD  major lead, spread piu' sottile
+#    GBPUSD  secondo major, controllo di robustezza fra simboli
+#    XAUUSD  🎯 l'oro e' la gamba che il mandato chiede ESPLICITAMENTE
+#            ("oro intraday sessione europea/USA") ED E' QUELLA CON LA
+#            GEOMETRIA PIU' GRASSA: ATR(14) su oro vale in USD molte
+#            volte lo spread, quindi F2 ha molto piu' margine che sui
+#            major a M5. Ma la profondita' storica di XAUUSD su BCM
+#            NON E' MAI STATA MISURATA (G1-PAOLO): questa gamba
+#            richiede prima una sonda di storico.
+#  TF: M5 e M15 -- OBBLIGATORIE ENTRAMBE (F6 + F8). L'attesa dichiarata
+#  e' che M15 fallisca il pavimento nuovo e M5 lo passi.
+#  LATI: separati, sempre. MOTORI: separati, sempre.
+#
+#  LA RIGA DI LANCIO NON STA IN QUESTO FILE e non e' stata costruita
+#  qui: la scrive il turno successivo, con l'irm davanti e la riga di
+#  raccolta in coda (REGOLA DELLE RIGHE DI LANCIO, CLAUDE.md), dopo
+#  essere passata da CHECKLIST_RIGA_DI_LANCIO.md.
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- @DAQUANDO: PERCHE' QUESTO VALORE E NON UN ALTRO ------------------
+# NON e' inventato e NON e' il pavimento storico del simbolo.
+# E' la FINESTRA DI COMPARABILITA' di casa: 2024.09.26 -> 2026.06.30 e'
+# la stessa su cui girano tutti gli altri PASSO 0 (M0PB il 31/08 sera,
+# LondonFx la notte dopo). Un candidato giudicato su una finestra
+# diversa non si puo' mettere accanto agli altri.
+# Non si va indietro fino al 1999 (dove i dati OHLC M1 sul forex
+# ESISTONO e sono misurati, R102) per due ragioni misurate:
+#   1. il TETTO ~100.000 BARRE del tester (regola di casa 25/08): a M5
+#      sono ~1,3 anni per corsa. Una finestra dal 1999 sarebbe un
+#      numero scritto che il banco NON PUO' ONORARE -- la classe
+#      "criterio fisicamente irraggiungibile" della CHECKLIST;
+#   2. questo passo NON E' UN VERDETTO DI MERITO: conta OCCASIONI e
+#      misura GEOMETRIE. La PROVA DI REGIME serve al merito, si fa
+#      dopo e a tick.
+# >>> E LA FINESTRA EFFETTIVA LA DICHIARA LA SONDA, non questo file:
+# le colonne "Giorni Contati" e "Barre Valutate" dicono su quanto si e'
+# davvero misurato. La firma del tetto e' "Barre Valutate" IDENTICHE su
+# simboli diversi. F1 e' per-giorno sul denominatore CONTATO, quindi
+# resta leggibile anche col campione ridotto.
+# >>> 🔴 LA GAMBA XAUUSD NON PUO' USARE QUESTA DATA senza prima una
+# sonda di storico (scarica_storico.ps1): la profondita' dell'oro su
+# BCM non e' mai stata misurata. Meglio un init fallito che una
+# finestra inventata.
+# ---------------------------------------------------------------------
+
+# --- INPUT PROPOSTI (NOMI NON ANCORA VERIFICATI IN UN SORGENTE) -------
+InpSigLen=63
+InpStdevMult=1.0
+InpExpansionGate=0.65||0.50||0.15||0.80||Y
+InpMicroTfMinuti=1
+InpMicroSpanMinuti=10
+InpMicroGate=0.20
+InpOraInizioServer=8||6||2||8||Y
+InpOreSessione=10
+InpAtrPeriodo=14
+InpSlAtrMult=1.2
+InpTpAtrMult=1.8
+InpCooldownBarre=10
+InpBarreOrizzonte=12
+InpPipSize=0.0001
+InpWarmupBarre=300
+InpAutoTest=true
+InpVerbose=true
+InpTag=DAYFLOW_SONDA
