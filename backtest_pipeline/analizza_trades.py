@@ -161,7 +161,8 @@ def main():
     # ---------- segnalazioni ----------
     avvisi = []
 
-    # 1) sovrapposizioni: stesso simbolo, ingressi entro 10 minuti
+    # 1) sovrapposizioni: stesso simbolo, FINESTRE che si sovrappongono
+    #    (oppure ingressi entro 10 minuti, per continuare a vedere i whipsaw)
     #
     # ⚠️ 06/08: "DIREZIONI OPPOSTE" va detto SOLO se le due posizioni erano
     #    aperte NELLO STESSO ISTANTE. Prima bastava che gli ingressi fossero
@@ -170,6 +171,14 @@ def main():
     #    whipsaw. E' lo stesso errore che avevo gia' fatto due volte a mano
     #    leggendo lo Storico invece delle posizioni aperte: qui lo chiude
     #    il codice, non la memoria.
+    # ⚠️ 31/08: il filtro "ingressi entro 600 s" era un SURROGATO della
+    #    sovrapposizione e falliva proprio sulle posizioni tenute per ore:
+    #    GAP long 01:00 + SUPERWAVE short 06:00 = 8,5 ORE opposte sul Dow,
+    #    scartate perche' gli ingressi distavano 5 ore. Stessa radice dei
+    #    tre casi persi a cavallo di due giorni (19, 21, 25/08). Ora la
+    #    coppia entra se le FINESTRE si toccano, a qualunque distanza
+    #    d'ingresso; il criterio dei 600 s resta solo per le sequenze
+    #    ravvicinate (whipsaw), che per definizione non si sovrappongono.
     persym = defaultdict(list)
     for r in oggi:
         persym[r.get("symbol", "?")].append(r)
@@ -178,13 +187,13 @@ def main():
         for i in range(len(tr)):
             for j in range(i + 1, len(tr)):
                 dt = (tr[j]["_ot"] - tr[i]["_ot"]).total_seconds()
-                if dt > 600:
-                    break
                 a, b = tr[i], tr[j]
                 # sovrapposizione vera: l'ultimo ad aprire lo fa prima che il primo chiuda
                 sovrapposte = True
                 if a["_ct"] and b["_ct"]:
                     sovrapposte = max(a["_ot"], b["_ot"]) < min(a["_ct"], b["_ct"])
+                if not sovrapposte and dt > 600:
+                    continue
                 if a.get("side") != b.get("side"):
                     coda = (" — ⚠️ **DIREZIONI OPPOSTE, contemporanee**" if sovrapposte
                             else " — direzioni opposte ma **in sequenza**: la seconda apre "
@@ -192,10 +201,11 @@ def main():
                 else:
                     coda = ("" if sovrapposte
                             else " — **in sequenza**, non contemporanee")
+                dist = ("%.0f s" % dt) if dt <= 600 else ("%.1f ore" % (dt / 3600.0))
                 avvisi.append(
-                    "🔶 **%s**: `%s` (%s) e `%s` (%s) a **%.0f s** di distanza%s" % (
+                    "🔶 **%s**: `%s` (%s) e `%s` (%s) a **%s** di distanza d'ingresso%s" % (
                         sym, a.get("strategy"), a.get("side"), b.get("strategy"),
-                        b.get("side"), dt, coda))
+                        b.get("side"), dist, coda))
 
     # 2) uscite troppo rapide o frazione bassa
     for r in oggi:
