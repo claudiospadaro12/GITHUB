@@ -1,0 +1,214 @@
+# =====================================================================
+#  PRE-REGISTRAZIONE ESTERNA DELLE CELLE DELL'OROLOGIO  --  01/09/2026
+#  Cacciatore articoli+paper, TERZA BATTUTA della caccia-frequenza.
+#  Dossier: caccia_strategie/CACCIA_FREQUENZA3_ART_PAPER_2026-09-01.md
+# =====================================================================
+#
+# #####################################################################
+# #  QUESTO FILE NON SI LANCIA. NON E' UNA PROVA. NON PINNA NIENTE.   #
+# #  E' un FOGLIO DI PRE-REGISTRAZIONE: scrive, PRIMA che la sonda    #
+# #  giri, QUALI CELLE la letteratura esterna prevede -- cosi' che il #
+# #  criterio C2 della sonda ("la cella vale SOLO se e' quella che la #
+# #  TESI aveva indicato PRIMA") possa essere giudicato senza che sia #
+# #  la nostra memoria a decidere dopo aver visto i colori.           #
+# #                                                                   #
+# #  NON TOCCA prove/SONDA_OROLOGIO_FX.txt (specifica congelata) ne'  #
+# #  i sette file esecutivi _00.._06. Nessun criterio e' stato        #
+# #  modificato: qui si AGGIUNGE una previsione, non si sposta una    #
+# #  soglia. Se Claudio non la firma, la sonda gira uguale e questo   #
+# #  foglio resta agli atti come previsione non usata.                #
+# #####################################################################
+#
+# ---------------------------------------------------------------------
+# 1. DA DOVE VIENE LA PREVISIONE (fonti, con l'etichetta)
+# ---------------------------------------------------------------------
+#
+#  [LETTO-VIA-SEARCH]  Breedon F., Ranaldo A., "Intraday Patterns in FX
+#    Returns and Order Flow", QMUL SEF WP 694 (03/04/2012), SNB WP 2011-04,
+#    Journal of Money Credit and Banking, luglio 2013.
+#    SSRN 2099321 -> 403. PDF SNB / EconStor / RePEc / QMUL / AEA -> tutti
+#    murati dal proxy. Cinque copie provate, zero aperte: la citazione
+#    viene da estratti di ricerca, ed e' etichettata cosi'.
+#      "currencies ... depreciate during local trading hours"
+#      "EUR/USD tends to depreciate in the European morning and then
+#       appreciate in US trading hours"
+#
+#  [LETTO-VIA-SEARCH]  Ranaldo A., "Segmentation and Time-of-Day Patterns
+#    in Foreign Exchange Markets", J. Banking & Finance 2009, SSRN 960209.
+#      "Domestic currencies appreciate (depreciate) systematically during
+#       foreign (domestic) working hours ... pervasively persist across
+#       many years, even after accounting for calendar effects."
+#
+#  [VERIFICATO NEL SORGENTE]  quantrocket-codeload/fx-bizday, Apache 2.0,
+#    raw.githubusercontent HTTP 200. Implementazione pubblica del paper.
+#    Copia in biblioteca/sorgenti/FxBizday_QuantRocket-Apache2_*.py
+#      SELL_EUR_START "03:00:00"   SELL_EUR_END "11:00:00"
+#      BUY_EUR_START  "11:00:00"   BUY_EUR_END  "16:00:00"
+#      lun-ven, nessuno stop, nessun take, nessun indicatore.
+#      Fuso dichiarato dall'autore: "the timezone for FX is always New
+#      York time regardless of the currency pair".
+#
+#  [VERIFICATO, abstract]  arXiv 1103.5664, "Intra-Day Seasonality in
+#    Foreign Exchange Market Transactions" (DEM/USD, Dealing 2000-2):
+#    "significant evidence of intraday seasonality in RETURNS and return
+#     volatilities".
+#
+# ---------------------------------------------------------------------
+# 2. LA CONVERSIONE ORARIA -- come e', e con quale incertezza
+# ---------------------------------------------------------------------
+#
+#  Regola di casa (CLAUDE.md): ora server BCM = ora italiana - 1.
+#
+#  ESTATE: NY = UTC-4, Italia = UTC+2  -> server = UTC+1
+#     03:00 NY = 07:00 UTC = 08:00 server
+#     11:00 NY = 15:00 UTC = 16:00 server
+#     16:00 NY = 20:00 UTC = 21:00 server
+#  INVERNO: NY = UTC-5, Italia = UTC+1 -> server = UTC+0
+#     03:00 NY = 08:00 UTC = 08:00 server
+#     11:00 NY = 16:00 UTC = 16:00 server
+#     16:00 NY = 21:00 UTC = 21:00 server
+#
+#  >>> Le due letture COINCIDONO: 08:00 / 16:00 / 21:00 SERVER in
+#      entrambe le stagioni, perche' NY e l'Europa cambiano insieme.
+#      [INFERITO dal calcolo dei fusi, NON verificato sull'orologio del
+#      terminale.] Resta l'errore noto di ~4 settimane l'anno gia'
+#      DICHIARATO dal criterio C6 della sonda (le ore legali USA e UE non
+#      si accendono lo stesso giorno). Non e' un errore nuovo.
+#
+# ---------------------------------------------------------------------
+# 3. LE CELLE PREVISTE -- scritte PRIMA, per il criterio C2
+# ---------------------------------------------------------------------
+#
+#  La griglia della sonda e' InpOraIngresso 0..23 passo 1 e InpOreDurata
+#  4 / 8 / 12. Le celle qui sotto SONO GIA' DENTRO quella griglia: non
+#  serve cambiare una riga dei sette file esecutivi.
+#
+#  CELLA A  (la piu' forte, e' quella nominata dal paper per nome)
+#     SIMBOLO   EURUSD
+#     LATO      SHORT
+#     InpOraIngresso = 8      InpOreDurata = 8     -> 08:00-16:00 server
+#     file esecutivo interessato: SONDA_OROLOGIO_02_EURUSD_SHORT.txt
+#     tesi: l'euro si deprezza nelle ore d'ufficio europee.
+#
+#  CELLA B  (la gamba di ritorno, stesso paper)
+#     SIMBOLO   EURUSD
+#     LATO      LONG
+#     InpOraIngresso = 16     InpOreDurata = 4     -> 16:00-20:00 server
+#     (il paper chiude alle 21:00 server; la griglia ha 4/8/12 e non 5,
+#      quindi 4 ore e' la durata piu' vicina PER DIFETTO. Dichiarato.)
+#     file esecutivo: SONDA_OROLOGIO_01_EURUSD_LONG.txt
+#
+#  CELLA C  (estensione dello stesso meccanismo, il paper dice
+#            "confirm this pattern across a range of currencies")
+#     SIMBOLO   GBPUSD
+#     LATO      SHORT
+#     InpOraIngresso = 8      InpOreDurata = 8     -> ore di Londra
+#     file esecutivo: SONDA_OROLOGIO_04_GBPUSD_SHORT.txt
+#
+#  CELLA D  (il lato yen: le ore d'ufficio giapponesi. USDJPY quota il
+#            DOLLARO in yen, quindi "yen debole nelle ore di Tokyo" =
+#            USDJPY che SALE -> LONG. Il Giappone non ha ora legale.)
+#     SIMBOLO   USDJPY -- 🔴 NON E' NEI SETTE FILE ESECUTIVI, che coprono
+#               EURUSD / GBPUSD / XAUUSD. E' una previsione che questa
+#               sonda NON PUO' GIUDICARE. Scritta per non perderla.
+#     LATO      LONG    InpOraIngresso = 0   InpOreDurata = 8
+#
+#  >>> XAUUSD (_05 e _06): il meccanismo di Breedon-Ranaldo e' una
+#      domanda di VALUTA da parte di imprese domestiche. L'oro non ha
+#      "ore d'ufficio locali". NESSUNA PREVISIONE ESTERNA su XAUUSD:
+#      quelle due corse restano esplorative, e vanno lette con C2 nella
+#      sua forma piu' severa (nessuna tesi che le abbia indicate prima
+#      = qualunque cella verde li' e' rumore fino a prova contraria).
+#
+# ---------------------------------------------------------------------
+# 4. IL CANCELLO DI COSTO -- gia' congelato in C1, e adesso TARATO
+# ---------------------------------------------------------------------
+#
+#  C1 della sonda dice gia': |lordo medio per giornata| >= 3 x spread
+#  mediano DELLA STESSA ORA. Non lo tocco. Ci aggiungo il NUMERO ESTERNO
+#  che dice quanto e' stretto quel cancello nella realta':
+#
+#   [VERIFICATO, fx-bizday Part5]  "our strategy cannot tolerate much
+#   slippage. Even 1 basis point will destroy the profitability"
+#   (scansione 0,1 / 0,5 / 1 / 2 bps one-way su 19 anni, 2005-2024)
+#
+#   [VERIFICATO, fx-bizday Part6]  lo spread EURUSD misurato dall'autore
+#   su barre BID_ASK a 1 minuto e' 0,125 bp medio (~0,14 pip): e' uno
+#   spread INTERACTIVE BROKERS IDEALPRO, non retail.
+#
+#  >>> TRADUZIONE PER NOI, ed e' la riga che decide:
+#      1 bp su EURUSD a 1,10 e' circa 1,1 pip. Il nostro spread di
+#      riferimento e' ~1 pip -- e NON E' MAI STATO MISURATO
+#      ([SPREAD NON MISURATO], settima caccia che lo scrive).
+#      Cioe': la VERSIONE INCONDIZIONATA del meccanismo (dentro tutti i
+#      giorni, tutte le ore della fascia) e' gia' DICHIARATA MORTA dal
+#      suo stesso autore a un costo che e' circa il nostro.
+#      NON e' una ragione per non far girare la sonda: e' la ragione per
+#      cui la sonda va fatta girare COSI' COM'E' -- perche' misura il
+#      rapporto lordo/spread ORA PER ORA, e la sola speranza del
+#      meccanismo e' che UNA fascia stretta abbia un rapporto molto
+#      sopra 3, mentre la media delle otto ore no.
+#
+#  E' anche il motivo per cui NON propongo di comprare fuori un EA
+#  "business day rotation": comprare la versione incondizionata
+#  significherebbe comprare una cosa gia' falsificata al nostro costo.
+#
+# ---------------------------------------------------------------------
+# 5. SE E SOLO SE C1 e C2 PASSANO -- il PASSO SUCCESSIVO, gia' scritto
+# ---------------------------------------------------------------------
+#
+#  CRITERI CONGELATI QUI, PRIMA DI QUALUNQUE NUMERO (mandato 01/09):
+#
+#   F1 - FREQUENZA >= 2,0 OPERAZIONI/GIORNO.
+#        Come si arriva a 2,0 senza scendere di timeframe:
+#          una gamba per fascia locale x due fasce (locale + estera) su
+#          UN simbolo = 2,0/giorno esatti, AL pavimento;
+#          tre simboli con fasce locali diverse (EUR ore europee, GBP ore
+#          di Londra, USDJPY ore di Tokyo) = 6/giorno, e le tre gambe
+#          NON sono lo stesso segnale moltiplicato: stanno in ORE
+#          DIVERSE. E' l'unica forma di frequenza che la casa ha gia'
+#          concluso essere praticabile ("piu' SIMBOLI, non piu'
+#          velocita'", caccia M1 del 29/08, riconfermata due volte).
+#
+#   F2 - TAGLIA: lordo mediano di fascia >= 3 x spread mediano DELLA
+#        STESSA ORA. E' esattamente C1 della sonda, non cambia.
+#        Spread di riferimento EURUSD ~1 pip [SPREAD NON MISURATO];
+#        il numero vero lo produce la sonda stessa.
+#
+#   H8 - Il cancello firmato (E >= 0,075R a tick) qui NON si legge come
+#        RR, perche' il meccanismo NUDO non ha ne' stop ne' take: esce a
+#        TEMPO. La forma leggibile e':
+#          E per gamba = drift_lordo_mediano - costo_tutto_compreso.
+#        Se si aggiunge uno stop protettivo (e va aggiunto, F9), allora
+#        RR = drift_mediano / distanza_stop e vale la regola di sempre:
+#        RR < 0,70 -> morto per aritmetica, senza corsa a tick.
+#
+#   TENUTA - la gamba dura 8 ore (locale) e 4-5 ore (estera).
+#        Su H1 sono 8 e 4 BARRE: sotto il "12 barre" del criterio del
+#        mandato. Su M15 sono 32 e 16-20 barre: sopra.
+#        🔴 Lo dichiaro invece di nasconderlo: il criterio delle 12 barre
+#        nasce da arXiv 2605.04004 §6.2, dove le barre erano da 5 minuti
+#        (12-15 barre = 60-75 MINUTI). In durata ASSOLUTA questa gamba
+#        sta 4-8 volte SOPRA quella soglia. La lettura "12 barre di H1"
+#        e' un errore di unita', e va risolta a favore della durata.
+#
+#   DUE LATI - gia' garantito dal disegno della sonda (sei corse).
+#   NON SI TOCCA IL FORWARD - nessuna sedia, nessun magic nuovo.
+#
+# ---------------------------------------------------------------------
+# 6. IL FILE PROVA VERO NON ESISTE, E NON DEVE ESISTERE OGGI
+# ---------------------------------------------------------------------
+#
+#  I sette file esecutivi della sonda ci sono gia' e sono congelati.
+#  Un ottavo file che pinnasse input inesistenti e' l'errore n.3 della
+#  CHECKLIST_RIGA_DI_LANCIO: MT5 ignora IN SILENZIO un pin che non
+#  trova, ed e' cosi' che e' nato il falso "0/8" del FiboH4.
+#  Prima la sonda gira. Poi si legge C1 e C2 contro questo foglio.
+#  Poi -- e solo allora -- si decide se esiste un EA da scrivere.
+#
+#  @SIMBOLO   (nessuno: questo foglio non lancia niente)
+#  @PERIODO   (nessuno)
+#  @DAQUANDO  (nessuno -- la finestra e' quella gia' misurata nei sette
+#              file: 2011.01.01 -> 2026.06.30, aritmetica sul tetto delle
+#              ~100.000 barre, e dentro lo storico misurato dei simboli)
+# =====================================================================
