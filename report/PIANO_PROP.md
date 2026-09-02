@@ -153,8 +153,9 @@ PORTATA (_"la flotta e' viva ma troppo LENTA"_):
 - 🥈 `docs/REGOLAMENTO_FUNDINGPIPS_2026-08.md` (riletto per i requisiti di
   frequenza: min 3 giorni, consistency 35% sui reward, **7 giorni
   profittevoli/30** sullo Zero, **"high-frequency trading" fra le pratiche
-  VIETATE**, e la **"Risk Per Trade Idea"** a finestra di 10 minuti che
-  colpisce i nostri gemelli) · `docs/REGOLAMENTO_FTMO_2026-08.md` (target
+  VIETATE**, e la **"Risk Per Trade Idea"** a finestra di 10 minuti — ⚠️ **la
+  lettura di allora era SBAGLIATA: corretta al v17, vedi H5**) ·
+  `docs/REGOLAMENTO_FTMO_2026-08.md` (target
   10%/5%, **min 4 giorni**, **nessun limite di tempo**)
 
 **🆕 Fonti nuove del diciassettesimo giro (v17, 02/09/2026)** — la giornata in
@@ -945,7 +946,7 @@ giorno migliore** (43,6-50,0%, gia' al limite).
 > supporto — non e' burocrazia**, ed e' il motivo per cui P0 (riga **C8**) e'
 > stata firmata lo stesso giorno.
 
-## H6-H9 — LA TABELLA MADRE DELLE RIGHE NUOVE
+## H6-H12 — LA TABELLA MADRE DELLE RIGHE NUOVE
 
 | # | parametro | valore PROPOSTO | fonti (rango) | conflitti | stato |
 |---|---|---|---|---|---|
@@ -953,10 +954,171 @@ giorno migliore** (43,6-50,0%, gia' al limite).
 | H7 | 💶 **Aspettativa per trade di riferimento del piano** (E) | **da accertare in forward**; oggi il piano lavora con la **banda 0,046R – 0,091R** dichiarata, e la usa **solo per stimare tempi**, mai per promettere risultati | 🥇 banco: +0,091R (dial T3 ÷ contratti) e +0,075R (`METRO_PROP` §9) · 🥇 forward 100k +0,044R (n=22) · 🥇 forward piccolo **−0,091R** (n=97) · 🥇🆕 **`report/M27_SEGNO_ASPETTATIVA_2026-08-31.md`** | 🔴 **CONFLITTO ANALIZZATO E RIDIMENSIONATO (M27, 31/08 sera)** — e **NON era simmetrico**: **(1)** il +0,091R del banco e' **OHLC** (`R103_CRITERI` §modello: _"1 = OHLC su M1, per tutte e 40"_, e i suoi stessi criteri scrivono _"sugli indici l'OHLC HA GIA' MENTITO"_, SupRev DOW 2,77 OHLC → 0,79 tick) = **limite superiore**, non misura pari; **(2)** il −0,091R del forward **non e' sistemico**: tolte **due sedie identificate** (`770101` modalita' vecchia e `770611` ORB) i restanti **76 ingressi fanno +22,97 € = +0,006%/trade, PIATTO**; **(3)** le **3 peggiori operazioni di agosto valgono l'85% della perdita**, sono **tutte della `770101`** e sono **tutte a −2,0% del conto contro l'1,0% dichiarato** (controprova 100k: lo stesso trade del 14/08 costa **−0,648% = 1R esatto** a 0,65% → **l'EA calcola giusto, e' la sedia del piccolo a girare a taglia doppia**) | 🔓 **APERTO — ma con una diagnosi.** Il segno di E oggi e' **indistinguibile da zero** (mediana dell'ingresso **0,00 €**, 49% positivi): la flotta **non perde per mancanza di edge, perde per due sedie identificate**. Si chiude con: R1 (verifica VPS della taglia 770101) + le due revisioni + **4 settimane di forward fermo** |
 | H8 | 🧪 **Cancello di ammissione di un motore "ad ALTA FREQUENZA"** | un motore veloce entra nell'imbuto come tale **solo se** porta **E ≥ 0,075R misurata a tick** (= l'aspettativa di casa) **e** DD ≤ 15% (cancello congelato) **e** n ≥ 150 (R59). **La frequenza da sola non e' un merito**: PF 1,00 × 30 trade/mese = **zero profitto e DD in piu'** | 🥇 la legge misurata di H4 su **4 round in 48 ore** (NyRetest ÷4,1 · Chaos ÷5,6 · InvEs ÷1,5 · Breakin ÷1,2) · 🥇 le tre versioni veloci in casa **tutte a PF≈1,00** · 🥇 `REFERTO_CRT_2026-08-30` (0/30 celle) | ⚠️ il cancello **non vieta** la caccia a motori veloci: vieta di chiamare "portata" una frequenza senza edge. ⛔ ~~E va letto con la clausola FundingPips _"high-frequency trading"_: definizione [INCERTO], da chiedere~~ → ✅ **v17: la clausola e' MISURATA e il paletto e' dentro il cancello** (E9) | 🧊 **CONGELATO (31/08/2026, "FIRMO TUTTE E DUE, PARTIAMO" — `report/FIRME_2026-08-31.md`)**, e **AMPLIATO il 02/09 con la firma P5**: al cancello si aggiunge il **PALETTO DI TENUTA — mai piu' del 25% dei trade sotto i 60 secondi** (`FIRME_2026-09-02.md` §P5, riga **E9**). 🆕 **v17 — PRIMA APPLICAZIONE, ed e' stata letale**: il promosso 9/10 della caccia del 31/08 (**M0PB**) e' andato al PASSO 0 il giorno dopo ed e' **MORTO 12/12** — F1 (frequenza) 0/12 e **H8 sull'RR 7/12 sotto soglia**, coi 5 sopra tutti a 0,70-0,74. Il cancello ha ucciso un candidato **al costo di una compilazione e 12 passate open-prices**, prima di spendere una sola corsa a tick (→ **H11**) |
 | H9 | 📅 **Conformita' ai requisiti di frequenza/consistenza** delle prop candidate | registrare e sorvegliare: **giorni minimi** (passati 3× largo), **best day ≤50%** (misurato **43,6%** sul 100k, **50,0%** sul piccolo), **consistency 35%** FundingPips (**non conforme oggi**), **giorni profittevoli ≥0,5%** The5ers (**1 su 13**) | 🥇 misure di questo giro sui due CSV · 🥈 `docs/REGOLAMENTO_FTMO_2026-08.md` · `docs/REGOLAMENTO_FUNDINGPIPS_2026-08.md` · `CONFIG_PROP_2026-08-18.md` righe 459-460, 489-490 | ⚠️ le soglie sono **[LETTO-VIA-SEARCH]** salvo FTMO (dossier). La misura del best-day e' su **13 giornate**: indicativa, non un verdetto | 🔓 **APERTO (v16)** — si chiude con la scelta della prop (F1) + la misura tenuta viva (→ M27) |
+| H10 🆕 | 🚚 **STATO DELLA PORTATA — LA MIGRAZIONE E' PARTITA** (nuova, v17) | la portata **non si compra: si sposta**. Calendario firmato il 02/09 e in corso: **fase 1 = consolidamento + collaudo enforcement** (zero sedie nuove) → **fase 2 = lotto swing, 8 sedie** → **fase 3 = lotto Larry + EMA200 Dow DA SOLA a meta' settimana** → **fase 4 = le rientrate** → **fase 5 = code e verdetti**. Obiettivo aritmetico invariato: **34,7 → 111,9 op/mese (×3,2)**, cioe' le due fasi della challenge da **8,9-14,4 mesi a 2,8-4,5 mesi** | ✍️🥇 `report/FIRME_2026-09-02.md` (le **5 decisioni** + **D1/D2**) · 🥇 `report/PIANO_MIGRAZIONE_100K_2026-08-31.md` §4 (le fasi e i loro cancelli) · 🥇 `report/COLLAUDO_ENFORCEMENT_FASE1_2026-09-02.md` §4 (le **5 condizioni** del cancello di fase) | ⚠️ **I cancelli sono cinque e nessuno compensa un altro**: **C-1** 9/9 criteri PASS · **C-2** una settimana di borsa (**5 giornate**) di pagelle col 100k che legge le bandiere · **C-3** picco rischio aperto osservato **≤ 3,25%** · **C-4** **zero blocchi orfani** · **C-5** il 100k **tornato alla configurazione firmata** (4,9 / 9,9 / pausa 4,0 / cap 3,25, un solo Guardian, nessuna GV di pausa rimasta accesa). 🔴 **Se anche una sola manca, la fase 2 non parte** e il piano ricade sull'opzione **(a) scaglionare** — che non e' enforcement, e' esposizione ridotta per via amministrativa, coi tempi che si allungano. 🔴 **E il C-3 e' un LIMITE INFERIORE** (300 s + pendenti, → **B11**). ⏱️ Costo per Claudio: **~2 h 30 di lavoro attivo su 5-7 giorni**, **mai le due sessioni di prova nello stesso giorno** | 📋 **REGISTRATO / IN CORSO (v17)** — le decisioni sono **firmate**, il cancello **non e' ancora verde**. 🛑 Il forward lo tocca **solo Claudio**, con la legge dello screenshot |
+| H11 🆕 | 🏹 **IL VIVAIO DELLA FREQUENZA — chi e' vivo, chi e' morto, chi e' in canna** (nuova, v17) | **tre candidati e una macchina pronta**, tutti al **PASSO 0** (si conta prima, si giudica dopo — mai una griglia): **① Sonda dell'Orologio** (FX, gia' costruita, gia' congelata, **mai girata**: costo di costruzione **ZERO**) · **② DayFlow VWAP Relay** (M5/M15 su EURUSD/GBPUSD/**XAUUSD**, 9/10 **di carta**, richiede **~4-5 h** per la sola sonda riusando lo chassis LondonFx) · **③ LondonFx** (EURUSD M5, RR dichiarato **1,875** → al cancello H8 basta il **42%** di win rate netto). 🪦 **④ M0PB: MORTO 12/12**, nel registro dei caduti | 🥇 `REFERTO_SONDAM0PB_2026-08-31.md` · 🥉 `CACCIA_FREQUENZA3_TV_GH_2026-09-01.md` §5 (DayFlow) · 🥉 `CACCIA_FREQUENZA3_ART_PAPER_2026-09-01.md` §3 e §7 (l'orologio) · 🥇 il cancello che li giudica: **H8 + E9** | ⚠️ **La tensione misurata che nessuno puo' indovinare** (DayFlow §5.6): **M5 da' la frequenza (~4,8/giorno) ma assottiglia la geometria** (SL 6 pip → il win rate necessario sale dal 43,0% al **50,2%**) e **degrada il gate**; **M15 conserva geometria e gate ma non arriva al pavimento** (~1,6/giorno contro il **2,0** chiesto da Claudio il 01/09). 👉 **Il punto d'incontro si misura, e la gamba XAUUSD e' la piu' promettente** (sull'oro l'ATR in USD vale molte volte lo spread). 🔴 **Rischio prop dichiarato di DayFlow**: 5 trade sullo stesso simbolo nella stessa sessione a 0,65% sono **3,25% = esattamente il cap C1** → **`InpMaxTradesPerDay` e' un input del PRIMO round, non un'aggiunta**; e non ha **nessun cap di perdita giornaliera** dentro il motore (LondonFx si') | 📋 **PROPOSTO (v17)** — nessun candidato promosso, nessun round aperto, **zero forward**. Ordine raccomandato dall'architetto-prop (**decide Claudio**): **prima l'Orologio** (costo zero, macchina pronta, previsione esterna gia' scritta), **poi la sonda DayFlow** |
+| H12 🆕 | 📏 **LO SPREAD BCM, ORA PER ORA** — il buco che sette dossier di caccia hanno dovuto marcare `[SPREAD NON MISURATO]` (nuova, v17) | **misurarlo dove si paga**, non in media: la **Sonda dell'Orologio campiona gia' `(ask−bid)/_Point` nell'istante esatto dell'operazione** (`InpMaxSpreadPts = 0` → _"lo spread si MISURA, non si filtra"_, lezione R55) su **tre simboli e ora per ora**. 👉 **Accendere la sonda chiude questo buco gratis**, e nel posto giusto | 🥇 sorgente `mql5/Experts/ABTG_SondaOrologio.mq5` (righe 32, 111, 113, 189, 242) · 🥉 `CACCIA_FREQUENZA3_ART_PAPER_2026-09-01.md` §3.7 · 🥉 il *RealCost Spread P95 Logger* (Code Base **74148**), promosso dal **23/08** e **mai usato** | 🔴 **Perche' morde adesso**: tutti i conti di frequenza del vivaio (H11) usano **~1 pip di convenzione** su EURUSD, che **non e' mai stato misurato**. E l'aritmetica esterna dice che **il margine vive o muore su un fattore 2, non su un fattore 10**: l'autore di `fx-bizday` dichiara che **1 bp (≈1,1 pip su EURUSD) distrugge la profittabilita'** del meccanismo orario nudo, su 19 anni, **con spread misurato a 0,125 bp** (IBKR, non retail). 👉 **Il nostro costo e' circa la soglia che uccide la versione media del motore** — quindi un candidato "quasi verde" a spread stimato **non e' un candidato** | 🔓 **APERTO (v17)** — si chiude **automaticamente** con la prima corsa completa della sonda, **anche se la sonda boccia tutto il resto**: il numero va **estratto e archiviato lo stesso** |
 
-📌 **Stato area H**: **3 PROPOSTE + 1 APERTA**, zero congelamenti chiesti,
-**zero modifiche al forward**. Nessuna sedia accesa, spenta o ridotta da questa
-sezione: e' aritmetica, e la firma resta a Claudio.
+📌 **Stato area H**: **1 CONGELATA (H8, ampliata da P5) · 3 PROPOSTE/IN CORSO ·
+2 APERTE**, **zero modifiche al forward**. Nessuna sedia accesa, spenta o
+ridotta da questa sezione: e' aritmetica e calendario, e la firma resta a
+Claudio.
+
+## H10-bis — 🚚 LA MIGRAZIONE, IN CHIARO: DOVE SIAMO E COSA MANCA
+
+✍️ **Le sette firme del 02/09 si CITANO, non si riscrivono**
+(`report/FIRME_2026-09-02.md`). Qui c'e' solo cio' che cambia **nel piano**:
+
+| decisione firmata | cosa cambia nel piano prop |
+|---|---|
+| **A2 → lettura di FAMIGLIA** (le sedie **validate** partono a **contratto × 0,65**; la A2 letterale allo 0,3% resta per le **giovani/deboli** gia' marcate cosi': ORB, GapCont) | 🟡 **La riga A2 non cambia valore, cambia PERIMETRO.** Motivazione a verbale, e va scritta: applicare la A2 letterale a **tutta** la flotta _"ridurrebbe la portata esattamente del fattore che la migrazione compra"_. Il rischio resta governato da **C1** (cap) e da **C3** (per sedia) |
+| **I 5 magic riusati si rinumerano SOLO all'apertura della challenge vera** | 🟢 continuita' statistica del dry-run; i due CSV sono **gia' separati per file**. E spiega i "magic doppi" del censimento (`770101/770202/770411/770901/770611` = **stesso magic sui DUE terminali**, non due grafici) |
+| **Cap C1 → strada (b): l'enforcement E' il cancello della fase 2** | 🔴 **E' la decisione piu' pesante del giorno**: nessun lotto di sedie nuove finche' i criteri 5-9 non sono PASS. **La portata ×3,2 e' subordinata a due sessioni da 45 e 40 minuti** |
+| **EMA200 Dow (881531) → FASE 3, DA SOLA, a meta' settimana** | 🟡 e' **il singolo cambiamento piu' grosso** (33-35 op/mese): le sue giornate storte vanno viste **in isolamento**, altrimenti non si attribuiscono |
+| **GapFill al rientro → MAX 2 simboli il lunedi'** (mai i 5) | 🔴 il **peggior giorno del banco e' il loro cluster** — e i 5 GapFill sono anche **cinque dei 13 muti** (H0): prima si riparano, poi si limita |
+| **D1 — niente ricompilazioni in fase 1** | 🟢 si collauda **esattamente il software che sta in campo**, che e' anche l'unica cosa che il collaudo deve dimostrare. ⚠️ Conseguenza da tenere agli atti: **il 100k NON e' HEAD** (su ORB il binario e' del pin, HEAD ha `v1.02 InpSLBufferPts` a default neutro) e **l'autotest congelato dice 19 casi**, mentre su HEAD sono **75** (marcatore `v1.40`): se un giorno si ricompila, **il criterio 2 e il criterio 4 vanno rifatti e il cancello aggiornato PRIMA dei numeri** |
+| **D2 — si' al canarino** | ✅ **fatto e verde**: `mql5/Scripts/ABTG_CanarinoGuardian.mq5`, sola lettura per costruzione (nessun `OrderSend`, nessun `CTrade`), **8/8 autotest in campo** sul 100k il 02/09. ⚠️ Limite dichiarato: prova **il canale e l'include**, **non** che i 5 binari chiamino la guardia — quella prova resta la riga `[GUARDIA]` di un EA vero |
+
+🐤 **Cosa ha gia' consegnato la prima corsa del canarino** (02/09, 07:56
+server — `VERBALE_CANARINO_PRIMA_CORSA_2026-09-02.md`): conto **50504263**
+confermato · `ABTG_CanaleEsiste() = SI` · **grezzo e ricalcolato coincidono su
+tutte e tre le bandiere, zero rilievi** · **reset 23 dedotto** (→ B3) ·
+battito del Guardian fresco entro la tolleranza di 120 s · pendenti **0** →
+rischio pendente non visto dal cap **0,00%** (fotografia, non misura del buco:
+→ **B11**) · riga `[GUARDIAN]` viva subito dopo (`totDD −0,64%`, `stato=OK`,
+`pausa=off`, `cap=off`).
+
+🔴 **E i tre modi di sbagliare il collaudo, presi dalla matrice dei rischi e
+messi qui perche' costano un conto** (X8, X7, X10):
+1. **abbassare `InpDailyLossPct` invece di `InpDailyPausePct`** — con
+   `InpAction=0` il Guardian esegue **`FlattenAll()`**: chiude **tutte** le
+   posizioni e cancella **tutti** i pendenti, **qualsiasi magic**. E anche in
+   `InpAction=1` resta `GV_BLOCKDAY` timbrato per la giornata;
+2. **la pausa e' un LATCH**: si esce **a due passi e in quest'ordine** — prima
+   si rialza la soglia a 4,0, **poi** si cancellano le GV da F3. Al contrario,
+   il giro di timer successivo la rimette;
+3. **le ore**: le finestre operative sono in **ora SERVER**, nel log si cercano
+   **un'ora dopo** (Esperti/Giornale = ora locale VPS). E' l'errore gia' fatto
+   il 06/08.
+
+## H11-bis — 🏹 LA CACCIA ALLA FREQUENZA: TRE BATTUTE, UN MORTO, UNA CONFERMA SCIENTIFICA
+
+### 🪦 Il morto: M0PB, e perche' vale piu' di un promosso
+
+🥇 `REFERTO_SONDAM0PB_2026-08-31.md`. Il candidato **9/10 di carta** della
+caccia del 31/08 e' andato al PASSO 0 il giorno dopo ed e' **MORTO 12/12** (6
+corse × 2 lati), **ai criteri congelati prima dei numeri**:
+
+| cancello | soglia congelata | esito misurato |
+|---|---|---|
+| **F1 — frequenza** | ≥ **1,00** segnali/giorno **per lato** | 🔴 **0/12.** Il lato migliore di tutta la griglia fa **0,52/giorno** (U30 M5 short) — **meta'** della soglia. Su M15 si scende a **0,15-0,21** |
+| **H8 — RR da mediane** | ≥ **0,70** (FIRMA 2 del 31/08) | 🔴 **7/12 sotto soglia**, e i 5 sopra stanno a **0,70-0,74**: win rate necessario **62-70%**, la zona che in casa non ha mai pagato |
+| **F2 — take mediano** | > 7 punti indice | 🟢 **12/12, alla grande** (27-119 punti). L'unico verde: quando il segnale arriva, **lo spazio c'e'** |
+
+📌 **Le tre cose che questo verdetto insegna, e che valgono per ogni caccia futura:**
+1. 💰 **Il costo del verdetto e' stato una compilazione e 12 passate
+   open-prices** (minuti), **zero corse a tick sprecate**. Il PASSO 0 come
+   contatore puro — niente ordini, niente griglia — **funziona**.
+2. 🔬 **La diagnosi strutturale, non l'aneddoto**: M0PB armava su un **evento
+   di CODA** (`RSI(6) ≥ 90`), e quanto spesso capiti dipende dalla
+   distribuzione. 👉 **E' questa la ragione per cui DayFlow merita una seconda
+   sonda**: arma su un **percentile** (`resid ≤ p25(resid, 63)`), che **il 25%
+   delle barre soddisfa PER COSTRUZIONE**, su qualunque mercato e regime. **Ed
+   e' una tesi FALSIFICABILE**: se anche il percentile collassa sotto 2/giorno,
+   l'argomento "percentile invece di coda" **e' morto per sempre**, e vale per
+   ogni caccia futura.
+3. 🚫 **Nessuna griglia di recupero** (regola della seconda caccia, 19/08): mai
+   "parametri diversi dello stesso motore morto". Voce aggiunta al **registro
+   dei caduti**.
+
+### 🕐 L'orologio: la sola volta che una fonte esterna ha nominato la nostra cella PRIMA della corsa
+
+🥉 `CACCIA_FREQUENZA3_ART_PAPER_2026-09-01.md` §3. Tre fonti accademiche
+**indipendenti fra loro** dicono la stessa cosa sul time-of-day nel forex:
+
+| fonte | rango / etichetta | cosa dice |
+|---|---|---|
+| **Breedon & Ranaldo**, *Intraday Patterns in FX Returns and Order Flow* — **Journal of Money, Credit and Banking, 2013** | 🥉 **[LETTO-VIA-SEARCH]** (**cinque mirror provati, cinque murati**) | _"currencies tend to depreciate during local trading hours"_ e, testuale, _"EUR/USD tends to depreciate in the European morning and then appreciate in US trading hours"_ — **col meccanismo economico**: le imprese domestiche comprano valuta estera nelle **proprie** ore d'ufficio |
+| **Ranaldo (2009)**, *Journal of Banking & Finance* | 🥉 **[LETTO-VIA-SEARCH]**, **fonte indipendente e ANTERIORE** | stessa cosa su piu' valute, e la frase che conta per noi: _"pervasively persist across many years, **even after accounting for calendar effects**"_ 👉 **non e' la stagionalita' di calendario**, che in casa e' **gia' caduta** (R63, 0/24 OOS su 11.928 operazioni). **Non e' un doppione di un morto** |
+| **arXiv 1103.5664** (2011) | 🥉 **[VERIFICATO, abstract letto per intero]** | la terza gamba sulla stagionalita' intraday |
+| **`fx-bizday`** — implementazione pubblica del principale, **Apache 2.0**, letta riga per riga | 🥉 **[VERIFICATO sul sorgente]** | **short EURUSD 08:00→16:00 server, long 16:00→21:00 server** (la conversione dei fusi **coincide estate e inverno**, perche' NY e l'Europa cambiano ora legale insieme) |
+
+🎯 **La conseguenza operativa, e non costa niente**: il criterio **C2** della
+sonda (_"la cella vale SOLO se e' quella che la tesi aveva indicato PRIMA"_)
+diventa una **PRE-REGISTRAZIONE ESTERNA**, depositata **prima** che la sonda
+giri:
+📄 `backtest_pipeline/prove/OROLOGIO_PREREGISTRAZIONE_BREEDON_2026-09-01.txt`
+(cella **A** 🥇 EURUSD **SHORT** ora **8** durata **8** · **B** EURUSD LONG 16/4
+· **C** GBPUSD SHORT 8/8 · XAUUSD **nessuna previsione esterna** → li' C2 vale
+nella forma piu' severa). ✅ **Tutte e tre le celle sono GIA' dentro la griglia
+congelata dal 28/08: non serve toccare una riga dei sette file prova.**
+
+🔴 **E LA LAPIDE, che va letta due volte, perche' e' scritta dall'autore del
+codice e non da noi**: _"our strategy cannot tolerate much slippage. **Even 1
+basis point will destroy the profitability**"_ — su **19 anni**, con lo spread
+misurato a **0,125 bp** (IBKR IDEALPRO). **1 bp su EURUSD ≈ 1,1 pip: circa il
+NOSTRO spread.**
+
+> 🎯 **Traduzione senza sconti: la versione INCONDIZIONATA del meccanismo — dentro
+> tutti i giorni, tutte le ore della fascia — e' gia' dichiarata morta dal suo
+> stesso autore a un costo che e' circa il nostro.** Quel che resta in piedi e'
+> **esattamente cio' che la nostra sonda misura**: se **UNA fascia stretta**
+> abbia un rapporto lordo/spread molto sopra 3, mentre la media delle otto ore
+> no.
+>
+> ✅ **E la clausola che rende utile anche il fallimento**: se C1 non passa su
+> nessuna fascia, **non e' un round perso** — e' la conferma **indipendente**,
+> sui nostri dati e sul nostro broker, di quello che `fx-bizday` ha misurato su
+> 19 anni di dati IBKR. **Due misure indipendenti che dicono la stessa cosa
+> chiudono una direzione per sempre**, e la chiudono bene.
+
+### 🧱 Il banco, e le due cose che lo bloccano oggi
+
+- 🥇 **Pavimento dei tick reali BCM sul forex: `2024.07.05`, MISURATO**
+  (`NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md`, righe verbatim del Diario del
+  tester su GBPUSD/EURUSD/EURGBP). Sugli **indici** il pavimento misurato e'
+  **2024.09.26** (R109/R97): **due date diverse, due misure diverse, nessun
+  conflitto** — il forex arriva **due mesi e mezzo prima**. 👉 Conseguenza per
+  la sonda: su **13,5 dei 15,5 anni** della finestra i tick sono **GENERATI
+  dalle M1** (fallback silenzioso, non un errore), quindi **la colonna spread
+  e' VERA solo dal 2024.07.05 in poi** — l'ultimo quarto circa della gamba OOS.
+  **Va dichiarato accanto al numero di H12, sempre.**
+- 🔎 **La cella GBPUSD della sonda costa ~200× la gemella EURUSD**
+  (`DIAGNOSI_GBPUSD_LENTA_2026-09-02.md`): **~1.600 s/passata contro 54 s**,
+  con un primo tentativo ucciso da _"no memory for ticks generating"_.
+  🥇 **L'EA e' ESCLUSO come causa, per lettura del codice** (972 righe: nessun
+  `CopyTicks`, nessun `CopyRates`, `OnTick` O(1), nessun loop di retry) e **le
+  celle 03/04 differiscono dalla 01/02 SOLO per simbolo, lato e magic —
+  verificato dal wrapper, non dichiarato**. Ipotesi ordinate: **H1** generazione
+  tick fuori scala + swat sui 16 GB · **H2** M1 vecchie non piu' integre → sync
+  silenzioso · **H3** il banco. **Piano diagnostico: ~10 minuti**, tre passi
+  (A: rileggere il censimento storico · B: cronometro sulla finestra
+  **2024→2026** · C: cronometro sul tratto **2011→2013**), **forward mai
+  toccato** → **M32**.
+- ☁️ **Cloud MQL5: FATTIBILE CON RISERVE** (`DOSSIER_CLOUD_AGENTS_2026-09-02.md`).
+  🟢 Le nostre due sonde sono **cloud-compatibili oggi, senza toccare una riga**
+  (frame dall'agente, file scritto solo dal terminale: e' esattamente il modo
+  che MetaQuotes raccomanda). 🔴 **Ma le riserve mordono**: **(1)** i **tick
+  reali** (`Model=4`) sul cloud sono **materia contestata e non documentata** —
+  il rischio e' che l'agente **degradi in silenzio** a tick generati e
+  restituisca numeri diversi **senza dirlo**; **(2)** 🎯 **il collo di
+  bottiglia misurato il 01/09 NON erano i core, era la RAM** — sceso a 4 agenti,
+  la cella 03 e' passata da **~1 ora a ~1 minuto a passata**, cioe' oggi e' un
+  lavoro da **~36 minuti in locale**: _"comprare cloud per 36 minuti e'
+  comprare aria"_; **(3)** **non esiste un tetto di spesa** ne' una stima
+  preventiva. 👉 **Ordine corretto, e non e' negoziabile: prima si chiude la
+  diagnosi GBPUSD (M32), poi si parla di cloud** — perche' se il problema e'
+  nei **dati**, il cloud **non lo risolve, lo moltiplica** (ogni agente rifa'
+  la stessa sincronizzazione lenta). Il collaudo, se si fara', costa
+  **≈ $0,62 [STIMA]** in tutto (passi A→D).
+
+### 📕 E le fonti che si CHIUDONO — che valgono quanto un candidato
+
+| fonte | verdetto | perche' e' strutturale (non "non ho guardato abbastanza") |
+|---|---|---|
+| **Articoli mql5.com** | 🔴 **CHIUSA come fonte di MOTORI** — **1.120 titoli censiti, ZERO candidati** | gli EA di strategia intraday completi sono **meno di 15** e appartengono a **tre serie a puntate** i cui motori sono breakout di sessione, ORB, SMC/ICT e scalping M1 — **le quattro famiglie gia' chiuse in casa con centinaia di celle a tick**. 🔬 **La ragione**: un articolo deve **spiegare** un'idea in 3.000 parole, e le idee spiegabili in 3.000 parole sono le idee **note**. 👉 Gli articoli si aprono per cercare **un PEZZO** (un modulo, un idioma, un metodo di misura), **non un motore**. Con la chiusura del Code Base (31/08), **le due meta' di mql5.com sono ora misurate entrambe** |
+| **QuantConnect** | 🔴 **ESAURITA** — **83 slug enumerati uno per uno, ZERO candidati** | le intraday sono **tre**: una e' arbitraggio su ETF USA che BCM non quota (e con tenute da **15 secondi** = viola E9), una e' pairs su 20 azioni bancarie **con un backtest di UN MESE**, la terza e' **R98, gia' misurata in casa** (−0,31 punti/trade su 410). Le altre 80 sono fattori di portafoglio a ribilancio mensile. **Due cacce su due la chiudono** |
+| **`geraked/metatrader5`** | 🔴 **CHIUSA**, misurata su **11 EA su 11** | dal dossier TV/GH §4.1 |
+| **Canale accademico non-arXiv** | 🔴 **MURATO** — **undici domini, undici HTTP 000**; SSRN alla **decima 403 di fila** | resta **solo arXiv**, che su q-fin **non ha praticamente nulla** sul time-of-day nei rendimenti FX (un titolo del 2011). 👉 **Di Breedon-Ranaldo non conosciamo la dimensione dell'effetto in punti base, ne' il campione, ne' le t-statistiche**: abbiamo **il segno, l'ora e il meccanismo**, e basta. **E' un buco che non si copre con la memoria** |
 
 ## 🕳️ COSA MANCA E CHI LO PORTA
 
@@ -988,13 +1150,66 @@ sezione: e' aritmetica, e la firma resta a Claudio.
 | M23 | 📏 **PASSO-0 DAX (D30EUR)** — blocca DaxReEntry (769300) e DaxValueArea (769600): la **conversione punti** (`InpMT5PerPuntoIndice` su DAX: 100 come US? da VERIFICARE) e il **flat di fine seduta cash** (16:30 server) NON sono misurati. Col default US (22:00) il DAX resterebbe in **overnight** — il difetto che la riga CRT ha gia' evitato scegliendo NASUSD. E' un affinamento **prima dei numeri** (regola di casa) | **cacciatore-strategie** / PC di backtest (sonda su un CSV D30EUR) | "quanti `_Point` MT5 vale 1 punto indice su D30EUR, e a che ora server chiude la seduta cash del DAX? Senza, ogni backtest DAX dei due candidati e' spazzatura (regola InpSessionHour)" |
 | M24 | 📏 **PASSO-0 SPREAD U30USD** — blocca NyRetest (769500, H1-intraday) e pesa su DowModelB (769400, M5): un motore intraday su Dow vive o muore sul **costo reale**. Lo spread U30USD su M5 e H1 non e' censito; senza, un verdetto OHLC e' fantasia (come lo shortgate insegna: OHLC inganna) | **cacciatore-strategie** / PC | "spread tipico e worst-case di U30USD su M5 e H1 (tick reali), per sapere se un retest-continuazione paga i costi prima di spenderci un round" |
 | M25 | 🔴 **CORRELAZIONE DowModelB vs 770202** (cancello preliminare della 3ª priorita' G3) e **sovrapposizione dei tre motori DAX** su D30EUR — con lo strumento gia' esistente (`sovrapposizione_sedie.py` di M2), da rifare quando i candidati hanno un forward/backtest con `open_time` | PC di backtest, dopo i primi round dei candidati | "DowModelB e 770202 aprono sullo stesso evento d'apertura US: sono un doppione (rischio doppio per il cap C1) o sono anti-correlati (fade vs breakout)? E i tre motori DAX coincidono nei minuti nei giorni di rottura?" — dipende da M18 (`open_time` in backtest) |
-| M27 | ✅ **ESEGUITA (31/08 sera, MOSSA 1 della FIRMA "PORTATA") — `report/M27_SEGNO_ASPETTATIVA_2026-08-31.md`**, zero round. Esiti: **(a) il −0,091R e' CONCENTRATO, non sistemico** (3 operazioni = 85% della perdita, tutte della `770101`; senza `770101` e `770611` i 76 ingressi restanti fanno **+22,97 € = piatto**); **(b) 🔴 la causa n.1 e' una TAGLIA**: tre stop pieni a **−2,0% del conto** su una sedia dichiarata **1,0%**, con la controprova 100k che esclude l'errore di misura (stesso trade, **−0,648% = 1R esatto**) → **violazione della A4 congelata**, e il **censimento `.chr` non l'ha vista** (legge l'input, non il realizzato); **(c)** il raggruppamento per qualita' del banco **non da' segnale** (dominato da 2-3 operazioni) — ma esce un fatto di **gerarchia**: il banco del +0,091R e' **OHLC** (R103) e i suoi stessi criteri dicono che sugli indici l'OHLC ha gia' mentito; **(d)** merito della flotta **SOSPESO** (mediana 0,00 €, 49% positivi), corsia **RISCHIO scattata** sulla Aperture DAX (**DD fwd 16,39% vs 6,25% promesso = 2,6×**) e secondo verdetto forward concorde su **ORB `770611` (0 vittorie su 10, due conti)**. 🟠 Scoperta collaterale: **6 sedie girano a lotto minimo 0,01** → le riduzioni firmate 23-24/08 sotto ~0,5% sul conto piccolo **sono finzione** (rischio reale ~0,7%). Chiude anche **meta' di M20** (il DD forward per famiglia ora esiste) | 🔴 **resta a Claudio la R1: verifica VPS di `InpRiskPercent` della 770101 + doppi grafici sullo stesso magic** | "prima di migrare (MOSSA 2): la 770101 gira all'1% o al 2%? Migrare una sedia a taglia doppia moltiplica il difetto, non la portata" |
+| M27 | ✅ **ESEGUITA (31/08 sera, MOSSA 1 della FIRMA "PORTATA") — `report/M27_SEGNO_ASPETTATIVA_2026-08-31.md`**, zero round. Esiti: **(a) il −0,091R e' CONCENTRATO, non sistemico** (3 operazioni = 85% della perdita, tutte della `770101`; senza `770101` e `770611` i 76 ingressi restanti fanno **+22,97 € = piatto**); **(b) 🔴 la causa n.1 e' una TAGLIA**: tre stop pieni a **−2,0% del conto** su una sedia dichiarata **1,0%**, con la controprova 100k che esclude l'errore di misura (stesso trade, **−0,648% = 1R esatto**) → **violazione della A4 congelata**, e il **censimento `.chr` non l'ha vista** (legge l'input, non il realizzato); **(c)** il raggruppamento per qualita' del banco **non da' segnale** (dominato da 2-3 operazioni) — ma esce un fatto di **gerarchia**: il banco del +0,091R e' **OHLC** (R103) e i suoi stessi criteri dicono che sugli indici l'OHLC ha gia' mentito; **(d)** merito della flotta **SOSPESO** (mediana 0,00 €, 49% positivi), corsia **RISCHIO scattata** sulla Aperture DAX (**DD fwd 16,39% vs 6,25% promesso = 2,6×**) e secondo verdetto forward concorde su **ORB `770611` (0 vittorie su 10, due conti)**. 🟠 Scoperta collaterale: **6 sedie girano a lotto minimo 0,01** → le riduzioni firmate 23-24/08 sotto ~0,5% sul conto piccolo **sono finzione** (rischio reale ~0,7%). Chiude anche **meta' di M20** (il DD forward per famiglia ora esiste) | ✅🆕 **v17 — LA R1 E' STATA ESEGUITA DA CLAUDIO IL 02/09 E IL FILONE §B1 E' CHIUSO** (`VERBALE_CHIUSURA_770101_2026-09-02.md`): **un solo grafico**, la sedia viva gira sulla **cella validata** a `InpRiskPercent = 1.0`, i "magic doppi" del censimento sono **lo stesso magic sui DUE terminali** (piccolo + mirror 100k, decisione firmata n.2), e la **trappola del default e' chiusa col FIX C4** (→ riga **A5**). 🔴 **Resta APERTO il §B3**: la corsia RISCHIO della C3 va **rifatta a rischio realizzato** → **M31** | "prima di migrare (MOSSA 2): la 770101 gira all'1% o al 2%?" → **risposta: all'1%, e il 2% era il default del sorgente e del preset, non il grafico.** ⚠️ Nota di censimento aperta dal C1: sul piccolo risulta **UNA sola** SupertrendReversal su 225JPY (H2) e la **H4 FW (770924) non e' in lista Expert** — da riconciliare col censimento alla prossima occasione |
 | M30 | 🔎 **IL CENSIMENTO DEL RISCHIO DEVE INCROCIARE DICHIARATO E REALIZZATO** (nasce da M27 §B1): oggi `censimento_rischio_*.txt` legge **l'input dai `.chr`** — e sulla `770101` l'input dice 1,0 mentre tre stop pieni dicono 2,0. Serve una colonna **"rischio REALIZZATO"** = perdita mediana degli stop pieni ÷ saldo, dallo statement: e' il controllo che rende A4 verificabile davvero. ➕ e la colonna **"aspettativa per trade promessa"** nei contratti (`CONTRATTI_SEDIE.md` ha DD e op/mese, **non E**: per questo il confronto E-vs-E non e' stato possibile in M27) | chat principale / strumenti + **architetto-prop** per la colonna dei contratti | "per ogni sedia: rischio dichiarato, rischio realizzato sugli stop pieni, e scarto. Una riga con scarto >1,3× e' una VIOLAZIONE di A4, non una curiosita' — ed e' esattamente cio' che il censimento di oggi non puo' vedere" |
-| M28 | 📅 **CENSIMENTO DEI REQUISITI DI FREQUENZA E CONSISTENZA** delle prop candidate — oggi ne abbiamo pezzi sparsi (FTMO 4 giorni · FundingPips 3 giorni + consistency 35% + 7 giorni profittevoli/30 sullo Zero · The5ers 3 giorni ≥0,5%) e **due clausole che colpiscono proprio la strada "frequenza"**: _"high-frequency trading"_ fra le pratiche vietate su FundingPips (definizione mai trovata) e la **"Risk Per Trade Idea"** (max 2% combinato per idea = nuova posizione entro **10 minuti** nella stessa direzione), che colpisce **i nostri gemelli e il pile-up di M2** | **cacciatore-config-prop** (dentro il mandato M19 sul secondo dossier) | "per ogni prop candidata a muri statici 5/10: giorni minimi (e la definizione di 'giorno di trading' e di 'giorno profittevole'), limite di tempo, consistency/best-day (soglia e formula esatta), **definizione letterale di 'high-frequency trading'** fra le pratiche vietate, e se esiste una regola tipo 'risk per trade idea' con finestra in minuti. Etichetta di verifica su ogni riga" |
+| M28 | ✅ **CHIUSA COI NUMERI (31/08-02/09, `report/CONFIG_PROP_2026-08-31.md` + firma P5)** — era: censimento dei requisiti di frequenza/consistenza + **la definizione letterale di "high-frequency trading"**. **Esiti:** **(a) 🥇 la clausola HFT e' disinnescata da un numero** — **nessuna** delle 5 prop censite definisce l'HFT per **trade/giorno**, **tutte** per **tempo di tenuta**; la soglia piu' severa **misurabile** e' **E8: _"non piu' del 50% dei trade tenuti sotto 1 minuto"_**, e noi stiamo al **4,6%** (581 trade auto, **mediana 224,7 min**) → **margine 10,9×**, il dry-run 100k al 4,5% (mediana 31,8 min). La filosofia _"1-2+ trade/giorno su TF bassi"_ e' **legale su tutte e 5**; **(b)** ✍️ **P5 FIRMATA** → paletto **max 25% dei trade sotto 60 s** (meta' del tetto E8, margine 2× per costruzione) = **riga E9**, gia' cablata nelle bozze LondonFx e DayFlow; **(c) 🔴 la correzione della "Risk Per Trade Idea"**, che questo piano leggeva **al contrario** → H5 riscritta e la riga "5,85% = hard breach" **RITIRATA** (dettaglio nel riquadro di H5); **(d) ⚠️ Alpha Capital resta un caso a parte**: chiede il **sorgente `.mq5` di ogni EA** — con 18 sedie **e' un progetto, non una casella** | ✅ — | ✅ — |
+| M28-bis 🆕 | 📅 **IL RESIDUO DI M28 — quello che i numeri NON hanno chiuso**: la clausola HFT e' misurata (sopra), ma **le soglie restano [LETTO-VIA-SEARCH]** e vanno **[VERIFICATO]** sulla prop che si comprera' davvero, dentro il mandato **M19**. Testo originale conservato — oggi ne abbiamo pezzi sparsi (FTMO 4 giorni · FundingPips 3 giorni + consistency 35% + 7 giorni profittevoli/30 sullo Zero · The5ers 3 giorni ≥0,5%) e **due clausole che colpiscono proprio la strada "frequenza"**: _"high-frequency trading"_ fra le pratiche vietate su FundingPips (definizione mai trovata) e la **"Risk Per Trade Idea"** (max 2% combinato per idea = nuova posizione entro **10 minuti** nella stessa direzione), che colpisce **i nostri gemelli e il pile-up di M2** | **cacciatore-config-prop** (dentro il mandato M19 sul secondo dossier) | "per ogni prop candidata a muri statici 5/10: giorni minimi (e la definizione di 'giorno di trading' e di 'giorno profittevole'), limite di tempo, consistency/best-day (soglia e formula esatta), **definizione letterale di 'high-frequency trading'** fra le pratiche vietate, e se esiste una regola tipo 'risk per trade idea' con finestra in minuti. Etichetta di verifica su ogni riga" |
 | M29 | 📈 **LA PROVA DI PORTATA A PORTAFOGLIO** — il banco R105 misura la flotta a **taglie miste** (rischio medio 0,812%); un conto prop la vorrebbe a **0,65% piatto** e con **un gemello per famiglia** (nota area C). Nessuno ha mai misurato la portata **e il cap C1** di QUELLA configurazione: quante op/mese restano dopo aver tolto i gemelli, quante volte il cap rifiuta un ingresso, e quanto profitto/mese ne esce | PC di backtest (rianalisi del dataset R105, zero ore di tester) + `sovrapposizione_sedie.py` | "sul dataset `R105_dataset_giornaliero.csv`: rifare il conto con **un gemello per famiglia** e **0,65% piatto** — quante op/mese, quanto profitto/mese, e quante volte il cap 3,25% avrebbe morso. E' la portata VERA della squadra prop, che oggi stimiamo per riconciliazione (0,80 × 0,63) invece di misurarla" |
+| M31 🆕 | ⚖️ **LA CORSIA RISCHIO DELLA C3, RIFATTA A RISCHIO REALIZZATO** (nasce da M27 §B3, resta viva dopo la chiusura del caso 770101). Il DD forward della famiglia **Aperture DAX** — **16,39% contro 6,25% promesso, 2,6×** — e' stato calcolato **sul realizzato di una sedia che girava a taglia doppia** (stop pieni a −2,0% del conto contro l'1,0% dichiarato). 🔴 **Quindi il numero che ha fatto scattare la corsia RISCHIO e' gonfiato di un fattore noto, e prima di spegnere qualcosa va rifatto**: stessa serie, stessi trade, **stop riscalati alla taglia dichiarata**. Se dopo il riscalo il DD resta sopra il promesso, la corsia scatta **davvero** e le due revisioni proposte (modalita' BUY/SELL vs RETEST-only) tornano sul tavolo con un numero pulito; se rientra, **la famiglia e' stata giudicata da un difetto di configurazione, non dal suo edge** | chat principale / strumenti (rianalisi degli statement, **zero round, zero tester**) + **Claudio** per la decisione finale | "per la famiglia Aperture DAX: DD forward ricalcolato **a rischio realizzato riscalato all'1%**, contro il DD promesso di `CONTRATTI_SEDIE.md`. 🛑 **Nessuno spegnimento prima di questo numero**: la C3 dice _'DD forward oltre il promesso'_, e un DD misurato a taglia doppia non e' quel DD" |
+| M32 🆕 | 🔎 **DIAGNOSI GBPUSD — i 10 minuti che sbloccano la sonda dell'orologio** (e decidono la questione cloud). La cella 03 costa **~1.600 s/passata contro i 54 s** della gemella EURUSD, con un primo tentativo ucciso da _"no memory for ticks generating"_. **L'EA e' escluso** (972 righe lette: nessun `CopyTicks`/`CopyRates`, `OnTick` O(1)) e **la configurazione e' identica** (verificata dal wrapper, non dichiarata): la differenza sta **nei DATI o nel BANCO**. Tre passi: **A** rileggere il censimento storico (`-SoloReferto`, ~1 min, non apre MT5) · **B** cronometro sulla finestra **2024.10→2026.06** (solo tick reali, ~4 min) · **C** cronometro sul tratto **2011→2013** (solo tick generati, ~5 min). Griglia di lettura dell'esito **gia' scritta** nel referto | **Claudio sul PC di backtest** (le stringhe le passa il verificatore) — **forward mai toccato**, i driver scrivono da soli `AllowLiveTrading=false` | "GBPUSD e' lento per i **dati vecchi** (H1: generazione tick fuori scala), per **M1 mancanti** (H2: sync silenzioso dal server) o per il **banco** (H3: RAM)? 🔴 **E' bloccante per due cose insieme**: senza risposta la gamba GBPUSD della sonda non gira, **e la decisione sul cloud non si puo' prendere** — perche' se il problema e' nei dati, **il cloud non lo risolve: lo moltiplica**" |
+| M33 🆕 | 🏹 **I PASSI 0 DEL VIVAIO FREQUENZA — l'ordine, e chi lo esegue** (dettaglio in **H11**/H11-bis). **(1) 🥇 ACCENDERE LA SONDA DELL'OROLOGIO**: costo di costruzione **ZERO** (7 file prova congelati dal 28/08, riga di lancio pronta, **mai girata**), pre-registrazione esterna **gia' depositata**; restituisce i 6 numeri coi cancelli congelati (C1 lordo/spread ora per ora · C2 la cella A pre-registrata · C3 altopiano non picco · C4 peggior giornata · 🆕 **lo spread BCM ora per ora, → H12** · F1 frequenza). **(2)** costruire la **sonda DayFlow** (~4-5 h riusando lo chassis `ABTG_SondaLondonFx`), coi cancelli gia' scritti: **< 2,00 segnali eseguibili/giorno = SCARTO IMMEDIATO** · **RR < 0,70 = scarto per aritmetica** · **≥25% sotto 60 s = SCARTO PROP (E9)** · e il **massimo segnali in UNA giornata**, perche' se `max × 0,65% > 3,25%` allora **`InpMaxTradesPerDay` entra nell'EA dal primo round**. **(3)** la sonda **LondonFx** (bozza congelata `prove/LONDONFX_FREQUENZA_BOZZA.txt`) | **Claudio** (corse sul PC di backtest) + **mql5-ea-developer** (sonda DayFlow) — l'ordine lo decide Claudio | "quale si accende per prima? La raccomandazione dell'architetto-prop, **dichiarata come tale**: **l'OROLOGIO**, perche' e' l'unica che costa zero, ha la macchina gia' sul banco, ha una **previsione esterna scritta prima** — e perche' **chiude comunque**, anche fallendo (§H11-bis). 🔴 Subordinata: la gamba **GBPUSD** e' bloccata da **M32**; le gambe EURUSD sono libere" |
 | M26 | 🐻 **IMPORT TICK DUKASCOPY per il verdetto ORSO** — il gated short 770250 (e ogni motore short/crollo) **non potra' MAI** avere un verdetto tick in un orso su BCM (tick BCM dal 26/09/2024 = nessun orso). Il verdetto ORSO oggi e' solo **OHLC** (PF 1.84): la conferma vera dei costi in un crollo richiede storico tick esterno (Dukascopy 2020/2022) | PC di backtest (import gia' progettato in M12, strada Dukascopy) | "importare i tick Dukascopy del crollo 2020 e dell'orso 2022 per NASUSD, cosi' il verdetto short-orso non resta OHLC-fantasia — e' la sola via al merito pieno del mattone TEMPESTA" |
 
 ## ✍️ LE FIRME CHE SERVONO A CLAUDIO (in ordine di urgenza)
+
+✅ **v17 (02/09) — SETTE FIRME IN UN GIORNO, E LA LISTA SI SVUOTA DI SOPRA.**
+Date e agli atti (`report/FIRME_2026-09-02.md`, `VERBALE_CHIUSURA_770101_2026-09-02.md`):
+le **5 decisioni della migrazione** (_"FIRMO TUTTE E 5 LE RACCOMANDAZIONI,
+PARTIAMO CON LA FASE 1"_) · **D1** (niente ricompilazioni) e **D2** (canarino,
+gia' costruito e verde) · **P5** (paletto di tenuta → **E9**) · **P0** (tetto
+simbolo+lato → **C8**) · **C4** (il fix del default → **A5**).
+**Il caso 770101 e' CHIUSO.**
+
+> 🔴 **QUELLO CHE SERVE ORA NON E' UNA FIRMA: SONO DUE SESSIONI DA 45 E 40
+> MINUTI — e sono il cancello della fase 2, cioe' del ×3,2 di portata.**
+>
+> 1. 🅲 **SESSIONE CAP + FAIL-OPEN (criteri 7 e 8, ~45 min, stessa sessione)** —
+>    in una finestra con **almeno una posizione aperta con SL** (senza, il cap
+>    **non e' innescabile**: rilievo R1). Si abbassa **`InpMaxOpenRiskPct`**
+>    appena sotto il rischio letto, si presidia, si **rimuove il Guardian**, si
+>    aspettano 3 minuti, lo si rimette e **si riverifica campo per campo**.
+> 2. 🅱️ **SESSIONE PAUSA + GESTIONE (criteri 5 e 6, ~40 min, ALTRO GIORNO)** —
+>    solo in una **giornata in perdita** (la pausa non e' innescabile a
+>    giornata positiva), meglio a ridosso delle **07:59 server**, e con uscita
+>    **a due passi**: prima la soglia a 4,0, **poi** le GV da F3.
+> 3. 📅 **Cinque giornate di pagelle** (criterio 9 esteso: vale il piu' severo
+>    fra i 3 giorni congelati e la settimana chiesta dal piano).
+>
+> 🛑 **Le due sessioni MAI nello stesso giorno.** 🛑 **`InpDailyLossPct` non si
+> tocca mai** (con `InpAction=0` fa `FlattenAll()` su tutto il conto, qualsiasi
+> magic). ⚠️ **E il collaudo costa 1-2 trade veri**: vanno annotati nella
+> pagella, altrimenti M27 e H5 misurano un buco che e' nostro.
+
+🪑 **LE DUE REVISIONI PROPOSTE IL 31/08 RESTANO SUL TAVOLO — ma con un
+prerequisito nuovo, ed e' importante che sia scritto.** La corsia RISCHIO
+scattata sulla **Aperture DAX** (DD forward 16,39% contro 6,25% promesso) e'
+stata misurata **sul realizzato di una sedia che girava a taglia doppia**.
+👉 **Prima di spegnere qualcosa, quel DD va rifatto a rischio realizzato
+riscalato (M31).** Se regge, la revisione procede; se rientra, avremmo spento
+una famiglia per un difetto di configurazione **gia' riparato il 02/09**.
+_(Per l'ORB `770611` il prerequisito non si applica: li' il verdetto e' **0
+vittorie su 10 operazioni su due conti indipendenti**, e non dipende dalla
+taglia.)_
+
+🏹 **E UNA SCELTA CHE COSTA ZERO E VA FATTA ADESSO (M33): quale passo 0 si
+accende per primo.** Raccomandazione dell'architetto-prop, **dichiarata come
+tale**: **la Sonda dell'Orologio** — macchina gia' costruita e congelata dal
+28/08, **mai girata**, con una **pre-registrazione esterna** depositata prima
+della corsa (Breedon-Ranaldo, JMCB 2013) e un sottoprodotto che chiude un buco
+aperto da **sette cacce** (lo spread BCM ora per ora, **H12**). **E chiude
+comunque**: se la deriva oraria non paga il nostro spread, quella e' una
+conferma indipendente di cio' che `fx-bizday` ha misurato su 19 anni, e la
+direzione si chiude **per sempre e bene**.
 
 ✅ **v16.1 (31/08 sera) — LE DUE FIRME DELL'AREA H SONO STATE DATE**
 ("FIRMO TUTTE E DUE, PARTIAMO" — verbale `report/FIRME_2026-08-31.md`): l'ordine
@@ -1002,13 +1217,15 @@ sezione: e' aritmetica, e la firma resta a Claudio.
 **MOSSA 1 e' gia' ESEGUITA e consegnata**
 (`report/M27_SEGNO_ASPETTATIVA_2026-08-31.md`).
 
-🔴 **QUELLO CHE SERVE ORA NON E' UNA FIRMA, E' UN CONTROLLO — e blocca la
-MOSSA 2.** M27 ha trovato che la **`770101` perde 2,0% del conto su uno stop
-pieno mentre e' dichiarata all'1,0%** (violazione della A4 congelata, non vista
-dal censimento perche' legge l'input e non il realizzato). 👉 **R1: verificare
-sul VPS `InpRiskPercent` del grafico DAX e che non esistano due grafici sullo
-stesso magic.** Finche' non e' chiarito, **migrare quella sedia
-moltiplicherebbe il difetto invece della portata**.
+~~🔴 **QUELLO CHE SERVE ORA NON E' UNA FIRMA, E' UN CONTROLLO — e blocca la
+MOSSA 2.**~~ → ✅ **ESEGUITO IL 02/09, E LA MOSSA 2 E' SBLOCCATA.** M27 aveva
+trovato che la **`770101` perde 2,0% del conto su uno stop pieno mentre e'
+dichiarata all'1,0%**. **R1 verificata da Claudio sul VPS**: **un solo
+grafico**, `InpRiskPercent = 1.0`, 5 input su 5 conformi alla cella validata;
+i "magic doppi" erano **lo stesso magic sui due terminali**. 👉 **La causa era
+il DEFAULT del sorgente e il preset omonimo, non il grafico** — entrambi
+riparati col **FIX C4** (riga **A5**). Verbale:
+`report/VERBALE_CHIUSURA_770101_2026-09-02.md`.
 
 🪑 **E due REVISIONI proposte dal criterio firmato il 18/08** (proposte, non
 decisioni): **(1) Aperture DAX** — corsia RISCHIO scattata (DD forward
@@ -1141,6 +1358,15 @@ Restano in lista:
    🛑 **Nulla di questo e' compilato ne' in campo**: restano da spuntare i **9
    criteri congelati** del referto, sul **dry-run 100k** e mai prima sul conto
    piccolo. La messa in campo la decide Claudio.
+   ✅ **v17 (02/09) — LA VOCE N.1 SI CHIUDE COME "DECISIONE" E SI APRE COME
+   "COLLAUDO".** ✍️ Claudio ha firmato la strada **(b)**: l'enforcement **e' il
+   cancello della fase 2**. 🥇 E la premessa e' misurata, non sperata: **i
+   binari in campo sul 100k contengono gia' la guardia** (pin `d0241ff`, **18
+   punti d'innesto**, `InpUsaGuardian=true` di default) e **il nucleo di
+   decisione B1/C1 e' identico byte a byte** fra la v1.20 compilata e la v1.40
+   di HEAD → **D1: niente ricompilazioni**, si collauda il software che sta in
+   campo. **Criteri 1-4 verdi, 5-9 con procedura scritta, canarino verde 8/8.**
+   Restano le **due sessioni di Claudio** e la settimana di pagelle (→ **H10**).
 2. **Il caso D di R84**: aprire o no il round di **validazione vera**
    (regimi + walk-forward) della conferma volumi-OR-ATR — passa i 4 cancelli
    congelati come **riduttore di perdita su base perdente** (mai edge).
@@ -1161,7 +1387,37 @@ _(A2/A4: FIRMA 4 · D-spegnimenti: FIRMA 5.)_
 
 ## 📊 IL CONTO DEL GIRO
 
-🆕 **v16.1 (31/08 notte): conteggi dei PARAMETRI invariati — 46 (12C · 18P ·
+🆕 **v17 (02/09): 53 parametri — 16 congelati · 20 proposti · 16 aperti · 1
+chiuso per misura.** Sette righe nuove e un cambio di stato, tutti tracciati:
+- 🧊 **A5** (il default `ABTG_DEF_RISK` **2.0 → 1.0** nel sorgente + preset
+  rinominato **LEGACY_2pct**, firma **C4**) · 🧊 **C8** (tetto **max posizioni
+  per simbolo+lato**, opt-in default spento, firma **P0**) · 🧊 **E9** (paletto
+  di tenuta anti-HFT: **max 25% dei trade sotto 60 s**, firma **P5**);
+- 📋 **B11** (il cap **cieco sui pendenti**: proposta P1, **prima si misura**)
+  · 📋 **H10** (stato della migrazione: **fase 1 avviata**, calendario e i **5
+  cancelli di fase**) · 📋 **H11** (il vivaio della frequenza: **M0PB morto
+  12/12**, DayFlow e LondonFx **in canna**, l'Orologio pronto e mai girato);
+- 🔓 **H12** (lo **spread BCM ora per ora**: `[NON MISURATO]` da sette cacce,
+  si chiude gratis con la prima corsa della sonda);
+- 🔄 **H8 passa da PROPOSTO a CONGELATO** (la firma era del 31/08, la riga non
+  l'aveva ancora recepita — **correzione di coerenza del documento**) e viene
+  **ampliato** col paletto P5.
+
+**Cosa NON e' cambiato, e va detto**: nessun valore firmato prima di oggi e'
+stato toccato, **nessuna sedia accesa, spenta o ridotta**, **zero modifiche al
+forward**, zero acquisti autorizzati, nessun candidato promosso. Le **sette
+firme del 02/09 sono CITATE dai verbali, mai riscritte qui**.
+🔴 **E i quattro conflitti/limiti nuovi, dichiarati e non nascosti**:
+**(1)** il default di rischio e' cambiato → **i confronti coi referti storici
+"a default" non sono piu' alla pari** (A5); **(2)** la **"Risk Per Trade Idea"**
+la leggevamo **al contrario**: la riga _"5,85% = hard breach"_ e' **ritirata**,
+e il breach vero e' **−10,67% su simbolo+lato** (H5 → C8); **(3)** il picco di
+rischio del cancello di fase 1 e' un **LIMITE INFERIORE** (300 s + pendenti,
+B11); **(4)** **il 100k non e' HEAD** e l'autotest congelato dice **19 casi**
+mentre HEAD ne ha **75** — se un giorno si ricompila, il cancello va aggiornato
+**prima** dei numeri (H10-bis).
+
+_(conteggio precedente, v16.1)_ **v16.1 (31/08 notte): conteggi dei PARAMETRI invariati — 46 (12C · 18P ·
 15A · 1 chiuso)**, perche' la MOSSA 1 non ha cambiato nessun valore: ha prodotto
 una **diagnosi**. Le due firme dell'area H sono **date**; **M27 e' CHIUSA** con
 referto dedicato; **M30 nuova** (il censimento del rischio deve incrociare
@@ -1246,6 +1502,7 @@ B9 — e le due consegne di M15 (screenshot fuso + `super trend.ex4`).
 
 | data | versione | cosa e' cambiato | perche' |
 |---|---|---|---|
+| 02/09/2026 | **v17** | 🚚 **LA FASE 1 DELLA MIGRAZIONE E' PARTITA, E IL CASO 770101 E' CHIUSO COL SUO FIX.** ✍️ **Sette firme in un giorno, tutte CITATE dai verbali e mai riscritte** (`report/FIRME_2026-09-02.md`, `report/VERBALE_CHIUSURA_770101_2026-09-02.md`): le **5 decisioni della migrazione** (_"FIRMO TUTTE E 5 LE RACCOMANDAZIONI, PARTIAMO CON LA FASE 1"_ — A2 come **lettura di famiglia**, magic rinumerati **solo alla challenge vera**, **cap C1 strada (b): l'enforcement E' IL CANCELLO DELLA FASE 2**, EMA200 Dow in **fase 3 da sola**, GapFill **max 2 simboli** il lunedi'), **D1** (niente ricompilazioni) e **D2** (canarino), piu' **P5**, **P0** e **C4**. 🔬 **CASO 770101 CHIUSO** (`VERBALE_CHIUSURA_770101`): **C1** un solo grafico sul piccolo (il doppio grafico **oggi non esiste**; i "magic doppi" del censimento sono **lo stesso magic sui DUE terminali**) · **C2** la sedia viva gira **sulla cella validata** (`InpRiskPercent=1.0`, RETEST, range 35, buffer 500: **5 input su 5 conformi**, screenshot agli atti) · **C3** linea del tempo confermata da tre fonti concordi · **C4 FIX ESEGUITO** → **riga A5 nuova, CONGELATA**: `ABTG_DEF_RISK` **2.0 → 1.0** in `ABTG_DAX_Apertura_EU.mq5:85` (l'intestazione vecchia **prescriveva** il 2%) e preset rinominato **`ABTG_DAX_Apertura_EU_LEGACY_2pct.set`**. 🔴 **COSTO DICHIARATO**: ogni backtest futuro **dai default nudi** girera' all'1% → **profitti e DD dimezzati rispetto ai referti storici a default**, che **NON si riscrivono**; le corse che passano il rischio da riga di lancio non sono toccate. **La R1 che bloccava la MOSSA 2 e' eseguita** → **M27 §B1 chiusa**; 🔴 **resta APERTO il §B3** (la corsia RISCHIO della C3 e' stata misurata **a taglia doppia** e va rifatta a rischio realizzato riscalato) → **M31 nuova, e nessuno spegnimento prima di quel numero**. 🛡️ **ENFORCEMENT IN COLLAUDO** (`COLLAUDO_ENFORCEMENT_FASE1_2026-09-02.md`): 🥇 misurato che **i binari in campo sul 100k contengono gia' la guardia** (pin `d0241ff`, **18 punti d'innesto** sui 5 mirror, `InpUsaGuardian=true`) e che **il nucleo di decisione B1/C1 e' identico byte a byte** fra la **v1.20** compilata e la **v1.40** di HEAD (6 funzioni su 6) → **D1: si collauda il software che sta in campo**, e ricompilare **brucerebbe il criterio 4**. **Criteri 1-4 VERDI sui binari in campo · 5-9 con procedura scritta · 13 rischi con la loro spia osservabile · 9 rilievi R1-R9.** 🐤 **CANARINO VERDE IN CAMPO** (`VERBALE_CANARINO_PRIMA_CORSA_2026-09-02.md`, 02/09 07:56 server): **8/8 autotest PASS**, conto **50504263**, `ABTG_CanaleEsiste()=SI`, **zero rilievi**, **reset 23 DEDOTTO** dalla chiave del giorno prop (`2026243` combacia con reset 23, **non** con reset 0 → **B3 confermata in campo**), pendenti 0. 👉 **I criteri 5/7/8 hanno finalmente un metro deterministico.** 📅 **AREA H estesa**: **H10** (stato della migrazione: fasi, calendario, i **5 cancelli** — _"se anche una sola manca, la fase 2 non parte"_), **H11** (il vivaio della frequenza) e **H12** (lo **spread BCM ora per ora**, `[NON MISURATO]` da sette cacce), piu' le sezioni in chiaro **H10-bis** e **H11-bis**. 🏹 **CACCIA FREQUENZA**: **M0PB MORTO 12/12 al PASSO 0** (`REFERTO_SONDAM0PB_2026-08-31`) — F1 0/12 (**0,52 segnali/giorno** contro un pavimento di 1,00), H8 **7/12 sotto RR 0,70**, F2 12/12 verde: **costo del verdetto = una compilazione e 12 passate open-prices, zero corse a tick**; e la **diagnosi strutturale** (evento di **coda** contro **percentile**) e' cio' che giustifica la seconda sonda. **DayFlow VWAP Relay promosso 9/10 di carta** (il regime **sceglie** il motore — forma `ABTG_EMA200`, 30/30 in casa — RR letto nel sorgente **1,50** → win rate 43,0% lordo; **tensione misurata M5 frequenza vs M15 geometria**, e `InpMaxTradesPerDay` **e' un input del primo round** perche' 5 trade a 0,65% = **esattamente il cap C1**). 🥇 **CONFERMA ESTERNA DELL'OROLOGIO**: **Breedon & Ranaldo, JMCB 2013** + **Ranaldo 2009** (fonte **indipendente e anteriore**, e _"even after accounting for calendar effects"_ → **non e' la stagionalita' di calendario, gia' caduta in R63**) + **arXiv 1103.5664** + l'implementazione **`fx-bizday`** letta riga per riga: **short EURUSD 08:00→16:00 server, long 16:00→21:00** — pre-registrazione depositata **prima** della corsa (`prove/OROLOGIO_PREREGISTRAZIONE_BREEDON_2026-09-01.txt`), **tutte e tre le celle gia' dentro la griglia congelata dal 28/08**. 🔴 **E la lapide, scritta dall'autore del codice**: _"even 1 basis point will destroy the profitability"_ su 19 anni, con spread misurato a **0,125 bp** — **1 bp ≈ 1,1 pip ≈ il nostro spread**: la versione **incondizionata** e' gia' morta al nostro costo, e cio' che resta e' **esattamente cio' che la sonda misura** (una fascia stretta con lordo/spread ≫ 3). **Fonti CHIUSE**: articoli MQL5 (**1.120 titoli, 0 candidati**, ragione **strutturale**), QuantConnect (**83 slug, 0 candidati**), `geraked` (11 EA su 11). 📏 **Pavimento tick reali BCM sul forex MISURATO: 2024.07.05** (indici: 2024.09.26 — due misure diverse, **nessun conflitto**) → su 13,5 dei 15,5 anni della sonda i tick sono **generati dalle M1**, e **la colonna spread e' vera solo dal 2024.07.05**. 🔎 **M32 nuova** (diagnosi GBPUSD ~200×: EA **escluso** per lettura del codice, 3 passi da 10 minuti) e **M33 nuova** (l'ordine dei passi 0). ☁️ **Cloud MQL5: FATTIBILE CON RISERVE** — le sonde sono **gia' cloud-ok**, ma **il collo di bottiglia del 01/09 era la RAM** (da ~1 ora a **~1 minuto a passata** scendendo a 4 agenti: _"comprare cloud per 36 minuti e' comprare aria"_) → **prima M32, poi il cloud**. 📋 **Righe nuove**: **A5** 🧊 · **B11** (cap **cieco sui pendenti**, e per questo il criterio C-3 della fase 1 e' un **LIMITE INFERIORE**: 300 s + pendenti) · **C8** 🧊 (tetto simbolo+lato, P0) · **E9** 🧊 (paletto tenuta, P5) · **H10** · **H11** · **H12**; **H8 corretta da PROPOSTO a CONGELATO** (firma 31/08 mai recepita nella riga) e **ampliata** col paletto P5. ✅ **M28 CHIUSA coi numeri** (nessuna prop definisce l'HFT per trade/giorno, **tutte per tenuta**; E8 = 50% sotto 1 min, **noi 4,6%**, mediana **224,7 min**, **margine 10,9×**) → residuo in **M28-bis**. 🔴 **E LA CORREZIONE CHE FA MALE E VA SCRITTA: la "Risk Per Trade Idea" la leggevamo AL CONTRARIO.** Non colpisce il pile-up di 8 sedie diverse (**la riga _"5,85% il 03/08 = hard breach"_ e' RITIRATA**): colpisce **stesso simbolo + stessa direzione**, vale **solo in Master**, tetto **3%<50k / 2%≥50k**, e i 10 minuti decorrono **dalla chiusura di un trade in perdita**. Applicata bene ai nostri CSV: **62 grappoli**, peggiore **−533,52 € = −10,67% del conto** (29/07, D30EUR short: 5 posizioni, 4 magic, 9 minuti) contro un tetto del 3% → **sforato 3,5×**. 👉 **Si disinnesca col tetto simbolo+lato (C8), non col cap globale** — ed e' il motivo per cui P0 e' stata firmata lo stesso giorno. 🛑 **Zero modifiche al forward, zero preset toccati, zero acquisti autorizzati, nessuna sedia accesa o spenta, nessun candidato promosso.** → **53 parametri (16C · 20P · 16A · 1 chiuso)** | le sette firme del 02/09 + il collaudo enforcement + la prima corsa del canarino + le due cacce frequenza del 01/09 + la nota pavimento tick + la diagnosi GBPUSD + il dossier cloud |
 | 31/08/2026 notte | **v16.1** | ✍️ **LE DUE FIRME DELL'AREA H SONO DATE** ("FIRMO TUTTE E DUE, PARTIAMO", `report/FIRME_2026-08-31.md`) e la **MOSSA 1 e' gia' ESEGUITA**: 🔬 **M27 CHIUSA — `report/M27_SEGNO_ASPETTATIVA_2026-08-31.md`** (solo analisi, zero round, zero modifiche al forward). **Il conflitto di H7 e' risolto, e non era simmetrico**: **(1)** il **+0,091R del banco e' OHLC** (`R103_CRITERI` §modello _"1 = OHLC su M1, per tutte e 40"_ → R105 → analisi dial), e i criteri di R103 dichiarano da soli che _"sugli indici l'OHLC HA GIA' MENTITO"_ (SupRev DOW **2,77 OHLC → 0,79 tick**): e' un **limite superiore**, non una misura pari al forward; **(2)** il **−0,091R NON e' sistemico**: le **3 peggiori operazioni di agosto valgono −309,39 € = l'85% della perdita** e sono **tutte e tre della `770101`**; tolte `770101` e `770611`, i **76 ingressi restanti fanno +22,97 € = +0,006% per trade, PIATTO**; **(3) 🔴 la causa n.1 e' una TAGLIA, non un edge**: quei tre stop pieni costano **−2,02 / −2,00 / −2,05% del conto** su una sedia **dichiarata 1,0%**, e la controprova sul 100k (stesso trade del 14/08, vol 11,80, **−647,82 = −0,648% = 1R esatto** a 0,65%) **esclude l'errore di misura** — rapporto dei volumi **5,9× contro 12,75× atteso**: il conto piccolo gira **~2,16 volte piu' grosso del dichiarato** → **riga rossa su A4 congelata**, annotata nella riga A4; **(4)** 🔎 e **il censimento `.chr` non l'ha vista**, perche' legge l'**input** e non il **realizzato** → **M30 nuova**. Altri esiti: **la corsia RISCHIO della C3 e' SCATTATA sulla Aperture DAX** (**DD forward 16,39% contro 6,25% promesso = 2,6×**, e la scomposizione per modalita' da' **BUY −266,60 · SELL −392,22 · RETEST +58,22**, col **RETEST verde su tre banchi concordi**: R83 + forward piccolo + forward 100k); **secondo verdetto forward concorde su ORB `770611`: 0 vittorie su 10 operazioni su DUE conti indipendenti**; il raggruppamento per **qualita' del banco NON da' segnale** (dominato da 2-3 operazioni, dichiarato); **merito della flotta SOSPESO** (mediana dell'ingresso **0,00 €**, 49% positivi, nessuna famiglia vicina al muro R59). 🟠 Scoperta collaterale che cambia il perimetro del conto piccolo: **6 sedie girano a lotto minimo 0,01** → **le riduzioni firmate 23-24/08 sotto ~0,5% sono FINZIONE** (rischio reale ~0,7% su XAUUSD), ed e' un argomento in piu' per la MOSSA 2. **Chiusa anche meta' di M20** (il DD forward per famiglia ora esiste, 14 famiglie). Aggiornate **H7** (APERTA, ma con diagnosi), **A4** (riga rossa annotata), **M27** (eseguita), **lista firme** (il blocco della MOSSA 2 + le due revisioni proposte); **M30 nuova**. 🛑 **Nessuna sedia accesa, spenta o ridotta: le due revisioni sono PROPOSTE, la parola resta a Claudio** | FIRME_2026-08-31 (commit `14747ee`) + MOSSA 1 eseguita sugli statement al 28/08 |
 | 31/08/2026 sera | **v16** | 🚄 **NASCE L'AREA H — ARITMETICA DELLA PORTATA.** Risposta alla domanda di Claudio (_"la flotta e' viva ma troppo LENTA — servono trade con frequenza"_) trasformata in numeri, con l'equazione dichiarata in testa: **profitto/mese = N × E × rischio**, e la constatazione che dei tre fattori **uno e' gia' bloccato per misura** (il rischio: dirupo a d≈1,055, C7), **uno ha oggi il segno sbagliato** (E: forward di agosto negativo) e solo il terzo e' quello che la domanda propone di alzare. 🥇 **[CALCOLO DI QUESTO GIRO]** su `trades_auto.csv`/`trades_100k.csv` (chiusure fino al **28/08**) + censimento `.chr` **25/08** (37 sedie vive) + `CONTRATTI_SEDIE.md`: **PORTATA** — flotta intera **111,9 op/mese misurate contro 176,9 promesse (resa 63%)**, squadra prop reale (i 5 mirror del 100k) **34,7 contro 46,1 (75%)**, e **13 sedie su 37 a ZERO** che valgono **21 op/mese pagate e non consegnate** (i 5 GapFill in testa, sospetto di guasto agli atti dal 22/08 e mai verificato). **FABBISOGNO** — a 0,65%/trade servono **205 trade** per il +10% con E=0,075R, **334** con E=0,046R (la cella verde piu' recente, INVES E3): oggi **5,9-9,6 mesi**, con la flotta migrata **1,8-3,0 mesi**. Le due strade si **riconciliano** (banco 13,08%/mese × 0,80 di taglia × 0,63 di frequenza = 6,6%/mese). **GAP** — su FTMO/FundingPips (**nessun limite di tempo**, min 4 e 3 giorni: li passiamo 3× largo) il gap **non e' di superamento ma di TEMPO: 77 op/mese, e sono gia' in casa**. 🔬 **LA LEGGE MISURATA DEL GIORNO, su 4 round in 48 ore: il gate che crea l'edge DIVIDE la frequenza per 4-6** (NyRetest ÷4,1 · Chaos ÷5,6 · InvEsaurimento ÷1,5 · Breakin ÷1,2) — e **tutte le versioni veloci che abbiamo hanno PF≈1,00** (NyRetest 1,002 · Breakin 1,007 · InvEs 1,00): **frequenza senza edge non e' portata, e' DD e costi** (CRT: 0/30 celle). Il conto delle strade: **(a)** servirebbero **~20 sedie nuove** (e l'imbuto ha promosso **0 su 6** in tre giorni); **(b)** un motore veloce che da solo faccia +5%/mese chiede **E=0,256R = 2,8× la migliore aspettativa mai misurata in casa** — ma a **E di casa** un motore da 30 trade/mese vale **+1,46%/mese, piu' di tutta la squadra prop di oggi**; **(d) 🆕 MIGRARE cio' che e' gia' validato** (×3,2 di portata, costo di ricerca ZERO, R105 D5: _"la squadra ottima e' la flotta INTERA"_) e' il pezzo grosso che la domanda non elencava. **Raccomandazione dichiarata: MIX, in quest'ordine — prima il SEGNO di E, poi la migrazione, poi i 13 muti, poi le sedie nuove per REGIME, e l'alta frequenza solo col cancello H8.** 🆕 **H5, misure di conformita' mai fatte prima**: **best day 43,6%** sul 100k (**50,0% esatto** sul piccolo) contro il 50% di FTMO 1-Step e il **35% di FundingPips (oggi NON conforme)**; **1 giornata su 13** supera il +0,5% richiesto dai "giorni profittevoli" The5ers (≈2 mesi solo per il requisito); e due clausole che colpiscono proprio la strada "frequenza": **"high-frequency trading" fra le pratiche vietate** su FundingPips e la **"Risk Per Trade Idea"** a finestra 10 minuti, che colpisce **i gemelli e il pile-up di M2**. Righe nuove **H6-H9**; in COSA MANCA **M27** (il segno di E), **M28** (requisiti di frequenza/consistenza + definizione letterale di HFT), **M29** (portata a portafoglio con un gemello per famiglia a 0,65% piatto). 📥 Assorbiti anche i cinque referti del 30-31/08 e il **dossier Orbit Funded** (secondo dossier arrivato, ma su un prodotto **instant** con EA/piattaforma/strumenti **[INCERTO]** → **M19 resta APERTO**). **Nessun valore firmato cambiato, forward intatto** → **46 parametri (12C · 18P · 15A · 1 chiuso)** | domanda di Claudio del 31/08 sera + i 5 referti di round + il forward ricontato al 28/08 |
 | 18/08/2026 ~01:00 | **v1** | prima stesura: 29 parametri in 6 aree, dalle fonti elencate in testa. Incorporati: dossier config-prop 18/08 (3 preset .set veri, censimento 6 prop non verificato, 36 buchi), le 9 proposte P1-P9, il censimento rischio 17-18/08 (tre sedie al 2% corrette a 1%), DOVE_SIAMO 17/08 (agosto −11%, manca il criterio di uscita). **NON incorporata** l'analisi trascrizioni (in lavorazione): 5 parametri marcati 🎬 in attesa | non esisteva un posto unico dove i numeri della prop stessero con fonte e stato |
