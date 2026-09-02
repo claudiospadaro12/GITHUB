@@ -170,3 +170,40 @@ minuto invece che con un confronto a mano fra due conti.
   PASS (19 vecchi + 26 nuovi), referto in zip `verifica_autotest_20260822`.
 - Da osservare lunedi': primo trade ORB OTT sul piccolo -> trailla o no
   (punto 3 sopra). Tutto pronto per l'apertura.
+
+---
+
+## 🔴 02/09 — L'OSSERVAZIONE ATTESA E' ARRIVATA: **IL PICCOLO NON TRAILLA NEMMENO A CODICE IDENTICO**
+
+Primo trade ORB OTT su ENTRAMBI i conti dopo la ricompilazione v1.02 del
+22/08 (stessa build, verificata su entrambi). Dai ReportHistory delle 21:07:
+
+| gamba | lotti | fill | SL iniziale | SL finale | uscita | esito | per lotto |
+|---|---:|---|---:|---:|---|---:|---:|
+| 100k #3298031 | 19,7 | 15:00:23 @ 53.065,5 | 53.006,5 | **53.164,4 (trascinato +98,9 pt)** | 16:02:56 | +1.680,35 | **+85,30** |
+| piccolo #3298032 | 1,0 | 15:00:23 @ 53.065,5 | 53.006,5 | **53.006,5 (MAI mosso)** | 16:45:11 | −50,91 | **−50,91** |
+
+**Verdetto del test pulito (punto 3 del 22/08): la DERIVA DI VERSIONE E'
+ESCLUSA.** Stesso `.ex5` v1.02 su entrambi, stesso segnale, stesso secondo,
+stesso SL iniziale — e il piccolo continua a non muovere lo stop. La causa
+e' o in codice identico che si comporta diversamente per ambiente (ipotesi
+2 del 22/08: handle EMA / `CopyBuffer` che fallisce in silenzio su quel
+terminale) o negli INPUT del pannello (da rifotografare dopo la
+ricompilazione: `InpUseTrailEMA`, `InpTP1Pct`).
+
+Nota di contorno (stessa giornata, altro EA, direzione OPPOSTA): la pendente
+MAXMIN DAX SHORT del piccolo e' stata annullata dall'EA alle 08:30, quella
+del 100k e' SCADUTA da sola alle 09:29 (`expired`) — sul 100k qualcosa non
+l'ha governata. Da guardare insieme, ma senza fondere le due indagini.
+
+### I tre passi di domani (03/09), in ordine
+1. **Screenshot pannello input ORB OTT su ENTRAMBI i terminali** (Claudio,
+   dichiarato in chat 02/09 sera): `InpUseTrailEMA`, `InpTP1Pct`, titolo
+   versione. Gli input NON si toccano — solo fotografia.
+2. **Log del terminale piccolo** nella finestra 16:00→17:45 ORA ITALIANA
+   (= 15:00→16:45 server, il trade): schede Esperti e Giornale, cercare
+   errori su indicatori/`CopyBuffer`/`PositionModify` o il silenzio totale.
+3. **La correzione d'igiene diventa URGENTE**: `ManageRunner()` muto rende
+   ogni occorrenza un'indagine di giorni. Preparato in repo il logging
+   (v1.03, solo repo — inerte finche' non si ricompila col solito script
+   `aggiorna_verifica_orb.ps1` e la legge dello screenshot).
