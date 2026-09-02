@@ -6616,3 +6616,80 @@ una corsa sana**, che ha bloccato la serata al primo blocco.
 > RAMO (un `if`, un gate, un verdetto), non si consegna sperando: **si scrive il
 > codice in modo che quel ramo regga anche nel caso non coperto**. Qui bastava
 > `$rcLetto`, e sono tre righe.
+
+---
+
+## 🆕 AGGIUNTA DEL 02/09/2026 — trovata verificando l'**include P0** (`mql5/Include/ABTG_PausaGuardian.mqh` v1.50), **prima del round di ricompilazione**
+
+## 109. 🪆 IL **NUCLEO PURO COLLAUDATO NON E' IL CODICE CHE GIRA**: 39 casi verdi su una funzione che la produzione **non chiama**
+
+**Il difetto.** Il cantiere fa la cosa giusta: separa un **nucleo puro**
+(`ABTG_TettoSimboloLatoRaggiunto_Calc`) proprio perche' sia collaudabile a
+tavolino, e ci attacca **39 casi di autotest**. Poi, nel punto in cui la
+decisione serve davvero, **riscrive la regola a mano**:
+
+```mql5
+int  nP0  = ABTG_ContaSimboloLato(simP0, lato_ingresso);
+bool morde = (nP0 >= tetto_simbolo_lato);   // <-- la regola, DI NUOVO, qui
+```
+
+Risultato: l'autotest e' **verde**, il codice e' **corretto**, e la copertura
+e' **zero**. I 39 casi non toccano nemmeno una volta la riga che il VPS
+esegue. Il giorno in cui il nucleo cambia — da `>=` a `>`, un `lato==0`
+trattato diversamente, un filtro sul magic — **l'autotest resta verde e il
+campo cambia comportamento**. Il collaudo diventa un timbro.
+
+**Perche' e' insidioso.** Non e' un bug: e' un **falso positivo di collaudo**.
+Le due strade danno oggi lo stesso risultato (qui verificato su **444.600**
+combinazioni di campo/simbolo/lato/tetto, 0 divergenze), quindi nessun test
+lo scopre e nessuna rilettura distratta lo nota. Si paga **dopo**, alla prima
+modifica del nucleo, e si paga con la fiducia nel numero "39/39 PASS".
+
+E la lezione era **gia' scritta in cima allo stesso file**, nel changelog del
+v1.30: _"Codice duplicato = bug duplicati, e uno l'abbiamo gia' pagato"_ (FIX 3
+di GoldenCross: il freno contava i DEAL invece delle POSIZIONI, e BULGE_MASTER
+ha ANCORA quel difetto). Il cantiere ha citato la lezione e l'ha rifatta
+sedici righe piu' sotto.
+
+> ✅ **REGOLA.** Quando si costruisce un **nucleo puro** per renderlo
+> collaudabile, la **produzione deve chiamarlo**. Non "una funzione
+> equivalente", non "la stessa formula": **quella funzione li'**. Il controllo
+> si fa a macchina e costa un grep:
+> **per ogni funzione `_Calc` con casi di autotest, deve esistere almeno una
+> chiamata dal percorso di produzione.** Se non c'e', o il nucleo e' morto o
+> la produzione ha una copia — e in tutti e due i casi il numero verde mente.
+>
+> Corollario: se alla produzione serve anche un **valore intermedio** (qui il
+> conteggio, per scriverlo nel giornale), si legge **una volta sola** e si
+> passa il dato **sia** alla funzione di conteggio **sia** a quella di
+> decisione. Non si ricalcola a mano per comodita' di log.
+
+### 109-bis. 🔢 IL **CANCELLO CHE CITA UN CONTEGGIO** E IL CANTIERE CHE GLIENE AGGIUNGE 39 SENZA DIRGLIELO
+
+Stesso giro, secondo difetto — e questo era **gia' previsto per iscritto**.
+Il pacchetto di collaudo diceva, nero su bianco (R5):
+
+> _"Se e quando si ricompila su HEAD, il cancello va aggiornato a **75 casi e
+> marcatore v1.40** — e la modifica va **dichiarata prima** dei numeri."_
+
+Poi il cantiere P0 aggancia **39 casi nuovi** a `ABTG_AutotestGuardia()` e alza
+il marcatore. Da quel commit in poi il cancello chiede **75** a un codice che
+ne produce **114**, e cerca **`v1.40`** in una riga che stampa **`v1.50`**. Il
+round non fallisce per il difetto vero: fallisce **dicendo la cosa sbagliata**
+("log troncato"), che e' il modo piu' costoso di fallire.
+
+> ✅ **REGOLA.** Un conteggio o un marcatore di versione citato da un
+> **cancello** e' un **accoppiamento fra due file**. Chi tocca il file
+> contato **aggiorna il cancello nello stesso commit** — e chi verifica
+> **ricontacon il codice davanti** (qui: contare le invocazioni di
+> `ABTG_AutotestCaso*` e **controllare che nessuna stia dentro un ciclo**,
+> altrimenti il numero non e' nemmeno determinabile a occhio).
+> Regola gemella gia' in lista: **§23, l'artefatto di input scaduto**. Qui
+> l'artefatto scaduto e' **un numero dentro un documento**, che scade in
+> silenzio e non ha una `data:` da guardare.
+>
+> 🩹 E il riflesso che chiude il cerchio: **se cambi il contenuto di un file
+> gia' citato altrove per versione, ALZA LA VERSIONE.** Il v1.50 corretto in
+> verifica e' diventato **v1.51** apposta: due byte diversi sotto lo stesso
+> numero sono la trappola che la §4 (`il SHA contiene davvero la correzione?`)
+> descrive, spostata dentro un file invece che fra due commit.
