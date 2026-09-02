@@ -78,7 +78,7 @@ o si scrive un contratto (misura nuova) o si dichiara formalmente lo stato._
 
 | EA | Simbolo | Magic | Rischio | DD promesso | Op/mese | Finestra | Fonte | Etichetta |
 |---|---|---|---:|---|---|---|---|---|
-| ABTG_DAX_Apertura_EU | D30EUR | 770101 | 1,0 (+0,65 sul 100k) | **6,25%** (R16; la griglia R46 sulla cella LIVE dà 7,23%) | **~21** (270 tr) | OOS 12,6 mesi | `REFERTO_PORTAFOGLIO_R16.md` tab. serie · `REFERTO_ROUND46_GESTIONE.md` riga "A = LIVE" | ✅ [TROVATO] |
+| ABTG_DAX_Apertura_EU | D30EUR | 770101 | 1,0 (+0,65 sul 100k) | **10,60%** (R83, cella RETEST viva a 1% — REVISIONE FIRMATA 02/09: il 6,25% di R16 descriveva la cella BUY/SELL che non gira piu'; verbale in FIRME_2026-09-02.md) | **~21** (270 tr) | OOS 12,6 mesi | `R83` (cella RETEST) · storici: `REFERTO_PORTAFOGLIO_R16.md` · `REFERTO_ROUND46_GESTIONE.md` | ✅ [TROVATO] |
 | ABTG_Dow_Apertura_US | U30USD | 770202 | 1,0 (+0,65) | **4,22%** (R16; R54 riconferma la cella live: 4,39%, PF 1,270) | **~10** (130 tr) | OOS 12,6 mesi | `REFERTO_PORTAFOGLIO_R16.md` · `REFERTO_ROUND54_LATI_DOW.md` §1 | ✅ [TROVATO] |
 | ABTG_ORB_Ottimizzato | U30USD | 770611 | 1,0 (+0,3) | **9,92%** (R15, col **doppio asterisco**: passa il muro 10% per 8 centesimi, cella di confine; R16 a 100k: 9,72%) — a 0,3% ≈ 3,0% | **~9,4** (119 tr) | OOS 12,6 mesi | `REFERTO_ROUND15_ORB_GESTIONE.md` · `REFERTO_PORTAFOGLIO_R16.md` | ✅ [TROVATO] |
 | ABTG_MaxMinNotte_DAX_Short_Ottimizzato | D30EUR | 770411 | 1,0 (+0,65) | **1,27%** (R16; la promozione 26/07: PF 2,05 · DD 3,1% · 41 tr, corr S&P ON) | **~1,7** (21 tr) | OOS 12,6 mesi | `REFERTO_PORTAFOGLIO_R16.md` · `REGISTRO_TEST.md` §MaxMinNotte raffinamento | ✅ [TROVATO] |
