@@ -72,9 +72,14 @@
 //  staccare, riattaccare e premere RIPRISTINA nella finestra dei
 //  parametri, altrimenti l'EA continua coi valori vecchi.
 //
-//  ⚠️ Il rischio resta al 2%: con questa configurazione il drawdown
-//  misurato e' 10,49% all'1% e 20,40% al 2%. Non l'ho toccato perche'
-//  e' una scelta di size, non di strategia.
+//  ⚠️ 02/09/2026 — FIX FIRMATO DA CLAUDIO (C4, diagnosi 770101 del 31/08):
+//  il default compilato del rischio era 2.0 = il DOPPIO del contratto
+//  della sedia (1,0%, CONTRATTI_SEDIE.md r.81) e della riga rossa A4.
+//  Ogni RIPRISTINA (procedura qui sopra!) rimetteva il 2% in silenzio:
+//  e' la causa misurata degli 8 stop pieni a ~2% del 23/07-14/08 (referto
+//  DIAGNOSI_770101_SIZING_2026-08-31.md, tre prove indipendenti).
+//  Ora il default e' 1.0: il prossimo RIPRISTINA atterra sul contratto.
+//  DD di riferimento: 10,49% misurato all'1%.
 // ====================================================================
 #define ABTG_DEF_RANGE_MIN    35     // 06/08: era 15. Fuori campione 8 celle su 8 in utile con 35-45, 0 su 12 sotto
 #define ABTG_DEF_RANGE_MODE   0      // 0=range di apertura (breakout classico dell'apertura EU)
@@ -82,7 +87,9 @@
 #define ABTG_DEF_CLOSE_MIN    30
 #define ABTG_DEF_USE_GAPFILL  false  // sul DAX di default breakout, non gap fill
 #define ABTG_DEF_BUFFER       500    // 06/08: era 200. Centro dell'altopiano, l'unica colonna sopra PF 1,16 con tutti e due i motori
-#define ABTG_DEF_RISK         2.0    // rischio max 2% (money management del piano)
+#define ABTG_DEF_RISK         1.0    // 02/09: era 2.0. Il default compilato era il DOPPIO del
+                                     // contratto (1,0%) e della riga rossa A4: ogni RIPRISTINA
+                                     // rimetteva il 2%. FIX firmato C4. DD misurato 10,49% a 1%.
 // 05/08: era 2 (punti fissi, 410). Cambiato in 1 (base candela) su tre riscontri:
 //  - forward 04/08, stesso simbolo/ora/direzione: punti fissi 1,90 punti catturati
 //    contro 25,64 della base candela. Tredici volte tanto.
@@ -303,7 +310,7 @@ input bool   InpUseVwapFilter = false;                // Opera solo dal lato giu
 input ENUM_TIMEFRAMES InpVwapTF = PERIOD_M15;         // TF per la VWAP (guida Emiliano: M15)
 
 input group "=== Rischio e gestione ==="
-input double InpRiskPercent    = ABTG_DEF_RISK;       // Rischio per trade in % (piano: max 2%)
+input double InpRiskPercent    = ABTG_DEF_RISK;       // Rischio per trade in % (contratto sedia: 1,0 - tetto A4: mai sopra 1)
 input ENUM_ABTG_SL InpSLMode   = ABTG_SL_RANGE;       // Come calcolo lo stop loss
 input double InpAtrSlMult       = 1.5;                // (SL_ATR) stop = X * ATR
 input int    InpAtrPeriodMgmt   = 14;                 // Periodo ATR per gestione
