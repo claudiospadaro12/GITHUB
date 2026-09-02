@@ -138,7 +138,13 @@ $INV = [Globalization.CultureInfo]::InvariantCulture
 $EA      = "ABTG_SondaOrologio"
 $Prova   = "SONDA_OROLOGIO_00_GEMELLI.txt"
 $Avvio   = Get-Date
-$Stamp   = $Avvio.ToString("yyyyMMdd_HHmm", $INV)
+# I SECONDI NEL TIMBRO, non solo i minuti: i tre passi si lanciano di
+# fila e due giri dello STESSO passo nello stesso minuto scriverebbero
+# nella stessa cartella e nello stesso zip, cioe' il secondo referto
+# coprirebbe il primo. Un artefatto che sovrascrive il precedente e'
+# la classe del giro a vuoto che si porta via il referto della notte
+# prima (31/08).
+$Stamp   = $Avvio.ToString("yyyyMMdd_HHmmss", $INV)
 $Dsk     = Join-Path $env:USERPROFILE "Desktop"
 $Work    = Join-Path $env:USERPROFILE "abtg_diag_gbpusd"
 $ProveD  = Join-Path $Work "prove"
@@ -161,14 +167,18 @@ $RigheLog   = New-Object System.Collections.ArrayList
 $CensRighe  = New-Object System.Collections.ArrayList
 $Artefatti  = New-Object System.Collections.ArrayList
 $Fatale     = ""
-$Terminale  = "n/d"
-$Compilato  = "NON TENTATA"
-$CacheTxt   = "NON SVUOTATA"
+# I VALORI DI PARTENZA DICONO "NON CI SONO ARRIVATO", mai "e' andata
+# male": un campo lasciato al default in un giro fermato prima NEGHEREBBE
+# AGLI ATTI un gate che invece ha girato (punto 94). "NON TENTATA" e
+# "TENTATA E FALLITA" sono due fatti diversi e si scrivono diversi.
+$Terminale  = "n/d (non cercato: la corsa si e' fermata prima)"
+$Compilato  = "NON TENTATA (la corsa si e' fermata prima)"
+$CacheTxt   = "NON RAGGIUNTA (la corsa si e' fermata prima)"
 $Cronometro = "non misurato"
 $EsitoCorsa = "NON ESEGUITA"
-$FrescoTxt  = "NON PERTINENTE"
+$FrescoTxt  = "NON RAGGIUNTA (la corsa non e' arrivata a leggere nessun CSV)"
 $RigheCsv   = "n/d"
-$Gemelli    = "NON PERTINENTE"
+$Gemelli    = "NON MISURATO (la corsa non e' arrivata a leggere il CSV)"
 $LogRaccolti= -1
 $DaQuando   = ""
 $Fino       = ""
@@ -627,6 +637,12 @@ try{
     & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
     while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $tC -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
     if(-not (Test-Path -LiteralPath $ex5)){
+      # IL CAMPO SI AGGIORNA PRIMA DEL throw. Lasciandolo al valore di
+      # partenza il referto direbbe "compilazione: NON TENTATA" proprio
+      # nel giro in cui la compilazione E' STATA TENTATA ed e' fallita:
+      # e' il punto 94 (il valore di partenza che NEGA AGLI ATTI il gate
+      # che invece ha girato). Trovato eseguendo, sul banco stubbato.
+      $Compilato = "TENTATA E FALLITA (dopo 180 s l'.ex5 non era comparso)"
       $logC = Join-Path $dstExp ($EA + ".log")
       if(Test-Path -LiteralPath $logC){
         Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force
