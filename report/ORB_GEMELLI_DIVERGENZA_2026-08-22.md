@@ -350,3 +350,46 @@ il 22/08 — con l'unica, importante eccezione che **condividono `SelPos()`**
    `ORB RUNNER:` / `ORB INIT:` / `ORB TP1:`. La riga che compare (o la sua
    assenza totale, che indicherebbe il punto B) **dice quale delle ipotesi e'
    quella giusta in un minuto**, invece che in tre giorni di confronti a mano.
+
+---
+
+## 📐 02/09 sera — CONTROPROVA STORICA DELL'IPOTESI A (SelPos/hedging), misurata sul CSV
+
+Fatto il controllo incrociato su `trades_auto.csv` (conto piccolo): per OGNI
+trade ORB storico, quali ALTRE posizioni U30USD erano aperte durante la sua
+vita?
+
+| data ORB | trailing? | posizioni U30 sovrapposte (magic, aperte PRIMA?) |
+|---|---|---|
+| 11/08 | n/d | nessuna |
+| 13/08 | n/d | Dow Apertura US 770202 (aperta DOPO l'ORB) |
+| **19/08** | **NO (misurato)** | **SW DOW H2 L 1/3 + 2/3 (770531), aperte alle 14:00 — PRIMA dell'ORB — e vive per TUTTA la sua durata** |
+| **21/08** | **NO (misurato)** | **SW DOW H2 S 1/3 + 2/3 (770531), aperte il 20/08 — PRIMA — e vive per tutta la durata** |
+| 24/08 | n/d | EMA200 DOW S1 (aperta 14:32, PRIMA dell'ORB delle 14:46) |
+
+**Nei DUE giorni in cui il mancato trailing e' misurato (19 e 21/08), sul
+piccolo c'era SEMPRE una posizione U30USD piu' VECCHIA di un altro magic,
+aperta per tutta la vita del trade ORB.** `PositionSelect(_Symbol)` seleziona
+la piu' vecchia -> magic diverso -> `SelPos()` falso -> `ManageRunner()` esce
+alla prima riga, muto. **L'ipotesi A spiega esattamente i giorni misurati.**
+E spiega anche perche' il 100k trailla: li' girano solo i 5 specchi, l'ORB
+sul Dow e' (quasi sempre) solo.
+
+**Il caso di oggi (02/09) NON falsifica A ma non la conferma**: le due
+posizioni U30 gemelle (sell 0,1+0,1 dal 31/08) sono morte alle 15:00:23,
+lo STESSO secondo del fill ORB — dopo, dall'export delle 21:07, l'ORB
+sembrerebbe solo. MA una posizione U30 aperta PRIMA della finestra del
+report e ANCORA aperta alle 21:07 sarebbe INVISIBILE in quell'export
+(non e' ne' chiusa ne' fra gli ordini di oggi). Percio' domani si aggiunge
+al controllo: **foto delle POSIZIONI APERTE sul piccolo (tab Trade), con
+simbolo e ora di apertura** — se c'e' una U30 vecchia di un altro magic,
+A spiega anche oggi; se non c'e', il caso di oggi punta su B (newBar
+appiccicoso) e lo decidono i log v1.03.
+
+### Checklist 03/09 aggiornata (ordine)
+1. Foto pannello input ORB su ENTRAMBI i terminali (`InpUseTrailEMA`,
+   `InpTP1Pct`, `InpExecTF`, titolo versione).
+2. Foto POSIZIONI APERTE del piccolo (tab Trade): tutte, con ora apertura.
+3. Log del piccolo 16:00->17:45 ora italiana (Esperti + Giornale).
+4. Quando Claudio vuole: ricompilazione v1.03 (solo log) su entrambi con
+   `aggiorna_verifica_orb.ps1` — stringa che passa PRIMA dal verificatore.
