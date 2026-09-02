@@ -4761,6 +4761,50 @@ zip che non esiste e torna indietro a chiedere.
 > rosso a schermo). Un `exit` che sta PRIMA della raccolta e uno che sta DOPO
 > non si raccontano con la stessa frase.
 
+### 94-ter. 🪦 IL CAMPO DEL REFERTO TIMBRATO **SOLO SUL RAMO DI SUCCESSO**: il ramo che FALLISCE lascia in piedi il «non tentato», e il referto nega proprio il passo che il round stava misurando
+
+_Difetto vero, **RIPRODOTTO ESEGUENDO** in `RIGA_SONDARSIEMAV8.ps1` (`$Compilato`),
+trovato PRIMA dell'invio, 02/09/2026._
+
+Il round della SONDA RSI+EMA V8 aveva UN fatto nuovo da misurare: **l'EA non era
+mai stato compilato**, e la pagina lo scriveva a chiare lettere — _«se la
+compilazione FALLISCE, QUELLO è il risultato del passo»_. Il driver:
+
+```powershell
+$Compilato = "NON TENTATA"          # valore di partenza
+...
+if(-not (Test-Path -LiteralPath $ex5)){
+  ... ; throw ("COMPILAZIONE FALLITA: ...")     # <-- non timbra il campo
+}
+$Compilato = "OK (...)"             # <-- SOLO il ramo di successo
+```
+
+Facendo fallire la compilazione sul banco stubbato, il referto usciva con:
+
+```
+compilazione: NON TENTATA   <- EA NUOVO: se e' FALLITA, QUESTO e' il risultato del passo
+```
+
+**Falso**: MetaEditor era stato lanciato e aveva fallito. E la pagina diceva a
+Claudio di leggere ESATTAMENTE quella riga cercandoci la parola `FALLITA` — un
+token che il codice non scriveva mai (e' il punto **82** letto dall'altro lato,
+e il punto **94** spostato dalla tabella al **ramo d'uscita**).
+
+Il campo non e' innocuo: sul referto del giro fallito qualcuno legge «non
+tentata» e va a cercare a monte un guasto che non c'e', mentre il risultato del
+passo — «questo EA non compila» — sta li' sotto in un'altra riga.
+
+> ✅ **REGOLA: ogni campo che finisce nel referto si timbra sul ramo che lo
+> DECIDE, non solo su quello che lo fa contento.** Prima di ogni `throw` che
+> chiude un passo, il campo di quel passo va messo al suo valore VERO. Gli stati
+> devono essere tanti quanti i rami: **NON TENTATA** (non ci siamo arrivati) /
+> **FALLITA** (tentata e andata male) / **OK** — e la pagina deve nominare un
+> token che il codice scrive DAVVERO.
+> Il controllo che lo trova: **si fa fallire ogni passo a turno sul banco** e si
+> rilegge il referto riga per riga chiedendosi *«questa frase e' vera adesso?»*.
+> L'analisi statica non lo vede: il campo e' inizializzato, assegnato e stampato,
+> tutto compila.
+
 ## 95. 🎚️ LA RIGA `Leverage=N` DELL'INI DEL TESTER PUO' ESSERE IGNORATA IN SILENZIO (pagata su R114, 27/08/2026 — e il canarino l'ha presa)
 
 R114 doveva misurare il margine a leva prop: .ini con `Leverage=15`

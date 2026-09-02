@@ -85,7 +85,7 @@ finestra 2024.09.26 → 2026.06.30, **MODELLO 2 "Solo prezzi di apertura"**
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_SONDARSIEMAV8.ps1` (marcatore `MARCATORE_RIGA_SONDARSIEMAV8_v1`) |
+| **Driver** | `righe/RIGA_SONDARSIEMAV8.ps1` (marcatore `MARCATORE_RIGA_SONDARSIEMAV8_v2`) |
 | **File prova** | `prove/RSIEMAV8_FREQUENZA_M5.txt` + `prove/RSIEMAV8_FREQUENZA_M15.txt` |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.**
@@ -103,7 +103,7 @@ mai compilato può cadere, ed è un risultato).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARSIEMAV8.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARSIEMAV8.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARSIEMAV8_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARSIEMAV8_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDARSIEMAV8_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDARSIEMAV8_CONTROLLO_ DI ADESSO: il controllo non e'' arrivato alla raccolta' };
@@ -119,7 +119,7 @@ mai compilato può cadere, ed è un risultato).
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARSIEMAV8.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARSIEMAV8.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARSIEMAV8_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARSIEMAV8_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDARSIEMAV8_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDARSIEMAV8_CORSA_ DI ADESSO: la corsa non e'' arrivata alla raccolta' };

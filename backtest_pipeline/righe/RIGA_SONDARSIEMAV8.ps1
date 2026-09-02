@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDARSIEMAV8_v1
+#  MARCATORE_RIGA_SONDARSIEMAV8_v2
 #  RIGA_SONDARSIEMAV8.ps1 -- SONDA DI CONTEGGIO RSI+EMA V8 (PASSO 0
 #  del candidato V8, porta di rientro della scheda 31/08 ESERCITATA su
 #  richiesta esplicita di Claudio, 01-02/09).
@@ -759,6 +759,12 @@ try{
   & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
   while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
   if(-not (Test-Path -LiteralPath $ex5)){
+    # IL CAMPO SI TIMBRA QUI, PRIMA DEL throw: se lo aggiornasse solo il ramo
+    # di successo, il referto del giro FALLITO direbbe ancora "NON TENTATA" --
+    # cioe' negherebbe agli atti PROPRIO il fatto che questo passo misura
+    # (EA mai compilato). Tre stati e tutti e tre veri: NON TENTATA (non ci
+    # siamo arrivati) / FALLITA (tentata, niente .ex5) / OK.
+    $Compilato = "FALLITA (tentata, nessun .ex5 prodotto): QUESTO E' IL RISULTATO DEL PASSO -- gli errori sono in COMPILAZIONE_FALLITA.log dentro lo zip"
     $logC = Join-Path $dstExp ($EA + ".log")
     if(Test-Path -LiteralPath $logC){
       Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force
