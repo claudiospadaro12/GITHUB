@@ -6337,3 +6337,77 @@ benissimo**. La sentinella non poteva scattare mai.
 >    slippage, MFE intrabar), la lettura si **spezza per epoca**: dentro la base
 >    tick vale, fuori è un **ripiego dichiarato**.
 
+---
+
+## 🆕 AGGIUNTA DEL 02/09/2026 — trovata verificando il PIANO-DIAGNOSI GBPUSD (`RIGA_DIAG_GBPUSD.ps1`), **leggendo `scarica_storico.ps1` prima di appoggiarci sopra un passo del piano**
+
+## 106. 🗄️ L'ARTEFATTO CHE **SI SVUOTA A OGNI CORSA** LETTO COME SE FOSSE UN **REGISTRO CUMULATIVO** — e il verdetto verde e' calcolato sulle righe PRESENTI, mentre la domanda riguarda una riga **ASSENTE**
+
+_Intercettata **prima dell'invio**, mentre si costruiva il PASSO A del piano
+diagnostico del 02/09 (`report/DIAGNOSI_GBPUSD_LENTA_2026-09-02.md`). Il piano
+diceva, in buona fede: «`scarica_storico.ps1 -SoloReferto` rilegge l'ultimo
+`ABTG_StoricoScaricato.csv` e stampa `PrimaDataLocale` per TF. Si guarda la riga
+**M1 di GBPUSD**». Nessun minuto bruciato — ma il ramo dell'ipotesi H2 sarebbe
+stato deciso su un verde che non parlava di GBPUSD._
+
+Il meccanismo, riga per riga di `scarica_storico.ps1`:
+
+1. **riga 230**: `if (Test-Path $CsvOut) { Remove-Item $CsvOut -Force }` — il CSV
+   del censimento viene **CANCELLATO** all'inizio di ogni corsa `-Auto`. Quindi
+   contiene **solo i simboli di QUELL'unica corsa**, non un registro che si
+   accumula. Il default e' `-Simboli "D30EUR,NASUSD,U30USD"`: chiunque abbia
+   lanciato l'ultima corsa sugli indici ha portato via le righe del forex.
+2. **righe 115-129**, il verdetto: `$bloccati` e `$daRifare` si calcolano
+   **sulle righe che ci sono**, e il ramo `if (-not $bloccati -and -not $daRifare)`
+   stampa in **VERDE**: *"OK: storico completo su tutte le righe. Si puo' rifare
+   la fase IS."* Un CSV con dentro **solo tre indici** esce verde — e chi era
+   venuto a chiedere di GBPUSD legge "completo".
+3. **riga 132**: `if ($SoloReferto) { Mostra-Referto; exit 0 }` — e quel ramo
+   esce **0 sempre**, anche a CSV **assente** o illeggibile. Quindi nemmeno il
+   codice di uscita puo' fare da rete.
+4. E **il file non porta la propria data** (punto 78): `Mostra-Referto` stampa il
+   **percorso** (riga 112) ma **mai** il `LastWriteTime`. Il censimento di GBPUSD
+   agli atti e' del **24/08** (R102 Blocco 1): una fotografia di **nove giorni
+   prima**, letta per rispondere a una domanda che e' **«ci sono ANCORA?»**.
+
+Le tre bugie stanno una dentro l'altra e si coprono a vicenda: **il verde non e'
+falso, e' fuori tema**; **lo zero non e' un successo, e' un ramo**; **la data non
+c'e'**. Chi legge vede *"OK: storico completo"* e archivia H2 come esclusa.
+
+### Perche' e' una classe a se', e non il punto 68 o il punto 80
+
+- il **punto 68** (verdetto binario senza lo stato "non ho fatto niente") parla di
+  uno strumento che **non ha misurato**; qui lo strumento **ha misurato benissimo
+  — un'altra cosa**;
+- il **punto 80** (colonna che la famiglia nuova non esporta) parla di una
+  **colonna** mancante; qui mancano **righe**, e le colonne sono tutte al loro
+  posto: nessun parser puo' accorgersene;
+- il **punto 23** (artefatto di input scaduto) guarda l'**eta'**; qui anche un
+  artefatto di **cinque minuti fa** direbbe la stessa bugia, se quella corsa
+  riguardava altri simboli.
+
+Il fatto nuovo e' la **semantica dell'artefatto**: un file che il produttore
+**azzera e riscrive** non e' un registro, e' una **ricevuta dell'ultima corsa**.
+Leggerlo come registro e' un errore che nessun controllo di freschezza intercetta.
+
+> ✅ **REGOLA (tripla).**
+> 1. **Prima di leggere un artefatto prodotto da un ALTRO strumento, si guarda se
+>    quello strumento lo AZZERA.** `grep` di `Remove-Item`/`FileOpen(...FILE_WRITE`
+>    sul percorso dell'artefatto, nel produttore. Se lo azzera: **non e' un
+>    registro**, e la sua completezza vale **solo per il perimetro di quella corsa**.
+> 2. **La domanda si fa sulla RIGA, non sul FILE.** Non "il censimento e'
+>    completo?" ma "**c'e' la riga `<SIMBOLO>` `<TF>`?**". E i tre esiti sono
+>    **ASSENTE / STANTIA / presente**, mai due. Un "verde d'insieme" calcolato
+>    sulle righe presenti **non risponde** a una domanda su una riga assente:
+>    quando la riga manca, il verdetto e' **"NON CENSITO"** e va scritto cosi',
+>    con accanto **quale lancio** produrrebbe la misura che manca.
+> 3. **L'artefatto si DATA e la data si STAMPA** (punto 78 + classe CSV stantio
+>    del 31/08), e la data si confronta con **la domanda**: se la domanda e' *"ci
+>    sono ANCORA?"*, una fotografia di nove giorni fa e' un **indizio**, non una
+>    misura — e il referto deve dirlo con quelle parole.
+>
+> ⚠️ **E il corollario sul codice di uscita:** un ramo che fa `Mostra-Referto; exit 0`
+> esce 0 **anche quando non c'e' niente da mostrare**. Il codice di uscita di uno
+> strumento di **sola lettura** non e' mai il verdetto di chi lo chiama: il
+> chiamante si rilegge l'artefatto da solo. (Applicato in `RIGA_DIAG_GBPUSD.ps1`:
+> il passo A alza un RILIEVO che lo dichiara, e il verdetto lo da' la sua lettura.)
