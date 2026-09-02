@@ -496,6 +496,10 @@ e non tocca nessuno dei 5 EA vivi. Costo: ~1 h di scrittura + 1 compilazione +
 l'include**, non che i **binari dei 5 mirror** chiamino la guardia — quella
 prova resta la riga `[GUARDIA]` di un EA vero. Servono entrambi._
 
+> 🐤 **AGGIORNAMENTO 02/09 (dopo la firma D2): P-C1 è COSTRUITO — `mql5/Scripts/ABTG_CanarinoGuardian.mq5`.** Script di sola lettura (un solo `OnStart`; zero `OrderSend`, zero `CTrade`, zero scritture di GlobalVariable), che legge le bandiere **con lo stesso include degli EA** e stampa il valore **grezzo accanto al ricalcolato**, più il **rischio pendente non visto dal cap** (misura del buco B6); 8 blocchi di autotest, fra cui il confronto dei nomi GV con le stringhe **hardcoded** dell'artefatto `attese_enforcement_fase1.txt`.
+> 🚫 **Scelta di progetto da conoscere prima di leggere i log:** il canarino **non** stampa il prefisso `[GUARDIA]` né la frase di blocco degli EA (tutte le sue righe iniziano con `[CANARINO]`), altrimenti il censimento del criterio 9 conterebbe blocchi che nessun EA ha subito.
+> 🟡 **Stato: COSTRUITO, IN ATTESA DI VERIFICATORE — non compilato** (qui non esistono MetaEditor né tester) e mai eseguito: prima corsa a mano di Claudio, come ogni artefatto nuovo.
+
 **R5 — Il conteggio dell'autotest e' cambiato: 19 → 75.** Il criterio 2 congela
 «19/19». Nel codice di HEAD (`ABTG_AutotestGuardia`, riga 1452) il conto e'
 **19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1) = 75**, e il marcatore
