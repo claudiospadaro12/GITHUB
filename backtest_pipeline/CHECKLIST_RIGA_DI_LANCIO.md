@@ -6491,11 +6491,11 @@ un falso sospetto sui binari in campo costa di piu'.
 
 ## 🆕 AGGIUNTA DEL 02/09/2026 (mattina) — **il difetto e' arrivato fino al PC di Claudio**: primo giro a vuoto di `RIGA_DIAG_GBPUSD.ps1` v1, ore 08:36, Windows PowerShell 5.1 vero
 
-## 107. 🕳️ L'**EXIT CODE CHE NON C'E'** LETTO COME FALLIMENTO: su PS 5.1 `Start-Process -PassThru` puo' restituire `ExitCode` **VUOTO**, e `$null -ne 0` e' **VERO**
+## 108. 🕳️ L'**EXIT CODE CHE NON C'E'** LETTO COME FALLIMENTO: su PS 5.1 `Start-Process -PassThru` puo' restituire `ExitCode` **VUOTO**, e `$null -ne 0` e' **VERO**
 
 _Il verificatore l'aveva messo in NON COPERTO («pwsh 7 qui, 5.1 sul VPS»), e la
 riga e' partita lo stesso. Costo: un giro a vuoto bloccato e una consegna da
-rifare. La classe **106** era stata scoperta LEGGENDO; questa e' stata scoperta
+rifare. La classe **106** era stata scoperta LEGGENDO; questa (**108**) e' stata scoperta
 **incassando**._
 
 Il fatto, misurato:
