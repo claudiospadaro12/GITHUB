@@ -1,0 +1,284 @@
+# =====================================================================
+#  RELATIVO -- PASSO 0: SONDA DI CONVERGENZA, FREQUENZA, TAGLIA, TENUTA
+#  *** BOZZA DEL CACCIATORE -- NON E' UNA PROVA OPERATIVA ***
+# ---------------------------------------------------------------------
+#  PERCHE' "BOZZA", E PERCHE' NON E' PIGRIZIA (regola di casa).
+#  Ne' l'EA ne' la sonda ESISTONO. Un file prova che pinna input
+#  inesistenti e' l'ERRORE N.3 della CHECKLIST_RIGA_DI_LANCIO, e MT5
+#  IGNORA IN SILENZIO un pin che non trova: e' cosi' che e' nato il
+#  falso "0/8" del FiboH4 (REGISTRO_TEST.md par. 2-bis).
+#  I nomi di input qui sotto sono PROPOSTI, non verificati nel sorgente.
+#  Ordine obbligato: prima la sonda, poi il numero, poi -- solo se il
+#  numero regge -- l'EA operativo.
+#
+#  E QUANDO SARA' PROMOSSA VA SPEZZATA IN FILE SEPARATI
+#  (RELATIVO_D30_M5.txt, RELATIVO_D30_M15.txt, RELATIVO_NAS_M5.txt ...),
+#  come si e' fatto per M0PB, LondonFx e la Sonda dell'Orologio: il
+#  driver generico legge @PERIODO e @SIMBOLO DAL PROVA, e un valore
+#  overridato da fuori resterebbe nascosto.
+#
+#  DOSSIER DI CACCIA:
+#    backtest_pipeline\caccia_strategie\CACCIA_FREQUENZA4_GH_TV_FF_2026-09-02.md
+#    (QUARTA BATTUTA della caccia-frequenza, FRONTE A -- perimetro
+#     GitHub + TradingView + Forex Factory. Unico promosso.)
+#  MANDATO: Claudio 02/09/2026 sera -- "MANDA LA NOSTRA FLOTTA DI AGENTI
+#           A CACCIA DI EA DAL TF BASSO M5,M15", frequenza >= 2/giorno.
+#  FIRMA:   report\FIRME_2026-08-31.md, FIRMA 2 (cancello H8,
+#           E >= 0,075R misurata A TICK).
+#  VINCOLO PROP: report\CONFIG_PROP_2026-08-31.md, proposta P5 --
+#           "meno del 25% dei trade sotto i 60 secondi". Vedi C8.
+#  REGOLA DEI DUE LATI + STORICO LUNGO SUGLI INDICI: CLAUDE.md, 25/08.
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    MOTORE (rapporto fra due simboli -> scarto dalla media mobile ->
+#    normalizzazione a z-score -> due soglie simmetriche -> uscita per
+#    convergenza) derivato dalla LETTURA di due sorgenti TradingView:
+#      1) "Pair Trade"  (c) vladimirkovalchuk / @wa1one
+#         https://www.tradingview.com/script/ru23VN0C/
+#         Pine v4, 40 righe, access=1, created 2022-01-15, 279 "agree"
+#      2) "Unilateral Pairs Trading"  @pietro3334
+#         https://www.tradingview.com/script/MD5vkc0n/
+#         Pine v4, 78 righe, access=1, created 2022-01-06, 30 "agree"
+#    NORMALIZZAZIONE ROBUSTA (opzione C6) dalla lettura di:
+#      3) "Statistical Arbitrage Pairs Trading - Long-Side Only"
+#         @piirsalu  https://www.tradingview.com/script/Kt6XkQIM/
+#         Pine v5, 97 righe, access=1, created 2025-01-30
+#    CONFERMA INDIPENDENTE DEL MECCANISMO SU MT5 E SU INDICI (indicatore,
+#    non EA -- quindi NON e' la fonte del codice, e' la conferma):
+#      4) m4rk-lewis/price_action_analytics (GitHub, 3 stelle)
+#         "the cointegration indicator ... to find equity index hedged
+#          pairs trades", "long S&P500 ... shorting EuroStoxx50 at the
+#          same time", "exiting on the convergence of the two instrument
+#          z-scores"                                        [VERIFICATO]
+#
+#    LICENZA -- IL PUNTO DELICATO, DICHIARATO:
+#      (1) e (2) NON DICHIARANO LICENZA nel sorgente [VERIFICATO:
+#      nessuna riga di licenza in nessuno dei due file]. Su TradingView
+#      access=1 rende il sorgente LEGGIBILE, non automaticamente
+#      RIUSABILE.
+#      >>> REGOLA APPLICATA: NON SI COPIA UNA RIGA DI CODICE DA (1) E
+#      (2). Si riscrive in MQL5 la FORMULA STATISTICA (media mobile,
+#      deviazione standard, z-score, correlazione: matematica pubblica,
+#      non proteggibile), E SI CITA COMUNQUE autore, URL e data in testa
+#      a qualunque .mq5 derivato -- come per ABTG_AllineaLondra.
+#      Lo z-score modificato mediana/MAD di (3) e' Iglewicz-Hoaglin:
+#      anch'esso formula pubblica.
+#
+#    Copie archiviate e lette riga per riga (tutte e tre, integrali):
+#      caccia_strategie\biblioteca\sorgenti\
+#        PairTrade_OLS_wa1one-vladimirkovalchuk_tv8e024d8c1b75_2026-09-02.pine
+#        UnilateralPairsTrading_pietro3334_tvb852187ca0ac_2026-09-02.pine
+#        StatArbPairsLongOnly_piirsalu_tvd9bf81d59471_2026-09-02.pine
+#
+# =====================================================================
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  DAX, Dow e Nasdaq sono lo stesso fattore di rischio guardato da tre
+#  fusi orari: nella sovrapposizione EU-USA si muovono insieme, ma NON
+#  nello stesso istante. Quando uno si stacca dall'altro piu' del suo
+#  solito -- misurato sul RAPPORTO, non sul prezzo -- la parte di quello
+#  scarto che e' RUMORE DI ESECUZIONE (e non notizia) rientra.
+#
+#  LA TESI IN UNA RIGA:
+#     "Non si scambia l'indice: si scambia la sua DISTANZA dall'altro."
+#
+#  E LA CONDIZIONE DI MORTE, SCRITTA PRIMA DELLA MISURA:
+#     se la divergenza NON rientra -- se lo scarto e' notizia
+#     idiosincratica invece che rumore -- allora questo non e' un motore
+#     di convergenza, e' un MOMENTUM TRAVESTITO, e si chiude.
+#     E' il numero 6 dei criteri qui sotto.
+#
+#  Se l'ipotesi e' vera:
+#    (a) l'attraversamento di soglia capita PIU' VOLTE AL GIORNO, perche'
+#        il grilletto e' un NUMERO DI DEVIAZIONI STANDARD (si auto-tara
+#        su qualunque coppia e qualunque epoca) e la sua FREQUENZA
+#        dipende dalla FINESTRA n, che e' un NOSTRO parametro e non un
+#        fatto del mercato -> PORTATA;
+#    (b) l'escursione favorevole fino alla convergenza paga lo spread
+#        con margine -> TAGLIA;
+#    (c) favorevole/avverso supera il cancello H8 con un win rate
+#        plausibile -> GEOMETRIA;
+#    (d) la posizione si tiene decine di barre: sopra il muro d'attrito
+#        (arXiv 2605.04004 par.6.2, tenuta >= 12 barre) e sotto la
+#        clausola HFT delle prop -> TENUTA.
+#
+#  LA DIFFERENZA CON I DUE CANDIDATI PRECEDENTI, scritta PRIMA:
+#    - M0PB armava su un EVENTO DI CODA (RSI(6) >= 90): misurato a 0,52
+#      segnali/giorno contro un pavimento di 1,00. Morto al PASSO 0.
+#    - DayFlow arma su un PERCENTILE: frequenza garantita in STATO, ma
+#      il cooldown a 10 barre ne butta via la meta'.
+#    - RELATIVO arma su un ATTRAVERSAMENTO di soglia normalizzata: la
+#      frequenza e' una MANOPOLA (la finestra n), non una speranza.
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE -- CONGELATI PRIMA DI VEDERE UN NUMERO
+# ---------------------------------------------------------------------
+#  C1  ATTRAVERSAMENTI ESEGUIBILI/GIORNO, per LATO e in somma
+#      >>> somma dei due lati < 2,00  ->  SCARTO IMMEDIATO
+#      (il pavimento del mandato). 2-3 passa al minimo; > 3 preferito.
+#
+#  C2  GIORNI SPAIATI: barre presenti su un simbolo e non sull'altro
+#      (feste americane/europee sfalsate, 4 luglio, Thanksgiving,
+#      Ferragosto, 26 dicembre).
+#      NON e' un cancello: e' il conteggio che dice quanto il segnale e'
+#      sporcato dai calendari. Ma se e' > 10% dei giorni la sonda va
+#      rifatta filtrando quei giorni, e si dichiara.
+#
+#  C3  MFE MEDIANA dal segnale alla convergenza
+#      >>> < 3x spread   ->  SCARTO
+#      >>> 3-6x spread   ->  SOSPESO (e finalmente si misura lo spread
+#                            col Code Base 74148, promosso dal 23/08 e
+#                            MAI usato: e' l'OTTAVA caccia che lo scrive)
+#      >>> > 6x spread   ->  passa
+#      NOTA [SPREAD NON MISURATO]: lo spread BCM su D30EUR / U30USD /
+#      NASUSD NON ESISTE IN REPO. Finche' non gira 74148, C3 e' tarato
+#      su una convenzione, non su una misura. E' dichiarato, non nascosto.
+#
+#  C4  MAE MEDIANA dal segnale alla convergenza
+#      Nessun cancello: dice DOVE puo' stare lo stop senza essere dentro
+#      il rumore (R109, pavimento SL).
+#
+#  C5  RR = C3 / C4
+#      >>> RR < 0,70  ->  SCARTO PER ARITMETICA, senza corsa a tick.
+#      Da p >= 1,075/(RR+1), cancello H8.
+#
+#  C6  QUOTA DI DIVERGENZE CHE NON CONVERGONO entro fine sessione
+#      >>> E' IL NUMERO CHE UCCIDE O SALVA LA TESI.
+#      Se e' alta, non e' convergenza: e' momentum travestito, e muore
+#      con lui l'intera famiglia valore-relativo per il nostro banco.
+#      Soglia congelata: > 40% -> SCARTO. 25-40% -> SOSPESO.
+#
+#  C7  MASSIMO ATTRAVERSAMENTI IN UNA GIORNATA
+#      Taglia InpMaxTradesPerDay SUI DATI.
+#      >>> se  max x 0,65% > 3,25%  (cap rischio aperto C1, firmato il
+#          18/08) il cap giornaliero va nell'EA DAL PRIMO ROUND.
+#
+#  C8  TENUTA MEDIANA in barre + QUOTA SOTTO 60 SECONDI
+#      >>> < 12 barre        ->  SOSPESO (muro d'attrito)
+#      >>> >= 25% sotto 60 s ->  SCARTO PROP (vincolo P5)
+#
+#  C9  GRADIENTE M5 vs M15
+#      Non e' un cancello: e' la conseguenza scomoda del dossier par.5.4
+#      messa alla prova. DERIVATO PRIMA DELLA MISURA: a M15 il candidato
+#      NON dovrebbe arrivare al pavimento (~1/giorno); il bersaglio e'
+#      M5 (~2-3/giorno). SE LA MISURA DICE IL CONTRARIO, LA DERIVAZIONE
+#      E' SBAGLIATA E VA SCRITTO.
+#
+# =====================================================================
+#  DUE RILIEVI TECNICI OBBLIGATORI NELL'EA -- non sono dettagli
+# ---------------------------------------------------------------------
+#  T1  IL SECONDO SIMBOLO SI LEGGE SOLO A BARRA CHIUSA.
+#      Il tester MT5 modella i tick SOLO del simbolo del grafico; del
+#      secondo scarica le barre. Leggere il secondo simbolo a shift 0
+#      significa leggere una barra IN FORMAZIONE = LOOK-AHEAD MASCHERATO.
+#      >>> Entrambe le serie a shift 1, E SI VERIFICA CHE I DUE time[1]
+#          COINCIDANO. Se non coincidono (buco su un simbolo), la barra
+#          si SALTA -- non si riusa la precedente.
+#      Questo controllo e' la differenza fra una misura e un artefatto.
+#
+#  T2  IL RAPPORTO NON E' ADIMENSIONALE PER I PUNTI.
+#      Lo z-score normalizza la SCALA, non il BETA: se il Dow e'
+#      sistematicamente piu' volatile del DAX, il rapporto eredita la
+#      volatilita' del Dow. Per questo il BETA OLS di "Pair Trade"
+#      (beta = correlation(x,y,n)*stdev(y,n)/stdev(x,n)) resta come
+#      SECONDA cella dell'ablazione (InpModoSpread), non si butta.
+#
+#  T3  FORMA UNILATERALE, NON A DUE GAMBE -- ed e' una SCELTA NOSTRA.
+#      A due gambe si pagano DUE spread per UNA convergenza. Qui si
+#      scambia SOLO il simbolo del grafico, usando l'altro come METRO.
+#      La forma a due gambe e' piu' pura statisticamente e piu' cara
+#      operativamente: NON E' STATA MISURATA. Dichiarato.
+#
+# =====================================================================
+#  QUESTA SONDA NON PIAZZA ORDINI.
+#  Come ABTG_SondaM0PB: "Expert Advisor che non fa l'expert". Conta,
+#  misura, e restituisce i numeri C1-C9 in colonna via OnTester (piu'
+#  un CSV riga-per-segnale fuori ottimizzazione). NESSUN OrderSend,
+#  NESSUN magic, NIENTE che possa toccare un conto.
+# =====================================================================
+#
+#  IL BANCO
+# ---------------------------------------------------------------------
+#  SIMBOLO SCAMBIATO   D30EUR   (gamba lead)
+#  SIMBOLO METRO       U30USD   (si legge, NON si scambia)
+#  Le altre due coppie, stessa sonda, file separati quando promossa:
+#    NASUSD scambiato / U30USD metro   <- la coppia piu' co-integrata
+#                                         delle tre, ed e' la stessa
+#                                         nominata da m4rk-lewis
+#    D30EUR scambiato / NASUSD metro   <- controllo
+#
+#  @DAQUANDO 2024.09.26 -- MISURATO, NON IPOTIZZATO: e' il pavimento dei
+#    tick BCM sugli indici, gia' a verbale in 17 file prova di questo
+#    repo. NON e' una data scelta: e' il muro dei dati.
+#    ATTENZIONE, DUE COSE DA MISURARE PRIMA DI FIDARSI:
+#      (a) quel pavimento e' misurato su D30EUR e NASUSD. Su U30USD la
+#          profondita' NON E' STATA VERIFICATA IN QUESTA CACCIA. Se
+#          U30USD parte dopo, la finestra si accorcia per TUTTE E TRE le
+#          coppie -- e mezza finestra che non esiste e' l'errore che sul
+#          driver indici e' gia' costato una volta (2024.01.01 dichiarato,
+#          26/09/2024 reale). Si misura con scarica_storico.ps1.
+#      (b) TETTO DEL TESTER ~100.000 BARRE (CLAUDE.md, 25/08): a M15
+#          bastano per ~4 anni, a M5 per ~1,3 anni. Dal 2024.09.26 a
+#          oggi sono ~1,94 anni: LA CORSA M5 VA SPEZZATA IN DUE TRANCHE
+#          (o accorciata), e va DICHIARATO. La corsa M15 sta dentro.
+#
+#  FINESTRA ORARIA: 14:30 -> 22:00 ORA SERVER BCM
+#    (= 15:30 -> 23:00 italiane; server BCM = ora italiana - 1).
+#    E' la sovrapposizione in cui entrambi i mercati sono liquidi.
+#    NON si converte a tavolino l'ora di chiusura: si sweepa, e si
+#    verifica sull'orologio del server.
+#
+#  MODELLO: OHLC 1-min per la SONDA (si contano eventi su barre chiuse,
+#    non P/L). Nessun verdetto di merito da qui: i verdetti sono a tick.
+#
+# ---------------------------------------------------------------------
+#  Direttive @ NUDE (senza # davanti) SOLO quando l'EA esistera'.
+#  Qui restano COMMENTATE, apposta: questo file NON e' lanciabile, e
+#  deve fallire rumorosamente se qualcuno prova a lanciarlo.
+# ---------------------------------------------------------------------
+# @SIMBOLO  D30EUR
+# @PERIODO  M5
+# @DAQUANDO 2024.09.26
+# @FINOA    2026.06.30
+#
+# ---------------------------------------------------------------------
+#  GLI INPUT PROPOSTI (NOMI NON ANCORA ESISTENTI -- vedi il cartello)
+#  Forma di casa: Nome=valore||start||step||stop||Y/N  (CINQUE campi).
+#  Un pin secco si scrive Nome=valore (senza barre).
+# ---------------------------------------------------------------------
+# --- il metro ---
+# InpSimboloMetro=U30USD                 # si LEGGE, non si scambia (T3)
+# InpModoSpread=0                        # 0 = rapporto y/x  |  1 = beta OLS (T2)
+# InpModoZScore=0                        # 0 = media/stdev   |  1 = mediana/MAD (par.7.1)
+#
+# --- I TRE PARAMETRI VERI DEL MOTORE: qui e solo qui sta lo screening ---
+# InpFinestraN=20||10||5||40||Y          # la MANOPOLA DELLA FREQUENZA (par.5.4)
+# InpSogliaIngressoSigma=1.05||0.75||0.15||1.65||Y
+# InpSogliaUscitaSigma=0.05              # pin: uscita per convergenza
+#
+# --- contenitore (pin secchi nella sonda) ---
+# InpOraInizioServer=14
+# InpMinInizioServer=30
+# InpOraFineServer=22
+# InpBarreMaxTenuta=120                  # taglio a fine sessione: alimenta C6
+# InpLato=0                              # 0=entrambi conta separato | 1=long | 2=short
+# InpScriviCsv=true
+# InpTag=RELATIVO_SONDA
+#
+# =====================================================================
+#  DUE COSE CHE QUESTA SONDA NON PUO' DIRE, E VANNO DETTE
+# ---------------------------------------------------------------------
+#  1. NON dice se il motore GUADAGNA. Dice se ha PORTATA, TAGLIA,
+#     GEOMETRIA e TENUTA sufficienti perche' valga la pena scrivere
+#     l'EA operativo. Il verdetto di merito e' a tick, dopo, e con
+#     >= 150 operazioni IS (Emendamento della Finestra, punto A).
+#  2. NON misura la CO-INTEGRAZIONE. La tesi assume che il rapporto
+#     D30EUR/U30USD sia STAZIONARIO intraday. Quella assunzione NON e'
+#     mai stata verificata in questo progetto, ed e' l'ipotesi piu'
+#     forte del candidato. C6 e' la sua approssimazione operativa.
+#
+#  E LA REGOLA DI SELEZIONE, dichiarata insieme al numero:
+#     CENTRO DELL'ALTOPIANO, MAI IL PICCO. Su tredici misure di
+#     Spearman IS->OOS dodici sono negative, l'ultima (R58) sui tick
+#     reali del nostro broker.
+# =====================================================================

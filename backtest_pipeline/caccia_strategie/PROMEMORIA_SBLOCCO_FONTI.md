@@ -450,3 +450,80 @@ codice MQL5, tutti aggiornati lo stesso giorno**. **Non si parte dai topic.**
 | `papers.ssrn.com` | 🔴 **403 — NONA di fila** |
 | `forexfactory.com` | 🔴 **403 — NONA di fila** |
 | `query1.finance.yahoo.com` · `stooq.com` · `datafeed.dukascopy.com` | 🔴 **403 al CONNECT, tutti e tre** — **nessun agente puo' MISURARE una frequenza da qui** |
+
+## 📅 02/09/2026 — QUARTA BATTUTA (FRONTE A): una diagnosi definitiva su FF e due misure di saturazione
+
+Misurato oggi, non ipotizzato. Dossier:
+`caccia_strategie/CACCIA_FREQUENZA4_GH_TV_FF_2026-09-02.md`.
+
+### 1. 🔴 FOREX FACTORY E' MURATA AL DOMINIO, **NON al trasporto** — e questo chiude la questione
+
+Il §B del 28/08 contiene la lezione preziosa _"GitHub non e' bloccato: e'
+bloccato `curl`"_: li' il blocco stava sul **trasporto**, e `WebFetch` lo
+aggirava. **Le nove dichiarazioni precedenti di "FF 403" erano TUTTE su
+`curl`.** Oggi, prima misura indipendente dal trasporto sullo stesso URL
+(`forexfactory.com/forum/71-trading-systems`):
+
+| trasporto | esito 02/09 |
+|---|---|
+| `curl` | 🔴 **403** (5.469 byte di pagina di blocco) |
+| **`WebFetch`** | 🔴 **403 Forbidden** |
+
+> 📌 **Da scrivere una volta e non riprovare:** _"Forex Factory NON e' il caso
+> GitHub. E' murata al dominio: `curl` e `WebFetch` rendono entrambi 403. Un
+> mandato che assegna 'FF Trading Systems' non e' eseguibile da qui, e va
+> dichiarato come buco — non compensato con la memoria."_
+>
+> ⚠️ **Il costo, che va nominato:** i thread storici di FF sono l'unico posto
+> dove si legge **come una strategia e' INVECCHIATA**. Quell'informazione non
+> ha sostituti fra le fonti vive.
+
+### 2. 📉 TRADINGVIEW: la saturazione ora e' un numero — **28 query su 68 rendono ZERO strategie**
+
+68 query in 7 ondate su angoli mai battuti. **Ventotto rendono zero
+strategie** (rendono indicatori, o niente):
+
+`cointegration` · `hurst exponent` · `kalman filter strategy` ·
+`market profile strategy` · `close after n bars` · `intraday seasonality` ·
+`hour of day strategy` · `multiple trades per day` · `15 min strategy forex` ·
+`gbpusd 15 min` · `intraday range reversion` · `asian range fade` ·
+`news spike fade` · `volatility contraction` · `standard deviation channel` ·
+`half life` · `lead lag` · `spread trading` · `index divergence` (46 risultati,
+**0 strategie**) · `es nq spread` · `beta neutral` ·
+`convergence divergence pairs` · `new york session strategy` ·
+`open range fade` · `vwap deviation strategy` · `quantile` · `tick imbalance` ·
+`cumulative delta strategy`.
+
+➡️ **Regola d'uso aggiornata:** `pubscripts-suggest-json` e' un motore di
+**TITOLI**, e i titoli sul nostro bersaglio sono finiti. Sommato ai 207 del
+01/09 e ai censimenti del 25-31/08, **la resa marginale di un'altra battuta
+TradingView e' bassa e prevedibile.**
+
+### 3. 📉 GITHUB: **quattro ricerche su cinque rendono lo STESSO pool gia' scartato**
+
+Con `api.github.com` murata da **dieci** dossier, l'unico canale resta
+`WebSearch` — che indicizza **il popolare, non il nuovo**. Cinque query nuove
+e mirate (M15+sessione+uscita a tempo, mean reversion M5/M15, pairs/spread,
+arbitraggio statistico, z-score fra due simboli) hanno restituito in
+maggioranza `geraked` · `nyao_scalper` · `santiago-cruzlopez` ·
+`sajidmahamud835` · `coler07` · `NadirAli*` · `abiodunaremu` — **tutti gia'
+scartati fra il 16/08 e il 01/09.**
+
+➡️ **GitHub come giacimento di EA MQL5 e' esaurito per noi.** Le uniche due
+query che hanno prodotto qualcosa di nuovo sono state quelle su un
+**meccanismo** (arbitraggio statistico / z-score fra due simboli), non su un
+**formato** (EA / MQL5 / scalping). 🎯 **Si cerca il meccanismo, non il
+contenitore.**
+
+### 4. Il resto della mappa, rimisurato oggi
+
+| fonte | 02/09/2026 |
+|---|---|
+| `tradingview.com` `pubscripts-suggest-json` | 🟢 **200** (30.538 byte sul bersaglio noto, identico al 01/09) |
+| `pine-facade` `/get/` | 🟢 **200**, `source` in chiaro (controllo positivo su hash reale) |
+| `raw.githubusercontent.com` | 🟢 **200** |
+| GitHub `WebSearch` + `WebFetch` su pagina repo | 🟢 **200** |
+| `forexfactory.com` | 🔴 **403 su DUE trasporti** — vedi §1 |
+| `api.github.com` (ricerca) | 🔴 403 — **DECIMA di fila**, non riprovata |
+| `papers.ssrn.com` | 🔴 403 — decima di fila, non riprovata |
+| `query1.finance.yahoo.com` · `stooq.com` · `datafeed.dukascopy.com` | 🔴 non riprovati (murati tre volte) — **quarta battuta di fila senza poter MISURARE una frequenza** |
