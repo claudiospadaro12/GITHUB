@@ -1,0 +1,332 @@
+# =====================================================================
+#  RSI + EMA CROSSOVER SIGNALS V8 -- PASSO 0: SONDA DI CONTEGGIO
+#  PROVA VERA, M5  --  indici, CONTATORE (nessun ordine)
+#  Pending su incrocio RSI(14)/SMA(RSI,14) + innesco su incrocio
+#  EMA(5)/EMA(20), su barra chiusa
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' L'ESERCIZIO DELLA PORTA DI RIENTRO scritta nella
+#  scheda del verdetto di carta:
+#    caccia_strategie\SCHEDA_RSIEMA_V8_2026-08-31.md
+#  Quella scheda dice NON PROMOSSO (31/08) e, nello stesso respiro,
+#  scrive la porta: "Se si vuole il numero vero: sonda di conteggio
+#  sullo stampo ABTG_SondaM0PB. Criteri da congelare PRIMA: F1 >= 1
+#  segnale/giorno per lato; H8 RR da mediane >= 0,70 (FIRMA 2);
+#  fascia F2 da definire per il simbolo scelto."
+#  Claudio ha chiesto ESPLICITAMENTE E DUE VOLTE (01-02/09/2026) di
+#  MISURARE il candidato invece di lasciarlo morire per analogia coi
+#  suoi parenti. La porta si esercita COSI': criteri congelati PRIMA,
+#  in questo file, e sonda che li stampa gia' applicati.
+#
+#  >>> E I CRITERI QUI SONO PIU' SEVERI DI QUELLI DELLA SCHEDA, non
+#  piu' morbidi: la scheda chiedeva 1,00 segnali/giorno per lato, qui
+#  si chiede ANCHE 2,00 TOTALI (pavimento firmato da Claudio l'01/09)
+#  e la fascia F2, che la scheda lasciava "da definire", e' definita
+#  qui sotto per gli INDICI, con le disuguaglianze scritte per esteso.
+#  Un criterio che si ammorbidisce quando si esercita una porta di
+#  rientro non e' un criterio: e' un favore.
+#
+#  GEMELLA: RSIEMAV8_FREQUENZA_M15.txt. Le DIFFERENZE fra le due sono
+#  DUE e sono dichiarate anche li':
+#    (1) @PERIODO (M5 / M15);
+#    (2) InpBarreOrizzonteLungo, che e' definito in ORE e non in
+#        barre: 96 barre M5 = 8 ore, 32 barre M15 = 8 ore.
+#  Tutto il resto e' IDENTICO, e il gate della riga di lancio verifica
+#  il diff meccanicamente. Due file e non uno perche' il generico
+#  legge @PERIODO dal prova: un @PERIODO overridato da fuori sarebbe
+#  uno stato nascosto.
+#  >>> InpBarreOrizzonte RESTA 12 IN ENTRAMBI, ed e' voluto: il muro
+#  d'attrito congelato e' di 12 BARRE, non di un'ora. Conseguenza da
+#  dichiarare nel referto: su M5 sono 60 minuti, su M15 sono 180. E'
+#  esattamente il gradiente di timeframe (criterio F6 qui sotto), non
+#  un'incoerenza.
+#
+#  FIRME: report\FIRME_2026-08-31.md, FIRMA 2 (cancello H8, E >= 0,075R).
+#         Pavimento di frequenza TOTALE: Claudio, 01/09/2026.
+#  PRECEDENTE DIRETTO: risultati_archivio\REFERTO_SONDAM0PB_2026-08-31.md
+#         (stesso banco, stesso stampo, morto 12/12 al PASSO 0).
+#
+# =====================================================================
+#  ORIGINE E ATTRIBUZIONE -- CASO ANOMALO, E VA LETTO
+# ---------------------------------------------------------------------
+#  Sorgente: Pine v6, 52 righe, intitolato "RSI + EMA Crossover
+#  Signals V8".
+#    AUTORE: IGNOTO (il sorgente non lo dichiara).
+#    PROVENIENZA: INCOLLATO IN CHAT DA CLAUDIO, 01-02/09/2026. Nessun
+#      link, nessuna pagina, nessun identificativo di pubblicazione:
+#      NON e' stato possibile risalire alla fonte, e non si e' finto
+#      di averlo fatto.
+#    LICENZA: NON DICHIARATA. Non e' "libera": e' IGNOTA, che e' una
+#      cosa diversa e piu' vincolante.
+#  CONSEGUENZE, scritte anche in testa a ABTG_SondaRsiEmaV8.mq5:
+#    - il porting esiste per USO INTERNO DI MISURA e basta;
+#    - NON VA REDISTRIBUITO COME ROBA NOSTRA (niente pubblicazione,
+#      niente vendita, niente pacchetti con la nostra firma);
+#    - se un giorno si volesse un EA operativo su questa logica,
+#      PRIMA si ritrova la fonte e si legge la licenza.
+#  Il sorgente NON e' in caccia_strategie\biblioteca\sorgenti\ perche'
+#  lo schema di archiviazione di casa nomina i file con AUTORE e
+#  LICENZA, e qui i due campi non esistono. Se salta fuori la fonte,
+#  si archivia e si aggiornano questo file e la testa del .mq5.
+#
+# =====================================================================
+#  COSA GIRA E COSA NON GIRA
+# ---------------------------------------------------------------------
+#  ABTG_SondaRsiEmaV8 e' un CONTATORE: NESSUN ordine, nessun lotto,
+#  nessun magic, nessuna sedia. Conta segnali per LATO e misura
+#  escursioni in punti indice. Il precedente di casa e' la
+#  SondaMediazione (firma di Claudio del 21/08, "metro, frequenza"),
+#  lo stampo diretto e' ABTG_SondaM0PB (collaudato sul campo il 31/08).
+#
+#  MODELLO DI CORSA: 2 = "Solo prezzi di apertura". Il segnale nasce su
+#  BARRA CHIUSA (V6 del sorgente) e non si apre niente: il tick non
+#  aggiunge informazione e costa ore. E' lo STESSO modello della corsa
+#  M0PB, apposta: il confronto col morto del 31/08 dev'essere diretto.
+#  NOTA DICHIARATA: il generico marca OGNI modello diverso da 4 col
+#  suffisso "_ohlc" nel nome del CSV -- qui la marca si legge
+#  "non-tick", non "OHLC M1".
+#
+#  IL CSV RIGA-PER-SEGNALE NON ESCE IN QUESTO GIRO: la corsa e' in
+#  ottimizzazione (2 passate) e la sonda lo spegne apposta (le passate
+#  si sovrascriverebbero -- trappola gia' scritta nel referto FVGRET).
+#  I numeri si leggono dalle 59 COLONNE OPTFRAME.
+#
+# =====================================================================
+#  IL MOTORE, E PERCHE' NON SI SWEEPA NIENTE
+# ---------------------------------------------------------------------
+#  I quattro numeri della fonte (RSI 14, sua SMA 14, EMA 5, EMA 20)
+#  sono #define DENTRO IL SORGENTE, non input: NON si possono muovere
+#  dalla riga di lancio, e non e' una dimenticanza. In un PASSO 0
+#  sweepare le lunghezze servirebbe solo a PESCARE la cella che fa
+#  passare il pavimento -- e' la regola della seconda caccia (19/08)
+#  letta dall'altro lato: su un motore che il giudizio di carta da'
+#  per morto, un'altra griglia trova solo picchi di rumore. Qui si
+#  misura IL MOTORE DELL'AUTORE, coi SUOI numeri, una volta sola.
+#
+#  L'ORDINE DEGLI EVENTI DENTRO LA BARRA e' la parte delicata del
+#  porting ed e' documentato in V4 del sorgente: ARMA (incrocio RSI),
+#  poi DISARMA (incrocio RSI contrario o incrocio EMA contrario), poi
+#  SEGNALA (pending armato + incrocio EMA nel verso), e il pending che
+#  spara si spegne. Due conseguenze dichiarate PRIMA:
+#    - armamento e segnale POSSONO cadere sulla stessa barra;
+#    - dopo un segnale, un secondo incrocio EMA nello stesso verso NON
+#      spara finche' l'RSI non riarma.
+#  Sei blocchi di autotest su sedici interrogano proprio questa
+#  sequenza.
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE (CONGELATI PRIMA DI OGNI NUMERO)
+# ---------------------------------------------------------------------
+#  F1 - PAVIMENTO DI FREQUENZA, DUE CONDIZIONI IN AND:
+#       (a) segnali TOTALI (long + short) >= 2,00 al giorno di borsa
+#           contato   -> colonna "Segnali Totali Al Giorno"
+#           [pavimento firmato da Claudio, 01/09/2026]
+#       (b) segnali >= 1,00 al giorno PER OGNI LATO
+#           -> colonne "Segnali Long/Short Al Giorno"
+#           [pavimento della scheda del 31/08]
+#       Se cade UNA QUALUNQUE delle due -> MORTO. Niente EA, niente
+#       griglia, niente corsa a tick.
+#       Il verdetto e' calcolato da VerdettoF1_Calc, che l'autotest
+#       esegue sui BORDI ESATTI (1,00 e 2,00 PASSANO).
+#
+#  F2 - TAGLIA DELLA MFE dentro il MURO D'ATTRITO di 12 barre:
+#       mediana della massima escursione FAVOREVOLE dall'ingresso, in
+#       punti indice -> colonne "Mfe Mediano Long/Short Punti Indice".
+#       LE DISUGUAGLIANZE, SENZA SOVRAPPOSIZIONI E SENZA BUCHI
+#       (clausola severa della classe 31/08):
+#         MFE mediana >  7,0 punti  -> VIVO
+#         MFE mediana <  5,0 punti  -> MORTO
+#         MFE mediana fra 5,0 e 7,0 INCLUSI -> VERDETTO SOSPESO
+#       La fascia sospesa NON e' un limbo comodo: e' il caso in cui il
+#       verdetto DIPENDE dallo spread vero, che in repo NON esiste.
+#       Si scioglie MISURANDOLO col Code Base 74148 (RealCost Spread
+#       P95 Logger, promosso il 23/08 e MAI ancora usato), non
+#       discutendone. Marcata [SPREAD NON MISURATO, 74148].
+#       Il verdetto e' calcolato da VerdettoF2_Calc, che l'autotest
+#       esegue su una cella di OGNI fascia E sui due bordi esatti.
+#
+#  F3 - MAE MEDIANA da leggere sempre -> colonne "Mae Mediano ...".
+#       Nessun cancello: e' il DENOMINATORE dell'RR, e da sola dice se
+#       un eventuale stop starebbe sopra o sotto il rumore.
+#
+#  F4 - MURO GIORNALIERO PROP: massimo di segnali in UNA giornata
+#       -> colonne "Max Segnali Giorno ...". E' il numero che taglia
+#       InpMaxTradesPerDay di un eventuale EA sui dati, non a occhio.
+#       ATTENZIONE PROP: se (max segnali giorno) x 0,65% supera il cap
+#       C1 di rischio aperto (3,25%, firmato il 18/08), il cap va
+#       scritto nell'EA DAL PRIMO ROUND, non aggiunto dopo. La sonda
+#       stampa il conto gia' fatto.
+#
+#  H8 - CANCELLO DI ARITMETICA (FIRMA 2 del 31/08, testuale: "Ogni
+#       motore ad alta frequenza entra in flotta SOLO con E >= 0.075R
+#       misurata A TICK. Frequenza sotto questo cancello = portata
+#       finta (DD e costi)."). La sonda restituisce
+#       RR = mediana(MFE)/mediana(MAE) -> colonne "RR Da Mediane".
+#       RR < 0,70 -> MORTO PER ARITMETICA, e NON si spende una corsa a
+#       tick. Tabella congelata: RR 0,36 -> serve WR 79,0% | 0,50 ->
+#       71,7% | 0,70 -> 63,2% | 0,73 -> 62,2% | 1,00 -> 53,8%
+#       -> colonne "Win Rate Necessario ... Pct".
+#
+#  F5 - DUE LATI, SEMPRE E SEPARATI (regola di Claudio del 25/08).
+#       Ogni numero di MERITO ha la sua colonna Long e la sua Short.
+#       L'UNICA colonna aggregata che entra in un cancello e' "Segnali
+#       Totali Al Giorno", e ci entra perche' il pavimento dell'01/09
+#       e' scritto cosi': e' un vincolo di PORTATA, non un merito, e i
+#       due pezzi restano leggibili separati.
+#
+#  F6 - GRADIENTE DI TIMEFRAME, dichiarato prima: la sonda gira su M5
+#       E su M15 (questa prova + la gemella). Attesi piu' segnali e
+#       MFE piu' piccole a M5. Il muro d'attrito resta di 12 BARRE su
+#       entrambi, quindi su M15 copre tre volte piu' tempo: se la MFE
+#       passa F2 solo su M15, il candidato non e' "vivo su M15" -- e'
+#       vivo su un orizzonte tre volte piu' lungo, e va detto cosi'.
+#
+#  ABL - ABLAZIONE (nessun cancello: e' la domanda che la scheda del
+#       31/08 poneva a parole -- "filtro appiccicato sopra trigger
+#       generico" -- e che qui diventa un numero). In OGNI passata
+#       escono, per lato:
+#         "Segnali Nudo"   = i soli incroci EMA, pending ignorato
+#         "Armamenti Rsi"  = i soli incroci RSI/SMA(RSI)
+#         "Pending Attivo" = barre valutate col latch ARMATO
+#         "Segnali"        = il motore completo (porta i cancelli)
+#       LETTURA:
+#         - se Segnali ~ Nudo e Pending Attivo ~ tutte le barre, il
+#           pending non filtra e il motore E' un incrocio di EMA,
+#           cioe' la famiglia SuperWave / Chaos Lyapunov, gia' morta
+#           due volte. Il verdetto di carta risulterebbe CONFERMATO
+#           DA UNA MISURA, che e' un esito diverso e piu' solido;
+#         - se Segnali << Nudo, il pending morde davvero, e la
+#           domanda torna a essere F1 (morde troppo?).
+#
+# =====================================================================
+#  COLLAUDI DA VERIFICARE PRIMA DI LEGGERE QUALUNQUE NUMERO
+# ---------------------------------------------------------------------
+#  - "Autotest Falliti" = 0 su "Autotest Blocchi" = 16.
+#    -1 = NON girato e il file non vale. E il contatore dei blocchi e'
+#    confrontato dal sorgente con un #define: se un blocco sparisce,
+#    l'autotest si dichiara FALLITO da solo.
+#  - "Stato Ambiguo Long" e "Stato Ambiguo Short" = 0. E' l'INVARIANTE
+#    piu' importante di questa sonda e non esisteva nello stampo: il
+#    pending e' un LATCH e non dimentica per decadimento come una
+#    media. La sonda ricostruisce lo stato facendo girare la macchina
+#    DUE VOLTE sulla stessa coda, con semi opposti; se i due esiti
+#    divergono la barra e' ambigua, il segnale NON viene contato (si
+#    tiene il seme pessimista, cioe' si sbaglia CONTRO il candidato) e
+#    il caso finisce in colonna. Se queste due colonne non sono ZERO,
+#    InpWarmupBarre e' troppo corto e i numeri di quella corsa NON
+#    VALGONO.
+#  - "Rsi Divergenza Max" ~ 0 (V1: la traduzione dell'RSI e' giusta;
+#    nella corsa M0PB del 31/08 e' venuta 0,000).
+#  - "Ema Divergenza Max" ~ 0 IN PREZZO (V3: i semi di Pine e di MT5
+#    sono diversi ma decadono; su un indice il residuo deve essere
+#    polvere, < 0,00001).
+#  - "Punto Indice Prezzo" = 1,00 (V9: conversione 100 misurata sui
+#    tre indici; se non viene 1,00 la taglia della MFE e' sbagliata di
+#    un fattore e F2 non si puo' leggere).
+#  - "Barre Saltate Dati" ~ 0.
+#  - "Segnali Scartati Orario" = 0 (InpUsaFinestraOraria = false).
+#  - "Mfe/Mae Non Positive" = 0 nella passata con Modo Prezzo Ingresso
+#    = 1: con l'ingresso all'apertura della prima barra della finestra
+#    le due escursioni sono >= 0 PER COSTRUZIONE. Se non sono zero, la
+#    finestra di misura non parte dove dovrebbe.
+#  - GATE DI DETERMINISMO fra le DUE passate: "Segnali", "Segnali
+#    Nudo", "Armamenti Rsi", "Pending Attivo" e "Giorni Contati"
+#    devono venire IDENTICI (nessuno dipende dal prezzo d'ingresso).
+#    Nella corsa M0PB del 31/08 il gate equivalente e' passato
+#    perfettamente.
+#  - INVARIANTE gratuita: "Segnali" <= "Segnali Nudo" su ogni riga e
+#    ogni lato. Se non fosse vero, il codice sarebbe rotto.
+#
+# =====================================================================
+#  LIMITI DICHIARATI PRIMA (non dopo)
+# ---------------------------------------------------------------------
+#  - FINESTRA: 2024.09.26 -> 2026.06.30, LA STESSA della corsa M0PB e
+#    delle altre corse indici. Il pavimento 2024.09.26 e' MISURATO
+#    (risultati_archivio\REFERTO_SONDA_STORICO_17-08.md). Andare piu'
+#    indietro in open-prices NON e' misurato che si possa: non si
+#    assume, e la coerenza col banco del 31/08 -- che e' il punto di
+#    questo giro -- vale di piu'.
+#  - TETTO ~100.000 BARRE DEL TESTER (regola di casa del 25/08): 21
+#    mesi di M5 possono ECCEDERE il tetto (~1,3 anni a M5). Non si
+#    spezza in tranche: la sonda DICHIARA DA SOLA la finestra
+#    effettiva con "Giorni Contati" e "Barre Valutate", e la firma del
+#    tetto e' "Barre Valutate" IDENTICHE su simboli diversi (checklist
+#    punto 36). F1 e' per-giorno sul denominatore CONTATO, quindi
+#    resta leggibile; il campione ridotto si dichiara nel referto.
+#  - UN SOLO REGIME (toro): questo passo conta OCCASIONI e misura
+#    GEOMETRIE, non merito. Il merito si misura a tick, dopo (R57).
+#  - LE ESCURSIONI SONO LIMITI SUPERIORI. La fonte NON HA USCITE (e'
+#    un indicatore: zero stop, zero take, zero sessione), quindi la
+#    sonda misura 12 barre piene senza nessuna uscita che le tronchi.
+#    * Su F2 la distorsione e' CONSERVATIVA NEL VERSO GIUSTO: se la
+#      MFE misurata qui non passa, quella incassabile passa ancora
+#      meno.
+#    * Su H8 NO, e va detto: anche la MAE e' un limite superiore, le
+#      due distorsioni vanno nello STESSO verso e NON si cancellano in
+#      modo dimostrabile. L'RR misurato qui e' un'INDICAZIONE, e il
+#      cancello si applica SAPENDOLO. Non e' una scusa preparata: e'
+#      scritto prima dei numeri.
+#  - LA SONDA NON SIMULA ESITI: non sa quante volte la MFE sarebbe
+#    stata incassata PRIMA della MAE. Quello e' l'ordine degli eventi
+#    dentro la barra, e lo vede solo il tick.
+#  - CODA NON VALUTATA: per avere l'orizzonte COMPLETO su OGNI segnale
+#    la sonda valuta la barra che sta 96 barre indietro. Le ultime 96
+#    barre della finestra (8 ore) non producono segnali. E' il prezzo
+#    per non avere NESSUNA mediana sporcata da un orizzonte troncato:
+#    su 21 mesi e' trascurabile, ma va detto.
+#  - NESSUN NUMERO DELL'AUTORE E' USATO IN NESSUN PUNTEGGIO: la fonte
+#    non ne dichiara, e se ne dichiarasse resterebbe [NON VERIFICATO].
+#
+# =====================================================================
+#  L'ASSE -- UNO SOLO, E NON E' UNA MANOPOLA DI MERITO
+# ---------------------------------------------------------------------
+#  Il generico RIFIUTA zero assi ("sarebbe un backtest singolo, non un
+#  walk-forward") e la sonda NON ha magic da usare come gemelli.
+#  L'asse e' InpModoPrezzoIngresso, ESATTAMENTE come nella SondaM0PB:
+#    1 = apertura della barra successiva  <- RIGA DEL VERDETTO
+#    0 = chiusura della barra di segnale  <- sensibilita' GRATIS
+#  2 passate utili, non decorative, e in piu' fanno da GATE DI
+#  DETERMINISMO (i conteggi non devono muoversi).
+#  NOTA SUL CRITERIO DI OTTIMIZZAZIONE: la sonda restituisce il numero
+#  di segnali totali e NON PROMUOVE NIENTE. Qui quel numero non
+#  dipende nemmeno dall'asse, quindi le due passate devono restituire
+#  lo STESSO criterio: se differiscono, il determinismo e' rotto.
+#  Nessuna cella di questa corsa va promossa: si LEGGONO le colonne.
+#
+#  IL VERDETTO SI LEGGE SULLA PASSATA CON Modo Prezzo Ingresso = 1.
+#  La passata con 0 e' INFORMATIVA e puo' produrre MFE/MAE negative
+#  (l'ingresso e' fuori dalla finestra di misura): sono contate nelle
+#  colonne "Non Positive" e NON si buttano.
+#
+# =====================================================================
+#  DOVE GIRA
+# ---------------------------------------------------------------------
+#  @SIMBOLO e' il LEAD (U30USD). NASUSD e D30EUR girano con -Simbolo
+#  del generico: override DICHIARATO dal wrapper, supportato dal
+#  generico (il parametro -Simbolo vince sulla direttiva). Sei corse
+#  in tutto: 3 simboli x {M5, M15}. E' IL BANCO IDENTICO alla corsa
+#  M0PB del 31/08, apposta: il confronto col morto di quel giorno
+#  dev'essere diretto e non "quasi".
+#
+#  LA RIGA DI LANCIO NON STA IN QUESTO FILE e non e' stata costruita
+#  qui: la scrive il turno successivo, con l'irm davanti e la riga di
+#  raccolta in coda (REGOLA DELLE RIGHE DI LANCIO, CLAUDE.md).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpBarreOrizzonte=12
+InpBarreOrizzonteLungo=96
+InpModoPrezzoIngresso=1||0||1||1||Y
+InpPuntiPerIndice=100.0
+InpUsaFinestraOraria=false
+InpOraInizioServer=14
+InpOraFineServer=21
+InpWarmupBarre=400
+InpConfrontaMT5=true
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=RSIEMAV8_SONDA
