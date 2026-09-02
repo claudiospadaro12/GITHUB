@@ -1,0 +1,96 @@
+# ATTESE DEL COLLAUDO ENFORCEMENT -- FASE 1 migrazione 100k (conto 50504263)
+# Generato il 2026-09-02 dal piano report/COLLAUDO_ENFORCEMENT_FASE1_2026-09-02.md
+#
+# A COSA SERVE: e' l'elenco MACCHINA-LEGGIBILE delle righe di log che fanno
+# fede nel collaudo dei criteri 5-9. Le righe di lancio (raccolta log, zip sul
+# Desktop del VPS) le scrive il VERIFICATORE: questo file e' il loro INPUT,
+# cosi' il cancello non dipende dall'occhio.
+#
+# FORMATO: CHIAVE | TIPO | TESTO
+#   TIPO = ATTESA   -> deve comparire perche' il criterio sia PASS
+#          VIETATA  -> se compare, ci si ferma
+#          CAMPO    -> riga da cui si estrae un NUMERO
+#   Nei TESTO, <...> sono segnaposto: si cerca per SOTTOSTRINGA, non per uguale.
+#
+# ASCII PURO, nessuna emoji e nessuna lettera accentata: i .ps1 su Windows
+# PowerShell 5.1 del VPS leggono in ANSI (regola di casa del 17/08).
+#
+# ATTENZIONE ORE: le schede Esperti/Giornale sono in ORA LOCALE del VPS
+# (= ora italiana); il grafico e' in ORA SERVER (= italiana meno 1). Le
+# finestre operative sotto sono in ORA SERVER.
+
+#--- PREREQUISITI (canale vivo, conto giusto) ------------------------------
+PRE.FILO      | ATTESA  | [GUARDIAN] filo verificato: 5 GlobalVariable su 5
+PRE.CONTO     | ATTESA  | (conto 50504263)
+PRE.AVVIO     | ATTESA  | [GUARDIAN] avviato. Saldo iniziale=
+PRE.SOGLIE    | ATTESA  | [GUARDIAN] pausa morbida=4.00%  cap rischio aperto=3.25%
+
+#--- CRITERIO 5: la pausa B1 morde ----------------------------------------
+C5.GUARDIAN   | ATTESA  | [GUARDIAN] * PAUSA NUOVI INGRESSI attiva:
+C5.EA         | ATTESA  | INGRESSO BLOCCATO -- PAUSA GIORNALIERA del Guardian (firma B1)
+C5.RIENTRO    | ATTESA  | via libera, il blocco e' rientrato (PAUSA GIORNALIERA
+
+#--- CRITERIO 6: le posizioni aperte restano gestite ----------------------
+# Non ha una riga unica: si verifica su scheda Trade/Storico (SL modificato o
+# parziale eseguito con orario DENTRO la finestra di pausa). La riga sotto e'
+# la promessa che l'include stampa a ogni blocco, ed e' il richiamo del
+# criterio, non la sua prova.
+C6.PROMESSA   | ATTESA  | La posizione eventualmente gia' aperta NON viene toccata.
+
+#--- CRITERIO 7: il cap C1 rifiuta l'ingresso ------------------------------
+C7.GUARDIAN   | ATTESA  | [GUARDIAN] * CAP RISCHIO APERTO attivo:
+C7.EA         | ATTESA  | INGRESSO BLOCCATO -- CAP RISCHIO APERTO raggiunto (firma C1)
+C7.RIENTRO    | ATTESA  | [GUARDIAN] cap rischio aperto rientrato:
+
+#--- CRITERIO 8: fail-open (si prova col CAP, MAI con la PAUSA) ------------
+# PASS = questa riga entro ~120 s (ABTG_BATTITO_TOLLERANZA) dalla rimozione
+# del Guardian dal grafico. L'ora della rimozione la annota Claudio.
+C8.RIENTRO    | ATTESA  | via libera, il blocco e' rientrato (CAP RISCHIO APERTO
+
+#--- CRITERIO 9: 5 giornate di borsa senza blocchi orfani ------------------
+# Ogni riga C9.BLOCCO deve avere, nello STESSO MINUTO, una riga C5.GUARDIAN
+# oppure C7.GUARDIAN che la spieghi. Un blocco senza causa = difetto.
+C9.BLOCCO     | CAMPO   | INGRESSO BLOCCATO --
+C9.RISCHIO    | CAMPO   | rischioAperto=
+# Dal CAMPO C9.RISCHIO si estrae il MASSIMO della settimana: cancello <= 3.25%.
+# CAVEAT DA DICHIARARE SEMPRE INSIEME AL NUMERO:
+#   (a) campionamento ogni 300 s (InpVerbose): i picchi fra due campioni non si vedono;
+#   (b) cecita' sui PENDENTI (buco B6, ABTG_Guardian.mq5 riga 159 cicla solo
+#       PositionsTotal()): e' un LIMITE INFERIORE del rischio impegnato.
+
+#--- RIGHE VIETATE: se compaiono, ci si ferma ------------------------------
+STOP.FILO     | VIETATA | *** FILO ROTTO ***
+STOP.DAILY    | VIETATA | [GUARDIAN] !! PERDITA GIORNALIERA SFONDATA
+STOP.TOTALE   | VIETATA | [GUARDIAN] !!! DD TOTALE SFONDATO
+STOP.AUTOTEST | VIETATA | *** FAIL ***
+
+#--- I CINQUE NOMI EA (il campo <chi> della riga [GUARDIA]) ----------------
+EA.1 | NOME | ABTG_DAX_Apertura_EU
+EA.2 | NOME | ABTG_Dow_Apertura_US
+EA.3 | NOME | ABTG_MaxMinNotte_DAX_Short_Ott
+EA.4 | NOME | ABTG_ORB_Ottimizzato
+EA.5 | NOME | ABTG_SupertrendReversal
+
+#--- FINESTRE IN CUI GLI EA TENTANO DAVVERO DI ENTRARE (ORA SERVER) --------
+# Servono a scegliere quando presidiare: fuori da queste, il silenzio nel log
+# non e' un PASS, e' un NON MISURATO.
+WIN.1 | 07:59       | ABTG_MaxMinNotte_DAX_Short_Ott | TryPlace   | il piu' regolare
+WIN.2 | 08:00-17:30 | ABTG_DAX_Apertura_EU           | MonitorRetest (motore ABTG_RETEST)
+WIN.3 | 14:30-17:30 | ABTG_Dow_Apertura_US           | MonitorRetest (motore ABTG_RETEST)
+WIN.4 | 14:30-21:00 | ABTG_ORB_Ottimizzato           | TryPlace / TryCloseConfirmEntry
+WIN.5 | ogni H2     | ABTG_SupertrendReversal        | Enter (225JPY)
+
+#--- NOMI DELLE GLOBALVARIABLE DEL CANALE (F3: Strumenti > Variabili globali)
+GV.1 | ABTG_PAUSA_GIORNO_50504263      | timestamp accensione pausa B1 (LATCH: non si spegne alzando la soglia)
+GV.2 | ABTG_PAUSA_FINO_50504263        | scadenza dichiarata della pausa
+GV.3 | ABTG_CAP_RISCHIO_50504263       | timestamp ri-timbrato ogni secondo finche' il cap C1 morde; 0 = rientrato
+GV.4 | ABTG_RISCHIO_APERTO_50504263    | rischio aperto in % (informativo)
+GV.5 | ABTG_GUARDIAN_BATTITO_50504263  | battito del guardiano (tolleranza 120 s)
+GV.6 | ABTG_GUARD_50504263_BLOCKDAY    | NON e' del canale: e' il blocco DURO. Se resta timbrato e InpAction=0, il Guardian chiude tutto al primo timer. Si azzera a mano da F3.
+
+#--- DIVIETI DI PROCEDURA (imparati leggendo il codice, non sbagliando) ----
+NO.1 | NON abbassare MAI InpDailyLossPct: con InpAction=0 esegue FlattenAll() su TUTTO il conto.
+NO.2 | La prova del fail-open si fa col CAP, MAI con la PAUSA (due fail-open diversi per disegno).
+NO.3 | Uscita dalla pausa a DUE passi e in QUEST'ORDINE: 1) rimettere InpDailyPausePct=4.0, 2) cancellare GV.1 e GV.2 da F3.
+NO.4 | Un solo Guardian per conto (regola B9): controllare il menu Finestra prima di attaccarne uno.
+NO.5 | In fase 1 NON si ricompila nulla: i binari in campo sono quelli col criterio 4 verde.
