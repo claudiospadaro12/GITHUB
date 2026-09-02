@@ -167,6 +167,44 @@
 //           Resta una domanda per il supporto (report/DOMANDE_SUPPORTO_PROP).
 //           NESSUN EA e' stato modificato: l'accensione per sedia e il valore
 //           del target li firma Claudio (come per P1).
+//  v1.50 -- 02/09/2026. TETTO PER SIMBOLO + LATO (cantiere P0, firmato da
+//           Claudio il 02/09, verbale report/FIRME_2026-09-02.md commit
+//           d3c4887). OPT-IN: default 0 = spento, comportamento identico
+//           a oggi.
+//           PERCHE': il 31/08 cinque EA diversi si sono trovati LONG sul Dow
+//           nello stesso momento. Nessuno aveva sbagliato -- ogni sedia
+//           rispettava il proprio InpMaxPositions, che pero' e' scritto
+//           "per questo magic". Il pile-up di casa e' TRASVERSALE alle
+//           famiglie, e non esisteva una sola riga di codice che guardasse
+//           il CONTO invece della sedia.
+//           CENSIMENTO PRIMA DI SCRIVERE (fase 1 del cantiere): il tetto
+//           "A1" (InpMaxPosSimbolo) esiste gia', COPIATO A MANO e IDENTICO
+//           in 5 EA della famiglia Aperture (DAX_Apertura_EU,
+//           Dow_Apertura_US, Nasdaq_Apertura_US, Apertura_3Ingressi,
+//           Apertura_Marco). Copre gia' due terzi del problema -- posizioni
+//           + pendenti, tutti i magic -- ma conta il TOTALE sul simbolo,
+//           NON per lato: con A1=1 un long e uno short sullo stesso simbolo
+//           (che su conto hedging sono una copertura, non un pile-up) si
+//           bloccherebbero a vicenda. P0 non lo duplica: e' la stessa idea
+//           divisa per lato e messa in UN posto solo, disponibile a tutta
+//           la flotta invece che ai 5 EA che hanno la copia.
+//           COSA HO SCRITTO QUI:
+//           - ABTG_LatoDaTipo_Calc() / ABTG_ContaSimboloLato_Calc() /
+//             ABTG_TettoSimboloLatoRaggiunto_Calc(): NUCLEO PURO, ricevono
+//             le righe di esposizione come argomento -> l'autotest ne passa
+//             di FINTE e prova il conteggio senza conto e senza tester;
+//           - ABTG_LeggiEsposizione() / ABTG_ContaSimboloLato() /
+//             ABTG_TettoSimboloLato_Calc(): il filo che legge il terminale;
+//           - ABTG_GuardiaIngresso() prende TRE argomenti nuovi IN CODA
+//             (tetto=0, lato=0, simbolo=""): le 93 chiamate reali censite
+//             in 65 file passano oggi 2 soli argomenti e restano valide
+//             riga per riga, senza toccare un solo EA;
+//           - motivo 6 nel giornale, con frase DIVERSA da B1/C1: vedi il
+//             commento dentro la guardia (collaudo C9, blocchi orfani).
+//           NESSUN EA e' stato modificato e NESSUN BINARIO CAMBIA: questa
+//           e' una modifica di repository, inerte finche' Claudio non
+//           ricompila (vincolo D1 del verbale). L'accensione per sedia e il
+//           valore del tetto li firma lui, come per P1 e S1.
 //  ASCII puro: niente accenti e niente emoji nelle stringhe.
 #ifndef ABTG_PAUSAGUARDIAN_MQH
 #define ABTG_PAUSAGUARDIAN_MQH
@@ -268,6 +306,7 @@ string ABTG_MotivoTesto(const int motivo)
    if(motivo==4) return("PERDITE CONSECUTIVE OGGI su questa sedia (freno P1)");
    if(motivo==5) return("OBIETTIVO DELLA CHALLENGE GIA' RAGGIUNTO (stop S1) -- "
                         "si riapre SOLO A MANO");
+   if(motivo==6) return("TETTO SIMBOLO+LATO raggiunto (P0)");
    return("nessuno");
   }
 
@@ -959,6 +998,218 @@ bool ABTG_ObiettivoRaggiunto(const double saldo_riferimento,const double target_
 
 //+------------------------------------------------------------------+
 //|                                                                   |
+//|   TETTO PER SIMBOLO + LATO (P0) -- NUCLEO PURO.                    |
+//|                                                                   |
+//|   QUESTA MODIFICA E' INERTE FINCHE' NON SI RICOMPILA. Vive nel     |
+//|   repository; i binari .ex5 gia' in campo sul VPS non cambiano di  |
+//|   una virgola finche' Claudio non li ricompila (vincolo D1 del     |
+//|   verbale report/FIRME_2026-09-02.md). Il forward NON viene         |
+//|   toccato da questo commit.                                        |
+//|                                                                    |
+//|   PERCHE' ESISTE: il pile-up di casa e' TRASVERSALE alle famiglie. |
+//|   Misurato il 31/08: cinque EA diversi, cinque magic diversi, tutti |
+//|   long sul Dow nello stesso momento. Ogni sedia rispettava il       |
+//|   PROPRIO tetto (InpMaxPositions = 1 "per questo magic"): il conto  |
+//|   si e' trovato con cinque volte il rischio previsto su UN solo     |
+//|   sottostante e UN solo lato. Nessuno aveva sbagliato; mancava la   |
+//|   regola che guarda il CONTO invece della sedia.                    |
+//|                                                                    |
+//|   COSA CONTA, detto senza ambiguita':                               |
+//|    - POSIZIONI APERTE  + ORDINI PENDENTI (il buco B6 qui NON si    |
+//|      ripete: un buy stop non ancora scattato e' rischio gia'        |
+//|      impegnato, e va contato PRIMA che diventi una posizione);      |
+//|    - stesso SIMBOLO;                                                |
+//|    - stesso LATO: BUY + BUY_LIMIT + BUY_STOP + BUY_STOP_LIMIT       |
+//|      fanno lato buy; i quattro speculari fanno lato sell. Due       |
+//|      ordini OPPOSTI non si sommano: su conto hedging un buy e un    |
+//|      sell sullo stesso simbolo sono una copertura, non un pile-up;  |
+//|    - TUTTI I MAGIC, compresi quelli che questo EA non conosce e     |
+//|      compreso l'eventuale ordine messo a mano. E' il punto: un      |
+//|      tetto che guardasse solo il proprio magic non avrebbe visto    |
+//|      NIENTE del caso del 31/08.                                     |
+//|                                                                    |
+//|   COSA NON FA (dichiarato, non scoperto dopo):                      |
+//|    - non pesa il RISCHIO: conta le TESTE, non i lotti ne' la        |
+//|      distanza dello stop. Cinque ordini da 0,01 contano cinque      |
+//|      come cinque ordini pieni. Il tetto in percentuale resta        |
+//|      mestiere del cap C1 del Guardian; questo e' un tetto sul       |
+//|      NUMERO, piu' grezzo e piu' difficile da sbagliare;             |
+//|    - non chiude niente e non tocca gli ordini gia' in campo: come   |
+//|      tutta questa guardia, agisce solo sull'AGGIUNTA;               |
+//|    - non conosce le CORRELAZIONI: Dow e Nasdaq restano due          |
+//|      simboli distinti e questo tetto non li somma.                  |
+//|                                                                    |
+//|   NUCLEO PURO anche qui, per lo stesso motivo di P1: il conteggio   |
+//|   vero deve interrogare il terminale, che a tavolino non esiste.    |
+//|   Allora il PENSIERO (che cosa e' "stesso lato", che cosa conta)    |
+//|   sta in funzioni che ricevono le righe COME ARGOMENTO, e           |
+//|   l'autotest gliene passa di FINTE.                                 |
+//+------------------------------------------------------------------+
+
+//--- i due lati. Numeri semplici, non un enum: cosi' non collidono con
+//    niente di gia' definito negli EA che includono questo file.
+#ifndef ABTG_LATO_BUY
+#define ABTG_LATO_BUY    1
+#define ABTG_LATO_SELL  -1
+#define ABTG_LATO_NULLO  0
+#endif
+
+//--- una riga di esposizione gia' letta (posizione O ordine pendente).
+//    E' l'unico "dato" che il nucleo conosce: nessuna funzione di
+//    terminale qui dentro.
+struct ABTG_EspoRiga
+  {
+   string   simbolo;    // POSITION_SYMBOL / ORDER_SYMBOL
+   int      tipo;       // POSITION_TYPE_* oppure ORDER_TYPE_*
+   long     magic;      // tenuto solo per poter PROVARE che non filtra
+  };
+
+//+------------------------------------------------------------------+
+//| Da che parte sta un tipo -- nucleo puro.                          |
+//|                                                                    |
+//| Vale sia per le POSIZIONI sia per gli ORDINI, e non e' una         |
+//| scorciatoia: in MQL5 POSITION_TYPE_BUY e ORDER_TYPE_BUY valgono    |
+//| entrambi 0, POSITION_TYPE_SELL e ORDER_TYPE_SELL entrambi 1.       |
+//| Sono scritti tutti e otto a mano invece che con un "pari/dispari"  |
+//| perche' un giorno qualcuno legge questa funzione e deve capire     |
+//| la regola senza andarsi a ricordare l'ordine dell'enum.            |
+//|                                                                    |
+//| Ritorna ABTG_LATO_NULLO per qualunque altro valore (p.es.          |
+//| ORDER_TYPE_CLOSE_BY): un tipo che non sappiamo leggere NON viene   |
+//| contato, cioe' non blocca. Fail-open, come tutto il resto.         |
+//+------------------------------------------------------------------+
+//| (scritto a if e non a switch di proposito: i valori di POSITION_TYPE|
+//| e di ORDER_TYPE si SOVRAPPONGONO -- 0 e 1 valgono per entrambi --   |
+//| e un switch con due etichette dello stesso valore non compila.)     |
+//+------------------------------------------------------------------+
+int ABTG_LatoDaTipo_Calc(const int tipo)
+  {
+   if(tipo==(int)ORDER_TYPE_BUY             ||  // 0 -- e' anche POSITION_TYPE_BUY
+      tipo==(int)ORDER_TYPE_BUY_LIMIT       ||  // 2
+      tipo==(int)ORDER_TYPE_BUY_STOP        ||  // 4
+      tipo==(int)ORDER_TYPE_BUY_STOP_LIMIT)     // 6
+      return(ABTG_LATO_BUY);
+
+   if(tipo==(int)ORDER_TYPE_SELL            ||  // 1 -- e' anche POSITION_TYPE_SELL
+      tipo==(int)ORDER_TYPE_SELL_LIMIT      ||  // 3
+      tipo==(int)ORDER_TYPE_SELL_STOP       ||  // 5
+      tipo==(int)ORDER_TYPE_SELL_STOP_LIMIT)    // 7
+      return(ABTG_LATO_SELL);
+
+   return(ABTG_LATO_NULLO);
+  }
+
+//+------------------------------------------------------------------+
+//| Quante teste ci sono su simbolo+lato -- nucleo puro.              |
+//| righe[] = posizioni E pendenti gia' letti, in qualunque ordine.    |
+//| Nessun filtro sul magic: e' voluto, ed e' il motivo per cui il     |
+//| campo magic esiste nella struct (serve a provarlo a macchina).     |
+//+------------------------------------------------------------------+
+int ABTG_ContaSimboloLato_Calc(const ABTG_EspoRiga &righe[],
+                               const string simbolo,const int lato)
+  {
+   if(lato==ABTG_LATO_NULLO) return(0);     // lato non dichiarato: non si conta
+   int n=0;
+   for(int i=ArraySize(righe)-1;i>=0;i--)
+     {
+      if(righe[i].simbolo!=simbolo)                    continue;
+      if(ABTG_LatoDaTipo_Calc(righe[i].tipo)!=lato)    continue;
+      n++;
+     }
+   return(n);
+  }
+
+//+------------------------------------------------------------------+
+//| LA DECISIONE -- nucleo puro. true = tetto raggiunto, si rifiuta.  |
+//| tetto_max <= 0 -> SPENTO, sempre false: e' il default neutro, e    |
+//| non e' un'opinione ma un caso di autotest.                         |
+//| Il confronto e' >= : con tetto 1 la PRIMA testa gia' presente      |
+//| chiude la porta alla seconda.                                      |
+//+------------------------------------------------------------------+
+bool ABTG_TettoSimboloLatoRaggiunto_Calc(const ABTG_EspoRiga &righe[],
+                                         const string simbolo,const int lato,
+                                         const int tetto_max)
+  {
+   if(tetto_max<=0)          return(false); // spento (0) o dito storto (<0)
+   if(lato==ABTG_LATO_NULLO) return(false); // lato non dichiarato: no-op
+   return(ABTG_ContaSimboloLato_Calc(righe,simbolo,lato)>=tetto_max);
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                   |
+//|   TETTO SIMBOLO+LATO (P0) -- IL FILO: legge il terminale.          |
+//|                                                                   |
+//+------------------------------------------------------------------+
+
+//--- riempie righe[] con TUTTE le posizioni e TUTTI gli ordini pendenti
+//    del terminale. Ritorna quante righe ha scritto.
+//    Si leggono tutti i simboli e tutti i magic: il filtro lo fa il
+//    nucleo, cosi' la lettura resta una sola e banale da rileggere.
+int ABTG_LeggiEsposizione(ABTG_EspoRiga &righe[])
+  {
+   int n=0;
+   ArrayResize(righe,0);
+
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk<=0) continue;
+      ArrayResize(righe,n+1);
+      righe[n].simbolo=PositionGetString(POSITION_SYMBOL);
+      righe[n].tipo   =(int)PositionGetInteger(POSITION_TYPE);
+      righe[n].magic  =(long)PositionGetInteger(POSITION_MAGIC);
+      n++;
+     }
+
+   // I PENDENTI: e' la meta' che il Guardian (buco B6, ABTG_Guardian.mq5
+   // riga 159) non guarda. Qui si guardano.
+   for(int i=OrdersTotal()-1;i>=0;i--)
+     {
+      ulong tk=OrderGetTicket(i);
+      if(tk<=0) continue;
+      ArrayResize(righe,n+1);
+      righe[n].simbolo=OrderGetString(ORDER_SYMBOL);
+      righe[n].tipo   =(int)OrderGetInteger(ORDER_TYPE);
+      righe[n].magic  =(long)OrderGetInteger(ORDER_MAGIC);
+      n++;
+     }
+
+   return(n);
+  }
+
+//--- quante teste ci sono ADESSO su simbolo+lato (informativo: serve al
+//    giornale e a un eventuale pannello).
+int ABTG_ContaSimboloLato(const string simbolo,const int lato)
+  {
+   ABTG_EspoRiga righe[];
+   ABTG_LeggiEsposizione(righe);
+   return(ABTG_ContaSimboloLato_Calc(righe,simbolo,lato));
+  }
+
+//+------------------------------------------------------------------+
+//| LA FUNZIONE COMMISSIONATA (cantiere P0 del 02/09).                |
+//| true = tetto raggiunto, l'ingresso va RIFIUTATO.                   |
+//|                                                                    |
+//| NOTA SUL NOME: in questo file il suffisso _Calc ha sempre voluto   |
+//| dire "nucleo puro". Qui il nome e la firma sono quelli chiesti dal |
+//| cantiere, ma la funzione LEGGE IL TERMINALE. Il nucleo puro esiste |
+//| e si chiama ABTG_TettoSimboloLatoRaggiunto_Calc(): e' quello che   |
+//| l'autotest interroga. Scritto qui per non lasciare una trappola a  |
+//| chi legge il file fra sei mesi.                                    |
+//+------------------------------------------------------------------+
+bool ABTG_TettoSimboloLato_Calc(const string simbolo,const int lato,
+                                const int tetto_max)
+  {
+   if(tetto_max<=0)          return(false); // spento: nemmeno una lettura
+   if(lato==ABTG_LATO_NULLO) return(false); // lato non dichiarato: no-op
+
+   ABTG_EspoRiga righe[];
+   ABTG_LeggiEsposizione(righe);
+   return(ABTG_TettoSimboloLatoRaggiunto_Calc(righe,simbolo,lato,tetto_max));
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                   |
 //|   LA GUARDIA -- la riga unica da mettere negli EA.                 |
 //|                                                                   |
 //+------------------------------------------------------------------+
@@ -1004,13 +1255,37 @@ bool ABTG_ObiettivoRaggiunto(const double saldo_riferimento,const double target_
 //| motivo di stop DEFINITIVO. Gli altri quattro dicono "non adesso",   |
 //| S1 dice "abbiamo finito".                                           |
 //+------------------------------------------------------------------+
+//| ARGOMENTI NUOVI v1.50 (tetto P0), tutti e tre IN CODA e a default    |
+//| neutro. La compatibilita' non e' una speranza, e' stata contata:     |
+//| 93 chiamate reali in 65 file (mql5/Experts + standalone + Scripts,   |
+//| censimento del 02/09) e TUTTE passano oggi 2 soli argomenti. Con i   |
+//| default qui sotto nessuna di quelle righe cambia comportamento ne'   |
+//| va toccata per compilare -- stesso identico pattern gia' usato per   |
+//| P1 (v1.30, due argomenti in coda) e S1 (v1.40, tre in coda).         |
+//|   tetto_simbolo_lato = 0 -> SPENTO, e nessuna lettura del terminale  |
+//|                       (no-op puro, verificato in autotest);          |
+//|   lato_ingresso      = ABTG_LATO_BUY / ABTG_LATO_SELL, la direzione  |
+//|                       dell'ordine che si sta per mandare. 0          |
+//|                       (default) = non dichiarata -> il tetto non     |
+//|                       puo' decidere, e non decide;                   |
+//|   simbolo_tetto      = "" (default) -> _Symbol. Si passa esplicito   |
+//|                       solo dagli EA multi-simbolo, che operano su    |
+//|                       un simbolo diverso da quello del grafico.      |
+//|                                                                      |
+//| P0 sta DOPO P1 e PRIMA del fail-open sul canale, per lo stesso       |
+//| motivo di P1: non dipende dal Guardian, e' una regola del CONTO e    |
+//| deve valere anche a guardiano spento e dentro il tester.             |
+//+------------------------------------------------------------------+
 bool ABTG_GuardiaIngresso(const bool attiva,const string chi="EA",
                           const bool pretendi_guardian=false,
                           const int soglia_perdite_consecutive=0,
                           const long magic=0,
                           const double saldo_riferimento=0.0,
                           const double obiettivo_pct=0.0,
-                          const bool obiettivo_su_equity=false)
+                          const bool obiettivo_su_equity=false,
+                          const int tetto_simbolo_lato=0,
+                          const int lato_ingresso=ABTG_LATO_NULLO,
+                          const string simbolo_tetto="")
   {
    if(!attiva) return(true);                    // 1. l'utente l'ha spenta
 
@@ -1023,6 +1298,46 @@ bool ABTG_GuardiaIngresso(const bool attiva,const string chi="EA",
    if(soglia_perdite_consecutive>0 &&
       ABTG_TroppePerditeConsecutive(magic,soglia_perdite_consecutive,chi))
       return(false);
+
+   // 1-ter. TETTO SIMBOLO+LATO (P0, opt-in): a tetto 0 o lato non
+   //        dichiarato non si legge nemmeno il terminale.
+   //        LA FRASE DEL GIORNALE E' DIVERSA DA QUELLA DI B1/C1, DI PROPOSITO:
+   //        il collaudo enforcement (backtest_pipeline/attese_enforcement_fase1.txt)
+   //        estrae il CAMPO C9.BLOCCO cercando la sottostringa "INGRESSO
+   //        BLOCCATO --", e pretende che ogni riga cosi' trovata abbia nello
+   //        stesso minuto una riga [GUARDIAN] che la spieghi. Un blocco P0 non
+   //        ce l'ha e non puo' averla (P0 non passa dal Guardian): se usasse
+   //        la stessa frase, il criterio 9 conterebbe un "blocco orfano" e
+   //        segnalerebbe un difetto che non esiste. Qui si scrive INGRESSO
+   //        RIFIUTATO, che non collide con nessuna ATTESA (C5.EA, C7.EA,
+   //        C5/C8.RIENTRO, C6.PROMESSA) ne' con le quattro VIETATE.
+   // stessa igiene di log del freno P1: si scrive al CAMBIO di stato e poi
+   // al massimo una volta ogni ABTG_LOG_OGNI_SEC, perche' questa riga puo'
+   // essere interrogata a ogni tick. (Dichiarate qui e non dentro il blocco
+   // per restare sullo stesso schema delle statiche gia' collaudate piu'
+   // sotto, ultimoMotivo/ultimoLog.)
+   static datetime ultimoLogTetto  =0;
+   static bool     ultimoStatoTetto=false;
+
+   if(tetto_simbolo_lato>0 && lato_ingresso!=ABTG_LATO_NULLO)
+     {
+      string simP0=(StringLen(simbolo_tetto)>0 ? simbolo_tetto : _Symbol);
+      int    nP0  =ABTG_ContaSimboloLato(simP0,lato_ingresso);
+      bool   morde=(nP0>=tetto_simbolo_lato);
+      datetime oraP0=TimeCurrent();
+
+      if(morde && (morde!=ultimoStatoTetto || (oraP0-ultimoLogTetto)>=ABTG_LOG_OGNI_SEC))
+        {
+         PrintFormat("[GUARDIA] %s: INGRESSO RIFIUTATO -- %s. Su %s lato %s ci sono gia' "
+                     "%d fra posizioni e pendenti (tetto %d, TUTTI i magic).",
+                     chi,ABTG_MotivoTesto(6),simP0,
+                     (lato_ingresso==ABTG_LATO_BUY?"BUY":"SELL"),
+                     nP0,tetto_simbolo_lato);
+         ultimoLogTetto=oraP0;
+        }
+      ultimoStatoTetto=morde;
+      if(morde) return(false);
+     }
 
    if(!ABTG_CanaleEsiste()) return(true);       // 2. nessun guardiano su questo conto
 
@@ -1386,13 +1701,152 @@ int ABTG_AutotestObiettivo()
    return(falliti);
   }
 
+//--- aggiunge una riga di esposizione FINTA (posizione o pendente).
+void ABTG_TestEspo(ABTG_EspoRiga &v[],const string simbolo,const int tipo,
+                   const long magic)
+  {
+   int n=ArraySize(v);
+   ArrayResize(v,n+1);
+   v[n].simbolo=simbolo;
+   v[n].tipo   =tipo;
+   v[n].magic  =magic;
+  }
+
+//+------------------------------------------------------------------+
+//| AUTOTEST del TETTO SIMBOLO+LATO (P0, v1.50).                      |
+//| Tutto sul nucleo puro: nessuna posizione, nessun ordine, nessun    |
+//| terminale. E' il motivo per cui il nucleo esiste.                  |
+//+------------------------------------------------------------------+
+int ABTG_AutotestTettoSimboloLato()
+  {
+   int falliti=0;
+   Print("[AUTOTEST] --- TETTO SIMBOLO+LATO (P0, v1.50) ---");
+
+   //--- A) DA CHE PARTE STA UN TIPO --------------------------------
+   ABTG_AutotestCasoInt("POSITION_TYPE_BUY -> lato buy",
+                        ABTG_LatoDaTipo_Calc((int)POSITION_TYPE_BUY),ABTG_LATO_BUY,falliti);
+   ABTG_AutotestCasoInt("POSITION_TYPE_SELL -> lato sell",
+                        ABTG_LatoDaTipo_Calc((int)POSITION_TYPE_SELL),ABTG_LATO_SELL,falliti);
+   ABTG_AutotestCasoInt("ORDER_TYPE_BUY_STOP -> lato buy",
+                        ABTG_LatoDaTipo_Calc((int)ORDER_TYPE_BUY_STOP),ABTG_LATO_BUY,falliti);
+   ABTG_AutotestCasoInt("ORDER_TYPE_BUY_LIMIT -> lato buy",
+                        ABTG_LatoDaTipo_Calc((int)ORDER_TYPE_BUY_LIMIT),ABTG_LATO_BUY,falliti);
+   ABTG_AutotestCasoInt("ORDER_TYPE_BUY_STOP_LIMIT -> lato buy",
+                        ABTG_LatoDaTipo_Calc((int)ORDER_TYPE_BUY_STOP_LIMIT),ABTG_LATO_BUY,falliti);
+   ABTG_AutotestCasoInt("ORDER_TYPE_SELL_STOP -> lato sell",
+                        ABTG_LatoDaTipo_Calc((int)ORDER_TYPE_SELL_STOP),ABTG_LATO_SELL,falliti);
+   ABTG_AutotestCasoInt("ORDER_TYPE_SELL_LIMIT -> lato sell",
+                        ABTG_LatoDaTipo_Calc((int)ORDER_TYPE_SELL_LIMIT),ABTG_LATO_SELL,falliti);
+   ABTG_AutotestCasoInt("ORDER_TYPE_SELL_STOP_LIMIT -> lato sell",
+                        ABTG_LatoDaTipo_Calc((int)ORDER_TYPE_SELL_STOP_LIMIT),ABTG_LATO_SELL,falliti);
+   ABTG_AutotestCasoInt("tipo sconosciuto (CLOSE_BY) -> lato nullo, non conta",
+                        ABTG_LatoDaTipo_Calc((int)ORDER_TYPE_CLOSE_BY),ABTG_LATO_NULLO,falliti);
+
+   //--- B) IL CONTEGGIO --------------------------------------------
+   ABTG_EspoRiga vuoto[];
+   ABTG_AutotestCasoInt("niente in campo -> 0 teste",
+                        ABTG_ContaSimboloLato_Calc(vuoto,"DAX",ABTG_LATO_BUY),0,falliti);
+
+   // solo POSIZIONI
+   ABTG_EspoRiga pos[];
+   ABTG_TestEspo(pos,"DAX",(int)POSITION_TYPE_BUY,111);
+   ABTG_TestEspo(pos,"DAX",(int)POSITION_TYPE_BUY,222);
+   ABTG_AutotestCasoInt("2 POSIZIONI buy sul DAX -> 2 sul lato buy",
+                        ABTG_ContaSimboloLato_Calc(pos,"DAX",ABTG_LATO_BUY),2,falliti);
+   ABTG_AutotestCasoInt("le stesse guardate dal lato SELL -> 0 (i lati sono separati)",
+                        ABTG_ContaSimboloLato_Calc(pos,"DAX",ABTG_LATO_SELL),0,falliti);
+
+   // solo PENDENTI -- il buco B6 che qui NON si ripete
+   ABTG_EspoRiga pend[];
+   ABTG_TestEspo(pend,"DAX",(int)ORDER_TYPE_BUY_STOP,111);
+   ABTG_TestEspo(pend,"DAX",(int)ORDER_TYPE_BUY_LIMIT,222);
+   ABTG_AutotestCasoInt("2 PENDENTI buy e NESSUNA posizione -> 2 (buco B6 chiuso)",
+                        ABTG_ContaSimboloLato_Calc(pend,"DAX",ABTG_LATO_BUY),2,falliti);
+
+   // MISTI, due simboli, due lati, magic diversi
+   ABTG_EspoRiga misto[];
+   ABTG_TestEspo(misto,"DAX",(int)POSITION_TYPE_BUY,      770101);
+   ABTG_TestEspo(misto,"DAX",(int)ORDER_TYPE_BUY_STOP,    770202);
+   ABTG_TestEspo(misto,"DAX",(int)ORDER_TYPE_BUY_LIMIT,   0);        // messo a mano
+   ABTG_TestEspo(misto,"DAX",(int)POSITION_TYPE_SELL,     770303);
+   ABTG_TestEspo(misto,"DAX",(int)ORDER_TYPE_SELL_STOP,   770404);
+   ABTG_TestEspo(misto,"DOW",(int)POSITION_TYPE_BUY,      770505);
+   ABTG_AutotestCasoInt("misto: DAX lato buy -> 3 (1 posizione + 2 pendenti)",
+                        ABTG_ContaSimboloLato_Calc(misto,"DAX",ABTG_LATO_BUY),3,falliti);
+   ABTG_AutotestCasoInt("misto: DAX lato sell -> 2 (il buy non si somma al sell)",
+                        ABTG_ContaSimboloLato_Calc(misto,"DAX",ABTG_LATO_SELL),2,falliti);
+   ABTG_AutotestCasoInt("misto: DOW lato buy -> 1 (l'altro simbolo non conta)",
+                        ABTG_ContaSimboloLato_Calc(misto,"DOW",ABTG_LATO_BUY),1,falliti);
+   ABTG_AutotestCasoInt("misto: simbolo mai visto -> 0",
+                        ABTG_ContaSimboloLato_Calc(misto,"EURUSD",ABTG_LATO_BUY),0,falliti);
+   ABTG_AutotestCasoInt("il conteggio e' TRASVERSALE ai magic (4 magic + 1 a mano)",
+                        ABTG_ContaSimboloLato_Calc(misto,"DAX",ABTG_LATO_BUY),3,falliti);
+   ABTG_AutotestCasoInt("lato non dichiarato (0) -> conteggio 0, non decide",
+                        ABTG_ContaSimboloLato_Calc(misto,"DAX",ABTG_LATO_NULLO),0,falliti);
+
+   //--- C) LA DECISIONE, e prima di tutto il DEFAULT NEUTRO ---------
+   ABTG_AutotestCaso("tetto 0 con 3 teste in campo -> NON frena (default = no-op)",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DAX",ABTG_LATO_BUY,0),false,falliti);
+   ABTG_AutotestCaso("tetto 0 a campo VUOTO -> NON frena",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(vuoto,"DAX",ABTG_LATO_BUY,0),false,falliti);
+   ABTG_AutotestCaso("tetto negativo (dito storto) -> NON frena",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DAX",ABTG_LATO_BUY,-1),false,falliti);
+   ABTG_AutotestCaso("tetto 1 ma lato non dichiarato -> NON frena",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DAX",ABTG_LATO_NULLO,1),false,falliti);
+
+   ABTG_AutotestCaso("tetto 1 a campo VUOTO -> si passa",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(vuoto,"DAX",ABTG_LATO_BUY,1),false,falliti);
+   ABTG_AutotestCaso("tetto 1 con UNA posizione buy -> FRENA (la seconda non entra)",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(pos,"DAX",ABTG_LATO_BUY,1),true,falliti);
+   ABTG_AutotestCaso("tetto 1 con UN SOLO PENDENTE buy -> FRENA lo stesso",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(pend,"DAX",ABTG_LATO_BUY,1),true,falliti);
+   ABTG_AutotestCaso("tetto 3 con ESATTAMENTE 3 teste -> FRENA (il confronto e' >=)",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DAX",ABTG_LATO_BUY,3),true,falliti);
+   ABTG_AutotestCaso("tetto 4 con 3 teste -> si passa (c'e' ancora posto)",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DAX",ABTG_LATO_BUY,4),false,falliti);
+   ABTG_AutotestCaso("tetto 3 sul lato SELL con 2 teste sell -> si passa",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DAX",ABTG_LATO_SELL,3),false,falliti);
+   ABTG_AutotestCaso("tetto 2 sul lato SELL con 2 teste sell -> FRENA",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DAX",ABTG_LATO_SELL,2),true,falliti);
+   ABTG_AutotestCaso("tetto 1 sul DOW mentre il DAX e' pieno -> il DOW passa",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(misto,"DOW",ABTG_LATO_SELL,1),false,falliti);
+
+   // il caso del 31/08 riprodotto: 5 sedie diverse, stesso simbolo, stesso lato
+   ABTG_EspoRiga pileup[];
+   ABTG_TestEspo(pileup,"DOW",(int)POSITION_TYPE_BUY,770201);
+   ABTG_TestEspo(pileup,"DOW",(int)POSITION_TYPE_BUY,770202);
+   ABTG_TestEspo(pileup,"DOW",(int)POSITION_TYPE_BUY,770203);
+   ABTG_TestEspo(pileup,"DOW",(int)ORDER_TYPE_BUY_STOP,770204);
+   ABTG_TestEspo(pileup,"DOW",(int)ORDER_TYPE_BUY_STOP,770205);
+   ABTG_AutotestCasoInt("pile-up del 31/08: 5 sedie long sul Dow -> 5 teste viste",
+                        ABTG_ContaSimboloLato_Calc(pileup,"DOW",ABTG_LATO_BUY),5,falliti);
+   ABTG_AutotestCaso("pile-up del 31/08 con tetto 2 -> la TERZA sedia veniva fermata",
+                     ABTG_TettoSimboloLatoRaggiunto_Calc(pileup,"DOW",ABTG_LATO_BUY,2),true,falliti);
+
+   //--- D) IL MOTIVO NEL GIORNALE, E CHE NON COLLIDA ----------------
+   ABTG_AutotestCaso("motivo 6 = tetto simbolo+lato (testo dedicato)",
+                     (StringFind(ABTG_MotivoTesto(6),"TETTO SIMBOLO+LATO")>=0),true,falliti);
+   ABTG_AutotestCaso("motivo 6 si dichiara P0",
+                     (StringFind(ABTG_MotivoTesto(6),"(P0)")>=0),true,falliti);
+   ABTG_AutotestCaso("motivo 6 NON contiene la frase del collaudo C9 (blocchi orfani)",
+                     (StringFind(ABTG_MotivoTesto(6),"INGRESSO BLOCCATO")>=0),false,falliti);
+   ABTG_AutotestCaso("motivo 6 e' DISTINTO dal motivo 1 (pausa B1)",
+                     (ABTG_MotivoTesto(6)==ABTG_MotivoTesto(1)),false,falliti);
+   ABTG_AutotestCaso("motivo 6 e' DISTINTO dal motivo 2 (cap C1)",
+                     (ABTG_MotivoTesto(6)==ABTG_MotivoTesto(2)),false,falliti);
+   ABTG_AutotestCaso("i motivi 1-5 non sono stati spostati (motivo 5 e' ancora S1)",
+                     (StringFind(ABTG_MotivoTesto(5),"OBIETTIVO")>=0),true,falliti);
+
+   return(falliti);
+  }
+
 int ABTG_AutotestGuardia()
   {
    int falliti=0;
    datetime ORA=(datetime)1000000;        // "adesso" finto, comodo per i conti
    int TOL=120;                           // tolleranza battito dei test
 
-   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.40 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
+   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.50 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
                (long)ORA,TOL);
 
    //--- PAUSA (B1) -------------------------------------------------
@@ -1449,8 +1903,14 @@ int ABTG_AutotestGuardia()
    //--- STOP S1 (v1.40): stessa scelta del P1 -- l'autotest nuovo gira
    //    dentro quello vecchio, cosi' ogni EA che gia' chiama
    //    ABTG_AutotestGuardia() eredita i casi nuovi senza essere toccato.
-   //    Conteggio dei casi: 19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1) = 75.
+   //    Conteggio dei casi: 19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1)
+   //    + 39 (P0, v1.50) = 114.
    falliti+=ABTG_AutotestObiettivo();
+
+   //--- TETTO P0 (v1.50): stessa scelta di P1 e S1 -- l'autotest nuovo gira
+   //    dentro quello vecchio, cosi' ogni EA che gia' chiama
+   //    ABTG_AutotestGuardia() eredita i casi nuovi senza essere toccato.
+   falliti+=ABTG_AutotestTettoSimboloLato();
 
    if(falliti==0) Print("[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.");
    else           PrintFormat("[AUTOTEST] ABTG_PausaGuardian: %d CASI FALLITI -- NON mettere in campo.",falliti);

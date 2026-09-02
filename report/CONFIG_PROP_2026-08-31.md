@@ -415,7 +415,54 @@ RISCHIO       cambia la STRATEGIA se il tetto e' troppo stretto: il grappolo DAX
               default 0 (spento), si accende una sedia per volta
 PRIORITA'     1 -- e' l'unica proposta che tocca una regola HARD BREACH gia' violata dai
               nostri dati, e non e' coperta dal cap C1 in nessuna sua forma
+STATO         🔨 COSTRUITO il 02/09 (cantiere P0, firma del 02/09 mattina).
+              IN ATTESA DI: verificatore + round di ricompilazione.
 ```
+
+### 🔨 P0 — STATO DEL CANTIERE (aggiornato 02/09)
+
+**COSTRUITO, NON IN CAMPO.** La modifica vive in `mql5/Include/ABTG_PausaGuardian.mqh`
+(v1.50) ed e' **inerte finche' non si ricompila**: i binari `.ex5` sul VPS non
+cambiano di una virgola (vincolo D1 del verbale `report/FIRME_2026-09-02.md`).
+Il forward NON e' stato toccato.
+
+**Fase 1 — censimento dell'esistente (fatto PRIMA di scrivere).** Il tetto "A1"
+(`InpMaxPosSimbolo`) **esisteva gia'**, copiato a mano e **identico byte per byte**
+in **5 EA** della famiglia Aperture: `ABTG_DAX_Apertura_EU`, `ABTG_Dow_Apertura_US`,
+`ABTG_Nasdaq_Apertura_US`, `ABTG_Apertura_3Ingressi` (default **0** = spento) e
+`ABTG_Apertura_Marco` (default **1**, ma **EA RITIRATO**). Conta posizioni **+**
+pendenti, su **tutti i magic** — quindi copre gia' due terzi del bersaglio.
+**Quello che NON fa: non divide per LATO.** Conta il totale sul simbolo: con A1=1
+un long e uno short sullo stesso simbolo — che su conto **hedging sono una
+copertura, non un pile-up** — si bloccherebbero a vicenda.
+**Conclusione del cantiere: P0 non duplica A1, lo estende** (stessa idea divisa
+per lato) e lo sposta in **un posto solo**, disponibile a tutta la flotta invece
+che ai 5 EA che ne hanno la copia. A1 resta dov'e': non e' stato toccato nessun EA.
+
+**Fase 2 — cosa e' stato scritto.** Nucleo puro (`ABTG_LatoDaTipo_Calc`,
+`ABTG_ContaSimboloLato_Calc`, `ABTG_TettoSimboloLatoRaggiunto_Calc`) + il filo che
+legge il terminale (`ABTG_LeggiEsposizione`, `ABTG_ContaSimboloLato`,
+`ABTG_TettoSimboloLato_Calc`). Conta **posizioni + pendenti** (il buco **B6** qui
+**non** si ripete), **stesso simbolo**, **stesso lato**, **tutti i magic**.
+Wiring: **3 argomenti in coda** a `ABTG_GuardiaIngresso` (`tetto=0`, `lato=0`,
+`simbolo=""`). Compatibilita' **contata, non sperata**: **93 chiamate reali in 65
+file**, tutte a 2 argomenti oggi — nessun EA cambia comportamento ne' va toccato
+per compilare. **39 casi di autotest** nuovi, agganciati a `ABTG_AutotestGuardia()`
+cosi' ogni EA che gia' lo chiama li eredita.
+
+**Il log non collide.** Un blocco P0 scrive `INGRESSO RIFIUTATO`, **non**
+`INGRESSO BLOCCATO --`: quest'ultima e' la sottostringa con cui il collaudo
+(`backtest_pipeline/attese_enforcement_fase1.txt`) estrae il campo **C9.BLOCCO**
+e pretende una riga `[GUARDIAN]` nello stesso minuto che lo spieghi. P0 non passa
+dal Guardian e quella riga non puo' averla: con la stessa frase, il **criterio 9
+avrebbe contato un "blocco orfano"** e segnalato un difetto inesistente.
+
+**⚠️ COSA RESTA DA FARE — e il rischio gia' scritto sopra vale ancora.** Nessuna
+sedia ha il tetto acceso e **il valore lo firma Claudio**. Il rischio dichiarato
+nella scheda (il grappolo DAX delle 08:15 e' fatto **apposta** di 3 sedie: a 2 se
+ne perde una) **non e' stato risolto dal codice, e' stato solo reso opt-in**:
+prima di stringere serve il **criterio 4** (backtest identico) su un valore alto.
+Il tetto conta le **TESTE, non il rischio**: cinque ordini da 0,01 contano cinque.
 
 ```
 PROPOSTA P1   IL CAP C1 VEDE ANCHE GLI ORDINI PENDENTI
