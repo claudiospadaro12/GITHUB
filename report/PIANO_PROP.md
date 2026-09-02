@@ -975,7 +975,7 @@ Claudio.
 | **Cap C1 → strada (b): l'enforcement E' il cancello della fase 2** | 🔴 **E' la decisione piu' pesante del giorno**: nessun lotto di sedie nuove finche' i criteri 5-9 non sono PASS. **La portata ×3,2 e' subordinata a due sessioni da 45 e 40 minuti** |
 | **EMA200 Dow (881531) → FASE 3, DA SOLA, a meta' settimana** | 🟡 e' **il singolo cambiamento piu' grosso** (33-35 op/mese): le sue giornate storte vanno viste **in isolamento**, altrimenti non si attribuiscono |
 | **GapFill al rientro → MAX 2 simboli il lunedi'** (mai i 5) | 🔴 il **peggior giorno del banco e' il loro cluster** — e i 5 GapFill sono anche **cinque dei 13 muti** (H0): prima si riparano, poi si limita |
-| **D1 — niente ricompilazioni in fase 1** | 🟢 si collauda **esattamente il software che sta in campo**, che e' anche l'unica cosa che il collaudo deve dimostrare. ⚠️ Conseguenza da tenere agli atti: **il 100k NON e' HEAD** (su ORB il binario e' del pin, HEAD ha `v1.02 InpSLBufferPts` a default neutro) e **l'autotest congelato dice 19 casi**, mentre su HEAD sono **75** (marcatore `v1.40`): se un giorno si ricompila, **il criterio 2 e il criterio 4 vanno rifatti e il cancello aggiornato PRIMA dei numeri** |
+| **D1 — niente ricompilazioni in fase 1** | 🟢 si collauda **esattamente il software che sta in campo**, che e' anche l'unica cosa che il collaudo deve dimostrare. ⚠️ Conseguenza da tenere agli atti: **il 100k NON e' HEAD** (su ORB il binario e' del pin, HEAD ha `v1.02 InpSLBufferPts` a default neutro) e **l'autotest congelato dice 19 casi**, mentre su HEAD sono **114** (marcatore `v1.51`): se un giorno si ricompila, **il criterio 2 e il criterio 4 vanno rifatti e il cancello aggiornato PRIMA dei numeri**. 🔄 **Aggiornato il 02/09 sera** (commit `e72546e`): l'include e' passato a **v1.51** e l'autotest da 75 a **114 casi** = **19** (B1/C1/battito/decisione) **+ 26** (P1) **+ 30** (S1) **+ 39** (P0, il tetto simbolo+lato di C8). Il cancello del pacchetto di collaudo (**R5 / criterio 2**) e' **gia' stato allineato dal verificatore a 114/`v1.51`**. ✅ **Il "19/19" dei binari IN CAMPO resta INVARIATO**: quelli sono `v1.20`, e il criterio 2 e' verde **per loro** — il 114 e' il numero che il cancello dovra' pretendere **solo dopo** un eventuale round di ricompilazione |
 | **D2 — si' al canarino** | ✅ **fatto e verde**: `mql5/Scripts/ABTG_CanarinoGuardian.mq5`, sola lettura per costruzione (nessun `OrderSend`, nessun `CTrade`), **8/8 autotest in campo** sul 100k il 02/09. ⚠️ Limite dichiarato: prova **il canale e l'include**, **non** che i 5 binari chiamino la guardia — quella prova resta la riga `[GUARDIA]` di un EA vero |
 
 🐤 **Cosa ha gia' consegnato la prima corsa del canarino** (02/09, 07:56
@@ -1414,8 +1414,11 @@ la leggevamo **al contrario**: la riga _"5,85% = hard breach"_ e' **ritirata**,
 e il breach vero e' **−10,67% su simbolo+lato** (H5 → C8); **(3)** il picco di
 rischio del cancello di fase 1 e' un **LIMITE INFERIORE** (300 s + pendenti,
 B11); **(4)** **il 100k non e' HEAD** e l'autotest congelato dice **19 casi**
-mentre HEAD ne ha **75** — se un giorno si ricompila, il cancello va aggiornato
-**prima** dei numeri (H10-bis).
+mentre HEAD ne ha **114** (marcatore `v1.51`, aggiornato il **02/09 sera** col
+commit `e72546e`: 19 + 26 P1 + 30 S1 + **39 P0**) — se un giorno si ricompila,
+il cancello va aggiornato **prima** dei numeri (H10-bis). ✅ Il **19/19 dei
+binari in campo (`v1.20`) resta invariato**, e il cancello del pacchetto di
+collaudo e' gia' allineato a 114/`v1.51` dal verificatore.
 
 _(conteggio precedente, v16.1)_ **v16.1 (31/08 notte): conteggi dei PARAMETRI invariati — 46 (12C · 18P ·
 15A · 1 chiuso)**, perche' la MOSSA 1 non ha cambiato nessun valore: ha prodotto
