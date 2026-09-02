@@ -45,6 +45,17 @@
 //|       del criterio 9 conterebbe blocchi che nessun EA ha mai      |
 //|       subito -- cioe' il collaudo si racconterebbe una bugia.     |
 //|       TUTTE le righe di qui iniziano con "[CANARINO]".            |
+//|       E LO STESSO VALE PER IL TOKEN DI FALLIMENTO DEL PROPRIO     |
+//|       AUTOTEST (v1.01): l'artefatto ha una riga VIETATA           |
+//|       STOP.AUTOTEST che cerca la sottostringa "*** FAIL ***",     |
+//|       prodotta da ABTG_AutotestCaso() dell'include (riga 1074).   |
+//|       Il prefisso "[CANARINO]" NON protegge, perche' la ricerca   |
+//|       e' per SOTTOSTRINGA e non per inizio riga: un blocco rosso  |
+//|       del canarino verrebbe letto come "l'autotest dell'include   |
+//|       e' rotto, fermare tutto" -- allarme vero ma sull'artefatto  |
+//|       SBAGLIATO, proprio mentre la fase 1 vieta di ricompilare.   |
+//|       Percio' qui il fallimento si chiama "*** ROSSO CANARINO ***"|
+//|       e non collide con nessun testo dell'artefatto.              |
 //|       CONSEGUENZA DICHIARATA: e' per questo che il canarino NON   |
 //|       chiama ABTG_GuardiaIngresso() come proponeva l'R4, ma       |
 //|       ricalcola con le funzioni _Calc che quella stessa funzione  |
@@ -79,6 +90,20 @@
 //  v1.00 -- 02/09/2026. Prima stesura (P-C1 / D2). NON compilata in
 //           sessione: qui non esistono MetaEditor ne' Strategy Tester.
 //           La compilazione e la prima corsa le fa Claudio.
+//  v1.01 -- 02/09/2026, dalla verifica pre-invio. Due correzioni
+//           MECCANICHE, nessun cambio di contratto e nessuna misura
+//           diversa:
+//           1) il token di fallimento dell'autotest era "*** FAIL ***",
+//              che e' ESATTAMENTE la riga VIETATA STOP.AUTOTEST
+//              dell'artefatto attese_enforcement_fase1.txt (la produce
+//              ABTG_AutotestCaso() dell'include). Rinominato in
+//              "*** ROSSO CANARINO ***": il verdetto e' identico, ma
+//              non si spaccia piu' per un fallimento dell'include.
+//           2) il separatore dei titoli era una riga VUOTA, e smentiva
+//              l'invariante dichiarata "tutte le righe iniziano con
+//              [CANARINO]". Ora l'invariante e' vera alla lettera e
+//              diventa collaudabile: contare le righe del referto che
+//              iniziano con [CANARINO] deve dare TUTTE le righe.
 #property script_show_inputs
 #property strict
 #property description "CANARINO DEL GUARDIAN (P-C1, firma D2 del 02/09/2026): SOLA LETTURA."
@@ -92,7 +117,7 @@
 //====================================================================
 //  COSTANTI
 //====================================================================
-#define CANARINO_VERSIONE           "v1.00"
+#define CANARINO_VERSIONE           "v1.01"
 #define CANARINO_BLOCCHI_ATTESI     8          // autotest: blocchi eseguiti = attesi
 #define CANARINO_LOGIN_COLLAUDO     50504263   // il 100k della fase 1
 
@@ -148,7 +173,9 @@ void Riga(const string testo)
 
 void Titolo(const string testo)
   {
-   Riga("");
+   Riga("[CANARINO]");     // separatore: mai una riga VUOTA, altrimenti
+                           // l'invariante "ogni riga inizia con [CANARINO]"
+                           // non e' piu' vera e non si puo' collaudare.
    Riga("[CANARINO] ==================================================================");
    Riga("[CANARINO] "+testo);
   }
@@ -343,7 +370,7 @@ int AutotestCanarino()
       Rilievo("BLOCCO 1 FALLITO: ABTG_GVNome NON produce piu' 'radice_login'. IL CANALE E' ROTTO.");
      }
    Riga(StringFormat("[CANARINO] AUTOTEST 1 pattern dei nomi (radice_login) su 5 radici: %s",
-                     (falliti==0 ? "PASS" : "*** FAIL ***")));
+                     (falliti==0 ? "PASS" : "*** ROSSO CANARINO ***")));
 
    //--- BLOCCO 2: i nomi generati combaciano con quelli SCRITTI A MANO
    //    nell'artefatto attese_enforcement_fase1.txt (righe GV.1-GV.6)?
@@ -367,7 +394,7 @@ int AutotestCanarino()
          Rilievo(StringFormat("BLOCCO 2 FALLITO: %d nomi su 6 NON combaciano con l'artefatto attese_enforcement_fase1.txt. RENAME SILENZIOSO DELL'INCLUDE.",b2_diff));
         }
       Riga(StringFormat("[CANARINO] AUTOTEST 2 confronto coi 6 nomi HARDCODED dell'artefatto: %s (%d differenze)",
-                        (b2_diff==0 ? "PASS" : "*** FAIL ***"),b2_diff));
+                        (b2_diff==0 ? "PASS" : "*** ROSSO CANARINO ***"),b2_diff));
      }
    else
      {
@@ -388,7 +415,7 @@ int AutotestCanarino()
    if(b3_a || !b3_b || b3_c || b3_d)
      { falliti++; Rilievo("BLOCCO 3 FALLITO: ABTG_PausaAttiva_Calc non risponde come il collaudo si aspetta."); }
    Riga(StringFormat("[CANARINO] AUTOTEST 3 nucleo PAUSA B1 (4 casi): %s",
-                     ((!b3_a && b3_b && !b3_c && !b3_d) ? "PASS" : "*** FAIL ***")));
+                     ((!b3_a && b3_b && !b3_c && !b3_d) ? "PASS" : "*** ROSSO CANARINO ***")));
 
    //--- BLOCCO 4: nucleo del CAP C1, compreso il fail-open per anzianita'
    //    del timbro (e' il meccanismo che il criterio 8 va a provare).
@@ -400,7 +427,7 @@ int AutotestCanarino()
    if(b4_a || !b4_b || b4_c)
      { falliti++; Rilievo("BLOCCO 4 FALLITO: ABTG_CapAttivo_Calc non scade piu' per anzianita': IL FAIL-OPEN DEL CAP NON C'E'."); }
    Riga(StringFormat("[CANARINO] AUTOTEST 4 nucleo CAP C1 + fail-open (3 casi): %s",
-                     ((!b4_a && b4_b && !b4_c) ? "PASS" : "*** FAIL ***")));
+                     ((!b4_a && b4_b && !b4_c) ? "PASS" : "*** ROSSO CANARINO ***")));
 
    //--- BLOCCO 5: nucleo del BATTITO (Guardian vivo).
    blocchi++;
@@ -411,7 +438,7 @@ int AutotestCanarino()
    if(b5_a || !b5_b || b5_c)
      { falliti++; Rilievo("BLOCCO 5 FALLITO: ABTG_GuardianVivo_Calc non distingue piu' un guardiano morto."); }
    Riga(StringFormat("[CANARINO] AUTOTEST 5 nucleo BATTITO (3 casi): %s",
-                     ((!b5_a && b5_b && !b5_c) ? "PASS" : "*** FAIL ***")));
+                     ((!b5_a && b5_b && !b5_c) ? "PASS" : "*** ROSSO CANARINO ***")));
 
    //--- BLOCCO 6: la DECISIONE completa e la sua precedenza (pausa prima
    //    del cap). E' il numero che il canarino stampa in campo: se qui
@@ -426,7 +453,7 @@ int AutotestCanarino()
    if(b6_libero!=0 || b6_pausa!=1 || b6_cap!=2 || b6_ent!=1 || b6_morto!=3)
      { falliti++; Rilievo("BLOCCO 6 FALLITO: ABTG_MotivoStop_Calc ha cambiato numeri o precedenza."); }
    Riga(StringFormat("[CANARINO] AUTOTEST 6 decisione completa e precedenza (5 casi): %s [libero=%d pausa=%d cap=%d entrambi=%d morto=%d]",
-                     ((b6_libero==0 && b6_pausa==1 && b6_cap==2 && b6_ent==1 && b6_morto==3) ? "PASS" : "*** FAIL ***"),
+                     ((b6_libero==0 && b6_pausa==1 && b6_cap==2 && b6_ent==1 && b6_morto==3) ? "PASS" : "*** ROSSO CANARINO ***"),
                      b6_libero,b6_pausa,b6_cap,b6_ent,b6_morto));
 
    //--- BLOCCO 7: le DUE FRASI che il verificatore cerca nei log degli EA
@@ -445,7 +472,7 @@ int AutotestCanarino()
               "cercate dall'artefatto. Le righe di raccolta del collaudo troverebbero ZERO blocchi.");
      }
    Riga(StringFormat("[CANARINO] AUTOTEST 7 frasi C5.EA/C7.EA prodotte dall'include: %s",
-                     (b7_ok ? "PASS" : "*** FAIL ***")));
+                     (b7_ok ? "PASS" : "*** ROSSO CANARINO ***")));
    Riga(StringFormat("[CANARINO] AUTOTEST 7    motivo 1 = '%s'",b7_t1));
    Riga(StringFormat("[CANARINO] AUTOTEST 7    motivo 2 = '%s'",b7_t2));
 
@@ -460,7 +487,7 @@ int AutotestCanarino()
    if(!b8_ok)
      { falliti++; Rilievo("BLOCCO 8 FALLITO: PctSuEquity_Calc sbaglia i casi degeneri (equity 0 o negativa)."); }
    Riga(StringFormat("[CANARINO] AUTOTEST 8 aritmetica delle percentuali (5 casi): %s",
-                     (b8_ok ? "PASS" : "*** FAIL ***")));
+                     (b8_ok ? "PASS" : "*** ROSSO CANARINO ***")));
 
    //--- IL CONTROLLO SUL CONTROLLO: i blocchi eseguiti sono quelli attesi?
    if(blocchi!=CANARINO_BLOCCHI_ATTESI)
