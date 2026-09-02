@@ -94,3 +94,31 @@ NO.2 | La prova del fail-open si fa col CAP, MAI con la PAUSA (due fail-open div
 NO.3 | Uscita dalla pausa a DUE passi e in QUEST'ORDINE: 1) rimettere InpDailyPausePct=4.0, 2) cancellare GV.1 e GV.2 da F3.
 NO.4 | Un solo Guardian per conto (regola B9): controllare il menu Finestra prima di attaccarne uno.
 NO.5 | In fase 1 NON si ricompila nulla: i binari in campo sono quelli col criterio 4 verde.
+
+#--- NOTE PER IL ROUND DI RICOMPILAZIONE (non sono attese della FASE 1) -----
+# Aggiunte il 02/09 dal verificatore, verificando ABTG_PausaGuardian.mqh v1.50.
+# In fase 1 nessuna di queste righe puo' comparire (i binari in campo sono
+# v1.20): servono a chi apre il round, perche' il cancello si aggiorni PRIMA
+# dei numeri e non dopo.
+#
+# ROUND.AUTOTEST -- dopo la ricompilazione l'autotest stampa 114 casi
+#   (19 B1/C1/battito/decisione + 26 P1 + 30 S1 + 39 P0) e il marcatore
+#   "[AUTOTEST] ABTG_PausaGuardian v1.51". Il criterio 2 congelato dice
+#   "19/19" ed e' giusto per i binari IN CAMPO: NON confrontare i due numeri
+#   senza dichiarare quale binario si sta guardando.
+#
+# ROUND.P0 -- il tetto simbolo+lato (P0, default SPENTO) rifiuta con la riga
+#   "[GUARDIA] <chi>: INGRESSO RIFIUTATO -- TETTO SIMBOLO+LATO raggiunto (P0)."
+#   La frase e' DIVERSA da "INGRESSO BLOCCATO --" APPOSTA: quella e' il CAMPO
+#   C9.BLOCCO, che pretende una riga [GUARDIAN] nello stesso minuto, e un
+#   rifiuto P0 non passa dal Guardian e non potrebbe averla. Verificato in
+#   modo esaustivo (17.472 righe rese sui domini reali dei segnaposto):
+#   nessuna riga P0 contiene una sottostringa ATTESA, VIETATA o CAMPO.
+#   -> un "INGRESSO RIFIUTATO" NON e' un blocco orfano e NON si conta in C9.
+#
+# ROUND.PRECEDENZA -- P0 (come P1 e S1) decide PRIMA del blocco B1/C1 e ritorna
+#   subito. Finche' P0 morde, le righe di RIENTRO attese dal collaudo
+#   (C7.RIENTRO, C8.RIENTRO: "via libera, il blocco e' rientrato (...)") sono
+#   RIMANDATE, non perse. -> se si collauda il cap C1 o il fail-open, il tetto
+#   P0 va tenuto a 0 sulla sedia di prova, altrimenti il criterio 8 puo'
+#   bocciare per un motivo che non e' suo.

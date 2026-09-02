@@ -205,6 +205,27 @@
 //           e' una modifica di repository, inerte finche' Claudio non
 //           ricompila (vincolo D1 del verbale). L'accensione per sedia e il
 //           valore del tetto li firma lui, come per P1 e S1.
+//  v1.51 -- 02/09/2026, DALLA VERIFICA PRE-ROUND del v1.50. Una correzione
+//           sola, a comportamento invariato, e il marcatore alzato perche'
+//           il codice e' cambiato DOPO che v1.50 era gia' citato altrove
+//           (un file che cambia senza cambiare versione e' la trappola
+//           "stesso numero, byte diversi"):
+//           - ABTG_GuardiaIngresso() decideva il tetto con la regola
+//             RISCRITTA A MANO (nP0>=tetto). Adesso legge il terminale UNA
+//             volta e passa dal nucleo puro (ABTG_ContaSimboloLato_Calc +
+//             ABTG_TettoSimboloLatoRaggiunto_Calc), cioe' dalle funzioni che
+//             i 39 casi collaudano davvero. Esito identico caso per caso --
+//             cambia che adesso l'autotest COPRE la riga che gira.
+//           NOTA: ABTG_TettoSimboloLato_Calc() resta l'API pubblica a un
+//           colpo per chi vuole la sola decisione (legge il terminale da
+//           se'); la guardia non la usa perche' le serve anche il CONTEGGIO
+//           per il giornale, e con una lettura sola lo ottiene.
+//           CONTEGGIO DELL'AUTOTEST, per il cancello del collaudo:
+//           19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1) + 39 (P0) = 114
+//           casi, marcatore stampato "v1.51". Il criterio 2 del pacchetto
+//           COLLAUDO_ENFORCEMENT_FASE1 congela "19/19" sui binari IN CAMPO
+//           (v1.20): resta valido per quelli, e va aggiornato a 114/v1.51
+//           SOLO nel round di ricompilazione, dichiarandolo PRIMA dei numeri.
 //  ASCII puro: niente accenti e niente emoji nelle stringhe.
 #ifndef ABTG_PAUSAGUARDIAN_MQH
 #define ABTG_PAUSAGUARDIAN_MQH
@@ -1322,8 +1343,21 @@ bool ABTG_GuardiaIngresso(const bool attiva,const string chi="EA",
    if(tetto_simbolo_lato>0 && lato_ingresso!=ABTG_LATO_NULLO)
      {
       string simP0=(StringLen(simbolo_tetto)>0 ? simbolo_tetto : _Symbol);
-      int    nP0  =ABTG_ContaSimboloLato(simP0,lato_ingresso);
-      bool   morde=(nP0>=tetto_simbolo_lato);
+      // UNA sola lettura del terminale, poi SIA il conteggio SIA la decisione
+      // passano dal NUCLEO PURO -- che e' esattamente quello che i 39 casi di
+      // autotest interrogano. CORREZIONE DEL VERIFICATORE (02/09): qui prima
+      // c'era 'morde=(nP0>=tetto_simbolo_lato)', la regola del tetto RISCRITTA
+      // A MANO. Il risultato era lo stesso (verificato caso per caso), ma
+      // l'autotest verde NON copriva la riga che gira davvero: bastava che un
+      // domani il nucleo cambiasse (p.es. da >= a >) perche' i 39 casi
+      // restassero verdi mentre il campo si comportava in un altro modo.
+      // Codice duplicato = bug duplicati: e' la lezione del FIX 3 di
+      // GoldenCross, scritta in testa a questo stesso file.
+      ABTG_EspoRiga righeP0[];
+      ABTG_LeggiEsposizione(righeP0);
+      int    nP0  =ABTG_ContaSimboloLato_Calc(righeP0,simP0,lato_ingresso);
+      bool   morde=ABTG_TettoSimboloLatoRaggiunto_Calc(righeP0,simP0,lato_ingresso,
+                                                       tetto_simbolo_lato);
       datetime oraP0=TimeCurrent();
 
       if(morde && (morde!=ultimoStatoTetto || (oraP0-ultimoLogTetto)>=ABTG_LOG_OGNI_SEC))
@@ -1846,7 +1880,7 @@ int ABTG_AutotestGuardia()
    datetime ORA=(datetime)1000000;        // "adesso" finto, comodo per i conti
    int TOL=120;                           // tolleranza battito dei test
 
-   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.50 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
+   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.51 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
                (long)ORA,TOL);
 
    //--- PAUSA (B1) -------------------------------------------------
@@ -1904,7 +1938,9 @@ int ABTG_AutotestGuardia()
    //    dentro quello vecchio, cosi' ogni EA che gia' chiama
    //    ABTG_AutotestGuardia() eredita i casi nuovi senza essere toccato.
    //    Conteggio dei casi: 19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1)
-   //    + 39 (P0, v1.50) = 114.
+   //    + 39 (P0, v1.50) = 114. E' il numero che il CANCELLO del criterio 2
+   //    dovra' pretendere dopo il round di ricompilazione (marcatore v1.51):
+   //    sui binari in campo, che sono v1.20, il cancello congelato resta 19.
    falliti+=ABTG_AutotestObiettivo();
 
    //--- TETTO P0 (v1.50): stessa scelta di P1 e S1 -- l'autotest nuovo gira

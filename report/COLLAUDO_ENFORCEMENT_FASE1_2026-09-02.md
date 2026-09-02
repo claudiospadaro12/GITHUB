@@ -43,7 +43,7 @@ fallisce ferma la migrazione.**
 | # | criterio (testo congelato) | stato | riferimento agli atti |
 |---|---|---|---|
 | 1 | «49/49 file compilano, 0 errori» | ✅ **VERDE 19/08 15:43** | `guardian_REFERTO_FASE0_2026-08-19.txt` — 49/49 compilati ADESSO; i 2 warning su PTE erano **pre-esistenti** al pin `2458b33` |
-| 2 | «autotest: 19/19 casi PASS» | ✅ **VERDE 19/08 15:49-15:52** (PC di backtest, conto 50503392, Guardian **disarmato**) | referto 19/08 §ESITI. ⚠️ vedi **R5**: su HEAD i casi oggi sono **75**, non 19 |
+| 2 | «autotest: 19/19 casi PASS» | ✅ **VERDE 19/08 15:49-15:52** (PC di backtest, conto 50503392, Guardian **disarmato**) | referto 19/08 §ESITI. ⚠️ vedi **R5**: su HEAD i casi oggi sono **114** (marcatore `v1.51`), non 19 |
 | 3 | «filo verificato: 5/5 nomi coincidono» | ✅ **VERDE due volte**: 19/08 15:49 sul PC (50503392) **e** 19/08 23:10 sul **100k (50504263)** | referto 19/08, §VERIFICA FINALE DOPO IL RIAVVIO |
 | 4 | «backtest identico al centesimo prima/dopo» | ✅ **VERDE 19/08 15:56** — 8 confronti su 8 identici (Profit, PF, Equity DD %, Trades), ricontrollati con diff byte-a-byte | `guardian_REFERTO_CRITERIO4_2026-08-19.txt` |
 | 5 | «pausa B1: il giornale dell'EA la nomina e l'ordine non parte» | 🟡 **DA COLLAUDARE** | procedura §2.3 |
@@ -500,16 +500,28 @@ prova resta la riga `[GUARDIA]` di un EA vero. Servono entrambi._
 > 🚫 **Scelta di progetto da conoscere prima di leggere i log:** il canarino **non** stampa il prefisso `[GUARDIA]` né la frase di blocco degli EA (tutte le sue righe iniziano con `[CANARINO]`), altrimenti il censimento del criterio 9 conterebbe blocchi che nessun EA ha subito.
 > 🟡 **Stato: COSTRUITO, IN ATTESA DI VERIFICATORE — non compilato** (qui non esistono MetaEditor né tester) e mai eseguito: prima corsa a mano di Claudio, come ogni artefatto nuovo.
 
-**R5 — Il conteggio dell'autotest e' cambiato: 19 → 75.** Il criterio 2 congela
-«19/19». Nel codice di HEAD (`ABTG_AutotestGuardia`, riga 1452) il conto e'
-**19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1) = 75**, e il marcatore
-stampato e' **`v1.40`**, non `v1.20`. Il **BLOCCO 2** delle righe del 19/08
-cerca `"[AUTOTEST] ABTG_PausaGuardian v1.20"` e pretende **esattamente 19** casi:
-🔴 **su HEAD fallirebbe, e fallirebbe dicendo la cosa sbagliata** ("log troncato").
+**R5 — Il conteggio dell'autotest e' cambiato: 19 → 75 → 114.** Il criterio 2
+congela «19/19». Nel codice di HEAD (`ABTG_AutotestGuardia`) il conto e'
+**19 (B1/C1/battito/decisione) + 26 (P1) + 30 (S1) + 39 (P0) = 114**, e il
+marcatore stampato e' **`v1.51`**, non `v1.20`. Il **BLOCCO 2** delle righe del
+19/08 cerca `"[AUTOTEST] ABTG_PausaGuardian v1.20"` e pretende **esattamente 19**
+casi: 🔴 **su HEAD fallirebbe, e fallirebbe dicendo la cosa sbagliata**
+("log troncato").
 _Proposta: il criterio 2 resta valido **come congelato** per i binari in campo
 (v1.20, 19 casi). Se e quando si ricompila su HEAD, il cancello va aggiornato a
-**75 casi e marcatore v1.40** — e la modifica va **dichiarata prima** dei
+**114 casi e marcatore `v1.51`** — e la modifica va **dichiarata prima** dei
 numeri, non dopo (regola di casa)._
+
+> ⚠️ **AGGIORNATO 02/09 DAL VERIFICATORE (era «75 casi, marcatore v1.40»).**
+> Il cantiere P0 ha portato l'include a v1.50/v1.51 aggiungendo **39 casi**:
+> il numero scritto qui era diventato **vecchio di 39 casi e di una versione**
+> nel momento stesso in cui P0 e' stato committato. Contato a macchina in
+> verifica: 19+26+30+39 = **114** invocazioni di
+> `ABTG_AutotestCaso`/`ABTG_AutotestCasoInt`, **nessuna dentro un ciclo**
+> (quindi 114 righe `[AUTOTEST]` esatte, non "circa"). ⚠️ **Chi apre il round
+> di ricompilazione aggiorna questo numero PRIMA di far girare l'autotest**:
+> un cancello che cita un conteggio che il codice non produce piu' e' un giro
+> a vuoto garantito, e boccia dicendo la cosa sbagliata.
 
 **R6 — Campo ≠ HEAD su ORB.** Il binario sul 100k e' del pin `d0241ff`; HEAD ha
 `v1.02` con `InpSLBufferPts` (default 0 = neutro, e i 2 punti di guardia sono

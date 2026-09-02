@@ -450,6 +450,20 @@ file**, tutte a 2 argomenti oggi — nessun EA cambia comportamento ne' va tocca
 per compilare. **39 casi di autotest** nuovi, agganciati a `ABTG_AutotestGuardia()`
 cosi' ogni EA che gia' lo chiama li eredita.
 
+> 🔎 **PASSAGGIO DAL VERIFICATORE (02/09) — l'include e' ora `v1.51`.**
+> Ricontato in modo indipendente: **93 chiamate in 65 file, tutte a 2
+> argomenti** (parse delle firme, non grep) ✅; i **39 valori attesi** dei casi
+> P0 riprodotti in un simulatore scritto dalla specifica — **0 discordanze** ✅;
+> percorso a **tetto spento provato IDENTICO riga per riga al v1.40** ✅.
+> **Una correzione applicata:** la guardia decideva il tetto con la regola
+> `nP0>=tetto` **riscritta a mano**, quindi i 39 casi collaudavano il nucleo
+> puro ma **non la riga che gira**. Ora legge il terminale una volta sola e
+> decide attraverso `ABTG_ContaSimboloLato_Calc` +
+> `ABTG_TettoSimboloLatoRaggiunto_Calc` — esito invariato, copertura vera.
+> **Conteggio globale dell'autotest: 114 casi** (19+26+30+39), marcatore
+> `v1.51`: il cancello del criterio 2 va aggiornato **prima** del round di
+> ricompilazione (vedi R5 in `COLLAUDO_ENFORCEMENT_FASE1_2026-09-02.md`).
+
 **Il log non collide.** Un blocco P0 scrive `INGRESSO RIFIUTATO`, **non**
 `INGRESSO BLOCCATO --`: quest'ultima e' la sottostringa con cui il collaudo
 (`backtest_pipeline/attese_enforcement_fase1.txt`) estrae il campo **C9.BLOCCO**
