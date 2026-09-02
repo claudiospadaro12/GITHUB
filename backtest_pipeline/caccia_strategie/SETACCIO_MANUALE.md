@@ -810,3 +810,63 @@ Deposit:    10000 USD
 **Non e' un EA disonesto: e' un EA misurato col metodo che noi abbiamo
 abbandonato dopo trenta ribaltamenti.** Il codice si potrebbe anche riusare;
 **il numero no**.
+
+---
+
+## 📅 02/09/2026 — CACCIA FREQUENZA, QUARTA BATTUTA (fronte B): 7 sorgenti Code Base letti, 7 scarti
+
+Dossier completo: `caccia_strategie/CACCIA_FREQUENZA4_CB_PAPER_2026-09-02.md`.
+Qui resta solo l'indice degli id, perche' e' questo il file che il prossimo
+cacciatore grep-a.
+
+| id | titolo | esito | la riga che lo prova |
+|---|---|---|---|
+| **23499** | `Ingrit` (V. Karputov, 2018) — **M5 nativo** | 🔴 **SCARTO** | **averaging senza cap dentro un motore di FADE**: il blocco `if(m_need_open_buy){ … OpenPosition(POSITION_TYPE_BUY,level); return; }` (righe 170-191) **non ha nessun controllo sul numero di posizioni** e `InpCloseOpposite` e' `false` di default → una barra M5 al 3% di rischio, ogni barra, contro il prezzo. Peccato: il motore (fade di un'estensione di 25 pip in 14 barre M5) e' leggibile e a due lati, e legge barra chiusa |
+| **42283** | `CCI + MACD Scalper` | 🔴 **SCARTO** | `CopyBuffer(cciHandler, 0, **0**, 3, cciArray)` **senza `ArraySetAsSeries`** → l'elemento `[2]` **e' la barra in formazione**, ed e' quello usato nella condizione (righe 99-101). Piu': tre indicatori in AND = tesi dentro il menu; `MaxOpenPositions` di fatto 1 |
+| **43278** | `Aussie Surfer` — GBPAUD M15 | 🔴 **SCARTO** | `static input double Entry_Amount = 0.30; // Entry lots` (**lotto fisso**) + `input int Take_Profit = 0;` (**nessun target**). Motore = Bollinger(5;2,5) + Alligator = **doppione di `ABTG_BandFade`** |
+| **44883** | `AK-47 Scalper EA - MT5` | 🔴🔴 **SCARTO** | `ENUM_ORDER_TYPE OrdType = ORDER_TYPE_SELL;//-1;` **cablato**: il ramo BUY e' codice morto e **non esiste nessun segnale** — riarma per sempre un sell-stop a 1,75 pip. `InpSL_Pips = 3.5` (spread ~1 pip = **29% dello stop**). `LotSize = (InpRisk) * m_account.FreeMargin();` non e' un rischio |
+| **49770** | `Probability Theory EA` (Koshtenko) | 🔴 **SCARTO** | `input int StopLoss = 0;` → `if(StopLoss>0) sl=…` → `trade.Buy(Lot(),NULL,pr,**sl**,tp,"")` con `sl=0`: **nessuno stop di default**. `input double Lots = 0.1` **fisso** |
+| **52105** | `QuickTrend Scalper` (`revised_self_adaptive_ea.mq5`) | 🔴 **SCARTO** | `input int InpPeriodRSI = **6**;` = **lo stesso grilletto di M0PB**, morto 12/12 il 31/08 (0,52 segnali/giorno). Regola del mandato: mai "parametri diversi di un motore morto". Piu' `InpLot = 0.05` fisso |
+| **59303** | `RSI Ea MT5` | 🟠 **SCARTO PER FREQUENZA** — e **non per difetto: e' il codice meglio scritto dei sette** (ATR-stop RR 1,5, rischio % opzionale, filtro di sessione, scale-out, barra chiusa) | `if ((CurrentSignal > LowerThreshold) && (PreviousSignal <= LowerThreshold))` con `LowerThreshold=20` su `iRSI(…,14,…)` (riga 675): **evento di coda**, non 2/giorno. `MaxOpenPositions = 1` |
+
+### 🔴 IL VERDETTO SULLA FONTE — adesso su 400 titoli, non su 20
+
+Le battute del 31/08 e 01/09 avevano chiuso il Code Base **su 20 id e 4 pagine**.
+Il 02/09 l'ho rifatto su **10 pagine e 400 id unici** (dall'id 76811 all'id
+11637), incrociando meccanicamente con i **78 id gia' setacciati** nei dossier
+precedenti (grep su `caccia_strategie/*` **e** `report/*`, come chiede §F del
+promemoria).
+
+> **Su 400 EA del Code Base MT5, i motori intraday M5/M15 con SL vero, rischio in
+> percentuale e frequenza >=2/giorno sono ZERO.** Non "pochi": zero.
+> Composizione misurata: **~53% attrezzi** (pannelli, calcolatori, gestori,
+> trailing, logger, copiatori — fra cui **sette utility `Quantora` di fila**),
+> **~15% snippet didattici**, **~20% incroci di indicatori senza tesi**,
+> **~8% griglia/martingala/recovery/lock**, il resto ONNX, Renko, rete, cripto.
+>
+> 🔬 **La ragione e' strutturale:** il Code Base premia cio' che serve a
+> **chiunque**. Un calcolatore di lotto serve a tutti; un motore di sessione su
+> M5 serve a chi ha gia' una tesi — e **chi ha una tesi che funziona non la
+> carica gratis**.
+>
+> ➡️ **Regola d'uso, confermata su 400 titoli: il Code Base si apre per gli
+> ATTREZZI, non per i motori.** Non si riapre per cercare un motore intraday
+> senza una ragione nuova e dichiarata.
+
+### 🪦 E una lapide dalla stessa battuta, che chiude una famiglia
+
+`arXiv 2407.08036` — *The tube oscillator* (Katic & Richter, 10/07/2024), su
+**DAX 40 ed EUR/USD dentro MetaTrader**, 2019/01→2024/05. Tre squalifiche
+verbatim: **(1)** i parametri della geometria sono **oscurati nel paper**
+(`###`, _"in this preliminary version, the parameters are not disclosed"_) → non
+replicabile; **(2)** _"in average, **61.67 trades are performed per day** …
+average position holding time of **171.75 seconds** … lots of positions gave up
+in **less than 30 seconds**"_ → viola il paletto prop **P5** (max 25% dei trade
+sotto 60 s); **(3)** _"the average profit/share is **0.37·10⁻⁵**"_ = **0,037 pip
+netti per trade** → contro il nostro spread di ~1 pip `[NON MISURATO]` e' morto
+di un fattore ~27.
+
+> 🎯 **Terza conferma indipendente del muro d'attrito** (arXiv 2605.04004 §6.2 ·
+> `fx-bizday` 01/09, _"even 1 basis point will destroy the profitability"_ ·
+> questa). **Direzione "oscillatore geometrico continuo ad altissima frequenza"
+> chiusa con un numero, prima di spenderci un round.**

@@ -1,0 +1,359 @@
+# =====================================================================
+#  VGRSI -- PASSO 0: SONDA DI CONTEGGIO E DI TAGLIA  --  SPECIFICA, M5
+#  Visibility Graphs RSI  --  indici + forex + oro, contatore
+# ---------------------------------------------------------------------
+#  >>> ATTENZIONE, PRIMA RIGA CHE CONTA: QUESTO FILE NON E' ESEGUIBILE.
+#      La sonda ABTG_SondaVGRSI NON ESISTE ANCORA. Nessuno ha scritto
+#      una riga di quell'indicatore. Questo file e' il CONTRATTO che
+#      chi la scrivera' deve rispettare, con i CRITERI CONGELATI PRIMA
+#      di qualunque numero.
+#      NON si passa a walkforward_generico.ps1 cosi' com'e': un pin che
+#      MT5 ignora in silenzio e' l'errore n.3 della
+#      CHECKLIST_RIGA_DI_LANCIO, ed e' come e' nato il falso "0/8" del
+#      FiboH4. Quando la sonda esistera', questo file diventa la prova
+#      vera -- esattamente come M0PB_FREQUENZA_BOZZA.txt e' diventato
+#      M0PB_FREQUENZA_M5.txt il 31/08.
+#
+#  DOSSIER DI CACCIA:
+#    backtest_pipeline\caccia_strategie\CACCIA_FREQUENZA4_CB_PAPER_2026-09-02.md
+#    (candidato P1, verdetto IN CODA 6/10 -- NON "prova subito")
+#
+# =====================================================================
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+# ---------------------------------------------------------------------
+#    PAPER   "Visibility graphs can make money in financial markets"
+#            arXiv 2605.01300v1  [cs.CE],  pubblicato 02/05/2026
+#            https://arxiv.org/abs/2605.01300
+#    AUTORE  Rafal Rak -- Institute of Physics, Faculty of Exact and
+#            Technical Sciences, University of Rzeszow, Pigonia 1,
+#            35-310 Rzeszow, Polonia
+#    LETTO   PDF scaricato il 02/09/2026, 5.756.634 byte, 16 pagine,
+#            letto per intero (Methods + Results + Discussion).
+#
+#  >>> 🔴 LICENZA -- DA LEGGERE PRIMA DI SCRIVERE UNA RIGA DI CODICE.
+#      Nota 1 a pagina 3, VERBATIM:
+#        "The VGRSI indicator is an original authorial concept
+#         introduced in this paper; the author reserves all rights to
+#         its use."
+#      NON c'e' licenza aperta. NON c'e' repository. NON c'e' .mq5.
+#      C'e' la FORMULA, per intero, ed e' implementabile.
+#      Uso INTERNO DI RICERCA (misura, backtest, referto): si fa, e si
+#      cita l'autore in testa a qualunque sorgente derivato.
+#      Qualunque cosa oltre (distribuzione, prodotto, pubblicazione):
+#      si chiede prima all'autore. Questa riga NON si cancella.
+#
+# =====================================================================
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  "Un RSI calcolato NON sulle differenze locali di prezzo, ma solo
+#   sulle variazioni dei punti passati ancora VISIBILI dal punto
+#   corrente (relazione di visibilita' all'indietro), misura la
+#   struttura geometrica della traiettoria invece della sua sola
+#   ampiezza -- e produce, su M5, abbastanza attraversamenti di soglia
+#   da fare almeno 2 segnali al giorno PER LATO, con un'escursione
+#   favorevole che vale almeno tre volte lo spread."
+#
+#  >>> QUELLO CHE L'IPOTESI *NON* DICE, e va detto:
+#      non c'e' un meccanismo di MERCATO dietro (chi sta dall'altra
+#      parte, perche' quel flusso esiste). E' una tesi GEOMETRICA, non
+#      microstrutturale. Nel punteggio del dossier vale 1 punto su 2, ed
+#      e' dichiarato li'.
+#
+# =====================================================================
+#  LA FORMULA, VERBATIM DAL PAPER (sezione Methods, pagg. 3-5)
+#  -- ricopiata qui perche' chi scrive l'indicatore non deve
+#     ri-scaricare un PDF da 5,7 MB, e perche' una formula riassunta
+#     e' una formula che diverge --
+# ---------------------------------------------------------------------
+#  DUE PARAMETRI STRUTTURALI:
+#    WS = Window Size       (lunghezza su cui si aggrega)
+#    WV = Window Visibility (raggio massimo della visibilita' indietro)
+#
+#  PASSO 1 -- VISIBILITA' ALL'INDIETRO.
+#    Per ogni j nella finestra  j in {t-WS+1, ..., t}
+#    si considerano solo gli indici passati
+#           i in {j-1, j-2, ..., max(0, j-WV)}
+#    Il punto (i, p_i) e' VISIBILE da (j, p_j) se, per OGNI k con
+#    i < k < j:
+#           p_k  <  p_j + (p_i - p_j)/(i - j) * (k - j)
+#    cioe' se nessun punto intermedio sfora la retta che unisce
+#    (i,p_i) a (j,p_j).
+#    L'insieme dei visibili e' V_j; se ne usano al massimo WS
+#    (sottoinsieme V_j^(WS), con |V_j^(WS)| <= WS).
+#
+#  PASSO 2 -- DALLA GEOMETRIA AI SEGNI.
+#    Variazione locale:  dp_i = p_i - p_(i-1)
+#    ATTENZIONE, dettaglio che si sbaglia facilmente e che il paper
+#    dichiara esplicitamente: la visibilita' seleziona SOLO QUALI i
+#    entrano nella somma; il dp_i si riferisce SEMPRE alla coppia
+#    contigua (i-1, i), anche se i-1 NON e' visibile da j.
+#
+#    S+(t) = somma su j da t-WS+1 a t, somma su i in V_j^(WS), di (+dp_i) per dp_i>0
+#    S-(t) = somma su j da t-WS+1 a t, somma su i in V_j^(WS), di (-dp_i) per dp_i<0
+#    N+(t) = conteggio degli stessi contributi con dp_i > 0
+#    N-(t) = conteggio degli stessi contributi con dp_i < 0
+#
+#  PASSO 3 -- DUE FORZE RELATIVE:
+#    rS(t) = S+(t) / S-(t)          (ampiezza)
+#    rN(t) = N+(t) / N-(t)          (frequenza)
+#
+#  PASSO 4 -- DUE VARIANTI DI AGGREGAZIONE:
+#    A0 (media):   rA0(t) = 0.5 * ( rS(t) + rN(t) )
+#    A1 (rapporto): rA1(t) = rS(t) / rN(t)
+#
+#  PASSO 5 -- NORMALIZZAZIONE 0..100:
+#    VGRSI_rA(t) = 100 - 100/(1 + rA(t))
+#
+#  INTERPRETAZIONE DELL'AUTORE (utile per leggere i risultati):
+#    A0 = filtro di TREND/persistenza (ampiezza E frequenza insieme).
+#    A1 = misura di IMPULSO/rottura (pochi movimenti, grande ampiezza),
+#         piu' sensibile ai falsi segnali.
+#    A1 alto + A0 basso = impulso senza struttura (fakeout).
+#    A1 alto + A0 in salita = impulso che diventa trend.
+#
+#  >>> 🔴 IL VINCOLO DI CALCOLO, MISURATO SULLA FORMULA E NON IPOTIZZATO
+#      L'implementazione ingenua ricalcola tutti i V_j a ogni barra:
+#      O(WS * WV^2) per barra. Con WS=WV=35 sono ~43.000 confronti per
+#      barra: su 150.000 barre M5 sono ~6,4 miliardi di operazioni, e
+#      NON GIRA nel tester.
+#      LA FORMA DA SCRIVERE E' INCREMENTALE: a ogni barra nuova si
+#      calcola UNA volta il set di visibilita' della barra nuova
+#      (O(WV^2) = ~1.200 confronti) e si tiene una CODA delle ultime WS
+#      barre, sommando il nuovo e togliendo il vecchio.
+#      Costo risultante: ~1.200 operazioni/barra = ~1,8e8 su 150.000
+#      barre. Gira.
+#      >>> Il criterio V7 qui sotto MISURA questo, e se non regge il
+#          candidato muore di costo. Si dichiara, non si nasconde.
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE (CONGELATI IL 02/09 PRIMA DI OGNI NUMERO)
+# ---------------------------------------------------------------------
+#  V1 - PAVIMENTO DI FREQUENZA (mandato di Claudio del 02/09 sera):
+#       segnali PER LATO >= 2,0 al giorno di borsa contato.
+#       < 2,0/giorno -> SCARTO IMMEDIATO. Niente EA, niente griglia.
+#                       E' esattamente cosi' che e' morto M0PB (12/12,
+#                       lato migliore 0,52/giorno) il 31/08.
+#       >= 2,0       -> PASSA.
+#       Riferimento esterno, DICHIARATO DALL'AUTORE e NON verificato:
+#         DJI30 3,5/gg (1.842 trade) | EURUSD 3,3/gg (1.677)
+#         XAUUSD 4,8/gg (2.418), su 503 giorni 2024-2025.
+#       ATTENZIONE: quelli sono TRADE con max 2 posizioni e minimo 30
+#       minuti fra ingressi. I SEGNALI grezzi saranno di piu'. Il
+#       confronto onesto e' segnali-dopo-i-vincoli, non segnali grezzi.
+#
+#  V2 - TAGLIA (metro di casa): mediana dell'escursione favorevole a
+#       12 barre dall'ingresso, misurata AL MOMENTO DEL SEGNALE.
+#       U30USD/NASUSD/D30EUR:  > 6,0 punti indice -> PASSA
+#                              < 4,0 punti indice -> SCARTO
+#                              fra 4,0 e 6,0      -> SOSPESO
+#       EURUSD:                > 3,0 pip -> PASSA | < 2,0 -> SCARTO
+#       XAUUSD:                > 3,0 x lo spread mediano misurato
+#       La soglia nasce da 3 x spread. Lo spread e' [NON MISURATO]:
+#       2,0 punti indice e' una STIMA di METRO_PROP D4, ~1 pip su
+#       EURUSD e' una CONVENZIONE. E' l'OTTAVA caccia che lo scrive.
+#       Nella fascia SOSPESO si misura lo spread vero e si rilegge.
+#
+#  V3 - ARITMETICA (cancello H8, FIRMA 2 del 31/08):
+#       RR = mediana(take) / mediana(stop), con lo stop dell'autore =
+#       mediana dell'altezza delle ultime N candele x Z.
+#       Si legge per Z = 1,0 / 1,5 / 2,0 e per N = 10 / 20.
+#       RR < 0,70 -> SCARTO PER ARITMETICA, e NON si spende una corsa
+#                    a tick. Atteso ~1,00 (SL e TP sono SIMMETRICI per
+#                    costruzione nel paper): serve win rate >= 53,75%.
+#
+#  V4 - L'AMBIGUITA' DEL GRILLETTO, SCIOLTA MISURANDO E NON INDOVINANDO.
+#       Il paper dice, verbatim: "Crossing the relevant threshold FROM
+#       ABOVE on all time scales triggered the opening of the
+#       corresponding position", con soglie 20-35 per il LONG e 70-95
+#       per lo SHORT.
+#       Lettura (a): "from above" per entrambi -> il long compra
+#            scendendo sotto ~30 (fade dell'ipervenduto) e lo short
+#            vende scendendo sotto ~80 (reversal dall'ipercomprato).
+#            = motore di MEAN REVERSION simmetrico.
+#       Lettura (b): il long incrocia 20-35 DAL BASSO, come l'RSI
+#            classico.
+#       >>> SI CONTANO ENTRAMBE, in colonne separate.
+#       >>> E si dichiara nel referto QUALE si e' usata per il verdetto:
+#           quella FEDELE AL TESTO (a), non quella che conta di piu'.
+#           Scegliere la lettura in base al risultato e' pesca.
+#
+#  V5 - RISCHIO, che si legge SEMPRE, a qualunque n (valvola R59):
+#       - massimo di segnali in UNA giornata, per lato. E' il numero
+#         che taglia InpMaxTradesPerDay dell'EA futuro SUI DATI, non a
+#         occhio.
+#       - la peggior giornata in R.
+#       Muro prop di riferimento: -5.000 su 100k = -5,0% giornaliero;
+#       il cap C1 firmato il 18/08 e' 3,25% di rischio aperto = 5 SL
+#       vivi da 0,65%.
+#       >>> Il DD DICHIARATO DALL'AUTORE e' 10-18% (DJI30 18%, EURUSD
+#           12%, XAUUSD 10%) su 10.000 USD con ~10% di nozionale per
+#           trade a LOTTO FISSO. Il muro prop e' 10% TOTALE: cosi'
+#           com'e' stata girata dall'autore, la strategia avrebbe
+#           bruciato una challenge su due strumenti su tre. Il DD scala
+#           col rischio (il nostro e' 0,65%), quindi e' comprimibile --
+#           ma un drawdown e' un FATTO ACCADUTO e va scritto prima.
+#
+#  V6 - ALTOPIANO, NON PICCO. La superficie su (WS, WV) si legge come
+#       superficie: una cella verde isolata fra celle rosse e' RUMORE
+#       (12 Spearman IS->OOS negative su 13, l'ultima a tick reali).
+#       >>> E QUI IL PUNTO CHE VALE PER TUTTO IL CANDIDATO:
+#           i numeri dell'autore (340.000 USD, Sharpe 2,55-3,60)
+#           nascono da una RI-OTTIMIZZAZIONE OGNI 7 GIORNI su una
+#           finestra di 30 -- verbatim: "It then selected the parameter
+#           set that was BEST IN TERMS OF PROFIT and executed trades
+#           over the following 7 days". Sono 104 scelte del PICCO.
+#           E' la regola di selezione che in casa e' misurata
+#           ANTI-predittiva. NOI CONGELIAMO I PARAMETRI. Se l'edge
+#           sopravvive al congelamento e' un edge; se no, era la
+#           ri-ottimizzazione. QUESTA E' LA DOMANDA DEL ROUND.
+#
+#  V7 - COSTO DI CALCOLO: secondi per passata, dichiarati. Se la forma
+#       incrementale non regge il tester, il candidato MUORE DI COSTO
+#       e si scrive cosi'. Non e' un difetto del metodo: e' un fatto
+#       della macchina, e va misurato prima di spendere un round.
+#
+# =====================================================================
+#  COSA GIRA E COSA NON GIRA
+# ---------------------------------------------------------------------
+#  ABTG_SondaVGRSI (DA SCRIVERE) e' un CONTATORE:
+#    NESSUN ordine, NESSUN lotto, NESSUN magic, NESSUNA sedia.
+#  Conta segnali per LATO e misura distanze. Il precedente di casa e'
+#  ABTG_SondaM0PB (31/08) e prima ancora la SondaMediazione (firma di
+#  Claudio del 21/08: "metro, frequenza").
+#
+#  MODELLO DI CORSA: 2 = "Solo prezzi di apertura". Il segnale nasce su
+#  BARRA CHIUSA (la visibilita' all'indietro usa SOLO punti passati:
+#  non esiste look-ahead possibile e il tick non aggiunge informazione).
+#  Il verdetto di MERITO, se mai ci sara', si da' a TICK REALI (R57).
+#
+#  UN SOLO TIMEFRAME, ED E' UNA SCELTA DICHIARATA.
+#  Il paper fa concordare TRE scale (M1, M5, M30). Qui si misura M5 DA
+#  SOLO, per tre motivi scritti prima:
+#    1. il mandato del 02/09 chiede M5/M15, non M1;
+#    2. il capitolo M1 e' CHIUSO a tick in casa ("trappola di costo
+#       strutturale", caccia del 29/08) e non si riapre di straforo
+#       dentro un candidato nuovo;
+#    3. contare M5 da solo da' il LIMITE SUPERIORE della frequenza:
+#       aggiungere l'AND con M1 e M30 puo' solo TOGLIERE segnali.
+#       Se M5 da solo non fa 2/giorno, il candidato e' morto e non
+#       serve scrivere le altre due scale.
+#  >>> Se M5 da solo passa V1 con margine, ALLORA si aggiungono le
+#      altre due scale in una seconda sonda, e si misura quanto
+#      l'AND costa in frequenza. Non prima.
+#
+# =====================================================================
+#  LIMITI DICHIARATI PRIMA (non dopo)
+# ---------------------------------------------------------------------
+#  - FINESTRA: 2024.09.26 -> 2026.06.30 sul lead (indice). Il pavimento
+#    2024.09.26 e' MISURATO, non ipotizzato:
+#    risultati_archivio\REFERTO_SONDA_STORICO_17-08.md (i 12 indici
+#    BCM, fra cui U30USD/NASUSD/D30EUR, partono tutti da li').
+#    Su EURUSD lo storico misurato e' 1999.01.04 e su XAUUSD
+#    2004.06.11 (stessa sonda), ma NON si usa una finestra piu' lunga
+#    a M5: vedi la riga del tetto.
+#  - TETTO ~100.000 BARRE DEL TESTER (regola di casa del 25/08): a M5
+#    sono ~1,3 anni per corsa. 21 mesi ECCEDONO il tetto.
+#    NON si spezza in tranche in questo passo: la sonda DICHIARA DA
+#    SOLA la finestra effettiva con "Giorni Contati" e "Barre
+#    Valutate", e la firma del tetto e' "Barre Valutate" IDENTICHE su
+#    simboli diversi (checklist punto 36). V1 e' per-giorno sul
+#    denominatore CONTATO, quindi resta leggibile anche troncato.
+#  - UN SOLO REGIME (toro) nella finestra indici: questo passo conta
+#    OCCASIONI e misura GEOMETRIE, NON merito. Il merito, se si
+#    arrivera' li', vuole la prova di regime (Emendamento punto C).
+#  - NESSUN numero dell'autore usato in nessun punteggio. I 340.000
+#    USD, il Sharpe 2,55-3,60 e i DD 10-18% restano
+#    [DICHIARATI DALL'AUTORE, NON VERIFICATI], e nascono per di piu'
+#    da una ri-ottimizzazione settimanale (V6).
+#  - LA FREQUENZA NON E' STATA MISURATA DA NESSUN AGENTE: da questo
+#    ambiente nessuna fonte di dati di prezzo e' raggiungibile
+#    (Yahoo, Stooq, Dukascopy: 403 al CONNECT dal 31/08).
+#    IL NUMERO LO FA IL PC DI CLAUDIO.
+#
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# ---------------------------------------------------------------------
+# LO SWEEP: si spazzola la GEOMETRIA, e solo quella.
+# Due assi, tenuti CORTI apposta (5 x 4 = 20 celle) perche' questo e'
+# uno SCREENING, non un verdetto, e perche' con 400 celle la superficie
+# non si legge piu': si pesca.
+# WS e WV coprono la fascia bassa/media del range dell'autore (10-200);
+# il centro (35/35) e' il valore che il paper usa nella Figura 1.
+# ---------------------------------------------------------------------
+InpWS=35||15||10||55||Y
+InpWV=35||20||20||80||Y
+
+# --- TUTTO IL RESTO PINNATO, e i motivi sono scritti ---
+# VARIANTE DI AGGREGAZIONE: 0 = A0 (media: ampiezza+frequenza).
+# E' la variante che l'autore descrive come filtro di TREND, ed e'
+# quella meno sensibile ai fakeout. A1 e' informativa e si misura in
+# una SECONDA corsa, non nello stesso sweep: mescolarle qui
+# raddoppierebbe le celle senza rendere leggibile nessuna delle due.
+InpVariante=0||0||0||0||N
+# SOGLIE: il centro delle fasce dell'autore (long 20-35, short 70-95).
+# NON si spazzolano: spazzolare la soglia INSIEME alla geometria
+# significa pescare la coppia che fa passare V1. Prima si guarda se la
+# geometria produce segnali al centro; poi, se serve, si muove la soglia.
+InpSogliaLong=30.0||30.0||0||30.0||N
+InpSogliaShort=80.0||80.0||0||80.0||N
+# LE DUE LETTURE DEL GRILLETTO (criterio V4): la sonda conta ENTRAMBE
+# in colonne separate, quindi qui non c'e' niente da scegliere.
+InpContaEntrambeLetture=true||true||0||true||N
+# GEOMETRIA DELLO STOP DELL'AUTORE: mediana dell'altezza delle ultime N
+# candele x Z. N e Z NON sono assi: la sonda li restituisce come
+# TABELLA (N = 10/20, Z = 1,0/1,5/2,0), perche' RR(Z) e' aritmetico e
+# sweeparlo servirebbe solo a pescare lo Z che fa passare H8.
+InpCandeleMediana=20||20||0||20||N
+# la finestra di misura dell'escursione favorevole: 12 barre, la stessa
+# di tutte le sonde di casa. NON si tocca: se cambia, i numeri di questa
+# sonda non sono confrontabili con quelli di M0PB e delle altre.
+InpBarreTarget=12||12||0||12||N
+# 1,00 sugli indici: la conversione punto-indice/prezzo e' MISURATA sui
+# tre indici BCM (collaudo T8 della SondaM0PB). Su EURUSD e XAUUSD il
+# wrapper deve passare il valore giusto, e il collaudo lo verifica.
+InpPuntiPerIndice=100.0||100.0||0||100.0||N
+# nessun filtro orario: si misura la giornata INTERA. Se l'edge esiste
+# solo in una fascia, lo dice la colonna per-ora, non un filtro deciso
+# prima di aver guardato.
+InpUsaFinestraOraria=false||false||0||false||N
+# barre di riscaldamento: WS+WV+margine. Con WS=55 e WV=80 il minimo
+# tecnico e' 135; 400 e' il margine di casa.
+InpWarmupBarre=400||400||0||400||N
+InpScriviCsv=true||true||0||true||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+InpTag=VGRSI_SONDA||VGRSI_SONDA||0||VGRSI_SONDA||N
+
+# ---------------------------------------------------------------------
+# GLI ALTRI SIMBOLI
+#   @SIMBOLO e' il LEAD (U30USD). EURUSD e XAUUSD girano con -Simbolo
+#   del generico: override DICHIARATO dal wrapper (il parametro vince
+#   sulla direttiva, misurato nel codice del generico alle righe 60 e
+#   303). Tre corse in tutto, etichette DOW/EUR/XAU.
+#   Perche' proprio questi tre e non altri: sono ESATTAMENTE i tre del
+#   paper (DJI30, EUR/USD, XAU/USD). Cambiare strumento in questo passo
+#   vorrebbe dire misurare una cosa diversa da quella che l'autore
+#   dichiara, e poi non poter confrontare niente.
+#
+# ---------------------------------------------------------------------
+# COLLAUDI DA VERIFICARE PRIMA DI LEGGERE QUALUNQUE NUMERO
+#   - "Autotest Falliti" = 0 (se e' -1 l'autotest NON e' girato e il
+#     file non vale).
+#   - COLLAUDO DELLA VISIBILITA' (il piu' importante, e va scritto):
+#     su una serie MONOTONA CRESCENTE tutti i punti sono visibili
+#     dal punto corrente -> |V_j| deve valere esattamente min(WV, j).
+#     Su una serie a V, i punti oltre il vertice NON devono esserlo.
+#     Se questi due casi non tornano, l'indicatore e' sbagliato e
+#     ogni numero dopo e' rumore.
+#   - COLLAUDO DEL DEGENERE: con WV=1 la visibilita' si riduce alla
+#     coppia contigua e VGRSI deve collassare su una forma nota
+#     dell'RSI. Se non collassa, la formula e' stata tradotta male.
+#   - "Barre Valutate" DIVERSE fra simboli diversi (se sono identiche,
+#     e' il tetto delle 100.000 barre che morde: si dichiara).
+#   - il tempo per passata (criterio V7), in secondi.
+# =====================================================================

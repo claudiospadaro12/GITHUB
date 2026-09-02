@@ -527,3 +527,93 @@ contenitore.**
 | `api.github.com` (ricerca) | 🔴 403 — **DECIMA di fila**, non riprovata |
 | `papers.ssrn.com` | 🔴 403 — decima di fila, non riprovata |
 | `query1.finance.yahoo.com` · `stooq.com` · `datafeed.dukascopy.com` | 🔴 non riprovati (murati tre volte) — **quarta battuta di fila senza poter MISURARE una frequenza** |
+
+---
+
+## 📅 02/09/2026 — QUARTA BATTUTA (fronte B): un canale intero dichiarato morto, e due conferme
+
+Misurato oggi, non ipotizzato. Dossier:
+`caccia_strategie/CACCIA_FREQUENZA4_CB_PAPER_2026-09-02.md`.
+
+### 1. 🔴 IL CANALE "SITI DI EA GRATUITI" E' MORTO DA QUI — 6 domini su 6
+
+| dominio | esito 02/09 |
+|---|---|
+| `www.earnforex.com` | 🔴 **000** — `curl` : `CONNECT tunnel: HTTP/1.1 403 Forbidden` · `WebFetch` : `{"error_type":"EGRESS_BLOCKED"}` |
+| `www.forex-tsd.com` | 🔴 **000** |
+| `fxcodebase.com` | 🔴 **000** |
+| `www.mt5-ea.com` | 🔴 **000** |
+| `traderversity.com` | 🔴 **000** |
+| `bestmetatraderindicators.com` | 🔴 **000** |
+
+> ⚠️ **Ed e' un 000 al CONNECT, non un 404.** Non vuol dire "non esiste": vuol
+> dire "il proxy non apre". **EarnForex resta una fonte VERA** (sorgenti `.mq5`
+> con licenza dichiarata) e **torna in gioco il giorno dopo lo sblocco** (§2 di
+> questo file). **Da aggiungere alla lista dei domini da autorizzare**:
+> `earnforex.com` + `*.earnforex.com`.
+>
+> 🎯 **Nel frattempo, la forma corretta da scrivere nei dossier:** _"le uniche
+> fonti di CODICE raggiungibili sono **mql5.com**, **tradingview.com +
+> pine-facade** e **raw.githubusercontent.com**. Tutto il resto e' murato, e
+> misurato."_ **Non riprovare il canale senza un motivo nuovo.**
+
+### 2. 📕 CODE BASE — la chiusura del 31/08 e' CONFERMATA, ma adesso su 400 id
+
+Le battute precedenti l'avevano chiuso su **20 id / 4 pagine**. Oggi: **10 pagine,
+400 id unici, 379 con descrizione estratta**, incrociati coi **78 id gia'
+setacciati**. **Zero motori intraday M5/M15.** Composizione e ragione strutturale
+in `SETACCIO_MANUALE.md` (blocco del 02/09).
+➡️ **Regola invariata e rafforzata: il Code Base si apre per gli ATTREZZI.**
+
+📌 **Nota tecnica utile:** il censimento si fa **solo sfogliando**
+`/en/code/mt5/experts/pageN` (N=1..10 danno 73-85 KB a pagina), e l'estrazione
+funziona sul pattern `/en/code/(\d+)" title="([^"]+)"`. Il download del sorgente
+resta `https://www.mql5.com/en/code/download/<id>` → ZIP, **200 su 8 su 8 oggi**.
+⚠️ **Molti `.mq5` del Code Base sono in UTF-16LE**: un `grep` diretto rende
+**zero righe** e sembra un file vuoto. Si passano da `iconv -f UTF-16LE -t UTF-8`
+**prima** di cercarci dentro. **Oggi mi ha quasi fatto scartare due sorgenti per
+"file illeggibile" quando erano solo in un'altra codifica.**
+
+### 3. 🟠 QUANTPEDIA — muro premium riconfermato, con la prova doppia
+
+`/strategies/intraday-currency-seasonality/` e
+`/strategies/exponential-fx-mean-reversion-strategy/` → **HTTP 200, 300.143 byte
+IDENTICI**, `<title>` = home page. Lo `/screener/` risponde (**641.609 byte**,
+titolo proprio) ma **0 slug estraibili dall'HTML grezzo**: tutto in JS.
+➡️ **Quarta caccia intraday consecutiva, zero candidati.** Forma definitiva
+invariata: *"si usa per SAPERE CHE UN EFFETTO ESISTE e risalire al paper"*.
+
+### 4. 🟢 arXiv — vivo, ma con un buco di RICERCA da conoscere
+
+`export.arxiv.org` **200**, `arxiv.org/pdf` **200** (due PDF da 5,7 e 5,4 MB
+scaricati e letti). ⚠️ **Ma le query in linguaggio naturale sono inaffidabili
+fuori da q-fin:** `abs:"opening range"` e `abs:"time-of-day"` rendono
+**quasi solo fisica, matematica pura e computer vision** (operatori di
+Schrodinger, relighting urbano, robot impollinatori). `abs:"intraday reversal"`
+rende **zero**.
+➡️ **Ricetta che funziona: partire dalla CATEGORIA** (`cat:q-fin.TR AND
+abs:"trading strategy"`, ordinata per data decrescente) **e leggere i titoli**,
+invece di sperare in una stringa esatta. **E' cosi' che e' uscito il promosso di
+oggi** (`2605.01300`, che nessuna query tematica aveva restituito).
+
+### 5. 🟡 MQL5 forum — raggiungibile, e uno slug da non riprovare
+
+`https://www.mql5.com/en/forum` → **200**, 160.848 byte, 147 link a thread.
+🔴 **`https://www.mql5.com/en/forum/expert` → 404**: quello slug non esiste.
+⬜ **Non l'ho battuto**, e il motivo e' dichiarato: per MT5 i codici condivisi
+finiscono **nel Code Base**, appena censito per intero. Il forum e' un firehose
+di Q&A dove si entra **con una domanda precisa**, non a pescare.
+
+### 6. Il resto della mappa, rimisurato oggi
+
+| fonte | 02/09/2026 |
+|---|---|
+| `mql5.com` (Code Base + download ZIP + forum) | 🟢 **200** |
+| `export.arxiv.org` + `arxiv.org/pdf` (solo `https`) | 🟢 **200** |
+| `tradingview.com` | 🟢 **200** |
+| `raw.githubusercontent.com` | 🟢 **301** (redirect atteso su root; i file a nome rispondono 200) |
+| `quantpedia.com` | 🟠 **200 ma premium** |
+| `github.com` (root, via curl) | 🟠 **400** — la ricetta valida resta `WebSearch` → `WebFetch` → `raw.githubusercontent` |
+| `papers.ssrn.com` | 🔴 **403 — UNDICESIMA di fila** |
+| `forexfactory.com` | 🔴 **403** |
+| **siti di EA gratuiti** (6 domini) | 🔴 **000, tutti e sei** — §1 |
