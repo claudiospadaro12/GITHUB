@@ -6411,3 +6411,78 @@ Leggerlo come registro e' un errore che nessun controllo di freschezza intercett
 > strumento di **sola lettura** non e' mai il verdetto di chi lo chiama: il
 > chiamante si rilegge l'artefatto da solo. (Applicato in `RIGA_DIAG_GBPUSD.ps1`:
 > il passo A alza un RILIEVO che lo dichiara, e il verdetto lo da' la sua lettura.)
+
+---
+
+## 🆕 AGGIUNTA DEL 02/09/2026 — trovata verificando il CANARINO del Guardian (`mql5/Scripts/ABTG_CanarinoGuardian.mq5`, P-C1 / firma D2), **prima della compilazione**
+
+## 107. 🦠 LO STRUMENTO DI MISURA CHE SCRIVE NELLO STESSO LOG DEL MISURATO: il gate attribuisce al PAZIENTE la riga del TERMOMETRO
+
+_Difetto vero, gia' committato in `mql5/Scripts/ABTG_CanarinoGuardian.mq5` v1.00
+(otto occorrenze, righe 346-463), corretto in v1.01 col commit di questa
+verifica. Trovato PRIMA che il file venisse compilato._
+
+Il canarino e' uno Script di **sola lettura** che gira **sul terminale live del
+100k**, cioe' **dentro l'ambiente che il collaudo sta misurando**. Le sue `Print`
+finiscono nella **stessa scheda Esperti** in cui il collaudo enforcement va a
+cercare le righe che fanno fede (`backtest_pipeline/attese_enforcement_fase1.txt`,
+che si cerca **per SOTTOSTRINGA**).
+
+L'autore ci aveva pensato, e per tre righe su quattro **aveva ragione**: il
+vincolo 3 in testa al file vieta esplicitamente il prefisso `[GUARDIA]` e le
+frasi di blocco `C5.EA` / `C7.EA` / `C9.BLOCCO`, e dichiara che «TUTTE le righe
+di qui iniziano con `[CANARINO]`» — verificato a macchina: quelle **non** ci
+sono. Il buco era **la riga VIETATA**, non le attese:
+
+```mql5
+// v1.00, riga 346 e altre sette
+Riga(StringFormat("[CANARINO] AUTOTEST 1 ...: %s", (falliti==0 ? "PASS" : "*** FAIL ***")));
+```
+
+`*** FAIL ***` e' **esattamente** `STOP.AUTOTEST | VIETATA` dell'artefatto, ed e'
+il token che produce `ABTG_AutotestCaso()` dell'include
+(`ABTG_PausaGuardian.mqh:1074`) — cioe' **la prova del criterio 2**. Un blocco
+rosso del canarino sarebbe stato raccolto e letto come *«l'autotest dell'include
+e' rotto, fermare tutto»*: allarme **vero** ma sull'**artefatto sbagliato**, e per
+giunta mentre la fase 1 vieta di ricompilare (`NO.5`), cioe' esattamente quando
+un falso sospetto sui binari in campo costa di piu'.
+
+### Perche' e' una classe a se'
+
+- **il prefisso NON e' una difesa.** `[CANARINO]` sta a inizio riga; il gate
+  cerca **una sottostringa in mezzo**. Un'invariante sull'**inizio** della riga
+  non dice niente su cosa c'e' **dentro**;
+- **il difetto nasce dalla buona pratica.** Il token `*** FAIL ***` e' lo
+  standard di casa per gli autotest (`ABTG_Bulge`, `ABTG_IntradayMomentum`,
+  l'include...): chi scrive un artefatto nuovo lo copia **giustamente**, e proprio
+  cosi' importa la collisione;
+- **non e' il punto 41** (gate e corsa che condividono il magic: li' la corsa
+  **cancella** la prova). Qui non si cancella niente: si **AGGIUNGE** una prova
+  falsa, ed e' peggio, perche' un dato in piu' non lascia buchi da notare;
+- **non e' il punto 82** (il gate cerca un token e la prosa lo nomina): li' la
+  firma resta **invisibile**; qui la firma e' **fin troppo visibile**, e di
+  qualcun altro.
+
+> ✅ **REGOLA: quando si introduce uno strumento (script, sonda, canarino) che
+> gira DENTRO l'ambiente misurato e stampa dove stampa il misurato, prima
+> dell'invio si passa il DIZIONARIO INTERO del contratto, non le tre righe a cui
+> si stava pensando.** Trenta righe di script, e gira ovunque:
+> ```python
+> # 1. estrai TUTTE le stringhe stampabili dello strumento (commenti VIA,
+> #    letterali adiacenti CONCATENATI, %s sostituito con ogni valore che la
+> #    funzione chiamata puo' davvero tornare);
+> # 2. aggiungi le varianti MAIUSCOLE (Select-String e' case-INSENSITIVE);
+> # 3. per OGNI testo del contratto -- ATTESA, VIETATA **e** CAMPO -- prova la
+> #    sottostringa. Zero collisioni, oppure si rinomina il token DELLO STRUMENTO
+> #    (mai quello del contratto).
+> ```
+> ⚠️ **Le VIETATE sono la meta' che si dimentica.** Si controllano le ATTESE
+> perche' fanno passare un criterio; ma una VIETATA sporcata **ferma un collaudo
+> sano**, e la diagnosi punta sull'artefatto sbagliato: e' un giro a vuoto con
+> l'aria di una scoperta.
+>
+> 🔁 **E il corollario:** il token nuovo si sceglie **misurando** che non
+> collida (`88 stringhe? no: TUTTE`), e il gate di installazione lo **conta**
+> (qui: 10 righe con `*** ROSSO CANARINO ***`), cosi' un ritorno silenzioso al
+> token vecchio -- un merge, un copia-incolla da un gemello -- diventa **GATE
+> ROSSO** invece che un allarme che nessuno sapra' leggere.
