@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_DIAG_GBPUSD_v1
+#  MARCATORE_RIGA_DIAG_GBPUSD_v2
 #  RIGA_DIAG_GBPUSD.ps1  --  IL PIANO DIAGNOSTICO DELLA CELLA GBPUSD LENTA
 #  (report/DIAGNOSI_GBPUSD_LENTA_2026-09-02.md, paragrafo 5)
 # ---------------------------------------------------------------------
@@ -9,10 +9,18 @@
 #  storico il costo esplode. Produce un CRONOMETRO e una tabella di
 #  campioni del banco, non un P/L.
 #
-#  I TRE PASSI (uno per lancio, si scelgono con -Passo):
+#  I QUATTRO PASSI (uno per lancio, si scelgono con -Passo):
 #    A  rilegge l'ultimo censimento dello storico (scarica_storico.ps1
 #       -SoloReferto) e DATA il file prima di leggerlo. NON apre MT5.
-#       -> risponde a H2 (M1 vecchie di GBPUSD non piu' integre)
+#       -> primo sguardo su H2, e costa un minuto.
+#       ESITO GIA' AGLI ATTI (02/09 08:40): "GBPUSD M1 NON CENSITO" --
+#       il censimento piu' recente e' del 30/08 e contiene SOLO i tre
+#       indici. H2 e' rimasta APERTA, ed e' per questo che esiste A2.
+#    A2 MISURA FRESCA del pavimento M1 di GBPUSD ed EURUSD (li chiede
+#       nella STESSA corsa, dal 2010.01.01, SENZA tick). APRE MT5 ed e'
+#       questione di minuti.
+#       -> CHIUDE H2: pavimento dopo il 2011 = H2 confermata;
+#          pavimento prima del 2011 = H2 esclusa, restano H1 e H3.
 #    B  4 passate su GBPUSD nella finestra RECENTE 2024.10.01 ->
 #       2026.06.30, cioe' DENTRO la base a tick reali (pavimento
 #       MISURATO il 01/09: 2024.07.05, Diario del tester).
@@ -33,6 +41,13 @@
 #   1. IL GENERICO NON HA UN CRONOMETRO. Stampa "avvio N pass..." e poi
 #      aspetta in silenzio. Ma il numero che questa diagnosi cerca E'
 #      il tempo: senza cronometro la corsa non misura niente.
+#
+#   2-bis. E IL SUO CODICE DI USCITA, SU 5.1, PUO' NON ESSERCI. Misurato
+#      sul PC di Claudio il 02/09 alle 08:36: `Start-Process -PassThru`
+#      senza `-Wait` ha restituito ExitCode VUOTO anche a processo
+#      finito, e `$null -ne 0` e' VERO. Qui il codice di uscita ha TRE
+#      stati (0 / diverso da 0 / NON LETTO) e il verdetto si appoggia
+#      sempre a un ARTEFATTO DATATO, mai al numero.
 #
 #   2. IL GENERICO NON HA UN TIMEOUT. Fa (Start-Process ...).WaitForExit()
 #      e basta. L'ipotesi H1 dice che la corsa PUO' incagliarsi per ore
@@ -154,6 +169,9 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/" + $Pin
 $MetroSec      = 218.0        # 4 passate EURUSD su 15,5 anni
 $MetroAnni     = 15.5
 $TickPavimento = "2024.07.05" # MISURATO il 01/09 (Diario del tester), non dedotto
+# L'INIZIO DELLA FINESTRA DELLA SONDA, contro cui si giudica il pavimento
+# M1. E' scritto qui e non ereditato: e' il numero che decide H2.
+$FinestraSonda = [datetime]::ParseExact("2011.01.01","yyyy.MM.dd",$INV)
 
 # --- TUTTO CIO' CHE LA RACCOLTA USA NASCE QUI, PRIMA DEL try.
 #     In PowerShell una `function` non e' dichiarativa, e' un'ISTRUZIONE:
@@ -179,6 +197,11 @@ $EsitoCorsa = "NON ESEGUITA"
 $FrescoTxt  = "NON RAGGIUNTA (la corsa non e' arrivata a leggere nessun CSV)"
 $RigheCsv   = "n/d"
 $Gemelli    = "NON MISURATO (la corsa non e' arrivata a leggere il CSV)"
+$PavimentoTxt = "NON MISURATO (nessun pavimento M1 letto in questo giro)"
+$RadiciLog  = @()
+$LenPrima   = @{}
+$RcTxt      = "non pertinente (nessun processo figlio lanciato in questo passo)"
+$Secondi    = -1.0
 $LogRaccolti= -1
 $DaQuando   = ""
 $Fino       = ""
@@ -290,6 +313,319 @@ function Campiona([datetime]$t0,[string]$dataFolder,[string]$sym,[double]$netZer
 }
 
 # =====================================================================
+#  I LOG DEL TESTER. LE RADICI SONO CINQUE, e gli AGENT NON stanno sotto
+#  la cartella dati (checklist 34-ter: la radice sbagliata). Si fotografa
+#  la lunghezza PRIMA e si legge SOLO cio' che e' cresciuto: un file non
+#  cresciuto e' il log di IERI, e leggerlo da capo e' il difetto del
+#  18/08 (il "=== FINITO" di ieri preso per quello di oggi).
+# =====================================================================
+function FotografaLog([string]$dataFolder,[string]$instDir){
+  $script:RadiciLog = @(
+    (Join-Path $env:APPDATA "MetaQuotes\Tester"),
+    (Join-Path $dataFolder "Tester"),
+    (Join-Path $instDir "Tester"),
+    (Join-Path $dataFolder "Logs"),
+    (Join-Path $dataFolder "MQL5\Logs")
+  )
+  $script:LenPrima = @{}
+  foreach($rad in $script:RadiciLog){
+    if(-not (Test-Path -LiteralPath $rad)){ continue }
+    foreach($f in @(Get-ChildItem -LiteralPath $rad -Recurse -File -Filter "*.log" -ErrorAction SilentlyContinue)){
+      $script:LenPrima[$f.FullName] = $f.Length
+    }
+  }
+  Dico ("log gia' presenti nelle 5 radici, fotografati: " + $script:LenPrima.Count) "DarkGray"
+}
+
+function RaccogliLog(){
+  $script:LogRaccolti = 0
+  $pattern = 'tick|ticks|memory|generat|history|Symbol|core|agent|EURUSD|' + [regex]::Escape($Simbolo)
+  foreach($rad in $script:RadiciLog){
+    if(-not (Test-Path -LiteralPath $rad)){ continue }
+    foreach($f in @(Get-ChildItem -LiteralPath $rad -Recurse -File -Filter "*.log" -ErrorAction SilentlyContinue)){
+      $da = 0
+      if($script:LenPrima.ContainsKey($f.FullName)){ $da = [int64]$script:LenPrima[$f.FullName] }
+      if($f.Length -le $da){ continue }
+      $script:LogRaccolti++
+      $testo = ""
+      try{
+        $fs = New-Object System.IO.FileStream($f.FullName,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
+        if($da -gt 0){ [void]$fs.Seek($da,[System.IO.SeekOrigin]::Begin) }
+        $sr = New-Object System.IO.StreamReader($fs)
+        $testo = $sr.ReadToEnd(); $sr.Close(); $fs.Close()
+      }catch{}
+      foreach($l in ($testo -split "`r?`n")){
+        if($l -match $pattern){ [void]$RigheLog.Add(($f.Name + ": " + $l.Trim())) }
+      }
+      try{ Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Work ("log_" + $f.Name)) -Force -ErrorAction SilentlyContinue }catch{}
+    }
+  }
+  Dico ("log CRESCIUTI in questo giro (5 radici): " + $script:LogRaccolti + "   righe interessanti: " + $RigheLog.Count) "Cyan"
+  if($script:LogRaccolti -eq 0){
+    [void]$Rilievi.Add("NESSUN log e' cresciuto durante questo giro nelle cinque radici scandite (" + ($script:RadiciLog -join " ; ") + "). Zero non vuol dire 'non e' successo niente': vuol dire che non ho trovato traccia scritta. Il conteggio dei tick e l'eventuale 'no memory for ticks generating' vanno cercati a mano nel Diario di MT5.")
+  }
+}
+
+# =====================================================================
+#  IL TERMINALE. UN SOLO SELETTORE PER TUTTI I PASSI, ed e' copiato
+#  RIGA PER RIGA da walkforward_generico.ps1 (righe 545-548) e da
+#  RIGA_SONDA_OROLOGIO.ps1 (681-683). Su una macchina con due istanze
+#  due selettori diversi scelgono terminali diversi: e' il punto 37.
+# =====================================================================
+function TrovaTerminale(){
+  $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
+  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+  if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+  if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1 (righe 545-548)." }
+  $inst = $cand.DirectoryName
+  $tr   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  $dati = (Get-ChildItem -LiteralPath $tr -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path -LiteralPath $o) -and ((Get-Content -LiteralPath $o -Raw).Trim() -ieq $inst) } | Select-Object -First 1 -ExpandProperty FullName)
+  if(-not $dati){ throw ("cartella dati MT5 non trovata per " + $inst) }
+  return @{ Inst=$inst; Dati=$dati }
+}
+
+# =====================================================================
+#  LANCIA UN FIGLIO CON GUARDIA DI TEMPO E CAMPIONAMENTO DEL BANCO,
+#  E LEGGE IL CODICE DI USCITA IN MODO **5.1-SAFE**.
+# ---------------------------------------------------------------------
+#  DIFETTO PAGATO IL 02/09/2026, ORE 08:36, SUL PC DI CLAUDIO (v1 di
+#  questa stessa riga -- primo giro a vuoto):
+#    Windows PowerShell 5.1 ha restituito **ExitCode VUOTO** ($null) su
+#    un processo avviato con `Start-Process -PassThru` senza `-Wait`,
+#    ANCHE dopo che `$proc.HasExited` era diventato vero. La v1 faceva
+#      try{ $rc = $proc.ExitCode }catch{ $rc = -1 };  if($rc -ne 0){ ... }
+#    e su PowerShell **`$null -ne 0` e' VERO**: il giro a vuoto e'
+#    uscito "FERMATA DAL DRIVER GENERICO (codice )" -- con la parentesi
+#    VUOTA -- mentre il driver generico aveva fatto tutto giusto in 9,1
+#    secondi. Un FALSO ALLARME che ha bloccato la serata.
+#  LE DUE REGOLE CHE NE ESCONO, applicate qui:
+#   1. TRE STATI, NON DUE: 0 / N diverso da 0 / **NON LETTO**. Un codice
+#      non letto NON e' un fallimento, ed esce scritto "NON LETTO" nel
+#      referto, mai come una parentesi vuota che nessuno sa leggere.
+#   2. IL VERDETTO NON SI APPOGGIA AL NUMERO, SI APPOGGIA A UN
+#      **ARTEFATTO DATATO**. Il codice di uscita, quando c'e', conferma;
+#      quando non c'e', si tira avanti e decide l'artefatto.
+# =====================================================================
+function EseguiConGuardia($argv,[string]$dataFolder,[string]$sym){
+  $tCorsa  = Get-Date
+  $netZero = BytesRete
+  $proc = Start-Process -FilePath "powershell" -ArgumentList $argv -NoNewWindow -PassThru
+  $scade = $tCorsa.AddMinutes($TimeoutMin)
+  $incagliata = $false
+  $prossimo = (Get-Date).AddSeconds($CampioneSec)
+  while(-not $proc.HasExited){
+    Start-Sleep -Milliseconds 500
+    if((Get-Date) -ge $prossimo){
+      $riga = Campiona $tCorsa $dataFolder $sym $netZero
+      [void]$Campioni.Add($riga)
+      Write-Host $riga -ForegroundColor DarkCyan
+      $prossimo = (Get-Date).AddSeconds($CampioneSec)
+    }
+    if((Get-Date) -ge $scade){ $incagliata = $true; break }
+  }
+  $sec = (New-TimeSpan -Start $tCorsa -End (Get-Date)).TotalSeconds
+  $rc = -1; $rcLetto = $false; $rcTxt = ""
+  if($incagliata){
+    $riga = Campiona $tCorsa $dataFolder $sym $netZero
+    [void]$Campioni.Add("ULTIMO CAMPIONE PRIMA DI FERMARE: " + $riga)
+    Write-Host ""
+    Dico ("TETTO DI " + $TimeoutMin + " MINUTI SFONDATO: fermo tutto. QUESTO E' IL RISULTATO, non un guasto.") "Red"
+    try{ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }catch{}
+    Start-Sleep -Seconds 2
+    Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 3
+    $rcTxt = "non pertinente: la corsa e' stata FERMATA dal tetto, non e' uscita da sola"
+  }
+  else{
+    # WaitForExit() su un processo gia' uscito costa zero e FORZA la
+    # sincronizzazione dell'oggetto: e' il gesto che su 5.1 fa la
+    # differenza fra un ExitCode leggibile e uno vuoto. Non basta da
+    # solo -- per questo sotto c'e' comunque il ramo "NON LETTO".
+    try{ $proc.WaitForExit() }catch{}
+    try{ $proc.Refresh() }catch{}
+    $grezzo = $null
+    try{ $grezzo = $proc.ExitCode }catch{ $grezzo = $null }
+    if($null -ne $grezzo -and (("" + $grezzo).Trim()) -match '^-?\d+$'){
+      $rc = [int](("" + $grezzo).Trim()); $rcLetto = $true; $rcTxt = "" + $rc
+    }
+    else{
+      # LA RIGA DEL REFERTO RESTA CORTA E LEGGIBILE; la spiegazione lunga
+      # sta UNA volta sola, nei RILIEVI. Un referto in cui una riga di
+      # intestazione e' un paragrafo non lo rilegge nessuno.
+      $rcTxt = "NON LETTO (ExitCode vuoto su PS 5.1) -- NON e' un fallimento: vedi RILIEVI"
+      [void]$Rilievi.Add("CODICE DI USCITA DEL FIGLIO NON LEGGIBILE (ExitCode vuoto su Windows PowerShell 5.1, Start-Process -PassThru). Non e' un fallimento e non e' un successo: e' un dato che non c'e'. Il verdetto di questo passo e' stato preso sugli ARTEFATTI datati (vedi le righe 'date:' / 'righe:' qui sotto), come prescrive la regola.")
+    }
+    Dico ("figlio uscito dopo " + (Fmt1 $sec) + " s -- codice di uscita: " + $rcTxt) "Cyan"
+  }
+  return @{ TCorsa=$tCorsa; Secondi=$sec; Incagliata=$incagliata; Rc=$rc; RcLetto=$rcLetto; RcTxt=$rcTxt }
+}
+
+# =====================================================================
+#  LEGGI IL CENSIMENTO DELLO STORICO -- la usano il PASSO A (rilettura di
+#  quello che c'e' gia') e il PASSO A2 (misura appena fatta).
+#    $tMin = $null  -> si legge il piu' recente e se ne DICHIARA l'eta'
+#    $tMin = data   -> il CSV DEVE essere piu' NUOVO di quella data:
+#                      se e' piu' vecchio e' di un ALTRO giro e NON si
+#                      legge (classe CSV stantio del 31/08).
+#  Scrive in $script:EsitoCorsa e $script:PavimentoTxt; riempie
+#  $CensRighe / $Problemi / $Artefatti, che sono ArrayList: si MUTANO,
+#  non si riassegnano, quindi dalla funzione si vedono senza $script:.
+# =====================================================================
+function CensimentoLeggi($tMin){
+  $fresco = ($null -ne $tMin)
+  $tag = 'A'
+  if($fresco){ $tag = 'A2' }
+  $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  $trovati = @()
+  if(Test-Path -LiteralPath $termRoot){
+    $trovati = @(Get-ChildItem -LiteralPath $termRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+      $csv = Join-Path $_.FullName "MQL5\Files\ABTG_StoricoScaricato.csv"
+      if(Test-Path -LiteralPath $csv){
+        $org = "origin.txt assente"
+        $o = Join-Path $_.FullName "origin.txt"
+        if(Test-Path -LiteralPath $o){ try{ $org = (Get-Content -LiteralPath $o -Raw).Trim() }catch{} }
+        [pscustomobject]@{ Csv=$csv; Origine=$org; Quando=(Get-Item -LiteralPath $csv).LastWriteTime }
+      }
+    })
+  }
+  if(@($trovati).Count -eq 0){
+    $script:EsitoCorsa = "" + $tag + ": CENSIMENTO ASSENTE"
+    [void]$Problemi.Add("Nessun ABTG_StoricoScaricato.csv sotto " + $termRoot + ": il censimento dello storico NON esiste su questa macchina. Il pavimento M1 di " + $Simbolo + " non e' misurato, e H2 resta APERTA. Prossimo passo: scarica_storico.ps1 -Simboli " + [char]34 + "GBPUSD,EURUSD" + [char]34 + " -SenzaTick (minuti, apre MT5).")
+    Dico "NESSUN CENSIMENTO TROVATO." "Red"
+  }
+  else{
+    foreach($t in @($trovati | Sort-Object Quando -Descending)){
+      $eta = (New-TimeSpan -Start $t.Quando -End $Avvio).TotalDays
+      [void]$CensRighe.Add("CSV: " + $t.Csv)
+      [void]$CensRighe.Add("  origine ......... " + $t.Origine)
+      [void]$CensRighe.Add("  scritto il ...... " + $t.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (" + (Fmt1 $eta) + " giorni fa)")
+      Dico ("censimento: " + $t.Csv) "Cyan"
+      Dico ("  scritto il " + $t.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + " (" + (Fmt1 $eta) + " giorni fa) -- origine " + $t.Origine) "Yellow"
+    }
+    # SI LEGGE IL PIU' RECENTE, e si dice che e' quello.
+    $capo = @($trovati | Sort-Object Quando -Descending)[0]
+    $etaCapo = (New-TimeSpan -Start $capo.Quando -End $Avvio).TotalDays
+    # --- IL CANCELLO DI FRESCHEZZA DEL PASSO A2. Qui non e' una nota:
+    #     se il CSV e' PRECEDENTE all'avvio della misura, la misura NON
+    #     e' avvenuta e questo file e' quello di prima. Si esce senza
+    #     leggere nemmeno una riga: leggerlo darebbe numeri plausibili e
+    #     di un altro giorno (classe CSV stantio del 31/08).
+    if($fresco -and $capo.Quando -lt $tMin){
+      [void]$CensRighe.Add("")
+      [void]$CensRighe.Add("!!! CSV STANTIO: scritto il " + $capo.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ", cioe' PRIMA dell'avvio di questa misura (" + ([datetime]$tMin).ToString("yyyy-MM-dd HH:mm:ss",$INV) + ").")
+      [void]$CensRighe.Add("    NON e' stato letto: e' il censimento di PRIMA.")
+      $script:EsitoCorsa = "" + $tag + ": CSV STANTIO (la misura non ha prodotto niente)"
+      $script:PavimentoTxt = "NON MISURATO: il CSV e' quello di prima (vedi PROBLEMI)."
+      [void]$Problemi.Add("IL CENSIMENTO NON E' STATO RISCRITTO: il CSV e' del " + $capo.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ", questa misura e' partita alle " + ([datetime]$tMin).ToString("yyyy-MM-dd HH:mm:ss",$INV) + ". Vuol dire che ABTG_HistoryDownloader non e' mai arrivato a scrivere (MT5 non e' partito, lo script non e' stato eseguito dal profilo, la compilazione e' fallita). Il pavimento M1 di " + $Simbolo + " resta NON MISURATO e H2 resta APERTA. Guarda i log nello zip.")
+      [void]$Artefatti.Add($capo.Csv)
+      return
+    }
+    $righeCens = @()
+    try{ $righeCens = @(Import-Csv -LiteralPath $capo.Csv) }catch{ $righeCens = @() }
+    [void]$CensRighe.Add("")
+    [void]$CensRighe.Add("LETTO IL PIU' RECENTE: " + $capo.Csv + "  (" + $capo.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ")")
+    [void]$CensRighe.Add("righe totali: " + @($righeCens).Count)
+    if(@($righeCens).Count -eq 0){
+      $script:EsitoCorsa = "" + $tag + ": CENSIMENTO ILLEGGIBILE"
+      [void]$Problemi.Add("Il CSV del censimento c'e' (" + $capo.Csv + ", del " + $capo.Quando.ToString("yyyy-MM-dd HH:mm",$INV) + ") ma NON si legge come CSV o e' vuoto: il pavimento M1 di " + $Simbolo + " resta NON MISURATO.")
+    }
+    else{
+      $cols = @($righeCens[0].PSObject.Properties.Name)
+      [void]$CensRighe.Add("colonne: " + ($cols -join " | "))
+      # Le colonne si cercano PER NOME. Se mancano, e' un PROBLEMA, non
+      # un trattino silenzioso (punto 80).
+      $manc = @()
+      foreach($c in @("Simbolo","Timeframe","PrimaDataLocale")){ if($cols -notcontains $c){ $manc += $c } }
+      if(@($manc).Count -gt 0){
+        $script:EsitoCorsa = "" + $tag + ": CENSIMENTO SENZA LE COLONNE ATTESE"
+        [void]$Problemi.Add("Il censimento non ha le colonne " + ($manc -join ", ") + ": intestazioni viste = " + ($cols -join " | ") + ". Non si legge nessun pavimento da questo file.")
+      }
+      else{
+        $simIntr = @($Simbolo,"EURUSD")
+        $vistoBersaglio = $false
+        # LE RIGHE SI CONTANO, non si fa Test-Path sul file: la classe
+        # 106 dice che il file c'e' sempre e parla dei simboli dell'ULTIMA
+        # corsa. La domanda e' "c'e' la RIGA <SIM> M1?", e per il passo A2
+        # la risposta deve essere SI per TUTTI E DUE i simboli, perche'
+        # scarica_storico.ps1 azzera il CSV (riga 230): se li avessimo
+        # chiesti in due lanci, il secondo avrebbe cancellato il primo.
+        $nM1 = @{}
+        foreach($s in $simIntr){ $nM1[$s] = 0 }
+        [void]$CensRighe.Add("")
+        [void]$CensRighe.Add("RIGHE M1 DEI SIMBOLI CHE CONTANO:")
+        Write-Host ""
+        Write-Host "    simbolo  TF   barre        PrimaDataLocale   PrimaDataServer   verdetto" -ForegroundColor Gray
+        foreach($s in $simIntr){
+          $rr = @($righeCens | Where-Object { ("" + $_.Simbolo).Trim() -ieq $s -and ("" + $_.Timeframe).Trim() -ieq "M1" })
+          if(@($rr).Count -eq 0){
+            [void]$CensRighe.Add("  " + $s + " M1: NON CENSITO (nessuna riga in questo CSV)")
+            Write-Host ("    " + $s + "  M1   -- NON CENSITO in questo CSV --") -ForegroundColor Red
+            if($s -ieq $Simbolo){
+              [void]$Problemi.Add($s + " M1 NON E' NEL CENSIMENTO piu' recente (" + $capo.Quando.ToString("yyyy-MM-dd HH:mm",$INV) + "): scarica_storico.ps1 cancella il CSV a ogni corsa (riga 230) e ci mette SOLO i simboli di QUELLA corsa. Un referto 'tutto COMPLETO' su altri simboli NON dice niente su " + $s + ". Il pavimento M1 di " + $s + " resta NON MISURATO e H2 resta APERTA: la misura fresca e' scarica_storico.ps1 -Simboli " + [char]34 + "GBPUSD,EURUSD" + [char]34 + " -SenzaTick (minuti, apre MT5).")
+            }
+          }
+          else{
+            $nM1[$s] = @($rr).Count
+            foreach($r in $rr){
+              $vistoBersaglio = $true
+              $barre = "" + $r.Barre
+              $pdl   = ("" + $r.PrimaDataLocale).Trim()
+              $pds   = ""
+              if($cols -contains "PrimaDataServer"){ $pds = ("" + $r.PrimaDataServer).Trim() }
+              $vrd   = ""
+              if($cols -contains "Verdetto"){ $vrd = ("" + $r.Verdetto).Trim() }
+              [void]$CensRighe.Add("  " + $s + " M1: barre " + $barre + " | PrimaDataLocale " + $pdl + " | PrimaDataServer " + $pds + " | " + $vrd)
+              Write-Host ("    " + $s + "  M1   " + $barre + "   " + $pdl + "   " + $pds + "   " + $vrd) -ForegroundColor White
+              if($s -ieq $Simbolo){
+                # IL CONFRONTO CHE DECIDE H2: il pavimento M1 LOCALE
+                # contro il 2011.01.01 della finestra della sonda.
+                $d = $null
+                try{ $d = [datetime]::ParseExact($pdl.Substring(0,10),"yyyy.MM.dd",$INV) }catch{
+                  try{ $d = [datetime]::Parse($pdl,$INV) }catch{ $d = $null }
+                }
+                if($null -eq $d){
+                  [void]$Problemi.Add($s + " M1: PrimaDataLocale = '" + $pdl + "' non si legge come data. Il pavimento resta NON MISURATO.")
+                }
+                elseif($d -gt $FinestraSonda){
+                  $script:PavimentoTxt = "PAVIMENTO M1 LOCALE DI " + $s + " = " + $d.ToString("yyyy.MM.dd",$INV) + "  ->  E' DOPO il " + $FinestraSonda.ToString("yyyy.MM.dd",$INV) + " della finestra della sonda."
+                  if($fresco){ $script:PavimentoTxt = $script:PavimentoTxt + "  ==> H2 CONFERMATA." }
+                  else       { $script:PavimentoTxt = $script:PavimentoTxt + "  (misura VECCHIA: indizio per H2, non conferma.)" }
+                  [void]$Problemi.Add("PAVIMENTO M1 LOCALE DI " + $s + " = " + $d.ToString("yyyy.MM.dd",$INV) + ", cioe' DOPO il " + $FinestraSonda.ToString("yyyy.MM.dd",$INV) + " su cui gira la finestra della sonda. E' la predizione P2a. Il pavimento si MISURA e la finestra si DICHIARA da li' (regola di casa: la profondita' si misura, non si assume).")
+                }
+                else{
+                  $script:PavimentoTxt = "PAVIMENTO M1 LOCALE DI " + $s + " = " + $d.ToString("yyyy.MM.dd",$INV) + "  ->  COPRE il " + $FinestraSonda.ToString("yyyy.MM.dd",$INV) + " della finestra della sonda."
+                  if($fresco){ $script:PavimentoTxt = $script:PavimentoTxt + "  ==> H2 ESCLUSA: le M1 ci sono. Restano H1 e H3, e le decidono i PASSI B e C." }
+                  else       { $script:PavimentoTxt = $script:PavimentoTxt + "  (misura VECCHIA: non chiude H2, che chiede 'ci sono ANCORA?'.)" }
+                  Dico ("pavimento M1 locale di " + $s + " = " + $d.ToString("yyyy.MM.dd",$INV) + ": COPRE il " + $FinestraSonda.ToString("yyyy.MM.dd",$INV) + " della finestra della sonda.") "Green"
+                }
+              }
+            }
+          }
+        }
+        [void]$CensRighe.Add("")
+        [void]$CensRighe.Add("conteggio righe M1: " + (($simIntr | ForEach-Object { $_ + "=" + $nM1[$_] }) -join "  "))
+        # --- IL PASSO A2 PRETENDE TUTTI E DUE I SIMBOLI, e li pretende
+        #     nella STESSA corsa: uno solo vorrebbe dire che il confronto
+        #     GBPUSD-contro-EURUSD, che e' meta' della domanda, non si puo'
+        #     fare -- e rifarlo dopo cancellerebbe questo (classe 106).
+        if($fresco){
+          $mancaM1 = @($simIntr | Where-Object { $nM1[$_] -lt 1 })
+          if(@($mancaM1).Count -gt 0){
+            [void]$Problemi.Add("LA MISURA FRESCA NON HA PRODOTTO LA RIGA M1 DI: " + ($mancaM1 -join ", ") + " (conteggio: " + (($simIntr | ForEach-Object { $_ + "=" + $nM1[$_] }) -join ", ") + "). Il downloader non e' arrivato in fondo su quel simbolo. ATTENZIONE: non basta rilanciare per il simbolo mancante -- scarica_storico.ps1 AZZERA il CSV a ogni corsa (riga 230), quindi si rilancia il PASSO A2 INTERO, con tutti e due i simboli insieme.")
+          }
+        }
+        if($etaCapo -gt 2.0 -and -not $fresco){
+          [void]$Problemi.Add("CENSIMENTO STANTIO: il CSV letto e' del " + $capo.Quando.ToString("yyyy-MM-dd HH:mm",$INV) + ", cioe' " + (Fmt1 $etaCapo) + " giorni fa. Dice cosa c'era sul disco ALLORA, non oggi -- ed e' esattamente la domanda di H2 ('ci sono ANCORA?'). Si legge come indizio, non come misura di oggi.")
+        }
+        if($vistoBersaglio -and $Problemi.Count -eq 0){ $script:EsitoCorsa = "" + $tag + ": CENSIMENTO LETTO E FRESCO" }
+        elseif($vistoBersaglio){ $script:EsitoCorsa = "" + $tag + ": CENSIMENTO LETTO CON RISERVE" }
+        else{ $script:EsitoCorsa = "" + $tag + ": " + $Simbolo + " M1 NON CENSITO" }
+      }
+    }
+    [void]$Artefatti.Add($capo.Csv)
+  }
+}
+# =====================================================================
 #  LE DUE FINESTRE, SCRITTE QUI E NON EREDITATE DA NESSUN DEFAULT.
 #  Classe del 31/08: "nessuna data di un wrapper e' un default
 #  ereditato". Che 2026.06.30 sia anche il default di
@@ -305,7 +641,8 @@ if($Passo -eq "C"){
   $DaQuando = "2011.01.01"; $Fino = "2013.01.01"; $Etichetta = "diagC_vecchia"
   $Titolo = "C -- FINESTRA VECCHIA (SOLO tick GENERATI dalle barre M1)"
 }
-if($Passo -eq "A"){ $Titolo = "A -- CENSIMENTO DELLO STORICO GIA' FATTO (nessun MT5 aperto)" }
+if($Passo -eq "A"){  $Titolo = "A -- CENSIMENTO DELLO STORICO GIA' FATTO (nessun MT5 aperto)" }
+if($Passo -eq "A2"){ $Titolo = "A2 -- CENSIMENTO FRESCO: misura del PAVIMENTO M1 di " + $Simbolo + " e EURUSD (APRE MT5, minuti)" }
 
 try{
   Testata ("DIAGNOSI GBPUSD LENTA -- PASSO " + $Passo)
@@ -315,7 +652,7 @@ try{
   # -------------------------------------------------------------------
   if($Pin -eq ""){ throw "-Pin obbligatorio: senza, girerebbe la punta del branch spacciandola per un commit congelato." }
   if($Pin -notmatch '^[0-9a-f]{40}$'){ throw ("-Pin deve essere un commit di 40 caratteri esadecimali, ricevuto: " + $Pin) }
-  if(@("A","B","C") -notcontains $Passo){ throw ("-Passo deve essere A, B o C, ricevuto: '" + $Passo + "'. A = censimento storico (non apre MT5); B = 4 passate finestra RECENTE; C = 4 passate finestra VECCHIA.") }
+  if(@("A","A2","B","C") -notcontains $Passo){ throw ("-Passo deve essere A, A2, B o C, ricevuto: '" + $Passo + "'. A = rilettura del censimento gia' fatto (NON apre MT5); A2 = censimento FRESCO, misura del pavimento M1 (APRE MT5, minuti); B = 4 passate finestra RECENTE; C = 4 passate finestra VECCHIA.") }
   if($Simbolo -notmatch '^[A-Za-z0-9_]{3,20}$'){ throw ("-Simbolo non e' un simbolo: '" + $Simbolo + "'") }
   if($TimeoutMin -lt 1 -or $TimeoutMin -gt 180){ throw ("-TimeoutMin fuori scala: " + $TimeoutMin + " (ammessi 1-180)") }
   if($CampioneSec -lt 5 -or $CampioneSec -gt 120){ throw ("-CampioneSec fuori scala: " + $CampioneSec + " (ammessi 5-120)") }
@@ -370,9 +707,20 @@ try{
 
     Testata "A2. IL REFERTO UFFICIALE (scarica_storico.ps1 -SoloReferto)"
     Write-Host "    (questo ramo NON apre MT5: legge il CSV e stampa. Vedi -SoloReferto, riga 132)" -ForegroundColor DarkGray
+    # IL CODICE DI USCITA SI LEGGE IN MODO 5.1-SAFE ANCHE QUI, dove non
+    # e' un gate: su Windows PowerShell 5.1 $LASTEXITCODE puo' restare
+    # $null (prima invocazione della sessione, o figlio che non lo
+    # imposta), e "" + $null stampa il VUOTO -- cioe' una riga di referto
+    # che nessuno sa leggere. Tre stati, non due: qui e ovunque.
     $global:LASTEXITCODE = 0
     & powershell @("-ExecutionPolicy","Bypass","-File",('"' + $ss + '"'),"-SoloReferto")
-    $rcSs = $LASTEXITCODE
+    $grezzoSs = $LASTEXITCODE
+    $rcSs = "NON LETTO"
+    if($null -ne $grezzoSs -and (("" + $grezzoSs).Trim()) -match '^-?\d+$'){ $rcSs = ("" + $grezzoSs).Trim() }
+    # E LA RIGA DEL REFERTO DICE CHE UN FIGLIO C'E' STATO: lasciarla al
+    # valore di partenza ("nessun processo figlio lanciato") negherebbe
+    # agli atti una chiamata che invece e' avvenuta (punto 94).
+    $RcTxt = $rcSs + "  (scarica_storico.ps1 -SoloReferto; NON e' un gate, vedi RILIEVI)"
     # IL CODICE DI USCITA DI QUESTO RAMO NON E' UN GATE, ED E' MISURATO:
     # scarica_storico.ps1 riga 132 fa "Mostra-Referto; exit 0" SEMPRE,
     # anche quando il CSV non esiste o non e' leggibile. Quindi "esce 0"
@@ -381,123 +729,130 @@ try{
     [void]$Rilievi.Add("scarica_storico.ps1 -SoloReferto esce SEMPRE 0 (riga 132: 'Mostra-Referto; exit 0'), anche a CSV assente o illeggibile: il suo codice di uscita (" + $rcSs + ") NON e' il verdetto del PASSO A. Il verdetto lo da' la lettura DATATA qui sotto.")
 
     Testata "A3. IL CSV DEL CENSIMENTO: DOVE STA, DI QUANDO E', COSA CONTIENE"
-    # SI ENUMERANO TUTTE le cartelle dati: se sul PC ci sono due
-    # terminali (BCM e BCM-V3) i censimenti sono DUE, e leggere quello
-    # sbagliato e' il difetto del punto 37 con un file al posto di un
-    # eseguibile. Qui si vedono tutti, con la loro origine e la loro data.
-    $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-    $trovati = @()
-    if(Test-Path -LiteralPath $termRoot){
-      $trovati = @(Get-ChildItem -LiteralPath $termRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-        $csv = Join-Path $_.FullName "MQL5\Files\ABTG_StoricoScaricato.csv"
-        if(Test-Path -LiteralPath $csv){
-          $org = "origin.txt assente"
-          $o = Join-Path $_.FullName "origin.txt"
-          if(Test-Path -LiteralPath $o){ try{ $org = (Get-Content -LiteralPath $o -Raw).Trim() }catch{} }
-          [pscustomobject]@{ Csv=$csv; Origine=$org; Quando=(Get-Item -LiteralPath $csv).LastWriteTime }
-        }
-      })
-    }
-    if(@($trovati).Count -eq 0){
-      $EsitoCorsa = "A: CENSIMENTO ASSENTE"
-      [void]$Problemi.Add("Nessun ABTG_StoricoScaricato.csv sotto " + $termRoot + ": il censimento dello storico NON esiste su questa macchina. Il pavimento M1 di " + $Simbolo + " non e' misurato, e H2 resta APERTA. Prossimo passo: scarica_storico.ps1 -Simboli " + [char]34 + "GBPUSD,EURUSD" + [char]34 + " -SenzaTick (minuti, apre MT5).")
-      Dico "NESSUN CENSIMENTO TROVATO." "Red"
-    }
-    else{
-      foreach($t in @($trovati | Sort-Object Quando -Descending)){
-        $eta = (New-TimeSpan -Start $t.Quando -End $Avvio).TotalDays
-        [void]$CensRighe.Add("CSV: " + $t.Csv)
-        [void]$CensRighe.Add("  origine ......... " + $t.Origine)
-        [void]$CensRighe.Add("  scritto il ...... " + $t.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (" + (Fmt1 $eta) + " giorni fa)")
-        Dico ("censimento: " + $t.Csv) "Cyan"
-        Dico ("  scritto il " + $t.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + " (" + (Fmt1 $eta) + " giorni fa) -- origine " + $t.Origine) "Yellow"
+    CensimentoLeggi $null
+  }
+
+  # ===================================================================
+  #  PASSO A2 -- IL CENSIMENTO FRESCO (apre MT5, minuti)
+  # ===================================================================
+  #  Nasce dal risultato del PASSO A del 02/09 mattina: "GBPUSD M1 NON
+  #  CENSITO". Il censimento piu' recente sul PC di backtest e' del
+  #  30/08 e contiene SOLO i tre indici -- conferma piena della classe
+  #  106 (l'artefatto che si svuota a ogni corsa letto come registro).
+  #  Quindi il pavimento M1 di GBPUSD non e' MAI stato misurato su quel
+  #  terminale, e H2 e' rimasta APERTA: qui si chiude.
+  #
+  #  DUE COSE CHE QUESTO PASSO DEVE FARE E CHE NESSUNO FAREBBE DA SOLO:
+  #   1. I DUE SIMBOLI NELLA STESSA CORSA. scarica_storico.ps1 riga 230
+  #      CANCELLA il CSV all'inizio: se GBPUSD ed EURUSD si chiedessero
+  #      in due lanci, il secondo cancellerebbe il primo e li avremmo
+  #      di nuovo non confrontabili. Un solo -Simboli "GBPUSD,EURUSD".
+  #   2. IL PIN DEVE COPRIRE ANCHE IL .mq5 CHE LO SCRIPT SI SCARICA DA
+  #      SOLO (punto 24: il pin che non copre il pezzo piu' importante
+  #      perche' lo scarica il gemello). scarica_storico.ps1 riga 55 ha
+  #      $EABranch = "lavoro" e da li' prende ABTG_HistoryDownloader.mq5:
+  #      senza riscrivere quella riga, il pin varrebbe per il driver e
+  #      NON per lo strumento che fa la misura.
+  # ===================================================================
+  if($Passo -eq "A2"){
+    Testata "A2-1. SCARICO E PINNO scarica_storico.ps1"
+    $ss = Join-Path $Work "scarica_storico.ps1"
+    Scarica ($RawPin + "/backtest_pipeline/scarica_storico.ps1") $ss
+    $txtSs = Get-Content -LiteralPath $ss -Raw
+    # I PARAMETRI ESISTONO DAVVERO? Si guarda il param(), non i commenti.
+    # E qui morde: questo script NON ha [CmdletBinding()], quindi NON
+    # rifiuta i parametri che non conosce (punto 71). Un refuso in
+    # -SenzaTick lo farebbe scaricare anche i TICK: da minuti a ore.
+    foreach($sw in @('SenzaTick','Auto','ChiudiMT5','SoloReferto')){
+      if($txtSs -notmatch ('(?m)^\s*\[switch\]\s*\$' + $sw + '\s*,?\s*$')){
+        throw ("scarica_storico.ps1 al pin NON dichiara [switch] $" + $sw + " nel param(): non lancio niente. Questo script non ha [CmdletBinding()], quindi un interruttore che non esiste verrebbe IGNORATO IN SILENZIO -- e senza -SenzaTick scaricherebbe anche i tick, che sono ore.")
       }
-      # SI LEGGE IL PIU' RECENTE, e si dice che e' quello.
-      $capo = @($trovati | Sort-Object Quando -Descending)[0]
-      $etaCapo = (New-TimeSpan -Start $capo.Quando -End $Avvio).TotalDays
-      $righeCens = @()
-      try{ $righeCens = @(Import-Csv -LiteralPath $capo.Csv) }catch{ $righeCens = @() }
-      [void]$CensRighe.Add("")
-      [void]$CensRighe.Add("LETTO IL PIU' RECENTE: " + $capo.Csv + "  (" + $capo.Quando.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ")")
-      [void]$CensRighe.Add("righe totali: " + @($righeCens).Count)
-      if(@($righeCens).Count -eq 0){
-        $EsitoCorsa = "A: CENSIMENTO ILLEGGIBILE"
-        [void]$Problemi.Add("Il CSV del censimento c'e' (" + $capo.Csv + ", del " + $capo.Quando.ToString("yyyy-MM-dd HH:mm",$INV) + ") ma NON si legge come CSV o e' vuoto: il pavimento M1 di " + $Simbolo + " resta NON MISURATO.")
-      }
-      else{
-        $cols = @($righeCens[0].PSObject.Properties.Name)
-        [void]$CensRighe.Add("colonne: " + ($cols -join " | "))
-        # Le colonne si cercano PER NOME. Se mancano, e' un PROBLEMA, non
-        # un trattino silenzioso (punto 80).
-        $manc = @()
-        foreach($c in @("Simbolo","Timeframe","PrimaDataLocale")){ if($cols -notcontains $c){ $manc += $c } }
-        if(@($manc).Count -gt 0){
-          $EsitoCorsa = "A: CENSIMENTO SENZA LE COLONNE ATTESE"
-          [void]$Problemi.Add("Il censimento non ha le colonne " + ($manc -join ", ") + ": intestazioni viste = " + ($cols -join " | ") + ". Non si legge nessun pavimento da questo file.")
-        }
-        else{
-          $simIntr = @($Simbolo,"EURUSD")
-          $vistoBersaglio = $false
-          [void]$CensRighe.Add("")
-          [void]$CensRighe.Add("RIGHE M1 DEI SIMBOLI CHE CONTANO:")
-          Write-Host ""
-          Write-Host "    simbolo  TF   barre        PrimaDataLocale   PrimaDataServer   verdetto" -ForegroundColor Gray
-          foreach($s in $simIntr){
-            $rr = @($righeCens | Where-Object { ("" + $_.Simbolo).Trim() -ieq $s -and ("" + $_.Timeframe).Trim() -ieq "M1" })
-            if(@($rr).Count -eq 0){
-              [void]$CensRighe.Add("  " + $s + " M1: NON CENSITO (nessuna riga in questo CSV)")
-              Write-Host ("    " + $s + "  M1   -- NON CENSITO in questo CSV --") -ForegroundColor Red
-              if($s -ieq $Simbolo){
-                [void]$Problemi.Add($s + " M1 NON E' NEL CENSIMENTO piu' recente (" + $capo.Quando.ToString("yyyy-MM-dd HH:mm",$INV) + "): scarica_storico.ps1 cancella il CSV a ogni corsa (riga 230) e ci mette SOLO i simboli di QUELLA corsa. Un referto 'tutto COMPLETO' su altri simboli NON dice niente su " + $s + ". Il pavimento M1 di " + $s + " resta NON MISURATO e H2 resta APERTA: la misura fresca e' scarica_storico.ps1 -Simboli " + [char]34 + "GBPUSD,EURUSD" + [char]34 + " -SenzaTick (minuti, apre MT5).")
-              }
-            }
-            else{
-              foreach($r in $rr){
-                $vistoBersaglio = $true
-                $barre = "" + $r.Barre
-                $pdl   = ("" + $r.PrimaDataLocale).Trim()
-                $pds   = ""
-                if($cols -contains "PrimaDataServer"){ $pds = ("" + $r.PrimaDataServer).Trim() }
-                $vrd   = ""
-                if($cols -contains "Verdetto"){ $vrd = ("" + $r.Verdetto).Trim() }
-                [void]$CensRighe.Add("  " + $s + " M1: barre " + $barre + " | PrimaDataLocale " + $pdl + " | PrimaDataServer " + $pds + " | " + $vrd)
-                Write-Host ("    " + $s + "  M1   " + $barre + "   " + $pdl + "   " + $pds + "   " + $vrd) -ForegroundColor White
-                if($s -ieq $Simbolo){
-                  # IL CONFRONTO CHE DECIDE H2: il pavimento M1 LOCALE
-                  # contro il 2011.01.01 della finestra della sonda.
-                  $d = $null
-                  try{ $d = [datetime]::ParseExact($pdl.Substring(0,10),"yyyy.MM.dd",$INV) }catch{
-                    try{ $d = [datetime]::Parse($pdl,$INV) }catch{ $d = $null }
-                  }
-                  if($null -eq $d){
-                    [void]$Problemi.Add($s + " M1: PrimaDataLocale = '" + $pdl + "' non si legge come data. Il pavimento resta NON MISURATO.")
-                  }
-                  elseif($d -gt [datetime]::ParseExact("2011.01.01","yyyy.MM.dd",$INV)){
-                    [void]$Problemi.Add("PAVIMENTO M1 LOCALE DI " + $s + " = " + $d.ToString("yyyy.MM.dd",$INV) + ", cioe' DOPO il 2011.01.01 su cui gira la finestra della sonda. E' la predizione P2a: la finestra della sonda parte da dove i dati non ci sono. Il pavimento si MISURA e la finestra si DICHIARA da li' (regola di casa: la profondita' si misura, non si assume).")
-                  }
-                  else{
-                    Dico ("pavimento M1 locale di " + $s + " = " + $d.ToString("yyyy.MM.dd",$INV) + ": COPRE il 2011.01.01 della finestra della sonda.") "Green"
-                  }
-                }
-              }
-            }
-          }
-          if($etaCapo -gt 2.0){
-            [void]$Problemi.Add("CENSIMENTO STANTIO: il CSV letto e' del " + $capo.Quando.ToString("yyyy-MM-dd HH:mm",$INV) + ", cioe' " + (Fmt1 $etaCapo) + " giorni fa. Dice cosa c'era sul disco ALLORA, non oggi -- ed e' esattamente la domanda di H2 ('ci sono ANCORA?'). Si legge come indizio, non come misura di oggi.")
-          }
-          if($vistoBersaglio -and $Problemi.Count -eq 0){ $EsitoCorsa = "A: CENSIMENTO LETTO E FRESCO" }
-          elseif($vistoBersaglio){ $EsitoCorsa = "A: CENSIMENTO LETTO CON RISERVE" }
-          else{ $EsitoCorsa = "A: " + $Simbolo + " M1 NON CENSITO" }
-        }
-      }
-      [void]$Artefatti.Add($capo.Csv)
     }
+    foreach($pr in @('Simboli','Da','Timeframes')){
+      if($txtSs -notmatch ('(?m)^\s*\[string\]\s*\$' + $pr + '\s*=')){
+        throw ("scarica_storico.ps1 al pin NON dichiara [string] $" + $pr + " nel param(): non lancio niente.")
+      }
+    }
+    if($txtSs -notmatch '(?m)^\s*\[int\]\s*\$TimeoutMin\s*='){ throw 'scarica_storico.ps1 al pin NON dichiara [int] $TimeoutMin nel param().' }
+    if($txtSs -notmatch 'PrimaDataLocale'){ throw "scarica_storico.ps1 al pin non nomina la colonna PrimaDataLocale: non e' lo strumento che questo passo chiede." }
+    # E LA RIGA CHE CANCELLA IL CSV: se un giorno sparisse, il censimento
+    # diventerebbe cumulativo e meta' dei ragionamenti di questa riga
+    # (classe 106) non varrebbero piu'. Meglio accorgersene qui.
+    if($txtSs -notmatch 'Remove-Item\s+\$CsvOut'){
+      [void]$Rilievi.Add("scarica_storico.ps1 al pin NON contiene piu' la riga che cancella il CSV prima della corsa (era la riga 230). Se lo strumento e' diventato CUMULATIVO, la classe 106 non si applica piu' e il conteggio delle righe qui sotto va riletto con quella luce.")
+    }
+    # IL PIN SUL PEZZO CHE SI SCARICA DA SOLO (punto 24).
+    if($txtSs -notmatch '\$EABranch\s*=\s*"lavoro"'){ throw 'scarica_storico.ps1 non ha la riga $EABranch = "lavoro" attesa: non lo posso pinnare, e senza pin si scaricherebbe ABTG_HistoryDownloader.mq5 dalla PUNTA del branch.' }
+    $txtSs = $txtSs -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch = "' + $Pin + '"')
+    Set-Content -LiteralPath $ss -Value $txtSs -Encoding ASCII
+    Dico "scarica_storico.ps1 scaricato, PARAMETRI VERIFICATI nel param() e PINNATO (riscarica ABTG_HistoryDownloader.mq5 al pin)" "Green"
+
+    Testata "A2-2. IL TERMINALE (serve per sapere DOVE nascera' il CSV)"
+    $cercaT = TrovaTerminale
+    $instDir    = $cercaT.Inst
+    $dataFolder = $cercaT.Dati
+    $Terminale  = $instDir
+    Dico ("terminale scelto: " + $instDir) "Yellow"
+    Dico ("cartella dati:    " + $dataFolder) "DarkGray"
+    $CsvCens = Join-Path $dataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
+    $etaPrima = "ASSENTE"
+    if(Test-Path -LiteralPath $CsvCens){ $etaPrima = (Get-Item -LiteralPath $CsvCens).LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV) }
+    Dico ("censimento PRIMA di questa corsa: " + $etaPrima + "   (scarica_storico.ps1 lo cancella e lo riscrive)") "DarkGray"
+    [void]$CensRighe.Add("censimento PRIMA di questa corsa: " + $etaPrima)
+
+    Testata "A2-3. LA MISURA FRESCA DEL PAVIMENTO M1"
+    Write-Host ""
+    Write-Host "###################################################################" -ForegroundColor Yellow
+    Write-Host "#  QUESTO PASSO APRE MT5 DA SOLO e scarica barre M1 dal broker.   #" -ForegroundColor Yellow
+    Write-Host "#  NON toccare il terminale mentre gira, e NON aprirne un altro.  #" -ForegroundColor Yellow
+    Write-Host "#  Sono MINUTI, non secondi: -SenzaTick evita le ore dei tick.    #" -ForegroundColor Yellow
+    Write-Host "###################################################################" -ForegroundColor Yellow
+    Write-Host ""
+    # -Da 2010.01.01: il pavimento si misura CHIEDENDO piu' indietro della
+    #  finestra che si vuole giustificare (2011.01.01 della sonda). Con il
+    #  default -Da 2023.01.01 il 2011 non verrebbe MAI chiesto e
+    #  PrimaDataLocale direbbe 2023 su un feed che magari ha il 1993.
+    # -Timeframes "M1": la domanda e' sul pavimento M1. Gli altri sei TF
+    #  del default sarebbero sei volte il lavoro per una risposta che
+    #  nessuno legge (e il tetto barre morde per TF: punto 18/36).
+    # -TimeoutMin INTERNO piu' corto del mio tetto: cosi' e' LUI a
+    #  fermarsi e a scrivere il suo referto parziale, invece che essere
+    #  ammazzato da me a meta'.
+    FotografaLog $dataFolder $instDir
+    $timeoutInterno = [math]::Max(5, $TimeoutMin - 5)
+    $argv = @("-ExecutionPolicy","Bypass","-File",('"' + $ss + '"'),
+              "-Auto",
+              "-Simboli",('"' + $Simbolo + ',EURUSD"'),
+              "-Timeframes",'"M1"',
+              "-Da","2010.01.01",
+              "-SenzaTick",
+              "-TimeoutMin",("" + $timeoutInterno))
+    Dico ("argv: powershell " + ($argv -join " ")) "DarkGray"
+    $esec = EseguiConGuardia $argv $dataFolder $Simbolo
+    $Secondi = $esec.Secondi
+    $RcTxt   = $esec.RcTxt
+    $Cronometro = "durata della misura: " + (Fmt1 $Secondi) + " s   (non e' il cronometro di una passata: qui si scarica storico, non si simula)"
+    if($esec.Incagliata){
+      $EsitoCorsa = "A2: INCAGLIATA (fermata dopo " + $TimeoutMin + " minuti)"
+      [void]$Problemi.Add("LO SCARICO DELLE M1 NON E' FINITO entro " + $TimeoutMin + " minuti ed e' stato FERMATO. Il censimento che trovi qui sotto, se c'e', e' PARZIALE. Guarda i campioni: se 'bases " + $Simbolo + "' stava crescendo, stava lavorando davvero e basta ridargli piu' tempo (-TimeoutMin piu' alto); se era fermo, il broker non stava mandando niente.")
+    }
+    elseif($esec.RcLetto -and $esec.Rc -eq 2){
+      [void]$Problemi.Add("scarica_storico.ps1 e' uscito con codice 2: la sua riga di chiusura '=== FINITO' non e' mai arrivata e MT5 e' stato fermato dal SUO timeout (" + $timeoutInterno + " min). IL REFERTO E' PARZIALE, e il pavimento letto qui sotto puo' essere piu' recente del vero.")
+    }
+    elseif($esec.RcLetto -and $esec.Rc -ne 0){
+      [void]$Problemi.Add("scarica_storico.ps1 e' uscito con codice " + $esec.Rc + ": lo scarico non e' andato a fondo (MT5 gia' aperto? terminale non trovato? compilazione del downloader fallita?). Quello che segue NON e' una misura fresca.")
+    }
+    RaccogliLog
+    # IL VERDETTO NON LO DA' IL CODICE DI USCITA, LO DA' L'ARTEFATTO:
+    # il CSV deve esistere, essere piu' NUOVO dell'avvio della corsa, e
+    # contenere DAVVERO le righe M1 dei due simboli, CONTATE.
+    CensimentoLeggi $esec.TCorsa
   }
 
   # ===================================================================
   #  PASSI B e C -- LE 4 PASSATE CRONOMETRATE
   # ===================================================================
-  if($Passo -ne "A"){
+  if($Passo -eq "B" -or $Passo -eq "C"){
     Testata "B1. SCARICO AL PIN E GATE SUL FILE PROVA"
     $drv = Join-Path $Work "walkforward_generico.ps1"
     Scarica ($RawPin + "/backtest_pipeline/walkforward_generico.ps1") $drv
@@ -606,20 +961,11 @@ try{
     }
 
     Testata "B2. TERMINALE E COMPILAZIONE"
-    # IL SELETTORE E' LO STESSO, RIGA PER RIGA, di walkforward_generico.ps1
-    # (righe 545-548) e di RIGA_SONDA_OROLOGIO.ps1 (righe 681-683): su una
-    # macchina con due istanze due selettori diversi scelgono terminali
-    # diversi, ed e' il punto 37.
-    $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
-    $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-    if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-    if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1 (righe 545-548)." }
-    $instDir    = $cand.DirectoryName
+    $cercaT = TrovaTerminale
+    $instDir    = $cercaT.Inst
+    $dataFolder = $cercaT.Dati
     $MetaEditor = Join-Path $instDir "metaeditor64.exe"
-    $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-    $dataFolder = (Get-ChildItem -LiteralPath $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path -LiteralPath $o) -and ((Get-Content -LiteralPath $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
-    if(-not $dataFolder){ throw ("cartella dati MT5 non trovata per " + $instDir) }
-    $Terminale = $instDir
+    $Terminale  = $instDir
     Dico ("terminale scelto: " + $instDir + "   (DEVE essere lo stesso che stampa poi il driver generico)") "Yellow"
     Dico ("cartella dati:    " + $dataFolder) "DarkGray"
 
@@ -677,24 +1023,7 @@ try{
       Dico ("Tester\cache: " + $CacheTxt) "Yellow"
     }
 
-    # --- FOTOGRAFIA DEI LOG PRIMA DI PARTIRE: dopo si legge SOLO il
-    #     nuovo. Tre radici (checklist 34-ter): gli agent NON stanno
-    #     sotto la cartella dati.
-    $RadiciLog = @(
-      (Join-Path $env:APPDATA "MetaQuotes\Tester"),
-      (Join-Path $dataFolder "Tester"),
-      (Join-Path $instDir "Tester"),
-      (Join-Path $dataFolder "Logs"),
-      (Join-Path $dataFolder "MQL5\Logs")
-    )
-    $lenPrima = @{}
-    foreach($rad in $RadiciLog){
-      if(-not (Test-Path -LiteralPath $rad)){ continue }
-      foreach($f in @(Get-ChildItem -LiteralPath $rad -Recurse -File -Filter "*.log" -ErrorAction SilentlyContinue)){
-        $lenPrima[$f.FullName] = $f.Length
-      }
-    }
-    Dico ("log gia' presenti nelle 5 radici, fotografati: " + $lenPrima.Count) "DarkGray"
+    FotografaLog $dataFolder $instDir
 
     Testata "B4. LA CORSA (4 passate: 2 magic gemelli x 2 finestre del driver generico)"
     Write-Host ""
@@ -734,79 +1063,71 @@ try{
     if($SoloControllo){ $argv += "-SoloControllo" }
     Dico ("argv: powershell " + ($argv -join " ")) "DarkGray"
 
-    $tCorsa = Get-Date          # <- LA DATA CONTRO CUI SI GIUDICA OGNI CSV
-    $netZero = BytesRete
-    $proc = Start-Process -FilePath "powershell" -ArgumentList $argv -NoNewWindow -PassThru
-    $scade = $tCorsa.AddMinutes($TimeoutMin)
-    $incagliata = $false
-    $prossimo = (Get-Date).AddSeconds($CampioneSec)
-    while(-not $proc.HasExited){
-      Start-Sleep -Milliseconds 500
-      if((Get-Date) -ge $prossimo){
-        $riga = Campiona $tCorsa $dataFolder $Simbolo $netZero
-        [void]$Campioni.Add($riga)
-        Write-Host $riga -ForegroundColor DarkCyan
-        $prossimo = (Get-Date).AddSeconds($CampioneSec)
-      }
-      if((Get-Date) -ge $scade){ $incagliata = $true; break }
-    }
-    $Secondi = (New-TimeSpan -Start $tCorsa -End (Get-Date)).TotalSeconds
-    $rc = -1
+    $esec = EseguiConGuardia $argv $dataFolder $Simbolo
+    $tCorsa     = $esec.TCorsa        # <- LA DATA CONTRO CUI SI GIUDICA OGNI ARTEFATTO
+    $Secondi    = $esec.Secondi
+    $RcTxt      = $esec.RcTxt
+    $incagliata = $esec.Incagliata
+    $rc         = $esec.Rc
+    # TRE STATI, NON DUE. "corsaFallita" e' VERO solo quando il codice di
+    # uscita e' stato LETTO DAVVERO ed e' diverso da zero. Un codice NON
+    # LETTO non e' un fallimento: si tira avanti e decide l'ARTEFATTO.
+    # (Difetto pagato il 02/09 alle 08:36: "FERMATA DAL DRIVER GENERICO
+    #  (codice )" su un giro a vuoto perfettamente riuscito.)
+    $corsaFallita = ($esec.RcLetto -and $rc -ne 0)
     if($incagliata){
-      $riga = Campiona $tCorsa $dataFolder $Simbolo $netZero
-      [void]$Campioni.Add("ULTIMO CAMPIONE PRIMA DI FERMARE: " + $riga)
-      Write-Host ""
-      Dico ("TETTO DI " + $TimeoutMin + " MINUTI SFONDATO: fermo la corsa. QUESTO E' IL RISULTATO, non un guasto.") "Red"
-      try{ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }catch{}
-      Start-Sleep -Seconds 2
-      Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-      Start-Sleep -Seconds 3
       $EsitoCorsa = "INCAGLIATA (fermata dopo " + $TimeoutMin + " minuti)"
       [void]$Problemi.Add("LA CORSA NON E' FINITA entro " + $TimeoutMin + " minuti ed e' stata FERMATA. Non e' un guasto da riparare: e' LA MISURA. Metro: 4 passate EURUSD su " + (Fmt1 $MetroAnni) + " anni costano " + (Fmt1 $MetroSec) + " s. Questa finestra e' molto piu' corta e ha sfondato. Nessun CSV, nessun cronometro valido, e i campioni del banco qui sotto sono l'unica cosa da leggere.")
     }
-    else{
-      try{ $rc = $proc.ExitCode }catch{ $rc = -1 }
-      Dico ("driver generico uscito con codice " + $rc + " dopo " + (Fmt1 $Secondi) + " s") "Cyan"
-      if($rc -ne 0){
-        $EsitoCorsa = "FERMATA DAL DRIVER GENERICO (codice " + $rc + ")"
-        [void]$Problemi.Add("il driver generico e' uscito con codice " + $rc + ": la corsa NON e' andata a fondo. Il tempo di " + (Fmt1 $Secondi) + " s NON e' un cronometro (e' il tempo di un fallimento), e i CSV eventualmente presenti sono di un ALTRO giro.")
+    elseif($corsaFallita){
+      $EsitoCorsa = "FERMATA DAL DRIVER GENERICO (codice " + $rc + ")"
+      [void]$Problemi.Add("il driver generico e' uscito con codice " + $rc + ": la corsa NON e' andata a fondo. Il tempo di " + (Fmt1 $Secondi) + " s NON e' un cronometro (e' il tempo di un fallimento), e i CSV eventualmente presenti sono di un ALTRO giro.")
+    }
+    elseif($SoloControllo){
+      # --- LA PROVA D'ARRIVO DEL GIRO A VUOTO E' UN ARTEFATTO, NON UN
+      #     NUMERO. -SoloControllo del driver generico scrive l'anteprima
+      #     dell'.ini e poi esce (walkforward_generico.ps1 righe 503-538):
+      #     quel file, DATATO, e' la prova che i gate sono stati passati e
+      #     che il driver e' arrivato in fondo al suo mestiere. Senza
+      #     questo, il giro a vuoto si reggeva su un ExitCode che su 5.1
+      #     puo' non esserci.
+      $Anteprima = Join-Path $Work ("anteprima_" + $EA + "_" + $Simbolo + ".ini")
+      $antOk = $false
+      $antTxt = "ASSENTE"
+      if(Test-Path -LiteralPath $Anteprima){
+        $lwA = (Get-Item -LiteralPath $Anteprima).LastWriteTime
+        $antTxt = "scritta il " + $lwA.ToString("yyyy-MM-dd HH:mm:ss",$INV)
+        if($lwA -ge $tCorsa){ $antOk = $true; $antTxt = "FRESCA, " + $antTxt }
+        else{ $antTxt = "STANTIA, " + $antTxt }
       }
-      elseif($SoloControllo){
-        $EsitoCorsa = "CONTROLLO OK (il tester NON e' stato aperto: -SoloControllo)"
-        $Cronometro = "non pertinente: -SoloControllo non apre il tester. Cronometrare un giro a vuoto darebbe un numero plausibile e falso (checklist 101-bis)."
-        Dico "GIRO A VUOTO COMPLETATO. NON e' il risultato: qui non e' girata nessuna passata." "Green"
+      $FrescoTxt = "anteprima .ini: " + $antTxt + "   [corsa avviata alle " + $tCorsa.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "]"
+      if(-not $antOk){
+        $EsitoCorsa = "CONTROLLO NON ARRIVATO IN FONDO"
+        [void]$Problemi.Add("IL GIRO A VUOTO NON HA PRODOTTO L'ANTEPRIMA FRESCA " + $Anteprima + " (" + $antTxt + "). Il driver generico non e' arrivato al suo ramo -SoloControllo: guarda le sue righe rosse qui sopra, sono il risultato.")
       }
+      else{
+        # E L'ANTEPRIMA SI GUARDA DENTRO, non si conta soltanto: un file
+        # fresco con dentro un'altra geometria e' la stessa bugia scritta
+        # meglio (punto 31: l'anteprima che non rispecchia i parametri).
+        $tAnt = Get-Content -LiteralPath $Anteprima -Raw
+        $attesiAnt = @(("Symbol=" + $Simbolo), ("Period=" + $Periodo), ("FromDate=" + $DaQuando), "AllowLiveTrading=false", "InpMagic=777290||777290||1||777291||Y")
+        $mancaAnt = @($attesiAnt | Where-Object { $tAnt -notmatch [regex]::Escape($_) })
+        if(@($mancaAnt).Count -gt 0){
+          $EsitoCorsa = "CONTROLLO CON ANTEPRIMA DIVERSA DA QUELLO CHE HO CHIESTO"
+          [void]$Problemi.Add("l'anteprima .ini non contiene: " + ($mancaAnt -join " ; ") + ". Il driver generico avrebbe lanciato una corsa DIVERSA da quella chiesta.")
+        }
+        else{
+          $EsitoCorsa = "CONTROLLO OK (anteprima .ini fresca e coerente; il tester NON e' stato aperto)"
+          Dico "GIRO A VUOTO COMPLETATO. NON e' il risultato: qui non e' girata nessuna passata." "Green"
+        }
+        # E QUESTO L'ANTEPRIMA NON PUO' DIRLO, quindi si dichiara:
+        [void]$Rilievi.Add("L'ANTEPRIMA NON DIMOSTRA IL MODELLO. walkforward_generico.ps1 scrive 'Model=4' LETTERALE nell'anteprima (riga 514) mentre nell'.ini vero scrive 'Model=$Modello' (riga 645): un 'Model=4' nell'anteprima e' vero per costruzione e non prova niente su -Modello. Qui -Modello e' " + $Modello + ", e lo si legge dal parametro, non dall'anteprima. (punto 31)")
+      }
+      $Cronometro = "non pertinente: -SoloControllo non apre il tester. Cronometrare un giro a vuoto darebbe un numero plausibile e falso (checklist 101-bis)."
+      [void]$Artefatti.Add($Anteprima)
     }
 
-    # --- I LOG: SOLO cio' che e' stato scritto DOPO la fotografia.
-    #     Un file NON cresciuto = niente da leggere, si salta (difetto
-    #     del 18/08: il "=== FINITO" di ieri preso per quello di oggi).
-    $LogRaccolti = 0
-    $pattern = 'tick|ticks|memory|generat|history|Symbol|core|agent|EURUSD|' + [regex]::Escape($Simbolo)
-    foreach($rad in $RadiciLog){
-      if(-not (Test-Path -LiteralPath $rad)){ continue }
-      foreach($f in @(Get-ChildItem -LiteralPath $rad -Recurse -File -Filter "*.log" -ErrorAction SilentlyContinue)){
-        $da = 0
-        if($lenPrima.ContainsKey($f.FullName)){ $da = [int64]$lenPrima[$f.FullName] }
-        if($f.Length -le $da){ continue }
-        $LogRaccolti++
-        $testo = ""
-        try{
-          $fs = New-Object System.IO.FileStream($f.FullName,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
-          if($da -gt 0){ [void]$fs.Seek($da,[System.IO.SeekOrigin]::Begin) }
-          $sr = New-Object System.IO.StreamReader($fs)
-          $testo = $sr.ReadToEnd(); $sr.Close(); $fs.Close()
-        }catch{}
-        foreach($l in ($testo -split "`r?`n")){
-          if($l -match $pattern){ [void]$RigheLog.Add(($f.Name + ": " + $l.Trim())) }
-        }
-        try{ Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Work ("log_" + $f.Name)) -Force -ErrorAction SilentlyContinue }catch{}
-      }
-    }
-    Dico ("log CRESCIUTI in questo giro (5 radici): " + $LogRaccolti + "   righe interessanti: " + $RigheLog.Count) "Cyan"
-    if($LogRaccolti -eq 0){
-      [void]$Rilievi.Add("NESSUN log e' cresciuto durante questo giro nelle cinque radici scandite (" + ($RadiciLog -join " ; ") + "). Zero non vuol dire 'non e' successo niente': vuol dire che non ho trovato traccia scritta. Il conteggio dei tick e l'eventuale 'no memory for ticks generating' vanno cercati a mano nel Diario di MT5.")
-    }
+    RaccogliLog
 
     # --- I CSV SI DATANO SEMPRE, ANCHE QUANDO LA CORSA E' MORTA.
     #     Classe del 31/08 (il CSV stantio), regola 2: "le due date
@@ -825,11 +1146,14 @@ try{
         $dateTxt0 += ($nomeF + " " + $et0 + ", scritto il " + $lw0.ToString("yyyy-MM-dd HH:mm:ss",$INV))
       }
       $FrescoTxt = ($dateTxt0 -join "   |   ") + "   [corsa avviata alle " + $tCorsa.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "]"
-      if($incagliata -or $rc -ne 0){
+      if($incagliata -or $corsaFallita){
         [void]$Problemi.Add("I CSV DI QUESTA ETICHETTA, DATATI: " + $FrescoTxt + ". La corsa NON e' andata a fondo, quindi qualunque CSV FRESCO qui e' PARZIALE e qualunque CSV STANTIO e' di un ALTRO giro: in tutti e due i casi NON SI LEGGE NESSUN NUMERO.")
       }
     }
-    if(-not $SoloControllo -and -not $incagliata -and $rc -eq 0){
+    # SI LEGGONO I NUMERI SOLO SE LA CORSA NON E' INCAGLIATA E NON E'
+    # FALLITA CON CODICE LETTO. Un codice NON LETTO non blocca la lettura:
+    # a decidere sono i CSV datati e contati qui sotto.
+    if(-not $SoloControllo -and -not $incagliata -and -not $corsaFallita){
       $mancanti = @()
       foreach($f in @($csvIS,$csvOOS)){ if(-not (Test-Path -LiteralPath $f)){ $mancanti += (Split-Path $f -Leaf) } }
       if(@($mancanti).Count -gt 0){
@@ -935,7 +1259,14 @@ $R = New-Object System.Collections.ArrayList
 [void]$R.Add("pin:  " + $Pin)
 [void]$R.Add("passo: " + $Titolo)
 [void]$R.Add("simbolo: " + $Simbolo)
-if($Passo -ne "A"){
+if($Passo -eq "A2"){
+  [void]$R.Add("misura: barre M1 di " + $Simbolo + " e EURUSD, chieste dal 2010.01.01 (piu' indietro della finestra della sonda, apposta), SENZA tick")
+  [void]$R.Add("strumento: scarica_storico.ps1 -Auto -Simboli " + [char]34 + $Simbolo + ",EURUSD" + [char]34 + " -Timeframes " + [char]34 + "M1" + [char]34 + " -Da 2010.01.01 -SenzaTick, PINNATO anche nel .mq5 che si scarica da solo (punto 24)")
+  [void]$R.Add("tetto: " + $TimeoutMin + " minuti miei (il suo interno e' piu' corto, cosi' e' LUI a fermarsi e a scrivere)")
+  [void]$R.Add("terminale: " + $Terminale)
+  [void]$R.Add("i DUE simboli sono stati chiesti nella STESSA corsa: scarica_storico.ps1 azzera il CSV a ogni lancio (riga 230), quindi due lanci separati si cancellerebbero a vicenda (classe 106)")
+}
+if($Passo -eq "B" -or $Passo -eq "C"){
   [void]$R.Add("finestra: " + $DaQuando + " -> " + $Fino + "   (split 40/60 del driver generico: 2 finestre x 2 magic gemelli = 4 passate)")
   [void]$R.Add("etichetta CSV: " + $Etichetta + "   -> risultati_prove\" + $EA + "\" + $EA + "_" + $Simbolo + "_IS_" + $Etichetta + ".csv (e _OOS_)")
   [void]$R.Add("banco: Modello " + $Modello + ", deposito " + $Deposito + ", periodo " + $Periodo + ", AllowLiveTrading=false (scritto dal driver generico, riga 638)")
@@ -946,6 +1277,7 @@ if($Passo -ne "A"){
   [void]$R.Add("rifai: il driver generico e' chiamato SEMPRE con -Rifai (mai una passata saltata e spacciata per fresca)")
   [void]$R.Add("log cresciuti in questo giro: " + (FmtN $LogRaccolti) + " su 5 radici scandite")
 }
+[void]$R.Add("codice di uscita del figlio: " + $RcTxt)
 [void]$R.Add("esito: " + $EsitoCorsa)
 [void]$R.Add("")
 [void]$R.Add("QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO SU NESSUN MOTORE.")
@@ -953,18 +1285,44 @@ if($Passo -ne "A"){
 [void]$R.Add("costo esplode. Nessuna sedia viva viene toccata, niente va in forward.")
 [void]$R.Add("")
 
-if($Passo -eq "A"){
+if($Passo -eq "A" -or $Passo -eq "A2"){
   [void]$R.Add("--- IL CENSIMENTO DELLO STORICO ------------------------------------")
   if($CensRighe.Count -eq 0){ [void]$R.Add("  (nessun censimento trovato o leggibile)") }
   foreach($l in $CensRighe){ [void]$R.Add("  " + $l) }
   [void]$R.Add("")
+  [void]$R.Add("--- IL PAVIMENTO M1, E COSA DECIDE ---------------------------------")
+  [void]$R.Add("  " + $PavimentoTxt)
+  [void]$R.Add("")
   [void]$R.Add("COME SI LEGGE:")
   [void]$R.Add("  PrimaDataLocale della riga M1 = il PAVIMENTO che il terminale ha")
-  [void]$R.Add("  SUL DISCO. Se e' piu' recente del 2011.01.01 su cui gira la sonda,")
-  [void]$R.Add("  la finestra della sonda parte da dove i dati non ci sono (H2).")
-  [void]$R.Add("  ATTENZIONE: questo file dice cosa c'era ALLORA, non oggi. La")
-  [void]$R.Add("  domanda di H2 e' 'ci sono ANCORA?', e a quella risponde solo una")
-  [void]$R.Add("  misura fresca: scarica_storico.ps1 -Simboli " + [char]34 + "GBPUSD,EURUSD" + [char]34 + " -SenzaTick.")
+  [void]$R.Add("  SUL DISCO. Se e' piu' recente del " + $FinestraSonda.ToString("yyyy.MM.dd",$INV) + " su cui gira la")
+  [void]$R.Add("  sonda, la finestra della sonda parte da dove i dati non ci sono.")
+  if($Passo -eq "A"){
+    [void]$R.Add("  ATTENZIONE: questo passo rilegge un file GIA' SCRITTO, quindi dice")
+    [void]$R.Add("  cosa c'era ALLORA, non oggi -- e la domanda di H2 e' 'ci sono")
+    [void]$R.Add("  ANCORA?'. A quella risponde solo il PASSO A2 (misura fresca).")
+    [void]$R.Add("  E il file contiene SOLO i simboli dell'ULTIMA corsa di")
+    [void]$R.Add("  scarica_storico.ps1, che lo AZZERA ogni volta (riga 230): un")
+    [void]$R.Add("  'tutto COMPLETO' su altri simboli non dice niente su " + $Simbolo + ".")
+  }
+  else{
+    [void]$R.Add("  QUESTA E' LA MISURA FRESCA: il CSV e' stato riscritto in questo")
+    [void]$R.Add("  giro (vedi le due date qui sopra) e contiene i due simboli chiesti")
+    [void]$R.Add("  insieme. Se il pavimento COPRE la finestra della sonda, H2 e'")
+    [void]$R.Add("  ESCLUSA e restano H1 e H3, che le decidono i PASSI B e C. Se il")
+    [void]$R.Add("  pavimento e' PIU' RECENTE, H2 e' CONFERMATA e la finestra della")
+    [void]$R.Add("  sonda va RIDICHIARATA da li' (la profondita' si misura).")
+  }
+  [void]$R.Add("")
+  [void]$R.Add("--- I CAMPIONI DEL BANCO DURANTE LA MISURA -------------------------")
+  if($Campioni.Count -eq 0){ [void]$R.Add("  (nessun campione: il passo A non lancia niente, oppure il figlio e' finito prima del primo intervallo)") }
+  foreach($l in $Campioni){ [void]$R.Add("  " + $l) }
+  if($Passo -eq "A2"){
+    [void]$R.Add("")
+    [void]$R.Add("--- RIGHE DEI LOG DI MT5 SCRITTE IN QUESTO GIRO --------------------")
+    if($RigheLog.Count -eq 0){ [void]$R.Add("  (nessuna riga trovata: NON vuol dire 'non e' successo niente', vuol dire che non ho trovato traccia scritta)") }
+    foreach($l in @($RigheLog | Select-Object -First 400)){ [void]$R.Add("  " + $l) }
+  }
 }
 else{
   [void]$R.Add("--- IL CRONOMETRO --------------------------------------------------")
@@ -1017,7 +1375,7 @@ foreach($f in @(Get-ChildItem -LiteralPath $Work -File -Filter "log_*.log" -Erro
 # cartella di lavoro e' la stessa, e un file rimasto li' da un altro
 # giro dentro questo zip e' un artefatto di un'altra corsa spacciato
 # per parte di questa (e' il referto stantio, in forma di allegato).
-if($Passo -ne "A"){
+if($Passo -eq "B" -or $Passo -eq "C"){
   foreach($f in @("COMPILAZIONE_FALLITA.log",$Prova)){
     foreach($base in @($Work,$ProveD)){
       $src = Join-Path $base $f

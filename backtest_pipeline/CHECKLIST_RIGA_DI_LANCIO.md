@@ -6486,3 +6486,89 @@ un falso sospetto sui binari in campo costa di piu'.
 > (qui: 10 righe con `*** ROSSO CANARINO ***`), cosi' un ritorno silenzioso al
 > token vecchio -- un merge, un copia-incolla da un gemello -- diventa **GATE
 > ROSSO** invece che un allarme che nessuno sapra' leggere.
+
+---
+
+## 🆕 AGGIUNTA DEL 02/09/2026 (mattina) — **il difetto e' arrivato fino al PC di Claudio**: primo giro a vuoto di `RIGA_DIAG_GBPUSD.ps1` v1, ore 08:36, Windows PowerShell 5.1 vero
+
+## 107. 🕳️ L'**EXIT CODE CHE NON C'E'** LETTO COME FALLIMENTO: su PS 5.1 `Start-Process -PassThru` puo' restituire `ExitCode` **VUOTO**, e `$null -ne 0` e' **VERO**
+
+_Il verificatore l'aveva messo in NON COPERTO («pwsh 7 qui, 5.1 sul VPS»), e la
+riga e' partita lo stesso. Costo: un giro a vuoto bloccato e una consegna da
+rifare. La classe **106** era stata scoperta LEGGENDO; questa e' stata scoperta
+**incassando**._
+
+Il fatto, misurato:
+
+- `RIGA_DIAG_GBPUSD.ps1` v1 lanciava il driver generico con
+  `Start-Process -FilePath "powershell" -ArgumentList $argv -NoNewWindow -PassThru`
+  (serve `-PassThru`, non `-Wait`, perche' il wrapper deve **campionare la
+  macchina e far scattare un tetto di tempo** mentre il figlio gira);
+- il ciclo `while(-not $proc.HasExited)` e' uscito **regolarmente**;
+- ma `$proc.ExitCode` ha restituito **`$null`**, senza sollevare eccezione —
+  quindi nemmeno il `try/catch` intorno serviva a niente;
+- il codice era:
+  ```powershell
+  try{ $rc = $proc.ExitCode }catch{ $rc = -1 }
+  if($rc -ne 0){ ... FERMATA ... }        # <-- $null -ne 0  E' VERO
+  ```
+- risultato a schermo: **`esito: FERMATA DAL DRIVER GENERICO (codice )`** — con la
+  **parentesi vuota**, perche' `"codice " + $null` in PowerShell da' `"codice "`.
+
+E il giro era **perfettamente riuscito**: 9,1 secondi, compilazione OK (50 KB),
+`Tester\cache` svuotata (prima 1, dopo 0), cioe' esattamente quello che ci si
+aspetta da un `-SoloControllo` del driver generico. **Un falso allarme rosso su
+una corsa sana**, che ha bloccato la serata al primo blocco.
+
+### Le due bugie, e sono una dentro l'altra
+
+1. **`-ne 0` su un valore che non c'e' e' sempre VERO.** In PowerShell
+   `$null -ne 0` -> `True`. Quindi ogni gate scritto `if($rc -ne 0){ fallito }`
+   tratta **"non ho letto"** come **"e' andata male"**. Il gemello e' peggio:
+   `if($rc -eq 0){ ok }` tratterebbe "non ho letto" come **"e' andata bene"**.
+   Le due varianti sbagliano nei due versi opposti, e nessuna delle due lo dice.
+2. **Il messaggio non e' leggibile.** `"(codice " + $rc + ")"` con `$rc` a `$null`
+   stampa `(codice )`. Chi legge il referto non ha modo di distinguere *"e' uscito
+   con un codice che non ti piace"* da *"il codice non l'ho proprio letto"* — ed
+   e' il punto **40** («non ho potuto misurare» e «ho misurato e va male» nello
+   stesso ramo), applicato al numero piu' banale che ci sia.
+
+### E dove altro vive lo stesso difetto
+
+- `$LASTEXITCODE` dopo `& script.ps1` o `& powershell ...`: puo' essere `$null`
+  alla **prima** invocazione della sessione, o se il figlio non lo imposta.
+  Vale anche per le **righe di chat**: il blocco di casa fa
+  `$global:LASTEXITCODE=0; & $p ...; $rc=$LASTEXITCODE; if($rc -ne 0){ ...rosso... }`
+  — e su `$null` quel rosso scatta da solo.
+- `$proc.ExitCode` dopo `Wait-Process` o dopo un `Stop-Process`.
+
+> ✅ **REGOLA (tripla).**
+> 1. **TRE STATI, MAI DUE: `0` / `N` diverso da 0 / `NON LETTO`.** Si legge
+>    cosi', e la forma e' sempre questa:
+>    ```powershell
+>    try{ $proc.WaitForExit() }catch{}      # su 5.1 sincronizza l'oggetto
+>    $grezzo = $null
+>    try{ $grezzo = $proc.ExitCode }catch{ $grezzo = $null }
+>    $rcLetto = ($null -ne $grezzo -and (("" + $grezzo).Trim()) -match '^-?\d+$')
+>    $fallito = ($rcLetto -and [int]$grezzo -ne 0)     # <-- MAI  $rc -ne 0
+>    ```
+>    Nelle righe di chat la stessa cosa si scrive
+>    `if(($rc -is [int]) -and ($rc -ne 0)){ ... }`.
+> 2. **IL VERDETTO NON SI APPOGGIA AL NUMERO, SI APPOGGIA A UN ARTEFATTO
+>    DATATO.** Il codice di uscita, quando c'e', **conferma**; quando non c'e',
+>    si tira avanti e decide l'artefatto: il CSV fresco e contato, l'anteprima
+>    `.ini` fresca e coerente, il referto con la sua `data:`. E' la stessa
+>    doctrina della classe CSV-stantio del 31/08, estesa: **si giudica cio' che
+>    la corsa ha LASCIATO, non cio' che ha DETTO**. Un passo che non ha nessun
+>    artefatto da esibire e' un passo che non si puo' giudicare — e va detto.
+> 3. **Un codice non letto si SCRIVE "NON LETTO" nel referto**, mai come una
+>    parentesi vuota. E la riga resta corta: la spiegazione lunga sta una volta
+>    sola, nei RILIEVI.
+>
+> ⚠️ **E il corollario metodologico, che e' la parte che brucia:** questo difetto
+> era **gia' scritto** nel NON COPERTO del verdetto («parse reale su pwsh 7, il
+> VPS ha 5.1»). Un NON COPERTO non e' un'assoluzione: e' un **elenco di cose che
+> possono ancora rompersi**. Quando un NON COPERTO tocca una riga che decide un
+> RAMO (un `if`, un gate, un verdetto), non si consegna sperando: **si scrive il
+> codice in modo che quel ramo regga anche nel caso non coperto**. Qui bastava
+> `$rcLetto`, e sono tre righe.
