@@ -26,6 +26,19 @@
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|  CHANGELOG                                                       |
+//|  v1.03 (02/09/2026, caccia ai GEMELLI CHE DIVERGONO) - SOLO      |
+//|        STRUMENTAZIONE DIAGNOSTICA: nessun input nuovo, nessun    |
+//|        cambio di logica di trading, nessuna riga di decisione    |
+//|        toccata. Serve a rispondere alla domanda del dossier      |
+//|        report/ORB_GEMELLI_DIVERGENZA_2026-08-22.md: perche' la   |
+//|        stessa .ex5 traila lo stop sul 100k e NON lo muove mai,   |
+//|        in silenzio totale, sul conto piccolo. Finora             |
+//|        ManageRunner() non stampava NULLA: ne' quando muoveva lo  |
+//|        stop, ne' quando usciva prima di muoverlo. Ora ogni ramo  |
+//|        di uscita anticipata lascia una traccia con prefisso      |
+//|        "ORB RUNNER:" / "ORB TP1:" / "ORB INIT:", stampata con    |
+//|        Print() (NON con Log(), che dipende da InpVerbose: una    |
+//|        diagnostica che si puo' spegnere per sbaglio non serve).  |
 //|  v1.02 (19/08/2026, preparazione R88) - UN SOLO input nuovo:     |
 //|        InpSLBufferPts (default 0 = comportamento IDENTICO a      |
 //|        v1.01). Allontana lo stop di N punti oltre il livello     |
@@ -37,7 +50,7 @@
 //|        InpOneTradePerDay.                                        |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.02"
+#property version   "1.03"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -203,11 +216,29 @@ int OnInit()
    gTrade.SetTypeFillingBySymbol(_Symbol);
    gTrade.SetDeviationInPoints(30);
    hAtr =iATR(_Symbol,InpExecTF,InpAtrPeriod);
+   //--- v1.03: la EMA veloce e' l'indicatore da cui dipende TUTTO il runner
+   //    (trailing + uscita su chiusura oltre l'EMA). L'ipotesi n.2 del dossier
+   //    22/08 e' proprio che su un terminale l'handle non si carichi e la
+   //    funzione esca in silenzio: qui si dichiara l'esito alla nascita, cosi'
+   //    la prima riga del log del terminale gia' assolve o accusa l'handle.
+   ResetLastError();
    hEmaF=iMA(_Symbol,InpExecTF,InpEmaFast,0,MODE_EMA,PRICE_CLOSE);
+   if(hEmaF==INVALID_HANDLE)
+      PrintFormat("ORB INIT: handle EMA veloce INVALID_HANDLE (%s, TF %d, periodo %d, EMA, PRICE_CLOSE) err=%d",
+                  _Symbol,(int)InpExecTF,InpEmaFast,GetLastError());
+   else
+      PrintFormat("ORB INIT: handle EMA veloce OK = %d (%s, TF %d, periodo %d, EMA, PRICE_CLOSE). Trailing EMA=%s, uscita su chiusura oltre EMA=%s",
+                  hEmaF,_Symbol,(int)InpExecTF,InpEmaFast,
+                  (InpUseTrailEMA?"ON":"OFF"),(InpExitOnEmaClose?"ON":"OFF"));
    hEmaS=iMA(_Symbol,InpExecTF,InpEmaSlow,0,MODE_EMA,PRICE_CLOSE);
    hEma200=iMA(_Symbol,InpExecTF,InpEma200Period,0,MODE_EMA,PRICE_CLOSE);
    if(hAtr==INVALID_HANDLE||hEmaF==INVALID_HANDLE||hEmaS==INVALID_HANDLE||hEma200==INVALID_HANDLE)
-     { Print("ERRORE: handle indicatori."); return(INIT_FAILED); }
+     {
+      //--- v1.03: dire QUALE handle e' saltato, non solo che qualcosa e' saltato
+      PrintFormat("ORB INIT: ERRORE handle indicatori (ATR=%d EMAveloce=%d EMAlenta=%d EMAlunga=%d), err=%d",
+                  hAtr,hEmaF,hEmaS,hEma200,GetLastError());
+      return(INIT_FAILED);
+     }
    if(InpUseNewsFilter) LoadNews();
    Log(StringFormat("avviato su %s. Range server %02d:%02d-%02d:%02d, ingresso %.1f x K(%.4f), fine %02d:%02d.",
        _Symbol,InpRangeStartHour,InpRangeStartMin,InpRangeEndHour,InpRangeEndMin,InpEntryPoints,InpK,InpEndHour,InpEndMin));
@@ -532,7 +563,25 @@ double SLforShort(double entry,double oppEntry,double atr)
 void ManageTP1()
   {
    if(!SelPos()) return;
-   if(gPart1 || InpTP1Pct<=0 || InpTP1Pct>=100) return;
+   //--- v1.03: DIFETTO N.2 del dossier 22/08, dichiarato UNA VOLTA SOLA.
+   //    Il breakeven (InpBreakeven) vive DENTRO questa funzione, dopo il
+   //    parziale: se InpTP1Pct<=0 si esce qui e lo stop in pari non puo'
+   //    scattare MAI, anche con InpBreakeven=true nel pannello. Sul conto
+   //    piccolo lo screenshot del 22/08 mostra proprio InpTP1Pct=0. Flag
+   //    statico: e' una condizione di configurazione, non un evento -- va
+   //    detta all'inizio, non a ogni tick.
+   if(InpTP1Pct<=0)
+     {
+      static bool avvisatoTP1Zero=false;
+      if(!avvisatoTP1Zero)
+        {
+         avvisatoTP1Zero=true;
+         PrintFormat("ORB TP1: TP1/breakeven disattivati da InpTP1Pct=%.1f (<=0). Nessun parziale e NESSUNO stop in pari, anche se InpBreakeven=%s.",
+                     InpTP1Pct,(InpBreakeven?"true":"false"));
+        }
+      return;
+     }
+   if(gPart1 || InpTP1Pct>=100) return;
    long type=PositionGetInteger(POSITION_TYPE);
    bool isLong=(type==POSITION_TYPE_BUY);
    double openP=PositionGetDouble(POSITION_PRICE_OPEN);
@@ -569,28 +618,164 @@ void ManageTP1()
 //+------------------------------------------------------------------+
 void ManageRunner()
   {
-   if(!SelPos()) return;
-   if(!InpUseTrailEMA && !InpExitOnEmaClose) return;
-   double ef[1]; if(CopyBuffer(hEmaF,0,1,1,ef)!=1) return;
+   //--- v1.03 -- STRUMENTAZIONE. Fino alla v1.02 questa funzione era MUTA:
+   //    usciva in silenzio su cinque rami diversi e non diceva niente nemmeno
+   //    quando il trailing FUNZIONAVA. Ecco perche' il 19/08, il 21/08 e il
+   //    02/09 la divergenza fra i due conti si e' potuta ricostruire solo
+   //    confrontando a mano i prezzi di chiusura. Da qui in poi ogni uscita
+   //    anticipata lascia il suo motivo nel Giornale del terminale.
+   //    THROTTLE: ManageRunner e' gia' chiamata una sola volta per barra M5
+   //    (OnTick, ramo newBar), ma i rami "normali" -- posizione assente,
+   //    condizione EMA non soddisfatta -- si stampano comunque al massimo una
+   //    volta per barra, cosi' la protezione regge anche se un domani qualcuno
+   //    spostasse la chiamata a ogni tick.
+   static datetime gDiagBar=0;
+   datetime barOra=iTime(_Symbol,InpExecTF,0);
+   bool unaPerBarra=(barOra!=gDiagBar);
+   if(unaPerBarra) gDiagBar=barOra;
+
+   if(!SelPos())
+     {
+      //--- Ramo 1. Nessuna posizione NOSTRA selezionabile. Nel caso normale
+      //    (nessuna posizione aperta) si tace, altrimenti il log si riempie di
+      //    righe inutili a ogni barra. Ma se una posizione col NOSTRO magic
+      //    esiste davvero e SelPos() dice comunque di no, siamo davanti
+      //    all'anomalia da conto HEDGING: SelPos() usa PositionSelect(_Symbol),
+      //    che seleziona la PRIMA posizione del simbolo QUALUNQUE sia il magic
+      //    -- e su U30USD sul conto piccolo girano anche 770202, 771531, 770511,
+      //    770531... Se ne e' aperta una di un'altra sedia, il nostro controllo
+      //    sul magic fallisce e il runner esce QUI, in silenzio: niente
+      //    trailing, niente uscita su EMA, niente breakeven. E' esattamente il
+      //    sintomo osservato il 02/09. Questa riga lo dimostra o lo scagiona.
+      int nostre=ContaPosizioniMagic();
+      if(nostre>0 && unaPerBarra)
+         PrintFormat("ORB RUNNER: SelPos() FALSO ma risultano %d posizioni con magic %s su %s -> PositionSelect ha selezionato la posizione di un'ALTRA sedia (conto hedging). Gestione del runner SALTATA.",
+                     nostre,IntegerToString(InpMagic),_Symbol);
+      return;
+     }
+
+   if(!InpUseTrailEMA && !InpExitOnEmaClose)
+     {
+      //--- Ramo 2. Configurazione: entrambe le gestioni EMA sono spente.
+      if(unaPerBarra)
+         Print("ORB RUNNER: InpUseTrailEMA=false E InpExitOnEmaClose=false -> nessuna gestione del runner, lo stop resta dov'e'.");
+      return;
+     }
+
+   if(hEmaF==INVALID_HANDLE)
+     {
+      //--- Ramo 3. Handle mai nato (ipotesi n.2 del dossier). OnInit fallisce
+      //    gia' in questo caso, ma se l'EA fosse stato ricaricato a caldo la
+      //    riga qui sotto e' l'unica prova che resta.
+      Print("ORB RUNNER: handle EMA veloce INVALID_HANDLE -> impossibile trailare. Ricaricare l'EA sul grafico.");
+      return;
+     }
+
+   //--- Ramo 4. L'handle c'e' ma i dati no: CopyBuffer fallisce (dati non
+   //    ancora sincronizzati, storico in caricamento, indicatore non calcolato).
+   //    Nella v1.02 questo era il silenzio perfetto: return e nessuna traccia.
+   double ef[1];
+   ResetLastError();
+   int copiati=CopyBuffer(hEmaF,0,1,1,ef);
+   if(copiati!=1)
+     {
+      PrintFormat("ORB RUNNER: CopyBuffer(EMA%d handle %d, shift 1) ha restituito %d invece di 1, err=%d -> gestione saltata su questa barra.",
+                  InpEmaFast,hEmaF,copiati,GetLastError());
+      return;
+     }
+
    long type=PositionGetInteger(POSITION_TYPE);
    bool isLong=(type==POSITION_TYPE_BUY);
    double close1=iClose(_Symbol,InpExecTF,1);
+   if(close1<=0)
+      PrintFormat("ORB RUNNER: iClose(%s,TF %d,shift 1) = %.5f (dato assente): il confronto con l'EMA usa un prezzo non valido.",
+                  _Symbol,(int)InpExecTF,close1);
 
    if(InpExitOnEmaClose)
      {
-      if(isLong && close1<ef[0]) { gTrade.PositionClose(_Symbol); Log("chiusura M5 sotto EMA9: uscita."); return; }
-      if(!isLong && close1>ef[0]){ gTrade.PositionClose(_Symbol); Log("chiusura M5 sopra EMA9: uscita."); return; }
+      if(isLong && close1<ef[0])
+        {
+         bool okC=gTrade.PositionClose(_Symbol);
+         if(okC) Log("chiusura M5 sotto EMA9: uscita.");
+         else    PrintFormat("ORB RUNNER: uscita per chiusura sotto EMA%d FALLITA, retcode %u (%s), err=%d",
+                             InpEmaFast,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+         return;
+        }
+      if(!isLong && close1>ef[0])
+        {
+         bool okC=gTrade.PositionClose(_Symbol);
+         if(okC) Log("chiusura M5 sopra EMA9: uscita.");
+         else    PrintFormat("ORB RUNNER: uscita per chiusura sopra EMA%d FALLITA, retcode %u (%s), err=%d",
+                             InpEmaFast,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+         return;
+        }
      }
    if(InpUseTrailEMA)
      {
       double sl=PositionGetDouble(POSITION_SL);
       double openP=PositionGetDouble(POSITION_PRICE_OPEN);
       double newSL=NormalizePrice(ef[0]);
-      if(isLong && newSL>sl && newSL<SymbolInfoDouble(_Symbol,SYMBOL_BID))
-         gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
-      if(!isLong && (newSL<sl||sl==0) && newSL>SymbolInfoDouble(_Symbol,SYMBOL_ASK))
-         gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP));
+      double bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
+      double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+      if(isLong && newSL>sl && newSL<bid)
+        {
+         ResetLastError();
+         if(gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP)))
+            PrintFormat("ORB RUNNER: stop LONG trascinato su EMA%d: %s -> %s (apertura %s, BID %s).",
+                        InpEmaFast,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+                        DoubleToString(openP,_Digits),DoubleToString(bid,_Digits));
+         else
+            PrintFormat("ORB RUNNER: PositionModify LONG FALLITA (%s -> %s), retcode %u (%s), err=%d",
+                        DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+                        gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+        }
+      else if(isLong && unaPerBarra)
+         //--- Ramo 5. Condizione non soddisfatta: si dicono i tre numeri che la
+         //    decidono, cosi' dal log si capisce SUBITO se l'EMA e' sotto lo
+         //    stop attuale (nulla da trascinare) o se e' il vincolo sul BID a
+         //    mordere. Una riga per barra, non a ogni tick.
+         PrintFormat("ORB RUNNER: nessun trascinamento LONG. EMA%d=%s, SL attuale=%s, BID=%s (servono EMA>SL e EMA<BID).",
+                     InpEmaFast,DoubleToString(newSL,_Digits),DoubleToString(sl,_Digits),DoubleToString(bid,_Digits));
+
+      if(!isLong && (newSL<sl||sl==0) && newSL>ask)
+        {
+         ResetLastError();
+         if(gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP)))
+            PrintFormat("ORB RUNNER: stop SHORT trascinato su EMA%d: %s -> %s (apertura %s, ASK %s).",
+                        InpEmaFast,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+                        DoubleToString(openP,_Digits),DoubleToString(ask,_Digits));
+         else
+            PrintFormat("ORB RUNNER: PositionModify SHORT FALLITA (%s -> %s), retcode %u (%s), err=%d",
+                        DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+                        gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+        }
+      else if(!isLong && unaPerBarra)
+         PrintFormat("ORB RUNNER: nessun trascinamento SHORT. EMA%d=%s, SL attuale=%s, ASK=%s (servono EMA<SL o SL=0, e EMA>ASK).",
+                     InpEmaFast,DoubleToString(newSL,_Digits),DoubleToString(sl,_Digits),DoubleToString(ask,_Digits));
      }
+  }
+
+//+------------------------------------------------------------------+
+//| v1.03 (solo DIAGNOSTICA, non decide niente): quante posizioni con |
+//| il NOSTRO magic ci sono davvero su questo simbolo. Serve a        |
+//| smascherare il caso hedging in cui PositionSelect(_Symbol) --     |
+//| usata da SelPos() -- seleziona la posizione di un'altra sedia e   |
+//| il controllo sul magic fa uscire il runner in silenzio.           |
+//| Costo: chiamata solo nel ramo diagnostico, al massimo una volta   |
+//| per barra M5.                                                     |
+//+------------------------------------------------------------------+
+int ContaPosizioniMagic()
+  {
+   int n=0;
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      n++;
+     }
+   return(n);
   }
 
 //+------------------------------------------------------------------+

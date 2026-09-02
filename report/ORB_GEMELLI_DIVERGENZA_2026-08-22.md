@@ -207,3 +207,146 @@ l'ha governata. Da guardare insieme, ma senza fondere le due indagini.
    ogni occorrenza un'indagine di giorni. Preparato in repo il logging
    (v1.03, solo repo — inerte finche' non si ricompila col solito script
    `aggiorna_verifica_orb.ps1` e la legge dello screenshot).
+
+---
+
+## 🛠️ v1.03 PREPARATA (SOLO REPO — inerte finche' Claudio non ricompila)
+
+`mql5/Experts/ABTG_ORB_Ottimizzato.mq5` portato a `#property version "1.03"`.
+**Solo strumentazione: nessun input nuovo, nessuna riga di decisione toccata,
+nessun cambio di logica di trading.** Il file compilato oggi si comporterebbe
+in modo identico al v1.02 — parla e basta. I log usano `Print()` e non `Log()`
+di proposito: `Log()` dipende da `InpVerbose`, e una diagnostica che si puo'
+spegnere da pannello per sbaglio non serve a niente in un'indagine come questa.
+
+### Log aggiunti, uno per uno
+
+**In `OnInit()` — prefisso `ORB INIT:`**
+1. `handle EMA veloce OK = <handle>` con simbolo, TF, periodo, e lo stato di
+   `InpUseTrailEMA` / `InpExitOnEmaClose` — cosi' la PRIMA riga del Giornale
+   dice gia' se l'ipotesi n.2 (handle non caricato) e' viva o morta, e
+   fotografa gli input del trailing senza aspettare lo screenshot.
+2. `handle EMA veloce INVALID_HANDLE` con i parametri usati e `GetLastError()`.
+3. In caso di `INIT_FAILED`: adesso dice **QUALE** handle e' saltato
+   (ATR / EMA veloce / EMA lenta / EMA lunga) + errore, non piu' il generico
+   "ERRORE: handle indicatori."
+
+**In `ManageRunner()` — prefisso `ORB RUNNER:`** (prima usciva in silenzio su
+cinque rami diversi e taceva anche quando il trailing funzionava)
+4. **Ramo `SelPos()` falso ma posizioni nostre esistenti**: nuova funzione di
+   sola diagnostica `ContaPosizioniMagic()` che conta le posizioni con magic
+   770611 scorrendo `PositionsTotal()`. Se ce n'e' almeno una e `SelPos()`
+   dice comunque di no, stampa che `PositionSelect` ha agganciato la posizione
+   di un'altra sedia. **E' il test decisivo dell'ipotesi nuova, vedi sotto.**
+   Se non c'e' nessuna posizione nostra, tace (altrimenti una riga per barra
+   tutto il giorno).
+5. **Ramo configurazione**: `InpUseTrailEMA=false E InpExitOnEmaClose=false`
+   -> nessuna gestione, lo stop resta dov'e'.
+6. **Ramo handle invalido**: `hEmaF==INVALID_HANDLE` -> impossibile trailare.
+7. **Ramo `CopyBuffer` fallito** (era IL silenzio perfetto): stampa quanti
+   valori ha copiato invece di 1, l'handle, e `GetLastError()` (preceduto da
+   `ResetLastError()`, cosi' il numero e' quello vero).
+8. **Dato di prezzo assente**: `iClose(shift 1) <= 0`, che renderebbe fasullo
+   il confronto con l'EMA.
+9. **Modifica RIUSCITA**: `stop LONG/SHORT trascinato su EMA9: <vecchio SL> ->
+   <nuovo SL>`, con prezzo di apertura e BID/ASK. Da oggi il trailing che
+   funziona si vede nel log, non si deduce dal prezzo di chiusura.
+10. **Modifica FALLITA**: `PositionModify FALLITA (<vecchio> -> <nuovo>)` con
+    `retcode`, descrizione del retcode e `GetLastError()`.
+11. **Condizione EMA non soddisfatta** (il caso "normale", con **throttle una
+    volta per barra**): stampa i tre numeri che decidono — `EMA9`, `SL
+    attuale`, `BID`/`ASK` — cosi' si distingue a colpo d'occhio "l'EMA e'
+    ancora sotto lo stop, niente da trascinare" da "e' il vincolo sul BID a
+    mordere".
+12. **Uscita su chiusura oltre l'EMA fallita**: retcode + errore (prima la
+    `PositionClose` veniva data per riuscita a scatola chiusa).
+
+**In `ManageTP1()` — prefisso `ORB TP1:`**
+13. **Una tantum, con flag statico**: `TP1/breakeven disattivati da
+    InpTP1Pct=0` — il **difetto n.2** del 22/08, quello per cui il breakeven
+    vive dentro la funzione del parziale e con `InpTP1Pct=0` non puo' scattare
+    mai, anche con `InpBreakeven=true` a pannello. Ora l'EA lo dichiara da
+    solo al primo tick utile invece di farcelo scoprire da uno screenshot.
+
+### ⚠️ Esito della verifica del punto 3: SI', esiste un percorso per cui il runner non gestisce nulla — e ne esistono TRE
+
+Richiesto: cercare un percorso per cui `ManageRunner()` non venga chiamata, o
+non faccia nulla, su un terminale e non sull'altro. **Trovato, e uno dei tre e'
+un candidato molto forte come causa vera della divergenza.**
+
+**A) 🔴 IL SOSPETTATO N.1 — `SelPos()` su conto HEDGING (nuovo, non era nel
+dossier).** Prima riga di `ManageRunner()`:
+
+```
+bool SelPos(){ if(!PositionSelect(_Symbol)) return(false); return(PositionGetInteger(POSITION_MAGIC)==InpMagic); }
+```
+
+`PositionSelect(_Symbol)` **non conosce il magic**: su conto hedging, se sul
+simbolo ci sono piu' posizioni, seleziona la PRIMA. Se quella prima e' di
+un'altra sedia, il confronto sul magic fallisce, `SelPos()` torna `false` e il
+runner **esce alla prima riga, in silenzio totale**: niente trailing, niente
+uscita su EMA, niente breakeven, niente chiusura di fine giornata.
+
+E il conto e' **HEDGING** (`CLAUDE.md`), e su **U30USD** girano da contratto
+almeno: `770202` Dow_Apertura_US, `771531` EMA200 (**33-35 operazioni al mese
+da sola**), `770511` SuperWave H1, `770531` SuperWave H2, `771321` PTE,
+`772234` GapFill, `772341` PunteLarry — oltre al nostro `770611`. Il
+`PIANO_MIGRAZIONE_100K_2026-08-31.md` (riga sulla finestra 14:30-14:46) dice
+espressamente che ORB, Dow_Apertura ed EMA200 Dow **operano sullo stesso
+simbolo negli stessi minuti**.
+
+Perche' spiegherebbe TUTTO il quadro osservato:
+- stessa `.ex5`, stesso secondo, comportamento diverso -> **dipende da cosa ha
+  aperto il RESTO della flotta su quel terminale**, che sui due conti e'
+  diverso (il 100k e' in migrazione, magic `88xxxx`);
+- silenzio assoluto nel log -> il `return` e' alla prima riga;
+- lo stop iniziale c'e' (viene messo all'apertura dell'ordine, che non passa
+  da `SelPos()`), ma non si muove mai;
+- e spiegherebbe anche il breakeven mancato **indipendentemente** da
+  `InpTP1Pct`, perche' `ManageTP1()` comincia con lo stesso `SelPos()`.
+
+**NON corretto**, come da mandato: la correzione (scorrere `PositionsTotal()`
+per simbolo+magic invece di `PositionSelect`) tocca `ManageTP1`, `HandleOCO`,
+`gHadPos`/`InpOneTradePerDay` ed `EndOfDay` — cioe' cambia il comportamento di
+trading su conto hedging e va misurata, non infilata dentro una patch di
+logging. **Il log n.4 serve proprio a provare o scagionare questa ipotesi al
+prossimo trade**, prima di scrivere una riga di fix.
+
+**B) 🟠 `newBar` che non scatta mai se `iTime(InpExecTF,0)` torna 0.** In
+`OnTick`: `datetime t=iTime(_Symbol,InpExecTF,0); bool newBar=(t!=gLastExec);`
+con `gLastExec` inizializzata a `0`. Se lo storico del TF di esecuzione non e'
+disponibile su quel terminale, `iTime` torna `0`, `newBar` resta **falso per
+sempre** e `ManageRunner()` **non viene mai chiamata**. E' una condizione
+appiccicosa e muta. Nota pratica: `InpExecTF` e' un **input** — se sui due
+conti fosse impostato diverso (o su un TF il cui storico non e' caricato),
+cambierebbero insieme la EMA del trailing e la rilevazione della nuova barra.
+**Da aggiungere alla lista degli input da fotografare domani.**
+
+**C) 🟡 Dopo `InpEndHour:InpEndMin` il runner non gira piu'.** In `OnTick` il
+blocco `if(nowMin>=InpEndHour*60+InpEndMin){ EndOfDay(); return; }` sta
+**prima** della chiamata a `ManageRunner()`. Corretto di suo (a fine giornata
+si chiude), ma se `InpCloseAtEnd=false` la posizione resta senza gestione.
+Non c'entra col trade del 02/09 (15:00-16:45 server), lo si annota per
+completezza.
+
+**Verificato e SCAGIONATO** (nessuna dipendenza trovata): `ManageRunner()`
+**non** dipende da `gPhase`, **non** dipende da `gPart1`/dal parziale, **non**
+dipende da `gRangeHigh`/`gRangeLow`, **non** e' sotto il filtro notizie
+(`InpUseNewsFilter` e' `false` di default e comunque il blocco news non fa
+`return`). Quindi l'ipotesi "il runner non parte perche' il TP1 non e' mai
+scattato" e' **falsa**: le due funzioni sono indipendenti, come gia' scritto
+il 22/08 — con l'unica, importante eccezione che **condividono `SelPos()`**
+(punto A).
+
+### Cosa serve adesso, in ordine
+1. Restano i tre passi del 02/09 (screenshot input, log del piccolo,
+   ricompilazione) — **con l'aggiunta di `InpExecTF` fra gli input da
+   fotografare** (punto B).
+2. Ricompilare la v1.03 su ENTRAMBI i terminali con
+   `backtest_pipeline/aggiorna_verifica_orb.ps1` (stessa procedura del 22/08,
+   con la legge dello screenshot). Finche' non lo si fa, **questa versione e'
+   inerte**: vive solo nel repo.
+3. Al prossimo trade ORB, leggere il Giornale del piccolo cercando
+   `ORB RUNNER:` / `ORB INIT:` / `ORB TP1:`. La riga che compare (o la sua
+   assenza totale, che indicherebbe il punto B) **dice quale delle ipotesi e'
+   quella giusta in un minuto**, invece che in tre giorni di confronti a mano.
