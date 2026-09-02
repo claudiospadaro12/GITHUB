@@ -4,6 +4,12 @@ _Aperto il 02/09/2026. Regole congelate (chat 02/09 mattina): ingresso sul
 segnale V8 (XAUUSD M15, barra confermata); uscita alla CHIUSURA di candela
 oltre la media centrale (SMA20); stop catastrofe sempre; taglia 0,50 fissa;
 conto separato dalla flotta. Bilancio a 30 trade, coi cancelli di casa.
+ESTENSIONE 02/09 pomeriggio (firmata in chat): stessi segnali e stesse regole
+anche su GER40/D30EUR (taglia fissa 10 lotti, ~1 EUR/punto) e XAGUSD (taglia
+fissa 0,25 lotti, 1 lotto = 5.000 oz -- MAI 2 lotti). Rischio bersaglio ~0,6-1%
+per trade allo stop catastrofe su ogni strumento. VINCOLO CORRELAZIONE: mai
+oro e argento in posizione INSIEME (stessa idea a taglia doppia); il DAX
+diversifica. Taglie da riverificare alla prima Specifica contratto BCM.
 I trade FUORI PROTOCOLLO si annotano e NON contano nella statistica._
 
 | # | data/ora (srv) | dir | lotti | in | out | netto EUR | protocollo | note |
