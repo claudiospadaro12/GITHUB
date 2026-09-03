@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDALONDONFX_v2
+#  MARCATORE_RIGA_SONDALONDONFX_v3
 #  RIGA_SONDALONDONFX.ps1 -- SONDA DI FREQUENZA LONDONFX (PASSO 0 della
 #  caccia frequenza forex, SECONDA BATTUTA del 31/08).
 #  ABTG_SondaLondonFx e' un CONTATORE: NESSUN ordine, nessun lotto,
@@ -461,6 +461,15 @@ try{
   & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
   while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
   if(-not (Test-Path -LiteralPath $ex5)){
+    # IL CAMPO SI TIMBRA QUI, PRIMA DEL throw (classe 94-ter della checklist,
+    # 02/09, pagata sulla sonda gemella RSI+EMA V8 e rimasta viva qui perche'
+    # questo driver e' del 31/08): se lo aggiornasse solo il ramo di successo,
+    # il referto del giro FALLITO direbbe ancora "NON TENTATA" -- cioe'
+    # negherebbe agli atti PROPRIO il fatto che questo passo misura (EA mai
+    # compilato), e la pagina dice a Claudio di cercare li' la parola FALLITA.
+    # Tre stati e tutti e tre veri: NON TENTATA (non ci siamo arrivati) /
+    # FALLITA (tentata, niente .ex5) / OK.
+    $Compilato = "FALLITA (tentata, nessun .ex5 prodotto): QUESTO E' IL RISULTATO DEL PASSO -- gli errori sono in COMPILAZIONE_FALLITA.log dentro lo zip"
     $logC = Join-Path $dstExp ($EA + ".log")
     if(Test-Path -LiteralPath $logC){
       Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force

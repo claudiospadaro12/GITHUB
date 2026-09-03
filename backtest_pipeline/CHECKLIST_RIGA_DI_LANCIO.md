@@ -6743,3 +6743,105 @@ diventati mezz'ora.
 > lo ri-spiega: lo CITA.** "La freschezza l'ha gia' controllata la riga sullo
 > zip" e' una frase che non puo' invecchiare; "= adesso" invecchia insieme alla
 > durata della corsa.
+
+---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 (sera) — trovata verificando la **SONDA LONDONFX** (`RIGA_SONDALONDONFX.ps1` v2, pin `49f68b7f`), pacchetto arrivato in verifica **il giorno dopo** che le stesse due classi erano state chiuse sulla sonda gemella
+
+## 111. 🧬 LA CLASSE SI CHIUDE SUL FILE DOVE E' STATA TROVATA, E I **FRATELLI DELLO STESSO STAMPO GIA' IN REPO** RESTANO ARMATI — anche quando la scheda della classe li NOMINA
+
+_Misurato, non ipotizzato. Il pacchetto SONDA LONDONFX presentato per la verifica
+il 03/09 portava **due** difetti, tutti e due gia' in questa checklist, tutti e
+due gia' **corretti** sulla sonda gemella RSI+EMA V8:_
+
+| classe | scoperta su | corretta il | viva su LONDONFX il 03/09 |
+|---|---|---|---|
+| **94-ter** (campo `compilazione:` timbrato solo sul ramo di successo) | `RIGA_SONDARSIEMAV8.ps1` | 02/09, commit `d7336af` | **SI** |
+| **110** (`riga data: = adesso`, mentre il timbro e' l'ora di AVVIO) | `RIGA_SONDARSIEMAV8_DA_MANDARE.md` | 03/09 | **SI** |
+
+L'aggravante e' che la **110 li nomina per nome**: _«Vale per tutte le pagine
+con lo stesso paragrafo (`RIGA_SONDAM0PB`, `RIGA_SONDALONDONFX`)»_. La classe
+era scritta, la lista dei contagiati era scritta, il fratello era scritto — e il
+fratello e' partito lo stesso, perche' **scrivere "vale anche per" non e' fare**.
+
+La causa strutturale non e' distrazione, e' **anagrafica**: `RIGA_SONDALONDONFX.ps1`
+e' del **31/08**, la correzione della 94-ter e' del **02/09**. Un file scritto
+PRIMA di una classe non viene toccato da quella classe se nessuno ci torna
+sopra: il fix viaggia **in avanti** (i file nuovi nascono corretti) e **non
+all'indietro**. La verifica di un pacchetto guarda il pacchetto; la checklist
+cresce sulla riga verificata; **nessuno dei due guarda i cloni dormienti** —
+e un clone dormiente e' esattamente cio' che una riga di lancio risveglia.
+
+### Perche' e' una classe a se', e non la 100 o la 104
+- La **100** e' il *blocco di lancio* vecchio sopravvissuto in un secondo `.md`:
+  li' il difetto e' una **copia della riga**. Qui la riga e' una sola e giusta:
+  a essere vecchio e' lo **script** che la riga serve, ed e' l'unico che c'e'.
+- La **104** e' il censimento incompleto **dentro una correzione in corso**
+  (la quarta occorrenza scritta in prosa). Qui la correzione era **completa e
+  verde sul suo perimetro**: il perimetro era solo il file sbagliato.
+
+> ✅ **REGOLA: quando una classe si chiude, si chiude sullo STAMPO, non sul file.**
+> Prima del commit che chiude una classe, SEMPRE:
+> ```
+> # 1. chi e' fratello? (lo stampo, non il nome del round)
+> grep -rln "<riga-firma del difetto>" backtest_pipeline/righe/*.ps1
+> # esempi reali: 'Compilato = "NON TENTATA"'   |   "riga data: = adesso"
+> # 2. l'elenco dei contagiati si SCRIVE nella scheda della classe
+> # 3. e ogni nome dell'elenco esce dal commit CORRETTO oppure
+> #    DICHIARATO ANCORA ARMATO, con la data
+> ```
+> ⚠️ **Un fratello non corretto va dichiarato ARMATO nella scheda**, non lasciato
+> in silenzio: "non l'ho ancora fatto" e "non ce n'era bisogno" si scrivono
+> diversi. E la dichiarazione ha una data, cosi' invecchia a vista.
+>
+> 🔴 **Corollario per il verificatore:** verificare una riga di lancio nata
+> PRIMA dell'ultima classe della checklist non e' come verificarne una nata
+> dopo. **La data del `.ps1` (`git log -1 --date=short`) contro la data delle
+> ultime classi dice quante classi possono essergli passate sopra senza
+> toccarlo** — ed e' li' che si guarda per primi.
+
+### 111-bis. 📊 E IL CENSIMENTO, FATTO SUL SERIO, DICE **QUANTO** GRANDE ERA (03/09/2026)
+
+La regola qui sopra e' stata **eseguita** appena scritta, e il numero e' il
+motivo per cui la classe esiste. Comandi e risultati, non stime:
+
+```bash
+cd backtest_pipeline/righe
+# 94-ter: chi inizializza il campo e NON lo timbra mai sul ramo fallito?
+for f in $(grep -rl 'Compilato = "NON TENTATA"' *.ps1); do
+  grep -q '\$Compilato *= *"FALLITA' "$f" || echo "ARMATO: $f"; done
+# -> 27 file su 29
+# 110: quali pagine dicono ancora "= adesso" / "l'ora di adesso"?
+grep -rn "ora di adesso\|data: = adesso" *.md
+# -> 7 pagine (12 occorrenze)
+```
+
+**27 driver su 29** e **7 pagine**. Le due classi erano state dichiarate chiuse
+con **un** file corretto ciascuna. Non e' un rimprovero a chi le ha chiuse: e'
+la misura di quanto poco costa scrivere la classe e quanto costa **propagarla**
+— ed e' esattamente per questo che la propagazione va messa nel commit che
+chiude la classe, o non succede mai.
+
+⚠️ **Non tutti i 27 mordono allo stesso modo**: la 94-ter e' load-bearing solo
+dove la pagina dice a Claudio di leggere `compilazione:` cercandoci `FALLITA`
+(i round con **EA mai compilato**). Ma "armato" e' un fatto, "innocuo qui" e'
+un giudizio: si scrive l'elenco, poi si giudica riga per riga.
+
+### Stato dei fratelli al 03/09/2026 (sera)
+- `RIGA_SONDALONDONFX.ps1` — **CORRETTO** (94-ter), marcatore `_v2` -> `_v3`.
+- `RIGA_SONDALONDONFX_DA_MANDARE.md` — **CORRETTO** (110 + 108) e ri-pinnato.
+- **ANCORA ARMATI al 03/09/2026** (fuori dal perimetro di questa verifica, da
+  correggere e ri-pinnare PRIMA del prossimo invio di ciascuna riga):
+  - **94-ter, 27 driver**: `RIGA_ALLINEALONDRA`, `RIGA_BREAKIN`, `RIGA_CHAOS`,
+    `RIGA_CHAOSABL`, `RIGA_CRT`, `RIGA_CRT_EXT`, `RIGA_CRT_EXT_S2`,
+    `RIGA_CRT_EXT_S2G`, `RIGA_CRT_GATE`, `RIGA_CRT_TICK_DIAG`, `RIGA_CRT_TICK_G`,
+    `RIGA_DAXREENTRY`, `RIGA_FASE2_CASSA`, `RIGA_FASE2_DRIVE`, `RIGA_INVES_DRIVE`,
+    `RIGA_NYRETEST`, `RIGA_NYRETEST_TAR`, `RIGA_NYRETEST_TAR2`,
+    `RIGA_PASSO0_FVGRET`, `RIGA_PASSO0_OUTOFNOISE`, `RIGA_PREOPEN_DAX`,
+    `RIGA_PREOPEN_DOW`, `RIGA_PREOPEN_NAS`, `RIGA_SHORTGATE`,
+    `RIGA_SHORTGATE_CASSA`, `RIGA_SONDAM0PB`, `RIGA_SONDA_OROLOGIO` (`.ps1`).
+  - **110, 7 pagine**: `RIGA_BREAKIN`, `RIGA_DAXREENTRY`, `RIGA_NYRETEST`,
+    `RIGA_NYRETEST_TAR`, `RIGA_NYRETEST_TAR2`, `RIGA_SONDAM0PB`,
+    `RIGA_SONDA_OROLOGIO` (`_DA_MANDARE.md`).
+  - Il piu' urgente e' **`RIGA_SONDAM0PB`**: e' la sonda dello stesso stampo,
+    stesso PASSO 0, stesso "EA mai compilato" — armata su TUTTE E DUE le classi.
