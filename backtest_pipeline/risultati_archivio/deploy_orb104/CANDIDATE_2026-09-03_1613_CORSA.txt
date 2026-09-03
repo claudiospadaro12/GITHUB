@@ -1,0 +1,57 @@
+CARTELLE GUARDATE (conto cercato 50503392, candidate 10):
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\15BEB048A4E0532395CCA693EA561D8C   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      origin.txt: C:\Program Files (x86)\BCM Markets MT4 Terminal
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5   [ELEGGIBILE, sotto il profilo di questa sessione]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=True file di log letti=21 leggibile=True
+      origin.txt: C:\Program Files\BCM Markets MT5 Terminal
+      login visti nei log: 50503392   piccolo 50503392=True   grande 50504263=False
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\73B7A2420D6397DFF9014A20F1201F97   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      origin.txt: C:\Program Files\Pepperstone MetaTrader 5
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna bases\BCMMarkets-Server (non e' il feed BCM)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\857385E4B0F2356AD99AA95CDF40FAE9   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=False file di log letti=3 leggibile=True
+      origin.txt: C:\Program Files\Tickmill Europe MT5 Terminal
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna bases\BCMMarkets-Server (non e' il feed BCM)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=True file di log letti=21 leggibile=True
+      origin.txt: C:\Program Files\BCM Markets MT5 Terminal -V3
+      login visti nei log: 50504263   piccolo 50503392=False   grande 50504263=True
+      traccia del 100k: origin.txt contiene -V3; login 50504263 nei log
+      scartata perche': E' IL 100k/-V3 (origin.txt contiene -V3; login 50504263 nei log): fuori dal perimetro firmato
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FF5C0E29FAC93F5DD90858C939E9C0E8   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Program Files\BCM Markets MT5 Terminal   [scartata]
+      trovata come: installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Program Files\BCM Markets MT5 Terminal -V3   [scartata]
+      trovata come: installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      traccia del 100k: percorso contiene -V3
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Program Files\Pepperstone MetaTrader 5   [scartata]
+      trovata come: installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Program Files\Tickmill Europe MT5 Terminal   [scartata]
+      trovata come: installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
