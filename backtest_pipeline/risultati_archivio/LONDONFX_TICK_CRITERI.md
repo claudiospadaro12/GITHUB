@@ -700,3 +700,23 @@ numero. Le caselle le riempio io dopo la sua risposta, con la data._
 
 _Fine bozza. **Nessun numero di questo round è stato prodotto, letto o guardato.
 Nessun EA è stato compilato. Nessuna riga di lancio è stata costruita.**_
+
+---
+
+## ✍️ FIRMA — 03/09/2026, ~09:45 (Claudio, in chat: "FIRMO TUTTO, ANCHE LA A SU F5")
+
+**TUTTI i criteri di questa bozza sono CONGELATI come proposti**, incluse le
+scelte raccomandate nei punti aperti:
+- **F5 = OPZIONE A** (soglia RSI short SIMMETRICA a 20 — esplicitamente
+  firmata: "anche la A su F5");
+- ora di sessione CONGELATA a 8 (le altre tornano solo dopo, se la 8 passa);
+- rischio 0,65% per trade;
+- terzo motore (allineamento 5 medie) DENTRO il contenitore, come da
+  raccomandazione F3;
+- prova di rischio sul vecchio = ROUND SEPARATO (R-C), con la regola
+  vincolante "nessuna sedia in forward prima che quella prova esista";
+- cap 2%/giorno acceso, con la rinuncia dichiarata su A5.
+
+Da qui in avanti i criteri NON si toccano: prima i numeri, poi (semmai) le
+revisioni, mai il contrario. Prossimo passo: costruzione dell'EA contenitore
+`ABTG_LondonFx` (repo-only) + riga di lancio dal verificatore.
