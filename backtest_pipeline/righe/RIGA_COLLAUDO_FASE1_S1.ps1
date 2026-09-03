@@ -1,6 +1,6 @@
 # =====================================================================
 #  RIGA_COLLAUDO_FASE1_S1.ps1
-#  MARCATORE-VERSIONE-SCRIPT: MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1
+#  MARCATORE-VERSIONE-SCRIPT: MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2
 # ---------------------------------------------------------------------
 #  A COSA SERVE (03/09/2026):
 #  e' lo strumento di LETTURA della SESSIONE 1 del collaudo enforcement
@@ -19,6 +19,18 @@
 #  Ogni gesto che CAMBIA STATO sul 100k (abbassare il cap, togliere e
 #  rimettere il Guardian) lo fa Claudio A MANO, con la legge dello
 #  screenshot: qui non c'e' una sola riga che possa farlo.
+#
+#  v2 (03/09/2026, dopo la FERMATA IN CAMPO delle 10:45:10 sul VPS,
+#  referto al pin 223e1f7): la scoperta della cartella dati NON si fa
+#  piu' per NOME ("-V3" dentro origin.txt sotto %APPDATA%), che sul VPS
+#  reale non combacia. Si scandisce LARGO (processi terminal64 vivi,
+#  cartelle dati di tutti i profili utente, installazioni PORTABLE sotto
+#  C:\Program Files*, C:\ e D:\) e si sceglie STRETTO, su un FATTO: il
+#  conto 50504263 nei log, la riga "filo verificato ... (conto 50504263)"
+#  e i referti del canarino intestati a quel login. Se le candidate con
+#  evidenza sono ZERO o PIU' DI UNA ci si FERMA, stampando l'elenco
+#  COMPLETO di cosa e' stato guardato -- e la cartella si puo' imporre
+#  con -CartellaDati senza aspettare un altro giro di push.
 #
 #  TRE MODI (uno per volta):
 #    (nessuno)  LETTURA PRIMA   -- prerequisiti P-1..P-5 leggibili dal log,
@@ -40,6 +52,8 @@
 #  USO (sempre col pin, dalla pagina
 #  backtest_pipeline/righe/COLLAUDO_FASE1_SESSIONE1_DA_MANDARE.md):
 #    powershell -ExecutionPolicy Bypass -File .\RIGA_COLLAUDO_FASE1_S1.ps1 -Pin <sha>
+#  e, se la scoperta si ferma, la stessa riga con in coda:
+#    -CartellaDati '<cartella dati dell'istanza del 100k>'
 #
 #  ASCII PURO (Windows PowerShell 5.1 legge i .ps1 in ANSI: niente emoji,
 #  niente lettere accentate). Cultura INVARIANTE su ogni numero.
@@ -49,8 +63,9 @@ param(
   [switch] $Presidio,
   [switch] $Chiusura,
   [int]    $Minuti       = 20,
-  [string] $OraRimozione = ""
-)
+  [string] $OraRimozione = "",
+  [string] $CartellaDati = ""     # v2: la cartella dati dell'istanza del 100k,
+)                                 # da usare SOLO se la scoperta automatica si ferma
 
 $ErrorActionPreference = "Continue"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -226,56 +241,229 @@ if ($Pin -notmatch "^[0-9a-fA-F]{7,40}$") {
 } else {
 
 # =====================================================================
-#  1) IL TERMINALE -V3 (100k). Se si legge il terminale sbagliato, tutto
-#     il resto e' teatro (rischio X3 della matrice del piano).
+#  1) LA CARTELLA DATI DEL 100k -- SCOPERTA PER FATTI, NON PER NOME.
+#
+#  PERCHE' e' cambiata (03/09/2026, driver v1 -> v2): la v1 cercava la
+#  stringa "-V3" dentro origin.txt sotto %APPDATA%\MetaQuotes\Terminal,
+#  e sul VPS di Claudio ha risposto "cartella dati -V3 non trovata"
+#  (referto delle 10:45:10, pin 223e1f7). IL NOME NON E' UN FATTO:
+#   - un'installazione PORTABLE non ha nessun origin.txt e tiene i dati
+#     DENTRO la cartella d'installazione;
+#   - la cartella dati puo' stare sotto un ALTRO profilo utente;
+#   - l'istanza puo' chiamarsi in qualunque modo.
+#  Il FATTO, invece, e' il conto: il login 50504263 nei log, il referto
+#  del canarino intestato a quel login, la riga "filo verificato ...
+#  (conto 50504263)" scritta dal Guardian.
+#
+#  REGOLA DI QUESTA SCOPERTA: si scandisce LARGO e si sceglie STRETTO.
+#  Se le candidate con evidenza sono ZERO o PIU' DI UNA, NON si indovina:
+#  ci si ferma stampando TUTTE le cartelle guardate e cosa c'era dentro,
+#  cosi' la cartella giusta la riconosce Claudio con uno sguardo (e la
+#  puo' imporre con -CartellaDati, senza aspettare un altro giro).
 # =====================================================================
-$termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-$DataFolder = ""
-$comeTrovato = ""
-if (Test-Path $termRoot) {
-  $cands = New-Object System.Collections.ArrayList
-  foreach ($d in @(Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)) {
-    $o = Join-Path $d.FullName "origin.txt"
-    if (-not (Test-Path $o)) { continue }
-    $t = ""
-    try { $t = [string](Get-Content $o -Raw -ErrorAction SilentlyContinue) } catch { $t = "" }
-    if ($t -and ($t -like "*-V3*")) { [void]$cands.Add($d) }
+$CAND = New-Object System.Collections.ArrayList
+
+function Aggiungi-Candidata($percorso, $origine) {
+  if ([string]::IsNullOrEmpty($percorso)) { return }
+  $full = $percorso
+  try {
+    if (-not (Test-Path -LiteralPath $percorso)) { return }
+    $full = (Get-Item -LiteralPath $percorso -ErrorAction Stop).FullName
+  } catch { return }
+  foreach ($c in $CAND) {
+    if ($c.Percorso -ieq $full) { $c.Origine = $c.Origine + " + " + $origine; return }
   }
-  if ($cands.Count -eq 1) {
-    $DataFolder = $cands[0].FullName
-    $comeTrovato = "origin.txt contiene -V3"
-  } elseif ($cands.Count -gt 1) {
-    $comeTrovato = ("AMBIGUO: " + $cands.Count + " cartelle dati con -V3 in origin.txt")
+  # una cartella entra nell'elenco se ha ALMENO UNA delle tre tracce di un
+  # terminale: logs\, MQL5\, terminal64.exe. Quelle con l'exe ma senza dati
+  # NON si buttano via in silenzio: si stampano scartate, col perche' --
+  # sono proprio il caso che fa dire a Claudio "ah, i dati stanno altrove".
+  $lg  = (Test-Path -LiteralPath (Join-Path $full "logs"))
+  $mq  = (Test-Path -LiteralPath (Join-Path $full "MQL5"))
+  $exe = (Test-Path -LiteralPath (Join-Path $full "terminal64.exe"))
+  if (-not $lg -and -not $mq -and -not $exe) { return }
+  [void]$CAND.Add([pscustomobject]@{
+    Percorso    = $full
+    Origine     = $origine
+    HaExe       = $exe
+    HaLogs      = $lg
+    HaMql       = $mq
+    Origin      = ""
+    FileLog     = 0
+    Logins      = ""
+    UltimoLogin = ""
+    ContoVisto  = $false
+    FiloConto   = $false
+    Canarini    = 0
+    UltimoCanarino = ""
+    UltimaAttivita = ""
+    Eleggibile  = $false
+    Scarto      = ""
+  })
+}
+
+#--- S1. I PROCESSI VIVI: e' il fatto piu' forte di tutti (se MT5 gira,
+#    la sua cartella d'installazione esiste di sicuro e la sappiamo).
+foreach ($pr in @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)) {
+  $exe = ""
+  try { $exe = $pr.Path } catch { $exe = "" }
+  if ($exe) { Aggiungi-Candidata (Split-Path -Parent $exe) ("processo terminal64 pid " + $pr.Id + " (portable?)") }
+}
+
+#--- S2/S3. Le cartelle dati classiche, di QUESTO utente e degli altri.
+$radiciTerminal = New-Object System.Collections.ArrayList
+if ($env:APPDATA) { [void]$radiciTerminal.Add((Join-Path $env:APPDATA "MetaQuotes\Terminal")) }
+try {
+  foreach ($u in @(Get-ChildItem "C:\Users" -Directory -ErrorAction SilentlyContinue)) {
+    [void]$radiciTerminal.Add((Join-Path $u.FullName "AppData\Roaming\MetaQuotes\Terminal"))
+  }
+} catch { }
+foreach ($rt in $radiciTerminal) {
+  if (-not (Test-Path -LiteralPath $rt)) { continue }
+  foreach ($d in @(Get-ChildItem -LiteralPath $rt -Directory -ErrorAction SilentlyContinue)) {
+    if ($d.Name -ieq "Common") { continue }
+    Aggiungi-Candidata $d.FullName ("cartella dati sotto " + $rt)
   }
 }
-# ripiego dichiarato: la cartella il cui GIORNALE dice 50504263
-if (-not $DataFolder -and (Test-Path $termRoot)) {
-  foreach ($d in @(Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)) {
-    $g = Join-Path $d.FullName "logs"
-    if (-not (Test-Path $g)) { continue }
-    $ultimo = ""
-    foreach ($f in @(Get-ChildItem $g -Filter "*.log" -ErrorAction SilentlyContinue | Sort-Object Name)) {
-      $txt = Leggi-Testo $f.FullName
-      if (-not $txt) { continue }
-      $mm = [regex]::Matches($txt, "'(\d{5,})': (?:login|authorized) on")
-      if ($mm.Count -gt 0) { $ultimo = $mm[$mm.Count - 1].Groups[1].Value }
+
+#--- S4. Le INSTALLAZIONI (per il caso portable: i dati stanno li' dentro).
+#    "Program Files" si scende SEMPRE di un livello (il broker puo'
+#    chiamarsi in qualunque modo: C:\Program Files\<Broker>\<Terminal>),
+#    e li' sotto entra chi ha terminal64.exe o un nome parlante.
+#    Su C:\ e D:\ si resta ai nomi parlanti: scendere ovunque vorrebbe
+#    dire elencare mezzo disco per niente.
+$radiciProfonde   = @("C:\Program Files", "C:\Program Files (x86)")
+$radiciSuperficie = @("C:\", "D:\")
+$paroleChiave = @("MT5", "BCM", "MetaTrader", "MetaQuotes", "Terminal")
+foreach ($ri in ($radiciProfonde + $radiciSuperficie)) {
+  if (-not (Test-Path -LiteralPath $ri)) { continue }
+  $profonda = ($radiciProfonde -contains $ri)
+  foreach ($d1 in @(Get-ChildItem -LiteralPath $ri -Directory -ErrorAction SilentlyContinue)) {
+    $nome1 = $false
+    foreach ($k in $paroleChiave) { if ($d1.Name -like ("*" + $k + "*")) { $nome1 = $true } }
+    if ($nome1 -or (Test-Path -LiteralPath (Join-Path $d1.FullName "terminal64.exe"))) {
+      Aggiungi-Candidata $d1.FullName ("installazione in " + $ri)
     }
-    if ($ultimo -eq $CONTO_COLLAUDO) {
-      $DataFolder = $d.FullName
-      $comeTrovato = "RIPIEGO: origin.txt senza -V3, scelta la cartella il cui giornale finisce col login " + $CONTO_COLLAUDO
-      break
+    if (-not $profonda -and -not $nome1) { continue }
+    foreach ($d2 in @(Get-ChildItem -LiteralPath $d1.FullName -Directory -ErrorAction SilentlyContinue)) {
+      $interessa2 = (Test-Path -LiteralPath (Join-Path $d2.FullName "terminal64.exe"))
+      if (-not $interessa2) {
+        foreach ($k in $paroleChiave) { if ($d2.Name -like ("*" + $k + "*")) { $interessa2 = $true } }
+      }
+      if ($interessa2) { Aggiungi-Candidata $d2.FullName ("installazione in " + $d1.FullName) }
     }
   }
 }
 
+#--- S5. La cartella IMPOSTA A MANO da Claudio (quando la sa lui).
+if ($CartellaDati) { Aggiungi-Candidata $CartellaDati "IMPOSTA A MANO con -CartellaDati" }
+
+#--- LE EVIDENZE, una candidata per volta. Tutto in sola lettura.
+$limiteGiorni = (Get-Date).AddDays(-20)
+foreach ($c in $CAND) {
+  if (-not $c.HaLogs -and -not $c.HaMql) { $c.Scarto = "c'e' terminal64.exe ma NESSUNA cartella logs\ ne' MQL5\: i dati di questa istanza stanno altrove (non e' portable)"; continue }
+  $o = Join-Path $c.Percorso "origin.txt"
+  if (Test-Path -LiteralPath $o) {
+    try { $c.Origin = ([string](Get-Content -LiteralPath $o -Raw -ErrorAction SilentlyContinue)).Trim() } catch { $c.Origin = "" }
+  }
+  $loginSet = @{}
+  $ultimaScrittura = $null
+  foreach ($sub in @("logs", "MQL5\Logs")) {
+    $dir = Join-Path $c.Percorso $sub
+    if (-not (Test-Path -LiteralPath $dir)) { continue }
+    $files = @(Get-ChildItem -LiteralPath $dir -Filter "*.log" -File -ErrorAction SilentlyContinue |
+               Where-Object { $_.LastWriteTime -ge $limiteGiorni -and $_.Length -lt 60000000 } |
+               Sort-Object LastWriteTime -Descending | Select-Object -First 8)
+    $c.FileLog = $c.FileLog + $files.Count
+    foreach ($f in $files) {
+      if ($null -eq $ultimaScrittura -or $f.LastWriteTime -gt $ultimaScrittura) { $ultimaScrittura = $f.LastWriteTime }
+      $txt = Leggi-Testo $f.FullName
+      if (-not $txt) { continue }
+      # 1) il conto come SOTTOSTRINGA: vale anche se il formato della
+      #    riga di collegamento cambia da una build all'altra
+      if ($txt.IndexOf($CONTO_COLLAUDO, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { $c.ContoVisto = $true }
+      # 2) la riga del Guardian che nomina il conto: e' il filo del collaudo
+      if ($txt.IndexOf("filo verificato", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -and
+          $txt.IndexOf("(conto " + $CONTO_COLLAUDO + ")", [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { $c.FiloConto = $true }
+      # 3) tutti i login visti, per far vedere a Claudio DI CHI e' la cartella
+      foreach ($m in [regex]::Matches($txt, "'(\d{5,})': (?:login|authorized) on")) {
+        $loginSet[$m.Groups[1].Value] = 1
+        $c.UltimoLogin = $m.Groups[1].Value
+      }
+    }
+  }
+  if ($loginSet.Keys.Count -gt 0) { $c.Logins = (($loginSet.Keys | Sort-Object) -join ",") }
+  if ($null -ne $ultimaScrittura) { $c.UltimaAttivita = $ultimaScrittura.ToString("yyyy-MM-dd HH:mm", $INV) }
+  $fdir = Join-Path $c.Percorso "MQL5\Files"
+  if (Test-Path -LiteralPath $fdir) {
+    $can = @(Get-ChildItem -LiteralPath $fdir -Filter ("ABTG_Canarino_" + $CONTO_COLLAUDO + "_*.txt") -File -ErrorAction SilentlyContinue |
+             Sort-Object LastWriteTime -Descending)
+    $c.Canarini = $can.Count
+    if ($can.Count -gt 0) { $c.UltimoCanarino = $can[0].Name }
+  }
+  $c.Eleggibile = ($c.ContoVisto -or $c.FiloConto -or ($c.Canarini -gt 0))
+  if (-not $c.Eleggibile) { $c.Scarto = "nessuna traccia del conto " + $CONTO_COLLAUDO }
+}
+
+#--- L'ELENCO COMPLETO: si stampa SEMPRE, anche quando la scelta e' facile.
+#    E' l'artefatto che permette a Claudio di dire "e' quella" in un colpo.
+Riga "=== CARTELLE GUARDATE (scoperta per FATTI: il conto, non il nome) ===" "Cyan"
+Riga ("  conto cercato: " + $CONTO_COLLAUDO + "   candidate esaminate: " + $CAND.Count) "Gray"
+foreach ($c in $CAND) {
+  $col = "Gray"
+  if ($c.Eleggibile) { $col = "Green" }
+  Riga ("  --- " + $c.Percorso) $col
+  Riga ("      trovata come : " + $c.Origine)
+  Riga ("      terminal64.exe=" + $c.HaExe + "  logs\=" + $c.HaLogs + "  MQL5\=" + $c.HaMql + "  file di log guardati=" + $c.FileLog + "  ultima scrittura=" + $c.UltimaAttivita)
+  if ($c.Origin) { Riga ("      origin.txt   : " + $c.Origin) }
+  Riga ("      login visti  : " + $(if ($c.Logins) { $c.Logins } else { "nessuno" }) + "   ultimo=" + $(if ($c.UltimoLogin) { $c.UltimoLogin } else { "-" }))
+  Riga ("      conto " + $CONTO_COLLAUDO + " nei log: " + $c.ContoVisto + "   filo verificato con quel conto: " + $c.FiloConto + "   referti canarino: " + $c.Canarini)
+  if ($c.UltimoCanarino) { Riga ("      ultimo canarino: " + $c.UltimoCanarino) }
+  if ($c.Scarto) { Riga ("      SCARTATA: " + $c.Scarto) "Yellow" }
+}
+Riga ""
+
+$eleggibili = @($CAND | Where-Object { $_.Eleggibile })
+$DataFolder = ""
+$comeTrovato = ""
+if ($CartellaDati) {
+  $imposta = @($CAND | Where-Object { $_.Origine -like "*IMPOSTA A MANO*" })
+  if ($imposta.Count -eq 1) {
+    $DataFolder = $imposta[0].Percorso
+    $comeTrovato = "IMPOSTA A MANO con -CartellaDati"
+    if (-not $imposta[0].Eleggibile) {
+      Riga ("ATTENZIONE: la cartella imposta a mano NON ha nessuna traccia del conto " + $CONTO_COLLAUDO + ".") "Yellow"
+      Riga "            Vado avanti perche' l'hai chiesto tu, ma il referto lo dice." "Yellow"
+      $comeTrovato = $comeTrovato + " (SENZA evidenza del conto: dichiarato)"
+    }
+  } else {
+    Riga ("FERMO: -CartellaDati punta a una cartella che non esiste o non e' una cartella dati: " + $CartellaDati) "Red"
+  }
+} elseif ($eleggibili.Count -eq 1) {
+  $DataFolder = $eleggibili[0].Percorso
+  $comeTrovato = "UNICA candidata con evidenza del conto " + $CONTO_COLLAUDO +
+                 " (log=" + $eleggibili[0].ContoVisto + ", filo=" + $eleggibili[0].FiloConto + ", canarini=" + $eleggibili[0].Canarini + ")"
+} elseif ($eleggibili.Count -gt 1) {
+  $comeTrovato = "AMBIGUO: " + $eleggibili.Count + " cartelle con evidenza del conto " + $CONTO_COLLAUDO
+  Riga ("FERMO -- " + $comeTrovato + ". NON indovino quale sia: le due potrebbero essere") "Red"
+  Riga "la stessa istanza vista due volte, oppure due terminali sullo stesso conto (violazione B9)." "Red"
+  foreach ($e in $eleggibili) { Riga ("   candidata: " + $e.Percorso) "Red" }
+  Riga "Rilancia la stessa riga aggiungendo   -CartellaDati '<il percorso giusto>'   (quello dell'istanza del 100k)." "Yellow"
+} else {
+  $comeTrovato = "NESSUNA cartella con evidenza del conto " + $CONTO_COLLAUDO
+  Riga ("FERMO -- " + $comeTrovato + ".") "Red"
+  Riga "Sopra c'e' l'elenco COMPLETO di quello che ho guardato e di cosa c'era dentro: se riconosci" "Yellow"
+  Riga "la cartella dell'istanza del 100k, rilancia la stessa riga aggiungendo" "Yellow"
+  Riga "   -CartellaDati 'C:\...\<cartella dati dell'istanza del 100k>'" "Yellow"
+  Riga "Se invece non c'e' proprio, il percorso lo si legge in MT5: File > Apri la cartella dei dati." "Yellow"
+}
+
 if (-not $DataFolder) {
-  $P_terminale = "FALLITO (cartella dati -V3 non trovata; " + $comeTrovato + ")"
-  Riga ("FERMO: " + $P_terminale) "Red"
-  $Esito = "FERMATA: terminale -V3 non trovato"
+  $P_terminale = "FALLITO (" + $comeTrovato + ", candidate esaminate " + $CAND.Count + ")"
+  $Esito = "FERMATA: cartella dati del 100k non identificata"
 } else {
   $P_terminale = "OK (" + (Split-Path -Leaf $DataFolder) + " -- " + $comeTrovato + ")"
-  Riga ("cartella dati -V3 : " + $DataFolder) "Gray"
-  Riga ("come trovata      : " + $comeTrovato) "Gray"
+  Riga ("cartella dati del 100k : " + $DataFolder) "Green"
+  Riga ("come trovata           : " + $comeTrovato) "Gray"
 
   # MT5 deve restare APERTO: qui non si chiude niente, ma se e' chiuso il
   # forward e' fermo e va DETTO (non e' un rifiuto: e' un avviso).
@@ -297,8 +485,13 @@ if (-not $DataFolder) {
   $contoAttivo = ""
   $serverConto = ""
   $quandoConto = ""
-  if (Test-Path $giornaleDir) {
-    foreach ($f in @(Get-ChildItem $giornaleDir -Filter "*.log" -ErrorAction SilentlyContinue | Sort-Object Name)) {
+  # v2: si guarda nel GIORNALE **e** in MQL5\Logs. Su un'installazione
+  # portable, o con una build che scrive il collegamento altrove, la
+  # riga di login puo' non stare dove la cercava la v1 -- e "non letto"
+  # su un terminale sanissimo e' un allarme falso.
+  foreach ($dirLog in @($giornaleDir, $espertiDir)) {
+    if (-not (Test-Path -LiteralPath $dirLog)) { continue }
+    foreach ($f in @(Get-ChildItem -LiteralPath $dirLog -Filter "*.log" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)) {
       $txt = Leggi-Testo $f.FullName
       if (-not $txt) { continue }
       $mm = [regex]::Matches($txt, "'(\d{5,})': (?:login|authorized) on ([^\r\n\(]+)")
@@ -306,9 +499,17 @@ if (-not $DataFolder) {
         $u = $mm[$mm.Count - 1]
         $contoAttivo = $u.Groups[1].Value
         $serverConto = $u.Groups[2].Value.Trim()
-        $quandoConto = $f.BaseName
+        $quandoConto = $f.BaseName + " (" + (Split-Path -Leaf $dirLog) + ")"
       }
     }
+  }
+  # ripiego dichiarato: se nessuna riga di collegamento esiste, il conto
+  # lo dice comunque il Guardian nella sua riga "filo verificato".
+  $scelta = @($CAND | Where-Object { $_.Percorso -ieq $DataFolder })
+  if (-not $contoAttivo -and $scelta.Count -eq 1 -and $scelta[0].FiloConto) {
+    $contoAttivo = $CONTO_COLLAUDO
+    $serverConto = "(non letto: nessuna riga di collegamento)"
+    $quandoConto = "riga [GUARDIAN] filo verificato ... (conto " + $CONTO_COLLAUDO + ")"
   }
   if ($contoAttivo -eq $CONTO_COLLAUDO) {
     $P_conto = "OK (" + $contoAttivo + " su " + $serverConto + ", ultimo collegamento nel giornale del " + $quandoConto + ")"

@@ -68,7 +68,41 @@ altrimenti M27 e H5 misurano un buco che è **nostro**.
 
 ---
 
-## 📌 IL PIN — **`223e1f7153e041c5a7c6a58ce9d5f2fef3478a27`**  ✅ **INSERITO** (verificato con `git rev-parse` e con `git ls-tree`: a questo commit ci sono sia il driver `RIGA_COLLAUDO_FASE1_S1.ps1` col marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1`, sia l'artefatto `backtest_pipeline/attese_enforcement_fase1.txt` che le tre righe scaricano)
+## 📌 IL PIN — **`@@PIN@@`** ⏳ **DA INSERIRE** (driver **v2**, marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2`)
+
+---
+
+## 🧭 SE LA RIGA 1 SI FERMA SULLA CARTELLA DATI (successo il 03/09 alle 10:45)
+
+Il **primo tentativo in campo si è fermato** con _«terminale -V3 non trovato»_:
+il driver **v1** cercava la scrittura `-V3` dentro `origin.txt` sotto
+`%APPDATA%\MetaQuotes\Terminal`, e sull'installazione vera non combacia (**il
+nome non è un fatto**: un MT5 **portable** tiene i dati dentro la cartella
+d'installazione e non ha nessun `origin.txt`).
+
+Il driver **v2** cerca per **FATTI**: il conto **50504263** nei log, la riga
+`[GUARDIAN] filo verificato ... (conto 50504263)`, i referti del canarino
+intestati a quel login. E scandisce **largo**: processi `terminal64` vivi,
+cartelle dati di **tutti** i profili utente, installazioni sotto
+`C:\Program Files`, `C:\Program Files (x86)`, `C:\`, `D:\`.
+
+**Se anche così si ferma, non indovina**: stampa `=== CARTELLE GUARDATE ===`
+con **tutte** le cartelle esaminate e, per ognuna, i login visti, se c'è il
+conto del collaudo, quanti referti del canarino, l'`origin.txt`. Due casi:
+
+| cosa dice | cosa fare |
+|---|---|
+| **NESSUNA cartella con evidenza** | guarda l'elenco: se riconosci la cartella dell'istanza del 100k, rilancia **la stessa riga** con in coda `-CartellaDati '<percorso>'` |
+| **AMBIGUO: 2+ cartelle con evidenza** | idem, `-CartellaDati '<percorso giusto>'` — e **dimmelo**, perché due cartelle vive sullo stesso conto possono anche voler dire **due terminali** (violazione B9) |
+
+📍 **Il percorso vero lo dà MT5 in due secondi**: sull'istanza del 100k →
+menu **File > Apri la cartella dei dati** → è **quella** cartella (quella che
+contiene `logs\`, `MQL5\`, `config\`). Copiami il percorso dalla barra degli
+indirizzi e mettilo dopo `-CartellaDati`.
+
+⚠️ **`-CartellaDati` non salta nessun controllo**: se la cartella imposta non ha
+traccia del conto 50504263, la riga **va avanti ma lo scrive nel referto**, e il
+controllo P-1 sul conto resta al suo posto (se il login è un altro → **ROSSO**).
 
 ---
 
@@ -82,9 +116,9 @@ confondere le righe di stamattina con quelle della prova).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='223e1f7153e041c5a7c6a58ce9d5f2fef3478a27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $r=@(Get-ChildItem -Path (Join-Path $env:USERPROFILE 'Desktop\COLLAUDO_FASE1_S1_*\RIGA_REFERTO_COLLAUDO_FASE1_S1.txt'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop\COLLAUDO_FASE1_S1_*\RIGA_REFERTO_COLLAUDO_FASE1_S1.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
     if($r.Count -eq 0){ throw 'NESSUN REFERTO DI ADESSO sul Desktop: copiami il rosso qui sopra.' };
@@ -108,6 +142,10 @@ confondere le righe di stamattina con quelle della prova).
 | righe **VIETATE** | **0** (`STOP.FILO`, `STOP.DAILY`, `STOP.TOTALE`, `STOP.AUTOTEST`) |
 | `ULTIMO cap dichiarato nel log` | **3.25% = configurazione firmata** |
 | `MASSIMO rischioAperto` | **> 0,00%** |
+
+🧭 **Se invece si ferma su `cartella dati del 100k non identificata`**: non è la
+sessione a saltare, è la scoperta — vedi la sezione qui sopra e rilancia con
+`-CartellaDati`.
 
 🔴 **GATE — se `rischio aperto` è 0,00%: LA SESSIONE SI RIMANDA.** Non è un
 fallimento del cap: è il criterio 7 che **non è innescabile** senza una
@@ -201,9 +239,9 @@ Nel log dev'essere comparsa la riga
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='223e1f7153e041c5a7c6a58ce9d5f2fef3478a27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Presidio -Minuti 20; $rc=$LASTEXITCODE;
     $r=@(Get-ChildItem -Path (Join-Path $env:USERPROFILE 'Desktop\COLLAUDO_FASE1_S1_*\RIGA_REFERTO_COLLAUDO_FASE1_S1.txt'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop\COLLAUDO_FASE1_S1_*\RIGA_REFERTO_COLLAUDO_FASE1_S1.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
     if($r.Count -eq 0){ throw 'NESSUN REFERTO DI ADESSO sul Desktop: copiami il rosso qui sopra.' };
@@ -285,9 +323,9 @@ configurazione firmata (condizione **C-5** del cancello).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='223e1f7153e041c5a7c6a58ce9d5f2fef3478a27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Chiusura; $rc=$LASTEXITCODE;
     $r=@(Get-ChildItem -Path (Join-Path $env:USERPROFILE 'Desktop\COLLAUDO_FASE1_S1_*\RIGA_REFERTO_COLLAUDO_FASE1_S1.txt'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop\COLLAUDO_FASE1_S1_*\RIGA_REFERTO_COLLAUDO_FASE1_S1.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
     if($r.Count -eq 0){ throw 'NESSUN REFERTO DI ADESSO sul Desktop: copiami il rosso qui sopra.' };
@@ -364,5 +402,6 @@ al passo 🔟, aggiungi `-OraRimozione '15:45:30'` (con **la tua** ora) dopo
 |---|---|---|
 | **0** | lettura completa | lo zip |
 | **2** | parziale: artefatto non scaricato o log del giorno mancante | lo zip **lo stesso** (dice cosa manca) |
-| **1** | **ROSSO**: conto sbagliato, riga VIETATA nel log, terminale `-V3` non trovato, pin assente/malformato | lo zip **lo stesso** + fermarsi |
+| **1** | **ROSSO**: conto sbagliato, riga VIETATA nel log, pin assente/malformato | lo zip **lo stesso** + fermarsi |
+| **1** | **cartella dati del 100k non identificata** (zero candidate, oppure 2+) | lo zip **lo stesso**: dentro c'è l'elenco completo → rilancia con `-CartellaDati` |
 | _(nessuno)_ | il blocco non arriva a lanciare: `irm` fallito o marcatore assente | copiami il **rosso in console** |
