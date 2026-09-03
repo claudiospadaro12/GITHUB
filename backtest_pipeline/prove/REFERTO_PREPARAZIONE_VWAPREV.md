@@ -244,3 +244,61 @@ _Artefatti di questo giro:_
 `backtest_pipeline/prove/PASSO0_VWAPREV_03_overnight.txt` ·
 `backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1` ·
 `backtest_pipeline/righe/RIGA_PASSO0_VWAPREV_DA_MANDARE.md`
+
+---
+
+## 7. 🧾 VERDETTO DEL VERIFICATORE-STRINGHE (03/09/2026, sera) — dopo il ri-pin del driver v4
+
+**FAIL → corretto → PASS.** La pagina era rimasta ferma al pin `1741094…`
+(driver v3) mentre `RIGA_PASSO0_VWAPREV.ps1` era stato riscritto a **v4**
+(commit `80fd7af`+`9967325`: sei correzioni 94-ter/108/115/116/116-bis/
+106-23, i 19 input mancanti nella baseline, e il cancello **S0** reso
+adjudicabile): il marcatore cercato dai tre blocchi di lancio
+(`MARCATORE_RIGA_PASSO0_VWAPREV_v3`) **non esisteva più** nel driver
+scaricato → **ogni lancio sarebbe morto con `SCRIPT VECCHIO`**. Corretto:
+
+1. **Ri-pinnata** su `99673257f1e43b2c87bca1c401faf49c2bbdc80f` (già antenato
+   di `origin/lavoro`, nessun commit nuovo necessario): tutti e **nove** gli
+   artefatti (i soliti otto + il CSV `spread_orario_D30EUR.csv` per S0)
+   blob-identici al working tree, riverificati uno per uno. Ricetta di
+   ri-pinnatura **estesa ai quattro conteggi di casa** (mancava il controllo
+   del pin abbreviato, classe 103): tutti verdi, nessun residuo.
+2. **Marcatore alzato** a `MARCATORE_RIGA_PASSO0_VWAPREV_v4` nei tre blocchi
+   e nella tabella di testa.
+3. **Prosa risincronizzata col codice v4**: selettore del terminale
+   riscritto per la classe 115, aggiunta la nota su backup/sentinella
+   dell'include (classe 116), corretta l'istruzione di lettura di `data:`
+   (era ancora "deve essere di ADESSO", lo stesso difetto della classe 110),
+   aggiunta la sezione S0 **adjudicabile** (era ancora scritta come "NON
+   ADJUDICABILE, non si stima" — stantia rispetto al criterio già misurato
+   il 03/09: soglia severa 3×1,7=5,1 punti/trade, rapporto ≥3,5 PASSA /
+   <2,5 NON PASSA / banda 2,5-3,5 senza verdetto), aggiornata la lista dei
+   file attesi nello zip (export per-trade + CSV spread), tabella dei
+   cambi v3→v4 aggiunta, numeri di verifica aggiornati (10.687 token, 0
+   collisioni, 0 parametri orfani, 49/49 input pinnati nei 4 file),
+   dichiarato onestamente che la batteria delle 11 corruzioni **non è
+   stata ri-eseguita** sul v4.
+4. **Parse reale** (`pwsh 7.4.6`): 0 errori sul driver e sui **sei** blocchi
+   `powershell` estratti dalle tre righe di lancio; ASCII puro su tutti;
+   guardia MT5/MetaEditor, `Tls12`, `Remove-Item` prima dell'`irm`,
+   azzeramento di `$LASTEXITCODE` e pin letterale corretto presenti in
+   tutti e sei.
+5. **Cancello S0 riverificato contro la misura di casa**
+   (`SPREAD_FLOTTA_MISURA_2026-09-03.md`): mediana D30EUR 1,6-1,7 punti
+   indice in sessione 8-16 server confermata, soglia severa 3×1,7=5,1
+   punti/trade confermata, clausola sull'ora peggiore (fuori sessione fino
+   a 12,0 di notte) confermata — i numeri nel prova (`ABTG_VwapRevert.txt`)
+   e nel driver (`$S0_SpreadMinimo`, `$S0_SogliaPassa`, `$S0_SogliaBoccia`)
+   coincidono con la misura, e i 19 input aggiunti alla baseline sono stati
+   confrontati uno per uno col file prova: tutti coerenti.
+6. **Difetto residuo, non bloccante** (condiviso col fratello ALLINEALONDRA):
+   `$MagicVietati` di questo driver non contiene i magic `7776xx` del PASSO 0
+   gemello ALLINEALONDRA. Non è un rischio reale (i blocchi di magic sono
+   numericamente disgiunti), ma è un buco di simmetria nel registro dei
+   vietati: segnalato, da chiudere nel prossimo giro, non blocca questo
+   invio.
+
+**NON COPERTO**: la batteria delle 11 corruzioni non è stata ri-eseguita sul
+v4 (dichiarato nel punto 3); l'esecuzione vera su MT5 (compilazione,
+autotest, tick reali, e il primo numero vero di S0) resta, per costruzione,
+il primo giro di controllo sul PC di Claudio.

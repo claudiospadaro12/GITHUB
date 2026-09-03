@@ -44,7 +44,7 @@ round si spazzola la sessione, non le medie"*.
 | `backtest_pipeline/prove/PASSO0_ALLINEALONDRA_01_nofinestra.txt` | 🔴 **la cella di ablazione** + l'effetto di secondo ordine dell'interruttore |
 | `backtest_pipeline/prove/PASSO0_ALLINEALONDRA_02_long.txt` | solo long + perché le celle dei lati esistono nonostante le colonne |
 | `backtest_pipeline/prove/PASSO0_ALLINEALONDRA_03_short.txt` | solo short |
-| `backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1` | il driver, marcatore `MARCATORE_RIGA_ALLINEALONDRA_v1` |
+| `backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1` | il driver, marcatore `MARCATORE_RIGA_ALLINEALONDRA_v2` |
 | `backtest_pipeline/righe/RIGA_ALLINEALONDRA_DA_MANDARE.md` | **la pagina da mandare a Claudio — l'unico posto in cui la riga esiste** |
 | questo file | il verbale della preparazione |
 
@@ -396,3 +396,49 @@ CSV costruiti con l'**intestazione VERA dell'EA** (29 colonne, letta nel sorgent
 
 **La riga da mandare sta in `backtest_pipeline/righe/RIGA_ALLINEALONDRA_DA_MANDARE.md`
 ed è l'unico posto in cui esiste.**
+
+---
+
+## 11. 🧾 VERDETTO DEL VERIFICATORE-STRINGHE (03/09/2026, sera) — dopo il ri-pin del driver v2
+
+**FAIL → corretto → PASS.** La pagina era rimasta ferma al pin `21cec02…`
+(terza pinnatura, driver v1) mentre `RIGA_ALLINEALONDRA.ps1` era stato
+riscritto a **v2** (commit `80fd7af`+`9967325`, sei correzioni 94-ter/108/
+115/116/116-bis/106-23): il marcatore cercato dai tre blocchi di lancio
+(`MARCATORE_RIGA_ALLINEALONDRA_v1`) **non esisteva più** nel driver
+scaricato → **ogni lancio sarebbe morto con `SCRIPT VECCHIO`**. Corretto:
+
+1. **Ri-pinnata** su `99673257f1e43b2c87bca1c401faf49c2bbdc80f` (già antenato
+   di `origin/lavoro`, nessun commit nuovo necessario): tutti e **otto** gli
+   artefatti blob-identici al working tree, riverificati uno per uno
+   (`git rev-parse <pin>:<file>` vs `git hash-object`). Ricetta di casa
+   eseguita, quattro conteggi tutti verdi, nessun pin abbreviato residuo.
+2. **Marcatore alzato** a `MARCATORE_RIGA_ALLINEALONDRA_v2` nei tre blocchi
+   e nella tabella di testa.
+3. **Prosa risincronizzata col codice v2**: selettore del terminale
+   riscritto per la classe 115 (era ancora descritto il selettore per nome
+   del v1), aggiunta la nota su backup/sentinella dell'include (classe
+   116), corretta l'istruzione di lettura di `data:` (era ancora
+   "deve essere di ADESSO", lo stesso difetto della classe 110 già chiuso
+   nel codice ma non nella pagina), aggiornati token/parametri verificati
+   coi numeri reali del v2 (13.103 token, 0 collisioni, 0 parametri
+   orfani), dichiarato onestamente che la batteria delle 28 corruzioni
+   **non è stata ri-eseguita** sul v2 (i gate sui file prova non erano nel
+   perimetro delle sei correzioni, ma la riesecuzione resta da fare).
+4. **Parse reale** (`pwsh 7.4.6`, non solo analisi statica): 0 errori sul
+   driver e sui **sei** blocchi `powershell` estratti dalle tre righe di
+   lancio (controllo/corsa/ripresa); ASCII puro su tutti; guardia
+   MT5/MetaEditor, `Tls12`, `Remove-Item` prima dell'`irm`, azzeramento di
+   `$LASTEXITCODE` e pin letterale corretto presenti in tutti e sei.
+5. **Difetto residuo, non bloccante**: la lista `$MagicVietati` di
+   `RIGA_PASSO0_VWAPREV.ps1` non contiene i magic `7776xx` di questo PASSO 0
+   (il rovescio è vero: `RIGA_ALLINEALONDRA.ps1` blocca correttamente
+   `773400-773431`). Non è un rischio reale — i due blocchi di magic sono
+   numericamente disgiunti, quindi nessuna corruzione può farli collidere —
+   ma è un buco di simmetria nel registro dei vietati: segnalato, da
+   chiudere nel prossimo giro su VWAPREV, non blocca questo invio.
+
+**NON COPERTO**: la batteria delle 28 corruzioni non è stata ri-eseguita sul
+v2 (dichiarato nel punto 3); l'esecuzione vera su MT5 (compilazione,
+autotest, tick reali) resta, per costruzione, il primo giro di controllo
+sul PC di Claudio.

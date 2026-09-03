@@ -15,7 +15,7 @@ CONTENITORE** (sessione + flat + tetto) rispetto al motore.
 | | |
 |---|---|
 | **EA (nuovo, MAI compilato)** | `mql5/Experts/ABTG_AllineaLondra.mq5` (riscrittura da © SoftKill21, TradingView `jU2JCWZr`, MPL 2.0) |
-| **Driver** | `righe/RIGA_ALLINEALONDRA.ps1` (marcatore `MARCATORE_RIGA_ALLINEALONDRA_v1`) |
+| **Driver** | `righe/RIGA_ALLINEALONDRA.ps1` (marcatore `MARCATORE_RIGA_ALLINEALONDRA_v2`) |
 | **File prova (4)** | `prove/PASSO0_ALLINEALONDRA_00_finestra.txt` · `_01_nofinestra.txt` · `_02_long.txt` · `_03_short.txt` |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_ALLINEALONDRA.md` |
 | **Dossier di caccia** | `caccia_strategie/CACCIA_INTRADAY_FOREX_ORO_2026-08-28.md` (scheda P2) |
@@ -119,10 +119,10 @@ liberi** e la somma sarà **maggiore** del congiunto.
 
 ---
 
-## 📌 IL PIN — **`21cec021a4550ba776714e810a618a0d8a40a306`**
+## 📌 IL PIN — **`99673257f1e43b2c87bca1c401faf49c2bbdc80f`**
 
 ```
-21cec021a4550ba776714e810a618a0d8a40a306
+99673257f1e43b2c87bca1c401faf49c2bbdc80f
 ```
 
 
@@ -212,16 +212,29 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
   ⚠️ `-SoloControllo` del **driver generico** invece **non compila** (esce prima):
   la compilazione la fa **questa** riga.
 - 🧩 **La riga installa `ABTG_PausaGuardian.mqh`** in `MQL5\Include` prima di
-  compilare. `walkforward_generico.ps1` **non lo fa** (verificato: nel driver
-  generico la stringa `PausaGuardian` non compare), e senza quel file l'EA non
-  compila. La copia si verifica **sul contenuto** (lunghezza), non sul nome.
-- 🎯 **Il terminale è scelto con lo STESSO selettore di
-  `walkforward_generico.ps1`** (righe 545-548: `*BCM Markets MT5 Terminal*`
-  escludendo `*-V3*`, ripiego `*BCM Markets*`), e **questa riga è l'unica che lo
-  stampa**: su BCM il driver generico **non stampa il terminale** (la sua
-  `Write-Host "terminale:"` di riga 583 vive solo nel ramo di un broker ESTERNO).
-  Non c'è quindi niente da confrontare: il selettore è identico per costruzione, e
-  se un giorno cambia in un file va cambiato nell'altro **nello stesso commit**.
+  compilare, **con backup e ripristino automatico** (classe 116):
+  una sentinella si scrive PRIMA di toccare il terminale; se il file c'era già
+  (diverso dal nostro) viene copiato in `%USERPROFILE%\abtg_allinealondra\backup\`
+  e **rimesso al suo posto a fine giro** (anche nel giro fermato); se questo
+  giro viene interrotto (Ctrl+C, finestra chiusa) il **giro successivo** trova
+  la sentinella, ripristina da solo e **lo dichiara nei RILIEVI** prima di
+  continuare. `walkforward_generico.ps1` **non installa l'include** (verificato:
+  nel driver generico la stringa `PausaGuardian` non compare), e senza quel
+  file l'EA non compila. La copia si verifica **sul contenuto** (lunghezza),
+  non sul nome, e il referto porta la **foto PRIMA/DOPO** dei tre file del
+  terminale che il giro potrebbe toccare (include, `.mq5`, `.ex5`).
+- 🎯 **Il terminale si sceglie per un FATTO, non per nome** (classe 115): si
+  scandisce **largo** (`origin.txt` sotto `%APPDATA%\MetaQuotes\Terminal`,
+  `Program Files`, e il caso **portable**) e si sceglie **stretto** la
+  cartella dati con `bases\*BCM*` (il feed), scartando le installazioni
+  `-V3` (il 100k non è il banco di backtest). Con **zero** o **due**
+  candidati la riga **si ferma**, stampa l'**elenco completo** di cosa ha
+  visto e la manopola `-Terminale "<cartella di installazione>"` per
+  sciogliere l'ambiguità a mano. Il terminale scelto viene **passato**
+  (`-Terminal`/`-MetaEditor`/`-DataFolder`) al driver generico: stesso
+  terminale **per costruzione**, non per copia di un selettore — ed è per
+  questo che **questa riga resta l'unica che lo stampa** (su BCM il driver
+  generico riceve il terminale già deciso e non stampa niente di suo).
 - **NESSUNA SEDIA VIVA VIENE TOCCATA.** Magic vergini `7776xx`,
   `AllowLiveTrading=false` negli `.ini` (lo scrive il driver generico).
 - 💰 **Rischio `InpRiskPercent = 0,65%`**, pinnato **nei file prova**, dove morde
@@ -249,9 +262,9 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='21cec021a4550ba776714e810a618a0d8a40a306'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='99673257f1e43b2c87bca1c401faf49c2bbdc80f'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -264,9 +277,16 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 - `driver generico scaricato e PINNATO`;
 - `file prova scaricati: 4 su 4` · `include scaricato: ABTG_PausaGuardian.mqh (<n> byte)`;
 - 🔴 **`sintassi a 5 campi, elenco chiuso, asse unico, geometria, interruttori, baseline assoluta, stella e magic: TUTTI PASSATI su 4 file su 4 (8 magic unici su 8)`**;
-- `terminale scelto: C:\Program Files\BCM Markets MT5 Terminal` — è l'**unico**
-  posto in cui il nome compare: il driver generico su BCM non lo stampa;
-- `include: INSTALLATO e VERIFICATO in ...`;
+- `terminale scelto: <cartella di installazione>` seguito da
+  `criterio ........ FATTO: ...` — scelto per il **feed** (`bases\*BCM*`),
+  **non** per nome (classe 115); se compaiono `NON SO QUALE TERMINALE USARE`
+  con un elenco, la riga si è fermata: si rilancia lo **stesso blocco**
+  aggiungendo `-Terminale "<cartella>"`;
+- 🟡 `sentinella di un giro interrotto: include ...` — compare **solo** se
+  un giro precedente si è fermato a metà (classe 116): normale se non c'è
+  mai stata un'interruzione, e in quel caso questa riga **non esce affatto**;
+- `include: INSTALLATO e VERIFICATO in ...` (con backup se c'era già un file
+  diverso);
 - 🔴 **`compilato ABTG_AllineaLondra: OK (... KB, ...)`** ← **è questa la riga che
   conta.** Se invece esce `COMPILAZIONE FALLITA`, sopra ci sono in **rosso** le
   ultime 40 righe del log di MetaEditor: **copiale in chat, sono il risultato**;
@@ -295,9 +315,9 @@ grep -rn "<pin vecchio>" .                           # DEVE dare 0
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='21cec021a4550ba776714e810a618a0d8a40a306'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='99673257f1e43b2c87bca1c401faf49c2bbdc80f'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -321,9 +341,9 @@ Si cambia **solo** ciò che sta dopo `-Pin $pin`. Combinazioni valide:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='21cec021a4550ba776714e810a618a0d8a40a306'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='99673257f1e43b2c87bca1c401faf49c2bbdc80f'; $p="$env:USERPROFILE\RIGA_ALLINEALONDRA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ALLINEALONDRA.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ALLINEALONDRA_v2' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '01_nofinestra' -SoloBanco 'V' -Rifai;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
@@ -370,11 +390,18 @@ Cartella e zip sul **Desktop**: `PASSO0_ALLINEALONDRA_<MODO>_<data>_<ora>` — d
 | fermata da una guardia o da un gate (pin, MT5 aperto, file prova, compilazione) | `1` | ✅ sì | lo **zip**, e il testo **rosso** a schermo |
 | ❌ **refuso in un interruttore** (`-SoloCela`, `-Banco`…) | binding error | 🔴 **NO** | PowerShell rifiuta il parametro **prima** che lo script parta: **non c'è nessuna cartella e nessuno zip**. Si manda il **testo rosso** a schermo |
 
-### 📅 Le due righe da guardare per prime nel referto
+### 📅 Le tre righe da guardare per prime nel referto
 
 1. **`modo:`** — `CORSA` (il risultato) / `CONTROLLO` (giro a vuoto: **non si
    manda come risultato**);
-2. **`data:`** — **deve essere di ADESSO**.
+2. **`data:`** — 🔴 **è l'ORA DI AVVIO del giro, NON l'ora attuale** (classe
+   110: la corsa completa dura 30-90 minuti, quindi quando il referto arriva
+   `data:` è già vecchia di mezz'ora o più **ed è giusta così**). Il referto
+   porta anche una riga **`fine:`**, che è l'ora della raccolta: è **quella**
+   da confrontare con l'orologio di adesso — se `fine:` è recente il referto
+   è fresco, a prescindere da quanto `data:` sembri vecchia;
+3. e se le due date non tornano (es. `fine:` è di ieri): il file è stantio,
+   non è di questo lancio.
 
 ---
 
@@ -440,16 +467,23 @@ Cartella e zip sul **Desktop**: `PASSO0_ALLINEALONDRA_<MODO>_<data>_<ora>` — d
 
 ## ✅ COSA È GIÀ STATO VERIFICATO — **eseguendo**, prima dell'invio
 
-- ✅ il `.ps1` **parsa**: PowerShell 7.4.6 + `[Parser]::ParseFile` → **0 errori**,
-  **10.505 token**; **ASCII puro** (0 byte non-ASCII, regola del 17/08);
-  **non usa `$args`**; **0 collisioni case-insensitive** fra nomi di variabile
-  (punto 79); **0 parametri orfani** e **0 variabili assegnate e mai rilette**
-  (punto 97);
-- ✅ **i quattro file prova sono ASCII puro** e passano tutti i gate:
-  **controllo positivo eseguito PRIMA e DOPO** la batteria delle corruzioni;
-- ✅ **e i gate sono stati fatti FALLIRE, uno per uno** — un gate che non scatta
-  mai non è dimostrato. **VENTOTTO corruzioni, VENTOTTO fermate**, ognuna col
-  messaggio giusto (l'elenco completo è nel referto di preparazione);
+- ✅ **03/09, RI-VERIFICATO sul driver v2** (`pwsh 7.4.6` + `[Parser]::ParseFile`):
+  **0 errori**, **13.103 token** (era 10.505 sul v1: lo script è cresciuto di
+  ~430 righe per le sei correzioni 94-ter/108/115/116/116-bis/106-23); **ASCII
+  puro** (0 byte non-ASCII, regola del 17/08); **non usa `$args`**; **0
+  collisioni case-insensitive** fra nomi di variabile su TUTTO il file (classe
+  79/79-bis, cercate col metodo del parser); **0 parametri orfani** (i dodici
+  parametri del v2, incluso il nuovo `-Terminale`, sono tutti usati più di una
+  volta nel corpo dello script, verificato a macchina);
+- ✅ **i quattro file prova sono ASCII puro e IDENTICI a quelli già verificati**
+  (nessuna riga toccata dalla riscrittura del driver): i **28 corruzioni /
+  28 fermate** della prima verifica (28/08, elenco completo nel referto di
+  preparazione) restano valide **sui gate che non sono cambiati**;
+- 🟡 **NON ri-eseguita su v2**: la batteria completa delle 28 corruzioni non è
+  stata rilanciata dopo la riscrittura del driver (il codice dei gate sui file
+  prova — sezione "2. GATE SUI FILE PROVA" — non è stato toccato dalle sei
+  correzioni, che riguardano terminale/include/compilazione/uscita/pulizia, ma
+  la riesecuzione integrale resta da fare e va dichiarata, non assunta);
 - ✅ **le tre tabelle, i gate di collaudo, i gemelli e la ricomposizione sono
   stati ESEGUITI** su un banco stubbato con **CSV sintetici che portano
   l'intestazione VERA dell'EA** (29 colonne), in **quattro scenari**: sano
@@ -468,10 +502,14 @@ davvero al 2024.07.05**, **se il tester legga davvero dal 2022.07.01** a M15, la
 **durata** e **ogni singolo numero**. Il giro di controllo copre gli artefatti
 **e la compilazione**; **i numeri li può dare solo la corsa**.
 
-🟢 **Il PIN è verificato** (28/08, terza pinnatura): `21cec02…` è antenato di
-`origin/lavoro` e tutti e **otto** gli artefatti che lo script scarica hanno a
-quel commit **blob identici al working tree** (`git rev-parse <pin>:<file>` vs
-`git hash-object`). I due pin precedenti (`9ed66e2…` prima passata, `23bb983…`
-seconda passata) sono **superati**: la seconda passata del verificatore ha
-trovato una quarta copia dell'errore su `Barre Allineate`, rimasta
-nell'intestazione di `ValutaBarraChiusa` nel `.mq5`.
+🟢 **Il PIN è verificato** (03/09, quarta pinnatura — driver v2): il commit
+`99673257…` è antenato di `origin/lavoro` e tutti e **otto** gli artefatti che
+lo script scarica hanno a quel commit **blob identici al working tree**
+(`git rev-parse <pin>:<file>` vs `git hash-object`, riverificato uno per uno).
+Il marcatore nel `.ps1` scaricato è **`MARCATORE_RIGA_ALLINEALONDRA_v2`**, lo
+stesso cercato dai tre blocchi qui sotto. I tre pin precedenti (`9ed66e2…`
+prima passata, `23bb983…` seconda passata, `21cec02…` terza passata) sono
+**superati**: il driver è stato riletto per intero contro le classi 106-116
+della CHECKLIST (nate dopo il 28/08), sei correzioni (94-ter, 108, 115, 116,
+116-bis, 106/23), marcatore alzato a `_v2`. Nessun criterio di lettura è
+cambiato: i file prova sono identici a quelli già verificati.

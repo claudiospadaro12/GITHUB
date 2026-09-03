@@ -20,7 +20,7 @@ regola intraday**.
 | | |
 |---|---|
 | **EA** | `mql5/Experts/ABTG_VwapRevert.mq5` (porting da **sumbloke077**, TradingView `YBqnzqDK`) |
-| **Driver** | `righe/RIGA_PASSO0_VWAPREV.ps1` (marcatore `MARCATORE_RIGA_PASSO0_VWAPREV_v3`) |
+| **Driver** | `righe/RIGA_PASSO0_VWAPREV.ps1` (marcatore `MARCATORE_RIGA_PASSO0_VWAPREV_v4`) |
 | **File prova** | `prove/ABTG_VwapRevert.txt` · `prove/PASSO0_VWAPREV_01_long.txt` · `prove/PASSO0_VWAPREV_02_short.txt` · `prove/PASSO0_VWAPREV_03_overnight.txt` |
 | **Referto di preparazione** | `prove/REFERTO_PREPARAZIONE_VWAPREV.md` |
 | **Tesi del porting** | `VWAPREVERT_TESI.md` |
@@ -84,24 +84,28 @@ numero.**
 
 ---
 
-## 📌 IL PIN — **`1741094908158090a5904c8e0330eab9db410e87`**
+## 📌 IL PIN — **`99673257f1e43b2c87bca1c401faf49c2bbdc80f`**
 
 ```
-1741094908158090a5904c8e0330eab9db410e87
+99673257f1e43b2c87bca1c401faf49c2bbdc80f
 ```
 
 ⚠️ **Il pin si rilegge DOPO il push, non prima.** Il commit da pinnare deve
-contenere **tutti e otto** gli artefatti che lo script scarica:
+contenere **tutti e nove** gli artefatti che lo script scarica:
 `walkforward_generico.ps1`, `RIGA_PASSO0_VWAPREV.ps1`, i **quattro** file prova,
-`ABTG_PausaGuardian.mqh` e **`mql5/Experts/ABTG_VwapRevert.mq5`** (che il driver
-generico riscarica **al pin**).
+`ABTG_PausaGuardian.mqh`, **`mql5/Experts/ABTG_VwapRevert.mq5`** (che il driver
+generico riscarica **al pin**) e, dal 03/09, **il CSV dello spread orario**
+`backtest_pipeline/risultati_archivio/spread_flotta/spread_orario_D30EUR.csv`
+(il cancello **S0** lo scarica **al pin**, non da HEAD: se manca o è vecchio,
+S0 esce `NON DISPONIBILE` e va scritto nei RILIEVI, mai stimato).
 
-✅ **Gia' verificato**: tutti e otto esistono nel commit sopra, letti con
-`git cat-file -s <pin>:<file>` **dopo** il push — e il `.mq5` nel pin contiene
-davvero il flat di fine seduta (7 occorrenze di `InpFlatFineSeduta`) **e le tre
-colonne di collaudo della v2** (`double stats[13]`, `Autotest Falliti,Flat
-Giorni,Flat Chiusure`); il `.ps1` porta il marcatore
-`MARCATORE_RIGA_PASSO0_VWAPREV_v3`.
+✅ **Gia' verificato (03/09)**: tutti e nove esistono nel commit sopra, letti
+uno per uno con `git rev-parse <pin>:<file>` **confrontato con**
+`git hash-object <file>` sul working tree — **blob identici su tutti e nove**.
+Il `.ps1` nel pin porta il marcatore `MARCATORE_RIGA_PASSO0_VWAPREV_v4`. Il
+`.mq5` nel pin contiene davvero il flat di fine seduta (`InpFlatFineSeduta`)
+**e le tre colonne di collaudo** (`double stats[13]`, `Autotest Falliti,Flat
+Giorni,Flat Chiusure`).
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
 silenzioso (`lavoro`) farebbe girare la punta del branch spacciandola per un
@@ -119,11 +123,15 @@ echo "vecchio: $VECCHIO"
 sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
 grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
+grep -rn "${VECCHIO:0:7}" backtest_pipeline/righe/*.md backtest_pipeline/prove/*.md   # DEVE dare 0 (punto 103: pin vecchio abbreviato in prosa)
 ```
 
-⚠️ **Servono TUTTI E DUE i conteggi**: il solo *"0 pin vecchi rimasti"* lo supera
-a mani basse anche un `sed` che **non ha matchato niente**. E il pin vecchio si
-legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
+⚠️ **Servono TUTTI E TRE i conteggi**: il solo *"0 pin vecchi rimasti"* lo supera
+a mani basse anche un `sed` che **non ha matchato niente**; il terzo è il punto
+**103**: il pin vecchio scritto **abbreviato in prosa** (es. `9ed66e2…`)
+sopravvive al `sed` sul pin per esteso e certifica un commit che non è più
+quello a cui si lancia. E il pin vecchio si legge **DAI PUNTI D'USO**
+(`$pin='<40 caratteri>'`), mai con un `grep` largo.
 
 ---
 
@@ -142,21 +150,39 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
   riuscita una compilazione fallita) e, se fallisce, **stampa in rosso le
   ultime 40 righe del log di MetaEditor** e si ferma.
 - 🧩 **La riga installa `ABTG_PausaGuardian.mqh`** in `MQL5\Include` prima di
-  compilare. `walkforward_generico.ps1` **non lo fa** (verificato: nel driver
-  generico la stringa `PausaGuardian` non compare), e senza quel file l'EA non
-  compila. La copia si verifica **sul contenuto** (lunghezza), non sul nome.
-- 🎯 **Il terminale è scelto con lo STESSO selettore di
-  `walkforward_generico.ps1`** (`*BCM Markets MT5 Terminal*` escludendo
-  `*-V3*`, ripiego `*BCM Markets*`), e la riga **lo stampa**: deve essere lo
-  stesso che stampa poi il driver generico. Prima era "il primo `origin.txt`
-  che contiene BCM", e su una macchina con due istanze i due script potevano
-  scegliere **terminali diversi** — include in uno, compilazione nell'altro.
+  compilare, **con backup e ripristino automatico** (classe 116): una
+  sentinella si scrive PRIMA di toccare il terminale; se c'era già un file
+  diverso viene copiato in `%USERPROFILE%\abtg_passo0_vwaprev\backup\` e
+  **rimesso al suo posto a fine giro** (anche nel giro fermato); se questo
+  giro viene interrotto, il **giro successivo** trova la sentinella, ripristina
+  da solo e lo **dichiara nei RILIEVI**. `walkforward_generico.ps1` **non
+  installa l'include** (verificato: la stringa `PausaGuardian` non compare nel
+  driver generico), e senza quel file l'EA non compila. La copia si verifica
+  **sul contenuto** (lunghezza), non sul nome, e il referto porta la **foto
+  PRIMA/DOPO** dei tre file del terminale che il giro potrebbe toccare.
+- 🎯 **Il terminale si sceglie per un FATTO, non per nome** (classe 115): si
+  scandisce **largo** (`origin.txt`, `Program Files`, il caso **portable**) e
+  si sceglie **stretto** la cartella dati con `bases\*BCM*` (il feed),
+  scartando le installazioni `-V3`. Con **zero** o **due** candidati la riga
+  **si ferma**, stampa l'**elenco completo** e la manopola
+  `-Terminale "<cartella di installazione>"`. Il terminale scelto viene
+  **passato** (`-Terminal`/`-MetaEditor`/`-DataFolder`) al driver generico:
+  stesso terminale **per costruzione** — prima (v3) il selettore era "il primo
+  `origin.txt` che contiene BCM", e su una macchina con due istanze i due
+  script potevano scegliere **terminali diversi**, include in uno e
+  compilazione nell'altro. La riga **lo stampa**, e su BCM il driver generico
+  riceve il terminale già deciso e non stampa niente di suo.
 - **NESSUNA SEDIA VIVA VIENE TOCCATA.** Magic vergini `7734xx`,
   `AllowLiveTrading=false` negli `.ini` (lo scrive il driver generico).
 - **16 passate** (4 celle × 2 finestre × 2 gemelle), **8 CSV**, `Model=4`
   (**tick reali**), finestra **2024.09.26 → 2026.06.30**, split 40/60,
   deposito **100.000**, rischio **`InpRiskPercent = 1.0`** — e quel numero è
   **letto dal file prova**, dove morde davvero, non da un parametro della riga.
+- 💰 **Dal 03/09 la riga scarica anche il CSV dello spread orario** (`spread_orario_D30EUR.csv`,
+  al pin) per il **cancello S0** (il costo): se il download fallisce o il file
+  ha poche ore leggibili, S0 esce `NON DISPONIBILE` per quella corsa — **si
+  scrive nei RILIEVI, non si stima**. Il cancello si legge **per cella**,
+  sull'export per-trade OOS: vedi il riquadro dedicato più sotto.
 - ♻️ **Se il pin cambia, la cache di `%USERPROFILE%\abtg_passo0_vwaprev` viene
   CANCELLATA** (file prova e CSV del pin vecchio). Senza, il gate di
   idempotenza del driver generico riproporrebbe i CSV di ieri come se fossero
@@ -181,9 +207,9 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='1741094908158090a5904c8e0330eab9db410e87'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='99673257f1e43b2c87bca1c401faf49c2bbdc80f'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Leggi i PROBLEMI nel REFERTO.' -ForegroundColor Red } }
 ```
@@ -191,17 +217,26 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
 **Cosa deve dire**, in ordine:
 
 - `pin ......... <40 caratteri>` e `celle ....... 4 su 4`;
+- `finestra .... 2024.09.26 -> 2026.06.30` e `banco ....... Modello 4 (TICK REALI) ...`;
+- `cancello S0 . soglia severa 3 x 1.7 = 5.1 punti indice/trade nelle ore 8-16, ...`;
+- 🟡 `sentinella di un giro interrotto: include ...` — compare **solo** se un
+  giro precedente si è fermato a metà (classe 116): normale che non esca mai;
 - `driver generico scaricato e PINNATO`;
 - `file prova scaricati: 4`;
+- `spread orario per S0: DISPONIBILE (<n> ore lette da spread_orario_D30EUR.csv al pin)`
+  — se esce `NON DISPONIBILE`, il cancello S0 non si potrà leggere in questa
+  corsa e lo dirà come RILIEVO, non come fermata;
 - `include scaricato: ABTG_PausaGuardian.mqh (<n> byte)`;
 - `geometria, valori dei tre interruttori, baseline assoluta, stella e magic: TUTTI PASSATI`;
-- `terminale scelto: C:\Program Files\BCM Markets MT5 Terminal` — ⚠️ **è il
-  numero da confrontare** con quello che stampa poi il driver generico: devono
-  essere **lo stesso**;
-- `include: INSTALLATO e VERIFICATO in ...`;
-- 🔴 **`compilato: ABTG_VwapRevert.ex5`** ← **è questa la riga che conta.** Se
-  invece esce `COMPILAZIONE FALLITA`, sopra ci sono in **rosso** le ultime 40
-  righe del log di MetaEditor: **copiale in chat, sono il risultato**;
+- `terminale scelto: <cartella di installazione>` seguito da
+  `criterio ........ FATTO: ...` — scelto per il **feed**, non per nome
+  (classe 115); se compare `NON SO QUALE TERMINALE USARE` con un elenco, si
+  rilancia lo **stesso blocco** aggiungendo `-Terminale "<cartella>"`;
+- `include: INSTALLATO e VERIFICATO in ...` (con backup se c'era già un file
+  diverso);
+- 🔴 **`compilato ABTG_VwapRevert: OK (... KB, ...)`** ← **è questa la riga che
+  conta.** Se invece esce `COMPILAZIONE FALLITA`, sopra ci sono in **rosso** le
+  ultime 40 righe del log di MetaEditor: **copiale in chat, sono il risultato**;
 - quattro volte l'anteprima dell'`.ini` del driver generico, e in fondo
   `ESITO: CONTROLLO COMPLETATO`.
 
@@ -218,9 +253,9 @@ legge **DAI PUNTI D'USO** (`$pin='<40 caratteri>'`), mai con un `grep` largo.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='1741094908158090a5904c8e0330eab9db410e87'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='99673257f1e43b2c87bca1c401faf49c2bbdc80f'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo, e leggi il REFERTO' -ForegroundColor Yellow } }
 ```
@@ -238,9 +273,9 @@ altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='1741094908158090a5904c8e0330eab9db410e87'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='99673257f1e43b2c87bca1c401faf49c2bbdc80f'; $p="$env:USERPROFILE\RIGA_PASSO0_VWAPREV.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PASSO0_VWAPREV.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v3' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PASSO0_VWAPREV_v4' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCella '03_overnight' -Rifai;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE O FERMO - lo zip esiste lo stesso: mandalo' -ForegroundColor Yellow } }
 ```
@@ -253,13 +288,22 @@ Cartella e zip sul **Desktop**: `PASSO0_VWAPREV_<MODO>_<data>_<ora>` — dentro:
 
 - **`REFERTO_PASSO0_VWAPREV.txt`** ← **è questo che conta**;
 - i **file prova** delle celle che hanno girato;
-- i **CSV** `ABTG_VwapRevert_D30EUR_IS_<cella>.csv` e `_OOS_<cella>.csv`.
+- i **CSV** `ABTG_VwapRevert_D30EUR_IS_<cella>.csv` e `_OOS_<cella>.csv`;
+- gli **export per-trade** `EXPORT_<cella>_abtg_trades_ABTG_VwapRevert_D30EUR_<magic>.csv`
+  (dal 03/09, servono al **cancello S0**);
+- `spread_orario_D30EUR.csv` (la misura scaricata al pin, per S0);
+- `COMPILAZIONE_FALLITA.log`, **solo se la compilazione è fallita**.
 
-### 📅 Le due righe da guardare per prime nel referto
+### 📅 Le tre righe da guardare per prime nel referto
 
 1. **`modo:`** — dice `CORSA` (il risultato) o `CONTROLLO` (giro a vuoto:
    **non si manda come risultato**);
-2. **`data:`** — **deve essere di ADESSO**.
+2. **`data:`** — 🔴 **è l'ORA DI AVVIO del giro, NON l'ora attuale** (classe
+   110: la corsa vera dura 15-40 minuti, quindi a referto letto `data:` è già
+   vecchia di un po' **ed è giusta così**). Il referto porta anche una riga
+   **`fine:`**, l'ora della raccolta: è **quella** da confrontare con
+   l'orologio di adesso;
+3. e se le due date non tornano (`fine:` non è di oggi): il file è stantio.
 
 ### 🔬 IL COLLAUDO STA NEL REFERTO, IN TRE COLONNE — **non** nella scheda Esperti
 
@@ -311,29 +355,58 @@ collaudo: autotest falliti = 0 (atteso 0) | flat giorni = 41 | flat chiusure = 2
    delle sole posizioni che attraversano la notte **questo giro non lo misura**.
    È lo stesso meccanismo dell'avvertenza 1, e qui morde **di più**: lì lo slot
    resta occupato per una barra, qui per **giorni**.
-4. 💰 **Il cancello S0 (il costo) NON È ADJUDICABILE OGGI, e non si stima.**
-   Lo **spread medio di BCM su D30EUR in M15 non è misurato in casa** (il
-   "1-2 punti indice" di `R98_CRITERI.md` è **[INCERTO]**) e il **rapporto punti
-   MT5 / punti indice su D30EUR non è agli atti** (R97 lo ha misurato su U30USD
-   e NASUSD, **non** sul DAX). Si legge la mediana del take **lordo**
-   nell'export per-trade in `Common\Files`:
-   `abtg_trades_ABTG_VwapRevert_D30EUR_<magic>.csv`.
-   ⚠️ **Quel file porta il MAGIC nel nome, non la finestra: la gamba OOS
-   SOVRASCRIVE la gamba IS dello stesso magic.**
+4. 💰 **Il cancello S0 (il costo) È ADJUDICABILE DAL 03/09/2026, coi numeri
+   fissati PRIMA della corsa** (in testa a `prove/ABTG_VwapRevert.txt`, ripetuti
+   dal driver). Lo spread REALE di BCM su D30EUR è **misurato** dai tick storici
+   (`SPREAD_FLOTTA_MISURA_2026-09-03.md`: mediana **1,6-1,7 punti indice** nelle
+   ore 8-16 server, più alto fuori sessione, fino a 3,5-3,9 di notte), e la
+   conversione è **misurata** (1 punto indice = 100 punti MT5, contract size
+   **10** EUR/punto/lotto, R114 GSPEC). La **CLAUSOLA SEVERA**: lo spread di
+   riferimento non scende **mai** sotto **1,7** (la mediana dell'ora peggiore
+   della sessione 8-16), quindi la soglia minima è **3 × 1,7 = 5,1 punti
+   indice/trade**; per un trade chiuso fuori sessione vale la mediana della sua
+   ora di chiusura (fino a 12,0 di notte); un trade senza ora leggibile prende
+   **4,0** (la mediana oraria peggiore) → soglia **12,0**. **VERDETTO sul
+   RAPPORTO** (media punti/trade del motore) / (media dello spread mediano
+   orario dei trade della cella): **≥ 3,5 PASSA**; **< 2,5 NON PASSA**; **fra
+   2,5 e 3,5 il verdetto NON SI DÀ** (banda della misura del 03/09). Il numero
+   si legge dall'**export per-trade** dell'EA in `Common\Files`
+   (`abtg_trades_ABTG_VwapRevert_D30EUR_<magic>.csv`, **gamba OOS**), e il
+   driver lo calcola da solo per ogni cella — vedi il riquadro `S0 (costo):`
+   sotto ogni cella nel referto.
+   ⚠️ **Tre limiti dichiarati**: (a) `net_profit` è **netto** di swap/commissioni
+   → verso SEVERO; (b) l'export porta l'**ora di chiusura**, non quella
+   d'ingresso: un trade entrato di notte e chiuso in sessione è giudicato a 1,7
+   (non severo); (c) il file porta il **MAGIC nel nome, non la finestra: la
+   gamba OOS (che gira per ultima) SOVRASCRIVE la IS dello stesso magic** — S0
+   si legge **solo sull'OOS**, mai sull'IS.
+   🔴 **Un S0 `NON PASSA` sulla `00_nudo` chiude il capitolo VWAP anche come
+   motore** (falsificazione già dichiarata nella BOZZA): non si cerca un'altra
+   taratura per farlo passare.
 
 ---
 
 ## ✅ COSA È GIÀ STATO VERIFICATO — **eseguendo**, prima dell'invio
 
-- ✅ il `.ps1` **parsa**: PowerShell 7.4.6 + `[Parser]::ParseFile` → **0 errori**,
-  **5.037 token**; **ASCII puro** (0 caratteri non-ASCII, regola del 17/08);
-- ✅ **audit collisioni CASE-INSENSITIVE sui nomi di variabile: zero**; e lo
-  script **non usa `$args`** (variabile automatica di PowerShell);
-- ✅ **i gate girano DAVVERO sui quattro file veri**: **controllo positivo
-  passato**, eseguito **prima e dopo** la batteria delle corruzioni;
-- ✅ **e i gate sono stati fatti FALLIRE, uno per uno** — un gate che non scatta
-  mai non è dimostrato. **Undici prove, undici fermate**, ognuna col messaggio
-  giusto:
+- ✅ **03/09, RI-VERIFICATO sul driver v4** (`pwsh 7.4.6` + `[Parser]::ParseFile`):
+  **0 errori**, **10.687 token** (era 5.037 sul v2: lo script è cresciuto per
+  le correzioni 94-ter/108/115/116/116-bis/106-23 e per il cancello S0); **ASCII
+  puro** (0 caratteri non-ASCII, regola del 17/08); **non usa `$args`**; **0
+  collisioni case-insensitive** fra nomi di variabile su TUTTO il file (classe
+  79/79-bis, cercate col metodo del parser); **0 parametri orfani** (i dieci
+  parametri del v4, incluso il nuovo `-Terminale`, sono tutti usati più di una
+  volta, verificato a macchina);
+- ✅ **i quattro file prova sono ASCII puro** e **portano tutti e 49 gli input
+  pinnati** (classe 25/113: i 19 input che nella v1/v2 non erano nella baseline
+  — `InpUsaGuardian`, `InpMaxSpread`, `InpWickMult`, ... — ora sono in forma
+  completa nei quattro file e nella baseline del driver);
+- 🟡 **NON ri-eseguita su v4**: la batteria delle 11 corruzioni della prima
+  verifica (28/08, tabella sotto) non è stata rilanciata dopo la riscrittura;
+  il codice dei gate sui file prova non è nel perimetro delle sei correzioni
+  106-116 (che toccano terminale/include/compilazione/uscita/pulizia/S0), ma
+  la riesecuzione integrale resta da fare e va dichiarata, non assunta;
+- ✅ **11 prove, 11 fermate della prima verifica (28/08)**, ognuna col
+  messaggio giusto:
 
   | corruzione | il gate ha detto |
   |---|---|
@@ -366,6 +439,20 @@ collaudo: autotest falliti = 0 (atteso 0) | flat giorni = 41 | flat chiusure = 2
 | **5** | parametro `-Rischio` **orfano** (solo stampato, mai passato) | rimosso; il referto stampa `InpRiskPercent` **letto dal file prova** |
 | **6** | criterio di lettura della `03_overnight` **incompleto** | scritto che **non è un costo puro**: lo slot occupato dalla posizione notturna cambia la **popolazione** dei trade |
 | **7** | due istruzioni di lettura **false** nel sorgente | la riga del flat si scrive **ogni giorno anche con 0 chiuse**; e non "dieci blocchi `[VWAPREV][AUTOTEST]`" (sono 17 righe) ma **`esito motore:` deve dire DIECI BLOCCHI SU DIECI** — che ora è la colonna `Autotest Falliti = 0` |
+
+### 🔧 E COSA È CAMBIATO NELLA **v3 → v4** (rilettura contro le classi 106-116, 03/09)
+
+| classe | difetto sul v3 | fix nel v4 |
+|---|---|---|
+| **94-ter** | il campo si chiamava `$Compilazione` (non `$Compilato`): il censimento per nome della classe 111 non lo vedeva (è la **113** applicata al censimento della 111) | rinominato `$Compilato`, tre stati veri (NON TENTATA / FALLITA / OK) timbrati sul ramo che decide |
+| **108** | il codice di uscita del driver generico letto a due stati (`-ne 0`): su PS 5.1 un codice NON LETTO sarebbe diventato "fallita" | tre stati (0 / N / NON LETTO); il verdetto lo danno gli **artefatti** (CSV freschi, anteprima `.ini` fresca) |
+| **115** | terminale scelto per NOME (`*BCM Markets MT5 Terminal*`) | scandito LARGO (`origin.txt`, `Program Files`, portable), scelto STRETTO per il **feed** (`bases\*BCM*`); zero/due candidati → si ferma con elenco e manopola `-Terminale` |
+| **116** | l'include veniva scritto in `MQL5\Include` **senza backup e senza ripristino** | sentinella PRIMA della scrittura, backup in `abtg_passo0_vwaprev\backup\`, ripristino a fine giro (anche nel giro fermato) e all'avvio del giro dopo se interrotto; foto PRIMA/DOPO dei tre file nel referto |
+| **116-bis** | Desktop assunto `%USERPROFILE%\Desktop` | cercato (`GetFolderPath` + i due ripieghi, incluso OneDrive) |
+| **106/23** | `COMPILAZIONE_FALLITA.log` di un giro precedente poteva finire nello zip di oggi | cancellato all'avvio |
+| **25/113** | 19 input **non pinnati** nei file prova (`InpUsaGuardian`, `InpMaxSpread`, `InpWickMult`, ...) | ora in forma completa nei 4 file e nella baseline assoluta del driver |
+| **S0** | il cancello del costo era **NON ADJUDICABILE** (spread D30EUR non misurato) | ADJUDICABILE dal 03/09 (spread misurato, contract size da R114): criteri fissati in testa a `prove/ABTG_VwapRevert.txt` PRIMA dei numeri, calcolati dal driver sull'export per-trade OOS |
+| **110** | il referto non distingueva ora di avvio da ora attuale | `data:` = ora di avvio + riga `fine:` = ora della raccolta |
 
 🟡 **Non verificato, e va detto**: tutto ciò che richiede **MT5** — la
 **compilazione** dell'EA (qui non c'è MetaEditor), l'esito dell'**autotest**,
