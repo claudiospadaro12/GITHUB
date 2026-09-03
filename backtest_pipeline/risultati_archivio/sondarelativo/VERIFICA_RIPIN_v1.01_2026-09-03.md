@@ -124,3 +124,103 @@ autotest 23 blocchi -> **il driver va aggiornato** (versione attesa 1.02).
 **NON COPERTO:** compilazione e corsa vera. Il fix v1.02 rende il criterio
 non-vuoto; NON e' promesso che porti C2 sotto il 10% su questa coppia --
 lo dira' la corsa, e le due colonne nuove diranno anche perche'.
+
+---
+
+## SEGUITO (03/09 sera, parte 2): driver ri-pinnato sulla v1.02, verificato dall'agente VERIFICATORE
+
+**Motivo:** come previsto a fine sezione precedente, il driver era rimasto
+ancorato ai numeri v1.01 mentre il sorgente e' gia' v1.02 (commit `d3e589c` +
+note `7e3c5a0`). Letto `mql5/Experts/ABTG_SondaRelativo.mq5` per intero (non
+fidandosi dei numeri di riga forniti): `#property version "1.02"` (riga 292),
+`grep -c '^\s*blocchi++;'` = **23** (non 22), `#define REL_NSTATS 95` (riga
+439) -> **98 colonne** (95 + Pass/Simbolo/Periodo), confermato leggendo la
+head CSV per intero (righe 2844-2882): le ultime due voci sono `Giorni Festa
+Metro,Giorni Metro Zero Calendario`, e `fmt1+fmt2+fmt3` hanno **95**
+specificatori numerici (32+31+34, righe 2889-2891) — combacia. Input EA
+invariati: **22** (`grep -cE '^\s*input\s+...\s*='`).
+
+### Corretto nel driver (`backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1`)
+| dove | prima | dopo |
+|---|---|---|
+| riga 2 (marcatore) | `_v3` | `_v4` (contenuto cambiato = versione alzata, classe 109-bis) |
+| righe 82-83 (commento header) | `"1.01"`, `22 blocchi`, `REL_NSTATS 94 (= 97 colonne)` | `"1.02"`, `23 blocchi`, `REL_NSTATS 95 (= 98 colonne)` |
+| riga 162 | `$VERSIONE_ATTESA = "1.01"` | `"1.02"` |
+| riga 163 | `$AUTOTEST_BLOCCHI_ATTESI = 22` | `23` |
+| riga 164 | `$NSTATS_ATTESI = 94` (commento "97 colonne") | `95` (commento "98 colonne") |
+| riga 713 | `"REL_NSTATS = ... (97 colonne)"` | `"... (98 colonne)"` |
+| riga 1017 | `"colonne: ... (attese 97)"` | `"... (attese 98)"` |
+| riga 1096 | `"...97 colonne OPTFRAME."` | `"...98 colonne OPTFRAME."` |
+| riga 1127 | `"...97 colonne + gli input..."` | `"...98 colonne + gli input..."` |
+| `$servono` (lista colonne pretese per nome) | non chiedeva le due colonne nuove | aggiunte `"Giorni Festa Metro","Giorni Metro Zero Calendario"` |
+| lettura riga CSV (`$r` per-cella) | non leggeva le due colonne nuove | aggiunti i campi `GFesta`/`GZeroCal` |
+| collaudi per riga | nessun controllo sulla colonna diagnostica | RILIEVO se `Giorni Metro Zero Calendario` != 0 (il vecchio criterio v1.01, atteso 0 su un metro quasi-24h) |
+| referto (riga di riferimento) | non stampava le due colonne | nuova riga "diagnostica C2 (v1.02): Giorni Festa Metro ... / Giorni Metro Zero Calendario ..." |
+
+**Le due colonne diagnostiche NON sono state aggiunte alla tabella delle 49
+celle** (che ha gia' 18 campi posizionali in un'unica `-f` format string):
+sono diagnostiche di calendario/metro, per costruzione COSTANTI sulla griglia
+(N, sigma) entro la stessa corsa (le festivita' non dipendono dai parametri
+del motore), quindi la riga di riferimento (`r0`) le rappresenta gia' tutte.
+Stravolgere il format string a 20 campi avrebbe rischiato uno sfasamento
+silenzioso — la classe di difetto che le tabelle a colonne fisse hanno gia'
+pagato altrove. Dichiarato: resta per un giro successivo se Claudio la vuole
+comunque per-cella (es. per scovare un'anomalia SU una sola cella, che
+implicherebbe un bug diverso dal calendario).
+
+### Difetto di classe gia' nota (109-bis) trovato per strada
+La pagina `RIGA_SONDARELATIVO_DA_MANDARE.md`, riga 97 ("`Autotest Falliti` =
+**0** su **21** blocchi"), era rimasta ferma alla v1.00 **anche dopo** il
+ri-pin v1.00->v1.01 di stamattina: non era stata toccata in quel giro.
+Corretta ora a 23. Non e' un difetto introdotto in questo giro, ma un
+residuo del giro precedente non pescato allora — lezione della classe
+109-bis: un conteggio citato in prosa e' un punto d'uso quanto uno nel
+codice, va cercato con `grep` sul NUMERO, non per intuito.
+
+### Controlli eseguiti
+1. **Parse pwsh reale** (pwsh 7.4.6 disponibile nell'ambiente) del driver
+   intero e dei 5 blocchi estratti dalla pagina: **tutti PASS**, zero errori.
+2. **Zero caratteri non-ASCII** nel driver `.ps1`.
+3. **Marcatore**: `_v4` in tutti i 7 punti d'uso della pagina (definizione +
+   tabella "Driver" + verifica al pin + 5 `Select-String` dei blocchi);
+   nessun residuo `_v3`.
+4. **Guardia MT5/MetaEditor**: presente nel driver e in tutti e 5 i blocchi
+   (invariata, non toccata).
+5. **Cultura invariante**: nessuna `Parse`/`ToString` nuova senza `$INV`; i
+   campi aggiunti usano le funzioni esistenti `Num`/`FmtN` (gia' invarianti).
+6. **Classe 112** (ogni input del prova esiste nell'EA, nei due versi):
+   logica di `GateProva` non toccata, input EA invariati a 22 -> gate ancora
+   corretto senza modifiche.
+7. **Tetto ~100.000 barre**: `$TETTO_GIORNI` invariato, non toccato da
+   questo giro (indipendente dalla versione dell'EA).
+8. **Classi 108/110/116**: non toccate, ri-lette per intero, ancora corrette.
+
+### Doppia ri-pinnatura (il marcatore cambia l'hash)
+Prima commit `5c21eca3` (gate v1.02), poi accorto che il marcatore andava
+alzato di conseguenza (classe 109-bis) -> secondo commit `01743b7e` (bump
+`_v3` -> `_v4`). Il pin finale scritto in pagina e' **`01743b7e`** (contiene
+entrambi i commit); l'hash intermedio `5c21eca3` non e' mai stato un pin
+vissuto, resta solo citato in prosa per la cronologia del giro.
+
+### Ri-pin della pagina (commit `01743b7ec58ae8376d095b1678a7d2fcd891cd97`)
+Pin precedente `526f76f6...` -> nuovo `01743b7e...`. Verificato via `raw`
+che al pin driver + generico + i 4 prova + `.mq5` sono **identici a HEAD**
+(sha256 confrontati uno per uno, tutti IDENTICO). Al pin: marcatore `_v4`
+presente nel driver scaricato, `#property version "1.02"` e
+`#define REL_NSTATS 95` confermati nell'.mq5 scaricato. Nessun residuo del
+pin vecchio come punto d'uso (le menzioni di `526f76f6` restano solo nella
+prosa storica, non riscritta per convenzione).
+
+## Verdetto (parte 2)
+**PASS.** Driver e pagina ri-pinnati e allineati alla v1.02 dell'EA;
+aggiunta la stampa delle due colonne diagnostiche nuove nella riga di
+riferimento del referto; corretto un residuo v1.00 non pescato nel giro
+precedente (riga 97 della pagina).
+
+**NON COPERTO:** compilazione reale con MetaEditor e corsa MT5 vera (fuori
+dal perimetro eseguibile in questo ambiente: serve il PC di backtest
+Windows). Non e' stato aggiunto un collaudo per-riga sull'IDENTITA' di
+`Giorni Festa Metro`/`Giorni Metro Zero Calendario` fra le 49 celle della
+stessa corsa (dovrebbero essere tutte uguali, essendo un fatto di
+calendario indipendente da N/sigma): se Claudio lo vuole, e' un giro
+successivo, dichiarato qui e non fatto in silenzio.
