@@ -6906,3 +6906,79 @@ Perche' e' una classe, e non "una svista":
 (whitelist `EURUSD`/`GBPUSD`, USDJPY rifiutato con errore onesto prima di
 toccare MT5), le etichette si derivano dal simbolo, e il referto stampa in
 chiaro **sia** il simbolo girato **sia** il lead dichiarato nei prova.
+
+---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 (mattina) — trovata verificando **SPREAD FLOTTA** (`RIGA_SPREAD_FLOTTA.ps1` v2, pin `c5dbd68` del 31/08, **mai lanciata**), cioe' RIFACENDO il censimento della classe 111 su un pacchetto che il censimento **non aveva pescato**
+
+## 113. 🕸️ IL CENSIMENTO PER **TOKEN** VEDE SOLO CHI IL CAMPO **CE L'HA**: il file dove il campo **MANCA DEL TUTTO** e' invisibile al grep — ed e' il caso PEGGIORE, non uno di meno
+
+_Misurato oggi, comandi e numeri, non stime._ La **111-bis** ha censito i
+fratelli armati cosi':
+
+```bash
+grep -rl 'Compilato = "NON TENTATA"' *.ps1      # -> 27 driver su 29 (94-ter)
+grep -rn "ora di adesso\|data: = adesso" *.md   # -> 7 pagine (110)
+```
+
+Due liste ordinate, due numeri, tutto giusto. **E il pacchetto SPREAD FLOTTA non
+compare in nessuna delle due** — verificato:
+
+```bash
+grep -l 'Compilato = "NON TENTATA"' *.ps1 | grep -c SPREAD_FLOTTA          # -> 0
+git show c5dbd68:.../RIGA_SPREAD_FLOTTA_DA_MANDARE.md | grep -c "= adesso" # -> 0
+```
+
+Non perche' fosse sano: **perche' stava peggio**.
+
+- sul **94-ter** non compariva perche' il driver **non aveva nessun campo
+  `compilazione:`**: non un campo timbrato male, un campo **assente**. Il grep
+  cerca il valore di partenza sbagliato, e dove il campo non esiste non c'e'
+  nessun valore da trovare;
+- sulla **110** non compariva perche' la pagina **non aveva nessuna istruzione di
+  freschezza**: ne' la frase sbagliata (`= adesso`), ne' il gate giusto (`$t0`).
+  Misurato sulla pagina al pin: `grep -c 'LastWriteTime\|\$t0\|freschezza'` -> **0**.
+
+**Il grep sul token misura la POPOLAZIONE SBAGLIATA**: censisce chi ha fatto il
+passo e l'ha fatto male, e lascia fuori chi il passo non l'ha fatto affatto. E
+l'ordine di gravita' e' rovesciato rispetto all'ordine di visibilita': il campo
+timbrato male dice una bugia leggibile, il campo che non c'e' non dice niente —
+e su una corsa di **ore**, "niente" e' quello che manda Claudio a rilanciare.
+
+**Quanto e' grande, misurato subito (e' il punto della 111-bis: la propagazione
+si fa, non si annuncia):**
+
+```bash
+cd backtest_pipeline/righe
+tot=0; nogate=0
+for f in *_DA_MANDARE.md; do tot=$((tot+1)); grep -q '\$t0' "$f" || nogate=$((nogate+1)); done
+echo "$nogate / $tot"      # -> 47 / 59
+```
+
+**47 pagine su 59 non hanno NESSUN `$t0`**, contro le **7** che la 110 aveva
+contato. La classe 110 e' stata censita sulle pagine che parlavano di
+freschezza; le altre **quaranta** non ne parlano proprio.
+
+> ✅ **REGOLA: si censisce l'ASSENZA, non solo il valore sbagliato.** Per ogni
+> classe che riguarda un campo o un gate, il censimento e' **doppio**:
+> ```bash
+> # 1. chi ce l'ha e lo sbaglia   (grep del token)     <- gia' di casa
+> # 2. chi NON CE L'HA affatto    (grep NEGATO sul perimetro intero)
+> for f in <perimetro>; do grep -q '<marca del passo fatto bene>' "$f" || echo "SENZA: $f"; done
+> ```
+> Il **perimetro** e' l'elenco dei file dello stampo (`*_DA_MANDARE.md`,
+> `righe/*.ps1`), **non** l'elenco dei file che il grep positivo ha trovato:
+> quello e' gia' il risultato, usarlo come perimetro e' circolare.
+>
+> ⚠️ **E il corollario per il verificatore:** quando una scheda di classe porta
+> una lista di contagiati, la prima domanda non e' *"il mio file e' nella
+> lista?"* — e' **_"la lista poteva vederlo?"_**. Qui la risposta era no, e il
+> pacchetto e' arrivato in verifica solo perche' la sessione principale l'ha
+> segnalato **a mano**.
+
+**Stato al 03/09/2026 (mattina).** `RIGA_SPREAD_FLOTTA` (driver **v3** + pagina)
+e' **CORRETTO** su 88 / 94-bis / 94-ter / 106 / 108 / 110 e ri-pinnato.
+**ANCORA ARMATE, dichiarate: le altre 46 pagine `*_DA_MANDARE.md` senza `$t0`**
+(elenco a comando, sopra) — da chiudere **prima del prossimo invio di ciascuna**,
+non in blocco: un gate di freschezza si aggancia all'artefatto che quella riga
+produce davvero, e quello si legge un file alla volta.
