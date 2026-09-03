@@ -617,3 +617,107 @@ di Q&A dove si entra **con una domanda precisa**, non a pescare.
 | `papers.ssrn.com` | 🔴 **403 — UNDICESIMA di fila** |
 | `forexfactory.com` | 🔴 **403** |
 | **siti di EA gratuiti** (6 domini) | 🔴 **000, tutti e sei** — §1 |
+
+---
+
+## 📅 03/09/2026 — QUINTA BATTUTA (fronte B): 🔓 **IL BUCO DEI DATI E' CHIUSO**, e due correzioni
+
+Misurato oggi, non ipotizzato. Dossier:
+`caccia_strategie/CACCIA_FREQUENZA5_IMPLEMENTAZIONI_2026-09-03.md`.
+
+### 1. 🔓 **SI POSSONO SCARICARE BARRE M1 DI PREZZO — dal canale gia' verde**
+
+Quattro dossier di fila (31/08, 01/09, 02/09 ×2) portano questa riga:
+> _"Da questo ambiente **nessun agente puo' MISURARE una frequenza, una
+> distribuzione di take o uno spread**"_ — Yahoo, Stooq, Dukascopy: **403 al
+> CONNECT**, misurati tre volte.
+
+**La diagnosi era giusta sui FEED e sbagliata sul PROBLEMA.** I dati stanno
+anche **dentro repo GitHub**, e `raw.githubusercontent.com` e' verde **dal
+28/08**. Nessuno aveva provato.
+
+**`github.com/FutureSharks/financial-data` — licenza GPL-3.0.**
+Prefisso: `https://raw.githubusercontent.com/FutureSharks/financial-data/master/`
+
+| famiglia | percorso | simboli | anni |
+|---|---|---|---|
+| indici histdata (**volume = 0**) | `pyfinancialdata/data/stocks/histdata/<SYM>/DAT_ASCII_<SYM>_M1_<ANNO>.csv` | `SPXUSD` · **`GRXEUR` = DAX 30 in EUR, STESSA SCALA di D30EUR** · `JPXJPY` · `ETXEUR` | **2010-2018** |
+| Oanda (**con volume**, file **mensili**) | `pyfinancialdata/data/currencies/oanda/<SYM>/<ANNO>/oanda-<SYM>-<ANNO>-<MESE>.csv` | `NAS100_USD` · `SPX500_USD` · `US2000_USD` · `UK100_GBP` · `FR40_EUR` · `JP225_USD` · `AU200_AUD` · **`XAU_USD`** · `EUR_USD` · `GBP_USD` · `AUD_JPY` · `USD_CAD` · `EUR_JPY` · `WTICO_USD` · … (25 cartelle) | **2005-2020** |
+
+**Controllo positivo di oggi:** `GRXEUR` 2014-2018 → **200 su 5 su 5**
+(~14,7 MB e ~213.000 barre M1 per file, 1.055.635 barre in totale);
+`SPXUSD` 2016-2018 → **200 su 3 su 3**; `NAS100_USD/2018/oanda-NAS100_USD-2018-3.csv`
+→ **200**, intestazione `time,close,high,low,open,volume`, **volume presente**.
+
+⚠️ **IL PERCORSO SCRITTO NEL README DEL REPO E' SBAGLIATO** (`data/stocks/…`
+→ **404**): quello giusto ha il prefisso del pacchetto,
+**`pyfinancialdata/data/stocks/…`**. **404 ≠ assenza** — qui era un percorso.
+Per elencare cartelle e file: `WebFetch` su `github.com/…/tree/master/…`
+(`api.github.com` resta murata).
+
+🔴 **I LIMITI, da scrivere accanto a OGNI numero che esce da qui:**
+non e' BCM (altri orari/spread/gap) · fuso **EST**, non ora server ·
+**volume 0 sugli indici histdata** (la VWAP vera non si calcola: si approssima
+con la media cumulativa di `hlc3`) · **OHLC M1, non tick** · **zero costi** ·
+finestra **2005-2020**, che **NON copre il 2024-2026** delle sedie.
+
+🎯 **Cosa cambia davvero:** (a) una **sonda di conteggio** si puo' fare **da
+qui**, senza svegliare il PC di Claudio; (b) i regimi che sugli indici a BCM
+**non abbiamo** (21 mesi, regime unico) — **crollo 2011, laterale 2015-2016,
+orso 2018** — diventano disponibili per **selezionare e falsificare**.
+**I VERDETTI RESTANO A TICK SUL NOSTRO BROKER** (F6 non si ammorbidisce).
+
+📦 Strumenti pronti e riusabili: `biblioteca/sonde_esterne/` (5 script + LEGGIMI).
+
+### 2. 🎯 **TRADINGVIEW NON E' SATURA: E' SATURA SUI FORMATI**
+
+Il 02/09 il fronte A ha misurato **28 query su 68 a zero strategie** e ha
+concluso che _"i titoli sul nostro bersaglio sono finiti"_. **Oggi, con query
+sul MECCANISMO invece che sul formato: 29 query, 47 strategie viste, 12
+sorgenti nuovi letti riga per riga.**
+
+Query produttive misurate oggi: `vwap reversion` → **15 strategie aperte** ·
+`liquidity sweep reversal` → 4 · `volatility expansion` → 3 · `nr7` → 2 ·
+`gap fill strategy` → 2 · `initial balance` → 2 · `anchored vwap strategy` → 2.
+
+Query a **ZERO strategie** da aggiungere alla lista dei vuoti:
+`vwap standard deviation` · `range expansion` · `opening range extension` ·
+`first hour range` · `intraday momentum last half hour` · `post news` ·
+`economic news volatility` · `sweep and reclaim` · `failed breakout reversal` ·
+`last hour` · `nasdaq dow correlation` · `market profile` (50 risultati, **0
+strategie**) · `session open reversal` · `index futures scalping` ·
+`intraday reversion index` · `trend squeeze breakout` · `coiling` ·
+`lead lag index` · `correlation divergence two symbols` · `news release strategy` ·
+`fomc` (18 risultati, 0 strategie) · `volatility compression` (1 strategia, protetta).
+
+➡️ **Regola d'uso aggiornata: si interroga il MECCANISMO
+(`vwap reversion`, `liquidity sweep reversal`, `volatility expansion`), non il
+FORMATO (`EA`, `MQL5`, `15 min strategy`) e non il MERCATO (`nasdaq intraday`).**
+
+### 3. 🔴 TRE DOMINI NUOVI, TUTTI MURATI
+
+| dominio | esito 03/09 | cosa ci costa |
+|---|---|---|
+| `medium.com` | 🔴 **`EGRESS_BLOCKED`** (WebFetch) | tre implementazioni Python di squeeze / compressione ATR viste in ricerca |
+| `concretumgroup.com` (sito di Zarattini) | 🔴 **000 al CONNECT** | il testo di *"Beat the Market"*, che e' il paper dietro `ABTG_OutOfNoise` |
+| `tapescript.io` | 🔴 **000 al CONNECT** | conversioni Pine/Python del momentum intraday |
+
+E **SSRN 403 per la DODICESIMA volta**, stavolta provata **sull'URL diretto
+del PDF** (`papers.ssrn.com/sol3/Delivery.cfm/5095349.pdf?...` → 403, 5.625
+byte di pagina di blocco): **non e' un problema di percorso, e' il dominio.**
+
+### 4. Il resto della mappa, rimisurato oggi
+
+| fonte | 03/09/2026 |
+|---|---|
+| `raw.githubusercontent.com` | 🟢 **200** (controllo positivo su `geraked/metatrader5/master/README.md`, 6.941 byte) |
+| 🆕 `raw` su repo di DATI | 🟢 **200** — §1 |
+| `tradingview.com` `pubscripts-suggest-json` | 🟢 **200** (40.283 byte sul bersaglio noto `vwap`) |
+| `pine-facade` `/get/` | 🟢 **200**, `source` in chiaro (146.815 byte sul controllo positivo) |
+| `arxiv.org/pdf` | 🟢 **200** (`2605.04004` → 1.130.529 byte, letto per intero) |
+| `WebSearch` | 🟢 restituisce repo e paper veri |
+| `github.com/…/tree/…` via `WebFetch` | 🟢 **200**, elenca cartelle e file |
+| `papers.ssrn.com` | 🔴 **403 — DODICESIMA di fila**, provata sul PDF diretto |
+| 🆕 `medium.com` · `concretumgroup.com` · `tapescript.io` | 🔴 **murati** — §3 |
+| MQL5 Code Base · articoli MQL5 · QuantConnect · `geraked` | ⬜ **non riaperti**: chiusi per mandato |
+| Forex Factory · EarnForex · Quantpedia premium | ⬜ **non riprovati**: murati e gia' misurati su due trasporti |

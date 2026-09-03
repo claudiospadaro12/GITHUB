@@ -1,0 +1,85 @@
+//@version=6
+strategy(
+     "Liquidity Sweep + VWAP Reversal (v6 clean)",
+     overlay = true,
+     initial_capital = 10000,
+     commission_type = strategy.commission.percent,
+     commission_value = 0.01,
+     process_orders_on_close = true
+)
+
+// ==================== INPUTS ====================
+tfHTF          = input.timeframe("D", "HTF für Vortageslevel")
+emaLen         = input.int(200, "EMA Trendfilter", minval = 1)
+atrLen         = input.int(14, "ATR Länge", minval = 1)
+slATR          = input.float(1.5, "Stop Loss (ATR)", step = 0.1)
+tpATR          = input.float(3.0, "Take Profit (ATR)", step = 0.1)
+useSession     = input.bool(true, "Session-Filter nutzen")
+sessionStr     = input.session("0930-1600", "Session (Exchange Time)")
+oneTradePerDay = input.bool(true, "Max. 1 Trade pro Tag")
+
+// ==================== SESSION ====================
+inSession = not useSession or not na(time(timeframe.period, sessionStr))
+
+// ==================== INDICATORS ====================
+ema200 = ta.ema(close, emaLen)
+vwapV  = ta.vwap(hlc3)
+atr    = ta.atr(atrLen)
+
+// ==================== PREVIOUS DAY LEVELS (NON-REPAINT) ====================
+pdHigh = request.security(
+    syminfo.tickerid, tfHTF, high[1],
+    barmerge.gaps_off, barmerge.lookahead_off
+)
+
+pdLow = request.security(
+    syminfo.tickerid, tfHTF, low[1],
+    barmerge.gaps_off, barmerge.lookahead_off
+)
+
+// ==================== PLOTS ====================
+plot(ema200, "EMA", linewidth = 2)
+plot(vwapV,  "VWAP", linewidth = 2)
+plot(pdHigh, "Prev Day High", style = plot.style_linebr)
+plot(pdLow,  "Prev Day Low",  style = plot.style_linebr)
+
+// ==================== DAILY LIMIT ====================
+var bool tradedToday = false
+newDay = ta.change(time("D")) > 0
+if newDay
+    tradedToday := false
+
+canTrade = inSession and (not oneTradePerDay or not tradedToday)
+
+// ==================== LOGIC ====================
+sweepDown = low < pdLow
+sweepUp   = high > pdHigh
+
+bull = close > ema200
+bear = close < ema200
+
+longConfirm  = sweepDown and close > pdLow  and close > vwapV
+shortConfirm = sweepUp   and close < pdHigh and close < vwapV
+
+// ==================== ENTRIES ====================
+if canTrade and bull and longConfirm and strategy.position_size == 0
+    strategy.entry("LONG", strategy.long)
+    tradedToday := true
+
+if canTrade and bear and shortConfirm and strategy.position_size == 0
+    strategy.entry("SHORT", strategy.short)
+    tradedToday := true
+
+// ==================== EXITS ====================
+longSL  = strategy.position_avg_price - slATR * atr
+longTP  = strategy.position_avg_price + tpATR * atr
+
+shortSL = strategy.position_avg_price + slATR * atr
+shortTP = strategy.position_avg_price - tpATR * atr
+
+strategy.exit("LONG EXIT",  from_entry = "LONG",  stop = longSL,  limit = longTP)
+strategy.exit("SHORT EXIT", from_entry = "SHORT", stop = shortSL, limit = shortTP)
+
+// ==================== ALERTS ====================
+alertcondition(longConfirm and bull and canTrade,  "Long Setup",  "LONG: Sweep + VWAP Reversal")
+alertcondition(shortConfirm and bear and canTrade, "Short Setup", "SHORT: Sweep + VWAP Reversal")

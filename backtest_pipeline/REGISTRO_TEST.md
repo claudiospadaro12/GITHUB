@@ -725,3 +725,53 @@ sta li', non si duplica.
   spread assunto 1,0-2,0 -> **il costo e' 1,7-3,3 volte l'edge richiesto**.
   Previsione dichiarata prima: MAE mediana 11,8 pip > SL 8,0 pip -> l'esito
   piu' probabile e' un NO. NIENTE e' stato girato ne' compilato.
+
+### CACCIA FREQUENZA — QUINTA BATTUTA (03/09, fronte B): le righe che toccano questo registro
+
+Dossier completo: `caccia_strategie/CACCIA_FREQUENZA5_IMPLEMENTAZIONI_2026-09-03.md`.
+Il resto sta li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi.**
+
+- 🔓 **SI POSSONO SCARICARE BARRE M1 DA QUI.** `github.com/FutureSharks/financial-data`
+  (GPL-3.0) via `raw.githubusercontent.com`: **DAX (`GRXEUR`, stessa scala di
+  D30EUR), S&P, Nikkei, EuroStoxx M1 2010-2018** e **Nasdaq/oro/major M1
+  2005-2020**. Scaricate e usate oggi: **1.870.955 barre M1**. Chiude il buco
+  dichiarato in quattro dossier ("da qui nessun agente puo' misurare una
+  frequenza"). Limiti e percorsi: `PROMEMORIA_SBLOCCO_FONTI.md` (blocco 03/09)
+  e `caccia_strategie/biblioteca/sonde_esterne/LEGGIMI.md`.
+  ⚠️ **Non e' BCM, e' OHLC M1, e' senza costi, e finisce nel 2020: da qui
+  escono MISURE DI OCCASIONI, mai verdetti.** F6 non si ammorbidisce.
+- 🩹 **CORREZIONE:** girava l'idea che **R95 (sweep+reclaim JPY) fosse "in coda,
+  non morto"**. `R95_REFERTO.md` (23/08) dice **0/30, PF 0,65-0,80, nessuna
+  passata sopra 1,00**, con **21.354 livelli creati e 0 buttati** e l'asse
+  della DENSITA' gia' spazzolato da M30 a H4. **E' bocciato.**
+- 🪦 **TRE LAPIDI NUOVE, tutte con un numero.**
+  (a) **Post-news 15-30 min: chiuso.** `arXiv 2605.04004` §4.7 (paper gia'
+  citato in 18 file del repo, §4.7 mai letto): 993 eventi 2022-2025 su MNQ,
+  _"the drift is real in the first five bars … From bar +6 onward, T-statistics
+  … are between 0.14 and 0.69"_, RTH T=0,38, Appendice A **`D127 — MNQ
+  post-news drift permanently rejected — LOCKED`**. E _"news proximity adds no
+  value"_ nemmeno come FILTRO. ⚠️ misurato su Nasdaq: per le due sedie
+  `ABTG_PostNews` su EURUSD/EURJPY e' un'indicazione forte, non un verdetto.
+  (b) **Sweep di micro-pivot sugli indici M5/M15: chiuso.** La densita' che
+  aveva ucciso R89 (14 trade IS) **si risolve** — pivot(3,3) da' **4,22-4,57
+  segnali/giorno per lato su DAX M5** — ma su **22.616 segnali** il tasso
+  TP-prima-di-SL e' **43,5-48,2% contro il 49,6% richiesto da H8 (8/8 sotto)**
+  e il **delta contro un ingresso CASUALE della stessa geometria e' −0,2 punti**.
+  (c) **Compressione ATR → espansione: chiusa.** Su **9.723 segnali**,
+  frequenza **0,55-1,87/gg per lato (0/8 sopra il pavimento)** e TP-prima-di-SL
+  **31,6-36,0% contro 35,8% (7/8 sotto)**, delta contro il caso **−1,2 punti**.
+- 🧪 **LA LEZIONE DI METODO, e vale per ogni sonda futura: IL CONTROLLO A
+  INGRESSI CASUALI.** Un tasso di vittoria da solo non dice niente; dice tutto
+  accanto al tasso di un ingresso **a caso con la stessa geometria, sugli
+  stessi dati**. Su **16 celle e 32.339 segnali** il delta medio e' **−0,70
+  punti**. Costa dieci righe. **Da oggi ogni sonda di conteggio porta il suo.**
+- 🛠️ **UNA RIPARAZIONE VALE PIU' DI UNA CACCIA:** `ABTG_OutOfNoise` **non e'
+  bocciato, e' rotto** (`REFERTO_PASSO0_OUTOFNOISE_2026-08-29.md`, n=0 su 3
+  celle): `CopyRates(...,0,need,r)` conta barre di **calendario** invece che di
+  **seduta**, quindi `nDays` resta 4-5 contro `InpConeMinDays=14` e l'EA non
+  entra mai. **Ed e' proprio il "momentum intraday M5/M15" che la caccia
+  cercava fuori**: la versione ad alta frequenza del paper di Gao e' quella di
+  Zarattini-Aziz-Barbon, e il suo porting e' gia' in casa.
+- ⛔ **Meccanismi chiusi per ARITMETICA, non per qualita':** gap intraday e
+  gap-fill (**un gap di apertura e' UNO al giorno**: nessuna implementazione
+  puo' superare il pavimento di 2 segnali/giorno per lato).

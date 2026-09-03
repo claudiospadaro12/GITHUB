@@ -1,0 +1,128 @@
+//@version=6
+strategy(
+     "Hybrid Trend-Following Inside Bar Breakout",
+     overlay=true,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     pyramiding=0,
+     commission_type=strategy.commission.percent,
+     commission_value=0.04
+)
+
+// =========================
+// INPUTS
+// =========================
+EMA_FAST = input.int(50, "EMA Fast")
+EMA_SLOW = input.int(200, "EMA Slow")
+
+ATR_FAST = input.int(14, "ATR Fast")
+ATR_SLOW = input.int(50, "ATR Slow")
+
+PARTIAL_TP_R = input.float(1.5, "Partial TP (R)")
+TRAIL_ATR_MULT = input.float(2.0, "Trailing ATR Mult")
+SL_ATR_MULT = input.float(1.0, "SL ATR Mult")
+
+COOLDOWN_AFTER_LOSS = input.int(3, "Cooldown After Loss (bars)")
+
+// =========================
+// INDICATORS
+// =========================
+emaFast = ta.ema(close, EMA_FAST)
+emaSlow = ta.ema(close, EMA_SLOW)
+
+atrFast = ta.atr(ATR_FAST)
+atrSlow = ta.atr(ATR_SLOW)
+
+// Inside bar
+insideBar = high < high[1] and low > low[1]
+
+// Candle body ratio
+body = math.abs(close - open)
+rangeCandle = high - low
+bodyRatio = rangeCandle > 0 ? body / rangeCandle : 0
+
+// =========================
+// STATE VARIABLES
+// =========================
+var float entryPrice = na
+var float stopLoss   = na
+var float takeProfit = na
+var float trailSL    = na
+var bool  partialHit = false
+var int   cooldown   = 0
+
+// =========================
+// COOLDOWN LOGIC
+// =========================
+if cooldown > 0
+    cooldown -= 1
+
+// =========================
+// EXIT LOGIC
+// =========================
+if strategy.position_size != 0
+
+    // Detect loss on last closed trade
+    if strategy.closedtrades > 0
+        lastProfit = strategy.closedtrades.profit(strategy.closedtrades - 1)
+        if lastProfit < 0
+            cooldown := COOLDOWN_AFTER_LOSS
+
+    // Partial TP
+    if not partialHit
+        if strategy.position_size > 0 and high >= takeProfit
+            strategy.close("LONG", qty_percent=50)
+            partialHit := true
+        if strategy.position_size < 0 and low <= takeProfit
+            strategy.close("SHORT", qty_percent=50)
+            partialHit := true
+
+    // Trailing Stop after partial
+    if partialHit
+        if strategy.position_size > 0
+            trailSL := math.max(trailSL, close - TRAIL_ATR_MULT * atrFast)
+            strategy.exit("TRAIL_LONG", from_entry="LONG", stop=trailSL)
+        if strategy.position_size < 0
+            trailSL := math.min(trailSL, close + TRAIL_ATR_MULT * atrFast)
+            strategy.exit("TRAIL_SHORT", from_entry="SHORT", stop=trailSL)
+
+// =========================
+// ENTRY LOGIC
+// =========================
+if strategy.position_size == 0 and cooldown == 0
+
+    trendLong  = emaFast > emaSlow
+    trendShort = emaFast < emaSlow
+
+    volOK = atrFast > atrSlow or (atrFast / close) >= 0.012
+
+    if volOK and insideBar[1] and bodyRatio > 0.5
+
+        // LONG ENTRY
+        if trendLong and close > high[1]
+            entryPrice := close
+            stopLoss := math.min(low[1], entryPrice - SL_ATR_MULT * atrFast)
+            R = math.abs(entryPrice - stopLoss)
+            takeProfit := entryPrice + PARTIAL_TP_R * R
+            trailSL := stopLoss
+            partialHit := false
+            strategy.entry("LONG", strategy.long)
+            strategy.exit("SL_LONG", from_entry="LONG", stop=stopLoss)
+
+        // SHORT ENTRY
+        if trendShort and close < low[1]
+            entryPrice := close
+            stopLoss := math.max(high[1], entryPrice + SL_ATR_MULT * atrFast)
+            R = math.abs(entryPrice - stopLoss)
+            takeProfit := entryPrice - PARTIAL_TP_R * R
+            trailSL := stopLoss
+            partialHit := false
+            strategy.entry("SHORT", strategy.short)
+            strategy.exit("SL_SHORT", from_entry="SHORT", stop=stopLoss)
+
+// =========================
+// PLOTS
+// =========================
+plot(emaFast, color=color.orange)
+plot(emaSlow, color=color.blue)
