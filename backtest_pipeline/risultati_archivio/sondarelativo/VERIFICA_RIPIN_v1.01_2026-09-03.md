@@ -229,3 +229,129 @@ Windows). Non e' stato aggiunto un collaudo per-riga sull'IDENTITA' di
 stessa corsa (dovrebbero essere tutte uguali, essendo un fatto di
 calendario indipendente da N/sigma): se Claudio lo vuole, e' un giro
 successivo, dichiarato qui e non fatto in silenzio.
+
+---
+
+## SEGUITO (03/09 notte): driver ri-pinnato sulla v1.03, verificato dall'agente VERIFICATORE
+
+**Motivo:** `mql5/Experts/ABTG_SondaRelativo.mq5` e' passato a **v1.03**
+(commit `e0026b6` + `01cbfc3`): trovata la causa ESATTA del collaudo T12
+rotto (`Sotto 60 Secondi Pct` non a 0,00 su gran parte delle celle). Il
+gate T7 sull'ingresso confrontava la barra TEORICA (`tSeg + gTfSec`) con
+quella REALE (`iTime` 0) solo in un punto: nei buchi di storico la posizione
+nasceva su una barra fuori sessione e la valutazione successiva la
+richiudeva con lo STESSO timestamp (`sec=0`, 0 barre). Fix: nuove funzioni
+pure `IngressoInFinestra_Calc` (gate sulla barra REALE) e
+`TenutaSecondi_Calc` (la tenuta in secondi ora si DERIVA dalle barre
+valutate, non dai due timestamp grezzi). Il driver
+`backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1` (pin precedente, commit
+`01743b7e`, marcatore `_v4`) aveva i gate ancora ancorati ai numeri v1.02:
+sarebbe partito e si sarebbe fermato al passo 2 con `#property version e'
+'1.03', attesa '1.02'`.
+
+**Letto `mql5/Experts/ABTG_SondaRelativo.mq5` per intero** (non fidandosi
+solo del commit message): `#property version "1.03"` (riga 309),
+`grep -cP '^\s*blocchi\+\+\s*;'` = **25** (blocco 24
+`IngressoInFinestra_Calc`, blocco 25 `TenutaSecondi_Calc`), `#define
+REL_NSTATS 97` (riga 498) -> **100 colonne** (97 + Pass/Simbolo/Periodo),
+confermato leggendo la head CSV per intero (righe 3084-3123 di
+`OnTesterDeinit`): le ultime due voci sono `Ingressi Barra Reale Fuori`
+(`stats[95]`) e `Chiuse Zero Barre` (`stats[96]`), e `ControllaColonne`
+verifica a runtime che `nomi = REL_NSTATS + 3 = 100`. Input EA invariati:
+**22** (`grep -cP '^\s*input\s+[A-Za-z_]\w*\s+[A-Za-z_]\w*\s*='`) — nessun
+input nuovo, solo colonne di sola lettura.
+
+### Corretto nel driver (`backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1`, commit `b3acff1`)
+| dove | prima | dopo |
+|---|---|---|
+| riga 2 (marcatore) | `_v4` | `_v5` (contenuto cambiato = versione alzata, classe 109-bis) |
+| righe 85-86 (commento header) | `"1.02"`, `23 blocchi`, `REL_NSTATS 95 (= 98 colonne)` | `"1.03"`, `25 blocchi`, `REL_NSTATS 97 (= 100 colonne)` |
+| riga 165 | `$VERSIONE_ATTESA = "1.02"` | `"1.03"` |
+| riga 166 | `$AUTOTEST_BLOCCHI_ATTESI = 23` | `25` |
+| riga 167 | `$NSTATS_ATTESI = 95` (commento "98 colonne") | `97` (commento "100 colonne") |
+| riga 732 | `"REL_NSTATS = ... (98 colonne)"` | `"... (100 colonne)"` |
+| riga 1036 | `"colonne: ... (attese 98)"` | `"... (attese 100)"` |
+| riga 1116 | `"...98 colonne OPTFRAME."` | `"...100 colonne OPTFRAME."` |
+| riga 1147 | `"...98 colonne + gli input..."` | `"...100 colonne + gli input..."` |
+| `$servono` (lista colonne pretese per nome) | non chiedeva le due colonne nuove | aggiunte `"Ingressi Barra Reale Fuori","Chiuse Zero Barre"` |
+| lettura riga CSV (`$r` per-cella) | non leggeva le due colonne nuove | aggiunti i campi `IngrFuori`/`ChiuseZero` |
+| collaudi per riga | nessun controllo sulle colonne T12 nuove | PROBLEMA se `Chiuse Zero Barre` != 0 (dalla v1.03 e' lo STESSO EVENTO di `Sotto 60 Secondi Pct`, qui in conteggio secco) |
+| dopo il ciclo delle 49 celle | nessuna diagnostica sul fix | RILIEVO aggregato: somma di `Ingressi Barra Reale Fuori` sulle 49 celle -> "MISURATO" se >0 (il fix ha morso, e' falsificabile e regge), "NON MISURATO" se 0 (non e' un fallimento: nessun buco di storico incontrato in questa finestra/simbolo) |
+| referto (riga di riferimento) | non stampava le due colonne | nuova riga "FIX T12 (v1.03): Chiuse Zero Barre ... / Ingressi Barra Reale Fuori ..." |
+
+Le due colonne diagnostiche **non** sono state aggiunte alla tabella delle
+49 celle (stesso ragionamento gia' scritto per `Giorni Festa Metro`/`Giorni
+Metro Zero Calendario` nella sezione precedente: format string a colonne
+fisse, rischio di sfasamento silenzioso se allargata): sono lette per NOME
+e riportate in aggregato/riferimento, non per-cella nella tabella.
+
+### Controlli eseguiti a macchina (pwsh disponibile nell'ambiente)
+1. **Parse pwsh reale** del driver intero e dei 5 blocchi estratti dalla
+   pagina: **tutti PASS**, zero errori.
+2. **Classe 79/79-bis** (collisione `$r`/`$R`): parser AST rieseguito dopo
+   le modifiche. Nessun `foreach($r ...)` a livello di script DOPO la
+   creazione di `$R` (riga 1019); i gruppi `ha`/`mappa`/`r` restanti sono
+   variabili locali di funzioni diverse (stesso esito gia' documentato
+   sopra per il pin precedente), confermato di nuovo dopo l'edit.
+3. **Banco eseguito con lo stato PIENO** (classe 79-bis, non solo le
+   funzioni): estratte le definizioni del driver via AST
+   (`ParamBlock.Extent`) ed eseguito `AnalizzaCsv` su un CSV OPTFRAME
+   sintetico da 100 colonne (header reale del `.mq5`, 49 righe, valori che
+   passano tutti i collaudi):
+   - CSV sano, `Ingressi Barra Reale Fuori` > 0 su una cella -> **0
+     PROBLEMI**, RILIEVO "FIX T12 (v1.03) MISURATO: ... = 3".
+   - stesso CSV con `Ingressi Barra Reale Fuori` = 0 ovunque -> **0
+     PROBLEMI**, RILIEVO "FIX T12 (v1.03) NON MISURATO IN QUESTA CORSA" (non
+     e' un fallimento, e' dichiarato).
+   - una cella con `Chiuse Zero Barre` = 1 -> **1 PROBLEMA** corretto
+     ("Chiuse Zero Barre = 1 ... contabilita' dei tempi rotta"),
+     `VerdettoL`/`VerdettoS` = `NON LEGGIBILE` (clausola severa rispettata).
+   - CSV "vecchio" (v1.02, senza le due colonne nuove) -> **1 PROBLEMA**
+     corretto ("mancano le colonne: Ingressi Barra Reale Fuori, Chiuse Zero
+     Barre"), nessun crash, nessuna lettura silenziosa sbagliata.
+4. **Gate di IDENTITA' DEL SORGENTE rieseguiti contro il `.mq5` vero**
+   (stesso codice del driver, non una copia): versione, blocchi, NSTATS,
+   input, grep contatore puro, `#include`, e le soglie `#define`
+   (`REL_C1_...`, `REL_C3_...`, `REL_C5_...`, `REL_C6_...`, `REL_C7_...`,
+   `REL_C8_...`, `REL_SPREAD_...`) confrontate con i numeri della pagina:
+   **tutti combaciano** (C1=2,00 · C5=0,70 · C6=25/40 · C8=12/25 · C2=10 ·
+   C7=0,65/3,25 · C3 multipli 3/6 · spread 2,80/1,80).
+5. **`GateProva`/`GateGemelli` rieseguiti contro i quattro `prove/RELATIVO_*.txt`
+   reali del repo** (invariati, hash confermati uguali al pin precedente):
+   **tutti e quattro PASS**, 49 celle ciascuno, gemellaggio VALIDO.
+6. **Zero caratteri non-ASCII** nel driver `.ps1`.
+7. **Marcatore**: `_v5` in tutti i 7 punti d'uso della pagina (definizione +
+   tabella "Driver" + verifica al pin + 5 `Select-String` dei blocchi);
+   nessun residuo `_v4`.
+8. **Guardia MT5/MetaEditor**, **cultura invariante**, **tetto ~100.000
+   barre**, **classi 108/110/116**: non toccate da questo giro, ri-lette
+   per intero, ancora corrette.
+
+### Ri-pin della pagina (commit `b3acff11221e2cb9fed0a48899b23e6c94cbf5a0`)
+Pin precedente `01743b7e...` -> nuovo `b3acff1...`. Verificato via `raw`
+che al pin driver + `walkforward_generico.ps1` + i 4 prove + `.mq5` sono
+**identici a HEAD** (sha256 confrontati uno per uno, tutti IDENTICO, HTTP
+200). Al pin: marcatore `_v5` presente nel driver scaricato, `#property
+version "1.03"` e `#define REL_NSTATS 97` confermati nell'.mq5 scaricato.
+Nessun residuo del pin vecchio come stringa completa nella pagina (le
+menzioni di `01743b7e`/`526f76f6` restano solo nella prosa storica, non
+riscritta per convenzione, come gia' fatto per i pin precedenti).
+
+## Verdetto (parte 3)
+**PASS.** Driver e pagina ri-pinnati e allineati alla v1.03 dell'EA (fix
+T12 sulla barra reale); lette e stampate le due colonne diagnostiche nuove
+(un collaudo per riga + un rilievo aggregato); verificato a macchina con un
+banco che esegue la RACCOLTA a stato pieno (classe 79-bis), non solo le
+funzioni pure, coprendo sia il ramo sano sia i due rami di rifiuto (T12
+rotto, CSV vecchio senza le colonne).
+
+**NON COPERTO:** compilazione reale con MetaEditor e corsa MT5 vera (fuori
+dal perimetro eseguibile in questo ambiente: serve il PC di backtest
+Windows). Non e' stato verificato a macchina il comportamento del gate
+`if($src -notmatch '\[AUTOTEST\]\s+21\s')` su un sorgente mutato (classe
+116-ter): resta un controllo di presenza letterale del blocco 21, invariato
+da prima di questo giro e non toccato ora. Non e' stato eseguito un vero
+walk-forward MT5 con lo storico reale: il banco sintetico dimostra che il
+driver LEGGE correttamente le due colonne nuove e reagisce nei tre rami
+attesi, non che la CORSA reale produca `Ingressi Barra Reale Fuori` > 0 su
+D30EUR/NASUSD -- quello lo dira' la prima corsa vera al nuovo pin.
