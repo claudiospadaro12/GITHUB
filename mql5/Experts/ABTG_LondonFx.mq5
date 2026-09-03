@@ -241,13 +241,40 @@
 //|      verificatore lo volesse comunque, si riaccende la sonda:     |
 //|      e' un'altra corsa, non un'altra colonna.                     |
 //|                                                                  |
+//|  N15. (v1.01) L'EXPORT PER-TRADE, E PERCHE' IL NOME PORTA IL      |
+//|      MOTORE. Due punti dei criteri firmati NON sono eseguibili    |
+//|      senza il per-trade: il 5.0.5 (prima data del per-trade, che  |
+//|      dice se i tick coprono davvero la finestra) e l'S4           |
+//|      (correlazione dei P&L GIORNALIERI fra i tre motori). Il      |
+//|      formato e' quello di casa (ExportTrades: Common\Files, ';',  |
+//|      otto colonne, letto da dd_portafoglio.py e                   |
+//|      analizza_payoff.py). L'UNICA differenza -- e ha un motivo    |
+//|      misurabile -- e' il suffisso "_m<motore>" nel nome: la       |
+//|      corsa principale di R116 e' UNA griglia di 6 passate         |
+//|      (3 InpMotore x 2 InpMagic) e Common\Files e' UNA sola        |
+//|      cartella per tutti gli agent. Col nome di casa nudo          |
+//|      (EA_simbolo_magic) i tre motori si sovrascriverebbero a      |
+//|      vicenda e S4 correlerebbe un motore con se stesso. Il        |
+//|      precedente in casa esiste (ABTG_Bulge aggiunge il suo ramo   |
+//|      di ablazione al nome), e i raccoglitori cercano              |
+//|      "abtg_trades_<EA>_<Simbolo>_*.csv": il suffisso ci sta       |
+//|      dentro. NIENTE COLONNA NUOVA nel CSV di OptFrame: la lista   |
+//|      dei nomi attesi sta nel driver del round e non la tocco io.  |
+//|                                                                  |
 //|  DEMO. ASCII PURO: niente accenti dentro le stringhe, niente      |
 //|  emoji (regola di casa dei .ps1, estesa ai .mq5 perche' log e     |
 //|  CSV finiscono negli stessi strumenti).                           |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - contenitore LondonFx R116 - riscritture da (c) SoftKill21, MPL 2.0"
 #property link      "https://www.tradingview.com/script/E6yr9CoN-EURUSD-5min-london-session-strategy/"
-#property version   "1.00"
+#property version   "1.01"
+//--- v1.01 (03/09/2026): AGGIUNTO SOLO l'export per-trade (ExportTrades,
+//    formato di casa, nome col suffisso del motore -- vedi N15) e il
+//    blocco 18 dell'autotest che ne prova il nome. Autotest: 18 blocchi
+//    / 117 casi (erano 17 / 112). NESSUNA riga di segnale, gestione,
+//    stop, input o magic e' stata toccata: v1.01 fa gli STESSI TRADE di
+//    v1.00, in piu' li scrive su file.
+//    v1.00 (03/09/2026): prima stesura, criteri firmati LONDONFX_TICK_CRITERI.md.
 #property description "R116: UN contenitore, TRE motori a interruttore (canale nudo / canale+RSI / allineamento 5 medie). Sessione Londra, flat obbligatorio, TP 15 / SL 8 pip, rischio 0,65%, cap 2%/giorno."
 #property strict
 
@@ -305,8 +332,8 @@ CTrade gTrade;
 //    SVUOTATO delle sue asserzioni (che il conteggio dei soli blocchi
 //    non vedrebbe). Se uno dei due conti non torna, l'autotest si
 //    dichiara FALLITO.
-#define LONDONFX_AUTOTEST_BLOCCHI_ATTESI 17
-#define LONDONFX_AUTOTEST_CASI_ATTESI   112
+#define LONDONFX_AUTOTEST_BLOCCHI_ATTESI 18   // v1.01: 17 + il blocco 18 (nome del file per-trade)
+#define LONDONFX_AUTOTEST_CASI_ATTESI   118   // v1.01: 112 + i 6 casi del blocco 18
 
 //==================================================================
 //  INPUT
@@ -808,6 +835,24 @@ double PercentualeFlat_Calc(const double usciteFlat, const double uscitetotali)
   {
    if(uscitetotali <= 0.0) return(0.0);
    return(100.0*usciteFlat/uscitetotali);
+  }
+
+//+------------------------------------------------------------------+
+//| IL NOME DEL FILE PER-TRADE (v1.01, vedi N15). E' una funzione     |
+//| PURA apposta: cosi' l'autotest puo' interrogarla senza aprire     |
+//| niente, e il suffisso del motore -- che e' l'unica differenza dal |
+//| formato di casa -- e' PROVATO, non promesso.                      |
+//|   abtg_trades_<EA>_<SIMBOLO>_<magic>_m<motore>.csv                |
+//| Il prefisso e i primi tre campi restano quelli di casa: i         |
+//| raccoglitori cercano "abtg_trades_<EA>_<Simbolo>_*.csv" e i       |
+//| lettori (dd_portafoglio.py, analizza_payoff.py, mc_trailing.py)   |
+//| usano il nome solo come ETICHETTA.                                |
+//+------------------------------------------------------------------+
+string NomeFilePerTrade_Calc(const string nomeEa, const string simbolo,
+                             const long magic, const int motore)
+  {
+   return("abtg_trades_" + nomeEa + "_" + simbolo + "_" +
+          IntegerToString(magic) + "_m" + IntegerToString(motore) + ".csv");
   }
 
 //==================================================================
@@ -1767,6 +1812,31 @@ void AutoTestLondonFx()
    if(!(!b17_sp && !b17_bo && b17_no))
      { falliti++; Log("[AUTOTEST] 17 SpreadFuoriLimite_Calc DIVERGE"); }
 
+   //--- BLOCCO 18 (v1.01): IL NOME DEL FILE PER-TRADE. L'unica
+   //    differenza dal formato di casa e' il suffisso "_m<motore>", e
+   //    serve a una cosa sola: nella griglia da 6 passate i tre motori
+   //    NON si devono sovrascrivere in Common\Files. Se il suffisso
+   //    sparisse, S4 correlerebbe un motore con se stesso e il numero
+   //    sembrerebbe comunque plausibile. Quindi si prova che il nome e'
+   //    ESATTAMENTE quello atteso e che cambia con motore, magic e
+   //    simbolo -- e che il prefisso di casa e' rimasto al suo posto,
+   //    altrimenti i raccoglitori (abtg_trades_<EA>_<Simbolo>_*.csv)
+   //    non lo troverebbero piu'.
+   blocchi++; casi += 6;
+   string b18_atteso = "abtg_trades_ABTG_LondonFx_EURUSD_774001_m2.csv";
+   string b18_n2 = NomeFilePerTrade_Calc("ABTG_LondonFx", "EURUSD", 774001, 2);
+   string b18_n1 = NomeFilePerTrade_Calc("ABTG_LondonFx", "EURUSD", 774001, 1);
+   string b18_gm = NomeFilePerTrade_Calc("ABTG_LondonFx", "EURUSD", 774002, 2);
+   string b18_sy = NomeFilePerTrade_Calc("ABTG_LondonFx", "GBPUSD", 774001, 2);
+   bool b18_ok = (b18_n2 == b18_atteso);            // il nome esatto
+   bool b18_mo = (b18_n1 != b18_n2);                // il motore morde
+   bool b18_mg = (b18_gm != b18_n2);                // il magic gemello morde
+   bool b18_si = (b18_sy != b18_n2);                // il simbolo morde
+   bool b18_pr = (StringFind(b18_n2, "abtg_trades_") == 0);
+   bool b18_cs = (StringSubstr(b18_n2, StringLen(b18_n2)-4) == ".csv");
+   if(!(b18_ok && b18_mo && b18_mg && b18_si && b18_pr && b18_cs))
+     { falliti++; Log("[AUTOTEST] 18 NomeFilePerTrade_Calc DIVERGE: il per-trade finirebbe nel file sbagliato (o si sovrascriverebbe fra motori) e i punti 5.0.5 / S4 leggerebbero un altro oggetto"); }
+
    //--- IL CONTROLLO SUL CONTROLLO: blocchi E casi devono essere quelli
    //    attesi. Un gate che non conta quello che ha eseguito non e' un
    //    gate (lezione R95 G4).
@@ -1804,8 +1874,68 @@ string OptFrame_FileName()
    return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
   }
 
+//+------------------------------------------------------------------+
+//| EXPORT PER-TRADE (v1.01) -- il formato di casa, senza inventare   |
+//| niente: Common\Files, separatore ';', le OTTO colonne che i       |
+//| lettori si aspettano gia'                                         |
+//|   close_time;symbol;magic;position_id;deal_type;volume;price;net_profit
+//| (dd_portafoglio.py legge la data da r[0] e il netto da r[7];      |
+//| analizza_payoff.py cerca l'intestazione "net_profit").            |
+//| Si scrive UNA VOLTA per passata, da OnTester: quindi SOLO nel     |
+//| tester, mai in forward. Il netto e' profitto + swap + commissione |
+//| sui soli deal di USCITA, come in tutta la flotta.                 |
+//| LIMITE DICHIARATO, perche' non lo scopra il verificatore: una     |
+//| passata che il tester ripesca dalla CACHE non riesegue OnTester e |
+//| NON riscrive il file (e' la stessa avvertenza che sta gia' in     |
+//| walkforward_generico.ps1). File assente o vecchio = quella cella  |
+//| non e' girata davvero, e va trattata cosi'.                       |
+//+------------------------------------------------------------------+
+void ExportTrades()
+  {
+   if(!HistorySelect(0, TimeCurrent())) return;
+   string fn = NomeFilePerTrade_Calc(MQLInfoString(MQL_PROGRAM_NAME), _Symbol, InpMagic, InpMotore);
+   int h = FileOpen(fn, FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON, ';');
+   if(h == INVALID_HANDLE)
+     {
+      PrintFormat("[LONDONFX] per-trade NON scritto: %s non si apre (codice %d). I punti 5.0.5 e S4 dei criteri restano SENZA dati.",
+                  fn, GetLastError());
+      return;
+     }
+   FileWrite(h, "close_time", "symbol", "magic", "position_id", "deal_type", "volume", "price", "net_profit");
+   int n = HistoryDealsTotal();
+   int scritte = 0;
+   for(int i = 0; i < n; i++)
+     {
+      ulong tk = HistoryDealGetTicket(i);
+      if(tk == 0) continue;
+      long entry = HistoryDealGetInteger(tk, DEAL_ENTRY);
+      if(entry != DEAL_ENTRY_OUT && entry != DEAL_ENTRY_OUT_BY) continue;
+      double net = HistoryDealGetDouble(tk, DEAL_PROFIT) +
+                   HistoryDealGetDouble(tk, DEAL_SWAP) +
+                   HistoryDealGetDouble(tk, DEAL_COMMISSION);
+      FileWrite(h,
+                TimeToString((datetime)HistoryDealGetInteger(tk, DEAL_TIME), TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                HistoryDealGetString(tk, DEAL_SYMBOL),
+                IntegerToString(HistoryDealGetInteger(tk, DEAL_MAGIC)),
+                IntegerToString(HistoryDealGetInteger(tk, DEAL_POSITION_ID)),
+                IntegerToString(HistoryDealGetInteger(tk, DEAL_TYPE)),
+                DoubleToString(HistoryDealGetDouble(tk, DEAL_VOLUME), 2),
+                DoubleToString(HistoryDealGetDouble(tk, DEAL_PRICE), _Digits),
+                DoubleToString(net, 2));
+      scritte++;
+     }
+   FileClose(h);
+   PrintFormat("[LONDONFX] per-trade: %d chiusure scritte nella cartella comune, file %s (in ottimizzazione questa riga non la legge nessuno: fa fede il FILE).",
+               scritte, fn);
+  }
+
 double OnTester()
   {
+   //--- IL PER-TRADE PRIMA DI TUTTO (v1.01, N15): e' l'unico posto da
+   //    cui i punti 5.0.5 (prima data) e S4 (correlazione dei P&L
+   //    giornalieri) possono uscire. Non tocca nessun contatore.
+   ExportTrades();
+
    //--- IL CANARINO, PRIMA DI TUTTO IL RESTO (N13).
    double spreadMed = Mediana  (gSpread, gNSpread);
    double spreadP95 = Percentile(gSpread, gNSpread, 0.95);
