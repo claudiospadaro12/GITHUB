@@ -16,8 +16,9 @@
 #   1. scarico AL PIN: generico (pinnato con replace di $EABranch), i 2
 #      prova, l'EA .mq5, l'include ABTG_PausaGuardian.mqh (censito dal
 #      sorgente, non indovinato);
-#   2. gate sul sorgente: #property version "1.00" (ancorato), i due
-#      #define dell'autotest (17 blocchi / 112 casi, ancorati), InpMagic
+#   2. gate sul sorgente: #property version "1.01" (ancorato), i due
+#      #define dell'autotest (18 blocchi / 118 casi, ancorati -- v1.01,
+#      commit 35c940e: export per-trade + blocco 18), InpMagic
 #      default 774001, hedge-safe (zero PositionSelect(_Symbol) fuori dai
 #      commenti), la guardia ABTG_GuardiaIngresso( nell'include (ancorata
 #      a destra, classe 116-ter);
@@ -37,7 +38,7 @@
 #   7. CORSA PRINCIPALE col generico (-Rifai SEMPRE, Modello 4, Spread 0
 #      dichiarato, deposito 100000): 6 celle x 2 finestre. CSV DATATI
 #      prima di leggerli (piu' vecchi dell'avvio della corsa = NON LETTI);
-#   8. collaudi sulle colonne (autotest 0/17/112, Canarino Torna, notti 0,
+#   8. collaudi sulle colonne (autotest 0/18/118, Canarino Torna, notti 0,
 #      eco dei fissi), GEMELLI identici per motore e finestra, cancelli
 #      A/B con le fasce disgiunte dei criteri, ablazione S1/S2/S3,
 #      dichiarazioni del canarino (tetto > 20%, flat > 40%);
@@ -66,10 +67,25 @@
 #   - Spread=0 nell'.ini (spread corrente DICHIARATO, R84-bis).
 #   - Modello letto dall'.ini VERO (gen_*.ini) + Diario: il report
 #     .htm del tester NON e' letto a macchina (NON COPERTO, dichiarato).
-#   - Il per-trade NON esiste nell'EA v1.00 (nessun file abtg_trades_*):
-#     il punto 5.0.5 dei criteri (prima data del per-trade) e S4
-#     (correlazione P&L giornalieri) NON sono eseguibili in questo giro.
-#     SEGNALATO, non corretto (gli .mq5 non si toccano da qui).
+#   - PER-TRADE (v1.01, commit 35c940e): l'EA lo scrive in Common\Files
+#     (ExportTrades, formato di casa), e il driver lo RACCOGLIE nello
+#     zip, FRESCO rispetto all'avvio della corsa/fase-2 (assente o
+#     vecchio = "cella non girata per cache, non zero trade": MAI
+#     letto come zero). Il nome del file (motore+magic+simbolo) NON
+#     porta la finestra ne' lo slippage: rappresenta SEMPRE l'ULTIMA
+#     cella scritta (corsa principale -> OOS; fase 2 -> slip 5).
+#     Punto 5.0.5 (prima data del per-trade, che vuole la copertura
+#     dall'INIZIO della finestra IS): NON verificabile da questo file
+#     (e' l'OOS) -- resta SEGNALATO, non corretto (il generico e la
+#     forma del nome non si toccano da una riga di lancio).
+#     Punto S4 (correlazione dei P&L giornalieri fra i tre motori,
+#     informativa, non un cancello): ORA ESEGUIBILE A MANO dai 3 CSV
+#     magic 774001 (motori 1/2/3) allegati allo zip -- si raggruppano
+#     i "net_profit" per data di "close_time", si sommano per giorno,
+#     si allineano le tre serie sulle date comuni (giorni mancanti =
+#     0) e si calcola la correlazione di Pearson a coppie: >= 0,80 e'
+#     un secondo indizio che i motori siano lo stesso oggetto. NON
+#     automatizzato qui (S4 non decide da sola, criteri par. 3.2).
 #
 #  QUANTO CI METTE [STIMA, non una previsione]: compilazione + 12
 #  passate a TICK REALI su ~2 anni di M15 forex con max 4 agenti (+4 di
@@ -134,11 +150,62 @@ $Sentinella = Join-Path $Work "R116_IN_CORSO.txt"
 $RawPin = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 
 # --- IDENTITA' DELL'EA (gate sul sorgente scaricato al pin)
-$VERSIONE_ATTESA = "1.00"
-$BLOCCHI_ATTESI  = 17
-$CASI_ATTESI     = 112
+# v1.01 (03/09, commit 35c940e): AGGIUNTO l'export per-trade
+# (NomeFilePerTrade_Calc + ExportTrades, formato di casa) e il blocco
+# 18 dell'autotest (6 casi) che ne prova il nome. Nessuna riga di
+# segnale/gestione/stop/input/magic toccata: v1.01 fa gli STESSI trade
+# di v1.00, in piu' li scrive su file (N15 nel sorgente).
+$VERSIONE_ATTESA = "1.01"
+$BLOCCHI_ATTESI  = 18
+$CASI_ATTESI     = 118
 $MAGIC1 = 774001
 $MAGIC2 = 774002
+# --- IL PER-TRADE (v1.01): Common\Files e' UNA sola cartella per tutti
+#     gli agent, e il nome dell'EA NON porta la finestra (IS/OOS) ne'
+#     lo slippage: dentro UNA corsa (IS+OOS in un solo invio al
+#     generico) l'OOS e' l'ultima a scrivere e SOVRASCRIVE l'IS sullo
+#     stesso motore/magic (stesso limite gia' di casa su
+#     RIGA_R112_EMADOW_CONTRATTO.ps1). Quindi il per-trade raccolto qui
+#     rappresenta SEMPRE E SOLO l'ultima finestra/cella scritta:
+#     corsa principale -> OOS; fase 2 -> slip 5 (l'ultima cella
+#     dell'asse). Dichiarato nel referto, non nascosto.
+$CommonFiles = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+function NomePerTrade([int]$motore,[long]$magic){ return ("abtg_trades_" + $EA + "_" + $Simbolo + "_" + $magic + "_m" + $motore + ".csv") }
+# Raccoglie i per-trade di una lista di coppie (Motore,Magic): FRESCHI
+# rispetto a $tRif (LastWriteTime -ge $tRif), o dichiarati ASSENTE /
+# VECCHIO con la formula di casa (checklist: "file assente o non
+# fresco = cella non girata per cache, non zero trade" -- mai zero).
+# $tag = etichetta CORTA per il nome del file di lavoro (mai lo stesso
+# testo lungo di $et, per non produrre nomi file assurdi); $et = frase
+# completa per RILIEVI/referto.
+function RaccogliPerTrade($coppie,[datetime]$tRif,[string]$tag,[string]$et){
+  $righe = New-Object System.Collections.ArrayList
+  $copie = New-Object System.Collections.ArrayList
+  foreach($c in $coppie){
+    $nome = NomePerTrade $c.Motore $c.Magic
+    $pt = Join-Path $CommonFiles $nome
+    if(-not (Test-Path -LiteralPath $pt)){
+      [void]$righe.Add("  motore " + $c.Motore + " magic " + $c.Magic + ": ASSENTE (" + $nome + ")")
+      [void]$Rilievi.Add($et + ": per-trade motore " + $c.Motore + " magic " + $c.Magic + " ASSENTE in Common\Files -- file assente o non fresco = cella non girata per cache, non zero trade.")
+      continue
+    }
+    $it = Get-Item -LiteralPath $pt
+    if($it.LastWriteTime -lt $tRif){
+      [void]$righe.Add("  motore " + $c.Motore + " magic " + $c.Magic + ": VECCHIO (" + $nome + ", " + $it.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV) + " < avvio " + $tRif.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ")")
+      [void]$Rilievi.Add($et + ": per-trade motore " + $c.Motore + " magic " + $c.Magic + " VECCHIO (di un giro precedente) -- file assente o non fresco = cella non girata per cache, non zero trade.")
+      continue
+    }
+    $nRighe = @(Get-Content -LiteralPath $pt).Count - 1; if($nRighe -lt 0){ $nRighe = 0 }
+    [void]$righe.Add("  motore " + $c.Motore + " magic " + $c.Magic + ": presente e FRESCO (" + $nome + "), " + $nRighe + " chiusure")
+    $dest = Join-Path $Work ("pertrade_" + $tag + "_m" + $c.Motore + "_" + $c.Magic + ".csv")
+    Copy-Item -LiteralPath $pt -Destination $dest -Force
+    [void]$copie.Add($dest)
+  }
+  return @{ Righe=$righe; Copie=$copie }
+}
+$PerTradeRighe = New-Object System.Collections.ArrayList
+$PerTradeCopie = New-Object System.Collections.ArrayList
+$PerTradeTxt   = "NON RACCOLTO: nessuna corsa che scrive per-trade e' arrivata al punto della raccolta"
 
 # --- I CANCELLI, ricopiati dai criteri firmati (par. 5.1, 5.7, 5.8) con
 #     le DISUGUAGLIANZE. Le fasce sono DISGIUNTE: nessun valore cade in
@@ -661,7 +728,7 @@ try{
   $bl = @($srcRighe | Where-Object { $_ -match ('^\s*#define\s+LONDONFX_AUTOTEST_BLOCCHI_ATTESI\s+' + $BLOCCHI_ATTESI + '\b') }).Count
   $ca = @($srcRighe | Where-Object { $_ -match ('^\s*#define\s+LONDONFX_AUTOTEST_CASI_ATTESI\s+' + $CASI_ATTESI + '\b') }).Count
   $DefineTxt = "LONDONFX_AUTOTEST_BLOCCHI_ATTESI " + $BLOCCHI_ATTESI + " (" + $bl + " riga), LONDONFX_AUTOTEST_CASI_ATTESI " + $CASI_ATTESI + " (" + $ca + " riga)"
-  if($bl -ne 1 -or $ca -ne 1){ throw ("i #define dell'autotest non sono quelli attesi (17 blocchi / 112 casi): " + $DefineTxt) }
+  if($bl -ne 1 -or $ca -ne 1){ throw ("i #define dell'autotest non sono quelli attesi (" + $BLOCCHI_ATTESI + " blocchi / " + $CASI_ATTESI + " casi): " + $DefineTxt) }
   $mg = @($srcRighe | Where-Object { $_ -match ('^\s*input\s+long\s+InpMagic\s*=\s*' + $MAGIC1 + '\s*;') }).Count
   $MagicTxt = "InpMagic default " + $MAGIC1 + " (" + $mg + " riga) -- gemello " + $MAGIC2 + " dal prova"
   if($mg -ne 1){ throw ("InpMagic default " + $MAGIC1 + " non trovato nel sorgente: " + $MagicTxt) }
@@ -845,6 +912,17 @@ try{
           $SpreadTxt = $Simbolo + " sessione di Londra, motore 2 -- IS: mediana " + (Fmt3 $r2i.SprMed) + " pip, P95 " + (Fmt3 $r2i.SprP95) + " pip (campione " + $r2i.SprN + ") | OOS: mediana " + (Fmt3 $r2o.SprMed) + " pip, P95 " + (Fmt3 $r2o.SprP95) + " pip (campione " + $r2o.SprN + "). SI ARCHIVIA ANCHE SE IL ROUND BOCCIA TUTTO (chiude H12). Prudenziale se la misura mancasse: 1,50 pip EURUSD / 2,00 pip GBPUSD [ASSUNTO]."
           if($r2o.SprN -le 0){ $SpreadTxt = "MISURA MANCANTE (campione 0): si rilegge con lo spread PRUDENZIALE 1,50 pip EURUSD / 2,00 pip GBPUSD [ASSUNTO, NON MISURATO], criteri par. 5.5." }
         }
+        # PER-TRADE (v1.01): raccolta nello zip, 6 file (3 motori x 2
+        # magic), FRESCHI rispetto all'avvio DI QUESTA corsa ($tCorsa).
+        # Rappresentano SOLO l'OOS (l'IS e' stato sovrascritto: vedi
+        # nota sopra $CommonFiles). Assente/vecchio = dichiarato nei
+        # RILIEVI con la formula di casa, MAI letto come zero trade.
+        $coppiePT = @()
+        foreach($m in @(1,2,3)){ foreach($mg in @($MAGIC1,$MAGIC2)){ $coppiePT += [pscustomobject]@{ Motore=$m; Magic=$mg } } }
+        $esitoPT = RaccogliPerTrade $coppiePT $tCorsa "main" "corsa principale (rappresenta SOLO l'OOS)"
+        $PerTradeCopie = @($PerTradeCopie) + @($esitoPT.Copie)
+        $PerTradeRighe = @($PerTradeRighe) + @("corsa principale (finestra OOS, avvio " + $tCorsa.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "):") + @($esitoPT.Righe)
+        $PerTradeTxt = "raccolti " + @($esitoPT.Copie).Count + "/6 file freschi -- rappresentano SOLO l'OOS (il nome del file non porta la finestra, e l'OOS e' l'ultima a scrivere: l'IS non e' recuperabile da qui, stesso limite di RIGA_R112_EMADOW_CONTRATTO.ps1). Righe per motore/magic sotto."
       } else { $CorsaMain = $CorsaMain + " -- CSV NON LETTI (vedi PROBLEMI)" }
     }
   } else {
@@ -875,6 +953,15 @@ try{
         if($r5.EInR -ge $E_PASSA){ $Fase2Verdetto = $Fase2Verdetto + "REGGE A 5 PUNTI (E >= " + (Fmt3 $E_PASSA) + "R): il diritto di chiedere la prova di rischio sul vecchio (round separato R-C) resta in piedi. NESSUNA SEDIA da qui." }
         else{ $Fase2Verdetto = $Fase2Verdetto + "VIVE SOLO A TAGLIA PICCOLA (E < " + (Fmt3 $E_PASSA) + "R a 5 punti, etichetta R55 dell'ORB): NON si propone." }
       } else { $Fase2Verdetto = "riga slip 5 MANCANTE nel CSV OOS di fase 2: verdetto NON leggibile" }
+      # PER-TRADE FASE 2 (v1.01): UN solo file possibile (motore 2,
+      # magic 774001 fisso nel prova F2): rappresenta SOLO l'ultima
+      # cella scritta (slip 5, l'ultima dell'asse 2||2||3||5||Y), MAI
+      # slip 2 (stesso nome, sovrascritto). Dichiarato, non nascosto.
+      $esitoPTF2 = RaccogliPerTrade @([pscustomobject]@{ Motore=2; Magic=$MAGIC1 }) $tF2 "f2" "fase 2 (rappresenta SOLO l'ultima cella scritta, slip 5: slip 2 ha lo STESSO nome file e viene sovrascritto)"
+      $PerTradeCopie = @($PerTradeCopie) + @($esitoPTF2.Copie)
+      $PerTradeRighe = @($PerTradeRighe) + @("fase 2 (motore 2 magic " + $MAGIC1 + ", rappresenta SOLO slip 5, avvio " + $tF2.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "):") + @($esitoPTF2.Righe)
+      if($SoloFase2){ $PerTradeTxt = "raccolti " + @($esitoPTF2.Copie).Count + "/1 file freschi dalla FASE 2 (-SoloFase2: la corsa principale non e' stata rifatta qui, nessun per-trade raccolto da essa in questo giro). Rappresenta SOLO slip 5 (slip 2 ha lo stesso nome file e viene sovrascritto)." }
+      else{ $PerTradeTxt = $PerTradeTxt + " + fase 2: " + @($esitoPTF2.Copie).Count + "/1 file fresco (slip 5, slip 2 sovrascritto)." }
     } else { $Fase2Txt = "LANCIATA alle " + $tF2.ToString("HH:mm:ss",$INV) + " ma CSV OOS NON LETTO (vedi PROBLEMI)" }
   }
   else{
@@ -982,7 +1069,10 @@ foreach($l in $RigheFotoDopo){ [void]$R.Add($l) }
 [void]$R.Add("Model letto: " + $ModelTxt)
 [void]$R.Add("riga del Diario 'ticks data begins from' (" + $Simbolo + "): " + $TickTxt)
 [void]$R.Add("log del tester letti a macchina (cresciuti in questo giro): " + $(if($LogLetti -ge 0){ "" + $LogLetti } else { "NON LETTI" }))
-[void]$R.Add("per-trade: NON ESISTE nell'EA v1.00 (nessun file abtg_trades_*): i punti 5.0.5 (prima data del per-trade) e S4 (correlazione P&L giornalieri) NON sono eseguibili in questo giro -- SEGNALATO, la copertura tick si legge dalla riga del Diario qui sopra")
+[void]$R.Add("per-trade (v1.01): " + $PerTradeTxt)
+foreach($l in $PerTradeRighe){ [void]$R.Add("  " + $l) }
+[void]$R.Add("  punto 5.0.5 (prima data del per-trade DALL'INIZIO della finestra IS): NON verificabile dal file raccolto (rappresenta l'OOS, non l'IS) -- SEGNALATO; la copertura tick si legge dalla riga del Diario qui sopra")
+[void]$R.Add("  punto S4 (correlazione P&L giornalieri fra i tre motori, informativa): ESEGUIBILE A MANO dai CSV magic " + $MAGIC1 + " allegati -- raggruppa 'net_profit' per data di 'close_time', somma per giorno, allinea le tre serie sulle date comuni (mancanti = 0), correlazione di Pearson a coppie; >= 0,80 e' un secondo indizio che i motori siano lo stesso oggetto. NON calcolata qui: non decide da sola (criteri par. 3.2).")
 [void]$R.Add("")
 [void]$R.Add("--- I CANCELLI (congelati PRIMA dei numeri, criteri par. 5; fasce DISGIUNTE par. 5.8) ---")
 [void]$R.Add("  A1 E OOS >= " + (Fmt3 $E_PASSA) + "R (zona morta " + (Fmt3 $E_MORTA) + "-" + (Fmt3 $E_PASSA) + ", bocciata < " + (Fmt3 $E_MORTA) + ") | A2 PF OOS >= " + (Fmt2 $PF_PASSA) + " (zona " + (Fmt2 $PF_MORTA) + "-" + (Fmt2 $PF_PASSA) + ", bocciata < " + (Fmt2 $PF_MORTA) + ")")
@@ -997,8 +1087,8 @@ foreach($wk in @("IS","OOS")){
   if(-not $w.Letto){ [void]$R.Add(("{0,-4} " -f $wk) + "SENZA NUMERI (CSV non letto: " + $w.CsvOra + ")"); continue }
   foreach($m in @(1,2,3)){
     if(-not $w.PerMotore.ContainsKey("" + $m)){ [void]$R.Add(("{0,-4} {1,-3} " -f $wk,$m) + "riga mancante"); continue }
-    $r = $w.PerMotore["" + $m]
-    [void]$R.Add(("{0,-4} {1,-3} {2,7} {3,7} {4,7} {5,6} {6,6} {7,7} {8,8} {9,8} {10,6} {11,6}" -f $wk,$m,$r.SegGen,$r.SoppPos,$r.SoppTetto,$r.GgTetto,$r.GgCap,(Fmt2 $r.FlatPct),(Fmt3 $r.SprMed),(Fmt3 $r.SprP95),$r.Notti,$r.Canarino))
+    $rg = $w.PerMotore["" + $m]
+    [void]$R.Add(("{0,-4} {1,-3} {2,7} {3,7} {4,7} {5,6} {6,6} {7,7} {8,8} {9,8} {10,6} {11,6}" -f $wk,$m,$rg.SegGen,$rg.SoppPos,$rg.SoppTetto,$rg.GgTetto,$rg.GgCap,(Fmt2 $rg.FlatPct),(Fmt3 $rg.SprMed),(Fmt3 $rg.SprP95),$rg.Notti,$rg.Canarino))
   }
 }
 [void]$R.Add("  (Giorni col Tetto Colpito > " + (Fmt2 $TETTO_PCT) + "% dei giorni contati = motore STROZZATO, confronto S1 contaminato; Flat > " + (Fmt2 $FLAT_PCT) + "% = si misura l'OROLOGIO. Le dichiarazioni, se scattano, stanno nei RILIEVI.)")
@@ -1010,8 +1100,8 @@ foreach($wk in @("IS","OOS")){
   if(-not $w.Letto){ [void]$R.Add(("{0,-4} " -f $wk) + "SENZA NUMERI"); continue }
   foreach($m in @(1,2,3)){
     if(-not $w.PerMotore.ContainsKey("" + $m)){ continue }
-    $r = $w.PerMotore["" + $m]
-    [void]$R.Add(("{0,-4} {1,-3} {2,6} {3,5} {4,5} {5,11} {6,7} {7,8} {8,8} {9,8} {10,8}" -f $wk,$m,$r.N,$r.IngL,$r.IngS,(Fmt2 $r.Profit),(Fmt3 $r.PF),(Fmt4 $r.EInR),(Fmt2 $r.DD),(Fmt2 $r.PG),$r.Giorni))
+    $rg = $w.PerMotore["" + $m]
+    [void]$R.Add(("{0,-4} {1,-3} {2,6} {3,5} {4,5} {5,11} {6,7} {7,8} {8,8} {9,8} {10,8}" -f $wk,$m,$rg.N,$rg.IngL,$rg.IngS,(Fmt2 $rg.Profit),(Fmt3 $rg.PF),(Fmt4 $rg.EInR),(Fmt2 $rg.DD),(Fmt2 $rg.PG),$rg.Giorni))
   }
   [void]$R.Add("  " + $wk + ": CSV scritto alle " + $w.CsvOra + " (FRESCO: piu' recente dell'avvio della corsa) | righe " + $w.NRighe + " (attese " + $w.CelleAttese + ") | gemelli: " + $w.Gemelli)
 }
@@ -1040,8 +1130,8 @@ foreach($wk in @("F2_IS","F2_OOS")){
   if(-not $w.Letto){ continue }
   foreach($k in @("2_slip2","2_slip5")){
     if(-not $w.PerMotore.ContainsKey($k)){ continue }
-    $r = $w.PerMotore[$k]
-    [void]$R.Add("  " + $w.Tag + " " + $k + ": n " + $r.N + " | profitto " + (Fmt2 $r.Profit) + " | PF " + (Fmt3 $r.PF) + " | E in R " + (Fmt4 $r.EInR) + " | DD " + (Fmt2 $r.DD) + "% | PG " + (Fmt2 $r.PG) + "% | eco Slippage Pts " + $r.Grezzo["Slippage Pts"] + " | CSV " + $w.CsvOra)
+    $rg = $w.PerMotore[$k]
+    [void]$R.Add("  " + $w.Tag + " " + $k + ": n " + $rg.N + " | profitto " + (Fmt2 $rg.Profit) + " | PF " + (Fmt3 $rg.PF) + " | E in R " + (Fmt4 $rg.EInR) + " | DD " + (Fmt2 $rg.DD) + "% | PG " + (Fmt2 $rg.PG) + "% | eco Slippage Pts " + $rg.Grezzo["Slippage Pts"] + " | CSV " + $w.CsvOra)
   }
 }
 [void]$R.Add("")
@@ -1088,14 +1178,15 @@ foreach($et in @($Etichetta,$EtichettaF2)){
 }
 foreach($f in @(Get-ChildItem -LiteralPath $Work -Filter ("anteprima_" + $EA + "_*.ini") -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $Avvio })){ Copy-Item -LiteralPath $f.FullName -Destination $Cart -Force }
 foreach($f in @(Get-ChildItem -LiteralPath $Work -Filter "log_*.log" -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $Avvio })){ Copy-Item -LiteralPath $f.FullName -Destination $Cart -Force }
+foreach($f in @($PerTradeCopie)){ if($f -and (Test-Path -LiteralPath $f)){ Copy-Item -LiteralPath $f -Destination $Cart -Force } }
 $zip = $Cart + ".zip"
 Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
 Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_R116_LONDONFX_" + $Simbolo + ".txt + COMPILAZIONE.log (+ _leggibile.txt) + i 2 prova + i CSV " + $EA + "_" + $Simbolo + "_IS_" + $Etichetta + ".csv e _OOS_ (6 righe l'uno) + gli .ini veri gen_*.ini + i log del tester cresciuti; se la fase 2 e' girata anche i CSV *_" + $EtichettaF2 + ".csv (2 righe l'uno)") -ForegroundColor Gray
-Write-Host "NOTA: nessun per-trade (l'EA v1.00 non lo esporta: segnalato nel referto). L'EA .mq5/.ex5 RESTA in MQL5\Experts del terminale di backtest (foto nel referto)." -ForegroundColor Gray
+Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_R116_LONDONFX_" + $Simbolo + ".txt + COMPILAZIONE.log (+ _leggibile.txt) + i 2 prova + i CSV " + $EA + "_" + $Simbolo + "_IS_" + $Etichetta + ".csv e _OOS_ (6 righe l'uno) + gli .ini veri gen_*.ini + i log del tester cresciuti + i per-trade pertrade_*.csv freschi (" + @($PerTradeCopie).Count + " raccolti in questo giro, rappresentano SOLO l'ultima cella scritta: vedi 'per-trade' nel referto); se la fase 2 e' girata anche i CSV *_" + $EtichettaF2 + ".csv (2 righe l'uno)") -ForegroundColor Gray
+Write-Host "NOTA: per-trade v1.01 raccolto FRESCO (assente/vecchio = cella non girata per cache, MAI zero trade: vedi referto). L'EA .mq5/.ex5 RESTA in MQL5\Experts del terminale di backtest (foto nel referto)." -ForegroundColor Gray
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
 if($Problemi.Count -gt 0){ Write-Host "ESITO: COMPLETATO CON PROBLEMI" -ForegroundColor Yellow; exit 1 }

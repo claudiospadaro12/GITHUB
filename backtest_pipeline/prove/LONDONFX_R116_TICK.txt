@@ -105,7 +105,7 @@
 # ---------------------------------------------------------------------
 #  SANITA' (par. 5.0), se cade una il round NON si legge:
 #    gemelli 774001/774002 IDENTICI al centesimo | Autotest Falliti 0
-#    su 17 blocchi / 112 casi | 6 righe in OGNI CSV | Model=4 dall'.ini
+#    su 18 blocchi / 118 casi (EA v1.01) | 6 righe in OGNI CSV | Model=4 dall'.ini
 #    vero e dal Diario | riga "ticks data begins from" ricopiata |
 #    conteggio dei log del tester letti | Canarino Torna = 1 |
 #    Notti Attraversate = 0.

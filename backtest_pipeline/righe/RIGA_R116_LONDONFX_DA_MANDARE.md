@@ -1,7 +1,7 @@
 # 🎯 R116 — LONDONFX A **TICK REALI**: **LA RIGA DA MANDARE** (EURUSD + GBPUSD, un simbolo per giro)
 
 **Che cos'è:** la **prima misura di MERITO** del **primo superstite della missione
-frequenza**. `ABTG_LondonFx` v1.00 (**EA NUOVO, MAI COMPILATO** — la compilazione
+frequenza**. `ABTG_LondonFx` v1.01 (**EA NUOVO, MAI COMPILATO** — la compilazione
 avviene qui e **se fallisce, QUELLO è il risultato del passo**) gira a **Modello 4,
 tick reali**, su **M15**, con **UN contenitore e TRE motori a interruttore**:
 motore **1** = canale nudo (controllo), motore **2** = canale + RSI (**la BASELINE, l'unico
@@ -51,10 +51,23 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 > agli atti; **(e)** il modello si verifica sull'**.ini VERO** (`gen_*.ini`) e sulla riga
 > del Diario `ticks data begins from`, **non** sull'anteprima (che scrive `Model=4`
 > hardcoded, classe 96) — il report `.htm` del tester **non è letto a macchina**;
-> **(f)** 🔴 **l'EA v1.00 NON esporta il per-trade** (nessun `abtg_trades_*`): i punti
-> **5.0.5** (prima data del per-trade) e **S4** (correlazione P&L giornalieri) dei
-> criteri **non sono eseguibili** in questo giro. **Segnalato, non corretto** (gli
-> `.mq5` non si toccano da una riga di lancio).
+> **(f)** 🟢 **v1.01 (commit `35c940e`) esporta il per-trade** (`abtg_trades_ABTG_LondonFx_
+> <SIM>_<magic>_m<motore>.csv`, Common\Files, blocco 18/6 casi che ne prova il nome): il
+> **driver lo RACCOGLIE nello zip**, FRESCO rispetto all'avvio della corsa/fase-2
+> (`pertrade_*.csv`; assente o vecchio = **"cella non girata per cache, non zero trade"**,
+> dichiarato nei RILIEVI, **mai** letto come zero). ⚠️ **Il nome del file NON porta la
+> finestra né lo slippage**: dentro UN giro (IS poi OOS in un solo invio al generico)
+> l'OOS SOVRASCRIVE l'IS sullo stesso motore/magic (stesso limite di
+> `RIGA_R112_EMADOW_CONTRATTO.ps1`), e in FASE 2 lo slip 5 sovrascrive lo slip 2 (stesso
+> motore/magic). Quindi: **punto 5.0.5** (prima data del per-trade **dall'inizio dell'IS**)
+> resta **NON verificabile** dal file raccolto (che è l'OOS) — **segnalato**, non corretto
+> (il generico e il nome del file non si toccano da una riga di lancio); **punto S4**
+> (correlazione P&L giornalieri fra i tre motori, informativa, non un cancello) **ORA È
+> ESEGUIBILE A MANO** dai 3 CSV magic 774001 (motori 1/2/3, tutti OOS) allegati: si
+> raggruppano i `net_profit` per data di `close_time`, si sommano per giorno, si allineano
+> le tre serie sulle date comuni (mancanti = 0) e si calcola la correlazione di Pearson a
+> coppie — `>= 0,80` è un secondo indizio che i motori siano lo stesso oggetto. **Non
+> automatizzata nel driver** (S4 non decide da sola, criteri par. 3.2).
 
 | | |
 |---|---|
@@ -91,7 +104,7 @@ Commit di `lavoro`, **verificato uno per uno via `raw` prima di scrivere questa 
 | `backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1` | 200, identico, marcatore presente, ASCII puro, parse `pwsh` OK |
 | `backtest_pipeline/prove/LONDONFX_R116_TICK.txt` + `LONDONFX_R116_FASE2_SLIPPAGE.txt` | 200, identici, ASCII puro |
 | `backtest_pipeline/walkforward_generico.ps1` | 200, identico (il driver lo pinna col replace di `$EABranch`) |
-| `mql5/Experts/ABTG_LondonFx.mq5` | 200, identico, `#property version "1.00"`, `#define` 17 / 112 |
+| `mql5/Experts/ABTG_LondonFx.mq5` | 200, identico, `#property version "1.01"`, `#define` 18 / 118 (v1.01: export per-trade + blocco 18, commit `35c940e`) |
 | `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (v1.51) |
 
 Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
@@ -211,7 +224,11 @@ magic, **56 colonne nostre** — le 8 del canarino PRIME, poi il conto economico
 l'eco dei fissi, l'autotest — **+ le 20 colonne di input** accodate dal tester) + gli
 **`.ini VERI`** della corsa (`gen_*.ini`, con `Model=4`) + i **log del tester cresciuti**
 durante il giro. Se la fase 2 è girata: anche `*_R116_<PFX>_SLIP.csv` (**2 righe l'uno**:
-slip 2 e 5). **Niente per-trade** (l'EA v1.00 non lo esporta: segnalato).
+slip 2 e 5). **+ i per-trade** `pertrade_*_m<motore>_<magic>.csv` (v1.01, fino a **6** dalla
+corsa principale — **rappresentano SOLO l'OOS** — e fino a **1** dalla fase 2 — rappresenta
+SOLO slip 5 —, freschi rispetto all'avvio di ciascuna: assente/vecchio è dichiarato nel
+referto, riga per riga, con la formula "cella non girata per cache, non zero trade", MAI
+letto come zero).
 ⚠️ **Nessun suffisso `_ohlc`** nei nomi: è la marca del generico per i modelli non-tick,
 e qui il modello è 4. Se un CSV lo porta, **non è di questo round**.
 
@@ -229,8 +246,8 @@ e qui il modello è 4. Se un CSV lo porta, **non è di questo round**.
   esiste); `FALLITA -- METAEDITOR MUTO` → non è un verdetto sul codice (editor aperto,
   percorso, permessi): si ricontrolla e si rifà; `NON TENTATA` → un gate ha fermato prima
   (`!!! FERMATO:` in fondo).
-- **identità**: `versione letta dal #property: 1.00`, `autotest dichiarato nel sorgente: 17
-  blocchi / 112 casi`, `magic: InpMagic default 774001`, `hedge-safe (N1): 0 chiamate`,
+- **identità**: `versione letta dal #property: 1.01`, `autotest dichiarato nel sorgente: 18
+  blocchi / 118 casi`, `magic: InpMagic default 774001`, `hedge-safe (N1): 0 chiamate`,
   `include censiti: 2 (Trade/Trade.mqh, ABTG_PausaGuardian.mqh)`, `include al pin: bool
   ABTG_GuardiaIngresso( trovata 1 volta`.
 - **`foto PRIMA/DOPO`**: `Include\ABTG_PausaGuardian.mqh → INVARIATO`; `Experts\.mq5` e
@@ -240,10 +257,15 @@ e qui il modello è 4. Se un CSV lo porta, **non è di questo round**.
   **`riga del Diario 'ticks data begins from'`** ricopiata (se `NON TROVATA`, la copertura
   tick va cercata a mano nel Diario: **"non l'ho letta" ≠ "i tick c'erano"**) · **`log del
   tester letti: N`** (un gate che non legge niente non è verde).
+- **`per-trade (v1.01)`**: quanti dei 6 `pertrade_*.csv` sono stati raccolti FRESCHI (righe
+  motore/magic sotto, ognuna `presente e FRESCO` / `ASSENTE` / `VECCHIO`) · punto **5.0.5**
+  dichiarato NON verificabile da questo file (è l'OOS) · punto **S4** dichiarato ESEGUIBILE
+  A MANO con la formula (raggruppa `net_profit` per `close_time`, correlazione di Pearson a
+  coppie fra i tre motori sui CSV magic 774001).
 
 🧪 **POI LA SANITÀ (§5.0) — se cade una, il round NON si legge:**
 `righe 6 (attese 6)` in IS **e** OOS · `gemelli: IDENTICI al centesimo su 3 coppie` ·
-`Autotest Falliti 0`, `17 / 112` (sta nei PROBLEMI se no) · `Canarino Torna = 1` ·
+`Autotest Falliti 0`, `18 / 118` (sta nei PROBLEMI se no) · `Canarino Torna = 1` ·
 `Notti Attraversate = 0` · nessun `eco … invece di …` nei PROBLEMI (= i pin sono passati:
 ora 8, 8 ore, TP 15,0 / SL 8,0, slip 0, rischio 0,65, tetto 6, cap 2,0, RSI 80/20, pip 0,00010 e 10,00).
 
@@ -299,7 +321,7 @@ senza la **prova di rischio sul vecchio** (round separato R-C) e il contratto de
 | **`SCRIPT VECCHIO`** o `irm` fallito (404 su un pin appena creato: cache raw ~5 min) | ❌ **NO** | il messaggio; aspetta 5 minuti e rilancia **la stessa riga** |
 | **Guardie del driver**: `-Pin` mancante/corto, `-Simbolo` fuori whitelist (USDJPY), MT5 riaperto nel frattempo | ✅ **SÌ** (`!!! FERMATO:` nel referto, tutto `NON TENTATA`) | lo zip |
 | **Scarico al pin fallito** (404 sul generico/prova/EA/include) | ✅ **SÌ** | lo zip; se è la cache raw, rilancia la stessa riga dopo 5 min |
-| **Gate sul sorgente** (versione ≠ 1.00, define ≠ 17/112, magic, hedge, include nuovo) o **sui prova** (direttive, assi, celle, fissi, gemellaggio) | ✅ **SÌ** | lo zip: il motivo è in `!!! FERMATO:` — non si aggiusta a mano, si torna in chat |
+| **Gate sul sorgente** (versione ≠ 1.01, define ≠ 18/118, magic, hedge, include nuovo) o **sui prova** (direttive, assi, celle, fissi, gemellaggio) | ✅ **SÌ** | lo zip: il motivo è in `!!! FERMATO:` — non si aggiusta a mano, si torna in chat |
 | **Terminale non unico** (`NON SO QUALE TERMINALE USARE`, elenco stampato) | ✅ **SÌ** | rilancia lo stesso blocco con `& $p -Pin $pin -Simbolo … -Terminale '<cartella dell'installazione>'` |
 | **Compilazione FALLITA** (o MUTA) | ✅ **SÌ** | lo zip: **è il risultato del passo** (include già rimesso a posto: foto DOPO) |
 | **Corsa con PROBLEMI** (CSV stantio/mancante, righe ≠ 6, gemelli divergenti, autotest, eco dei pin, `no memory`) | ✅ **SÌ** (esito `COMPLETATO CON PROBLEMI`, exit 1) | lo zip: il referto dice quale sanità è caduta |
@@ -308,15 +330,48 @@ _(Tabella compilata **eseguendo**, non a memoria — punto 94-bis. Su banco `pws
 "guardie", "scarico fallito", "-SoloControllo/-SoloFase2 insieme" e, **col pin vero**, lo
 scarico dei 6 file + gate sul sorgente + gate sui prova + "terminale non trovato" arrivano
 tutti allo zip. Il primo giro NON ci arrivava (`$logC` non definito nel giro morto prima
-della compilazione: preso e corretto eseguendo). **Mutation test dei gate** via raw locale:
-9 mutazioni su 9 fermate al gate giusto (versione 1.01, `#define` 111, asse motore 1-2,
-fisso 1,0%, include con la guardia rinominata — classe 116-ter —, `@SIMBOLO GBPUSD`,
-`PositionSelect(_Symbol)` aggiunto, ora 9, asse slippage 0-5). **Harness sui CSV** (6 righe
-finte, 3 motori × 2 magic): lettura, gemelli, verdetti A/B, ablazione e i **bordi esatti**
-delle fasce — dove la `FasciaPG` non tipizzata diceva PASSA a −5,01 (confronto di STRINGHE,
-classe 64): tipizzata e ricontrollata. I rami dal terminale in poi (compilazione, corsa,
-fase 2, log) **non sono eseguibili qui** (niente MT5): coperti dalla struttura
-try/ripristino-sempre/raccolta-sempre, e vanno nel NON COPERTO.)_
+della compilazione: preso e corretto eseguendo). **Mutation test dei gate** via raw locale
+(prima passata, EA ancora v1.00): 9 mutazioni su 9 fermate al gate giusto (versione 1.01,
+`#define` 111, asse motore 1-2, fisso 1,0%, include con la guardia rinominata — classe
+116-ter —, `@SIMBOLO GBPUSD`, `PositionSelect(_Symbol)` aggiunto, ora 9, asse slippage 0-5).
+**Harness sui CSV** (6 righe finte, 3 motori × 2 magic): lettura, gemelli, verdetti A/B,
+ablazione e i **bordi esatti** delle fasce — dove la `FasciaPG` non tipizzata diceva PASSA
+a −5,01 (confronto di STRINGHE, classe 64): tipizzata e ricontrollata. I rami dal terminale
+in poi (compilazione, corsa, fase 2, log) **non sono eseguibili qui** (niente MT5): coperti
+dalla struttura try/ripristino-sempre/raccolta-sempre, e vanno nel NON COPERTO.)_
+
+> 🆕 **RI-VERIFICA del 03/09 (sera), dopo l'EA v1.01 (commit `35c940e`, export
+> per-trade + blocco 18).** I gate erano ancora ancorati a 1.00/17/112: **corretti** a
+> 1.01/18/118 (driver + questa pagina). Ri-eseguito con `pwsh` **sul sorgente REALE al
+> pin** (non uno stub): `versione=1.01 define=LONDONFX_AUTOTEST_BLOCCHI_ATTESI 18 (1
+> riga), LONDONFX_AUTOTEST_CASI_ATTESI 118 (1 riga)` → **PASSA**. Due mutazioni nuove,
+> fermate al gate giusto: versione `1.01`→`1.02` (`"versione letta '1.02', attesa
+> '1.01'"`) e `#define` casi `118`→`117` (`"18 blocchi / 118 casi": ... CASI_ATTESI 118
+> (0 riga)"`). Le altre 9 mutazioni della prima passata restano valide: **nessuna riga
+> di codice che toccano è stata modificata** in questa verifica.
+>
+> **Difetto NUOVO trovato ed eseguito, non nella lista sopra**: classe **79/79-bis**
+> (`$r`/`$R` collidono, PowerShell è case-insensitive) — a script-scope, **fuori da
+> ogni funzione**, i tre punti `$r = $w.PerMotore[...]` nelle tabelle CANARINO / CONTO
+> ECONOMICO / FASE 2 sovrascrivevano `$R` (l'`ArrayList` del referto, dichiarato prima):
+> la PRIMA corsa **RIUSCITA** che arriva a quelle tabelle avrebbe fatto esplodere
+> `[void]$R.Add(...)` con `Method invocation failed because [PSCustomObject] does not
+> contain a method named 'Add'` — **zero referto, zero zip**, fuori dal `try/catch`
+> (RACCOLTA non protetta). Riprodotto su banco `pwsh` (repro minimo: 2 righe, crash
+> confermato), **corretto** rinominando le tre variabili locali in `$rg`, e
+> **ri-eseguito** lo stesso banco con lo stato PIENO (17 `.Add` in sequenza, IS+OOS+F2):
+> `$R` resta un `ArrayList` fino in fondo. Il giro a vuoto (`-SoloControllo`) **non lo
+> vedeva** (le tabelle si saltano se `$w.Letto` è falso): esattamente il meccanismo
+> della 79-bis, "vive solo quando la corsa è RIUSCITA".
+>
+> **Banco NUOVO sul per-trade** (funzioni `NomePerTrade`/`RaccogliPerTrade`, isolate ed
+> eseguite con `pwsh`, 3 casi): file ASSENTE → dichiarato con la formula di casa; file
+> presente ma `LastWriteTime` PRIMA dell'avvio → dichiarato `VECCHIO` con la stessa
+> formula; file fresco → copiato in `pertrade_<tag>_m<motore>_<magic>.csv` (tag "main" o "f2") col nome
+> `abtg_trades_ABTG_LondonFx_EURUSD_774001_m2.csv` **identico byte per byte** a quello
+> che produce `NomeFilePerTrade_Calc` dell'EA (controllato a mano contro il sorgente).
+> Rami non eseguibili qui (niente MT5, niente Common\Files reale): compilazione, corsa,
+> fase 2 — restano nel NON COPERTO come prima.
 
 ## 🟡 SE LA RIGA SI FERMA SU **«NON SO QUALE TERMINALE USARE»**
 È la regola di casa (**classe 115**). Il selettore è quello della sonda del passo 0
