@@ -94,14 +94,14 @@ compilazione = **stima onesta 15–35 minuti** per tutto il giro [STIMA, non una
 previsione]. Il giro a vuoto è questione di minuti (ma COMPILA: è lì che un EA
 mai compilato può cadere, ed è un risultato).
 
-## 📌 IL PIN — **`<PIN>`**  ⛔ DA INSERIRE DOPO IL PUSH (commit di 40 caratteri esadecimali del branch `lavoro`)
+## 📌 IL PIN — **`0f01962014dc13ae6e578adbf1319b35e865cea1`**  ✅ INSERITO (commit di `lavoro`, verificato con `git rev-parse`; contiene driver + 2 prova + la sonda `.mq5`)
 
 ## 1️⃣ Giro a vuoto
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARSIEMAV8.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='0f01962014dc13ae6e578adbf1319b35e865cea1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARSIEMAV8.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARSIEMAV8.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARSIEMAV8_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -117,7 +117,7 @@ mai compilato può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARSIEMAV8.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='0f01962014dc13ae6e578adbf1319b35e865cea1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARSIEMAV8.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARSIEMAV8.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARSIEMAV8_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
