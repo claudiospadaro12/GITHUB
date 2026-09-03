@@ -80,9 +80,9 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 > dice **con la foto prima/dopo**, non con una frase. `Tester\cache` svuotata (solo
 > quella, mai `bases\ticks`).
 
-## 📌 IL PIN — **`de01aea710653dfabe0244699266b0593a9ecf97`**
+## 📌 IL PIN — **`b5b5d7b9dd3f2e48fe17025a12331a500d33acf8`**
 
-_Pinnata il 03/09 (pomeriggio): prima di questo commit qui c'era un segnaposto._
+_Pinnata il 03/09 (pomeriggio) e RI-PINNATA sul commit di questo pacchetto (quello che ha inserito il primo pin): i sei file sono identici fra i due commit. Prima del primo pin qui c'era un segnaposto._
 Commit di `lavoro`, **verificato uno per uno via `raw` prima di scrivere questa riga**
 (HTTP 200 + sha256 identico al repo):
 
@@ -105,7 +105,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -122,7 +122,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD; $rc=$LASTEXITCODE;
@@ -146,7 +146,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -163,7 +163,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD; $rc=$LASTEXITCODE;
@@ -190,7 +190,7 @@ fragilità). **Non rifà le 12 passate**: gira le 4 di slippage 2/5 sul motore 2
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD -SoloFase2; $rc=$LASTEXITCODE;
@@ -356,7 +356,8 @@ TOK='@@PIN'"@@"                    # composto: la ricetta non contiene la string
 sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|" "$F"
 grep -c "\$pin='$SHA'" "$F"        # DEVE dare 5 (blocchi 1-5)
 grep -c "\$pin='$TOK'" "$F"        # DEVE dare 0
-grep -ci "segnaposto\|non funziona\|la riga non parte" "$F"   # DEVE dare 0 dopo aver RISCRITTO il cartello (classe 101)
+CART='segnap'"osto"'\|non funz'"iona"'\|la riga non par'"te"   # composto: la ricetta non deve contenere il cartello che cerca (punto 77)
+grep -ci "$CART" "$F"             # DEVE dare 0 dopo aver RISCRITTO il cartello (classe 101)
 ```
 **Ri-pinnatura** (vecchio → nuovo): il pin vecchio si legge **dai punti d'uso**
 (`grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1`), si sostituisce **solo lì** e nel

@@ -107,7 +107,11 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
    (`RIGA_DEPLOY_ORB104_PICCOLO_DA_MANDARE.md`, pin `8167c77…`): CONTROLLO
    prima (va bene anche di giorno), CORSA con MT5 chiuso, poi PASSO 3.
 5. Righe in costruzione da agenti (03/09 ~14:50): **R116 LondonFx** (tick,
-   EURUSD+GBPUSD) e **sonda RELATIVO** (4 prove) — da lanciare quando il PC di
+   EURUSD+GBPUSD) -> **PRONTA** (03/09 pom.): `backtest_pipeline/righe/RIGA_R116_LONDONFX_DA_MANDARE.md`,
+   driver `RIGA_R116_LONDONFX.ps1` v1 + 2 prova `LONDONFX_R116_*.txt`, 5 blocchi
+   (EUR vuoto/corsa, GBP vuoto/corsa, -SoloFase2), pin nella pagina. NOTA: l'EA
+   v1.00 NON esporta il per-trade (5.0.5 e S4 dei criteri non eseguibili: segnalato).
+   E **sonda RELATIVO** (4 prove) — da lanciare quando il PC di
    backtest si libera dopo il DUKA. Poi il giacimento di classe 3:
    AllineaLondra e VwapRevert (righe gia' scritte, costano UNA corsa).
 6. Collaudo Fase 1 sessione 2 (pausa/gestione) — MAI lo stesso giorno della 1.
