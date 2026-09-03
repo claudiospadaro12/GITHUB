@@ -1,0 +1,181 @@
+# =====================================================================
+#  PASSO 0 -- POST NEWS / DISOCCUPAZIONE USA su USD/JPY M5
+#  cella 00_conta : CONTARE LE OCCASIONI, non giudicare la strategia
+#  EA: ABTG_PostNews.mq5 v1.10+   Preset gemello:
+#      mql5\Presets\ABTG_PostNews_NFP_USDJPY.set
+#  Scritto il 03/09/2026. NON LANCIATO (chi scrive non ha MT5).
+# =====================================================================
+#
+#  DA DOVE VIENE QUESTA CELLA
+#  Slide del corso AB Forex "man_FX_2018_protec...", pag. 140-143,
+#  portata da Claudio il 03/09/2026. Regole tradotte una per una nel
+#  preset gemello, con la mappa regola->parametro scritta li' dentro.
+#
+#  >>> COSA DEVE RISPONDERE, e NIENT'ALTRO
+#      1. quante volte l'evento c'e' davvero nel periodo (l'EA lo stampa
+#         da solo in avvio: "[PostNews][NEWS] ... UTILI per questo preset N")
+#      2. quanti ORDINI e quante OPERAZIONI ne escono (colonna Trades)
+#      3. se il campione basta al metro di casa (Emendamento A: >=150
+#         operazioni per finestra). ATTESA, gia' calcolata: NO.
+#         12 eventi l'anno x 2 gambe = 24 ordini piazzati l'anno, e solo
+#         una parte scatta. Anche prendendo TUTTO lo storico disponibile
+#         il campione IS non arriva a 150. Percio':
+#         >>> DA QUESTA CELLA NON PUO' USCIRE NESSUNA PROMOZIONE. <<<
+#         Il giudizio possibile e' la PROVA DI REGIME (Emendamento C) e
+#         vale SOLO sul RISCHIO (Emendamento B): se il DD sfonda si
+#         boccia; se il profitto e' bello NON si promuove, si scrive
+#         "campione sottile".
+#
+#  >>> PERCHE' IL ROUND PRECEDENTE DI QUESTO EA E' DA BUTTARE
+#      Il verdetto "PostNews: nessun edge" del 07/08 e' NULLO: i quattro
+#      CSV hanno Trades=0. Due cause sommate, tutte e due corrette il
+#      03/09:
+#        (a) il DATO: abtg_news.csv aveva 17 righe datate 2026-2027 e il
+#            periodo testato non le conteneva -> zero eventi.
+#        (b) il CANALE: l'EA leggeva il CSV senza FILE_COMMON e nel
+#            tester ogni agente ha la SUA sandbox MQL5\Files, dove il
+#            file non arriva mai -> FileOpen falliva e il filtro si
+#            spegneva in silenzio.
+#      >>> CONTROLLO OBBLIGATORIO PRIMA DI LEGGERE QUALSIASI NUMERO:
+#          nel log della passata deve comparire
+#            [PostNews][NEWS] letto da Common\Files | righe 600 |
+#            UTILI per questo preset N | dal .. al ..
+#          con N > 0. Se N=0, o se compare CALENDARIO CIECO / CANARINO
+#          ROSSO, LA PASSATA SI BUTTA: non e' "niente edge", e' "non e'
+#          girata". E' esattamente l'errore da cui nasce questa cella.
+#
+#  >>> IL CALENDARIO, E DOVE VA MESSO (passo che fa fallire il round)
+#      File: mql5\Files\abtg_news_postnews_2010_2025_UTC.csv
+#      (599 eventi 2010-2025, prodotto da
+#       backtest_pipeline\costruisci_news_postnews.py; UTC dichiarato).
+#      VA COPIATO IN TUTTE E DUE:
+#         %APPDATA%\MetaQuotes\Terminal\Common\Files\
+#         <DataFolder del terminale>\MQL5\Files\
+#      Common e' quella che conta nel tester (gli agenti la condividono);
+#      l'altra serve al test singolo e al grafico.
+#      NB: NON si tocca abtg_news.csv, che e' il file del FORWARD.
+#
+#  >>> IL BANCO, DICHIARATO PRIMA DEI NUMERI
+#      Servono barre M5 di USDJPY dal 2010: a BCM i TICK REALI sui cross
+#      partono molto dopo (su GBPUSD dal 2024.07.05, misurato in R93).
+#      Quindi questa cella e' OHLC/M1 = -Modello 1 = SCREENING, e un
+#      numero OHLC non e' mai un verdetto (in questa casa l'illusione
+#      OHLC ha gia' revocato una promozione: SupRev DOW H4, PF 2,77 OHLC
+#      contro 0,79 a tick reali). Se lo screening e' interessante, la
+#      finestra recente si RIFA' a tick reali (-Modello 4) e SOLO quella
+#      si legge come misura.
+#
+#  >>> LA DATA DI INIZIO NON E' SCRITTA QUI APPOSTA.
+#      @DAQUANDO e' OMESSO: il driver si ferma e obbliga a misurarla.
+#         powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "USDJPY" -SoloReferto
+#      e poi si passa con -DaQuando <la data VERA delle barre M1>.
+#      Mettere 2010.01.01 a occhio significa far girare meta' finestra
+#      su dati che non esistono.
+#
+#  >>> IL LIMITE MISURATO DI QUESTA CELLA (va scritto accanto al numero)
+#      L'ora d'azione e' FISSA (13:45 server = 14:45 IT, cioe' notizia
+#      +15 min). Sul calendario di casa, su 186 disoccupazioni USA
+#      2010-2025 ce ne sono 10 che NON escono alle 14:30 italiane ma
+#      alle 13:30 -- tutte di NOVEMBRE, la settimana in cui l'Europa ha
+#      gia' cambiato ora e gli USA no. La slide lo dice ("13:30 a
+#      novembre") e il nostro dato lo conferma.
+#      Su quei 10 eventi (5% del campione) questa cella legge le candele
+#      SBAGLIATE. L'errore DILUISCE, non gonfia: un risultato positivo
+#      resta valido con l'asterisco, uno negativo va riletto.
+#      La correzione strutturale (ora d'azione derivata dall'evento del
+#      calendario, POSTNEWS_CORSO_SPEC.md par. 5.2) e' la modifica
+#      successiva, da fare SOLO se questo passo 0 dice che vale la pena.
+#
+#  >>> IL TRACK RECORD DELLA SLIDE NON ENTRA IN NESSUN CRITERIO.
+#      2009 +195, 2010 +118, 2011 +151, 2012 +107, 2013 -28, 2014 +105,
+#      2015 +105, 2016 +119, 2017 +218 pips: [DICHIARATI] dal relatore,
+#      pips grezzi, senza spread, senza slippage, senza size, senza
+#      lista operazioni, senza broker. Sono la MOTIVAZIONE per misurare.
+#      Non si citano come risultato e non si confrontano con l'uscita di
+#      questa cella (unita' diverse, costi diversi, dati diversi).
+#
+#  >>> LO SWEEP: due passate sul MAGIC che DEVONO uscire identiche al
+#      centesimo. Non e' spreco: l'export dell'OptFrame scrive il CSV
+#      solo in ottimizzazione, e due celle gemelle sono un controllo di
+#      coerenza gratis. Se differiscono, qualcosa e' rotto.
+#      Magic 771203 e 771208: blocco vergine (771201 = ECB, 771202 =
+#      FOMC, tutti e due VIVI in forward: non si toccano).
+#
+#  RIGA DI LANCIO (PC di backtest, MT5 CHIUSO; prima sempre -SoloControllo):
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 `
+#       -Expert ABTG_PostNews -Prova prove\POSTNEWS_NFP_00_conta.txt `
+#       -Simbolo USDJPY -Periodo M5 -DaQuando <data MISURATA> `
+#       -Modello 1 -Etichetta NFP00 -SoloControllo
+# =====================================================================
+
+@SIMBOLO  USDJPY
+@PERIODO  M5
+
+InpUsaGuardian=true||true||0||true||N
+
+# --- orari, ORA SERVER (= ora italiana - 1) ---
+# notizia 14:30 IT = 13:30 server; candele di riferimento 13:35 e 13:40;
+# la barra d'azione e' quella che si APRE alle 13:45, quando la 13:40
+# e' chiusa (l'EA legge le barre [1] e [2] = proprio quelle due).
+InpActionHour=13||13||0||13||N
+InpActionMin=45||45||0||45||N
+# scadenza dei pendenti 17:59 IT = 16:59 server
+InpExpiryHour=16||16||0||16||N
+InpExpiryMin=59||59||0||59||N
+
+# --- l'evento ---
+InpRestrictToNews=true||true||0||true||N
+InpUseNewsFilter=true||true||0||true||N
+InpNewsFile=abtg_news_postnews_2010_2025_UTC.csv
+InpNewsCommon=true||true||0||true||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsCurrencies=USD
+# "Unemployment Rate" e non "Non-Farm": nel calendario di casa l'ADP e'
+# gia' escluso, ma il titolo del dato BLS e' questo ed e' quello che
+# nomina la slide. NewsToday fa match sulla DATA, quindi un titolo
+# troppo largo aprirebbe in giorni sbagliati.
+InpNewsTitleMatch=Unemployment Rate
+InpNewsShiftMinutes=0||0||0||0||N
+
+# --- i due pendenti ---
+# slide: BUY a X+3 (SL X-22, TP X+33) e SELL a Y-2 (SL Y+23, TP Y-32).
+# Misurati DALL'INGRESSO -- come fa l'EA -- sono 25 di SL e 30 di TP su
+# tutte e due le gambe: (X+3)-25 = X-22 e (X+3)+30 = X+33; (Y-2)+25 =
+# Y+23 e (Y-2)-30 = Y-32. Gli unici numeri asimmetrici sono gli offset
+# d'ingresso, e l'EA ha gia' due input separati. Verificato dal caso
+# "T3 slide NFP USDJPY" dell'autotest dell'EA.
+InpBuyOffsetPips=3.0||3.0||0||3.0||N
+InpSellOffsetPips=2.0||2.0||0||2.0||N
+InpTPpips=30.0||30.0||0||30.0||N
+InpSLpips=25.0||25.0||0||25.0||N
+# la slide dice "piazzati i due ordini non si tocca piu' niente": niente
+# OCO e niente chiusura alla scadenza dei pendenti.
+InpUseOCO=false||false||0||false||N
+InpCloseAtExpiry=false||false||0||false||N
+
+# --- nessun trailing (la slide non lo prevede) ---
+InpUseTrail25=false||false||0||false||N
+InpTrailTriggerPips=25.0||25.0||0||25.0||N
+InpTrailNewSLpips=15.0||15.0||0||15.0||N
+
+# --- la chiusura delle 22:50 IT = 21:50 server.
+# Funziona perche' questa notizia esce SEMPRE di venerdi' e
+# FridayCloseCheck agisce solo di venerdi'.
+InpFridayClose=true||true||0||true||N
+InpFridayCloseHour=21||21||0||21||N
+InpFridayCloseMin=50||50||0||50||N
+
+# --- rischio: metro di casa, NON il 3% del corso.
+# 1,30% su un riferimento di 50 pip = 0,65% per ORDINE e 1,30% per
+# EVENTO nel caso peggiore (tutte e due le gambe stoppate: 25+25 pip).
+InpRiskPercent=1.30||1.30||0||1.30||N
+InpRiskRefSLpips=50.0||50.0||0||50.0||N
+
+# --- generali ---
+InpComment=NFP PostNews
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- l'unico sweep: due gemelle che DEVONO uscire identiche ---
+InpMagic=771203||771203||5||771208||Y

@@ -1,0 +1,128 @@
+; =====================================================================
+; Preset POST-NEWS -- DISOCCUPAZIONE USA (BLS) -- USD/JPY -- M5
+; Fonte: slide del corso AB Forex "man_FX_2018_protec...", pag. 140-143,
+; portata da Claudio il 03/09/2026.
+; EA: ABTG_PostNews.mq5 v1.10 o superiore.  Magic 771203.
+; =====================================================================
+;
+; LE REGOLE DELLA SLIDE, E DOVE FINISCONO QUI SOTTO
+;   ogni primo venerdi' del mese, 14:30 italiane (13:30 a novembre),
+;   rilascio Unemployment Rate USA (Bureau of Labor Statistics)
+;       -> InpNewsTitleMatch=Unemployment Rate + InpNewsCurrencies=USD
+;   riferimento = le DUE candele M5 DOPO quella della notizia (14:35 e
+;   14:40); X = massimo delle due, Y = minimo delle due
+;       -> l'EA prende iHigh/iLow delle barre [1] e [2] all'orario
+;          d'azione, cioe' proprio quelle due
+;   BUY STOP a X+3 pip, SL X-22, TP X+33
+;   SELL STOP a Y-2 pip, SL Y+23, TP Y-32
+;       -> vedi "L'ASIMMETRIA CHE NON C'E'" qui sotto
+;   scadenza dei pendenti 17:59 italiane dello stesso giorno
+;       -> InpExpiryHour/Min = 16:59 server
+;   piazzati i due ordini NON SI TOCCA PIU' NIENTE fino alle 22:50 IT;
+;   a quell'ora si chiude/cancella tutto quel che e' rimasto
+;       -> InpCloseAtExpiry=false (la posizione NON muore a 16:59) e
+;          InpFridayClose alle 21:50 server = 22:50 IT. Funziona perche'
+;          questa notizia esce SEMPRE di VENERDI', e FridayCloseCheck
+;          agisce solo di venerdi'.
+;
+; L'ASIMMETRIA CHE NON C'E' -- perche' NON e' servito toccare l'EA
+;   La slide misura SL e TP dal LIVELLO (X e Y), l'EA li misura
+;   DALL'INGRESSO. Sono la stessa cosa scritta in due modi:
+;       BUY : ingresso X+3 ; X-22 = (X+3) - 25 ; X+33 = (X+3) + 30
+;       SELL: ingresso Y-2 ; Y+23 = (Y-2) + 25 ; Y-32 = (Y-2) - 30
+;   -> SL 25 e TP 30 per TUTTE E DUE le gambe. Gli unici numeri davvero
+;      asimmetrici sono gli offset d'ingresso (+3 e -2), e per quelli
+;      l'EA ha gia' due input separati dalla v1.00.
+;   Verificato dall'autotest dell'EA, caso "T3 slide NFP USDJPY".
+;
+; L'ORA. Server BCM = ora italiana - 1 (regola di casa, CLAUDE.md).
+;   notizia 14:30 IT = 13:30 server -> candele 13:35 e 13:40 server
+;   -> la barra d'azione e' quella che si APRE alle 13:45 server, quando
+;      la 13:40 e' chiusa. Da qui InpActionHour=13 / InpActionMin=45.
+;
+; !!! IL LIMITE DICHIARATO DI QUESTO PRESET !!!
+;   L'ora d'azione qui e' FISSA a orologio. Misurato sul calendario di
+;   casa (costruisci_news_postnews.py): su 186 disoccupazioni USA
+;   2010-2025, 10 NON escono alle 14:30 italiane ma alle 13:30, e sono
+;   TUTTE di NOVEMBRE (la settimana in cui l'Europa ha gia' cambiato ora
+;   e gli USA no). Esattamente cio' che dice la slide.
+;   Su QUEI 10 eventi questo preset legge le candele SBAGLIATE (misura il
+;   range di un momento qualunque, un'ora dopo la notizia).
+;   Sono il 5% del campione e l'errore DILUISCE, non gonfia: un risultato
+;   positivo resta valido, ma va scritto con questo asterisco accanto.
+;   La correzione strutturale (ora d'azione derivata dall'evento del
+;   calendario, SPEC par. 5.2) e' la modifica successiva, da fare SOLO
+;   se lo screening dice che vale la pena.
+;
+; !!! IL TRACK RECORD DELLA SLIDE NON E' UNA PROVA !!!
+;   Il relatore dichiara 2009 +195, 2010 +118, 2011 +151, 2012 +107,
+;   2013 -28, 2014 +105, 2015 +105, 2016 +119, 2017 +218 pips.
+;   Sono [DICHIARATI], pips grezzi, senza spread, senza slippage, senza
+;   size, senza lista operazioni e senza broker. NON si citano come
+;   risultato: sono la MOTIVAZIONE per misurare, niente di piu'.
+;
+; IL CALENDARIO. Serve il file prodotto da
+;   backtest_pipeline/costruisci_news_postnews.py, e va messo in
+;   Common\Files (nel tester ogni agente ha la sua sandbox: e' li' che
+;   il round del 07/08 e' morto). A fine avvio l'EA stampa
+;       [PostNews][NEWS] letto da ... | UTILI per questo preset N | dal .. al ..
+;   Se N=0 la passata SI BUTTA: non e' "niente edge", e' "non e' girata".
+;
+; RISCHIO. La slide non dice niente sul rischio. Qui si usa il metro di
+;   casa, NON il 3% del modulo ECB/FOMC: InpRiskPercent=1.30 su
+;   InpRiskRefSLpips=50 = 0,65% per ORDINE e 1,30% per EVENTO nel caso
+;   peggiore (tutte e due le gambe stoppate: 25+25 = 50 pip). E' la
+;   riscalatura firmata il 18/08 (cap C1 3,25% = 5 SL vivi da 0,65%).
+;
+; USO: grafico USDJPY M5, carica questo preset. DEMO. Nessuna garanzia.
+; =====================================================================
+
+; --- orari (ORA SERVER = ora italiana - 1) ---
+InpActionHour=13
+InpActionMin=45
+InpExpiryHour=16
+InpExpiryMin=59
+
+; --- l'evento ---
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news_postnews_2010_2025_UTC.csv
+InpNewsCommon=true
+InpNewsMinImpact=3
+InpNewsCurrencies=USD
+InpNewsTitleMatch=Unemployment Rate
+InpNewsShiftMinutes=0
+
+; --- i due pendenti (slide: +3 / -2 ; SL 25 e TP 30 dall'ingresso) ---
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=2.0
+InpTPpips=30.0
+InpSLpips=25.0
+; la slide non autorizza a cancellare la gamba opposta ("non si tocca
+; piu' niente"), e il corso ECB/FOMC nega l'OCO in modo esplicito.
+InpUseOCO=false
+; la posizione NON muore alla scadenza dei pendenti: si chiude a TP, a
+; SL, o alle 22:50 IT dal blocco "venerdi".
+InpCloseAtExpiry=false
+
+; --- nessun trailing: la slide dice di non toccare niente ---
+InpUseTrail25=false
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+
+; --- la chiusura delle 22:50 IT (la notizia e' SEMPRE di venerdi') ---
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+
+; --- rischio: metro di casa, non il 3% del corso ---
+InpRiskPercent=1.30
+InpRiskRefSLpips=50.0
+
+; --- generali ---
+InpComment=NFP PostNews
+InpMagic=771203
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpUsaGuardian=true
