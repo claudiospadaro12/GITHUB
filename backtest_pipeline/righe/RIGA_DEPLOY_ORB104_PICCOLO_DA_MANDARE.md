@@ -1,5 +1,17 @@
 # 🚀 DEPLOY DELLA v1.04 DELL'ORB SUL **SOLO PICCOLO** — **PASSO 2: LE DUE RIGHE DA MANDARE**
 
+> ## 🔴 CORREZIONE MISURATA IL 03/09 ALLE 16:08 — LA SESSIONE GIUSTA È **ADMINISTRATOR**, NON MASTER
+> Fatto: `Get-CimInstance Win32_Process` sul VPS mostra **entrambi** i `terminal64` (pid 9452 piccolo,
+> pid 4948 -V3/100k) eseguiti da **`VMI3047753\Administrator`**. Quindi la cartella dati VIVA del
+> piccolo è `C:\Users\Administrator\...\215D85D767A1C39E22D242C8114BF9F5` (ORB v1.02 del 22/08,
+> `.ex5` 80.024 byte), ed è quella che il CONTROLLO delle 16:02 ha scelto. La copia sotto
+> `C:\Users\Master\...\215D85...` (v1.02 del 27/08, `.ex5` 80.872 byte, vista al PASSO 1) è una
+> **copia MORTA**: nessun processo la usa. **I due blocchi si lanciano dalla sessione ADMINISTRATOR**;
+> il driver, che sceglie la cartella sotto il profilo che lo lancia, così prende quella viva. Ogni
+> riga qui sotto che dice "Master" è superata da questa nota (il driver e il pin NON cambiano).
+> Conseguenza da annotare: qualunque deploy fatto dalla sessione Master dopo il 22/08 non è mai
+> arrivato al piccolo vivo.
+
 # 🖥️ SUL VPS, SESSIONE **MASTER** (NON Administrator), **MT5 E METAEDITOR CHIUSI**, QUANDO LA FLOTTA È FERMA (**DOPO LE 22:15 IT** O **PRIMA DELLE 07:30 IT**)
 
 **Che cos'è:** la **seconda** delle due mosse firmate da Claudio il **03/09 alle

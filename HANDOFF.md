@@ -80,6 +80,14 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
   2 giorni, 3 senza stop dichiarato, 5 su 8 sul DAX (3 fuori sessione cash), il
   laterale ha segato entrambi i lati. Numeri finali di 6-7-8 da leggere dallo
   storico. Se si riprende, regole da rifirmare PRIMA.
+- **🔴 FATTO NUOVO 16:08 (VPS): TUTTA LA FLOTTA GIRA SOTTO `Administrator`, NON Master.**
+  `Get-CimInstance Win32_Process`: pid 9452 (piccolo) e pid 4948 (-V3/100k) entrambi
+  `VMI3047753\Administrator`. Le cartelle dati vive stanno sotto `C:\Users\Administrator\...`
+  (piccolo `215D85...` con ORB v1.02 del 22/08; 100k `BCA8AD...`). Le copie sotto
+  `C:\Users\Master\...` sono MORTE: il PASSO 1 di stamattina ha compilato leggendo una
+  copia morta (innocuo: non ha scritto), e ogni deploy fatto da Master dopo il 22/08 non
+  e' mai arrivato in forward. Da oggi: **ogni riga per il VPS si lancia dalla sessione
+  Administrator** (collaudo, deploy, pagelle). Pagina del deploy corretta con banner.
 - **ORB v1.04 — PASSO 1 FATTO alle 14:18: COMPILA (0 errori, 0 warning)**,
   referto `risultati_archivio/REFERTO_COMPILA_ORB104_2026-09-03.txt`. Rilievo: il
   giro e' partito dal VPS (nessun danno, tre INVARIATO misurati): la prossima
