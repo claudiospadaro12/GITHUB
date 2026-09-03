@@ -6845,3 +6845,64 @@ un giudizio: si scrive l'elenco, poi si giudica riga per riga.
     `RIGA_SONDA_OROLOGIO` (`_DA_MANDARE.md`).
   - Il piu' urgente e' **`RIGA_SONDAM0PB`**: e' la sonda dello stesso stampo,
     stesso PASSO 0, stesso "EA mai compilato" — armata su TUTTE E DUE le classi.
+
+---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 — trovata montando la **corsa gemella GBPUSD** della SONDA LONDONFX, cioe' leggendo la pagina `_DA_MANDARE.md` e il driver `_v3` **uno accanto all'altro**
+
+## 112. 🎟️ IL **PARAMETRO PROMESSO CHE NON ESISTE**: la pagina e l'header dello script annunciano la gamba futura con un'opzione (`-Simbolo`) che il `param()` **non ha** — e le due dichiarazioni si confermano a vicenda
+
+_Difetto vero, committato e **pinnato** (`RIGA_SONDALONDONFX.ps1` v3 e
+`RIGA_SONDALONDONFX_DA_MANDARE.md` al pin di stamattina), trovato PRIMA
+dell'invio della gamba GBPUSD._
+
+La pagina diceva, in un riquadro dedicato: _"**GBPUSD** girera' DOPO come corsa
+aggiuntiva dichiarata (override `-Simbolo` del generico, stesso prova)"_. E
+l'**header dello script** — cioe' il posto dove si va a controllare se la pagina
+dice il vero — diceva la **stessa identica cosa**: _"GBPUSD girera' DOPO come
+corsa aggiuntiva dichiarata (-Simbolo override del generico, stesso prova)"_.
+
+**Il `param()` del driver non aveva nessun `-Simbolo`.** Le due corse erano
+**cablate** sul lead (`C "EUR_M5" "EURUSD" ...`), e dieci righe sopra il blocco
+delle corse c'era perfino il commento che lo ammetteva — _"in questo giro NESSUN
+override di simbolo"_ — **senza mai dire che l'override non esisteva proprio**.
+
+Perche' e' una classe, e non "una svista":
+
+- l'affermazione e' **doppia e coerente**: pagina e header dicono la stessa
+  frase. La ricetta di casa per non fidarsi della pagina e' _"apri lo script e
+  leggilo"_ (punto 1) — e chi l'avesse fatta avrebbe trovato **la conferma**,
+  perche' l'header e' prosa quanto la pagina. La verifica cade **nel punto
+  esatto in cui doveva mordere**;
+- l'affermazione e' **al futuro**: non descrive quello che la corsa di oggi fa
+  (e che il giro a vuoto proverebbe), ma quello che la corsa di **domani** fara'.
+  Nessun gate, nessun giro a vuoto, nessun referto puo' smentirla: **il futuro
+  non e' eseguibile**, quindi non e' collaudato;
+- il costo e' **un giro a vuoto pieno**: chi monta la gamba dopo incolla in
+  buona fede `& $p -Pin $pin -Simbolo GBPUSD` e si prende
+  `A parameter cannot be found that matches parameter name 'Simbolo'` —
+  rumoroso, per fortuna, ma dopo aver chiuso MT5 e con la sessione aperta ad
+  aspettare. E se il parametro fosse esistito con un **altro significato**
+  (es. un `-Simbolo` che filtra invece di sostituire), sarebbe stato **silenzioso**.
+
+> ✅ **REGOLA: ogni PROMESSA DI PARAMETRO va verificata contro il `param()`, non
+> contro un'altra prosa.** Quando la pagina (o l'header) dice _"la gamba X girera'
+> con `-Qualcosa`"_, si apre lo script e si cerca **`-Qualcosa` nel blocco
+> `param()`**, non la frase che lo annuncia. Due prose d'accordo fra loro non
+> sono una verifica: sono **una copia**.
+>
+> 📐 **E il perimetro sono TUTTE le opzioni nominate al futuro**, non solo quella
+> del round: `-Simbolo`, `-SoloCorsa`, `-Fino`, gli switch dedicati. In pratica,
+> a fine verifica: **elenca le opzioni citate nella pagina e nell'header,
+> intersecale col `param()` reale, e la differenza va dichiarata o cancellata.**
+>
+> ⚠️ **Corollario, e vale oltre i parametri:** un'affermazione **AL FUTURO**
+> dentro un artefatto eseguibile (_"poi si fara' cosi'"_, _"la gamba dopo usera'"_)
+> non e' collaudabile da nessun gate. Se resta, si scrive **come TODO esplicito**
+> (_"il parametro NON esiste ancora"_), mai come istruzione operativa. Qui la
+> frase era scritta come istruzione, ed e' per questo che ha retto due verifiche.
+
+**Chiusa il 03/09/2026** con il driver **v4**: `-Simbolo` esiste davvero
+(whitelist `EURUSD`/`GBPUSD`, USDJPY rifiutato con errore onesto prima di
+toccare MT5), le etichette si derivano dal simbolo, e il referto stampa in
+chiaro **sia** il simbolo girato **sia** il lead dichiarato nei prova.
