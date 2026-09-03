@@ -174,6 +174,12 @@
 //      "Giorni Spaiati Pct" = 100% ogni giorno, cioe' C2 avrebbe
 //      misurato gli ORARI DI QUOTAZIONE invece dei CALENDARI.
 //      Il perche' per esteso sta in testa ad AllineaSerie_Calc.
+//      >>> FIX C2 v1.01 (04/09): la misura D30EUR/U30USD ha mostrato
+//      il difetto che il paragrafo sopra descriveva ma non correggeva
+//      ancora del tutto: un giorno in cui il METRO era chiuso per
+//      FESTIVITA' PROPRIA (DAX aperto, Dow chiuso o viceversa) veniva
+//      contato "spaiato" come un buco vero. Ora si distingue: vedi il
+//      cartello sopra GiorniMetroAttivi_Calc/GiornoMetroAttivo_Calc.
 //
 //  T4. FORMA UNILATERALE, NON A DUE GAMBE -- ed e' una SCELTA
 //      NOSTRA. A due gambe si pagano DUE spread per UNA
@@ -276,7 +282,26 @@
 //      sbaglierebbe CONTRO il candidato.
 //+------------------------------------------------------------------+
 #property copyright "ABTG - Sonda di convergenza RELATIVO (PASSO 0, caccia 02/09/2026)"
-#property version   "1.00"
+#property version   "1.01"
+//  v1.01 (04/09/2026) -- FIX C2 "GIORNI SPAIATI": la corsa D30EUR x
+//  U30USD M15 (REFERTO_SONDARELATIVO_D30_M15.txt) ha misurato C2 fino
+//  al 60,50% (soglia 10%), 47 celle su 49 NON LEGGIBILI. La CAUSA e'
+//  che DAX e Dow hanno calendari di festivita' DIVERSI: un giorno in
+//  cui il METRO era semplicemente chiuso per festa PROPRIA (T3)
+//  veniva contato come "spaiato" allo stesso modo di un buco VERO del
+//  feed (mercato aperto, barra mancante per davvero). Fix: si
+//  distingue costruendo, dai tempi del metro gia' scaricati per la
+//  coda, l'elenco dei giorni in cui il metro ha ALMENO una barra
+//  (GiorniMetroAttivi_Calc/GiornoMetroAttivo_Calc). Un giorno senza
+//  NESSUNA barra del metro e' festivita' propria del suo mercato:
+//  NON entra nel numeratore di C2 (va in "Giorni Festa Metro",
+//  informativo, colonna nuova). Un giorno in cui il metro ERA attivo
+//  ma manca proprio quella barra o quello span resta spaiato VERO.
+//  NON TOCCATA la logica di ingresso/uscita/convergenza: spanOk
+//  decide lo z-score esattamente come prima, cambia SOLO come il
+//  buco viene classificato per il gate C2. REL_NSTATS 93 -> 94
+//  (colonna "Giorni Festa Metro" in coda), autotest 21 -> 22 blocchi
+//  (BLOCCO 22: GiorniMetroAttivi_Calc/GiornoMetroAttivo_Calc).
 #property description "CONTATORE di attraversamenti dello z-score del rapporto fra DUE simboli. NON APRE ORDINI."
 #property strict
 
@@ -367,7 +392,9 @@
 //    virgole dell'intestazione e i '%' del formato e URLA se non
 //    tornano (la trappola del CSV sfasato di ABTG_SondaM0PB, risolta
 //    a mano li' e resa automatica qui).
-#define REL_NSTATS                 93
+//    v1.01 (04/09): +1 (94) per "Giorni Festa Metro" (fix C2, vedi
+//    GiorniMetroAttivi_Calc): informativo, NON entra nel numeratore C2.
+#define REL_NSTATS                 94
 
 //==================================================================
 //  INPUT
@@ -458,8 +485,16 @@ long gSotto60L = 0, gSotto60S = 0;
 //--- giornate (T15)
 int  gDayStamp = -1;
 bool gDaySpaiato = false;
+//--- FIX C2 v1.01 (04/09): un giorno in cui il METRO non ha MAI
+//    quotato dentro la finestra (festivita' propria del suo mercato,
+//    calendari diversi fra gamba e metro, T3) e' FISIOLOGICO, non e'
+//    un difetto del feed. gDayFestaMetro lo isola dal gDaySpaiato
+//    "vero" (buco mentre il metro era comunque attivo). Vedi
+//    GiorniMetroAttivi_Calc/GiornoMetroAttivo_Calc piu' sotto.
+bool gDayFestaMetro = false;
 int  gDayEseL = 0, gDayEseS = 0;
 long gGiorniContati = 0, gGiorniSpaiati = 0;
+long gGiorniFestaMetro = 0;   // informativo: ESCLUSI dal numeratore C2, non dal denominatore
 long gMaxGiornoL = 0, gMaxGiornoS = 0, gMaxGiornoTot = 0;
 long gGiorni2Tot = 0, gGiorniZero = 0;
 
@@ -966,6 +1001,79 @@ bool AllineaSerie_Calc(const datetime &ty[], const int n,
   }
 
 //+------------------------------------------------------------------+
+//| FIX C2 v1.01 (04/09) -- IL GIORNO DI FESTA DEL METRO NON E' UN    |
+//| GIORNO SPAIATO.                                                    |
+//| Il referto REFERTO_SONDARELATIVO_D30_M15.txt ha misurato C2 fino   |
+//| al 60,50% su D30EUR (gamba, DAX) x U30USD (metro, Dow): la CAUSA   |
+//| e' che DAX e Dow hanno calendari di festivita' DIVERSI (4 luglio,  |
+//| Thanksgiving, Ferragosto tedesco...). Finora OGNI barra con metro  |
+//| mancante (controllo su 'ultimaValida') o OGNI buco nello span      |
+//| dello z-score (controllo su 'spanOk'), entrambi dentro             |
+//| ValutaBarraChiusa piu' sotto, marcavano l'INTERA giornata           |
+//| "spaiata", SENZA distinguere due casi diversi:                     |
+//|   (a) il METRO non ha MAI quotato quel giorno di calendario -> il  |
+//|       suo mercato era CHIUSO per festivita' propria. FISIOLOGICO,  |
+//|       non e' un difetto del feed (T3/T15 gia' escludono cosi' le   |
+//|       festivita' della GAMBA dal denominatore; qui si fa lo        |
+//|       stesso ragionamento per il METRO, sul lato NUMERATORE).      |
+//|   (b) il METRO ha quotato ALTRE barre quel giorno, ma proprio      |
+//|       quella barra/quello span ha un buco -> difetto vero del      |
+//|       feed, e QUESTO deve restare "spaiato".                       |
+//| La distinzione si fa SENZA calendari esterni: basta guardare se    |
+//| tx[] (le barre del metro gia' scaricate per la coda) contiene      |
+//| ALMENO una barra nello stesso giorno di calendario del SERVER.     |
+//| Se non c'e' nessuna barra quel giorno, il mercato del metro era    |
+//| chiuso: e' la stessa logica della clausola SICURA del compito      |
+//| (punto 4): il denominatore (giorni con barre della GAMBA, T15)     |
+//| NON cambia; cambia SOLO chi entra nel numeratore "spaiato".        |
+//+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+//| Costruisce, scandendo tx[] UNA sola volta (tx e' crescente, come   |
+//| tutte le serie qui), l'elenco ORDINATO e SENZA DOPPIONI dei giorni |
+//| di calendario (anno*1000+giorno dell'anno) in cui il METRO ha      |
+//| ALMENO una barra. E' la stessa scansione O(nx) gia' pagata per     |
+//| AllineaSerie_Calc: costo aggiuntivo trascurabile.                  |
+//+------------------------------------------------------------------+
+void GiorniMetroAttivi_Calc(const datetime &tx[], const int nx, int &giorni[], int &nGiorni)
+  {
+   nGiorni = 0;
+   int cap = 32;
+   if(ArrayResize(giorni, cap) < cap){ ArrayResize(giorni, 0); return; }
+   int ultimo = -1;
+   for(int i = 0; i < nx; i++)
+     {
+      MqlDateTime g; TimeToStruct(tx[i], g);
+      int stamp = g.year*1000 + g.day_of_year;
+      if(stamp == ultimo) continue;   // stessa giornata della barra precedente: niente doppioni
+      ultimo = stamp;
+      if(nGiorni >= cap)
+        {
+         cap *= 2;
+         if(ArrayResize(giorni, cap) < cap) break;   // capacita' esaurita: caso limite, non urla, si ferma
+        }
+      giorni[nGiorni] = stamp;
+      nGiorni++;
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Il metro ha quotato ALMENO una barra nel giorno 'stamp'? giorni[]  |
+//| e' ordinato crescente (viene da tx[] crescente): ricerca binaria.  |
+//+------------------------------------------------------------------+
+bool GiornoMetroAttivo_Calc(const int &giorni[], const int nGiorni, const int stamp)
+  {
+   int lo = 0, hi = nGiorni - 1;
+   while(lo <= hi)
+     {
+      int mid = (lo + hi) / 2;
+      if(giorni[mid] == stamp) return(true);
+      if(giorni[mid] <  stamp) lo = mid + 1; else hi = mid - 1;
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
 //| QUANTE BARRE INDIETRO GUARDA LO Z-SCORE. Non e' un dettaglio: e'  |
 //| l'ampiezza su cui si pretende l'allineamento dei due feed (T2).   |
 //|   modo rapporto : delta[k] serve su n barre, e ogni delta serve   |
@@ -1096,8 +1204,8 @@ void AzzeraContatori()
    gChiuseL = 0; gChiuseS = 0; gConvergL = 0; gConvergS = 0;
    gFineSessL = 0; gFineSessS = 0; gTettoL = 0; gTettoS = 0;
    gFineCorsa = 0; gSotto60L = 0; gSotto60S = 0;
-   gDayStamp = -1; gDaySpaiato = false; gDayEseL = 0; gDayEseS = 0;
-   gGiorniContati = 0; gGiorniSpaiati = 0;
+   gDayStamp = -1; gDaySpaiato = false; gDayFestaMetro = false; gDayEseL = 0; gDayEseS = 0;
+   gGiorniContati = 0; gGiorniSpaiati = 0; gGiorniFestaMetro = 0;
    gMaxGiornoL = 0; gMaxGiornoS = 0; gMaxGiornoTot = 0;
    gGiorni2Tot = 0; gGiorniZero = 0;
    gNMfeL = 0; gNMfeS = 0; gNMaeL = 0; gNMaeS = 0;
@@ -1308,7 +1416,13 @@ void ChiudiGiornata()
    if(tot > gMaxGiornoTot) gMaxGiornoTot = tot;
    if(tot >= 2) gGiorni2Tot++;
    if(tot == 0) gGiorniZero++;
-   if(gDaySpaiato) gGiorniSpaiati++;
+   //--- FIX C2 v1.01: se il giorno ha ANCHE un buco vero (gDaySpaiato),
+   //    conta come spaiato vero: la severita' resta dalla parte del
+   //    difetto. Solo se il giorno e' spiegato INTERAMENTE da festivita'
+   //    del metro (nessun buco vero rilevato) va in gGiorniFestaMetro,
+   //    che e' informativo e NON entra nel numeratore di C2.
+   if(gDaySpaiato)          gGiorniSpaiati++;
+   else if(gDayFestaMetro)  gGiorniFestaMetro++;
   }
 
 //+------------------------------------------------------------------+
@@ -1571,6 +1685,7 @@ void ValutaBarraChiusa()
       ChiudiGiornata();
       gDayStamp = stamp;
       gDaySpaiato = false;
+      gDayFestaMetro = false;
       gDayEseL = 0; gDayEseS = 0;
       gGiorniContati++;
       primaBarraGiorno = true;
@@ -1590,6 +1705,16 @@ void ValutaBarraChiusa()
    int nxC = CopyClose(InpSimboloMetro, PERIOD_CURRENT, ty[0], tSeg, cx);
    int nx  = (nxT > 0 && nxT == nxC) ? nxT : 0;
 
+   //--- FIX C2 v1.01: i giorni di calendario in cui il METRO ha quotato
+   //    ALMENO una barra dentro tx[] (gia' scaricato sopra). Serve a
+   //    separare "il mercato del metro era chiuso quel giorno" (T3,
+   //    festivita' propria, FISIOLOGICO) da "il metro era attivo ma
+   //    manca proprio quella barra/quello span" (difetto vero del feed).
+   //    Vedi il cartello sopra GiorniMetroAttivi_Calc.
+   int giorniMetroAttivi[];
+   int nGiorniMetroAttivi = 0;
+   GiorniMetroAttivi_Calc(tx, nx, giorniMetroAttivi, nGiorniMetroAttivi);
+
    //--- LO SPAN CHE LO Z-SCORE GUARDA (T2). Si calcola PRIMA
    //    dell'allineamento perche' e' anche l'intervallo su cui ha senso
    //    contare le barre del SOLO METRO: vedi il cartello in testa ad
@@ -1605,22 +1730,60 @@ void ValutaBarraChiusa()
      { gBarreSaltateDati++; return; }
 
    bool ultimaValida = valido[iSeg];
-   if(!ultimaValida){ gMetroMancantiUltima++; gDaySpaiato = true; }
+   if(!ultimaValida)
+     {
+      gMetroMancantiUltima++;
+      //--- FIX C2 v1.01: se il metro non ha MAI quotato nel giorno della
+      //    barra di SEGNALE, il suo mercato era chiuso quel giorno (T3):
+      //    non e' "spaiato", e' festivita' propria del metro (T15 gia'
+      //    fa lo stesso ragionamento per la gamba, sul denominatore).
+      if(GiornoMetroAttivo_Calc(giorniMetroAttivi, nGiorniMetroAttivi, ts.year*1000 + ts.day_of_year))
+         gDaySpaiato = true;      // il metro ERA attivo quel giorno: buco vero
+      else
+         gDayFestaMetro = true;   // il metro non ha quotato affatto: festivita' propria
+     }
    if(soloMetro > 0){ gValutazioniSoloMetro++; gDaySpaiato = true; }
+   //    (soloMetro conta il caso OPPOSTO -- il metro ha barre che la
+   //    gamba non ha -- che non e' la festivita' descritta sopra: resta
+   //    fuori da questo fix, e' un rilievo separato, vedi T3 in testa.)
 
    //--- L'ALLINEAMENTO SI PRETENDE SU TUTTO LO SPAN, non solo sulla
    //    barra di segnale. Un buco dentro la finestra fa calcolare media
    //    e deviazione su barre di ore diverse: il numero uscirebbe, e
-   //    sarebbe finto.
+   //    sarebbe finto. spanOk NON CAMBIA con questo fix (resta identico
+   //    a prima, bit per bit): decide ancora se lo z-score si calcola.
+   //    Cambia SOLO come il buco viene CLASSIFICATO per il gate C2: si
+   //    scandisce l'INTERO span (niente piu' 'break' al primo invalido)
+   //    per sapere se OGNI bar mancante ricade su un giorno in cui il
+   //    metro non ha mai quotato (festa, propagata in avanti dallo
+   //    z-score che guarda indietro, T2) oppure se ALMENO una ricade su
+   //    un giorno in cui il metro era comunque attivo (buco vero).
    bool spanOk = (span > 0 && iSeg - span + 1 >= 0);
+   //--- parte vero SOLO se si e' potuto scandire davvero lo span (si
+   //    entra nel ciclo sotto): se spanOk era GIA' falso in partenza
+   //    (span/warmup malconfigurati, mai vero a regime: OnInit lo
+   //    impedisce) non e' provato che sia "festa", quindi resta un
+   //    buco vero per prudenza (stesso trattamento di prima del fix).
+   bool bucoSpanSoloFesta = spanOk;
    if(spanOk)
      {
       for(int k = iSeg - span + 1; k <= iSeg; k++)
         {
-         if(!valido[k]){ spanOk = false; break; }
+         if(!valido[k])
+           {
+            spanOk = false;
+            MqlDateTime tk; TimeToStruct(ty[k], tk);
+            if(GiornoMetroAttivo_Calc(giorniMetroAttivi, nGiorniMetroAttivi, tk.year*1000 + tk.day_of_year))
+               bucoSpanSoloFesta = false;   // quel giorno il metro ha quotato: buco vero, non festa
+           }
         }
      }
-   if(!spanOk && ultimaValida){ gValutazioniPerseBuco++; gDaySpaiato = true; }
+   if(!spanOk && ultimaValida)
+     {
+      gValutazioniPerseBuco++;
+      if(bucoSpanSoloFesta) gDayFestaMetro = true;   // l'eco di una festa gia' contata altrove nello span
+      else                  gDaySpaiato    = true;   // buco vero dentro un giorno con metro attivo
+     }
 
    //--- ECO ATR (T13): non decide niente, serve a leggere il MAE in ATR.
    double tr[], atr[];
@@ -2066,6 +2229,30 @@ void AutoTestRelativo()
       MathAbs(a21_h)>0.0001    || MathAbs(a21_c)>0.0001)
      { falliti++; Log("[AUTOTEST] 21 AggiornaEscursione_Calc DIVERGE"); }
 
+   //--- BLOCCO 22 (v1.01, fix C2): GiorniMetroAttivi_Calc / GiornoMetroAttivo_Calc.
+   //    tx = barre del metro su 3 giorni: 2024.01.01 (2 barre),
+   //    2024.01.02 SALTATO (il "festivo"), 2024.01.03 (1 barra).
+   //    Attesi: 2 giorni distinti trovati; 01/01 e 03/01 ATTIVI;
+   //    02/01 (nessuna barra) NON attivo.
+   blocchi++;
+   datetime a22_tx[]; ArrayResize(a22_tx,3);
+   a22_tx[0] = D'2024.01.01 10:00';
+   a22_tx[1] = D'2024.01.01 10:15';
+   a22_tx[2] = D'2024.01.03 10:00';
+   int a22_giorni[]; int a22_n = -1;
+   GiorniMetroAttivi_Calc(a22_tx, 3, a22_giorni, a22_n);
+   MqlDateTime a22_g1; TimeToStruct(D'2024.01.01 09:00', a22_g1);
+   MqlDateTime a22_g2; TimeToStruct(D'2024.01.02 09:00', a22_g2);
+   MqlDateTime a22_g3; TimeToStruct(D'2024.01.03 09:00', a22_g3);
+   int  a22_s1 = a22_g1.year*1000 + a22_g1.day_of_year;
+   int  a22_s2 = a22_g2.year*1000 + a22_g2.day_of_year;
+   int  a22_s3 = a22_g3.year*1000 + a22_g3.day_of_year;
+   bool a22_a1 = GiornoMetroAttivo_Calc(a22_giorni, a22_n, a22_s1);   // true
+   bool a22_a2 = GiornoMetroAttivo_Calc(a22_giorni, a22_n, a22_s2);   // false: il "festivo"
+   bool a22_a3 = GiornoMetroAttivo_Calc(a22_giorni, a22_n, a22_s3);   // true
+   if(a22_n != 2 || !a22_a1 || a22_a2 || !a22_a3)
+     { falliti++; Log("[AUTOTEST] 22 GiorniMetroAttivi_Calc/GiornoMetroAttivo_Calc DIVERGONO"); }
+
    gAutotestFalliti = falliti;
    gAutotestBlocchi = blocchi;
    Log(StringFormat("AUTOTEST: %d BLOCCHI SU %d PASSATI (falliti %d). L'esito VERO esce nelle colonne 'Autotest Falliti' e 'Autotest Blocchi': in ottimizzazione questa riga non la legge nessuno.",
@@ -2269,9 +2456,10 @@ double OnTester()
                (int)gBarreValutate, (int)gBarreFuoriFinestra, (int)gBarreSaltateDati, (int)gGiorniContati);
    PrintFormat("   DUE FEED: metro mancante sulla barra di segnale %d | valutazioni perse per buco nella coda %d | valutazioni con barre di SOLO metro %d | z non calcolabile %d",
                (int)gMetroMancantiUltima, (int)gValutazioniPerseBuco, (int)gValutazioniSoloMetro, (int)gZNonCalcolabile);
-   PrintFormat("   C2 giorni spaiati: %d su %d = %.2f%%   %s",
+   PrintFormat("   C2 giorni spaiati: %d su %d = %.2f%%   %s   (giorni FESTA METRO esclusi dal numeratore, fix v1.01: %d)",
                (int)gGiorniSpaiati, (int)gGiorniContati, spaiPct,
-               (spaiPct > REL_C2_GIORNI_SPAIATI_PCT ? "<<< oltre il 10%: la sonda va rifatta filtrando quei giorni, e si dichiara" : "sotto il 10%"));
+               (spaiPct > REL_C2_GIORNI_SPAIATI_PCT ? "<<< oltre il 10%: la sonda va rifatta filtrando quei giorni, e si dichiara" : "sotto il 10%"),
+               (int)gGiorniFestaMetro);
    PrintFormat("   COLLAUDO T6 (deve essere ZERO): attraversamenti scartati perche' era aperto l'ALTRO lato = %d",
                (int)gOccupatoAltroLato);
    PrintFormat("   COLLAUDO T12 (deve essere 0,00%%): tenuta sotto 60 secondi = %.2f%%", sotto60Pct);
@@ -2311,8 +2499,8 @@ double OnTester()
    //    tre righe di formato SI TOCCANO SEMPRE INSIEME. Il controllo
    //    automatico (ControllaColonne) conta virgole e '%' e URLA: e' il
    //    guardiano che sulla SondaM0PB non c'era.
-   //    CONTEGGIO CONGELATO: REL_NSTATS = 93 valori -> 96 nomi
-   //    (Pass, Simbolo, Periodo + 93) -> 96 specificatori -> 96 argomenti.
+   //    CONTEGGIO CONGELATO v1.01: REL_NSTATS = 94 valori -> 97 nomi
+   //    (Pass, Simbolo, Periodo + 94) -> 97 specificatori -> 97 argomenti.
    double stats[REL_NSTATS];
    stats[0]  = (double)gGrezziL;
    stats[1]  = (double)gGrezziS;
@@ -2407,6 +2595,7 @@ double OnTester()
    stats[90] = (double)InpBarreMaxTenuta;
    stats[91] = (double)InpBarreOrizzonte;
    stats[92] = (double)InpLato;
+   stats[93] = (double)gGiorniFestaMetro;   // FIX C2 v1.01: informativo, ESCLUSI dal numeratore C2
 
    if(InpScriviCsv && !MQLInfoInteger(MQL_OPTIMIZATION)) ScriviCsvTotali(stats);
 
@@ -2439,6 +2628,8 @@ void ScriviCsvTotali(const double &s[])
              StringFormat("somma dei due lati %.3f, pavimento %.2f", s[7], REL_C1_ESEGUIBILI_GIORNO));
    FileWrite(h, "C2", "giorni spaiati pct", DoubleToString(s[70], 2), "",
              StringFormat("oltre %.0f%% la sonda va rifatta filtrando quei giorni", REL_C2_GIORNI_SPAIATI_PCT));
+   FileWrite(h, "-", "giorni festa metro (informativo)", DoubleToString(s[93], 0), "",
+             "fix v1.01: giorno con ZERO barre del metro nella coda = festivita' propria del suo mercato (T3), ESCLUSO dal numeratore C2");
    FileWrite(h, "C3", "MFE mediana punti indice", DoubleToString(s[10], 3), DoubleToString(s[11], 3),
              StringFormat(">= %.2f = %.0f x spread MISURATO %.2f (ora peggiore 14-21)",
                           s[21], REL_C3_MULTIPLO_SCARTO, s[20]));
@@ -2515,7 +2706,7 @@ void OnTesterDeinit()
    bool header_scritto = false; int righe = 0;
    string periodo = EnumToString((ENUM_TIMEFRAMES)Period());
 
-   //--- 96 nomi = Pass + Simbolo + Periodo + 93 valori di stats[].
+   //--- 97 nomi (v1.01) = Pass + Simbolo + Periodo + 94 valori di stats[].
    string head = "Pass,Simbolo,Periodo,"
                  "Attraversamenti Grezzi Long,Attraversamenti Grezzi Short,"
                  "Attraversamenti Eseguibili Long,Attraversamenti Eseguibili Short,"
@@ -2553,14 +2744,16 @@ void OnTesterDeinit()
                  "Metro Prima Barra Epoch,Gamba Prima Barra Epoch,Campioni Troncati,"
                  "Autotest Falliti,Autotest Blocchi,"
                  "Finestra N,Soglia Ingresso Sigma,Soglia Uscita Sigma,"
-                 "Modo Spread,Modo Z Score,Barre Max Tenuta,Barre Orizzonte,Lato Attivo";
+                 "Modo Spread,Modo Z Score,Barre Max Tenuta,Barre Orizzonte,Lato Attivo,"
+                 "Giorni Festa Metro";
 
    //--- LA RIGA E' SPEZZATA IN TRE, E NON E' ESTETICA: MQL5 non accetta
-   //    piu' di 64 parametri per chiamata, e qui gli argomenti sono 96.
+   //    piu' di 64 parametri per chiamata, e qui gli argomenti sono 97
+   //    (v1.01: +1 per "Giorni Festa Metro", data[93], in coda a fmt3).
    //    Un solo StringFormat non compilerebbe.
    string fmt1 = "%d,%s,%s,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.3f,%.3f,%.0f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.2f,%.2f,%.3f,%.3f,%.2f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f";
    string fmt2 = "%.2f,%.2f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.2f,%.2f,%.2f,%.2f,%.0f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f";
-   string fmt3 = "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.4f,%.4f,%.5f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f,%.0f";
+   string fmt3 = "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.4f,%.4f,%.5f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f";
    ControllaColonne(head, fmt1 + "," + fmt2 + "," + fmt3);
 
    while(FrameNext(pass, name, id, value, data))
@@ -2594,7 +2787,7 @@ void OnTesterDeinit()
                                 data[73], data[74], data[75], data[76], data[77], data[78],
                                 data[79], data[80], data[81], data[82], data[83], data[84],
                                 data[85], data[86], data[87], data[88], data[89], data[90],
-                                data[91], data[92]);
+                                data[91], data[92], data[93]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
