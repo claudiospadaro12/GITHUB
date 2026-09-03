@@ -817,3 +817,15 @@ Il resto sta li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi.**
 - **La mossa piu' economica del prossimo giro:** SPREAD_FLOTTA su
   EURUSD/GBPUSD/XAUUSD (stessa macchina del 03/09, zero modifiche): tutti i
   cancelli forex poggiano ancora su una convenzione.
+
+## 🪦 ABTG_VwapRevert (D30EUR M15) — FALSIFICATO 03/09/2026, cancello S0
+Passo 0 girato a tick reali (`backtest_pipeline/risultati_archivio/vwaprevert/CORSA_2026-09-03_1711_FALSIFICATO.txt`):
+4 celle (00_nudo, 01_long, 02_short, 03_overnight), tutte **S0 NON PASSA** (rapporto
+punti/spread ben sotto 2,5, anzi NEGATIVO su tutte e quattro: -0,11 / -0,21 / -0,14 / -0,21).
+Il motore perde in media PIU' dello spread: non e' un problema di costo, e' un problema
+di edge. Per la clausola gia' scritta nella bozza dei criteri ("un S0 NON PASSA sulla
+00_nudo chiude il capitolo VWAP anche come motore: non si cerca un'altra taratura per
+farlo passare"), il candidato e' CHIUSO. n OOS 00_nudo=107 (sotto 150: comunque il
+rischio era gia' bocciato dal merito prima che il campione contasse). Nessuna nuova
+taratura di InpSigmaMult o altri parametri: il meccanismo VWAP-reversion su D30EUR M15
+e' arato.

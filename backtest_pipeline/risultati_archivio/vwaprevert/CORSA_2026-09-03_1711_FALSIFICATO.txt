@@ -1,0 +1,136 @@
+=====================================================================
+ PASSO 0 -- VWAP REVERT (ABTG_VwapRevert) su D30EUR M15
+=====================================================================
+modo: CORSA   <- CONTROLLO = giro a vuoto, NON e' il risultato
+data: 2026-09-03 17:11:49   <- e' l'ORA DI AVVIO del giro, NON l'ora attuale (classe 110)
+fine: 2026-09-03 17:14:37   <- ora della raccolta: 'adesso' si confronta con QUESTA
+pin:  99673257f1e43b2c87bca1c401faf49c2bbdc80f
+finestra: 2024.09.26 -> 2026.06.30  (split 40/60)
+banco: Modello 4 TICK REALI, deposito 100000, rischio 1.0% (letto dal file prova, non da un parametro)
+terminale: C:\Program Files\BCM Markets MT5 Terminal
+criterio di scelta: FATTO: cartella dati con bases\BCMMarkets-Server (il feed); scartate le installazioni -V3 (il 100k non e' il banco di backtest)   <- scelto per un FATTO e PASSATO al driver generico (classe 115)
+cartella dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+include: ABTG_PausaGuardian.mqh INSTALLATO e VERIFICATO (112481 byte), il file DIVERSO che c'era prima e' in C:\Users\Master\abtg_passo0_vwaprev\backup\ABTG_PausaGuardian.mqh.prima_20260903_1711 -- viene RIMESSO COM'ERA a fine giro
+include a fine giro: RIPRISTINATO dal backup C:\Users\Master\abtg_passo0_vwaprev\backup\ABTG_PausaGuardian.mqh.prima_20260903_1711
+compilazione: OK (108 KB, 17:11:53)   <- tre stati: NON TENTATA / FALLITA / OK (classe 94-ter)
+spread orario per S0: DISPONIBILE (24 ore lette da spread_orario_D30EUR.csv al pin)
+
+FOTO DEL TERMINALE, PRIMA e DOPO (classe 116: la prova sta nella foto):
+  Include\ABTG_PausaGuardian.mqh
+     prima: presente, 82941 byte, 2026-08-31 14:59:16
+     dopo:  presente, 82941 byte, 2026-08-31 14:59:16   -> INVARIATO (com'era prima)
+  Experts\ABTG_VwapRevert.mq5
+     prima: presente, 90710 byte, 2026-09-03 17:11:34
+     dopo:  presente, 90710 byte, 2026-09-03 17:13:57   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)
+  Experts\ABTG_VwapRevert.ex5
+     prima: presente, 110836 byte, 2026-09-03 17:11:36
+     dopo:  presente, 111044 byte, 2026-09-03 17:13:59   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)
+
+QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+E' un CONTA-OPERAZIONI: misura la FREQUENZA del motore VWAP REVERT
+e il COSTO della regola intraday. Il PF qui sotto si LEGGE ma NON si
+giudica: i criteri di merito della BOZZA sono [DA FIRMARE], e quattro
+celle non sono un round.
+
+LA DOMANDA DEL PASSO 0 (dossier P1): quante operazioni per lato?
+  A. n per lato >= 150 IS -> campione c'e', il round si puo' disegnare
+  B. n per lato <  150 IS -> MERITO SOSPESO (valvola R59 / regola B),
+                             il RISCHIO si giudica lo stesso
+  C. n enorme             -> alzare InpSigmaMult (banda piu' selettiva),
+                             NON il rischio e NON un filtro nuovo
+
+--- LA TABELLA ---
+cella         n IS   n OOS   PF IS   PF OOS  DD OOS%  Prof OOS  PeggGio%  gemelli
+00_nudo          58     107    1.00     0.73    24.38    -18575     -2.15  IDENTICI
+              collaudo: autotest falliti = 0 (atteso 0) | flat giorni = 305 | flat chiusure = 9   [flat dichiarato: 1]
+              esito: MISURATA  |  IL MOTORE, due lati insieme, INTRADAY -- porta i gemelli
+              S0 (costo): NON PASSA (rapporto < 2,5)  |  n = 107, media = -0.25 punti indice/trade, mediana = -2.61, spread mediano orario medio = +2.26, rapporto = -0.11  |  chiusi fuori 8-16: 44, senza ora: 0
+              S0 fonte: abtg_trades_ABTG_VwapRevert_D30EUR_773400.csv (gamba OOS, FRESCO)
+01_long          18      44    1.24     0.80     9.15     -5577     -2.05  IDENTICI
+              collaudo: autotest falliti = 0 (atteso 0) | flat giorni = 305 | flat chiusure = 4   [flat dichiarato: 1]
+              esito: MISURATA  |  SOLO LONG -- la frequenza del lato long
+              S0 (costo): NON PASSA (rapporto < 2,5)  |  n = 44, media = -0.44 punti indice/trade, mediana = -3.46, spread mediano orario medio = +2.11, rapporto = -0.21  |  chiusi fuori 8-16: 15, senza ora: 0
+              S0 fonte: abtg_trades_ABTG_VwapRevert_D30EUR_773410.csv (gamba OOS, FRESCO)
+02_short         41      66    0.87     0.64    21.60    -16367     -2.15  IDENTICI
+              collaudo: autotest falliti = 0 (atteso 0) | flat giorni = 305 | flat chiusure = 5   [flat dichiarato: 1]
+              esito: MISURATA  |  SOLO SHORT -- la frequenza del lato short
+              S0 (costo): NON PASSA (rapporto < 2,5)  |  n = 66, media = -0.32 punti indice/trade, mediana = -2.20, spread mediano orario medio = +2.35, rapporto = -0.14  |  chiusi fuori 8-16: 30, senza ora: 0
+              S0 fonte: abtg_trades_ABTG_VwapRevert_D30EUR_773420.csv (gamba OOS, FRESCO)
+03_overnight     61     111    0.97     0.73    26.00    -21189     -2.15  IDENTICI
+              collaudo: autotest falliti = 0 (atteso 0) | flat giorni = 0 | flat chiusure = 0   [flat dichiarato: 0]
+              esito: MISURATA  |  FLAT SPENTO -- quanto costa la regola intraday
+              S0 (costo): NON PASSA (rapporto < 2,5)  |  n = 111, media = -0.50 punti indice/trade, mediana = -2.70, spread mediano orario medio = +2.33, rapporto = -0.21  |  chiusi fuori 8-16: 47, senza ora: 0
+              S0 fonte: abtg_trades_ABTG_VwapRevert_D30EUR_773430.csv (gamba OOS, FRESCO)
+
+--- COME SI LEGGE, e sono quattro avvertenze, non quattro note ---
+1. n(01_long) + n(02_short) NON FA n(00_nudo), e NON e' un guasto.
+   MISURATO NEL SORGENTE (OnNewBar): il giro esce con
+   'if(CountPositions()>0) return' PRIMA di guardare il lato, e dopo
+   un PiazzaOrdine long fa 'return' senza valutare lo short (una sola
+   decisione per barra). Con un lato spento lo slot resta libero.
+2. LA FINESTRA E' UN SOLO REGIME RIALZISTA (21 mesi di feed BCM sugli
+   indici). Il lato SHORT parte svantaggiato PER REGIME, non per
+   merito del motore. Un 'niente edge short' letto qui chiude la
+   domanda per QUESTA EPOCA, non in assoluto.
+3. LA CELLA 03_overnight NON PUO' VINCERE. Anche se facesse meglio del
+   00_nudo NON diventa la cella da mandare in campo: tenere posizioni
+   overnight e' incompatibile con FTMO Standard (leva 1:100) sul conto
+   finanziato, che e' il posto per cui questo candidato esiste. Serve a
+   sapere QUANTO stiamo pagando per restare a 1:100. Se il divario
+   fosse enorme, la conseguenza e' 'questo non e' un motore intraday',
+   non 'accendiamo l'overnight'.
+   E IL COSTO NON E' UN COSTO PURO: il costo si legge come delta di Prof
+   OOS e di n fra 00_nudo e 03_overnight. Non e' un costo puro: col flat
+   spento la posizione notturna tiene occupato lo slot
+   (if(CountPositions()>0) return) e blocca gli ingressi del giorno dopo
+   -- un n piu' basso qui e' anche meccanica dello slot, non solo
+   mercato. Il P&L delle sole posizioni che attraversano la notte questo
+   giro non lo misura.
+4. IL CANCELLO S0 (il costo) E' ADJUDICABILE DAL 03/09/2026, coi numeri
+   FISSATI PRIMA di questa corsa (testa di prove\ABTG_VwapRevert.txt):
+   spread REALE dai tick BCM (SPREAD_FLOTTA_MISURA_2026-09-03.md): D30EUR
+   mediana 1,6-1,7 punti indice nelle ore 8-16 server, 2,6-2,7 alle 17-20,
+   2,8-4,0 la notte; 1 punto indice = 100 punti MT5 = 1,00 di prezzo.
+   Regola (C2 di casa): media dei punti indice per operazione >= 3x lo
+   spread MEDIANO dell'ORA in cui il trade lavora. CLAUSOLA SEVERA: lo
+   spread di riferimento non scende MAI sotto 1,7 (l'ora peggiore della
+   sessione) -> soglia minima 5,1 punti/trade; fuori dalle 8-16 vale la
+   mediana dell'ora di chiusura (fino a 12,0 di notte). Verdetto sul
+   RAPPORTO media punti / media spread: >= 3,5 PASSA, < 2,5 NON PASSA,
+   in mezzo NON SI DA' (banda della misura del 03/09).
+   COME SI LEGGE IL NUMERO, e tre limiti dichiarati:
+   - punti = net_profit / (volume x 10): contract size 10 e profitto in
+     EUR (R114 GSPEC D30EUR). L'export NON porta il prezzo d'ingresso, e
+     net_profit e' al netto di swap e commissioni: <= lordo, verso severo;
+   - l'ORA e' quella di CHIUSURA (l'export non ha quella d'ingresso): un
+     trade entrato di notte e chiuso in sessione e' giudicato a 1,7. E' il
+     limite dell'EA (segnalato), NON e' severo;
+   - l'export porta il MAGIC nel nome, non la finestra: la gamba OOS
+     SOVRASCRIVE la IS. S0 e' letto sull'OOS e basta.
+   Sulla 03_overnight net_profit contiene anche gli swap notturni: e' il
+   costo VERO di quella cella, non un artefatto.
+   Un S0 NON PASSA sulla 00_nudo chiude il capitolo VWAP anche come motore
+   (falsificazione gia' dichiarata nella BOZZA): non si cerca un'altra
+   taratura per farlo passare.
+
+--- LE TRE COLONNE DI COLLAUDO, e non si guardano nella scheda Esperti ---
+In OTTIMIZZAZIONE le Print girano sugli agent e NON LE LEGGE NESSUNO.
+Percio' l'autotest e il flat escono in COLONNA nel CSV, e questo referto
+le stampa sotto ogni cella:
+  'autotest falliti' = 0  -> la riga 'esito motore:' dell'EA dice DIECI
+                            BLOCCHI SU DIECI: i numeri si leggono.
+  'autotest falliti' > 0  -> DIVERGE: i numeri di questa tabella NON si
+                            leggono, c'e' da guardare il codice.
+  'autotest falliti' non-eseg / assente -> nessun gate: il numero e'
+                            senza collaudo, e va detto.
+  'flat giorni' = giornate in cui il flat e' scattato. Col flat ACCESO
+                  uno zero e' un rilievo; col flat SPENTO un valore >0 e'
+                  un problema: l'interruttore non morde.
+  'flat chiusure' = posizioni davvero chiuse dal flat, in totale.
+
+PROBLEMI: 0
+RILIEVI: 1
+  - in C:\Users\Master\abtg_passo0_vwaprev\backup ci sono 1 backup ABTG_PausaGuardian.mqh.prima_* di giri precedenti (il primo: ABTG_PausaGuardian.mqh.prima_20260903_1711). Non li tocco: sono copie di cio' che il terminale aveva PRIMA, si cancellano a mano.
+
+COME SI RIPRENDE: si riparte dalla pagina righe/RIGA_PASSO0_VWAPREV_DA_MANDARE.md,
+NON da questa riga: $p e $pin nascono dentro il blocco e non sopravvivono.
