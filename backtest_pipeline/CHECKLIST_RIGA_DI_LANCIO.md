@@ -6693,3 +6693,53 @@ round non fallisce per il difetto vero: fallisce **dicendo la cosa sbagliata**
 > verifica e' diventato **v1.51** apposta: due byte diversi sotto lo stesso
 > numero sono la trappola che la §4 (`il SHA contiene davvero la correzione?`)
 > descrive, spostata dentro un file invece che fra due commit.
+
+---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 — trovata verificando la SONDA RSI+EMA V8 (PASSO 0, `RIGA_SONDARSIEMAV8.ps1`, pin `0f01962`), l'unico difetto di un pacchetto per il resto pulito
+
+## 110. ⏱️ IL TIMBRO `data:` E' L'ORA DI **AVVIO**, E LA RIGA DICE A CLAUDIO DI CONFRONTARLO CON L'**ORA ATTUALE**
+
+_Difetto vero, `righe/RIGA_SONDARSIEMAV8_DA_MANDARE.md` (blocco 2, ultima riga,
+e sezione COME SI LEGGE): la riga stampa_
+
+```
+POI nel REFERTO: riga data: = adesso, riga modo: = CORSA.
+```
+
+_mentre il driver timbra `data: ` + `$Avvio` — cioe' `Get-Date` preso alla riga
+176, **prima** delle 14 passate. La stessa pagina dichiara che la corsa dura
+**15-35 minuti**: quando il messaggio compare, la riga `data:` e' vecchia di
+mezz'ora **e il referto e' giusto**._
+
+E' il **rovescio** della classe "referto stantio" del 17/08 e del punto 50: li'
+un file vecchio sembrava nuovo, qui un file **nuovo sembra vecchio**. Il costo
+non e' un numero sbagliato, e' peggio: e' il **rilancio** della corsa piu' lunga
+del round, in buona fede, perche' l'istruzione che gliel'ha fatta guardare gli
+ha dato il metro sbagliato. Nota che la contromisura c'era ed era buona
+(`Where-Object { $_.LastWriteTime -ge $t0 }` sullo zip, a macchina): il difetto
+sta **solo nella frase italiana** che la duplica a mano — e l'istruzione umana
+sbagliata batte il gate giusto, perche' e' l'ultima cosa che si legge.
+
+Vale per **tutte** le pagine con lo stesso paragrafo (`RIGA_SONDAM0PB`,
+`RIGA_SONDALONDONFX`: `riga data: = l'ora di adesso`): la formula e' stata
+copiata quando i round duravano un minuto e nessuno l'ha ri-letta quando sono
+diventati mezz'ora.
+
+> ✅ **REGOLA. Un'istruzione di freschezza dichiara SEMPRE l'orologio a cui si
+> riferisce.** Mai "= adesso": o **l'ora di avvio** (e allora si dice, e si
+> stampa il valore atteso), oppure il referto porta **anche** una riga `fine:`
+> e allora "adesso" ha senso. La forma che costa zero e non puo' sbagliare e'
+> far calcolare l'atteso **alla riga stessa**, dal suo `$t0`:
+> ```powershell
+> $iv=[Globalization.CultureInfo]::InvariantCulture;
+> Write-Host ('riga data: = ORA DI AVVIO (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) +
+>             '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + ')')
+> ```
+> (`$iv` non e' pedanteria: `HH:mm` usa il **separatore d'ora della cultura**, e
+> il PC di Claudio e' it-IT — vedi §5, cultura invariante.)
+>
+> Regola gemella: **se un gate a macchina esiste gia', la frase in italiano non
+> lo ri-spiega: lo CITA.** "La freschezza l'ha gia' controllata la riga sullo
+> zip" e' una frase che non puo' invecchiare; "= adesso" invecchia insieme alla
+> durata della corsa.
