@@ -75,16 +75,28 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
 - DUKA tranche-sonda Dow (2024-10 → 2025-06) in completamento (~14:45 oggi).
   Riga IMPORT+SONDA di validazione in preparazione (cancello: mediana ≤0,05%,
   copertura ≥80%, DST — decide se scaricare la storica da 5 giorni).
-- **Diario manuale V8** (`report/DIARIO_MANUALE_V8.md`): 4 trade — 2 DENTRO
-  protocollo (DAX), 2 FUORI. Lezione misurata: i 3 trade DAX sono tutti FUORI
-  sessione cash (sera/pre-apertura), e il laterale sega. Statistica a 30 trade.
+- **Diario manuale V8** (`report/DIARIO_MANUALE_V8.md`): **SOSPESO da Claudio
+  alle ~14:40** ("molto male, mi concentro sulla creazione di EA"): 8 trade in
+  2 giorni, 3 senza stop dichiarato, 5 su 8 sul DAX (3 fuori sessione cash), il
+  laterale ha segato entrambi i lati. Numeri finali di 6-7-8 da leggere dallo
+  storico. Se si riprende, regole da rifirmare PRIMA.
+- **ORB v1.04 — PASSO 1 FATTO alle 14:18: COMPILA (0 errori, 0 warning)**,
+  referto `risultati_archivio/REFERTO_COMPILA_ORB104_2026-09-03.txt`. Rilievo: il
+  giro e' partito dal VPS (nessun danno, tre INVARIATO misurati): la prossima
+  compilazione di prova dal PC di backtest. PASSO 2 (deploy SOLO piccolo):
+  driver nuovo in costruzione da un agente (foto prima/dopo anche del -V3,
+  backup v1.02, `-VersioneAttesa 1.04`), finestra proposta stasera dopo le 22:15.
 
 ### ⏳ CODA (prossimi passi)
 1. Collaudo Fase 1 sessione 1 alle 15:30 (VPS come Administrator, rischio>0).
 2. DUKA fine corsa → zip → import+sonda → cancello storica.
 3. Passo C diagnosi GBPUSD stasera a banco pulito (chiude H1 vs H3).
-4. Compilazione di prova ORB v1.04 → deploy sul piccolo (firmato).
-5. Sonda RELATIVO quando pronta; poi round R116 a tick (EURUSD+GBPUSD M15).
+4. ~~Compilazione di prova ORB v1.04~~ FATTA (OK) → deploy sul piccolo stasera
+   dopo le 22:15 con la riga PASSO 2 (agente in corso, poi verificatore).
+5. Righe in costruzione da agenti (03/09 ~14:50): **R116 LondonFx** (tick,
+   EURUSD+GBPUSD) e **sonda RELATIVO** (4 prove) — da lanciare quando il PC di
+   backtest si libera dopo il DUKA. Poi il giacimento di classe 3:
+   AllineaLondra e VwapRevert (righe gia' scritte, costano UNA corsa).
 6. Collaudo Fase 1 sessione 2 (pausa/gestione) — MAI lo stesso giorno della 1.
 
 ---
