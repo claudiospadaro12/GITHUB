@@ -93,9 +93,12 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 > dice **con la foto prima/dopo**, non con una frase. `Tester\cache` svuotata (solo
 > quella, mai `bases\ticks`).
 
-## 📌 IL PIN — **`b5b5d7b9dd3f2e48fe17025a12331a500d33acf8`**
+## 📌 IL PIN — **`ecb4e43177d9f7fc20786cfbb23cbf73a3f988be`**
 
-_Pinnata il 03/09 (pomeriggio) e RI-PINNATA sul commit di questo pacchetto (quello che ha inserito il primo pin): i sei file sono identici fra i due commit. Prima del primo pin qui c'era il token della prima stesura, sostituito con la ricetta in fondo._
+_Pinnata il 03/09 (pomeriggio), poi RI-PINNATA (03/09 sera) sul commit `ecb4e43` che
+aggiorna driver e pagina all'EA v1.01 (gate 1.01/18/118 + raccolta per-trade + fix
+classe 79): i sei file sono identici fra `ecb4e43` e HEAD di quel momento. Prima del
+primo pin qui c'era il token della prima stesura._
 Commit di `lavoro`, **verificato uno per uno via `raw` prima di scrivere questa riga**
 (HTTP 200 + sha256 identico al repo):
 
@@ -118,7 +121,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='ecb4e43177d9f7fc20786cfbb23cbf73a3f988be'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -135,7 +138,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='ecb4e43177d9f7fc20786cfbb23cbf73a3f988be'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD; $rc=$LASTEXITCODE;
@@ -159,7 +162,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='ecb4e43177d9f7fc20786cfbb23cbf73a3f988be'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -176,7 +179,7 @@ Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='ecb4e43177d9f7fc20786cfbb23cbf73a3f988be'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD; $rc=$LASTEXITCODE;
@@ -203,7 +206,7 @@ fragilità). **Non rifà le 12 passate**: gira le 4 di slippage 2/5 sul motore 2
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='b5b5d7b9dd3f2e48fe17025a12331a500d33acf8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='ecb4e43177d9f7fc20786cfbb23cbf73a3f988be'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD -SoloFase2; $rc=$LASTEXITCODE;
