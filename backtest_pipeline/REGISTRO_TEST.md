@@ -775,3 +775,45 @@ Il resto sta li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi.**
 - ⛔ **Meccanismi chiusi per ARITMETICA, non per qualita':** gap intraday e
   gap-fill (**un gap di apertura e' UNO al giorno**: nessuna implementazione
   puo' superare il pavimento di 2 segnali/giorno per lato).
+
+## QUINTA BATTUTA CACCIA FREQUENZA (03/09/2026, tre fronti per MECCANISMO) — 0 EA promossi, 3 lapidi misurate, il giacimento e' in casa
+- Dossier: `caccia_strategie/CACCIA_FREQUENZA5_TASSONOMIA_2026-09-03.md` (24
+  meccanismi in 10 famiglie), `CACCIA_FREQUENZA5_IMPLEMENTAZIONI_2026-09-03.md`
+  (8 meccanismi battuti, 47 strategie, 12 sorgenti letti, MISURE su 32.339
+  segnali con controllo a ingressi casuali), `report/GIACIMENTO_DI_CASA_2026-09-03.md`
+  (122 artefatti censiti).
+- **LAPIDI (misurate, non opinate):** (L1) regime post-news 15-30 min su
+  Nasdaq: CHIUSO — arXiv 2605.04004 §4.7, 993 eventi, T 0,14-0,69 da barra +6,
+  "D127 permanently rejected"; (L2) sweep di micro-pivot sugli indici: densita'
+  ok (4,2-4,6/gg) ma TP-prima-di-SL 43-48% contro 49,6% richiesto, 8/8 sotto,
+  delta vs caso -0,2 pt su 22.616 segnali; (L3) compressione ATR -> espansione:
+  0/8 sopra il pavimento di frequenza, 7/8 sotto H8, delta vs caso -1,2 pt su
+  9.723 segnali; (L4) gap intraday: uno al giorno per costruzione, non puo'
+  superare il pavimento; (L5) momentum intraday di Gao: morto in casa (R98) per
+  attrito overnight che sui CFD non esiste (Elaut-Frommel-Lampaert); (L6)
+  contrarian post-sovrareazione su forex/commodity: chiuso dagli autori
+  (Caporale-Plastun) e coerente con R42 0/24.
+- **CORREZIONE agli atti:** R95 (sweep JPY) NON e' "in coda": `R95_REFERTO.md`
+  23/08 = 30/30 passate in perdita, PF 0,65-0,80. E' BOCCIATO.
+- **NOVITA' DI METODO:** (a) dati M1 storici raggiungibili via
+  raw.githubusercontent (FutureSharks/financial-data, GPL-3: DAX/S&P/Nasdaq/oro
+  2005-2020, fuso EST, OHLC non tick, zero costi -> misure di occasioni, mai
+  verdetti); (b) controllo a INGRESSI CASUALI con la stessa geometria, sugli
+  stessi dati: un win rate senza il suo caso non dice nulla (script in
+  `caccia_strategie/biblioteca/sonde_esterne/`); (c) uno zero su arXiv NON e'
+  assenza di letteratura (la microstruttura vive su JF/JFE/RFS/JBF, non su arXiv).
+- **CONVERGENZA DEI TRE FRONTI:** il materiale migliore e' GIA' IN CASA:
+  `ABTG_OutOfNoise` = esattamente il momentum intraday di Zarattini-Aziz-Barbon
+  (SFI RP 24-97), baco di warmup gia' corretto (v1.01/v1.02), MAI rigirato ->
+  una corsa; Sonda dell'Orologio (celle GBPUSD/oro dopo il Passo C);
+  `ABTG_VwapRevert` (M15 DAX, oggi adjudicabile con lo spread misurato);
+  `ABTG_AllineaLondra` (M15 EURUSD). Meccanismi nuovi con evidenza da rivista,
+  mai toccati: fix valutari (Krohn-Mueller-Whelan JF 2024 — sopravvive SOLO il
+  fade dello spike, la deriva muore di costo x2,7), numeri tondi (Osler JF
+  2003), salti statistici (Lee-Mykland RFS 2008), lead-lag USA->Europa
+  (misurabile con la sonda RELATIVO). Regola nuova proposta: prima di portare
+  un meccanismo accademico sui CFD, chiedersi su quale ATTRITO ISTITUZIONALE
+  poggia e se esiste su BCM.
+- **La mossa piu' economica del prossimo giro:** SPREAD_FLOTTA su
+  EURUSD/GBPUSD/XAUUSD (stessa macchina del 03/09, zero modifiche): tutti i
+  cancelli forex poggiano ancora su una convenzione.
