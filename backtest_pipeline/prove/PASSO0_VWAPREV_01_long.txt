@@ -78,6 +78,37 @@ InpFlatOra=20||20||0||20||N
 InpFlatMinuto=45||45||0||45||N
 InpStopNuoviMinPrimaFlat=0||0||0||0||N
 
+# --- I DICIANNOVE INPUT CHE FINO ALLA v3 RESTAVANO AL DEFAULT COMPILATO
+#     (03/09/2026, classi 25/113 della CHECKLIST). Un input NON scritto
+#     qui non e' "al default": MT5 lo prende dall'ultima impostazione
+#     che RICORDA per questo EA, flag di ottimizzazione compreso, e il
+#     gate della baseline non puo' vedere un campo che manca del tutto.
+#     Valori = default del sorgente (autore o casa), tranne
+#     InpUsaGuardian, pinnato a 0 come nel fratello AllineaLondra: nel
+#     tester e' fail-open comunque, e 0 toglie una dipendenza NON
+#     MISURATA da GlobalVariable rimaste sul PC di backtest.
+#     Le stringhe (InpComment, InpNewsFile, InpNewsCurrencies) restano
+#     al default: non sono numeri e non hanno un flag da spegnere.
+InpBodyPctMax=0.30||0.30||0||0.30||N
+InpWickMult=2.0||2.0||0||2.0||N
+InpDojiBodyPct=0.20||0.20||0||0.20||N
+InpClosePct=0.30||0.30||0||0.30||N
+InpPartialR=1.0||1.0||0||1.0||N
+InpPartialPercent=50.0||50.0||0||50.0||N
+InpBreakEven=1||1||0||1||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpHourStart=10||10||0||10||N
+InpHourEnd=16||16||0||16||N
+InpFridayCloseHour=20||20||0||20||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpUsaGuardian=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
+
 # --- RISCHIO E CAP (il cap e' il criterio C6, obbligatorio) ---
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpMaxTradesPerDay=2||2||0||2||N

@@ -73,19 +73,52 @@
 #     un motore gia' tarato = 0 successi su 5).
 #
 # ---------------------------------------------------------------------
-#  IL CANCELLO S0 (il COSTO) NON E' IN QUESTA TABELLA
+#  IL CANCELLO S0 (il COSTO) -- ADJUDICABILE DAL 03/09/2026, criteri
+#  scritti QUI, PRIMA della corsa (nessun numero della corsa e' mai
+#  stato visto quando questo blocco e' stato scritto)
 # ---------------------------------------------------------------------
-#  S0 pretende che il risultato LORDO medio per operazione valga
-#  almeno 3x lo spread medio della fascia, IN PUNTI INDICE. Due cose
-#  mancano e vanno dichiarate mancanti, non stimate:
-#    - lo spread medio di BCM su D30EUR in M15 NON E' MISURATO IN CASA
-#      (il "1-2 punti indice" di R98_CRITERI.md e' [INCERTO]);
-#    - il rapporto punti MT5 / punti indice su D30EUR NON E' AGLI ATTI
-#      (R97 lo ha misurato su U30USD e NASUSD, non sul DAX).
-#  Finche' non sono misurati, S0 e' NON ADJUDICABILE. Si legge la
-#  mediana del take lordo nell'export per-trade in Common\Files
-#  (abtg_trades_ABTG_VwapRevert_D30EUR_<magic>.csv) e si riporta il
-#  numero grezzo, senza pronunciare il verdetto.
+#  Fino al 28/08 S0 era NON ADJUDICABILE per due mancanze. Oggi sono
+#  MISURATE, non stimate:
+#    - lo spread REALE di BCM su D30EUR, dai tick storici 2024.09.26 ->
+#      2026.06.30 (SPREAD_FLOTTA_MISURA_2026-09-03.md, CSV orario
+#      spread_orario_D30EUR.csv): mediana 1,6-1,7 PUNTI INDICE nelle
+#      ore 8-16 server, 2,6-2,7 alle 17-20, 2,8-4,0 dalle 21 alle 7;
+#    - la conversione: 1 punto indice = 100 punti MT5 = 1,00 di prezzo
+#      (stesso referto), e il contratto: CONTRACT_SIZE 10, profitto in
+#      EUR su conto EUR (R114 GSPEC, 27/08).
+#
+#  LA REGOLA (metro: R98_CRITERI.md par. 3.2 + C2 di casa, applicata
+#  ORA PER ORA come prescrive la misura del 03/09):
+#    la MEDIA dei punti indice per operazione della cella deve valere
+#    almeno 3x lo spread MEDIANO dell'ORA in cui il trade lavora.
+#  I NUMERI, fissati adesso:
+#    - CLAUSOLA SEVERA: lo spread di riferimento non scende MAI sotto
+#      1,7 (la mediana dell'ora PEGGIORE della sessione 8-16, l'ora 8),
+#      quindi la soglia minima e' 3 x 1,7 = 5,1 punti indice/trade;
+#    - per un trade chiuso FUORI dalle 8-16 vale la mediana della sua
+#      ora di chiusura (17-20: 7,8-8,1; notte: fino a 12,0);
+#    - trade senza ora leggibile: 4,0 (la mediana oraria peggiore della
+#      giornata) -> soglia 12,0;
+#    - VERDETTO sul RAPPORTO (media punti/trade) / (media dello spread
+#      mediano orario dei trade): >= 3,5 PASSA; < 2,5 NON PASSA; fra
+#      2,5 e 3,5 il verdetto NON SI DA' (banda della misura del 03/09).
+#  COME SI LEGGE IL NUMERO (dall'export per-trade dell'EA, Common\Files
+#  \abtg_trades_ABTG_VwapRevert_D30EUR_<magic>.csv, SOLO deal di uscita):
+#    punti/trade = net_profit / (volume x 10).
+#  TRE LIMITI, dichiarati:
+#    1. l'export NON porta il prezzo d'ingresso, e net_profit e' NETTO
+#       di swap e commissioni: <= lordo -> verso SEVERO;
+#    2. l'export porta l'ORA DI CHIUSURA, non quella d'ingresso: un trade
+#       entrato di notte e chiuso in sessione e' giudicato a 1,7. E' un
+#       limite dell'EA (segnalato: esportare anche il deal d'ingresso),
+#       e NON e' severo;
+#    3. il file porta il MAGIC nel nome, non la finestra: la gamba OOS
+#       (che gira per ultima) SOVRASCRIVE la IS. S0 si legge sull'OOS.
+#  Il driver calcola tutto questo da solo e lo stampa per cella; i due
+#  export gemelli (magic 773400/773401) devono coincidere.
+#  >>> Un S0 NON PASSA sulla 00_nudo CHIUDE il capitolo VWAP anche come
+#      motore (falsificazione gia' dichiarata nella BOZZA): non si cerca
+#      un'altra taratura per farlo passare.
 #
 # ---------------------------------------------------------------------
 #  IGIENE (cancello S2 della BOZZA, e qui vale gia')
@@ -207,6 +240,37 @@ InpFlatFineSeduta=1||1||0||1||N
 InpFlatOra=20||20||0||20||N
 InpFlatMinuto=45||45||0||45||N
 InpStopNuoviMinPrimaFlat=0||0||0||0||N
+
+# --- I DICIANNOVE INPUT CHE FINO ALLA v3 RESTAVANO AL DEFAULT COMPILATO
+#     (03/09/2026, classi 25/113 della CHECKLIST). Un input NON scritto
+#     qui non e' "al default": MT5 lo prende dall'ultima impostazione
+#     che RICORDA per questo EA, flag di ottimizzazione compreso, e il
+#     gate della baseline non puo' vedere un campo che manca del tutto.
+#     Valori = default del sorgente (autore o casa), tranne
+#     InpUsaGuardian, pinnato a 0 come nel fratello AllineaLondra: nel
+#     tester e' fail-open comunque, e 0 toglie una dipendenza NON
+#     MISURATA da GlobalVariable rimaste sul PC di backtest.
+#     Le stringhe (InpComment, InpNewsFile, InpNewsCurrencies) restano
+#     al default: non sono numeri e non hanno un flag da spegnere.
+InpBodyPctMax=0.30||0.30||0||0.30||N
+InpWickMult=2.0||2.0||0||2.0||N
+InpDojiBodyPct=0.20||0.20||0||0.20||N
+InpClosePct=0.30||0.30||0||0.30||N
+InpPartialR=1.0||1.0||0||1.0||N
+InpPartialPercent=50.0||50.0||0||50.0||N
+InpBreakEven=1||1||0||1||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpHourStart=10||10||0||10||N
+InpHourEnd=16||16||0||16||N
+InpFridayCloseHour=20||20||0||20||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpUsaGuardian=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
 
 # --- RISCHIO E CAP (il cap e' il criterio C6, obbligatorio) ---
 InpRiskPercent=1.0||1.0||0||1.0||N

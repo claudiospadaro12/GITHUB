@@ -1,6 +1,42 @@
 # =====================================================================
-#  MARCATORE_RIGA_ALLINEALONDRA_v1
+#  MARCATORE_RIGA_ALLINEALONDRA_v2
 #  RIGA_ALLINEALONDRA.ps1  --  PASSO 0 DEL "MONEY MAKER EURUSD 15min"
+# ---------------------------------------------------------------------
+#  v2 (03/09/2026) -- la v1 era del 28/08, PRIMA delle classi 106-116
+#  della CHECKLIST (corollario della classe 111: un driver nato prima di
+#  una classe non viene toccato da quella classe se nessuno ci torna
+#  sopra). Rilettura completa contro le classi nuove, sei correzioni:
+#   94-ter  il campo 'compilazione:' aveva SOLO lo stato OK: sul ramo
+#           fallito restava "NON TENTATA". Ora ha tre stati veri
+#           (NON TENTATA / FALLITA / OK) timbrati sul ramo che decide.
+#   108     il codice di uscita del driver generico era letto a due
+#           stati ('$rc -ne 0'): su PS 5.1 un codice NON LETTO sarebbe
+#           diventato "fallita". Ora tre stati (0 / N / NON LETTO), e
+#           il verdetto lo danno gli ARTEFATTI (CSV freschi in corsa,
+#           anteprima .ini fresca nel controllo).
+#   115     il terminale era scelto per NOME ("*BCM Markets MT5
+#           Terminal*"). Ora si scandisce LARGO (origin.txt + Program
+#           Files + portable) e si sceglie per un FATTO (la cartella
+#           dati con bases\*BCM*, cioe' il feed); con zero o due
+#           candidati ci si ferma STAMPANDO L'ELENCO e la manopola
+#           -Terminale. E il terminale scelto viene PASSATO al driver
+#           generico (-Terminal/-MetaEditor/-DataFolder): stesso
+#           terminale per costruzione, non per copia del selettore.
+#   116     l'include veniva SCRITTO in MQL5\Include del terminale
+#           senza backup e senza ripristino. Ora: sentinella PRIMA
+#           della scrittura, backup in %USERPROFILE%\abtg_allinealondra\
+#           backup\, ripristino a fine giro (anche nel giro fermato) e,
+#           se un giro precedente e' stato interrotto a meta', il
+#           ripristino avviene all'avvio del giro dopo ed e' DICHIARATO.
+#           Foto PRIMA/DOPO dei tre file del terminale nel referto.
+#   116-bis il Desktop era "%USERPROFILE%\Desktop" secco: con OneDrive
+#           lo zip finiva in una cartella che Claudio non vede. Ora si
+#           CERCA (GetFolderPath, poi i due ripieghi), e la riga di chat
+#           lo cerca nello stesso modo.
+#   106/23  AUTOTEST_ALLINEALONDRA.txt e COMPILAZIONE_FALLITA.log di un
+#           giro PRECEDENTE restavano in %USERPROFILE%\abtg_allinealondra
+#           e finivano nello zip di OGGI: ora si cancellano all'avvio.
+#  Nessun criterio di lettura e' cambiato. I file prova sono gli stessi.
 #  ABTG_AllineaLondra  su  EURUSD  M15,  QUATTRO CELLE,  DUE BANCHI:
 #     00_finestra    baseline, finestra ACCESA      magic 777600/777601
 #     01_nofinestra  ABLAZIONE: finestra SPENTA     magic 777610/777611
@@ -145,7 +181,12 @@ param(
   [string]$DaScreening   = "2022.07.01",   # banco S: DERIVATO dal tetto delle 100.000 barre
   [string]$DaTick        = "2024.07.05",   # banco V: INFERITO da GBPUSD, NON misurato su EURUSD
   [string]$Fino          = "2026.06.30",
-  [int]$Deposito         = 100000
+  [int]$Deposito         = 100000,
+  # -Terminale: si usa SOLO se la scelta automatica si ferma perche' non
+  #  ha un FATTO per decidere (classe 115). La riga stampa l'elenco delle
+  #  installazioni trovate e il percorso da incollare qui (la cartella
+  #  che contiene terminal64.exe).
+  [string]$Terminale     = ""
 )
 $ErrorActionPreference = "Stop"
 [Threading.Thread]::CurrentThread.CurrentCulture   = [Globalization.CultureInfo]::InvariantCulture
@@ -156,10 +197,34 @@ $INV = [Globalization.CultureInfo]::InvariantCulture
 $EA     = "ABTG_AllineaLondra"
 $Avvio  = Get-Date
 $Stamp  = $Avvio.ToString("yyyyMMdd_HHmm", $INV)
-$Dsk    = Join-Path $env:USERPROFILE "Desktop"
+# IL DESKTOP SI CERCA, NON SI ASSUME (classe 116-bis): con OneDrive il
+# Desktop vero non e' %USERPROFILE%\Desktop, e una New-Item -Force ne
+# creerebbe uno finto in cui Claudio non troverebbe mai lo zip. La riga
+# di chat lo cerca con le STESSE tre righe.
+function TrovaDesktop(){
+  foreach($p in @([Environment]::GetFolderPath("Desktop"),
+                  (Join-Path $env:USERPROFILE "Desktop"),
+                  (Join-Path $env:USERPROFILE "OneDrive\Desktop"))){
+    if($p -and (Test-Path -LiteralPath $p)){ return $p }
+  }
+  return $env:USERPROFILE
+}
+$Dsk    = TrovaDesktop
 $Work   = Join-Path $env:USERPROFILE "abtg_allinealondra"
 $Prove  = Join-Path $Work "prove"
+$BackupDir  = Join-Path $Work "backup"
+$Sentinella = Join-Path $Work "INCLUDE_IN_CORSO.txt"
+$IncNostro  = "ABTG_PausaGuardian.mqh"
 $RawPin = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
+
+# GLI ARTEFATTI PER-GIRO DI UN GIRO PRECEDENTE SI TOLGONO ALL'AVVIO
+# (classi 23/106): AUTOTEST_ALLINEALONDRA.txt e COMPILAZIONE_FALLITA.log
+# si scrivono solo quando c'e' qualcosa da scrivere, quindi una copia
+# vecchia rimasta qui finirebbe nello zip di OGGI e racconterebbe un
+# fatto di ieri. Lo zip di ieri li ha gia', sul Desktop.
+foreach($vecchioF in @("AUTOTEST_ALLINEALONDRA.txt","COMPILAZIONE_FALLITA.log")){
+  Remove-Item -LiteralPath (Join-Path $Work $vecchioF) -Force -ErrorAction SilentlyContinue
+}
 
 # --- I VALORI DICHIARATI, contro cui i gate confrontano i file prova.
 #     NON si confronta col PARAMETRO che serve ad accorciare la
@@ -179,9 +244,51 @@ $Problemi  = New-Object System.Collections.ArrayList
 $Rilievi   = New-Object System.Collections.ArrayList
 $Fatale    = ""
 $Include   = "NON INSTALLATO"
-$Terminale = "n/d"
+$TermScelto = "NON SCELTO"
+$TermCrit   = "n/d"
+$DataFolder = ""
 $Compilato = "NON TENTATA"
 $Autotest  = @()
+# --- lo stato dell'include nel terminale (classe 116): la sentinella
+#     si scrive PRIMA di toccare il terminale, il ripristino gira nella
+#     RACCOLTA (sempre) e, se il giro muore a meta', all'avvio del giro
+#     dopo.
+$IncInstallato = $false      # questo giro ha SCRITTO l'include nel terminale
+$IncBackup     = ""          # dove sta la copia del file che c'era prima ("" = non c'era)
+$IncDest       = ""          # il percorso nel terminale
+$IncEsito      = "NON TOCCATO"
+$Ripristino    = "NON NECESSARIO"
+$FotoPrima     = @{}
+$FotoDopo      = @{}
+$Fine          = $null
+
+# FOTO di un file del terminale (classe 116, regola 2: la prova sta
+# nella foto, non nella frase). Si prende PRIMA e si RIFA' DOPO.
+function Foto([string]$percorso){
+  if($percorso -eq "" -or $null -eq $percorso){ return "ASSENTE" }
+  if(-not (Test-Path -LiteralPath $percorso)){ return "ASSENTE" }
+  $i = Get-Item -LiteralPath $percorso
+  return ("presente, " + $i.Length + " byte, " + $i.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV))
+}
+function HashFile([string]$percorso){
+  if(-not (Test-Path -LiteralPath $percorso)){ return "" }
+  try{ return (Get-FileHash -LiteralPath $percorso -Algorithm SHA256).Hash }catch{ return "" }
+}
+# RIPRISTINO DELL'INCLUDE nel terminale: rimette il backup se c'era un
+# file prima, toglie il nostro se non c'era. Torna una frase per il
+# referto. NON lancia mai: si chiama anche dalla raccolta di un giro
+# fermato, e li' un'eccezione farebbe perdere il referto.
+function RipristinaInclude([string]$dest,[string]$backup){
+  try{
+    if($dest -eq "" -or -not (Test-Path -LiteralPath $dest)){ return "niente da ripristinare (il file nostro non c'e' piu')" }
+    if($backup -ne "" -and (Test-Path -LiteralPath $backup)){
+      Copy-Item -LiteralPath $backup -Destination $dest -Force
+      return ("RIPRISTINATO dal backup " + $backup)
+    }
+    Remove-Item -LiteralPath $dest -Force
+    return "RIMOSSO (prima di questo giro non c'era)"
+  }catch{ return ("RIPRISTINO FALLITO: " + $_.Exception.Message + " -- il file nostro e' ancora in " + $dest) }
+}
 
 $Modo = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
@@ -474,6 +581,32 @@ try{
   if($DaScreening -ne $DaScreeningDichiarato){
     [void]$Rilievi.Add("banco S girato dal " + $DaScreening + " invece del " + $DaScreeningDichiarato + " dichiarato nei file prova: finestra cambiata a mano. Va scritto accanto ai numeri.")
   }
+  if($DaTick -ne "2024.07.05"){
+    [void]$Rilievi.Add("banco V girato dal " + $DaTick + " invece del 2024.07.05 dichiarato: finestra cambiata a mano. Va scritto accanto ai numeri.")
+  }
+  if($Fino -ne "2026.06.30"){
+    [void]$Rilievi.Add("fine finestra " + $Fino + " invece del 2026.06.30 dichiarato: finestra cambiata a mano. Va scritto accanto ai numeri.")
+  }
+  if($Terminale -ne "" -and -not (Test-Path -LiteralPath (Join-Path $Terminale "terminal64.exe"))){
+    throw ("-Terminale '" + $Terminale + "' non contiene terminal64.exe: va passata la cartella di INSTALLAZIONE del terminale.")
+  }
+
+  # LA SENTINELLA DI UN GIRO PRECEDENTE INTERROTTO (classe 116, regola 1).
+  # Il ripristino dell'include gira nella raccolta; se un giro e' stato
+  # ucciso a meta' (Ctrl+C, finestra chiusa, riavvio) fra la copia e la
+  # raccolta, nel terminale e' rimasto un include NOSTRO che nessuno ha
+  # piu' tolto. Qui si rimedia PRIMA di ogni altra cosa e lo si dichiara.
+  if(Test-Path -LiteralPath $Sentinella){
+    $righeS = @(Get-Content -LiteralPath $Sentinella -ErrorAction SilentlyContinue)
+    $sDest = ""; $sBack = ""
+    if(@($righeS).Count -ge 1){ $sDest = ("" + $righeS[0]).Trim() }
+    if(@($righeS).Count -ge 2){ $sBack = ("" + $righeS[1]).Trim() }
+    if($sBack -eq "NESSUNO"){ $sBack = "" }
+    $esitoS = RipristinaInclude $sDest $sBack
+    Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
+    [void]$Rilievi.Add("UN GIRO PRECEDENTE ERA STATO INTERROTTO fra l'installazione dell'include e la raccolta: " + $IncNostro + " in " + $sDest + " -> " + $esitoS + " (fatto adesso, all'avvio di questo giro).")
+    Dico ("sentinella di un giro interrotto: include " + $esitoS) "Yellow"
+  }
 
   $passate = @($Ordinate).Count * @($BanchiDaFare).Count * 2 * 2
   Dico ("pin ......... " + $Pin)
@@ -669,34 +802,167 @@ try{
   #  3. L'INCLUDE E LA COMPILAZIONE -- i due pezzi che il driver
   #     generico non fa (l'include) o fa troppo tardi (la compilazione).
   # -------------------------------------------------------------------
-  Titolo "3. INSTALLO L'INCLUDE E COMPILO"
-  # IL SELETTORE E' LO STESSO, RIGA PER RIGA, DI walkforward_generico.ps1
-  # (righe 545-548; punti 26/27/37): su una macchina con DUE istanze i
-  # due script potrebbero scegliere TERMINALI DIVERSI -- include
-  # installato in uno, compilazione fatta nell'altro. Se il selettore
-  # del driver generico cambia, cambia anche questo: si toccano insieme.
-  $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
-  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-  if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-  if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1." }
-  $instDir    = $cand.DirectoryName
+  Titolo "3. IL TERMINALE (per FATTI), L'INCLUDE (con sentinella) E LA COMPILAZIONE"
+  # IL TERMINALE SI SCEGLIE PER UN FATTO, NON PER NOME (classe 115). La
+  # v1 copiava il selettore per nome di walkforward_generico.ps1
+  # ("*BCM Markets MT5 Terminal*"): combacia sul banco e puo' non
+  # combaciare sulla macchina vera (portable, altro profilo, altro
+  # nome). Qui si scandisce LARGO -- le cartelle dati (origin.txt), le
+  # installazioni in Program Files, il caso portable (MQL5 dentro
+  # l'installazione) -- e si sceglie STRETTO col fatto piu' forte: la
+  # cartella dati che ha bases\*BCM*, cioe' il feed. Il percorso che
+  # contiene "BCM" e' un fatto piu' debole e viene dichiarato tale.
+  # Con ZERO o DUE candidati non si indovina: ci si ferma stampando
+  # l'elenco intero e la manopola -Terminale.
+  # E IL TERMINALE SCELTO VIENE PASSATO al driver generico
+  # (-Terminal/-MetaEditor/-DataFolder): cosi' i due script usano lo
+  # stesso terminale PER COSTRUZIONE, non perche' copiano lo stesso
+  # selettore (punti 27/37).
+  $termRoot = ""
+  if($env:APPDATA){ $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal" }
+  $mappaInst = @{}
+  if($termRoot -ne "" -and (Test-Path -LiteralPath $termRoot)){
+    foreach($dCart in @(Get-ChildItem -LiteralPath $termRoot -Directory -ErrorAction SilentlyContinue)){
+      if($dCart.Name -ieq "Common"){ continue }
+      $oTxt = Join-Path $dCart.FullName "origin.txt"
+      if(-not (Test-Path -LiteralPath $oTxt)){ continue }
+      $instOrigin = (Get-Content -LiteralPath $oTxt -Raw -ErrorAction SilentlyContinue)
+      if($null -eq $instOrigin){ continue }
+      $instOrigin = $instOrigin.Trim().TrimEnd("\")
+      if($instOrigin -ne "" -and -not $mappaInst.ContainsKey($instOrigin)){ $mappaInst[$instOrigin] = $dCart.FullName }
+    }
+  }
+  foreach($radiceP in @("C:\Program Files","C:\Program Files (x86)")){
+    if(-not (Test-Path -LiteralPath $radiceP)){ continue }
+    foreach($tExe in @(Get-ChildItem -LiteralPath $radiceP -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)){
+      $kInst = $tExe.DirectoryName.TrimEnd("\")
+      if(-not $mappaInst.ContainsKey($kInst)){
+        # PORTABLE: la cartella dati sta DENTRO l'installazione
+        $dfPort = ""
+        if(Test-Path -LiteralPath (Join-Path $kInst "MQL5\Experts")){ $dfPort = $kInst }
+        $mappaInst[$kInst] = $dfPort
+      }
+    }
+  }
+  $candidati = New-Object System.Collections.ArrayList
+  foreach($kInst in @($mappaInst.Keys)){
+    if(-not (Test-Path -LiteralPath (Join-Path $kInst "terminal64.exe"))){ continue }
+    if(-not (Test-Path -LiteralPath (Join-Path $kInst "metaeditor64.exe"))){ continue }
+    $dfCand = $mappaInst[$kInst]
+    $fatto = ""
+    if($dfCand -ne ""){
+      $basi = @(Get-ChildItem -LiteralPath (Join-Path $dfCand "bases") -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*BCM*" })
+      if($basi.Count -gt 0){ $fatto = "cartella dati con bases\" + $basi[0].Name + " (il feed)" }
+    }
+    if($fatto -eq "" -and $kInst -like "*BCM*"){ $fatto = "solo il percorso di installazione contiene BCM (fatto DEBOLE)" }
+    [void]$candidati.Add([pscustomobject]@{ Inst=$kInst; Data=$dfCand; Fatto=$fatto })
+  }
+  Write-Host "  installazioni MT5 trovate (terminal64.exe + metaeditor64.exe):" -ForegroundColor Gray
+  foreach($cCand in $candidati){
+    $fTxt = $cCand.Fatto; if($fTxt -eq ""){ $fTxt = "nessun fatto BCM" }
+    $dTxt = $cCand.Data;  if($dTxt -eq ""){ $dTxt = "cartella dati NON trovata" }
+    Write-Host ("    " + $cCand.Inst + "   [" + $fTxt + "]   dati: " + $dTxt) -ForegroundColor Gray
+  }
+  $scelto = $null
+  if($Terminale -ne ""){
+    $tNorm = $Terminale.TrimEnd("\")
+    $scelto = @($candidati | Where-Object { $_.Inst -ieq $tNorm }) | Select-Object -First 1
+    if($null -eq $scelto){
+      $dfMan = ""
+      if($mappaInst.ContainsKey($tNorm)){ $dfMan = $mappaInst[$tNorm] }
+      if($dfMan -eq "" -and (Test-Path -LiteralPath (Join-Path $tNorm "MQL5\Experts"))){ $dfMan = $tNorm }
+      $scelto = [pscustomobject]@{ Inst=$tNorm; Data=$dfMan; Fatto="SCELTO A MANO con -Terminale" }
+    }
+    $TermCrit = "SCELTO A MANO con -Terminale (i gate sul terminale girano lo stesso)"
+  }
+  else{
+    $conFeed  = @($candidati | Where-Object { $_.Fatto -like "cartella dati con bases*" })
+    $conFatto = @($candidati | Where-Object { $_.Fatto -ne "" })
+    $feedNoV3 = @($conFeed | Where-Object { $_.Inst -notlike "*-V3*" })
+    if($feedNoV3.Count -eq 1){
+      $scelto = $feedNoV3[0]; $TermCrit = "FATTO: " + $scelto.Fatto + "; scartate le installazioni -V3 (il 100k non e' il banco di backtest)"
+    }
+    elseif($feedNoV3.Count -gt 1){
+      $elenco = (@($feedNoV3 | ForEach-Object { $_.Inst }) -join " | ")
+      throw ("NON SO QUALE TERMINALE USARE (classe 115: l'ambiente non si indovina): " + $feedNoV3.Count + " installazioni con feed BCM e senza -V3: " + $elenco + ". Rilancia lo stesso blocco aggiungendo al driver: -Terminale ""<cartella di installazione>"".")
+    }
+    elseif($conFeed.Count -ge 1){
+      $scelto = $conFeed[0]; $TermCrit = "FATTO: " + $scelto.Fatto + " -- ma e' un'installazione -V3 (l'unica col feed BCM): DICHIARATO"
+      [void]$Rilievi.Add("l'unica installazione col feed BCM e' una -V3 (" + $scelto.Inst + "): il banco gira li'. Se non e' quello voluto, rilancia con -Terminale.")
+    }
+    elseif($conFatto.Count -eq 1){
+      $scelto = $conFatto[0]; $TermCrit = "FATTO DEBOLE: " + $scelto.Fatto + " (nessuna cartella dati con bases\*BCM* trovata)"
+      [void]$Rilievi.Add("il terminale e' stato scelto per il solo PERCORSO che contiene BCM (" + $scelto.Inst + "): nessuna cartella dati con bases\*BCM* trovata. Dichiarato, non indovinato.")
+    }
+    else{
+      $elenco = "nessuna"
+      if($candidati.Count -gt 0){ $elenco = (@($candidati | ForEach-Object { $_.Inst + " [" + $(if($_.Fatto -ne ""){$_.Fatto}else{"nessun fatto BCM"}) + "]" }) -join " | ") }
+      throw ("NON SO QUALE TERMINALE USARE (classe 115: l'ambiente non si indovina dal nome). Installazioni viste: " + $elenco + ". Rilancia lo stesso blocco aggiungendo al driver: -Terminale ""<cartella che contiene terminal64.exe>"".")
+    }
+  }
+  $instDir    = $scelto.Inst
+  $TermExe    = Join-Path $instDir "terminal64.exe"
   $MetaEditor = Join-Path $instDir "metaeditor64.exe"
-  $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-  $dataFolder = (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir) } | Select-Object -First 1 -ExpandProperty FullName)
-  if(-not $dataFolder){ throw ("cartella dati non trovata per " + $instDir) }
-  $Terminale = $instDir
-  Dico ("terminale scelto: " + $instDir + "  (selettore IDENTICO a walkforward_generico.ps1 righe 545-548; su BCM il generico NON stampa il terminale, quindi questa e' l'unica riga che lo dice)") "Yellow"
+  $dataFolder = $scelto.Data
+  if($dataFolder -eq "" -or $null -eq $dataFolder){ throw ("cartella dati non trovata per " + $instDir + ": nessun origin.txt in " + $termRoot + " la nomina e non e' portable (manca MQL5\Experts dentro l'installazione). Il terminale va aperto almeno una volta.") }
+  $TermScelto = $instDir
+  $DataFolder = $dataFolder
+  Dico ("terminale scelto: " + $instDir) "Yellow"
+  Dico ("criterio ........ " + $TermCrit) "Yellow"
+  Dico ("cartella dati ... " + $dataFolder) "Yellow"
 
-  # LA COPIA SI VERIFICA SUL CONTENUTO, NON SUL NOME (punto 27-ter): se
-  # in Include esistesse una CARTELLA con quel nome, Copy-Item ci
-  # metterebbe il file DENTRO e Test-Path direbbe verde lo stesso.
-  $incDir = Join-Path $dataFolder "MQL5\Include"
-  New-Item -ItemType Directory -Force -Path $incDir | Out-Null
-  $lenInc = (Get-Item -LiteralPath $incSrc).Length
-  Copy-Item -LiteralPath $incSrc -Destination $incDir -Force
-  $vInc = Get-Item -LiteralPath (Join-Path $incDir "ABTG_PausaGuardian.mqh") -ErrorAction Stop
-  if($vInc.PSIsContainer -or $vInc.Length -ne $lenInc){ throw ("ABTG_PausaGuardian.mqh copiato ma NON verificato in " + $incDir + " (lunghezza diversa o e' una cartella).") }
-  $Include = "INSTALLATO e VERIFICATO in " + $incDir + " (" + $lenInc + " byte)"
+  # LA FOTO PRIMA dei tre file del terminale che questo giro tocca
+  # (classe 116, regola 2). Il .mq5 e l'.ex5 in Experts sono SCRITTI
+  # apposta (e' il banco: li scrive anche il driver generico); l'include
+  # viene messo e poi RIMESSO COM'ERA.
+  $incDir  = Join-Path $dataFolder "MQL5\Include"
+  $dstExp  = Join-Path $dataFolder "MQL5\Experts"
+  $IncDest = Join-Path $incDir $IncNostro
+  $dstMq5  = Join-Path $dstExp ($EA + ".mq5")
+  $ex5     = Join-Path $dstExp ($EA + ".ex5")
+  $FotoPrima["include"] = Foto $IncDest
+  $FotoPrima["mq5"]     = Foto $dstMq5
+  $FotoPrima["ex5"]     = Foto $ex5
+  Dico ("foto PRIMA -- Include\" + $IncNostro + ": " + $FotoPrima["include"])
+  Dico ("foto PRIMA -- Experts\" + $EA + ".mq5: " + $FotoPrima["mq5"])
+  Dico ("foto PRIMA -- Experts\" + $EA + ".ex5: " + $FotoPrima["ex5"])
+  $residui = @(Get-ChildItem -LiteralPath $BackupDir -Filter ($IncNostro + ".prima_*") -ErrorAction SilentlyContinue)
+  if($residui.Count -gt 0){
+    [void]$Rilievi.Add("in " + $BackupDir + " ci sono " + $residui.Count + " backup " + $IncNostro + ".prima_* di giri precedenti (il primo: " + $residui[0].Name + "). Non li tocco: sono copie di cio' che il terminale aveva PRIMA, si cancellano a mano.")
+  }
+
+  # L'INCLUDE: sentinella PRIMA della scrittura, backup se c'era gia'
+  # un file DIVERSO, niente da fare se c'e' gia' ed e' IDENTICO.
+  New-Item -ItemType Directory -Force -Path $incDir,$BackupDir | Out-Null
+  $hashPin = HashFile $incSrc
+  $hashTerm = HashFile $IncDest
+  if($hashTerm -ne "" -and $hashTerm -eq $hashPin -and -not (Get-Item -LiteralPath $IncDest).PSIsContainer){
+    $IncEsito = "GIA' PRESENTE E IDENTICO al pin: non toccato"
+    $Include  = $IncNostro + " " + $IncEsito + " (" + $IncDest + ")"
+  }
+  else{
+    $IncBackup = ""
+    if(Test-Path -LiteralPath $IncDest){
+      $IncBackup = Join-Path $BackupDir ($IncNostro + ".prima_" + $Stamp)
+      Copy-Item -LiteralPath $IncDest -Destination $IncBackup -Force
+      if(-not (Test-Path -LiteralPath $IncBackup)){ throw ("backup dell'include NON riuscito in " + $IncBackup + ": non tocco il terminale.") }
+    }
+    $sBackTxt = $IncBackup; if($sBackTxt -eq ""){ $sBackTxt = "NESSUNO" }
+    Set-Content -LiteralPath $Sentinella -Value @($IncDest, $sBackTxt, ("pin " + $Pin), ("avvio " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))) -Encoding ASCII
+    # LA COPIA SI VERIFICA SUL CONTENUTO, NON SUL NOME (punto 27-ter): se
+    # in Include esistesse una CARTELLA con quel nome, Copy-Item ci
+    # metterebbe il file DENTRO e Test-Path direbbe verde lo stesso.
+    $lenInc = (Get-Item -LiteralPath $incSrc).Length
+    Copy-Item -LiteralPath $incSrc -Destination $incDir -Force
+    $IncInstallato = $true
+    $vInc = Get-Item -LiteralPath $IncDest -ErrorAction Stop
+    if($vInc.PSIsContainer -or $vInc.Length -ne $lenInc){ throw ($IncNostro + " copiato ma NON verificato in " + $incDir + " (lunghezza diversa o e' una cartella).") }
+    $IncEsito = "INSTALLATO e VERIFICATO (" + $lenInc + " byte)"
+    if($IncBackup -ne ""){ $IncEsito += ", il file DIVERSO che c'era prima e' in " + $IncBackup }
+    else{ $IncEsito += ", prima non c'era" }
+    $IncEsito += " -- viene RIMESSO COM'ERA a fine giro"
+    $Include = $IncNostro + " " + $IncEsito
+  }
   Dico $Include "Green"
 
   # --- LA COMPILAZIONE, IN ENTRAMBI I RAMI (controllo E corsa vera).
@@ -706,24 +972,34 @@ try{
   #     che muore con "compilazione fallita" senza dire perche'.
   #     L'.ex5 si CANCELLA prima: senza, un binario vecchio farebbe
   #     passare per riuscita una compilazione fallita (punto 23/54).
+  #     IL CAMPO 'compilazione:' HA TRE STATI e si timbra sul ramo che lo
+  #     DECIDE (classe 94-ter): NON TENTATA / FALLITA / OK.
   $mq5 = Join-Path $Work ($EA + ".mq5")
   Scarica ($RawPin + "/mql5/Experts/" + $EA + ".mq5") $mq5
-  $dstExp = Join-Path $dataFolder "MQL5\Experts"
   New-Item -ItemType Directory -Force -Path $dstExp | Out-Null
-  $dstMq5 = Join-Path $dstExp ($EA + ".mq5")
   Copy-Item -LiteralPath $mq5 -Destination $dstMq5 -Force
-  $ex5 = Join-Path $dstExp ($EA + ".ex5")
   Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+  $logC = Join-Path $dstExp ($EA + ".log")
+  Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
   $t0 = Get-Date
+  $Compilato = "FALLITA (MetaEditor lanciato, nessun .ex5 entro 180 s)"
   & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
-  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+  $battito = 0
+  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){
+    $sec = [int](New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds
+    if($sec -ge ($battito + 10)){ $battito = $sec; Dico ("   ... aspetto l'.ex5 da " + $sec + "s (tetto 180 s): NON interrompere, la riga si ferma da sola") }
+    Start-Sleep -Seconds 2
+  }
   if(-not (Test-Path -LiteralPath $ex5)){
-    $logC = Join-Path $dstExp ($EA + ".log")
     if(Test-Path -LiteralPath $logC){
       Copy-Item -LiteralPath $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force
       Get-Content -LiteralPath $logC -Tail 40 | ForEach-Object { Write-Host $_ -ForegroundColor Red }
+      $Compilato = "FALLITA (MetaEditor lanciato, nessun .ex5; il log e' in COMPILAZIONE_FALLITA.log dentro lo zip)"
     }
-    throw ("COMPILAZIONE FALLITA: " + $EA + " non era MAI stato compilato da nessuno. Gli errori sono qui sopra e in COMPILAZIONE_FALLITA.log dentro lo zip. SE LA COMPILAZIONE FALLISCE, IL RISULTATO DEL PASSO 0 E' QUESTO: si riporta cosi' com'e'.")
+    else{
+      $Compilato = "FALLITA -- METAEDITOR MUTO (nessun .ex5 e NESSUN log entro 180 s: editor aperto, percorso o permessi; NON e' un verdetto sul codice)"
+    }
+    throw ("COMPILAZIONE " + $Compilato + ". " + $EA + " non era MAI stato compilato da nessuno. SE LA COMPILAZIONE FALLISCE, IL RISULTATO DEL PASSO 0 E' QUESTO: si riporta cosi' com'e'.")
   }
   $Compilato = "OK (" + [int]((Get-Item -LiteralPath $ex5).Length/1024) + " KB, " + (Get-Item -LiteralPath $ex5).LastWriteTime.ToString("HH:mm:ss",$INV) + ")"
   Dico ("compilato " + $EA + ": " + $Compilato) "Green"
@@ -748,20 +1024,44 @@ try{
                 "-DaQuando",$banco.Da,
                 "-Fino",$Fino,
                 "-Modello",("" + $banco.Modello),
-                "-Deposito",("" + $Deposito))
+                "-Deposito",("" + $Deposito),
+                # LO STESSO TERMINALE PER COSTRUZIONE (classi 37/115): il
+                # generico non sceglie, riceve.
+                "-Terminal",$TermExe,
+                "-MetaEditor",$MetaEditor,
+                "-DataFolder",$dataFolder)
       if($SoloControllo){ $argv += "-SoloControllo" }
       if($Rifai){ $argv += "-Rifai" }
       $tLancio = Get-Date
-      $global:LASTEXITCODE = 0
+      $global:LASTEXITCODE = $null
       & powershell $argv
-      $rc = $LASTEXITCODE
-      if($rc -ne 0){
-        $cel.Ris[$banco.Id] = [pscustomobject]@{ Esito=("FERMATA (codice " + $rc + ")"); Fresca="NO"; GemIS="NON MISURATO"; GemOOS="NON MISURATO"; DatiIS=$null; DatiOOS=$null }
-        [void]$Problemi.Add("cella " + $cel.Id + " banco " + $banco.Id + ": il driver generico e' uscito con codice " + $rc)
+      # IL CODICE DI USCITA SI LEGGE A TRE STATI (classe 108): 0 / N / NON
+      # LETTO. Su PS 5.1 un codice VUOTO letto con '-ne 0' diventerebbe
+      # "fallita" su una corsa sana. Quando non c'e', decide l'ARTEFATTO:
+      # in corsa i CSV freschi (sotto), nel controllo l'anteprima .ini
+      # fresca che il generico scrive nella cartella di lavoro.
+      $rcGrezzo = $LASTEXITCODE
+      $rcLetto  = ($null -ne $rcGrezzo -and (("" + $rcGrezzo).Trim()) -match '^-?\d+$')
+      $rcTxt    = "NON LETTO"
+      if($rcLetto){ $rcTxt = ("" + [int]$rcGrezzo) }
+      if($rcLetto -and [int]$rcGrezzo -ne 0){
+        $cel.Ris[$banco.Id] = [pscustomobject]@{ Esito=("FERMATA (codice " + $rcTxt + ")"); Fresca="NO"; GemIS="NON MISURATO"; GemOOS="NON MISURATO"; DatiIS=$null; DatiOOS=$null }
+        [void]$Problemi.Add("cella " + $cel.Id + " banco " + $banco.Id + ": il driver generico e' uscito con codice " + $rcTxt + " (il suo messaggio rosso e' qui sopra in console)")
         continue
       }
+      if(-not $rcLetto){
+        [void]$Rilievi.Add("cella " + $cel.Id + " banco " + $banco.Id + ": codice di uscita del driver generico NON LETTO (capita su PS 5.1). NON e' un fallimento: decide l'artefatto (CSV freschi in corsa, anteprima .ini fresca nel controllo).")
+      }
       if($SoloControllo){
-        $cel.Ris[$banco.Id] = [pscustomobject]@{ Esito="CONTROLLO OK"; Fresca="NON PERTINENTE (giro di controllo: il tester non e' stato aperto)"; GemIS="NON PERTINENTE"; GemOOS="NON PERTINENTE"; DatiIS=$null; DatiOOS=$null }
+        $anteprima = Join-Path $Work ("anteprima_" + $EA + "_" + $Simbolo + ".ini")
+        $antFresca = (Test-Path -LiteralPath $anteprima) -and ((Get-Item -LiteralPath $anteprima).LastWriteTime -ge $tLancio)
+        if($antFresca){
+          $cel.Ris[$banco.Id] = [pscustomobject]@{ Esito=("CONTROLLO OK (anteprima .ini fresca; codice " + $rcTxt + ")"); Fresca="NON PERTINENTE (giro di controllo: il tester non e' stato aperto)"; GemIS="NON PERTINENTE"; GemOOS="NON PERTINENTE"; DatiIS=$null; DatiOOS=$null }
+        }
+        else{
+          $cel.Ris[$banco.Id] = [pscustomobject]@{ Esito=("CONTROLLO SENZA ARTEFATTO (nessuna anteprima .ini fresca; codice " + $rcTxt + ")"); Fresca="NO"; GemIS="NON MISURATO"; GemOOS="NON MISURATO"; DatiIS=$null; DatiOOS=$null }
+          [void]$Problemi.Add("cella " + $cel.Id + " banco " + $banco.Id + ": il giro di controllo NON ha lasciato l'anteprima .ini fresca (" + $anteprima + "): il driver generico si e' fermato prima. Il suo messaggio e' in console.")
+        }
         continue
       }
       # IL NOME DEL CSV: il driver generico mette "_ohlc" davanti
@@ -956,6 +1256,25 @@ catch{
 #  Regola di casa: i risultati finiscono sul Desktop e in uno zip.
 # =====================================================================
 Titolo "RACCOLTA"
+# IL RIPRISTINO DELL'INCLUDE, SEMPRE (classe 116): vive QUI e non nel
+# ramo felice, cosi' gira anche nel giro fermato da un gate o da una
+# compilazione fallita. Il Ctrl+C lo copre la sentinella, al giro dopo.
+if($IncInstallato){
+  $Ripristino = RipristinaInclude $IncDest $IncBackup
+  if($Ripristino -like "RIPRISTINATO*" -or $Ripristino -like "RIMOSSO*"){
+    Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
+  }
+  else{
+    [void]$Problemi.Add("include NON rimesso a posto nel terminale: " + $Ripristino + ". La sentinella " + $Sentinella + " resta: il prossimo giro riprova all'avvio.")
+  }
+  Dico ("include nel terminale: " + $Ripristino) "Yellow"
+}
+if($IncDest -ne ""){
+  $FotoDopo["include"] = Foto $IncDest
+  $FotoDopo["mq5"]     = Foto (Join-Path $DataFolder ("MQL5\Experts\" + $EA + ".mq5"))
+  $FotoDopo["ex5"]     = Foto (Join-Path $DataFolder ("MQL5\Experts\" + $EA + ".ex5"))
+}
+$Fine = Get-Date
 $Cart = Join-Path $Dsk ("PASSO0_ALLINEALONDRA_" + $Modo + "_" + $Stamp)
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 
@@ -976,7 +1295,8 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("=====================================================================")
 [void]$RefTxt.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto (NON e' il risultato)")
 [void]$RefTxt.Add("                      CORSA     = la misura")
-[void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
+[void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   <- e' l'ORA DI AVVIO del giro, NON l'ora attuale (classe 110)")
+[void]$RefTxt.Add("fine: " + $Fine.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   <- ora della raccolta: 'adesso' si confronta con QUESTA")
 [void]$RefTxt.Add("pin:  " + $Pin)
 [void]$RefTxt.Add("banco S: modello 1 (OHLC M1)    " + $DaScreening + " -> " + $Fino + "   split 40/60")
 [void]$RefTxt.Add("         SOLO SCREENING, mai un verdetto. La finestra e' DERIVATA dal")
@@ -985,9 +1305,27 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("         Il 2024.07.05 e' il pavimento dei tick BCM MISURATO SU GBPUSD,")
 [void]$RefTxt.Add("         qui INFERITO per analogia: su EURUSD NON e' misurato.")
 [void]$RefTxt.Add("deposito: " + $Deposito + "    rischio: " + $Baseline["InpRiskPercent"] + "% (letto dalla baseline dichiarata e pinnato nei file prova, non da un parametro della riga)")
-[void]$RefTxt.Add("terminale: " + $Terminale)
+[void]$RefTxt.Add("terminale: " + $TermScelto)
+[void]$RefTxt.Add("criterio di scelta: " + $TermCrit + "   <- scelto per un FATTO e PASSATO al driver generico (classe 115)")
+[void]$RefTxt.Add("cartella dati: " + $(if($DataFolder -ne ""){$DataFolder}else{"n/d"}))
 [void]$RefTxt.Add("include: " + $Include)
-[void]$RefTxt.Add("compilazione: " + $Compilato)
+[void]$RefTxt.Add("include a fine giro: " + $Ripristino)
+[void]$RefTxt.Add("compilazione: " + $Compilato + "   <- tre stati: NON TENTATA / FALLITA / OK (classe 94-ter)")
+[void]$RefTxt.Add("")
+[void]$RefTxt.Add("FOTO DEL TERMINALE, PRIMA e DOPO (classe 116: la prova sta nella foto):")
+foreach($kF in @("include","mq5","ex5")){
+  $etF = @{ "include"=("Include\" + $IncNostro); "mq5"=("Experts\" + $EA + ".mq5"); "ex5"=("Experts\" + $EA + ".ex5") }[$kF]
+  $pF = "NON FOTOGRAFATO (il giro si e' fermato prima di scegliere il terminale)"; if($FotoPrima.ContainsKey($kF)){ $pF = $FotoPrima[$kF] }
+  $dF = "NON FOTOGRAFATO"; if($FotoDopo.ContainsKey($kF)){ $dF = $FotoDopo[$kF] }
+  $notaF = ""
+  if($kF -eq "include" -and $FotoPrima.ContainsKey($kF) -and $FotoDopo.ContainsKey($kF)){
+    if($pF -eq $dF){ $notaF = "   -> INVARIATO (com'era prima)" } else { $notaF = "   -> DIVERSO: vedi 'include a fine giro' e i PROBLEMI" }
+  }
+  if($kF -ne "include"){ $notaF = "   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)" }
+  [void]$RefTxt.Add("  " + $etF)
+  [void]$RefTxt.Add("     prima: " + $pF)
+  [void]$RefTxt.Add("     dopo:  " + $dF + $notaF)
+}
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.")
 [void]$RefTxt.Add("E' un CONTA-OPERAZIONI: misura la FREQUENZA del motore prima di")
