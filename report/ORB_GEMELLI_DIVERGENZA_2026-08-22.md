@@ -703,3 +703,13 @@ NESSUN DEPLOY (tre righe INVARIATO misurate). Rilievo della sessione: il giro e'
 dal VPS (cartella dati Master 215D85..., -V3 scartate), non dal PC di backtest — nessun
 danno, ma la prossima prova si lancia dal PC. **PASSO 2 bloccato** finche'
 `aggiorna_verifica_orb.ps1` non e' ristretto al SOLO piccolo + `-VersioneAttesa 1.04`.
+
+
+## 🟢 03/09 16:36 — PASSO 2 CONFERMATO: v1.04 VIVA SUL PICCOLO, 0 FALLITI
+Screenshot scheda Esperti del conto 50503392 (piccolo): `ORB AUTOTEST: 10 blocchi su 10
+passati, 33 casi dichiarati, 0 falliti. Nucleo di selezione hedge-safe VERIFICATO a tavolino
+(NON sostituisce la prova in campo).` La v1.02 non stampa questa riga: e' la prova d'identita'
+che il piccolo gira con la v1.04. Deploy eseguito dalla sessione Administrator (fatto nuovo
+del 03/09: tutta la flotta gira sotto Administrator, non Master). Il 100k resta sulla v1.02,
+come da perimetro firmato. Il mistero dei gemelli ORB (SelPos su hedging) e' chiuso: fix in
+forward sul piccolo da questo momento.
