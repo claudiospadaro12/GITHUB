@@ -442,3 +442,27 @@ La pagella ufficiale ha aggiunto tre fatti che entrano in questa indagine:
    trailing E la riga "Rischio per trade in %" (contratto: 0,3 — se dice
    1,0 e' il difetto). L'eventuale correzione la esegue Claudio con la
    legge dello screenshot, come sempre.
+
+### 📸 03/09, 07:34 — FOTO 2: pannello ORB del CONTO 100k. DUE VERDETTI IN UNA FOTO
+
+`ABTG_ORB_Ottimizzato 1.02 (U30USD,M5)`, magic 770611, letto riga per riga e
+confrontato campo per campo con la foto del piccolo delle 07:29:
+
+1. **I DUE PANNELLI SONO IDENTICI IN OGNI RIGA** (trailing EMA true 9/21,
+   ExecTF 5 Minutes, TP1Pct 0.0, SL HALFRANGE, TP RANGE x1,5, OneTradePerDay
+   true, solo long, Guardian true, Verbose true, MaxSpread 0, versione 1.02).
+   ==> input identici + binario identico + comportamento DIVERSO = la causa
+   del trailing NON sta negli input ne' nella build: e' posizionale o
+   ambientale. Le candidate vive restano A (SelPos/hedging: il piccolo ha
+   VICINI di simbolo su U30USD, il 100k praticamente mai), B (newBar), e
+   (b)/(c) della pagella (PositionModify rifiutato / terminale fermo — le
+   decide il Giornale). La v1.03 in repo le rendera' distinguibili in un log.
+   NB: TP1Pct=0.0 ANCHE sul 100k -> il difetto n.2 (breakeven morto) e' su
+   ENTRAMBE le istanze, uguale. Coerente: il 100k non ha mai mostrato BE,
+   solo trailing.
+2. **"Rischio per trade in % = 1.0" SUL 100k — CONFERMATA la sovrataglia
+   3,3x della pagella.** Il contratto (DEPLOY_GUARDIANO_100K.md,
+   CONTRATTI_SEDIE.md) dice 0,3% per ORB 770611 sul 100k. La correzione
+   proposta a Claudio (da eseguire lui, legge dello screenshot): campo
+   "Rischio per trade in %" 1.0 -> 0.3 sull'istanza del 100k, screenshot
+   prima e dopo, OK. Nessun altro campo si tocca.
