@@ -1,25 +1,41 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDALONDONFX_v3
+#  MARCATORE_RIGA_SONDALONDONFX_v4
 #  RIGA_SONDALONDONFX.ps1 -- SONDA DI FREQUENZA LONDONFX (PASSO 0 della
 #  caccia frequenza forex, SECONDA BATTUTA del 31/08).
 #  ABTG_SondaLondonFx e' un CONTATORE: NESSUN ordine, nessun lotto,
-#  nessun magic, nessuna sedia. DUE CORSE in sequenza:
-#    EUR_M5   EURUSD M5    prove\LONDONFX_FREQUENZA_M5.txt
-#    EUR_M15  EURUSD M15   prove\LONDONFX_FREQUENZA_M15.txt
+#  nessun magic, nessuna sedia. DUE CORSE in sequenza, sullo STESSO
+#  simbolo (-Simbolo, default il lead EURUSD):
+#    <PFX>_M5   <SIM> M5    prove\LONDONFX_FREQUENZA_M5.txt
+#    <PFX>_M15  <SIM> M15   prove\LONDONFX_FREQUENZA_M15.txt
+#  dove <PFX> sono le prime 3 lettere del simbolo (EUR_M5/EUR_M15 su
+#  EURUSD, GBP_M5/GBP_M15 su GBPUSD): l'etichetta entra nel NOME del
+#  CSV, quindi due simboli non si sovrascrivono MAI.
 #  finestra 2024.09.26 -> 2026.06.30, MODELLO 2 ("Solo prezzi di
 #  apertura": il segnale nasce su barra chiusa e non si apre niente --
 #  il tick non aggiunge informazione e costa ore).
 # ---------------------------------------------------------------------
 #  LE SCELTE, DICHIARATE (sono nel prova, qui il riassunto):
-#  - SOLO EURUSD IN QUESTO GIRO, ed e' una scelta e non una svista:
-#    EURUSD e' il lead del candidato (il simbolo dell'autore). GBPUSD
-#    girera' DOPO come corsa aggiuntiva dichiarata (-Simbolo override
-#    del generico, stesso prova). USDJPY NON puo' MAI cavalcare questo
-#    prova: la sonda RIFIUTA DI PARTIRE se InpPipSize non combacia col
-#    pip del simbolo (0.01 per JPY, qui e' pinnato 0.0001) -- e'
-#    VOLUTO: meglio un init fallito che una taglia sbagliata di 100
-#    volte letta come buona. La gamba JPY e' un GIRO SEPARATO con un
-#    prova suo.
+#  - UN SIMBOLO PER GIRO, e il simbolo si DICHIARA (v4, 03/09): il
+#    default e' EURUSD, il lead del candidato (il simbolo dell'autore,
+#    ed e' la corsa gia' fatta il 03/09 alle 08:56). GBPUSD gira come
+#    CORSA GEMELLA passando -Simbolo GBPUSD: e' l'override -Simbolo
+#    del generico, PREVISTO DAL PROVA ("GBPUSD e USDJPY girano con
+#    -Simbolo del generico ... il parametro -Simbolo vince sulla
+#    direttiva", par. DOVE GIRA) e supportato dal generico alle righe
+#    303-305 (la direttiva @SIMBOLO si legge SOLO se il parametro e'
+#    vuoto). I DUE PROVA RESTANO DICHIARATI SUL LEAD e il gate qui
+#    sotto PRETENDE @SIMBOLO = EURUSD anche nella corsa GBPUSD: la
+#    dichiarazione sta nel prova, l'override sta nella riga, e il
+#    referto stampa TUTTI E DUE in chiaro. Pattern gia' di casa,
+#    dichiarato nel referto della sonda V8.
+#  - USDJPY NON puo' MAI cavalcare questo prova: la sonda RIFIUTA DI
+#    PARTIRE se InpPipSize non combacia col pip del simbolo (0.01 per
+#    JPY, qui e' pinnato 0.0001) -- e' VOLUTO: meglio un init fallito
+#    che una taglia sbagliata di 100 volte letta come buona. La gamba
+#    JPY e' un GIRO SEPARATO con un prova suo. Per non far scoprire
+#    quel muro DOPO due avvii del terminale, il driver ha una
+#    WHITELIST (EURUSD, GBPUSD) e si ferma PRIMA di toccare qualunque
+#    cosa, dicendo perche'.
 #  - DUE file prova (M5/M15) gemelli: il generico legge @PERIODO dal
 #    prova e un override da fuori sarebbe stato nascosto. Le righe
 #    vive differiscono per ESATTAMENTE DUE nomi, tutti e due dichiarati
@@ -111,7 +127,12 @@ param(
   #  la punta del branch spacciandola per un commit congelato.
   [string]$Pin          = "",
   [switch]$SoloControllo,
-  [string]$SoloCorsa    = "",            # etichetta singola (es. "EUR_M5"); default: tutte e due
+  # -Simbolo: il simbolo di TUTTE E DUE le corse di questo giro. Default
+  #  EURUSD (il lead, dichiarato nei prova). GBPUSD = corsa gemella con
+  #  override DICHIARATO. Whitelist gattata piu' sotto: USDJPY VIETATO
+  #  qui (vuole InpPipSize=0.01, il prova pinna 0.0001).
+  [string]$Simbolo      = "EURUSD",
+  [string]$SoloCorsa    = "",            # etichetta singola (es. "EUR_M5" / "GBP_M15"); default: tutte e due
   [string]$DaQuando     = "2024.09.26",  # finestra di TUTTE le corse di PASSO 0 (comparabilita': dichiarata nei prova)
   [string]$Fino         = "2026.06.30",  # dichiarata nei prova (@FINOA) e gattata
   [double]$FrazioneIS   = 1.0,           # finestra intera; la gamba OOS del generico e' degenere e si ignora
@@ -125,6 +146,17 @@ $INV = [Globalization.CultureInfo]::InvariantCulture
 
 $EA          = "ABTG_SondaLondonFx"
 $SimboloLead = "EURUSD"
+# --- IL SIMBOLO DI QUESTO GIRO (v4). Si normalizza SUBITO, perche' da
+#     qui nascono le ETICHETTE (che entrano nei NOMI dei CSV) e il nome
+#     dello zip. La WHITELIST viene gattata dentro il try, insieme alle
+#     altre guardie, cosi' la raccolta gira lo stesso e il referto dice
+#     perche' ci si e' fermati.
+if($null -eq $Simbolo){ $Simbolo = "" }
+$Simbolo  = $Simbolo.Trim().ToUpperInvariant()
+$SIMBOLI_AMMESSI = @("EURUSD","GBPUSD")
+$Prefisso = $Simbolo
+if($Simbolo.Length -ge 3){ $Prefisso = $Simbolo.Substring(0,3) }
+$OverrideSimbolo = ($Simbolo -ne $SimboloLead)
 $Avvio   = Get-Date
 $Stamp   = $Avvio.ToString("yyyyMMdd_HHmm", $INV)
 $Dsk     = Join-Path $env:USERPROFILE "Desktop"
@@ -144,7 +176,7 @@ $F2_SCARTO  = 3.00     # MFE mediana 12 barre, pip:    MORTO se mfe   <  3,00
 $F2_PASSA   = 6.00     #                               SOSPESO se 3,00 <= mfe <= 6,00; PASSA solo SOPRA 6,00
 $SOGLIA_H8  = 0.70     # RR da mediane:                MORTO PER ARITMETICA se rr < 0,70
 $AUTOTEST_BLOCCHI_ATTESI = 16
-$PIP_ATTESO   = 0.0001 # eco L5 su EURUSD a 5 decimali
+$PIP_ATTESO   = 0.0001 # eco L5 su EURUSD/GBPUSD a 5 decimali (i due soli simboli ammessi qui)
 $PIPPTI_ATTESO= 10.0   # eco L5: 1 pip = 10 punti MT5 su un feed a 5 decimali
 $NCelleAttese = 6      # 2 (InpUsaRsi) x 3 (InpOraInizioServer). RICONTATE dai pin ||Y scaricati, piu' sotto.
 
@@ -163,8 +195,15 @@ $Modo      = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
 # =====================================================================
-#  LE DUE CORSE. Un prova per TF, simbolo = @SIMBOLO (il lead EURUSD):
-#  in questo giro NESSUN override di simbolo (dichiarato in testa).
+#  LE DUE CORSE. Un prova per TF. Il SIMBOLO viene da -Simbolo (default
+#  il lead EURUSD) e finisce nell'argv del generico come -Simbolo: e'
+#  l'override PREVISTO dal prova e supportato dal generico (righe
+#  303-305: @SIMBOLO si legge SOLO se il parametro e' vuoto).
+#  L'ETICHETTA si deriva dal simbolo (EUR_M5 / GBP_M5 ...) perche'
+#  entra nel NOME del CSV: cosi' la corsa GBPUSD non puo' sovrascrivere
+#  i CSV della corsa EURUSD gia' fatta (e viceversa). Il NOME del CSV
+#  del generico porta gia' anche il simbolo -- l'etichetta e' la
+#  seconda cintura, non la sola.
 # =====================================================================
 function C([string]$et,[string]$sym,[string]$tf,[string]$prova,[int]$lungo){
   return [pscustomobject]@{ Etichetta=$et; Simbolo=$sym; Periodo=$tf; Prova=$prova; LungoAtteso=$lungo
@@ -176,8 +215,8 @@ function C([string]$et,[string]$sym,[string]$tf,[string]$prova,[int]$lungo){
 $PROVA_M5  = "LONDONFX_FREQUENZA_M5.txt"
 $PROVA_M15 = "LONDONFX_FREQUENZA_M15.txt"
 $CORSE = @()
-$CORSE += (C "EUR_M5"  "EURUSD" "M5"  $PROVA_M5  96)
-$CORSE += (C "EUR_M15" "EURUSD" "M15" $PROVA_M15 32)
+$CORSE += (C ($Prefisso + "_M5")  $Simbolo "M5"  $PROVA_M5  96)
+$CORSE += (C ($Prefisso + "_M15") $Simbolo "M15" $PROVA_M15 32)
 
 # I FISSI attesi nei prova (primo campo prima di ||): TUTTI gli input
 # della sonda, nome per nome, tranne i due assi Y e il fisso PER-TF
@@ -279,7 +318,12 @@ function GateProva([string]$percorso,[string]$pf,[string]$tfAtteso,[string]$lung
   $assi = $lettura.Assi
 
   # LE QUATTRO DIRETTIVE, NUDE E GATTATE (commentate = gate vuoto = ci si ferma).
-  if($h["@SIMBOLO"]  -ne $SimboloLead){ throw ($pf + ": @SIMBOLO e' '" + $h["@SIMBOLO"] + "', atteso il lead " + $SimboloLead) }
+  # @SIMBOLO deve restare il LEAD ANCHE quando -Simbolo e' un altro
+  # (v4): il prova DICHIARA il lead, la riga di comando DICHIARA
+  # l'override, e il generico fa vincere il parametro (righe 303-305).
+  # Allineare il prova al simbolo di turno vorrebbe dire modificare un
+  # file congelato a ogni gamba: NON si fa, e questo gate lo impedisce.
+  if($h["@SIMBOLO"]  -ne $SimboloLead){ throw ($pf + ": @SIMBOLO e' '" + $h["@SIMBOLO"] + "', atteso il lead " + $SimboloLead + " (il prova si dichiara SEMPRE sul lead; il simbolo di questa corsa e' " + $Simbolo + " e passa dall'override -Simbolo, che nel generico vince sulla direttiva)") }
   if($h["@PERIODO"]  -ne $tfAtteso){    throw ($pf + ": @PERIODO e' '" + $h["@PERIODO"] + "', atteso " + $tfAtteso) }
   if($h["@DAQUANDO"] -ne $DaQuando){    throw ($pf + ": @DAQUANDO e' '" + $h["@DAQUANDO"] + "', atteso " + $DaQuando + " (la finestra di TUTTE le corse di PASSO 0, per comparabilita')") }
   if($h["@FINOA"]    -ne $Fino){        throw ($pf + ": @FINOA e' '" + $h["@FINOA"] + "', atteso " + $Fino + " (la finestra si dichiara nel prova, non si eredita dal default del generico)") }
@@ -357,6 +401,14 @@ try{
   # -------------------------------------------------------------------
   if($Pin -eq ""){ throw "-Pin obbligatorio: senza, girerebbe la punta del branch spacciandola per un commit congelato." }
   if($Pin -notmatch '^[0-9a-f]{40}$'){ throw ("-Pin deve essere un commit di 40 caratteri esadecimali, ricevuto: " + $Pin) }
+  # LA WHITELIST DEI SIMBOLI (v4). Sta QUI, prima di scaricare e prima
+  # di aprire MT5, perche' il muro vero e' DENTRO la sonda (init
+  # fallito su InpPipSize) e si scoprirebbe dopo una compilazione e due
+  # avvii del terminale, con un referto pieno di righe vuote.
+  if($SIMBOLI_AMMESSI -notcontains $Simbolo){
+    throw ("-Simbolo '" + $Simbolo + "' NON e' ammesso su QUESTO prova. Ammessi: " + ($SIMBOLI_AMMESSI -join ", ") +
+           " (" + $SimboloLead + " e' il lead). USDJPY e' VIETATO QUI ed e' VOLUTO: vuole InpPipSize=0.01 mentre i due prova lo pinnano a 0.0001, e la sonda RIFIUTEREBBE DI PARTIRE (init fallito) -- meglio cosi' che una taglia sbagliata di 100 volte letta come buona. La gamba JPY e' un GIRO SEPARATO con un prova suo.")
+  }
   if(Get-Process terminal64,metaeditor64 -ErrorAction SilentlyContinue){
     throw "MT5 O METAEDITOR APERTO: col terminale aperto il tester non gira (zero CSV), con MetaEditor aperto la compilazione torna subito senza compilare."
   }
@@ -369,7 +421,13 @@ try{
   }
 
   Dico ("pin ......... " + $Pin)
-  Dico ("corse ....... " + @($CorseDaFare).Count + " su 2 (SOLO EURUSD, il lead: GBPUSD dopo, USDJPY con un prova suo -- vedi header). " + $NCelleAttese + " passate a corsa (assi InpUsaRsi x InpOraInizioServer)")
+  if($OverrideSimbolo){
+    Dico ("simbolo ..... " + $Simbolo + "  <- OVERRIDE DICHIARATO (-Simbolo). I due prova restano dichiarati sul LEAD " + $SimboloLead + " (@SIMBOLO " + $SimboloLead + ", e il gate lo PRETENDE): il parametro -Simbolo del generico VINCE sulla direttiva (walkforward_generico.ps1 righe 303-305). Etichette " + $Prefisso + "_M5 / " + $Prefisso + "_M15: i CSV NON si sovrascrivono fra simboli.") "Yellow"
+  }
+  else{
+    Dico ("simbolo ..... " + $Simbolo + "  <- il LEAD, nessun override (e' il simbolo dichiarato in @SIMBOLO dai due prova). Etichette " + $Prefisso + "_M5 / " + $Prefisso + "_M15.")
+  }
+  Dico ("corse ....... " + @($CorseDaFare).Count + " su 2 (un simbolo per giro: l'altro major gira in un giro suo, USDJPY con un prova suo -- vedi header). " + $NCelleAttese + " passate a corsa (assi InpUsaRsi x InpOraInizioServer)")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
   Dico ("banco ....... MODELLO 2 (SOLO PREZZI DI APERTURA): contatore su barra chiusa, il tick non aggiunge niente. Deposito " + $Deposito + " (inerte: zero ordini)")
   Dico ("cancelli .... F1 >= " + (Fmt2 $SOGLIA_F1) + " segnali/gg per lato | F2 MFE mediana VIVA solo > " + (Fmt2 $F2_PASSA) + " pip (" + (Fmt2 $F2_SCARTO) + "-" + (Fmt2 $F2_PASSA) + " sospeso, < " + (Fmt2 $F2_SCARTO) + " morto) | H8 RR >= " + (Fmt2 $SOGLIA_H8)) "Yellow"
@@ -746,7 +804,7 @@ try{
     $c15 = $CORSE | Where-Object { $_.Periodo -eq "M15" } | Select-Object -First 1
     if($null -ne $c5 -and $null -ne $c15 -and $null -ne $c5.Giorni -and $null -ne $c15.Giorni -and $c15.Giorni -gt 0){
       if($c5.Giorni -lt 0.9*$c15.Giorni){
-        [void]$Rilievi.Add("TETTO su EURUSD M5: " + (FmtN $c5.Giorni) + " giorni contati contro " + (FmtN $c15.Giorni) + " a M15. La corsa M5 copre una finestra EFFETTIVA piu' corta (tetto ~100k barre): F1 resta per-giorno (leggibile), il campione e il regime coperto vanno dichiarati nel referto di lettura -- e il confronto F6 fra M5 e M15 confronta anche due finestre diverse, va detto.")
+        [void]$Rilievi.Add("TETTO su " + $Simbolo + " M5: " + (FmtN $c5.Giorni) + " giorni contati contro " + (FmtN $c15.Giorni) + " a M15. La corsa M5 copre una finestra EFFETTIVA piu' corta (tetto ~100k barre): F1 resta per-giorno (leggibile), il campione e il regime coperto vanno dichiarati nel referto di lettura -- e il confronto F6 fra M5 e M15 confronta anche due finestre diverse, va detto.")
       }
     }
   }
@@ -765,7 +823,11 @@ if($Modo -ne "CORSA" -and $Modo -ne "CONTROLLO"){
   $Modo = "CORSA"; if($SoloControllo){ $Modo = "CONTROLLO" }
 }
 Titolo "RACCOLTA"
-$Cart = Join-Path $Dsk ("SONDALONDONFX_" + $Modo + "_" + $Stamp)
+# IL NOME DELLA CARTELLA/ZIP PORTA IL SIMBOLO (v4): due giri sullo
+# stesso Desktop (EURUSD gia' fatto, GBPUSD gemella) non devono nemmeno
+# poter essere confusi a occhio, e il filtro della riga di lancio puo'
+# cercare SONDALONDONFX_CORSA_GBPUSD_*.zip senza pescare l'altro.
+$Cart = Join-Path $Dsk ("SONDALONDONFX_" + $Modo + "_" + $Simbolo + "_" + $Stamp)
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 
 # IL CONTEGGIO DEI CSV *_OOS SI FA QUI, PRIMA DEL REFERTO, cosi' il
@@ -784,11 +846,22 @@ if($nOosTrovati -gt 0){
 $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("=====================================================================")
 [void]$RefTxt.Add(" SONDA LONDONFX -- PASSO 0, CONTATORE DI FREQUENZA E TAGLIA (" + $EA + ")")
-[void]$RefTxt.Add(" EURUSD (lead) x 2 TF (M5, M15) -- NESSUN ORDINE -- 6 passate a corsa")
+[void]$RefTxt.Add(" " + $Simbolo + " x 2 TF (M5, M15) -- NESSUN ORDINE -- 6 passate a corsa")
 [void]$RefTxt.Add("=====================================================================")
 [void]$RefTxt.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto, NON e' il risultato")
 [void]$RefTxt.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV))
 [void]$RefTxt.Add("pin:  " + $Pin)
+# IL SIMBOLO E L'OVERRIDE, IN CHIARO E SEPARATI: cosa e' stato girato
+# (riga di comando) e cosa e' dichiarato nei prova (il lead). Chi legge
+# il referto senza la riga di lancio deve poterlo sapere da qui.
+if($OverrideSimbolo){
+  [void]$RefTxt.Add("simbolo di questa corsa: " + $Simbolo + ", OVERRIDE DICHIARATO da riga di comando (-Simbolo " + $Simbolo + "); prova dichiarati sul lead " + $SimboloLead)
+  [void]$RefTxt.Add("  come funziona, dichiarato: i due file prova portano '@SIMBOLO " + $SimboloLead + "' e il gate di questa riga lo PRETENDE (il prova non si tocca a ogni gamba). Il generico legge la direttiva SOLO se il parametro -Simbolo e' vuoto (walkforward_generico.ps1 righe 303-305): qui NON e' vuoto, quindi VINCE " + $Simbolo + ". Pattern gia' di casa, dichiarato nel referto della sonda V8.")
+  [void]$RefTxt.Add("  etichette: " + $Prefisso + "_M5 / " + $Prefisso + "_M15 (derivate dal simbolo, entrano nel NOME dei CSV: nessuna sovrascrittura fra simboli).")
+}
+else{
+  [void]$RefTxt.Add("simbolo di questa corsa: " + $Simbolo + ", il LEAD -- nessun override (e' il simbolo dichiarato in @SIMBOLO dai due prova). Etichette " + $Prefisso + "_M5 / " + $Prefisso + "_M15.")
+}
 [void]$RefTxt.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
 [void]$RefTxt.Add("banco: MODELLO 2 (SOLO PREZZI DI APERTURA). Il segnale nasce su barra chiusa e non si apre niente: il tick non aggiunge informazione. I CSV portano il suffisso _ohlc (marca del generico per ogni modello non-tick).")
 [void]$RefTxt.Add("terminale: " + $Terminale)
@@ -797,7 +870,7 @@ $RefTxt = New-Object System.Collections.ArrayList
 [void]$RefTxt.Add("grep contatore puro: " + $GrepTxt)
 [void]$RefTxt.Add("celle per corsa: " + $CelleTxt)
 [void]$RefTxt.Add("gemellaggio prova M5/M15: " + $Gemelle)
-[void]$RefTxt.Add("simboli: SOLO EURUSD in questo giro (il lead, dichiarato). GBPUSD dopo, come corsa aggiuntiva dichiarata; USDJPY MAI su questo prova (vuole InpPipSize=0.01: la sonda con 0.0001 RIFIUTA di partire, apposta).")
+[void]$RefTxt.Add("simboli: UN SIMBOLO PER GIRO (qui " + $Simbolo + "). Ammessi su questo prova: " + ($SIMBOLI_AMMESSI -join ", ") + " -- USDJPY MAI (vuole InpPipSize=0.01: la sonda con 0.0001 RIFIUTA di partire, apposta; la whitelist di questa riga lo ferma prima ancora di aprire MT5).")
 [void]$RefTxt.Add("csv *_OOS trovati: " + $nOosTrovati + " (attesi 0: FrazioneIS " + $FrazioneIS + " = gamba OOS degenere; il rosso del generico su quei file e' ATTESO e NON si rilancia)")
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add("--- I TRE CANCELLI (congelati PRIMA dei numeri; disuguaglianze da VerdettoF1/F2/H8_Calc) ---")
@@ -875,7 +948,9 @@ foreach($p in $Rilievi){ [void]$RefTxt.Add("  - " + $p) }
 [void]$RefTxt.Add('COME SI RIPRENDE: dalla pagina righe/RIGA_SONDALONDONFX_DA_MANDARE.md, NON da')
 [void]$RefTxt.Add('questa riga: $Pin nasce dentro il blocco e non sopravvive.')
 
-$refPath = Join-Path $Cart "REFERTO_SONDALONDONFX.txt"
+# IL NOME DEL REFERTO PORTA IL SIMBOLO (v4): due zip diversi estratti
+# nella stessa cartella non devono sovrascriversi il referto a vicenda.
+$refPath = Join-Path $Cart ("REFERTO_SONDALONDONFX_" + $Simbolo + ".txt")
 Set-Content -LiteralPath $refPath -Value ($RefTxt -join "`r`n") -Encoding ASCII
 Write-Host ($RefTxt -join "`r`n")
 
@@ -899,7 +974,7 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host "FILE ATTESI NELLO ZIP: REFERTO_SONDALONDONFX.txt + i 2 prova + 2 CSV OPTFRAME (ABTG_SondaLondonFx_EURUSD_IS_ohlc_<ETICHETTA>.csv, 6 righe l'uno = le 6 passate)" -ForegroundColor Gray
+Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDALONDONFX_" + $Simbolo + ".txt + i 2 prova + 2 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prefisso + "_M5.csv e " + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prefisso + "_M15.csv, 6 righe l'uno = le 6 passate)") -ForegroundColor Gray
 Write-Host ("CSV *_OOS trovati: " + $nOosTrovati + " (attesi 0: FrazioneIS 1.0 = gamba OOS degenere; il numero sta ANCHE nel referto).") -ForegroundColor Gray
 Write-Host "      Il rosso del generico su quei file e' ATTESO: NON rilanciare." -ForegroundColor Gray
 Write-Host "NOTA: nessun per-trade (zero ordini) e nessun CSV riga-per-segnale (ottimizzazione)." -ForegroundColor Gray
