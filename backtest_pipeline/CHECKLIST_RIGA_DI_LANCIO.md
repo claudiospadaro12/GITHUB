@@ -7247,3 +7247,53 @@ ovvia — «prendi quella sotto `C:\Users\Master`» — è la 115 rifatta col no
 > referti degli altri round** (HANDOFF, report di campo), non solo nel codice e
 > nel banco. Il banco di casa aveva **un** profilo perché chi lo ha scritto ne
 > aveva in mente uno: è la 115 vista dal lato dello stub.
+
+## 🆕 AGGIUNTA DEL 03/09/2026 (sera) — trovata verificando la SONDA RELATIVO (`RIGA_SONDARELATIVO.ps1` v1, pin `665416e2`), **ESEGUENDO la sezione RACCOLTA con lo stato pieno** dopo che un banco di 21 casi sulle funzioni era uscito tutto verde
+
+### 79-bis. 🔠 LA CLASSE 79 NEL RAMO CHE IL GIRO A VUOTO **NON PUO' RAGGIUNGERE**: `$r` del ciclo delle celle distrugge `$R` del referto, e il difetto vive solo quando la corsa e' RIUSCITA
+
+_Difetto vero, committato e pinnato (`RIGA_SONDARELATIVO.ps1` righe 1073-1074 al commit `665416e2`),
+trovato PRIMA dell'invio. **Misurato**, non letto: RACCOLTA eseguita su pwsh con `$Righe49` popolato da
+un CSV sintetico di 49 righe -> `Method invocation failed because [PSCustomObject] does not contain a
+method named 'Add'`, nessun referto, nessuno zip. Stessa RACCOLTA in modo CONTROLLO (`$Righe49 = $null`)
+-> referto e zip regolari, `CONTROLLO OK`._
+
+```powershell
+$R = New-Object System.Collections.ArrayList            # il referto
+...
+foreach($r in ($Righe49 | Sort-Object N, Sigma)){       # $r E' $R: PowerShell e' case-insensitive
+  [void]$R.Add(("{0,3} ..." -f $r.N, ...))              # $R e' adesso la riga del CSV: muore qui
+```
+
+La 79 (25/08) aveva gia' insegnato il meccanismo. Quello che la rende una classe a se' e' **dove sta** e
+**chi non la vede**:
+- sta **fuori dal `try`**, nella sezione che la 116 vuole "sempre eseguita": un errore terminante li' non
+  ha nessun `catch`, e la promessa "lo zip esce anche se la corsa si ferma" e' proprio quella che salta;
+- il ciclo entra **solo se la corsa ha prodotto le righe**: il giro a vuoto (`$Righe49 = $null`) lo
+  scavalca ed esce verde. E' la **50** rovesciata: non un referto del giro a vuoto che sembra la corsa, ma
+  un giro a vuoto che **certifica** una corsa che poi muore alla fine dei suoi 45 minuti;
+- il banco di chi l'ha scritto era **sulle funzioni** (GateProva, AnalizzaCsv: 21/21 verdi, e lo sono
+  davvero): il difetto e' nel **flusso a livello di script** che gira dopo. E' la **109** (il nucleo puro
+  collaudato non e' il codice che gira) applicata a una raccolta.
+
+> ✅ **REGOLA (due pezzi, tutti e due a macchina).**
+> 1. **La classe 79 si cerca col PARSER, non a occhio**, su ogni `.ps1` prima dell'invio:
+>    ```powershell
+>    $ast=[System.Management.Automation.Language.Parser]::ParseFile($f,[ref]$null,[ref]$null)
+>    $ast.FindAll({param($n) $n -is [System.Management.Automation.Language.VariableExpressionAst]},$true) |
+>      Group-Object { $_.VariablePath.UserPath.ToLower() } |
+>      Where-Object { @($_.Group.VariablePath.UserPath | Sort-Object -Unique -CaseSensitive).Count -gt 1 } |
+>      ForEach-Object { $_.Name + " -> righe " + (($_.Group.Extent.StartLineNumber | Sort-Object -Unique) -join " ") }
+>    ```
+>    Ogni coppia stampata si giudica: **stessa funzione o livello di script = difetto**; funzioni diverse
+>    = locali, va bene. Qui usciva `r/R` con le righe, in due secondi.
+> 2. **Il banco esegue ANCHE le sezioni a livello di script, con lo stato PIENO**: la raccolta si
+>    `Invoke-Expression` dal marcatore `#  RACCOLTA` in poi (con gli `exit` sostituiti da `return`) **due
+>    volte**: una con l'analisi del CSV gia' fatta (`$Righe49`, `$Cella`, `$Mappa` popolati) e una nel modo
+>    CONTROLLO. Se solo la seconda esce verde, il giro a vuoto non e' una prova della corsa.
+>
+> ⚠️ Corollario per il verificatore: quando una pagina dichiara "eseguito su banco, N/N verdi", la prima
+> domanda e' **"il banco e' arrivato alla RACCOLTA con le righe dentro?"** — perche' e' l'unico posto del
+> driver che il giro a vuoto, per costruzione, non copre mai.
+
+---
