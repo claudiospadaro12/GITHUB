@@ -50,19 +50,20 @@ risultato del passo** — ed è meglio scoprirlo qui che sul terminale che lavor
 | **MT5** | **PUÒ restare aperto** (non si scrive niente nelle cartelle del terminale). **MetaEditor NO: va CHIUSO** — con l'editor aperto la compilazione da riga di comando torna subito senza fare nulla |
 | **Quanto ci mette** | copia della libreria standard + 2 download + 1 compilazione = **1–3 minuti** [STIMA] |
 
-## 📌 IL PIN — **`@@PIN@@`**  🚧 **SEGNAPOSTO: QUESTA PAGINA NON È ANCORA LANCIABILE**
+## 📌 IL PIN — **`4d768e3892eb2bc46e1ab848f3cc07517dea7bd1`**  ✅ **INSERITO**
 
-🚧 **Finché qui sopra c'è `@@PIN@@` la riga NON funziona e NON deve essere
-mandata**: il driver rifiuta qualunque `-Pin` che non sia un commit di **40
-caratteri esadecimali**, quindi si fermerebbe subito. Il pin vero lo mette il
-commit successivo a questo.
+Commit di `lavoro` verificato con `git rev-parse`: contiene **il driver**
+(`righe/RIGA_COMPILA_ORB104.ps1`), **il sorgente v1.04**
+(`mql5/Experts/ABTG_ORB_Ottimizzato.mq5`, identico al commit del fix `19312c8`)
+e **il suo include** (`mql5/Include/ABTG_PausaGuardian.mqh`, v1.51) — tutti e
+tre scaricati **allo stesso pin**, mai dalla punta del branch.
 
 ## ▶️ IL BLOCCO (uno solo)
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process metaeditor64 -EA SilentlyContinue){ throw 'METAEDITOR APERTO: chiudilo e rilancia (MT5 invece puo'' restare aperto).' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COMPILA_ORB104.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='4d768e3892eb2bc46e1ab848f3cc07517dea7bd1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COMPILA_ORB104.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COMPILA_ORB104.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COMPILA_ORB104_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
