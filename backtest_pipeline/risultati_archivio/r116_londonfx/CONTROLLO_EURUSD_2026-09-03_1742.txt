@@ -1,0 +1,85 @@
+=====================================================================
+ R116 -- LONDONFX A TICK REALI (ABTG_LondonFx v1.01) -- EURUSD M15
+ UN contenitore, TRE motori (ablazione) x 2 magic gemelli -- criteri FIRMATI 03/09
+=====================================================================
+modo: CONTROLLO   <- CONTROLLO = giro a vuoto, NON e' il risultato; FASE2 = sola fase 2 forzata
+data: 2026-09-03 17:42:49   <- ORA DI AVVIO del giro (non l'ora in cui leggi: la corsa dura decine di minuti)
+pin:  ecb4e43177d9f7fc20786cfbb23cbf73a3f988be
+simbolo di questa corsa: EURUSD, il LEAD -- nessun override. Etichette R116_EUR / R116_EUR_SLIP.
+finestra: IS 2024.07.05 -> 2025.04.21 | OOS 2025.04.22 -> 2026.06.30  (split 0.4 come lo calcola il generico) -- UN SOLO REGIME, tick reali dal 2024.07.05 (pavimento misurato il 01/09)
+  regime contenuto [DICHIARATO]: IS = seconda meta' 2024 + primo trimestre 2025 (dollaro forte fino a gennaio 2025, poi inversione); OOS = da aprile 2025 (risalita dell'euro 2025 e quello che e' venuto dopo, da leggere sul grafico, non assunto). Nessuna prova di regime: da qui NON esce una sedia (F12).
+banco: MODELLO 4 = tick REALI | Spread=0 nell'.ini (corrente, DICHIARATO) | deposito 100000 | leva 100 | rischio 0,65% | sessione 08:00-16:00 ORA SERVER (= Londra) | TP 15,0 / SL 8,0 pip su ENTRAMBE le gambe | slippage 0 (fase 2: 2/5)
+terminale: C:\Program Files\BCM Markets MT5 Terminal (selettore: BCM Markets, non -V3 -- lo stesso della sonda del passo 0)
+cartella dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+compilazione: OK (78 KB, 79806 byte, 17:42:54), errori 0, warning 0   <- EA MAI COMPILATO PRIMA: se e' FALLITA, QUESTO e' il risultato del passo
+riga Result del log: Result: 0 errors, 0 warnings, 1440 ms elapsed, cpu='X64 Regular'
+versione letta dal #property: 1.01   (attesa 1.01)
+autotest dichiarato nel sorgente: LONDONFX_AUTOTEST_BLOCCHI_ATTESI 18 (1 riga), LONDONFX_AUTOTEST_CASI_ATTESI 118 (1 riga)
+magic: InpMagic default 774001 (1 riga) -- gemello 774002 dal prova
+hedge-safe (N1): 0 chiamate Position*(_Symbol) fuori dai commenti (attese 0: N1, hedge-safe dalla nascita)
+include censiti nel sorgente: 2 (Trade/Trade.mqh, ABTG_PausaGuardian.mqh)
+include al pin: bool ABTG_GuardiaIngresso( trovata 1 volta (ancorata a destra); marcatore versione nell'include: v1.51; 112481 byte
+ripristino del terminale: include del terminale RIPRISTINATO dal backup (c'era gia' prima di questo giro)
+foto PRIMA/DOPO dei file del terminale (classe 116: la prova sta nella foto, non nella frase):
+  Experts\ABTG_LondonFx.mq5: prima [ASSENTE] dopo [presente, 119478 byte, 2026-09-03 17:42:50] -> CAMBIATO   atteso: SCRITTO (l'EA al pin: resta, come ogni EA della pipeline)
+  Experts\ABTG_LondonFx.ex5: prima [ASSENTE] dopo [presente, 79806 byte, 2026-09-03 17:42:54] -> CAMBIATO   atteso: SCRITTO (compilato qui: resta, il tester lo richiede)
+  Include\ABTG_PausaGuardian.mqh: prima [presente, 82941 byte, 2026-08-31 14:59:16] dopo [presente, 82941 byte, 2026-08-31 14:59:16] -> INVARIATO   atteso: INVARIATO (installato al pin e RIMESSO com'era)
+cache tester: prima 25 file, dopo 0
+celle: 6 a finestra nella corsa principale (3 InpMotore x 2 InpMagic) + 2 a finestra in FASE 2 (InpSlippagePts 2/5), ricontate dai pin ||Y al pin
+gemellaggio prova principale/fase 2: VALIDO: le righe vive differiscono SOLO per le 3 differenze dichiarate (InpMotore asse->pin 2, InpMagic asse->pin 774001, InpSlippagePts pin 0->asse 2/5)
+corsa principale: CONTROLLO (generico -SoloControllo: MT5 NON aperto, anteprima .ini scritta -- NON e' l'.ini che girera', classe 96)
+fase 2 (slippage 2/5, motore 2): CONTROLLO (generico -SoloControllo sul prova di fase 2: gate e conteggio celle eseguiti, MT5 NON aperto)
+Model letto: n/d (giro a vuoto: l'anteprima scrive Model=4 hardcoded e NON fa da prova, classe 96)
+riga del Diario 'ticks data begins from' (EURUSD): n/d (giro a vuoto)
+log del tester letti a macchina (cresciuti in questo giro): 0
+per-trade (v1.01): NON RACCOLTO: nessuna corsa che scrive per-trade e' arrivata al punto della raccolta
+  punto 5.0.5 (prima data del per-trade DALL'INIZIO della finestra IS): NON verificabile dal file raccolto (rappresenta l'OOS, non l'IS) -- SEGNALATO; la copertura tick si legge dalla riga del Diario qui sopra
+  punto S4 (correlazione P&L giornalieri fra i tre motori, informativa): ESEGUIBILE A MANO dai CSV magic 774001 allegati -- raggruppa 'net_profit' per data di 'close_time', somma per giorno, allinea le tre serie sulle date comuni (mancanti = 0), correlazione di Pearson a coppie; >= 0,80 e' un secondo indizio che i motori siano lo stesso oggetto. NON calcolata qui: non decide da sola (criteri par. 3.2).
+
+--- I CANCELLI (congelati PRIMA dei numeri, criteri par. 5; fasce DISGIUNTE par. 5.8) ---
+  A1 E OOS >= 0.075R (zona morta 0.050-0.075, bocciata < 0.050) | A2 PF OOS >= 1.15 (zona 1.10-1.15, bocciata < 1.10)
+  A3 segno IS/OOS coerente e PF IS > 1,00 (IS negativo = bocciata) | A4 DD OOS <= 8.00% (zona fino a 10.00, bocciata PER RISCHIO oltre)
+  A5 Peggior Giornata >= -4.00% (zona fino a -5.00, bocciata PER RISCHIO sotto) | A6 n >= 150 IS e OOS (30-149 merito sospeso, < 30 non misurabile)
+  Il RISCHIO boccia a QUALUNQUE n. Ambiguita' -> clausola PIU' SEVERA, dichiarata. Promuovibile SOLO il motore 2, gamba per gamba. Vietato nominare 'la cella migliore'.
+
+--- IL CANARINO, PRIMA DEL CONTO ECONOMICO (par. 4.3) -- per motore, per finestra (riga magic 774001) ---
+fin  mot  SegGen SoppPos SoppTet  GgTet  GgCap   Flat%   SprMed   SprP95  Notti  Canar
+IS   SENZA NUMERI (CSV non letto: n/d)
+OOS  SENZA NUMERI (CSV non letto: n/d)
+  (Giorni col Tetto Colpito > 20.00% dei giorni contati = motore STROZZATO, confronto S1 contaminato; Flat > 40.00% = si misura l'OROLOGIO. Le dichiarazioni, se scattano, stanno nei RILIEVI.)
+
+--- IL CONTO ECONOMICO, per motore e finestra (riga magic 774001; n IS e n OOS accanto a OGNI numero) ---
+fin  mot      n    nL    nS    profitto      PF   E in R      DD%   PegGg%   giorni
+IS   SENZA NUMERI
+OOS  SENZA NUMERI
+  motori: 1 = CANALE NUDO (controllo) | 2 = CANALE + RSI (BASELINE, l'unico promuovibile) | 3 = ALLINEAMENTO 5 MEDIE (controllo)
+  E in R = payoff medio / rischio medio DICHIARATO all'apertura (colonna dell'EA, esatta al primo ordine). Profitti in EURO a deposito 100000: NON confrontabili con i round a 1,00%.
+
+--- I VERDETTI PER MOTORE (cancelli A/B, letti in OOS con IS per A3/A6) ---
+  motore 1: SENZA VERDETTO (corsa non letta)
+  motore 2: SENZA VERDETTO (corsa non letta)
+  motore 3: SENZA VERDETTO (corsa non letta)
+  A5 e il cap del 2%: se A5 passa, passa ANCHE grazie a un cap che sta nella fonte, non a un merito del segnale (par. 5.4). Se A5 fallisce LO STESSO, il cap non funziona come crediamo: si indaga il CONTENITORE prima del merito.
+  F5: lo short gira con soglia RSI 20 (simmetrica, firmata), PIU' PERMISSIVA del 10 dell'autore. Se lo short passa e il long no, va scritto cosi'.
+
+--- L'ABLAZIONE S1/S2/S3 (par. 3.2, OOS, soglia S1 = 0.05R = 2/3 del cancello H8) ---
+  NON CALCOLATA
+
+--- FASE 2 (par. 5.6): il verdetto si legge a 5 PUNTI ---
+  stato: CONTROLLO (generico -SoloControllo sul prova di fase 2: gate e conteggio celle eseguiti, MT5 NON aperto)
+  verdetto: n/d
+
+--- LO SPREAD MISURATO (F9, chiude H12 anche se il round boccia) ---
+  NON MISURATO (nessun CSV letto)
+
+--- COSA NON SI PUO' DIRE con questi dati (par. 5.10, ricopiato) ---
+  1. 'regge nel tempo' (un solo regime, 24 mesi) | 2. 'il DD sara' quello' (un broker, un feed, un regime) | 3. 'il forex BCM ha questi spread' in generale
+  4. promuovere il motore 1 o 3, SOPRATTUTTO se sono i piu' belli | 5. 'basta cambiare l'ora' se la 8 muore | 6. 'su GBPUSD serve uno stop piu' largo' e rilanciare | 7. passare al forward senza la prova di rischio sul vecchio (par. 6) e il contratto della sedia
+  Previsione dichiarata PRIMA (par. 0.2): NO probabile (MAE mediana 11,8 pip sopra lo stop di 8,0; costo 1,7-3,3x l'edge). Da giudicare qui: avevo detto NO -- cos'e' successo?
+
+PROBLEMI: 0
+RILIEVI: 0
+
+COME SI RIPRENDE: dalla pagina righe/RIGA_R116_LONDONFX_DA_MANDARE.md, NON da questa
+riga: $Pin nasce dentro il blocco e non sopravvive. Un giro morto a meta' si rilancia
+INTERO (il generico ha -Rifai: i CSV vecchi finiscono in vecchi\). Solo la fase 2: -SoloFase2.
