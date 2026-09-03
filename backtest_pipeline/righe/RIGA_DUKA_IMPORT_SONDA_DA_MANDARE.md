@@ -63,7 +63,7 @@ MT5. Se la compilazione e' rossa o mancano i CSV, si ferma qui.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_IMPORT_SONDA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='2f56afb67aff5e199b858d4791aa63e02d351fd4'; $p="$env:USERPROFILE\RIGA_DUKA_IMPORT_SONDA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_IMPORT_SONDA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_IMPORT_SONDA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
@@ -75,7 +75,7 @@ MT5. Se la compilazione e' rossa o mancano i CSV, si ferma qui.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_IMPORT_SONDA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='2f56afb67aff5e199b858d4791aa63e02d351fd4'; $p="$env:USERPROFILE\RIGA_DUKA_IMPORT_SONDA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_IMPORT_SONDA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_IMPORT_SONDA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -130,7 +130,7 @@ sola sonda** con `-SoloSonda` (non ri-importa, ri-misura soltanto):
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_DUKA_IMPORT_SONDA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='2f56afb67aff5e199b858d4791aa63e02d351fd4'; $p="$env:USERPROFILE\RIGA_DUKA_IMPORT_SONDA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DUKA_IMPORT_SONDA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DUKA_IMPORT_SONDA_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloSonda }
