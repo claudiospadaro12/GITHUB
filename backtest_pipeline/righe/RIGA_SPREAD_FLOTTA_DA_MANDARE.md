@@ -69,7 +69,7 @@ giorni.
 
 ---
 
-## 📌 IL PIN — **`<PIN>`**  ✅ INSERITO (verificato con `git rev-parse`: contiene il driver **v3** + il motore `ABTG_SpreadOrario.mq5` v2). _Il pin `c5dbd68` del 31/08 e il marcatore `MARCATORE_RIGA_SPREAD_FLOTTA_v2` sono **BRUCIATI**: non incollarli più. Lancia SOLO i blocchi di questa pagina._
+## 📌 IL PIN — **`e1c81430c8ba1b4f835cbeb7927f400d54501da1`**  ✅ INSERITO (verificato con `git rev-parse`: contiene il driver **v3** + il motore `ABTG_SpreadOrario.mq5` v2). _Il pin `c5dbd68` del 31/08 e il marcatore `MARCATORE_RIGA_SPREAD_FLOTTA_v2` sono **BRUCIATI**: non incollarli più. Lancia SOLO i blocchi di questa pagina._
 
 ## ▶️ 1️⃣ LA CORSA (blocco intero, un comando solo)
 
@@ -83,7 +83,7 @@ lo **compila**, e cicla i tre simboli **in un solo MT5, su un solo grafico**
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia (questa riga apre MT5 da sola).' };
-    $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
@@ -113,7 +113,7 @@ morte con lui). **Cambia solo la lista dopo `-Simboli`**, copiandola dalla riga
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='<PIN>'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simboli "U30USD,D30EUR"; $rc=$LASTEXITCODE;
