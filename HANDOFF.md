@@ -83,16 +83,29 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
 - **ORB v1.04 — PASSO 1 FATTO alle 14:18: COMPILA (0 errori, 0 warning)**,
   referto `risultati_archivio/REFERTO_COMPILA_ORB104_2026-09-03.txt`. Rilievo: il
   giro e' partito dal VPS (nessun danno, tre INVARIATO misurati): la prossima
-  compilazione di prova dal PC di backtest. PASSO 2 (deploy SOLO piccolo):
-  driver nuovo in costruzione da un agente (foto prima/dopo anche del -V3,
-  backup v1.02, `-VersioneAttesa 1.04`), finestra proposta stasera dopo le 22:15.
+  compilazione di prova dal PC di backtest. **PASSO 2 (deploy SOLO piccolo):
+  PAGINA PRONTA E PINNATA** — `righe/RIGA_DEPLOY_ORB104_PICCOLO_DA_MANDARE.md`
+  (pin `8167c772ac15df23ef177fa5754839232829869b`, driver
+  `RIGA_DEPLOY_ORB104_PICCOLO.ps1` marcatore `_v1`): due blocchi, CONTROLLO
+  (anche di giorno, non scrive) poi CORSA (VPS, sessione **Master**, MT5 e
+  MetaEditor CHIUSI, dopo le 22:15). Cartella dati scelta per QUATTRO fatti
+  (bases BCM, niente 100k, login 50503392, profilo della sessione: checklist
+  **115-bis**), foto prima/dopo di piccolo E -V3 (byte+sha256), backup su
+  `Desktop\backup_orb_v102_<data>\<ora>`, ripristino su fallimento. 27 casi
+  eseguiti su banco stubbato, verificatore PASS (eseguito a mano: strumento
+  Agent non disponibile): `risultati_archivio/REFERTO_DEPLOY_ORB104_PICCOLO_PREPARAZIONE.md`.
+  PASSO 3: la prova della v1.04 e' la riga `ORB AUTOTEST ... 0 falliti` nella
+  scheda Esperti (OnInit NON stampa la versione). `aggiorna_verifica_orb.ps1`
+  NON toccato (viola il perimetro: resta agli atti).
 
 ### ⏳ CODA (prossimi passi)
 1. Collaudo Fase 1 sessione 1 alle 15:30 (VPS come Administrator, rischio>0).
 2. DUKA fine corsa → zip → import+sonda → cancello storica.
 3. Passo C diagnosi GBPUSD stasera a banco pulito (chiude H1 vs H3).
 4. ~~Compilazione di prova ORB v1.04~~ FATTA (OK) → deploy sul piccolo stasera
-   dopo le 22:15 con la riga PASSO 2 (agente in corso, poi verificatore).
+   dopo le 22:15 con la riga PASSO 2: **pagina pronta**
+   (`RIGA_DEPLOY_ORB104_PICCOLO_DA_MANDARE.md`, pin `8167c77…`): CONTROLLO
+   prima (va bene anche di giorno), CORSA con MT5 chiuso, poi PASSO 3.
 5. Righe in costruzione da agenti (03/09 ~14:50): **R116 LondonFx** (tick,
    EURUSD+GBPUSD) e **sonda RELATIVO** (4 prove) — da lanciare quando il PC di
    backtest si libera dopo il DUKA. Poi il giacimento di classe 3:
