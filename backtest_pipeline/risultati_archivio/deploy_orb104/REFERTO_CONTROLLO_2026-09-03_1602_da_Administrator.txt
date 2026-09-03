@@ -1,0 +1,115 @@
+=====================================================================
+ DEPLOY -- ABTG_ORB_Ottimizzato v1.04 sul SOLO PICCOLO 50503392 (PASSO 2)
+ Perimetro firmato da Claudio il 03/09 alle 11:05 (FIRMO IL PERIMETRO
+ PICCOLO): il 100k/-V3 50504263 resta INTATTO fino a fine Fase 1.
+=====================================================================
+modo: CONTROLLO   <- CONTROLLO = giro a vuoto, NON scrive nel terminale e NON e' il risultato
+data: 2026-09-03 16:02:45   <- ORA DI AVVIO del giro (non l'ora in cui leggi)
+pin:  5d21c3bf791adfe357c352a66be4b8af5dea3ad1
+
+cartella dati del piccolo: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+criterio di scelta: FATTO: unica cartella dati sotto il profilo di questa sessione (Administrator) con bases\BCMMarkets-Server e SENZA traccia del 100k (ne' -V3 ne' login 50504263); login 50503392 CONFERMATO nei log
+installazione (metaeditor64): C:\Program Files\BCM Markets MT5 Terminal
+versione INSTALLATA prima del giro: 1.02   (letta dal .mq5 del terminale, non assunta)
+
+sorgente al pin: ABTG_ORB_Ottimizzato.mq5: 74103 byte, sha256 C14D85DD889BFD66, 2026-09-03 16:02:47
+include al pin:  ABTG_PausaGuardian.mqh: 112481 byte, sha256 B7462CD5D2F8B903, 2026-09-03 16:02:48
+versione letta dal #property: 1.04   (attesa 1.04, commit del fix 19312c8)
+autotest dichiarato nel sorgente: 10 blocchi / 33 casi (dai #define del sorgente)
+include censiti nel sorgente: 2 (Trade/Trade.mqh, ABTG_PausaGuardian.mqh)
+grep del difetto curato: 0 occorrenze di PositionSelect(_Symbol) fuori dai commenti (attese 0)
+
+backup: NON FATTO (modo CONTROLLO: non c'e' niente da proteggere, non si scrive)
+scritture nel terminale: NESSUNA SCRITTURA nel terminale
+compilazione: NON TENTATA (modo CONTROLLO: questo giro NON scrive e NON compila, NON e' il risultato del passo)
+   <- QUATTRO STATI: NON TENTATA / FALLITA (ripristinato) / FALLITA -- METAEDITOR MUTO (ripristinato) / OK (con la dimensione)
+riga Result del log: NON LETTA
+codice di uscita di metaeditor64: NON LETTO   (1 con .ex5 e Result 0/0 e' NORMALE, misurato il 03/09; NON LETTO non e' un fallimento)
+ripristino: niente da ripristinare (il terminale non e' mai stato scritto)
+
+DEPLOY: NON AVVENUTO (modo CONTROLLO: nessuna scrittura nel terminale, per scelta)
+IL -V3 / 100k: INVARIATO su 3 foto di file REALMENTE PRESENTI prima del giro (su 6 foto totali, 2 cartelle con traccia del 100k; le foto su file ASSENTI non contano come prova)
+   <- TRE STATI: INVARIATO su N foto di file REALMENTE PRESENTI / NON MISURATO (nessun file vero da fotografare: la sua cartella dati sta sotto un altro profilo) / ATTENZIONE CAMBIATO
+PARAMETRI (.set/.chr/.ini): INVARIATI (Presets, Profiles\Charts, config: stessi file, stessi byte, stesse date). I parametri del grafico restano quelli: rischio 1,0% sul piccolo.
+  PICCOLO Experts\ABTG_ORB_Ottimizzato.mq5: prima [presente, 39456 byte, sha256 550B7D36B429705E, 2026-08-22 15:10:59] dopo [presente, 39456 byte, sha256 550B7D36B429705E, 2026-08-22 15:10:59] -> INVARIATO
+  PICCOLO Experts\ABTG_ORB_Ottimizzato.ex5: prima [presente, 80024 byte, sha256 ADF87860355DE7A5, 2026-08-22 15:11:04] dopo [presente, 80024 byte, sha256 ADF87860355DE7A5, 2026-08-22 15:11:04] -> INVARIATO
+  PICCOLO Include\ABTG_PausaGuardian.mqh: prima [presente, 53840 byte, sha256 F8402268DBB4FDF8, 2026-08-22 15:10:59] dopo [presente, 53840 byte, sha256 F8402268DBB4FDF8, 2026-08-22 15:10:59] -> INVARIATO
+  -V3 C:\Program Files\BCM Markets MT5 Terminal -V3 MQL5\Experts\ABTG_ORB_Ottimizzato.mq5: prima [ASSENTE] dopo [ASSENTE] -> INVARIATO
+  -V3 C:\Program Files\BCM Markets MT5 Terminal -V3 MQL5\Experts\ABTG_ORB_Ottimizzato.ex5: prima [ASSENTE] dopo [ASSENTE] -> INVARIATO
+  -V3 C:\Program Files\BCM Markets MT5 Terminal -V3 MQL5\Include\ABTG_PausaGuardian.mqh: prima [ASSENTE] dopo [ASSENTE] -> INVARIATO
+  -V3 C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104 MQL5\Experts\ABTG_ORB_Ottimizzato.mq5: prima [presente, 39456 byte, sha256 550B7D36B429705E, 2026-08-22 15:10:59] dopo [presente, 39456 byte, sha256 550B7D36B429705E, 2026-08-22 15:10:59] -> INVARIATO
+  -V3 C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104 MQL5\Experts\ABTG_ORB_Ottimizzato.ex5: prima [presente, 80428 byte, sha256 1E158C8D4920305C, 2026-08-22 15:11:07] dopo [presente, 80428 byte, sha256 1E158C8D4920305C, 2026-08-22 15:11:07] -> INVARIATO
+  -V3 C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104 MQL5\Include\ABTG_PausaGuardian.mqh: prima [presente, 53840 byte, sha256 F8402268DBB4FDF8, 2026-08-22 15:10:59] dopo [presente, 53840 byte, sha256 F8402268DBB4FDF8, 2026-08-22 15:10:59] -> INVARIATO
+  parametri MQL5\Presets: prima [48 file, 32394 byte, ultima scrittura 2026-08-30 15:15:12] dopo [48 file, 32394 byte, ultima scrittura 2026-08-30 15:15:12] -> INVARIATO
+  parametri MQL5\Profiles\Charts: prima [66 file, 59079880 byte, ultima scrittura 2026-09-01 20:00:34] dopo [66 file, 59079880 byte, ultima scrittura 2026-09-01 20:00:34] -> INVARIATO
+  parametri config: prima [13 file, 940506 byte, ultima scrittura 2026-09-03 16:02:23] dopo [13 file, 940506 byte, ultima scrittura 2026-09-03 16:02:23] -> INVARIATO
+
+COSA SUCCEDE DOPO: il CONTROLLO e' pulito. La CORSA si lancia con MT5 e MetaEditor
+CHIUSI, dalla stessa sessione Master, con la flotta ferma (dopo le 22:15 IT o
+prima delle 07:30 IT). Scrivera' SOLO nella cartella dati scritta qui sopra.
+
+PROBLEMI: 0
+RILIEVI: 1
+  - processi aperti durante il CONTROLLO (terminal64 pid 4948, terminal64 pid 9452): TOLLERATO qui, perche' questo giro non scrive niente. La CORSA li pretende CHIUSI e si ferma da sola.
+
+--- L'ELENCO DI COSA HO GUARDATO (classe 115: la cartella si sceglie per fatti; anche in CANDIDATE.txt) ---
+CARTELLE GUARDATE (conto cercato 50503392, candidate 10):
+  --- C:\Program Files\BCM Markets MT5 Terminal -V3   [scartata]
+      trovata come: processo terminal64 pid 4948 + installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      traccia del 100k: percorso contiene -V3
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Program Files\BCM Markets MT5 Terminal   [scartata]
+      trovata come: processo terminal64 pid 9452 + installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\15BEB048A4E0532395CCA693EA561D8C   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      origin.txt: C:\Program Files (x86)\BCM Markets MT4 Terminal
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5   [ELEGGIBILE, sotto il profilo di questa sessione]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=True file di log letti=21 leggibile=False
+      origin.txt: C:\Program Files\BCM Markets MT5 Terminal
+      login visti nei log: 50503392   piccolo 50503392=True   grande 50504263=False
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\73B7A2420D6397DFF9014A20F1201F97   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      origin.txt: C:\Program Files\Pepperstone MetaTrader 5
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna bases\BCMMarkets-Server (non e' il feed BCM)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\857385E4B0F2356AD99AA95CDF40FAE9   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=False file di log letti=3 leggibile=True
+      origin.txt: C:\Program Files\Tickmill Europe MT5 Terminal
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna bases\BCMMarkets-Server (non e' il feed BCM)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=True bases\BCMMarkets-Server=True file di log letti=21 leggibile=False
+      origin.txt: C:\Program Files\BCM Markets MT5 Terminal -V3
+      login visti nei log: 50504263   piccolo 50503392=False   grande 50504263=True
+      traccia del 100k: origin.txt contiene -V3; login 50504263 nei log
+      scartata perche': E' IL 100k/-V3 (origin.txt contiene -V3; login 50504263 nei log): fuori dal perimetro firmato
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FF5C0E29FAC93F5DD90858C939E9C0E8   [scartata]
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False metaeditor64.exe=False logs\=True MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Program Files\Pepperstone MetaTrader 5   [scartata]
+      trovata come: installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+  --- C:\Program Files\Tickmill Europe MT5 Terminal   [scartata]
+      trovata come: installazione in C:\Program Files
+      terminal64.exe=True metaeditor64.exe=True logs\=False MQL5\=False bases\BCMMarkets-Server=False file di log letti=0 leggibile=True
+      login visti nei log: nessuno   piccolo 50503392=False   grande 50504263=False
+      scartata perche': nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)
+
+COME SI RIPRENDE: dalla pagina righe/RIGA_DEPLOY_ORB104_PICCOLO_DA_MANDARE.md,
+NON da questa riga (il pin nasce dentro il blocco e non sopravvive).
