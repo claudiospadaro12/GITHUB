@@ -1,6 +1,52 @@
 # =====================================================================
+#  *** SONDA COMPLETATA il 03/09 (ABTG_SondaRelativo.mq5, mai
+#  *** compilata) -- FANNO FEDE I PROVA RELATIVO_*.txt
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' DIVENTATO STORIA. Resta in repo perche' contiene la
+#  derivazione della tesi, l'attribuzione e i criteri C1-C9 COME SONO
+#  STATI CONGELATI PRIMA DI VEDERE UN NUMERO -- e i criteri si leggono
+#  dove sono stati scritti, non dove sono stati riscritti.
+#
+#  DA QUI IN AVANTI SI LANCIANO E FANNO FEDE:
+#    prove\RELATIVO_D30_M5.txt    gamba D30EUR x metro U30USD, M5
+#    prove\RELATIVO_D30_M15.txt   gemella M15
+#    prove\RELATIVO_NAS_M5.txt    gamba NASUSD x metro U30USD, M5
+#    prove\RELATIVO_NAS_M15.txt   gemella M15
+#  (blocco dei parametri IDENTICO nei quattro: differiscono solo per
+#   @SIMBOLO e @PERIODO)
+#
+#  COSA E' CAMBIATO RISPETTO A QUESTA BOZZA, e non e' cosmetico:
+#   1. LA SONDA ESISTE: mql5\Experts\ABTG_SondaRelativo.mq5 (contatore
+#      puro: nessun OrderSend, nessun CTrade, nessun lotto, nessun
+#      magic). NON E' MAI STATA COMPILATA: si compila in MetaEditor
+#      PRIMA di qualunque corsa.
+#   2. I NOMI DEGLI INPUT QUI SOTTO ERANO PROPOSTI. Fanno fede quelli
+#      del sorgente, ricopiati nei quattro prova. VERIFICATO A MACCHINA
+#      il 03/09: nessuno dei nomi proposti qui e' fantasma (sarebbe
+#      stato ignorato in silenzio da MT5), ma NOVE input REALI qui non
+#      c'erano e vanno pinnati -- InpAtrModoRma, InpAtrPeriod,
+#      InpAutoTest, InpBarreOrizzonte, InpConfrontaMT5,
+#      InpMinFineServer, InpPuntiPerIndice, InpVerbose, InpWarmupBarre.
+#      Nei quattro prova sono pinnati TUTTI E 22 SU 22.
+#   3. C3 NON HA PIU' LA FASCIA "SOSPESO PER SPREAD NON MISURATO": il
+#      debito del 23/08 e' stato pagato la mattina del 03/09
+#      (SPREAD_FLOTTA_MISURA_2026-09-03.md). La soglia e' SECCA, sulla
+#      MEDIANA ORARIA PEGGIORE nelle ore di lavoro (clausola severa):
+#        D30EUR scambiato -> spread 2,80 -> C3 = 8,40 punti indice
+#        NASUSD scambiato -> spread 1,80 -> C3 = 5,40 punti indice
+#      Il cartello [SPREAD NON MISURATO] del criterio C3 qui sotto e'
+#      quindi SUPERATO: e' rimasto scritto perche' i criteri non si
+#      riscrivono a posteriori, ma NON e' piu' quello che gira.
+#   4. IL SECONDO SIMBOLO (metro) e' letto con CopyTime/CopyClose
+#      SULL'INTERVALLO DI TEMPO della gamba e ALLINEATO PER TIMESTAMP;
+#      le barre mancanti sono COLONNE, mai silenzio; la severita' della
+#      regola (allineamento preteso su TUTTO lo span dello z-score) ha
+#      una colonna che ne misura il COSTO.
+#
+# =====================================================================
 #  RELATIVO -- PASSO 0: SONDA DI CONVERGENZA, FREQUENZA, TAGLIA, TENUTA
 #  *** BOZZA DEL CACCIATORE -- NON E' UNA PROVA OPERATIVA ***
+#  *** (superata: vedi il cartello qui sopra) ***
 # ---------------------------------------------------------------------
 #  PERCHE' "BOZZA", E PERCHE' NON E' PIGRIZIA (regola di casa).
 #  Ne' l'EA ne' la sonda ESISTONO. Un file prova che pinna input
