@@ -858,3 +858,60 @@ motori sono comunque ben dentro la bocciatura per rischio, la divergenza non spo
 dentro i cancelli), ma segnala un problema di determinismo/non-riproducibilita' del tester su questo
 banco che va capito prima di fidarsi ciecamente dei prossimi round su GBPUSD. Motori 1 e 2 non
 segnalati come rotti dal gate.
+
+### SECONDA CACCIA DOPO R116 (03/09 sera) — le righe che toccano questo registro
+
+Dossier completo: `caccia_strategie/CACCIA_LONDRA_ALTERNATIVA_2026-09-03.md`.
+Il resto sta li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi.**
+
+- 🪦 **L'APERTURA DI LONDRA E' CHIUSA IN TUTTE E DUE LE FORME "A LIVELLO", e la
+  chiusura non viene dal web: viene dai nostri `input`.** I 4 migliori candidati
+  esterni letti oggi (TradingView: `4H Range Scalp V3 - Smart Fakeout`,
+  `Strategy_500 Turtle Soup NY V5`, `Gold H1 Breakout Failure`,
+  `Parent Session Sweeps`) sono **riga per riga `ABTG_BreakinBox`**, che il
+  31/08 e' stato misurato a tick su D30EUR e **CHIUSO da lettera congelata**
+  (A: TP al lato opposto **PF 1,007 DD 24,1%** · B: RR fisso 2,0 **PF 1,106
+  DD 19,7%**, cancello DD <=15%). Verificato negli `input` del nostro EA
+  (righe 191-237): `InpConfirmMaxBars=8` **e'** il `max_bars_outside=6` del
+  candidato C1; `InpSlBufferPts` **e'** l'SL all'estremo dello sweep;
+  `InpMinBoxATR` **e'** il filtro di ampiezza; `InpTP_RR` **e'** l'ablazione.
+  👉 **Non si riapre cambiando simbolo**: sarebbe BreakinBox su forex, e R95 ha
+  gia' girato quella geometria su EURJPY (**0/30**).
+- 🕐 **IL FUSO DI LONDRA E' CHIUSO (aperto come `[INCERTO]` il 19/08 con TRE
+  valori diversi in tre posti).** Il Passo 0 di `ABTG_AllineaLondra` (03/09
+  16:51) lo scrive misurato: _"l'orologio del server BCM segna la STESSA ora di
+  Londra tutto l'anno"_ → **Londra apre alle 08:00 ORA SERVER**. Ne segue che
+  `Londra_ORB` ("06-07 server") e R45 ("07:00 server") misuravano la
+  **pre-apertura**, non l'apertura.
+- 🎯 **L'alternativa vera sulla stessa inefficienza NON e' un range: e' la
+  DERIVA ORARIA** (`OROLOGIO_VS_BREEDON_2026-09-03.md`, misurata oggi) —
+  EURUSD **SHORT 08:00-16:00 server**, C1 **4,59** su IS 2011-2017 (n=1.607) e
+  **5,31** su OOS 2017-2026 (n=2.411), **cella indicata PRIMA dei numeri**.
+  Zero livelli, zero rotture: **nessuna parentela con i sei caduti di Londra**,
+  e riempie il buco SHORT. Il suo problema e' l'**ESECUZIONE** (~1 bp la uccide),
+  non l'edge → la domanda del prossimo round e' *"come si entra senza pagare lo
+  spread"*, non *"quale motore"*.
+- 🔬 **CONTROLLO DI METODO NUOVO, da rifare sempre: la licenza si verifica
+  contro un bersaglio noto.** Prima di scrivere "nessuna licenza" su 8 sorgenti
+  ho riscaricato uno script che sappiamo MPL: **l'intestazione c'e'**, quindi il
+  canale non la perde. Risultato scomodo: **i due candidati con MPL 2.0 sono
+  quelli ROTTI** (`SMC Liquidity Grab Pro` ha `barmerge.lookahead_on`;
+  `Falcon Liquidity Grab` ha `low < ta.lowest(low,5)`, condizione
+  **matematicamente impossibile**), e i quattro scritti bene non hanno licenza.
+  **Una licenza libera non certifica che il codice funzioni.**
+- ⛔ **ANGOLO REGIME: bloccato dai DATI, non dall'idea.** `REFERTO_CRT` STAGE-2
+  misura che il fade di sessione e' un motore da **CHOP** (2023 **+5.259** su
+  n=83; orso 2022 **+2.633**) e **perde nel crollo (−2.760) e nel toro liscio
+  (−609)**. I tick BCM coprono **21-24 mesi di solo toro**: il regime in cui la
+  famiglia vive **non e' raggiungibile** senza l'import Dukascopy (strumenti
+  pronti dal 31/08, **mai lanciati**). Stessa porta di CRT e NY-Retest.
+- 🕳️ **Buco dichiarato:** **Osler 2003 (JF) e Osler 2005 (JIMF)** — la tesi
+  accademica sotto lo stop-hunt — **NON APERTE**: SSRN 403 (13ª di fila),
+  `newyorkfed.org` egress-blocked, mirror `technicalanalysis.org.uk` 403,
+  `ideas.repec.org` egress-blocked su due trasporti. ⚠️ E dallo snippet si
+  intuisce che taglierebbe **in due direzioni opposte** (il "cascade" dopo il
+  livello e' un argomento **pro-breakout**): da leggere prima di citarla.
+- 🔧 **Un attrezzo in cassa:** `Dynamic Session Range Sweep Detector`
+  (Code Base **76305**, indicatore) — level builder di sessione **in ora
+  server**, `PipSize` fatto giusto, e una **penetrazione minima** prima di
+  contare uno sweep (`InpMinSweepPips=2,0`) che `ABTG_BreakinBox` **non ha**.

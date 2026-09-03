@@ -721,3 +721,78 @@ byte di pagina di blocco): **non e' un problema di percorso, e' il dominio.**
 | 🆕 `medium.com` · `concretumgroup.com` · `tapescript.io` | 🔴 **murati** — §3 |
 | MQL5 Code Base · articoli MQL5 · QuantConnect · `geraked` | ⬜ **non riaperti**: chiusi per mandato |
 | Forex Factory · EarnForex · Quantpedia premium | ⬜ **non riprovati**: murati e gia' misurati su due trasporti |
+
+---
+
+## 📅 03/09/2026 (sera) — SECONDA CACCIA DOPO R116: tre domini nuovi murati, e un controllo di metodo
+
+Misurato oggi, non ipotizzato. Dossier:
+`caccia_strategie/CACCIA_LONDRA_ALTERNATIVA_2026-09-03.md`.
+
+### 1. 🔴 LA LETTERATURA DI MICROSTRUTTURA FX RESTA IRRAGGIUNGIBILE — TRE PORTE, TRE MURI
+
+Bersaglio: **Osler**, *Currency Orders and Exchange Rate Dynamics* (JF 2003) e
+*Stop-loss orders and price cascades in currency markets* (JIMF 2005) — la tesi
+accademica sotto il meccanismo "stop hunt".
+
+| porta | trasporto | esito 03/09 |
+|---|---|---|
+| `papers.ssrn.com/sol3/papers.cfm?abstract_id=3138756` | `curl` | 🔴 **403** (5.505 byte di blocco) — **TREDICESIMA di fila** |
+| 🆕 `www.newyorkfed.org/…/staff_reports/sr125.pdf` (PDF ufficiale, gratuito) | `curl` | 🔴 **000 al CONNECT** |
+| 🆕 stesso URL | **`WebFetch`** | 🔴 **`EGRESS_BLOCKED`** — **non e' il caso GitHub: e' murato al dominio** |
+| 🆕 `technicalanalysis.org.uk/bar-charts/Osle02.pdf` (mirror) | `curl` | 🔴 **403** |
+| `ideas.repec.org` | **`WebFetch`** | 🔴 **`EGRESS_BLOCKED`** (finora dichiarato solo su `curl`: ora misurato su due trasporti) |
+
+> 📌 **Da aggiungere alla lista dei domini da autorizzare (§2):**
+> `newyorkfed.org` + `*.newyorkfed.org` — e' un sito **pubblico e gratuito**
+> della Fed di New York, ospita gli **staff reports** che sono le versioni
+> pre-pubblicazione di mezza letteratura di microstruttura FX. Sarebbe la via
+> LEGITTIMA e gratuita per aggirare il muro SSRN.
+
+### 2. 🔬 CONTROLLO DI METODO NUOVO: la LICENZA si verifica contro un bersaglio noto
+
+Prima di scrivere "nessuna licenza dichiarata" su otto sorgenti Pine, ho
+verificato che **non fosse il canale a perderla**: riscaricato con lo stesso
+endpoint `pine-facade /get/` uno script che sappiamo essere MPL
+(`PUB;yMINlAO3…`, SoftKill21, gia' in biblioteca) → la riga
+`// This source code is subject to the terms of the Mozilla Public License 2.0…`
+**arriva, alla riga 1**.
+
+➡️ **Il canale non perde le licenze: quando mancano, mancano davvero.**
+E' lo stesso principio del pattern `PUB;` sbagliato del 25/08 (un identificatore
+sbagliato non da' un errore, da' un candidato "non letto") applicato alla
+licenza: **un'assenza va misurata contro un positivo noto, o non e' un'assenza.**
+
+🔴 **Risultato scomodo, da tenere a mente:** dei sei candidati letti sulla stessa
+famiglia, **i due con MPL 2.0 sono quelli ROTTI** (uno ha `barmerge.lookahead_on`,
+l'altro una condizione d'ingresso matematicamente impossibile) e i quattro
+scritti bene non hanno licenza. **Una licenza libera non certifica che il codice
+funzioni.**
+
+### 3. 📉 TRADINGVIEW: dodici query nuove a ZERO strategie, sul bersaglio "fade di sessione"
+
+Da aggiungere alla lista dei vuoti (non riprovarle):
+`london killzone` · `london fade` · `session high low` (**50 risultati, 0
+strategie**) · `opening range reversal` · `overextension` · `reversion to open` ·
+`morning reversal` · `first hour reversal` · `atr extension` ·
+`currency strength strategy` · `session drift` · `intraday seasonality forex`.
+
+Query **produttive** oggi (mecanismo, non formato — regola del 03/09 confermata):
+`sweep reversal` (6 strategie) · `liquidity grab` (5) · `session sweep` (5) ·
+`turtle soup` (4) · `fakeout` (3) · `time of day` (3) · `stop hunt` (2) ·
+`london session` (2) · `asian session` (2) · `range fade` (2).
+
+### 4. Il resto della mappa, rimisurato oggi
+
+| fonte | 03/09/2026 sera |
+|---|---|
+| `tradingview.com` `pubscripts-suggest-json` | 🟢 **200** (40.283 byte sul bersaglio noto `vwap`, **identico** alla misura del mattino) |
+| `pine-facade` `/get/` | 🟢 **200**, `source` in chiaro **con intestazione di licenza quando c'e'** (§2) |
+| `mql5.com` (pagina codice + download ZIP) | 🟢 **200** (controllo positivo su 68951: titolo, autore, `datePublished`, `UserDownloads:2465`) |
+| `export.arxiv.org` (API) | 🟢 **200** — ma **4 query in tema, 1 solo hit fuori tema**: conferma che la microstruttura non vive su arXiv |
+| `raw.githubusercontent.com` | 🟢 **200** |
+| GitHub `WebSearch` → `WebFetch` su pagina repo | 🟢 **200** |
+| `papers.ssrn.com` | 🔴 **403 — TREDICESIMA di fila** |
+| 🆕 `newyorkfed.org` · `technicalanalysis.org.uk` | 🔴 **murati** — §1 |
+| `ideas.repec.org` | 🔴 **`EGRESS_BLOCKED` anche via `WebFetch`** (secondo trasporto) — §1 |
+| Forex Factory · Quantpedia premium · EarnForex | ⬜ **non riprovate**: murate e gia' misurate su due trasporti (02/09) |
