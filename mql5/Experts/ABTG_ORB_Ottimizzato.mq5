@@ -26,6 +26,46 @@
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //|  CHANGELOG                                                       |
+//|  v1.04 (03/09/2026) - LA CURA del difetto SelPos/HEDGING.        |
+//|        Il dossier report/ORB_GEMELLI_DIVERGENZA_2026-08-22.md    |
+//|        ha CONFERMATO il meccanismo su tre giornate misurate      |
+//|        (19/08, 21/08, 02/09) e con la FOTO A del 03/09           |
+//|        (LARRY DOW S, magic 772341, aperta il 01/09 e viva per    |
+//|        tutta la vita del trade ORB). Meccanismo, detto giusto:   |
+//|        su conto HEDGING PositionSelect(_Symbol) seleziona la     |
+//|        posizione col TICKET PIU' BASSO del simbolo -- NON "la    |
+//|        piu' vecchia in orologio" (misurato in                    |
+//|        report/VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md: il     |
+//|        16,5% delle coppie ha l'ordine per ticket INVERTITO       |
+//|        rispetto all'orologio, perche' una posizione nata da un   |
+//|        pendente eredita il ticket di QUANDO il pendente e' stato |
+//|        PIAZZATO). Se quel ticket e' di un'altra sedia, il        |
+//|        controllo sul magic falliva e l'EA restava CIECO alla     |
+//|        propria posizione: niente trailing, niente breakeven,     |
+//|        niente OCO disarmato, niente OneTradePerDay, niente       |
+//|        chiusura di fine giornata.                                |
+//|        COSA CAMBIA QUI: ogni selezione passa da un nucleo puro   |
+//|        che scorre PositionsTotal() filtrando SIMBOLO + MAGIC e   |
+//|        restituisce il TICKET della NOSTRA posizione; ogni        |
+//|        scrittura (PositionClose / PositionModify) usa quel       |
+//|        TICKET e non piu' _Symbol. Lettura e scrittura corrette   |
+//|        INSIEME, come impone                                      |
+//|        report/AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md: farne  |
+//|        una sola crea la categoria "arancione" (leggo la mia e    |
+//|        chiudo quella del vicino), che e' PEGGIO del bug.         |
+//|        I log diagnostici della v1.03 restano TUTTI. Il log n.4   |
+//|        ("SelPos falso ma posizioni nostre esistenti") e' ora     |
+//|        impossibile per costruzione ed e' sostituito dal log      |
+//|        "ORB SELEZIONE:", che al primo trade con vicini stampa    |
+//|        QUALE ticket nostro e' stato preso e quale avrebbe preso  |
+//|        la v1.03: e' cosi' che il fix si VERIFICA in campo.       |
+//|        Aggiunto un AUTOTEST a tavolino (10 blocchi, 33 casi) sul |
+//|        nucleo puro della selezione: gira in OnInit, non tocca il |
+//|        mercato.                                                  |
+//|        NEL TESTER il comportamento deve restare IDENTICO al      |
+//|        centesimo (l'EA e' solo sul simbolo: nessun vicino, il    |
+//|        ticket piu' basso e' sempre il nostro). E' il test di     |
+//|        NON-REGRESSIONE, non di merito.                            |
 //|  v1.03 (02/09/2026, caccia ai GEMELLI CHE DIVERGONO) - SOLO      |
 //|        STRUMENTAZIONE DIAGNOSTICA: nessun input nuovo, nessun    |
 //|        cambio di logica di trading, nessuna riga di decisione    |
@@ -50,8 +90,17 @@
 //|        InpOneTradePerDay.                                        |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.03"
+#property version   "1.04"
 #property strict
+
+//--- v1.04: QUANTI BLOCCHI E QUANTI CASI deve eseguire l'autotest.
+//    Due contatori e non uno (pattern di casa, ABTG_LondonFx): un blocco
+//    cancellato per sbaglio non deve poter passare per "tutto verde", e
+//    nemmeno un blocco SVUOTATO delle sue asserzioni, che il conteggio
+//    dei soli blocchi non vedrebbe. Se uno dei due conti non torna,
+//    l'autotest si dichiara FALLITO.
+#define ORBOTT_AUTOTEST_BLOCCHI_ATTESI 10
+#define ORBOTT_AUTOTEST_CASI_ATTESI    33
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -172,6 +221,12 @@ input string InpComment   = "ORB OTT";
 input long   InpMagic     = 770611;   // magic DIVERSO dal corso (770601)
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
+//--- v1.04: autotest a tavolino del nucleo di selezione hedge-safe.
+//    NON tocca il mercato, NON cambia una sola decisione di trading:
+//    stampa in OnInit e basta. Default true perche' una verifica che si
+//    puo' spegnere da pannello per sbaglio non serve a niente -- e
+//    perche' e' l'unica prova che qui si puo' produrre senza MetaEditor.
+input bool   InpAutoTest  = true;     // Autotest del nucleo di selezione (stampa in OnInit)
 
 input group "=== Slippage stimato (R55: quanto scala questa cella) ==="
 //  PERCHE' (15/08/2026, R55). Tutti i backtest del progetto girano con
@@ -204,6 +259,17 @@ double   gRangeHigh=0, gRangeLow=0;
 bool     gPart1=false;
 bool     gHadPos=false;
 datetime gLastExec=0;
+
+//--- v1.04: IL TICKET DELLA NOSTRA POSIZIONE. Lo scrive SelPos() a ogni
+//    selezione riuscita ed e' l'unico appiglio usato dalle scritture
+//    (PositionModify / PositionClose). Vale 0 quando non abbiamo niente
+//    di aperto: qualunque scrittura con gTicketMio==0 e' un errore di
+//    programmazione, non una condizione di mercato.
+ulong    gTicketMio=0;
+//--- v1.04: buffer riusati per fotografare le posizioni del terminale.
+//    Globali e non locali apposta: la lettura gira a ogni tick e non
+//    deve allocare/liberare array ogni volta.
+string   gPosSym[]; long gPosMag[]; ulong gPosTk[];
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 
@@ -240,6 +306,7 @@ int OnInit()
       return(INIT_FAILED);
      }
    if(InpUseNewsFilter) LoadNews();
+   if(InpAutoTest) Autotest();   // v1.04: verifica a tavolino del nucleo di selezione
    Log(StringFormat("avviato su %s. Range server %02d:%02d-%02d:%02d, ingresso %.1f x K(%.4f), fine %02d:%02d.",
        _Symbol,InpRangeStartHour,InpRangeStartMin,InpRangeEndHour,InpRangeEndMin,InpEntryPoints,InpK,InpEndHour,InpEndMin));
    return(INIT_SUCCEEDED);
@@ -277,6 +344,14 @@ void OnTick()
    // il pendente opposto restava vivo (scadenza 600') e riapriva in giornata
    // ("si gira e ristoppato", visto live il 06/08). Con il flag acceso, chiuso
    // il trade del giorno si cancellano i pendenti superstiti.
+   //--- v1.04, CAMBIO DI COMPORTAMENTO REALE, da tenere davanti agli occhi:
+   //    il codice qui sotto e' identico, ma SelPos() ora VEDE. Nelle giornate
+   //    con un vicino a ticket piu' basso gHadPos restava falso per sempre e
+   //    "un trade al giorno" NON SI ARMAVA MAI: i pendenti superstiti
+   //    restavano vivi e potevano riaprire in giornata. Da adesso quelle
+   //    giornate si comportano come tutte le altre -> su un simbolo affollato
+   //    ci si aspetta MENO trade, non di piu'. Non e' un miglioramento
+   //    promesso: e' l'EA che fa quello che dice il suo pannello.
    if(SelPos()) gHadPos=true;
    else if(gHadPos && InpOneTradePerDay) CancelPendings();
 
@@ -284,7 +359,15 @@ void OnTick()
    if(now.day_of_year!=gDay){ gDay=now.day_of_year; ResetDay(); }
 
    bool newsBlk=InNewsBlackout(TimeCurrent());
-   if(newsBlk && InpNewsFlatten){ CancelPendings(); if(SelPos()) gTrade.PositionClose(_Symbol); }
+   //--- v1.04: il flatten notizie chiudeva con PositionClose(_Symbol), cioe'
+   //    "chiudi il ticket piu' basso del simbolo": su hedging poteva essere
+   //    la posizione di un'ALTRA sedia (categoria arancione dell'audit del
+   //    03/09). Ora chiude SOLO le nostre, una per una, per TICKET.
+   //    NB: in tutto il forward questo ramo non e' mai stato eseguito
+   //    (InpUseNewsFilter=false e abtg_news.csv vuoto, misurato in
+   //    report/VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md): si corregge
+   //    perche' il ramo esiste, non perche' abbia fatto danni.
+   if(newsBlk && InpNewsFlatten){ CancelPendings(); ChiudiPosizioniMie("blackout notizie"); }
 
    int nowMin=now.hour*60+now.min;
    if(nowMin>=InpEndHour*60+InpEndMin){ EndOfDay(); return; }
@@ -601,13 +684,33 @@ void ManageTP1()
    // EMA200, dove era costata -112,78 EUR su due short oro a 0,01 lotti.
    bool parzOK = (cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv));
    if(parzOK) gPart1=true;
+   //--- v1.04: dopo il parziale la posizione e' CAMBIATA (volume ridotto, e
+   //    in casi limite chiusa del tutto). Prima si continuava a leggere SL e
+   //    tipo dalla selezione precedente, cioe' da dati vecchi. Ci si
+   //    riaggancia PER TICKET: se il ticket non esiste piu', non c'e' niente
+   //    da portare in pari e si esce.
+   if(!PositionSelectByTicket(ticket)) return;
    double bePari  = NormalizePrice(openP);
    double slPrec  = PositionGetDouble(POSITION_SL);
    bool   dirLong = (PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY);
    // il breakeven si fa SOLO se migliora lo stop: cosi' non si ripete a ogni tick
    bool beFatto = (InpBreakeven && ((dirLong && bePari>slPrec) ||
                                     (!dirLong && (slPrec==0 || bePari<slPrec))));
-   if(beFatto) gTrade.PositionModify(_Symbol,bePari,PositionGetDouble(POSITION_TP));
+   //--- v1.04: lo stop in pari si mette sul NOSTRO TICKET. Con
+   //    PositionModify(_Symbol,...) su hedging si sarebbe spostato lo stop
+   //    della posizione col ticket piu' basso del simbolo -- cioe', con un
+   //    vicino davanti, LO STOP DI UN'ALTRA SEDIA.
+   if(beFatto)
+     {
+      ResetLastError();
+      if(!gTrade.PositionModify(gTicketMio,bePari,PositionGetDouble(POSITION_TP)))
+        {
+         beFatto=false;
+         PrintFormat("ORB TP1: stop in pari FALLITO sul ticket #%I64u (-> %s), retcode %u (%s), err=%d",
+                     gTicketMio,DoubleToString(bePari,_Digits),
+                     gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+        }
+     }
    if(parzOK || beFatto)
       Log(parzOK ? "target: parziale + stop in pari."
                  : "target: stop in pari (parziale impossibile al lotto minimo).");
@@ -636,21 +739,22 @@ void ManageRunner()
 
    if(!SelPos())
      {
-      //--- Ramo 1. Nessuna posizione NOSTRA selezionabile. Nel caso normale
-      //    (nessuna posizione aperta) si tace, altrimenti il log si riempie di
-      //    righe inutili a ogni barra. Ma se una posizione col NOSTRO magic
-      //    esiste davvero e SelPos() dice comunque di no, siamo davanti
-      //    all'anomalia da conto HEDGING: SelPos() usa PositionSelect(_Symbol),
-      //    che seleziona la PRIMA posizione del simbolo QUALUNQUE sia il magic
-      //    -- e su U30USD sul conto piccolo girano anche 770202, 771531, 770511,
-      //    770531... Se ne e' aperta una di un'altra sedia, il nostro controllo
-      //    sul magic fallisce e il runner esce QUI, in silenzio: niente
-      //    trailing, niente uscita su EMA, niente breakeven. E' esattamente il
-      //    sintomo osservato il 02/09. Questa riga lo dimostra o lo scagiona.
+      //--- Ramo 1. Nessuna posizione NOSTRA selezionabile.
+      //    v1.03: qui si stampava il log n.4, "SelPos() falso ma posizioni
+      //    nostre esistenti", che era IL test dell'ipotesi hedging.
+      //    v1.04: quella condizione e' IMPOSSIBILE PER COSTRUZIONE -- SelPos()
+      //    non usa piu' PositionSelect(_Symbol) ma sceglie il nostro ticket
+      //    scorrendo tutte le posizioni. Il controllo resta come INVARIANTE:
+      //    se dovesse stampare ancora, non e' piu' il difetto hedging, e' una
+      //    PositionSelectByTicket che fallisce su un ticket appena letto
+      //    (posizione chiusa nel frattempo, o guaio serio del terminale). Va
+      //    letta come un allarme, non come la conferma di un'ipotesi.
+      //    La prova POSITIVA del fix la stampa ora "ORB SELEZIONE:" dentro
+      //    SelPos(), al primo trade con vicini.
       int nostre=ContaPosizioniMagic();
       if(nostre>0 && unaPerBarra)
-         PrintFormat("ORB RUNNER: SelPos() FALSO ma risultano %d posizioni con magic %s su %s -> PositionSelect ha selezionato la posizione di un'ALTRA sedia (conto hedging). Gestione del runner SALTATA.",
-                     nostre,IntegerToString(InpMagic),_Symbol);
+         PrintFormat("ORB RUNNER: INVARIANTE VIOLATA -- risultano %d posizioni con magic %I64d su %s ma la selezione per ticket e' fallita. Gestione del runner SALTATA su questa barra.",
+                     nostre,InpMagic,_Symbol);
       return;
      }
 
@@ -691,22 +795,31 @@ void ManageRunner()
       PrintFormat("ORB RUNNER: iClose(%s,TF %d,shift 1) = %.5f (dato assente): il confronto con l'EMA usa un prezzo non valido.",
                   _Symbol,(int)InpExecTF,close1);
 
+   //--- v1.04: le due uscite su EMA chiudono IL NOSTRO TICKET. Con
+   //    PositionClose(_Symbol) su hedging si sarebbe chiusa la posizione col
+   //    ticket piu' basso del simbolo: con un vicino davanti, il trade di
+   //    un'altra sedia. Nella v1.03 il danno non si e' mai prodotto solo
+   //    perche' SelPos() era falso proprio in quei casi e non si arrivava
+   //    fin qui: correggere la lettura SENZA la scrittura avrebbe ARMATO il
+   //    colpo (categoria arancione dell'audit del 03/09).
    if(InpExitOnEmaClose)
      {
       if(isLong && close1<ef[0])
         {
-         bool okC=gTrade.PositionClose(_Symbol);
-         if(okC) Log("chiusura M5 sotto EMA9: uscita.");
-         else    PrintFormat("ORB RUNNER: uscita per chiusura sotto EMA%d FALLITA, retcode %u (%s), err=%d",
-                             InpEmaFast,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+         ResetLastError();
+         bool okC=gTrade.PositionClose(gTicketMio);
+         if(okC) Log(StringFormat("chiusura M5 sotto EMA9: uscita (ticket #%I64u).",gTicketMio));
+         else    PrintFormat("ORB RUNNER: uscita per chiusura sotto EMA%d FALLITA sul ticket #%I64u, retcode %u (%s), err=%d",
+                             InpEmaFast,gTicketMio,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
          return;
         }
       if(!isLong && close1>ef[0])
         {
-         bool okC=gTrade.PositionClose(_Symbol);
-         if(okC) Log("chiusura M5 sopra EMA9: uscita.");
-         else    PrintFormat("ORB RUNNER: uscita per chiusura sopra EMA%d FALLITA, retcode %u (%s), err=%d",
-                             InpEmaFast,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+         ResetLastError();
+         bool okC=gTrade.PositionClose(gTicketMio);
+         if(okC) Log(StringFormat("chiusura M5 sopra EMA9: uscita (ticket #%I64u).",gTicketMio));
+         else    PrintFormat("ORB RUNNER: uscita per chiusura sopra EMA%d FALLITA sul ticket #%I64u, retcode %u (%s), err=%d",
+                             InpEmaFast,gTicketMio,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
          return;
         }
      }
@@ -717,16 +830,20 @@ void ManageRunner()
       double newSL=NormalizePrice(ef[0]);
       double bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
       double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+      //--- v1.04: il trascinamento dello stop va sul NOSTRO TICKET (vedi sopra:
+      //    PositionModify(_Symbol,...) spostava lo stop del ticket piu' basso
+      //    del simbolo). Il ticket compare anche nel log: sul conto piccolo,
+      //    con i vicini, e' la riga che prova che il fix funziona.
       if(isLong && newSL>sl && newSL<bid)
         {
          ResetLastError();
-         if(gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP)))
-            PrintFormat("ORB RUNNER: stop LONG trascinato su EMA%d: %s -> %s (apertura %s, BID %s).",
-                        InpEmaFast,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+         if(gTrade.PositionModify(gTicketMio,newSL,PositionGetDouble(POSITION_TP)))
+            PrintFormat("ORB RUNNER: stop LONG trascinato su EMA%d sul ticket #%I64u: %s -> %s (apertura %s, BID %s).",
+                        InpEmaFast,gTicketMio,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
                         DoubleToString(openP,_Digits),DoubleToString(bid,_Digits));
          else
-            PrintFormat("ORB RUNNER: PositionModify LONG FALLITA (%s -> %s), retcode %u (%s), err=%d",
-                        DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+            PrintFormat("ORB RUNNER: PositionModify LONG FALLITA sul ticket #%I64u (%s -> %s), retcode %u (%s), err=%d",
+                        gTicketMio,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
                         gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
         }
       else if(isLong && unaPerBarra)
@@ -740,13 +857,13 @@ void ManageRunner()
       if(!isLong && (newSL<sl||sl==0) && newSL>ask)
         {
          ResetLastError();
-         if(gTrade.PositionModify(_Symbol,newSL,PositionGetDouble(POSITION_TP)))
-            PrintFormat("ORB RUNNER: stop SHORT trascinato su EMA%d: %s -> %s (apertura %s, ASK %s).",
-                        InpEmaFast,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+         if(gTrade.PositionModify(gTicketMio,newSL,PositionGetDouble(POSITION_TP)))
+            PrintFormat("ORB RUNNER: stop SHORT trascinato su EMA%d sul ticket #%I64u: %s -> %s (apertura %s, ASK %s).",
+                        InpEmaFast,gTicketMio,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
                         DoubleToString(openP,_Digits),DoubleToString(ask,_Digits));
          else
-            PrintFormat("ORB RUNNER: PositionModify SHORT FALLITA (%s -> %s), retcode %u (%s), err=%d",
-                        DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
+            PrintFormat("ORB RUNNER: PositionModify SHORT FALLITA sul ticket #%I64u (%s -> %s), retcode %u (%s), err=%d",
+                        gTicketMio,DoubleToString(sl,_Digits),DoubleToString(newSL,_Digits),
                         gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
         }
       else if(!isLong && unaPerBarra)
@@ -755,29 +872,159 @@ void ManageRunner()
      }
   }
 
-//+------------------------------------------------------------------+
-//| v1.03 (solo DIAGNOSTICA, non decide niente): quante posizioni con |
-//| il NOSTRO magic ci sono davvero su questo simbolo. Serve a        |
-//| smascherare il caso hedging in cui PositionSelect(_Symbol) --     |
-//| usata da SelPos() -- seleziona la posizione di un'altra sedia e   |
-//| il controllo sul magic fa uscire il runner in silenzio.           |
-//| Costo: chiamata solo nel ramo diagnostico, al massimo una volta   |
-//| per barra M5.                                                     |
-//+------------------------------------------------------------------+
-int ContaPosizioniMagic()
+//==================================================================
+//  v1.04 -- SELEZIONE HEDGE-SAFE DELLE POSIZIONI
+//
+//  IL DIFETTO CHE CURA (misurato, non ipotizzato):
+//    bool SelPos(){ if(!PositionSelect(_Symbol)) return(false);
+//                   return(PositionGetInteger(POSITION_MAGIC)==InpMagic); }
+//  Su conto HEDGING PositionSelect(_Symbol) aggancia la posizione col
+//  TICKET PIU' BASSO del simbolo, qualunque sia il magic. Se non e' la
+//  nostra, il controllo sul magic fallisce e l'EA diventa CIECO alla
+//  propria posizione: niente trailing, niente breakeven, niente OCO
+//  disarmato, niente OneTradePerDay, niente chiusura di fine giornata.
+//  Osservato tre volte sul conto piccolo (19/08, 21/08, 02/09) e
+//  inchiodato dalla FOTO A del 03/09.
+//
+//  "TICKET PIU' BASSO", NON "PIU' VECCHIA IN OROLOGIO". La formulazione
+//  giusta e' quella misurata in
+//  report/VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md: su 170 coppie, il
+//  16,5% ha l'ordine per ticket INVERTITO rispetto all'orologio, perche'
+//  una posizione nata da un PENDENTE eredita il ticket di quando il
+//  pendente e' stato PIAZZATO, non di quando si e' riempito. E questo EA
+//  entra proprio con BuyStop/SellStop piazzati a inizio sessione.
+//
+//  LA FORMA DEL FIX: nucleo PURO (nessuna chiamata al terminale, quindi
+//  autotestabile a tavolino) + un guscio sottile che gli passa la foto
+//  delle posizioni. Il pensiero sta nel nucleo, cosi' l'autotest prova
+//  il codice che gira davvero, non una sua copia.
+//==================================================================
+
+//--- Il predicato, una riga sola: la posizione e' NOSTRA se coincidono
+//    SIMBOLO e MAGIC. Il magic da solo non basta (lo stesso EA puo'
+//    girare su piu' simboli), il simbolo da solo e' il difetto di
+//    HARSI_Assistant censito nell'audit.
+bool PosMia_Calc(const string sym,const long magic,const string mioSym,const long mioMagic)
+  { return(sym==mioSym && magic==mioMagic); }
+
+//--- Elenca i ticket NOSTRI, ORDINATI PER TICKET CRESCENTE.
+//    L'ordinamento non e' estetica: fissa quale posizione si gestisce
+//    quando ne abbiamo piu' d'una (la piu' bassa, cioe' la prima nata),
+//    e rende l'esito indipendente dall'ordine con cui il terminale
+//    restituisce gli indici -- che NON e' l'ordine dei ticket.
+int ElencaTicketMiei_Calc(const string &sym[],const long &mag[],const ulong &tk[],const int n,
+                          const string mioSym,const long mioMagic,ulong &miei[])
   {
+   ArrayResize(miei,0);
+   int q=0;
+   for(int i=0;i<n;i++)
+     {
+      if(tk[i]==0) continue;
+      if(!PosMia_Calc(sym[i],mag[i],mioSym,mioMagic)) continue;
+      ArrayResize(miei,q+1);
+      int j=q-1;
+      while(j>=0 && miei[j]>tk[i]){ miei[j+1]=miei[j]; j--; }
+      miei[j+1]=tk[i];
+      q++;
+     }
+   return(q);
+  }
+
+//--- Sceglie IL NOSTRO ticket e, gratis, dice anche quale ticket avrebbe
+//    agganciato PositionSelect(_Symbol) (= il piu' basso del simbolo,
+//    qualunque magic) e di chi e'. Quel secondo dato non decide niente:
+//    serve al log "ORB SELEZIONE:", che e' il modo in cui questo fix si
+//    verifica in campo al primo trade con vicini.
+ulong ScegliTicketMio_Calc(const string &sym[],const long &mag[],const ulong &tk[],const int n,
+                           const string mioSym,const long mioMagic,
+                           int &quanteMie,ulong &tkPrimoLista,long &magicPrimoLista)
+  {
+   ulong miei[];
+   quanteMie=ElencaTicketMiei_Calc(sym,mag,tk,n,mioSym,mioMagic,miei);
+   tkPrimoLista=0; magicPrimoLista=0;
+   for(int i=0;i<n;i++)
+     {
+      if(tk[i]==0) continue;
+      if(sym[i]!=mioSym) continue;                    // i vicini di ALTRI simboli non contano
+      if(tkPrimoLista==0 || tk[i]<tkPrimoLista){ tkPrimoLista=tk[i]; magicPrimoLista=mag[i]; }
+     }
+   return(quanteMie>0 ? miei[0] : 0);
+  }
+
+//--- Il guscio: fotografa le posizioni del terminale negli array globali.
+//    Attenzione, PositionGetTicket(i) SELEZIONA la posizione all'indice i:
+//    dopo questa funzione la "posizione corrente" e' l'ultima letta, mai
+//    dare per buono che sia la nostra. Chi deve leggerne i campi passa
+//    sempre da SelPos(), che rifa' PositionSelectByTicket.
+int LeggiPosizioni()
+  {
+   int tot=PositionsTotal();
+   ArrayResize(gPosSym,tot); ArrayResize(gPosMag,tot); ArrayResize(gPosTk,tot);
    int n=0;
-   for(int i=PositionsTotal()-1;i>=0;i--)
+   for(int i=0;i<tot;i++)
      {
       ulong tk=PositionGetTicket(i);
       if(tk==0) continue;
-      if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
-      if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      gPosTk[n] =tk;
+      gPosSym[n]=PositionGetString(POSITION_SYMBOL);
+      gPosMag[n]=PositionGetInteger(POSITION_MAGIC);
       n++;
      }
    return(n);
   }
 
+//--- Quante posizioni NOSTRE ci sono davvero. Era la funzione di sola
+//    diagnostica della v1.03 (l'audit del 03/09 la cita come "il pattern
+//    sano gia' in casa"): ora e' scritta sopra al nucleo puro, cosi' non
+//    esistono due implementazioni dello stesso filtro che possono
+//    divergere.
+int ContaPosizioniMagic()
+  {
+   ulong miei[];
+   int n=LeggiPosizioni();
+   return(ElencaTicketMiei_Calc(gPosSym,gPosMag,gPosTk,n,_Symbol,InpMagic,miei));
+  }
+
+//+------------------------------------------------------------------+
+//| v1.04 -- CHIUSURA DELLE NOSTRE POSIZIONI, UNA PER UNA, PER TICKET.|
+//| Sostituisce PositionClose(_Symbol) nei due punti di "flatten"      |
+//| (fine giornata e blackout notizie). Tre cose che cambiano:         |
+//|  1. non puo' piu' toccare la posizione di un'altra sedia;          |
+//|  2. se per qualunque motivo di NOSTRE ce ne fossero due (il caso   |
+//|     che l'OCO cieco rendeva possibile), le chiude ENTRAMBE;        |
+//|  3. quando non abbiamo niente non fa NESSUNA chiamata: EndOfDay(), |
+//|     che gira a ogni tick dopo l'ora di fine, resta muto invece di  |
+//|     ritentare all'infinito (il "ciclo che chiude i vicini a        |
+//|     catena" descritto nella VERIFICA del 03/09 qui non puo'        |
+//|     nascere).                                                      |
+//+------------------------------------------------------------------+
+int ChiudiPosizioniMie(const string motivo)
+  {
+   ulong miei[];
+   int n=LeggiPosizioni();
+   int q=ElencaTicketMiei_Calc(gPosSym,gPosMag,gPosTk,n,_Symbol,InpMagic,miei);
+   int chiuse=0;
+   for(int i=0;i<q;i++)
+     {
+      ResetLastError();
+      if(gTrade.PositionClose(miei[i]))
+        { chiuse++; Log(StringFormat("%s: chiusa la posizione #%I64u.",motivo,miei[i])); }
+      else
+         PrintFormat("ORB CHIUSURA: PositionClose(#%I64u) FALLITA (%s), retcode %u (%s), err=%d",
+                     miei[i],motivo,gTrade.ResultRetcode(),gTrade.ResultRetcodeDescription(),GetLastError());
+     }
+   if(chiuse>0) gTicketMio=0;
+   return(chiuse);
+  }
+
+//+------------------------------------------------------------------+
+//| OCO: appena una posizione NOSTRA esiste, il pendente opposto si    |
+//| cancella. v1.04: prima questa riga era dietro il SelPos() cieco,   |
+//| quindi nelle giornate con un vicino a ticket piu' basso il secondo |
+//| lato restava ARMATO -- misurato in forward sul gemello nativo      |
+//| (ABTG_ORB, 4 giornate su 16 con il secondo lato riempito,          |
+//| report/VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md). Sul 770611 non |
+//| si e' ancora prodotto, ma era possibile per costruzione.           |
 //+------------------------------------------------------------------+
 void HandleOCO(){ if(SelPos()) CancelPendings(); }
 
@@ -796,7 +1043,11 @@ void CancelPendings()
 void EndOfDay()
   {
    CancelPendings();
-   if(InpCloseAtEnd && SelPos()){ gTrade.PositionClose(_Symbol); Log("fine giornata: posizione chiusa."); }
+   //--- v1.04: chiusura di fine giornata PER TICKET, e solo delle nostre.
+   //    Prima: SelPos() cieco -> nelle giornate con vicini la posizione NON
+   //    veniva chiusa affatto; e se SelPos() fosse stato corretto da solo,
+   //    PositionClose(_Symbol) avrebbe chiuso il trade del vicino.
+   if(InpCloseAtEnd) ChiudiPosizioniMie("fine giornata");
    gPhase=ORB_DONE;
   }
 
@@ -854,7 +1105,212 @@ double NormVol(double v)
   }
 
 bool SpreadOK(){ if(InpMaxSpread<=0) return(true); return(SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)<=InpMaxSpread); }
-bool SelPos(){ if(!PositionSelect(_Symbol)) return(false); return(PositionGetInteger(POSITION_MAGIC)==InpMagic); }
+
+//+------------------------------------------------------------------+
+//| SelPos() -- v1.04, HEDGE-SAFE. Nome invariato apposta: tutti i     |
+//| punti di chiamata (ManageTP1, ManageRunner, HandleOCO, il ramo     |
+//| gHadPos/InpOneTradePerDay) restano una riga uguale a prima, e la   |
+//| revisione prima della firma guarda UNA funzione sola.              |
+//| Contratto: true = la NOSTRA posizione esiste ED E' SELEZIONATA per |
+//| ticket, quindi tutte le PositionGet* che seguono leggono lei.      |
+//| Effetto collaterale voluto: scrive gTicketMio, che e' l'appiglio   |
+//| di ogni scrittura (modify/close).                                  |
+//+------------------------------------------------------------------+
+bool SelPos()
+  {
+   int  quante=0; ulong tkPrimo=0; long magicPrimo=0;
+   int  n=LeggiPosizioni();
+   gTicketMio=ScegliTicketMio_Calc(gPosSym,gPosMag,gPosTk,n,_Symbol,InpMagic,quante,tkPrimo,magicPrimo);
+   if(gTicketMio==0) return(false);
+
+   //--- LA PROVA SUL CAMPO DEL FIX (sostituisce il log n.4 della v1.03,
+   //    "SelPos falso ma posizioni nostre esistenti", che ora e'
+   //    impossibile per costruzione). Stampa SOLO quando il ticket piu'
+   //    basso del simbolo NON e' il nostro: cioe' esattamente nei casi in
+   //    cui la v1.03 sarebbe uscita cieca. Una riga per TICKET nostro
+   //    (non per barra, non per tick): al primo trade con vicini si vede
+   //    una volta e basta, e dice tutto quello che serve.
+   static ulong ultimoAnnunciato=0;
+   if(tkPrimo!=gTicketMio && gTicketMio!=ultimoAnnunciato)
+     {
+      ultimoAnnunciato=gTicketMio;
+      PrintFormat("ORB SELEZIONE: presa la NOSTRA posizione #%I64u (magic %I64d, %d nostra/e su %s). Il ticket piu' basso del simbolo e' #%I64u di magic %I64d: la v1.03 avrebbe agganciato QUELLO e sarebbe uscita CIECA. Gestione attiva.",
+                  gTicketMio,InpMagic,quante,_Symbol,tkPrimo,magicPrimo);
+     }
+
+   //--- L'aggancio vero. Se fallisce (posizione chiusa fra la lettura e
+   //    adesso) si azzera il ticket: nessuna scrittura deve poter partire
+   //    su un appiglio morto.
+   if(!PositionSelectByTicket(gTicketMio)){ gTicketMio=0; return(false); }
+   return(true);
+  }
+
+//==================================================================
+//  v1.04 -- AUTOTEST DEL NUCLEO DI SELEZIONE (gira in OnInit)
+//
+//  Perche' esiste. Qui non c'e' MetaEditor ne' Strategy Tester: senza
+//  questa funzione l'unica prova che il fix e' scritto giusto sarebbe
+//  "l'ho riletto". L'autotest interroga il NUCLEO PURO -- lo stesso che
+//  gira in campo, non una copia -- con posizioni finte, e in particolare
+//  con IL caso che ha prodotto il difetto: un vicino di un altro magic
+//  col TICKET PIU' BASSO del nostro.
+//
+//  Cosa NON prova: che PositionSelect(_Symbol) scelga davvero il ticket
+//  piu' basso su conto hedging. Quella resta una premessa (dichiarata
+//  come tale nella VERIFICA del 03/09, limite n.4), coerente con 16
+//  giornate su 16 dello storico. Qui si prova che, QUALUNQUE cosa
+//  scelga il terminale, noi scegliamo LA NOSTRA.
+//
+//  Si legge ESEGUENDO, non compilando: le righe escono nel Giornale al
+//  caricamento dell'EA sul grafico (e all'avvio di ogni backtest).
+//==================================================================
+void CasoPos(string &sym[],long &mag[],ulong &tk[],const int idx,
+             const string s,const long m,const ulong t)
+  { sym[idx]=s; mag[idx]=m; tk[idx]=t; }
+
+void DimensionaCaso(string &sym[],long &mag[],ulong &tk[],const int k)
+  { ArrayResize(sym,k); ArrayResize(mag,k); ArrayResize(tk,k); }
+
+void Autotest()
+  {
+   int blocchi=0, casi=0, falliti=0;
+   string sym[]; long mag[]; ulong tk[];
+   ulong  miei[];
+   int    q=0; ulong ret=0, primo=0; long magicPrimo=0;
+
+   const string S="MIOSIMBOLO";   // il nostro simbolo (finto: il nucleo non tocca il terminale)
+   const string A="ALTROSIMB";    // un simbolo qualsiasi che non e' il nostro
+   const long   M=770611;         // il NOSTRO magic
+   const long   V=772341;         // il vicino: e' il magic di LARRY DOW S, quello della FOTO A
+
+   //--- BLOCCO 1: il predicato simbolo+magic. Il magic da solo non basta,
+   //    il simbolo da solo nemmeno.
+   blocchi++; casi+=4;
+   if(!( PosMia_Calc(S,M,S,M) && !PosMia_Calc(A,M,S,M) &&
+        !PosMia_Calc(S,V,S,M) && !PosMia_Calc(A,V,S,M) ))
+     { falliti++; Print("ORB AUTOTEST: 1 PosMia_Calc DIVERGE"); }
+
+   //--- BLOCCO 2: nessuna posizione al mondo. Niente da selezionare, e
+   //    soprattutto nessun ticket inventato.
+   blocchi++; casi+=3;
+   DimensionaCaso(sym,mag,tk,0);
+   ret=ScegliTicketMio_Calc(sym,mag,tk,0,S,M,q,primo,magicPrimo);
+   if(!(ret==0 && q==0 && primo==0))
+     { falliti++; Print("ORB AUTOTEST: 2 lista vuota DIVERGE"); }
+
+   //--- BLOCCO 3: una sola posizione, nostra. Il caso del conto 100k, dove
+   //    l'ORB sul Dow e' quasi sempre solo: qui il difetto non mordeva.
+   blocchi++; casi+=3;
+   DimensionaCaso(sym,mag,tk,1);
+   CasoPos(sym,mag,tk,0,S,M,5000);
+   ret=ScegliTicketMio_Calc(sym,mag,tk,1,S,M,q,primo,magicPrimo);
+   if(!(ret==5000 && q==1 && primo==5000))
+     { falliti++; Print("ORB AUTOTEST: 3 una sola nostra DIVERGE"); }
+
+   //--- BLOCCO 4: c'e' SOLO un vicino. Non dobbiamo selezionare niente --
+   //    ma dobbiamo saper dire di CHI e' il ticket piu' basso.
+   blocchi++; casi+=4;
+   DimensionaCaso(sym,mag,tk,1);
+   CasoPos(sym,mag,tk,0,S,V,4000);
+   ret=ScegliTicketMio_Calc(sym,mag,tk,1,S,M,q,primo,magicPrimo);
+   if(!(ret==0 && q==0 && primo==4000 && magicPrimo==V))
+     { falliti++; Print("ORB AUTOTEST: 4 solo vicino DIVERGE"); }
+
+   //--- BLOCCO 5: IL CASO DEL 02/09. Vicino di un altro magic col ticket
+   //    PIU' BASSO + la nostra posizione. La v1.02/v1.03 usciva cieca qui.
+   //    Il nucleo deve restituire IL NOSTRO ticket e, insieme, il ticket
+   //    del vicino per il log di verifica.
+   blocchi++; casi+=4;
+   DimensionaCaso(sym,mag,tk,2);
+   CasoPos(sym,mag,tk,0,S,V,4000);
+   CasoPos(sym,mag,tk,1,S,M,5000);
+   ret=ScegliTicketMio_Calc(sym,mag,tk,2,S,M,q,primo,magicPrimo);
+   if(!(ret==5000 && q==1 && primo==4000 && magicPrimo==V))
+     { falliti++; Print("ORB AUTOTEST: 5 vicino con ticket PIU' BASSO DIVERGE (e' IL caso del difetto)"); }
+
+   //--- BLOCCO 6: vicino col ticket piu' ALTO. Anche prima funzionava:
+   //    deve continuare a funzionare uguale (non-regressione).
+   blocchi++; casi+=3;
+   DimensionaCaso(sym,mag,tk,2);
+   CasoPos(sym,mag,tk,0,S,M,4000);
+   CasoPos(sym,mag,tk,1,S,V,5000);
+   ret=ScegliTicketMio_Calc(sym,mag,tk,2,S,M,q,primo,magicPrimo);
+   if(!(ret==4000 && q==1 && primo==4000))
+     { falliti++; Print("ORB AUTOTEST: 6 vicino con ticket piu' alto DIVERGE"); }
+
+   //--- BLOCCO 7: DUE posizioni nostre (il caso che l'OCO cieco rendeva
+   //    possibile) piu' un vicino davanti. Si gestisce la nostra col
+   //    ticket piu' basso, e il conteggio deve dire 2 -- e' l'unico modo
+   //    per accorgersi di un doppio ingresso.
+   blocchi++; casi+=3;
+   DimensionaCaso(sym,mag,tk,3);
+   CasoPos(sym,mag,tk,0,S,V,4000);
+   CasoPos(sym,mag,tk,1,S,M,6000);
+   CasoPos(sym,mag,tk,2,S,M,5000);
+   ret=ScegliTicketMio_Calc(sym,mag,tk,3,S,M,q,primo,magicPrimo);
+   if(!(ret==5000 && q==2 && primo==4000))
+     { falliti++; Print("ORB AUTOTEST: 7 due posizioni nostre DIVERGE"); }
+
+   //--- BLOCCO 8: l'ordine della LISTA non e' l'ordine dei TICKET.
+   //    Stesso scenario del blocco 5 con gli indici invertiti: l'esito
+   //    deve essere identico. E' la traduzione in codice della correzione
+   //    di premessa del 03/09 ("ticket piu' basso", non "piu' vecchia").
+   blocchi++; casi+=2;
+   DimensionaCaso(sym,mag,tk,2);
+   CasoPos(sym,mag,tk,0,S,M,5000);
+   CasoPos(sym,mag,tk,1,S,V,4000);
+   ret=ScegliTicketMio_Calc(sym,mag,tk,2,S,M,q,primo,magicPrimo);
+   if(!(ret==5000 && primo==4000))
+     { falliti++; Print("ORB AUTOTEST: 8 indipendenza dall'ordine di lista DIVERGE"); }
+
+   //--- BLOCCO 9: il filtro SIMBOLO. Una posizione NOSTRA su un altro
+   //    simbolo (stesso EA su un altro grafico) non si tocca; e un ticket
+   //    bassissimo su un altro simbolo non deve entrare nel confronto.
+   blocchi++; casi+=3;
+   DimensionaCaso(sym,mag,tk,3);
+   CasoPos(sym,mag,tk,0,A,V,1000);   // vicino, ALTRO simbolo: irrilevante
+   CasoPos(sym,mag,tk,1,A,M,3000);   // NOSTRO magic ma ALTRO simbolo: non e' nostra qui
+   CasoPos(sym,mag,tk,2,S,V,4000);   // vicino sul nostro simbolo
+   ret=ScegliTicketMio_Calc(sym,mag,tk,3,S,M,q,primo,magicPrimo);
+   if(!(ret==0 && q==0 && primo==4000))
+     { falliti++; Print("ORB AUTOTEST: 9 filtro simbolo DIVERGE"); }
+
+   //--- BLOCCO 10: l'elenco usato dalle CHIUSURE (ChiudiPosizioniMie).
+   //    Deve contenere solo le nostre, ordinate per ticket crescente: e'
+   //    la garanzia che il flatten non possa mai toccare un vicino.
+   blocchi++; casi+=4;
+   DimensionaCaso(sym,mag,tk,0);
+   int q0=ElencaTicketMiei_Calc(sym,mag,tk,0,S,M,miei);
+   DimensionaCaso(sym,mag,tk,4);
+   CasoPos(sym,mag,tk,0,S,V,4000);
+   CasoPos(sym,mag,tk,1,S,M,6000);
+   CasoPos(sym,mag,tk,2,A,M,2000);
+   CasoPos(sym,mag,tk,3,S,M,5000);
+   int q4=ElencaTicketMiei_Calc(sym,mag,tk,4,S,M,miei);
+   if(!(q0==0 && q4==2 && miei[0]==5000 && miei[1]==6000))
+     { falliti++; Print("ORB AUTOTEST: 10 ElencaTicketMiei_Calc DIVERGE"); }
+
+   //--- IL CONTROLLO SUL CONTROLLO. Un gate che non conta quello che ha
+   //    eseguito non e' un gate: un blocco cancellato passerebbe per
+   //    "tutto verde", e un blocco svuotato delle asserzioni pure.
+   if(blocchi!=ORBOTT_AUTOTEST_BLOCCHI_ATTESI)
+     {
+      falliti++;
+      PrintFormat("ORB AUTOTEST: eseguiti %d blocchi ma ne erano attesi %d: MANCA UN BLOCCO. Autotest FALLITO.",
+                  blocchi,ORBOTT_AUTOTEST_BLOCCHI_ATTESI);
+     }
+   if(casi!=ORBOTT_AUTOTEST_CASI_ATTESI)
+     {
+      falliti++;
+      PrintFormat("ORB AUTOTEST: dichiarati %d casi ma ne erano attesi %d: un blocco e' stato SVUOTATO. Autotest FALLITO.",
+                  casi,ORBOTT_AUTOTEST_CASI_ATTESI);
+     }
+
+   PrintFormat("ORB AUTOTEST: %d blocchi su %d passati, %d casi dichiarati, %d falliti. %s",
+               blocchi-falliti,blocchi,casi,falliti,
+               (falliti==0 ? "Nucleo di selezione hedge-safe VERIFICATO a tavolino (NON sostituisce la prova in campo)."
+                           : "ATTENZIONE: il nucleo di selezione NON e' quello atteso. NON mettere in forward."));
+  }
 
 //==================================================================
 //  FILTRO NOTIZIE (CSV in MQL5/Files)

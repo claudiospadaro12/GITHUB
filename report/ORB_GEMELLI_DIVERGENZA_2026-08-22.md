@@ -540,3 +540,149 @@ nostre esistenti"). La FOTO B (Giornale) resta utile ma non piu' decisiva.
    singolo EA o in un helper condiviso): selezione della posizione PER
    MAGIC iterando le posizioni, non col PositionSelect nudo. Da scrivere,
    autotestare, verificare — poi ricompilazione firmata da Claudio.
+
+---
+
+## 🛠️ 03/09 — v1.04 IL FIX (SOLO REPO, da firmare e ricompilare)
+
+`mql5/Experts/ABTG_ORB_Ottimizzato.mq5` portato a `#property version "1.04"`.
+**Non è compilato, non è in forward, non tocca nessun terminale**: vive nel
+repo finché Claudio non firma e non si esegue
+`backtest_pipeline/aggiorna_verifica_orb.ps1` con la legge dello screenshot.
+
+### 📐 La forma del fix (lettura E scrittura, insieme)
+L'audit del 03/09 lo impone: correggere solo la **lettura** crea la categoria
+🟠 — _"trovo la mia posizione, decido di chiuderla, e chiudo quella del
+vicino"_ — che su un simbolo affollato è **peggio del bug originale**. Qui le
+due mosse sono nello stesso commit.
+
+- **Nucleo PURO, autotestabile a tavolino** (non tocca il terminale):
+  `PosMia_Calc()` (predicato simbolo+magic), `ElencaTicketMiei_Calc()` (i
+  nostri ticket, **ordinati per ticket crescente**), `ScegliTicketMio_Calc()`
+  (restituisce il NOSTRO ticket e, come informazione di servizio, **quale
+  ticket avrebbe agganciato `PositionSelect(_Symbol)` e di che magic è**).
+- **Guscio sottile**: `LeggiPosizioni()` fotografa `PositionsTotal()` in tre
+  array; `SelPos()` chiama il nucleo, scrive `gTicketMio` e riaggancia con
+  **`PositionSelectByTicket`** (così tutte le `PositionGet*` che seguono
+  leggono la NOSTRA posizione, come prima).
+- **Nel file non resta nessun `PositionSelect(_Symbol)`, nessun
+  `PositionClose(_Symbol)`, nessun `PositionModify(_Symbol,...)`** — solo
+  citazioni nei commenti che spiegano cosa c'era prima.
+- 📌 Nei commenti la premessa è scritta **giusta**: _"il ticket più basso"_,
+  non _"la più vecchia"_ (correzione misurata in
+  `VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md`: 16,5% delle coppie ha
+  l'ordine per ticket invertito rispetto all'orologio, perché una posizione
+  nata da un **pendente** eredita il ticket di quando il pendente è stato
+  **piazzato** — ed è esattamente come entra questo EA).
+
+### ✅ I punti corretti, uno per uno
+
+| punto (file:funzione) | prima (v1.03) | dopo (v1.04) |
+|---|---|---|
+| `SelPos()` | `PositionSelect(_Symbol)` + check magic | scorre le posizioni, filtra **simbolo+magic**, sceglie il **nostro ticket più basso**, riaggancia con `PositionSelectByTicket` |
+| `OnTick()` ramo `gHadPos`/`InpOneTradePerDay` | cieco con i vicini → **"un trade al giorno" non si armava MAI** | si arma sempre |
+| `HandleOCO()` | cieco con i vicini → **il pendente opposto restava armato** | disarma sempre |
+| `ManageTP1()` breakeven | `PositionModify(_Symbol, …)` | `PositionModify(gTicketMio, …)` + **riaggancio per ticket dopo il parziale** (prima si leggevano SL e tipo da dati vecchi) + log del fallimento |
+| `ManageRunner()` uscita su EMA (long e short) | `PositionClose(_Symbol)` ×2 | `PositionClose(gTicketMio)` ×2, ticket nel log |
+| `ManageRunner()` trailing (long e short) | `PositionModify(_Symbol, …)` ×2 | `PositionModify(gTicketMio, …)` ×2, ticket nel log |
+| `OnTick()` flatten notizie | `if(SelPos()) PositionClose(_Symbol)` | `ChiudiPosizioniMie("blackout notizie")` |
+| `EndOfDay()` | `if(InpCloseAtEnd && SelPos()) PositionClose(_Symbol)` | `if(InpCloseAtEnd) ChiudiPosizioniMie("fine giornata")` |
+| `ContaPosizioniMagic()` | loop a sé stante (solo diagnostica) | riscritta **sopra al nucleo puro**: una sola implementazione del filtro |
+
+### 🔍 I log della v1.03: TUTTI conservati, uno riscritto
+`ORB INIT:` (handle EMA), `ORB TP1:` (il difetto n.2, `InpTP1Pct=0` che uccide
+il breakeven) e i rami `ORB RUNNER:` 2-12 sono **invariati**, con l'aggiunta del
+**ticket** nelle righe di trailing/uscita.
+
+Il **log n.4** (_"SelPos falso ma posizioni nostre esistenti"_) era il **test**
+dell'ipotesi: adesso quella condizione è **impossibile per costruzione**.
+Al suo posto due cose:
+1. 🎯 **`ORB SELEZIONE:`** dentro `SelPos()` — stampa **una volta per ticket**,
+   e **solo quando il ticket più basso del simbolo NON è il nostro**: dice
+   quale posizione nostra è stata presa, quante ne abbiamo, e **quale ticket
+   di quale magic avrebbe agganciato la v1.03**, dichiarando che lì sarebbe
+   uscita cieca. **È così che il fix si verifica in campo**, al primo trade
+   con vicini: se quella riga compare e nella stessa barra compare anche
+   `ORB RUNNER: stop … trascinato`, il caso è chiuso sul campo.
+2. 🚨 Nel ramo 1 di `ManageRunner()` resta un controllo, ma cambia significato:
+   diventa un **allarme di invariante violata** (posizioni nostre presenti e
+   selezione per ticket fallita = anomalia del terminale, non più il difetto
+   hedging).
+
+### 🧪 AUTOTEST — 10 blocchi, 33 casi, contati due volte
+Pattern di casa (`ABTG_LondonFx`): `#define ORBOTT_AUTOTEST_BLOCCHI_ATTESI 10`
+e `#define ORBOTT_AUTOTEST_CASI_ATTESI 33`. **Due contatori e non uno**: un
+blocco cancellato non deve poter passare per verde, e nemmeno un blocco
+svuotato delle sue asserzioni. Gira in `OnInit` dietro `InpAutoTest` (default
+true), stampa `ORB AUTOTEST:` e **non tocca il mercato**.
+
+| # | blocco | casi | perché c'è |
+|---:|---|---:|---|
+| 1 | `PosMia_Calc` simbolo+magic | 4 | il magic da solo non basta, il simbolo da solo nemmeno |
+| 2 | lista vuota (0 posizioni) | 3 | non deve inventarsi ticket |
+| 3 | **1 sola posizione, nostra** | 3 | il caso del 100k, dove il difetto non mordeva |
+| 4 | **solo un vicino** (0 nostre) | 4 | non selezionare niente, ma saper dire di chi è il ticket più basso |
+| 5 | 🎯 **vicino con ticket PIÙ BASSO + la nostra** | 4 | **IL caso del 19/08, 21/08, 02/09** |
+| 6 | vicino con ticket più alto | 3 | non-regressione del caso che già funzionava |
+| 7 | **N=2 posizioni nostre** + vicino | 3 | il doppio ingresso che l'OCO cieco rendeva possibile |
+| 8 | **ordine di lista invertito** | 2 | l'indice non è il ticket (la correzione di premessa del 03/09) |
+| 9 | filtro **simbolo** | 3 | una nostra su un altro simbolo non si tocca |
+| 10 | `ElencaTicketMiei_Calc` (le **chiusure**) | 4 | garanzia che il flatten non possa toccare un vicino |
+
+**Cosa l'autotest NON prova** (dichiarato): che `PositionSelect(_Symbol)` scelga
+davvero il ticket più basso su hedging. Resta la **premessa** del limite n.4
+della VERIFICA — coerente con 16 giornate su 16, mai testata in laboratorio.
+Il fix però **non ne dipende**: qualunque cosa scelga il terminale, noi
+scegliamo la nostra.
+
+### ⚠️ I CAMBI DI COMPORTAMENTO REALI — da mettere davanti a Claudio PRIMA della firma
+Non è "solo un fix di igiene". Sui giorni **con vicini** l'EA farà cose che
+prima non faceva:
+
+1. 🔴 **`InpOneTradePerDay` ora si arma anche coi vicini.** Prima `gHadPos`
+   restava falso per sempre e i pendenti superstiti potevano riaprire in
+   giornata. **Atteso: MENO trade su U30USD, non di più.**
+2. 🔴 **L'OCO ora disarma il pendente opposto anche coi vicini.** Sul gemello
+   nativo questo difetto ha prodotto **4 secondi lati su 16 giornate** (e per
+   fortuna +201 EUR: fortuna su n=4, non un argomento).
+3. 🔴 **Trailing, uscita su EMA e breakeven ora ESEGUONO coi vicini.** È la
+   cura del caso 02/09 (−50,91 contro +1.680 del gemello). **Cambia la vita
+   dei trade**: uscite diverse, P/L diverso in entrambe le direzioni. **Non si
+   promette più profitto**: si promette che l'EA fa quello che dice il
+   pannello.
+4. 🔴 **La chiusura di fine giornata ora avviene davvero** nei giorni con
+   vicini (prima non chiudeva niente) — e chiude **il nostro ticket**, mai
+   quello del vicino.
+5. 🟡 **Se ci fossero DUE posizioni nostre**, `EndOfDay`/flatten le chiudono
+   **entrambe**; runner e TP1 gestiscono **solo quella col ticket più basso**.
+   Limite dichiarato, non nascosto.
+6. 🟡 **Riaggancio per ticket dopo il parziale** in `ManageTP1()`: il breakeven
+   ora lavora su dati freschi. Con `InpTP1Pct=0` (configurazione attuale su
+   ENTRAMBI i conti) **questo ramo non viene mai eseguito**: il difetto n.2
+   resta lì, aperto e dichiarato, e **non è stato toccato in questo giro** —
+   una modifica alla volta.
+7. 🟢 **Nuovo input `InpAutoTest`** (default true) in fondo al gruppo
+   "Generali": stampa e basta, nessuna decisione di trading. I `.set` esistenti
+   non lo contengono e MT5 userà il default: nessun altro campo cambia.
+
+### 📏 Come si verifica (e come NON si verifica)
+- **Backtest, test di NON-REGRESSIONE**: stessa cella prima/dopo, a parità di
+  tutto. Nel tester l'EA è **solo** sul simbolo, quindi il ticket più basso è
+  sempre il nostro: **il risultato atteso è IDENTICO al centesimo**. Se
+  cambia, il fix ha rotto qualcos'altro. Non è un test di merito.
+- **Forward, test di MERITO**: al primo trade con vicini sul conto piccolo,
+  nel Giornale devono comparire **`ORB SELEZIONE:`** e, sulla stessa
+  posizione, le righe **`ORB RUNNER: stop … trascinato`**. Metrica attesa:
+  **nessun aumento di frequenza** (semmai calo), peggior giornata e DD in
+  calo sui giorni con vicini.
+- 🚫 **Non si dichiara risolto niente finché non compila e non gira.** Qui non
+  c'è MetaEditor né Strategy Tester: **la compilazione non è stata verificata**,
+  l'autotest **non è stato eseguito** (si legge ESEGUENDO, non scrivendo).
+
+### 🚧 Cosa NON è stato toccato in questo giro (una variabile alla volta)
+- `ABTG_ORB.mq5` **nativo** (l'unico col difetto misurato in forward) e il suo
+  `InpOneTradePerDay` dichiarato e mai letto: coda dei fix, giro successivo.
+- `ABTG_MaxMinNotte`, `Gold_Ichimoku_TK_ATR_EA`, i due Aperture 🟠, l'helper
+  condiviso `ABTG_PosHedge.mqh` e gli 11 file in `standalone/`.
+- Il **difetto n.2** (`InpTP1Pct=0` che uccide il breakeven): dichiarato dal
+  log, non corretto. È una scelta di configurazione, la firma Claudio.
