@@ -1,0 +1,65 @@
+# =====================================================================
+#  R116 -- FASE 2 (R55-bis, firma F10): SLIPPAGE 2 e 5 punti sul SOLO
+#  MOTORE 2 (canale + RSI, la baseline, l'unico promuovibile).
+#  GEMELLO del prova principale LONDONFX_R116_TICK.txt: stessi fissi,
+#  stessa finestra, stesso banco. Le righe vive differiscono per
+#  ESATTAMENTE TRE nomi, tutti e tre dichiarati qui e gattati dal
+#  driver RIGA_R116_LONDONFX.ps1:
+#    InpMotore       da asse 1/2/3        a PIN 2   (la baseline)
+#    InpMagic        da asse 774001/774002 a PIN 774001 (niente gemelli
+#                    qui: la sanita' del banco e' gia' misurata nella
+#                    corsa principale, sulle stesse celle)
+#    InpSlippagePts  da PIN 0              ad ASSE 2||2||3||5||Y
+#  Una QUARTA differenza, o una delle tre mancante, FERMA tutto.
+# ---------------------------------------------------------------------
+#  L'ASSE: InpSlippagePts=2||2||3||5||Y -> start 2, step 3, stop 5 =
+#  ESATTAMENTE due celle, 2 e 5 (Floor(|5-2|/3)+1 = 2, come conta il
+#  generico e come spazzola MT5). Lo 0 NON si rifa': e' la corsa
+#  principale. 2 celle x 2 finestre = 4 passate a tick a gamba.
+#
+#  QUANDO GIRA (criteri par. 5.6, congelato PRIMA): SOLO se il motore 2
+#  passa TUTTI i cancelli A sulla gamba. Il driver lo decide a macchina
+#  leggendo il CSV OOS della corsa principale con le disuguaglianze
+#  ricopiate dai criteri, e accoda questa fase nello stesso giro.
+#  -SoloFase2 la forza senza rifare la corsa principale (per un giro
+#  morto a meta' o per una sensibilita' che Claudio vuole comunque:
+#  NON e' una selezione, e' una misura di fragilita', non puo'
+#  promuovere niente).
+#
+#  COME SI LEGGE: >>> IL VERDETTO SI LEGGE A 5 PUNTI (0,5 pip = 6,3%
+#  di un R con SL 8 pip). 0 e 2 sono la sensibilita'. Se E OOS scende
+#  sotto 0,075R a 5 punti la cella e' "VIVE SOLO A TAGLIA PICCOLA"
+#  (etichetta R55 dell'ORB) e NON si propone. Ambiguita' -> clausola
+#  severa.
+#  N9 dell'EA: lo slippage e' un COSTO SIMULATO sulla geometria (SL
+#  8,0 + S, TP 15,0 - S), NON la deviation di CTrade (fissa a 30 pt).
+#  Il lotto si calcola sulla distanza DAVVERO piazzata: il rischio in
+#  euro resta 0,65%, 1R cresce. La colonna "Slippage Pts" fa l'eco.
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  M15
+@DAQUANDO 2024.07.05
+@FINOA    2026.06.30
+
+InpUsaGuardian=true||true||0||true||N
+InpMotore=2||2||0||2||N
+InpSmaPeriodo=5||5||0||5||N
+InpRsiPeriodo=5||5||0||5||N
+InpRsiSoglia=80.0||80.0||0||80.0||N
+InpSmma1=3||3||0||3||N
+InpSmma2=6||6||0||6||N
+InpSmma3=9||9||0||9||N
+InpSmma4=50||50||0||50||N
+InpEmaLenta=200||200||0||200||N
+InpOraInizioServer=8||8||0||8||N
+InpOreSessione=8||8||0||8||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxSpread=0||0||0||0||N
+InpSlippagePts=2||2||3||5||Y
+InpPipSize=0.0001||0.0001||0||0.0001||N
+InpWarmupBarre=300||300||0||300||N
+InpComment=LONDONFX
+InpMagic=774001||774001||0||774001||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

@@ -1,0 +1,217 @@
+# =====================================================================
+#  R116 -- ABTG_LondonFx a TICK REALI (Modello 4) su M15 -- PROVA PRINCIPALE
+#  UN contenitore, TRE motori a interruttore: l'ASSE e' l'ABLAZIONE,
+#  non una manopola. Criteri FIRMATI da Claudio il 03/09/2026 ~09:45
+#  ("FIRMO TUTTO, ANCHE LA A SU F5"):
+#    backtest_pipeline\risultati_archivio\LONDONFX_TICK_CRITERI.md
+#    report\FIRME_2026-09-03.md (sezione R116)
+#  Passo 0 gia' superato (EURUSD 19/24, GBPUSD 24/24 righe vive):
+#    backtest_pipeline\risultati_archivio\REFERTO_SONDALONDONFX_2026-09-03.md
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON HA UNA GRIGLIA E NON HA UN PICCO (firma F11).
+#      Tutti i parametri di motore sono CONGELATI ai valori della fonte
+#      (SMA 5, RSI 5, soglia 80/20, TP 15,0 / SL 8,0 pip, sessione 8 ore).
+#      Le celle NON sono candidate in gara: sono 3 rami di un'ABLAZIONE
+#      (motore 1 nudo = CONTROLLO, motore 2 canale+RSI = BASELINE, l'unico
+#      promuovibile, motore 3 allineamento 5 medie = secondo CONTROLLO) x
+#      2 magic gemelli (igiene del banco: due passate identiche al
+#      centesimo). E' VIETATO nominare "la cella migliore", promuovere il
+#      motore 1 o 3, o scegliere la gamba che va meglio (criteri par. 5.2).
+#  >>> UN SIMBOLO PER GIRO. @SIMBOLO e' il LEAD (EURUSD, il simbolo
+#      dell'autore); la gamba GBPUSD gira con -Simbolo GBPUSD del
+#      generico (override DICHIARATO: il parametro vince sulla direttiva,
+#      walkforward_generico.ps1 righe 303-305), stesso file prova, e il
+#      driver RIGA_R116_LONDONFX.ps1 PRETENDE @SIMBOLO EURUSD anche in
+#      quella corsa (il prova non si tocca a ogni gamba). Stesso pattern
+#      della sonda del passo 0 (driver v4, 03/09).
+#
+# =====================================================================
+#  LA DOMANDA DEL ROUND (criteri par. 0), in una riga
+# ---------------------------------------------------------------------
+#  Il canale di Londra + RSI, misurato a TICK REALI con lo spread VERO
+#  del broker, produce E >= 0,075R per operazione su EURUSD e GBPUSD
+#  M15 -- e, se si', e' il SEGNALE a produrla o il CONTENITORE
+#  (sessione + flat + tetti)? Le due domande sono la stessa misura: i
+#  tre motori girano nello stesso contenitore, nella stessa corsa.
+#
+#  PREVISIONE DICHIARATA PRIMA DEI NUMERI (criteri par. 0.2): NO
+#  probabile. La MAE mediana del passo 0 (11,8 pip) sta SOPRA lo stop
+#  della fonte (8,0 pip) e il costo e' da 1,7 a 3,3 volte l'edge
+#  richiesto. Un NO qui e' un verdetto valido e pieno.
+#
+# =====================================================================
+#  LA FINESTRA -- DIMENSIONATA SULLE OPERAZIONI, NON SUGLI ANNI
+#  (Emendamento della finestra, regola A: IS >= 150 trade, OOS >= 150)
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.07.05 = PAVIMENTO DEI TICK REALI forex BCM, MISURATO
+#  il 01/09 dal Diario del tester ("EURUSD/GBPUSD: ticks data begins
+#  from 2024.07.05 00:00", NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md).
+#  Prima di quella data MT5 GENERA i tick dalle M1 e lo spread e'
+#  ricostruito: questo round vive di tick veri, quindi NON si va
+#  indietro. @FINOA 2026.06.30 = fine standard di casa.
+#  Split 40/60 (firma F1), calcolato come lo calcola il generico
+#  (Inizio + Floor(giorni * 0,40)):
+#    IS   2024.07.05 -> 2025.04.21   (290 giorni, ~207 di borsa)
+#    OOS  2025.04.22 -> 2026.06.30   (435 giorni, ~311 di borsa)
+#  STIMA DELLE OPERAZIONI (dalle frequenze MISURATE al passo 0, riga
+#  EUR_M15 / RSI / ora 8: 2,26 segnali/gg long + ~2,0-2,3 short = ~4,4
+#  al giorno; GBP_M15 ~4,6). Con 1 posizione per volta la conversione
+#  segnale -> operazione e' stimata 0,60-0,75 [INFERITO]:
+#    motore 2 (baseline): 2,6-3,3 trade/gg -> IS 540-680, OOS 810-1030
+#    anche a conversione DIMEZZATA: IS 270+, OOS 400+  -> regola A
+#    soddisfatta con margine doppio, e per LATO.
+#    motore 1 (nudo): ~6/gg al tetto -> IS ~1.240, OOS ~1.870
+#    motore 3 (5 medie): MAI CONTATO da nessuno -> [IGNOTO]. Se esce
+#    sotto 150 il confronto S1 su quel ramo e' SOSPESO (valvola R59).
+#  Quanti anni servono lo detta la frequenza: a ~3 trade/gg bastano
+#  ~2 mesi di borsa per 150 operazioni; la finestra e' molto piu'
+#  lunga di quanto la regola A pretenda. Il LIMITE VERO e' l'altro:
+#  >>> UN SOLO REGIME (criteri par. 2.3, regola C NON soddisfatta).
+#      Regime CONTENUTO, dichiarato: forex major 2024.07 -> 2026.06.
+#      IS = seconda meta' 2024 e primo trimestre 2025 (dollaro forte
+#      da autunno 2024 a gennaio 2025, poi l'inversione di febbraio-
+#      aprile 2025); OOS = da aprile 2025 in poi (la risalita dell'euro
+#      del 2025 e quello che e' venuto dopo, che qui NON si assume:
+#      si legge dal grafico e dai per-trade, non da questo file).
+#      Nessuna prova di regime (toro/orso/laterale/crollo): da questo
+#      round NON esce una sedia (firma F12), al massimo il diritto di
+#      chiedere la prova di rischio sul vecchio (round separato, R-C).
+#  TETTO ~100k BARRE (regola 25/08): 96 barre M15 x ~520 giorni di
+#  borsa = ~50.000 barre, meta' del tetto. NON morde. (Su M5 avrebbe
+#  morso: e' una delle ragioni per cui il round e' M15 e basta.)
+#
+# =====================================================================
+#  IL BANCO
+# ---------------------------------------------------------------------
+#  Modello 4 = OGNI TICK BASATO SU TICK REALI (firma F1): e' il punto
+#  del round. L'ANTEPRIMA .ini del giro a vuoto scrive Model=4
+#  hardcoded (difetto noto del generico, checklist 96): qui 4 e'
+#  proprio quello che si vuole, quindi l'anteprima NON fa da prova --
+#  il modello si verifica sull'.ini VERO della corsa (gen_*.ini nella
+#  cartella di lavoro) e sulla riga "ticks data begins from" del
+#  Diario del tester, ricopiata nel referto.
+#  Spread=0 nell'.ini (spread CORRENTE, DICHIARATO agli atti, R84-bis):
+#  a tick reali bid/ask vengono dal flusso dei tick registrato dal
+#  broker, e l'EA lo MISURA all'ingresso (mediana + P95, firma F9).
+#  Deposito 100.000 = taglia prop: il DD si legge contro il muro prop
+#  senza scalature; rischio 0,65% = la taglia di campo (firma F6).
+#  Leva 100, valuta EUR: fissi del generico.
+#  RAM: max 4 agenti locali e RAM pulita (nota del 01/09: 8 agenti
+#  hanno saturato 16 GB con "no memory for ticks generating").
+#
+# =====================================================================
+#  I CANCELLI (criteri par. 5, FIRMATI, ricopiati qui con le
+#  DISUGUAGLIANZE; il driver li applica a macchina sul CSV OOS)
+# ---------------------------------------------------------------------
+#  SANITA' (par. 5.0), se cade una il round NON si legge:
+#    gemelli 774001/774002 IDENTICI al centesimo | Autotest Falliti 0
+#    su 17 blocchi / 112 casi | 6 righe in OGNI CSV | Model=4 dall'.ini
+#    vero e dal Diario | riga "ticks data begins from" ricopiata |
+#    conteggio dei log del tester letti | Canarino Torna = 1 |
+#    Notti Attraversate = 0.
+#  CANCELLO A (tutte e sei, per gamba, sul motore 2 -- l'unico promuovibile):
+#    A1  E OOS in R      >= 0,075  (FIRMA 2 del 31/08, al NETTO dei costi)
+#    A2  PF OOS          >= 1,15
+#    A3  segno del profitto COERENTE fra IS e OOS, e PF IS > 1,00
+#    A4  DD OOS          <= 8,0 %  (a rischio 0,65%, letto DIRETTO)
+#    A5  Peggior Giornata >= -4,0 % (oltre, il Guardian avrebbe messo in
+#        pausa: quel backtest non e' nemmeno riproducibile)
+#    A6  n OOS >= 150 e n IS >= 150, per gamba
+#  LE TRE FASCE (par. 5.8, DISGIUNTE):
+#    E   : >= 0,075 PASSA | 0,050 <= E < 0,075 NON PASSA | < 0,050 BOCCIATA
+#    PF  : >= 1,15  PASSA | 1,10 <= PF < 1,15  NON PASSA | < 1,10  BOCCIATA
+#    DD  : <= 8,0   PASSA | 8,0 < DD <= 10,0   NON PASSA | > 10,0  BOCCIATA
+#    PG  : >= -4,0  PASSA | -5,0 <= PG < -4,0  NON PASSA | < -5,0  BOCCIATA
+#    n   : >= 150   PASSA | 30 <= n < 150 MERITO SOSPESO | < 30 NON MISURABILE
+#  BOCCIATURA SECCA (par. 5.7): basta UNA fra E < 0,050R, PF < 1,10,
+#  IS negativo, DD > 10,0%, PG < -5,0%. Le ultime due bocciano per
+#  RISCHIO a QUALUNQUE n: il giudizio di rischio non si sospende mai.
+#  ABLAZIONE (par. 3.2, in OOS, per gamba): S1 max(E)-min(E) <= 0,05R
+#  fra i tre motori, S2 stesso segno del profitto, S3 n >= 150 per
+#  ogni motore -> "i tre vanno uguale: il contenitore e' l'edge, il
+#  segnale non conta, NESSUNA sedia sul segnale". Un motore con n < 150
+#  -> confronto SOSPESO su quel motore.
+#  CANARINO (par. 4.3): Giorni col Tetto Colpito > 20% -> motore
+#  STROZZATO dal contenitore (confronto S1 contaminato, ATTESO sul
+#  motore 1); Trade Chiusi dal Flat > 40% -> il round misura
+#  l'OROLOGIO, non il motore.
+#  FASE 2 (firma F10, R55-bis): SOLO se il motore 2 passa TUTTI i
+#  cancelli A sulla gamba, si rilancia con InpSlippagePts 2 e 5 (lo 0
+#  e' questa corsa) col prova gemello LONDONFX_R116_FASE2_SLIPPAGE.txt.
+#  Il verdetto si legge a 5 punti: E < 0,075R -> "vive solo a taglia
+#  piccola", NON si propone.
+#  AMBIGUITA' -> CLAUSOLA PIU' SEVERA, dichiarata nel referto (F8).
+#
+# =====================================================================
+#  COSA NON SI FA (criteri par. 8)
+# ---------------------------------------------------------------------
+#  Nessuna griglia di motore, nessuno sweep dell'ora (congelata a 8 ORA
+#  SERVER BCM = ora italiana - 1 = ora di Londra: 08:00-16:00, fine
+#  esclusa), nessun adattamento della geometria per simbolo (su GBPUSD
+#  lo stop vale ~1 ATR: strettissimo, e resta), nessuna gestione
+#  (parziale/pari/trailing NON ESISTONO nel file), nessun filtro
+#  aggiunto, nessun simbolo in piu' (USDJPY vietato: il driver lo ferma
+#  prima di MT5 e l'EA rifiuterebbe di partire con InpPipSize=0.0001),
+#  nessun M5.
+#
+# =====================================================================
+#  I DUE ASSI -- 6 celle utili, nessuna decorativa
+# ---------------------------------------------------------------------
+#  ASSE 1 = InpMotore 1/2/3 (3 valori): E' L'ABLAZIONE (firme F3/F4),
+#    non uno sweep di merito. Cambia UNA riga sola fra le celle.
+#  ASSE 2 = InpMagic 774001/774002 (2 valori): GEMELLI di determinismo
+#    (sanita' par. 5.0 punto 1: "due passate con lo stesso input e magic
+#    diverso -> identiche al centesimo, altrimenti banco sporco").
+#    Pattern di casa (R103, R115, CRT): il magic e' l'asse gemello.
+#    Blocco 7740xx VERGINE nel repo (verificato il 03/09 alla firma e
+#    ri-verificato il giorno di questa riga: unica occorrenza = il
+#    default input dell'EA; 7741xx e' GapContinuation).
+#  CELLE COME LE CONTA IL GENERICO: 3 x 2 = 6 passate a finestra, 12 a
+#  gamba, 24 per le due gambe (+ 4 a gamba di FASE 2, solo se dovuta).
+#  SCELTA DICHIARATA rispetto alla tabella "dimensione" dei criteri
+#  (12 + 2 gemelli = 14): qui i gemelli girano su TUTTI e tre i motori
+#  e su entrambe le finestre (un solo prova, un solo avvio del tester a
+#  finestra); costa 10 passate a tick in piu' in totale e compra tre
+#  coppie gemelle per finestra invece di una. I criteri chiedono "due
+#  passate identiche": qui ce ne sono sei per gamba. E' un vincolo in
+#  piu', non in meno.
+#  CRITERIO DI OTTIMIZZAZIONE: l'EA dichiara il Recovery Factor SOLO
+#  perche' il tester pretende un numero. Ordina le righe, NON promuove
+#  nessuno: leggere "la cella migliore" da li' e' VIETATO (F11).
+#
+# =====================================================================
+#  I FISSI, TUTTI E DICIOTTO, NOME PER NOME (l'errore n.3 della
+#  checklist: un pin che MT5 non trova viene IGNORATO IN SILENZIO).
+#  Il driver li gatta uno per uno con questi valori, e l'EA ne fa
+#  l'ECO in colonna (Motore, Ora Inizio Server, Ore Sessione, Tp Pip,
+#  Sl Pip, Slippage Pts, Risk Pct, Max Trades Giorno, Cap Giornaliero
+#  Pct, Rsi Soglia Long/Short, Pip Size Prezzo, Pip In Punti Mt5, Max
+#  Spread Pts): sono i numeri che l'EA ha DAVVERO usato.
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  M15
+@DAQUANDO 2024.07.05
+@FINOA    2026.06.30
+
+InpUsaGuardian=true||true||0||true||N
+InpMotore=2||1||1||3||Y
+InpSmaPeriodo=5||5||0||5||N
+InpRsiPeriodo=5||5||0||5||N
+InpRsiSoglia=80.0||80.0||0||80.0||N
+InpSmma1=3||3||0||3||N
+InpSmma2=6||6||0||6||N
+InpSmma3=9||9||0||9||N
+InpSmma4=50||50||0||50||N
+InpEmaLenta=200||200||0||200||N
+InpOraInizioServer=8||8||0||8||N
+InpOreSessione=8||8||0||8||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxSpread=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpPipSize=0.0001||0.0001||0||0.0001||N
+InpWarmupBarre=300||300||0||300||N
+InpComment=LONDONFX
+InpMagic=774001||774001||1||774002||Y
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
