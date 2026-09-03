@@ -1,0 +1,145 @@
+data: 2026-09-03 15:32:36   (ora di AVVIO, ora LOCALE del VPS)
+fine: 2026-09-03 15:32:50
+modo: LETTURA PRIMA
+pin:  2e37a67db8c1345acfa2a3870d50e115f0695034
+terminale:  OK (BCA8AD18563BF5B64A433C2662D0A104 -- UNICA candidata con evidenza del conto 50504263 (log=True, filo=True, canarini=1))
+conto:      OK (50504263 su BCMMarkets-Server through Access Server, ultimo collegamento nel giornale del 20260902 (logs))
+artefatto:  OK (12 ATTESA, 4 VIETATA, 2 CAMPO, dal pin 2e37a67db8c1345acfa2a3870d50e115f0695034)
+log:        OK (20260903.log, 229 righe)
+censimento: OK (229 righe di log passate su 18 voci del contratto)
+canarino:   NESSUN REFERTO dopo le 15:32:36
+zip:        DA SCRIVERE
+esito: LETTURA COMPLETA
+
+NOTA ORE: le righe di log di MT5 sono in ORA LOCALE del VPS (= ora italiana).
+Il grafico, le GlobalVariable e i referti del canarino sono in ORA SERVER (= italiana meno 1).
+
+===============================================================
+COLLAUDO ENFORCEMENT FASE 1 -- SESSIONE 1 (cap C1 + fail-open)
+modo: LETTURA PRIMA   -- SOLA LETTURA, non tocca MT5
+data: 2026-09-03 15:32:36   (ora LOCALE del VPS = ora italiana; il GRAFICO e' un'ora indietro)
+===============================================================
+
+=== CARTELLE GUARDATE (scoperta per FATTI: il conto, non il nome) ===
+  conto cercato: 50504263   candidate esaminate: 10
+  --- C:\Program Files\BCM Markets MT5 Terminal -V3
+      trovata come : processo terminal64 pid 4948 (portable?) + installazione in C:\Program Files
+      terminal64.exe=True  logs\=False  MQL5\=False  file di log guardati=0  ultima scrittura=
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: c'e' terminal64.exe ma NESSUNA cartella logs\ ne' MQL5\: i dati di questa istanza stanno altrove (non e' portable)
+  --- C:\Program Files\BCM Markets MT5 Terminal
+      trovata come : processo terminal64 pid 9452 (portable?) + installazione in C:\Program Files
+      terminal64.exe=True  logs\=False  MQL5\=False  file di log guardati=0  ultima scrittura=
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: c'e' terminal64.exe ma NESSUNA cartella logs\ ne' MQL5\: i dati di questa istanza stanno altrove (non e' portable)
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\15BEB048A4E0532395CCA693EA561D8C
+      trovata come : cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False  logs\=True  MQL5\=False  file di log guardati=0  ultima scrittura=
+      origin.txt   : C:\Program Files (x86)\BCM Markets MT4 Terminal
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: nessuna traccia del conto 50504263
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+      trovata come : cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False  logs\=True  MQL5\=True  file di log guardati=16  ultima scrittura=2026-09-03 11:18
+      origin.txt   : C:\Program Files\BCM Markets MT5 Terminal
+      login visti  : 50503392   ultimo=50503392
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: nessuna traccia del conto 50504263
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\73B7A2420D6397DFF9014A20F1201F97
+      trovata come : cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False  logs\=True  MQL5\=True  file di log guardati=0  ultima scrittura=
+      origin.txt   : C:\Program Files\Pepperstone MetaTrader 5
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: nessuna traccia del conto 50504263
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\857385E4B0F2356AD99AA95CDF40FAE9
+      trovata come : cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False  logs\=True  MQL5\=True  file di log guardati=0  ultima scrittura=
+      origin.txt   : C:\Program Files\Tickmill Europe MT5 Terminal
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: nessuna traccia del conto 50504263
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104
+      trovata come : cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False  logs\=True  MQL5\=True  file di log guardati=16  ultima scrittura=2026-09-03 11:15
+      origin.txt   : C:\Program Files\BCM Markets MT5 Terminal -V3
+      login visti  : 50504263   ultimo=50504263
+      conto 50504263 nei log: True   filo verificato con quel conto: True   referti canarino: 1
+      ultimo canarino: ABTG_Canarino_50504263_20260902_075638_srv.txt
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FF5C0E29FAC93F5DD90858C939E9C0E8
+      trovata come : cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal
+      terminal64.exe=False  logs\=True  MQL5\=False  file di log guardati=0  ultima scrittura=
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: nessuna traccia del conto 50504263
+  --- C:\Program Files\Pepperstone MetaTrader 5
+      trovata come : installazione in C:\Program Files
+      terminal64.exe=True  logs\=False  MQL5\=False  file di log guardati=0  ultima scrittura=
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: c'e' terminal64.exe ma NESSUNA cartella logs\ ne' MQL5\: i dati di questa istanza stanno altrove (non e' portable)
+  --- C:\Program Files\Tickmill Europe MT5 Terminal
+      trovata come : installazione in C:\Program Files
+      terminal64.exe=True  logs\=False  MQL5\=False  file di log guardati=0  ultima scrittura=
+      login visti  : nessuno   ultimo=-
+      conto 50504263 nei log: False   filo verificato con quel conto: False   referti canarino: 0
+      SCARTATA: c'e' terminal64.exe ma NESSUNA cartella logs\ ne' MQL5\: i dati di questa istanza stanno altrove (non e' portable)
+
+cartella dati del 100k : C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104
+come trovata           : UNICA candidata con evidenza del conto 50504263 (log=True, filo=True, canarini=1)
+processi terminal64 vivi: 2 (questa riga NON ne tocca nessuno)
+P-1 CONTO ATTIVO  : 50504263  server BCMMarkets-Server through Access Server   ATTESO 50504263
+ARTEFATTO dal pin : 12 ATTESA, 4 VIETATA, 2 CAMPO
+LOG ESPERTI -V3   : C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104\MQL5\Logs\20260903.log
+                    229 righe, ultima scrittura 15:30:49
+SEGNAPOSTO scritto: C:\Users\Administrator\Desktop\COLLAUDO_FASE1_S1_SEGNAPOSTO.txt  (ora 15:32:36)
+
+=== CENSIMENTO DELLE RIGHE CHE FANNO FEDE (log di 20260903, ora LOCALE VPS) ===
+  PRE.FILO      ATTESA   trovate 0  (dopo il segnaposto: 0)
+  PRE.CONTO     ATTESA   trovate 0  (dopo il segnaposto: 0)
+  PRE.AVVIO     ATTESA   trovate 0  (dopo il segnaposto: 0)
+  PRE.SOGLIE    ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C5.GUARDIAN   ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C5.EA         ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C5.RIENTRO    ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C6.PROMESSA   ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C7.GUARDIAN   ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C7.EA         ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C7.RIENTRO    ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C8.RIENTRO    ATTESA   trovate 0  (dopo il segnaposto: 0)
+  C9.BLOCCO     CAMPO    trovate 0  (dopo il segnaposto: 0)
+  C9.RISCHIO    CAMPO    trovate 187  (dopo il segnaposto: 0)
+      ME	0	00:00:01.270	ABTG_Guardian (AUDNZD,H1)	[GUARDIAN] eq=102316.04  dayLoss=0.00%  totDD=-2.32%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+      JS	0	00:05:01.272	ABTG_Guardian (AUDNZD,H1)	[GUARDIAN] eq=102316.04  dayLoss=0.00%  totDD=-2.32%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+      QN	0	00:10:01.253	ABTG_Guardian (AUDNZD,H1)	[GUARDIAN] eq=102316.04  dayLoss=0.00%  totDD=-2.32%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+      CL	0	00:15:01.252	ABTG_Guardian (AUDNZD,H1)	[GUARDIAN] eq=102316.04  dayLoss=0.00%  totDD=-2.32%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+      IK	0	00:20:01.245	ABTG_Guardian (AUDNZD,H1)	[GUARDIAN] eq=102316.04  dayLoss=0.00%  totDD=-2.32%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+      CF	0	00:25:01.268	ABTG_Guardian (AUDNZD,H1)	[GUARDIAN] eq=102316.04  dayLoss=0.00%  totDD=-2.32%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+      ... (181 righe non stampate a video, tutte nello zip)
+  STOP.FILO     VIETATA  trovate 0  (dopo il segnaposto: 0)
+  STOP.DAILY    VIETATA  trovate 0  (dopo il segnaposto: 0)
+  STOP.TOTALE   VIETATA  trovate 0  (dopo il segnaposto: 0)
+  STOP.AUTOTEST VIETATA  trovate 0  (dopo il segnaposto: 0)
+
+=== TRACCIA DEL GUARDIAN: avvii e soglie (ora LOCALE VPS) ===
+  nessuna riga di avvio del Guardian nel log di questa giornata.
+  avvii del Guardian nella giornata: 0   (uno per ogni riavvio/cambio parametri/riattacco)
+
+=== RISCHIO APERTO letto dal Guardian (righe periodiche, ogni 300 s) ===
+  ULTIMA riga periodica (15:30:06): DK	0	15:30:06.703	ABTG_Guardian (AUDNZD,H1)	[GUARDIAN] eq=102624.06  dayLoss=-0.31%  totDD=-2.62%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+  MASSIMO rischioAperto della giornata: 0.65%   (cancello di fase: <= 3,25%)
+  CAVEAT DA RIPETERE SEMPRE INSIEME AL NUMERO (R7): (a) campionamento ogni 300 s, i picchi
+  fra due campioni non si vedono; (b) il cap e' CIECO SUI PENDENTI (buco B6): e' un LIMITE INFERIORE.
+
+=== REFERTI DEL CANARINO (MQL5\Files\ABTG_Canarino_*.txt) ===
+  nessun referto del canarino scritto dopo le 15:32:36 (ora locale VPS).
+  Nel modo LETTURA PRIMA e' NORMALE (il canarino lo lanci tu dopo). Nella RACCOLTA FINALE
+  vuol dire che le corse del canarino non ci sono: la parte deterministica dei criteri 7/8 manca.
+
+=== BLOCCHI DEGLI EA E LORO CAUSA ===
+  righe INGRESSO BLOCCATO nella giornata : 0
+  righe di CAUSA del Guardian            : 0
+  spia A1 (tetto per simbolo, InpMaxPosSimbolo>0) nella giornata: 0
