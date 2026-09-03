@@ -348,13 +348,15 @@ CSV costruiti con l'**intestazione VERA dell'EA** (29 colonne, letta nel sorgent
 - **se il tester legga davvero dal 2022.07.01 a M15** (data **derivata** dal tetto
   delle 100.000 barre, non misurata);
 - **la durata** della corsa e **ogni singolo numero**;
-- 🟢 **IL PIN — messo e verificato il 28/08 sera, terza pinnatura**: `21cec02…`,
-  otto artefatti confermati blob-identici al working tree. Al momento della
-  consegna di questo referto il pin era ancora un segnaposto di 40 zeri; la
-  sessione principale l'ha pinnato dopo il push (`9ed66e2…`), il verificatore
-  ha trovato 6 difetti, ri-pinnato (`23bb983…`), il verificatore ha trovato
-  ancora 2 difetti (una quarta copia di un errore già corretto altrove tre
-  volte), ri-corretto e ri-pinnato all'attuale — come da passo 10 sotto.
+- 🟢 **IL PIN sta SOLO nella pagina** `righe/RIGA_ALLINEALONDRA_DA_MANDARE.md`
+  — qui **non si scrive, nemmeno abbreviato** (classi 100 e 103: il 28/08 questo
+  referto portava tre pin abbreviati in prosa, e due su tre erano superati).
+  Storia senza numeri: al momento della consegna di questo referto il pin era
+  un segnaposto; poi **tre pinnature il 28/08** (prima pinnatura → 6 difetti del
+  verificatore → ri-pin → 2 difetti → ri-pin) e una **quarta il 03/09** con la
+  **v2 del driver** (rilettura contro le classi 106-116 della checklist: 94-ter,
+  108, 115, 116, 116-bis, 106/23, piu' la classe 79 presa dal parse — vedi
+  l'intestazione del `.ps1`).
 
 ---
 
@@ -378,15 +380,18 @@ CSV costruiti con l'**intestazione VERA dell'EA** (29 colonne, letta nel sorgent
 
 1. ✅ **Push** degli otto artefatti sul branch `lavoro` — fatto;
 2. ✅ **pinnatura** della pagina con la ricetta e **rimozione del cartello del
-   segnaposto** nello stesso passo — fatto, prima pinnatura `9ed66e2…`;
+   segnaposto** nello stesso passo — fatto (28/08, prima pinnatura);
 3. ✅ verifica `git cat-file -s <pin>:<file>` sugli **otto** artefatti — fatto;
 4. ✅ **verificatore-stringhe**, prima passata — FAIL con 6 difetti, tutti
-   corretti, ri-pinnato `23bb983…`;
+   corretti, ri-pinnato (28/08);
 5. ✅ **verificatore-stringhe**, seconda passata — FAIL con 2 difetti (una
    quarta copia di un errore già corretto tre volte altrove), corretto,
-   ri-pinnato all'attuale `21cec02…`, tutti e otto gli artefatti riconfermati
-   blob-identici;
-6. **solo dopo**, la riga va a Claudio — e il primo giro è quello di **controllo**,
+   ri-pinnato (28/08, terza pinnatura), otto artefatti blob-identici;
+6. ✅ **03/09 — rilettura contro le classi 106-116** (nate DOPO il 28/08):
+   driver **v2**, sette difetti corretti (elenco nell'intestazione del `.ps1` e
+   nella pagina), eseguito su banco Linux al pin, **quarta pinnatura**. Il pin
+   attuale è **solo nella pagina**;
+7. **solo dopo**, la riga va a Claudio — e il primo giro è quello di **controllo**,
    che è anche la **prima compilazione** dell'EA.
 
 **La riga da mandare sta in `backtest_pipeline/righe/RIGA_ALLINEALONDRA_DA_MANDARE.md`

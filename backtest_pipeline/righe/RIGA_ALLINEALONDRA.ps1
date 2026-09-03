@@ -903,20 +903,20 @@ try{
   $instDir    = $scelto.Inst
   $TermExe    = Join-Path $instDir "terminal64.exe"
   $MetaEditor = Join-Path $instDir "metaeditor64.exe"
-  $dataFolder = $scelto.Data
-  if($dataFolder -eq "" -or $null -eq $dataFolder){ throw ("cartella dati non trovata per " + $instDir + ": nessun origin.txt in " + $termRoot + " la nomina e non e' portable (manca MQL5\Experts dentro l'installazione). Il terminale va aperto almeno una volta.") }
+  $cartDati = $scelto.Data
+  if($cartDati -eq "" -or $null -eq $cartDati){ throw ("cartella dati non trovata per " + $instDir + ": nessun origin.txt in " + $termRoot + " la nomina e non e' portable (manca MQL5\Experts dentro l'installazione). Il terminale va aperto almeno una volta.") }
   $TermScelto = $instDir
-  $DataFolder = $dataFolder
+  $DataFolder = $cartDati
   Dico ("terminale scelto: " + $instDir) "Yellow"
   Dico ("criterio ........ " + $TermCrit) "Yellow"
-  Dico ("cartella dati ... " + $dataFolder) "Yellow"
+  Dico ("cartella dati ... " + $cartDati) "Yellow"
 
   # LA FOTO PRIMA dei tre file del terminale che questo giro tocca
   # (classe 116, regola 2). Il .mq5 e l'.ex5 in Experts sono SCRITTI
   # apposta (e' il banco: li scrive anche il driver generico); l'include
   # viene messo e poi RIMESSO COM'ERA.
-  $incDir  = Join-Path $dataFolder "MQL5\Include"
-  $dstExp  = Join-Path $dataFolder "MQL5\Experts"
+  $incDir  = Join-Path $cartDati "MQL5\Include"
+  $dstExp  = Join-Path $cartDati "MQL5\Experts"
   $IncDest = Join-Path $incDir $IncNostro
   $dstMq5  = Join-Path $dstExp ($EA + ".mq5")
   $ex5     = Join-Path $dstExp ($EA + ".ex5")
@@ -1029,7 +1029,7 @@ try{
                 # generico non sceglie, riceve.
                 "-Terminal",$TermExe,
                 "-MetaEditor",$MetaEditor,
-                "-DataFolder",$dataFolder)
+                "-DataFolder",$cartDati)
       if($SoloControllo){ $argv += "-SoloControllo" }
       if($Rifai){ $argv += "-Rifai" }
       $tLancio = Get-Date
@@ -1226,7 +1226,7 @@ try{
     # -- e farebbe morire la corsa dentro un raccoglitore che e'
     # dichiarato BEST-EFFORT, cioe' l'esatto contrario del suo mestiere.
     $radici = @()
-    if($dataFolder){  $radici += (Join-Path $dataFolder "Tester") }
+    if($cartDati){  $radici += (Join-Path $cartDati "Tester") }
     if($env:APPDATA){ $radici += (Join-Path $env:APPDATA "MetaQuotes\Tester") }
     $righeAT = @()
     foreach($radice in $radici){
@@ -1321,7 +1321,7 @@ foreach($kF in @("include","mq5","ex5")){
   if($kF -eq "include" -and $FotoPrima.ContainsKey($kF) -and $FotoDopo.ContainsKey($kF)){
     if($pF -eq $dF){ $notaF = "   -> INVARIATO (com'era prima)" } else { $notaF = "   -> DIVERSO: vedi 'include a fine giro' e i PROBLEMI" }
   }
-  if($kF -ne "include"){ $notaF = "   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)" }
+  if($kF -ne "include" -and $FotoDopo.ContainsKey($kF)){ $notaF = "   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)" }
   [void]$RefTxt.Add("  " + $etF)
   [void]$RefTxt.Add("     prima: " + $pF)
   [void]$RefTxt.Add("     dopo:  " + $dF + $notaF)

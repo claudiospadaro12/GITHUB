@@ -344,32 +344,32 @@ function LeggiExport([string]$percorso){
   return @($out)
 }
 function CalcolaS0($trades){
-  $ris = [pscustomobject]@{ N=0; Media=$null; Mediana=$null; SpreadMedio=$null; Rapporto=$null; Fuori=0; SenzaOra=0; Verdetto="NON MISURABILE" }
-  if($null -eq $trades){ $ris.Verdetto = "NON MISURABILE (export per-trade assente)"; return $ris }
+  $s0 = [pscustomobject]@{ N=0; Media=$null; Mediana=$null; SpreadMedio=$null; Rapporto=$null; Fuori=0; SenzaOra=0; Verdetto="NON MISURABILE" }
+  if($null -eq $trades){ $s0.Verdetto = "NON MISURABILE (export per-trade assente)"; return $s0 }
   $n = @($trades).Count
-  $ris.N = $n
-  if($n -eq 0){ $ris.Verdetto = "NON MISURABILE (0 operazioni chiuse nell'export)"; return $ris }
+  $s0.N = $n
+  if($n -eq 0){ $s0.Verdetto = "NON MISURABILE (0 operazioni chiuse nell'export)"; return $s0 }
   $somma = 0.0; $sommaSp = 0.0
   $valori = New-Object System.Collections.ArrayList
   foreach($t in $trades){
     $somma += [double]$t.Punti
     [void]$valori.Add([double]$t.Punti)
     $sp = $S0_SpreadIgnoto
-    if($t.Ora -ge 0 -and $S0_Mappa.ContainsKey([int]$t.Ora)){ $sp = [double]$S0_Mappa[[int]$t.Ora] } else { $ris.SenzaOra++ }
+    if($t.Ora -ge 0 -and $S0_Mappa.ContainsKey([int]$t.Ora)){ $sp = [double]$S0_Mappa[[int]$t.Ora] } else { $s0.SenzaOra++ }
     if($sp -lt $S0_SpreadMinimo){ $sp = $S0_SpreadMinimo }
     $sommaSp += $sp
-    if($t.Ora -lt 8 -or $t.Ora -gt 16){ $ris.Fuori++ }
+    if($t.Ora -lt 8 -or $t.Ora -gt 16){ $s0.Fuori++ }
   }
   $ord = @($valori | Sort-Object)
-  $ris.Media = $somma / $n
-  if($n % 2 -eq 1){ $ris.Mediana = $ord[[int][math]::Floor($n/2)] } else { $ris.Mediana = ($ord[$n/2 - 1] + $ord[$n/2]) / 2.0 }
-  $ris.SpreadMedio = $sommaSp / $n
-  if($ris.SpreadMedio -gt 0){ $ris.Rapporto = $ris.Media / $ris.SpreadMedio }
-  if($null -eq $ris.Rapporto){ $ris.Verdetto = "NON MISURABILE (spread medio non leggibile)" }
-  elseif($ris.Rapporto -ge $S0_SogliaPassa){ $ris.Verdetto = "PASSA (rapporto >= 3,5)" }
-  elseif($ris.Rapporto -lt $S0_SogliaBoccia){ $ris.Verdetto = "NON PASSA (rapporto < 2,5)" }
-  else{ $ris.Verdetto = "NON SI DA' (rapporto fra 2,5 e 3,5: banda della misura del 03/09)" }
-  return $ris
+  $s0.Media = $somma / $n
+  if($n % 2 -eq 1){ $s0.Mediana = $ord[[int][math]::Floor($n/2)] } else { $s0.Mediana = ($ord[$n/2 - 1] + $ord[$n/2]) / 2.0 }
+  $s0.SpreadMedio = $sommaSp / $n
+  if($s0.SpreadMedio -gt 0){ $s0.Rapporto = $s0.Media / $s0.SpreadMedio }
+  if($null -eq $s0.Rapporto){ $s0.Verdetto = "NON MISURABILE (spread medio non leggibile)" }
+  elseif($s0.Rapporto -ge $S0_SogliaPassa){ $s0.Verdetto = "PASSA (rapporto >= 3,5)" }
+  elseif($s0.Rapporto -lt $S0_SogliaBoccia){ $s0.Verdetto = "NON PASSA (rapporto < 2,5)" }
+  else{ $s0.Verdetto = "NON SI DA' (rapporto fra 2,5 e 3,5: banda della misura del 03/09)" }
+  return $s0
 }
 
 # --- IL PARSER DEL CSV DI OTTIMIZZAZIONE.
@@ -843,19 +843,19 @@ try{
   $instDir    = $scelto.Inst
   $TermExe    = Join-Path $instDir "terminal64.exe"
   $MetaEditor = Join-Path $instDir "metaeditor64.exe"
-  $dataFolder = $scelto.Data
-  if($dataFolder -eq "" -or $null -eq $dataFolder){ throw ("cartella dati non trovata per " + $instDir + ": nessun origin.txt in " + $termRoot + " la nomina e non e' portable (manca MQL5\Experts dentro l'installazione). Il terminale va aperto almeno una volta.") }
+  $cartDati = $scelto.Data
+  if($cartDati -eq "" -or $null -eq $cartDati){ throw ("cartella dati non trovata per " + $instDir + ": nessun origin.txt in " + $termRoot + " la nomina e non e' portable (manca MQL5\Experts dentro l'installazione). Il terminale va aperto almeno una volta.") }
   $TermScelto = $instDir
-  $DataFolder = $dataFolder
+  $DataFolder = $cartDati
   Dico ("terminale scelto: " + $instDir) "Yellow"
   Dico ("criterio ........ " + $TermCrit) "Yellow"
-  Dico ("cartella dati ... " + $dataFolder) "Yellow"
+  Dico ("cartella dati ... " + $cartDati) "Yellow"
 
   # LA FOTO PRIMA dei tre file del terminale che questo giro tocca
   # (classe 116, regola 2). Il .mq5 e l'.ex5 in Experts sono SCRITTI
   # apposta (e' il banco); l'include viene messo e poi RIMESSO COM'ERA.
-  $incDir  = Join-Path $dataFolder "MQL5\Include"
-  $dstExp  = Join-Path $dataFolder "MQL5\Experts"
+  $incDir  = Join-Path $cartDati "MQL5\Include"
+  $dstExp  = Join-Path $cartDati "MQL5\Experts"
   $IncDest = Join-Path $incDir $IncNostro
   $dstMq5  = Join-Path $dstExp ($EA + ".mq5")
   $ex5     = Join-Path $dstExp ($EA + ".ex5")
@@ -956,7 +956,7 @@ try{
               # LO STESSO TERMINALE PER COSTRUZIONE (classi 37/115)
               "-Terminal",$TermExe,
               "-MetaEditor",$MetaEditor,
-              "-DataFolder",$dataFolder)
+              "-DataFolder",$cartDati)
     if($SoloControllo){ $argv += "-SoloControllo" }
     if($Rifai){ $argv += "-Rifai" }
     $tLancio = Get-Date
@@ -1125,7 +1125,7 @@ foreach($kF in @("include","mq5","ex5")){
   if($kF -eq "include" -and $FotoPrima.ContainsKey($kF) -and $FotoDopo.ContainsKey($kF)){
     if($pF -eq $dF){ $notaF = "   -> INVARIATO (com'era prima)" } else { $notaF = "   -> DIVERSO: vedi 'include a fine giro' e i PROBLEMI" }
   }
-  if($kF -ne "include"){ $notaF = "   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)" }
+  if($kF -ne "include" -and $FotoDopo.ContainsKey($kF)){ $notaF = "   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)" }
   [void]$RefTxt.Add("  " + $etF)
   [void]$RefTxt.Add("     prima: " + $pF)
   [void]$RefTxt.Add("     dopo:  " + $dF + $notaF)

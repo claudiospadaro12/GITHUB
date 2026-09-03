@@ -6845,6 +6845,17 @@ un giudizio: si scrive l'elenco, poi si giudica riga per riga.
     `RIGA_SONDA_OROLOGIO` (`_DA_MANDARE.md`).
   - Il piu' urgente e' **`RIGA_SONDAM0PB`**: e' la sonda dello stesso stampo,
     stesso PASSO 0, stesso "EA mai compilato" — armata su TUTTE E DUE le classi.
+- **03/09/2026 (pomeriggio), due fratelli chiusi per intero** (94-ter, 108,
+  110, 115, 116, 116-bis, 106/23, piu' la 79 presa dal parse), rileggendo
+  ogni driver contro tutte le classi nate dopo la sua data:
+  - `RIGA_ALLINEALONDRA.ps1` — **CORRETTO**, `_v1` -> `_v2`, pagina ri-pinnata.
+  - `RIGA_PASSO0_VWAPREV.ps1` — **CORRETTO**, `_v3` -> `_v4`, pagina ri-pinnata.
+    ⚠️ **Non era nell'elenco dei 27** qui sopra, ed era armato lo stesso: il
+    campo si chiamava `$Compilazione` invece di `$Compilato`, e il censimento
+    per token (`Compilato = "NON TENTATA"`) **non poteva vederlo** — e' la
+    classe **113** applicata al censimento della **111**. Un censimento per
+    nome di variabile va rifatto anche sul **sinonimo**: `grep -l 'NON TENTATA'`
+    prende tutti, poi si guarda uno per uno chi timbra il ramo fallito.
 
 ---
 
@@ -7297,3 +7308,85 @@ La 79 (25/08) aveva gia' insegnato il meccanismo. Quello che la rende una classe
 > driver che il giro a vuoto, per costruzione, non copre mai.
 
 ---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 (sera) — trovata dal **verificatore** ri-eseguendo la logica delle FOTO del `-V3` del PASSO 2 ORB (`RIGA_DEPLOY_ORB104_PICCOLO.ps1`, pin `8167c77`) su un banco costruito col caso **VPS reale**, non col caso comodo
+
+## 117. 🫥 LA FOTO DI UN FILE **CHE NON C'È** ESCE `INVARIATO` — e il perimetro che il round pretende MISURATO diventa verde avendo guardato il vuoto
+
+_Misurato, non immaginato: quattro scenari eseguiti in `pwsh`._ La classe **116**
+prescrive la regola giusta — «la prova sta nella FOTO, non nella frase»: si fotografa
+(esiste? quanti byte? che data?) **prima** e si rifà **dopo**. Il PASSO 2 dell'ORB la
+applicava al terminale che **non** doveva essere toccato (il 100k / `-V3`, perimetro
+firmato da Claudio): per ogni cartella con traccia del 100k, tre foto dei tre file,
+prima e dopo, e in fondo il campo `IL -V3 / 100k:`.
+
+Il buco sta in `Confronta()`:
+
+```powershell
+function Confronta($a,$b){
+  if($a.Esiste -ne $b.Esiste -or $a.Len -ne $b.Len -or $a.Hash -ne $b.Hash){ return "CAMBIATO" }
+  ...
+  return "INVARIATO"       # <-- ASSENTE prima + ASSENTE dopo passa DI QUI
+}
+```
+
+**ASSENTE prima e ASSENTE dopo = `INVARIATO`.** E il campo riassuntivo contava le
+foto, non le prove:
+
+```powershell
+$V3Txt = "INVARIATO su tutte le " + @($FotoV3).Count + " foto (" + @($V3Cand).Count + " cartelle...)"
+```
+
+Sul banco di casa non si vedeva, perché il banco aveva una cartella dati `-V3` **coi
+file dentro**. Sul VPS vero il fatto è un altro, ed era **già misurato nel referto del
+PASSO 1**: dalla sessione **Master** si vedono le **installazioni** `...-V3` in
+`Program Files` («installazioni -V3 presenti e scartate»), mentre la **cartella dati**
+del 100k sta sotto **Administrator** e Master **non la legge**. Quindi:
+
+- l'unica candidata con traccia del 100k è una **cartella di installazione**, dove i
+  tre file **non esistono e non sono mai esistiti**;
+- tre foto `ASSENTE -> ASSENTE -> INVARIATO`;
+- il referto scrive **`IL -V3 / 100k: INVARIATO su tutte le 3 foto`**, e la pagina
+  insegna a Claudio che quella riga è l'esito buono;
+- **e il rilievo onesto non parte**, perché era condizionato a `$v3n -eq 0` («nessuna
+  cartella `-V3` raggiungibile»): una candidata c'era. **La presenza di un'esca
+  spegne la dichiarazione di ignoranza e la sostituisce con un verde.**
+
+È la 116 vista dal lato del vuoto, ed è parente stretta della **113** (il file dove il
+campo manca del tutto è invisibile al grep) e della **82** (un controllo che cerca un
+token che il codice non scrive è un controllo finto): qui il controllo cerca un file
+che in quella cartella non c'è, e il «non c'è» viene contato come «non è cambiato».
+
+> ✅ **REGOLA (tre pezzi).**
+> 1. **SI CONTANO LE FOTO SU FILE REALMENTE PRESENTI**, non le foto. Prima di scrivere
+>    un riassunto `INVARIATO su N`, si filtra: `@($Foto | Where-Object { $_.Prima.Esiste })`.
+>    Se il filtro è **vuoto**, il campo **non dice `INVARIATO`: dice `NON MISURATO`**,
+>    con dentro quante cartelle ha guardato, quante foto ha preso e perché erano vuote.
+> 2. **L'ORDINE DEI TRE STATI È: CAMBIATO → NON MISURATO → INVARIATO.** Il caso
+>    peggiore — un file che **COMPARE** dove non doveva (ASSENTE -> presente) — è un
+>    `CAMBIATO`, e non deve mai essere declassato dal ramo del vuoto.
+> 3. **UNA MISURA IMPOSSIBILE SI DICHIARA UNA VOLTA SOLA, NEL POSTO CHE SA.** Il
+>    rilievo «non l'ho potuto misurare» non va messo dove si contano le **candidate**
+>    (che è troppo presto: una cartella può esserci ed essere un'esca), ma dove si
+>    contano le **prove**. E la pagina deve insegnare a leggere **`NON MISURATO`** come
+>    un esito **atteso e legittimo**, distinto sia dal verde sia dal guasto: altrimenti
+>    Claudio, che ha imparato a cercare la parola `INVARIATO`, ricomincia a cercarla.
+>
+> ⚠️ **E la regola di metodo che l'ha fatta uscire:** il banco va costruito col caso
+> **dell'ambiente vero**, che spesso è già scritto in un referto di un passo
+> precedente. Qui bastava rileggere il referto del PASSO 1 (`REFERTO_COMPILA_ORB104_2026-09-03.txt`)
+> per sapere che da Master si vedono le *installazioni* `-V3` e non le loro *cartelle
+> dati*: il banco «comodo» (dati `-V3` leggibili) è l'unico scenario in cui il difetto
+> non si vede. È la 115-bis vista dal lato dello stub, di nuovo.
+
+**Censimento** (classe 111/113 — i fratelli dello stesso stampo): la coppia
+`Foto`/`Confronta` è ricopiata in più driver di casa. Chi la usa deve rispondere a
+**due** domande, e la seconda è quella nuova:
+
+```powershell
+# 1) chi ha una funzione Confronta che tratta ASSENTE/ASSENTE come INVARIATO?
+grep -n 'Esiste -ne' backtest_pipeline/righe/*.ps1
+# 2) di questi, chi costruisce un riassunto "INVARIATO su tutte le N foto"
+#    SENZA filtrare le foto su file davvero esistenti?
+grep -n 'INVARIATO su' backtest_pipeline/righe/*.ps1
+```

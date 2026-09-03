@@ -203,9 +203,15 @@ in tutto il repo.
 - **Se BCM espone `SYMBOL_VOLUME_REAL` su D30EUR.** Finché non è misurato, la
   VWAP è **TICK-VOLUME-pesata** — ed è il dato su cui poggia la banda, cioè il
   motore intero. **[INCERTO, già dichiarato nella tesi]**
-- **Il cancello S0 (costo)**: **non adjudicabile**. Lo spread medio BCM su
-  D30EUR M15 non è misurato in casa, e il rapporto punti MT5 / punti indice su
-  D30EUR **non è agli atti** (R97 lo misurò su U30USD e NASUSD).
+- **Il cancello S0 (costo)**: al 28/08 era **non adjudicabile** (spread BCM su
+  D30EUR non misurato, conversione punti non agli atti). **Dal 03/09 lo è**:
+  spread orario reale dai tick (`SPREAD_FLOTTA_MISURA_2026-09-03.md`, D30EUR
+  mediana 1,6-1,7 punti indice nelle ore 8-16, 1 punto indice = 100 punti MT5)
+  e contract size 10 (R114 GSPEC). I criteri sono scritti **in testa a
+  `prove/ABTG_VwapRevert.txt`** (soglia severa 3 × 1,7 = **5,1 punti/trade**,
+  ora per ora fuori sessione, banda 2,5-3,5 senza verdetto), e il driver **v4**
+  li applica sull'export per-trade OOS. Resta **non misurabile** da qui: il
+  numero, che lo dà solo la corsa.
 - **Ogni singolo numero.** Il giro a vuoto copre gli artefatti; i numeri li può
   dare solo la corsa, sul PC di Claudio.
 
