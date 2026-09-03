@@ -3,7 +3,89 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-08-29 pomeriggio**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-09-03 mezzogiorno**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🗓️ AGGIORNAMENTO 03/09 — LA GIORNATA PIU' DENSA: gemelli ORB risolti, LondonFx promosso+firmato (R116), spread misurato, migrazione Fase 1 avviata
+
+### 🔫 MISTERO GEMELLI ORB — RISOLTO (dossier `report/ORB_GEMELLI_DIVERGENZA_2026-08-22.md`)
+- Causa **confermata su 3 giorni su 3** (19/08, 21/08, 02/09): `SelPos()` usa
+  `PositionSelect(_Symbol)` che su conto HEDGING prende la posizione col TICKET
+  PIU' BASSO del simbolo; se e' di un altro magic, l'ORB e' cieco alla propria
+  posizione → trailing/breakeven/OCO/OneTradePerDay muti. Pistola fumante:
+  `LARRY DOW S` (772341) aperta dal 01/09 sul Dow del piccolo.
+- **FIX v1.04** scritto (commit `19312c8`, SOLO REPO, mai compilato):
+  selezione hedge-safe per simbolo+magic ovunque, chiusure per ticket, 33 casi
+  autotest, log che verifica in campo. **7 cambi di comportamento reali** da
+  leggere prima della firma. **Perimetro deploy FIRMATO** (11:05): solo conto
+  PICCOLO, 100k intatto fino a fine Fase 1 (D1 mirror). Stringa di compilazione
+  di prova in preparazione dal verificatore.
+- **TAGLIA ORB 100k 3,3x** scoperta dalla pagella (girava a 1,0% invece di
+  0,3% dal 24/08) → **CORRETTA da Claudio** alle 08:10 (foto prima/dopo).
+
+### 🕶️ AUDIT DI FLOTTA `PositionSelect` (report/AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md)
+- 126 EA censiti: **26 VULNERABILI + 8 MEZZO-FIX (chiudono per simbolo) + 85 sani**.
+- `report/VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md`: danno ATTIVO mai successo
+  (0/1264); danno PASSIVO misurato (ORB nativo 770601: secondo lato aperto
+  4 giornate su 16). Coda fix: rossi prima, 100k dopo Fase 1.
+- **ANTIPASTO eseguito** (commit `7d0da9f`, repo-only): `InpOneTradePerDay`
+  IMPLEMENTATO (era dichiarato e mai letto) in ABTG_ORB.mq5 v1.01 e
+  ABTG_MaxMinNotte.mq5 v1.11, hedge-safe. Sul MaxMin oro 770402 cambia i
+  numeri alla prossima ricompilazione (changelog avvisa).
+
+### 🏹 VIVAIO — un morto misurato, un promosso firmato, due in coda
+- **V8 (RSI+EMA)**: NON PROMOSSO **confermato da misura** — l'ablazione mostra
+  che il filtro RSI toglie solo il 9-13% degli incroci EMA (e' un incrocio EMA,
+  famiglia gia' morta). `REFERTO_SONDARSIEMAV8_2026-09-03.md`. L'esperimento
+  MANUALE di Claudio continua (diario, il V8 come sveglia).
+- **LondonFx**: PRIMO SUPERSTITE del passo 0 — EURUSD 19/24 righe vive, GBPUSD
+  24/24, filtro RSI taglia 73-77% (filtro VERO). `REFERTO_SONDALONDONFX_2026-09-03.md`.
+  **R116 FIRMATO** (F5=A soglia short 20, ora 8, rischio 0,65%): criteri in
+  `LONDONFX_TICK_CRITERI.md`, firma in `report/FIRME_2026-09-03.md`. **EA
+  contenitore `ABTG_LondonFx.mq5` COSTRUITO** (commit `42eb67b`, repo-only,
+  3 motori a interruttore, nato hedge-safe, 112 casi autotest).
+- **RELATIVO** (scarto DAX/Dow come motore) e **VGRSI** (paper arXiv): promossi
+  della 4a battuta di caccia, in coda. Sonda RELATIVO in costruzione.
+
+### 💸 SPREAD FLOTTA — MISURATO (`SPREAD_FLOTTA_MISURA_2026-09-03.md`)
+252M tick, **solo-bid 0,000% su 3 simboli** (le corse Model 4 usano lo spread
+vero, niente da rifare). Mediane in sessione: NASUSD 1,6-1,8, U30USD 1,9-2,0,
+D30EUR 1,6-1,7 punti indice; **DAX di notte 3,5-3,9** (MaxMinNotte paga).
+Il "2.0 NON MISURATO" dei prova e' storia: dai round futuri si cita questa misura.
+
+### 🕐 OROLOGIO vs BREEDON — confronto CHIUSO (`OROLOGIO_VS_BREEDON_2026-09-03.md`)
+La cella pre-registrata dal paper (EURUSD SHORT 08:00-16:00 server) **passa il
+cancello C1 su ENTRAMBE le finestre** (IS C1 4,59 / OOS 5,31). Conferma a doppia
+fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
+
+### 🚚 MIGRAZIONE 100k — Fase 4 VERDE, collaudo Fase 1 in corso
+- **Censimento sedie mute 6/6 VIVE e attaccate** (`CENSIMENTO_SEDIE_MUTE_2026-09-03.md`)
+  → semaforo Fase 4 verde.
+- **PIANO_PROP v18** (`report/PIANO_PROP.md`) incorpora tutta la giornata.
+- **Collaudo enforcement Fase 1 sessione 1** (cap/fail-open): pacchetto costruito
+  (`backtest_pipeline/righe/COLLAUDO_FASE1_SESSIONE1_DA_MANDARE.md`, driver v2 pin
+  `2e37a67`). SCOPERTA: il terminale del 100k gira sotto l'utente Windows
+  **Administrator** (non Master) → il collaudo si lancia dalla sessione
+  Administrator. Idraulica confermata (conto trovato, filo ok), ma
+  **rischioAperto=0,00%** alle 11:19 → collaudo VERO rimandato alle ~15:30
+  (ore USA, mirror con posizioni aperte). Le 3 stringhe sono in chat.
+
+### 🎫 DUKA + esperimento manuale
+- DUKA tranche-sonda Dow (2024-10 → 2025-06) in completamento (~14:45 oggi).
+  Riga IMPORT+SONDA di validazione in preparazione (cancello: mediana ≤0,05%,
+  copertura ≥80%, DST — decide se scaricare la storica da 5 giorni).
+- **Diario manuale V8** (`report/DIARIO_MANUALE_V8.md`): 4 trade — 2 DENTRO
+  protocollo (DAX), 2 FUORI. Lezione misurata: i 3 trade DAX sono tutti FUORI
+  sessione cash (sera/pre-apertura), e il laterale sega. Statistica a 30 trade.
+
+### ⏳ CODA (prossimi passi)
+1. Collaudo Fase 1 sessione 1 alle 15:30 (VPS come Administrator, rischio>0).
+2. DUKA fine corsa → zip → import+sonda → cancello storica.
+3. Passo C diagnosi GBPUSD stasera a banco pulito (chiude H1 vs H3).
+4. Compilazione di prova ORB v1.04 → deploy sul piccolo (firmato).
+5. Sonda RELATIVO quando pronta; poi round R116 a tick (EURUSD+GBPUSD M15).
+6. Collaudo Fase 1 sessione 2 (pausa/gestione) — MAI lo stesso giorno della 1.
 
 ---
 
