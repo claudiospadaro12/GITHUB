@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SPREAD_FLOTTA_v2
+#  MARCATORE_RIGA_SPREAD_FLOTTA_v3
 #  RIGA_SPREAD_FLOTTA.ps1  --  SPREAD REALE PER FASCIA ORARIA sui tre
 #                              indici della flotta (NASUSD, U30USD,
 #                              D30EUR), dai TICK STORICI gia' sul disco
@@ -9,8 +9,10 @@
 #  MISURARE lo spread reale su BCM, simbolo per simbolo, ORA per ORA:
 #  oggi tutti i prova usano "spread 2.0 [NON MISURATO]". Questa riga
 #  mette finalmente in campo il logger promosso il 23/08 (mai lanciato)
-#  e lo ESTENDE: v2 = multi-simbolo + tabella oraria (media/mediana/
-#  P95/max per ora del giorno SERVER, in punti indice).
+#  e lo ESTENDE: il MOTORE v2 e' multi-simbolo + tabella oraria
+#  (media/mediana/P95/max per ora del giorno SERVER, in punti indice).
+#  NB: il motore .mq5 e' alla v2, questa riga .ps1 e' alla v3 -- i due
+#  numeri di versione sono INDIPENDENTI e i due marcatori pure.
 #
 #  DOVE GIRA, E PERCHE' (scelta del design 23/08, confermata):
 #  lo spread NON si raccoglie live: si legge dai TICK STORICI gia'
@@ -41,10 +43,42 @@
 #     SIMBOLO PER SIMBOLO: e' leggibile in ogni momento, anche a
 #     meta' corsa;
 #   - ogni simbolo scrive il SUO CSV appena finisce;
-#   - se la corsa muore a meta', si RILANCIA la stessa riga passando
-#     -Simboli con i soli mancanti (la riga li stampa in fondo).
+#   - se la corsa muore a meta', si usa il BLOCCO DI RIPRESA della
+#     pagina passando -Simboli coi soli mancanti (la riga li stampa in
+#     fondo, e li scrive nel referto);
+#   - per FERMARLA a mano (RAM, o serve il PC): si CHIUDE MT5 e basta.
+#     La riga se ne accorge entro 20 s, raccoglie il parziale, fa lo
+#     zip e stampa la ripresa. NON serve Ctrl+C.
 #
 #  NON committa, NON tocca il forward, NON promuove niente.
+#
+#  ---------------------------------------------------------------------
+#  v3 (03/09, dal FAIL del verificatore -- classi 88 / 94-bis / 94-ter /
+#      106 / 108 / 110 della CHECKLIST_RIGA_DI_LANCIO.md):
+#   1. IL REFERTO DELLA RIGA SI SCRIVE SU **OGNI** RAMO che arriva dopo
+#      la creazione della cartella di raccolta (terminale non trovato,
+#      scarico del motore fallito, COMPILAZIONE FALLITA, MT5 gia'
+#      aperto, giro a vuoto, corsa vera) -- prima usciva 1 in silenzio e
+#      sul Desktop non restava NIENTE da mandare (94-bis), mentre la
+#      pagina prometteva un referto.
+#   2. TRE STATI PER OGNI PASSO (94-ter): motore / compilazione /
+#      guardia MT5 / corsa hanno "NON TENTATA" - "FALLITA" - "OK", e il
+#      campo si timbra sul ramo che lo DECIDE. Il log di MetaEditor
+#      finisce in raccolta come COMPILAZIONE_FALLITA.log.
+#   3. RIGA "fine:" NEL REFERTO (110): "data:" e' l'ora di AVVIO e su
+#      una corsa di ORE sembra vecchia; adesso il referto porta tutte e
+#      due le ore e lo dice a chi legge.
+#   4. LA PULIZIA PRE-CORSA NON DISTRUGGE PIU' I REPERTI DELLA CORSA
+#      PRIMA (88): il referto e i CSV che stanno in MQL5\Files vengono
+#      COPIATI in raccolta (suffisso _PRIMA) e solo dopo cancellati.
+#      Serve alla RIPRESA: se la corsa di prima e' stata interrotta a
+#      meta', quei file erano l'unica copia.
+#   5. SE MT5 SPARISCE (chiuso a mano per liberare RAM, o crollato) la
+#      riga se ne accorge entro 20 s, CHIUDE il giro, raccoglie il
+#      parziale e stampa la RIPRESA: prima restava a girare a vuoto
+#      fino al timeout (fino a 7 ore).
+#   6. Compress-Archive non fallisce piu' in silenzio: lo stato dello
+#      zip finisce in console e in coda al referto.
 # =====================================================================
 [CmdletBinding()]
 param(
@@ -101,10 +135,97 @@ if([string]::IsNullOrWhiteSpace($Dsk)){ $Dsk = Join-Path $env:USERPROFILE "Deskt
 $Cart = Join-Path $Dsk ("SPREAD_FLOTTA_" + $Stamp)
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 $RefertoRiga = Join-Path $Cart "RIGA_REFERTO_SPREAD_FLOTTA.txt"
+$Zip         = Join-Path $Dsk ("SPREAD_FLOTTA_" + $Stamp + ".zip")
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss",$INV) }
 function Dico($t,$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
 function Titolo($t){ Write-Host ""; Write-Host ("=== " + $t + " ===") -ForegroundColor Cyan }
+
+# ---------------------------------------------------------------------
+#  STATO DEI PASSI (checklist 94-ter): ogni campo che finisce nel
+#  referto ha TANTI STATI QUANTI I RAMI, e si timbra sul ramo che lo
+#  DECIDE -- non solo su quello che lo fa contento.
+# ---------------------------------------------------------------------
+$StatoMotore  = "NON SCARICATO"
+$StatoCompila = "NON TENTATA"
+$StatoMT5     = "NON TENTATA"
+$StatoCorsa   = "NON TENTATA"
+$StatoZip     = "NON FATTO"
+$SimFatti     = @()
+$SimMancano   = @() + $ListaSim
+$haTxt        = $false
+
+# ---------------------------------------------------------------------
+#  IL REFERTO DELLA RIGA + LO ZIP, SCRITTI SU OGNI RAMO (94-bis).
+#  Un exit che non lascia niente sul Desktop e' un exit su cui la
+#  pagina non puo' dire "mandami lo zip".
+# ---------------------------------------------------------------------
+function ScriviRefertoRiga($esito,$causa){
+  $fine  = Get-Date
+  $fatti = "nessuno"
+  if($script:SimFatti.Count   -gt 0){ $fatti = ($script:SimFatti -join ", ") }
+  $manca = "nessuno"
+  if($script:SimMancano.Count -gt 0){ $manca = ($script:SimMancano -join ", ") }
+
+  $r = New-Object System.Collections.Generic.List[string]
+  [void]$r.Add("RIGA_SPREAD_FLOTTA v3 -- referto della riga")
+  [void]$r.Add("data:    " + $script:Avvio.ToString("yyyy-MM-dd HH:mm",$script:INV) + "   <-- ORA DI AVVIO della riga, NON l'ora attuale (la corsa dura ORE)")
+  [void]$r.Add("fine:    " + $fine.ToString("yyyy-MM-dd HH:mm",$script:INV) + "   <-- quando questo referto e' stato scritto")
+  [void]$r.Add("modo:    PC di backtest, MT5 aperto SOLO per la misura (StartUp .ini, AllowLiveTrading=false); spread letto dai TICK STORICI su disco, non live")
+  [void]$r.Add("pin:     " + $script:Pin)
+  [void]$r.Add("simboli: " + $script:SimboliCsv)
+  [void]$r.Add("finestra: " + $script:Da + " -> " + $script:A)
+  [void]$r.Add("")
+  [void]$r.Add("PASSI (NON TENTATA = non ci siamo arrivati; FALLITA = tentata e andata male):")
+  [void]$r.Add("  motore:       " + $script:StatoMotore)
+  [void]$r.Add("  compilazione: " + $script:StatoCompila)
+  [void]$r.Add("  guardia MT5:  " + $script:StatoMT5)
+  [void]$r.Add("  corsa:        " + $script:StatoCorsa)
+  [void]$r.Add("")
+  [void]$r.Add("esito:   " + $esito)
+  if($causa -ne ""){ [void]$r.Add("causa:   " + $causa) }
+  [void]$r.Add("csv freschi:  " + $fatti)
+  [void]$r.Add("csv MANCANTI: " + $manca)
+  # la RIPRESA si propone SOLO quando c'e' davvero un parziale da riprendere:
+  # su una FERMATA (MT5 aperto, compilazione fallita...) la cosa giusta e'
+  # togliere l'ostacolo e rilanciare il blocco NORMALE, non la ripresa.
+  if($esito -eq "PARZIALE" -and $script:SimMancano.Count -gt 0){
+    [void]$r.Add("RIPRESA: usa il BLOCCO DI RIPRESA della pagina con -Simboli """ + ($script:SimMancano -join ",") + """")
+  }
+  if($script:haTxt){ [void]$r.Add("referto MQL5: REFERTO_SPREAD_FLOTTA.txt fresco (copiato in questa cartella)") }
+  else             { [void]$r.Add("referto MQL5: MANCANTE o vecchio") }
+  $prima = @(Get-ChildItem -LiteralPath $script:Cart -Filter "*_PRIMA*" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+  if($prima.Count -gt 0){
+    [void]$r.Add("reperti della corsa PRECEDENTE messi in salvo qui (suffisso _PRIMA, NON sono di questa corsa): " + ($prima -join ", "))
+  }
+  [void]$r.Add("")
+  [void]$r.Add("ATTENZIONE (checklist 106): REFERTO_SPREAD_FLOTTA.txt NON e' cumulativo --")
+  [void]$r.Add("il motore lo RISCRIVE da zero a ogni corsa, quindi su una RIPRESA contiene")
+  [void]$r.Add("SOLO i simboli di quella ripresa. Il quadro completo e' l'unione delle")
+  [void]$r.Add("cartelle SPREAD_FLOTTA_* sul Desktop (i CSV per simbolo non si sovrascrivono).")
+  [void]$r.Add("zip atteso: " + $script:Zip)
+  $r | Set-Content -Path $script:RefertoRiga -Encoding ASCII
+
+  # --- zip leggero: solo csv + txt (i log restano in cartella) ---
+  $script:StatoZip = "NON FATTO"
+  $daZip = @()
+  $daZip += Get-ChildItem -LiteralPath $script:Cart -Filter "*.csv" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }
+  $daZip += Get-ChildItem -LiteralPath $script:Cart -Filter "*.txt" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }
+  if($daZip.Count -gt 0){
+    try{
+      Compress-Archive -Path $daZip -DestinationPath $script:Zip -Force -ErrorAction Stop
+      $script:StatoZip = "OK"
+    }catch{
+      $script:StatoZip = "FALLITO: " + $_.Exception.Message
+    }
+  }else{
+    $script:StatoZip = "NON FATTO: niente da comprimere"
+  }
+  if($script:StatoZip -ne "OK"){
+    Add-Content -Path $script:RefertoRiga -Value ("zip: " + $script:StatoZip) -Encoding ASCII
+    Write-Host ("   ZIP NON FATTO (" + $script:StatoZip + "): manda la CARTELLA " + $script:Cart) -ForegroundColor Yellow
+  }
+}
 
 # --- scarico blindato: Remove-Item prima, errore terminante, marcatore
 function Scarica($url,$dest,$marcatore){
@@ -118,7 +239,7 @@ function Scarica($url,$dest,$marcatore){
 
 Write-Host ""
 Write-Host "#####################################################################" -ForegroundColor Cyan
-Write-Host ("#  SPREAD ORARIO FLOTTA -- " + $SimboliCsv + " @ BCM (v2)") -ForegroundColor Cyan
+Write-Host ("#  SPREAD ORARIO FLOTTA -- " + $SimboliCsv + " @ BCM (v3)") -ForegroundColor Cyan
 Write-Host "#####################################################################" -ForegroundColor Cyan
 Write-Host "  !!! SOLO SUL PC DI BACKTEST -- MAI SUL VPS: apre/chiude MT5 e sul" -ForegroundColor Yellow
 Write-Host "      VPS spegnerebbe la FLOTTA IN FORWARD (EA veri)." -ForegroundColor Yellow
@@ -135,7 +256,11 @@ Titolo "F1 - terminale BCM + cartella dati"
 $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
 $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
 if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-if(-not $cand){ Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
+if(-not $cand){
+  Write-Host "Terminale BCM non trovato." -ForegroundColor Red
+  ScriviRefertoRiga "FERMATA" "terminale BCM (terminal64.exe) non trovato in Program Files"
+  exit 1
+}
 $instDir    = $cand.DirectoryName
 $Terminal   = Join-Path $instDir "terminal64.exe"
 $MetaEditor = Join-Path $instDir "metaeditor64.exe"
@@ -144,7 +269,11 @@ $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue |
     $o = Join-Path $_.FullName "origin.txt"
     (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir)
 } | Select-Object -First 1 -ExpandProperty FullName
-if(-not $DataFolder){ Write-Host "Cartella dati MT5 non trovata." -ForegroundColor Red; exit 1 }
+if(-not $DataFolder){
+  Write-Host "Cartella dati MT5 non trovata." -ForegroundColor Red
+  ScriviRefertoRiga "FERMATA" "cartella dati MT5 non trovata (origin.txt che punta al terminale BCM)"
+  exit 1
+}
 Write-Host ("   terminale : " + $instDir) -ForegroundColor Green
 Write-Host ("   dati      : " + $DataFolder) -ForegroundColor Green
 
@@ -158,7 +287,15 @@ Titolo "F2 - ABTG_SpreadOrario.mq5 dal pin (con marcatore) + compilazione"
 $DstDir = Join-Path $DataFolder "MQL5\Scripts"
 New-Item -ItemType Directory -Force -Path $DstDir | Out-Null
 $Mq5 = Join-Path $DstDir "ABTG_SpreadOrario.mq5"
-Scarica ($RawPin + "/mql5/Scripts/ABTG_SpreadOrario.mq5") $Mq5 'SPREAD ORARIO MULTI-SIMBOLO v2'
+try{
+  Scarica ($RawPin + "/mql5/Scripts/ABTG_SpreadOrario.mq5") $Mq5 'SPREAD ORARIO MULTI-SIMBOLO v2'
+}catch{
+  $StatoMotore = "SCARICO FALLITO: " + $_.Exception.Message
+  Write-Host ("ERRORE nello scarico del motore dal pin: " + $_.Exception.Message) -ForegroundColor Red
+  ScriviRefertoRiga "FERMATA" "motore ABTG_SpreadOrario.mq5 non scaricato dal pin (rete, pin sbagliato, o marcatore assente)"
+  exit 1
+}
+$StatoMotore = "OK (dal pin, marcatore 'SPREAD ORARIO MULTI-SIMBOLO v2' verificato)"
 Write-Host ("   sorgente pinnato -> " + $Mq5) -ForegroundColor Green
 $Ex5  = [System.IO.Path]::ChangeExtension($Mq5, ".ex5")
 $Log5 = [System.IO.Path]::ChangeExtension($Mq5, ".log")
@@ -172,11 +309,19 @@ $t0 = Get-Date
 & $MetaEditor "/compile:$Mq5" "/log" | Out-Null
 while((-not (Test-Path -LiteralPath $Ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
 if(-not (Test-Path -LiteralPath $Ex5)){
-  Write-Host "ERRORE di compilazione (nessun .ex5 dopo 180 s)." -ForegroundColor Red
-  if(Test-Path -LiteralPath $Log5){ Get-Content -LiteralPath $Log5 -ErrorAction SilentlyContinue | Select-Object -Last 40 | ForEach-Object { Write-Host $_ -ForegroundColor DarkYellow } }
+  $StatoCompila = "FALLITA (nessun .ex5 dopo 180 s)"
+  Write-Host "ERRORE di compilazione (nessun .ex5 dopo 180 s): vedi COMPILAZIONE_FALLITA.txt in raccolta." -ForegroundColor Red
+  if(Test-Path -LiteralPath $Log5){
+    Get-Content -LiteralPath $Log5 -ErrorAction SilentlyContinue | Select-Object -Last 40 | ForEach-Object { Write-Host $_ -ForegroundColor DarkYellow }
+    # il log degli errori va IN RACCOLTA **con estensione .txt**: e' il
+    # risultato del passo, e lo zip prende solo *.csv e *.txt
+    Copy-Item -LiteralPath $Log5 -Destination (Join-Path $Cart "COMPILAZIONE_FALLITA.txt") -Force -ErrorAction SilentlyContinue
+  }
   Write-Host "   (se MetaEditor era gia' APERTO: chiudilo e rilancia)" -ForegroundColor Yellow
+  ScriviRefertoRiga "FERMATA" "compilazione di ABTG_SpreadOrario.mq5 FALLITA (errori in COMPILAZIONE_FALLITA.txt, se MetaEditor ha scritto il log)"
   exit 1
 }
+$StatoCompila = "OK (.ex5 prodotto in questa corsa)"
 Write-Host "   compilato: ABTG_SpreadOrario.ex5" -ForegroundColor Green
 
 # =====================================================================
@@ -211,27 +356,43 @@ if($running -and $ChiudiMT5){
   $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
 }
 if($running){
+  $StatoMT5 = "RIFIUTATA: MT5 era gia' APERTO (nessun -ChiudiMT5)"
   Write-Host ""
   Write-Host "   MT5 e' APERTO. In automatico non si puo': un secondo avvio sulla" -ForegroundColor Red
   Write-Host "   stessa cartella dati non esegue lo script." -ForegroundColor Red
   Write-Host "   Aggiungi -ChiudiMT5 per farlo chiudere da solo (MAI SUL VPS: li'" -ForegroundColor Red
   Write-Host "   spegneresti la FLOTTA IN FORWARD)." -ForegroundColor Red
+  ScriviRefertoRiga "FERMATA" "MT5 gia' APERTO all'avvio: la riga NON lo ammazza da sola (rete che protegge il forward)"
   exit 1
 }
+$StatoMT5 = "OK (MT5 chiuso all'avvio)"
 
 if($SoloControllo){
+  $StatoCorsa = "NON TENTATA (-SoloControllo: MT5 non aperto)"
   Write-Host ""
   Write-Host "GIRO A VUOTO OK: terminale trovato, motore SCARICATO DAL PIN e COMPILATO," -ForegroundColor Green
   Write-Host "preset scritto, MT5 CHIUSO. Non ho aperto MT5 e non ho toccato nessun file." -ForegroundColor Green
   Write-Host "Per la corsa vera: la stessa riga SENZA -SoloControllo." -ForegroundColor Yellow
+  ScriviRefertoRiga "CONTROLLO OK" ""
+  Write-Host ("RACCOLTA (giro a vuoto): " + $Cart) -ForegroundColor Green
   exit 0
 }
 
-# cancella gli output vecchi DEI SIMBOLI RICHIESTI: cosi' un file
-# trovato dopo e' NUOVO di sicuro (gate onesto sulla freschezza)
+# --- pulizia pre-corsa, CON SALVATAGGIO DEI REPERTI (checklist 88) ------
+#  cancellare gli output vecchi serve al gate di freschezza (un file
+#  trovato dopo e' NUOVO di sicuro), MA se la corsa di prima e' stata
+#  INTERROTTA a meta' quei file sono l'unica copia che esiste: prima si
+#  copiano in raccolta col suffisso _PRIMA, poi si cancellano.
+if(Test-Path -LiteralPath $TxtOut){
+  Copy-Item -LiteralPath $TxtOut -Destination (Join-Path $Cart "REFERTO_SPREAD_FLOTTA_PRIMA.txt") -Force -ErrorAction SilentlyContinue
+  Write-Host "   (referto della corsa precedente salvato come REFERTO_SPREAD_FLOTTA_PRIMA.txt)" -ForegroundColor DarkGray
+}
 Remove-Item -LiteralPath $TxtOut -Force -ErrorAction SilentlyContinue
 foreach($s in $ListaSim){
   $c = Join-Path $FilesDir ("spread_orario_" + $s + ".csv")
+  if(Test-Path -LiteralPath $c){
+    Copy-Item -LiteralPath $c -Destination (Join-Path $Cart ("spread_orario_" + $s + "_PRIMA.csv")) -Force -ErrorAction SilentlyContinue
+  }
   Remove-Item -LiteralPath $c -Force -ErrorAction SilentlyContinue
 }
 
@@ -318,12 +479,15 @@ function Conta-CsvFreschi {
 Write-Host "   avvio MT5..." -ForegroundColor Cyan
 Start-Process -FilePath $Terminal -ArgumentList "/config:$Ini"
 
-$scaduto  = (Get-Date).AddMinutes($TimeoutMin)
-$finito   = $false
-$ErrPref0 = $ErrorActionPreference
+$scaduto    = (Get-Date).AddMinutes($TimeoutMin)
+$finito     = $false
+$mt5Sparito = $false
+$giri       = 0
+$ErrPref0   = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
 while((Get-Date) -lt $scaduto){
   Start-Sleep -Seconds 20
+  $giri = $giri + 1
   $coda = Coda-Log
   if($coda -match "SPREAD FLOTTA FINITA"){
     Write-Host "   lo script ha stampato la riga di chiusura di FLOTTA: ha finito." -ForegroundColor Green
@@ -341,6 +505,16 @@ while((Get-Date) -lt $scaduto){
         $finito = $true; break
       }
     }
+  }
+  # MT5 SPARITO (chiuso a mano per liberare RAM, oppure crollato): non si
+  # aspetta il timeout di ore a vuoto. Si esce, si raccoglie il parziale e
+  # si stampa la RIPRESA. Sta DOPO i due controlli di fine corsa apposta:
+  # se la corsa era finita, il verdetto e' COMPLETA anche se MT5 e' stato
+  # chiuso nello stesso giro. I primi 3 giri (60 s) sono di grazia: il
+  # terminale ci mette qualche secondo a comparire fra i processi.
+  if($giri -ge 3 -and -not (Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)){
+    Write-Host "   MT5 NON C'E' PIU' (chiuso da fuori o crollato): chiudo il giro e raccolgo il parziale." -ForegroundColor Yellow
+    $mt5Sparito = $true; break
   }
   Write-Host ("   ... in corso (lettura tick), CSV per-simbolo freschi: " + $csvOk + "/" + $ListaSim.Count) -ForegroundColor DarkGray
 }
@@ -379,25 +553,25 @@ if(Test-Path $logDirW){
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $Cart -Force -ErrorAction SilentlyContinue }
 }
 
-# --- referto della RIGA (data:/modo:, esito per simbolo) ---
+# --- stato della corsa, coi suoi rami veri (94-ter) ---
 $esito = "PARZIALE"
 if($finito -and $SimMancano.Count -eq 0 -and $haTxt){ $esito = "COMPLETA" }
-$r = New-Object System.Collections.Generic.List[string]
-[void]$r.Add("RIGA_SPREAD_FLOTTA v2 -- referto della riga")
-[void]$r.Add("data:    " + $Avvio.ToString("yyyy-MM-dd HH:mm",$INV))
-[void]$r.Add("modo:    PC di backtest, MT5 aperto SOLO per la misura (StartUp .ini, AllowLiveTrading=false); spread letto dai TICK STORICI su disco, non live")
-[void]$r.Add("pin:     " + $Pin)
-[void]$r.Add("simboli: " + $SimboliCsv)
-[void]$r.Add("finestra:" + $Da + " -> " + $A)
-[void]$r.Add("esito:   " + $esito)
-[void]$r.Add("csv freschi:  " + ($SimFatti -join ", "))
-if($SimMancano.Count -gt 0){
-  [void]$r.Add("csv MANCANTI: " + ($SimMancano -join ", "))
-  [void]$r.Add("RIPRESA: rilancia la stessa riga con -Simboli """ + ($SimMancano -join ",") + """")
+$causa = ""
+if($esito -eq "COMPLETA"){
+  $StatoCorsa = "OK (riga di chiusura vista, tutti i CSV freschi e non vuoti)"
+}elseif($mt5Sparito){
+  $StatoCorsa = "INTERROTTA: MT5 e' sparito durante la corsa (chiuso da fuori o crollato)"
+  $causa      = "MT5 chiuso/crollato prima della fine: quello che era gia' misurato e' qui, il resto si riprende"
+}elseif(-not $finito){
+  $StatoCorsa = "INTERROTTA: TIMEOUT di " + $TimeoutMin + " min senza riga di chiusura"
+  $causa      = "timeout: la riga di chiusura 'SPREAD FLOTTA FINITA' non e' arrivata"
+}else{
+  $StatoCorsa = "FINITA ma INCOMPLETA (riga di chiusura vista, ma qualche CSV manca o e' a 0 tick)"
+  $causa      = "il motore ha chiuso, ma non tutti i simboli hanno prodotto un CSV con tick > 0"
 }
-if($haTxt){ [void]$r.Add("referto MQL5: REFERTO_SPREAD_FLOTTA.txt fresco (copiato)") }
-else      { [void]$r.Add("referto MQL5: MANCANTE o vecchio") }
-$r | Set-Content -Path $RefertoRiga -Encoding ASCII
+
+# --- referto della RIGA + zip (stessa funzione di tutti gli altri rami) ---
+ScriviRefertoRiga $esito $causa
 
 # stampa a schermo il referto MQL5 se c'e'
 if($haTxt){
@@ -405,32 +579,31 @@ if($haTxt){
   Get-Content -LiteralPath (Join-Path $Cart "REFERTO_SPREAD_FLOTTA.txt") | ForEach-Object { Write-Host $_ }
 }
 
-# zip leggero: solo csv + txt (i log restano in cartella, non nello zip)
-$Zip = Join-Path $Dsk ("SPREAD_FLOTTA_" + $Stamp + ".zip")
-$daZip = @()
-$daZip += Get-ChildItem -LiteralPath $Cart -Filter "*.csv" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }
-$daZip += Get-ChildItem -LiteralPath $Cart -Filter "*.txt" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }
-if($daZip.Count -gt 0){
-  try{ Compress-Archive -Path $daZip -DestinationPath $Zip -Force }catch{ }
-}
-
 Write-Host ""
 Write-Host ("RACCOLTA: " + $Cart) -ForegroundColor Green
-Write-Host ("ZIP PRONTO DA MANDARE: " + $Zip) -ForegroundColor Green
+if($StatoZip -eq "OK"){ Write-Host ("ZIP PRONTO DA MANDARE: " + $Zip) -ForegroundColor Green }
+else                  { Write-Host ("ZIP NON FATTO (" + $StatoZip + "): manda la CARTELLA qui sopra.") -ForegroundColor Yellow }
 Write-Host "Verifica che dentro ci siano:" -ForegroundColor DarkGray
 foreach($s in $ListaSim){
   Write-Host ("   - spread_orario_" + $s + ".csv   (24 righe orarie + riga TUTTO)") -ForegroundColor DarkGray
 }
 Write-Host "   - REFERTO_SPREAD_FLOTTA.txt   (BID/ASK + tabella oraria per simbolo)" -ForegroundColor DarkGray
-Write-Host "   - RIGA_REFERTO_SPREAD_FLOTTA.txt (data/modo/esito della riga)" -ForegroundColor DarkGray
+Write-Host "   - RIGA_REFERTO_SPREAD_FLOTTA.txt (data/fine/modo/passi/esito della riga)" -ForegroundColor DarkGray
+Write-Host ("   la riga data: del referto vale " + $Avvio.ToString("yyyy-MM-dd HH:mm",$INV) + " = ORA DI AVVIO, NON l'ora attuale (" + (Get-Date).ToString("HH:mm",$INV) + "): la riga fine: dice quando ha finito.") -ForegroundColor DarkGray
 
 # =====================================================================
 #  CODICE DI USCITA (un parziale NON esce 0)
 #   0 -> misura COMPLETA: riga di chiusura vista, TUTTI i CSV freschi,
-#        referto fresco
+#        referto fresco. (Esce 0 anche il giro a vuoto -SoloControllo,
+#        che pero' scrive "esito: CONTROLLO OK" nel referto: il numero
+#        non basta, si legge il referto.)
 #   2 -> PARZIALE / RIPRENDIBILE: manca qualcosa; il referto parziale
 #        e' comunque leggibile, e la RIPRESA e' stampata qui sopra
-#   1 -> gia' uscito prima (pin/terminale/compilazione/MT5 aperto)
+#   1 -> fermata prima della corsa (terminale, scarico del motore,
+#        COMPILAZIONE, MT5 gia' aperto): da v3 anche questi rami
+#        lasciano referto + zip sul Desktop. Unica eccezione: -Pin
+#        assente/malformato e -Simboli vuoto, che escono 1 PRIMA che la
+#        cartella di raccolta esista (errori di riga, rossi in console).
 # =====================================================================
 if($esito -eq "COMPLETA"){
   Write-Host ""
@@ -439,10 +612,11 @@ if($esito -eq "COMPLETA"){
 }
 Write-Host ""
 Write-Host "ATTENZIONE: MISURA PARZIALE (riprendibile)." -ForegroundColor Red
-if(-not $finito){ Write-Host "  la riga di chiusura 'SPREAD FLOTTA FINITA' non e' arrivata (timeout?)." -ForegroundColor Red }
+if($mt5Sparito){ Write-Host "  MT5 e' sparito durante la corsa (chiuso da fuori o crollato)." -ForegroundColor Red }
+if(-not $finito -and -not $mt5Sparito){ Write-Host "  la riga di chiusura 'SPREAD FLOTTA FINITA' non e' arrivata (timeout?)." -ForegroundColor Red }
 if($SimMancano.Count -gt 0){
   Write-Host ("  CSV mancanti (assenti, o presenti con 0 tick letti): " + ($SimMancano -join ", ")) -ForegroundColor Red
-  Write-Host ("  RIPRESA: rilancia la stessa riga con -Simboli """ + ($SimMancano -join ",") + """") -ForegroundColor Yellow
+  Write-Host ("  RIPRESA: usa il BLOCCO DI RIPRESA della pagina con -Simboli """ + ($SimMancano -join ",") + """") -ForegroundColor Yellow
 }
 if(-not $haTxt){ Write-Host "  manca il referto txt fresco (il parziale, se c'e', e' in MQL5\Files)." -ForegroundColor Red }
 Write-Host "  Quello che c'e' sta comunque in raccolta e nello zip: chi legge decide." -ForegroundColor Yellow
