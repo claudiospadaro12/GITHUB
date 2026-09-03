@@ -1,3 +1,11 @@
+> ⚠️ **QUESTO FILE E' STORICO (14/08) — NON e' la coda attuale.** Per lo stato
+> vivo e i prossimi passi vai a **`HANDOFF.md`, sezione "AGGIORNAMENTO 03/09"**
+> (coda in fondo alla sezione) + `report/PIANO_PROP.md` v18. Sotto qui e' tutto
+> materiale gia' CHIUSO, tenuto solo come archivio. Non seguire l'ordine di
+> lancio qui sotto: e' superato.
+
+---
+
 # DA FARE — lista di ripresa (aggiornata 14/08/2026, mattina)
 
 _Lista esatta, in ordine di lancio. Tutto cio' che serve e' gia' scritto e
