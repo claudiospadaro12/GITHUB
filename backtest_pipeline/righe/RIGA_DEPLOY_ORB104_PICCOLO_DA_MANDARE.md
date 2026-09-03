@@ -67,12 +67,21 @@ misurato dalla foto del PASSO 1): è quella che viene sostituita.
 | **Quando** | flotta ferma: **dopo le 22:15 IT o prima delle 07:30 IT** (l'ORB parte alle 14:30 ora server = 15:30 IT: c'è tutta la mattina per il PASSO 3) |
 | **Quanto ci mette** | scansione + 2 download + 1 compilazione = **1–3 minuti** [STIMA] |
 
-## 📌 IL PIN — **`@@PIN@@`**  ⛔ **SEGNAPOSTO: QUESTA PAGINA NON È ANCORA LANCIABILE**
+## 📌 IL PIN — **`8167c772ac15df23ef177fa5754839232829869b`**  ✅ **INSERITO**
 
-Finché la riga qui sopra e i due blocchi portano `@@PIN@@` al posto di un commit di
-40 caratteri, **i blocchi non vanno incollati**: l'`irm` scaricherebbe da un URL che
-non esiste. Il pin viene inserito **con un commit apposta**, dopo la verifica dei
-tre file via `raw` (driver + `.mq5` v1.04 + `.mqh` v1.51, tutti **allo stesso pin**).
+Commit di `lavoro` (è il commit del driver, quello col quarto fatto del profilo),
+**verificato uno per uno via `raw` prima di scrivere questa riga** (HTTP 200 + sha256
+identico al repo):
+
+| file al pin | esito |
+|---|---|
+| `backtest_pipeline/righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1` | 200, identico, marcatore `_v1` presente, ASCII puro (0 righe non-ASCII) |
+| `mql5/Experts/ABTG_ORB_Ottimizzato.mq5` | 200, identico, `#property version "1.04"`, **identico al commit del fix `19312c8`** (sha256 `c14d85dd…`, gli stessi 74.103 byte del PASSO 1) |
+| `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (**v1.51**, sha256 `b7462cd5…`, gli stessi 112.481 byte del PASSO 1) |
+
+Tutti e tre scaricati **allo stesso pin**, mai dalla punta del branch. Il pin è
+scritto **tre volte** in questa pagina (qui e nei due blocchi) e sono **la stessa
+stringa**: i tre conteggi della ricetta (classi 101/103) tornano.
 
 ## ▶️ BLOCCO 1 — **CONTROLLO** (giro a vuoto: non scrive nel terminale, dice cosa farebbe)
 
@@ -82,7 +91,7 @@ guardate, la cartella scelta col suo **criterio**, la **versione installata** le
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='8167c772ac15df23ef177fa5754839232829869b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Modo CONTROLLO; $rc=$LASTEXITCODE;
@@ -105,7 +114,7 @@ uno dei due è aperto, **prima di scaricare qualunque cosa**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTI: chiudili tutti e due (flotta ferma: dopo le 22:15 IT o prima delle 07:30 IT) e rilancia. Non ho scaricato e non ho toccato niente.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='8167c772ac15df23ef177fa5754839232829869b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Modo CORSA; $rc=$LASTEXITCODE;

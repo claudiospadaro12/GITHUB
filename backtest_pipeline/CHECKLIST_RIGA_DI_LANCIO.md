@@ -7203,3 +7203,47 @@ gate che passa sul file mutato non e' un gate: e' una decorazione.
 > che nel linguaggio segue davvero quel nome. E il modo di scoprirlo e' uno
 > solo: **mutare il file e ricontrollare che il gate diventi rosso**. Un gate
 > non provato su una mutazione va scritto nel NON COPERTO.
+
+---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 (sera) — trovata **costruendo** la riga del DEPLOY della v1.04 dell'ORB sul solo piccolo (`RIGA_DEPLOY_ORB104_PICCOLO.ps1`, 27 casi eseguiti su banco stubbato), **leggendo l'HANDOFF accanto al codice**: la classe 115 applicata alla lettera avrebbe prodotto un giro a vuoto
+
+### 115-bis. 👥 IL FATTO CHE IDENTIFICA IL **CONTO** NON IDENTIFICA L'**ISTANZA**: due cartelle dati sotto due profili utente possono essere collegate allo STESSO login, e solo il PROFILO DELLA SESSIONE dice quale gira il forward
+
+_Non pagato in campo: trovato PRIMA dell'invio, ma su fatti MISURATI, non
+ipotizzati._ La classe **115** dice: si sceglie la cartella dati per **fatti del
+sistema** (il login nei log, il feed `bases\<server>`), mai per nome. La riga del
+deploy la applicava: `bases\BCMMarkets-Server` + nessuna traccia del 100k + login
+`50503392` nei log. Sul banco: **un'eleggibile, verde**.
+
+Poi due righe lette **altrove**:
+- HANDOFF 03/09: _«il terminale del 100k gira sotto l'utente Windows
+  **Administrator** (non Master)»_ — scoperto quella mattina, in campo;
+- `report/DAX_14-08_DUE_MOTORI.md` (righe 402-403): sotto **Administrator** c'era
+  anche una cartella **`215D85D7...`**, cioè la **stessa installazione** del piccolo
+  (MT5 deriva il nome della cartella dati dal percorso di installazione, che è
+  uguale per tutti gli utenti), _«collegata al conto: registra i deal»_.
+
+Cioè: **due** cartelle dati, sotto **due** profili, tutte e due con
+`bases\BCMMarkets-Server`, tutte e due col login del piccolo nei log, nessuna con
+`-V3`. Con i fatti della 115 sono **due eleggibili** → la riga si ferma (bene) → un
+giro a vuoto, con MT5 chiuso di notte, per farsi dire la manopola. E la tentazione
+ovvia — «prendi quella sotto `C:\Users\Master`» — è la 115 rifatta col nome dell'utente.
+
+> ✅ **REGOLA: il login identifica il CONTO; l'ISTANZA che gira il forward la
+> identifica il PROFILO DELLA SESSIONE che la lancia.** Un terminale MT5 gira sotto
+> l'utente Windows che lo ha avviato, e la sua cartella dati sta sotto
+> `%APPDATA%` **di quell'utente**: quindi la scelta automatica pretende **anche**
+> che la cartella stia sotto `%APPDATA%` della sessione che esegue la riga — che è
+> un fatto del sistema (la sessione è quella, misurabile), non un nome. Le altre
+> cartelle che passano i fatti del conto **si elencano** come «sotto un ALTRO
+> profilo» (rilievo se la scelta c'è stata, `FERMATO` con il nome della sessione
+> se non c'è **nessuna** eleggibile sotto questo profilo: quasi sempre vuol dire
+> «sei nella sessione sbagliata») e **si impongono solo con la manopola**, che le
+> accetta con un rilievo che lo dice. Corollario: **la pagina dice in testa DA
+> QUALE SESSIONE si lancia**, perché la sessione è diventata un input.
+>
+> E la regola gemella, di metodo: **i fatti dell'ambiente si cercano anche nei
+> referti degli altri round** (HANDOFF, report di campo), non solo nel codice e
+> nel banco. Il banco di casa aveva **un** profilo perché chi lo ha scritto ne
+> aveva in mente uno: è la 115 vista dal lato dello stub.
