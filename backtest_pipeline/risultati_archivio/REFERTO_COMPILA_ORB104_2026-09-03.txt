@@ -1,0 +1,58 @@
+(trascritto dalla chat il 03/09 ~14:25 IT: l'upload dello zip dall'app non passava,
+Claudio ha incollato il REFERTO a mano. Log MetaEditor: solo le prime 30 righe.)
+
+=====================================================================
+ COMPILAZIONE DI PROVA -- ABTG_ORB_Ottimizzato v1.04 (PASSO 1)
+ Sequenza firmata da Claudio il 03/09 alle 11:05 (FIRMO IL PERIMETRO
+ PICCOLO): prima si vede compilare fuori dal terminale vivo, poi il
+ deploy sul SOLO conto piccolo 50503392.
+=====================================================================
+modo: CORSA
+data: 2026-09-03 14:18:20   <- ORA DI AVVIO del giro
+pin:  117c2d4757d54e98232d4d97367a9069c6f9c49f
+
+terminale: C:\Program Files\BCM Markets MT5 Terminal
+criterio di scelta: FATTO: cartella dati con bases\BCMMarkets-Server (scartate le installazioni -V3: il perimetro firmato e' il PICCOLO)
+cartella dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+libreria standard: copiata da ...\215D85D767A1C39E22D242C8114BF9F5\MQL5\Include (266 file), Trade\Trade.mqh VERIFICATO presente
+cartella di lavoro: C:\Users\Master\abtg_compila_orb104\MQL5
+
+sorgente al pin: ABTG_ORB_Ottimizzato.mq5: 74103 byte, sha256 C14D85DD889BFD66, 2026-09-03 14:18:22
+include al pin:  ABTG_PausaGuardian.mqh: 112481 byte, sha256 B7462CD5D2F8B903, 2026-09-03 14:18:22
+versione letta dal #property: 1.04   (attesa 1.04, commit del fix 19312c8)
+autotest dichiarato nel sorgente: 10 blocchi / 33 casi
+include censiti nel sorgente: 2 (Trade/Trade.mqh, ABTG_PausaGuardian.mqh)
+grep del difetto curato: 0 occorrenze di PositionSelect(_Symbol) fuori dai commenti (attese 0)
+
+compilazione: OK (91 KB, 93174 byte, 14:18:26), 0 errors, 0 warning
+riga Result del log: Result: 0 errors, 0 warnings, 1367 ms elapsed, cpu='X64 Regular'
+codice di uscita di metaeditor64: 1
+tentativi:
+  - A (/inc sull'albero di lavoro): .ex5 PRODOTTO, codice di uscita 1
+.ex5 prodotto SOLO qui: C:\Users\Master\abtg_compila_orb104\MQL5\Experts\ABTG_ORB_Ottimizzato.ex5
+
+NESSUN DEPLOY e' avvenuto (misurato: foto prima/dopo dei file del terminale)
+  Experts\ABTG_ORB_Ottimizzato.mq5: prima [presente, 39456 byte, 2026-08-27 09:52:01] dopo [idem] -> INVARIATO
+  Experts\ABTG_ORB_Ottimizzato.ex5: prima [presente, 80872 byte, 2026-08-27 09:52:10] dopo [idem] -> INVARIATO
+  Include\ABTG_PausaGuardian.mqh: prima [presente, 82941 byte, 2026-08-31 14:59:16] dopo [idem] -> INVARIATO
+  ripristino: niente da ripristinare (il terminale non e' mai stato scritto)
+
+PROBLEMI: 0
+RILIEVI: 0
+
+--- NOTA DELLA SESSIONE (03/09) ---
+1. VERDETTO PASSO 1: la v1.04 COMPILA (0 errori, 0 warning, .ex5 91 KB contro
+   gli 80 KB della v1.02 installata: coerente coi ~1.900 byte di codice nuovo
+   hedge-safe + autotest).
+2. DOVE ha girato: cartella dati di Master 215D85... con bases\BCMMarkets-Server,
+   e con installazioni -V3 presenti e scartate = e' il VPS (terminale vivo del
+   piccolo), non il PC di backtest. Danno: NESSUNO, misurato dalle tre righe
+   INVARIATO e dalla cartella di lavoro separata. Ma la regola "VPS = solo
+   forward" e' stata sfiorata: la prossima compilazione di prova si lancia dal
+   PC di backtest, e la pagina lo dira' in testa a caratteri grandi.
+3. Il codice di uscita 1 di metaeditor64 con .ex5 prodotto e Result 0/0 e' il
+   comportamento noto (metaeditor ritorna il numero di file compilati): non
+   e' un fallimento. Classe gia' coperta dal referto (fa fede .ex5 + log).
+4. Il PASSO 2 (deploy sul SOLO piccolo) resta BLOCCATO finche'
+   aggiorna_verifica_orb.ps1 non viene ristretto al piccolo (oggi scrive
+   anche sul -V3/100k) e lanciato con -VersioneAttesa 1.04.

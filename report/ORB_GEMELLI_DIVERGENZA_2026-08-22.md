@@ -693,3 +693,13 @@ sul piccolo; il 100k resta com'e' fino a fine Fase 1 (D1 dei mirror).
 Sequenza: compilazione di prova sul PC di backtest -> se 0 errori, deploy
 sul piccolo via aggiorna_verifica_orb.ps1 (22/08) con screenshot.
 Verbale firma: report/FIRME_2026-09-03.md.
+
+
+## ✅ 03/09 14:18 — PASSO 1 ESEGUITO: la v1.04 COMPILA
+Referto: `backtest_pipeline/risultati_archivio/REFERTO_COMPILA_ORB104_2026-09-03.txt`
+(trascritto dalla chat, upload zip non riuscito). Risultato: **0 errori, 0 warning**,
+`.ex5` 93.174 byte, versione letta 1.04, autotest 10/33 dichiarati, 0 `PositionSelect(_Symbol)`,
+NESSUN DEPLOY (tre righe INVARIATO misurate). Rilievo della sessione: il giro e' partito
+dal VPS (cartella dati Master 215D85..., -V3 scartate), non dal PC di backtest — nessun
+danno, ma la prossima prova si lancia dal PC. **PASSO 2 bloccato** finche'
+`aggiorna_verifica_orb.ps1` non e' ristretto al SOLO piccolo + `-VersioneAttesa 1.04`.
