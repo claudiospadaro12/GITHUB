@@ -720,3 +720,67 @@ scelte raccomandate nei punti aperti:
 Da qui in avanti i criteri NON si toccano: prima i numeri, poi (semmai) le
 revisioni, mai il contrario. Prossimo passo: costruzione dell'EA contenitore
 `ABTG_LondonFx` (repo-only) + riga di lancio dal verificatore.
+
+---
+
+### 🏗️ EA costruito (repo-only, MAI COMPILATO): `mql5/Experts/ABTG_LondonFx.mq5`, **v1.00**
+
+_03/09/2026, subito dopo la firma. **Non compilato, non girato, nessuna riga di
+lancio**: qui non esistono MetaEditor né Strategy Tester. La compilazione e la
+riga di lancio sono del verificatore._
+
+**2.012 righe, ASCII puro.** Cosa c'è dentro, mappato sulle firme:
+
+| firma | dove vive nel codice |
+|---|---|
+| **F3** — un contenitore, tre motori | `InpMotore` (1/2/3) → **`MotoreSegnale_Calc()`, unica funzione in cui i tre si distinguono**. Tutto il resto è attraversato da tutti e tre |
+| **F3** — motore 3 portato dentro | `AllineaLong_Calc` / `AllineaShort_Calc` copiate **alla lettera** da `ABTG_AllineaLondra.mq5` righe 356-373. Di quell'EA **non** si prende altro (né sessione, né TP in R, né parziale/pari/trailing). **`ABTG_AllineaLondra.mq5` non è stato toccato** |
+| **F5 = A** | un solo `InpRsiSoglia = 80`; lo short usa `100 - 80 = 20`, **confronto stretto su entrambi i lati**, autotest sul **bordo esatto** (80,0 e 20,0 non armano). Entrambe le soglie escono in colonna |
+| **F2** — ora 8 | `InpOraInizioServer = 8`, `InpOreSessione = 8`, fine **esclusa**; autotest sui bordi 08:00 (dentro) / 16:00 (fuori) |
+| **F6** — 0,65% | `InpRiskPercent = 0.65`, lotto dalla distanza **davvero piazzata** |
+| **F9** — spread misurato | `InpMaxSpread = 0` (spento); `(ask-bid)/pip` registrato **all'ingresso** → colonne **Spread Mediano** e **Spread P95** (`PercentileOrdinato_Calc`, nearest-rank, ricontabile a mano) |
+| **F10** — R55-bis | `InpSlippagePts` (0/2/5): **costo simulato sulla geometria**, SL 8,0 + S e TP 15,0 − S. **Non** è la deviation di CTrade (che resta fissa a 30 pt = contenitore) |
+| **canarino (§4.3)** | le **8 colonne obbligatorie stanno PRIME nel CSV**, prima del conto economico, e escono da `FrameAdd`/OPTFRAME, non da `Print` |
+| geometria (§3.4) | `LONDONFX_TP_PIP 15.0` / `LONDONFX_SL_PIP 8.0` sono **`#define`, non input**: non si adattano per simbolo dalla riga di lancio |
+| contenitore (§3.3) | flat **non disattivabile** (nessun bool lo spegne), 1 posizione, tetto 6/giorno, cap 2%/giorno che **chiude e blocca**, Guardian acceso |
+| gestione (§3.3) | **non esiste nel file**: niente parziale, niente breakeven, niente trailing. Non è un input a `false` — è codice che non c'è |
+
+**Tre cose in più rispetto alla bozza, dichiarate qui perché sono scelte nostre:**
+
+1. **N6 — l'ingresso deve cadere dentro la sessione.** Il segnale nasce su barra
+   chiusa e l'ordine parte all'apertura della successiva: quello delle 15:45
+   entrerebbe alle 16:00, cioè dove il flat chiude al tick dopo. Non si apre.
+   **Non è un taglio anticipato**: è lo stesso cancello di sessione applicato al
+   momento in cui l'ordine parte. Costo misurato dalla colonna **`Segnali
+   Soppressi Fine Sessione`**. Conseguenza: su M15 l'ultima barra di segnale
+   utile è quella delle **15:30**.
+2. **`E In R` in colonna**, col suo denominatore accanto (`Rischio Medio
+   Valuta` = media dei rischi in euro **dichiarati all'apertura**). Il cancello
+   A1 si legge senza scalature a mano. Limite dichiarato: esatto al primo
+   ordine, non al centesimo (il rischio in euro cresce col saldo).
+3. **`Canarino Torna` (1/0)**: l'EA verifica da sé l'identità
+   `Segnali Generati = Ingressi + le 5 soppressioni + Ingressi Falliti`. Se è
+   **0**, le colonne del canarino **non si leggono**.
+
+**Sicurezza — hedge-safe dalla nascita (audit del 03/09):** zero occorrenze di
+`PositionSelect(_Symbol)` fuori dai commenti, zero `PositionClose/Modify/
+ClosePartial(_Symbol)`. Lettura per `PositionsTotal()` + `PositionGetTicket(i)`
+filtrata **simbolo + magic**, scrittura **solo per ticket**.
+
+**Autotest:** `InpAutoTest` esegue **17 blocchi / 112 casi**, con **due**
+contatori attesi (`#define` su blocchi *e* casi: un blocco svuotato delle sue
+asserzioni non passa per verde). Bordi esatti esercitati: cap −2,00%, tetto 6,
+sessione 8/16, RSI 80/20, uguaglianza stretta sul canale, geometria con
+slippage, P95. Esito in colonna (`Autotest Falliti` / `Blocchi` / `Casi`).
+
+**Magic:** `InpMagic = 774001` — blocco **7740xx verificato vergine oggi** nei
+sorgenti (`7741xx` è di `ABTG_GapContinuation`). ⚠️ **Da ri-verificare il giorno
+del lancio.**
+
+🚫 **Cosa NON è stato verificato in questo giro, e va detto:** **la
+compilazione** (nessun MetaEditor qui: errori di sintassi/tipo sono possibili e
+li scoprirà l'F7), il comportamento a runtime, la frequenza reale del motore 3
+(mai contata da nessuno), e ovviamente **nessun numero di backtest**. I
+controlli fatti sono statici: bilanciamento dei blocchi, ASCII puro, nessuna
+funzione duplicata, allineamento **56 nomi = 56 specificatori = 56 argomenti**
+del CSV OPTFRAME, indici `stats[0..52]` tutti assegnati.
