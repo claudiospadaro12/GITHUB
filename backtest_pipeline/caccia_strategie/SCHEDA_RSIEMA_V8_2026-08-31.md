@@ -121,3 +121,16 @@ contatore a runtime e' confrontato col `#define`. I 16 blocchi sono stati
 stessa riproduzione, fatta girare su una passeggiata casuale tipo indice, da'
 `Stato Ambiguo = 0`, `MFE/MAE >= 0` col modo 1 e `Segnali <= Nudo`.
 **Resta da fare la sola cosa che conta: compilare e far girare.**
+
+---
+
+## ✅ 03/09/2026 — LA PORTA DI RIENTRO E' STATA ESERCITATA: VERDETTO DI CARTA **CONFERMATO DA MISURA**
+
+La sonda `ABTG_SondaRsiEmaV8` (7 corse, 21 mesi, pin `0f01962`) ha risposto
+alla domanda di questa scheda: **l'ablazione mostra che il filtro RSI toglie
+solo il 9-13% degli incroci EMA(5/20)** — il motore e', nei numeri, un
+incrocio di EMA della famiglia gia' morta due volte. Frequenza abbondante
+(2-6,6 segnali/giorno per lato), geometria da moneta (RR 0,92-1,17, MFE~MAE).
+Referto completo: `risultati_archivio/REFERTO_SONDARSIEMAV8_2026-09-03.md`.
+NON PROMOSSO resta il verdetto — ora con i numeri sotto, che e' un esito
+piu' solido della carta da sola.

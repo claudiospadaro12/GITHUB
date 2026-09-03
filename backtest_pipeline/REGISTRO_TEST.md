@@ -682,3 +682,20 @@ sta li', non si duplica.
 - **NON ritestare con altre griglie** (seconda caccia 19/08). Alternative gia'
   in vivaio, stessa missione frequenza: LondonFx (RR 1,875, bozza congelata)
   e Sonda dell'Orologio (pronta dal 28/08, mai girata).
+
+## RSI+EMA V8 (Pine anonimo, incollato in chat 01-02/09) — NON PROMOSSO, CONFERMATO DA MISURA, 03/09/2026
+- **Verdetto: il filtro RSI toglie solo il 9-13% degli incroci EMA(5/20)**
+  (ablazione su 7 corse: 3 indici x M5/M15 + ORO_M15, 21 mesi, sonda
+  `ABTG_SondaRsiEmaV8`, pin `0f01962`). Nei numeri e' un incrocio di EMA:
+  famiglia SuperWave/ChaosLyapunov, gia' morta due volte. Il verdetto di
+  carta del 31/08 (SCHEDA_RSIEMA_V8) esce CONFERMATO DA UNA MISURA — la
+  porta di rientro e' stata esercitata coi numeri, come chiesto da Claudio.
+- F1 abbondante (2,0-6,6 segnali/giorno per lato: la frequenza non era il
+  problema); geometria MFE~MAE, RR 0,92-1,17, WR necessario 50-56% =
+  moneta lanciata (indicazione, limiti superiori); muro F4: a taglia di
+  flotta 19,5% (M5) / 8,45% (M15) di rischio aperto contro cap 3,25%.
+- PROBLEMI 7 dichiarati: invariante V8 della sonda violato su ~1-1,5% dei
+  segnali -> escursioni NON certificate; il verdetto poggia sui CONTEGGI
+  (robusti). Referto: `risultati_archivio/REFERTO_SONDARSIEMAV8_2026-09-03.md`.
+- **NON ritestare con altre griglie.** L'esperimento manuale di Claudio
+  (diario DIARIO_MANUALE_V8.md) continua: misura Claudio+V8, non il V8 nudo.
