@@ -2564,6 +2564,57 @@ void AutoTestRelativo()
    if(a23_nc != 2 || a23_nf != 1 || !a23_cal5 || a23_fin5 || !a23_fin8)
      { falliti++; Log("[AUTOTEST] 23 GiorniMetroAttivi_Calc modo FINESTRA (fix v1.02) DIVERGE"); }
 
+   //--- BLOCCO 24 (v1.03): IL GATE T7 SULLA BARRA D'INGRESSO REALE.
+   //    E' il caso che produceva il collaudo T12 rotto, messo a tavolino
+   //    con la finestra vera della prova (14:30-22:00, fine ESCLUSA) e
+   //    il TF vero (M15 = 900 s):
+   //      a) storico pieno, barra di segnale 21:30 -> ingresso 21:45:
+   //         dentro, e contigua. E' il caso normale, e la risposta DEVE
+   //         essere identica a quella del gate vecchio.
+   //      b) storico pieno, barra di segnale 21:45 -> ingresso 22:00:
+   //         fine ESCLUSA, quindi fuori (nessuna regressione sul bordo).
+   //      c) IL BUCO: barra di segnale 21:30, la 21:45 MANCA e la barra
+   //         vera e' la 22:00. Il gate VECCHIO guardava la teorica
+   //         (21:45) e diceva DENTRO; il nuovo guarda la reale (22:00) e
+   //         dice FUORI. E' esattamente l'ingresso che nasceva fuori
+   //         sessione e moriva a durata nulla.
+   //      d) buco che salta DENTRO la finestra (16:00 -> 16:30): si
+   //         entra lo stesso, ma 'contigua' e' false e lo dichiara.
+   blocchi++;
+   bool a24_c1 = true, a24_c2 = true, a24_c3 = true, a24_c4 = true;
+   bool a24_a = IngressoInFinestra_Calc(D'2024.01.08 21:30', D'2024.01.08 21:45', 900, 14, 30, 22, 0, a24_c1);
+   bool a24_b = IngressoInFinestra_Calc(D'2024.01.08 21:45', D'2024.01.08 22:00', 900, 14, 30, 22, 0, a24_c2);
+   bool a24_c = IngressoInFinestra_Calc(D'2024.01.08 21:30', D'2024.01.08 22:00', 900, 14, 30, 22, 0, a24_c3);
+   bool a24_d = IngressoInFinestra_Calc(D'2024.01.08 16:00', D'2024.01.08 16:30', 900, 14, 30, 22, 0, a24_c4);
+   //--- e la barra 0 non puo' MAI essere indietro rispetto alla barra di
+   //    segnale: se lo fosse, non e' un ingresso ed e' un difetto di
+   //    lettura della serie, non un orario fuori finestra.
+   bool a24_c5 = true;
+   bool a24_e = IngressoInFinestra_Calc(D'2024.01.08 16:00', D'2024.01.08 16:00', 900, 14, 30, 22, 0, a24_c5);
+   if(!a24_a || !a24_c1 ||          // (a) dentro e contigua
+      a24_b  || !a24_c2 ||          // (b) fuori (fine esclusa) ma contigua
+      a24_c  ||  a24_c3 ||          // (c) IL BUCO: fuori, e non contigua
+      !a24_d ||  a24_c4 ||          // (d) dentro ma NON contigua
+      a24_e)                        // (e) barra 0 non avanti: non e' un ingresso
+     { falliti++; Log("[AUTOTEST] 24 IngressoInFinestra_Calc (gate T7 sulla barra REALE, fix T12 v1.03) DIVERGE"); }
+
+   //--- BLOCCO 25 (v1.03): LA TENUTA IN SECONDI DALLE BARRE VALUTATE.
+   //    Il collaudo T12 in forma di aritmetica: a M5 e a M15 UNA barra
+   //    vale gia' 300 e 900 secondi, quindi nessuna tenuta puo' cadere
+   //    nella fascia 1-59 s. L'unico "sotto 60" possibile e' ZERO barre,
+   //    che e' il difetto che il collaudo deve continuare a vedere.
+   blocchi++;
+   long a25_m15_1  = TenutaSecondi_Calc(1,  900);
+   long a25_m5_1   = TenutaSecondi_Calc(1,  300);
+   long a25_m15_12 = TenutaSecondi_Calc(12, 900);
+   long a25_zero   = TenutaSecondi_Calc(0,  900);
+   long a25_neg    = TenutaSecondi_Calc(-3, 900);
+   long a25_tf0    = TenutaSecondi_Calc(5,    0);
+   if(a25_m15_1 != 900 || a25_m5_1 != 300 || a25_m15_12 != 10800 ||
+      a25_zero != 0 || a25_neg != 0 || a25_tf0 != 0 ||
+      a25_m15_1 < 60 || a25_m5_1 < 60)
+     { falliti++; Log("[AUTOTEST] 25 TenutaSecondi_Calc (collaudo T12 in aritmetica, fix v1.03) DIVERGE"); }
+
    gAutotestFalliti = falliti;
    gAutotestBlocchi = blocchi;
    Log(StringFormat("AUTOTEST: %d BLOCCHI SU %d PASSATI (falliti %d). L'esito VERO esce nelle colonne 'Autotest Falliti' e 'Autotest Blocchi': in ottimizzazione questa riga non la legge nessuno.",
@@ -2773,7 +2824,10 @@ double OnTester()
                (int)gGiorniFestaMetro, (int)gGiorniMetroZeroCal);
    PrintFormat("   COLLAUDO T6 (deve essere ZERO): attraversamenti scartati perche' era aperto l'ALTRO lato = %d",
                (int)gOccupatoAltroLato);
-   PrintFormat("   COLLAUDO T12 (deve essere 0,00%%): tenuta sotto 60 secondi = %.2f%%", sotto60Pct);
+   PrintFormat("   COLLAUDO T12 (deve essere 0,00%%): tenuta sotto 60 secondi = %.2f%% | chiuse con ZERO barre valutate = %d (v1.03: la tenuta in secondi viene dalle barre, quindi i due numeri sono lo stesso evento)",
+               sotto60Pct, (int)gChiuseZeroBarre);
+   PrintFormat("   FIX T12 v1.03 (la misura che lo rende falsificabile): ingressi fermati dal gate sulla barra REALE che il gate vecchio lasciava passare = %d. Se e' 0 e T12 fallisce ancora, la diagnosi della v1.03 e' SBAGLIATA.",
+               (int)gIngressoBarraRealeFuori);
    PrintFormat("   COLLAUDO T13: scarto medio contro iATR = %.4f%% (con InpAtrModoRma=false atteso ~0; se non lo e', la convenzione di iATR e' Wilder e VA SCRITTO)", atrDiv);
    PrintFormat("   COLLAUDO T14: punto indice = %.5f in prezzo (deve valere 1,00 sui tre indici)", gPuntoIndice);
    PrintFormat("   AUTOTEST: falliti %d su %d blocchi (-1 = NON eseguito, che non e' 'passato')",
@@ -2810,8 +2864,8 @@ double OnTester()
    //    tre righe di formato SI TOCCANO SEMPRE INSIEME. Il controllo
    //    automatico (ControllaColonne) conta virgole e '%' e URLA: e' il
    //    guardiano che sulla SondaM0PB non c'era.
-   //    CONTEGGIO CONGELATO v1.01: REL_NSTATS = 94 valori -> 97 nomi
-   //    (Pass, Simbolo, Periodo + 94) -> 97 specificatori -> 97 argomenti.
+   //    CONTEGGIO CONGELATO v1.03: REL_NSTATS = 97 valori -> 100 nomi
+   //    (Pass, Simbolo, Periodo + 97) -> 100 specificatori -> 100 argomenti.
    double stats[REL_NSTATS];
    stats[0]  = (double)gGrezziL;
    stats[1]  = (double)gGrezziS;
@@ -2908,6 +2962,8 @@ double OnTester()
    stats[92] = (double)InpLato;
    stats[93] = (double)gGiorniFestaMetro;   // FIX C2 v1.01/v1.02: informativo, ESCLUSI dal numeratore C2
    stats[94] = (double)gGiorniMetroZeroCal; // CONTROLLO v1.02: quante volte mordeva il criterio di CALENDARIO v1.01 (atteso 0)
+   stats[95] = (double)gIngressoBarraRealeFuori; // FIX T12 v1.03: quante volte il gate NUOVO ha morso dove il vecchio passava. Se 0 e T12 fallisce ancora, la diagnosi e' sbagliata
+   stats[96] = (double)gChiuseZeroBarre;         // COLLAUDO T12 in conteggio secco: posizioni chiuse senza aver valutato UNA barra (atteso 0)
 
    if(InpScriviCsv && !MQLInfoInteger(MQL_OPTIMIZATION)) ScriviCsvTotali(stats);
 
@@ -2968,6 +3024,10 @@ void ScriviCsvTotali(const double &s[])
              StringFormat("due lati %.2f | muro d'attrito %.0f", s[48], REL_C8_TENUTA_BARRE_MIN));
    FileWrite(h, "C8", "tenuta sotto 60 secondi pct", DoubleToString(s[49], 2), "",
              StringFormat("COLLAUDO T12: deve essere 0,00 | scarto prop a %.0f%%", REL_C8_QUOTA_SOTTO60_KO));
+   FileWrite(h, "-", "chiuse con ZERO barre (collaudo T12)", DoubleToString(s[96], 0), "",
+             "v1.03: la tenuta in secondi viene dalle BARRE VALUTATE, quindi 'sotto 60 s' = 'zero barre'. Atteso 0");
+   FileWrite(h, "-", "ingressi barra reale fuori (fix T12 v1.03)", DoubleToString(s[95], 0), "",
+             "quante volte il gate T7 sulla barra REALE ha fermato un ingresso che il gate vecchio (barra teorica tSeg+TF) lasciava passare. Se 0 e T12 fallisce ancora, la diagnosi v1.03 e' SBAGLIATA");
    FileWrite(h, "-", "attraversamenti grezzi", DoubleToString(s[0], 0), DoubleToString(s[1], 0),
              StringFormat("%.3f al giorno", s[8]));
    FileWrite(h, "-", "attraversamenti eseguibili", DoubleToString(s[2], 0), DoubleToString(s[3], 0),
@@ -3020,7 +3080,7 @@ void OnTesterDeinit()
    bool header_scritto = false; int righe = 0;
    string periodo = EnumToString((ENUM_TIMEFRAMES)Period());
 
-   //--- 97 nomi (v1.01) = Pass + Simbolo + Periodo + 94 valori di stats[].
+   //--- 100 nomi (v1.03) = Pass + Simbolo + Periodo + 97 valori di stats[].
    string head = "Pass,Simbolo,Periodo,"
                  "Attraversamenti Grezzi Long,Attraversamenti Grezzi Short,"
                  "Attraversamenti Eseguibili Long,Attraversamenti Eseguibili Short,"
@@ -3059,16 +3119,19 @@ void OnTesterDeinit()
                  "Autotest Falliti,Autotest Blocchi,"
                  "Finestra N,Soglia Ingresso Sigma,Soglia Uscita Sigma,"
                  "Modo Spread,Modo Z Score,Barre Max Tenuta,Barre Orizzonte,Lato Attivo,"
-                 "Giorni Festa Metro,Giorni Metro Zero Calendario";
+                 "Giorni Festa Metro,Giorni Metro Zero Calendario,"
+                 "Ingressi Barra Reale Fuori,Chiuse Zero Barre";
 
    //--- LA RIGA E' SPEZZATA IN TRE, E NON E' ESTETICA: MQL5 non accetta
-   //    piu' di 64 parametri per chiamata, e qui gli argomenti sono 98
+   //    piu' di 64 parametri per chiamata, e qui gli argomenti sono 100
    //    (v1.01: +1 per "Giorni Festa Metro", data[93], in coda a fmt3;
-   //     v1.02: +1 per "Giorni Metro Zero Calendario", data[94]).
+   //     v1.02: +1 per "Giorni Metro Zero Calendario", data[94];
+   //     v1.03: +2 per "Ingressi Barra Reale Fuori" (data[95]) e
+   //            "Chiuse Zero Barre" (data[96]), fix T12).
    //    Un solo StringFormat non compilerebbe.
    string fmt1 = "%d,%s,%s,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.3f,%.3f,%.0f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.2f,%.2f,%.3f,%.3f,%.2f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f";
    string fmt2 = "%.2f,%.2f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.2f,%.2f,%.2f,%.2f,%.0f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f";
-   string fmt3 = "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.4f,%.4f,%.5f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f";
+   string fmt3 = "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.4f,%.4f,%.5f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f";
    ControllaColonne(head, fmt1 + "," + fmt2 + "," + fmt3);
 
    while(FrameNext(pass, name, id, value, data))
@@ -3102,7 +3165,7 @@ void OnTesterDeinit()
                                 data[73], data[74], data[75], data[76], data[77], data[78],
                                 data[79], data[80], data[81], data[82], data[83], data[84],
                                 data[85], data[86], data[87], data[88], data[89], data[90],
-                                data[91], data[92], data[93], data[94]);
+                                data[91], data[92], data[93], data[94], data[95], data[96]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
