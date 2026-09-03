@@ -699,3 +699,15 @@ sta li', non si duplica.
   (robusti). Referto: `risultati_archivio/REFERTO_SONDARSIEMAV8_2026-09-03.md`.
 - **NON ritestare con altre griglie.** L'esperimento manuale di Claudio
   (diario DIARIO_MANUALE_V8.md) continua: misura Claudio+V8, non il V8 nudo.
+
+## LONDONFX (canale di Londra + RSI, EURUSD) — PASSO 0 SUPERATO, 03/09/2026
+- **PRIMO SUPERSTITE della missione frequenza**: su EURUSD M15 con RSI,
+  12/12 righe VIVE (2,0-2,3 segnali/giorno per lato, MFE med 10-13,4 pip,
+  RR 0,90-1,14); M5 vivo a ora 8, sospeso a ora 4 (spread non misurato).
+  Ablazione: il filtro RSI taglia il 73-77% dei segnali nudi (filtro VERO,
+  opposto del V8). Corsa pulita: PROBLEMI 0, collaudi tutti verdi.
+- Referto: `risultati_archivio/REFERTO_SONDALONDONFX_2026-09-03.md`.
+  Prossimi passi proposti: gemella GBPUSD, SPREAD_FLOTTA (74148), round a
+  tick reali su EURUSD M15 ora=8 con criteri congelati prima + ablazione
+  a 3 motori (contenitore vs segnale). Il passo 0 conta occasioni: il
+  MERITO non e' ancora misurato.
