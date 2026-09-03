@@ -1,5 +1,9 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDARELATIVO_v3
+#  MARCATORE_RIGA_SONDARELATIVO_v4
+#  (v3 -> v4, 03/09 sera: gate ancorati alla v1.02 dell'EA -- REL_NSTATS
+#  94->95/98 colonne, autotest 22->23 blocchi, version "1.01"->"1.02",
+#  stampate le due colonne diagnostiche nuove -- contenuto cambiato,
+#  marcatore alzato: classe 109-bis/il riflesso "alza la versione").
 #  RIGA_SONDARELATIVO.ps1 -- SONDA DI CONVERGENZA "RELATIVO" (PASSO 0
 #  del candidato P1 della quarta battuta, 02/09; shortlist n.1 del
 #  GIACIMENTO_DI_CASA del 03/09, sezione 8).
