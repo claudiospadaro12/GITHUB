@@ -168,3 +168,131 @@ in chat → se pulito, **CORSA** con MT5 e MetaEditor chiusi e flotta ferma → 
 chat → **PASSO 3** (scheda Esperti: `ORB AUTOTEST ... 0 falliti`; Giornale: `loaded
 successfully`; F7: `InpRiskPercent = 1.0`) → screenshot. La cartella di backup
 resta sul Desktop finché il PASSO 3 non è chiuso.
+
+## 6. 🔍 IL VERIFICATORE-STRINGHE, VERIFICA VERA (03/09/2026, sera — ri-verifica dopo la classe 117)
+
+_Questa sezione è del `verificatore-stringhe` (non della sessione che ha scritto le
+sezioni 1-5), eseguita da capo sui file **a HEAD**, non fidandosi del verdetto
+precedente. Ripete la checklist per intero, coi comandi._
+
+**Cosa era già stato corretto prima di questa ri-verifica** (commit `5d21c3b` +
+`8cc550d`, di un giro precedente interrotto da errori di server): classe **117**
+(la foto di un file ASSENTE usciva `INVARIATO`; ora tre stati `CAMBIATO` /
+`NON MISURATO` / `INVARIATO su N foto vere`, con `NON MISURATO` come esito atteso
+sul VPS reale — Master non legge la cartella dati del 100k sotto Administrator,
+misurato al PASSO 1), marcatore `_v1` → `_v2`, pagina ri-pinnata.
+
+**Verificato da capo, oggi, coi comandi:**
+1. **Driver e pagina a HEAD sono IDENTICI ai pin dichiarati**: `git diff 5d21c3b HEAD
+   -- .../RIGA_DEPLOY_ORB104_PICCOLO.ps1` e `git diff 8cc550d HEAD -- .../
+   RIGA_DEPLOY_ORB104_PICCOLO_DA_MANDARE.md` → **entrambi vuoti**.
+2. **`5d21c3b` è antenato di `origin/lavoro`** (`git fetch` + `git merge-base
+   --is-ancestor`) e `git status` pulito sui due file: niente in sospeso da pushare.
+3. **Parse reale con `pwsh` 7 (`Parser::ParseFile`) DISPONIBILE in questa sessione**:
+   `RIGA_DEPLOY_ORB104_PICCOLO.ps1` intero → **0 errori**. I **due blocchi** della
+   pagina estratti uno per uno e parsati a parte (non solo letti) → **0 errori**
+   ciascuno, apici raddoppiati (`e''`) verificati sintatticamente validi in stringhe
+   a singolo apice.
+4. **Ricerca dei duplicati di variabile per case-insensitivity (classe 79)** col
+   parser su tutto il driver: **un solo gruppo**, `me` (righe 296-299, locale dentro
+   `AggiungiCandidata`) contro `$Me` (righe 156/632/699/735, a livello di script) —
+   **scope diversi** (variabile di funzione non dichiarata `$script:`, quindi NON
+   tocca l'omonima esterna): esattamente il caso "funzioni diverse = locale, va
+   bene" che la classe 79 stessa distingue dal difetto vero. Non è un difetto.
+5. **ASCII puro**: `grep -P '[^\x00-\x7F]'` su driver e sui due blocchi estratti →
+   **zero righe** in tutti e tre.
+6. **Byte reali scaricati dal pin, non assunti**: `curl` diretto su
+   `raw.githubusercontent.com/.../5d21c3bf.../` per i tre file (`.ps1`, `.mq5`,
+   `.mqh`) → HTTP 200 su tutti e tre, sha256 **identici** a quelli dichiarati in
+   pagina (`c14d85dd...`/74.103 byte per l'EA, `b7462cd5...`/112.481 byte per
+   l'include) e identici anche ai file di `mql5/` a HEAD del repo. `#property
+   version "1.04"`, `ORBOTT_AUTOTEST_BLOCCHI_ATTESI 10` / `_CASI_ATTESI 33`,
+   `bool ABTG_GuardiaIngresso(` (ancorato con la parentesi) tutti confermati nel
+   sorgente scaricato. `PositionSelect(_Symbol)` vivo: **0 occorrenze** fuori dai
+   commenti (le uniche righe che matchano sono commenti o `PositionSelectByTicket`,
+   nome diverso).
+7. **La deviazione dal verbale firmato è reale e giustificata, non solo dichiarata**:
+   `report/FIRME_2026-09-03.md` dice testualmente "deploy sul piccolo con
+   `aggiorna_verifica_orb.ps1`". Letto `aggiorna_verifica_orb.ps1` riga per riga:
+   riga 25 `param([string]$VersioneAttesa = "1.02")`, righe 93-104 costruiscono un
+   array di **due** istanze (`PICCOLO` e `GRANDE/100k -V3`) e il `foreach` alle
+   righe 107+ **compila e scrive su entrambe**. Userebbe la v1.02 come atteso e
+   toccherebbe il -V3: **violerebbe il perimetro "100k INTATTO" nello stesso
+   momento in cui lo eseguirebbe**. La riga nuova, dedicata, è la scelta corretta —
+   non lo stesso script "esteso", uno **diverso**, col perimetro dentro per
+   costruzione (mai `-V3` nel path di scrittura).
+8. **Guardia processi PRIMA del download**: nel blocco CORSA della pagina
+   (`Get-Process terminal64,metaeditor64` come **prima riga** del blocco, prima di
+   qualunque `irm`) e nel driver (sezione 0, con lo stesso `throw` se `Modo`=CORSA).
+   In CONTROLLO tollerato e dichiarato (rilievo), mai un blocco.
+9. **Cultura**: ogni `.ToString(...)` e ogni `[int]::Parse(...)` nel driver porta
+   `$INV` (`InvariantCulture`) — nessuna eccezione (grep di tutte le occorrenze,
+   12 righe, tutte con `$INV`); `CurrentCulture`/`CurrentUICulture` del thread
+   forzati a invariante in testa allo script. Nessun `-f` in stile Python.
+10. **Nessuna scrittura in CONTROLLO nel terminale**: confermato leggendo il ramo
+    (righe 690-700 del driver): si ferma prima del backup, timbra i campi come
+    "NON FATTO"/"NON AVVENUTO". Le uniche scritture di un CONTROLLO sono nella
+    cartella di lavoro locale (`%USERPROFILE%\abtg_deploy_orb104`, mai nel
+    terminale) e nello zip di raccolta sul Desktop (promesso, non un difetto).
+11. **Sentinella (116) e backup/ripristino**: scritta PRIMA della prima scrittura
+    reale (riga 720, prima di `Copy-Item`), letta all'avvio del giro successivo
+    (righe 394-409): in CORSA ripristina e cancella la sentinella dichiarandolo nei
+    RILIEVI; in CONTROLLO si limita a un PROBLEMA senza scrivere. Il ripristino è
+    verificato per sha256 (`RipristinaDaBackup`), non per frase.
+12. **116-bis (Desktop calcolato in due modi)**: le stesse tre righe
+    (`[Environment]::GetFolderPath('Desktop')` → `%USERPROFILE%\Desktop` →
+    `%USERPROFILE%\OneDrive\Desktop`) sono identiche, carattere per carattere
+    nell'ordine dei fallback, fra `TrovaDesktop()` nel driver e i due blocchi della
+    pagina.
+13. **108 (exit code)**: sia nei blocchi (`$rc -isnot [int]` / `$rc -is [int] -and
+    $rc -ne 0`, mai `-ne 0` nudo) sia dentro `Compila()` (`$RcTxt` resta "NON LETTO"
+    se `$esito.Rc` non è un intero) — tre stati, mai due.
+14. **110 (`data:` = ora di avvio)**: sia il referto del driver (`"data: " + $Avvio...
+    + "<- ORA DI AVVIO del giro (non l'ora in cui leggi)"`) sia i due blocchi
+    (`$t0.ToString(...)` confrontato esplicitamente con `(Get-Date).ToString(...)`
+    in console) calcolano l'atteso, non scrivono "= adesso".
+15. **115 / 115-bis (cartella scelta per fatti, profilo compreso)**: i quattro fatti
+    (bases\BCMMarkets-Server, assenza di traccia del 100k per `-V3` **o** login
+    50504263, login 50503392 come conferma, `%APPDATA%` della sessione lanciante)
+    sono tutti nel codice (righe 565-624), con manopola `-CartellaDati` che passa
+    dagli stessi gate (righe 599-606) — non salta i controlli.
+16. **Timeout realistico**: `$TimeoutSec` default 120s contro un tempo di
+    compilazione **misurato** al PASSO 1 di 1.367 ms (`REFERTO_COMPILA_ORB104_
+    2026-09-03.txt`, riga `Result: 0 errors, 0 warnings, 1367 ms elapsed`): il
+    tetto ha margine ampio, il ramo "MUTO" (nessun log dopo 20s) è dichiarato e
+    ripristina, non è un'euristica del silenzio che finge un successo.
+17. **Censimento dei fratelli (111/113, informativo, FUORI PERIMETRO)**: la coppia
+    `Foto`/`Confronta` (`Esiste -ne`) compare anche in `RIGA_COMPILA_ORB104.ps1` e
+    `RIGA_R116_LONDONFX.ps1`, ma il riassunto `"INVARIATO su ... foto"` (il pezzo che
+    la classe 117 corregge) compare **solo** in `RIGA_DEPLOY_ORB104_PICCOLO.ps1`
+    (`grep -l 'INVARIATO su' *.ps1`): i due fratelli non hanno lo stesso concetto di
+    "-V3 misurato per differenza" (COMPILA_ORB104 non tocca nessun terminale vivo,
+    R116_LONDONFX è di un altro round). Dichiarato e NON toccato: `RIGA_R116_*` è
+    esplicitamente fuori dal perimetro di questa verifica.
+
+```
+VERDETTO   PASS
+STRINGA    i due blocchi di RIGA_DEPLOY_ORB104_PICCOLO_DA_MANDARE.md al pin
+           5d21c3bf791adfe357c352a66be4b8af5dea3ad1, così come sono in pagina
+           (verbatim, verificati byte per byte contro il file a HEAD)
+DIFETTI    nessuno residuo. Corretto PRIMA di questa ri-verifica (giro precedente,
+           committato prima dell'interruzione): classe 117 (foto di un file
+           ASSENTE letta come INVARIATO) -> 5d21c3b, pagina ri-pinnata -> 8cc550d
+PIN        5d21c3bf791adfe357c352a66be4b8af5dea3ad1 (DEFINITIVO: nessuna
+           correzione necessaria in questo giro, HEAD == pin per entrambi i file)
+NON COPERTO
+           - parse reale su Windows PowerShell 5.1 (il VPS): qui pwsh 7 disponibile,
+             usato per il parse sintattico, non per un'esecuzione reale su 5.1.
+             Nessun costrutto esclusivo di pwsh 7 nel file (niente operatore
+             ternario, niente && / || fra comandi, niente -AsHashtable, niente ??).
+           - il formato esatto della riga di login nei log MT5 ('NNNN': login on
+             ...): l'ancoraggio è a sottostringa: se il formato reale del VPS
+             differisse, il fallback è un RILIEVO dichiarato ("login NON compare"),
+             non un blocco -- la scelta della cartella regge comunque sugli altri
+             fatti (bases\, assenza di traccia del 100k, profilo).
+           - il comportamento vero di Master verso il profilo Administrator sul VPS:
+             misurato indirettamente dal PASSO 1 (installazioni -V3 viste, cartella
+             dati -V3 no), non da questa sessione (niente VPS qui). Il campo
+             NON MISURATO è la lettura corretta se questo si conferma; ATTENZIONE
+             CAMBIATO se qualcosa di inatteso si vede.
+```
