@@ -96,15 +96,15 @@ cartello che non c'e', o impara a ignorare il conteggio (guardiano decorativo, p
 (`RIGA_SONDALONDONFX`, `RIGA_COMPILA_ORB104`, `RIGA_DEPLOY_ORB104_PICCOLO`) danno **0** perche' non usano la
 parola ne' nel cartello ne' nella ricetta.
 
+**Aggiornamento a fine verifica (commit `ccaafa4`, arrivato durante il banco):** la sessione principale ha
+composto il terzo conteggio (`CART='segnap'"osto\|..."`), quindi la riga 350 non conta piu' se stessa. Eseguito
+sulla pagina a HEAD: **da' 2** (righe 148 e 347 restano). Le due righe qui sotto vanno ancora riformulate.
+
 **Correzione (pagina):**
 - riga 148 -> `✅ **INSERITO il 03/09/2026** (prima di questo commit qui c'era il token @@PIN composto, non un commit).`
   — senza le tre parole, e senza le parole della 101-ter (`non esiste`, `provvisori`, `da sostituire` vicino a "pin");
 - riga 347 -> `# e il CARTELLO del token si RISCRIVE al passato (classe 101), non si lascia:`;
-- riga 350 -> comporre le parole, come il token del 77:
-  ```bash
-  SEG='segna'"posto"; NF='non fun'"ziona"; NP='la riga non'" parte"
-  grep -ci "$SEG\|$NF\|$NP" "$F"                # DEVE dare 0
-  ```
+- riga 350 -> gia' composta in `ccaafa4` (`CART=...`): resta cosi'.
 
 ## 3. 🔎 RILIEVI (non bloccano; si dichiarano)
 
