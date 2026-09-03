@@ -1,0 +1,20 @@
+=== DUKASCOPY -> TICK CSV: referto ===
+versione: DUKA-TICK-v2
+comando : --simboli USA30IDXUSD --da 2024-10-01 --a 2025-06-16 --dst usa --fuso server --motore curl --pausa-ms 250 --cartella C:\Users\Master\dukascopy_lavoro
+motore  : curl [curl 8.21.0 (Windows) libcurl/8.21.0 Schannel zlib/1.3.2 WinIDN WinLDAP]
+ESITO   : COMPLETO MA CON BUCHI (rilancia): USA30IDXUSD
+data: 2026-09-03 17:01 (ora del PC)  =  2026-09-03 15:01 UTC
+fuso timestamp: server (calendario DST usa -- la sonda decide, criterio congelato)
+
+U30USD_DK: 20716582 tick totali
+  prezzo minimo 36563.04  massimo 45079.50
+  2024: 5507628 tick
+  2025: 15208954 tick
+  spread (campione 1/100): mediana 2.53  p90 5.47  <-- da confrontare con lo spread del tester (R55)
+  divisore usato 1000, ordine campi p1_ask  <-- CONTROLLA L'ORDINE DI GRANDEZZA
+  fuso: server (calendario DST usa)
+  scaricate 217 ore (4.8 MB .bi5), 5104 cache, 0 assenti (404), 7 errori, 0 buchi cache
+  file mensili scritti: 9 (in C:\Users\Master\dukascopy_lavoro\tick)
+  ULTIMO ERRORE: ERRORE 503 su https://datafeed.dukascopy.com/datafeed/USA30IDXUSD/2025/05/11/10h_ticks.bi5
+  (con errori > 0 la copertura NON e' garantita: rilancia,
+   la cache evita di riscaricare quello che c'e' gia')
