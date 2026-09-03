@@ -69,6 +69,62 @@ segnaposto `__SYM__`; e c'e' `backtest_pipeline/controlla_prova.py`, che il pin
 vuoto lo trova **prima** di svegliare MT5.
 
 
+## 2-ter) POST NEWS — il "nessun edge" e' UNA PASSATA CHE NON E' MAI GIRATA (corretto il 03/09/2026)
+
+| # | EA | Sym | Risultato in archivio | Verdetto |
+|---|---|---|---|---|
+| P1 | ABTG_PostNews | EURUSD / EURJPY, IS+OOS | **Profit 0.00, Trades 0** in tutti e 4 i CSV | 🔴 letto come "nessun edge" il 07/08 — ⚠️ **RITIRATO** |
+
+🔴 **Non e' un verdetto ribaltato: e' un verdetto INESISTENTE.** Quattro file di
+risultato con `Trades 0` non misurano una strategia debole, non misurano niente.
+`risultati_prove/ABTG_PostNews/*.csv` — colonna `Trades` = 0 su ogni riga.
+
+🔎 **DUE cause sommate, e servivano tutte e due per fare zero:**
+- **(a) il DATO.** `mql5/Files/abtg_news.csv` aveva **17 righe datate 2026-2027**
+  (`data/abtg_news.csv` e' **vuoto, 0 byte**). Con `InpRestrictToNews=true` e
+  nessun evento nel periodo, nessun ordine parte.
+- **(b) il CANALE.** L'EA apriva il CSV **senza `FILE_COMMON`**. Nel tester ogni
+  agente ha la **sua** sandbox `MQL5\Files` e i driver di casa non ci copiano
+  file ausiliari (gia' verificato riga per riga in `lancia_r93.ps1`, ed e' lo
+  stesso difetto pagato sul FiboH4): `FileOpen` falliva, `LoadNews` tornava con
+  0 eventi e **il filtro si spegneva da solo, in silenzio.**
+
+🛠️ **Corretto, e in modo che non si ripeta:**
+- `ABTG_PostNews.mq5` **v1.10**: `InpNewsCommon` (default `true`, Common prima e
+  sandbox come ripiego — **il live non cambia**), due canarini in chiaro
+  (`CALENDARIO CIECO` / `CANARINO ROSSO`) e la riga di copertura
+  `[PostNews][NEWS] letto da … | UTILI per questo preset N | dal … al …`.
+  **Una passata con N=0 si butta.** Piu' `InpAutoTest` sui casi di accettazione
+  della SPEC (par. 7).
+- **Il calendario vero**: `backtest_pipeline/costruisci_news_postnews.py` →
+  `mql5/Files/abtg_news_postnews_2010_2025_UTC.csv`, **599 eventi 2010-2025**
+  (143 ECB PC, 84 FOMC PC, 186 Unemployment Rate USA, 186 Nonfarm Payrolls),
+  fusi dalle due sorgenti di biblioteca. ADP / U6 / Private Nonfarm esclusi in
+  modo esplicito (`NewsToday` fa match sulla **data**: un ADP di mercoledi'
+  aprirebbe in un giorno senza notizia). Autotest 14 casi, 0 falliti.
+  ⚠️ **`abtg_news.csv` NON e' stato toccato: e' il file del forward.**
+
+⚖️ **E il round rifatto NON promuove comunque.** 12-16 eventi l'anno: il metro
+di casa (Emendamento A, >=150 operazioni per finestra) **non e' raggiungibile**.
+Il giudizio possibile e' la **prova di regime** e vale **solo sul RISCHIO**
+(Emendamento B). Va scritto **prima** dei numeri, non dopo.
+
+⚠️ **Da tenere accanto al risultato, gia' in registro (lapide 03/09):**
+`arXiv 2605.04004` §4.7 — su 993 eventi il drift post-news e' reale **nelle
+prime cinque barre** e da bar +6 le T-statistiche stanno fra 0,14 e 0,69.
+Misurato su Nasdaq, non sul forex: **indicazione forte, non verdetto**. Ma la
+Post News piazza i pendenti a news+10/+15 e li lascia vivi **per ore**: la
+maggior parte della sua finestra di riempimento cade **fuori** dalle cinque
+barre. E' un'attesa dichiarata prima della misura.
+
+🆕 **Cella nuova in coda (03/09):** `prove/POSTNEWS_NFP_00_conta.txt` —
+disoccupazione USA su **USDJPY M5**, dalla slide del corso AB Forex (pag.
+140-143), preset `ABTG_PostNews_NFP_USDJPY.set`, magic 771203. E' un **passo 0
+conta-occasioni**, OHLC, e non e' stata lanciata. Il track record 2009-2017 del
+relatore e' **[dichiarato]**, pips grezzi senza costi: motivazione per
+misurare, **mai** un risultato da citare.
+
+
 ## 3) ORB e altri breakout indici (screen OHLC + direzione L/S)
 
 | # | EA | Sym | Miglior config | Risultato | Verdetto |
