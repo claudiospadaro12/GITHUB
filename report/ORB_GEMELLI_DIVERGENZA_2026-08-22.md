@@ -481,3 +481,8 @@ prossimo trade il rapporto lotti gemelli deve tornare ~6 (0,3%/1,0% x 20)
 Restano aperti, sul mistero del trailing: foto posizioni APERTE del
 piccolo + Giornale del piccolo (02/09, 16:00->17:50 IT), e i log della
 v1.03 alla prossima ricompilazione.
+
+_(03/09 08:17 — controllo finale: Claudio ha riaperto il pannello del
+PICCOLO, verificato "Rischio per trade in % = 1.0" (contratto rispettato,
+nessuna modifica necessaria) e chiuso con Annulla. Quadro taglie definitivo:
+piccolo 1,0% / 100k 0,3%, entrambi fotografati.)_
