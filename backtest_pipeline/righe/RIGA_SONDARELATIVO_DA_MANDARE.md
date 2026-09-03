@@ -304,7 +304,7 @@ sonda lo spegne apposta: le passate si sovrascriverebbero).
    altrimenti si fa **a mano** fra i due referti.
 6. **Foto PRIMA/DOPO** dei tre file del terminale e la riga `pulizia:`.
 7. **I CRITERI DI LETTURA** (stampati dai `#define`, uguali a questa pagina).
-8. **I COLLAUDI** (su tutte le righe): autotest 0/21, T6 = 0, sotto 60 s = 0,00,
+8. **I COLLAUDI** (su tutte le righe): autotest 0/23, T6 = 0, sotto 60 s = 0,00,
    punto indice 1,000, spread e soglia C3 del simbolo, troncati 0, storico
    gamba/metro, C2. **Un solo fallimento = NON LEGGIBILE.**
 9. **LA CELLA DI RIFERIMENTO N=20 σ=1,05** — la risposta letterale alla
