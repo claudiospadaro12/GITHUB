@@ -1,0 +1,255 @@
+=====================================================================
+ SONDA RELATIVO -- PASSO 0, CONTATORE DI CONVERGENZA (ABTG_SondaRelativo)
+ gamba D30EUR (si scambia) x metro U30USD (si legge), M15 -- NESSUN ORDINE -- 49 passate
+=====================================================================
+modo: CORSA   <- CONTROLLO = giro a vuoto, NON e' il risultato
+data: 2026-09-03 22:10:08   <- ORA DI AVVIO, non di fine: la corsa dura decine di minuti
+pin:  01743b7ec58ae8376d095b1678a7d2fcd891cd97
+prova: D30_M15 = RELATIVO_D30_M15.txt
+finestra: 2024.09.26 -> 2026.06.30  (UNA TRANCHE, FrazioneIS 1)
+banco: MODELLO 2 (SOLO PREZZI DI APERTURA): il segnale nasce su barra chiusa e non si apre niente. I CSV portano il suffisso _ohlc (marca del generico per ogni modello non-tick). Deposito 100000 (inerte).
+terminale: C:\Program Files\BCM Markets MT5 Terminal   [FATTO: cartella dati con bases\BCMMarkets-Server (scartate le installazioni -V3)]   dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+compilazione: OK (88 KB, 22:10:12), 0 errors, 0 warning   <- EA NUOVO: se e' FALLITA, QUESTO e' il risultato del passo
+riga Result del log: Result: 0 errors, 0 warnings, 1861 ms elapsed, cpu='X64 Regular'
+codice di uscita di metaeditor64: 1   (NON LETTO non e' un fallimento: fa fede l'.ex5 e il log)
+versione letta dal #property: 1.02 (attesa 1.02)
+autotest nel sorgente: 23 blocchi (righe 'blocchi++;' fuori dai commenti) (attesi 23)
+colonne: REL_NSTATS = 95 -> 98 colonne (attese 98)
+input: 22 input letti dal sorgente (attesi 22, tutti pinnati nel prova)
+grep contatore puro: 0 chiamate di trading fuori dai commenti (attese 0)
+include: 0 righe #include (attese 0: sonda autosufficiente)
+celle: 49 (2 assi: InpFinestraN 10..40 passo 5 x InpSogliaIngressoSigma 0,75..1,65 passo 0,15), ricontate dai pin ||Y al pin
+gemellaggio 4 prova: VALIDO: i 4 prova hanno il blocco dei parametri IDENTICO riga per riga e differiscono SOLO per @SIMBOLO e @PERIODO
+tetto barre: DENTRO IL TETTO: M15 chiede 642 giorni (1.76 anni) contro ~1461 di tetto | EFFETTIVA: prima barra GAMBA 2024-09-26, METRO 2024-09-26, Giorni Contati 438 su ~459 feriali chiesti, Barre Valutate 12981
+cache tester: prima 0 file, dopo 0
+codice di uscita del generico: 0
+anteprima .ini (solo CONTROLLO): n/a (solo in CONTROLLO)
+csv *_OOS trovati: 1 (attesi 0: gamba OOS degenere; il rosso del generico su quel file e' ATTESO e NON si rilancia)
+foto PRIMA dei file del terminale:
+   Experts\ABTG_SondaRelativo.mq5: presente, 158977 byte, 2026-09-03 22:09:48
+   Experts\ABTG_SondaRelativo.ex5: presente, 89410 byte, 2026-09-03 22:09:55
+   Files\OptResults_ABTG_SondaRelativo_D30EUR.csv: assente
+foto DOPO:
+   Experts\ABTG_SondaRelativo.mq5: presente, 158977 byte, 2026-09-03 22:10:14
+   Experts\ABTG_SondaRelativo.ex5: presente, 88890 byte, 2026-09-03 22:10:18
+   Files\OptResults_ABTG_SondaRelativo_D30EUR.csv: assente
+pulizia: nessun CSV grezzo residuo; nel terminale RESTANO (dichiarati, non cancellati): C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\ABTG_SondaRelativo.mq5 e C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\ABTG_SondaRelativo.ex5
+
+--- I CRITERI DI LETTURA (dai #define del sorgente al pin, uguali alla pagina; scritti PRIMA dei numeri) ---
+  C1 >= 2.00/gg | C3 MFE >= 8.40 pti (3.00 x spread 2.80; largo > 16.80) | C5 RR >= 0.70 | C6 non conv. > 40.00% scarto, 25.00-40.00% sospeso | C8 tenuta < 12.00 barre sospeso, >= 25.00% sotto 60 s scarto | C2 > 10.00% spaiati | C7 0.65% x max/gg vs cap 3.25%
+  VERDETTO PER LATO = ALTOPIANO, NON PICCO: esiste un blocco 2x2 di celle CONTIGUE (N adiacenti x sigma adiacenti)
+  in cui C1 (somma dei lati) + C3 (lato) + C5 (lato) + C6 (totale) + C8 (totale) stanno in piedi INSIEME?
+    VIVO    = almeno un blocco 2x2 tutto di celle VIVE (C6 <= 25.00% e tenuta >= 12.00 barre dentro)
+    SOSPESO = blocchi 2x2 in piedi solo con celle SOSPESE dentro (C6 25.00-40.00% o tenuta < 12.00)
+    NO      = nessun blocco 2x2: le celle vive, se ci sono, sono ISOLATE = rumore. Una cella sola non e' una risposta.
+  CLAUSOLA SEVERA: un solo collaudo fallito su una sola delle 49 righe = NON LEGGIBILE, nessun verdetto.
+  NESSUNA CELLA VIENE PROMOSSA: la cella di riferimento (N=20, sigma=1.05) si stampa perche' e' la domanda-sonda, non perche' e' la migliore.
+
+--- I COLLAUDI (si leggono PRIMA dei numeri; su TUTTE le righe) ---
+  righe nel CSV: 49 (attese 49) | CSV scritto alle 2026-09-03 22:10:50 (FRESCO: piu' recente dell'avvio della corsa)
+  autotest: 0 falliti su 23 blocchi (attesi 0/23) | occupato ALTRO lato (T6): 0 (atteso 0) | sotto 60 s: 0.32% (atteso 0,00)
+  punto indice: 1.000 (atteso 1,000) | spread misurato: 2.80 (atteso 2.80) | soglia C3: 8.40 (attesa 8.40) | campioni troncati: 0 (atteso 0)
+  ATR divergenza vs iATR: 0.0000% (atteso ~0 con SMA del TR) | ATR mediano 33.30 punti idx
+  storico: prima barra GAMBA 2024-09-26 16:00 | METRO 2024-09-26 16:00 (il metro NON deve partire dopo la gamba)
+  barre valutate 12981 | fuori finestra 25639 | saltate per dati 192 | giorni contati 438
+  DUE FEED: metro mancante sul segnale 352 | valutazioni perse per buco 58 (il COSTO della regola stretta) | solo metro 4 | z non calcolabile 0
+  C2 giorni spaiati: 42 = 9.59% (oltre 10.00% = rifare filtrando, e dichiarare)
+  diagnostica C2 (v1.02): Giorni Festa Metro 2 (festivita' del metro DENTRO la finestra della sonda, ora esclusa dal numeratore C2) | Giorni Metro Zero Calendario 0 (vecchio criterio v1.01, tenuto come controllo, atteso 0 su un metro quasi-24h)
+  (i valori qui sopra sono della prima riga; i collaudi sono stati verificati su TUTTE le 49 righe: un fallimento sta nei PROBLEMI)
+
+--- LA CELLA DI RIFERIMENTO (N=20, sigma=1.05): la domanda-sonda del GIACIMENTO sez. 8 ---
+  n/d
+
+--- LA MAPPA 7x7 PER LATO (V = C1+C3+C5+C6+C8 in piedi; S = in piedi con C6 25-40% o tenuta < 12; . = no) ---
+VERDETTO LONG : NON LEGGIBILE (47 collaudi falliti: vedi PROBLEMI)
+VERDETTO SHORT: NON LEGGIBILE (47 collaudi falliti: vedi PROBLEMI)
+
+--- LE 49 CELLE (ordinate per N, poi sigma; mai aggregate) ---
+  N sigma ese/ggL ese/ggS ese/ggT   MFE L   MFE S   RR L   RR S nonCnv% ten.med mx/g  C1 C3L C3S  C6  C8 L/S
+ 10  0.75   2.126   2.144   4.269   23.40   22.50   1.04   0.95   15.88    4.00    9   1   2   2   2   1 S/S
+ 10  0.90   1.998   2.059   4.057   23.30   22.00   1.01   0.92   15.87    4.00    8   1   2   2   2   1 S/S
+ 10  1.05   1.881   1.950   3.831   23.85   22.00   1.03   0.90   15.91    4.00    8   1   2   2   2   1 S/S
+ 10  1.20   1.756   1.822   3.578   23.90   22.30   1.00   0.89   16.27    5.00    7   1   2   2   2   1 S/S
+ 10  1.35   1.614   1.687   3.301   25.00   22.50   1.06   0.88   16.53    5.00    6   1   2   2   2   1 S/S
+ 10  1.50   1.482   1.523   3.005   24.50   23.00   0.98   0.88   16.57    5.00    6   1   2   2   2   1 S/S
+ 10  1.65   1.279   1.326   2.605   26.00   23.90   1.06   0.89   16.74    5.00    5   1   2   2   2   1 S/S
+ 15  0.75   1.594   1.605   3.199   25.60   25.40   1.07   0.92   23.05    5.00    8   1   2   2   2   1 S/S
+ 15  0.90   1.530   1.505   3.034   26.55   26.20   1.08   0.97   23.33    6.00    7   1   2   2   2   1 S/S
+ 15  1.05   1.466   1.397   2.863   27.45   26.35   1.14   0.95   23.92    6.00    7   1   2   2   2   1 S/S
+ 15  1.20   1.361   1.331   2.692   28.15   26.00   1.20   0.90   24.34    6.00    6   1   2   2   2   1 S/S
+ 15  1.35   1.269   1.258   2.527   28.05   26.50   1.14   0.93   24.57    6.00    6   1   2   2   2   1 S/S
+ 15  1.50   1.180   1.132   2.313   28.20   27.55   1.15   0.93   25.27    6.00    5   1   2   2   1   1 S/S
+ 15  1.65   1.032   0.995   2.027   28.55   27.20   1.14   0.92   24.77    6.00    5   1   2   2   2   1 S/S
+ 20  0.75   1.295   1.338   2.632   27.70   27.60   1.11   1.06   29.14    6.00    7   1   2   2   1   1 S/S
+ 20  0.90   1.212   1.251   2.463   30.00   25.85   1.17   0.95   30.21    6.00    7   1   2   2   1   1 S/S
+ 20  1.05   1.151   1.199   2.349   31.00   26.20   1.19   0.91   30.52    7.00    5   1   2   2   1   1 S/S
+ 20  1.20   1.087   1.121   2.208   30.20   27.50   1.17   0.98   31.64    7.00    5   1   2   2   1   1 S/S
+ 20  1.35   1.032   1.032   2.064   29.95   26.35   1.15   0.86   32.52    7.00    5   1   2   2   1   1 S/S
+ 20  1.50   0.952   0.941   1.893   30.00   27.65   1.13   0.95   32.57    7.00    5   0   2   2   1   1 ./.
+ 20  1.65   0.847   0.854   1.701   31.70   27.80   1.21   0.91   31.95    7.00    5   0   2   2   1   1 ./.
+ 25  0.75   1.164   1.192   2.356   28.95   24.95   1.21   0.86   33.33    6.00    8   1   2   2   1   1 S/S
+ 25  0.90   1.059   1.096   2.155   30.55   26.00   1.25   0.88   34.22    7.00    6   1   2   2   1   1 S/S
+ 25  1.05   1.005   1.041   2.046   33.30   27.95   1.32   0.89   33.93    7.00    6   1   2   2   1   1 S/S
+ 25  1.20   0.927   0.959   1.886   33.60   27.20   1.21   0.83   34.75    7.00    6   0   2   2   1   1 ./.
+ 25  1.35   0.852   0.893   1.744   34.50   27.50   1.23   0.84   34.29    8.00    6   0   2   2   1   1 ./.
+ 25  1.50   0.799   0.824   1.623   36.15   28.60   1.32   0.86   33.76    8.00    5   0   2   2   1   1 ./.
+ 25  1.65   0.740   0.735   1.475   36.65   29.90   1.35   0.93   33.75    8.00    5   0   2   2   1   1 ./.
+ 30  0.75   1.011   1.055   2.066   30.40   28.90   1.22   0.99   35.80    6.00    6   1   2   2   1   1 S/S
+ 30  0.90   0.943   0.968   1.911   31.90   29.55   1.16   0.95   37.04    7.00    6   0   2   2   1   1 ./.
+ 30  1.05   0.893   0.893   1.785   34.20   28.90   1.22   0.89   37.60    8.00    6   0   2   2   1   1 ./.
+ 30  1.20   0.854   0.845   1.699   35.45   30.40   1.08   0.89   37.50    8.00    5   0   2   2   1   1 ./.
+ 30  1.35   0.797   0.785   1.582   36.30   32.05   1.04   0.93   36.80    9.00    5   0   2   2   1   1 ./.
+ 30  1.50   0.733   0.726   1.459   35.40   34.95   0.96   0.99   37.09    9.00    5   0   2   2   1   1 ./.
+ 30  1.65   0.651   0.642   1.292   37.60   35.60   0.98   0.92   35.69   10.00    5   0   2   2   1   1 ./.
+ 35  0.75   0.920   0.936   1.856   32.50   27.50   1.20   0.92   38.50    7.00    6   0   2   2   1   1 ./.
+ 35  0.90   0.845   0.868   1.712   36.15   27.50   1.25   0.81   39.60    8.00    5   0   2   2   1   1 ./.
+ 35  1.05   0.795   0.817   1.612   37.25   27.65   1.20   0.73   39.80    8.00    5   0   2   2   1   1 ./.
+ 35  1.20   0.749   0.758   1.507   36.45   28.20   1.09   0.78   40.91    9.00    5   0   2   2   0   1 ./.
+ 35  1.35   0.694   0.696   1.390   36.45   30.00   1.09   0.75   41.22   10.00    5   0   2   2   0   1 ./.
+ 35  1.50   0.616   0.614   1.231   36.80   31.50   1.03   0.76   42.30   10.00    4   0   2   2   0   1 ./.
+ 35  1.65   0.580   0.543   1.123   38.35   33.55   1.04   0.79   40.85   11.00    4   0   2   2   0   1 ./.
+ 40  0.75   0.842   0.813   1.655   32.50   29.20   1.16   0.76   42.62    8.00    6   0   2   2   0   1 ./.
+ 40  0.90   0.774   0.785   1.559   34.40   27.30   1.14   0.72   43.92    8.00    5   0   2   2   0   1 ./.
+ 40  1.05   0.737   0.753   1.491   35.10   27.10   1.10   0.69   44.26    9.00    5   0   2   2   0   1 ./.
+ 40  1.20   0.674   0.680   1.354   36.60   28.15   1.18   0.66   46.04   10.00    5   0   2   2   0   1 ./.
+ 40  1.35   0.644   0.619   1.263   38.40   28.40   1.26   0.65   46.29   10.00    5   0   2   2   0   1 ./.
+ 40  1.50   0.610   0.568   1.178   37.40   29.60   1.17   0.67   46.12   11.00    5   0   2   2   0   1 ./.
+ 40  1.65   0.546   0.491   1.037   38.60   32.30   1.15   0.71   46.70   12.00    4   0   2   2   0   2 ./.
+
+--- LE NOTE CHE VANNO LETTE INSIEME AI NUMERI ---
+  - QUESTA SONDA NON DICE SE IL MOTORE GUADAGNA: conta OCCASIONI e misura TAGLIA, GEOMETRIA, CONVERGENZA, TENUTA.
+    Il merito e' a tick, dopo, con >= 150 operazioni IS (Emendamento della Finestra, punto A).
+  - NON MISURA LA CO-INTEGRAZIONE: C6 e' la sua approssimazione operativa. Se C6 e' alto, e' MOMENTUM TRAVESTITO.
+  - IL DAX DALLE 17 SERVER IN POI E' FUORI DAL SUO CASH e lo spread quasi raddoppia (2,80 = ora peggiore): C3 usa la
+    CLAUSOLA SEVERA (mediana oraria PEGGIORE), non la mediana di sessione 1,6-1,7 citata nel GIACIMENTO.
+  - C9 GRADIENTE M5/M15: si legge confrontando i referti D30_M5/D30_M15 (e NAS) a parita' di tutto il resto.
+    Derivato PRIMA della misura: a M15 il candidato NON dovrebbe arrivare al pavimento; il bersaglio e' M5.
+  - TETTO BARRE (M5): la finestra EFFETTIVA la dice la riga 'tetto barre' qui sopra; C1 resta per-giorno sul denominatore CONTATO.
+  - UN SOLO BROKER, UN SOLO REGIME (toro). FORMA UNILATERALE: a due gambe i numeri di C3 andrebbero RADDOPPIATI.
+  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 98 colonne OPTFRAME.
+
+AVVISO: FrazioneIS 1.0 -> la gamba 'OOS' del generico e' DEGENERE (0 giorni). Il rosso del generico sul CSV *_OOS e' ATTESO: NON rilanciare.
+
+PROBLEMI: 47
+  - cella N=10 sigma=0.75: Sotto 60 Secondi Pct = 0.32 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=25 sigma=1.20: Sotto 60 Secondi Pct = 0.36 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=35 sigma=0.90: Sotto 60 Secondi Pct = 0.13 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=15 sigma=1.50: Sotto 60 Secondi Pct = 0.39 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=15 sigma=0.75: Sotto 60 Secondi Pct = 0.64 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=30 sigma=1.20: Sotto 60 Secondi Pct = 0.27 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=40 sigma=0.90: Sotto 60 Secondi Pct = 0.44 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=20 sigma=1.50: Sotto 60 Secondi Pct = 0.60 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=20 sigma=0.75: Sotto 60 Secondi Pct = 0.52 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=10 sigma=1.05: Sotto 60 Secondi Pct = 0.30 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=35 sigma=1.20: Sotto 60 Secondi Pct = 0.45 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=25 sigma=1.50: Sotto 60 Secondi Pct = 0.42 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=25 sigma=0.75: Sotto 60 Secondi Pct = 0.10 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=15 sigma=1.05: Sotto 60 Secondi Pct = 0.56 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=40 sigma=1.20: Sotto 60 Secondi Pct = 0.67 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=30 sigma=1.50: Sotto 60 Secondi Pct = 0.31 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=30 sigma=0.75: Sotto 60 Secondi Pct = 0.33 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=20 sigma=1.05: Sotto 60 Secondi Pct = 0.58 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=10 sigma=1.35: Sotto 60 Secondi Pct = 0.21 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=35 sigma=1.50: Sotto 60 Secondi Pct = 0.74 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=25 sigma=1.05: Sotto 60 Secondi Pct = 0.11 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=15 sigma=1.35: Sotto 60 Secondi Pct = 0.54 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=40 sigma=1.50: Sotto 60 Secondi Pct = 0.58 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=40 sigma=0.75: Sotto 60 Secondi Pct = 0.41 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=20 sigma=1.35: Sotto 60 Secondi Pct = 0.66 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=30 sigma=1.05: Sotto 60 Secondi Pct = 0.13 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=10 sigma=1.65: Sotto 60 Secondi Pct = 0.26 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=10 sigma=0.90: Sotto 60 Secondi Pct = 0.28 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=25 sigma=1.35: Sotto 60 Secondi Pct = 0.13 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=15 sigma=1.65: Sotto 60 Secondi Pct = 0.34 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=15 sigma=0.90: Sotto 60 Secondi Pct = 0.60 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=30 sigma=1.35: Sotto 60 Secondi Pct = 0.14 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=40 sigma=1.05: Sotto 60 Secondi Pct = 0.31 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=20 sigma=1.65: Sotto 60 Secondi Pct = 0.67 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=20 sigma=0.90: Sotto 60 Secondi Pct = 0.56 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=10 sigma=1.20: Sotto 60 Secondi Pct = 0.19 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=35 sigma=1.35: Sotto 60 Secondi Pct = 0.49 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=25 sigma=1.65: Sotto 60 Secondi Pct = 0.62 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=25 sigma=0.90: Sotto 60 Secondi Pct = 0.11 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=15 sigma=1.20: Sotto 60 Secondi Pct = 0.59 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=40 sigma=1.35: Sotto 60 Secondi Pct = 0.54 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=30 sigma=1.65: Sotto 60 Secondi Pct = 0.35 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=30 sigma=0.90: Sotto 60 Secondi Pct = 0.36 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=20 sigma=1.20: Sotto 60 Secondi Pct = 0.41 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=10 sigma=1.50: Sotto 60 Secondi Pct = 0.23 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=35 sigma=1.65: Sotto 60 Secondi Pct = 0.61 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+  - cella N=40 sigma=1.65: Sotto 60 Secondi Pct = 0.44 (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta.
+RILIEVI: 72
+  - cella N=10 sigma=0.75: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=1.20: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=0.90: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=0.90: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=1.50: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=0.75: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.20: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.20: Giorni Spaiati Pct = 56.62 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=0.90: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=0.90: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.50: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=0.75: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.05: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.20: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.20: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.50: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=0.75: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.05: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.20: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.20: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=1.50: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.50: Giorni Spaiati Pct = 56.62 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=0.75: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=0.75: Giorni Spaiati Pct = 56.62 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.05: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.35: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.50: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.50: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=0.75: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=0.75: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.05: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.35: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.50: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.50: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=0.75: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=0.75: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.35: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.05: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.05: Giorni Spaiati Pct = 56.62 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=10 sigma=1.65: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=0.90: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.05: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.05: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.35: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.65: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=0.90: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.35: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.35: Giorni Spaiati Pct = 56.62 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=1.05: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.05: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.65: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=0.90: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.20: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.35: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.35: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.65: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=0.90: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.20: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.35: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.35: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=1.65: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.65: Giorni Spaiati Pct = 56.62 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=0.90: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=0.90: Giorni Spaiati Pct = 56.62 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.20: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.50: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.65: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.65: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=1.65: Barre Saltate Dati = 192 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.65: Giorni Spaiati Pct = 59.59 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - firma del tetto NON verificabile a macchina in questa corsa: il CSV del gemello NAS_M15 non e' in workdir. Si confronta a mano 'Barre Valutate' fra i due referti dello stesso TF: IDENTICHE = tetto.
+  - un CSV *_OOS esiste NONOSTANTE la gamba degenere (FrazioneIS 1): numeri su finestra NON dichiarata, NON leggerli. Nello zip solo come reperto.
+
+COME SI RIPRENDE: dalla pagina righe/RIGA_SONDARELATIVO_DA_MANDARE.md, NON da questa riga: $Pin nasce dentro il blocco e non sopravvive.
