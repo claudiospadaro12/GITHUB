@@ -7307,6 +7307,22 @@ La 79 (25/08) aveva gia' insegnato il meccanismo. Quello che la rende una classe
 > domanda e' **"il banco e' arrivato alla RACCOLTA con le righe dentro?"** — perche' e' l'unico posto del
 > driver che il giro a vuoto, per costruzione, non copre mai.
 
+#### 79-bis / censimento dei fratelli (classe 111) — 03/09/2026, sera tardi
+
+La classe e' stata chiusa su `RIGA_SONDARELATIVO.ps1` **la sera stessa**, e la 111 dice che chiudere sul
+file dove il difetto e' stato trovato lascia i fratelli armati. Censimento fatto **a macchina** su tutte
+le `backtest_pipeline/righe/*.ps1` (cerca: `$R = New-Object ... ArrayList`, poi un `$r` assegnato o di
+ciclo **dopo** quella riga, poi almeno un `$R.Add` **dopo** la colpa):
+
+- **1 fratello armato: `RIGA_POSTNEWS_NFP.ps1`** (PASSO 0 NFP/USDJPY, scritto lo stesso giorno, mai
+  lanciato). `$r = $w.PerMagic[...]` nel ciclo dei magic, poi **21** `$R.Add`. Riprodotto in `pwsh`
+  (`does not contain a method named 'Add'`), corretto in `$rg`, ri-censito: **0 armati**.
+- Nessun altro file del repo ha lo stampo.
+
+> 📌 **La classe si e' ripresentata in meno di 24 ore, su un driver scritto DOPO** che era stata scritta:
+> la regola col parser (punto 1 qui sopra) non basta se non la si esegue **su ogni riga nuova**, non solo
+> su quella che ha pagato. Il censimento va rifatto quando nasce una riga nuova con un referto `$R`.
+
 ---
 
 ## 🆕 AGGIUNTA DEL 03/09/2026 (sera) — trovata dal **verificatore** ri-eseguendo la logica delle FOTO del `-V3` del PASSO 2 ORB (`RIGA_DEPLOY_ORB104_PICCOLO.ps1`, pin `8167c77`) su un banco costruito col caso **VPS reale**, non col caso comodo
