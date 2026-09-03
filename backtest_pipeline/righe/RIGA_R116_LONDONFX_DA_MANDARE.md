@@ -80,10 +80,21 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 > dice **con la foto prima/dopo**, non con una frase. `Tester\cache` svuotata (solo
 > quella, mai `bases\ticks`).
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`de01aea710653dfabe0244699266b0593a9ecf97`**
 
-> 🔴 **IL PIN QUI SOPRA È UN SEGNAPOSTO E NON FUNZIONA.** Va sostituito col commit vero
-> dopo il push (ricetta in fondo), e finché è così **LA RIGA NON PARTE**.
+_Pinnata il 03/09 (pomeriggio): prima di questo commit qui c'era un segnaposto._
+Commit di `lavoro`, **verificato uno per uno via `raw` prima di scrivere questa riga**
+(HTTP 200 + sha256 identico al repo):
+
+| file al pin | esito |
+|---|---|
+| `backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1` | 200, identico, marcatore presente, ASCII puro, parse `pwsh` OK |
+| `backtest_pipeline/prove/LONDONFX_R116_TICK.txt` + `LONDONFX_R116_FASE2_SLIPPAGE.txt` | 200, identici, ASCII puro |
+| `backtest_pipeline/walkforward_generico.ps1` | 200, identico (il driver lo pinna col replace di `$EABranch`) |
+| `mql5/Experts/ABTG_LondonFx.mq5` | 200, identico, `#property version "1.00"`, `#define` 17 / 112 |
+| `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (v1.51) |
+
+Tutti e sei scaricati **allo stesso pin**, mai dalla punta del branch.
 
 ---
 
@@ -94,7 +105,7 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -111,7 +122,7 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD; $rc=$LASTEXITCODE;
@@ -135,7 +146,7 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -152,7 +163,7 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD; $rc=$LASTEXITCODE;
@@ -179,7 +190,7 @@ fragilità). **Non rifà le 12 passate**: gira le 4 di slippage 2/5 sul motore 2
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='de01aea710653dfabe0244699266b0593a9ecf97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD -SoloFase2; $rc=$LASTEXITCODE;
@@ -293,11 +304,19 @@ senza la **prova di rischio sul vecchio** (round separato R-C) e il contratto de
 | **Compilazione FALLITA** (o MUTA) | ✅ **SÌ** | lo zip: **è il risultato del passo** (include già rimesso a posto: foto DOPO) |
 | **Corsa con PROBLEMI** (CSV stantio/mancante, righe ≠ 6, gemelli divergenti, autotest, eco dei pin, `no memory`) | ✅ **SÌ** (esito `COMPLETATO CON PROBLEMI`, exit 1) | lo zip: il referto dice quale sanità è caduta |
 | **Corsa OK** (con o senza fase 2) | ✅ **SÌ** | lo zip |
-_(I rami "guardie", "scarico fallito", "-SoloControllo/-SoloFase2 insieme" sono stati
-**eseguiti** su banco con `pwsh` prima dell'invio e arrivano tutti allo zip — il primo
-giro NON ci arrivava (`$logC` non definito nel giro morto prima della compilazione: preso
-e corretto **eseguendo**, classe 94-bis). I rami dal terminale in poi non sono eseguibili
-qui (niente MT5): sono coperti dalla struttura try/raccolta-sempre, e vanno nel NON COPERTO.)_
+_(Tabella compilata **eseguendo**, non a memoria — punto 94-bis. Su banco `pwsh`: i rami
+"guardie", "scarico fallito", "-SoloControllo/-SoloFase2 insieme" e, **col pin vero**, lo
+scarico dei 6 file + gate sul sorgente + gate sui prova + "terminale non trovato" arrivano
+tutti allo zip. Il primo giro NON ci arrivava (`$logC` non definito nel giro morto prima
+della compilazione: preso e corretto eseguendo). **Mutation test dei gate** via raw locale:
+9 mutazioni su 9 fermate al gate giusto (versione 1.01, `#define` 111, asse motore 1-2,
+fisso 1,0%, include con la guardia rinominata — classe 116-ter —, `@SIMBOLO GBPUSD`,
+`PositionSelect(_Symbol)` aggiunto, ora 9, asse slippage 0-5). **Harness sui CSV** (6 righe
+finte, 3 motori × 2 magic): lettura, gemelli, verdetti A/B, ablazione e i **bordi esatti**
+delle fasce — dove la `FasciaPG` non tipizzata diceva PASSA a −5,01 (confronto di STRINGHE,
+classe 64): tipizzata e ricontrollata. I rami dal terminale in poi (compilazione, corsa,
+fase 2, log) **non sono eseguibili qui** (niente MT5): coperti dalla struttura
+try/ripristino-sempre/raccolta-sempre, e vanno nel NON COPERTO.)_
 
 ## 🟡 SE LA RIGA SI FERMA SU **«NON SO QUALE TERMINALE USARE»**
 È la regola di casa (**classe 115**). Il selettore è quello della sonda del passo 0
