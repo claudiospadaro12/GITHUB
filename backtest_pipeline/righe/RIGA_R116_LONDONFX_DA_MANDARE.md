@@ -82,7 +82,7 @@ cancelli A su quella gamba — lo decide **il driver, a macchina**, dal CSV OOS.
 
 ## 📌 IL PIN — **`b5b5d7b9dd3f2e48fe17025a12331a500d33acf8`**
 
-_Pinnata il 03/09 (pomeriggio) e RI-PINNATA sul commit di questo pacchetto (quello che ha inserito il primo pin): i sei file sono identici fra i due commit. Prima del primo pin qui c'era un segnaposto._
+_Pinnata il 03/09 (pomeriggio) e RI-PINNATA sul commit di questo pacchetto (quello che ha inserito il primo pin): i sei file sono identici fra i due commit. Prima del primo pin qui c'era il token della prima stesura, sostituito con la ricetta in fondo._
 Commit di `lavoro`, **verificato uno per uno via `raw` prima di scrivere questa riga**
 (HTTP 200 + sha256 identico al repo):
 
@@ -272,7 +272,7 @@ Il driver scrive per ogni motore **una riga di esito** (`PASSA TUTTI I CANCELLI 
 **promuovibile SOLO il motore 2, gamba per gamba** · un motore 1 o 3 che "passa" **si
 scrive e basta** (è un controllo) · **vietato nominare "la cella migliore"** · **A5 passa
 anche grazie al cap del 2% che sta nella fonte** (non è merito del segnale); se A5 fallisce
-lo stesso, il cap non funziona come crediamo → si indaga il **contenitore**.
+lo stesso, il cap non lavora come crediamo → si indaga il **contenitore**.
 
 🧬 **POI L'ABLAZIONE S1/S2/S3** (§3.2, OOS): `max(E) − min(E) ≤ 0,05R` **e** stesso segno
 **e** n ≥ 150 su tutti e tre → *"i tre vanno uguale: **il contenitore è l'edge**, il
