@@ -525,10 +525,17 @@ n.4 della v1.03 al prossimo trade ORB con vicini ("SelPos falso ma posizioni
 nostre esistenti"). La FOTO B (Giornale) resta utile ma non piu' decisiva.
 
 ### 🛠️ Prossimi passi proposti (niente si tocca in forward senza firma)
-1. **AUDIT DI FLOTTA** (agente, solo repo): quali ALTRI EA usano lo stesso
-   pattern `PositionSelect(_Symbol)` + controllo magic su conto hedging?
-   Ogni EA che condivide il simbolo con altri e' potenzialmente cieco alla
-   propria posizione — gestione, breakeven, chiusure di fine giornata.
+1. ✅ **AUDIT DI FLOTTA — FATTO il 03/09**: referto in
+   **`report/AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md`**.
+   126 file esaminati: **26 🔴 vulnerabili · 8 🟠 "mezzo fix" (leggono per
+   ticket ma CHIUDONO per simbolo — su hedging chiudono la posizione del
+   VICINO) · 85 🟢 sani · 7 ⚪ non tradano**. In cima alla classifica di
+   gravita': ORB_Ottimizzato 770611 (U30USD, 9 vicini, gia' misurato),
+   MaxMinNotte 770402 (XAUUSD, 13 vicini) e Gold_Ichimoku 250604.
+   🔥 **Scoperta che allarga il caso**: la stessa `SelPos()` governa anche
+   `HandleOCO()` e `gHadPos`/`InpOneTradePerDay` — da cieco **il pendente
+   opposto non si disarma e il "un trade al giorno" non si arma mai**: e' un
+   difetto di **RISCHIO** (esposizione doppia), non solo di gestione.
 2. **FIX v1.04 dell'ORB** (dopo l'audit, che dice se conviene un fix nel
    singolo EA o in un helper condiviso): selezione della posizione PER
    MAGIC iterando le posizioni, non col PositionSelect nudo. Da scrivere,
