@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDARELATIVO_v1
+#  MARCATORE_RIGA_SONDARELATIVO_v2
 #  RIGA_SONDARELATIVO.ps1 -- SONDA DI CONVERGENZA "RELATIVO" (PASSO 0
 #  del candidato P1 della quarta battuta, 02/09; shortlist n.1 del
 #  GIACIMENTO_DI_CASA del 03/09, sezione 8).
@@ -1070,8 +1070,8 @@ foreach($lato in @("L","S")){ if($Mappa.ContainsKey($lato) -and $null -ne $Mappa
 [void]$R.Add("--- LE 49 CELLE (ordinate per N, poi sigma; mai aggregate) ---")
 [void]$R.Add(("{0,3} {1,5} {2,7} {3,7} {4,7} {5,7} {6,7} {7,6} {8,6} {9,7} {10,7} {11,4} {12,3} {13,3} {14,3} {15,3} {16,3} {17,3}" -f "N","sigma","ese/ggL","ese/ggS","ese/ggT","MFE L","MFE S","RR L","RR S","nonCnv%","ten.med","mx/g","C1","C3L","C3S","C6","C8","L/S"))
 if($null -ne $Righe49){
-  foreach($r in ($Righe49 | Sort-Object N, Sigma)){
-    [void]$R.Add(("{0,3} {1,5} {2,7} {3,7} {4,7} {5,7} {6,7} {7,6} {8,6} {9,7} {10,7} {11,4} {12,3} {13,3} {14,3} {15,3} {16,3} {17,3}" -f $r.N, (Fmt2 $r.Sigma), (Fmt3 $r.EseGL), (Fmt3 $r.EseGS), (Fmt3 $r.EseGT), (Fmt2 $r.MfeL), (Fmt2 $r.MfeS), (Fmt2 $r.RrL), (Fmt2 $r.RrS), (Fmt2 $r.NonConvT), (Fmt2 $r.TenMedT), (FmtN $r.MaxGT), $r.C1, $r.C3L, $r.C3S, $r.C6, $r.C8, ((StatoCella $r "L" $sg) + "/" + (StatoCella $r "S" $sg))))
+  foreach($rw in ($Righe49 | Sort-Object N, Sigma)){
+    [void]$R.Add(("{0,3} {1,5} {2,7} {3,7} {4,7} {5,7} {6,7} {7,6} {8,6} {9,7} {10,7} {11,4} {12,3} {13,3} {14,3} {15,3} {16,3} {17,3}" -f $rw.N, (Fmt2 $rw.Sigma), (Fmt3 $rw.EseGL), (Fmt3 $rw.EseGS), (Fmt3 $rw.EseGT), (Fmt2 $rw.MfeL), (Fmt2 $rw.MfeS), (Fmt2 $rw.RrL), (Fmt2 $rw.RrS), (Fmt2 $rw.NonConvT), (Fmt2 $rw.TenMedT), (FmtN $rw.MaxGT), $rw.C1, $rw.C3L, $rw.C3S, $rw.C6, $rw.C8, ((StatoCella $rw "L" $sg) + "/" + (StatoCella $rw "S" $sg))))
   }
 }
 [void]$R.Add("")

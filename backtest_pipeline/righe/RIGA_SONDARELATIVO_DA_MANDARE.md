@@ -132,7 +132,7 @@ che finisce nel referto come **scelta dichiarata**. Le due strade, per Claudio:
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_SONDARELATIVO.ps1` (marcatore `MARCATORE_RIGA_SONDARELATIVO_v1`) |
+| **Driver** | `righe/RIGA_SONDARELATIVO.ps1` (marcatore `MARCATORE_RIGA_SONDARELATIVO_v2`) |
 | **File prova** | i 4 `prove/RELATIVO_*.txt` (scaricati tutti al pin, ne gira uno) |
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI** |
 | **Cosa scrive nel terminale** | `MQL5\Experts\ABTG_SondaRelativo.mq5` + `.ex5` (restano, **dichiarati** nel referto con foto PRIMA/DOPO — classe 116, sentinella `SONDARELATIVO_IN_CORSO.txt` nella workdir `%USERPROFILE%\abtg_sondarelativo`) e svuota `Tester\cache` |
@@ -145,14 +145,14 @@ può cadere, ed è un risultato).
 
 ## 📌 IL PIN — **`665416e2fddc6d11b9537c303788ac749e606236`**
 
-✅ **INSERITO il 03/09/2026** (prima di questo commit qui c'era un segnaposto).
+✅ **INSERITO il 03/09/2026** (prima di questo commit qui c'era il token @@PIN composto, non un commit).
 Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
 `walkforward_generico.ps1`, **verificato uno per uno via `raw` al pin** (HTTP 200
 + hash identico al repo) prima di scrivere questa riga:
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1` | 200, identico (sha256 af9f8056...), marcatore `MARCATORE_RIGA_SONDARELATIVO_v1` presente, ASCII puro, parse OK |
+| `backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1` | 200, identico (sha256 af9f8056...), marcatore `MARCATORE_RIGA_SONDARELATIVO_v2` presente, ASCII puro, parse OK |
 | `backtest_pipeline/walkforward_generico.ps1` | 200, identico (5d98af3d...): il driver lo scarica al pin e lo ri-pinna sul `.mq5` |
 | `backtest_pipeline/prove/RELATIVO_D30_M5.txt` · `_D30_M15` · `_NAS_M5` · `_NAS_M15` | 200 tutti e quattro, identici (fa29b70b / 86c0fe18 / 1f9dd9a1 / f8565ef9); blocco dei parametri identico riga per riga |
 | `mql5/Experts/ABTG_SondaRelativo.mq5` | 200, identico (80ed8a45...), `#property version "1.00"`, 21 blocchi autotest, REL_NSTATS 93, 22 input, 0 chiamate di trading, 0 `#include` |
@@ -164,7 +164,7 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M15 -SoloControllo; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_D30_M15_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -181,7 +181,7 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M15; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_D30_M15_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -200,7 +200,7 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_M15; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_NAS_M15_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -219,7 +219,7 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M5 -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_D30_M5_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -238,7 +238,7 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_M5 -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_NAS_M5_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -344,7 +344,7 @@ F=backtest_pipeline/righe/RIGA_SONDARELATIVO_DA_MANDARE.md
 SHA=$(git rev-parse HEAD)                      # il commit che CONTIENE driver + 4 prova + .mq5
 TOK='@@PIN'"@@"                                # composto: la ricetta non contiene il token per esteso
 sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|g" "$F"
-# e il CARTELLO del segnaposto si RISCRIVE (classe 101), non si lascia:
+# e il CARTELLO del token si RISCRIVE al passato (classe 101), non si lascia:
 grep -c "\$pin='$SHA'" "$F"                    # DEVE dare 5 (1 giro a vuoto + 4 corse)
 grep -c "\$pin='$TOK'" "$F"                    # DEVE dare 0
 CART='segnap'"osto\|non funz"'iona\|la riga non par'"te"   # composto, come TOK
