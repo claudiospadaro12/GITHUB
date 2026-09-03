@@ -712,3 +712,16 @@ sta li', non si duplica.
   tick reali su EURUSD M15 ora=8 con criteri congelati prima + ablazione
   a 3 motori (contenitore vs segnale). Il passo 0 conta occasioni: il
   MERITO non e' ancora misurato.
+- 📝 **BOZZA DEI CRITERI del round a tick (R116 proposto, numero verificato
+  libero il 03/09): `risultati_archivio/LONDONFX_TICK_CRITERI.md`** — DA
+  FIRMARE, 12 righe F. Banco: tick REALI dal pavimento misurato 2024.07.05
+  -> 2026.06.30 (~23,8 mesi, UN SOLO REGIME), M15, EURUSD+GBPUSD, ora
+  CONGELATA a 8, rischio 0,65%. Cancelli: E OOS >= 0,075R NETTA (FIRMA 2
+  del 31/08) · PF >= 1,15 · DD <= 8,0% · peggior giornata >= -4,0% (oltre,
+  il Guardian avrebbe messo in pausa: backtest non riproducibile) · n >= 150
+  per gamba. Ablazione a 3 motori con soglia di somiglianza DICHIARATA PRIMA
+  (scarto di E <= 0,05R = 2/3 del cancello H8 -> "il contenitore e' l'edge").
+  Numero da tenere in cima: 1R = 8 pip, il cancello vale 0,60 pip e lo
+  spread assunto 1,0-2,0 -> **il costo e' 1,7-3,3 volte l'edge richiesto**.
+  Previsione dichiarata prima: MAE mediana 11,8 pip > SL 8,0 pip -> l'esito
+  piu' probabile e' un NO. NIENTE e' stato girato ne' compilato.
