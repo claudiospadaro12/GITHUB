@@ -432,12 +432,14 @@ function RaccogliLog(){
   return $n
 }
 
-# --- LE FASCE, ricopiate segno per segno (criteri par. 5.8)
-function FasciaE($e){  if($e -ge $E_PASSA){ return "PASSA" }; if($e -ge $E_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA" }
-function FasciaPF($p){ if($p -ge $PF_PASSA){ return "PASSA" }; if($p -ge $PF_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA" }
-function FasciaDD($d){ if($d -le $DD_PASSA){ return "PASSA" }; if($d -le $DD_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA PER RISCHIO" }
-function FasciaPG($g){ if($g -ge $PG_PASSA){ return "PASSA" }; if($g -ge $PG_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA PER RISCHIO" }
-function FasciaN($n){  if($n -ge $N_PASSA){ return "PASSA" }; if($n -ge $N_MIN){ return "MERITO SOSPESO" }; return "NON MISURABILE" }
+# --- LE FASCE, ricopiate segno per segno (criteri par. 5.8). Parametri TIPIZZATI:
+#     un -4.01 passato come stringa farebbe un confronto di STRINGHE e direbbe
+#     PASSA (classe 64 della checklist, riprodotta sul banco il 03/09).
+function FasciaE([double]$e){  if($e -ge $E_PASSA){ return "PASSA" }; if($e -ge $E_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA" }
+function FasciaPF([double]$p){ if($p -ge $PF_PASSA){ return "PASSA" }; if($p -ge $PF_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA" }
+function FasciaDD([double]$d){ if($d -le $DD_PASSA){ return "PASSA" }; if($d -le $DD_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA PER RISCHIO" }
+function FasciaPG([double]$g){ if($g -ge $PG_PASSA){ return "PASSA" }; if($g -ge $PG_MORTA){ return "NON PASSA (zona morta)" }; return "BOCCIATA PER RISCHIO" }
+function FasciaN([int]$n){  if($n -ge $N_PASSA){ return "PASSA" }; if($n -ge $N_MIN){ return "MERITO SOSPESO" }; return "NON MISURABILE" }
 
 # IL VERDETTO DI UN MOTORE su una gamba (OOS + IS per A3/A6). Ordine
 # congelato: rischio a qualunque n -> non misurabile -> bocciatura
@@ -512,6 +514,7 @@ function CollaudaRighe($righe,[string]$et,[int]$slipAtteso){
       if(-not $ok -and $slipAtteso -lt 0 -and $k -eq "Slippage Pts"){ $ok = $true }
       if(-not $ok){ [void]$Problemi.Add($tag + ": eco '" + $k + "' = " + $v + " invece di " + $eco[$k] + ": il pin NON e' passato, l'EA ha girato con un altro contenitore.") }
     }
+    if($r.Magic -eq $MAGIC2){ continue }   # le dichiarazioni una volta per motore: i gemelli sono identici (gate a parte)
     if($r.Giorni -gt 0 -and (100.0*$r.GgTetto/$r.Giorni) -gt $TETTO_PCT){ [void]$Rilievi.Add($tag + ": Giorni col Tetto Colpito " + $r.GgTetto + "/" + $r.Giorni + " = " + (Fmt2 (100.0*$r.GgTetto/$r.Giorni)) + "% > " + (Fmt2 $TETTO_PCT) + "%: motore STROZZATO DAL CONTENITORE, il suo posto nel confronto S1 e' CONTAMINATO (confronto operativo, non segnale-contro-contenitore). Atteso sul motore 1.") }
     if($r.FlatPct -gt $FLAT_PCT){ [void]$Rilievi.Add($tag + ": Trade Chiusi dal Flat " + (Fmt2 $r.FlatPct) + "% > " + (Fmt2 $FLAT_PCT) + "%: il round sta misurando l'OROLOGIO, non il motore, e va scritto in quei termini.") }
   }
