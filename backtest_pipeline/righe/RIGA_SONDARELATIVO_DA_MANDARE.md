@@ -94,7 +94,7 @@ INSIEME?**
 
 🛑 **CLAUSOLA SEVERA SUI COLLAUDI:** un **solo** collaudo fallito su una **sola**
 delle 49 righe = **NON LEGGIBILE**, nessun verdetto. I collaudi (per riga):
-`Autotest Falliti` = **0** su **21** blocchi (−1 = non girato ≠ passato) ·
+`Autotest Falliti` = **0** su **23** blocchi (−1 = non girato ≠ passato) ·
 `Scartati Occupato Altro Lato Collaudo` = **0** (T6, per costruzione) ·
 `Sotto 60 Secondi Pct` = **0,00** (T12) · `Punto Indice Prezzo` = **1,000** (T14) ·
 `Spread Misurato` = **2,80 / 1,80** e `Soglia C3` = **8,40 / 5,40** (altrimenti
@@ -132,7 +132,7 @@ che finisce nel referto come **scelta dichiarata**. Le due strade, per Claudio:
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_SONDARELATIVO.ps1` (marcatore `MARCATORE_RIGA_SONDARELATIVO_v3`) |
+| **Driver** | `righe/RIGA_SONDARELATIVO.ps1` (marcatore `MARCATORE_RIGA_SONDARELATIVO_v4`) |
 | **File prova** | i 4 `prove/RELATIVO_*.txt` (scaricati tutti al pin, ne gira uno) |
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI** |
 | **Cosa scrive nel terminale** | `MQL5\Experts\ABTG_SondaRelativo.mq5` + `.ex5` (restano, **dichiarati** nel referto con foto PRIMA/DOPO — classe 116, sentinella `SONDARELATIVO_IN_CORSO.txt` nella workdir `%USERPROFILE%\abtg_sondarelativo`) e svuota `Tester\cache` |
@@ -143,7 +143,21 @@ degenere) + 1 compilazione. **M15: 8–25 minuti** a prova. **M5: 15–45 minuti
 prova. Giro a vuoto: **1–3 minuti** (ma **COMPILA**: è lì che un EA mai compilato
 può cadere, ed è un risultato).
 
-## 📌 IL PIN — **`526f76f6bef2b82b3e28edc0fc1306a3eeee1be9`**
+## 📌 IL PIN — **`01743b7ec58ae8376d095b1678a7d2fcd891cd97`**
+
+✅ **RI-PINNATO il 03/09/2026 (sera)** sul commit `01743b7e` (due commit sul
+driver: `5c21eca3` alza i gate alla v1.02 dell'EA — `#property version "1.01"
+-> "1.02"`, `REL_NSTATS 94 -> 95` cioe' **98 colonne** non piu' 97, autotest
+**23** blocchi non piu' 22, stampa nel referto delle due colonne diagnostiche
+nuove `Giorni Festa Metro` e `Giorni Metro Zero Calendario` — e `01743b7e`
+alza il **marcatore** `_v3 -> _v4` di conseguenza, classe 109-bis: il
+contenuto del file citato da un cancello e' cambiato, il marcatore va con
+lui, altrimenti una copia locale vecchia sul PC di backtest passerebbe il
+controllo `Select-String` della riga). Anche la riga 97 di questa pagina
+("Autotest Falliti = 0 su 21 blocchi") era rimasta ferma al v1.00 dal
+ri-pin precedente: corretta a 23 qui. Storia del pin precedente (`526f76f6`,
+invariata sotto): puntava a un driver coi gate ancora sui numeri VECCHI
+della sonda (v1.00 / 21 blocchi / 93 stats / 96 colonne).
 
 ✅ **RI-PINNATO il 03/09/2026** sul commit `526f76f6` (fix del driver: gate
 ancorati alla v1.01 dell'EA, marcatore `_v2` -> `_v3`). Il pin precedente
@@ -156,19 +170,19 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1` | 200, identico (sha256 ea6c6fff...), marcatore `MARCATORE_RIGA_SONDARELATIVO_v3` presente, ASCII puro, parse OK |
+| `backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1` | 200, identico (sha256 8d8c18d3...), marcatore `MARCATORE_RIGA_SONDARELATIVO_v4` presente, ASCII puro, parse OK (pwsh 7.4.6) |
 | `backtest_pipeline/walkforward_generico.ps1` | 200, identico (5d98af3d..., invariato dal pin precedente): il driver lo scarica al pin e lo ri-pinna sul `.mq5` |
 | `backtest_pipeline/prove/RELATIVO_D30_M5.txt` · `_D30_M15` · `_NAS_M5` · `_NAS_M15` | 200 tutti e quattro, identici (fa29b70b / 86c0fe18 / 1f9dd9a1 / f8565ef9, invariati dal pin precedente); blocco dei parametri identico riga per riga |
-| `mql5/Experts/ABTG_SondaRelativo.mq5` | 200, identico (sha256 0b7d02e5...), `#property version "1.01"`, 22 blocchi autotest, REL_NSTATS 94, 22 input, 0 chiamate di trading, 0 `#include` |
+| `mql5/Experts/ABTG_SondaRelativo.mq5` | 200, identico (sha256 23e8e9ec...), `#property version "1.02"`, 23 blocchi autotest, REL_NSTATS 95 (98 colonne), 22 input, 0 chiamate di trading, 0 `#include` |
 
 ## 1️⃣ Giro a vuoto (su `D30_M15`: sta dentro il tetto, quindi arriva a COMPILARE e a far girare i controlli del generico; i gate sui 4 prova e sul sorgente girano comunque tutti)
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='526f76f6bef2b82b3e28edc0fc1306a3eeee1be9'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='01743b7ec58ae8376d095b1678a7d2fcd891cd97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M15 -SoloControllo; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_D30_M15_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -183,9 +197,9 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='526f76f6bef2b82b3e28edc0fc1306a3eeee1be9'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='01743b7ec58ae8376d095b1678a7d2fcd891cd97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M15; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_D30_M15_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -202,9 +216,9 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='526f76f6bef2b82b3e28edc0fc1306a3eeee1be9'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='01743b7ec58ae8376d095b1678a7d2fcd891cd97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_M15; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_NAS_M15_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -221,9 +235,9 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='526f76f6bef2b82b3e28edc0fc1306a3eeee1be9'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='01743b7ec58ae8376d095b1678a7d2fcd891cd97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M5 -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_D30_M5_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -240,9 +254,9 @@ Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='526f76f6bef2b82b3e28edc0fc1306a3eeee1be9'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='01743b7ec58ae8376d095b1678a7d2fcd891cd97'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_M5 -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SONDARELATIVO_NAS_M5_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -259,8 +273,10 @@ Zip sul Desktop **`SONDARELATIVO_<PROVA>_<timestamp>.zip`** →
 `REFERTO_SONDARELATIVO_<PROVA>.txt` + `COMPILAZIONE.log` (il log vero di
 MetaEditor) + il prova girato + **1 CSV OPTFRAME**
 `ABTG_SondaRelativo_<SIMBOLO>_IS_ohlc_<PROVA>.csv` (**49 righe** = le 49
-passate, **97 colonne nostre** + gli input accodati dal tester; il driver legge
-per NOME; l'ultima, `Giorni Festa Metro`, è informativa — v1.01, fix C2). Il giro a vuoto produce `SONDARELATIVO_D30_M15_CONTROLLO_…zip`
+passate, **98 colonne nostre** + gli input accodati dal tester; il driver legge
+per NOME; le ultime due, `Giorni Festa Metro` e `Giorni Metro Zero Calendario`,
+sono informative — v1.02, fix C2 sulla finestra: la seconda e' il vecchio
+criterio v1.01 tenuto come controllo, attesa 0). Il giro a vuoto produce `SONDARELATIVO_D30_M15_CONTROLLO_…zip`
 (solo referto + log + prova) **e NON è un risultato**.
 ⚠️ Il suffisso **`_ohlc`** nei nomi CSV è la marca del generico per ogni modello
 non-tick: qui vuol dire **Modello 2, open prices** — non OHLC M1. Niente
@@ -277,8 +293,8 @@ sonda lo spegne apposta: le passate si sovrascriverebbero).
    (prime 30 righe del log nel referto, log intero nello zip). Se **METAEDITOR
    MUTO** → non è un verdetto sul codice: ricontrollare `metaeditor64` chiuso e
    rifare.
-4. **Identità del sorgente:** `versione 1.01` · `autotest 22 blocchi` ·
-   `REL_NSTATS = 94 -> 97 colonne` · `22 input` · `0 chiamate di trading` ·
+4. **Identità del sorgente:** `versione 1.02` · `autotest 23 blocchi` ·
+   `REL_NSTATS = 95 -> 98 colonne` · `22 input` · `0 chiamate di trading` ·
    `0 #include` · `celle 49` · `gemellaggio 4 prova: VALIDO`.
 5. **`tetto barre:`** — sui M15 `DENTRO IL TETTO`; sui M5 `OLTRE IL TETTO …
    ACCETTATO con -AccettoTettoBarre` **e subito dopo la finestra EFFETTIVA**
@@ -310,7 +326,7 @@ promozione esce da qui: il merito è a tick, dopo, con ≥ 150 operazioni IS.
 |---|---|---|
 | **MT5 o MetaEditor aperto** (il blocco si ferma **prima** di scaricare) | ❌ **NO** | il messaggio rosso; chiudili e rilancia |
 | **`SCRIPT VECCHIO`** o download della riga fallito | ❌ **NO** | il messaggio in console (404 sul pin appena creato: aspetta 5 minuti e rilancia **la stessa riga**) |
-| **Gate del driver** (pin, `-Prova`, sorgente non 1.01 / autotest ≠ 22 / soglie ≠ pagina / include, prova non gemelli, input mancante, **tetto barre senza interruttore**, terminale ambiguo) | ✅ **SÌ** | lo zip: `compilazione: NON TENTATA` e `!!! FERMATO:` col motivo |
+| **Gate del driver** (pin, `-Prova`, sorgente non 1.02 / autotest ≠ 23 / soglie ≠ pagina / include, prova non gemelli, input mancante, **tetto barre senza interruttore**, terminale ambiguo) | ✅ **SÌ** | lo zip: `compilazione: NON TENTATA` e `!!! FERMATO:` col motivo |
 | **Compilazione FALLITA** (o MUTA) | ✅ **SÌ** | lo zip: **è il risultato del passo** (log dentro) |
 | **Generico fermato ai suoi controlli / CSV non prodotto / CSV STANTIO** | ✅ **SÌ** | lo zip: `PROBLEMI` lo dice, la corsa non ha numeri, si rilancia **lo stesso blocco** |
 | **Corsa OK con collaudi falliti** | ✅ **SÌ** | lo zip: `NON LEGGIBILE`, nessun verdetto — è un dato sulla sonda, non sul mercato |
