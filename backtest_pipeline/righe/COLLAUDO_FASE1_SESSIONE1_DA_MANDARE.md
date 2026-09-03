@@ -68,7 +68,7 @@ altrimenti M27 e H5 misurano un buco che è **nostro**.
 
 ---
 
-## 📌 IL PIN — **`@@PIN@@`** ⏳ **DA INSERIRE** (driver **v2**, marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2`)
+## 📌 IL PIN — **`2e37a67db8c1345acfa2a3870d50e115f0695034`**  ✅ **INSERITO** — driver **v2**, marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2` (verificato con `git rev-parse` e `git ls-tree`: a questo commit ci sono il driver v2 e l'artefatto `backtest_pipeline/attese_enforcement_fase1.txt` che le tre righe scaricano). ⛔ Il pin `223e1f7` e il marcatore `..._v1` sono **BRUCIATI** (la v1 e' quella che si e' fermata sul VPS alle 10:45): non incollarli piu'.
 
 ---
 
@@ -116,7 +116,7 @@ confondere le righe di stamattina con quelle della prova).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='2e37a67db8c1345acfa2a3870d50e115f0695034'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
@@ -239,7 +239,7 @@ Nel log dev'essere comparsa la riga
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='2e37a67db8c1345acfa2a3870d50e115f0695034'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Presidio -Minuti 20; $rc=$LASTEXITCODE;
@@ -323,7 +323,7 @@ configurazione firmata (condizione **C-5** del cancello).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='2e37a67db8c1345acfa2a3870d50e115f0695034'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Chiusura; $rc=$LASTEXITCODE;
