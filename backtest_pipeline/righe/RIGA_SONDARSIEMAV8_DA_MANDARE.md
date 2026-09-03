@@ -46,6 +46,16 @@ finestra 2024.09.26 → 2026.06.30, **MODELLO 2 "Solo prezzi di apertura"**
 > sotto il rumore dell'oro). Se l'eco NON viene 1,000, la scala dei decimali
 > del feed è un'altra: la corsa oro **non si legge** finché l'unità non è
 > rideclarata (PROBLEMA dedicato nel referto).
+>
+> 📏 **E LA FINESTRA DELL'ORO E' TAGLIATA — va detto DOVE si legge il numero**
+> (rilievo 1 del verificatore, 03/09). Il pavimento **MISURATO** sull'oro e'
+> **2004.06.11 = 22,1 anni** (`risultati_archivio/REFERTO_SONDA_STORICO_17-08.md`,
+> righe 34 e 40); qui se ne usano **21 mesi su 264**, per comparabilita' col banco
+> M0PB. La scelta e' legittima e dichiarata, ma per l'**Emendamento della Finestra**
+> (regole C e D) il taglio va letto insieme al verdetto: se `ORO_M15` esce **MORTO**,
+> vuol dire **"su 1,75 anni di toro non ce l'ha"**, NON "l'oro non ha edge".
+> ⚠️ Questa riga oggi **non e' nel referto**, sta solo qui: al prossimo re-pin
+> va stampata dentro il blocco `[ORO]`.
 
 > ⚙️ **Le scelte, dichiarate:** DUE prova gemelli (M5/M15) che differiscono per
 > **ESATTAMENTE DUE righe vive**, tutte e due dichiarate e **gattate
@@ -89,7 +99,8 @@ finestra 2024.09.26 → 2026.06.30, **MODELLO 2 "Solo prezzi di apertura"**
 | **File prova** | `prove/RSIEMAV8_FREQUENZA_M5.txt` + `prove/RSIEMAV8_FREQUENZA_M15.txt` |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.**
-⏱️ **14 passate open-prices** su ~21 mesi + 7 avvii del terminale + 1
+⏱️ **14 passate open-prices** su ~21 mesi + **14 avvii del terminale** (il generico
+gira SEMPRE tutte e due le gambe: 7 IS + 7 OOS degeneri) + 1
 compilazione = **stima onesta 15–35 minuti** per tutto il giro [STIMA, non una
 previsione]. Il giro a vuoto è questione di minuti (ma COMPILA: è lì che un EA
 mai compilato può cadere, ed è un risultato).
@@ -127,13 +138,16 @@ mai compilato può cadere, ed è un risultato).
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if($ko){ Write-Host 'CORSA CON PROBLEMI: lo zip esiste lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'POI nel REFERTO: riga data: = adesso, riga modo: = CORSA.' -ForegroundColor Gray }
+    $iv=[Globalization.CultureInfo]::InvariantCulture;
+    Write-Host ('POI nel REFERTO: riga modo: = CORSA, e riga data: = ORA DI AVVIO di questa corsa (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + '): il referto si timbra all''INIZIO e la corsa dura 15-35 minuti. La freschezza e'' gia'' stata controllata a macchina sullo zip qui sopra.') -ForegroundColor Gray }
 ```
 
 ## 📦 COSA TORNA
 Zip sul Desktop **`SONDARSIEMAV8_CORSA_...zip`** → `REFERTO_SONDARSIEMAV8.txt`
 + i 2 prova + **7 CSV OPTFRAME** (`ABTG_SondaRsiEmaV8_<SIMBOLO>_IS_ohlc_<ETICHETTA>.csv`,
-**2 righe l'uno** = le 2 passate, con le **59 colonne**: Segnali / Nudo /
+**2 righe l'uno** = le 2 passate, con le **59 colonne nostre + 13 di input**
+accodate dal tester (`FrameInputs`; il driver legge per NOME, quindi non morde):
+Segnali / Nudo /
 Pending Attivo / Armamenti Rsi per lato **in ogni passata** (l'ablazione),
 Segnali Long/Short/Totali Al Giorno, Mfe/Mae Mediano per lato in punti indice,
 RR Da Mediane, Win Rate Necessario, Max Segnali Giorno, orizzonte lungo,
@@ -148,7 +162,11 @@ la sonda lo spegne apposta: le passate si sovrascriverebbero).
 
 ## 🔎 COME SI LEGGE
 🕐 **PRIMA DI TUTTO** apri `REFERTO_SONDARSIEMAV8.txt` e controlla:
-- riga **`data:`** = l'ora di adesso (referto stantio = giro vecchio);
+- riga **`data:`** = **l'ora in cui hai lanciato il blocco 2** (il referto si timbra
+  all'**AVVIO**, la corsa dura 15-35 min: **l'ora attuale NON e' il metro**). La riga
+  te la stampa gia' in console. _(Difetto D1 del verificatore, 03/09: la frase
+  vecchia diceva "= adesso" e avrebbe fatto rilanciare la corsa piu' lunga del
+  round in buona fede. Rovescio del referto stantio del 17/08.)_
 - riga **`modo:`** = **CORSA**;
 - riga **`compilazione:`** = OK — EA nuovo: se è FALLITA, quello È il risultato
   (errori in `COMPILAZIONE_FALLITA.log` nello zip);
@@ -191,6 +209,26 @@ simula esiti**: l'ordine MFE/MAE dentro le 12 barre lo vede solo il tick. F6:
 12 barre su M15 = il triplo del tempo di M5 — "vivo solo su M15" si dice "vivo
 su un orizzonte 3 volte più lungo". Un solo regime (toro): questo passo conta
 **occasioni e geometrie**, non merito. Nessuna promozione esce da qui.
+
+## 🔧 IN CODA AL PROSSIMO RE-PIN (rilievi del verificatore, 03/09 — NON bloccano questa partenza)
+
+Nessuno di questi tocca le due stringhe: si applicano al **driver**, quindi
+costano un re-pin e si fanno **dopo** che questa corsa e' tornata.
+
+1. 🥇 **Referto: stampare la nota della finestra oro** dentro il blocco `[ORO]`
+   (testo nel riquadro qui sopra). Senza, il verdetto sull'oro si legge male.
+2. 🔍 **Giro a vuoto: guardare l'artefatto datato, non solo il codice d'uscita.**
+   Oggi l'unica prova che il generico ha passato i controlli e' `$LASTEXITCODE`,
+   che il driver stesso dichiara inaffidabile (classe 108). Esiste gia'
+   `anteprima_ABTG_SondaRsiEmaV8_<SIMBOLO>.ini` in workdir: basta `Test-Path` +
+   freschezza `> $tCorsa`. ⚠️ **Solo esistenza e data: quel file MENTE su
+   `Model=4`** (punto 96 della checklist), il contenuto non si guarda.
+3. 📝 **`$CacheTxt` nasce a `"NON SVUOTATA"`**: in un giro che muore prima del
+   blocco cache il referto scrive una frase che si confonde col fallimento vero.
+   Va messo **`"NON RAGGIUNTA"`** (classe punto 94).
+4. 📋 **La frase sbagliata di D1 vive anche altrove**:
+   `RIGA_SONDAM0PB_DA_MANDARE.md` riga 100 e `RIGA_SONDALONDONFX_DA_MANDARE.md`
+   riga 114. Da correggere quando si riaprono quelle righe.
 
 ## 🔴 AVVISI ATTESI (rossi e gialli — nessuno di questi è un guasto)
 1. Il generico stamperà rosso sui CSV **`*_OOS`** (**7 volte**, una per
