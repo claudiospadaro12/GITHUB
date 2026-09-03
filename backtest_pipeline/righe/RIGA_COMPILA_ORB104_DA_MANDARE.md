@@ -50,20 +50,31 @@ risultato del passo** — ed è meglio scoprirlo qui che sul terminale che lavor
 | **MT5** | **PUÒ restare aperto** (non si scrive niente nelle cartelle del terminale). **MetaEditor NO: va CHIUSO** — con l'editor aperto la compilazione da riga di comando torna subito senza fare nulla |
 | **Quanto ci mette** | copia della libreria standard + 2 download + 1 compilazione = **1–3 minuti** [STIMA] |
 
-## 📌 IL PIN — **`4d768e3892eb2bc46e1ab848f3cc07517dea7bd1`**  ✅ **INSERITO**
+## 📌 IL PIN — **`117c2d4757d54e98232d4d97367a9069c6f9c49f`**  ✅ **INSERITO**
 
-Commit di `lavoro` verificato con `git rev-parse`: contiene **il driver**
-(`righe/RIGA_COMPILA_ORB104.ps1`), **il sorgente v1.04**
-(`mql5/Experts/ABTG_ORB_Ottimizzato.mq5`, identico al commit del fix `19312c8`)
-e **il suo include** (`mql5/Include/ABTG_PausaGuardian.mqh`, v1.51) — tutti e
-tre scaricati **allo stesso pin**, mai dalla punta del branch.
+Commit di `lavoro`, **verificato uno per uno via `raw` prima di scrivere questa
+riga** (HTTP 200 + hash identico al repo):
+
+| file al pin | esito |
+|---|---|
+| `backtest_pipeline/righe/RIGA_COMPILA_ORB104.ps1` | 200, identico, marcatore presente, ASCII puro |
+| `mql5/Experts/ABTG_ORB_Ottimizzato.mq5` | 200, identico, `#property version "1.04"`, **identico al commit del fix `19312c8`** |
+| `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (**v1.51**) |
+
+Tutti e tre scaricati **allo stesso pin**, mai dalla punta del branch.
+_(Nota di lavorazione: il primo pin inserito qui era il commit di un ALTRO
+agente, che ha pushato su `lavoro` nello stesso minuto. Era valido lo stesso
+— stessi tre file, stessi hash — ma un pin si scrive solo se si sa **che
+cos'è**: ri-pinnato sul commit di questo pacchetto e ri-verificato via `raw`.
+Il vecchio numero **non è rimasto scritto da nessuna parte**, nemmeno
+abbreviato: un pin morto in una pagina viva è la classe 103.)_
 
 ## ▶️ IL BLOCCO (uno solo)
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process metaeditor64 -EA SilentlyContinue){ throw 'METAEDITOR APERTO: chiudilo e rilancia (MT5 invece puo'' restare aperto).' };
-    $pin='4d768e3892eb2bc46e1ab848f3cc07517dea7bd1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COMPILA_ORB104.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='117c2d4757d54e98232d4d97367a9069c6f9c49f'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COMPILA_ORB104.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COMPILA_ORB104.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COMPILA_ORB104_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
