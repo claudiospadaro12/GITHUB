@@ -844,3 +844,17 @@ oltre soglia 20%): il suo posto nel confronto S1 e' contaminato, ma non cambia i
 motore passa comunque). Spread misurato ed archiviato (F9/H12): EURUSD Londra motore 2, IS mediana
 0,200 pip, OOS mediana 0,100 pip. GBPUSD ancora da girare, ma la bocciatura e' PER RISCHIO (non per
 frequenza): probabile lo stesso esito, si vede.
+
+## 🪦 R116 ABTG_LondonFx GBPUSD (M15, tick reali) — BOCCIATA PER RISCHIO (numeri peggiori di EURUSD) + BANCO SPORCO su motore 3
+`backtest_pipeline/risultati_archivio/r116_londonfx/CORSA_GBPUSD_2026-09-03_1755_BOCCIATA_BANCO_SPORCO.txt`.
+Motore 2 (l'unico promuovibile): E OOS=-0,1726R (peggio di EURUSD -0,108R), PF OOS=0,763, DD OOS=55,03%,
+IS gia' in perdita pesante (PF 0,688). Motori 1 e 3 bocciati con DD 55-61%. **R116 CHIUSO su entrambi i
+simboli, entrambi bocciati per rischio, previsione pre-dichiarata ("NO probabile") confermata due volte.**
+
+⚠️ **PROBLEMA PROCEDURALE, da investigare separatamente:** il gate di sanita' del driver (5.0.1) ha
+dichiarato il banco GBPUSD "FERMO" -- i gemelli (stesso motore 3, magic 774001 vs 774002, dovrebbero
+dare Profit/Expected Payoff IDENTICI) DIVERGONO su IS e OOS. Non cambia il verdetto (tutti e tre i
+motori sono comunque ben dentro la bocciatura per rischio, la divergenza non sposterebbe nessun numero
+dentro i cancelli), ma segnala un problema di determinismo/non-riproducibilita' del tester su questo
+banco che va capito prima di fidarsi ciecamente dei prossimi round su GBPUSD. Motori 1 e 2 non
+segnalati come rotti dal gate.

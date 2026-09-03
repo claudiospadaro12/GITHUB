@@ -1,0 +1,173 @@
+=====================================================================
+ R116 -- LONDONFX A TICK REALI (ABTG_LondonFx v1.01) -- GBPUSD M15
+ UN contenitore, TRE motori (ablazione) x 2 magic gemelli -- criteri FIRMATI 03/09
+=====================================================================
+modo: CORSA   <- CONTROLLO = giro a vuoto, NON e' il risultato; FASE2 = sola fase 2 forzata
+data: 2026-09-03 17:55:19   <- ORA DI AVVIO del giro (non l'ora in cui leggi: la corsa dura decine di minuti)
+pin:  ecb4e43177d9f7fc20786cfbb23cbf73a3f988be
+simbolo di questa corsa: GBPUSD, OVERRIDE DICHIARATO da riga di comando (-Simbolo GBPUSD); prova dichiarati sul lead EURUSD
+  come funziona: i prova portano '@SIMBOLO EURUSD' e il gate lo PRETENDE; il generico legge la direttiva SOLO se -Simbolo e' vuoto (righe 303-305), qui vince GBPUSD. Etichette R116_GBP / R116_GBP_SLIP nei nomi dei CSV.
+finestra: IS 2024.07.05 -> 2025.04.21 | OOS 2025.04.22 -> 2026.06.30  (split 0.4 come lo calcola il generico) -- UN SOLO REGIME, tick reali dal 2024.07.05 (pavimento misurato il 01/09)
+  regime contenuto [DICHIARATO]: IS = seconda meta' 2024 + primo trimestre 2025 (dollaro forte fino a gennaio 2025, poi inversione); OOS = da aprile 2025 (risalita dell'euro 2025 e quello che e' venuto dopo, da leggere sul grafico, non assunto). Nessuna prova di regime: da qui NON esce una sedia (F12).
+banco: MODELLO 4 = tick REALI | Spread=0 nell'.ini (corrente, DICHIARATO) | deposito 100000 | leva 100 | rischio 0,65% | sessione 08:00-16:00 ORA SERVER (= Londra) | TP 15,0 / SL 8,0 pip su ENTRAMBE le gambe | slippage 0 (fase 2: 2/5)
+terminale: C:\Program Files\BCM Markets MT5 Terminal (selettore: BCM Markets, non -V3 -- lo stesso della sonda del passo 0)
+cartella dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+compilazione: OK (78 KB, 80146 byte, 17:55:23), errori 0, warning 0   <- EA MAI COMPILATO PRIMA: se e' FALLITA, QUESTO e' il risultato del passo
+riga Result del log: Result: 0 errors, 0 warnings, 1244 ms elapsed, cpu='X64 Regular'
+versione letta dal #property: 1.01   (attesa 1.01)
+autotest dichiarato nel sorgente: LONDONFX_AUTOTEST_BLOCCHI_ATTESI 18 (1 riga), LONDONFX_AUTOTEST_CASI_ATTESI 118 (1 riga)
+magic: InpMagic default 774001 (1 riga) -- gemello 774002 dal prova
+hedge-safe (N1): 0 chiamate Position*(_Symbol) fuori dai commenti (attese 0: N1, hedge-safe dalla nascita)
+include censiti nel sorgente: 2 (Trade/Trade.mqh, ABTG_PausaGuardian.mqh)
+include al pin: bool ABTG_GuardiaIngresso( trovata 1 volta (ancorata a destra); marcatore versione nell'include: v1.51; 112481 byte
+ripristino del terminale: include del terminale RIPRISTINATO dal backup (c'era gia' prima di questo giro)
+foto PRIMA/DOPO dei file del terminale (classe 116: la prova sta nella foto, non nella frase):
+  Experts\ABTG_LondonFx.mq5: prima [presente, 119478 byte, 2026-09-03 17:51:18] dopo [presente, 119478 byte, 2026-09-03 17:55:24] -> stessa dimensione, data diversa   atteso: SCRITTO (l'EA al pin: resta, come ogni EA della pipeline)
+  Experts\ABTG_LondonFx.ex5: prima [presente, 80464 byte, 2026-09-03 17:51:20] dopo [presente, 79824 byte, 2026-09-03 17:55:27] -> CAMBIATO   atteso: SCRITTO (compilato qui: resta, il tester lo richiede)
+  Include\ABTG_PausaGuardian.mqh: prima [presente, 82941 byte, 2026-08-31 14:59:16] dopo [presente, 82941 byte, 2026-08-31 14:59:16] -> INVARIATO   atteso: INVARIATO (installato al pin e RIMESSO com'era)
+cache tester: prima 2 file, dopo 0
+celle: 6 a finestra nella corsa principale (3 InpMotore x 2 InpMagic) + 2 a finestra in FASE 2 (InpSlippagePts 2/5), ricontate dai pin ||Y al pin
+gemellaggio prova principale/fase 2: VALIDO: le righe vive differiscono SOLO per le 3 differenze dichiarate (InpMotore asse->pin 2, InpMagic asse->pin 774001, InpSlippagePts pin 0->asse 2/5)
+corsa principale: LANCIATA alle 17:55:23 -- CSV IS e OOS LETTI (freschi), 6 + 6 righe
+fase 2 (slippage 2/5, motore 2): NON DOVUTA: il motore 2 NON passa tutti i cancelli A su GBPUSD (criteri par. 5.6: la fase 2 si fa SOLO sulle celle che passano). Nessuna passata spesa.
+Model letto: gen_ABTG_LondonFx_GBPUSD_IS_R116_GBP.ini: Model=4 | gen_ABTG_LondonFx_GBPUSD_OOS_R116_GBP.ini: Model=4  (dall'.ini VERO scritto dal generico per QUESTA corsa, non dall'anteprima)
+riga del Diario 'ticks data begins from' (GBPUSD): 20260903.log: GI	0	17:56:30.577	Tester	GBPUSD: ticks data begins from 2024.07.05 00:00
+log del tester letti a macchina (cresciuti in questo giro): 8
+per-trade (v1.01): raccolti 6/6 file freschi -- rappresentano SOLO l'OOS (il nome del file non porta la finestra, e l'OOS e' l'ultima a scrivere: l'IS non e' recuperabile da qui, stesso limite di RIGA_R112_EMADOW_CONTRATTO.ps1). Righe per motore/magic sotto.
+  corsa principale (finestra OOS, avvio 2026-09-03 17:55:23):
+    motore 1 magic 774001: presente e FRESCO (abtg_trades_ABTG_LondonFx_GBPUSD_774001_m1.csv), 1491 chiusure
+    motore 1 magic 774002: presente e FRESCO (abtg_trades_ABTG_LondonFx_GBPUSD_774002_m1.csv), 1491 chiusure
+    motore 2 magic 774001: presente e FRESCO (abtg_trades_ABTG_LondonFx_GBPUSD_774001_m2.csv), 719 chiusure
+    motore 2 magic 774002: presente e FRESCO (abtg_trades_ABTG_LondonFx_GBPUSD_774002_m2.csv), 719 chiusure
+    motore 3 magic 774001: presente e FRESCO (abtg_trades_ABTG_LondonFx_GBPUSD_774001_m3.csv), 946 chiusure
+    motore 3 magic 774002: presente e FRESCO (abtg_trades_ABTG_LondonFx_GBPUSD_774002_m3.csv), 946 chiusure
+  punto 5.0.5 (prima data del per-trade DALL'INIZIO della finestra IS): NON verificabile dal file raccolto (rappresenta l'OOS, non l'IS) -- SEGNALATO; la copertura tick si legge dalla riga del Diario qui sopra
+  punto S4 (correlazione P&L giornalieri fra i tre motori, informativa): ESEGUIBILE A MANO dai CSV magic 774001 allegati -- raggruppa 'net_profit' per data di 'close_time', somma per giorno, allinea le tre serie sulle date comuni (mancanti = 0), correlazione di Pearson a coppie; >= 0,80 e' un secondo indizio che i motori siano lo stesso oggetto. NON calcolata qui: non decide da sola (criteri par. 3.2).
+
+--- I CANCELLI (congelati PRIMA dei numeri, criteri par. 5; fasce DISGIUNTE par. 5.8) ---
+  A1 E OOS >= 0.075R (zona morta 0.050-0.075, bocciata < 0.050) | A2 PF OOS >= 1.15 (zona 1.10-1.15, bocciata < 1.10)
+  A3 segno IS/OOS coerente e PF IS > 1,00 (IS negativo = bocciata) | A4 DD OOS <= 8.00% (zona fino a 10.00, bocciata PER RISCHIO oltre)
+  A5 Peggior Giornata >= -4.00% (zona fino a -5.00, bocciata PER RISCHIO sotto) | A6 n >= 150 IS e OOS (30-149 merito sospeso, < 30 non misurabile)
+  Il RISCHIO boccia a QUALUNQUE n. Ambiguita' -> clausola PIU' SEVERA, dichiarata. Promuovibile SOLO il motore 2, gamba per gamba. Vietato nominare 'la cella migliore'.
+
+--- IL CANARINO, PRIMA DEL CONTO ECONOMICO (par. 4.3) -- per motore, per finestra (riga magic 774001) ---
+fin  mot  SegGen SoppPos SoppTet  GgTet  GgCap   Flat%   SprMed   SprP95  Notti  Canar
+IS   1      3558    1331     532    100     96    1.62    0.400    0.700      0      1
+IS   2       952     374      18      9     24    3.34    0.400    0.800      0      1
+IS   3      2027     956     191     34     49    4.19    0.400    0.700      0      1
+OOS  1      5339    2138     735    141    122    2.08    0.200    0.700      0      1
+OOS  2      1395     584      24      9     29    4.73    0.200    0.700      0      1
+OOS  3      2929    1502     210     47     55    3.91    0.200    0.700      0      1
+  (Giorni col Tetto Colpito > 20.00% dei giorni contati = motore STROZZATO, confronto S1 contaminato; Flat > 40.00% = si misura l'OROLOGIO. Le dichiarazioni, se scattano, stanno nei RILIEVI.)
+
+--- IL CONTO ECONOMICO, per motore e finestra (riga magic 774001; n IS e n OOS accanto a OGNI numero) ---
+fin  mot      n    nL    nS    profitto      PF   E in R      DD%   PegGg%   giorni
+IS   1      990   525   465   -67890.69   0.765  -0.1722    69.84    -2.06      204
+IS   2      509   274   235   -52478.32   0.688  -0.2357    53.17    -2.05      204
+IS   3      669   358   311   -61892.79   0.711  -0.2142    64.37    -2.08      204
+  IS: CSV scritto alle 2026-09-03 17:56:18 (FRESCO: piu' recente dell'avvio della corsa) | righe 6 (attese 6) | gemelli: ROTTI O NON VERIFICABILI (vedi PROBLEMI)
+OOS  1     1491   758   733   -59010.15   0.877  -0.0870    61.25    -4.86      308
+OOS  2      719   364   355   -54987.65   0.763  -0.1726    55.03    -2.07      308
+OOS  3      946   459   487   -47242.89   0.865  -0.0956    54.84    -4.87      308
+  OOS: CSV scritto alle 2026-09-03 17:58:01 (FRESCO: piu' recente dell'avvio della corsa) | righe 6 (attese 6) | gemelli: ROTTI O NON VERIFICABILI (vedi PROBLEMI)
+  motori: 1 = CANALE NUDO (controllo) | 2 = CANALE + RSI (BASELINE, l'unico promuovibile) | 3 = ALLINEAMENTO 5 MEDIE (controllo)
+  E in R = payoff medio / rischio medio DICHIARATO all'apertura (colonna dell'EA, esatta al primo ordine). Profitti in EURO a deposito 100000: NON confrontabili con i round a 1,00%.
+
+--- I VERDETTI PER MOTORE (cancelli A/B, letti in OOS con IS per A3/A6) ---
+  motore 1 (CANALE NUDO (controllo)): BOCCIATA PER RISCHIO (a qualunque n: il giudizio di rischio non si sospende mai)
+     A1 E=-0.0870R BOCCIATA | A2 PF=0.877 BOCCIATA | A3 segno IS/OOS coerente e PF IS>1: NON PASSA (IS profit -67890.69, PF IS 0.765) | A4 DD=61.25% BOCCIATA PER RISCHIO | A5 PG=-4.86% NON PASSA (zona morta) | A6 n OOS=1491 PASSA, n IS=990 PASSA
+  motore 2 (CANALE + RSI (BASELINE, l'unico promuovibile)): BOCCIATA PER RISCHIO (a qualunque n: il giudizio di rischio non si sospende mai)
+     A1 E=-0.1726R BOCCIATA | A2 PF=0.763 BOCCIATA | A3 segno IS/OOS coerente e PF IS>1: NON PASSA (IS profit -52478.32, PF IS 0.688) | A4 DD=55.03% BOCCIATA PER RISCHIO | A5 PG=-2.07% PASSA | A6 n OOS=719 PASSA, n IS=509 PASSA
+  motore 3 (ALLINEAMENTO 5 MEDIE (controllo)): BOCCIATA PER RISCHIO (a qualunque n: il giudizio di rischio non si sospende mai)
+     A1 E=-0.0956R BOCCIATA | A2 PF=0.865 BOCCIATA | A3 segno IS/OOS coerente e PF IS>1: NON PASSA (IS profit -61892.79, PF IS 0.711) | A4 DD=54.84% BOCCIATA PER RISCHIO | A5 PG=-4.87% NON PASSA (zona morta) | A6 n OOS=946 PASSA, n IS=669 PASSA
+  A5 e il cap del 2%: se A5 passa, passa ANCHE grazie a un cap che sta nella fonte, non a un merito del segnale (par. 5.4). Se A5 fallisce LO STESSO, il cap non funziona come crediamo: si indaga il CONTENITORE prima del merito.
+  F5: lo short gira con soglia RSI 20 (simmetrica, firmata), PIU' PERMISSIVA del 10 dell'autore. Se lo short passa e il long no, va scritto cosi'.
+
+--- L'ABLAZIONE S1/S2/S3 (par. 3.2, OOS, soglia S1 = 0.05R = 2/3 del cancello H8) ---
+  E OOS in R: motore 1 -0.0870 | motore 2 -0.1726 | motore 3 -0.0956 -> max-min 0.0856R (S1 soglia 0.05R: FALSO) | S2 stesso segno: VERO | S3 n>=150 tutti: VERO -> IL MOTORE 1 (NUDO) E' IL MIGLIORE: conferma della lezione di casa (filtro appiccicato = 0/5). NON si promuove il nudo (e' il controllo): tesi di un round successivo
+
+--- FASE 2 (par. 5.6): il verdetto si legge a 5 PUNTI ---
+  stato: NON DOVUTA: il motore 2 NON passa tutti i cancelli A su GBPUSD (criteri par. 5.6: la fase 2 si fa SOLO sulle celle che passano). Nessuna passata spesa.
+  verdetto: n/d
+
+--- LO SPREAD MISURATO (F9, chiude H12 anche se il round boccia) ---
+  GBPUSD sessione di Londra, motore 2 -- IS: mediana 0.400 pip, P95 0.800 pip (campione 509) | OOS: mediana 0.200 pip, P95 0.700 pip (campione 719). SI ARCHIVIA ANCHE SE IL ROUND BOCCIA TUTTO (chiude H12). Prudenziale se la misura mancasse: 1,50 pip EURUSD / 2,00 pip GBPUSD [ASSUNTO].
+
+--- COSA NON SI PUO' DIRE con questi dati (par. 5.10, ricopiato) ---
+  1. 'regge nel tempo' (un solo regime, 24 mesi) | 2. 'il DD sara' quello' (un broker, un feed, un regime) | 3. 'il forex BCM ha questi spread' in generale
+  4. promuovere il motore 1 o 3, SOPRATTUTTO se sono i piu' belli | 5. 'basta cambiare l'ora' se la 8 muore | 6. 'su GBPUSD serve uno stop piu' largo' e rilanciare | 7. passare al forward senza la prova di rischio sul vecchio (par. 6) e il contratto della sedia
+  Previsione dichiarata PRIMA (par. 0.2): NO probabile (MAE mediana 11,8 pip sopra lo stop di 8,0; costo 1,7-3,3x l'edge). Da giudicare qui: avevo detto NO -- cos'e' successo?
+
+--- RIGHE INTERESSANTI DAI LOG DEL TESTER (tick, memoria, autotest) ---
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] banda 1.00 sigma | lookback 20 | ATR(10)x1.50 | TP 2.00R | vita ordine 3 barre | floor=AUTORE | D30EUR | magic 773400
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] vwap: 15.0000/5.0000 (attesi 15.0000/5.0000) | pesata 17.5000/4.3301 (attesi 17.5000/4.3301) | una barra 42.0000/0.0000 (attesi 42.0000/0.0000) | n=0 ok=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] banda: sotto=1 (atteso 1) | dentro=0 (atteso 0) | bordo=0 (atteso 0) | short=1 (atteso 1) | sigma 0=0 (atteso 0, e' COSTITUTIVA) | 2 sigma bordo=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] candele: hammer=1 (atteso 1) | corpo grosso=0 (atteso 0) | hammer su star=0 (atteso 0) | star=1 (atteso 1) | star su hammer=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] candele: doji=1 (atteso 1) | non doji=0 (atteso 0) | piatta=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] chiusura: 80%=1 (atteso 1) | 20%=0 (atteso 0) | 70% esatto=1 (atteso 1) | short 20%=1 (atteso 1) | short 80%=0 (atteso 0) | piatta=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] conferma: bull engulf=1 (atteso 1) | non engulf=0 (atteso 0) | bear engulf=1 (atteso 1) | contin. long=1 (atteso 1) | low basso=0 (atteso 0) | contin. short=1 (atteso 1)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] anti-candelone: 10=1 (atteso 1) | 20=0 (atteso 0) | 15 esatto=1 (atteso 1) | ATR 0=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] segnale long: completo=1 (atteso 1) | dentro banda=0 (atteso 0) | non all'estremo=0 (atteso 0) | conferma debole=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] segnale: candelone=0 (atteso 0) | solo-engulfing=0 (atteso 0) | SHORT speculare=1 (atteso 1)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] pavimento AUTORE (R): 2.00 (atteso 2.00) | 3.00 (atteso 3.00) | short 2.00 (atteso 2.00) | lato sbagliato 0.00 (atteso 0.00)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] pavimento ALLARGA (SL): 98.00 (atteso 98.00) | 97.00 (atteso 97.00) | spento 99.80 (atteso 99.80) | short 102.00 (atteso 102.00)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] sessione: stesso giorno=1 (atteso 1) | giorni diversi=0 (atteso 0) | ancoraggio 22 unisce=1 (atteso 1) | ancoraggio 22 separa=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] orario: 12 in 10-16=1 (atteso 1) | 17=0 (atteso 0) | estremo 10=1 (atteso 1) | 2 in 22-6=1 (atteso 1)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] flat 20:45: esatto=1 (atteso 1) | 20:46=1 (atteso 1) | 20:00=0 (atteso 0) | 23:59=1 (atteso 1) | 09:30=0 (atteso 0) | 00:00=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] coda 30min: 20:15=1 (atteso 1) | 20:14=0 (atteso 0) | 20:50=1 (atteso 1) | spenta=0 (atteso 0)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [VWAPREV][AUTOTEST] esito motore: DIECI BLOCCHI SU DIECI, la regola ragiona come la firma.
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] ABTG_PausaGuardian v1.51 -- nucleo puro, ora finta=1000000 tolleranza=120 s
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] pausa mai accesa (0,0) -> libero                     atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] pausa accesa, scadenza NEL FUTURO -> bloccato        atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] pausa accesa, scadenza GIA' PASSATA -> libero        atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] pausa accesa 1h fa, scadenza MANCANTE -> bloccato (ripiego 24h) atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] pausa accesa 25h fa, scadenza MANCANTE -> libero (ripiego scaduto) atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] cap non scritto (0) -> libero                        atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] cap timbrato 1 s fa (battito fresco) -> bloccato     atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] cap timbrato 119 s fa (al limite dentro) -> bloccato atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] cap timbrato 300 s fa (Guardian morto) -> libero, FAIL-OPEN atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] battito assente (0) -> Guardian NON vivo             atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] battito di 2 s fa -> Guardian vivo                   atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] battito di 600 s fa -> Guardian NON vivo             atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] tutto tranquillo -> si apre                          atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] solo pausa -> motivo 1                               atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] solo cap -> motivo 2                                 atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] pausa E cap insieme -> vince la pausa (motivo 1)     atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] Guardian morto e NON lo pretendo -> si apre (fail-open) atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] Guardian morto e LO pretendo -> motivo 3             atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] Guardian morto CON cap vecchio -> si apre lo stesso (fail-open) atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] --- FRENO P1: perdite consecutive per POSIZIONE (hedging) ---
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] perdita chiusa con UN deal -> 1                      atteso=1 ottenuto=1  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] perdita chiusa in 3 PEZZI -> 1, non 3                atteso=1 ottenuto=1  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] parziale in UTILE + stop sul resto (netto<0) -> 1    atteso=1 ottenuto=1  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] perdita + (parziale utile & stop) -> 2 (conta-deal direbbe 1) atteso=2 ottenuto=2  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] perdita, VINCITA, perdita, perdita -> 2              atteso=2 ottenuto=2  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] la spiegazione NOMINA la vincita che ha rotto la serie atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST]   spiegazione prodotta: 2 perdite consecutive su 4 posizioni chiuse oggi; la serie riparte dalla posizione #2002 chiusa a +30.00 (netto >=0: interrompe il conteggio)
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] stessi deal in ORDINE SPARSO -> sempre 2             atteso=2 ottenuto=2  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] pareggio esatto (netto 0) -> interrompe la serie     atteso=1 ottenuto=1  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] deal di un ALTRO magic -> ignorati, restano 2        atteso=2 ottenuto=2  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] lo stesso storico letto dall'ALTRA sedia -> 1        atteso=1 ottenuto=1  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] 3 perdite di IERI, giorno nuovo -> 0                 atteso=0 ottenuto=0  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] le stesse 3 perdite dentro la finestra di IERI -> 3  atteso=3 ottenuto=3  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] nessun deal oggi -> 0 (non e' un errore)             atteso=0 ottenuto=0  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] posizione appena aperta (solo IN) -> non conta, 1    atteso=1 ottenuto=1  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] parziale fatto ma posizione VIVA -> non conta, 1     atteso=1 ottenuto=1  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] la stessa, una volta CHIUSA -> 2                     atteso=2 ottenuto=2  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] giorno server reset 0 -> mezzanotte di oggi          atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] giorno server reset 23 -> ieri alle 23:00 (giorno prop) atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] alle 23:30 con reset 23 -> il giorno prop e' gia' girato atteso=SI ottenuto=SI  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] soglia 0 con 0 perdite -> NON frena                  atteso=NO ottenuto=NO  PASS
+  20260903.log: CS	0	17:12:06.061	ABTG_VwapRevert (D30EUR,M15)	2024.09.28 00:00:00   [AUTOTEST] soglia 0 con 3 perdite -> NON frena (default = no-op) atteso=NO ottenuto=NO  PASS
+  ... (3605 altre righe nei log_*.log dentro lo zip)
+
+PROBLEMI: 2
+  - R116_GBP/IS: GEMELLI DIVERGONO sul motore 3 (774001 contro 774002): Profit, Expected Payoff. Banco sporco: il round e' FERMO (sanita' 5.0.1).
+  - R116_GBP/OOS: GEMELLI DIVERGONO sul motore 3 (774001 contro 774002): Profit, Expected Payoff. Banco sporco: il round e' FERMO (sanita' 5.0.1).
+RILIEVI: 2
+  - R116_GBP/IS (motore 1, magic 774001, slip 0): Giorni col Tetto Colpito 100/204 = 49.02% > 20.00%: motore STROZZATO DAL CONTENITORE, il suo posto nel confronto S1 e' CONTAMINATO (confronto operativo, non segnale-contro-contenitore). Atteso sul motore 1.
+  - R116_GBP/OOS (motore 1, magic 774001, slip 0): Giorni col Tetto Colpito 141/308 = 45.78% > 20.00%: motore STROZZATO DAL CONTENITORE, il suo posto nel confronto S1 e' CONTAMINATO (confronto operativo, non segnale-contro-contenitore). Atteso sul motore 1.
+
+COME SI RIPRENDE: dalla pagina righe/RIGA_R116_LONDONFX_DA_MANDARE.md, NON da questa
+riga: $Pin nasce dentro il blocco e non sopravvive. Un giro morto a meta' si rilancia
+INTERO (il generico ha -Rifai: i CSV vecchi finiscono in vecchi\). Solo la fase 2: -SoloFase2.
