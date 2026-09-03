@@ -11,7 +11,12 @@
    (`risultati_archivio/REFERTO_COMPILA_ORB104_2026-09-03.txt`)
 2. **solo se 0 errori, deploy sul SOLO conto piccolo 50503392** ← **sono queste
    due righe**. Il terminale **100k / `-V3` (conto 50504263) resta INTATTO** fino a
-   fine Fase 1 — e la riga **lo misura**, non lo promette.
+   fine Fase 1: la riga **non ha nessun percorso di scrittura fuori dalla cartella
+   scelta** (questo è per costruzione, e le foto del piccolo lo misurano), e del 100k
+   **fotografa quello che la sessione Master riesce davvero a leggere**. ⚠️ Se non
+   riesce a leggerne nemmeno un file, il referto scrive **`NON MISURATO`** — **non**
+   `INVARIATO`: la foto di un file che non c'è non è una prova (classe **117**,
+   trovata dal verificatore prima di questo invio).
 
 La v1.04 (`mql5/Experts/ABTG_ORB_Ottimizzato.mq5`, commit del fix `19312c8`) è la
 **cura del difetto `SelPos`/HEDGING**: selezione per **SIMBOLO + MAGIC**, scritture
@@ -33,6 +38,14 @@ misurato dalla foto del PASSO 1): è quella che viene sostituita.
 > l'unico input nuovo della v1.04, `InpAutoTest`, prende il default (`true`). E
 > anche questo è **misurato**: conteggio + byte + ultima scrittura di `Presets\`,
 > `Profiles\Charts\` e `config\` **prima e dopo** → `INVARIATI`.
+>
+> ⚠️ **Il terzo file NON è «dell'ORB»: `ABTG_PausaGuardian.mqh` è l'include CONDIVISO
+> del Guardian**, che sul quel terminale usano **decine di EA** della flotta. Sul
+> piccolo oggi c'è una versione da **82.941 byte** (foto del PASSO 1, 31/08); questo
+> giro la porta a **v1.51 / 112.481 byte**. Gli **`.ex5` già in forward NON cambiano
+> comportamento** — ognuno si porta dentro il Guardian con cui è stato compilato —
+> ma **cambia l'ingresso di ogni compilazione futura su quel terminale**. La riga lo
+> scrive nei **RILIEVI**; va saputo prima del round di ricompilazione.
 
 > 🏷️ **LA CARTELLA DATI DEL PICCOLO SI SCEGLIE PER FATTI, NON PER NOME** (classe
 > 115). La riga scandisce **largo** (cartelle dati di tutti i profili, installazioni
@@ -61,13 +74,13 @@ misurato dalla foto del PASSO 1): è quella che viene sostituita.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1` (marcatore `MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v1`) |
+| **Driver** | `righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1` (marcatore `MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v2`) |
 | **Dove** | **VPS**, sessione **Master** (la cartella dati del piccolo è sotto `C:\Users\Master\...`, misurato al PASSO 1) |
-| **MT5 / MetaEditor** | **CORSA: TUTTI E DUE CHIUSI**, e la riga si ferma da sola se non lo sono, **prima di scaricare qualunque cosa**. ⚠️ Il gate vede **tutti i processi della macchina**, anche il terminale del 100k che gira nella sessione **Administrator**: se lo nomina (`terminal64 pid ...`), va chiuso **da quella sessione** e riaperto dopo il PASSO 3 — chiuderlo e riaprirlo **non tocca i suoi file** (la riga li fotografa: `INVARIATO`). È la stessa regola della procedura del 22/08 («chiudi ENTRAMBI i terminali»). **CONTROLLO: possono restare aperti** (non scrive niente; lo segna come rilievo) |
+| **MT5 / MetaEditor** | **CORSA: TUTTI E DUE CHIUSI**, e la riga si ferma da sola se non lo sono, **prima di scaricare qualunque cosa**. ⚠️ Il gate vede **tutti i processi della macchina**, anche il terminale del 100k che gira nella sessione **Administrator**: se lo nomina (`terminal64 pid ...`), va chiuso **da quella sessione** e riaperto dopo il PASSO 3 — chiuderlo e riaprirlo **non tocca i suoi file** (la riga li fotografa, se li vede: vedi il punto 9 di «come si legge»). È la stessa regola della procedura del 22/08 («chiudi ENTRAMBI i terminali»). **CONTROLLO: possono restare aperti** (non scrive niente; lo segna come rilievo) |
 | **Quando** | flotta ferma: **dopo le 22:15 IT o prima delle 07:30 IT** (l'ORB parte alle 14:30 ora server = 15:30 IT: c'è tutta la mattina per il PASSO 3) |
 | **Quanto ci mette** | scansione + 2 download + 1 compilazione = **1–3 minuti** [STIMA] |
 
-## 📌 IL PIN — **`8167c772ac15df23ef177fa5754839232829869b`**  ✅ **INSERITO**
+## 📌 IL PIN — **`5d21c3bf791adfe357c352a66be4b8af5dea3ad1`**  ✅ **INSERITO**
 
 Commit di `lavoro` (è il commit del driver, quello col quarto fatto del profilo),
 **verificato uno per uno via `raw` prima di scrivere questa riga** (HTTP 200 + sha256
@@ -75,25 +88,26 @@ identico al repo):
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1` | 200, identico, marcatore `_v1` presente, ASCII puro (0 righe non-ASCII) |
+| `backtest_pipeline/righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1` | 200, identico, marcatore `_v2` presente, ASCII puro (0 righe non-ASCII), parse reale `Parser::ParseFile` OK |
 | `mql5/Experts/ABTG_ORB_Ottimizzato.mq5` | 200, identico, `#property version "1.04"`, **identico al commit del fix `19312c8`** (sha256 `c14d85dd…`, gli stessi 74.103 byte del PASSO 1) |
 | `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (**v1.51**, sha256 `b7462cd5…`, gli stessi 112.481 byte del PASSO 1) |
 
 Tutti e tre scaricati **allo stesso pin**, mai dalla punta del branch. Il pin è
-scritto **tre volte** in questa pagina (qui e nei due blocchi) e sono **la stessa
-stringa**: i tre conteggi della ricetta (classi 101/103) tornano.
+scritto **quattro volte** in questa pagina (qui, nei **due** blocchi e nella nota in
+fondo alla tabella delle uscite) e sono **la stessa identica stringa da 40 hex**,
+zero forme abbreviate: i conteggi della ricetta (classi 101/103/104) tornano.
 
 ## ▶️ BLOCCO 1 — **CONTROLLO** (giro a vuoto: non scrive nel terminale, dice cosa farebbe)
 
 Si lancia **prima**, anche di giorno con MT5 aperto. Torna l'elenco delle cartelle
 guardate, la cartella scelta col suo **criterio**, la **versione installata** letta dal
-`.mq5` del terminale, le foto `INVARIATO` di tutto.
+`.mq5` del terminale, e le foto del piccolo tutte `INVARIATO` (sul 100k vedi il punto 9).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='8167c772ac15df23ef177fa5754839232829869b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='5d21c3bf791adfe357c352a66be4b8af5dea3ad1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Modo CONTROLLO; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $c -and (Test-Path -LiteralPath $c)){ $d=$c } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'DEPLOY_ORB104_PICCOLO_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
@@ -114,9 +128,9 @@ uno dei due è aperto, **prima di scaricare qualunque cosa**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTI: chiudili tutti e due (flotta ferma: dopo le 22:15 IT o prima delle 07:30 IT) e rilancia. Non ho scaricato e non ho toccato niente.' };
-    $pin='8167c772ac15df23ef177fa5754839232829869b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='5d21c3bf791adfe357c352a66be4b8af5dea3ad1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_ORB104_PICCOLO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Modo CORSA; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $c -and (Test-Path -LiteralPath $c)){ $d=$c } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'DEPLOY_ORB104_PICCOLO_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
@@ -170,11 +184,25 @@ uno dei due è aperto, **prima di scaricare qualunque cosa**.
    `NON LETTO` non è un fallimento.
 8. **`DEPLOY:`** — `AVVENUTO` / `TENTATO E RIPRISTINATO` / `NON AVVENUTO`, con il
    perché. **`ripristino:`** dice cosa è stato rimesso e da dove.
-9. **`IL -V3 / 100k:`** = **`INVARIATO su tutte le N foto`** — sotto, riga per riga,
-   ogni copia dei tre file trovata con traccia del 100k, `prima [...] dopo [...]`.
-   Se dice `NESSUNA cartella -V3 raggiungibile`, è un rilievo: il 100k sta sotto un
-   profilo che la sessione Master non legge; la riga scrive comunque **solo** nella
-   cartella scelta al punto 2.
+9. **`IL -V3 / 100k:`** ha **TRE STATI**, e vanno letti per quello che dicono
+   (classe **117**):
+   - **`INVARIATO su N foto di file REALMENTE PRESENTI`** → misurato davvero: N copie
+     vere dei tre file, prima e dopo identiche;
+   - **`NON MISURATO`** → la riga ha guardato le cartelle con traccia del 100k ma
+     **non c'era dentro nemmeno un file vero da fotografare** (tipicamente vede solo
+     la **cartella di installazione** `...-V3` in `Program Files`, mentre la sua
+     **cartella dati** sta sotto **Administrator**, che la sessione Master non legge).
+     **È il caso PIÙ PROBABILE sul VPS, ed è un RILIEVO, non un problema**: il
+     perimetro qui regge **per costruzione** (la riga non ha nessun percorso di
+     scrittura fuori dalla cartella scelta al punto 2), ma sul 100k **non è
+     misurato** — e il referto lo dice con questa parola invece di regalare un verde.
+     ⚠️ **Non confondere `NON MISURATO` con un guasto: non blocca e non richiede
+     niente.**
+   - **`ATTENZIONE: un file del -V3 RISULTA CAMBIATO`** → **PROBLEMA**: non riaprire
+     il 100k, manda lo zip.
+   Sotto, riga per riga, ogni copia dei tre file cercata sotto una cartella con
+   traccia del 100k, `prima [...] dopo [...]`: le righe `ASSENTE ... ASSENTE` sono
+   proprio quelle che **non contano** come prova.
 10. **`PARAMETRI (.set/.chr/.ini):`** = **`INVARIATI`** (Presets, Charts, config).
 11. Le **tre righe `PICCOLO ...`**: in CORSA OK devono dire **`CAMBIATO`** tutte e tre
     (nuovi byte: `.mq5` 74.103, `.mqh` 112.481, `.ex5` ~93.000); in CONTROLLO o
@@ -187,14 +215,18 @@ uno dei due è aperto, **prima di scaricare qualunque cosa**.
 |---|---|---|---|
 | **MT5 o MetaEditor aperti**, blocco CORSA (si ferma **prima** di scaricare) | ❌ **NO** | **intatto** | il messaggio rosso in console; chiudi tutto, rilancia |
 | **`SCRIPT VECCHIO`** o download della riga fallito | ❌ **NO** | **intatto** | il messaggio in console (404 su un pin appena creato: aspetta 5 minuti, rilancia **la stessa riga**) |
-| **Gate del driver** (pin, MT5 aperto visto dal driver, versione ≠ 1.04, include, cartella dati **0 o 2 eleggibili**, `Trade.mqh` assente, `-CartellaDati` che non passa i gate, sentinella in CONTROLLO) | ✅ **SÌ** | **intatto** (`backup: NON FATTO`) | lo zip: `!!! FERMATO:` col motivo |
-| **CONTROLLO pulito** | ✅ **SÌ** | **intatto** (foto tutte `INVARIATO`) | lo zip → si passa alla CORSA |
+| **Gate del driver** (pin, MT5 aperto visto dal driver, versione ≠ 1.04, include, cartella dati **0 o 2 eleggibili**, `Trade.mqh` assente, `-CartellaDati` che non passa i gate) | ✅ **SÌ** | **intatto** (`backup: NON FATTO`) | lo zip: `!!! FERMATO:` col motivo |
+| **Sentinella di un giro interrotto, trovata in CONTROLLO** (il CONTROLLO non scrive, quindi **non ripristina**) | ✅ **SÌ** | **intatto** | lo zip: qui **non** c'è `!!! FERMATO:`, c'è **`PROBLEMI: 1`** che dice di rilanciare in CORSA (che rimette a posto dal backup) |
+| **CONTROLLO pulito** | ✅ **SÌ** | **intatto** (le tre righe `PICCOLO` e i `PARAMETRI` tutti `INVARIATO`) | lo zip → si passa alla CORSA |
 | **CORSA, compilazione FALLITA o MUTA** | ✅ **SÌ** (+ backup) | **RIPRISTINATO** (le tre righe `PICCOLO` dicono `INVARIATO`) | lo zip, **prima di riaprire MT5** |
 | **CORSA, eccezione dopo la scrittura** (es. MetaEditor non parte) | ✅ **SÌ** (+ backup) | **RIPRISTINATO** (`ripristino: ... dopo un'eccezione`) | lo zip, **prima di riaprire MT5** |
-| **CORSA OK** | ✅ **SÌ** (+ backup) | **v1.04 dentro** (tre `CAMBIATO`, `-V3` `INVARIATO`, parametri `INVARIATI`) | lo zip → **PASSO 3** |
+| **CORSA OK** | ✅ **SÌ** (+ backup) | **v1.04 dentro** (tre `CAMBIATO`, parametri `INVARIATI`, `-V3` `INVARIATO su N foto vere` **oppure** `NON MISURATO`: punto 9) | lo zip → **PASSO 3** |
 _(la tabella è stata compilata **eseguendo** ogni ramo su un banco stubbato — 27
 casi, elenco in `risultati_archivio/REFERTO_DEPLOY_ORB104_PICCOLO_PREPARAZIONE.md` —
-non a memoria: punto 94-bis.)_
+non a memoria: punto 94-bis. Il **verificatore** ha poi rieseguito la logica delle
+foto del `-V3` su quattro scenari e ha trovato la **classe 117**: driver corretto,
+marcatore portato a `_v2`, pagina ri-pinnata su
+`5d21c3bf791adfe357c352a66be4b8af5dea3ad1`.)_
 
 ## 🟡 SE LA RIGA SI FERMA SU **«NON SO QUALE CARTELLA DATI È IL PICCOLO»**
 Non è un guasto: è la regola di casa (**classe 115** — l'ambiente non si indovina dal
@@ -218,12 +250,18 @@ rilievo che lo dice**.
 2. Rilievo **`ora di avvio ... dentro la finestra in cui la flotta di solito
    lavora`**: compare se la CORSA parte fra le 07:30 e le 22:15; MT5 chiuso è
    misurato, quindi la flotta è ferma comunque. Dichiarato, non un blocco.
-3. Rilievo **`il login 50503392 NON compare nei log degli ultimi 45 giorni`**: un
+3. Rilievo **`IL 100k/-V3 NON E' STATO MISURATO in questo giro`** con
+   `IL -V3 / 100k: NON MISURATO`: è l'esito **atteso** se da Master non si legge il
+   profilo Administrator. Vedi il punto 9: non blocca, e non è un verde mancato — è
+   il verde **finto** che è stato tolto.
+4. Rilievo **`ABTG_PausaGuardian.mqh e' un include CONDIVISO`**: vedi il riquadro
+   «cosa scrive» qui sopra. Dichiarato, atteso.
+5. Rilievo **`il login 50503392 NON compare nei log degli ultimi 45 giorni`**: un
    terminale connesso da settimane può non avere una riga di login recente; la
    scelta si regge sugli altri due fatti.
-4. Rilievo **`processi aperti durante il CONTROLLO`**: tollerato solo lì.
-5. Ogni 10 secondi di attesa: **`... aspetto l'.ex5 da Ns`**. Non interrompere.
-6. La cartella **`backup_orb_v102_...`** resta sul Desktop: si cancella a mano, dopo.
+6. Rilievo **`processi aperti durante il CONTROLLO`**: tollerato solo lì.
+7. Ogni 10 secondi di attesa: **`... aspetto l'.ex5 da Ns`**. Non interrompere.
+8. La cartella **`backup_orb_v102_...`** resta sul Desktop: si cancella a mano, dopo.
 
 ## ✅ PASSO 3 — LA VERIFICA NEL TERMINALE (dopo una CORSA con `DEPLOY: AVVENUTO`)
 1. **Riapri MT5 del piccolo** (sessione Master). I grafici ORB sono **gli stessi di
