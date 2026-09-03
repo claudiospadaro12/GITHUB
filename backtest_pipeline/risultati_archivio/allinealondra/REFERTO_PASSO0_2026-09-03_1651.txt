@@ -1,0 +1,265 @@
+=====================================================================
+ PASSO 0 -- ALLINEA LONDRA (ABTG_AllineaLondra) su EURUSD M15
+ 4 celle x 2 banchi -- l'ASSE PRINCIPALE e' l'ABLAZIONE DELLA FINESTRA
+=====================================================================
+modo: CORSA   <- CONTROLLO = giro a vuoto (NON e' il risultato)
+                      CORSA     = la misura
+data: 2026-09-03 16:51:18   <- e' l'ORA DI AVVIO del giro, NON l'ora attuale (classe 110)
+fine: 2026-09-03 16:56:29   <- ora della raccolta: 'adesso' si confronta con QUESTA
+pin:  99673257f1e43b2c87bca1c401faf49c2bbdc80f
+banco S: modello 1 (OHLC M1)    2022.07.01 -> 2026.06.30   split 40/60
+         SOLO SCREENING, mai un verdetto. La finestra e' DERIVATA dal
+         tetto delle 100.000 barre (M15 ~ 4 anni), NON misurata.
+banco V: modello 4 (TICK REALI) 2024.07.05 -> 2026.06.30   split 40/60
+         Il 2024.07.05 e' il pavimento dei tick BCM MISURATO SU GBPUSD,
+         qui INFERITO per analogia: su EURUSD NON e' misurato.
+deposito: 100000    rischio: 0.65% (letto dalla baseline dichiarata e pinnato nei file prova, non da un parametro della riga)
+terminale: C:\Program Files\BCM Markets MT5 Terminal
+criterio di scelta: FATTO: cartella dati con bases\BCMMarkets-Server (il feed); scartate le installazioni -V3 (il 100k non e' il banco di backtest)   <- scelto per un FATTO e PASSATO al driver generico (classe 115)
+cartella dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+include: ABTG_PausaGuardian.mqh INSTALLATO e VERIFICATO (112481 byte), il file DIVERSO che c'era prima e' in C:\Users\Master\abtg_allinealondra\backup\ABTG_PausaGuardian.mqh.prima_20260903_1651 -- viene RIMESSO COM'ERA a fine giro
+include a fine giro: RIPRISTINATO dal backup C:\Users\Master\abtg_allinealondra\backup\ABTG_PausaGuardian.mqh.prima_20260903_1651
+compilazione: OK (62 KB, 16:51:21)   <- tre stati: NON TENTATA / FALLITA / OK (classe 94-ter)
+
+FOTO DEL TERMINALE, PRIMA e DOPO (classe 116: la prova sta nella foto):
+  Include\ABTG_PausaGuardian.mqh
+     prima: presente, 82941 byte, 2026-08-31 14:59:16
+     dopo:  presente, 82941 byte, 2026-08-31 14:59:16   -> INVARIATO (com'era prima)
+  Experts\ABTG_AllineaLondra.mq5
+     prima: presente, 69409 byte, 2026-09-03 16:50:55
+     dopo:  presente, 69409 byte, 2026-09-03 16:55:43   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)
+  Experts\ABTG_AllineaLondra.ex5
+     prima: presente, 64256 byte, 2026-09-03 16:50:57
+     dopo:  presente, 63712 byte, 2026-09-03 16:55:45   -> scritto apposta da questo giro (e' il banco: lo scrive anche il driver generico)
+
+QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+E' un CONTA-OPERAZIONI: misura la FREQUENZA del motore prima di
+qualunque lettura di merito (valvola R59, Emendamento regola A). Il PF
+qui sotto si LEGGE ma NON si giudica: non ci sono criteri di merito
+firmati e quattro celle non sono un round. Nessuna sedia viva e' stata
+toccata: magic vergini 7776xx, AllowLiveTrading=false in ogni .ini.
+
+I TRE ESITI, congelati PRIMA dei numeri (testa di
+prove/PASSO0_ALLINEALONDRA_00_finestra.txt):
+  A. n >= 150 per finestra -> campione presente, il round si puo' disegnare
+  B. n <  150              -> MERITO SOSPESO, il RISCHIO si giudica lo stesso
+  C. n enorme              -> la manopola e' la FINESTRA, non il rischio
+                              e non un filtro nuovo appiccicato sopra
+
+---------------------------------------------------------------------
+ TABELLA 1 -- IL CONTEGGIO (e' questo il PASSO 0)
+---------------------------------------------------------------------
+cella          bk fin |      n | IngTot  Long Short | BarreAllin GgTetto
+00_finestra    S  IS  |    766 |    527   261   266 |       3389     157
+00_finestra    S  OOS |   1094 |    750   372   378 |       4893     212
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+00_finestra    V  IS  |    343 |    229   119   110 |       1574      66
+00_finestra    V  OOS |    545 |    372   172   200 |       2399     104
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+01_nofinestra  S  IS  |   1218 |    852   422   430 |      11363     362
+01_nofinestra  S  OOS |   1822 |   1292   655   637 |      16657     553
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+01_nofinestra  V  IS  |    584 |    417   217   200 |       5427     172
+01_nofinestra  V  OOS |    930 |    644   304   340 |       8382     281
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+02_long        S  IS  |    381 |    261   261     0 |       1714      76
+02_long        S  OOS |    533 |    373   373     0 |       2459     103
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+02_long        V  IS  |    171 |    119   119     0 |        860      36
+02_long        V  OOS |    248 |    172   172     0 |       1088      46
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+03_short       S  IS  |    385 |    266     0   266 |       1675      80
+03_short       S  OOS |    562 |    378     0   378 |       2434     108
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+03_short       V  IS  |    172 |    110     0   110 |        714      30
+03_short       V  OOS |    297 |    200     0   200 |       1311      57
+               esito: MISURATA
+               il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+
+COME SI LEGGE LA TABELLA 1 -- tre avvertenze, non tre note:
+ 1. 'BarreAllin' NON e' contato prima di TUTTI i cancelli, ed e' la cosa
+    da sapere prima di guardarlo. LETTO NEL SORGENTE: gBarreAllineate++
+    (riga 867) sta dentro ValutaBarraChiusa, ma OnTick esce PRIMA con
+    'if(DevoFlat_Calc(...)){ ChiudiTutto(); return; }' (righe 622-623).
+    Il FLAT e' un cancello del contenitore, ed e' proprio quello che
+    l'ablazione sposta. Quindi la FINESTRA DI CONTEGGIO cambia da cella
+    a cella:
+       00_finestra   -> conta le barre di 03:00-10:29  (~30 barre M15/gg)
+       01_nofinestra -> conta le barre di 00:00-23:43  (~95 barre M15/gg)
+    >>> IL RAPPORTO 01/00 VALE ~3,2 PER COSTRUZIONE e NON dice niente
+        sul motore: quanto spesso il motore si allinea e' una proprieta'
+        del mercato, IDENTICA nelle due celle. NON si confronta.
+    DENTRO UNA CELLA il rapporto IngTot/BarreAllin si legge, e dice
+    quanto mordono slot, tetto e finestra d'ingresso. Ma una barra
+    allineata NON e' un'occasione persa: l'allineamento e' uno STATO e
+    resta vero per molte barre, quindi la stessa spinta e' contata
+    decine di volte.
+ 2. n(02_long) + n(03_short) NON FA n(00_finestra), e NON e' un guasto.
+    Misurato nel sorgente: SegnaleAllineamento() (riga 866) filtra gia' il
+    lato; SUBITO DOPO arrivano lo slot ('if(ContaPosizioni() >=
+    InpMaxPositions) return', riga 871) e il tetto, che sono UNO SOLO per
+    i due lati (gTradesToday). Nel 00 una posizione long occupa lo slot e
+    blocca uno short che sarebbe entrato. Con un lato spento
+    slot e tetto restano liberi: la somma sara' MAGGIORE del congiunto.
+ 3. Le colonne Long/Short del 00_finestra e le celle 02/03 rispondono a DUE
+    domande diverse: le prime dicono quanto trada ogni lato NELLA
+    configurazione CHE ANDREBBE IN CAMPO, le seconde quanto tradano da soli.
+    Non si confrontano fra loro.
+
+---------------------------------------------------------------------
+ TABELLA 2 -- I NUMERI CHE SI LEGGONO MA NON SI GIUDICANO
+---------------------------------------------------------------------
+cella          bk |  PF IS  PF OOS  DD OOS%   Prof OOS  PeggGG%  UscFlat/UscMerc
+00_finestra    S  |   0.85    0.87    35.31     -32248    -1.47  9/741
+00_finestra    V  |   0.90    0.80    26.26     -25732    -1.46  4/368
+01_nofinestra  S  |   0.79    0.68    79.96     -79336    -1.80  65/1227
+01_nofinestra  V  |   0.60    0.75    46.62     -46611    -2.35  28/616
+02_long        S  |   0.81    0.73    35.76     -33605    -1.47  6/367
+02_long        V  |   0.74    0.70    19.25     -18556    -1.46  3/169
+03_short       S  |   0.89    1.01    16.31      +1352    -1.46  3/375
+03_short       V  |   1.12    0.88    10.44      -8814    -1.46  1/199
+
+'PeggGG%' e' la PEGGIOR GIORNATA in % di equity: e' IL numero della riga
+prop (muro FTMO giornaliero -5.000 su 100k = -5%), e si riporta SEMPRE,
+anche quando il merito e' sospeso (Emendamento regola B: il campione
+sottile sospende il MERITO, mai il RISCHIO).
+'UscFlat/UscMerc' dice CHI ha chiuso: la chiusura forzata di fine
+sessione, oppure stop/take. Un rapporto sbilanciato sul flat vuol dire
+che il motore vive quasi solo dentro la sessione e che i target quasi
+non si toccano: e' una descrizione del motore, non un giudizio.
+
+---------------------------------------------------------------------
+ TABELLA 3 -- IL COLLAUDO, IN COLONNE (non nella scheda Esperti)
+---------------------------------------------------------------------
+cella          bk | AutoFail Notti SprSalt LotMin | Fin MinIni MinIng MinFin FlatAnt MinFlat
+00_finestra    S  |        0     0       0      0 |   1    180    525    645      15     630
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+00_finestra    V  |        0     0       0      0 |   1    180    525    645      15     630
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+01_nofinestra  S  |        0     5       0      0 |   0    180    525    645      15    1424
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+01_nofinestra  V  |        0     4       0      0 |   0    180    525    645      15    1424
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+02_long        S  |        0     0       0      0 |   1    180    525    645      15     630
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+02_long        V  |        0     0       0      0 |   1    180    525    645      15     630
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+03_short       S  |        0     0       0      0 |   1    180    525    645      15     630
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+03_short       V  |        0     0       0      0 |   1    180    525    645      15     630
+               gemelli: IS=IDENTICI  OOS=IDENTICI
+
+(la tabella 3 mostra la finestra OOS; i gate girano su TUTTE E DUE le
+ finestre e su TUTTE E DUE le righe gemelle, e cio' che non torna finisce
+ nei PROBLEMI qui sotto.)
+
+COME SI LEGGE OGNI COLONNA:
+  AutoFail = 0  -> gli 8 blocchi dell'autotest del nucleo sono passati:
+                   i numeri delle tabelle 1 e 2 SI LEGGONO.
+           > 0  -> DIVERGE: i numeri NON si leggono, si guarda il codice.
+           = -1 -> autotest NON ESEGUITO, che NON e' 'passato'.
+  Notti    = 0  -> la chiusura forzata e' stata ERMETICA. Un valore > 0
+                   e' una posizione viva a cavallo della notte: il mandato
+                   FTMO 'mai overnight' NON e' rispettato. Va detto.
+  SprSalt  = 0  -> canarino: il filtro di spread e' pinnato a 0 in tutti
+                   e quattro i file prova. Se e' > 0, il file prova che ha
+                   girato NON e' quello che crediamo.
+  LotMin   > 0  -> su quegli ingressi il lotto e' salito al minimo del
+                   broker: il rischio REALE e' piu' alto dello 0,65%.
+  Fin           -> LA CELLA DI ABLAZIONE, in colonna: 1 = finestra accesa,
+                   0 = spenta. E' la prova che l'interruttore e' arrivato
+                   dentro il tester e non e' stato reso inerte.
+  MinIni/MinIng/MinFin -> la finestra DAVVERO usata, in minuti del giorno
+                   (attesi 180/525/645 = 03:00/08:45/10:45 ORA SERVER).
+  MinFlat       -> il minuto in cui il flat e' caduto davvero: 630 (10:30)
+                   con la finestra accesa, 1424 (23:44) con la finestra
+                   spenta. Il flat NON e' disattivabile da nessun input.
+
+--- RIGHE [AUTOTEST] DAGLI AGENT (best-effort, MAI un gate) ---
+  NON LETTE (vedi RILIEVI). Non e' un verdetto: e' un'assenza. Il gate vero e' la colonna AutoFail della tabella 3.
+
+=====================================================================
+ L'ABLAZIONE -- 00_finestra CONTRO 01_nofinestra
+ (accostata dal driver, NON adjudicata: e' un giudizio, non un conto)
+=====================================================================
+LA DOMANDA (dossier P2): il CONTENITORE (sessione + flat + tetto) E' il
+motore, oppure questo e' un doppione di ABTG_SuperWave / ABTG_CrossEma /
+ABTG_GoldenCross con un orologio addosso?
+  se il nudo va UGUALE -> la sessione non serve, il candidato e' un doppione
+  se il nudo CROLLA    -> il contenitore E' il motore
+
+  banco S  (OHLC M1 -- SOLO SCREENING, mai un verdetto. E' il CAMPIONE: 4 anni, due regimi (crollo 2022, risalita 2023-2025))
+                    n OOS   PF OOS   DD OOS%    Prof OOS   PeggGG%  BarreAllin
+    00_finestra     1094     0.87     35.31      -32248     -1.47        4893
+    01_nofinestra   1822     0.68     79.96      -79336     -1.80       16657
+
+  banco V  (TICK REALI -- il RIEMPIMENTO vero (spread e fill del feed), ma finestra corta e un regime solo)
+                    n OOS   PF OOS   DD OOS%    Prof OOS   PeggGG%  BarreAllin
+    00_finestra      545     0.80     26.26      -25732     -1.46        2399
+    01_nofinestra    930     0.75     46.62      -46611     -2.35        8382
+
+    ^^^ la colonna BarreAllin di queste due righe NON si confronta: ha due
+        finestre di conteggio diverse (vedi avvertenza 1 della tabella 1).
+!!! E LA DIFFERENZA NON E' UN COSTO PURO. Va letta come un PACCHETTO:
+      (finestra d'ingresso rimossa) + (ancoraggio a MEZZANOTTE SERVER)
+    Con la finestra spenta il TETTO di 2 ingressi al giorno resta acceso,
+    quindi il motore NON opera distribuito su tutto il giorno: prende i
+    PRIMI DUE segnali dopo il cambio di giornata del server. Su un
+    allineamento di medie -- che e' uno STATO e resta vero per molte barre
+    -- quei due ingressi cadono tipicamente subito dopo le 00:00 SERVER.
+    Chi volesse il motore davvero libero deve alzare ANCHE InpMaxTradesDay:
+    sarebbe una cella a DUE righe mosse, cioe' un'altra misura, e QUESTO
+    GIRO NON CE L'HA. La colonna 'GgTetto' (tabella 1) dice quante giornate
+    il tetto ha davvero morso.
+
+!!! E IL CONFRONTO SI LEGGE SU TUTTI E DUE I BANCHI, non su uno.
+    Il banco S (OHLC M1) e' SOLO SCREENING e non autorizza nessuna
+    proposta; il banco V ha il riempimento vero ma un solo regime e un
+    campione piu' sottile. Se i due banchi si contraddicono, NON e' un
+    errore: e' la tensione gia' nota del progetto (o la finestra lunga o il
+    riempimento vero, mai tutti e due), e si dichiara.
+
+!!! QUELLO CHE QUESTO GIRO NON MISURA, dichiarato:
+    - la SCORRELAZIONE dalle sedie long della flotta. Il dossier avvisa che
+      questo e' un motore a favore del trend, quindi nelle mattine di trend
+      forte e' CORRELATO alle sedie long gia' in campo. Si misura sulle
+      serie per-trade, e non si fa qui;
+    - il COSTO (spread). Il filtro di spread e' SPENTO apposta, per misurare
+      il motore nudo. NESSUNA CELLA SI PROMUOVE COSI' (lezione R55);
+    - l'ORA GIUSTA. Gli orari sono i numeri letterali del Pine letti come ora
+      server: un PUNTO DI PARTENZA dichiarato, non una conversione di fuso.
+      La sessione e' l'asse del PRIMO ROUND VERO, e quello e' un altro giro.
+      MISURATO con la regola di casa (server = ora italiana - 1, ancora:
+      DAX 09:00 IT = 08:00 server): l'orologio del server BCM segna la
+      STESSA ora di Londra tutto l'anno. Quindi 03:00-08:45 SERVER sono
+      03:00-08:45 DI LONDRA, e Londra apre alle 08:00: la finestra
+      d'ingresso contiene 45 MINUTI DI LONDRA SU 5h45. Questo giro conta
+      quindi operazioni prese quasi tutte PRIMA dell'apertura di Londra,
+      mentre la tesi del candidato parla delle 'prime ore di Londra'.
+      Il conteggio vale; l'etichetta no. Il flat delle 10:30 server e'
+      invece meta' mattina di Londra, come vuole la tesi.
+
+PROBLEMI: 3
+  - cella 01_nofinestra banco S (IS): 'Notti Attraversate' = 6 invece di 0 su 2 righe gemelle. La chiusura forzata di fine sessione NON e' stata ermetica: il mandato FTMO 'mai overnight' non e' rispettato su questo simbolo. Si dichiara, non si interpreta.
+  - cella 01_nofinestra banco S (OOS): 'Notti Attraversate' = 5 invece di 0 su 2 righe gemelle. La chiusura forzata di fine sessione NON e' stata ermetica: il mandato FTMO 'mai overnight' non e' rispettato su questo simbolo. Si dichiara, non si interpreta.
+  - cella 01_nofinestra banco V (OOS): 'Notti Attraversate' = 4 invece di 0 su 2 righe gemelle. La chiusura forzata di fine sessione NON e' stata ermetica: il mandato FTMO 'mai overnight' non e' rispettato su questo simbolo. Si dichiara, non si interpreta.
+RILIEVI: 2
+  - in C:\Users\Master\abtg_allinealondra\backup ci sono 1 backup ABTG_PausaGuardian.mqh.prima_* di giri precedenti (il primo: ABTG_PausaGuardian.mqh.prima_20260903_1650). Non li tocco: sono copie di cio' che il terminale aveva PRIMA, si cancellano a mano.
+  - righe [AUTOTEST] NON LETTE dai log degli agent (il percorso cambia fra le build di MT5). NON e' un guasto della corsa e NON e' un gate: il gate vero e' la colonna 'Autotest Falliti', che sta nella tabella del collaudo. Queste righe avrebbero detto in piu' QUALE degli 8 blocchi ha ceduto.
+
+COME SI RIPRENDE: si riparte dalla pagina
+righe/RIGA_ALLINEALONDRA_DA_MANDARE.md, che e' l'UNICO posto in cui la
+riga di lancio esiste (CHECKLIST punto 100). NON da questa riga: $p e
+$pin nascono dentro il blocco e non sopravvivono.
+Il referto e' SEMPRE D'INSIEME: anche con -SoloCella la riga rilegge i
+CSV gia' presenti di tutte le celle, quindi il confronto 00 contro 01
+esce anche se le due celle sono girate in serate diverse.
+ATTENZIONE: con un PIN DIVERSO la riga CANCELLA risultati_prove\ e le
+celle gia' girate SONO PERSE. Un ri-pin a meta' round = si ricomincia.
