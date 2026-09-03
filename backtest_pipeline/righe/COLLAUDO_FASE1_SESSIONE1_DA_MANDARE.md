@@ -62,17 +62,17 @@ scaricano **dal pin** e le cercano nel log — il cancello non dipende dall'occh
 
 Con il cap abbassato, per **tutta la durata della sessione** i 5 mirror **non
 aprono**. Un blocco forzato **PERDE quel trade, non lo rimanda**. E fra il
-passo 9️⃣ e l'11️⃣ (≈ 4 minuti) il 100k è **senza rete**.
+passo 🔟 (Guardian rimosso) e il 1️⃣2️⃣ (Guardian rimesso) — circa **4 minuti** — il 100k è **senza rete**.
 👉 **Alla fine, annota nella pagella del giorno i trade persi** (azione G7):
 altrimenti M27 e H5 misurano un buco che è **nostro**.
 
 ---
 
-## 📌 IL PIN — **`@@PIN@@`** ⏳ **DA INSERIRE** (questa pagina non si lancia finché il cartello non dice INSERITO)
+## 📌 IL PIN — **`223e1f7153e041c5a7c6a58ce9d5f2fef3478a27`**  ✅ **INSERITO** (verificato con `git rev-parse` e con `git ls-tree`: a questo commit ci sono sia il driver `RIGA_COLLAUDO_FASE1_S1.ps1` col marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1`, sia l'artefatto `backtest_pipeline/attese_enforcement_fase1.txt` che le tre righe scaricano)
 
 ---
 
-# ▶️ LA SEQUENZA — 13 passi, in quest'ordine
+# ▶️ LA SEQUENZA — 15 passi, in quest'ordine
 
 ## 1️⃣ RIGA 1 — **LETTURA PRIMA** (PowerShell sul VPS, ~30 secondi)
 
@@ -82,7 +82,7 @@ confondere le righe di stamattina con quelle della prova).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='223e1f7153e041c5a7c6a58ce9d5f2fef3478a27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
@@ -201,7 +201,7 @@ Nel log dev'essere comparsa la riga
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='223e1f7153e041c5a7c6a58ce9d5f2fef3478a27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Presidio -Minuti 20; $rc=$LASTEXITCODE;
@@ -285,7 +285,7 @@ configurazione firmata (condizione **C-5** del cancello).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='223e1f7153e041c5a7c6a58ce9d5f2fef3478a27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S1.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S1.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S1_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Chiusura; $rc=$LASTEXITCODE;
