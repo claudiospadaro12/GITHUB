@@ -1,9 +1,12 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDARELATIVO_v4
-#  (v3 -> v4, 03/09 sera: gate ancorati alla v1.02 dell'EA -- REL_NSTATS
-#  94->95/98 colonne, autotest 22->23 blocchi, version "1.01"->"1.02",
-#  stampate le due colonne diagnostiche nuove -- contenuto cambiato,
-#  marcatore alzato: classe 109-bis/il riflesso "alza la versione").
+#  MARCATORE_RIGA_SONDARELATIVO_v5
+#  (v4 -> v5, 03/09 notte: gate ancorati alla v1.03 dell'EA -- fix T12
+#  "tenuta sotto 60 secondi" (gate T7 sulla barra REALE, non piu' su
+#  quella teorica) -- REL_NSTATS 95->97/100 colonne, autotest 23->25
+#  blocchi, version "1.02"->"1.03", lette e stampate le due colonne
+#  diagnostiche nuove ("Ingressi Barra Reale Fuori", "Chiuse Zero
+#  Barre") -- contenuto cambiato, marcatore alzato: classe 109-bis/il
+#  riflesso "alza la versione").
 #  RIGA_SONDARELATIVO.ps1 -- SONDA DI CONVERGENZA "RELATIVO" (PASSO 0
 #  del candidato P1 della quarta battuta, 02/09; shortlist n.1 del
 #  GIACIMENTO_DI_CASA del 03/09, sezione 8).
@@ -79,8 +82,8 @@
 #  >>> CONTATORE PURO, PROVATO A MACCHINA: grep delle chiamate di
 #      trading FUORI dai commenti, attese ZERO (il modello sta QUI e
 #      non nel .mq5, apposta).
-#  >>> IDENTITA' DEL SORGENTE: #property version "1.02", 23 blocchi di
-#      autotest contati (blocchi++), REL_NSTATS 95 (= 98 colonne), 22
+#  >>> IDENTITA' DEL SORGENTE: #property version "1.03", 25 blocchi di
+#      autotest contati (blocchi++), REL_NSTATS 97 (= 100 colonne), 22
 #      input letti dal sorgente e TUTTI pinnati nel prova (nome per
 #      nome, nei due versi: un pin che l'EA non ha e' l'errore n.3
 #      della checklist, un input che il prova non pinna e' uno stato
@@ -159,9 +162,9 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Sentinella = Join-Path $Work "SONDARELATIVO_IN_CORSO.txt"
 
 # --- IDENTITA' ATTESA DEL SORGENTE (gate, non decorazione)
-$VERSIONE_ATTESA         = "1.02"
-$AUTOTEST_BLOCCHI_ATTESI = 23
-$NSTATS_ATTESI           = 95      # 95 valori + Pass, Simbolo, Periodo = 98 colonne
+$VERSIONE_ATTESA         = "1.03"
+$AUTOTEST_BLOCCHI_ATTESI = 25
+$NSTATS_ATTESI           = 97      # 97 valori + Pass, Simbolo, Periodo = 100 colonne
 $INPUT_ATTESI            = 22
 $NCelleAttese            = 49      # 2 assi x 7 valori. RICONTATE dai pin ||Y scaricati al pin.
 
@@ -509,7 +512,8 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
     "Scartati Occupato Altro Lato Collaudo","Atr Mediano Punti Indice","Atr Divergenza Rel Media Pct","Punto Indice Prezzo",
     "Metro Prima Barra Epoch","Gamba Prima Barra Epoch","Campioni Troncati","Autotest Falliti","Autotest Blocchi",
     "Finestra N","Soglia Ingresso Sigma","Soglia Uscita Sigma","Modo Spread","Modo Z Score","Barre Max Tenuta","Barre Orizzonte","Lato Attivo",
-    "Giorni Festa Metro","Giorni Metro Zero Calendario")
+    "Giorni Festa Metro","Giorni Metro Zero Calendario",
+    "Ingressi Barra Reale Fuori","Chiuse Zero Barre")
   $manca = New-Object System.Collections.ArrayList
   foreach($cn in $servono){ if(-not $ix.ContainsKey($cn)){ [void]$manca.Add($cn) } }
   if($manca.Count -gt 0){ [void]$Problemi.Add("nel CSV mancano le colonne: " + ($manca -join ", ") + " (header OPTFRAME cambiato nella sonda?)."); return }
@@ -551,6 +555,7 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
       SoloMetro = Num $c[$ix["Valutazioni Con Solo Metro"]]; ZNon = Num $c[$ix["Z Non Calcolabile"]]
       Spaiati = Num $c[$ix["Giorni Spaiati"]]; SpaiPct = Num $c[$ix["Giorni Spaiati Pct"]]; C2 = [int](Num $c[$ix["C2 Esito"]])
       GFesta = Num $c[$ix["Giorni Festa Metro"]]; GZeroCal = Num $c[$ix["Giorni Metro Zero Calendario"]]
+      IngrFuori = Num $c[$ix["Ingressi Barra Reale Fuori"]]; ChiuseZero = Num $c[$ix["Chiuse Zero Barre"]]
       AltroLato = Num $c[$ix["Scartati Occupato Altro Lato Collaudo"]]
       AtrMed = Num $c[$ix["Atr Mediano Punti Indice"]]; AtrDiv = Num $c[$ix["Atr Divergenza Rel Media Pct"]]
       PuntoIdx = Num $c[$ix["Punto Indice Prezzo"]]
@@ -572,6 +577,7 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
     if($r.AutoBl -ne $AUTOTEST_BLOCCHI_ATTESI){ [void]$Problemi.Add($et + ": Autotest Blocchi = " + $r.AutoBl + " invece di " + $AUTOTEST_BLOCCHI_ATTESI + " (sonda diversa da quella attesa?)."); $collaudoKo++ }
     if($r.AltroLato -ne 0){ [void]$Problemi.Add($et + ": Scartati Occupato Altro Lato Collaudo = " + (FmtN $r.AltroLato) + " (atteso 0 per costruzione, T6): la macchina a stati e' rotta, i numeri non valgono."); $collaudoKo++ }
     if([math]::Abs($r.Sotto60) -gt 0.0001){ [void]$Problemi.Add($et + ": Sotto 60 Secondi Pct = " + (Fmt2 $r.Sotto60) + " (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta."); $collaudoKo++ }
+    if($r.ChiuseZero -ne 0){ [void]$Problemi.Add($et + ": Chiuse Zero Barre = " + (FmtN $r.ChiuseZero) + " (atteso 0, fix T12 v1.03: dalla v1.03 e' LO STESSO EVENTO di 'Sotto 60 Secondi Pct', qui in conteggio secco): contabilita' dei tempi rotta."); $collaudoKo++ }
     if([math]::Abs($r.PuntoIdx - 1.0) -gt 0.001){ [void]$Problemi.Add($et + ": Punto Indice Prezzo = " + (Fmt3 $r.PuntoIdx) + " invece di 1,000 (T14): MFE/MAE sbagliati di un fattore, la TAGLIA non si legge."); $collaudoKo++ }
     if([math]::Abs($r.Spread - $SpreadAtteso) -gt 0.001){ [void]$Problemi.Add($et + ": Spread Misurato Punti Indice = " + (Fmt2 $r.Spread) + " invece di " + (Fmt2 $SpreadAtteso) + ": la sonda ha preso un altro simbolo."); $collaudoKo++ }
     if([math]::Abs($r.SogliaC3 - $SogliaC3Attesa) -gt 0.001){ [void]$Problemi.Add($et + ": Soglia C3 Punti Indice = " + (Fmt2 $r.SogliaC3) + " invece di " + (Fmt2 $SogliaC3Attesa) + "."); $collaudoKo++ }
@@ -594,6 +600,19 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
       $collaudoKo++
     }
   }
+  # FIX T12 v1.03, MISURATO (non solo dichiarato): quante volte il gate
+  # sulla barra REALE ha morso dove il gate vecchio (barra teorica) lasciava
+  # passare. E' la somma su tutte le celle, non un collaudo per riga: puo'
+  # essere 0 per costruzione (nessun buco di storico incontrato in QUESTA
+  # finestra/simbolo), e in quel caso il fix non e' stato messo alla prova
+  # qui, non e' "sbagliato" -- si dichiara e basta (ordine di lettura
+  # consigliato: 1. autotest 0/25, 2. Chiuse Zero Barre=0 e Sotto60=0,00 su
+  # tutte le celle, 3. questo numero: se e' 0 mentre il 2 passa comunque,
+  # il fix non ha mai morso qui).
+  $sommaIngrFuori = (@($righe | Measure-Object -Property IngrFuori -Sum)).Sum
+  if($null -eq $sommaIngrFuori){ $sommaIngrFuori = 0 }
+  if($sommaIngrFuori -eq 0){ [void]$Rilievi.Add("FIX T12 (v1.03) NON MISURATO IN QUESTA CORSA: Ingressi Barra Reale Fuori = 0 sulla somma delle " + $righe.Count + " celle. Il collaudo T12 (Chiuse Zero Barre / Sotto 60 Secondi Pct) puo' passare comunque: se qui non c'e' nessun buco di storico, il fix semplicemente non e' mai stato chiamato a intervenire su questa finestra/simbolo, e non e' un problema. Se invece T12 fallisce ancora ALTROVE con questo a 0, la diagnosi v1.03 va riverificata (vedi commento del sorgente).") }
+  else{ [void]$Rilievi.Add("FIX T12 (v1.03) MISURATO: Ingressi Barra Reale Fuori = " + (FmtN $sommaIngrFuori) + " (somma sulle " + $righe.Count + " celle): il gate nuovo sulla barra REALE ha morso almeno una volta dove il gate vecchio (barra teorica) avrebbe lasciato passare l'ingresso. E' la prova che il fix e' falsificabile e regge.") }
   # la finestra EFFETTIVA (tetto o broker, classe 36): dalla prima riga.
   $r0 = $righe[0]
   $dGamba = ([DateTime]'1970-01-01').AddSeconds($r0.GambaEpoch)
@@ -710,7 +729,7 @@ try{
   $defs = LeggiDefine $src
   $nst = [int](DefNum $defs "REL_NSTATS")
   $NStatsTxt = "REL_NSTATS = " + $nst + " -> " + ($nst + 3) + " colonne"
-  if($nst -ne $NSTATS_ATTESI){ throw ("REL_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (98 colonne).") }
+  if($nst -ne $NSTATS_ATTESI){ throw ("REL_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (100 colonne).") }
   $inputEA = LeggiInputEA $src
   $InputTxt = "" + @($inputEA).Count + " input letti dal sorgente"
   if(@($inputEA).Count -ne $INPUT_ATTESI){ throw ("input: " + $InputTxt + ", attesi " + $INPUT_ATTESI + ".") }
@@ -1014,7 +1033,7 @@ $R = New-Object System.Collections.ArrayList
 [void]$R.Add("codice di uscita di metaeditor64: " + $RcMeTxt + "   (NON LETTO non e' un fallimento: fa fede l'.ex5 e il log)")
 [void]$R.Add("versione letta dal #property: " + $VersioneTxt + " (attesa " + $VERSIONE_ATTESA + ")")
 [void]$R.Add("autotest nel sorgente: " + $AutoSrcTxt + " (attesi " + $AUTOTEST_BLOCCHI_ATTESI + ")")
-[void]$R.Add("colonne: " + $NStatsTxt + " (attese 98)")
+[void]$R.Add("colonne: " + $NStatsTxt + " (attese 100)")
 [void]$R.Add("input: " + $InputTxt + " (attesi " + $INPUT_ATTESI + ", tutti pinnati nel prova)")
 [void]$R.Add("grep contatore puro: " + $GrepTxt)
 [void]$R.Add("include: " + $IncludeTxt)
@@ -1053,6 +1072,7 @@ if($null -ne $Righe49){
   [void]$R.Add("  DUE FEED: metro mancante sul segnale " + (FmtN $r0.MetroManc) + " | valutazioni perse per buco " + (FmtN $r0.PerseBuco) + " (il COSTO della regola stretta) | solo metro " + (FmtN $r0.SoloMetro) + " | z non calcolabile " + (FmtN $r0.ZNon))
   [void]$R.Add("  C2 giorni spaiati: " + (FmtN $r0.Spaiati) + " = " + (Fmt2 $r0.SpaiPct) + "% (oltre " + (Fmt2 $PAGINA_C2_SPAIATI) + "% = rifare filtrando, e dichiarare)")
   [void]$R.Add("  diagnostica C2 (v1.02): Giorni Festa Metro " + (FmtN $r0.GFesta) + " (festivita' del metro DENTRO la finestra della sonda, ora esclusa dal numeratore C2) | Giorni Metro Zero Calendario " + (FmtN $r0.GZeroCal) + " (vecchio criterio v1.01, tenuto come controllo, atteso 0 su un metro quasi-24h)")
+  [void]$R.Add("  FIX T12 (v1.03): Chiuse Zero Barre " + (FmtN $r0.ChiuseZero) + " (atteso 0, prima riga; collaudato su TUTTE le righe, un fallimento sta nei PROBLEMI) | Ingressi Barra Reale Fuori " + (FmtN $r0.IngrFuori) + " (prima riga; la SOMMA sulle " + (FmtN $CsvRighe) + " celle sta nei RILIEVI qui sotto: se e' 0 mentre il collaudo T12 passa comunque, il fix non e' mai stato messo alla prova in questa corsa)")
   [void]$R.Add("  (i valori qui sopra sono della prima riga; i collaudi sono stati verificati su TUTTE le " + (FmtN $CsvRighe) + " righe: un fallimento sta nei PROBLEMI)")
 }
 else{ [void]$R.Add("  SENZA NUMERI (corsa non girata, CSV non prodotto o non letto: vedi PROBLEMI / FERMATO)") }
@@ -1093,7 +1113,7 @@ if($null -ne $Righe49){
 [void]$R.Add("    Derivato PRIMA della misura: a M15 il candidato NON dovrebbe arrivare al pavimento; il bersaglio e' M5.")
 [void]$R.Add("  - TETTO BARRE (M5): la finestra EFFETTIVA la dice la riga 'tetto barre' qui sopra; C1 resta per-giorno sul denominatore CONTATO.")
 [void]$R.Add("  - UN SOLO BROKER, UN SOLO REGIME (toro). FORMA UNILATERALE: a due gambe i numeri di C3 andrebbero RADDOPPIATI.")
-[void]$R.Add("  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 98 colonne OPTFRAME.")
+[void]$R.Add("  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 100 colonne OPTFRAME.")
 [void]$R.Add("")
 if($FrazioneIS -ge 1.0){ [void]$R.Add("AVVISO: FrazioneIS 1.0 -> la gamba 'OOS' del generico e' DEGENERE (0 giorni). Il rosso del generico sul CSV *_OOS e' ATTESO: NON rilanciare."); [void]$R.Add("") }
 if($Fatale -ne ""){ [void]$R.Add("!!! FERMATO: " + $Fatale); [void]$R.Add("") }
@@ -1124,7 +1144,7 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, 49 righe = le 49 passate, 98 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
+if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, 49 righe = le 49 passate, 100 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
 else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_SONDARELATIVO.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
 Write-Host ("CSV *_OOS trovati: " + $nOos + " (attesi 0: gamba OOS degenere; il numero sta ANCHE nel referto). Il rosso del generico su quel file e' ATTESO: NON rilanciare.") -ForegroundColor Gray
 
