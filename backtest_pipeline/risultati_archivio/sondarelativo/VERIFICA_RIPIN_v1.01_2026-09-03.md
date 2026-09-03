@@ -89,3 +89,38 @@ dal perimetro eseguibile qui: PC di backtest Windows, non disponibile in
 questo ambiente). Il collaudo qui sopra e' analisi statica + esecuzione
 reale della logica di parsing/gate del driver contro il `.mq5` vero letto
 da disco, non una corsa del tester.
+
+---
+
+## SEGUITO (03/09 sera): perche' la v1.01 non ha spostato un centesimo
+
+La corsa rifatta con la v1.01 (`REFERTO_D30_M15_2026-09-03_1814_v101_IDENTICO_A_PREFIX.txt`)
+e' IDENTICA alla v1.00 su ogni numero: `diff` delle righe 48-130 dei due
+referti mostra come uniche differenze i blocchi di autotest (21 -> 22) e le
+colonne (96 -> 97). Quindi la v1.01 girava per davvero.
+
+**Non e' un bug di collegamento.** Ogni anello e' stato verificato riga per
+riga: `GiorniMetroAttivi_Calc` chiamata in `ValutaBarraChiusa`;
+`gDayFestaMetro` scritto nei due punti giusti; letto in `ChiudiGiornata`
+nell'`else` di `gDaySpaiato`; esportato in `stats[93]` e in intestazione CSV.
+
+**La condizione non si e' mai verificata, e si dimostra senza rigirare.**
+Per costruzione `Spaiati(v1.01) = Spaiati(v1.00) - GiorniFestaMetro`; poiche'
+44 = 44 su tutte le 49 celle, `gGiorniFestaMetro = 0`. La v1.01 chiedeva
+"zero barre del metro in TUTTO il giorno di calendario": U30USD e' un CFD
+quasi 24h e la coda di 300 barre finisce sempre dopo le 14:30 server, quindi
+contiene sempre le barre NOTTURNE del metro dello stesso giorno. I 352 buchi
+non sono giornate intere, sono PEZZI della finestra 14:30-22:00.
+
+"Giorni Festa Metro" non compare nel referto perche' il referto lo scrive il
+DRIVER dal CSV e il driver non stampa quella colonna: nel CSV c'e' (il
+referto stesso dichiara 97 colonne lette).
+
+**v1.02**: stessa logica, granularita' della FINESTRA ORARIA invece del
+giorno di calendario. Il criterio vecchio resta come controllo
+("Giorni Metro Zero Calendario", atteso 0). REL_NSTATS 95 / 98 colonne,
+autotest 23 blocchi -> **il driver va aggiornato** (versione attesa 1.02).
+
+**NON COPERTO:** compilazione e corsa vera. Il fix v1.02 rende il criterio
+non-vuoto; NON e' promesso che porti C2 sotto il 10% su questa coppia --
+lo dira' la corsa, e le due colonne nuove diranno anche perche'.
