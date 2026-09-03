@@ -1,0 +1,345 @@
+# =====================================================================
+#  RELATIVO -- PASSO 0: SONDA DI CONVERGENZA  --  PROVA VERA
+#  GAMBA NASUSD (si scambia)  x  METRO U30USD (si legge)  --  M5
+# ---------------------------------------------------------------------
+#  PROMOSSA il 03/09/2026 dalla bozza RELATIVO_FREQUENZA_BOZZA.txt, che
+#  RESTA IN REPO COME STORIA (ci sono dentro la derivazione della tesi e
+#  la caccia). DA QUI IN AVANTI FA FEDE QUESTO FILE: i nomi di input
+#  della bozza erano PROPOSTI e alcuni NON esistono nel sorgente. MT5
+#  IGNORA IN SILENZIO un pin che non trova -- e' l'errore n.3 della
+#  CHECKLIST_RIGA_DI_LANCIO, ed e' cosi' che e' nato il falso "0/8" del
+#  FiboH4 (REGISTRO_TEST.md par. 2-bis).
+#  I nomi qui sotto sono copiati dal sorgente ABTG_SondaRelativo.mq5.
+#
+#  QUATTRO FILE, NON UNO. Gemelli:
+#    RELATIVO_D30_M5.txt   (gamba D30EUR: spread misurato diverso ->
+#                           CANCELLO C3 DIVERSO. Non e' un @SIMBOLO
+#                           overridato: e' un'altra soglia)
+#    RELATIVO_D30_M15.txt
+#    RELATIVO_NAS_M5.txt   <- QUESTO
+#    RELATIVO_NAS_M15.txt  (identico salvo @PERIODO)
+#  Spezzati perche' il driver generico legge @PERIODO e @SIMBOLO DAL
+#  PROVA: un valore overridato da fuori sarebbe uno stato nascosto.
+#  >>> IL BLOCCO DEI PARAMETRI DEI QUATTRO FILE E' IDENTICO CARATTERE
+#  PER CARATTERE, InpTag COMPRESO: i quattro differiscono SOLO per
+#  @SIMBOLO e @PERIODO. Il diff si verifica meccanicamente, ed e' la
+#  stessa disciplina dei gemelli M0PB_FREQUENZA_M5/M15. Il cancello C3
+#  cambia lo stesso fra D30 e NAS, ma NON da un input: la sonda lo
+#  prende dalla tabella dello spread MISURATO in base a _Symbol, e se
+#  il simbolo non e' in tabella SI RIFIUTA DI PARTIRE.
+#
+#  SORGENTE : mql5\Experts\ABTG_SondaRelativo.mq5  [MAI COMPILATA]
+#  DOSSIER  : caccia_strategie\CACCIA_FREQUENZA4_GH_TV_FF_2026-09-02.md
+#             (QUARTA BATTUTA, unico promosso: P1)
+#  SHORTLIST: report\GIACIMENTO_DI_CASA_2026-09-03.md, sezione 8 punto 1
+#  FIRMA    : report\FIRME_2026-08-31.md, FIRMA 2 (cancello H8)
+#  PROP     : report\CONFIG_PROP_2026-08-31.md, proposta P5 (vedi C8)
+#  SPREAD   : risultati_archivio\SPREAD_FLOTTA_MISURA_2026-09-03.md
+#             + spread_flotta\spread_orario_NASUSD.csv   [MISURATO]
+#  DUE LATI + STORICO LUNGO SUGLI INDICI: CLAUDE.md, 25/08.
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    MOTORE (rapporto fra due simboli -> scarto dalla media mobile ->
+#    z-score -> due soglie simmetriche -> uscita per convergenza)
+#    derivato dalla LETTURA di:
+#      1) "Pair Trade" (c) vladimirkovalchuk / @wa1one
+#         https://www.tradingview.com/script/ru23VN0C/
+#      2) "Unilateral Pairs Trading" (c) @pietro3334
+#         https://www.tradingview.com/script/MD5vkc0n/
+#      3) "Statistical Arbitrage Pairs Trading - Long-Side Only"
+#         (c) @piirsalu  https://www.tradingview.com/script/Kt6XkQIM/
+#         (da qui SOLO la normalizzazione robusta mediana/MAD)
+#      4) conferma indipendente del meccanismo su MT5 e su INDICI:
+#         m4rk-lewis/price_action_analytics (GitHub) -- indicatore, non
+#         EA: NON e' la fonte del codice.
+#    LICENZA: (1), (2) e (3) NON DICHIARANO NESSUNA LICENZA nel
+#    sorgente [VERIFICATO il 02/09/2026]. Su TradingView access=1 rende
+#    il sorgente LEGGIBILE, non automaticamente RIUSABILE.
+#    >>> REGOLA APPLICATA: NON E' STATA COPIATA NEMMENO UNA RIGA DI
+#    PINE. E' stata riscritta in MQL5 la FORMULA STATISTICA (media,
+#    deviazione, correlazione, z-score, z modificato di
+#    Iglewicz-Hoaglin: matematica pubblica, non proteggibile) E SI CITA
+#    COMUNQUE autore, URL e data, come per ABTG_AllineaLondra.
+#    Copie archiviate: caccia_strategie\biblioteca\sorgenti\
+#
+# =====================================================================
+#  COSA GIRA, E COSA NON GIRA
+# ---------------------------------------------------------------------
+#  ABTG_SondaRelativo E' UN CONTATORE: NESSUN OrderSend, nessun CTrade,
+#  nessun lotto, nessun magic, nessuna sedia. Le "posizioni" del
+#  sorgente sono FINTE -- variabili in memoria che servono a misurare
+#  escursioni e tenuta. InpTag e' una ETICHETTA per i file, non un
+#  magic. Il precedente di casa e' la SondaMediazione (firma di Claudio
+#  del 21/08, "metro, frequenza") e la SondaM0PB del 31/08.
+#
+#  >>> LA DIFFERENZA CON OGNI ALTRA SONDA DI CASA: QUESTA LEGGE DUE
+#  SIMBOLI. Prima della corsa lo storico del METRO (U30USD) DEVE essere
+#  gia' scaricato nel terminale, altrimenti ogni barra risulta
+#  "spaiata" e il referto misura la configurazione, non il mercato.
+#  Si scarica con scarica_storico.ps1 -Simboli "U30USD" PRIMA di
+#  lanciare, e si controlla la colonna "Metro Prima Barra Epoch".
+#
+#  MODELLO DI CORSA: 2 = "Solo prezzi di apertura" (-Modello 2). Il
+#  segnale nasce su BARRA CHIUSA e non si apre niente: il tick non
+#  aggiunge informazione e costa ore. NOTA DICHIARATA: il generico
+#  marca ogni modello diverso da 4 col suffisso "_ohlc" nel nome del
+#  CSV -- qui la marca si legge "non-tick", non "OHLC M1".
+#
+#  IL CSV RIGA-PER-SEGNALE NON ESCE IN QUESTO GIRO: la corsa e' in
+#  ottimizzazione e la sonda lo spegne apposta (le passate si
+#  sovrascriverebbero -- trappola gia' scritta nel referto FVGRET).
+#  I numeri si leggono dalle 96 COLONNE OPTFRAME.
+#
+# =====================================================================
+#  IL BANCO
+# ---------------------------------------------------------------------
+#  SIMBOLO SCAMBIATO (gamba)   NASUSD     <- @SIMBOLO
+#  SIMBOLO METRO               U30USD     <- InpSimboloMetro, SI LEGGE
+#                                            E NON SI SCAMBIA
+#  >>> E' LA COPPIA PIU' CO-INTEGRATA DELLE TRE dichiarate nella bozza,
+#  ed e' la stessa nominata da m4rk-lewis ("equity index hedged pairs
+#  trades ... exiting on the convergence of the two instrument
+#  z-scores"). Due indici USA sullo STESSO fuso: qui il "ritardo di
+#  allineamento fra due mercati" della tesi C'E' MENO che sulla coppia
+#  DAX/Dow -- quindi se la tesi e' vera per il RITARDO, questa coppia
+#  dovrebbe fare MENO occasioni, e se invece ne fa di piu' la fonte
+#  della divergenza non e' il fuso orario ma la ROTAZIONE SETTORIALE
+#  (tech contro industriali). SONO DUE STORIE DIVERSE E LA SONDA LE
+#  DISTINGUE: e' per questo che le due coppie girano ENTRAMBE.
+#  FORMA UNILATERALE, ED E' UNA SCELTA NOSTRA: a due gambe si pagano
+#  DUE spread per UNA convergenza. La forma a due gambe e' piu' pura
+#  statisticamente e piu' cara operativamente: NON E' STATA MISURATA.
+#
+#  FINESTRA ORARIA 14:30 -> 22:00 ORA SERVER BCM (= 15:30 -> 23:00
+#  italiane; server BCM = ora italiana - 1). E' la sovrapposizione in
+#  cui entrambi i mercati sono liquidi. Inizio INCLUSO, fine ESCLUSA.
+#
+# =====================================================================
+#  CRITERI DI ACCETTAZIONE -- CONGELATI PRIMA DI VEDERE UN NUMERO
+#  (sono #define nel sorgente, non input: un cancello che si sposta
+#   dalla riga di lancio non e' un cancello)
+# ---------------------------------------------------------------------
+#  C1  ATTRAVERSAMENTI ESEGUIBILI/GIORNO, per LATO e in SOMMA
+#      colonne "Eseguibili Al Giorno Long/Short/Totale", "C1 Esito"
+#      >>> somma dei due lati < 2,00  ->  SCARTO IMMEDIATO
+#      (il pavimento del mandato di Claudio del 02/09). 2-3 passa al
+#      minimo; > 3 e' la fascia preferita.
+#      "Eseguibili" = presi a slot libero, UNA posizione per volta:
+#      sono quelli che un EA prenderebbe davvero. Gli "Attraversamenti
+#      Grezzi" stanno accanto e NON sono il cancello.
+#
+#  C2  GIORNI SPAIATI: colonne "Giorni Spaiati", "Giorni Spaiati Pct".
+#      NON e' un cancello di merito: dice quanto i calendari sfalsati
+#      (4 luglio, Thanksgiving, Ferragosto, 26 dicembre) sporcano il
+#      segnale. > 10% dei giorni -> la sonda va rifatta filtrando quei
+#      giorni, E SI DICHIARA.
+#
+#  C3  MFE MEDIANA dal segnale alla convergenza, in PUNTI INDICE
+#      colonne "Mfe Mediana Long/Short Punti Indice", "Mfe Su Spread",
+#      "C3 Esito Long/Short"
+#      >>> SOGLIA SECCA PER QUESTA CORSA: 5,40 PUNTI INDICE
+#          (= 3 x 1,80, spread MISURATO di NASUSD)
+#      >>> sotto 5,40   -> SCARTO
+#      >>> sopra 10,80  -> passa LARGO (6x)
+#      LA FASCIA "SOSPESO PER SPREAD NON MISURATO" DELLA BOZZA QUI NON
+#      ESISTE PIU': il debito del 23/08 e' stato pagato la mattina del
+#      03/09 (252 milioni di tick, solo-bid 0,000%).
+#      QUALE numero: la MEDIANA ORARIA PEGGIORE di NASUSD dentro le ore
+#      di lavoro di questa sonda (14-21 ora server, l'ultima ora
+#      d'ingresso e' la 21). E' la CLAUSOLA SEVERA -- non la media
+#      della finestra, non l'ora migliore: la PEGGIORE.
+#      I numeri, da spread_orario_NASUSD.csv, colonna mediana_idx:
+#        ore 14 15 16 17 18 19 20 21
+#            1,8 1,8 1,7 1,7 1,7 1,6 1,7 1,7   -> PEGGIORE 1,80
+#      >>> IL NASDAQ, A DIFFERENZA DEL DAX, STA DENTRO IL SUO CASH PER
+#          TUTTA LA NOSTRA FINESTRA: lo spread e' PIATTO fra le 14 e le
+#          21 e la clausola severa costa quasi niente (1,80 contro un
+#          minimo di 1,60). Sul DAX la stessa clausola porta 2,80
+#          contro 1,70. E' un fatto misurato, non una stima: la stessa
+#          soglia "3x lo spread" pesa in modo MOLTO diverso sulle due
+#          coppie, e i due referti NON si confrontano sul numero grezzo
+#          di punti indice ma sulla colonna "Mfe Su Spread".
+#      Un solo spread per convergenza, perche' la forma e' UNILATERALE.
+#
+#  C4  MAE MEDIANA dal segnale alla convergenza
+#      colonne "Mae Mediana Long/Short Punti Indice"
+#      Nessun cancello: dice DOVE puo' stare lo stop senza essere
+#      dentro il rumore (R109, pavimento SL).
+#
+#  C5  RR = C3 / C4    colonne "Rr Da Mediane Long/Short", "C5 Esito"
+#      >>> RR < 0,70 -> SCARTO PER ARITMETICA, senza corsa a tick.
+#      Da p >= (E+1)/(RR+1) con E = 0,075R (cancello H8, FIRMA 2 del
+#      31/08). Tabella congelata, riprodotta dall'autotest blocco 16:
+#        RR 0,36 -> serve WR 79,0% | 0,50 -> 71,7%
+#        RR 0,73 -> 62,2%          | 1,00 -> 53,8%
+#      colonne "Win Rate Necessario Long/Short Pct".
+#
+#  C6  QUOTA DI DIVERGENZE CHE NON CONVERGONO
+#      colonne "Non Convergute Long/Short/Totale Pct", "C6 Esito"
+#      >>> E' IL NUMERO CHE UCCIDE O SALVA LA TESI.
+#      Se e' alta, non e' convergenza: e' MOMENTUM TRAVESTITO, e muore
+#      con lui l'intera famiglia valore-relativo per il nostro banco.
+#      >>> > 40%   -> SCARTO
+#      >>> 25-40%  -> SOSPESO
+#      Denominatore = posizioni finte CHIUSE. Le uscite di FINE CORSA
+#      sono ESCLUSE ("Uscite Fine Corsa Escluse"): sono il bordo della
+#      corsa, non divergenze che non rientrano.
+#
+#  C7  MASSIMO ESEGUIBILI IN UNA GIORNATA
+#      colonne "Max Eseguibili Giorno ...", "Rischio Aperto Max Pct",
+#      "C7 Cap Necessario"
+#      Taglia InpMaxTradesPerDay dell'EA futuro SUI DATI, non a occhio.
+#      >>> se max x 0,65% > 3,25% (cap rischio aperto C1, firmato il
+#          18/08) il cap giornaliero va nell'EA DAL PRIMO ROUND.
+#
+#  C8  TENUTA MEDIANA IN BARRE + QUOTA SOTTO 60 SECONDI
+#      colonne "Tenuta Mediana ... Barre", "Sotto 60 Secondi Pct",
+#      "C8 Esito"
+#      >>> < 12 barre        -> SOSPESO (muro d'attrito, arXiv
+#                               2605.04004 par.6.2)
+#      >>> >= 25% sotto 60 s -> SCARTO PROP (vincolo P5)
+#      La seconda meta' e' un COLLAUDO, non una scoperta: a M5 la
+#      tenuta minima e' UNA barra = 300 secondi, quindi la quota sotto
+#      60 s DEVE venire 0,00%. Se non viene zero e' rotta la
+#      contabilita' dei tempi.
+#
+#  C9  GRADIENTE M5 vs M15 -- si legge confrontando questo file con
+#      RELATIVO_NAS_M15.txt, a parita' di tutto il resto.
+#      Non e' un cancello: e' la conseguenza scomoda del dossier
+#      par.5.4 messa alla prova. DERIVATO PRIMA DELLA MISURA: a M15 il
+#      candidato NON dovrebbe arrivare al pavimento (~1/giorno); il
+#      bersaglio e' M5 (~2-3/giorno). SE LA MISURA DICE IL CONTRARIO,
+#      LA DERIVAZIONE E' SBAGLIATA E VA SCRITTO.
+#
+# =====================================================================
+#  COLLAUDI DA VERIFICARE PRIMA DI LEGGERE QUALUNQUE NUMERO
+#  (se uno solo di questi non torna, il file NON VALE)
+# ---------------------------------------------------------------------
+#  - "Autotest Falliti" = 0 su "Autotest Blocchi" = 21.
+#    -1 = NON eseguito, e NON e' "passato".
+#  - "Scartati Occupato Altro Lato Collaudo" = 0. Deve esserlo per
+#    costruzione: mentre un long e' aperto, per arrivare a z > +soglia
+#    lo z deve prima passare da -soglia_uscita, che chiude il long. Se
+#    non e' zero, la macchina a stati e' rotta e i numeri non valgono.
+#  - "Sotto 60 Secondi Pct" = 0,00 (vedi C8).
+#  - "Punto Indice Prezzo" = 1,00 (conversione 100 punti MT5 = 1 punto
+#    indice, misurata sui tre indici). Se non viene 1,00, MFE e MAE
+#    sono sbagliati di un fattore e la TAGLIA non si legge.
+#  - "Spread Misurato Punti Indice" = 1,80 e "Soglia C3 Punti Indice"
+#    = 5,40. Se non sono questi, la sonda ha preso un altro simbolo.
+#  - "Atr Divergenza Rel Media Pct" ~ 0 con InpAtrModoRma=false (la
+#    convenzione di iATR misurata sulla SondaM0PB e' la SMA del TR).
+#    Se NON viene ~0, la convenzione e' Wilder e VA SCRITTO: la colonna
+#    MISURA, non assume.
+#  - "Campioni Troncati" = 0 (1 = mediane TRONCATE, non si leggono).
+#  - "Metro Prima Barra Epoch" e "Gamba Prima Barra Epoch": convertirle
+#    e verificare che il metro NON parta dopo la gamba. E' il debito
+#    (a) della bozza: il pavimento 2024.09.26 e' MISURATO su D30EUR e
+#    NASUSD, su U30USD NON E' MAI STATO VERIFICATO. Se U30USD parte
+#    dopo, la finestra si accorcia per TUTTE E TRE le coppie.
+#  - "Valutazioni Metro Mancante Segnale" e "Valutazioni Perse Buco
+#    Finestra": se la seconda e' grande, la nostra REGOLA STRETTA (si
+#    pretende l'allineamento su TUTTO lo span dello z-score, mai un
+#    carry-forward) sta mangiando il campione, e il referto lo deve
+#    dire. Non e' un errore: e' un COSTO, ed e' misurato.
+#
+# =====================================================================
+#  LIMITI DICHIARATI PRIMA (non dopo)
+# ---------------------------------------------------------------------
+#  - QUESTA SONDA NON DICE SE IL MOTORE GUADAGNA. Dice se ha PORTATA,
+#    TAGLIA, GEOMETRIA, CONVERGENZA e TENUTA sufficienti perche' valga
+#    la pena scrivere l'EA operativo. Il merito e' a tick, dopo, e con
+#    >= 150 operazioni IS (Emendamento della Finestra, punto A).
+#    Nessuna colonna di P/L, profit factor o drawdown esce da qui:
+#    senza operazioni sarebbero tutti ZERO, e uno zero in colonna prima
+#    o poi qualcuno lo legge come un risultato.
+#  - NON MISURA LA CO-INTEGRAZIONE. La tesi assume che il rapporto
+#    NASUSD/U30USD sia STAZIONARIO intraday: assunzione MAI verificata
+#    in questo progetto, ed e' l'ipotesi piu' forte del candidato.
+#    C6 e' la sua approssimazione operativa.
+#  - FINESTRA 2024.09.26 -> 2026.06.30, la stessa delle altre corse
+#    indici. Il pavimento 2024.09.26 e' MISURATO
+#    (risultati_archivio\REFERTO_SONDA_STORICO_17-08.md) SU D30EUR E
+#    NASUSD -- su U30USD lo dice la colonna, vedi i collaudi.
+#  - TETTO ~100.000 BARRE DEL TESTER (CLAUDE.md, 25/08): 21 mesi di M5
+#    possono ECCEDERE il tetto (~1,3 anni a M5). NON si spezza in
+#    tranche, per la stessa ragione della SondaM0PB: la sonda DICHIARA
+#    DA SOLA la finestra effettiva con "Giorni Contati" e "Barre
+#    Valutate", e la firma del tetto e' "Barre Valutate" IDENTICHE su
+#    corse diverse (CHECKLIST punto 36). C1 e' per-giorno sul
+#    denominatore CONTATO, quindi resta leggibile; il campione ridotto
+#    si dichiara nel referto.
+#  - LA SONDA NON SA QUANTI ATTRAVERSAMENTI CI SONO LA NOTTE: fuori
+#    dalla finestra non calcola nemmeno lo z-score. La colonna "Barre
+#    Fuori Finestra" dice quante barre sono state saltate.
+#  - UN SOLO BROKER (BCM), un solo regime. Questo passo conta OCCASIONI
+#    e misura GEOMETRIE, non merito.
+#  - LA FORMA A DUE GAMBE NON E' STATA MISURATA. In quella forma i
+#    numeri di C3 andrebbero RADDOPPIATI.
+#
+# =====================================================================
+#  GLI ASSI -- DUE, DICHIARATI, E SONO I TRE PARAMETRI VERI DEL MOTORE
+#  MENO UNO
+# ---------------------------------------------------------------------
+#  InpFinestraN            10 -> 40 passo 5   (7 valori)
+#     E' LA MANOPOLA DELLA FREQUENZA (dossier par.5.4). La frequenza di
+#     questo motore non e' una speranza: e' un parametro NOSTRO. Per
+#     questo l'asse c'e', e per questo il massimo del criterio di
+#     ottimizzazione NON e' un merito (la finestra piu' corta conta
+#     sempre di piu': lo dice il sorgente in OnTester).
+#  InpSogliaIngressoSigma  0,75 -> 1,65 passo 0,15  (7 valori)
+#     Quante deviazioni standard di scarto servono per chiamare
+#     "divergenza" una divergenza.
+#  = 49 passate. La griglia e' quella CONGELATA NELLA BOZZA prima di
+#    qualunque numero: non e' stata ritoccata dopo.
+#
+#  InpSogliaUscitaSigma resta PINNATO a 0,05: NON e' un parametro, e'
+#  LA DEFINIZIONE DI C6 ("lo scarto e' tornato dentro un ventesimo di
+#  sigma dalla sua media"). Sweeparlo vorrebbe dire spostare il
+#  cancello mentre lo si misura.
+#  InpModoSpread e InpModoZScore restano PINNATI a 0: sono l'ABLAZIONE
+#  (beta OLS, z robusto mediana/MAD), e l'ablazione si fa DOPO, una
+#  variabile alla volta, solo se il motore base regge.
+#
+#  E LA REGOLA DI SELEZIONE, dichiarata insieme al numero:
+#     CENTRO DELL'ALTOPIANO, MAI IL PICCO. Su tredici misure di
+#     Spearman IS->OOS dodici sono negative. Qui per giunta non si
+#     "seleziona" niente: si guarda se ESISTE un altopiano in cui C1,
+#     C3, C5, C6 e C8 stanno in piedi INSIEME. Se passa solo una cella
+#     isolata, e' rumore, e la risposta e' NO.
+#
+# =====================================================================
+#  DOVE GIRA
+# ---------------------------------------------------------------------
+#  @FINOA e' documentazione: il driver generico prende la fine da
+#  -Fino, che vale 2026.06.30 di default. Le direttive lette dal
+#  generico sono @SIMBOLO, @PERIODO, @DAQUANDO.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpSimboloMetro=U30USD
+InpModoSpread=0
+InpModoZScore=0
+InpFinestraN=20||10||5||40||Y
+InpSogliaIngressoSigma=1.05||0.75||0.15||1.65||Y
+InpSogliaUscitaSigma=0.05
+InpOraInizioServer=14
+InpMinInizioServer=30
+InpOraFineServer=22
+InpMinFineServer=0
+InpBarreMaxTenuta=120
+InpBarreOrizzonte=24
+InpLato=0
+InpPuntiPerIndice=100.0
+InpAtrPeriod=14
+InpAtrModoRma=false
+InpWarmupBarre=300
+InpConfrontaMT5=true
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=RELATIVO_SONDA
