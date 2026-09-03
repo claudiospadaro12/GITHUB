@@ -486,3 +486,50 @@ _(03/09 08:17 — controllo finale: Claudio ha riaperto il pannello del
 PICCOLO, verificato "Rischio per trade in % = 1.0" (contratto rispettato,
 nessuna modifica necessaria) e chiuso con Annulla. Quadro taglie definitivo:
 piccolo 1,0% / 100k 0,3%, entrambi fotografati.)_
+
+---
+
+## 🔫 03/09, 08:19 — FOTO A (posizioni aperte del piccolo): LA PISTOLA FUMANTE
+
+Screenshot della scheda Trade del piccolo, letto riga per riga:
+
+| ticket | simbolo | apertura | tipo | magic | commento |
+|---|---|---|---|---|---|
+| 3299061 | GBPUSD | 02/09 16:00:39 | buy 0,08 | 772422 | EASYTREND GBPUSD L |
+| 3302773 | XAUUSD | 03/09 07:06:49 | buy 0,01 | 770402 | MAXMIN ORO BUY |
+| **3280485** | **U30USD** | **01/09 08:45:01** | **sell 0,10** | **772341** | **LARRY DOW S** |
+
+**`LARRY DOW S` (magic 772341) e' APERTA SUL DOW DAL 01/09 alle 08:45 — cioe'
+era viva PRIMA e DURANTE tutta la vita del trade ORB di ieri (fill 15:00:23,
+morte 16:45:11).** Era invisibile nel ReportHistory di ieri sera (ne' chiusa
+ne' fra gli ordini del giorno) — esattamente il buco di osservazione
+dichiarato ieri notte nella controprova storica.
+
+### ⚖️ L'IPOTESI A E' ORA CONFERMATA SU TUTTI E TRE I GIORNI MISURATI
+
+| giorno senza trailing | posizione U30 piu' VECCHIA di altro magic, viva per tutta la vita dell'ORB |
+|---|---|
+| 19/08 | SW DOW H2 L 1/3+2/3 (770531, aperte 14:00) |
+| 21/08 | SW DOW H2 S 1/3+2/3 (770531, aperte il 20/08) |
+| **02/09** | **LARRY DOW S (772341, aperta il 01/09 08:45)** |
+
+E sul 100k girano solo i 5 specchi: l'ORB sul Dow e' solo -> trailla sempre.
+Meccanismo: `PositionSelect(_Symbol)` su conto HEDGING seleziona la posizione
+PIU' VECCHIA del simbolo; se non e' dell'ORB, `SelPos()` fallisce sul magic e
+`ManageRunner()` (e `ManageTP1()`, che condivide la stessa prima riga) esce
+in silenzio. **Il colpevole e' il codice, identico sui due conti: cambia solo
+il VICINATO.**
+
+Formalita' residue (dichiarate): la conferma STRUMENTALE arrivera' dal log
+n.4 della v1.03 al prossimo trade ORB con vicini ("SelPos falso ma posizioni
+nostre esistenti"). La FOTO B (Giornale) resta utile ma non piu' decisiva.
+
+### 🛠️ Prossimi passi proposti (niente si tocca in forward senza firma)
+1. **AUDIT DI FLOTTA** (agente, solo repo): quali ALTRI EA usano lo stesso
+   pattern `PositionSelect(_Symbol)` + controllo magic su conto hedging?
+   Ogni EA che condivide il simbolo con altri e' potenzialmente cieco alla
+   propria posizione — gestione, breakeven, chiusure di fine giornata.
+2. **FIX v1.04 dell'ORB** (dopo l'audit, che dice se conviene un fix nel
+   singolo EA o in un helper condiviso): selezione della posizione PER
+   MAGIC iterando le posizioni, non col PositionSelect nudo. Da scrivere,
+   autotestare, verificare — poi ricompilazione firmata da Claudio.
