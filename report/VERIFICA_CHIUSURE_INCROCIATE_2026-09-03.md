@@ -375,3 +375,68 @@ _Verifica del 03/09/2026. Nessun EA modificato, nessun fix scritto, come da
 mandato. Prossimo passo su firma di Claudio: la coda dei fix resta quella
 dell'audit, con `ABTG_ORB` nativo promosso e il fix dell'input morto come
 antipasto._
+
+---
+
+## 🍽️ ANTIPASTO ESEGUITO (repo-only) — 03/09/2026
+
+**Voce B della coda qui sopra: `InpOneTradePerDay` dichiarato e mai letto.
+Scelta (a) — IMPLEMENTATO — per TUTTI E DUE gli EA.** Nessuna rimozione
+dall'input: in entrambi i casi il comportamento promesso è realizzabile senza
+stravolgere l'EA, quindi si è preferito far dire il vero al pannello invece di
+cancellargli la promessa.
+
+| EA | prima | dopo | cura |
+|---|---|---|---|
+| `mql5/Experts/ABTG_ORB.mq5` | v1.00, input dichiarato e mai letto | **v1.01** | **(a)** implementato |
+| `mql5/Experts/ABTG_MaxMinNotte.mq5` | v1.10, input dichiarato e mai letto | **v1.11** | **(a)** implementato |
+
+**Semantica**, la stessa del gemello che ce l'ha funzionante
+(`ABTG_ORB_Ottimizzato` v1.04, ramo `gHadPos`), in due rami:
+1. **non si riarma/ripiazza** una giornata già operata (`PuoArmare_Calc`);
+2. **finito il trade del giorno, i pendenti superstiti si cancellano**
+   (`GiornataSpesa_Calc`), che è il buco da cui rientrava il trade in più.
+
+**Hedge-safe per costruzione, il difetto 🔴 non entra da questa porta.** La
+conoscenza "oggi ho già operato" **non passa da `SelPos()`/`PositionSelect(_Symbol)`**:
+scorre `PositionsTotal()` filtrando **simbolo + magic** e legge lo **storico del
+giorno** filtrando `DEAL_SYMBOL` + `DEAL_MAGIC` — lo stesso pattern che questo
+documento dichiara immune (`ABTG_Dow_Apertura_US.mq5:740-745`), compresa la
+distinzione **"non lo so" ≠ "no"** su `HistorySelect` non ancora sincronizzato.
+
+### ⚠️ Quello che l'antipasto NON fa (per non sovravvendere)
+- **Non tocca `SelPos()`** in nessuno dei due file: il difetto 🔴 C9 resta
+  intero e **conserva la sua priorità nella coda**. In particolare **non
+  impedisce che il secondo lato si apra MENTRE il primo è vivo** (le 4 giornate
+  su 16 misurate qui sopra): chiude solo la **riapertura DOPO** che il trade del
+  giorno è finito.
+- **Nessuna compilazione, nessun backtest**: in questo ambiente non esistono
+  MetaEditor né Strategy Tester. È stato aggiunto un **autotest a tavolino**
+  (4 blocchi / 24 casi per file, tabelle di verità complete, gira in `OnInit`)
+  che prova **solo i predicati puri**, non le risposte del terminale.
+
+### 📐 Impatto atteso sui numeri — diverso nei due EA, e va detto
+- **`ABTG_ORB` — atteso INERTE nel tester.** Lì l'EA è solo sul simbolo,
+  `SelPos()` non è mai cieco e `HandleOCO()` cancella il pendente opposto
+  nell'istante in cui la posizione nasce: di superstiti da cancellare non ce
+  n'è. **Morde in CAMPO**, dove il difetto 🔴 li lasciava vivi — cioè
+  esattamente sul **+25% di frequenza rispetto al contratto** misurato qui.
+- **`ABTG_MaxMinNotte` — può cambiare i numeri anche nel tester.** Fino alla
+  v1.10 un pendente superstite lo toglieva solo il **cutoff**: una giornata che
+  apriva e chiudeva **prima** del cutoff restava scoperta e poteva fare il
+  secondo trade. Attesi **meno trade**; profit factor e drawdown **si misurano**.
+- In entrambi, **`InpOneTradePerDay=false` riproduce la versione precedente
+  esatta**: il confronto con/senza si fa a parità di tutto il resto.
+
+### 🪑 Sedia viva — `ABTG_MaxMinNotte` sull'ORO (magic 770402)
+La modifica è **solo nel repo e oggi è INERTE**: la `.ex5` che gira sul VPS non
+cambia finché non viene **ricompilata e ricaricata**. **Alla prossima
+ricompilazione il comportamento cambia davvero**, nella direzione di *meno*
+trade. Prima di sostituire la sedia viva va rifatto il **backtest di
+riferimento** con e senza il flag.
+
+### 📌 Residuo noto, dichiarato e non corretto qui
+`ABTG_ORB` **non ha** la guardia anti-duplicato al riavvio che
+`ABTG_MaxMinNotte` ha già in `OnTick`. Il nuovo ramo `PuoArmare_Calc` copre il
+caso "oggi ho già operato", ma **non** il caso "ho già dei pendenti piazzati e
+il terminale è ripartito". Voce separata, non aperta in questo giro.

@@ -21,9 +21,77 @@
 //|  ATTENZIONE Orari in ORA SERVER (controlla sul TUO grafico).    |
 //|     Nessun EA garantisce profitti. TESTA SU DEMO.               |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//|  CHANGELOG                                                       |
+//|  v1.11 (03/09/2026) - IL PANNELLO SMETTE DI MENTIRE.             |
+//|        InpOneTradePerDay era DICHIARATO e MAI LETTO: unica        |
+//|        occorrenza nel sorgente (riga 65 della v1.10), censito in  |
+//|        report/VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md. Nei     |
+//|        .set in campo e' true (per esempio                         |
+//|        sedie_piccolo/sedia_MAXMIN_ORO_770402.set:15), quindi il   |
+//|        pannello prometteva una cosa che il codice non faceva.     |
+//|                                                                   |
+//|        COSA FA ADESSO, due righe di decisione:                    |
+//|         1. non RIPIAZZA i pendenti se oggi un mio ingresso c'e'   |
+//|            gia' allo storico (PuoArmare_Calc);                    |
+//|         2. quando il trade del giorno e' FINITO, cancella subito  |
+//|            i pendenti superstiti (GiornataSpesa_Calc), invece di  |
+//|            aspettare il cutoff. Stessa semantica del gemello che  |
+//|            ce l'ha funzionante, ABTG_ORB_Ottimizzato (ramo        |
+//|            gHadPos).                                              |
+//|                                                                   |
+//|        HEDGE-SAFE PER COSTRUZIONE. La conoscenza "oggi ho gia'    |
+//|        operato" NON passa da PositionSelect(_Symbol): scorre      |
+//|        PositionsTotal() filtrando SIMBOLO+MAGIC e lo storico del  |
+//|        giorno filtrando DEAL_SYMBOL+DEAL_MAGIC (pattern di        |
+//|        HaGiaOperatoOggi in ABTG_Dow_Apertura_US, dichiarato       |
+//|        immune dalla VERIFICA del 03/09). Il difetto C9 non entra  |
+//|        da questa porta.                                           |
+//|                                                                   |
+//|        ATTENZIONE, QUELLO CHE QUESTO FIX NON FA. NON tocca        |
+//|        SelPos(), che resta il PositionSelect(_Symbol) cieco di    |
+//|        sempre, ne' ManagePos()/EndOfDay() che ci si appoggiano:   |
+//|        quello e' il difetto C9, secondo in ordine di gravita'     |
+//|        nell'audit del 03/09, e ha una sua voce nella coda dei     |
+//|        fix. Qui si chiude solo la riapertura DOPO che il trade    |
+//|        del giorno e' finito.                                      |
+//|                                                                   |
+//|        ATTENZIONE, SEDIA VIVA. Questo EA ha una sedia in forward  |
+//|        sull'ORO (magic 770402). La modifica e' SOLO NEL REPO e    |
+//|        oggi e' INERTE: la .ex5 che gira sul VPS non cambia finche'|
+//|        non viene RICOMPILATA e ricaricata. ALLA PROSSIMA          |
+//|        RICOMPILAZIONE IL COMPORTAMENTO CAMBIA DAVVERO, e nella    |
+//|        direzione di MENO trade, non di piu'. Prima di sostituire  |
+//|        la sedia viva va rifatto il backtest di riferimento:       |
+//|        qui, a differenza dell'ORB nativo, il fix NON e' inerte    |
+//|        nel tester (vedi sotto).                                   |
+//|                                                                   |
+//|        PERCHE' NEL TESTER PUO' CAMBIARE I NUMERI: fino alla v1.10 |
+//|        un pendente superstite veniva tolto solo dal CUTOFF        |
+//|        (InpEntryCutoffHour/Min). Una giornata in cui il trade     |
+//|        apre e chiude PRIMA del cutoff lasciava vivo il pendente   |
+//|        opposto, che poteva far scattare un SECONDO trade nella    |
+//|        stessa giornata: adesso non piu'. Attesi MENO trade e      |
+//|        stessa o minore frequenza; profit factor e drawdown si     |
+//|        MISURANO, non si promettono. InpOneTradePerDay=false       |
+//|        riproduce la v1.10 esatta, per il confronto a parita' di   |
+//|        tutto il resto.                                            |
+//|        Aggiunto un AUTOTEST a tavolino (4 blocchi, 24 casi) sui   |
+//|        predicati puri: gira in OnInit, non tocca il mercato.      |
+//|  v1.10 - versione precedente.                                     |
+//+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.10"
+#property version   "1.11"
 #property strict
+
+//--- v1.11: QUANTI BLOCCHI E QUANTI CASI deve eseguire l'autotest.
+//    Due contatori e non uno (pattern di casa, ABTG_LondonFx /
+//    ABTG_ORB_Ottimizzato): un blocco cancellato per sbaglio non deve
+//    poter passare per "tutto verde", e nemmeno un blocco SVUOTATO
+//    delle sue asserzioni, che il conteggio dei soli blocchi non
+//    vedrebbe. Se uno dei due conti non torna, l'autotest e' FALLITO.
+#define MM_AUTOTEST_BLOCCHI_ATTESI 4
+#define MM_AUTOTEST_CASI_ATTESI    24
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -62,7 +130,10 @@ input int    InpEntryCutoffMin  = 30;// BCM: 8:30 = 09:30 CET (solo la rottura "
 input int    InpCloseHour    = 17;   // Ora cancellazione/flat (server). BCM: 17:30 = 18:30 CET
 input int    InpCloseMin     = 30;
 input bool   InpCloseAtEnd   = true; // Chiudi posizioni residue a fine finestra
-input bool   InpOneTradePerDay = true;
+//--- v1.11: DA QUI IN AVANTI QUESTO INPUT E' LETTO DAVVERO (fino alla
+//    v1.10 era dichiarato e mai usato). true = un solo ciclo di trade al
+//    giorno; false = comportamento IDENTICO alla v1.10.
+input bool   InpOneTradePerDay = true; // Un solo trade al giorno (v1.11: ora e' applicato davvero)
 input int    InpPendingExpiryMin = 90; // Cancella il pendente non eseguito dopo N minuti
 
 input group "=== Ingresso ==="
@@ -114,6 +185,7 @@ input string InpComment   = "MAXMIN";
 input long   InpMagic     = 770401;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
+input bool   InpAutoTest  = true;    // Autotest dei predicati "un trade al giorno" (stampa in OnInit)
 
 //==================================================================
 //  STATO
@@ -124,6 +196,14 @@ ENUM_MMPHASE gPhase=MMP_WAIT;
 int      gDay=-1;
 double   gBoxHigh=0, gBoxLow=0;
 bool     gPart1=false, gPart2=false;
+//--- v1.11, "un trade al giorno". gOperatoOggi e' un TIMBRO che si accende
+//    una volta sola e non si spegne fino al cambio di giornata: acceso da
+//    una posizione nostra viva (a costo zero, a ogni tick) oppure dallo
+//    storico del giorno (che sopravvive a riavvio e ricompilazione).
+//    gUltimoCheckStorico limita la lettura dello storico a una al minuto:
+//    serve solo finche' il timbro e' spento, poi non si legge piu'.
+bool     gOperatoOggi=false;
+datetime gUltimoCheckStorico=0;
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 
@@ -140,6 +220,7 @@ int OnInit()
    if(hAtr==INVALID_HANDLE || hEma200==INVALID_HANDLE)
      { Print("ERRORE: handle indicatori."); return(INIT_FAILED); }
    if(InpUseNewsFilter) LoadNews();
+   if(InpAutoTest) Autotest();   // v1.11: verifica a tavolino dei predicati "un trade al giorno"
    Log(StringFormat("avviato su %s. Box server %02d:%02d-%02d:%02d, piazzo %02d:%02d, flat %02d:%02d.",
        _Symbol,InpBoxStartHour,InpBoxStartMin,InpBoxEndHour,InpBoxEndMin,InpPlaceHour,InpPlaceMin,InpCloseHour,InpCloseMin));
    return(INIT_SUCCEEDED);
@@ -159,6 +240,12 @@ void OnTick()
 
    MqlDateTime now; TimeToStruct(TimeCurrent(),now);
    if(now.day_of_year!=gDay){ gDay=now.day_of_year; ResetDay(); }
+
+   //--- v1.11: la guardia "un trade al giorno". Sta DOPO il cambio di
+   //    giornata, non prima: al primo tick del giorno nuovo il timbro
+   //    dev'essere gia' stato azzerato da ResetDay(), altrimenti la prima
+   //    cosa che farebbe sarebbe cancellare i pendenti di ieri.
+   UnTradeAlGiorno();
 
    bool newsBlk = InNewsBlackout(TimeCurrent());
    if(newsBlk && InpNewsFlatten){ CancelPendings(); if(SelPos()) gTrade.PositionClose(_Symbol); }
@@ -187,11 +274,26 @@ void OnTick()
    if(gPhase==MMP_WAIT && nowMin >= InpPlaceHour*60+InpPlaceMin)
      {
       if(newsBlk) return;                 // durante blackout news non piazzo
+      //--- v1.11: non RIPIAZZARE su una giornata gia' operata. La guardia
+      //    anti-duplicato qui sopra vede solo la roba APERTA ADESSO: a
+      //    trade gia' chiuso non vedeva niente e, dopo un riavvio, la
+      //    macchina a stati ripartiva da MMP_WAIT e ripiazzava (e' esattamente
+      //    l'incidente del 05/08 sugli Aperture). Lo storico invece se lo
+      //    ricorda. Nel tester e' INERTE: gPhase e' MMP_WAIT solo prima del
+      //    primo piazzamento, quando il timbro e' per forza spento.
+      if(!PuoArmare_Calc(InpOneTradePerDay,gOperatoOggi))
+        {
+         gPhase=MMP_DONE;   // MMP_DONE e non MMP_WAIT: cosi' il log non si ripete a ogni tick
+         Log("oggi ho gia' operato (storico simbolo+magic): non ripiazzo.");
+         return;
+        }
       if(TryPlace()) gPhase=MMP_PLACED;
      }
   }
 
-void ResetDay(){ gPhase=MMP_WAIT; gBoxHigh=0; gBoxLow=0; gPart1=false; gPart2=false; Log("nuovo giorno."); }
+void ResetDay(){ gPhase=MMP_WAIT; gBoxHigh=0; gBoxLow=0; gPart1=false; gPart2=false;
+                 gOperatoOggi=false; gUltimoCheckStorico=0;   // v1.11: il timbro del giorno riparte da zero
+                 Log("nuovo giorno."); }
 
 //+------------------------------------------------------------------+
 //| Calcola max/min del BOX notturno (gestisce lo scavalco mezzanotte)|
@@ -387,6 +489,207 @@ void EndOfDay()
    CancelPendings();
    if(InpCloseAtEnd && SelPos()){ gTrade.PositionClose(_Symbol); Log("fine finestra: posizione chiusa."); }
    gPhase=MMP_DONE;
+  }
+
+//==================================================================
+//  v1.11 -- "UN SOLO TRADE AL GIORNO"
+//
+//  La regola e' divisa in QUATTRO PREDICATI PURI (nessuna chiamata al
+//  terminale dentro) piu' due gusci che leggono il mercato. Non e'
+//  pignoleria: senza MetaEditor ne' Strategy Tester in questo ambiente,
+//  i predicati puri sono l'unica parte che si puo' PROVARE prima di
+//  metterla in campo -- ed e' quello che fa Autotest() qui sotto sul
+//  codice che gira davvero, non su una sua copia.
+//
+//  DUE CONOSCENZE DIVERSE, e vanno tenute separate:
+//   - "ho una posizione MIA viva ADESSO"  -> guarda le posizioni;
+//   - "oggi un mio ingresso c'e' GIA' STATO" -> guarda lo storico, e
+//     resta vero anche a trade chiuso, anche dopo un riavvio.
+//  La prima da sola e' la guardia anti-duplicato che questo EA ha gia'
+//  in OnTick: utile, ma a trade gia' chiuso non vede niente.
+//==================================================================
+
+//--- Predicato puro: questa roba e' NOSTRA? SIMBOLO e MAGIC, tutti e due.
+//    Il magic da solo non basta (lo stesso EA gira su piu' simboli), il
+//    simbolo da solo e' esattamente il difetto C9 dell'audit del 03/09.
+bool PosMia_Calc(const string sym,const long magic,const string mioSym,const long mioMagic)
+  { return(sym==mioSym && magic==mioMagic); }
+
+//--- Predicato puro: devo TIMBRARE la giornata come "gia' operata"?
+//    La riga che conta e' la seconda: storicoLetto==false vuol dire
+//    "NON LO SO" (HistorySelect non ancora sincronizzato all'avvio del
+//    terminale), e "non lo so" NON e' "si". Non si timbra e si riprova
+//    al giro dopo. Stessa correzione fatta il 14/08 sugli Aperture.
+bool TimbraGiornata_Calc(const bool posMiaAperta,const bool storicoLetto,const bool giaOperatoOggi)
+  {
+   if(posMiaAperta)  return(true);
+   if(!storicoLetto) return(false);
+   return(giaOperatoOggi);
+  }
+
+//--- Predicato puro: il trade del giorno e' FINITO e quindi i pendenti
+//    superstiti vanno tolti di mezzo? Serve che il timbro sia acceso E
+//    che nessuna posizione nostra sia piu' viva: finche' e' viva non c'e'
+//    niente da cancellare (ci pensa gia' l'OCO) e non e' ancora "finito".
+bool GiornataSpesa_Calc(const bool unoAlGiorno,const bool operatoOggi,const bool posMiaAperta)
+  { return(unoAlGiorno && operatoOggi && !posMiaAperta); }
+
+//--- Predicato puro: posso ancora PIAZZARE per oggi? No, se ho gia'
+//    operato. Attenzione: qui NON si guarda se la posizione e' viva --
+//    ripiazzare mentre il trade e' ancora aperto sarebbe il caso peggiore
+//    di tutti, due posizioni sullo stesso segnale.
+bool PuoArmare_Calc(const bool unoAlGiorno,const bool operatoOggi)
+  { return(!(unoAlGiorno && operatoOggi)); }
+
+//--- Guscio HEDGE-SAFE: quante posizioni NOSTRE ci sono adesso.
+//    Scorre PositionsTotal(); NON usa PositionSelect(_Symbol), che su
+//    conto hedging aggancia il ticket piu' basso del simbolo e puo'
+//    essere quello di un'altra sedia (difetto C9, audit del 03/09).
+int ContaPosizioniMie()
+  {
+   int q=0;
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PosMia_Calc(PositionGetString(POSITION_SYMBOL),
+                     PositionGetInteger(POSITION_MAGIC),_Symbol,InpMagic)) q++;
+     }
+   return(q);
+  }
+
+//--- Guscio: nello STORICO DI OGGI c'e' un MIO ingresso?
+//    Filtra DEAL_SYMBOL + DEAL_MAGIC, come HaGiaOperatoOggi() in
+//    ABTG_Dow_Apertura_US:740-745, che la VERIFICA del 03/09 dichiara
+//    "hedge-safe e immune al difetto di questo audit".
+bool HaGiaOperatoOggi(bool &storicoLetto)
+  {
+   storicoLetto=false;
+   MqlDateTime d; TimeToStruct(TimeCurrent(),d);
+   d.hour=0; d.min=0; d.sec=0;
+   datetime inizioGiorno=StructToTime(d);
+   if(!HistorySelect(inizioGiorno,TimeCurrent()+60)) return(false);
+   storicoLetto=true;
+   int n=HistoryDealsTotal();
+   for(int i=n-1;i>=0;i--)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk<=0) continue;
+      if(!PosMia_Calc(HistoryDealGetString(tk,DEAL_SYMBOL),
+                      HistoryDealGetInteger(tk,DEAL_MAGIC),_Symbol,InpMagic)) continue;
+      if(HistoryDealGetInteger(tk,DEAL_ENTRY)==DEAL_ENTRY_IN) return(true);
+     }
+   return(false);
+  }
+
+//--- ATTENZIONE, il BOX di questo EA e' NOTTURNO e scavalca la mezzanotte
+//    (default 23:00 -> 04:59 server), ma il TIMBRO no: si riferisce al
+//    giorno di calendario del server, lo stesso su cui gia' ragiona
+//    gDay/ResetDay(). Coerente, perche' i pendenti si piazzano alle 07:59
+//    e il ciclo di trade vive tutto dentro la stessa giornata server.
+void UnTradeAlGiorno()
+  {
+   bool posMia=(ContaPosizioniMie()>0);
+
+   //--- (1) CONOSCENZA. Il timbro si accende una volta sola. La posizione
+   //    viva si guarda sempre (non costa niente); lo storico si interroga
+   //    al massimo UNA VOLTA AL MINUTO e solo finche' il timbro e' spento:
+   //    in campo sono poche letture al giorno, nel tester una al minuto
+   //    simulato, e appena il timbro si accende non si legge piu'.
+   if(!gOperatoOggi)
+     {
+      bool storicoLetto=false, gia=false;
+      if(!posMia && TimeCurrent()-gUltimoCheckStorico>=60)
+        {
+         gUltimoCheckStorico=TimeCurrent();
+         gia=HaGiaOperatoOggi(storicoLetto);
+        }
+      if(TimbraGiornata_Calc(posMia,storicoLetto,gia)) gOperatoOggi=true;
+     }
+
+   //--- (2) AZIONE, identica al gemello ABTG_ORB_Ottimizzato (ramo gHadPos):
+   //    finito il trade del giorno, i pendenti superstiti non devono poter
+   //    riaprire in giornata. Prima della v1.11 li toglieva solo il CUTOFF,
+   //    e una giornata che apriva e chiudeva PRIMA del cutoff restava
+   //    scoperta. CancelPendings() filtra gia' simbolo+magic e quando non
+   //    c'e' niente da cancellare non fa nessuna chiamata.
+   if(GiornataSpesa_Calc(InpOneTradePerDay,gOperatoOggi,posMia)) CancelPendings();
+  }
+
+//==================================================================
+//  AUTOTEST DEI PREDICATI (v1.11)
+//
+//  Perche' esiste: qui non c'e' MetaEditor ne' Strategy Tester, quindi
+//  senza questa funzione l'unica prova che le tabelle di verita' siano
+//  scritte giuste sarebbe "l'ho riletto". Le quattro tabelle sono
+//  COMPLETE (tutte le combinazioni), non a campione.
+//  Cosa NON prova: che il terminale risponda quello che ci aspettiamo
+//  (posizioni, storico, sincronizzazione). Quella resta la prova in
+//  campo. Qui si prova che, DATE le risposte, decidiamo giusto.
+//  Si legge ESEGUENDO: le righe escono nel Giornale al caricamento.
+//==================================================================
+void Autotest()
+  {
+   int blocchi=0, casi=0, falliti=0;
+
+   const string S="MIOSIMBOLO";   // il nostro simbolo (finto: i predicati non toccano il terminale)
+   const string A="ALTROSIMB";    // un simbolo qualsiasi che non e' il nostro
+   const long   M=770401;         // il NOSTRO magic
+   const long   V=770402;         // un vicino: la sedia MAXMIN ORO, stesso EA su un altro simbolo
+
+   //--- BLOCCO 1: simbolo+magic. Il magic da solo non basta, il simbolo nemmeno.
+   blocchi++; casi+=4;
+   if(!( PosMia_Calc(S,M,S,M) && !PosMia_Calc(A,M,S,M) &&
+        !PosMia_Calc(S,V,S,M) && !PosMia_Calc(A,V,S,M) ))
+     { falliti++; Print("MAXMIN AUTOTEST: 1 PosMia_Calc DIVERGE"); }
+
+   //--- BLOCCO 2: il timbro. Tabella completa (posMia, storicoLetto, gia).
+   //    Le due righe che contano sono (F,F,T) e (F,F,F): storico NON letto
+   //    = "non lo so" = NON si timbra, mai.
+   blocchi++; casi+=8;
+   if(!( TimbraGiornata_Calc(true ,false,false) && TimbraGiornata_Calc(true ,false,true ) &&
+         TimbraGiornata_Calc(true ,true ,false) && TimbraGiornata_Calc(true ,true ,true ) &&
+        !TimbraGiornata_Calc(false,false,false) && !TimbraGiornata_Calc(false,false,true ) &&
+        !TimbraGiornata_Calc(false,true ,false) &&  TimbraGiornata_Calc(false,true ,true ) ))
+     { falliti++; Print("MAXMIN AUTOTEST: 2 TimbraGiornata_Calc DIVERGE"); }
+
+   //--- BLOCCO 3: giornata spesa. Tabella completa (uno, operato, posMia).
+   //    L'unico VERO e' (T,T,F): input acceso, ho operato, e la posizione
+   //    non c'e' piu'. Con la posizione ancora viva deve essere FALSO.
+   blocchi++; casi+=8;
+   if(!( !GiornataSpesa_Calc(false,false,false) && !GiornataSpesa_Calc(false,false,true ) &&
+         !GiornataSpesa_Calc(false,true ,false) && !GiornataSpesa_Calc(false,true ,true ) &&
+         !GiornataSpesa_Calc(true ,false,false) && !GiornataSpesa_Calc(true ,false,true ) &&
+          GiornataSpesa_Calc(true ,true ,false) && !GiornataSpesa_Calc(true ,true ,true ) ))
+     { falliti++; Print("MAXMIN AUTOTEST: 3 GiornataSpesa_Calc DIVERGE"); }
+
+   //--- BLOCCO 4: il ripiazzamento. Tabella completa (uno, operato). Con
+   //    l'input SPENTO si piazza sempre = la v1.10 esatta.
+   blocchi++; casi+=4;
+   if(!( PuoArmare_Calc(false,false) && PuoArmare_Calc(false,true ) &&
+         PuoArmare_Calc(true ,false) && !PuoArmare_Calc(true ,true ) ))
+     { falliti++; Print("MAXMIN AUTOTEST: 4 PuoArmare_Calc DIVERGE"); }
+
+   //--- IL CONTROLLO SUL CONTROLLO. Un gate che non conta quello che ha
+   //    eseguito non e' un gate: un blocco cancellato passerebbe per
+   //    "tutto verde", e un blocco svuotato delle asserzioni pure.
+   if(blocchi!=MM_AUTOTEST_BLOCCHI_ATTESI)
+     {
+      falliti++;
+      PrintFormat("MAXMIN AUTOTEST: eseguiti %d blocchi ma ne erano attesi %d: MANCA UN BLOCCO. Autotest FALLITO.",
+                  blocchi,MM_AUTOTEST_BLOCCHI_ATTESI);
+     }
+   if(casi!=MM_AUTOTEST_CASI_ATTESI)
+     {
+      falliti++;
+      PrintFormat("MAXMIN AUTOTEST: dichiarati %d casi ma ne erano attesi %d: un blocco e' stato SVUOTATO. Autotest FALLITO.",
+                  casi,MM_AUTOTEST_CASI_ATTESI);
+     }
+
+   PrintFormat("MAXMIN AUTOTEST: %d blocchi su %d passati, %d casi dichiarati, %d falliti. %s",
+               blocchi-falliti,blocchi,casi,falliti,
+               (falliti==0 ? "Predicati 'un trade al giorno' VERIFICATI a tavolino (NON sostituisce la prova in campo)."
+                           : "ATTENZIONE: i predicati NON sono quelli attesi. NON mettere in forward."));
   }
 
 //==================================================================
