@@ -75,8 +75,8 @@
 #  >>> CONTATORE PURO, PROVATO A MACCHINA: grep delle chiamate di
 #      trading FUORI dai commenti, attese ZERO (il modello sta QUI e
 #      non nel .mq5, apposta).
-#  >>> IDENTITA' DEL SORGENTE: #property version "1.01", 22 blocchi di
-#      autotest contati (blocchi++), REL_NSTATS 94 (= 97 colonne), 22
+#  >>> IDENTITA' DEL SORGENTE: #property version "1.02", 23 blocchi di
+#      autotest contati (blocchi++), REL_NSTATS 95 (= 98 colonne), 22
 #      input letti dal sorgente e TUTTI pinnati nel prova (nome per
 #      nome, nei due versi: un pin che l'EA non ha e' l'errore n.3
 #      della checklist, un input che il prova non pinna e' uno stato
@@ -155,9 +155,9 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Sentinella = Join-Path $Work "SONDARELATIVO_IN_CORSO.txt"
 
 # --- IDENTITA' ATTESA DEL SORGENTE (gate, non decorazione)
-$VERSIONE_ATTESA         = "1.01"
-$AUTOTEST_BLOCCHI_ATTESI = 22
-$NSTATS_ATTESI           = 94      # 94 valori + Pass, Simbolo, Periodo = 97 colonne
+$VERSIONE_ATTESA         = "1.02"
+$AUTOTEST_BLOCCHI_ATTESI = 23
+$NSTATS_ATTESI           = 95      # 95 valori + Pass, Simbolo, Periodo = 98 colonne
 $INPUT_ATTESI            = 22
 $NCelleAttese            = 49      # 2 assi x 7 valori. RICONTATE dai pin ||Y scaricati al pin.
 
@@ -504,7 +504,8 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
     "Giorni Spaiati","Giorni Spaiati Pct","C2 Esito",
     "Scartati Occupato Altro Lato Collaudo","Atr Mediano Punti Indice","Atr Divergenza Rel Media Pct","Punto Indice Prezzo",
     "Metro Prima Barra Epoch","Gamba Prima Barra Epoch","Campioni Troncati","Autotest Falliti","Autotest Blocchi",
-    "Finestra N","Soglia Ingresso Sigma","Soglia Uscita Sigma","Modo Spread","Modo Z Score","Barre Max Tenuta","Barre Orizzonte","Lato Attivo")
+    "Finestra N","Soglia Ingresso Sigma","Soglia Uscita Sigma","Modo Spread","Modo Z Score","Barre Max Tenuta","Barre Orizzonte","Lato Attivo",
+    "Giorni Festa Metro","Giorni Metro Zero Calendario")
   $manca = New-Object System.Collections.ArrayList
   foreach($cn in $servono){ if(-not $ix.ContainsKey($cn)){ [void]$manca.Add($cn) } }
   if($manca.Count -gt 0){ [void]$Problemi.Add("nel CSV mancano le colonne: " + ($manca -join ", ") + " (header OPTFRAME cambiato nella sonda?)."); return }
@@ -545,6 +546,7 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
       MetroManc = Num $c[$ix["Valutazioni Metro Mancante Segnale"]]; PerseBuco = Num $c[$ix["Valutazioni Perse Buco Finestra"]]
       SoloMetro = Num $c[$ix["Valutazioni Con Solo Metro"]]; ZNon = Num $c[$ix["Z Non Calcolabile"]]
       Spaiati = Num $c[$ix["Giorni Spaiati"]]; SpaiPct = Num $c[$ix["Giorni Spaiati Pct"]]; C2 = [int](Num $c[$ix["C2 Esito"]])
+      GFesta = Num $c[$ix["Giorni Festa Metro"]]; GZeroCal = Num $c[$ix["Giorni Metro Zero Calendario"]]
       AltroLato = Num $c[$ix["Scartati Occupato Altro Lato Collaudo"]]
       AtrMed = Num $c[$ix["Atr Mediano Punti Indice"]]; AtrDiv = Num $c[$ix["Atr Divergenza Rel Media Pct"]]
       PuntoIdx = Num $c[$ix["Punto Indice Prezzo"]]
@@ -576,6 +578,7 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
     if($r.SigUsc -ne 0.05 -or $r.ModoSp -ne 0 -or $r.ModoZ -ne 0 -or $r.BarreMax -ne 120 -or $r.BarreOr -ne 24 -or $r.Lato -ne 0){ [void]$Problemi.Add($et + ": eco dei pin diverso dall'atteso (uscita " + (Fmt2 $r.SigUsc) + ", spread " + $r.ModoSp + ", z " + $r.ModoZ + ", tenuta " + $r.BarreMax + ", orizzonte " + $r.BarreOr + ", lato " + $r.Lato + "): il pin non e' passato."); $collaudoKo++ }
     if($r.BarreSal -gt 10){ [void]$Rilievi.Add($et + ": Barre Saltate Dati = " + (FmtN $r.BarreSal) + " (atteso ~0): buchi nello storico, da guardare.") }
     if($r.SpaiPct -gt $sg.C2){ [void]$Rilievi.Add($et + ": Giorni Spaiati Pct = " + (Fmt2 $r.SpaiPct) + " > " + (Fmt2 $sg.C2) + " (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.") }
+    if($r.GZeroCal -ne 0){ [void]$Rilievi.Add($et + ": Giorni Metro Zero Calendario = " + (FmtN $r.GZeroCal) + " (atteso 0: e' il vecchio criterio v1.01 -- zero barre in TUTTO il giorno calendario sul metro 24h -- tenuto SOLO come controllo. Se non e' 0 su un metro quasi-24h, guardare da vicino: e' la spia della domanda VUOTA che la v1.02 ha corretto).") }
     # incrocio fra gli esiti scritti dalla sonda e la ricalcolo con i #define del sorgente
     $c1r = 0; if($r.EseGT -ge $sg.C1){ $c1r = 1 }
     $c6r = 2; if($r.NonConvT -gt $sg.C6KO){ $c6r = 0 } elseif($r.NonConvT -gt $sg.C6SOSP){ $c6r = 1 }
@@ -703,7 +706,7 @@ try{
   $defs = LeggiDefine $src
   $nst = [int](DefNum $defs "REL_NSTATS")
   $NStatsTxt = "REL_NSTATS = " + $nst + " -> " + ($nst + 3) + " colonne"
-  if($nst -ne $NSTATS_ATTESI){ throw ("REL_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (97 colonne).") }
+  if($nst -ne $NSTATS_ATTESI){ throw ("REL_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (98 colonne).") }
   $inputEA = LeggiInputEA $src
   $InputTxt = "" + @($inputEA).Count + " input letti dal sorgente"
   if(@($inputEA).Count -ne $INPUT_ATTESI){ throw ("input: " + $InputTxt + ", attesi " + $INPUT_ATTESI + ".") }
@@ -1007,7 +1010,7 @@ $R = New-Object System.Collections.ArrayList
 [void]$R.Add("codice di uscita di metaeditor64: " + $RcMeTxt + "   (NON LETTO non e' un fallimento: fa fede l'.ex5 e il log)")
 [void]$R.Add("versione letta dal #property: " + $VersioneTxt + " (attesa " + $VERSIONE_ATTESA + ")")
 [void]$R.Add("autotest nel sorgente: " + $AutoSrcTxt + " (attesi " + $AUTOTEST_BLOCCHI_ATTESI + ")")
-[void]$R.Add("colonne: " + $NStatsTxt + " (attese 97)")
+[void]$R.Add("colonne: " + $NStatsTxt + " (attese 98)")
 [void]$R.Add("input: " + $InputTxt + " (attesi " + $INPUT_ATTESI + ", tutti pinnati nel prova)")
 [void]$R.Add("grep contatore puro: " + $GrepTxt)
 [void]$R.Add("include: " + $IncludeTxt)
@@ -1045,6 +1048,7 @@ if($null -ne $Righe49){
   [void]$R.Add("  barre valutate " + (FmtN $r0.BarreVal) + " | fuori finestra " + (FmtN $r0.BarreFuori) + " | saltate per dati " + (FmtN $r0.BarreSal) + " | giorni contati " + (FmtN $r0.Giorni))
   [void]$R.Add("  DUE FEED: metro mancante sul segnale " + (FmtN $r0.MetroManc) + " | valutazioni perse per buco " + (FmtN $r0.PerseBuco) + " (il COSTO della regola stretta) | solo metro " + (FmtN $r0.SoloMetro) + " | z non calcolabile " + (FmtN $r0.ZNon))
   [void]$R.Add("  C2 giorni spaiati: " + (FmtN $r0.Spaiati) + " = " + (Fmt2 $r0.SpaiPct) + "% (oltre " + (Fmt2 $PAGINA_C2_SPAIATI) + "% = rifare filtrando, e dichiarare)")
+  [void]$R.Add("  diagnostica C2 (v1.02): Giorni Festa Metro " + (FmtN $r0.GFesta) + " (festivita' del metro DENTRO la finestra della sonda, ora esclusa dal numeratore C2) | Giorni Metro Zero Calendario " + (FmtN $r0.GZeroCal) + " (vecchio criterio v1.01, tenuto come controllo, atteso 0 su un metro quasi-24h)")
   [void]$R.Add("  (i valori qui sopra sono della prima riga; i collaudi sono stati verificati su TUTTE le " + (FmtN $CsvRighe) + " righe: un fallimento sta nei PROBLEMI)")
 }
 else{ [void]$R.Add("  SENZA NUMERI (corsa non girata, CSV non prodotto o non letto: vedi PROBLEMI / FERMATO)") }
@@ -1085,7 +1089,7 @@ if($null -ne $Righe49){
 [void]$R.Add("    Derivato PRIMA della misura: a M15 il candidato NON dovrebbe arrivare al pavimento; il bersaglio e' M5.")
 [void]$R.Add("  - TETTO BARRE (M5): la finestra EFFETTIVA la dice la riga 'tetto barre' qui sopra; C1 resta per-giorno sul denominatore CONTATO.")
 [void]$R.Add("  - UN SOLO BROKER, UN SOLO REGIME (toro). FORMA UNILATERALE: a due gambe i numeri di C3 andrebbero RADDOPPIATI.")
-[void]$R.Add("  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 97 colonne OPTFRAME.")
+[void]$R.Add("  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 98 colonne OPTFRAME.")
 [void]$R.Add("")
 if($FrazioneIS -ge 1.0){ [void]$R.Add("AVVISO: FrazioneIS 1.0 -> la gamba 'OOS' del generico e' DEGENERE (0 giorni). Il rosso del generico sul CSV *_OOS e' ATTESO: NON rilanciare."); [void]$R.Add("") }
 if($Fatale -ne ""){ [void]$R.Add("!!! FERMATO: " + $Fatale); [void]$R.Add("") }
@@ -1116,7 +1120,7 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, 49 righe = le 49 passate, 97 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
+if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, 49 righe = le 49 passate, 98 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
 else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_SONDARELATIVO.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
 Write-Host ("CSV *_OOS trovati: " + $nOos + " (attesi 0: gamba OOS degenere; il numero sta ANCHE nel referto). Il rosso del generico su quel file e' ATTESO: NON rilanciare.") -ForegroundColor Gray
 
