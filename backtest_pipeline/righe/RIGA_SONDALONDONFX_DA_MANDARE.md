@@ -54,7 +54,7 @@ informazione e costa ore):
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_SONDALONDONFX.ps1` (marcatore `MARCATORE_RIGA_SONDALONDONFX_v2`) |
+| **Driver** | `righe/RIGA_SONDALONDONFX.ps1` (marcatore `MARCATORE_RIGA_SONDALONDONFX_v3`) |
 | **File prova** | `prove/LONDONFX_FREQUENZA_M5.txt` + `prove/LONDONFX_FREQUENZA_M15.txt` |
 
 **MT5 e MetaEditor CHIUSI. PC di backtest, non VPS.**
@@ -63,20 +63,22 @@ compilazione = **stima onesta 10–25 minuti** per tutto il giro [STIMA, non una
 previsione]. Il giro a vuoto è questione di minuti (ma COMPILA: è lì che un EA
 mai compilato può cadere, ed è un risultato).
 
-## 📌 IL PIN — **`49f68b7f70532d517b52b707a3ef41cf2c5ed6f9`**  ✅ INSERITO (verificato con git rev-parse: contiene driver v2 + 2 prova + la sonda .mq5)
+## 📌 IL PIN — **`dba950aca3d4c9ea108447ee5d07d3482bc12dda`**  ✅ INSERITO (verificato con git rev-parse: contiene driver **v3** + 2 prova + la sonda .mq5 + il generico). _Ri-pinnata il 03/09 dopo il FAIL del verificatore: pin precedente `49f68b7` e marcatore `_v2` **bruciati**, non incollarli piu'._
 
 ## 1️⃣ Giro a vuoto
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='49f68b7f70532d517b52b707a3ef41cf2c5ed6f9'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='dba950aca3d4c9ea108447ee5d07d3482bc12dda'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDALONDONFX_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDALONDONFX_CONTROLLO_ DI ADESSO: il controllo non e'' arrivato alla raccolta' };
-    if($rc -ne 0){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Mandami questo zip:' -ForegroundColor Red; Write-Host $z[0].FullName -ForegroundColor Yellow } else { Write-Host 'CONTROLLO OK: lancia il blocco 2.' -ForegroundColor Green } }
+    $ko=(($rc -is [int]) -and ($rc -ne 0));
+    if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip qui sotto.' -ForegroundColor Yellow };
+    if($ko){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Mandami questo zip:' -ForegroundColor Red; Write-Host $z[0].FullName -ForegroundColor Yellow } else { Write-Host 'CONTROLLO OK (fa comunque fede il referto nello zip): lancia il blocco 2.' -ForegroundColor Green } }
 ```
 
 ## 2️⃣ Corsa vera
@@ -84,21 +86,26 @@ mai compilato può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='49f68b7f70532d517b52b707a3ef41cf2c5ed6f9'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='dba950aca3d4c9ea108447ee5d07d3482bc12dda'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin; $rc=$LASTEXITCODE;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDALONDONFX_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDALONDONFX_CORSA_ DI ADESSO: la corsa non e'' arrivata alla raccolta' };
-    if($rc -ne 0){ Write-Host 'CORSA CON PROBLEMI: lo zip esiste lo stesso, mandalo.' -ForegroundColor Yellow };
+    $ko=(($rc -is [int]) -and ($rc -ne 0));
+    if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
+    if($ko){ Write-Host 'CORSA CON PROBLEMI: lo zip esiste lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'POI nel REFERTO: riga data: = adesso, riga modo: = CORSA.' -ForegroundColor Gray }
+    $iv=[Globalization.CultureInfo]::InvariantCulture;
+    Write-Host ('POI nel REFERTO: riga modo: = CORSA, e riga data: = ORA DI AVVIO di questa corsa (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + '): il referto si timbra all''INIZIO e la corsa dura 10-25 minuti. La freschezza e'' gia'' stata controllata a macchina sullo zip qui sopra.') -ForegroundColor Gray }
 ```
 
 ## 📦 COSA TORNA
 Zip sul Desktop **`SONDALONDONFX_CORSA_...zip`** → `REFERTO_SONDALONDONFX.txt`
 + i 2 prova + **2 CSV OPTFRAME** (`ABTG_SondaLondonFx_EURUSD_IS_ohlc_<ETICHETTA>.csv`,
-**6 righe l'uno** = le 6 passate, con le 58 colonne: Segnali Nudo / Segnali Con
+**6 righe l'uno** = le 6 passate, con le **58 colonne nostre + le 15 di input**
+accodate dal tester (`FrameInputs`; il driver legge per NOME, quindi non morde):
+Segnali Nudo / Segnali Con
 Rsi per lato **in ogni passata**, Segnali Long/Short Al Giorno, Mfe/Mae Mediano
 per lato in PIP, RR Da Mediane, Win Rate Necessario, Max Segnali Giorno,
 orizzonte lungo, Rsi Divergenza Max, Autotest Falliti…). **Mandami lo zip
@@ -111,10 +118,20 @@ la sonda lo spegne apposta: le passate si sovrascriverebbero).
 
 ## 🔎 COME SI LEGGE
 🕐 **PRIMA DI TUTTO** apri `REFERTO_SONDALONDONFX.txt` e controlla:
-- riga **`data:`** = l'ora di adesso (referto stantio = giro vecchio);
+- riga **`data:`** = **l'ora in cui hai lanciato il blocco 2** (il referto si timbra
+  all'**AVVIO**, la corsa dura 10-25 min: **l'ora attuale NON è il metro**). La riga
+  te la stampa già in console, col valore atteso. _(Difetto D2 del verificatore,
+  03/09, classe 110: la frase vecchia diceva "= adesso" e avrebbe fatto rilanciare
+  in buona fede una corsa sana. La freschezza vera l'ha già controllata a macchina
+  il filtro `LastWriteTime -ge $t0` sullo zip.)_
 - riga **`modo:`** = **CORSA**;
-- riga **`compilazione:`** = OK — EA nuovo: se è FALLITA, quello È il risultato
-  (errori in `COMPILAZIONE_FALLITA.log` nello zip);
+- riga **`compilazione:`** = OK — EA nuovo: se è **FALLITA**, quello È il risultato
+  (errori in `COMPILAZIONE_FALLITA.log` nello zip). _(Difetto D1 del verificatore,
+  03/09, classe 94-ter: fino al pin `49f68b7` il campo veniva timbrato **solo sul
+  ramo di successo**, e un giro con la compilazione fallita usciva con
+  `compilazione: NON TENTATA` — cioè negava agli atti proprio il fatto che questo
+  passo misura. Dal driver **v3** gli stati sono tre e sono tutti veri:
+  `NON TENTATA` / `FALLITA` / `OK`.)_
 - riga **`grep contatore puro:`** = **0 chiamate** (il contatore non può aprire
   ordini, provato a macchina);
 - riga **`celle per corsa:`** = **6**, ricontate dai pin `||Y` al pin;
