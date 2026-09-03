@@ -302,6 +302,9 @@ function Compila([string]$exe,[string[]]$argomenti,[string]$ex5,[string]$log,[in
   $t0 = Get-Date
   Dico ("metaeditor64: " + $exe + " " + ($argomenti -join " ")) "Yellow"
   $global:LASTEXITCODE = $null
+  # il campo si timbra PRIMA del lancio (classe 94-ter): se l'invocazione
+  # stessa esplode, il referto non deve dire "non tentata".
+  $script:Compilato = "FALLITA -- METAEDITOR NON PARTITO (eccezione al lancio di " + $exe + ": vedi la riga FERMATO)"
   # INVOCAZIONE DIRETTA: e' PowerShell a quotare ogni argomento (i path
   # hanno gli spazi di "Program Files"). MAI Start-Process con la
   # stringa di argomenti montata a mano: 22/08, rc=0 e zero compilazioni.
@@ -712,6 +715,7 @@ try{
       $Compilato = "OK (" + $kb + " KB, " + $itm.Length + " byte, " + $itm.LastWriteTime.ToString("HH:mm:ss",$INV) + "), 0 errors, " + $wtxt
       $Ex5Nuovo = $DestEx5
       $DeployTxt = "AVVENUTO: v" + $VersioneAttesa + " installata e compilata nel SOLO terminale del piccolo (" + $Scelta + ")"
+      $Ripristino = "NON NECESSARIO (compilazione OK: i file nuovi restano; il backup dei vecchi resta sul Desktop, non si cancella da solo)"
       Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
       Dico ("COMPILATA: " + $Compilato) "Green"
       if($nWar -gt 0){
