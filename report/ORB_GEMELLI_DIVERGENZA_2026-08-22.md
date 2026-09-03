@@ -393,3 +393,26 @@ appiccicoso) e lo decidono i log v1.03.
 3. Log del piccolo 16:00->17:45 ora italiana (Esperti + Giornale).
 4. Quando Claudio vuole: ricompilazione v1.03 (solo log) su entrambi con
    `aggiorna_verifica_orb.ps1` — stringa che passa PRIMA dal verificatore.
+
+---
+
+## 📸 03/09 mattina — FOTO 1/3: pannello input ORB del CONTO PICCOLO, letto riga per riga
+
+`ABTG_ORB_Ottimizzato 1.02 (U30USD,M5)`, magic 770611, Guardian=true:
+
+- **`Trailing dello stop sull'EMA veloce = true`** (EmaFast 9, EmaSlow 21) -> il trailing E' ACCESO
+- **`TF di esecuzione = 5 Minutes`** -> InpExecTF valido, la EMA e la barra di
+  esecuzione puntano a M5 (l'ipotesi "ExecTF strano" si sgonfia; resta B solo
+  nella variante "storico M5 non disponibile in quel momento", meno probabile)
+- **`% chiusa al target = 0.0`** -> il difetto n.2 CONFERMATO ancora presente:
+  TP1 e breakeven morti su questa istanza ("Stop in pari dopo la parziale =
+  true" e' inerte)
+- Range 14:30->14:45 server, fine giornata 21:00, CloseAtEnd true,
+  OneTradePerDay true, PendingExpiry 600 min, solo LONG, SL HALFRANGE,
+  TP RANGE x1,5, rischio 1,0%, Verbose true
+
+**VERDETTO della foto: gli INPUT del piccolo NON sono la causa** (come il
+22/08). Il discriminante resta fra A (SelPos/posizione U30 piu' vecchia di
+altro magic) e B (newBar appiccicoso) — e lo decidono la FOTO 2 (posizioni
+APERTE del piccolo con ora di apertura) e la FOTO 3 (log 16:00->17:45 IT di
+ieri), piu' il confronto col pannello del 100k.
