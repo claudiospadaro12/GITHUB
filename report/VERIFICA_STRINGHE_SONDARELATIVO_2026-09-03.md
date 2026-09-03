@@ -251,3 +251,120 @@ grep -c "MARCATORE_RIGA_SONDARELATIVO_v2" "$P"       # 7 (5 blocchi + riga Drive
 ---
 _Banco eseguito con `pwsh` 7.4.6 (Linux): `parse.ps1`, `bench.ps1` (48 casi), `casing.ps1` (scansione
 classe 79 col parser). Nessun file del forward toccato; `.mq5` non modificato._
+
+---
+
+## 7. ✅ SECONDA PASSATA (03/09/2026, sera) — CORREZIONE APPLICATA, RI-PINNATA, VERDETTO FINALE: **PASS**
+
+Il costruttore che doveva applicare la correzione del DIFETTO 1 non ha proseguito
+(nessun commit fra `7cb4721` e la ripresa di questa verifica). Applicata qui, con
+la stessa ricetta gia' scritta alla sezione 5:
+
+```
+VERDETTO    PASS
+STRINGA     i 5 blocchi della pagina (invariati nella forma, pin nuovo) sono corretti E il driver a cui
+            puntano ora scrive il referto e lo zip anche sulla CORSA riuscita.
+PIN         ed46f2fff884b331d24e4cfa521e080d38bf5dc7
+```
+
+### 7.1 Correzione (commit `ed46f2f`)
+- `RIGA_SONDARELATIVO.ps1` righe 1073-1074: `foreach($r in ...)` -> `foreach($rw in ...)`, e le 19
+  referenze `$r.xxx` nella `-f` -> `$rw.xxx` (20 sostituzioni totali, verificate `grep -o '\$rw' | wc -l` = 20,
+  `grep -c '\$r[ ."]'` sulle due righe = 0). Marcatore `_v1` -> `_v2`.
+- `RIGA_SONDARELATIVO_DA_MANDARE.md`: marcatore bumpato nei 5 blocchi + tabella (7 occorrenze), riga 148
+  e riga 347 riscritte senza le parole cercate dal terzo conteggio composto (`grep -ci "$CART" -> 0`, era 2).
+
+### 7.2 La correzione e' stata ESEGUITA, non solo letta (banco RACCOLTA, stato pieno)
+Riprodotto PRIMA il difetto sul driver VECCHIO (commit `665416e2`): sezione RACCOLTA estratta ed eseguita
+come funzione, con `$Righe49` popolato da 49 righe sintetiche (stessa forma della sezione 1) -> **stesso
+errore del referto FAIL**, `[PSCustomObject] does not contain a method named 'Add'`, nessun referto,
+nessuno zip (TEST A FALLITO). Il ramo CONTROLLO (`$Righe49 = $null`) invece verde (TEST B PASS) --
+riproduce esattamente "il giro a vuoto non lo vede".
+
+Poi la STESSA identica prova sul driver CORRETTO: TEST A **PASS** -- referto di 88 righe con le 49 celle
+in tabella, cartella e zip prodotti sul Desktop finto, `ESITO: CORSA COMPLETATO`; TEST B **PASS** invariato.
+Nessuna ipotesi: il banco e' arrivato alla RACCOLTA con lo stato pieno (79-bis, punto 2 della regola),
+prima e dopo la correzione.
+
+### 7.3 Scansione classe 79 col parser AST su TUTTO il driver corretto
+```
+r -> righe (moltissime, tutte dentro funzioni O prima della nascita di $R alla riga 993)
+ha/hA -> righe 403 407 410 414 416 609        (locali a funzioni diverse: GateGemelli / AnalizzaCsv)
+mappa/Mappa -> righe 241 301...1066            (locali a funzioni diverse: LeggiProva / script-scope)
+```
+- L'unica collisione ARMATA (`$r`/`$R` a script-scope, righe 1073-1074) e' SANATA.
+- **Rilievo nuovo (non bloccante):** righe **872, 883, 890** (dentro la sezione "6. COMPILAZIONE", prima
+  di "INIZIO ESECUZIONE" -> `try` -> RACCOLTA) usano `$r` come variabile di ciclo su `$LogRighe` (le righe
+  del log di compilazione). E' una **mina DISINNESCATA**: `$R` (il referto) nasce solo alla riga 993, cioe'
+  **dopo**; verificato `grep -n '\$R\b' | awk -F: '$1<993'` -> nessuna riga. Per la regola di casa (punto 2
+  della classe 79: *"si segnala lo stesso, perche' basta spostare una riga per armarla"*) va dichiarata:
+  se in un round futuro la sezione 7 (LA CORSA) o la RACCOLTA venissero anticipate prima della 6, o se
+  $R nascesse prima, questi tre `$r` la romperebbero di nuovo. Non blocca questo invio: l'ordine attuale
+  del file la tiene disarmata.
+- `ha/hA` e `mappa/Mappa`: confermate locali a funzioni diverse (nessuna condivide scope), innocue.
+
+### 7.4 Ripasso classi 106-117 (79-bis compresa) sul pacchetto
+- **106/107/109/114/114-bis**: non pertinenti a questo driver (riguardano artefatti cumulativi, canarino
+  Guardian, nucleo _Calc, bandiere del Guardian: nessuno di questi pattern e' presente qui).
+- **108** (exit code a tre stati): presente sia nel driver (`$rcLetto`, tre stati per generico e metaeditor)
+  sia nei 5 blocchi (`($rc -is [int]) -and ($rc -ne 0)`).
+- **94-ter** (campo `compilazione:` timbrato anche sul FALLITO): presente, righe 887-888 timbrano
+  `$Compilato = "FALLITA..."` sia per errori letti sia per METAEDITOR MUTO.
+- **110** (timbro `data:` = AVVIO, non "adesso"): pagina usa `$t0` in tutti e 4 i blocchi corsa, mai la
+  frase "= adesso" (`grep -c "ora di adesso\|data: = adesso"` -> 0).
+- **111/111-bis/113** (fratelli dello stampo ancora armati): `RIGA_SONDARELATIVO` NON e' nell'elenco dei 27
+  driver ne' delle 7/46 pagine ancora armate sulla 94-ter/110 (e' nato dopo le correzioni: verificato
+  `grep -n SONDARELATIVO CHECKLIST_RIGA_DI_LANCIO.md` -> compare solo nella scheda 79-bis).
+- **112** (parametro promesso che non esiste): elencate le opzioni citate in pagina/header (`-Pin`,
+  `-Prova`, `-SoloControllo`, `-AccettoTettoBarre`, `-Terminale`) e intersecate col `param()` reale:
+  tutte presenti. `-Simbolo`/`-Periodo` citati in prosa sono SEMPRE riferiti al GENERICO (non passati:
+  confermato, l'`$argv` del generico non li contiene), mai promessi come opzioni di QUESTO driver.
+- **115** (terminale scelto da un FATTO): confermato a meta' (gia' un rilievo dichiarato in pagina, sezione
+  "SE LA RIGA SI FERMA SU NON SO QUALE TERMINALE"): sceglie per `bases\*BCM*` e poi per nome (`-notlike
+  "*-V3*"`) fra le eleggibili, nessuna scansione del caso portable. Dichiarato, non bloccante.
+- **116/116-bis** (ripristino solo nel ramo felice / Desktop calcolato in due modi): sentinella scritta
+  PRIMA di copiare nel terminale e rimossa in RACCOLTA (che gira sempre, fuori dal `try`); foto PRIMA/DOPO
+  dei 3 file; il calcolo del Desktop e' IDENTICO (stesse 3 righe, stesso ordine, stesso fallback
+  `$env:USERPROFILE`) nel driver (`TrovaDesktop`) e nei 5 blocchi (`grep` = 5).
+- **116-ter** (gate non ancorato): l'unico gate per sottostringa e' il marcatore (`Select-String
+  -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v2'`), univoco nel repo (nessun altro file lo nomina,
+  classe 100); i confronti su versione/soglie/input sono uguaglianze esatte, non substring.
+- **117** (foto di file assente letta come INVARIATO): non pertinente -- questo driver non ha una funzione
+  `Confronta()` che produce un verdetto automatico INVARIATO/CAMBIATO: `Foto()` stampa "assente" o
+  "presente, N byte, data" per PRIMA e DOPO, e la lettura resta umana (nessun verdetto automatico da
+  falsare).
+- **Controlli 1-12 della tabella (non-ASCII, formati .NET, cultura, cache raw, MT5 chiuso, stringhe vuote,
+  `fermoDa`, ora server, PTE, `@DAQUANDO`, quoting)**: rieseguiti dopo la correzione, tutti confermati
+  (driver: 0 non-ASCII, 0 formati alla Python, `InvariantCulture` in testa + `$INV` su ogni Parse/ToString
+  numerico o di data, marcatore verificato prima di eseguire, guardia `Get-Process terminal64,metaeditor64`
+  sia nei blocchi che nel driver, nessuna stringa vuota passata, `fermoDa` assente, `@DAQUANDO 2024.09.26`
+  gattato, 5 blocchi parse 0 errori).
+- **Identita' del sorgente, a macchina sui file veri** (non sul banco costruito a mano): `#property
+  version "1.00"` (atteso), 21 righe `blocchi++;` fuori commento (atteso), `[AUTOTEST] 21` presente,
+  `REL_NSTATS 93`, 22 input REALI (28 righe `^input ` di cui 6 sono `input group`, escluse dalla regex del
+  driver che pretende `=`), 0 chiamate di trading fuori dai commenti (le uniche 2 occorrenze di
+  `OrderSend`/`CTrade`/ecc. sono dentro `//` nella testata, correttamente scartate dallo stesso filtro del
+  driver), 0 `#include`. `GateProva` sui 4 prova VERI: 4/4 verdi, 49 celle ciascuno; `GateGemelli`: VALIDO.
+  Tetto barre ricalcolato sui file veri: 642 giorni chiesti (2024.09.26 -> 2026.06.30) contro tetto 475
+  (M5, OLTRE) e 1461 (M15, DENTRO) -- coerente coi blocchi 2-3 "dentro" e 4-5 "oltre, serve
+  `-AccettoTettoBarre`".
+
+### 7.5 Ri-pinnatura e verifica via raw (pin `ed46f2f`)
+`git merge-base --is-ancestor ed46f2f origin/lavoro` -> antenato. `git status` pulito su `backtest_pipeline/`
+e `mql5/`. I 7 artefatti pinnati (driver, generico, 4 prova, `.mq5`) scaricati **davvero** via
+`raw.githubusercontent.com/.../ed46f2f/...`: HTTP 200 + sha256 identico al repo locale per tutti e sette
+(nessun ritardo di cache osservato: fetch eseguito subito dopo il push). Conteggi della ricetta: `$pin=
+'ed46f2f...'` = 5, `$pin='665416e2...'` = 0, terzo conteggio composto = 0, prefisso a 7 del pin vecchio
+in `backtest_pipeline/` = solo nella prosa storica della checklist (classe 79-bis, 2 occorrenze, mai in un
+blocco incollabile).
+
+### 7.6 NON COPERTO (invariato dalla prima passata)
+Compilazione e corsa MT5 vera; Windows PowerShell 5.1 vero (parse su pwsh 7.4.6); comportamento del tester
+con `FromDate > ToDate` sulla gamba OOS degenere; sezione 5 del driver (scelta terminale) non eseguibile
+qui; `metaeditor64` con percorsi contenenti spazi; il residuo dichiarato di `walkforward_generico.ps1`
+riga 604 (`/log` senza nome scrive `Experts\ABTG_SondaRelativo.log` nel terminale, non fotografato: file
+condiviso da altri driver, fuori dal perimetro di questa correzione, gia' un rilievo aperto).
+
+_Seconda passata eseguita con `pwsh` 7.4.6 (Linux): `casing.ps1` (parser AST, classe 79), `bench_raccolta.ps1`
+(RACCOLTA eseguita PRIMA/DOPO la correzione, stato pieno e CONTROLLO), `bench_gates.ps1` (GateProva/
+GateGemelli sui 4 prova veri). `.mq5` letto, non modificato._
