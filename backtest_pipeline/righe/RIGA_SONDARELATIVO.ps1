@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDARELATIVO_v2
+#  MARCATORE_RIGA_SONDARELATIVO_v3
 #  RIGA_SONDARELATIVO.ps1 -- SONDA DI CONVERGENZA "RELATIVO" (PASSO 0
 #  del candidato P1 della quarta battuta, 02/09; shortlist n.1 del
 #  GIACIMENTO_DI_CASA del 03/09, sezione 8).
@@ -75,8 +75,8 @@
 #  >>> CONTATORE PURO, PROVATO A MACCHINA: grep delle chiamate di
 #      trading FUORI dai commenti, attese ZERO (il modello sta QUI e
 #      non nel .mq5, apposta).
-#  >>> IDENTITA' DEL SORGENTE: #property version "1.00", 21 blocchi di
-#      autotest contati (blocchi++), REL_NSTATS 93 (= 96 colonne), 22
+#  >>> IDENTITA' DEL SORGENTE: #property version "1.01", 22 blocchi di
+#      autotest contati (blocchi++), REL_NSTATS 94 (= 97 colonne), 22
 #      input letti dal sorgente e TUTTI pinnati nel prova (nome per
 #      nome, nei due versi: un pin che l'EA non ha e' l'errore n.3
 #      della checklist, un input che il prova non pinna e' uno stato
@@ -155,9 +155,9 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Sentinella = Join-Path $Work "SONDARELATIVO_IN_CORSO.txt"
 
 # --- IDENTITA' ATTESA DEL SORGENTE (gate, non decorazione)
-$VERSIONE_ATTESA         = "1.00"
-$AUTOTEST_BLOCCHI_ATTESI = 21
-$NSTATS_ATTESI           = 93      # 93 valori + Pass, Simbolo, Periodo = 96 colonne
+$VERSIONE_ATTESA         = "1.01"
+$AUTOTEST_BLOCCHI_ATTESI = 22
+$NSTATS_ATTESI           = 94      # 94 valori + Pass, Simbolo, Periodo = 97 colonne
 $INPUT_ATTESI            = 22
 $NCelleAttese            = 49      # 2 assi x 7 valori. RICONTATE dai pin ||Y scaricati al pin.
 
@@ -703,7 +703,7 @@ try{
   $defs = LeggiDefine $src
   $nst = [int](DefNum $defs "REL_NSTATS")
   $NStatsTxt = "REL_NSTATS = " + $nst + " -> " + ($nst + 3) + " colonne"
-  if($nst -ne $NSTATS_ATTESI){ throw ("REL_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (96 colonne).") }
+  if($nst -ne $NSTATS_ATTESI){ throw ("REL_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (97 colonne).") }
   $inputEA = LeggiInputEA $src
   $InputTxt = "" + @($inputEA).Count + " input letti dal sorgente"
   if(@($inputEA).Count -ne $INPUT_ATTESI){ throw ("input: " + $InputTxt + ", attesi " + $INPUT_ATTESI + ".") }
@@ -1007,7 +1007,7 @@ $R = New-Object System.Collections.ArrayList
 [void]$R.Add("codice di uscita di metaeditor64: " + $RcMeTxt + "   (NON LETTO non e' un fallimento: fa fede l'.ex5 e il log)")
 [void]$R.Add("versione letta dal #property: " + $VersioneTxt + " (attesa " + $VERSIONE_ATTESA + ")")
 [void]$R.Add("autotest nel sorgente: " + $AutoSrcTxt + " (attesi " + $AUTOTEST_BLOCCHI_ATTESI + ")")
-[void]$R.Add("colonne: " + $NStatsTxt + " (attese 96)")
+[void]$R.Add("colonne: " + $NStatsTxt + " (attese 97)")
 [void]$R.Add("input: " + $InputTxt + " (attesi " + $INPUT_ATTESI + ", tutti pinnati nel prova)")
 [void]$R.Add("grep contatore puro: " + $GrepTxt)
 [void]$R.Add("include: " + $IncludeTxt)
@@ -1085,7 +1085,7 @@ if($null -ne $Righe49){
 [void]$R.Add("    Derivato PRIMA della misura: a M15 il candidato NON dovrebbe arrivare al pavimento; il bersaglio e' M5.")
 [void]$R.Add("  - TETTO BARRE (M5): la finestra EFFETTIVA la dice la riga 'tetto barre' qui sopra; C1 resta per-giorno sul denominatore CONTATO.")
 [void]$R.Add("  - UN SOLO BROKER, UN SOLO REGIME (toro). FORMA UNILATERALE: a due gambe i numeri di C3 andrebbero RADDOPPIATI.")
-[void]$R.Add("  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 96 colonne OPTFRAME.")
+[void]$R.Add("  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 97 colonne OPTFRAME.")
 [void]$R.Add("")
 if($FrazioneIS -ge 1.0){ [void]$R.Add("AVVISO: FrazioneIS 1.0 -> la gamba 'OOS' del generico e' DEGENERE (0 giorni). Il rosso del generico sul CSV *_OOS e' ATTESO: NON rilanciare."); [void]$R.Add("") }
 if($Fatale -ne ""){ [void]$R.Add("!!! FERMATO: " + $Fatale); [void]$R.Add("") }
@@ -1116,7 +1116,7 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, 49 righe = le 49 passate, 96 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
+if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, 49 righe = le 49 passate, 97 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
 else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_SONDARELATIVO.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
 Write-Host ("CSV *_OOS trovati: " + $nOos + " (attesi 0: gamba OOS degenere; il numero sta ANCHE nel referto). Il rosso del generico su quel file e' ATTESO: NON rilanciare.") -ForegroundColor Gray
 
