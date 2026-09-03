@@ -1,0 +1,35 @@
+=====================================================================
+ DUKA IMPORT + SONDA -- U30USD -> U30USD_DK
+=====================================================================
+data: 2026-09-03 22:43:48  (ORA DI AVVIO)
+modo: IMPORT + SONDA
+pin:  2f56afb67aff5e199b858d4791aa63e02d351fd4
+terminale: C:\Program Files\BCM Markets MT5 Terminal
+compilazione: OK (33 KB, 22:43:52)
+CSV copiati in MQL5\Files: 9
+giorni sonda: 2024.11.20;2025.06.10;2024.10.29;2024.10.31;2025.03.12;2025.03.25
+
+ESITO SONDA: 5/6 giorni dentro soglia (peggiore 0.0696% il 2024.11.20)
+VERDETTO:    QUASI: leggere QUALI giorni falliscono (DST?)
+
+CRITERI CONGELATI (par. 4a): mediana |diff bid| <= 0.05%, copertura >= 80%.
+  - tutti i giorni dentro          -> OK: il custom U30USD_DK e' usabile
+    per VERDETTI A PARAMETRI CONGELATI (NY Retest). Nessuna taratura.
+  - SOLO i giorni delle settimane DST sfasate fuori (2024.10.29/31 e/o
+    2025.03.12/25) -> calendario DST sbagliato: si RICONVERTE con
+    RIGA_DUKA_A -SoloCache -Dst europa, si ri-copiano i CSV e si RI-lancia
+    QUESTA riga (import+sonda, non -SoloSonda: i CSV sono cambiati).
+  - altri giorni fuori             -> CANCELLO CHIUSO: i _DK in frigo,
+    come gli _EXT HistData. Nessun 'pero' quasi'.
+
+SPREAD DK vs nativo: NON e' un cancello, e' DICHIARATO nel log (scheda
+  Esperti / *.log): coi tick veri lo spread storico e' nei prezzi.
+
+NOTA RUNTIME (native ticks): la sonda confronta il custom con i tick
+  NATIVI di U30USD via CopyTicksRange. Se un giorno esce 'tick
+  nativi=0 -> NON confrontabile', il terminale non aveva ancora la storia
+  tick nativa di quel giorno: apri un grafico U30USD M1, lascia
+  che MT5 la scarichi, poi RI-lancia la sonda con -SoloSonda (non ri-importa).
+
+PROBLEMI: 0
+RILIEVI: 0

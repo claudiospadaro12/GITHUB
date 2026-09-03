@@ -1,0 +1,2 @@
+Versione,SimboloDK,SimboloSorgente,Maschera,FileImportati,TickScritti,RigheScartate,TickFuoriOrdine,PrimoTick,UltimoTick,ProprietaGuaste,EsitoSonda,Verdetto
+IMP-TICK-v0-BOZZA,U30USD_DK,U30USD,U30USD_DK_ticks_*.csv,9,20753611,0,0,2024.10.01 01:00,2025.06.17 00:59,0,5/6 giorni dentro soglia (peggiore 0.0696% il 2024.11.20),QUASI: leggere QUALI giorni falliscono (DST?)

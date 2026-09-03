@@ -915,3 +915,20 @@ Il resto sta li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi.**
   (Code Base **76305**, indicatore) — level builder di sessione **in ora
   server**, `PipSize` fatto giusto, e una **penetrazione minima** prima di
   contare uno sweep (`InpMinSweepPips=2,0`) che `ABTG_BreakinBox` **non ha**.
+
+## 🔴 DUKA IMPORT+SONDA U30USD_DK -- CANCELLO CHIUSO (per lettera dei criteri congelati)
+`backtest_pipeline/risultati_archivio/duka/REFERTO_IMPORT_SONDA_2026-09-03_2243.txt`.
+5/6 giorni-campione dentro soglia (mediana |diff bid| <=0,05%), 1 fuori:
+**2024.11.20 a 0,0696%**. Criteri congelati PRIMA (par. 4a) distinguevano tre esiti:
+tutti dentro=OK, SOLO i giorni DST (2024.10.29/31, 2025.03.12/25) fuori=riconvertire,
+ALTRI giorni fuori=CANCELLO CHIUSO "nessun 'pero' quasi'". Il 20/11/2024 NON e' uno
+dei quattro giorni DST elencati (e' 3+ settimane dopo la fine DST europea del 27/10 e
+la fine DST USA del 3/11): per lettera del criterio gia' firmato, questo e' CANCELLO
+CHIUSO, non "quasi". Il tester stesso non sa distinguere (verdetto automatico "QUASI:
+leggere quali giorni falliscono") -- lo si e' letto qui a mano.
+**U30USD_DK va in FRIGO** (come gli _EXT HistData): non si usa per verdetti a
+parametri congelati finche' non si capisce la causa del 20/11 (holiday pre-Thanksgiving?
+copertura tick nativa zero quel giorno? -- non misurato qui). Prima di riaprire il
+capitolo: aprire un grafico U30USD M1 per scaricare lo storico tick nativo di quel
+giorno specifico e rilanciare la sonda con -SoloSonda per vedere se il problema e'
+"non confrontabile" (tick nativi assenti) o un vero disallineamento prezzi.
