@@ -79,8 +79,10 @@ verificato anche col marcatore e col parse `pwsh`):
 | `mql5/Include/ABTG_PausaGuardian.mqh` | v1.51 |
 | `mql5/Presets/ABTG_PostNews_NFP_USDJPY.set` | 32 righe (31 fissi + InpMagic 771203) |
 | `mql5/Files/abtg_news_postnews_2010_2025_UTC.csv` | 600 righe (1 header + 599 eventi) |
+| `mql5/Scripts/ABTG_HistoryDownloader.mq5` | lo strumento della **misura storico** (fase 8): scritto qui perché il driver lo scarica **al pin** come gli altri, e senza di lui non esiste `-DaQuando` |
 
-Tutti e sette scaricati **allo stesso pin**, mai dalla punta del branch.
+Tutti e **otto** scaricati **allo stesso pin**, mai dalla punta del branch —
+verificati uno per uno via `raw` (HTTP 200 + `sha256` identico al repo al pin).
 
 ---
 
