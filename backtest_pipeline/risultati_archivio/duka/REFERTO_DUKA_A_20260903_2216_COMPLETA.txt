@@ -1,0 +1,48 @@
+=== REFERTO MISSIONE A DUKASCOPY -- TICK DOW (RIGA_DUKA_A v3) ===
+data     : 2026-09-03 22:26:16  (avvio 2026-09-03 22:16:13)
+modo     : CORSA VERA
+pin      : 1c3aa23fccd2b1df61d5ff641e2150f75d0a551f
+finestra : 2024-10-01 -> 2025-06-16  (222 giorni iterati, sabato escluso)
+strumento: USA30IDXUSD -> U30USD_DK   dst: usa   fuso: server
+motore   : curl (C:\WINDOWS\system32\curl.exe)  -- misurato-passante 31/08, urllib strozzato dal server
+python   : C:\Users\Master\AppData\Local\Programs\Python\Python314\python.exe
+
+ESITO    : OK: corsa COMPLETA (0.2 h). Esito .py: OK
+
+CONTEGGI (misurati, non stimati):
+  giorni completati / totali : 222 / 222  (dall'ultima riga di progresso del .py)
+  MB .bi5 scaricati (questa corsa): 0.0
+  proiezione del .py: RESTANO ~0.0 ORE
+  CSV mensili prodotti       : 9 su ~9 mesi attesi  (870.9 MB in C:\Users\Master\dukascopy_lavoro\tick)
+
+IL DOWNLOAD E' RIPRENDIBILE: rilancia la stessa riga per continuare.
+(cache per ora scaricata in C:\Users\Master\dukascopy_lavoro\raw, 404 memorizzati, scritture
+ atomiche; i mesi CSV gia' scritti restano validi, il mese in corso si
+ rifa' dalla cache senza riscaricare.)
+
+MT5: NON toccato da questa riga (download puro HTTP). L'import in MT5
+     e' il passo DOPO, con la sua riga e la sonda (DUKASCOPY_PASSO0.md par. 4).
+
+ELENCO CSV MENSILI (nome / MB):
+  U30USD_DK_ticks_2024-10.csv  78.0 MB
+  U30USD_DK_ticks_2024-11.csv  77.7 MB
+  U30USD_DK_ticks_2024-12.csv  75.5 MB
+  U30USD_DK_ticks_2025-01.csv  95.0 MB
+  U30USD_DK_ticks_2025-02.csv  81.2 MB
+  U30USD_DK_ticks_2025-03.csv  131.6 MB
+  U30USD_DK_ticks_2025-04.csv  164.7 MB
+  U30USD_DK_ticks_2025-05.csv  113.6 MB
+  U30USD_DK_ticks_2025-06.csv  53.6 MB
+
+CAMPIONE (controllo dell'ordine di grandezza: un Dow sta fra 8000 e 70000):
+  prime righe di U30USD_DK_ticks_2024-10.csv:
+    Time,Msec,Bid,Ask
+    2024.10.01 01:00:00,656,42272.715,42278.249
+    2024.10.01 01:00:00,907,42273.275,42278.761
+  ultime righe di U30USD_DK_ticks_2025-06.csv:
+    2025.06.17 00:59:59,488,42273.999,42279.261
+    2025.06.17 00:59:59,639,42272.787,42278.261
+
+PASSO DOPO: mandare a Claude SOLO lo zip leggero DUKA_A_20260903_2216.zip
+(referto + console + campioni). MAI zippare i GB di CSV: quelli restano
+in C:\Users\Master\dukascopy_lavoro\tick per il passo di import.
