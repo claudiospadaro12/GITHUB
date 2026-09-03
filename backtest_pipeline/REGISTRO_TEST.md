@@ -829,3 +829,18 @@ farlo passare"), il candidato e' CHIUSO. n OOS 00_nudo=107 (sotto 150: comunque 
 rischio era gia' bocciato dal merito prima che il campione contasse). Nessuna nuova
 taratura di InpSigmaMult o altri parametri: il meccanismo VWAP-reversion su D30EUR M15
 e' arato.
+
+## 🪦 R116 ABTG_LondonFx EURUSD (M15, tick reali) — BOCCIATA PER RISCHIO, tutti e 3 i motori
+`backtest_pipeline/risultati_archivio/r116_londonfx/CORSA_EURUSD_2026-09-03_1751_BOCCIATA.txt`.
+IS 2024.07.05->2025.04.21, OOS 2025.04.22->2026.06.30, un solo regime (dichiarato). Motore 2
+(canale+RSI, l'unico promuovibile): E OOS=-0,1078R (soglia 0,075R), PF OOS=0,843 (soglia 1,15),
+DD OOS=37,14% (tetto 8%), IS gia' in perdita (profit -36.353,98, PF 0,795). Motori 1 e 3
+(controlli) bocciati per rischio allo stesso modo (DD 45,29% e 31,26%). Nessuno passa A1/A2/A3/A4.
+Ablazione S1: differenza fra motori 0,0561R, sopra soglia 0,05R MA nessun motore passa i cancelli
+di merito, quindi nessuna promozione comunque. Fase 2 (slippage) NON dovuta: nessuna cella
+passa i cancelli A. **Previsione pre-dichiarata nei criteri (par. 0.2): "NO probabile" -- CONFERMATA.**
+Rilievo: motore 1 (controllo, canale nudo) e' strozzato dal tetto giornaliero (38%/22% dei giorni
+oltre soglia 20%): il suo posto nel confronto S1 e' contaminato, ma non cambia il verdetto (nessun
+motore passa comunque). Spread misurato ed archiviato (F9/H12): EURUSD Londra motore 2, IS mediana
+0,200 pip, OOS mediana 0,100 pip. GBPUSD ancora da girare, ma la bocciatura e' PER RISCHIO (non per
+frequenza): probabile lo stesso esito, si vede.
