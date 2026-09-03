@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v1
+#  MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v2
 #  RIGA_DEPLOY_ORB104_PICCOLO.ps1 -- DEPLOY della v1.04 di
 #  ABTG_ORB_Ottimizzato sul SOLO terminale del conto PICCOLO 50503392,
 #  sul VPS, sessione Master.
@@ -635,7 +635,11 @@ try{
   Dico ("criterio ............ " + $Criterio) "Yellow"
   Dico ("installazione ....... " + $Inst) "Yellow"
   $v3n = @($V3Cand).Count
-  if($v3n -eq 0){ [void]$Rilievi.Add("NESSUNA candidata con traccia del 100k/-V3 trovata da questa sessione (puo' stare sotto un altro profilo utente non leggibile): la foto del -V3 non e' stata possibile. Questa riga scrive SOLO sotto " + $Scelta + ", per costruzione.") }
+  # NIENTE VERDETTO QUI: quante di queste cartelle contengano davvero i tre
+  # file si sa solo dopo le foto, e una cartella di INSTALLAZIONE con "-V3"
+  # nel nome ne contiene ZERO (classe 117). Il campo IL -V3 / 100k lo decide
+  # la raccolta, contando le foto su file REALMENTE presenti.
+  if($v3n -eq 0){ [void]$Rilievi.Add("NESSUNA candidata con traccia del 100k/-V3 trovata da questa sessione (la sua cartella dati sta sotto un altro profilo utente che questa sessione non legge): il 100k risultera' NON MISURATO, non 'invariato'. Questa riga scrive SOLO sotto " + $Scelta + ", per costruzione.") }
   Dico ("candidate con traccia del 100k/-V3 da fotografare: " + $v3n)
 
   foreach($a in $altri){
@@ -720,8 +724,12 @@ try{
     Copy-Item -LiteralPath $Mq5 -Destination $DestMq5 -Force
     if((HashPieno $Mq5) -ne (HashPieno $DestMq5)){ throw ("COPIA NON VERIFICATA: " + $DestMq5 + " non e' identico (sha256) al sorgente scaricato al pin.") }
     if((HashPieno $Mqh) -ne (HashPieno $DestMqh)){ throw ("COPIA NON VERIFICATA: " + $DestMqh + " non e' identico (sha256) all'include scaricato al pin.") }
-    $ScrittiTxt = "SCRITTI nel terminale del piccolo: " + $DestMq5 + " e " + $DestMqh + " (sha256 identici ai file al pin)"
+    $ScrittiTxt = "SCRITTI nel terminale del piccolo: " + $DestMq5 + " e " + $DestMqh + " (sha256 identici ai file al pin; l'.ex5 lo scrive MetaEditor qui sotto)"
     Dico $ScrittiTxt "Green"
+    # L'INCLUDE E' CONDIVISO: si dichiara, non si nasconde dentro "tre file".
+    if($FotoP["Include\" + $IncNostro].Esiste -and $FotoP["Include\" + $IncNostro].Hash -ne (Hash16 $Mqh)){
+      [void]$Rilievi.Add($IncNostro + " NON e' un file del solo ORB: e' l'include CONDIVISO del Guardian, usato da decine di EA di questa flotta. Prima [" + (FotoTxt $FotoP["Include\" + $IncNostro]) + "], adesso la versione al pin (v1.51). Gli .ex5 GIA' in forward NON cambiano comportamento (ognuno si porta dentro il Guardian con cui fu compilato): cambia l'INGRESSO delle compilazioni FUTURE su questo terminale. Dichiarato, non un guasto -- ma va saputo prima del round di ricompilazione.")
+    }
 
     Titolo "6. COMPILAZIONE con il metaeditor64 dell'installazione del piccolo"
     $esito = Compila $Me @(("/compile:" + $DestMq5), ("/inc:" + $MqlDir), ("/log:" + $LogPath)) $DestEx5 $LogPath $TimeoutSec
@@ -817,19 +825,35 @@ if($FotoPrese){
       $st = Confronta $FotoP[$t.N] $d
       [void]$FotoDopoTxt.Add("  PICCOLO " + $t.N + ": prima [" + (FotoTxt $FotoP[$t.N]) + "] dopo [" + (FotoTxt $d) + "] -> " + $st)
     }
-    if(@($FotoV3).Count -eq 0){ $V3Txt = "NESSUNA cartella -V3 raggiungibile da fotografare (vedi RILIEVI)" }
+    # LA FOTO DI UN FILE CHE NON C'E' NON E' UNA MISURA (classe 117).
+    # Una candidata con traccia del 100k puo' essere la sola CARTELLA DI
+    # INSTALLAZIONE in Program Files (quella si' che Master la vede): li'
+    # dentro i tre file non esistono, e ASSENTE prima + ASSENTE dopo esce
+    # "INVARIATO". Contarlo come prova vorrebbe dire scrivere "il 100k e'
+    # intatto" avendo guardato il vuoto. Si conta quante foto stanno su un
+    # file REALMENTE ESISTENTE prima del giro: se sono ZERO, il campo dice
+    # NON MISURATO, non INVARIATO.
+    $v3Vere = @($FotoV3 | Where-Object { $_.Prima.Esiste })
+    foreach($f in $FotoV3){
+      $d = Foto $f.P
+      $st = Confronta $f.Prima $d
+      if($st -eq "CAMBIATO"){ $V3Tocc = $true }
+      [void]$FotoDopoTxt.Add("  -V3 " + $f.Cart + " MQL5\" + $f.N + ": prima [" + (FotoTxt $f.Prima) + "] dopo [" + (FotoTxt $d) + "] -> " + $st)
+    }
+    if($V3Tocc){
+      $V3Txt = "ATTENZIONE: un file del -V3 RISULTA CAMBIATO -- leggi le righe qui sotto"
+      [void]$Problemi.Add("un file del terminale -V3 e' cambiato durante il giro: NON doveva succedere (questa riga scrive solo sotto " + $Scelta + "). Controlla le foto prima/dopo PRIMA di riaprire il 100k.")
+    }
+    elseif(@($v3Vere).Count -eq 0){
+      $V3Txt = ("NON MISURATO -- " + @($V3Cand).Count + " cartelle con traccia del 100k guardate, " +
+                @($FotoV3).Count + " foto, e NESSUNA su un file che esisteva davvero (ASSENTE prima E dopo: e' la foto del vuoto, non una prova). " +
+                "La cartella DATI del 100k sta sotto un altro profilo utente (Administrator, HANDOFF 03/09) che la sessione " + $env:USERNAME + " non legge. " +
+                "Il perimetro qui e' DICHIARATO PER COSTRUZIONE -- questa riga scrive SOLO sotto " + $Scelta + ", e le righe PICCOLO/PARAMETRI lo misurano -- ma sul 100k NON e' misurato.")
+      [void]$Rilievi.Add("IL 100k/-V3 NON E' STATO MISURATO in questo giro: nessuna copia REALE dei tre file sotto le cartelle con traccia del 100k (" + @($FotoV3).Count + " foto, tutte ASSENTE->ASSENTE). Il referto NON dice INVARIATO, dice NON MISURATO. La sua cartella dati sta sotto il profilo Administrator: per MISURARLO davvero il giro va rifatto da una sessione che legge quel profilo. Non e' un blocco: questa riga non ha nessun percorso di scrittura fuori da " + $Scelta + ".")
+    }
     else{
-      $V3Txt = "INVARIATO su tutte le " + @($FotoV3).Count + " foto (" + @($V3Cand).Count + " cartelle con traccia del 100k)"
-      foreach($f in $FotoV3){
-        $d = Foto $f.P
-        $st = Confronta $f.Prima $d
-        if($st -eq "CAMBIATO"){ $V3Tocc = $true }
-        [void]$FotoDopoTxt.Add("  -V3 " + $f.Cart + " MQL5\" + $f.N + ": prima [" + (FotoTxt $f.Prima) + "] dopo [" + (FotoTxt $d) + "] -> " + $st)
-      }
-      if($V3Tocc){
-        $V3Txt = "ATTENZIONE: un file del -V3 RISULTA CAMBIATO -- leggi le righe qui sotto"
-        [void]$Problemi.Add("un file del terminale -V3 e' cambiato durante il giro: NON doveva succedere (questa riga scrive solo sotto " + $Scelta + "). Controlla le foto prima/dopo PRIMA di riaprire il 100k.")
-      }
+      $V3Txt = ("INVARIATO su " + @($v3Vere).Count + " foto di file REALMENTE PRESENTI prima del giro (su " +
+                @($FotoV3).Count + " foto totali, " + @($V3Cand).Count + " cartelle con traccia del 100k; le foto su file ASSENTI non contano come prova)")
     }
     $pOk = $true
     foreach($dd in $DirParam){
@@ -878,6 +902,7 @@ $Ref = New-Object System.Collections.ArrayList
 [void]$Ref.Add("")
 [void]$Ref.Add("DEPLOY: " + $DeployTxt)
 [void]$Ref.Add("IL -V3 / 100k: " + $V3Txt)
+[void]$Ref.Add("   <- TRE STATI: INVARIATO su N foto di file REALMENTE PRESENTI / NON MISURATO (nessun file vero da fotografare: la sua cartella dati sta sotto un altro profilo) / ATTENZIONE CAMBIATO")
 [void]$Ref.Add("PARAMETRI (.set/.chr/.ini): " + $ParamTxt)
 foreach($r in $FotoDopoTxt){ [void]$Ref.Add($r) }
 if(-not $FotoPrese){ [void]$Ref.Add("  (nessuna foto: il giro si e' fermato prima di scegliere la cartella dati, quindi non e' stato scritto niente da nessuna parte)") }
