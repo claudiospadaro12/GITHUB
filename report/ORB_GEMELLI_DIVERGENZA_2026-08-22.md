@@ -686,3 +686,10 @@ prima non faceva:
   condiviso `ABTG_PosHedge.mqh` e gli 11 file in `standalone/`.
 - Il **difetto n.2** (`InpTP1Pct=0` che uccide il breakeven): dichiarato dal
   log, non corretto. È una scelta di configurazione, la firma Claudio.
+
+### ✍️ 03/09, ~11:05 — PERIMETRO DEL DEPLOY v1.04 FIRMATO
+Claudio, testuale: "FIRMO IL PERIMETRO PICCOLO". La v1.04 si ricompila SOLO
+sul piccolo; il 100k resta com'e' fino a fine Fase 1 (D1 dei mirror).
+Sequenza: compilazione di prova sul PC di backtest -> se 0 errori, deploy
+sul piccolo via aggiorna_verifica_orb.ps1 (22/08) con screenshot.
+Verbale firma: report/FIRME_2026-09-03.md.
