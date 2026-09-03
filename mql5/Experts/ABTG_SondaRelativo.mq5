@@ -130,8 +130,12 @@
 //      vuol dire leggere una barra IN FORMAZIONE = LOOK-AHEAD
 //      MASCHERATO. Qui ENTRAMBE le serie si leggono a shift 1 e
 //      oltre, e si VERIFICA CHE I TIMESTAMP COINCIDANO barra per
-//      barra. Colonne: "Barre Metro Mancanti Ultima",
-//      "Barre Buco Finestra", "Barre Solo Metro".
+//      barra. Colonne (NOMI REALI, quelli dell'intestazione di
+//      OnTesterDeinit -- la prima stesura ne citava tre che non
+//      esistevano, corretto nell'audit del 03/09):
+//        "Valutazioni Metro Mancante Segnale"
+//        "Valutazioni Perse Buco Finestra"
+//        "Valutazioni Con Solo Metro"
 //
 //  T2. SE MANCA UNA BARRA DEL METRO, LA BARRA SI SALTA. NON SI
 //      RIUSA LA PRECEDENTE, e non esiste nessun input per farlo:
@@ -144,10 +148,11 @@
 //      c'e' un buco, media e deviazione sarebbero calcolate su
 //      barre di ORE DIVERSE. Quindi si pretende l'allineamento
 //      SULL'INTERA finestra, e il costo di questa severita' e'
-//      MISURATO in due colonne separate ("Barre Metro Mancanti
-//      Ultima" = buco sulla barra di segnale; "Barre Buco
-//      Finestra" = buco solo nella coda). Se la seconda e' grande,
-//      la regola stretta sta mangiando il campione e il referto lo
+//      MISURATO in due colonne separate ("Valutazioni Metro
+//      Mancante Segnale" = buco sulla barra di segnale;
+//      "Valutazioni Perse Buco Finestra" = barra di segnale
+//      allineata ma buco nella coda). Se la seconda e' grande, la
+//      regola stretta sta mangiando il campione e il referto lo
 //      deve dire.
 //
 //  T3. I CALENDARI NON COINCIDONO (4 luglio, Thanksgiving,
@@ -162,6 +167,13 @@
 //      risultare "mancanti" per sincronizzazione, non per
 //      calendario. E' un altro motivo per cui questi conteggi
 //      sono colonne e non silenzio.
+//      >>> CORREZIONE DELL'AUDIT 03/09: le barre del SOLO METRO si
+//      contano SOLO dentro lo span dello z-score, non su tutta la
+//      coda di warmup. La coda attraversa la notte e il metro di
+//      notte quota mentre la gamba no: contarla avrebbe dato
+//      "Giorni Spaiati Pct" = 100% ogni giorno, cioe' C2 avrebbe
+//      misurato gli ORARI DI QUOTAZIONE invece dei CALENDARI.
+//      Il perche' per esteso sta in testa ad AllineaSerie_Calc.
 //
 //  T4. FORMA UNILATERALE, NON A DUE GAMBE -- ed e' una SCELTA
 //      NOSTRA. A due gambe si pagano DUE spread per UNA
@@ -355,7 +367,7 @@
 //    virgole dell'intestazione e i '%' del formato e URLA se non
 //    tornano (la trappola del CSV sfasato di ABTG_SondaM0PB, risolta
 //    a mano li' e resa automatica qui).
-#define REL_NSTATS                 72
+#define REL_NSTATS                 93
 
 //==================================================================
 //  INPUT
@@ -910,9 +922,22 @@ void AggiornaEscursione_Calc(const int lato, const double prezzoIngresso,
 //| GAMBA (soloMetro): e' l'altra meta' dei giorni spaiati, quella    |
 //| che si dimentica sempre perche' non rompe niente.                 |
 //| Scansione a due indici, O(n+nx): le due serie sono ordinate.      |
+//|                                                                   |
+//| >>> 'daConta' NON E' UN DETTAGLIO: E' UNA CORREZIONE DEL 03/09     |
+//| (audit di completamento della sonda). soloMetro si conta SOLO da   |
+//| ty[daConta] in avanti, cioe' sullo SPAN che lo z-score guarda      |
+//| davvero. Contandolo su tutta la coda di warmup (300 barre = 25 ore |
+//| a M5) verrebbe un numero ENORME e SEMPRE positivo: quella coda     |
+//| attraversa la NOTTE, e di notte il metro (U30USD, quasi 24h) ha    |
+//| barre che la gamba (D30EUR, cash EU) non puo' avere. Con quel      |
+//| conteggio "Giorni Spaiati" verrebbe 100% tutti i giorni: un numero |
+//| vero che risponde alla DOMANDA SBAGLIATA, perche' C2 deve misurare |
+//| i CALENDARI (4 luglio, Thanksgiving), non gli orari di quotazione. |
+//| daConta fuori dominio -> si conta da 0. Mai in silenzio.           |
 //+------------------------------------------------------------------+
 bool AllineaSerie_Calc(const datetime &ty[], const int n,
                        const datetime &tx[], const double &cx[], const int nx,
+                       const int daConta,
                        double &xa[], bool &valido[], int &allineate, int &soloMetro)
   {
    allineate = 0; soloMetro = 0;
@@ -920,12 +945,14 @@ bool AllineaSerie_Calc(const datetime &ty[], const int n,
    if(ArrayResize(xa, n) != n) return(false);
    if(ArrayResize(valido, n) != n) return(false);
    for(int i = 0; i < n; i++){ xa[i] = 0.0; valido[i] = false; }
+   int      dc  = (daConta < 0 || daConta >= n) ? 0 : daConta;
+   datetime tDa = ty[dc];
    if(nx < 1) return(true);          // nessuna barra del metro: tutto invalido, e non e' un errore di codice
 
    int j = 0;
    for(int i = 0; i < n; i++)
      {
-      while(j < nx && tx[j] < ty[i]){ j++; soloMetro++; }
+      while(j < nx && tx[j] < ty[i]){ if(tx[j] >= tDa) soloMetro++; j++; }
       if(j < nx && tx[j] == ty[i])
         {
          xa[i] = cx[j];
@@ -934,7 +961,7 @@ bool AllineaSerie_Calc(const datetime &ty[], const int n,
          j++;
         }
      }
-   while(j < nx){ j++; soloMetro++; }
+   while(j < nx){ if(tx[j] >= tDa) soloMetro++; j++; }
    return(true);
   }
 
@@ -980,12 +1007,15 @@ bool ZDueBarre_Calc(const double &y[], const double &x[], const int n, const int
    if(ArrayResize(s, nS) != nS) return(false);
    for(int k = 0; k < nS; k++)
      {
-      int abs = fine - nS + 1 + k;
+      int idx = fine - nS + 1 + k;      // 'idx' e non 'abs': 'abs' e' un
+                                        // nome troppo vicino alle funzioni
+                                        // matematiche di MQL5 per usarlo
+                                        // come variabile.
       double v;
       if(modoSpread == 1)
-        { if(!SpreadOls_Calc(x, y, n, abs, finestra, v)) return(false); }
+        { if(!SpreadOls_Calc(x, y, n, idx, finestra, v)) return(false); }
       else
-        { if(!Rapporto_Calc(y[abs], x[abs], v))          return(false); }
+        { if(!Rapporto_Calc(y[idx], x[idx], v))          return(false); }
       s[k] = v;
      }
 
@@ -1560,21 +1590,28 @@ void ValutaBarraChiusa()
    int nxC = CopyClose(InpSimboloMetro, PERIOD_CURRENT, ty[0], tSeg, cx);
    int nx  = (nxT > 0 && nxT == nxC) ? nxT : 0;
 
+   //--- LO SPAN CHE LO Z-SCORE GUARDA (T2). Si calcola PRIMA
+   //    dell'allineamento perche' e' anche l'intervallo su cui ha senso
+   //    contare le barre del SOLO METRO: vedi il cartello in testa ad
+   //    AllineaSerie_Calc.
+   int span   = SpanRichiesto_Calc(InpFinestraN, InpModoSpread);
+   int iDaSpan = iSeg - span + 1;
+   if(iDaSpan < 0) iDaSpan = 0;
+
    double xa[];
    bool   valido[];
    int    allineate = 0, soloMetro = 0;
-   if(!AllineaSerie_Calc(ty, n, tx, cx, nx, xa, valido, allineate, soloMetro))
+   if(!AllineaSerie_Calc(ty, n, tx, cx, nx, iDaSpan, xa, valido, allineate, soloMetro))
      { gBarreSaltateDati++; return; }
 
    bool ultimaValida = valido[iSeg];
    if(!ultimaValida){ gMetroMancantiUltima++; gDaySpaiato = true; }
    if(soloMetro > 0){ gValutazioniSoloMetro++; gDaySpaiato = true; }
 
-   //--- L'ALLINEAMENTO SI PRETENDE SU TUTTO LO SPAN CHE LO Z-SCORE
-   //    GUARDA (T2), non solo sulla barra di segnale. Un buco dentro
-   //    la finestra fa calcolare media e deviazione su barre di ore
-   //    diverse: il numero uscirebbe, e sarebbe finto.
-   int  span   = SpanRichiesto_Calc(InpFinestraN, InpModoSpread);
+   //--- L'ALLINEAMENTO SI PRETENDE SU TUTTO LO SPAN, non solo sulla
+   //    barra di segnale. Un buco dentro la finestra fa calcolare media
+   //    e deviazione su barre di ore diverse: il numero uscirebbe, e
+   //    sarebbe finto.
    bool spanOk = (span > 0 && iSeg - span + 1 >= 0);
    if(spanOk)
      {
@@ -1664,3 +1701,905 @@ void ValutaBarraChiusa()
 
    ApriPosizioneFinta(lato, tProssima, apProssima, z, atrSeg);
   }
+
+//==================================================================
+//  AUTOTEST DEL NUCLEO PURO
+//  Gira in OnInit, prima di qualunque barra. NON stampa un verdetto
+//  che nessuno legge: il numero di blocchi FALLITI e il numero di
+//  blocchi ESEGUITI finiscono nelle colonne "Autotest Falliti" e
+//  "Autotest Blocchi" (CHECKLIST punto 99). -1 vuol dire NON
+//  ESEGUITO, che non e' "passato".
+//  REGOLA DI SCRITTURA (CHECKLIST punto 98): ogni blocco usa nomi di
+//  variabile col PROPRIO PREFISSO (a1_, a2_, ...). In MQL5 due
+//  dichiarazioni dello stesso nome nello stesso scope sono un errore
+//  secco di compilazione, e nessuna rilettura lo vede.
+//  Ogni valore atteso qui sotto e' calcolato A MANO nel commento: un
+//  test che copia il risultato del codice non prova niente.
+//==================================================================
+void AutoTestRelativo()
+  {
+   int falliti = 0;
+   int blocchi = 0;
+
+   //--- BLOCCO 1: SmaFin_Calc, valore e DOMINIO.
+   //    v = [1,2,3,4,5]: sma(fine 4, 3) = (3+4+5)/3 = 4; sma(fine 2, 3) = 2.
+   //    fine 1 con 3 barre sborda all'indietro -> false (NON si tosa).
+   blocchi++;
+   double a1_v[]; ArrayResize(a1_v,5);
+   a1_v[0]=1.0; a1_v[1]=2.0; a1_v[2]=3.0; a1_v[3]=4.0; a1_v[4]=5.0;
+   double a1_o1=0.0, a1_o2=0.0, a1_o3=0.0, a1_o4=0.0, a1_o5=0.0;
+   bool   a1_k1 = SmaFin_Calc(a1_v, 5, 4, 3, a1_o1);   // 4
+   bool   a1_k2 = SmaFin_Calc(a1_v, 5, 2, 3, a1_o2);   // 2
+   bool   a1_k3 = SmaFin_Calc(a1_v, 5, 1, 3, a1_o3);   // sborda -> false
+   bool   a1_k4 = SmaFin_Calc(a1_v, 5, 5, 3, a1_o4);   // fine fuori -> false
+   bool   a1_k5 = SmaFin_Calc(a1_v, 5, 4, 0, a1_o5);   // quante 0 -> false
+   if(!a1_k1 || !a1_k2 || a1_k3 || a1_k4 || a1_k5 ||
+      MathAbs(a1_o1-4.0)>0.0001 || MathAbs(a1_o2-2.0)>0.0001)
+     { falliti++; Log("[AUTOTEST] 1 SmaFin_Calc DIVERGE"); }
+
+   //--- BLOCCO 2: StdevFin_Calc, deviazione di POPOLAZIONE (divisore
+   //    'quante', convenzione di ta.stdev biased=true, che e' il
+   //    default di Pine -- scelta dichiarata nel sorgente).
+   //    [3,4,5]: media 4, scarti -1,0,1 -> sqrt(2/3) = 0,8164966.
+   //    Con quante = 1 la deviazione e' 0 e la funzione risponde TRUE:
+   //    e' misurata e nulla, non indefinita. Serie costante -> 0.
+   blocchi++;
+   double a2_o1=0.0, a2_o2=0.0, a2_o3=0.0;
+   bool   a2_k1 = StdevFin_Calc(a1_v, 5, 4, 3, a2_o1);   // 0,8164966
+   bool   a2_k2 = StdevFin_Calc(a1_v, 5, 4, 1, a2_o2);   // 0, true
+   double a2_c[]; ArrayResize(a2_c,3); a2_c[0]=2.0; a2_c[1]=2.0; a2_c[2]=2.0;
+   bool   a2_k3 = StdevFin_Calc(a2_c, 3, 2, 3, a2_o3);   // 0, true
+   if(!a2_k1 || !a2_k2 || !a2_k3 ||
+      MathAbs(a2_o1-0.8164966)>0.0001 || MathAbs(a2_o2)>0.0000001 || MathAbs(a2_o3)>0.0000001)
+     { falliti++; Log("[AUTOTEST] 2 StdevFin_Calc DIVERGE (o non e' di popolazione)"); }
+
+   //--- BLOCCO 3: CorrFin_Calc. y = 2x -> +1 esatto; y specchiata -> -1;
+   //    serie costante -> NON esiste (false), non zero.
+   blocchi++;
+   double a3_x[]; ArrayResize(a3_x,4); a3_x[0]=1.0; a3_x[1]=2.0; a3_x[2]=3.0; a3_x[3]=4.0;
+   double a3_y[]; ArrayResize(a3_y,4); a3_y[0]=2.0; a3_y[1]=4.0; a3_y[2]=6.0; a3_y[3]=8.0;
+   double a3_z[]; ArrayResize(a3_z,4); a3_z[0]=8.0; a3_z[1]=6.0; a3_z[2]=4.0; a3_z[3]=2.0;
+   double a3_k[]; ArrayResize(a3_k,4); a3_k[0]=1.0; a3_k[1]=1.0; a3_k[2]=1.0; a3_k[3]=1.0;
+   double a3_o1=0.0, a3_o2=0.0, a3_o3=0.0;
+   bool   a3_b1 = CorrFin_Calc(a3_x, a3_y, 4, 3, 4, a3_o1);   // +1
+   bool   a3_b2 = CorrFin_Calc(a3_x, a3_z, 4, 3, 4, a3_o2);   // -1
+   bool   a3_b3 = CorrFin_Calc(a3_k, a3_y, 4, 3, 4, a3_o3);   // false
+   if(!a3_b1 || !a3_b2 || a3_b3 ||
+      MathAbs(a3_o1-1.0)>0.0001 || MathAbs(a3_o2+1.0)>0.0001)
+     { falliti++; Log("[AUTOTEST] 3 CorrFin_Calc DIVERGE"); }
+
+   //--- BLOCCO 4: mediana. Dispari -> centrale; pari -> media dei due
+   //    centrali; vettore vuoto -> 0. MedianaFin su finestra mobile:
+   //    [5,1,9,3,7] tutta -> 5; ultime 3 = {9,3,7} -> 7.
+   blocchi++;
+   double a4_d[]; ArrayResize(a4_d,5);
+   a4_d[0]=1.0; a4_d[1]=2.0; a4_d[2]=3.0; a4_d[3]=4.0; a4_d[4]=5.0;
+   double a4_p[]; ArrayResize(a4_p,4); a4_p[0]=1.0; a4_p[1]=2.0; a4_p[2]=4.0; a4_p[3]=8.0;
+   double a4_m1 = MedianaOrdinata_Calc(a4_d, 5);   // 3
+   double a4_m2 = MedianaOrdinata_Calc(a4_p, 4);   // 3
+   double a4_m3 = MedianaOrdinata_Calc(a4_d, 0);   // 0
+   double a4_v[]; ArrayResize(a4_v,5);
+   a4_v[0]=5.0; a4_v[1]=1.0; a4_v[2]=9.0; a4_v[3]=3.0; a4_v[4]=7.0;
+   double a4_o1=0.0, a4_o2=0.0, a4_o3=0.0;
+   bool   a4_k1 = MedianaFin_Calc(a4_v, 5, 4, 5, a4_o1);   // 5
+   bool   a4_k2 = MedianaFin_Calc(a4_v, 5, 4, 3, a4_o2);   // 7
+   bool   a4_k3 = MedianaFin_Calc(a4_v, 5, 1, 3, a4_o3);   // sborda -> false
+   if(!a4_k1 || !a4_k2 || a4_k3 ||
+      MathAbs(a4_m1-3.0)>0.0001 || MathAbs(a4_m2-3.0)>0.0001 || MathAbs(a4_m3)>0.0001 ||
+      MathAbs(a4_o1-5.0)>0.0001 || MathAbs(a4_o2-7.0)>0.0001)
+     { falliti++; Log("[AUTOTEST] 4 MedianaOrdinata_Calc / MedianaFin_Calc DIVERGONO"); }
+
+   //--- BLOCCO 5: MAD (Iglewicz-Hoaglin). [1,2,3,4,100]: mediana 3,
+   //    scarti |.-3| = {2,1,0,1,97} -> ordinati {0,1,1,2,97} -> MAD 1.
+   //    E' il senso della normalizzazione ROBUSTA: il 100 non la muove.
+   //    Serie costante -> mediana 5, MAD 0 (true: misurato e nullo).
+   blocchi++;
+   double a5_v[]; ArrayResize(a5_v,5);
+   a5_v[0]=1.0; a5_v[1]=2.0; a5_v[2]=3.0; a5_v[3]=4.0; a5_v[4]=100.0;
+   double a5_me=0.0, a5_ma=0.0, a5_me2=0.0, a5_ma2=0.0;
+   bool   a5_k1 = MadFin_Calc(a5_v, 5, 4, 5, a5_me, a5_ma);
+   double a5_c[]; ArrayResize(a5_c,3); a5_c[0]=5.0; a5_c[1]=5.0; a5_c[2]=5.0;
+   bool   a5_k2 = MadFin_Calc(a5_c, 3, 2, 3, a5_me2, a5_ma2);
+   if(!a5_k1 || !a5_k2 ||
+      MathAbs(a5_me-3.0)>0.0001 || MathAbs(a5_ma-1.0)>0.0001 ||
+      MathAbs(a5_me2-5.0)>0.0001 || MathAbs(a5_ma2)>0.0000001)
+     { falliti++; Log("[AUTOTEST] 5 MadFin_Calc DIVERGE"); }
+
+   //--- BLOCCO 6: il rapporto, col guardiano su x <= 0. Un tick sporco
+   //    a zero su un CFD esiste: la divisione per zero diventerebbe un
+   //    SEGNALE FINTO, e un segnale finto e' peggio di nessun segnale.
+   blocchi++;
+   double a6_o1=0.0, a6_o2=1.0, a6_o3=1.0;
+   bool   a6_k1 = Rapporto_Calc(10.0,  4.0, a6_o1);   // 2,5
+   bool   a6_k2 = Rapporto_Calc(10.0,  0.0, a6_o2);   // false
+   bool   a6_k3 = Rapporto_Calc(10.0, -1.0, a6_o3);   // false
+   if(!a6_k1 || a6_k2 || a6_k3 ||
+      MathAbs(a6_o1-2.5)>0.0001 || MathAbs(a6_o2)>0.0001 || MathAbs(a6_o3)>0.0001)
+     { falliti++; Log("[AUTOTEST] 6 Rapporto_Calc DIVERGE"); }
+
+   //--- BLOCCO 7: beta OLS e spread OLS (T5). Con y = 2x il beta DEVE
+   //    valere 2 e lo spread 0: e' la definizione della copertura
+   //    perfetta, cioe' il caso in cui il motore NON deve vedere niente.
+   //    x = [1,2,3,4]: stdev pop = 1,1180340; y = [2,4,6,8]: 2,2360680.
+   //    beta = 1 * 2,2360680 / 1,1180340 = 2; spread = 5 - 2*2,5 = 0.
+   blocchi++;
+   double a7_b=0.0, a7_s=0.0, a7_bk=0.0;
+   bool   a7_k1 = BetaOls_Calc  (a3_x, a3_y, 4, 3, 4, a7_b);
+   bool   a7_k2 = SpreadOls_Calc(a3_x, a3_y, 4, 3, 4, a7_s);
+   bool   a7_k3 = BetaOls_Calc  (a3_k, a3_y, 4, 3, 4, a7_bk);  // x costante -> false
+   if(!a7_k1 || !a7_k2 || a7_k3 ||
+      MathAbs(a7_b-2.0)>0.0001 || MathAbs(a7_s)>0.0001)
+     { falliti++; Log("[AUTOTEST] 7 BetaOls_Calc / SpreadOls_Calc DIVERGONO"); }
+
+   //--- BLOCCO 8: z classico. d = [1,2,3,4,5], fine 4, finestra 3:
+   //    media {3,4,5} = 4, dev 0,8164966 -> z = (5-4)/0,8164966 = 1,2247449.
+   //    Deviazione nulla -> false, MAI zero: zero e' "perfettamente
+   //    allineati", cioe' la condizione di USCITA, e un indefinito letto
+   //    come uscita chiuderebbe posizioni che nessuno ha chiuso.
+   blocchi++;
+   double a8_o=0.0, a8_ko=1.0;
+   bool   a8_k1 = ZClassico_Calc(a4_d, 5, 4, 3, a8_o);
+   bool   a8_k2 = ZClassico_Calc(a2_c, 3, 2, 3, a8_ko);
+   if(!a8_k1 || a8_k2 || MathAbs(a8_o-1.2247449)>0.0001 || MathAbs(a8_ko)>0.0001)
+     { falliti++; Log("[AUTOTEST] 8 ZClassico_Calc DIVERGE"); }
+
+   //--- BLOCCO 9: z MODIFICATO. d = [1,2,3,4,5], finestra 5: mediana 3,
+   //    MAD 1 -> z = 0,6745*(5-3)/1 = 1,3490.
+   //    La costante 0,6745 e' il quartile della normale: senza di lei
+   //    l'ablazione InpModoZScore confronterebbe DUE RIGHELLI DIVERSI.
+   //    Il blocco fallisce anche se z modificato = z classico.
+   blocchi++;
+   double a9_o=0.0, a9_ko=1.0;
+   bool   a9_k1 = ZModificato_Calc(a4_d, 5, 4, 5, a9_o);
+   bool   a9_k2 = ZModificato_Calc(a2_c, 3, 2, 3, a9_ko);
+   if(!a9_k1 || a9_k2 || MathAbs(a9_o-1.3490)>0.0001 || MathAbs(a9_ko)>0.0001)
+     { falliti++; Log("[AUTOTEST] 9 ZModificato_Calc DIVERGE"); }
+
+   //--- BLOCCO 10: L'ATTRAVERSAMENTO, bordi compresi. E' il cuore della
+   //    PORTATA: e' la differenza fra contare uno STATO (z sotto soglia,
+   //    contato a ogni barra) e un EVENTO (z era sopra, ora e' sotto).
+   blocchi++;
+   bool a10_l1 = Attraversamento_Calc( 0.0, -1.5, 1.0, +1);  // si
+   bool a10_l2 = Attraversamento_Calc(-1.2, -1.5, 1.0, +1);  // era gia' sotto -> no
+   bool a10_l3 = Attraversamento_Calc(-1.0, -1.5, 1.0, +1);  // bordo zPrec = -soglia -> si
+   bool a10_l4 = Attraversamento_Calc( 0.0, -1.0, 1.0, +1);  // z fermo SULLA soglia -> no
+   bool a10_s1 = Attraversamento_Calc( 0.0,  1.5, 1.0, -1);  // si
+   bool a10_s2 = Attraversamento_Calc( 1.2,  1.5, 1.0, -1);  // no
+   bool a10_s3 = Attraversamento_Calc( 1.0,  1.5, 1.0, -1);  // si
+   bool a10_s4 = Attraversamento_Calc( 0.0,  1.0, 1.0, -1);  // no
+   bool a10_z  = Attraversamento_Calc( 0.0, -1.5, 0.0, +1);  // soglia nulla -> no
+   bool a10_n  = Attraversamento_Calc( 0.0, -1.5, 1.0,  0);  // lato assente -> no
+   if(!(a10_l1 && !a10_l2 && a10_l3 && !a10_l4 &&
+        a10_s1 && !a10_s2 && a10_s3 && !a10_s4 && !a10_z && !a10_n))
+     { falliti++; Log("[AUTOTEST] 10 Attraversamento_Calc DIVERGE"); }
+
+   //--- BLOCCO 11: la CONVERGENZA, cioe' la definizione operativa di C6.
+   blocchi++;
+   bool a11_l1 = Convergenza_Calc(-0.04, 0.05, +1);  // rientrato
+   bool a11_l2 = Convergenza_Calc(-0.06, 0.05, +1);  // ancora fuori
+   bool a11_l3 = Convergenza_Calc(-0.05, 0.05, +1);  // bordo incluso
+   bool a11_l4 = Convergenza_Calc( 2.00, 0.05, +1);  // ha sfondato dall'altra parte
+   bool a11_s1 = Convergenza_Calc( 0.04, 0.05, -1);
+   bool a11_s2 = Convergenza_Calc( 0.06, 0.05, -1);
+   bool a11_s3 = Convergenza_Calc( 0.05, 0.05, -1);
+   bool a11_s4 = Convergenza_Calc(-2.00, 0.05, -1);
+   bool a11_n  = Convergenza_Calc( 0.00, 0.05,  0);
+   if(!(a11_l1 && !a11_l2 && a11_l3 && a11_l4 &&
+        a11_s1 && !a11_s2 && a11_s3 && a11_s4 && !a11_n))
+     { falliti++; Log("[AUTOTEST] 11 Convergenza_Calc DIVERGE"); }
+
+   //--- BLOCCO 12: la finestra AL MINUTO (T7). 14:30 incluso, 22:00
+   //    ESCLUSA. Piu' il caso a cavallo della mezzanotte e le ore
+   //    impossibili.
+   blocchi++;
+   bool a12_a = InFinestra_Calc(14, 30, 14, 30, 22, 0);  // bordo iniziale: dentro
+   bool a12_b = InFinestra_Calc(14, 29, 14, 30, 22, 0);  // un minuto prima: fuori
+   bool a12_c = InFinestra_Calc(21, 59, 14, 30, 22, 0);  // ultimo minuto: dentro
+   bool a12_d = InFinestra_Calc(22,  0, 14, 30, 22, 0);  // bordo finale ESCLUSO
+   bool a12_e = InFinestra_Calc(23,  0, 14, 30, 22, 0);  // fuori
+   bool a12_f = InFinestra_Calc(23,  0, 22,  0,  2, 0);  // cavallo: dentro
+   bool a12_g = InFinestra_Calc( 1, 59, 22,  0,  2, 0);  // cavallo: dentro
+   bool a12_h = InFinestra_Calc( 2,  0, 22,  0,  2, 0);  // cavallo: fine esclusa
+   bool a12_i = InFinestra_Calc(10,  0, 22,  0,  2, 0);  // cavallo: fuori
+   bool a12_j = InFinestra_Calc(24,  0, 14, 30, 22, 0);  // ora impossibile
+   bool a12_k = InFinestra_Calc(14, 60, 14, 30, 22, 0);  // minuto impossibile
+   bool a12_l = InFinestra_Calc(15,  0, 14, 30, 14, 30); // finestra nulla
+   if(!(a12_a && !a12_b && a12_c && !a12_d && !a12_e &&
+        a12_f && a12_g && !a12_h && !a12_i && !a12_j && !a12_k && !a12_l))
+     { falliti++; Log("[AUTOTEST] 12 InFinestra_Calc DIVERGE"); }
+
+   //--- BLOCCO 13: TRUE RANGE, prima barra compresa (high-low).
+   //    h=[10,11,12] l=[9,10,11] c=[9,5;10,5;11,5] -> TR = [1; 1,5; 1,5]
+   blocchi++;
+   double a13_h[]; ArrayResize(a13_h,3); a13_h[0]=10.0; a13_h[1]=11.0; a13_h[2]=12.0;
+   double a13_l[]; ArrayResize(a13_l,3); a13_l[0]= 9.0; a13_l[1]=10.0; a13_l[2]=11.0;
+   double a13_c[]; ArrayResize(a13_c,3); a13_c[0]= 9.5; a13_c[1]=10.5; a13_c[2]=11.5;
+   double a13_tr[];
+   bool   a13_k1 = TrSerie_Calc(a13_h, a13_l, a13_c, 3, a13_tr);
+   bool   a13_k2 = TrSerie_Calc(a13_h, a13_l, a13_c, 0, a13_tr);   // n < 1 -> false
+   if(!a13_k1 || a13_k2 ||
+      MathAbs(a13_tr[0]-1.0)>0.0001 || MathAbs(a13_tr[1]-1.5)>0.0001 ||
+      MathAbs(a13_tr[2]-1.5)>0.0001)
+     { falliti++; Log("[AUTOTEST] 13 TrSerie_Calc DIVERGE"); }
+
+   //--- BLOCCO 14: ATR nei DUE modi, sullo stesso TR [1; 1,5; 1,5],
+   //    periodo 2. Wilder/RMA: seme 1,25 poi 1,25+0,5*(1,5-1,25)=1,375.
+   //    SMA del TR (modo MT5, default): (1,5+1,5)/2 = 1,5.
+   //    Il blocco fallisce anche se i due VENISSERO UGUALI: se
+   //    coincidessero, T13 sarebbe una bugia scritta in testa al file.
+   blocchi++;
+   double a14_rma[], a14_sma[];
+   bool   a14_k1 = AtrSerie_Calc(a13_tr, 3, 2, true,  a14_rma);
+   bool   a14_k2 = AtrSerie_Calc(a13_tr, 3, 2, false, a14_sma);
+   bool   a14_k3 = AtrSerie_Calc(a13_tr, 3, 5, false, a14_sma);   // n < periodo -> false
+   if(!a14_k1 || !a14_k2 || a14_k3 ||
+      MathAbs(a14_rma[1]-1.25 )>0.0001 || MathAbs(a14_rma[2]-1.375)>0.0001 ||
+      MathAbs(a14_sma[1]-1.25 )>0.0001 || MathAbs(a14_sma[2]-1.5  )>0.0001 ||
+      MathAbs(a14_rma[2]-a14_sma[2]) < 0.0001)
+     { falliti++; Log("[AUTOTEST] 14 AtrSerie_Calc DIVERGE (o le due modalita' coincidono, e allora T13 e' sbagliata)"); }
+
+   //--- BLOCCO 15: conversione in punti indice e RR da mediane.
+   blocchi++;
+   double a15_p1 = PuntiIndice_Calc(12.5, 1.0);   // 12,5
+   double a15_p2 = PuntiIndice_Calc(12.5, 0.5);   // 25
+   double a15_p3 = PuntiIndice_Calc(12.5, 0.0);   // non convertibile -> 0
+   double a15_r1 = RrDaMediane_Calc(6.0, 8.0);    // 0,75
+   double a15_r2 = RrDaMediane_Calc(6.0, 0.0);    // MAE nullo -> 0
+   if(MathAbs(a15_p1-12.5)>0.0001 || MathAbs(a15_p2-25.0)>0.0001 || MathAbs(a15_p3)>0.0001 ||
+      MathAbs(a15_r1-0.75)>0.0001 || MathAbs(a15_r2)>0.0001)
+     { falliti++; Log("[AUTOTEST] 15 PuntiIndice_Calc / RrDaMediane_Calc DIVERGONO"); }
+
+   //--- BLOCCO 16: L'ARITMETICA DEL CANCELLO H8 CONTRO LA TABELLA
+   //    CONGELATA NEL DOSSIER. Non e' un test di comodo: se questa
+   //    formula si muove, si muove IL CANCELLO.
+   //      RR 0,36 -> 79,0% | 0,50 -> 71,7% | 0,73 -> 62,2% | 1,00 -> 53,8%
+   blocchi++;
+   double a16_a = WinRateNecessario_Calc(0.36, REL_H8_E_TARGET_R);
+   double a16_b = WinRateNecessario_Calc(0.50, REL_H8_E_TARGET_R);
+   double a16_c = WinRateNecessario_Calc(0.73, REL_H8_E_TARGET_R);
+   double a16_d = WinRateNecessario_Calc(1.00, REL_H8_E_TARGET_R);
+   double a16_e = WinRateNecessario_Calc(-1.5, REL_H8_E_TARGET_R);   // fuori dominio -> 0
+   if(MathAbs(a16_a-0.790)>0.001 || MathAbs(a16_b-0.717)>0.001 ||
+      MathAbs(a16_c-0.622)>0.001 || MathAbs(a16_d-0.538)>0.001 ||
+      MathAbs(a16_e)>0.0001)
+     { falliti++; Log("[AUTOTEST] 16 WinRateNecessario_Calc NON riproduce la tabella congelata del dossier"); }
+
+   //--- BLOCCO 17: la TABELLA DELLO SPREAD MISURATO. Se un giorno
+   //    qualcuno cambia un numero qui, il cancello C3 cambia in
+   //    silenzio: questo blocco e' il chiavistello.
+   //    Simbolo NON misurato -> -1, e la sonda si rifiuta di partire.
+   blocchi++;
+   double a17_d = SpreadMisurato_Calc("D30EUR");
+   double a17_n = SpreadMisurato_Calc("NASUSD");
+   double a17_u = SpreadMisurato_Calc("U30USD");
+   double a17_s = SpreadMisurato_Calc("D30EUR.cash");   // suffisso di broker
+   double a17_x = SpreadMisurato_Calc("EURUSD");        // non misurato
+   if(MathAbs(a17_d-2.80)>0.0001 || MathAbs(a17_n-1.80)>0.0001 ||
+      MathAbs(a17_u-2.00)>0.0001 || MathAbs(a17_s-2.80)>0.0001 || a17_x > 0.0)
+     { falliti++; Log("[AUTOTEST] 17 SpreadMisurato_Calc DIVERGE dalla tabella misurata del 03/09"); }
+
+   //--- BLOCCO 18: L'ALLINEAMENTO DEI DUE FEED. E' la funzione piu'
+   //    importante del file, e quella che rende una sonda a due feed un
+   //    artefatto se scritta di fretta.
+   //    ty = [100,200,300,400]; tx = [100,300,350,400].
+   //      -> valido = [SI, NO, SI, SI], allineate = 3
+   //      -> la barra 350 e' SOLO METRO: con daConta = 0 si conta (1),
+   //         con daConta = 3 (si conta solo da ty[3] = 400) NON si
+   //         conta (0). E' la correzione del 03/09.
+   blocchi++;
+   datetime a18_ty[]; ArrayResize(a18_ty,4);
+   a18_ty[0]=(datetime)100; a18_ty[1]=(datetime)200; a18_ty[2]=(datetime)300; a18_ty[3]=(datetime)400;
+   datetime a18_tx[]; ArrayResize(a18_tx,4);
+   a18_tx[0]=(datetime)100; a18_tx[1]=(datetime)300; a18_tx[2]=(datetime)350; a18_tx[3]=(datetime)400;
+   double a18_cx[]; ArrayResize(a18_cx,4);
+   a18_cx[0]=10.0; a18_cx[1]=30.0; a18_cx[2]=35.0; a18_cx[3]=40.0;
+   double a18_xa[]; bool a18_va[];
+   int    a18_al=0, a18_so=0;
+   bool   a18_k1 = AllineaSerie_Calc(a18_ty, 4, a18_tx, a18_cx, 4, 0, a18_xa, a18_va, a18_al, a18_so);
+   int    a18_al2=0, a18_so2=0;
+   double a18_xa2[]; bool a18_va2[];
+   bool   a18_k2 = AllineaSerie_Calc(a18_ty, 4, a18_tx, a18_cx, 4, 3, a18_xa2, a18_va2, a18_al2, a18_so2);
+   int    a18_al3=0, a18_so3=0;
+   double a18_xa3[]; bool a18_va3[];
+   bool   a18_k3 = AllineaSerie_Calc(a18_ty, 4, a18_tx, a18_cx, 0, 0, a18_xa3, a18_va3, a18_al3, a18_so3);
+   int    a18_al4=0, a18_so4=0;
+   bool   a18_k4 = AllineaSerie_Calc(a18_ty, 0, a18_tx, a18_cx, 4, 0, a18_xa3, a18_va3, a18_al4, a18_so4);
+   if(!a18_k1 || !a18_k2 || !a18_k3 || a18_k4 ||
+      a18_al != 3 || a18_so != 1 || a18_al2 != 3 || a18_so2 != 0 ||
+      a18_al3 != 0 ||
+      !a18_va[0] || a18_va[1] || !a18_va[2] || !a18_va[3] ||
+      MathAbs(a18_xa[0]-10.0)>0.0001 || MathAbs(a18_xa[2]-30.0)>0.0001 ||
+      MathAbs(a18_xa[3]-40.0)>0.0001 || MathAbs(a18_xa[1])>0.0001 ||
+      a18_va3[0] || a18_va3[3])
+     { falliti++; Log("[AUTOTEST] 18 AllineaSerie_Calc DIVERGE (e con lei tutta la sincronizzazione dei due feed)"); }
+
+   //--- BLOCCO 19: quante barre indietro guarda lo z-score. Non e' un
+   //    dettaglio: e' l'ampiezza su cui si PRETENDE l'allineamento (T2).
+   blocchi++;
+   int a19_r = SpanRichiesto_Calc(20, 0);   // 2n+1 = 41
+   int a19_b = SpanRichiesto_Calc(20, 1);   // 3n+1 = 61
+   int a19_z = SpanRichiesto_Calc( 0, 0);   // 0
+   int a19_n = SpanRichiesto_Calc(-3, 1);   // 0
+   if(a19_r != 41 || a19_b != 61 || a19_z != 0 || a19_n != 0)
+     { falliti++; Log("[AUTOTEST] 19 SpanRichiesto_Calc DIVERGE"); }
+
+   //--- BLOCCO 20: LA CATENA INTERA, a mano. finestra 3, modo rapporto,
+   //    z classico, metro costante a 1 (cosi' rapporto = gamba).
+   //      y = [1,2,3,5,4,7,6], fine = 6
+   //      s = y[1..6]           = [2, 3, 5, 4, 7, 6]
+   //      d = s - sma(s,3)      = [5/3, 0, 5/3, 1/3]
+   //      z    su {0; 5/3; 1/3} : media 2/3, dev 0,7200823 -> -0,4629100
+   //      zPrec su {5/3; 0; 5/3}: media 10/9, dev 0,7856742 -> +0,7071068
+   //    Se un indice si sposta di uno, questi due numeri si scambiano o
+   //    cambiano segno: e' un test che VEDE l'errore piu' probabile.
+   blocchi++;
+   double a20_y[]; ArrayResize(a20_y,7);
+   a20_y[0]=1.0; a20_y[1]=2.0; a20_y[2]=3.0; a20_y[3]=5.0;
+   a20_y[4]=4.0; a20_y[5]=7.0; a20_y[6]=6.0;
+   double a20_x[]; ArrayResize(a20_x,7);
+   for(int a20_i = 0; a20_i < 7; a20_i++) a20_x[a20_i] = 1.0;
+   double a20_z=0.0, a20_zp=0.0;
+   bool   a20_k1 = ZDueBarre_Calc(a20_y, a20_x, 7, 6, 3, 0, 0, a20_z, a20_zp);
+   double a20_z2=0.0, a20_zp2=0.0;
+   bool   a20_k2 = ZDueBarre_Calc(a20_y, a20_x, 7, 3, 3, 0, 0, a20_z2, a20_zp2);  // span 7 > fine+1 -> false
+   double a20_z3=0.0, a20_zp3=0.0;
+   bool   a20_k3 = ZDueBarre_Calc(a20_y, a20_x, 7, 6, 3, 1, 0, a20_z3, a20_zp3);  // beta OLS: span 10 -> false
+   double a20_z4=0.0, a20_zp4=0.0;
+   bool   a20_k4 = ZDueBarre_Calc(a20_y, a20_x, 7, 0, 3, 0, 0, a20_z4, a20_zp4);  // fine < 1 -> false
+   if(!a20_k1 || a20_k2 || a20_k3 || a20_k4 ||
+      MathAbs(a20_z + 0.4629100)>0.0001 || MathAbs(a20_zp - 0.7071068)>0.0001)
+     { falliti++; Log("[AUTOTEST] 20 ZDueBarre_Calc DIVERGE (la catena rapporto -> scarto -> z e' rotta)"); }
+
+   //--- BLOCCO 21: MFE e MAE. Escono ENTRAMBI come distanze POSITIVE:
+   //    il segno lo porta il LATO, non il numero. E sono MASSIMI: una
+   //    barra che non spinge non abbassa niente.
+   blocchi++;
+   double a21_f = 0.0, a21_a = 0.0;
+   AggiornaEscursione_Calc(+1, 100.0, 105.0, 98.0, 1.0, a21_f, a21_a);   // mfe 5, mae 2
+   AggiornaEscursione_Calc(+1, 100.0, 103.0, 95.0, 1.0, a21_f, a21_a);   // mfe resta 5, mae 5
+   double a21_g = 0.0, a21_b = 0.0;
+   AggiornaEscursione_Calc(-1, 100.0, 105.0, 98.0, 1.0, a21_g, a21_b);   // short: mfe 2, mae 5
+   double a21_h = 0.0, a21_c = 0.0;
+   AggiornaEscursione_Calc( 0, 100.0, 105.0, 98.0, 1.0, a21_h, a21_c);   // lato assente: niente
+   if(MathAbs(a21_f-5.0)>0.0001 || MathAbs(a21_a-5.0)>0.0001 ||
+      MathAbs(a21_g-2.0)>0.0001 || MathAbs(a21_b-5.0)>0.0001 ||
+      MathAbs(a21_h)>0.0001    || MathAbs(a21_c)>0.0001)
+     { falliti++; Log("[AUTOTEST] 21 AggiornaEscursione_Calc DIVERGE"); }
+
+   gAutotestFalliti = falliti;
+   gAutotestBlocchi = blocchi;
+   Log(StringFormat("AUTOTEST: %d BLOCCHI SU %d PASSATI (falliti %d). L'esito VERO esce nelle colonne 'Autotest Falliti' e 'Autotest Blocchi': in ottimizzazione questa riga non la legge nessuno.",
+                    blocchi - falliti, blocchi, falliti));
+  }
+
+//==================================================================//
+//  OPTFRAME (inlined, self-contained) - export automatico dei      //
+//  risultati di OTTIMIZZAZIONE in CSV. NON richiede include.       //
+//  Scrive MQL5\Files\OptResults_<EA>_<Symbol>.csv.                 //
+//  In backtest singolo e' inerte (FrameAdd gira in ottimizzazione).//
+//==================================================================//
+#define OPTFRAME_NAME "OptFrame"
+#define OPTFRAME_ID   1
+
+string OptFrame_FileName()
+  {
+   return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
+  }
+
+//+------------------------------------------------------------------+
+//| Conta le occorrenze di UN carattere in una stringa. Serve al       |
+//| controllo automatico dell'intestazione: vedi ControllaColonne.     |
+//+------------------------------------------------------------------+
+int ContaCarattere(const string s, const ushort c)
+  {
+   int n = 0;
+   int L = StringLen(s);
+   for(int i = 0; i < L; i++) if(StringGetCharacter(s, i) == c) n++;
+   return(n);
+  }
+
+//+------------------------------------------------------------------+
+//| IL CONTROLLO CHE LA SONDA M0PB NON AVEVA, E CHE LI' E' COSTATO UN  |
+//| CSV SFASATO. 'stats', l'intestazione e la riga di formato SI       |
+//| TOCCANO SEMPRE INSIEME: una colonna aggiunta a uno solo dei tre    |
+//| sposta TUTTI i numeri di una casella, e chi legge trova il numero  |
+//| sbagliato sotto il nome giusto -- senza nessun errore a schermo.   |
+//| Qui si contano le VIRGOLE dell'intestazione e i '%' del formato e  |
+//| si URLA se non tornano. Il controllo non ripara: dichiara.         |
+//|   nomi attesi          = REL_NSTATS + 3 (Pass, Simbolo, Periodo)   |
+//|   virgole attese       = nomi - 1                                  |
+//|   specificatori attesi = nomi                                      |
+//+------------------------------------------------------------------+
+bool ControllaColonne(const string head, const string fmt)
+  {
+   int virgole = ContaCarattere(head, ',');
+   int perc    = ContaCarattere(fmt,  '%');
+   int nomi    = REL_NSTATS + 3;
+   bool ok = (virgole == nomi - 1) && (perc == nomi);
+   if(!ok)
+      PrintFormat("### CSV SFASATO ### intestazione con %d virgole (attese %d) e formato con %d specificatori (attesi %d) per REL_NSTATS = %d. LE COLONNE NON CORRISPONDONO AI NUMERI: NON LEGGERE QUESTO CSV.",
+                  virgole, nomi - 1, perc, nomi, REL_NSTATS);
+   return(ok);
+  }
+
+//+------------------------------------------------------------------+
+//| Il referto a schermo del BACKTEST SINGOLO, un lato per volta, coi  |
+//| cancelli GIA' applicati. Gli stessi numeri escono in colonna: qui  |
+//| si stampano perche' nella corsa singola le Print SI LEGGONO.       |
+//+------------------------------------------------------------------+
+void StampaLatoRelativo(const string lato, const long grezzi, const long esegui,
+                        const double perGiorno, const double mfeMed, const double maeMed,
+                        const double rr, const long chiuse, const long converg,
+                        const double nonConvPct, const double tenuta, const long maxGiorno)
+  {
+   Print("--------------------------------------------------------------");
+   PrintFormat("[RELATIVO-SONDA] ===== LATO %s =====", lato);
+   PrintFormat("   C1 eseguibili/giorno  : %.3f   (eseguibili %d su %d grezzi)",
+               perGiorno, (int)esegui, (int)grezzi);
+   PrintFormat("   C3 MFE mediana        : %.3f punti indice = %.2f x lo spread MISURATO (%.2f)   %s",
+               mfeMed, (gSpreadMisurato > 0.0 ? mfeMed/gSpreadMisurato : 0.0), gSpreadMisurato,
+               (mfeMed < gSogliaC3 ? "<<< C3 NON PASSATO: SCARTO" : "C3 passato"));
+   PrintFormat("   C4 MAE mediana        : %.3f punti indice   (nessun cancello: e' il pavimento dello SL)", maeMed);
+   PrintFormat("   C5 RR = C3/C4         : %.4f   %s", rr,
+               (rr < REL_C5_RR_MINIMO ? "<<< C5 NON PASSATO: SCARTO PER ARITMETICA" : "C5 passato"));
+   PrintFormat("      win rate NECESSARIO per E >= %.3fR : %.1f%%",
+               REL_H8_E_TARGET_R, 100.0*WinRateNecessario_Calc(rr, REL_H8_E_TARGET_R));
+   PrintFormat("   C6 non convergute     : %.2f%%   (convergute %d su %d chiuse)   %s",
+               nonConvPct, (int)converg, (int)chiuse,
+               (nonConvPct > REL_C6_NON_CONVERGUTE_KO ? "<<< C6 NON PASSATO: NON E' CONVERGENZA, E' MOMENTUM TRAVESTITO"
+                                                      : (nonConvPct > REL_C6_NON_CONVERGUTE_SOSP ? "C6 SOSPESO" : "C6 passato")));
+   PrintFormat("   C8 tenuta mediana     : %.2f barre   %s", tenuta,
+               (tenuta < REL_C8_TENUTA_BARRE_MIN ? "<<< sotto il muro d'attrito: SOSPESO" : "sopra il muro d'attrito"));
+   PrintFormat("   C7 massimo in un giorno: %d   (e' da qui che si taglia InpMaxTradesPerDay, SUI DATI)", (int)maxGiorno);
+  }
+
+double OnTester()
+  {
+   //--- LA CHIUSURA DELLA CORSA, e sono tre gesti che nessuna barra
+   //    fara' piu': la posizione finta ancora aperta si chiude col
+   //    motivo 4 (FINE CORSA) ed e' ESCLUSA da C6 -- non e' una
+   //    divergenza che non converge, e' il bordo della corsa;
+   //    gli osservatori a meta' orizzonte si contano e si buttano;
+   //    l'ultima giornata si chiude a mano.
+   if(gPosAttiva)
+      ChiudiPosizioneFinta(4, iTime(_Symbol, PERIOD_CURRENT, 0), iOpen(_Symbol, PERIOD_CURRENT, 0));
+   ScartaOsservatoriIncompleti();
+   ChiudiGiornata();
+   gDayStamp = -1;
+
+   //--- LE MEDIANE. Tutte in PUNTI INDICE salvo la tenuta, in BARRE.
+   double mfeMedL = Mediana(gMfeL, gNMfeL);
+   double mfeMedS = Mediana(gMfeS, gNMfeS);
+   double maeMedL = Mediana(gMaeL, gNMaeL);
+   double maeMedS = Mediana(gMaeS, gNMaeS);
+   double rrL     = RrDaMediane_Calc(mfeMedL, maeMedL);
+   double rrS     = RrDaMediane_Calc(mfeMedS, maeMedS);
+   double tenMedL = Mediana(gTenL, gNTenL);
+   double tenMedS = Mediana(gTenS, gNTenS);
+
+   //--- la tenuta dei DUE lati insieme: si accorpano i campioni, NON si
+   //    fa la media delle due mediane (che non e' una mediana).
+   double tenTutte[];
+   int    nTen = gNTenL + gNTenS;
+   double tenMedT = 0.0;
+   if(nTen > 0 && ArrayResize(tenTutte, nTen) == nTen)
+     {
+      for(int i = 0; i < gNTenL; i++) tenTutte[i]          = gTenL[i];
+      for(int j = 0; j < gNTenS; j++) tenTutte[gNTenL + j] = gTenS[j];
+      tenMedT = Mediana(tenTutte, nTen);
+     }
+
+   double mfeOrMedL = Mediana(gMfeOrL, gNMfeOrL);
+   double mfeOrMedS = Mediana(gMfeOrS, gNMfeOrS);
+   double maeOrMedL = Mediana(gMaeOrL, gNMaeOrL);
+   double maeOrMedS = Mediana(gMaeOrS, gNMaeOrS);
+   double movOrMedL = Mediana(gMovOrL, gNMovOrL);
+   double movOrMedS = Mediana(gMovOrS, gNMovOrS);
+   double atrMed    = Mediana(gAtrPts, gNAtr);
+
+   //--- C1: PORTATA. Il denominatore sono i GIORNI CONTATI (T15), cioe'
+   //    i giorni con almeno una barra valutata dentro la finestra.
+   double gg    = (double)gGiorniContati;
+   double eseGL = (gg > 0.0) ? (double)gEseguibiliL/gg : 0.0;
+   double eseGS = (gg > 0.0) ? (double)gEseguibiliS/gg : 0.0;
+   double eseGT = eseGL + eseGS;
+   double greGT = (gg > 0.0) ? (double)(gGrezziL + gGrezziS)/gg : 0.0;
+   double c1Esito = (eseGT >= REL_C1_ESEGUIBILI_GIORNO) ? 1.0 : 0.0;
+
+   //--- C2: GIORNI SPAIATI. NON e' un cancello di merito: dice quanto i
+   //    calendari sfalsati sporcano il campione.
+   double spaiPct = (gg > 0.0) ? 100.0*(double)gGiorniSpaiati/gg : 0.0;
+   double c2Esito = (spaiPct <= REL_C2_GIORNI_SPAIATI_PCT) ? 1.0 : 0.0;
+
+   //--- C3: TAGLIA, contro lo spread MISURATO (mediana oraria PEGGIORE
+   //    nelle ore di lavoro, clausola severa). 0 = scarto, 1 = passa,
+   //    2 = passa LARGO (> 6x). Nessuna fascia "sospeso": il debito
+   //    dello spread e' stato pagato il 03/09.
+   double largo   = REL_C3_MULTIPLO_LARGO*gSpreadMisurato;
+   double c3L     = (mfeMedL >  largo) ? 2.0 : ((mfeMedL >= gSogliaC3) ? 1.0 : 0.0);
+   double c3S     = (mfeMedS >  largo) ? 2.0 : ((mfeMedS >= gSogliaC3) ? 1.0 : 0.0);
+   double mfeSpL  = (gSpreadMisurato > 0.0) ? mfeMedL/gSpreadMisurato : 0.0;
+   double mfeSpS  = (gSpreadMisurato > 0.0) ? mfeMedS/gSpreadMisurato : 0.0;
+   double c5L     = (rrL >= REL_C5_RR_MINIMO) ? 1.0 : 0.0;
+   double c5S     = (rrS >= REL_C5_RR_MINIMO) ? 1.0 : 0.0;
+
+   //--- C6: LA CONDIZIONE DI MORTE DELLA TESI. Denominatore = posizioni
+   //    finte CHIUSE (fine corsa esclusa). Se il denominatore e' zero il
+   //    numero non esiste: si scrive 0 e lo dice la colonna "Chiuse".
+   double nonConvL = (gChiuseL > 0) ? 100.0*(double)(gChiuseL - gConvergL)/(double)gChiuseL : 0.0;
+   double nonConvS = (gChiuseS > 0) ? 100.0*(double)(gChiuseS - gConvergS)/(double)gChiuseS : 0.0;
+   long   chiuseT  = gChiuseL + gChiuseS;
+   long   convT    = gConvergL + gConvergS;
+   double nonConvT = (chiuseT > 0) ? 100.0*(double)(chiuseT - convT)/(double)chiuseT : 0.0;
+   double c6Esito  = (nonConvT >  REL_C6_NON_CONVERGUTE_KO)   ? 0.0
+                   : ((nonConvT > REL_C6_NON_CONVERGUTE_SOSP) ? 1.0 : 2.0);
+
+   //--- C7: cap di rischio aperto (firmato il 18/08). Se il massimo
+   //    giornaliero misurato porta il rischio aperto oltre il cap,
+   //    InpMaxTradesPerDay entra nell'EA DAL PRIMO ROUND.
+   double rischioMax = (double)gMaxGiornoTot*REL_C7_RISCHIO_PER_TRADE;
+   double c7Cap      = (rischioMax > REL_C7_CAP_RISCHIO_APERTO) ? 1.0 : 0.0;
+
+   //--- C8: tenuta e clausola HFT delle prop. La quota sotto 60 secondi
+   //    e' un COLLAUDO (T12): su M5 la tenuta minima e' 300 s, quindi
+   //    DEVE venire 0,00%. Se non viene zero, e' rotta la contabilita'
+   //    dei tempi, non e' una scoperta sul mercato.
+   double sotto60Pct = (chiuseT > 0) ? 100.0*(double)(gSotto60L + gSotto60S)/(double)chiuseT : 0.0;
+   double c8Esito    = (sotto60Pct >= REL_C8_QUOTA_SOTTO60_KO) ? 0.0
+                     : ((tenMedT   <  REL_C8_TENUTA_BARRE_MIN) ? 1.0 : 2.0);
+
+   double atrDiv = (gAtrDivN > 0) ? gAtrDivRelSom/(double)gAtrDivN : 0.0;
+
+   //--- la profondita' VERA dello storico dei due feed. E' il debito (a)
+   //    lasciato aperto dalla bozza: "@DAQUANDO 2024.09.26 e' misurato
+   //    su D30EUR e NASUSD; su U30USD NON e' stato verificato".
+   //    Qui si LEGGE, e a fine corsa la serie del metro e' sincronizzata.
+   double metroPrima = (double)(long)SeriesInfoInteger(InpSimboloMetro, PERIOD_CURRENT, SERIES_FIRSTDATE);
+   double gambaPrima = (double)(long)SeriesInfoInteger(_Symbol,        PERIOD_CURRENT, SERIES_FIRSTDATE);
+
+   //--- REFERTO A SCHERMO (corsa singola).
+   Print("==============================================================");
+   PrintFormat("[RELATIVO-SONDA] GAMBA %s (si scambia) contro METRO %s (si legge), %s - etichetta '%s'. NESSUN ORDINE APERTO: e' un contatore.",
+               _Symbol, InpSimboloMetro, EnumToString((ENUM_TIMEFRAMES)Period()), InpTag);
+   PrintFormat("   motore: %s -> scarto -> z %s, finestra n=%d, ingresso %.2f sigma, convergenza %.2f sigma",
+               (InpModoSpread == 1 ? "spread beta OLS" : "rapporto gamba/metro"),
+               (InpModoZScore == 1 ? "MODIFICATO mediana/MAD" : "classico media/deviazione"),
+               InpFinestraN, InpSogliaIngressoSigma, InpSogliaUscitaSigma);
+   PrintFormat("   barre valutate %d | fuori finestra %d | saltate per dati %d | giorni contati %d",
+               (int)gBarreValutate, (int)gBarreFuoriFinestra, (int)gBarreSaltateDati, (int)gGiorniContati);
+   PrintFormat("   DUE FEED: metro mancante sulla barra di segnale %d | valutazioni perse per buco nella coda %d | valutazioni con barre di SOLO metro %d | z non calcolabile %d",
+               (int)gMetroMancantiUltima, (int)gValutazioniPerseBuco, (int)gValutazioniSoloMetro, (int)gZNonCalcolabile);
+   PrintFormat("   C2 giorni spaiati: %d su %d = %.2f%%   %s",
+               (int)gGiorniSpaiati, (int)gGiorniContati, spaiPct,
+               (spaiPct > REL_C2_GIORNI_SPAIATI_PCT ? "<<< oltre il 10%: la sonda va rifatta filtrando quei giorni, e si dichiara" : "sotto il 10%"));
+   PrintFormat("   COLLAUDO T6 (deve essere ZERO): attraversamenti scartati perche' era aperto l'ALTRO lato = %d",
+               (int)gOccupatoAltroLato);
+   PrintFormat("   COLLAUDO T12 (deve essere 0,00%%): tenuta sotto 60 secondi = %.2f%%", sotto60Pct);
+   PrintFormat("   COLLAUDO T13: scarto medio contro iATR = %.4f%% (con InpAtrModoRma=false atteso ~0; se non lo e', la convenzione di iATR e' Wilder e VA SCRITTO)", atrDiv);
+   PrintFormat("   COLLAUDO T14: punto indice = %.5f in prezzo (deve valere 1,00 sui tre indici)", gPuntoIndice);
+   PrintFormat("   AUTOTEST: falliti %d su %d blocchi (-1 = NON eseguito, che non e' 'passato')",
+               gAutotestFalliti, gAutotestBlocchi);
+   PrintFormat("   storico: prima barra GAMBA %s | prima barra METRO %s (il pavimento 2024.09.26 e' misurato su D30EUR/NASUSD, su U30USD lo dice QUESTA riga)",
+               TimeToString((datetime)(long)gambaPrima, TIME_DATE|TIME_MINUTES),
+               TimeToString((datetime)(long)metroPrima, TIME_DATE|TIME_MINUTES));
+   if(gTroncato)
+      Print("   >>> ATTENZIONE: raggiunto il tetto dei campioni: LE MEDIANE SONO TRONCATE e non vanno lette.");
+
+   StampaLatoRelativo("LONG",  gGrezziL, gEseguibiliL, eseGL, mfeMedL, maeMedL, rrL,
+                      gChiuseL, gConvergL, nonConvL, tenMedL, gMaxGiornoL);
+   StampaLatoRelativo("SHORT", gGrezziS, gEseguibiliS, eseGS, mfeMedS, maeMedS, rrS,
+                      gChiuseS, gConvergS, nonConvS, tenMedS, gMaxGiornoS);
+
+   Print("--------------------------------------------------------------");
+   PrintFormat("[RELATIVO-SONDA] C1 SOMMA DEI DUE LATI: %.3f eseguibili/giorno (pavimento %.2f)   %s",
+               eseGT, REL_C1_ESEGUIBILI_GIORNO,
+               (eseGT < REL_C1_ESEGUIBILI_GIORNO ? "<<< C1 NON PASSATO: SCARTO IMMEDIATO" : "C1 passato"));
+   PrintFormat("   C6 SOMMA DEI DUE LATI: %.2f%% non convergute su %d chiuse   %s",
+               nonConvT, (int)chiuseT,
+               (c6Esito == 0.0 ? "<<< C6 NON PASSATO: NON E' CONVERGENZA, E' MOMENTUM TRAVESTITO -- muore la famiglia valore-relativo"
+                               : (c6Esito == 1.0 ? "C6 SOSPESO (25-40%)" : "C6 passato")));
+   PrintFormat("   C7: massimo %d eseguibili in un giorno -> rischio aperto %.2f%% contro un cap di %.2f%%   %s",
+               (int)gMaxGiornoTot, rischioMax, REL_C7_CAP_RISCHIO_APERTO,
+               (c7Cap > 0.0 ? "<<< InpMaxTradesPerDay VA NELL'EA DAL PRIMO ROUND" : "il cap regge senza limite giornaliero"));
+   PrintFormat("   C8: tenuta mediana (due lati) %.2f barre contro un muro di %.0f", tenMedT, REL_C8_TENUTA_BARRE_MIN);
+   PrintFormat("   giorni con almeno 2 eseguibili %d | giorni a zero %d | uscite di FINE CORSA escluse da C6: %d",
+               (int)gGiorni2Tot, (int)gGiorniZero, (int)gFineCorsa);
+   Print("[RELATIVO-SONDA] questa corsa NON promuove niente e NON dice se il motore guadagna: e' un conteggio. Il merito si misura a tick, dopo, e solo se questi numeri reggono.");
+   Print("==============================================================");
+
+   //--- ATTENZIONE: 'stats', l'intestazione di OnTesterDeinit e le sue
+   //    tre righe di formato SI TOCCANO SEMPRE INSIEME. Il controllo
+   //    automatico (ControllaColonne) conta virgole e '%' e URLA: e' il
+   //    guardiano che sulla SondaM0PB non c'era.
+   //    CONTEGGIO CONGELATO: REL_NSTATS = 93 valori -> 96 nomi
+   //    (Pass, Simbolo, Periodo + 93) -> 96 specificatori -> 96 argomenti.
+   double stats[REL_NSTATS];
+   stats[0]  = (double)gGrezziL;
+   stats[1]  = (double)gGrezziS;
+   stats[2]  = (double)gEseguibiliL;
+   stats[3]  = (double)gEseguibiliS;
+   stats[4]  = (double)gGiorniContati;
+   stats[5]  = eseGL;                       // C1 lato LONG
+   stats[6]  = eseGS;                       // C1 lato SHORT
+   stats[7]  = eseGT;                       // C1 SOMMA: il cancello del mandato
+   stats[8]  = greGT;
+   stats[9]  = c1Esito;
+   stats[10] = mfeMedL;                     // C3 LONG
+   stats[11] = mfeMedS;                     // C3 SHORT
+   stats[12] = maeMedL;                     // C4 LONG
+   stats[13] = maeMedS;                     // C4 SHORT
+   stats[14] = rrL;                         // C5 LONG
+   stats[15] = rrS;                         // C5 SHORT
+   stats[16] = 100.0*WinRateNecessario_Calc(rrL, REL_H8_E_TARGET_R);
+   stats[17] = 100.0*WinRateNecessario_Calc(rrS, REL_H8_E_TARGET_R);
+   stats[18] = mfeSpL;
+   stats[19] = mfeSpS;
+   stats[20] = gSpreadMisurato;
+   stats[21] = gSogliaC3;
+   stats[22] = c3L;
+   stats[23] = c3S;
+   stats[24] = c5L;
+   stats[25] = c5S;
+   stats[26] = (double)gChiuseL;
+   stats[27] = (double)gChiuseS;
+   stats[28] = (double)gConvergL;
+   stats[29] = (double)gConvergS;
+   stats[30] = nonConvL;
+   stats[31] = nonConvS;
+   stats[32] = nonConvT;                    // C6: il numero che uccide o salva la tesi
+   stats[33] = (double)gFineSessL;
+   stats[34] = (double)gFineSessS;
+   stats[35] = (double)gTettoL;
+   stats[36] = (double)gTettoS;
+   stats[37] = (double)gFineCorsa;
+   stats[38] = c6Esito;
+   stats[39] = (double)gMaxGiornoL;
+   stats[40] = (double)gMaxGiornoS;
+   stats[41] = (double)gMaxGiornoTot;       // C7
+   stats[42] = rischioMax;
+   stats[43] = c7Cap;
+   stats[44] = (double)gGiorni2Tot;
+   stats[45] = (double)gGiorniZero;
+   stats[46] = tenMedL;                     // C8 LONG
+   stats[47] = tenMedS;                     // C8 SHORT
+   stats[48] = tenMedT;                     // C8 due lati
+   stats[49] = sotto60Pct;                  // collaudo T12: deve essere 0
+   stats[50] = c8Esito;
+   stats[51] = mfeOrMedL;                   // T11: indipendenti dalla regola d'uscita
+   stats[52] = mfeOrMedS;
+   stats[53] = maeOrMedL;
+   stats[54] = maeOrMedS;
+   stats[55] = movOrMedL;                   // l'unico numero SEGNATO della sonda
+   stats[56] = movOrMedS;
+   stats[57] = (double)gNMfeOrL;            // numerosita' VERA delle mediane a orizzonte
+   stats[58] = (double)gNMfeOrS;
+   stats[59] = (double)gOsIncompletiL;
+   stats[60] = (double)gOsIncompletiS;
+   stats[61] = (double)gBarreValutate;
+   stats[62] = (double)gBarreFuoriFinestra;
+   stats[63] = (double)gBarreSaltateDati;
+   stats[64] = (double)gMetroMancantiUltima;   // T1
+   stats[65] = (double)gValutazioniPerseBuco;  // T2: il COSTO della regola stretta
+   stats[66] = (double)gValutazioniSoloMetro;  // T3: l'altra meta' dei giorni spaiati
+   stats[67] = (double)gBarreSenzaZAperta;
+   stats[68] = (double)gZNonCalcolabile;
+   stats[69] = (double)gGiorniSpaiati;
+   stats[70] = spaiPct;                     // C2
+   stats[71] = c2Esito;
+   stats[72] = (double)gAttrIngressoFuori;  // T7
+   stats[73] = (double)gAttrPrimaBarra;     // T9
+   stats[74] = (double)gOccupatoStessoL;
+   stats[75] = (double)gOccupatoStessoS;
+   stats[76] = (double)gOccupatoAltroLato;  // COLLAUDO T6: DEVE VENIRE ZERO
+   stats[77] = atrMed;                      // eco T13
+   stats[78] = atrDiv;                      // collaudo T13
+   stats[79] = gPuntoIndice;                // collaudo T14: deve valere 1,00
+   stats[80] = metroPrima;
+   stats[81] = gambaPrima;
+   stats[82] = (gTroncato ? 1.0 : 0.0);
+   stats[83] = (double)gAutotestFalliti;    // 0 = passati; >0 DIVERGE; -1 NON eseguito
+   stats[84] = (double)gAutotestBlocchi;
+   stats[85] = (double)InpFinestraN;        // eco degli ASSI e dei pin
+   stats[86] = InpSogliaIngressoSigma;
+   stats[87] = InpSogliaUscitaSigma;
+   stats[88] = (double)InpModoSpread;
+   stats[89] = (double)InpModoZScore;
+   stats[90] = (double)InpBarreMaxTenuta;
+   stats[91] = (double)InpBarreOrizzonte;
+   stats[92] = (double)InpLato;
+
+   if(InpScriviCsv && !MQLInfoInteger(MQL_OPTIMIZATION)) ScriviCsvTotali(stats);
+
+   //--- MT5 vuole un criterio di ottimizzazione. Qui NON si sceglie
+   //    niente e NESSUNA CELLA VIENE PROMOSSA: si dichiara il numero di
+   //    attraversamenti ESEGUIBILI, che e' cio' che la sonda conta.
+   //    Leggerlo per sbaglio come "il migliore" vorrebbe dire "quello
+   //    che ha contato di piu'", e contare di piu' NON e' un merito:
+   //    la finestra n e' proprio la manopola della frequenza, quindi il
+   //    massimo di questo criterio e' la finestra piu' corta, sempre.
+   double criterion = (double)(gEseguibiliL + gEseguibiliS);
+   FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
+   return(criterion);
+  }
+
+//+------------------------------------------------------------------+
+//| CSV dei totali della corsa singola: gli stessi numeri delle        |
+//| colonne, in un file, cosi' il referto non dipende dal log.         |
+//+------------------------------------------------------------------+
+void ScriviCsvTotali(const double &s[])
+  {
+   string f = StringFormat("ABTG_SondaRelativo_%s_%s_%s_totali.csv",
+                           _Symbol, InpSimboloMetro, EnumToString((ENUM_TIMEFRAMES)Period()));
+   int h = FileOpen(f, FILE_WRITE|FILE_CSV|FILE_ANSI, ";");
+   if(h == INVALID_HANDLE)
+     { Log(StringFormat("CSV totali non scritto (err %d).", GetLastError())); return; }
+
+   FileWrite(h, "cancello", "grandezza", "LONG", "SHORT", "soglia congelata");
+   FileWrite(h, "C1", "eseguibili al giorno", DoubleToString(s[5], 3), DoubleToString(s[6], 3),
+             StringFormat("somma dei due lati %.3f, pavimento %.2f", s[7], REL_C1_ESEGUIBILI_GIORNO));
+   FileWrite(h, "C2", "giorni spaiati pct", DoubleToString(s[70], 2), "",
+             StringFormat("oltre %.0f%% la sonda va rifatta filtrando quei giorni", REL_C2_GIORNI_SPAIATI_PCT));
+   FileWrite(h, "C3", "MFE mediana punti indice", DoubleToString(s[10], 3), DoubleToString(s[11], 3),
+             StringFormat(">= %.2f = %.0f x spread MISURATO %.2f (ora peggiore 14-21)",
+                          s[21], REL_C3_MULTIPLO_SCARTO, s[20]));
+   FileWrite(h, "C3", "MFE in multipli di spread", DoubleToString(s[18], 3), DoubleToString(s[19], 3),
+             StringFormat("< %.0f scarto | > %.0f passa largo", REL_C3_MULTIPLO_SCARTO, REL_C3_MULTIPLO_LARGO));
+   FileWrite(h, "C4", "MAE mediana punti indice", DoubleToString(s[12], 3), DoubleToString(s[13], 3),
+             "nessun cancello: e' il pavimento dello SL (R109)");
+   FileWrite(h, "C5", "RR = C3/C4", DoubleToString(s[14], 4), DoubleToString(s[15], 4),
+             StringFormat(">= %.2f, altrimenti SCARTO PER ARITMETICA (H8)", REL_C5_RR_MINIMO));
+   FileWrite(h, "C5", "win rate necessario pct", DoubleToString(s[16], 2), DoubleToString(s[17], 2),
+             StringFormat("perche' E >= %.3fR", REL_H8_E_TARGET_R));
+   FileWrite(h, "C6", "non convergute pct", DoubleToString(s[30], 2), DoubleToString(s[31], 2),
+             StringFormat("due lati %.2f%% | > %.0f scarto, %.0f-%.0f sospeso",
+                          s[32], REL_C6_NON_CONVERGUTE_KO, REL_C6_NON_CONVERGUTE_SOSP, REL_C6_NON_CONVERGUTE_KO));
+   FileWrite(h, "C6", "chiuse / convergute", StringFormat("%.0f / %.0f", s[26], s[28]),
+             StringFormat("%.0f / %.0f", s[27], s[29]),
+             StringFormat("fine sessione %.0f/%.0f, tetto %.0f/%.0f, fine corsa esclusa %.0f",
+                          s[33], s[34], s[35], s[36], s[37]));
+   FileWrite(h, "C7", "massimo eseguibili in un giorno", DoubleToString(s[39], 0), DoubleToString(s[40], 0),
+             StringFormat("totale %.0f -> rischio aperto %.2f%% contro cap %.2f%%", s[41], s[42], REL_C7_CAP_RISCHIO_APERTO));
+   FileWrite(h, "C8", "tenuta mediana barre", DoubleToString(s[46], 2), DoubleToString(s[47], 2),
+             StringFormat("due lati %.2f | muro d'attrito %.0f", s[48], REL_C8_TENUTA_BARRE_MIN));
+   FileWrite(h, "C8", "tenuta sotto 60 secondi pct", DoubleToString(s[49], 2), "",
+             StringFormat("COLLAUDO T12: deve essere 0,00 | scarto prop a %.0f%%", REL_C8_QUOTA_SOTTO60_KO));
+   FileWrite(h, "-", "attraversamenti grezzi", DoubleToString(s[0], 0), DoubleToString(s[1], 0),
+             StringFormat("%.3f al giorno", s[8]));
+   FileWrite(h, "-", "attraversamenti eseguibili", DoubleToString(s[2], 0), DoubleToString(s[3], 0),
+             "T6: quelli presi a slot libero");
+   FileWrite(h, "-", "scartati slot occupato stesso lato", DoubleToString(s[74], 0), DoubleToString(s[75], 0), "");
+   FileWrite(h, "-", "scartati slot occupato ALTRO lato", DoubleToString(s[76], 0), "",
+             "COLLAUDO T6: DEVE VENIRE ZERO, altrimenti la macchina a stati e' rotta");
+   FileWrite(h, "-", "MFE a orizzonte fisso", DoubleToString(s[51], 3), DoubleToString(s[52], 3),
+             StringFormat("su %.0f/%.0f osservatori completi (T11)", s[57], s[58]));
+   FileWrite(h, "-", "MAE a orizzonte fisso", DoubleToString(s[53], 3), DoubleToString(s[54], 3),
+             StringFormat("incompleti scartati %.0f/%.0f", s[59], s[60]));
+   FileWrite(h, "-", "movimento netto a orizzonte", DoubleToString(s[55], 3), DoubleToString(s[56], 3),
+             "l'unico numero SEGNATO: positivo = a favore del lato");
+   FileWrite(h, "-", "giorni contati", DoubleToString(s[4], 0), "", "T15");
+   FileWrite(h, "-", "giorni con almeno 2 eseguibili", DoubleToString(s[44], 0), "", "");
+   FileWrite(h, "-", "giorni a zero eseguibili", DoubleToString(s[45], 0), "", "");
+   FileWrite(h, "-", "barre valutate / fuori finestra", DoubleToString(s[61], 0), DoubleToString(s[62], 0), "T8");
+   FileWrite(h, "-", "barre saltate per dati", DoubleToString(s[63], 0), "", "deve essere ~0 a regime");
+   FileWrite(h, "-", "metro mancante sulla barra di segnale", DoubleToString(s[64], 0), "", "T1");
+   FileWrite(h, "-", "valutazioni perse per buco nella coda", DoubleToString(s[65], 0), "",
+             "T2: il COSTO della regola stretta");
+   FileWrite(h, "-", "valutazioni con barre di solo metro", DoubleToString(s[66], 0), "", "T3");
+   FileWrite(h, "-", "z non calcolabile", DoubleToString(s[68], 0), "", "deviazione o MAD nulla");
+   FileWrite(h, "-", "barre senza z con posizione aperta", DoubleToString(s[67], 0), "", "");
+   FileWrite(h, "-", "attraversamenti con ingresso fuori finestra", DoubleToString(s[72], 0), "", "T7");
+   FileWrite(h, "-", "attraversamenti sulla prima barra di sessione", DoubleToString(s[73], 0), "",
+             "T9: da sottrarre, non da indovinare");
+   FileWrite(h, "-", "ATR mediano punti indice", DoubleToString(s[77], 4), "", "T13: eco, non motore");
+   FileWrite(h, "-", "scarto medio pct contro iATR", DoubleToString(s[78], 4), "", "collaudo T13");
+   FileWrite(h, "-", "punto indice in prezzo", DoubleToString(s[79], 5), "", "T14: deve valere 1,00");
+   FileWrite(h, "-", "prima barra metro / gamba (epoch)", DoubleToString(s[80], 0), DoubleToString(s[81], 0),
+             "profondita' VERA dello storico dei due feed");
+   FileWrite(h, "-", "campioni troncati", DoubleToString(s[82], 0), "", "1 = mediane TRONCATE, non leggere");
+   FileWrite(h, "-", "autotest falliti su blocchi", DoubleToString(s[83], 0), DoubleToString(s[84], 0),
+             "0 falliti = passato; -1 = NON eseguito");
+   FileClose(h);
+   Log(StringFormat("scritto MQL5\\Files\\%s", f));
+  }
+
+int OnTesterInit() { return(INIT_SUCCEEDED); }
+
+void OnTesterDeinit()
+  {
+   string fname = OptFrame_FileName();
+   int h = FileOpen(fname, FILE_WRITE|FILE_CSV|FILE_ANSI, ",");
+   if(h == INVALID_HANDLE)
+     { PrintFormat("OptFrame: impossibile creare %s (err %d)", fname, GetLastError()); return; }
+   FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
+   ulong pass; string name; long id; double value; double data[];
+   bool header_scritto = false; int righe = 0;
+   string periodo = EnumToString((ENUM_TIMEFRAMES)Period());
+
+   //--- 96 nomi = Pass + Simbolo + Periodo + 93 valori di stats[].
+   string head = "Pass,Simbolo,Periodo,"
+                 "Attraversamenti Grezzi Long,Attraversamenti Grezzi Short,"
+                 "Attraversamenti Eseguibili Long,Attraversamenti Eseguibili Short,"
+                 "Giorni Contati,Eseguibili Al Giorno Long,Eseguibili Al Giorno Short,"
+                 "Eseguibili Al Giorno Totale,Grezzi Al Giorno Totale,C1 Esito,"
+                 "Mfe Mediana Long Punti Indice,Mfe Mediana Short Punti Indice,"
+                 "Mae Mediana Long Punti Indice,Mae Mediana Short Punti Indice,"
+                 "Rr Da Mediane Long,Rr Da Mediane Short,"
+                 "Win Rate Necessario Long Pct,Win Rate Necessario Short Pct,"
+                 "Mfe Su Spread Long,Mfe Su Spread Short,"
+                 "Spread Misurato Punti Indice,Soglia C3 Punti Indice,"
+                 "C3 Esito Long,C3 Esito Short,C5 Esito Long,C5 Esito Short,"
+                 "Chiuse Long,Chiuse Short,Convergute Long,Convergute Short,"
+                 "Non Convergute Long Pct,Non Convergute Short Pct,Non Convergute Totale Pct,"
+                 "Uscite Fine Sessione Long,Uscite Fine Sessione Short,"
+                 "Uscite Tetto Barre Long,Uscite Tetto Barre Short,Uscite Fine Corsa Escluse,C6 Esito,"
+                 "Max Eseguibili Giorno Long,Max Eseguibili Giorno Short,Max Eseguibili Giorno Totale,"
+                 "Rischio Aperto Max Pct,C7 Cap Necessario,"
+                 "Giorni Almeno 2 Eseguibili,Giorni Zero Eseguibili,"
+                 "Tenuta Mediana Long Barre,Tenuta Mediana Short Barre,Tenuta Mediana Totale Barre,"
+                 "Sotto 60 Secondi Pct,C8 Esito,"
+                 "Mfe Orizzonte Mediana Long,Mfe Orizzonte Mediana Short,"
+                 "Mae Orizzonte Mediana Long,Mae Orizzonte Mediana Short,"
+                 "Movimento Orizzonte Mediano Long,Movimento Orizzonte Mediano Short,"
+                 "Orizzonte Completo Long,Orizzonte Completo Short,"
+                 "Orizzonte Incompleto Long,Orizzonte Incompleto Short,"
+                 "Barre Valutate,Barre Fuori Finestra,Barre Saltate Dati,"
+                 "Valutazioni Metro Mancante Segnale,Valutazioni Perse Buco Finestra,"
+                 "Valutazioni Con Solo Metro,Barre Senza Z Con Posizione Aperta,Z Non Calcolabile,"
+                 "Giorni Spaiati,Giorni Spaiati Pct,C2 Esito,"
+                 "Attraversamenti Ingresso Fuori Finestra,Attraversamenti Prima Barra Sessione,"
+                 "Occupato Stesso Lato Long,Occupato Stesso Lato Short,"
+                 "Scartati Occupato Altro Lato Collaudo,"
+                 "Atr Mediano Punti Indice,Atr Divergenza Rel Media Pct,Punto Indice Prezzo,"
+                 "Metro Prima Barra Epoch,Gamba Prima Barra Epoch,Campioni Troncati,"
+                 "Autotest Falliti,Autotest Blocchi,"
+                 "Finestra N,Soglia Ingresso Sigma,Soglia Uscita Sigma,"
+                 "Modo Spread,Modo Z Score,Barre Max Tenuta,Barre Orizzonte,Lato Attivo";
+
+   //--- LA RIGA E' SPEZZATA IN TRE, E NON E' ESTETICA: MQL5 non accetta
+   //    piu' di 64 parametri per chiamata, e qui gli argomenti sono 96.
+   //    Un solo StringFormat non compilerebbe.
+   string fmt1 = "%d,%s,%s,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.3f,%.3f,%.0f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.2f,%.2f,%.3f,%.3f,%.2f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f";
+   string fmt2 = "%.2f,%.2f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.2f,%.2f,%.2f,%.2f,%.0f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f";
+   string fmt3 = "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.4f,%.4f,%.5f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.3f,%.3f,%.0f,%.0f,%.0f,%.0f,%.0f";
+   ControllaColonne(head, fmt1 + "," + fmt2 + "," + fmt3);
+
+   while(FrameNext(pass, name, id, value, data))
+     {
+      string params[]; uint pcount = 0;
+      FrameInputs(pass, params, pcount);
+      if(!header_scritto)
+        {
+         string testa = head;
+         for(uint i = 0; i < pcount; i++)
+           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) testa += "," + kv[0]; }
+         FileWrite(h, testa); header_scritto = true;
+        }
+      string row = StringFormat(fmt1,
+                                (int)pass, _Symbol, periodo,
+                                data[0],  data[1],  data[2],  data[3],  data[4],  data[5],
+                                data[6],  data[7],  data[8],  data[9],  data[10], data[11],
+                                data[12], data[13], data[14], data[15], data[16], data[17],
+                                data[18], data[19], data[20], data[21], data[22], data[23],
+                                data[24], data[25], data[26], data[27], data[28], data[29]);
+      row += "," + StringFormat(fmt2,
+                                data[30], data[31], data[32], data[33], data[34], data[35],
+                                data[36], data[37], data[38], data[39], data[40], data[41],
+                                data[42], data[43], data[44], data[45], data[46], data[47],
+                                data[48], data[49], data[50], data[51], data[52], data[53],
+                                data[54], data[55], data[56], data[57], data[58], data[59],
+                                data[60]);
+      row += "," + StringFormat(fmt3,
+                                data[61], data[62], data[63], data[64], data[65], data[66],
+                                data[67], data[68], data[69], data[70], data[71], data[72],
+                                data[73], data[74], data[75], data[76], data[77], data[78],
+                                data[79], data[80], data[81], data[82], data[83], data[84],
+                                data[85], data[86], data[87], data[88], data[89], data[90],
+                                data[91], data[92]);
+      for(uint i = 0; i < pcount; i++)
+        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
+      FileWrite(h, row); righe++;
+     }
+   FileClose(h);
+   PrintFormat("OptFrame: scritte %d passate in MQL5\\Files\\%s", righe, fname);
+  }
+//================== fine OPTFRAME inlined ==========================//
