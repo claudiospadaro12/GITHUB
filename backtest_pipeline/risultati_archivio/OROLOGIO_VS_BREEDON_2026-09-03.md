@@ -4,15 +4,20 @@ Fonti: foglio di pre-registrazione `prove/OROLOGIO_PREREGISTRAZIONE_BREEDON_2026
 (scritto PRIMA dei numeri, per il criterio C2) e RICOMPOSIZIONE della sonda
 (zip 31/08 22:03, pin f81eb70, rimandato da Claudio il 03/09). La cella qui
 riletta e' la 01 (EURUSD LONG, 72 celle x 2 finestre); la 02 (SHORT) e' stata
-misurata l'01/09 con esito gia' letto in chat — qui si usa anche lo SPECCHIO
-della long (il lordo e' deriva bid-su-bid: short = -long per costruzione),
-dichiarato.
+misurata l'01/09 con esito gia' letto in chat — qui si usa la MISURA DIRETTA
+della cella 02 (zip CORSA 31/08 22:04, rimandato da Claudio il 03/09,
+72/72 righe su entrambe le finestre) — lo specchio della long, usato in
+prima stesura, e' coerente coi numeri diretti (29,7 vs 32,1) e resta come
+controllo incrociato.
 
 ## CELLA A — EURUSD SHORT 08:00-16:00 server (LA previsione del paper): ✅ CONFERMATA
-| finestra | lordo short (specchio) | spread med | C1 (soglia 3) | n |
+| finestra | lordo short | spread med | C1 (soglia 3) | n |
 |---|---:|---:|---:|---:|
-| IS 2011-2017 | **+29,74** pti | 7,00 | **4,25** ✅ | 1607 |
-| OOS 2017-2026 | **+4,62** pti | 1,00 | **4,62** ✅ | 2411 |
+| IS 2011-2017 | **+32,13** pti (misura diretta) | 7,00 | **4,59** ✅ | 1607 |
+| OOS 2017-2026 | **+5,31** pti (misura diretta) | 1,00 | **5,31** ✅ | 2411 |
+
+Giornate positive IS: 51,9% — la deriva non e' fatta di code rare ma di una
+maggioranza sottile di giornate, coerente con la natura del fenomeno.
 
 **La cella indicata DAL PAPER PRIMA dei numeri passa il cancello C1 su
 ENTRAMBE le finestre.** E' la forma piu' forte di conferma che il metodo di
