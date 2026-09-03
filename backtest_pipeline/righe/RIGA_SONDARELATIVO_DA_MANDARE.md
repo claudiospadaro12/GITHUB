@@ -143,17 +143,26 @@ degenere) + 1 compilazione. **M15: 8–25 minuti** a prova. **M5: 15–45 minuti
 prova. Giro a vuoto: **1–3 minuti** (ma **COMPILA**: è lì che un EA mai compilato
 può cadere, ed è un risultato).
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`665416e2fddc6d11b9537c303788ac749e606236`**
 
-> 🔴 IL PIN QUI SOPRA È UN SEGNAPOSTO E NON FUNZIONA. Va sostituito col commit
-> vero dopo il push (ricetta in fondo), e finché è così LA RIGA NON PARTE.
+✅ **INSERITO il 03/09/2026** (prima di questo commit qui c'era un segnaposto).
+Commit di `lavoro` che **contiene** driver + 4 prova + la sonda `.mq5` +
+`walkforward_generico.ps1`, **verificato uno per uno via `raw` al pin** (HTTP 200
++ hash identico al repo) prima di scrivere questa riga:
+
+| file al pin | esito |
+|---|---|
+| `backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1` | 200, identico (sha256 af9f8056...), marcatore `MARCATORE_RIGA_SONDARELATIVO_v1` presente, ASCII puro, parse OK |
+| `backtest_pipeline/walkforward_generico.ps1` | 200, identico (5d98af3d...): il driver lo scarica al pin e lo ri-pinna sul `.mq5` |
+| `backtest_pipeline/prove/RELATIVO_D30_M5.txt` · `_D30_M15` · `_NAS_M5` · `_NAS_M15` | 200 tutti e quattro, identici (fa29b70b / 86c0fe18 / 1f9dd9a1 / f8565ef9); blocco dei parametri identico riga per riga |
+| `mql5/Experts/ABTG_SondaRelativo.mq5` | 200, identico (80ed8a45...), `#property version "1.00"`, 21 blocchi autotest, REL_NSTATS 93, 22 input, 0 chiamate di trading, 0 `#include` |
 
 ## 1️⃣ Giro a vuoto (su `D30_M15`: sta dentro il tetto, quindi arriva a COMPILARE e a far girare i controlli del generico; i gate sui 4 prova e sul sorgente girano comunque tutti)
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M15 -SoloControllo; $rc=$LASTEXITCODE;
@@ -170,7 +179,7 @@ può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M15; $rc=$LASTEXITCODE;
@@ -189,7 +198,7 @@ può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_M15; $rc=$LASTEXITCODE;
@@ -208,7 +217,7 @@ può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M5 -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -227,7 +236,7 @@ può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='665416e2fddc6d11b9537c303788ac749e606236'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_M5 -AccettoTettoBarre; $rc=$LASTEXITCODE;
