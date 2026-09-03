@@ -7068,3 +7068,62 @@ non rientrata prima del blocco) — e dichiara che il secondo è quello fedele a
 codice. La scelta fra i due **si firma prima** della sessione del criterio 9,
 non dopo aver visto i numeri (regola di casa: i criteri si cambiano prima dei
 dati)._
+
+---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 (10:45, **pagata in campo**) — la SESSIONE 1 del collaudo enforcement si e' fermata al primo passo sul VPS di Claudio
+
+## 115. 🏷️ L'AMBIENTE DI CAMPO INDOVINATO DAL **NOME** INVECE CHE DA UN **FATTO**: il pattern combacia sul banco e non combacia sulla macchina vera
+
+_Difetto vero, `RIGA_COLLAUDO_FASE1_S1.ps1` v1, referto delle **10:45:10** dal
+VPS: **«FERMATA: terminale -V3 non trovato (cartella dati -V3 non trovata)»**.
+Un giro a vuoto su una riga che era stata parsata, eseguita su banco e
+mutata — ma il banco lo avevo costruito **io**, cioe' **a immagine della mia
+ipotesi**._
+
+Il codice che si e' fermato:
+
+```powershell
+# v1: la cartella dati del 100k = quella il cui origin.txt contiene "-V3"
+$termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+... if ($t -like "*-V3*") { ... }
+```
+
+`-V3` e' **l'etichetta che usiamo NOI in chat e nei referti** per distinguere
+l'istanza del 100k. Non e' una proprieta' della macchina: su MT5 la cartella
+dati puo' stare **dentro l'installazione** (modalita' **portable**: nessun
+`origin.txt` esiste), sotto **un altro profilo utente**, o avere un nome che
+non contiene niente di riconoscibile.
+
+### Perche' e' una classe a se'
+
+- **il banco conferma l'ipotesi invece di metterla alla prova.** Lo stub lo
+  scrive chi ha scritto il codice: se l'euristica e' "cerca `-V3`", lo stub
+  avra' `-V3`. Verde a casa, rosso in campo — e il rosso costa **un giro col
+  forward aperto**;
+- **non e' la 106 ne' la 113**: li' si legge male un artefatto che esiste. Qui
+  l'artefatto **non viene proprio trovato**, e la diagnosi stampata («non
+  trovato») e' vera **e inutile**: non dice cosa c'era al suo posto;
+- **il fatto giusto c'era gia'**, ed era a portata di `grep`: il **numero di
+  conto**. Un login e' una proprieta' del sistema misurato; un suffisso nel
+  nome e' una convenzione nostra.
+
+> ✅ **REGOLA: si scandisce LARGO e si sceglie STRETTO, e il criterio di scelta
+> e' un FATTO DEL SISTEMA MISURATO — mai un nome, un suffisso o una posizione
+> "canonica".** Per un terminale MT5 i fatti sono: il **login** nei log
+> (sottostringa, UTF-16 col BOM gestito), le righe che nominano quel conto, gli
+> artefatti intestati a quel conto. Le radici da guardare comprendono
+> **sempre** anche il caso portable (i dati dentro l'installazione) e i
+> **processi vivi** (il percorso dell'exe e' un fatto, non un'ipotesi).
+>
+> 🧾 **E quando la scelta non e' unica (ZERO candidate, oppure DUE), non si
+> indovina: ci si ferma STAMPANDO L'ELENCO COMPLETO di cosa si e' guardato e
+> cosa c'era dentro.** Un «non trovato» secco costa un secondo giro per sapere
+> cos'altro chiedere; un elenco con dentro i login visti, l'`origin.txt` e gli
+> artefatti trovati si legge a occhio e chiude la partita subito.
+>
+> 🎛️ **Insieme all'elenco si consegna la MANOPOLA** (qui `-CartellaDati
+> '<percorso>'`): la riga dev'essere **riparabile dall'utente al volo**, senza
+> un altro commit e un altro push. La manopola **non salta i controlli**: se il
+> percorso imposto non ha traccia del conto, la riga va avanti **dichiarandolo**
+> e il gate sul conto boccia lo stesso.
