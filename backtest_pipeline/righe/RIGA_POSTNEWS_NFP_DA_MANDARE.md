@@ -60,7 +60,7 @@ una griglia).
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_POSTNEWS_NFP.ps1` (marcatore `MARCATORE_RIGA_POSTNEWS_NFP_v1`, `-Pin` obbligatorio) |
+| **Driver** | `righe/RIGA_POSTNEWS_NFP.ps1` (marcatore `MARCATORE_RIGA_POSTNEWS_NFP_v2`, `-Pin` obbligatorio) |
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI** prima di lanciare (la riga li riguarda anche subito prima della misura storico) |
 | **Quanto ci mette** | compilazione (EA nuovo) + **misura storico M1 USDJPY senza tick** (10-45 minuti, MOLTO variabile: dipende da quanti anni servono davvero) + 2 passate OHLC M1 su una finestra pluriennale (secondi-minuti, non tick reali) + 2-3 avvii del terminale. **Totale onesto: 20-60 minuti, quasi tutti nella misura storico** [STIMA: nessuna corsa di casa ha mai cronometrato questa misura per USDJPY, il numero vero lo dice questo giro] |
 
@@ -72,9 +72,9 @@ verificato anche col marcatore e col parse `pwsh`):
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_POSTNEWS_NFP.ps1` | marcatore `MARCATORE_RIGA_POSTNEWS_NFP_v1` presente, ASCII puro, parse `pwsh` OK |
+| `backtest_pipeline/righe/RIGA_POSTNEWS_NFP.ps1` | marcatore `MARCATORE_RIGA_POSTNEWS_NFP_v2` presente, ASCII puro, parse `pwsh` OK |
 | `backtest_pipeline/prove/POSTNEWS_NFP_00_conta.txt` | `@DAQUANDO`/`@FINOA` assenti, 34 righe vive |
-| `backtest_pipeline/walkforward_generico.ps1` | identico (il driver lo pinna col replace di `$EABranch`) |
+| `backtest_pipeline/walkforward_generico.ps1` | identico (il driver lo pinna col replace di `$EABranch` **e gli alza `[Charts] MaxBars`**, poi rilegge **dal disco** lo stato finale di entrambi: 2 occorrenze attese) |
 | `mql5/Experts/ABTG_PostNews.mq5` | `#property version "1.10"`, 3 `AT_Caso(` + 2 `falliti++` (5 casi) |
 | `mql5/Include/ABTG_PausaGuardian.mqh` | v1.51 |
 | `mql5/Presets/ABTG_PostNews_NFP_USDJPY.set` | 32 righe (31 fissi + InpMagic 771203) |
@@ -91,7 +91,7 @@ Tutti e sette scaricati **allo stesso pin**, mai dalla punta del branch.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='8ac9c304d8c56bfae8d8b8c13fc544a6ae0f0c62'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_NFP.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_NFP.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_NFP_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_NFP_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
     $d=$null; foreach($k in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $k -and (Test-Path $k)){ $d=$k } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'POSTNEWS_NFP_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -112,7 +112,7 @@ da solo se lo storico M1 non è ancora sul disco del PC di backtest.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='8ac9c304d8c56bfae8d8b8c13fc544a6ae0f0c62'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_NFP.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_NFP.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_NFP_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_NFP_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $d=$null; foreach($k in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $k -and (Test-Path $k)){ $d=$k } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'POSTNEWS_NFP_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -229,7 +229,7 @@ positivo resta valido con l'asterisco, uno negativo va riletto.
 | **Terminale non unico** (`NON SO QUALE TERMINALE USARE`) | ✅ **SÌ** | rilancia lo stesso blocco con `& $p -Pin $pin -Terminale '<cartella dell'installazione>'` |
 | **Compilazione FALLITA** (o MUTA) | ✅ **SÌ** | lo zip: **è il risultato del passo** (include già rimesso a posto) |
 | **Misura storico NON riuscita** (2 tentativi, tetto raggiunto) | ✅ **SÌ** | lo zip: rilancia (vedi §🩹 sopra), eventualmente con `-TimeoutStoricoMin` più alto |
-| **Corsa con PROBLEMI** (CSV stantio/mancante, righe ≠ 2, gemelli divergenti, autotest, canarino N=0, `no memory`) | ✅ **SÌ** (esito `COMPLETATO CON PROBLEMI`, exit 1) | lo zip: il referto dice quale sanità è caduta |
+| **Corsa con PROBLEMI** (CSV stantio/mancante, righe ≠ 2, gemelli divergenti, autotest ≠ 0, **canarino N=0 / `CALENDARIO CIECO` / `CANARINO ROSSO` / canarino ASSENTE a corsa finita**, `no memory`) | ✅ **SÌ** (esito `COMPLETATO CON PROBLEMI`, exit 1) | lo zip: il referto dice quale sanità è caduta |
 | **Corsa OK** | ✅ **SÌ** | lo zip |
 
 ## 🔴 AVVISI ATTESI (nessuno è un guasto)
@@ -252,7 +252,12 @@ positivo resta valido con l'asterisco, uno negativo va riletto.
    dichiarazione nei RILIEVI.
 7. `CODICE DI USCITA NON LETTO` a fine blocco — non è un fallimento: fa fede
    il referto.
-8. `il broker NON ha M1 fino a 2010.01.01: il muro vero e' <data>` nei RILIEVI
+8. `driver generico ... con MaxBars alzato -- stato finale riletto dal disco` —
+   il tetto «Max barre nel grafico» del terminale non deve poter troncare **in
+   silenzio** una finestra pluriennale (checklist 36). Se il generico al pin
+   cambiasse, la riga si ferma qui invece di produrre numeri coerenti e falsi.
+   [INFERITO che il tester onori la riga: non è misurato da nessuna corsa di casa.]
+9. `il broker NON ha M1 fino a 2010.01.01: il muro vero e' <data>` nei RILIEVI
    — non è un errore, è la misura che ha fatto il suo lavoro: il calendario
    copre 2010-2025 ma lo storico M1 del broker può partire più tardi.
 

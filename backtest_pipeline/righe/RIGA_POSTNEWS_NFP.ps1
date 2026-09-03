@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_POSTNEWS_NFP_v1
+#  MARCATORE_RIGA_POSTNEWS_NFP_v2
 #  RIGA_POSTNEWS_NFP.ps1 -- PASSO 0 (conta-occasioni) del preset
 #  NFP/USDJPY di ABTG_PostNews.mq5 (v1.10). Modello 1 (1 minuto OHLC =
 #  SCREENING, mai un verdetto), @PERIODO M5, UNA finestra IS/OOS, UN
@@ -86,7 +86,9 @@
 #   0. guardie: -Pin 40-hex obbligatorio, MT5 e MetaEditor CHIUSI,
 #      sentinella di un giro precedente interrotto (classe 116);
 #   1. scarico AL PIN: walkforward_generico.ps1 (pinnato col replace di
-#      $EABranch), ABTG_PostNews.mq5, ABTG_PausaGuardian.mqh (censito dal
+#      $EABranch + [Charts] MaxBars alzato, ENTRAMBI riletti dal disco:
+#      gate sullo stato finale, non sul replace),
+#      ABTG_PostNews.mq5, ABTG_PausaGuardian.mqh (censito dal
 #      sorgente), il calendario CSV, il preset .set, il prova .txt, e
 #      ABTG_HistoryDownloader.mq5 (per la misura storico, fase 8);
 #   2. gate sul sorgente: #property version "1.10" (ancorato), casi
@@ -774,8 +776,21 @@ try{
   $t = Get-Content -LiteralPath $drv -Raw
   if($t -notmatch '\$EABranch\s*=\s*"lavoro"'){ throw 'walkforward_generico.ps1 non ha la riga $EABranch = "lavoro" attesa: non lo posso pinnare.' }
   $t = $t -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
+  # IL TETTO DELLE BARRE (checklist 36, gia' portato da RIGA_R107/R111/R114).
+  # Se il tester ereditasse il tetto "Max barre nel grafico" del terminale, le
+  # serie verrebbero TRONCATE IN SILENZIO e i CSV uscirebbero pieni di numeri
+  # coerenti e falsi. Qui morde piu' che altrove: la finestra e' pluriennale
+  # (calendario 2010-2025) e l'EA legge iHigh/iLow(_Symbol,PERIOD_M5,...).
+  # [INFERITO] che il tester onori questa riga: NON e' misurato da nessuna
+  # corsa di casa -- si scrive perche' costa zero, non perche' sia provata.
+  $t = $t -replace '(?m)^\[Experts\]\r?$', "[Charts]`r`nMaxBars=2000000000`r`n`r`n[Experts]"
   Set-Content -LiteralPath $drv -Value $t -Encoding ASCII
-  Dico "driver generico scaricato e PINNATO (riscarica l'EA al pin, non dalla punta del branch)" "Green"
+  # GATE SULLO STATO FINALE, non sul replace (checklist 33): si rilegge dal
+  # disco il file che verra' DAVVERO eseguito, non la variabile in memoria.
+  if(-not (Select-String -LiteralPath $drv -SimpleMatch -Pattern ('$EABranch="' + $Pin + '"') -Quiet)){ throw "walkforward_generico.ps1: il pin di `$EABranch NON risulta scritto nel file su disco (il replace non ha morso): mi fermo." }
+  $nMax = @(Select-String -LiteralPath $drv -SimpleMatch -Pattern 'MaxBars=2000000000').Count
+  if($nMax -ne 2){ throw ("walkforward_generico.ps1: MaxBars scritto " + $nMax + " volte invece di 2 (anteprima + corsa vera): il generico al pin e' cambiato, mi fermo.") }
+  Dico "driver generico scaricato, PINNATO (riscarica l'EA al pin, non dalla punta del branch) e con MaxBars alzato -- stato finale riletto dal disco" "Green"
 
   Remove-Item -Path (Join-Path $Prove "POSTNEWS_NFP_*.txt") -Force -ErrorAction SilentlyContinue
   $provaPath = Join-Path $Prove $PROVA_FILE
@@ -1145,14 +1160,33 @@ foreach($l in $StoricoTentativi){ [void]$R.Add("  " + $l) }
 [void]$R.Add("log del tester letti a macchina (cresciuti in questo giro): " + $(if($LogLetti -ge 0){ "" + $LogLetti } else { "NON LETTI" }))
 [void]$R.Add("")
 [void]$R.Add("--- IL CANARINO NEWS (letto dai LOG del tester, NON dal CSV -- par. intestazione) ---")
-if($canarino.Righe.Count -eq 0){ [void]$R.Add("  NESSUNA riga '[PostNews][NEWS] letto da ...' trovata nei log letti: NON CONFERMATO che il calendario sia arrivato agli agenti. Se la corsa e' COMPLETATA questo e' un PROBLEMA, non un warning.") }
+# IL CANARINO E' UN CANCELLO, NON UNA DECORAZIONE (classe 14/84): ogni
+# rilievo qui sotto entra ANCHE in $Problemi, cioe' nel ramo che decide il
+# codice d'uscita. Se finisse solo in $R (una lista di righe di testo), la
+# riga in chat direbbe "CORSA OK" in verde con il calendario cieco: e' ESATTAMENTE
+# l'errore del 07/08 (verdetto "PostNews nessun edge" con Trades=0) che questo
+# round esiste per non ripetere.
+$CorsaVeraFinita = ((-not $SoloControllo) -and $Fatale -eq "")
+if($canarino.Righe.Count -eq 0){
+  [void]$R.Add("  NESSUNA riga '[PostNews][NEWS] letto da ...' trovata nei log letti: NON CONFERMATO che il calendario sia arrivato agli agenti. Se la corsa e' COMPLETATA questo e' un PROBLEMA, non un warning.")
+  if($CorsaVeraFinita){ [void]$Problemi.Add("CANARINO NEWS ASSENTE: la corsa e' arrivata in fondo ma nei log del tester non c'e' nessuna riga '[PostNews][NEWS] letto da ...'. NON e' confermato che il calendario sia arrivato agli agenti: i numeri economici NON si leggono.") }
+}
 foreach($l in $canarino.Righe){ [void]$R.Add("  " + $l) }
-if($canarino.Cieco.Count -gt 0){ [void]$R.Add("  !!! CALENDARIO CIECO trovato " + $canarino.Cieco.Count + " volte: il file non e' arrivato agli agenti. La passata NON CONTA.") }
-if($canarino.Rosso.Count -gt 0){ [void]$R.Add("  !!! CANARINO ROSSO trovato " + $canarino.Rosso.Count + " volte: il calendario si legge ma per QUESTO preset ha ZERO eventi utili. La passata NON CONTA.") }
+if($canarino.Cieco.Count -gt 0){
+  [void]$R.Add("  !!! CALENDARIO CIECO trovato " + $canarino.Cieco.Count + " volte: il file non e' arrivato agli agenti. La passata NON CONTA.")
+  [void]$Problemi.Add("CALENDARIO CIECO nei log del tester (" + $canarino.Cieco.Count + " volte): il calendario non e' arrivato agli agenti. La passata NON CONTA: non e' 'niente edge', e' 'non e' girata'.")
+}
+if($canarino.Rosso.Count -gt 0){
+  [void]$R.Add("  !!! CANARINO ROSSO trovato " + $canarino.Rosso.Count + " volte: il calendario si legge ma per QUESTO preset ha ZERO eventi utili. La passata NON CONTA.")
+  [void]$Problemi.Add("CANARINO ROSSO nei log del tester (" + $canarino.Rosso.Count + " volte): il calendario si legge ma per QUESTO preset ha ZERO eventi utili. La passata NON CONTA.")
+}
 if($canarino.Valori.Count -gt 0){
   $distinti = @($canarino.Valori | Select-Object -Unique)
   [void]$R.Add("  UTILI per questo preset: valori trovati nei log = " + ($canarino.Valori -join ", ") + "  (distinti: " + ($distinti -join ", ") + ")")
-  if(@($distinti | Where-Object { $_ -le 0 }).Count -gt 0){ [void]$R.Add("  !!! N=0 su almeno una riga: CALENDARIO CIECO PER QUESTO PRESET. La passata con N=0 NON CONTA: non e' 'niente edge', e' 'non e' girata'.") }
+  if(@($distinti | Where-Object { $_ -le 0 }).Count -gt 0){
+    [void]$R.Add("  !!! N=0 su almeno una riga: CALENDARIO CIECO PER QUESTO PRESET. La passata con N=0 NON CONTA: non e' 'niente edge', e' 'non e' girata'.")
+    [void]$Problemi.Add("CANARINO NEWS N=0 su almeno una passata (valori letti: " + ($canarino.Valori -join ", ") + "): calendario cieco PER QUESTO PRESET. La passata con N=0 NON CONTA: non e' 'niente edge', e' 'non e' girata'.")
+  }
 }
 [void]$R.Add("--- AUTOTEST, letto dai log del tester (atteso 0 casi falliti su OGNI riga) ---")
 if($autotestLog.Righe.Count -eq 0){ [void]$R.Add("  NESSUNA riga '[PostNews][AUTOTEST] ---- fine: ...' trovata nei log letti.") }
@@ -1166,9 +1200,14 @@ foreach($tag in @("IS","OOS")){
   [void]$R.Add("  " + $tag + " (CSV " + $w.CsvOra + ", righe " + $w.NRighe + "/" + $NCELLE_ATTESE + ", gemelli: " + $w.Gemelli + ")")
   foreach($mg in @($MAGIC1,$MAGIC2)){
     if(-not $w.PerMagic.ContainsKey("" + $mg)){ [void]$R.Add("    magic " + $mg + ": riga mancante"); continue }
-    $r = $w.PerMagic["" + $mg]
-    $fN = if($r.N -ge $N_PASSA){ "PASSA (Emendamento A, >= " + $N_PASSA + ")" } elseif($r.N -ge $N_MIN){ "MERITO SOSPESO (Emendamento A, " + $N_MIN + "-" + ($N_PASSA-1) + ")" } else { "NON MISURABILE (Emendamento A, < " + $N_MIN + ")" }
-    [void]$R.Add("    magic " + $mg + ": n=" + $r.N + " " + $fN + " | Profit " + (Fmt2 $r.Profit) + " | Payoff " + (Fmt4 $r.Payoff) + " | PF " + (Fmt2 $r.PF) + " | RF " + (Fmt2 $r.RF) + " | Sharpe " + (Fmt2 $r.Sharpe) + " | Equity DD% " + (Fmt2 $r.DD))
+    # NB: la variabile della cella si chiama $rg e NON $r (classe 79-bis):
+    # in PowerShell i nomi NON distinguono maiuscole/minuscole, quindi un
+    # $r qui dentro DISTRUGGEREBBE $R, la lista del referto -- e il difetto
+    # vivrebbe SOLO quando la corsa e' riuscita (nel giro a vuoto questo
+    # ramo non si raggiunge nemmeno).
+    $rg = $w.PerMagic["" + $mg]
+    $fN = if($rg.N -ge $N_PASSA){ "PASSA (Emendamento A, >= " + $N_PASSA + ")" } elseif($rg.N -ge $N_MIN){ "MERITO SOSPESO (Emendamento A, " + $N_MIN + "-" + ($N_PASSA-1) + ")" } else { "NON MISURABILE (Emendamento A, < " + $N_MIN + ")" }
+    [void]$R.Add("    magic " + $mg + ": n=" + $rg.N + " " + $fN + " | Profit " + (Fmt2 $rg.Profit) + " | Payoff " + (Fmt4 $rg.Payoff) + " | PF " + (Fmt2 $rg.PF) + " | RF " + (Fmt2 $rg.RF) + " | Sharpe " + (Fmt2 $rg.Sharpe) + " | Equity DD% " + (Fmt2 $rg.DD))
   }
 }
 [void]$R.Add("  Emendamento B (rischio): questo OPTFRAME NON esporta 'Peggior Giornata %' (a differenza di altri EA di casa) -- il giudizio di rischio si legge SOLO su Equity DD%, dichiarato, nessuna soglia numerica e' stata CONGELATA per questo preset in nessun materiale ricevuto.")
