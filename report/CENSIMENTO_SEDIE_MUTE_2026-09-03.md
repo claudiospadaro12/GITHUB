@@ -10,7 +10,7 @@ setup) o MORTE in silenzio? Era l'ultimo semaforo della Fase 4 della migrazione.
 | SupRev DAX H4 | D30EUR,H4 08:51 | `ABTG_SupRev_DAX_H4_Ottimizzato` | ✅ VIVA (attaccata, indicatori disegnati = calcola) |
 | PTE Dow (771321) | U30USD,H1 08:47 | `ABTG_PTE` | ✅ VIVA (attaccata, livelli disegnati) |
 | BB EURUSD | EURUSD,H1 08:48 | `ABTG_BreakingBand` | ✅ VIVA (attaccata, bande disegnate) |
-| BB AUDUSD | — | — | ⬜ **MANCA LA FOTO** (la tab AUDUSD,H1 esiste nel terminale: da fotografare) |
+| BB AUDUSD | AUDUSD,H1 08:54 | `ABTG_BreakingBand` | ✅ VIVA (attaccata, bande disegnate) |
 
 Contesto comune a tutte le foto: Algo Trading VERDE in toolbar, terminale
 connesso (ping 15-27 ms), bilancio 5.103,62 coerente con la pagella.
@@ -19,7 +19,7 @@ connesso (ping 15-27 ms), bilancio 5.103,62 coerente con la pagella.
 attaccato + oggetti disegnati). La conferma fine (righe recenti in scheda
 Esperti per ciascun EA) non e' stata raccolta: se una sedia resta muta a
 lungo, quella e' la verifica successiva. Per la Fase 4 il semaforo che
-serviva era "attaccate o no": 5/6 SI, 1 da fotografare.
+serviva era "attaccate o no": 6/6 SI.
 
-**Verdetto parziale: 5 sedie su 6 VIVE E ATTACCATE — nessuna morta in
-silenzio.** Manca solo BB AUDUSD per chiudere 6/6.
+**VERDETTO FINALE (08:54, sesta foto arrivata): 6 SEDIE SU 6 VIVE E
+ATTACCATE — nessuna morta in silenzio. Il semaforo della Fase 4 e' VERDE.**
