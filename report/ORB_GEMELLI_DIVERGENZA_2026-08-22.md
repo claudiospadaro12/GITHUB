@@ -416,3 +416,29 @@ appiccicoso) e lo decidono i log v1.03.
 altro magic) e B (newBar appiccicoso) — e lo decidono la FOTO 2 (posizioni
 APERTE del piccolo con ora di apertura) e la FOTO 3 (log 16:00->17:45 IT di
 ieri), piu' il confronto col pannello del 100k.
+
+### 🔗 03/09 — incrocio con la pagella AUTOMATICA del 02/09 (giornata_2026-09-02.md)
+
+La pagella ufficiale ha aggiunto tre fatti che entrano in questa indagine:
+
+1. **La foto 1 di stamattina ELIMINA la sua candidata (a)** ("trailing spento
+   sul grafico piccolo"): `Trailing dello stop sull'EMA veloce = true`,
+   fotografato. Restano: (b) `PositionModify` rifiutato (lo dice il Giornale
+   del piccolo nella finestra del trade), (c) terminale fermo/disconnesso
+   (stesso Giornale), piu' le nostre A (SelPos/hedging) e B (newBar) del
+   dossier — che la v1.03 rendera' distinguibili in un log.
+2. **Pista con una data**: le uscite gemelle erano IDENTICHE l'11 e il 13/08;
+   le divergenze cominciano il 19/08 — il giorno dell'incidente del template,
+   quando la sedia ORB del piccolo fu l'unica ricostruita senza fotografia.
+   (NB: non contraddice A — anche l'11 e il 13/08 il piccolo aveva vicini di
+   simbolo, ma l'11 non ne aveva e il 13 il vicino e' entrato DOPO: il
+   pattern resta compatibile. Da tenere entrambe.)
+3. **SCOPERTA INDIPENDENTE E PIU' URGENTE DEL TRAILING — la TAGLIA**: il
+   rapporto lotti 100k/piccolo e' passato da ~6 (contratto: 0,3% sul 100k
+   contro 1,0% sul piccolo) a ~20 fra il 21 e il 24/08 = **il 100k gira a
+   1,0%, 3,3 VOLTE il contratto**. Il +1.680 del 02/09 e' fuori contratto;
+   riportata a 0,3% la sedia sul 100k vale circa −383, non +496.
+   ==> LA FOTO DEL PANNELLO 100k ha ora DUE bersagli: gli input del
+   trailing E la riga "Rischio per trade in %" (contratto: 0,3 — se dice
+   1,0 e' il difetto). L'eventuale correzione la esegue Claudio con la
+   legge dello screenshot, come sempre.
