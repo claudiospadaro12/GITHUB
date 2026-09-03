@@ -988,3 +988,99 @@ copertura tick nativa zero quel giorno? -- non misurato qui). Prima di riaprire 
 capitolo: aprire un grafico U30USD M1 per scaricare lo storico tick nativo di quel
 giorno specifico e rilanciare la sonda con -SoloSonda per vedere se il problema e'
 "non confrontabile" (tick nativi assenti) o un vero disallineamento prezzi.
+
+---
+
+### CACCIA NOTIZIE (03/09 sera, due fronti) — le righe che toccano questo registro
+
+Dossier completi: `caccia_strategie/CACCIA_NOTIZIE_TASSONOMIA_2026-09-03.md`
+(19 famiglie di eventi, frequenze contate su 46.112 righe di calendario di casa)
+e `caccia_strategie/CACCIA_CANDELA_NEWS_2026-09-03.md` (3 meccanismi cercati,
+8 implementazioni viste, 3 sorgenti letti). Il resto sta li', non si duplica.
+**ZERO EA esterni promossi, ZERO file prova nuovi.**
+
+- 🔧 **CORREZIONE ALLA LAPIDE L1, misurata.** `arxiv.org/abs/2605.04004`
+  (aperto oggi) dichiara **barre da CINQUE MINUTI**. Quindi il §4.7 del paper
+  ("the drift is real in the **first five bars**... **from bar +6** onward
+  T = 0,14-0,69") vuol dire **reale nei minuti 0-25, morto dal minuto 30**.
+  🔴 **L1 chiude il post-news DAL MINUTO 30. NON chiude i minuti 0-25** — che
+  e' esattamente dove agisce `ABTG_PostNews` (news+10 FOMC / news+15 ECB).
+  ⚠️ Non e' una promozione: l'autore attribuisce quella deriva **al salto**
+  ("that is just the news spike itself"), non a una continuazione prendibile
+  entrando dopo. Ma L1 finora era citata come chiusura di TUTTA la famiglia.
+- 🪦 **LAPIDE NUOVA — SPIKE & FADE: chiuso.** La tesi accademica esiste
+  (Ederington & Lee, JFQA 30(1) 117-134, 1995: sovrareazione nei **primi 40
+  secondi**, corretta nel **2º-3º minuto**, futures FX/tassi **1988-1992**),
+  ma vive **sotto M5** e **dentro la finestra vietata FTMO (±2 min)**.
+  Non si testa con la nostra macchina e non si esegue su un funded.
+  ⚠️ Il paper NON e' stato aperto (Cambridge/IDEAS bloccati): citazione da
+  snippet, marcata [INCERTO] nel dossier. La lapide regge lo stesso perche'
+  l'orizzonte a 40 secondi e' sotto M5 da qualunque fonte lo si legga.
+- 🕳️ **"MOMENTUM CANDLE CONTINUATION" (il colore della 1ª candela predice le
+  successive): NESSUNA letteratura, NESSUNA implementazione.** arXiv API 3
+  interrogazioni, Quantpedia, ricerca generale: torna solo folklore retail.
+  Non e' un meccanismo bocciato: e' un meccanismo che non esiste da leggere.
+- 🎯 **IL TERZO MECCANISMO CE L'ABBIAMO GIA', ED E' IL MIGLIORE LETTO OGGI.**
+  `ABTG_PostNews.mq5` (473 righe, 39 input) **e'** il "range della candela
+  della notizia come livello": max/min di due candele M5, BUY/SELL STOP oltre
+  gli estremi, **OCO VERO** (`OcoCheck`), **SL vero**, **rischio in %**,
+  size calcolata sul **doppio stop**. Zero bandiere rosse. 🔴 Due rilievi:
+  `InpRiskPercent` di default **3,0** (va rimesso a 0,65 prima di qualunque
+  confronto) e **39 input** (sopra il tetto ~15).
+- 🧱 **IL VINCOLO FTMO NON DIPENDE DALLA FAMIGLIA DI EVENTO: DIPENDE DAL
+  MINUTO.** Vietato aprire **o chiudere** (SL/TP inclusi) ±2 min dal rilascio
+  sugli strumenti colpiti, **solo su FTMO Account Standard** (non in
+  Challenge, non su Swing). ➡️ **news+3 minuti in poi = compatibile con ogni
+  famiglia**; **pendenti prima del dato = incompatibile con tutte**.
+  🔴 **5 implementazioni esterne su 5 piazzano PRIMA o SUL rilascio: 100% del
+  campione esterno e' FTMO-incompatibile.**
+  ⚠️ **Insidia nuova, mai considerata:** un EA che entra a news+10 puo' avere
+  lo **SL colpito dentro la finestra ±2 min dell'evento SUCCESSIVO**, e con
+  **43 giorni l'anno a >=4 eventi high** non e' teorico. **Un EA news
+  FTMO-compatibile ha bisogno del calendario per USCIRE, non solo per entrare.**
+- 📊 **NUMERI DI CASA, contati oggi sui 3 CSV di `biblioteca/dati/`
+  (46.112 righe):** il **33%** di tutte le notizie high di 5 anni cade
+  nell'ora **13:00 server** (NFP/CPI/PPI/Retail/GDP + conf. stampa ECB);
+  **48,7%** dei giorni di calendario ha >=1 evento high; **43 giorni/anno**
+  ne hanno >=4 (= sfonderebbero il cap C1 di 5 SL vivi prima del muro FTMO);
+  **269 eventi USD high/anno** su **137 giorni**.
+  🔴 **NFP + Unemployment Rate + Average Hourly Earnings escono nello STESSO
+  MINUTO**: 3 righe di CSV, **UN solo movimento**. Un filtro largo apre 3 volte.
+- 🕳️ **BUCO DI COPERTURA MISURATO:** i nostri CSV marcano ad alto impatto solo
+  **USD/GBP/EUR/JPY**. Per **CAD/AUD/NZD/CHF** l'unico "impatto 3" e' la
+  **decisione sui tassi**: CPI e lavoro di quei paesi passano come impatto 2.
+  Un motore su AUD/CAD non sarebbe protetto dal filtro news di casa.
+- 🔧 **TRE CORREZIONI DI METODO agli atti:** (a) **Quantpedia NON e' tutta
+  premium** — le pagine `/strategies/` si', **gli ARTICOLI del blog no** (2
+  letti interi oggi): su Quantpedia si entra dagli articoli; (b) **la ricerca
+  repository di GitHub FUNZIONA** (controllo positivo `q=mql5` -> **2,6k
+  repo**): gli zero dei dossier precedenti sono zeri VERI, ma le query lunghe
+  danno 0 perche' GitHub vuole TUTTI i termini — vanno spezzate; (c) **il
+  calendario nativo MQL5 non gira nel tester**, confermato su due pagine
+  indipendenti (libro MQL5 + articolo 22580 del 28/05/2026): **ogni EA news di
+  casa DEVE essere guidato da CSV** — cosa che `ABTG_PostNews` gia' fa.
+- 🚨 **DA NON FAR GIRARE MAI ACCANTO ALLA FLOTTA:** Code Base **55630**
+  (Mullerp04) ha un `DeletePending()` che **cancella TUTTI i pendenti del
+  terminale senza controllare il magic** (il commento dice il contrario, il
+  codice non lo fa). Su un conto con piu' EA accesi cancellerebbe i pendenti
+  di MaxMinNotte e delle aperture.
+- 🔴 **TradingView e' CHIUSA per il tema news, e ora e' motivato:** Pine non ha
+  un calendario con timestamp di rilascio al minuto (verificato sulla pagina
+  di uno script open-source: *"TradingView doesn't support external API
+  connections"*). Non esiste una STRATEGY news-driven backtestabile li'.
+- 🎯 **LA MOSSA PIU' ECONOMICA DEL PROSSIMO GIRO, e non e' un EA nuovo:**
+  `ABTG_PostNews` oggi vede **16 eventi/anno** (8 FOMC + 8 ECB) — con la
+  regola IS>=150 servirebbero ~9 anni. **NFP e CPI USA escono alla STESSA ORA
+  (13:30 server) e MAI lo stesso giorno**: +24 eventi/anno = **40 totali,
+  +150%**, cambiando **solo il CSV e 3 input**, zero righe di codice.
+  Spec (senza `@DAQUANDO`, da misurare) in `CACCIA_CANDELA_NEWS_2026-09-03.md` §7.
+  🔬 Ablazione gia' pronta e gratis: il corso **butta** la candela della
+  notizia sull'ECB e la **tiene** sul FOMC, senza mai spiegare perche'. Sono 5
+  minuti di `InpActionMin`: nessuna delle due versioni ha mai avuto un numero.
+- 🚧 **Buchi dichiarati:** la **lista FTMO degli eventi "Restricted event"**
+  NON e' stata letta (ftmo.com egress-blocked, 3 aggregatori bloccati) —
+  **serve che Claudio apra `ftmo.com/en/calendar/` dal suo browser**, sono 2
+  minuti e chiudono un buco che gli agenti non possono chiudere.
+  **forexfactory.com 403** (calendario e thread), **SSRN 403** (14ª di fila),
+  e 13 domini accademici/istituzionali bloccati (NBER, Fed, ECB, Cambridge,
+  ScienceDirect, ResearchGate, Semantic Scholar, Skidmore...).
