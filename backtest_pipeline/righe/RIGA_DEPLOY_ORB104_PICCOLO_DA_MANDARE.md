@@ -38,9 +38,13 @@ misurato dalla foto del PASSO 1): è quella che viene sostituita.
 > 115). La riga scandisce **largo** (cartelle dati di tutti i profili, installazioni
 > in `Program Files`, processi vivi) e sceglie **stretto**: **`bases\BCMMarkets-Server`**
 > presente **e nessuna traccia del 100k** (né `-V3` nell'`origin.txt`, né il login
-> `50504263` nei log degli ultimi 45 giorni). Il login `50503392` nei log è la
-> **conferma** (se manca è un rilievo dichiarato, non un blocco). Se le eleggibili
-> sono **0 o più di 1**, la riga **si ferma e stampa l'elenco completo** di cosa ha
+> `50504263` nei log degli ultimi 45 giorni) **e sotto il profilo della sessione da
+> cui lanci** (`%APPDATA%`: il piccolo gira sotto **Master**, misurato al PASSO 1;
+> il 100k gira sotto **Administrator**, HANDOFF 03/09 — e sotto quel profilo può
+> esserci anche una **copia** della stessa installazione, che passa i primi due fatti
+> ma **non viene scelta da sola**). Il login `50503392` nei log è la **conferma**
+> (se manca è un rilievo dichiarato, non un blocco). Se le scelte automatiche sono
+> **0 o più di 1**, la riga **si ferma e stampa l'elenco completo** di cosa ha
 > guardato — vedi la sezione gialla in fondo.
 
 > 🧰 **BACKUP PRIMA, RIPRISTINO SU FALLIMENTO.** I tre file di prima finiscono in
@@ -59,7 +63,7 @@ misurato dalla foto del PASSO 1): è quella che viene sostituita.
 |---|---|
 | **Driver** | `righe/RIGA_DEPLOY_ORB104_PICCOLO.ps1` (marcatore `MARCATORE_RIGA_DEPLOY_ORB104_PICCOLO_v1`) |
 | **Dove** | **VPS**, sessione **Master** (la cartella dati del piccolo è sotto `C:\Users\Master\...`, misurato al PASSO 1) |
-| **MT5 / MetaEditor** | **CORSA: TUTTI E DUE CHIUSI**, e la riga si ferma da sola se non lo sono, **prima di scaricare qualunque cosa**. **CONTROLLO: possono restare aperti** (non scrive niente; lo segna come rilievo) |
+| **MT5 / MetaEditor** | **CORSA: TUTTI E DUE CHIUSI**, e la riga si ferma da sola se non lo sono, **prima di scaricare qualunque cosa**. ⚠️ Il gate vede **tutti i processi della macchina**, anche il terminale del 100k che gira nella sessione **Administrator**: se lo nomina (`terminal64 pid ...`), va chiuso **da quella sessione** e riaperto dopo il PASSO 3 — chiuderlo e riaprirlo **non tocca i suoi file** (la riga li fotografa: `INVARIATO`). È la stessa regola della procedura del 22/08 («chiudi ENTRAMBI i terminali»). **CONTROLLO: possono restare aperti** (non scrive niente; lo segna come rilievo) |
 | **Quando** | flotta ferma: **dopo le 22:15 IT o prima delle 07:30 IT** (l'ORB parte alle 14:30 ora server = 15:30 IT: c'è tutta la mattina per il PASSO 3) |
 | **Quanto ci mette** | scansione + 2 download + 1 compilazione = **1–3 minuti** [STIMA] |
 
@@ -128,10 +132,12 @@ uno dei due è aperto, **prima di scaricare qualunque cosa**.
 1. **`data:`** = **l'ora in cui hai LANCIATO il blocco** (timbro all'avvio; la riga te
    la stampa già in console). **`modo:`** = `CONTROLLO` o `CORSA`.
 2. **`cartella dati del piccolo:`** + **`criterio di scelta:`** — deve dire
-   `FATTO: unica cartella dati con bases\BCMMarkets-Server e SENZA traccia del 100k`
-   e, se c'è, `login 50503392 CONFERMATO nei log`. Al PASSO 1 era
-   `...\Terminal\215D85D767A1C39E22D242C8114BF9F5`: se qui esce **un'altra**, fermati
-   e manda lo zip.
+   `FATTO: unica cartella dati sotto il profilo di questa sessione (Master) con
+   bases\BCMMarkets-Server e SENZA traccia del 100k` e, se c'è, `login 50503392
+   CONFERMATO nei log`. Al PASSO 1 era
+   `C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5`:
+   **nel CONTROLLO, se qui esce un'altra cartella, fermati e manda lo zip** — è per
+   questo che il CONTROLLO va **prima** della CORSA.
 3. **`versione INSTALLATA prima del giro:`** = **`1.02`** (letta dal `.mq5` del
    terminale, non assunta). Un numero diverso non è un guasto, ma va letto.
 4. **`versione letta dal #property:`** = **1.04**, **`autotest dichiarato:`** =
@@ -177,17 +183,25 @@ uno dei due è aperto, **prima di scaricare qualunque cosa**.
 | **CORSA, compilazione FALLITA o MUTA** | ✅ **SÌ** (+ backup) | **RIPRISTINATO** (le tre righe `PICCOLO` dicono `INVARIATO`) | lo zip, **prima di riaprire MT5** |
 | **CORSA, eccezione dopo la scrittura** (es. MetaEditor non parte) | ✅ **SÌ** (+ backup) | **RIPRISTINATO** (`ripristino: ... dopo un'eccezione`) | lo zip, **prima di riaprire MT5** |
 | **CORSA OK** | ✅ **SÌ** (+ backup) | **v1.04 dentro** (tre `CAMBIATO`, `-V3` `INVARIATO`, parametri `INVARIATI`) | lo zip → **PASSO 3** |
-_(la tabella è stata compilata **eseguendo** ogni ramo su un banco stubbato — 23
-casi, elenco nel referto di preparazione — non a memoria: punto 94-bis.)_
+_(la tabella è stata compilata **eseguendo** ogni ramo su un banco stubbato — 27
+casi, elenco in `risultati_archivio/REFERTO_DEPLOY_ORB104_PICCOLO_PREPARAZIONE.md` —
+non a memoria: punto 94-bis.)_
 
 ## 🟡 SE LA RIGA SI FERMA SU **«NON SO QUALE CARTELLA DATI È IL PICCOLO»**
 Non è un guasto: è la regola di casa (**classe 115** — l'ambiente non si indovina dal
 nome, si decide con un fatto). Il referto e `CANDIDATE.txt` portano **l'elenco di
 tutte le cartelle guardate**, con dentro `origin.txt`, `bases\`, i **login visti nei
-log** e il perché dello scarto. Riconosci quella del piccolo (login `50503392`,
-niente `-V3`) e rilancia **lo stesso blocco** aggiungendo al driver:
-`& $p -Pin $pin -Modo CORSA -CartellaDati "<percorso incollato>"`. La manopola **non
-salta i controlli**: una cartella con traccia del 100k viene rifiutata lo stesso.
+log**, il **profilo** e il perché dello scarto. Due casi tipici:
+- **«N cartelle passano i fatti ma NESSUNA sta sotto il profilo di questa
+  sessione»** → quasi sempre sei nella sessione **sbagliata** (Administrator invece
+  di Master): cambia sessione e rilancia **lo stesso blocco**, senza manopola;
+- **«eleggibili sotto questo profilo: 2»** (o 0 con un elenco che la contiene) →
+  riconosci quella del piccolo (login `50503392`, niente `-V3`, la `215D85...` del
+  PASSO 1) e rilancia **lo stesso blocco** aggiungendo al driver:
+  `& $p -Pin $pin -Modo CORSA -CartellaDati "<percorso incollato>"`.
+La manopola **non salta i controlli**: una cartella con traccia del 100k viene
+rifiutata lo stesso, e una cartella sotto un altro profilo viene accettata **con un
+rilievo che lo dice**.
 
 ## 🔴 AVVISI ATTESI (nessuno è un guasto)
 1. **`codice di uscita di metaeditor64: 1`** con `.ex5` fresco e `Result: 0 errors`:

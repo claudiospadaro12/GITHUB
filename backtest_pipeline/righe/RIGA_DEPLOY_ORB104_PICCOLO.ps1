@@ -48,10 +48,16 @@
 #        3. il login 50503392 nei log degli ultimi 45 giorni: e' la
 #           CONFERMA. Se manca e' un RILIEVO dichiarato, non un blocco
 #           (un terminale connesso da settimane puo' non avere una riga
-#           di login recente).
-#      Se le candidate eleggibili sono ZERO o PIU' DI UNA, non si
-#      indovina: ci si ferma stampando l'ELENCO COMPLETO (con dentro
-#      login visti, origin.txt, bases) e la manopola -CartellaDati.
+#           di login recente);
+#        4. la cartella sta sotto il PROFILO DI QUESTA SESSIONE (%APPDATA%):
+#           il terminale gira sotto l'utente che lo lancia, e il piccolo
+#           gira sotto Master (misurato al PASSO 1: C:\Users\Master\...).
+#           Il 100k gira sotto Administrator (HANDOFF 03/09), e sotto
+#           quel profilo puo' esserci anche una copia della stessa
+#           installazione: passa i fatti 1-3 ma NON si sceglie da sola.
+#      Se le candidate scelte in automatico sono ZERO o PIU' DI UNA, non
+#      si indovina: ci si ferma stampando l'ELENCO COMPLETO (con dentro
+#      login visti, origin.txt, bases, profilo) e la manopola -CartellaDati.
 #      La manopola NON salta i controlli: la cartella imposta passa gli
 #      stessi gate, e se non li passa la riga si ferma dicendo perche'.
 #
@@ -292,7 +298,7 @@ function AggiungiCandidata([string]$percorso,[string]$origine){
   [void]$Cand.Add([pscustomobject]@{
     Percorso=$full; Origine=$origine; HaExe=$exe; HaMe=$me; HaLogs=$lg; HaMql=$mq
     Origin=""; BaseBcm=$false; Logins=""; FileLog=0; VistoPiccolo=$false; VistoGrande=$false
-    TracciaV3=""; Eleggibile=$false; Scarto=""; Leggibile=$true
+    TracciaV3=""; Eleggibile=$false; Profilo=$false; Scarto=""; Leggibile=$true
   })
 }
 
@@ -484,8 +490,10 @@ try{
   }
   $radici = New-Object System.Collections.ArrayList
   if($env:APPDATA){ [void]$radici.Add((Join-Path $env:APPDATA "MetaQuotes\Terminal")) }
+  $drive = $env:SystemDrive
+  if(-not $drive){ $drive = "C:" }
   try{
-    foreach($u in @(Get-ChildItem "C:\Users" -Directory -ErrorAction SilentlyContinue)){
+    foreach($u in @(Get-ChildItem -LiteralPath (Join-Path $drive "Users") -Directory -ErrorAction SilentlyContinue)){
       [void]$radici.Add((Join-Path $u.FullName "AppData\Roaming\MetaQuotes\Terminal"))
     }
   }catch{}
@@ -497,8 +505,15 @@ try{
     }
   }
   $paroleChiave = @("MT5","BCM","MetaTrader","MetaQuotes","Terminal")
-  foreach($ri in @("C:\Program Files","C:\Program Files (x86)")){
+  $radiciInst = New-Object System.Collections.ArrayList
+  foreach($ri in @($env:ProgramFiles, ${env:ProgramFiles(x86)}, (Join-Path $drive "Program Files"), (Join-Path $drive "Program Files (x86)"))){
+    if(-not $ri){ continue }
     if(-not (Test-Path -LiteralPath $ri)){ continue }
+    $giaVisto = $false
+    foreach($x in $radiciInst){ if($x -ieq $ri){ $giaVisto = $true } }
+    if(-not $giaVisto){ [void]$radiciInst.Add($ri) }
+  }
+  foreach($ri in $radiciInst){
     foreach($d1 in @(Get-ChildItem -LiteralPath $ri -Directory -ErrorAction SilentlyContinue)){
       $nome1 = $false
       foreach($k in $paroleChiave){ if($d1.Name -like ("*" + $k + "*")){ $nome1 = $true } }
@@ -547,17 +562,25 @@ try{
     if($c.Percorso -like "*-V3*"){ [void]$tr.Add("percorso contiene -V3") }
     if($c.VistoGrande){ [void]$tr.Add("login " + $CONTO_GRANDE + " nei log") }
     $c.TracciaV3 = (@($tr) -join "; ")
+    # IL PROFILO DI QUESTA SESSIONE e' un fatto del sistema: il terminale
+    # del piccolo gira sotto l'utente che lo ha lanciato (Master, misurato
+    # al PASSO 1: cartella dati sotto C:\Users\Master). Una cartella
+    # eleggibile sotto un ALTRO profilo (o portable) non si sceglie da sola:
+    # si elenca, e si impone solo con -CartellaDati.
+    if($env:APPDATA){ $c.Profilo = $c.Percorso.StartsWith(($env:APPDATA.TrimEnd("\")), [System.StringComparison]::OrdinalIgnoreCase) }
     if(-not $c.HaMql){ $c.Scarto = "nessuna cartella MQL5\ (installazione non portable: i dati stanno altrove)"; continue }
     if(-not $c.BaseBcm){ $c.Scarto = "nessuna bases\" + $BASE_BCM + " (non e' il feed BCM)"; continue }
     if($c.TracciaV3 -ne ""){ $c.Scarto = "E' IL 100k/-V3 (" + $c.TracciaV3 + "): fuori dal perimetro firmato"; continue }
     $c.Eleggibile = $true
+    if(-not $c.Profilo){ $c.Scarto = "eleggibile per i fatti, ma sotto un ALTRO profilo utente (questa sessione e' " + $env:USERNAME + ", APPDATA " + $env:APPDATA + "): non scelta da sola. Se e' davvero il piccolo, imponila con -CartellaDati" }
   }
 
   $righeC.Clear()
   [void]$righeC.Add("CARTELLE GUARDATE (conto cercato " + $CONTO_PICCOLO + ", candidate " + $Cand.Count + "):")
   foreach($c in $Cand){
     $tag = "scartata"
-    if($c.Eleggibile){ $tag = "ELEGGIBILE" }
+    if($c.Eleggibile -and $c.Profilo){ $tag = "ELEGGIBILE, sotto il profilo di questa sessione" }
+    elseif($c.Eleggibile){ $tag = "eleggibile per i fatti, ma sotto un ALTRO profilo" }
     [void]$righeC.Add("  --- " + $c.Percorso + "   [" + $tag + "]")
     [void]$righeC.Add("      trovata come: " + $c.Origine)
     [void]$righeC.Add("      terminal64.exe=" + $c.HaExe + " metaeditor64.exe=" + $c.HaMe + " logs\=" + $c.HaLogs + " MQL5\=" + $c.HaMql + " bases\" + $BASE_BCM + "=" + $c.BaseBcm + " file di log letti=" + $c.FileLog + " leggibile=" + $c.Leggibile)
@@ -572,19 +595,28 @@ try{
 
   $V3Cand = @($Cand | Where-Object { $_.TracciaV3 -ne "" })
   $eleg = @($Cand | Where-Object { $_.Eleggibile })
+  $auto = @($eleg | Where-Object { $_.Profilo })
   if($CartellaDati -ne ""){
     $imp = @($Cand | Where-Object { $_.Origine -like "*IMPOSTA A MANO*" })
     if($imp.Count -eq 0){ throw ("-CartellaDati '" + $CartellaDati + "' non esiste o non ha nessuna traccia di un terminale (logs\, MQL5\, terminal64.exe): non la uso.") }
     if(-not $imp[0].Eleggibile){ throw ("-CartellaDati '" + $CartellaDati + "' NON passa i gate: " + $imp[0].Scarto + ". La manopola non salta i controlli: mi fermo.") }
     $Piccolo = $imp[0]
     $Criterio = "IMPOSTA A MANO con -CartellaDati, e ha passato gli stessi gate (bases\" + $BASE_BCM + ", nessuna traccia del 100k)"
+    if(-not $Piccolo.Profilo){ [void]$Rilievi.Add("la cartella imposta con -CartellaDati sta sotto un ALTRO profilo utente rispetto a questa sessione (" + $env:USERNAME + "): l'hai scelta tu, e' dichiarato.") }
   }
-  elseif($eleg.Count -eq 1){
-    $Piccolo = $eleg[0]
-    $Criterio = "FATTO: unica cartella dati con bases\" + $BASE_BCM + " e SENZA traccia del 100k (ne' -V3 ne' login " + $CONTO_GRANDE + ")"
+  elseif($auto.Count -eq 1){
+    $Piccolo = $auto[0]
+    $Criterio = "FATTO: unica cartella dati sotto il profilo di questa sessione (" + $env:USERNAME + ") con bases\" + $BASE_BCM + " e SENZA traccia del 100k (ne' -V3 ne' login " + $CONTO_GRANDE + ")"
+    if($eleg.Count -gt 1){
+      $altre = @($eleg | Where-Object { -not $_.Profilo } | ForEach-Object { $_.Percorso }) -join " | "
+      [void]$Rilievi.Add("altre " + ($eleg.Count - 1) + " cartelle passano i fatti ma stanno sotto un ALTRO profilo utente, e NON sono state toccate: " + $altre + ". Se il piccolo fosse una di quelle, questo giro ha scritto nella cartella sbagliata: controlla il percorso scelto.")
+    }
+  }
+  elseif($auto.Count -eq 0 -and $eleg.Count -ge 1){
+    throw ("NON SO QUALE CARTELLA DATI E' IL PICCOLO (classe 115): " + $eleg.Count + " cartelle passano i fatti ma NESSUNA sta sotto il profilo di questa sessione (" + $env:USERNAME + ", APPDATA " + $env:APPDATA + "). O sei nella sessione sbagliata (il piccolo gira sotto Master, misurato al PASSO 1), o e' portable. L'elenco e' qui sopra e nel referto: se e' davvero quella, rilancia LO STESSO blocco aggiungendo al driver -CartellaDati ""<percorso>"".")
   }
   else{
-    throw ("NON SO QUALE CARTELLA DATI E' IL PICCOLO (classe 115: eleggibili " + $eleg.Count + ", ne serve 1). L'elenco completo di cosa ho guardato e' qui sopra e nel referto. Rilancia LO STESSO blocco aggiungendo al driver: -CartellaDati ""<percorso della cartella dati del piccolo>"".")
+    throw ("NON SO QUALE CARTELLA DATI E' IL PICCOLO (classe 115: eleggibili sotto questo profilo " + $auto.Count + ", ne serve 1). L'elenco completo di cosa ho guardato e' qui sopra e nel referto. Rilancia LO STESSO blocco aggiungendo al driver: -CartellaDati ""<percorso della cartella dati del piccolo>"".")
   }
   if($Piccolo.VistoPiccolo){ $Criterio = $Criterio + "; login " + $CONTO_PICCOLO + " CONFERMATO nei log" }
   else{
