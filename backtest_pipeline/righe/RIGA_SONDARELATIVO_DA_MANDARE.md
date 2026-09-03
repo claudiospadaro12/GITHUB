@@ -347,7 +347,8 @@ sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|g" "$
 # e il CARTELLO del segnaposto si RISCRIVE (classe 101), non si lascia:
 grep -c "\$pin='$SHA'" "$F"                    # DEVE dare 5 (1 giro a vuoto + 4 corse)
 grep -c "\$pin='$TOK'" "$F"                    # DEVE dare 0
-grep -ci "segnaposto\|non funziona\|la riga non parte" "$F"   # DEVE dare 0
+CART='segnap'"osto\|non funz"'iona\|la riga non par'"te"   # composto, come TOK
+grep -ci "$CART" "$F"                          # DEVE dare 0 (cartello riscritto, non lasciato)
 # RI-PINNATURA (vecchio -> nuovo): il vecchio si legge DAI PUNTI D'USO, la prosa e' storia e non si tocca
 VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{40}')
 sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
