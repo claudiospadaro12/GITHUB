@@ -466,3 +466,18 @@ confrontato campo per campo con la foto del piccolo delle 07:29:
    proposta a Claudio (da eseguire lui, legge dello screenshot): campo
    "Rischio per trade in %" 1.0 -> 0.3 sull'istanza del 100k, screenshot
    prima e dopo, OK. Nessun altro campo si tocca.
+
+### ✅ 03/09, 08:10 — CORREZIONE TAGLIA ESEGUITA DA CLAUDIO (legge dello screenshot rispettata)
+
+Screenshot DOPO letto riga per riga: pannello `ABTG_ORB_Ottimizzato 1.02
+(U30USD,M5)` sul conto 100k, **"Rischio per trade in % = 0.3"** — riportato
+al contratto. NESSUN altro campo cambiato (verificato contro la foto delle
+07:34: trailing true 9/21, TP1Pct 0.0, ExecTF 5 Minutes, magic 770611,
+tutto identico). Sequenza completa: foto prima (07:34, 1.0) -> modifica ->
+foto dopo (08:10, 0.3). **IL CASO SOVRATAGLIA 3,3x E' CHIUSO**: dal
+prossimo trade il rapporto lotti gemelli deve tornare ~6 (0,3%/1,0% x 20)
+— la PRIMA COPPIA GEMELLA FUTURA e' la verifica sul campo.
+
+Restano aperti, sul mistero del trailing: foto posizioni APERTE del
+piccolo + Giornale del piccolo (02/09, 16:00->17:50 IT), e i log della
+v1.03 alla prossima ricompilazione.
