@@ -168,14 +168,19 @@ pagato altrove. Dichiarato: resta per un giro successivo se Claudio la vuole
 comunque per-cella (es. per scovare un'anomalia SU una sola cella, che
 implicherebbe un bug diverso dal calendario).
 
-### Difetto di classe gia' nota (109-bis) trovato per strada
-La pagina `RIGA_SONDARELATIVO_DA_MANDARE.md`, riga 97 ("`Autotest Falliti` =
-**0** su **21** blocchi"), era rimasta ferma alla v1.00 **anche dopo** il
-ri-pin v1.00->v1.01 di stamattina: non era stata toccata in quel giro.
-Corretta ora a 23. Non e' un difetto introdotto in questo giro, ma un
-residuo del giro precedente non pescato allora — lezione della classe
-109-bis: un conteggio citato in prosa e' un punto d'uso quanto uno nel
-codice, va cercato con `grep` sul NUMERO, non per intuito.
+### Difetto di classe gia' nota (109-bis) trovato per strada — DUE occorrenze
+La pagina `RIGA_SONDARELATIVO_DA_MANDARE.md` aveva **due** numeri rimasti
+fermi alla v1.00, **anche dopo** il ri-pin v1.00->v1.01 di stamattina (non
+erano stati toccati in quel giro): riga 97 ("`Autotest Falliti` = **0** su
+**21** blocchi", nella sezione "CLAUSOLA SEVERA SUI COLLAUDI") e riga 307
+("autotest 0/21", nella sezione "COME SI LEGGE", punto 8) — la seconda
+trovata solo in un secondo passaggio con `grep -n '0/21\|autotest.*21'`
+sull'intera pagina, dopo aver corretto la prima e riletto il file intero
+invece di fidarsi della prima passata. Entrambe corrette a 23. Non sono
+difetti introdotti in questo giro, ma residui del giro precedente non
+pescati allora — lezione della classe 109-bis: un conteggio citato in
+prosa e' un punto d'uso quanto uno nel codice, e va cercato con `grep`
+sul NUMERO in TUTTA la pagina, non per intuito su un solo punto.
 
 ### Controlli eseguiti
 1. **Parse pwsh reale** (pwsh 7.4.6 disponibile nell'ambiente) del driver
@@ -214,8 +219,8 @@ prosa storica, non riscritta per convenzione).
 ## Verdetto (parte 2)
 **PASS.** Driver e pagina ri-pinnati e allineati alla v1.02 dell'EA;
 aggiunta la stampa delle due colonne diagnostiche nuove nella riga di
-riferimento del referto; corretto un residuo v1.00 non pescato nel giro
-precedente (riga 97 della pagina).
+riferimento del referto; corretti DUE residui v1.00 non pescati nel giro
+precedente (righe 97 e 307 della pagina, sezioni diverse).
 
 **NON COPERTO:** compilazione reale con MetaEditor e corsa MT5 vera (fuori
 dal perimetro eseguibile in questo ambiente: serve il PC di backtest
