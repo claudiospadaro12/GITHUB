@@ -64,16 +64,11 @@ una griglia).
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI** prima di lanciare (la riga li riguarda anche subito prima della misura storico) |
 | **Quanto ci mette** | compilazione (EA nuovo) + **misura storico M1 USDJPY senza tick** (10-45 minuti, MOLTO variabile: dipende da quanti anni servono davvero) + 2 passate OHLC M1 su una finestra pluriennale (secondi-minuti, non tick reali) + 2-3 avvii del terminale. **Totale onesto: 20-60 minuti, quasi tutti nella misura storico** [STIMA: nessuna corsa di casa ha mai cronometrato questa misura per USDJPY, il numero vero lo dice questo giro] |
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`8ac9c304d8c56bfae8d8b8c13fc544a6ae0f0c62`**
 
-⚠️ **QUESTA PAGINA NON È ANCORA LANCIABILE.** Il pin qui sopra è un
-segnaposto: la riga sotto **non funziona finché non viene sostituito** con
-l'hash del commit che contiene, insieme, driver + prova + preset + calendario
-+ EA + include + generico. Non incollarla così com'è.
-
-Una volta pinnata, questa tabella riporta i sette file **verificati uno per
-uno via `raw` prima di mandare la pagina** (HTTP 200 + marcatore/contenuto
-atteso):
+Commit di `lavoro` (03/09/2026), **verificato file per file via `raw` prima di
+scrivere questa pagina** (HTTP 200 + hash sha256 identico al repo, driver
+verificato anche col marcatore e col parse `pwsh`):
 
 | file al pin | esito |
 |---|---|
@@ -94,7 +89,7 @@ Tutti e sette scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_NFP.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='8ac9c304d8c56bfae8d8b8c13fc544a6ae0f0c62'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_NFP.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_NFP.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_NFP_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -115,7 +110,7 @@ da solo se lo storico M1 non è ancora sul disco del PC di backtest.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_NFP.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='8ac9c304d8c56bfae8d8b8c13fc544a6ae0f0c62'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_NFP.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_NFP.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_NFP_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
