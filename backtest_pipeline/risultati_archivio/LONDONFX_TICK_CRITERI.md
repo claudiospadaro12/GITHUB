@@ -784,3 +784,14 @@ li scoprirà l'F7), il comportamento a runtime, la frequenza reale del motore 3
 controlli fatti sono statici: bilanciamento dei blocchi, ASCII puro, nessuna
 funzione duplicata, allineamento **56 nomi = 56 specificatori = 56 argomenti**
 del CSV OPTFRAME, indici `stats[0..52]` tutti assegnati.
+
+### ✅ 03/09 ~12:10 — verifiche d'integrita' pre-lancio (fatte in sessione, non da agente)
+- **Magic 774001 VERGINE**: unica occorrenza nel repo = il default input di
+  ABTG_LondonFx.mq5. 774101 e' GapContinuation (7741xx, altro blocco). Da
+  ri-confermare col grep il giorno del lancio (la sedia potrebbe nascere prima).
+- **ABTG_LondonFx hedge-safe confermato**: zero `PositionSelect(_Symbol)` /
+  `PositionClose(_Symbol)` / `PositionModify(_Symbol)` fuori dai commenti (le
+  2 occorrenze sono commenti che spiegano cosa NON fa). Il difetto C9 non nasce.
+- **Graffe bilanciate** (diff 0) su ABTG_LondonFx, ABTG_ORB v1.01, ABTG_MaxMinNotte
+  v1.11 — integrita' strutturale ok (NON e' una prova di compilazione: quella
+  resta il primo passo del giro a vuoto).
