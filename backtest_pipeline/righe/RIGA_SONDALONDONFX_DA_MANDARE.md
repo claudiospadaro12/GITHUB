@@ -89,7 +89,7 @@ compilazione = **stima onesta 10–25 minuti** per la gamba GBPUSD [STIMA, non u
 previsione]. Il giro a vuoto è questione di minuti (ma COMPILA: è lì che un EA
 mai compilato può cadere, ed è un risultato).
 
-## 📌 IL PIN — **`@@PIN@@`**  ✅ INSERITO (verificato con `git rev-parse`: contiene il driver **v4** con `-Simbolo` + i 2 prova + la sonda `.mq5` + il generico). _Ri-pinnata il 03/09 per il driver **v4**: **tutti i pin precedenti e i marcatori `_v2` / `_v3` sono BRUCIATI — non incollarli più.** Lancia SOLO i quattro blocchi di questa pagina._
+## 📌 IL PIN — **`4671be3c69db037afeb530637e360bb4a43f6363`**  ✅ INSERITO (verificato con `git rev-parse`: contiene il driver **v4** con `-Simbolo` + i 2 prova + la sonda `.mq5` + il generico). _Ri-pinnata il 03/09 per il driver **v4**: **tutti i pin precedenti e i marcatori `_v2` / `_v3` sono BRUCIATI — non incollarli più.** Lancia SOLO i quattro blocchi di questa pagina._
 
 ---
 
@@ -106,7 +106,7 @@ mai compilato può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='4671be3c69db037afeb530637e360bb4a43f6363'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -122,7 +122,7 @@ mai compilato può cadere, ed è un risultato).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='4671be3c69db037afeb530637e360bb4a43f6363'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD; $rc=$LASTEXITCODE;
@@ -152,7 +152,7 @@ sequenza con le etichette **`GBP_M5`** / **`GBP_M15`**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='4671be3c69db037afeb530637e360bb4a43f6363'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -168,7 +168,7 @@ sequenza con le etichette **`GBP_M5`** / **`GBP_M15`**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='4671be3c69db037afeb530637e360bb4a43f6363'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDALONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDALONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDALONDONFX_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD; $rc=$LASTEXITCODE;
