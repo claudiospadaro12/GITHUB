@@ -6982,3 +6982,89 @@ e' **CORRETTO** su 88 / 94-bis / 94-ter / 106 / 108 / 110 e ri-pinnato.
 (elenco a comando, sopra) — da chiudere **prima del prossimo invio di ciascuna**,
 non in blocco: un gate di freschezza si aggancia all'artefatto che quella riga
 produce davvero, e quello si legge un file alla volta.
+
+---
+
+## 🆕 AGGIUNTA DEL 03/09/2026 (mattina) — trovata **costruendo** le righe della SESSIONE 1 del collaudo enforcement, cioè leggendo l'artefatto delle attese **accanto al codice del Guardian**, riga per riga
+
+## 114. 🎭 L'**ATTESA CONGELATA CHE LA PROCEDURA NON PUÒ PRODURRE**: il codice azzera la bandiera **in silenzio**, e la riga promessa non esce — così un collaudo sano si presenta come incompleto
+
+_Misurato, non ipotizzato._ L'artefatto congelato il 02/09
+(`backtest_pipeline/attese_enforcement_fase1.txt`) chiede, per il criterio 7:
+
+```
+C7.GUARDIAN | ATTESA | [GUARDIAN] * CAP RISCHIO APERTO attivo:
+C7.EA       | ATTESA | INGRESSO BLOCCATO -- CAP RISCHIO APERTO raggiunto (firma C1)
+C7.RIENTRO  | ATTESA | [GUARDIAN] cap rischio aperto rientrato:
+```
+
+e il piano (§2.5 passo 6) rassicura: _«il cap non è un latch: rientra da solo
+entro un giro (riga 427) e scrive la sua riga di rientro»_. **Vero in generale,
+FALSO nella procedura che il piano stesso prescrive.** Le due righe del codice:
+
+```mql5
+// ABTG_Guardian.mq5:283  -- OnInit
+GlobalVariableSet(GV_CAP,0);          // il cap si ricalcola da zero a ogni avvio
+// ABTG_Guardian.mq5:425-428 -- OnTimer, ramo "rientrato"
+if(GlobalVariableGet(GV_CAP)>0)
+   PrintFormat("[GUARDIAN] cap rischio aperto rientrato: %.2f%% < %.2f%%",riskPct,InpMaxOpenRiskPct);
+```
+
+La riga di rientro esce **solo se la bandiera è ancora accesa** quando il
+rischio rientra. Ma la procedura prescrive di rialzare la soglia **cambiando un
+input**, e ogni cambio di input (come ogni riattacco dell'EA) passa da
+`OnDeinit`+`OnInit`: **`GV_CAP` è già a zero, in silenzio, un istante prima**.
+Risultato: `C7.RIENTRO` **non può comparire** — comparirebbe solo per un evento
+che nessuno controlla (una posizione che si chiude *mentre* il guardiano gira
+con la soglia ancora bassa).
+
+### Perché è una classe a sé
+
+- **non è un'attesa sbagliata**: la frase esiste, il codice la stampa davvero,
+  in un altro scenario. È l'**accoppiata attesa+procedura** a essere impossibile;
+- **il costo è asimmetrico e silenzioso**: una prova **riuscita** si presenta
+  come **2 righe su 3** — e chi legge il verbale la settimana dopo, senza il
+  codice davanti, la archivia come "criterio 7 incompleto, si ripete", cioè
+  **una sessione in più sul forward**, con il suo costo in trade persi;
+- **non è la 94-ter** (campo timbrato solo sul ramo di successo: lì il referto
+  *nega* un passo avvenuto). Qui non c'è nessun campo: c'è un **evento fisico
+  che la procedura rende impossibile**;
+- **non è la 106** (artefatto che si svuota): la riga non viene cancellata, **non
+  nasce**.
+
+> ✅ **REGOLA: ogni ATTESA di un contratto si verifica con la domanda
+> "QUALE GESTO DELLA PROCEDURA la produce?", e la risposta si legge NEL CODICE,
+> non nel piano.** Tre esiti, tutti leciti, e **si dichiarano prima della prova**:
+> 1. la produce il gesto N → si scrive accanto all'attesa **quale gesto**;
+> 2. la produce solo un evento **opportunistico** → l'attesa è 🟡 e non fa PASS
+>    né FAIL da sola;
+> 3. **non la produce nessun gesto della procedura** → si dichiara
+>    **NON OTTENIBILE** *prima*, con le righe di codice che lo dimostrano, e
+>    **la sua assenza non si conta come FAIL**.
+>
+> ⚠️ **E la contromisura sta nello STRUMENTO, non solo nella pagina:** il
+> referto della riga di raccolta **stampa da sé** il perché di quell'assenza
+> (qui: `RIGA_COLLAUDO_FASE1_S1.ps1`, blocco `C7.RIENTRO`), perché una nota che
+> vive solo nella pagina `_DA_MANDARE.md` non è nello zip che si rileggerà fra
+> un mese.
+
+### 114-bis. ⏱️ LA REGOLA DEL CONTRATTO **PIÙ SEVERA DEL CODICE**: la causa si stampa UNA VOLTA SOLA, e il gate la pretende OGNI VOLTA
+
+Stessa lettura, stesso artefatto, criterio 9:
+
+```
+# Ogni riga C9.BLOCCO deve avere, nello STESSO MINUTO, una riga C5.GUARDIAN
+# oppure C7.GUARDIAN che la spieghi. Un blocco senza causa = difetto.
+```
+
+Ma il Guardian stampa la causa **solo al CAMBIO di stato** (`if(GlobalVariableGet(GV_CAP)<=0)` prima di
+timbrare), mentre un EA può bloccare **dieci minuti dopo**: al banco, con una
+causa alle 15:29 e un blocco alle 15:35, la regola letterale conta **1 blocco
+orfano su 1** — cioè **un difetto inventato**, proprio nel criterio che deve
+dire «zero blocchi orfani».
+_Contromisura applicata: la riga di raccolta stampa **due conteggi** — quello
+**letterale** (stesso minuto) e quello a **causa vigente** (l'ultima accensione
+non rientrata prima del blocco) — e dichiara che il secondo è quello fedele al
+codice. La scelta fra i due **si firma prima** della sessione del criterio 9,
+non dopo aver visto i numeri (regola di casa: i criteri si cambiano prima dei
+dati)._
