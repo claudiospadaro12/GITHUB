@@ -224,6 +224,13 @@
 //      successiva) cade ANCORA dentro la finestra: gli altri si
 //      contano a parte ("Attraversamenti Ingresso Fuori
 //      Finestra"), non si eseguono.
+//      DALLA v1.03 "la successiva" e' la barra 0 VERA (tProssima),
+//      non tSeg + gTfSec: se lo storico della gamba ha un buco le
+//      due NON coincidono, e chiedere alla barra teorica lasciava
+//      aprire posizioni su una barra gia' fuori sessione (era la
+//      causa del collaudo T12 rotto). Quante volte il gate nuovo
+//      morde lo dice la colonna "Ingressi Barra Reale Fuori":
+//      senza buchi vale 0 e il comportamento e' identico a prima.
 //
 //  T8. I BARRE FUORI FINESTRA NON SI VALUTANO, ED E' UNA SCELTA.
 //      Fuori dalla sessione non si calcola nemmeno lo z-score
@@ -263,6 +270,16 @@
 //      venire 0,00%. Se non viene zero, c'e' un errore nella
 //      contabilita' dei tempi. Il vincolo si legge lo stesso,
 //      perche' e' quello che chiede CONFIG_PROP_2026-08-31 P5.
+//      DALLA v1.03 la tenuta in secondi si misura sulle BARRE
+//      EFFETTIVAMENTE VALUTATE (gPosBarre x gTfSec) e non sulla
+//      differenza di calendario fra i due timestamp: su un buco
+//      dello storico quella differenza misura IL BUCO, non la
+//      posizione. Il collaudo NON diventa per questo una
+//      tautologia -- resta l'unico modo di produrre "sotto 60 s",
+//      cioe' gPosBarre = 0: una posizione chiusa senza aver mai
+//      valutato una barra. Il conteggio secco esce in colonna
+//      ("Chiuse Zero Barre"), e il tempo di calendario grezzo resta
+//      leggibile nel CSV riga-per-segnale ("secondi_calendario").
 //
 //  T13. ATR: ECO, NON MOTORE. L'ATR della gamba al momento del
 //      segnale non decide niente qui: serve a leggere il MAE in
@@ -289,7 +306,49 @@
 //      sbaglierebbe CONTRO il candidato.
 //+------------------------------------------------------------------+
 #property copyright "ABTG - Sonda di convergenza RELATIVO (PASSO 0, caccia 02/09/2026)"
-#property version   "1.02"
+#property version   "1.03"
+//  v1.03 (03/09/2026) -- FIX T12 "TENUTA SOTTO 60 SECONDI". Difetto
+//  PRE-ESISTENTE (c'era gia' nella primissima corsa v1.00, quindi NON
+//  introdotto dai fix C2): 47 celle su 49 con "Sotto 60 Secondi Pct"
+//  fra 0,10 e 0,74 dove il collaudo pretende 0,00.
+//  LA CAUSA, TRACCIATA RIGA PER RIGA (non e' una supposizione):
+//    a) i due timestamp che entrano in 'sec' sono APERTURE DI BARRA
+//       sulla stessa griglia del TF, quindi la loro differenza vale 0
+//       oppure >= gTfSec (300 s a M5, 900 s a M15). "sotto 60 secondi"
+//       non e' "una tenuta corta": e' ESATTAMENTE sec = 0.
+//    b) sec = 0 si produce in UN SOLO punto: la posizione viene aperta
+//       su tProssima (la barra 0 VERA, iTime(...,0)) mentre il gate T7
+//       controllava la finestra oraria su tAttesa = tSeg + gTfSec, cioe'
+//       sulla barra d'ingresso TEORICA. Quando la GAMBA ha un buco
+//       (barra M15 mancante) le due NON coincidono: la teorica cade
+//       dentro la finestra, la REALE cade fuori, il gate lascia passare
+//       e la posizione nasce su una barra FUORI SESSIONE.
+//    c) alla valutazione successiva quella stessa barra e' la barra di
+//       segnale (tSeg == gPosTIngr) e, essendo fuori finestra, scatta la
+//       rete "nessuno stato attraversa la notte": ChiudiPosizioneFinta(2,
+//       tSeg, ...) con tSeg == gPosTIngr -> sec = 0 -> gSotto60++.
+//       Quel ramo esce PRIMA del passo 6, quindi gPosBarre e' ancora 0:
+//       la stessa posizione deposita anche un campione di tenuta a ZERO
+//       BARRE, che tirava giu' pure la mediana di C8.
+//  FIX, in due gesti e nessuno tocca z-score/ingresso/uscita/C2:
+//    1) il gate T7 si applica alla barra d'ingresso REALE (tProssima),
+//       non a quella teorica. Senza buchi le due coincidono e il
+//       comportamento e' IDENTICO: il fix morde solo sul buco.
+//    2) la tenuta in secondi si misura sulle BARRE EFFETTIVAMENTE
+//       VALUTATE (gPosBarre x gTfSec) e non sulla differenza di
+//       calendario grezza fra due timestamp, che su un buco misura il
+//       buco e non la posizione. Il tempo di calendario resta, come
+//       colonna SEPARATA, nel CSV riga-per-segnale.
+//  COSI' T12 NON DIVENTA UNA TAUTOLOGIA: con la (2) "sotto 60 s"
+//  significa ora, esattamente, "posizione chiusa senza aver mai
+//  valutato una barra", che e' un difetto vero e resta rilevabile.
+//  E IL FIX E' FALSIFICABILE (lezione della v1.01): esce la colonna
+//  "Ingressi Barra Reale Fuori" = quante volte il gate nuovo ha
+//  fermato un ingresso che il vecchio lasciava passare. Se torna 0 e
+//  T12 fallisce ancora, questa diagnosi e' SBAGLIATA e va riscritta.
+//  Accanto, "Chiuse Zero Barre" = il collaudo T12 in conteggio secco.
+//  REL_NSTATS 95 -> 97, autotest 23 -> 25 blocchi, CSV dei segnali
+//  con una colonna in piu' ("secondi_calendario").
 //  v1.02 (03/09/2026) -- IL FIX v1.01 ERA COLLEGATO MA NON POTEVA
 //  MORDERE: LA DOMANDA ERA POSTA ALLA GRANULARITA' SBAGLIATA.
 //  MISURA (non opinione): la corsa D30_M15 rifatta con la v1.01
@@ -436,7 +495,7 @@
 //    v1.02 (03/09): +1 (95) per "Giorni Metro Zero Calendario", il
 //    criterio VUOTO della v1.01 tenuto come contatore di controllo:
 //    atteso 0, ed e' la PROVA misurata della diagnosi (vedi in testa).
-#define REL_NSTATS                 95
+#define REL_NSTATS                 97
 
 //==================================================================
 //  INPUT
@@ -515,6 +574,15 @@ long gOccupatoStessoL = 0, gOccupatoStessoS = 0;
 long gOccupatoAltroLato = 0;          // COLLAUDO T6: deve venire 0
 long gAttrIngressoFuori = 0;
 long gAttrPrimaBarra    = 0;
+//--- FIX T12 v1.03, ed e' il numero che rende il fix FALSIFICABILE
+//    (lezione della v1.01, che "girava" senza mai mordere): quante
+//    volte il gate T7 ha fermato un ingresso che la versione vecchia
+//    lasciava passare, cioe' i casi in cui la barra d'ingresso TEORICA
+//    (tSeg + gTfSec) cadeva DENTRO la finestra ma quella REALE
+//    (iTime(...,0), spostata da un buco dello storico) cadeva FUORI.
+//    Senza buchi vale 0. Se vale 0 E il collaudo T12 fallisce ancora,
+//    la diagnosi della v1.03 e' sbagliata e va riscritta.
+long gIngressoBarraRealeFuori = 0;
 
 //--- esiti delle posizioni finte
 long gChiuseL = 0, gChiuseS = 0;
@@ -523,6 +591,12 @@ long gFineSessL = 0, gFineSessS = 0;
 long gTettoL = 0, gTettoS = 0;
 long gFineCorsa = 0;                  // esclusa da C6: e' un artefatto del bordo corsa
 long gSotto60L = 0, gSotto60S = 0;
+//--- COLLAUDO T12 in conteggio secco (v1.03): posizioni chiuse con
+//    ZERO barre valutate. Dalla v1.03 la tenuta in secondi vale
+//    gPosBarre x gTfSec, quindi "sotto 60 secondi" e "zero barre" sono
+//    lo STESSO evento: la percentuale dice quanto pesa, questo dice
+//    quante sono. Atteso 0.
+long gChiuseZeroBarre = 0;
 
 //--- giornate (T15)
 int  gDayStamp = -1;
@@ -857,6 +931,54 @@ bool InFinestra_Calc(const int ora, const int minuto,
    if(a == b) return(false);            // finestra nulla: non si conta niente
    if(a < b)  return(m >= a && m < b);
    return(m >= a || m < b);
+  }
+
+//+------------------------------------------------------------------+
+//| FIX T12 v1.03 -- IL GATE T7 SULLA BARRA D'INGRESSO **REALE**.     |
+//|                                                                   |
+//| La sonda entra e esce SULL'APERTURA DELLA BARRA SUCCESSIVA (T10), |
+//| e "la successiva" e' la barra 0 del terminale (tReale), non       |
+//| tSeg + tfSec. Le due coincidono SOLO se lo storico e' pieno: se   |
+//| alla gamba manca una barra M15, la barra teorica cade dentro la   |
+//| finestra e quella VERA puo' cadere gia' fuori. Chiedere alla      |
+//| teorica lasciava aprire una posizione su una barra FUORI          |
+//| sessione, che la valutazione dopo chiudeva subito come "fine      |
+//| sessione" con lo STESSO timestamp d'ingresso: tenuta 0 secondi e  |
+//| 0 barre. Era la causa del collaudo T12 rotto (v1.00 -> v1.02).    |
+//|                                                                   |
+//| 'contigua' esce a parte perche' MISURA il buco: senza buchi vale  |
+//| sempre true e questa funzione risponde esattamente come la        |
+//| versione vecchia -- il fix morde SOLO dove c'era il difetto.      |
+//+------------------------------------------------------------------+
+bool IngressoInFinestra_Calc(const datetime tSeg, const datetime tReale, const int tfSec,
+                             const int oraIni, const int minIni,
+                             const int oraFin, const int minFin,
+                             bool &contigua)
+  {
+   contigua = (tfSec > 0 && tReale == tSeg + tfSec);
+   if(tReale <= tSeg) return(false);    // barra 0 non piu' avanti della barra di segnale: non e' un ingresso
+   MqlDateTime t; TimeToStruct(tReale, t);
+   return(InFinestra_Calc(t.hour, t.min, oraIni, minIni, oraFin, minFin));
+  }
+
+//+------------------------------------------------------------------+
+//| FIX T12 v1.03 -- LA TENUTA IN SECONDI SI DERIVA DALLE BARRE       |
+//| EFFETTIVAMENTE VALUTATE, non dalla differenza di calendario fra   |
+//| il timestamp d'ingresso e quello d'uscita.                        |
+//|                                                                   |
+//| Il perche' e' la stessa cosa che ha rotto il gate C2: con un buco |
+//| nello storico (barra mancante, festivo del metro, salto di        |
+//| sessione) la differenza di calendario misura IL BUCO, non la      |
+//| posizione. Una posizione viva 3 barre M15 e' viva 2700 secondi    |
+//| anche se in mezzo il feed ha saltato mezz'ora.                    |
+//| Conseguenza voluta: l'unico modo di restare "sotto 60 secondi" e' |
+//| barre = 0, cioe' una posizione chiusa senza aver mai valutato una |
+//| barra -- che e' un difetto vero, e resta il collaudo T12.         |
+//+------------------------------------------------------------------+
+long TenutaSecondi_Calc(const int barre, const int tfSec)
+  {
+   if(barre <= 0 || tfSec <= 0) return(0);
+   return((long)barre*(long)tfSec);
   }
 
 //+------------------------------------------------------------------+
@@ -1275,10 +1397,10 @@ void AzzeraContatori()
    gBarreSenzaZAperta = 0; gZNonCalcolabile = 0;
    gGrezziL = 0; gGrezziS = 0; gEseguibiliL = 0; gEseguibiliS = 0;
    gOccupatoStessoL = 0; gOccupatoStessoS = 0; gOccupatoAltroLato = 0;
-   gAttrIngressoFuori = 0; gAttrPrimaBarra = 0;
+   gAttrIngressoFuori = 0; gAttrPrimaBarra = 0; gIngressoBarraRealeFuori = 0;
    gChiuseL = 0; gChiuseS = 0; gConvergL = 0; gConvergS = 0;
    gFineSessL = 0; gFineSessS = 0; gTettoL = 0; gTettoS = 0;
-   gFineCorsa = 0; gSotto60L = 0; gSotto60S = 0;
+   gFineCorsa = 0; gSotto60L = 0; gSotto60S = 0; gChiuseZeroBarre = 0;
    gDayStamp = -1; gDaySpaiato = false; gDayFestaMetro = false; gDayMetroZeroCal = false;
    gDayEseL = 0; gDayEseS = 0;
    gGiorniContati = 0; gGiorniSpaiati = 0; gGiorniFestaMetro = 0; gGiorniMetroZeroCal = 0;
@@ -1450,7 +1572,8 @@ int OnInit()
       if(gCsvSeg != INVALID_HANDLE)
          FileWrite(gCsvSeg, "ora_ingresso", "lato", "z_ingresso", "prezzo_ingresso",
                    "ora_uscita", "prezzo_uscita", "motivo_uscita", "barre_tenuta",
-                   "secondi_tenuta", "mfe_punti_indice", "mae_punti_indice", "atr_punti_indice");
+                   "secondi_tenuta", "secondi_calendario",
+                   "mfe_punti_indice", "mae_punti_indice", "atr_punti_indice");
       else
          Log("ATTENZIONE: CSV dei segnali non aperto: il conteggio restera' solo nelle colonne, non ricontabile a mano.");
      }
@@ -1557,8 +1680,14 @@ void ChiudiPosizioneFinta(const int motivo, const datetime tUscita, const double
    if(!gPosAttiva) return;
 
    int    lato = gPosLato;
-   long   sec  = (long)(tUscita - gPosTIngr);
-   double barre= (double)gPosBarre;
+   //--- FIX T12 v1.03: la tenuta in secondi VIENE DALLE BARRE VALUTATE
+   //    (vedi TenutaSecondi_Calc), non dai due timestamp. Il tempo di
+   //    calendario grezzo NON si butta: resta accanto, come colonna
+   //    separata del CSV riga-per-segnale, perche' la differenza fra i
+   //    due numeri E' la misura dei buchi dello storico.
+   long   sec    = TenutaSecondi_Calc(gPosBarre, gTfSec);
+   long   secCal = (long)(tUscita - gPosTIngr);
+   double barre  = (double)gPosBarre;
 
    if(motivo == 4) gFineCorsa++;
    else
@@ -1585,9 +1714,14 @@ void ChiudiPosizioneFinta(const int motivo, const datetime tUscita, const double
          if(motivo == 3) gTettoS++;
          if(sec < 60) gSotto60S++;
         }
+      //--- COLLAUDO T12 in conteggio secco: con la tenuta derivata dalle
+      //    barre, "sotto 60 s" e "zero barre" sono lo stesso evento. Si
+      //    contano tutte e due perche' una e' una PERCENTUALE (pesa) e
+      //    l'altra e' un NUMERO (esiste o non esiste).
+      if(gPosBarre <= 0) gChiuseZeroBarre++;
      }
 
-   ScriviSegnale(motivo, tUscita, prezzoUscita, sec);
+   ScriviSegnale(motivo, tUscita, prezzoUscita, sec, secCal);
 
    gPosAttiva = false;
    gPosLato   = 0;
@@ -1600,7 +1734,7 @@ void ChiudiPosizioneFinta(const int motivo, const datetime tUscita, const double
 //| SondaMediazione, firma di Claudio del 21/08).                     |
 //+------------------------------------------------------------------+
 void ScriviSegnale(const int motivo, const datetime tUscita,
-                   const double prezzoUscita, const long sec)
+                   const double prezzoUscita, const long sec, const long secCal)
   {
    if(gCsvSeg == INVALID_HANDLE) return;
    int dgt = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
@@ -1619,6 +1753,7 @@ void ScriviSegnale(const int motivo, const datetime tUscita,
              mot,
              IntegerToString(gPosBarre),
              IntegerToString((int)sec),
+             IntegerToString((int)secCal),
              DoubleToString(gPosMfe, 3),
              DoubleToString(gPosMae, 3),
              DoubleToString(PuntiIndice_Calc(gPosAtr, gPuntoIndice), 4));
@@ -1734,14 +1869,33 @@ void ValutaBarraChiusa()
 
    bool inSeg  = InFinestra_Calc(ts.hour, ts.min, InpOraInizioServer, InpMinInizioServer,
                                  InpOraFineServer, InpMinFineServer);
-   bool inIngr = InFinestra_Calc(ti.hour, ti.min, InpOraInizioServer, InpMinInizioServer,
-                                 InpOraFineServer, InpMinFineServer);
+   //--- FIX T12 v1.03: 'inIngrAttesa' e' la risposta della versione
+   //    vecchia (barra d'ingresso TEORICA). NON decide piu' niente: si
+   //    tiene solo per MISURARE, poco piu' sotto, quante volte differisce
+   //    dalla risposta sulla barra REALE. Il gate vero e' 'inIngr', e
+   //    nasce dopo tProssima perche' e' su QUELLA barra che si entra.
+   bool inIngrAttesa = InFinestra_Calc(ti.hour, ti.min, InpOraInizioServer, InpMinInizioServer,
+                                       InpOraFineServer, InpMinFineServer);
 
    //--- 2) FUORI SESSIONE non si valuta niente (T8), ma NESSUNO STATO
    //    ATTRAVERSA LA NOTTE: la posizione finta e gli osservatori,
    //    se per qualunque motivo fossero ancora vivi, muoiono qui.
    //    In condizioni normali sono gia' chiusi dalla barra precedente
    //    (quella con inIngr = false), e questo blocco non fa niente.
+   //    v1.03, E VA SCRITTO: e' proprio da QUI che usciva il collaudo
+   //    T12 rotto. Non perche' questa rete sia sbagliata, ma perche' il
+   //    gate T7 (allora sulla barra TEORICA) lasciava aprire posizioni
+   //    su una barra gia' fuori sessione: alla valutazione dopo quella
+   //    barra era la barra di segnale, tSeg coincideva col timestamp
+   //    d'ingresso e la chiusura veniva registrata a durata NULLA, per
+   //    giunta senza aver mai attraversato il passo 6 (gPosBarre = 0).
+   //    Col gate sulla barra REALE questo non e' piu' costruibile; la
+   //    rete resta perche' resta il caso di una valutazione saltata per
+   //    dati mancanti. Nota dichiarata: qui l'uscita e' segnata sulla
+   //    CHIUSURA della barra di segnale e non sull'apertura della
+   //    successiva (T10) perche' in questo ramo la barra successiva non
+   //    e' nemmeno stata letta; incide solo sul CSV riga-per-segnale,
+   //    la tenuta ora viene dalle barre valutate.
    if(!inSeg)
      {
       gBarreFuoriFinestra++;
@@ -1755,6 +1909,20 @@ void ValutaBarraChiusa()
    double   apProssima = iOpen(_Symbol, PERIOD_CURRENT, 0);
    datetime tProssima  = iTime(_Symbol, PERIOD_CURRENT, 0);
    if(apProssima <= 0.0 || tProssima <= 0){ gBarreSaltateDati++; return; }
+
+   //--- FIX T12 v1.03: IL GATE T7 SULLA BARRA D'INGRESSO **REALE**.
+   //    Si entra e si esce su tProssima (T10), quindi e' tProssima che
+   //    deve stare dentro la finestra -- non tSeg + gTfSec, che e' dove
+   //    la barra CADREBBE se lo storico fosse pieno. Con un buco della
+   //    gamba le due divergono, la teorica dice "dentro" e la vera e'
+   //    gia' fuori sessione: era cosi' che nasceva una posizione su una
+   //    barra fuori finestra, chiusa subito dopo con lo stesso
+   //    timestamp d'ingresso (tenuta 0 secondi, 0 barre = T12 rotto).
+   bool contiguaIngr = false;
+   bool inIngr = IngressoInFinestra_Calc(tSeg, tProssima, gTfSec,
+                                         InpOraInizioServer, InpMinInizioServer,
+                                         InpOraFineServer,   InpMinFineServer,
+                                         contiguaIngr);
 
    gBarreValutate++;
 
@@ -1963,7 +2131,19 @@ void ValutaBarraChiusa()
 
    //--- la barra d'INGRESSO deve cadere ancora dentro la finestra (T7):
    //    un ingresso che nasce gia' oltre il flat non e' eseguibile.
-   if(!inIngr){ gAttrIngressoFuori++; return; }
+   //    v1.03: 'inIngr' guarda la barra REALE. Il ramo qui sotto e' LA
+   //    MISURA CHE RENDE IL FIX FALSIFICABILE (lezione della v1.01, che
+   //    girava senza mai mordere): conta SOLO gli ingressi che il gate
+   //    vecchio -- quello sulla barra teorica -- avrebbe lasciato
+   //    passare. Se questa colonna torna 0 su tutte le celle e il
+   //    collaudo T12 fallisce ancora, la diagnosi della v1.03 e'
+   //    sbagliata e va riscritta, non ritoccata.
+   if(!inIngr)
+     {
+      gAttrIngressoFuori++;
+      if(inIngrAttesa) gIngressoBarraRealeFuori++;
+      return;
+     }
 
    ApriPosizioneFinta(lato, tProssima, apProssima, z, atrSeg);
   }
