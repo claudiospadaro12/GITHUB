@@ -7127,3 +7127,79 @@ non contiene niente di riconoscibile.
 > un altro commit e un altro push. La manopola **non salta i controlli**: se il
 > percorso imposto non ha traccia del conto, la riga va avanti **dichiarandolo**
 > e il gate sul conto boccia lo stesso.
+
+---
+
+## 🆕 AGGIUNTE DEL 03/09/2026 (pomeriggio) — trovate **costruendo e poi ESEGUENDO su banco stubbato** la riga della COMPILAZIONE DI PROVA della v1.04 dell'ORB (`RIGA_COMPILA_ORB104.ps1`, 15 casi eseguiti). Tutte e tre **pagate prima dell'invio**, nessuna e' ipotetica.
+
+## 116. 🧹 IL **RIPRISTINO CHE VIVE SOLO NEL RAMO FELICE**: il giro INTERROTTO lascia roba NOSTRA dentro il terminale, e nessun referto lo dira' mai
+
+_Misurato, non immaginato._ La riga della compilazione ORB ha un ramo che, come
+ultima risorsa, copia `ABTG_PausaGuardian.mqh` dentro `MQL5\Include` del
+terminale (con backup) e lo **rimette a posto alla fine**. Sul banco, il caso
+«MetaEditor muto» ha sforato il tetto di tempo e il processo e' stato
+**ucciso**: il ripristino, che stava dopo, **non e' mai girato**. La prova e'
+arrivata dai casi successivi: la foto PRIMA diceva `presente` un file che nella
+cartella del terminale **non doveva esserci**.
+
+E' la stessa forma del punto **94-ter** (il campo timbrato solo dove fa
+comodo), ma su un **effetto collaterale nel mondo**, non su una riga di testo:
+
+- il `try/catch` copre l'eccezione, **non copre il Ctrl+C, la finestra chiusa,
+  il tetto di tempo, il riavvio**;
+- il file rimasto li' e' **nostro** e ha un nome che sembra legittimo: fra una
+  settimana nessuno sa piu' di chi sia, e un'altra ricompilazione lo usera' in
+  silenzio;
+- il backup `*.prima_*` orfano ha lo stesso problema al contrario: e' un file
+  che **nessuno rivendica**.
+
+> ✅ **REGOLA (tre pezzi, e sono tre righe di codice).**
+> 1. **SENTINELLA PRIMA DELLA SCRITTURA.** Prima di toccare qualunque cosa
+>    fuori dalla propria cartella di lavoro si scrive un file
+>    (`<work>\..._IN_CORSO.txt`) con dentro **dove** si e' scritto e **dove sta
+>    il backup**. Il giro dopo, **come prima cosa**, se la sentinella c'e':
+>    rimette a posto, la cancella e lo **DICHIARA nei RILIEVI**. Il file vive
+>    nella cartella di lavoro, che **non si azzera** (si azzera solo l'albero
+>    dei sorgenti dentro).
+> 2. **LA PROVA STA NELLA FOTO, NON NELLA FRASE.** «Nessun deploy e' avvenuto»
+>    non si scrive: si **misura**. Foto (esiste? quanti byte? che data?) di ogni
+>    file del terminale che il giro potrebbe toccare, presa PRIMA e RIFATTA
+>    DOPO, stampata nel referto riga per riga. Lunghezza diversa = PROBLEMA;
+>    stessa lunghezza e data diversa = rilievo. `Copy-Item` su Windows conserva
+>    la data del sorgente, quindi un ripristino fatto bene esce `INVARIATO`
+>    anche nella data — ed e' proprio quello che si vuole leggere.
+> 3. **E I RESIDUI SI DICHIARANO, NON SI CANCELLANO DA SOLI.** Trovare backup
+>    `*.prima_*` di giri passati e' un RILIEVO con il conteggio e il primo nome:
+>    solo la sentinella sa cosa rimettere dove, il resto lo decide chi legge.
+
+### 116-bis. 🖥️ IL **DESKTOP CALCOLATO IN DUE MODI DIVERSI** dalla riga di chat e dal driver: lo zip c'e', e la riga giura che non c'e'
+
+Trovato **rileggendo** la riga accanto al driver, prima dell'invio. Il driver
+cercava il Desktop **vero** (`[Environment]::GetFolderPath('Desktop')`, poi
+`%USERPROFILE%\Desktop`, poi `%USERPROFILE%\OneDrive\Desktop`: e' il pattern di
+`aggiorna_verifica_orb.ps1`, nato perche' **con OneDrive il Desktop non e'
+`%USERPROFILE%\Desktop`**), mentre il blocco di lancio guardava **solo**
+`%USERPROFILE%\Desktop`. Su una macchina con OneDrive attivo il giro sarebbe
+finito benissimo e la riga avrebbe **buttato tutto** con
+_«NESSUNO ZIP DI ADESSO: non e' arrivata alla raccolta»_ — un falso rosso su
+una corsa sana, cioe' la classe **108** riprodotta con un altro ingrediente.
+
+> ✅ **REGOLA: la riga di chat e il driver devono calcolare le CARTELLE nello
+> STESSO modo, e il modo e' quello del driver.** Ogni volta che il blocco cerca
+> un artefatto (`Get-ChildItem ...Desktop\NOME_*.zip`), il percorso si ricava
+> con le **stesse tre righe** del driver, copiate. Vale per Desktop, workdir,
+> `Documents`: qualunque cartella che Windows possa aver spostato.
+
+### 116-ter. 🎯 IL GATE COL MODELLO **NON ANCORATO**: `ABTG_GuardiaIngresso` combacia anche con `ABTG_GuardiaIngressoRINOMINATA`
+
+Trovato **eseguendo una mutazione**: l'include e' stato mutato rinominando la
+funzione che la riga pretende (`bool ABTG_GuardiaIngresso` ->
+`bool ABTG_GuardiaIngressoRINOMINATA`) e **il gate e' passato lo stesso**,
+perche' `-notmatch 'bool\s+ABTG_GuardiaIngresso'` combacia col **prefisso**. Un
+gate che passa sul file mutato non e' un gate: e' una decorazione.
+
+> ✅ **REGOLA: un modello che cerca un IDENTIFICATORE si ancora sempre a
+> destra** — con la parentesi (`'bool\s+NOME\s*\('`), con `\b`, o col carattere
+> che nel linguaggio segue davvero quel nome. E il modo di scoprirlo e' uno
+> solo: **mutare il file e ricontrollare che il gate diventi rosso**. Un gate
+> non provato su una mutazione va scritto nel NON COPERTO.
