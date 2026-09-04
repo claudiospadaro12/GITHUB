@@ -163,26 +163,55 @@ questo EA: **mettici il tempo che ci mette, e se sembra bloccato guarda che il
 tester stia macinando invece di fermare tutto.** Il referto porta l'**ora di
 avvio**, non quella di fine, apposta.
 
-## 📌 IL PIN — `PIN_DA_INSERIRE`
+## 📌 IL PIN — **`983a0f2d68ab75f7519c69a615d2b7ce89543f85`**
 
-⛔ **CARTELLO: il pin non è ancora stato inserito.** Questa pagina **non si
-lancia** finché al posto di `PIN_DA_INSERIRE` non c'è il commit a 40 caratteri e
-la tabella di verifica `raw` qui sotto non è compilata (classe 101: il cartello
-**si riscrive**, non si lascia).
+✅ **INSERITO il 04/09/2026** (prima di questo commit qui c'era il cartello del
+segnaposto: si **riscrive**, non si lascia — classe 101). I **nove** file che il
+driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** +
+**sha256 identico** al repo) **prima** che questa riga fosse dichiarata pronta.
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | ⬜ |
-| `mql5/Experts/ABTG_Relativo.mq5` | ⬜ |
-| i 6 `backtest_pipeline/prove/RELATIVO_R117_*.txt` | ⬜ |
-| `backtest_pipeline/walkforward_generico.ps1` | ⬜ |
+| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | **200, identico** (`9b1d15a4…`) · marcatore `MARCATORE_RIGA_RELATIVO_R117_v1` · **ASCII puro** · **parse 0 errori** (pwsh 7.4.6) · **0 usi di `$r` dopo la nascita di `$R`** (classe 79, vedi sotto) |
+| `mql5/Experts/ABTG_Relativo.mq5` | **200, identico** (`e28d6778…`) · `#property version "1.00"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
+| i **6** `backtest_pipeline/prove/RELATIVO_R117_*.txt` | **200 tutti e sei, identici** · 32 righe vive ciascuno · 28 input che **combaciano nome per nome** con quelli dell'EA · differenze reciproche: **solo `@SIMBOLO`, `InpMagic`, `InpModoSonda`** |
+| `backtest_pipeline/walkforward_generico.ps1` | **200, identico** (`5d98af3d…`, invariato): il driver lo scarica al pin e lo ri-pinna sull'EA |
+
+### 🧪 E LA RIGA È STATA **ESEGUITA**, NON SOLO LETTA (banco pwsh 7.4.6)
+
+| prova a banco | esito |
+|---|---|
+| `GateProva` sui **sei** prova | **PASSATI**, 1 passata ciascuno |
+| `GateGemelli` a sei | `VALIDO: differenze DICHIARATE trovate: InpMagic, InpModoSonda (più @SIMBOLO)` |
+| **controprova**: magic sbagliato | **RIFIUTATO** — *"InpMagic è '774601', atteso '999999'"* |
+| **controprova**: un prova del **passo 0** dato in pasto alla riga nuova | **RIFIUTATO** — *"il parametro 'InpBarreOrizzonte' NON è un input di ABTG_Relativo"* |
+| cancelli di merito, **caso sano** | tutti e 7 `PASSA` → **PASSA TUTTI I CANCELLI A** |
+| cancelli di merito, **DD 11,5% + peggior giornata −6,2%** | **BOCCIATA PER RISCHIO** *anche con `E` e PF verdi* — è l'Emendamento regola B che morde |
+| collaudo dell'**eco dei pin** (CSV con N=20/σ=1,05) | **PROBLEMA**: *"IL PIN NON È PASSATO e la corsa ha misurato un'altra configurazione"* |
+| sezione **RACCOLTA eseguita con lo stato PIENO** | referto completo, zip creato, `ESITO: CORSA COMPLETATO` |
+
+> ### 🔴 UN DIFETTO TROVATO E CORRETTO — e vale la pena scriverlo
+> La prima stesura del driver aveva un **`foreach($r in $RigheCancelli)` dentro
+> la raccolta**: in PowerShell `$r` **è** `$R`, cioè **il referto**. È
+> esattamente la **classe 79** che il verificatore di stringhe aveva trovato il
+> 03/09 sulla riga della sonda, e l'avevo reintrodotta. Peggio: **lo scanner AST
+> che avevo scritto per cercarla era cieco**, perché `Sort-Object -Unique` in
+> PowerShell è **case-insensitive** e collassava `$r` e `$R` in un nome solo.
+> Rifatto con `-CaseSensitive`, il difetto è saltato fuori al primo giro di
+> banco (`does not contain a method named 'Add'`) ed è corretto. **Un gate che
+> non può fallire non è un gate.**
+
+> 🚧 **NON COPERTO dal banco** (e va dichiarato): la **compilazione** in
+> MetaEditor, la **corsa vera** di MT5 a tick reali, **Windows PowerShell 5.1**
+> (qui il parse è su pwsh 7), il comportamento del generico con `-Modello 4`, e
+> la sezione **scelta del terminale**.
 
 ## 1️⃣ Giro a vuoto (`-SoloControllo`, con `-AccettoTettoBarre`: **serve anche qui**)
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -SoloControllo -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -200,7 +229,7 @@ la tabella di verifica `raw` qui sotto non è compilata (classe 101: il cartello
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -218,7 +247,7 @@ la tabella di verifica `raw` qui sotto non è compilata (classe 101: il cartello
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -236,7 +265,7 @@ la tabella di verifica `raw` qui sotto non è compilata (classe 101: il cartello
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30 -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -254,7 +283,7 @@ la tabella di verifica `raw` qui sotto non è compilata (classe 101: il cartello
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -272,7 +301,7 @@ la tabella di verifica `raw` qui sotto non è compilata (classe 101: il cartello
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -290,7 +319,7 @@ la tabella di verifica `raw` qui sotto non è compilata (classe 101: il cartello
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
