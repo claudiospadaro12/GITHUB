@@ -7817,3 +7817,41 @@ non è un gate: è una diagnosi sbagliata già scritta.
 > da bloccante a rilievo — non si tace e si tiene la soglia stretta.
 > Corollario: **il messaggio di fallimento non deve mai escludere una causa che
 > nessuno ha misurato.** Elenca, non assolve.
+
+---
+
+## 🆕 AGGIUNTA DEL 04/09/2026 (terzo giro di verifica su R117, commit `8fce113`) — la classe che **nasce dalla correzione della 123**
+
+## 124. 🟢 IL **DECLASSAMENTO DA `Problemi` A `Rilievi` TOGLIE ANCHE IL SEGNALE**: il gate declassato esce **verde, `exit 0`**, e la pagina continua a dire *"se e' FALLITO il round non parte"* — parola che il referto **non stampa piu'**
+
+La classe 123 impone di declassare un gate da bloccante a rilievo quando una
+delle cause dello scarto non e' quantificata. In R117 il declassamento e' stato
+applicato al **collaudo del porto** (`$Problemi.Add(...)` → `$Rilievi.Add(...)`,
+righe 1288-1294), ed e' giusto. Ma il declassamento ha portato con se' **tre
+effetti collaterali che nessuno aveva dichiarato**:
+
+1. **il codice di uscita**: `if($Problemi.Count -gt 0){ ... exit 1 }` — con zero
+   problemi la corsa PORTO fuori tolleranza esce `exit 0` e stampa in **verde**
+   `ESITO: CORSA COMPLETATO`. Il wrapper della pagina, che avvisa solo se
+   `$rc -ne 0`, tace;
+2. **la parola cambiata**: il referto non stampa piu' `FALLITO` ma
+   `FUORI TOLLERANZA`, mentre la pagina (blocco 2 e sezione *"le righe da
+   guardare per prime"*) continuava a dire *"se e' FALLITO, il round non parte"*.
+   Claudio cerca a schermo una parola **che non esiste piu'**, non la trova, e
+   legge il verde;
+3. **la semantica opposta**: quella stessa frase gli ordina di FERMARE il round
+   proprio per l'esito che la v3 ha deciso essere **non bloccante** — cioe' il
+   giro a vuoto nell'altra direzione (si aspetta un verdetto in chat per una
+   cosa che il round considera un rilievo).
+
+> ✅ **REGOLA**: quando un gate viene **declassato** da bloccante a rilievo, nella
+> stessa modifica si sistemano **tutti e tre** i canali del segnale:
+> **(a)** il testo del referto, **(b)** la **console** (un rilievo che decide se
+> lanciare altre corse vuole una riga sua, gialla, DOPO l'`ESITO:` verde — non
+> una riga in mezzo a duecento), **(c)** **la pagina**, che va rigrepata per la
+> vecchia parola del verdetto (`FALLITO`, `NON PARTE`, `il round finisce li'`).
+> Corollario operativo: **si grepa la pagina con la parola VECCHIA e con quella
+> NUOVA.** Se la vecchia esce ancora, il declassamento e' fatto a meta'.
+> Corollario di verifica: **ogni declassamento cambia anche il codice di uscita**
+> — va detto esplicitamente nel verdetto, perche' e' il segnale su cui la riga di
+> lancio decide se avvisare o no.
