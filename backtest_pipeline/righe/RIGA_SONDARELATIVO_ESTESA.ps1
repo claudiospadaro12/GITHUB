@@ -675,6 +675,50 @@ function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
   # la cella di riferimento (la domanda-sonda del GIACIMENTO)
   $script:Cella = @($righe | Where-Object { $_.N -eq $RIF_N -and [math]::Abs($_.Sigma - $RIF_SIGMA) -lt 0.001 }) | Select-Object -First 1
   if($null -eq $script:Cella){ [void]$Rilievi.Add("la cella di riferimento N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " NON e' nel CSV (griglia diversa?): la domanda-sonda si legge sulla cella piu' vicina, a mano.") }
+
+  # --- COLLAUDO DI RIPRODUZIONE (esiste SOLO in questa riga ESTESA).
+  #     La stessa cella, con gli stessi input, deve dare gli stessi
+  #     numeri del 04/09: una passata non sa nemmeno che la griglia
+  #     intorno a lei e' cresciuta. Se non torna, il referto del 04/09
+  #     non e' riproducibile su questo banco, e la scelta della cella
+  #     per il round a tick non si puo' appoggiare su di lui.
+  if($null -eq $script:Cella){
+    [void]$Problemi.Add("COLLAUDO DI RIPRODUZIONE NON ESEGUIBILE: la cella N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " non e' nel CSV, quindi non si puo' verificare che questa corsa riproduca i numeri del 04/09. La mappa estesa NON si cuce su quella vecchia.")
+  }
+  elseif(-not $RIPRO.ContainsKey($Simbolo)){
+    [void]$Rilievi.Add("COLLAUDO DI RIPRODUZIONE saltato: nessun atteso in tabella per " + $Simbolo + ". Si dichiara, non si inventa un atteso.")
+  }
+  else{
+    $rip = $RIPRO[$Simbolo]
+    $cr  = $script:Cella
+    $sc  = New-Object System.Collections.ArrayList
+    $oss = [ordered]@{ "Giorni Contati"=$cr.Giorni; "Barre Valutate"=$cr.BarreVal;
+                       "Grezzi L"=$cr.GrezL; "Grezzi S"=$cr.GrezS;
+                       "Eseguibili L"=$cr.EseL; "Eseguibili S"=$cr.EseS }
+    $chi = [ordered]@{ "Giorni Contati"="Giorni"; "Barre Valutate"="BarreVal";
+                       "Grezzi L"="GrezL"; "Grezzi S"="GrezS";
+                       "Eseguibili L"="EseL"; "Eseguibili S"="EseS" }
+    foreach($vk in @($oss.Keys)){
+      $val = [double]$oss[$vk]; $atteso = [double]$rip[$chi[$vk]]
+      if([math]::Abs($val - $atteso) -gt 0.5){ [void]$sc.Add($vk + " " + (FmtN $val) + " invece di " + (FmtN $atteso)) }
+    }
+    $oss2 = [ordered]@{ "MFE mediana L"=$cr.MfeL; "MFE mediana S"=$cr.MfeS;
+                        "MAE mediana L"=$cr.MaeL; "MAE mediana S"=$cr.MaeS;
+                        "Non convergute tot pct"=$cr.NonConvT; "Tenuta mediana tot"=$cr.TenMedT }
+    $chi2 = [ordered]@{ "MFE mediana L"="MfeL"; "MFE mediana S"="MfeS";
+                        "MAE mediana L"="MaeL"; "MAE mediana S"="MaeS";
+                        "Non convergute tot pct"="NonConvT"; "Tenuta mediana tot"="TenMedT" }
+    foreach($vk in @($oss2.Keys)){
+      $val = [double]$oss2[$vk]; $atteso = [double]$rip[$chi2[$vk]]
+      if([math]::Abs($val - $atteso) -gt 0.011){ [void]$sc.Add($vk + " " + (Fmt2 $val) + " invece di " + (Fmt2 $atteso)) }
+    }
+    if($sc.Count -gt 0){
+      [void]$Problemi.Add("COLLAUDO DI RIPRODUZIONE FALLITO sulla cella N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " (" + $Simbolo + "): " + ($sc -join "; ") + ". Estendere la griglia NON puo' cambiare una passata con gli stessi identici input: se questi numeri divergono e' cambiato il BANCO (storico scaricato dopo il 04/09, cache del tester, sorgente diverso). I numeri del referto del 04/09 NON sono riproducibili qui: la mappa estesa resta leggibile DA SOLA, ma i verdetti del 04/09 vanno considerati SUPERATI, non confermati.")
+    }
+    else{
+      [void]$Rilievi.Add("COLLAUDO DI RIPRODUZIONE PASSATO sulla cella N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " (" + $Simbolo + "): 12 grandezze su 12 identiche ai referti del 04/09 (6 conteggi esatti + 6 mediane/quote a 0,01). Le celle nuove si leggono sulla STESSA scala delle vecchie.")
+    }
+  }
   # la mappa 7x7 e l'ALTOPIANO, per lato
   $listaN   = @($righe | ForEach-Object { $_.N } | Sort-Object -Unique)
   $listaSig = @($righe | ForEach-Object { $_.Sigma } | Sort-Object -Unique)
@@ -728,7 +772,7 @@ try{
   Dico "driver generico scaricato e PINNATO (riscarica la sonda al pin, non dalla punta del branch)" "Green"
   Remove-Item -Path (Join-Path $Prove "RELATIVO_*.txt") -Force -ErrorAction SilentlyContinue
   foreach($k in @($CORSE.Keys)){ Scarica ($RawPin + "/backtest_pipeline/prove/" + $CORSE[$k].File) (Join-Path $Prove $CORSE[$k].File) }
-  Dico ("file prova scaricati: " + @(Get-ChildItem $Prove -Filter "RELATIVO_*_ESTESA.txt").Count + " su 2 (ne gira UNO, l''altro serve al gemellaggio a DUE)") "Green"
+  Dico ("file prova scaricati: " + @(Get-ChildItem $Prove -Filter "RELATIVO_*_ESTESA.txt").Count + " su 2 (ne gira UNO, l'altro serve al gemellaggio a DUE)") "Green"
   $mq5 = Join-Path $Work ($EA + ".mq5")
   Scarica ($RawPin + "/mql5/Experts/" + $EA + ".mq5") $mq5
 
@@ -1029,8 +1073,8 @@ Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
 
 $suff = ""
 if($Modo -eq "CONTROLLO"){ $suff = "CONTROLLO_" }
-$Cart = Join-Path $Dsk ("SONDARELATIVO_" + $Prova + "_" + $suff + $Stamp)
-if($Prova -eq ""){ $Cart = Join-Path $Dsk ("SONDARELATIVO_SENZAPROVA_" + $suff + $Stamp) }
+$Cart = Join-Path $Dsk ("SONDARELATIVO_EST_" + $Prova + "_" + $suff + $Stamp)
+if($Prova -eq ""){ $Cart = Join-Path $Dsk ("SONDARELATIVO_EST_SENZAPROVA_" + $suff + $Stamp) }
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 
 $nOos = 0
@@ -1040,11 +1084,11 @@ if($nOos -gt 0){ [void]$Rilievi.Add("un CSV *_OOS esiste NONOSTANTE la gamba deg
 $sg = $SoglieSrc
 $R = New-Object System.Collections.ArrayList
 [void]$R.Add("=====================================================================")
-[void]$R.Add(" SONDA RELATIVO -- PASSO 0, CONTATORE DI CONVERGENZA (" + $EA + ")")
-[void]$R.Add(" gamba " + $Simbolo + " (si scambia) x metro " + $METRO + " (si legge), " + $Periodo + " -- NESSUN ORDINE -- 49 passate")
+[void]$R.Add(" SONDA RELATIVO -- PASSO 0 / ESTENSIONE DELLA GRIGLIA (" + $EA + ")")
+[void]$R.Add(" gamba " + $Simbolo + " (si scambia) x metro " + $METRO + " (si legge), " + $Periodo + " -- NESSUN ORDINE -- " + $NCelleAttese + " passate (griglia ESTESA; le " + $NCelleVecchie + " del 04/09 sono dentro)")
 [void]$R.Add("=====================================================================")
 [void]$R.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto, NON e' il risultato")
-[void]$R.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   <- ORA DI AVVIO, non di fine: la corsa dura decine di minuti")
+[void]$R.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   <- ORA DI AVVIO, non di fine. MISURATO il 04/09: 49 passate M5 = ~30 s di tester, quindi 90 ~= 1 minuto piu' gli avvii del terminale")
 [void]$R.Add("pin:  " + $Pin)
 [void]$R.Add("prova: " + $Prova + " = " + $FileProva)
 [void]$R.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
@@ -1079,7 +1123,7 @@ foreach($f in $FotoDopo){ [void]$R.Add("   " + $f) }
 [void]$R.Add("    VIVO    = almeno un blocco 2x2 tutto di celle VIVE (C6 <= " + (Fmt2 $PAGINA_C6_SOSP) + "% e tenuta >= " + (Fmt2 $PAGINA_C8_TENUTA) + " barre dentro)")
 [void]$R.Add("    SOSPESO = blocchi 2x2 in piedi solo con celle SOSPESE dentro (C6 " + (Fmt2 $PAGINA_C6_SOSP) + "-" + (Fmt2 $PAGINA_C6_KO) + "% o tenuta < " + (Fmt2 $PAGINA_C8_TENUTA) + ")")
 [void]$R.Add("    NO      = nessun blocco 2x2: le celle vive, se ci sono, sono ISOLATE = rumore. Una cella sola non e' una risposta.")
-[void]$R.Add("  CLAUSOLA SEVERA: un solo collaudo fallito su una sola delle 49 righe = NON LEGGIBILE, nessun verdetto.")
+[void]$R.Add("  CLAUSOLA SEVERA: un solo collaudo fallito su una sola delle " + $NCelleAttese + " righe = NON LEGGIBILE, nessun verdetto.")
 [void]$R.Add("  NESSUNA CELLA VIENE PROMOSSA: la cella di riferimento (N=" + $RIF_N + ", sigma=" + (Fmt2 $RIF_SIGMA) + ") si stampa perche' e' la domanda-sonda, non perche' e' la migliore.")
 [void]$R.Add("")
 [void]$R.Add("--- I COLLAUDI (si leggono PRIMA dei numeri; su TUTTE le righe) ---")
@@ -1112,12 +1156,12 @@ if($null -ne $Cella){
 }
 else{ [void]$R.Add("  n/d") }
 [void]$R.Add("")
-[void]$R.Add("--- LA MAPPA 7x7 PER LATO (V = C1+C3+C5+C6+C8 in piedi; S = in piedi con C6 25-40% o tenuta < 12; . = no) ---")
+[void]$R.Add("--- LA MAPPA 10x9 PER LATO (V = C1+C3+C5+C6+C8 in piedi; S = in piedi con C6 25-40% o tenuta < 12; . = no). Le prime 7 righe x 7 colonne sono la mappa del 04/09 ---")
 foreach($lato in @("L","S")){ if($Mappa.ContainsKey($lato) -and $null -ne $Mappa[$lato]){ [void]$R.Add($Mappa[$lato]); [void]$R.Add("") } }
 [void]$R.Add("VERDETTO LONG : " + $VerdettoL)
 [void]$R.Add("VERDETTO SHORT: " + $VerdettoS)
 [void]$R.Add("")
-[void]$R.Add("--- LE 49 CELLE (ordinate per N, poi sigma; mai aggregate) ---")
+[void]$R.Add("--- LE " + $NCelleAttese + " CELLE (ordinate per N, poi sigma; mai aggregate). Quelle con N <= 40 E sigma <= 1,65 sono le " + $NCelleVecchie + " del 04/09 ---")
 [void]$R.Add(("{0,3} {1,5} {2,7} {3,7} {4,7} {5,7} {6,7} {7,6} {8,6} {9,7} {10,7} {11,4} {12,3} {13,3} {14,3} {15,3} {16,3} {17,3}" -f "N","sigma","ese/ggL","ese/ggS","ese/ggT","MFE L","MFE S","RR L","RR S","nonCnv%","ten.med","mx/g","C1","C3L","C3S","C6","C8","L/S"))
 if($null -ne $RigheGriglia){
   foreach($rw in ($RigheGriglia | Sort-Object N, Sigma)){
@@ -1131,8 +1175,16 @@ if($null -ne $RigheGriglia){
 [void]$R.Add("  - NON MISURA LA CO-INTEGRAZIONE: C6 e' la sua approssimazione operativa. Se C6 e' alto, e' MOMENTUM TRAVESTITO.")
 [void]$R.Add("  - IL DAX DALLE 17 SERVER IN POI E' FUORI DAL SUO CASH e lo spread quasi raddoppia (2,80 = ora peggiore): C3 usa la")
 [void]$R.Add("    CLAUSOLA SEVERA (mediana oraria PEGGIORE), non la mediana di sessione 1,6-1,7 citata nel GIACIMENTO.")
-[void]$R.Add("  - C9 GRADIENTE M5/M15: si legge confrontando i referti D30_M5/D30_M15 (e NAS) a parita' di tutto il resto.")
-[void]$R.Add("    Derivato PRIMA della misura: a M15 il candidato NON dovrebbe arrivare al pavimento; il bersaglio e' M5.")
+[void]$R.Add("  - C9 GRADIENTE M5/M15: NON si legge in questa corsa. I due M15 hanno dato SOSPESO su entrambi i lati il 04/09 e")
+[void]$R.Add("    sono CHIUSI: questa estensione gira solo su M5. Il confronto fra TF resta quello dei referti del 04/09.")
+[void]$R.Add("  - PERCHE' QUESTA CORSA ESISTE: il 04/09 l'altopiano VIVO si appoggiava al BORDO della griglia su ENTRAMBI gli assi")
+[void]$R.Add("    (N=40 e sigma=1,65 erano i massimi misurati), quindi il CENTRO dell'altopiano NON era determinabile. Qui si guarda")
+[void]$R.Add("    se l'altopiano CONTINUA (e allora il centro va rifatto) o se FINISCE (e allora la scelta del 04/09 regge).")
+[void]$R.Add("    Nessuna delle due uscite e' un fallimento. Decisione di Claudio del 04/09 (D4 della proposta a tick reali).")
+[void]$R.Add("  - E IL BORDO SI SPOSTA, NON SPARISCE: se un blocco 2x2 VIVO tocca N=55 o sigma=1,95, la griglia va estesa ANCORA")
+[void]$R.Add("    prima di congelare una cella. Il rilievo si riscrive uguale, un gradino piu' in la'.")
+[void]$R.Add("  - PREVISIONE SCRITTA PRIMA: N e sigma piu' grandi RIDUCONO le occasioni; una parte delle celle nuove dovrebbe morire")
+[void]$R.Add("    sul PAVIMENTO C1 (2,00/giorno) per PORTATA, non per geometria. Se muore cosi', il bordo vecchio non tagliava niente.")
 [void]$R.Add("  - TETTO BARRE (M5): la finestra EFFETTIVA la dice la riga 'tetto barre' qui sopra; C1 resta per-giorno sul denominatore CONTATO.")
 [void]$R.Add("  - UN SOLO BROKER, UN SOLO REGIME (toro). FORMA UNILATERALE: a due gambe i numeri di C3 andrebbero RADDOPPIATI.")
 [void]$R.Add("  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 100 colonne OPTFRAME.")
@@ -1144,10 +1196,10 @@ foreach($p in $Problemi){ [void]$R.Add("  - " + $p) }
 [void]$R.Add("RILIEVI: " + $Rilievi.Count)
 foreach($p in $Rilievi){ [void]$R.Add("  - " + $p) }
 [void]$R.Add("")
-[void]$R.Add('COME SI RIPRENDE: dalla pagina righe/RIGA_SONDARELATIVO_DA_MANDARE.md, NON da questa riga: $Pin nasce dentro il blocco e non sopravvive.')
+[void]$R.Add('COME SI RIPRENDE: dalla pagina righe/RIGA_SONDARELATIVO_ESTESA_DA_MANDARE.md, NON da questa riga: $Pin nasce dentro il blocco e non sopravvive.')
 
-$refPath = Join-Path $Cart ("REFERTO_SONDARELATIVO_" + $Prova + ".txt")
-if($Prova -eq ""){ $refPath = Join-Path $Cart "REFERTO_SONDARELATIVO.txt" }
+$refPath = Join-Path $Cart ("REFERTO_SONDARELATIVO_EST_" + $Prova + ".txt")
+if($Prova -eq ""){ $refPath = Join-Path $Cart "REFERTO_SONDARELATIVO_EST.txt" }
 Set-Content -LiteralPath $refPath -Value ($R -join "`r`n") -Encoding ASCII
 Write-Host ($R -join "`r`n")
 
@@ -1166,8 +1218,8 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, 49 righe = le 49 passate, 100 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
-else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_SONDARELATIVO.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
+if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_EST_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, " + $NCelleAttese + " righe = le " + $NCelleAttese + " passate, 100 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
+else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_SONDARELATIVO_EST.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
 Write-Host ("CSV *_OOS trovati: " + $nOos + " (attesi 0: gamba OOS degenere; il numero sta ANCHE nel referto). Il rosso del generico su quel file e' ATTESO: NON rilanciare.") -ForegroundColor Gray
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
