@@ -73,10 +73,16 @@
 #      cambia sotto i piedi, ed e' un PROBLEMA.
 #      Tre cose si misurano, e tutte e tre sono gate:
 #        (a) 'letto da' DEVE essere Common\Files. E' QUESTA la prova del
-#            fix: a passata singola anche la sandbox del terminale
-#            risponderebbe (il file lo installiamo in tutte e due), per
-#            cui 'M>=1' da solo NON proverebbe niente sul FILE_COMMON.
-#            Se risponde la sandbox, il ramo Common ha fallito: PROBLEMA.
+#            fix: 'M>=1' da solo NON proverebbe niente sul FILE_COMMON,
+#            perche' il file e' installato in ENTRAMBI i posti (Common
+#            E sandbox). NON MISURATO se la sandbox DEL TESTER (diversa
+#            dalla cartella dati: ogni agente di ottimizzazione ha la
+#            SUA, sotto <Tester>\Agent-...\MQL5\Files, che questa riga
+#            NON popola) risponda comunque in una passata singola: se
+#            capitasse, l'esito atteso e' comunque leggibile, CALENDARIO
+#            CIECO (nessuna sandbox popolata), non 'sandbox' silenzioso.
+#            Se il canarino dice 'sandbox', il ramo Common ha fallito:
+#            PROBLEMA in ogni caso.
 #        (b) 'righe N' DEVE combaciare con le righe evento contate QUI
 #            dal file al pin (header escluso: StringToTime('Data Ora')
 #            torna 0 e l'EA la salta). Se non combacia, l'EA ha letto
@@ -302,14 +308,14 @@ foreach($s in $SEDIE){
     Dove        = @()
     RigheFile   = @()
     Utili       = @()
-    Cieco       = 0
-    Rosso       = 0
+    Cieco       = -1
+    Rosso       = -1
     Autotest    = @()
     AutoFalliti = @()
-    Ordini      = 0
-    NienteNews  = 0
+    Ordini      = -1
+    NienteNews  = -1
     LogVisti    = -1
-    LogNuovi    = 0
+    LogNuovi    = -1
     Verdetto    = "NON VERIFICATO (la riga non e' arrivata a misurarlo)"
   }
 }
@@ -1124,7 +1130,7 @@ catch{
 #  Qui si tocca abtg_news.csv, che si chiama come il file del FORWARD:
 #  si rimette com'era, o si rimuove se non c'era.
 # =====================================================================
-if($IncInstallato -or $CalInstallato){
+if(@($Backup.Keys).Count -gt 0){
   $fatti = New-Object System.Collections.ArrayList
   foreach($dest in @($Backup.Keys)){
     try{
@@ -1161,6 +1167,13 @@ if($FotoPrese){
       }
     }
   } catch { [void]$Problemi.Add("non ho potuto rifare la foto dei file del terminale: il ripristino resta DICHIARATO e non MISURATO.") }
+  # DICHIARATO, non fotografato: ogni corsa vera del tester scrive
+  # OptReport_POSTNEWSVER_<sedia>.htm nel terminale. Non e' un file che
+  # questa riga tocchi in scrittura ne' che serva rileggere (il verdetto
+  # sta nei log, non nel report ottimizzazione), ma resta LI' dopo il
+  # giro: non viene ripulito. Dichiarato qui invece di lasciarlo un buco
+  # silenzioso nella lista "cosa resta nel terminale".
+  foreach($s in $SEDIE){ [void]$Rilievi.Add("il terminale conserva 'OptReport_POSTNEWSVER_" + $s.Id + ".htm' (report nativo del tester): non fotografato ne' ripulito da questa riga, dichiarato per completezza.") }
 }
 
 # =====================================================================
@@ -1219,15 +1232,15 @@ foreach($s in $SEDIE){
   [void]$REF.Add("    di cui DENTRO la finestra: " + (FmtN $st.InFinestra) + "   " + $st.DateFinestra)
   [void]$REF.Add("    ini: " + $st.Ini)
   [void]$REF.Add("    corsa: " + $st.Corsa + " | file .log nelle radici del TESTER prima: " + (FmtN $st.LogVisti) + " | cresciuti in questa corsa: " + (FmtN $st.LogNuovi))
-  [void]$REF.Add("    canarino NEWS: " + @($st.RigheNews).Count + " righe (una in OnInit + una per ogni giorno di test: l'EA ricarica il file quando cambia il giorno)")
+  [void]$REF.Add("    canarino NEWS: " + $(if($st.Corsa -like "NON TENTATA*"){ "n/d (nessuna corsa)" } else { "" + @($st.RigheNews).Count + " righe" }) + " (una in OnInit + una per ogni giorno di test: l'EA ricarica il file quando cambia il giorno)")
   foreach($riga in @($st.RigheNews | Select-Object -First 4)){ [void]$REF.Add("      " + $riga) }
   if(@($st.RigheNews).Count -gt 4){ [void]$REF.Add("      ... (le altre in evidenza_" + $s.Id + ".txt)") }
   [void]$REF.Add("    letto da (valori distinti): " + $(if(@($st.Dove).Count -gt 0){ (@(@($st.Dove) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso Common\Files: e' QUESTA la prova del fix")
   [void]$REF.Add("    righe del file (distinti): " + $(if(@($st.RigheFile).Count -gt 0){ (@(@($st.RigheFile) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + (FmtN $NRigheEventoPin) + " (le righe evento del file al pin)")
   [void]$REF.Add("    UTILI per questo preset (distinti): " + $(if(@($st.Utili).Count -gt 0){ (@(@($st.Utili) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + (FmtN $st.UtiliAttesi) + " (conto rifatto qui sul file al pin; NB: conta TUTTO il file, non la finestra)")
-  [void]$REF.Add("    CALENDARIO CIECO: " + $st.Cieco + " | CANARINO ROSSO: " + $st.Rosso + "   (attesi 0 e 0)")
+  [void]$REF.Add("    CALENDARIO CIECO: " + (FmtN $st.Cieco) + " | CANARINO ROSSO: " + (FmtN $st.Rosso) + "   (attesi 0 e 0)")
   [void]$REF.Add("    autotest 'casi falliti' (atteso 0 su ogni riga): " + $(if(@($st.AutoFalliti).Count -gt 0){ (@($st.AutoFalliti) -join ", ") } else { "nessuna riga trovata" }))
-  [void]$REF.Add("    ordini pendenti piazzati [RILIEVO, mai un gate]: " + $st.Ordini + " | righe 'nessuna notizia nel CSV oggi': " + $st.NienteNews)
+  [void]$REF.Add("    ordini pendenti piazzati [RILIEVO, mai un gate]: " + (FmtN $st.Ordini) + " | righe 'nessuna notizia nel CSV oggi': " + (FmtN $st.NienteNews))
 }
 [void]$REF.Add("")
 [void]$REF.Add("--- COSA NON SI PUO' DIRE con questo referto ---")

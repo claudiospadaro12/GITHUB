@@ -37,7 +37,7 @@ backtest, prima** che tu ridistribuisca il fix sul VPS.
 | **Non usa `walkforward_generico.ps1`** (scelta dichiarata in testa allo script) | ① il generico **muore senza un asse `\|\|Y`**: per usarlo bisognerebbe *inventare* uno sweep (un secondo magic da censire vergine, o uno sweep che cambia il comportamento). ② il generico **non carica i `.set`**: vuole un `prove\*.txt`, cioè una **trascrizione a mano** del preset — ma qui l'oggetto della verifica **è il preset della sedia viva**, va letto com'è, non ricopiato. ③ il generico spezza sempre in IS/OOS: 4 avvii del tester per una domanda che ne chiede 2. Quindi: **`.ini` scritti dal driver, a passata singola**, struttura copiata campo per campo dal generico e da R114 (`[Charts] MaxBars`, `AllowLiveTrading=false`, `ShutdownTerminal=1`), con **gate sull'`.ini` riletto dal disco**. **Nessun file `prove/*.txt` viene creato: non serve** (scritto qui perché nessuno lo cerchi invano). |
 | **Da dove vengono i `[TesterInputs]`** | **tutti** gli input dell'EA letti dal **sorgente al pin** e blindati al **default compilato**, poi il `.set` della sedia **sovrascrive**. Motivo: un input non nominato nell'`.ini` si prende quello che **il tester ricorda dall'ultima corsa** di quell'EA — sul PC di backtest è la corsa NFP, con **un altro calendario**. Scrivere tutto **toglie lo stato nascosto**. |
 | **`InpNewsCommon` non è nei due `.set`** (sono precedenti alla v1.10) | nell'`.ini` ci finisce il **default compilato letto dal sorgente**, e c'è un **gate** che pretende che quel default sia `true`: è **la stessa condizione della sedia in forward** (anche un grafico usa il default per ciò che il `.set` non nomina). **I due `.set` NON vengono modificati da questa riga**: la verifica deve misurare i file **così come sono oggi sul VPS**. Aggiungere la riga esplicita è una **modifica candidata, da decidere DOPO** — finisce nei RILIEVI del referto. |
-| 🐤 **Il canarino, e cosa prova DAVVERO** | la riga `[PostNews][NEWS] letto da … \| righe N \| UTILI per questo preset M …` la stampa `LoadNews()` **in `OnInit` e poi una volta al giorno** (l'EA ricarica il file quando cambia il giorno): su due settimane le righe attese sono **una decina**, non una, e devono dire tutte la stessa cosa. **Tre gate**: **(a)** `letto da` **deve** essere `Common\Files` — è **questa** la prova del fix (a passata singola risponderebbe anche la sandbox, che il driver popola: quindi `M>=1` da solo **non proverebbe niente** sul `FILE_COMMON`); **(b)** `righe N` deve combaciare con le righe evento **contate dal file al pin**; **(c)** `UTILI M` deve combaciare col conto **rifatto dal driver** con le stesse tre regole del sorgente (impatto, valuta, titolo — confronto **case sensitive**, come `StringFind`). |
+| 🐤 **Il canarino, e cosa prova DAVVERO** | la riga `[PostNews][NEWS] letto da … \| righe N \| UTILI per questo preset M …` la stampa `LoadNews()` **in `OnInit` e poi una volta al giorno** (l'EA ricarica il file quando cambia il giorno): su due settimane le righe attese sono **una decina**, non una, e devono dire tutte la stessa cosa. **Tre gate**: **(a)** `letto da` **deve** essere `Common\Files` — è **questa** la prova del fix (`M>=1` da solo **non proverebbe niente** sul `FILE_COMMON`, perché il file è installato in ENTRAMBI i posti, Common e sandbox della cartella dati). **NON MISURATO**: se la sandbox **dell'agente del tester** (diversa dalla cartella dati — ogni agente di ottimizzazione ha la SUA, sotto `<Tester>\Agent-...\MQL5\Files`, che questa riga NON popola) risponda comunque in una passata singola; se capitasse, l'esito atteso resta comunque leggibile (`CALENDARIO CIECO`, non un `sandbox` silenzioso). Se il canarino dice `sandbox`, il ramo Common ha fallito: **PROBLEMA in ogni caso**; **(b)** `righe N` deve combaciare con le righe evento **contate dal file al pin**; **(c)** `UTILI M` deve combaciare col conto **rifatto dal driver** con le stesse tre regole del sorgente (impatto, valuta, titolo — confronto **case sensitive**, come `StringFind`). |
 | ⚠️ **La trappola di lettura** | **`UTILI` conta TUTTO il file, non la finestra testata.** Quindi `M>=1` **non** dimostra che nella finestra ci fosse un evento. Quello è un **gate separato**, fatto **prima di aprire MT5**: se la finestra non contiene almeno un evento **per sedia**, la riga **si ferma**. |
 | 🐤 **Il secondo canarino, gratis** | l'autotest dell'EA ha un caso n.5 che **è** il calendario: la riga `[PostNews][AUTOTEST] ---- fine: N casi falliti ----` **deve dire 0**. Gate. |
 | 🧪 **Dove si leggono i log (e dove NO)** | **solo le tre radici del TESTER** (`%APPDATA%\MetaQuotes\Tester`, `<CartellaDati>\Tester`, `<Installazione>\Tester`). **Non** `MQL5\Logs`: lanciare il tester con `/config` **avvia il terminale**, che carica l'ultimo profilo coi suoi grafici — se lassù c'è un `ABTG_PostNews` su grafico stampa **il suo** canarino, col **suo** preset, e finirebbe mescolato a quello in prova. |
@@ -81,7 +81,7 @@ Tutti e **sei** scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ECBFOMC_VERIFICA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -90,7 +90,8 @@ Tutti e **sei** scaricati **allo stesso pin**, mai dalla punta del branch.
     if($z.Count -eq 0){ throw 'NESSUNO ZIP POSTNEWS_ECBFOMC_VERIFICA_CONTROLLO_ DI ADESSO SUL DESKTOP: il controllo non e'' arrivato alla raccolta. Mandami quello che vedi qui sopra.' };
     $ko=(($rc -is [int]) -and ($rc -ne 0));
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip qui sotto.' -ForegroundColor Yellow };
-    if($ko){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Mandami questo zip:' -ForegroundColor Red; Write-Host $z[0].FullName -ForegroundColor Yellow } else { Write-Host 'CONTROLLO OK (fa comunque fede il referto: compilazione OK, 2 .ini verificati, 1 evento in finestra per sedia): lancia il blocco 2.' -ForegroundColor Green } }
+    if($ko){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Mandami questo zip:' -ForegroundColor Red; Write-Host $z[0].FullName -ForegroundColor Yellow } else { Write-Host 'CONTROLLO OK (fa comunque fede il referto: compilazione OK, 2 .ini verificati, 1 evento in finestra per sedia): lancia il blocco 2.' -ForegroundColor Green };
+    Write-Host ('NEL REFERTO la riga data: e'' l''ORA DI AVVIO di questo giro (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + '). La freschezza dello zip l''ha gia'' controllata la riga qui sopra.') -ForegroundColor Gray }
 ```
 
 ## 2️⃣ LA VERIFICA VERA (2 passate singole: EURJPY 771201 e EURUSD 771202)
@@ -98,7 +99,7 @@ Tutti e **sei** scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ECBFOMC_VERIFICA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
@@ -108,27 +109,40 @@ Tutti e **sei** scaricati **allo stesso pin**, mai dalla punta del branch.
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'VERIFICA CON PROBLEMI: lo zip esiste lo stesso, mandalo -- il referto dice quale sedia e perche''.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
+    Write-Host ('NEL REFERTO la riga data: e'' l''ORA DI AVVIO di questo giro (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + '). La freschezza dello zip l''ha gia'' controllata la riga qui sopra.') -ForegroundColor Gray;
     Write-Host 'IL VERDETTO E'' IN CIMA AL REFERTO, UNO PER SEDIA: CALENDARIO LETTO / CALENDARIO CIECO-PROBLEMA.' -ForegroundColor Gray }
 ```
 
 ### 🔧 Se dice `NON SO QUALE TERMINALE USARE`
 
-Rilancia lo **stesso** blocco aggiungendo la cartella dell'installazione di
-backtest (te la stampa lui stesso nell'elenco):
+Aggiungi `-Terminale '<cartella copiata dall'elenco che ti ha stampato>'` alla
+riga `& $p -Pin $pin ...` **del blocco intero che stavi lanciando** (1️⃣ o 2️⃣) e
+rilancia **tutto il blocco**, non solo un pezzo. Esempio sul blocco 1️⃣:
 
 ```powershell
-& $p -Pin $pin -Terminale '<cartella dell''installazione MT5 di backtest>'
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
+    $pin='@@PIN@@'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1" -OutFile $p -EA Stop;
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ECBFOMC_VERIFICA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo -Terminale 'C:\Program Files\BCM Markets MT5 Terminal'; $rc=$LASTEXITCODE;
+    $d=$null; foreach($k in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $k -and (Test-Path $k)){ $d=$k } }; if(-not $d){ $d=$env:USERPROFILE };
+    $z=@(Get-ChildItem (Join-Path $d 'POSTNEWS_ECBFOMC_VERIFICA_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+    if($z.Count -eq 0){ throw 'NESSUNO ZIP POSTNEWS_ECBFOMC_VERIFICA_CONTROLLO_ DI ADESSO SUL DESKTOP: il controllo non e'' arrivato alla raccolta. Mandami quello che vedi qui sopra.' };
+    $ko=(($rc -is [int]) -and ($rc -ne 0));
+    if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip qui sotto.' -ForegroundColor Yellow };
+    if($ko){ Write-Host '!!! CONTROLLO NON PASSATO: NON lanciare la corsa vera. Mandami questo zip:' -ForegroundColor Red; Write-Host $z[0].FullName -ForegroundColor Yellow } else { Write-Host 'CONTROLLO OK: lancia il blocco 2 (con lo stesso -Terminale).' -ForegroundColor Green };
+    Write-Host ('NEL REFERTO la riga data: e'' l''ORA DI AVVIO di questo giro (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + ').') -ForegroundColor Gray }
 ```
 
 ### 🗓️ Se vuoi un'altra finestra
 
 Il gate ricontrolla che la finestra nuova contenga **almeno un evento per
 sedia** (e se non lo contiene **si ferma**, dicendoti in che date stanno gli
-eventi del calendario al pin):
-
-```powershell
-& $p -Pin $pin -DaQuando 2026.09.05 -Fino 2026.09.20
-```
+eventi del calendario al pin). **Non lanciare un frammento a parte**: dentro
+al blocco intero che stavi già usando (1️⃣ o 2️⃣), nella riga che comincia con
+`& $p -Pin $pin`, aggiungi `-DaQuando 2026.09.05 -Fino 2026.09.20` prima del
+punto e virgola, poi rilancia **tutto** il blocco `& { ... }` da cima a fondo.
 
 ## 📦 COSA TORNA
 
@@ -232,7 +246,7 @@ F=backtest_pipeline/righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA_DA_MANDARE.md
 SHA=$(git rev-parse HEAD)          # il commit che CONTIENE driver + EA + include + calendario + i due preset
 TOK='@@PIN'"@@"                    # composto: la ricetta non contiene la stringa che cerca
 sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|" "$F"
-grep -c "\$pin='$SHA'" "$F"        # DEVE dare 2 (blocchi 1-2)
+grep -c "\$pin='$SHA'" "$F"        # DEVE dare 3 (blocco 1, blocco 2, l'esempio -Terminale)
 grep -c "\$pin='$TOK'" "$F"        # DEVE dare 0
 grep -c "$TOK" "$F"                # DEVE dare 0: l'ULTIMO segnaposto vive nel
                                    # CARTELLO in cima, che va RISCRITTO a mano
