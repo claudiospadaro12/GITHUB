@@ -7406,3 +7406,92 @@ grep -n 'Esiste -ne' backtest_pipeline/righe/*.ps1
 #    SENZA filtrare le foto su file davvero esistenti?
 grep -n 'INVARIATO su' backtest_pipeline/righe/*.ps1
 ```
+
+---
+
+## 🆕 AGGIUNTE DEL 04/09/2026 — trovate dal **verificatore** sul pacchetto POSTNEWS ECB+FOMC (`RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1` + pagina, **prima della pinnatura**), ESEGUENDO il ripristino su banco e rifacendo il censimento della classe 42
+
+## 116-quater. 🚩 IL RIPRISTINO COMANDATO DA UNA **BANDIERA ALZATA DOPO LA SCRITTURA**, non dal REGISTRO delle scritture — e il referto scrive «NON NECESSARIO»
+
+_Misurato su banco, non immaginato._ Il driver fa tutto giusto secondo la
+classe **116**: sentinella scritta **prima** della copia, backup, ripristino
+fuori dal `try`. Ma il ripristino e' chiuso dentro:
+
+```powershell
+if($IncInstallato -or $CalInstallato){ ... rimetti a posto ... }
+```
+
+e le due bandiere si alzano **DOPO** che le installazioni sono riuscite:
+
+```powershell
+$esitoCC = InstallaConBackup $calPin $CalCommon   # <-- Common\Files GIA' SOSTITUITO
+$esitoCL = InstallaConBackup $calPin $CalLocale   # <-- se QUESTA esplode...
+$CalInstallato = $true                            # <-- ...questa riga non si esegue mai
+```
+
+Fra la prima copia e la bandiera c'e' una finestra in cui il file **e' gia'
+sostituito** e nessuno lo rimette. Riprodotto sul banco (`InstallaConBackup` su
+`Common\Files\abtg_news.csv`, poi eccezione simulata sulla seconda): il file del
+terminale resta **quello del pin**, la sentinella resta a terra, e il referto
+stampa la frase piu' sbagliata che ci sia —
+
+```
+ripristino del terminale: NON NECESSARIO (il terminale non e' mai stato scritto)
+```
+
+— cioe' il contrario esatto di quello che e' successo. La foto PRIMA/DOPO
+(regola 116 punto 2) **non salva sempre**: confronta esistenza, byte e data, e
+`Copy-Item` conserva la data del sorgente, quindi due file di **pari lunghezza**
+escono `INVARIATO`. Nel pacchetto di oggi il difetto era **mascherato per
+fortuna** (l'include si installa per primo e alza la sua bandiera), il che e'
+peggio: vive in silenzio finche' qualcuno toglie l'`#include`.
+
+> ✅ **REGOLA. Il ripristino si comanda dal REGISTRO DELLE SCRITTURE, mai da una
+> bandiera.** Se la funzione che installa registra gia' dove ha scritto (ed e'
+> quello che scrive la sentinella), quel registro **e' la condizione**:
+> ```powershell
+> if(@($Backup.Keys).Count -gt 0){ ... }      # non:  if($IncInstallato -or $CalInstallato)
+> ```
+> Corollario: **la riga del referto sul ripristino non e' una costante di
+> default.** «NON NECESSARIO (il terminale non e' mai stato scritto)» si puo'
+> stampare **solo** se il registro e' vuoto — altrimenti e' una dichiarazione
+> non misurata, ed e' esattamente cio' che la 116 vieta.
+
+```powershell
+# censimento (classe 111/113): chi condiziona il ripristino a una bandiera?
+grep -n 'Installato -or\|Installato)' backtest_pipeline/righe/*.ps1
+```
+
+### 42-bis. 🔁 RECIDIVA DELLA CLASSE 42 (04/09/2026): la riga di riparazione in un **blocco ```powershell a se'**, con `$p` e `$pin` evaporati
+
+La classe **42** (la riga che riusa una variabile del blocco precedente) e'
+tornata, in forma peggiore: non piu' in prosa ma dentro **blocchi fenced**, che
+sono fatti apposta per essere copiati da soli. Sulla pagina POSTNEWS ECB+FOMC
+erano **due**:
+
+```powershell
+& $p -Pin $pin -Terminale '<cartella>'          # rilancio col terminale imposto
+& $p -Pin $pin -DaQuando 2026.09.05 -Fino ...   # rilancio con un'altra finestra
+```
+
+`$p` e `$pin` nascono dentro il `& { ... }` del blocco 1/2: quando il blocco
+finisce **non esistono piu'**. Eseguito davvero, `& $null` risponde
+_«The expression after '&' in a pipeline element produced an object that was not
+valid»_ — un messaggio che non nomina il colpevole. E il ramo che ci porta non e'
+raro: e' proprio quello che il driver stesso suggerisce
+(`NON SO QUALE TERMINALE USARE`).
+
+> ✅ **REGOLA (rafforzata). Un rilancio con un'opzione in piu' NON e' uno
+> snippet: e' il BLOCCO INTERO, ricopiato, con l'argomento aggiunto alla riga
+> `& $p -Pin $pin ...`.** Se la pagina vuole restare corta, la frase e' _«aggiungi
+> `-Terminale '<cartella>'` alla riga `& $p -Pin $pin ...` **del blocco che stavi
+> lanciando** e rilancia il blocco INTERO»_ — mai un fenced che comincia con `& $p`.
+
+**Censimento del 04/09/2026** (i fratelli gia' in repo, classe 111):
+
+```powershell
+# blocchi ```powershell che contengono "& $p" e NON contengono "& {"
+# -> 4 in repo: RIGA_POSTNEWS_ECBFOMC_VERIFICA (x2, corretti oggi),
+#               RIGA_POSTNEWS_NFP (-TimeoutStoricoMin 90), RIGA_R101 (-SoloEa DAX)
+# piu' la variante in PROSA: RIGA_COMPILA_ORB104 ("parametro al driver: & $p -Pin $pin -Terminale ...")
+```
