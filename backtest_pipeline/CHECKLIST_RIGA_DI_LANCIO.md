@@ -7643,3 +7643,34 @@ SONDARELATIVO_ESTESA). **Una sola è ATTIVA, ed è nuova:**
 > verifica che nessuno falsifica diventa, in due giorni, un timbro. Qui il timbro
 > ha certificato «0» su un file che ne aveva tre, e un fratello con un difetto
 > **attivo** è rimasto in repo per giorni con lo scan «passato».
+
+## 119. 🔢 Due conteggi con lo stesso nome ma significato diverso, confrontati come fossero uno solo
+
+**Trovato il 04/09/2026** su `RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1`, alla PRIMA
+corsa vera su MT5 (non catturato dalle due review statiche precedenti, che
+non avevano potuto eseguire il tester). Il canarino dell'EA
+(`[PostNews][NEWS] letto da ... | righe N | ...`) stampa `gNewsCount`:
+`LoadNews()` incrementa questo contatore per OGNI riga fisica che
+`FileReadString`/`FileIsLineEnding` attraversano nel ciclo, **header
+compreso** — non solo per le righe che superano il parsing della data. Il
+driver invece calcolava l'atteso contando SOLO gli eventi con data valida
+(`LeggiCalendario`, che scarta l'header): su un file con 1 header + 17
+eventi, l'EA stampava correttamente `righe 18` e il driver si aspettava
+`righe 17` — **PROBLEMI: 2** su un giro dove il fix vero (lettura da
+`Common\Files`) funzionava perfettamente.
+
+**La regola**: quando un driver deriva un "atteso" da un file per confrontarlo
+con l'output di un EA, il nome della variabile non basta a garantire che i
+due lati contino la STESSA cosa. Va verificato **leggendo il codice
+dell'EA** cosa conta esattamente quel contatore (ogni riga fisica? solo le
+righe valide? solo quelle che passano un filtro?), non assunto dal nome del
+messaggio di log. **Fix**: due variabili distinte con nomi che dichiarano la
+differenza (`$NRigheFilePin` = righe totali header incluso, `$NRigheEventoPin`
+= eventi validi), usate ciascuna nel confronto giusto.
+
+> 📌 **Perché le due review statiche precedenti non l'hanno preso**: nessuna
+> delle due aveva potuto eseguire MT5 (ambiente Linux, dichiarato in ogni
+> "NON COPERTO"). Un conteggio derivato da un comportamento runtime dell'EA
+> (non da un `#define` o da una costante nel sorgente) va verificato con una
+> corsa vera, non solo con la lettura del codice: la review statica può solo
+> DICHIARARE il rischio, non chiuderlo.

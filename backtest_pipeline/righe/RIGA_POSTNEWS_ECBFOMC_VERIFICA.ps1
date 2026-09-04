@@ -288,6 +288,15 @@ $logC   = Join-Path $Work "COMPILAZIONE.log"
 $InputsSorgente = [ordered]@{}
 $Eventi = @()                 # eventi del calendario al pin
 $NRigheEventoPin = -1
+# righe TOTALI del file (header incluso): e' QUESTO il numero che l'EA
+# stampa come 'righe N' nel canarino (LoadNews conta ogni riga fisica
+# che FileReadString attraversa nel ciclo while, header compreso: solo
+# gli EVENTI utili/filtrati escludono l'header, non il conteggio grezzo
+# delle righe lette). Misurato su due corse reali (04/09): file 3 righe
+# totali -> canarino 'righe 3'; file 18 righe totali -> canarino 'righe
+# 18'. Confondere le due e' la classe 119: un conteggio SEMANTICAMENTE
+# diverso (eventi vs righe fisiche) confrontato come fossero lo stesso.
+$NRigheFilePin = -1
 
 # --- LE DUE SEDIE. Nascono qui: la raccolta le scorre SEMPRE.
 $SEDIE = @(
@@ -822,8 +831,9 @@ try{
   if($calRighe[0].Trim() -ne "Data Ora;Impatto;Valuta;Titolo"){ throw ("calendario " + $NEWSFILE + ": header '" + $calRighe[0] + "', atteso 'Data Ora;Impatto;Valuta;Titolo'.") }
   $Eventi = LeggiCalendario $calPin
   $NRigheEventoPin = @($Eventi).Count
+  $NRigheFilePin = @($calRighe).Count
   if($NRigheEventoPin -le 0){ throw ("calendario " + $NEWSFILE + ": ZERO righe evento leggibili. La verifica non avrebbe niente da trovare.") }
-  $CalCsvTxt = "" + @($calRighe).Count + " righe nel file (1 header + " + $NRigheEventoPin + " eventi), header verificato. L'EA deve stampare 'righe " + $NRigheEventoPin + "': un numero diverso vuol dire che ha letto UN ALTRO " + $NEWSFILE + "."
+  $CalCsvTxt = "" + $NRigheFilePin + " righe nel file (1 header + " + $NRigheEventoPin + " eventi), header verificato. L'EA deve stampare 'righe " + $NRigheFilePin + "' (il conteggio grezzo di LoadNews, header incluso: NON e' il conteggio eventi): un numero diverso vuol dire che ha letto UN ALTRO " + $NEWSFILE + "."
   Dico ("calendario: " + $CalCsvTxt) "Green"
 
   $dtDa = [datetime]::ParseExact($DaQuando,"yyyy.MM.dd",$INV)
@@ -1084,8 +1094,8 @@ try{
       }
       $rigDist = @(@($st.RigheFile) | Select-Object -Unique)
       if(@($rigDist).Count -gt 1){ [void]$motivi.Add("'righe' cambia fra le righe di log (" + ($rigDist -join ", ") + ").") }
-      elseif(@($rigDist).Count -eq 1 -and [int]$rigDist[0] -ne $NRigheEventoPin){
-        [void]$motivi.Add("l'EA dice 'righe " + $rigDist[0] + "' ma il file " + $NEWSFILE + " AL PIN ha " + $NRigheEventoPin + " righe evento: ha letto UN ALTRO calendario.")
+      elseif(@($rigDist).Count -eq 1 -and [int]$rigDist[0] -ne $NRigheFilePin){
+        [void]$motivi.Add("l'EA dice 'righe " + $rigDist[0] + "' ma il file " + $NEWSFILE + " AL PIN ha " + $NRigheFilePin + " righe totali (header incluso): ha letto UN ALTRO calendario.")
       }
       $utiDist = @(@($st.Utili) | Select-Object -Unique)
       if(@($utiDist).Count -gt 1){ [void]$motivi.Add("'UTILI per questo preset' cambia fra le righe di log (" + ($utiDist -join ", ") + ").") }
@@ -1242,7 +1252,7 @@ foreach($s in $SEDIE){
   foreach($riga in @($st.RigheNews | Select-Object -First 4)){ [void]$REF.Add("      " + $riga) }
   if(@($st.RigheNews).Count -gt 4){ [void]$REF.Add("      ... (le altre in evidenza_" + $s.Id + ".txt)") }
   [void]$REF.Add("    letto da (valori distinti): " + $(if(@($st.Dove).Count -gt 0){ (@(@($st.Dove) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso Common\Files: e' QUESTA la prova del fix")
-  [void]$REF.Add("    righe del file (distinti): " + $(if(@($st.RigheFile).Count -gt 0){ (@(@($st.RigheFile) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + (FmtN $NRigheEventoPin) + " (le righe evento del file al pin)")
+  [void]$REF.Add("    righe del file (distinti): " + $(if(@($st.RigheFile).Count -gt 0){ (@(@($st.RigheFile) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + (FmtN $NRigheFilePin) + " (righe TOTALI del file al pin, header incluso: e' quello che stampa LoadNews)")
   [void]$REF.Add("    UTILI per questo preset (distinti): " + $(if(@($st.Utili).Count -gt 0){ (@(@($st.Utili) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + (FmtN $st.UtiliAttesi) + " (conto rifatto qui sul file al pin; NB: conta TUTTO il file, non la finestra)")
   [void]$REF.Add("    CALENDARIO CIECO: " + (FmtN $st.Cieco) + " | CANARINO ROSSO: " + (FmtN $st.Rosso) + "   (attesi 0 e 0)")
   [void]$REF.Add("    autotest 'casi falliti' (atteso 0 su ogni riga): " + $(if(@($st.AutoFalliti).Count -gt 0){ (@($st.AutoFalliti) -join ", ") } else { "nessuna riga trovata" }))
