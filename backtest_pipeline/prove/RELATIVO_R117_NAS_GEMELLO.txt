@@ -1,0 +1,189 @@
+# =====================================================================
+#  RELATIVO -- PASSO 1 (MERITO, TICK REALI)  --  PROVA VERA  --  R117
+#  gamba NASUSD -- GEMELLO DI DETERMINISMO (stessi input, magic diverso)
+# ---------------------------------------------------------------------
+#  QUESTO NON E' IL PASSO 0. Il passo 0 (ABTG_SondaRelativo, contatore
+#  puro) e' CHIUSO: ha misurato portata, taglia, geometria, convergenza
+#  e tenuta, e NON ha mai emesso un euro di P/L. Qui gira
+#  ABTG_Relativo, che APRE ORDINI VERI, e questa e' la PRIMA MISURA DI
+#  MERITO del meccanismo.
+#
+#  SEI PROVA, E OGNUNO HA UN COMPITO DIVERSO (non sono sei tentativi):
+#    RELATIVO_R117_D30.txt          gamba D30EUR, magic 774601  <- la misura
+#    RELATIVO_R117_NAS.txt          gamba NASUSD, magic 774602  <- la misura
+#    RELATIVO_R117_D30_GEMELLO.txt  identico al primo, magic 774611
+#    RELATIVO_R117_NAS_GEMELLO.txt  identico al secondo, magic 774612
+#         >>> i GEMELLI servono a UNA cosa sola: due passate con gli
+#         stessi input e magic diverso devono venire IDENTICHE AL
+#         CENTESIMO. Se divergono il banco e' sporco e il round non si
+#         legge -- prima ancora di guardare un profitto.
+#    RELATIVO_R117_D30_PORTO.txt    InpModoSonda=true, NESSUN ORDINE
+#    RELATIVO_R117_NAS_PORTO.txt    InpModoSonda=true, NESSUN ORDINE
+#         >>> il COLLAUDO DEL PORTO. L'EA conta e basta: i "Segnali
+#         Grezzi Long/Short" devono venire IDENTICI, ALLA CIFRA, agli
+#         "Attraversamenti Grezzi Long/Short" del referto del passo 0
+#         sulla stessa cella e sulla stessa finestra. Lo z-score si
+#         calcola su BARRE CHIUSE e il modello di tick non lo tocca: se
+#         non combaciano, il nucleo e' stato trasportato male e il
+#         round NON PARTE.
+#  I sei differiscono SOLO per @SIMBOLO, InpMagic e InpModoSonda. Il
+#  resto del blocco dei parametri e' identico carattere per carattere,
+#  e la riga di lancio lo verifica meccanicamente.
+#
+# =====================================================================
+#  LA CELLA, E DA DOVE VIENE
+# ---------------------------------------------------------------------
+#  InpFinestraN = 40, InpSogliaIngressoSigma = 1.35, per ENTRAMBE le
+#  gambe. NON e' il picco di niente: e' un vertice di un blocco 2x2 che
+#  sta in piedi su TUTTE E QUATTRO le mappe (D30 long, D30 short, NAS
+#  long, NAS short) della griglia ESTESA a 90 celle, ed e' INTERNO su
+#  entrambi gli assi (i bordi sono N=10/N=55 e sigma=0,75/1,95).
+#  I quattro vertici del blocco, e il pareggio rotto (occasioni/giorno
+#  e C6, dichiarati PRIMA):
+#     cella          D30 tot/gg  D30 C6%   NAS tot/gg  NAS C6%
+#     N=40 s=1,35       3,376     19,68      3,564      17,96   <- scelta
+#     N=40 s=1,50       3,122     19,97      3,336      18,32
+#     N=45 s=1,35       3,088     20,85      3,291      19,51
+#     N=45 s=1,50       2,880     21,50      3,102      19,91
+#  N=40/s=1,35 domina su ENTRAMBI i criteri e su ENTRAMBE le gambe, e
+#  ha SEDICI vicini ortogonali VIVI su sedici (4 vicini x 2 gambe x 2
+#  lati): non e' un picco di rumore, e' un punto interno.
+#  >>> RILIEVO CHE RESTA E NON SI NASCONDE: su NASUSD la regione viva
+#  tocca ANCORA il bordo (N=55, sigma=1,95), quindi la cella e' INTERNA
+#  ma non e' dimostrato che sia CENTRALE su quella gamba. Claudio ha
+#  deciso di fermarsi qui, ed e' dichiarato.
+#  >>> E i due criteri di pareggio spingono SISTEMATICAMENTE verso il
+#  bordo basso della regione viva (piu' occasioni e C6 piu' basso
+#  crescono entrambi al calare di N e sigma): non sono una regola di
+#  centratura, sono una regola di frequenza. E' l'anello completo di
+#  vicini vivi a rendere accettabile il risultato, non il criterio.
+#
+# =====================================================================
+#  LA GEOMETRIA, E DA DOVE ESCE OGNI NUMERO
+# ---------------------------------------------------------------------
+#  InpAtrSL = 2.75 -> stop REALE, sul broker, obbligatorio.
+#    MAE mediana MISURATA sulla cella: D30 22,60/22,77 punti indice,
+#    NAS 40,00/41,88. ATR mediano MISURATO: D30 17,13, NAS 26,98.
+#    MAE in ATR: 1,32-1,33 (D30) e 1,48-1,55 (NAS). x2 -> 2,64...3,10.
+#    2,75 e' UN SOLO valore per le due gambe, ed era gia' scritto PRIMA
+#    che arrivassero i numeri di questa cella: spostarlo adesso sarebbe
+#    tararlo sui dati.
+#    ASIMMETRIA DICHIARATA: a 2,75 ATR lo stop vale 2,08 volte la MAE
+#    mediana su D30EUR ma solo 1,77-1,86 su NASUSD. Atteso falsificabile:
+#    PIU' uscite per stop su NASUSD. Lo dice la colonna "Uscite Stop".
+#  InpMaxTradesPerDay = 5 -> NON e' una preferenza, e' aritmetica:
+#    il passo 0 ha misurato fino a 10 occasioni/giorno su D30EUR;
+#    10 x 0,65% = -6,50%, che SFONDA il muro prop giornaliero del 5%.
+#    5 x 0,65% = 3,25% = esattamente il cap C1 firmato il 18/08.
+#  InpRiskPercent = 0.65 -> la taglia di CAMPO, cosi' il drawdown si
+#    legge contro il muro prop SENZA nessuna scalatura inferita.
+#  InpBarreMaxTenuta = 120 -> INERTE per costruzione: la sessione
+#    14:30-22:00 dura 450 minuti = 90 barre M5. Il contenitore VERO e'
+#    il flat di fine sessione, che nel codice non e' nemmeno un input.
+#  InpMaxSpreadPts = 0 -> filtro SPENTO: lo spread si MISURA, non si
+#    filtra (lezione R55). Esce in colonna, mediana e P95.
+#  InpSaltaGiorniSpaiati = false -> i giorni spaiati si MISURANO. Su un
+#    contatore un giorno spaiato e' un segnale finto da filtrare; su un
+#    EA vero e' un'operazione vera con una perdita vera, cioe' un
+#    RISCHIO da misurare. Tre colonne dedicate.
+#
+# =====================================================================
+#  CRITERI DI MERITO -- CONGELATI PRIMA DEI NUMERI
+#  (dettaglio completo in report\PROPOSTA_RELATIVO_TICK_REALI_2026-09-04.md)
+# ---------------------------------------------------------------------
+#  A1  aspettativa OOS >= 0,075 R, a tick e AL NETTO dei costi (H8)
+#  A2  profit factor OOS >= 1,15
+#  A3  segno del profitto COERENTE fra IS e OOS, e PF IS > 1,00
+#  A4  drawdown di equity OOS <= 8,0% a rischio 0,65%
+#  A5  peggior giornata non peggiore di -4,0% (a 4,0% il Guardian
+#      metterebbe in pausa: sotto quella soglia il backtest descrive
+#      una giornata che sul campo NON SAREBBE ESISTITA)
+#  A6  n >= 150 operazioni in IS E in OOS, per gamba
+#  A7  quota di trade sotto 60 secondi < 25% (vincolo prop P5).
+#      A M5 la tenuta minima e' UNA barra = 300 s: questa DEVE venire
+#      0,00. E' un COLLAUDO, non una scoperta.
+#  BOCCIATURA SECCA: E < 0,050R | PF < 1,10 | IS negativo |
+#      DD > 10,0% | peggior giornata < -5,0%. Le ultime due bocciano
+#      PER RISCHIO qualunque sia il PF e qualunque sia n.
+#  n < 30 NON e' una bocciatura: e' "non misurabile".
+#
+# =====================================================================
+#  IL BANCO, E I SUOI LIMITI DICHIARATI PRIMA
+# ---------------------------------------------------------------------
+#  MODELLO 4 = OGNI TICK BASATO SU TICK REALI. E' il punto del round:
+#  sul tick reale lo spread NON si assume, SI PAGA.
+#  FINESTRA 2024.09.26 -> 2026.06.30 = il pavimento MISURATO dei tick
+#  reali degli indici BCM, e la STESSA finestra del passo 0: i conteggi
+#  sono confrontabili riga per riga (e' cio' che rende possibile il
+#  collaudo del porto).
+#  SPLIT 40/60 (default di casa). ATTENZIONE: IS e OOS qui NON servono
+#  a selezionare niente -- la cella e' congelata e non c'e' nessuna
+#  griglia. Sono DUE CAMPIONI INDIPENDENTI DELLA STESSA
+#  CONFIGURAZIONE.
+#  >>> E L'OOS NON E' UN VERO OUT-OF-SAMPLE, e va scritto: la cella e'
+#  stata scelta guardando una misura che copre l'INTERA finestra, OOS
+#  compreso. Le attenuanti (centro e non picco; criteri senza nessun
+#  P/L dentro; stessa cella su due mercati diversi) sono reali ma non
+#  annullano il fatto. L'unico vero out-of-sample sara' il forward demo.
+#  >>> UN SOLO REGIME (toro). Emendamento della Finestra: regola A
+#  soddisfatta (le operazioni bastano), regola C NON soddisfatta
+#  (nessuna prova di regime). DA QUESTO ROUND NON ESCE UNA SEDIA.
+#  >>> UN SOLO BROKER. FORMA UNILATERALE (una gamba si scambia, il
+#  metro si legge): a due gambe si pagherebbero DUE spread per UNA
+#  convergenza, e quella forma non e' mai stata misurata.
+#  >>> TETTO ~100.000 BARRE: M5 su 21 mesi lo eccede. Non si spezza in
+#  tranche (stessa scelta del passo 0): la finestra EFFETTIVA la
+#  dichiarano le colonne. A tick reali il vincolo vero e' la RAM:
+#  MASSIMO 4 AGENTI (lezione del 01/09, "no memory for ticks generating").
+#  >>> PRIMA DELLA CORSA lo storico del METRO (U30USD) deve essere gia'
+#  scaricato, o ogni barra risulta "spaiata" e il referto misura la
+#  configurazione invece del mercato.
+#
+# =====================================================================
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Motore derivato dalla LETTURA di tre script Pine:
+#      1) "Pair Trade" (c) vladimirkovalchuk / @wa1one
+#         https://www.tradingview.com/script/ru23VN0C/
+#      2) "Unilateral Pairs Trading" (c) @pietro3334
+#         https://www.tradingview.com/script/MD5vkc0n/
+#      3) "Statistical Arbitrage Pairs Trading - Long-Side Only"
+#         (c) @piirsalu  https://www.tradingview.com/script/Kt6XkQIM/
+#    Nessuno dei tre dichiara una licenza [VERIFICATO 02/09/2026].
+#    NON E' STATA COPIATA NEMMENO UNA RIGA DI PINE: e' stata riscritta
+#    la formula statistica (matematica pubblica) e si cita comunque
+#    autore, URL e data.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpSimboloMetro=U30USD
+InpModoSpread=0
+InpModoZScore=0
+InpFinestraN=40
+InpSogliaIngressoSigma=1.35
+InpSogliaUscitaSigma=0.05
+InpOraInizioServer=14
+InpMinInizioServer=30
+InpOraFineServer=22
+InpMinFineServer=0
+InpAtrSL=2.75
+InpBarreMaxTenuta=120
+InpRiskPercent=0.65
+InpMaxTradesPerDay=5
+InpLato=0
+InpAtrPeriod=14
+InpAtrModoRma=false
+InpMagic=774612
+InpSlippagePts=10
+InpMaxSpreadPts=0
+InpModoSonda=false
+InpSaltaGiorniSpaiati=false
+InpWarmupBarre=300
+InpPuntiPerIndice=100.0
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=RELATIVO

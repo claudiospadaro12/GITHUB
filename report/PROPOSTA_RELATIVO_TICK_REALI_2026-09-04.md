@@ -7,8 +7,27 @@
 > Claudio, e si congelano **PRIMA** dei numeri. Questo è il punto in cui la casa
 > si ferma e decide, non il punto in cui si programma.
 
-_04/09/2026 · repo `/home/user/GITHUB`, branch `lavoro` · Parte 1 del mandato:
-**proposta, poi stop**._
+_04/09/2026 · repo `/home/user/GITHUB`, branch `lavoro`._
+
+> ## 🔄 REVISIONE DEL 04/09 (SERA) — **LA CELLA È CAMBIATA, E IL PERCHÉ È MISURATO**
+> La prima stesura di questo documento proponeva **N=35 / σ=1,50** e portava un
+> **RILIEVO scritto in chiaro** (§3.4 di allora): *l'altopiano vivo si appoggiava
+> al BORDO della griglia su entrambi gli assi, quindi il centro non era
+> determinabile*. Claudio ha deciso (**D4**) di **estendere la griglia PRIMA** di
+> scrivere l'EA. L'estensione è girata (**90 celle, N 10→55 × σ 0,75→1,95**,
+> `RIGA_SONDARELATIVO_ESTESA`) e ha risposto:
+>
+> | | esito |
+> |---|---|
+> | **collaudo di riproduzione** (cella N=20/σ=1,05 contro i referti del mattino) | ✅ **PASSATO su entrambe le gambe, 12 grandezze su 12** → le celle nuove si leggono sulla stessa scala delle vecchie |
+> | **D30EUR** | **VIVO/VIVO**, 19 blocchi 2×2. L'angolo estremo N=55/σ=1,95 **muore per PORTATA**, come previsto prima della misura |
+> | **NASUSD** | **VIVO/VIVO**, 23 blocchi 2×2. L'angolo estremo **non muore**: su questa gamba l'altopiano **tocca ancora il bordo** |
+>
+> **Claudio ha deciso di FERMARSI QUI** e di scegliere un blocco 2×2 vivo su
+> **entrambe** le gambe che **non tocchi nessun bordo**: **N=40-45 × σ=1,35-1,50**.
+> Dentro quel blocco, **N=40 / σ=1,35 domina su entrambi i criteri di pareggio
+> (più occasioni, C6 più basso) su ENTRAMBE le gambe**. Tutto ciò che qui sotto
+> dipende dalla cella è stato **ricalcolato** su di lei (§1.1, §2.4, §3).
 
 **Numero di round proposto: `R117`** — **verificato libero oggi**
 (`grep -rno "\bR117\b"` su tutto il repo → **0 occorrenze**; `R116` è l'ultimo
@@ -16,11 +35,11 @@ assegnato, LondonFx). ⚠️ **Da ri-verificare il giorno del lancio.**
 
 | voce | valore proposto |
 |---|---|
-| **EA** | `mql5/Experts/ABTG_Relativo.mq5` — **DA SCRIVERE** (non esiste: verificato) |
+| **EA** | `mql5/Experts/ABTG_Relativo.mq5` — **SCRITTO** il 04/09 (Parte 2). Non compilato in questo ambiente: si compila in MetaEditor |
 | **cosa NON si tocca** | `mql5/Experts/ABTG_SondaRelativo.mq5` resta il **contatore puro, invariato, v1.03** |
 | **gambe / TF** | **D30EUR · M5** e **NASUSD · M5** — le due che hanno dato **VIVO su entrambi i lati** |
 | **metro** | **U30USD** — si legge, non si scambia (T4 della sonda) |
-| **cella (entrambe le gambe)** | **`InpFinestraN = 35`, `InpSogliaIngressoSigma = 1.50`**, `InpSogliaUscitaSigma = 0.05` (§3) |
+| **cella (entrambe le gambe)** | **`InpFinestraN = 40`, `InpSogliaIngressoSigma = 1.35`**, `InpSogliaUscitaSigma = 0.05` (§3) |
 | **modello** | **4 = Ogni tick basato su TICK REALI** — è il punto del round |
 | **finestra** | **2024.09.26 → 2026.06.30** = **il pavimento tick reali degli indici BCM**, e **la stessa identica finestra della sonda** (§5.1) |
 | **sessione** | **14:30 → 22:00 ORA SERVER, CONGELATA**, fine esclusa (T7 della sonda) |
@@ -49,38 +68,49 @@ in colonna prima o poi qualcuno lo legge come un risultato"*).
 ### 1.1 🔢 IL NUMERO CHE DEVE STARE IN CIMA, PRIMA DI TUTTI GLI ALTRI
 
 Con la geometria proposta al §2.4 (**SL = 2,75 × ATR**, cioè **1R ≈ 47,1 punti
-indice su D30EUR** e **≈ 74,2 su NASUSD**), e con i numeri **MISURATI** della
-cella scelta:
+indice su D30EUR** e **≈ 74,2 su NASUSD**), e con i numeri **MISURATI della
+cella N=40 / σ=1,35** (letti riga per riga dai referti della griglia estesa):
 
 | voce | **D30EUR** | **NASUSD** | fonte |
 |---|---:|---:|---|
-| MFE mediana (cella N=35 σ=1.50, lato L/S) | **22,40 / 22,10 pti** | **36,70 / 36,00 pti** | [MISURATO, referto 04/09] |
-| MAE mediana (= MFE/RR, §3.3) | **≈ 22,6 / 23,0 pti** | **≈ 39,9 / 40,0 pti** | [DERIVATO dai referti] |
+| MFE mediana (lato L / S) | **23,50 / 25,50 pti** | **37,20 / 36,85 pti** | [MISURATO] |
+| RR da mediane (L / S) | 1,04 / 1,12 | 0,93 / 0,88 | [MISURATO] |
+| MAE mediana (= MFE/RR) | **22,60 / 22,77 pti** | **40,00 / 41,88 pti** | [DERIVATO dai referti] |
 | ATR mediano di sessione | **17,13 pti** | **26,98 pti** | [MISURATO] |
 | **1R proposto** (2,75 × ATR) | **47,1 pti** | **74,2 pti** | [CALCOLO §2.4] |
-| **MFE mediana in R** (= TETTO del guadagno) | **0,475 R** | **0,495 R** | [CALCOLO] |
-| spread misurato, ora peggiore della finestra | **2,80 pti** | **1,80 pti** | [MISURATO 03/09, `SPREAD_FLOTTA_MISURA`] |
+| **MFE mediana in R** (= TETTO del guadagno) | **0,499 / 0,541 R** | **0,501 / 0,497 R** | [CALCOLO] |
+| spread misurato, ora peggiore della finestra | **2,80 pti** | **1,80 pti** | [MISURATO 03/09] |
 | **costo dello spread in R** | **0,059 R** | **0,024 R** | [CALCOLO] |
 | **costo / cancello H8 (0,075R)** | 🔴 **79%** | 🟢 **32%** | [CALCOLO] |
-| slippage 5 punti MT5 = 0,05 pti indice | 0,001 R | 0,0007 R | [CALCOLO] — **irrilevante**, e non è un caso (§2.9) |
+| slippage 5 punti MT5 = 0,05 pti indice | 0,11% di 1R | 0,07% di 1R | [CALCOLO] — **irrilevante** (§2.9) |
+| C6 non convergute (totale) | **19,68 %** | **17,96 %** | [MISURATO] |
+| tenuta mediana | **13 barre** | **12 barre** | [MISURATO] |
+| max occasioni in un giorno | **10** | **8** | [MISURATO] → §2.6 |
 
 > ### 🔴 **IL WIN RATE CHE SERVE, CALCOLATO PRIMA DI GUARDARE**
 > Se il guadagno per vincente fosse **pari alla MFE mediana** (che è un **tetto**:
 > l'uscita alla convergenza sta **sotto** il massimo dell'escursione) e la
 > perdente pagasse **1R pieno**, il pareggio **al netto dello spread** cade a:
-> - **D30EUR: win rate ≥ 71,8%**
-> - **NASUSD: win rate ≥ 68,5%**
+> - **D30EUR: win rate ≥ 68,7% (short) — 70,7% (long)**
+> - **NASUSD: win rate ≥ 68,2% (long) — 68,4% (short)**
 >
-> **[INFERITO, non misurato]** Il tasso di convergenza misurato è **82,2%**
-> (D30) e **83,7%** (NAS): il margine c'è, **ma solo se quasi ogni convergenza
-> è un profitto e se il realizzato è vicino alla MFE mediana**. Sono **due cose
-> che la sonda non ha mai misurato**, e sono esattamente ciò che questo round va
-> a vedere.
+> **[INFERITO, non misurato]** Il tasso di convergenza misurato su questa cella è
+> **80,3%** (D30) e **82,0%** (NAS): il margine c'è, **ma solo se quasi ogni
+> convergenza è un profitto e se il realizzato è vicino alla MFE mediana**. Sono
+> **due cose che il passo 0 non ha mai misurato**, ed è esattamente ciò che
+> questo round va a vedere.
 >
-> ⚠️ Il limite di questo calcolo, dichiarato: le **non convergute** (16-20%)
+> ⚠️ Il limite di questo calcolo, dichiarato: le **non convergute** (18-20%)
 > **non perdono automaticamente 1R** — escono al flat di sessione e possono
-> chiudere in guadagno. Il numero sopra è quindi una **forchetta severa**, non
-> una previsione di perdita.
+> chiudere in guadagno. È una **forchetta severa**, non una previsione di
+> perdita.
+>
+> 📌 **Rispetto alla cella vecchia (N=35/σ=1,50) quasi niente si muove**, ed è
+> di per sé un piccolo segno di robustezza dell'altopiano: occasioni **3,376 vs
+> 3,433** su D30 e **3,564 vs 3,631** su NAS (praticamente pari), C6 **un po'
+> peggiore** (19,68 vs 17,83 su D30; 17,96 vs 16,28 su NAS), MFE **un po' più
+> grande** (23,50 vs 22,40 su D30), tenuta identica.
+> **Nessun numero si è mosso abbastanza da cambiare una conclusione.**
 
 ### 1.2 🔮 LA PREVISIONE DICHIARATA **PRIMA** (falsificabile)
 
@@ -165,30 +195,49 @@ tutte**, lo stop reale del §2.4, che nella sonda non esisteva.
 ### 2.4 🛡️ LO **STOP DI SICUREZZA REALE** — obbligatorio, e da dove esce il numero
 
 **Perché è obbligatorio e non opzionale:** la sonda non ne aveva bisogno perché
-non apriva niente. Un EA vero senza SC **broker-side** è una posizione nuda
+non apriva niente. Un EA vero senza SL **broker-side** è una posizione nuda
 davanti a una disconnessione, a un gap e a un evento macro. **Non si discute.**
 
-**La derivazione, da C4 (MAE mediana = il "pavimento SL" già stampato nei
-referti):**
+**La derivazione, da C4 (MAE mediana = il "pavimento SL" stampato nei referti),
+sulla cella N=40 / σ=1,35:**
 
-| passo | D30EUR | NASUSD |
+| passo | D30EUR (L / S) | NASUSD (L / S) |
 |---|---:|---:|
-| MAE mediana alla cella scelta (L/S) | 22,6 / 23,0 pti | 39,9 / 40,0 pti |
+| MAE mediana alla cella scelta | 22,60 / 22,77 pti | 40,00 / 41,88 pti |
 | ATR mediano di sessione | 17,13 pti | 26,98 pti |
-| **MAE mediana in ATR** | **1,32** | **1,48** |
-| **× 2 (il margine, sotto)** | **2,64 ATR** | **2,96 ATR** |
+| **MAE mediana in ATR** | **1,32 / 1,33** | **1,48 / 1,55** |
+| **× 2 (il margine, sotto)** | **2,64 / 2,66 ATR** | **2,97 / 3,10 ATR** |
 | **valore proposto, UNICO per le due gambe** | **2,75 × ATR** | **2,75 × ATR** |
 | in punti indice (all'ATR mediano) | **47,1 pti** | **74,2 pti** |
 
-**Perché il fattore 2 e non un altro:** la MAE **mediana** è, per definizione,
-il livello che **metà** dei trade supera. Uno stop lì ucciderebbe metà delle
-convergenze prima che convergano — cioè misurerebbe lo stop, non il motore. Il
-**doppio della mediana** lascia passare la larghissima maggioranza delle
-escursioni avverse tipiche e taglia solo la coda. **È un numero da manuale, non
-pescato:** e ha una corroborazione indipendente, che si dichiara come tale e non
-come prova — **2,75 × ATR è il valore già validato in casa su un altro motore**
-(`IchiCross_Gold`, config v1.4). Due derivazioni indipendenti che cadono nello
-stesso intervallo 2,6-3,0 sono un buon segno; **non sono una misura.**
+**Perché il fattore 2:** la MAE **mediana** è, per definizione, il livello che
+**metà** dei trade supera. Uno stop lì ucciderebbe metà delle convergenze prima
+che convergano — cioè misurerebbe **lo stop**, non il motore. Il **doppio della
+mediana** lascia passare la larghissima maggioranza delle escursioni avverse
+tipiche e taglia solo la coda.
+
+> ### 🔒 **PERCHÉ 2,75 E NON IL CENTRO DEL NUOVO INTERVALLO (2,87)**
+> Perché **2,75 era già scritto nella prima stesura di questo documento, PRIMA
+> che arrivassero i numeri della cella nuova.** Spostarlo adesso — dopo aver
+> visto i numeri — sarebbe **esattamente il riflesso che questa casa vieta**. Lo
+> stop non è un criterio di giudizio, ma la disciplina è la stessa: un parametro
+> che si sposta dopo aver guardato i dati è un parametro tarato sui dati.
+> **2,75 resta dentro l'intervallo misurato su tutte e quattro le combinazioni
+> gamba × lato**, e ha una corroborazione indipendente che si dichiara come tale
+> e non come prova: è il valore già validato in casa su un altro motore
+> (`IchiCross_Gold`, config v1.4).
+
+> ### ⚠️ **L'ASIMMETRIA CHE NE RESTA — RILIEVO, non nota a piè di pagina**
+> A 2,75 ATR lo stop vale:
+>
+> | | D30EUR L | D30EUR S | NASUSD L | NASUSD S |
+> |---|---:|---:|---:|---:|
+> | **SL / MAE mediana** | **2,08×** | **2,07×** | **1,86×** | **1,77×** |
+>
+> Su **NASUSD, e soprattutto sul lato SHORT**, lo stop è quindi **più stretto di
+> quanto il progetto ("×2") chiedesse**. Conseguenza attesa e falsificabile:
+> **più uscite per stop su NASUSD che su D30EUR**. Lo dice la colonna
+> `Uscite Stop`. Se non succede, questa lettura è sbagliata e va riscritta.
 
 **Un solo valore per tutte e due le gambe, ed è voluto:** adattare la geometria
 simbolo per simbolo prima di avere una misura è **pescare la geometria che fa
@@ -199,15 +248,15 @@ NASUSD, **quello è il risultato**, e dice che il motore è NAS-nativo.
 > **Aggiungere uno stop CAMBIA la popolazione dei trade misurata dalla sonda.**
 > Tronca esattamente i trade che sarebbero convergiuti dopo un'escursione
 > profonda. **Quindi questo round NON valida i numeri della sonda: è una misura
-> nuova.** Il tasso di convergenza misurato (82-84%) **scenderà**, e va letto in
-> colonna (`Uscite per Convergenza / per Stop / per Flat / per Tetto`), non
-> confrontato ingenuamente col referto del 04/09.
+> nuova.** Il tasso di convergenza misurato (80,3% / 82,0%) **scenderà**, e va
+> letto in colonna (`Uscite Convergenza / Stop / Flat Sessione / Tetto Barre`),
+> non confrontato ingenuamente col referto del passo 0.
 
-**La fascia alternativa, ed è una FORCELLA PER CLAUDIO (§7):** uno stop più
-stretto (**1,5 × MAE mediana ≈ 2,0 ATR**) migliora la geometria in R ma tronca
-di più. **Raccomandazione: 2,75 ATR al primo giro** (sta più vicino al
-contenitore misurato), e **2,0 ATR come ablazione a UN SOLO ASSE in fase 2**,
-solo sulle celle che passano.
+**La forcella per Claudio (§7):** uno stop più stretto (**1,5 × MAE mediana ≈
+2,0 ATR**) migliora la geometria in R ma tronca di più.
+**Raccomandazione: 2,75 ATR al primo giro** (sta più vicino al contenitore
+misurato), **2,0 ATR come ablazione a UN SOLO ASSE in fase 2**, solo sulle celle
+che passano.
 
 ### 2.5 ⏱️ IL TIME-STOP E IL FLAT DI SESSIONE — e il rilievo su `InpBarreMaxTenuta`
 
@@ -226,7 +275,7 @@ solo sulle celle che passano.
 | **flat di fine sessione (22:00 server)** | **SÌ, non disattivabile** | è il contenitore **realmente misurato** dalla sonda |
 | `InpBarreMaxTenuta` | **120** = **inerte, fedele alla sonda** | riprodurre il contenitore misurato, non inventarne uno |
 | time-stop stretto | **NON nel primo giro** | è una variabile in più, e la regola è **una alla volta** |
-| candidato per la fase 2 | **48 barre = 4 h ≈ 4 × la tenuta mediana** | la tenuta mediana **MISURATA** alla cella scelta è **13 barre (D30)** e **12 barre (NAS)** ≈ 60-65 minuti |
+| candidato per la fase 2 | **48 barre = 4 h ≈ 4 × la tenuta mediana** | la tenuta mediana **MISURATA** alla cella N=40/σ=1,35 è **13 barre (D30)** e **12 barre (NAS)** = 65 e 60 minuti |
 
 E il vincolo prop **P5** (`CONFIG_PROP_2026-08-31`: *"meno del 25% dei trade
 sotto i 60 secondi"*) è **soddisfatto per costruzione**: la tenuta minima a M5 è
@@ -239,14 +288,15 @@ v1.03: quel collaudo era rotto e nessuno se n'era accorto per due versioni).
 Il `#define REL_C7` del sorgente è esplicito: *"Se il massimo giornaliero
 misurato supera 5, `InpMaxTradesPerDay` entra nell'EA DAL PRIMO ROUND"*.
 
-**Misurato alla cella scelta:** massimo eseguibili in un giorno = **9 (D30EUR)**
-e **8 (NASUSD)**. → **La condizione è scattata.**
+**Misurato alla cella N=40 / σ=1,35:** massimo eseguibili in un giorno =
+**10 (D30EUR)** e **8 (NASUSD)**. → **La condizione è scattata**, e sulla cella
+nuova morde **più** di prima (era 9 sulla cella vecchia).
 
 **L'aritmetica, che non è un'opinione:**
 
 | | calcolo | contro il muro |
 |---|---|---|
-| 9 operazioni × 0,65% tutte perdenti | **−5,85%** | 🔴 **sfonda il muro prop giornaliero del 5%** (`METRO_PROP`) |
+| 10 operazioni × 0,65% tutte perdenti | **−6,50%** | 🔴 **sfonda il muro prop giornaliero del 5%** (`METRO_PROP`) |
 | **tetto proposto: 5 × 0,65%** | **−3,25%** | 🟢 sotto il muro 5% **e** sotto la pausa Guardian a **4,0%** |
 
 **`InpMaxTradesPerDay = 5`** — e il 5 non è pescato: è **esattamente
@@ -309,117 +359,107 @@ STOP**. Qui lo stop è **47-74 punti indice**, cioè **4.700-7.400 punti MT5**
 
 ---
 
-## 3. 🎯 LA CELLA — **N = 35, σ = 1.50**, per **tutte e due** le gambe
+## 3. 🎯 LA CELLA — **N = 40, σ = 1,35**, per **tutte e due** le gambe
 
 ### 3.1 La regola di scelta, dichiarata PRIMA del numero
 
-> **MAI il picco. SEMPRE il centro dell'altopiano** (i blocchi 2×2 in piedi, non
-> la cella migliore). E se il centro **cade fuori griglia**, il pareggio si
-> rompe **verso la cella che NON sta sul BORDO della griglia misurata** — mai
-> verso quella col numero più bello.
+> 1. **MAI il picco. SEMPRE un punto INTERNO all'altopiano** (blocchi 2×2 in
+>    piedi, non la cella migliore di una classifica).
+> 2. **Il blocco dev'essere vivo su ENTRAMBE le gambe e non toccare NESSUN
+>    bordo della griglia misurata**, su nessuno dei due assi.
+> 3. **Il pareggio fra i vertici del blocco si rompe con due criteri
+>    dichiarati**: (a) più occasioni al giorno, (b) C6 più basso. Se i due
+>    criteri puntassero in direzioni diverse, la scelta tornerebbe a Claudio.
 
-### 3.2 Gli altopiani, ricostruiti cella per cella dai referti
+### 3.2 La griglia estesa, e dove sta l'altopiano
 
-**D30EUR M5** (`REFERTO_D30_M5_2026-09-04_1419_v103_VIVO.txt`) — 3 blocchi 2×2
-vivi, identici sui due lati:
+Griglia misurata: **N ∈ [10, 55] passo 5** × **σ ∈ [0,75, 1,95] passo 0,15** =
+**90 celle**, entrambe le gambe, entrambi i lati (mappe 10×9 nei referti).
 
-| blocco | N | σ |
+| gamba | verdetto | forma della regione VIVA |
 |---|---|---|
-| 1 | 35, 40 | 1.20, 1.35 |
-| 2 | 35, 40 | 1.35, 1.50 |
-| 3 | 35, 40 | 1.50, 1.65 |
-| **unione** | **{35, 40}** | **{1.20, 1.35, 1.50, 1.65}** |
+| **D30EUR M5** | **VIVO / VIVO**, 19 blocchi 2×2 | banda diagonale: cresce con N e con σ, poi **muore nell'angolo estremo** (N=55 × σ≥1,20 e N=50 × σ≥1,65) |
+| **NASUSD M5** | **VIVO / VIVO**, 23 blocchi 2×2 | banda diagonale che **arriva fino al bordo** N=55 / σ=1,95 senza morire |
 
-**NASUSD M5** (`REFERTO_NAS_M5_2026-09-04_1422_v103_VIVO.txt`) — 2 blocchi 2×2
-vivi, identici sui due lati:
+**Il blocco 2×2 scelto — `N ∈ {40, 45} × σ ∈ {1,35, 1,50}` — è VIVO su tutte e
+quattro le mappe** (D30 long, D30 short, NAS long, NAS short) **ed è interno su
+entrambi gli assi** (i bordi sono N=10 / N=55 e σ=0,75 / σ=1,95).
 
-| blocco | N | σ |
-|---|---|---|
-| 1 | 35, 40 | 1.35, 1.50 |
-| 2 | 35, 40 | 1.50, 1.65 |
-| **unione** | **{35, 40}** | **{1.35, 1.50, 1.65}** |
+### 3.3 I quattro vertici, e il pareggio rotto
 
-**Intersezione delle due gambe: `N ∈ {35, 40}` × `σ ∈ {1.35, 1.50, 1.65}`.**
+| cella | D30 tot/gg | D30 C6 % | NAS tot/gg | NAS C6 % |
+|---|---:|---:|---:|---:|
+| **N=40 σ=1,35** | **3,376** | **19,68** | **3,564** | **17,96** |
+| N=40 σ=1,50 | 3,122 | 19,97 | 3,336 | 18,32 |
+| N=45 σ=1,35 | 3,088 | 20,85 | 3,291 | 19,51 |
+| N=45 σ=1,50 | 2,880 | 21,50 | 3,102 | 19,91 |
 
-### 3.3 La scelta, e come si legge
+> ✅ **`N=40 / σ=1,35` domina su ENTRAMBI i criteri di pareggio e su ENTRAMBE le
+> gambe**: più occasioni e C6 più basso, quattro volte su quattro. I due criteri
+> **non si contraddicono**, quindi la scelta non torna a Claudio.
 
-**σ = 1.50** → è il **centro esatto** della banda viva comune (1.35 / **1.50** /
-1.65) ed è **interno** anche alla banda più larga di D30EUR (1.20-1.65).
-**σ = 1.65 è il bordo della griglia** e viene scartato per questo.
+🎁 **E la stessa cella serve tutti e due i mercati.** Nessuna geometria per
+simbolo, nessuna manopola pescata: **una sola configurazione, due mercati.**
 
-**N = 35** → il centro vero sarebbe **37,5**, che **non esiste** su una griglia a
-passo 5. Si rompe il pareggio con la regola del §3.1: **N = 40 è il bordo della
-griglia** (nessuno ha mai misurato N = 45), **N = 35 no** (sotto c'è N = 30,
-misurato). **Si sceglie N = 35 perché è quello con storia misurata da entrambi i
-lati sull'asse N.**
+### 3.4 ✅ IL RILIEVO DEL BORDO È CHIUSO — ed ecco la prova, misurata
 
-📌 **Due fatti concordanti, dichiarati come CORROBORAZIONE e non come regola di
-scelta** (se avessero puntato dall'altra parte, la scelta non sarebbe cambiata):
-N=35 ha **più occasioni** (3,43 vs 3,12 al giorno su D30; 3,63 vs 3,34 su NAS) →
-campione più grande per il cancello dei 150; e ha il **C6 più basso** (17,83% vs
-19,97% su D30; 16,28% vs 18,32% su NAS) → più vicino alla tesi di convergenza.
+La prima stesura portava un rilievo grosso: *l'altopiano tocca il bordo su
+entrambi gli assi, quindi il centro non è determinabile*. **L'estensione l'ha
+risolto**, e la prova non è che la cella "sembra centrale": è che **è
+circondata da celle vive**.
 
-**I numeri esatti della cella scelta, copiati riga per riga dai referti:**
+| vicino ortogonale di N=40 / σ=1,35 | D30 L | D30 S | NAS L | NAS S |
+|---|---|---|---|---|
+| N=35 σ=1,35 | V | V | V | V |
+| N=45 σ=1,35 | V | V | V | V |
+| N=40 σ=1,20 | V | V | V | V |
+| N=40 σ=1,50 | V | V | V | V |
 
-| | ese/gg L | ese/gg S | **tot/gg** | MFE L | MFE S | RR L | RR S | **C6 nonCnv%** | **C8 ten.med** | max/gg |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| **D30EUR** N35 σ1.50 | 1,667 | 1,766 | **3,433** | 22,40 | 22,10 | 0,99 | 0,96 | **17,83** | **13,00** | 9 |
-| **NASUSD** N35 σ1.50 | 1,856 | 1,776 | **3,631** | 36,70 | 36,00 | 0,92 | 0,90 | **16,28** | **12,00** | 8 |
+**Sedici vicini su sedici sono VIVI.** Una cella con l'anello completo di vicini
+vivi su due mercati e due lati non è un picco di rumore: è un punto interno di
+una regione.
 
-🎁 **Bonus metodologico, e va incassato:** **la stessa cella serve tutte e due le
-gambe.** Nessuna geometria per simbolo, nessuna manopola pescata: **una sola
-configurazione, due mercati.**
+### 3.5 ⚠️ MA DUE RILIEVI RESIDUI RESTANO, E VANNO SCRITTI
 
-### 3.4 🔴 IL RILIEVO CHE NON SI NASCONDE: **L'ALTOPIANO TOCCA IL BORDO SU ENTRAMBI GLI ASSI**
+> **RILIEVO 1 — su NASUSD l'altopiano tocca ANCORA il bordo.** Su D30EUR
+> l'angolo estremo **muore per portata** (previsto prima della misura: N e σ più
+> grandi riducono le occasioni fino al pavimento C1 di 2,00/giorno) e questo
+> **chiude** la domanda su quella gamba. Su **NASUSD no**: a N=55 e σ=1,95 le
+> celle sono ancora vive, quindi **non sappiamo dove finisce** la regione viva di
+> NASUSD. Claudio ha deciso di **fermarsi qui** — decisione legittima e
+> dichiarata — ma la conseguenza va scritta: **la cella scelta è interna, non è
+> dimostrato che sia centrale sulla gamba NASUSD.**
+>
+> **RILIEVO 2 — i due criteri di pareggio spingono SISTEMATICAMENTE verso il
+> bordo BASSO della regione viva.** "Più occasioni" e "C6 più basso" crescono
+> entrambi al calare di N e di σ, cioè verso il confine inferiore dell'altopiano.
+> Quindi la regola di pareggio **non è** una regola di centratura: è una regola
+> di frequenza. Il fatto che il risultato abbia comunque l'anello completo di
+> vicini vivi (§3.4) è ciò che lo rende accettabile — **non il criterio in sé**.
 
-La griglia misurata è `N ∈ [10, 40]` passo 5 × `σ ∈ [0,75, 1,65]` passo 0,15.
-**Il blocco vivo occupa l'angolo in alto a destra e si appoggia al bordo su TUTTI
-E DUE gli assi: nessuna cella oltre N = 40 o oltre σ = 1,65 è mai stata
-misurata.**
+### 3.6 ⚠️ IL DEBITO C2 SU D30EUR — e perché **NON** blocca questo round
 
-Le due letture possibili, **entrambe compatibili coi dati che abbiamo**:
+Il referto D30 porta **`Giorni Spaiati Pct = 12,93%`** su tutte le celle (sopra
+la soglia di casa del 10%), e **1.057** buchi del metro sulla barra di segnale
+**contro 1** di NASUSD. La qualità dell'allineamento fra i due feed **non è la
+stessa sulle due gambe**, ed è un fatto misurato.
 
-| ipotesi | conseguenza per N=35/σ=1.50 |
-|---|---|
-| l'altopiano **finisce** poco oltre il bordo | 🟢 la scelta è vicina al centro vero: **regge** |
-| l'altopiano **continua** verso N=50, σ=2,00 | 🟠 quello che chiamiamo "centro" è in realtà il **fianco basso** di un altopiano più grande, e il centro vero è altrove |
-
-> 🔬 **Raccomandazione (decide Claudio, §7):** un round futuro dovrebbe
-> **ESTENDERE la griglia della sonda** a `N = 45, 50, 55` e `σ = 1,80, 1,95`
-> **prima** di fidarsi del tutto della cella. Costa **una corsa OHLC, zero
-> tick**. ⚠️ Ma attenzione all'effetto collaterale, misurabile in anticipo: N e σ
-> più grandi **riducono** le occasioni (su D30 si passa da 13,07/gg a N=10 a
-> 2,89/gg a N=40/σ1.65) — l'estensione rischia di uscire dal pavimento di
-> portata C1, e **quello sarebbe già una risposta**.
-
-### 3.5 ⚠️ IL DEBITO C2 SU D30EUR — e perché **NON** blocca questo round
-
-Il referto D30_M5 porta **53 rilievi**, di cui **48 sono la stessa cosa**:
-`Giorni Spaiati Pct = 12,93% > 10%` su **tutte** le celle. La regola della sonda
-dice *"si rifà filtrando, e si dichiara"*. **NASUSD è pulito: 0,22%.**
-
-E c'è un secondo numero che punta nella stessa direzione: **"metro mancante sul
-segnale" = 1.057 su D30EUR contro 1 su NASUSD**. **Mille volte peggio.** La
-qualità dell'allineamento fra i due feed **non è la stessa sulle due gambe**, ed
-è un fatto misurato.
-
-> ### 💡 LA MIA LETTURA, ed è il motivo per cui propongo di girare **lo stesso**
+> ### 💡 IL CAPOVOLGIMENTO, ed è la decisione **D3** di Claudio
 > **C2 è un cancello di IGIENE DI MISURA per un CONTATORE.** Su un contatore un
-> giorno spaiato produce un **segnale finto** e sporca le statistiche. In un **EA
-> vero**, quello stesso giorno spaiato produce **un'operazione vera con una
-> perdita vera**: non è un artefatto da filtrare, **è un rischio da misurare**.
+> giorno spaiato produce un **segnale finto** e sporca le statistiche: giusto
+> filtrarlo. In un **EA vero** quello stesso giorno produce **un'operazione vera
+> con una perdita vera**: non è un artefatto da togliere, **è un rischio da
+> misurare**.
 >
-> **Proposta:** si gira su **entrambe le gambe**, e il round **MISURA** il costo
-> dei giorni spaiati invece di nasconderlo, con due colonne obbligatorie:
-> `Operazioni Aperte in Giorni Spaiati` e il loro **P/L separato**. Il filtro
-> resta scritto ma **spento** (`InpSaltaGiorniSpaiati = false`), come ablazione
-> di fase 2.
+> **Si gira su entrambe le gambe**, e il round **MISURA** il costo dei giorni
+> spaiati invece di nasconderlo, con **tre colonne dedicate**:
+> `Operazioni In Giorni Spaiati`, `Profitto In Giorni Spaiati`, `Profitto Fuori
+> Giorni Spaiati`. Il filtro esiste nel codice (`InpSaltaGiorniSpaiati`) ma
+> **nasce SPENTO**: è un'ablazione di fase 2.
 >
-> ⚠️ **E si dichiara in ogni tabella:** *"la cella di D30EUR è stata scelta su
-> una misura con C2 = 12,93%, sopra la soglia di casa del 10%"*. Il VIVO è
-> genuino; è stato misurato con questo difetto.
-
----
+> ⚠️ **E si dichiara in ogni tabella:** *"la cella di D30EUR è stata scelta su una
+> misura con C2 = 12,93%, sopra la soglia di casa del 10%"*. Il VIVO è genuino;
+> è stato misurato con questo difetto.
 
 ## 4. 🔢 MAGIC NUMBER — blocco **`7746xx`**, verificato **VERGINE**
 
@@ -444,8 +484,16 @@ verificati con lo stesso metodo, **0 occorrenze come magic**.)
 | **774611 / 774612** | i **gemelli di determinismo** (§6.1), stessi input, magic diverso |
 | 774603-774609 | riservati alle ablazioni di fase 2 (stop stretto, filtro spaiati, slippage) |
 
-⚠️ **Da ri-verificare il giorno del lancio**: fra oggi e allora qualcuno può
-prendere il blocco.
+✅ **RI-VERIFICATO il 04/09 (sera), a distanza di ore dalla prima verifica:**
+`grep -rnoE "(magic|Magic|MAGIC)[A-Za-z_ ]*=[ ]*7746[0-9]{2}"` su tutto il repo
+→ **0**. Le uniche occorrenze a 6 cifre di `7746xx` fuori da `.git` sono **in
+questo stesso documento** (dove il blocco viene assegnato) e **un decimale**
+dentro `data/snapshots/2026-09-03.json` (`0.3826774611687554`). **Il blocco è
+ancora VERGINE.** Ri-verificato anche **`R117`**: `grep -rno "\bR117\b"` →
+**0 occorrenze** fuori da questo documento.
+
+⚠️ **Da ri-verificare comunque il giorno del lancio**: fra oggi e allora
+qualcuno può prendere il blocco.
 
 ---
 
@@ -471,8 +519,8 @@ prendere il blocco.
 
 ### 5.2 🐤 Il canarino della frequenza — si legge **PRIMA** del conto economico
 
-**Ancoraggio [MISURATO]:** 3,43 (D30) e 3,63 (NAS) eseguibili al giorno, **due
-lati sommati**, alla cella scelta.
+**Ancoraggio [MISURATO]:** **3,376** (D30EUR) e **3,564** (NASUSD) eseguibili al
+giorno, **due lati sommati**, alla cella **N=40 / σ=1,35**.
 
 **Modello [INFERITO]:** lo stop reale **libera lo slot prima** della sonda
 (→ più operazioni), il tetto 5/giorno **ne toglie** sui giorni affollati (→
@@ -481,7 +529,7 @@ costruzione**. Stima prudente: **2,8 - 3,6 operazioni/giorno**.
 
 | | IS (~177 gg) | OOS (~264 gg) | per LATO in IS |
 |---|---:|---:|---:|
-| **stima** | **495 - 637** | **740 - 950** | **~250 - 320** |
+| **stima** | **490 - 630** | **730 - 940** | **~245 - 315** |
 
 > ### ✅ **Il campione NON è il problema di questo round, e passa anche PER LATO.**
 > L'Emendamento della Finestra (**regola A**) chiede **≥ 150 operazioni IS**:
@@ -545,9 +593,11 @@ dichiara nel referto**. **Non si aggiusta la fascia dopo aver visto il numero.**
 ### 5.6 🚨 LA CONTAMINAZIONE DELL'OOS, dichiarata prima e senza sconti
 
 > ### 🔴 **L'OOS DI QUESTO ROUND NON È UN VERO OUT-OF-SAMPLE.**
-> La cella N=35/σ=1.50 è stata scelta guardando una misura che copre
-> **l'INTERA finestra 2024.09.26 → 2026.06.30**, cioè **anche l'OOS**. Nascondere
-> questo fatto renderebbe il round una bugia.
+> La cella **N=40 / σ=1,35** è stata scelta guardando una misura che copre
+> **l'INTERA finestra 2024.09.26 → 2026.06.30**, cioè **anche l'OOS**. E la
+> griglia estesa del 04/09 sera **copre esattamente la stessa finestra**: la
+> seconda corsa non ha aggiunto out-of-sample, ha aggiunto **celle**.
+> Nascondere questo fatto renderebbe il round una bugia.
 
 **Le tre attenuanti, che sono reali ma non annullano il problema:**
 
@@ -648,7 +698,9 @@ out-of-sample di RELATIVO sarà il forward demo**, e va scritto in ogni tabella.
 > motore diverso senza accorgercene?
 
 `InpModoSonda = true` → l'EA **conta e non ordina**, con la cella scelta, sulla
-**stessa finestra**.
+**stessa finestra**. **L'interruttore esiste nel codice** (`ABTG_Relativo.mq5`,
+scelta di traduzione **R1**) e i grezzi si contano **prima di ogni filtro**,
+apposta perché restino confrontabili.
 
 | grandezza | atteso | perché |
 |---|---|---|
@@ -676,36 +728,43 @@ errori più pericolosa (un motore che sembra quello promosso e non lo è).
 
 ---
 
-## 7. ✍️ LE DECISIONI CHE RESTANO A CLAUDIO (io propongo, non firmo)
+## 7. ✍️ LE DECISIONI — quelle PRESE e quelle che RESTANO
+
+### 7.1 ✅ Già decise da Claudio il 04/09
+
+| # | decisione | esito |
+|---|---|---|
+| **D3** | includere **D30EUR** col suo debito C2 = 12,93% | ✅ **SÌ**, misurando il costo con le tre colonne dedicate (§3.6) |
+| **D4** | estendere la griglia **prima** di scrivere l'EA | ✅ **SÌ, ESEGUITO.** 90 celle, riproduzione passata, rilievo del bordo chiuso su D30EUR (§3.4-3.5) |
+| **D5** | `InpMaxTradesPerDay = 5` | ✅ **SÌ.** 10 × 0,65% = −6,50% sfonda il muro giornaliero (§2.6) |
+| **D6** | criteri di merito del §5 | ✅ **CONGELATI come proposti** |
+| **D7** | cella definitiva | ✅ **N=40 / σ=1,35**, con i due rilievi residui del §3.5 dichiarati |
+
+### 7.2 ⬜ Quelle che restano aperte
 
 | # | decisione | la mia raccomandazione |
 |---|---|---|
-| **D1** | **I criteri del §5 si congelano?** | 🟢 **sì, così come sono** — sono la traduzione di cancelli già firmati (H8, C1, P5, Emendamento), non numeri nuovi |
-| **D2** | **SL a 2,75 × ATR o a 2,0 × ATR?** | 🟢 **2,75 al primo giro** (più vicino al contenitore misurato), **2,0 come ablazione di fase 2** |
-| **D3** | **Si gira anche D30EUR, col suo debito C2 = 12,93%?** | 🟢 **sì**, dichiarandolo, con la colonna 8 del §6.3: il tick **misura** quel costo invece di nasconderlo |
-| **D4** | **Si estende la griglia della sonda (N 45-55, σ 1,80-1,95) PRIMA del tick?** | 🟠 **facoltativo ma consigliato**: costa **una corsa OHLC, zero tick**, e toglie il rilievo del bordo (§3.4) |
-| **D5** | **`InpMaxTradesPerDay = 5`?** | 🟢 **sì, e non è opinabile**: 9 operazioni × 0,65% = **−5,85%**, oltre il muro giornaliero del 5% |
-| **D6** | **Numero di round `R117` e blocco magic `7746xx`** | 🟢 verificati liberi oggi, **da ri-verificare al lancio** |
+| **D2** | **SL a 2,75 × ATR o a 2,0 × ATR?** | 🟢 **2,75 al primo giro** (più vicino al contenitore misurato, e già scritto prima di vedere i numeri nuovi), **2,0 come ablazione di fase 2** |
+| **D8** | **il RILIEVO 1 del §3.5** (su NASUSD l'altopiano tocca ancora il bordo) si accetta come limite dichiarato, o si estende ancora la griglia su quella sola gamba? | 🟠 **si accetta e si dichiara.** Estendere ancora costerebbe una corsa OHLC, ma la cella scelta ha **l'anello completo di vicini vivi** e il round a tick misura il merito, non la centratura. Se il round dovesse passare, la centratura di NASUSD diventa una domanda da rifare **prima** del forward |
+| **D9** | ri-verifica di `R117` e del blocco `7746xx` **il giorno del lancio** | 🟢 routine, la fa la riga di lancio |
 
----
+## 8. 🛑 IL PERIMETRO DI QUESTO LAVORO
 
-## 8. 🛑 COSA **NON** È STATO FATTO IN QUESTO GIRO
+**Fatto (04/09):**
+1. ✅ Scritto `mql5/Experts/ABTG_Relativo.mq5` — l'EA operativo, **con ordini
+   veri**, nucleo statistico **trasportato riga per riga** dalla sonda v1.03 e
+   **20 blocchi di autotest** che lo interrogano a tavolino.
+2. ✅ Scritto il file prova e la riga di lancio del round a tick reali.
+3. ✅ Estesa la griglia della sonda e letta la mappa 10×9 (decisione D4).
 
-1. ❌ **Non è stata scritta una riga di `ABTG_Relativo.mq5`.**
-2. ❌ **Non è stata preparata nessuna riga di lancio, nessun `.ps1`, nessun file
-   prova.**
-3. ❌ **Non è stato toccato `ABTG_SondaRelativo.mq5`**: resta il **contatore
-   puro, v1.03, invariato**.
-4. ❌ **Non è stato toccato niente del forward né del VPS.**
-5. ❌ **Nessun criterio è stato CONGELATO**: sono **proposti**. La firma è di
-   Claudio.
-6. ✅ **Sono stati letti**: il sorgente della sonda (verso di ingresso e uscita
-   **verificati sul codice**, non assunti), i due referti VIVI riga per riga, il
-   precedente metodologico `LONDONFX_TICK_CRITERI.md` (R116), l'audit hedging del
-   03/09, `METRO_PROP`, `CONFIG_PROP` (P5), e il repo per magic e numero di round.
-
----
-
-_Fine della Parte 1. **Il prossimo passo — scrivere l'EA e la riga di lancio —
-NON parte finché non arriva l'OK.** È un punto di decisione che coinvolge
-Claudio, non solo tecnico._
+**NON fatto, e va detto:**
+1. ❌ **`ABTG_SondaRelativo.mq5` NON è stato toccato**: resta il contatore puro,
+   v1.03, invariato.
+2. ❌ **Niente è stato compilato e niente è stato girato**: in questo ambiente
+   non esistono MetaEditor né Strategy Tester. **Se la compilazione fallisce,
+   QUELLO è il risultato del passo.**
+3. ❌ **Non è stato toccato niente del forward né del VPS**, nessuna sedia,
+   nessun preset.
+4. ❌ **Nessun criterio è stato spostato** dopo aver visto i numeri
+   dell'estensione: la cella è cambiata perché la **griglia** è cambiata, i
+   **cancelli** sono gli stessi (stanno nei `#define` del sorgente della sonda).
