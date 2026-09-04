@@ -138,27 +138,51 @@ riga `_v5` stimava *15-45 minuti*: era una **STIMA prudenziale**, e la misura
 l'ha smentita. Se questa corsa ci mettesse molto di più **non è un errore**, ma
 va scritto.
 
-## 📌 IL PIN — `PIN_DA_INSERIRE`
+## 📌 IL PIN — **`d1fb9e7732d41aec071aa0cae5962e3abcb986a4`**
 
-⛔ **CARTELLO: il pin non è ancora stato inserito.** Questa pagina **non si
-lancia** finché al posto di `PIN_DA_INSERIRE` non c'è il commit a 40 caratteri e
-la tabella di verifica `raw` qui sotto non è compilata. È la regola di casa
-(classe 101: il cartello **si riscrive**, non si lascia).
+✅ **INSERITO il 04/09/2026** (prima di questo commit qui c'era il cartello del
+segnaposto: si **riscrive**, non si lascia — classe 101). I **cinque** file che
+il driver scarica sono stati **verificati uno per uno via `raw` al pin** (HTTP
+**200** + **sha256 identico** al repo) **prima** che questa riga fosse
+dichiarata pronta.
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_SONDARELATIVO_ESTESA.ps1` | ⬜ |
-| `backtest_pipeline/prove/RELATIVO_D30_M5_ESTESA.txt` | ⬜ |
-| `backtest_pipeline/prove/RELATIVO_NAS_M5_ESTESA.txt` | ⬜ |
-| `backtest_pipeline/walkforward_generico.ps1` | ⬜ |
-| `mql5/Experts/ABTG_SondaRelativo.mq5` | ⬜ |
+| `backtest_pipeline/righe/RIGA_SONDARELATIVO_ESTESA.ps1` | **200, identico** (sha256 `949667ee…`) · marcatore `MARCATORE_RIGA_SONDARELATIVO_ESTESA_v1` presente · **ASCII puro** (0 byte > 127) · **parse OK** (pwsh 7.4.6, 0 errori) · **0 omonimie** case-insensitive (scansione AST: classe 79/79-bis) |
+| `backtest_pipeline/prove/RELATIVO_D30_M5_ESTESA.txt` | **200, identico** (`7cc6b1a1…`) · 26 righe vive · ASCII puro |
+| `backtest_pipeline/prove/RELATIVO_NAS_M5_ESTESA.txt` | **200, identico** (`5b8bcd47…`) · 26 righe vive · ASCII puro · **differisce dal gemello per la SOLA riga `@SIMBOLO`** (diff meccanico: 1 differenza su 26) |
+| `backtest_pipeline/walkforward_generico.ps1` | **200, identico** (`5d98af3d…`, invariato dal 03/09): il driver lo scarica al pin e lo ri-pinna sul `.mq5` |
+| `mql5/Experts/ABTG_SondaRelativo.mq5` | **200, identico** (`b7326318…`) · `#property version "1.03"` · 25 blocchi autotest · REL_NSTATS 97 (100 colonne) · 22 input · **0 chiamate di trading** · 0 `#include` — **NON TOCCATO** |
+
+### 🧪 E LA RIGA È STATA **ESEGUITA**, NON SOLO LETTA (banco pwsh 7.4.6)
+
+| prova a banco | esito |
+|---|---|
+| `GateProva` sui **due** prova estesi | **PASSATI**, `Celle = 90` su entrambi |
+| `GateGemelli` | `VALIDO: i 2 prova hanno il blocco dei parametri IDENTICO riga per riga` |
+| **controprova**: il prova **vecchio** (`RELATIVO_D30_M5.txt`) dato in pasto alla riga nuova | **RIFIUTATO**, come deve: *"InpFinestraN è '20\|\|10\|\|5\|\|40\|\|Y', atteso '…55\|\|Y'"* |
+| `CelleAsse` sui due pin (la stessa aritmetica del generico) | N = **10**, σ = **9**, prodotto = **90** |
+| `AnalizzaCsv` + `StatoCella` + `Altopiano` su un **CSV sintetico da 90 righe e 100 colonne** | 90 righe lette, **0 problemi**, mappa **10×9** stampata intera |
+| **collaudo di riproduzione — caso sano** | `COLLAUDO DI RIPRODUZIONE PASSATO … 12 grandezze su 12` |
+| **collaudo di riproduzione — caso rotto** (spostata **una sola** MFE di **0,10**) | **`PROBLEMI: 1`** con il numero divergente nominato: il gate **morde** |
+| sezione **RACCOLTA eseguita con lo stato PIENO** (lezione classe 79-bis: il difetto stava nel *flusso*, non nelle funzioni) | referto scritto, tabella delle **90** celle, cartella e **zip** creati, `ESITO: CORSA COMPLETATO` |
+
+> ⚠️ **Il CSV del banco è SINTETICO**: le V/S/. che ha prodotto **non sono una
+> previsione** di come verrà la mappa vera. Servivano solo a far girare il
+> codice con lo stato pieno.
+
+> 🚧 **NON COPERTO dal banco** (e va dichiarato): la **compilazione** in
+> MetaEditor, la **corsa vera** di MT5, **Windows PowerShell 5.1** (qui il parse
+> è su pwsh 7), il **conteggio reale delle celle prodotto dal motore di
+> ottimizzazione** (il rischio dell'asse σ in virgola mobile: lo dice il gate
+> sulle righe del CSV, non il banco), la sezione **scelta del terminale**.
 
 ## 1️⃣ Giro a vuoto (`-SoloControllo`, con `-AccettoTettoBarre`: **serve anche qui**)
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO_ESTESA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='d1fb9e7732d41aec071aa0cae5962e3abcb986a4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO_ESTESA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO_ESTESA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_ESTESA_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M5_EST -SoloControllo -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -175,7 +199,7 @@ la tabella di verifica `raw` qui sotto non è compilata. È la regola di casa
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO_ESTESA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='d1fb9e7732d41aec071aa0cae5962e3abcb986a4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO_ESTESA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO_ESTESA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_ESTESA_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_M5_EST -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -195,7 +219,7 @@ la tabella di verifica `raw` qui sotto non è compilata. È la regola di casa
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO_ESTESA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='d1fb9e7732d41aec071aa0cae5962e3abcb986a4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDARELATIVO_ESTESA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDARELATIVO_ESTESA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDARELATIVO_ESTESA_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_M5_EST -AccettoTettoBarre; $rc=$LASTEXITCODE;
