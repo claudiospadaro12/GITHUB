@@ -1,0 +1,216 @@
+=====================================================================
+ SONDA RELATIVO -- PASSO 0, CONTATORE DI CONVERGENZA (ABTG_SondaRelativo)
+ gamba D30EUR (si scambia) x metro U30USD (si legge), M5 -- NESSUN ORDINE -- 49 passate
+=====================================================================
+modo: CORSA   <- CONTROLLO = giro a vuoto, NON e' il risultato
+data: 2026-09-04 14:19:23   <- ORA DI AVVIO, non di fine: la corsa dura decine di minuti
+pin:  b3acff11221e2cb9fed0a48899b23e6c94cbf5a0
+prova: D30_M5 = RELATIVO_D30_M5.txt
+finestra: 2024.09.26 -> 2026.06.30  (UNA TRANCHE, FrazioneIS 1)
+banco: MODELLO 2 (SOLO PREZZI DI APERTURA): il segnale nasce su barra chiusa e non si apre niente. I CSV portano il suffisso _ohlc (marca del generico per ogni modello non-tick). Deposito 100000 (inerte).
+terminale: C:\Program Files\BCM Markets MT5 Terminal   [FATTO: cartella dati con bases\BCMMarkets-Server (scartate le installazioni -V3)]   dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+compilazione: OK (90 KB, 14:19:27), 0 errors, 0 warning   <- EA NUOVO: se e' FALLITA, QUESTO e' il risultato del passo
+riga Result del log: Result: 0 errors, 0 warnings, 1462 ms elapsed, cpu='X64 Regular'
+codice di uscita di metaeditor64: 1   (NON LETTO non e' un fallimento: fa fede l'.ex5 e il log)
+versione letta dal #property: 1.03 (attesa 1.03)
+autotest nel sorgente: 25 blocchi (righe 'blocchi++;' fuori dai commenti) (attesi 25)
+colonne: REL_NSTATS = 97 -> 100 colonne (attese 100)
+input: 22 input letti dal sorgente (attesi 22, tutti pinnati nel prova)
+grep contatore puro: 0 chiamate di trading fuori dai commenti (attese 0)
+include: 0 righe #include (attese 0: sonda autosufficiente)
+celle: 49 (2 assi: InpFinestraN 10..40 passo 5 x InpSogliaIngressoSigma 0,75..1,65 passo 0,15), ricontate dai pin ||Y al pin
+gemellaggio 4 prova: VALIDO: i 4 prova hanno il blocco dei parametri IDENTICO riga per riga e differiscono SOLO per @SIMBOLO e @PERIODO
+tetto barre: OLTRE IL TETTO: M5 chiede 642 giorni (1.76 anni) contro ~475 giorni (1.3 anni) di tetto -- ACCETTATO con -AccettoTettoBarre (scelta DICHIARATA): la finestra EFFETTIVA la dice la sonda, e sta qui sotto | EFFETTIVA: prima barra GAMBA 2024-09-26, METRO 2024-09-26, Giorni Contati 441 su ~459 feriali chiesti, Barre Valutate 38760
+cache tester: prima 1 file, dopo 0
+codice di uscita del generico: 0
+anteprima .ini (solo CONTROLLO): n/a (solo in CONTROLLO)
+csv *_OOS trovati: 1 (attesi 0: gamba OOS degenere; il rosso del generico su quel file e' ATTESO e NON si rilancia)
+foto PRIMA dei file del terminale:
+   Experts\ABTG_SondaRelativo.mq5: presente, 175264 byte, 2026-09-04 14:10:05
+   Experts\ABTG_SondaRelativo.ex5: presente, 90968 byte, 2026-09-04 14:10:07
+   Files\OptResults_ABTG_SondaRelativo_D30EUR.csv: assente
+foto DOPO:
+   Experts\ABTG_SondaRelativo.mq5: presente, 175264 byte, 2026-09-04 14:19:28
+   Experts\ABTG_SondaRelativo.ex5: presente, 90282 byte, 2026-09-04 14:19:30
+   Files\OptResults_ABTG_SondaRelativo_D30EUR.csv: assente
+pulizia: nessun CSV grezzo residuo; nel terminale RESTANO (dichiarati, non cancellati): C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\ABTG_SondaRelativo.mq5 e C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\ABTG_SondaRelativo.ex5
+
+--- I CRITERI DI LETTURA (dai #define del sorgente al pin, uguali alla pagina; scritti PRIMA dei numeri) ---
+  C1 >= 2.00/gg | C3 MFE >= 8.40 pti (3.00 x spread 2.80; largo > 16.80) | C5 RR >= 0.70 | C6 non conv. > 40.00% scarto, 25.00-40.00% sospeso | C8 tenuta < 12.00 barre sospeso, >= 25.00% sotto 60 s scarto | C2 > 10.00% spaiati | C7 0.65% x max/gg vs cap 3.25%
+  VERDETTO PER LATO = ALTOPIANO, NON PICCO: esiste un blocco 2x2 di celle CONTIGUE (N adiacenti x sigma adiacenti)
+  in cui C1 (somma dei lati) + C3 (lato) + C5 (lato) + C6 (totale) + C8 (totale) stanno in piedi INSIEME?
+    VIVO    = almeno un blocco 2x2 tutto di celle VIVE (C6 <= 25.00% e tenuta >= 12.00 barre dentro)
+    SOSPESO = blocchi 2x2 in piedi solo con celle SOSPESE dentro (C6 25.00-40.00% o tenuta < 12.00)
+    NO      = nessun blocco 2x2: le celle vive, se ci sono, sono ISOLATE = rumore. Una cella sola non e' una risposta.
+  CLAUSOLA SEVERA: un solo collaudo fallito su una sola delle 49 righe = NON LEGGIBILE, nessun verdetto.
+  NESSUNA CELLA VIENE PROMOSSA: la cella di riferimento (N=20, sigma=1.05) si stampa perche' e' la domanda-sonda, non perche' e' la migliore.
+
+--- I COLLAUDI (si leggono PRIMA dei numeri; su TUTTE le righe) ---
+  righe nel CSV: 49 (attese 49) | CSV scritto alle 2026-09-04 14:19:58 (FRESCO: piu' recente dell'avvio della corsa)
+  autotest: 0 falliti su 25 blocchi (attesi 0/25) | occupato ALTRO lato (T6): 0 (atteso 0) | sotto 60 s: 0.00% (atteso 0,00)
+  punto indice: 1.000 (atteso 1,000) | spread misurato: 2.80 (atteso 2.80) | soglia C3: 8.40 (attesa 8.40) | campioni troncati: 0 (atteso 0)
+  ATR divergenza vs iATR: 0.0000% (atteso ~0 con SMA del TR) | ATR mediano 17.13 punti idx
+  storico: prima barra GAMBA 2024-09-26 16:10 | METRO 2024-09-26 16:10 (il metro NON deve partire dopo la gamba)
+  barre valutate 38760 | fuori finestra 77154 | saltate per dati 0 | giorni contati 441
+  DUE FEED: metro mancante sul segnale 1057 | valutazioni perse per buco 60 (il COSTO della regola stretta) | solo metro 9 | z non calcolabile 0
+  C2 giorni spaiati: 57 = 12.93% (oltre 10.00% = rifare filtrando, e dichiarare)
+  diagnostica C2 (v1.02): Giorni Festa Metro 2 (festivita' del metro DENTRO la finestra della sonda, ora esclusa dal numeratore C2) | Giorni Metro Zero Calendario 0 (vecchio criterio v1.01, tenuto come controllo, atteso 0 su un metro quasi-24h)
+  FIX T12 (v1.03): Chiuse Zero Barre 0 (atteso 0, prima riga; collaudato su TUTTE le righe, un fallimento sta nei PROBLEMI) | Ingressi Barra Reale Fuori 75 (prima riga; la SOMMA sulle 49 celle sta nei RILIEVI qui sotto: se e' 0 mentre il collaudo T12 passa comunque, il fix non e' mai stato messo alla prova in questa corsa)
+  (i valori qui sopra sono della prima riga; i collaudi sono stati verificati su TUTTE le 49 righe: un fallimento sta nei PROBLEMI)
+
+--- LA CELLA DI RIFERIMENTO (N=20, sigma=1.05): la domanda-sonda del GIACIMENTO sez. 8 ---
+  eseguibili/giorno: LONG 3.213 | SHORT 3.297 | SOMMA 6.510 (C1 >= 2.00: esito 1) | grezzi L/S 2246/2374, eseguibili 1417/1454 su 441 giorni
+  MFE mediana: LONG 18.50 pti = 6.61 x spread | SHORT 17.70 pti = 6.32 x spread   (C3 soglia 8.40 = 3x 2.80; esiti L/S 2/2: 0 scarto, 1 passa, 2 largo)
+  MAE mediana: LONG 16.00 | SHORT 18.50 pti (pavimento SL) | RR: L 1.156 / S 0.957 (C5 >= 0.70: esiti 1/1) | win rate necessario L 49.86% / S 54.94%
+  C6 non convergute: L 8.82% / S 9.83% / TOTALE 9.33% (chiuse 1417/1454, convergute 1292/1311, fine corsa escluse 0; esito 2: 0 scarto, 1 sospeso, 2 passa)
+  C8 tenuta mediana: L 8.00 / S 9.00 / due lati 9.00 barre (esito 1) | C7 max eseguibili in un giorno L/S/tot 7/9/13 -> rischio aperto 8.45% vs cap 3.25% (cap necessario: 1)
+  giorni con >= 2 eseguibili 436 | giorni a zero 4
+  stato della cella: LONG S | SHORT S   (V viva, S sospesa, . no)
+
+--- LA MAPPA 7x7 PER LATO (V = C1+C3+C5+C6+C8 in piedi; S = in piedi con C6 25-40% o tenuta < 12; . = no) ---
+    lato L   sigma -> 0.75  0.90  1.05  1.20  1.35  1.50  1.65
+    N=10          S     S     S     S     S     S     S   
+    N=15          S     S     S     S     S     S     S   
+    N=20          S     S     S     S     S     S     S   
+    N=25          S     S     S     S     S     S     S   
+    N=30          S     S     S     S     S     S     V   
+    N=35          S     S     S     V     V     V     V   
+    N=40          S     S     V     V     V     V     V   
+    celle VIVE 10 / SOSPESE 39 su 49
+
+    lato S   sigma -> 0.75  0.90  1.05  1.20  1.35  1.50  1.65
+    N=10          S     S     S     S     S     S     S   
+    N=15          S     S     S     S     S     S     S   
+    N=20          S     S     S     S     S     S     S   
+    N=25          S     S     S     S     S     S     S   
+    N=30          S     S     S     S     S     S     V   
+    N=35          S     S     S     V     V     V     V   
+    N=40          S     S     V     V     V     V     V   
+    celle VIVE 10 / SOSPESE 39 su 49
+
+VERDETTO LONG : VIVO (3 blocchi 2x2 tutti VIVI)
+VERDETTO SHORT: VIVO (3 blocchi 2x2 tutti VIVI)
+
+--- LE 49 CELLE (ordinate per N, poi sigma; mai aggregate) ---
+  N sigma ese/ggL ese/ggS ese/ggT   MFE L   MFE S   RR L   RR S nonCnv% ten.med mx/g  C1 C3L C3S  C6  C8 L/S
+ 10  0.75   6.463   6.603  13.066   12.90   13.00   1.01   1.04    5.14    5.00   22   1   1   1   2   1 S/S
+ 10  0.90   6.091   6.209  12.299   13.00   13.50   1.00   1.07    5.22    5.00   19   1   1   1   2   1 S/S
+ 10  1.05   5.707   5.825  11.533   13.40   13.90   1.00   1.08    5.15    5.00   18   1   1   1   2   1 S/S
+ 10  1.20   5.351   5.503  10.855   13.50   14.00   1.03   1.08    5.18    5.00   17   1   1   1   2   1 S/S
+ 10  1.35   4.961   5.063  10.025   13.50   14.50   1.00   1.11    5.11    5.00   16   1   1   1   2   1 S/S
+ 10  1.50   4.472   4.549   9.020   13.90   14.50   1.02   1.07    4.73    5.00   15   1   1   1   2   1 S/S
+ 10  1.65   3.927   3.989   7.916   14.50   14.30   1.07   1.02    4.50    5.00   13   1   1   1   2   1 S/S
+ 15  0.75   4.744   4.689   9.433   15.00   15.70   1.10   1.05    6.90    6.00   18   1   1   1   2   1 S/S
+ 15  0.90   4.463   4.433   8.896   15.50   16.10   1.11   1.02    6.93    6.00   18   1   1   1   2   1 S/S
+ 15  1.05   4.218   4.197   8.415   15.50   16.50   1.07   1.02    6.93    7.00   18   1   1   1   2   1 S/S
+ 15  1.20   3.912   3.864   7.776   16.50   16.95   1.10   1.02    6.77    7.00   15   1   1   2   2   1 S/S
+ 15  1.35   3.578   3.571   7.150   16.60   17.40   1.09   1.04    6.41    7.00   13   1   1   2   2   1 S/S
+ 15  1.50   3.302   3.320   6.621   16.50   17.50   1.06   1.03    6.40    7.00   11   1   1   2   2   1 S/S
+ 15  1.65   2.943   3.000   5.943   17.05   17.30   1.05   0.96    6.03    7.00   11   1   2   2   2   1 S/S
+ 20  0.75   3.696   3.712   7.408   17.10   17.40   1.14   1.02    8.91    8.00   16   1   2   2   2   1 S/S
+ 20  0.90   3.431   3.494   6.925   17.70   18.00   1.14   1.00    9.14    8.00   14   1   2   2   2   1 S/S
+ 20  1.05   3.213   3.297   6.510   18.50   17.70   1.16   0.96    9.33    9.00   13   1   2   2   2   1 S/S
+ 20  1.20   3.002   3.091   6.093   18.50   19.00   1.12   1.03    9.45    9.00   12   1   2   2   2   1 S/S
+ 20  1.35   2.757   2.893   5.651   18.45   19.00   1.07   1.01    9.67    9.00   12   1   2   2   2   1 S/S
+ 20  1.50   2.592   2.678   5.270   18.80   19.00   1.02   1.01    9.81    9.00   11   1   2   2   2   1 S/S
+ 20  1.65   2.336   2.454   4.789   19.50   19.90   1.05   1.00    9.80    9.00    9   1   2   2   2   1 S/S
+ 25  0.75   3.043   3.224   6.268   18.50   19.00   1.12   1.06   10.71    8.00   14   1   2   2   2   1 S/S
+ 25  0.90   2.807   2.984   5.791   19.05   19.45   1.12   1.02   11.16    9.00   13   1   2   2   2   1 S/S
+ 25  1.05   2.646   2.789   5.435   19.60   20.05   1.09   0.99   11.26   10.00   12   1   2   2   2   1 S/S
+ 25  1.20   2.494   2.608   5.102   20.00   20.75   1.08   0.99   11.16   10.00   10   1   2   2   2   1 S/S
+ 25  1.35   2.324   2.438   4.762   20.50   21.10   1.08   0.96   11.33   10.00    9   1   2   2   2   1 S/S
+ 25  1.50   2.150   2.243   4.392   20.95   21.00   1.07   0.96   11.77   11.00    8   1   2   2   2   1 S/S
+ 25  1.65   2.018   2.041   4.059   20.50   21.45   1.03   0.98   11.96   11.00    8   1   2   2   2   1 S/S
+ 30  0.75   2.714   2.841   5.556   20.00   19.50   1.08   0.95   13.14    9.00   13   1   2   2   2   1 S/S
+ 30  0.90   2.512   2.628   5.141   20.90   20.20   1.12   0.95   13.81   10.00   12   1   2   2   2   1 S/S
+ 30  1.05   2.347   2.435   4.782   21.00   21.15   1.07   1.00   14.13   11.00   11   1   2   2   2   1 S/S
+ 30  1.20   2.204   2.265   4.469   21.00   21.40   1.02   0.97   14.71   11.00   10   1   2   2   2   1 S/S
+ 30  1.35   2.034   2.102   4.136   21.40   21.70   1.04   0.95   15.02   11.00    9   1   2   2   2   1 S/S
+ 30  1.50   1.898   1.961   3.859   21.50   22.80   1.08   1.01   14.92   11.00    8   1   2   2   2   1 S/S
+ 30  1.65   1.737   1.794   3.531   22.30   22.70   1.09   1.00   15.22   12.00    7   1   2   2   2   2 V/V
+ 35  0.75   2.381   2.490   4.871   20.50   20.05   1.04   0.95   15.13   10.00   11   1   2   2   2   1 S/S
+ 35  0.90   2.215   2.308   4.524   21.00   20.50   1.02   0.91   15.89   11.00   10   1   2   2   2   1 S/S
+ 35  1.05   2.070   2.163   4.234   21.00   20.50   1.00   0.87   16.39   11.00   10   1   2   2   2   1 S/S
+ 35  1.20   1.943   2.034   3.977   21.00   22.00   0.99   0.96   16.99   12.00   10   1   2   2   2   2 V/V
+ 35  1.35   1.825   1.893   3.719   21.00   22.70   0.98   0.98   17.50   12.00   10   1   2   2   2   2 V/V
+ 35  1.50   1.667   1.766   3.433   22.40   22.10   0.99   0.96   17.83   13.00    9   1   2   2   2   2 V/V
+ 35  1.65   1.531   1.633   3.163   22.50   23.60   0.97   1.02   17.85   13.00    9   1   2   2   2   2 V/V
+ 40  0.75   2.152   2.288   4.440   20.50   20.50   0.95   0.99   17.77   10.00   11   1   2   2   2   1 S/S
+ 40  0.90   2.025   2.118   4.143   21.50   22.00   0.95   1.03   18.23   11.00   11   1   2   2   2   1 S/S
+ 40  1.05   1.891   1.957   3.848   22.00   23.30   0.98   1.04   18.80   12.00   10   1   2   2   2   2 V/V
+ 40  1.20   1.791   1.832   3.624   23.50   24.55   1.07   1.09   19.21   13.00   10   1   2   2   2   2 V/V
+ 40  1.35   1.658   1.719   3.376   23.50   25.50   1.04   1.12   19.68   13.00   10   1   2   2   2   2 V/V
+ 40  1.50   1.542   1.580   3.122   23.65   25.50   0.99   1.11   19.97   14.00    9   1   2   2   2   2 V/V
+ 40  1.65   1.444   1.442   2.887   23.90   24.90   0.98   1.01   20.35   14.00    8   1   2   2   2   2 V/V
+
+--- LE NOTE CHE VANNO LETTE INSIEME AI NUMERI ---
+  - QUESTA SONDA NON DICE SE IL MOTORE GUADAGNA: conta OCCASIONI e misura TAGLIA, GEOMETRIA, CONVERGENZA, TENUTA.
+    Il merito e' a tick, dopo, con >= 150 operazioni IS (Emendamento della Finestra, punto A).
+  - NON MISURA LA CO-INTEGRAZIONE: C6 e' la sua approssimazione operativa. Se C6 e' alto, e' MOMENTUM TRAVESTITO.
+  - IL DAX DALLE 17 SERVER IN POI E' FUORI DAL SUO CASH e lo spread quasi raddoppia (2,80 = ora peggiore): C3 usa la
+    CLAUSOLA SEVERA (mediana oraria PEGGIORE), non la mediana di sessione 1,6-1,7 citata nel GIACIMENTO.
+  - C9 GRADIENTE M5/M15: si legge confrontando i referti D30_M5/D30_M15 (e NAS) a parita' di tutto il resto.
+    Derivato PRIMA della misura: a M15 il candidato NON dovrebbe arrivare al pavimento; il bersaglio e' M5.
+  - TETTO BARRE (M5): la finestra EFFETTIVA la dice la riga 'tetto barre' qui sopra; C1 resta per-giorno sul denominatore CONTATO.
+  - UN SOLO BROKER, UN SOLO REGIME (toro). FORMA UNILATERALE: a due gambe i numeri di C3 andrebbero RADDOPPIATI.
+  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 100 colonne OPTFRAME.
+
+AVVISO: FrazioneIS 1.0 -> la gamba 'OOS' del generico e' DEGENERE (0 giorni). Il rosso del generico sul CSV *_OOS e' ATTESO: NON rilanciare.
+
+PROBLEMI: 0
+RILIEVI: 53
+  - TETTO BARRE accettato esplicitamente (-AccettoTettoBarre): M5 su 642 giorni chiesti contro ~475 di tetto. La finestra EFFETTIVA (Gamba Prima Barra Epoch, Giorni Contati, Barre Valutate) e' nel referto e va letta PRIMA di C1: il denominatore e' quello contato, non quello chiesto.
+  - cella N=10 sigma=0.75: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=1.50: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.20: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=0.90: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=0.75: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.50: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=1.20: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=0.90: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=0.75: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.50: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=10 sigma=1.05: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=1.20: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=0.75: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=1.50: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=1.05: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=1.20: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=0.75: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.05: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=1.50: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=10 sigma=1.35: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=0.75: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.05: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=1.35: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=1.50: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=0.75: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.35: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=1.05: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=10 sigma=1.65: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=10 sigma=0.90: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=1.65: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.35: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=1.05: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=0.90: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.65: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=1.35: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=1.05: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=0.90: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=1.65: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=1.35: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=10 sigma=1.20: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=25 sigma=0.90: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=1.65: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=15 sigma=1.20: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=1.35: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=30 sigma=0.90: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=35 sigma=1.65: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=20 sigma=1.20: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=10 sigma=1.50: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - cella N=40 sigma=1.65: Giorni Spaiati Pct = 12.93 > 10.00 (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.
+  - FIX T12 (v1.03) MISURATO: Ingressi Barra Reale Fuori = 1819 (somma sulle 49 celle): il gate nuovo sulla barra REALE ha morso almeno una volta dove il gate vecchio (barra teorica) avrebbe lasciato passare l'ingresso. E' la prova che il fix e' falsificabile e regge.
+  - firma del tetto NON verificabile a macchina in questa corsa: il CSV del gemello NAS_M5 non e' in workdir. Si confronta a mano 'Barre Valutate' fra i due referti dello stesso TF: IDENTICHE = tetto.
+  - un CSV *_OOS esiste NONOSTANTE la gamba degenere (FrazioneIS 1): numeri su finestra NON dichiarata, NON leggerli. Nello zip solo come reperto.
+
+COME SI RIPRENDE: dalla pagina righe/RIGA_SONDARELATIVO_DA_MANDARE.md, NON da questa riga: $Pin nasce dentro il blocco e non sopravvive.
