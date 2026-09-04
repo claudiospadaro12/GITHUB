@@ -148,7 +148,7 @@ dichiarata pronta.
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_SONDARELATIVO_ESTESA.ps1` | **200, identico** (sha256 `949667ee…`) · marcatore `MARCATORE_RIGA_SONDARELATIVO_ESTESA_v1` presente · **ASCII puro** (0 byte > 127) · **parse OK** (pwsh 7.4.6, 0 errori) · **0 omonimie** case-insensitive (scansione AST: classe 79/79-bis) |
+| `backtest_pipeline/righe/RIGA_SONDARELATIVO_ESTESA.ps1` | **200, identico** (sha256 `949667ee…`) · marcatore `MARCATORE_RIGA_SONDARELATIVO_ESTESA_v1` presente · **ASCII puro** (0 byte > 127) · **parse OK** (pwsh 7.4.6, 0 errori) · **3 coppie case-insensitive, tutte inerti** (classe 79/79-bis): `$hA`/`$ha` in funzioni diverse, `$Mappa`/`$mappa` idem, `$r`/`$R` disgiunte per ordine (`$r` muore riga 982, `$R` nasce riga 1085) |
 | `backtest_pipeline/prove/RELATIVO_D30_M5_ESTESA.txt` | **200, identico** (`7cc6b1a1…`) · 26 righe vive · ASCII puro |
 | `backtest_pipeline/prove/RELATIVO_NAS_M5_ESTESA.txt` | **200, identico** (`5b8bcd47…`) · 26 righe vive · ASCII puro · **differisce dal gemello per la SOLA riga `@SIMBOLO`** (diff meccanico: 1 differenza su 26) |
 | `backtest_pipeline/walkforward_generico.ps1` | **200, identico** (`5d98af3d…`, invariato dal 03/09): il driver lo scarica al pin e lo ri-pinna sul `.mq5` |
