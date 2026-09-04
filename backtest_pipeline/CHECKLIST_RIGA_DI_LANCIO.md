@@ -7495,3 +7495,62 @@ raro: e' proprio quello che il driver stesso suggerisce
 #               RIGA_POSTNEWS_NFP (-TimeoutStoricoMin 90), RIGA_R101 (-SoloEa DAX)
 # piu' la variante in PROSA: RIGA_COMPILA_ORB104 ("parametro al driver: & $p -Pin $pin -Terminale ...")
 ```
+
+## 🆕 AGGIUNTA DEL 04/09/2026 (pomeriggio) — trovata **RI-VERIFICANDO LA PATCH** delle sei classi qui sopra (commit `006ed2f`): la correzione di un difetto **ne ha portato dentro uno nuovo**, ed e' della stessa famiglia che stava chiudendo
+
+### 94-quater. 📄 IL **RILIEVO CHE DICHIARA UN ARTEFATTO** PRODOTTO SOLO DAL RAMO **CHE NON E' STATO ESEGUITO**: il giro a vuoto giura che nel terminale c'e' un file che non e' mai stato scritto
+
+Il difetto originale era un buco onesto: il tester lascia nel terminale il suo
+report nativo (`Report=OptReport_POSTNEWSVER_<sedia>` nell'`.ini`) e nessuno lo
+diceva. La patch ha chiuso il buco **dichiarandolo**, ma lo ha dichiarato
+**incondizionatamente**:
+
+```powershell
+if($FotoPrese){
+  ...
+  foreach($s in $SEDIE){ [void]$Rilievi.Add("il terminale conserva 'OptReport_POSTNEWSVER_" + $s.Id + ".htm' ...") }
+}
+```
+
+`$FotoPrese` si alza al **passo 6** (le foto PRIMA), cioe' **prima** del bivio
+`if($SoloControllo)`. Quindi nel **giro di controllo** — quello in cui MT5 **non
+viene mai aperto**, per costruzione dichiarata — il referto elenca due RILIEVI
+che affermano l'esistenza di due `.htm` che quel giro **non ha prodotto**. Stesso
+esito se il giro muore prima della prima corsa: `Corsa = NON TENTATA`, e il
+rilievo parla lo stesso.
+
+E' la classe **94** vista dall'altro lato: non un **campo** col valore di
+partenza sbagliato, ma una **frase** aggiunta sempre, che descrive l'effetto di
+un ramo condizionale. Il paradosso e' che nello stesso commit cinque campi
+(`Cieco`, `Rosso`, `Ordini`, `NienteNews`, `LogNuovi`) passavano da `0` a `-1`
+**proprio** per non far sembrare misurato cio' che non lo era: la mano destra
+chiudeva la 94-ter e la sinistra apriva la 94-quater, due schermate piu' sotto.
+
+> ✅ **REGOLA. Un RILIEVO che descrive un EFFETTO va condizionato alla CAUSA,
+> esattamente come un numero.** Se l'artefatto lo produce la corsa, il rilievo si
+> emette solo se la corsa **c'e' stata**; se non c'e' stata, la frase giusta non e'
+> il silenzio ma **l'altra meta'**: _«nessun `<file>` prodotto da questo giro
+> (corsa NON TENTATA): se c'e' nel terminale, e' di un giro PRECEDENTE — NON
+> MISURATO»_. Un file omonimo lasciato da ieri e' indistinguibile da uno di oggi
+> finche' qualcuno non lo **fotografa**: dirlo e' l'unica cosa onesta.
+
+```powershell
+# la forma corretta
+foreach($s in $SEDIE){
+  if($Stato[$s.Id].Corsa -like "NON TENTATA*"){
+    [void]$Rilievi.Add("sedia " + $s.Id + ": nessun 'OptReport_POSTNEWSVER_" + $s.Id + ".htm' prodotto da questo giro (corsa " + $Stato[$s.Id].Corsa + "). Se un file con quel nome c'e' nel terminale e' di un giro PRECEDENTE: NON MISURATO da questa riga.")
+  } else {
+    [void]$Rilievi.Add("sedia " + $s.Id + ": dopo questa corsa il terminale conserva 'OptReport_POSTNEWSVER_" + $s.Id + ".htm' (report nativo del tester, ReplaceReport=1): non fotografato ne' ripulito da questa riga.")
+  }
+}
+```
+
+```powershell
+# censimento (classe 111/113): rilievi/righe di referto emessi FUORI dal ramo che li causa
+grep -n 'Rilievi.Add' backtest_pipeline/righe/*.ps1 | grep -v 'Corsa\|if('
+```
+
+**Lezione di metodo, quella che conta:** una patch applicata **a mano** su piu'
+punti va **ri-verificata come se fosse una riga nuova**, almeno sui rami che la
+patch attraversa. Qui i sei difetti erano chiusi bene e il settimo e' nato dal
+sesto: **la ri-verifica non e' una formalita', e' il posto dove si paga meno.**
