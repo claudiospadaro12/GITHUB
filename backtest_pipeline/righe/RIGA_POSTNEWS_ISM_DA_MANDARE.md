@@ -1,7 +1,7 @@
 # 🎯 POSTNEWS ISM1500/EURUSD — PASSO 0 (conta-occasioni): **LA RIGA DA MANDARE**
 
 > ✅ **PRONTA — pinnata il 04/09/2026** al commit `c1782ffbba2d207480691c7c13b84e50cbbb52a8`
-> (ricetta del pin applicata, nessun segnaposto residuo). **Passo 2 della
+> (ricetta del pin applicata, nessun testo di attesa residuo). **Passo 2 della
 > ricetta (riscarico via `raw` + confronto sha256) fatto qui sotto**, vedi la
 > tabella del pin.
 
@@ -63,13 +63,13 @@ piazza i due pendenti). Numeri **contati sul file**, non stimati:
 | giornate utili nel calendario (`ISM1500OK`) | **431**, dal 2010.01.04 al 2023.12.20 |
 | arco coperto | **13,96 anni** → **30,9 giornate/anno** |
 | *(per confronto: il dossier diceva **31,5**/anno — contava le **441** giornate PRIMA dell'igiene di `costruisci_news_blocchi_usa.py`)* | |
-| anni di **IS** necessari a **150 occasioni** | **4,9** |
-| → finestra **totale** necessaria (split 0,40) | **~12,1 anni** |
+| anni di **IS** necessari a **150 occasioni** *(contato sulla cumulata: la 150ª cade il **2014.06.24**)* | **4,48** |
+| → finestra **totale** necessaria (split 0,40) | **11,2 anni** (a 11,0 l'IS fa **147**, a 12,0 fa **161**) |
 | finestra di default di questa riga (2010.01.01 → 2023.12.31) | **14,0 anni** → **IS 189 occasioni · OOS 242 occasioni** |
 
 **Cosa vuol dire, onestamente:** questa famiglia arriva a **189 occasioni IS**
 **solo perché si usa praticamente tutto il calendario disponibile**. Su qualunque
-finestra più corta di ~12 anni l'IS scende sotto le 150 occasioni. E soprattutto:
+finestra più corta di ~11,2 anni l'IS scende sotto le 150 occasioni. E soprattutto:
 
 > ⚠️ **189 occasioni NON sono 189 operazioni.** Ogni occasione piazza **due**
 > pendenti e ne può scattare **0, 1 o 2**: `n(IS)` sta fra **0 e 378**. Se le
@@ -151,19 +151,18 @@ sono ancora lì, la misura è veloce.)*
 Non è un guasto della riga: `ABTG_HistoryDownloader` non ha finito di scaricare
 le barre M1 di EURUSD entro il tetto (45 minuti × 2 tentativi). Il download
 **resta sul disco** (`bases\` non si svuota mai): **rilancia lo stesso blocco**,
-quasi certamente più veloce. Se serve più tempo a tentativo:
+quasi certamente più veloce.
 
-```powershell
-& $p -Pin $pin -TimeoutStoricoMin 90
-```
+Se serve più tempo a tentativo: **aggiungi `-TimeoutStoricoMin 90` alla riga
+`& $p -Pin $pin -SoloControllo;` (blocco 1) o `& $p -Pin $pin;` (blocco 2)
+DENTRO il blocco, e rilancia il BLOCCO INTERO.** `$p` e `$pin` nascono dentro
+il `& { ... }`: fuori da lì non esistono, e una riga che comincia con `& $p`
+incollata da sola muore con un messaggio che non nomina il colpevole.
 
-Le altre due manopole dichiarate (si usano **solo** se serve, e la scelta va
-scritta nel round):
-
-```powershell
-& $p -Pin $pin -PavimentoDaQuando 2010.01.01   # il pavimento (default: questo)
-& $p -Pin $pin -Fino 2023.12.31                # la fine finestra (default: questa)
-```
+Le altre due manopole dichiarate si aggiungono **allo stesso modo, dentro il
+blocco** (e la scelta va scritta nel round): `-PavimentoDaQuando 2010.01.01`
+(il pavimento, default: questo) e `-Fino 2023.12.31` (la fine finestra,
+default: questa).
 
 ## 📦 COSA TORNA
 
@@ -249,7 +248,7 @@ sporco e il round è fermo.
 | **Scarico al pin fallito** (404 su uno degli otto file) | ✅ **SÌ** | lo zip; se è la cache raw, rilancia dopo 5 min |
 | **Gate sul sorgente / sul prova / di coerenza col preset** | ✅ **SÌ** | lo zip: il motivo è in `!!! FERMATO:` — non si aggiusta a mano, si torna in chat |
 | **Calendario** (righe ≠ 464, intestazione diversa, **utili ≠ 431**, **giornate ≠ 431**, date diverse, installazione fallita) | ✅ **SÌ** | lo zip |
-| **Terminale non unico** (`NON SO QUALE TERMINALE USARE`) | ✅ **SÌ** | rilancia con `& $p -Pin $pin -Terminale '<cartella dell'installazione>'` |
+| **Terminale non unico** (`NON SO QUALE TERMINALE USARE`) | ✅ **SÌ** | aggiungi `-Terminale "<cartella dell'installazione>"` alla riga `& $p -Pin $pin ...` **dentro il blocco** e rilancia il blocco INTERO |
 | **Compilazione FALLITA** (o MUTA) | ✅ **SÌ** | lo zip: **è il risultato del passo** (include già rimesso a posto) |
 | **Misura storico NON riuscita** (2 tentativi) | ✅ **SÌ** | lo zip: rilancia (vedi §🩹), eventualmente con `-TimeoutStoricoMin` più alto |
 | **Finestra vuota** (`-DaQuando usato` non prima di `-Fino`) | ✅ **SÌ** | lo zip: **è il risultato del passo**, non un guasto |
@@ -288,15 +287,15 @@ TOK='@@PIN'"@@"                    # composto: la ricetta non contiene la string
 sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|" "$F"
 grep -c "\$pin='$SHA'" "$F"        # DEVE dare 2 (blocchi 1-2)
 grep -c "\$pin='$TOK'" "$F"        # DEVE dare 0
-CART='segnap'"osto"'\|non e'"'"' ancora lanciabile'\|la riga non par'"te"   # composto
+CART='segnap'"osto"'\|ancora lanciab'"il"'\|la riga non par'"te"   # composto: nessun pezzo qui sopra contiene la stringa intera che cerca
 grep -ci "$CART" "$F"              # DEVE dare 0 dopo aver RISCRITTO il cartello
-grep -o "$TOK" "$F" | wc -l        # DEVE dare 0: nessun segnaposto sopravvissuto
+grep -o "$TOK" "$F" | wc -l        # DEVE dare 0: nessun token del pin sopravvissuto
 ```
 
 **Poi (passo 2, quello che questa pagina non poteva fare):** riscaricare gli
 **otto** file da `raw` al pin e confrontare il `sha256` con la colonna in
 tabella. Se uno solo non torna, **la pagina non è pinnata**: si rifà.
 
-**Il cartello** in cima ("QUESTA PAGINA NON È ANCORA LANCIABILE…") va
-**RISCRITTO**, non solo lasciato: una frase che sopravvive alla pinnatura
-direbbe il falso a chi legge dopo (classe 101).
+**Il cartello di attesa** in cima (quello che dichiara che la pagina non si può
+ancora lanciare) va **RISCRITTO**, non solo lasciato: una frase che sopravvive
+alla pinnatura direbbe il falso a chi legge dopo (classe 101).

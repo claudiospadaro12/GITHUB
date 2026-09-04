@@ -387,6 +387,7 @@ $PavimentoTxt     = "NON APPLICATO (misura non arrivata)"
 $StoricoTxt = "NON MISURATO"
 $StoricoTentativi = New-Object System.Collections.ArrayList
 $StoricoCsvCopia = ""
+$provaPath = ""; $presetPath = ""
 $WinIS = "n/d"; $WinOOS = "n/d"
 $OccTxt = "NON CONTATE"
 $OccIS = -1; $OccOOS = -1
@@ -482,9 +483,10 @@ function CelleAsse([string]$valore,[string]$nome){
 # I 31 FISSI del prova, nome per nome (identici, valore per valore, al
 # preset ABTG_PostNews_USD1330_USDJPY.set: fase 4 lo riverifica).
 # L'ordine non conta per il gate, ma e' quello del file, per leggibilita'.
-# NB: rispetto alla riga NFP cambiano SEI valori -- ActionHour/Min 15:15,
-# ExpiryHour/Min 16:25, NewsFile, NewsTitleMatch, CloseAtExpiry TRUE,
-# RiskPercent 0.65, Comment. Tutti presi 1:1 dal preset frozen.
+# NB: rispetto alla riga NFP cambiano SETTE chiavi -- ExpiryHour 14 (NFP 16),
+# ExpiryMin 45 (NFP 59), NewsFile, NewsTitleMatch, CloseAtExpiry true (NFP
+# false), RiskPercent 0.65 (NFP 1.30), Comment. ActionHour/Min restano 13:45,
+# IDENTICI alla sedia NFP. Tutti presi 1:1 dal preset frozen.
 $FissiAttesi = [ordered]@{
   "InpUsaGuardian"="true"; "InpActionHour"="13"; "InpActionMin"="45"; "InpExpiryHour"="14"; "InpExpiryMin"="45"
   "InpRestrictToNews"="true"; "InpUseNewsFilter"="true"; "InpNewsFile"=$NEWSFILE; "InpNewsCommon"="true"
@@ -1457,8 +1459,8 @@ if(Test-Path -LiteralPath $logC){
   Copy-Item -LiteralPath $logC -Destination $Cart -Force
   Set-Content -LiteralPath (Join-Path $Cart "COMPILAZIONE_leggibile.txt") -Value ((LeggiTesto $logC) -join "`r`n") -Encoding ASCII
 }
-if(Test-Path -LiteralPath $provaPath){ Copy-Item -LiteralPath $provaPath -Destination $Cart -Force }
-if(Test-Path -LiteralPath $presetPath){ Copy-Item -LiteralPath $presetPath -Destination $Cart -Force }
+if($provaPath  -and (Test-Path -LiteralPath $provaPath)){  Copy-Item -LiteralPath $provaPath  -Destination $Cart -Force }
+if($presetPath -and (Test-Path -LiteralPath $presetPath)){ Copy-Item -LiteralPath $presetPath -Destination $Cart -Force }
 if($StoricoCsvCopia -ne "" -and (Test-Path -LiteralPath $StoricoCsvCopia)){ Copy-Item -LiteralPath $StoricoCsvCopia -Destination $Cart -Force }
 $Results = Join-Path $Work ("risultati_prove\" + $EA)
 foreach($leg in @("IS","OOS")){

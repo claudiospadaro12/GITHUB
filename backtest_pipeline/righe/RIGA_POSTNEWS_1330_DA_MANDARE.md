@@ -1,7 +1,7 @@
 # 🎯 POSTNEWS USD1330/USDJPY — PASSO 0 (conta-occasioni): **LA RIGA DA MANDARE**
 
 > ✅ **PRONTA — pinnata il 04/09/2026** al commit `c1782ffbba2d207480691c7c13b84e50cbbb52a8`
-> (ricetta del pin applicata, nessun segnaposto residuo). **Passo 2 della
+> (ricetta del pin applicata, nessun testo di attesa residuo). **Passo 2 della
 > ricetta (riscarico via `raw` + confronto sha256) fatto qui sotto**, vedi la
 > tabella del pin.
 
@@ -73,14 +73,14 @@ possono contare **prima** della corsa. Numeri **contati sul file**, non stimati:
 | **giornate** utili (= occasioni: `gPlacedDay` dà 1 piazzamento/giorno) | **347**, dal 2010.01.14 al 2023.12.14 |
 | arco coperto | **13,91 anni** → **24,9 giornate/anno** |
 | *(per confronto: il dossier diceva **43,5**/anno — contava 609 giornate del blocco **intero**, GDP e giornate DST comprese, che il default qui **esclude**)* | |
-| anni di **IS** necessari a **150 occasioni** | **6,0** |
-| → finestra **totale** necessaria (split 0,40) | **~15,1 anni** |
-| finestra **massima disponibile** (il calendario finisce nel 2023) | **14,0 anni** |
+| anni di **IS** necessari a **150 occasioni** *(contato sulla cumulata: la 150ª cade il **2016.10.14**, non stimato sul tasso medio)* | **6,78** |
+| → finestra **totale** necessaria (split 0,40) | **17,0 anni** *(il tasso medio 24,9/anno direbbe 15,1: sottostima, perché il CPI manca 2010-2013 e la prima metà è più magra)* |
+| finestra **massima disponibile** (il calendario finisce nel 2023) | **14,0 anni** → deficit **−3,0 anni** |
 | finestra di default di questa riga (2010.01.01 → 2023.12.31) | **IS 119 occasioni · OOS 228 occasioni** |
 
 > ⚠️ **Detto onestamente: con questo calendario e lo split 0,40 di casa, le
-> OCCASIONI IS non possono arrivare a 150.** Servirebbero ~15,1 anni di dati e ne
-> esistono 14,0. **Non si aggira spostando lo split**: la soglia si dichiara
+> OCCASIONI IS non possono arrivare a 150.** Servirebbero 17,0 anni di dati e ne
+> esistono 14,0: ne mancano **3,0**. **Non si aggira spostando lo split**: la soglia si dichiara
 > prima e si legge dopo — muovere il confine IS/OOS *per far passare un gate* è
 > pescare, ed è il difetto che questa casa ha già pagato.
 >
@@ -164,19 +164,18 @@ da solo se lo storico M1 di USDJPY non è ancora sul disco del PC di backtest.
 Non è un guasto della riga: `ABTG_HistoryDownloader` non ha finito di scaricare
 le barre M1 di USDJPY entro il tetto (45 minuti × 2 tentativi). Il download
 **resta sul disco** (`bases\` non si svuota mai): **rilancia lo stesso blocco**,
-quasi certamente più veloce. Se serve più tempo a tentativo:
+quasi certamente più veloce.
 
-```powershell
-& $p -Pin $pin -TimeoutStoricoMin 90
-```
+Se serve più tempo a tentativo: **aggiungi `-TimeoutStoricoMin 90` alla riga
+`& $p -Pin $pin -SoloControllo;` (blocco 1) o `& $p -Pin $pin;` (blocco 2)
+DENTRO il blocco, e rilancia il BLOCCO INTERO.** `$p` e `$pin` nascono dentro
+il `& { ... }`: fuori da lì non esistono, e una riga che comincia con `& $p`
+incollata da sola muore con un messaggio che non nomina il colpevole.
 
-Le altre due manopole dichiarate (si usano **solo** se serve, e la scelta va
-scritta nel round):
-
-```powershell
-& $p -Pin $pin -PavimentoDaQuando 2010.01.01   # il pavimento (default: questo)
-& $p -Pin $pin -Fino 2023.12.31                # la fine finestra (default: questa)
-```
+Le altre due manopole dichiarate si aggiungono **allo stesso modo, dentro il
+blocco** (e la scelta va scritta nel round): `-PavimentoDaQuando 2010.01.01`
+(il pavimento, default: questo) e `-Fino 2023.12.31` (la fine finestra,
+default: questa).
 
 ## 📦 COSA TORNA
 
@@ -267,7 +266,7 @@ probabile (119 occasioni → 150 operazioni solo con ≥1,26 gambe per occasione
 | **Scarico al pin fallito** (404 su uno degli otto file) | ✅ **SÌ** | lo zip; se è la cache raw, rilancia dopo 5 min |
 | **Gate sul sorgente / sul prova / di coerenza col preset** | ✅ **SÌ** | lo zip: il motivo è in `!!! FERMATO:` — non si aggiusta a mano, si torna in chat |
 | **Calendario** (righe ≠ 645, intestazione diversa, **utili ≠ 541**, **giornate ≠ 347**, date diverse, installazione fallita) | ✅ **SÌ** | lo zip |
-| **Terminale non unico** (`NON SO QUALE TERMINALE USARE`) | ✅ **SÌ** | rilancia con `& $p -Pin $pin -Terminale '<cartella dell'installazione>'` |
+| **Terminale non unico** (`NON SO QUALE TERMINALE USARE`) | ✅ **SÌ** | aggiungi `-Terminale "<cartella dell'installazione>"` alla riga `& $p -Pin $pin ...` **dentro il blocco** e rilancia il blocco INTERO |
 | **Compilazione FALLITA** (o MUTA) | ✅ **SÌ** | lo zip: **è il risultato del passo** (include già rimesso a posto) |
 | **Misura storico NON riuscita** (2 tentativi) | ✅ **SÌ** | lo zip: rilancia (vedi §🩹), eventualmente con `-TimeoutStoricoMin` più alto |
 | **Finestra vuota** (`-DaQuando usato` non prima di `-Fino`) | ✅ **SÌ** | lo zip: **è il risultato del passo**, non un guasto |
@@ -307,15 +306,15 @@ TOK='@@PIN'"@@"                    # composto: la ricetta non contiene la string
 sed -i "s|\$pin='$TOK'|\$pin='$SHA'|g; s|\*\*\`$TOK\`\*\*|\*\*\`$SHA\`\*\*|" "$F"
 grep -c "\$pin='$SHA'" "$F"        # DEVE dare 2 (blocchi 1-2)
 grep -c "\$pin='$TOK'" "$F"        # DEVE dare 0
-CART='segnap'"osto"'\|non e'"'"' ancora lanciabile'\|la riga non par'"te"   # composto
+CART='segnap'"osto"'\|ancora lanciab'"il"'\|la riga non par'"te"   # composto: nessun pezzo qui sopra contiene la stringa intera che cerca
 grep -ci "$CART" "$F"              # DEVE dare 0 dopo aver RISCRITTO il cartello
-grep -o "$TOK" "$F" | wc -l        # DEVE dare 0: nessun segnaposto sopravvissuto
+grep -o "$TOK" "$F" | wc -l        # DEVE dare 0: nessun token del pin sopravvissuto
 ```
 
 **Poi (passo 2, quello che questa pagina non poteva fare):** riscaricare gli
 **otto** file da `raw` al pin e confrontare il `sha256` con la colonna in
 tabella. Se uno solo non torna, **la pagina non è pinnata**: si rifà.
 
-**Il cartello** in cima ("QUESTA PAGINA NON È ANCORA LANCIABILE…") va
-**RISCRITTO**, non solo lasciato: una frase che sopravvive alla pinnatura
-direbbe il falso a chi legge dopo (classe 101).
+**Il cartello di attesa** in cima (quello che dichiara che la pagina non si può
+ancora lanciare) va **RISCRITTO**, non solo lasciato: una frase che sopravvive
+alla pinnatura direbbe il falso a chi legge dopo (classe 101).
