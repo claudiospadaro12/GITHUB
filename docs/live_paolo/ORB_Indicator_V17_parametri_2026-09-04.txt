@@ -1,0 +1,59 @@
+ORB_Indicator_V17 1.17 -- parametri letti da screenshot mandato da Claudio (04/09/2026)
+Grafico su cui era applicato: NASUSD_EXT, M15
+
+=== LICENZA ===
+InpExpiryDate            2026.12.31 00:00:00
+ID univoco istanza       ORB1
+
+=== ORARI ===
+InpTime1                 14:25:00
+InpTime2                 14:29:59
+InpTimeEnd               22:59:59
+
+=== IMPOSTAZIONI RANGE ===
+InpEntryPoints           10.0
+InpHistoricalDays        5
+
+=== COEFFICIENTI K -- TABELLA STRUMENTI ===
+InpSymGroup1             D30EUR,SPXUSD,U30USD,NASUSD,,XAUUSD      InpK1  1.0
+InpSymGroup2             225JPY                                    InpK2  10.0
+InpSymGroup3             AUDJPY,CADJPY,CHFJPY,GBPJPY,EURJPY,NZDJPY,USDJPY   InpK3  0.01
+InpSymGroup4             AUDCAD,AUDCHF,AUDNZD,AUDUSD,CADCHF,EURAUD,EURCAD,EURCHF,EURGBP,EURNZD,EURUSD   InpK4  0.0001
+InpSymGroup5             GBPAUD,GBPCAD,GBPCHF,GBPNZD,GBPUSD,NZDCAD,NZDCHF,NZDUSD,USDCAD,USDCHF          InpK5  0.0001
+InpSymGroup6             USOIL,UKOIL                               InpK6  0.01
+
+=== BOX ===
+InpBoxColor              RoyalBlue
+InpBoxAlphaFill          120
+InpBoxAlphaBorder        220
+
+=== LINEE HIGH/LOW ===
+InpHighLineColor         DodgerBlue
+InpLowLineColor          DodgerBlue
+InpRangeLineStyle        Solid
+InpRangeLineWidth        2
+
+=== LINEE ENTRY ===
+InpLongEntryColor        Lime
+InpShortEntryColor       Red
+InpEntryLineStyle        Dash
+InpEntryLineWidth        1
+
+=== ALERT ===
+InpAlertLong             true
+InpAlertShort            true
+InpAlertCooldown         300
+
+=== PULSANTE HIDE/SHOW ===
+InpBtnCorner             Right upper chart corner
+InpBtnX                  10
+InpBtnY                  65
+
+NOTA [SESSIONE, non del docente]: InpTime1-InpTime2 (14:25:00-14:29:59) sono
+i 5 minuti IMMEDIATAMENTE PRIMA delle 14:30 server, non i primi minuti DOPO
+l'apertura. Se questo e' davvero il "range" su cui il box si disegna, e'
+un ORB pre-apertura (range dell'ultimo tratto di pre-market/asta), diverso
+dal meccanismo di ABTG_ORB (range calcolato SUBITO DOPO l'apertura). Da
+verificare con Paolo o dal comportamento a video: potrebbe anche essere che
+l'indicatore usi questi orari solo come sveglia/marcatore e il box vero lo
+disegni altrove -- non assunto, segnalato.
