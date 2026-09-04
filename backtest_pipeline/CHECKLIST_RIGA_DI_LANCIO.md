@@ -7855,3 +7855,119 @@ effetti collaterali che nessuno aveva dichiarato**:
 > Corollario di verifica: **ogni declassamento cambia anche il codice di uscita**
 > — va detto esplicitamente nel verdetto, perche' e' il segnale su cui la riga di
 > lancio decide se avvisare o no.
+
+---
+
+## 🆕 AGGIUNTE DEL 04/09/2026 (notte) — trovate dal **verificatore** sul passo 0 POSTNEWS **ISM** e **1330** (`RIGA_POSTNEWS_ISM.ps1` / `RIGA_POSTNEWS_1330.ps1` + le due pagine, pin `c1782ff`), **ESEGUENDO** i pezzi sospetti su `pwsh` invece di leggerli. Due classi nuove, tutte e due **riprodotte**, tutte e due nate copiando la riga sorella NFP.
+
+## 125. 🧯 LA **RACCOLTA «SEMPRE»** CHE DEREFERENZIA UNA VARIABILE NATA **DENTRO** IL `try`: `Test-Path -LiteralPath $null` sotto `Stop` UCCIDE LA RACCOLTA, E LO **ZIP NON ESCE** — proprio sul ramo in cui la pagina lo promette
+
+La sezione `RACCOLTA -- SEMPRE, anche quando la corsa si e' fermata a meta'` sta
+**fuori** dal `try/catch`, ed e' giusto cosi' (classe 94-ter: ogni passo timbra
+il suo campo, il referto esce comunque). Ma il corpo della raccolta scrive:
+
+```powershell
+if(Test-Path -LiteralPath $provaPath){ Copy-Item -LiteralPath $provaPath -Destination $Cart -Force }
+if(Test-Path -LiteralPath $presetPath){ Copy-Item -LiteralPath $presetPath -Destination $Cart -Force }
+```
+
+`$provaPath` e `$presetPath` **nascono nella fase 1, DENTRO il `try`**. Se il giro
+muore PRIMA (guardia `-Pin`, guardia `-Fino`/`-PavimentoDaQuando`, MT5 riaperto,
+oppure — ed e' il caso **piu' probabile di tutti** — un **404 della cache raw sul
+primo file scaricato**, il generico), quelle variabili **non esistono**. Eseguito
+davvero su `pwsh` con `$ErrorActionPreference='Stop'`:
+
+```
+Test-Path -LiteralPath $null
+-> ArgumentNullException: Value cannot be null.
+   (Parameter 'The provided Path argument was null or an empty collection.')
+```
+
+E' un **errore terminante**. Il referto e' gia' stato scritto due righe sopra
+(`Set-Content $refPath`), quindi **la cartella sul Desktop c'e' col referto
+dentro**, ma lo script muore **prima** di `Compress-Archive`: **lo ZIP non esiste**.
+
+### Perche' e' una classe a se', e non la 121
+
+La **121** e' `$record.Campo` che torna `$null` e poi `$tabella[$null]`: un dato
+letto male. Qui il dato non c'e' proprio perche' **il ramo che lo crea non e'
+stato percorso** — ed e' il ramo di FALLIMENTO, cioe' esattamente quello per cui
+la raccolta esiste. La classe 94-ter dice *"ogni passo timbra il suo campo PRIMA
+di potersi fermare"*: qui il campo e' timbrato, ma **il fattorino muore per
+strada**.
+
+E il danno vero e' la **bugia in pagina**: la tabella *LE USCITE, UNA PER UNA*
+promette `✅ SI` lo zip su righe come
+
+| **Guardie del driver**: `-Pin` mancante/corto, `-Fino`/`-PavimentoDaQuando` malformati, MT5 riaperto | ✅ **SI** |
+| **Scarico al pin fallito** (404 su uno degli otto file) | ✅ **SI** |
+
+e su quei rami lo zip **non c'e'**. Claudio riceve invece il `throw` della riga di
+chat (*"NESSUNO ZIP ... Mandami quello che vedi qui sopra"*) e **la cartella col
+referto resta orfana sul Desktop**, senza che nessuno gli dica di guardarci.
+
+> ✅ **REGOLA**: ogni variabile toccata dalla sezione RACCOLTA/RIPRISTINO (che vive
+> FUORI dal `try`) va **inizializzata in cima al file**, con le altre (`$Compilato
+> = "NON TENTATA"` e compagnia). Se nasce dentro il `try`, la raccolta la tocca
+> **solo** protetta:
+>
+> ```powershell
+> if($provaPath -and (Test-Path -LiteralPath $provaPath)){ ... }
+> ```
+>
+> Corollario di **verifica**: la tabella delle uscite non si legge, **si esegue**
+> — si prende il ramo piu' precoce (guardia `-Pin` vuota) e si guarda se lo zip
+> c'e' davvero. Se la tabella dice `SI` e lo zip non c'e', la tabella e' un
+> giro a vuoto scritto.
+
+**Fratelli in repo al 04/09/2026 (classe 111)**: `RIGA_POSTNEWS_NFP.ps1` (righe
+1245-1246), `RIGA_POSTNEWS_ISM.ps1` (1429-1430), `RIGA_POSTNEWS_1330.ps1`
+(1460-1461). Tutti e tre dallo stesso stampo.
+
+## 126. 🩹 IL **GREP-GUARDIA DEL CARTELLO AVVELENATO DALLA PROSA CHE LO NOMINA**: la ricetta del pin dice «DEVE dare 0» e da' 2 — per sempre
+
+La ricetta del pin in fondo alle pagine `_DA_MANDARE.md` ha una guardia contro la
+classe 101 (il cartello *"QUESTA PAGINA NON E' ANCORA LANCIABILE"* che sopravvive
+alla pinnatura):
+
+```bash
+CART='segnap'"osto"'\|non e'"'"' ancora lanciabile'\|la riga non par'"te"
+grep -ci "$CART" "$F"              # DEVE dare 0 dopo aver RISCRITTO il cartello
+```
+
+Il pattern e' **composto apposta** (`'segnap'"osto"`) perche' la riga della ricetta
+non contenga la parola che cerca. Ma le due pagine nuove hanno aggiunto **altrove**
+due frasi che la contengono in chiaro:
+
+- riga 4, il banner nuovo: *"(ricetta del pin applicata, nessun **segnaposto**
+  residuo)"*;
+- l'ultima riga della ricetta stessa, aggiunta col commit `c1782ff`:
+  `grep -o "$TOK" "$F" | wc -l   # DEVE dare 0: nessun **segnaposto** sopravvissuto`.
+
+**Misurato, non supposto:** sulla pagina NFP (la sorella collaudata) `grep -ci
+"$CART"` da' **0**. Sulle due pagine nuove da' **2**, su tutte e due. La guardia
+non puo' piu' dare 0 **per costruzione**: chi la riesegue o si spaventa per niente
+o — molto peggio — impara che quel `2` e' rumore e **smette di guardarlo**. Da
+quel momento un cartello vero passerebbe indisturbato.
+
+### 126-bis. 🔤 E il pattern e' scritto in una GRAFIA che il cartello non usa
+
+Nelle due pagine nuove il pattern e' stato cambiato rispetto alla NFP (`non
+funziona` -> `non e' ancora lanciabile`), scritto in **ASCII con l'apostrofo**.
+Il cartello vero, citato tre righe piu' sotto nella pagina stessa, e' scritto
+**con l'accento**: `QUESTA PAGINA NON È ANCORA LANCIABILE`. `grep -ci "non e'
+ancora lanciabile"` **non lo trova**. Cioe': anche togliendo l'avvelenamento del
+punto 126, quella parte del pattern sarebbe comunque **cieca proprio al testo che
+deve cercare** — la stessa forma della classe **118** (il rilevatore vittima del
+difetto che deve trovare), qui sull'ACCENTO invece che sul case.
+
+> ✅ **REGOLA**: una guardia che si esprime come *"questo comando DEVE dare 0"* va
+> **eseguita sul file finito** prima di dichiararla applicata, e il suo risultato
+> va **scritto nel verdetto**. Due corollari:
+> **(a)** la prosa della pagina non nomina mai in chiaro le parole che la guardia
+> cerca (si compone anche li', o si usa un'altra parola: *"nessun testo di
+> attesa residuo"*);
+> **(b)** il pattern si scrive in **tutte le grafie** in cui la parola compare nel
+> repo (accentata e non): `non . ancora lanciabile` con il punto al posto della
+> lettera, o due alternative nel pattern.
+
